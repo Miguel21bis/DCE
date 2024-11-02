@@ -11,7 +11,7 @@ known issues:
 - [stats]	stats for your own package are rarely displayed
 
 ==:20.79.484:==
-484 test	[test]	test
+484 test	[test]	test 2
 
 ==:20.79.483:==
 483 added	[release]	merging files for publication
