@@ -10,6 +10,9 @@ known issues:
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 - [stats]	stats for your own package are rarely displayed
 
+==:20.79.484:==
+484 test	[test]	test
+
 ==:20.79.483:==
 483 added	[release]	merging files for publication
 482 fixed	[generator]	-nan(ind) bug again ...
