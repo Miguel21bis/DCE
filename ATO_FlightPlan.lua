@@ -1451,7 +1451,17 @@ local altRole = 0
 
 if not camp.SAR then camp.SAR = {} end
 camp.SAR.helicopter = {} 
+
+
+
+--= = = = = = = =  = = = = = = = = = =  = = = = = = = = = =  ==  = = = 
 ----- create flight plans in mission file for all flights in ATO -----
+----- create flight plans in mission file for all flights in ATO -----
+----- create flight plans in mission file for all flights in ATO -----
+----- create flight plans in mission file for all flights in ATO -----
+--= = = = = = = =  = = = = = = = = = =  = = = = = = = = = =  ==  = = = 
+
+
 for side, pack in pairs(ATO) do													--iterate through sides in ATO
 	
 	--M27 Randomly moves the 2 BullsEye
@@ -1548,9 +1558,9 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				if  not db_airbases[flight[f].base].LimitedParkNb then
 					TabLPark[flight[f].base][timmingParking] = 0
 				end
-				if  not TabLPark[flight[f].base]["totENmmTEMPS"] then
-					TabLPark[flight[f].base]["totENmmTEMPS"] = {}
-				end
+				-- if  not TabLPark[flight[f].base]["totENmmTEMPS"] then
+				-- 	TabLPark[flight[f].base]["totENmmTEMPS"] = {}
+				-- end
 
 				local is_helicopter = false
 				if isHelicopter[flight[f].type]  then
@@ -1564,14 +1574,16 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				--TabLPark[flight[f].base][NbPlaneTot] limite l'apparition des avions si cela depasse le total, cela permet d'afficher plus d'avion avec lateActivation = false
 				if (flight[f].route[1].id ~= "Spawn" and flight[f].route[1].eta and flight[f].route[2]) or (flight[f].route[1].id ~= "Spawn" and flight[f].route[1].eta and not db_airbases[flight[f].base].unitname) then										
 					
+					-- mn_StartParking = 10 -- 10mn de temps de presence sur parking
+
 					-- for i = timmingParking - mn_StartParking, timmingParking  do
-					for i =  -mn_StartParking, timmingParking  do					
-						if not TabLPark[flight[f].base][i] then TabLPark[flight[f].base][i] = 0 end
-						TabLPark[flight[f].base][i] = TabLPark[flight[f].base][i] + flight[f].number
+					for mn =  -mn_StartParking, timmingParking  do					
+						if not TabLPark[flight[f].base][mn] then TabLPark[flight[f].base][mn] = 0 end
+						TabLPark[flight[f].base][mn] = TabLPark[flight[f].base][mn] + flight[f].number
 						
 						
-						if not TabLPark[flight[f].base]["totENmmTEMPS"][i] then TabLPark[flight[f].base]["totENmmTEMPS"][i] = 0 end
-						TabLPark[flight[f].base]["totENmmTEMPS"][i] = TabLPark[flight[f].base]["totENmmTEMPS"][i] + flight[f].number
+						-- if not TabLPark[flight[f].base]["totENmmTEMPS"][mn] then TabLPark[flight[f].base]["totENmmTEMPS"][mn] = 0 end
+						-- TabLPark[flight[f].base]["totENmmTEMPS"][mn] = TabLPark[flight[f].base]["totENmmTEMPS"][mn] + flight[f].number
 					end
 
 					if (db_airbases[flight[f].base].LimitedParkNb and TabLPark[flight[f].base][timmingParking]  )    then						 --or TabLPark[flight[f].base].flag										
@@ -1582,20 +1594,42 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							TabLPark[flight[f].base]["LimitedParkNb"] = db_airbases[flight[f].base].LimitedParkNb
 						end
 						
-						-- for i = timmingParking - mn_StartParking, timmingParking  do
-						for i = -mn_StartParking , timmingParking  do
-							-- print("AtoFP LimitedParkTiming 00 i: "..(i*60).." "..flight[f].base)
-							-- print("AtoFP LimitedParkTiming 01 "..(i*60).." "..flight[f].base.." "..tostring(TabLPark[flight[f].base][i] ).." >? "..db_airbases[flight[f].base].LimitedParkNb)
-							if   TabLPark[flight[f].base][i] > db_airbases[flight[f].base].LimitedParkNb  then  								
-								LimitedParkTiming = true
-								TabLPark[flight[f].base]["totENmmTEMPS"][i] = TabLPark[flight[f].base]["totENmmTEMPS"][i] - flight[f].number
-								-- print("AtoFP LimitedParkTiming 01a "..tostring(LimitedParkTiming))														
-							elseif    string.find(flight[f].base,"FARP") and camp.player and TabLPark[flight[f].base][i] > (db_airbases[flight[f].base].LimitedParkNb - 4) and (flight[f].base == camp.player.airbase) and (not flight[f].player and not flight[f].client)  then  								
-								-- le helico sur le FARP du joueur spawn en l'air
-								LimitedParkTiming = true
-								PlayerFirstParking = true			-- Helico FARP
-								-- print("AtoFP LimitedParkTiming 01b "..tostring(LimitedParkTiming))
-							end	
+
+						for mn = -mn_StartParking , timmingParking  do
+							if TabLPark[flight[f].base][mn] > db_airbases[flight[f].base].LimitedParkNb  then  	
+								if db_airbases[flight[f].base].parkAlertSAR and isHelicopter[flight[f].type] then
+
+									for n = 1,  #flight[f].number do
+										local foundParkPlace = false
+										for baseN, park in pairs(base.parkAlertSAR) do
+											if not park.occupied or park.occupied == nil then
+												park.occupied = false
+												if not flight[f]["parkAlertSAR"] then flight[f]["parkAlertSAR"] = {} end
+												flight[f]["parkAlertSAR"][n] = park
+												foundParkPlace = true
+												break
+											end
+										end
+										if not foundParkPlace then
+											LimitedParkTiming = true
+										end
+									end
+									
+								else
+									LimitedParkTiming = true
+								end
+
+								-- LimitedParkTiming = true
+
+								-- TabLPark[flight[f].base]["totENmmTEMPS"][mn] = TabLPark[flight[f].base]["totENmmTEMPS"][mn] - flight[f].number
+								
+							end
+							-- elseif    string.find(flight[f].base,"FARP") and camp.player and TabLPark[flight[f].base][mn] > (db_airbases[flight[f].base].LimitedParkNb - 4) and (flight[f].base == camp.player.airbase) and (not flight[f].player and not flight[f].client)  then  								
+								-- l helico sur le FARP du joueur spawn en l'air
+								-- LimitedParkTiming = true
+								-- PlayerFirstParking = true			-- Helico FARP
+
+							-- end	
 						end
 						
 						--si c'est un intercepteur sur piste dur, on bloque sa place en enlevant une place de LimitedParkNb
@@ -7161,6 +7195,13 @@ debugGenMFile:close()
 -- local campFile = io.open("Debug/targetList_InThisMission_AtoFP.lua", "w")								
 -- campFile:write(camp_str)															
 -- campFile:close()
+
+
+
+local camp_str = "TabLPark = " .. TableSerialization(TabLPark, 0)						
+local campFile = io.open("Debug/TabLPark_AtoFP.lua", "w")								
+campFile:write(camp_str)															
+campFile:close()
 
 local testPosRunwayImpact = false
 
