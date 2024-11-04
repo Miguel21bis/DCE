@@ -1,9 +1,9 @@
 --To create the flight plans in the mission file for all flights in the ATO
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M78_a
+-- last modification: M61_k
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_FlightPlan.lua"] = "1.58.280"
+versionDCE["ATO_FlightPlan.lua"] = "1.58.281"
 ------------------------------------------------------------------------------------------------------- 
 
 -- SomethingSimple_a		(a add randomizeSkills)
@@ -23,7 +23,7 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.280"
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 -- modification M63_a		compatible Datacard Generator or CombatFlite
--- modification M61_j		SAR (j bug parkAlertSAR.occupied)(debug SAR on CV)(f radio_start)(d theatre)
+-- modification M61_k		SAR (k use parkAlertSAR for all Heli)(j bug parkAlertSAR.occupied)(debug SAR on CV)(f radio_start)(d theatre)
 -- modification M60_c		add CTLD (c load_CTLD option)(b bug vehicul)(a JTAC)
 -- modification M58_a		flight plan, heading, Dist, ETE
 -- modification M56_b		AssignCallnameSquad (b: callsignId)
@@ -62,10 +62,30 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.280"
 
 
 
-local debugStart = true			--NE PAS CHANGER, les infos restent seulement dans le fichier debugGenMission
+local debugStart = true					--NE PAS CHANGER, les infos restent seulement dans le fichier debugGenMission
 local debugTxt_AtoFP = ""
 debugFLIGHT = ""
 local tabCallSignFligt = {}
+
+local tabDivert = {}					-- modification M33.c 	Custom Briefing (onBoardNum)	
+TabLPark	= {}
+local PlayerTask = ""		
+local tempBaseAirStart = {}
+local tempDeckPlace = {}
+testDeckPlace = {}
+local altRole = 0
+
+if not camp.SAR then camp.SAR = {} end
+camp.SAR.helicopter = {} 
+
+local ParkSarAirBase = {}				--reprend la table db_airbases[basename].parkAlertSAR
+--.occupied = true
+--.reservedAR = true
+
+targetList_InThisMission = {}			-- garde en mémoire les targets pour eviter de les pruner plus tard
+
+local mn_StartParking = 5 				--[en minute] 5 mn de temps de presence sur parking
+
 if Multi.NbGroup >= 1 then 
 
 	
@@ -213,26 +233,6 @@ AWACS = math.random(1, #callsign_west.AWACS ),
 tanker = math.random(1, #callsign_west.tanker),
 }
 local callsign_east_counter = 0
-
-
--- --recupere les Id deja utilise pour ne pas creer de doublon
--- for _side, side in pairs(mission.coalition) do	
--- 	for countryN, country in pairs(side.country) do
--- 		for category, groups in pairs(country) do
--- 			if type(groups) == "table" and groups["group"]  then
--- 				for Ngroup, group in pairs(groups["group"]) do
--- 					allIdGroup[group.groupId] = true
-					
--- 					for Nunit, unit in pairs(group.units) do
--- 						allIdUnit[unit.unitId] = true
-
--- 					end	
--- 				end			
--- 			end
--- 		end
--- 	end
--- end
-
 
 
 commonFreq = {
@@ -864,11 +864,11 @@ function SpawnOn(spawn, waypoints, group, Pn, spawnTime, from, flight, f)
 		
 		group.start_time = spawnTime
 		
-		if waypoints[1]["helipadId"] then
-			waypoints[1]["helipadId"] = nil
+		if waypoints[1].helipadId then
+			waypoints[1].helipadId = nil
 		end
-		if waypoints[1]["linkUnit"] then
-			waypoints[1]["linkUnit"] = nil
+		if waypoints[1].linkUnit then
+			waypoints[1].linkUnit = nil
 		end		
 		
 		local alt = 150
@@ -1354,10 +1354,10 @@ local NbPlanetDeck = 0														-- nb d'avion total sur la plateform
 local basePlayer = ""
 -- Cherche le nb d'avion dans le package joueur
 for side, pack in pairs(ATO) do	
-	for p = 1, #pack do															--iterate through packages in sides
+	for p = 1, #pack do															
 		if camp.player and camp.player.side == side and camp.player.pack_n == p then			
-			for role,flight in pairs(pack[p]) do									--iterate through roles in package (main, SEAD, escort)		
-				for f = 1, #flight do												--iterate through flights in roles				
+			for role, flight in pairs(pack[p]) do										
+				for f = 1, #flight do															
 					if flight[f].player then
 						basePlayer = flight[f].base
 					end	
@@ -1376,8 +1376,8 @@ for side, pack in pairs(ATO) do
 				end
 			end
 		
-			for role,flight in pairs(pack[p]) do									--iterate through roles in package (main, SEAD, escort)		
-				for f = 1, #flight do												--iterate through flights in roles									
+			for role,flight in pairs(pack[p]) do									
+				for f = 1, #flight do																			
 					if flight[f].base == basePlayer then
 						NbFlightPackage = NbFlightPackage + 1
 					end
@@ -1387,14 +1387,11 @@ for side, pack in pairs(ATO) do
 	end
 end
 
-
-local mn_StartParking = 10 																		-- 10mn de temps de presence sur parking
-
 -- Assigne le temp d occupation parking du joueur, pour manager le parking avion
 for side, pack in pairs(ATO) do	
 	for p = 1, #pack do	
 		if camp.player and camp.player.side == side and camp.player.pack_n == p then			
-			for role,flight in pairs(pack[p]) do	
+			for role, flight in pairs(pack[p]) do	
 				for f = 1, #flight do			
 					if flight[f].player then
 						
@@ -1413,20 +1410,66 @@ for side, pack in pairs(ATO) do
 	end
 end
 
-local ParkSarAirBase = {}
 
+--Reset les anciennes position occupées par la mission precedente
 for baseName, base in pairs(db_airbases) do
 	if base.parkAlertSAR and base.parkAlertSAR ~= nil then
+
 		ParkSarAirBase[baseName] = base.parkAlertSAR
-		for baseN, park in pairs(base.parkAlertSAR) do
+
+		for parkN, park in pairs(ParkSarAirBase[baseName]) do
 			park.occupied = false
+			park.reservedAR = false
 		end
 	end
 end
 
+-- if db_airbases[flight[f].base].parkAlertSAR and isHelicopter[flight[f].type] then
+
+-- 	--combien de place libre reste t'il:
+-- 	local freeParkSpace = 0 
+-- 	for baseN, park in pairs(ParkSarAirBase[flight[f].base]) do
+-- 		if (not park.occupied or park.occupied == nil) and not park.reservedAR then
+-- 			freeParkSpace = freeParkSpace + 1
+-- 		end
+-- 	end
+
+-- reserve les parking SAR aux missions SAR
+--car maintenant, on utilise aussi leur parking pour tous les autres helico si ceux ci ne sont pas utilisé
+for side, pack in pairs(ATO) do	
+	for p = 1, #pack do	
+		
+		for role, flight in pairs(pack[p]) do	
+			for f = 1, #flight do			
+				if flight[f].task == "SAR" then
+					
+					if ParkSarAirBase[flight[f].base] then
+
+						for n=1, flight[f].number do 
+							
+							for parkN, park in pairs(ParkSarAirBase[flight[f].base]) do
+
+								if not park.reservedAR or park.reservedAR == nil then
+									park.reservedAR = true
+									flight[f]["reservedAR"] = true
+									break
+								end
+
+							end
+						end
+					end
+					
+				
+				end	
+			end
+		end	
+		
+	end
+end
+
+
 
 -- garde en mémoire les targets pour eviter de les pruner plus tard
-targetList_InThisMission = {}
 for side, pack in pairs(ATO) do	
 	for p = 1, #pack do			
 		for role, flight in pairs(pack[p]) do	
@@ -1440,18 +1483,6 @@ for side, pack in pairs(ATO) do
 		end	
 	end
 end
-
-local tabDivert = {}														-- modification M33.c 	Custom Briefing (onBoardNum)	
-TabLPark	= {}
-local PlayerTask = ""		
-local tempBaseAirStart = {}
-local tempDeckPlace = {}
-testDeckPlace = {}
-local altRole = 0
-
-if not camp.SAR then camp.SAR = {} end
-camp.SAR.helicopter = {} 
-
 
 
 --= = = = = = = =  = = = = = = = = = =  = = = = = = = = = =  ==  = = = 
@@ -1549,6 +1580,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				
 				local PlayerFirstParking = false
 
+				--TabLPark[flight[f].base][NbPlaneTot] --NbPlaneTot sera utilisé pour ajouter des avions static sur les emplacements parking jamais utilisé
 				if not TabLPark[flight[f].base] then TabLPark[flight[f].base] = {} end
 				if not TabLPark[flight[f].base]["NbPlaneTot"] then TabLPark[flight[f].base]["NbPlaneTot"] = 0 end
 				
@@ -1571,75 +1603,148 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 				
 				-- LimitedParkTiming  limite par timming l'apparition des avions
-				--TabLPark[flight[f].base][NbPlaneTot] limite l'apparition des avions si cela depasse le total, cela permet d'afficher plus d'avion avec lateActivation = false
+				
+				
+				--[[
+				création d'une table où l'on compte le nb d'aéronef present sur le parking avant décollage
+				T0 est le début du jeux
+				timmingParking : est l'heure de décollage du flight
+				mn_StartParking : on considére qu'il faut 10mn avant de décoller, donc 10mn d'occupation parking
+				si un joueur est sur la base le temps d'occupation parking correspond au temp de preparation du joueur
+				["Dubai Intl"] = 
+				{
+					[1] = 8,
+					[2] = 8,
+					[3] = 8,
+					[4] = 8,
+					[5] = 8,
+					[6] = 8,
+					[7] = 8,
+					[8] = 8,
+					[9] = 8,
+					[10] = 8,
+					[11] = 8,
+					[12] = 8,
+					[13] = 4,
+					[14] = 4,
+					[15] = 4,
+					[16] = 4,
+					[17] = 4,
+					[18] = 4,
+					[19] = 4,
+					[20] = 4,
+					[21] = 4,
+					[22] = 4,
+					[23] = 4,
+					[24] = 4,
+					[25] = 4,
+					[26] = 4,
+					[27] = 4,
+					[28] = 4,
+					[29] = 4,
+					[30] = 4,
+					[31] = 4,
+					[32] = 4,
+					[33] = 4,
+					[34] = 4,
+					[35] = 4,
+					[36] = 4,
+					[37] = 4,
+					[0] = 16,
+					[-15] = 16,
+					[-2] = 16,
+					[-4] = 16,
+					[-8] = 16,
+					[-16] = 16,
+					[-17] = 16,
+					[-9] = 16,
+					[-18] = 16,
+					[-19] = 16,
+					[-10] = 16,
+					[-20] = 16,
+					[-21] = 16,
+					[-11] = 16,
+					[-22] = 16,
+					[-3] = 16,
+					[-23] = 16,
+					[-12] = 16,
+					[-24] = 16,
+					[-1] = 16,
+					[-25] = 16,
+					[-13] = 16,
+					[-5] = 16,
+					["LimitedParkNb"] = 96,
+					[-7] = 16,
+					[-14] = 16,
+					[-6] = 16,
+					--]]
 				if (flight[f].route[1].id ~= "Spawn" and flight[f].route[1].eta and flight[f].route[2]) or (flight[f].route[1].id ~= "Spawn" and flight[f].route[1].eta and not db_airbases[flight[f].base].unitname) then										
-					
-					-- mn_StartParking = 10 -- 10mn de temps de presence sur parking
 
-					-- for i = timmingParking - mn_StartParking, timmingParking  do
 					for mn =  -mn_StartParking, timmingParking  do					
 						if not TabLPark[flight[f].base][mn] then TabLPark[flight[f].base][mn] = 0 end
-						TabLPark[flight[f].base][mn] = TabLPark[flight[f].base][mn] + flight[f].number
 						
-						
-						-- if not TabLPark[flight[f].base]["totENmmTEMPS"][mn] then TabLPark[flight[f].base]["totENmmTEMPS"][mn] = 0 end
-						-- TabLPark[flight[f].base]["totENmmTEMPS"][mn] = TabLPark[flight[f].base]["totENmmTEMPS"][mn] + flight[f].number
+						if flight[f].task == "SAR" and flight[f].reservedAR then
+							
+						else
+							--s'il n'y a plus de place, on le dit (LimitedParkTiming) et on arrete de compter
+							if db_airbases[flight[f].base].LimitedParkNb and  TabLPark[flight[f].base][mn] + flight[f].number > db_airbases[flight[f].base].LimitedParkNb then
+								LimitedParkTiming = true
+								break
+							else
+								--si il reste de la place, on ajoute la somme 
+								TabLPark[flight[f].base][mn] = TabLPark[flight[f].base][mn] + flight[f].number
+							end
+						end
+
 					end
 
-					if (db_airbases[flight[f].base].LimitedParkNb and TabLPark[flight[f].base][timmingParking]  )    then						 --or TabLPark[flight[f].base].flag										
-						
-						TabLPark[flight[f].base]["NbPlaneTot"] = TabLPark[flight[f].base]["NbPlaneTot"] + flight[f].number
-						
-						if not TabLPark[flight[f].base]["LimitedParkNb"] then 
-							TabLPark[flight[f].base]["LimitedParkNb"] = db_airbases[flight[f].base].LimitedParkNb
+					--NbPlaneTot sera utilisé pour ajouter des avions static sur les emplacements parking jamais utilisé
+					for mn, value in pairs(TabLPark[flight[f].base]) do
+						if TabLPark[flight[f].base]["NbPlaneTot"] < value then
+							TabLPark[flight[f].base]["NbPlaneTot"] = value
 						end
-						
+					end
 
-						for mn = -mn_StartParking , timmingParking  do
-							if TabLPark[flight[f].base][mn] > db_airbases[flight[f].base].LimitedParkNb  then  	
-								if db_airbases[flight[f].base].parkAlertSAR and isHelicopter[flight[f].type] then
+					if LimitedParkTiming then
 
-									for n = 1,  #flight[f].number do
-										local foundParkPlace = false
-										for baseN, park in pairs(base.parkAlertSAR) do
-											if not park.occupied or park.occupied == nil then
-												park.occupied = false
-												if not flight[f]["parkAlertSAR"] then flight[f]["parkAlertSAR"] = {} end
-												flight[f]["parkAlertSAR"][n] = park
-												foundParkPlace = true
-												break
-											end
-										end
-										if not foundParkPlace then
-											LimitedParkTiming = true
+						if db_airbases[flight[f].base].parkAlertSAR and isHelicopter[flight[f].type] then
+
+							--combien de place libre reste t'il:
+							local freeParkSpace = 0 
+							for baseN, park in pairs(ParkSarAirBase[flight[f].base]) do
+								if (not park.occupied or park.occupied == nil) and not park.reservedAR then
+									freeParkSpace = freeParkSpace + 1
+								end
+							end
+
+							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe ParkSarAirBase D "..tostring(freeParkSpace).." "..tostring(debug.getinfo(1).currentline)) end	
+
+							if freeParkSpace >= flight[f].number then
+								--il y a donc de la place sur les parking SAR (ParkSarAirBase), on enleve donc la limite LimitedParkTiming
+								LimitedParkTiming = false
+
+								--TODO enlever ceci: ai décollage
+								-- ["helipadId"] = 1665,
+								-- ["linkUnit"] = 1665,
+
+								for n = 1,  flight[f].number do
+
+									for baseN, park in pairs(ParkSarAirBase[flight[f].base]) do
+										if (not park.occupied or park.occupied == nil) and not park.reservedAR then
+											park.occupied = true
+											if not flight[f]["parkAlertSAR"] then flight[f]["parkAlertSAR"] = {} end
+											flight[f]["parkAlertSAR"][n] = park
+											
+											if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe ParkSarAirBase E "..tostring(flight[f]["parkAlertSAR"]).." "..tostring(debug.getinfo(1).currentline)) end
+
+											break
 										end
 									end
-									
-								else
-									LimitedParkTiming = true
+
 								end
-
-								-- LimitedParkTiming = true
-
-								-- TabLPark[flight[f].base]["totENmmTEMPS"][mn] = TabLPark[flight[f].base]["totENmmTEMPS"][mn] - flight[f].number
-								
 							end
-							-- elseif    string.find(flight[f].base,"FARP") and camp.player and TabLPark[flight[f].base][mn] > (db_airbases[flight[f].base].LimitedParkNb - 4) and (flight[f].base == camp.player.airbase) and (not flight[f].player and not flight[f].client)  then  								
-								-- l helico sur le FARP du joueur spawn en l'air
-								-- LimitedParkTiming = true
-								-- PlayerFirstParking = true			-- Helico FARP
-
-							-- end	
-						end
-						
-						--si c'est un intercepteur sur piste dur, on bloque sa place en enlevant une place de LimitedParkNb
-						if (flight[f].task == "Intercept" or flight[f].task == "SAR" )  and not db_airbases[flight[f].base].unitname then
-							if  db_airbases[flight[f].base].LimitedParkNb then
-								db_airbases[flight[f].base].LimitedParkNb = db_airbases[flight[f].base].LimitedParkNb - flight[f].number
-								-- print("AtoFP LimitedParkTiming passe LimitedParkNb - flight[f].number "..tostring(db_airbases[flight[f].base].LimitedParkNb))	
-							end
-						end
-					end				
+						end	
+					end					
 				end
 
 				local NavTargetPoints = {}
@@ -1997,24 +2102,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							speed_locked = true,
 						}
 					end
-
-					--set NEWSPEED
-					-- if 	flight[f].loadout.vCruise and waypoints[w]["speed"] < flight[f].loadout.vCruise / 4 * 3 then
-					-- 	waypoints[w]["speed"] = flight[f].loadout.vCruise / 4 * 3 +1
-					-- end
-					
-					--Eagle_01 Modification E01.d
-					-- if flight[f].helicopter and flight[f].airdromeId >= 100 then					
-						-- if  w == 1  then	 	
-								-- waypoints[w]["helipadId"] = flight[f].airdromeId
-								-- -- E01.c attention, cette ligne enleve les helico du Tarawa
-								-- -- flight[f].airdromeId = nil
-								-- waypoints[w]["airdromeId"] = flight[f].airdromeId
-						-- elseif  flight[f].route[w].id == "Land"  then	 	
-								-- waypoints[w]["helipadId"] = flight[f].airdromeId
-								-- waypoints[w]["airdromeId"] = flight[f].airdromeId
-						-- end						
-					-- end
 					
 					-- modification M17.e
 					if flight[f].type == "F-14B" and ( flight[f].player or  flight[f].client) then		-- and TargetPointF14 --or Multi.NbGroup >= 1 
@@ -2296,9 +2383,9 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						else
 							waypoints[w]["type"] = "TakeOffParking"
 							waypoints[w]["action"] = "From Parking Area"
-							if db_airbases[flight[f].base].unitname or (flight[f].airdromeId and flight[f].airdromeId >= 100) then									--airbase is a carrier
-								waypoints[w]["linkUnit"] = flight[f].airdromeId
-								waypoints[w]["helipadId"] = flight[f].airdromeId
+							if db_airbases[flight[f].base].unitname or (flight[f].airdromeId and flight[f].airdromeId >= 100 and not flight[f]["parkAlertSAR"]) then									--airbase is a carrier
+								waypoints[w].linkUnit = flight[f].airdromeId
+								waypoints[w].helipadId = flight[f].airdromeId
 							else
 								waypoints[w]["airdromeId"] = flight[f].airdromeId
 							end
@@ -2394,8 +2481,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							waypoints[w].ETA_locked = false
 							waypoints[w].speed_locked = true
 							if db_airbases[flight[f].base].unitname then
-								waypoints[w]["linkUnit"] = flight[f].airdromeId
-								waypoints[w]["helipadId"] = flight[f].airdromeId
+								waypoints[w].linkUnit = flight[f].airdromeId
+								waypoints[w].helipadId = flight[f].airdromeId
 							else
 								waypoints[w]["airdromeId"] = flight[f].airdromeId
 								--ATO_FP_Debug10
@@ -3994,8 +4081,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				if waypoints[1].name == "Taxi" then
 
 					waypoints[2]["airdromeId"] = waypoints[1]["airdromeId"]
-					waypoints[2]["linkUnit"] = waypoints[1]["linkUnit"]
-					waypoints[2]["helipadId"] = waypoints[1]["helipadId"]
+					waypoints[2].linkUnit = waypoints[1].linkUnit
+					waypoints[2].helipadId = waypoints[1].helipadId
 					waypoints[2]["action"] = waypoints[1]["action"]
 					waypoints[2]["type"] = waypoints[1]["type"]
 
@@ -4340,21 +4427,39 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end 
 						
-	
 					--FARP parking id
 					-- if  flight[f].airdromeId >= 100 then
-					if  string.find(flight[f].base,"FARP")  then
-						units[n]["parking"] = tostring(n)
-						units[n]["parking_id"] = tostring(n)
+					if string.find(flight[f].base,"FARP") then
+						if not LimitedParkTiming and not flight[f]["parkAlertSAR"] then
+
+							units[n]["parking"] = tostring(n)
+							units[n]["parking_id"] = tostring(n)
+
+						elseif flight[f]["parkAlertSAR"] and flight[f]["parkAlertSAR"][n] then
+
+							waypoints[1]["action"] = "From Ground Area" 
+							waypoints[1]["type"] = "TakeOffGround"
+							waypoints[1].x = flight[f]["parkAlertSAR"][n].x
+							waypoints[1].y = flight[f]["parkAlertSAR"][n].y
+
+						end
 					end
 					
 					--TODO ajouter une protection: if no findParkId spawn en vol
 					-- n assigne pas de parking aux IA qui spawn in air
-					if waypoints[1]["action"] == "From Parking Area" and flight[f].parking_id and LimitedParkTiming ~= true and not db_airbases[flight[f].base].BaseAirStart then
-						local findParkId = GetParkingId( flight[f].parking_id, flight[f].base)						
-						if findParkId then
-							units[n]["parking_id"] = findParkId
-						end						
+					if waypoints[1]["action"] == "From Parking Area" and flight[f].parking_id and not LimitedParkTiming and not db_airbases[flight[f].base].BaseAirStart then
+						if not flight[f]["parkAlertSAR"] then
+							local findParkId = GetParkingId( flight[f].parking_id, flight[f].base)						
+							if findParkId then
+								units[n]["parking_id"] = findParkId
+							end	
+						elseif flight[f]["parkAlertSAR"][n] then
+							waypoints[1]["action"] = "From Ground Area" 
+							waypoints[1]["type"] = "TakeOffGround"
+							waypoints[1].x = flight[f]["parkAlertSAR"][n].x
+							waypoints[1].y = flight[f]["parkAlertSAR"][n].y
+						end
+											
 					end		
 					
 					if flight[f].sidenumber and flight[f].sidenumber[1] and flight[f].sidenumber[2] then		--squadron has sidenumbers defined
@@ -4834,7 +4939,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = -- = - = - = - = - = - = - = - = - = - = -- = - = - = - = - = - = - = - = - = - = -- = - = - = - = - = - = -
 				--Player & Client on SuperCarrier
 				-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = -- = - = - = - = - = - = - = - = - = - = -- = - = - = - = - = - = - = - = - = - = -- = - = - = - = - = - = -
-				if (db_airbases[flight[f].base].unitname or LimitedParkTiming ) and  ( flight[f].player or flight[f].client ) and waypoints[1]["type"] ~= "Turning Point" then --??? LimitedParkTiming? vraiment pour le joueur?
+				if (db_airbases[flight[f].base].unitname ) and  ( flight[f].player or flight[f].client ) and waypoints[1]["type"] ~= "Turning Point" then --??? LimitedParkTiming? vraiment pour le joueur?
 					if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe 0A-a SinglePlayer ..NbPlanetDeck: "..NbPlanetDeck) end
 					
 					spawn_time = mission_ini.startup_time_player
@@ -4869,7 +4974,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					then	--group launches after mission start																	-- calcul le nombre de flight dans un Package, en comptant ceux des Roles				
 					if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe AA LimitedParkTiming "..tostring(LimitedParkTiming)) end
 					
-					if (db_airbases[flight[f].base].unitname and (flight[f].task ~= "Intercept"  and  flight[f].task ~= "SAR"))  or string.find(flight[f].base,"FARP") then												--for groups on aircraft carriers -- modification M37.e SuperCarrier   and ((not SuperCarrier ) or (SuperCarrier and spawn_time>600))
+					if (db_airbases[flight[f].base].unitname ) then						--  or string.find(flight[f].base,"FARP")						--for groups on aircraft carriers
 						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe BB unitname+FARP "..group['route']['points'][1]["ETA"].." Multi.NbGroup?: "..tostring(Multi.NbGroup).." MultiPlayer.pack_n[p?: ".. tostring(camp.MultiPlayer.pack_n[p]) .." SingleWithDServerAiAir?: "..tostring(SingleWithDServerAiAir) ) end
 						
 						--permet de spawner les avions avant qu'ils ne démarrent
@@ -5073,7 +5178,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					------------------	
 					--SUR PISTE DUR---
 					------------------	
-					elseif (flight[f].task ~= "Intercept"  and  flight[f].task ~= "SAR") then 															
+					elseif (flight[f].task ~= "Intercept" and flight[f].task ~= "SAR" and not flight[f]["parkAlertSAR"]) then 															
 						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe II SUR PISTE DUR") end
 						
 						if LimitedParkTiming or db_airbases[flight[f].base].BaseAirStart then								
@@ -5085,8 +5190,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						
 						elseif group.route.points[1].action ~= "Turning Point" then
 
-							group['uncontrolled'] = true																							--make group uncontrolled						
 							group['lateActivation'] = false
+							group['uncontrolled'] = true																							--make group uncontrolled						
 							
 							Start_set_ai_task(group, spawn_time, debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
 						end												
@@ -5157,6 +5262,71 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				if (flight[f].task == "SAR" and conditionUno)  then			--or flight[f].task == "CSAR" 		
 					camp.SAR.Flag = camp.SAR.Flag + 1								--go to next trigger flag number					
 					
+					-- ParkSarAirBase
+					if ParkSarAirBase[flight[f].base] then
+						
+						local pkFound = false
+						local nPk = 0
+						
+						--premier passage, on se positionne sur les places reservées, si elles existent
+						for parkN, park in pairs(ParkSarAirBase[flight[f].base]) do
+							if park.reservedAR and not park.occupied then
+								park.occupied = true
+								nPk = parkN
+								pkFound = true
+								break
+							end
+						end
+
+						if not pkFound  then
+							local nLoop = 1
+							repeat
+							nPk = math.random(1, #ParkSarAirBase[flight[f].base])
+							
+								if not ParkSarAirBase[flight[f].base][nPk].occupied or ParkSarAirBase[flight[f].base][nPk].occupied == false then
+									ParkSarAirBase[flight[f].base][nPk].occupied = true
+									pkFound = true
+								end
+								nLoop = nLoop + 1
+							until nLoop > 200 or pkFound
+						end
+						
+						if pkFound then
+						
+							waypoints[1]["action"] = "From Ground Area" 
+							waypoints[1]["type"] = "TakeOffGround"
+							
+							group.units[1].x = ParkSarAirBase[flight[f].base][nPk].x
+							group.units[1].y = ParkSarAirBase[flight[f].base][nPk].y
+
+							group.x = ParkSarAirBase[flight[f].base][nPk].x
+							group.y = ParkSarAirBase[flight[f].base][nPk].y
+
+							waypoints[1].x = ParkSarAirBase[flight[f].base][nPk].x
+							waypoints[1].y = ParkSarAirBase[flight[f].base][nPk].y
+							
+							if waypoints[1].linkUnit then
+								waypoints[1].linkUnit = nil
+							end
+
+							if group.units[1].parking then
+								group.units[1].parking = nil
+							end
+
+							if group.units[1].parking_id then
+								group.units[1].parking_id = nil
+							end
+						end
+					end
+					
+					--ajuste l'altitude des helico en zone montagneuse, ils ont beaucoup de mal en alti radar
+					for n = 1, #waypoints do
+						if waypoints[n]["type"] == "Land" then
+							waypoints[n]["action"] = "LandingReFuAr"
+							waypoints[n]["type"] = "LandingReFuAr"
+						end
+					end
+
 					if ( flight[f].client ~= true and flight[f].player ~= true)  then	--or LimitedParkTiming or  ParkSarAirBase[flight[f].base]						-- M11 PVP ne copie pas de trigger retardé START pour les clients/joueurs	
 
 						group['uncontrolled'] = true											
@@ -5165,58 +5335,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						--TODO reassigner la position landing PilotEjected
 						--TODO pourquoi pas de soldier rouge?
 						
-						-- ParkSarAirBase
-						if ParkSarAirBase[flight[f].base] then
-							-- print("AtoFP G ")
-							local pkFound = false
-							local nLoop = 1
-							local nPk = 0
-							repeat
-							   nPk = math.random(1, #ParkSarAirBase[flight[f].base])
-							   
-								if not ParkSarAirBase[flight[f].base][nPk].occupied or ParkSarAirBase[flight[f].base][nPk].occupied == false then
-									ParkSarAirBase[flight[f].base][nPk].occupied = true
-									pkFound = true
-								end
-								nLoop = nLoop + 1
-							until nLoop > 200 or pkFound
-							
-							if pkFound then
-							
-								waypoints[1]["action"] = "From Ground Area" 
-								waypoints[1]["type"] = "TakeOffGround"
-								
-								group.units[1].x = ParkSarAirBase[flight[f].base][nPk].x
-								group.units[1].y = ParkSarAirBase[flight[f].base][nPk].y
-
-								group.x = ParkSarAirBase[flight[f].base][nPk].x
-								group.y = ParkSarAirBase[flight[f].base][nPk].y
-	
-								waypoints[1].x = ParkSarAirBase[flight[f].base][nPk].x
-								waypoints[1].y = ParkSarAirBase[flight[f].base][nPk].y
-								
-								if waypoints[1].linkUnit then
-									waypoints[1].linkUnit = nil
-								end
-
-								if group.units[1].parking then
-									group.units[1].parking = nil
-								end
-
-								if group.units[1].parking_id then
-									group.units[1].parking_id = nil
-								end
-							end
-						end
-						
-						--ajuste l'altitude des helico en zone montagneuse, ils ont beaucoup de mal en alti radar
-						for n = 1, #waypoints do
-							if waypoints[n]["type"] == "Land" then
-								waypoints[n]["action"] = "LandingReFuAr"
-								waypoints[n]["type"] = "LandingReFuAr"
-							end
-						end
-
 						--triggered action to start uncontrolled group
 						group['tasks'] = {
 							[1] = {
@@ -5578,8 +5696,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					}
 
 					if onCV then
-						waypoints[1]["linkUnit"] = PedroLinkCV.id_unit
-						waypoints[1]["helipadId"] = PedroLinkCV.id_unit
+						waypoints[1].linkUnit = PedroLinkCV.id_unit
+						waypoints[1].helipadId = PedroLinkCV.id_unit
 					end
 
 
@@ -5722,16 +5840,20 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 		
 					waypoints[1].ETA = 0													-- Place l'heure d'apparition au lancement de mission, pour avoir plus de temps...^^	
-					waypoints[1]["type"] = "TakeOffParking"
-					waypoints[1]["action"] = "From Parking Area"							--TODO pourquoi je l'avais enlevé déjà????
 					
+					--ne change pas le type de decollage d'une position SAR (from ground)
+					if waypoints[1]["type"] ~= "TakeOffGround" then
+						waypoints[1]["type"] = "TakeOffParking"
+						waypoints[1]["action"] = "From Parking Area"							--TODO pourquoi je l'avais enlevé déjà????
+					end
+
 					if db_airbases[flight[f].base].elevation then
 						waypoints[1]["alt"] = 500 + db_airbases[flight[f].base].elevation
 					end
 					
-					if db_airbases[flight[f].base].unitname or (flight[f].airdromeId and flight[f].airdromeId >= 100) then									--airbase is a carrier
-						waypoints[1]["linkUnit"] = flight[f].airdromeId						--Debug_l
-						waypoints[1]["helipadId"] = flight[f].airdromeId
+					if db_airbases[flight[f].base].unitname or (flight[f].airdromeId and flight[f].airdromeId >= 100 and not flight[f]["parkAlertSAR"]) then									--airbase is a carrier
+						waypoints[1].linkUnit = flight[f].airdromeId						--Debug_l
+						waypoints[1].helipadId = flight[f].airdromeId
 					else
 						waypoints[1]["airdromeId"] = flight[f].airdromeId
 					end	
@@ -6439,23 +6561,29 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 				end
 				
-				-- if waypoints[1]["linkUnit"] then				
-				-- 	info04 = "linkUnit "..waypoints[1]["linkUnit"]				
+				-- if waypoints[1].linkUnit then				
+				-- 	info04 = "linkUnit "..waypoints[1].linkUnit				
 				-- end
-				-- if waypoints[1]["helipadId"] then				
-				-- 	info04 = info04.." helipadId "..waypoints[1]["helipadId"]				
+				-- if waypoints[1].helipadId then				
+				-- 	info04 = info04.." helipadId "..waypoints[1].helipadId				
 				-- end	
 
-				if group.route.points[1]["linkUnit"] then				
-					info04 = "linkUnit "..group.route.points[1]["linkUnit"]				
+				if group.route.points[1].linkUnit then				
+					info04 = "linkUnit "..group.route.points[1].linkUnit				
 				end
-				if group.route.points[1]["helipadId"] then				
-					info04 = info04.." helipadId "..group.route.points[1]["helipadId"]				
+				if group.route.points[1].helipadId then				
+					info04 = info04.." helipadId "..group.route.points[1].helipadId				
+				end	
+
+				info05 = info05.."|" .. group.route.points[1]["action"].."|"
+
+				if units[1]["parking_id"] then 
+					info05 = info05.."| parking_id: |"					
 				end	
 
 				for i = 1, #units do
 					if units[i]["parking_id"] then 
-						info05 = info05.."| parking_id: |"..units[i]["parking_id"].."|"						
+						info05 = info05.."|"..units[i]["parking_id"].."|"						
 					end												
 				end
 
@@ -6468,8 +6596,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end												
 				end
 				
-				-- if waypoints[1]["linkUnit"] then				
-					-- info06 = info06.." linkUnit CV "..waypoints[1]["linkUnit"]				
+				-- if waypoints[1].linkUnit then				
+					-- info06 = info06.." linkUnit CV "..waypoints[1].linkUnit				
 				-- end	
 				
 				
