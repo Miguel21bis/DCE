@@ -4,7 +4,7 @@
  
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.171"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.172"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
@@ -777,6 +777,276 @@ db_all_loadouts = {
 			},
 		},
 	},
+	["vwv_a1_skyraider"] = {
+		Strike = {
+			["NAM-AG-Bombs 500lbs*8 - Rkt*14 - FT*3"] = {
+				minscore = 0.3,
+				support = {
+					SEAD = true,
+					Escort = false,
+					["Escort Jammer"] = false,
+				},
+				country = {
+					[1] = "USA",
+				},
+				attributes =  { "soft" },
+				code_loadout =  { "NAM" },
+				weaponType = "Bombs",
+				expend = "All",
+				day = true,
+				night = true,
+				adverseWeather = true,
+				range = 300000,
+				firepower = 1,
+				vCruise = 154.16666666667,
+				vAttack = 154.16666666667,
+				hCruise = 3315.2,
+				hAttack = 200,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{AN-M64}",
+					["num"] = 15,
+					["settings"] = {
+						["NFP_PRESID"] = "WWII_B_A_GPMedium",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = 1,
+						["NFP_fuze_type_tail"] = 1,
+						["function_delay_ctrl_ANM101A2"] = 0,
+						["function_delay_ctrl_ANM103A1"] = 0,
+						["vane_rev_threshold_ctrl_ANM101A2"] = 160,
+						["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
+					},
+				},
+				[2] = {
+					["CLSID"] = "{AN-M64}",
+					["num"] = 1,
+					["settings"] = {
+						["NFP_PRESID"] = "WWII_B_A_GPMedium",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = 1,
+						["NFP_fuze_type_tail"] = 1,
+						["function_delay_ctrl_ANM101A2"] = 0,
+						["function_delay_ctrl_ANM103A1"] = 0,
+						["vane_rev_threshold_ctrl_ANM101A2"] = 160,
+						["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
+					},
+				},
+				[3] = {
+					["CLSID"] = "{AN-M64}",
+					["num"] = 14,
+					["settings"] = {
+						["NFP_PRESID"] = "WWII_B_A_GPMedium",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = 1,
+						["NFP_fuze_type_tail"] = 1,
+						["function_delay_ctrl_ANM101A2"] = 0,
+						["function_delay_ctrl_ANM103A1"] = 0,
+						["vane_rev_threshold_ctrl_ANM101A2"] = 160,
+						["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
+					},
+				},
+				[4] = {
+					["CLSID"] = "{AN-M64}",
+					["num"] = 2,
+					["settings"] = {
+						["NFP_PRESID"] = "WWII_B_A_GPMedium",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = 1,
+						["NFP_fuze_type_tail"] = 1,
+						["function_delay_ctrl_ANM101A2"] = 0,
+						["function_delay_ctrl_ANM103A1"] = 0,
+						["vane_rev_threshold_ctrl_ANM101A2"] = 160,
+						["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
+					},
+				},
+				[5] = {
+					["CLSID"] = "{AN-M64}",
+					["num"] = 13,
+					["settings"] = {
+						["NFP_PRESID"] = "WWII_B_A_GPMedium",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = 1,
+						["NFP_fuze_type_tail"] = 1,
+						["function_delay_ctrl_ANM101A2"] = 0,
+						["function_delay_ctrl_ANM103A1"] = 0,
+						["vane_rev_threshold_ctrl_ANM101A2"] = 160,
+						["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
+					},
+				},
+				[6] = {
+					["CLSID"] = "{AN-M64}",
+					["num"] = 3,
+					["settings"] = {
+						["NFP_PRESID"] = "WWII_B_A_GPMedium",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = 1,
+						["NFP_fuze_type_tail"] = 1,
+						["function_delay_ctrl_ANM101A2"] = 0,
+						["function_delay_ctrl_ANM103A1"] = 0,
+						["vane_rev_threshold_ctrl_ANM101A2"] = 160,
+						["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
+					},
+				},
+				[7] = {
+					["CLSID"] = "{AN-M64}",
+					["num"] = 12,
+					["settings"] = {
+						["NFP_PRESID"] = "WWII_B_A_GPMedium",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = 1,
+						["NFP_fuze_type_tail"] = 1,
+						["function_delay_ctrl_ANM101A2"] = 0,
+						["function_delay_ctrl_ANM103A1"] = 0,
+						["vane_rev_threshold_ctrl_ANM101A2"] = 160,
+						["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
+					},
+				},
+				[8] = {
+					["CLSID"] = "{AN-M64}",
+					["num"] = 4,
+					["settings"] = {
+						["NFP_PRESID"] = "WWII_B_A_GPMedium",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = 1,
+						["NFP_fuze_type_tail"] = 1,
+						["function_delay_ctrl_ANM101A2"] = 0,
+						["function_delay_ctrl_ANM103A1"] = 0,
+						["vane_rev_threshold_ctrl_ANM101A2"] = 160,
+						["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
+					},
+				},
+				[9] = {
+					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+					["num"] = 11,
+				},
+				[10] = {
+					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+					["num"] = 5,
+				},
+				[11] = {
+					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+					["num"] = 10,
+				},
+				[12] = {
+					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+					["num"] = 6,
+				},
+				[13] = {
+					["CLSID"] = "{AV8BNA_AERO1D}",
+					["num"] = 9,
+				},
+				[14] = {
+					["CLSID"] = "{AV8BNA_AERO1D}",
+					["num"] = 7,
+				},
+				[15] = {
+					["CLSID"] = "{AV8BNA_AERO1D}",
+					["num"] = 8,
+				},
+					},
+					fuel = 1036,
+					flare = 240,
+					chaff = 240,
+					gun = 100,
+				},
+			},			
+			["NAM-AG-Rkt*70 - FT*3"] = {
+				minscore = 0.3,
+				support = {
+					SEAD = true,
+					Escort = false,
+					["Escort Jammer"] = false,
+				},
+				country = {
+					[1] = "USA",
+				},
+				attributes =  { "soft" },
+				code_loadout =  { "NAM" },
+				weaponType = "rockets",
+				expend = "Auto",
+				day = true,
+				night = true,
+				adverseWeather = true,
+				range = 450000,
+				firepower = 1,
+				vCruise = 154.16666666667,
+				vAttack = 154.16666666667,
+				hCruise = 3315.2,
+				hAttack = 200,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+					["num"] = 15,
+				},
+				[2] = {
+					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+					["num"] = 1,
+				},
+				[3] = {
+					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+					["num"] = 14,
+				},
+				[4] = {
+					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+					["num"] = 2,
+				},
+				[5] = {
+					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+					["num"] = 13,
+				},
+				[6] = {
+					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+					["num"] = 3,
+				},
+				[7] = {
+					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+					["num"] = 12,
+				},
+				[8] = {
+					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+					["num"] = 4,
+				},
+				[9] = {
+					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+					["num"] = 11,
+				},
+				[10] = {
+					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+					["num"] = 5,
+				},
+				[11] = {
+					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+					["num"] = 10,
+				},
+				[12] = {
+					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+					["num"] = 6,
+				},
+				[13] = {
+					["CLSID"] = "{AV8BNA_AERO1D}",
+					["num"] = 9,
+				},
+				[14] = {
+					["CLSID"] = "{AV8BNA_AERO1D}",
+					["num"] = 7,
+				},
+				[15] = {
+					["CLSID"] = "{AV8BNA_AERO1D}",
+					["num"] = 8,
+				},
+					},
+					fuel = 1036,
+					flare = 240,
+					chaff = 240,
+					gun = 100,
+				},
+			},
+		},
+	},
 	["VSN_F100"] = {
 		SEAD = {
 			["NAM - SEAD - FTx2 - AGM-45x2"] = {
@@ -1387,6 +1657,170 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
+	},
+	["vwv_mig17f"] = {
+		Strike = {
+			["All-AG-FAB-250*2"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				attributes =  { "soft", "Parked Aircraft", "Structure" },
+				code_loadout =  { "all" },
+				weaponType = "Bombs",
+				expend = "All",
+				attackType = "Dive",
+				day = true,
+				range = 150000,
+				firepower = 1,
+				vCruise = 200,
+				vAttack = 213.86666666667,
+				hCruise = 3000,
+				hAttack = 3000,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{3C612111-C7AD-476E-8A8E-2485812F4E5C}",
+					["num"] = 2,
+				},
+				[2] = {
+					["CLSID"] = "{3C612111-C7AD-476E-8A8E-2485812F4E5C}",
+					["num"] = 1,
+				},
+					},
+					fuel = 1140,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+		["Fighter Sweep"] = {
+			["Fighter Sweep - MiG-17"] = {
+				self_escort = true,
+				attributes =  { },
+				code_loadout =  { "all" },
+				day = true,
+				range = 250000,
+				firepower = 1,
+				vCruise = 200,
+				vAttack = 250,
+				hCruise = 5000,
+				hAttack = 5000,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					},
+					fuel = 1140,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},	
+			},
+		},
+		Escort = {
+			["Escort - MiG-17"] = {
+				attributes =  { },
+				code_loadout =  { "all" },
+				day = true,
+				range = 250000,
+				firepower = 1,
+				vCruise = 200,
+				standoff = 3000,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					},
+					fuel = 1140,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+		CAP = {
+			["CAP - MiG-17"] = {
+				attributes =  { },
+				code_loadout =  { "all" },
+				day = true,
+				range = 250000,
+				firepower = 1,
+				vCruise = 200,
+				vAttack = 213.86666666667,
+				hCruise = 3000,
+				hAttack = 3000,
+				standoff = 3000,
+				tStation = 1800,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					},
+					fuel = 1140,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+		["Anti-ship Strike"] = {
+			["Antiship -AG-FAB-250*2"] = {
+				minscore = 0.3,
+				support = {
+					SEAD = false,
+					Escort = true,
+					["Laser Illumination"] = false,
+				},
+				attributes =  { "ship" },
+				code_loadout =  { "all" },
+				weaponType = "Bombs",
+				expend = "All",
+				attackType = "Dive",
+				day = true,
+				range = 250000,
+				firepower = 1,
+				vCruise = 200,
+				vAttack = 213.86666666667,
+				hCruise = 3000,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = {
+					["CLSID"] = "{3C612111-C7AD-476E-8A8E-2485812F4E5C}",
+					["num"] = 2,
+				},
+				[2] = {
+					["CLSID"] = "{3C612111-C7AD-476E-8A8E-2485812F4E5C}",
+					["num"] = 1,
+				},
+					},
+					fuel = 1140,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+		Intercept = {
+			["Intercept - Mig-17F"] = {
+				attributes =  { },
+				code_loadout =  { "all" },
+				day = true,
+				range = 150000,
+				firepower = 1,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					},
+					fuel = 1140,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
 	},
 	["MiG-19P"] = {
 		Strike = {
@@ -6075,6 +6509,189 @@ db_all_loadouts = {
 					flare = 15,
 					ammo_type = 1,
 					chaff = 30,
+					gun = 100,
+				},
+			},
+		},
+	},
+	["vwv_crusader"] = {
+		["Fighter Sweep"] = {
+			["Fighter Sweep - Crusader"] = {
+				self_escort = true,
+				attributes =  { },
+				code_loadout =  { "all" },
+				day = true,
+				range = 250000,
+				firepower = 1,
+				vCruise = 245,
+				vAttack = 277.5,
+				hCruise = 5486.4,
+				hAttack = 5487,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 6,
+					},
+					[2] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 1,
+					},
+					[3] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 5,
+					},
+					[4] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 2,
+					},
+					[5] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 4,
+					},
+					[6] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 3,
+					},
+				},				
+					fuel = 4096,
+					flare = 120,
+					chaff = 120,
+					gun = 100,
+				},	
+			},
+		},
+		Escort = {
+			["Escort - Crusader"] = {
+				attributes =  { },
+				code_loadout =  { "all" },
+				day = true,
+				range = 250000,
+				firepower = 1,
+				vCruise = 245,
+				standoff = nil,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 6,
+					},
+					[2] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 1,
+					},
+					[3] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 5,
+					},
+					[4] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 2,
+					},
+					[5] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 4,
+					},
+					[6] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 3,
+					},
+				},				
+					fuel = 4096,
+					flare = 120,
+					chaff = 120,
+					gun = 100,
+				},	
+			},
+		},
+		CAP = {
+			["CAP - Crusader"] = {
+				attributes =  { },
+				code_loadout =  { "all" },
+				day = true,
+				range = 250000,
+				firepower = 1,
+				vCruise = 245,
+				vAttack = 277.5,
+				hCruise = 5486.4,
+				hAttack = 5487,
+				standoff = nil,
+				tStation = 1800,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 6,
+					},
+					[2] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 1,
+					},
+					[3] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 5,
+					},
+					[4] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 2,
+					},
+					[5] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 4,
+					},
+					[6] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 3,
+					},
+				},
+				},
+					fuel = 4096,
+					flare = 120,
+					chaff = 120,
+					gun = 100,
+			},
+		},
+		Intercept = {
+			["Intercept - Crusader"] = {
+				attributes =  { },
+				code_loadout =  { "all" },
+				day = true,
+				range = 150000,
+				firepower = 1,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 6,
+					},
+					[2] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 1,
+					},
+					[3] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 5,
+					},
+					[4] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 2,
+					},
+					[5] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 4,
+					},
+					[6] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 3,
+					},
+					},
+					fuel = 4096,
+					flare = 120,
+					chaff = 120,
 					gun = 100,
 				},
 			},
@@ -39388,7 +40005,7 @@ db_all_loadouts = {
 				},
 			},
 			["Strike 1980s 1xB8V20+8xATGM_AT6+Gunner"] = {
-				minscore = 0.3,
+				minscore = 0.1,
 				support = {
 					Escort = true,
 					SEAD = false,
@@ -40300,6 +40917,184 @@ db_all_loadouts = {
 					},
 					fuel = 1500,
 					flare = 128,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+	},
+	["vwv_hh2d"] = {
+		CSAR = {
+			["CSAR HH-2"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				day = true,
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = {
+					["CLSID"] = "ab-212_cable",
+					["num"] = 5,
+					},
+					},
+					fuel = 1100,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+		SAR = {
+			["SAR HH-2"] = {
+				minscore = 0.3,
+				support = {
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				day = true,
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = {
+					["CLSID"] = "ab-212_cable",
+					["num"] = 5,
+					},
+					},
+					fuel = 1100,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+		Transport = {
+			Default = {
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				day = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					},
+					fuel = 1100,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+	},
+	["vwv_sh2f"] = {
+		CSAR = {
+			["CSAR SH-2"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				day = true,
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					},
+					fuel = 1100,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+		SAR = {
+			["SAR SH-2"] = {
+				minscore = 0.3,
+				support = {
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				day = true,
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					},
+					fuel = 1100,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+		Transport = {
+			["transport SH-2"] = {
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				day = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					},
+					fuel = 1100,
+					flare = 0,
 					chaff = 0,
 					gun = 100,
 				},
