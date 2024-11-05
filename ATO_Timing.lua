@@ -1,13 +1,13 @@
 --To define Time on target for all packages and ETA for all aircraft waypoints
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  Debug_k cleanCode_c
+-- last modification:  adjustment_h
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_Timing.lua"] = "1.7.66"
+versionDCE["ATO_Timing.lua"] = "1.7.67"
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_c
--- adjustment_g				(g add AFAC task)(f not standoff in cap)(d escort Transport)(c airstart for Fuel)(b attempts to "dilute" all packages throughout the duration of the mission)(a gives more time to set up the player flight (SP and MP))						
+-- adjustment_h				(g add AFAC task)(f not standoff in cap)(d escort Transport)(c airstart for Fuel)(b attempts to "dilute" all packages throughout the duration of the mission)(a gives more time to set up the player flight (SP and MP))						
 -- Debug_k					(k latest = nil)(j time between CAPs too long)(i client Transport)(h tot bug with same target_name)(g escort/transport)(f add offset role == Anti-ship Strike)(e retablit ate<0 jusqu'a wpt 1) (d: tot transport bug)(c: speed trop faible pour les escort : = flight[f].loadout.vCruise / 4 * 3) (c: Spawn before Departure) (a: vCruise by default) 
 -- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
 -- modification M17_b		Option F-14B
@@ -678,6 +678,7 @@ for side, pack in pairs(ATO) do
 							end
 							
 							flight[f].route[w].id = "Spawn"
+							flight[f].route[w].name = "Create Spawn Wp in AtoTiming "..tostring(debug.getinfo(1).currentline)
 							flight[f].route[w].alt = flight[f].route[w + 1].alt
 							flight[f].route[w].eta = 0											--ETA of WP is at mission start
 							flight[f].route[w].speed = speed									--set NEWSPEED
@@ -687,6 +688,7 @@ for side, pack in pairs(ATO) do
 								y = flight[f].route[w + 1].y + math.sin(math.rad(h)) * dist,
 								eta = 0,														--ETA of WP is at mission start
 								id = "Spawn",													--WP is spawn point
+								name = "Create Spawn Wp in AtoTiming "..tostring(debug.getinfo(1).currentline),
 								alt = flight[f].route[w + 1].alt,
 								speed = speed,													--set NEWSPEED
 							}
