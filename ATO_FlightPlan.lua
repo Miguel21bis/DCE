@@ -4403,6 +4403,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						["type"] = flight[f].type,
 						["y"] = waypoints[1]["y"] + ((n - 1) * 15) +  ((f-1) * 15) + ((p - 1) * 15), --ATO_FP_Debug01 	--ANTI-COLLISION B
 						["x"] = waypoints[1]["x"] + ((n - 1) * 15) +  ((f-1) * 15) + ((p - 1) * 15), -- ATO_FP_Debug01	--ANTI-COLLISION B
+						-- ["y"] = waypoints[1]["y"] ,
+						-- ["x"] = waypoints[1]["x"] ,
 						["name"] = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight) .. "-" .. n,
 						-- ["payload"] = flight[f].loadout.stores,
 						["payload"] = {
@@ -4451,10 +4453,18 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						elseif flight[f]["parkAlertSAR"] and flight[f]["parkAlertSAR"][n] then
 
-							waypoints[1].action = "From Ground Area" 
-							waypoints[1].type = "TakeOffGround"
-							waypoints[1].x = flight[f]["parkAlertSAR"][n].x
-							waypoints[1].y = flight[f]["parkAlertSAR"][n].y
+							if n==1 then
+								--groups.xy se fera plus loin, dans le code, avec waypoints[1].xy comme ref
+								waypoints[1].action = "From Ground Area" 
+								waypoints[1].type = "TakeOffGround"
+								waypoints[1].x = flight[f]["parkAlertSAR"][n].x
+								waypoints[1].y = flight[f]["parkAlertSAR"][n].y
+								units[n].x = flight[f]["parkAlertSAR"][n].x
+								units[n].y = flight[f]["parkAlertSAR"][n].y
+							else
+								units[n].x = flight[f]["parkAlertSAR"][n].x
+								units[n].y = flight[f]["parkAlertSAR"][n].y
+							end
 
 							--on le fait reposer au meme endroit:
 							waypoints[#waypoints].action = "Landing" 
@@ -4467,10 +4477,18 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					elseif is_helicopter and waypoints[1].action ~= "Spawn" then
 						if flight[f]["parkAlertSAR"] and flight[f]["parkAlertSAR"][n] then
 
-							waypoints[1].action = "From Ground Area" 
-							waypoints[1].type = "TakeOffGround"
-							waypoints[1].x = flight[f]["parkAlertSAR"][n].x
-							waypoints[1].y = flight[f]["parkAlertSAR"][n].y
+							if n==1 then
+								--groups.xy se fera plus loin, dans le code, avec waypoints[1].xy comme ref
+								waypoints[1].action = "From Ground Area" 
+								waypoints[1].type = "TakeOffGround"
+								waypoints[1].x = flight[f]["parkAlertSAR"][n].x
+								waypoints[1].y = flight[f]["parkAlertSAR"][n].y
+								units[n].x = flight[f]["parkAlertSAR"][n].x
+								units[n].y = flight[f]["parkAlertSAR"][n].y
+							else
+								units[n].x = flight[f]["parkAlertSAR"][n].x
+								units[n].y = flight[f]["parkAlertSAR"][n].y
+							end
 
 							--on le fait reposer au meme endroit:
 							waypoints[#waypoints].action = "Landing" 
@@ -4481,7 +4499,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 					
-					--TODO ajouter une protection: if no findParkId spawn en vol
+					
 					-- n assigne pas de parking aux IA qui spawn in air
 					if waypoints[1].action == "From Parking Area" and flight[f].parking_id and not LimitedParkTiming and not db_airbases[flight[f].base].BaseAirStart then
 						if not flight[f]["parkAlertSAR"] then
@@ -4490,10 +4508,24 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								units[n]["parking_id"] = findParkId
 							end	
 						elseif flight[f]["parkAlertSAR"][n] then
-							waypoints[1].action = "From Ground Area" 
-							waypoints[1].type = "TakeOffGround"
-							waypoints[1].x = flight[f]["parkAlertSAR"][n].x
-							waypoints[1].y = flight[f]["parkAlertSAR"][n].y
+							if n==1 then
+								--groups.xy se fera plus loin, dans le code, avec waypoints[1].xy comme ref
+								waypoints[1].action = "From Ground Area" 
+								waypoints[1].type = "TakeOffGround"
+								waypoints[1].x = flight[f]["parkAlertSAR"][n].x
+								waypoints[1].y = flight[f]["parkAlertSAR"][n].y
+								units[n].x = flight[f]["parkAlertSAR"][n].x
+								units[n].y = flight[f]["parkAlertSAR"][n].y
+							else
+								units[n].x = flight[f]["parkAlertSAR"][n].x
+								units[n].y = flight[f]["parkAlertSAR"][n].y
+							end
+
+							--on le fait reposer au meme endroit:
+							waypoints[#waypoints].action = "Landing" 
+							waypoints[#waypoints].type = "Land"
+							waypoints[#waypoints].x = flight[f]["parkAlertSAR"][n].x
+							waypoints[#waypoints].y = flight[f]["parkAlertSAR"][n].y
 						end
 											
 					end		
@@ -4834,6 +4866,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					os.execute 'pause'
 				end
 				
+				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe waypoints[1][x] AA "..tostring(waypoints[1]["x"])) end	
+
 				local group = 
 				{				
 					-- ['frequency'] = GetFrequency(side, flight[f].target_name, flight[f].task, flight[f].type),				-- M06
@@ -4860,6 +4894,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					
 				}
 
+				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe group[x] BB "..tostring(group["x"])) end	
+				
 				--ajoute la frequence à l AFAC
 				if flight[f].task == "AFAC"  then
 					for w=1, #waypoints do
@@ -5035,7 +5071,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								if not TimingDeckCata[side] then TimingDeckCata[side] = {} end
 								if not TimingDeckCata[side][flight[f].base] then TimingDeckCata[side][flight[f].base] = {} end
 								
-								--TODO il faudrait prendre en compte le nombre d'avion à lancer, mais bordel à faire
+								-- TODO il faudrait prendre en compte le nombre d'avion à lancer, mais bordel à faire
 								-- local timeToLauch = flight[f].number * mission_ini.CV_TimeBtwPlane
 								-- placeTiming = math.ceil(spawn_time / 300) *300
 							
