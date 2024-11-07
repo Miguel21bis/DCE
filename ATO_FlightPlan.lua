@@ -1681,21 +1681,13 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe ParkSarAirBase A0 "..tostring(flight[f].route[1].id).." "..tostring(flight[f].route[2])) end	
 
-
 				if (flight[f].route[1].id ~= "Spawn" and flight[f].route[1].eta and flight[f].route[2]) or (flight[f].route[1].id ~= "Spawn" and flight[f].route[1].eta and not db_airbases[flight[f].base].unitname) then										
-
-					-- if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe ParkSarAirBase A1 timmingParking: "..tostring(timmingParking)) end	
-
 
 					for mn =  -mn_StartParking, timmingParking  do					
 						if not TabLPark[flight[f].base][mn] then TabLPark[flight[f].base][mn] = 0 end
 						
-						-- if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe ParkSarAirBase A3 "..tostring(role).." "..tostring(flight[f].reservedAR)) end	
-
-
 						if flight[f].task == "SAR" and flight[f].reservedAR then
-							-- if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe ParkSarAirBase B "..tostring(flight[f].task).." "..tostring(flight[f].name)) end	
-
+							
 						else
 							--s'il n'y a plus de place, on le dit (LimitedParkTiming) et on arrete de compter
 							if db_airbases[flight[f].base].LimitedParkNb and  TabLPark[flight[f].base][mn] + flight[f].number > db_airbases[flight[f].base].LimitedParkNb then
@@ -1704,12 +1696,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							else
 								--si il reste de la place, on ajoute la somme 
 								TabLPark[flight[f].base][mn] = TabLPark[flight[f].base][mn] + flight[f].number
-
-								-- if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe ParkSarAirBase C "..tostring(flight[f].task).." "..tostring(flight[f].name).." Nb a cette Mn: "..tostring(TabLPark[flight[f].base][mn])) end	
-
 							end
 						end
-
 					end
 
 					--NbPlaneTot sera utilisé pour ajouter des avions static sur les emplacements parking jamais utilisé
@@ -1754,7 +1742,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 											break
 										end
 									end
-
 								end
 							end
 						end	
@@ -5861,7 +5848,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					if	flight[f].client == true then EPlayer = " - Client" end
 					
 					-- local etiquette = "Pack " .. p .. " - "..flight[f].number.." "..flight[f].type.. " - " .. flight[f].name .." - " .. flight[f].task .." ".. f.. EPlayer.." spawn_time: "..spawn_time
-					local etiquette = "Pack " .. p .. " - "..flight[f].number.." "..flight[f].type.. " - " .. flight[f].name .." - " .. flight[f].task .." ".. f.. EPlayer
+					local etiquette = "Pack " .. p .. " - "..flight[f].number.." "..ReplaceTypeName(flight[f].type).. " - " .. flight[f].name .." - " .. flight[f].task .." ".. f.. EPlayer
 					
 					local testST
 					if (db_airbases[flight[f].base].unitname or db_airbases[flight[f].base].helipadId) then	

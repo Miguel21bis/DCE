@@ -1,12 +1,13 @@
 --To manually generate the first campaign mission and reset the campaign to initial status. For manual use by campaign designer only, not required for normal campaign play.
 --Initiated by FirstMission.bat
 ------------------------------------------------------------------------------------------------------- 
--- last modification: adjustment_o
+-- last modification: M80_a
 if not versionDCE then versionDCE = {} end
-versionDCE["BAT_FirstMission.lua"] = "1.12.95"
+versionDCE["BAT_FirstMission.lua"] = "1.13.97"
 -------------------------------------------------------------------------------------------------------
 -- adjustment_o				(o full targetList)(n targetList numeric)(m BAT)(l playable_m from data_divers)(k bugList)(j pairsByKeys)(i global TabTask)(h firstmission_flag)(g mise a niveau)(d: use io.stdin:read)(c: fire playable_m from conf_mod)(b: robust form)
--- cleancode_b
+-- cleancode_c
+-- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M61_c		SAR (c DEV creation fichier cercle commande: w3)
 -- modification M56_a		AssignCallnameSquad
 -- modification M55_a		player can change the type of plane
@@ -15,7 +16,7 @@ versionDCE["BAT_FirstMission.lua"] = "1.12.95"
 -- modification M40_f		Template Active GroundGroup moving front (f: sideBase)
 -- modification M38_n		helps to balance the game (n: delete Ngroug)
 -- modification M35_e		version ScriptsMod + camp (e: ScriptsMod_version from UTIL_Changelog)
--- modification M14		Versionning
+-- modification M14			Versionning
 -- modification M11A_b_l	Multiplayer (bl MP overRide) (gh %target alive)(x: only active Target)(q: displays all tasks of several squadrons)(p: Task table)
 -------------------------------------------------------------------------------------------------------
 
@@ -71,6 +72,7 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 dofile("Init/targetlist_init.lua")
+dofile("Init/various_table.lua")
 
 if not targetlist.blue[1] then
 	targetlistToNum()
@@ -187,7 +189,7 @@ repeat
 				-- Ecran N°2 Selection du Target	
 				print("choose a Single target")
 				
-				local taDIndex = {}	 
+				local tabIndex = {}	 
 				for side, targetSide in pairs(targetlist) do
 					local j = 1
 					local Ckey = 0

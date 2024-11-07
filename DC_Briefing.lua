@@ -1,14 +1,15 @@
 --To create the briefing for the next mission
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M78_a
+-- last modification: M80_a
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_Briefing.lua"] = "1.23.153"
+versionDCE["DC_Briefing.lua"] = "1.24.154"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_d						
 -- adjustment_b				(b \\" to \")(a add AFAC task)
 -- Debug_h					(h nbPasse)(g mission h)(f mission.maxDictId)(e intercept navigation) (d: affiche info MP)(c: camp.date.day)  (b: Mi8 & Mi24)(a: add Mig21 Channel 00)
 
+-- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)
 -- modification M61_a		SAR
 -- modification M58_b		flight plan, heading, Dist, ETE (b bug, no view)
@@ -246,7 +247,7 @@ do
 			if unit.inactive ~= true then															--unit is active
 				table.insert(entries[1].values, unit.name)											--unit name
 				table.insert(entries[2].values, ReplaceTypeName(unit.type))							--unit type
-				table.insert(entries[3].values, unit.base)											--unit base
+				table.insert(entries[3].values, ReplaceBaseName(unit.base))											--unit base
 				table.insert(entries[4].values, unit.roster.lost)									--unit lost aircraft
 				table.insert(entries[5].values, unit.roster.damaged)								--unit damaged aircraft
 				table.insert(entries[6].values, unit.roster.ready)									--unit ready aircraft
@@ -726,12 +727,12 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 								end
 							end
 							if tgt_n == 1 then
-								s = s .. "You are assigned to ground alert intercept duty at " .. airbase .. ". Early warning radar has detected " .. tgt_n .. " target inbound to your sector at " .. math.floor(tgt_heading) .. "°/" .. FormatDistance(tgt_distance, unitsUse) .. ". Launch imediately for interception.\n"
+								s = s .. "You are assigned to ground alert intercept duty at " .. ReplaceBaseName(airbase) .. ". Early warning radar has detected " .. tgt_n .. " target inbound to your sector at " .. math.floor(tgt_heading) .. "°/" .. FormatDistance(tgt_distance, unitsUse) .. ". Launch imediately for interception.\n"
 							else
-								s = s .. "You are assigned to ground alert intercept duty at " .. airbase .. ". Early warning radar has detected " .. tgt_n .. " targets inbound to your sector at " .. math.floor(tgt_heading) .. "°/" .. FormatDistance(tgt_distance, unitsUse) .. ". Launch imediately for interception.\n"
+								s = s .. "You are assigned to ground alert intercept duty at " .. ReplaceBaseName(airbase) .. ". Early warning radar has detected " .. tgt_n .. " targets inbound to your sector at " .. math.floor(tgt_heading) .. "°/" .. FormatDistance(tgt_distance, unitsUse) .. ". Launch imediately for interception.\n"
 							end
 					else
-							s = s .. "You are assigned to ground alert intercept duty at " .. airbase .. " Wait for the GCI to scramble you..."
+							s = s .. "You are assigned to ground alert intercept duty at " .. ReplaceBaseName(airbase) .. " Wait for the GCI to scramble you..."
 					
 					end
 					--Fighter Sweep
@@ -765,7 +766,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					--Escort
 					elseif player_task == "Escort" then
 						if target.class == "airbase" then
-							s = s .. "Escort a strike mission against " .. target.name .. ". Engage all hostile aircraft posing a threat to the strike package. "
+							s = s .. "Escort a strike mission against " .. ReplaceBaseName(target.name) .. ". Engage all hostile aircraft posing a threat to the strike package. "
 							--s = s .. "Man your aircraft at " .. time_start .. " and prepare to launch at " .. time_launch .. ". Your Time on Target is " .. time_target .. ". Good Luck."
 						elseif target.task == "Strike" or target.task == "Anti-ship Strike" then 
 							s = s .. "Escort a strike mission against the " .. target_name .. ". Engage all hostile aircraft posing a threat to the strike package. "
@@ -970,6 +971,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 							for flight_n,flight in pairs(role) do													--iterate through the flights in all roles
 								for e = 1, #entries do																--iterate through all entries
 									local value = ReplaceTypeName(flight[entries[e].lookup])
+									value = ReplaceBaseName(flight[entries[e].lookup])
 									local l = string.len(tostring(value))	 + 3										--get the string length of the current entry for this flight
 									if l > entries[e].str_length then												--if the string length is larger than the previous
 										entries[e].str_length = l													--make it the new length (find the largest)
@@ -1044,7 +1046,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					-- modification M27 	movedBullseye
 					if brief and brief[sideName] then
 						local s = "Bullseye:\n"
-						s = s.." bullseye Name " .. brief[sideName].bullseye.name
+						s = s.." bullseye Name " .. ReplaceBaseName(brief[sideName].bullseye.name)
 						if brief[sideName]["bullseye"].lat then
 							s = s.." " .. format_dms(brief[sideName]["bullseye"].lat ,brief[sideName]["bullseye"].lon ,4)  .." \n"
 						end
@@ -1177,7 +1179,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					--Radio navigation
 						
 					local s = "Radio Navigation:\n"
-					s = s .."Base: ".. Tplayer.pack[Tplayer.role][Tplayer.flight].base
+					s = s .."Base: ".. ReplaceBaseName(Tplayer.pack[Tplayer.role][Tplayer.flight].base)
 					--homebase TACAN
 					if db_airbases[Tplayer.pack[Tplayer.role][Tplayer.flight].base].TACAN then
 						s = s .. " TACAN: " .. db_airbases[Tplayer.pack[Tplayer.role][Tplayer.flight].base].TACAN 
@@ -1204,7 +1206,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					if Tplayer.pack[Tplayer.role][Tplayer.flight].divert then 	
 						for Divert, _base in pairs(Tplayer.pack[Tplayer.role][Tplayer.flight].divert) do							
 							if Divert ~= Tplayer.pack[Tplayer.role][Tplayer.flight].base then	
-								s = s .."Divert: ".. _base							
+								s = s .."Divert: ".. ReplaceBaseName(_base)							
 								--Divert TACAN
 								if db_airbases[_base].TACAN then
 									s = s .. " TACAN: " .. db_airbases[_base].TACAN 
@@ -1532,7 +1534,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					for Nradio = 1, #radioP do
 						entry = {name = "", call = "", freq = "",radio = ""}
 						entry["name"] = "ATC: "
-						entry["call"] = Tplayer.pack[Tplayer.role][Tplayer.flight].base
+						entry["call"] = ReplaceBaseName(Tplayer.pack[Tplayer.role][Tplayer.flight].base)
 						entry["freq"] = string.format("%07.3f", freqA).. " MHz"	
 						
 						if FreqCapability(freqA, radioP, Nradio, "") then
@@ -1856,7 +1858,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 							for Nradio = 1, #radioP do
 								entry = {name = "", call = "", freq = "", radio = ""}
 								entry["name"] = "Divert: "
-								entry["call"] = call
+								entry["call"] = ReplaceBaseName(call)
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 								if FreqCapability(freqA, radioP, Nradio, "") then
@@ -1900,7 +1902,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 								if freqA and freqA ~= nil and freqA ~= 0 then 
 									entry = {name = "", call = "", freq = "", radio = ""}
 									entry["name"] = "ATC"
-									entry["call"] = baseName
+									entry["call"] = ReplaceBaseName(baseName)
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 									if FreqCapability(freqA, radioP, Nradio, "ATC "..tostring(baseName)) then
@@ -2062,7 +2064,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 							if sideName == side then																	--if camp.player.side == side then
 								for base , Tmn in pairs(pPA) do
 									if base == Tplayer.pack[Tplayer.role][Tplayer.flight].base then 
-										s = s..tostring(base).." Takeoff time on the platform at ...\n"
+										s = s..ReplaceBaseName(base).." Takeoff time on the platform at ...\n"
 										for sec, name in pairsByKeys(Tmn) do
 											if tabNam[name] ~= true then
 												catTime = camp.time + sec 

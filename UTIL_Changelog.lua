@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.78.483"
+versionDCE["UTIL_Changelog.lua"] = "20.80.484"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.78.483"
+VersionDCE["UTIL_Changelog.txt"] = "20.80.484"
 --[[
 
 
@@ -10,8 +10,9 @@ known issues:
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 - [stats]	stats for your own package are rarely displayed
 
-==:20.79.484:==
-484 test	[test]	test 2
+==:20.80.484:==
+485 added	[alias]	added the Init\various_table file to use various tables, such as base name or aircraft type aliases  (M80)
+484 modified	[parking]	use of additional car parks, initially reserved for SARs
 
 ==:20.79.483:==
 483 added	[release]	merging files for publication

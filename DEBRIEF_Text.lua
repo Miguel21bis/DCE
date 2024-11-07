@@ -861,7 +861,7 @@ do
 			if unit.inactive ~= true then																								--unit is active
 				table.insert(entries[side_name][1].values, unit.name)																	--unit name
 				table.insert(entries[side_name][2].values, ReplaceTypeName(unit.type))													--unit type
-				table.insert(entries[side_name][3].values, unit.base)																	--unit base
+				table.insert(entries[side_name][3].values, ReplaceBaseName(unit.base))																	--unit base
 				if unit.score_last.kills_air > 0 then
 					table.insert(entries[side_name][4].values, unit.score.kills_air .. " (+" .. unit.score_last.kills_air .. ")")		--unit air kills plus score from this mission
 				else

@@ -1,12 +1,13 @@
 --Various functions
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M78_a
+-- last modification: M80_a
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Functions.lua"] = "1.16.127"
+versionDCE["UTIL_Functions.lua"] = "1.17.128"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_f						
 -- adjustment_o				(n loadout code)(m disp_time)(l add AFAC task)(k FormatTime)(i add insertBugList(txt))(h use isWesternCountry)(fg: add Loadout tiers)(e todo)(d:CheckConfModMaster )(c: fire playable_m from conf_mod)
 -- debug_i					(i planeType)(h Tha\'lah)(g string.gsub(v, "\"", "\\\"" ))(f new generateId)(d UH to HF) Angle et Bearing des statics sur PA
+-- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)
 -- modification M77_l		CG_ArtySpotter (kl listSpotterAircraft)
 -- modification M63_a		compatible Datacard Generator or CombatFlite
@@ -861,7 +862,14 @@ function ReplaceTypeName(s)
 	end
 end
 
-
+--function to replace certain type names
+function ReplaceBaseName(s)
+	if BaseNameAlias and BaseNameAlias[s] then
+		return BaseNameAlias[s]
+	else
+		return s
+	end
+end
 
 
  function _affiche(_table, titre, prof)

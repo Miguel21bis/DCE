@@ -1,13 +1,14 @@
 --To evaluate the DCS debrief.log, update the campaign status files/OOBs, generate a debriefing and initiate generation of next campaign mission
 --Initiated by MissionEnd.lua running from within DCS
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  cleanCode_b
+-- last modification:  M80_a
 if not versionDCE then versionDCE = {} end
-versionDCE["DEBRIEF_Master.lua"] = "1.15.120"
+versionDCE["DEBRIEF_Master.lua"] = "1.16.121"
 -------------------------------------------------------------------------------------------------------
 -- adjustment_n				(n new targetlist)(m oob_scen ==0)(l acceptedMission again)(k bugList)(j pairsByKeys)(i global TabTask)(g mise a niveau)(e: use io.stdin:read)(c: fire playable_m from conf_mod)(b: robust form) 
 -- debug_d	 				(cd: EndMission)
 -- cleanCode_b
+-- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M61_a		SAR
 -- modification M56_a		AssignCallnameSquad
 -- modification M55_a		player can change the type of plane
@@ -106,6 +107,8 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 require("Active/oob_ground")																	--load ground oob
 require("Active/oob_air")																		--load air oob
 require("Active/targetlist")																--load targetlist
+dofile("Init/various_table.lua")
+
 if not targetlist.blue[1] then
 	targetlistToNum()
 end
@@ -201,11 +204,8 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 
 --run log evaluation and status updates
 dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_StatsEvaluation.lua")
--- print("DebriefMaster A "..tostring(targetlist.blue[8].elements[2].name).." dead? "..tostring(targetlist.blue[8].elements[2].dead))
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_DestroyTarget.lua")												--Mod11.j
--- print("DebriefMaster B "..tostring(targetlist.blue[8].elements[2].name).." dead? "..tostring(targetlist.blue[8].elements[2].dead))
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
--- print("DebriefMaster C "..tostring(targetlist.blue[8].elements[2].name).." dead? "..tostring(targetlist.blue[8].elements[2].dead))
 
 --update campaign time
 local elapsed_time = math.floor(events[#events].t - events[1].t)								--mission runtime in seconds

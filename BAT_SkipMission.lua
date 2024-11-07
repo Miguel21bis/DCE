@@ -1,13 +1,14 @@
 --To manually re-generate and replace the current campaign mission. For contingency only, not required for normal campaign play.
 --Initiated by RedoMission.bat
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleancode_c
+-- last modification: M80_a
 if not versionDCE then versionDCE = {} end
-versionDCE["BAT_SkipMission.lua"] = "1.13.95"
+versionDCE["BAT_SkipMission.lua"] = "1.14.96"
 -------------------------------------------------------------------------------------------------------
 -- adjustment_n				(n targetList numeric)(m BAT)(l playable_m from data_divers)(k bugList)(j pairsByKeys)(i global TabTask)(h skipmission_flag)(g mise a niveau)(e: use io.stdin:read)(c: fire playable_m from conf_mod)(b: robust form) 
 -- debug_d					(cd: EndMission)
 -- cleancode_c
+-- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M61_a		SAR
 -- modification M56_a		AssignCallnameSquad
 -- modification M55_a		player can change the type of plane
@@ -67,6 +68,7 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 dofile("Active/targetlist.lua")
+dofile("Init/various_table.lua")
 
 local db_airbasesFile = "Active/db_airbases.lua"
 local TestPath = io.open(db_airbasesFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
