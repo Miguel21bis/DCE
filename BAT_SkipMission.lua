@@ -68,7 +68,13 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 dofile("Active/targetlist.lua")
-dofile("Init/various_table.lua")
+
+
+-- Exécution du fichier s'il existe
+local testFile = "Init/various_table.lua"
+if fileExists(testFile) then
+    dofile(testFile)
+end
 
 local db_airbasesFile = "Active/db_airbases.lua"
 local TestPath = io.open(db_airbasesFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
@@ -82,7 +88,6 @@ else
 		io.close(TestPath2)
 		dofile(db_airbasesFile2)
 		--creer le fichier db_airbases dans Active, meme en cours de campagne, pour garder la retrocompatibilite
-		print("MainA create copie db_airbase from Init")
 		local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
 		local trigFile = io.open("Active/db_airbases.lua", "w")
 		trigFile:write(airbases_Str)

@@ -788,6 +788,50 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																		end
 																	end
 																end
+
+																-- if Debug.Generator.SpySquad == unit.name then print() print("Passa AA loadout_eligible: "..tostring(loadout_eligible)) print() end
+																
+
+																if target.attributes and target.attributes[1] and target.attributes[1] ~= "" then								
+																	-- if Debug.Generator.SpySquad == unit.name then print("Passa A "..target.name) end
+
+																	for tgt_attributeN, target_attribute in ipairs(target.attributes) do																					
+																		-- if Debug.Generator.SpySquad == unit.name then print("Passa B "..target_attribute) end
+
+																		if target_attribute == "Helicopter" and isHelicopter[unit.type] then
+																			-- if Debug.Generator.SpySquad == unit.name then print("Passa C "..target_attribute) end
+
+																			if #target.attributes == 1 then																
+																				loadout_eligible = true																			
+																				break
+																			end
+																		elseif target_attribute == "Helicopter" and not isHelicopter[unit.type] then
+																			
+																			-- if Debug.Generator.SpySquad == unit.name then print("Passa D "..target_attribute) end
+
+																			loadout_eligible = false																			
+																			break
+																			
+																		elseif target_attribute == "Plane" and not isHelicopter[unit.type] then
+																			
+																			-- if Debug.Generator.SpySquad == unit.name then print("Passa E "..target_attribute) end
+
+																			if #target.attributes == 1 then																
+																				loadout_eligible = true																			
+																				break
+																			end
+																		elseif target_attribute == "Plane" and isHelicopter[unit.type] then
+																			
+																			-- if Debug.Generator.SpySquad == unit.name then print("Passa F "..target_attribute) end
+
+																			loadout_eligible = false																			
+																			break
+																			
+																		end
+																	end
+																end
+
+																-- if Debug.Generator.SpySquad == unit.name then print("Passa G loadout_eligible: "..tostring(loadout_eligible)) print() end
 																
 																if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "A")   
 																and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name  and  Debug.Generator.SpyTask == task

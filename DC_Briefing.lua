@@ -580,7 +580,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 									target_name = pack.main[1].target_name,
 									sortie_n = sortie_n,
 									tot = tot,
-									type = pack.main[1].type,
+									type = ReplaceTypeName(pack.main[1].type),
 								}
 							else																					--ATOList has content
 								for a = 1, #ATOList do																--go through ATOList to see if there is already a package entered with same target
@@ -593,7 +593,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 											target_name = pack.main[1].target_name,
 											sortie_n = sortie_n,
 											tot = tot,
-											type = pack.main[1].type,
+											type = ReplaceTypeName(pack.main[1].type),
 										}
 									end
 								end

@@ -48,6 +48,17 @@ function StringToTxtBrief(text)
 	end
 end
 
+--//####################### file function:
+function fileExists(path)
+	local file = io.open(path, "r")
+	if file then
+		file:close()
+		return true
+	else
+		return false
+	end
+end
+
 -- sorts tables alphabetically, to be used in a "for" loop instead of pairs or ipairs
 -- http://www.lua.org/pil/19.3.html
 function pairsByKeys (t, f)

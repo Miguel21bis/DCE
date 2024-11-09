@@ -72,7 +72,13 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 dofile("Init/targetlist_init.lua")
-dofile("Init/various_table.lua")
+
+-- Exécution du fichier s'il existe
+local testFile = "Init/various_table.lua"
+if fileExists(testFile) then
+    dofile(testFile)
+end
+
 
 if not targetlist.blue[1] then
 	targetlistToNum()

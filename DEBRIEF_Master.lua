@@ -107,7 +107,13 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 require("Active/oob_ground")																	--load ground oob
 require("Active/oob_air")																		--load air oob
 require("Active/targetlist")																--load targetlist
-dofile("Init/various_table.lua")
+
+-- Exécution du fichier s'il existe
+local testFile = "Init/various_table.lua"
+if fileExists(testFile) then
+    dofile(testFile)
+end
+
 
 if not targetlist.blue[1] then
 	targetlistToNum()
