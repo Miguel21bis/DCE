@@ -1,9 +1,9 @@
 --To create the Air Tasking Order
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  Debug_s
+-- last modification:  M11A_bk
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_Generator.lua"] = "1.20.131"
+versionDCE["ATO_Generator.lua"] = "1.20.132"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_c
 -- adjustment_Ac			(low Red flight)(score & sort)(a country table)(z priority)(y nb of Cap & Firepower)(v: depreciated variable capability)(u score & strikeOnlyWithEscorte)(minscore)(s tasks table)(op ne donne pas tout en CAP)(o info loadout)(N ne donne pas tout en CAP)(lM: MP) (ghi:donne une alti aléatoire) (f:altitude en fonction diff entre role)(e: random loadout temp)(cd:support équitable entre escadron)(b: TASK Coef)(a: escort mandatory or not)
@@ -18,7 +18,7 @@ versionDCE["ATO_Generator.lua"] = "1.20.131"
 -- modification M38_t		Check and Help CampaignMaker (t debug/debugGenerator)(r +)(o _affiche) (e: loadout Task?)
 -- modification M16_b		SpawnAir B1b & B-52 need BaseAirStart = true in db_aibase
 -- modification M13_e		Performance Scripting
--- modification M11A_bj		Multiplayer	(bj same target)(bi bug CAP)(bb: rapport entre escorte et cap)(wxy: force same package)(z: debug MP avec 1 Plane)(y: interdit l'escorte avion/helico) (x: EscorteTot-max) (w: choix EscorteMax) (v: interdit Strike sans escorte)(u: reserve avion Escorte) (t: different Type possible/task)
+-- modification M11A_bk		Multiplayer	(bk tente d obtenir ce que l'on souahite)(bj same target)(bi bug CAP)(bb: rapport entre escorte et cap)(wxy: force same package)(z: debug MP avec 1 Plane)(y: interdit l'escorte avion/helico) (x: EscorteTot-max) (w: choix EscorteMax) (v: interdit Strike sans escorte)(u: reserve avion Escorte) (t: different Type possible/task)
 -- modification M06			helicopter playable
 ------------------------------------------------------------------------------------------------------- 	
 
@@ -2906,31 +2906,36 @@ function createATO_table(draftPriority)
 														end
 														
 
-														-- if support.name ~= nil then
-															if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "C") 
-															and ( Debug.Generator.SpySquad and Debug.Generator.SpySquad == draft.name 
-															or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
-															then
-																
-																debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG passe C_00_h  we don't accept a single aircraft as escort supportTask "..supportTask.." draft.task "..tostring(draft.task)) 
-															end
+														--si c'est un task d'une demande MP, on chunte la restrition plus loin
+														--TODO zapper aussi si un avion non multi mais dans un group de multi
+														--TODO pourquoi causes: n'en a toujours que 2 (alors que là, il y a 4)
+														--TODO pourquoi le coef est plus important sur d'autre élément que lorsqu'on demande notre target?
+														local MultiPlayerOveRide  = false
+														if multiPlaneSet[side] and multiPlaneSet[side][support.type] then
+															MultiPlayerOveRide = true
+														end
+														
+														if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "C") 
+														and ( Debug.Generator.SpySquad and Debug.Generator.SpySquad == draft.name 
+														or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
+														then
 															
-															if support.number >= 2 and dispoTmp[support.name].unassigned < 2 and draft.task ~= supportTask then
-																
-																support_available = false																									--not enough support available
-																
-																local TabRejected = {}
-																TabRejected["sujet"]  = support.id.." type: "..support.type.." we don't accept a single aircraft as escort "..supportName
-																TabRejected["cause"] = { support.number, dispoTmp[support.name].unassigned, supportName, draft.task  }
-																TabRejected["ligne"]  = debug.getinfo(1).currentline														
-																table.insert(draft["rejected"], TabRejected)
-															else
-																dispoTmp[support.name].unassigned = dispoTmp[support.name].unassigned - support.number
-															end
-
+															debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG passe C_00_h  we don't accept a single aircraft as escort supportTask "..supportTask.." draft.task "..tostring(draft.task)) 
+														end
+														
+														if (support.number >= 2 and dispoTmp[support.name].unassigned < 2 and draft.task ~= supportTask) and not MultiPlayerOveRide then
 															
+															support_available = false																									--not enough support available
+															
+															local TabRejected = {}
+															TabRejected["sujet"]  = support.id.." type: "..support.type.." we don't accept a single aircraft as escort "..supportName
+															TabRejected["cause"] = { support.number, dispoTmp[support.name].aircraft_available, dispoTmp[support.name].unassigned, supportName, draft.task  }
+															TabRejected["ligne"]  = debug.getinfo(1).currentline														
+															table.insert(draft["rejected"], TabRejected)
+														else
+															dispoTmp[support.name].unassigned = dispoTmp[support.name].unassigned - support.number
+														end
 
-														-- end
 													end
 												end
 											end
@@ -3702,9 +3707,14 @@ function showAtoSort(newDraftByPriority)
 				end
 				if draft.rejected then
 					for id, _rejected in pairs(draft.rejected) do
+
+						--ecrit les causes:
+						local causeTxt = ""
+						for causeN, cause in ipairs(_rejected.cause) do
+							causeTxt = causeTxt .. " | "..tostring(cause)
+						end
 						debuGenTxt = debuGenTxt.."\n"..(	" rejected/ ".._rejected.sujet..
-							" / cause " ..tostring(_rejected.cause[1])..
-							" "..tostring(_rejected.cause[2])..
+							" / cause " ..causeTxt..
 							" / ligne " ..tostring(_rejected.ligne)
 							)
 					end

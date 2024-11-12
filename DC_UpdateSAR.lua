@@ -1,11 +1,12 @@
 -- updates the situation of the rejected pilots
 -- fill in the useful tables during the game
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  debug_f
+-- last modification:  cleanCode_a
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_UpdateSAR.lua"] = "1.3.16"
+versionDCE["DC_UpdateSAR.lua"] = "1.4.17"
 -------------------------------------------------------------------------------------------------------
 -- adjustement_g			(f coldAtStart)(d: enregistre les ref des circles dans la mission)(c inTheEnemyCamp)(b detect not camp_ZoneSAR.blue )(a boundary)
+-- cleanCode_a
 -- debug_f 					(f loss boundary)(e empty table)(d id duplicates)(c il reste des MIA)(b: camp_ZoneSAR)
 -- modification M61_d		SAR	 (d theatre)
 -------------------------------------------------------------------------------------------------------
@@ -1172,9 +1173,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
                 -- supprime d'abord le soldat existant, pour actualiser sa position et son status
                 DeleteSoldierAliasPilot(element)
 
-                if element.status == "EVAC_possible" and  element.SurfaceType ~= 5  then       --element.SurfaceType ~= 3 and-- and element.side == sideName
-                
-                    -- print("DcUS BB name ejected "..tostring(element.name))
+                if element.status == "EVAC_possible" and  element.SurfaceType ~= 5  then 
                     
                     local AddPilot = element
                     AddPilot.smokeOK = false

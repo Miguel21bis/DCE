@@ -5600,14 +5600,20 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 					
 					if flight[f].player or flight[f].client then										-- M11 multiplayer, les joueurs sont ajouté dans la base ready pour ne pas attendre 
+						
 						table.insert(GCI.Interceptor[side].base[flight[f].base].ready, t)
 						GCI.Interceptor[side].base[flight[f].base].ready_n = GCI.Interceptor[side].base[flight[f].base].ready_n + 1
+					
 					elseif #GCI.Interceptor[side].base[flight[f].base].ready == #GCI.Interceptor[side].base[flight[f].base].ready15 and #GCI.Interceptor[side].base[flight[f].base].ready == #GCI.Interceptor[side].base[flight[f].base].ready30 then
+						
 						table.insert(GCI.Interceptor[side].base[flight[f].base].ready, t)
 						GCI.Interceptor[side].base[flight[f].base].ready_n = GCI.Interceptor[side].base[flight[f].base].ready_n + 1
+					
 					elseif #GCI.Interceptor[side].base[flight[f].base].ready15 == #GCI.Interceptor[side].base[flight[f].base].ready30 then
+						
 						table.insert(GCI.Interceptor[side].base[flight[f].base].ready15, t)
 						GCI.Interceptor[side].base[flight[f].base].ready15_n = GCI.Interceptor[side].base[flight[f].base].ready15_n + 1
+					
 					else
 						table.insert(GCI.Interceptor[side].base[flight[f].base].ready30, t)
 					end

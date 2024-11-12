@@ -2,13 +2,13 @@
 --Script attached to mission and executed via trigger
 --Requires GCIdata.lua to be attached and run in mission in order to get access to table GCI
 ------------------------------------------------------------------------------------------------------- 
--- last modification debug_c
+-- last modification adjustment_c
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\GCIscript.lua"] = "1.4.18"
+versionDCE["Mission Scripts\GCIscript.lua"] = "1.4.19"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_a
 -- debug_c							(c getcategory again)(b unit category, tks ldnz)(a getheading Z)
--- adjustment_b						(b: intercept)(a recherche blocage)
+-- adjustment_c						(c no Inter In Bad Side) in wrongSide)(b: intercept)(a recherche blocage)
 -- modification M11_j				Multiplayer
 ------------------------------------------------------------------------------------------------------- 
 
@@ -236,7 +236,7 @@ local function GCI_Cycle()
 	--assign interceptors to targets
 	ErrorMsg = "Assign interceptors."																--Error message in case follow on code fails
 	for track_side, side in pairs(target_tracks) do													--iterate throug sides in target_tracks table
-		-- env.info("DCE_Gci Passe B_A track_side "..tostring(track_side))
+		env.info("DCE_Gci Passe B_A track_side "..tostring(track_side))
 		
 		for target_name, target in pairs(side) do													--iterate through targets
 			-- env.info("DCE_Gci  Passe B_B target_name "..tostring(target_name).." target.history "..tostring(target.history))
@@ -245,7 +245,24 @@ local function GCI_Cycle()
 			if target.history > 0 then																--target was detected at least two times in sequence
 				-- env.info("DCE_Gci   Passe B_C target.assigned "..tostring(target.assigned).." target.number "..tostring(target.number))
 				
-				if target.assigned < target.number then												--if target has less interceptors assigned than it has aircraft in group
+				--ne declenche les intercepteur que si les ENI franchissent la frontiere
+				local ourSideOfBorder = false
+
+				if camp.boundary and camp.boundary[track_side] and camp.boundary[track_side] ~= nil then
+
+					ourSideOfBorder =  CheckPointInPoly2(target.point, camp.boundary[track_side])
+
+					env.info("DCE_Gci Passe B_C2 track_side "..tostring(track_side).." ourSideOfBorder: "..tostring(ourSideOfBorder))
+
+					if ourSideOfBorder  then
+						env.info( "DCE_SAR_AddSoldierAliasManhunt? G ourSideOfBorder  ")
+						ourSideOfBorder = true
+					end
+				else
+					ourSideOfBorder = true
+				end
+
+				if ourSideOfBorder and target.assigned < target.number then												--if target has less interceptors assigned than it has aircraft in group
 					-- env.info("DCE_Gci    Passe B_D target.assigned ")
 					
 					--find all flights in range to intercept target

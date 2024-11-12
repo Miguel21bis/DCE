@@ -3,13 +3,13 @@
 -- 
 -- .
 ------------------------------------------------------------------------------------------------------- 
--- last modification cleanCode_b
+-- last modification M61_j
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\SAR.lua"] = "1.3.19"
+versionDCE["Mission Scripts\SAR.lua"] = "1.3.20"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_b
 -- adjustment_g						(if exist)(f don't spawn a manhunt in the ENI camp)(e CVN to CV)(c ajust nb of ManHunt)								
--- modification M61_i				SAR (i correction 100 to 200m)(g guideTreuilSAR)(e: add MGRS_Chute_10KM)(b debug)
+-- modification M61_j				SAR (j noSAR in wrongSide)(i correction 100 to 200m)(g guideTreuilSAR)(e: add MGRS_Chute_10KM)(b debug)
 -------------------------------------------------------------------------------------------------------
 
 do
@@ -491,6 +491,7 @@ do
 					rightSide = true
 				end
 
+
 			end
 			if altiSelected < 999999 and randomSpawn and rightSide then
 				env.info( "DCE_SAR_AddSoldierAliasManhunt G ejectedPilotName:  "..tostring(ejectedPilotName).." randomIdCountry: "..tostring(randomIdCountry).." n: "..tostring(n))
@@ -776,6 +777,8 @@ do
 
     function checkImmediatSAR(EjectedPilot)	
 		
+		env.info( "DCE_checkImmediatSAR A "..tostring(EjectedPilot.name))
+
         local pt_chute = {}
 		-- local initDesc = Event.initiator:getDesc()	
 
@@ -805,7 +808,13 @@ do
 		-- 	end
 		-- end
 
-		if EjectedPilot and EjectedPilot.x and EjectedPilot.unit:isExist()  then  --and isExist
+		if EjectedPilot and EjectedPilot.x then
+			env.info( "DCE_checkImmediatSAR B :isExist(): "..tostring(EjectedPilot.unit:isExist()))
+		end
+		
+		if EjectedPilot and EjectedPilot.x  then -- and EjectedPilot.unit:isExist()  --and isExist
+			env.info( "DCE_checkImmediatSAR C "..tostring(EjectedPilot.name))
+
 			local grid
 			if EjectedPilot.SurfaceType ~= 3 and EjectedPilot.SurfaceType ~= 5  then
 
@@ -891,15 +900,27 @@ do
 			
 			--si EjectedPilot est chez l'ENI, on ne lance pas de SAR
 			-- on lancera une CSAR dans les missions suivantes
-			local rightSideOfBorder
-			if camp.boundary and camp.boundary[EjectedPilot.side] and camp.boundary[EjectedPilot.side] ~= nil then
-				rightSideOfBorder =  CheckPointInPoly2({x=EjectedPilot.x2d,y=EjectedPilot.y2d}, camp.boundary[EjectedPilot.side])
-				env.info( "DCE_checkImmediatSAR? CC boundary rightSideOfBorder __"..tostring(rightSideOfBorder).."__ EjectedPilot.side: "..tostring(EjectedPilot.side))
-				if rightSideOfBorder == nil or rightSideOfBorder == false then
-					env.info( "DCE_checkImmediatSAR? DD boundary rightSideOfBorder __FALSE__ Return ")
+
+			local wrongSide = false
+			local ENI_Side = DCS_ENI_Side[EjectedPilot.side]
+			if camp.boundary and camp.boundary[ENI_Side] and camp.boundary[ENI_Side] ~= nil then
+				wrongSide =  CheckPointInPoly2({x=uPilot.x2d,y=uPilot.y2d} , camp.boundary[uPilot.side])
+				env.info( "DCE_checkImmediatSAR C ?  boundary wrongSide ? __"..tostring(wrongSide))
+				if wrongSide  then
+					env.info( "DCE_checkImmediatSAR? D boundary rightSideOfBorder __FALSE__ Return ")
 					return
 				end
 			end
+
+			-- local rightSideOfBorder
+			-- if camp.boundary and camp.boundary[EjectedPilot.side] and camp.boundary[EjectedPilot.side] ~= nil then
+			-- 	rightSideOfBorder =  CheckPointInPoly2({x=EjectedPilot.x2d,y=EjectedPilot.y2d}, camp.boundary[EjectedPilot.side])
+			-- 	env.info( "DCE_checkImmediatSAR? CC boundary rightSideOfBorder __"..tostring(rightSideOfBorder).."__ EjectedPilot.side: "..tostring(EjectedPilot.side))
+			-- 	if rightSideOfBorder == nil or rightSideOfBorder == false then
+			-- 		env.info( "DCE_checkImmediatSAR? DD boundary rightSideOfBorder __FALSE__ Return ")
+			-- 		return
+			-- 	end
+			-- end
 
 
 			--si EjectedPilot sur une VILLE on ne lance pas de SAR ni de CSAR
