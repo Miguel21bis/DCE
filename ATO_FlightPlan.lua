@@ -2241,6 +2241,12 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					elseif waypoints[w]["name"] == "Departure"  then
 						-- waypoints[w]["speed"] = pack[p].main[1].loadout.vCruise / 4 * 3					--set NEWSPEED
 					end
+
+					--sets the speed_locked values for the CAP only (it can arrive late ^^)
+					if flight[f].task == "CAP" and waypoints[w]["name"] ~= "Land" and waypoints[w]["name"] ~= "Departure" and waypoints[w]["name"] ~= "Taxi" then
+						waypoints[w].ETA_locked = false
+						waypoints[w].speed_locked = true
+					end
 	
 					-- ATO_FP_Debug08 vi trop faible pour les escorteurs des strike trop lent 					
 					if 	w>1 and flight[f].loadout.vCruise and waypoints[w]["speed"] < flight[f].loadout.vCruise / 4 * 3 then					
@@ -2255,31 +2261,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							_affiche(flight[f], "flight[f]")
 							os.execute 'pause'
 						end
-						-- waypoints[w]["speed"] = flight[f].loadout.vCruise / 4 * 3					--set NEWSPEED							
-							
-						-- if w < #flight[f].route then								
-							-- print("AtoFP passe 02 w "..w)							
-							-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
-							-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
-							-- local task_entry = {	
-								-- ["enabled"] = true,
-								-- ["auto"] = false,
-								-- ["id"] = "WrappedAction",
-								-- ["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-								-- ["params"] = 
-								-- {
-									-- ["action"] = 
-									-- {
-										-- ["id"] = "Script",
-										-- ["params"] = 
-										-- {
-											-- ["command"] = 'OrbitPosition("' .. grpname .. '", ' .. waypoints[w]["alt"] .. ', ' .. flight[f].loadout.vCruise / 3 * 2 .. ', ' .. waypoints[w].ETA .. ')',
-										-- },
-									-- },
-								-- },
-							-- }
-							-- table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-						-- end																	
+																					
 					end	
 						
 					--attack waypoint is a fly over point
@@ -2323,16 +2305,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						}
 						table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 							
-					end
-					
-					--fighter escorts fly with cruise speed to egress
-					--set NEWSPEED
-					-- if waypoints[w]["name"] == "Egress" and flight[f].task == "Escort" then
-					-- 	waypoints[w]["speed"] = pack[p].main[1].loadout.vCruise
-					-- 	if 	flight[f].loadout.vCruise and waypoints[w]["speed"] < flight[f].loadout.vCruise / 4 * 3 then					
-					-- 		waypoints[w]["speed"] = flight[f].loadout.vCruise / 4 * 3		
-					-- 	end						
-					-- end
+					end			
 	
 					--player flight WP ETA
 					if flight[f].player then
@@ -2517,12 +2490,12 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 									['briefing_name'] = 'Stacking',
 									['action'] = 'Turning Point',
 									['alt_type'] = 'BARO',
-									['speed_locked'] = false,
+									speed_locked = false,
 									['ETA'] = ETA_orbit,
 									['y'] = pointOrbit.y,
 									['formation_template'] = '',
 									['name'] = 'Stacking',
-									['ETA_locked'] = true,
+									ETA_locked = true,
 									['speed'] = waypoints[w-1]["speed"],
 									['x'] = pointOrbit.x,
 									['task'] = {
@@ -5588,7 +5561,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						airdromeId = flight[f].airdromeId,
 						time = -900
 					}
-					
+
+					-- Initialize base tables if not already set
 					if GCI.Interceptor[side].base[flight[f].base] == nil then
 						GCI.Interceptor[side].base[flight[f].base] = {
 							ready30 = {},
@@ -5596,27 +5570,62 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							ready15_n = 0,
 							ready = {},
 							ready_n = 0,
+							assign_index = 1  -- New variable to track insertion index
 						}
 					end
-					
-					if flight[f].player or flight[f].client then										-- M11 multiplayer, les joueurs sont ajouté dans la base ready pour ne pas attendre 
-						
-						table.insert(GCI.Interceptor[side].base[flight[f].base].ready, t)
-						GCI.Interceptor[side].base[flight[f].base].ready_n = GCI.Interceptor[side].base[flight[f].base].ready_n + 1
-					
-					elseif #GCI.Interceptor[side].base[flight[f].base].ready == #GCI.Interceptor[side].base[flight[f].base].ready15 and #GCI.Interceptor[side].base[flight[f].base].ready == #GCI.Interceptor[side].base[flight[f].base].ready30 then
-						
-						table.insert(GCI.Interceptor[side].base[flight[f].base].ready, t)
-						GCI.Interceptor[side].base[flight[f].base].ready_n = GCI.Interceptor[side].base[flight[f].base].ready_n + 1
-					
-					elseif #GCI.Interceptor[side].base[flight[f].base].ready15 == #GCI.Interceptor[side].base[flight[f].base].ready30 then
-						
-						table.insert(GCI.Interceptor[side].base[flight[f].base].ready15, t)
-						GCI.Interceptor[side].base[flight[f].base].ready15_n = GCI.Interceptor[side].base[flight[f].base].ready15_n + 1
-					
+
+					-- Assign the plane to a table based on the assign_index
+					local base = GCI.Interceptor[side].base[flight[f].base]
+
+					if flight[f].player or flight[f].client then
+						-- Always prioritize the `ready` table for player-controlled flights
+						table.insert(base.ready, t)
+						base.ready_n = base.ready_n + 1
 					else
-						table.insert(GCI.Interceptor[side].base[flight[f].base].ready30, t)
+						-- Insert into the appropriate table based on the current assign_index
+						if base.assign_index == 1 then
+							table.insert(base.ready, t)
+							base.ready_n = base.ready_n + 1
+						elseif base.assign_index == 2 then
+							table.insert(base.ready15, t)
+							base.ready15_n = base.ready15_n + 1
+						elseif base.assign_index == 3 then
+							table.insert(base.ready30, t)
+						end
+
+						-- Update assign_index for the next plane, cycling back to 1 after 3
+						base.assign_index = base.assign_index % 3 + 1
 					end
+
+					
+					-- if GCI.Interceptor[side].base[flight[f].base] == nil then
+					-- 	GCI.Interceptor[side].base[flight[f].base] = {
+					-- 		ready30 = {},
+					-- 		ready15 = {},
+					-- 		ready15_n = 0,
+					-- 		ready = {},
+					-- 		ready_n = 0,
+					-- 	}
+					-- end
+					
+					-- if flight[f].player or flight[f].client then										
+						
+					-- 	table.insert(GCI.Interceptor[side].base[flight[f].base].ready, t)
+					-- 	GCI.Interceptor[side].base[flight[f].base].ready_n = GCI.Interceptor[side].base[flight[f].base].ready_n + 1
+					
+					-- elseif #GCI.Interceptor[side].base[flight[f].base].ready == #GCI.Interceptor[side].base[flight[f].base].ready15 and #GCI.Interceptor[side].base[flight[f].base].ready == #GCI.Interceptor[side].base[flight[f].base].ready30 then
+						
+					-- 	table.insert(GCI.Interceptor[side].base[flight[f].base].ready, t)
+					-- 	GCI.Interceptor[side].base[flight[f].base].ready_n = GCI.Interceptor[side].base[flight[f].base].ready_n + 1
+					
+					-- elseif #GCI.Interceptor[side].base[flight[f].base].ready15 == #GCI.Interceptor[side].base[flight[f].base].ready30 then
+						
+					-- 	table.insert(GCI.Interceptor[side].base[flight[f].base].ready15, t)
+					-- 	GCI.Interceptor[side].base[flight[f].base].ready15_n = GCI.Interceptor[side].base[flight[f].base].ready15_n + 1
+					
+					-- else
+					-- 	table.insert(GCI.Interceptor[side].base[flight[f].base].ready30, t)
+					-- end
 
 				elseif flight[f].task == "AWACS" then
 					GCI.EWR[side][units[1].name] = true											--add AWACS to EWR table
@@ -5965,8 +5974,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						groupRTB.route.points[1]['action'] = 'Turning Point'
 						groupRTB.route.points[1]['type'] = 'Turning Point'
 
-						groupRTB.route.points[1]['ETA_locked'] = true
-						groupRTB.route.points[1]['speed_locked'] = true
+						groupRTB.route.points[1].ETA_locked = true
+						groupRTB.route.points[1].speed_locked = true
 
 						if flight[f].loadout.vAttack then
 							groupRTB.route.points[1]['speed'] = flight[f].loadout.vAttack
@@ -5987,7 +5996,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 																	},
 																},
 															}
-						groupRTB.route.points[2]['ETA_locked'] = false
+						groupRTB.route.points[2].ETA_locked = false
 
 					elseif groupRTB.route.points[2] and  groupRTB.route.points[3] then
 						-- groupRTB.route.points[1] = groupRTB.route.points[2]
@@ -5999,8 +6008,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 												
 						groupRTB.route.points[1] = groupRTB.route.points[3]					
 						
-						groupRTB.route.points[1]['speed_locked'] = true
-						groupRTB.route.points[1]['ETA_locked'] = true
+						groupRTB.route.points[1].speed_locked = true
+						groupRTB.route.points[1].ETA_locked = true
 						groupRTB.route.points[1]['ETA'] = 60
 						-- groupRTB.route.points[1]['x'] = groupRTB.route.points[1]['x'] + 5000
 						-- groupRTB.route.points[1]['y'] = groupRTB.route.points[1]['y'] + 5000
@@ -6019,8 +6028,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						groupRTB.route.points[2].x = tempWPT['x'] 
 						groupRTB.route.points[2].y = tempWPT['y'] 
 						groupRTB.route.points[1]['ETA'] = 70
-						groupRTB.route.points[2]['speed_locked'] = false
-						groupRTB.route.points[2]['ETA_locked'] = true						
+						groupRTB.route.points[2].speed_locked = false
+						groupRTB.route.points[2].ETA_locked = true						
 					end
 
 					groupRTB.name = "Recovery "..groupRTB.name
@@ -6247,12 +6256,12 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						['briefing_name'] = 'interWpt',
 						['action'] = 'Turning Point',
 						['alt_type'] = 'BARO',
-						['speed_locked'] = false,
+						speed_locked = false,
 						['ETA'] = tonumber(newEta),
 						['y'] = newPoint.y,
 						['formation_template'] = '',
 						['name'] = 'Stacking',
-						['ETA_locked'] = true,
+						ETA_locked = true,
 						['speed'] = wpt2.speed,
 						['x'] = newPoint.x,
 						['task'] = {

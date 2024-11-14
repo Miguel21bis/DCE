@@ -1105,7 +1105,7 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																									aircraft_requested =  multiPlaneSet[side][unit.type][task].NbPlane
 																									if aircraft_requested > 4 then aircraft_requested = 4 end
 																								end
-																							elseif task == "CAP" and aircraft_requested < 2  then--and unit_loadouts[l].firepower > 2
+																							elseif task == "Strike" and aircraft_requested < 2 and aircraft_requested < 2  then
 																								aircraft_requested = 2
 																							
 																							end
@@ -1125,15 +1125,18 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																								end
 
 																							end
-
+																							
 																							if task == "AWACS" or task == "Refueling" or task == "Transport" or task == "Nothing" or task == "Reconnaissance" or task == "AFAC" then
-																								aircraft_requested = math.ceil(aircraft_requested)											--round up
-																							elseif (unit.type == "S-3B" or unit.type == "F-117A" or unit.type == "B-1B" or unit.type == "B-52H" or unit.type == "Tu-22M3" or unit.type == "Tu-95MS" or unit.type == "Tu-142" or unit.type == "Tu-160" or unit.type == "MiG-25RBT")
-																								and task ~= "Runway Attack"	then
-																								aircraft_requested = math.ceil(aircraft_requested)											--round up
+																								aircraft_requested = math.ceil(aircraft_requested)											
+																							-- elseif (unit.type == "S-3B" or unit.type == "F-117A" or unit.type == "B-1B" or unit.type == "B-52H" or unit.type == "Tu-22M3" or unit.type == "Tu-95MS" or unit.type == "Tu-142" or unit.type == "Tu-160" or unit.type == "MiG-25RBT")
+																							-- 	and task ~= "Runway Attack"	then
+																							-- 	aircraft_requested = math.ceil(aircraft_requested)	
+																							elseif (data_divers[unit.type] and data_divers[unit.type].flyingAlone) and task ~= "Runway Attack"	then
+																								
+																								aircraft_requested = math.ceil(aircraft_requested)											
 																							else
 																								--aircraft_requested = math.ceil(aircraft_requested / 2) * 2								--round up to an even number
-																								aircraft_requested = math.ceil(aircraft_requested)											--round up
+																								aircraft_requested = math.ceil(aircraft_requested)											
 																							end
 
 																							local aircraft_assign
@@ -1153,6 +1156,7 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																							-- modification M11.o multiplayer
 																							if multiPlaneSet then
 																								debugMulti = debugMulti.."\n"..("AtoG passe A_AAb "..tostring(task).." "..unit.type.." aircraft_assign:"..tostring(aircraft_assign))
+																								
 																								if multiPlaneSet[side] and multiPlaneSet[side][unit.type]  and multiPlaneSet[side][unit.type][task] and task_bool then																							
 																									if Multi.Target and Multi.Target[side] then
 																										debugMulti = debugMulti.."\n"..("AtoG passe A_AAe Multi.Target[side] "..tostring(Multi.Target[side]) .. " ==? target_name? " .. tostring(target_name))
@@ -1550,11 +1554,11 @@ draft_sorties["blue"] = mysort(draft_sorties["blue"])
 draft_sorties["red"] = mysort(draft_sorties["red"])
 
 if Debug.Generator.affiche then	
-	local di = 1 
-	debuGenTxt = debuGenTxt.."\n"..("BLUE PART A")
+	
+	-- debuGenTxt = debuGenTxt.."\n"..("BLUE PART A")
 		
 	for sideName, drafts in pairs(draft_sorties) do
-	
+		local di = 1 
 		debuGenTxt = debuGenTxt.."\n\n\n"..(string.upper(sideName).." PART A")
 
 		for draft_n, draft in pairs(drafts) do	
@@ -1586,37 +1590,10 @@ if Debug.Generator.affiche then
 	debuGenTxt = debuGenTxt.."\n"
 end
 
--- if Debug.Generator.affiche then	
--- 	local di = 1 
--- 	debuGenTxt = debuGenTxt.."\n"..("RED PART A")
--- 	for draft_n, draft in pairs(draft_sorties["red"]) do	
--- 		if  di < Debug.Generator.nb or draft.name == Debug.Generator.SpySquad  or draft.target_name == Debug.Generator.SpyTarget then
--- 			debuGenTxt = debuGenTxt.."\n"..(	"A N° " .. draft_n..
--- 					" /id/ " ..tostring(draft.id)..
--- 					" /Nb/ " ..draft.number..
--- 					" /flights/ " ..tostring(draft.flights)..
--- 					" /Type/ "..draft.type..
--- 					" /threatsGround/ "..round(draft.threatsGround)..
--- 					" /threatsAir/ "..round(draft.threatsAir)..
--- 					" /Score/ " ..round(draft.score)..
--- 					" /Task/ "..draft.task..
--- 					" /Target/ "..draft.target_name..
--- 					" /Sead_Of/ "..tostring(draft.route.threats.SEAD_offset)..		
--- 					" /MainMPOveRide/ " ..tostring(draft.MainMPOveRide)..
--- 					" /remainingFirepower/ " ..draft.remainingFirepower..
--- 					" /multipack/ " ..draft.multipack
--- 					-- .." /loadout/ "..tostring(draft.loadout.loadout_name)
--- 					)
--- 					debuGenTxt = debuGenTxt.."\n"
--- 			di = di +1
--- 		end
--- 	end
--- 	debuGenTxt = debuGenTxt.."\n\n\n"
--- end
-
 --create additional draft sorties with support flights assigned
 local wk = 1							
 i_timmer02 = 0
+local uniqueBonus = false
 
 --inversion des 2 boucles draft_sortie en premier, oob_air ensuite, pour homogeniser les chances de sortie de tous les escadrons support
 for sideName, draftT in pairs(draft_sorties) do		
@@ -1691,10 +1668,53 @@ for sideName, draftT in pairs(draft_sorties) do
 			end
 		end
 
-		-- _affiche(oob_air["blue"][1], "table.move oob")
+		if multiPlaneSet.red then
+			-- print("PASSE A")
+			for o = 1, #oob_air["red"] do
+				
+				local oob = oob_air["red"][o]
+
+				if multiPlaneSet.red[oob.type] and oob and oob.tasks then
+					-- print("PASSE   D")
+					for taskName, taskValue in pairs(oob.tasks) do
+						-- print("PASSE    E taskName "..tostring(taskName))
+						if taskName == multiPlaneSet.red.task then
+							-- print("PASSE     FIN OK")
+							-- Décaler les éléments de la position 1 à o-1 vers la droite
+							table.move(oob_air["red"], 1, o-1, 2)
+							-- Mettre l'élément trouvé en tête de la table
+							oob_air["red"][1] = oob
+							-- Supprimer l'élément à sa position originale (qui a été décalée)
+							table.remove(oob_air["red"], o + 1)
+							break -- Si un seul déplacement est requis, on peut quitter la boucle ici
+						end
+					end
+				end
+			end
+		end
+
+		-- _affiche(oob_air["red"][1], "table.move oob")
 		
 		
+
+
+		-- -- Reset les unités comme non vérifiée
+		-- local fullMP_Plane = true
+		-- for typeM, tasksM in pairs(draft.multiPlaneSet_B[sideName]) do
+		-- 	for taskM, value in pairs(tasksM) do
+		-- 		if not value or not value.checked then
+		-- 			fullMP_Plane = false
+
+		-- 		end
+		-- 	end
+		-- end
 		
+		
+		--tag multiPlaneSet_B Présent pour l'avion MAIN
+		if multiPlaneSet_B and draft.multiPlaneSet_B[sideName] and draft.multiPlaneSet_B[sideName][draft.type] then
+			draft.multiPlaneSet_B[sideName][draft.type][draft.task].checked = true
+		end
+
 		local remain_SEAD_offset = draft.route.threats.SEAD_offset
 		local remain_air_total = draft.route.threats.air_total
 
@@ -1714,7 +1734,6 @@ for sideName, draftT in pairs(draft_sorties) do
 
 					if side == sideName and unit.inactive ~= true and db_airbases[unit.base] and db_airbases[unit.base].inactive ~= true and ( SupportMPOveRide or (aircraft_availability[unit.name] and aircraft_availability[unit.name].available > 0))  and db_airbases[unit.base].x  then	--if unit is active, its base is active and has available aircraft -- ATO_G_debug01 Fin de campagne					
 						
-					
 						if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "B") 
 						and ( Debug.Generator.SpySquad and Debug.Generator.SpySquad == draft.name 
 						or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
@@ -1723,18 +1742,10 @@ for sideName, draftT in pairs(draft_sorties) do
 						end
 			
 						
-						
 						for task, task_bool in pairs(unit.tasks) do											--iterate through all tasks of unit
 							local playable_II = false
 							local aliasTask = ""
-							
-							-- if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "B") and multiPlaneSet[side]   
-							-- and (Debug.Generator.SpySquad and (Debug.Generator.SpySquad == unit.name or Debug.Generator.SpySquad == draft.name)  and   (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
-							-- or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
-							-- then
-							-- 	debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II passe B_02_c  "..draft.type.." OOBunit: "..unit.type.." "..task.." "..draft.target_name) 
-							-- 	debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II passe B_02_d MainMPOveRide: "..tostring(draft.MainMPOveRide).." multiPlaneSet: "..tostring(multiPlaneSet[side][unit.type]).." task_bool: "..tostring(task_bool) ) 
-							-- end						
+												
 							
 							if draft.MainMPOveRide and multiPlaneSet[side] and multiPlaneSet[side][unit.type] and task_bool then	--and multiPlaneSet[unit.type][task] and task == "Strike" 
 								SupportMPOveRide = true							
@@ -1742,39 +1753,14 @@ for sideName, draftT in pairs(draft_sorties) do
 								SupportMPOveRide = false	
 							end
 							
-							-- if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "B")   
-							-- and (Debug.Generator.SpySquad and (Debug.Generator.SpySquad == unit.name or Debug.Generator.SpySquad == draft.name)  and   (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
-							-- or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
-							-- then
-							-- 	debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II passe B_02_e SupportMPOveRide: "..tostring(SupportMPOveRide)) 
-							-- end
 
 							local temp_draft_sorties = {}														--temporary table to hold additional draft sorties with escorts assigned
 							-- if (SupportMPOveRide or (task == "SEAD" or task == "Escort" or task == "Escort Jammer" or task == "Flare Illumination" or task == "Laser Illumination")) and task_bool then	--task is a support task and is true
 							if ( draft.task ~= "CAP" and draft.task ~= "Intercept" ) and (task == "SEAD" or task == "Escort" or task == "Escort Jammer" or task == "Flare Illumination" or task == "Laser Illumination" or task == "Strike") and task_bool then	--task is a support task --and is true and draft.task ~= "SAR"
 								
-								-- if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "B") 
-								-- and (Debug.Generator.SpySquad and (Debug.Generator.SpySquad == unit.name or Debug.Generator.SpySquad == draft.name)  and   (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
-								-- or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
-								-- then
-								-- 	debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II passe B_03 task_bool draft: "..task.." SupportMPOveRide: "..tostring(SupportMPOveRide)) 
-								-- end
-								
 								--get possible loadouts
 								local unit_loadouts = {}														--table to hold all loadouts for this aircraft type and task
 			
-								-- if aliasTask ~= "" then
-								-- 	for loadout_name, ltable in pairs(db_loadouts[unit.type][aliasTask]) do			--iterate through all loadouts for the aircraft type and task
-								-- 		ltable.name = loadout_name
-								-- 		unit_loadouts[#unit_loadouts+1] = ltable
-								-- 	end
-								-- else
-								-- 	for loadout_name, ltable in pairs(db_loadouts[unit.type][task]) do			--iterate through all loadouts for the aircraft type and task
-								-- 		ltable.name = loadout_name
-								-- 		unit_loadouts[#unit_loadouts+1] = ltable
-								-- 	end		
-								-- end
-								
 								for loadout_name, ltable in pairs(db_loadouts[unit.type][task]) do			--iterate through all loadouts for the aircraft type and task
 									ltable.name = loadout_name
 									if ltable.standoff == nil then ltable.standoff = 0 end
@@ -1800,25 +1786,14 @@ for sideName, draftT in pairs(draft_sorties) do
 										unit_loadouts[#unit_loadouts+1] = ltable
 									end
 									
-								
 								end
 
 
 								-- trie par standoff
 								table.sort(unit_loadouts, function(a,b) return a.standoff > b.standoff  end)
 
-								
 								for l = 1, #unit_loadouts do													--iterate through all available loadouts				
 									
-									-- if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "B") 
-									-- and (Debug.Generator.SpySquad and (Debug.Generator.SpySquad == unit.name or Debug.Generator.SpySquad == draft.name)  and   (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
-									-- or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
-									-- then
-									-- 	debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II passe B_03b task: "..task.." unit_loadouts[l].name: "..tostring(unit_loadouts[l].name)) 
-									
-									-- end
-								
-
 									--get possible Time on Target
 									local tot_from = 0															--earliest Time on Target for this loadout
 									local tot_to = 0															--latest Time on target for this loadout
@@ -1849,21 +1824,7 @@ for sideName, draftT in pairs(draft_sorties) do
 										end
 									end
 									
-									-- if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "B")   
-									-- and (Debug.Generator.SpySquad and (Debug.Generator.SpySquad == unit.name or Debug.Generator.SpySquad == draft.name)  and  (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
-									-- or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
-									-- then
-									-- 	debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II passe B_04 tot_from: |"..tostring(tot_from).."|"..tostring(tot_to).."|" ) 
-									-- end
-
 									if SupportMPOveRide or (tot_from ~= 0 or tot_to ~= 0)   then										--loadout has an eligible time on target
-										
-										-- if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "B")   
-										-- and (Debug.Generator.SpySquad and (Debug.Generator.SpySquad == unit.name or Debug.Generator.SpySquad == draft.name)  and  (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
-										-- or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
-										-- then
-										-- 	debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II passe B_05 tot_from  "..task) 
-										-- end
 										
 										local _NbTotalSupport = 0
 
@@ -1888,24 +1849,6 @@ for sideName, draftT in pairs(draft_sorties) do
 												end
 											end
 										end
-										
-										-- if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "B")   
-										-- and (Debug.Generator.SpySquad and (Debug.Generator.SpySquad == unit.name or Debug.Generator.SpySquad == draft.name)  and  (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
-										-- or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
-										-- then
-										-- 	if draft.loadout.support and draft.loadout.support[task] then
-										-- 		debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II passe B_11a tot_from  "..tostring(task))
-										-- 	else
-										-- 		debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II passe B_11b tot_from  "..tostring(task).." NbTotalSupport: "..tonumber(draft.support[task]["NbTotalSupport"]).." escort_max: "..tonumber(draft.support[task]["escort_max"]))
-										-- 		debuGenTxt = debuGenTxt.."\n".."                              ---> task "..task.." loadoutName: "..tostring(draft.loadout.name)
-												
-										-- 		if draft.loadout.support and draft.loadout.support[task] then
-										-- 			debuGenTxt = debuGenTxt.."\n".."                              --->  " ..tostring(draft.loadout.support[task])
-										-- 		else
-										-- 			debuGenTxt = debuGenTxt.."\n".."                              --->  No loadout.support"
-										-- 		end
-										-- 	end
-										-- end
 										
 										i_timmer02 = i_timmer02 +1
 										if SupportMPOveRide or (draft.loadout.support and draft.loadout.support[task])
@@ -2039,7 +1982,9 @@ for sideName, draftT in pairs(draft_sorties) do
 															and (Debug.Generator.SpySquad and (Debug.Generator.SpySquad == unit.name or Debug.Generator.SpySquad == draft.name)  and  (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
 															or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
 															then
-																debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II passe B_16 weather_eligible route.lenght: "..tostring(route.lenght).. " <= "..tostring(unit_loadouts[l].range * 2).." (loadouts: )" ..tostring(unit_loadouts[l].range)..") loadoutName: "..tostring(unit_loadouts[l].name)) 
+																debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II passe B_16 weather_eligible route.lenght: "..tostring(route.lenght).. " <= "..tostring(unit_loadouts[l].range * 2)
+																.." (loadouts: )" ..tostring(unit_loadouts[l].range)..") loadoutName: "..tostring(unit_loadouts[l].name)
+																.."unit_loadouts[l].minrange: "..tostring(unit_loadouts[l].minrange)) 
 															end
 												
 															
@@ -2128,56 +2073,89 @@ for sideName, draftT in pairs(draft_sorties) do
 															
 																debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II passe_Escort P "..unit.type.." "..task.." "..escort_num)
 																
-																
+
 																--*********************************************************************************
 																-- modification M11.o multiplayer**************************************************
 																local txtDebug = ""
 																if draft.multiPlaneSet_B  then
 																	txtDebug = txtDebug .. " passeA ".."/n"
 
-																	if  draft.multiPlaneSet_B[side] and draft.multiPlaneSet_B[side][unit.type]  and draft.multiPlaneSet_B[side][unit.type][task] then	
-																	
-																		-- if draft.multiPlaneSet_B[side][unit.type][task].NbPlane > 0 then
-																			
-																			--si l'avion de support est déjà utilise en MAIN, on enleve la qté dejà utilisé
-																			if draft.multiPlaneSet_B and draft.multiPlaneSet_B[side] and draft.multiPlaneSet_B[side][draft.type] and draft.multiPlaneSet_B[side][draft.type][task] then
-																				draft.multiPlaneSet_B[side][draft.type][task].NbPlane = draft.multiPlaneSet_B[side][draft.type][task].InitNbPlaneByTask - draft.number
-																				txtDebug = txtDebug .. "    passeB "..draft.multiPlaneSet_B[side][draft.type][task].NbPlane.."/n"
-																			end
-
-																			playable_II = true
-																			
-																			if escort_num < draft.multiPlaneSet_B[side][unit.type][task].NbPlane then
-																				escort_num =  draft.multiPlaneSet_B[side][unit.type][task].NbPlane
-																				txtDebug = txtDebug .. "    passeC "..escort_num.."/n"					
-																			elseif escort_num > draft.multiPlaneSet_B[side][unit.type][task].NbPlane then
-																					escort_num =  draft.multiPlaneSet_B[side][unit.type][task].NbPlane
-																					txtDebug = txtDebug .. "    passeD "..escort_num.."/n"	
-																			end	
-
-																			txtDebug = txtDebug .. "    passeE "..draft.score.."/n"
-
-																			draft.score = draft.score * 1.2 + 1000
-																			draft.scoreAdd =  draft.scoreAdd + 1000
-																			draft.scoreCoef =  draft.scoreCoef * 1.2
-																			-- draft.multiPlaneSet_B[side][unit.type][task].NbPlane = draft.multiPlaneSet_B[side][unit.type][task].NbPlane - escort_num
+																	-- if  draft.multiPlaneSet_B[side] and draft.multiPlaneSet_B[side][unit.type]  and draft.multiPlaneSet_B[side][unit.type][task] then	
+																	if MP_Game then
 																		
-																			txtDebug = txtDebug .. "    passeF "..draft.score.."/n"
+																		--si l'avion de support est déjà utilise en MAIN, on enleve la qté dejà utilisé
+																		if draft.multiPlaneSet_B and draft.multiPlaneSet_B[side] and draft.multiPlaneSet_B[side][draft.type] and draft.multiPlaneSet_B[side][draft.type][task] then
+																			draft.multiPlaneSet_B[side][draft.type][task].NbPlane = draft.multiPlaneSet_B[side][draft.type][task].InitNbPlaneByTask - draft.number
+																			txtDebug = txtDebug .. "    passeB "..draft.multiPlaneSet_B[side][draft.type][task].NbPlane.."/n"
 
-																			txtDebug = txtDebug .. "    passeG NbPlane "..draft.multiPlaneSet_B[side][unit.type][task].NbPlane.."/n"
-																			txtDebug = txtDebug .." InitNbPlaneByTask: "..tostring(draft.multiPlaneSet_B[side][unit.type][task].InitNbPlaneByTask)
+																		end
 
-																		-- else
-																		-- 	--si le nb de plane joueur est rempli, on enleve ceux des IA supplémentaire
-																		-- 	escort_num = 0
+																		playable_II = true
+																		
+																		if escort_num < draft.multiPlaneSet_B[side][unit.type][task].NbPlane then
+																			escort_num =  draft.multiPlaneSet_B[side][unit.type][task].NbPlane
+																			txtDebug = txtDebug .. "    passeC "..escort_num.."/n"					
+																		elseif escort_num > draft.multiPlaneSet_B[side][unit.type][task].NbPlane then
+																			escort_num =  draft.multiPlaneSet_B[side][unit.type][task].NbPlane
+																			txtDebug = txtDebug .. "    passeD "..escort_num.."/n"	
+																		end	
 
-																		-- end
+																		txtDebug = txtDebug .. "    passeE "..draft.score.."/n"
+
+																		draft.score = draft.score * 1.2 + 1000
+																		draft.scoreAdd =  draft.scoreAdd + 1000
+																		draft.scoreCoef =  draft.scoreCoef * 1.2
+																		
+																		txtDebug = txtDebug .. "    passeF "..draft.score.."/n"
+
+																		txtDebug = txtDebug .. "    passeG NbPlane "..draft.multiPlaneSet_B[side][unit.type][task].NbPlane.."/n"
+																		txtDebug = txtDebug .." InitNbPlaneByTask: "..tostring(draft.multiPlaneSet_B[side][unit.type][task].InitNbPlaneByTask)
+
+																		-- Marquer l'unité comme vérifiée
+																		draft.multiPlaneSet_B[side][unit.type][task].checked = true
+
+																		-- Vérification si tous les éléments sont cochés
+																		local fullMP_Plane = true
+																		for typeM, tasksM in pairs(draft.multiPlaneSet_B[side]) do
+																			if type(tasksM) == "table" then
+																				for taskM, value in pairs(tasksM) do
+																					if type(value) == "table" and not value.checked then
+																						fullMP_Plane = false
+																						break  -- Arrêter la vérification dès qu'un élément n'est pas coché
+																					end
+																				end
+																				if not fullMP_Plane then
+																					break  -- Sortir complètement si un type n'est pas entièrement vérifié
+																				end
+																			end
+																		end
+
+																		-- Doubler le score si tous les éléments sont cochés
+																		if fullMP_Plane and not uniqueBonus then
+																			draft.score = draft.score * 20000
+																			draft.scoreCoef =  draft.scoreCoef * 1.2
+
+																			print(tostring(draft.id).." "..draft.score)
+																			uniqueBonus = true
+
+																			os.execute 'pause'
+
+																			-- --reset le checked
+																			-- for typeM, tasksM in pairs(draft.multiPlaneSet_B[side]) do
+																			-- 	if type(tasksM) == "table" then
+																			-- 		for taskM, value in pairs(tasksM) do
+																			-- 			if type(value) == "table" and value.checked then
+																			-- 				value.checked = false
+																			-- 			end
+																			-- 		end
+																			-- 	end
+																			-- end
+																		end
 
 																	end
 
 																	debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II passe B_20a2. escort_num "..tostring(escort_num).." txtDebug: "..txtDebug  ) 
 																	
-
 																end
 																
 																if Multi.NbGroup == 0 then
@@ -2206,13 +2184,13 @@ for sideName, draftT in pairs(draft_sorties) do
 																--add escort table to sortie															
 																draft.support[task]["NbTotalSupport"] = draft.support[task]["NbTotalSupport"] + escort_num
 																draft.support[task]["escort_max"] = escort_max
-																
+											
 																if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "B")   
-																and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name  and  (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
+																and (Debug.Generator.SpySquad and (Debug.Generator.SpySquad == unit.name or Debug.Generator.SpySquad == draft.name)  and  (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
 																or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
 																then
-																	debuGenTxt = debuGenTxt..debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II passe B_21b Id "..tostring(draft.id).." "..unit.type.." "..unit.name.."".." escort_num "..tostring(escort_num).." "..draft.target_name.." NbTotalSupport: "..draft.support[task]["NbTotalSupport"].." entryEscortNum: "..tostring(entryEscortNum)) 
-																	-- os.execute 'pause'
+																	debuGenTxt = debuGenTxt..debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II passe B_21b Id "..tostring(draft.id).." "..unit.type.." "..unit.name.."".." escort_num "..tostring(escort_num).." "..draft.target_name.." NbTotalSupport: "..draft.support[task]["NbTotalSupport"].." entryEscortNum: "..tostring(entryEscortNum))
+																	
 																end
 
 
@@ -2222,7 +2200,7 @@ for sideName, draftT in pairs(draft_sorties) do
 																	and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name  and  (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
 																	or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
 																	then
-																		debuGenTxt = debuGenTxt..debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II passe B_21c Add In draft.support ") 
+																		debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II passe B_21c Add In draft.support ") 
 																	end
 
 																	if not draft.support[task][unit.type] then
@@ -2418,12 +2396,13 @@ debuGenTxt = debuGenTxt.."\n\n"..("ATO Assigning Escorts (" .. status_counter_es
 	-- table.sort(draft_sorties["red"], function(a,b) return a.priorityIni > b.priorityIni  end)
 	
 if Debug.Generator.affiche then	
-	local di = 1 
-	debuGenTxt = debuGenTxt.."\n"..("BLUE PART B")
+	 
+	-- debuGenTxt = debuGenTxt.."\n"..("BLUE PART B")
 	
 	for sideName, drafts in pairs(draft_sorties) do
 		debuGenTxt = debuGenTxt.."\n\n\n"..( string.upper(sideName).." PART B")
 
+		local di = 1
 		for draft_n, draft in pairs(drafts) do	
 			if  di < Debug.Generator.nb or draft.name == Debug.Generator.SpySquad  or draft.target_name == Debug.Generator.SpyTarget then
 				
@@ -2907,11 +2886,10 @@ function createATO_table(draftPriority)
 														
 
 														--si c'est un task d'une demande MP, on chunte la restrition plus loin
-														--TODO zapper aussi si un avion non multi mais dans un group de multi
 														--TODO pourquoi causes: n'en a toujours que 2 (alors que là, il y a 4)
 														--TODO pourquoi le coef est plus important sur d'autre élément que lorsqu'on demande notre target?
 														local MultiPlayerOveRide  = false
-														if multiPlaneSet[side] and multiPlaneSet[side][support.type] then
+														if multiPlaneSet[side] and multiPlaneSet[side][draft.type] then
 															MultiPlayerOveRide = true
 														end
 														
@@ -3639,7 +3617,7 @@ end
 -- _affiche(draft_sorties.blue[1], "draft_sorties.blue[1]")
 -- _affiche(draft_sorties.red[1], "draft_sorties.red[1]")
 
-function showAtoSort(newDraftByPriority)
+function showAtoSort(newDraftByPriority, tablePrio)
 	
 	local ShowSquad 
 	local ShowTarget 
@@ -3672,8 +3650,8 @@ function showAtoSort(newDraftByPriority)
 				end
 			end	
 						
-			if  di < Debug.Generator.nb or draft.name == ShowSquad or NameOK  then
-				debuGenTxt = debuGenTxt.."\n"..(	side.." C N° " .. draft_n..
+			if di < Debug.Generator.nb or draft.name == ShowSquad or NameOK  then
+				debuGenTxt = debuGenTxt.."\n"..(	side.." tablePrio: "..tablePrio.." C N° " .. draft_n..
 						-- " /support/ " ..tostring(draft.support)..
 						" /Id" ..tostring(draft.id)..
 						" /Prioriry/ " ..tostring(draft.priorityIni)..
@@ -3710,8 +3688,8 @@ function showAtoSort(newDraftByPriority)
 
 						--ecrit les causes:
 						local causeTxt = ""
-						for causeN, cause in ipairs(_rejected.cause) do
-							causeTxt = causeTxt .. " | "..tostring(cause)
+						for causeN, cause_ in ipairs(_rejected.cause) do
+							causeTxt = causeTxt .. " |-"..causeN.."-| "..tostring(cause_)
 						end
 						debuGenTxt = debuGenTxt.."\n"..(	" rejected/ ".._rejected.sujet..
 							" / cause " ..causeTxt..
@@ -3827,7 +3805,7 @@ for sidePrio, tableauPrio in pairs(targetListPrio) do
 
 		if Debug.Generator.affiche and newDraftByPriority ~= nil then	
 			debuGenTxt = "\n"..debuGenTxt.." \n Side: "..sidePrio.."  tablePrio "..tostring(tablePrio).."\n" 
-			showAtoSort(newDraftByPriority)
+			showAtoSort(newDraftByPriority, tablePrio)
 		end
 
 		newDraftByPriority = {

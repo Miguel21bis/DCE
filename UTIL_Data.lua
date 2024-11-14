@@ -1,11 +1,11 @@
 --Various DATA
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification: updateData_Bc
+-- last modification: updateData_Bd
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Data.lua"] = "1.14.82"
+versionDCE["UTIL_Data.lua"] = "1.14.83"
 ------------------------------------------------------------------------------------------------------- 
--- updateData_Bc			(CH-47F H-6J)(a OH-58)(z F-4E-45MC)(UH-60L)(x hHover)(w reaper)(v Hercules)(u tabTask)(t add is_helicopter table)(s F1EE)(r F-16C_50)(q): Add helicos  (p): Add WOC80)(o: transfer the dataMap to another file)
+-- updateData_Bd			(Bd flyingAlone)(CH-47F H-6J)(a OH-58)(z F-4E-45MC)(UH-60L)(x hHover)(w reaper)(v Hercules)(u tabTask)(t add is_helicopter table)(s F1EE)(r F-16C_50)(q): Add helicos  (p): Add WOC80)(o: transfer the dataMap to another file)
 -- debug_c					(c OH-6A)(b requiredModulesSpecialName)(a add isWesternCountry function)
 -- cleanCode_a				(a: repetition)
 -- adjustment_e				(e delete EPLRS_Capacity table)(d CVN to CV)(bombing on Group&Unit)(b: Syria nnTimeZone +3 & GudautaGPS )
@@ -74,11 +74,13 @@ ejectedPilotFrequency = {
 }
 
 
+-- data_divers = {}
 --instrumentUnits = "imperial" or  metric or russian (metric and QNH in mmHg)
 -- inheritedFrom = "F-14",	--copy radio frequency, failues ...
 -- inherited_APA_From = "F-14",	--copy AddPropAircraft
 --requiredModules = true,						--itsModule
 -- requiredModulesSpecialName = "VSN_F105",	--if the aircraft type name does not match the requested module name
+--flyingAlone = false
 	-- alignment_PropAircraft = {
 	-- 	fast = {
 	-- 		["ReadyALCM"] = true,
@@ -461,6 +463,7 @@ data_divers = {
 	["F-117A"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
+		flyingAlone = true,
 	},	
 	["B-1B"] = 	{
 		instrumentUnits = "imperial",
@@ -469,6 +472,7 @@ data_divers = {
 			type = "Link16",
 			isDonnor = true,
 		},
+		flyingAlone = true,
 	},	
 	["B-52H"] = 	{
 		instrumentUnits = "imperial",
@@ -477,6 +481,7 @@ data_divers = {
 			type = "Link16",
 			isDonnor = true,
 		},
+		flyingAlone = true,
 	},	
 	["H-6J"] = 	{
 		instrumentUnits = "metric",
@@ -716,7 +721,7 @@ data_divers = {
 	["MiG-25PD"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-	},	
+	},
 	["MiG-27K"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
@@ -821,6 +826,7 @@ data_divers = {
 	["S-3B Tanker"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
+		flyingAlone = true,
 	},	
 	["KC135MPRS"] = {
 		instrumentUnits = "imperial",
@@ -846,6 +852,7 @@ data_divers = {
 	["MiG-25RBT"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
+		flyingAlone = true,
 	},	
 	["Su-24MR"] = {
 		instrumentUnits = "russian",
@@ -855,11 +862,23 @@ data_divers = {
 	["Tu-22M3"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
+		flyingAlone = true,
 	},	
+	["Tu-95MS"] = {
+		instrumentUnits = "russian",
+		EPLRS_Capacity = false,
+		flyingAlone = true,
+	},
 	["Tu-142"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
+		flyingAlone = true,
 	},	
+	["Tu-160"] = {
+		instrumentUnits = "russian",
+		EPLRS_Capacity = false,
+		flyingAlone = true,
+	},
 	
 
 	["C-130"] = {
@@ -920,7 +939,7 @@ payloadType = {
 	["Mi-24P"] = 2400,
 	["Mi-26"] = 20000,
 }
- 
+
 isHelicopter = {
 	--West Side
 	["SA342M"] = {},

@@ -808,26 +808,27 @@ do
 		-- 	end
 		-- end
 
-		if EjectedPilot and EjectedPilot.x then
-			env.info( "DCE_checkImmediatSAR B :isExist(): "..tostring(EjectedPilot.unit:isExist()))
-		end
+		-- if EjectedPilot and EjectedPilot.x then
+		-- 	env.info( "DCE_checkImmediatSAR B :isExist(): "..tostring(EjectedPilot.unit:isExist()))
+		-- end
 		
 		if EjectedPilot and EjectedPilot.x  then -- and EjectedPilot.unit:isExist()  --and isExist
+			
 			env.info( "DCE_checkImmediatSAR C "..tostring(EjectedPilot.name))
 
-			local grid
-			if EjectedPilot.SurfaceType ~= 3 and EjectedPilot.SurfaceType ~= 5  then
+			local grid = coord.LLtoMGRS(coord.LOtoLL(EjectedPilot))
 
-				grid = coord.LLtoMGRS(coord.LOtoLL(EjectedPilot.unit:getPosition().p))
-
+			if grid  then
+				env.info( "DCE_checkImmediatSAR  A1 grid found ")	
 			else
-
-				grid = EjectedPilot.grid
-				
+				grid = EjectedPilot.grid	
+				env.info( "DCE_checkImmediatSAR  A2 grid else ")				
 			end
 
 			
 			local chuteZone = grid.UTMZone .. ' ' .. grid.MGRSDigraph .. ' ' .. grid.Easting .. ' ' .. grid.Northing
+
+			env.info( "DCE_checkImmediatSAR? A3 chuteZone "..chuteZone)	
 
 			--Avec 2 lettres (A et B) on passe de zone de 10km à des zone de 50km (la limite supérieur serait de 100km)
 			local subdiv_E_Num = tonumber(string.sub(grid.Easting, 1, 1))
@@ -850,8 +851,8 @@ do
 			local MGRS_Chute = grid.UTMZone.."_"..grid.MGRSDigraph.."_"..subdiv_E_Alpha.."_"..subdiv_N_Alpha
 			local MGRS_Chute_10KM = grid.UTMZone.."_"..grid.MGRSDigraph.."_"..subdiv_E_Num.."_"..subdiv_N_Num
 						
-			env.info( "DCE_checkImmediatSAR? AA Start if EjectedPilot MGRS_Chute "..MGRS_Chute)	
-			env.info( "DCE_checkImmediatSAR? AA Start if EjectedPilot MGRS_Chute_10KM "..MGRS_Chute_10KM)		
+			env.info( "DCE_checkImmediatSAR? A4 Start if EjectedPilot MGRS_Chute "..MGRS_Chute)	
+			env.info( "DCE_checkImmediatSAR? A5 Start if EjectedPilot MGRS_Chute_10KM "..MGRS_Chute_10KM)		
 			
 			local t = timer.getTime()
 			
@@ -904,7 +905,7 @@ do
 			local wrongSide = false
 			local ENI_Side = DCS_ENI_Side[EjectedPilot.side]
 			if camp.boundary and camp.boundary[ENI_Side] and camp.boundary[ENI_Side] ~= nil then
-				wrongSide =  CheckPointInPoly2({x=uPilot.x2d,y=uPilot.y2d} , camp.boundary[uPilot.side])
+				wrongSide =  CheckPointInPoly2({x=EjectedPilot.x2d,y=EjectedPilot.y2d} , camp.boundary[ENI_Side])
 				env.info( "DCE_checkImmediatSAR C ?  boundary wrongSide ? __"..tostring(wrongSide))
 				if wrongSide  then
 					env.info( "DCE_checkImmediatSAR? D boundary rightSideOfBorder __FALSE__ Return ")

@@ -130,14 +130,14 @@ local function GCI_Cycle()
 			--trigger.action.outText(side_name .." / " .. base_name .. ": Ready: " .. #base.ready .. " / Ready15: " .. #base.ready15 .. " / Ready30: " .. #base.ready30, 5)	--FOR DEBGUG
 			
 			--move ready 15 flights to ready
-			while #base.ready < base.ready_n and base.ready15[1] and base.ready15[1].time + 900 < current_time do		--less interceptor flights are ready than planned AND ready15 flights exist AND flight must be in ready15 since 15 minutes to move up (when coming from ready30, otherwise time is -900 for no delay)														
+			while #base.ready < base.ready_n and base.ready15[1] and base.ready15[1].time + 1800 < current_time do		--less interceptor flights are ready than planned AND ready15 flights exist AND flight must be in ready15 since 15 minutes to move up (when coming from ready30, otherwise time is -900 for no delay)														
 				base.ready15[1].time = current_time												--reset timer so that flight will not become ready until 15 minutes have passed
 				table.insert(base.ready, base.ready15[1])										--move ready15 flight to ready
 				table.remove(base.ready15, 1)													--move ready15 flight to ready		
 			end
 			
 			--move ready 30 flights to ready 15
-			while #base.ready15 < base.ready15_n and base.ready30[1] do							--less interceptor flights are ready15 than planned AND ready30 flights exist															
+			while #base.ready15 < base.ready15_n and base.ready30[1] and base.ready30[1].time + 3600 < current_time do							--less interceptor flights are ready15 than planned AND ready30 flights exist															
 				base.ready30[1].time = current_time												--set timer so that flight will not become ready15 until 15 minutes have passed
 				table.insert(base.ready15, base.ready30[1])										--move ready30 flight to ready15
 				table.remove(base.ready30, 1)													--move ready30 flight to ready15	

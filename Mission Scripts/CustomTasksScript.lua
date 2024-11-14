@@ -2650,7 +2650,7 @@ end	--Custom_AddWptSAR
 function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, speed, alt)
 	if FpsLeak_B then return end
 	local current_time = timer.getTime()
-	env.info( "current_time: "..tostring(current_time).." Custom_SAR A, grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(mgrsChute))
+	env.info( "Custom_SAR A0 current_time: "..tostring(current_time).." grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(mgrsChute))
 
 	local function Execute()
 		local current_time = timer.getTime()
@@ -2721,7 +2721,7 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 					local wrongSide = false
 					local ENI_Side = DCS_ENI_Side[uPilot.side]
 					if camp.boundary and camp.boundary[ENI_Side] and camp.boundary[ENI_Side] ~= nil then
-						wrongSide =  CheckPointInPoly2({x=uPilot.x2d,y=uPilot.y2d} , camp.boundary[uPilot.side])
+						wrongSide =  CheckPointInPoly2({x=uPilot.x2d,y=uPilot.y2d} , camp.boundary[ENI_Side])
 						env.info( "Custom_SAR DD3?  boundary wrongSide ? __"..tostring(wrongSide))
 						if wrongSide  then
 							authorisesRescue = false
