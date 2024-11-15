@@ -2210,6 +2210,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 			end		
 				
 			env.info( "Custom_AddWptSAR nb_survivor  "..tostring(nb_survivor).." FuelPercent: "..tostring(FuelPercent))
+			env.info( "Custom_AddWptSAR pt_start.c2d  "..tostring(pt_start.x2d).." pt_start.y2d: "..tostring(pt_start.y2d))
 			
 			local newRoute = {}
 			if nb_survivor >= 1 and FuelPercent >= 0.5 and selectedDistance < 30001 then
@@ -2236,6 +2237,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 							["action"] = "Turning Point",
 							["type"] = "Turning Point",
 							["alt_type"] = "BARO",
+							["name"] = "if nb_survivor >= 1",
 							["speed"] = tonumber(speed),
 							["task"] = 
 							{
@@ -2537,6 +2539,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 								["action"] = "Turning Point",
 								["type"] = "Turning Point",
 								["alt_type"] = "BARO",
+								["name"] = "ELSE SAR&Autre",
 								["speed"] = tonumber(speed),
 								["task"] = 
 								{

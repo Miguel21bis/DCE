@@ -2132,24 +2132,14 @@ for sideName, draftT in pairs(draft_sorties) do
 
 																		-- Doubler le score si tous les éléments sont cochés
 																		if fullMP_Plane and not uniqueBonus then
-																			draft.score = draft.score * 20000
-																			draft.scoreCoef =  draft.scoreCoef * 1.2
+																			draft.score = draft.score * 2000
+																			draft.scoreCoef =  draft.scoreCoef * 2000
 
-																			print(tostring(draft.id).." "..draft.score)
 																			uniqueBonus = true
 
-																			os.execute 'pause'
+																			-- print(tostring(draft.id).." "..draft.score)																			
+																			-- os.execute 'pause'
 
-																			-- --reset le checked
-																			-- for typeM, tasksM in pairs(draft.multiPlaneSet_B[side]) do
-																			-- 	if type(tasksM) == "table" then
-																			-- 		for taskM, value in pairs(tasksM) do
-																			-- 			if type(value) == "table" and value.checked then
-																			-- 				value.checked = false
-																			-- 			end
-																			-- 		end
-																			-- 	end
-																			-- end
 																		end
 
 																	end
@@ -2169,11 +2159,7 @@ for sideName, draftT in pairs(draft_sorties) do
 																TrackPlayability(unit.player, "target_firepower")							--track playabilty criterium has been met
 																
 																local entryEscortNum
-																-- if escort_num > 4 then 
-																	-- entryEscortNum = 4
-																-- else
-																	-- entryEscortNum = escort_num
-																-- end
+																
 																entryEscortNum = escort_num
 																
 																if not draft.support[task] then

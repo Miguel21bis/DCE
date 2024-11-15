@@ -341,7 +341,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			night = true,
 			elevation = 3,
 			min_alt = 0,
-			max_alt = 22000,
+			max_alt = 59000, --22000,
 		}
 
 		
