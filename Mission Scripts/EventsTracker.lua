@@ -4,9 +4,9 @@
 ------------------------------------------------------------------------------------------------------- 
 -- MBot version 20200111
 -------------------------------------------------------------------------------------------------------
--- last modification  debug_p
+-- last modification  M61_j
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\EventsTracker.lua"] = "1.12.62"
+versionDCE["Mission Scripts\EventsTracker.lua"] = "1.12.71"
 ------------------------------------------------------------------------------------------------------- 
 
 -- test_b 					(b: saved game on another DD)
@@ -14,7 +14,7 @@ versionDCE["Mission Scripts\EventsTracker.lua"] = "1.12.62"
 -- debug_p					(op prohibited character of player names)(n getCategory)(m Pedro cycle)(n scene life0)(m escorte)(jkl wrong caratere in player names)(i: base.side = base.coalition)(b: n'affiche pas les messages d'error sauf � la fin de mission)
 -- cleanCode_f 
 -- modification M62_a		compatible Datacard Generator or CombatFlite
--- modification M61_a		SAR
+-- modification M61_j		SAR (j noSAR in wrongSide)
 -- modification M50_c		Records landings for later use in logistics (C-130, Transport...) (bc: caractere interdit)
 -- modification M40_i		Pedro Helicopter (i use new follow task)
 -- modification M37_e		SuperCarrier
@@ -391,7 +391,7 @@ function EventHandler:onEvent(event)
 				PilotEjection.CloseRoad = CloseRoad
 				table.insert(tabEjection, PilotEjection)
 				
-				_affiche(PilotEjection, " PilotEjection |PilotEjection_A")
+				_affiche(PilotEjection, " PilotEjection |log_entry.type == eject")
 
 				-- local PilotVec3 = {
 					-- x = ptEvent.x,
@@ -476,9 +476,9 @@ function EventHandler:onEvent(event)
 				-- SumSoldierAliasPilot = SumSoldierAliasPilot + 1
 				-- selectedEjection.SumEjectedPilotDay  = SumSoldierAliasPilot
 
-				_affiche(selectedEjection, " selectedEjection |PilotEjection_B")
+				_affiche(selectedEjection, " selectedEjection |pilot seat separation")
 
-				checkImmediatSAR(event, selectedEjection)
+				-- checkImmediatSAR(event, selectedEjection)
 			end
 		else
 			env.info( "DCE_EventT  PASSE M pilot seat separation, id: "..tostring(event.id).."_type_"..tostring(log_entry.type))
@@ -529,12 +529,20 @@ function EventHandler:onEvent(event)
 					log_entry.initiatorPilotName = selectedEjection.initiatorPilotName
 					log_entry.initiator = selectedEjection.initiator	
 					
-					selectedEjection.x = ptEvent.x
-					selectedEjection.y = ptEvent.y
-					selectedEjection.z = ptEvent.z
+					-- selectedEjection.x = ptEvent.x
+					-- selectedEjection.y = ptEvent.y
+					-- selectedEjection.z = ptEvent.z
+
+					--on change la position, car le vent peut pousser le parachute de la mere vers la terre
+					selectedEjection.x = PilotVec3.x
+					selectedEjection.y = PilotVec3.y
+					selectedEjection.z = PilotVec3.z
+
 					selectedEjection.x2d = PilotVec3.x
 					selectedEjection.y2d = PilotVec3.z	
 					selectedEjection.z2d = PilotVec3.y
+
+					selectedEjection.SurfaceType = land.getSurfaceType({x = selectedEjection.x, y = selectedEjection.z})
 
 					SumSoldierAliasPilot = SumSoldierAliasPilot + 1
 					selectedEjection.SumEjectedPilotDay  = SumSoldierAliasPilot
@@ -549,7 +557,7 @@ function EventHandler:onEvent(event)
 
 					-- selectedEjection.grid = coord.LLtoMGRS(coord.LOtoLL(selectedEjection.unit:getPosition().p))
 	
-					_affiche(selectedEjection, " selectedEjection |PilotEjection_C")
+					_affiche(selectedEjection, " selectedEjection |pilot land")
 
 					checkImmediatSAR(selectedEjection)
 					

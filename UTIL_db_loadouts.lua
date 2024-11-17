@@ -9,6 +9,17 @@ versionDCE["UTIL_db_loadouts.lua"] = "1.3.174"
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
+-- V 174 - Su-17M4 (modification of certain speeds and altitudes)
+-- V 173 - code_loadout =  { "All" }, correction ! thanks BAMSE
+-- V 172 - Crusader - Skyraider - MiG-17F - HH-2D - SH-2F
+-- V 171 - CH-47F - H-6J from JG_1 BAMSE
+-- V 170 - New Shrikes for the NAM A-4E
+-- V168 - WOB ajustements
+-- V166 - F-4E for WOB - OH-58D
+-- V165 - Fixes for Iran Irak War
+-- V164 - NAM loadout (later) and No guided weapons for F-4E (bugged for IA)
+-- V163 - Canadian F-5E for WOC80
+
 --[[ Loadout Entry Example ----------------------------------------------------------------------------
 
 ["MiG-21Bis"] = {														--String, aircraft type
@@ -23292,7 +23303,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 80000,
-				firepower = 1,
+				firepower = 4,
 				vCruise = 60,
 				vAttack = 80,
 				hCruise = 70,
@@ -34329,9 +34340,9 @@ db_all_loadouts = {
 				day = true,
 				range = 600000,
 				firepower = 1,
-				vCruise = 250,
+				vCruise = 239,
 				vAttack = 300,
-				hCruise = 5500,
+				hCruise = 9000,
 				hAttack = 4000,
 				sortie_rate = 6,
 				stores = {
@@ -34553,10 +34564,10 @@ db_all_loadouts = {
 				day = true,
 				range = 300000,
 				firepower = 1,
-				vCruise = 250,
+				vCruise = 240,
 				vAttack = 300,
-				hCruise = 1500,
-				hAttack = 1000,
+				hCruise = 500,
+				hAttack = 100,
 				sortie_rate = 6,
 				stores = {
 					pylons = {
@@ -34605,9 +34616,9 @@ db_all_loadouts = {
 				day = true,
 				range = 300000,
 				firepower = 1,
-				vCruise = 250,
+				vCruise = 239,
 				vAttack = 300,
-				hCruise = 5500,
+				hCruise = 9000,
 				hAttack = 4000,
 				sortie_rate = 6,
 				stores = {
@@ -34749,9 +34760,9 @@ db_all_loadouts = {
 				day = true,
 				range = 600000,
 				firepower = 1,
-				vCruise = 250,
+				vCruise = 239,
 				vAttack = 300,
-				hCruise = 5500,
+				hCruise = 9000,
 				hAttack = 4000,
 				sortie_rate = 6,
 				stores = {
@@ -34795,9 +34806,9 @@ db_all_loadouts = {
 				day = true,
 				range = 600000,
 				firepower = 1,
-				vCruise = 250,
+				vCruise = 239,
 				vAttack = 300,
-				hCruise = 5500,
+				hCruise = 9000,
 				hAttack = 4000,
 				sortie_rate = 6,
 				stores = {
@@ -35006,9 +35017,9 @@ db_all_loadouts = {
 				adverseWeather = true,
 				range = 300000,
 				firepower = 1,
-				vCruise = 245,
+				vCruise = 239,
 				vAttack = 277,
-				hCruise = 5500,
+				hCruise = 9000,
 				hAttack = 200,
 				sortie_rate = 6,
 				stores = {
@@ -40017,7 +40028,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 150000,
-				firepower = 1,
+				firepower = 8,
 				vCruise = 75,
 				vAttack = 85,
 				hCruise = 50,

@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.80.484"
+versionDCE["UTIL_Changelog.lua"] = "20.80.489"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.80.484"
+VersionDCE["UTIL_Changelog.txt"] = "20.80.489"
 --[[
 
 
@@ -10,7 +10,11 @@ known issues:
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 - [stats]	stats for your own package are rarely displayed
 
-==:20.80.484:==
+==:20.80.489:==
+489 fixed	[SAR]	SARs no longer take off
+488 fixed	[GCI]	interceptors go into the enemy camp
+487 fixed	[loadout]	correction of -code_loadout =  { "All" } + modification of certain speeds and altitudes (Su-17M4)
+486 added	[loadout]	Crusader - Skyraider - MiG-17F - HH-2D - SH-2F 
 485 added	[alias]	added the Init\various_table file to use various tables, such as base name or aircraft type aliases  (M80)
 484 modified	[parking]	use of additional car parks, initially reserved for SARs
 

@@ -2,13 +2,13 @@
 --Script attached to mission and executed via trigger
 --Requires GCIdata.lua to be attached and run in mission in order to get access to table GCI
 ------------------------------------------------------------------------------------------------------- 
--- last modification debug_c
+-- last modification adjustment_c
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\GCIscript.lua"] = "1.4.18"
+versionDCE["Mission Scripts\GCIscript.lua"] = "1.4.19"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_a
 -- debug_c							(c getcategory again)(b unit category, tks ldnz)(a getheading Z)
--- adjustment_b						(b: intercept)(a recherche blocage)
+-- adjustment_c						(c no Inter In Bad Side) in wrongSide)(b: intercept)(a recherche blocage)
 -- modification M11_j				Multiplayer
 ------------------------------------------------------------------------------------------------------- 
 
@@ -130,14 +130,14 @@ local function GCI_Cycle()
 			--trigger.action.outText(side_name .." / " .. base_name .. ": Ready: " .. #base.ready .. " / Ready15: " .. #base.ready15 .. " / Ready30: " .. #base.ready30, 5)	--FOR DEBGUG
 			
 			--move ready 15 flights to ready
-			while #base.ready < base.ready_n and base.ready15[1] and base.ready15[1].time + 900 < current_time do		--less interceptor flights are ready than planned AND ready15 flights exist AND flight must be in ready15 since 15 minutes to move up (when coming from ready30, otherwise time is -900 for no delay)														
+			while #base.ready < base.ready_n and base.ready15[1] and base.ready15[1].time + 1800 < current_time do		--less interceptor flights are ready than planned AND ready15 flights exist AND flight must be in ready15 since 15 minutes to move up (when coming from ready30, otherwise time is -900 for no delay)														
 				base.ready15[1].time = current_time												--reset timer so that flight will not become ready until 15 minutes have passed
 				table.insert(base.ready, base.ready15[1])										--move ready15 flight to ready
 				table.remove(base.ready15, 1)													--move ready15 flight to ready		
 			end
 			
 			--move ready 30 flights to ready 15
-			while #base.ready15 < base.ready15_n and base.ready30[1] do							--less interceptor flights are ready15 than planned AND ready30 flights exist															
+			while #base.ready15 < base.ready15_n and base.ready30[1] and base.ready30[1].time + 3600 < current_time do							--less interceptor flights are ready15 than planned AND ready30 flights exist															
 				base.ready30[1].time = current_time												--set timer so that flight will not become ready15 until 15 minutes have passed
 				table.insert(base.ready15, base.ready30[1])										--move ready30 flight to ready15
 				table.remove(base.ready30, 1)													--move ready30 flight to ready15	
@@ -236,7 +236,7 @@ local function GCI_Cycle()
 	--assign interceptors to targets
 	ErrorMsg = "Assign interceptors."																--Error message in case follow on code fails
 	for track_side, side in pairs(target_tracks) do													--iterate throug sides in target_tracks table
-		-- env.info("DCE_Gci Passe B_A track_side "..tostring(track_side))
+		env.info("DCE_Gci Passe B_A track_side "..tostring(track_side))
 		
 		for target_name, target in pairs(side) do													--iterate through targets
 			-- env.info("DCE_Gci  Passe B_B target_name "..tostring(target_name).." target.history "..tostring(target.history))
@@ -245,7 +245,24 @@ local function GCI_Cycle()
 			if target.history > 0 then																--target was detected at least two times in sequence
 				-- env.info("DCE_Gci   Passe B_C target.assigned "..tostring(target.assigned).." target.number "..tostring(target.number))
 				
-				if target.assigned < target.number then												--if target has less interceptors assigned than it has aircraft in group
+				--ne declenche les intercepteur que si les ENI franchissent la frontiere
+				local ourSideOfBorder = false
+
+				if camp.boundary and camp.boundary[track_side] and camp.boundary[track_side] ~= nil then
+
+					ourSideOfBorder =  CheckPointInPoly2(target.point, camp.boundary[track_side])
+
+					env.info("DCE_Gci Passe B_C2 track_side "..tostring(track_side).." ourSideOfBorder: "..tostring(ourSideOfBorder))
+
+					if ourSideOfBorder  then
+						env.info( "DCE_SAR_AddSoldierAliasManhunt? G ourSideOfBorder  ")
+						ourSideOfBorder = true
+					end
+				else
+					ourSideOfBorder = true
+				end
+
+				if ourSideOfBorder and target.assigned < target.number then												--if target has less interceptors assigned than it has aircraft in group
 					-- env.info("DCE_Gci    Passe B_D target.assigned ")
 					
 					--find all flights in range to intercept target

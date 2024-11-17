@@ -2,9 +2,9 @@
 --Script attached to mission and executed via trigger
 --Functions accessed via LUA Run Script on waypoint
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  Reglage_n
+-- last modification:  M61_j
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\CustomTasksScript.lua"] = "1.9.32"
+versionDCE["Mission Scripts\CustomTasksScript.lua"] = "1.9.38"
 ------------------------------------------------------------------------------------------------------- 
 -- Reglage_n				(n force RTB)(m stopcondition)(l escorte)(k CVN to CV)(j altitudeEnabled true)(h GetHeading)(global path)(f rejoin debug)(e more scheduleFunction) (d landingImpossible denivelé)(c: limit =  1 ?)(b: orbit infini) all ["groupAttack"] = false,
 -- cleanCode_a
@@ -12,7 +12,7 @@ versionDCE["Mission Scripts\CustomTasksScript.lua"] = "1.9.32"
 
 -- modification M74_a		mix static, vehicle and map elements in a Target.
 -- modification M68_a		add AFAC task
--- modification M61_d		SAR (d Custom_Altitude-follow the valleys)(b debug+shifts task injections) 
+-- modification M61_j		SAR (j noSAR in wrongSide)(d Custom_Altitude-follow the valleys)(b debug+shifts task injections) 
 -- modification M54_b		revoir CustomTaskScript et TaskBombing (b: add duration)
 -- modification M45_a		compatible with 2.7.0
 
@@ -2210,6 +2210,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 			end		
 				
 			env.info( "Custom_AddWptSAR nb_survivor  "..tostring(nb_survivor).." FuelPercent: "..tostring(FuelPercent))
+			env.info( "Custom_AddWptSAR pt_start.c2d  "..tostring(pt_start.x2d).." pt_start.y2d: "..tostring(pt_start.y2d))
 			
 			local newRoute = {}
 			if nb_survivor >= 1 and FuelPercent >= 0.5 and selectedDistance < 30001 then
@@ -2236,6 +2237,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 							["action"] = "Turning Point",
 							["type"] = "Turning Point",
 							["alt_type"] = "BARO",
+							["name"] = "if nb_survivor >= 1",
 							["speed"] = tonumber(speed),
 							["task"] = 
 							{
@@ -2537,6 +2539,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 								["action"] = "Turning Point",
 								["type"] = "Turning Point",
 								["alt_type"] = "BARO",
+								["name"] = "ELSE SAR&Autre",
 								["speed"] = tonumber(speed),
 								["task"] = 
 								{
@@ -2650,7 +2653,7 @@ end	--Custom_AddWptSAR
 function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, speed, alt)
 	if FpsLeak_B then return end
 	local current_time = timer.getTime()
-	env.info( "current_time: "..tostring(current_time).." Custom_SAR A, grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(mgrsChute))
+	env.info( "Custom_SAR A0 current_time: "..tostring(current_time).." grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(mgrsChute))
 
 	local function Execute()
 		local current_time = timer.getTime()
@@ -2716,8 +2719,19 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 				
 				if  string.lower(uPilot.side) ==  coalitionId[grpSide]  then
 					env.info( "Custom_SAR DD2 uPilot.name: "..tostring(uPilot.name).."| uPilot.embarked: "..tostring(uPilot.embarked))
+
+					local authorisesRescue = true
+					local wrongSide = false
+					local ENI_Side = DCS_ENI_Side[uPilot.side]
+					if camp.boundary and camp.boundary[ENI_Side] and camp.boundary[ENI_Side] ~= nil then
+						wrongSide =  CheckPointInPoly2({x=uPilot.x2d,y=uPilot.y2d} , camp.boundary[ENI_Side])
+						env.info( "Custom_SAR DD3?  boundary wrongSide ? __"..tostring(wrongSide))
+						if wrongSide  then
+							authorisesRescue = false
+						end
+					end
 					
-					if uPilot.name and uPilot.name ~= nil and not uPilot.embarked then 
+					if authorisesRescue and uPilot.name and uPilot.name ~= nil and not uPilot.embarked then
 						
 						local unitPilot = Unit.getByName(uPilot.name)
 						local temp_x2d, temp_y2d, temp_z2d = 0, 0, 0
