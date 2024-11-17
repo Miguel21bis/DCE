@@ -4,7 +4,7 @@
  
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.173"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.174"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
@@ -45180,7 +45180,7 @@ db_all_loadouts = {
 	},
 	["F-14A-135-GR"] = {
 		CAP = {
-			["80s AA Iran AIM-7MH*6, AIM-9L*2"] = {
+			["CAP - IIW - AA - AIM-7F*6 - AIM9L*2"] = {
 				attributes =  { "IRIAF" },
 				code_loadout =  { "IIW" },
 				day = true,
@@ -45198,30 +45198,38 @@ db_all_loadouts = {
 				sortie_rate = 10,
 				stores = {
 					pylons = {
-						[1] = {
-							CLSID = "{LAU-138 wtip - AIM-9L}",
-						},
-						[2] = {
-							CLSID = "{SHOULDER AIM-7MH}",
-						},
-						[4] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[5] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[6] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[7] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[10] = {
-							CLSID = "{LAU-138 wtip - AIM-9L}",
-						},
-						[9] = {
-							CLSID = "{SHOULDER AIM-7MH}",
-						},
+				[1] = {
+					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+					["num"] = 10,
+				},
+				[2] = {
+					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+					["num"] = 1,
+				},
+				[3] = {
+					["CLSID"] = "{SHOULDER AIM-7F}",
+					["num"] = 9,
+				},
+				[4] = {
+					["CLSID"] = "{SHOULDER AIM-7F}",
+					["num"] = 2,
+				},
+				[5] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 7,
+				},
+				[6] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 6,
+				},
+				[7] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 5,
+				},
+				[8] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 4,
+				},
 					},
 					fuel = "7348",
 					flare = 60,
@@ -45376,7 +45384,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["80s AA Iran AIM-54A-MK47*2, AIM-7MH*3, AIM-9L*2"] = {
+			["CAP - IIW - AA - AIM-54A-MK47*2 - AIM-7F*3 - AIM9L*2"] = {
 				attributes =  { "IRIAF" },
 				code_loadout =  { "IIW" },
 				day = true,
@@ -45394,27 +45402,34 @@ db_all_loadouts = {
 				sortie_rate = 10,
 				stores = {
 					pylons = {
-						[1] = {
-							CLSID = "{LAU-138 wtip - AIM-9L}",
-						},
-						[2] = {
-							CLSID = "{SHOULDER AIM-7MH}",
-						},
-						[4] = {
-							CLSID = "{AIM_54A_Mk47}",
-						},
-						[5] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[10] = {
-							CLSID = "{LAU-138 wtip - AIM-9L}",
-						},
-						[7] = {
-							CLSID = "{AIM_54A_Mk47}",
-						},
-						[9] = {
-							CLSID = "{SHOULDER AIM-7MH}",
-						},
+				[1] = {
+					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+					["num"] = 10,
+				},
+				[2] = {
+					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+					["num"] = 1,
+				},
+				[3] = {
+					["CLSID"] = "{SHOULDER AIM-7F}",
+					["num"] = 9,
+				},
+				[4] = {
+					["CLSID"] = "{SHOULDER AIM-7F}",
+					["num"] = 2,
+				},
+				[5] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 5,
+				},
+				[6] = {
+					["CLSID"] = "{AIM_54A_Mk47}",
+					["num"] = 7,
+				},
+				[7] = {
+					["CLSID"] = "{AIM_54A_Mk47}",
+					["num"] = 4,
+				},
 					},
 					fuel = "7348",
 					flare = 60,
@@ -45479,7 +45494,7 @@ db_all_loadouts = {
 			},
 		},
 		["Fighter Sweep"] = {
-			["80s AA Iran AIM-7MH*6, AIM-9L*2"] = {
+			["FS - IIW - AA - AIM-7F*6 - AIM9L*2"] = {
 				attributes =  { "IRIAF" },
 				code_loadout =  { "IIW" },
 				day = true,
@@ -45497,30 +45512,38 @@ db_all_loadouts = {
 				sortie_rate = 10,
 				stores = {
 					pylons = {
-						[1] = {
-							CLSID = "{LAU-138 wtip - AIM-9L}",
-						},
-						[2] = {
-							CLSID = "{SHOULDER AIM-7MH}",
-						},
-						[4] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[5] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[6] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[7] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[10] = {
-							CLSID = "{LAU-138 wtip - AIM-9L}",
-						},
-						[9] = {
-							CLSID = "{SHOULDER AIM-7MH}",
-						},
+				[1] = {
+					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+					["num"] = 10,
+				},
+				[2] = {
+					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+					["num"] = 1,
+				},
+				[3] = {
+					["CLSID"] = "{SHOULDER AIM-7F}",
+					["num"] = 9,
+				},
+				[4] = {
+					["CLSID"] = "{SHOULDER AIM-7F}",
+					["num"] = 2,
+				},
+				[5] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 7,
+				},
+				[6] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 6,
+				},
+				[7] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 5,
+				},
+				[8] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 4,
+				},
 					},
 					fuel = "7348",
 					flare = 60,
@@ -45675,7 +45698,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["80s AA Iran AIM-54A-MK47*2, AIM-7MH*3, AIM-9L*2"] = {
+			["FS - IIW - AA - AIM-54A-MK47*2 - AIM-7F*3 - AIM9L*2"] = {
 				attributes =  { "IRIAF" },
 				code_loadout =  { "IIW" },
 				day = true,
@@ -45693,27 +45716,34 @@ db_all_loadouts = {
 				sortie_rate = 10,
 				stores = {
 					pylons = {
-						[1] = {
-							CLSID = "{LAU-138 wtip - AIM-9L}",
-						},
-						[2] = {
-							CLSID = "{SHOULDER AIM-7MH}",
-						},
-						[4] = {
-							CLSID = "{AIM_54A_Mk47}",
-						},
-						[5] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[10] = {
-							CLSID = "{LAU-138 wtip - AIM-9L}",
-						},
-						[7] = {
-							CLSID = "{AIM_54A_Mk47}",
-						},
-						[9] = {
-							CLSID = "{SHOULDER AIM-7MH}",
-						},
+				[1] = {
+					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+					["num"] = 10,
+				},
+				[2] = {
+					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+					["num"] = 1,
+				},
+				[3] = {
+					["CLSID"] = "{SHOULDER AIM-7F}",
+					["num"] = 9,
+				},
+				[4] = {
+					["CLSID"] = "{SHOULDER AIM-7F}",
+					["num"] = 2,
+				},
+				[5] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 5,
+				},
+				[6] = {
+					["CLSID"] = "{AIM_54A_Mk47}",
+					["num"] = 7,
+				},
+				[7] = {
+					["CLSID"] = "{AIM_54A_Mk47}",
+					["num"] = 4,
+				},
 					},
 					fuel = "7348",
 					flare = 60,
@@ -45778,7 +45808,7 @@ db_all_loadouts = {
 			},
 		},
 		Escort = {
-			["80s AA Iran AIM-7MH*6, AIM-9L*2"] = {
+			["Escort - IIW - AA - AIM-7F*6 - AIM9L*2"] = {
 				attributes =  { },
 				code_loadout =  { "IIW" },
 				day = true,
@@ -45792,30 +45822,38 @@ db_all_loadouts = {
 				sortie_rate = 10,
 				stores = {
 					pylons = {
-						[1] = {
-							CLSID = "{LAU-138 wtip - AIM-9L}",
-						},
-						[2] = {
-							CLSID = "{SHOULDER AIM-7MH}",
-						},
-						[4] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[5] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[6] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[7] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[10] = {
-							CLSID = "{LAU-138 wtip - AIM-9L}",
-						},
-						[9] = {
-							CLSID = "{SHOULDER AIM-7MH}",
-						},
+				[1] = {
+					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+					["num"] = 10,
+				},
+				[2] = {
+					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+					["num"] = 1,
+				},
+				[3] = {
+					["CLSID"] = "{SHOULDER AIM-7F}",
+					["num"] = 9,
+				},
+				[4] = {
+					["CLSID"] = "{SHOULDER AIM-7F}",
+					["num"] = 2,
+				},
+				[5] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 7,
+				},
+				[6] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 6,
+				},
+				[7] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 5,
+				},
+				[8] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 4,
+				},
 					},
 					fuel = "7348",
 					flare = 60,
@@ -45958,7 +45996,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["80s AA Iran AIM-54A-MK47*2, AIM-7MH*3, AIM-9L*2"] = {
+			["Escort - IIW - AA - AIM-54A-MK47*2 - AIM-7F*3 - AIM9L*2"] = {
 				attributes =  { },
 				code_loadout =  { "IIW" },
 				day = true,
@@ -45972,27 +46010,34 @@ db_all_loadouts = {
 				sortie_rate = 10,
 				stores = {
 					pylons = {
-						[1] = {
-							CLSID = "{LAU-138 wtip - AIM-9L}",
-						},
-						[2] = {
-							CLSID = "{SHOULDER AIM-7MH}",
-						},
-						[4] = {
-							CLSID = "{AIM_54A_Mk47}",
-						},
-						[5] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[10] = {
-							CLSID = "{LAU-138 wtip - AIM-9L}",
-						},
-						[7] = {
-							CLSID = "{AIM_54A_Mk47}",
-						},
-						[9] = {
-							CLSID = "{SHOULDER AIM-7MH}",
-						},
+				[1] = {
+					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+					["num"] = 10,
+				},
+				[2] = {
+					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+					["num"] = 1,
+				},
+				[3] = {
+					["CLSID"] = "{SHOULDER AIM-7F}",
+					["num"] = 9,
+				},
+				[4] = {
+					["CLSID"] = "{SHOULDER AIM-7F}",
+					["num"] = 2,
+				},
+				[5] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 5,
+				},
+				[6] = {
+					["CLSID"] = "{AIM_54A_Mk47}",
+					["num"] = 7,
+				},
+				[7] = {
+					["CLSID"] = "{AIM_54A_Mk47}",
+					["num"] = 4,
+				},
 					},
 					fuel = "7348",
 					flare = 60,
@@ -46053,7 +46098,7 @@ db_all_loadouts = {
 			},
 		},
 		Intercept = {
-			["80s AA Iran AIM-7MH*6, AIM-9L*2"] = {
+			["Intercept - IIW - AA - AIM-7F*6 - AIM9L*2"] = {
 				attributes =  { },
 				code_loadout =  { "IIW" },
 				day = true,
@@ -46064,30 +46109,38 @@ db_all_loadouts = {
 				sortie_rate = 10,
 				stores = {
 					pylons = {
-						[1] = {
-							CLSID = "{LAU-138 wtip - AIM-9L}",
-						},
-						[2] = {
-							CLSID = "{SHOULDER AIM-7MH}",
-						},
-						[4] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[5] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[6] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[7] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[10] = {
-							CLSID = "{LAU-138 wtip - AIM-9L}",
-						},
-						[9] = {
-							CLSID = "{SHOULDER AIM-7MH}",
-						},
+				[1] = {
+					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+					["num"] = 10,
+				},
+				[2] = {
+					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+					["num"] = 1,
+				},
+				[3] = {
+					["CLSID"] = "{SHOULDER AIM-7F}",
+					["num"] = 9,
+				},
+				[4] = {
+					["CLSID"] = "{SHOULDER AIM-7F}",
+					["num"] = 2,
+				},
+				[5] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 7,
+				},
+				[6] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 6,
+				},
+				[7] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 5,
+				},
+				[8] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 4,
+				},
 					},
 					fuel = "7348",
 					flare = 60,
@@ -46221,7 +46274,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["80s AA Iran AIM-54A-MK47*2, AIM-7MH*3, AIM-9L*2"] = {
+			["Intercept - IIW - AA - AIM-54A-MK47*2 - AIM-7F*3 - AIM9L*2"] = {
 				attributes =  { },
 				code_loadout =  { "IIW" },
 				day = true,
@@ -46232,27 +46285,34 @@ db_all_loadouts = {
 				sortie_rate = 10,
 				stores = {
 					pylons = {
-						[1] = {
-							CLSID = "{LAU-138 wtip - AIM-9L}",
-						},
-						[2] = {
-							CLSID = "{SHOULDER AIM-7MH}",
-						},
-						[4] = {
-							CLSID = "{AIM_54A_Mk47}",
-						},
-						[5] = {
-							CLSID = "{BELLY AIM-7MH}",
-						},
-						[10] = {
-							CLSID = "{LAU-138 wtip - AIM-9L}",
-						},
-						[7] = {
-							CLSID = "{AIM_54A_Mk47}",
-						},
-						[9] = {
-							CLSID = "{SHOULDER AIM-7MH}",
-						},
+				[1] = {
+					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+					["num"] = 10,
+				},
+				[2] = {
+					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+					["num"] = 1,
+				},
+				[3] = {
+					["CLSID"] = "{SHOULDER AIM-7F}",
+					["num"] = 9,
+				},
+				[4] = {
+					["CLSID"] = "{SHOULDER AIM-7F}",
+					["num"] = 2,
+				},
+				[5] = {
+					["CLSID"] = "{BELLY AIM-7F}",
+					["num"] = 5,
+				},
+				[6] = {
+					["CLSID"] = "{AIM_54A_Mk47}",
+					["num"] = 7,
+				},
+				[7] = {
+					["CLSID"] = "{AIM_54A_Mk47}",
+					["num"] = 4,
+				},
 					},
 					fuel = "7348",
 					flare = 60,
