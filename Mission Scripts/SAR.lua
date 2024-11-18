@@ -606,7 +606,7 @@ do
 									['action'] = {
 										['id'] = 'Script',
 										['params'] = {
-											["command"] = 'Custom_Altitude("' .. FlightSAR.name .. '",  "' .. 2 .. '")',
+											["command"] = 'Custom_Altitude("' .. FlightSAR.name .. "',  '  nil  ', '" .."2".. "')",
 										},
 									},
 								},
@@ -1155,7 +1155,7 @@ do
 										['action'] = {
 											['id'] = 'Script',
 											['params'] = {
-												["command"] = 'Custom_Altitude("' .. grpname .. '")',
+												["command"] = 'Custom_Altitude("' .. grpname .. "',  '  nil  ', '" .."1".. "')",
 											},
 										},
 									},

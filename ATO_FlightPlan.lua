@@ -3557,8 +3557,12 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							end
 
 							local altitude = altitudeCruise
+							if is_helicopter then altitude = 150 end
 							if data_divers and data_divers[flight[f].type] and data_divers[flight[f].type].hCruise then
 								altitude = data_divers[flight[f].type].hCruise
+							end
+							if flight[f].loadout.heavy_load then
+								altitude = altitude /2
 							end
 								
 							local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
@@ -4306,6 +4310,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						calcWish = skillWish[side]
 					end
 					
+					local mSkill = 2
 					if n == 1 then 
 						mSkill = ( math.random(calcWish-20, calcWish+18) / 25 ) + 1		-- 75-62 = 13 (13 + 5 = 18 )5 % de chance d'avoir excellent
 					else

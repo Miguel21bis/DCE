@@ -371,7 +371,7 @@ end
 
 
 
--- par d�faut, on assigne une valeur superieur au camp du joueur, qu'il soit rouge ou bleu.
+-- par défaut, on assigne une valeur superieur au camp du joueur, qu'il soit rouge ou bleu.
 skillWish = {
 	["red"] = 50,
 	["blue"] = 50,

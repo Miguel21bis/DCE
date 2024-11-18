@@ -27,6 +27,14 @@ if not camp.debugInGamePopup then
 	env.setErrorMessageBoxEnabled(false)
 end
 
+env.info("ACRF10 version of Lua _VERSION "..tostring(_VERSION))
+
+-- math.pow = function(x, y)
+--     return x ^ y
+-- end
+
+
+env.info("ACRF10 start loading ACRF10 script ")
 
 radioCommands = {}
 
@@ -266,6 +274,12 @@ function GetHeading(p1, p2)
 	end
 end
 
+function getOppositePointOnCircle(posA, centerCircle)
+    -- Calculer les coordonnées opposées sur le cercle
+    local bx = 2 * centerCircle.x - posA.x
+    local by = 2 * centerCircle.Y - posA.y
+    return bx, by
+end
 -- --function to return heading between two vector2 points
 -- -- return une valeur en degré par rapport au nord géographique (pas le cercle trigonometrique)
 -- function GetHeading(p1, p2)
@@ -436,6 +450,298 @@ function RemovePlane(PlayerGroup)
 	end
 end
 
+-- _affiche(titre) ACRF10 DCE Desc
+-- _affiche (a b)     speedMax0 388.10000610352
+-- _affiche (a b)     massEmpty 10550
+-- _affiche (a b)     range 1950
+-- _affiche(a c)           box min
+-- _affiche(e f)                          y -2.3299200534821
+-- _affiche(e f)                          x -10
+-- _affiche(e f)                          z -9
+-- _affiche(a c)           box max
+-- _affiche(e f)                          y 2.7555100917816
+-- _affiche(e f)                          x 11
+-- _affiche(e f)                          z 9
+-- _affiche (a b)     Hmax 18500
+-- _affiche (a b)     Kmax 0.68999999761581
+-- _affiche (a b)     _origin 
+-- _affiche (a b)     speedMax10K 693.25
+-- _affiche (a b)     NyMin -3
+-- _affiche (a b)     fuelMassMax 3800
+-- _affiche (a b)     speedMax 693.25
+-- _affiche (a b)     NyMax 6.5
+-- _affiche (a b)     massMax 17800
+-- _affiche (a b)     RCS 4
+-- _affiche (a b)     displayName mig-23ml
+-- _affiche (a b)     life 16
+-- _affiche (a b)     VyMax 240
+-- _affiche (a b)     Kab 3
+-- _affiche(a c)           attributes Air
+-- _affiche(d)                true
+-- _affiche(a c)           attributes Fighters
+-- _affiche(d)                true
+-- _affiche(a c)           attributes NonAndLightArmoredUnits
+-- _affiche(d)                true
+-- _affiche(a c)           attributes NonArmoredUnits
+-- _affiche(d)                true
+-- _affiche(a c)           attributes All
+-- _affiche(d)                true
+-- _affiche(a c)           attributes Battle airplanes
+-- _affiche(d)                true
+-- _affiche(a c)           attributes Planes
+-- _affiche(d)                true
+-- _affiche (a b)     typeName MiG-23MLD
+-- _affiche (a b)     category 0
+
+-- interdit aux CAP et Intercepteur d'entrer dans une zone SAM connu
+function avoidArea()
+	
+	env.info("ACRF10_avoidArea A0 camp.groundthreats.? "..tostring(camp.groundthreats))
+
+	if not camp.groundthreats then return end
+
+	local current_time = timer.getTime()
+	
+	for _, sideNum in ipairs({coalition.side.BLUE, coalition.side.RED}) do
+		env.info("ACRF10_avoidArea A sideNum "..tostring(sideNum).." coalitionIdNumeric: "..tostring(coalitionIdNumeric[sideNum]))
+
+		local groups = coalition.getGroups(sideNum, Group.Category.AIRPLANE)
+
+		for i, gp in pairs(groups) do
+			local gpName = Group.getName(gp)
+		
+			if string.find(gpName,"CAP") or string.find(gpName,"Intercept") then
+				local wingman = gp:getUnits()
+
+				for wingmanN, _unit in ipairs(wingman) do											
+		
+					if _unit and _unit:isActive() and _unit:inAir() then
+						local currentPoint = _unit:getPoint()
+						local currentPointXY = {
+							x = currentPoint.x,
+							y = currentPoint.z,
+						}
+
+						local gpGid = Group.getID(gp)
+						local unitName = _unit:getName()
+						local callSign = _unit:getCallsign()
+
+						local description = _unit:getDesc()
+
+						local speedMax = 300
+						local speedCruise = 300
+						local Hcruise = 7600
+						if description then
+							if description.speedMax then
+								speedMax = description.speedMax
+							end
+							if description.speedMax0 then
+								speedCruise = description.speedMax0 / 2
+							end
+							if description.Hmax then
+								Hcruise = description.Hmax / 3
+							end
+						end
+						
+						env.info("ACRF10_avoidArea B gpGid "..tostring(gpGid).." gpName: "..tostring(gpName).." unitName: "..tostring(unitName))
+					
+						local ctr = _unit:getGroup():getController()	
+							
+						local ENI_side = DCS_ENI_Side[coalitionIdNumeric[sideNum]]
+						-- env.info("ACRF10_avoidArea F______ ENI_side "..tostring(ENI_side))
+								
+						for threatN, threat in pairs(camp.groundthreats[ENI_side]) do
+							
+							-- env.info("ACRF10_avoidArea G______ threatN "..tostring(threatN).." class: "..tostring(threat.class))
+
+							if threat and threat.class and threat.class == "SAM"  then
+
+								local distance = math.sqrt(math.pow(threat.x - currentPointXY.x, 2) + math.pow(threat.y - currentPointXY.y, 2))
+
+								-- env.info("ACRF10_avoidArea I1______ distance "..tostring(distance))
+
+								local condition2 = false
+								-- local distance2 = math.sqrt((threat.x - currentPointXY.x) ^ 2 + (threat.y - currentPointXY.y) ^ 2)
+								-- if (distance2 and distance2 <= threat.range) then
+								-- 	condition2 = true
+								-- end
+
+								-- env.info("ACRF10_avoidArea I2______ distance2 "..tostring(distance2))
+
+
+								if (distance and distance <= threat.range) or condition2 then
+
+									env.info( "ACRF10_avoidArea I0_______")
+									-- env.info( "ACRF10_avoidArea I1_______  hasTask? "..tostring(ctr:hasTask()))
+
+									ctr:resetTask()
+
+									-- env.info( "ACRF10_avoidArea I2_______  hasTask? "..tostring(ctr:hasTask()))
+				
+									ctr:setOption(AI.Option.Air.id.PROHIBIT_AA, true)
+
+									ctr:resetTask()
+
+									-- env.info( "ACRF10_avoidArea I3_______  hasTask? "..tostring(ctr:hasTask()))
+				
+									ctr:setOption(AI.Option.Air.id.PROHIBIT_AA, true)
+
+									env.info( "ACRF10_avoidArea I4_______  hasTask? "..tostring(ctr:hasTask()))
+				
+
+									local foundGroup = false
+									local breaktab = false
+									local CAP_group = {
+										name = "",
+										from = 0,
+										to = 0,
+										base = {
+											x = 0,
+											y = 0 ,
+										}
+									}
+
+									for _coalition, coalition in pairs(env.mission.coalition) do
+										env.info( "ACRF10_avoidArea J________  _coalition? "..tostring(_coalition).." coalitionIdNumeric[sideNum]? "..tostring(coalitionIdNumeric[sideNum]).." sideNum? "..tostring(sideNum))
+										if _coalition == coalitionIdNumeric[sideNum] then
+											for Ncountry, _country in pairs(coalition.country) do	
+												if _country.plane then
+													for Ngroup, _group in pairs(_country.plane.group) do
+														if _group.groupId and _group.groupId == gpGid then 				
+															
+															CAP_group.name = _group.name
+															foundGroup = true
+
+															env.info( "ACRF10_avoidArea M        found Froup "..tostring(unitName))
+				
+															--Station
+															for key, value in ipairs(_group.route.points) do						
+																if value.name == 'Station' then
+																	CAP_group.to = key 
+																	CAP_group.from = key - 1
+																end				
+															end
+
+															--BaseXY
+															
+															CAP_group.base = {
+																x = _group.route.points[1].x,
+																y = _group.route.points[1].y,
+															}  
+																	
+															
+							
+															breaktab = true
+															break
+														end
+													end
+												end
+												if breaktab then break end
+											end
+										end
+										if breaktab then break end
+									end
+
+
+
+									if CAP_group.to ~= 0 then
+										local switchtask = {
+												id = "SwitchWaypoint", 
+													params = {
+														goToWaypointIndex = CAP_group.to,
+														fromWaypointIndex = CAP_group.from
+												}
+											}
+									
+										cntrl:setCommand(switchtask)
+				
+										env.info( "ACRF10_avoidArea W        goToWaypointIndex "..tostring(unitName).." "..callSign.." goToWaypointIndex "..tostring(CAP_group.to) )
+										_affiche(switchtask, "switchtask function avoidArea()")
+									
+									elseif CAP_group.base.x ~= 0 then
+
+										local position = _unit:getPosition()
+										-- local heading = math.atan2(position.x.z, position.x.x) -- Calcul du cap en radians
+
+										local oppositePoint_x, oppositePoint_y = getOppositePointOnCircle(currentPointXY, threat)
+
+										local flightPlan = {
+											id = 'Mission',
+											params = {
+												route = {
+													points = {
+														{
+															x = currentPointXY.x,
+															y = currentPointXY.y,
+															speed = speedMax, 
+															speed_locked = true,
+															ETA_locked = false,
+															action = "Turning Point",
+															type = "Turning Point"
+														},
+														{
+															x = oppositePoint_x,
+															y = oppositePoint_y,
+															speed = speedCruise, 
+															alt = Hcruise,
+															speed_locked = true,
+															ETA_locked = false,
+															action = "Turning Point",
+															type = "Turning Point"
+														},
+														--point à mi chemin entre le point 2 et 4
+														{
+															x = (oppositePoint_x + CAP_group.base.x ) / 2,
+															y = (oppositePoint_y + CAP_group.base.y ) / 2,
+															speed = speedCruise, 
+															alt = Hcruise,
+															speed_locked = true,
+															ETA_locked = false,
+															action = "Turning Point",
+															type = "Turning Point",
+															cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, false)
+														},
+														{
+															x = CAP_group.base.x,
+															y = CAP_group.base.y,
+															speed = speedCruise,
+															action = "Landing",
+															type = "Land"
+														}
+													}
+												}
+											}
+										}
+										ctr:setTask(flightPlan)
+									end
+
+									if not foundGroup then
+										env.info( "ACRF10_avoidArea Z        NO foundGroup "..tostring(unitName).." "..callSign )
+									end
+
+
+									break -- il est entre dans une zone interdite, on l evacue et on s arrete là
+								end
+
+							end
+
+						end
+						
+					end
+				end
+			end
+		end
+	end
+
+
+	local groups = coalition.getGroups(coalition.side.BLUE, Group.Category.AIRPLANE)
+	
+	-- for i, gp in pairs(groups) do	
+	
+		
+	-- end
+	return timer.getTime() + 1
+end
 
 -- modification M32	E-2C automatic retreat 
 function AirRetreat()
@@ -1055,6 +1361,7 @@ function SAR_F10(arg)
 end
 
 
+--TODO ne mettre la balise ejection que pour le group humain, si MP
 function activateRadioBeacon(arguments)
 
 	local gpGid = arguments[1]
@@ -2275,9 +2582,10 @@ timer.scheduleFunction(LoopPilot, nil, timer.getTime() + 15)
 
 timer.scheduleFunction(AirRetreat, nil, timer.getTime() + 5)
 
+timer.scheduleFunction(avoidArea, nil, timer.getTime() + 5)
 
 timer.scheduleFunction(getLL_TargetPosition, nil, timer.getTime() + 20)	
 
 
-env.info( "AdCR10 load fin ")
+env.info("ACRF10 end of loading AdCR10 script ")
   

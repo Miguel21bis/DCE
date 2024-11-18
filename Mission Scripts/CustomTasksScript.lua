@@ -1766,19 +1766,8 @@ function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)
 		
 		local flight = Group.getByName(FlightName)							--get group
 		if flight then														--group still exists
-			-- env.info( "DCE_CustomSearchThenEngage CCC1 "..tostring(FlightName))
 			
 			local element = flight:getUnit(1)								--get first unit in group
-			
-			-- if not element or not element:inAir()  then
-			-- 	local wingman = flight:getUnits()								--get list of units from attacking flights
-			-- 	for n = 2, #wingman do
-			-- 		element = flight:getUnit(n)
-			-- 		if element and element:inAir() then
-			-- 			break
-			-- 		end
-			-- 	end
-			-- end
 
 			if not element   then
 				local wingman = flight:getUnits()								--get list of units from attacking flights
@@ -1790,25 +1779,25 @@ function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)
 				end
 			end
 
-			-- env.info( "DCE_CustomSearchThenEngage CCC2 "..tostring(FlightName))
-			-- if element and element:inAir() and element:getPlayerName() == nil then		--stop it for groups that have landed and don't apply it to players
-			
 			local RTB = false
-			local  gpGid = ""
-			local  callSign = ""
+			local gpGid = ""
+			local callSign = ""
+			local cat
 			if element and element:getPlayerName() == nil and not RTB then
 				gpGid = Group.getID(flight)
 				callSign = Unit.getCallsign(element)
+				cat = Group.getCategory(flight)
+				-- if Group.getCategory(event.target:getGroup()) == 0
 				
 				if tabBingoPlane[gpGid] and tabBingoPlane[gpGid][callSign] then
 					RTB = true
 				end
-				env.info( "DCE_CustomSearchThenEngage CCC3 gpGid FlightName "..tostring(FlightName).." gpGid "..tostring(gpGid).." callSign "..tostring(callSign).." RTB "..tostring(RTB))
+				env.info( "DCE_CustomSearchThenEngage CCC3 gpGid FlightName "..tostring(FlightName).." gpGid "..tostring(gpGid).." callSign "..tostring(callSign).." cat "..tostring(cat))
 
-				_affiche(tabBingoPlane, "tabBingoPlane")
+				-- _affiche(tabBingoPlane, "tabBingoPlane CustomSearchThenEngage")
 			end
 			
-			if element and element:getPlayerName() == nil and not RTB then
+			if cat and element and element:getPlayerName() == nil and not RTB then
 				env.info( "DCE_CustomSearchThenEngage DDD1 "..tostring(FlightName).." " ..tostring(callSign).." RTB "..tostring(RTB))
 
 				local cntrl = flight:getController()						--get controller of group
@@ -1817,9 +1806,12 @@ function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)
 				env.info( "DCE_CustomSearchThenEngage DDD2 hasTask? "..tostring(cntrl:hasTask()))
 
 				-- if not cntrl:hasTask() then
-					env.info( "DCE_CustomSearchThenEngage DDD3 passe ")
+				env.info( "DCE_CustomSearchThenEngage DDD3 passe ")
 
-					local task_entry = {										--define engage task		
+				local task_entry = {}
+
+				if cat == 0 then  --Airplane
+					task_entry = {										--define engage task		
 						id = 'ControlledTask', 
 						params = { 
 							task = {
@@ -1843,35 +1835,59 @@ function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)
 							}
 						} 
 					}
+				elseif cat == 1 then  -- helo
+					task_entry = {										--define engage task		
+						id = 'ControlledTask', 
+						params = { 
+							task = {
+								["enabled"] = true,
+								["auto"] = false,
+								["id"] = "EngageTargetsInZone",
+								["number"] = 1,		--TODO attention, est-ce vraiment le nombre 1?
+								["params"] = {
+									["targetTypes"] = { "Helicopters"},
+									["x"] = pos.x,
+									["y"] = pos.z,
+									["value"] = TargetType .. ";",
+									["priority"] = 0,
+									["zoneRadius"] = 15000,
+								}
+							}, 
+							stopCondition = {
+								duration = 50,									--task is valid for 6 seconds only (after 5 seconds it is joined by the next iteration with updated zone position)
+							}
+						} 
+					}
+				end
 
-					cntrl:pushTask(task_entry)									--set task for group
-					
-					if camp.debug then
-						-- local TimeSearchEngage = timer.getTime() + 5
-						-- local logStr = "task_entry = " .. TableSerialization(task_entry, 0)
-						-- local FlightNameClean = FlightName:gsub('[%p%c%s]', '_')
-						-- local logFile = io.open(path.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_CustomSearchThenEngage.lua", "w")
-						-- logFile:write(logStr)
-						-- logFile:close()				
-					
-						env.info( "DCE_CustomSearchThenEngage EEE "..tostring(FlightName).."| TargetType |"..tostring(TargetType).."| Radius |"..tostring(Radius))
-					end
+				cntrl:pushTask(task_entry)									--set task for group
+				
+				if camp.debug and cat == 1 then
+					local TimeSearchEngage = timer.getTime() + 5
+					local logStr = "task_entry = " .. TableSerialization(task_entry, 0)
+					local FlightNameClean = FlightName:gsub('[%p%c%s]', '_')
+					local logFile = io.open(path.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_CustomSearchThenEngage.lua", "w")
+					logFile:write(logStr)
+					logFile:close()				
+				
+					env.info( "DCE_CustomSearchThenEngage EEE "..tostring(FlightName).."| TargetType |"..tostring(TargetType).."| Radius |"..tostring(Radius))
+				end
 
-					local nextSecond = math.ceil(timer.getTime()) + 60
-					if agendaSeconde[nextSecond] then
-						local i = 1
-						repeat
-							nextSecond = nextSecond + 1
-							i = i + 1
-						until not agendaSeconde[nextSecond] or i > 1000	
-						agendaSeconde[nextSecond] = true
-					else
-						agendaSeconde[nextSecond] = true
-					end
+				local nextSecond = math.ceil(timer.getTime()) + 60
+				if agendaSeconde[nextSecond] then
+					local i = 1
+					repeat
+						nextSecond = nextSecond + 1
+						i = i + 1
+					until not agendaSeconde[nextSecond] or i > 1000	
+					agendaSeconde[nextSecond] = true
+				else
+					agendaSeconde[nextSecond] = true
+				end
 
-					-- env.info( "DCE_CustomSearchThenEngage FFF "..tostring(FlightName).." nextSecond: "..tostring(nextSecond))
+				-- env.info( "DCE_CustomSearchThenEngage FFF "..tostring(FlightName).." nextSecond: "..tostring(nextSecond))
 
-					return nextSecond									--repeat function every 5 seconds	
+				return nextSecond									--repeat function every 5 seconds	
 					-- return timer.getTime() + 5									--repeat function every 5 seconds
 				-- end
 			end
@@ -2271,7 +2287,6 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 							["ETA_locked"] = true,
 							["y"] = pt_start.y2d,
 							["x"] = pt_start.x2d,
-							["name"] = "",
 							["formation_template"] = "",
 							["speed_locked"] = true,
 						}, -- end of [1]  
@@ -2573,7 +2588,6 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 								["ETA_locked"] = true,
 								["y"] = pt_start.y2d,
 								["x"] = pt_start.x2d,
-								["name"] = "",
 								["formation_template"] = "",
 								["speed_locked"] = true,
 							}, -- end of [1]  
@@ -3323,6 +3337,11 @@ end	--Custom_SAR
 function Custom_Altitude(grpname, wptAlti, wptTag)
 	if FpsLeak_B then return end
 	
+	if wptTag then
+		wptTag = tonumber(wptTag)
+	else
+		wptTag = 0
+	end
 	if not wptAlti or wptAlti == nil then
 		wptAlti = 1
 		env.info( "Custom_Altitude, A wptAlti  |"..tostring(grpname).." |wptAlti: "..tostring(wptAlti))
@@ -3332,15 +3351,60 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 	
 	local function Execute()
 		local current_time = timer.getTime()
-		env.info( "current_time: "..tostring(current_time).." Custom_Altitude, C grpname |"..tostring(grpname).." |wptAlti: "..tostring(wptAlti))
+		local flight = Group.getByName(grpname)		
 		
-		local flight = Group.getByName(grpname)								
-		local leader = flight:getUnit(1)		
-		local ctr = leader:getGroup():getController()
+		local selectedMember = flight:getUnits(1)
+		local wingman = flight:getUnits()
+		-- for memberN, _unit in ipairs(wingman) do											
+			-- if _unit and _unit:isActive() and _unit:inAir() then
+				-- selectedMember = _unit
+			-- end
+		-- end
+		
+		for memberN, _unit in ipairs(wingman) do
+			if _unit and _unit:isActive() and _unit:inAir() then
+				selectedMember = _unit
+			end
+		end
+
+		if not selectedMember or not selectedMember:isExist() then
+			env.info(" Custom_Altitude, C1 selectedMember Erreur : selectedMember est invalide ou inexistant.")
+
+			return
+		end
+
+		env.info( "current_time: "..tostring(current_time).." Custom_Altitude, C2 selectedMember |"..tostring(selectedMember))
+
+		
+		local ctr = selectedMember:getGroup():getController()
 		local current_time = timer.getTime()
+		local actualPosition = selectedMember:getPoint()
+		local actualPositionXY = {
+			x = actualPosition.x,
+			y = actualPosition.z,
+		}
+
+		-- local leader = flight:getUnit(1)		
+		-- local ctr = leader:getGroup():getController()
+		-- local current_time = timer.getTime()
+		-- local actualPosition = leader:getPoint()
+		-- local actualPositionXY = {
+		-- 	x = actualPosition.x,
+		-- 	y = actualPosition.z,
+		-- }
 		
 		local addAlti = 150
-		if  leader:getTypeName() == "Mi-24P" or leader:getTypeName() == "UH-1H" then
+		local str_selectedMember = selectedMember:getTypeName()
+		
+		env.info( "current_time: "..tostring(current_time).." Custom_Altitude, C3 str_selectedMember |"..tostring(str_selectedMember))		
+
+		local str_selectedMember = selectedMember:getTypeName()
+		if type(str_selectedMember) ~= "string" then
+			env.info("Custom_Altitude, C4 Erreur : str_selectedMember n'est pas une chaîne.")
+			return
+		end
+
+		if  (str_selectedMember == "Mi-24P" or str_selectedMember == "UH-1H") then
 			addAlti = 250
 		end
 
@@ -3350,7 +3414,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 			local foundAeronef = false
 			local copyRoute = {}
 			
-			-- env.info( "Custom_Altitude, D gpGid? |"..tostring(gpGid))
+			env.info( "Custom_Altitude, D gpGid? |"..tostring(gpGid))
 
 			for tblGrpId, value in pairs(LastInjectFlightPlan) do
 				if tblGrpId == gpGid then
@@ -3362,7 +3426,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 			end
 			
 			if not foundAeronef then
-				-- env.info( "Custom_Altitude, E |")
+				env.info( "Custom_Altitude, E |")
 				
 				for _coalition, coalition in pairs(env.mission.coalition) do
 					for Ncountry, _country in pairs(coalition.country) do	
@@ -3382,7 +3446,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 				end
 			end
 
-			-- env.info( "Custom_Altitude, E1a wptTag  "..tostring(wptTag))
+			env.info( "Custom_Altitude, E1a wptTag  "..tostring(wptTag))
 
 			--enleve le script Custom_Altitude pour eviter de le reinjecter et d avoir une boucle
 			if wptTag and wptTag ~= nil then
@@ -3405,7 +3469,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 				end
 			else
 				for Npoint, point in ipairs(copyRoute)  do
-					local actualPosition = leader:getPoint()
+					
 					local distance = math.sqrt(math.pow(point.x - actualPosition.x, 2) + math.pow(point.y - actualPosition.z, 2))
 					if distance < 1000 then
 						env.info( "Custom_Altitude, F1_ga   ")
@@ -3428,17 +3492,50 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 				end
 			end
 
-			local deleteBeforHere = false
-			for m = #copyRoute, 1, -1 do
-				--deleteBeforHere
-				if copyRoute[m].name == "deleteBeforHere" then
-					deleteBeforHere = true
-				elseif deleteBeforHere then
-					table.remove(copyRoute, m)
+			--enleve le script Custom_Altitude pour eviter de le reinjecter et d avoir une boucle
+			-- local deleteBeforHere = false
+			-- for m = #copyRoute, 1, -1 do
+			-- 	--deleteBeforHere
+			-- 	if copyRoute[m].name == "deleteBeforHere" then
+			-- 		deleteBeforHere = true
+			-- 	elseif deleteBeforHere then
+			-- 		table.remove(copyRoute, m)
+			-- 	end
+			-- end
+
+			--enleve le script Custom_Altitude pour eviter de le reinjecter et d avoir une boucle
+			-- if wptTag and wptTag > 0 then
+			
+			-- 	-- Créer une copie du tableau pour éviter les problèmes d'indexation
+			-- 	local copy = {}
+			-- 	for i, v in ipairs(copyRoute) do
+			-- 		table.insert(copy, v)
+			-- 	end
+			
+			-- 	-- Supprimer les éléments du tableau d'origine
+			-- 	for i = #copy, 1, -1 do
+			-- 		if i <= wptTag then
+			-- 			table.remove(copyRoute, i)
+			-- 		end
+			-- 	end
+			-- end
+
+			if wptTag and wptTag > 0 then
+				for i = #copyRoute, 1, -1 do
+					if i <= wptTag then
+						table.remove(copyRoute, i)
+					end
 				end
 			end
+			
 
-			-- env.info( "Custom_Altitude, F1_gc  #copyRoute "..tostring(#copyRoute))
+			if camp.debug then	
+				local logStr = "Mission = " .. TableSerialization(copyRoute, 0)
+				local grpnameClean = grpname:gsub('[%p%c%s]', '_')
+				local logFile = io.open(path.."Debug\\"..grpnameClean.."_".. "Custom_Altitude_copyRoute_"..current_time..".lua", "w")
+				logFile:write(logStr)
+				logFile:close()	
+			end
 
 			--cherche la prochaine action pour ne pas trop calculer de wpt intermedaire
 			local nWptNextCustom = 9999
@@ -3462,19 +3559,24 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 
 			local copyRoute2 = {}
 			local altiWpt = {}
+			
 			for n = 1, #copyRoute - 1  do
-				-- env.info( "Custom_Altitude, Ga n: : "..tostring(n))
-				
 				if n > nWptNextCustom then    --ne pas ajouter trop de wpt, sinon ça plante DCS (75 wpt max)
 					-- env.info( "Custom_Altitude, Gb break : "..tostring(n))
 					break 
 				end
 
+				if n == 1 then    --force la position de l'etat actuel
+					copyRoute[1].x = actualPositionXY.x
+					copyRoute[1].y = actualPositionXY.y
+				end
+
+				table.insert(copyRoute2, copyRoute[n])
+
 				local distance = math.sqrt(math.pow(copyRoute[n].x - copyRoute[n+1].x, 2) + math.pow(copyRoute[n].y - copyRoute[n+1].y, 2))
 				local heading = GetHeading({x=copyRoute[n].x, y=copyRoute[n].y} , {x=copyRoute[n+1].x, y=copyRoute[n+1].y} )
 				local altiMax = 1
 				
-				table.insert(copyRoute2, copyRoute[n])
 				local origineN = #copyRoute2
 				local distInterWpt = 0
 				local sondagePt
@@ -3488,13 +3590,8 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 				selectedPoint = {x=copyRoute[n].x, y=copyRoute[n].y}
 				oldAltiMax = land.getHeight({x =selectedPoint.x, y = selectedPoint.y})
 				
-				-- env.info( "CustomTS Oa oldAltiMax: "..tostring(oldAltiMax).."")
-				
 				for interval = 1, distance  , interDistance do
-				-- for interval = 1, distance - interDistance , interDistance do			--mesure l'altitude tous les 500m pour garder la plus grande
-					
-					-- env.info( "CustomTS Ob oldAltiMax: "..tostring(oldAltiMax).." interval: "..tostring(interval))
-					
+			
 					if interval == 1 then
 						-- selectedPoint = {x=copyRoute[n].x, y=copyRoute[n].y}
 						-- oldAltiMax = land.getHeight({x =selectedPoint.x, y = selectedPoint.y})
@@ -3529,8 +3626,6 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 					end
 
 					local diffAlti0 = altiMax0 - altiMin0
-					-- env.info( "CustomTS Pa diffAlti0: "..tostring(diffAlti0).." = altiMax0: "..tostring(altiMax0).." - altiMin0: "..tostring(altiMin0).."")
-					
 					
 					if diffAlti0 >= 450 and  diffAlti0 < 950 then
 						AddHeadingMin = -25
@@ -3544,8 +3639,6 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 						diffHeading = 5
 					end
 
-					-- env.info( "CustomTS Pb AddHeadingMin: "..tostring(AddHeadingMin).."")
-					
 					local sumAlti = {}
 
 					--cumul les alti pour trouver la plus petite sur les differents chemin calculé
@@ -3559,7 +3652,6 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 	
 							if not sumAlti[tostring(AddHeading)] then 
 								sumAlti[tostring(AddHeading)] = {}
-								-- env.info( "CustomTS Pc AAA AddHeading: "..tostring(AddHeading).."")								
 							end
 							if not sumAlti[tostring(AddHeading)]["sum"]  then sumAlti[tostring(AddHeading)]["sum"]  = 0 end
 							if not sumAlti[tostring(AddHeading)]["altiMax"]  then sumAlti[tostring(AddHeading)]["altiMax"]  = 0 end
@@ -3571,9 +3663,6 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 
 							if sumAlti[tostring(AddHeading)]["altiMax"] < sondageAlti then
 								sumAlti[tostring(AddHeading)]["altiMax"] = sondageAlti
-								
-								-- env.info( "CustomTS Pd AAA_b sondageAlti: "..tostring(AddHeading).." altiMax: "..tostring(sondageAlti).."")	
-								
 							end
 						end
 
@@ -3585,7 +3674,6 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 							
 							if not sumAlti[tostring(AddHeading)] then 
 								sumAlti[tostring(AddHeading)] = {}
-								-- env.info( "CustomTS Pe BBB PROBLEME CAP AddHeading: "..tostring(AddHeading).."")									
 							end
 							if not sumAlti[tostring(AddHeading)]["altiMaxLong"]  then sumAlti[tostring(AddHeading)]["altiMaxLong"]  = 0 end
 
@@ -3617,41 +3705,27 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 					
 					for NaddHdg, value in pairs(sumAlti) do
 					
-						-- env.info( "CustomTS R NaddHdg: "..tostring(NaddHdg).." sum: "..tostring(sumAlti[tostring(NaddHdg)].sum).." selectSum: "..tostring(selectSum).." altiMaxLong: "..tostring(sumAlti[tostring(NaddHdg)].altiMaxLong))
-						
 						if foundLowAltiMaxLong then
 							if sumAlti[tostring(NaddHdg)].sum < selectSum and  sumAlti[tostring(NaddHdg)].altiMaxLong < 3500 then
 								selectSum = sumAlti[tostring(NaddHdg)].sum
 								selectHdg = tonumber(NaddHdg)
-								-- env.info( "CustomTS Sa selectHdg: "..tostring(selectHdg).."***** altiMaxLong: "..tostring(sumAlti[NaddHdg].altiMaxLong))
 							end
 						elseif sumAlti[tostring(NaddHdg)].sum < selectSum then
 							selectSum = sumAlti[tostring(NaddHdg)].sum
 							selectHdg = tonumber(NaddHdg)
-							-- env.info( "CustomTS Sb selectHdg: "..tostring(selectHdg).."***** altiMaxLong: "..tostring(sumAlti[NaddHdg].altiMaxLong))
 						end
 					end
-
-					-- env.info( "CustomTS T selectHdg: "..tostring(selectHdg).."")
-					-- env.info( "CustomTS U altiMax: "..tostring(sumAlti[tostring(selectHdg)].altiMax).."")
 
 					altiMax = sumAlti[tostring(selectHdg)].altiMax
 
 					headingAlt = heading + tonumber(selectHdg)
 					
-					-- env.info( "CustomTS Ub headingAlt= "..tostring(headingAlt).." heading: "..tostring(heading).." selectHdg: "..tostring(selectHdg).."")
-					
-					
 					local selectedPointNew = GetOffsetPoint(selectedPoint, headingAlt , sumAlti[tostring(selectHdg)].distance )
 					selectedPoint = selectedPointNew
-					
-					
-					
 					
 					local PrintAltiMaxLong =  0
 					if sumAlti[tostring(selectHdg)] and sumAlti[tostring(selectHdg)].altiMaxLong then
 						PrintAltiMaxLong =  math.floor(sumAlti[tostring(selectHdg)].altiMaxLong)
-						-- env.info( "CustomTS Ub headingAlt: "..tostring(headingAlt).." PrintAltiMaxLong: "..tostring(math.floor(PrintAltiMaxLong)))
 					end
 					
 					local alt_type = "BARO"
@@ -3659,12 +3733,8 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 						alt_type = "RADIO"
 					end
 
-					-- env.info( "CustomTS V oldAltiMax: "..tostring(oldAltiMax).." -altiMax: "..tostring(altiMax).." ||"..tostring(math.abs(oldAltiMax - altiMax)).."|| > 300??? PrintAltiMaxLong: "..tostring(PrintAltiMaxLong))
-					
 					if (math.abs(oldAltiMax - altiMax) > 300 or  math.abs(oldHeadingAlt - headingAlt) > diffHeading )  then
-					-- if (math.abs(oldAltiMax - altiMax) > 300 or  math.abs(oldHeadingAlt - headingAlt) > 5 )  then --or  math.abs(oldHeadingAlt - headingAlt) > 6
-						-- env.info( "CustomTS W PAAAAAAAAAAAAAASE: ")
-						
+
 						oldAltiMax = altiMax
 						oldHeadingAlt =  headingAlt
 						distInterWpt = 0
@@ -3682,7 +3752,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 							['ETA'] = (interval / copyRoute[n].speed) + copyRoute[n].ETA ,
 							['y'] = selectedPoint.y,
 							['x'] = selectedPoint.x,
-							-- ['name'] = 'altMax: '..tostring(math.floor(altiMax)).."|hdg: "..tostring(math.floor(selectHdg)).."|alti: "..tostring(alti).."|altiMaxLong: "..tostring(PrintAltiMaxLong),
+							['name'] = 'from Cus_tom_Alti_tude interWpt: '..tostring(#copyRoute2),
 							['formation_template'] = '',
 							['speed'] = tonumber(copyRoute[n].speed),
 							['ETA_locked'] = false,
@@ -3743,8 +3813,8 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 				end
 			end
 			
-			--supprime le premier wpt, sinon l'helico revient sur ses pas.
-			table.remove(copyRoute2, 1)
+			-- --supprime le premier wpt, sinon l'helico revient sur ses pas.
+			-- table.remove(copyRoute2, 1)
 			
 			local Mission = {
 					id = 'Mission', 
@@ -3772,6 +3842,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 	end
 	
 	local nextSecond = math.ceil(timer.getTime()) + 1
+	
 	if agendaSeconde[nextSecond] then
 		local i = 1
 		repeat

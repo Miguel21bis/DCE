@@ -34608,6 +34608,7 @@ db_all_loadouts = {
 					Escort = true,
 					SEAD = true,
 				},
+				heavy_load = true,
 				attributes =  { "soft", "Parked Aircraft", "SAM", "Structure", "frontline" },
 				code_loadout =  { "IIW", "WOC80", "WOB" },
 				weaponType = "Bombs",
@@ -45198,7 +45199,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 500000,
-				firepower = 2,
+				firepower = 3,
 				vCruise = 213.83333333333,
 				vAttack = 213.83333333333,
 				hCruise = 9753.6,
@@ -45206,41 +45207,41 @@ db_all_loadouts = {
 				standoff = 20000,
 				tStation = 3600,
 				LDSD = true,
-				sortie_rate = 10,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
-					["num"] = 10,
-				},
-				[2] = {
-					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
-					["num"] = 1,
-				},
-				[3] = {
-					["CLSID"] = "{SHOULDER AIM-7F}",
-					["num"] = 9,
-				},
-				[4] = {
-					["CLSID"] = "{SHOULDER AIM-7F}",
-					["num"] = 2,
-				},
-				[5] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 7,
-				},
-				[6] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 6,
-				},
-				[7] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 5,
-				},
-				[8] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 4,
-				},
+						[1] = {
+							["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+							["num"] = 10,
+						},
+						[2] = {
+							["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+							["num"] = 1,
+						},
+						[3] = {
+							["CLSID"] = "{SHOULDER AIM-7F}",
+							["num"] = 9,
+						},
+						[4] = {
+							["CLSID"] = "{SHOULDER AIM-7F}",
+							["num"] = 2,
+						},
+						[5] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 7,
+						},
+						[6] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 6,
+						},
+						[7] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 5,
+						},
+						[8] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 4,
+						},
 					},
 					fuel = "7348",
 					flare = 60,
@@ -45255,7 +45256,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 450000,
-				firepower = 3,
+				firepower = 3.5,
 				vCruise = 213.83333333333,
 				vAttack = 213.83333333333,
 				hCruise = 9753.6,
@@ -45263,7 +45264,7 @@ db_all_loadouts = {
 				standoff = 100300,
 				tStation = 3600,
 				LDSD = true,
-				sortie_rate = 10,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
 						[1] = {
@@ -45301,7 +45302,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 450000,
-				firepower = 1,
+				firepower = 3.5,
 				vCruise = 213.83333333333,
 				vAttack = 213.83333333333,
 				hCruise = 9753.6,
@@ -45309,7 +45310,7 @@ db_all_loadouts = {
 				standoff = 100300,
 				tStation = 3600,
 				LDSD = true,
-				sortie_rate = 10,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
 						[1] = {
@@ -45353,7 +45354,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 450000,
-				firepower = 2,
+				firepower = 3,
 				vCruise = 213.83333333333,
 				vAttack = 213.83333333333,
 				hCruise = 9753.6,
@@ -45361,7 +45362,7 @@ db_all_loadouts = {
 				standoff = 20000,
 				tStation = 3600,
 				LDSD = true,
-				sortie_rate = 10,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
 						[1] = {
@@ -45402,7 +45403,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 600000,
-				firepower = 3,
+				firepower = 3.5,
 				vCruise = 213.83333333333,
 				vAttack = 213.83333333333,
 				hCruise = 9753.6,
@@ -45410,37 +45411,37 @@ db_all_loadouts = {
 				standoff = 100300,
 				tStation = 3600,
 				LDSD = true,
-				sortie_rate = 10,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
-					["num"] = 10,
-				},
-				[2] = {
-					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
-					["num"] = 1,
-				},
-				[3] = {
-					["CLSID"] = "{SHOULDER AIM-7F}",
-					["num"] = 9,
-				},
-				[4] = {
-					["CLSID"] = "{SHOULDER AIM-7F}",
-					["num"] = 2,
-				},
-				[5] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 5,
-				},
-				[6] = {
-					["CLSID"] = "{AIM_54A_Mk47}",
-					["num"] = 7,
-				},
-				[7] = {
-					["CLSID"] = "{AIM_54A_Mk47}",
-					["num"] = 4,
-				},
+						[1] = {
+							["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+							["num"] = 10,
+						},
+						[2] = {
+							["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+							["num"] = 1,
+						},
+						[3] = {
+							["CLSID"] = "{SHOULDER AIM-7F}",
+							["num"] = 9,
+						},
+						[4] = {
+							["CLSID"] = "{SHOULDER AIM-7F}",
+							["num"] = 2,
+						},
+						[5] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 5,
+						},
+						[6] = {
+							["CLSID"] = "{AIM_54A_Mk47}",
+							["num"] = 7,
+						},
+						[7] = {
+							["CLSID"] = "{AIM_54A_Mk47}",
+							["num"] = 4,
+						},
 					},
 					fuel = "7348",
 					flare = 60,
@@ -45455,7 +45456,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 450000,
-				firepower = 4,
+				firepower = 5,
 				vCruise = 213.83333333333,
 				vAttack = 213.83333333333,
 				hCruise = 9753.6,
@@ -45463,7 +45464,7 @@ db_all_loadouts = {
 				standoff = 100300,
 				tStation = 3600,
 				LDSD = true,
-				sortie_rate = 10,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
 						[1] = {
@@ -45512,7 +45513,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 500000,
-				firepower = 1,
+				firepower = 3,
 				vCruise = 213.83333333333,
 				vAttack = 213.83333333333,
 				hCruise = 9753.6,
@@ -45520,41 +45521,41 @@ db_all_loadouts = {
 				standoff = 100300,
 				tStation = 3600,
 				LDSD = true,
-				sortie_rate = 10,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
-					["num"] = 10,
-				},
-				[2] = {
-					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
-					["num"] = 1,
-				},
-				[3] = {
-					["CLSID"] = "{SHOULDER AIM-7F}",
-					["num"] = 9,
-				},
-				[4] = {
-					["CLSID"] = "{SHOULDER AIM-7F}",
-					["num"] = 2,
-				},
-				[5] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 7,
-				},
-				[6] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 6,
-				},
-				[7] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 5,
-				},
-				[8] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 4,
-				},
+						[1] = {
+							["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+							["num"] = 10,
+						},
+						[2] = {
+							["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+							["num"] = 1,
+						},
+						[3] = {
+							["CLSID"] = "{SHOULDER AIM-7F}",
+							["num"] = 9,
+						},
+						[4] = {
+							["CLSID"] = "{SHOULDER AIM-7F}",
+							["num"] = 2,
+						},
+						[5] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 7,
+						},
+						[6] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 6,
+						},
+						[7] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 5,
+						},
+						[8] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 4,
+						},
 					},
 					fuel = "7348",
 					flare = 60,
@@ -45569,7 +45570,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 500000,
-				firepower = 1,
+				firepower = 3.5,
 				vCruise = 213.83333333333,
 				vAttack = 213.83333333333,
 				hCruise = 9753.6,
@@ -45577,7 +45578,7 @@ db_all_loadouts = {
 				standoff = 100300,
 				tStation = 3600,
 				LDSD = true,
-				sortie_rate = 10,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
 						[1] = {
@@ -45615,7 +45616,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 500000,
-				firepower = 1,
+				firepower = 3.5,
 				vCruise = 213.83333333333,
 				vAttack = 213.83333333333,
 				hCruise = 9753.6,
@@ -45623,7 +45624,7 @@ db_all_loadouts = {
 				standoff = 100300,
 				tStation = 3600,
 				LDSD = true,
-				sortie_rate = 10,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
 						[1] = {
@@ -45667,7 +45668,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 500000,
-				firepower = 1,
+				firepower = 3,
 				vCruise = 213.83333333333,
 				vAttack = 213.83333333333,
 				hCruise = 9753.6,
@@ -45675,7 +45676,7 @@ db_all_loadouts = {
 				standoff = 20300,
 				tStation = 3600,
 				LDSD = true,
-				sortie_rate = 10,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
 						[1] = {
@@ -45716,7 +45717,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 500000,
-				firepower = 1,
+				firepower = 3.5,
 				vCruise = 213.83333333333,
 				vAttack = 213.83333333333,
 				hCruise = 9753.6,
@@ -45724,37 +45725,37 @@ db_all_loadouts = {
 				standoff = 100300,
 				tStation = 3600,
 				LDSD = true,
-				sortie_rate = 10,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
-					["num"] = 10,
-				},
-				[2] = {
-					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
-					["num"] = 1,
-				},
-				[3] = {
-					["CLSID"] = "{SHOULDER AIM-7F}",
-					["num"] = 9,
-				},
-				[4] = {
-					["CLSID"] = "{SHOULDER AIM-7F}",
-					["num"] = 2,
-				},
-				[5] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 5,
-				},
-				[6] = {
-					["CLSID"] = "{AIM_54A_Mk47}",
-					["num"] = 7,
-				},
-				[7] = {
-					["CLSID"] = "{AIM_54A_Mk47}",
-					["num"] = 4,
-				},
+						[1] = {
+							["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+							["num"] = 10,
+						},
+						[2] = {
+							["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+							["num"] = 1,
+						},
+						[3] = {
+							["CLSID"] = "{SHOULDER AIM-7F}",
+							["num"] = 9,
+						},
+						[4] = {
+							["CLSID"] = "{SHOULDER AIM-7F}",
+							["num"] = 2,
+						},
+						[5] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 5,
+						},
+						[6] = {
+							["CLSID"] = "{AIM_54A_Mk47}",
+							["num"] = 7,
+						},
+						[7] = {
+							["CLSID"] = "{AIM_54A_Mk47}",
+							["num"] = 4,
+						},
 					},
 					fuel = "7348",
 					flare = 60,
@@ -45769,7 +45770,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 500000,
-				firepower = 1,
+				firepower = 5,
 				vCruise = 213.83333333333,
 				vAttack = 213.83333333333,
 				hCruise = 9753.6,
@@ -45777,7 +45778,7 @@ db_all_loadouts = {
 				standoff = 100300,
 				tStation = 3600,
 				LDSD = true,
-				sortie_rate = 10,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
 						[1] = {
@@ -45826,45 +45827,45 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 500000,
-				firepower = 1,
+				firepower = 3,
 				vCruise = 255.83333333333,
 				standoff = 80300,
 				LDSD = true,
-				sortie_rate = 10,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
-					["num"] = 10,
-				},
-				[2] = {
-					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
-					["num"] = 1,
-				},
-				[3] = {
-					["CLSID"] = "{SHOULDER AIM-7F}",
-					["num"] = 9,
-				},
-				[4] = {
-					["CLSID"] = "{SHOULDER AIM-7F}",
-					["num"] = 2,
-				},
-				[5] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 7,
-				},
-				[6] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 6,
-				},
-				[7] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 5,
-				},
-				[8] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 4,
-				},
+						[1] = {
+							["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+							["num"] = 10,
+						},
+						[2] = {
+							["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+							["num"] = 1,
+						},
+						[3] = {
+							["CLSID"] = "{SHOULDER AIM-7F}",
+							["num"] = 9,
+						},
+						[4] = {
+							["CLSID"] = "{SHOULDER AIM-7F}",
+							["num"] = 2,
+						},
+						[5] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 7,
+						},
+						[6] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 6,
+						},
+						[7] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 5,
+						},
+						[8] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 4,
+						},
 					},
 					fuel = "7348",
 					flare = 60,
@@ -45879,11 +45880,11 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 500000,
-				firepower = 1,
+				firepower = 3.5,
 				vCruise = 255.83333333333,
 				standoff = 80300,
 				LDSD = true,
-				sortie_rate = 10,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
 						[1] = {
@@ -45921,11 +45922,11 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 500000,
-				firepower = 1,
+				firepower = 3.5,
 				vCruise = 255.83333333333,
 				standoff = 80300,
 				LDSD = true,
-				sortie_rate = 10,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
 						[1] = {
@@ -45969,11 +45970,11 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 500000,
-				firepower = 1,
+				firepower = 3,
 				vCruise = 255.83333333333,
 				standoff = 80300,
 				LDSD = true,
-				sortie_rate = 10,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
 						[1] = {
@@ -46014,41 +46015,41 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 500000,
-				firepower = 1,
+				firepower = 3.5,
 				vCruise = 255.83333333333,
 				standoff = 80300,
 				LDSD = true,
-				sortie_rate = 10,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
-					["num"] = 10,
-				},
-				[2] = {
-					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
-					["num"] = 1,
-				},
-				[3] = {
-					["CLSID"] = "{SHOULDER AIM-7F}",
-					["num"] = 9,
-				},
-				[4] = {
-					["CLSID"] = "{SHOULDER AIM-7F}",
-					["num"] = 2,
-				},
-				[5] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 5,
-				},
-				[6] = {
-					["CLSID"] = "{AIM_54A_Mk47}",
-					["num"] = 7,
-				},
-				[7] = {
-					["CLSID"] = "{AIM_54A_Mk47}",
-					["num"] = 4,
-				},
+						[1] = {
+							["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+							["num"] = 10,
+						},
+						[2] = {
+							["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+							["num"] = 1,
+						},
+						[3] = {
+							["CLSID"] = "{SHOULDER AIM-7F}",
+							["num"] = 9,
+						},
+						[4] = {
+							["CLSID"] = "{SHOULDER AIM-7F}",
+							["num"] = 2,
+						},
+						[5] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 5,
+						},
+						[6] = {
+							["CLSID"] = "{AIM_54A_Mk47}",
+							["num"] = 7,
+						},
+						[7] = {
+							["CLSID"] = "{AIM_54A_Mk47}",
+							["num"] = 4,
+						},
 					},
 					fuel = "7348",
 					flare = 60,
@@ -46063,11 +46064,11 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 500000,
-				firepower = 1,
+				firepower = 5,
 				vCruise = 255.83333333333,
 				standoff = 80300,
 				LDSD = true,
-				sortie_rate = 10,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
 						[1] = {
@@ -46116,42 +46117,42 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 450000,
-				firepower = 1,
-				sortie_rate = 10,
+				firepower = 3,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
-					["num"] = 10,
-				},
-				[2] = {
-					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
-					["num"] = 1,
-				},
-				[3] = {
-					["CLSID"] = "{SHOULDER AIM-7F}",
-					["num"] = 9,
-				},
-				[4] = {
-					["CLSID"] = "{SHOULDER AIM-7F}",
-					["num"] = 2,
-				},
-				[5] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 7,
-				},
-				[6] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 6,
-				},
-				[7] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 5,
-				},
-				[8] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 4,
-				},
+						[1] = {
+							["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+							["num"] = 10,
+						},
+						[2] = {
+							["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+							["num"] = 1,
+						},
+						[3] = {
+							["CLSID"] = "{SHOULDER AIM-7F}",
+							["num"] = 9,
+						},
+						[4] = {
+							["CLSID"] = "{SHOULDER AIM-7F}",
+							["num"] = 2,
+						},
+						[5] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 7,
+						},
+						[6] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 6,
+						},
+						[7] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 5,
+						},
+						[8] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 4,
+						},
 					},
 					fuel = "7348",
 					flare = 60,
@@ -46166,8 +46167,8 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 450000,
-				firepower = 1,
-				sortie_rate = 10,
+				firepower = 3.5,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
 						[1] = {
@@ -46205,8 +46206,8 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 450000,
-				firepower = 1,
-				sortie_rate = 10,
+				firepower = 3.5,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
 						[1] = {
@@ -46250,8 +46251,8 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 450000,
-				firepower = 1,
-				sortie_rate = 10,
+				firepower = 3,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
 						[1] = {
@@ -46292,38 +46293,38 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 450000,
-				firepower = 1,
-				sortie_rate = 10,
+				firepower = 3.5,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
-					["num"] = 10,
-				},
-				[2] = {
-					["CLSID"] = "{LAU-138 wtip - AIM-9L}",
-					["num"] = 1,
-				},
-				[3] = {
-					["CLSID"] = "{SHOULDER AIM-7F}",
-					["num"] = 9,
-				},
-				[4] = {
-					["CLSID"] = "{SHOULDER AIM-7F}",
-					["num"] = 2,
-				},
-				[5] = {
-					["CLSID"] = "{BELLY AIM-7F}",
-					["num"] = 5,
-				},
-				[6] = {
-					["CLSID"] = "{AIM_54A_Mk47}",
-					["num"] = 7,
-				},
-				[7] = {
-					["CLSID"] = "{AIM_54A_Mk47}",
-					["num"] = 4,
-				},
+						[1] = {
+							["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+							["num"] = 10,
+						},
+						[2] = {
+							["CLSID"] = "{LAU-138 wtip - AIM-9L}",
+							["num"] = 1,
+						},
+						[3] = {
+							["CLSID"] = "{SHOULDER AIM-7F}",
+							["num"] = 9,
+						},
+						[4] = {
+							["CLSID"] = "{SHOULDER AIM-7F}",
+							["num"] = 2,
+						},
+						[5] = {
+							["CLSID"] = "{BELLY AIM-7F}",
+							["num"] = 5,
+						},
+						[6] = {
+							["CLSID"] = "{AIM_54A_Mk47}",
+							["num"] = 7,
+						},
+						[7] = {
+							["CLSID"] = "{AIM_54A_Mk47}",
+							["num"] = 4,
+						},
 					},
 					fuel = "7348",
 					flare = 60,
@@ -46338,8 +46339,8 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 450000,
-				firepower = 1,
-				sortie_rate = 10,
+				firepower = 5,
+				sortie_rate = 5,
 				stores = {
 					pylons = {
 						[1] = {

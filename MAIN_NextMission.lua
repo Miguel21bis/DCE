@@ -697,6 +697,15 @@ end
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Debug.lua")
 
 
+--TODO groundthreats introuvable
+-- print("MainNE A groundthreats "..tostring(groundthreats.blue[1].type))
+camp["groundthreats"] = groundthreats
+
+-- print("MainNE A groundthreats "..tostring(camp.groundthreats.blue[1].type))
+
+-- os.execute 'pause'
+
+
 mission.currentKey = 1010000															--not clear how this works but is required for multiplyer clients to be available for selection on mission start
 
 
