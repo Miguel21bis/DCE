@@ -277,7 +277,7 @@ end
 function getOppositePointOnCircle(posA, centerCircle)
     -- Calculer les coordonnées opposées sur le cercle
     local bx = 2 * centerCircle.x - posA.x
-    local by = 2 * centerCircle.Y - posA.y
+    local by = 2 * centerCircle.y - posA.y
     return bx, by
 end
 -- --function to return heading between two vector2 points
@@ -493,8 +493,83 @@ end
 -- _affiche (a b)     typeName MiG-23MLD
 -- _affiche (a b)     category 0
 
+hotSpotAirDefence = {
+    red = {}, 
+    blue = {},
+}
+
+local function calculateDistance(x1, y1, x2, y2)
+    return math.sqrt((x2 - x1)^2 + (y2 - y1)^2)
+end
+
+function hotSpotSAM()
+    if not camp.groundthreats then return end
+
+    local clusterThreshold = 30000 -- Distance max pour regrouper les SAMs
+
+    for side, antiAirCover in pairs(camp.groundthreats) do
+        local clusters = {}
+
+        -- Parcourir chaque SAM
+        for _, cover in ipairs(antiAirCover) do
+            local addedToCluster = false
+
+			if cover.class == "SAM" then
+				-- Ajouter le SAM à un cluster existant s'il est proche
+				for _, cluster in ipairs(clusters) do
+					local dist = calculateDistance(cover.x, cover.y, cluster.centerX, cluster.centerY)
+					if dist <= clusterThreshold then
+						cluster.totalWeight = cluster.totalWeight + 1
+						cluster.sumX = cluster.sumX + cover.x
+						cluster.sumY = cluster.sumY + cover.y
+						cluster.centerX = cluster.sumX / cluster.totalWeight
+						cluster.centerY = cluster.sumY / cluster.totalWeight
+						addedToCluster = true
+						break
+					end
+				end
+
+				-- Si aucun cluster n'est trouvé, en créer un nouveau
+				if not addedToCluster then
+					table.insert(clusters, {
+						totalWeight = 1,
+						sumX = cover.x,
+						sumY = cover.y,
+						centerX = cover.x,
+						centerY = cover.y,
+					})
+				end
+			end
+        end
+
+        -- Sauvegarder les clusters comme des hotspots
+        hotSpotAirDefence[side] = {}
+        for _, cluster in ipairs(clusters) do
+            table.insert(hotSpotAirDefence[side], { x = cluster.centerX, y = cluster.centerY })
+        end
+    end
+end
+
+
+local function chooseBestHotspot(actualPos, side)
+    local bestHotSpot = nil
+    local shortestDistance = math.huge
+
+    for _, hotspot in ipairs(hotSpotAirDefence[side]) do
+        local dist = calculateDistance(actualPos.x, actualPos.y, hotspot.x, hotspot.y)
+        if dist < shortestDistance then
+            shortestDistance = dist
+            bestHotSpot = hotspot
+        end
+    end
+
+    return bestHotSpot
+end
+
+
+
 -- interdit aux CAP et Intercepteur d'entrer dans une zone SAM connu
-function avoidArea()
+local function avoidArea()
 	
 	env.info("ACRF10_avoidArea A0 camp.groundthreats.? "..tostring(camp.groundthreats))
 
@@ -503,8 +578,7 @@ function avoidArea()
 	local current_time = timer.getTime()
 	
 	for _, sideNum in ipairs({coalition.side.BLUE, coalition.side.RED}) do
-		env.info("ACRF10_avoidArea A sideNum "..tostring(sideNum).." coalitionIdNumeric: "..tostring(coalitionIdNumeric[sideNum]))
-
+		
 		local groups = coalition.getGroups(sideNum, Group.Category.AIRPLANE)
 
 		for i, gp in pairs(groups) do
@@ -520,6 +594,7 @@ function avoidArea()
 						local currentPointXY = {
 							x = currentPoint.x,
 							y = currentPoint.z,
+							z = currentPoint.y,
 						}
 
 						local gpGid = Group.getID(gp)
@@ -543,47 +618,26 @@ function avoidArea()
 							end
 						end
 						
-						env.info("ACRF10_avoidArea B gpGid "..tostring(gpGid).." gpName: "..tostring(gpName).." unitName: "..tostring(unitName))
-					
 						local ctr = _unit:getGroup():getController()	
 							
 						local ENI_side = DCS_ENI_Side[coalitionIdNumeric[sideNum]]
-						-- env.info("ACRF10_avoidArea F______ ENI_side "..tostring(ENI_side))
 								
 						for threatN, threat in pairs(camp.groundthreats[ENI_side]) do
 							
-							-- env.info("ACRF10_avoidArea G______ threatN "..tostring(threatN).." class: "..tostring(threat.class))
-
 							if threat and threat.class and threat.class == "SAM"  then
 
 								local distance = math.sqrt(math.pow(threat.x - currentPointXY.x, 2) + math.pow(threat.y - currentPointXY.y, 2))
 
-								-- env.info("ACRF10_avoidArea I1______ distance "..tostring(distance))
-
-								local condition2 = false
-								-- local distance2 = math.sqrt((threat.x - currentPointXY.x) ^ 2 + (threat.y - currentPointXY.y) ^ 2)
-								-- if (distance2 and distance2 <= threat.range) then
-								-- 	condition2 = true
-								-- end
-
-								-- env.info("ACRF10_avoidArea I2______ distance2 "..tostring(distance2))
-
-
-								if (distance and distance <= threat.range) or condition2 then
+								if (distance and distance <= threat.range) then
 
 									env.info( "ACRF10_avoidArea I0_______")
-									-- env.info( "ACRF10_avoidArea I1_______  hasTask? "..tostring(ctr:hasTask()))
-
+									
 									ctr:resetTask()
 
-									-- env.info( "ACRF10_avoidArea I2_______  hasTask? "..tostring(ctr:hasTask()))
-				
 									ctr:setOption(AI.Option.Air.id.PROHIBIT_AA, true)
 
 									ctr:resetTask()
 
-									-- env.info( "ACRF10_avoidArea I3_______  hasTask? "..tostring(ctr:hasTask()))
-				
 									ctr:setOption(AI.Option.Air.id.PROHIBIT_AA, true)
 
 									env.info( "ACRF10_avoidArea I4_______  hasTask? "..tostring(ctr:hasTask()))
@@ -652,20 +706,151 @@ function avoidArea()
 														fromWaypointIndex = CAP_group.from
 												}
 											}
+									end
 									
-										cntrl:setCommand(switchtask)
+									-- 	ctr:setCommand(switchtask)
 				
-										env.info( "ACRF10_avoidArea W        goToWaypointIndex "..tostring(unitName).." "..callSign.." goToWaypointIndex "..tostring(CAP_group.to) )
-										_affiche(switchtask, "switchtask function avoidArea()")
+									-- 	env.info( "ACRF10_avoidArea W        goToWaypointIndex "..tostring(unitName).." "..callSign.." goToWaypointIndex "..tostring(CAP_group.to) )
+									-- 	_affiche(switchtask, "switchtask function avoidArea()")
 									
-									elseif CAP_group.base.x ~= 0 then
+									-- elseif CAP_group.base.x ~= 0 then
+
+
+									env.info( "ACRF10_avoidArea K0_______ currentPointXY.y: "..tostring(currentPointXY.y).." threat.name "..tostring(threat.name))
+
+									local pointOfCoverage = chooseBestHotspot(currentPointXY, coalitionIdNumeric[sideNum])
+
+									
+									_affiche(pointOfCoverage, "ACRF10_avoidArea pointOfCoverage")
+									
+
+									if Hcruise < currentPointXY.z then
+										Hcruise = currentPointXY.z
+									end
+
+									local flightPlan
+
+									if pointOfCoverage then
+
+										env.info( "ACRF10_avoidArea K1_______ currentPointXY.y: "..tostring(currentPointXY.y).." threat.y "..tostring(threat.y))
+
+										local oppositePoint_x, oppositePoint_y = getOppositePointOnCircle(currentPointXY, threat)
+
+										flightPlan = {
+											id = 'Mission',
+											params = {
+												route = {
+													points = {
+														{
+															x = currentPointXY.x,
+															y = currentPointXY.y,
+															speed = speedMax, 
+															speed_locked = true,
+															ETA_locked = false,
+															action = "Turning Point",
+															type = "Turning Point"
+														},
+														{
+															x = oppositePoint_x,
+															y = oppositePoint_y,
+															speed = speedCruise, 
+															alt = Hcruise,
+															speed_locked = true,
+															ETA_locked = false,
+															action = "Turning Point",
+															type = "Turning Point"
+														},
+														--point à mi chemin entre le point 2 et 4
+														{
+															x = pointOfCoverage.x ,
+															y = pointOfCoverage.y ,
+															speed = speedCruise, 
+															alt = Hcruise,
+															speed_locked = true,
+															ETA_locked = false,
+															action = "Turning Point",
+															type = "Turning Point",
+															['task'] = {
+																['id'] = 'ComboTask',
+																['params'] = {
+																	['tasks'] = {
+																		[1] = {
+																			['enabled'] = true,
+																			['auto'] = false,
+																			['id'] = 'ControlledTask',
+																			['number'] = 1,
+																			['params'] = {
+																				['task'] = {
+																					['id'] = 'EngageTargetsInZone',
+																					['params'] = {
+																						['targetTypes'] = {
+																							[1] = 'Air',
+																							[2] = 'Cruise missiles',
+																						},
+																						['value'] = 'Air;Cruise missiles;',
+																						['priority'] = 0,
+																						x = pointOfCoverage.x ,
+																						y = pointOfCoverage.y ,
+																						['zoneRadius'] = 50000,
+																					},
+																				},
+																				['stopCondition'] = {
+																					['lastWaypoint'] = 3,
+																				},
+																			},
+																		},
+																		[2] = {
+																			['enabled'] = true,
+																			['auto'] = false,
+																			['id'] = 'ControlledTask',
+																			['number'] = 2,
+																			['params'] = {
+																				['task'] = {
+																					['id'] = 'Orbit',
+																					['params'] = {
+																						['altitude'] = Hcruise,
+																						['pattern'] = 'Race-Track',
+																						['speed'] = speedCruise,
+																					},
+																				},
+																				['stopCondition'] = {
+																					['time'] = 1000,
+																				},
+																				['option'] = {
+																					['id'] = AI.Option.Air.id.PROHIBIT_AA,
+																					['value'] = false -- Désactiver l'interdiction d'engager des cibles aériennes
+																				},
+																			},
+																		},
+																	},
+																},
+															},
+															-- cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, false)
+														},
+													
+														{
+															x = CAP_group.base.x,
+															y = CAP_group.base.y,
+															speed = speedCruise,
+															action = "Landing",
+															type = "Land"
+														}
+													}
+												}
+											}
+										}
+
+									else
+
 
 										local position = _unit:getPosition()
 										-- local heading = math.atan2(position.x.z, position.x.x) -- Calcul du cap en radians
 
+										env.info( "ACRF10_avoidArea K2_______ currentPointXY.y: "..tostring(currentPointXY.y).." threat.y "..tostring(threat.y))
+
 										local oppositePoint_x, oppositePoint_y = getOppositePointOnCircle(currentPointXY, threat)
 
-										local flightPlan = {
+										flightPlan = {
 											id = 'Mission',
 											params = {
 												route = {
@@ -699,7 +884,7 @@ function avoidArea()
 															ETA_locked = false,
 															action = "Turning Point",
 															type = "Turning Point",
-															cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, false)
+															-- cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, false)
 														},
 														{
 															x = CAP_group.base.x,
@@ -712,11 +897,27 @@ function avoidArea()
 												}
 											}
 										}
-										ctr:setTask(flightPlan)
+										
 									end
 
 									if not foundGroup then
 										env.info( "ACRF10_avoidArea Z        NO foundGroup "..tostring(unitName).." "..callSign )
+									end
+
+									if flightPlan then 
+										ctr:setTask(flightPlan)
+									end
+
+
+									if camp.debug then
+										local TimeSearchEngage = timer.getTime() + 5
+										local logStr = "flightPlan = " .. TableSerialization(flightPlan, 0)
+										local FlightNameClean = unitName:gsub('[%p%c%s]', '_')
+										local logFile = io.open(path.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_avoidArea.lua", "w")
+										logFile:write(logStr)
+										logFile:close()				
+									
+										env.info( "DCE_avoidArea ZZZ "..tostring(unitName))
 									end
 
 
@@ -2574,6 +2775,16 @@ function LoopPilot()
 	
 	return timer.getTime() + 15
 
+end
+
+--creation de la table de couverture anti aérienne AMI
+hotSpotSAM()
+
+if camp.debug then
+	local logStr = "hotSpotAirDefence = " .. TableSerialization(hotSpotAirDefence, 0)
+	local logFile = io.open(path.."Debug\\".."hotSpotAirDefence.lua", "w")
+	logFile:write(logStr)
+	logFile:close()
 end
 
 timer.scheduleFunction(timerPlayerMenu, nil, timer.getTime() + 5)
