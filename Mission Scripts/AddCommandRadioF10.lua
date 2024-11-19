@@ -587,7 +587,14 @@ local function avoidArea()
 			local gpGid = Group.getID(gp)
 			local nowTime = timer.getTime()
 
-			if (string.find(gpName,"CAP") or string.find(gpName,"Intercept")) and (flightPlanTimer[gpGid] and nowTime < flightPlanTimer[gpGid] + 30)   then
+			local passTimer = true
+			if (flightPlanTimer[gpGid] and nowTime < flightPlanTimer[gpGid] + 30) then 
+				passTimer = false 
+				env.info("ACRF10_avoidArea A "..tostring(gpName).." "..tostring(passTimer))
+				_affiche(flightPlanTimer, "ACRF10_avoidArea flightPlanTimer")
+			end
+
+			if (string.find(gpName,"CAP") or string.find(gpName,"Intercept")) and passTimer then
 				local wingman = gp:getUnits()
 
 				for wingmanN, _unit in ipairs(wingman) do											
@@ -890,10 +897,12 @@ local function avoidArea()
 
 									if flightPlan then 
 										ctr:resetTask()
-										controller:setOption(AI.Option.Air.id.REACTION_ON_THREAT, AI.Option.Air.val.EVADE_FIRE) -- Prioriser l'évasion
-										controller:setOption(AI.Option.Air.id.PROHIBIT_AA, true) -- Désactiver l'engagement A/A
+										ctr:setOption(AI.Option.Air.id.REACTION_ON_THREAT, true) -- Prioriser l'évasion
+										ctr:setOption(AI.Option.Air.val.EVADE_FIRE,true ) -- Prioriser l'évasion
+										ctr:setOption(AI.Option.Air.id.PROHIBIT_AA, true) -- Désactiver l'engagement A/A
 										ctr:setTask(flightPlan)
 										flightPlanTimer[gpGid] = nowTime
+										_affiche(flightPlanTimer, "ACRF10_avoidArea Z2 flightPlanTimer")
 									end
 
 
@@ -1381,7 +1390,8 @@ function bingo(gpGid, groupMission)
 								
 						cntrl:setCommand(switchtask)
 
-						cntrl:setOption(AI.Option.Air.id.REACTION_ON_THREAT, AI.Option.Air.val.EVADE_FIRE) -- Prioriser l'évasion
+						cntrl:setOption(AI.Option.Air.id.REACTION_ON_THREAT, true) -- Prioriser l'évasion
+						cntrl:setOption(AI.Option.Air.val.EVADE_FIRE,true ) -- Prioriser l'évasion
 						cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, true) -- Désactiver l'engagement A/A
 						cntrl:setOption(AI.Option.Air.id.PROHIBIT_JETT, false)
 						cntrl:setOption(AI.Option.Air.id.JETT_TANKS_IF_EMPTY, true)
