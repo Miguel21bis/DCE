@@ -399,12 +399,14 @@ function EventHandler:onEvent(event)
 					-- z = ptEvent.z,
 				-- }
 				
-				env.info( "DCE_EJECT EventT :radioTransmission frequency A  "..tostring(camp.ejectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..PilotEjection.initiator))
-				
-				trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', PilotEjection, 0, true, camp.ejectedPilotFrequency[side].GuardEjection, 1, 'GuardEjection'..PilotEjection.initiator)
-				
-				env.info( "DCE_EJECT EventT :radioTransmission frequency B  "..tostring(camp.ejectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..PilotEjection.initiator))
-				
+				if PilotEjection.initiator:getPlayerName()	then
+					env.info( "DCE_EJECT EventT :radioTransmission frequency A  "..tostring(camp.ejectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..PilotEjection.initiator))
+					
+					trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', PilotEjection, 0, true, camp.ejectedPilotFrequency[side].GuardEjection, 1, 'GuardEjection'..PilotEjection.initiator)
+					
+					env.info( "DCE_EJECT EventT :radioTransmission frequency B  "..tostring(camp.ejectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..PilotEjection.initiator))
+				end
+
 				ejectionSeatTemp = {
 					radio_on = true,
 					time_on = log_entry.t,

@@ -37,6 +37,7 @@ env.info("ACRF10 version of Lua _VERSION "..tostring(_VERSION))
 env.info("ACRF10 start loading ACRF10 script ")
 
 radioCommands = {}
+flightPlanTimer = {}
 
 coalitionId = {
 	["0"] = "neutral",
@@ -505,7 +506,7 @@ end
 function hotSpotSAM()
     if not camp.groundthreats then return end
 
-    local clusterThreshold = 30000 -- Distance max pour regrouper les SAMs
+    local clusterThreshold = 100000 -- Distance max pour regrouper les SAMs
 
     for side, antiAirCover in pairs(camp.groundthreats) do
         local clusters = {}
@@ -571,7 +572,7 @@ end
 -- interdit aux CAP et Intercepteur d'entrer dans une zone SAM connu
 local function avoidArea()
 	
-	env.info("ACRF10_avoidArea A0 camp.groundthreats.? "..tostring(camp.groundthreats))
+	-- env.info("ACRF10_avoidArea A0 camp.groundthreats.? "..tostring(camp.groundthreats))
 
 	if not camp.groundthreats then return end
 
@@ -583,8 +584,10 @@ local function avoidArea()
 
 		for i, gp in pairs(groups) do
 			local gpName = Group.getName(gp)
-		
-			if string.find(gpName,"CAP") or string.find(gpName,"Intercept") then
+			local gpGid = Group.getID(gp)
+			local nowTime = timer.getTime()
+
+			if (string.find(gpName,"CAP") or string.find(gpName,"Intercept")) and (flightPlanTimer[gpGid] and nowTime < flightPlanTimer[gpGid] + 30)   then
 				local wingman = gp:getUnits()
 
 				for wingmanN, _unit in ipairs(wingman) do											
@@ -597,7 +600,6 @@ local function avoidArea()
 							z = currentPoint.y,
 						}
 
-						local gpGid = Group.getID(gp)
 						local unitName = _unit:getName()
 						local callSign = _unit:getCallsign()
 
@@ -630,19 +632,8 @@ local function avoidArea()
 
 								if (distance and distance <= threat.range) then
 
-									env.info( "ACRF10_avoidArea I0_______")
-									
-									ctr:resetTask()
-
-									ctr:setOption(AI.Option.Air.id.PROHIBIT_AA, true)
-
-									ctr:resetTask()
-
-									ctr:setOption(AI.Option.Air.id.PROHIBIT_AA, true)
-
-									env.info( "ACRF10_avoidArea I4_______  hasTask? "..tostring(ctr:hasTask()))
+									env.info( "ACRF10_avoidArea I4_______  ")
 				
-
 									local foundGroup = false
 									local breaktab = false
 									local CAP_group = {
@@ -697,7 +688,6 @@ local function avoidArea()
 									end
 
 
-
 									if CAP_group.to ~= 0 then
 										local switchtask = {
 												id = "SwitchWaypoint", 
@@ -708,22 +698,12 @@ local function avoidArea()
 											}
 									end
 									
-									-- 	ctr:setCommand(switchtask)
-				
-									-- 	env.info( "ACRF10_avoidArea W        goToWaypointIndex "..tostring(unitName).." "..callSign.." goToWaypointIndex "..tostring(CAP_group.to) )
-									-- 	_affiche(switchtask, "switchtask function avoidArea()")
-									
-									-- elseif CAP_group.base.x ~= 0 then
-
-
 									env.info( "ACRF10_avoidArea K0_______ currentPointXY.y: "..tostring(currentPointXY.y).." threat.name "..tostring(threat.name))
 
 									local pointOfCoverage = chooseBestHotspot(currentPointXY, coalitionIdNumeric[sideNum])
 
-									
 									_affiche(pointOfCoverage, "ACRF10_avoidArea pointOfCoverage")
 									
-
 									if Hcruise < currentPointXY.z then
 										Hcruise = currentPointXY.z
 									end
@@ -747,8 +727,10 @@ local function avoidArea()
 															speed = speedMax, 
 															speed_locked = true,
 															ETA_locked = false,
+															alt = Hcruise,
 															action = "Turning Point",
-															type = "Turning Point"
+															type = "Turning Point",
+															name = "Found pointOfCoverage"
 														},
 														{
 															x = oppositePoint_x,
@@ -860,9 +842,11 @@ local function avoidArea()
 															y = currentPointXY.y,
 															speed = speedMax, 
 															speed_locked = true,
+															alt = Hcruise,
 															ETA_locked = false,
 															action = "Turning Point",
-															type = "Turning Point"
+															type = "Turning Point",
+															name = "NOFound pointOfCoverage"
 														},
 														{
 															x = oppositePoint_x,
@@ -905,7 +889,11 @@ local function avoidArea()
 									end
 
 									if flightPlan then 
+										ctr:resetTask()
+										controller:setOption(AI.Option.Air.id.REACTION_ON_THREAT, AI.Option.Air.val.EVADE_FIRE) -- Prioriser l'évasion
+										controller:setOption(AI.Option.Air.id.PROHIBIT_AA, true) -- Désactiver l'engagement A/A
 										ctr:setTask(flightPlan)
+										flightPlanTimer[gpGid] = nowTime
 									end
 
 
@@ -1388,7 +1376,15 @@ function bingo(gpGid, groupMission)
 								}
 							}
 					
+							
+						cntrl:resetTask()
+								
 						cntrl:setCommand(switchtask)
+
+						cntrl:setOption(AI.Option.Air.id.REACTION_ON_THREAT, AI.Option.Air.val.EVADE_FIRE) -- Prioriser l'évasion
+						cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, true) -- Désactiver l'engagement A/A
+						cntrl:setOption(AI.Option.Air.id.PROHIBIT_JETT, false)
+						cntrl:setOption(AI.Option.Air.id.JETT_TANKS_IF_EMPTY, true)
 
 						env.info( "DCE_Bingo EE        goToWaypointIndex "..tostring(unitName).." "..callSign.." goToWaypointIndex "..tostring(rtbGroup.to) )
 						_affiche(switchtask, "switchtask function bingo()")
@@ -1642,6 +1638,7 @@ function FctRtbGroup(rtbGroup)
 			}
 		}
 
+	rtbCtr:resetTask()
 	rtbCtr:setCommand(switchtask)
 	
 end

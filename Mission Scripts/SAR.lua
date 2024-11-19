@@ -606,7 +606,7 @@ do
 									['action'] = {
 										['id'] = 'Script',
 										['params'] = {
-											["command"] = 'Custom_Altitude("' .. FlightSAR.name .. "',  '  nil  ', '" .."2".. "')",
+											["command"] = "Custom_Altitude('" .. FlightSAR.name .. "',  '  nil  ', '" .."2".. "')",
 										},
 									},
 								},
@@ -1155,7 +1155,7 @@ do
 										['action'] = {
 											['id'] = 'Script',
 											['params'] = {
-												["command"] = 'Custom_Altitude("' .. grpname .. "',  '  nil  ', '" .."1".. "')",
+												["command"] = "Custom_Altitude('" .. grpname .. "',  '  nil  ', '" .."1".. "')",
 											},
 										},
 									},
@@ -1920,10 +1920,11 @@ function getOutGDFM(argGid)
 
 							local side = coalitionIdNumeric[tonumber(damaged.initiatorSIDE)]
 
-							env.info( "DCE_EJECT EventT :radioTransmission frequency A  "..tostring(camp.ejectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..damaged.initiator))
-							trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', damaged, 0, true, camp.ejectedPilotFrequency[side].GuardEjection, 1, 'GuardEjection'..damaged.initiator)
-							env.info( "DCE_EJECT EventT :radioTransmission frequency B  "..tostring(camp.ejectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..damaged.initiator))
-							
+							if damaged.unit:getPlayerName()	then
+								env.info( "DCE_EJECT EventT :radioTransmission frequency A  "..tostring(camp.ejectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..damaged.initiator))
+								trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', damaged, 0, true, camp.ejectedPilotFrequency[side].GuardEjection, 1, 'GuardEjection'..damaged.initiator)
+								env.info( "DCE_EJECT EventT :radioTransmission frequency B  "..tostring(camp.ejectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..damaged.initiator))
+							end
 
 							damaged.x = damaged.crashPoint.x
 							damaged.y = damaged.crashPoint.y
@@ -1953,15 +1954,15 @@ function getOutGDFM(argGid)
 				
 							damaged.name = damaged.name:gsub('[%p%c%s]', '_')
 
-							-- local typeLand = land.getSurfaceType({x =sondagePt.x, y = sondagePt.y})
+							local typeLand = land.getSurfaceType({x =damaged.x, y = damaged.y})
 
-							-- if damaged.SurfaceType ~= 3 and damaged.SurfaceType ~= 5  then
+							if typeLand ~= 3 and typeLand ~= 5  then
 									
 								AddSoldierAliasPilot(damaged)
 								damaged.createdSoldier = true
 								trigger.action.smoke(PilotVec3, trigger.smokeColor.Red)
 								
-							-- end
+							end
 
 							checkImmediatSAR(damaged)
 
