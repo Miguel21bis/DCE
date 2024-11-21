@@ -1729,10 +1729,7 @@ function CustomLaserDesignationAFAC(AfacFlightName, refX, refY, LaserCode)
 		if laser and laser ~= nil then											--if there is a new laser spot
 			env.info("DCE_CustomLaserDesignationAFAC :MM  ")
 
-			return timer.getTime() + 60							--repeat designation cylce in 2 seconds
-		-- else													--if no laser spot was created
-		-- 	env.info("DCE_CustomLaserDesignationAFAC :NN  ")
-		-- 	return												--stop designation cycle
+			return timer.getTime() + 60							--repeat designation cylce in 2 seconds										--stop designation cycle
 		end
 	end
 
@@ -1759,10 +1756,7 @@ function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)
 		searchTime = timer.getTime() + 1800
 	end
 
-	-- env.info( "DCE_CustomSearchThenEngage AAA "..tostring(FlightName).." searchTime: "..tostring(searchTime))
-
 	local function ApplyEngageTargetsInZoneTask()							--engage targets in zone task needs to be applied continously to update zone position to group position
-		-- env.info( "DCE_CustomSearchThenEngage BBB "..tostring(FlightName))
 		
 		local flight = Group.getByName(FlightName)							--get group
 		if flight then														--group still exists
@@ -1787,27 +1781,16 @@ function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)
 				gpGid = Group.getID(flight)
 				callSign = Unit.getCallsign(element)
 				cat = Group.getCategory(flight)
-				-- if Group.getCategory(event.target:getGroup()) == 0
 				
 				if tabBingoPlane[gpGid] and tabBingoPlane[gpGid][callSign] then
 					RTB = true
 				end
-				-- env.info( "DCE_CustomSearchThenEngage CCC3 gpGid FlightName "..tostring(FlightName).." gpGid "..tostring(gpGid).." callSign "..tostring(callSign).." cat "..tostring(cat))
-
-				-- _affiche(tabBingoPlane, "tabBingoPlane CustomSearchThenEngage")
 			end
 			
 			if cat and element and element:getPlayerName() == nil and not RTB then
-				-- env.info( "DCE_CustomSearchThenEngage DDD1 "..tostring(FlightName).." " ..tostring(callSign).." RTB "..tostring(RTB))
-
+				
 				local cntrl = flight:getController()						--get controller of group
 				local pos = element:getPoint()								--get position
-
-				-- env.info( "DCE_CustomSearchThenEngage DDD2 hasTask? "..tostring(cntrl:hasTask()))
-
-				-- if not cntrl:hasTask() then
-				-- env.info( "DCE_CustomSearchThenEngage DDD3 passe ")
-
 				local task_entry = {}
 
 				if cat == 0 then  --Airplane
@@ -1885,11 +1868,8 @@ function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)
 					agendaSeconde[nextSecond] = true
 				end
 
-				-- env.info( "DCE_CustomSearchThenEngage FFF "..tostring(FlightName).." nextSecond: "..tostring(nextSecond))
-
 				return nextSecond									--repeat function every 5 seconds	
-					-- return timer.getTime() + 5									--repeat function every 5 seconds
-				-- end
+
 			end
 		end
 	end

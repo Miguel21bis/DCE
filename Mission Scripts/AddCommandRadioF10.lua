@@ -33,8 +33,20 @@ env.info("ACRF10 version of Lua _VERSION "..tostring(_VERSION))
 --     return x ^ y
 -- end
 
+for k, v in pairs(AI.Option.Air.val) do
+    env.info(k .. " = " .. tostring(v))
+end
+
+env.info("Constante REACTION_ON_THREAT : " .. tostring(AI.Option.Air.id.REACTION_ON_THREAT))
+env.info("Valeur EVADE_FIRE : " .. tostring(AI.Option.Air.val.EVADE_FIRE))
+
+
+env.info("Constante AAA_EVADE_FIRE : " .. tostring(AI.Option.Air.val.REACTION_ON_THREAT.AAA_EVADE_FIRE))
+env.info("Valeur EVADE_FIRE : " ..        tostring(AI.Option.Air.val.REACTION_ON_THREAT.EVADE_FIRE))
+
 
 env.info("ACRF10 start loading ACRF10 script ")
+
 
 radioCommands = {}
 flightPlanTimer = {}
@@ -574,6 +586,8 @@ local function avoidArea()
 	
 	-- env.info("ACRF10_avoidArea A0 camp.groundthreats.? "..tostring(camp.groundthreats))
 
+	debug_avoidArea = false
+
 	if not camp.groundthreats then return end
 
 	local current_time = timer.getTime()
@@ -590,8 +604,8 @@ local function avoidArea()
 			local passTimer = true
 			if (flightPlanTimer[gpGid] and nowTime < flightPlanTimer[gpGid] + 30) then 
 				passTimer = false 
-				env.info("ACRF10_avoidArea A "..tostring(gpName).." "..tostring(passTimer))
-				_affiche(flightPlanTimer, "ACRF10_avoidArea flightPlanTimer")
+				-- env.info("ACRF10_avoidArea A "..tostring(gpName).." "..tostring(passTimer))
+				-- _affiche(flightPlanTimer, "ACRF10_avoidArea flightPlanTimer")
 			end
 
 			if (string.find(gpName,"CAP") or string.find(gpName,"Intercept")) and passTimer then
@@ -637,7 +651,9 @@ local function avoidArea()
 
 								local distance = math.sqrt(math.pow(threat.x - currentPointXY.x, 2) + math.pow(threat.y - currentPointXY.y, 2))
 
-								if (distance and distance <= threat.range) then
+								-- if debug_avoidArea or (distance and distance <= threat.range) then
+								if debug_avoidArea or (distance and distance <= ((2 / 3) * threat.range)) then
+
 
 									env.info( "ACRF10_avoidArea I4_______  ")
 				
@@ -647,14 +663,24 @@ local function avoidArea()
 										name = "",
 										from = 0,
 										to = 0,
+										task = {},
 										base = {
 											x = 0,
 											y = 0 ,
-										}
+										},
+										orbitCAP = {
+											x = 0,
+											y = 0 ,
+											altitude = 0,
+											speed = 0,
+										},
+										sation1 = {},
+										sation2 = {},
 									}
 
 									for _coalition, coalition in pairs(env.mission.coalition) do
 										env.info( "ACRF10_avoidArea J________  _coalition? "..tostring(_coalition).." coalitionIdNumeric[sideNum]? "..tostring(coalitionIdNumeric[sideNum]).." sideNum? "..tostring(sideNum))
+										
 										if _coalition == coalitionIdNumeric[sideNum] then
 											for Ncountry, _country in pairs(coalition.country) do	
 												if _country.plane then
@@ -664,25 +690,47 @@ local function avoidArea()
 															CAP_group.name = _group.name
 															foundGroup = true
 
-															env.info( "ACRF10_avoidArea M        found Froup "..tostring(unitName))
+															-- env.info( "ACRF10_avoidArea M        found Froup "..tostring(unitName))
 				
 															--Station
-															for key, value in ipairs(_group.route.points) do						
+															for pointN, value in ipairs(_group.route.points) do						
 																if value.name == 'Station' then
-																	CAP_group.to = key 
-																	CAP_group.from = key - 1
+																	CAP_group.to = pointN 
+																	CAP_group.from = pointN - 1
+																	if value.task then
+																		
+
+																		if value.task.params and value.task.params.tasks then
+
+																			for i, valueTasks in ipairs(value.task.params.tasks) do
+
+																				if valueTasks.params.task.id == "EngageTargetsInZone" then
+
+																					CAP_group.sation1 = _group.route.points[pointN]
+																					CAP_group.sation2 = _group.route.points[pointN+1]
+
+																					-- CAP_group.orbitCAP.x = valueTasks.params.task.params.x
+																					-- CAP_group.orbitCAP.y = valueTasks.params.task.params.y
+																				
+																			
+																				elseif valueTasks.params.task.id == "Orbit" then
+																					CAP_group.orbitCAP.altitude = valueTasks.params.task.params.altitude
+																					CAP_group.orbitCAP.speed = valueTasks.params.task.params.speed
+																				end
+																			end
+																		end
+																	end
+																	break
 																end				
 															end
 
 															--BaseXY
 															
 															CAP_group.base = {
-																x = _group.route.points[1].x,
-																y = _group.route.points[1].y,
+																x = _group.route.points[#_group.route.points].x,
+																y = _group.route.points[#_group.route.points].y,
 															}  
-																	
-															
-							
+																
 															breaktab = true
 															break
 														end
@@ -694,7 +742,6 @@ local function avoidArea()
 										if breaktab then break end
 									end
 
-
 									if CAP_group.to ~= 0 then
 										local switchtask = {
 												id = "SwitchWaypoint", 
@@ -705,21 +752,42 @@ local function avoidArea()
 											}
 									end
 									
-									env.info( "ACRF10_avoidArea K0_______ currentPointXY.y: "..tostring(currentPointXY.y).." threat.name "..tostring(threat.name))
+									-- env.info( "ACRF10_avoidArea K0_______ currentPointXY.y: "..tostring(currentPointXY.y).." threat.name "..tostring(threat.name))
 
 									local pointOfCoverage = chooseBestHotspot(currentPointXY, coalitionIdNumeric[sideNum])
 
-									_affiche(pointOfCoverage, "ACRF10_avoidArea pointOfCoverage")
+									-- _affiche(pointOfCoverage, "ACRF10_avoidArea pointOfCoverage")
 									
-									if Hcruise < currentPointXY.z then
+									
+									local altCircle = Hcruise + (math.random(1,10) * 10)
+									local timeCircle = current_time
+
+									if CAP_group.orbitCAP.altitude ~= 0 then
+										Hcruise = CAP_group.orbitCAP.altitude
+									elseif Hcruise < currentPointXY.z then
 										Hcruise = currentPointXY.z
 									end
+
+									if CAP_group.orbitCAP.speed ~= 0 then
+										speedCruise = CAP_group.orbitCAP.speed
+									end
+
+									if CAP_group.orbitCAP.altitude ~= 0 then
+										altCircle = CAP_group.orbitCAP.altitude
+										timeCircle = timeCircle + 150
+
+									else
+										--temps d orbit pour intercepteur
+										timeCircle = timeCircle + 900
+									end
+									
+									
 
 									local flightPlan
 
 									if pointOfCoverage then
 
-										env.info( "ACRF10_avoidArea K1_______ currentPointXY.y: "..tostring(currentPointXY.y).." threat.y "..tostring(threat.y))
+										-- env.info( "ACRF10_avoidArea K1_______ currentPointXY.y: "..tostring(currentPointXY.y).." threat.y "..tostring(threat.y))
 
 										local oppositePoint_x, oppositePoint_y = getOppositePointOnCircle(currentPointXY, threat)
 
@@ -763,11 +831,51 @@ local function avoidArea()
 																['id'] = 'ComboTask',
 																['params'] = {
 																	['tasks'] = {
-																		[1] = {
+																		[1] = 
+																		{
+																			["number"] = 1,
+																			["auto"] = false,
+																			["id"] = "WrappedAction",
+																			["name"] = "regleEngagement: feu a volonté",
+																			["enabled"] = true,
+																			["params"] = 
+																			{
+																				["action"] = 
+																				{
+																					["id"] = "Option",
+																					["params"] = 
+																					{
+																						["value"] = 0,
+																						["name"] = 0,
+																					}, -- end of ["params"]
+																				}, -- end of ["action"]
+																			}, -- end of ["params"]
+																		}, -- end of [1]
+																		[2] = 
+																		{
+																			["enabled"] = true,
+																			["auto"] = false,
+																			["id"] = "WrappedAction",
+																			["name"] = "interdire la pc",
+																			["number"] = 2,
+																			["params"] = 
+																			{
+																				["action"] = 
+																				{
+																					["id"] = "Option",
+																					["params"] = 
+																					{
+																						["value"] = false,
+																						["name"] = 16,
+																					}, -- end of ["params"]
+																				}, -- end of ["action"]
+																			}, -- end of ["params"]
+																		}, -- end of [2]
+																		[3] = {
 																			['enabled'] = true,
 																			['auto'] = false,
 																			['id'] = 'ControlledTask',
-																			['number'] = 1,
+																			['number'] = 3,
 																			['params'] = {
 																				['task'] = {
 																					['id'] = 'EngageTargetsInZone',
@@ -783,34 +891,30 @@ local function avoidArea()
 																						['zoneRadius'] = 50000,
 																					},
 																				},
-																				['stopCondition'] = {
-																					['lastWaypoint'] = 3,
-																				},
 																			},
 																		},
-																		[2] = {
+																		[4] = {
 																			['enabled'] = true,
 																			['auto'] = false,
 																			['id'] = 'ControlledTask',
-																			['number'] = 2,
+																			['number'] = 4,
 																			['params'] = {
 																				['task'] = {
 																					['id'] = 'Orbit',
 																					['params'] = {
-																						['altitude'] = Hcruise,
+																						['altitude'] = altCircle,
 																						['pattern'] = 'Race-Track',
 																						['speed'] = speedCruise,
 																					},
 																				},
 																				['stopCondition'] = {
-																					['time'] = 1000,
+																					['time'] = timeCircle,
 																				},
-																				['option'] = {
-																					['id'] = AI.Option.Air.id.PROHIBIT_AA,
-																					['value'] = false -- Désactiver l'interdiction d'engager des cibles aériennes
-																				},
+																				
 																			},
 																		},
+																		
+																	
 																	},
 																},
 															},
@@ -829,13 +933,37 @@ local function avoidArea()
 											}
 										}
 
-									else
+										-- env.info( "ACRF10_avoidArea K2_______ #CAP_group.sation1: "..tostring(#CAP_group.sation1))
+										if CAP_group.sation1 ~= nil and CAP_group.sation2 ~= nil and CAP_group.orbitCAP.altitude ~= 0 then
+											
+											-- env.info( "ACRF10_avoidArea K3A_______ ##flightPlan.params.route.points: "..tostring(#flightPlan.params.route.points).." type"..tostring(flightPlan.params.route.points[#flightPlan.params.route.points].type))
+											
+											-- table.insert(flightPlan.params.route.points, #flightPlan.params.route.points - 1, CAP_group.sation1)
+											
+											-- env.info( "ACRF10_avoidArea K3B_______ ##flightPlan.params.route.points: "..tostring(#flightPlan.params.route.points).." type"..tostring(flightPlan.params.route.points[#flightPlan.params.route.points].type))
+											
+											-- table.insert(flightPlan.params.route.points, #flightPlan.params.route.points - 1, CAP_group.sation2)
+										
+											local numPoints = #flightPlan.params.route.points
+											local indexForStation1 = numPoints 
+											local indexForStation2 = numPoints +1 -- Station2 viendra après Station1
 
+											-- env.info("ACRF10_avoidArea K3A_______ ##flightPlan.params.route.points: " .. tostring(numPoints) .. " type " .. tostring(flightPlan.params.route.points[numPoints].type))
+
+											-- Insérer station1 et station2 à des indices fixes
+											table.insert(flightPlan.params.route.points, indexForStation1, CAP_group.sation1)
+											table.insert(flightPlan.params.route.points, indexForStation2, CAP_group.sation2)
+											
+											-- env.info("ACRF10_avoidArea K3B_______ ##flightPlan.params.route.points: " .. tostring(#flightPlan.params.route.points) .. " type " .. tostring(flightPlan.params.route.points[#flightPlan.params.route.points].type))
+											
+										end
+
+									else --if NOT pointOfCoverage then
 
 										local position = _unit:getPosition()
 										-- local heading = math.atan2(position.x.z, position.x.x) -- Calcul du cap en radians
 
-										env.info( "ACRF10_avoidArea K2_______ currentPointXY.y: "..tostring(currentPointXY.y).." threat.y "..tostring(threat.y))
+										env.info( "ACRF10_avoidArea L_______ currentPointXY.y: "..tostring(currentPointXY.y).." threat.y "..tostring(threat.y))
 
 										local oppositePoint_x, oppositePoint_y = getOppositePointOnCircle(currentPointXY, threat)
 
@@ -897,8 +1025,8 @@ local function avoidArea()
 
 									if flightPlan then 
 										ctr:resetTask()
-										ctr:setOption(AI.Option.Air.id.REACTION_ON_THREAT, true) -- Prioriser l'évasion
-										ctr:setOption(AI.Option.Air.val.EVADE_FIRE,true ) -- Prioriser l'évasion
+										-- ctr:setOption(AI.Option.Air.id.REACTION_ON_THREAT, AI.Option.Air.val.EVADE_FIRE)
+										ctr:setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2)
 										ctr:setOption(AI.Option.Air.id.PROHIBIT_AA, true) -- Désactiver l'engagement A/A
 										ctr:setTask(flightPlan)
 										flightPlanTimer[gpGid] = nowTime
@@ -1305,19 +1433,14 @@ function bingo(gpGid, groupMission)
 					local report = " not humainUnit "
 					local cntrl = unit:getController()
 					
-					cntrl:resetTask()
+					-- cntrl:resetTask()
 
-					env.info( "DCE_Bingo BB    hasTask? "..tostring(cntrl:hasTask()))
+					-- env.info( "DCE_Bingo BB    hasTask? "..tostring(cntrl:hasTask()))
 
-					cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, true)
-
-					-- cntrl:setOption(AI.Option.Air.id.RTB_ON_BINGO, true)
-
-					cntrl:setOption(AI.Option.Air.id.PROHIBIT_AB, true)
-
-					cntrl:setOption(AI.Option.Air.id.PROHIBIT_JETT, false)
-
-					cntrl:setOption(AI.Option.Air.id.JETT_TANKS_IF_EMPTY, true)
+					-- cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, true)
+					-- cntrl:setOption(AI.Option.Air.id.PROHIBIT_AB, true)
+					-- cntrl:setOption(AI.Option.Air.id.PROHIBIT_JETT, false)
+					-- cntrl:setOption(AI.Option.Air.id.JETT_TANKS_IF_EMPTY, true)
 
 					
 
@@ -1390,10 +1513,10 @@ function bingo(gpGid, groupMission)
 								
 						cntrl:setCommand(switchtask)
 
-						cntrl:setOption(AI.Option.Air.id.REACTION_ON_THREAT, true) -- Prioriser l'évasion
-						cntrl:setOption(AI.Option.Air.val.EVADE_FIRE,true ) -- Prioriser l'évasion
+						cntrl:setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2)
 						cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, true) -- Désactiver l'engagement A/A
 						cntrl:setOption(AI.Option.Air.id.PROHIBIT_JETT, false)
+						cntrl:setOption(AI.Option.Air.id.PROHIBIT_AB, true)
 						cntrl:setOption(AI.Option.Air.id.JETT_TANKS_IF_EMPTY, true)
 
 						env.info( "DCE_Bingo EE        goToWaypointIndex "..tostring(unitName).." "..callSign.." goToWaypointIndex "..tostring(rtbGroup.to) )
@@ -2804,6 +2927,9 @@ timer.scheduleFunction(avoidArea, nil, timer.getTime() + 5)
 
 timer.scheduleFunction(getLL_TargetPosition, nil, timer.getTime() + 20)	
 
+
+
+_affiche(AI.Option.Air.val, "AI.Option.Air.val")
 
 env.info("ACRF10 end of loading AdCR10 script ")
   
