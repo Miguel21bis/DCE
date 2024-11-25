@@ -7,7 +7,7 @@ if not versionDCE then versionDCE = {} end
 versionDCE["UTIL_ResetCampaign.lua"] = "1.12.58"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_a			en attente d utilisation)
--- adjustment_c			(c targetList)(b pairsByKeys)(a firstmission_flag)
+-- adjustment_c			(c targetList)(b pairsByKeys)(a Firstmission_flag)
 -- modification M63_a	compatible Datacard Generator or CombatFlite
 -- modification M61_a	SAR
 -- modification M55_c	player can change the type of plane (c:triggers part)
@@ -50,7 +50,7 @@ else
 	end
 end
 
-if firstmission_flag then																				--if the script is called by BAT_FirstMission.lua, then FirstMission is true and camp_status is reset to init. When called by DEBRIEF_Master.lua, block is skipped and camp_camp status carried over in mission is used.
+if Firstmission_flag then																				--if the script is called by BAT_FirstMission.lua, then FirstMission is true and camp_status is reset to init. When called by DEBRIEF_Master.lua, block is skipped and camp_camp status carried over in mission is used.
 	local camp_str = "camp = " .. TableSerialization(camp, 0)										--make a string of campaign initial status table
 	local campFile = io.open("Active/camp_status.lua", "w")											--open campaign status file
 	camp.versionPackageICM = tostring(versionPackageICM)											-- modification M35 version ScriptsMod -- ajoute la version du script dans camp_status pour utilisation en fin de mission

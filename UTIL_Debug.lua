@@ -56,12 +56,12 @@ if Debug.debug then
 	testFile:close()
 
 
-	--recherche Debug/bugList.lua
-	local testFile = "Debug/bugList.lua"
+	--recherche Debug/BugList.lua
+	local testFile = "Debug/BugList.lua"
 	local TestPath = io.open(testFile, "r")										--cette maniere de chercer la presence d un fichier evite un plantage
 	if TestPath ~= nil and MissionInstance == 1 then														--check si le fichier existe 
 		io.close(TestPath)
-		os.execute('start "bugList" "notepad.exe" "Debug/bugList.lua"')			--open the bugList file with notepad
+		os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')			--open the BugList file with notepad
 	end	
 
 end
@@ -114,10 +114,10 @@ infoPopulate = infoPopulate .."Number of static groups: "..tostring(NbGrStatic).
 
 print(infoPopulate)
 
-debugFLIGHT = debugFLIGHT .. infoPopulate
+DebugFLIGHT = DebugFLIGHT .. infoPopulate
 
 local debugFLIGHTFile = io.open("Debug/debugFlight.txt", "w")										--open targetlist file
-debugFLIGHTFile:write(debugFLIGHT)																		--save new data
+debugFLIGHTFile:write(DebugFLIGHT)																		--save new data
 debugFLIGHTFile:close()
 
 
@@ -125,7 +125,7 @@ debugFLIGHTFile:close()
 function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackType, attackAlt, id_task)
 
 	local target = TargetName
-	-- if targetList_InThisMission[target] then
+	-- if TargetList_InThisMission[target] then
 
 	-- 	-- print("DcB found target: "..target)
 	-- else
@@ -170,7 +170,7 @@ function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackTyp
 
 		if not foundTarget then
 			local txtBug = "UtilD NOT found CustomGroupAttack target: "..tostring(target)
-			-- table.insert(bugList, txtBug)
+			-- table.insert(BugList, txtBug)
 			insertBugList(txtBug)
 		end
 
@@ -217,7 +217,7 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 
 			if not foundTarget then
 				local txtBug = "UutilD NOT found CustomStaticAttack target: "..tostring(target)
-				-- table.insert(bugList, txtBug)
+				-- table.insert(BugList, txtBug)
 				insertBugList(txtBug)
 			end
 

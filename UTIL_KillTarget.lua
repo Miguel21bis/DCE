@@ -7,7 +7,7 @@ versionDCE["UTIL_KillTarget.lua"] = "1.6.20"
 ------------------------------------------------------------------------------------------------------- 
 -- Debug_c
 -- cleanCode_a
--- adjustment_b				(b target boucle) (a firstmission_flag
+-- adjustment_b				(b target boucle) (a Firstmission_flag
 -- modification M61_a		SAR
 -- modification M56_a		AssignCallnameSquad
 -- modification M38_l		Check and Help CampaignMaker (l: naval environment)(k: enleve du targetlist les CAP inter etc)(j: debug) (h: activeInactiveTarget step by step)

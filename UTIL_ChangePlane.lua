@@ -42,7 +42,7 @@ end
 -- table.sort(oob_air["red"], cmp)
 
 
---affiche le type d'avion selectionné et son squadrons
+--affiche le type d'avion selectionnï¿½ et son squadrons
 for side, squadTL in  pairs(oob_air) do
 	for squad_n, squad in  pairs(squadTL) do
 		if squad.player then 
@@ -57,13 +57,13 @@ end
 -- oobAirSide = oob_air[playerSide]
 -- table.sort(oobAirSide, cmp)
 
---TIPS sort (attention suite à un tri, la boucle doit etre fait avec ipairs)
+--TIPS sort (attention suite ï¿½ un tri, la boucle doit etre fait avec ipairs)
 oobAirSide = oob_air[playerSide]
 table.sort(oobAirSide, function(a, b) return a.type:upper() < b.type:upper() end)
 
 local nType = 1
 local TabSquad = {}
--- for nSide , oob_airSide in pairs(oob_air) do														--pour afficher l'exemple de selection du premier avion présenté
+-- for nSide , oob_airSide in pairs(oob_air) do														--pour afficher l'exemple de selection du premier avion prï¿½sentï¿½
 	-- if nSide == playerSide then
 		-- for i,v in ipairs(animals) do print(v.name) end
 		for m , unit in ipairs(oobAirSide) do
@@ -79,7 +79,7 @@ local TabSquad = {}
 -- end
 io.write( "\n")
 --===================================================================================
--- Ecran N°1 Selection Nombre d'avion Multiplayer
+-- Ecran Nï¿½1 Selection Nombre d'avion Multiplayer
 repeat
 	input = tonumber(io.stdin:read())
 
@@ -136,10 +136,10 @@ airFile:close()
 
 local oldSquadNameInit = oldSquadName
 
-if skipmission_flag then
+if Skipmission_flag then
 	-- dofile("../../../Missions/Campaigns/"..camp.title.."/Active/camp_triggers.lua")	
 	dofile("Active/camp_triggers.lua")	
-elseif firstmission_flag then
+elseif Firstmission_flag then
 	dofile("../../../Missions/Campaigns/"..camp.title.."/Init/camp_triggers_init.lua")	
 	-- dofile("Init/camp_triggers.lua")	
 end
@@ -266,9 +266,9 @@ trigFile:close()
 
 
 ChangePlane = true
-if skipmission_flag then
+if Skipmission_flag then
 	dofile("../../../ScriptsMod."..versionPackageICM.."/BAT_SkipMission.lua")
-elseif firstmission_flag then
+elseif Firstmission_flag then
 	dofile("../../../ScriptsMod."..versionPackageICM.."/BAT_FirstMission.lua")
 end
 

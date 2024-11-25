@@ -177,22 +177,30 @@ data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
+		vCruise = 230,
+		hCruise = 4500,
 	},	
 	["A-4E-C"] = 	{--mod
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		requiredModules = true,						--itsModule
 		playable = true,
+		vCruise = 221,
+		hCruise = 10630,--TODO a confirmer
 	},
 	["A-6E"] = 	{				--Mod
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
 		EPLRS_Capacity = false,
+		vCruise = 216,
+		hCruise = 10670,
 	},	
 	["EA_6B"] = 	{					--Mod
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		requiredModules = true,						--itsModule
+		vCruise = 215,
+		hCruise = 9140,
 	},
 	
 	["VSN_F100"] = 	{				--Mod
@@ -241,6 +249,8 @@ data_divers = {
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
 		EPLRS_Capacity = true,
+		vCruise = 110,
+		hCruise = 4570,
 	},
 	
 	["vwv_a1_skyraider"] = 	{				--Mod
@@ -254,6 +264,8 @@ data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
+		vCruise = 154,
+		hCruise = 7600,
 	},
 	
 	["A-10C"] = 	{
@@ -264,6 +276,8 @@ data_divers = {
 			isDonnor = true,
 		},
 		playable = true,
+		vCruise = 154,
+		hCruise = 7600,
 	},	
 	["A-10C_2"] = 	{
 		instrumentUnits = "imperial",
@@ -277,6 +291,8 @@ data_divers = {
 		},
 		inheritedFrom = "A-10C",	--copy radio frequency, failues ...
 		playable = true,
+		vCruise = 154,
+		hCruise = 7600,
 	},	
 	
 	["F-86F Sabre"] = 	{
@@ -287,6 +303,8 @@ data_divers = {
 	["F-4E"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
+		vCruise = 215,
+		hCruise = 9000,
 	},
 	["F-4E-45MC"] = 	{
 		instrumentUnits = "imperial",
@@ -314,13 +332,15 @@ data_divers = {
 			AntishipStrike = true,
 			Reconnaissance = true,
 		},
-		vCruise = 257,--a peaufiner
-		hCruise = 9750,--a peaufiner
+		vCruise = 215,--a peaufiner
+		hCruise = 9000,--a peaufiner
 	},	
 	["F-5E-3"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
+		vCruise = 200,
+		hCruise = 7600,
 	},
 	["vwv_crusader"] = 	{				--Mod
 		instrumentUnits = "imperial",
@@ -334,7 +354,7 @@ data_divers = {
 	["F-14A-135-GR"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-		inheritedFrom = "F-14",	--copy radio frequency, failues ...
+		inheritedFrom = "F-14",	--copy radio frequency, failures ...
 		inherited_APA_From = "F-14",	--copy AddPropAircraft
 		playable = true,
 		alignment_PropAircraft = {
@@ -361,8 +381,8 @@ data_divers = {
 			SEAD = true,
 		},
 		
-		vCruise = 223,
-		hCruise = 9750,
+		vCruise = 230,
+		hCruise = 9140,
 	},	
 	["F-14B"] = 	{
 		instrumentUnits = "imperial",
@@ -393,8 +413,8 @@ data_divers = {
 			AFAC = true,
 			SEAD = true,
 		},
-		vCruise = 223,
-		hCruise = 9750,
+		vCruise = 230,
+		hCruise = 9140,
 	},			
 	["F-15C"] = 	{
 		instrumentUnits = "imperial",
@@ -403,6 +423,8 @@ data_divers = {
 			type = "Link16",
 			isDonnor = true,
 		},
+		vCruise = 265,
+		hCruise = 12000,
 	},	
 	["F-15E"] = 	{
 		instrumentUnits = "imperial",
@@ -411,11 +433,15 @@ data_divers = {
 			type = "Link16",
 			isDonnor = true,
 		},
+		vCruise = 245,
+		hCruise = 12670,
 	},
 	["F-15ESE"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = true,
 		playable = true,
+		vCruise = 250,
+		hCruise = 12670,
 	},
 	["F-16C_50"] = 	{
 		instrumentUnits = "imperial",
@@ -429,6 +455,8 @@ data_divers = {
 
 		},
 		playable = true,
+		vCruise = 220,
+		hCruise = 9140,
 	},	
 	["F-16C bl.52d"] = 	{
 		instrumentUnits = "imperial",
@@ -437,6 +465,8 @@ data_divers = {
 			type = "Link16",
 			isDonnor = true,
 		},
+		vCruise = 220,
+		hCruise = 9140,
 	},	
 	["F/A-18C"]  = 	{
 		instrumentUnits = "imperial",
@@ -464,6 +494,8 @@ data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		flyingAlone = true,
+		vCruise = 260,
+		hCruise = 12500,
 	},	
 	["B-1B"] = 	{
 		instrumentUnits = "imperial",
@@ -473,6 +505,8 @@ data_divers = {
 			isDonnor = true,
 		},
 		flyingAlone = true,
+		vCruise = 250,
+		hCruise = 9150,
 	},	
 	["B-52H"] = 	{
 		instrumentUnits = "imperial",
@@ -482,6 +516,8 @@ data_divers = {
 			isDonnor = true,
 		},
 		flyingAlone = true,
+		vCruise = 250,
+		hCruise = 12000,
 	},	
 	["H-6J"] = 	{
 		instrumentUnits = "metric",
@@ -492,6 +528,8 @@ data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
+		vCruise = 240,
+		hCruise = 7500,
 	},	
 	["MB-339A"] = {
 		instrumentUnits = "imperial",
@@ -809,6 +847,8 @@ data_divers = {
 			type = "Link16",
 			isDonnor = true,
 		},
+		vCruise = 230,
+		hCruise = 9150,
 	},	
 	["E-2C"] = {
 		instrumentUnits = "imperial",
@@ -817,10 +857,14 @@ data_divers = {
 			type = "Link16",
 			isDonnor = true,
 		},
+		vCruise = 145,
+		hCruise = 7600,
 	},	
 	["A-50"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
+		vCruise = 205,
+		hCruise = 9150,
 	},	
 
 	["S-3B Tanker"] = {
@@ -884,6 +928,8 @@ data_divers = {
 	["C-130"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
+		vCruise = 140,
+		hCruise = 7620,
 	},	
 	["Hercules"] = {			--Mod
 		instrumentUnits = "imperial",
@@ -902,6 +948,8 @@ data_divers = {
 	["An-26B"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
+		vCruise = 123,
+		hCruise = 7500,
 	},	
 	["IL-76MD"] = {
 		instrumentUnits = "russian",

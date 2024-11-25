@@ -69,7 +69,7 @@ local function checkBug(name, origine, category)
 end 
 
 local function checkBug2(txt)
-	-- if Debug.AfficheSol and firstmission_flag then
+	-- if Debug.AfficheSol and Firstmission_flag then
 	if Debug.AfficheSol then
 		print("DC_UT checkBug2 "..txt)
 	end
@@ -77,7 +77,7 @@ end
 
 local function checkBug3(txt)
 	if Debug.checkTargetName  and DC_UpdateTargetlist_counter > 1 then
-		-- table.insert(bugList, "DC_UT checkBug3 "..txt)
+		-- table.insert(BugList, "DC_UT checkBug3 "..txt)
 		insertBugList("DC_UT checkBug3 :"..txt)
 	end
 end 
@@ -232,7 +232,7 @@ end
 
 
 local function findInTemplates(name, side, classT, debugDCUT)
-	if not (Debug.checkTargetName and (firstmission_flag or skipmission_flag)) then return true end
+	if not (Debug.checkTargetName and (Firstmission_flag or Skipmission_flag)) then return true end
 	
 	if  type(tabTemplates) == "table" then		--Debug.checkTargetName2Space  and 
 		for i = 1 , #tabTemplates do
@@ -309,13 +309,13 @@ local function checkRequiredModules()
 end
 
 
--- print("DcUpdateTargetlist Initialisation acceptedMission? "..tostring(acceptedMission))
+-- print("DcUpdateTargetlist Initialisation AcceptedMission? "..tostring(AcceptedMission))
 -- os.execute 'pause'
 
 
 checkRequiredModules()
 
-if Debug.checkTargetName and (firstmission_flag or skipmission_flag) then
+if Debug.checkTargetName and (Firstmission_flag or Skipmission_flag) then
 	tabTemplates = TabFileTemplate()
 end
 

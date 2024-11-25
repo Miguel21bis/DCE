@@ -18,7 +18,7 @@ versionDCE["ATO_PlayerAssign.lua"] = "1.9.72"
 
 local debugAssign = false
 
-if debugAssignAll then 
+if DebugAssignAll then 
 	debugAssign = true
 end
 
@@ -431,7 +431,7 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 				print("s - skip mission")
 				tabIndex["s"] = true
 				tabIndex["S"] = true
-				if badEntry then print("\n\WARNING, your previous choice was wrong. Do it again: ") end
+				if badEntry then print("\n\\WARNING, your previous choice was wrong. Do it again: ") end
 				print("Please select your flight (1-"..(#playable).."): ")
 
 				r = io.stdin:read()

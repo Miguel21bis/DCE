@@ -254,7 +254,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			type = unit.type,
 			class = "SAM",
 			level = 5,
-			SEAD_offset = 1,
+			SEAD_offset = 2,
 			x = unit.x,
 			y = unit.y,
 			range = 10000,

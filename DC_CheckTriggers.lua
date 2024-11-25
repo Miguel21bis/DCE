@@ -29,7 +29,7 @@ versionDCE["DC_CheckTriggers.lua"] = "1.16.93"
 
 local debugKT = false
 
-if not TaskRefused and not camp.waitingNextGen and not (EndCampaign or camp.endCampaign ) and not firstmission_flag   then
+if not TaskRefused and not camp.waitingNextGen and not (EndCampaign or camp.endCampaign ) and not Firstmission_flag   then
 	BriefingImagesB = {}                                         --reset stockImage
 	BriefingImagesR = {}                                         --reset stockImage
 end

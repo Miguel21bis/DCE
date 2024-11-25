@@ -5,7 +5,7 @@
 if not versionDCE then versionDCE = {} end
 versionDCE["BAT_FirstMission.lua"] = "1.13.97"
 -------------------------------------------------------------------------------------------------------
--- adjustment_o				(o full targetList)(n targetList numeric)(m BAT)(l playable_m from data_divers)(k bugList)(j pairsByKeys)(i global TabTask)(h firstmission_flag)(g mise a niveau)(d: use io.stdin:read)(c: fire playable_m from conf_mod)(b: robust form)
+-- adjustment_o				(o full targetList)(n targetList numeric)(m BAT)(l playable_m from data_divers)(k BugList)(j pairsByKeys)(i global TabTask)(h Firstmission_flag)(g mise a niveau)(d: use io.stdin:read)(c: fire playable_m from conf_mod)(b: robust form)
 -- cleancode_c
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M61_c		SAR (c DEV creation fichier cercle commande: w3)
@@ -21,8 +21,9 @@ versionDCE["BAT_FirstMission.lua"] = "1.13.97"
 -------------------------------------------------------------------------------------------------------
 
 
-bugList = {}
-firstmission_flag = true	
+BugList = {}
+Firstmission_flag = true	
+DebuGenTxt = ""					--debug cumulutatif de ATO_Generator
 
 local function AcceptMission()
 	repeat

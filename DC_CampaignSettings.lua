@@ -267,7 +267,7 @@ for RFname, RFtrig in pairs(camp_triggers) do
 		end
 
 		sourceName = sourceName:gsub( "\"", "")
-		sourceName = sourceName:gsub( "\(", "")
+		sourceName = sourceName:gsub( "\\(", "")
 		destName = destName:gsub( "\"", "")
 
 

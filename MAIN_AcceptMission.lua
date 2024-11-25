@@ -115,7 +115,7 @@ require("Active/camp_triggers")
 
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Refpoints.lua")			--besoin par NavalEnv
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_MissionScore.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Time.lua")				--need if acceptedMission
+dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Time.lua")				--need if AcceptedMission
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_MoonPhase.lua")
 -- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_DestroyTarget.lua")			-- Mod26
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_NavalEnvironment.lua")		--besoin par CheckTrigger pour bouger les navires

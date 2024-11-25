@@ -7,7 +7,7 @@ versionDCE["MAIN_NextMission.lua"] = "1.35.211"
 ------------------------------------------------------------------------------------------------------- 
 -- debug_l 					(l endCampaign)(ik error beacon file)(h mission.maxDictId)(g help campaignMaker)(f autolase)(e camp_ZoneSAR in skipmod)(d: oob_ground not in mission)(c: EndMission)
 -- Reglage_e				(e EPLRS_Capacity)(d CVN to CV)(c stop si < 2.7.0 (ver18))(a: Init/loadout selection)
--- adjustment_g				(g keep original triggers( a_remove_scene_objects ))(e oob_scen ==0)(d currentKey)(c clean conf_mod)(b firstmission_flag)(a: add Loadout tiers)
+-- adjustment_g				(g keep original triggers( a_remove_scene_objects ))(e oob_scen ==0)(d currentKey)(c clean conf_mod)(b Firstmission_flag)(a: add Loadout tiers)
 -- cleanCode_f
 -- modification M77_k		CG_ArtySpotter (k listSpotterAircraft)(c camp.spotter)(b tempo)
 -- modification M71_b		payloadRestricted  (b Action.RestrictedLoadout(file))
@@ -275,9 +275,9 @@ local function AddFileTrigger(filename, cond0, predicate1, predicate2)
 	mission.trig.conditions[trig_n] = cond																			--"return(true)"
 	--						[1] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_6\"));",
 	if predicate2 == "a_out_sound_c" then
-		mission.trig.actions[trig_n] = "a_out_sound_c("..idCountry..", getValueResourceByKey(\"ResKey_Action_" .. mission.maxDictId .. "\"), 0);"
+		mission.trig.actions[trig_n] = 'a_out_sound_c("..idCountry..", getValueResourceByKey(\"ResKey_Action_" .. mission.maxDictId .. "\"), 0);'
 	else
-		mission.trig.actions[trig_n] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_" .. mission.maxDictId .. "\"));"
+		mission.trig.actions[trig_n] = 'a_do_script_file(getValueResourceByKey(\"ResKey_Action_" .. mission.maxDictId .. "\"));'
 	end
 
 	mission.trigrules[trig_n] = {
@@ -411,11 +411,11 @@ if 	not mission_ini  or mission_ini == nil  then
 	dofile("Init/conf_mod.lua")	
 end
 
-if firstmission_flag  or skipmission_flag then
+if Firstmission_flag  or Skipmission_flag then
 	local needUpdate = CheckConfModMaster()													-- modification M38.d Check and Help CampaignMaker
 	if needUpdate > 0 then																	-- modification M53_a	automatic update of the conf_mod file	
 		UpdateConfMod()
-		if firstmission_flag then
+		if Firstmission_flag then
 			modifiCampInit()
 		end
 	end
@@ -478,7 +478,7 @@ end
 -- modification M35.d (d: info log) version ScriptsMod
 camp["versionPackageICM"] = versionPackageICM
 
-if firstmission_flag then 
+if Firstmission_flag then 
 	camp["MissionFilename"] =  camp.title.."_first.miz"	
 else
 	camp["MissionFilename"] =  camp.title.."_ongoing.miz"	
@@ -540,10 +540,10 @@ end
 
 
 -- modification M49.c big central db_loadout (c: loadout statistics)
-local loadoutFile01 = "../../../Missions/Campaigns/"..camp.title.."/Active/loadouts_archive.lua"
+local loadoutFile01 = "../../../Missions/Campaigns/"..camp.title.."/Active/Loadouts_archive.lua"
 local TestPathloadout = io.open(loadoutFile01, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
-if TestPathloadout == nil or firstmission_flag then																	--check si le fichier existe dans ScriptsMod
-	local loadout_str = "loadouts_archive = " .. TableSerialization(db_loadouts, 0)						--make a string
+if TestPathloadout == nil or Firstmission_flag then																	--check si le fichier existe dans ScriptsMod
+	local loadout_str = "Loadouts_archive = " .. TableSerialization(db_loadouts, 0)						--make a string
 	local loadoutFile = io.open(loadoutFile01, "w")															--open targetlist file
 	
 	if not loadoutFile or loadoutFile == nil then
@@ -590,7 +590,7 @@ if TestPathADD_addData ~= nil  then														--check si le fichier existe da
 
 end
 
--- if not UTIL_KillTarget and (skipmission_flag or firstmission_flag)  then
+-- if not UTIL_KillTarget and (Skipmission_flag or Firstmission_flag)  then
 	require("Active/oob_air")
 	require("Active/oob_ground")
 	require("Init/conf_mod")
@@ -680,17 +680,17 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Briefing.lua")
 
 
 --supprime l'ancien fichier
---recherche Debug/bugList.lua
-local testFile = "Debug/bugList.lua"
+--recherche Debug/BugList.lua
+local testFile = "Debug/BugList.lua"
 local TestPath = io.open(testFile, "r")										--cette maniere de chercer la presence d un fichier evite un plantage
 if TestPath ~= nil then														--check si le fichier existe 
 	io.close(TestPath)
-	os.remove("Debug/bugList.lua")
+	os.remove("Debug/BugList.lua")
 end	
 
-if bugList and type(bugList) == "table" and #bugList >= 1 then
-	local table_Str = "bugList = " .. TableSerialization(bugList, 0)
-	local bugFile = io.open("Debug/bugList.lua", "w")
+if BugList and type(BugList) == "table" and #BugList >= 1 then
+	local table_Str = "BugList = " .. TableSerialization(BugList, 0)
+	local bugFile = io.open("Debug/BugList.lua", "w")
 	bugFile:write(table_Str)
 	bugFile:close()
 end
@@ -1047,7 +1047,7 @@ if camp.waitingNextGen then
 	camp.waitingNextGen = false
 end
 --permet d'avancer l'horaire entre 2 missions
-if skipmission_flag then
+if Skipmission_flag then
 	if camp.waitingNextGen then
 		camp.waitingNextGen = false
 	end
@@ -1121,10 +1121,10 @@ cmpFile:close()
 local NbMission  = camp.mission
 
 if mission_ini.backupAllMissionFiles and mission_ini.backupAllMissionFiles == true then
-	if not firstmission_flag then
+	if not Firstmission_flag then
 		NbMission = tostring(camp.mission - 1)
 		--en skipMission, la mission n'a pas �t� jou�e, donc c'est la suivante
-		if skipmission_flag then
+		if Skipmission_flag then
 			NbMission = NbMission + 1 
 		end
 	end
@@ -1138,14 +1138,14 @@ else
 	NbMission = "__Old"
 end
 
-if firstmission_flag then																--is true if script is launched from GenerateFirstMission.lua
+if Firstmission_flag then																--is true if script is launched from GenerateFirstMission.lua
 	if not (mission_ini.backupAllMissionFiles and mission_ini.backupAllMissionFiles == true) then		
 		os.remove("../"..camp.title.."/Debriefing/"..camp.title.."_first"..NbMission..".miz")
 	end	
 	os.rename("../"..camp.title.."_first.miz", "../"..camp.title.."/Debriefing/"..camp.title.."_first"..NbMission..".miz")
 	miz = minizip.zipCreate("../" .. camp.title .. "_first.miz")					--create the first campaign mission
 else																				--is false if script is launched from Debrief_Master.lua
-	if skipmission_flag then
+	if Skipmission_flag then
 		os.remove( "../"..camp.title.."/Debriefing/"..camp.title.."_ongoing"..NbMission..".miz")
 	end	
 	res = os.rename("../"..camp.title.."_ongoing.miz", "../"..camp.title.."/Debriefing/"..camp.title.."_ongoing"..NbMission..".miz")
@@ -1275,8 +1275,8 @@ missFile:close()
 
 
 if not (EndCampaign or camp.endCampaign) then 
-	local loadout_str = "loadouts_archive = " .. TableSerialization(loadouts_archive, 0)	--make a string
-	local loadoutFile = io.open("Active/loadouts_archive.lua", "w")							--open targetlist file
+	local loadout_str = "Loadouts_archive = " .. TableSerialization(Loadouts_archive, 0)	--make a string
+	local loadoutFile = io.open("Active/Loadouts_archive.lua", "w")							--open targetlist file
 	loadoutFile:write(loadout_str)																--save new data
 	loadoutFile:close()	
 end

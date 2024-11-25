@@ -15,7 +15,7 @@ versionDCE["DEBRIEF_StatsEvaluation.lua"] = "1.8.64"
 -- modification M11A_be			Multiplayer	(be camp.client)(y: force same package)
 ------------------------------------------------------------------------------------------------------- 
 
-if not acceptedMission or acceptedMission == nil then
+if not AcceptedMission or AcceptedMission == nil then
 	oob_air = deepcopy(oob_air)
 	oob_ground = deepcopy(oob_ground)
 	targetlist = deepcopy(targetlist)
@@ -68,7 +68,7 @@ require("Active/last_Mission")
 
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateSAR.lua")
 
--- print("DebriefStatsEvaluation Initialisation acceptedMission? "..tostring(acceptedMission))
+-- print("DebriefStatsEvaluation Initialisation AcceptedMission? "..tostring(AcceptedMission))
 -- os.execute 'pause'
 
 --reset air oob last mission stats

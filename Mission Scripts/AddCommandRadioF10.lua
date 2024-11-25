@@ -2707,13 +2707,15 @@ function addFuncs(gid, Group)
 		 -- commandDB['speed'] = missionCommands.addCommandForGroup(gid,"Testing", nil, Test, Group)
 		 -- commandDB['RTB'] = missionCommands.addCommandForGroup(gid,"Package_RTB", nil, RtbPack, Group)
 
-		local TimeSearchEngage = timer.getTime()
-		local logStr = "radioCommands = " .. TableSerialization(radioCommands, 0)
-		local FlightNameClean = "radioCommands"
-		local logFile = io.open(path.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_radioCommands.lua", "w")
-		logFile:write(logStr)
-		logFile:close()		
-
+		 if camp.debug then
+			local TimeSearchEngage = timer.getTime()
+			local logStr = "radioCommands = " .. TableSerialization(radioCommands, 0)
+			local FlightNameClean = "radioCommands"
+			local logFile = io.open(path.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_radioCommands.lua", "w")
+			logFile:write(logStr)
+			logFile:close()		
+		 end
+		 
 		 env.info("DCE_addFuncs PASSE   _D  ")	
 
 	end

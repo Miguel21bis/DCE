@@ -11,7 +11,7 @@ versionDCE["DC_MissionScore.lua"] = "1.1.2"
 --define the mission score
 do
 	local mscore
-	if firstmission_flag then									--the mission is the first campaign mission
+	if Firstmission_flag then									--the mission is the first campaign mission
 		mscore = 51											--mission is scored 51 (proceed to next campaign stage)
 	else													--not first campaign mission
 		mscore = 50											--mission is scored 50 (stay in campaign stage)

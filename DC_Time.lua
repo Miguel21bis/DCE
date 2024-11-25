@@ -7,7 +7,7 @@ if not versionDCE then versionDCE = {} end
 versionDCE["DC_Time.lua"] = "1.4.14"
 ------------------------------------------------------------------------------------------------------- 
 -- Debug_e 					(e aliasYear)(d advances 2 times)(c hourlyTolerance work)(b: bug idle_time fin de mission)(a n'avance pas le temps entre accept mission et next)
--- adjustment_f				(f hoursFrom)(d: CampTotalTimeS)((c_skipmission_flag)b diminue time entre tentative pour avoir le levé de soleil)(a CampTotalTimeS)
+-- adjustment_f				(f hoursFrom)(d: CampTotalTimeS)((c_Skipmission_flag)b diminue time entre tentative pour avoir le levï¿½ de soleil)(a CampTotalTimeS)
 -- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
 -- modification M25_b 		onlyDayMission.
 ------------------------------------------------------------------------------------------------------- 
@@ -18,13 +18,13 @@ if camp.day == nil then																			--if counter does not exist yet
 end
 
 
-if not 	acceptedMission  then
+if not 	AcceptedMission  then
 
 	--on n'avance pas le temps entre une mission accept et une suivante
 	local idle_time = 0
 
-	-- if not camp.waitingNextGen and not firstmission_flag or (MissionInstance and MissionInstance > 1) then																	--waitingNextGen: evite d'avancer 2 fois le temps si le joueur decide d'accepter la mission, mais d'en relancer une plus tard
-	if not firstmission_flag or (MissionInstance and MissionInstance > 1) then																	--waitingNextGen: evite d'avancer 2 fois le temps si le joueur decide d'accepter la mission, mais d'en relancer une plus tard
+	-- if not camp.waitingNextGen and not Firstmission_flag or (MissionInstance and MissionInstance > 1) then																	--waitingNextGen: evite d'avancer 2 fois le temps si le joueur decide d'accepter la mission, mais d'en relancer une plus tard
+	if not Firstmission_flag or (MissionInstance and MissionInstance > 1) then																	--waitingNextGen: evite d'avancer 2 fois le temps si le joueur decide d'accepter la mission, mais d'en relancer une plus tard
 		-- print("DcT       A2 ")
 		idle_time = math.random(mission_ini.idle_time_min, mission_ini.idle_time_max)								--random idle time to next mission in seconds, depending on min-max defined for campaign
 		camp.time = camp.time + idle_time															--add idle time to campaign time
@@ -117,7 +117,7 @@ if not 	acceptedMission  then
 	mission["date"]["Month"] = camp.date.month														--set mission month
 
 
-	if (skipmission_flag or firstmission_flag or (MissionInstance and MissionInstance > 1)) and not camp.waitingNextGen then
+	if (Skipmission_flag or Firstmission_flag or (MissionInstance and MissionInstance > 1)) and not camp.waitingNextGen then
 		if idle_time > 86400 then
 
 			print(disp_time(idle_time) 
@@ -139,7 +139,7 @@ if not 	acceptedMission  then
 	local targetTime =  camp.time + mission_ini.startup_time_player + 3600
 
 	--dawn == aube
-	--dusk == crépuscule
+	--dusk == crï¿½puscule
 	if targetTime >= mission_ini.dawn and targetTime <= mission_ini.dusk then										--current time is between dawn and dusk
 		if targetTime + mission_ini.mission_duration <= mission_ini.dusk then										--mission duration ends before dusk
 			daytime = "day"
@@ -162,7 +162,7 @@ if not 	acceptedMission  then
 		end
 	end
 
-else	--si la mission est acceptée, on prend juste les infos sans ajouter de temps
+else	--si la mission est acceptï¿½e, on prend juste les infos sans ajouter de temps
 	-- print("DcT    M1 ")
 
 	camp.time = camp.time + mission_ini.mission_duration
@@ -177,7 +177,7 @@ else	--si la mission est acceptée, on prend juste les infos sans ajouter de temp
 		aliasYear = 1970
 	end
 
-	-- --dans le cas ou la date est changé manuellement
+	-- --dans le cas ou la date est changï¿½ manuellement
 	-- if camp.date.day >= 32 and (camp.date.month == 1 or camp.date.month == 3 or camp.date.month == 5 or camp.date.month == 7 or camp.date.month == 8 or camp.date.month == 10 or camp.date.month == 12) then	--month change for large months
 	-- 	camp.date.day = 1																		--first day of next month
 	-- 	camp.date.month = camp.date.month + 1	

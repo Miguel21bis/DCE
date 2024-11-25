@@ -90,13 +90,13 @@ function createPolyAltiHelico(unitHelico, hHover)
 		end
 	end
 
-	if not altiHelicoMap[unitHelico] then altiHelicoMap[unitHelico] = {} end
-	if not altiHelicoMap[unitHelico][hHover] then altiHelicoMap[unitHelico][hHover] = {} end
+	if not AltiHelicoMap[unitHelico] then AltiHelicoMap[unitHelico] = {} end
+	if not AltiHelicoMap[unitHelico][hHover] then AltiHelicoMap[unitHelico][hHover] = {} end
 
-	altiHelicoMap[unitHelico][hHover] = tempAlti
+	AltiHelicoMap[unitHelico][hHover] = tempAlti
 
-	-- local camp_str = "altiHelicoMap = " .. TableSerialization(altiHelicoMap[unitHelico], 0)						--make a string
-	-- local campFile = io.open("Debug/altiHelicoMap_AtoGenerator_"..unitHelico..".lua", "w")										--open targetlist file
+	-- local camp_str = "AltiHelicoMap = " .. TableSerialization(AltiHelicoMap[unitHelico], 0)						--make a string
+	-- local campFile = io.open("Debug/AltiHelicoMap_AtoGenerator_"..unitHelico..".lua", "w")										--open targetlist file
 	-- campFile:write(camp_str)																		--save new data
 	-- campFile:close()
 
@@ -114,7 +114,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 		is_helicopter = true
 	end
 	
-	if not altiHelicoMap[unit.type] then 
+	if not AltiHelicoMap[unit.type] then 
 		if is_helicopter then
 			if isHelicopter[unit.type] and isHelicopter[unit.type]["hHover"] then
 				createPolyAltiHelico(unit.type, isHelicopter[unit.type].hHover)
@@ -325,7 +325,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			local tooHighReliefB = false
 			-- if unit.helicopter then
 			if is_helicopter then
-				for Npoly, poly in ipairs(altiHelicoMap) do
+				for Npoly, poly in ipairs(AltiHelicoMap) do
 					for n = 1 , #poly - 1 do
 						freeRouteX, freeRouteY = findIntersect(point1, point2, poly[n], poly[n+1])
 						if freeRouteX then 
@@ -405,7 +405,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 					
 					local tooHighReliefC = false
 					if is_helicopter then
-						for Npoly, poly in ipairs(altiHelicoMap) do		
+						for Npoly, poly in ipairs(AltiHelicoMap) do		
 							for n = 1 , #poly - 1 do
 								local freeRouteC = findIntersect(point1, point2alt, poly[n], poly[n+1])
 								if freeRouteC then 
@@ -462,7 +462,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 						local testX, testY = false, false
 						local tooHighReliefC2 = false
 						if is_helicopter then
-							for Npoly, poly in ipairs(altiHelicoMap) do		
+							for Npoly, poly in ipairs(AltiHelicoMap) do		
 								for n = 1 , #poly - 1 do
 									testX, testY = findIntersect(point1, point2alt, poly[n], poly[n+1])
 									if testX then 
@@ -649,7 +649,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 
 							local tooHighReliefD = false
 							if is_helicopter then
-								for Npoly, poly in ipairs(altiHelicoMap) do
+								for Npoly, poly in ipairs(AltiHelicoMap) do
 									for n = 1 , #poly - 1 do
 										local freeRoute = findIntersect(target, draft_IP, poly[n], poly[n+1])					
 										if freeRoute then 

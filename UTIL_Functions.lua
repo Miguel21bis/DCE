@@ -723,6 +723,7 @@ function GenerateIDUnit(name)
 		os.execute 'pause'
 	end
 	allIdUnit[idUnitCounter] = true
+	UnitByName[name] = idUnitCounter
 
 	return idUnitCounter
 end
@@ -1549,7 +1550,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 					return 0
 				end	
 			elseif range == "UHF"  then	
-				if camp.radioB[side] and camp.radioB[side][range]   then		--Cherche d'abord une frequence UHF commune	--and commonFreq[side]  == 0
+				if camp.radioB[side] and camp.radioB[side][range]   then		--Cherche d'abord une frequence UHF commune	--and CommonFreq[side]  == 0
 					freq = 0
 					repeat
 						freq = math.random(camp.radioB[side][range].min, camp.radioB[side][range].max - 1)		--find random frequency in mHz
@@ -1566,7 +1567,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 					return 0
 				end	
 			elseif range == "VHF"  then	
-				if camp.radioB[side] and camp.radioB[side][range]   then		--Cherche d'abord une frequence UHF commune	--and commonFreq[side]  == 0
+				if camp.radioB[side] and camp.radioB[side][range]   then		--Cherche d'abord une frequence UHF commune	--and CommonFreq[side]  == 0
 					freq = 0
 					repeat
 						freq = math.random(camp.radioB[side][range].min, camp.radioB[side][range].max - 1)		--find random frequency in mHz
@@ -3009,18 +3010,18 @@ function AssignCallnameSquad()
 end
 
 function insertBugList(txt)
-	if not bugList then bugList = {} end
+	if not BugList then BugList = {} end
 
-	if #bugList >=1 then
-		for n=1, #bugList do
-			if bugList[n] == txt then
+	if #BugList >=1 then
+		for n=1, #BugList do
+			if BugList[n] == txt then
 				-- le bug est déjà enregistré, inutile de l'ajouter
 				return
 			end
 		end
 	end
 
-	table.insert(bugList,txt)
+	table.insert(BugList,txt)
 
 end
 

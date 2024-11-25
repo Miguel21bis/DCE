@@ -1566,50 +1566,50 @@ db_all_loadouts = {
 				sortie_rate = 12,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{AGM_45A}",
-					["num"] = 8,
-					["settings"] = {
-						["EAS_bypass_ctrl"] = 1,
-						["NFP_rfgu_type"] = 1,
-						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
-						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
-					},
-				},
-				[2] = {
-					["CLSID"] = "{AGM_45A}",
-					["num"] = 4,
-					["settings"] = {
-						["EAS_bypass_ctrl"] = 1,
-						["NFP_rfgu_type"] = 1,
-						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
-						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
-					},
-				},
-				[3] = {
-					["CLSID"] = "{AGM_45A}",
-					["num"] = 7,
-					["settings"] = {
-						["EAS_bypass_ctrl"] = 1,
-						["NFP_rfgu_type"] = 1,
-						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
-						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
-					},
-				},
-				[4] = {
-					["CLSID"] = "{AGM_45A}",
-					["num"] = 5,
-					["settings"] = {
-						["EAS_bypass_ctrl"] = 1,
-						["NFP_rfgu_type"] = 1,
-						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
-						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
-					},
-				},
-				[5] = {
-					["CLSID"] = "{VSN_F105G_Center_PTB}",
-					["num"] = 6,
-				},
+						[1] = {
+							["CLSID"] = "{AGM_45A}",
+							["num"] = 8,
+							["settings"] = {
+								["EAS_bypass_ctrl"] = 1,
+								["NFP_rfgu_type"] = 1,
+								["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
+								["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
+							},
+						},
+						[2] = {
+							["CLSID"] = "{AGM_45A}",
+							["num"] = 4,
+							["settings"] = {
+								["EAS_bypass_ctrl"] = 1,
+								["NFP_rfgu_type"] = 1,
+								["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
+								["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
+							},
+						},
+						[3] = {
+							["CLSID"] = "{AGM_45A}",
+							["num"] = 7,
+							["settings"] = {
+								["EAS_bypass_ctrl"] = 1,
+								["NFP_rfgu_type"] = 1,
+								["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
+								["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
+							},
+						},
+						[4] = {
+							["CLSID"] = "{AGM_45A}",
+							["num"] = 5,
+							["settings"] = {
+								["EAS_bypass_ctrl"] = 1,
+								["NFP_rfgu_type"] = 1,
+								["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
+								["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
+							},
+						},
+						[5] = {
+							["CLSID"] = "{VSN_F105G_Center_PTB}",
+							["num"] = 6,
+						},
 					},
 					fuel = 4986,
 					flare = 15,
@@ -1632,8 +1632,8 @@ db_all_loadouts = {
 				firepower = 1,
 				sortie_rate = 6,
 				stores = {
-				["pylons"] = {
-			},
+					["pylons"] = {
+					},
 					fuel = 1172,
 					flare = 0,
 					chaff = 0,
@@ -1660,7 +1660,6 @@ db_all_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					["pylons"] = {
-			},
 					},
 					fuel = 1172,
 					flare = 0,
@@ -1668,6 +1667,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
+		},
 	},
 	["vwv_mig17f"] = {
 		Strike = {

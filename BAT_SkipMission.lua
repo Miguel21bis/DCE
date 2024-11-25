@@ -5,7 +5,7 @@
 if not versionDCE then versionDCE = {} end
 versionDCE["BAT_SkipMission.lua"] = "1.14.96"
 -------------------------------------------------------------------------------------------------------
--- adjustment_n				(n targetList numeric)(m BAT)(l playable_m from data_divers)(k bugList)(j pairsByKeys)(i global TabTask)(h skipmission_flag)(g mise a niveau)(e: use io.stdin:read)(c: fire playable_m from conf_mod)(b: robust form) 
+-- adjustment_n				(n targetList numeric)(m BAT)(l playable_m from data_divers)(k BugList)(j pairsByKeys)(i global TabTask)(h Skipmission_flag)(g mise a niveau)(e: use io.stdin:read)(c: fire playable_m from conf_mod)(b: robust form) 
 -- debug_d					(cd: EndMission)
 -- cleancode_c
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
@@ -21,8 +21,9 @@ versionDCE["BAT_SkipMission.lua"] = "1.14.96"
 -- modification M11A_b_l	Multiplayer (bl MP overRide)(g %target alive)(y: force same package)(x: only active Target)(t:display name )(s: T choice bug)(r: targets already destroyed)(q: displays all tasks of several squadrons)
 -------------------------------------------------------------------------------------------------------
 
-bugList = {}
-skipmission_flag = true
+BugList = {}
+Skipmission_flag = true
+DebuGenTxt = ""					--debug cumulutatif de ATO_Generator
 
 local function AcceptMission()
 	repeat

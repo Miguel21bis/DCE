@@ -1555,9 +1555,9 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					--***************************************************************************
 					--COMMON_freq****************************************************************
 					if mission_ini.MP_PlaneRecovery and Multi.NbGroup >= 1  then
-						if commonFreq[sideName]["UHF"][1] ~= 0 then
-							for cf = 1 , #commonFreq[sideName]["UHF"] do						
-								local freqA = tonumber(commonFreq[sideName]["UHF"][cf])
+						if CommonFreq[sideName]["UHF"][1] ~= 0 then
+							for cf = 1 , #CommonFreq[sideName]["UHF"] do						
+								local freqA = tonumber(CommonFreq[sideName]["UHF"][cf])
 								local call = ""
 								local lib = ""
 								if cf == 1 then lib = "A" else lib = "B" end
@@ -1590,9 +1590,9 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 						--***************************************************************************
 						--COMMON_VHF_freq
-						if commonFreq[sideName]["VHF"][1] ~= 0 then
-							for cf = 1 , #commonFreq[sideName]["VHF"] do						
-								local freqA = tonumber(commonFreq[sideName]["VHF"][cf])
+						if CommonFreq[sideName]["VHF"][1] ~= 0 then
+							for cf = 1 , #CommonFreq[sideName]["VHF"] do						
+								local freqA = tonumber(CommonFreq[sideName]["VHF"][cf])
 								local call = ""
 								local lib = ""
 								if cf == 1 then lib = "C" else lib = "D" end
@@ -1621,9 +1621,9 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 						--***************************************************************************
 						--COMMON_HF_freq
-						if commonFreq[sideName]["HF"][1] ~= 0 then			
-							for cf = 1 , #commonFreq[sideName]["VHF"] do
-								local freqA = tonumber(commonFreq[sideName]["HF"][cf])
+						if CommonFreq[sideName]["HF"][1] ~= 0 then			
+							for cf = 1 , #CommonFreq[sideName]["VHF"] do
+								local freqA = tonumber(CommonFreq[sideName]["HF"][cf])
 								local call = ""
 								local lib = ""
 								if cf == 1 then lib = "G" else lib = "H" end
@@ -1652,9 +1652,9 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 						
 						--***************************************************************************
 						--COMMON_LVHF_freq
-						if commonFreq[sideName]["LVHF"][1] ~= 0 then
-							for cf = 1 , #commonFreq[sideName]["LVHF"] do
-								local freqA = tonumber(commonFreq[sideName]["LVHF"][cf])
+						if CommonFreq[sideName]["LVHF"][1] ~= 0 then
+							for cf = 1 , #CommonFreq[sideName]["LVHF"] do
+								local freqA = tonumber(CommonFreq[sideName]["LVHF"][cf])
 								local call = ""
 								local lib = ""
 								if cf == 1 then lib = "E" else lib = "F" end

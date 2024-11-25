@@ -60,31 +60,27 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.281"
 
 
 
-
+DebugFLIGHT = ""
+TabLPark	= {}
+TargetList_InThisMission = {}			-- garde en mémoire les targets pour eviter de les pruner plus tard
+UnitByName = {}							-- table de tous les unitId généré, utile pour placer le TACAN sur l'unitId qui est demandé avant la génération du l'unité
 
 local debugStart = true					--NE PAS CHANGER, les infos restent seulement dans le fichier debugGenMission
 local debugTxt_AtoFP = ""
-debugFLIGHT = ""
 local tabCallSignFligt = {}
-
 local tabDivert = {}					-- modification M33.c 	Custom Briefing (onBoardNum)	
-TabLPark	= {}
 local PlayerTask = ""		
 local tempBaseAirStart = {}
 local tempDeckPlace = {}
-testDeckPlace = {}
+local testDeckPlace = {}
 local altRole = 0
+local mn_StartParking = 5 				--[en minute] 5 mn de temps de presence sur parking
+local ParkSarAirBase = {}				--reprend la table db_airbases[basename].parkAlertSAR
+
 
 if not camp.SAR then camp.SAR = {} end
 camp.SAR.helicopter = {} 
 
-local ParkSarAirBase = {}				--reprend la table db_airbases[basename].parkAlertSAR
---.occupied = true
---.reservedAR = true
-
-targetList_InThisMission = {}			-- garde en mémoire les targets pour eviter de les pruner plus tard
-
-local mn_StartParking = 5 				--[en minute] 5 mn de temps de presence sur parking
 
 if Multi.NbGroup >= 1 then 
 
@@ -146,9 +142,9 @@ for option, value  in pairs(mission_forcedOptions) do								-- ajoute les optio
 end
 
 -- inheritedFrom
-local type_withData_player = playerSquad.type
-if data_divers and data_divers[playerSquad.type] and data_divers[playerSquad.type].inheritedFrom then
-	type_withData_player = data_divers[playerSquad.type].inheritedFrom
+local type_withData_player = PlayerSquad.type
+if data_divers and data_divers[PlayerSquad.type] and data_divers[PlayerSquad.type].inheritedFrom then
+	type_withData_player = data_divers[PlayerSquad.type].inheritedFrom
 end
 
 
@@ -235,7 +231,7 @@ tanker = math.random(1, #callsign_west.tanker),
 local callsign_east_counter = 0
 
 
-commonFreq = {
+CommonFreq = {
 	blue = {
 		UHF = {
 			[1] = 0,
@@ -294,21 +290,22 @@ commonFreq = {
 
 --DCS_Side = {"blue", "red", "neutrals"}
 --commun frequence M34_
-for n, side in pairs(DCS_Side) do
-	commonFreq[side]["UHF"][1] = GetFrequency(side, nil, "coalition", nil, "UHF")	
-	commonFreq[side]["UHF"][2] = GetFrequency(side, nil, "coalition", nil, "UHF")
+for sideName, side in pairs(DCS_Side) do
+	CommonFreq[side]["UHF"][1] = GetFrequency(side, nil, "coalition", nil, "UHF")	
+	CommonFreq[side]["UHF"][2] = GetFrequency(side, nil, "coalition", nil, "UHF")
 
-	commonFreq[side]["VHF"][1] = GetFrequency(side, nil, "coalition", nil, "VHF")	
-	commonFreq[side]["VHF"][2] = GetFrequency(side, nil, "coalition", nil, "VHF")
+	CommonFreq[side]["VHF"][1] = GetFrequency(side, nil, "coalition", nil, "VHF")	
+	CommonFreq[side]["VHF"][2] = GetFrequency(side, nil, "coalition", nil, "VHF")
 
-	commonFreq[side]["HF"][1] = GetFrequency(side, nil, "coalition", nil, "HF")	
-	commonFreq[side]["HF"][2] = GetFrequency(side, nil, "coalition", nil, "HF")
+	CommonFreq[side]["HF"][1] = GetFrequency(side, nil, "coalition", nil, "HF")	
+	CommonFreq[side]["HF"][2] = GetFrequency(side, nil, "coalition", nil, "HF")
 		
-	commonFreq[side]["LVHF"][1] = GetFrequency(side, nil, "coalition", nil, "LVHF")	
-	commonFreq[side]["LVHF"][2] = GetFrequency(side, nil, "coalition", nil, "LVHF")				
+	CommonFreq[side]["LVHF"][1] = GetFrequency(side, nil, "coalition", nil, "LVHF")	
+	CommonFreq[side]["LVHF"][2] = GetFrequency(side, nil, "coalition", nil, "LVHF")				
 
 	for n=1, 2 do
-		if tonumber(commonFreq[side]["UHF"][n]) == 243 or tonumber(commonFreq[side]["UHF"][n]) == 121.5 then
+		local testFreqency = tonumber(CommonFreq[side]["UHF"][n])
+		if tonumber(CommonFreq[side]["UHF"][n]) == 243 or tonumber(CommonFreq[side]["UHF"][n]) == 121.5 then
 			print("ATTENTION GUARD Frequence Commune "..tostring(testFreqency))
 			os.execute 'pause'
 		end
@@ -341,6 +338,11 @@ end
 
 local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 	local style
+	local callsign_flight = 0
+	local testCall = ""
+	local callsign_nb = 0
+	local _name = ""
+	local foundCsf = false
 
 	local westernCountry = isWesternCountry(country)
 
@@ -365,9 +367,9 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 		--M56_b
 		--si le callsign à déjà été défini par AssignCallnameSquad() ou oob_air_init
 		if flight_ and flight_["callsign"] and flight_["callsignId"]  then
-			
+
 			if aircraft_n == 1 then
-				local foundCsf = false
+				
 				local ii = 1
 				repeat 
 					callsign_flight = math.random(1, 9)
@@ -489,7 +491,8 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 	end
 
 	if callsign == nil then
-		print("AtoFP ERROR callsign == nil , style: "..tostring(style).." country: "..tostring(country) .." WestCallsign: "..tostring(WestCallsign[country]) )
+		-- print("AtoFP ERROR callsign == nil , style: "..tostring(style).." country: "..tostring(country) .." WestCallsign: "..tostring(WestCallsign[country]) )
+		print("AtoFP ERROR callsign == nil , style: "..tostring(style).." country: "..tostring(country)  )
 		os.execute 'pause'
 	end
 	return callsign
@@ -503,8 +506,9 @@ function GetSidenumber(squadron, lower, upper, nUnit, player, type)				--not loc
 	if sidenumbers[squadron] == nil then										--sidenumber squadron entry does not exist
 		sidenumbers[squadron] = {}												--create sidenumber squadron entry
 	end
-		
-	local s																		--new sidenumber
+	local upperNum = tonumber(upper)
+	local lowerNum = tonumber(lower)
+	local s 																		--new sidenumber
 	local counter = 0
 	
 	--cherche si le joueur fait partie de cet escadron
@@ -519,24 +523,26 @@ function GetSidenumber(squadron, lower, upper, nUnit, player, type)				--not loc
 	-- modification M42.b : liveryModex
 	local leaderCheck															--on s assure que le num 200 (par exemple) est donné au leader et pas un ailier
 	if player and nUnit == 1 then
-		s = tonumber(lower)
+		s = lowerNum
 	else
-		repeat
-			leaderCheck = true
-			counter = counter + 1
-			s = math.random(tonumber(lower)+reservedDigit, tonumber(upper))		--find random sidenumber
+		if lowerNum and upperNum then
+			repeat
+				leaderCheck = true
+				counter = counter + 1
+				s = math.random(lowerNum +reservedDigit, upperNum)		--find random sidenumber
 
-			if nUnit == 1 and tonumber(string.sub (s, -1)) ~= 0 and not sidenumbers[squadron][lower]  then	--on s assure que le num 200 (par exemple) est donné au leader et pas un ailier
-				leaderCheck = false
-			end
-			
-		until (sidenumbers[squadron][s] == nil and leaderCheck)	or counter == 100	--repeat until a sidenumber is found that is not yet in squadron use or stop after 100 tries
-		
+				if nUnit == 1 and tonumber(string.sub (s, -1)) ~= 0 and not sidenumbers[squadron][lower]  then	--on s assure que le num 200 (par exemple) est donné au leader et pas un ailier
+					leaderCheck = false
+				end
+				
+			until (sidenumbers[squadron][s] == nil and leaderCheck)	or counter == 100	--repeat until a sidenumber is found that is not yet in squadron use or stop after 100 tries
+		end
+
 		--le script n'a pas trouvé de serial non libre
 		if counter >= 100 then
 			
 			local totSerial = {}
-			for n=tonumber(lower), tonumber(upper) do								--creation de la table de tous les serial
+			for n= lowerNum, tonumber(upper) do								--creation de la table de tous les serial
 				totSerial[n] = false
 			end
 
@@ -557,19 +563,22 @@ function GetSidenumber(squadron, lower, upper, nUnit, player, type)				--not loc
 		end
 	
 	end
-	sidenumbers[squadron][s] = true													--mark sidenumber in use for squadron
 	
+	if s and s ~= nil then
+		sidenumbers[squadron][s] = true													--mark sidenumber in use for squadron
+	end
 	-- particularité du Harrier : donner 810 pour afficher 18
+	local s_str = tostring(s)
 	if type == "AV8BNA" then	
-		local Digit_1 = string.sub(s, -1, -1)		
-		local Digit_2 = string.sub(s, -2, -2)		
+		local Digit_1 = string.sub(s_str, -1, -1)		
+		local Digit_2 = string.sub(s_str, -2, -2)		
 		s = tonumber(Digit_1..Digit_2.."0")			
 		s = string.format("%03d", s)
 	else
-		local lNew = string.len(s)													--lenght of new sidenumber
+		local lNew = string.len(s_str)													--lenght of new sidenumber
 		local lOld = string.len(lower)												--lenght of given lower end of sidenumbers
 		for n = lNew, lOld - 1 do													--for each character that new sidenumber is smaller than given lower ranger
-			s = "0" .. s															--add a zero in front
+			s = "0" .. s_str															--add a zero in front
 		end
 	end
 	
@@ -674,7 +683,7 @@ local function Get_IDM_Id()
 		i=i+1
 		local digit1 = math.random(1,39)
 
-		testId = digit1
+		testId = tostring(digit1)
 		
 	until IDM_Id[testId] == nil 	or i >= 300	
 
@@ -706,7 +715,7 @@ end
 
 
 ---- function to assign A-A TACAN channels ----
-channel_tacan = {}																--table to store tanker TACAN channels
+local channel_tacan = {}																--table to store tanker TACAN channels
 -- https://forums.eagle.ru/showpost.php?p=3821502&postcount=139
 -- https://forums.eagle.ru/topic/199994-tacan-and-dl-last-update/
 -- 37-67  ??.?
@@ -716,15 +725,30 @@ for basename, base in pairs(db_airbases) do															--iterate through airb
 	if base.TACAN then
 		local tacanClean = base.TACAN
 		local channel = 0
+		local one, two
 		if string.find(base.TACAN, "/") then
 			one, two = tacanClean:match("([^,]+)/([^,]+)")
 			tacanClean = one:gsub( " ", "")			
 		elseif string.find(base.TACAN, "-") then
 			one, two = tacanClean:match("([^,]+)-([^,]+)")
 			tacanClean = one:gsub( " ", "")			
-		end				
-		channel = tonumber(string.sub(base.TACAN, 1, #tacanClean - 1))		
+		end			
+
+		local test = string.sub(base.TACAN, 1, #tacanClean - 1)
+		-- if test and test ~= nil then
+		-- 	channel = tonumber(test)		
+		-- 	channel_tacan[channel] = true			
+		-- end
+
+		-- local channel = 0
+		if test and test ~= nil then
+			local channel_num = tonumber(test)
+			if channel_num then
+				channel = channel_num
+			end
+		end
 		channel_tacan[channel] = true
+
 	end
 end
 
@@ -777,10 +801,11 @@ function fct_movedBullseye(side, NameTheatre)
 		end
 
 
-		local i = table.getn(tempArrayBulls)
+		-- local i = table.getn(tempArrayBulls)
+		local i = #tempArrayBulls
 		
 		if i >= 1 then
-			j = math.random(1, i)
+			local j = math.random(1, i)
 			tempBullseye.x = tempArrayBulls[j].x
 			tempBullseye.y = tempArrayBulls[j].y
 			tempBullseye.name = tempArrayBulls[j].name
@@ -1166,7 +1191,7 @@ function  createBombingChapter(id_task ,flight ,waypoints, weaponType, attackTyp
 	
 	local stopLoop = false
 	-- cherche xy des elements dans la table oob_ground s'ils n'existent pas dans la table targetlist
-	if (id_task == "AttackUnit" or id_task == "Bombing" or id_task == "AttackMapObject") and e ~= nil then
+	if (id_task == "AttackUnit" or id_task == "Bombing" or id_task == "AttackMapObject") and element ~= nil then
 		-- if not (flight.target.elements and flight.target.elements[e] and flight.target.elements[e].x) then
 		
 		-- if not (flight.target.elements) or not (flight.target.elements[e]) or not( flight.target.elements[e].x) then
@@ -1259,7 +1284,7 @@ function  createBombingChapter(id_task ,flight ,waypoints, weaponType, attackTyp
 				["x"] = element.x,
 				["y"] = element.y,
 				["unitId"] = element.unitId,
-				["expend"] = expend,
+				["expend"] = flight.loadout.expend,
 				["weaponType"] = weaponType,
 				["groupAttack"] = false,
 				["attackType"] = attackType,
@@ -1289,7 +1314,7 @@ function  createBombingChapter(id_task ,flight ,waypoints, weaponType, attackTyp
 			["params"] = {
 				["x"] = element.x,
 				["y"] = element.y,
-				["expend"] = expend,
+				["expend"] = flight.loadout.expend,
 				["weaponType"] = weaponType,
 				["groupAttack"] = false,
 				["attackType"] = attackType,
@@ -1313,7 +1338,7 @@ function  createBombingChapter(id_task ,flight ,waypoints, weaponType, attackTyp
 				["x"] = element.x,
 				["y"] = element.y,
 				["weaponType"] = weaponType,
-				["expend"] = expend,
+				["expend"] = flight.loadout.expend,
 				["direction"] = 0,
 				["attackQtyLimit"] = false,
 				["attackQty"] = 1,
@@ -1476,7 +1501,7 @@ for side, pack in pairs(ATO) do
 			for f = 1, #flight do
 				if flight[f].target and flight[f].target.elements then
 					for elementN, element in ipairs(flight[f].target.elements) do
-						targetList_InThisMission[element.name] = true
+						TargetList_InThisMission[element.name] = true
 					end				
 				end					
 			end
@@ -2656,9 +2681,9 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						local NameTheatre =  string.lower(mission.theatre)
 						local AltFloor = 0 
 
-						if altitudeFloorNew then				
-							for level, layers in pairs(altitudeFloorNew) do
-								-- print("AtoFP AA altitudeFloorNew level "..tostring(level))
+						if AltitudeFloorNew then				
+							for level, layers in pairs(AltitudeFloorNew) do
+								-- print("AtoFP AA AltitudeFloorNew level "..tostring(level))
 
 								for polyN, poly in pairs(layers) do
 									-- print("AtoFP BB polyN "..tostring(polyN).." waypoints[1]: "..tostring(waypoints[1].x) .." poly.x: "..tostring(poly.x))
@@ -2759,7 +2784,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					-- de façon dégradé, l'on ne prend que la position de la cible dans son ensemble
 					if tgtlist == nil and flight[f].task == "Runway Attack" then
 						tgtlist =  '{ x = ' .. tostring(flight[f].target.x) .. ', y = ' .. tostring(flight[f].target.y) .. '}, '
-						-- table.insert(bugList, "no known runway element for the target "..tostring(flight[f].target_name))
+						-- table.insert(BugList, "no known runway element for the target "..tostring(flight[f].target_name))
 						insertBugList("no known runway element for the target "..tostring(flight[f].target_name))
 					end
 
@@ -3595,6 +3620,9 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								if flight[1].tacan == nil then
 									flight[1].tacan = GetTankerTACAN()															--get new channel for first flight in pack only, all other flights will use same channel
 								end
+
+								local unitIdTemp = GenerateIDUnit("AtoFP ".. "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight) .. "-1")
+
 								local task_entry = {
 									["enabled"] = true,
 									["auto"] = true,
@@ -3609,7 +3637,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 											{
 												["type"] = 4,
 												["AA"] = true,
-												["unitId"] = id_counter,
+												["unitId"] = unitIdTemp,
 												["modeChannel"] = "Y",
 												["name"] = "",
 												["channel"] = flight[1].tacan,
@@ -3880,6 +3908,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					if flight[f].player or flight[f].client then																				--flight is player flight
 						if waypoints[w - 1] then																			--previous waypoint exists
 							local distance = GetDistance(waypoints[w - 1], waypoints[w])									--distance between waypoints
+							local distanceStr = tostring(distance)
+							local suffixe = " KM"
 							if waypoints[w].name == "Target" then
 								distance = GetDistance(waypoints[w - 2], waypoints[w])										--for target waypoint measure distance from IP, since attack point is removed for player flight
 							end
@@ -3903,19 +3933,20 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								and (data_divers[flight[f].type].instrumentUnits == "metric" or data_divers[flight[f].type].instrumentUnits =="russian") then
 									distance = math.ceil(distance / 1000)
 									TotFlightDist = TotFlightDist + tonumber(distance)
-									distance = distance .. " KM"
+									distanceStr = tostring(distance) .. " KM"
 									suffixe = " KM"
 								else
 									distance = math.ceil(distance / 1000 * 0.539957)
 									TotFlightDist = TotFlightDist + tonumber(distance)
-									distance = distance .. " NM"
+									distanceStr = distance .. " NM"
 									suffixe = " NM"
 								end
 								
 								local ete = ""
+								local eteNum = 0
 								if  waypoints[w].ETA and  waypoints[w-1].ETA then
-									ete = math.floor(((waypoints[w].ETA - waypoints[w-1].ETA) / 60) + 0.5)								
-									ete = tostring(ete).." mn"								
+									eteNum = math.floor(((waypoints[w].ETA - waypoints[w-1].ETA) / 60) + 0.5)								
+									ete = tostring(eteNum).." mn"								
 								end
 								
 								-- modification M58_a		flight plan, heading, Dist, ETE
@@ -3927,22 +3958,22 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								end
 								waypoints[w]["name"] = waypoints[w]["name"] .. s
 								
-								local space = 4 - string.len(tostring(heading))
-								local s = ""
+								space = 4 - string.len(tostring(heading))
+								s = ""
 								for n = 1, space  do															
 									s = s .. " "																	
 								end
 								heading = heading .. s
 								
-								local space = 7 - string.len(tostring(distance))
-								local s = ""
+								space = 7 - string.len(tostring(distanceStr))
+								s = ""
 								for n = 1, space  do															
 									s = s .. " "
 								end
-								distance = s..distance	
+								distanceStr = s..distanceStr	
 
-								local space = 6 - string.len(tostring(ete))
-								local s = ""
+								space = 6 - string.len(tostring(ete))
+								s = ""
 								for n = 1, space  do															
 									s = s .. " "																	
 								end
@@ -4358,6 +4389,11 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						-- os.execute 'pause'
 					end
 
+					local unitIdTemp = 1
+					local name = "AtoFP ".. "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight) .. "-" .. n
+					if not UnitByName[name] then
+						unitIdTemp = GenerateIDUnit(name)
+					end
 					units[n] = 
 					{
 						["alt"] = waypoints[1].alt,
@@ -4382,7 +4418,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						},
 						["AddPropAircraft"] = flight[f].loadout.AddPropAircraft,
 						["speed"] = waypoints[1].speed,
-						["unitId"] = GenerateIDUnit("AtoFP ".. "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight) .. "-" .. n),
+						["unitId"] = unitIdTemp,
 						["alt_type"] = waypoints[1].alt_type,
 						["skill"] = skill,
 						["hardpoint_racks"] = true,
@@ -4775,6 +4811,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				
 				--certain plane ne peuvent pas dépasser les valeurs de la radio 1 pour la frequence générale (exemple M-2000)
+				local info = ""
 				if frequency[type_withData] and frequency[type_withData].radio.frequencyMustBeRadio1 then
 					if not FreqCapability2(testFreqency, type_withData, 1, info) then
 
@@ -5937,7 +5974,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						waypoints[1]["airdromeId"] = flight[f].airdromeId
 					end	
 					
-					debugFLIGHT = debugFLIGHT .."Passe Player ou Client TakeOffParking"
+					DebugFLIGHT = DebugFLIGHT .."Passe Player ou Client TakeOffParking"
 					
 				elseif SingleWithDServer and flight[f].player then
 					units[1]["skill"] = "Client"
@@ -6044,7 +6081,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					local NameTheatre =  string.lower(mission.theatre)
 					local AltFloor = -1
 
-					if altitudeFloorNew  then					
+					if AltitudeFloorNew  then					
 						local function findCorrectAltitude(testN, Heading)
 							local AltFloorFunc = 99999
 							local newPoint = groupRTB.route.points[1]
@@ -6052,7 +6089,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								newPoint = GetOffsetPoint(groupRTB.route.points[1], Heading, testN * 1000, false)
 							end
 
-							for level, polys in pairs(altitudeFloorNew) do	
+							for level, polys in pairs(AltitudeFloorNew) do	
 								-- if is_helicopter then 
 								-- 	print("AtoFp altiFloor passe BBBheli testN "..tostring(testN).." Heading "..tostring(Heading)) 
 								-- 	print("AtoFp altiFloor passe BBBheli level "..tostring(level).." AltFloorFunc "..AltFloorFunc) 
@@ -6794,7 +6831,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				
 				debugTempFLIGHT = debugTempFLIGHT.."\n"..("\n")
 				
-				debugFLIGHT = debugFLIGHT .. debugTempFLIGHT
+				DebugFLIGHT = DebugFLIGHT .. debugTempFLIGHT
 				debugTxt_AtoFP = debugTxt_AtoFP .. debugTempFLIGHT
 				
 				if Multi.NbGroup >= 1 and not Debug.AfficheFlight then 

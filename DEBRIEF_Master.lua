@@ -5,7 +5,7 @@
 if not versionDCE then versionDCE = {} end
 versionDCE["DEBRIEF_Master.lua"] = "1.16.121"
 -------------------------------------------------------------------------------------------------------
--- adjustment_n				(n new targetlist)(m oob_scen ==0)(l acceptedMission again)(k bugList)(j pairsByKeys)(i global TabTask)(g mise a niveau)(e: use io.stdin:read)(c: fire playable_m from conf_mod)(b: robust form) 
+-- adjustment_n				(n new targetlist)(m oob_scen ==0)(l AcceptedMission again)(k BugList)(j pairsByKeys)(i global TabTask)(g mise a niveau)(e: use io.stdin:read)(c: fire playable_m from conf_mod)(b: robust form) 
 -- debug_d	 				(cd: EndMission)
 -- cleanCode_b
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
@@ -23,8 +23,9 @@ versionDCE["DEBRIEF_Master.lua"] = "1.16.121"
 -- modification M11A_b_l	Multiplayer (bl MP overRide) (g %target alive)(t:display name )(s: T choice bug)(q: displays all tasks of several squadrons)
 -------------------------------------------------------------------------------------------------------
 
-bugList = {}
-acceptedMission = false
+BugList = {}
+AcceptedMission = false
+DebuGenTxt = ""					--debug cumulutatif de ATO_Generator
 
 local function AcceptMission()
 	repeat
@@ -273,7 +274,7 @@ if input == "y" or input == "yes" then
 	
 	-- increase campaign mission number
 	-- camp.mission = camp.mission + 1	
-	acceptedMission = true
+	AcceptedMission = true
 
 	--TODO cette partie devrait etre dans MAIN_AcceptMission .... a voir
 	
@@ -303,7 +304,7 @@ if input == "y" or input == "yes" then
 	
 	dofile("../../../ScriptsMod."..versionPackageICM.."/MAIN_AcceptMission.lua")
 
-	acceptedMission = false
+	AcceptedMission = false
 	
 else
 

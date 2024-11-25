@@ -164,7 +164,7 @@ end
 -- decides whether the given ground unit (which is on side 'unitSide') should be kept or not
 local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, category)
 	
-	if targetList_InThisMission[unit.name] then
+	if TargetList_InThisMission[unit.name] then
 
 		return true 
 	end
@@ -235,7 +235,7 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 					closestTarget = math.min(closestTarget, dist)				
 				end 
 				
-				-- targetList_InThisMission
+				-- TargetList_InThisMission
 
 				--TODO revoir les cibles, elles ne sont plus forcement dans la liste mission
 				-- les cibles identifiées par idgroup seront Gardées (Keep) 
