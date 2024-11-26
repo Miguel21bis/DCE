@@ -33,7 +33,7 @@ DCS_ENI_Side = {
 
 --function to return txt whith carriage return
 function StringToTxt(text)
-	text = string.gsub(text, "\\n", "\n")	
+	text = string.gsub(text, "\\n", "\n")
 	return text
 end
 
@@ -41,7 +41,7 @@ end
 -- modification M41
 function StringToTxtBrief(text)
 	if type(text) == "string" then
-		text = string.gsub(text, "\\n", " \\\n")		
+		text = string.gsub(text, "\\n", " \\\n")
 		return text
 	else
 		return  text
@@ -66,12 +66,12 @@ function pairsByKeys (t, f)
 	local initType
 	local dontSort = false
     for n in pairs(t) do initType = type(n) break end
-	for n in pairs(t) do 
-		table.insert(a, n) 
+	for n in pairs(t) do
+		table.insert(a, n)
 		if type(n) ~= initType then dontSort = true end
 	end
-	if not dontSort then 
-		table.sort(a, f) 
+	if not dontSort then
+		table.sort(a, f)
 	end
     local i = 0      -- iterator variable
     local iter = function ()   -- iterator function
@@ -193,14 +193,14 @@ local loadoutStructures = {
 	{name = "minscore", check = false },
 	{name = "support", check = false },
 	{name = "country", check = false },
-	
+
 	{name = "self_escort", check = false },
 	{name = "attributes", check = false },
 	{name = "code_loadout", check = false },
 	{name = "weaponType", check = false },
 	{name = "expend", check = false },
 	{name = "attackType", check = false },
-	
+
 	{name = "day", check = false },
 	{name = "night", check = false },
 	{name = "adverseWeather", check = false },
@@ -220,22 +220,22 @@ local loadoutStructures = {
 	{name = "LDSD", check = false },
 	{name = "sortie_rate", check = false },
 	{name = "stores", check = false },
-	
+
 
 }
 
 function makeStrutureLoadout(loadoutTotal)
-	
+
 	for plane, loadoutsByTask in pairsByKeys(loadoutTotal) do
 		for task, loadouts in pairsByKeys(loadoutsByTask) do
 
 			for loadoutName, loadout in pairsByKeys(loadouts) do
-			
+
 				local loadoutTemp = {}
 
 				--ajoutes les entrées selon le canevas
 				for structN, struct in ipairs(loadoutStructures) do
-					
+
 					if loadout[struct.name] then
 						local entrie = {
 							[struct.name] = loadout[struct.name]
@@ -247,16 +247,16 @@ function makeStrutureLoadout(loadoutTotal)
 				--fait un repassage pour ajouter ce qui n etait pas dans le canevas
 				for key, values in pairs(loadout) do
 					local inStructure = false
-					
+
 					for structN, struct in ipairs(loadoutStructures) do
 						if struct.name == key then
 							inStructure = true
 							break
 						end
-					end	
+					end
 
 					if not inStructure then
-						
+
 						local entrie = {
 							[key] = values
 						}
@@ -280,7 +280,7 @@ local item = 0
 local lodaoutStructure = {}
 
 function TableSerializationLoadout(t, i, iTotal)
-	
+
 	local text = ""
 
 		local recal = false
@@ -288,8 +288,8 @@ function TableSerializationLoadout(t, i, iTotal)
 		local tab = ""
 
 		--ignore les chapitres 4 issue du rangement loadoutStructures
-		if iTotal == 4 then 
-			recal = true 
+		if iTotal == 4 then
+			recal = true
 			text = ""
 		else
 			text = "{\n"
@@ -326,11 +326,11 @@ function TableSerializationLoadout(t, i, iTotal)
 				text = text .. v .. ",\n"
 			elseif type(v) == "table" then
 				local tableOneLigne = false
-				
+
 				if k == "attributes" or k == "code_loadout" then
 					tableOneLigne = true
 				end
-				
+
 				if tableOneLigne then
 					text = text .." {"
 					local passLoop = false
@@ -343,7 +343,7 @@ function TableSerializationLoadout(t, i, iTotal)
 				else
 					text = text .. TableSerializationLoadout(v, i+1, iTotal + 1)
 				end
-				
+
 			elseif type(v) == "boolean" then
 				if v == true then
 					text = text .. "true,\n"
@@ -393,7 +393,7 @@ end
 function GetHeading(p1, p2)
 	local deltax = p2.x - p1.x
 	local deltay = p2.y - p1.y
-	local result 
+	local result
 	if (deltax > 0) and (deltay == 0) then
 		result =  0
 	elseif (deltax > 0) and (deltay > 0) then
@@ -428,7 +428,7 @@ function GetHeading(p1, p2)
     --     result = (-1* result) + 450
     -- end
 
-	return result 
+	return result
 
 end
 
@@ -448,13 +448,13 @@ function getHeadingByPos(unit)
 		return Heading
 	end
 end
-	
+
 function HeadingDegToRad(angle)
 	angle = angle % 360 							-- garde le reste de 360
 	return angle * 0.0174532925				-- 0,0174532925
 end
-	
-	
+
+
 --function to return the angle between two headings
 function GetDeltaHeading(h1, h2)
 	local delta = h2 - h1
@@ -470,11 +470,11 @@ end
 --function to return distance between two vector2 points
 function GetDistance(p1, p2)
 
-	if not p1.x then 
+	if not p1.x then
 		_affiche(p1, "p1")
 	end
-	
-	if not p2.x then 
+
+	if not p2.x then
 		_affiche(p2, "p2")
 	end
 
@@ -506,16 +506,16 @@ function GetTangentDistance(p1, p2, p3)
 		alpha = math.abs(alpha - 360)
 	end
 	local p1_p3_distance = GetDistance(p1, p3)
-	
+
 	local p2_p1_heading = GetHeading(p2, p1)
 	local p2_p3_heading = GetHeading(p2, p3)
-	
+
 	local beta = math.abs(p2_p1_heading - p2_p3_heading)
 	if beta > 180 then
 		beta = math.abs(beta - 360)
 	end
 	local p2_p3_distance = GetDistance(p2, p3)
-	
+
 	if alpha > 90 or alpha < -90 then
 		return p1_p3_distance
 	elseif beta > 90 or beta < -90 then
@@ -533,7 +533,7 @@ function GetTangentLenght(p1, p2, pc, r)
 	local p1_pc = GetDistance(p1, pc)
 	local p2_pc = GetDistance(p2, pc)
 	local p1_p2 = GetDistance(p1, p2)
-	
+
 	if (p1.x == pc.x and p1.y == pc.y) or (p2.x == pc.x and p2.y == pc.y) then			--p1 or p2 are the center of the circle
 		if p1_p2 > r then																--the other point is outside of the circle
 			return r																	--return the circle radius
@@ -570,7 +570,7 @@ end
 
 
 --function to return subsequent IDs
-	
+
 
 --recupere les Id deja utilise pour ne pas creer de doublon
 function getAllId()
@@ -587,7 +587,7 @@ function getAllId()
 	-- 			if type(groups) == "table" and groups["group"]  then
 	-- 				for Ngroup, group in pairs(groups["group"]) do
 	-- 					allIdGroup[group.groupId] = true
-						
+
 	-- 					for Nunit, unit in pairs(group.units) do
 	-- 						allIdUnit[unit.unitId] = true
 
@@ -597,9 +597,9 @@ function getAllId()
 	-- 		end
 	-- 	end
 	-- end
-	
+
 	--recupere les Id deja utilise pour ne pas creer de doublon
-	for coal_name,coal in pairs(oob_ground) do	
+	for coal_name,coal in pairs(oob_ground) do
 		for countryN, country in pairs(coal) do
 			for category, groups in pairs(country) do
 				if type(groups) == "table" and groups["group"]  then
@@ -607,7 +607,7 @@ function getAllId()
 
 						if not allIdGroup[group.groupId] then
 							allIdGroup[group.groupId] = true
-							AllIdGroupImport = true 
+							AllIdGroupImport = true
 						else
 							table.insert(GroupIdError,group.groupId )
 							-- print("UtilF F1 found GroupIdError ID "..tostring(group.groupId).." name: "..tostring(group.name))
@@ -617,13 +617,13 @@ function getAllId()
 
 							if not allIdUnit[unit.unitId] then
 								allIdUnit[unit.unitId] = true
-								AllIdUnitImport = true 
+								AllIdUnitImport = true
 							else
 								table.insert(unitIdError, unit.unitId )
 								-- print("UtilF F2 found unitIdError ID "..tostring(unit.unitId).." name: "..tostring(unit.name))
 							end
-						end	
-					end			
+						end
+					end
 				end
 			end
 		end
@@ -631,7 +631,7 @@ function getAllId()
 
 	if unitIdError and #unitIdError > 0 then
 		for errorN, IdError in pairs(unitIdError) do
-			for coal_name,coal in pairs(oob_ground) do	
+			for coal_name,coal in pairs(oob_ground) do
 				for countryN, country in pairs(coal) do
 					for category, groups in pairs(country) do
 						if type(groups) == "table" and groups["group"]  then
@@ -643,8 +643,8 @@ function getAllId()
 											print("UtilF PP found NEW ID| "..tostring(unit.unitId).." |unit.NAME:| "..tostring(unit.name))
 										end
 									end
-								end	
-							end			
+								end
+							end
 						end
 					end
 				end
@@ -655,20 +655,20 @@ function getAllId()
 
 	if GroupIdError and #GroupIdError > 0 then
 		for errorN, IdError in pairs(GroupIdError) do
-			for coal_name,coal in pairs(oob_ground) do	
+			for coal_name,coal in pairs(oob_ground) do
 				for countryN, country in pairs(coal) do
 					for category, groups in pairs(country) do
 						if type(groups) == "table" and groups["group"]  then
 							for Ngroup, group in pairs(groups["group"]) do
-								
+
 								if IdError == group.groupId then
 									group.groupId = GenerateIDGroup(group.name)
 									if Debug.debug then
 										print("UtilF PP found NEW ID| "..tostring(group.groupId).." |group.NAME:| "..tostring(group.name))
 									end
 								end
-								
-							end			
+
+							end
 						end
 					end
 				end
@@ -689,7 +689,7 @@ function GenerateIDGroup(name)
 	local loop = 1
 	repeat
 		idGroupCounter = idGroupCounter + 1
-		loop = loop+1	
+		loop = loop+1
 		-- if allIdGroup[idGroupCounter] then
 		-- 	-- print("UtilF  GenerateIDGroup IDGroup déjà utilisé: "..tostring(idGroupCounter))
 		-- 	-- os.execute 'pause'
@@ -707,7 +707,7 @@ end
 
 local idUnitCounter = 100000
 function GenerateIDUnit(name)
-	
+
 	if not AllIdUnitImport or not AllIdGroupImport then
 		getAllId()
 	end
@@ -715,9 +715,9 @@ function GenerateIDUnit(name)
 	local loop = 1
 	repeat
 		idUnitCounter = idUnitCounter + 1
-		loop = loop+1	
+		loop = loop+1
 	until not allIdUnit[idUnitCounter] or loop > 5000
-	
+
 	if loop > 5000 then
 		print("UtilF Bug GenerateIDUnit loop > 5000 "..tostring(idUnitCounter))
 		os.execute 'pause'
@@ -742,7 +742,7 @@ function disp_time(time)
 	local seconds = math.floor((time%60))
 	return string.format("%d days %02d hours",days,hours)
   end
-  
+
 
 --function to return various date and time formats of a number in seconds
 function FormatTime(t, form)
@@ -753,19 +753,19 @@ function FormatTime(t, form)
 	if t >= 86400 then
 		t= t - 86400
 	end
-		
+
 	hour = math.floor(t / 3600)
 	t = t - hour * 3600
 	if hour < 10 then
 		hour = "0" .. hour
 	end
-	
+
 	minute = math.floor(t / 60)
 	t = t - minute * 60
 	if minute < 10 then
 		minute = "0" .. minute
 	end
-	
+
 	second = math.floor(t)
 	if second < 10 then
 		second = "0" .. second
@@ -810,7 +810,7 @@ function FormatDate(day, month, year)
 	elseif month == 12 then
 		month = "December"
 	end
-	
+
 	return month .. " " .. day .. ", " .. year
 end
 
@@ -885,60 +885,60 @@ end
 
 
  function _affiche(_table, titre, prof)
- 
+
  if not prof or prof == nil then prof = 999 end 						-- prof = profondeur de niveau dans la hierarchie
   print()
    print()
     print()
-    if titre == nil then print( string.format(" _affiche() titre = nil ")) 
+    if titre == nil then print( string.format(" _affiche() titre = nil "))
     elseif type( titre) == "string" then
 		print( string.format(" _affiche(titre) "..tostring(titre)))
 	end
-  
+
 	if type( _table) == "table"  then
-	
-		for a, b in pairs(_table) do 
-		
+
+		for a, b in pairs(_table) do
+
 			if  type(b) ~= "table" then
 				print(" _affiche(a b)    |"..tostring(a).."|"..tostring(b).."|")
 			elseif type(b) == "table"   and prof >= 2 then
 				for c, d in pairs(b) do
 					print( " _affiche(a c)     "..tostring(a).."   "..tostring(c))
-					
-					
+
+
 					if type(d)~= "table"  then
 						print( " _affiche(d)                "..tostring(d))
 					elseif type(d) == "table"  and prof >= 3 then
-						for e, f in pairs(d) do							
-							
+						for e, f in pairs(d) do
+
 							if type( f ) ~= "table"  then
 								print( " _affiche(e f)                          "..tostring(e).." "..tostring(f))
 							elseif type( f ) == "table"  and prof >= 4 then
 								for g, h in pairs(f) do
-									print( " _affiche(  e)                     "..tostring(e))									
-									
+									print( " _affiche(  e)                     "..tostring(e))
+
 									if type( h ) ~= "table"  then
-										print( " _affiche(g h)                                    "..tostring(g).." "..tostring(h))	
+										print( " _affiche(g h)                                    "..tostring(g).." "..tostring(h))
 									elseif type( h ) == "table"  and prof >= 5 then
-										for i, j in pairs(h) do										
-										
+										for i, j in pairs(h) do
+
 											if type( j ) ~= "table"  then
 												print( " _affiche(i j)                                              "..tostring(i).." "..tostring(j))
-											elseif type( j ) == "table" and prof >= 6 then									
+											elseif type( j ) == "table" and prof >= 6 then
 												for k, l in pairs(j) do
 													print( " _affiche(k)                                                   "..tostring(k))
-													
+
 													if type( l ) ~= "table"  then
 														print( " _affiche(l)                                                   "..tostring(l))
 													elseif type( l ) == "table" and prof >= 7 then
 														for m, n in pairs(l) do
 															print( " _affiche(m)                                                        "..tostring(m))
-														
+
 															if type( n ) ~= "table"  then
 																print( " _affiche(n)                                                             "..tostring(n))
 															elseif type( n ) == "table"  and prof >= 8 then
 																print( " n est une table                                                              "..tostring(n).."---------------------------")
-												  
+
 															end --if
 														end --for l
 													end --if
@@ -953,84 +953,84 @@ end
 				end -- for v
 			end -- if v
 		end  -- for _table
-	
+
 	else print( "_affiche NoTable==> " ..tostring(_table))
-	
+
 	end -- if if type( _table) == "table"
-	
+
 end -- function affiche
+
 
 function _afficheTXT(_table, titre, prof)
 
-
 	--export custom mission log
-	local logExp = "logExp  " 
-		
- if not prof or prof == nil then prof = 999 end 						-- prof = profondeur de niveau dans la hierarchie
-  logExp = logExp.."\n"
-  
+	local logExp = "logExp  "
+
+	if not prof or prof == nil then prof = 999 end 						-- prof = profondeur de niveau dans la hierarchie
+	logExp = logExp.."\n"
+
     if titre == nil then logExp = logExp.. string.format(" _affiche() titre = nil ")
     elseif type( titre) == "string" then
 		logExp = logExp.. string.format(" _affiche(titre) "..tostring(titre)).."\n"
 	end
-  
+
 	if type( _table) == "table"  then --and  (table.getn(_table) ~= 0 or table.getn(_table) ~= nil
-	
+
 		for a, b in pairs(_table) do --for a, b in pairs(event.initiator) do --for a, b in pairs(_ammo) do
-		
+
 			if  type(b) ~= "table" then
 				logExp = logExp.." _affiche (a b)     "..tostring(a).." "..tostring(b).."\n"
 			elseif type(b) == "table"   and prof >= 2 then
 				for c, d in pairs(b) do
 					logExp = logExp.. " _affiche(a c)           "..tostring(a).." "..tostring(c).."\n"
-					
-					
+
+
 					if type(d)~= "table"  then
 						logExp = logExp.. " _affiche(d)                "..tostring(d).."\n"
 					elseif type(d) == "table"  and prof >= 3 then
 						for e, f in pairs(d) do
-							
+
 							if type( f ) ~= "table"  then
 								logExp = logExp.. " _affiche(e f)                          "..tostring(e).." "..tostring(f).."\n"
 							elseif type( f ) == "table"  and prof >= 4 then
 								logExp = logExp.. " _affiche( e)                                "..tostring(e).."\n"
 								for g, h in pairs(f) do
 									logExp = logExp.. " _affiche(Ig)                                 "..tostring(g).."\n"
-									
-									
+
+
 									if type( h ) ~= "table"  then
-										logExp = logExp.. " _affiche(g h)                                    "..tostring(g).." "..tostring(h).."\n"	
+										logExp = logExp.. " _affiche(g h)                                    "..tostring(g).." "..tostring(h).."\n"
 									elseif type( h ) == "table"  and prof >= 5 then
 										logExp = logExp.. " _affiche( g)                                         "..tostring(g).."\n"
 										for i, j in pairs(h) do
-										
+
 											if type( j ) ~= "table"  then
 												logExp = logExp.. " _affiche(i j)                                              "..tostring(i).." "..tostring(j).."\n"
-											elseif type( j ) == "table" and prof >= 6 then									
+											elseif type( j ) == "table" and prof >= 6 then
 												logExp = logExp.. " _affiche(i)                                                  "..tostring(i).."\n"
-												for k, l in pairs(j) do													
-													
+												for k, l in pairs(j) do
+
 													if type( l ) ~= "table"  then
 														logExp = logExp.. " _affiche(k l)                                                   "..tostring(k).." "..tostring(l).."\n"
 													elseif type( l ) == "table" and prof >= 7 then
 														logExp = logExp.. " _affiche(k)                                                       "..tostring(k).."\n"
 														for m, n in pairs(l) do
 															logExp = logExp.. " _affiche(m)                                                        "..tostring(m).."\n"
-														
-														
+
+
 															if type( n ) ~= "table"  then
 																logExp = logExp.. " _affiche(m n)                                                   "..tostring(m).." "..tostring(n).."\n"
 															elseif type( n ) == "table" and prof >= 7 then
 																logExp = logExp.. " _affiche(m)                                                       "..tostring(m).."\n"
 																for o, p in pairs(n) do
 																	logExp = logExp.. " _affiche(o)                                                        "..tostring(o).."\n"
-														
-														
+
+
 																	if type( p ) ~= "table"  then
 																		logExp = logExp.. " _affiche(p)                                                             "..tostring(p).."\n"
 																	elseif type( p ) == "table"  and prof >= 8 then
 																		logExp = logExp.. " p est une table                                                              "..tostring(p).."---------------------------".."\n"
-																			
+
 																	end
 																end
 															end --if
@@ -1047,13 +1047,13 @@ function _afficheTXT(_table, titre, prof)
 				end -- for v
 			end -- if v
 		end  -- for _table
-	
+
 	else logExp = logExp.. "_affiche NoTable==> " ..tostring(_table).."\n"
-	
+
 	end -- if if type( _table) == "table"
-	
+
 	return logExp
-	
+
 end -- function affiche
 
 
@@ -1081,18 +1081,18 @@ function FreqCapability2(TestFreq, flightType, Nradio, info)
 	for wave, freqRange in pairs(RadioPlane[Nradio]) do
 		-- if string.lower(wave)  ~= "nbcanal"  then
 		if type(freqRange)  == "table"  then
-			if tonumber(TestFreq) < freqRange.max and  tonumber(TestFreq) > freqRange.min then			
-				if RadioPlane[Nradio] and RadioPlane[Nradio][wave] and (TestFreq > RadioPlane[Nradio][wave].min and TestFreq < RadioPlane[Nradio][wave].max)	 then		
+			if tonumber(TestFreq) < freqRange.max and  tonumber(TestFreq) > freqRange.min then
+				if RadioPlane[Nradio] and RadioPlane[Nradio][wave] and (TestFreq > RadioPlane[Nradio][wave].min and TestFreq < RadioPlane[Nradio][wave].max)	 then
 					return true
-				end 
+				end
 			end
 		end
 	end
-	
+
 	if TestFreq >= 225 then
-		waves = "UHF" 
+		waves = "UHF"
 	elseif TestFreq >= 100 and TestFreq < 225 then
-		waves = "VHF" 
+		waves = "VHF"
 	elseif TestFreq >= 20 and TestFreq < 100 then
 		waves = "LVHF"
 		if RadioPlane[Nradio] and not RadioPlane[Nradio][waves] then waves = "LVHF" end
@@ -1107,11 +1107,11 @@ function FreqCapability2(TestFreq, flightType, Nradio, info)
 		print("********************ATTENTION******************")
 		print()
 		os.execute 'pause'
-	end 
+	end
 
-	if RadioPlane[Nradio] and RadioPlane[Nradio][waves] and (TestFreq > RadioPlane[Nradio][waves].min and TestFreq < RadioPlane[Nradio][waves].max)	 then		
+	if RadioPlane[Nradio] and RadioPlane[Nradio][waves] and (TestFreq > RadioPlane[Nradio][waves].min and TestFreq < RadioPlane[Nradio][waves].max)	 then
 		return true
-	else 
+	else
 		return false
 	end
 end
@@ -1122,7 +1122,7 @@ end
 function CreatePlageFrequency()																				--trouve une plage de frequence commune si c'est possible
 	local activeVHF = false
 	camp.radio = {}
-	
+
 	local TempRadio = {
 		["blue"] = {
 			-- [1] = {
@@ -1138,55 +1138,55 @@ function CreatePlageFrequency()																				--trouve une plage de frequen
 	for side, oob_side in pairs(oob_air) do
 		for n, sqd in pairs(oob_side) do
 			if not sqd.inactive and sqd.player then
-				if frequency[sqd.type] then					
-					for n = 1,  #frequency[sqd.type].radio do	
+				if frequency[sqd.type] then
+					for n = 1,  #frequency[sqd.type].radio do
 						for bandFreq, value in pairs(frequency[sqd.type].radio[n]) do
 							if bandFreq == "HF" or bandFreq == "VHF" or bandFreq == "UHF" or bandFreq == "LVHF"  then			--or bandFreq == "FM"					
-								
-								if not TempRadio[side][n] then TempRadio[side][n] = {} end	
+
+								if not TempRadio[side][n] then TempRadio[side][n] = {} end
 								if not TempRadio[side][n][bandFreq] then TempRadio[side][n][bandFreq] = {} end
-								
+
 								TempRadio[side][n][bandFreq].min = value.min
 								TempRadio[side][n][bandFreq].max = value.max
 							end
-						end					
-					end				
+						end
+					end
 				end
 			end
 		end
-	end	
+	end
 	-- _affiche(TempRadio, "UTIL_F 1er TempRadio")
-	
+
 	for side, oob_side in pairs(oob_air) do
 		for n, sqd in pairs(oob_side) do
 			if not sqd.inactive then
 				if frequency[sqd.type] then
-					for typeRadio , PlaneFreqRadio in pairs(frequency[sqd.type]) do	
+					for typeRadio , PlaneFreqRadio in pairs(frequency[sqd.type]) do
 						if typeRadio == "radio" and type(PlaneFreqRadio) == "table" then
 							for nr , _bandFreq in pairs(PlaneFreqRadio) do	--for nr , value in pairs(frequency[sqd.type].radio) do
-								for bandFreq , value in pairs(_bandFreq) do		
-									if bandFreq == "HF" or bandFreq == "LVHF" or bandFreq == "VHF" or bandFreq == "UHF" then		
-			
-										if not TempRadio[side][nr] then TempRadio[side][nr] = {} end	
+								for bandFreq , value in pairs(_bandFreq) do
+									if bandFreq == "HF" or bandFreq == "LVHF" or bandFreq == "VHF" or bandFreq == "UHF" then
+
+										if not TempRadio[side][nr] then TempRadio[side][nr] = {} end
 										if not TempRadio[side][nr][bandFreq] then TempRadio[side][nr][bandFreq] = {} end
 										if not TempRadio[side][nr][bandFreq].min then TempRadio[side][nr][bandFreq].min = value.min  end
 										if not TempRadio[side][nr][bandFreq].max then TempRadio[side][nr][bandFreq].max = value.max  end
-								
+
 										if (value.min < TempRadio[side][nr][bandFreq].max)  then								--si une plage radio est en dehors des autres, on privil�gie le joueur
-											if value.min > TempRadio[side][nr][bandFreq].min then 
-												TempRadio[side][nr][bandFreq].min =  value.min	
+											if value.min > TempRadio[side][nr][bandFreq].min then
+												TempRadio[side][nr][bandFreq].min =  value.min
 											end
-											
-											if (value.max < TempRadio[side][nr][bandFreq].max) and (value.max > TempRadio[side][nr][bandFreq].min )  then 
+
+											if (value.max < TempRadio[side][nr][bandFreq].max) and (value.max > TempRadio[side][nr][bandFreq].min )  then
 												TempRadio[side][nr][bandFreq].max =  value.max
 											end
 										end
-										
-										if sqd.player and TempRadio[side][1][bandFreq] then 
+
+										if sqd.player and TempRadio[side][1][bandFreq] then
 											-- print("sqd.type "..tostring(sqd.type))
 											TempRadio[side][1][bandFreq]["player"] = true
 										end
-										
+
 									end
 								end
 							end
@@ -1208,7 +1208,7 @@ function CreatePlageFrequency()																				--trouve une plage de frequen
 	--*****************************************************************************   radioC   ********
 
 	camp.radioC = {}
-	
+
 	local TempRadio = {
 		["blue"] = {},
 		["red"] = {},
@@ -1217,57 +1217,57 @@ function CreatePlageFrequency()																				--trouve une plage de frequen
 	for side, oob_side in pairs(oob_air) do
 		for n, sqd in pairs(oob_side) do
 			if not sqd.inactive and sqd.player then
-				if frequency[sqd.type] then					
-					for n = 1,  #frequency[sqd.type].radio do	
+				if frequency[sqd.type] then
+					for n = 1,  #frequency[sqd.type].radio do
 						for bandFreq, value in pairs(frequency[sqd.type].radio[n]) do
 							if bandFreq == "HF" or bandFreq == "VHF" or bandFreq == "UHF" or bandFreq == "LVHF"  then			--or bandFreq == "FM"					
-								
-								if not TempRadio[side][bandFreq] then 
+
+								if not TempRadio[side][bandFreq] then
 									TempRadio[side][bandFreq] = {
 										min = value.min,
 										max = value.max,
-									} 
+									}
 								end
 
 							end
-						end					
-					end				
+						end
+					end
 				end
 			end
 		end
-	end	
-	
+	end
+
 	for side, oob_side in pairs(oob_air) do
 		for n, sqd in pairs(oob_side) do
 			if not sqd.inactive then
 				if frequency[sqd.type] then
-					for typeRadio , PlaneFreqRadio in pairs(frequency[sqd.type]) do	
+					for typeRadio , PlaneFreqRadio in pairs(frequency[sqd.type]) do
 						if typeRadio == "radio" and type(PlaneFreqRadio) == "table" then
 							for nr , _bandFreq in pairs(PlaneFreqRadio) do	--for nr , value in pairs(frequency[sqd.type].radio) do
-								for bandFreq , value in pairs(_bandFreq) do		
-									if bandFreq == "HF" or bandFreq == "LVHF" or bandFreq == "VHF" or bandFreq == "UHF" then		
-			
-										if not TempRadio[side][bandFreq] then 
+								for bandFreq , value in pairs(_bandFreq) do
+									if bandFreq == "HF" or bandFreq == "LVHF" or bandFreq == "VHF" or bandFreq == "UHF" then
+
+										if not TempRadio[side][bandFreq] then
 											TempRadio[side][bandFreq] = {
 												min = value.min,
 												max = value.max,
-											} 
+											}
 										end
-										
+
 										if (value.min < TempRadio[side][bandFreq].max)  then								--si une plage radio est en dehors des autres, on privil�gie le joueur
-											if value.min > TempRadio[side][bandFreq].min then 
-												TempRadio[side][bandFreq].min =  value.min	
+											if value.min > TempRadio[side][bandFreq].min then
+												TempRadio[side][bandFreq].min =  value.min
 											end
-											
-											if (value.max < TempRadio[side][bandFreq].max) and (value.max > TempRadio[side][bandFreq].min )  then 
+
+											if (value.max < TempRadio[side][bandFreq].max) and (value.max > TempRadio[side][bandFreq].min )  then
 												TempRadio[side][bandFreq].max =  value.max
 											end
 										end
-										
-										if sqd.player and TempRadio[side][bandFreq] then 
+
+										if sqd.player and TempRadio[side][bandFreq] then
 											TempRadio[side][bandFreq]["player"] = true
 										end
-										
+
 									end
 								end
 							end
@@ -1290,7 +1290,7 @@ end
 function CreatePlageFrequencyB()																				--trouve une plage de frequence commune si c'est possible
 	local activeVHF = false
 	camp.radioB = {}
-	
+
 	local TempRadioB = {
 		["blue"] = {
 			-- [1] = {
@@ -1310,10 +1310,10 @@ function CreatePlageFrequencyB()																				--trouve une plage de freque
 					-- for n = 1,  #frequency[sqd.type].radio do	
 						-- for bandFreq, value in pairs(frequency[sqd.type].radio[n]) do
 							-- if bandFreq == "FM" or bandFreq == "VHF" or bandFreq == "UHF" or bandFreq == "LVHF" or bandFreq == "HF" then								
-								
+
 								-- if not TempRadio[side][n] then TempRadio[side][n] = {} end	
 								-- if not TempRadio[side][n][bandFreq] then TempRadio[side][n][bandFreq] = {} end
-								
+
 								-- TempRadio[side][n][bandFreq].min = value.min
 								-- TempRadio[side][n][bandFreq].max = value.max
 							-- end
@@ -1324,38 +1324,38 @@ function CreatePlageFrequencyB()																				--trouve une plage de freque
 		-- end
 	-- end	
 	-- _affiche(TempRadio, "UTIL_F 1er TempRadio")
-	
+
 	for side, oob_side in pairs(oob_air) do
 		for n, sqd in pairs(oob_side) do
 			if not sqd.inactive then
 				if frequency[sqd.type] then
-					for typeRadio , PlaneFreqRadio in pairs(frequency[sqd.type]) do	
+					for typeRadio , PlaneFreqRadio in pairs(frequency[sqd.type]) do
 						if typeRadio == "radio" and type(PlaneFreqRadio) == "table" then
 							for nr , _bandFreq in pairs(PlaneFreqRadio) do	--for nr , value in pairs(frequency[sqd.type].radio) do
-								for bandFreq , value in pairs(_bandFreq) do		
-									if bandFreq == "HF" or bandFreq == "LVHF" or bandFreq == "VHF" or bandFreq == "UHF" then		
-			
-										
+								for bandFreq , value in pairs(_bandFreq) do
+									if bandFreq == "HF" or bandFreq == "LVHF" or bandFreq == "VHF" or bandFreq == "UHF" then
+
+
 										if not TempRadioB[side][bandFreq] then TempRadioB[side][bandFreq] = {} end
 										if not TempRadioB[side][bandFreq].min then TempRadioB[side][bandFreq].min = value.min  end
 										if not TempRadioB[side][bandFreq].max then TempRadioB[side][bandFreq].max = value.max  end
-								
+
 										if (value.min < TempRadioB[side][bandFreq].max)  then								--si une plage radio est en dehors des autres, on privil�gie le joueur
-											if value.min > TempRadioB[side][bandFreq].min then 
-												TempRadioB[side][bandFreq].min =  value.min	
+											if value.min > TempRadioB[side][bandFreq].min then
+												TempRadioB[side][bandFreq].min =  value.min
 											end
-											
-											if (value.max < TempRadioB[side][bandFreq].max) and (value.max > TempRadioB[side][bandFreq].min )  then 
+
+											if (value.max < TempRadioB[side][bandFreq].max) and (value.max > TempRadioB[side][bandFreq].min )  then
 												TempRadioB[side][bandFreq].max =  value.max
 											end
 										end
-										
-										if sqd.player and TempRadioB[side][bandFreq] then 
+
+										if sqd.player and TempRadioB[side][bandFreq] then
 											-- print("sqd.type "..tostring(sqd.type))
 											TempRadioB[side][bandFreq]["player"] = true
 											camp.radioWavePlayer = bandFreq
 										end
-										
+
 									end
 								end
 							end
@@ -1384,14 +1384,14 @@ package_freq = {															--table to store frequencies assigned to packages
 		["VHF"] = {},
 		-- ["FM"] = {},
 		["LVHF"] = {},
-		["HF"] = {},		
+		["HF"] = {},
 	},
 	["red"] = {
 		["UHF"] = {},
 		["VHF"] = {},
 		-- ["FM"] = {},
 		["LVHF"] = {},
-		["HF"] = {},	
+		["HF"] = {},
 	},
 }
 
@@ -1442,14 +1442,14 @@ function FreqCapability(TestFreq, type, Nradio, info)
 
 	for wave, freqRange in pairs(RadioPlane) do
 		if wave  == "HF" or wave  == "LVHF" or  wave  == "VHF" or  wave  == "UHF" then
-			if tonumber(TestFreq) < freqRange.max and  tonumber(TestFreq) > freqRange.min then			
-				if RadioPlane[wave] and (TestFreq > RadioPlane[wave].min and TestFreq < RadioPlane[wave].max)	 then		
+			if tonumber(TestFreq) < freqRange.max and  tonumber(TestFreq) > freqRange.min then
+				if RadioPlane[wave] and (TestFreq > RadioPlane[wave].min and TestFreq < RadioPlane[wave].max)	 then
 					return true
-				end 
+				end
 			end
 		end
 	end
-	
+
 	return false
 
 end
@@ -1464,11 +1464,11 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 	if camp.radio[side] and camp.radio[side][2] and (task == "EWR" or task == "AWACS" or task == "Refueling" or task == "AFAC") then			--if player has two radions, chose frequency range from AWACS and tanker from radio 2
 		nRadio = 2
 	end
-	
+
 	--check si la freq existe dans la radio 1, debug freq groupe
 	local tabWave = {"UHF", "VHF", "LVHF", "HF"}
 	function freqValide(checkFreq)
-		for nb, Wave in pairs(tabWave) do 
+		for nb, Wave in pairs(tabWave) do
 			local nRadio = 1
 			if frequency[type] and frequency[type].prefFreqPackage then
 				nRadio = frequency[type].prefFreqPackage.nRadio
@@ -1476,18 +1476,18 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 			if checkFreq and frequency[type] then
 				if frequency[type]["radio"] then
 					for radioN = 1 , #frequency[type]["radio"] do
-					
+
 						if frequency[type]["radio"][radioN][Wave] then
-							
+
 							return true
 
 						end
 
 					end
 				end
-				
+
 				return false
-				
+
 				-- if checkFreq and frequency[type] and frequency[type]["radio"] and frequency[type]["radio"][nRadio] and frequency[type]["radio"][nRadio][Wave] then
 				-- 	return true
 				-- else
@@ -1499,7 +1499,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 			end
 		end
 	end
-	
+
 	--si la freq package a déjà été désignée, on la reprend
 	if task ~= "coalition" and overide ~= nil then
 		if package_freq[side]["UHF"][targetname] and freqValide(package_freq[side]["UHF"][targetname]) then
@@ -1507,13 +1507,13 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 		elseif package_freq[side]["VHF"][targetname] and freqValide(package_freq[side]["VHF"][targetname]) then
 			return package_freq[side]["VHF"][targetname]															--return frequency
 		elseif package_freq[side]["LVHF"][targetname] and freqValide(package_freq[side]["LVHF"][targetname]) then
-			return package_freq[side]["LVHF"][targetname]	
+			return package_freq[side]["LVHF"][targetname]
 		elseif package_freq[side]["HF"][targetname] and freqValide(package_freq[side]["HF"][targetname]) then
-			return package_freq[side]["HF"][targetname]	
+			return package_freq[side]["HF"][targetname]
 		end
 	end
 
-	function GetLocFrequency(side, targetname, nRadio, type,  range)		
+	function GetLocFrequency(side, targetname, nRadio, type,  range)
 
 		if task == "EWR" then		-- (range == "UHF" or range == "VHF")  and
 			range = camp.radioWavePlayer
@@ -1530,9 +1530,9 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 				package_freq[side][range][targetname] = freq							--store frequency for package
 				return freq																--return frequency
 			end
-		
+
 		elseif task == "coalition"   then						--(range == "HF" or range == "FM")
-			if range == "HF"  then	
+			if range == "HF"  then
 				if camp.radioB[side] and camp.radioB[side][range]  then
 					freq = 0
 					repeat
@@ -1548,8 +1548,8 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 					return freq																--return frequency
 				else
 					return 0
-				end	
-			elseif range == "UHF"  then	
+				end
+			elseif range == "UHF"  then
 				if camp.radioB[side] and camp.radioB[side][range]   then		--Cherche d'abord une frequence UHF commune	--and CommonFreq[side]  == 0
 					freq = 0
 					repeat
@@ -1557,7 +1557,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 						local deci = math.random(0, 9) / 10									--random first decimal place
 						-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
 						local mil = 00														--impossible pour certain avions, comme le M2000
-						
+
 						freq = freq + deci + mil											--combine to complete frequency
 					until assigned_freq[freq] == nil and (freq<242.9 or freq>243.1)			--repeat until a frequency is found that is not yet in use
 
@@ -1565,8 +1565,8 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 					return freq																--return frequency
 				else
 					return 0
-				end	
-			elseif range == "VHF"  then	
+				end
+			elseif range == "VHF"  then
 				if camp.radioB[side] and camp.radioB[side][range]   then		--Cherche d'abord une frequence UHF commune	--and CommonFreq[side]  == 0
 					freq = 0
 					repeat
@@ -1574,7 +1574,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 						local deci = math.random(0, 9) / 10									--random first decimal place
 						-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
 						local mil = 00														--impossible pour certain avions, comme le M2000
-						
+
 						freq = freq + deci + mil											--combine to complete frequency
 					until assigned_freq[freq] == nil and (freq<121.45 or freq>121.55)	and freq ~= 123.1			--repeat until a frequency is found that is not yet in use
 
@@ -1582,8 +1582,8 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 					return freq																--return frequency
 				else
 					return 0
-				end	
-			elseif range == "LVHF" then	
+				end
+			elseif range == "LVHF" then
 				if camp.radioB[side] and camp.radioB[side][range]   then
 					freq = 0
 					repeat
@@ -1597,11 +1597,11 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 					return freq																--return frequency
 				else
 					return 0
-				end	
+				end
 			end
 		elseif range == "UHF" and task ~= "EWR" then
 			-- if camp.radio[side][nRadio] and camp.radio[side][nRadio][range]	and frequency[type] and frequency[type]["radio"] and frequency[type]["radio"][nRadio] and frequency[type]["radio"][nRadio][range]  then		--Cherche d'abord une frequence UHF commune
-			if frequency[type] and frequency[type]["radio"]   then	
+			if frequency[type] and frequency[type]["radio"]   then
 				for radioN = 1, #frequency[type]["radio"] do
 					local passe = true
 					if nRadio ~= nil and nRadio ~= radioN then
@@ -1611,11 +1611,11 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 						if wave == range  then
 							local i = 1
 							repeat
-								local rangeMin = camp.radioC[side][range].min 
+								local rangeMin = camp.radioC[side][range].min
 								local rangeMax = camp.radioC[side][range].max
 								if camp.radioC[side][range].min < freqRange.min then rangeMin = freqRange.min end
 								if camp.radioC[side][range].max > freqRange.max then rangeMax = freqRange.max end
-								
+
 								freq = math.random(camp.radioC[side][range].min, camp.radioC[side][range].max - 1)
 								local deci = math.random(0, 9) / 10									--random first decimal place
 								-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
@@ -1629,13 +1629,13 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 
 							assigned_freq[freq] = true												--mark frequency in use
 							package_freq[side][range][targetname] = freq							--store frequency for package
-							return freq		
+							return freq
 						end
 					end
-				end					
+				end
 			end
 		elseif range == "VHF" then
-			if frequency[type] and frequency[type]["radio"]   then	
+			if frequency[type] and frequency[type]["radio"]   then
 				for radioN = 1, #frequency[type]["radio"] do
 					local passe = true
 					if nRadio ~= nil and nRadio ~= radioN then
@@ -1645,55 +1645,55 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 						if wave == range and passe then
 							local i = 1
 							repeat
-								local rangeMin = camp.radioC[side][range].min 
+								local rangeMin = camp.radioC[side][range].min
 								local rangeMax = camp.radioC[side][range].max
 								if camp.radioC[side][range].min < freqRange.min then rangeMin = freqRange.min end
 								if camp.radioC[side][range].max > freqRange.max then rangeMax = freqRange.max end
-								
+
 								freq = math.random(rangeMin, rangeMax)
 								local deci = math.random(0, 9) / 10									--random first decimal place
 								-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
 								local mil = 00														--impossible pour certain avions, comme le M2000
 								freq = freq + deci + mil											--combine to complete frequency
 								i=i+1
-								
+
 							until assigned_freq[freq] == nil and FreqCapability(freq, type, radioN) and (freq<121.45 or freq>121.55)	and freq ~= 123.1 or i > 1000		--repeat until a frequency is found that is not yet in use
 
 							if i>=1000 then
 								print("UtilF          BUG A range "..range .. " with "..tostring(type))
 							end
 							assigned_freq[freq] = true												--mark frequency in use
-							
+
 							if overide ~= nil then
 								package_freq[side][range][targetname] = freq							--store frequency for package
 							end
-							return freq		
+							return freq
 						end
 					end
-				
-				end					
-			end
-		elseif range == "LVHF" then				
 
-			if frequency[type] and frequency[type]["radio"]   then	
+				end
+			end
+		elseif range == "LVHF" then
+
+			if frequency[type] and frequency[type]["radio"]   then
 				for radioN = 1, #frequency[type]["radio"] do
 					for wave, freqRange in pairs(frequency[type]["radio"][radioN]) do
 						if wave == range  then
-						
+
 							repeat
 								freq = math.random(camp.radioC[side][range].min, camp.radioC[side][range].max - 1)
 							until assigned_freq[freq] == nil and freq ~= 4125 and freq ~= 5680		--repeat until a frequency is found that is not yet in use
 
 							assigned_freq[freq] = true												--mark frequency in use
 							package_freq[side][range][targetname] = freq							--store frequency for package
-							return freq		
+							return freq
 						end
 					end
-				end					
+				end
 			end
-		elseif range == "HF" then				
+		elseif range == "HF" then
 
-			if frequency[type] and frequency[type]["radio"]   then	
+			if frequency[type] and frequency[type]["radio"]   then
 				repeat
 					freq = math.random(camp.radioC[side][range].min * 10, camp.radioC[side][range].max * 10)		--find random frequency in mHz
 				until assigned_freq[freq] == nil and freq ~= 4125 and freq ~= 5680										--repeat until a frequency is found that is not yet in use
@@ -1721,9 +1721,9 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 			return result
 		end
 	end
-	
+
 	local result
-	
+
 	if waves == nil or waves == false then
 		waves = "UHF"
 		foundUHFwave = false
@@ -1744,11 +1744,11 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 		end
 	end
 
-	if task == "EWR" then	
+	if task == "EWR" then
 		if camp.radio[side][1] and camp.radio[side][1]["UHF"] and camp.radio[side][1]["UHF"]["player"] then
 			result = GetLocFrequency(side, targetname, nRadio, type,  "UHF")
 		elseif camp.radio[side][1] and camp.radio[side][1]["VHF"] and camp.radio[side][1]["VHF"]["player"] then
-			result = GetLocFrequency(side, targetname, nRadio, type,  "VHF")			
+			result = GetLocFrequency(side, targetname, nRadio, type,  "VHF")
 		else
 			result = GetLocFrequency(side, targetname, nRadio, type,  "UHF")
 		end
@@ -1762,21 +1762,21 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 		result = GetLocFrequency(side, targetname, nRadio, type,  waves)
 		-- if Debug.debug then print("UtilF GetFrequency PASSE ELSE "..tostring(result)) end
 	end
-	
+
 	if result then
 		-- if Debug.debug then print("UtilF GetFrequency PASSE return A "..tostring(result)) end
 		return result
-	else 
+	else
 		result = GetLocFrequency(side, targetname, nRadio, type,  "UHF")
 		if result then
 			-- if Debug.debug then print("UtilF GetFrequency PASSE return B UHF "..tostring(result)) end
 			return result
-		else 
+		else
 			result = GetLocFrequency(side, targetname, nRadio, type,  "LVHF")
 			if result then
 				-- if Debug.debug then print("UtilF GetFrequency PASSE return C LVHF "..tostring(result)) end
 				return result
-			else 
+			else
 				if not camp.radio[side] then camp.radio[side] = {} end
 				if not camp.radio[side][nRadio] then camp.radio[side][nRadio] = {} end
 				if not camp.radio[side][nRadio]["VHF"] then camp.radio[side][nRadio]["VHF"]  = {} end
@@ -1805,10 +1805,10 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 
 					assigned_freq[freq] = true												--mark frequency in use
 					package_freq[side][range][targetname] = freq							--store frequency for package
-					
+
 					-- if Debug.debug then print("UtilF GetFrequency PASSE return D UHF  "..tostring(result)) end
-					return freq								
-				end 				
+					return freq
+				end
 			end
 		end
 	end
@@ -1845,7 +1845,7 @@ function loadoutPylon(loadoutTable)
 				local newSort = false
 				if loadout.stores and loadout.stores.pylons then
 					for chapterN, emport in pairs(loadout.stores.pylons) do
-						
+
 						if emport.num and emport.num ~= chapterN then
 							-- print("UtilF incoherence pylon N and Num: "..tostring(plane).." "..tostring(task).." "..tostring(loadoutName).." "..tostring(chapterN))
 							-- os.execute 'pause'
@@ -1855,7 +1855,7 @@ function loadoutPylon(loadoutTable)
 
 					if newSort then
 						for chapterN, emport in pairs(loadout.stores.pylons) do
-							newSortPylons[emport.num] = 
+							newSortPylons[emport.num] =
 							{
 								["CLSID"] =	emport.CLSID,
 							}
@@ -1864,9 +1864,9 @@ function loadoutPylon(loadoutTable)
 					else
 						for chapterN, emport in pairs(loadout.stores.pylons) do
 							emport.num = nil
-							
+
 						end
-					end					
+					end
 				end
 
 				if newSort then
@@ -1882,9 +1882,9 @@ function loadoutPylon(loadoutTable)
 	end
 	return loadoutTable
 end
-	
+
 -- modification M49.a big central db_loadout
-	
+
 function buildsLoadout()
 	local addLoadoutsTag = false
 	-- campaigns_code_loadout = { 
@@ -1899,17 +1899,17 @@ function buildsLoadout()
 		-- ["HWITC"] = 		"Hot War in the Cold",
 		-- ["IIW"] = 			"Iran Iraq War",
 	-- }   
-	
 
-	
+
+
 	if  campMod.selectLoadout == "init" then
 		require("Init/db_loadouts")
 	else
 		-- charge le loadout central en premier pour avoir la table de code_loadout
-		dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_db_loadouts.lua")	
+		dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_db_loadouts.lua")
 	end
-	
-	
+
+
 	-- --si ADD_loadouts existe, on le precharge pour prendre en compte son/ses codes code_loadout que l'on ajoutera au central
 	-- local loadoutFile02 = "../../../Missions/Campaigns/"..camp.title.."/Init/ADD_loadouts.lua"
 	-- local TestPathADD_loadouts = io.open(loadoutFile02, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
@@ -1949,11 +1949,11 @@ function buildsLoadout()
 	-- 		end
 	-- 	end
 	-- end
-	
+
 		-- cherche le code a appliquer au loadout, pour charger le bon..loadout ^^
-		if (not ( campConfMod and  campConfMod.code_loadout) and campaigns_code_loadout )then 
+		if (not ( campConfMod and  campConfMod.code_loadout) and campaigns_code_loadout )then
 			campConfMod = {}
-			for codeName , names in pairs(campaigns_code_loadout) do			
+			for codeName , names in pairs(campaigns_code_loadout) do
 				if type(names) == "table" then
 					for nameN, name in pairs(names) do
 						-- print("UtilF title "..camp.title.." string.find "..name)
@@ -1962,8 +1962,8 @@ function buildsLoadout()
 							campConfMod.code_loadout = codeName
 							infoBreak = true
 							break
-						else string.find(string.lower(camp.title) , string.lower(name))			
-							campConfMod.code_loadout = codeName								
+						else string.find(string.lower(camp.title) , string.lower(name))
+							campConfMod.code_loadout = codeName
 						end
 					end
 				else
@@ -1995,35 +1995,35 @@ function buildsLoadout()
 		-- modification M49.a big central db_loadout
 		--construit la table loadout en fonction du loadout général et de la campagne
 		db_loadouts = {}
-	
-		for plane, planeTab  in pairs(db_all_loadouts) do		
-			for taskName, loadout  in pairs(planeTab) do					
+
+		for plane, planeTab  in pairs(db_all_loadouts) do
+			for taskName, loadout  in pairs(planeTab) do
 				for loadoutName, value  in pairs(loadout) do
-					if value.code_loadout and value.code_loadout ~= "" then 								
-						for code_loadout_number, code in pairs(value.code_loadout) do																																
+					if value.code_loadout and value.code_loadout ~= "" then
+						for code_loadout_number, code in pairs(value.code_loadout) do
 							if string.lower(campConfMod.code_loadout) == string.lower(code) or string.lower(code) == "all" then
-								if not db_loadouts[plane] then							
+								if not db_loadouts[plane] then
 									db_loadouts[plane] = {}
-								end 
-								if not db_loadouts[plane][taskName] then db_loadouts[plane][taskName] = {} end 
-								if not db_loadouts[plane][taskName][loadoutName] then db_loadouts[plane][taskName][loadoutName] = {} end 
+								end
+								if not db_loadouts[plane][taskName] then db_loadouts[plane][taskName] = {} end
+								if not db_loadouts[plane][taskName][loadoutName] then db_loadouts[plane][taskName][loadoutName] = {} end
 								db_loadouts[plane][taskName][loadoutName] = value
-							end						
+							end
 						end
-					elseif  value.code_loadout == "" or not value.code_loadout  or not value.code_loadout == nil  then 
-						if not db_loadouts[plane] then							
+					elseif  value.code_loadout == "" or not value.code_loadout  or not value.code_loadout == nil  then
+						if not db_loadouts[plane] then
 							db_loadouts[plane] = {}
-						end 
-						if not db_loadouts[plane][taskName] then db_loadouts[plane][taskName] = {} end 
-						if not db_loadouts[plane][taskName][loadoutName] then db_loadouts[plane][taskName][loadoutName] = {} end 
+						end
+						if not db_loadouts[plane][taskName] then db_loadouts[plane][taskName] = {} end
+						if not db_loadouts[plane][taskName][loadoutName] then db_loadouts[plane][taskName][loadoutName] = {} end
 						db_loadouts[plane][taskName][loadoutName] = value
 					end
 				end
 			end
 		end
 	end
-	
-	
+
+
 	-- if TestPathADD_loadouts ~= nil and add_loadouts  then																	--check si le fichier existe dans ScriptsMod
 	-- 	for plane, planeTab  in pairs(add_loadouts) do		
 	-- 		for taskName, loadout  in pairs(planeTab) do					
@@ -2036,34 +2036,34 @@ function buildsLoadout()
 	-- 							end 
 	-- 							if not db_loadouts[plane][taskName] then db_loadouts[plane][taskName] = {} end 
 	-- 							if not db_loadouts[plane][taskName][loadoutName] then db_loadouts[plane][taskName][loadoutName] = {} end 
-								
+
 	-- 							local n = 0
 	-- 							local insertionAutorise = false
 	-- 							local insertionOK  = false
 	-- 							repeat
-									
+
 	-- 								if not db_loadouts[plane][taskName][loadoutName] then
 	-- 									db_loadouts[plane][taskName][loadoutName] = value
 	-- 									insertionOK = true
 	-- 								end
-	
+
 	-- 								if not insertionOK and  db_loadouts[plane][taskName][loadoutName..tostring(n)] then
 	-- 									n = tonumber(n) + 1
 	-- 								else
 	-- 									insertionAutorise = true
 	-- 								end
-									
+
 	-- 								if insertionAutorise then
 	-- 									db_loadouts[plane][taskName][loadoutName..tostring(n)] = value
 	-- 									insertionOK = true
 	-- 								end
-									
+
 	-- 								if tonumber(n) > 50 then
 	-- 									print("MainNM MEGA BUG ADD_loadout")
 	-- 								end
 	-- 							until insertionOK or tonumber(n) > 50
-									
-	
+
+
 	-- 						end						
 	-- 					end
 	-- 				end
@@ -2074,18 +2074,18 @@ function buildsLoadout()
 
 	--routine de verification des code campagne
 	-- dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_db_loadouts.lua")
-	
+
 	if campaigns_code_loadout and not addLoadoutsTag then
 		for planeType, plane  in pairs(db_loadouts) do
-			for taskName, loadouts in pairs(plane) do			
+			for taskName, loadouts in pairs(plane) do
 				for loadoutName, loadout  in pairs(loadouts) do
 					-- print("UtilF "..plane.." "..taskName.." "..loadoutName)
-					if loadout and loadout.code_loadout and loadout.code_loadout ~= "" then 			
-						for code_loadout_number, code in ipairs(loadout.code_loadout) do									
+					if loadout and loadout.code_loadout and loadout.code_loadout ~= "" then
+						for code_loadout_number, code in ipairs(loadout.code_loadout) do
 							if not campaigns_code_loadout[code]  then	--and not string.lower(code) == "all"
-							
+
 								if  string.lower(code) ~= "all"  then
-									
+
 									print()
 									print("********************ATTENTION******************")
 									print("***************Note for the Campaign Maker*****"..planeType.." ||| "..taskName.." ||| "..loadoutName.." ||| "..code.." not found in campaigns_code_loadout****************")
@@ -2093,14 +2093,14 @@ function buildsLoadout()
 									print()
 									-- os.execute 'pause'
 								end
-							else						
+							else
 								-- print("UtilF camp.code_loadout "..camp.code_loadout.." found")						
 							end
 						end
 					end
 				end
 			end
-		end	
+		end
 	end
 
 
@@ -2118,7 +2118,7 @@ function buildsLoadout()
 		testFile:close()
 
 		if db_all_loadouts then
-			
+
 			local copy_all_loadouts = deepcopy(db_all_loadouts)
 			copy_all_loadouts = loadoutPylon(copy_all_loadouts)
 
@@ -2141,7 +2141,7 @@ buildsLoadout()
 -- modification M54		revoir CustomTaskScript et TaskBombing
 -- check si tous les avions pr�vu dans oob_air ont leur task d�clar� possible dans la table TaskByPlane
 function Check_TaskPossibleByPlane()
-	
+
 	-- StrikeCombi = {
 		-- ["CAS"] = false,
 		-- ["Ground Attack"] = false,
@@ -2185,23 +2185,23 @@ function Check_TaskPossibleByPlane()
 	end
 
 	checkOobAir = deepcopy(oob_air)
-	
-	
-	for side, squadTbl in  pairs(checkOobAir) do		
+
+
+	for side, squadTbl in  pairs(checkOobAir) do
 		for squad_n, squad in  pairs(squadTbl) do
-			
+
 			local foundPlane = false
 			-- print("UtilF side "..side.." "..squad_n.." "..tostring(squad.name))
 			if squad.tasks and type(squad.tasks) == "table" then --not squad.inactive and 
-				
+
 				-- StrikeCombi
 				local addMultipleStrike = false
-				for taskOA, valueOA in  pairs(squad.tasks) do					
-					if taskOA == "Strike" and valueOA == true  then					
+				for taskOA, valueOA in  pairs(squad.tasks) do
+					if taskOA == "Strike" and valueOA == true  then
 						addMultipleStrike = true
-					end				
+					end
 				end
-				
+
 				--ajoute les vrais id des differents Strike
 				if addMultipleStrike then
 					squad.tasks["Strike"] = nil
@@ -2210,31 +2210,31 @@ function Check_TaskPossibleByPlane()
 					squad.tasks["Pinpoint Strike"] = true
 					-- squad.tasks["Runway Attack"] = true				
 				end
-				
+
 				local foundStrikeTask = false
 				for taskOA, valueOA in  pairs(squad.tasks) do
-					
+
 					local foundTask = false
-					
+
 					-- print("UtilF passe A "..taskOA.." valueOA: "..tostring(valueOA))
-					
+
 					if taskOA == "Escort Jammer" then
-						taskOA = "Ground Attack"					
+						taskOA = "Ground Attack"
 					elseif taskOA == "Flare Illumination" then
 						taskOA = "Ground Attack"
 					elseif taskOA == "Laser Illumination" then
 						taskOA = "AFAC"
 					elseif taskOA == "Anti-ship Strike" then
-						taskOA = "Antiship Strike"	
+						taskOA = "Antiship Strike"
 					elseif taskOA == "SAR" or taskOA == "CSAR" then
-						taskOA = "Transport"							
+						taskOA = "Transport"
 					end
-					
+
 					if  type(valueOA) ~= "boolean" then
 						print("UtilF ATTENTION is not a boolean value for : "..tostring(squad.type).." "..tostring(taskOA))
 						os.execute 'pause'
 					end
-					
+
 					if valueOA == true and TaskByPlane[taskOA] then
 						for plane_TbP, value in  pairs(TaskByPlane[taskOA]) do
 							if squad.type == plane_TbP   then
@@ -2244,47 +2244,47 @@ function Check_TaskPossibleByPlane()
 									foundStrikeTask = true
 								end
 							end
-						end						
-						
+						end
+
 						--toutes les tasks sauf strike
 						if not foundTask and not addMultipleStrike and not tostring(taskOA) == "Fighter Sweep" then
 							print("(Error UutilF C01) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring(taskOA))
-							os.execute 'pause'				
+							os.execute 'pause'
 						end
-					
+
 					elseif valueOA == true and not TaskByPlane[taskOA] and not tostring(taskOA) == "Fighter Sweep" then
 						print("(Error UutilF C02) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring(taskOA))
 						os.execute 'pause'
-					end			
+					end
 				end
-				
+
 				--si aucune tasks strike n'a �t� trouv�
 				if not foundStrikeTask and  addMultipleStrike then
 					print("(Error UutilF C03) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring("Strike ( CAS or Ground Attack or Pinpoint Strike )"))
-					os.execute 'pause'				
+					os.execute 'pause'
 				end
 				if not squad.inactive and not foundPlane   then
 					--TODO revoir ce pb, exemple avec campaign Hornet Over Carrier SC
 					print("(Error UutilF C04)||"..tostring(squad.type).."||"..tostring(squad.name).."||  impossible to find a task/aircraft match with all files concerned ".." (oob_air_init or  UTIL_Data.lua or bad Task or bad boolean task)")
-					
+
 					for taskOA, valueOA in  pairs(squad.tasks) do
 						print(tostring(taskOA).." : "..tostring(valueOA))
 					end
-					os.execute 'pause'				
+					os.execute 'pause'
 				end
-			end			
+			end
 		end
-	end	
+	end
 end
 
 
 --M43 assignation des numeros de parking du type C08 
 parkOccupied = {}
 function GetParkingId(parkingId, base)
-	local s	
+	local s
 	local counter = 0
-	if not parkOccupied[base]  then										
-		parkOccupied[base] = {}												
+	if not parkOccupied[base]  then
+		parkOccupied[base] = {}
 	end
 
 	-- parking_id = {
@@ -2307,14 +2307,14 @@ function GetParkingId(parkingId, base)
 		if #valueCopy == 2 and not single then
 			local lower = tonumber(valueCopy[1])
 			local upper = tonumber(valueCopy[2])
-			
+
 			repeat
 				counter = counter + 1
-				s = math.random(lower, upper)		
+				s = math.random(lower, upper)
 				-- s = prefix..string.format("%02d", s)
 				s = prefix.. s
-			until parkOccupied[base][s] == nil 	or counter == 100				
-			
+			until parkOccupied[base][s] == nil 	or counter == 100
+
 		elseif #valueCopy > 2 or single then
 			repeat
 				counter = counter + 1
@@ -2322,14 +2322,14 @@ function GetParkingId(parkingId, base)
 				s = valueCopy[r]
 				-- s = prefix..string.format("%02d", s)
 				s = prefix.. s
-			until parkOccupied[base][s] == nil 	or counter == 100					
+			until parkOccupied[base][s] == nil 	or counter == 100
 		end
 
 		if parkOccupied[base][s] == nil then
 			break
 		end
 	end
-	
+
 	--ne trouve pas de place libre:
 	if counter >= 100 then
 		return false
@@ -2377,7 +2377,7 @@ function CheckPointInPolygon(point, polygon, show)
 
 		-- 	print("UtilsF j "..tostring(j))
 		-- 	_affiche(polygon[j], "polygon[j]")
-			
+
 		-- 	print("UtilsF polygon[i].x "..tostring(polygon[i].x))
 		-- 	print("UtilsF polygon[i].y "..tostring(polygon[i].y))
 
@@ -2389,9 +2389,9 @@ function CheckPointInPolygon(point, polygon, show)
 
 		-- end
 
-        if (polygon[i].y < point.y 
-		and polygon[j].y >= point.y 
-		or polygon[j].y < point.y 
+        if (polygon[i].y < point.y
+		and polygon[j].y >= point.y
+		or polygon[j].y < point.y
 		and polygon[i].y >= point.y) then
             if (polygon[i].x + ( point.y - polygon[i].y ) / (polygon[j].y - polygon[i].y) * (polygon[j].x - polygon[i].x) < point.x) then
                 oddNodes = not oddNodes;
@@ -2399,7 +2399,7 @@ function CheckPointInPolygon(point, polygon, show)
         end
         j = i;
     end
-    return oddNodes 
+    return oddNodes
 end
 
 function CheckConfModMaster()
@@ -2409,18 +2409,18 @@ function CheckConfModMaster()
 		mission_ini = mission_ini_check,
 		mission_forcedOptions = mission_forcedOptions_check,
 		campaign_ini = campaign_ini_check,
-		Debug = Debug_check, 
+		Debug = Debug_check,
 		campMod = campMod_check,
-		
+
 	}
 
 	local confModLocal = {
 		mission_ini = mission_ini,
 		mission_forcedOptions = mission_forcedOptions,
 		campaign_ini = campaign_ini,
-		Debug = Debug, 
+		Debug = Debug,
 		campMod = campMod,
-		
+
 	}
 
 	local function checkChanged()
@@ -2429,7 +2429,7 @@ function CheckConfModMaster()
 		for var1, value1 in pairs(confModCheck) do
 			if type(value1) ~= "table" then
 				if confModLocal[var1] == nil then found = false   return false end
-	
+
 			elseif type(value1) == "table" then
 				for var2, value2 in pairs(value1) do
 					if type(value2) ~= "table" then
@@ -2452,23 +2452,23 @@ function CheckConfModMaster()
 			-- print("UtilF var1 |"..var1  )
 
 			if type(value1) ~= "table" then
-				if confModCheck[var1] == nil then found = false print("UtilF B not found var1 |"..var1  )  return false end			
+				if confModCheck[var1] == nil then found = false print("UtilF B not found var1 |"..var1  )  return false end
 			elseif type(value1) == "table" then
 				for var2, value2 in pairs(value1) do
 					if type(value2) ~= "table" then
-						if confModCheck[var1] == nil or confModCheck[var1][var2] == nil  then 
-							found = false 
+						if confModCheck[var1] == nil or confModCheck[var1][var2] == nil  then
+							found = false
 							-- print("UtilF B not found var2 |"..var1.." "..var2  ) 
-							return false 
+							return false
 						end
 
 					elseif type(value2) == "table" then
 						for var3, value3 in pairs(value2) do
 							if type(value3) ~= "table" then
 								-- print("UtilF var1 |"..var1.." var2 "..var2.." var3 "..var3  )
-								if confModCheck[var1] == nil or confModCheck[var1][var2] == nil or confModCheck[var1][var2][var3] == nil  then 
+								if confModCheck[var1] == nil or confModCheck[var1][var2] == nil or confModCheck[var1][var2][var3] == nil  then
 									-- print("UtilF B not found var3 |"..var3  )
-									found = false return false 
+									found = false return false
 								end
 
 							end
@@ -2481,8 +2481,8 @@ function CheckConfModMaster()
 		return true
 
 	end
-	
-	
+
+
 	local integrity = checkChanged()
 
 
@@ -2495,19 +2495,19 @@ end
 
   --a function that automatically updates the conf_mod keeping as much as possible the old settings of the player
 function UpdateConfMod()
-	
+
 	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ConfModCheck.lua")
 	local confModCheck = {
 		mission_ini = mission_ini_check,
 		mission_forcedOptions = mission_forcedOptions_check,
 		campaign_ini = campaign_ini_check,
-		Debug = Debug_check, 
+		Debug = Debug_check,
 		campMod = campMod_check,
-		
+
 	}
 
 	monfichier = io.open("../../../ScriptsMod."..versionPackageICM.."/UTIL_ConfModCheck.lua", "r")
-	
+
 	io.input(monfichier)
 
 	local TableName
@@ -2516,7 +2516,7 @@ function UpdateConfMod()
 	local nTable = {}
 	local n = 0
 	local ligne = 0
-	for line in io.lines() do 
+	for line in io.lines() do
 		local one
 		local two
 		local com
@@ -2526,7 +2526,7 @@ function UpdateConfMod()
 		local VariableName
 		local str_length
 		local nextTab = ""
-		
+
 		ligne = ligne +1
 		--cherche le nom de la table "principal" dans le fichier de ref UTIL_ConfModCheck
 		if string.find(line, "=") and string.find(line, "{") and not string.find(line, "versionDCE")  then
@@ -2542,62 +2542,62 @@ function UpdateConfMod()
 			elseif not string.find(one, "%-%-") then																--si la ligne n'est pas un commentaire
 				TableNameSub = one:gsub("	", "")
 				TableNameSub = TableNameSub:gsub(" ", "")
-				nTable[n] = TableNameSub				
-				for m = 2, n do 
+				nTable[n] = TableNameSub
+				for m = 2, n do
 					firstTab = firstTab.."	"
 				end
 				txt = txt ..firstTab..TableNameSub.." = {\n"
-			end		
+			end
 
 			--colle les valeurs weather de campaign_ini
 			if nTable[2] == "weather" then
 				-- if 
 			end
-		
+
 		--cherche le nom de la variable (key)
-		elseif string.find(line, "=") and string.find(line, ",") and not string.find(line, "{") then				
+		elseif string.find(line, "=") and string.find(line, ",") and not string.find(line, "{") then
 			one, two = line:match("(.*)=(.*)")																		--s�pare la ligne en 2, au niveau de =
-			
-			if  not string.find(one, "%-%-") then				
+
+			if  not string.find(one, "%-%-") then
 				VariableName = one:gsub("	", "")
-				ShowVariableName = VariableName				
-				
+				ShowVariableName = VariableName
+
 				if string.find(VariableName, "%[") then																--si la key est une autre table, on enleve les crochets, guillemet				
 					VariableName = VariableName:gsub("%[", "")
 					VariableName = VariableName:gsub("%]", "")
 					VariableName = VariableName:gsub("\"", "")
-					
-					if string.sub(VariableName, -1) == " " then 
+
+					if string.sub(VariableName, -1) == " " then
 						VariableName = VariableName:sub(1, -2)
 					end
 				else
 					VariableName = VariableName:gsub(" ", "")
-					
+
 				end
-			end	
+			end
 			--traitement du commentaire avec la valeur de la variable
 			com1, com2 = two:match("(.*)-(.*)")
 			if com2 and string.find(com2, "%-%-") then
 				comTemp, com2 = com2:match("(.*)-(.*)")
 			end
-			
+
 		elseif string.find(line, "}") and not string.find(line, "=") then
 			nTable[n] = nil																								--supprime la sous-table, comme si on fermait par }
 			n = n -1																									--ferme la sous table ou l'iteration
-			txt = txt ..""..line.."\n"		
+			txt = txt ..""..line.."\n"
 		else
-			txt = txt ..""..line.."\n"		
+			txt = txt ..""..line.."\n"
 		end
 
 		if not com2 or com2 == nil then
-			com2 = "" 
+			com2 = ""
 		end
-		
+
 		local check = {}
 		if (
-			nTable[1] == "mission_ini" 
-			or nTable[1] == "mission_forcedOptions" 
-			or nTable[1] == "Debug" 
+			nTable[1] == "mission_ini"
+			or nTable[1] == "mission_forcedOptions"
+			or nTable[1] == "Debug"
 			-- or nTable[1] == "campaign_ini"
 			or nTable[1] == "campMod"
 			) and VariableName  then
@@ -2607,7 +2607,7 @@ function UpdateConfMod()
 			elseif nTable[1] == "campMod" then tableId = campMod													--on donne le nom de la clef
 			-- elseif nTable[1] == "campaign_ini" then tableId = campaign_ini
 			end
-		
+
 			--test si les sous table existent
 			-- si elle n'existe pas, on load la table _check � la place
 			local notLoad = false
@@ -2620,7 +2620,7 @@ function UpdateConfMod()
 						testSubTableId =  testSubTableId[nTable[n]]													--prend la valeur de la table du joueur  n-1
 					end
 				end
-			end							
+			end
 
 			--la table est inconnue dans le conf_mod du joueur, donc  on load la table _check � la place
 			if not tableId or tableId == nil or notLoad then
@@ -2634,7 +2634,7 @@ function UpdateConfMod()
 
 			-- _affiche(tableId, "tableIdA")
 
-			for m = 1, n do 
+			for m = 1, n do
 				firstTab = firstTab.."	"
 			end
 			if #nTable >=2 then																						--iteration des cascades de sous table
@@ -2653,11 +2653,11 @@ function UpdateConfMod()
 			if  not tableId[VariableName] then
 				if com1 then
 					com1a, com2b = com1:match("(.*),(.*)")
-					
+
 					com1a = com1a:gsub(" ", "")
-					if  not string.find(com1a, "true") and not string.find(com1a, "false") and not string.find(com1a, ".") and not string.find(com1a, "\"") and  type(com1a) ~= "number" then						
+					if  not string.find(com1a, "true") and not string.find(com1a, "false") and not string.find(com1a, ".") and not string.find(com1a, "\"") and  type(com1a) ~= "number" then
 						com1a = "\""..com1a.."\""
-					end				
+					end
 					tableId[VariableName] = com1a
 
 					if VariableName == "selectLoadout" and mission_ini.SelectLoadout then tableId[VariableName] = "\""..mission_ini.SelectLoadout.."\"" end
@@ -2668,46 +2668,46 @@ function UpdateConfMod()
 					elseif n == 3 then
 						tableId[VariableName] = confModCheck[nTable[1]][nTable[n-1]][nTable[n]][VariableName]
 					elseif n== 4 then
-						tableId[VariableName] = confModCheck[nTable[1]][nTable[n-2]][nTable[n-1]][nTable[n]][VariableName]					
+						tableId[VariableName] = confModCheck[nTable[1]][nTable[n-2]][nTable[n-1]][nTable[n]][VariableName]
 					end
 				end
 			end
 
 			--r�cup�re et format la valeur de la variable
-			local resultNumber = tonumber(tableId[VariableName])			
+			local resultNumber = tonumber(tableId[VariableName])
 			if  type(tableId[VariableName]) ~= "boolean"	and not (string.find(tableId[VariableName], "true") or string.find(tableId[VariableName], "false"))
 			-- and not string.find(com1a, "\"")
 			and  not resultNumber then
 				if com1a and not string.find(com1a, "\"") then
 					result = tableId[VariableName]
 				end
-				
-				if not string.find(tableId[VariableName], "\"") then					
-					result = "\""..tableId[VariableName].."\""					
+
+				if not string.find(tableId[VariableName], "\"") then
+					result = "\""..tableId[VariableName].."\""
 				else
 					result = tableId[VariableName]
 				end
-			else 
+			else
 				result = tableId[VariableName]
 			end
-			
+
 			--calcul l'espace necessaire pour afficher les commentaires
 			str_length = string.len(tostring(firstTab..ShowVariableName.." = "..tostring(result)))
-			for n = 1, 14 - math.floor(str_length/4) do														
+			for n = 1, 14 - math.floor(str_length/4) do
 				nextTab = nextTab .. "	"
-			end		
+			end
 
 			txt = txt..firstTab..ShowVariableName.." = "..tostring(result)..","..nextTab.."--"..com2.."\n"
-		end		
+		end
 	end
-	
+
 	io.close(monfichier)
-	
+
 	txt = txt.. "pictureBrief = " .. TableSerialization(pictureBrief, 0)
 
 	local updateFile = io.open("Init/conf_mod.lua", "w")										--open targetlist file
 	updateFile:write(txt)																		--save new data
-	
+
 	io.close(updateFile)
 
 	dofile("Init/conf_mod.lua")
@@ -2744,7 +2744,7 @@ function modifiCampInit()
 	}
 
 	local monfichier = io.open("Init/camp_init.lua", "r")
-		
+
 	io.input(monfichier)
 	local n = 0
 	local nTab = {
@@ -2753,8 +2753,8 @@ function modifiCampInit()
 		false,
 		false,
 	}
-	for line in io.lines() do 
-		
+	for line in io.lines() do
+
 
 		local addLine = false
 		local varString, com2
@@ -2802,8 +2802,8 @@ function modifiCampInit()
 			end
 
 		else
-			
-			if not string.find(line, "}")   then 
+
+			if not string.find(line, "}")   then
 				txt = txt .. line .. "\n"
 				-- print("UtilF passe ADD  J n:|"..tostring(n).." nTab[n]: "..tostring(nTab[n]))
 			else
@@ -2818,14 +2818,14 @@ function modifiCampInit()
 			end
 
 		end
-			
+
 	end
 
 	io.close(monfichier)
 
 	local updateFile = io.open("Init/camp_init.lua", "w")										--open targetlist file
 	updateFile:write(txt)																		--save new data
-	
+
 	io.close(updateFile)
 
 	dofile("Init/camp_init.lua")
@@ -2841,9 +2841,9 @@ function AssignCallnameSquad()
 	--Il peut meme le changer au cours de la campagne, DCE le prendra en compte
 	-- il existe une "protection" contre les mauvais callsign ajout� par le joueur, s'il se trompe
 	--https://wiki.hoggitworld.com/view/DCS_enum_callsigns
-	
+
 	--******************************
-	
+
 	--the callsign or callname will now be assigned to a "west" squad for the entire campaign
 	--by default, the assignment is done at the first mission or at any skipMission if it was not done before
 	--the assignment is done in priority with SpecificCallnames if they exist, then, the choice is automatic and random.
@@ -2852,82 +2852,82 @@ function AssignCallnameSquad()
 	-- there is a "protection" against bad callsign added by the player, if he is wrong
 	--https://wiki.hoggitworld.com/view/DCS_enum_callsigns
 
-	
-	
+
+
 	--si le joueur veut changer de callname � un squad, nous mettons � jour le Active/oob_air par rapport au Init/oob_air_init
 	dofile("Init/oob_air_init.lua")
 	initOobAir = deepcopy(oob_air)
-	
+
 	oob_air = nil
-	
+
 	dofile("Active/oob_air.lua")
-	
+
 	for initSide, initUnit in pairs(initOobAir) do
-		for n = 1, #initUnit do	
+		for n = 1, #initUnit do
 			if initUnit[n].callsign then												--si le joueur a enregistr� une callname perso
-				for side, unit in pairs(oob_air) do	
-					for r = 1, #unit do	
+				for side, unit in pairs(oob_air) do
+					for r = 1, #unit do
 						if unit[r].name == initUnit[n].name and unit[r].callsign ~= initUnit[n].callsign then				--si c'est le meme suad
-							
+
 							unit[r].callsign = initUnit[n].callsign
 							-- print("utilFct CORRECTION callsign "..unit[r].callsign)
 							-- os.execute 'pause'
-						end			
+						end
 					end
 				end
 			end
 		end
-	end	
-	
+	end
 
-	
+
+
 	local CallSigneAssigned = {}
 
-	for side,unit in pairs(oob_air) do	
-		for n = 1, #unit do	
+	for side,unit in pairs(oob_air) do
+		for n = 1, #unit do
 			--regarde les CallName d�j� attribu� par le concepteur de campagne
 			-- if WestCallsign[unit[n].country] == "west" and unit[n].callsign then
 			if isWesternCountry(unit[n].country) and unit[n].callsign then
-				CallSigneAssigned[unit[n].callsign] = true								
-			end			
+				CallSigneAssigned[unit[n].callsign] = true
+			end
 		end
 	end
-	
-	for side, unit_ in pairs(oob_air) do	
-		for n = 1, #unit_ do			
-			unit = unit_[n]	
+
+	for side, unit_ in pairs(oob_air) do
+		for n = 1, #unit_ do
+			unit = unit_[n]
 			if  not unit.inactive then
-				local Imax = 0			
+				local Imax = 0
 				-- if WestCallsign[unit.country] == "west" and not unit.callsign then
 				if isWesternCountry(unit.country) and not unit.callsign then
 						local assigneOk = false
-						
+
 						--s'il existe une table avec des CallName sp�cifique � un type d'avion
 						if  SpecificCallnames[unit.type] and SpecificCallnames[unit.type][unit.country]  then
-							
+
 							--recherch l'index le plus haut de la table SpecificCallnames
 							local Imax = 0
 							for index, value in pairs(SpecificCallnames[unit.type][unit.country]) do
 								if index > Imax then
 									Imax = index
-								end						
+								end
 							end
-							
+
 							local j = 0
 							repeat
 								local i =  math.random(9, Imax)
-								
+
 								if not CallSigneAssigned[SpecificCallnames[unit.type][unit.country][i]] then
 									unit.callsign = SpecificCallnames[unit.type][unit.country][i]
 									unit.callsignId = i
 									CallSigneAssigned[unit.callsign] = true
 									assigneOk = true
-									break								
+									break
 								end
 								j = j + 1
-							until j > 50 or assigneOk						
+							until j > 50 or assigneOk
 						end
-						
+
 						if not assigneOk then
 							if unit.tasks["AWACS"] then
 								category = "AWACS"
@@ -2936,7 +2936,7 @@ function AssignCallnameSquad()
 							else
 								category = "generic"
 							end
-							
+
 							for i = 1, #callsign_west[category] do
 								if not CallSigneAssigned[callsign_west[category][i]] then
 									unit.callsign = callsign_west[category][i]
@@ -2946,7 +2946,7 @@ function AssignCallnameSquad()
 									break
 								end
 							end
-							
+
 							if not assigneOk then
 								local i =  math.random(1, #callsign_west[category])
 								unit.callsign = callsign_west[category][i]
@@ -2956,28 +2956,28 @@ function AssignCallnameSquad()
 								break
 							end
 						end
-		
+
 				-- elseif WestCallsign[unit.country] == "west" and unit.callsign then								--controle si le callsign renseign� par le joueur/campaignMaker est compatible
 				elseif isWesternCountry(unit.country) and unit.callsign then
 					local GoodCallSign = false
 					if  not unit.inactive and SpecificCallnames[unit.type] and SpecificCallnames[unit.type][unit.country]  then
-						
+
 						--recherch l'index le plus haut de la table SpecificCallnames
 						local Imax = 0
 						for index, value in pairs(SpecificCallnames[unit.type][unit.country]) do
 							if index > Imax then
 								Imax = index
-							end						
+							end
 						end
 						for i = 9, Imax do
 							if SpecificCallnames[unit.type][unit.country][i] == unit.callsign then
 								unit.callsignId = i
 								GoodCallSign = true
-								break								
+								break
 							end
 						end
 					end
-					
+
 					if not GoodCallSign then
 						if unit.tasks["AWACS"] then
 							category = "AWACS"
@@ -2994,7 +2994,7 @@ function AssignCallnameSquad()
 							end
 						end
 					end
-					
+
 					if not GoodCallSign then
 						print("Error(UtilFct) This callsign: ("..tostring(unit.callsign)..") is not compatible with this type of aircraft ("..tostring(unit.type)..")")
 						print(" This callsign is ignored for this mission. Change this callsign in /Init/oob_air_init.lua for this squadron ("..tostring(unit.name)..")")
@@ -3002,7 +3002,7 @@ function AssignCallnameSquad()
 						print("https://wiki.hoggitworld.com/view/DCS_enum_callsigns")
 						os.execute 'pause'
 						unit.callsign = nil
-					end				
+					end
 				end
 			end
 		end
@@ -3029,7 +3029,7 @@ end
 	--sort() trie la table alpha en fonction du priority
 function targetlistToNum()
 	local targetlistTempB = {}
-											
+
 	for target_name, target in pairs(targetlist["blue"]) do
 		target.titleName = target_name
 		if not target.name then target.name = target_name end
@@ -3071,7 +3071,7 @@ function listSpotterAircraft()
 					if string.lower(taskName) == "spotter" and value == true then
 						isAfacAircraft[sqd.type] = true
 					end
-				end				
+				end
 			end
 		end
 	end
@@ -3092,9 +3092,9 @@ end
 local showLL_position = true
 
 function format_dms(lat_decimal, lon_decimal, precision)
-    
+
 	if not showLL_position then return "" end
-	
+
 	local lat_deg, lat_min, lat_sec = latLon_decimal_to_dms(lat_decimal)
     local lon_deg, lon_min, lon_sec = latLon_decimal_to_dms(lon_decimal)
 
@@ -3102,15 +3102,15 @@ function format_dms(lat_decimal, lon_decimal, precision)
     local lon_direction = lon_decimal >= 0 and 'E' or 'W'
 
     if precision == 4 then
-        return string.format("%s%d°%02d' - %s%d°%02d'", 
+        return string.format("%s%d°%02d' - %s%d°%02d'",
                              lat_direction, math.abs(lat_deg), math.abs(lat_min),
                              lon_direction, math.abs(lon_deg), math.abs(lon_min))
     elseif precision == 6 then
-        return string.format("%s%d°%02d'%02d\" - %s%d°%02d'%02d\"", 
+        return string.format("%s%d°%02d'%02d\" - %s%d°%02d'%02d\"",
                              lat_direction, math.abs(lat_deg), math.abs(lat_min), math.floor(math.abs(lat_sec)),
                              lon_direction, math.abs(lon_deg), math.abs(lon_min), math.floor(math.abs(lon_sec)))
     elseif precision == 8 then
-        return string.format("%s%d°%02d'%05.2f\" - %s%d°%02d'%05.2f\"", 
+        return string.format("%s%d°%02d'%05.2f\" - %s%d°%02d'%05.2f\"",
                              lat_direction, math.abs(lat_deg), math.abs(lat_min), math.abs(lat_sec),
                              lon_direction, math.abs(lon_deg), math.abs(lon_min), math.abs(lon_sec))
     else
@@ -3143,8 +3143,8 @@ function dcs_to_gps(easting, northing, P0_lat, P0_lon)
     local lon0_rad = math.rad(P0_lon)
 
     -- Delta en mètres par rapport au point de référence P0
-    local delta_easting = easting 
-    local delta_northing = northing 
+    local delta_easting = easting
+    local delta_northing = northing
 
     -- Calcul du méridien d'origine
     local M0 = a * ((1 - e2 / 4 - 3 * e2^2 / 64 - 5 * e2^3 / 256) * lat0_rad
@@ -3218,26 +3218,26 @@ function newPosLatLon(latA, lonA, distance, azimut)
     local latA_rad = toRadians(latA)
     local lonA_rad = toRadians(lonA)
     local azimut_rad = toRadians(azimut)
-    
+
     -- Distance en fraction de rayon terrestre (distance en mètres ici)
     local d = distance / R
 
     -- Calcul de la latitude de B
     local latB_rad = math.asin(math.sin(latA_rad) * math.cos(d) + math.cos(latA_rad) * math.sin(d) * math.cos(azimut_rad))
-    
+
     -- Calcul de la différence de longitude
     local deltaLon_rad = atan2(
         math.sin(azimut_rad) * math.sin(d) * math.cos(latA_rad),
         math.cos(d) - math.sin(latA_rad) * math.sin(latB_rad)
     )
-    
+
     -- Calcul de la longitude de B
     local lonB_rad = lonA_rad + deltaLon_rad
-    
+
     -- Conversion des résultats en degrés
     local latB = toDegrees(latB_rad)
     local lonB = toDegrees(lonB_rad)
-    
+
     return latB, lonB
 end
 
