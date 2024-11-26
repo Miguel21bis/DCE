@@ -11,8 +11,8 @@ versionDCE["UTIL_Debug.lua"] = "1.3.9"
 
 
 if Debug.debug then
-	--local sorties_str = "draft_sorties = " .. TableSerialization(draft_sorties, 0)		--this can take up to 30 seconds for parge missions, only activate if really needed
-	--local sortiesFile = io.open("Debug/ATO_draft_sorties.lua", "w")
+	--local sorties_str = "Draft_sorties = " .. TableSerialization(Draft_sorties, 0)		--this can take up to 30 seconds for parge missions, only activate if really needed
+	--local sortiesFile = io.open("Debug/ATO_Draft_sorties.lua", "w")
 	--sortiesFile:write(sorties_str)
 	--sortiesFile:close()
 
@@ -30,7 +30,7 @@ if Debug.debug then
 	threatFile:close()
 	
 	
-	local available_str = "aircraft_availability = " .. TableSerialization(aircraft_availability, 0)
+	local available_str = "Aircraft_availability = " .. TableSerialization(Aircraft_availability, 0)
 	local availableFile = io.open("Debug/AircraftAvailability_UtilDebug.lua", "w")
 	availableFile:write(available_str)
 	availableFile:close()
@@ -50,7 +50,7 @@ if Debug.debug then
 	file_File:write(file_str)																	--save new data
 	file_File:close()
 
-	local test_str = "payloadRestricted = " .. TableSerialization(payloadRestricted, 0)						--make a string
+	local test_str = "PayloadRestricted = " .. TableSerialization(PayloadRestricted, 0)						--make a string
 	local testFile = io.open("Debug/loadout_restrictied_UtilDebug.lua", "w")								--open targetlist file
 	testFile:write(test_str)															--save new data
 	testFile:close()

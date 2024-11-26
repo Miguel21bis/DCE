@@ -57,7 +57,7 @@ for side,unit in pairs(oob_air) do																								--iterate through all 
 			for task,task_bool in pairs(unit[n].tasks) do											--iterate through all tasks of unit
 
 				if task_bool then	
-					local temp_draft_sorties = {}														--temporary table to hold additional draft sorties with escorts assigned
+					local temp_Draft_sorties = {}														--temporary table to hold additional draft sorties with escorts assigned
 					--get possible loadouts
 					local unit_loadouts = {}														--table to hold all loadouts for this aircraft type and task
 					for loadout_name, ltable in pairs(db_loadouts[unit[n].type][task]) do			--iterate through all loadouts for the aircraft type and task

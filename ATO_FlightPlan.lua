@@ -17,7 +17,7 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.281"
 
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)
 -- modification M74_a		mix static, vehicle and map elements in a Target.
--- modification M71_a		payloadRestricted
+-- modification M71_a		PayloadRestricted
 -- modification M68_a		add AFAC task
 -- modification M67_a		add 2.9 datalinks dataCartridge
 -- modification M66_a		add Runway Attack
@@ -513,6 +513,7 @@ function GetSidenumber(squadron, lower, upper, nUnit, player, type)				--not loc
 	
 	--cherche si le joueur fait partie de cet escadron
 	local reservedDigit = 0
+	oob_air = oob_air or {}
 	for side_name,side in pairs(oob_air) do	
 		for n,unit in pairs(side) do
 			if unit.name == squadron and unit.player  then
@@ -766,7 +767,7 @@ local function GetTankerTACAN()
 end
 
 --Mod M27.b Randomly moves the 2 BullsEye
-function fct_movedBullseye(side, NameTheatre)
+local function fct_movedBullseye(side, NameTheatre)
 	
 	local tempArrayBulls = {}
 	local tempBullseye =
@@ -3206,12 +3207,12 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						
 						elseif flight[f].task == "Laser Illumination" then
 							local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
-							local LaserCode1 = math.random(1,7)
-							local LaserCode2 = math.random(1,8)
-							local LaserCode3 = math.random(1,8)
-							flight[f].target.LaserCode = tonumber("1" .. LaserCode1 .. LaserCode2 .. LaserCode3)				--store laser code for flight target
+							local laserCode1 = math.random(1,7)
+							local laserCode2 = math.random(1,8)
+							local laserCode3 = math.random(1,8)
+							flight[f].target.LaserCode = tonumber("1" .. laserCode1 .. laserCode2 .. laserCode3)				--store laser code for flight target
 							for ff = 1, #pack[p].main do																		--iterate through all main body flights
-								pack[p].main[ff].target.LaserCode = tonumber("1" .. LaserCode1 .. LaserCode2 .. LaserCode3)		--store laser code in all main body flights
+								pack[p].main[ff].target.LaserCode = tonumber("1" .. laserCode1 .. laserCode2 .. laserCode3)		--store laser code in all main body flights
 							end
 							
 							local tgt = ""
@@ -3523,18 +3524,18 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						
 						elseif flight[f].task == "AFAC" then
 							local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
-							local LaserCode1 = 0
-							local LaserCode2 = 0
-							local LaserCode3 = 0
-							local LaserCode = 0
+							local laserCode1 = 0
+							local laserCode2 = 0
+							local laserCode3 = 0
+							local LaserCode = ""
 							
 							if not pack[p].main[f].target.LaserCode then
 								
-								LaserCode1 = math.random(1,7)
-								LaserCode2 = math.random(1,8)
-								LaserCode3 = math.random(1,8)
+								laserCode1 = math.random(1,7)
+								laserCode2 = math.random(1,8)
+								laserCode3 = math.random(1,8)
 
-								LaserCode = tonumber("1" .. LaserCode1 .. LaserCode2 .. LaserCode3)
+								LaserCode = 1 .. laserCode1 .. laserCode2 .. laserCode3
 								
 								flight[f].target.LaserCode = LaserCode																--store laser code for flight target
 							
@@ -3992,6 +3993,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								
 								if  waypoints[w].briefing_name == "Land"  then
 									local tempTime = 0
+									local tempTimeStr = ""
 									for ww = 1, #waypoints do
 										if waypoints[ww].briefing_name == "Departure" then
 											 tempTime =   waypoints[w].ETA - waypoints[ww].ETA
@@ -3999,15 +4001,15 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 										end
 									end
 									if tempTime ~= 0 then
-										tempTime = FormatTime( tempTime, "hh:mm")
+										tempTimeStr = FormatTime( tempTime, "hh:mm")
 										-- tempTime =  math.floor((tempTime / 60) + 0.5)	.. " mn"
 										
-										local space = 6 - string.len(tostring(tempTime))
+										local space = 6 - string.len(tostring(tempTimeStr))
 										local s = ""
 										for n = 1, space  do															
 											s = s .. " "																	
 										end
-										waypoints[w]["TotFlightTime"] = s..tempTime									
+										waypoints[w]["TotFlightTime"] = s..tempTimeStr									
 										waypoints[w]["TotFlightDist"] = TotFlightDist .. suffixe
 										
 									end
@@ -4437,7 +4439,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					--ajout les restrictions au loadout s il y en a
 					if (flight[f].player or flight[f].client) then
-						for typeAircraft, payloadProhibited in pairs(payloadRestricted) do
+						for typeAircraft, payloadProhibited in pairs(PayloadRestricted) do
 							if typeAircraft and payloadProhibited and flight[f].type == typeAircraft then
 								units[n].payload.restricted = payloadProhibited
 							end
@@ -6985,7 +6987,7 @@ end
 local sommePlane = {} 
 for CV, SixPack in pairs(testSixPack) do	
 	
-	if table.getn(SixPack) > 0 then
+	if #SixPack > 0 then
 
 		table.sort(SixPack, function(a,b) return a.time < b.time  end)
 		if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.. _afficheTXT(SixPack, "SixPack") end	
@@ -7041,7 +7043,7 @@ for CV, SixPack in pairs(testSixPack) do
 				end
 			end
 			
-			if breakloop or n > table.getn(SixPack) then									
+			if breakloop or n > #SixPack then									
 				if SixPack[n]["client"] and SingleWithDServer  then	-- and not SingleWithDServerAiAir
 					print()
 					print("********************ATTENTION******************")
@@ -7070,7 +7072,7 @@ for CV, SixPack in pairs(testSixPack) do
 			end
 			
 			n = n +1 
-		until breakloop or n > table.getn(SixPack)
+		until breakloop or n > #SixPack
 	end
 end
 
@@ -7080,12 +7082,12 @@ if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.. _afficheTXT(testDeckPlace, 
 -- limite le nombre d'avion sur le pont (permet de faire apparaitre les avions tardif, s'il y a de la place)
 for CV, deck in pairs(testDeckPlace) do	
 	
-	if table.getn(deck) > 0 then
+	if #deck > 0 then
 
 		table.sort(deck, function(a,b) return a.time < b.time  end)
 		if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.. _afficheTXT(deck, "testDeckPlace deck") end	
 		
-		if testSixPack[CV] and table.getn(testSixPack[CV]) > 0 then
+		if testSixPack[CV] and #testSixPack[CV] > 0 then
 			
 			--cherche une place dispo sur le deck pour les avions tardif
 			local counter = 0
@@ -7419,7 +7421,7 @@ end
 camp.BaseAirStart = tempBaseAirStart
 
 -- local debugTxt_AtoFP = debugTxt_AtoFP
-local debugGenMFile = io.open("Debug/debugGenMission.txt", "w")										
+local debugGenMFile = io.open("Debug/debugGenMission.txt", "w") or error("Failed to open debug file")									
 debugGenMFile:write(debugTxt_AtoFP)																		
 debugGenMFile:close()
 
@@ -7443,7 +7445,7 @@ debugGenMFile:close()
 
 
 local camp_str = "TabLPark = " .. TableSerialization(TabLPark, 0)						
-local campFile = io.open("Debug/TabLPark_AtoFP.lua", "w")								
+local campFile = io.open("Debug/TabLPark_AtoFP.lua", "w") or error("Failed to open debug file")						
 campFile:write(camp_str)															
 campFile:close()
 
@@ -7652,7 +7654,7 @@ for _side, side in pairs(mission.coalition) do
 end
 
 
-positionCentrale = {}
+local positionCentrale = {}
 for _side, side in pairs(mission.coalition) do	
 	for countryN, country in pairs(side.country) do
 		

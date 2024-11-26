@@ -10,7 +10,7 @@ versionDCE["MAIN_NextMission.lua"] = "1.35.211"
 -- adjustment_g				(g keep original triggers( a_remove_scene_objects ))(e oob_scen ==0)(d currentKey)(c clean conf_mod)(b Firstmission_flag)(a: add Loadout tiers)
 -- cleanCode_f
 -- modification M77_k		CG_ArtySpotter (k listSpotterAircraft)(c camp.spotter)(b tempo)
--- modification M71_b		payloadRestricted  (b Action.RestrictedLoadout(file))
+-- modification M71_b		PayloadRestricted  (b Action.RestrictedLoadout(file))
 -- modification M66_a		bombOnRunway
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 -- modification M64_b		adds elements of a new base_mission (b: update Type & groupId)
@@ -49,21 +49,21 @@ versionDCE["MAIN_NextMission.lua"] = "1.35.211"
 ----- unpack template mission file ----
 local minizip = require('minizip')
 
---ajoutes les restrictions de loadout dans la table payloadRestricted
+--ajoutes les restrictions de loadout dans la table PayloadRestricted
 
-local restrictedPathActive = "Active/payloadRestricted.lua"
+local restrictedPathActive = "Active/PayloadRestricted.lua"
 local TestPath = io.open(restrictedPathActive, "r")
 
 if  TestPath ~= nil then
 	io.close(TestPath)
 
-	dofile("Active/payloadRestricted.lua")
+	dofile("Active/PayloadRestricted.lua")
 end
 
 
-if not payloadRestricted then
+if not PayloadRestricted then
 	
-	payloadRestricted = {}
+	PayloadRestricted = {}
 
 	local restrictedPath = "Init/restricted_loadout.miz"
 	local TestPath = io.open(restrictedPath, "r")
@@ -86,7 +86,7 @@ if not payloadRestricted then
 							for Nunit, unit in pairs(group.units) do
 
 								if unit.payload and unit.payload.restricted then
-									payloadRestricted[unit.type] = unit.payload.restricted
+									PayloadRestricted[unit.type] = unit.payload.restricted
 								end
 
 							end

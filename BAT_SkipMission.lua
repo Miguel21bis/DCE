@@ -451,27 +451,27 @@ if input == "y" or input == "yes" then
 				print("Mission Generation Error. No eligible player flight in 20 attempts. Try again.\n\n")
 				break
 			else																							--no player flight could be assigned, advance time and try again
-				if playability_criterium.active_unit == nil then
+				if Playability_criterium.active_unit == nil then
 					print("Player unit is not active.\n\n")
-				elseif playability_criterium.base == nil then
+				elseif Playability_criterium.base == nil then
 					print("Player airbase is not operational.\n\n")
-				elseif playability_criterium.ready_aircraft == nil then
+				elseif Playability_criterium.ready_aircraft == nil then
 					print("Player unit has no ready aircraft.\n\n")
-				elseif playability_criterium.tot == nil then
+				elseif Playability_criterium.tot == nil then
 					print("Player aircraft type cannot operate at this time of day.\n\n")
-				elseif playability_criterium.target == nil then
+				elseif Playability_criterium.target == nil then
 					print("No eligible mission available for player.\n\n")
-				elseif playability_criterium.target_firepower == nil then
+				elseif Playability_criterium.target_firepower == nil then
 					print("Not enough ready aircraft for this mission.\n\n")
-				elseif playability_criterium.weather == nil then
+				elseif Playability_criterium.weather == nil then
 					print("Player aircraft type cannot operate in this weather.\n\n")
-				elseif playability_criterium.target_range == nil then
+				elseif Playability_criterium.target_range == nil then
 					print("No eligible mission available for player.\n\n")
-				elseif playability_criterium.coop == nil then
+				elseif Playability_criterium.coop == nil then
 					print("Not enough ready aircraft for all clients.\n\n")
 				elseif Multi.NbGroup and not PlayerFlight then
 					print("Not enough ready aircraft for all clients.\n\n")
-				elseif playability_criterium.intercept == nil then
+				elseif Playability_criterium.intercept == nil then
 					print("Ground alert intercept duty without launch.\n\n")
 				end
 			end

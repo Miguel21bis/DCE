@@ -31,13 +31,14 @@ else
 	--TODO targetlist est repris à 0 ici, pas top
 	oob_air = nil
 	dofile("Active/oob_air.lua")
+	oob_air = oob_air or {} -- Assurez que c'est une table, même après un reset
 
 	oob_ground = nil
 	dofile("Active/oob_ground.lua")
 
 	--clean All Id 
-	allIdGroupImport = false
-	allIdUnitImport = false
+	AllIdGroupImport = false
+	AllIdUnitImport = false
 
 	getAllId()
 

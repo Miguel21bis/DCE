@@ -293,20 +293,20 @@ if #playable > 0 and not AllCoopPossible then
 	for i=1, #playable do		
 		local Number = playable[i].number
 		
-		if camp.aircraft_availability[playable[i].squadName] then		
+		if camp.Aircraft_availability[playable[i].squadName] then		
 			local testIme = 0
 			--check la plus grande valeur, qui correspond certainement aux derniers ajouts
-			for k  , _unavailable in pairs(camp.aircraft_availability[playable[i].squadName].unavailable) do	
+			for k  , _unavailable in pairs(camp.Aircraft_availability[playable[i].squadName].unavailable) do	
 				if _unavailable  > testIme then				
 					testIme = _unavailable
 				end		
 			end
 			
-			for k  , _unavailable in pairs(camp.aircraft_availability[playable[i].squadName].unavailable) do				
+			for k  , _unavailable in pairs(camp.Aircraft_availability[playable[i].squadName].unavailable) do				
 				if _unavailable == testIme and Number > 0 then
-					camp.aircraft_availability[playable[i].squadName].unavailable[k] = 0				
-					camp.aircraft_availability[playable[i].squadName].assigned = camp.aircraft_availability[playable[i].squadName].assigned - 1 
-					camp.aircraft_availability[playable[i].squadName].unassigned = camp.aircraft_availability[playable[i].squadName].unassigned + 1 					
+					camp.Aircraft_availability[playable[i].squadName].unavailable[k] = 0				
+					camp.Aircraft_availability[playable[i].squadName].assigned = camp.Aircraft_availability[playable[i].squadName].assigned - 1 
+					camp.Aircraft_availability[playable[i].squadName].unassigned = camp.Aircraft_availability[playable[i].squadName].unassigned + 1 					
 					Number = Number - 1
 				end		
 			end
@@ -314,7 +314,7 @@ if #playable > 0 and not AllCoopPossible then
 	end
 else
 	if  debugAssign then
-		_affiche(playability_criterium, "playability_criterium AtoPA")
+		_affiche(Playability_criterium, "Playability_criterium AtoPA")
 		os.execute 'pause'
 	end
 end

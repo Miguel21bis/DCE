@@ -11,7 +11,7 @@ versionDCE["DC_CheckTriggers.lua"] = "1.16.93"
 -- adjustment_m				(m add new country if template need)(L win totalAirUnitAliveBySide)(k \\" to \")(j moveToAnotherBaseOrDeactivate name & attributes)(i add moveToAnotherBaseOrDeactivate)(h taskSelected)(g airReinforceDelay)(f add targetIsActive)(e check found activate target)(d totalAirUnitAliveBySide)(c add automaticReinforce) (a boat CampTotalTimeS)
 -- debug_g					(fg -nan(ind) Return.BaseAlive)(e link of briefing)(d: ensures that DCE chooses between several ship patrol areas)(a: n'ajoute pas le texte s'il existe d�j�)
 -- modification M73_d		automatic squad transfer based on available/unavailable runways/bases (c disabledByDCE)
--- modification M71_b		payloadRestricted (b Action.RestrictedLoadout(file))
+-- modification M71_b		PayloadRestricted (b Action.RestrictedLoadout(file))
 -- modification M70_a		GroundZoneTarget (adds the possibility of counting unit completeness by zone) 
 -- modification M66_d		bombOnRunway and ActivateBaseAndItsUnits (d <0 non réparable)
 -- modification M53_cd		simplification of the "Reserves" variable (cd: debug)(b: add reserve in AirUnitAlive)
@@ -1513,7 +1513,7 @@ Action = {}
 
 		local missionFromBaseMission = mission
 
-		local payloadRestricted = {}
+		local PayloadRestricted = {}
 
 		local restrictedPath = "Loadouts/"..file
 		local TestPath = io.open(restrictedPath, "r")
@@ -1535,7 +1535,7 @@ Action = {}
 								for Nunit, unit in pairs(group.units) do
 
 									if unit.payload and unit.payload.restricted then
-										payloadRestricted[unit.type] = unit.payload.restricted
+										PayloadRestricted[unit.type] = unit.payload.restricted
 									end
 
 								end
@@ -1547,8 +1547,8 @@ Action = {}
 			
 			mission = missionFromBaseMission
 
-			local data_str = "payloadRestricted = " .. TableSerialization(payloadRestricted, 0)						
-			local dataFile = io.open("Active/payloadRestricted.lua", "w")								
+			local data_str = "PayloadRestricted = " .. TableSerialization(PayloadRestricted, 0)						
+			local dataFile = io.open("Active/PayloadRestricted.lua", "w")								
 			dataFile:write(data_str)														
 			dataFile:close()
 

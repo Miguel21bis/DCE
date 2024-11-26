@@ -576,10 +576,10 @@ end
 function getAllId()
 	allIdGroup = {}
 	GroupIdError = {}
-	allIdGroupImport = false		--deprecate?
+	AllIdGroupImport = false		--deprecate?
 	allIdUnit = {}
 	unitIdError = {}
-	allIdUnitImport = false		--deprecate?
+	AllIdUnitImport = false		--deprecate?
 
 	-- for _side, side in pairs(mission.coalition) do	
 	-- 	for countryN, country in pairs(side.country) do
@@ -607,7 +607,7 @@ function getAllId()
 
 						if not allIdGroup[group.groupId] then
 							allIdGroup[group.groupId] = true
-							allIdGroupImport = true 
+							AllIdGroupImport = true 
 						else
 							table.insert(GroupIdError,group.groupId )
 							-- print("UtilF F1 found GroupIdError ID "..tostring(group.groupId).." name: "..tostring(group.name))
@@ -617,7 +617,7 @@ function getAllId()
 
 							if not allIdUnit[unit.unitId] then
 								allIdUnit[unit.unitId] = true
-								allIdUnitImport = true 
+								AllIdUnitImport = true 
 							else
 								table.insert(unitIdError, unit.unitId )
 								-- print("UtilF F2 found unitIdError ID "..tostring(unit.unitId).." name: "..tostring(unit.name))
@@ -682,7 +682,7 @@ end
 
 local idGroupCounter = 100000
 function GenerateIDGroup(name)
-	if not allIdUnitImport or not allIdGroupImport then
+	if not AllIdUnitImport or not AllIdGroupImport then
 		getAllId()
 	end
 
@@ -708,7 +708,7 @@ end
 local idUnitCounter = 100000
 function GenerateIDUnit(name)
 	
-	if not allIdUnitImport or not allIdGroupImport then
+	if not AllIdUnitImport or not AllIdGroupImport then
 		getAllId()
 	end
 
