@@ -2178,7 +2178,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					if TestPath ~= nil then 
 						io.close(TestPath)
 						local ScratBriefTXT = StringToTxtBrief(briefing[sideName])
-						local config
+						config = {}
 						dofile(ScratchpadPath)
 						local ScratFil = io.open(ScratchpadPath, "w") or error("Failed to open Scratchpad file")
 						config.content = ScratBriefTXT
