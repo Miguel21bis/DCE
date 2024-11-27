@@ -750,10 +750,10 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 										end
 
 										--check range from threat
-										if groundthreatsAll then
+										if GroundthreatsAll then
 											
 											for elementN, element in pairs(target.elements) do
-												for threatN, threat in pairs(groundthreatsAll[ DCS_ENI_Side[side_name] ]) do
+												for threatN, threat in pairs(GroundthreatsAll[ DCS_ENI_Side[side_name] ]) do
 													if element.x  and element.x > math.floor(threat.x)-1 and  element.x < math.floor(threat.x)+1 then
 														if element.y > math.floor(threat.y)-1 and  element.y < math.floor(threat.y)+1 then
 															element.range = threat.range

@@ -25,7 +25,7 @@ versionDCE["MAIN_NextMission.lua"] = "1.35.211"
 -- modification M52_a		campaign player's choices 
 -- modification M51_a		Moonphase
 -- modification M49_f		big central db_loadout (f: detection automatique du codeNom)(d: tag in conf_mod)(ce: loadout statistics)(b: archive)
--- modification M48_e		Accept result mission (e: debug horaire)(d: garde en memoire le txt camp["briefing_text"])
+-- modification M48_e		Accept result mission (e: debug horaire)(d: garde en memoire le txt camp["Briefing_text"])
 -- modification M47_c		keeps the history of the campaign files (c: save debugging information during mission generation)
 -- modification M40_k		Template Active GroundGroup moving front (k: update Active/db_airbase)
 -- modification M40			Pedro
@@ -44,6 +44,24 @@ versionDCE["MAIN_NextMission.lua"] = "1.35.211"
 -- modification M05_c		ajout picture Briefing (c: correction path vide)
 -- modification M00_b		Integration de conf_mod
 -- -------------------------------------------------------------------------------------------------------	
+
+
+Brief = {
+	red = {},
+	blue = {},
+}
+
+Briefing_text = ""
+
+
+-- par défaut, on assigne une valeur superieur au camp du joueur, qu'il soit rouge ou bleu.
+SkillWish = {
+	["red"] = 50,
+	["blue"] = 50,
+}
+
+PlacePA = {}
+AltitudeCruise = 5400			--for Helicopter
 
 --Check_TaskPossibleByPlane
 ----- unpack template mission file ----

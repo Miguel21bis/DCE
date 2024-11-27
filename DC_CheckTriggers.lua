@@ -17,7 +17,7 @@ versionDCE["DC_CheckTriggers.lua"] = "1.16.93"
 -- modification M53_cd		simplification of the "Reserves" variable (cd: debug)(b: add reserve in AirUnitAlive)
 -- modification M51_a		kill Pedro when CV sink
 -- modification M50_b		Records landings for later use in logistics (C-130, Transport...) (b: suivi en %)
--- modification M48_h		Accept result mission (h: debug firstNews) (g: addImage trigger)(f: debug)(d: garde en memoire le txt camp["briefing_text"])
+-- modification M48_h		Accept result mission (h: debug firstNews) (g: addImage trigger)(f: debug)(d: garde en memoire le txt camp["Briefing_text"])
 -- modification M40_l		Template Active GroundGroup moving front (l: TemplateDeactivate)(k: update route)(ij: bug insert) (fgh: sideBase)(e: heading unite & group)(d: movedXY bug) (c: new unitId) (b: bug 2.7)
 -- modification M38_j		Check and Help CampaignMaker (ij more info)(h: KillTarget step by step)
 -- modification M33_m 		Custom Briefing (lm: use  DictKey_descriptionText)
@@ -377,7 +377,7 @@ Return = {}
 								for n = 1, #PolyZonesTable do
 									poly[n] = Refpoint[PolyZonesTable[n]]
 								end
-								return CheckPointInPoly(point, poly)							--checks if point is in polygon, returns true or false
+								return CheckPointInPolygon(point, poly)							--checks if point is in polygon, returns true or false
 							end
 						end
 					end
@@ -427,31 +427,31 @@ Action = {}
 		--n'ajoute pas le texte s'il existe deja
 		
 		if debugKT then
-			print("DcCT Pbriefing_text "..type(briefing_text))
+			print("DcCT PBriefing_text "..type(Briefing_text))
 			print("DcCT arg "..type(arg))
 
-			_affiche(briefing_text, "briefing_text DcCT")
+			_affiche(Briefing_text, "Briefing_text DcCT")
 			_affiche(arg, "arg")
 		end
 
-		if string.find(briefing_text, arg) then
+		if string.find(Briefing_text, arg) then
 			-- print("DcCT PASSE B ")
 			return
 		end		
 		
 		if clear then
-			briefing_status = ""												--clear briefing text from previous mission instances
-			briefing_text = briefing_text .. arg .. " \n \n"					--add trigger text to briefing text of this mission instance with double new line
-			-- print("DcCT PASSE C "..briefing_text)
+			Briefing_status = ""												--clear briefing text from previous mission instances
+			Briefing_text = Briefing_text .. arg .. " \n \n"					--add trigger text to briefing text of this mission instance with double new line
+			-- print("DcCT PASSE C "..Briefing_text)
 		else
-			briefing_text = briefing_text .. arg .. " \n \n"					--add trigger text to briefing text of this mission instance with double new line
-			-- print("DcCT PASSE D "..briefing_text)
+			Briefing_text = Briefing_text .. arg .. " \n \n"					--add trigger text to briefing text of this mission instance with double new line
+			-- print("DcCT PASSE D "..Briefing_text)
 		end
 	end
 	
 	--add briefing text
 	function Action.TextPlayMission(arg)
-		briefing_text_playable = briefing_text_playable .. arg .. " \n \n"		--add trigger text to briefing text of this mission only if it is playable
+		Briefing_text_playable = Briefing_text_playable .. arg .. " \n \n"		--add trigger text to briefing text of this mission only if it is playable
 	end
 	
 	--add briefing picture
@@ -485,7 +485,7 @@ Action = {}
 		print()
 		print("********************ATTENTION******************")
 		print(" 	Action.CampaignEnd(arg)---> : "..tostring(arg))
-		print(" 	Action.CampaignEnd(arg)---> : "..tostring(briefing_text))
+		print(" 	Action.CampaignEnd(arg)---> : "..tostring(Briefing_text))
 		print("********************ATTENTION******************")
 		print("*************** Attention, take into account that the campaign is over, press to see the rest..****************")
 		print("********************ATTENTION******************")
@@ -582,9 +582,9 @@ Action = {}
 		--attention, les camps sont inversé, c'est le camp du target, ou la targetlist d'un camp (trouc de ouf)
 		for side_name, targets in pairs(targetlist) do													--Iterate through all side
 			for targetN, target in pairs(targets) do												--Iterat through all targets
-				if target.titleName and target.titleName == targetName and NewSide  == side_name then				
-					targetlist[OldSide][target_name] = targetlist[side_name][target_name]			--integration de ce target dans le camp oppos�				
-					targetlist[side_name][target_name] = nil										--suppression de ce target de l'ancien camp		
+				if target.titleName and target.titleName == baseName and NewSide  == side_name then				
+					targetlist[OldSide][baseName] = targetlist[side_name][baseName]			--integration de ce target dans le camp oppos�				
+					targetlist[side_name][baseName] = nil										--suppression de ce target de l'ancien camp		
 				end
 			end
 		end
@@ -639,7 +639,7 @@ Action = {}
 							-- if debugKT then print(" 	ActivateBaseAndAssociatedTargets DcCT "..tname.." "..tostring(active)) end
 						end
 					else
-						if debugKT then print(" 	ActivateBaseAndAssociatedTargets DcCT alwaysActive=true impossible à désactiver "..tname.." "..tostring(active)) end
+						if debugKT then print(" 	ActivateBaseAndAssociatedTargets DcCT alwaysActive=true impossible à désactiver "..baseName.." "..tostring(active)) end
 					end
 				end
 			end
@@ -754,7 +754,8 @@ Action = {}
 			AirUnitBaseInternal(unitName, tab_baseName[1] )
 		elseif type(tab_baseName) == "table" and #tab_baseName > 1 then
 			for n, baseName in ipairs(tab_baseName) do
-				placeToBeFound = AirUnitBaseInternal(unitName, baseName )
+				--TODO placeToBeFound n'est plus utiliser, pourquoi?
+				-- placeToBeFound = AirUnitBaseInternal(unitName, baseName )
 				break
 			end	
 		end
@@ -831,7 +832,7 @@ Action = {}
 			end
 		end
 
-		local placeToBeFound = false
+		-- local placeToBeFound = false
 		if type(tab_baseName) == "string" then
 			if checkBaseCapacity(unitName, tab_baseName) then
 				-- moveAllOrOneUnit(unitName, tab_baseName )
@@ -847,7 +848,7 @@ Action = {}
 				transfertOk = true
 			end	
 		elseif type(tab_baseName) == "table" and #tab_baseName > 1 then
-			local placeToBeFound = false
+			-- local placeToBeFound = false
 			for n, baseName in ipairs(tab_baseName) do
 				if debugKT then print(" 		-> moveToAnotherBaseOrDeactivate table test baseName "..baseName) end
 				if checkBaseCapacity(unitName, baseName) then
@@ -1023,9 +1024,9 @@ Action = {}
 				if debugKT then print("DcCT "..tostring(text)) end
 
 				if destSide == "blue" then										--side is blue
-					briefing_oob_text_blue = briefing_oob_text_blue .. text		--add to blue briefing oob text
+					Briefing_oob_text_blue = Briefing_oob_text_blue .. text		--add to blue briefing oob text
 				elseif destSide == "red" then									--side is red
-					briefing_oob_text_red = briefing_oob_text_red .. text		--add to red briefing oob text
+					Briefing_oob_text_red = Briefing_oob_text_red .. text		--add to red briefing oob text
 				end
 			end
 		end
@@ -1070,9 +1071,9 @@ Action = {}
 							text = "" .. repair .. " damaged " .. ReplaceTypeName(unit.type) .. " from ".. unit.name .. " have been repaired and returned back to service. \n \n"	--text to be added to briefing/oob
 						end
 						if side_name == "blue" then									--side is blue
-							briefing_oob_text_blue = briefing_oob_text_blue .. text	--add to blue briefing oob text
+							Briefing_oob_text_blue = Briefing_oob_text_blue .. text	--add to blue briefing oob text
 						elseif side_name == "red" then								--side is red
-							briefing_oob_text_red = briefing_oob_text_red .. text	--add to red briefing oob text
+							Briefing_oob_text_red = Briefing_oob_text_red .. text	--add to red briefing oob text
 						end
 					end
 				end
@@ -1181,7 +1182,7 @@ Action = {}
 												temp_dead_last = false
 												temp_CheckDay = nil
 												
-												text = "" .. target.elements[e].name .. " from ".. target.titleName .. " have been repaired and returned back to service. \n \n"
+												local text = "" .. target.elements[e].name .. " from ".. target.titleName .. " have been repaired and returned back to service. \n \n"
 												
 												if Debug.AfficheSol or debugKT then
 													print("Dc_CT Debug Resurrection: "..target.titleName .. " "..target.elements[e].name)
@@ -1189,9 +1190,9 @@ Action = {}
 												end
 												
 												if side_name == "blue" then									--side is blue
-													briefing_oob_text_blue = briefing_oob_text_blue .. text	--add to blue briefing oob text
+													Briefing_oob_text_blue = Briefing_oob_text_blue .. text	--add to blue briefing oob text
 												elseif side_name == "red" then								--side is red
-													briefing_oob_text_red = briefing_oob_text_red .. text	--add to red briefing oob text
+													Briefing_oob_text_red = Briefing_oob_text_red .. text	--add to red briefing oob text
 												end
 												
 
@@ -1274,14 +1275,14 @@ Action = {}
 						end
 
 						
-						Action.Text(target_name.." repair in progress, old value: "..oldVAlive.." new value "..target.alive)
+						Action.Text(target.name.." repair in progress, old value: "..oldVAlive.." new value "..target.alive)
 
 						local nbRunwayPartDead = #target.elements -  (#target.elements * target.alive/100)
 
 						if Debug.AfficheSol or debugKT then
-							print("Dc_CT repair Runway "..target_name.." old value: "..oldVAlive.." new value "..target.alive ) 
+							print("Dc_CT repair Runway "..target.name.." old value: "..oldVAlive.." new value "..target.alive ) 
 							print("Dc_CT repairRunwayPerDay "..repairRunwayPerDay)
-							print("Dc_CT RUNWAY repair: "..target_name.." new value: "..target.alive.." nbRunwayPartDead: "..nbRunwayPartDead )
+							print("Dc_CT RUNWAY repair: "..target.name.." new value: "..target.alive.." nbRunwayPartDead: "..nbRunwayPartDead )
 							-- os.execute 'pause'
 						end
 
@@ -1306,7 +1307,7 @@ Action = {}
 						--runway réparé
 						if oldVAlive < 50 and target.alive >= 50 then  
 							if attibut ~= nil  and attibut == "RUNWAY" then
-								if debugKT then print(" 	->RUNWAY Action.ActivateBaseAndItsUnits  active: TRUE "..target_name) end
+								if debugKT then print(" 	->RUNWAY Action.ActivateBaseAndItsUnits  active: TRUE "..target.name) end
 
 								Action.ActivateBaseAndItsUnits(target.db_airbaseName,true)
 								Action.Text(target.db_airbaseName.." runway is repaired and can be used again.")
@@ -1330,13 +1331,13 @@ Action = {}
 							local element_name = target.elements[e].name
 							if camp.ShipDamagedLast and camp.ShipDamagedLast[element_name] then				--ship has taken damage during last mission
 								if camp.ShipHealth[element_name] == 0 then									--ship is sunk
-									briefing_text = briefing_text .. "Intel Update: " .. element_name .. " has been sunk. \n \n"
+									Briefing_text = Briefing_text .. "Intel Update: " .. element_name .. " has been sunk. \n \n"
 								elseif camp.ShipHealth[element_name] < 33 then								--ship has less than 33% health
-									briefing_text = briefing_text .. "Intel Update: " .. element_name .. " has been heavily damaged. \n \n"
+									Briefing_text = Briefing_text .. "Intel Update: " .. element_name .. " has been heavily damaged. \n \n"
 								elseif camp.ShipHealth[element_name] < 66 then								--ship has less than 66% health
-									briefing_text = briefing_text .. "Intel Update: " .. element_name .. " has been moderately damaged. \n \n"
+									Briefing_text = Briefing_text .. "Intel Update: " .. element_name .. " has been moderately damaged. \n \n"
 								elseif camp.ShipHealth[element_name] < 100 then								--ship has less than 100% health
-									briefing_text = briefing_text .. "Intel Update: " .. element_name .. " has been lightly damaged. \n \n"
+									Briefing_text = Briefing_text .. "Intel Update: " .. element_name .. " has been lightly damaged. \n \n"
 								end
 							end
 						end
@@ -1345,9 +1346,9 @@ Action = {}
 				
 				if target.alive and target.dead_last > 0 and target.hidden ~= true then			--ground target was hit in last mission and should not be hidden
 					if target.alive == 0 then									--target is dead
-						briefing_text = briefing_text .. "Intel Update: " .. target.titleName .. " has been destroyed. \n \n"
+						Briefing_text = Briefing_text .. "Intel Update: " .. target.titleName .. " has been destroyed. \n \n"
 					else														--target is still alive
-						briefing_text = briefing_text .. "Intel Update: " .. target.titleName .. " has been reduced to " .. target.alive .. "%. \n \n"
+						Briefing_text = Briefing_text .. "Intel Update: " .. target.titleName .. " has been reduced to " .. target.alive .. "%. \n \n"
 					end
 				end
 			end
@@ -1548,7 +1549,7 @@ Action = {}
 			mission = missionFromBaseMission
 
 			local data_str = "PayloadRestricted = " .. TableSerialization(PayloadRestricted, 0)						
-			local dataFile = io.open("Active/PayloadRestricted.lua", "w")								
+			local dataFile = io.open("Active/PayloadRestricted.lua", "w") or error("Failed to open debug file")						
 			dataFile:write(data_str)														
 			dataFile:close()
 
@@ -1627,7 +1628,7 @@ Action = {}
 			end			
 		end
 		
-		function movedXY(Unit, Category)
+		local function movedXY(Unit, Category)
 			local foundInGround = false
 			for Oside_name, Oside in pairs(oob_ground) do																--iterate through sides
 				for Ocountry_n, Ocountry in pairs(Oside) do															--iterate through countries
@@ -1719,7 +1720,7 @@ Action = {}
 		end	
 
 
-		tmp_ground = {}
+		local tmp_ground = {}
 		tmp_ground["blue"] = deepcopy(staticTemplate.coalition.blue.country)											--copy mission data
 		tmp_ground["red"] = deepcopy(staticTemplate.coalition.red.country)												--copy mission data
 		
@@ -1891,6 +1892,8 @@ Action = {}
 		-- 		end
 		-- 	end
 		-- end
+
+		local file
 		
 		if type(TabFile) == "table" then		
 			file =  TabFile[math.random(1, #TabFile)]
@@ -1899,7 +1902,7 @@ Action = {}
 		end
 		
 		dofile("Templates/"..file)
-		tmp_ground = {}
+		local tmp_ground = {}
 		tmp_ground["blue"] = deepcopy(staticTemplate.coalition.blue.country)											--copy mission data
 		tmp_ground["red"] = deepcopy(staticTemplate.coalition.red.country)												--copy mission data
 		
@@ -2016,10 +2019,10 @@ Action = {}
 ----- run campaign triggers -----
 
 --define variables to persist across multiple mission generation attempts
-if briefing_status == nil then													--if briefing status string does not exist yet it must be created
-	briefing_status = ""														--text string to be added to briefing
-	briefing_oob_text_red = ""													--text string to be added to next briefing (red repair and reinforcements)
-	briefing_oob_text_blue = ""													--text string to be added to next briefing (blue repair and reinforcements)
+if Briefing_status == nil then													--if briefing status string does not exist yet it must be created
+	Briefing_status = ""														--text string to be added to briefing
+	Briefing_oob_text_red = ""													--text string to be added to next briefing (red repair and reinforcements)
+	Briefing_oob_text_blue = ""													--text string to be added to next briefing (blue repair and reinforcements)
 end
 if BriefingImagesB == nil then
 	BriefingImagesB = { }															--global table to hold information about briefing images to be added to miz mission file
@@ -2028,17 +2031,17 @@ if BriefingImagesR == nil then
   BriefingImagesR = { }                             --global table to hold information about briefing images to be added to miz mission file
 end
 
-if camp.briefing_text and camp.briefing_text ~= nil and camp.briefing_text ~= "" then
-	briefing_text = camp.briefing_text																--briefing text to be added this mission instance
+if camp.Briefing_text and camp.Briefing_text ~= nil and camp.Briefing_text ~= "" then
+	Briefing_text = camp.Briefing_text																--briefing text to be added this mission instance
 else
 	
-	briefing_text = ""
+	Briefing_text = ""
 
-	-- print("DcCT reset briefing_text 2")
+	-- print("DcCT reset Briefing_text 2")
 	-- os.execute 'pause'
 end
 
-briefing_text_playable = ""														--briefing text to be added only if this mission instance results in a playable mission
+Briefing_text_playable = ""														--briefing text to be added only if this mission instance results in a playable mission
 
 --go through campaign triggers
 for trigger_name,trigger in pairs(camp_triggers) do								--iterate through triggers
@@ -2046,7 +2049,7 @@ for trigger_name,trigger in pairs(camp_triggers) do								--iterate through tri
 	if trigger.active then														--trigger is active
 		if debugKT then print("DcCT passe 01 if trigger.active: trigger.condition: "..tostring(trigger.condition)) end
 		local condition = loadstring("if " .. trigger.condition .." then return true end")	--make a function from the string condition
-		if condition() then														--if the trigger condition is true
+		if type(condition) == "function" and condition() then														--if the trigger condition is true
 			if debugKT then print(" -> :DcCT passe 02 passe  condition()trigger_name: "..tostring(trigger_name)) end
 			if type(trigger.action) == "table" then								--multiple actions
 				for i,action in ipairs(trigger.action) do
@@ -2243,13 +2246,13 @@ end
 
 
 -- --add date and time header for this mission instance briefing text
--- if briefing_text ~= "" then														--brefing text from this mission instance exists and should be added to briefing_status text
--- 	-- print("DcCT AVANT briefing_text ")
--- 	-- print(tostring(briefing_text))
+-- if Briefing_text ~= "" then														--brefing text from this mission instance exists and should be added to Briefing_status text
+-- 	-- print("DcCT AVANT Briefing_text ")
+-- 	-- print(tostring(Briefing_text))
 	
--- 	briefing_status = briefing_status .. FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ": \n \n" .. briefing_text		--add date and time, then add briefing text of this mission instance
--- 	-- print("DcCT APRES briefing_text ")
--- 	-- print(tostring(briefing_status))
+-- 	Briefing_status = Briefing_status .. FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ": \n \n" .. Briefing_text		--add date and time, then add briefing text of this mission instance
+-- 	-- print("DcCT APRES Briefing_text ")
+-- 	-- print(tostring(Briefing_status))
 -- 	-- os.execute 'pause'
 -- end
 
@@ -2270,8 +2273,8 @@ if camp.endCampaign  then
 	print("******************** ATTENTION ****************** "..tostring(camp.endCampaign))
 	print()
 
-	local briefClean = briefing_text:gsub("\n", "\n")
-	print(" 	briefing_text---> : ".."\n"..tostring(briefClean))
+	local briefClean = Briefing_text:gsub("\n", "\n")
+	print(" 	Briefing_text---> : ".."\n"..tostring(briefClean))
 	print()
 	print("******************** ATTENTION ******************")
 	print("******************** ATTENTION ******************")

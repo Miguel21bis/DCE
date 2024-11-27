@@ -17,7 +17,7 @@ versionDCE["DC_NavalEnvironment.lua"] = "1.12.33"
 -- modification M11_a		Multiplayer
 ------------------------------------------------------------------------------------------------------- 
 
-local poly = {}	
+local poly = {}
 
 --function to check if point is in polygon
 -- function CheckPointInPoly(point, poly)
@@ -41,8 +41,8 @@ local poly = {}
 -- end
 
 --function to find random point in polygon
-function RandomPointInPoly(poly)	
-	
+function RandomPointInPoly(poly)
+
 	-- _affiche(poly, "DcNE random Before")
 
 	-- action = 'Action.ShipMission("TF-71", {{"CV-1-1", "CV-1-2", "CV-1-3", "CV-1-4"}}, 10, 8, nil)',
@@ -51,7 +51,7 @@ function RandomPointInPoly(poly)
 
 	-- [1] = 'Action.ShipMission("TF-71", {  {"TF-71-1", "TF-71-2"}, {"TF-71-3", "TF-71-4"},  {"TF-71-5", "TF-71-6"}}, 10, 8, nil)',
 
-	
+
 	local maxx = -9999999
 	local minx = 9999999
 	local maxy = -9999999
@@ -70,17 +70,17 @@ function RandomPointInPoly(poly)
 			miny = poly[n].y
 		end
 	end
-	
+
 	-- poly[#poly + 1] = poly[1]
-	
+
 	-- _affiche(poly, "DcNE random After")
 
 	local newpoint = {}
-	
+
 	local n = 1
 	local found = false
 	repeat
-		
+
 		local i = 1
 		repeat
 			newpoint = {
@@ -89,7 +89,7 @@ function RandomPointInPoly(poly)
 			}
 			i = i +1
 
-			found = CheckPointInPolygon(newpoint, poly) 
+			found = CheckPointInPolygon(newpoint, poly)
 		until found or i > 100000
 
 		if not found then
@@ -99,7 +99,7 @@ function RandomPointInPoly(poly)
 			-- print("miny: "..tostring(miny))
 			-- print("maxy: "..tostring(maxy))
 			-- print()
-			
+
 			-- minx =  minx*1.01
 			-- maxx =  maxx*0.99
 			-- miny =  miny*1.01
@@ -116,10 +116,10 @@ function RandomPointInPoly(poly)
 			-- print("maxx: "..tostring(maxx))
 			-- print("miny: "..tostring(miny))
 			-- print("maxy: "..tostring(maxy))
-			
+
 			-- print("DcNE NOT found moins 1% "..n)
 			-- print()print()
-	
+
 			-- os.execute 'pause'
 
 		end
@@ -129,20 +129,20 @@ function RandomPointInPoly(poly)
 	until n > 50 or found
 
 	if not found then
-		
+
 		-- _affiche(poly, "DcNE bug 4 poly")
 		print("minx: "..tostring(minx))
 		print("maxx: "..tostring(maxx))
 		print("miny: "..tostring(miny))
 		print("maxy: "..tostring(maxy))
-		
+
 		print("DcNE impossible found next random point")
 
 		-- os.execute 'pause'
 	-- else
 	-- 	print("DcNE found next random point")
 	end
-	
+
 	return newpoint
 end
 
@@ -150,17 +150,17 @@ end
 --function to assign movement to ship groups
 function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTime)
 
-	poly = {}	
-	local firstItem = 9999
+	poly = {}
+	local firstItem = ""
 
 	local testTxt = ""
-	
-	if not windDirection or windDirection == nil then
-		windDirection = 0
+
+	if not WindDirection or WindDirection == nil then
+		WindDirection = 0
 	end
 
 	if type(WPtable) == "table" then
-		if WPtable[1] == ""  then									
+		if WPtable[1] == ""  then
 			table.remove(WPtable, 1)
 			firstItem = "originalWPT"
 		end
@@ -175,7 +175,7 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 		firstItem = "originalWPT"
 		table.remove(WPtable[1], 1)
 	end
-	
+
 	if type(WPtable[1]) == "string" then												--WP is a single point marked by trigger zone	
 		for w = 1, #WPtable do
 			poly[w] = Refpoint[WPtable[w]]
@@ -211,7 +211,7 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 					if GroupName == group.name then											--ship group found
 						--determine ship route
 						local route = {}																		--local table to build group route
-						
+
 						if firstItem == "originalWPT" then														--if the WP string is empty, use the groups initial position
 							route[1] = {
 								x = group.x,
@@ -224,7 +224,7 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 						end
 
 						route[1].time = StartTime
-						
+
 						if #poly == 1 and PatrolSpeed  then				--patrol after route
 							route[1].speed = PatrolSpeed													--set speed to patrol speed
 						elseif #poly == 1 then
@@ -233,10 +233,10 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 							route[1].speed = CruiseSpeed
 						end
 
-						
+
 						--wpt indefini si CV, sinon ils risquent d etre au stop
 						-- local QteWptConnu = false
-						local nTotal 
+						local nTotal
 						if (string.find(group.units[1].name, "CV")  or string.find(group.units[1].name, "LHA") )then
 							nTotal = 10
 							CruiseSpeed = data_configuration.CV_Vmax
@@ -245,7 +245,7 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 							nTotal = #poly																	--pour revenir au code original de Mbot
 							-- QteWptConnu = true
 						end
-						
+
 						local testTxt = ""
 
 						for n = 2, nTotal do																	--go through waypoints table passed as function argument
@@ -253,38 +253,38 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 							testTxt = testTxt.." 01 "
 
 							if (n == 2 ) and (string.find(group.units[1].name, "CV")  or string.find(group.units[1].name, "LHA") )then
-							
-								if  n == 2 then	
-									
+
+								if  n == 2 then
+
 									if poly and #poly > 1 then
-										
+
 										local foundWpt_2 = false
 										local i_tot = 0
 
 										local i_2 = 0
 										local distFctSpeed_2 = data_configuration.CV_Vmax * (100) *2
 										local WptInWind_2 = {}
-									
+
 										local j = 0
 
 										repeat
 
 											local distFctSpeed_2 = data_configuration.CV_Vmax * ( mission_ini.startup_time_player + (mission_ini.startup_time_player/3))
-											-- local WptInWind_2 = GetOffsetPoint(route[2], windDirection, distFctSpeed_2)
+											-- local WptInWind_2 = GetOffsetPoint(route[2], WindDirection, distFctSpeed_2)
 											local WptInWind_2 = {}
 											local j_2 = 0
-											
+
 
 											repeat
-												
-												WptInWind_2 = GetOffsetPoint(route[1], windDirection , distFctSpeed_2)
+
+												WptInWind_2 = GetOffsetPoint(route[1], WindDirection , distFctSpeed_2)
 												if CheckPointInPolygon(WptInWind_2, poly) == true then
 													foundWpt_2 = true
 												end
 
 												j_2 = j_2+1
 											until foundWpt_2 or j_2 > 10
-											
+
 
 											if foundWpt_2 then
 												route[2] = {
@@ -294,7 +294,7 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 												}
 
 												route[2].time = route[1].time + GetDistance(route[1], route[2]) / data_configuration.CV_Vmax
-									
+
 											end
 
 											i_tot = i_tot+1
@@ -310,19 +310,19 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 											end
 
 										until (foundWpt_2 ) or i_tot >= 500
-										
+
 										if not route[2] then
 											route[2] = RandomPointInPoly(poly)
 										end
 
 									end
-								end								
+								end
 							else
 								testTxt = testTxt.." 02 "
 
 								if #poly == 1 then												--WP is a single point marked by trigger zone	
 									route[n] = poly[1]												--store x-y coordnates of that trigger zone
-									
+
 								elseif #poly == 2 then												--WP is a polygon marked by multiple trigger zones
 									local p1 = poly[1]
 									local p2 = poly[2]
@@ -334,38 +334,38 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 										y = p1.y + dy * rand / 100
 									}
 								elseif #poly > 2 then														--poly has more than two points
-										
+
 									--get random point within polygon
 									-- DC_NE_Debug02	maximizes the distance between two ship turns
 									if n >= 4 then
 										local distBtw  = {}
 										local tabTestWPT = {}
-										local maxDistId = 1 										
-										for i = 1 , MaxLoop do											
+										local maxDistId = 1
+										for i = 1 , MaxLoop do
 											tabTestWPT[i] = RandomPointInPoly(poly)
-											distBtw[i] =  GetDistance(route[n - 1], tabTestWPT[i])										
-											if distBtw[i] > distBtw[maxDistId] then 
+											distBtw[i] =  GetDistance(route[n - 1], tabTestWPT[i])
+											if distBtw[i] > distBtw[maxDistId] then
 												maxDistId = i
 											end
-										end 
+										end
 										route[n] = tabTestWPT[maxDistId]
 									else
 										route[n] = RandomPointInPoly(poly)
 									end
 								end
 							end
-							
+
 							if #poly == 1 and PatrolSpeed  then				--patrol after route
-								
+
 								route[n].speed = tonumber(PatrolSpeed)													--set speed to patrol speed
 							elseif #poly == 1 then
 								route[n].speed = 0
 							else
 								route[n].speed = tonumber(CruiseSpeed)
 							end
-							
+
 							route[n].time = route[n - 1].time + GetDistance(route[n - 1], route[n]) / CruiseSpeed	--calculate time at waypoint based on speed and distance from previous waypoint
-						
+
 						end
 
 						--ship position at current time
@@ -389,10 +389,10 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 								for w = n - 1, 1, -1 do															--go throut all waypoints ahead of waypoint at current time
 									table.remove(route, w)														--remove these waypoints
 								end
-								break	
+								break
 							end
 						end
-						
+
 						--patrol zone at end of route
 						if PatrolSpeed and PatrolSpeed > 0 then													--if there is a patrol speed assigned, ship should patrol at end of route
 							while route[#route].time < CurrentTime + mission_ini.mission_duration * 2 do			--repeat as long as last waypoint time is within twice the mission duration
@@ -406,34 +406,34 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 								elseif #poly > 2 then											--poly has more than two points, patrol in random pattern within this polygon
 									local distBtw  = {}
 									local tabTestWPT = {}
-									local maxDistId = 1 										
-									for i = 1 , MaxLoop do											
+									local maxDistId = 1
+									for i = 1 , MaxLoop do
 										tabTestWPT[i] = RandomPointInPoly(poly)
-										distBtw[i] =  GetDistance(route[#route], tabTestWPT[i])										
-										if distBtw[i] > distBtw[maxDistId] then 
+										distBtw[i] =  GetDistance(route[#route], tabTestWPT[i])
+										if distBtw[i] > distBtw[maxDistId] then
 											maxDistId = i
 										end
 									end
-									
+
 									nextWP = tabTestWPT[maxDistId]
 								end
-								
-								
+
+
 								local nextTime = route[#route].time + GetDistance(route[#route], nextWP) / PatrolSpeed	--time at next waypoint
-								
+
 								route[#route + 1] = {
 									x = nextWP.x,
 									y = nextWP.y,
 									speed = PatrolSpeed,
 									time =  nextTime
 								}
-								
-								
+
+
 							end
 						end
 
 						--suppression des doublons
-						if #route > 1 then							
+						if #route > 1 then
 							for n = 2, #route do
 								if route[n-1] and route[n] then
 									if (route[n-1].x ==   route[n].x) and (route[n-1].y ==   route[n].y) then
@@ -444,28 +444,28 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 								end
 							end
 						end
-	
+
 						--DC_NE_Debug01	transforms an angle of more than 90� into 2 WPT of less than 90�
-						tablWPT = {}
+						-- tablWPT = {} utilité?
 						local routeModif = {}
-						if #route > 1 then							
-							routeModif[1] = route[1]							
-							for n = 2, #route-1 do							
+						if #route > 1 then
+							routeModif[1] = route[1]
+							for n = 2, #route-1 do
 								local waypoint = {}
 								local h1 = GetHeading(route[n-1], route[n] )
 								local h2 = GetHeading(route[n], route[n+1] )
 								local angle = GetDeltaHeading(h1, h2)
 								local bearing = 0
-								
+
 								if (angle > 90 or angle < -90)  then
 								-- if (angle >= 90 or angle <= -90) and (angle ~= 180 or angle ~= -180) then
-									
+
 									if angle >= 90 then bearing = h1 - 90
 										-- print("DcNE passe CC passe (bearing = h1 - 90) "..bearing.." = "..h1.." - 90")
-										
+
 									elseif angle <= -90 then bearing = h1 + 90
 										-- print("DcNE passe DD passe (bearing = h1 + 90) "..bearing.." = "..h1.." + 90")
-										
+
 									end
 									local intercalWP = GetOffsetPoint(route[n], bearing, 3000)
 									waypoint = {
@@ -474,10 +474,10 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 										speed = PatrolSpeed,
 										time =  0
 									}
-									
-									table.insert(routeModif, waypoint )									
-								end	
-								
+
+									table.insert(routeModif, waypoint )
+								end
+
 								if  angle ~= 0  then
 									table.insert(routeModif, route[n] )
 								end
@@ -487,45 +487,45 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 							-- 	-- print("DcNE _03_ #routeModif "..tostring(#routeModif))
 							-- end
 						end
-						
+
 						if #route > 1 then
 							route = {}
-							route = deepcopy(routeModif) 
+							route = deepcopy(routeModif)
 						end
-						
+
 						--recalcul les timmings en fonction des nouveaux wpt ajout�
 						local addTime
-						if #route > 1 then		
+						if #route > 1 then
 							addTime = route[1].time
 							for n = 1, #route-1 do
 								addTime = addTime + GetDistance(route[n], route[n+1]) / route[n].speed	--time at next waypoint
 								route[n+1]["time"] = addTime
 							end
 						end
-						
-						
+
+
 						--group initial position
 						group.x = route[1].x
 						group.y = route[1].y
-						
+
 						--units in group initial position and heading
 						local delta_heading = 0												--change of heading between initial leader heading as per base_mission and actual heading at start of route
 						local PaHeading = 0
 						if route[2] then													--if there is more than one waypoint
 							delta_heading = GetHeading(route[1], route[2]) - math.deg(group.units[1].heading)		--difference between heading as per base_mission and actual heading at start of route
 							PaHeading = math.rad(GetHeading(route[1], route[2]))
-						
+
 						end
 						local dx = 0
 						local dy = 0
-						
+
 						for u = 2, #group.units do											--go through all units in group after the leader
 							local bearing_from_leader = GetHeading(group.units[1], group.units[u])		--unit bearing from leader
 							bearing_from_leader = bearing_from_leader + delta_heading					--update bearing from leader by change of group heading
 							local distance_from_leader = GetDistance(group.units[1], group.units[u])	--unit distance from leader
 							dx = math.cos(math.rad(bearing_from_leader)) * distance_from_leader	--x component from leader
 							dy = math.sin(math.rad(bearing_from_leader)) * distance_from_leader	--y component from leader
-							
+
 							group.units[u].x = route[1].x + dx								--unit initial position relative to leader
 							group.units[u].y = route[1].y + dy								--unit initial position relative to leader
 							if route[2] then												--if there is more than one waypoint
@@ -539,7 +539,7 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 								for static_n, static in ipairs(country.static.group) do		--go through static groups								
 									if static.route.points[1].linkUnit and static.route.points[1].linkUnit == group.units[u].unitId then	--static unit is linked to ship
 										local bearing_from_leader = GetHeading(group.units[1], static)				--static bearing from leader
-							
+
 										bearing_from_leader = bearing_from_leader + delta_heading					--update bearing from leader by change of group heading
 										local distance_from_leader = GetDistance(group.units[1], static)			--unit distance from leader
 										local dx = math.cos(math.rad(bearing_from_leader)) * distance_from_leader	--x component from leader
@@ -558,13 +558,13 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 								end
 							end
 						end
-						
+
 						group.units[1].x = route[1].x										--leader initial position
 						group.units[1].y = route[1].y										--leader initial position
 						if route[2] then													--if there is more than one waypoint
 							group.units[1].heading = PaHeading			--update initial leader heading
 						end
-						
+
 						--group route
 						group.route.points[1].x = route[1].x
 						group.route.points[1].y = route[1].y
@@ -594,13 +594,13 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 						for n = #group.route.points, #route + 1, -1 do
 							group.route.points[n] = nil										--clear the group's route points after the last waypoint (it might inherit from an old route)
 						end
-						
+
 						--airbase (carrier) position
 						for basename,base in pairs(db_airbases) do							--go through airbases
 							for u = 1, #group.units do										--go through units in group
-								
+
 								-- print("DcNE passe A base.unitname "..tostring(base.unitname).." uName "..tostring(group.units[u].name).." u: "..u )
-								
+
 								if base.unitname == group.units[u].name then				--if unit is an airbase (carrier)	
 									base.x = group.units[u].x								--update airbase (carrier) position
 									base.y = group.units[u].y								--update airbase (carrier) position
@@ -647,8 +647,8 @@ for basename,base in pairs(db_airbases) do															--iterate through airba
 								base.elevation = 0
 								if not base.ATC_frequency then										--modification M33.e 	Custom Briefing (e: CV Manual Freq)								
 									base.ATC_frequency = tostring(unit.frequency / 1000000)			--si ATC_frequency non present dans db_airbases, on prend la freq de base_mission
-								else									
-									unit.frequency = base.ATC_frequency * 1000000									
+								else
+									unit.frequency = base.ATC_frequency * 1000000
 								end
 								--get carrier TACAN and ICLS
 								for taskn,task in ipairs(group.route.points[1].task.params.tasks) do	--go through group tasks in first waypoint
@@ -664,7 +664,7 @@ for basename,base in pairs(db_airbases) do															--iterate through airba
 										end
 									end
 								end
-								
+
 								if string.lower(mission_ini.SC_CarrierIntoWind) == "auto" then											-- modification M36.d	(d: add timer) MenuRadio request manual TurnIntoWind
 									--add mission trigger to add carrier to CarrierIntoWindScript (turn into wind during flight ops)
 									local trig_n = #mission.trig.funcStartup + 1
@@ -674,7 +674,7 @@ for basename,base in pairs(db_airbases) do															--iterate through airba
 									-- mission.trig.actions[trig_n] = 'a_do_script(\\\"CarrierIntoWind(\\\\\\"' .. group.name .. '\\\\\\")\\\"); mission.trig.funcStartup[' .. trig_n .. ']=nil;'
 
 									mission.trig.actions[trig_n] = "a_do_script('CarrierIntoWind(\\\"" .. group.name .. "\\\")'); mission.trig.funcStartup[" .. trig_n .. "]=nil;"
-									
+
 									mission.trigrules[trig_n] = {
 										["rules"] = {},
 										["eventlist"] = "",
@@ -685,7 +685,7 @@ for basename,base in pairs(db_airbases) do															--iterate through airba
 												["predicate"] = "a_do_script",
 												["text"] = "CarrierIntoWind('" .. group.name .. "')",
 												["KeyDict_text"] = "CarrierIntoWind('" .. group.name .. "')",
-												["ai_task"] = 
+												["ai_task"] =
 												{
 													[1] = "",
 													[2] = "",
@@ -694,7 +694,7 @@ for basename,base in pairs(db_airbases) do															--iterate through airba
 										},
 									}
 								end
-							
+
 							end
 						end
 					end
@@ -705,7 +705,7 @@ for basename,base in pairs(db_airbases) do															--iterate through airba
 end
 
 -- modification M11 : Multiplayer													-- pour donner de la place sur le PA, on supprime, � la demande, les statics pr�sent
-function deleteStaticOnCV(GroupName)
+function DeleteStaticOnCV(GroupName)
 
 	--search for ship group
 	for coal_name,coal in pairs(oob_ground) do												--go through sides(red/blue)	
@@ -721,14 +721,14 @@ function deleteStaticOnCV(GroupName)
 									for group_n, _group in ipairs(mission.coalition[coal_name].country[country_n].static.group) do
 
 										if _group.units[1].unitId == _static.units[1].unitId then
-											
+
 											if Debug.debug then
 												print("DcNE CleanDeck remove Static "..tostring(_group.units[1].type)..""..tostring(_group.units[1].name))
 											end
 
-											val = table.remove(mission.coalition[coal_name].country[country_n].static.group, group_n)
+											local val = table.remove(mission.coalition[coal_name].country[country_n].static.group, group_n)
 										end
-									
+
 									end
 
 								end

@@ -5,7 +5,7 @@
 if not versionDCE then versionDCE = {} end
 versionDCE["BAT_SkipMission.lua"] = "1.14.96"
 -------------------------------------------------------------------------------------------------------
--- adjustment_n				(n targetList numeric)(m BAT)(l playable_m from data_divers)(k BugList)(j pairsByKeys)(i global TabTask)(h Skipmission_flag)(g mise a niveau)(e: use io.stdin:read)(c: fire playable_m from conf_mod)(b: robust form) 
+-- adjustment_n				(n targetList numeric)(m BAT)(l Playable_m from data_divers)(k BugList)(j pairsByKeys)(i global TabTask)(h Skipmission_flag)(g mise a niveau)(e: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form) 
 -- debug_d					(cd: EndMission)
 -- cleancode_c
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
@@ -90,7 +90,7 @@ else
 		dofile(db_airbasesFile2)
 		--creer le fichier db_airbases dans Active, meme en cours de campagne, pour garder la retrocompatibilite
 		local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
-		local trigFile = io.open("Active/db_airbases.lua", "w")
+		local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open Active/db_airbases.lua file")
 		trigFile:write(airbases_Str)
 		trigFile:close()
 	end
@@ -100,11 +100,11 @@ if not targetlist.blue[1] then
 	targetlistToNum()
 end
 
-playable_m = {}
+Playable_m = {}
 
 for planeType, value in pairsByKeys(data_divers) do	
 	if value.playable then
-		playable_m[planeType] = true
+		Playable_m[planeType] = true
 	end
 end		
 
@@ -124,28 +124,33 @@ if  TestPath ~= nil then
 end
 
 --affiche le type d'avion selectionné et son squadrons M55_a
-playerPlaneBAT = ""
-playerSquadBAT = ""
-playerCountryBAT = ""
+local playerInfo = {
+	planeBat = "",
+	squadBat = "",
+	countryBat = "",
+}
+
+-- playerSide = ""
 for side, squadTL in  pairsByKeys(oob_air) do
 	for squad_n, squad in  pairsByKeys(squadTL) do
-		if squad.player then 
-			playerPlaneBAT = squad.type
-			playerSquadBAT = squad.name
-			playerCountryBAT = squad.country
+		if squad.player then
+			playerInfo.planeBAT = squad.type
+			playerInfo.squadBAT = squad.name
+			playerInfo.countryBAT = squad.country
 		end
 	end
 end
 
+
 if versionPackageICM then
-	print("= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." = = = = = = = = = = = = = = = = = =")
-	print("= = = = = = = = = = = = = Campaign Version : "..tostring(camp.version))
-	print("= = = = = = = = = = = = = Script Version : "..showVersion)
-	print("= = = = = = = = = = = = = Player Plane : "..tostring(playerPlaneBAT).." "..tostring(playerSquadBAT).." "..tostring(playerCountryBAT))
+	print("0A0= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
+	print("= = = = = = = = = = = = = Script Version : "..tostring(showVersion).." = = Lua Version : "..tostring(_VERSION))
+	print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
 	print()
-else 
+
+else
 	print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
-end	
+end
 	--===================================================================================
 	-- Ecran N°0 Choix next campaign mission
 local input
@@ -283,7 +288,7 @@ if input == "y" or input == "yes" then
 					local stopLoop = false
 					for nSide , oob_airSide in pairsByKeys(oob_air) do														--pour afficher l'exemple de selection du premier avion présenté
 						for m , unit in pairsByKeys(oob_airSide) do
-							if playable_m[unit.type] and unit.inactive ~= true and not stopLoop then
+							if Playable_m[unit.type] and unit.inactive ~= true and not stopLoop then
 								ExPlaneA = unit.type
 								stopLoop = true
 							end
@@ -307,7 +312,7 @@ if input == "y" or input == "yes" then
 				for nSide , oob_airSide in pairsByKeys(oob_air) do	
 					print() print(nSide..":")
 					for m , unit in pairsByKeys(oob_airSide) do						
-						if playable_m[unit.type]  and unit.inactive ~= true then							
+						if Playable_m[unit.type]  and unit.inactive ~= true then							
 							for taskStr , nbool in pairsByKeys(oob_air[nSide][m].tasks) do
 								taskStr = tostring(taskStr)							
 								
@@ -475,15 +480,14 @@ if input == "y" or input == "yes" then
 					print("Ground alert intercept duty without launch.\n\n")
 				end
 			end
-			if showVersion then
-				print("= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." = = = = = = = = = = = = = = = = = =")
-				print("= = = = = = = = = = = = = Campaign Version : "..tostring(camp.version))
-				print("= = = = = = = = = = = = = Script Version : "..showVersion)
-				print("= = = = = = = = = = = = = Player Plane : "..tostring(playerPlaneBAT).." "..tostring(playerSquadBAT).." "..tostring(playerCountryBAT))
+			if showVersion  then
+				print("= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
+				print("= = = = = = = = = = = = = Script Version : "..tostring(showVersion).." = = Lua Version : "..tostring(_VERSION))
+				print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
 				print()
-			else 
+			else
 				print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
-			end	
+			end
 
 		until 1 == 2
 

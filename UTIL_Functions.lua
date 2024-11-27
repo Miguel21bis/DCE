@@ -5,7 +5,7 @@ if not versionDCE then versionDCE = {} end
 versionDCE["UTIL_Functions.lua"] = "1.17.128"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_f						
--- adjustment_o				(n loadout code)(m disp_time)(l add AFAC task)(k FormatTime)(i add insertBugList(txt))(h use isWesternCountry)(fg: add Loadout tiers)(e todo)(d:CheckConfModMaster )(c: fire playable_m from conf_mod)
+-- adjustment_o				(n loadout code)(m disp_time)(l add AFAC task)(k FormatTime)(i add insertBugList(txt))(h use isWesternCountry)(fg: add Loadout tiers)(e todo)(d:CheckConfModMaster )(c: fire Playable_m from conf_mod)
 -- debug_i					(i planeType)(h Tha\'lah)(g string.gsub(v, "\"", "\\\"" ))(f new generateId)(d UH to HF) Angle et Bearing des statics sur PA
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)
@@ -30,6 +30,9 @@ DCS_ENI_Side = {
 	["blue"] = "red",
 	["red"] = "blue"
 	}
+
+	
+Assigned_freq = {}
 
 --function to return txt whith carriage return
 function StringToTxt(text)
@@ -1376,7 +1379,7 @@ function CreatePlageFrequencyB()																				--trouve une plage de freque
 end
 
 ----- function to assign frquencies to packages -----
-assigned_freq = {}														--table to store frequencies in use
+
 assigned_AdfFreq = {}														--table to store frequencies in use
 package_freq = {															--table to store frequencies assigned to packages
 	["blue"] = {
@@ -1524,9 +1527,9 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 					-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
 					local mil = 00														--impossible pour certain avions, comme le M2000
 					freq = freq + deci + mil											--combine to complete frequency
-				until assigned_freq[freq] == nil and (freq<242.9 or freq>243.1)			--repeat until a frequency is found that is not yet in use
+				until Assigned_freq[freq] == nil and (freq<242.9 or freq>243.1)			--repeat until a frequency is found that is not yet in use
 
-				assigned_freq[freq] = true												--mark frequency in use
+				Assigned_freq[freq] = true												--mark frequency in use
 				package_freq[side][range][targetname] = freq							--store frequency for package
 				return freq																--return frequency
 			end
@@ -1542,9 +1545,9 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 						-- local mil = 00														--impossible pour certain avions, comme le M2000
 
 						freq = freq + deci + mil											--combine to complete frequency
-					until assigned_freq[freq] == nil										--repeat until a frequency is found that is not yet in use
+					until Assigned_freq[freq] == nil										--repeat until a frequency is found that is not yet in use
 
-					assigned_freq[freq] = true												--mark frequency in use
+					Assigned_freq[freq] = true												--mark frequency in use
 					return freq																--return frequency
 				else
 					return 0
@@ -1559,9 +1562,9 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 						local mil = 00														--impossible pour certain avions, comme le M2000
 
 						freq = freq + deci + mil											--combine to complete frequency
-					until assigned_freq[freq] == nil and (freq<242.9 or freq>243.1)			--repeat until a frequency is found that is not yet in use
+					until Assigned_freq[freq] == nil and (freq<242.9 or freq>243.1)			--repeat until a frequency is found that is not yet in use
 
-					assigned_freq[freq] = true												--mark frequency in use
+					Assigned_freq[freq] = true												--mark frequency in use
 					return freq																--return frequency
 				else
 					return 0
@@ -1576,9 +1579,9 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 						local mil = 00														--impossible pour certain avions, comme le M2000
 
 						freq = freq + deci + mil											--combine to complete frequency
-					until assigned_freq[freq] == nil and (freq<121.45 or freq>121.55)	and freq ~= 123.1			--repeat until a frequency is found that is not yet in use
+					until Assigned_freq[freq] == nil and (freq<121.45 or freq>121.55)	and freq ~= 123.1			--repeat until a frequency is found that is not yet in use
 
-					assigned_freq[freq] = true												--mark frequency in use
+					Assigned_freq[freq] = true												--mark frequency in use
 					return freq																--return frequency
 				else
 					return 0
@@ -1592,8 +1595,8 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 						-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
 						local mil = 00														--impossible pour certain avions, comme le M2000
 						freq = freq + deci + mil											--combine to complete frequency
-					until assigned_freq[freq] == nil										--repeat until a frequency is found that is not yet in use
-					assigned_freq[freq] = true												--mark frequency in use
+					until Assigned_freq[freq] == nil										--repeat until a frequency is found that is not yet in use
+					Assigned_freq[freq] = true												--mark frequency in use
 					return freq																--return frequency
 				else
 					return 0
@@ -1621,13 +1624,13 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 								-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
 								local mil = 00														--impossible pour certain avions, comme le M2000
 								freq = freq + deci + mil											--combine to complete frequency
-							until assigned_freq[freq] == nil and FreqCapability(freq, type, radioN) and (freq<242.9 or freq>243.1) or i > 1000		--repeat until a frequency is found that is not yet in use
+							until Assigned_freq[freq] == nil and FreqCapability(freq, type, radioN) and (freq<242.9 or freq>243.1) or i > 1000		--repeat until a frequency is found that is not yet in use
 
 							if i>=1000 then
 								print("UtilF          BUG A range "..range .. " with "..tostring(type))
 							end
 
-							assigned_freq[freq] = true												--mark frequency in use
+							Assigned_freq[freq] = true												--mark frequency in use
 							package_freq[side][range][targetname] = freq							--store frequency for package
 							return freq
 						end
@@ -1657,12 +1660,12 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 								freq = freq + deci + mil											--combine to complete frequency
 								i=i+1
 
-							until assigned_freq[freq] == nil and FreqCapability(freq, type, radioN) and (freq<121.45 or freq>121.55)	and freq ~= 123.1 or i > 1000		--repeat until a frequency is found that is not yet in use
+							until Assigned_freq[freq] == nil and FreqCapability(freq, type, radioN) and (freq<121.45 or freq>121.55)	and freq ~= 123.1 or i > 1000		--repeat until a frequency is found that is not yet in use
 
 							if i>=1000 then
 								print("UtilF          BUG A range "..range .. " with "..tostring(type))
 							end
-							assigned_freq[freq] = true												--mark frequency in use
+							Assigned_freq[freq] = true												--mark frequency in use
 
 							if overide ~= nil then
 								package_freq[side][range][targetname] = freq							--store frequency for package
@@ -1682,9 +1685,9 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 
 							repeat
 								freq = math.random(camp.radioC[side][range].min, camp.radioC[side][range].max - 1)
-							until assigned_freq[freq] == nil and freq ~= 4125 and freq ~= 5680		--repeat until a frequency is found that is not yet in use
+							until Assigned_freq[freq] == nil and freq ~= 4125 and freq ~= 5680		--repeat until a frequency is found that is not yet in use
 
-							assigned_freq[freq] = true												--mark frequency in use
+							Assigned_freq[freq] = true												--mark frequency in use
 							package_freq[side][range][targetname] = freq							--store frequency for package
 							return freq
 						end
@@ -1696,7 +1699,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 			if frequency[type] and frequency[type]["radio"]   then
 				repeat
 					freq = math.random(camp.radioC[side][range].min * 10, camp.radioC[side][range].max * 10)		--find random frequency in mHz
-				until assigned_freq[freq] == nil and freq ~= 4125 and freq ~= 5680										--repeat until a frequency is found that is not yet in use
+				until Assigned_freq[freq] == nil and freq ~= 4125 and freq ~= 5680										--repeat until a frequency is found that is not yet in use
 
 				freq = freq /10
 				local freqRemp
@@ -1707,7 +1710,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 				until freqRemp >= camp.radioC[side][range].min and freqRemp <= camp.radioC[side][range].max
 				freq = freqRemp
 
-				assigned_freq[freq] = true												--mark frequency in use
+				Assigned_freq[freq] = true												--mark frequency in use
 				package_freq[side][range][targetname] = freq							--store frequency for package
 				return freq																--return frequency				
 			end
@@ -1801,9 +1804,9 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 						-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
 						local mil = 00														--impossible pour certain avions, comme le M2000
 						freq = freq + deci + mil											--combine to complete frequency
-					until assigned_freq[freq] == nil and (freq<242.9 or freq>243.1)			--repeat until a frequency is found that is not yet in use
+					until Assigned_freq[freq] == nil and (freq<242.9 or freq>243.1)			--repeat until a frequency is found that is not yet in use
 
-					assigned_freq[freq] = true												--mark frequency in use
+					Assigned_freq[freq] = true												--mark frequency in use
 					package_freq[side][range][targetname] = freq							--store frequency for package
 
 					-- if Debug.debug then print("UtilF GetFrequency PASSE return D UHF  "..tostring(result)) end

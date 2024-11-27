@@ -15,7 +15,7 @@ versionDCE["DC_Briefing.lua"] = "1.24.154"
 -- modification M58_b		flight plan, heading, Dist, ETE (b bug, no view)
 -- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
 -- modification M51_d  		Moonphase (d: NVG info)
--- modification M48_g		Accept result mission (d: garde en memoire le txt camp["briefing_text"]) (g: addImage trigger)(f: debug)
+-- modification M48_g		Accept result mission (d: garde en memoire le txt camp["Briefing_text"]) (g: addImage trigger)(f: debug)
 -- modification M47_d  		Keeps the history of the campaign files (d: Briefing part)
 -- modification M41_b 		Sratchpad written in the Sratchpad file, if this modul is installed
 -- modification M38_k 		Check and Help CampaignMaker (k: frequence)
@@ -143,7 +143,7 @@ local function FreqCapabilityB(TestFreq, RadioPlane)
 	-- end
 end
 
-function writeWordsNicelyTidy(entries)
+local function writeWordsNicelyTidy(entries)
 	local txt = ""
 	
 	--determine maximum string length for each entry
@@ -192,7 +192,7 @@ end
 do	
 	local s = ""
 	
-	-- camp["briefing_text"] = " "..FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ": \\\n \\\n" 		--add date and time header
+	-- camp["Briefing_text"] = " "..FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ": \\\n \\\n" 		--add date and time header
 	
 
 	if AirLiftObjectif and AirLiftObjectif ~= nil then
@@ -294,28 +294,28 @@ do
 		--add oob description text (reinforcements and repairs)
 		if PlayerFlight and camp.player and camp.player.side == side_name then										--only do it for player side
 			if side_name == "blue" then
-				if briefing_oob_text_blue ~= "" then
-					s = s .. "\n" .. briefing_oob_text_blue .. "\n"
+				if Briefing_oob_text_blue ~= "" then
+					s = s .. "\n" .. Briefing_oob_text_blue .. "\n"
 				else
 					s = s .. "\n\n"
 				end
 			elseif side_name == "red" then
-				if briefing_oob_text_red ~= "" then
-					s = s .. "\n" .. briefing_oob_text_red .. "\n"
+				if Briefing_oob_text_red ~= "" then
+					s = s .. "\n" .. Briefing_oob_text_red .. "\n"
 				else
 					s = s .. "\n\n"
 				end
 			end
 		elseif PlayerFlight and camp.client and camp.client.side == side_name then										--only do it for player side
 			if side_name == "blue" then
-				if briefing_oob_text_blue ~= "" then
-					s = s .. "\n" .. briefing_oob_text_blue .. "\n"
+				if Briefing_oob_text_blue ~= "" then
+					s = s .. "\n" .. Briefing_oob_text_blue .. "\n"
 				else
 					s = s .. "\n\n"
 				end
 			elseif side_name == "red" then
-				if briefing_oob_text_red ~= "" then
-					s = s .. "\n" .. briefing_oob_text_red .. "\n"
+				if Briefing_oob_text_red ~= "" then
+					s = s .. "\n" .. Briefing_oob_text_red .. "\n"
 				else
 					s = s .. "\n\n"
 				end
@@ -442,15 +442,15 @@ do
 	
 	
 	--Assign briefing text to mission file
-	if briefing_text_playable ~= "" and PlayerFlight then											--there is briefing text which is only added if the mission is actually playable
-		if briefing_text == "" then																	--there was no briefing text for this mission instance yet
-			briefing_status = briefing_status .." ".. FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ":\n\n"		--add date and time header
+	if Briefing_text_playable ~= "" and PlayerFlight then											--there is briefing text which is only added if the mission is actually playable
+		if Briefing_text == "" then																	--there was no briefing text for this mission instance yet
+			Briefing_status = Briefing_status .." ".. FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ":\n\n"		--add date and time header
 		end
-		briefing_status = briefing_status .. briefing_text_playable									--add briefing text 
+		Briefing_status = Briefing_status .. Briefing_text_playable									--add briefing text 
 	end
 	
-	if camp["briefing_text"] and not TaskRefused then
-		local briefTemp = camp["briefing_text"]
+	if camp["Briefing_text"] and not TaskRefused then
+		local briefTemp = camp["Briefing_text"]
 		-- briefTemp = briefTemp:gsub("\\\\\\n", " \\\n")
 		-- briefTemp = briefTemp:gsub("\\\\\\n", " \\\n")
 		-- briefTemp = briefTemp:gsub("\\\\\n", " \\\n")
@@ -461,26 +461,26 @@ do
 		mission.descriptionText =  briefTemp
 		
 		
-		-- camp["briefing_text"] = nil
-		-- print("DcB reset briefing_text 4")
+		-- camp["Briefing_text"] = nil
+		-- print("DcB reset Briefing_text 4")
 		-- os.execute 'pause'
 
 	else 
 		mission.descriptionText = "\n" 
 	end
 
-	if camp["briefing_text"] then
-		-- camp["briefing_text"] = camp["briefing_text"]:gsub("\\\\\\n", " \\\n")
-		-- camp["briefing_text"] = camp["briefing_text"]:gsub("\\\\\\n", " \\\n")
-		-- camp["briefing_text"] = camp["briefing_text"]:gsub("\\\\\n", " \\\n")
-		-- camp["briefing_text"] = camp["briefing_text"]:gsub("\\\\n", " \\\n")
-		-- camp["briefing_text"] = camp["briefing_text"]:gsub(" \\n", " \\\n")
-		-- camp["briefing_text"] = camp["briefing_text"]:gsub(" \n", " \\\n")
+	if camp["Briefing_text"] then
+		-- camp["Briefing_text"] = camp["Briefing_text"]:gsub("\\\\\\n", " \\\n")
+		-- camp["Briefing_text"] = camp["Briefing_text"]:gsub("\\\\\\n", " \\\n")
+		-- camp["Briefing_text"] = camp["Briefing_text"]:gsub("\\\\\n", " \\\n")
+		-- camp["Briefing_text"] = camp["Briefing_text"]:gsub("\\\\n", " \\\n")
+		-- camp["Briefing_text"] = camp["Briefing_text"]:gsub(" \\n", " \\\n")
+		-- camp["Briefing_text"] = camp["Briefing_text"]:gsub(" \n", " \\\n")
 	end
 
-	mission.descriptionText = mission.descriptionText ..briefing_status .. "\n" .. s
+	mission.descriptionText = mission.descriptionText ..Briefing_status .. "\n" .. s
 end
--- print("DCB briefing_text 4 "..tostring(camp["briefing_text"]))
+-- print("DCB Briefing_text 4 "..tostring(camp["Briefing_text"]))
 -- os.execute 'pause'
 
 -- modification M11B. : Multiplayer
@@ -1044,11 +1044,11 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 
 					-- modification M27 	movedBullseye
-					if brief and brief[sideName] then
+					if Brief[sideName] then
 						local s = "Bullseye:\n"
-						s = s.." bullseye Name " .. ReplaceBaseName(brief[sideName].bullseye.name)
-						if brief[sideName]["bullseye"].lat then
-							s = s.." " .. format_dms(brief[sideName]["bullseye"].lat ,brief[sideName]["bullseye"].lon ,4)  .." \n"
+						s = s.." bullseye Name " .. ReplaceBaseName(Brief[sideName].bullseye.name)
+						if Brief[sideName]["bullseye"].lat then
+							s = s.." " .. format_dms(Brief[sideName]["bullseye"].lat ,Brief[sideName]["bullseye"].lon ,4)  .." \n"
 						end
 						s = s.." \n"
 						if allowedBrief then  briefing[sideName] = briefing[sideName] .. s .. "\n\n" s="" end
@@ -1241,7 +1241,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					end
 					
 					--tanker TACAN
-					tanker_TACAN = {}
+					local tanker_TACAN = {}
 					if refuelable then	
 						for pack_n,pack in pairs(ATO[Tplayer.side]) do																		--iterate through packages in player side
 							for role_name,role in pairs(pack) do																				--iterate through roles in package
@@ -1522,13 +1522,13 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 							for n = 1, #radioP do
 								for wave, freqTest in pairs(radioP[n]) do								
 									if type(freqTest) == "table" and freqTest.max and tonumber(ATC_freqTemp[i]) < freqTest.max and  tonumber(ATC_freqTemp[i]) > freqTest.min then	
-										freqA = tonumber(ATC_freqTemp[i])
+										freqA = tonumber(ATC_freqTemp[i]) or 0
 									end
 								end
 							end
 						end						
 					else
-						freqA = tonumber(db_airbases[Tplayer.pack[Tplayer.role][Tplayer.flight].base].ATC_frequency)
+						freqA = tonumber(db_airbases[Tplayer.pack[Tplayer.role][Tplayer.flight].base].ATC_frequency) or 0
 					end
 
 					for Nradio = 1, #radioP do
@@ -1890,13 +1890,13 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 										
 										for wave, freqTest in pairs(radioP[Nradio]) do								
 											if type(freqTest) == "table" and freqTest.max and tonumber(ATC_freqTemp[i]) < freqTest.max and  tonumber(ATC_freqTemp[i]) > freqTest.min then	
-												freqA = tonumber(ATC_freqTemp[i])
+												freqA = tonumber(ATC_freqTemp[i]) or 0
 											end
 										end
 										
 									end						
 								else
-									freqA = tonumber(base.ATC_frequency)
+									freqA = tonumber(base.ATC_frequency) or 0
 								end
 
 								if freqA and freqA ~= nil and freqA ~= 0 then 
@@ -2059,15 +2059,15 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					-- Modification M15 info catapulte/pont dans briefing	
 					local tabNam = {}	
 					s = ""
-					if placePA then
-						for side , pPA in pairs(placePA) do
+					if PlacePA then
+						for side , pPA in pairs(PlacePA) do
 							if sideName == side then																	--if camp.player.side == side then
 								for base , Tmn in pairs(pPA) do
 									if base == Tplayer.pack[Tplayer.role][Tplayer.flight].base then 
 										s = s..ReplaceBaseName(base).." Takeoff time on the platform at ...\n"
 										for sec, name in pairsByKeys(Tmn) do
 											if tabNam[name] ~= true then
-												catTime = camp.time + sec 
+												local catTime = camp.time + sec 
 												s = s.." "..FormatTime(catTime, "hh:mm").. " - "..tostring(name).."\n"
 												tabNam[name] = true
 											end
@@ -2172,16 +2172,15 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					local ScratchpadPath = "../../../../../../Config/ScratchpadConfig.lua"
 					-- local ScratchpadPath = "../../../../../../Config/ScratchpadConfig.lua"
 					local TestPath = io.open(ScratchpadPath, "r")
--- print("DC_B ScratchpadPath "..tostring(ScratchpadPath))
--- print("DC_B TestPath "..tostring(TestPath))
-				
+
 					-- modification M41 	Scratchpad written in the Sratchpad file, if this modul is installed
 					-- if mission_ini.WrittenOnScratchpadMod and TestPath ~= nil then 
 					if TestPath ~= nil then 
 						io.close(TestPath)
 						local ScratBriefTXT = StringToTxtBrief(briefing[sideName])
+						local config
 						dofile(ScratchpadPath)
-						local ScratFil = io.open(ScratchpadPath, "w")
+						local ScratFil = io.open(ScratchpadPath, "w") or error("Failed to open Scratchpad file")
 						config.content = ScratBriefTXT
 						local ScratConfig = "config = " .. TableSerialization(config, 0)
 						ScratFil:write(ScratConfig)
@@ -2219,13 +2218,13 @@ if not (EndCampaign or camp.endCampaign) then
 	 -- ajoute les images du target selectionné
 	if target_picture["blue"] then
 		for TP_n, target_picture in ipairs(target_picture.blue) do
-			filename = target_picture    
+			local filename = target_picture    
 			table.insert(BriefingImagesB, filename)
 		end
 	end
 	if target_picture["red"] then
 		for TP_n, target_picture in ipairs(target_picture.red) do
-			filename = target_picture    
+			local filename = target_picture    
 			table.insert(BriefingImagesR, filename)
 		end
 	end
@@ -2297,14 +2296,14 @@ end
 
 local BriefingTmp = StringToTxt(dictionary.DictKey_descriptionRedTask_2)
 BriefingTmp = BriefingTmp.."\n\n"..StringToTxt(dictionary.DictKey_descriptionBlueTask_3)
-local debugBriefingFile = io.open("Debug/briefing.txt", "w")										--open targetlist file
+local debugBriefingFile = io.open("Debug/briefing.txt", "w") or error("Failed to open Debug/briefing.txt file")
 debugBriefingFile:write(BriefingTmp)																		--save new data
 debugBriefingFile:close()
 
 
 
 local BriefingTmp = StringToTxt(dictionary.DictKey_descriptionText_1)
-local debugBriefingFile = io.open("Debug/briefingDescriptionText.txt", "w")										--open targetlist file
+local debugBriefingFile = io.open("Debug/briefingDescriptionText.txt", "w")	 or error("Failed to open Debug/briefingDescriptionText file")
 debugBriefingFile:write(BriefingTmp)																		--save new data
 debugBriefingFile:close()
 

@@ -5,7 +5,7 @@
 if not versionDCE then versionDCE = {} end
 versionDCE["DEBRIEF_Master.lua"] = "1.16.121"
 -------------------------------------------------------------------------------------------------------
--- adjustment_n				(n new targetlist)(m oob_scen ==0)(l AcceptedMission again)(k BugList)(j pairsByKeys)(i global TabTask)(g mise a niveau)(e: use io.stdin:read)(c: fire playable_m from conf_mod)(b: robust form) 
+-- adjustment_n				(n new targetlist)(m oob_scen ==0)(l AcceptedMission again)(k BugList)(j pairsByKeys)(i global TabTask)(g mise a niveau)(e: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form) 
 -- debug_d	 				(cd: EndMission)
 -- cleanCode_b
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
@@ -129,11 +129,11 @@ if TestPath ~= nil then																					--check si le fichier existe dans Sc
 	require("Active/camp_ZoneSAR")																--zoneSAR
 end
 
-playable_m = {}
+Playable_m = {}
 
 for planeType, value in pairsByKeys(data_divers) do	
 	if value.playable then
-		playable_m[planeType] = true
+		Playable_m[planeType] = true
 	end
 end	
 
@@ -473,7 +473,7 @@ if input == "y" or input == "yes" then
 					local stopLoop = false
 					for nSide , oob_airSide in pairsByKeys(oob_air) do														--pour afficher l'exemple de selection du premier avion presente
 						for m , unit in pairsByKeys(oob_airSide) do
-							if playable_m[unit.type] and unit.inactive ~= true and not stopLoop then
+							if Playable_m[unit.type] and unit.inactive ~= true and not stopLoop then
 								ExPlaneA = unit.type
 								stopLoop = true
 							end
@@ -497,7 +497,7 @@ if input == "y" or input == "yes" then
 				for nSide , oob_airSide in pairsByKeys(oob_air) do	
 					print() print(nSide..":")
 					for m , unit in pairsByKeys(oob_airSide) do						
-						if playable_m[unit.type]  and unit.inactive ~= true then							
+						if Playable_m[unit.type]  and unit.inactive ~= true then							
 							for taskStr , nbool in pairsByKeys(oob_air[nSide][m].tasks) do
 								taskStr = tostring(taskStr)							
 								
@@ -602,9 +602,9 @@ if input == "y" or input == "yes" then
 	-- camp.mission = camp.mission + 1	
 	
 	--generate next campaign mission
-	briefing_status = ""																		--text string to be added to next briefing (status reports are amended for each mission generation attempt until mission is succesfully generated)
-	briefing_oob_text_red = ""																	--text string to be added to next briefing (red repair and reinforcements)
-	briefing_oob_text_blue = ""																	--text string to be added to next briefing (blue repair and reinforcements)
+	Briefing_status = ""																		--text string to be added to next briefing (status reports are amended for each mission generation attempt until mission is succesfully generated)
+	Briefing_oob_text_red = ""																	--text string to be added to next briefing (red repair and reinforcements)
+	Briefing_oob_text_blue = ""																	--text string to be added to next briefing (blue repair and reinforcements)
 	PlayerFlight = false																		--variable to control mission generation loop
 	
 	MissionInstance = 0

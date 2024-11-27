@@ -120,7 +120,7 @@ if EndCampaign or camp.endCampaign then												--if the campaign has ended
 		end
 	until TableRemove == false
 		
-	 -- ajout du BriefingImagesB/R sauvegardé dans le camp_status en cas de d'attente de generation de mission
+	 -- ajout du BriefingImagesB/R sauvegardï¿½ dans le camp_status en cas de d'attente de generation de mission
 	if BriefingImagesB and camp.BriefingImagesB  then
 		for iCamp = 1, #camp.BriefingImagesB do 	
 			local found = false
@@ -170,7 +170,7 @@ if EndCampaign or camp.endCampaign then												--if the campaign has ended
 	mission.descriptionBlueTask = ""							--disable briefing
 	mission.descriptionRedTask = ""								--disable briefing
 	-- mission.descriptionText = ""
-	mission.descriptionText = briefing_status .. "\\n"
+	mission.descriptionText = Briefing_status .. "\\n"
 	
 	-- ----- convert tables back to strings for insertion into content files -----
 	-- local misStr = "mission = " .. TableSerialization(mission, 0)

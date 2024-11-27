@@ -79,7 +79,7 @@ if mission_ini.slider_CampaignDuration and mission_ini.slider_CampaignDuration =
 	os.execute 'pause'	
 end
 
-airUnitReinforce = {}										--creation table qui reinforce qui, pour plus de souplesse d emploi
+local airUnitReinforce = {}										--creation table qui reinforce qui, pour plus de souplesse d emploi
 
 
 --[[
@@ -90,8 +90,8 @@ for name, trig in pairs(camp_triggers) do
 	if trig.action and type(trig.action == "table") then			
 		for n = 1, #trig.action do 				
 			if trig.action[n] == 'Action.CampaignEnd("win")' or  trig.action[n] == 'Action.CampaignEnd("loss")' then	
-				EndOne, EndTwo = trig.action[n]:match("([^,]+)\"([^,]+)")
-				EndOne2, winLoss = EndOne:match("([^,]+)\"([^,]+)")															
+				local EndOne, EndTwo = trig.action[n]:match("([^,]+)\"([^,]+)")
+				local EndOne2, winLoss = EndOne:match("([^,]+)\"([^,]+)")															
 				-- print()
 				-- print("DcCS BEFORE  "..tostring(trig.condition))					
 				
@@ -106,7 +106,7 @@ for name, trig in pairs(camp_triggers) do
 						
 						local stringEgal = ""
 						local stringAnd = ""										
-						one, two = strMatch:match("([^,]+)<([^,]+)")
+						local one, two = strMatch:match("([^,]+)<([^,]+)")
 
 						if one == nil and two == nil and  string.find(strMatch, "==") then
 							one, two = strMatch:match("([^,]+)=([^,]+)")
@@ -253,7 +253,7 @@ for RFname, RFtrig in pairs(camp_triggers) do
 	if RFtrig.action and type(RFtrig.action) ~= "table" and string.find(RFtrig.action, "Action.AirUnitReinforce")  then
 		
 		-- print("DcCS RFtrig.action "..tostring(RFtrig.action))
-		local sourceName01, destName
+		local sourceName01, destName, dechet02
 		local dechet01, sourceName
 
 		if string.find(RFtrig.action, ",") then
@@ -369,20 +369,12 @@ for side , oob_airSide in pairs(oob_air) do														--pour afficher l'exemp
 	end
 end
 
-
-
 -- par défaut, on assigne une valeur superieur au camp du joueur, qu'il soit rouge ou bleu.
-skillWish = {
-	["red"] = 50,
-	["blue"] = 50,
-}
-
-for side, wish in pairs(skillWish) do
+for side, wish in pairs(SkillWish) do
 	if side == SidePlayer then
-		skillWish[side] = 62 
-		-- print("DcCS side:  "..side.." |skillWish: "..tostring(skillWish[side]))
+		SkillWish[side] = 62
 	else
-		skillWish[side] = 50
+		SkillWish[side] = 50
 	end
 end
 
@@ -393,24 +385,24 @@ if mission_ini.slider_EnemyLevel and type(mission_ini.slider_EnemyLevel == "numb
 	-- print("DcCSPARTIE slider_EnemyLevel ***************************************************************************")
 	-- print("DcCS slider_EnemyLevel:  "..tostring(mission_ini.slider_EnemyLevel))
 	
-	for side, wish in pairs(skillWish) do		
+	for side, wish in pairs(SkillWish) do		
 		--change la valeur Skill
 		if side == SidePlayer then
 			-- 1 (easy player)		70
 			-- 4 (very difficult)	55
-			skillWish[side] = ((-5 * mission_ini.slider_EnemyLevel) + 75) 									--change la valeur Skill du camp 
+			SkillWish[side] = ((-5 * mission_ini.slider_EnemyLevel) + 75) 									--change la valeur Skill du camp 
 		else
 			-- 1 (easy player)		30
 			-- 4 (very difficult)	60
-			skillWish[side] = ((10 * mission_ini.slider_EnemyLevel) + 20)											--change la valeur Skill du camp adverse
+			SkillWish[side] = ((10 * mission_ini.slider_EnemyLevel) + 20)											--change la valeur Skill du camp adverse
 		end		
 		
-		if skillWish[side] < 0 then
-			skillWish[side] = 0
-		elseif skillWish[side] > 100 then
-			skillWish[side] = 100
+		if SkillWish[side] < 0 then
+			SkillWish[side] = 0
+		elseif SkillWish[side] > 100 then
+			SkillWish[side] = 100
 		end
-		-- print("DcCS AFTER Skill "..tostring(side).." "..tostring(skillWish[side]))
+		-- print("DcCS AFTER Skill "..tostring(side).." "..tostring(SkillWish[side]))
 	end
 end	
 	--[[

@@ -14,7 +14,7 @@ versionDCE["MAIN_AcceptMission.lua"] = "1.10.63"
 -- modification M56_a		AssignCallnameSquad
 -- modification M51_a		Moonphase
 -- modification M49_a		big central db_loadout
--- modification M48_g		Accept result mission (d: garde en memoire le txt camp["briefing_text"]) (g: addImage trigger)(af: debug)
+-- modification M48_g		Accept result mission (d: garde en memoire le txt camp["Briefing_text"]) (g: addImage trigger)(af: debug)
 -- modification M34_Bl		custom FrequenceRadio (l new file name)
 -- -------------------------------------------------------------------------------------------------------
 
@@ -131,18 +131,18 @@ mission.currentKey = 1010000															--not clear how this works but is req
 camp.waitingNextGen = true
 
 --si la generation de la mission suivante est repoussee, on sauvegarde le txt cree par les trigger txt precedent
--- if briefing_text ~= "" then	
-	if camp["briefing_text"] then 
-		camp["briefing_text"] = ""..FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. camp["briefing_text"] .. ": \n \n" 		--add date and time header
+-- if Briefing_text ~= "" then	
+	if camp["Briefing_text"] then 
+		camp["Briefing_text"] = ""..FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. camp["Briefing_text"] .. ": \n \n" 		--add date and time header
 	else 
-		camp["briefing_text"] = ""..FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ": \n \n" 		--add date and time header
+		camp["Briefing_text"] = ""..FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ": \n \n" 		--add date and time header
 	end
 	
-	if briefing_text ~= "" then	
-		-- briefing_text = briefing_text:gsub("\n", "\\\n")
-		-- briefing_text = briefing_text:gsub("\\n", "\\\n")
-		-- briefing_text = briefing_text:gsub("\\\\\n", "\\\n")
-		camp["briefing_text"] = camp["briefing_text"] .. briefing_text
+	if Briefing_text ~= "" then	
+		-- Briefing_text = Briefing_text:gsub("\n", "\\\n")
+		-- Briefing_text = Briefing_text:gsub("\\n", "\\\n")
+		-- Briefing_text = Briefing_text:gsub("\\\\\n", "\\\n")
+		camp["Briefing_text"] = camp["Briefing_text"] .. Briefing_text
 	end
 
 --si la generation de la mission suivante est repoussee, on sauvegarde le txt cr�e par les trigger txt precedent

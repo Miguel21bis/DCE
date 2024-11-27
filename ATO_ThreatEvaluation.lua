@@ -1400,7 +1400,7 @@ for zone_n,zone in pairs(mission.triggers.zones) do												--iterate through
 	end
 end
 
-groundthreatsAll = deepcopy(groundthreats)
+GroundthreatsAll = deepcopy(groundthreats)
 
 function CheckPointInCercle(point, circle)
 	--(x-center_x)^2 + (y - center_y)^2 < radius^2
@@ -1449,29 +1449,29 @@ end
 				
 if Debug.debug then
 	local camp_str = "threatgroundthreats_AtoTE = " .. TableSerialization(groundthreats, 0)						--make a string
-	local campFile = io.open("Debug/threat_groundthreats_AtoTE.lua", "w")								--open targetlist file
+	local campFile = io.open("Debug/threat_groundthreats_AtoTE.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
 
 	
-	local camp_str = "threatgroundthreatsALL_AtoTE = " .. TableSerialization(groundthreatsAll, 0)						--make a string
-	local campFile = io.open("Debug/threat_groundthreatsALL_AtoTE.lua", "w")								--open targetlist file
+	local camp_str = "threatgroundthreatsALL_AtoTE = " .. TableSerialization(GroundthreatsAll, 0)						--make a string
+	local campFile = io.open("Debug/threat_groundthreatsALL_AtoTE.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
 
 	local camp_str = "GCI_AtoTE = " .. TableSerialization(GCI, 0)						--make a string
-	local campFile = io.open("Debug/threat_GCI_AtoTE.lua", "w")								--open targetlist file
+	local campFile = io.open("Debug/threat_GCI_AtoTE.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
 
 
 	local camp_str = "fighterthreats_AtoTE = " .. TableSerialization(fighterthreats, 0)						--make a string
-	local campFile = io.open("Debug/threat_fighterthreats_AtoTE.lua", "w")								--open targetlist file
+	local campFile = io.open("Debug/threat_fighterthreats_AtoTE.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
 
 	local camp_str = "ewr_AtoTE = " .. TableSerialization(ewr, 0)						--make a string
-	local campFile = io.open("Debug/threat_EWR_AtoTE.lua", "w")								--open targetlist file
+	local campFile = io.open("Debug/threat_EWR_AtoTE.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
 

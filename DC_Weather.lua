@@ -15,7 +15,7 @@ versionDCE["DC_Weather.lua"] = "1.6.22"
 ------------------------------------------------------------------------------------------------------- 
 
 
-	-- windDirection = camp.weather.direction													--recupere la vrai direction du vent (aéronautique)
+	-- WindDirection = camp.weather.direction													--recupere la vrai direction du vent (aéronautique)
 
 
 local debugWeather = false
@@ -1624,7 +1624,7 @@ for placeName, place in pairs(db_airbases) do
 			direction = direction + 360
 		end
 
-		windDirection = direction													--recupere la vrai direction du vent (aéronautique)
+		WindDirection = direction													--recupere la vrai direction du vent (aéronautique)
 
 		direction = math.floor(direction / 10) * 10
 		if direction < 10 then

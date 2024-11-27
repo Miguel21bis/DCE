@@ -1015,8 +1015,8 @@ function EventHandler:onEvent(event)
 		if camp.debugTraceability then 
 			camp.debugTraceability = {} 
 		end
-		if camp.briefing_text then
-			camp.briefing_text = ""
+		if camp.Briefing_text then
+			camp.Briefing_text = ""
 		end
 
 		--export camp stats file

@@ -115,10 +115,10 @@ end
 --******************************************************************--
 --******************************************************************--
 
-local playable_m = {}
+local Playable_m = {}
 for planeType, value in pairs(data_divers) do	
 	if value.playable then
-		playable_m[planeType] = true
+		Playable_m[planeType] = true
 	end
 end	
 
@@ -151,10 +151,10 @@ end
 local oobAirSide = oob_air[playerSide]
 table.sort(oobAirSide, function(a, b) return a.type:upper() < b.type:upper() end)
 
--- playable_m = {}
+-- Playable_m = {}
 -- for planeType, value in pairs(data_divers) do	
 -- 	if value.playable then
--- 		playable_m[planeType] = true
+-- 		Playable_m[planeType] = true
 -- 	end
 -- end	
 
@@ -163,7 +163,7 @@ local nType = 1
 local tabSquad = {}
 
 for m , unit in ipairs(oobAirSide) do
-	if playable_m[unit.type] then
+	if Playable_m[unit.type] then
 
 		table.insert(tabSquad, nType, unit.type.." | "..unit.name.." | "..unit.base)
 
@@ -187,8 +187,8 @@ local testFile = io.open(pathCampaign.."/Debug/DCEM_Function_taskByPlane.lua", "
 testFile:write(test_str)															--save new data
 testFile:close()
 
-local test_str = "playable_m = " .. TableSerialization(playable_m, 0)						--make a string
-local testFile = io.open(pathCampaign.."/Debug/DCEM_Function_playable_m.lua", "w")								--open targetlist file
+local test_str = "Playable_m = " .. TableSerialization(Playable_m, 0)						--make a string
+local testFile = io.open(pathCampaign.."/Debug/DCEM_Function_Playable_m.lua", "w")								--open targetlist file
 testFile:write(test_str)															--save new data
 testFile:close()
 
@@ -200,7 +200,7 @@ testFile:close()
 
 return {
     taskByPlane = taskByPlane,
-    playable_m = playable_m,
+    Playable_m = Playable_m,
 	tabSquad = tabSquad,
 }
 

@@ -28,7 +28,7 @@ AltiHelicoMap = {}
 AltitudeFloorNew = {}
 PlayerSquad = {}
 
-local _debugGlobal = false
+DebugRoute = false
 local blockOnlyPriority = false
 local denom_NeDonnePasTOUT = 1.5 --1.3		--nb, coef, dénominateur pour ne pas donner tous les chasseurs à l'escorte, en garder pour les intercepteur/cap
 --plus le chiffre est petit, moins il y a de CAP et intercepteur
@@ -289,6 +289,22 @@ local function mysort(s)
     end)
     return t
 end
+
+local function table_move(src, start, stop, dest, tbl)
+    tbl = tbl or src
+    local offset = dest - start
+    if offset > 0 then -- Décalage vers l'avant
+        for i = stop, start, -1 do
+            tbl[i + offset] = src[i]
+        end
+    else -- Décalage vers l'arrière
+        for i = start, stop do
+            tbl[i + offset] = src[i]
+        end
+    end
+    return tbl
+end
+
 
 local function round(num)
 local dec = 2
@@ -1056,7 +1072,7 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																								DebuGenTxt = DebuGenTxt.."\n"..("______________ToTarget "..tostring(ToTarget).." <=? "..tostring(unit_loadouts[l].range))
 																								DebuGenTxt = DebuGenTxt.."\n"..("______________minrange? "..tostring(unit_loadouts[l].minrange))
 																								DebuGenTxt = DebuGenTxt.."\n"..("______________ToTarget * 1.5 "..tostring(ToTarget * 1.5).." >? "..tostring(unit_loadouts[l].minrange))
-																								_debugGlobal = true
+																								DebugRoute = true
 																							end
 
 																							-- print("                    AtoG ToTarget "..tostring(ToTarget).." <=?? unit_loadouts[l].range: "..tostring(unit_loadouts[l].range) )
@@ -1078,7 +1094,7 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																							-- _affiche(unit.name, "unit")
 																							-- _affiche(unit_loadouts[l], "unit_loadouts[l]")
 
-																							_debugGlobal = false
+																							DebugRoute = false
 																						end
 
 																						local altiPass = true
@@ -1674,7 +1690,7 @@ for sideName, draftT in pairs(Draft_sorties) do
 					for taskName, taskValue in pairs(oob.tasks) do
 						if taskName == multiPlaneSet.blue.task then
 							-- Décaler les éléments de la position 1 à o-1 vers la droite
-							table.move(oob_air["blue"], 1, o-1, 2)
+							table_move(oob_air["blue"], 1, o-1, 2)
 							-- Mettre l'élément trouvé en tête de la table
 							oob_air["blue"][1] = oob
 							-- Supprimer l'élément à sa position originale (qui a été décalée)
@@ -1693,7 +1709,7 @@ for sideName, draftT in pairs(Draft_sorties) do
 					for taskName, taskValue in pairs(oob.tasks) do
 						if taskName == multiPlaneSet.red.task then
 							-- Décaler les éléments de la position 1 à o-1 vers la droite
-							table.move(oob_air["red"], 1, o-1, 2)
+							table_move(oob_air["red"], 1, o-1, 2)
 							-- Mettre l'élément trouvé en tête de la table
 							oob_air["red"][1] = oob
 							-- Supprimer l'élément à sa position originale (qui a été décalée)

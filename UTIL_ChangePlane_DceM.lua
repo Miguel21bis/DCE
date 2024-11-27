@@ -4,7 +4,7 @@
 if not versionDCE then versionDCE = {} end
 versionDCE["UTIL_ChangePlane_DceM.lua"] = "1.3.7"
 -------------------------------------------------------------------------------------------------------
--- adjustment_c				(b playable_m from data_divers)
+-- adjustment_c				(b Playable_m from data_divers)
 -- cleanCode_a				
 -- modification M55_c		player can change the type of plane (c:triggers part)(b:same Side)
 -------------------------------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ local oldSquadName = ""
 local newSquadName = ""
 
 
---affiche le type d'avion selectionné et son squadrons
+--affiche le type d'avion selectionnï¿½ et son squadrons
 for side, squadTL in  pairs(oob_air) do
 	for squad_n, squad in  pairs(squadTL) do
 		if squad.player then 
@@ -86,19 +86,19 @@ end
 -- oobAirSide = oob_air[playerSide]
 -- table.sort(oobAirSide, cmp)
 
---TIPS sort (attention suite à un tri, la boucle doit etre fait avec ipairs)
+--TIPS sort (attention suite ï¿½ un tri, la boucle doit etre fait avec ipairs)
 oobAirSide = oob_air[playerSide]
 table.sort(oobAirSide, function(a, b) return a.type:upper() < b.type:upper() end)
 
--- playable_m = {}
+-- Playable_m = {}
 -- for planeType, value in pairs(frequency) do	
--- 	playable_m[planeType] = true
+-- 	Playable_m[planeType] = true
 -- end	
 
-playable_m = {}
+Playable_m = {}
 for planeType, value in pairs(data_divers) do	
 	if value.playable then
-		playable_m[planeType] = true
+		Playable_m[planeType] = true
 	end
 end	
 
@@ -107,7 +107,7 @@ local nType = 1
 local TabSquad = {}
 
 for m , unit in ipairs(oobAirSide) do
-	if playable_m[unit.type] then
+	if Playable_m[unit.type] then
 
 		table.insert(TabSquad,nType, unit.type.." | "..unit.name.." | "..unit.base)
 

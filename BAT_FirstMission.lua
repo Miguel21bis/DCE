@@ -5,7 +5,7 @@
 if not versionDCE then versionDCE = {} end
 versionDCE["BAT_FirstMission.lua"] = "1.13.97"
 -------------------------------------------------------------------------------------------------------
--- adjustment_o				(o full targetList)(n targetList numeric)(m BAT)(l playable_m from data_divers)(k BugList)(j pairsByKeys)(i global TabTask)(h Firstmission_flag)(g mise a niveau)(d: use io.stdin:read)(c: fire playable_m from conf_mod)(b: robust form)
+-- adjustment_o				(o full targetList)(n targetList numeric)(m BAT)(l Playable_m from data_divers)(k BugList)(j pairsByKeys)(i global TabTask)(h Firstmission_flag)(g mise a niveau)(d: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form)
 -- cleancode_c
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M61_c		SAR (c DEV creation fichier cercle commande: w3)
@@ -87,11 +87,11 @@ if not targetlist.blue[1] then
 	targetlistToNum()
 end
 
-playable_m = {}
+Playable_m = {}
 
 for planeType, value in pairsByKeys(data_divers) do
 	if value.playable then
-		playable_m[planeType] = true
+		Playable_m[planeType] = true
 	end
 end
 
@@ -112,28 +112,30 @@ if  TestPath ~= nil then
 end
 
 --affiche le type d'avion selectionné et son squadrons M55_a
-playerPlaneBAT = ""
-playerSquadBAT = ""
-playerCountryBAT = ""
+local playerInfo = {
+	planeBat = "",
+	squadBat = "",
+	countryBat = "",
+}
+
 -- playerSide = ""
 for side, squadTL in  pairsByKeys(oob_air) do
 	for squad_n, squad in  pairsByKeys(squadTL) do
 		if squad.player then
-			playerPlaneBAT = squad.type
-			playerSquadBAT = squad.name
-			playerCountryBAT = squad.country
+			playerInfo.planeBAT = squad.type
+			playerInfo.squadBAT = squad.name
+			playerInfo.countryBAT = squad.country
 		end
 	end
 end
 
 
 if versionPackageICM then
-	print("0A0= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." = = = = = = = = = = = = = = = = = =\n"..
-		"= = = = = = = = = = = = = Campaign Version : "..tostring(camp.version).."\n"..
-		"= = = = = = = = = = = = = Script Version : "..showVersion.."\n"..
-		"= = = = = = = = = = = = = Player Plane : "..tostring(playerPlaneBAT).." Unit: "..tostring(playerSquadBAT).." Country: "..tostring(playerCountryBAT).."\n"..
-		"\n"
-	)
+	print("0A0= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
+	print("= = = = = = = = = = = = = Script Version : "..tostring(showVersion).." = = Lua Version : "..tostring(_VERSION))
+	print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
+	print()
+
 else
 	print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
 end
@@ -261,7 +263,7 @@ repeat
 				local stopLoop = false
 				for nSide , oob_airSide in pairsByKeys(oob_air) do														--pour afficher l'exemple de selection du premier avion présenté
 					for m , unit in pairsByKeys(oob_airSide) do
-						if playable_m[unit.type] and unit.inactive ~= true and not stopLoop then
+						if Playable_m[unit.type] and unit.inactive ~= true and not stopLoop then
 							ExPlaneA = unit.type
 							stopLoop = true
 						end
@@ -283,7 +285,7 @@ repeat
 				for nSide , oob_airSide in pairsByKeys(oob_air) do
 					print() print(nSide..":")
 					for m , unit in pairsByKeys(oob_airSide) do
-						if playable_m[unit.type]  and unit.inactive ~= true then
+						if Playable_m[unit.type]  and unit.inactive ~= true then
 							for taskStr , nbool in pairsByKeys(oob_air[nSide][m].tasks) do
 								taskStr = tostring(taskStr)
 
@@ -454,10 +456,9 @@ repeat
 		end
 
 		if showVersion  then
-			print("= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." = = = = = = = = = = = = = = = = = =")
-			print("= = = = = = = = = = = = = Campaign Version : "..tostring(camp.version))
-			print("= = = = = = = = = = = = = Script Version : "..showVersion)
-			print("= = = = = = = = = = = = = Player Plane : "..tostring(playerPlaneBAT).." Unit: "..tostring(playerSquadBAT).." Country: "..tostring(playerCountryBAT))
+			print("= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
+			print("= = = = = = = = = = = = = Script Version : "..tostring(showVersion).." = = Lua Version : "..tostring(_VERSION))
+			print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
 			print()
 		else
 			print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")

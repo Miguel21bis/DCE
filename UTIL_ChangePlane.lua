@@ -67,7 +67,7 @@ local TabSquad = {}
 	-- if nSide == playerSide then
 		-- for i,v in ipairs(animals) do print(v.name) end
 		for m , unit in ipairs(oobAirSide) do
-			if playable_m[unit.type] and unit.inactive ~= true  then
+			if Playable_m[unit.type] and unit.inactive ~= true  then
 				table.insert(TabSquad,nType, unit.name)
 				
 				io.write("\n"..nType .." | "..unit.type .." | "..unit.name.." | "..unit.country)
