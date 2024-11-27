@@ -275,9 +275,9 @@ local function AddFileTrigger(filename, cond0, predicate1, predicate2)
 	mission.trig.conditions[trig_n] = cond																			--"return(true)"
 	--						[1] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_6\"));",
 	if predicate2 == "a_out_sound_c" then
-		mission.trig.actions[trig_n] = 'a_out_sound_c("..idCountry..", getValueResourceByKey(\"ResKey_Action_" .. mission.maxDictId .. "\"), 0);'
+		mission.trig.actions[trig_n] = "a_out_sound_c("..idCountry..", getValueResourceByKey(\"ResKey_Action_" .. mission.maxDictId .. "\"), 0);"
 	else
-		mission.trig.actions[trig_n] = 'a_do_script_file(getValueResourceByKey(\"ResKey_Action_" .. mission.maxDictId .. "\"));'
+		mission.trig.actions[trig_n] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_" .. mission.maxDictId .. "\"));"
 	end
 
 	mission.trigrules[trig_n] = {

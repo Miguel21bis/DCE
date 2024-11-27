@@ -124,7 +124,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 		end
 	end
 
-	before = os.clock()
+	local before = os.clock()
 
 	--function to return radar horizon
 	local function RadarHorizon(h1, h2)
@@ -1791,7 +1791,7 @@ end
 
 
 function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainUnit)																					--get the escort route given the escort start point and an existing package route
-	before = os.clock()
+	local before = os.clock()
 	--make a local copy of the route table forwarded as function argument (otherwise the original route gets adjusted
 	-- local MainUnitHelicopter = mainUnit.helicopter
 	local route = deepcopy(orig_route)
@@ -1875,6 +1875,11 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 	route[1].y = basePoint.y
 	route[1].alt = basePoint.h
 
+	if #orig_route < 2 then
+		_affiche(orig_route, "orig_route")
+		_affiche(mainUnit, "mainUnit")
+		os.execute 'pause'
+	end
 	route[2].x = basePoint.x
 	route[2].y = basePoint.y
 	route[2].alt = basePoint.h
