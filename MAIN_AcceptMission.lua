@@ -99,7 +99,7 @@ else
 		--creer le fichier db_airbases dans Active, meme en cours de campagne, pour garder la retrocompatibilite
 		print("MainA create copie db_airbase from Init")
 		local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
-		local trigFile = io.open("Active/db_airbases.lua", "w")
+		local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
 		trigFile:write(airbases_Str)
 		trigFile:close()
 	end
@@ -165,7 +165,7 @@ end
 ----- convert tables back to strings for insertion into content files -----
 local cmpStr = "camp = " .. TableSerialization(camp, 0)
 
-local cmpFile = io.open("Active/camp_status.lua", "w")								--campaign status file
+local cmpFile = io.open("Active/camp_status.lua", "w") or error("Failed to open debug file")
 cmpFile:write(cmpStr)
 cmpFile:close()
 
@@ -186,32 +186,32 @@ local air_str = "oob_air = " .. TableSerialization(oob_air, 0)								--make a s
 if TypeAlias then
 	air_str = air_str .. "TypeAlias = " .. TableSerialization(TypeAlias, 0)
 end
-local airFile = io.open("Active/oob_air.lua", "w")											--open oob air file
+local airFile = io.open("Active/oob_air.lua", "w") or error("Failed to open debug file")
 airFile:write(air_str)																		--save new data
 airFile:close()
 
 local ground_str = "oob_ground = " .. TableSerialization(oob_ground, 0)						--make a string
-local groundFile = io.open("Active/oob_ground.lua", "w")									--open oob ground file
+local groundFile = io.open("Active/oob_ground.lua", "w") or error("Failed to open debug file")
 groundFile:write(ground_str)																--save new data
 groundFile:close()
 
 
 local tgt_str = "targetlist = " .. TableSerialization(targetlist, 0)						--make a string
-local tgtFile = io.open("Active/targetlist.lua", "w")										--open targetlist file
+local tgtFile = io.open("Active/targetlist.lua", "w") or error("Failed to open debug file")
 tgtFile:write(tgt_str)																		--save new data
 tgtFile:close()
 
 local trigStr = "camp_triggers = " .. TableSerializationAG(camp_triggers, 0)
-local trigFile = io.open("Active/camp_triggers.lua", "w")
+local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to open debug file")
 trigFile:write(trigStr)
 trigFile:close()
 
 local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
-local trigFile = io.open("Active/db_airbases.lua", "w")
+local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
 trigFile:write(airbases_Str)
 trigFile:close()
 
 local ZoneSAR_str = "camp_ZoneSAR = " .. TableSerialization(camp_ZoneSAR, 0)					--make a string
-local ZoneSARFile = io.open("Active/camp_ZoneSAR.lua", "w")									--open ZoneSAR file
+local ZoneSARFile = io.open("Active/camp_ZoneSAR.lua", "w")	 or error("Failed to open debug file")
 ZoneSARFile:write(ZoneSAR_str)																	--save new data
 ZoneSARFile:close()

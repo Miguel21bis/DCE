@@ -11,6 +11,15 @@ versionDCE["DC_Time.lua"] = "1.4.14"
 -- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
 -- modification M25_b 		onlyDayMission.
 ------------------------------------------------------------------------------------------------------- 
+--Global variable:
+--determine mission time of day
+Daytime	= ""																					--variable what Daytime the is covered in the duration of the mission
+
+--local variable:
+local actualTime
+local daysfrom
+local hoursFrom
+local referenceTime
 
 --campaign day counter
 if camp.day == nil then																			--if counter does not exist yet
@@ -96,14 +105,14 @@ if not 	AcceptedMission  then
 		aliasYear = 1970
 	end 
 
-	reference = os.time{day=camp.dateInit.day, year=aliasInitYear, month=camp.dateInit.month} 
+	referenceTime = os.time{day=camp.dateInit.day, year=aliasInitYear, month=camp.dateInit.month} 
 	actualTime = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month} + camp.time
-	CampTotalTimeS = os.difftime(actualTime, reference) --/ (24 * 60 * 60) -- seconds in a day
+	CampTotalTimeS = os.difftime(actualTime, referenceTime) --/ (24 * 60 * 60) -- seconds in a day
 	camp.date.CampTotalTimeS = CampTotalTimeS
 	daysfrom = CampTotalTimeS/ (24 * 60 * 60) -- seconds in a day
 	hoursFrom = CampTotalTimeS/ (3600) -- seconds to hours
 
-	-- print("DcT A reference "..tostring(reference).." actualTime "..actualTime) -- today it prints "1"
+	-- print("DcT A referenceTime "..tostring(referenceTime).." actualTime "..actualTime) -- today it prints "1"
 	-- print("DcT A CampTotalTimeS "..tostring(CampTotalTimeS).." daysfrom "..daysfrom.." hoursFrom "..hoursFrom) -- today it prints "1"
 
 	-- os.execute 'pause'
@@ -133,8 +142,8 @@ if not 	AcceptedMission  then
 		print("Next mission scheduled at: " .. FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year .. ".\n")
 	end
 
-	--determine mission time of day
-	daytime	= ""																					--variable what daytime the is covered in the duration of the mission
+	-- --determine mission time of day
+	-- Daytime	= ""																					--variable what Daytime the is covered in the duration of the mission
 
 	local targetTime =  camp.time + mission_ini.startup_time_player + 3600
 
@@ -142,22 +151,22 @@ if not 	AcceptedMission  then
 	--dusk == cr�puscule
 	if targetTime >= mission_ini.dawn and targetTime <= mission_ini.dusk then										--current time is between dawn and dusk
 		if targetTime + mission_ini.mission_duration <= mission_ini.dusk then										--mission duration ends before dusk
-			daytime = "day"
+			Daytime = "day"
 		else																						--mission duration ends after dusk
-			daytime = "day-night"
+			Daytime = "day-night"
 		end
 	else																							--current time is between dusk and dawn
 		if targetTime < mission_ini.dawn then																--mission starts before dawn
 			if targetTime + mission_ini.mission_duration < mission_ini.dawn then									--mission duration ends before dawn
-				daytime = "night"
+				Daytime = "night"
 			else
-				daytime = "night-day"
+				Daytime = "night-day"
 			end
 		else																						--mission starts after dusk
 			if targetTime + mission_ini.mission_duration < mission_ini.dawn + 86400 then							--mission duration ends before dawn of next day
-				daytime = "night"
+				Daytime = "night"
 			else
-				daytime = "night-day"
+				Daytime = "night-day"
 			end
 		end
 	end
@@ -203,12 +212,8 @@ else	--si la mission est accept�e, on prend juste les infos sans ajouter de te
 		camp.day = camp.day + 1																		--counter for campaign days
 	end
 
-	reference = os.time{day=camp.dateInit.day, year=aliasInitYear, month=camp.dateInit.month} 
+	referenceTime = os.time{day=camp.dateInit.day, year=aliasInitYear, month=camp.dateInit.month} 
 	actualTime = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month} + camp.time
-	CampTotalTimeS = os.difftime(actualTime, reference) --/ (24 * 60 * 60) -- seconds in a day
-
-	-- print("DcT B reference "..tostring(reference).." actualTime "..actualTime) -- today it prints "1"
-	-- print("DcT B CampTotalTimeS "..tostring(CampTotalTimeS).." daysfrom ") -- today it prints "1"
-
+	CampTotalTimeS = os.difftime(actualTime, referenceTime) --/ (24 * 60 * 60) -- seconds in a day
 
 end

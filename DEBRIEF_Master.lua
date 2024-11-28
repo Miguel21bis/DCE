@@ -28,8 +28,9 @@ AcceptedMission = false
 DebuGenTxt = ""					--debug cumulutatif de ATO_Generator
 
 local function AcceptMission()
+	local m = ""
 	repeat
-		print("\n\n Night or Day ? : "..daytime)													-- info day or not
+		print("\n\n Night or Day ? : "..Daytime)													-- info day or not
 		print("\n\nAccept Mission ?:")	
 		
 		print("a".." - Accept mission")
@@ -53,9 +54,10 @@ local function AcceptMission()
 		return true
 	end
 end
------ random seed -----
-math.randomseed(tonumber(tostring(os.time()):reverse():sub(1,6)))
-math.random(); math.random(); math.random()
+
+-- random seed -----
+local seed = os.time() -- Récupérer un timestamp en secondes
+math.randomseed(seed)  -- Initialiser le générateur pseudo-aléatoire
 
 
 --load functions
@@ -153,7 +155,7 @@ else
 		dofile(db_airbasesFile2)
 		--creer le fichier db_airbases dans Active, meme en cours de campagne, pour garder la retrocompatibilite
 		local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
-		local trigFile = io.open("Active/db_airbases.lua", "w")
+		local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
 		trigFile:write(airbases_Str)
 		trigFile:close()
 	end
@@ -221,7 +223,7 @@ camp.time = camp.time + elapsed_time															--add mission time to campaig
 
 --create and view debriefing file for mission
 dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
-local debriefFile = io.open("Debriefing/Debriefing " .. camp.mission .. ".txt", "w")			--create new debriefing file
+local debriefFile = io.open("Debriefing/Debriefing " .. camp.mission .. ".txt", "w") or error("Failed to open debug file")
 debriefFile:write(debriefing)																	--write debriefing text into file (variable debriefing comes from DEBRIEF_Text.lua)
 debriefFile:close()
 os.execute('start "Debriefing" "notepad.exe" "Debriefing/Debriefing ' .. camp.mission .. '.txt"')	--open the debriefing file with notepad
@@ -280,7 +282,7 @@ if input == "y" or input == "yes" then
 	
 	--save new data (remaining files are updated in MAIN_NextMission.lua)
 	local client_str = "clientstats = " .. TableSerialization(clientstats, 0)					--make a string
-	local clientFile = io.open("Active/clientstats.lua", "w")									--open clientstats file
+	local clientFile = io.open("Active/clientstats.lua", "w") or error("Failed to open debug file")
 	clientFile:write(client_str)																--save new data
 	clientFile:close()
 	
@@ -298,7 +300,7 @@ if input == "y" or input == "yes" then
 		end
 	end
 	local scen_str = "oob_scen = " .. TableSerialization(oob_scen, 0)							--make a string
-	local scenFile = io.open("Active/oob_scen.lua", "w")										--open oob_scen file
+	local scenFile = io.open("Active/oob_scen.lua", "w") or error("Failed to open debug file")
 	scenFile:write(scen_str)																	--save new data
 	scenFile:close()
 	
@@ -326,6 +328,7 @@ print("\nGenerate next campaign mission? y(es)/n(o):\n")						--ask for user con
 
 local input
 local playable_type = {}
+local choix1
 
 SinglePlayer = false
 if Multi == nil then
@@ -491,7 +494,7 @@ if input == "y" or input == "yes" then
 					local seen = {}	
 					local tasks = {}
 				local ti = 65 																						--char(65) == a
-				tabTaskAvailable = {}
+				local tabTaskAvailable = {}
 				
 				-- parse toutes les unites et rempli le tab tabTaskAvailable pour etre sur de proposer toutes les task propos� active 
 				for nSide , oob_airSide in pairsByKeys(oob_air) do	
@@ -683,7 +686,7 @@ else
 	
 	----- convert tables back to strings for insertion into content files -----
 	local cmpStr = "camp = " .. TableSerialization(camp, 0)
-	local cmpFile = io.open("Active/camp_status.lua", "w")								--campaign status file
+	local cmpFile = io.open("Active/camp_status.lua", "w") or error("Failed to open debug file")
 	cmpFile:write(cmpStr)
 	cmpFile:close()
 	

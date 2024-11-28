@@ -327,7 +327,7 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 
 		local tabIndex = {}
 		repeat
-			print("\n\n Day or Night? : "..daytime)														-- info day or not
+			print("\n\n Day or Night? : "..Daytime)														-- info day or not
 			print("\n\nAvailable tasks:")
 			for index = 1, #playable do
 				io.write(index.." - "..playable[index].base.." - "..playable[index].unitname )

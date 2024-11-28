@@ -9,8 +9,8 @@ versionDCE["DEBRIEF_Text.lua"] = "1.3.3"
 -- adjustment_a				(a priority numeric targetTable)
 -- modification M61_a		SAR
 ------------------------------------------------------------------------------------------------------- 
- 
-debriefing = ""																						--Global debriefing text string. Will be used in DEBRIEF_Master.lua to write debriefing txt file with notepad
+
+local debriefing = ""
 
 -- header ---------------------------------------------------------------------------------- 
 do
@@ -26,26 +26,26 @@ do
 	for n = 1, divider_length do
 		s = s .. "-"
 	end
-	
+
 	debriefing = debriefing .. s .. "\n\n"
 end
 
 
 -- player package evaluation ---------------------------------------------------------------------------------- 
 do
-	
-	
+
+
 	-- local _Str = "targetlistB = " .. TableSerialization(targetlist, 0)
 	-- local trigFile = io.open("Debug/targetlistB.lua", "w")
 	-- trigFile:write(_Str)
 	-- trigFile:close()
-	
+
 	local s = ""
-	
+
 	--function to build a list of the target and target element status
 	local function TargetStats(target_name)
 		local t = ""
-		
+
 		local targetSelect = {}
 		for targetN, target in ipairs(targetlist[camp.player.side]) do
 			if target.titleName == target_name and  target.elements  then
@@ -53,9 +53,9 @@ do
 				break
 			end
 		end
-		
+
 		if targetSelect.elements then									--if the target is a scenery, vehicle or ship target
-			str_length = string.len(target_name)													--string lenght of target name
+			local str_length = string.len(target_name)													--string lenght of target name
 			for elementN, element in pairs(targetSelect.elements) do						--find string lenght of elements names to find the longest name for alignement of status amendment
 				local ename = tostring(element.name)			--element name
 				local i = string.find(ename, "#")													--position of # in string
@@ -70,14 +70,14 @@ do
 					str_length = string.len(ename) + 2
 				end
 			end
-			
+
 			t = t .. target_name																	--Target name
 			local space = str_length + 3 - string.len(target_name)									--calculate number of spaces that need to be added for alignement (string length of largest + 3 - length of current entry = number of spaces)
-			for m = 1, space do															
+			for m = 1, space do
 				t = t .. " "																		--add one space for every missing letter
 			end
 			t = t .. "(" .. tostring(targetSelect.alive) .. "%)\n"				--Target percentage of alive sub-elements 
-			
+
 			for elementN, element in ipairs(targetSelect.elements) do						--list all target elements
 				local ename = element.name			--element name
 				local i = string.find(ename, "#")													--position of # in string
@@ -90,10 +90,10 @@ do
 				end
 				t = t .. "- " .. ename
 				space = str_length + 3 - string.len("- " .. ename)									--calculate number of spaces that need to be added for alignement (string length of largest + 3 - length of current entry = number of spaces)
-				for m = 1, space do															
+				for m = 1, space do
 					t = t .. " "																	--add one space for every missing letter
 				end
-				
+
 				if camp.ShipHealth and camp.ShipHealth[ename] then														--element is a ship that took damage
 					if camp.ShipHealth[ename] == 0 then												--ship is sunk
 						t = t .. "(sunk)"
@@ -121,11 +121,11 @@ do
 		end
 		return t
 	end
-	
+
 	--function to build a list of stats of all aircraft within a package
 	local function PackageStats()
 		local t = "Package:\n"
-		
+
 		--define list entries
 		local entries = {
 			[1] = {
@@ -182,7 +182,7 @@ do
 				end
 			end
 		end
-			
+
 		--determine maximum string length for each entry
 		for e = 1, #entries do																		--iterate through entries
 			entries[e].str_length = string.len(entries[e].header)									--store string length of header for this entry
@@ -193,40 +193,40 @@ do
 				end
 			end
 		end
-		
+
 		--build the list header
 		for e = 1, #entries do																		--iterate through entries
 			t = t .. entries[e].header																--add header
 			if e < #entries then																	--if this is not the last header, add spaces to the next header	
 				local space = entries[e].str_length + 5 - string.len(entries[e].header)				--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
-				for m = 1, space do															
+				for m = 1, space do
 					t = t .. " "																	--add one space for every missing letter
 				end
 			end
 		end
 		t = t .. "\n"
-	
+
 		--build the list		
 		for n = 1, #entries[1].values do															--iterate through number of values (number of units)
 			for e = 1, #entries do																	--iterate through entries
 				t = t .. entries[e].values[n]														--add value to list
 				if e < #entries then																--if this is not the last header, add spaces to the next header	
 					local space = entries[e].str_length + 5 - string.len(tostring(entries[e].values[n]))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
-					for m = 1, space do													
+					for m = 1, space do
 						t = t .. " "																--add one space for every missing letter
 					end
 				end
 			end
 			t = t .. "\n"																			--make a new line after each unit
 		end
-	
+
 		return t
 	end
-	
+
 	local player_task = camp.player.pack[camp.player.role][camp.player.flight].task								--player task
 	local target_name = camp.player.pack[camp.player.role][camp.player.flight].target_name						--name of player package target
-	
-	local target_alive = 0										
+
+	local target_alive = 0
 	local target_hit = 0
 	local targetSelect = {}
 	for targetN, target in ipairs(targetlist[camp.player.side]) do
@@ -253,7 +253,7 @@ do
 		pack_lost = pack_lost + v.lost
 	end
 
-	
+
 	--CAP
 	if player_task == "CAP" then
 		s = s .. "You have been tasked to perform a Combat Air Patrol at " .. target_name .. ". "
@@ -271,7 +271,7 @@ do
 			end
 		end
 		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
-	
+
 	--Intercept
 	elseif player_task == "Intercept" then
 		s = s .. "You have been tasked to perform an Intercept mission from " .. camp.player.target.base .. ". "
@@ -312,11 +312,11 @@ do
 			end
 		end
 		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
-	
+
 	--Airbase Strike
 	elseif target_class == "airbase" then
 		local target_unit_name = camp.player.pack[camp.player.role][camp.player.flight].target.unit.name
-	
+
 		if player_task == "Strike" then
 			s = s .. "You have been tasked with striking " .. target_name .. " hosting " .. ReplaceTypeName(camp.player.pack[camp.player.role][camp.player.flight].target.unit.type) .. " of the " .. target_unit_name .. ". "
 		elseif player_task == "Escort" then
@@ -330,7 +330,7 @@ do
 		elseif player_task == "Laser Illumination" then
 			s = s .. "You have been tasked with providing target laser designation for a strike against " .. target_name .. " hosting " .. ReplaceTypeName(camp.player.pack[camp.player.role][camp.player.flight].target.unit.type) .. " of the " .. target_unit_name .. ". "
 		end
-		
+
 		if pack_kills_air > 0 then
 			for side_name,side in pairs(oob_air) do
 				for unit_n,unit in ipairs(side) do
@@ -366,14 +366,14 @@ do
 				s = s .. "Your package has not achieved to destroy any enemy aircraft.\n\n"
 			else
 				s = s .. "Your package has sustained " .. pack_lost .. " losses without destroying any aircraft.\n\n"
-			end			
+			end
 		end
 		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
-	
+
 	--Strike
 	elseif player_task == "Strike" then
 		s = s .. "You have been tasked with striking " .. target_name
-		
+
 		local ship_hit
 		-- if targetlist[camp.player.side][target_name].elements then
 		-- 	for e = 1, #targetlist[camp.player.side][target_name].elements do
@@ -392,7 +392,7 @@ do
 				end
 			end
 		end
-		
+
 		if ship_hit then
 			s = s .. ". The target has been hit and has taken damage.\n\n"
 		elseif target_hit > 0 then
@@ -405,10 +405,10 @@ do
 		else
 			s = s .. " but were unable to inflict any damage. " .. target_name .. " remains " .. target_alive .. "% intact.\n\n"
 		end
-		
+
 		--list the target
 		s = s .. TargetStats(target_name)
-		
+
 		--air-air stats
 		if pack_kills_air == 0 then
 			if pack_lost == 0 then
@@ -428,7 +428,7 @@ do
 	--Anti-ship Strike
 	elseif player_task == "Anti-ship Strike" then
 		s = s .. "You have been tasked with an anti-ship strike against "  .. target_name
-		
+
 		local ship_hit
 		-- if targetlist[camp.player.side][target_name].elements then
 		-- 	for e = 1, #targetlist[camp.player.side][target_name].elements do
@@ -447,7 +447,7 @@ do
 				end
 			end
 		end
-		
+
 		if ship_hit then
 			s = s .. ". The target has been hit and has taken damage.\n\n"
 		elseif target_hit > 0 then
@@ -460,10 +460,10 @@ do
 		else
 			s = s .. " but were unable to inflict any damage. " .. target_name .. " remains " .. target_alive .. "% intact.\n\n"
 		end
-		
+
 		--list the target
 		s = s .. TargetStats(target_name)
-		
+
 		--air-air stats
 		if pack_kills_air == 0 then
 			if pack_lost == 0 then
@@ -479,7 +479,7 @@ do
 			end
 		end
 		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
-		
+
 	--Escort
 	elseif player_task == "Escort" then
 		if target_class == "airbase" then
@@ -488,7 +488,7 @@ do
 			s = s .. "You have been tasked with escorting a recon mission " .. targetSelect.text .. ".\n\n"
 		else
 			s = s .. "You have been tasked with escorting a strike against " .. target_name
-			
+
 			local ship_hit
 			-- if targetlist[camp.player.side][target_name].elements then
 			-- 	for e = 1, #targetlist[camp.player.side][target_name].elements do
@@ -506,7 +506,7 @@ do
 					end
 				end
 			end
-			
+
 			if ship_hit then
 				s = s .. ". The target has been hit and has taken damage.\n\n"
 			elseif target_hit > 0 then
@@ -519,11 +519,11 @@ do
 			else
 				s = s .. ". No damage was inflicted. " .. target_name .. " remains " .. tostring(target_alive) .. "% intact.\n\n"
 			end
-			
+
 			--list the target
 			s = s .. TargetStats(target_name)
 		end
-		
+
 		--air-air stats
 		if pack_kills_air == 0 then
 			if pack_lost == 0 then
@@ -539,7 +539,7 @@ do
 			end
 		end
 		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
-	
+
 	--SEAD
 	elseif player_task == "SEAD" then
 		if target_class == "airbase" then
@@ -548,7 +548,7 @@ do
 			s = s .. "You have been tasked with providing SEAD escort for a recon mission " .. targetSelect.text .. ".\n\n"
 		else
 			s = s .. "You have been tasked with providing SEAD escort for a strike against " .. target_name
-			
+
 			local ship_hit
 			-- if targetlist[camp.player.side][target_name].elements then
 			-- 	for e = 1, #targetlist[camp.player.side][target_name].elements do
@@ -566,7 +566,7 @@ do
 					end
 				end
 			end
-			
+
 			if ship_hit then
 				s = s .. ". The target has been hit and has taken damage.\n\n"
 			elseif target_hit > 0 then
@@ -579,11 +579,11 @@ do
 			else
 				s = s .. ". No damage was inflicted. " .. target_name .. " remains " .. target_alive .. "% intact.\n\n"
 			end
-			
+
 			--list the target
 			s = s .. TargetStats(target_name)
 		end
-		
+
 		--air-air stats
 		if pack_kills_air == 0 then
 			if pack_lost == 0 then
@@ -599,14 +599,14 @@ do
 			end
 		end
 		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
-		
+
 	--Escort Jammer
 	elseif player_task == "Escort Jammer" then
 		if targetSelect.task == "Reconnaissance" then
 			s = s .. "You have been tasked with providing jammer escort for a recon mission " .. targetSelect.text .. ".\n\n"
 		else
 			s = s .. "You have been tasked with providing jammer escort for a strike against " .. target_name
-			
+
 			local ship_hit
 			-- if targetlist[camp.player.side][target_name].elements then
 			-- 	for e = 1, #targetlist[camp.player.side][target_name].elements do
@@ -624,7 +624,7 @@ do
 					end
 				end
 			end
-			
+
 			if ship_hit then
 				s = s .. ". The target has been hit and has taken damage.\n\n"
 			elseif target_hit > 0 then
@@ -637,11 +637,11 @@ do
 			else
 				s = s .. ". No damage was inflicted. " .. target_name .. " remains " .. target_alive .. "% intact.\n\n"
 			end
-			
+
 			--list the target
 			s = s .. TargetStats(target_name)
 		end
-		
+
 		--air-air stats
 		if pack_kills_air == 0 then
 			if pack_lost == 0 then
@@ -657,14 +657,14 @@ do
 			end
 		end
 		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
-		
+
 	--Flare Illumination
 	elseif player_task == "Flare Illumination" then
 		if targetSelect.task == "Reconnaissance" then
 			s = s .. "You have been tasked with providing battlefield flare illumination for a recon mission " .. targetSelect.text .. ".\n\n"
 		else
 			s = s .. "You have been tasked with providing battlefield flare illumination for a strike against " .. target_name
-			
+
 			local ship_hit
 			-- if targetlist[camp.player.side][target_name].elements then
 			-- 	for e = 1, #targetlist[camp.player.side][target_name].elements do
@@ -682,7 +682,7 @@ do
 					end
 				end
 			end
-			
+
 			if ship_hit then
 				s = s .. ". The target has been hit and has taken damage.\n\n"
 			elseif target_hit > 0 then
@@ -695,11 +695,11 @@ do
 			else
 				s = s .. ". No damage was inflicted. " .. target_name .. " remains " .. target_alive .. "% intact.\n\n"
 			end
-			
+
 			--list the target
 			s = s .. TargetStats(target_name)
 		end
-		
+
 		--air-air stats
 		if pack_kills_air == 0 then
 			if pack_lost == 0 then
@@ -715,14 +715,14 @@ do
 			end
 		end
 		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
-	
+
 	--Laser Illumination
 	elseif player_task == "Laser Illumination" then
 		if targetSelect.task == "Reconnaissance" then
 			s = s .. "You have been tasked with providing target laser designation for a recon mission " .. targetSelect.text .. ".\n\n"
 		else
 			s = s .. "You have been tasked with providing target laser designation for a strike against " .. target_name
-			
+
 			local ship_hit
 			-- if targetlist[camp.player.side][target_name].elements then
 			-- 	for e = 1, #targetlist[camp.player.side][target_name].elements do
@@ -740,7 +740,7 @@ do
 					end
 				end
 			end
-			
+
 			if ship_hit then
 				s = s .. ". The target has been hit and has taken damage.\n\n"
 			elseif target_hit > 0 then
@@ -753,11 +753,11 @@ do
 			else
 				s = s .. ". No damage was inflicted. " .. target_name .. " remains " .. target_alive .. "% intact.\n\n"
 			end
-			
+
 			--list the target
 			s = s .. TargetStats(target_name)
 		end
-		
+
 		--air-air stats
 		if pack_kills_air == 0 then
 			if pack_lost == 0 then
@@ -773,29 +773,29 @@ do
 			end
 		end
 		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
-	
+
 	--Reconnaissance
 	elseif player_task == "Reconnaissance" then
 		s = s .. "You have been tasked with reconnaissance of " .. target_name .. ".\n\n"
 		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
-	
+
 	--AWACAS
 	elseif player_task == "AWACS" then
 		s = s .. "You have been tasked with an AWACS patrol at " .. target_name .. ".\n\n"
 		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
-		
+
 	--Refuelling
 	elseif player_task == "Refueling" then
 		s = s .. "You have been tasked with a refuelling mission at " .. target_name .. ".\n\n"
 		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
-		
+
 	--Transport
 	elseif player_task == "Transport" then
 		local from = camp.player.pack[camp.player.role][camp.player.flight].target.base
 		local to = camp.player.pack[camp.player.role][camp.player.flight].target.destination
 		s = s .. "You have been tasked with a transport  mission from " .. from .. " to " .. to .. ".\n\n"
 		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
-		
+
 	--Ferry/Nothing
 	elseif player_task == "Nothing" then
 		local from = camp.player.pack[camp.player.role][camp.player.flight].target.base
@@ -804,18 +804,18 @@ do
 		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
 
 	end
-	
-	debriefing = debriefing .. s ..  "\n"	
+
+	debriefing = debriefing .. s ..  "\n"
 end
 
 
 -- Order of Battle Air ---------------------------------------------------------------------------------- 
 do
 	local s = "Order of Battle:\n----------------\n\n"												--make lists of the air order of battle for all sides
-	
+
 	local entries = {}
 	for side_name,side in pairs(oob_air) do															--iterate through sides in oob_air
-	
+
 		--define list entries
 		entries[side_name] = {
 			[1] = {
@@ -855,7 +855,7 @@ do
 				values = {},
 			},
 		}
-	
+
 		--add list values
 		for unit_n,unit in ipairs(side) do																								--iterate through units
 			if unit.inactive ~= true then																								--unit is active
@@ -895,7 +895,7 @@ do
 			end
 		end
 	end
-		
+
 	--determine maximum string length for each entry
 	for e = 1, #entries["blue"] do																	--iterate through entries
 		entries["blue"][e].str_length = string.len(entries["blue"][e].header)						--store string length of header for this entry
@@ -915,7 +915,7 @@ do
 			end
 		end
 	end
-		
+
 	--build list
 	for side_name,side in pairs(entries) do															--iterate through sides in oob_air
 		if side_name == "blue" then
@@ -923,26 +923,26 @@ do
 		else
 			s = s .. "Red Air Units:\n"																--side header
 		end
-		
+
 		--build the list header
 		for e = 1, #entries[side_name] do															--iterate through entries
 			s = s .. entries[side_name][e].header													--add header
 			if e < #entries[side_name] and (side_name == "blue" or side_name == "red") then															--if this is not the last header, add spaces to the next header	
 				local space = entries[side_name][e].str_length + 5 - string.len(entries[side_name][e].header)		--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
-				for m = 1, space do															
+				for m = 1, space do
 					s = s .. " "																	--add one space for every missing letter
 				end
 			end
 		end
 		s = s .. "\n"
-	
+
 		--build the list		
 		for n = 1, #entries[side_name][1].values do													--iterate through number of values (number of units)
 			for e = 1, #entries[side_name] do														--iterate through entries
 				s = s .. entries[side_name][e].values[n]											--add value to list
 				if e < #entries[side_name] then														--if this is not the last header, add spaces to the next header	
 					local space = entries[side_name][e].str_length + 5 - string.len(tostring(entries[side_name][e].values[n]))		--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
-					for m = 1, space do													
+					for m = 1, space do
 						s = s .. " "																--add one space for every missing letter
 					end
 				end
@@ -952,29 +952,29 @@ do
 
 		s = s .. "\n\n"																				--make a new line after each side
 	end
-	
+
 	debriefing = debriefing .. s .. "\n"
 end
-	
-	
+
+
 -- Order of Battle Ground ---------------------------------------------------------------------------------- 
 do
 	local s = ""
-	
+
 	for side_name, targets in pairs(targetlist) do														--iterate through sides in targetlist
 		if side_name == "blue" then																	--owner of the target is the opposite of targetlist side
 			s = s .. "Red Ground Assets:\n"															--side header
 		else
 			s = s .. "Blue Ground Assets:\n"														--side header
 		end
-		
+
 		-- --put targetlist in array and sort
 		-- local sort_table = {}																		--array to sort the targetlist
 		-- for k,v in pairs(side) do
 		-- 	table.insert(sort_table, k)																--insert key into sort table
 		-- end
 		-- table.sort(sort_table)																		--sort the table
-		
+
 		-- table.sort(targetSide, function(a,b) return a.titleName < b.titleName  end)
 
 		--define list entries
@@ -992,7 +992,7 @@ do
 				values = {},
 			},
 		}
-		
+
 		--add list values
 		-- for i, v in ipairs(sort_table) do															--iterate through sort table
 		-- 	if side[v].inactive ~= true then														--target is active
@@ -1014,7 +1014,7 @@ do
 			if target.inactive ~= true then														--target is active
 				if target.hidden == nil or target.hidden == false then							--target is not hidden
 					if target.alive then															--if target has an alive value it is a scenery, vehicle or ship target and should be listed
-						table.insert(entries[1].values, target.titleName)										
+						table.insert(entries[1].values, target.titleName)
 						table.insert(entries[2].values, math.ceil(target.alive) .. "%")
 						if target.dead_last > 0 then
 							table.insert(entries[3].values, "(-" .. math.ceil(target.dead_last) .. "%)")
@@ -1036,7 +1036,7 @@ do
 				end
 			end
 		end
-		
+
 		--build the list header
 		--[[for e = 1, #entries do																		--iterate through entries
 			s = s .. entries[e].header																--add header
@@ -1048,20 +1048,20 @@ do
 			end
 		end
 		s = s .. "\n"--]]
-	
+
 		--build the list		
 		for n = 1, #entries[1].values do															--iterate through number of values (number of units)
 			for e = 1, #entries do																	--iterate through entries
 				s = s .. entries[e].values[n]														--add value to list
 				if e < #entries then																--if this is not the last header, add spaces to the next header	
 					local space = entries[e].str_length + 3 - string.len(tostring(entries[e].values[n]))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
-					for m = 1, space do													
+					for m = 1, space do
 						s = s .. " "																--add one space for every missing letter
 					end
 				end
 			end
 			s = s .. "\n"																			--make a new line after each unit
-			
+
 			local targetSelect = {}
 			for targetN, target in ipairs(targetlist[camp.player.side]) do
 				if target.titleName == entries[1].values[n] and  target.elements  then
@@ -1077,7 +1077,7 @@ do
 						s = s .. "   - " .. element_name															--add element
 						if camp.ShipHealth and camp.ShipHealth[element_name] then									--ship has a health entry
 							local space = entries[1].str_length - string.len(tostring("   - " .. element_name))		--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
-							for m = 1, space do													
+							for m = 1, space do
 								s = s .. " "																		--add one space for every missing letter
 							end
 							if camp.ShipHealth[element_name] == 0 then									--ship is sunk
@@ -1098,7 +1098,7 @@ do
 
 		s = s .. "\n\n"																				--make a new line after each side
 	end
-	
+
 	debriefing = debriefing .. s .. "\n"
 end
 
@@ -1106,7 +1106,7 @@ end
 -- Clien scoreboard ---------------------------------------------------------------------------------- 
 do
 	local s = "Scoreboard:\n-----------\n\n"														--make lists of player scoreboard
-	
+
 	--define list entries
 	local entries = {
 		[1] = {
@@ -1140,7 +1140,7 @@ do
 		[8] = {
 			header = "MIA",
 			values = {},
-		},		
+		},
 		[9] = {
 			header = "Rescued",
 			values = {},
@@ -1234,7 +1234,7 @@ do
 			table.insert(entries[11].values, client.dead)
 		end
 	end
-	
+
 	--determine maximum string length for each entry
 	for e = 1, #entries do																		--iterate through entries
 		entries[e].str_length = string.len(entries[e].header)									--store string length of header for this entry
@@ -1245,13 +1245,13 @@ do
 			end
 		end
 	end
-	
+
 	--build the list header
 	for e = 1, #entries do																		--iterate through entries
 		s = s .. entries[e].header																--add header
 		if e < #entries then																	--if this is not the last header, add spaces to the next header	
 			local space = entries[e].str_length + 5 - string.len(entries[e].header)				--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
-			for m = 1, space do															
+			for m = 1, space do
 				s = s .. " "																	--add one space for every missing letter
 			end
 		end
@@ -1264,13 +1264,13 @@ do
 			s = s .. entries[e].values[n]														--add value to list
 			if e < #entries then																--if this is not the last header, add spaces to the next header	
 				local space = entries[e].str_length + 5 - string.len(tostring(entries[e].values[n]))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
-				for m = 1, space do													
+				for m = 1, space do
 					s = s .. " "																--add one space for every missing letter
 				end
 			end
 		end
 		s = s .. "\n"																			--make a new line after each unit
 	end
-	
+
 	debriefing = debriefing .. s
 end

@@ -787,7 +787,7 @@ Divers:
 -- M29 -Added- Menu F10 Refueling + RTB package + Info Bingo Wingman
 -- M27 -Added- movedBullseye
 -- M26 -Added- destroys the last targets automatically, avoids a package for a single remaining target
--- M25 -Added- added an option to get only daytime : If you don't want to fly night missions 
+-- M25 -Added- added an option to get only Daytime : If you don't want to fly night missions 
 -- M24 -Added- automatic configuration for MP (prunescript, static aircrafts on the deck, etc...)
 -- M23 -Added- Delete all USN Deckcrew mod units without editing base mission
 -- M22 -Added- limits unwanted detections : used to Intercept missions

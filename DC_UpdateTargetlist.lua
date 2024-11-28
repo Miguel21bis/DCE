@@ -28,7 +28,9 @@ else
 	DC_UpdateTargetlist_counter = DC_UpdateTargetlist_counter + 1
 end
 
-listRequiredModules = {}
+local tabTemplates = {}
+
+ListRequiredModules = {}
 
 GroundTarget = {																				--count total and alive ground targets for each side
 	["red"] = {
@@ -50,7 +52,7 @@ GroundZoneTarget = {																				--count total and alive ground targets f
 
 -- modification M38 : Debug Name of TargetList 
 local function checkBug(name, origine, category)
-	
+
 	if name == nil then
 		print("DC_UT checkBug "..origine.." "..category..", ATTENTION: Name is empty: "..tostring(name))
 	end
@@ -61,26 +63,26 @@ local function checkBug(name, origine, category)
 			print("DC_UT checkBug "..origine.." "..category..", ATTENTION: Name whith Double Space: "..name)
 		end
 	end
-	
+
 	if Debug.checkTargetName then
 		if string.sub(name, -1) == " " then print("DC_UT "..origine.." "..category..", ATTENTION: Name ending with a space|"..name.."|") end
 		if string.sub(name, 1,1) == " " then print("DC_UT "..origine.." "..category..", ATTENTION: Name beginning with a space|"..name.."|") end
 	end
-end 
+end
 
 local function checkBug2(txt)
 	-- if Debug.AfficheSol and Firstmission_flag then
 	if Debug.AfficheSol then
 		print("DC_UT checkBug2 "..txt)
 	end
-end 
+end
 
 local function checkBug3(txt)
 	if Debug.checkTargetName  and DC_UpdateTargetlist_counter > 1 then
 		-- table.insert(BugList, "DC_UT checkBug3 "..txt)
 		insertBugList("DC_UT checkBug3 :"..txt)
 	end
-end 
+end
 
 local function checkElementXY(targetElement, targetside)
 	--pour eviter les doubles target comme base strategique
@@ -91,12 +93,12 @@ local function checkElementXY(targetElement, targetside)
 
 	if targetElement.name then
 		for country_n, country in pairs(oob_ground[targetside]) do
-			for classname, class in pairs(country) do	
-				if type(class) =="table" and class.group then	
-					for group_n, group in pairs(class.group) do	
-						if group.name == targetElement.name then	
+			for classname, class in pairs(country) do
+				if type(class) =="table" and class.group then
+					for group_n, group in pairs(class.group) do
+						if group.name == targetElement.name then
 							-- print("DcUT               MB return Found group.name")						
-							return group.x, group.y, classname							
+							return group.x, group.y, classname
 						end
 					end
 				end
@@ -104,10 +106,10 @@ local function checkElementXY(targetElement, targetside)
 		end
 		if not foundElement then
 			for country_n, country in pairs(oob_ground[targetside]) do
-				
-				for classname, class in pairs(country) do	
+
+				for classname, class in pairs(country) do
 					if type(class) =="table" and class.group then
-						for group_n, group in pairs(class.group) do	
+						for group_n, group in pairs(class.group) do
 							for unitN, unit in ipairs(group.units) do
 								if unit.name == targetElement.name then
 									-- print("DcUT               MC return Found group.name")	
@@ -117,27 +119,27 @@ local function checkElementXY(targetElement, targetside)
 						end
 					end
 				end
-			end	
+			end
 		end
 	end
 
 	-- if not foundElement then
 	-- 	checkBug3("Error_3 : The x and y positions of this target are missing:  '" .. targetElement.name .. "!")
-	
+
 	-- end
 
 end
 
-function updateAlive(target)
+local function updateAlive(target)
 	local nbDead = 0
 	local nbMainObjective = 0
 	target.alive = 100
 	for _elementN, element in pairs(target.elements) do
-		if element.mainObjective then	
-			nbMainObjective = nbMainObjective + 1	
+		if element.mainObjective then
+			nbMainObjective = nbMainObjective + 1
 		end
-		if element.dead and element.mainObjective then	
-			nbDead = nbDead + 1	
+		if element.dead and element.mainObjective then
+			nbDead = nbDead + 1
 		end
 	end
 	if nbDead>0 then
@@ -146,8 +148,8 @@ function updateAlive(target)
 
 	local nbdead_last = 0
 	for _elementN, element in pairs(target.elements) do
-		if element.dead_last and element.mainObjective then	
-			nbdead_last = nbdead_last + 1	
+		if element.dead_last and element.mainObjective then
+			nbdead_last = nbdead_last + 1
 		end
 	end
 	if nbdead_last > 0 then
@@ -185,33 +187,33 @@ end
 
 -- camp_triggers = {
  -- action[i]Action.TemplateActive
- 
+
  -- }
 
 
-local function TabFileTemplate()	
+local function TabFileTemplate()
 	local ArrayFileTemplate = {}
 	if camp_triggers == nil then
-		local ArrayFileTemplate 
-		return ArrayFileTemplate  
+		local ArrayFileTemplate
+		return ArrayFileTemplate
 	end
-	 
+
 	local ArrayFileTemplate = {}
 	local camp_triggersTemPlaTe =  camp_triggers
-	
-	for nTrigger, trigger in pairs(camp_triggersTemPlaTe) do	
-		if type(trigger.action) == "table" then		
+
+	for nTrigger, trigger in pairs(camp_triggersTemPlaTe) do
+		if type(trigger.action) == "table" then
 			for n = 1, #trigger.action do
 				-- [1] = 'Action.TemplateActive("North Cyprus Force 2 T1.stm")',
-				
+
 				if trigger.action[n] then
 					if string.find(trigger.action[n], ".stm") then
-						
-						str2 = trigger.action[n]
-						res2 = string.match(str2, '%b""')
+
+						local str2 = trigger.action[n]
+						local res2 = string.match(str2, '%b""')
 						res2 = string.gsub(res2, '"', "")
-							
-						table.insert(ArrayFileTemplate, res2)						
+
+						table.insert(ArrayFileTemplate, res2)
 					end
 				else
 					print()
@@ -223,30 +225,30 @@ local function TabFileTemplate()
 					print()
 					print(tostring(trigger.action[n-1]))
 					os.execute 'pause'
-				end				
+				end
 			end
-		end		
-	end	
-	return ArrayFileTemplate	
+		end
+	end
+	return ArrayFileTemplate
 end
 
 
 local function findInTemplates(name, side, classT, debugDCUT)
 	if not (Debug.checkTargetName and (Firstmission_flag or Skipmission_flag)) then return true end
-	
+
 	if  type(tabTemplates) == "table" then		--Debug.checkTargetName2Space  and 
 		for i = 1 , #tabTemplates do
-			dofile("Templates/"..tabTemplates[i])										
-			
+			dofile("Templates/"..tabTemplates[i])
+
 			local DictKey = {}
 			if staticTemplate.localization and staticTemplate.localization.DEFAULT then
 				for dictNameId, key in pairs(staticTemplate.localization.DEFAULT) do
 					DictKey[dictNameId] = key
 				end
-				
+
 			end
 			-- if debugDCUT then _affiche(DictKey, "DictKey DcUT") end
-			
+
 			for country_n, country in pairs(staticTemplate.coalition[side].country) do					--iterate through countries
 				for classname, class in pairs(country) do
 					-- if debugDCUT then print("DCUT A classname: "..tostring(classname).." classT: "..tostring(classT)) end
@@ -264,16 +266,16 @@ local function findInTemplates(name, side, classT, debugDCUT)
 
 								if DictKey[group.name]  == name then
 									-- if debugDCUT then print("DCUT E return true") end
-									
+
 									return true
 								end
-							end							
+							end
 						end
-					end					
+					end
 				end
-			end						
+			end
 		end
-	end	
+	end
 	return false
 end
 
@@ -286,8 +288,8 @@ end
 local function checkRequiredModules()
 	if  type(tabTemplates) == "table" then
 		for i = 1 , #tabTemplates do
-			dofile("Templates/"..tabTemplates[i])										
-			
+			dofile("Templates/"..tabTemplates[i])
+
 			if staticTemplate.requiredModules then
 				for key, value in pairs(staticTemplate.requiredModules) do
 					local entry = {
@@ -296,15 +298,15 @@ local function checkRequiredModules()
 							"Template: "..tabTemplates[i],
 						}
 					}
-					if listRequiredModules[value] then
-						table.insert(listRequiredModules[value].origine, "Template: "..tabTemplates[i] )
+					if ListRequiredModules[value] then
+						table.insert(ListRequiredModules[value].origine, "Template: "..tabTemplates[i] )
 					else
-						listRequiredModules[value] = entry 
-					end					
-				end				
-			end								
+						ListRequiredModules[value] = entry
+					end
+				end
+			end
 		end
-	end	
+	end
 	return false
 end
 
@@ -332,7 +334,7 @@ end
 	-- ["max_y"] = 942610,
 -- }
 
-box = {	--gulf
+local box = {	--gulf
 	["min_x"] = -289090,
 	["min_y"] = -840909,
 	["max_x"] = 790909,
@@ -357,7 +359,7 @@ for coal_name,coal in pairs(oob_ground) do										--go through sides(red/blue)
 				end
 			end
 		end
-	
+
 		if country.ship then													--country has ships
 			for group_n,group in ipairs(country.ship.group) do					--go through groups
 				if group.x < box.min_x then
@@ -378,8 +380,8 @@ for coal_name,coal in pairs(oob_ground) do										--go through sides(red/blue)
 end
 
 for base_name,base in pairs(db_airbases) do
-	
-	if base.x and base.x ~= 9999999999 then 
+
+	if base.x and base.x ~= 9999999999 then
 		if base.x < box.min_x then
 			box.min_x = base.x
 		end
@@ -387,7 +389,7 @@ for base_name,base in pairs(db_airbases) do
 			box.max_x = base.x
 		end
 	end
-	if base.y and base.y ~= 9999999999 then 
+	if base.y and base.y ~= 9999999999 then
 		if base.y <box. min_y then
 			box.min_y = base.y
 		end
@@ -402,14 +404,14 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 	for SideTL, targets in pairs(targetlist)	 do
 		if camp_ZoneSAR[SideTL] then
 			for zoneName, elementC in pairs(camp_ZoneSAR[SideTL]) do
-			
+
 				local AltiReference = 999999
 				local referenceX = elementC[1].x2d
 				local referenceY = elementC[1].y2d
 
 				for i = 1, #elementC do
 
-					local ePriority = 0 
+					local ePriority = 0
 					if elementC[i].inTheEnemyCamp then
 						ePriority = 5		--	10
 					elseif elementC[i].inTheEnemyCamp == false then
@@ -423,7 +425,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 						if target.titleName == zoneName then
 							local foundElement = false
 							if target.elements then
-								
+
 								for elementN, element in pairs(target.elements) do
 									if elementC[i].name == element.name then
 										element.status = elementC[i].status
@@ -445,11 +447,11 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 						end
 					end
 
-					if not foundZoneName then 
+					if not foundZoneName then
 						local newElement = elementC[i]
 						newElement.type = "Ejected Pilot"
 						newElement.x = elementC[i].x2d
-						newElement.y = elementC[i].y2d	
+						newElement.y = elementC[i].y2d
 						newElement.z = elementC[i].z2d
 
 						local newTarget = {
@@ -461,7 +463,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 								min = 1,
 								max = 1,
 							},
-							
+
 							elements = {
 								[1] = newElement,
 							},
@@ -479,15 +481,15 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 						referenceY = elementC[i].y2d
 					end
 				end
-				
+
 				for targetN, target in ipairs(targets) do
-					if target.titleName == zoneName then					
+					if target.titleName == zoneName then
 						target.x = referenceX
 						target.y = referenceY
 						target.z = AltiReference
 					end
 				end
-			end	
+			end
 		end
 	end
 
@@ -501,7 +503,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 					for elementN, element in ipairs(targets[i].elements) do
 						if element.status and (element.status == 'rescued' or element.status == "POW") then
 							-- _affiche(element, "element PW or Rescued DcUT ")
-							
+
 							table.remove(targets[i].elements, elementN)
 							findDeprecated = true
 								--supprime la zone SAR s'il n'y a plus d'élément dedans
@@ -511,12 +513,12 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 							break
 						end
 					end
-				end 
+				end
 				if findDeprecated then break end
 			end
 			if findDeprecated then break end
 		end
-				
+
 	until findDeprecated == false
 
 end
@@ -525,11 +527,11 @@ end
 for side_name, targets in pairs(targetlist) do													--Iterate through all side
 	for targetN, target in pairs(targets) do												--Iterat through all targets
 		local maxRange = 0
-		if not target.name then 
-			target.name = target.titleName 
+		if not target.name then
+			target.name = target.titleName
 		end
 
-		if not target.name then 
+		if not target.name then
 			print("DcUT no target.name , voici le target.titleName: "..tostring(target.titleName) )
 			_affiche(target, "DcUT TargetNoName")
 			os.execute 'pause'
@@ -538,9 +540,9 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 		-- checkBug(target, "targetlist", "name")
 		if target.titleName then checkBug(target.titleName, "targetlist", "target.titleName") end
 		if target.name then checkBug(target.name, "targetlist", "target.name") end
-		
+
 		target.ATO = true																	--add target to ATO boolean
-		
+
 		if  target.task ~= "Runway Attack" then
 			target.alive = nil																	--clear target alive value
 		end
@@ -549,7 +551,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 		if side_name == "red" then
 			targetside = "blue"
 		end
-		
+
 		--target position by refpoint 
 		if target.refpoint then																--target coordinates are referenced by a refpoint
 			if Refpoint then																--global Refpoint is not available when UpdateTargelist is called by DEBRIEF_Master. In this case updating the target coordinates can be ignored as this is not needed for debriefing.
@@ -564,18 +566,18 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 					target.x = target.MultiPoints[1].x										--for targets with multiple points use first point as target coordinates (proforma only, not needed for tasks with multiple points)
 					target.y = target.MultiPoints[1].y
 				else																		--only a single refoint
-					if not Refpoint[target.refpoint] then 
-						print("DCE does not find the name of this reference (of targetlist) in the fields of baseMission.miz "..tostring(target.refpoint))	
+					if not Refpoint[target.refpoint] then
+						print("DCE does not find the name of this reference (of targetlist) in the fields of baseMission.miz "..tostring(target.refpoint))
 						os.execute 'pause'
 						_affiche(Refpoint, "Refpoint")
 						os.execute 'pause'
 					end
-					
+
 					target.x = Refpoint[target.refpoint].x									--get x-coordinate
 					target.y = Refpoint[target.refpoint].y									--get y-coordinate
 				end
-				if target.x == nil or target.y == nil then					
-					checkBug3(" Error_01: Refpoint '" .. target.refpoint .. "' of target '" .. target.name .. "' not found!")				
+				if target.x == nil or target.y == nil then
+					checkBug3(" Error_01: Refpoint '" .. target.refpoint .. "' of target '" .. target.name .. "' not found!")
 				end
 			end
 		end
@@ -585,10 +587,10 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 			local master = target.slaved[1]
 			local bearing = target.slaved[2]
 			local distance = target.slaved[3]
-			
+
 			local master_x
 			local master_y
-			
+
 			--find either master group or units (vehicle or ship) and get master  x-y coordinates
 			for coal_name,coal in pairs(oob_ground) do										--go through sides(red/blue)	
 				for country_n,country in ipairs(coal) do									--go through countries
@@ -609,7 +611,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 							end
 						end
 					end
-				
+
 					if country.ship then													--country has ships
 						for group_n,group in ipairs(country.ship.group) do					--go through groups
 							if group.name == master then
@@ -629,7 +631,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 					end
 				end
 			end
-			
+
 			if master_x and master_y then													--a master was found
 				target.x = master_x + math.cos(math.rad(bearing)) * distance				--update target position relative to master position
 				target.y = master_y + math.sin(math.rad(bearing)) * distance				--update target position relative to master position
@@ -637,8 +639,8 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 				checkBug3(" Error_02 target position slaved to group/unit : Master '" .. master .. "' of target '" ..  "' not found!")
 			end
 		end
-	
-		if target.task == "Strike" then														
+
+		if target.task == "Strike" then
 			if target.class == nil or  target.class == "vehicle" or  target.class == "static"  then														--For scenery object targets
 				-- if target.CheckDay and target.CheckDay < CampTotalTimeS then
 				-- 	target.dead_last = 0
@@ -648,12 +650,12 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 				target.x = 0																--Introduce x coordinate for target
 				target.y = 0																--Introduce y coordinate for target
 				target.dead_last = 0														--Introduce percentage of elements that died in last mission (for debriefing)
-			
+
 				-- print("DcUT targetName "..side_name.." "..tostring(target.name))
 				if target.name == nil then
 					_affiche(target, "target nil")
 				end
-				
+
 				local checkGroup = {}
 				checkGroup[target.name] = {
 					MainObjective = true,
@@ -681,7 +683,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 						end
 					end
 				end
-				
+
 				for country_n, country in pairs(oob_ground[targetside]) do					--iterate through countries
 					for classname, classG in pairs(country) do								--iterate through classes in country 
 						if classname == "vehicle" or classname == "ship" or classname == "static" then				--for vehicles or ships
@@ -695,19 +697,19 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 									target.groupId = group.groupId							--store target group ID
 									target.x = group.x										--add x coordinate of target
 									target.y = group.y										--add y coordinate of target
-									
+
 									if target.lat and target.lon then
 										group.hidden = true
 									end
-									
+
 									if not target.elements then target.elements = {} end	--add elements table
 									-- target.dead_last = 0									--Introduce percentage of elements that died in last mission (for debriefing)
-									
+
 									for unit_n, unit in pairs(group.units) do				--Iterate through all units of group
 										local alreadyThere = false
 										for elementN, element in pairs(target.elements) do
 											if unit.name == element.name then
-											
+
 												element.dead = unit.dead								--store unit status
 												element.dead_last = unit.dead_last					--store unit dead_last
 												element.CheckDay = unit.CheckDay						-- M19 ajoute la date destruction/ravito pour les futurs check de ravitaillement
@@ -717,8 +719,8 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 												element.fromGroupName = true
 												element.type = unit.type
 												element.mainObjective = checkGroup[group.name].MainObjective
-		
-											
+
+
 												if element.dead then											--if target element is dead		
 													target.alive = target.alive - 100 / #target.elements				--reduce target alive percentage	
 												end
@@ -732,7 +734,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 										end
 
 										if not alreadyThere then
-											
+
 											local elementTemp = {							--add new element
 												name = unit.name,								--store unit name
 												dead = unit.dead,								--store unit status
@@ -744,14 +746,14 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 												fromGroupName = true,
 												type = unit.type,
 												mainObjective = checkGroup[group.name].MainObjective,
-													
+
 											}
 											table.insert(target.elements, elementTemp)
 										end
 
 										--check range from threat
 										if GroundthreatsAll then
-											
+
 											for elementN, element in pairs(target.elements) do
 												for threatN, threat in pairs(GroundthreatsAll[ DCS_ENI_Side[side_name] ]) do
 													if element.x  and element.x > math.floor(threat.x)-1 and  element.x < math.floor(threat.x)+1 then
@@ -766,7 +768,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 												end
 											end
 										end
-										
+
 									end
 
 									for unit_n, unit in pairs(group.units) do						--Iterate through all units of group
@@ -799,35 +801,35 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 				-- end
 
 				target.range = maxRange
-			
+
 				if target.elements then
 					--permet de rechercher les elements déjà present dans targetList, car renseigné par campaignMaker
 					for elementN, element in pairs(target.elements) do									--Iterate through elements of target															
 						if element.fromGroupName == nil and element.fromUnitName == nil  then  --and not element.class
-							
+
 							local temp = {x=0,y=0,class=""}
 							temp.x, temp.y, temp.class = checkElementXY(element, targetside)
-							
-							if temp.x == nil then 
+
+							if temp.x == nil then
 								local elementTMP = deepcopy(element)
 								elementTMP.name = elementTMP.name.."-1"
 								temp.x, temp.y, temp.class = checkElementXY(elementTMP, targetside)
-								if temp.x ~= nil then 
-									
+								if temp.x ~= nil then
+
 									element.name = element.name.."-1"
 								end
 							end
 
 
 
-							if temp.x == nil then 
-								element.class = "MapObject"						
+							if temp.x == nil then
+								element.class = "MapObject"
 							else
 								element.class = temp.class
 								element.x = temp.x										--add x coordinate of target
 								element.y = temp.y										--add y coordinate of target
 							end
-								
+
 							if  element.x then
 								target.x = element.x										--add x coordinate of target
 								target.y = element.y										--add y coordinate of target
@@ -839,13 +841,13 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 							-- if element.dead_last then
 							-- 	target.dead_last = target.dead_last + 100 / #target.elements		--add target died in last mission percentage
 							-- end
-							
+
 						end
 					end
 				end
 
 				if target.elements and not target.inactive then
-					for elementN, element in pairs(target.elements) do	
+					for elementN, element in pairs(target.elements) do
 						if  (element.x == 0 or not element.x) then
 							checkBug3(" Error_05 : this targelist item was not found in oob_ground or base_mission, a space character error or -1?:  |" .. element.name .. "|")
 						end
@@ -898,18 +900,18 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 								target.y = db_airbases[target.name].y						--add y coordinate of target
 								if not target.x or target.x == nil then
 									checkBug3(" Error_7: this base |"..target.name.."| linked to this objective  (targetlist_ini.lua)|"..target.titleName.."| was not found in the file (db_airbase.lua)")
-				
+
 								end
 							end
 						end
 					end
 				end
-				if not target.foundOobGround then 
-					checkBug3(" Error_8: this base |"..target.name.."| linked to this objective  (targetlist_ini.lua)|"..target.titleName.."| was not found in the file (db_airbase.lua)") 
+				if not target.foundOobGround then
+					checkBug3(" Error_8: this base |"..target.name.."| linked to this objective  (targetlist_ini.lua)|"..target.titleName.."| was not found in the file (db_airbase.lua)")
 				end
-				
+
 			end
-		
+
 		elseif target.task == "Anti-ship Strike" then										--For ship group targets
 			for country_n, country in pairs(oob_ground[targetside]) do						--iterate through countries
 				if country.ship then
@@ -924,17 +926,17 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 							target.groupId = group.groupId								--store target group ID
 							target.x = group.x											--add x coordinate of target
 							target.y = group.y											--add y coordinate of target
-							
+
 							if target.lat and target.lon then
 								group.hidden = true
 							end
-							
+
 							target.elements = {}										--add elements table
 							target.dead_last = 0										--Introduce percentage of elements that died in last mission (for debriefing)
 							for unit_n, unit in pairs(group.units) do					--Iterate through all units of group
 								local temp = {x=0,y=0,class=""}
 								temp.x, temp.y, temp.class = checkElementXY(unit, targetside)
-								if temp.x == nil then 
+								if temp.x == nil then
 									temp.class = "MapObject"
 								end
 								target.elements[unit_n] = {								--add new element
@@ -975,17 +977,17 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 
 			-- if not target.foundOobGround then checkBug3("DC_UT Anti-ship Strike error Not Found "..target.titleName) end
 			if not target.foundOobGround then checkBug3(" Error_9: this Ship |"..target.name.."| linked to this objective  (targetlist_ini.lua)|"..target.titleName.."| was not found in the file (base_mission.miz or template)") end
-			
+
 		elseif target.task == "Transport" or target.task == "Nothing" then					--For transport or ferry tasks
 			if target.destination and not db_airbases[target.destination] then
 				print("DcUT from targetlist/destination, no found |"..tostring(target.destination).."|  in db_airbases ")
-			
+
 			elseif target.destination and not db_airbases[target.destination].x then
 				print("DcUT from targetlist/destination, no found |"..tostring(target.destination).."| xy position, in db_airbases ")
 			end
 			target.x = db_airbases[target.destination].x
 			target.y = db_airbases[target.destination].y
-		
+
 		elseif target.task == "CSAR" then
 			target.alive = 100															--Introduce percentage of alive target elements
 			target.dead_last = 0														--Introduce percentage of elements that died in last mission (for debriefing)
@@ -1004,27 +1006,27 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 			target.alive = math.floor(target.alive)
 			target.dead_last = math.floor(target.dead_last)
 
-		elseif target.task == "Runway Attack" then														
+		elseif target.task == "Runway Attack" then
 			--creation des parties de Runway à bombarder, crée à partir des info runway.hdg et runway.length x et y
 			-- la mise a jour du target runway se fait dans le fichier DEBRIEF_StatsEvaluation.lua
 			-- en fonction du runway.life qui doit etre de 3600 point lorsqu'il est intacte.
 			if db_airbases[target.db_airbaseName] then									--if the target airbase has an entry in db_airbases table
-				
+
 				target.foundOobGround = true
-			
+
 				target.x = db_airbases[target.db_airbaseName].x						--add x coordinate of target
 				target.y = db_airbases[target.db_airbaseName].y						--add y coordinate of target
-				
+
 				if db_airbases[target.db_airbaseName].runways and db_airbases[target.db_airbaseName].runways[1] and db_airbases[target.db_airbaseName].runways[1].hdg then
 					--pour le cas particulier des runway non detecté à l'impacte bombe, il faut s appuyer sur target.element.dead et non oob_ground dead
 					if  target.elements == nil   then
-						
-						target.alive = 100															
-						target.dead_last = 0														
+
+						target.alive = 100
+						target.dead_last = 0
 						for iRunway, runway in ipairs(db_airbases[target.db_airbaseName].runways) do
 							if runway.x and runway.x ~= 0 then
 								--pour la map caucasus
-								if camp.theatre and (string.lower(camp.theatre)  == "caucasus" or string.lower(camp.theatre)  == "persiangulf") then 
+								if camp.theatre and (string.lower(camp.theatre)  == "caucasus" or string.lower(camp.theatre)  == "persiangulf") then
 									local hdg = runway.hdg
 									if not runway.true_hdg or runway.true_hdg == nil then
 										hdg = runway.hdg + camp.variation
@@ -1036,7 +1038,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 
 									local distance = 0
 									local interval = runway.length / 9
-									for e = 1, 8 do												
+									for e = 1, 8 do
 										distance = distance + interval
 										local newPos = GetOffsetPoint({x=runway.x, y=runway.y}, hdg, distance)
 										if not target.elements then target.elements = {} end
@@ -1046,10 +1048,10 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 											x = newPos.x,
 											y = newPos.y,
 											mainObjective = true,
-										} 
-											
+										}
+
 									end
-								
+
 								-- elseif camp.theatre and string.lower(camp.theatre) == "syria" then 
 								else
 									--pour la map Syria
@@ -1059,7 +1061,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 									end
 									local distance = 0
 									local interval = runway.length / 9
-									for e = 1, 4 do												
+									for e = 1, 4 do
 										distance = distance + interval
 										local newPos = GetOffsetPoint({x=runway.x, y=runway.y}, hdg, distance)
 										if not target.elements then target.elements = {} end
@@ -1069,13 +1071,13 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 											x = newPos.x,
 											y = newPos.y,
 											mainObjective = true,
-										} 
-											
+										}
+
 									end
 									hdg = hdg + 180
-									
+
 									distance = 0
-									for e = 5, 8 do												
+									for e = 5, 8 do
 										distance = distance + interval
 										local newPos = GetOffsetPoint({x=runway.x, y=runway.y}, hdg, distance)
 										if not target.elements then target.elements = {} end
@@ -1085,33 +1087,33 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 											x = newPos.x,
 											y = newPos.y,
 											mainObjective = true,
-										} 
-											
+										}
+
 									end
 								end
 							end
 						end
 					else --si les element runway exite
-					
-						for elementN, element in pairs(target.elements) do							
-							element.mainObjective = true							
+
+						for elementN, element in pairs(target.elements) do
+							element.mainObjective = true
 						end
 
-						if target.alive and target.alive < 50 then			
+						if target.alive and target.alive < 50 then
 							target.ATO = false										--remove target to ATO
-							
+
 							--rempli la table camp qui sera utilisé pour détruire artificiellement la piste pendant le jeux
 							if not camp.runwayCratere then camp.runwayCratere = {} end
-							if not camp.runwayCratere[target.titleName] then 
+							if not camp.runwayCratere[target.titleName] then
 								camp.runwayCratere[target.titleName] = target
 							end
 						end
 
-						if not target.alive or target.alive == nil then			
-							target.alive = 100								
+						if not target.alive or target.alive == nil then
+							target.alive = 100
 						end
 
-						
+
 						--met à jour target_dead_last pour avoir le (-70%) par exemple dans le DEBRIEF_Text
 						for e = 1, #target.elements do												--Iterate through elements of target
 							if target.elements[e].dead_last then
@@ -1127,7 +1129,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 					txtBug = txtBug .."DcUT Bug related to the targetlist_init.lua file in the target: : "..target.titleName.."\n"
 
 					insertBugList(txtBug)
-					
+
 					if mission_ini.debug then
 						print(txtBug)
 						os.execute 'pause'
@@ -1138,11 +1140,11 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 					checkBug3(" Error_11: this base |"..target.db_airbaseName.."| linked to this objective  (targetlist_ini.lua)|"..target.titleName.."| was not found in the file (db_airbase.lua)")
 				end
 			end
-							
+
 			if not target.foundOobGround then checkBug3(" Error_12: this base |"..target.db_airbaseName.."| linked to this objective  (targetlist_ini.lua)|"..target.titleName.."| was not found in the file (db_airbase.lua)") end
-			
+
 		end
-				
+
 		if target.alive then																--target has an alive value (is a ground target)
 		-- if 	target.task and target.task == "Strike" or target.task == "Anti-ship Strike" or target.task == "Runway Attack" then
 			if not target.alive then
@@ -1151,16 +1153,16 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 			if target.elements then
 				target = updateAlive(target)
 			end
-			
-			local attibut 
+
+			local attibut
 			if target.attributes and target.attributes[1] then attibut = string.upper(target.attributes[1]) end
-			
+
 			-- modification M26  destroys targets if below a certain value
 			if target.alive <= campMod.KillTargetValue and target.alive > 0 and attibut ~= "RUNWAY" then					--if target alive is lower than 0 (due to rounding errors)
 				checkBug2("DC_UT target.name target.alive <= 20 "..target.titleName.." "..tostring(target.alive))
 				KillTarget(target.titleName, target.name)															--set target alive 0
 				target.alive = 0
-				if target.elements then 						
+				if target.elements then
 					for element_n,element in pairs(target.elements) do
 						if not element.dead then
 							KillTarget(element.name, target.titleName)
@@ -1177,7 +1179,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 			if target.alive == 0 then														--target is destroyed
 				target.ATO = false															--remove target from ATO
 			end
-			
+
 			if target.inactive ~= true then													--target is active
 				if 	target.task and target.task == "Strike" or target.task == "Anti-ship Strike" or target.task == "Runway Attack" then
 					GroundTarget[side_name].total = GroundTarget[side_name].total + 1			--count the number of all ground targets for each side
@@ -1194,15 +1196,15 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 
 			if target.inactive ~= true then													--target is active
 				if 	target.zone then
-					
-					if not GroundZoneTarget[side_name][target.zone] then 
+
+					if not GroundZoneTarget[side_name][target.zone] then
 						GroundZoneTarget[side_name][target.zone] = {
 							total = 0,
 							alive = 0,
 						}
 					end
 					GroundZoneTarget[side_name][target.zone].total = GroundZoneTarget[side_name][target.zone].total + 1			--count the number of all ground targets for each side
-					
+
 					if target.alive > 0 then													--target is not destroyed
 						GroundZoneTarget[side_name][target.zone].alive = GroundZoneTarget[side_name][target.zone].alive + 1		--count the number of all alive ground targets for each side
 					end
@@ -1210,13 +1212,13 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 					-- print("DcUT ignores this target: ".. target.titleName)
 				end
 			end
-			
+
 		end
 	end
 
 	checkBug2("DC_UT GroundTarget "..side_name.." "..GroundTarget[side_name].total.." Alive: "..GroundTarget[side_name].alive)
 
-	
+
 	if GroundTarget[side_name].total > 0 then
 		GroundTarget[side_name].percent = math.ceil(100 / GroundTarget[side_name].total * GroundTarget[side_name].alive)	--calculate percentage of alive ground targets per side
 		checkBug2("DC_UT GroundTarget "..side_name.." percent "..GroundTarget[side_name].percent)
@@ -1243,9 +1245,9 @@ local posFile = "Init/LL_KnownPositionsTable.lua"
 local TestPath = io.open(posFile, "r")
 if  TestPath ~= nil then
 	LL_KnownPositionsFileExit = true
-	io.close(TestPath)	
+	io.close(TestPath)
 	dofile(posFile) --LL_KnownPositions = {}
-end 
+end
 
 if LL_KnownPositionsFileExit then
 	for campName, targets in pairs(targetlist) do
@@ -1321,11 +1323,11 @@ local qte = 1
 local targetPosTemp = {}
 
 
-for sideName, countries in pairs(oob_ground) do												
+for sideName, countries in pairs(oob_ground) do
 	for countryN, country in pairs(countries) do
 		if type(country) == "table" then
-			for typeName, typeTable in pairs(country) do						
-				if typeName == "vehicle" or typeName == "ship" or typeName == "static" then	
+			for typeName, typeTable in pairs(country) do
+				if typeName == "vehicle" or typeName == "ship" or typeName == "static" then
 					for groupN, group in pairs(typeTable.group) do
 
 						if group.x and group.y then
@@ -1336,17 +1338,17 @@ for sideName, countries in pairs(oob_ground) do
 							local floor_y = math.floor(group.y)
 							local xKey = math.abs(floor_x)
 
-							if not targetPosTemp[xKey] then 
-								targetPosTemp[xKey] = {} 
+							if not targetPosTemp[xKey] then
+								targetPosTemp[xKey] = {}
 								addItem = true
 							else
 								for n, pos in pairs(targetPosTemp[xKey]) do
 									if floor_x == pos.x and floor_y == pos.y then
 										break
-									end 
+									end
 								end
 							end
-							
+
 							if addItem == true then
 								local posTemp = {
 									x = floor_x,
@@ -1357,26 +1359,26 @@ for sideName, countries in pairs(oob_ground) do
 								-- print("DcUT #targetPosTemp:oob_ground "..qte.." "..typeName)
 								qte = qte + 1
 							end
-						
-							for unitN, unit in pairs(group.units) do			
-								if unit.x and unit.y then					
+
+							for unitN, unit in pairs(group.units) do
+								if unit.x and unit.y then
 									local addItemSub = false
-									
+
 									local floor_x = math.floor(unit.x)
 									local floor_y = math.floor(unit.y)
 									local xKey = math.abs(floor_x)
-				
-									if not targetPosTemp[xKey] then 
-										targetPosTemp[xKey] = {} 
+
+									if not targetPosTemp[xKey] then
+										targetPosTemp[xKey] = {}
 										addItemSub = true
 									else
 										for n, pos in pairs(targetPosTemp[xKey]) do
 											if floor_x == pos.x and floor_y == pos.y then
 												break
-											end 
+											end
 										end
 									end
-									
+
 									if addItemSub == true then
 										local posTemp = {
 											x = floor_x,
@@ -1411,17 +1413,17 @@ if targetlist then
 				local floor_y = math.floor(target.y)
 				local xKey = math.abs(floor_x)
 
-				if not targetPosTemp[xKey] then 
-					targetPosTemp[xKey] = {} 
+				if not targetPosTemp[xKey] then
+					targetPosTemp[xKey] = {}
 					addItem = true
 				else
 					for n, pos in pairs(targetPosTemp[xKey]) do
 						if floor_x == pos.x and floor_y == pos.y then
 							break
-						end 
+						end
 					end
 				end
-				
+
 				if addItem == true then
 					local posTemp = {
 						x = floor_x,
@@ -1439,18 +1441,18 @@ if targetlist then
 							local floor_x = math.floor(element.x)
 							local floor_y = math.floor(element.y)
 							local xKey = math.abs(floor_x)
-			
-							if not targetPosTemp[xKey] then 
-								targetPosTemp[xKey] = {} 
+
+							if not targetPosTemp[xKey] then
+								targetPosTemp[xKey] = {}
 								addItemSub = true
 							else
 								for n, pos in pairs(targetPosTemp[xKey]) do
 									if floor_x == pos.x and floor_y == pos.y then
 										break
-									end 
+									end
 								end
 							end
-							
+
 							if addItemSub == true then
 								local posTemp = {
 									x = floor_x,
@@ -1476,35 +1478,35 @@ tabTemplates = TabFileTemplate()
 
 if tabTemplates ~= nil then
 	for i = 1 , #tabTemplates do
-		dofile("Templates/"..tabTemplates[i])	
-		
-		for sideName, sideTable in pairs(staticTemplate.coalition) do	
+		dofile("Templates/"..tabTemplates[i])
+
+		for sideName, sideTable in pairs(staticTemplate.coalition) do
 			for labelCountry, countries in pairs(sideTable) do
 				if type(countries) == "table" then
 					for countryN, country in pairs(countries) do
 						for typeName, typeTable in pairs(country) do
-							if typeName == "vehicle" or typeName == "ship" or typeName == "static" then		
+							if typeName == "vehicle" or typeName == "ship" or typeName == "static" then
 								for groupN, group in pairs(typeTable.group) do
-					
+
 									if group.x and group.y then
-					
+
 										local addItem = false
-					
+
 										local floor_x = math.floor(group.x)
 										local floor_y = math.floor(group.y)
 										local xKey = math.abs(floor_x)
-					
-										if not targetPosTemp[xKey] then 
-											targetPosTemp[xKey] = {} 
+
+										if not targetPosTemp[xKey] then
+											targetPosTemp[xKey] = {}
 											addItem = true
 										else
 											for n, pos in pairs(targetPosTemp[xKey]) do
 												if floor_x == pos.x and floor_y == pos.y then
 													break
-												end 
+												end
 											end
 										end
-										
+
 										if addItem == true then
 											local posTemp = {
 												x = floor_x,
@@ -1513,26 +1515,26 @@ if tabTemplates ~= nil then
 											}
 											table.insert(targetPosTemp[xKey], posTemp)
 										end
-									
-										for unitN, unit in pairs(group.units) do			
-											if unit.x and unit.y then					
+
+										for unitN, unit in pairs(group.units) do
+											if unit.x and unit.y then
 												local addItemSub = false
-												
+
 												local floor_x = math.floor(unit.x)
 												local floor_y = math.floor(unit.y)
 												local xKey = math.abs(floor_x)
-							
-												if not targetPosTemp[xKey] then 
-													targetPosTemp[xKey] = {} 
+
+												if not targetPosTemp[xKey] then
+													targetPosTemp[xKey] = {}
 													addItemSub = true
 												else
 													for n, pos in pairs(targetPosTemp[xKey]) do
 														if floor_x == pos.x and floor_y == pos.y then
 															break
-														end 
+														end
 													end
 												end
-												
+
 												if addItemSub == true then
 													local posTemp = {
 														x = floor_x,
@@ -1559,7 +1561,7 @@ end
 
 --*********************************************************************************
 
-for baseName, base in pairs(db_airbases) do	
+for baseName, base in pairs(db_airbases) do
 	if base.x and base.y and base.x < 999999999 and base.x > -999999999 and base.y < 999999999 and base.y > -999999999 then
 		local addItem = false
 
@@ -1567,17 +1569,17 @@ for baseName, base in pairs(db_airbases) do
 		local floor_y = math.floor(base.y)
 		local xKey = math.abs(floor_x)
 
-		if not targetPosTemp[xKey] then 
-			targetPosTemp[xKey] = {} 
+		if not targetPosTemp[xKey] then
+			targetPosTemp[xKey] = {}
 			addItem = true
 		else
 			for n, pos in pairs(targetPosTemp[xKey]) do
 				if floor_x == pos.x and floor_y == pos.y then
 					break
-				end 
+				end
 			end
 		end
-		
+
 		if addItem == true then
 			local posTemp = {
 				x = floor_x,
@@ -1594,7 +1596,7 @@ end
 --*********************************************************************************
 -- cherche les points 
 if mission and mission.triggers and mission.triggers.zones then
-	for zoneN, zone in pairs(mission.triggers.zones) do	
+	for zoneN, zone in pairs(mission.triggers.zones) do
 		if zone.x and zone.y  then
 			local addItem = false
 
@@ -1602,17 +1604,17 @@ if mission and mission.triggers and mission.triggers.zones then
 			local floor_y = math.floor(zone.y)
 			local xKey = math.abs(floor_x)
 
-			if not targetPosTemp[xKey] then 
-				targetPosTemp[xKey] = {} 
+			if not targetPosTemp[xKey] then
+				targetPosTemp[xKey] = {}
 				addItem = true
 			else
 				for n, pos in pairs(targetPosTemp[xKey]) do
 					if floor_x == pos.x and floor_y == pos.y then
 						break
-					end 
+					end
 				end
 			end
-			
+
 			if addItem == true then
 				local posTemp = {
 					x = floor_x,
@@ -1637,13 +1639,13 @@ if Debug.debug then
 	_affiche(GroundZoneTarget, " DcUT GroundZoneTarget")
 
 	local camp_str = "target = " .. TableSerialization(targetlist, 0)						--make a string
-	local campFile = io.open("Debug/targetlist_DcUT.lua", "w")								--open targetlist file
+	local campFile = io.open("Debug/targetlist_DcUT.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
 
 
 	local camp_str = "oob_ground = " .. TableSerialization(oob_ground, 0)						--make a string
-	local campFile = io.open("Debug/oob_ground_DcUT.lua", "w")								--open targetlist file
+	local campFile = io.open("Debug/oob_ground_DcUT.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
 

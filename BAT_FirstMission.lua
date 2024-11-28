@@ -28,8 +28,9 @@ mission = {}					--pour declarer la table globale et calmer les inquietudes d'ID
 oob_air = {}					--pour declarer la table globale et calmer les inquietudes d'IDE ^^
 
 local function AcceptMission()
+	local m = ""
 	repeat
-		print("\n\n Night or Day ? : "..daytime)													-- info day or not
+		print("\n\n Night or Day ? : "..Daytime)													-- info day or not
 		print("\n\nAccept Mission ?:")
 
 		print("a".." - Accept mission")
@@ -55,11 +56,9 @@ local function AcceptMission()
 	end
 end
 
-
-
------ random seed -----
-math.randomseed(tonumber(tostring(os.time()):reverse():sub(1,6)))
-math.random(); math.random(); math.random()
+-- random seed -----
+local seed = os.time() -- Récupérer un timestamp en secondes
+math.randomseed(seed)  -- Initialiser le générateur pseudo-aléatoire
 
 if versionPackageICM == nil then
 	versionPackageICM = os.getenv('versionPackageICM')														-- modification M35.b version ScriptsMod
@@ -144,6 +143,7 @@ end
 print("Reset the campaign and generate a new first mission.\n")
 
 local input
+local choix1
 local playable_type = {}
 
 SinglePlayer = false
@@ -279,7 +279,7 @@ repeat
 
 				local playable_type = {}
 				local ti = 65 																						--char(65) == a
-				tabTaskAvailable = {}
+				local tabTaskAvailable = {}
 
 				-- parse toutes les unités et rempli le tab tabTaskAvailable pour etre sur de proposer toutes les task proposé active 
 				for nSide , oob_airSide in pairsByKeys(oob_air) do

@@ -640,7 +640,7 @@ for side, pack in pairs(ATO) do
 				end
 
 				--Air starts
-				local airstart = false															--if TOT causes a take off before mission start, flight becomes air start and this variable gets the number of the spawn WP
+				local airstart = 0															--if TOT causes a take off before mission start, flight becomes air start and this variable gets the number of the spawn WP
 				
 				--Debug_b		for w = target_wp - 1, 1, -1 do	 	
 				local deltaETA = 0	
@@ -706,7 +706,7 @@ for side, pack in pairs(ATO) do
 			
 				--remove WPs ahead of spawn WP
 				local flight_tgt_wp = target_wp													--local copy of the target waypoint number for this flight only
-				if airstart then																--if the flight is an air start
+				if airstart ~= 0 then																--if the flight is an air start
 					
 					for w = airstart - 1, 1, -1 do												--iterate through all the WPs from airstart WP to first WP
 						table.remove(flight[f].route, w)										--remove all WPs ahead of spwan WP
@@ -836,7 +836,7 @@ end
 
 if Debug.debug then
 	local camp_str = "AtoTiming = " .. TableSerialization(ATO, 0)						--make a string
-	local campFile = io.open("Debug/ATO_AtoTiming.lua", "w")								--open targetlist file
+	local campFile = io.open("Debug/ATO_AtoTiming.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
 
@@ -851,17 +851,17 @@ if Debug.debug then
 	end
 
 	local camp_str = "TOT_TimeOccupation = " .. TableSerialization(TOT_TimeOccupation, 0)	
-	local campFile = io.open("Debug/TOT_TimeOccupation_AtoT.lua", "w")				
+	local campFile = io.open("Debug/TOT_TimeOccupation_AtoT.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)													
 	campFile:close()
 
 	local test_str = "Aircraft_availability = " .. TableSerialization(Aircraft_availability, 0)	
-	local testFile = io.open("Debug/Aircraft_availability_AtoT.lua", "w")		
+	local testFile = io.open("Debug/Aircraft_availability_AtoT.lua", "w") or error("Failed to open debug file")
 	testFile:write(test_str)														
 	testFile:close()
 
 	local debugTmp = StringToTxt(debugTxt_AtoT)
-	local debugTmpFile = io.open("Debug/debugTxt_AtoT_AtoTiming.lua", "w")		
+	local debugTmpFile = io.open("Debug/debugTxt_AtoT_AtoTiming.lua", "w") or error("Failed to open debug file")
 	debugTmpFile:write(debugTmp)											
 	debugTmpFile:close()
 

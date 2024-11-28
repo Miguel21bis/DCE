@@ -690,43 +690,43 @@ for side, units in pairs(oob_air) do																								--iterate through al
 												tot_to = 999999
 											end
 										elseif unit_loadouts[l].day then																		--loadout is day capable
-											if daytime == "night-day" then
+											if Daytime == "night-day" then
 												tot_from = mission_ini.dawn - camp.time																--from dawn
 												tot_to = mission_ini.mission_duration																	--to mission end
 												if task == "Intercept" or task == "SAR" then																		--for interceptors, tot_to is not limitted by mission duration
 													tot_to = mission_ini.dusk - camp.time
 												end
-											elseif daytime == "day" then
+											elseif Daytime == "day" then
 												tot_from = 0																					--from missiom start
 												tot_to = mission_ini.mission_duration																	--to mission end
 												if task == "Intercept" or task == "SAR" then																		--for interceptors, tot_to is not limitted by mission duration
 													tot_to = mission_ini.dusk - camp.time
 												end
-											elseif daytime == "day-night" then
+											elseif Daytime == "day-night" then
 												tot_from = 0																					--from mission start
 												tot_to = mission_ini.dusk - camp.time																	--to dusk
 											end
 										elseif unit_loadouts[l].night then																		--loadout is night capable
-											if daytime == "day-night" then
+											if Daytime == "day-night" then
 												tot_from = mission_ini.dusk - camp.time																--from dusk
 												tot_to = mission_ini.mission_duration																	--to mission end
 												if task == "Intercept" or task == "SAR" then																		--for interceptors, tot_to is not limitted by mission duration
 													tot_to = mission_ini.dawn - camp.time
 												end
-											elseif daytime == "night" then
+											elseif Daytime == "night" then
 												tot_from = 0																					--from mission start
 												tot_to = mission_ini.mission_duration																	--to mission end
 												if task == "Intercept"  or task == "SAR" then																		--for interceptors, tot_to is not limitted by mission duration
 													tot_to = mission_ini.dawn - camp.time
 												end
-											elseif daytime == "night-day" then
+											elseif Daytime == "night-day" then
 												tot_from = 0																					--from mission start
 												tot_to = mission_ini.dawn - camp.time																	--to dawn
 											end
 										end
 
 										-- if tot_to == 0 then
-										-- 	print("AtoG daytime "..tostring(daytime).." loadoutName: "..tostring(unit_loadouts[l].name))
+										-- 	print("AtoG Daytime "..tostring(Daytime).." loadoutName: "..tostring(unit_loadouts[l].name))
 										-- 	os.execute 'pause'
 										-- end
 
@@ -989,15 +989,15 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																						DebuGenTxt = DebuGenTxt.."\n"..("AtoG passe A_15 multipack "..tostring(multipack).." FOR multipack Boucle "..target_name)
 																					end
 
-																					--determine route variants depending on daytime
+																					--determine route variants depending on Daytime
 																					local variant
-																					if daytime == "day" then
+																					if Daytime == "day" then
 																						variant = 1
-																					elseif daytime == "night" then
+																					elseif Daytime == "night" then
 																						variant = 2
-																					elseif daytime == "night-day" then
+																					elseif Daytime == "night-day" then
 																						variant = 3
-																					elseif daytime == "day-night" then
+																					elseif Daytime == "day-night" then
 																						variant = 4
 																					end
 
@@ -1005,7 +1005,7 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																					and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name  and  Debug.Generator.SpyTask == task
 																					or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == target_name ))
 																					then
-																						DebuGenTxt = DebuGenTxt.."\n"..("AtoG passe A_16 "..tostring(variant).." "..tostring(daytime).." Befor variant Condition "..target_name)
+																						DebuGenTxt = DebuGenTxt.."\n"..("AtoG passe A_16 "..tostring(variant).." "..tostring(Daytime).." Befor variant Condition "..target_name)
 																					end
 
 																					while variant > 0 do
@@ -1539,7 +1539,7 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																							until aircraft_assign <= 0																		--stop making more draft sorties
 																						end
 
-																						variant = variant - 2																			--determines if while-loop does another route variant depending on daytime
+																						variant = variant - 2																			--determines if while-loop does another route variant depending on Daytime
 																					end
 																				end
 																			end
@@ -1835,24 +1835,24 @@ for sideName, draftT in pairs(Draft_sorties) do
 										tot_from = 0															--from mission start
 										tot_to = mission_ini.mission_duration											--to mission end
 									elseif unit_loadouts[l].day then											--loadout is day capable
-										if daytime == "night-day" then
+										if Daytime == "night-day" then
 											tot_from = mission_ini.dawn - camp.time									--from dawn
 											tot_to = mission_ini.mission_duration										--to mission end
-										elseif daytime == "day" then
+										elseif Daytime == "day" then
 											tot_from = 0														--from missiom start
 											tot_to = mission_ini.mission_duration										--to mission end
-										elseif daytime == "day-night" then
+										elseif Daytime == "day-night" then
 											tot_from = 0														--from mission start
 											tot_to = mission_ini.dusk - camp.time										--to dusk
 										end
 									elseif unit_loadouts[l].night then											--loadout is night capable
-										if daytime == "day-night" then
+										if Daytime == "day-night" then
 											tot_from = mission_ini.dusk - camp.time									--from dusk
 											tot_to = mission_ini.mission_duration										--to mission end
-										elseif daytime == "night" then
+										elseif Daytime == "night" then
 											tot_from = 0														--from mission start
 											tot_to = mission_ini.mission_duration										--to mission end
-										elseif daytime == "night-day" then
+										elseif Daytime == "night-day" then
 											tot_from = 0														--from mission start
 											tot_to = mission_ini.dawn - camp.time										--to dawn
 										end
@@ -3474,7 +3474,7 @@ local function createATO_table(draftPriority)
 													if entry.loadout.day and entry.loadout.night then							--day/night loadout
 														operating_hours = 86400													--full day in seconds
 													elseif entry.loadout.day then												--day loadout
-														operating_hours = mission_ini.dusk - mission_ini.dawn									--daytime in seconds
+														operating_hours = mission_ini.dusk - mission_ini.dawn									--Daytime in seconds
 													elseif entry.loadout.night then												--night loadout
 														operating_hours = mission_ini.dawn + (86400 - mission_ini.dusk)						--nighttime in seconds
 													end

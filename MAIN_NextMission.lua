@@ -80,7 +80,7 @@ end
 
 
 if not PayloadRestricted then
-	
+
 	PayloadRestricted = {}
 
 	local restrictedPath = "Init/restricted_loadout.miz"
@@ -96,7 +96,7 @@ if not PayloadRestricted then
 		local misRestictedFunc = loadstring(misResticted)()
 
 
-		for _side, side in pairs(mission.coalition) do	
+		for _side, side in pairs(mission.coalition) do
 			for countryN, country in pairs(side.country) do
 				for category, groups in pairs(country) do
 					if type(groups) == "table" and groups["group"]  then	--and groups[1].units
@@ -183,14 +183,14 @@ for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed 
 
 		if addToMission  then
 			local zones_n = #mission.triggers.zones	+ 1									--trigger zone number
-			
+
 			--add trigger zone
 			mission.triggers.zones[zones_n] = {
 				["x"] = scen.x,
 				["y"] = scen.z,
 				["radius"] = 1,
 				["zoneId"] = zones_n,
-				["color"] = 
+				["color"] =
 				{
 					[1] = 1,
 					[2] = 1,
@@ -203,7 +203,7 @@ for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed 
 
 			--add trigger
 			mission.trig.actions[1] = mission.trig.actions[1] ..  "a_scenery_destruction_zone(" .. zones_n .. ", ".. txDestruction..");"
-			
+
 			mission.trigrules[1].actions[#mission.trigrules[1].actions + 1] = {
 				["ai_task"] = {
 					[1] = "",
@@ -218,14 +218,14 @@ for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed 
 end
 
 -----------------------------------------------------------------------
-mapResource = 
+mapResource =
 {
 } -- end of mapResource
 
 ----- prepare triggers to run files in mission -----
 -- local trig_n = 1
 local function AddFileTrigger(filename, cond0, predicate1, predicate2)
-	
+
 	--attention, les sons sont à telecharger de cette maniere
 	--	[4] = "a_out_sound_c(21, getValueResourceByKey(\"ResKey_Action_2\"), 0);a_out_sound_c(8, getValueResourceByKey(\"ResKey_Action_3\"), 0);",
 -- 	["rules"] = 
@@ -260,13 +260,13 @@ local function AddFileTrigger(filename, cond0, predicate1, predicate2)
 -- 		}, -- end of [2]
 -- 	}, -- end of ["actions"]
 -- }, -- end of [4]
-	
+
 	local cond = ""
-	local rule = ""
+	local rule = nil
 	if not cond0 then
 		cond = "return(true)"
 		rule = nil
-	else 
+	else
 		cond = "return(c_time_after("..tostring(cond0)..") )"
 		rule = {
 			['predicate'] = 'c_time_after',
@@ -278,7 +278,7 @@ local function AddFileTrigger(filename, cond0, predicate1, predicate2)
 	if not predicate1 then
 		predicate1 = "triggerStart"
 	end
-	
+
 	if not predicate2 then
 		predicate2 = 'a_do_script_file'
 	end
@@ -331,32 +331,32 @@ function AddFileTriggerTempo(filename, time, predicat0, ActionPredicate0)
 
 	for key, value in ipairs(ActionPredicate0) do
 		local  trigrulesAction = {}
-		
+
 		if value.Predicate == "a_do_script_file" then
 			trigrulesAction = {
 				["file"] = 'ResKey_Action_' .. mission.maxDictId,
 				["predicate"] = 'a_do_script_file',
 			}
-				
+
 		elseif value.Predicate == "a_do_script"   then
 			trigrulesAction = {
 				-- ref: ["text"] = "ctld.JTACAutoLase('JTAC1', 1688, true,\"all\",1)",
 				["text"] = "ctld.JTACAutoLase('"..value.NameJTAC.."', 1688, true,\\\"all\\\",1)",
 				["predicate"] = "a_do_script",
-				["ai_task"] = 
+				["ai_task"] =
 				{
 					[1] = "",
 					[2] = "",
 				}
 			}
 			--ref:		a_do_script(\"ctld.JTACAutoLase('JTAC1', 1688, true,\\\"all\\\",1)\");a_do_script(\"ctld.JTACAutoLase(
-			s = s.."a_do_script(\\\"ctld.JTACAutoLase(\\\'"..value.NameJTAC.."\\\', 1688, true,\\\"all\\\",1));" 
+			s = s.."a_do_script(\\\"ctld.JTACAutoLase(\\\'"..value.NameJTAC.."\\\', 1688, true,\\\"all\\\",1));"
 		end
-		
+
 		table.insert(Table_trigrulesAction, trigrulesAction)
 	end
-	
-	
+
+
 	if filename and filename ~= "" then
 		mapResource["ResKey_Action_" .. mission.maxDictId] = filename
 		--							[1] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_6\"));",
@@ -364,13 +364,13 @@ function AddFileTriggerTempo(filename, time, predicat0, ActionPredicate0)
 	else
 		--[3] = "a_do_script(\"ctld.JTACAutoLase('JTAC1', 1688, false,\\\"all\\\")\"); mission.trig.func[3]=nil;",		
 		mission.trig.actions[trig_n] = s..' mission.trig.func[' .. trig_n .. ']=nil;'
-		
+
 	end
 
 	mission.trig.func[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
 	mission.trig.flag[trig_n] = true
 	mission.trig.conditions[trig_n] = "return(c_time_after(" .. time .. ") )"
-	
+
 	mission.trigrules[trig_n] = {
 		['rules'] = {
 			[1] = {
@@ -381,10 +381,10 @@ function AddFileTriggerTempo(filename, time, predicat0, ActionPredicate0)
 		['eventlist'] = '',
 		['comment'] = 'Trigger ' .. trig_n,
 		['predicate'] = predicat0,
-	
+
 	}
 	mission.trigrules[trig_n]['actions'] = Table_trigrulesAction
-	
+
 	-- table.insert(mission.trigrules[trig_n]['actions'], trigrulesAction)
 end
 
@@ -403,13 +403,13 @@ AddFileTrigger("Pedro.lua")															-- modification M40 Pedro
 AddFileTrigger("SAR.lua")															-- modification M61 SAR
 AddFileTrigger("Cercle_City.lua")													-- modification M61 SAR
 AddFileTrigger("AirGroundAttackScript.lua")
-AddFileTrigger("bombOnRunway.lua")													
+AddFileTrigger("bombOnRunway.lua")
 AddFileTrigger("beacon.ogg", nil, nil, "a_out_sound_c")
 AddFileTrigger("beaconsilent.ogg", nil, nil, "a_out_sound_c")
 -- AddFileTrigger("CG_ArtySpotter.lua")												--https://www.digitalcombatsimulator.com/fr/files/3339128/
 
 
-AddFileTriggerTempo("CG_ArtySpotter.lua", 2, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})	
+AddFileTriggerTempo("CG_ArtySpotter.lua", 2, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})
 
 
 if mission_ini.load_mist then
@@ -426,7 +426,7 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 
 if 	not mission_ini  or mission_ini == nil  then
-	dofile("Init/conf_mod.lua")	
+	dofile("Init/conf_mod.lua")
 end
 
 if Firstmission_flag  or Skipmission_flag then
@@ -467,7 +467,7 @@ elseif  mission_ini.silenceATC == "auto" and nbTotalClient >= 2 then
 else
 	camp.silenceATC = false
 end
-	
+
 
 local verScriptsModPath = "../../../ScriptsMod."..versionPackageICM.."/UTIL_Changelog.lua"
 local TestPath = io.open(verScriptsModPath, "r")
@@ -475,31 +475,31 @@ if  TestPath ~= nil then
 	io.close(TestPath)
 	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Changelog.lua")
 	camp.ScriptsMod = versionDCE["UTIL_Changelog.lua"]
-	
-else 
+
+else
 
 	local verScriptsModPath = "../../../ScriptsMod."..versionPackageICM.."/UTIL_Version.lua"
 	local TestPath = io.open(verScriptsModPath, "r")
 	if  TestPath ~= nil then
 		io.close(TestPath)
 		dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Version.lua")
-		camp.ScriptsMod = version_ScriptsMod.ScriptsMod	
-	end	
-	
+		camp.ScriptsMod = version_ScriptsMod.ScriptsMod
+	end
+
 end
 
 if not camp.path or camp.path == nil then												-- modification M35.d version ScriptsMod
 	camp.path = os.getenv('pathSavedGames')												-- modification M35.e version ScriptsMod
-	camp.path = string.gsub(camp.path, "\\", "/") 
+	camp.path = string.gsub(camp.path, "\\", "/")
 end
 
 -- modification M35.d (d: info log) version ScriptsMod
 camp["versionPackageICM"] = versionPackageICM
 
-if Firstmission_flag then 
-	camp["MissionFilename"] =  camp.title.."_first.miz"	
+if Firstmission_flag then
+	camp["MissionFilename"] =  camp.title.."_first.miz"
 else
-	camp["MissionFilename"] =  camp.title.."_ongoing.miz"	
+	camp["MissionFilename"] =  camp.title.."_ongoing.miz"
 end
 
 
@@ -563,14 +563,14 @@ local TestPathloadout = io.open(loadoutFile01, "r")																--cette manie
 if TestPathloadout == nil or Firstmission_flag then																	--check si le fichier existe dans ScriptsMod
 	local loadout_str = "Loadouts_archive = " .. TableSerialization(db_loadouts, 0)						--make a string
 	local loadoutFile = io.open(loadoutFile01, "w")															--open targetlist file
-	
+
 	if not loadoutFile or loadoutFile == nil then
 		print("MainNM Tthis campaign folder  |"..camp.title.."|  does not exist ")
 		os.execute 'pause'
 	end
 	-- print("passe loadout AA First "..loadoutFile01) os.execute 'pause'
 	loadoutFile:write(loadout_str)																			--save new data
-	loadoutFile:close()		
+	loadoutFile:close()
 end
 if TestPathloadout ~= nil then
 	TestPathloadout:close()
@@ -578,17 +578,17 @@ end
 -- print("passe loadout BB") os.execute 'pause'
 
 EPLRS_Capacity = {}
-for planeType, value in pairsByKeys(data_divers) do	
+for planeType, value in pairsByKeys(data_divers) do
 	if value.EPLRS_Capacity then
 		EPLRS_Capacity[planeType] = true
 	end
-end		
+end
 
 --si ADD_data existe, on le precharge pour l'ajouter au DATA centram
 local addDataFile02 = "../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua"
 local TestPathADD_addData = io.open(addDataFile02, "r")										--cette maniere de chercher la presence d un fichier evite un plantage
 if TestPathADD_addData ~= nil  then														--check si le fichier existe dans ScriptsMod
-	dofile("../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua")	
+	dofile("../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua")
 
 	if add_EPLRS_Capacity then
 		for key , value in pairs(add_EPLRS_Capacity) do
@@ -628,7 +628,7 @@ if TestPathZoneSAR == nil  then														--check si le fichier existe dans S
 
 elseif not UTIL_KillTarget then	--TODO attention, controler si l'actualité des ejectedPilot soit bien mise à jour
 	require("Active/camp_ZoneSAR")
-end		
+end
 --assign les callsign par squad west
 AssignCallnameSquad()
 
@@ -640,7 +640,7 @@ local TestPath = io.open(RadioFile, "r")																--cette maniere de cherc
 if TestPath ~= nil then																					--check si le fichier existe dans ScriptsMod
 	io.close(TestPath)
 	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataRadio.lua")
-else	
+else
 	local RadioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
 	local TestPath2 = io.open(RadioFile2, "r")
 	if TestPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
@@ -675,7 +675,7 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
 
 if UTIL_KillTarget then
-	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_KillTarget.lua")	
+	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_KillTarget.lua")
 end
 
 dofile("../../../ScriptsMod."..versionPackageICM.."/ATO_ThreatEvaluation.lua")
@@ -704,7 +704,7 @@ local TestPath = io.open(testFile, "r")										--cette maniere de chercer la p
 if TestPath ~= nil then														--check si le fichier existe 
 	io.close(TestPath)
 	os.remove("Debug/BugList.lua")
-end	
+end
 
 if BugList and type(BugList) == "table" and #BugList >= 1 then
 	local table_Str = "BugList = " .. TableSerialization(BugList, 0)
@@ -745,7 +745,7 @@ for side_name, side in pairs(mission.coalition) do																--iterate thro
 			if type(categorie_) == "table" and categorie_.group then
 				for _group, group in pairs(categorie_) do
 					for groupN, group_ in pairs(group) do
-						
+
 						if group_.groupId > maxGroupId then
 							maxGroupId = group_.groupId
 						end
@@ -769,7 +769,7 @@ for side_name, side in pairs(mission.coalition) do																--iterate thro
 						end
 
 						for unitN, unit in ipairs(group_.units) do
-							
+
 							if unit.unitId > maxUnitId then
 								maxUnitId = unit.unitId
 							end
@@ -783,9 +783,9 @@ for side_name, side in pairs(mission.coalition) do																--iterate thro
 								-- print("MainNM error, duplicate of |"..tostring(categorie).."| OLD uniId |".. tostring(uniId[unit.unitId]) .."|and|"..tostring(unit.name))
 								table.insert(unitIdError,unit.name )
 							end
-						
+
 						end
-					end	
+					end
 				end
 			end
 		end
@@ -793,7 +793,7 @@ for side_name, side in pairs(mission.coalition) do																--iterate thro
 end
 print()
 --renumerote automatiquement le groupId en doublon
-for nError , refName in pairs(GroupIdError) do				
+for nError , refName in pairs(GroupIdError) do
 
 	local nTentative = 0
 	local found = false
@@ -817,7 +817,7 @@ for nError , refName in pairs(GroupIdError) do
 			nTentative = nTentative + 1
 		until found or nTentative > 500
 	end
-	
+
 	if not found then
 		testId =  maxGroupId + 1
 	end
@@ -828,7 +828,7 @@ for nError , refName in pairs(GroupIdError) do
 	if testId < minGroupId then
 		minGroupId = testId
 	end
-	
+
 	--change l'Id dans la mission
 	for side_name, side in pairs(mission.coalition) do																--iterate through sides
 		for country_n, country_ in pairs(side.country) do															--iterate through countries
@@ -870,7 +870,7 @@ print()
 
 
 --renumerote automatiquement le uniId en doublon
-for nErrorB , refNameB in pairs(unitIdError) do				
+for nErrorB , refNameB in pairs(unitIdError) do
 
 	local nTentative = 0
 	local found = false
@@ -894,7 +894,7 @@ for nErrorB , refNameB in pairs(unitIdError) do
 			nTentative = nTentative + 1
 		until found or nTentative > 500
 	end
-	
+
 	if not found then
 		testId =  maxUnitId + 1
 	end
@@ -912,12 +912,12 @@ for nErrorB , refNameB in pairs(unitIdError) do
 				if type(categorieB) == "table" and categorieB.group then
 					for _groupB, groupsB in pairs(categorieB) do
 						for groupNB, groupB in pairs(groupsB) do
-							
-							for unitNB, unitB in ipairs(groupB.units) do	
+
+							for unitNB, unitB in ipairs(groupB.units) do
 								if unitB.name == refNameB then
 									-- print("MainNM update MISSION NEW uniId |"..testId.."| groupName |".. groupB.name.."| unitName |".. unitB.name)
 									unitB.unitId = testId
-									
+
 									-- print("MainNM new uniId? "..tostring(categorieB[_groupB][groupNB].units[unitNB].unitId))
 								end
 							end
@@ -985,7 +985,7 @@ for side_name, side in pairs(mission.coalition) do																--iterate thro
 						end
 
 						for unitN, unit in ipairs(group_.units) do
-							
+
 							if not  uniId[unit.unitId] then
 								-- uniId[unit.unitId] = unit.unitId
 								uniId[unit.unitId] = unit.name
@@ -996,7 +996,7 @@ for side_name, side in pairs(mission.coalition) do																--iterate thro
 								end
 							end
 						end
-					end	
+					end
 				end
 			end
 		end
@@ -1014,7 +1014,7 @@ end
 
 
 -- 						for unitN, unit in ipairs(group_.units) do
-							
+
 -- 							-- if unit.dead_last then
 -- 							-- 	unit.dead_last = nil
 -- 							-- end
@@ -1031,8 +1031,8 @@ end
 local changedFilePlayed = {}
 for side_name, side in pairs(mission.coalition) do																--iterate through sides
 	for country_n, country in pairs(side.country) do															--iterate through countries
-		if type(country) == "table" then	
-			for typeChapter, chapter in pairs(country) do	
+		if type(country) == "table" then
+			for typeChapter, chapter in pairs(country) do
 				if type(chapter) == "table" then
 					for groupN, group in ipairs(chapter.group) do														--iterate through vehicle groups
 						if group.route.points[1]  and group.route.points[1].task then
@@ -1045,7 +1045,7 @@ for side_name, side in pairs(mission.coalition) do																--iterate thro
 
 										mission.maxDictId = mission.maxDictId + 1
 										task.params.action.params.file = "ResKey_advancedFile_"..mission.maxDictId
-										
+
 										mapResource["ResKey_advancedFile_" .. mission.maxDictId] = "beacon.ogg"
 
 										table.insert(changedFilePlayed, group.groupId)
@@ -1075,12 +1075,12 @@ if not (EndCampaign or camp.endCampaign )then
 	dofile("../../../ScriptsMod."..versionPackageICM.."/DC_EndCampaign.lua")
 end
 
-if listRequiredModules then	
+if ListRequiredModules then
 	local infoShow = false
-	for nameN, module in pairs(listRequiredModules) do
-		
+	for nameN, module in pairs(ListRequiredModules) do
+
 		if module and module ~= nil then
-			
+
 			if not infoShow then
 				print("Note that this mission requires these modules:")
 				infoShow = true
@@ -1092,7 +1092,7 @@ if listRequiredModules then
 
 			end
 		end
-	end	
+	end
 end
 
 ----- convert tables back to strings for insertion into content files -----
@@ -1105,31 +1105,31 @@ local gciStr = "GCI = " .. TableSerialization(GCI, 0)
 local cmpStr = "camp = " .. TableSerialization(camp, 0)
 
 ----- create temporary content files of new mission file -----
-local misFile = io.open("misFile.lua", "w")											--mission
+local misFile = io.open("misFile.lua", "w") or error("Failed to open debug file")											--mission
 misFile:write(misStr)
 misFile:close()
 
-local optFile = io.open("optFile.lua", "w")											--options
+local optFile = io.open("optFile.lua", "w") or error("Failed to open debug file")											--options
 optFile:write(optStr)
 optFile:close()
 
-local warFile = io.open("warFile.lua", "w")											--warehouses
+local warFile = io.open("warFile.lua", "w") or error("Failed to open debug file")											--warehouses
 warFile:write(warStr)
 warFile:close()
 
-local dicFile = io.open("dicFile.lua", "w")											--dictionary
+local dicFile = io.open("dicFile.lua", "w") or error("Failed to open debug file")											--dictionary
 dicFile:write(dicStr)
 dicFile:close()
 
-local resFile = io.open("resFile.lua", "w")											--mapResource
+local resFile = io.open("resFile.lua", "w")	 or error("Failed to open debug file")										--mapResource
 resFile:write(resStr)
 resFile:close()
 
-local gciFile = io.open("GCIdata.lua", "w")											--GCI data file (EWR radars, AWACS, interceptors)
+local gciFile = io.open("GCIdata.lua", "w") or error("Failed to open debug file")											--GCI data file (EWR radars, AWACS, interceptors)
 gciFile:write(gciStr)
 gciFile:close()
 
-local cmpFile = io.open("Active/camp_status.lua", "w")								--campaign status file
+local cmpFile = io.open("Active/camp_status.lua", "w") or error("Failed to open debug file")								--campaign status file
 cmpFile:write(cmpStr)
 cmpFile:close()
 
@@ -1143,7 +1143,7 @@ if mission_ini.backupAllMissionFiles and mission_ini.backupAllMissionFiles == tr
 		NbMission = tostring(camp.mission - 1)
 		--en skipMission, la mission n'a pas �t� jou�e, donc c'est la suivante
 		if Skipmission_flag then
-			NbMission = NbMission + 1 
+			NbMission = NbMission + 1
 		end
 	end
 
@@ -1157,17 +1157,17 @@ else
 end
 
 if Firstmission_flag then																--is true if script is launched from GenerateFirstMission.lua
-	if not (mission_ini.backupAllMissionFiles and mission_ini.backupAllMissionFiles == true) then		
+	if not (mission_ini.backupAllMissionFiles and mission_ini.backupAllMissionFiles == true) then
 		os.remove("../"..camp.title.."/Debriefing/"..camp.title.."_first"..NbMission..".miz")
-	end	
+	end
 	os.rename("../"..camp.title.."_first.miz", "../"..camp.title.."/Debriefing/"..camp.title.."_first"..NbMission..".miz")
 	miz = minizip.zipCreate("../" .. camp.title .. "_first.miz")					--create the first campaign mission
 else																				--is false if script is launched from Debrief_Master.lua
 	if Skipmission_flag then
 		os.remove( "../"..camp.title.."/Debriefing/"..camp.title.."_ongoing"..NbMission..".miz")
-	end	
+	end
 	res = os.rename("../"..camp.title.."_ongoing.miz", "../"..camp.title.."/Debriefing/"..camp.title.."_ongoing"..NbMission..".miz")
-	miz = minizip.zipCreate("../" .. camp.title .. "_ongoing.miz")					
+	miz = minizip.zipCreate("../" .. camp.title .. "_ongoing.miz")
 end
 
 
@@ -1190,15 +1190,15 @@ miz:zipAddFile("l10n/DEFAULT/Pedro.lua", "../../../ScriptsMod."..versionPackageI
 miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "Active/camp_status.lua")
 miz:zipAddFile("l10n/DEFAULT/debugGenMission.txt", "Debug/debugGenMission.txt")
 miz:zipAddFile("l10n/DEFAULT/debugFlight.txt", "Debug/debugFlight.txt")
-miz:zipAddFile("l10n/DEFAULT/SAR.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/SAR.lua")	
-miz:zipAddFile("l10n/DEFAULT/Cercle_City.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/Cercle_City.lua")	
-miz:zipAddFile("l10n/DEFAULT/bombOnRunway.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/bombOnRunway.lua")	
-miz:zipAddFile("l10n/DEFAULT/CG_ArtySpotter.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/CG_ArtySpotter.lua")	
+miz:zipAddFile("l10n/DEFAULT/SAR.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/SAR.lua")
+miz:zipAddFile("l10n/DEFAULT/Cercle_City.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/Cercle_City.lua")
+miz:zipAddFile("l10n/DEFAULT/bombOnRunway.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/bombOnRunway.lua")
+miz:zipAddFile("l10n/DEFAULT/CG_ArtySpotter.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/CG_ArtySpotter.lua")
 
 
 miz:zipAddFile("l10n/DEFAULT/beacon.ogg", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/beacon.ogg")											-- modification M60 CTLD
-miz:zipAddFile("l10n/DEFAULT/beaconsilent.ogg", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/beaconsilent.ogg")		
-miz:zipAddFile("l10n/DEFAULT/ejectionRadioBeacon.ogg", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/ejectionRadioBeacon.ogg")	
+miz:zipAddFile("l10n/DEFAULT/beaconsilent.ogg", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/beaconsilent.ogg")
+miz:zipAddFile("l10n/DEFAULT/ejectionRadioBeacon.ogg", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/ejectionRadioBeacon.ogg")
 
 if mission_ini.load_mist then
 	miz:zipAddFile("l10n/DEFAULT/mist.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/mist.lua")											-- modification M60 CTLD
@@ -1208,23 +1208,23 @@ if mission_ini.load_CTLD then
 end
 
 local BriefingImages = {}
-for _i,_filename in ipairs(BriefingImagesB) do	
+for _i,_filename in ipairs(BriefingImagesB) do
 	findValue = false
 	for i,filename in ipairs(BriefingImages) do
 		if _filename == filename then findValue = true    break end
 	end
 	if not findValue then
 		table.insert(BriefingImages, _filename)
-	end 
+	end
 end
-for _i,_filename in ipairs(BriefingImagesR) do	
+for _i,_filename in ipairs(BriefingImagesR) do
 	findValue = false
 	for i,filename in ipairs(BriefingImages) do
 		if _filename == filename then findValue = true  break end
 	end
 	if not findValue then
 		table.insert(BriefingImages, _filename)
-	end 
+	end
 end
 
 for i,filename in ipairs(BriefingImages) do											-- M05.b : ajout picture Briefing + pictures Target
@@ -1240,7 +1240,7 @@ miz:zipClose()
 
 
 
-	
+
 ----- remove temporary content files -----
 os.remove("misFile.lua")
 os.remove("optFile.lua")
@@ -1265,55 +1265,55 @@ local air_str = "oob_air = " .. TableSerialization(oob_air, 0)								--make a s
 if TypeAlias then
 	air_str = air_str .. "TypeAlias = " .. TableSerialization(TypeAlias, 0)
 end
-local airFile = io.open("Active/oob_air.lua", "w")											--open oob air file
+local airFile = io.open("Active/oob_air.lua", "w") or error("Failed to open debug file")
 airFile:write(air_str)																		--save new data
 airFile:close()
 
 local ground_str = "oob_ground = " .. TableSerialization(oob_ground, 0)						--make a string
-local groundFile = io.open("Active/oob_ground.lua", "w")									--open oob ground file
+local groundFile = io.open("Active/oob_ground.lua", "w") or error("Failed to open debug file")
 groundFile:write(ground_str)																--save new data
 groundFile:close()
 
 
 local tgt_str = "targetlist = " .. TableSerialization(targetlist, 0)						--make a string
-local tgtFile = io.open("Active/targetlist.lua", "w")										--open targetlist file
+local tgtFile = io.open("Active/targetlist.lua", "w") or error("Failed to open debug file")
 tgtFile:write(tgt_str)																		--save new data
 tgtFile:close()
 
 local trigStr = "camp_triggers = " .. TableSerializationAG(camp_triggers, 0)
-local trigFile = io.open("Active/camp_triggers.lua", "w")
+local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to open debug file")
 trigFile:write(trigStr)
 trigFile:close()
 
 
 local miss_str = "last_Mission = " .. TableSerialization(mission, 0)						--make a string
-local missFile = io.open("Active/last_Mission.lua", "w")								--open targetlist file
+local missFile = io.open("Active/last_Mission.lua", "w") or error("Failed to open debug file")
 missFile:write(miss_str)															--save new data
 missFile:close()
 
 
-if not (EndCampaign or camp.endCampaign) then 
+if not (EndCampaign or camp.endCampaign) then
 	local loadout_str = "Loadouts_archive = " .. TableSerialization(Loadouts_archive, 0)	--make a string
-	local loadoutFile = io.open("Active/Loadouts_archive.lua", "w")							--open targetlist file
+	local loadoutFile = io.open("Active/Loadouts_archive.lua", "w") or error("Failed to open debug file")
 	loadoutFile:write(loadout_str)																--save new data
-	loadoutFile:close()	
+	loadoutFile:close()
 end
 --M40_k
 local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
-local trigFile = io.open("Active/db_airbases.lua", "w")
+local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
 trigFile:write(airbases_Str)
 trigFile:close()
 
 if camp_ZoneSAR then
 	local ZoneSAR_str = "camp_ZoneSAR = " .. TableSerialization(camp_ZoneSAR, 0)					--make a string
-	local ZoneSARFile = io.open("Active/camp_ZoneSAR.lua", "w")										--open ZoneSAR file
+	local ZoneSARFile = io.open("Active/camp_ZoneSAR.lua", "w") or error("Failed to open debug file")
 	ZoneSARFile:write(ZoneSAR_str)																	--save new data
 	ZoneSARFile:close()
 end
 
 -- if Debug.debug then
 -- 	local camp_str = "mission = " .. TableSerialization(mission, 0)						--make a string
--- 	local campFile = io.open("Debug/mission_MainNM.lua", "w")								--open targetlist file
+-- 	local campFile = io.open("Debug/mission_MainNM.lua", "w") or error("Failed to open debug file")
 -- 	campFile:write(camp_str)															--save new data
 -- 	campFile:close()
 -- end

@@ -87,24 +87,24 @@ function AddSoldierAliasPilot(element)
     if element.circle and element.circle.id then
         CircleName =  "circle "..tostring(element.circle.id).."_x_"..tostring(element.circle.x).."_y_"..tostring(element.circle.y)
     end
-    
-    
+
+
     local AddGroup = {
         ["visible"] = false,
-        ["tasks"] = 
+        ["tasks"] =
         {
         }, -- end of ["tasks"]
         ["uncontrollable"] = false,
         ["task"] = "Pas de sol",
         ["taskSelected"] = true,
-        ["route"] = 
+        ["route"] =
         {
-            ["spans"] = 
+            ["spans"] =
             {
             }, -- end of ["spans"]
-            ["points"] = 
+            ["points"] =
             {
-                [1] = 
+                [1] =
                 {
                     ["alt"] = tonumber(element.z2d),
                     ["type"] = "Turning Point",
@@ -117,38 +117,38 @@ function AddSoldierAliasPilot(element)
                     ["ETA_locked"] = true,
                     ["speed"] = 0,
                     ["action"] = "Off Road",
-                    ["task"] = 
+                    ["task"] =
                     {
                         ["id"] = "ComboTask",
-                        ["params"] = 
+                        ["params"] =
                         {
-                            ["tasks"] = 
+                            ["tasks"] =
                             {
-                                [1] = 
+                                [1] =
                                 {
                                     ["number"] = 1,
                                     ["auto"] = false,
                                     ["id"] = "EmbarkToTransport",
                                     ["enabled"] = true,
-                                    ["params"] = 
+                                    ["params"] =
                                     {
                                         ["y"] = tonumber(element.y2d),
                                         ["x"] = tonumber(element.x2d),
                                         ["zoneRadius"] = 2000,
                                     }, -- end of ["params"]
                                 }, -- end of [1]
-								[2] = 
+								[2] =
 								{
 									["enabled"] = true,
 									["auto"] = false,
 									["id"] = "WrappedAction",
 									["number"] = 2,
-									["params"] = 
+									["params"] =
 									{
-										["action"] = 
+										["action"] =
 										{
 											["id"] = "Option",
-											["params"] = 
+											["params"] =
 											{
 												["name"] = 0,
 												["value"] = 4,
@@ -206,9 +206,9 @@ function AddSoldierAliasPilot(element)
         }, -- end of ["route"]
         ["groupId"] = GenerateIDGroup("Group_"..element.name),
         ["hidden"] = hidden,
-        ["units"] = 
+        ["units"] =
         {
-            [1] = 
+            [1] =
             {
                 ["type"] = "Soldier M4",
                 ["unitId"] = GenerateIDUnit(element.name),
@@ -234,7 +234,7 @@ function AddSoldierAliasPilot(element)
     --     print("DcUsar AddSoldierAliasPilot unitId "..tostring(AddGroup.units[1].unitId).." NAME: "..tostring(AddGroup.units[1].name))
     -- end
 
-    for coal_name, coal in pairs(oob_ground) do		
+    for coal_name, coal in pairs(oob_ground) do
         for country_n, country in ipairs(coal) do
             if string.lower(country.name) == string.lower(element.country) then
                if country.vehicle then
@@ -246,7 +246,7 @@ function AddSoldierAliasPilot(element)
                     end
                     if not found then
                         table.insert(country.vehicle.group, AddGroup)
-                     end                           
+                     end
                 else
                     country.vehicle = {
                             ["group"] = {
@@ -261,7 +261,7 @@ end
 
 function DeleteSoldierAliasPilot(element)
     local found = false
-    for coal_name, coal in pairs(oob_ground) do		
+    for coal_name, coal in pairs(oob_ground) do
         for country_n, country in ipairs(coal) do
             if string.lower(country.name) == string.lower(element.country) then
                if country.vehicle then
@@ -293,66 +293,66 @@ end
 
 --ajoute les ejectedPilot du fichier temp zoneSAR au fichier camp_ZoneSAR
 if zoneSAR and zoneSAR ~= nil then
-    for Nside, sideName in pairs(DCS_Side)	 do	
+    for Nside, sideName in pairs(DCS_Side)	 do
         for zoneName, element in pairs(zoneSAR) do
             for i = 1, #element do
                 if  element[i].side == "" then
                     element[i].side = "neutrals"
                 end
                 if element[i].side == sideName then
-                     if not camp_ZoneSAR[sideName][zoneName] then				
+                     if not camp_ZoneSAR[sideName][zoneName] then
                         camp_ZoneSAR[sideName][zoneName] = {
                             [1] = element[i]
-                        } 
+                        }
                     else
                         local foundElement = false
                         for n=1, #camp_ZoneSAR[sideName][zoneName] do
                              if element[i].name == camp_ZoneSAR[sideName][zoneName][n].name then
-                                
+
                                 foundElement = true
-                                break						
+                                break
                             end
                         end
                         if not foundElement then
                             table.insert(camp_ZoneSAR[sideName][zoneName], element[i] )
                         end
                     end
-                end		
-            end		
+                end
+            end
         end
     end
 end
 
 
 if zoneSAR and zoneSAR ~= nil then
-    for Nside, sideName in pairs(DCS_Side)	 do	
+    for Nside, sideName in pairs(DCS_Side)	 do
         for zoneName, element in pairs(zoneSAR) do
             for i = 1, #element do
                if  element[i].side == "" then
                     element[i].side = "neutrals"
                 end
                 if element[i].side == sideName then
-                    if not camp_ZoneSAR[sideName][zoneName] then				
+                    if not camp_ZoneSAR[sideName][zoneName] then
                         camp_ZoneSAR[sideName][zoneName] = {
                             [1] = element[i]
-                        } 
+                        }
                     else
                          for n=1, #camp_ZoneSAR[sideName][zoneName] do
                             if element[i].name == camp_ZoneSAR[sideName][zoneName][n].name then
                                  if element[i].embarked == true  and  camp_ZoneSAR[sideName][zoneName][n].status ~= "rescued" then
                                      camp_ZoneSAR[sideName][zoneName][n].status = "rescued"
-                                   
+
                                     if element[i].initiatorPilotName then
                                         print("DcUS rescued "..tostring(zoneName).." "..tostring(element[i].initiatorPilotName))
                                     else
                                         print("DcUS rescued "..tostring(zoneName).." "..tostring(element[i].name))
-                                    end  
-                                end					
+                                    end
+                                end
                             end
                         end
                     end
-                end		
-            end		
+                end
+            end
         end
     end
 end
@@ -380,12 +380,12 @@ if  tableDrawings and tableDrawings.layers then
             for Nobjet, objet in ipairs(layer.objects) do
                 local testName = string.lower(objet.name)
                  if ( string.find( testName , "border") or string.find( testName , "boundary") or string.find( testName , "frontline")   ) and #objet.points >= 3 then
-					for n, point in ipairs(objet.points) do						
+					for n, point in ipairs(objet.points) do
                         local newPoints = {
                             x = point.x +  objet.mapX,
                             y = point.y +  objet.mapY,
-                        } 
-						
+                        }
+
                         table.insert(boundary[string.lower(layer.name)], newPoints)
 
 						foundBoundary = true
@@ -466,8 +466,8 @@ local timeActualCampaignSecond = os.time{day=camp.date.day, year=camp.date.year,
 if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
     for sideName, sideSAR in pairs(camp_ZoneSAR) do
         for ZoneName, zone in pairs(sideSAR) do
-            
-            for Nelement, element in ipairs(zone) do           
+
+            for Nelement, element in ipairs(zone) do
                 if element.status ~= "rescued" and element.embarked then
                     element.status = "rescued"
                 end
@@ -491,9 +491,9 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                     --         element.y = element.CloseRoad.y
                     --     end
                     -- end                   
-					
+
 					if debugDcUS then print("DcUS EjectedPilot name: "..tostring(element.name)) end
-					
+
                     local redDistance ={500, 3000, 20000, 200000}
                     -- local nbAMI_ENI = {
                     --     neutrals = {},
@@ -522,10 +522,10 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                      --recherche le nombre d'AMI ENI proche
                     for DistanceN, refD in ipairs(redDistance) do
                         for side, oob in pairs(oob_ground) do
-                            for country_n, country in pairs(oob_ground[side]) do						
+                            for country_n, country in pairs(oob_ground[side]) do
                                 if country.static then
-                                    for group_n, group in pairs(country.static.group) do				
-                                        
+                                    for group_n, group in pairs(country.static.group) do
+
                                         local distance = math.sqrt(math.pow(element.x2d - group.x, 2) + math.pow(element.y2d - group.y, 2))
                                         if not nbAMI_ENI[side][refD] then
                                             nbAMI_ENI[side][refD] = 0
@@ -536,8 +536,8 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                                     end
                                 end
                                 if  country.vehicle then
-                                    for group_n, group in pairs(country.vehicle.group) do				
-                                        if not string.find(group.name, "_Pilot_") then 
+                                    for group_n, group in pairs(country.vehicle.group) do
+                                        if not string.find(group.name, "_Pilot_") then
                                             local distance = math.sqrt(math.pow(element.x2d - group.x, 2) + math.pow(element.y2d - group.y, 2))
 
                                             if not nbAMI_ENI[side][refD] then
@@ -577,7 +577,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                         enemy = "blue"
                     end
 
-                    if debugDcUS then 
+                    if debugDcUS then
                         print("DcUS AA initChoicePOW "..tostring(element.initChoicePOW))
                     end
 
@@ -586,7 +586,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                         if element.year and element.month and element.day then
                             local timeEjectSecond = os.time{day=element.day, year=element.year, month=element.month}
                             local daysfrom = os.difftime(timeActualCampaignSecond, timeEjectSecond) / (24 * 60 * 60) -- seconds in a day 
-                            element.ejectNbDay = daysfrom    
+                            element.ejectNbDay = daysfrom
                         else
                             element.ejectNbDay = 0
                         end
@@ -594,7 +594,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                         if element.year and element.month and element.day then
                             local timeEjectSecond = os.time{day=element.day, year=element.year, month=element.month}
                             local daysfrom = os.difftime(timeActualCampaignSecond, timeEjectSecond) / (24 * 60 * 60) -- seconds in a day 
-                            element.ejectNbDay = tonumber(daysfrom)    
+                            element.ejectNbDay = tonumber(daysfrom)
                         end
                     end
 
@@ -602,16 +602,16 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                         element.POW_nextDayCheck =  element.ejectNbDay + 2
                     end
 
-                    if debugDcUS then 
+                    if debugDcUS then
                         print("DcUS AAb ejectNbDay "..tostring(element.ejectNbDay).." POW_nextDayCheck: "..tostring(element.POW_nextDayCheck))
                     end
 
                     --cherche s'il est ejecté chez l'ENI
                     if not element.initChoicePOW or element.initChoicePOW == nil then
-                        element.inTheEnemyCamp =  CheckPointInPoly2({x=element.x2d,y=element.y2d}, boundary[enemy])                 
+                        element.inTheEnemyCamp =  CheckPointInPoly2({x=element.x2d,y=element.y2d}, boundary[enemy])
                         -- element.inTheEnemyCamp =  CheckPointInPoly2({x=element.y2d,y=element.x2d}, boundary[enemy])
-                    
-                        if debugDcUS then 
+
+                        if debugDcUS then
                             print("DcUS BB inTheEnemyCamp "..tostring(element.inTheEnemyCamp))
                         end
 
@@ -628,31 +628,26 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                         --             os.execute 'pause'
                         --         end
                         --         -- DeleteSoldierAliasPilot(element)
-                                
+
                         --     else
                         --         if debugDcUS then 
                         --             print("DcUS DD freeAtMoment "..element.status)
                         --         end
-                                
-                        --     end
-                            
-                        -- end
 
-                       
+                        --     end
+
+                        -- end
 
                         element.initChoicePOW = true
 
-                        math.random(3, 15)
-                        math.random(3, 15)
-                        math.random(3, 15)
                         local PowDayMax = math.random(3, 15)
 
                         element.PowDayMax = PowDayMax
 
-                        if debugDcUS then 
+                        if debugDcUS then
                             print("DcUS EE initChoicePOW "..tostring(element.initChoicePOW))
                         end
-                        
+
                     elseif element.initChoicePOW and element.inTheEnemyCamp then
                             -- reference = os.time{day=15, year=2015, month=2}
                             -- daysfrom = os.difftime(os.time(), reference) / (24 * 60 * 60) -- seconds in a day
@@ -660,11 +655,8 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                             -- print(wholedays) -- today it prints "1"
 
                         if not element.PowDayMax then
-                            math.random(3, 15)
-                            math.random(3, 15)
-                            math.random(3, 15)
                             local PowDayMax = math.random(3, 15)
-                            
+
                             element.PowDayMax = PowDayMax
                         end
 
@@ -682,42 +674,42 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                     end
 
                     --////////////////////////////************************////////////////////
-                    if debugDcUS then 
+                    if debugDcUS then
                         print("DcUS FFc ejectNbDay "..tostring(element.ejectNbDay).." POW_nextDayCheck: "..tostring(element.POW_nextDayCheck))
                     end
 
 					if element.status ~= "POW" and  element.inTheEnemyCamp and not debugNoPow  and (element.ejectNbDay < element.POW_nextDayCheck) then
-                        
+
                         --indique de ne pas regarder à chaque generation le random POW, cela fausse les stats
                         --ne regarde qu'une fois par jour, ou tous les 2 jours ou...
                         element.POW_nextDayCheck = element.ejectNbDay + 2
 
                         -- if debugDcUS then print("DcUS IF_111A status ~= POW and inTheEnemyCamp ") end
-                        
+
                         _affiche(nbAMI_ENI, "nbAMI_ENI")
 
-						if nbAMI_ENI[sideName][500] >= 2  then 
+						if nbAMI_ENI[sideName][500] >= 2  then
 							element.status = "EVAC_possible"
                             if debugDcUS then print("DcUS A ") end
-						elseif  nbAMI_ENI[sideName][500] == 0 and  nbAMI_ENI[enemy][500] >= 2  then 
+						elseif  nbAMI_ENI[sideName][500] == 0 and  nbAMI_ENI[enemy][500] >= 2  then
 							element.status = "POW"
                             if debugDcUS then print("DcUS B POW enemy][500] >= 2 ")  os.execute 'pause' end
                             -- DeleteSoldierAliasPilot(element)
-						elseif nbAMI_ENI[sideName][3000] >= 2  and  nbAMI_ENI[enemy][3000] < 2 then 
+						elseif nbAMI_ENI[sideName][3000] >= 2  and  nbAMI_ENI[enemy][3000] < 2 then
 							element.status = "EVAC_possible"
                             if debugDcUS then print("DcUS C ") end
-						elseif nbAMI_ENI[sideName][3000] < 2  and  nbAMI_ENI[enemy][3000] >= 2 then 
+						elseif nbAMI_ENI[sideName][3000] < 2  and  nbAMI_ENI[enemy][3000] >= 2 then
 							element.status = "POW"
                             if debugDcUS then print("DcUS D POW enemy][3000] >= 2 ")  os.execute 'pause' end
                             -- DeleteSoldierAliasPilot(element)
-						elseif nbAMI_ENI[sideName][3000] >= 2  and  nbAMI_ENI[enemy][3000] >= 2  then 
+						elseif nbAMI_ENI[sideName][3000] >= 2  and  nbAMI_ENI[enemy][3000] >= 2  then
 							local pourcent = (nbAMI_ENI[sideName][3000] / ( nbAMI_ENI[sideName][3000] + nbAMI_ENI[enemy][3000]))*100
 							local coef = (element.ejectNbDay*(-1) + 5) -- plus le nb de jour augmente, plus les chances d etre capturé augmente
                             if coef < 1 then coef = 1 end
                             local randomMalChance = math.random(1, 100) / coef
 
-                            if debugDcUS then print("DcUS F coef "..coef)   
-                                print("DcUS J POW [enemy][3000] >= 2 | randomMalChance  "..randomMalChance.." > pourcent? "..pourcent)  
+                            if debugDcUS then print("DcUS F coef "..coef)
+                                print("DcUS J POW [enemy][3000] >= 2 | randomMalChance  "..randomMalChance.." > pourcent? "..pourcent)
                             end
 							if randomMalChance > pourcent then
 								element.status = "POW"
@@ -726,47 +718,47 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
 								 element.status = "EVAC_possible"
                                 if debugDcUS then print("DcUS E enemy][3000] >= 2 ||if randomMalChance > pourcent ") end
                             end
-						elseif nbAMI_ENI[sideName][20000] >= 2  and  nbAMI_ENI[enemy][20000] < 2 then 
+						elseif nbAMI_ENI[sideName][20000] >= 2  and  nbAMI_ENI[enemy][20000] < 2 then
 							element.status = "EVAC_possible"
                             if debugDcUS then print("DcUS G ") end
-						elseif nbAMI_ENI[sideName][20000] < 2  and  nbAMI_ENI[enemy][20000] >= 2 then 
-							
+						elseif nbAMI_ENI[sideName][20000] < 2  and  nbAMI_ENI[enemy][20000] >= 2 then
+
                             element.status = "EVAC_possible"
                             if debugDcUS then print("DcUS H  POW [enemy][20000] >= 2 ")  end
 
                             -- element.status = "POW"
                             -- if debugDcUS then print("DcUS H  POW [enemy][20000] >= 2 ")   os.execute 'pause' end
                             -- DeleteSoldierAliasPilot(element)
-						elseif nbAMI_ENI[sideName][20000] >= 2  and  nbAMI_ENI[enemy][20000] >= 2  then 
+						elseif nbAMI_ENI[sideName][20000] >= 2  and  nbAMI_ENI[enemy][20000] >= 2  then
 
 							local pourcent = (nbAMI_ENI[sideName][20000] / ( nbAMI_ENI[sideName][20000] + nbAMI_ENI[enemy][20000]))*100
                             local coef = (element.ejectNbDay*(-1) + 5) -- plus le nb de jour augmente, plus les chances d etre capturé augmente
                             if coef < 1 then coef = 1 end
                             if debugDcUS then print("DcUS Ja POW [enemy][20000] >= 2 | Nb_sideName  "..nbAMI_ENI[sideName][20000].." Nb_enemy: ".. nbAMI_ENI[enemy][20000].." coef: "..coef) end
-                                
+
 							local randomMalChance = math.random(1, 100)/coef
                             if debugDcUS then print("DcUS F coef "..coef)
-                                print("DcUS Jb POW [enemy][20000] >= 2 | randomMalChance  "..randomMalChance.." > pourcent? "..pourcent)  
+                                print("DcUS Jb POW [enemy][20000] >= 2 | randomMalChance  "..randomMalChance.." > pourcent? "..pourcent)
                             end
-                            
+
 							if randomMalChance > pourcent then
                                 element.status = "POW"
-                                if debugDcUS then 
-                                    print("DcUS Jc POW [enemy][20000] >= 2 | randomMalChance  "..randomMalChance.." > pourcent? "..pourcent)  
-                                    os.execute 'pause' 
+                                if debugDcUS then
+                                    print("DcUS Jc POW [enemy][20000] >= 2 | randomMalChance  "..randomMalChance.." > pourcent? "..pourcent)
+                                    os.execute 'pause'
                                 end
 							elseif  not debugNoPow then
 								element.status = "EVAC_possible"
                                 if debugDcUS then print("DcUS I ") end
                             end
-						
-						elseif nbAMI_ENI[sideName][200000] >= 2  and  nbAMI_ENI[enemy][200000] < 2 then 
+
+						elseif nbAMI_ENI[sideName][200000] >= 2  and  nbAMI_ENI[enemy][200000] < 2 then
 							element.status = "EVAC_possible"
                             if debugDcUS then print("DcUS K ") end
-						elseif nbAMI_ENI[sideName][200000] < 2  and  nbAMI_ENI[enemy][200000] >= 2 then 
+						elseif nbAMI_ENI[sideName][200000] < 2  and  nbAMI_ENI[enemy][200000] >= 2 then
 							element.status = "EVAC_possible"
                             if debugDcUS then print("DcUS L ") end
-						elseif nbAMI_ENI[sideName][200000] >= 2  and  nbAMI_ENI[enemy][200000] >= 2  then 
+						elseif nbAMI_ENI[sideName][200000] >= 2  and  nbAMI_ENI[enemy][200000] >= 2  then
 							element.status = "EVAC_possible"
                             if debugDcUS then print("DcUS M ") end
 
@@ -777,7 +769,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
 
                     elseif  element.status == "POW" then
                         -- if debugDcUS then print("DcUS IF_111B status == POW ") end
-                    
+
                     elseif not  element.inTheEnemyCamp then
 
                         element.status = "EVAC_possible"
@@ -791,7 +783,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                         print("DcUS Q FINAL: "..tostring(element.status))
                     end
 
-                    if camp.theatre and camp.theatre == "caucasus" then 
+                    if camp.theatre and camp.theatre == "caucasus" then
                         dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data_circleSAR_Caucasus.lua")
 
                         element.theatreCercle = true
@@ -805,18 +797,18 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                         -- // axe_X : 18869 pixel (gauche à droite)
                         -- // axe_Y : 10391 pixel (haut en bas)
                         -- // 0/0 point origine en haut à droite
-            
+
                         -- //TODO trouver 2 bases eloigné, dessiner 2 cerles dessus et trouver la distance équivalente sur DCS
                         -- //426 nm => 788952 metre
                         -- // 1 pixel = 41.81 metre
-                    
+
 
                         --offset --caucasus
                         --TODO a faire pour les autres map
 
 
                         -- ['Vizianii'] = {
-                        
+
                         --     y = 904028.820,
                         --     x =	-319918.785,
 
@@ -845,7 +837,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                             -- mis_x => pix_y
                             -- mis_x = (-220531*pix_y) / 5900
                             -- mis_x = (-220531*pix_y) / ref_pixel_ordonne
-                        
+
 
                         -- ['Viazami'] = {
 
@@ -879,7 +871,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                         --     }, 
                         -- }
 
-                        
+
                         -- circleSAR = {       --  anapa
                         --     {   
                         --         pixel_x = 3626,   
@@ -889,7 +881,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                         --         abcisse_m = 242165.40114826,      y 
                         --     }, 
                         -- }  
-                        
+
                         --     circleSAR = {    --  batumi
                         --     {   
                         --         pixel_x = 11587,   
@@ -899,7 +891,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                         -- }
 
                         if debugDcUS then print("DcUSAR passe 0 CIRCLE ") end
-                        for nCircle, circle in ipairs(circleSAR) do                   
+                        for nCircle, circle in ipairs(circleSAR) do
 
                             --Pixel axe x : horizontal vers la droite
                             --Pixel axe y : horizontal vers le bas
@@ -911,7 +903,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                             -- local mission2d_x = (ref_DCS_metre_ordonne * circle.pixel_y) / ref_pixel_ordonne     --pas assez precis
                             local mission2d_x = 58538.7 - (47.2304 * circle.pixel_y )
                                                 --  58538.7−47.2304x
-                            
+
 
                             -- local mission2d_y = (ref_DCS_metre_abscissse * circle.pixel_x) / ref_pixel_abscissse    --pas assez precis                 
                             -- local mission2d_y = (564387 * circle.x2d) / offsett_pix_x
@@ -921,18 +913,18 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                             local testX = math.abs(element.x2d - mission2d_x)
                             local testY =  math.abs(element.y2d - mission2d_y)
                             -- print("DcUSAR passe A element x: "..tostring(element.x2d).." Y: "..tostring(element.y2d).." ||mission X: "..tostring(mission2d_x).." Y: "..tostring(mission2d_y).." ||Delat "..tostring(testX).." Y: "..tostring(testY))
-                
-                            if math.abs(element.x2d - mission2d_x) <= 2000 and math.abs(element.y2d - mission2d_y) <= 2000 then                       
+
+                            if math.abs(element.x2d - mission2d_x) <= 2000 and math.abs(element.y2d - mission2d_y) <= 2000 then
                                 -- print("DcUSAR passe B x: "..tostring(mission2d_x).." Y: "..tostring(mission2d_y))
 
                                 local result = math.pow ((element.x2d - mission2d_x), 2) + math.pow((element.y2d - mission2d_y), 2) <= math.pow((circle.radius * 47.2287), 2)
                                 if result then
-                                    
+
                                     --le soldierEjectedPilot est déjà dans une zone SAR possible
                                     -- on arrete donc de chercher
-                                    if debugDcUS then 
-                                        print("DcUS DcUSAR déjà sur une zone SAR pour poser l'helico: "..tostring(element.name)) 
-                                        print("DcUS DcUSAR circle.pixel_x: "..tostring(circle.pixel_x)) 
+                                    if debugDcUS then
+                                        print("DcUS DcUSAR déjà sur une zone SAR pour poser l'helico: "..tostring(element.name))
+                                        print("DcUS DcUSAR circle.pixel_x: "..tostring(circle.pixel_x))
                                         print("DcUS DcUSAR circle.pixel_y: "..tostring(circle.pixel_y))
                                     end
 
@@ -948,7 +940,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                                 end
                             end
                         end
-                        
+
                         -- print("DcUSAR fin ")
                         -- os.execute 'pause'
 
@@ -965,19 +957,19 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                             y = 0,
                         }
                         if not inSarZone then
-                            for nCircle, circle in ipairs(circleSAR) do                   
-                            
+                            for nCircle, circle in ipairs(circleSAR) do
+
                                 -- local newZone_metre_x = (ref_DCS_metre_ordonne * circle.pixel_y) / ref_pixel_ordonne         --pas assez precis
                                 local newZone_metre_x = 58538.7 - (47.2304 * circle.pixel_y )
 
 
                                 -- local newZone_metre_y = (ref_DCS_metre_abscissse * circle.pixel_x) / ref_pixel_abscissse      --pas assez precis
                                 local newZone_metre_y = (47.2287 * circle.pixel_x) + 70914
-                                
+
                                 -- if math.abs(element.x2d - newZone_metre_x) <= 2000 and math.abs(element.y2d - newZone_metre_y) <= 2000 then 
-                                    
-                                if math.abs(element.x2d - newZone_metre_x) <= 20000 and math.abs(element.y2d - newZone_metre_y) <= 20000 then 					
-                                    
+
+                                if math.abs(element.x2d - newZone_metre_x) <= 20000 and math.abs(element.y2d - newZone_metre_y) <= 20000 then
+
                                     --distance de la nouvelle zone degagé depuis la zone de chute
                                     local distChuteNewZone = math.sqrt(math.pow(element.x2d - newZone_metre_x, 2) + math.pow(element.y2d - newZone_metre_y, 2))
 
@@ -985,17 +977,17 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                                                 -- local distance = math.sqrt(math.pow(element.x2d - newZone_metre_x, 2) + math.pow(element.y2d - newZone_metre_y, 2))
 
                                     if distChuteNewZone < distanceSelected and not debugNoPow then
-                                        
+
                                         --ne se déplace pas en territoire ENI
                                         local testEnyCamp =  CheckPointInPoly2({x=newZone_metre_x,y=newZone_metre_y}, boundary[enemy])
 
-                                        if element.inTheEnemyCamp or (not element.inTheEnemyCamp and not testEnyCamp) then 
+                                        if element.inTheEnemyCamp or (not element.inTheEnemyCamp and not testEnyCamp) then
                                             distanceSelected = distChuteNewZone
 
                                             --pour info, ce n'est pas la position xy mais une reference circle
                                             xy_Selected.x = circle.pixel_x
                                             xy_Selected.y = circle.pixel_y
-                                        
+
                                             element.x2d = newZone_metre_x + (Nelement * 100)
                                             element.y2d = newZone_metre_y + (Nelement * 100)
                                             element["circle"] = {
@@ -1003,7 +995,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                                                 x = circle.pixel_x,
                                                 y = circle.pixel_y,
                                             }
-                                        end              
+                                        end
                                     end
                                 end
                             end
@@ -1011,23 +1003,23 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
 
                         if distanceSelected < 9999999 then
                             element.landingPossible = true
-                            
-                            if debugDcUS then 
+
+                            if debugDcUS then
                                 print("DcUS DcUSAR trouve une NOUVELLE  zone SAR pour poser l'helico "..tostring(element.name))
-                                print("DcUS DcUSAR circle.pixel_x: "..tostring(xy_Selected.x)) 
+                                print("DcUS DcUSAR circle.pixel_x: "..tostring(xy_Selected.x))
                                 print("DcUS DcUSAR circle.pixel_y: "..tostring(xy_Selected.y))
                                 print("DcUS DcUSAR : "..tostring(element.name).." inTheEnemyCamp? AVANT "..tostring(element.inTheEnemyCamp))
                             end
 
-                            
+
                             element.inTheEnemyCamp =  CheckPointInPoly2({x=element.x2d,y=element.y2d}, boundary[enemy])
 
-                            
-                            
-                            if debugDcUS then 
-                            
-                                print("DcUS DcUSAR : "..tostring(element.name).." inTheEnemyCamp? APRES "..tostring(element.inTheEnemyCamp)) 
-                            
+
+
+                            if debugDcUS then
+
+                                print("DcUS DcUSAR : "..tostring(element.name).." inTheEnemyCamp? APRES "..tostring(element.inTheEnemyCamp))
+
                             end
 
                         end
@@ -1040,8 +1032,8 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                 --selectionne la base la plus proche pour leur porter secours
                 local selectedDistance = 9999999
                 local selectedUnitName = ""
-                for side_name,side in pairs(oob_air) do  
-                    if side_name == element.side then                      
+                for side_name,side in pairs(oob_air) do
+                    if side_name == element.side then
                         for n, unit in pairs(side) do
                             if unit.tasks.SAR  and not unit.inactive  then
                                 local unitReserve = 0
@@ -1063,27 +1055,27 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                                         selectedDistance = distance
                                         selectedUnitName = unit.name
 
-                                        if debugDcUS then 
+                                        if debugDcUS then
                                             print("DcUS EE_1 selectedUnitSAR "..tostring(element.MGRS_Chute )..tostring(element.name).." SUnitName: "..selectedUnitName.." "..selectedDistance)
                                         end
 
                                     end
-                                end 
+                                end
                             end
                         end
                     end
                 end
                 if selectedUnitName ~= "" then
                     element.selectedUnitSAR = selectedUnitName
-                    if debugDcUS then 
+                    if debugDcUS then
                         print("DcUS EEE_2 selectedUnitSAR "..tostring(element.MGRS_Chute ).." SUnitName: "..tostring(element.name).." SUnitName: "..selectedUnitName.." "..selectedDistance)
                     end
                 end
-                
-                if debugDcUS then 
+
+                if debugDcUS then
                     print("DcUS GG initChoicePOW "..tostring(element.initChoicePOW))
                 end
-                
+
             end
         end
     end
@@ -1127,7 +1119,7 @@ end
 --mis à jour des status des pilotes ejecté en fonction de leur récuperation
 -- if camp.SAR and camp.SAR.pilotEjected then
 --     for N_Pilot, uPilot in ipairs(camp.SAR.pilotEjected) do
-        
+
 --         if uPilot.embarked then 
 
 --             if camp_ZoneSAR and camp_ZoneSAR ~= nil then
@@ -1136,7 +1128,7 @@ end
 --                         for Nelement, element in ipairs(zone) do
 --                             -- if element.name == uPilot.name and element.status == "MIA" then
 --                             if element.name == uPilot.name and element.status == "EVAC_possible" then
-                                
+
 
 --                                 if uPilot.embarkAndSafe then 
 --                                     element.status = "OK"
@@ -1154,7 +1146,7 @@ end
 
 
 if not camp.SAR then camp.SAR = {} end
-camp.SAR.pilotEjected = {} 
+camp.SAR.pilotEjected = {}
 
 --creation table de la liste des pilote ejecté à utiliser dans le game DC_StaticAircraft
 --UTIL pour calculer en temps réel la distance séparant ces pilotes des helico pour déclencher le fumigene
@@ -1162,7 +1154,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
     for sideName, sideSAR in pairs(camp_ZoneSAR) do
         for ZoneName, zone in pairs(sideSAR) do
             for Nelement, element in ipairs(zone) do
-                
+
 				-- land.SurfaceType 
 				-- LAND             1
 				-- SHALLOW_WATER    2
@@ -1173,8 +1165,8 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
                 -- supprime d'abord le soldat existant, pour actualiser sa position et son status
                 DeleteSoldierAliasPilot(element)
 
-                if element.status == "EVAC_possible" and  element.SurfaceType ~= 5  then 
-                    
+                if element.status == "EVAC_possible" and  element.SurfaceType ~= 5  then
+
                     local AddPilot = element
                     AddPilot.smokeOK = false
                     AddPilot.embarked = false

@@ -219,26 +219,59 @@ for side,unit in pairs(oob_air) do												--Iterate through sides in oob_air
 end
 
 
---remove static aircraft that are linked to a carrier that is dead/not in mission
-for side_name,side in pairs(mission.coalition) do											--side table(red/blue)
-	for country_n,country in pairs(side.country) do											--country table (number array)
-		if country.static then																--if country has static objects
-			for n = #country.static.group, 1, -1 do											--iterate through static groups backwards
-				local linkUnit = country.static.group[n].route.points[1].linkUnit			--ID of unit to which static is linked
-				if linkUnit then															--if static is linked to a unit
-					for _c,c in pairs(side.country) do										--country table (number array)
-						if c.ship then														--country has ships
-							for _g,g in pairs(c.ship.group) do								--groups table (number array)
-								for _u,u in pairs(g.units) do								--units table (number array)
-									if u.unitId == linkUnit then							--ship that static is linked to is found
-										if (g.probability and g.probability < 1) or u.dead then		--ship is dead or not in mission
-											table.remove(country.static.group, group_n)		--remove group of static unit from mission
-										end
-										break
-									end
-								end
-							end
-						end
+-- --remove static aircraft that are linked to a carrier that is dead/not in mission
+-- for side_name,side in pairs(mission.coalition) do											--side table(red/blue)
+-- 	for country_n,country in pairs(side.country) do											--country table (number array)
+-- 		if country.static then																--if country has static objects
+-- 			for n = #country.static.group, 1, -1 do											--iterate through static groups backwards
+-- 				local linkUnit = country.static.group[n].route.points[1].linkUnit			--ID of unit to which static is linked
+-- 				if linkUnit then															--if static is linked to a unit
+-- 					for _c,c in pairs(side.country) do										--country table (number array)
+-- 						if c.ship then														--country has ships
+-- 							for _g,g in pairs(c.ship.group) do								--groups table (number array)
+-- 								for _u,u in pairs(g.units) do								--units table (number array)
+-- 									if u.unitId == linkUnit then							--ship that static is linked to is found
+-- 										if (g.probability and g.probability < 1) or u.dead then		--ship is dead or not in mission
+-- 											table.remove(country.static.group, group_n)		--remove group of static unit from mission
+-- 										end
+-- 										break
+-- 									end
+-- 								end
+-- 							end
+-- 						end
+-- 					end
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+-- end
+
+-- Index ships by unitId for fast lookup
+local shipIndex = {}
+for _, side in pairs(mission.coalition) do
+	for _, country in pairs(side.country) do
+		if country.ship then
+			for _, g in pairs(country.ship.group) do
+				for _, u in pairs(g.units) do
+					shipIndex[u.unitId] = { group = g, unit = u }
+				end
+			end
+		end
+	end
+end
+
+-- Remove static aircraft linked to dead/missing carriers
+for _, side in pairs(mission.coalition) do
+	for _, country in pairs(side.country) do
+		if country.static then
+			for n = #country.static.group, 1, -1 do
+				local staticGroup = country.static.group[n]
+				local linkUnit = staticGroup.route and staticGroup.route.points[1].linkUnit
+				
+				if linkUnit and shipIndex[linkUnit] then
+					local linkedShip = shipIndex[linkUnit]
+					if (linkedShip.group.probability and linkedShip.group.probability < 1) or linkedShip.unit.dead then
+						table.remove(country.static.group, n)
 					end
 				end
 			end

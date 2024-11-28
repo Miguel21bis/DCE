@@ -19,7 +19,7 @@ versionDCE["DC_Prune.lua"] = "1.6.23"
 -- M16_d			SpawnAir, & insert pos far target 
 ------------------------------------------------------------------------------------------------------- 
 
-cibleTrouve = {}
+local cibleTrouve = {}
 
 local PruneScript =				mission_ini.PruneScriptConf.PruneScript
 local pruneAggressiveness =		mission_ini.PruneScriptConf.PruneAggressiveness
@@ -130,7 +130,7 @@ local function stringStarts(str, start)
 end
 
 -- iterate through all consecutive pairs of waypoints
-function waypointPairs(wps, f)
+local function waypointPairs(wps, f)
 	local wi = 1
 	while (wps[wi]) do
 		local wp = wps[wi]
@@ -149,7 +149,7 @@ function waypointPairs(wps, f)
 	 -- Z02 : SAM ajoute un waypoint sur les intercepteurs (qui n'ont qu'un seul waypoint) pour éviter de supprimer les unité proche
 -- TODO fonction a déplacer dans ATO_FlightPlan
 		if wi <= 1 and (wps[1].name == "Intercept" or wps[1].name == "SAR") then
-			np = wps[1]
+			local np = wps[1]
 			np.x = wp.x + 5000
 			np.y = wp.y + 5000
 			found = true
@@ -246,7 +246,7 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 								if wp1.task.params.tasks[ti].id == 'AttackGroup' then
 									if wp1.task.params.tasks[ti].params then
 										if wp1.task.params.tasks[ti].params.groupId then
-											targetGroupId =  wp1.task.params.tasks[ti].params.groupId
+											local targetGroupId =  wp1.task.params.tasks[ti].params.groupId
 											if allGroundGroupId[targetGroupId] then
 		-- print("DC_P_P Keep cibles identifiées par idgroup seront Gardées "..targetGroupId.." Unit "..unit.name)	
 												cibleTrouve[targetGroupId] = allGroundGroupId[targetGroupId].name
@@ -380,7 +380,7 @@ local function pruneUnits(groundFun, airFun)
 
 		print()
 		local prune_str = "mission_AtoFP = " .. TableSerialization(addPrune, 0)						--make a string
-		local pruneFile = io.open("Debug/prune_DcPrune.lua", "w")								--open targetlist file
+		local pruneFile = io.open("Debug/prune_DcPrune.lua", "w") or error("Failed to open debug file")
 		pruneFile:write(prune_str)															--save new data
 		pruneFile:close()
 	end

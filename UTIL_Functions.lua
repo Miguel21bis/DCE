@@ -2728,7 +2728,7 @@ function modifiCampInit()
 	-- 		year = 1986,
 	-- 		month = 4,
 	-- 	},
-	-- 	time = 11700,					--daytime in seconds
+	-- 	time = 11700,					--Daytime in seconds
 	-- 	variation = 4,					--variation in degrees from true north to magneitic north
 
 	local txt = ""

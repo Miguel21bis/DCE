@@ -15,6 +15,9 @@ versionDCE["DEBRIEF_StatsEvaluation.lua"] = "1.8.64"
 -- modification M11A_be			Multiplayer	(be camp.client)(y: force same package)
 ------------------------------------------------------------------------------------------------------- 
 
+--Global variable
+packstats = {}	--track stats for player package
+
 if not AcceptedMission or AcceptedMission == nil then
 	oob_air = deepcopy(oob_air)
 	oob_ground = deepcopy(oob_ground)
@@ -229,8 +232,7 @@ local function AddClient(name)
 	end
 end
 
---track stats for player package
-packstats = {}
+
 if camp.client then
 	-- local testN = 999
 	-- --recupere la plus petite valeur de pack, le strike est surement dedans
@@ -1075,7 +1077,7 @@ end
 -- 			},
 if camp.statLost then
 
-	noNeedTask = {
+	local noNeedTask = {
 		Escort = true,
 		CAP = true,
 		SEAD = true,
@@ -1163,12 +1165,12 @@ end
 
 if Debug.debug and camp.newTaskRequest then
 	local _Str = "newTaskRequest = " .. TableSerialization(camp.newTaskRequest, 0)
-	local trigFile = io.open("Debug/newTaskRequest.lua", "w")
+	local trigFile = io.open("Debug/newTaskRequest.lua", "w") or error("Failed to open debug file")
 	trigFile:write(_Str)
 	trigFile:close()
 
 	local _Str = "newTaskPerTarget = " .. TableSerialization(camp.newTaskPerTarget, 0)
-	local trigFile = io.open("Debug/newTaskPerTarget.lua", "w")
+	local trigFile = io.open("Debug/newTaskPerTarget.lua", "w") or error("Failed to open debug file")
 	trigFile:write(_Str)
 	trigFile:close()
 end
@@ -1222,7 +1224,7 @@ end
 
 if Debug.debug and camp.statLost then
 	local _Str = "statLost = " .. TableSerialization(camp.statLost, 0)
-	local trigFile = io.open("Debug/statLost.lua", "w")
+	local trigFile = io.open("Debug/statLost.lua", "w") or error("Failed to open debug file")
 	trigFile:write(_Str)
 	trigFile:close()
 end
@@ -1230,6 +1232,6 @@ end
 
 
 local _Str = "statLost = " .. TableSerialization(clientstatsDetail, 0)
-local trigFile = io.open("Debug/statsClientDetails.lua", "w")
+local trigFile = io.open("Debug/statsClientDetails.lua", "w") or error("Failed to open debug file")
 trigFile:write(_Str)
 trigFile:close()

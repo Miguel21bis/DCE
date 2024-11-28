@@ -2153,13 +2153,13 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					-- 	end
 					-- end
 
-					local lMetar = tabMetar[Tplayer.pack[Tplayer.role][Tplayer.flight].base][unitsUse]
+					local lMetar = TabMetar[Tplayer.pack[Tplayer.role][Tplayer.flight].base][unitsUse]
 
 					print(lMetar)
 
 
 					if allowedBrief then  briefing[sideName] = briefing[sideName] .. s .. "\n\n" ..tostring(lMetar) .. "\n"		 end			
-					if allowedBrief then  briefing[sideName] = briefing[sideName] .. tostring(moonTxt).. "\n"			end
+					if allowedBrief then  briefing[sideName] = briefing[sideName] .. tostring(MoonTxt).. "\n"			end
 
 					--Assign briefing text to mission file
 					if sideName == "blue" then

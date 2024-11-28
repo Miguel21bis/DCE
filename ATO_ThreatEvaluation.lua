@@ -1190,7 +1190,7 @@ for side,unit in pairs(oob_air) do																--iterate through all sides
 					if  db_loadouts[unit[n].type] then						
 						if  db_loadouts[unit[n].type][task] then							--task is true and db_loadouts has such tasks
 							for loadout_name, loadout in pairs(db_loadouts[unit[n].type][task]) do		--iterate through all loadout.descriptions for a given aircraft type
-								if (daytime == "day" and loadout.day) or (daytime == "night" and loadout.night) or (daytime == "night-day" and (loadout.day or loadout.night)) or (daytime == "day-night" and (loadout.day or loadout.night)) then	--loadout works for current time of day
+								if (Daytime == "day" and loadout.day) or (Daytime == "night" and loadout.night) or (Daytime == "night-day" and (loadout.day or loadout.night)) or (Daytime == "day-night" and (loadout.day or loadout.night)) then	--loadout works for current time of day
 									if loadout.country == nil or loadout.country == unit[n].country then	--loadout is country unspecific or applies to unit country
 										-- if task == "AWACS" then												--if loadout is AWACS
 										-- 	local entry = {													--define fighterthreats table entry

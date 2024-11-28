@@ -122,10 +122,10 @@ if mission.requiredModules then
 				"base_mission.miz  ",
 			}
 		}
-		if listRequiredModules[nameN] then
-			table.insert(listRequiredModules[nameN].origine, "base_mission.miz  " )
+		if ListRequiredModules[nameN] then
+			table.insert(ListRequiredModules[nameN].origine, "base_mission.miz  " )
 		else
-			listRequiredModules[nameN] = entry
+			ListRequiredModules[nameN] = entry
 		end
 	end
 end
@@ -1573,16 +1573,16 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						typeNameRequire = data_divers[flight[f].type].requiredModulesSpecialName
 					end
 
-					if listRequiredModules[typeNameRequire] then
+					if ListRequiredModules[typeNameRequire] then
 
-						for n, from in pairs(listRequiredModules[typeNameRequire].origine) do
+						for n, from in pairs(ListRequiredModules[typeNameRequire].origine) do
 
 							if from ~= "data_divers: "..typeNameRequire then
-								table.insert(listRequiredModules[typeNameRequire].origine, "data_divers: "..typeNameRequire )
+								table.insert(ListRequiredModules[typeNameRequire].origine, "data_divers: "..typeNameRequire )
 							end
 						end
 					else
-						listRequiredModules[typeNameRequire] = entry
+						ListRequiredModules[typeNameRequire] = entry
 					end
 				end
 
@@ -6847,9 +6847,9 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 end
 
 --ajoute les modules necessaire dans le fichier mission
-if listRequiredModules then
+if ListRequiredModules then
 	if not mission.requiredModules then mission.requiredModules = {} end
-	for nameN, module in pairs(listRequiredModules) do
+	for nameN, module in pairs(ListRequiredModules) do
 		if not mission.requiredModules[nameN] then mission.requiredModules[nameN] = nameN end
 	end
 end

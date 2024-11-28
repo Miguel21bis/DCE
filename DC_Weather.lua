@@ -16,7 +16,7 @@ versionDCE["DC_Weather.lua"] = "1.6.22"
 
 
 	-- WindDirection = camp.weather.direction													--recupere la vrai direction du vent (aéronautique)
-
+TabMetar = {}
 
 local debugWeather = false
 local debugTxt = ""
@@ -24,6 +24,7 @@ local debugTxt = ""
 local PresetChoice = 0
 local showOne = false
 local showOneNight = false
+local baseChoice
 
 local foundSinglePlayer = {}
 local FieldElevation = 0												--elevation of players airfield used for minimum cloud base
@@ -40,7 +41,7 @@ for side,unit in pairs(oob_air) do										--iterate through all sides
 			if FieldElevation == nil then
 				FieldElevation = 0
 			end
-						
+
 			foundSinglePlayer = {
 				place = unit[n].base,
 				type = unit[n].type,
@@ -54,7 +55,7 @@ for side,unit in pairs(oob_air) do										--iterate through all sides
 end
 
 
-	
+
 -- if debugWeather then 
 -- 	print("old weather:")
 -- 	_affiche(camp.weather, "camp.weather DcW")
@@ -105,7 +106,7 @@ if camp.weather.zone == nil then										--no weather exists yet
 	-- if debugWeather then print("DcW A camp.weather.zoneTemp: "..tostring(camp.weather.zoneTemp)) end	
 	-- if debugWeather then print("DcW A2 camp.weather.zoneNextTemp: "..tostring(camp.weather.zoneNextTemp)) end
 	-- if debugWeather then print("DcW Initial weather: "..tostring(randChance).. "<=? "..tostring(ProbaPhight)) end	
-	
+
 	debugTxt = debugTxt .."DcW A camp.weather.zoneTemp: "..tostring(camp.weather.zoneTemp).."\n"
 	debugTxt = debugTxt .."DcW A2 camp.weather.zoneNextTemp: "..tostring(camp.weather.zoneNextTemp).."\n"
 	debugTxt = debugTxt .."DcW Initial weather: "..tostring(randChance).. "<=? "..tostring(ProbaPhight).."\n"
@@ -159,7 +160,7 @@ if camp.weather.zone == nil then										--no weather exists yet
 		end
 
 		local rando = math.random(0,100)
-		
+
 		-- if debugWeather then print("DcW random (rando) weather : "..tostring(rando)) end
 		debugTxt = debugTxt .."DcW random (rando) weather : "..tostring(rando).."\n"
 
@@ -174,13 +175,13 @@ if camp.weather.zone == nil then										--no weather exists yet
 		debugTxt = debugTxt .."<=B "..tostring(limitB).."\n"
 		debugTxt = debugTxt .."<=C "..tostring(limitC).."\n"
 
-		
+
 		if  rando < limitA  then--rando <= ((ProbaPlow / 4)*1)
 
 			camp.weather.zoneNext = "low sector warm"					--next zone is a warm sector
 			-- if debugWeather then print("DcW ProbaPlow weather rando: "..tostring(rando).. "<=? limitA "..tostring(limitA)) end
 			debugTxt = debugTxt .."DcW ProbaPlow weather rando: "..tostring(rando).. "<=? limitA "..tostring(limitA).."\n"
-		
+
 		elseif rando < limitB then
 
 			camp.weather.zoneNext = "low front warm"					--Next zone is a warm front
@@ -191,19 +192,19 @@ if camp.weather.zone == nil then										--no weather exists yet
 			camp.weather.zoneNext = "low sector cold"					--next zone is a cold sector
 			-- if debugWeather then print("DcW ProbaPlow weather rando: "..tostring(rando).. "<=? limitC "..tostring(limitC)) end
 			debugTxt = debugTxt .."DcW ProbaPlow weather rando: "..tostring(rando).. "<=? limitC "..tostring(limitC).."\n"
-			
+
 		else  --rando <= ProbaPlow  then
-			
+
 			--TODo pb ici, à 60 % de chance d avoir du mauvais temps, on ne devrait pas avoir l'ultra mauvais temps
 			camp.weather.zoneNext = "low front cold"					--Next zone is a cold front
 			-- if debugWeather then print("DcW ProbaPlow weather rando: "..tostring(rando).. "<=?Else D ") end
 			debugTxt = debugTxt .."DcW ProbaPlow weather rando: "..tostring(rando).. "<=?Else D ".."\n"
 		end
-	end	
-		
+	end
+
 		-- local rando = math.random(1,4)
 		-- if debugWeather then print("DcW NO rando: " ..rando) end
-		
+
 		-- if rando == 1 then
 		-- 	camp.weather.zoneNext = "low sector cold"					--next zone is a cold sector
 		-- elseif rando == 2 then
@@ -214,10 +215,10 @@ if camp.weather.zone == nil then										--no weather exists yet
 		-- 	camp.weather.zoneNext = "low front warm"					--Next zone is a warm front
 		-- end
 	-- end
-	
+
 	camp.weather.zoneEnd = -1											--Current (non-existing) zone end negative to trigger weather change
 	InitalW = true
-end 
+end
 
 
 
@@ -251,12 +252,12 @@ if elapsed_time > camp.weather.zoneEnd then										--active weather zone has e
 		camp.weather.zoneEnd = elapsed_time + math.random(21600, 172800)		--set duration of current weather zone (between 6 and 48 hours for warm sector)
 		camp.weather.zoneTemp = camp.weather.zoneNextTemp						--make next weather zone temperature the current temperature
 	end
-	
+
 	--Next zone
 	camp.weather.zoneNextTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)			--Set temperature of next weather zone (+/- 5°C of reference tempereature)
-	
+
 	if not InitalW then 																		-- evite de passer 2 fois le random lors de la premiere mission
-		
+
 		-- local chance = 100 / (mission_ini.weather.pHigh + mission_ini.weather.pLow) * mission_ini.weather.pHigh					--chance of next weather zone being a high pressure system
 		local ProbaPhight = (mission_ini.weather.pHigh / (mission_ini.weather.pHigh + mission_ini.weather.pLow)) * 100					--chance of next weather zone being a high pressure system
 		local randChance = math.random(1, 100)
@@ -282,7 +283,7 @@ if elapsed_time > camp.weather.zoneEnd then										--active weather zone has e
 	end
 end
 
-if debugWeather then 
+if debugWeather then
 	print("calcul new weather:")
 	_affiche(camp.weather, "camp.weather DcW")
 end
@@ -401,7 +402,7 @@ local preset = {
 		},
 		cover = 50,
 	},
-	
+
 	[5] = {
 		altiMin = 1260,
 		altiMax = 4620,
@@ -469,7 +470,7 @@ local preset = {
 				base = 40,
 				ceiling = 0,
 			},
-		},	
+		},
 		cover = 67,
 	},
 	[8] = {
@@ -495,7 +496,7 @@ local preset = {
 				ceiling = 0,
 			},
 		},
-		cover = 75,	
+		cover = 75,
 	},
 	[9] = {
 		altiMin = 1680,
@@ -514,7 +515,7 @@ local preset = {
 				base = 20,
 				ceiling = 22,
 			},
-		},	
+		},
 		cover = 75,
 	},
 	[10] = {
@@ -539,7 +540,7 @@ local preset = {
 				base = 40,
 				ceiling = 0,
 			},
-		},	
+		},
 		cover = 67,
 	},
 	[11] = {
@@ -564,7 +565,7 @@ local preset = {
 				base = 41,
 				ceiling = 0,
 			},
-		},	
+		},
 		cover = 75,
 	},
 	[12] = {
@@ -589,7 +590,7 @@ local preset = {
 				base = 41,
 				ceiling = 0,
 			},
-		},	
+		},
 		cover = 75,
 	},
 	[13] = {
@@ -614,7 +615,7 @@ local preset = {
 				base = 41,
 				ceiling = 0,
 			},
-		},	
+		},
 		cover = 75,
 	},
 	[14] = {
@@ -634,7 +635,7 @@ local preset = {
 				base = 41,
 				ceiling = 0,
 			},
-		},	
+		},
 		cover = 87,
 	},
 	[15] = {
@@ -659,7 +660,7 @@ local preset = {
 				base = 41,
 				ceiling = 0,
 			},
-		},	
+		},
 		cover = 67,
 	},
 	[16] = {
@@ -684,7 +685,7 @@ local preset = {
 				base = 40,
 				ceiling = 0,
 			},
-		},	
+		},
 		cover = 75,
 	},
 	[17] = {
@@ -709,7 +710,7 @@ local preset = {
 				base = 32,
 				ceiling = 34,
 			},
-		},	
+		},
 		cover = 87,
 	},
 	[18] = {
@@ -734,7 +735,7 @@ local preset = {
 				base = 38,
 				ceiling = 41,
 			},
-		},	
+		},
 		cover = 87,
 	},
 	[19] = {
@@ -759,7 +760,7 @@ local preset = {
 				base = 31,
 				ceiling = 33,
 			},
-		},	
+		},
 		cover = 100,
 	},
 	[20] = {
@@ -785,7 +786,7 @@ local preset = {
 				ceiling = 0,
 			},
 		},
-		cover = 87,	
+		cover = 87,
 	},
 	[21] = {
 		altiMin = 1260,
@@ -809,7 +810,7 @@ local preset = {
 				base = 41,
 				ceiling = 0,
 			},
-		},	
+		},
 		cover = 87,
 	},
 	[22] = {
@@ -830,7 +831,7 @@ local preset = {
 				ceiling = 20,
 			},
 		},
-		cover = 87,	
+		cover = 87,
 	},
 	[23] = {
 		altiMin = 840,
@@ -854,7 +855,7 @@ local preset = {
 				base = 32,
 				ceiling = 35,
 			},
-		},	
+		},
 		cover = 87,
 	},
 	[24] = {
@@ -879,7 +880,7 @@ local preset = {
 				base = 34,
 				ceiling = 0,
 			},
-		},	
+		},
 		cover = 87,
 	},
 	[25] = {
@@ -904,7 +905,7 @@ local preset = {
 				base = 40,
 				ceiling = 42,
 			},
-		},	
+		},
 		cover = 87,
 	},
 	[26] = {
@@ -930,7 +931,7 @@ local preset = {
 				ceiling = 0,
 			},
 		},
-		cover = 100,	
+		cover = 100,
 	},
 	[27] = {
 		altiMin = 420,
@@ -954,7 +955,7 @@ local preset = {
 				base = 34,
 				ceiling = 36,
 			},
-		},	
+		},
 		cover = 100,
 	},
 	[28] = {
@@ -980,7 +981,7 @@ local preset = {
 				base = 40,
 				ceiling = 0,
 			},
-		},	
+		},
 		cover = 100,
 	},
 	[29] = {
@@ -1006,7 +1007,7 @@ local preset = {
 				base = 40,
 				ceiling = 0,
 			},
-		},	
+		},
 		cover = 100,
 	},
 	[30] = {
@@ -1033,7 +1034,7 @@ local preset = {
 				ceiling = 0,
 			},
 		},
-		cover = 100,	
+		cover = 100,
 	},
 }
 
@@ -1052,16 +1053,16 @@ if camp.weather.zone == "high" then
 		Rmini = 1
 		Rmaxi = 4
 	end
-	
-	presetMiss = ""
-	baseChoice = 5000							--TODO quelle base est appliquée par l editeur de mission en cas d extreme beau
+
+	local presetMiss = ""
+	local baseChoice = 5000							--TODO quelle base est appliquée par l editeur de mission en cas d extreme beau
 	PresetChoice = math.random(Rmini, Rmaxi)
-	
+
 	if PresetChoice ~= 0 then
-		baseChoice =  math.random(preset[PresetChoice].altiMin, preset[PresetChoice].altiMax)		
+		baseChoice =  math.random(preset[PresetChoice].altiMin, preset[PresetChoice].altiMax)
 		presetMiss = preset[PresetChoice].name
 	end
-	
+
 	--clouds
 	mission.weather["clouds"] = {
 		["thickness"] = 0,
@@ -1076,23 +1077,23 @@ if camp.weather.zone == "high" then
 	local windDir = math.random(0, 359)
 	local windSpeed = math.random(0, 5)
 	mission.weather["wind"] = {
-		["at8000"] = 
+		["at8000"] =
 		{
 			["speed"] = windSpeed * 2.5,
 			["dir"] = windDir,
 		},
-		["at2000"] = 
+		["at2000"] =
 		{
 			["speed"] = windSpeed * 0.8,
 			["dir"] = windDir,
 		},
-		["atGround"] = 
+		["atGround"] =
 		{
 			["speed"] = windSpeed,
 			["dir"] = windDir,
 		},
 	}
-	
+
 	--turbulence
 
 
@@ -1118,7 +1119,7 @@ if camp.weather.zone == "high" then
 	mission.weather["groundTurbulence"] = math.random(0, mission.weather.wind.atGround.speed * coef) --10
 	-- print("DcW ponderation High "..ponderation.." coef "..coef.." max_atGroung: "..max_atGroung.." groundTurbulence: "..mission.weather["groundTurbulence"])
 	-- mission.weather["groundTurbulence"] = math.random(0, 10)--10
-	
+
 	--temperature
 	mission.weather["season"]["temperature"] = camp.weather.zoneTemp
 	-- if debugWeather then print("DcW B temperature: "..mission.weather["season"]["temperature"]) end
@@ -1127,14 +1128,14 @@ if camp.weather.zone == "high" then
 	-- 720- -790 mm Hg
 	mission.weather["qnh"] = math.random(760, 780)
 
-	
+
 ----- COLD FRONT -----
 elseif camp.weather.zone == "low front cold" then
 
 	local front_remaining = (camp.weather.zoneEnd - elapsed_time) / 3600					--hours until end of cold front
 	local front_duration = (camp.weather.zoneEnd - camp.weather.zoneStart) / 3600			--duration of the front in hours
 	local strength = 10 - front_remaining * 10 / front_duration								--strength of the front on a scale of 0-10
-	
+
 	--clouds
 	PresetChoice = math.random(28, 30)
 	if FieldElevation >= preset[PresetChoice].altiMin and FieldElevation <= preset[PresetChoice].altiMax then
@@ -1142,7 +1143,7 @@ elseif camp.weather.zone == "low front cold" then
 	else
 		baseChoice =  math.random(preset[PresetChoice].altiMin, preset[PresetChoice].altiMax)
 	end
-	
+
 	mission.weather["clouds"] = {
 		["thickness"] = math.random(4000, 8000),
 		["density"] = math.random(9, 10),
@@ -1157,23 +1158,23 @@ elseif camp.weather.zone == "low front cold" then
 	local windDir = math.random(0, 359)
 	local windSpeed = math.random(3, 5)
 	mission.weather["wind"] = {
-		["at8000"] = 
+		["at8000"] =
 		{
 			["speed"] = windSpeed * 2.5,
 			["dir"] = windDir,
 		},
-		["at2000"] = 
+		["at2000"] =
 		{
 			["speed"] = windSpeed * 0.8,
 			["dir"] = windDir,
 		},
-		["atGround"] = 
+		["atGround"] =
 		{
 			["speed"] = windSpeed,
 			["dir"] = windDir,
 		},
 	}
-	
+
 	--turbulence
 	local coef = 1
 	local ponderation = math.random(1, 100)
@@ -1213,7 +1214,7 @@ elseif camp.weather.zone == "low front cold" then
 			-- mission.weather["groundTurbulence"] = math.random(10, 60)--60
 	--temperature
 	mission.weather["season"]["temperature"] = math.ceil(camp.weather.zoneTemp + strength * (camp.weather.zoneNextTemp - camp.weather.zoneTemp) / 10)
-	
+
 	--pressure
 	mission.weather["qnh"] = math.random(740, 760)
 
@@ -1224,14 +1225,14 @@ elseif camp.weather.zone == "low front warm" then
 	local front_remaining = (camp.weather.zoneEnd - elapsed_time) / 3600					--hours until end of warm front
 	local front_duration = (camp.weather.zoneEnd - camp.weather.zoneStart) / 3600			--duration of the front in hours
 	local strength = 10 - front_remaining * 10 / front_duration								--strength of the front on a scale of 0-10
-	
+
 	--clouds
 	-- pondere en fonction des zones desertique (%low weather)
 	-- print("DcW LFW ProbaPhight "..ProbaPhight)
 	-- print("DcW LFW AVANT strength "..strength)
 	-- print("DcW LFW  math.random "..math.floor(strength - (strength * ProbaPhight/100)).." BTW  "..math.ceil(strength))
 
-	strength = math.random(math.floor(strength - (strength * ProbaPhight/100)), math.ceil(strength)) 
+	strength = math.random(math.floor(strength - (strength * ProbaPhight/100)), math.ceil(strength))
 
 	-- print("DcW LFW APRES strength "..strength)
 
@@ -1285,30 +1286,30 @@ elseif camp.weather.zone == "low front warm" then
 	else
 		mission.weather["clouds"]["iprecptns"] = 0
 	end
-	
+
 
 	--wind
 	-- local windDir = 180
 	local windDir = math.random(0, 359)
 	local windSpeed = math.random(2, 5)
 	mission.weather["wind"] = {
-		["at8000"] = 
+		["at8000"] =
 		{
 			["speed"] = windSpeed * 2.5,
 			["dir"] = windDir,
 		},
-		["at2000"] = 
+		["at2000"] =
 		{
 			["speed"] = windSpeed * 0.8,
 			["dir"] = windDir,
 		},
-		["atGround"] = 
+		["atGround"] =
 		{
 			["speed"] = windSpeed,
 			["dir"] = windDir,
 		},
 	}
-	
+
 	--turbulence
 	local coef = 1
 	local ponderation = math.random(1, 100)
@@ -1339,14 +1340,14 @@ elseif camp.weather.zone == "low front warm" then
 	mission.weather["groundTurbulence"] = math.random(10, max_atGroung)--30
 	-- print("DcW ponderation LFW "..ponderation.." coef "..coef.." max_atGroung: "..max_atGroung.." groundTurbulence: "..mission.weather["groundTurbulence"])
 	-- mission.weather["groundTurbulence"] = math.random(10, 30)--30
-	
+
 	--temperature
 	mission.weather["season"]["temperature"] = math.ceil(camp.weather.zoneTemp + strength * (camp.weather.zoneNextTemp - camp.weather.zoneTemp) / 10)
-	
+
 	--pressure
 	mission.weather["qnh"] = math.random(740, 760)
 
-	
+
 ----- COLD SECTOR ------
 elseif camp.weather.zone == "low sector cold" then
 
@@ -1354,13 +1355,13 @@ elseif camp.weather.zone == "low sector cold" then
 	-- PresetChoice = math.random(20, 25)
 	PresetChoice = 1
 	baseChoice =  math.random(preset[PresetChoice].altiMin, preset[PresetChoice].altiMax)
-	
+
 	mission.weather["clouds"] = {
 		["thickness"] = math.random(100, 1000),
 		["density"] = math.random(0, 1),
 		-- ["base"] = math.random(4000, 6000),
 		["base"] = baseChoice,
-		
+
 		["iprecptns"] = 0,
 		["preset"] = preset[PresetChoice].name,
 	}
@@ -1370,23 +1371,23 @@ elseif camp.weather.zone == "low sector cold" then
 	local windDir = math.random(0, 359)
 	local windSpeed = math.random(1, 5)
 	mission.weather["wind"] = {
-		["at8000"] = 
+		["at8000"] =
 		{
 			["speed"] = windSpeed * 2.5,
 			["dir"] = windDir,
 		},
-		["at2000"] = 
+		["at2000"] =
 		{
 			["speed"] = windSpeed * 0.8,
 			["dir"] = windDir,
 		},
-		["atGround"] = 
+		["atGround"] =
 		{
 			["speed"] = windSpeed,
 			["dir"] = windDir,
 		},
 	}
-	
+
 	--turbulence
 	local coef = 1
 	local ponderation = math.random(1, 100)
@@ -1419,7 +1420,7 @@ elseif camp.weather.zone == "low sector cold" then
 
 	--temperature
 	mission.weather["season"]["temperature"] = camp.weather.zoneTemp
-	
+
 	--pressure
 	mission.weather["qnh"] = math.random(740, 760)
 
@@ -1430,7 +1431,7 @@ elseif camp.weather.zone == "low sector warm" then
 	--clouds
 	PresetChoice = math.random(5, 20)
 	baseChoice =  math.random(preset[PresetChoice].altiMin, preset[PresetChoice].altiMax)
-	
+
 	mission.weather["clouds"] = {
 		["thickness"] = math.random(100, 1000),
 		["density"] = math.random(1, 4),
@@ -1445,23 +1446,23 @@ elseif camp.weather.zone == "low sector warm" then
 	local windDir = math.random(0, 359)
 	local windSpeed = math.random(1, 5)
 	mission.weather["wind"] = {
-		["at8000"] = 
+		["at8000"] =
 		{
 			["speed"] = windSpeed * 2.5,
 			["dir"] = windDir,
 		},
-		["at2000"] = 
+		["at2000"] =
 		{
 			["speed"] = windSpeed * 0.8,
 			["dir"] = windDir,
 		},
-		["atGround"] = 
+		["atGround"] =
 		{
 			["speed"] = windSpeed,
 			["dir"] = windDir,
 		},
 	}
-	
+
 	--turbulence
 	local coef = 1
 	local ponderation = math.random(1, 100)
@@ -1479,7 +1480,7 @@ elseif camp.weather.zone == "low sector warm" then
 	elseif ponderation <= 100 then
 		coef = 6
 	end
-	
+
 	local max_atGroung = (mission.weather.wind.atGround.speed * coef > 5 and mission.weather.wind.atGround.speed * coef or 6)
 			-- local max_at2000 = (mission.weather.wind.at2000.speed * coef > 5 and mission.weather.wind.at2000.speed * coef or 6)
 			-- local max_at8000 = (mission.weather.wind.at8000.speed * coef > 5 and mission.weather.wind.at8000.speed * coef or 6)
@@ -1489,7 +1490,7 @@ elseif camp.weather.zone == "low sector warm" then
 			-- 	["at2000"] = math.random(5,  max_at2000),--30
 			-- 	["at8000"] = math.random(5,  max_at8000),--30
 			-- }
-	
+
 	if max_atGroung <= 10 then max_atGroung = 11 end
 	mission.weather["groundTurbulence"] = math.random(10, max_atGroung)--30
 	-- mission.weather["groundTurbulence"] = math.random(10, 30)--30
@@ -1498,11 +1499,11 @@ elseif camp.weather.zone == "low sector warm" then
 
 	--temperature
 	mission.weather["season"]["temperature"] = camp.weather.zoneTemp
-	
+
 	--pressure
 	mission.weather["qnh"] = math.random(740, 760)
-	
-	
+
+
 end
 
 
@@ -1539,7 +1540,7 @@ if mission.weather["wind"]["atGround"]["speed"] < 2 then															--Fog is 
 end
 
 --halo
-mission.weather["halo"] = 
+mission.weather["halo"] =
 {
 	["preset"] = "auto",
 }
@@ -1558,16 +1559,16 @@ camp.date.minute =  math.floor((camp.time / 3600 - camp.date.hour) * 60)
 --###################################################################
 
 
-tab_unite = {
+local tab_unite = {
 	[1] = "imperial",
 	[2] = "metric",
 	[3] = "russian",
 }
-tabMetar = {}
+
 
 for placeName, place in pairs(db_airbases) do
 	for i, units in ipairs(tab_unite) do
-		
+
 		local METAR = "METAR "
 
 		-- code = {
@@ -1612,14 +1613,18 @@ for placeName, place in pairs(db_airbases) do
 		end
 
 		local minute = (timePrepa / 3600 - hours) * 60
+		local minuteStr = ""
 
 		if minute < 10 then
-			minute = "0" .. minute
+			minuteStr = "0" .. minute
+		else
+			minuteStr = tostring(minute)
 		end
-		METAR = METAR .. minute .. " "
+		METAR = METAR .. minuteStr .. " "
 
 		--wind
 		local direction = mission.weather["wind"]["atGround"]["dir"] - 180
+		local directionStr = ""
 		if direction < 0 then
 			direction = direction + 360
 		end
@@ -1628,9 +1633,11 @@ for placeName, place in pairs(db_airbases) do
 
 		direction = math.floor(direction / 10) * 10
 		if direction < 10 then
-			direction = "00" .. direction
+			directionStr = "00" .. direction
 		elseif direction < 100 then
-			direction = "0" .. direction
+			directionStr = "0" .. direction
+		else
+			directionStr = tostring(direction)
 		end
 		local speed = mission.weather["wind"]["atGround"]["speed"]
 		if units == "imperial" then
@@ -1640,7 +1647,7 @@ for placeName, place in pairs(db_airbases) do
 			speed = "0" .. speed
 		end
 		-- 33014G26KT
-		
+
 		--turbulence or Gust, si la rafale de vent est supérieur à 25% au vent normal
 		local gust = ""
 		-- if (mission.weather["groundTurbulence"] / 10) > mission.weather["wind"]["atGround"]["speed"] * 1.20 then
@@ -1655,13 +1662,15 @@ for placeName, place in pairs(db_airbases) do
 			if mission.weather["wind"]["atGround"]["speed"] == 0 then
 				METAR = METAR .. "00000KT "
 			else
-				METAR = METAR .. direction .. speed .. gust .. "KT "
+				METAR = METAR .. directionStr .. speed .. gust .. "KT "
 			end
 		else
 			if mission.weather["wind"]["atGround"]["speed"] == 0 then
 				METAR = METAR .. "00000MPS "
 			else
-				METAR = METAR .. direction .. speed .. gust .. "MPS "
+				METAR = METAR .. directionStr
+
+				.. speed .. gust .. "MPS "
 			end
 		end
 
@@ -1669,14 +1678,17 @@ for placeName, place in pairs(db_airbases) do
 		--visibility
 		if mission.weather["enable_fog"] == true then
 			local vis = math.floor(mission.weather["fog"]["visibility"] / 100) * 100
+			local visStr = ""
 			if vis < 10 then
-				vis = "000" .. vis
+				visStr = "000" .. vis
 			elseif vis < 100 then
-				vis = "00" .. vis
+				visStr = "00" .. vis
 			elseif vis < 1000 then
-				vis = "0" .. vis
+				visStr = "0" .. vis
+			else
+				visStr = tostring(vis)
 			end
-			METAR = METAR .. vis .. " " 
+			METAR = METAR .. visStr .. " "
 		else
 			-- if mission.weather["clouds"]["iprecptns"] == 1 then
 			-- 	METAR = METAR .. "9999 "
@@ -1738,10 +1750,10 @@ for placeName, place in pairs(db_airbases) do
 		end
 
 		if PresetChoice > 0 then
-			local deltaBase = 0 
+			local deltaBase = 0
 			for n, layer in ipairs(preset[PresetChoice].layers) do
 				if n == 1 then
-					deltaBase = (layer.base * 10) - ceilingFt  
+					deltaBase = (layer.base * 10) - ceilingFt
 				end
 
 				local metarLayer = ""
@@ -1754,14 +1766,15 @@ for placeName, place in pairs(db_airbases) do
 				end
 
 				local stringBase = math.floor((layer.base * 10) - deltaBase)
+				local baseCloud = ""
 				if stringBase < 10 then
-					stringBase = "00"..stringBase
+					baseCloud = "00"..stringBase
 				elseif stringBase < 100 then
-					stringBase = "0" .. stringBase
+					baseCloud = "0" .. stringBase
 				end
 
 
-				METAR = METAR .. metarLayer..stringBase
+				METAR = METAR .. metarLayer..baseCloud
 
 			end
 		end
@@ -1784,28 +1797,32 @@ for placeName, place in pairs(db_airbases) do
 			airfieldAlti = place.elevation
 		end
 		local tempCorrected = math.ceil(mission.weather.season.temperature - (0.0065 * airfieldAlti))
-	
+
 		-- local tempT = math.abs(mission.weather.season.temperature)
-		local tempT = math.abs(tempCorrected)
-		if tempT < 10 then
-			tempT = "0"..tempT
+		local tempT_num = math.abs(tempCorrected)
+		local tempT = ""
+		if tempT_num < 10 then
+			tempT = "0"..tempT_num
 		end
 		if mission.weather.season.temperature < 0 then
-			METAR = METAR .. " M" .. tempT 
+			METAR = METAR .. " M" .. tempT
 		else
 			METAR = METAR .. " " .. tempT
 		end
-		
+
 		-- dewPoint = airTemp - ((cloudAltitude/1000) * 2.5) 
 		local dewPoint = math.ceil(mission.weather.season.temperature - (((mission.weather.clouds.base * 3.281 )/1000) * 2.5) )
 		local tempDewPoint = math.abs(dewPoint)
+		local tempDewPointStr = ""
 		if tempDewPoint < 10 then
-			tempDewPoint = "0"..tempDewPoint
+			tempDewPointStr = "0"..tempDewPoint
+		else
+			tempDewPointStr = tostring(tempDewPoint)
 		end
 		if dewPoint < 0 then
-			METAR = METAR .. "/M" .. tempDewPoint 
+			METAR = METAR .. "/M" .. tempDewPointStr
 		else
-			METAR = METAR .. "/" .. tempDewPoint 
+			METAR = METAR .. "/" .. tempDewPointStr
 		end
 
 		--*******************************************************************************
@@ -1830,14 +1847,14 @@ for placeName, place in pairs(db_airbases) do
 			local turbulenceInfo = ""
 			local turbulDigit = ""
 			local turbulValue =  mission.weather["groundTurbulence"] / 10
-	
+
 			-- max 60/10 = 6
 			--4 valeurs sont retenu, pour 
 				-- 0 rien 
 				-- 2 Light
 				-- 4 Moderate
 				-- 6 Severe
-	
+
 			if turbulValue <= 0 then   -- rien
 				turbulenceInfo = " 5"..0
 			elseif turbulValue <= 2 then   -- Light
@@ -1848,23 +1865,23 @@ for placeName, place in pairs(db_airbases) do
 				else
 					turbulenceInfo = " 5"..5
 				end
-			else 
+			else
 				if mission.weather.clouds.density == 0 then
 					turbulenceInfo = " 5"..7
 				else
 					turbulenceInfo = " 5"..9
 				end
 			end
-	
+
 			-- no turbulence layer in DCS
 			turbulenceInfo = turbulenceInfo .. "000"
-	
+
 			-- Turbulence layer’s base: next 3 digits.  (direct reading in 100s of ft/30s meters)
-	
+
 			-- 	Thickness of turbulence layer: last digit:
-		 
+
 				-- Thickness of Layer
-	
+
 				-- 0-- Up to top of cloud			
 				-- 1-- 300m/1000’			
 				-- 2-- 600m/2000’			
@@ -1875,23 +1892,23 @@ for placeName, place in pairs(db_airbases) do
 				-- 7-- 2100m/7000’			
 				-- 8-- 2400m/8000’			
 				-- 9-- 2700m/9000’
-	
+
 				-- no turbulence layer in DCS, but groundTurbulence, maybe 2000ft ^^
 			turbulenceInfo = turbulenceInfo .. "2"
-			 
+
 			METAR = METAR ..turbulenceInfo
 
 		--QNH
 		--le QNH de DCS est en mm d Hg, il faut le transformer pour etre en HPa
 
+		local qnhStr = ""
 		if units == "imperial" then
-			local qnh =mission.weather["qnh"] / 25.399999704976
+			local qnh = mission.weather["qnh"] / 25.399999704976
 
-			qnh = tostring(qnh)
+			qnhStr = tostring(qnh)
+			qnhStr = qnhStr:sub(1, 2)..qnhStr:sub(4, 5)
 
-			qnh = qnh:sub(1, 2)..qnh:sub(4, 5)
-
-			METAR = METAR .. " A" .. qnh
+			METAR = METAR .. " A" .. qnhStr
 		elseif units == "metric" then
 
 			local qnh = math.floor(mission.weather["qnh"] / 760 * 1013.25)
@@ -1952,12 +1969,12 @@ for placeName, place in pairs(db_airbases) do
 				visu_m = 0,
 				color = "RED",
 			},
-			
+
 		}
 
 		local vis = 80000
 		if mission.weather["enable_fog"] == true then
-			vis = mission.weather["fog"]["visibility"] 
+			vis = mission.weather["fog"]["visibility"]
 		end
 		if preset[PresetChoice] and preset[PresetChoice].visibility and preset[PresetChoice].visibility < vis then
 			-- print("DcW PresetChoice "..PresetChoice.." visibility "..preset[PresetChoice].visibility)
@@ -1971,17 +1988,17 @@ for placeName, place in pairs(db_airbases) do
 				-- print("DcW passe color ")
 				METAR = METAR .. " " .. level.color
 				break
-			end 
+			end
 		end
 
 		METAR = METAR .. "="
-				
-		if not tabMetar[placeName] then tabMetar[placeName] = {} end
-		tabMetar[placeName][units] = METAR
-		
+
+		if not TabMetar[placeName] then TabMetar[placeName] = {} end
+		TabMetar[placeName][units] = METAR
+
 		if debugWeather then
-			print("DcW units "..tabMetar[placeName][units])
-			if tabMetar[placeName][units] == nil then
+			print("DcW units "..TabMetar[placeName][units])
+			if TabMetar[placeName][units] == nil then
 				print("DcW placeName "..placeName.." units "..units )
 			end
 		end
@@ -1994,30 +2011,30 @@ for placeName, place in pairs(db_airbases) do
 
 		if not showOne then
 			if foundSinglePlayer and foundSinglePlayer.type and foundSinglePlayer.place then
-				
-				if tabMetar and tabMetar[foundSinglePlayer.place] 
-				and data_divers and data_divers[foundSinglePlayer.type] 
-				and data_divers[foundSinglePlayer.type].instrumentUnits 
+
+				if TabMetar and TabMetar[foundSinglePlayer.place]
+				and data_divers and data_divers[foundSinglePlayer.type]
+				and data_divers[foundSinglePlayer.type].instrumentUnits
 				then
-					if  tabMetar[foundSinglePlayer.place][data_divers[foundSinglePlayer.type].instrumentUnits] then
-						print("Metar: ".. tostring(tabMetar[foundSinglePlayer.place][data_divers[foundSinglePlayer.type].instrumentUnits]))
+					if  TabMetar[foundSinglePlayer.place][data_divers[foundSinglePlayer.type].instrumentUnits] then
+						print("Metar: ".. tostring(TabMetar[foundSinglePlayer.place][data_divers[foundSinglePlayer.type].instrumentUnits]))
 						showOne = true
 					else
-					
+
 					end
 
 				end
 			else
 				-- print("DcW B not found foundSinglePlayer.type "..tostring(foundSinglePlayer.type).." place "..tostring(foundSinglePlayer.place))
-			end		
+			end
 		end
 
 
-		moonTxt = ""
-		if not showOneNight and string.find(daytime, "night") then
-			moonTxt = moonphase(camp.date.day, camp.date.month, camp.date.year)
+		MoonTxt = ""
+		if not showOneNight and string.find(Daytime, "night") then
+			MoonTxt = moonphase(camp.date.day, camp.date.month, camp.date.year)
 			showOneNight = true
-			-- print(moonTxt)
+			-- print(MoonTxt)
 		end
 
 	end   -- end of unite
@@ -2028,7 +2045,7 @@ end   --end db_airbase
 -- 	print("---")
 -- 	print("DcW camp.weather.zoneTemp "..camp.weather.zone)
 -- 	print("DcW camp.weather.zoneNextTemp "..camp.weather.zoneNext)
-	
+
 -- 	print("---")
 -- 	print()
 
@@ -2039,12 +2056,12 @@ end   --end db_airbase
 debugTxt = debugTxt .."DcW camp.weather.zoneTemp "..camp.weather.zone.."\n"
 debugTxt = debugTxt .."DcW camp.weather.zoneNextTemp "..camp.weather.zoneNext.."\n"
 
-if not camp["debugTraceability"] then 
-	camp["debugTraceability"] = {} 
+if not camp["debugTraceability"] then
+	camp["debugTraceability"] = {}
 end
 
-if not camp["debugTraceability"]["weather"] then 
-	camp["debugTraceability"]["weather"] = "" 
+if not camp["debugTraceability"]["weather"] then
+	camp["debugTraceability"]["weather"] = ""
 end
 
 camp["debugTraceability"]["weather"] = debugTxt
