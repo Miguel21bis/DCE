@@ -8,7 +8,7 @@ versionDCE["MAIN_AcceptMission.lua"] = "1.10.63"
 
 -- cleanCode_f				(e: os.remove)
 -- debug_a					(a endCampaign)
--- adjustment_g				(f currentKey)(e not DC_Weather)(d pairsByKeys)(c move UpdateSar & correct Brief Systeme)(b: don't load UTIL_Debug)(a: don't load Ini/db_airbase)
+-- adjustment_g				(f currentKey)(e not DC_Weather)(d PairsByKeys)(c move UpdateSar & correct Brief Systeme)(b: don't load UTIL_Debug)(a: don't load Ini/db_airbase)
 -- modification M63_a		compatible Datacard Generator or CombatFlite
 -- modification M61_a		SAR
 -- modification M56_a		AssignCallnameSquad
@@ -108,7 +108,7 @@ end
 
 -- require("Active/targetlist")
 if not targetlist.blue[1] then
-	targetlistToNum()
+	TargetlistToNum()
 end
 
 require("Active/camp_triggers")

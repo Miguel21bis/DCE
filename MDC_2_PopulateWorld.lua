@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-global, lowercase-global
 --MiG-21 Dynamic Campaign: Guardians of the Caucasus by Marc "MBot" Marbot
 --This file does the campaign bookkeeping (repair and reinforcements) at the start of a mission, spawns ground units and destroys killed static objects.
 --v1.1 21.02.2015

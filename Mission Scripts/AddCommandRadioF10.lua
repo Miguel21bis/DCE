@@ -209,7 +209,7 @@ end -- function affiche
 
 -- sorts tables alphabetically, to be used in a "for" loop instead of pairs or ipairs
 -- http://www.lua.org/pil/19.3.html
-function pairsByKeys (t, f)
+function PairsByKeys (t, f)
     local a = {}
 	local initType
 	local dontSort = false
@@ -243,15 +243,15 @@ function radToDeg(_rad)
 end 
 
 --function to make a deep copy of a table
-function deepcopy(orig)
+function Deepcopy(orig)
     local orig_type = type(orig)
     local copy
     if orig_type == 'table' then
         copy = {}
         for orig_key, orig_value in next, orig, nil do
-            copy[deepcopy(orig_key)] = deepcopy(orig_value)
+            copy[Deepcopy(orig_key)] = Deepcopy(orig_value)
         end
-        setmetatable(copy, deepcopy(getmetatable(orig)))
+        setmetatable(copy, Deepcopy(getmetatable(orig)))
     else -- number, string, boolean, etc
         copy = orig
     end
@@ -354,7 +354,7 @@ end
 -- @param rawHeading
 -- @treturn number heading of the unit, in range
 -- of 0 to 2*pi.
-function getHeadingByPos(unit)
+function GetHeadingByPos(unit)
 	local unitpos = unit:getPosition()
 	local Heading = 0
 	if unitpos then
@@ -1220,7 +1220,7 @@ function AirRetreat()
 																local retreatRoute = {}
 																
 																-- retreatRoute = _group.route.points										--copie de l'ancienne route
-																retreatRoute = deepcopy(_group.route.points)
+																retreatRoute = Deepcopy(_group.route.points)
 																
 																-- ajoute comme premier wpt leur position initial pour garder la fonction AWACS
 																local FirstWPT = {
@@ -1699,7 +1699,7 @@ function activateRadioBeacon(arguments)
 
 	local pilEjectObj = Unit.getByName(ejectedPilot.name)
 
-	if pilEjectObj and camp.ejectedPilotFrequency and camp.ejectedPilotFrequency[ejectedPilot.side] then
+	if pilEjectObj and camp.EctedPilotFrequency and camp.EctedPilotFrequency[ejectedPilot.side] then
 
 		env.info( "AddCRF10:activateRadioBeacon  pilEjectObj:isExist "..tostring(pilEjectObj:isExist()))
 
@@ -1708,9 +1708,9 @@ function activateRadioBeacon(arguments)
 
 			env.info( "AddCRF10:activateRadioBeacon  pilEjectPos.y "..tostring(pilEjectPos.y))
 
-			trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', ejectedPilot.position, 0, true, camp.ejectedPilotFrequency[ejectedPilot.side].radioBeacon, 1, 'radioBeacon_'..ejectedPilot.name)
+			trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', ejectedPilot.position, 0, true, camp.EctedPilotFrequency[ejectedPilot.side].radioBeacon, 1, 'radioBeacon_'..ejectedPilot.name)
 
-			local freqShow = camp.ejectedPilotFrequency[ejectedPilot.side].radioBeacon / 1000000
+			local freqShow = camp.EctedPilotFrequency[ejectedPilot.side].radioBeacon / 1000000
 			trigger.action.outTextForGroup(gpGid, "activate RadioBeacon on : "..freqShow, 45 , true)
 		end
 	else

@@ -29,7 +29,7 @@ groundthreats = {
 	}
 }
 
-local callsign_west = {
+local Callsign_west = {
 		JTAC_EWR = {
 			[1] = "Axeman",	
 			[2] = "Darknight",
@@ -1085,7 +1085,7 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 					-- camp west, si utilisation des EWR, pour que les indicatifs soient bien pris en compte, l'enregistrement par DCS est comme ci dessus, il n'y a pas de SetCallsign
 					if group.route.points[1].task.params.tasks[t].params.callname then							--if group has a callsign set									
 						ewr_call = group.route.points[1].task.params.tasks[t].params.callname					--set callname modification M07f
-						ewr_call = callsign_west.JTAC_EWR[ewr_call]									
+						ewr_call = Callsign_west.JTAC_EWR[ewr_call]									
 					end
 					
 					if group.route.points[1].task.params.tasks[t].params.action and ewr_task then
@@ -1095,9 +1095,9 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 							if group.route.points[1].task.params.tasks[t].params.action.params.callsign then
 								ewr_call = group.route.points[1].task.params.tasks[t].params.action.params.callsign						--set callsign
 
-							elseif group.route.points[1].task.params.tasks[t].params.action.params.callname then						-- callname is callsign_west
+							elseif group.route.points[1].task.params.tasks[t].params.action.params.callname then						-- callname is Callsign_west
 								ewr_call = group.route.points[1].task.params.tasks[t].params.action.params.callname						--set callname modification M07e
-								ewr_call = callsign_west.JTAC_EWR[ewr_call]
+								ewr_call = Callsign_west.JTAC_EWR[ewr_call]
 							end										
 							-- print("AtoTE  EWR C  ewr_call "..tostring(ewr_call))									
 						end																	
@@ -1142,7 +1142,7 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 								-- tempFreq = ewr_freq * 1000000
 								EwrAdd = true
 							elseif ewrFreqDejaTraite[sidename][group.groupId] then
-								insertBugList("no callsign planned for this EWR name "..tostring(unit.name).." type "..tostring(unit.type))
+								InsertBugList("no callsign planned for this EWR name "..tostring(unit.name).." type "..tostring(unit.type))
 							end
 						-- end
 					else
@@ -1400,7 +1400,7 @@ for zone_n,zone in pairs(mission.triggers.zones) do												--iterate through
 	end
 end
 
-GroundthreatsAll = deepcopy(groundthreats)
+GroundthreatsAll = Deepcopy(groundthreats)
 
 function CheckPointInCercle(point, circle)
 	--(x-center_x)^2 + (y - center_y)^2 < radius^2
@@ -1420,7 +1420,7 @@ sumCercleSAM = sumCercleSAM + #groundthreats["red"]
 
 --supprime les cercles dans les cercles pour eviter d'en avoir beaucoup beaucoup
 if sumCercleSAM >= reduceCercle then
-	local copyThreats = deepcopy(groundthreats)
+	local copyThreats = Deepcopy(groundthreats)
 	for sideThreat, threats in pairs(groundthreats) do	
 		for n=#threats-1, 2, -1 do
 			for copyThreats_n, 	copyThreat in pairs(copyThreats[sideThreat]) do 			

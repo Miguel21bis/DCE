@@ -13,31 +13,31 @@ versionDCE["UTIL_KillTarget.lua"] = "1.6.20"
 -- modification M38_l		Check and Help CampaignMaker (l: naval environment)(k: enleve du targetlist les CAP inter etc)(j: debug) (h: activeInactiveTarget step by step)
 ------------------------------------------------------------------------------------------------------- 
 
-debugKT = true
+local debugKT = true
 
-function activeInactiveGround(targetName, active, dead)
+local function activeInactiveGround(targetName, active, dead)
 	-- print("UtilKT activeInactiveGround tostring "..tostring(targetName).." active " ..tostring(active).." dead "..tostring(dead))
 	local inactive = true
 	if active then
 		inactive = false
 	end
 
-	for side_name,side in pairs(oob_ground) do											
-		for country_n,country in pairs(side) do		
-			if country.vehicle then		
-				for group_n, group in pairs(country.vehicle.group) do	
+	for side_name,side in pairs(oob_ground) do
+		for country_n,country in pairs(side) do
+			if country.vehicle then
+				for group_n, group in pairs(country.vehicle.group) do
 					if targetName == group.name then
-						for unit_n, unit in pairs(group.units) do					
-							
-							
+						for unit_n, unit in pairs(group.units) do
+
+
 							if dead then
 								unit.dead = true														--mark unit as dead in oob_ground
 								unit.dead_last = true													--mark unit as died in last mission
 								print("UKT oob_ground dead  vehicle "..unit.name)
 							else
-								unit.DCE_inactive = inactive	
+								unit.DCE_inactive = inactive
 								print("UKT oob_ground PasseIn/Active vehicle "..unit.name)
-						
+
 							end
 						end
 						if not dead then
@@ -47,11 +47,11 @@ function activeInactiveGround(targetName, active, dead)
 					end
 				end
 			end
-			if country.static then															
-				for group_n, group in pairs(country.static.group) do							
-					if targetName == group.name then	
-						for unit_n, unit in pairs(group.units) do									
-							
+			if country.static then
+				for group_n, group in pairs(country.static.group) do
+					if targetName == group.name then
+						for unit_n, unit in pairs(group.units) do
+
 							if dead then
 								unit.dead = true														--mark unit as dead in oob_ground
 								unit.dead_last = true													--mark unit as died in last mission
@@ -59,29 +59,29 @@ function activeInactiveGround(targetName, active, dead)
 							else
 								unit.DCE_inactive = inactive
 								print("UKT oob_ground PasseIn/Active static "..unit.name)
-								
+
 							end
 						end
 						if not dead then
 							group.DCE_inactive = inactive
 							print("UKT oob_ground PasseIn/Active static "..group.name)
-							
+
 						end
 					end
 				end
 			end
-			if country.ship then																
-				for group_n,group in pairs(country.ship.group) do							
-					if targetName == group.name then	
-						for unit_n,unit in pairs(group.units) do									
-							
-							
+			if country.ship then
+				for group_n,group in pairs(country.ship.group) do
+					if targetName == group.name then
+						for unit_n,unit in pairs(group.units) do
+
+
 							if dead then
 								unit.dead = true														--mark unit as dead in oob_ground
 								unit.dead_last = true													--mark unit as died in last mission
 								print("UKT oob_ground dead  ship "..unit.name)
 							else
-								unit.DCE_inactive = inactive	
+								unit.DCE_inactive = inactive
 								print("UKT oob_ground PasseIn/Active ship "..unit.name)
 							end
 						end
@@ -95,7 +95,8 @@ function activeInactiveGround(targetName, active, dead)
 		end
 	end
 end
-function activeInactiveTarget(targetName, active, pourcent, side, dead)
+
+local function activeInactiveTarget(targetName, active, pourcent, side, dead)
 	local inactive = true
 	if active then
 		inactive = false
@@ -103,10 +104,10 @@ function activeInactiveTarget(targetName, active, pourcent, side, dead)
 
 	if targetName ~= nil and not dead then
 		activeInactiveGround(targetName, active)
-		
+
 		for side_name, targets in pairs(targetlist) do											--iterate through targetlist
 			for targetN, target in pairs(targets) do										--iterate through targets
-				if targetName == target.titleName then	
+				if targetName == target.titleName then
 
 					target["inactive"] = inactive
 					print("UKT targetlist PasseIn/Active ship "..targetName)
@@ -116,13 +117,13 @@ function activeInactiveTarget(targetName, active, pourcent, side, dead)
 	elseif dead == true then
 		for side_name, targets in pairs(targetlist) do											--iterate through targetlist
 			for targetN, target in pairs(targets) do										--iterate through targets
-				if targetName == target.titleName then	
-					if target.elements then 						
+				if targetName == target.titleName then
+					if target.elements then
 						for element_n,element in pairs(target.elements) do
 							if element.dead then											--element was already dead previously
 								element.dead_last = false									--mark element as not died in last mission
 							else
-								element.dead = true	
+								element.dead = true
 								print("UKT targetlist dead target "..element.name)
 
 								-- activeInactiveGround(targetName, active, dead)
@@ -150,7 +151,7 @@ function activeInactiveTarget(targetName, active, pourcent, side, dead)
 				nbCible = nbCible+1
 			end
 		end
-	
+
 		local randomDesactive = math.random(1, nbCible)
 
 		repeat
@@ -160,7 +161,7 @@ function activeInactiveTarget(targetName, active, pourcent, side, dead)
 				if target.task and target.task ~= "Intercept" and target.task ~= "CAP" and target.task ~= "AWACS" and target.task ~= "Refueling"  and target.task ~= "Transport"  and target.task ~= "SAR" then
 					iCible = iCible+1
 					if iCible == randomDesactive and target["inactive"] ~= inactive then
-						
+
 						target["inactive"] = inactive
 						activeInactiveGround(target.titleName, active)
 						nbDesactive = nbDesactive + 1
@@ -176,7 +177,7 @@ function activeInactiveTarget(targetName, active, pourcent, side, dead)
 end
 
 
-function checkGroundFirst(pourcent, side, active )
+local function checkGroundFirst(pourcent, side, active )
 
 	local inactive = true
 	if active then
@@ -187,7 +188,7 @@ function checkGroundFirst(pourcent, side, active )
 
 	--compte le nombre de cible
 	local nbCible = 0
-	for country_n, country in pairs(oob_ground[side]) do		
+	for country_n, country in pairs(oob_ground[side]) do
 		if country.vehicle then
 			for group_n, group in pairs(country.vehicle.group) do
 
@@ -199,27 +200,27 @@ function checkGroundFirst(pourcent, side, active )
 
 	print("UtilKT nbCible "..nbCible.." pourcent: "..pourcent)
 
-	repeat			
+	repeat
 		local randomCible = math.random(1, nbCible)
 
 		-- print("UtilKT randomCible "..randomCible.." nbDesactive "..nbDesactive)
 		local breakOn = false
-		for country_n,country in pairs(oob_ground[side]) do	
-			
+		for country_n,country in pairs(oob_ground[side]) do
+
 			local i_cible = 0
 
-			if country.vehicle then		
+			if country.vehicle then
 
-				for group_n, group in pairs(country.vehicle.group) do	
+				for group_n, group in pairs(country.vehicle.group) do
 					for unit_n, unit in pairs(group.units) do
 						i_cible = i_cible + 1
 
 						if i_cible == randomCible then
 
 							if not unit.DCE_inactive or (unit.DCE_inactive ~= inactive) then
-								unit.DCE_inactive = inactive	
+								unit.DCE_inactive = inactive
 								nbDesactive = nbDesactive + 1
-								
+
 								print("UKT                                     activeInactiveGround PasseIn/Active "..unit.name)
 								breakOn = true
 							end
@@ -234,25 +235,25 @@ function checkGroundFirst(pourcent, side, active )
 
 		-- print("UtilKT nbDesactive "..nbDesactive)
 
-	until (nbDesactive/nbCible *100 )> pourcent 
+	until (nbDesactive/nbCible *100 )> pourcent
 
 	-- print("UtilKT nbDesactive "..nbDesactive.." nbCible: "..nbCible.." nbDesactive/nbCible "..tostring(nbDesactive/nbCible *100))
 
 
 	--si tous les véhicules ont été desactivé et qu'ils font partie du targetlist, on desactive le target de targetlist
-	for country_n, country in pairs(oob_ground[side]) do		
-		if country.vehicle then		
-			for group_n, group in pairs(country.vehicle.group) do	
+	for country_n, country in pairs(oob_ground[side]) do
+		if country.vehicle then
+			for group_n, group in pairs(country.vehicle.group) do
 
 				local totalUnit = #group.units
 				local sumUnitDesactive = 0
-				
+
 				for unit_n, unit in pairs(group.units) do
 					if unit.DCE_inactive and  unit.DCE_inactive == true then
-						sumUnitDesactive = sumUnitDesactive +1 
+						sumUnitDesactive = sumUnitDesactive +1
 					end
 				end
-				
+
 				if sumUnitDesactive >= totalUnit then
 
 					print("UKT activeInactiveTarget inactive "..group.name)
@@ -271,9 +272,9 @@ end
 print("Actuel Num de mission "..camp.mission)
 print("Change number of mission or press \"Enter\".\n")				--ask for user confirmation
 
-	
 
-local input
+
+local input, input2
 
 input = tonumber(io.stdin:read())
 if input and input ~= nil and input > 0 and input < 100 then
@@ -288,8 +289,8 @@ repeat
 			["blue"] = {},
 			["red"] = {},
 			}
-	for side, targets in pairsByKeys(targetlist) do														--iterate through sides in targetlist						
-		for targetN, target in pairsByKeys(targets) do												--iterate through all hostile targets
+	for side, targets in PairsByKeys(targetlist) do														--iterate through sides in targetlist						
+		for targetN, target in PairsByKeys(targets) do												--iterate through all hostile targets
 			if target.task and target.task ~= "Intercept" and target.task ~= "CAP" and target.task ~= "AWACS" and target.task ~= "Refueling"  and target.task ~= "Transport"  and target.task ~= "SAR" then
 				local active = false
 				if not target.inactive or target.inactive == nil  then
@@ -301,19 +302,19 @@ repeat
 							["priority"] = tonumber(target.priority),
 							["alive"] = tonumber(target.alive),
 							["active"] = active,
-							
+
 							}
-					
-					table.insert(tableTargetlist[side], draftTarget)						
-					
-					i = i +1 
+
+					table.insert(tableTargetlist[side], draftTarget)
+
+					i = i +1
 				end
 			end
 		end
 	end
 
-	for side, targets in pairsByKeys(targetlist) do														--iterate through sides in targetlist						
-		for targetN, target in pairsByKeys(targets) do												--iterate through all hostile targets
+	for side, targets in PairsByKeys(targetlist) do														--iterate through sides in targetlist						
+		for targetN, target in PairsByKeys(targets) do												--iterate through all hostile targets
 			if target.task and target.task ~= "Intercept" and target.task ~= "CAP" and target.task ~= "AWACS" and target.task ~= "Refueling"  and target.task ~= "Transport"  and target.task ~= "SAR" then
 				local active = false
 				if not target.inactive or target.inactive == nil  then
@@ -325,12 +326,12 @@ repeat
 							["priority"] = tonumber(target.priority),
 							["alive"] = tonumber(target.alive),
 							["active"] = active,
-							
+
 							}
-					
-					table.insert(tableTargetlist[side], draftTarget)						
-					
-					i = i +1 
+
+					table.insert(tableTargetlist[side], draftTarget)
+
+					i = i +1
 				end
 			end
 		end
@@ -344,9 +345,9 @@ repeat
 
 	-- table.sort(oobAirSide, function(a, b) return a.type:upper() < b.type:upper() end)
 
-	local tabIndex = {}	 
-	for side, Targetlist in pairsByKeys(tableTargetlist) do
-		local jMax
+	local tabIndex = {}
+	for side, Targetlist in PairsByKeys(tableTargetlist) do
+		local jMax, ownerSide
 		if side == "red" then
 			ownerSide = "blue coalition"
 			jMax = #tableTargetlist["red"]
@@ -358,31 +359,31 @@ repeat
 
 		local Ckey = 0
 		print() print(ownerSide..":")
-		for key, value in pairsByKeys(Targetlist) do	
-			if  j <= jMax and value.active  then	
+		for key, value in PairsByKeys(Targetlist) do
+			if  j <= jMax and value.active  then
 				if side == "red" then
 					Ckey = key + #tableTargetlist["blue"]															--permet de n'afficher qu'un nombre continue pour les 2 camps
-				else 
+				else
 					Ckey = key
-				end											
+				end
 				io.write(  Ckey.." "..tostring(value.name) .."  "..tostring(value.alive).." % Actif? "..tostring(value.active).."\n")
 				if not tabIndex[Ckey]  then tabIndex[Ckey] = {} end
 				tabIndex[Ckey]["side"] = side
-				j = j+1	
+				j = j+1
 			end
 		end
 
-		for key, value in pairsByKeys(Targetlist) do	
-			if  j <= jMax and not value.active  then	
+		for key, value in PairsByKeys(Targetlist) do
+			if  j <= jMax and not value.active  then
 				if side == "red" then
 					Ckey = key + #tableTargetlist["blue"]															--permet de n'afficher qu'un nombre continue pour les 2 camps
-				else 
+				else
 					Ckey = key
-				end											
+				end
 				io.write(  Ckey.." "..tostring(value.name) .."  "..tostring(value.alive).." % Actif? "..tostring(value.active).."\n")
 				if not tabIndex[Ckey]  then tabIndex[Ckey] = {} end
 				tabIndex[Ckey]["side"] = side
-				j = j+1	
+				j = j+1
 			end
 		end
 	end
@@ -402,7 +403,7 @@ repeat
 		dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
 
 
-		
+
 		local inputString = string.lower(io.stdin:read())
 		if inputString == "s" then
 			break
@@ -444,7 +445,7 @@ repeat
 			input = tonumber(inputString)
 
 			if (input == nil or input == "") then input = 999 end
-			
+
 			if input >  #tableTargetlist["blue"] then
 				Ckey = input - #tableTargetlist["blue"]
 			else
@@ -459,9 +460,9 @@ repeat
 
 				--activeInactiveTarget(targetName,					 active, pourcent, side, dead)
 				activeInactiveTarget(tableTargetlist[side][Ckey].name, nil, 	nil,	nil,  dead)
-				
+
 				print("\n"..tableTargetlist[side][Ckey].name.."\n")
-			else 
+			else
 				print("\nInvalid entry.\n")
 			end
 
@@ -477,37 +478,37 @@ repeat
 
 			input = tonumber(inputString)
 
-			local active = true
+			local active
 
 			active = string.sub (inputString, -1)
-	
+
 			if tostring(active) == "a" then
 				active = true
 				input = inputString:sub(1, -2)
-				
+
 			elseif tostring(active) == "i" then
 				active = false
 				input = inputString:sub(1, -2)
-				
+
 			end
-	
+
 			input = tonumber(input)
-	
+
 			if (input == nil or input == "") then input = 999 end
 			if input >  #tableTargetlist["blue"] then
 				Ckey = input - #tableTargetlist["blue"]
 			else
 				Ckey = input
 			end
-	
+
 			if  tabIndex[input] then
 				local side = tabIndex[input]["side"]
-				
+
 				--activeInactiveTarget(targetName,					 active, pourcent, side, dead)
 				activeInactiveTarget(tableTargetlist[side][Ckey].name, active, 	nil,	nil,  nil)
-				
+
 				print("\n"..tableTargetlist[side][Ckey].name.."\n")
-			else 
+			else
 				print("\nInvalid entry.\n")
 			end
 
@@ -527,20 +528,19 @@ repeat
 
 
 	until  tabIndex[input] or inputString == "s"
-	io.write( "\n")	
-	
+	io.write( "\n")
 
-	
+
+
 	print("(S) Stop script ?")
 	print("(enter) to start again.\n")
 	input2 = string.lower(io.stdin:read())
-	
+
 until  input2 == "s"
-io.write( "\n")	
+io.write( "\n")
 
 UTIL_KillTarget = false
 
 
 --TODO ne permettre que la mise a jour du num mission
 
-	

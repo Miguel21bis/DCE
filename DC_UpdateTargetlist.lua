@@ -7,7 +7,7 @@ versionDCE["DC_UpdateTargetlist.lua"] = "1.11.47"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_c
 -- adjustment_a				(a GroundTarget.percent = 100 & Error_05 )
--- debug_c					(bc insertBugList)(a -nan(ind))
+-- debug_c					(bc InsertBugList)(a -nan(ind))
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (camp.targetPos)
 -- modification M74_a		mix static, vehicle and map elements in a Target.
 -- modification M70_a		GroundZoneTarget (adds the possibility of counting unit completeness by zone) 
@@ -19,7 +19,7 @@ versionDCE["DC_UpdateTargetlist.lua"] = "1.11.47"
 -------------------------------------------------------------------------------------------------------
 
 if not targetlist.blue[1] then
-	targetlistToNum()
+	TargetlistToNum()
 end
 
 if not DC_UpdateTargetlist_counter then
@@ -80,7 +80,7 @@ end
 local function checkBug3(txt)
 	if Debug.checkTargetName  and DC_UpdateTargetlist_counter > 1 then
 		-- table.insert(BugList, "DC_UT checkBug3 "..txt)
-		insertBugList("DC_UT checkBug3 :"..txt)
+		InsertBugList("DC_UT checkBug3 :"..txt)
 	end
 end
 
@@ -811,7 +811,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 							temp.x, temp.y, temp.class = checkElementXY(element, targetside)
 
 							if temp.x == nil then
-								local elementTMP = deepcopy(element)
+								local elementTMP = Deepcopy(element)
 								elementTMP.name = elementTMP.name.."-1"
 								temp.x, temp.y, temp.class = checkElementXY(elementTMP, targetside)
 								if temp.x ~= nil then
@@ -875,7 +875,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 					else
 
 						local txt = "DcUT no found xy "..target.titleName.." (normal message if it's a template activation)"
-						insertBugList("DC_UT checkBug_xy :"..txt)
+						InsertBugList("DC_UT checkBug_xy :"..txt)
 						-- os.execute 'pause'
 					end
 				end
@@ -1128,7 +1128,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 					local txtBug = "DcUT The information runway hdg and lenght and position runway.x, runway.y are missing in the file db_airbases.lua to create the portions to attack.\n"
 					txtBug = txtBug .."DcUT Bug related to the targetlist_init.lua file in the target: : "..target.titleName.."\n"
 
-					insertBugList(txtBug)
+					InsertBugList(txtBug)
 
 					if mission_ini.debug then
 						print(txtBug)
@@ -1283,7 +1283,7 @@ if LL_KnownPositionsFileExit then
 					end
 					if distMin ~= 9999999 then
 						local azimut = GetHeading(target, pointNearest)
-						target.lat, target.lon = newPosLatLon(pointNearest.lat, pointNearest.lon, distMin, azimut)
+						target.lat, target.lon = NewPosLatLon(pointNearest.lat, pointNearest.lon, distMin, azimut)
 					end
 				end
 

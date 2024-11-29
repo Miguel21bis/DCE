@@ -149,7 +149,7 @@ for name, trig in pairs(camp_triggers) do
 									-- -- for RFname, RFtrig in pairs(camp_triggers) do
 										-- -- --action = 'Action.AirUnitReinforce("R/335 TFS", "335 TFS", 6)',
 										-- -- if RFtrig.action and type(RFtrig.action) ~= "table" and string.find(RFtrig.action, "Action.AirUnitReinforce") and string.find(RFtrig.action, name3) then
-											-- -- RFtrigCopy = deepcopy(RFtrig)
+											-- -- RFtrigCopy = Deepcopy(RFtrig)
 											-- -- RFtrigCopy.action = RFtrigCopy.action:gsub( "Action", "GetName")																																	
 											-- -- local f = loadstring(RFtrigCopy.action)()											
 										-- -- end
@@ -460,7 +460,7 @@ end
 
 if mission_ini.slider_PercentPlane and type(mission_ini.slider_PercentPlane == "number") then
 	local NbTotalAeronefInit, NbTotalAeronefAfter = 0, 0
-	local view_oob_air = deepcopy(oob_air)
+	local view_oob_air = Deepcopy(oob_air)
 	for side,unit in pairs(oob_air) do
 		for n = 1, #unit do
 			if 	not unit[n].inactive then

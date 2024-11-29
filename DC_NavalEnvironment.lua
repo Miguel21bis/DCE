@@ -239,8 +239,8 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 						local nTotal
 						if (string.find(group.units[1].name, "CV")  or string.find(group.units[1].name, "LHA") )then
 							nTotal = 10
-							CruiseSpeed = data_configuration.CV_Vmax
-							PatrolSpeed = data_configuration.CV_Vmax
+							CruiseSpeed = Data_configuration.CV_Vmax
+							PatrolSpeed = Data_configuration.CV_Vmax
 						else
 							nTotal = #poly																	--pour revenir au code original de Mbot
 							-- QteWptConnu = true
@@ -262,14 +262,14 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 										local i_tot = 0
 
 										local i_2 = 0
-										local distFctSpeed_2 = data_configuration.CV_Vmax * (100) *2
+										local distFctSpeed_2 = Data_configuration.CV_Vmax * (100) *2
 										local WptInWind_2 = {}
 
 										local j = 0
 
 										repeat
 
-											local distFctSpeed_2 = data_configuration.CV_Vmax * ( mission_ini.startup_time_player + (mission_ini.startup_time_player/3))
+											local distFctSpeed_2 = Data_configuration.CV_Vmax * ( mission_ini.startup_time_player + (mission_ini.startup_time_player/3))
 											-- local WptInWind_2 = GetOffsetPoint(route[2], WindDirection, distFctSpeed_2)
 											local WptInWind_2 = {}
 											local j_2 = 0
@@ -290,10 +290,10 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 												route[2] = {
 													x = WptInWind_2.x,
 													y = WptInWind_2.y,
-													speed = data_configuration.CV_Vmax
+													speed = Data_configuration.CV_Vmax
 												}
 
-												route[2].time = route[1].time + GetDistance(route[1], route[2]) / data_configuration.CV_Vmax
+												route[2].time = route[1].time + GetDistance(route[1], route[2]) / Data_configuration.CV_Vmax
 
 											end
 
@@ -490,7 +490,7 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 
 						if #route > 1 then
 							route = {}
-							route = deepcopy(routeModif)
+							route = Deepcopy(routeModif)
 						end
 
 						--recalcul les timmings en fonction des nouveaux wpt ajout�

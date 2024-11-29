@@ -6,7 +6,7 @@ if not versionDCE then versionDCE = {} end
 versionDCE["UTIL_Debug.lua"] = "1.3.9"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_a
--- adjustment_g		(f targetName)(e package_freq)(ac affiche le nombre d element dans la mission)
+-- adjustment_g		(f targetName)(e Package_freq)(ac affiche le nombre d element dans la mission)
 ------------------------------------------------------------------------------------------------------- 
 
 
@@ -17,7 +17,7 @@ if Debug.debug then
 	--sortiesFile:close()
 
 	local ato_str = "ATO = " .. TableSerialization(ATO, 0)
-	local atoFile = io.open("Debug/ATO_UtilDebug.lua", "w")
+	local atoFile = io.open("Debug/ATO_UtilDebug.lua", "w") or error("Failed to open debug ATO_UtilDebug file")
 	atoFile:write(ato_str)
 	atoFile:close()
 
@@ -25,33 +25,33 @@ if Debug.debug then
 	local ground_str = "groundthreats = " .. TableSerialization(groundthreats, 0)
 	local air_str = "fighterthreats = " .. TableSerialization(fighterthreats, 0)
 	local ewr_str = "ewr = " .. TableSerialization(ewr, 0)
-	local threatFile = io.open("Debug/threat_UtilDebug.lua", "w")
+	local threatFile = io.open("Debug/threat_UtilDebug.lua", "w") or error("Failed to open debug file")
 	threatFile:write(ground_str .. "\n\n" .. air_str .. "\n\n" .. ewr_str)
 	threatFile:close()
 	
 	
 	local available_str = "Aircraft_availability = " .. TableSerialization(Aircraft_availability, 0)
-	local availableFile = io.open("Debug/AircraftAvailability_UtilDebug.lua", "w")
+	local availableFile = io.open("Debug/AircraftAvailability_UtilDebug.lua", "w") or error("Failed to open debug threat_UtilDebug file")
 	availableFile:write(available_str)
 	availableFile:close()
 
-	local camp_str = "freqence_package_AtoFP = " .. TableSerialization(package_freq, 0)			--make a string
-	local campFile = io.open("Debug/package_freq__UtilDebug.lua", "w")								--open targetlist file
+	local camp_str = "freqence_package_AtoFP = " .. TableSerialization(Package_freq, 0)			--make a string
+	local campFile = io.open("Debug/Package_freq__UtilDebug.lua", "w") or error("Failed to open debug Package_freq__UtilDebug file")
 	campFile:write(camp_str)																	--save new data
 	campFile:close()
 
 	local file_str = "GCI = " .. TableSerialization(GCI, 0)			--make a string
-	local file_File = io.open("Debug/GCI_Data_UtilDebug.lua", "w")								--open targetlist file
+	local file_File = io.open("Debug/GCI_Data_UtilDebug.lua", "w") or error("Failed to open debug GCI_Data_UtilDebug file")
 	file_File:write(file_str)																	--save new data
 	file_File:close()
 
 	local file_str = "EWR = " .. TableSerialization(ewr, 0)			--make a string
-	local file_File = io.open("Debug/EWR_UtilDebug.lua", "w")								--open targetlist file
+	local file_File = io.open("Debug/EWR_UtilDebug.lua", "w") or error("Failed to open debug EWR_UtilDebug file")
 	file_File:write(file_str)																	--save new data
 	file_File:close()
 
 	local test_str = "PayloadRestricted = " .. TableSerialization(PayloadRestricted, 0)						--make a string
-	local testFile = io.open("Debug/loadout_restrictied_UtilDebug.lua", "w")								--open targetlist file
+	local testFile = io.open("Debug/loadout_restrictied_UtilDebug.lua", "w") or error("Failed to open debug loadout_restrictied_UtilDebug file")
 	testFile:write(test_str)															--save new data
 	testFile:close()
 
@@ -116,7 +116,7 @@ print(infoPopulate)
 
 DebugFLIGHT = DebugFLIGHT .. infoPopulate
 
-local debugFLIGHTFile = io.open("Debug/debugFlight.txt", "w")										--open targetlist file
+local debugFLIGHTFile = io.open("Debug/debugFlight.txt", "w") or error("Failed to open debug file")
 debugFLIGHTFile:write(DebugFLIGHT)																		--save new data
 debugFLIGHTFile:close()
 
@@ -171,7 +171,7 @@ function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackTyp
 		if not foundTarget then
 			local txtBug = "UtilD NOT found CustomGroupAttack target: "..tostring(target)
 			-- table.insert(BugList, txtBug)
-			insertBugList(txtBug)
+			InsertBugList(txtBug)
 		end
 
 end
@@ -218,7 +218,7 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 			if not foundTarget then
 				local txtBug = "UutilD NOT found CustomStaticAttack target: "..tostring(target)
 				-- table.insert(BugList, txtBug)
-				insertBugList(txtBug)
+				InsertBugList(txtBug)
 			end
 
 		end

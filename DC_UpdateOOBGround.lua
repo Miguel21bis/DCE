@@ -10,23 +10,6 @@ versionDCE["DC_UpdateOOBGround.lua"] = "1.3.10"
 -- modification M33_f		frequence des FARP selon db_airbase
 ------------------------------------------------------------------------------------------------------- 
 
--- --recupere les Id deja utilise pour ne pas creer de doublon
--- for coal_name,coal in pairs(oob_ground) do	
--- 	for countryN, country in pairs(coal) do
--- 		for category, groups in pairs(country) do
--- 			if type(groups) == "table" and groups["group"]  then
--- 				for Ngroup, group in pairs(groups["group"]) do
--- 					allIdGroup[group.groupId] = true
-					
--- 					for Nunit, unit in pairs(group.units) do
--- 						allIdUnit[unit.unitId] = true
-
--- 					end	
--- 				end			
--- 			end
--- 		end
--- 	end
--- end
 
 for coal_name,coal in pairs(oob_ground) do												--go through sides(red/blue)	
 	for country_n,country in ipairs(coal) do											--go through countries
@@ -384,7 +367,7 @@ end
 
 
 local name = {}
-local GroupIdError = {}
+local groupIdError = {}
 local GroupId_2 = {}
 local UnitId_2 = {}
 
@@ -409,7 +392,7 @@ for side_name, side in pairs(oob_ground) do														--iterate through count
 						-- 	print("DcUOOBG error, duplicate of |"..categorie.."| GroupId |".. GroupId[group_.groupId].."|and|"..tostring(group_.name)
 						-- )
 
-						-- 	table.insert(GroupIdError,group_.name )
+						-- 	table.insert(groupIdError,group_.name )
 						-- 	-- os.execute 'pause'
 
 						group_.groupId = GetNewId(GroupId, maxGroupId, minGroupId)
@@ -436,7 +419,7 @@ for side_name, side in pairs(oob_ground) do														--iterate through count
 end
 
 -- --renumerote automatiquement le groupId en doublon
--- for nError , refName in pairs(GroupIdError) do				
+-- for nError , refName in pairs(groupIdError) do				
 
 -- 	local nTentative = 0
 -- 	local found = false
@@ -497,8 +480,8 @@ end
 --******************************************************************************************************************************
 
 
-mission.coalition.blue.country = deepcopy(oob_ground.blue)											--copy blue oob into mission
-mission.coalition.red.country = deepcopy(oob_ground.red)											--copy red oob into mission
+mission.coalition.blue.country = Deepcopy(oob_ground.blue)											--copy blue oob into mission
+mission.coalition.red.country = Deepcopy(oob_ground.red)											--copy red oob into mission
 
 --iterate through all vehicles and ships to remove those marked as dead during previous debriefings (static objects need not be removed, as these are spawned in a destroyed state)
 for k1,v1 in pairs(mission.coalition) do															--side table(red/blue)	

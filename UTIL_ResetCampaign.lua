@@ -7,7 +7,7 @@ if not versionDCE then versionDCE = {} end
 versionDCE["UTIL_ResetCampaign.lua"] = "1.12.58"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_a			en attente d utilisation)
--- adjustment_c			(c targetList)(b pairsByKeys)(a Firstmission_flag)
+-- adjustment_c			(c targetList)(b PairsByKeys)(a Firstmission_flag)
 -- modification M63_a	compatible Datacard Generator or CombatFlite
 -- modification M61_a	SAR
 -- modification M55_c	player can change the type of plane (c:triggers part)
@@ -22,8 +22,8 @@ versionDCE["UTIL_ResetCampaign.lua"] = "1.12.58"
 
 
 ----- random seed -----
-math.randomseed(tonumber(tostring(os.time()):reverse():sub(1,6)))
-math.random(); math.random(); math.random()
+local seed = os.time() -- Récupérer un timestamp en secondes
+math.randomseed(seed)  -- Initialiser le générateur pseudo-aléatoire
 
 require("Init/camp_init")
 
@@ -52,7 +52,7 @@ end
 
 if Firstmission_flag then																				--if the script is called by BAT_FirstMission.lua, then FirstMission is true and camp_status is reset to init. When called by DEBRIEF_Master.lua, block is skipped and camp_camp status carried over in mission is used.
 	local camp_str = "camp = " .. TableSerialization(camp, 0)										--make a string of campaign initial status table
-	local campFile = io.open("Active/camp_status.lua", "w")											--open campaign status file
+	local campFile = io.open("Active/camp_status.lua", "w") or error("Failed to open debug file")
 	camp.versionPackageICM = tostring(versionPackageICM)											-- modification M35 version ScriptsMod -- ajoute la version du script dans camp_status pour utilisation en fin de mission
 	campFile:write(camp_str)																		--write initial status
 	campFile:close()
@@ -80,48 +80,48 @@ end
 table.sort(oob_air.blue, function(a, b) return a.type:upper() < b.type:upper() end)
 table.sort(oob_air.red, function(a, b) return a.type:upper() < b.type:upper() end)
 local air_str = "oob_air = " .. TableSerialization(oob_air, 0)										--make a string
-local airFile = io.open("Active/oob_air.lua", "w")													--open oob air file
+local airFile = io.open("Active/oob_air.lua", "w") or error("Failed to open debug file")
 airFile:write(air_str)																				--write initial data
 airFile:close()
 
 local tgt_str = "targetlist = " .. TableSerialization(targetlist, 0)								--make a string
-local tgtFile = io.open("Active/targetlist.lua", "w")												--open targetlist file
+local tgtFile = io.open("Active/targetlist.lua", "w") or error("Failed to open debug file")
 tgtFile:write(tgt_str)																				--write initial data
 tgtFile:close()
 
 local ground_str = "oob_ground = {}"
-local groundFile = io.open("Active/oob_ground.lua", "w")											--open oob ground file
+local groundFile = io.open("Active/oob_ground.lua", "w") or error("Failed to open debug file")
 groundFile:write(ground_str)																		--write initial data
 groundFile:close()
 
 local scen_str = "oob_scen = {}"
-local scenFile = io.open("Active/oob_scen.lua", "w")												--open clientstats file
+local scenFile = io.open("Active/oob_scen.lua", "w") or error("Failed to open debug file")
 scenFile:write(scen_str)																			--write initial file
 scenFile:close()
 
 local client_str = "clientstats = {}"
-local clientFile = io.open("Active/clientstats.lua", "w")											--open clientstats file
+local clientFile = io.open("Active/clientstats.lua", "w") or error("Failed to open debug file")
 clientFile:write(client_str)																		--write initial file
 clientFile:close()
 
 -- require("Init/camp_triggers_init")																	--open campaign trigger file
 local trigStr = "camp_triggers = " .. TableSerializationAG(camp_triggers, 0)							--write
-local trigFile = io.open("Active/camp_triggers.lua", "w")
+local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to open debug file")
 trigFile:write(trigStr)
 trigFile:close()
 
 local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
-local trigFile = io.open("Active/db_airbases.lua", "w")
+local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
 trigFile:write(airbases_Str)
 trigFile:close()
 
 local scen_str = "oob_scen = {}"
-local scenFile = io.open("Active/oob_scen.lua", "w")												--open clientstats file
+local scenFile = io.open("Active/oob_scen.lua", "w") or error("Failed to open debug file")
 scenFile:write(scen_str)																			--write initial file
 scenFile:close()
 
 local ZoneSAR_str = "camp_ZoneSAR = {}"																--make a string
-local ZoneSARFile = io.open("Active/camp_ZoneSAR.lua", "w")											--open ZoneSAR file
+local ZoneSARFile = io.open("Active/camp_ZoneSAR.lua", "w") or error("Failed to open debug file")
 ZoneSARFile:write(ZoneSAR_str)																		--save new data
 ZoneSARFile:close()
 
@@ -151,8 +151,8 @@ do
 
 	
 	oob_ground = {}
-	oob_ground["blue"] = deepcopy(mission.coalition.blue.country)											--copy mission data
-	oob_ground["red"] = deepcopy(mission.coalition.red.country)												--copy mission data
+	oob_ground["blue"] = Deepcopy(mission.coalition.blue.country)											--copy mission data
+	oob_ground["red"] = Deepcopy(mission.coalition.red.country)												--copy mission data
 
 	--store group and unit names in oob_ground instead of pointers to dict table
 	for side_name, side in pairs(oob_ground) do																--iterate through sides
@@ -199,7 +199,7 @@ do
 	
 	--save oob_ground status file
 	local ground_str = "oob_ground = " .. TableSerialization(oob_ground, 0)								--make a string
-	local groundFile = io.open("Active/oob_ground.lua", "w")											--open oob ground file
+	local groundFile = io.open("Active/oob_ground.lua", "w") or error("Failed to open debug file")
 	groundFile:write(ground_str)																		--write initial data
 	groundFile:close()
 end

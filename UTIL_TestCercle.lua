@@ -178,27 +178,27 @@ for nCircle, circle in ipairs(circleSAR) do
     local mission2d_y = (47.2287 * circle.pixel_x) + 70914
                         -- 47.2287x+70914
 
-        tempZone = 
+    local tempZone = 
+    {
+        ["radius"] = circle.radius * 47.2287,
+        ["zoneId"] = nCircle,
+        ["color"] = 
         {
-            ["radius"] = circle.radius * 47.2287,
-            ["zoneId"] = nCircle,
-            ["color"] = 
-            {
-                [1] = 1,
-                [2] = 1,
-                [3] = 1,
-                [4] = 0.15,
-            },
-            -- ["properties"] = 
-            -- {
-            -- },
-            ["hidden"] = false,
-            ["y"] = mission2d_y,
-            ["x"] = mission2d_x,
-            ["name"] = tostring(nCircle),
-        }
+            [1] = 1,
+            [2] = 1,
+            [3] = 1,
+            [4] = 0.15,
+        },
+        -- ["properties"] = 
+        -- {
+        -- },
+        ["hidden"] = false,
+        ["y"] = mission2d_y,
+        ["x"] = mission2d_x,
+        ["name"] = tostring(nCircle),
+    }
 
-        mission["triggers"]["zones"][n] = tempZone
+    mission["triggers"]["zones"][n] = tempZone
 
 end
 
@@ -212,24 +212,24 @@ end
 	local cmpStr = "camp = " .. TableSerialization(camp, 0)
 
 	----- create temporary content files of new mission file -----
-	local misFile = io.open("misFile.lua", "w")											--mission
+	local misFile = io.open("misFile.lua", "w") or error("Failed to open debug file")											--mission
 	misFile:write(misStr)
 	misFile:close()
 
 
-	local optFile = io.open("optFile.lua", "w")											--options
+	local optFile = io.open("optFile.lua", "w")	 or error("Failed to open debug file")										--options
 	optFile:write(optStr)
 	optFile:close()
 
-	local warFile = io.open("warFile.lua", "w")											--warehouses
+	local warFile = io.open("warFile.lua", "w") or error("Failed to open debug file")											--warehouses
 	warFile:write(warStr)
 	warFile:close()
 
-	local dicFile = io.open("dicFile.lua", "w")											--dictionary
+	local dicFile = io.open("dicFile.lua", "w") or error("Failed to open debug file")											--dictionary
 	dicFile:write(dicStr)
 	dicFile:close()
 
-	local resFile = io.open("resFile.lua", "w")											--mapResource
+	local resFile = io.open("resFile.lua", "w") or error("Failed to open debug file")											--mapResource
 	resFile:write(resStr)
 	resFile:close()
 
@@ -239,7 +239,7 @@ end
     -- os.remove("../"..camp.title.."/Debriefing/"..camp.title.."_testCircle"..NbMission..".miz")
 
     -- os.rename("../"..camp.title.."_first.miz", "../"..camp.title.."/Debriefing/"..camp.title.."_first"..NbMission..".miz")
-    miz = minizip.zipCreate("../" .. camp.title .. "_testCircle.miz")					--create the first campaign mission
+    local miz = minizip.zipCreate("../" .. camp.title .. "_testCircle.miz")					--create the first campaign mission
 	
 	miz:zipAddFile("mission", "misFile.lua")
 	miz:zipAddFile("options", "optFile.lua")

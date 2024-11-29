@@ -33,15 +33,15 @@ timer.scheduleFunction(ChangeValue, nil, timer.getTime() + 28)							--pendant l
 
 	
 --function to make a deep copy of a table
-local function deepcopy(orig)
+local function Deepcopy(orig)
     local orig_type = type(orig)
     local copy
     if orig_type == 'table' then
         copy = {}
         for orig_key, orig_value in next, orig, nil do
-            copy[deepcopy(orig_key)] = deepcopy(orig_value)
+            copy[Deepcopy(orig_key)] = Deepcopy(orig_value)
         end
-        setmetatable(copy, deepcopy(getmetatable(orig)))
+        setmetatable(copy, Deepcopy(getmetatable(orig)))
     else -- number, string, boolean, etc
         copy = orig
     end
@@ -75,7 +75,7 @@ function TurnIntoWind(GroupName, pos, heading)
 	local txt = ""
 	
 	if heading == nil or not heading then
-		heading = rad2Deg(getHeadingByPos(carrier))
+		heading = rad2Deg(GetHeadingByPos(carrier))
 	end
 	
 	local typeName = Group.getByName(GroupName):getUnit(1):getTypeName()
@@ -134,7 +134,7 @@ function TurnIntoWind(GroupName, pos, heading)
 				for group_n,group in ipairs(country.ship.group) do
 					-- if GroupName == env.getValueDictByKey(group.name) then
 					if GroupName == group.name then							--M45
-						_route = deepcopy(group.route.points)										--make a copy of the route
+						_route = Deepcopy(group.route.points)										--make a copy of the route
 					end
 				end
 			end
@@ -244,7 +244,7 @@ function ResumeRoute(arg)
 		local groupCarrier = Group.getByName(GroupName)
 		local carrier = groupCarrier:getUnit(1)	
 		local Desc = carrier:getDesc()
-		local heading = getHeadingByPos(carrier)
+		local heading = GetHeadingByPos(carrier)
 		local pos = carrier:getPoint()
 
 		heading = rad2Deg(heading)
@@ -258,7 +258,7 @@ function ResumeRoute(arg)
 					for group_n,group in ipairs(country.ship.group) do
 						-- if GroupName == env.getValueDictByKey(group.name) then
 						if GroupName == group.name then
-							_route = deepcopy(group.route.points)										--make a copy of the route
+							_route = Deepcopy(group.route.points)										--make a copy of the route
 						end
 					end
 				end
@@ -369,7 +369,7 @@ function CarrierIntoWind(GroupName)
 			local carrier = group:getUnit(1)														--get group leader (assumed to be the carrier)
 			local carrierName = carrier:getName()													--get carrier name
 			local carrierPos = carrier:getPoint()													--get position of carrier
-			local carrierHeading = getHeadingByPos(carrier)
+			local carrierHeading = GetHeadingByPos(carrier)
 			local carrierCoal = carrier:getCoalition()												--get coalition of carrier
 			local FlightOps = false																		
 			

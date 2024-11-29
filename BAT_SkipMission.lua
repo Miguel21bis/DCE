@@ -5,7 +5,7 @@
 if not versionDCE then versionDCE = {} end
 versionDCE["BAT_SkipMission.lua"] = "1.14.96"
 -------------------------------------------------------------------------------------------------------
--- adjustment_n				(n targetList numeric)(m BAT)(l Playable_m from data_divers)(k BugList)(j pairsByKeys)(i global TabTask)(h Skipmission_flag)(g mise a niveau)(e: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form) 
+-- adjustment_n				(n targetList numeric)(m BAT)(l Playable_m from Data_divers)(k BugList)(j PairsByKeys)(i global TabTask)(h Skipmission_flag)(g mise a niveau)(e: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form) 
 -- debug_d					(cd: EndMission)
 -- cleancode_c
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
@@ -73,7 +73,7 @@ dofile("Active/targetlist.lua")
 
 -- Exécution du fichier s'il existe
 local testFile = "Init/various_table.lua"
-if fileExists(testFile) then
+if FileExists(testFile) then
     dofile(testFile)
 end
 
@@ -97,12 +97,12 @@ else
 end
 
 if not targetlist.blue[1] then
-	targetlistToNum()
+	TargetlistToNum()
 end
 
 Playable_m = {}
 
-for planeType, value in pairsByKeys(data_divers) do
+for planeType, value in PairsByKeys(Data_divers) do
 	if value.playable then
 		Playable_m[planeType] = true
 	end
@@ -131,8 +131,8 @@ local playerInfo = {
 }
 
 -- playerSide = ""
-for side, squadTL in  pairsByKeys(oob_air) do
-	for squad_n, squad in  pairsByKeys(squadTL) do
+for side, squadTL in  PairsByKeys(oob_air) do
+	for squad_n, squad in  PairsByKeys(squadTL) do
 		if squad.player then
 			playerInfo.planeBAT = squad.type
 			playerInfo.squadBAT = squad.name
@@ -227,7 +227,7 @@ if input == "y" or input == "yes" then
 					print("choose a Single target")
 
 					local tabIndex = {}
-					-- for side, Targetlist in pairsByKeys(tableTargetlist) do
+					-- for side, Targetlist in PairsByKeys(tableTargetlist) do
 					for side, targetSide in pairs(targetlist) do
 						local j = 1
 						local Ckey = 0
@@ -288,8 +288,8 @@ if input == "y" or input == "yes" then
 				for i = 1 , Multi.NbGroup do
 					local ExPlaneA = ""
 					local stopLoop = false
-					for nSide , oob_airSide in pairsByKeys(oob_air) do														--pour afficher l'exemple de selection du premier avion présenté
-						for m , unit in pairsByKeys(oob_airSide) do
+					for nSide , oob_airSide in PairsByKeys(oob_air) do														--pour afficher l'exemple de selection du premier avion présenté
+						for m , unit in PairsByKeys(oob_airSide) do
 							if Playable_m[unit.type] and unit.inactive ~= true and not stopLoop then
 								ExPlaneA = unit.type
 								stopLoop = true
@@ -311,11 +311,11 @@ if input == "y" or input == "yes" then
 				local tabTaskAvailable = {}
 
 				-- parse toutes les unités et rempli le tab tabTaskAvailable pour etre sur de proposer toutes les task proposé active 
-				for nSide , oob_airSide in pairsByKeys(oob_air) do
+				for nSide , oob_airSide in PairsByKeys(oob_air) do
 					print() print(nSide..":")
-					for m , unit in pairsByKeys(oob_airSide) do
+					for m , unit in PairsByKeys(oob_airSide) do
 						if Playable_m[unit.type]  and unit.inactive ~= true then
-							for taskStr , nbool in pairsByKeys(oob_air[nSide][m].tasks) do
+							for taskStr , nbool in PairsByKeys(oob_air[nSide][m].tasks) do
 								taskStr = tostring(taskStr)
 
 								if not tabTaskAvailable[nSide] then tabTaskAvailable[nSide] = {} end
@@ -329,9 +329,9 @@ if input == "y" or input == "yes" then
 
 				-- display le tableau des choix d'avion et de task
 				--tabTaskAvailable[nSide][unit.type][taskStr]
-				for nSide , unit_type in pairsByKeys(tabTaskAvailable) do
+				for nSide , unit_type in PairsByKeys(tabTaskAvailable) do
 					print() print(nSide..":")
-					for unitType , TabType in pairsByKeys(unit_type) do
+					for unitType , TabType in PairsByKeys(unit_type) do
 
 						local IndexStringType = string.lower(string.char(ti))
 						if not playable_type[IndexStringType] then playable_type[IndexStringType] = {} end
@@ -340,7 +340,7 @@ if input == "y" or input == "yes" then
 
 						io.write(" (1 to 8): ("..IndexStringType.."): "..unitType..":")
 
-						for taskStr , nbool in pairsByKeys(TabType) do
+						for taskStr , nbool in PairsByKeys(TabType) do
 							if   nbool == true then
 								io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
 								local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
@@ -451,8 +451,8 @@ if input == "y" or input == "yes" then
 					print("\nNext mission generated.\n")													--confirmation text
 					break
 				end
-			elseif stopBug then																			--mission has a player flight
-				print("\n\n stopBug .\n")																--confirmation text
+			elseif StopBug then																			--mission has a player flight
+				print("\n\n StopBug .\n")																--confirmation text
 				break
 			elseif MissionInstance == 20 then																--no player flight could be assigned in 20 tries, stop it
 				print("Mission Generation Error. No eligible player flight in 20 attempts. Try again.\n\n")

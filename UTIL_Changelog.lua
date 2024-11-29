@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.80.489"
+versionDCE["UTIL_Changelog.lua"] = "20.80.490"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.80.489"
+VersionDCE["UTIL_Changelog.txt"] = "20.80.490"
 --[[
 
 
@@ -10,12 +10,13 @@ known issues:
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 - [stats]	stats for your own package are rarely displayed
 
-==:20.80.489:==
+==:20.80.490:==
+490 fixed	[cleaning]	Many Global variables have been renamed to start with a capital letter.
 489 fixed	[SAR]	SARs no longer take off
 488 fixed	[GCI]	interceptors go into the enemy camp
 487 fixed	[loadout]	correction of -code_loadout =  { "All" } + modification of certain speeds and altitudes (Su-17M4)
 486 added	[loadout]	Crusader - Skyraider - MiG-17F - HH-2D - SH-2F 
-485 added	[alias]	added the Init\various_table file to use various tables, such as base name or aircraft type aliases  (M80)
+485 added	[alias]	added the Init\various_table file to use various tables, such as base name or aircraft type aliases  (M80) (TypeAlias[] & BaseNameAlias[] )
 484 modified	[parking]	use of additional car parks, initially reserved for SARs
 
 ==:20.79.483:==
@@ -31,7 +32,7 @@ known issues:
 477 modified	[loadout][restricted]	the prohibited items can now evolve over the course of the campaign. CampaignMaker must add them to a Loadouts folder, then activate them in the camp_triggers_init.lua file with the new function: Action.RestrictedLoadout(file)
 476 fixed	[weather]	clouds are always lower than airports at altitude
 475 fixed	[VSN_F105]	the required module name is not correct
-474 added	[dataMap]	marianaislands locationForEphemeris
+474 added	[dataMap]	marianaislands LocationForEphemeris
 473 fixed	[country]	new countries in templates are not added automatically
 472 fixed	[ejectedPilot]	borders were no longer calculated, so ejected pilots no longer appeared
 471 modified	[loadout]	WOB Mirage F1 Strike (correction)
@@ -144,16 +145,16 @@ known issues:
 440 modified	[requiredModules]third-party mod units, added with templates, do not indicate that the mod must be added .  
 439 added	[loadout][restricted]	to block certain loadouts: add a "restricted_loadout.miz" mission file to \Init with all the aircraft/helico whose loadouts you have blocked. M71
 438 modified	[data][inherited] to avoid duplicate registrations of certain similar modules (SA342M, SA342L etc...), add a heritage system 
-					data_divers = {	
+					Data_divers = {	
 					-- inheritedFrom = "F-14",	--copy radio frequency, failues ...
 					-- inherited_APA_From = "F-14",	--copy AddPropAircraft
 
 					one of the consequences is to transfer playable module information to the table:
-					data_divers = {
+					Data_divers = {
 						playable = true,
 
 437 modified	[failures]	random failures (SinglePlayer only) are customized to the correct device type (A-4, A-10, AV8, AJS37, C101, F-5E, M2000, MF1, F-14, F-15, F-18, F-86, L-39, MB339, Mig-21, JF-17, Ah-64, Ka-50, Mi-24)
-436 fixed 	[spawn][heli]	altitudeFloor helico spawn altitude too low or too high
+436 fixed 	[spawn][heli]	AltitudeFloor helico spawn altitude too low or too high
 435 fixed	[EWR]		sometimes the EWR frequencies do not match the briefing frequencies
 434 added	[campaign] 	GroundZoneTarget (adds the possibility of counting unit completeness by zone) (M70)
 					if a zone collapses and you feel that this could lead to the end of the campaign, do it like this:
@@ -209,7 +210,7 @@ known issues:
 399 fixed	[timing]	some CAPs are not created, and the transport task for players does not work (Hecule Mode)
 398 modified	[altitude][heli]	helicopter spawn too high
 397 fixed	[F-14]		many NavTargetPoints are repeated in the mission file 
-396 add		[module]	adds "requiredModules" according to the info saved in the DATA file , exemple: data_divers["Hercules"].requiredModules = true,	
+396 add		[module]	adds "requiredModules" according to the info saved in the DATA file , exemple: Data_divers["Hercules"].requiredModules = true,	
 395 modified	[CTLD]		add version 202310.01
 394 modified	[mist]		add version 47.5.122
 393 modified	[loadout]	tanker speed | Mi-24P Night capability |  E-3 AWACS altitude |Tomcat loadout with 2 AIM-54 fixed | 
@@ -444,7 +445,7 @@ known issues:
 210 fixed	[strike]	F-18 Jsow don't bomb
 209 fixed	[mission]	some planes go around in circles during the spawn
 208 fixed	[strike]	wingmen don't bomb
-207 added	[mission]	adds M-2000C in data_AddPropAircraft
+207 added	[mission]	adds M-2000C in Data_AddPropAircraft
 206 fixed	[development]	bug with move ship (UTIL_KillTarget)
 
 ==:20.58.205:==

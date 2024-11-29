@@ -154,7 +154,7 @@ Debug_check = {
 }
 
 
-campMod_check = {
+CampMod_check = {
 	
 	--***loadout options***
 	selectLoadout = "central",				-- ("central"/"init")		[default: "central"] (init: for old campaigns, if the loadout file is located in the /Init folder)

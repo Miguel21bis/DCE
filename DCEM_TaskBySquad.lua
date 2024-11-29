@@ -63,7 +63,7 @@ end
 
 
 
-taskByPlane = {}
+local taskByPlane = {}
 --affiche le type d'avion selectionné et son squadrons
 for side, squadTL in  pairs(oob_air) do
 	for squad_n, squad in  pairs(squadTL) do
@@ -94,7 +94,7 @@ end
 
 
 local test_str = "taskByPlane = " .. TableSerialization(taskByPlane, 0)						--make a string
-local testFile = io.open(pathCampaign.."/Debug/DCEM_taskByPlane.lua", "w")								--open targetlist file
+local testFile = io.open(pathCampaign.."/Debug/DCEM_taskByPlane.lua", "w") or error("Failed to open debug file")
 testFile:write(test_str)															--save new data
 testFile:close()
 

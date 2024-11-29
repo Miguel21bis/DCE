@@ -6,7 +6,7 @@ if not versionDCE then versionDCE = {} end
 versionDCE["UTIL_Data.lua"] = "1.14.83"
 ------------------------------------------------------------------------------------------------------- 
 -- updateData_Bd			(Bd flyingAlone)(CH-47F H-6J)(a OH-58)(z F-4E-45MC)(UH-60L)(x hHover)(w reaper)(v Hercules)(u tabTask)(t add is_helicopter table)(s F1EE)(r F-16C_50)(q): Add helicos  (p): Add WOC80)(o: transfer the dataMap to another file)
--- debug_c					(c OH-6A)(b requiredModulesSpecialName)(a add isWesternCountry function)
+-- debug_c					(c OH-6A)(b requiredModulesSpecialName)(a add IsWesternCountry function)
 -- cleanCode_a				(a: repetition)
 -- adjustment_e				(e delete EPLRS_Capacity table)(d CVN to CV)(bombing on Group&Unit)(b: Syria nnTimeZone +3 & GudautaGPS )
 -- modification M68_a		add AFAC task
@@ -45,7 +45,7 @@ versionDCE["UTIL_Data.lua"] = "1.14.83"
 -- 	["JF-17"] = true,
 -- }
 
-data_configuration = {
+Data_configuration = {
 	CV_Vmax = 15.4,								--10-- (default : 15.4333( m/s):30kts), can have bp with F14, go down to 10 m/s
 	CV_windDeck = 13.8,							--9-- (default : 13.89( m/s):27kts), can have bp with F14, go down to 9 m/s
 	CV_despawnAfterLanding = true,				-- (default : true) despawn aircraft landing on CV and LHA ,this avoids collisions between taxxing and landing aircraft
@@ -58,7 +58,7 @@ data_configuration = {
 }
 
 
-ejectedPilotFrequency = {
+EctedPilotFrequency = {
 	blue = {
 		GuardEjection = 243000000,			--frequency used for automatic triggering of the radio beacon during ejection (blue side usually 243)
 		radioBeacon = 121500000,			--think you need a compatible helicopter to listen and follow the frequency (preset Chanel 4 R-852)
@@ -74,7 +74,7 @@ ejectedPilotFrequency = {
 }
 
 
--- data_divers = {}
+-- Data_divers = {}
 --instrumentUnits = "imperial" or  metric or russian (metric and QNH in mmHg)
 -- inheritedFrom = "F-14",	--copy radio frequency, failues ...
 -- inherited_APA_From = "F-14",	--copy AddPropAircraft
@@ -94,7 +94,7 @@ ejectedPilotFrequency = {
 	-- 	}
 	-- }
 
-data_divers = {
+Data_divers = {
 
 	["MosquitoFBMkVI"] = 
 	{
@@ -959,7 +959,7 @@ data_divers = {
 
 }
 
-payloadType = {
+PayloadType = {
 	["C-47"] = 10000,					--a consolider
 	["C-17A"] = 70000,					--max 77000 mais longue piste � pr�voir
 	["C-130"] = 19000,					--Kg
@@ -988,7 +988,7 @@ payloadType = {
 	["Mi-26"] = 20000,
 }
 
-isHelicopter = {
+IsHelicopter = {
 	--West Side
 	["SA342M"] = {},
 	["SA342L"] = {},
@@ -1063,7 +1063,7 @@ isHelicopter = {
 
 --pb F18	"Pinpoint Strike" + AttackGroup  (pas pr�vu)
 --pb Mi24	"GroundAttack" + AttackUnit (pas pr�vu)
-groupTask = {
+GoupTask = {
 	["CAS"] = {
 		["AttackGroup"] = true,
 		["AttackUnit"] = true,
@@ -1124,7 +1124,7 @@ groupTask = {
 --Ground Attack					X													X										X
 --Runway Attack					X													X					X
 
-strikeDegradedMode = {
+StrikeDegradedMode = {
 	["CAS"] = {
 		["AttackGroup"] = true,
 		["AttackUnit"] = true,
@@ -1145,7 +1145,7 @@ strikeDegradedMode = {
 }
 	
 	
-groupTaskByTypeTarget = {
+GoupTaskByTypeTarget = {
 	["DynamicGroup"] = {
 		["CAS"] = {
 			["AttackGroup"] = true,
@@ -2261,7 +2261,7 @@ TaskByPlane = {
 
 }
 
-function isWesternCountry(country)
+function IsWesternCountry(country)
     return not (
 		 ("Russia" 			== country) or 
 		 ("Ukraine" 		== country) or 
@@ -2322,7 +2322,7 @@ end
 	-- ["USAF Aggressors"] = "west", 
 -- }
 
-callsign_west = {
+Callsign_west = {
 	generic = {
 		[1] = "Enfield",
 		[2] = "Springfield",
@@ -3745,7 +3745,7 @@ Failures = {
 	},
 }
 
-dataCountry = {
+DataCountry = {
 	
 	{id = 0, name = "Russia"},
 	{id = 1, name = "Ukraine"}, 

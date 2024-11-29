@@ -115,7 +115,7 @@ if Debug.debug and oob_air then
 end
 
 --crer une table identique, en enlevant les infos des layers 
-for mapName, layers in pairs(altitudeFloor) do
+for mapName, layers in pairs(AltitudeFloor) do
 	if string.lower(mapName) == string.lower(mission.theatre) then
 		for alti, layer in pairs(layers) do
 
@@ -828,21 +828,21 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																	for tgt_attributeN, target_attribute in ipairs(target.attributes) do
 																		-- if Debug.Generator.SpySquad == unit.name then print("Passa B "..target_attribute) end
 
-																		if target_attribute == "Helicopter" and isHelicopter[unit.type] then
+																		if target_attribute == "Helicopter" and IsHelicopter[unit.type] then
 																			-- if Debug.Generator.SpySquad == unit.name then print("Passa C "..target_attribute) end
 
 																			if #target.attributes == 1 then
 																				loadout_eligible = true
 																				break
 																			end
-																		elseif target_attribute == "Helicopter" and not isHelicopter[unit.type] then
+																		elseif target_attribute == "Helicopter" and not IsHelicopter[unit.type] then
 
 																			-- if Debug.Generator.SpySquad == unit.name then print("Passa D "..target_attribute) end
 
 																			loadout_eligible = false
 																			break
 
-																		elseif target_attribute == "Plane" and not isHelicopter[unit.type] then
+																		elseif target_attribute == "Plane" and not IsHelicopter[unit.type] then
 
 																			-- if Debug.Generator.SpySquad == unit.name then print("Passa E "..target_attribute) end
 
@@ -850,7 +850,7 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																				loadout_eligible = true
 																				break
 																			end
-																		elseif target_attribute == "Plane" and isHelicopter[unit.type] then
+																		elseif target_attribute == "Plane" and IsHelicopter[unit.type] then
 
 																			-- if Debug.Generator.SpySquad == unit.name then print("Passa F "..target_attribute) end
 
@@ -1163,7 +1163,7 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																							-- elseif (unit.type == "S-3B" or unit.type == "F-117A" or unit.type == "B-1B" or unit.type == "B-52H" or unit.type == "Tu-22M3" or unit.type == "Tu-95MS" or unit.type == "Tu-142" or unit.type == "Tu-160" or unit.type == "MiG-25RBT")
 																							-- 	and task ~= "Runway Attack"	then
 																							-- 	aircraft_requested = math.ceil(aircraft_requested)	
-																							elseif (data_divers[unit.type] and data_divers[unit.type].flyingAlone) and task ~= "Runway Attack"	then
+																							elseif (Data_divers[unit.type] and Data_divers[unit.type].flyingAlone) and task ~= "Runway Attack"	then
 
 																								aircraft_requested = math.ceil(aircraft_requested)
 																							else
@@ -1266,7 +1266,7 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																									task = task,
 																									tasks = unit.tasks,
 																									loadout = unit_loadouts[l],
-																									target = deepcopy(target),
+																									target = Deepcopy(target),
 																									target_name = target.titleName,
 																									targetPriority = target.priority,
 																									route = route,
@@ -2291,7 +2291,7 @@ for sideName, draftT in pairs(Draft_sorties) do
 																		tasks = unit.tasks,
 																		loadout = unit_loadouts[l],
 																		route = route,
-																		target = deepcopy(draft.target),
+																		target = Deepcopy(draft.target),
 																		target_name = draft.target.titleName,
 																		tot_from = draft.tot_from,
 																		tot_to = draft.tot_to,
@@ -2303,8 +2303,8 @@ for sideName, draftT in pairs(Draft_sorties) do
 																end
 
 																--recalculate threat level for sortie adjusted by number of escort
-																-- route.threats.ground_total_OLD = deepcopy(route.threats.ground_total)
-																-- route.threats.air_total_OLD = deepcopy(route.threats.air_total)
+																-- route.threats.ground_total_OLD = Deepcopy(route.threats.ground_total)
+																-- route.threats.air_total_OLD = Deepcopy(route.threats.air_total)
 
 																local route_threat_OLD = draft.route.threats.ground_total + draft.route.threats.air_total
 																-- print()
@@ -2771,7 +2771,7 @@ local function createATO_table(draftPriority)
 										--en fonction du learning des missions passé, interdit une mission si les task support ne sont pas present
 
 										local tempInfo = draft.id.." AtoG NbTotPlanePerTask CALCUL"
-										local draft_availability = deepcopy(Aircraft_availability)
+										local draft_availability = Deepcopy(Aircraft_availability)
 										if camp.newTaskPerTarget then
 											for tableTargetName, targetTask in pairs(camp.newTaskPerTarget) do
 												if tableTargetName == draft.target_name and targetTask.tasks then
@@ -2891,7 +2891,7 @@ local function createATO_table(draftPriority)
 
 										-- 				if not needSupport[draft.name] then needSupport[draft.name] = 0 end
 										-- 				if not availSupport[draft.name] then availSupport[draft.name] = 0 end
-										-- 				needSupport[draft.name] =  deepcopy(draft.number)	
+										-- 				needSupport[draft.name] =  Deepcopy(draft.number)	
 
 										-- 				--TODO comment ça marche? ça a l'air inutile....
 										-- 				availSupport[draft.name] =  Aircraft_availability[draft.name].unassigned
@@ -2935,7 +2935,7 @@ local function createATO_table(draftPriority)
 										-- s il n y a qu un avion d escorte, on bache la mission
 										--obliger de regarder la demande total du package, par rapport aux existants
 
-										local dispoTmp = deepcopy(Aircraft_availability)
+										local dispoTmp = Deepcopy(Aircraft_availability)
 
 										--enleve deja l effectif du main (il peut y avoir 4 F18 strike et 2f18 sead ou escorte)
 										dispoTmp[draft.name].unassigned = dispoTmp[draft.name].unassigned - draft.number
@@ -3409,7 +3409,7 @@ local function createATO_table(draftPriority)
 														task = entry.task,
 														loadout = entry.loadout,
 														route = {},																		--route is a table and connot be copied as a whole
-														target = deepcopy(entry.target),
+														target = Deepcopy(entry.target),
 														target_name = entry.target_name,
 														firepower = assigned * entry.loadout.firepower,
 														tot_from = entry.tot_from,
@@ -3985,7 +3985,7 @@ end
 
 -- 		if priorityRef[side] > draft.priorityIni  then
 -- 			priorityRef[side] = draft.priorityIni
--- 			allPrioCompleted_N_1 = deepcopy(allPrioCompleted_N)
+-- 			allPrioCompleted_N_1 = Deepcopy(allPrioCompleted_N)
 
 -- 		end
 

@@ -85,7 +85,7 @@ function TableSerialization(t, i, params)
 	-- 	table.sort(t, function(a,b) return a[params] > b[params]  end)
 	-- end
 
-	for k,v in pairsByKeys(t) do
+	for k,v in PairsByKeys(t) do
 		if type(k) == "string" then
 			text = text .. tab .. '["' .. k .. '"] = '
 		else
@@ -400,11 +400,11 @@ function EventHandler:onEvent(event)
 				-- }
 				
 				if event.initiator and event.initiator:getPlayerName()	then
-					env.info( "DCE_EJECT EventT :radioTransmission frequency A  "..tostring(camp.ejectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..PilotEjection.initiator))
+					env.info( "DCE_EJECT EventT :radioTransmission frequency A  "..tostring(camp.EctedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..PilotEjection.initiator))
 					
-					trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', PilotEjection, 0, true, camp.ejectedPilotFrequency[side].GuardEjection, 1, 'GuardEjection'..PilotEjection.initiator)
+					trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', PilotEjection, 0, true, camp.EctedPilotFrequency[side].GuardEjection, 1, 'GuardEjection'..PilotEjection.initiator)
 					
-					env.info( "DCE_EJECT EventT :radioTransmission frequency B  "..tostring(camp.ejectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..PilotEjection.initiator))
+					env.info( "DCE_EJECT EventT :radioTransmission frequency B  "..tostring(camp.EctedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..PilotEjection.initiator))
 				end
 
 				ejectionSeatTemp = {

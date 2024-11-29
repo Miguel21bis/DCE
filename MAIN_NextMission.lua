@@ -9,14 +9,14 @@ versionDCE["MAIN_NextMission.lua"] = "1.35.211"
 -- Reglage_e				(e EPLRS_Capacity)(d CVN to CV)(c stop si < 2.7.0 (ver18))(a: Init/loadout selection)
 -- adjustment_g				(g keep original triggers( a_remove_scene_objects ))(e oob_scen ==0)(d currentKey)(c clean conf_mod)(b Firstmission_flag)(a: add Loadout tiers)
 -- cleanCode_f
--- modification M77_k		CG_ArtySpotter (k listSpotterAircraft)(c camp.spotter)(b tempo)
+-- modification M77_k		CG_ArtySpotter (k ListSpotterAircraft)(c camp.spotter)(b tempo)
 -- modification M71_b		PayloadRestricted  (b Action.RestrictedLoadout(file))
 -- modification M66_a		bombOnRunway
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 -- modification M64_b		adds elements of a new base_mission (b: update Type & groupId)
 -- modification M63_a		compatible Datacard Generator or CombatFlite
 -- modification M62_a		allows you to use third party files that Data information without being overwritten by central information updates
--- modification M61_g		SAR (g ejectedPilotFrequency)(c theatre)
+-- modification M61_g		SAR (g EctedPilotFrequency)(c theatre)
 -- modification M60_d		add CTLD (d always beacon.ogg)(c load_CTLD option)(b debug)
 -- Psyko modification M59_a			silences the tower
 -- Norman99 modification M57_a		Simple Fuel Check Script
@@ -84,10 +84,10 @@ if not PayloadRestricted then
 	PayloadRestricted = {}
 
 	local restrictedPath = "Init/restricted_loadout.miz"
-	local TestPath = io.open(restrictedPath, "r")
+	local testPath = io.open(restrictedPath, "r")
 
-	if  TestPath ~= nil then
-		io.close(TestPath)
+	if  testPath ~= nil then
+		io.close(testPath)
 
 		local zipFileResticted = minizip.unzOpen("Init/restricted_loadout.miz", 'rb')
 
@@ -434,26 +434,26 @@ if Firstmission_flag  or Skipmission_flag then
 	if needUpdate > 0 then																	-- modification M53_a	automatic update of the conf_mod file	
 		UpdateConfMod()
 		if Firstmission_flag then
-			modifiCampInit()
+			ModifiCampInit()
 		end
 	end
 end
 
 camp.SC_FullPlaneOnDeck = mission_ini.SC_FullPlaneOnDeck								-- modification M37.d SuperCarrier
-camp.CV_Vmax = data_configuration.CV_Vmax												-- modification M37.d SuperCarrier
-camp.CV_windDeck = data_configuration.CV_windDeck										-- modification M37.d SuperCarrier
-camp.CV_despawnAfterLanding = data_configuration.CV_despawnAfterLanding				-- modification M18.e despawn (e: option confMod)
+camp.CV_Vmax = Data_configuration.CV_Vmax												-- modification M37.d SuperCarrier
+camp.CV_windDeck = Data_configuration.CV_windDeck										-- modification M37.d SuperCarrier
+camp.CV_despawnAfterLanding = Data_configuration.CV_despawnAfterLanding				-- modification M18.e despawn (e: option confMod)
 camp.SC_CarrierIntoWind = string.lower(mission_ini.SC_CarrierIntoWind)					-- modification M36.d	MenuRadio request manual TurnIntoWind
 camp.debug = Debug.debug
 -- camp.makeCampaign = Debug.makeCampaign
 camp.debugInGamePopup = Debug.debugInGamePopup
 camp.theatre = NameTheatre
-camp.ejectedPilotFrequency = ejectedPilotFrequency
+camp.EctedPilotFrequency = EctedPilotFrequency
 
 camp.spotter = mission_ini.spotter
-camp.spotterAircraft = listSpotterAircraft()
+camp.spotterAircraft = ListSpotterAircraft()
 
-nbTotalClient = 0
+local nbTotalClient = 0
 for k=1, Multi.NbGroup do
 	nbTotalClient = nbTotalClient + Multi.Group[k].NbPlane
 end
@@ -477,7 +477,7 @@ if  TestPath ~= nil then
 	camp.ScriptsMod = versionDCE["UTIL_Changelog.lua"]
 
 else
-
+	--OBSOLETE
 	local verScriptsModPath = "../../../ScriptsMod."..versionPackageICM.."/UTIL_Version.lua"
 	local TestPath = io.open(verScriptsModPath, "r")
 	if  TestPath ~= nil then
@@ -562,23 +562,24 @@ local loadoutFile01 = "../../../Missions/Campaigns/"..camp.title.."/Active/Loado
 local TestPathloadout = io.open(loadoutFile01, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
 if TestPathloadout == nil or Firstmission_flag then																	--check si le fichier existe dans ScriptsMod
 	local loadout_str = "Loadouts_archive = " .. TableSerialization(db_loadouts, 0)						--make a string
-	local loadoutFile = io.open(loadoutFile01, "w")															--open targetlist file
+	local loadoutFile = io.open(loadoutFile01, "w")	 or error("Failed to open loadoutFile file")
 
 	if not loadoutFile or loadoutFile == nil then
 		print("MainNM Tthis campaign folder  |"..camp.title.."|  does not exist ")
 		os.execute 'pause'
+	else
+		loadoutFile:write(loadout_str)
+		loadoutFile:close()
 	end
-	-- print("passe loadout AA First "..loadoutFile01) os.execute 'pause'
-	loadoutFile:write(loadout_str)																			--save new data
-	loadoutFile:close()
 end
+
 if TestPathloadout ~= nil then
 	TestPathloadout:close()
 end
 -- print("passe loadout BB") os.execute 'pause'
 
 EPLRS_Capacity = {}
-for planeType, value in pairsByKeys(data_divers) do
+for planeType, value in PairsByKeys(Data_divers) do
 	if value.EPLRS_Capacity then
 		EPLRS_Capacity[planeType] = true
 	end
@@ -649,7 +650,7 @@ else
 	end
 end
 
-getAllId()
+GetAllId()
 
 require("Active/camp_triggers")
 
@@ -686,7 +687,7 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/ATO_Timing.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_AddPropAircraft.lua")		-- modification M17_f	add AddPropAircraft Option all type
 
 local tgt_str = "targetlist = " .. TableSerialization(targetlist, 0)						--make a string
-local tgtFile = io.open("Active/targetlist.lua", "w")										--open targetlist file
+local tgtFile = io.open("Active/targetlist.lua", "w") or error("Failed to open debug file")
 tgtFile:write(tgt_str)																		--save new data
 tgtFile:close()
 
@@ -708,7 +709,7 @@ end
 
 if BugList and type(BugList) == "table" and #BugList >= 1 then
 	local table_Str = "BugList = " .. TableSerialization(BugList, 0)
-	local bugFile = io.open("Debug/BugList.lua", "w")
+	local bugFile = io.open("Debug/BugList.lua", "w") or error("Failed to open debug file")
 	bugFile:write(table_Str)
 	bugFile:close()
 end
@@ -732,7 +733,7 @@ mission.currentKey = 1010000															--not clear how this works but is req
 local GroupId = {}
 local uniId = {}
 local name = {}
-local GroupIdError = {}
+local groupIdError = {}
 local minGroupId = 999999
 local maxGroupId = 0
 local unitIdError = {}
@@ -765,7 +766,7 @@ for side_name, side in pairs(mission.coalition) do																--iterate thro
 						else
 							-- print("MainNM error, duplicate of |"..categorie.."| OLD GroupId |".. GroupId[group_.groupId].."|and|"..tostring(group_.name) )
 
-							table.insert(GroupIdError,group_.name )
+							table.insert(groupIdError,group_.name )
 						end
 
 						for unitN, unit in ipairs(group_.units) do
@@ -793,7 +794,7 @@ for side_name, side in pairs(mission.coalition) do																--iterate thro
 end
 print()
 --renumerote automatiquement le groupId en doublon
-for nError , refName in pairs(GroupIdError) do
+for nError , refName in pairs(groupIdError) do
 
 	local nTentative = 0
 	local found = false
@@ -954,7 +955,7 @@ end
 local GroupId = {}
 local uniId = {}
 local name = {}
-local GroupIdError = {}
+local groupIdError = {}
 local minGroupId = 999999
 local maxGroupId = 0
 local unitIdError = {}
@@ -1136,7 +1137,7 @@ cmpFile:close()
 
 ----- create new mission file and add content files -----
 
-local NbMission  = camp.mission
+local NbMission  = tostring(camp.mission)
 
 if mission_ini.backupAllMissionFiles and mission_ini.backupAllMissionFiles == true then
 	if not Firstmission_flag then
@@ -1156,6 +1157,7 @@ else
 	NbMission = "__Old"
 end
 
+local miz
 if Firstmission_flag then																--is true if script is launched from GenerateFirstMission.lua
 	if not (mission_ini.backupAllMissionFiles and mission_ini.backupAllMissionFiles == true) then
 		os.remove("../"..camp.title.."/Debriefing/"..camp.title.."_first"..NbMission..".miz")
@@ -1166,7 +1168,7 @@ else																				--is false if script is launched from Debrief_Master.lua
 	if Skipmission_flag then
 		os.remove( "../"..camp.title.."/Debriefing/"..camp.title.."_ongoing"..NbMission..".miz")
 	end
-	res = os.rename("../"..camp.title.."_ongoing.miz", "../"..camp.title.."/Debriefing/"..camp.title.."_ongoing"..NbMission..".miz")
+	local res = os.rename("../"..camp.title.."_ongoing.miz", "../"..camp.title.."/Debriefing/"..camp.title.."_ongoing"..NbMission..".miz")
 	miz = minizip.zipCreate("../" .. camp.title .. "_ongoing.miz")
 end
 
@@ -1208,6 +1210,7 @@ if mission_ini.load_CTLD then
 end
 
 local BriefingImages = {}
+local findValue
 for _i,_filename in ipairs(BriefingImagesB) do
 	findValue = false
 	for i,filename in ipairs(BriefingImages) do

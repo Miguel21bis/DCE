@@ -37,7 +37,7 @@ end
 if camp.flag == nil then
 	camp.flag = {}
 end
-local old_flag = deepcopy(camp.flag)												--copy campaign flags, so that modifications of flags do not affect condition of subsequent campaign triggers in same mission
+local old_flag = Deepcopy(camp.flag)												--copy campaign flags, so that modifications of flags do not affect condition of subsequent campaign triggers in same mission
 
 
 ----- functions to return campaign information to build trigger conditions -----
@@ -47,32 +47,32 @@ Return = {}
 	function Return.Time()
 		return camp.time
 	end
-	
+
 	--return day of month
 	function Return.Day()
 		return camp.date.day
 	end
-	
+
 	--return month as number
 	function Return.Month()
 		return camp.date.month
 	end
-	
+
 	--return year
 	function Return.Year()
 		return camp.date.year
 	end
-	
+
 	--return mission number
 	function Return.Mission()
 		return camp.mission
 	end
-	
+
 	--return campagn flag
-	function Return.CampFlag(arg)		
+	function Return.CampFlag(arg)
 		return old_flag[arg]													--return old_flag (unmodified by other campaign trigger in same mission)		
 	end
-	
+
 	--return if air unit is active
 	function Return.AirUnitActive(name)
 		for side_name,side in pairs(oob_air) do									--iterate through sides in oob_air
@@ -105,7 +105,7 @@ Return = {}
 			end
 		end
 	end
-	
+
 	--return number of ready aircraft for an air unit
 	function Return.AirUnitReady(name)
 		local found
@@ -124,7 +124,7 @@ Return = {}
 			return 0
 		end
 	end
-	
+
 	--return number of ready + damaged aircraft for an air unit
 	function Return.AirUnitAlive(name)
 		for side_name,side in pairs(oob_air) do									--iterate through sides in oob_air
@@ -139,13 +139,13 @@ Return = {}
 			end
 		end
 	end
-	
+
 	--return number of ready + damaged + reserve aircraft by side
 	function Return.totalAirUnitAliveBySide(sideTest)
 		local sum = 0
-		
+
 		for side_name, side in pairs(oob_air) do									--iterate through sides in oob_air
-			if side_name == sideTest then	
+			if side_name == sideTest then
 				for unit_n,unit in pairs(side) do									--iterate through units in side
 					if not unit.inactive then										--unit found
 						sum = sum + unit.roster.ready
@@ -178,7 +178,7 @@ Return = {}
 			end
 		end
 	end
-	
+
 	--return air unit player
 	function Return.AirUnitPlayer(name)
 		for side_name,side in pairs(oob_air) do									--iterate through sides in oob_air
@@ -189,7 +189,7 @@ Return = {}
 			end
 		end
 	end
-	
+
 	--return alive percentage of target
 	function Return.TargetAlive(targetName)
 		local foundTarget = false
@@ -202,7 +202,7 @@ Return = {}
 					else
 						return 100
 					end
-					
+
 				end
 			end
 		end
@@ -226,7 +226,7 @@ Return = {}
 		for side_name, targets in pairs(targetlist) do								--iterate through sides in targetlist
 			for targetN, target in pairs(targets) do							--iterate through targets in side
 				if target.titleName and target.titleName == basename or basename == target.db_airbaseName then
-				
+
 					local rightAttribute = false
 					foundBase = true
 
@@ -234,11 +234,11 @@ Return = {}
 
 					if  target.attributes then
 						if tostring(target.attributes) == "Structure" then
-							rightAttribute = true 
+							rightAttribute = true
 						elseif type(target.attributes) == "table" then
 							for n , attribute in  pairs(target.attributes) do
 								if attribute == "Structure" then
-									rightAttribute = true 
+									rightAttribute = true
 								end
 							end
 						end
@@ -264,7 +264,7 @@ Return = {}
 		-- end
 
 		-- if foundBase then 
-		if nTotal > 0 then 
+		if nTotal > 0 then
 			returnValue = (1 - (nElementDead / nTotal)) * 100
 			-- print("DcCT Return.BaseAlive() PASSE D ")
 		else
@@ -272,7 +272,7 @@ Return = {}
 			-- print("DcCT Return.BaseAlive() PASSE E ")
 		end
 
-		
+
 
 		-- print("DcCT Return.BaseAlive(basename) "..basename.." returnValue: "..tostring(returnValue))
 
@@ -302,7 +302,7 @@ Return = {}
 		end
 		return false
 	end
-	
+
 	--return vehicle/ship group hidden status
 	function Return.GroupHidden(groupname)
 		for sidename,side in pairs(oob_ground) do								--iterate through sides in ground OOB
@@ -319,7 +319,7 @@ Return = {}
 			end
 		end
 	end
-	
+
 	--return vehicle/ship group probability status
 	function Return.GroupProbability(groupname)
 		for sidename,side in pairs(oob_ground) do								--iterate through sides in ground OOB
@@ -340,7 +340,7 @@ Return = {}
 			end
 		end
 	end
-	
+
 	--return boolean whether ship group is in polygon
 	function Return.ShipGroupInPoly(GroupName, PolyZonesTable)
 		for coal_name,coal in pairs(oob_ground) do												--go through sides(red/blue)	
@@ -371,7 +371,7 @@ Return = {}
 											return false
 										end
 									end
-								end					
+								end
 							else																--if polygon has more than two points
 								local poly = {}													--table to store x-y coordinates of all points of polygon
 								for n = 1, #PolyZonesTable do
@@ -385,9 +385,9 @@ Return = {}
 			end
 		end
 	end
-	
-	
-	
+
+
+
 		--returns the logistics of a base in weight
 	function Return.PlaceLogistic(placeName)
 		for db_baseName, base_ in pairs(db_airbases) do								--iterate through sides in oob_air		
@@ -395,7 +395,7 @@ Return = {}
 				if base_.logistic then
 					return base_.logistic
 				else
-					return 0	
+					return 0
 				end
 			end
 		end
@@ -409,23 +409,23 @@ Return = {}
 					local result = math.ceil(base_.logistic / weightObjectif * 100)
 					return result
 				else
-					return 0	
+					return 0
 				end
 			end
 		end
-	end	
+	end
 
 ----- functions to buld trigger actions -----
 Action = {}
-	
+
 	--void action
 	function Action.None()
 	end
-	
+
 	--add briefing text
 	function Action.Text(arg, clear)
 		--n'ajoute pas le texte s'il existe deja
-		
+
 		if debugKT then
 			print("DcCT PBriefing_text "..type(Briefing_text))
 			print("DcCT arg "..type(arg))
@@ -437,8 +437,8 @@ Action = {}
 		if string.find(Briefing_text, arg) then
 			-- print("DcCT PASSE B ")
 			return
-		end		
-		
+		end
+
 		if clear then
 			Briefing_status = ""												--clear briefing text from previous mission instances
 			Briefing_text = Briefing_text .. arg .. " \n \n"					--add trigger text to briefing text of this mission instance with double new line
@@ -448,12 +448,12 @@ Action = {}
 			-- print("DcCT PASSE D "..Briefing_text)
 		end
 	end
-	
+
 	--add briefing text
 	function Action.TextPlayMission(arg)
 		Briefing_text_playable = Briefing_text_playable .. arg .. " \n \n"		--add trigger text to briefing text of this mission only if it is playable
 	end
-	
+
 	--add briefing picture
 	function Action.AddImage(filename, side)
 		if side == "blue"  then
@@ -463,25 +463,25 @@ Action = {}
 		elseif side == "all" or side == "" or side == nil then
 			table.insert(BriefingImagesB, filename)
 			table.insert(BriefingImagesR, filename)
-		end	
+		end
 	end
-	
+
 	--set campagn flag to value
 	function Action.SetCampFlag(n, value)
 		camp.flag[n] = value
 	end
-	
+
 	--add or subtract to campaign flag
 	function Action.AddCampFlag(n, add)
 		camp.flag[n] = camp.flag[n] + add
 	end
-	
+
 	--end campaign
 	function Action.CampaignEnd(arg)
 		EndCampaign = arg
 		camp.endCampaign = arg
 		if debugKT then print(" 	Action.CampaignEnd(arg)---> : "..tostring(arg)) end
-		
+
 		print()
 		print("********************ATTENTION******************")
 		print(" 	Action.CampaignEnd(arg)---> : "..tostring(arg))
@@ -492,7 +492,7 @@ Action = {}
 		print()
 		os.execute 'pause'
 	end
-	
+
 	--set target active/inactive
 	local targetFound = false
 	function Action.TargetActive(targetName, state)
@@ -514,7 +514,7 @@ Action = {}
 			os.execute 'pause'
 		end
 	end
-	
+
 	--set target priority
 	function Action.TargetPriority(targetName, priority)
 		for sidename, targets in pairs(targetlist) do
@@ -526,7 +526,7 @@ Action = {}
 			end
 		end
 	end
-	
+
 	--set unit active/inactive
 	function Action.AirUnitActive(unitName, state)
 		for side_name,side in pairs(oob_air) do									--iterate through sides in oob_air
@@ -551,7 +551,7 @@ Action = {}
 						for group_n,group in pairs(typetable.group) do			--iterate through groups
 							for unit_n,unit in pairs(group.units) do			--iterate through units
 								if unit.name == pedroName then					--unit found
-									unit.dead = true							
+									unit.dead = true
 								end
 							end
 						end
@@ -561,28 +561,28 @@ Action = {}
 		end
 	end
 
-	
+
 	--Miguel21 modification M40.g : Template Active GroundGroup moving front (f: sideBase)
 	--set side base
 	function Action.SideBase(NewSide, baseName)
-		
-		if NewSide == "blue" then 
+
+		if NewSide == "blue" then
 			OldSide = "red"
 		else
 			OldSide = "blue"
 		end
-		
+
 		for db_baseName, base in pairs(db_airbases) do							--iterate through sides in db_airbases
 			if db_baseName == baseName then										--unit found
 				base.side = NewSide												--set new airbase for unit
 			end
 		end
-		
+
 		--change de camp dans le target liste
 		--attention, les camps sont inversé, c'est le camp du target, ou la targetlist d'un camp (trouc de ouf)
 		for side_name, targets in pairs(targetlist) do													--Iterate through all side
 			for targetN, target in pairs(targets) do												--Iterat through all targets
-				if target.titleName and target.titleName == baseName and NewSide  == side_name then				
+				if target.titleName and target.titleName == baseName and NewSide  == side_name then
 					targetlist[OldSide][baseName] = targetlist[side_name][baseName]			--integration de ce target dans le camp oppos�				
 					targetlist[side_name][baseName] = nil										--suppression de ce target de l'ancien camp		
 				end
@@ -594,12 +594,12 @@ Action = {}
 			if country.static then															--country has ships
 				for group_n, _group in ipairs(country.static.group) do							--go through groups
 					if  string.find(_group.name, baseName) then
-						table.insert(oob_ground[NewSide][1].static.group, _group )						
+						table.insert(oob_ground[NewSide][1].static.group, _group )
 						table.remove(oob_ground[OldSide][country_n].static.group, group_n)
 					end
 				end
 			end
-			
+
 			--Cef ne veut pas changer les vehicules de camp :( ^^
 			-- if country.vehicle then															--country has ships
 				-- for group_n, _group in ipairs(country.vehicle.group) do							--go through groups
@@ -609,24 +609,24 @@ Action = {}
 					-- end
 				-- end
 			-- end
-		end		
-		
+		end
+
 	end
 
 	--activates or deactivates a base and the units stationed on it 
 	function ActivateBaseAndAssociatedTargets(baseName, active)
 		local inactive
-		if active then 
-			inactive = false 
+		if active then
+			inactive = false
 		else
 			inactive = true
 		end
 
-		for db_baseName, base in pairs(db_airbases) do							
-			if db_baseName == baseName then										
+		for db_baseName, base in pairs(db_airbases) do
+			if db_baseName == baseName then
 				base.inactive = inactive
 				-- if debugKT then print(" 	ActivateBaseAndAssociatedTargets DcCT "..db_baseName.." "..tostring(active)) end
-				break									
+				break
 			end
 		end
 
@@ -646,62 +646,62 @@ Action = {}
 		end
 
 	end
-	
+
 	--activates or deactivates a base and the units stationed on it 
 	function Action.ActivateBaseAndItsUnits(baseName, activeBase)
 		local inactive
 		local baseMutation
 
-		if activeBase then 
-			inactive = false 
+		if activeBase then
+			inactive = false
 		else
 			inactive = true
 		end
 
 		if debugKT then print(" 	->START function Action.ActivateBaseAndItsUnits   "..baseName) end
 
-		for db_baseName, base in pairs(db_airbases) do							
-			if db_baseName == baseName and base.inactive ~= inactive then										
+		for db_baseName, base in pairs(db_airbases) do
+			if db_baseName == baseName and base.inactive ~= inactive then
 				base.inactive = inactive
 				if debugKT then print(" 		         ->ActivateBaseAndItsUnits db_airbases  "..baseName.." base.inactive? "..tostring(base.inactive)) end
-				break									
+				break
 			end
 		end
-		
-		for side_name, side in pairs(oob_air) do								 
-			for unit_n, unit in pairs(side) do									 
-				
+
+		for side_name, side in pairs(oob_air) do
+			for unit_n, unit in pairs(side) do
+
 				--parse toutes les unités qui sont stationnées sur la base en question
 				--et regarde s'il est possible de les transferer ailleurs
 				--ou alors, ces unités sont désactivée dans moveToAnotherBaseOrDeactivate
-				if unit.base == baseName then	
-					
+				if unit.base == baseName then
+
 					local transfertPossible = false
 					if unit.baseAlternative then
-						if debugKT then print("		 		->ActivateBaseAndItsUnits baseAlternative oob_air.inactive? "..tostring(unit.inactive).." : "..tostring(unit.name)) end	
-						
+						if debugKT then print("		 		->ActivateBaseAndItsUnits baseAlternative oob_air.inactive? "..tostring(unit.inactive).." : "..tostring(unit.name)) end
+
 						transfertPossible = Action.moveToAnotherBaseOrDeactivate(unit.name, unit.baseAlternative )
-					
+
 					else
-						
+
 						if unit.inactive ~= inactive then
 							if inactive == true then
-								
+
 								unit.inactive = inactive
 								unit.disabledByDCE = true
-								
-								if debugKT then print("		 		->ActivateBaseAndItsUnits oob_air.inactive "..tostring(unit.inactive).." : "..tostring(unit.name)) end	
-							
+
+								if debugKT then print("		 		->ActivateBaseAndItsUnits oob_air.inactive "..tostring(unit.inactive).." : "..tostring(unit.name)) end
+
 							elseif inactive == false and unit.disabledByDCE then
-								
+
 								unit.inactive = inactive
 								unit.disabledByDCE = nil
-								
-								if debugKT then print("		 		->ActivateBaseAndItsUnits oob_air.inactive "..tostring(unit.inactive).." : "..tostring(unit.name)) end	
-							
+
+								if debugKT then print("		 		->ActivateBaseAndItsUnits oob_air.inactive "..tostring(unit.inactive).." : "..tostring(unit.name)) end
+
 							end
 						end
-					end								 
+					end
 				end
 			end
 		end
@@ -737,8 +737,8 @@ Action = {}
 				os.execute 'pause'
 			end
 
-			for side_name, air in pairs(oob_air) do			
-				for unit_n, unit in pairs(air) do						
+			for side_name, air in pairs(oob_air) do
+				for unit_n, unit in pairs(air) do
 					if unit.name == unitName and unit.base ~= baseDestination then
 						unit.base = baseDestination										--set new airbase for unit
 						ActivateBaseAndAssociatedTargets(baseDestination, true)
@@ -757,7 +757,7 @@ Action = {}
 				--TODO placeToBeFound n'est plus utiliser, pourquoi?
 				-- placeToBeFound = AirUnitBaseInternal(unitName, baseName )
 				break
-			end	
+			end
 		end
 
 
@@ -776,14 +776,14 @@ Action = {}
 		if debugKT then print(" ->START function Action.moveToAnotherBaseOrDeactivate unitName  "..unitName) end
 		local transfertOk = false
 
-		local typeAeronef 
+		local typeAeronef
 		local sideUnite
-		local inactive 
-		
+		local inactive
+
 		--recupere le type d aeronef pour savoir si c'est un helico ou pas
 		for side, squads in pairs(oob_air) do
 			for squadN, squad in ipairs(squads) do
-				
+
 				if unitName == squad.name then
 					if debugKT then print("				DcCT check  unitName : "..tostring(unitName).." ==squad.name: "..tostring(squad.name)) end
 					typeAeronef = squad.type
@@ -802,33 +802,33 @@ Action = {}
 		local function checkBaseCapacity(unitName, checkBase)
 
 			if sideUnite == db_airbases[checkBase].side then
-				
+
 				if not db_airbases[checkBase].baseAlive then
 					Return.BaseAlive(checkBase)
-				end 
-				
+				end
+
 				if not db_airbases[checkBase].runwayAlive then
 					db_airbases[checkBase].runwayAlive = 100
 				end
-				
-				if isHelicopter[typeAeronef] then
+
+				if IsHelicopter[typeAeronef] then
 					if db_airbases[checkBase].baseAlive >= 20  then  --and db_airbases[checkBase].runwayAlive > 20
-						if debugKT then print(" 		-> moveToAnotherBaseOrDeactivate isHelicopter baseAlive > 20 runwayAlive > 20 ") end
-						return true 
-					else 
-						return false 
+						if debugKT then print(" 		-> moveToAnotherBaseOrDeactivate IsHelicopter baseAlive > 20 runwayAlive > 20 ") end
+						return true
+					else
+						return false
 					end
 
 				else
 					if db_airbases[checkBase].baseAlive >= 20 and db_airbases[checkBase].runwayAlive >= 50 then
 						if debugKT then print(" 		-> moveToAnotherBaseOrDeactivate PLANE baseAlive > 20 runwayAlive > 50 ") end
-						return true 
-					else 
-						return false 
+						return true
+					else
+						return false
 					end
 				end
-			else 
-				return false 
+			else
+				return false
 			end
 		end
 
@@ -846,7 +846,7 @@ Action = {}
 				Action.AirUnitBase(unitName, tab_baseName[1])
 				-- Action.Text(unitName.."  moveToAnotherBase."..tab_baseName[1])
 				transfertOk = true
-			end	
+			end
 		elseif type(tab_baseName) == "table" and #tab_baseName > 1 then
 			-- local placeToBeFound = false
 			for n, baseName in ipairs(tab_baseName) do
@@ -859,20 +859,20 @@ Action = {}
 					transfertOk = true
 					break
 				end
-			end	
+			end
 
 		end
 
 		if not transfertOk and not inactive then
 			Action.AirUnitActive(unitName, false)
 			Action.Text(unitName.."  this unit is deactivated.")
-		end	
+		end
 
 		if debugKT then print(" ->FIN function Action.moveToAnotherBaseOrDeactivate transfertOk?  "..tostring(transfertOk).." "..unitName) end
 
 		return transfertOk
 	end
-	
+
 	--set unit playable
 	function Action.AirUnitPlayer(unitName, state)
 		for side_name,side in pairs(oob_air) do									--iterate through sides in oob_air
@@ -883,7 +883,7 @@ Action = {}
 			end
 		end
 	end
-	
+
 	--send reinforcement aircraft from one unit to another
 	function Action.AirUnitReinforce(sourceName, destName)						--(sourceName, destName, destNumber) destNumber => deprecated
 		-- print("DcCT passe 00 sourceName "..tostring(sourceName).." destName: "..tostring(destName))
@@ -919,12 +919,12 @@ Action = {}
 		--M53_a
 
 		--si (sourceName, ..., ...)
-		if destUnit == nil or destUnit == "" then			
+		if destUnit == nil or destUnit == "" then
 
-			if sourceUnit == nil then			
+			if sourceUnit == nil then
 				return
 			end
-			
+
 			if  not sourceUnit.roster.trans then sourceUnit.roster.trans = 0 end
 			destUnit = sourceUnit
 			sourceUnitRosterReserve = sourceUnit.roster.reserve
@@ -936,15 +936,15 @@ Action = {}
 		-- si sourceName (et donc sourceUnit) n'est pas trouv�
 		if sourceUnit == nil or sourceUnit == "" then
 			if not destUnit.roster.trans then destUnit.roster.trans = 0 end
-			sourceUnit = destUnit			
+			sourceUnit = destUnit
 			sourceUnitRosterReserve = sourceUnit.roster.reserve
 			casB = true
 		end
 
 		if not sourceUnit.roster.trans then sourceUnit.roster.trans = 0 end
 		if not destUnit.roster.trans then destUnit.roster.trans = 0 end
-		
-		
+
+
 		if destUnit.roster.ready < destUnit.number then								--destination ready number is below nominal number
 			if sourceUnitRosterReserve > 0 then									--source unit has ready aircraft
 				local maxtrans = destUnit.number - destUnit.roster.ready				--maximal number of transferable aircraft
@@ -987,18 +987,18 @@ Action = {}
 				--demande 1 reserve 20 : 1/20 = 0.05
 				--demande 15 reserve 20 : 15/20 = 0.75
 				--demande 20 reserve 20 :  20/20 = 1
-				
-				
 
 
-				maxtrans = math.ceil( maxtrans) 
+
+
+				maxtrans = math.ceil( maxtrans)
 				-- local minTrans = math.ceil(maxtrans/4*3)
-				
+
 
 				local trans = math.random(minTrans, maxtrans)							--set random number of actual transferable aircraft
 				destUnit.roster.ready = destUnit.roster.ready + trans			--transfer aircraft
 				sourceUnitRosterReserve = sourceUnitRosterReserve - trans		--transfer aircraft
-				
+
 				if casA then
 					-- print("DcCT passe 11 RosterReserve "..sourceUnitRosterReserve.." - "..trans)
 					sourceUnit.roster.reserve = sourceUnitRosterReserve
@@ -1010,10 +1010,10 @@ Action = {}
 				else
 					-- print("DcCT passe 13A RosterReserve "..sourceUnit.roster.ready.." - "..trans)
 					sourceUnit.roster.ready = sourceUnit.roster.ready - trans
-					sourceUnit.roster.trans = sourceUnit.roster.trans +  trans			
+					sourceUnit.roster.trans = sourceUnit.roster.trans +  trans
 					-- print("DcCT passe 13B RosterReserve "..sourceUnit.roster.ready)		
 				end
-				
+
 				local text
 				if trans == 1 then
 					text = "" .. trans .. " replacement " .. ReplaceTypeName(destUnit.type) .. " has been transferred from " .. sourceName .. " to " .. destName .. " (maxtrans: " .. maxtrans ..  " Reserve: " .. sourceUnitRosterReserve ..  " normal.assigned: " .. destUnit.number ..")".. ". \n \n"	--text to be added to briefing/oob
@@ -1031,7 +1031,7 @@ Action = {}
 			end
 		end
 	end
-	
+
 	--repair damaged aircraft in all air units
 	function Action.AirUnitRepair(arg)
 		local s = {}
@@ -1055,7 +1055,7 @@ Action = {}
 					end
 					if repair > 0 then												--if aircraft are repaird in this round
 						unit.roster.damaged = unit.roster.damaged - repair
-						
+
 						if unit.roster.reserve and unit.roster.ready + repair >= unit.number then		-- les r�par�s ne doivent pas d�passer le stock initial
 							 local returToReserve = unit.roster.ready + repair - unit.number
 							unit.roster.reserve = unit.roster.reserve + returToReserve
@@ -1086,8 +1086,8 @@ Action = {}
 		print("DC CT GroundTarget BLUE: "..GroundTarget["blue"].percent)
 		print("DC CT GroundTarget RED: "..GroundTarget["red"].percent)
 	end
-	
-	
+
+
 	-- Miguel21 modification M19.f : Repair Ground
 	function Action.GroundUnitRepair()
 
@@ -1096,22 +1096,22 @@ Action = {}
 			if side_name == "red" then
 				groundside = "blue"
 			end
-			
+
 			for targetN, target in pairs(targets) do		--Iterat through all targets
 				local attibut = {}
 
-				if target.attributes and type(target.attributes) == "table" then 
+				if target.attributes and type(target.attributes) == "table" then
 					for key, value in pairs(target.attributes) do
 						if value and value ~= "" then
-							attibut[string.upper(value)] =  true 
+							attibut[string.upper(value)] =  true
 						end
 					end
 				end
 
-			
+
 
 				if target.alive and not attibut["RUNWAY"]   then
-					
+
 					local prob = 0
 					local aliveMiniForRepair = campMod.RepairMinimumDestroyed
 
@@ -1119,23 +1119,23 @@ Action = {}
 						-- print("DcCT NAME: target_name "..target_name)
 						-- print("DcCT NAME: attributes "..tostring(target.attributes[1]))
 
-						
+
 
 						if target.targetSpecificRepairValue then prob = target.targetSpecificRepairValue
-						elseif attibut["SAM"] or attibut["EWR"] then 
-							prob = campMod.RepairSAM 
+						elseif attibut["SAM"] or attibut["EWR"] then
+							prob = campMod.RepairSAM
 
-						elseif attibut["AIRBASE"] or attibut["STRUCTURE"]  then 
+						elseif attibut["AIRBASE"] or attibut["STRUCTURE"]  then
 							prob = campMod.RepairAirbase
 							aliveMiniForRepair = campMod.RepairBaseMinimumDestroyed
 
-						elseif attibut["STATION"]  then 
+						elseif attibut["STATION"]  then
 							prob = campMod.RepairStation
 
-						elseif attibut["BRIDGE"]  then 
+						elseif attibut["BRIDGE"]  then
 							prob = campMod.RepairBridge
 
-						else 
+						else
 
 							prob = campMod.Repair
 						end
@@ -1147,27 +1147,27 @@ Action = {}
 					-- print("DcCT target_name "..tostring(target_name).." aliveMiniForRepair "..aliveMiniForRepair)
 					-- _affiche(attibut, "attibut DcCT")
 					-- os.execute 'pause'
-					
-					if target.elements   then 
+
+					if target.elements   then
 						for e = 1, #target.elements do												--Iterate through elements of target
 							local temp_dead = nil
 							local temp_dead_last = nil
 							local temp_CheckDay = nil
 							-- local prob = 0
 							local forcedReAlive = false												-- M19.f
-							
-							if target.elements[e].dead then 
+
+							if target.elements[e].dead then
 								temp_dead = target.elements[e].dead
 								temp_dead_last = target.elements[e].dead_last
-								temp_CheckDay = target.elements[e].CheckDay	
+								temp_CheckDay = target.elements[e].CheckDay
 							end
-						
+
 
 							if  target.alive < 100 and target.alive >= aliveMiniForRepair   then
 								if  target.elements[e].dead  then
 									if target.elements[e].CheckDay then
 										if	CampTotalTimeS >= target.elements[e].CheckDay + (campMod.groundReinforceDelay * 3600) then
-											
+
 											local test_prob = math.random(1,100)
 
 											if Debug.AfficheSol or debugKT then
@@ -1181,20 +1181,20 @@ Action = {}
 												temp_dead = nil
 												temp_dead_last = false
 												temp_CheckDay = nil
-												
+
 												local text = "" .. target.elements[e].name .. " from ".. target.titleName .. " have been repaired and returned back to service. \n \n"
-												
+
 												if Debug.AfficheSol or debugKT then
 													print("Dc_CT Debug Resurrection: "..target.titleName .. " "..target.elements[e].name)
 													print("Dc_CT Debug "..text)
 												end
-												
+
 												if side_name == "blue" then									--side is blue
 													Briefing_oob_text_blue = Briefing_oob_text_blue .. text	--add to blue briefing oob text
 												elseif side_name == "red" then								--side is red
 													Briefing_oob_text_red = Briefing_oob_text_red .. text	--add to red briefing oob text
 												end
-												
+
 
 												target.elements[e].dead = nil
 												target.elements[e].CheckDay = nil
@@ -1205,10 +1205,10 @@ Action = {}
 													print("Dc_CT Debug D² : "..target.titleName .. " alive: "..target.alive)
 													-- os.execute 'pause'
 												end
-															
+
 												target.dead_last = math.floor(target.dead_last -  (1/#target.elements *100))
 												if target.dead_last < 0 then  target.dead_last = 0 end
-		
+
 											else -- sinon on met � jour la date de check pour y revenir seulement un jour apres
 												-- temp_CheckDay = camp.day
 												temp_CheckDay = CampTotalTimeS
@@ -1219,7 +1219,7 @@ Action = {}
 								end
 							end
 
-							if forcedReAlive then						 
+							if forcedReAlive then
 								local endfunction = false
 								for c = 1, #oob_ground[groundside] do													--iterate through countries in side
 									for typename,typetable in pairs(oob_ground[groundside][c]) do						--iterate through country table content
@@ -1227,13 +1227,13 @@ Action = {}
 											for group_n,group in pairs(typetable.group) do			--iterate through groups	
 												for unit_n,unit in pairs(group.units) do			--iterate through groups	
 													if  target.elements[e].name == unit.name then
-													
+
 														if Debug.AfficheSol then
 															if temp_dead then print(" temp_dead "..tostring(temp_dead))  end
 															if temp_dead_last then print(" temp_dead_last "..tostring(temp_dead_last))  end
 															if temp_CheckDay then print(" temp_CheckDay "..tostring(temp_CheckDay))  end
 														end
-														
+
 														 group.units[unit_n]['dead'] = temp_dead
 														 group.units[unit_n]['dead_last'] = temp_dead_last
 														 group.units[unit_n].CheckDay = temp_CheckDay
@@ -1243,9 +1243,9 @@ Action = {}
 													end
 													if endfunction then  break end
 												end
-												if endfunction then  break end	
+												if endfunction then  break end
 											end
-											if endfunction then  break end	
+											if endfunction then  break end
 										end
 										-- if endfunction then break end	
 									end
@@ -1258,7 +1258,7 @@ Action = {}
 
 				elseif attibut == "RUNWAY" and target.alive  and  target.alive < 100 and target.alive > campMod.RepairBaseMinimumDestroyed and  target.CheckDay then   --
 					local oldVAlive = target.alive
-					if CampTotalTimeS >= target.CheckDay + 3600 then 
+					if CampTotalTimeS >= target.CheckDay + 3600 then
 						local repairRunwayPerDay
 						if db_airbases[target.db_airbaseName] and db_airbases[target.db_airbaseName].customRepairRunwayPerDay then
 							repairRunwayPerDay = db_airbases[target.db_airbaseName].customRepairRunwayPerDay
@@ -1270,17 +1270,17 @@ Action = {}
 						target.CheckDay = CampTotalTimeS
 
 						if target.alive > 100  then --or  target.alive >= 50
-							target.alive = 100 
-							
+							target.alive = 100
+
 						end
 
-						
+
 						Action.Text(target.name.." repair in progress, old value: "..oldVAlive.." new value "..target.alive)
 
 						local nbRunwayPartDead = #target.elements -  (#target.elements * target.alive/100)
 
 						if Debug.AfficheSol or debugKT then
-							print("Dc_CT repair Runway "..target.name.." old value: "..oldVAlive.." new value "..target.alive ) 
+							print("Dc_CT repair Runway "..target.name.." old value: "..oldVAlive.." new value "..target.alive )
 							print("Dc_CT repairRunwayPerDay "..repairRunwayPerDay)
 							print("Dc_CT RUNWAY repair: "..target.name.." new value: "..target.alive.." nbRunwayPartDead: "..nbRunwayPartDead )
 							-- os.execute 'pause'
@@ -1290,22 +1290,22 @@ Action = {}
 						--raz tout
 						for i=1, #target.elements do
 							target.elements[i].dead = nil
-							target.elements[i].dead_last = nil									
+							target.elements[i].dead_last = nil
 							target.elements[i].CheckDay = nil
-						end	
+						end
 
 						for i=1, #target.elements do
-							
+
 							if i > nbRunwayPartDead then break end
-							
+
 							target.elements[i].dead = true
-							target.elements[i].dead_last = true								
+							target.elements[i].dead_last = true
 							target.elements[i].CheckDay = CampTotalTimeS
-							
+
 						end
 
 						--runway réparé
-						if oldVAlive < 50 and target.alive >= 50 then  
+						if oldVAlive < 50 and target.alive >= 50 then
 							if attibut ~= nil  and attibut == "RUNWAY" then
 								if debugKT then print(" 	->RUNWAY Action.ActivateBaseAndItsUnits  active: TRUE "..target.name) end
 
@@ -1316,15 +1316,15 @@ Action = {}
 
 					end
 				end
-			end	
+			end
 		end
 	end
-	
+
 	--add ground target intel updates to briefing
 	function Action.AddGroundTargetIntel(side)
 		if MissionInstance == 1 then											--ground target intel updates are only added in first mission instance (to avoid duplication)
 			for targetN, target in pairs(targetlist[side]) do				--iterate through targets in side
-			
+
 				if target.expand then											--target should be displayed with expanded elements
 					if target.elements then										--target has elements
 						for e = 1, #target.elements do							--iterate through elements
@@ -1343,7 +1343,7 @@ Action = {}
 						end
 					end
 				end
-				
+
 				if target.alive and target.dead_last > 0 and target.hidden ~= true then			--ground target was hit in last mission and should not be hidden
 					if target.alive == 0 then									--target is dead
 						Briefing_text = Briefing_text .. "Intel Update: " .. target.titleName .. " has been destroyed. \n \n"
@@ -1354,7 +1354,7 @@ Action = {}
 			end
 		end
 	end
-	
+
 	--change vehicle/ship group hidden status
 	function Action.GroupHidden(groupname, hidden_bool)
 		for sidename,side in pairs(oob_ground) do								--iterate through sides in ground OOB
@@ -1372,7 +1372,7 @@ Action = {}
 			end
 		end
 	end
-	
+
 	--change vehicle/ship group probability status
 	--due to the way stats are reset for a new playrun upon completing a FirstMission, groups probability changed by trigger in first mission will not be carried over to second mission! Repeat trigger on second mission or use the trigger from mission 2 on only for flawless function.
 	function Action.GroupProbability(groupname, prob_val)
@@ -1391,7 +1391,7 @@ Action = {}
 			end
 		end
 	end
-	
+
 	--move vehicle group to refpoint
 	--due to the way stats are reset for a new playrun upon completing a FirstMission, groups moved by trigger in first mission will not be carried over to second mission! Repeat trigger on second mission or use the trigger from mission 2 on only for flawless function.
 	function Action.GroupMove(GroupName, ZoneName)
@@ -1417,7 +1417,7 @@ Action = {}
 			end
 		end
 	end
-	
+
 	--move vehicle group relative to another group
 	--due to the way stats are reset for a new playrun upon completing a FirstMission, groups moved by trigger in first mission will not be carried over to second mission! Repeat trigger on second mission or use the trigger from mission 2 on only for flawless function.
 	function Action.GroupSlave(GroupName, master, bearing, distance)
@@ -1426,7 +1426,7 @@ Action = {}
 				if country.vehicle then											--country has vehicles
 					for group_n,group in ipairs(country.vehicle.group) do		--go through groups
 						if GroupName == group.name then							--ship group found
-							
+
 							--find master group and get master  x-y coordinates
 							for m_coal_name,m_coal in pairs(oob_ground) do									--go through sides(red/blue)	
 								for m_country_n,m_country in ipairs(m_coal) do								--go through countries
@@ -1458,7 +1458,7 @@ Action = {}
 			end
 		end
 	end
-	
+
 	--assign and run a movement mission to a ship group: move group along waypoints/polygons at cruise speed and optionally patrol at last polygon at patrol speed
 	--GroupName is a string with the name of the ship group to get a mission
 	--WPtable is a set of trigger zone names acting as waypoints for the ship to follow. WPtable is an array of multiple waypoints (example: {"ZoneName1", ZoneName2"} ).
@@ -1474,30 +1474,30 @@ Action = {}
 			for country_n,country in ipairs(coal) do							--go through countries
 				if country.ship then											--country has ships
 					for group_n,group in ipairs(country.ship.group) do			--go through groups
-						
+
 						if GroupName == group.name then							--ship group found							
-							
+
 							local firstWPT = "test"
 							if type(WPtable) == "table" then
-								if WPtable[1] == ""  then									
+								if WPtable[1] == ""  then
 									table.remove(WPtable, 1)
 									firstWPT = ""
 								end
-								
+
 								RandomWPtable = WPtable[math.random(1, #WPtable)]
 
 								if firstWPT == "" then
 									table.insert(RandomWPtable, 1, firstWPT)
 								end
 							end
-							
+
 							camp.ShipMissions[GroupName] = {					--store ship mission in camp for subsequent executions during later missions
 								WPtable = WPtable,
 								CruiseSpeed = CruiseSpeed,
 								PatrolSpeed = PatrolSpeed,
 								-- StartTime = StartTime
 							}
-							
+
 							-- print("DcCT GroupName "..GroupName.." ShipGroupMovement")
 
 							-- ShipGroupMovement(GroupName, RandomWPtable, CruiseSpeed, PatrolSpeed, StartTime)	--exectue ship mission
@@ -1508,7 +1508,7 @@ Action = {}
 			end
 		end
 	end
-	
+
 	function Action.RestrictedLoadout(file)
 		-- restricted_loadout.miz
 
@@ -1528,7 +1528,7 @@ Action = {}
 			local misResticted = zipFileResticted:unzReadAllCurrentFile()
 			local misRestictedFunc = loadstring(misResticted)()
 
-			for _side, side in pairs(mission.coalition) do	
+			for _side, side in pairs(mission.coalition) do
 				for countryN, country in pairs(side.country) do
 					for category, groups in pairs(country) do
 						if type(groups) == "table" and groups["group"]  then
@@ -1545,12 +1545,12 @@ Action = {}
 					end
 				end
 			end
-			
+
 			mission = missionFromBaseMission
 
-			local data_str = "PayloadRestricted = " .. TableSerialization(PayloadRestricted, 0)						
-			local dataFile = io.open("Active/PayloadRestricted.lua", "w") or error("Failed to open debug file")						
-			dataFile:write(data_str)														
+			local data_str = "PayloadRestricted = " .. TableSerialization(PayloadRestricted, 0)
+			local dataFile = io.open("Active/PayloadRestricted.lua", "w") or error("Failed to open debug file")
+			dataFile:write(data_str)
 			dataFile:close()
 
 		end
@@ -1558,35 +1558,35 @@ Action = {}
 
 	--Miguel21 modification M40
 	--TemplateActive
-	function Action.TemplateActive(TabFile)				
+	function Action.TemplateActive(TabFile)
 		if debugKT then print("	--> function Action.TemplateActive "..tostring( TabFile)) end
-		
+
 		local file
-		
+
 		--cherche la valeur UnitID la plus haute
 		local CurrentUnitId = 0
 		local CurrentGroupId = 0
 		for Oside_name, Oside in pairs(oob_ground) do																--iterate through sides
 			for Ocountry_n, Ocountry in pairs(Oside) do															--iterate through countries				
-				for Ocategory, Ogroup in pairs(Ocountry) do					
-					if  type(Ogroup) == "table" then						
-						for Ngroup, O_group in pairs(Ogroup) do						
-							for g = 1, #O_group do										
-								if O_group[g].groupId > CurrentGroupId then										
+				for Ocategory, Ogroup in pairs(Ocountry) do
+					if  type(Ogroup) == "table" then
+						for Ngroup, O_group in pairs(Ogroup) do
+							for g = 1, #O_group do
+								if O_group[g].groupId > CurrentGroupId then
 									CurrentGroupId = O_group[g].groupId
 								end
 								for u = 1, #O_group[g].units do											--iterate through units								
-									if O_group[g].units[u].unitId > CurrentUnitId then										
+									if O_group[g].units[u].unitId > CurrentUnitId then
 										CurrentUnitId = O_group[g].units[u].unitId
-									end								
+									end
 								end
 							end
 						end
 					end
-				end				
+				end
 			end
-		end	
-		
+		end
+
 		-- print("DcCT AA CurrentGroupId: "..CurrentGroupId.." CurrentUnitId: "..CurrentUnitId)
 
 		for side_name, side in pairs(mission.coalition) do																--iterate through sides
@@ -1594,16 +1594,16 @@ Action = {}
 				for categorie, categorie_ in pairs(country_) do
 					if type(categorie_) == "table" and categorie_.group then
 						for _group, group in pairs(categorie_) do
-							for groupN, group_ in pairs(group) do						
+							for groupN, group_ in pairs(group) do
 								if group_.groupId > CurrentUnitId then
 									CurrentUnitId = group_.groupId
 								end
-								for unitN, unit in ipairs(group_.units) do								
+								for unitN, unit in ipairs(group_.units) do
 									if unit.unitId > CurrentUnitId then
 										CurrentUnitId = unit.unitId
-									end					
+									end
 								end
-							end	
+							end
 						end
 					end
 				end
@@ -1617,7 +1617,7 @@ Action = {}
 				if O_sideName == sideName  then
 					for O_country_n, O_country in pairs(O_countries) do															--iterate through countries
 						if O_country.id == countryId and O_country[category] and O_country[category].group then																			--country has vehicles
-							for g = 1, #O_country[category].group do							
+							for g = 1, #O_country[category].group do
 								if O_country[category].group[g].name  == groupName then
 									return true
 								end
@@ -1625,15 +1625,15 @@ Action = {}
 						end
 					end
 				end
-			end			
+			end
 		end
-		
+
 		local function movedXY(Unit, Category)
 			local foundInGround = false
 			for Oside_name, Oside in pairs(oob_ground) do																--iterate through sides
 				for Ocountry_n, Ocountry in pairs(Oside) do															--iterate through countries
 					if Ocountry[Category] then																			--country has vehicles
-						for g = 1, #Ocountry[Category].group do							
+						for g = 1, #Ocountry[Category].group do
 							for u = 1, #Ocountry[Category].group[g].units do											--iterate through units								
 								if Ocountry[Category].group[g].units[u].name == Unit.name then
 
@@ -1642,7 +1642,7 @@ Action = {}
 										Ocountry[Category].group[g].units[u].x = Unit.x
 										Ocountry[Category].group[g].units[u].y = Unit.y
 										Ocountry[Category].group[g].units[u].heading = Unit.heading
-										
+
 										if u == 1 then
 											Ocountry[Category].group[g].heading = Unit.heading				--M40.e
 											Ocountry[Category].group[g].x = Unit.x							--M40.e
@@ -1650,13 +1650,13 @@ Action = {}
 											foundInGround = true
 											-- print("[1]DcCt update movedXY "..Unit.name.." "..Ocountry[Category].group[g].units[u].heading)
 										end
-									end										
-								end														
+									end
+								end
 							end
 						end
 					end
 				end
-			end	
+			end
 		end
 
 		function SetRouteXY(Groupname, Category, Route )
@@ -1664,40 +1664,40 @@ Action = {}
 			for Oside_name, Oside in pairs(oob_ground) do																--iterate through sides
 				for Ocountry_n, Ocountry in pairs(Oside) do															--iterate through countries
 					if Ocountry[Category] then																			--country has vehicles
-						for g = 1, #Ocountry[Category].group do							
-							if Ocountry[Category].group[g].name == Groupname then								
+						for g = 1, #Ocountry[Category].group do
+							if Ocountry[Category].group[g].name == Groupname then
 								Ocountry[Category].group[g].route = Route
 							end
 						end
 					end
 				end
-			end	
-		end		
+			end
+		end
 
-		
+
 		-- cree une table identifiant des noms de pays
 		local countryNameToN = {
 			red = {},
 			blue = {},
 			neutrals = {},
 		}
-		for sideName, side in pairs(oob_ground) do																
-			for countryN, country in pairs(side) do															
+		for sideName, side in pairs(oob_ground) do
+			for countryN, country in pairs(side) do
 				if country.name then
 					if not countryNameToN[sideName] then countryNameToN[sideName] = {} end
-					if countryNameToN[sideName][country.name] == nil then 
-						countryNameToN[sideName][country.name] = countryN 
+					if countryNameToN[sideName][country.name] == nil then
+						countryNameToN[sideName][country.name] = countryN
 					end
 				end
 			end
 		end
-		
-		if type(TabFile) == "table" then		
+
+		if type(TabFile) == "table" then
 			file =  TabFile[math.random(1, #TabFile)]
-		else 
+		else
 			file = TabFile
 		end
-		
+
 		dofile("Templates/"..file)
 
 		--ajoute le tag ["taskSelected"] = true,
@@ -1707,9 +1707,9 @@ Action = {}
 				for category_n, category in pairs(country) do
 
 					if type(category) == "table" and category.group then
-						
-						for group_n, group in pairs(category.group) do						
-							
+
+						for group_n, group in pairs(category.group) do
+
 							group.taskSelected = true
 							-- print("DcST "..group.name.." group.taskSelected = true")
 							-- os.execute 'pause'
@@ -1717,34 +1717,34 @@ Action = {}
 					end
 				end
 			end
-		end	
+		end
 
 
 		local tmp_ground = {}
-		tmp_ground["blue"] = deepcopy(staticTemplate.coalition.blue.country)											--copy mission data
-		tmp_ground["red"] = deepcopy(staticTemplate.coalition.red.country)												--copy mission data
-		
-		-- tmp_dictionary = deepcopy(staticTemplate.localization.DEFAULT)
-		
+		tmp_ground["blue"] = Deepcopy(staticTemplate.coalition.blue.country)											--copy mission data
+		tmp_ground["red"] = Deepcopy(staticTemplate.coalition.red.country)												--copy mission data
+
+		-- tmp_dictionary = Deepcopy(staticTemplate.localization.DEFAULT)
+
 		--store group and unit names in oob_ground instead of pointers to dict table
 		for sideName, countries in pairs(tmp_ground) do
-			for countryN, country in pairs(countries) do	
+			for countryN, country in pairs(countries) do
 				for category, class in pairs(country) do
-					if type(class) =="table" and class.group then		
-						for g = 1, #class.group do	
-							local groupname = class.group[g].name			
-							
+					if type(class) =="table" and class.group then
+						for g = 1, #class.group do
+							local groupname = class.group[g].name
+
 							--TODO attention, un nom identique existe peut etre dans les autres SIDE
 							local found = FindUnit(groupname, sideName, country.id, category)
-							class.group[g].name = groupname				
-							
+							class.group[g].name = groupname
+
 							if found then
 								SetRouteXY(groupname, category, class.group[g].route )
 							end
-							
-							for u = 1, #class.group[g].units do									
-								local unitname = class.group[g].units[u].name					
-								class.group[g].units[u].name = unitname													
+
+							for u = 1, #class.group[g].units do
+								local unitname = class.group[g].units[u].name
+								class.group[g].units[u].name = unitname
 								if found then
 									movedXY(class.group[g].units[u], category )
 								else
@@ -1752,15 +1752,15 @@ Action = {}
 									class.group[g].units[u].unitId = CurrentUnitId
 									-- print("DcCT  vehicle CurrentUnitId: "..CurrentUnitId.." name: "..class.group[g].units[u].name)
 								end
-							end							
-							
+							end
+
 							-- print("DcCT B found? "..tostring(found))
 
-							if not found then							
+							if not found then
 								CurrentGroupId = CurrentGroupId + 1													--actualise un groupId unique, evite les plantages
 								class.group[g].groupId = CurrentGroupId
 								local newCountryN = countryNameToN[sideName][country.name]
-								
+
 								if not countryNameToN[sideName][country.name] then
 
 									-- countryNameToN[sideName][country.name] = #countryNameToN + 1
@@ -1768,7 +1768,7 @@ Action = {}
 									for key, value in pairs(countryNameToN[sideName]) do
 										if idMax < value then
 											idMax = value
-										end 
+										end
 									end
 
 									countryNameToN[sideName][country.name] = idMax + 1
@@ -1781,16 +1781,16 @@ Action = {}
 											["group"] = {},
 										}
 									}
-									
+
 								else
 									if not oob_ground[sideName][newCountryN][category] then
 										oob_ground[sideName][newCountryN][category] = {
 											["group"] = {},
 										}
-									end							
-										
+									end
+
 								end
-								
+
 								table.insert(oob_ground[sideName][newCountryN][category]["group"], class.group[g])
 								-- print("DcCT D category "..tostring(category).." g.name "..tostring(class.group[g].name))
 							end
@@ -1802,11 +1802,11 @@ Action = {}
 				-- 		local groupname = country.ship.group[g].name								--find groupname in dictionary table			
 				-- 		local found = FindUnit(groupname, "ship")
 				-- 		country.ship.group[g].name = groupname												--give group the actual groupname instead of the pointer to the dictionary table						
-						
+
 				-- 		if found then
 				-- 			SetRouteXY(groupname, "ship", country.ship.group[g].route )
 				-- 		end
-						
+
 				-- 		for u = 1, #country.ship.group[g].units do											--iterate through units
 				-- 			local unitname = country.ship.group[g].units[u].name					--find unitname in dictionary table
 				-- 			country.ship.group[g].units[u].name = unitname									--give unit the actual unitname instead of the pointer to the dictionary table							
@@ -1818,7 +1818,7 @@ Action = {}
 				-- 				-- print("DcCT  ship CurrentUnitId: "..CurrentUnitId.." name: "..country.vehicle.group[g].units[u].name)
 				-- 			end
 				-- 		end							
-							
+
 				-- 		if not found then
 				-- 			CurrentGroupId = CurrentGroupId + 1													--actualise un groupId unique, evite les plantages
 				-- 			country.ship.group[g].groupId = CurrentGroupId
@@ -1835,7 +1835,7 @@ Action = {}
 				-- 	for g = 1, #country.static.group do															--iterate through static groups	
 				-- 		local groupname = country.static.group[g].name											--find groupname in dictionary table			
 				-- 		local found = FindUnit(groupname, "static")
-						
+
 				-- 		for u = 1, #country.static.group[g].units do											--iterate through units
 				-- 			-- local unitname = country.static.group[g].units[u].name								--find unitname in dictionary table
 				-- 			-- country.static.group[g].units[u].name = unitname									--give unit the actual unitname instead of the pointer to the dictionary table							
@@ -1847,7 +1847,7 @@ Action = {}
 				-- 				-- print("DcCT  static CurrentUnitId: "..CurrentUnitId.." name: "..country.vehicle.group[g].units[u].name)
 				-- 			end
 				-- 		end							
-							
+
 				-- 		if not found then														
 				-- 			CurrentGroupId = CurrentGroupId + 1													--actualise un groupId unique, evite les plantages
 				-- 			country.static.group[g].groupId = CurrentGroupId						
@@ -1863,12 +1863,12 @@ Action = {}
 			end
 		end
 	end
-	
-	
-	function Action.TemplateDeactivate(TabFile)	
-		
+
+
+	function Action.TemplateDeactivate(TabFile)
+
 		if debugKT then print("	--> function Action.TemplateDeactivate "..tostring( TabFile)) end
-		
+
 		-- local function FindUnit(Group_name, category)
 		-- 	for Oside_name, Oside in pairs(oob_ground) do																--iterate through sides
 		-- 		for Ocountry_n, Ocountry in pairs(Oside) do															--iterate through countries
@@ -1882,7 +1882,7 @@ Action = {}
 		-- 		end
 		-- 	end			
 		-- end
-		
+
 		-- local countryNameToN = {}
 		-- for side_name, side in pairs(oob_ground) do																--iterate through sides
 		-- 	for country_n, country in pairs(side) do															--iterate through countries
@@ -1894,58 +1894,58 @@ Action = {}
 		-- end
 
 		local file
-		
-		if type(TabFile) == "table" then		
+
+		if type(TabFile) == "table" then
 			file =  TabFile[math.random(1, #TabFile)]
-		else 
+		else
 			file = TabFile
 		end
-		
+
 		dofile("Templates/"..file)
 		local tmp_ground = {}
-		tmp_ground["blue"] = deepcopy(staticTemplate.coalition.blue.country)											--copy mission data
-		tmp_ground["red"] = deepcopy(staticTemplate.coalition.red.country)												--copy mission data
-		
-		-- tmp_dictionary = deepcopy(staticTemplate.localization.DEFAULT)
-		
+		tmp_ground["blue"] = Deepcopy(staticTemplate.coalition.blue.country)											--copy mission data
+		tmp_ground["red"] = Deepcopy(staticTemplate.coalition.red.country)												--copy mission data
+
+		-- tmp_dictionary = Deepcopy(staticTemplate.localization.DEFAULT)
+
 		--store group and unit names in oob_ground instead of pointers to dict table
 		for sideName, countries in pairs(tmp_ground) do
-			for countryN, country in pairs(countries) do	
+			for countryN, country in pairs(countries) do
 				for category, class in pairs(country) do
-					if type(class) == "table" and class.group then		
-						for g = 1, #class.group do	
+					if type(class) == "table" and class.group then
+						for g = 1, #class.group do
 							-- local groupnName = class.group[g].name		
 							local tmpGroupName = class.group[g].name								--find groupname in dictionary table		
-							
+
 							-- local idDecativate = 0
 							-- local groupDeactivate = {}
-							
+
 							for O_sideName, O_countries in pairs(oob_ground) do																--iterate through sides
 								for O_countryN, O_country in pairs(O_countries) do															--iterate through countries
 									if O_country[category] then																			--country has vehicles
-										for o_g = #O_country[category].group, 1, -1  do							
+										for o_g = #O_country[category].group, 1, -1  do
 											if sideName == O_sideName and country.id == O_country.id and O_country[category].group[o_g].name  == tmpGroupName then
 												-- idDecativate = o_g
 												-- groupDeactivate = O_country[category].group
 
-												table.remove(O_country[category].group, o_g)	
+												table.remove(O_country[category].group, o_g)
 
 											end
 										end
 									end
 								end
-							end	
-							
+							end
+
 							-- if idDecativate ~= 0 then						
 							-- 	table.remove(groupDeactivate, idDecativate)
 							-- end		
-						end				
+						end
 					end
 				end
 				-- if country.ship then																			--country has ships
 				-- 	for tg = 1, #country.ship.group do															--iterate through ship groups	
 				-- 		local tmpGroupName = country.ship.group[tg].name								--find groupname in dictionary table			
-						
+
 				-- 		local idDecativate = 0
 				-- 		local groupDeactivate = {}
 				-- 		local category = "ship"
@@ -1961,7 +1961,7 @@ Action = {}
 				-- 				end
 				-- 			end
 				-- 		end	
-						
+
 				-- 		if idDecativate ~= 0 then					
 				-- 			table.remove(groupDeactivate, idDecativate)
 				-- 		end	
@@ -1970,7 +1970,7 @@ Action = {}
 				-- if country.static then																			--country has static objects
 				-- 	for tg = 1, #country.static.group do															--iterate through static groups	
 				-- 		local tmpGroupName = country.static.group[tg].name											--find groupname in dictionary table			
-						
+
 				-- 		local idDecativate = 0
 				-- 		local groupDeactivate = {}
 				-- 		local category = "static"
@@ -1986,7 +1986,7 @@ Action = {}
 				-- 				end
 				-- 			end
 				-- 		end	
-						
+
 				-- 		if idDecativate ~= 0 then						
 				-- 			table.remove(groupDeactivate, idDecativate)
 				-- 		end												
@@ -1995,11 +1995,11 @@ Action = {}
 			end
 		end
 	end
-	
+
 	if not AirLiftObjectif then
 		AirLiftObjectif = {}
 	end
-	
+
 	--return alive percentage of target
 	function Action.LogisticObjectif(placeName, weightObjectif)
 		for db_baseName, base_ in pairs(db_airbases) do								--iterate through sides in oob_air		
@@ -2008,7 +2008,7 @@ Action = {}
 				if base_.logistic then
 					local result = math.ceil(base_.logistic / weightObjectif * 100)
 					liftText = "The objective of the "..placeName.." airlift is "..result.."% of the "..weightObjectif.." Kg"
-					AirLiftObjectif[placeName.."_"..weightObjectif] = liftText					
+					AirLiftObjectif[placeName.."_"..weightObjectif] = liftText
 				else
 					liftText = "The objective of the "..placeName.." airlift is 0% of the "..weightObjectif.." Kg"
 					AirLiftObjectif[placeName.."_"..weightObjectif] = liftText
@@ -2034,7 +2034,7 @@ end
 if camp.Briefing_text and camp.Briefing_text ~= nil and camp.Briefing_text ~= "" then
 	Briefing_text = camp.Briefing_text																--briefing text to be added this mission instance
 else
-	
+
 	Briefing_text = ""
 
 	-- print("DcCT reset Briefing_text 2")
@@ -2082,7 +2082,7 @@ if debugKT then print("camp.automaticReinforce "..tostring(CampTotalTimeS).." >=
 --recompletement automatique des unités AIR
 --**********************************************************************************
 if CampTotalTimeS >= camp.automaticReinforce + campMod.airReinforceDelay * 3600 then
-	for side_name, side in pairs(oob_air) do	
+	for side_name, side in pairs(oob_air) do
 		for unit_n, unit in pairs(side) do
 			if unit.roster.reserve and unit.roster.reserve > 0 then -- not unit.inactive and 
 				Action.AirUnitReinforce(unit.name, "")
@@ -2115,11 +2115,11 @@ end
 -- Runway >= 20 et <= 50 : la piste est HS pour les avions mais reste REPARABLE, (Base Active, Plane Off, Heli On)
 -- Runway > 50 la piste est PRATICABLE, REPARATION en cours , (Base Active, Plane On, Heli On)
 
-	
+
 	-- Destruction d'une base : 
 	-- BaseAlive < 20 ou à "RepairBaseMinimumDestroyed" : base HS DEFINITIVEMENT (Base Inactive, Plane Off, Heli Off)
 	-- XXXX airbase is destroyed and will not be able to support air units anymore.
-	
+
 	-- Destruction d'une piste : 
 	-- Runway < 20 ou à "RepairBaseMinimumDestroyed" : piste HS DEFINITIVEMENT, (Base Active, Plane Off, Heli On)
 	-- XXXX runway is completely destroyed and the base is not able to support planes  anymore ...
@@ -2136,14 +2136,14 @@ end
 --recupere les valeurs dans targetlist, interressant les bases pour les coller à la table db_airbases
 for side_name, targets in pairs(targetlist) do													--Iterate through all side
 	for targetN, target in pairs(targets) do												--Iterat through all targets
-		
+
 		if target.db_airbaseName and db_airbases[target.db_airbaseName] then
-			if target.task ~= "Runway Attack"  then 
-				
+			if target.task ~= "Runway Attack"  then
+
 				--creation de db_airbases[target.db_airbaseName].baseAlive
 				Return.BaseAlive(target.db_airbaseName)
 
-			elseif target.task == "Runway Attack" and target.alive then 
+			elseif target.task == "Runway Attack" and target.alive then
 				db_airbases[target.db_airbaseName].runwayAlive = target.alive
 
 			end
@@ -2152,12 +2152,12 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 end
 
 for baseName, base in pairs(db_airbases) do
-	
+
 	if not string.find(string.lower(baseName), "reserve")  then
 		if not base.baseAlive then
 			Return.BaseAlive(baseName)
-		end 
-		
+		end
+
 		if not base.runwayAlive and not base.BaseAirStart then
 			base.runwayAlive = 100
 		end
@@ -2165,7 +2165,7 @@ for baseName, base in pairs(db_airbases) do
 	--base détruite
 	if base.baseAlive and base.baseAlive < campMod.RepairBaseMinimumDestroyed and not base.inactive   then
 		if debugKT then print(baseName.." 	airbase < 20 || airbase is destroyed and will not be able to support air units anymore. ") end
-		
+
 		Action.ActivateBaseAndItsUnits(baseName, false )
 		Action.Text(baseName.." airbase is destroyed and will not be able to support air units anymore.")
 
@@ -2173,18 +2173,18 @@ for baseName, base in pairs(db_airbases) do
 		--runway gravement endommagé, irréparable
 		if  base.runwayAlive < campMod.RepairBaseMinimumDestroyed then
 			if debugKT then print(baseName.." .runwayAlive < 20 || runway is completely destroyed and the base is not able to support planes  anymore.") end
-			
+
 			Action.ActivateBaseAndItsUnits(baseName, true )
 
 			if base.runwayTxt == nil or base.runwayTxt ~= "<"..campMod.RepairBaseMinimumDestroyed then
 				base.runwayTxt = "<"..campMod.RepairBaseMinimumDestroyed
 				Action.Text(baseName.." runway is completely destroyed and the base is not able to support planes anymore.")
 			end
-		
+
 			--runway endommagé mais base encore active (les avions ne peuvent plus décoller, les helico si)
 		elseif  base.runwayAlive < 50 then
 			if debugKT then print(baseName.." .runwayAlive < 50 || runway is badly damaged and it will require major repairs before it can be used again.") end
-			
+
 			Action.ActivateBaseAndItsUnits(baseName, true )
 
 			if base.runwayTxt == nil or base.runwayTxt ~= "<50" then
@@ -2195,9 +2195,9 @@ for baseName, base in pairs(db_airbases) do
 			--réparation du runway
 		elseif  base.runwayAlive >= 50 then
 			if debugKT then print(baseName.." .runwayAlive >= 50 || runway is repaired and can be used again..") end
-			
+
 			Action.ActivateBaseAndItsUnits(baseName, true )
-			
+
 			if  base.runwayTxt == "<50" or base.runwayTxt == "<"..campMod.RepairBaseMinimumDestroyed then
 				base.runwayTxt = ">=50"
 				Action.Text(baseName.." runway is repaired and can be used again.")
@@ -2209,7 +2209,7 @@ for baseName, base in pairs(db_airbases) do
 	if testBaseAlive then
 		if testBaseAlive <= campMod.RepairBaseMinimumDestroyed and not base.inactive then
 			if debugKT then print(" 	airbase < RepairBaseMinimumDestroyed  active: FALSE "..baseName) end
-		
+
 
 			Action.ActivateBaseAndItsUnits(baseName, false)
 			Action.Text(baseName.." airbase is destroyed and will not be able to support air units.")
@@ -2224,7 +2224,7 @@ end
 -- 	local foundUnitOnThisBase = false
 -- 	for side_name, sideAir in pairs(oob_air) do						
 -- 		for unit_n, unit in pairs(sideAir) do	
-			
+
 -- 			if unit.base == db_baseName and not unit.inactive then	
 -- 				ActivateBaseAndAssociatedTargets(db_baseName, true)									
 -- 				foundUnitOnThisBase = true
@@ -2249,14 +2249,14 @@ end
 -- if Briefing_text ~= "" then														--brefing text from this mission instance exists and should be added to Briefing_status text
 -- 	-- print("DcCT AVANT Briefing_text ")
 -- 	-- print(tostring(Briefing_text))
-	
+
 -- 	Briefing_status = Briefing_status .. FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ": \n \n" .. Briefing_text		--add date and time, then add briefing text of this mission instance
 -- 	-- print("DcCT APRES Briefing_text ")
 -- 	-- print(tostring(Briefing_status))
 -- 	-- os.execute 'pause'
 -- end
 
-if debugKT then 
+if debugKT then
 	_affiche(camp.flag, "Marqueur ou  CampFlag")
 end
 
@@ -2283,7 +2283,7 @@ if camp.endCampaign  then
 
 	local foundPlayer = false
 	if not camp.playerSide then
-		for side, units in pairs(oob_air)do			
+		for side, units in pairs(oob_air)do
 			for unitN, unit in pairs(units)do
 				if unit.player then
 					camp.playerSide = side
@@ -2297,15 +2297,15 @@ if camp.endCampaign  then
 	if camp.playerSide == "blue" then
 		for imageN, image in pairs(BriefingImagesB) do
 			os.execute('start "end_Campaign" "mspaint.exe" "Images\\' .. image .. '"')
-			
+
 			-- os.execute('start "end_Campaign" "ms-photos.exe" "Images\\' .. image .. '"')
 		end
 	elseif camp.playerSide == "red" then
 		for imageN, image in pairs(BriefingImagesR) do
 			os.execute('start "end_Campaign" "mspaint.exe" "Images\\' .. image .. '"')
-			
+
 			-- os.execute('start "end_Campaign" "ms-photos.exe" "Images\\' .. image .. '"')
-		end			
+		end
 	end
 
 
@@ -2318,7 +2318,7 @@ if camp.endCampaign  then
 		-- 	table.insert(BriefingImagesR, filename)
 		-- end	
 
-	
+
 
 	os.execute 'pause'
 end

@@ -78,7 +78,7 @@ local function createPolyAltiHelico(unitHelico, hHover)
 	-- print("AtoRouteG A unitHelico "..unitHelico.." hHover "..hHover)
 
 	local tempAlti = {}
-	for mapName, layers in pairs(altitudeFloor) do
+	for mapName, layers in pairs(AltitudeFloor) do
 		-- print("AtoRouteG B mapName "..mapName)
 
 		if string.lower(mapName) == string.lower(mission.theatre) then
@@ -139,14 +139,14 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 	local standoff																										--standoff distance of attack WP from target
 
 	local is_helicopter = false
-	if isHelicopter[unit.type]  then
+	if IsHelicopter[unit.type]  then
 		is_helicopter = true
 	end
 
 	if not AltiHelicoMap[unit.type] then
 		if is_helicopter then
-			if isHelicopter[unit.type] and isHelicopter[unit.type]["hHover"] then
-				createPolyAltiHelico(unit.type, isHelicopter[unit.type].hHover)
+			if IsHelicopter[unit.type] and IsHelicopter[unit.type]["hHover"] then
+				createPolyAltiHelico(unit.type, IsHelicopter[unit.type].hHover)
 			else
 				createPolyAltiHelico(unit.type, 1500)
 			end
@@ -1841,7 +1841,7 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 	local before = os.clock()
 	--make a local copy of the route table forwarded as function argument (otherwise the original route gets adjusted
 	-- local MainUnitHelicopter = mainUnit.helicopter
-	local route = deepcopy(orig_route)
+	local route = Deepcopy(orig_route)
 	local TagPause = false
 
 	-- Miguel21 modification M16.c // ne recopie pas le Spawn des B1b et B-52 en apparation sur une base virtuel en alti
@@ -1852,7 +1852,7 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 
 	-- change l'altitude des differents role, sinon, Strike Escorte et SEAD sont � la meme alti, pas bien
 	local randomAlti = math.random(4500, 7600)
-	if isHelicopter[unitEscort.type]  then
+	if IsHelicopter[unitEscort.type]  then
 		-- if not loadouts.hCruise then
 		-- 	_affiche(unitEscort, "unitEscort AtoRG")
 		-- 	_affiche(loadouts, "loadouts AtoRG")
@@ -1874,7 +1874,7 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 			higher = 608
 		end
 
-		if not isHelicopter[unitEscort.type]  then
+		if not IsHelicopter[unitEscort.type]  then
 			-- -- on ne l'applique pas � un groupe volant sous les radars
 			-- if route[w].alt > 1000 then
 			-- 	route[w].alt = route[w].alt + higher
@@ -1893,7 +1893,7 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 		end
 
 		-- elseif MainUnitHelicopter and not unitEscort.helicopter  then
-		if isHelicopter[mainUnit.type] and not isHelicopter[unitEscort.type] then
+		if IsHelicopter[mainUnit.type] and not IsHelicopter[unitEscort.type] then
 			-- les avions escorte d helicopter doivent etre a leur alti conso
 			route[w].alt = route[w].alt +  randomAlti
 		end
@@ -1937,7 +1937,7 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 		route[3].alt = basePoint.h
 	end
 
-	if not isHelicopter[unitEscort.type] then
+	if not IsHelicopter[unitEscort.type] then
 		local heading = 0
 		for n, wpt in ipairs(route) do
 			if wpt.id == "Join" then
@@ -1950,8 +1950,8 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 
 		local altitude = AltitudeCruise *2/3
 
-		if data_divers[unitEscort.type] and data_divers[unitEscort.type].hCruise then
-			altitude = data_divers[unitEscort.type].hCruise *2/3
+		if Data_divers[unitEscort.type] and Data_divers[unitEscort.type].hCruise then
+			altitude = Data_divers[unitEscort.type].hCruise *2/3
 		end
 
 

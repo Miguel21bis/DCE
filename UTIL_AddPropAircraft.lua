@@ -13,7 +13,7 @@ versionDCE["UTIL_AddPropAircraft.lua"] = "1.5.28"
 ------------------------------------------------------------------------------------------------------- 
  
 
-data_AddPropAircraft = {
+Data_AddPropAircraft = {
 
 	["A-10C_2"] = 
 	{

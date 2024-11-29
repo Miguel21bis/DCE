@@ -81,8 +81,14 @@ repeat
 	if inputString == "s" then
 		break
 	else
-		input = tonumber(inputString)		
-		DelGroup(input)
+		 -- Convertir inputString en nombre
+		 local convertedInput = tonumber(inputString) -- Conversion potentiellement nil
+		 if convertedInput then
+			 input = convertedInput -- Assigner seulement si la conversion a réussi
+			 DelGroup(input)
+		 else
+			 print("Erreur : Entrée invalide. Veuillez entrer un nombre.")
+		 end
 	end
 
 
@@ -92,11 +98,11 @@ until  input == "s" or inputString == "s"
 io.write( "\n")	
 
 local ground_str = "oob_ground = " .. TableSerialization(oob_ground, 0)						--make a string
-local groundFile = io.open("Active/oob_ground.lua", "w")									--open oob ground file
+local groundFile = io.open("Active/oob_ground.lua", "w") or error("Failed to open debug file")
 groundFile:write(ground_str)																--save new data
 groundFile:close()
 
-stopBug = true
+StopBug = true
 
 os.execute 'pause'																					--pause command window for user to read text
 os.exit()
