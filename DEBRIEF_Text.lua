@@ -1,4 +1,4 @@
---To create the debriefing text for the mission
+--To create the Debriefing text for the mission
 --Initiated by DEBRIEF_Master.lua
 -------------------------------------------------------------------------------------------------------
 -- last modification: adjustment_a
@@ -10,7 +10,7 @@ versionDCE["DEBRIEF_Text.lua"] = "1.3.3"
 -- modification M61_a		SAR
 ------------------------------------------------------------------------------------------------------- 
 
-local debriefing = ""
+Debriefing = ""
 
 -- header ---------------------------------------------------------------------------------- 
 do
@@ -27,7 +27,7 @@ do
 		s = s .. "-"
 	end
 
-	debriefing = debriefing .. s .. "\n\n"
+	Debriefing = Debriefing .. s .. "\n\n"
 end
 
 
@@ -805,7 +805,7 @@ do
 
 	end
 
-	debriefing = debriefing .. s ..  "\n"
+	Debriefing = Debriefing .. s ..  "\n"
 end
 
 
@@ -953,7 +953,7 @@ do
 		s = s .. "\n\n"																				--make a new line after each side
 	end
 
-	debriefing = debriefing .. s .. "\n"
+	Debriefing = Debriefing .. s .. "\n"
 end
 
 
@@ -1099,7 +1099,7 @@ do
 		s = s .. "\n\n"																				--make a new line after each side
 	end
 
-	debriefing = debriefing .. s .. "\n"
+	Debriefing = Debriefing .. s .. "\n"
 end
 
 
@@ -1272,5 +1272,5 @@ do
 		s = s .. "\n"																			--make a new line after each unit
 	end
 
-	debriefing = debriefing .. s
+	Debriefing = Debriefing .. s
 end

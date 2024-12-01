@@ -1,4 +1,4 @@
---To evaluate the DCS debrief.log, update the campaign status files/OOBs, generate a debriefing and initiate generation of next campaign mission
+--To evaluate the DCS debrief.log, update the campaign status files/OOBs, generate a Debriefing and initiate generation of next campaign mission
 --Initiated by MissionEnd.lua running from within DCS
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  M80_a
@@ -221,12 +221,12 @@ local elapsed_time = math.floor(events[#events].t - events[1].t)								--missio
 camp.time = camp.time + elapsed_time															--add mission time to campaign time
 
 
---create and view debriefing file for mission
+--create and view Debriefing file for mission
 dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
 local debriefFile = io.open("Debriefing/Debriefing " .. camp.mission .. ".txt", "w") or error("Failed to open debug file")
-debriefFile:write(debriefing)																	--write debriefing text into file (variable debriefing comes from DEBRIEF_Text.lua)
+debriefFile:write(Debriefing)																	--write Debriefing text into file (variable Debriefing comes from DEBRIEF_Text.lua)
 debriefFile:close()
-os.execute('start "Debriefing" "notepad.exe" "Debriefing/Debriefing ' .. camp.mission .. '.txt"')	--open the debriefing file with notepad
+os.execute('start "Debriefing" "notepad.exe" "Debriefing/Debriefing ' .. camp.mission .. '.txt"')	--open the Debriefing file with notepad
 
 		
 local showVersion = versionPackageICM

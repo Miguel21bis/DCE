@@ -1,4 +1,4 @@
----@diagnostic disable: lowercase-global
+---@diagnostic disable: param-type-mismatch, lowercase-global
 
 ------------------------------------------------------------------------------------------------------- 
 -- Last modification M53_b
@@ -46,12 +46,6 @@ versionDCE["UTIL_SunMoonRise.lua"] = "1.2.4"
 -- 5.1.0 - 2019-07-13:  Corrected Windows/Unix timestamp conversion.  Corrected sunrise/sunset time
 --                      display when no sunrise or no sunset.
 --
-
-local dawnAngle, duskAngle, sunRiseSetTimes, moonRiseSetTimes, tDate, bSunrise, bSunset
-local bMoonrise, bMoonset, nTimeLZero, nTimeStyle, bDayLength, bSunAngle
-local lat, long, timeOffset, iTimeNow, Gday, Gmonth, jDateSun, jDateMoon, moonTimeOffset
-local portion, FtimeDiff, Ftime
-
 function Initialize()
   --
   -- this function is called when the script measure is initialized or reloaded
@@ -631,40 +625,9 @@ end                                                                      -- func
 ----------------------------------------------------------------------------------------------------
 ------------------------------------- [ other odds and sods ] --------------------------------------
 
--- function getTimeOffset()
---   return (os.time() - os.time(os.date('!*t')) + (os.date('*t')['isdst'] and 3600 or 0))
--- end
-
-
 function getTimeOffset()
-
-  local utcDate = os.date('!*t')
-  local localDate = os.date('*t')
-
-  local isDST = localDate.isdst and 3600 or 0 -- Vérifie si c'est l'heure d'été
----@diagnostic disable-next-line: param-type-mismatch
-  return os.time(localDate) - os.time(utcDate) + isDST
+  return (os.time() - os.time(os.date('!*t')) + (os.date('*t')['isdst'] and 3600 or 0))
 end
-
-
-
-
--- function getTimeOffset()
---     ---@diagnostic disable-next-line: assign-type-mismatch
---     local utc_table = os.date('!*t') -- Force l'outil à comprendre que c'est une table
-
---     -- Vérification explicite pour Lua Language Server (optionnel mais explicite)
---     if type(utc_table) ~= "table" then
---         error("os.date('!*t') should return a table, but returned: " .. type(utc_table))
---     end
-
---     local current_time = os.time()
---     local utc_time = os.time(utc_table)
---     local dst_offset = os.date('*t')['isdst'] and 3600 or 0
---     return current_time - utc_time + dst_offset
--- end
-
-
 
 function twoDigitsFormat(num)
   --

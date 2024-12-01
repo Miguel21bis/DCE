@@ -761,8 +761,8 @@ for e = 1, #events do
 								unit.dead = true													--mark unit as dead in oob_ground
 								unit.dead_last = true												--mark unit as died in last mission
 								unit.CheckDay = camp.date.CampTotalTimeS                            -- ajoute la date de destruction		 Miguel21 modification M19 : Repair SAM	
-								camp.ShipHealth[unit.name] = 0										--mark unit has 0 health for briefing/debriefing
-								camp.ShipDamagedLast[unit.name] = true								--mark ship took damage in last mission for briefing/debriefing
+								camp.ShipHealth[unit.name] = 0										--mark unit has 0 health for briefing/Debriefing
+								camp.ShipDamagedLast[unit.name] = true								--mark ship took damage in last mission for briefing/Debriefing
 								
 								--award ship kill to air unit
 								if hit_table[events[e].initiator] ~= nil then														--check if dead ship has a hit entry

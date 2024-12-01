@@ -2144,7 +2144,10 @@ for sideName, draftT in pairs(Draft_sorties) do
 
 																		--si l'avion de support est déjà utilise en MAIN, on enleve la qté dejà utilisé
 																		if multiPlaneSet_B and multiPlaneSet_B[side] and multiPlaneSet_B[side][draft.type] and multiPlaneSet_B[side][draft.type][draft.task] and task_bool then
-																			multiPlaneSet_B[side][draft.type][task].NbPlane = multiPlaneSet_B[side][draft.type][draft.task].InitNbPlaneByTask - draft.number
+																			
+																			-- print("AtoG II passe_Escort P2 side "..side.." draft.type: "..tostring(draft.type).." task "..tostring(task).." draft.task "..tostring(draft.task).."")
+																			
+																			multiPlaneSet_B[side][draft.type][draft.task].NbPlane = multiPlaneSet_B[side][draft.type][draft.task].InitNbPlaneByTask - draft.number
 																			txtDebug = txtDebug .. "    passeB NbPlane: "..multiPlaneSet_B[side][draft.type][draft.task].NbPlane.." draft.task: "..tostring(draft.task).."/n"
 
 																		end

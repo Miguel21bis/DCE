@@ -34,6 +34,10 @@ DCS_ENI_Side = {
 
 AllIdGroup = {}
 AllIdUnit = {}
+UnitByName = {}						-- table de tous les unitId généré, utile pour placer le TACAN sur l'unitId qui est demandé avant la génération du l'unité
+
+-- UnitByName = UnitByName or {}						-- table de tous les unitId généré, utile pour placer le TACAN sur l'unitId qui est demandé avant la génération du l'unité
+
 
 
 Assigned_freq = {}
@@ -2405,18 +2409,18 @@ function CheckConfModMaster()
 	local confModCheck = {
 		mission_ini = mission_ini_check,
 		mission_forcedOptions = mission_forcedOptions_check,
-		campaign_ini = campaign_ini_check,
+		-- campaign_ini = campaign_ini_check,
 		Debug = Debug_check,
-		CampMod = CampMod_check,
+		campMod = campMod_check,
 
 	}
 
 	local confModLocal = {
 		mission_ini = mission_ini,
 		mission_forcedOptions = mission_forcedOptions,
-		campaign_ini = campaign_ini,
+		-- campaign_ini = campaign_ini,
 		Debug = Debug,
-		CampMod = CampMod,
+		campMod = campMod,
 
 	}
 
@@ -2497,31 +2501,26 @@ function UpdateConfMod()
 	local confModCheck = {
 		mission_ini = mission_ini_check,
 		mission_forcedOptions = mission_forcedOptions_check,
-		campaign_ini = campaign_ini_check,
+		-- campaign_ini = campaign_ini_check,
 		Debug = Debug_check,
-		CampMod = CampMod_check,
+		campMod = campMod_check,
 
 	}
 
-	monfichier = io.open("../../../ScriptsMod."..versionPackageICM.."/UTIL_ConfModCheck.lua", "r")
+	local monfichier = io.open("../../../ScriptsMod."..versionPackageICM.."/UTIL_ConfModCheck.lua", "r")
+
+	if not monfichier then return end
 
 	io.input(monfichier)
 
-	local TableName
-	local TableNameSub
+	local TableName, TableNameSub, tableId
 	local txt = ""
 	local nTable = {}
 	local n = 0
 	local ligne = 0
 	for line in io.lines() do
-		local one
-		local two
-		local com
-		local com1
-		local com2
+		local one, two, com, com1, com2, VariableName, str_length, result, comTemp, com1a, com2b
 		local firstTab = ""
-		local VariableName
-		local str_length
 		local nextTab = ""
 
 		ligne = ligne +1
@@ -2596,19 +2595,19 @@ function UpdateConfMod()
 			or nTable[1] == "mission_forcedOptions"
 			or nTable[1] == "Debug"
 			-- or nTable[1] == "campaign_ini"
-			or nTable[1] == "CampMod"
+			or nTable[1] == "campMod"
 			) and VariableName  then
 			if nTable[1] == "mission_ini" then tableId = mission_ini												--on donne le nom de la clef
 			elseif nTable[1] == "mission_forcedOptions" then tableId = mission_forcedOptions						--on donne le nom de la clef
 			elseif nTable[1] == "Debug" then tableId = Debug														--on donne le nom de la clef
-			elseif nTable[1] == "CampMod" then tableId = CampMod													--on donne le nom de la clef
+			elseif nTable[1] == "campMod" then tableId = campMod													--on donne le nom de la clef
 			-- elseif nTable[1] == "campaign_ini" then tableId = campaign_ini
 			end
 
 			--test si les sous table existent
 			-- si elle n'existe pas, on load la table _check � la place
 			local notLoad = false
-			local testSubTableId = deepcopy(tableId)
+			local testSubTableId = Deepcopy(tableId)
 			if #nTable >=2 then																						--iteration des cascades de sous table
 				for n = 2, #nTable do
 					if  testSubTableId[nTable[n]] == nil then
@@ -2624,7 +2623,7 @@ function UpdateConfMod()
 				if nTable[1] == "mission_ini" then tableId = mission_ini_check
 				elseif nTable[1] == "mission_forcedOptions" then tableId = mission_forcedOptions_check
 				elseif nTable[1] == "Debug" then tableId = Debug_check
-				elseif nTable[1] == "CampMod" then tableId = CampMod_check
+				elseif nTable[1] == "campMod" then tableId = campMod_check
 				-- elseif nTable[1] == "campaign_ini" then tableId = campaign_ini_check
 				end
 			end
@@ -2635,12 +2634,12 @@ function UpdateConfMod()
 				firstTab = firstTab.."	"
 			end
 			if #nTable >=2 then																						--iteration des cascades de sous table
-				for n = 2, #nTable do
-					tableId =  tableId[nTable[n]]																	--prend la valeur de la table n-1
+				for m = 2, #nTable do
+					tableId =  tableId[nTable[m]]																	--prend la valeur de la table n-1
 				end
 			end
 
-			if  camp.weather then
+			if camp.weather then
 				if tableId.pHigh and camp.weather.pHigh then  tableId.pHigh = camp.weather.pHigh  end
 				if tableId.pLow and camp.weather.pLow then tableId.pLow = camp.weather.pLow end
 				if tableId.refTemp and camp.weather.refTemp then tableId.refTemp = camp.weather.refTemp end
@@ -2670,16 +2669,52 @@ function UpdateConfMod()
 				end
 			end
 
-			--r�cup�re et format la valeur de la variable
-			local resultNumber = tonumber(tableId[VariableName])
-			if  type(tableId[VariableName]) ~= "boolean"	and not (string.find(tableId[VariableName], "true") or string.find(tableId[VariableName], "false"))
-			-- and not string.find(com1a, "\"")
-			and  not resultNumber then
+			-- --récupère et format la valeur de la variable
+			-- local resultNumber = tonumber(tableId[VariableName])
+			-- local varIsStrBoolean = false
+
+			-- if  type(tableId[VariableName]) ~= "boolean"	and not (string.find(tableId[VariableName], "true") or string.find(tableId[VariableName], "false"))
+			-- and  not resultNumber then
+			-- 	if com1a and not string.find(com1a, "\"") then
+			-- 		result = tableId[VariableName]
+			-- 	end
+
+			-- 	if not string.find(tableId[VariableName], "\"") then
+			-- 		result = "\""..tableId[VariableName].."\""
+			-- 	else
+			-- 		result = tableId[VariableName]
+			-- 	end
+			-- else
+			-- 	result = tableId[VariableName]
+			-- end
+			
+			--récupère et format la valeur de la variable
+			local resultNumber
+			local varIsStrBoolean = false
+			local foundComma = false
+
+			if tableId and VariableName and tableId[VariableName] then
+				local checkValue = tableId[VariableName]
+				resultNumber = tonumber(checkValue)
+
+				-- print("UtilF VariableName: "..tostring(VariableName) .. " |:| "..tostring(tableId[VariableName]) )
+				if checkValue and type(checkValue) == "string" then
+					if string.find(checkValue, "\"") then
+						foundComma = true
+					end
+					if (checkValue == "true" or checkValue == "false") then
+						varIsStrBoolean = true
+					end
+					
+				end
+			end
+
+			if  type(tableId[VariableName]) ~= "boolean" and not varIsStrBoolean and not resultNumber then
 				if com1a and not string.find(com1a, "\"") then
 					result = tableId[VariableName]
 				end
 
-				if not string.find(tableId[VariableName], "\"") then
+				if not foundComma then
 					result = "\""..tableId[VariableName].."\""
 				else
 					result = tableId[VariableName]
@@ -2688,6 +2723,7 @@ function UpdateConfMod()
 				result = tableId[VariableName]
 			end
 
+			
 			--calcul l'espace necessaire pour afficher les commentaires
 			str_length = string.len(tostring(firstTab..ShowVariableName.." = "..tostring(result)))
 			for n = 1, 14 - math.floor(str_length/4) do
@@ -2702,7 +2738,7 @@ function UpdateConfMod()
 
 	txt = txt.. "pictureBrief = " .. TableSerialization(pictureBrief, 0)
 
-	local updateFile = io.open("Init/conf_mod.lua", "w")										--open targetlist file
+	local updateFile = io.open("Init/conf_mod.lua", "w") or error("Failed to open debug file")
 	updateFile:write(txt)																		--save new data
 
 	io.close(updateFile)

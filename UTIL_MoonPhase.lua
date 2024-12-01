@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-global, lowercase-global
 --[[
 author/auteur = papoo
 update/mise � jour = 17/08/2019
@@ -39,11 +40,11 @@ local Waxing_Crescent = "Waxing crescent"     -- level 20 MoonPhase Selector swi
 local New_Moon = "New Moon"                   -- level 10 MoonPhase Selector switch
 -- local New_Moon = "Nouvelle lune"                -- level 10 MoonPhase Selector switch
 
-local  bSunrise, bSunset, sSunset, bMoonrise, sMoonrise, bMoonset, sMoonset
+
 
 function Moonphase(day,month,year)
 
-	local function julianDate(d, m, y)
+	function julianDate(d, m, y)
 		local mm, yy, k1, k2, k3, j
 		yy = y - math.floor((12 - m) / 10)
 		mm = m + 9
@@ -60,7 +61,7 @@ function Moonphase(day,month,year)
 		return j
 	end
 
-	local function  moonAge(d, m, y)
+	function  moonAge(d, m, y)
 		local j, ip, ag
 		j = julianDate(d, m, y)
 		ip = (j + 4.867) / 29.53059
@@ -89,7 +90,7 @@ function Moonphase(day,month,year)
 	-- elseif theMoon > 1    then moonText, level = Waxing_Crescent,   20 --Premier croissant, Waxing_Crescent     > 1.84375
 	-- else                       moonText, level = New_Moon,          10 --Nouvelle Lune, New_Moon
 	-- end
-
+	
 	if     theMoon > 29   then moonText = "New Moon"				level = 0 --Nouvelle Lune, New_Moon
 	elseif theMoon > 23   then moonText = "Waning Crescent"			level = 10 --Dernier croissant, Waning_Crescent
 	elseif theMoon > 22   then moonText = "Third Quarter"			level = 30 --Dernier quartier, Third_Quarter
@@ -100,34 +101,34 @@ function Moonphase(day,month,year)
 	elseif theMoon > 1    then moonText = "Waxing Crescent"			level = 10 --Premier croissant, Waxing_Crescent
 	else                       moonText = "New Moon"				level =  0 --Nouvelle Lune, New_Moon
 	end
-
+	
 	--inverse le chiffre, car apres 13j, l'intesit� diminue
 	if theMoon > 13 then
 		theMoon = math.abs(theMoon - 26)
 	end
-
+		
 	local lumi = math.floor(theMoon /13 * 100)
-
+	
 	-- string.format("%.3f", 5.0)
-
+	
 	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_SunMoonRIse.lua")
-
+	
 	local Timestamp = os.time({year= camp.date.year, month= camp.date.month, day= camp.date.day, hour= camp.date.hour, minute= camp.date.minute})
-
+	
 	local NameTheatre =  string.lower(mission.theatre)
 
 	local locationBis = {}
 
 	for key, value in pairs(LocationForEphemeris) do
 
-		locationBis[string.lower(key)] = value
-
+		locationBis[string.lower(key)] = value 
+	
 	end
-
-	local loc = locationBis[NameTheatre]
-
+	
+	loc = locationBis[NameTheatre]
+	
 	if not loc then
-
+	
 		print()
 		print("********************ATTENTION******************")
 		print("***************Note for the Campaign Maker*****")
@@ -136,7 +137,7 @@ function Moonphase(day,month,year)
 		print("********************ATTENTION******************")
 		print()
 		os.execute 'pause'
-
+	
 	end
 
 	local sSunrise, sSunset, sMoonrise, sMoonset, sDayLength, sSunAngle
@@ -156,30 +157,30 @@ function Moonphase(day,month,year)
                          sMoonset,
                          sDayLength,
                          sSunAngle)
-
+	
 	if bSunrise ~= "----" then
 		hour, minute = bSunrise:match("([^,]+):([^,]+)")
 		sSunrise = tonumber(hour) * 3600 + tonumber(minute) *60
 	end
 	if bSunset ~= "----" then
-		hour, minute = bSunset:match("([^,]+):([^,]+)")
+		hour, minute = bSunset:match("([^,]+):([^,]+)")	
 		sSunset = tonumber(hour) * 3600 + tonumber(minute) *60
 	end
 	if bMoonrise then
-		hour, minute = bMoonrise:match("([^,]+):([^,]+)")
+		hour, minute = bMoonrise:match("([^,]+):([^,]+)")	
 		sMoonrise = tonumber(hour) * 3600 + tonumber(minute) *60
 	end
 	if bMoonset then
-		hour, minute = bMoonset:match("([^,]+):([^,]+)")
+		hour, minute = bMoonset:match("([^,]+):([^,]+)")	
 		sMoonset = tonumber(hour) * 3600 + tonumber(minute) *60
 	end
-
-	local timeToTarget = camp.time + 3600
+	
+	local timeToTarget = camp.time + 3600	
 	local infoMoonSet = ""
 	local NiveauDeNuit = 0
 
 	if sSunrise and sSunset then
-
+		
 		if timeToTarget < sSunrise or timeToTarget > sSunset then				--il fait nuit		
 			if timeToTarget < sMoonrise and timeToTarget > sMoonset then		--pas de lune
 				NiveauDeNuit = 4
@@ -193,24 +194,24 @@ function Moonphase(day,month,year)
 			end
 		end
 	end
-
+	
 	local NVG_info =  "Sunrise   "..tostring(bSunrise) .. "\\n"..
 				"Sunset    "..tostring(bSunset).. "\\n"..
 				"Moonrise  "..tostring(bMoonrise).. "\\n"..
-				"Moonset   "..tostring(bMoonset).. "\\n"..
+				"Moonset   "..tostring(bMoonset).. "\\n"..	
 				"NVG Info => Night Level: "..tostring(NiveauDeNuit).." (max 5)  "..moonText.." ( "..lumi.."% full moon)"..tostring(infoMoonSet)
-
+	
 	if bSunrise == "----" or bSunset == "----" then
 		NVG_info = "The sun doesn't set, you're probably beyond the Arctic Circle."
 		print(NVG_info)
 	else
-
+		
 		print("Sunrise   "..tostring(bSunrise))
 		print("Sunset    "..tostring(bSunset))
 		print("Moonrise  "..tostring(bMoonrise))
 		print("Moonset   "..tostring(bMoonset))
 		print("NVG Info => Night Level: "..tostring(NiveauDeNuit).." (max 5)  "..moonText.." ( "..lumi.."% full moon)"..tostring(infoMoonSet))
-
+		
 	end
 
 	return NVG_info

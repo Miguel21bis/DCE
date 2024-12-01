@@ -554,7 +554,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 
 		--target position by refpoint 
 		if target.refpoint then																--target coordinates are referenced by a refpoint
-			if Refpoint then																--global Refpoint is not available when UpdateTargelist is called by DEBRIEF_Master. In this case updating the target coordinates can be ignored as this is not needed for debriefing.
+			if Refpoint then																--global Refpoint is not available when UpdateTargelist is called by DEBRIEF_Master. In this case updating the target coordinates can be ignored as this is not needed for Debriefing.
 
 				if type(target.refpoint) == "table" then									--multiple refpoints
 					target.MultiPoints = {}
@@ -649,7 +649,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 				target.alive = 100															--Introduce percentage of alive target elements
 				target.x = 0																--Introduce x coordinate for target
 				target.y = 0																--Introduce y coordinate for target
-				target.dead_last = 0														--Introduce percentage of elements that died in last mission (for debriefing)
+				target.dead_last = 0														--Introduce percentage of elements that died in last mission (for Debriefing)
 
 				-- print("DcUT targetName "..side_name.." "..tostring(target.name))
 				if target.name == nil then
@@ -703,7 +703,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 									end
 
 									if not target.elements then target.elements = {} end	--add elements table
-									-- target.dead_last = 0									--Introduce percentage of elements that died in last mission (for debriefing)
+									-- target.dead_last = 0									--Introduce percentage of elements that died in last mission (for Debriefing)
 
 									for unit_n, unit in pairs(group.units) do				--Iterate through all units of group
 										local alreadyThere = false
@@ -932,7 +932,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 							end
 
 							target.elements = {}										--add elements table
-							target.dead_last = 0										--Introduce percentage of elements that died in last mission (for debriefing)
+							target.dead_last = 0										--Introduce percentage of elements that died in last mission (for Debriefing)
 							for unit_n, unit in pairs(group.units) do					--Iterate through all units of group
 								local temp = {x=0,y=0,class=""}
 								temp.x, temp.y, temp.class = checkElementXY(unit, targetside)
@@ -990,7 +990,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 
 		elseif target.task == "CSAR" then
 			target.alive = 100															--Introduce percentage of alive target elements
-			target.dead_last = 0														--Introduce percentage of elements that died in last mission (for debriefing)
+			target.dead_last = 0														--Introduce percentage of elements that died in last mission (for Debriefing)
 			for e = 1, #target.elements do												--Iterate through elements of target
 				if not target.elements[e].x then
 					checkBug3(" Error_10: The x and y positions of this SAR position are missing:  '" .. target.titleName .. "!")

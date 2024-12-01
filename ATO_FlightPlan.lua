@@ -63,7 +63,6 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.281"
 DebugFLIGHT = ""
 TabLPark	= {}
 TargetList_InThisMission = {}			-- garde en mémoire les targets pour eviter de les pruner plus tard
-UnitByName = {}							-- table de tous les unitId généré, utile pour placer le TACAN sur l'unitId qui est demandé avant la génération du l'unité
 
 local debugStart = true					--NE PAS CHANGER, les infos restent seulement dans le fichier debugGenMission
 local debugTxt_AtoFP = ""
