@@ -1,10 +1,11 @@
+---@diagnostic disable: undefined-global, need-check-nil, lowercase-global
 --gives the player the possibility to change planes during the campaign.
 ------------------------------------------------------------------------------------------------------- 
 -- last modification: cleanCode_a
 if not versionDCE then versionDCE = {} end
 versionDCE["UTIL_ChangePlane_DceM.lua"] = "1.3.7"
 -------------------------------------------------------------------------------------------------------
--- adjustment_c				(b Playable_m from data_divers)
+-- adjustment_c				(b Playable_m from Data_divers)
 -- cleanCode_a				
 -- modification M55_c		player can change the type of plane (c:triggers part)(b:same Side)
 -------------------------------------------------------------------------------------------------------
@@ -96,7 +97,7 @@ table.sort(oobAirSide, function(a, b) return a.type:upper() < b.type:upper() end
 -- end	
 
 Playable_m = {}
-for planeType, value in pairs(data_divers) do	
+for planeType, value in pairs(Data_divers) do	
 	if value.playable then
 		Playable_m[planeType] = true
 	end

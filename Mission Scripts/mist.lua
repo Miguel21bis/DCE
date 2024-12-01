@@ -844,7 +844,7 @@ do -- the main scope
 					end
 
 					mist.DBs.zonesByName[zone_data.name] = zone
-					mist.DBs.zonesByNum[#mist.DBs.zonesByNum + 1] = mist.utils.deepCopy(zone)	--[[deepcopy so that the zone in zones_by_name and the zone in
+					mist.DBs.zonesByNum[#mist.DBs.zonesByNum + 1] = mist.utils.deepCopy(zone)	--[[Deepcopy so that the zone in zones_by_name and the zone in
 																								zones_by_num se are different objects.. don't want them linked.]]
 				end
 			end
@@ -939,7 +939,7 @@ do -- the main scope
         --log:warn("updateALiveUnits")
 		local lalive_units = mist.DBs.aliveUnits -- local references for faster execution
 		local lunits = mist.DBs.unitsByNum
-		local ldeepcopy = mist.utils.deepCopy
+		local lDeepcopy = mist.utils.deepCopy
 		local lUnit = Unit
 		local lremovedAliveUnits = mist.DBs.removedAliveUnits
 		local updatedUnits = {}
@@ -956,7 +956,7 @@ do -- the main scope
 					if unit and unit:isExist() == true then
 						----dbLog:info("unit named $1 alive!", lunits[i].unitName) -- spammy
 						local pos = unit:getPosition()
-						local newtbl = ldeepcopy(lunits[i])
+						local newtbl = lDeepcopy(lunits[i])
 						if pos then
 							newtbl.pos = pos.p
 						end

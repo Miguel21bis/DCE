@@ -81,7 +81,7 @@ if not 	AcceptedMission  then
 	if not camp.dateInit then
 		local tempCamp = camp
 		dofile("Init/camp_init.lua")
-		local campInit =  deepcopy(camp)
+		local campInit =  Deepcopy(camp)
 		camp = tempCamp
 		camp.dateInit = {
 			day = campInit.date.day,
@@ -129,7 +129,7 @@ if not 	AcceptedMission  then
 	if (Skipmission_flag or Firstmission_flag or (MissionInstance and MissionInstance > 1)) and not camp.waitingNextGen then
 		if idle_time > 86400 then
 
-			print(disp_time(idle_time) 
+			print(Disp_time(idle_time) 
 			.. " passed. Next mission scheduled at: " 
 			.. FormatTime(camp.time, "hh:mm") .. ", " 
 			.. tostring(camp.date.day) .. "." 

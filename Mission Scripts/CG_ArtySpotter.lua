@@ -430,7 +430,7 @@ local function shellZone(initiatorName)
 end
 
 -- MGRS conversion to LL to x,z
-local function convertMGRStoPos ( _mrgs )
+local function convertMGRStoPos ( _mgrs )
 
 	local lat, lon = coord.MGRStoLL( _mgrs )
     local markerPos = coord.LLtoLO( lat, lon, 0 )

@@ -206,9 +206,9 @@ end
 
 --permet de garder la demande initial en multi
 -- if Multi.Group and not MultiInit then
--- 	MultiInit = deepcopy(Multi) 
+-- 	MultiInit = Deepcopy(Multi) 
 -- elseif Multi.Group and MultiInit then
--- 	Multi = deepcopy(MultiInit) 
+-- 	Multi = Deepcopy(MultiInit) 
 -- end 
 
 -- local camp_str = "playable_AtoPA = " .. TableSerialization(playable, 0)														--make a string
@@ -217,7 +217,7 @@ end
 -- campFile:close()
 
 --fait une copie de Multi pour eviter de perdre le nombre d'avion
-local MultiBIS = deepcopy(Multi)
+local MultiBIS = Deepcopy(Multi)
 
 local CreaClientFlight = {}																									--crée une table pour dérouler plus tard les flight selectionnable
 
@@ -236,19 +236,19 @@ if #playable > 0 then
 
 				-- playability_Multi[k] = 0
 
-				if not MultiBIS.Group[k].NotAssigned then MultiBIS.Group[k].NotAssigned = deepcopy(MultiBIS.Group[k].NbPlane) end
+				if not MultiBIS.Group[k].NotAssigned then MultiBIS.Group[k].NotAssigned = Deepcopy(MultiBIS.Group[k].NbPlane) end
 
 				local nbPlaneFlight = playable[i].number
 
 				if playable[i].number >=  MultiBIS.Group[k].NotAssigned then
-					nbPlaneFlight = deepcopy(MultiBIS.Group[k].NotAssigned)
+					nbPlaneFlight = Deepcopy(MultiBIS.Group[k].NotAssigned)
 					MultiBIS.Group[k].NotAssigned = 0
 				else
 					MultiBIS.Group[k].NotAssigned = MultiBIS.Group[k].NotAssigned - playable[i].number
 				end
 
 				-- playability_Multi[k] = 1																				--propose ce choix au joueur						
-				local tabTemp = deepcopy(MultiBIS.Group[k])
+				local tabTemp = Deepcopy(MultiBIS.Group[k])
 				table.insert(CreaClientFlight, tabTemp)
 				CreaClientFlight[#CreaClientFlight]["NbPlane"] = nbPlaneFlight							 				--TODO ce number pourrait reprendre l'historique						
 

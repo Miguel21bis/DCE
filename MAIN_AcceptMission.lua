@@ -8,7 +8,7 @@ versionDCE["MAIN_AcceptMission.lua"] = "1.10.63"
 
 -- cleanCode_f				(e: os.remove)
 -- debug_a					(a endCampaign)
--- adjustment_g				(f currentKey)(e not DC_Weather)(d pairsByKeys)(c move UpdateSar & correct Brief Systeme)(b: don't load UTIL_Debug)(a: don't load Ini/db_airbase)
+-- adjustment_g				(f currentKey)(e not DC_Weather)(d PairsByKeys)(c move UpdateSar & correct Brief Systeme)(b: don't load UTIL_Debug)(a: don't load Ini/db_airbase)
 -- modification M63_a		compatible Datacard Generator or CombatFlite
 -- modification M61_a		SAR
 -- modification M56_a		AssignCallnameSquad
@@ -59,7 +59,7 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_StatsEvaluation.lua"
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_DestroyTarget.lua")												--Mod11.j
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
 -- print("MainAM DD "..tostring(targetlist.blue[8].elements[2].name).." dead? "..tostring(targetlist.blue[8].elements[2].dead))
---create and view debriefing file for mission
+--create and view Debriefing file for mission
 --cette foi-ci, on enregistre les stats, mais sans les montrer
 
 dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
@@ -108,7 +108,7 @@ end
 
 -- require("Active/targetlist")
 if not targetlist.blue[1] then
-	targetlistToNum()
+	TargetlistToNum()
 end
 
 require("Active/camp_triggers")

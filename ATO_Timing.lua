@@ -160,7 +160,7 @@ for side, pack in pairs(ATO) do
 					
 					if i > 20 then
 						-- print("AtoT i: "..i.." reset Quart ")
-						TOT_TimeOccupation[#TOT_TimeOccupation+1]= deepcopy(timingQuarOccupation)
+						TOT_TimeOccupation[#TOT_TimeOccupation+1]= Deepcopy(timingQuarOccupation)
 						-- timingQuarOccupation = {blue = {0,0,0,0}, red = {0,0,0,0}}
 						timingQuarOccupation[side] =  {0,0,0,0}
 						repeat

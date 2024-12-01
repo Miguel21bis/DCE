@@ -7,7 +7,7 @@ versionDCE["DC_UpdateTargetlist.lua"] = "1.11.47"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_c
 -- adjustment_a				(a GroundTarget.percent = 100 & Error_05 )
--- debug_c					(bc insertBugList)(a -nan(ind))
+-- debug_c					(bc InsertBugList)(a -nan(ind))
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (camp.targetPos)
 -- modification M74_a		mix static, vehicle and map elements in a Target.
 -- modification M70_a		GroundZoneTarget (adds the possibility of counting unit completeness by zone) 
@@ -19,7 +19,7 @@ versionDCE["DC_UpdateTargetlist.lua"] = "1.11.47"
 -------------------------------------------------------------------------------------------------------
 
 if not targetlist.blue[1] then
-	targetlistToNum()
+	TargetlistToNum()
 end
 
 if not DC_UpdateTargetlist_counter then
@@ -80,7 +80,7 @@ end
 local function checkBug3(txt)
 	if Debug.checkTargetName  and DC_UpdateTargetlist_counter > 1 then
 		-- table.insert(BugList, "DC_UT checkBug3 "..txt)
-		insertBugList("DC_UT checkBug3 :"..txt)
+		InsertBugList("DC_UT checkBug3 :"..txt)
 	end
 end
 
@@ -554,7 +554,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 
 		--target position by refpoint 
 		if target.refpoint then																--target coordinates are referenced by a refpoint
-			if Refpoint then																--global Refpoint is not available when UpdateTargelist is called by DEBRIEF_Master. In this case updating the target coordinates can be ignored as this is not needed for debriefing.
+			if Refpoint then																--global Refpoint is not available when UpdateTargelist is called by DEBRIEF_Master. In this case updating the target coordinates can be ignored as this is not needed for Debriefing.
 
 				if type(target.refpoint) == "table" then									--multiple refpoints
 					target.MultiPoints = {}
@@ -649,7 +649,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 				target.alive = 100															--Introduce percentage of alive target elements
 				target.x = 0																--Introduce x coordinate for target
 				target.y = 0																--Introduce y coordinate for target
-				target.dead_last = 0														--Introduce percentage of elements that died in last mission (for debriefing)
+				target.dead_last = 0														--Introduce percentage of elements that died in last mission (for Debriefing)
 
 				-- print("DcUT targetName "..side_name.." "..tostring(target.name))
 				if target.name == nil then
@@ -703,7 +703,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 									end
 
 									if not target.elements then target.elements = {} end	--add elements table
-									-- target.dead_last = 0									--Introduce percentage of elements that died in last mission (for debriefing)
+									-- target.dead_last = 0									--Introduce percentage of elements that died in last mission (for Debriefing)
 
 									for unit_n, unit in pairs(group.units) do				--Iterate through all units of group
 										local alreadyThere = false
@@ -811,7 +811,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 							temp.x, temp.y, temp.class = checkElementXY(element, targetside)
 
 							if temp.x == nil then
-								local elementTMP = deepcopy(element)
+								local elementTMP = Deepcopy(element)
 								elementTMP.name = elementTMP.name.."-1"
 								temp.x, temp.y, temp.class = checkElementXY(elementTMP, targetside)
 								if temp.x ~= nil then
@@ -875,7 +875,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 					else
 
 						local txt = "DcUT no found xy "..target.titleName.." (normal message if it's a template activation)"
-						insertBugList("DC_UT checkBug_xy :"..txt)
+						InsertBugList("DC_UT checkBug_xy :"..txt)
 						-- os.execute 'pause'
 					end
 				end
@@ -932,7 +932,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 							end
 
 							target.elements = {}										--add elements table
-							target.dead_last = 0										--Introduce percentage of elements that died in last mission (for debriefing)
+							target.dead_last = 0										--Introduce percentage of elements that died in last mission (for Debriefing)
 							for unit_n, unit in pairs(group.units) do					--Iterate through all units of group
 								local temp = {x=0,y=0,class=""}
 								temp.x, temp.y, temp.class = checkElementXY(unit, targetside)
@@ -990,7 +990,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 
 		elseif target.task == "CSAR" then
 			target.alive = 100															--Introduce percentage of alive target elements
-			target.dead_last = 0														--Introduce percentage of elements that died in last mission (for debriefing)
+			target.dead_last = 0														--Introduce percentage of elements that died in last mission (for Debriefing)
 			for e = 1, #target.elements do												--Iterate through elements of target
 				if not target.elements[e].x then
 					checkBug3(" Error_10: The x and y positions of this SAR position are missing:  '" .. target.titleName .. "!")
@@ -1128,7 +1128,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 					local txtBug = "DcUT The information runway hdg and lenght and position runway.x, runway.y are missing in the file db_airbases.lua to create the portions to attack.\n"
 					txtBug = txtBug .."DcUT Bug related to the targetlist_init.lua file in the target: : "..target.titleName.."\n"
 
-					insertBugList(txtBug)
+					InsertBugList(txtBug)
 
 					if mission_ini.debug then
 						print(txtBug)
@@ -1283,7 +1283,7 @@ if LL_KnownPositionsFileExit then
 					end
 					if distMin ~= 9999999 then
 						local azimut = GetHeading(target, pointNearest)
-						target.lat, target.lon = newPosLatLon(pointNearest.lat, pointNearest.lon, distMin, azimut)
+						target.lat, target.lon = NewPosLatLon(pointNearest.lat, pointNearest.lon, distMin, azimut)
 					end
 				end
 

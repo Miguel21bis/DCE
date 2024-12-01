@@ -2428,7 +2428,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 						if tblGrpId == gpGid then
 							env.info( "Custom_AddWptSAR CSAR O  foundAeronef " )
 
-							copyRoute = deepcopy(value.params.route.points)
+							copyRoute = Deepcopy(value.params.route.points)
 							foundAeronef = true
 							break
 						end
@@ -2440,7 +2440,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 								if _country.helicopter then
 									for Ngroup, _group in pairs(_country.helicopter.group) do
 										if _group.groupId == gpGid then 						
-											copyRoute = deepcopy(_group.route.points)						
+											copyRoute = Deepcopy(_group.route.points)						
 											foundAeronef = true
 											break						
 										end
@@ -3398,7 +3398,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 
 			for tblGrpId, value in pairs(LastInjectFlightPlan) do
 				if tblGrpId == gpGid then
-					copyRoute = deepcopy(value.params.route.points)
+					copyRoute = Deepcopy(value.params.route.points)
 					foundAeronef = true
 					env.info( "Custom_Altitude, D2_a found LastInjectFlightPlan tblGrpId |"..tostring(tblGrpId))
 					break
@@ -3413,7 +3413,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 						if _country.helicopter then
 							for Ngroup, _group in pairs(_country.helicopter.group) do
 								if _group.groupId == gpGid then 						
-									copyRoute = deepcopy(_group.route.points)						
+									copyRoute = Deepcopy(_group.route.points)						
 									foundAeronef = true
 									env.info( "Custom_Altitude, D2_b found foundAeronef _group.groupId |"..tostring(_group.groupId ))
 									break						

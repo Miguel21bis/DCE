@@ -19,12 +19,12 @@ versionDCE["DEBRIEF_StatsEvaluation.lua"] = "1.8.64"
 packstats = {}	--track stats for player package
 
 if not AcceptedMission or AcceptedMission == nil then
-	oob_air = deepcopy(oob_air)
-	oob_ground = deepcopy(oob_ground)
-	targetlist = deepcopy(targetlist)
-	clientstats = deepcopy(clientstats)
-	camp = deepcopy(camp)
-	camp_ZoneSAR = deepcopy(camp_ZoneSAR)
+	oob_air = Deepcopy(oob_air)
+	oob_ground = Deepcopy(oob_ground)
+	targetlist = Deepcopy(targetlist)
+	clientstats = Deepcopy(clientstats)
+	camp = Deepcopy(camp)
+	camp_ZoneSAR = Deepcopy(camp_ZoneSAR)
 
 	print()
 else
@@ -43,7 +43,7 @@ else
 	AllIdGroupImport = false
 	AllIdUnitImport = false
 
-	getAllId()
+	GetAllId()
 
 	--TODO attention, surveiller les conséquences de ces lignes plus bas (est-ce que ça double? ou revient à 0?)
 	targetlist = nil
@@ -669,8 +669,8 @@ for e = 1, #events do
 		if events[e].initiator and string.find(events[e].initiator,"Transport") and not tabTransport[events[e].initiator] then
 			local payload  = 0
 			
-			if payloadType[events[e].type_name] then
-				payload  = payloadType[events[e].type_name]																--see UTIL_Data.lua
+			if PayloadType[events[e].type_name] then
+				payload  = PayloadType[events[e].type_name]																--see UTIL_Data.lua
 			end
 			
 			if events[e].place then
@@ -761,8 +761,8 @@ for e = 1, #events do
 								unit.dead = true													--mark unit as dead in oob_ground
 								unit.dead_last = true												--mark unit as died in last mission
 								unit.CheckDay = camp.date.CampTotalTimeS                            -- ajoute la date de destruction		 Miguel21 modification M19 : Repair SAM	
-								camp.ShipHealth[unit.name] = 0										--mark unit has 0 health for briefing/debriefing
-								camp.ShipDamagedLast[unit.name] = true								--mark ship took damage in last mission for briefing/debriefing
+								camp.ShipHealth[unit.name] = 0										--mark unit has 0 health for briefing/Debriefing
+								camp.ShipDamagedLast[unit.name] = true								--mark ship took damage in last mission for briefing/Debriefing
 								
 								--award ship kill to air unit
 								if hit_table[events[e].initiator] ~= nil then														--check if dead ship has a hit entry

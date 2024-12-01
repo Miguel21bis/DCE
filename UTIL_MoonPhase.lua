@@ -1,6 +1,7 @@
+---@diagnostic disable: undefined-global, lowercase-global
 --[[
 author/auteur = papoo
-update/mise à jour = 17/08/2019
+update/mise ï¿½ jour = 17/08/2019
 creation = 04/08/2019
 source https://github.com/JamesSherburne/MoonPhasesLua/blob/master/main.lua
 https://pon.fr/dzvents-phases-lunaires-sans-api
@@ -27,7 +28,7 @@ local Waning_Crescent = "Waning Crescent"     -- level 80 MoonPhase Selector swi
 local Last_Quarter = "Last Quarter"           -- level 70 MoonPhase Selector switch
 -- local Last_Quarter = "Dernier quartier"         -- level 70 MoonPhase Selector switch
 local Waning Gibbous = "Waning gibbous"       -- level 60 MoonPhase Selector switch
--- local Waning_Gibbous = "Gibbeuse décroissante"  -- level 60 MoonPhase Selector switch
+-- local Waning_Gibbous = "Gibbeuse dï¿½croissante"  -- level 60 MoonPhase Selector switch
 local Full_Moon = "Full Moon"                 -- level 50 MoonPhase Selector switch
 -- local Full_Moon = "Pleine une"                  -- level 50 MoonPhase Selector switch
 local Waxing_Gibbous = "Waxing gibbous"       -- level 40 MoonPhase Selector switch
@@ -41,7 +42,7 @@ local New_Moon = "New Moon"                   -- level 10 MoonPhase Selector swi
 
 
 
-function moonphase(day,month,year)
+function Moonphase(day,month,year)
 
 	function julianDate(d, m, y)
 		local mm, yy, k1, k2, k3, j
@@ -82,7 +83,7 @@ function moonphase(day,month,year)
 	-- if     theMoon > 29   then moonText, level = New_Moon,          10 --Nouvelle Lune, New_Moon                > 27.65625
 	-- elseif theMoon > 23   then moonText, level = Waning_Crescent,   80 --Dernier croissant, Waning_Crescent     > 23.96875
 	-- elseif theMoon > 22   then moonText, level = Third_Quarter,     70 --Dernier quartier, Third_Quarter        > 20.28125
-	-- elseif theMoon > 15   then moonText, level = Waning_Gibbous,    60 --Gibbeuse décroissante, Waning_Gibbous  > 16.59375
+	-- elseif theMoon > 15   then moonText, level = Waning_Gibbous,    60 --Gibbeuse dï¿½croissante, Waning_Gibbous  > 16.59375
 	-- elseif theMoon > 13   then moonText, level = Full_Moon,         50 --Pleine lune, Full_Moon                 > 12.90625
 	-- elseif theMoon > 8    then moonText, level = Waxing_Gibbous,    40 --Gibbeuse croissante, Waxing_Gibbous    > 9.21875
 	-- elseif theMoon > 6    then moonText, level = First_Quarter,     30 --Premier Quartier, First_Quarter        > 5.53125
@@ -93,7 +94,7 @@ function moonphase(day,month,year)
 	if     theMoon > 29   then moonText = "New Moon"				level = 0 --Nouvelle Lune, New_Moon
 	elseif theMoon > 23   then moonText = "Waning Crescent"			level = 10 --Dernier croissant, Waning_Crescent
 	elseif theMoon > 22   then moonText = "Third Quarter"			level = 30 --Dernier quartier, Third_Quarter
-	elseif theMoon > 15   then moonText = "Waning Gibbous"			level = 50 --Gibbeuse décroissante, Waning_Gibbous
+	elseif theMoon > 15   then moonText = "Waning Gibbous"			level = 50 --Gibbeuse dï¿½croissante, Waning_Gibbous
 	elseif theMoon > 13   then moonText = "Full Moon"				level = 100 --Pleine lune, Full_Moon
 	elseif theMoon > 8    then moonText = "Waxing Gibbous"			level = 50 --Gibbeuse croissante, Waxing_Gibbous
 	elseif theMoon > 6    then moonText = "First Quarter"			level = 30 --Premier Quartier, First_Quarter
@@ -101,14 +102,14 @@ function moonphase(day,month,year)
 	else                       moonText = "New Moon"				level =  0 --Nouvelle Lune, New_Moon
 	end
 	
-	--inverse le chiffre, car apres 13j, l'intesité diminue
+	--inverse le chiffre, car apres 13j, l'intesitï¿½ diminue
 	if theMoon > 13 then
 		theMoon = math.abs(theMoon - 26)
 	end
 		
 	local lumi = math.floor(theMoon /13 * 100)
 	
-	string.format("%.3f", 5.0)
+	-- string.format("%.3f", 5.0)
 	
 	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_SunMoonRIse.lua")
 	
@@ -118,7 +119,7 @@ function moonphase(day,month,year)
 
 	local locationBis = {}
 
-	for key, value in pairs(locationForEphemeris) do
+	for key, value in pairs(LocationForEphemeris) do
 
 		locationBis[string.lower(key)] = value 
 	
@@ -131,7 +132,7 @@ function moonphase(day,month,year)
 		print()
 		print("********************ATTENTION******************")
 		print("***************Note for the Campaign Maker*****")
-		print("***************Ajoute la MAP et des coordonées LatLong dans UTIL_DataMap pour utiliser les infos Moon ****************")
+		print("***************Ajoute la MAP et des coordonï¿½es LatLong dans UTIL_DataMap pour utiliser les infos Moon ****************")
 		print("***************Add MAP and LatLong coordinates in UTIL_DataMap to use Moon info****************")
 		print("********************ATTENTION******************")
 		print()

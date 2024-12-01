@@ -2013,11 +2013,11 @@ for placeName, place in pairs(db_airbases) do
 			if foundSinglePlayer and foundSinglePlayer.type and foundSinglePlayer.place then
 
 				if TabMetar and TabMetar[foundSinglePlayer.place]
-				and data_divers and data_divers[foundSinglePlayer.type]
-				and data_divers[foundSinglePlayer.type].instrumentUnits
+				and Data_divers and Data_divers[foundSinglePlayer.type]
+				and Data_divers[foundSinglePlayer.type].instrumentUnits
 				then
-					if  TabMetar[foundSinglePlayer.place][data_divers[foundSinglePlayer.type].instrumentUnits] then
-						print("Metar: ".. tostring(TabMetar[foundSinglePlayer.place][data_divers[foundSinglePlayer.type].instrumentUnits]))
+					if  TabMetar[foundSinglePlayer.place][Data_divers[foundSinglePlayer.type].instrumentUnits] then
+						print("Metar: ".. tostring(TabMetar[foundSinglePlayer.place][Data_divers[foundSinglePlayer.type].instrumentUnits]))
 						showOne = true
 					else
 
@@ -2032,7 +2032,7 @@ for placeName, place in pairs(db_airbases) do
 
 		MoonTxt = ""
 		if not showOneNight and string.find(Daytime, "night") then
-			MoonTxt = moonphase(camp.date.day, camp.date.month, camp.date.year)
+			MoonTxt = Moonphase(camp.date.day, camp.date.month, camp.date.year)
 			showOneNight = true
 			-- print(MoonTxt)
 		end

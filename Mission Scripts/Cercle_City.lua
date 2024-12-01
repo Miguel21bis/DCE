@@ -1,3 +1,4 @@
+---@diagnostic disable: lowercase-global, trailing-space
 
 --circle around the cities, to prevent a SAR helicopter from landing in the city
 ------------------------------------------------------------------------------------------------------- 

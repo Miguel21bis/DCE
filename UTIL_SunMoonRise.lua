@@ -1,3 +1,4 @@
+---@diagnostic disable: param-type-mismatch, lowercase-global
 
 ------------------------------------------------------------------------------------------------------- 
 -- Last modification M53_b
@@ -107,7 +108,7 @@ function GetSunMoonTimes(nLatitude,
   -- set default values
   sunRiseSetTimes = {6, 6, 6, 12, 13, 18, 18, 18, 24}
   moonRiseSetTimes = {0, 23.9}
-  NoSunRise, NoSunSet = False, False
+  NoSunRise, NoSunSet = false, false
   Sky = {0,0,0}
   Dec = {0,0,0}
   VHz = {0,0,0}

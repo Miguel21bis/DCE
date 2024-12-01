@@ -3,21 +3,21 @@
 -- Pruning can improve the performance of the mission by removing units that are very unlikely to participate in it.
 --
 -- In particular this varies depending on.
---		- Whether the unit is an anti-air unit (of various types) or not.
---		- How close any flight passes to the unit when that flight is flying along the waypoints.
---		- Whether that unit is close to any 'Target' or 'Attack' waypoint 
-------------------------------------------------------------------------------------------------------- 
--- last modification: Reglage_g 
+--  Whether the unit is an anti-air unit (of various types) or not.
+-- How close any flight passes to the unit when that flight is flying along the waypoints.
+-- Whether that unit is close to any 'Target' or 'Attack' waypoint
+-------------------------------------------------------------------------------------------------------
+-- last modification: Reglage_g
 if not versionDCE then versionDCE = {} end
 versionDCE["DC_Prune.lua"] = "1.6.23"
-------------------------------------------------------------------------------------------------------- 	
+-------------------------------------------------------------------------------------------------------
 -- Reglage_g		(g targetList_InThisMission)(f debug file)(g add 9A33)(f ZSU_57_2)(e dont prune target mission)(d unit FARP)(c: scud)(b: add FPS-117 & FUG & FUSE) (a: ajust PruneScriptConf)
 -- debug_g			(g function entry)(f: keept EWR)(e: prune category tag)(d: Static Plane Bug + Heli)(c: Package avion supprimé)(b: FARP)(a: helicopter)
 -- M23_a			Désactive USN Mod
 -- M21_a			Ajout Convoy (interdit à Prune de les Pruner..)
 -- Z02_a			DontPrunSAM et prend en compte la position des intercepteur qui n'ont qu'un seul waypoint
--- M16_d			SpawnAir, & insert pos far target 
-------------------------------------------------------------------------------------------------------- 
+-- M16_d			SpawnAir, & insert pos far target
+-------------------------------------------------------------------------------------------------------
 
 local cibleTrouve = {}
 
@@ -30,9 +30,9 @@ local PruneSam =				mission_ini.PruneScriptConf.ForcedPruneSam
 local function findPlayerSide()
 	for side,units in pairs(oob_air) do
 		for ui,unit in pairs(units) do
-			if unit.player then return side end 
-		end 
-	end 
+			if unit.player then return side end
+		end
+	end
 	return nil
 end
 
@@ -47,7 +47,7 @@ local function GroundGroupId()
 		for nc, country in pairs(ncountry ) do
 			if country["vehicle"] then
 				for vi,vehicle in pairs(country) do
-					if 	type(vehicle) == "table" then									
+					if 	type(vehicle) == "table" then
 						for gi,ngroup in pairs(vehicle["group"]) do
 							if ngroup["groupId"] then
 								allGroundGroupId[ngroup["groupId"]] = {}
@@ -55,19 +55,19 @@ local function GroundGroupId()
 								allGroundGroupId[ngroup["groupId"]].y = ngroup["y"]
 								allGroundGroupId[ngroup["groupId"]].name = ngroup["name"]
 							end
-						end 
+						end
 					end
 				end
 			end
 		end
-	end 
+	end
 	return allGroundGroupId
 end
 
 -- given a unit return the anti-air type of an unit: SHORT, MEDIUM, LONG, IR, AAA or NONE.
 local function unitAntiAirType(unit)
 	-- List reduced from https://forums.eagle.ru/showthread.php?t=174971
-	local types = { 
+	local types = {
 		["2S6 Tunguska"]="MEDIUM",	-- 12km
 		["Tor 9A331"]="MEDIUM",		-- 12km
 		["Strela-10M3"]="IR",		-- 5km
@@ -112,7 +112,7 @@ local function unitAntiAirType(unit)
 		["snr s-125 tr"]="MEDIUM",				-- 35km
 		["FuMG-401"]="MEDIUM",				-- 8km
 		["FuSe-65"]="MEDIUM",				-- 8km
-		
+
 	}
 	local got = types[unit.type]
 	return (got or "NONE")
@@ -134,8 +134,8 @@ local function waypointPairs(wps, f)
 	local wi = 1
 	while (wps[wi]) do
 		local wp = wps[wi]
-		local nextWi = wi + 1 
-		local found = false 
+		local nextWi = wi + 1
+		local found = false
 		while (wps[nextWi]) do
 			local np = wps[nextWi]
 			if (np.x ~= wp.x) or (np.y ~= wp.y) then
@@ -143,7 +143,7 @@ local function waypointPairs(wps, f)
 				wi = nextWi
 				f(wp, np)
 				break
-			end				
+			end
 			nextWi = nextWi + 1
 		end
 	 -- Z02 : SAM ajoute un waypoint sur les intercepteurs (qui n'ont qu'un seul waypoint) pour éviter de supprimer les unité proche
@@ -158,15 +158,15 @@ local function waypointPairs(wps, f)
 			break
 		end
 		if not found then return end
-	end 
-end 
+	end
+end
 
 -- decides whether the given ground unit (which is on side 'unitSide') should be kept or not
 local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, category)
-	
+
 	if TargetList_InThisMission[unit.name] then
 
-		return true 
+		return true
 	end
 
 	if pruneStatic and (category == 'plane' or category == 'helicopter') and stringStarts(unit.name, 'Static') then
@@ -193,9 +193,9 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 	elseif  string.find(string.lower(unit.name),"farp") then
 		-- print("DC_P_ keep name FARP: "..tostring(unit.name))
 		return true -- keep FARP_
-	end 
+	end
 	local aaType = unitAntiAirType(unit)
-	
+
 	-- debug02 : FARP bug
 	if unit.type == "FARP" or unit.type == "Invisible FARP" then
 		-- print("DC_P_ keep type FARP: "..tostring(unit.type))
@@ -214,27 +214,27 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 	-- decides which aircraft waypoints we want to check against, we really don't care if enemy planes fly over enemy defenses.
 	local otherSide = (unitSide == "blue") and "red" or "blue"
 	local checkSides = unitSide == playerSide and { unitSide, otherSide } or { otherSide }	-- if unit is same side as player check both, else just check enemy
-	
+
 	-- for other types of unit it depends on distance to waypoints 
 	local closestWP     = 100000000
-	local closestTarget = 100000000	
-	for csi,side in pairs(checkSides) do 
-		for wpi,wps in pairs(allWaypoints[side]) do 
-			waypointPairs(wps, function (wp1, wp2) 
+	local closestTarget = 100000000
+	for csi,side in pairs(checkSides) do
+		for wpi,wps in pairs(allWaypoints[side]) do
+			waypointPairs(wps, function (wp1, wp2)
 				-- calculate the distance between the unit and the closest point along the two waypoints		
 				local dist = GetTangentDistance(wp1, wp2, unit)
-				closestWP = math.min(closestWP, dist)		
-				 
+				closestWP = math.min(closestWP, dist)
+
 				-- if this is a 'target' waypoint then record that distance as well
 				if wp1.name == 'Target' or wp1.name == 'Attack' then
 					local dist = GetDistance(wp1, unit)
-					closestTarget = math.min(closestTarget, dist)				
-				end 
-				if wp2.name == 'Target' or wp2.name == 'Attack' then 
+					closestTarget = math.min(closestTarget, dist)
+				end
+				if wp2.name == 'Target' or wp2.name == 'Attack' then
 					local dist = GetDistance(wp2, unit)
-					closestTarget = math.min(closestTarget, dist)				
-				end 
-				
+					closestTarget = math.min(closestTarget, dist)
+				end
+
 				-- TargetList_InThisMission
 
 				--TODO revoir les cibles, elles ne sont plus forcement dans la liste mission
@@ -263,18 +263,18 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 			end)
 		end
 	end
-	
+
 	-- depending on the closest distance (and unit type) decide if we want to keep this unit
-	local range = { 
-		["LONG"] = 400000.0, ["MEDIUM"] = 80000, ["SHORT"] = 30000, 
-		["AAA"] = 15000.0, ["IR"] = 20000.0, ["NONE"] = 10000.0 
+	local range = {
+		["LONG"] = 400000.0, ["MEDIUM"] = 80000, ["SHORT"] = 30000,
+		["AAA"] = 15000.0, ["IR"] = 20000.0, ["NONE"] = 10000.0
 	}
 	local rfactor = math.min(math.max(pruneAggressiveness, 0), 3)
 	local keep = closestWP*rfactor <= range[aaType] or closestTarget*rfactor <= 25000
-	
+
 	-- print("DC_P_P Unit " .. unit.type .. " unit.name" .. unit.name .. " closestWP " .. closestWP .. " closestTarget " .. 
 			-- closestTarget .. " Keep = " .. (keep and "KEEP" or "PRUNE"))
-	
+
 	-- if  unit.category and  keep == false then
 		-- print("DC_P_P UnitCat " .. unit.category.." " ..unit.type .. " " .. unit.name .. " closestWP " .. closestWP .. " closestTarget " .. 
 				-- closestTarget .. " Keep = " .. (keep and "KEEP" or "PRUNE"))
@@ -283,7 +283,7 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 				-- closestTarget .. " Keep = " .. (keep and "KEEP" or "PRUNE"))
 	-- end
 	return keep
-end 
+end
 
 -- decides whether the given air unit should be kept or not
 local function keepAirUnit(unit, side)
@@ -294,20 +294,20 @@ end
 -- Get all the waypoints for all (flying) units for all countries
 local function getAllWaypoints()
 	local allWaypoints = {}
-	for si, side in pairs(mission.coalition) do 
+	for si, side in pairs(mission.coalition) do
 		local sideWaypoints = {}
 		for ci, country in pairs(side.country) do
-			if country.plane then 
+			if country.plane then
 				for gi, grp in pairs(country.plane.group) do
-					table.insert(sideWaypoints, grp.route.points)				
+					table.insert(sideWaypoints, grp.route.points)
 				end
-			end 
+			end
 			if country.helicopter then
 --				for gi, grp in pairs(country.plane.helicopter) do
 				for gi, grp in pairs(country.helicopter.group) do       -- debug01 : helicopter bug
-					table.insert(sideWaypoints, grp.route.points)				
+					table.insert(sideWaypoints, grp.route.points)
 				end
-			end 
+			end
 		end
 		allWaypoints[si] = sideWaypoints
 	end
@@ -319,21 +319,21 @@ local function pruneUnits(groundFun, airFun)
 	local totalPruned = 0
 	local totalKept = 0
 	local addPrune = {}
-	local i = 1		
+	local i = 1
 	local j = 1
 	-- prune all the units in a given group (e.g. 'vehicle' or 'static')
 	local pruneInGroup = function (container, side, fun, category)
 		if container and container.group and container then
 			local newGroup = {}
-				
-			for gi, grp in pairs(container.group) do 			
-				if grp.units then 	
-				
+
+			for gi, grp in pairs(container.group) do
+				if grp.units then
+
 					-- either the whole group survives (if any unit in it survives), or the whole group is removed.
 					local saved = false
-					for ui, unit in pairs(grp.units) do	
+					for ui, unit in pairs(grp.units) do
 						-- unit['category'] = category
-						
+
 						saved = saved or fun(unit, side, category)
 					end
 					if not saved then
@@ -348,10 +348,10 @@ local function pruneUnits(groundFun, airFun)
 									i = 0
 								end
 								i=i+1
-								
+
 							end
 						end
-					else 
+					else
 						totalKept = totalKept + #grp.units
 						table.insert(newGroup, grp)
 					end
@@ -359,19 +359,19 @@ local function pruneUnits(groundFun, airFun)
 			end
 			container.group = newGroup
 
-		end 
-	end 
+		end
+	end
 
 -- M16.d :
 -- Obligé de passer les Aéronefs static avec "groudFun" pour les enlever en fonction de la distance.
-	for si, side in pairs(mission.coalition) do 
+	for si, side in pairs(mission.coalition) do
 		for ci, country in pairs(side.country) do
-			pruneInGroup(country.vehicle, si, groundFun, "vehicle")			
+			pruneInGroup(country.vehicle, si, groundFun, "vehicle")
 			pruneInGroup(country.plane, si, groundFun, "plane")			-- plus efficace que pruneInGroup(country.plane, si, airFun, "Planes")
 			pruneInGroup(country.static, si, groundFun, "static")
 			pruneInGroup(country.helicopter, si, groundFun, "helicopter")
 		end
-	end	
+	end
 	print("Pruned " .. totalPruned .. ", kept " .. totalKept)
 
 	if Debug.debug then
@@ -391,13 +391,13 @@ local function prune()
 	local allGroundGroupId = GroundGroupId()
 	-- get the waypoints for all air units in the mission.
 	local allWaypoints = getAllWaypoints()
-	
+
 	-- prune the required ground and air units 
 	pruneUnits(
 		function (unit, side, category) return keepGroundUnit(unit, side, allWaypoints, allGroundGroupId, category) end
 		,
 		-- function (unit, side, category) return keepAirUnit(unit, side, category) end 
-		function (unit, side, category) return keepAirUnit(unit, side) end 
+		function (unit, side, category) return keepAirUnit(unit, side) end
 	)
 end
 
@@ -405,21 +405,21 @@ function NbPlane()
 	local Count = {
 					NbPlane = 0,
 					NbPlaneStatic = 0,
-					
+
 					NbHeli = 0,
 					NbHeliStatic = 0,
 				}
 
 	for side, _coalition in pairs(mission.coalition) do
-		for ci, country in pairs(mission.coalition[side].country) do 	
+		for ci, country in pairs(mission.coalition[side].country) do
 			if country.plane then
 				if country.plane.group then
-					for gi = 1, #country.plane.group do	
+					for gi = 1, #country.plane.group do
 						for ui = 1, #country.plane.group[gi].units do
 							local testName = string.lower(country.plane.group[gi].units[ui].name)
 							if  string.find(testName,"static")  then
 								Count.NbPlaneStatic = Count.NbPlaneStatic +  1
-							else  
+							else
 								Count.NbPlane = Count.NbPlane +  1
 							end
 						end
@@ -428,17 +428,17 @@ function NbPlane()
 			end
 		end
 	end
-	
+
 	for side, _coalition in pairs(mission.coalition) do
-		for ci, country in pairs(mission.coalition[side].country) do 
+		for ci, country in pairs(mission.coalition[side].country) do
 			if country.helicopter then
 				if country.helicopter.group then
-					for gi = 1, #country.helicopter.group do	
+					for gi = 1, #country.helicopter.group do
 						for ui = 1, #country.helicopter.group[gi].units do
 							local testName = string.lower(country.helicopter.group[gi].units[ui].name)
 							if  string.find(testName,"static")  then
 								Count.NbHeliStatic = Count.NbHeliStatic +  1
-							else  
+							else
 								Count.NbHeli = Count.NbHeli +  1
 							end
 						end
@@ -447,25 +447,25 @@ function NbPlane()
 			end
 		end
 	end
-	
+
 	return Count
 end
 
 
--- Tomsk modification V9 Integration de  Prune Script
-if PruneScript == true then 
-	_Count = NbPlane()
+-- Tomsk modification V9 Integration de Prune Script
+if PruneScript == true then
+	local _Count = NbPlane()
 	print ("Number of plane Before Prune: ".._Count.NbPlane.." PlaneStatic: ".._Count.NbPlaneStatic.." Nb Helic: ".._Count.NbHeli.." HeliStatic ".._Count.NbHeliStatic)
-	prune()	
+	prune()
 	_Count = NbPlane()
-	print ("Number of plane After Prune: ".._Count.NbPlane.." PlaneStatic: ".._Count.NbPlaneStatic.." Nb Helic: ".._Count.NbHeli.." HeliStatic ".._Count.NbHeliStatic)	
+	print ("Number of plane After Prune: ".._Count.NbPlane.." PlaneStatic: ".._Count.NbPlaneStatic.." Nb Helic: ".._Count.NbHeli.." HeliStatic ".._Count.NbHeliStatic)
 end
 
 
 
 if cibleTrouve then
 	-- print("(TEST DC_Prune) Numero des cibles trouvées et normalement préservées de Prune: ")
-	for i, cible in pairs(cibleTrouve) do 
+	for i, cible in pairs(cibleTrouve) do
 		if cible  then
 			-- print(i.." DC_P_P cibleTrouve Keep "..cible)
 		end

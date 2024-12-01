@@ -92,7 +92,7 @@ for side, squadTL in  pairs(oob_air) do
                             end
 
 							--si transport et helico, ajoute SAR et CSAR
-                            if task == "Transport" and isHelicopter[squad.type]    then
+                            if task == "Transport" and IsHelicopter[squad.type]    then
                                 task = "SAR"		
 								if not taskByPlane[squad.type][task] then taskByPlane[squad.type][task] = true end	
 								task = "CSAR"		
@@ -116,7 +116,7 @@ end
 --******************************************************************--
 
 local Playable_m = {}
-for planeType, value in pairs(data_divers) do	
+for planeType, value in pairs(Data_divers) do	
 	if value.playable then
 		Playable_m[planeType] = true
 	end
@@ -152,7 +152,7 @@ local oobAirSide = oob_air[playerSide]
 table.sort(oobAirSide, function(a, b) return a.type:upper() < b.type:upper() end)
 
 -- Playable_m = {}
--- for planeType, value in pairs(data_divers) do	
+-- for planeType, value in pairs(Data_divers) do	
 -- 	if value.playable then
 -- 		Playable_m[planeType] = true
 -- 	end
@@ -178,17 +178,17 @@ end
 --******************************************************************--
 
 local test_str = "tabSquad = " .. TableSerialization(tabSquad, 0)						--make a string
-local testFile = io.open(pathCampaign.."/Debug/DCEM_Function_tabSquad.lua", "w")								--open targetlist file
+local testFile = io.open(pathCampaign.."/Debug/DCEM_Function_tabSquad.lua", "w") or error("Failed to open debug file")
 testFile:write(test_str)															--save new data
 testFile:close()
 
 local test_str = "taskByPlane = " .. TableSerialization(taskByPlane, 0)						--make a string
-local testFile = io.open(pathCampaign.."/Debug/DCEM_Function_taskByPlane.lua", "w")								--open targetlist file
+local testFile = io.open(pathCampaign.."/Debug/DCEM_Function_taskByPlane.lua", "w") or error("Failed to open debug file")
 testFile:write(test_str)															--save new data
 testFile:close()
 
 local test_str = "Playable_m = " .. TableSerialization(Playable_m, 0)						--make a string
-local testFile = io.open(pathCampaign.."/Debug/DCEM_Function_Playable_m.lua", "w")								--open targetlist file
+local testFile = io.open(pathCampaign.."/Debug/DCEM_Function_Playable_m.lua", "w") or error("Failed to open debug file")
 testFile:write(test_str)															--save new data
 testFile:close()
 

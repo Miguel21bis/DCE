@@ -11,8 +11,8 @@ versionDCE["UTIL_HelpBalancePower.lua"] = "1.3.7"
 ------------------------------------------------------------------------------------------------------- 
 
 require("Init/oob_air_init")
- 
- 
+
+
 -- if should_reload( 'oob_air_init' ) then
     package.loaded[ 'Init/oob_air_init' ] = nil
     require("Init/oob_air_init")
@@ -40,23 +40,22 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 
 
-balance = {}
-balanceTS = {}
+local balance = {}
+local balanceTS = {}
+local tabMaxSum = {}
 
-tabMaxSum = {}
-	
-	
+
 for side,unit in pairs(oob_air) do																								--iterate through all sides
 
 	for n = 1, #unit do																				--iterate through all units
 
 		if unit[n].inactive ~= true and db_airbases[unit[n].base] and db_airbases[unit[n].base].inactive ~= true then
-			
+
 			local plane = unit[n].type
-			
+
 			for task,task_bool in pairs(unit[n].tasks) do											--iterate through all tasks of unit
 
-				if task_bool then	
+				if task_bool then
 					local temp_Draft_sorties = {}														--temporary table to hold additional draft sorties with escorts assigned
 					--get possible loadouts
 					local unit_loadouts = {}														--table to hold all loadouts for this aircraft type and task
@@ -67,21 +66,21 @@ for side,unit in pairs(oob_air) do																								--iterate through all 
 
 					-- ajoute dans une table les informations aux plus hautes valeurs
 					if unit[n].number > 0 and db_loadouts[unit[n].type][task]  then																				--has ready aircraft
-								
+
 						local somme = 0
 						local sum_fireP = 0
 						local sum_capY = 0
 						for l = 1, #unit_loadouts do
 							sum_fireP = sum_fireP +  unit_loadouts[l].firepower
 							-- sum_capY = sum_capY +  unit_loadouts[l].capability
-							
+
 							local break_loop = false
 							for n = 1, 6 do
-								
+
 								if not tabMaxSum[side] then tabMaxSum[side] = {} end
 								if not tabMaxSum[side][n] then tabMaxSum[side][n] = {}  tabMaxSum[side][n]["sum"] = 0 end
-								
-								if ((sum_fireP * sum_capY)  /#unit_loadouts) > tabMaxSum[side][n]["sum"] then								
+
+								if ((sum_fireP * sum_capY)  /#unit_loadouts) > tabMaxSum[side][n]["sum"] then
 
 									tabMaxSum[side][n] = nil
 									tabMaxSum[side][n] = {
@@ -95,41 +94,41 @@ for side,unit in pairs(oob_air) do																								--iterate through all 
 									}
 									break_loop = true
 									break
-									
+
 								end
 								if break_loop then break end
 							end
-						end  
-						
+						end
+
 						--(sum_fireP  /#unit_loadouts) pour calculer la moyenne des firepowers
 						-- aditionne ici les plus hautes valeurs
-						
+
 						if not balanceTS[task] then balanceTS[task] = {} end
 						if not balanceTS[task][side] then balanceTS[task][side] = {} end
 						if not balanceTS[task][side]["somme"..side] then balanceTS[task][side]["somme"..side] = 0 end
 						if not balanceTS[task][side]["number"..side] then balanceTS[task][side]["number"..side] = 0 end
-						
+
 --todo la sum de firepower = 1 fait 3 pour 3 loadout, a revoir, 	
-						if task == "Escort" or task == "CAP" or task == "Intercept" then	
+						if task == "Escort" or task == "CAP" or task == "Intercept" then
 							somme = ((sum_fireP * sum_capY)  /#unit_loadouts)  * unit[n].number
 							balanceTS[task][side]["somme"..side] = balanceTS[task][side]["somme"..side] + somme
 							balanceTS[task][side]["number"..side] = balanceTS[task][side]["number"..side] + unit[n].number
-							
+
 						else
 							somme = (sum_fireP  /#unit_loadouts)  * unit[n].number
 							balanceTS[task][side]["somme"..side] = balanceTS[task][side]["somme"..side] + somme
 							balanceTS[task][side]["number"..side] = balanceTS[task][side]["number"..side] + unit[n].number
-							
+
 						end
 						--unit_loadouts[l].capability * unit_loadouts[l].firepower
-					
+
 					end
 				end
 
 			end
-			
+
 		end
-		
+
 	end
 
 end
@@ -152,7 +151,7 @@ end
 local s = "\\n"																	--make a list with details of the player waypoints
 
 local entries = {																			--list entries that are making up the navigaion overview
-		
+
 	[1] = {
 		lookup = "task",
 		header = "Task",
@@ -165,8 +164,8 @@ local entries = {																			--list entries that are making up the naviga
 	},
 	[3] = {
 		lookup = "sommeblue",
-		header = "TotBlue",		
-		str_length = 8,	
+		header = "TotBlue",
+		str_length = 8,
 	},
 	[4] = {
 		lookup = "numberred",
@@ -175,8 +174,8 @@ local entries = {																			--list entries that are making up the naviga
 	},
 	[5] = {
 		lookup = "sommered",
-		header = "TotRed",		
-		str_length = 8,	
+		header = "TotRed",
+		str_length = 8,
 	},
 }
 
@@ -186,7 +185,7 @@ for e = 1, #entries do																		--iterate through all entries
 																							--if this is not the last entry of the waypoints, add spaces to the next entry	
 	local space = entries[e].str_length + 0 - string.len(tostring(entries[e].header))		--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
 	entries[e]["space"] = space
-	for n = 1, space * 1.0 do															
+	for n = 1, space * 1.0 do
 		s = s .. " "																		--add 1.5 spaces for every missing letter
 	end
 
@@ -209,18 +208,18 @@ for task, _side in pairs(balanceTS) do
 		s = s.. entry
 	end
 
-					
+
 	for side, _value in pairs(_side) do
 		-- io.write("B")
-		
+
 		-- for key, value in pairs(_value) do
 			-- io.write("C")
-			
-			
+
+
 				for e = 1, #entries do
 					-- io.write("D")
 					local entry = ""
-					
+
 					if entries[e].lookup == "number"..side then
 						entry = ""..Space(balanceTS[task][side]["number"..side], entries[e].str_length)
 						-- io.write("|E_/"..entry.."/")
@@ -236,12 +235,12 @@ for task, _side in pairs(balanceTS) do
 						-- end
 					-- end
 				end
-		
+
 		-- end
 
-		
+
 	end
-		
+
 	s = s .. "\\n"
 
 end
@@ -254,4 +253,3 @@ print("UTIL_HBP HelpBalancePwer "..DebugTXT)
 print()
 print("You can change oob_air_init.lua or db_loadout.lua file ")
 print("And touch any key for restart the script without closing/opening a dos windows ")
-	
