@@ -61,9 +61,13 @@ function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackTyp
 			--export custom mission log
 			local logStr = "ComboTask = " .. TableSerialization(ComboTask, 0)
 			local FlightNameClean = FlightName:gsub('[%p%c%s]', '_')
-			local logFile = io.open(path.."Debug\\"..FlightNameClean.."_"..n.."_".. "CustomGroupAttack".."_"..tostring(current_time)..".lua", "w")
-			logFile:write(logStr)
-			logFile:close()
+			local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..n.."_".. "CustomGroupAttack".."_"..tostring(current_time)..".lua", "w")
+			if logFile then
+				logFile:write(logStr)
+				logFile:close()
+			else
+				env.info("DCE_CustomGroupAttack: Failed to open log file for writing.")
+			end
 		end
 		
 		cntrl:pushTask(ComboTask)									--push task to front of task list	
@@ -291,9 +295,13 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 			--export custom mission log
 			local logStr = "ComboTask = " .. TableSerialization(ComboTask, 0)
 			local FlightNameClean = FlightName:gsub('[%p%c%s]', '_')
-			local logFile = io.open(path.."Debug\\"..FlightNameClean.."_"..n.."_".. "CustomStaticAttack_"..tostring(current_time)..".lua", "w")
-			logFile:write(logStr)
-			logFile:close()
+			local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..n.."_".. "CustomStaticAttack_"..tostring(current_time)..".lua", "w")
+			if logFile then
+				logFile:write(logStr)
+				logFile:close()
+			else
+				env.info("DCE_CustomStaticAttack: Failed to open log file for writing.")
+			end
 		end
 		
 		cntrl:pushTask(ComboTask)									--push task to front of task list	
@@ -518,7 +526,7 @@ function CustomMixClassAttack(FlightName, TargetList, expend, weaponType, attack
 			--export custom mission log
 			local logStr = "ComboTask = " .. TableSerialization(ComboTask, 0)
 			local FlightNameClean = FlightName:gsub('[%p%c%s]', '_')
-			local logFile = io.open(path.."Debug\\"..FlightNameClean.."_"..n.."_".. "CustomMixClasscAttack_"..tostring(current_time)..".lua", "w")
+			local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..n.."_".. "CustomMixClasscAttack_"..tostring(current_time)..".lua", "w")
 			logFile:write(logStr)
 			logFile:close()
 		end
@@ -764,9 +772,13 @@ function CustomMapObjectAttack(FlightName, TargetList, expend, weaponType, attac
 			--export custom mission log
 			local logStr = "ComboTask = " .. TableSerialization(ComboTask, 0)
 			local FlightNameClean = FlightName:gsub('[%p%c%s]', '_')
-			local logFile = io.open(path.."Debug\\"..FlightNameClean.."_"..n.."_CustomMapObjectAttack_"..tostring(current_time)..".lua", "w")
-			logFile:write(logStr)
-			logFile:close()
+			local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..n.."_CustomMapObjectAttack_"..tostring(current_time)..".lua", "w")
+			if logFile then
+				logFile:write(logStr)
+				logFile:close()
+			else
+				env.info("DCE_CustomMapObjectAttack: Failed to open log file for writing.")
+			end
 		end
 		
 		cntrl:pushTask(ComboTask)									--push task to front of task list	
@@ -1094,9 +1106,13 @@ function CustomAirbaseAttack(FlightName, TargetPos, expend, weaponType, attackTy
 			if camp.debug then
 				local logStr = "ComboTask = " .. TableSerialization(ComboTask, 0)
 				local FlightNameClean = FlightName:gsub('[%p%c%s]', '_')
-				local logFile = io.open(path.."Debug\\"..FlightNameClean.."_"..n.."_".. "CustomAirbaseAttack.lua", "w")
-				logFile:write(logStr)
-				logFile:close()
+				local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..n.."_".. "CustomAirbaseAttack.lua", "w")
+				if logFile then
+					logFile:write(logStr)
+					logFile:close()
+				else
+					env.info("DCE_CustomAirbaseAttack: Failed to open log file for writing.")
+				end
 			end
 
 			cntrl:pushTask(ComboTask)									--push task to front of task list
@@ -1959,9 +1975,13 @@ function OrbitPosition(FlightName, Alt, Speed, UntilTime)
 			if camp.debug then
 				local logStr = "OrbitPosition = " .. TableSerialization(task_entry, 0)
 				local FlightNameClean = FlightName:gsub('[%p%c%s]', '_')
-				local logFile = io.open(path.."Debug\\"..FlightNameClean.."_".. "OrbitPosition_"..current_time..".lua", "w")
-				logFile:write(logStr)
-				logFile:close()
+				local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_".. "OrbitPosition_"..current_time..".lua", "w")
+				if logFile then
+					logFile:write(logStr)
+					logFile:close()
+				else
+					env.info("DCE_OrbitPosition: Failed to open log file for writing.")
+				end
 			end
 		end
 	end
@@ -2093,9 +2113,13 @@ function Custom_RTB_2_Base(grpname, BaseName, speed, alt)
 			if camp.debug then
 				local logStr = "Custom_RTB_2_Base = " .. TableSerialization(Mission, 0)
 				local grpnameClean = grpname:gsub('[%p%c%s]', '_')
-				local logFile = io.open(path.."Debug\\"..grpnameClean.."_".. "Custom_RTB_2_Base.lua", "w")
-				logFile:write(logStr)
-				logFile:close()
+				local logFile = io.open(PathDCE.."Debug\\"..grpnameClean.."_".. "Custom_RTB_2_Base.lua", "w")
+				if logFile then
+					logFile:write(logStr)
+					logFile:close()
+				else
+					env.info("DCE_Custom_RTB_2_Base: Failed to open log file for writing.")
+				end
 			end
 			env.info( "Custom_RTB_2_Base M,  setTask ")
 
@@ -2614,9 +2638,13 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 			if camp.debug then
 				local logStr = "Custom_AddWptSAR = " .. TableSerialization(Mission, 0)
 				local grpnameClean = grpname:gsub('[%p%c%s]', '_')
-				local logFile = io.open(path.."Debug\\"..grpnameClean.."_Custom_AddWptSAR_"..current_time..".lua", "w")
-				logFile:write(logStr)
-				logFile:close()
+				local logFile = io.open(PathDCE.."Debug\\"..grpnameClean.."_Custom_AddWptSAR_"..current_time..".lua", "w")
+				if logFile then
+					logFile:write(logStr)
+					logFile:close()
+				else
+					env.info("DCE_Custom_AddWptSAR: Failed to open log file for writing.")
+				end
 			end
 
 			LastInjectFlightPlan[gpGid] = Mission
@@ -3289,11 +3317,15 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 		if camp.debug then
 			local logStr = "Custom_SAR = " .. TableSerialization(Mission, 0)
 			local grpnameClean = grpname:gsub('[%p%c%s]', '_')
-			local logFile = io.open(path.."Debug\\"..grpnameClean.."_".. "Custom_SAR_"..current_time..".lua", "w")
-			logFile:write(logStr)
-			logFile:close()
+			local logFile = io.open(PathDCE.."Debug\\"..grpnameClean.."_".. "Custom_SAR_"..current_time..".lua", "w")
+			if logFile then
+				logFile:write(logStr)
+				logFile:close()
+			else
+				env.info("DCE_Custom_SAR_: Failed to open log file for writing.")
+			end
 		end
-		env.info( "Custom_SAR, PASSE setTask path: "..tostring(path))
+		env.info( "Custom_SAR, PASSE setTask PathDCE: "..tostring(PathDCE))
 
 		--ajoute le plan de vol dans db, pour utiliser plus tard si necessaire, car DCS ne garde pas en env.mission les plan de vol ajouté à l'arrache
 		LastInjectFlightPlan[gpGid] = Mission
@@ -3512,9 +3544,13 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 			if camp.debug then	
 				local logStr = "Mission = " .. TableSerialization(copyRoute, 0)
 				local grpnameClean = grpname:gsub('[%p%c%s]', '_')
-				local logFile = io.open(path.."Debug\\"..grpnameClean.."_".. "Custom_Altitude_copyRoute_"..current_time..".lua", "w")
-				logFile:write(logStr)
-				logFile:close()	
+				local logFile = io.open(PathDCE.."Debug\\"..grpnameClean.."_".. "Custom_Altitude_copyRoute_"..current_time..".lua", "w")
+				if logFile then
+					logFile:write(logStr)
+					logFile:close()
+				else
+					env.info("DCE_Custom_Altitude_copyRoute: Failed to open log file for writing.")
+				end
 			end
 
 			--cherche la prochaine action pour ne pas trop calculer de wpt intermedaire
@@ -3808,9 +3844,13 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 			if camp.debug then	
 				local logStr = "Mission = " .. TableSerialization(Mission, 0)
 				local grpnameClean = grpname:gsub('[%p%c%s]', '_')
-				local logFile = io.open(path.."Debug\\"..grpnameClean.."_".. "Custom_Altitude_"..current_time..".lua", "w")
-				logFile:write(logStr)
-				logFile:close()	
+				local logFile = io.open(PathDCE.."Debug\\"..grpnameClean.."_".. "Custom_Altitude_"..current_time..".lua", "w")
+				if logFile then
+					logFile:write(logStr)
+					logFile:close()
+				else
+					env.info("DCE_Custom_Altitude_: Failed to open log file for writing.")
+				end
 			end
 
 			Controller.setTask(ctr, Mission)										--activate task with mission for retreat AWACS

@@ -265,7 +265,7 @@ local function addMenuItems(groupId, initiatorName)
 	local TimeSearchEngage = timer.getTime()
 	local logStr = "artyTask = " .. TableSerialization(artyTask, 0)
 	local FlightNameClean = "artyTask"
-	local logFile = io.open(path.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_artyTask.lua", "w")
+	local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_artyTask.lua", "w")
 	logFile:write(logStr)
 	logFile:close()		
 
@@ -301,7 +301,7 @@ local function removeMenuItems(initiatorName)
 		local TimeSearchEngage = timer.getTime()
 		local logStr = "artyTasks = " .. TableSerialization(artyTasks, 0)
 		local FlightNameClean = "artyTasks"
-		local logFile = io.open(path.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_removeMenuItems.lua", "w")
+		local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_removeMenuItems.lua", "w")
 		logFile:write(logStr)
 		logFile:close()	
 		
@@ -423,7 +423,7 @@ local function shellZone(initiatorName)
 	local TimeSearchEngage = timer.getTime()
 	local logStr = "artyTasksTOUT = " .. TableSerialization(artyTasks, 0)
 	local FlightNameClean = "artyTasksTOUT"
-	local logFile = io.open(path.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_artyTasksTOUT.lua", "w")
+	local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_artyTasksTOUT.lua", "w")
 	logFile:write(logStr)
 	logFile:close()	
 

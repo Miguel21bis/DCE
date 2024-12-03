@@ -157,9 +157,13 @@ do
 		if camp.debug then
 			local logStr = "injectPedro = " .. TableSerialization(Mission, 0)
 			local FlightNameClean = pt_start.PedroName:gsub('[%p%c%s]', '_')
-			local logFile = io.open(path.."Debug\\"..FlightNameClean.."_".. "injecteRoutePedro.lua", "w")
-			logFile:write(logStr)
-			logFile:close()
+			local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_".. "injecteRoutePedro.lua", "w")
+			if logFile then
+				logFile:write(logStr)
+				logFile:close()
+			else
+				env.info("DCE_injecteRoutePedro: Failed to open log file for writing.")
+			end
 		end
 
 		local ctr = Group.getByName("Group_"..pt_start.PedroName):getController()
@@ -271,7 +275,7 @@ do
 		
 		-- local logStr = "create_Pedro = " .. TableSerialization(groupData, 0)
 		-- local FlightNameClean = pt_start.PedroName:gsub('[%p%c%s]', '_')
-		-- local logFile = io.open(path ..FlightNameClean.."_".. "create_Pedro.lua", "w")
+		-- local logFile = io.open(PathDCE ..FlightNameClean.."_".. "create_Pedro.lua", "w")
 		-- logFile:write(logStr)
 		-- logFile:close()
 		

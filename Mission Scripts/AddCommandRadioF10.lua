@@ -48,8 +48,8 @@ env.info("Valeur EVADE_FIRE : " ..        tostring(AI.Option.Air.val.REACTION_ON
 env.info("ACRF10 start loading ACRF10 script ")
 
 
-radioCommands = {}
-flightPlanTimer = {}
+local radioCommands = {}
+local flightPlanTimer = {}
 
 coalitionId = {
 	["0"] = "neutral",
@@ -89,6 +89,7 @@ DCS_CategoryById = {
 	[1] = Helicopters,
 
 }
+
 
 local commandDB = {}
 
@@ -287,7 +288,7 @@ function GetHeading(p1, p2)
 	end
 end
 
-function getOppositePointOnCircle(posA, centerCircle)
+local function getOppositePointOnCircle(posA, centerCircle)
     -- Calculer les coordonnées opposées sur le cercle
     local bx = 2 * centerCircle.x - posA.x
     local by = 2 * centerCircle.y - posA.y
@@ -506,7 +507,7 @@ end
 -- _affiche (a b)     typeName MiG-23MLD
 -- _affiche (a b)     category 0
 
-hotSpotAirDefence = {
+local hotSpotAirDefence = {
     red = {},
     blue = {},
 }
@@ -515,7 +516,7 @@ local function calculateDistance(x1, y1, x2, y2)
     return math.sqrt((x2 - x1)^2 + (y2 - y1)^2)
 end
 
-function hotSpotSAM()
+local function hotSpotSAM()
     if not camp.groundthreats then return end
 
     local clusterThreshold = 100000 -- Distance max pour regrouper les SAMs
@@ -586,7 +587,7 @@ local function avoidArea()
 
 	-- env.info("ACRF10_avoidArea A0 camp.groundthreats.? "..tostring(camp.groundthreats))
 
-	debug_avoidArea = false
+	local debug_avoidArea = false
 
 	if not camp.groundthreats then return end
 
@@ -1033,17 +1034,22 @@ local function avoidArea()
 										_affiche(flightPlanTimer, "ACRF10_avoidArea Z2 flightPlanTimer")
 									end
 
-
 									if camp.debug then
 										local TimeSearchEngage = timer.getTime() + 5
 										local logStr = "flightPlan = " .. TableSerialization(flightPlan, 0)
 										local FlightNameClean = unitName:gsub('[%p%c%s]', '_')
-										local logFile = io.open(path.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_avoidArea.lua", "w")
-										logFile:write(logStr)
-										logFile:close()
+										local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_avoidArea.lua", "w")
 
-										env.info( "DCE_avoidArea ZZZ "..tostring(unitName))
+										if logFile then
+											logFile:write(logStr)
+											logFile:close()
+										else
+											env.info("DCE_avoidArea: Failed to open log file for writing.")
+										end
+
+										env.info("DCE_avoidArea ZZZ " .. tostring(unitName))
 									end
+
 
 
 									break -- il est entre dans une zone interdite, on l evacue et on s arrete là
@@ -1375,7 +1381,7 @@ function AirRetreat()
 
 
 																-- local logStr = "Mission = " .. TableSerialization(Mission, 0)
-																-- local logFile = io.open(path.."_"..nameAwacs.."_".. "Mission_AWACSretreatRoute.lua", "w")
+																-- local logFile = io.open(PathDCE.."_"..nameAwacs.."_".. "Mission_AWACSretreatRoute.lua", "w")
 																-- logFile:write(logStr)
 																-- logFile:close()	
 
@@ -1398,7 +1404,7 @@ function AirRetreat()
 	return timer.getTime() + 1
 end
 
-function bingo(gpGid, groupMission)
+local function bingo(gpGid, groupMission)
 
 	for index, unit in pairs(groupMission:getUnits()) do
 
@@ -1586,6 +1592,7 @@ end
 function AFAC_F10(playerGroup)
 
 	local gpGid = playerGroup:getID()
+	local menuAFAC
 	missionCommands.removeItemForGroup(gpGid, {"AFAC"})
 
 	-- AFAC_available[FlightName] = nil
@@ -1736,7 +1743,7 @@ function BullsEye(PlayerGroup)
 
 	local Coalition = PlayerUnit:getCoalition()
 
-	sideT = {
+	local sideT = {
 		[0] = "neutral",
 		[1] = "red",
 		[2] = "blue"
@@ -2331,7 +2338,7 @@ function getOut(gid)
 
 end
 
-function getLL_TargetPosition()
+local function getLL_TargetPosition()
 	trigger.action.outText("DCE_getLL_TargetPosition Init ", 15)
 	-- [357797] = 
 	-- {
@@ -2367,9 +2374,13 @@ function getLL_TargetPosition()
 	end
 
 	local logStr = "LL_KnownPositions = " .. TableSerialization(camp.targetPos, 0)
-	local logFile = io.open(path.."Init\\".."LL_KnownPositionsTable.lua", "w")
-	logFile:write(logStr)
-	logFile:close()
+	local logFile = io.open(PathDCE.."Init\\".."LL_KnownPositionsTable.lua", "w")
+	if logFile then
+		logFile:write(logStr)
+		logFile:close()
+	else
+		env.info("DCE_LL_KnownPositions: Failed to open log file for writing.")
+	end
 
 	trigger.action.outText("DCE_getLL_TargetPosition End ", 15)
 
@@ -2415,7 +2426,7 @@ function getLL_TargetPosition()
 	-- if camp.debug then
 	-- 	--export custom mission log
 	-- 	local logStr = "targetPos = " .. TableSerialization(camp.targetPos, 0)
-	-- 	local logFile = io.open(path.."Debug\\".."targetPos"..".lua", "w")
+	-- 	local logFile = io.open(PathDCE.."Debug\\".."targetPos"..".lua", "w")
 	-- 	logFile:write(logStr)
 	-- 	logFile:close()
 	-- end
@@ -2429,7 +2440,7 @@ if camp.makeCampaign then
 	-- local LL_KnownPositionsTable = {}
 
 	-- -- Lire le fichier oobground.lua et charger la table
-	-- local fileName = path.."Active\\".."oob_ground.lua"
+	-- local fileName = PathDCE.."Active\\".."oob_ground.lua"
 
 	-- local oob_ground = assert(loadfile(fileName)) -- Charge le fichier
 
@@ -2520,7 +2531,7 @@ if camp.makeCampaign then
 
 	-- 	--***************************************************************************
 	-- 	-- Lire le fichier targetlist pour ajouter les xy des elements de la map
-	-- 	local fileName = path.."Active\\".."targetlist.lua"
+	-- 	local fileName = PathDCE.."Active\\".."targetlist.lua"
 
 	-- 	local targetList = assert(loadfile(fileName)) -- Charge le fichier
 
@@ -2614,12 +2625,12 @@ if camp.makeCampaign then
 
 	-- --export custom mission log
 	-- local logStr = "LL_KnownPositions = " .. TableSerialization(LL_KnownPositionsTable, 0)
-	-- local logFile = io.open(path.."Init\\".."LL_KnownPositionsTable.lua", "w")
+	-- local logFile = io.open(PathDCE.."Init\\".."LL_KnownPositionsTable.lua", "w")
 	-- logFile:write(logStr)
 	-- logFile:close()
 end
 
-function addFuncs(gid, Group)
+local function addFuncs(gid, Group)
 
 	env.info("DCE_addFuncs PASSE   _A gid "..tostring(gid).." Group "..tostring(Group))
 
@@ -2711,15 +2722,131 @@ function addFuncs(gid, Group)
 			local TimeSearchEngage = timer.getTime()
 			local logStr = "radioCommands = " .. TableSerialization(radioCommands, 0)
 			local FlightNameClean = "radioCommands"
-			local logFile = io.open(path.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_radioCommands.lua", "w")
-			logFile:write(logStr)
-			logFile:close()
+			local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_radioCommands.lua", "w")
+			if logFile then
+				logFile:write(logStr)
+				logFile:close()
+			else
+				env.info("DCE_addFuncs: Failed to open log file for writing.")
+			end
 		 end
 
 		 env.info("DCE_addFuncs PASSE   _D  ")
 
 	end
 end
+
+--////////////////////////////////////////////////////////////////////////////////////////////
+--test BULLE
+--////////////////////////////////////////////////////////////////////////////////////////////
+
+
+--////////////////////////////////////////////////////////////////////////////////////////////
+
+-- coalition.getGroups(Coalition, Group.Category.AIRPLANE)
+-- _group.category = Group.Category.GROUND;
+
+	-- --recupere les dynamique
+	-- local GroundGroups = coalition.getGroups(coalitionIdNumericENI[Coalition], Group.Category.GROUND)
+
+	-- 	--recupere les static
+	-- 	local statics = coalition.getStaticObjects(coalitionIdNumericENI[Coalition])
+
+--////////////////////////////////////////////////////////////////////////////////////////////
+
+
+-- Liste des groupes au sol et leurs états d'origine
+local groundGroups = {}
+
+-- Collecte des groupes dynamiques au sol
+local function collectGroundGroups()
+    groundGroups = {}
+    local totalGroups = 0
+    local validGroups = 0
+
+    local function addGroupsFromCoalition(side)
+        -- Récupère uniquement les groupes dynamiques au sol
+        local allGroups = coalition.getGroups(side, Group.Category.GROUND)
+        totalGroups = totalGroups + #allGroups
+
+        for _, group in ipairs(allGroups) do
+            if group and group:isExist() then
+                env.info("Checking group: " .. group:getName())
+                local groupName = group:getName()
+                local units = group:getUnits()
+                if #units > 0 then
+                    groundGroups[groupName] = {
+                        name = groupName,
+                        invisible = false -- État actuel
+                    }
+                    validGroups = validGroups + 1
+                    env.info("Added ground vehicle group: " .. groupName)
+                else
+                    env.info("Skipped group (no units): " .. groupName)
+                end
+            end
+        end
+    end
+
+    -- Ajout des groupes des deux coalitions
+    addGroupsFromCoalition(coalition.side.RED)  -- Groupes dynamiques côté RED
+    addGroupsFromCoalition(coalition.side.BLUE) -- Groupes dynamiques côté BLUE
+
+    env.info("Total groups found: " .. tostring(totalGroups))
+    env.info("Ground vehicle groups collected: " .. tostring(validGroups))
+end
+
+-- Basculer la visibilité d'un groupe via SetInvisible
+local function toggleGroupVisibility(groupData)
+    local group = Group.getByName(groupData.name)
+    if group and group:isExist() then
+        local controller = group:getController()
+        if controller then
+            local SetInvisible = {
+                id = 'SetInvisible',
+                params = {
+                    value = not groupData.invisible -- Basculer la visibilité
+                }
+            }
+            controller:setCommand(SetInvisible)
+            groupData.invisible = not groupData.invisible -- Mise à jour de l'état
+            env.info("Toggled visibility for group: " .. groupData.name .. " to " .. tostring(groupData.invisible))
+        else
+            env.warning("No controller found for group: " .. groupData.name)
+        end
+    else
+        env.info("Group does not exist anymore: " .. groupData.name)
+    end
+end
+
+-- Basculer l'état de visibilité des unités au sol
+local function toggleGroundUnits()
+    env.info("Toggling ground units visibility...")
+    for _, groupData in pairs(groundGroups) do
+        toggleGroupVisibility(groupData)
+    end
+end
+
+-- Planification initiale et exécution toutes les 10 minutes
+local function scheduleToggle()
+    toggleGroundUnits()
+    return timer.getTime() + 150 -- 600 secondes = 10 minutes
+end
+
+-- Planification de la collecte initiale après 10 secondes
+timer.scheduleFunction(function()
+    collectGroundGroups()
+    timer.scheduleFunction(scheduleToggle, nil, timer.getTime() + 10) -- Commence le cycle après 10 minutes
+end, nil, timer.getTime() + 10)
+
+
+
+
+
+--////////////////////////////////////////////////////////////////////////////////////////////
+--test BULLE (fin)
+--////////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 EventHandler2 = {}
@@ -2837,7 +2964,7 @@ function EventHandler2:onEvent(event)
 					-- if camp.debug then
 					-- 	local logStr = "DamagedFM = " .. TableSerialization(groundDamagedFlyingMachine, 0)
 					-- 	local grpnameClean = unitName:gsub('[%p%c%s]', '_')
-					-- 	local logFile = io.open(path.."Debug\\"..event.initiator.id_.."_"..grpnameClean.."_".. "DamagedFM_"..current_time..".lua", "w")
+					-- 	local logFile = io.open(PathDCE.."Debug\\"..event.initiator.id_.."_"..grpnameClean.."_".. "DamagedFM_"..current_time..".lua", "w")
 					-- 	logFile:write(logStr)
 					-- 	logFile:close()
 					-- end
@@ -2857,11 +2984,13 @@ world.addEventHandler(EventHandler2)
 --sur certaines map en solo (Syria) l'evenement Birth n'est pas detectée
 local function timerPlayerMenu(arg)
 	if (radioCommands == nil or #radioCommands == 0) and timer.getTime() < 10   then
-
+		local Uid, Group, gpGid
 		local playerObj = localGetPlayerObj()
-		local Uid = playerObj:getID()
-		local Group = playerObj:getGroup()
-		local gpGid = playerObj:getGroup():getID()
+		if playerObj then
+			Uid = playerObj:getID()
+			Group = playerObj:getGroup()
+			gpGid = playerObj:getGroup():getID()
+		end
 
 		if gpGid and Group then
 			addFuncs(gpGid, Group)
@@ -2914,9 +3043,13 @@ hotSpotSAM()
 
 if camp.debug then
 	local logStr = "hotSpotAirDefence = " .. TableSerialization(hotSpotAirDefence, 0)
-	local logFile = io.open(path.."Debug\\".."hotSpotAirDefence.lua", "w")
-	logFile:write(logStr)
-	logFile:close()
+	local logFile = io.open(PathDCE.."Debug\\".."hotSpotAirDefence.lua", "w")
+	if logFile then
+		logFile:write(logStr)
+		logFile:close()
+	else
+		env.info("DCE_hotSpotAirDefence: Failed to open log file for writing.")
+	end
 end
 
 timer.scheduleFunction(timerPlayerMenu, nil, timer.getTime() + 5)
@@ -2932,5 +3065,7 @@ timer.scheduleFunction(getLL_TargetPosition, nil, timer.getTime() + 20)
 
 
 _affiche(AI.Option.Air.val, "AI.Option.Air.val")
+
+_affiche(DCS_CategoryById, "DCE_DCS_CategoryById")
 
 env.info("ACRF10 end of loading AdCR10 script ")

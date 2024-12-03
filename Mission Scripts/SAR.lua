@@ -14,30 +14,32 @@ versionDCE["Mission Scripts\SAR.lua"] = "1.3.20"
 
 do
 	zoneSAR = {}																									--table enumérant les helico SAR pour eviter d'en envoyer plusieurs aux memes endroits
-	nbManhunt = {
+
+	local nbManhunt = {
 		[1] = 0,
 		[2] = 0,
 		[3] = 0,
 	}
-	guideSAR = {}
-	walkEjectedPilot = {}
-	SoldierAliasManhunt = {}
-	createWreck = {}
-	createWreckCrew = {}
 
-	pathDD = "c:"
-	--prepare campaign path
-	path = string.gsub(camp.path, "/", "\\")																		--replace slashes in campaign path with double-backslashes
-	if  string.sub (camp.path, 2, 2) ~= ":" then																		--si le chemin est differen de C:\Users ou D:\Users
-		path = os.getenv('USERPROFILE') .. "\\" .. path																	--get path of windows userprofile and add to campaign path	
-	else
-		pathDD = string.sub (camp.path, 1, 2)
-	
-	end
-	path = path .."Mods\\tech\\DCE\\Missions\\Campaigns\\"..camp.title.."\\"											-- modification M35.b version ScriptsMod
-	
+	local guideSAR = {}
+	local walkEjectedPilot = {}
+	local SoldierAliasManhunt = {}
+	local createWreck = {}
+	local createWreckCrew = {}
 
-	
+	-- pathDD = "c:"
+	-- --prepare campaign path
+	-- path = string.gsub(camp.path, "/", "\\")																		--replace slashes in campaign path with double-backslashes
+	-- if  string.sub (camp.path, 2, 2) ~= ":" then																		--si le chemin est differen de C:\Users ou D:\Users
+	-- 	path = os.getenv('USERPROFILE') .. "\\" .. path																	--get path of windows userprofile and add to campaign path	
+	-- else
+	-- 	pathDD = string.sub (camp.path, 1, 2)
+
+	-- end
+	-- path = path .."Mods\\tech\\DCE\\Missions\\Campaigns\\"..camp.title.."\\"											-- modification M35.b version ScriptsMod
+
+
+
 	-- SAR = {
 	-- 	helicopter = {
 	-- 		[1] = "machprout",
@@ -61,31 +63,31 @@ do
 
 	--ajoute la table (camp.SAR.pilotEjected) dans SAR  pour n'avoir qu'une seule table
 	for N_Pilot, ejectedPilot in ipairs(camp.SAR.pilotEjected) do
-		if ejectedPilot and ejectedPilot.MGRS_Chute   then		
+		if ejectedPilot and ejectedPilot.MGRS_Chute   then
 			if zoneSAR[ejectedPilot.MGRS_Chute] == nil then
 				zoneSAR[ejectedPilot.MGRS_Chute] = {}
 			end
 			table.insert( zoneSAR[ejectedPilot.MGRS_Chute], ejectedPilot)
-		end	
+		end
 	end
-	
-	function despawnSoldierAliasPilot(EjectedPilotName, embarkation)			
+
+	function despawnSoldierAliasPilot(EjectedPilotName, embarkation)
 		env.info("DCE_despawnSoldierAliasPilot START "..tostring(EjectedPilotName))
-		
-		for MGRS_Chute, zone in pairs(zoneSAR) do	
-			for N_Pilot, ejectedPilot in ipairs(zone) do		
+
+		for MGRS_Chute, zone in pairs(zoneSAR) do
+			for N_Pilot, ejectedPilot in ipairs(zone) do
 				if ejectedPilot.name and ejectedPilot.name == EjectedPilotName    then	--and ejectedPilot.embarked ~= true
-					
+
 					env.info( "DCE_SAR: the pilot :"..EjectedPilotName.." is on board ".." ejectedPilot.Coalition: "..tostring(ejectedPilot.Coalition))
 					-- trigger.action.outText("SAR: the pilot:"..EjectedPilotName.." is on board", 10)
 
 					if ejectedPilot.Coalition then
 						trigger.action.outTextForCoalition(ejectedPilot.Coalition, "SAR Coalition: the pilot:"..EjectedPilotName.." is on board", 10)
 					end
-					
+
 					ejectedPilot.embarked = true
 					ejectedPilot.status = "rescued"
-					
+
 					local log_entry = {}
 					log_entry.type = "embarkedEjectedPilot"
 					log_entry.t = timer.getTime()
@@ -95,7 +97,7 @@ do
 					table.insert(customLog, log_entry)
 
 					StopRadioTransmission(EjectedPilotName)
-					
+
 					local soldier = Unit.getByName(EjectedPilotName)
 
 					if soldier and soldier:isExist()  then
@@ -105,12 +107,12 @@ do
 						-- trigger.action.outText("despawnSoldierAliasPilot "..tostring(EjectedPilot.name), 30)
 
 						StopRadioTransmission(EjectedPilotName)
-								
+
 						env.info("DCE_despawnSoldierAliasPilot FIN "..tostring(EjectedPilotName))
 					end
 				end
 			end
-		end		
+		end
 	end
 
 	function AddSoldierAliasPilot(element)
@@ -128,20 +130,20 @@ do
 
 		local AddGroup = {
 			["visible"] = false,
-			["tasks"] = 
+			["tasks"] =
 			{
 			}, -- end of ["tasks"]
 			["uncontrollable"] = false,
 			["task"] = "Pas de sol",
 			["taskSelected"] = true,
-			["route"] = 
+			["route"] =
 			{
-				["spans"] = 
+				["spans"] =
 				{
 				}, -- end of ["spans"]
-				["points"] = 
+				["points"] =
 				{
-					[1] = 
+					[1] =
 					{
 						-- ["alt"] = tonumber(element.z),
 						["alt"] = 0,
@@ -154,38 +156,38 @@ do
 						["ETA_locked"] = true,
 						["speed"] = 1,
 						["action"] = "Off Road",
-						["task"] = 
+						["task"] =
 						{
 							["id"] = "ComboTask",
-							["params"] = 
+							["params"] =
 							{
-								["tasks"] = 
+								["tasks"] =
 								{
-									[1] = 
+									[1] =
 									{
 										["number"] = 1,
 										["auto"] = false,
 										["id"] = "EmbarkToTransport",
 										["enabled"] = true,
-										["params"] = 
+										["params"] =
 										{
 											["y"] = tonumber(element.y2d + 5),
 											["x"] = tonumber(element.x2d + 5),
 											["zoneRadius"] = 2000,
 										}, -- end of ["params"]
 									}, -- end of [1]
-									[2] = 
+									[2] =
 									{
 										["enabled"] = true,
 										["auto"] = false,
 										["id"] = "WrappedAction",
 										["number"] = 2,
-										["params"] = 
+										["params"] =
 										{
-											["action"] = 
+											["action"] =
 											{
 												["id"] = "Option",
-												["params"] = 
+												["params"] =
 												{
 													["name"] = 0,
 													["value"] = 4,
@@ -198,7 +200,7 @@ do
 						}, -- end of ["task"]
 						["speed_locked"] = true,
 					}, -- end of [1]
-					[2] = 
+					[2] =
 					{
 						-- ["alt"] = tonumber(element.z),
 						["alt"] = 0,
@@ -211,38 +213,38 @@ do
 						["ETA_locked"] = false,
 						["speed"] = 1,
 						["action"] = "Off Road",
-						["task"] = 
+						["task"] =
 						{
 							["id"] = "ComboTask",
-							["params"] = 
+							["params"] =
 							{
-								["tasks"] = 
+								["tasks"] =
 								{
-									[1] = 
+									[1] =
 									{
 										["number"] = 1,
 										["auto"] = false,
 										["id"] = "EmbarkToTransport",
 										["enabled"] = true,
-										["params"] = 
+										["params"] =
 										{
 											["y"] = tonumber(element.y2d + 5),
 											["x"] = tonumber(element.x2d + 5),
 											["zoneRadius"] = 2000,
 										}, -- end of ["params"]
 									}, -- end of [1]
-									[2] = 
+									[2] =
 									{
 										["enabled"] = true,
 										["auto"] = false,
 										["id"] = "WrappedAction",
 										["number"] = 2,
-										["params"] = 
+										["params"] =
 										{
-											["action"] = 
+											["action"] =
 											{
 												["id"] = "Option",
-												["params"] = 
+												["params"] =
 												{
 													["name"] = 0,
 													["value"] = 4,
@@ -259,9 +261,9 @@ do
 			}, -- end of ["route"]
 			-- ["groupId"] = GenerateID(),
 			["hidden"] = hidden,
-			["units"] = 
+			["units"] =
 			{
-				[1] = 
+				[1] =
 				{
 					["type"] = "Soldier M4",
 					-- ["unitId"] = GenerateID(),
@@ -286,10 +288,14 @@ do
 			local TimeSearchEngage = timer.getTime() + 5
 			local logStr = "AddGroup = " .. TableSerialization(AddGroup, 0)
 			local ElementNameClean = element.name:gsub('[%p%c%s]', '_')
-			local logFile = io.open(path.."Debug\\"..ElementNameClean.."_"..TimeSearchEngage.."_".. "_AddSoldierAliasPilot.lua", "w")
-			logFile:write(logStr)
-			logFile:close()				
-		
+			local logFile = io.open(PathDCE.."Debug\\"..ElementNameClean.."_"..TimeSearchEngage.."_".. "_AddSoldierAliasPilot.lua", "w")
+			if logFile then
+				logFile:write(logStr)
+				logFile:close()
+			else
+				env.info("DCE_SAR_AddSoldierAliasPilot: Failed to open log file for writing.")
+			end
+
 			env.info( "DCE_SAR_AddSoldierAliasPilot write debug file "..tostring(ElementNameClean))
 		end
 
@@ -298,7 +304,7 @@ do
 	function AddSoldierAliasManhunt(EjectedPilot)
 
 		local function AddMultipleSoldier(ejectedPilotName, randomIdCountry, point, n)
-			
+
 			env.info( "DCE_SAR_AddSoldierAliasManhunt A randomIdCountry:  "..tostring(randomIdCountry))
 
 			if not SoldierAliasManhunt[randomIdCountry] then SoldierAliasManhunt[randomIdCountry] = 0 end
@@ -320,20 +326,20 @@ do
 
 			local AddGroup = {
 				["visible"] = false,
-				["tasks"] = 
+				["tasks"] =
 				{
 				}, -- end of ["tasks"]
 				["uncontrollable"] = false,
 				["task"] = "Pas de sol",
 				["taskSelected"] = true,
-				["route"] = 
+				["route"] =
 				{
-					["spans"] = 
+					["spans"] =
 					{
 					}, -- end of ["spans"]
-					["points"] = 
+					["points"] =
 					{
-						[1] = 
+						[1] =
 						{
 							["alt"] = 0,
 							["type"] = "Turning Point",
@@ -345,12 +351,12 @@ do
 							["ETA_locked"] = true,
 							["speed"] = 0,
 							["action"] = "Off Road",
-							["task"] = 
+							["task"] =
 							{
 								["id"] = "ComboTask",
-								["params"] = 
+								["params"] =
 								{
-									["tasks"] = 
+									["tasks"] =
 									{
 									}, -- end of ["tasks"]
 								}, -- end of ["params"]
@@ -361,7 +367,7 @@ do
 				}, -- end of ["route"]
 				-- ["groupId"] = GenerateID(),
 				["hidden"] = hidden,
-				["units"] = 
+				["units"] =
 				{
 					-- [1] = 
 					-- {
@@ -374,7 +380,7 @@ do
 					-- 	["heading"] = 0,
 					-- 	["playerCanDrive"] = false,
 					-- }, -- end of [1]
-					[1] = 
+					[1] =
 					{
 						["skill"] = "Average",
 						["coldAtStart"] = false,
@@ -395,7 +401,7 @@ do
 			coalition.addGroup(randomIdCountry, Group.Category.GROUND, AddGroup)
 			SoldierAliasManhunt[randomIdCountry] = SoldierAliasManhunt[randomIdCountry] + 1
 		end
-		
+
 
 		local ejectedPilotName = EjectedPilot:getName()
 		local ejectedPilotCoalition = EjectedPilot:getCoalition()
@@ -451,7 +457,7 @@ do
 			local i = 1
 			-- local alti 
 			local altiSelected = 999999
-			
+
 			local pointSelected = PosEjectedPilot
 			repeat
 				-- local testLand = land.getSurfaceType({x = testX, y = testY})
@@ -463,7 +469,7 @@ do
 				local testPoint = GetOffsetPoint( {x=PosEjectedPilot.x, y=PosEjectedPilot.z}, portionCercle, distance)
 				local testAlti = land.getHeight({testPoint.x, testPoint.y})
 				local testLand = land.getSurfaceType({x = testPoint.x, y = testPoint.y})
-				
+
 				if testAlti < altiSelected and (testLand ~= 2 and testLand ~= 3) then
 					pointSelected = testPoint
 					altiSelected = testAlti
@@ -505,7 +511,7 @@ do
 
 
 	function startSAR(arg)
-		
+
 		local FlightSAR = arg[1]
 		local pt_dest = arg[2]
 		-- local pt_AfterTakeOff  = arg[3]
@@ -514,29 +520,29 @@ do
 		local point_1x = FlightSAR.x
 		local current_time = timer.getTime() +1
 		local speed = FlightSAR.vAttack
-		local distance01 = math.sqrt(math.pow(FlightSAR.x - pt_dest.x2d, 2) + math.pow(FlightSAR.y - pt_dest.y2d, 2))		
+		local distance01 = math.sqrt(math.pow(FlightSAR.x - pt_dest.x2d, 2) + math.pow(FlightSAR.y - pt_dest.y2d, 2))
 
 		local alt_cruise = FlightSAR.hCruise
 		local CV_Name = ""
 
 		--400			10000 https://calculis.net/droite
 		--60			1
-		
+
 		-- y = aX + b
 		-- y = (0.034 + X ) + 60
-		local a = 0.034 
-		alt_cruise = (0.034 * distance01) + 60 
-		if alt_cruise > FlightSAR.hCruise then 
+		local a = 0.034
+		alt_cruise = (0.034 * distance01) + 60
+		if alt_cruise > FlightSAR.hCruise then
 			alt_cruise = FlightSAR.hCruise
 		end
-		
-		
+
+
 		local heading1 = GetHeading(FlightSAR, {x=pt_dest.x2d, y=pt_dest.y2d})
 		local distanceAfterPt2 = distance01/2
 
 		local point_2 = GetOffsetPoint(FlightSAR, heading1, distanceAfterPt2)
 		local point_2z = land.getHeight({x =point_2.x, y = point_2.y})
-		
+
 		env.info( "DCE_SAR startSAR point_2z "..tostring(point_2z).." heading1: "..tostring(heading1))
 		-- trigger.action.outText("SAR startSAR point_2z "..tostring(point_2z).." heading1: "..tostring(heading1), 30)
 
@@ -553,13 +559,13 @@ do
 				["type"] = "Turning Point",
 				["alt_type"] = "BARO",
 				["speed"] = tonumber(speed),
-				["task"] = 
+				["task"] =
 				{
 					["id"] = "ComboTask",
-					["params"] = 
+					["params"] =
 					{
-						["tasks"] = 
-						{								
+						["tasks"] =
+						{
 							-- [1] = {
 								-- ['enabled'] = true,
 								-- ['auto'] = false,
@@ -590,12 +596,12 @@ do
 				["action"] = "Turning Point",
 				["alt_type"] = "BARO",
 				["speed"] = tonumber(speed),
-				["task"] = 
+				["task"] =
 				{
 					["id"] = "ComboTask",
-					["params"] = 
+					["params"] =
 					{
-						["tasks"] = 
+						["tasks"] =
 						{
 							[1] = {
 								['enabled'] = true,
@@ -622,18 +628,18 @@ do
 				["name"] = "",
 				["formation_template"] = "",
 				["speed_locked"] = true,
-			},				
+			},
 			{
 				["alt"] = tonumber(altiTarget),
 				["action"] = "Turning Point",
 				["alt_type"] = "BARO",
 				["speed"] = tonumber(FlightSAR.vCruise),
-				["task"] = 
+				["task"] =
 				{
 					["id"] = "ComboTask",
-					["params"] = 
+					["params"] =
 					{
-						["tasks"] = 
+						["tasks"] =
 						{
 						}, -- end of ["tasks"]
 					}, -- end of ["params"]
@@ -653,29 +659,29 @@ do
 				["action"] = "Turning Point",
 				["alt_type"] = "RADIO",
 				["speed"] = tonumber(FlightSAR.vCruise),
-				["task"] = 
+				["task"] =
 				{
 					["id"] = "ComboTask",
-					["params"] = 
+					["params"] =
 					{
-						["tasks"] = 
+						["tasks"] =
 						{
-							[1] = 
+							[1] =
 							{
 
 								["enabled"] = true,
 								["auto"] = false,
 								["id"] = "WrappedAction",
 								["number"] = 2,
-								["params"] = 
+								["params"] =
 								{
-									["action"] = 
+									["action"] =
 									{
 										["id"] = "Script",
-										["params"] = 
+										["params"] =
 										{
 														-- Custom_SAR(grpname, airdrome, airdromeX2d, airdromeY2d, mgrsChute, speed, alt)
-											["command"] = 'Custom_SAR("' .. FlightSAR.name .. '",  "' .. FlightSAR.airdromeName .. '",  "' .. FlightSAR.x .. '",  "' .. FlightSAR.y .. '",  "' .. pt_dest.MGRS_Chute .. '",   "' .. FlightSAR.vCruise .. '",  "' .. alt_cruise ..  '")', 
+											["command"] = 'Custom_SAR("' .. FlightSAR.name .. '",  "' .. FlightSAR.airdromeName .. '",  "' .. FlightSAR.x .. '",  "' .. FlightSAR.y .. '",  "' .. pt_dest.MGRS_Chute .. '",   "' .. FlightSAR.vCruise .. '",  "' .. alt_cruise ..  '")',
 										}, -- end of ["params"]
 									}, -- end of ["action"]
 								}, -- end of ["params"]
@@ -697,12 +703,12 @@ do
 				["action"] = "Turning Point",
 				["alt_type"] = "BARO",
 				["speed"] = tonumber(FlightSAR.vCruise),
-				["task"] = 
+				["task"] =
 				{
 					["id"] = "ComboTask",
-					["params"] = 
+					["params"] =
 					{
-						["tasks"] = 
+						["tasks"] =
 						{
 						}, -- end of ["tasks"]
 					}, -- end of ["params"]
@@ -721,12 +727,12 @@ do
 				["action"] = "Landing",
 				["alt_type"] = "BARO",
 				["speed"] =  tonumber(FlightSAR.vCruise),
-				["task"] = 
+				["task"] =
 				{
 					["id"] = "ComboTask",
-					["params"] = 
+					["params"] =
 					{
-						["tasks"] = 
+						["tasks"] =
 						{
 						}, -- end of ["tasks"]
 					}, -- end of ["params"]
@@ -743,8 +749,8 @@ do
 				['helipadId'] = tonumber(FlightSAR.airdromeId),
 			},
 		} -- end of ["route"]
-		
-		
+
+
 		local Mission = {
 			id = 'Mission',
 			params = {
@@ -752,8 +758,8 @@ do
 					points = pointData
 				}
 			}
-		}		
-		
+		}
+
 		local ctr = Group.getByName(FlightSAR.name):getController()
 		Controller.setTask(ctr, Mission)
 
@@ -762,21 +768,25 @@ do
 		if camp.debug then
 			local logStr = "Start_SAR = " .. TableSerialization(Mission, 0)
 			local FlightNameClean = FlightSAR.name:gsub('[%p%c%s]', '_')
-			local logFile = io.open(path.."Debug\\"..FlightNameClean.."_".. "Start_SAR"..current_time..".lua", "w")
-			logFile:write(logStr)
-			logFile:close()		
+			local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_".. "Start_SAR"..current_time..".lua", "w")
+			if logFile then
+				logFile:write(logStr)
+				logFile:close()
+			else
+				env.info("DCE_SAR_Start_SAR: Failed to open log file for writing.")
+			end
 		end
 
-		local flight = Group.getByName(FlightSAR.name)								
+		local flight = Group.getByName(FlightSAR.name)
 		local leader = flight:getUnit(1)
 		local  gpGid = Group.getID(flight)
-		
+
 		LastInjectFlightPlan[gpGid] = Mission
     end
 
 
-    function checkImmediatSAR(EjectedPilot)	
-		
+    function checkImmediatSAR(EjectedPilot)
+
 		env.info( "DCE_checkImmediatSAR A "..tostring(EjectedPilot.name))
 
         local pt_chute = {}
@@ -789,9 +799,9 @@ do
 				EjectedPilot.initiatorSIDE = "red"
 			elseif EjectedPilot.initiatorSIDE == 2 then
 				EjectedPilot.initiatorSIDE = "blue"
-			end		
-		end	
-		
+			end
+		end
+
 		local isExist = false
 
 		-- if EjectedPilot.unit then
@@ -811,24 +821,24 @@ do
 		-- if EjectedPilot and EjectedPilot.x then
 		-- 	env.info( "DCE_checkImmediatSAR B :isExist(): "..tostring(EjectedPilot.unit:isExist()))
 		-- end
-		
+
 		if EjectedPilot and EjectedPilot.x  then -- and EjectedPilot.unit:isExist()  --and isExist
-			
+
 			env.info( "DCE_checkImmediatSAR C "..tostring(EjectedPilot.name))
 
 			local grid = coord.LLtoMGRS(coord.LOtoLL(EjectedPilot))
 
 			if grid  then
-				env.info( "DCE_checkImmediatSAR  A1 grid found ")	
+				env.info( "DCE_checkImmediatSAR  A1 grid found ")
 			else
-				grid = EjectedPilot.grid	
-				env.info( "DCE_checkImmediatSAR  A2 grid else ")				
+				grid = EjectedPilot.grid
+				env.info( "DCE_checkImmediatSAR  A2 grid else ")
 			end
 
-			
+
 			local chuteZone = grid.UTMZone .. ' ' .. grid.MGRSDigraph .. ' ' .. grid.Easting .. ' ' .. grid.Northing
 
-			env.info( "DCE_checkImmediatSAR? A3 chuteZone "..chuteZone)	
+			env.info( "DCE_checkImmediatSAR? A3 chuteZone "..chuteZone)
 
 			--Avec 2 lettres (A et B) on passe de zone de 10km à des zone de 50km (la limite supérieur serait de 100km)
 			local subdiv_E_Num = tonumber(string.sub(grid.Easting, 1, 1))
@@ -850,17 +860,17 @@ do
 			-- local MGRS_Chute = grid.UTMZone.."_"..grid.MGRSDigraph.."_"..string.sub(grid.Easting, 1, 1).."_"..string.sub(grid.Northing, 1, 1)
 			local MGRS_Chute = grid.UTMZone.."_"..grid.MGRSDigraph.."_"..subdiv_E_Alpha.."_"..subdiv_N_Alpha
 			local MGRS_Chute_10KM = grid.UTMZone.."_"..grid.MGRSDigraph.."_"..subdiv_E_Num.."_"..subdiv_N_Num
-						
-			env.info( "DCE_checkImmediatSAR? A4 Start if EjectedPilot MGRS_Chute "..MGRS_Chute)	
-			env.info( "DCE_checkImmediatSAR? A5 Start if EjectedPilot MGRS_Chute_10KM "..MGRS_Chute_10KM)		
-			
+
+			env.info( "DCE_checkImmediatSAR? A4 Start if EjectedPilot MGRS_Chute "..MGRS_Chute)
+			env.info( "DCE_checkImmediatSAR? A5 Start if EjectedPilot MGRS_Chute_10KM "..MGRS_Chute_10KM)
+
 			local t = timer.getTime()
-			
+
             EjectedPilot.x2d = EjectedPilot.x
 			EjectedPilot.y2d = EjectedPilot.z
 			EjectedPilot.z2d = land.getHeight({x = EjectedPilot.x, y = EjectedPilot.z})
 			-- EjectedPilot.name = "Mis"..camp.mission.."_M"..camp.date.month.."_D"..camp.date.day.."_H"..camp.date.hour.."_Mn"..camp.date.minute.."_Pilot_"..EjectedPilot.initiator.."_Nb"..tostring(EjectedPilot.SumEjectedPilotDay)
-			
+
 			-- if EjectedPilot.initiatorPilotName then
 			-- 	EjectedPilot.name = "Mis"..camp.mission.."_Pilot_"..EjectedPilot.initiatorPilotName.."_Nb"..tostring(EjectedPilot.SumEjectedPilotDay)
 			-- else
@@ -874,7 +884,7 @@ do
 			EjectedPilot.day = camp.date.day
 			EjectedPilot.hour = camp.date.hour
 
-			
+
 			EjectedPilot.nameId = EjectedPilot.initiatorMissionID
 			EjectedPilot.MGRS_Chute = MGRS_Chute
 			EjectedPilot.MGRS_Chute_10KM = MGRS_Chute_10KM
@@ -882,23 +892,23 @@ do
 			EjectedPilot.status = "MIA"
 			EjectedPilot.side = EjectedPilot.initiatorSIDE
 			EjectedPilot.country = EjectedPilot.initiatorCountry
-							
+
 			EjectedPilot.embarkAndSafe = false
 			EjectedPilot.smokeOK = false
 			EjectedPilot.embarked = false
 			EjectedPilot.landingPossible = false
 
-			EjectedPilot.initChoicePOW = false	
+			EjectedPilot.initChoicePOW = false
 
-			EjectedPilot.radio_start = 0			
-			
+			EjectedPilot.radio_start = 0
+
 			env.info( "DCE_checkImmediatSAR? BB EjectedPilot.name "..EjectedPilot.name)
 			-- _affiche(tabEjection, " tabEjection |checkImmediatSAR")
-			
+
 			--ajoute à la queue le crash suivant dans la table zoneSAR
-			if not zoneSAR[MGRS_Chute] then zoneSAR[MGRS_Chute] = {} end			
+			if not zoneSAR[MGRS_Chute] then zoneSAR[MGRS_Chute] = {} end
 			table.insert( zoneSAR[MGRS_Chute], EjectedPilot)
-			
+
 			--si EjectedPilot est chez l'ENI, on ne lance pas de SAR
 			-- on lancera une CSAR dans les missions suivantes
 
@@ -932,13 +942,13 @@ do
 
 				for nCircle, circle in ipairs(circleCity[NameTheatre]) do
 					--voir le code identique sur DC_UpdateSAR.lua
-					
+
 					local mission2d_x = 58538.7 - (47.2304 * circle.pixel_y )
 					local mission2d_y = (47.2287 * circle.pixel_x) + 70914
 
 					-- env.info( "checkImmediatSAR? Passe 2  mission2d_x: "..tostring(mission2d_x).." |mission2d_y: "..tostring(mission2d_y))
 
-					if math.abs(EjectedPilot.x2d - mission2d_x) <= 50000 and math.abs(EjectedPilot.y2d - mission2d_y) <= 50000 then 
+					if math.abs(EjectedPilot.x2d - mission2d_x) <= 50000 and math.abs(EjectedPilot.y2d - mission2d_y) <= 50000 then
 						env.info( "DCE_checkImmediatSAR? Passe 3 <= 50000  ")
 
 						local result = math.pow ((EjectedPilot.x2d - mission2d_x), 2) + math.pow((EjectedPilot.y2d - mission2d_y), 2) <= math.pow((circle.radius * 47.229042083728), 2)
@@ -948,9 +958,18 @@ do
 						env.info( "DCE_checkImmediatSAR? Passe 5 debugA?  "..tostring(debugA))
 
 						if result then
-							
+
 							--le soldierEjectedPilot est déjà dans une zone CITY 
 							-- pas de SAR ni CSAR
+
+							-- rightSideOfBorder =  CheckPointInPoly2(pointSelected, camp.boundary[manhuntSide])
+
+							local rightSideOfBorder
+							if camp.boundary and camp.boundary[EjectedPilot.side] and camp.boundary[EjectedPilot.side] ~= nil then
+								rightSideOfBorder =  CheckPointInPoly2({x=EjectedPilot.x2d,y=EjectedPilot.y2d}, camp.boundary[EjectedPilot.side])
+
+							end
+
 							env.info("DCE_SAR zone CITY rightSideOfBorde B? "..tostring(rightSideOfBorder))
 							if rightSideOfBorder then
 								EjectedPilot.status = "Rescued"
@@ -962,27 +981,27 @@ do
 
 							EjectedPilot.landingPossible = false
 							return
-						
+
 						end
 					end
 
 				end
 			end
-			
+
 			--regarde la partie aéronaval, pour voir si c'est le pedro qui y va
-			
-			local groups = coalition.getGroups(EjectedPilot.Coalition, Group.Category.SHIP)			
-            local selected_distance = 60000		
+
+			local groups = coalition.getGroups(EjectedPilot.Coalition, Group.Category.SHIP)
+            local selected_distance = 60000
             local selectedPoint = {}
-            
+
             for i, gp in pairs(groups) do
 
 				local units = gp:getUnits()
-				local _unit = units[1]					
+				local _unit = units[1]
                 local gpName = Group.getName(gp)
 				local uName = Unit.getName(_unit)
-				
-                if string.find(uName,"CV") or string.find(uName,"LHA")  then 
+
+                if string.find(uName,"CV") or string.find(uName,"LHA")  then
 
                     local callsign = _unit:getCallsign()
                     local ShipTypeName = _unit:getTypeName()
@@ -993,95 +1012,95 @@ do
 						name = "",
 						Id = 0,
 					}
-						
+
 					local uId = _unit:getID()
-	
+
                     local TtempPoint = _unit:getPoint()
                     BaseHelico.x = TtempPoint.x
                     BaseHelico.y = TtempPoint.z
                     BaseHelico.z = TtempPoint.y
                     BaseHelico.name = uName
 					BaseHelico.Id = tonumber(uId)
-                            
+
                     local description = _unit:getDesc()
-						
+
                     if _unit:isActive() then
-                        local distance = math.sqrt(math.pow(BaseHelico.x - EjectedPilot.x2d, 2) + math.pow(BaseHelico.y - EjectedPilot.y2d, 2))			
+                        local distance = math.sqrt(math.pow(BaseHelico.x - EjectedPilot.x2d, 2) + math.pow(BaseHelico.y - EjectedPilot.y2d, 2))
                         if distance < selected_distance then
 							selected_distance = distance
-                            selectedPoint = BaseHelico 		 				
+                            selectedPoint = BaseHelico
                         end
                     end
                 end
             end
-			
+
 			--si le crash est proche du CV, c'est le pedro qui y va
 			if selected_distance < 6000 then
 				env.info( "DCE_checkImmediatSAR? EE <6000 donc AERONAVAL?   ")
 				--temp de reaction en fonction de la distance
 				--6000 -> 30 s
 				--m 	-> x s
-				local tempReact = (selected_distance * 30) / 6000													
+				local tempReact = (selected_distance * 30) / 6000
 				timer.scheduleFunction(PedroSAR, {selectedPoint, EjectedPilot}, timer.getTime() + tempReact)
 
 			-- elseif zoneSAR[EjectedPilot.MGRS_Chute] == nil or ( zoneSAR[EjectedPilot.MGRS_Chute] and zoneSAR[EjectedPilot.MGRS_Chute].groupSAR and  zoneSAR[EjectedPilot.MGRS_Chute].groupSAR == "" ) then
 			elseif  zoneSAR[EjectedPilot.MGRS_Chute].groupSAR == "" or zoneSAR[EjectedPilot.MGRS_Chute].groupSAR == nil or zoneSAR[EjectedPilot.MGRS_Chute].groupSAR == false then
 				env.info( "DCE_checkImmediatSAR? FFa >6000 donc TERRESTRE?   ")
-				
+
 				--find all flights in range to Ejected Pilot and hover ceiling
-				local eligible_flights = {}														
+				local eligible_flights = {}
 				for base_name, base in pairs(camp.SAR.alertSAR[EjectedPilot.side].base) do
 					env.info( "DCE_checkImmediatSAR? FFb  base_name "..tostring(base_name))
-					for flight_n, flight in ipairs(base.ready) do							
-						
-						local distance = math.sqrt(math.pow(flight.x - EjectedPilot.x2d, 2) + math.pow(flight.y - EjectedPilot.y2d, 2))	
-						
-						if distance >= flight.range  then	
+					for flight_n, flight in ipairs(base.ready) do
+
+						local distance = math.sqrt(math.pow(flight.x - EjectedPilot.x2d, 2) + math.pow(flight.y - EjectedPilot.y2d, 2))
+
+						if distance >= flight.range  then
 							env.info( "DCE_checkImmediatSAR? trop loin : "..tostring(distance).." > flight.range: "..tostring(flight.range))
 						end
-						
+
 						if EjectedPilot.z2d >= flight.hHover then
 							env.info( "DCE_checkImmediatSAR? trop haut : "..tostring(EjectedPilot.z2d).." > flight.hHover: "..tostring(flight.hHover))
 						end
-						
-						if distance < flight.range and EjectedPilot.z2d < flight.hHover then						
-							eligible_flights[flight.name] = distance	
+
+						if distance < flight.range and EjectedPilot.z2d < flight.hHover then
+							eligible_flights[flight.name] = distance
 							env.info( "DCE_checkImmediatSAR? FFc eligible_flights?   "..tostring(flight.name).."|distance: "..tostring(distance))
 						end
 					end
 				end
-				
+
 				env.info( "DCE_checkImmediatSAR? interB   ")
 				-- _affiche(eligible_flights, "eligible_flights interB")
-				
+
 				--select the flight closest to rescue Ejected Pilot
-				local selected_flight															
-				local selected_distance = 9999999												
-				for flight_name, distance in pairs(eligible_flights) do							
-					if distance < selected_distance then										
-						selected_flight = flight_name											
-						selected_distance = distance	
+				local selected_flight
+				local selected_distance = 9999999
+				for flight_name, distance in pairs(eligible_flights) do
+					if distance < selected_distance then
+						selected_flight = flight_name
+						selected_distance = distance
 						env.info( "DCE_checkImmediatSAR? HH selected_flight?   "..tostring(selected_flight))
 					end
 				end
-				
+
 				env.info( "DCE_checkImmediatSAR? interC  selected_flight  "..tostring(selected_flight))
-				
+
 				--assign selected flight to rescue
 				if selected_flight then
 					env.info( "DCE_checkImmediatSAR? II   ")
-					for base_name, base in pairs(camp.SAR.alertSAR[EjectedPilot.side].base) do				
-						for flight_n, flight in pairs(base.ready) do													
-							if flight.name == selected_flight then									
+					for base_name, base in pairs(camp.SAR.alertSAR[EjectedPilot.side].base) do
+						for flight_n, flight in pairs(base.ready) do
+							if flight.name == selected_flight then
 								env.info( "checkImmediatSAR? JJ    ")
 								trigger.action.setUserFlag(flight.flag, true)		--set flag true to launch SAR Alert					
-								
+
 								local idInfo = Group.getByName(selected_flight):getID()
 								local _side = Group.getByName(selected_flight):getCoalition()
-								
+
 								env.info( "DCE_checkImmediatSAR? YY launch SAR Alert   ")
-								
-								timer.scheduleFunction(startSAR, {flight, EjectedPilot}, timer.getTime() + 30)				
+
+								timer.scheduleFunction(startSAR, {flight, EjectedPilot}, timer.getTime() + 30)
 
 								if not zoneSAR[EjectedPilot.MGRS_Chute].groupSAR or zoneSAR[EjectedPilot.MGRS_Chute].groupSAR == nil then
 									zoneSAR[EjectedPilot.MGRS_Chute].groupSAR = "Group_"..flight.name
@@ -1102,25 +1121,25 @@ do
 		local pt_dest = arg[2]
 
 		local nb
-		if not listPedro[pt_start.name] then		
+		if not listPedro[pt_start.name] then
 			nb = 1
 		else
 			nb = #listPedro[pt_start.name]
 		end
-		
+
 		local FlightName = "Pedro_"..pt_start.name.."_"..tostring(nb)
 
 		local current_time = timer.getTime() +1
 		local speed = 75		-- v = m/s 46
-		
-		local uPedro = Unit.getByName("Unit_"..FlightName)		
+
+		local uPedro = Unit.getByName("Unit_"..FlightName)
 		local TtempPoint = uPedro:getPoint()
 		pt_start.x = TtempPoint.x
 		pt_start.y = TtempPoint.z
 		pt_start.z = TtempPoint.y
 
 		local alt = 60
-		
+
 		local distance01 = math.sqrt(math.pow(pt_start.x - pt_dest.x2d, 2) + math.pow(pt_start.y - pt_dest.y2d, 2))		--distance between tanker and player
 		local destName
 		if not pt_dest.name or pt_dest.name == "" then
@@ -1128,23 +1147,23 @@ do
 		else
 			destName = pt_dest.name
 		end
-		
+
 		local grpname = "Group_"..FlightName
 		local route = {}
 		route = {
-				[1] = 
+				[1] =
 				{
 					["alt"] = pt_start.z,
 					["action"] = "Turning Point",
 					["type"] = "Turning Point",
 					["alt_type"] = "BARO",
 					["speed"] = speed,
-					["task"] = 
+					["task"] =
 					{
 						["id"] = "ComboTask",
-						["params"] = 
+						["params"] =
 						{
-							["tasks"] = 
+							["tasks"] =
 							{
 								[1] = {
 									['enabled'] = true,
@@ -1171,19 +1190,19 @@ do
 					["formation_template"] = "",
 					["speed_locked"] = true,
 				}, -- end of [1]  
-			[2] = 
+			[2] =
 			{
 				["alt"] = alt,
 				["action"] = "Turning Point",
 				["alt_type"] = "BARO",
-				["name"] = "IP",				
+				["name"] = "IP",
 				["speed"] = speed,
-				["task"] = 
+				["task"] =
 				{
 					["id"] = "ComboTask",
-					["params"] = 
+					["params"] =
 					{
-						["tasks"] = 
+						["tasks"] =
 						{
 						}, -- end of ["tasks"]
 					}, -- end of ["params"]
@@ -1196,32 +1215,32 @@ do
 				["formation_template"] = "",
 				["speed_locked"] = true,
 			},
-			[3] = 
+			[3] =
 			{
 				["alt"] = alt,
 				["action"] = "Turning Point",
 				['name'] = 'Attack',
 				["alt_type"] = "BARO",
 				["speed"] = speed,
-				["task"] = 
+				["task"] =
 				{
 					["id"] = "ComboTask",
-					["params"] = 
+					["params"] =
 					{
-						["tasks"] = 
+						["tasks"] =
 						{
-							[1] = 
+							[1] =
 							{
 								["number"] = 1,
 								["auto"] = false,
 								["id"] = "ControlledTask",
 								["enabled"] = true,
-								["params"] = 
+								["params"] =
 								{
-									["task"] = 
+									["task"] =
 									{
 										["id"] = "Orbit",
-										["params"] = 
+										["params"] =
 										{
 											["speedEdited"] = true,
 											["pattern"] = "Circle",
@@ -1230,24 +1249,24 @@ do
 											["altitudeEdited"] = true,
 										}, -- end of ["params"]
 									}, -- end of ["task"]
-									["stopCondition"] = 
+									["stopCondition"] =
 									{
 										["duration"] = 150,
 									}, -- end of ["stopCondition"]
 								}, -- end of ["params"]
 							}, -- end of [1]
-							[2] = 
+							[2] =
 							{
 								["enabled"] = true,
 								["auto"] = false,
 								["id"] = "WrappedAction",
 								["number"] = 2,
-								["params"] = 
+								["params"] =
 								{
-									["action"] = 
+									["action"] =
 									{
 										["id"] = "Script",
-										["params"] = 
+										["params"] =
 										{
 											-- ["command"] = "Custom_RTB_2_CV(\"Group_Pedro_CV-71 Theodore Roosevelt_1\",  \"CV-71 Theodore Roosevelt\",  \"46.25\",  \"60\")",
 											["command"] = 'Custom_RTB_2_CV("' .. grpname .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
@@ -1266,31 +1285,31 @@ do
 				["formation_template"] = "",
 				["speed_locked"] = true,
 			},
-			[4] = 
+			[4] =
 			{
 				["alt"] = alt,
 				["action"] = "Turning Point",
 				["alt_type"] = "BARO",
 				["speed"] = speed,
-				["task"] = 
+				["task"] =
 				{
 					["id"] = "ComboTask",
-					["params"] = 
+					["params"] =
 					{
-						["tasks"] = 
+						["tasks"] =
 						{
 							["enabled"] = true,
 							["auto"] = false,
 							["id"] = "WrappedAction",
 							["number"] = 1,
-							["params"] = 
+							["params"] =
 							{
-								["action"] = 
+								["action"] =
 								{
 									["id"] = "Script",
-									["params"] = 
+									["params"] =
 									{
-										["command"] = 'Custom_RTB_2_CV("' .. grpname .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',	
+										["command"] = 'Custom_RTB_2_CV("' .. grpname .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
 									},
 								},
 							},
@@ -1306,31 +1325,31 @@ do
 				["formation_template"] = "",
 				["speed_locked"] = true,
 			},
-			[5] = 
+			[5] =
 			{
 				["alt"] = alt,
 				["action"] = "Landing",
 				["alt_type"] = "BARO",
 				["speed"] = speed,
-				["task"] = 
+				["task"] =
 				{
 					["id"] = "ComboTask",
-					["params"] = 
+					["params"] =
 					{
-						["tasks"] = 
+						["tasks"] =
 						{
 							["enabled"] = true,
 							["auto"] = false,
 							["id"] = "WrappedAction",
 							["number"] = 1,
-							["params"] = 
+							["params"] =
 							{
-								["action"] = 
+								["action"] =
 								{
 									["id"] = "Script",
-									["params"] = 
+									["params"] =
 									{
-										["command"] = 'Custom_RTB_2_CV("' .. grpname .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',	
+										["command"] = 'Custom_RTB_2_CV("' .. grpname .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
 									},
 								},
 							},
@@ -1349,8 +1368,8 @@ do
 				['helipadId'] = pt_start.Id,
 			}
 		} -- end of ["route"]
-		
-		
+
+
 		local Mission = {
 			id = 'Mission',
 			params = {
@@ -1359,9 +1378,9 @@ do
 				}
 			}
 		}
-		
+
 		local ctr = Group.getByName("Group_"..FlightName):getController()
-		
+
 		-- local ctr = value.Pedro_group:getController()
 		Controller.setTask(ctr, Mission)
 	end	--function PedroSAR(arg)
@@ -1373,12 +1392,12 @@ function checkAddingManhunt()
 	-- 	return
 	-- end
 	local nbOfTargetMan = {}
-	for MGRS_Chute, zone in pairs(zoneSAR) do	
+	for MGRS_Chute, zone in pairs(zoneSAR) do
 		if not nbOfTargetMan[MGRS_Chute] then nbOfTargetMan[MGRS_Chute] = 0 end
-		for N_Pilot, ejectedPilot in ipairs(zone) do								
+		for N_Pilot, ejectedPilot in ipairs(zone) do
 			if ejectedPilot.name and ejectedPilot.embarked ~= true and ( not nbOfTargetMan[MGRS_Chute] or nbOfTargetMan[MGRS_Chute] < 2 )   then
-				local unitPilot = Unit.getByName(ejectedPilot.name)							
-				
+				local unitPilot = Unit.getByName(ejectedPilot.name)
+
 				if unitPilot and ejectedPilot.Coalition and  nbManhunt[ejectedPilot.Coalition] and  nbManhunt[ejectedPilot.Coalition] < 19 then
 					env.info( "")
 					env.info( "DCE_SAR:checkAddingManhunt   ejectedPilot.name | "..tostring(ejectedPilot.name).." ejectedPilot.inTheEnemyCamp "..tostring( ejectedPilot.inTheEnemyCamp))
@@ -1392,7 +1411,7 @@ function checkAddingManhunt()
 						if rightSideOfBorder == nil or rightSideOfBorder == false then
 							ejectedPilot.inTheEnemyCamp = true
 							env.info( "DCE_checkAddingManhunt? DDD boundary  ejectedPilot.inTheEnemyCamp = true  ")
-							
+
 						end
 					end
 
@@ -1401,10 +1420,10 @@ function checkAddingManhunt()
 						env.info( "DCE_SAR:checkAddingManhunt EEE "..tostring(MGRS_Chute).." | "..tostring(ejectedPilot.name))
 						env.info( "DCE_SAR:checkAddingManhunt timer.scheduleFunction(despawnSoldierAliasPilot "..tostring(ejectedPilot.name))
 
-						timer.scheduleFunction(AddSoldierAliasManhunt, unitPilot, timer.getTime() + 2) 
+						timer.scheduleFunction(AddSoldierAliasManhunt, unitPilot, timer.getTime() + 2)
 						nbOfTargetMan[MGRS_Chute] = nbOfTargetMan[MGRS_Chute] + 1
 					end
-												
+
 				end
 			end
 		end
@@ -1416,21 +1435,21 @@ function checkAddingManhunt()
 end
 
 function LoopManagedRadioTransmission()
-	for MGRS_Chute, zone in pairs(zoneSAR) do	
-		for N_Pilot, ejectedPilot in ipairs(zone) do								
+	for MGRS_Chute, zone in pairs(zoneSAR) do
+		for N_Pilot, ejectedPilot in ipairs(zone) do
 			if ejectedPilot.name and (not ejectedPilot.radio_on or ejectedPilot.radio_on == nil) and ejectedPilot.embarked ~= true   then
-				
+
 				local unitPilot = Unit.getByName(ejectedPilot.name)
 				local actualTime = timer.getTime()
-				
+
 				-- env.info( "LoopManagedRadioTransmission D "..tostring(unitPilot).."|"..tostring(ejectedPilot.radio_start).."|"..tostring("<?").."|"..tostring(actualTime).."|")
-				
+
 				if unitPilot and ejectedPilot.radio_start and ejectedPilot.radio_start <= actualTime then
-					
-					
-					
+
+
+
 					local PosEjectedPilot = unitPilot:getPoint()
-					
+
 					local PilotVec3 = {
 						x = PosEjectedPilot.x,
 						y = land.getHeight({x = PosEjectedPilot.x, y = PosEjectedPilot.z}),
@@ -1439,24 +1458,24 @@ function LoopManagedRadioTransmission()
 
 					trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', PilotVec3, 0, true, camp.EctedPilotFrequency[ejectedPilot.side].radioBeacon, 1, 'radioBeacon_'..ejectedPilot.name)
 					ejectedPilot.radio_on = true
-					
+
 					env.info( "DCE_SAR:LoopManagedRadioTransmission E frequency  "..tostring(camp.EctedPilotFrequency[ejectedPilot.side].radioBeacon).." MGRS_Chute: "..tostring(ejectedPilot.MGRS_Chute).." |MGRS_Chute_10KM: "..tostring(ejectedPilot.MGRS_Chute_10KM).." "..tostring('radio_'..ejectedPilot.name))
-					
+
 				end
 			end
 		end
-	end	
+	end
 	return timer.getTime() + 60
-end	
+end
 
 function StopRadioTransmission(PilotName)
 
 	trigger.action.stopRadioTransmission('radioBeacon_'..PilotName)
-	
+
 	env.info( "DCE_RADIO StopRadioTransmission  "..tostring('radioBeacon_'..PilotName))
-					
-	
-	
+
+
+
 end
 
 function StopRadioTransmissionSeat()
@@ -1486,22 +1505,22 @@ function StopRadioTransmissionSeat()
 					trigger.action.stopRadioTransmission('GuardEjection'..ejected.name)
 					ejected.radio_on = false
 					-- env.info( "DCE_RADIO StopRadioTransmissionSeat F "..tostring('GuardEjection'..ejected.name))	
-				end 
+				end
 			end
-		end	
-	end		
+		end
+	end
 	return timer.getTime() + 5
 end
 
-	
+
 function LoopSAR()
 	--** allume le fumigene lorsque la SAR est proche
 	--** déclare le pilote dans l'helico meme s'il ne peut pas se poser
 
 	-- TODO  Pilot no KIA si MERe and EJECTION and PilotSEPARATION a faire dans DEBRIEF_StatEvaluation
 	-- TODO ajouter le son scramble
-	
-	
+
+
 	-- SAR = {
 	-- 	helicopter = {
 	-- 		[1] = "machprout",
@@ -1529,13 +1548,13 @@ function LoopSAR()
 			if country.helicopter then
 				for group_n, group in ipairs(country.helicopter.group) do
 					local gpSAR = Group.getByName(group.name)
-					
-					
+
+
 					if gpSAR then
-					
-						local units_SAR = gpSAR:getUnits()					
-						local unitSAR 
-						local SAR_Coalition 
+
+						local units_SAR = gpSAR:getUnits()
+						local unitSAR
+						local SAR_Coalition
 
 						-- local unitSAR = units_SAR[1]
 						-- local SAR_Coalition = tostring(unitSAR:getCoalition())
@@ -1551,22 +1570,22 @@ function LoopSAR()
 								unitSAR = units_SAR[n]
 								if unitSAR then
 									SAR_Coalition = tostring(unitSAR:getCoalition())
-									local humanSarPlayer = unitSAR:getPlayerName()	
+									local humanSarPlayer = unitSAR:getPlayerName()
 
-									if  unitSAR:isActive() and  string.lower(coalition_name) ==  coalitionId[SAR_Coalition] then						
-										local Pos_SAR = unitSAR:getPoint()		
+									if  unitSAR:isActive() and  string.lower(coalition_name) ==  coalitionId[SAR_Coalition] then
+										local Pos_SAR = unitSAR:getPoint()
 										local  SAR_unitId = Unit.getID(unitSAR)
-										local SAR_Name = unitSAR:getName()	
+										local SAR_Name = unitSAR:getName()
 										if not walkEjectedPilot[SAR_unitId] then walkEjectedPilot[SAR_unitId] = false end
-										if not guideSAR[SAR_unitId] then guideSAR[SAR_unitId] = false end									
-										
-										for MGRS_Chute, zone in pairs(zoneSAR) do	
-											for N_Pilot, ejectedPilot in ipairs(zone) do								
+										if not guideSAR[SAR_unitId] then guideSAR[SAR_unitId] = false end
+
+										for MGRS_Chute, zone in pairs(zoneSAR) do
+											for N_Pilot, ejectedPilot in ipairs(zone) do
 												if ejectedPilot.name and ejectedPilot.embarked ~= true and ejectedPilot.side == coalition_name  then
-													local unitPilot = Unit.getByName(ejectedPilot.name)							
-													
+													local unitPilot = Unit.getByName(ejectedPilot.name)
+
 													if unitPilot then
-									
+
 														local PosEjectedPilot = unitPilot:getPoint()
 														local distance = math.sqrt(math.pow(Pos_SAR.x - PosEjectedPilot.x, 2) + math.pow(Pos_SAR.z - PosEjectedPilot.z, 2))
 
@@ -1579,7 +1598,7 @@ function LoopSAR()
 															}
 															trigger.action.smoke(PilotVec3, trigger.smokeColor.Red)
 															ejectedPilot.smokeOK = true
-															
+
 														elseif distance <= 1000 and distance > 450 then
 															if humanSarPlayer then
 																ejectedPilot.landingPossible = true
@@ -1588,31 +1607,31 @@ function LoopSAR()
 
 															end
 														elseif distance <= 450 and not ejectedPilot.embarked and not humanSarPlayer and ( ejectedPilot.scheduleEmbarkedOK == nil or ejectedPilot.scheduleEmbarkedOK == false) then
-															
+
 															ejectedPilot.scheduleEmbarkedOK = true
 
 															env.info( "DCE_SAR:LoopSTARt distance <= 450 "..tostring(ejectedPilot.name))
-															
-															timer.scheduleFunction(StopRadioTransmission, ejectedPilot.name, timer.getTime() + 149) 
-															
+
+															timer.scheduleFunction(StopRadioTransmission, ejectedPilot.name, timer.getTime() + 149)
+
 															if not ejectedPilot.landingPossible then
 																--TODO placer ici un script d immobilisation de l helico pour occuper le pilote humain a piloter son appareil :)
-																
-																env.info( "DCE_SAR:LoopSTARt timer.scheduleFunction(despawnSoldierAliasPilot "..tostring(ejectedPilot.name))														
-																timer.scheduleFunction(despawnSoldierAliasPilot, ejectedPilot.name, timer.getTime() + 150) 
-																
+
+																env.info( "DCE_SAR:LoopSTARt timer.scheduleFunction(despawnSoldierAliasPilot "..tostring(ejectedPilot.name))
+																timer.scheduleFunction(despawnSoldierAliasPilot, ejectedPilot.name, timer.getTime() + 150)
+
 															else
 																env.info( "DCE_SAR:Pilot.landingPossible, helico: |"..tostring(humanSarPlayer).."| |"..tostring(SAR_Name).."| DEVRAIT se poser pour recuperer "..tostring(ejectedPilot.name))
-															
+
 																if not unitPilot:isExist()  then
 																	StopRadioTransmission(ejectedPilot.name)
 																end
 															end
 														elseif distance <= 450 and not ejectedPilot.embarked and humanSarPlayer then
 															local h = math.ceil(Pos_SAR.y - land.getHeight({x = Pos_SAR.x, y = Pos_SAR.z}))
-															local SARinAir = unitSAR:inAir() 
+															local SARinAir = unitSAR:inAir()
 															env.info( "DCE_SAR:humanSarPlayer Pilot.landingPossible, helico: |"..tostring(humanSarPlayer).."| |"..tostring(SAR_Name).."| HumainPilot se pose ou fait hoover pour recuperer "..tostring(ejectedPilot.name))
-														
+
 															env.info( "DCE_SAR:humanSarPlayer".." Hauteur?: "..h.." SARinAir?: "..tostring(SARinAir).." "..distance.." guideSAR "..tostring(guideSAR[SAR_unitId]).." walkEjectedPilot "..tostring(walkEjectedPilot[SAR_unitId]))
 
 															-- l helicopter tente un helitreuillage
@@ -1622,24 +1641,24 @@ function LoopSAR()
 
 																guideSAR[SAR_unitId] = true
 																guideTreuilSAR(unitSAR, PosEjectedPilot, ejectedPilot)
-															
-															
+
+
 															--l helicoptere est considéré posé
 															-- elseif h <= 3 and distance <= 200 and (walkEjectedPilot[SAR_unitId] == nil or walkEjectedPilot[SAR_unitId] == false) then
 															elseif not SARinAir and distance <= 200 and (walkEjectedPilot[SAR_unitId] == nil or walkEjectedPilot[SAR_unitId] == false) then
-																trigger.action.outTextForUnit( SAR_unitId ,  "you are less than 200m from the wrecked pilot, he should be walking towards you: ", 2 , true)	
+																trigger.action.outTextForUnit( SAR_unitId ,  "you are less than 200m from the wrecked pilot, he should be walking towards you: ", 2 , true)
 																env.info( "DCE_SAR:humanSarPlayer SAR attempts ground embarkation")
 
 																walkEjectedPilot[SAR_unitId] = true
 																detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
 
 															end
-														
+
 														end
 													end
 												end
 											end
-										end							
+										end
 									end
 								end
 							end
@@ -1656,16 +1675,19 @@ end
 
 --guide le pilote humain SAR vers l ejectedPilot
 function guideTreuilSAR(unitSAR, PosEjectedPilot, ejectedPilot)
+
 	local outFonction = false
+	local SAR_unitId = Unit.getID(unitSAR)
+
 	function guidage()
-		local  SAR_unitId = Unit.getID(unitSAR)
-		local Pos_SAR = unitSAR:getPoint()	
+
+		local Pos_SAR = unitSAR:getPoint()
 		local distance = math.ceil(math.sqrt(math.pow(Pos_SAR.x - PosEjectedPilot.x, 2) + math.pow(Pos_SAR.z - PosEjectedPilot.z, 2)))
 
 		local ejectedPilot_h = land.getHeight({x = PosEjectedPilot.x, y = PosEjectedPilot.z})
 
 		local SAR_h = math.ceil(Pos_SAR.y)
-		local SARinAir = unitSAR:inAir() 
+		local SARinAir = unitSAR:inAir()
 
 		-- local unitSarPos = unitSAR:getPosition()
    		-- local bearing_rad = math.atan2(unitSarPos.x.z, unitSarPos.x.x))
@@ -1691,13 +1713,13 @@ function guideTreuilSAR(unitSAR, PosEjectedPilot, ejectedPilot)
 
 
 		local bearing_vector = {
-			x = PosEjectedPilot.x - Pos_SAR.x, 
-			y = PosEjectedPilot.y - Pos_SAR.y, 
+			x = PosEjectedPilot.x - Pos_SAR.x,
+			y = PosEjectedPilot.y - Pos_SAR.y,
 			z = PosEjectedPilot.z - Pos_SAR.z
 			}
 		local bearing_rad = math.atan2(bearing_vector.z, bearing_vector.x)
 		if bearing_rad < 0 then
-				bearing_rad = bearing_rad + (2 * math.pi) 
+				bearing_rad = bearing_rad + (2 * math.pi)
 		end
 		local bearing = math.ceil(math.deg(bearing_rad))
 
@@ -1706,7 +1728,7 @@ function guideTreuilSAR(unitSAR, PosEjectedPilot, ejectedPilot)
 		trigger.action.outTextForUnit( SAR_unitId , "Helitacking Distance: "..tostring(distance).." (need <10m) High: "..tostring(high).." (need <45m) Bearing: "..tostring(bearing) , 2 , true)
 
 		if distance <= 10 and high <=45 then
-			
+
 			local speed = Object.getVelocity(unitSAR)
 			speed = math.sqrt(speed.x^2 + speed.y^2 + speed.z^2)
 			speed = math.ceil(speed * 10)/10
@@ -1727,9 +1749,9 @@ function guideTreuilSAR(unitSAR, PosEjectedPilot, ejectedPilot)
 		return timer.getTime() + 1
 	end
 
-	if outFonction then 
+	if outFonction then
 		guideSAR[SAR_unitId] = false
-		return 
+		return
 	end
 
 	--si l helico n est pas posé
@@ -1740,17 +1762,18 @@ end
 
 --guide le pilote humain SAR vers l ejectedPilot
 function detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
+
 	local outFonction = false
+	local SAR_unitId = Unit.getID(unitSAR)
+
 	env.info( "SAR:humanSarPlayer embarkation PASSE AA ")
 
 	function walk()
 		env.info( "SAR:humanSarPlayer embarkation PASSE BB ")
-		local unitPilot = Unit.getByName(ejectedPilot.name)							
+		local unitPilot = Unit.getByName(ejectedPilot.name)
 		local PosEjectedPilot = unitPilot:getPoint()
-
-		local SAR_unitId = Unit.getID(unitSAR)
-		local Pos_SAR = unitSAR:getPoint()	
-		local SARinAir = unitSAR:inAir() 
+		local Pos_SAR = unitSAR:getPoint()
+		local SARinAir = unitSAR:inAir()
 
 		local distance = math.ceil(math.sqrt(math.pow(Pos_SAR.x - PosEjectedPilot.x, 2) + math.pow(Pos_SAR.z - PosEjectedPilot.z, 2)))
 
@@ -1760,7 +1783,7 @@ function detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
 			env.info( "SAR:humanSarPlayer embarkation PASSE CC ")
 
 			trigger.action.outTextForUnit( SAR_unitId , "Use airborne troops for on-boarding" , 2 , false)
-			
+
 			if distance <= 20 then
 				env.info( "SAR:humanSarPlayer embarkation & StopRadioTransmission PASSE DD "..tostring(ejectedPilot.name))
 				local embarkation = true
@@ -1780,9 +1803,9 @@ function detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
 		return timer.getTime() + 1
 	end
 
-	if outFonction then 
+	if outFonction then
 		walkEjectedPilot[SAR_unitId] = false
-		return 
+		return
 	end
 
 	timer.scheduleFunction(walk, nil, timer.getTime() + 1)
@@ -1793,7 +1816,7 @@ function despawn2(unitToDespawn)
 	_affiche(unitToDespawn, "DCE_despawn2 B despawn unitToDespawn")
 	if unitToDespawn and unitToDespawn:isExist() then
 		unitToDespawn:destroy()
-		
+
 		env.info("DCE_despawn2 C despawn ")
 	end
 end
@@ -1832,19 +1855,23 @@ function spawnWreck(element)
 	}
 
 	staticObj.category = DCS_CategoryById[element.categoryId]
-	
+
 	coalition.addStaticObject(element.countryId, staticObj)
 
 	createWreck[wreckName] = true
-	
+
 	if camp.debug then
 		local TimeNow = timer.getTime() + 5
 		local logStr = "AddstaticObj = " .. TableSerialization(staticObj, 0)
 		local ElementNameClean = element.name:gsub('[%p%c%s]', '_')
-		local logFile = io.open(path.."Debug\\".."wreckSpawn"..ElementNameClean.."_"..TimeNow.."_".. ".lua", "w")
-		logFile:write(logStr)
-		logFile:close()				
-	
+		local logFile = io.open(PathDCE.."Debug\\".."wreckSpawn"..ElementNameClean.."_"..TimeNow.."_".. ".lua", "w")
+		if logFile then
+			logFile:write(logStr)
+			logFile:close()
+		else
+			env.info("DCE_spawnWreck: Failed to open log file for writing.")
+		end
+
 		env.info( "DCE_spawnWreck write debug file "..tostring(ElementNameClean))
 	end
 
@@ -1903,7 +1930,7 @@ function getOutGDFM(argGid)
 
 					if damaged.unit and damaged.unit:isExist() and damaged.unit:isActive() and not damaged.unit:inAir() then
 						env.info( "DCE_getOut D ")
-							
+
 						damaged.initiator = damaged.unit:getName()
 
 						if not createWreckCrew[damaged.initiator] then
@@ -1951,26 +1978,26 @@ function getOutGDFM(argGid)
 							else
 								damaged.name = "Mis"..camp.mission.."_Pilot_"..damaged.initiator.."_Nb"..tostring(damaged.SumEjectedPilotDay).."_Damaged"
 							end
-				
+
 							damaged.name = damaged.name:gsub('[%p%c%s]', '_')
 
 							local typeLand = land.getSurfaceType({x =damaged.x, y = damaged.y})
 
 							if typeLand ~= 3 and typeLand ~= 5  then
-									
+
 								AddSoldierAliasPilot(damaged)
 								damaged.createdSoldier = true
 								trigger.action.smoke(PilotVec3, trigger.smokeColor.Red)
-								
+
 							end
 
 							checkImmediatSAR(damaged)
 
 							env.info("DCE_getOut E test despawn ")
 
-							timer.scheduleFunction(despawn2, damaged.unit, timer.getTime() + 30) 
+							timer.scheduleFunction(despawn2, damaged.unit, timer.getTime() + 30)
 
-							timer.scheduleFunction(spawnWreck, damaged, timer.getTime() + 35) 
+							timer.scheduleFunction(spawnWreck, damaged, timer.getTime() + 35)
 
 							createWreckCrew[damaged.initiator] = true
 						end
