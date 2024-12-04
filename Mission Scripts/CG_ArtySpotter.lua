@@ -84,7 +84,7 @@ local outputFormat = "MGRS"
 
 -- Fonction pour obtenir toutes les trigger zones dont le nom commence par "Arty_" ou "Arty-" ou "Arty"
 function getArtyTriggerZones()
-    
+
     for i, zone in ipairs(env.mission.triggers.zones) do
         if string.sub(string.lower(zone.name), 1, 4) == artyZonePrefixName then
             table.insert(artyZones, zone)
@@ -120,7 +120,7 @@ local function RemainingShells(initiatorName)
 
 	local nbSalve = math.floor(user_qty_Total_Shells / user_quantity)
 	trigger.action.outTextForUnit( artyTasks[initiatorName].unitID, "Number of shells remaining:  "..user_qty_Total_Shells.." Number of salvos possible: "..tostring(nbSalve), 10)
-	
+
 end
 
 ---- set values selected by player through F10 menu
@@ -148,13 +148,13 @@ local function setValue( arg )
 	artyTasks[initiatorName].adjustDirection = arg[2]
 	artyTasks[initiatorName].adjustDistance = arg[3]
 
-	if artyTasks[initiatorName].adjustDirection ~= nil and artyTasks[initiatorName].adjustDistance ~= nil then	
+	if artyTasks[initiatorName].adjustDirection ~= nil and artyTasks[initiatorName].adjustDistance ~= nil then
 
 		trigger.action.outText("Direction corrected by "..artyTasks[initiatorName].adjustDirection.." °, Fire adjusted by "..artyTasks[initiatorName].adjustDistance.." meters", 10)
 
 	end
 
-	artyAction( initiatorName )	
+	artyAction( initiatorName )
 end
 
 -- Function to add F10 menu items for a specific group and store references
@@ -166,9 +166,9 @@ local function addMenuItems(groupId, initiatorName)
 
 	-- menuItems = true
 	artyTasks[initiatorName].menuItems = true
-	
+
     local artyTask = artyTasks[initiatorName]
-	
+
     artyTask.ArtyMenu = missionCommands.addSubMenuForGroup(groupId, 'Artillery Commands', nil)
     artyTask.Adjust = missionCommands.addSubMenuForGroup(groupId, 'Adjust fire', artyTask.ArtyMenu)
 					missionCommands.addCommandForGroup(groupId, 'Remaining shells', artyTask.ArtyMenu, RemainingShells, initiatorName)
@@ -199,7 +199,7 @@ local function addMenuItems(groupId, initiatorName)
 		artyTask.dir[#artyTask.dir + 1] = missionCommands.addCommandForGroup(groupId, 'request fire for effect', artyTask.dir["dir_NE_dist"..dist], setValue, {2, 45, dist, initiatorName})
 	end
 	--*************************************
-	
+
     -- artyTask.commands[#artyTask.commands + 1] = missionCommands.addCommandForGroup(groupId, 'adjust fire East', artyTask.Adjust, function() setValue("dir", 90, initiatorName) end)
 	--*************************************
 	artyTask.dir.dir_E = missionCommands.addSubMenuForGroup(groupId, 'adjust fire East', artyTask.Adjust)
@@ -266,8 +266,12 @@ local function addMenuItems(groupId, initiatorName)
 	local logStr = "artyTask = " .. TableSerialization(artyTask, 0)
 	local FlightNameClean = "artyTask"
 	local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_artyTask.lua", "w")
-	logFile:write(logStr)
-	logFile:close()		
+	if logFile then
+		logFile:write(logStr)
+		logFile:close()
+	else
+		env.info("DCE_artyTask: Failed to open log file for writing.")
+	end
 
 end
 
@@ -277,7 +281,7 @@ local function removeMenuItems(initiatorName)
 	env.info("CG_ArtySpotter: removeMenuItems AA: initiatorName: "..tostring(initiatorName))
 
     local artyTask = artyTasks[initiatorName]
-	
+
     if artyTask and artyTask.groupID then
 		env.info("CG_ArtySpotter: removeMenuItems BB: |"..tostring(artyTask.groupID).."|")
 
@@ -302,9 +306,13 @@ local function removeMenuItems(initiatorName)
 		local logStr = "artyTasks = " .. TableSerialization(artyTasks, 0)
 		local FlightNameClean = "artyTasks"
 		local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_removeMenuItems.lua", "w")
-		logFile:write(logStr)
-		logFile:close()	
-		
+		if logFile then
+			logFile:write(logStr)
+			logFile:close()
+		else
+			env.info("DCE_artyTask_removeMenuItems: Failed to open log file for writing.")
+		end
+
 		-- if artyTask.dir then
 		-- 	missionCommands.removeItemForGroup(artyTask.groupID, artyTask.dir)
 		-- end		
@@ -322,18 +330,18 @@ local function removeMenuItems(initiatorName)
 		local Uid = artyTasks[initiatorName].initiator:getID()
 		local gpGid = artyTasks[initiatorName].initiator:getGroup():getID()
 
-		
+
 		env.info("CG_ArtySpotter: CGAS_timerPlayerMenu: Uid: "..tostring(Uid))
 		env.info("CG_ArtySpotter: CGAS_timerPlayerMenu: gpGid: "..tostring(gpGid))
-	
+
 		if not menuRadioInit then menuRadioInit = {} end
 		menuRadioInit[initiatorName] = {}
 
 		menuRadioInit[initiatorName] = missionCommands.addCommandForGroup(gpGid, 'Artillery Init', nil, menuAccueil, Uid)
 
-		
+
     end
-	
+
 	-- menuItems = false
 	artyTask.menuItems = false
 
@@ -385,7 +393,7 @@ local function shellZone(initiatorName)
 			--we increase the chances that a large proportion of the shells will fall close to the center of the zone
 			if j == 1 then
 				randomX = math.random(-artyRadius / 3, artyRadius / 3)
-				randomZ = math.random(-artyRadius / 3, artyRadius / 3)			
+				randomZ = math.random(-artyRadius / 3, artyRadius / 3)
 			elseif j == 2 then
 				randomX = math.random(-artyRadius / 2, artyRadius / 2)
 				randomZ = math.random(-artyRadius / 2, artyRadius / 2)
@@ -393,11 +401,11 @@ local function shellZone(initiatorName)
 				randomX = math.random(-artyRadius , artyRadius )
 				randomZ = math.random(-artyRadius , artyRadius )
 				j = 0
-			end 
+			end
 			j = j + 1
 		end
 
-		
+
 		local strikePos = {
 		  x = _shellPos.x + randomX,
 		  y = _shellPos.y,
@@ -416,16 +424,20 @@ local function shellZone(initiatorName)
 		  trigger.action.explosion(strikePos, tntEquivalent)  -- Create an explosion at the target position with a predefined power
 		  if _artyCall == 1 and user_smokeOn then trigger.action.smoke(strikePos, trigger.smokeColor.Red) end
 		end, {}, timer.getTime() + i)
-	end	
-	
+	end
+
 	env.info("CG_ArtySpotter: HH shellZone  initiatorName: "..tostring(initiatorName))
 
 	local TimeSearchEngage = timer.getTime()
 	local logStr = "artyTasksTOUT = " .. TableSerialization(artyTasks, 0)
 	local FlightNameClean = "artyTasksTOUT"
 	local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_artyTasksTOUT.lua", "w")
-	logFile:write(logStr)
-	logFile:close()	
+	if logFile then
+		logFile:write(logStr)
+		logFile:close()
+	else
+		env.info("DCE_artyTask_shellZone: Failed to open log file for writing.")
+	end
 
 end
 
@@ -444,36 +456,36 @@ local function convertPos2Coord ( _pos, _reply )
 	local lat, lon, alt = coord.LOtoLL (_pos)
 	local lat_degrees = math.floor (lat)
 	local lat_minutes = (60 * (lat - lat_degrees))
-	local lat_seconds = math.floor(60 * (lat_minutes - math.floor(lat_minutes))) 
+	local lat_seconds = math.floor(60 * (lat_minutes - math.floor(lat_minutes)))
 	lat_minutes = math.floor(lat_minutes)
 
 	local lon_degrees = math.floor (lon)
 	local lon_minutes = (60 * (lon - lon_degrees))
 	local lon_seconds = math.floor (60 * (lon_minutes - math.floor(lon_minutes)))
 	lon_minutes = math.floor(lon_minutes)
-	  
+
 	local coordStringLL = "N" .. lat_degrees .. " " .. lat_minutes .. " " ..lat_seconds.. " E".. lon_degrees .. " " .. lon_minutes .. " ".. lon_seconds
-	  
+
 	local targetMGRS = coord.LLtoMGRS(lat, lon)
 	targetMGRS.Easting = math.floor (( targetMGRS.Easting /10 ) + 0.5 )
 	targetMGRS.Northing = math.floor (( targetMGRS.Northing / 10 ) + 0.5 )
 	--local coordStringMGRS = targetMGRS.UTMZone.." "..targetMGRS.MGRSDigraph.." "..string.sub(targetMGRS.Easting, 1, -2).." "..string.sub(targetMGRS.Northing, 1, -2)
 	local coordStringMGRS = targetMGRS.UTMZone.." "..targetMGRS.MGRSDigraph.." "..targetMGRS.Easting.." "..targetMGRS.Northing
-	  
+
 	if outputFormat == "MGRS" then
 		coordString = coordStringMGRS
 	else
 		coordString = coordStringLL
 	end
-	  
+
 	-- return either formated string or MGRS coordinate  
-	
+
 	if _reply == "string" then
 		return coordString
 	elseif _reply == "pos" then
 		return targetMGRS
 	end
-end  
+end
 
 --***************************************************************************************************
 --***************************************************************************************************
@@ -487,7 +499,7 @@ function addF10MapMarker(text, pos)
 	local markType = "Diamond" -- You can use "Arrow", "Circle", "Diamond", etc.
 	local markColor = {0, 0, 255} -- RGB color (0-255) for the marker
 	local markAlpha = 1.0 -- Transparency of the marker (0.0 - 1.0)
- 
+
     -- Add the marker to the map
 
     trigger.action.markToAll(idMark, text, pos, true, "testMessage")
@@ -549,20 +561,20 @@ end
 -- Who is the player
 -- Function to determine which unit is controlled by the player
 local function getPlayerControlledUnit()
-	
+
 	local playerUnit = nil
 
 	-- Iterate through all coalitions and their respective player units
 	for coalitionID = 1, 2 do  -- 1 = Red, 2 = Blue
 		local playerUnits = coalition.getPlayers(coalitionID)
-		
+
 		for _, unit in ipairs(playerUnits) do
 			if unit and unit:getPlayerName() then
 				playerUnit = unit
 				break
 			end
 		end
-		
+
 		if playerUnit then
 			break
 		end
@@ -583,55 +595,55 @@ artyAction = function ( initiatorName )
 
 	-- Check Call for arty direction correction
 	if _adjustDirection ~= 0 and _adjustDistance ~= 0 then
-		
-		if _adjustDirection == 360 then			
-			
+
+		if _adjustDirection == 360 then
+
 			adjustX = _adjustDistance
-			adjustZ = 0					
+			adjustZ = 0
 			trigger.action.outTextForUnit( artyTasks[initiatorName].unitID, "Fire adjusted to the North", 10)
-		
-		elseif _adjustDirection == 45 then			
-			
+
+		elseif _adjustDirection == 45 then
+
 			adjustX = _adjustDistance
 			adjustZ = _adjustDistance
 			trigger.action.outTextForUnit( artyTasks[initiatorName].unitID, "Fire adjusted to the North-East", 10)
-		
-		elseif _adjustDirection == 90 then			
-			
+
+		elseif _adjustDirection == 90 then
+
 			adjustX = 0
-			adjustZ = _adjustDistance				
+			adjustZ = _adjustDistance
 			trigger.action.outTextForUnit( artyTasks[initiatorName].unitID, "Fire adjusted to the East", 10)
-		
-		elseif _adjustDirection == 135 then			
-			
+
+		elseif _adjustDirection == 135 then
+
 			adjustX = - _adjustDistance
-			adjustZ = _adjustDistance					
+			adjustZ = _adjustDistance
 			trigger.action.outTextForUnit( artyTasks[initiatorName].unitID, "Fire adjusted to the South-East", 10)
-		
+
 		elseif _adjustDirection == 180 then
-			
+
 			adjustX = - _adjustDistance
-			adjustZ = 0					
+			adjustZ = 0
 			trigger.action.outTextForUnit( artyTasks[initiatorName].unitID, "Fire adjusted to the South", 10)
-		
-		elseif _adjustDirection == 225 then			
-			
+
+		elseif _adjustDirection == 225 then
+
 			adjustX = - _adjustDistance
-			adjustZ = - _adjustDistance						
+			adjustZ = - _adjustDistance
 			trigger.action.outTextForUnit( artyTasks[initiatorName].unitID, "Fire adjusted to the South-West", 10)
-		
-		elseif _adjustDirection == 270 then			
-			
+
+		elseif _adjustDirection == 270 then
+
 			adjustX = 0
-			adjustZ = - _adjustDistance				
+			adjustZ = - _adjustDistance
 			trigger.action.outTextForUnit( artyTasks[initiatorName].unitID, "Fire adjusted meters to the West", 10)
-		
-		elseif _adjustDirection == 315 then			
-			
+
+		elseif _adjustDirection == 315 then
+
 			adjustX = _adjustDistance
-			adjustZ = - _adjustDistance					
+			adjustZ = - _adjustDistance
 			trigger.action.outTextForUnit( artyTasks[initiatorName].unitID, "Fire adjusted meters to the North-West", 10)
-		
+
 		end
 
 		artyTasks[initiatorName].adjustDirection = 0
@@ -664,16 +676,16 @@ artyAction = function ( initiatorName )
 			_targetPosXZ.y = _targetPosXZ.y + 3
 
 			local lineOfSight = land.isVisible(_playerPosXZ, _targetPosXZ)
-			local spotterSide =   "neutral"	
+			local spotterSide =   "neutral"
 			local sideNum = artyTasks[initiatorName].initiator:getCoalition()
 
-			if sideNum then				
+			if sideNum then
 				if sideNum == coalition.side.RED then
 					spotterSide =  "red"
 				elseif sideNum == coalition.side.BLUE then
 					spotterSide =   "blue"
 				else
-					spotterSide =   "neutral"			
+					spotterSide =   "neutral"
 				end
 			end
 
@@ -715,7 +727,7 @@ artyAction = function ( initiatorName )
 				end
 
 			elseif camp.boundary and camp.boundary[spotterSide] and camp.boundary[spotterSide] ~= nil then
-				
+
 				local artyPoint = foundArtyPointInPoly(camp.boundary[spotterSide], _targetPosXZ )
 
 				nearestZone = math.sqrt(math.pow(artyPoint.x - _targetPosXZ.x, 2) + math.pow(artyPoint.y - _targetPosXZ.z, 2))
@@ -742,12 +754,12 @@ artyAction = function ( initiatorName )
 			end
 
 			if  trigger.misc.getUserFlag( "artyEnabled" ) == 1 and _dist <= user_spottingDistance and user_qty_Total_Shells > 1 and lineOfSight and passZoneDistance then
-		
+
 				if _artyCall == 1 then
 					-- trigger.action.outTextForUnit( artyTasks[_initiatorName].unitID, "Arty single round requested on "..targetPosString, 10)
 					quantity = 1
 					user_qty_Total_Shells = user_qty_Total_Shells -1
-					
+
 				elseif _artyCall == 2 then
 					-- trigger.action.outTextForUnit( artyTasks[_initiatorName].unitID, "Arty fire for effect requested on "..targetPosString, 10)
 					quantity = quantity_effect
@@ -757,7 +769,7 @@ artyAction = function ( initiatorName )
 					user_qty_Total_Shells = user_qty_Total_Shells - quantity
 
 				end
-				
+
 
 				--https://www.reddit.com/media?url=https%3A%2F%2Fpreview.redd.it%2Fhprc5usnka4a1.png%3Fauto%3Dwebp%26s%3D7e56478c90ab7e8fe38a290fd419d58d52cf791f
 				-- calculates (very approximately) shell flight time
@@ -775,33 +787,33 @@ artyAction = function ( initiatorName )
 			elseif user_qty_Total_Shells <= 0 then
 				--initiates the artilleryman's response with a time delay ~= 5s
 				timer.scheduleFunction(responseTime, {artyTasks[initiatorName].unitID, "Out of ammunition"}, timer.getTime() + responseTimeVar)
-			
+
 			elseif _dist > user_spottingDistance then
 				--initiates the artilleryman's response with a time delay ~= 5s
 				timer.scheduleFunction(responseTime, {artyTasks[initiatorName].unitID, "Out of your range: "..tostring(_dist)}, timer.getTime() + responseTimeVar)
-			
+
 			elseif not lineOfSight then
 				--initiates the artilleryman's response with a time delay ~= 5s
 				timer.scheduleFunction(responseTime, {artyTasks[initiatorName].unitID, "Cheater, you don't really see the target, do you? ^^ "}, timer.getTime() + responseTimeVar)
-			
+
 			elseif not passZoneDistance then
 				--initiates the artilleryman's response with a time delay ~= 5s
 				timer.scheduleFunction(responseTime, {artyTasks[initiatorName].unitID, "Out of range of artillery support: "..tostring(math.floor(nearestZone))}, timer.getTime() + responseTimeVar)
-			
-			else	
+
+			else
 				--initiates the artilleryman's response with a time delay ~= 5s
 				timer.scheduleFunction(responseTime, {artyTasks[initiatorName].unitID, "Artillery not available"}, timer.getTime() + responseTimeVar)
-			
+
 			end
-			
+
 		else
 			-- trigger.action.outTextForUnit( artyTasks[_initiatorName].unitID, "Arty Requested Without Marker", 10)
 			--initiates the artilleryman's response with a time delay ~= 5s
 			timer.scheduleFunction(responseTime, {artyTasks[initiatorName].unitID, "Arty Requested Without Marker"}, timer.getTime() + responseTimeVar)
 		end
-	
+
 		_artyCall = 0
-		
+
 	end
 end
 
@@ -820,7 +832,7 @@ local function removeSpaces( _text )
 	_text = _text:gsub( " ", "" )
 	_text = _text:gsub( "-", "" )
 	return _text
-	
+
 end
 
 -- Function to validate the structure of the MGRS coordinate
@@ -855,19 +867,19 @@ local function processMGRS( _text, _playerPos, initiatorName )
 
 			-- Complete MGRS coordinate
 			return _cleanedText
-			
+
 		elseif len == 10 then
-			
+
 			-- Add UTM Zone based on player position
 			local _utmZone = coord.LLtoMGRS(_playerPos.Lat, _playerPos.Lon).UTMZone
 			return _utmZone .. _cleanedText
-			
+
 		elseif len == 8 then
-			
+
 			-- Add UTM Zone and MGRS Digraph based on player position
 			local _mgrs = coord.LLtoMGRS( _playerPos.Lat, _playerPos.Lon )
 			return _mgrs.UTMZone .. _mgrs.MGRSDigraph .. _cleanedText
-			
+
 		else
 
 			-- Invalid MGRS coordinate
@@ -893,12 +905,12 @@ end
 local function isValidInitiator(initiator)
     local isValid = false
 
-	if not initiator then 
-		return false 
+	if not initiator then
+		return false
 	end
-    
+
     -- Check type restriction	
-    if user_restrictByType == "helo" then	
+    if user_restrictByType == "helo" then
         if initiator:getDesc().category == Unit.Category.Helicopter then
             isValid = true
         end
@@ -906,17 +918,17 @@ local function isValidInitiator(initiator)
 
     -- Check name restriction
     if user_restrictByUnitName ~= "" then
-	
+
         -- local name = initiator:getName():lower()
 
 		local name = initiator:getPlayerName()
-		
+
         if name:find(user_restrictByUnitName:lower()) then
 			isValid = true
         end
     end
 
-		
+
 
 	-- DCE environment
 	if camp.spotterAircraft then
@@ -936,12 +948,12 @@ local function checkAndRemovePrefix(text)
 
 	local test = text:sub(1, #user_markerPrefix)
 
-	 if user_markerPrefix ~= "" and text:sub(1, #user_markerPrefix) == user_markerPrefix then	
-		return true, text:sub(#user_markerPrefix + 1)    
-	elseif user_markerPrefix == "" then	
-		return true, text		
-	else	
-		return false, text		
+	 if user_markerPrefix ~= "" and text:sub(1, #user_markerPrefix) == user_markerPrefix then
+		return true, text:sub(#user_markerPrefix + 1)
+	elseif user_markerPrefix == "" then
+		return true, text
+	else
+		return false, text
 	end
 
 end
@@ -949,11 +961,11 @@ end
 
 -- Event handler for map marker creation
 local function onPlayerAddMarker(event)
-	
+
 	if event.id == world.event.S_EVENT_BIRTH then
-		
+
 		if event.initiator and Object.getCategory(event.initiator) ~= Object.Category.STATIC and event.initiator:getPlayerName() then
-			
+
 			local groupId = event.initiator:getGroup():getID()
 			local Uid = event.initiator:getID()
 			local initiatorName = event.initiator:getPlayerName()
@@ -979,96 +991,96 @@ local function onPlayerAddMarker(event)
 
 		-- env.info("CG_ArtySpotter: MARK_ADDED 2 event.initiator "..tostring(event.initiator))
 		-- _affiche(event.initiator, "CG_ArtySpotter: MARK_ADDED 2 event.initiator")
-		 
+
 		if isValidInitiator(event.initiator) then
 			trigger.action.outText("initiator isValidInitiator", 5)
 
 			env.info("CG_ArtySpotter: MARK_ADDED 3 initiator isValidInitiator ")
-			
+
 			--no time to add a prefix when adding a marker
 			local hasPrefix = true
 
             if hasPrefix then
-		
+
 				local _targetPosXZ = event.pos
-				
+
 				if event.initiator then
 
-					local initiatorName = event.initiator:getPlayerName()					
+					local initiatorName = event.initiator:getPlayerName()
 					local playerUnit = event.initiator
 					local _playerPosXZ = playerUnit:getPoint()
-					
+
 
 					-- Store position**********************************************************
 
 					if not artyTasks[initiatorName] then
 						artyTasks[initiatorName] = tableOfClient
 					end
-					
+
 					trigger.action.outTextForUnit( event.initiator:getID(), "Marker added", 5)
 					env.info("CG_ArtySpotter: MARK_ADDED 5 Marker added")
-					
+
 					artyTasks[initiatorName].playerPosXZ = _playerPosXZ
 					artyTasks[initiatorName].targetPosXZ = _targetPosXZ
 					artyTasks[initiatorName].unitID = event.initiator:getID()
 					artyTasks[initiatorName].initiator = event.initiator
 					artyTasks[initiatorName].MARKER_FOUND = true
-				
+
 					-- Add menu items for the initiator's group
 					local groupId = event.initiator:getGroup():getID()
 					artyTasks[initiatorName].groupID = groupId
-				
+
 					-- if menuItems == false then 
-					if artyTasks[initiatorName].menuItems == false or artyTasks[initiatorName].menuItems == nil then  
+					if artyTasks[initiatorName].menuItems == false or artyTasks[initiatorName].menuItems == nil then
 						addMenuItems(groupId, initiatorName)
 					end
-		
-				end				
-			end			
+
+				end
+			end
 		else
             --trigger.action.outText("You do not have permission to add a marker.", 5)
         end
-		    
+
 	elseif event.id == world.event.S_EVENT_MARK_CHANGE then
-	 
+
 		if not event.initiator then
 			event.initiator = getPlayerControlledUnit()
 		end
 
         if isValidInitiator(event.initiator) then
-		
+
 			local hasPrefix, cleanedText = checkAndRemovePrefix(event.text)
-			
+
             -- if hasPrefix or markerIsPosition then
 
 			env.info("CG_ArtySpotter: S_EVENT_MARK_CHANGE  hasPrefix "..tostring(hasPrefix))
 			env.info("CG_ArtySpotter: S_EVENT_MARK_CHANGE  cleanedText "..tostring(cleanedText))
 
 			if hasPrefix then
-			
+
 				local markText = cleanedText
-				
+
 				trigger.action.outTextForUnit( event.initiator:getID(), "Text: "..markText, 5)
-				
+
 				if markText and event.initiator then
-				
+
 					-- local initiatorName = event.initiator:getName()
 					local initiatorName = event.initiator:getPlayerName()
 					artyTasks[initiatorName].MARKER_FOUND = true
 					local playerUnit = event.initiator
-					
+
 					if not artyTasks[initiatorName] then
 						artyTasks[initiatorName] = {}
 					end
-					
+
 					artyTasks[initiatorName].initiator = event.initiator
 					artyTasks[initiatorName].unitID = event.initiator:getID()
-					
+
 					trigger.action.outTextForUnit( event.initiator:getID(), "Marker changed", 5)
 					env.info("CG_ArtySpotter: Marker changed")
-					
+
 					if playerUnit then
-					
+
 						if markText ~= "" then
 
 							local playerPosXZ = playerUnit:getPoint()
@@ -1077,39 +1089,39 @@ local function onPlayerAddMarker(event)
 							local validMGRS = processMGRS(markText, playerPosition, initiatorName)
 
 							if validMGRS then
-							
+
 								trigger.action.outTextForUnit( artyTasks[initiatorName].unitID, "Valid MGRS: " .. validMGRS, 10)
-								
+
 								local tmpMGRS = {
 									UTMZone = string.sub(validMGRS, 1, 3),
 									MGRSDigraph = string.sub(validMGRS, 4, 5),
 									Easting = tonumber(string.sub(validMGRS, 6, 9)) * 10,
 									Northing = tonumber(string.sub(validMGRS, 10, 13)) * 10
 								}
-								
+
 								local targetPoint = MGRStoVec3(tmpMGRS)
 								targetPoint.y = land.getHeight({ x = targetPoint.x, y = targetPoint.z })
 
 								artyTasks[initiatorName].targetPosXZ = targetPoint
 								artyTasks[initiatorName].playerPosXZ = playerPosXZ
-													
+
 							else
 								trigger.action.outTextForUnit( artyTasks[initiatorName].unitID, "Invalid MGRS coordinate entered.", 10)
 							end
-							
+
 						else
-							
+
 							artyTasks[initiatorName].targetPosXZ.y = land.getHeight({ x = artyTasks[initiatorName].targetPosXZ.x, y = artyTasks[initiatorName].targetPosXZ.z })
 
 						end
 
 						local _groupId = event.initiator:getGroup():getID()
 						artyTasks[initiatorName].groupID = _groupId
-						
+
 						-- if menuItems == false then 
 						-- 	addMenuItems(groupId, initiatorName)
 						-- end
-						if artyTasks[initiatorName].menuItems == false or artyTasks[initiatorName].menuItems == nil then 
+						if artyTasks[initiatorName].menuItems == false or artyTasks[initiatorName].menuItems == nil then
 							addMenuItems(_groupId, initiatorName)
 						end
 					end
@@ -1118,50 +1130,52 @@ local function onPlayerAddMarker(event)
 		else
             --trigger.action.outText("You do not have permission to change this marker.", 5)
 		end
-		
+
     elseif event.id == world.event.S_EVENT_MARK_REMOVED then
-	
+
         trigger.action.outText("Marker removed", 5)
-		
+
 		if not event.initiator then
 			event.initiator = getPlayerControlledUnit()
 		end
 
         if event.initiator then
-		
+
             -- local initiatorName = event.initiator:getName()
 			local initiatorName = event.initiator:getPlayerName()
-			
+
 			_affiche(initiatorName, " S_EVENT_MARK_REMOVED initiatorName")
 
 			if initiatorName and artyTasks[initiatorName] then
-			
+
 				removeMenuItems(initiatorName)
                 artyTasks[initiatorName] = nil
-				
-            end			
+
+            end
         end
 	end
 end
 
 --sur certaines map en solo (Syria) l'evenement Birth n'est pas detectée
 local function CGAS_timerPlayerMenu(arg)
-	if menuRadioInit == nil then			
+	if menuRadioInit == nil then
 
 		local playerObj = getPlayerControlledUnit()
-		local initiatorName = playerObj:getPlayerName()
-		local Uid = playerObj:getID()
-		local gpGid = playerObj:getGroup():getID()
+		if playerObj then
+			local initiatorName = playerObj:getPlayerName()
+			local Uid = playerObj:getID()
+			local gpGid = playerObj:getGroup():getID()
 
-		env.info("CG_ArtySpotter: CGAS_timerPlayerMenu: playerObj: "..tostring(playerObj))
-		env.info("CG_ArtySpotter: CGAS_timerPlayerMenu: initiatorName: "..tostring(initiatorName))
-		env.info("CG_ArtySpotter: CGAS_timerPlayerMenu: Uid: "..tostring(Uid))
-		env.info("CG_ArtySpotter: CGAS_timerPlayerMenu: gpGid: "..tostring(gpGid))
-	
-		menuRadioInit = {}
-		menuRadioInit[initiatorName] = {}
+			env.info("CG_ArtySpotter: CGAS_timerPlayerMenu: playerObj: "..tostring(playerObj))
+			env.info("CG_ArtySpotter: CGAS_timerPlayerMenu: initiatorName: "..tostring(initiatorName))
+			env.info("CG_ArtySpotter: CGAS_timerPlayerMenu: Uid: "..tostring(Uid))
+			env.info("CG_ArtySpotter: CGAS_timerPlayerMenu: gpGid: "..tostring(gpGid))
 
-		menuRadioInit[initiatorName] = missionCommands.addCommandForGroup(gpGid, 'Artillery Init', nil, menuAccueil, Uid)
+			menuRadioInit = {}
+			menuRadioInit[initiatorName] = {}
+
+			menuRadioInit[initiatorName] = missionCommands.addCommandForGroup(gpGid, 'Artillery Init', nil, menuAccueil, Uid)
+		end
 
 	end
 end

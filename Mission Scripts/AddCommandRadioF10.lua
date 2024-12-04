@@ -2830,7 +2830,7 @@ end
 -- Planification initiale et exécution toutes les 10 minutes
 local function scheduleToggle()
     toggleGroundUnits()
-    return timer.getTime() + 150 -- 600 secondes = 10 minutes
+    return timer.getTime() + 1200 -- 600 secondes = 10 minutes
 end
 
 -- Planification de la collecte initiale après 10 secondes

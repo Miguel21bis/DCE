@@ -995,9 +995,9 @@ function EventHandler:onEvent(event)
 		local scenDescr = "--Destroyed scenery objects\n\n"
 		local scenStr = "scen_log = " .. TableSerialization(scenLog, 0)
 		local scenFile = io.open(PathDCE .. "scen_destroyed.lua", "w")
-		if logFile then
-			logFile:write(logStr)
-			logFile:close()
+		if scenFile then
+			scenFile:write(scenStr)
+			scenFile:close()
 		else
 			env.info("DCE_scen_destroyed: Failed to open log file for writing.")
 		end
@@ -1014,9 +1014,9 @@ function EventHandler:onEvent(event)
 		--export camp stats file
 		local campStr = "camp = " .. TableSerialization(camp, 0)
 		local campFile = io.open(PathDCE .. "camp_status.lua", "w")
-		if logFile then
-			logFile:write(logStr)
-			logFile:close()
+		if campFile then
+			campFile:write(campStr)
+			campFile:close()
 		else
 			env.info("DCE_camp_status: Failed to open log file for writing.")
 		end
@@ -1024,9 +1024,9 @@ function EventHandler:onEvent(event)
 		--export zoneSAR file
 		local SAR_Str = "zoneSAR = " .. TableSerialization(zoneSAR, 0)
 		local SAR_File = io.open(PathDCE .. "zoneSAR.lua", "w")
-		if logFile then
-			logFile:write(logStr)
-			logFile:close()
+		if SAR_File then
+			SAR_File:write(SAR_Str)
+			SAR_File:close()
 		else
 			env.info("DCE_zoneSAR: Failed to open log file for writing.")
 		end
@@ -1037,9 +1037,9 @@ function EventHandler:onEvent(event)
 		if camp.debug then
 			local fileStr = "scen_log = " .. TableSerialization(eventIdTotal, 0)
 			local fileFile = io.open(PathDCE.."Debug\\" .. "eventIdTotal.lua", "w")
-			if logFile then
-				logFile:write(logStr)
-				logFile:close()
+			if fileFile then
+				fileFile:write(fileStr)
+				fileFile:close()
 			else
 				env.info("DCE_eventIdTotal: Failed to open log file for writing.")
 			end
