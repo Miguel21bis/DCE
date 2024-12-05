@@ -10,7 +10,7 @@ if not versionDCE then versionDCE = {} end
 versionDCE["Mission Scripts\AddCommandRadioF10.lua"] = "1.12.44"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_a				(a: remove RemovePlane)
--- adjustment_g				(g force RTB if bingo)(f ENI table)(e: add SAR_F10)(d GetHeading)(c coalitionIdNumeric)(b group Item Radio)(a: ajust function trigo)
+-- adjustment_g				(g force RTB if bingo)(f ENI table)(e: add sar_F10)(d GetHeading)(c coalitionIdNumeric)(b group Item Radio)(a: ajust function trigo)
 -- debug_g					(g no menu in SP)(f getCategory)(e getHeading Z)(d: tanker exist)n'affiche pas les messages d'error sauf à la fin de mission
 -- debug_bonfor_a			RTB from to inversé
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a dcs_to_gps)
@@ -29,27 +29,20 @@ end
 
 env.info("ACRF10 version of Lua _VERSION "..tostring(_VERSION))
 
--- math.pow = function(x, y)
---     return x ^ y
--- end
-
 for k, v in pairs(AI.Option.Air.val) do
     env.info(k .. " = " .. tostring(v))
 end
 
 env.info("Constante REACTION_ON_THREAT : " .. tostring(AI.Option.Air.id.REACTION_ON_THREAT))
 env.info("Valeur EVADE_FIRE : " .. tostring(AI.Option.Air.val.EVADE_FIRE))
-
-
 env.info("Constante AAA_EVADE_FIRE : " .. tostring(AI.Option.Air.val.REACTION_ON_THREAT.AAA_EVADE_FIRE))
 env.info("Valeur EVADE_FIRE : " ..        tostring(AI.Option.Air.val.REACTION_ON_THREAT.EVADE_FIRE))
-
-
 env.info("ACRF10 start loading ACRF10 script ")
 
 
-local radioCommands = {}
-local flightPlanTimer = {}
+LastInjectFlightPlan = {}																--garde les derniers plan de vol injecté
+tabBingoPlane = {}
+groundDamagedFlyingMachine = {}
 
 coalitionId = {
 	["0"] = "neutral",
@@ -90,18 +83,15 @@ DCS_CategoryById = {
 
 }
 
-
+local radioCommands = {}
+local flightPlanTimer = {}
 local commandDB = {}
-
-tabBingoPlane = {}
 local tabJockerPlane = {}
+local var_TPN_alreadyAdded = false
 
-TPN_alreadyAdded = false
 
-groundDamagedFlyingMachine = {}
 
 function _affiche(_table, titre, prof)
-
 
 	--export custom mission log
 	local logExp = "logExp  "
@@ -231,6 +221,63 @@ function PairsByKeys (t, f)
     end
     return iter
 end
+
+
+function TableSerialization(t, i, params)
+
+	local crlf = ""
+	local tab1 = ""
+	for n = 1, i do																	--controls the indent for the current text line
+		tab1 = tab1 .. "\t"
+	end
+
+	local text = "\n"..crlf..tab1.."{\n"..crlf
+
+	local tab = ""
+	for n = 1, i + 1 do																	--controls the indent for the current text line
+		tab = tab .. "\t"
+	end
+
+	-- if params then
+	-- 	table.sort(t, function(a,b) return a[params] > b[params]  end)
+	-- end
+
+	for k,v in PairsByKeys(t) do
+		if type(k) == "string" then
+			text = text .. tab .. '["' .. k .. '"] = '
+		else
+			text = text .. tab .. "[" .. k .. "] = "
+		end
+		if type(v) == "string" then
+			text = text .. '"' .. v .. '",\n'..crlf
+		elseif type(v) == "number" then
+			text = text .. v .. ",\n"..crlf
+		elseif type(v) == "table" then
+			text = text .. TableSerialization(v, i + 1)
+		elseif type(v) == "boolean" then
+			if v == true then
+				text = text .. "true,\n"..crlf
+			else
+				text = text .. "false,\n"..crlf
+			end
+		elseif type(v) == "function" then
+			text = text .. v .. ",\n"..crlf
+		elseif v == nil then
+			text = text .. "nil,\n"..crlf
+		end
+	end
+	tab = ""
+	for n = 1, i do																		--indent for closing bracket is one less then previous text line
+		tab = tab .. "\t"
+	end
+	if i == 0 then
+		text = text .. tab .. "}\n"		..crlf												--the last bracket should not be followed by an comma
+	else
+		text = text .. tab .. "},\n"	..crlf												--all brackets with indent higher than 0 are followed by a comma
+	end
+	return text
+end
+
 --function to return distance between two vector2 points
 function GetDistance(p1, p2)
 	local deltax = p2.x - p1.x
@@ -1620,8 +1667,37 @@ function AFAC_F10(playerGroup)
 
 end
 
+local function activateRadioBeacon(arguments)
+
+	local gpGid = arguments[1]
+	local ejectedPilot = arguments[2]
+
+	local pilEjectObj = Unit.getByName(ejectedPilot.name)
+
+	if pilEjectObj and camp.EctedPilotFrequency and camp.EctedPilotFrequency[ejectedPilot.side] then
+
+		env.info( "AddCRF10:activateRadioBeacon  pilEjectObj:isExist "..tostring(pilEjectObj:isExist()))
+
+		if not ejectedPilot.embarked  and pilEjectObj:isExist()  then
+			local pilEjectPos = pilEjectObj:getPoint()
+
+			env.info( "AddCRF10:activateRadioBeacon  pilEjectPos.y "..tostring(pilEjectPos.y))
+
+			trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', ejectedPilot.position, 0, true, camp.EctedPilotFrequency[ejectedPilot.side].radioBeacon, 1, 'radioBeacon_'..ejectedPilot.name)
+
+			local freqShow = camp.EctedPilotFrequency[ejectedPilot.side].radioBeacon / 1000000
+			trigger.action.outTextForGroup(gpGid, "activate RadioBeacon on : "..freqShow, 45 , true)
+		end
+	else
+		trigger.action.outTextForGroup(gpGid, "Error, no frequency  ", 15 , true)
+		env.info( "Error, no frequency  ")
+	end
+end
+
+
+
 	--************* SAR ejectedPilot PART ****************************************
-function SAR_F10(arg)
+local function sar_F10(arg)
 	local gpGid = arg[1]
 	local playerGroup = arg[2]
 	-- local gpGid = playerGroup:getID()
@@ -1637,9 +1713,6 @@ function SAR_F10(arg)
 	local playerCoal = playerUnit:getCoalition()
 
 	local listEjectPil = {}
-
-	-- missionCommands.addCommandForGroup(gid, "SAR", nil, SAR_F10, Group)
-	-- local subR_SAR = missionCommands.addSubMenuForGroup(gpGid, "SAR", nil)
 
 	missionCommands.removeItemForGroup(gpGid, {"SAR"})
 	missionCommands.removeItemForGroup(gpGid, {"Activate beacon radios", "SAR"})
@@ -1697,34 +1770,6 @@ function SAR_F10(arg)
 	-- return timer.getTime() + 1
 end
 
-
---TODO ne mettre la balise ejection que pour le group humain, si MP
-function activateRadioBeacon(arguments)
-
-	local gpGid = arguments[1]
-	local ejectedPilot = arguments[2]
-
-	local pilEjectObj = Unit.getByName(ejectedPilot.name)
-
-	if pilEjectObj and camp.EctedPilotFrequency and camp.EctedPilotFrequency[ejectedPilot.side] then
-
-		env.info( "AddCRF10:activateRadioBeacon  pilEjectObj:isExist "..tostring(pilEjectObj:isExist()))
-
-		if not ejectedPilot.embarked  and pilEjectObj:isExist()  then
-			local pilEjectPos = pilEjectObj:getPoint()
-
-			env.info( "AddCRF10:activateRadioBeacon  pilEjectPos.y "..tostring(pilEjectPos.y))
-
-			trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', ejectedPilot.position, 0, true, camp.EctedPilotFrequency[ejectedPilot.side].radioBeacon, 1, 'radioBeacon_'..ejectedPilot.name)
-
-			local freqShow = camp.EctedPilotFrequency[ejectedPilot.side].radioBeacon / 1000000
-			trigger.action.outTextForGroup(gpGid, "activate RadioBeacon on : "..freqShow, 45 , true)
-		end
-	else
-		trigger.action.outTextForGroup(gpGid, "Error, no frequency  ", 15 , true)
-		env.info( "Error, no frequency  ")
-	end
-end
 
 
 
@@ -2334,7 +2379,7 @@ end
 function getOut(gid)
 	env.info( "DCE_getOut A function getOut(gid) ")
 
-	getOutGDFM(gid)
+	GetOutGDFM(gid)
 
 end
 
@@ -2704,8 +2749,8 @@ local function addFuncs(gid, Group)
 			end
 		end
 
-		-- SAR_F10(Group)
-		timer.scheduleFunction(SAR_F10, {gid, Group}, timer.getTime() + 2)
+		-- sar_F10(Group)
+		timer.scheduleFunction(sar_F10, {gid, Group}, timer.getTime() + 2)
 
 		-- AFAC_F10(Group)
 		timer.scheduleFunction(AFAC_F10, Group, timer.getTime() + 2)
@@ -2827,17 +2872,17 @@ local function toggleGroundUnits()
     end
 end
 
--- Planification initiale et exécution toutes les 10 minutes
-local function scheduleToggle()
-    toggleGroundUnits()
-    return timer.getTime() + 1200 -- 600 secondes = 10 minutes
-end
+-- -- Planification initiale et exécution toutes les 10 minutes
+-- local function scheduleToggle()
+--     toggleGroundUnits()
+--     return timer.getTime() + 1200 -- 600 secondes = 10 minutes
+-- end
 
--- Planification de la collecte initiale après 10 secondes
-timer.scheduleFunction(function()
-    collectGroundGroups()
-    timer.scheduleFunction(scheduleToggle, nil, timer.getTime() + 10) -- Commence le cycle après 10 minutes
-end, nil, timer.getTime() + 10)
+-- -- Planification de la collecte initiale après 10 secondes
+-- timer.scheduleFunction(function()
+--     collectGroundGroups()
+--     timer.scheduleFunction(scheduleToggle, nil, timer.getTime() + 10) -- Commence le cycle après 10 minutes
+-- end, nil, timer.getTime() + 10)
 
 
 
@@ -2855,8 +2900,8 @@ function EventHandler2:onEvent(event)
 	-- env.info("DCE_EventHandler2 PASSE 01 event.id "..tostring(event.id))
 	-- _affiche(event, "EventHandler2 event")
 
-	if event and event.id and info_event and info_event[tonumber(event.id)] then
-		idLabel = tostring(info_event[tonumber(event.id)])
+	if event and event.id and Info_event and Info_event[tonumber(event.id)] then
+		idLabel = tostring(Info_event[tonumber(event.id)])
 		-- env.info("DCE_EventHandler2 PASSE 02 event.id "..tostring(event.id).." " ..idLabel)
 	end
 
@@ -3024,14 +3069,14 @@ function LoopPilot()
 
 
 
-	if camp.TableTransportPilotNames and ctld and ctld.alreadyInitialized and not TPN_alreadyAdded then
+	if camp.TableTransportPilotNames and ctld and ctld.alreadyInitialized and not var_TPN_alreadyAdded then
 		for n=1, #camp.TableTransportPilotNames do
 			ctld.transportPilotNames[#ctld.transportPilotNames +1 ] = camp.TableTransportPilotNames[n]
 		end
 
 		env.info( "AdCR10 add  ctld.transportPilotNames ")
 
-		TPN_alreadyAdded = true
+		var_TPN_alreadyAdded = true
 	end
 
 	return timer.getTime() + 15

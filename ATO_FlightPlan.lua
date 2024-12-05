@@ -929,7 +929,7 @@ function SpawnOn(spawn, waypoints, group, Pn, spawnTime, from, flight, f, role)
 			waypoints[1]["alt"] = alt  + (Pn * 10) + altRole * 33
 		end
 
-		for	n = 1 , #group.units do
+		for	n = 2 , #group.units do
 			if not flight[f].task == "AFAC" then
 				group.units[n].x = ((Pn-1) * 15) + ((f-1) * 15) + group.units[n].x + (15 * n)	--ANTI-COLLISION A
 				group.units[n].y = ((Pn-1) * 15) + ((f-1) * 15) + group.units[n].y + (15 * n)
@@ -4322,7 +4322,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				local units = {}
 
 				if flight[f].number > 0 and flight[f].number < 1 then flight[f].number = 1 end
-				
+
 				local calcWish
 				local randSkill
 
@@ -4383,9 +4383,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						and flight[f].route[1].airstart
 					then
 						fuelTemp = fuelTemp * 0.75
-
-						-- print("AtoFP deltaETA "..flight[f].route[1].deltaETA.." fuelTemp: "..fuelTemp)
-						-- os.execute 'pause'
 					end
 
 					local unitIdTemp = 1
@@ -4393,6 +4390,15 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					if not UnitByName[name] then
 						unitIdTemp = GenerateIDUnit(name)
 					end
+
+					local define_x = waypoints[1]["x"]
+					local define_y = waypoints[1]["y"]
+
+					if n >= 2 then
+						define_x = waypoints[1]["x"] + ((n - 1) * 15) +  ((f-1) * 15) + ((p - 1) * 15) -- ATO_FP_Debug01	--ANTI-COLLISION B
+						define_y = waypoints[1]["y"] + ((n - 1) * 15) +  ((f-1) * 15) + ((p - 1) * 15) --ATO_FP_Debug01 	--ANTI-COLLISION B
+					end
+
 					units[n] =
 					{
 						["alt"] = waypoints[1].alt,
@@ -4401,10 +4407,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						["psi"] = 0,
 						["livery_id"] = flight[f].livery,
 						["type"] = flight[f].type,
-						["y"] = waypoints[1]["y"] + ((n - 1) * 15) +  ((f-1) * 15) + ((p - 1) * 15), --ATO_FP_Debug01 	--ANTI-COLLISION B
-						["x"] = waypoints[1]["x"] + ((n - 1) * 15) +  ((f-1) * 15) + ((p - 1) * 15), -- ATO_FP_Debug01	--ANTI-COLLISION B
-						-- ["y"] = waypoints[1]["y"] ,
-						-- ["x"] = waypoints[1]["x"] ,
+						["x"] = define_x ,
+						["y"] = define_y ,
 						["name"] = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight) .. "-" .. n,
 						-- ["payload"] = flight[f].loadout.stores,
 						["payload"] = {
@@ -4501,13 +4505,28 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 					-- n assigne pas de parking aux IA qui spawn in air
-					if waypoints[1].action == "From Parking Area" and flight[f].parking_id and not LimitedParkTiming and not db_airbases[flight[f].base].BaseAirStart then
-						if not flight[f]["parkAlertSAR"] then
-							local findParkId = GetParkingId( flight[f].parking_id, flight[f].base)
-							if findParkId then
-								units[n]["parking_id"] = findParkId
+					if waypoints[1].action == "From Parking Area" and not LimitedParkTiming and not db_airbases[flight[f].base].BaseAirStart then
+						if not flight[f]["parkAlertSAR"] and flight[f].parking_id then
+
+							local parkParameters = GetParkingId( flight[f].parking_id, flight[f].base)
+
+							_affiche(parkParameters, "parkParameters B")
+
+							if parkParameters and parkParameters["parking_id"] then
+								units[n]["heading"] = parkParameters["heading"]
+								units[n]["parking"] = parkParameters["parking"]
+								units[n]["parking_id"] = parkParameters["parking_id"]
+								units[n]["x"] = parkParameters["x"]
+								units[n]["y"] = parkParameters["y"]
+								if n==1 then
+									waypoints[1].x = parkParameters["x"]
+									waypoints[1].y = parkParameters["y"]
+								end
 							end
-						elseif flight[f]["parkAlertSAR"][n] then
+
+
+
+						elseif flight[f]["parkAlertSAR"] and flight[f]["parkAlertSAR"][n] then
 							if n==1 then
 								--groups.xy se fera plus loin, dans le code, avec waypoints[1].xy comme ref
 								waypoints[1].action = "From Ground Area"
@@ -5310,13 +5329,13 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								waypoints[1].linkUnit = nil
 							end
 
-							if group.units[1].parking then
-								group.units[1].parking = nil
-							end
+							-- if group.units[1].parking then
+							-- 	group.units[1].parking = nil
+							-- end
 
-							if group.units[1].parking_id then
-								group.units[1].parking_id = nil
-							end
+							-- if group.units[1].parking_id then
+							-- 	group.units[1].parking_id = nil
+							-- end
 						end
 					end
 				end
@@ -6082,11 +6101,11 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					local altFloor = -1
 
 					if AltitudeFloorNew  then
-						
+
 						local function findCorrectAltitude(testN, Heading)
 						local altFloorFunc = 99999
 						local newPoint = groupRTB.route.points[1]
-						
+
 						if testN > 0 then
 							newPoint = GetOffsetPoint(groupRTB.route.points[1], Heading, testN * 1000, false)
 						end

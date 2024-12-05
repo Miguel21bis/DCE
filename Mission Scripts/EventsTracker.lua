@@ -32,9 +32,19 @@ env.info("DCETestingConstante: Unit.Category.GROUND_UNIT "..tostring(Unit.Catego
 env.info("DCETestingConstante: Unit.Category.SHIP "..tostring(Unit.Category.SHIP))
 env.info("DCETestingConstante: Unit.Category.STRUCTURE "..tostring(Unit.Category.STRUCTURE))
 
-Last_AddSoldierAliasPilot = 0
+-- Last_AddSoldierAliasPilot = 0
+
+EjectionSeatFrequency = {}
 SumSoldierAliasPilot = 0
-eventIdTotal = {}
+CustomLog = {}
+
+local scenLog = {}
+local eventIdTotal = {}
+local tabEjection = {}
+local despawn = {}
+local eventHandlerDCE = {}
+
+
 
 local function WarningText()
 	local text = "WARNING:\n"
@@ -63,73 +73,94 @@ env.info( "DCE_PathDCE "..tostring(PathDCE) )
 env.info( "DCE_pathDD "..tostring(pathDD) )
 -----*********check PathDCE**************---------
 
-tabEjection = {}
-ejectionSeatFrequency = {}
+local function health1s(arg)
 
-function TableSerialization(t, i, params)
+	local healthTemp = arg[1]
+	local event = arg[2]
 
-	local crlf = ""
-	local tab1 = ""
-	for n = 1, i do																	--controls the indent for the current text line
-		tab1 = tab1 .. "\t"
-	end
+	-- PilotName = log_entry.targetPilotName,
+	-- typeEvent = log_entry.type,
+	-- objSujet
+	-- life = life,
+	-- health0 = init_life,
+	-- health = log_entry.health,
 
-	local text = "\n"..crlf..tab1.."{\n"..crlf
+	--TODO ajouter une condition d'existence de l'unite, inutile de demander à un dead
 
-	local tab = ""
-	for n = 1, i + 1 do																	--controls the indent for the current text line
-		tab = tab .. "\t"
-	end
+	-- Object.Category
+	-- 	UNIT    1
+	-- 	WEAPON  2
+	-- 	STATIC  3
+	-- 	BASE    4
+	-- 	SCENERY 5
+	-- 	Cargo   6
 
-	-- if params then
-	-- 	table.sort(t, function(a,b) return a[params] > b[params]  end)
-	-- end
+	local health1sCategory = Object.getCategory(healthTemp.objSujet)
+	-- env.info( "DCE_EventT (health1s) targetCategory| "..tostring(health1sCategory))
 
-	for k,v in PairsByKeys(t) do
-		if type(k) == "string" then
-			text = text .. tab .. '["' .. k .. '"] = '
-		else
-			text = text .. tab .. "[" .. k .. "] = "
-		end
-		if type(v) == "string" then
-			text = text .. '"' .. v .. '",\n'..crlf
-		elseif type(v) == "number" then
-			text = text .. v .. ",\n"..crlf
-		elseif type(v) == "table" then
-			text = text .. TableSerialization(v, i + 1)
-		elseif type(v) == "boolean" then
-			if v == true then
-				text = text .. "true,\n"..crlf
-			else
-				text = text .. "false,\n"..crlf
+	if health1sCategory ~= 0 then
+		if health1sCategory and ( health1sCategory == 1 or health1sCategory == 3 or health1sCategory == 4)  then
+			--Function also works with Unit, Static Object, Airbase
+			local tempName = healthTemp.objSujet:getName()
+			-- env.info( "DCE_EventT (health1s) |getName| "..tostring(tempName))
+
+			if health1sCategory == 3 then
+				local staticHealth1sCategory = event.target:getDesc().category
+				-- env.info( "DCE_EventT (health1s) |staticHealth1sCategory| "..tostring(staticHealth1sCategory))
 			end
-		elseif type(v) == "function" then
-			text = text .. v .. ",\n"..crlf
-		elseif v == nil then
-			text = text .. "nil,\n"..crlf
 		end
+
+		local lifeActual1s = healthTemp.objSujet:getLife()		--651: Unit doesn't exist
+		local lifePourcent = (lifeActual1s/healthTemp.health0) * 100
+		local initDesc = healthTemp.objSujet:getDesc()
+
+		local health1s_entry = {
+			PilotName = healthTemp.PilotName,
+			lifeActual1s = lifeActual1s,
+			health0 = healthTemp.health0,
+			lifePourcent = lifePourcent,
+			event = healthTemp.typeEvent,
+			description = initDesc,
+		}
+
+		table.insert(CustomLog, health1s_entry)
 	end
-	tab = ""
-	for n = 1, i do																		--indent for closing bracket is one less then previous text line
-		tab = tab .. "\t"
-	end
-	if i == 0 then
-		text = text .. tab .. "}\n"		..crlf												--the last bracket should not be followed by an comma
-	else
-		text = text .. tab .. "},\n"	..crlf												--all brackets with indent higher than 0 are followed by a comma
-	end
-	return text
 end
 
-customLog = {}
-local scenLog = {}
+--1s apres le hit, la valeur est plus proche de la réalité
+local function addHit1s(hitTemp)
 
-if not despawn then
-	despawn = {}
+	if scenLog and scenLog[hitTemp.scenaryName] and scenLog[hitTemp.scenaryName].event == "S_EVENT_DEAD" then
+		env.info( "DCE_EventT addHit1s  B return S_EVENT_DEAD "..tostring(hitTemp.scenaryName))
+		return
+	end
+
+	local lifeActual1s = hitTemp.objScen:getLife()
+
+	local lifePourcent = (lifeActual1s/hitTemp.hightLife) * 100
+
+	scenLog[hitTemp.scenaryName] = {							--add scenery object to table
+		scenaryName = hitTemp.scenaryName,
+		lifeActual1s = lifeActual1s,
+		hightLife = hitTemp.hightLife,
+		objScen = hitTemp.objScen,
+		health0 = hitTemp.health0,									--store initial health of scenery object
+		lasthit = hitTemp.lasthit,					--store who hit the scenery object
+		lifeHit = hitTemp.lifeHit,
+		lifePourcent = lifePourcent,
+		x = hitTemp.x,
+		y = hitTemp.y,
+		z = hitTemp.z,
+		description = hitTemp.description,
+		event = hitTemp.event,
+	}
 end
 
-EventHandler = {}
-function EventHandler:onEvent(event)
+--###################  ######   #####################################
+--###################  MAIN   #####################################
+--###################  ######   #####################################
+
+function eventHandlerDCE:onEvent(event)
 
 	--custom events log
 	local log_entry = {															--create a custom log entry for this event
@@ -194,7 +225,7 @@ function EventHandler:onEvent(event)
 		-- _affiche(event, "EventT  PASSE 00b event INCONNU")
 	end
 
-	info_event = {
+	Info_event = {
 		[0] =  "S_EVENT_INVALID",
 		[1] = "S_EVENT_SHOT",
 		[2] = "S_EVENT_HIT",
@@ -336,7 +367,7 @@ function EventHandler:onEvent(event)
 		if event.initiator then
 			local ptEvent = event.initiator:getPoint()
 			local PilotEjection = {}
-			local side = 0
+			local side
 			if ptEvent  and  ptEvent.x then
 
 				PilotEjection = {
@@ -407,13 +438,13 @@ function EventHandler:onEvent(event)
 					env.info( "DCE_EJECT EventT :radioTransmission frequency B  "..tostring(camp.EctedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..PilotEjection.initiator))
 				end
 
-				ejectionSeatTemp = {
+				local ejectionSeatTemp = {
 					radio_on = true,
 					time_on = log_entry.t,
 					name = PilotEjection.initiator,
 				}
 
-				table.insert(ejectionSeatFrequency, ejectionSeatTemp)
+				table.insert(EjectionSeatFrequency, ejectionSeatTemp)
 			end
 		end
 	end
@@ -480,7 +511,7 @@ function EventHandler:onEvent(event)
 
 				_affiche(selectedEjection, " selectedEjection |pilot seat separation")
 
-				-- checkImmediatSAR(event, selectedEjection)
+				-- CheckImmediatSAR(event, selectedEjection)
 			end
 		else
 			env.info( "DCE_EventT  PASSE M pilot seat separation, id: "..tostring(event.id).."_type_"..tostring(log_entry.type))
@@ -561,7 +592,7 @@ function EventHandler:onEvent(event)
 
 					_affiche(selectedEjection, " selectedEjection |pilot land")
 
-					checkImmediatSAR(selectedEjection)
+					CheckImmediatSAR(selectedEjection)
 
 					env.info( "DCE_EvenT: createdSoldier? SurfaceType? "..tostring(selectedEjection.SurfaceType))
 					-- trigger.action.outText("EvenT:  createdSoldier? SurfaceType? "..tostring(selectedEjection.SurfaceType), 30)
@@ -633,13 +664,13 @@ function EventHandler:onEvent(event)
 					env.info("DCE_Pedro landing Passe D1 "..tostring(cvName))
 
 					cvName = cvName:gsub( "Unit_Pedro_", "")
-					cvName, rest = cvName:match("([^,]+)_([^,]+)")
+					cvName, _ = cvName:match("([^,]+)_([^,]+)")
 					env.info("DCE_Pedro landing Passe D2 "..tostring(cvName))
 
-					needPedro(cvName, event)
+					NeedPedro(cvName, event)
 
-					env.info("DCE_TryStart Passe D3 needPedro cvName: "..tostring(cvName))
-					-- trigger.action.outText("TryStart needPedro ", 30)
+					env.info("DCE_TryStart Passe D3 NeedPedro cvName: "..tostring(cvName))
+					-- trigger.action.outText("TryStart NeedPedro ", 30)
 
 				elseif camp.CV_despawnAfterLanding then
 					env.info("DCE_Despawn Add Table CV despawn "..s)
@@ -684,7 +715,7 @@ function EventHandler:onEvent(event)
 				log_entry.z = initPoint.z
 			end
 
-			table.insert(customLog, log_entry)
+			table.insert(CustomLog, log_entry)
 			env.info("DCE_Landing fin Passe Y ")
 		end
 
@@ -707,7 +738,7 @@ function EventHandler:onEvent(event)
 				health = log_entry.health,
 			}
 
-			timer.scheduleFunction(health1s, healthTemp, timer.getTime() + 1)
+			timer.scheduleFunction(health1s, {healthTemp, event}, timer.getTime() + 1)
 		end
 	end
 
@@ -808,7 +839,7 @@ function EventHandler:onEvent(event)
 							health = log_entry.health,
 						}
 
-						timer.scheduleFunction(health1s, healthTemp, timer.getTime() + 1)
+						timer.scheduleFunction(health1s, {healthTemp, event}, timer.getTime() + 1)
 
 						-- local pos = Unit.getByName('whatever'):getPoint()
 						-- local agl = pos.y - land.getHeight({x=pos.x, y = pos.z})
@@ -828,104 +859,24 @@ function EventHandler:onEvent(event)
 			end
 
 		end
-		table.insert(customLog, log_entry)																					--add log entry to custom log
+		table.insert(CustomLog, log_entry)																					--add log entry to custom log
 	end
 
-	function health1s(healthTemp)
+	-- --Xsecondes apres le hit, la valeur est plus proche de la réalité
+	-- function addHitXs(hitTemp)
+	-- 	if scenLog and scenLog[hitTemp.scenaryName] and scenLog[hitTemp.scenaryName].event == "S_EVENT_DEAD" then
+	-- 		env.info( "DCE_EventT addHit1s  B return S_EVENT_DEAD "..tostring(hitTemp.scenaryName))
+	-- 		return
+	-- 	end
 
-		-- PilotName = log_entry.targetPilotName,
-		-- typeEvent = log_entry.type,
-		-- objSujet
-		-- life = life,
-		-- health0 = init_life,
-		-- health = log_entry.health,
-
-		--TODO ajouter une condition d'existence de l'unite, inutile de demander à un dead
-
-		-- Object.Category
-		-- 	UNIT    1
-		-- 	WEAPON  2
-		-- 	STATIC  3
-		-- 	BASE    4
-		-- 	SCENERY 5
-		-- 	Cargo   6
-
-		local health1sCategory = Object.getCategory(healthTemp.objSujet)
-		-- env.info( "DCE_EventT (health1s) targetCategory| "..tostring(health1sCategory))
-
-		if health1sCategory ~= 0 then
-			if health1sCategory and ( health1sCategory == 1 or health1sCategory == 3 or health1sCategory == 4)  then
-				--Function also works with Unit, Static Object, Airbase
-				local tempName = healthTemp.objSujet:getName()
-				-- env.info( "DCE_EventT (health1s) |getName| "..tostring(tempName))
-
-				if health1sCategory == 3 then
-					local staticHealth1sCategory = event.target:getDesc().category
-					-- env.info( "DCE_EventT (health1s) |staticHealth1sCategory| "..tostring(staticHealth1sCategory))
-				end
-			end
-
-			local lifeActual1s = healthTemp.objSujet:getLife()		--651: Unit doesn't exist
-			local lifePourcent = (lifeActual1s/healthTemp.health0) * 100
-			local initDesc = healthTemp.objSujet:getDesc()
-
-			health1s_entry = {
-				PilotName = healthTemp.PilotName,
-				lifeActual1s = lifeActual1s,
-				health0 = healthTemp.health0,
-				lifePourcent = lifePourcent,
-				event = healthTemp.typeEvent,
-				description = initDesc,
-			}
-
-			table.insert(customLog, health1s_entry)
-		end
-	end
-
-	--1s apres le hit, la valeur est plus proche de la réalité
-	function addHit1s(hitTemp)
-
-		if scenLog and scenLog[hitTemp.scenaryName] and scenLog[hitTemp.scenaryName].event == "S_EVENT_DEAD" then
-			env.info( "DCE_EventT addHit1s  B return S_EVENT_DEAD "..tostring(hitTemp.scenaryName))
-			return
-		end
-
-		local lifeActual1s = hitTemp.objScen:getLife()
-
-		local lifePourcent = (lifeActual1s/hitTemp.hightLife) * 100
-
-		scenLog[hitTemp.scenaryName] = {							--add scenery object to table
-			scenaryName = hitTemp.scenaryName,
-			lifeActual1s = lifeActual1s,
-			hightLife = hitTemp.hightLife,
-			objScen = hitTemp.objScen,
-			health0 = hitTemp.health0,									--store initial health of scenery object
-			lasthit = hitTemp.lasthit,					--store who hit the scenery object
-			lifeHit = hitTemp.lifeHit,
-			lifePourcent = lifePourcent,
-			x = hitTemp.x,
-			y = hitTemp.y,
-			z = hitTemp.z,
-			description = hitTemp.description,
-			event = hitTemp.event,
-		}
-	end
-
-	--Xsecondes apres le hit, la valeur est plus proche de la réalité
-	function addHitXs(hitTemp)
-		if scenLog and scenLog[hitTemp.scenaryName] and scenLog[hitTemp.scenaryName].event == "S_EVENT_DEAD" then
-			env.info( "DCE_EventT addHit1s  B return S_EVENT_DEAD "..tostring(hitTemp.scenaryName))
-			return
-		end
-
-		local lifeActual = hitTemp.objScen:getLife()
-		local lifePourcent = (lifeActual/hitTemp.hightLife) * 100
+	-- 	local lifeActual = hitTemp.objScen:getLife()
+	-- 	local lifePourcent = (lifeActual/hitTemp.hightLife) * 100
 
 
-		scenLog[hitTemp.scenaryName]["life_Xs_"..math.floor(timer.getTime())] = lifeActual
-		scenLog[hitTemp.scenaryName]["lifePourcent_Xs_"..math.floor(timer.getTime())] = lifePourcent
+	-- 	scenLog[hitTemp.scenaryName]["life_Xs_"..math.floor(timer.getTime())] = lifeActual
+	-- 	scenLog[hitTemp.scenaryName]["lifePourcent_Xs_"..math.floor(timer.getTime())] = lifePourcent
 
-	end
+	-- end
 
 	--mission end
 	if event.id == world.event.S_EVENT_MISSION_END then
@@ -982,7 +933,7 @@ function EventHandler:onEvent(event)
 
 
 		--export custom mission log
-		local logStr = "events = " .. TableSerialization(customLog, 0)
+		local logStr = "events = " .. TableSerialization(CustomLog, 0)
 		local logFile = io.open(PathDCE .. "MissionEventsLog.lua", "w")
 		if logFile then
 			logFile:write(logStr)
@@ -1167,7 +1118,7 @@ function EventHandler:onEvent(event)
 		end
 	end
 end
-world.addEventHandler(EventHandler)
+world.addEventHandler(eventHandlerDCE)
 
 
 --collect initial health of ships
@@ -1270,7 +1221,7 @@ end
 
 local function despawnIA()
 
-	reset = false
+	local reset = false
 
 	for n = 1, #despawn do
 

@@ -2277,11 +2277,11 @@ end
 
 --M43 assignation des numeros de parking du type C08 
 ParkOccupied = {}
-function GetParkingId(parkingId, base)
+function GetParkingId(parkingId, baseName)
 	local s
 	local counter = 0
-	if not ParkOccupied[base]  then
-		ParkOccupied[base] = {}
+	if not ParkOccupied[baseName]  then
+		ParkOccupied[baseName] = {}
 	end
 
 	-- parking_id = {
@@ -2311,9 +2311,9 @@ function GetParkingId(parkingId, base)
 					counter = counter + 1
 					local randomValue = math.random(math.floor(lower), math.floor(upper)) -- Forcer en entiers
 					s = prefix .. randomValue
-				until ParkOccupied[base][s] == nil or counter == 100
+				until ParkOccupied[baseName][s] == nil or counter == 100
 			else
-				print("Error: Range limits are not valid numbers."..base.." prefix: "..tostring(prefix))
+				print("Error: Range limits are not valid numbers."..baseName.." prefix: "..tostring(prefix))
 			end
 
 		elseif #valueCopy > 2 or single then
@@ -2323,10 +2323,10 @@ function GetParkingId(parkingId, base)
 				s = valueCopy[r]
 				-- s = prefix..string.format("%02d", s)
 				s = prefix.. s
-			until ParkOccupied[base][s] == nil 	or counter == 100
+			until ParkOccupied[baseName][s] == nil 	or counter == 100
 		end
 
-		if ParkOccupied[base][s] == nil then
+		if ParkOccupied[baseName][s] == nil then
 			break
 		end
 	end
@@ -2336,9 +2336,39 @@ function GetParkingId(parkingId, base)
 		return false
 	end
 
-	ParkOccupied[base][s] = true
+	ParkOccupied[baseName][s] = true
 
-	return tostring(s)
+	local parkParameters = {}
+
+	if ParkListPosition and NameTheatre then
+
+		local airdromeId = db_airbases[baseName].airdromeId
+
+		if airdromeId and ParkListPosition[NameTheatre] and ParkListPosition[NameTheatre][airdromeId] then
+
+			for n, parkList in pairs(ParkListPosition[NameTheatre][airdromeId]) do
+				if s == tostring(parkList["parking_id"]) then
+					parkParameters = {
+						["heading"] = parkList["heading"],
+						["parking"] = parkList["parking"],
+						["parking_id"] = parkList["parking_id"],
+						["x"] = parkList["x"],
+						["y"] = parkList["y"],
+					}
+				end
+			end
+		end
+	end
+
+	-- if not parkParameters.parking_id then
+	-- 	parkParameters["parking_id"] = s
+	-- end
+
+	-- return tostring(parkParameters)
+
+	_affiche(parkParameters, "parkParameters A")
+
+	return parkParameters
 
 end
 
@@ -2687,7 +2717,7 @@ function UpdateConfMod()
 			-- else
 			-- 	result = tableId[VariableName]
 			-- end
-			
+
 			--récupère et format la valeur de la variable
 			local resultNumber
 			local varIsStrBoolean = false
@@ -2705,7 +2735,7 @@ function UpdateConfMod()
 					if (checkValue == "true" or checkValue == "false") then
 						varIsStrBoolean = true
 					end
-					
+
 				end
 			end
 
@@ -2723,7 +2753,7 @@ function UpdateConfMod()
 				result = tableId[VariableName]
 			end
 
-			
+
 			--calcul l'espace necessaire pour afficher les commentaires
 			str_length = string.len(tostring(firstTab..ShowVariableName.." = "..tostring(result)))
 			for n = 1, 14 - math.floor(str_length/4) do

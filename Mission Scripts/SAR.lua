@@ -71,8 +71,8 @@ for N_Pilot, ejectedPilot in ipairs(camp.SAR.pilotEjected) do
 	end
 end
 
-function despawnSoldierAliasPilot(EjectedPilotName, embarkation)
-	env.info("DCE_despawnSoldierAliasPilot START "..tostring(EjectedPilotName))
+function DespawnSoldierAliasPilot(EjectedPilotName, embarkation)
+	env.info("DCE_DespawnSoldierAliasPilot START "..tostring(EjectedPilotName))
 
 	for MGRS_Chute, zone in pairs(zoneSAR) do
 		for N_Pilot, ejectedPilot in ipairs(zone) do
@@ -94,7 +94,7 @@ function despawnSoldierAliasPilot(EjectedPilotName, embarkation)
 				log_entry.initiatorPilotName = tostring(ejectedPilot.initiatorPilotName)
 				log_entry.initiator = ejectedPilot.name
 
-				table.insert(customLog, log_entry)
+				table.insert(CustomLog, log_entry)
 
 				StopRadioTransmission(EjectedPilotName)
 
@@ -104,11 +104,11 @@ function despawnSoldierAliasPilot(EjectedPilotName, embarkation)
 					if not embarkation or embarkation == nil then
 						soldier:destroy()
 					end
-					-- trigger.action.outText("despawnSoldierAliasPilot "..tostring(EjectedPilot.name), 30)
+					-- trigger.action.outText("DespawnSoldierAliasPilot "..tostring(EjectedPilot.name), 30)
 
 					StopRadioTransmission(EjectedPilotName)
 
-					env.info("DCE_despawnSoldierAliasPilot FIN "..tostring(EjectedPilotName))
+					env.info("DCE_DespawnSoldierAliasPilot FIN "..tostring(EjectedPilotName))
 				end
 			end
 		end
@@ -510,7 +510,7 @@ end	--function AddSoldierAliasManhunt(EjectedPilot)
 
 
 
-function startSAR(arg)
+local function startSAR(arg)
 
 	local FlightSAR = arg[1]
 	local pt_dest = arg[2]
@@ -785,9 +785,9 @@ function startSAR(arg)
 end
 
 
-function checkImmediatSAR(EjectedPilot)
+function CheckImmediatSAR(EjectedPilot)
 
-	env.info( "DCE_checkImmediatSAR A "..tostring(EjectedPilot.name))
+	env.info( "DCE_CheckImmediatSAR A "..tostring(EjectedPilot.name))
 
 	local pt_chute = {}
 	-- local initDesc = Event.initiator:getDesc()	
@@ -819,26 +819,26 @@ function checkImmediatSAR(EjectedPilot)
 	-- end
 
 	-- if EjectedPilot and EjectedPilot.x then
-	-- 	env.info( "DCE_checkImmediatSAR B :isExist(): "..tostring(EjectedPilot.unit:isExist()))
+	-- 	env.info( "DCE_CheckImmediatSAR B :isExist(): "..tostring(EjectedPilot.unit:isExist()))
 	-- end
 
 	if EjectedPilot and EjectedPilot.x  then -- and EjectedPilot.unit:isExist()  --and isExist
 
-		env.info( "DCE_checkImmediatSAR C "..tostring(EjectedPilot.name))
+		env.info( "DCE_CheckImmediatSAR C "..tostring(EjectedPilot.name))
 
 		local grid = coord.LLtoMGRS(coord.LOtoLL(EjectedPilot))
 
 		if grid  then
-			env.info( "DCE_checkImmediatSAR  A1 grid found ")
+			env.info( "DCE_CheckImmediatSAR  A1 grid found ")
 		else
 			grid = EjectedPilot.grid
-			env.info( "DCE_checkImmediatSAR  A2 grid else ")
+			env.info( "DCE_CheckImmediatSAR  A2 grid else ")
 		end
 
 
 		local chuteZone = grid.UTMZone .. ' ' .. grid.MGRSDigraph .. ' ' .. grid.Easting .. ' ' .. grid.Northing
 
-		env.info( "DCE_checkImmediatSAR? A3 chuteZone "..chuteZone)
+		env.info( "DCE_CheckImmediatSAR? A3 chuteZone "..chuteZone)
 
 		--Avec 2 lettres (A et B) on passe de zone de 10km à des zone de 50km (la limite supérieur serait de 100km)
 		local subdiv_E_Num = tonumber(string.sub(grid.Easting, 1, 1))
@@ -861,8 +861,8 @@ function checkImmediatSAR(EjectedPilot)
 		local MGRS_Chute = grid.UTMZone.."_"..grid.MGRSDigraph.."_"..subdiv_E_Alpha.."_"..subdiv_N_Alpha
 		local MGRS_Chute_10KM = grid.UTMZone.."_"..grid.MGRSDigraph.."_"..subdiv_E_Num.."_"..subdiv_N_Num
 
-		env.info( "DCE_checkImmediatSAR? A4 Start if EjectedPilot MGRS_Chute "..MGRS_Chute)
-		env.info( "DCE_checkImmediatSAR? A5 Start if EjectedPilot MGRS_Chute_10KM "..MGRS_Chute_10KM)
+		env.info( "DCE_CheckImmediatSAR? A4 Start if EjectedPilot MGRS_Chute "..MGRS_Chute)
+		env.info( "DCE_CheckImmediatSAR? A5 Start if EjectedPilot MGRS_Chute_10KM "..MGRS_Chute_10KM)
 
 		local t = timer.getTime()
 
@@ -902,8 +902,7 @@ function checkImmediatSAR(EjectedPilot)
 
 		EjectedPilot.radio_start = 0
 
-		env.info( "DCE_checkImmediatSAR? BB EjectedPilot.name "..EjectedPilot.name)
-		-- _affiche(tabEjection, " tabEjection |checkImmediatSAR")
+		env.info( "DCE_CheckImmediatSAR? BB EjectedPilot.name "..EjectedPilot.name)
 
 		--ajoute à la queue le crash suivant dans la table zoneSAR
 		if not zoneSAR[MGRS_Chute] then zoneSAR[MGRS_Chute] = {} end
@@ -916,9 +915,9 @@ function checkImmediatSAR(EjectedPilot)
 		local ENI_Side = DCS_ENI_Side[EjectedPilot.side]
 		if camp.boundary and camp.boundary[ENI_Side] and camp.boundary[ENI_Side] ~= nil then
 			wrongSide =  CheckPointInPoly2({x=EjectedPilot.x2d,y=EjectedPilot.y2d} , camp.boundary[ENI_Side])
-			env.info( "DCE_checkImmediatSAR C ?  boundary wrongSide ? __"..tostring(wrongSide))
+			env.info( "DCE_CheckImmediatSAR C ?  boundary wrongSide ? __"..tostring(wrongSide))
 			if wrongSide  then
-				env.info( "DCE_checkImmediatSAR? D boundary rightSideOfBorder __FALSE__ Return ")
+				env.info( "DCE_CheckImmediatSAR? D boundary rightSideOfBorder __FALSE__ Return ")
 				return
 			end
 		end
@@ -926,9 +925,9 @@ function checkImmediatSAR(EjectedPilot)
 		-- local rightSideOfBorder
 		-- if camp.boundary and camp.boundary[EjectedPilot.side] and camp.boundary[EjectedPilot.side] ~= nil then
 		-- 	rightSideOfBorder =  CheckPointInPoly2({x=EjectedPilot.x2d,y=EjectedPilot.y2d}, camp.boundary[EjectedPilot.side])
-		-- 	env.info( "DCE_checkImmediatSAR? CC boundary rightSideOfBorder __"..tostring(rightSideOfBorder).."__ EjectedPilot.side: "..tostring(EjectedPilot.side))
+		-- 	env.info( "DCE_CheckImmediatSAR? CC boundary rightSideOfBorder __"..tostring(rightSideOfBorder).."__ EjectedPilot.side: "..tostring(EjectedPilot.side))
 		-- 	if rightSideOfBorder == nil or rightSideOfBorder == false then
-		-- 		env.info( "DCE_checkImmediatSAR? DD boundary rightSideOfBorder __FALSE__ Return ")
+		-- 		env.info( "DCE_CheckImmediatSAR? DD boundary rightSideOfBorder __FALSE__ Return ")
 		-- 		return
 		-- 	end
 		-- end
@@ -936,9 +935,9 @@ function checkImmediatSAR(EjectedPilot)
 
 		--si EjectedPilot sur une VILLE on ne lance pas de SAR ni de CSAR
 		local NameTheatre =  string.lower(env.mission.theatre)
-		env.info( "DCE_checkImmediatSAR? NameTheatre "..tostring(NameTheatre))
+		env.info( "DCE_CheckImmediatSAR? NameTheatre "..tostring(NameTheatre))
 		if circleCity[NameTheatre] then
-			env.info( "DCE_checkImmediatSAR? Passe 1 NameTheatre  ")
+			env.info( "DCE_CheckImmediatSAR? Passe 1 NameTheatre  ")
 
 			for nCircle, circle in ipairs(circleCity[NameTheatre]) do
 				--voir le code identique sur DC_UpdateSAR.lua
@@ -946,16 +945,16 @@ function checkImmediatSAR(EjectedPilot)
 				local mission2d_x = 58538.7 - (47.2304 * circle.pixel_y )
 				local mission2d_y = (47.2287 * circle.pixel_x) + 70914
 
-				-- env.info( "checkImmediatSAR? Passe 2  mission2d_x: "..tostring(mission2d_x).." |mission2d_y: "..tostring(mission2d_y))
+				-- env.info( "CheckImmediatSAR? Passe 2  mission2d_x: "..tostring(mission2d_x).." |mission2d_y: "..tostring(mission2d_y))
 
 				if math.abs(EjectedPilot.x2d - mission2d_x) <= 50000 and math.abs(EjectedPilot.y2d - mission2d_y) <= 50000 then
-					env.info( "DCE_checkImmediatSAR? Passe 3 <= 50000  ")
+					env.info( "DCE_CheckImmediatSAR? Passe 3 <= 50000  ")
 
 					local result = math.pow ((EjectedPilot.x2d - mission2d_x), 2) + math.pow((EjectedPilot.y2d - mission2d_y), 2) <= math.pow((circle.radius * 47.229042083728), 2)
-					env.info( "DCE_checkImmediatSAR? Passe 4 result?  "..tostring(result))
+					env.info( "DCE_CheckImmediatSAR? Passe 4 result?  "..tostring(result))
 
 					local debugA = type(result)
-					env.info( "DCE_checkImmediatSAR? Passe 5 debugA?  "..tostring(debugA))
+					env.info( "DCE_CheckImmediatSAR? Passe 5 debugA?  "..tostring(debugA))
 
 					if result then
 
@@ -1036,7 +1035,7 @@ function checkImmediatSAR(EjectedPilot)
 
 		--si le crash est proche du CV, c'est le pedro qui y va
 		if selected_distance < 6000 then
-			env.info( "DCE_checkImmediatSAR? EE <6000 donc AERONAVAL?   ")
+			env.info( "DCE_CheckImmediatSAR? EE <6000 donc AERONAVAL?   ")
 			--temp de reaction en fonction de la distance
 			--6000 -> 30 s
 			--m 	-> x s
@@ -1045,32 +1044,32 @@ function checkImmediatSAR(EjectedPilot)
 
 		-- elseif zoneSAR[EjectedPilot.MGRS_Chute] == nil or ( zoneSAR[EjectedPilot.MGRS_Chute] and zoneSAR[EjectedPilot.MGRS_Chute].groupSAR and  zoneSAR[EjectedPilot.MGRS_Chute].groupSAR == "" ) then
 		elseif  zoneSAR[EjectedPilot.MGRS_Chute].groupSAR == "" or zoneSAR[EjectedPilot.MGRS_Chute].groupSAR == nil or zoneSAR[EjectedPilot.MGRS_Chute].groupSAR == false then
-			env.info( "DCE_checkImmediatSAR? FFa >6000 donc TERRESTRE?   ")
+			env.info( "DCE_CheckImmediatSAR? FFa >6000 donc TERRESTRE?   ")
 
 			--find all flights in range to Ejected Pilot and hover ceiling
 			local eligible_flights = {}
 			for base_name, base in pairs(camp.SAR.alertSAR[EjectedPilot.side].base) do
-				env.info( "DCE_checkImmediatSAR? FFb  base_name "..tostring(base_name))
+				env.info( "DCE_CheckImmediatSAR? FFb  base_name "..tostring(base_name))
 				for flight_n, flight in ipairs(base.ready) do
 
 					local distance = math.sqrt(math.pow(flight.x - EjectedPilot.x2d, 2) + math.pow(flight.y - EjectedPilot.y2d, 2))
 
 					if distance >= flight.range  then
-						env.info( "DCE_checkImmediatSAR? trop loin : "..tostring(distance).." > flight.range: "..tostring(flight.range))
+						env.info( "DCE_CheckImmediatSAR? trop loin : "..tostring(distance).." > flight.range: "..tostring(flight.range))
 					end
 
 					if EjectedPilot.z2d >= flight.hHover then
-						env.info( "DCE_checkImmediatSAR? trop haut : "..tostring(EjectedPilot.z2d).." > flight.hHover: "..tostring(flight.hHover))
+						env.info( "DCE_CheckImmediatSAR? trop haut : "..tostring(EjectedPilot.z2d).." > flight.hHover: "..tostring(flight.hHover))
 					end
 
 					if distance < flight.range and EjectedPilot.z2d < flight.hHover then
 						eligible_flights[flight.name] = distance
-						env.info( "DCE_checkImmediatSAR? FFc eligible_flights?   "..tostring(flight.name).."|distance: "..tostring(distance))
+						env.info( "DCE_CheckImmediatSAR? FFc eligible_flights?   "..tostring(flight.name).."|distance: "..tostring(distance))
 					end
 				end
 			end
 
-			env.info( "DCE_checkImmediatSAR? interB   ")
+			env.info( "DCE_CheckImmediatSAR? interB   ")
 			-- _affiche(eligible_flights, "eligible_flights interB")
 
 			--select the flight closest to rescue Ejected Pilot
@@ -1080,25 +1079,25 @@ function checkImmediatSAR(EjectedPilot)
 				if distance < selected_distance then
 					selected_flight = flight_name
 					selected_distance = distance
-					env.info( "DCE_checkImmediatSAR? HH selected_flight?   "..tostring(selected_flight))
+					env.info( "DCE_CheckImmediatSAR? HH selected_flight?   "..tostring(selected_flight))
 				end
 			end
 
-			env.info( "DCE_checkImmediatSAR? interC  selected_flight  "..tostring(selected_flight))
+			env.info( "DCE_CheckImmediatSAR? interC  selected_flight  "..tostring(selected_flight))
 
 			--assign selected flight to rescue
 			if selected_flight then
-				env.info( "DCE_checkImmediatSAR? II   ")
+				env.info( "DCE_CheckImmediatSAR? II   ")
 				for base_name, base in pairs(camp.SAR.alertSAR[EjectedPilot.side].base) do
 					for flight_n, flight in pairs(base.ready) do
 						if flight.name == selected_flight then
-							env.info( "checkImmediatSAR? JJ    ")
+							env.info( "CheckImmediatSAR? JJ    ")
 							trigger.action.setUserFlag(flight.flag, true)		--set flag true to launch SAR Alert					
 
 							local idInfo = Group.getByName(selected_flight):getID()
 							local _side = Group.getByName(selected_flight):getCoalition()
 
-							env.info( "DCE_checkImmediatSAR? YY launch SAR Alert   ")
+							env.info( "DCE_CheckImmediatSAR? YY launch SAR Alert   ")
 
 							timer.scheduleFunction(startSAR, {flight, EjectedPilot}, timer.getTime() + 30)
 
@@ -1121,10 +1120,10 @@ function PedroSAR(arg)
 	local pt_dest = arg[2]
 
 	local nb
-	if not listPedro[pt_start.name] then
+	if not ListPedro[pt_start.name] then
 		nb = 1
 	else
-		nb = #listPedro[pt_start.name]
+		nb = #ListPedro[pt_start.name]
 	end
 
 	local FlightName = "Pedro_"..pt_start.name.."_"..tostring(nb)
@@ -1387,7 +1386,7 @@ end	--function PedroSAR(arg)
 
 
 
-function checkAddingManhunt()
+local function checkAddingManhunt()
 	-- if 1==1 then
 	-- 	return
 	-- end
@@ -1418,7 +1417,7 @@ function checkAddingManhunt()
 					if  ejectedPilot.inTheEnemyCamp then
 
 						env.info( "DCE_SAR:checkAddingManhunt EEE "..tostring(MGRS_Chute).." | "..tostring(ejectedPilot.name))
-						env.info( "DCE_SAR:checkAddingManhunt timer.scheduleFunction(despawnSoldierAliasPilot "..tostring(ejectedPilot.name))
+						env.info( "DCE_SAR:checkAddingManhunt timer.scheduleFunction(DespawnSoldierAliasPilot "..tostring(ejectedPilot.name))
 
 						timer.scheduleFunction(AddSoldierAliasManhunt, unitPilot, timer.getTime() + 2)
 						nbOfTargetMan[MGRS_Chute] = nbOfTargetMan[MGRS_Chute] + 1
@@ -1490,10 +1489,10 @@ function StopRadioTransmissionSeat()
 
 	-- env.info( "DCE_RADIO StopRadioTransmissionSeat A  "..tostring(time))
 
-	if ejectionSeatFrequency and #ejectionSeatFrequency >= 1 then
+	if EjectionSeatFrequency and #EjectionSeatFrequency >= 1 then
 		-- env.info( "DCE_RADIO StopRadioTransmissionSeat B  "..tostring(time))
 
-		for n, ejected in pairs(ejectionSeatFrequency) do
+		for n, ejected in pairs(EjectionSeatFrequency) do
 			-- env.info( "DCE_RADIO StopRadioTransmissionSeat C  "..tostring(time))
 
 			if ejected.radio_on then
@@ -1512,6 +1511,144 @@ function StopRadioTransmissionSeat()
 	return timer.getTime() + 5
 end
 
+--guide le pilote humain SAR vers l ejectedPilot
+local function detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
+
+	local outFonction = false
+	local SAR_unitId = Unit.getID(unitSAR)
+
+	env.info( "SAR:humanSarPlayer embarkation PASSE AA ")
+
+	local function walk()
+		env.info( "SAR:humanSarPlayer embarkation PASSE BB ")
+		local unitPilot = Unit.getByName(ejectedPilot.name)
+		local PosEjectedPilot = unitPilot:getPoint()
+		local Pos_SAR = unitSAR:getPoint()
+		local SARinAir = unitSAR:inAir()
+
+		local distance = math.ceil(math.sqrt(math.pow(Pos_SAR.x - PosEjectedPilot.x, 2) + math.pow(Pos_SAR.z - PosEjectedPilot.z, 2)))
+
+		trigger.action.outTextForUnit( SAR_unitId , "Embarkation Distance: "..tostring(distance).." (must be <200m)" , 2 , true)
+
+		if distance <= 200 and not SARinAir then
+			env.info( "SAR:humanSarPlayer embarkation PASSE CC ")
+
+			trigger.action.outTextForUnit( SAR_unitId , "Use airborne troops for on-boarding" , 2 , false)
+
+			if distance <= 20 then
+				env.info( "SAR:humanSarPlayer embarkation & StopRadioTransmission PASSE DD "..tostring(ejectedPilot.name))
+				local embarkation = true
+				DespawnSoldierAliasPilot(ejectedPilot.name, embarkation )
+				-- StopRadioTransmission(ejectedPilot.name)
+				outFonction = true
+				return
+			end
+
+		elseif distance > 200 or SARinAir then
+			env.info( "SAR:humanSarPlayer embarkation PASSE EE ")
+			outFonction = true
+			walkEjectedPilot[SAR_unitId] = false
+			return
+		end
+		env.info( "SAR:humanSarPlayer embarkation PASSE FF ")
+		return timer.getTime() + 1
+	end
+
+	if outFonction then
+		walkEjectedPilot[SAR_unitId] = false
+		return
+	end
+
+	timer.scheduleFunction(walk, nil, timer.getTime() + 1)
+
+end
+
+--guide le pilote humain SAR vers l ejectedPilot
+local function guideTreuilSAR(unitSAR, PosEjectedPilot, ejectedPilot)
+
+	local outFonction = false
+	local SAR_unitId = Unit.getID(unitSAR)
+
+	local function guidage()
+
+		local Pos_SAR = unitSAR:getPoint()
+		local distance = math.ceil(math.sqrt(math.pow(Pos_SAR.x - PosEjectedPilot.x, 2) + math.pow(Pos_SAR.z - PosEjectedPilot.z, 2)))
+
+		local ejectedPilot_h = land.getHeight({x = PosEjectedPilot.x, y = PosEjectedPilot.z})
+
+		local SAR_h = math.ceil(Pos_SAR.y)
+		local SARinAir = unitSAR:inAir()
+
+		-- local unitSarPos = unitSAR:getPosition()
+   		-- local bearing_rad = math.atan2(unitSarPos.x.z, unitSarPos.x.x))
+		-- if bearing_rad < 0 then
+		-- 	bearing_rad = bearing_rad + (2 * math.pi) 
+		-- end
+		-- local bearing = math.ceil(math.deg(bearing_rad))
+
+
+		-- --    local group_1_pos = Group.getByName('group_1'):getUnits()[1]:getPoint()
+		-- --    local group_2_pos = Group.getByName('group_2'):getUnits()[1]:getPoint()
+		-- --    local distance = ((group_1_pos.x - group_2_pos.x)^2 + (group_1_pos.z - group_2_pos.z)^2)^0.5
+		-- local bearing_vector = {
+		-- 	x = PosEjectedPilot.x - Pos_SAR.x, 
+		-- 	y = PosEjectedPilot.y - Pos_SAR.y, 
+		-- 	z = PosEjectedPilot.z - Pos_SAR.z
+		-- 	}
+		-- local bearing_rad = math.atan2(bearing_vector.z, bearing_vector.x)
+		-- if bearing_rad < 0 then
+		-- 		bearing_rad = bearing_rad + (2 * math.pi) 
+		-- end
+		-- local bearing = math.ceil(math.deg(bearing_rad))
+
+
+		local bearing_vector = {
+			x = PosEjectedPilot.x - Pos_SAR.x,
+			y = PosEjectedPilot.y - Pos_SAR.y,
+			z = PosEjectedPilot.z - Pos_SAR.z
+			}
+		local bearing_rad = math.atan2(bearing_vector.z, bearing_vector.x)
+		if bearing_rad < 0 then
+				bearing_rad = bearing_rad + (2 * math.pi)
+		end
+		local bearing = math.ceil(math.deg(bearing_rad))
+
+		local high = math.ceil(SAR_h - ejectedPilot_h)
+		-- local high = SAR_h - ejectedPilot_h 
+		trigger.action.outTextForUnit( SAR_unitId , "Helitacking Distance: "..tostring(distance).." (need <10m) High: "..tostring(high).." (need <45m) Bearing: "..tostring(bearing) , 2 , true)
+
+		if distance <= 10 and high <=45 then
+
+			local speed = Object.getVelocity(unitSAR)
+			speed = math.sqrt(speed.x^2 + speed.y^2 + speed.z^2)
+			speed = math.ceil(speed * 10)/10
+
+			trigger.action.outTextForUnit( SAR_unitId , "Speed: "..tostring(speed) .." ( need < 0.2)" , 2 , false)
+
+			if speed <= 0.2 then
+				DespawnSoldierAliasPilot(ejectedPilot.name)
+				outFonction = true
+				return
+			end
+
+		elseif distance > 100 or not SARinAir then	-- high <= 2
+			outFonction = true
+			guideSAR[SAR_unitId] = false
+			return
+		end
+		return timer.getTime() + 1
+	end
+
+	if outFonction then
+		guideSAR[SAR_unitId] = false
+		return
+	end
+
+	--si l helico n est pas posé
+	if not walkEjectedPilot[SAR_unitId] or walkEjectedPilot[SAR_unitId] == nil then
+		timer.scheduleFunction(guidage, nil, timer.getTime() + 1)
+	end
+end
 
 function LoopSAR()
 	--** allume le fumigene lorsque la SAR est proche
@@ -1617,8 +1754,8 @@ function LoopSAR()
 															if not ejectedPilot.landingPossible then
 																--TODO placer ici un script d immobilisation de l helico pour occuper le pilote humain a piloter son appareil :)
 
-																env.info( "DCE_SAR:LoopSTARt timer.scheduleFunction(despawnSoldierAliasPilot "..tostring(ejectedPilot.name))
-																timer.scheduleFunction(despawnSoldierAliasPilot, ejectedPilot.name, timer.getTime() + 150)
+																env.info( "DCE_SAR:LoopSTARt timer.scheduleFunction(DespawnSoldierAliasPilot "..tostring(ejectedPilot.name))
+																timer.scheduleFunction(DespawnSoldierAliasPilot, ejectedPilot.name, timer.getTime() + 150)
 
 															else
 																env.info( "DCE_SAR:Pilot.landingPossible, helico: |"..tostring(humanSarPlayer).."| |"..tostring(SAR_Name).."| DEVRAIT se poser pour recuperer "..tostring(ejectedPilot.name))
@@ -1673,146 +1810,8 @@ function LoopSAR()
 
 end
 
---guide le pilote humain SAR vers l ejectedPilot
-function guideTreuilSAR(unitSAR, PosEjectedPilot, ejectedPilot)
 
-	local outFonction = false
-	local SAR_unitId = Unit.getID(unitSAR)
-
-	function guidage()
-
-		local Pos_SAR = unitSAR:getPoint()
-		local distance = math.ceil(math.sqrt(math.pow(Pos_SAR.x - PosEjectedPilot.x, 2) + math.pow(Pos_SAR.z - PosEjectedPilot.z, 2)))
-
-		local ejectedPilot_h = land.getHeight({x = PosEjectedPilot.x, y = PosEjectedPilot.z})
-
-		local SAR_h = math.ceil(Pos_SAR.y)
-		local SARinAir = unitSAR:inAir()
-
-		-- local unitSarPos = unitSAR:getPosition()
-   		-- local bearing_rad = math.atan2(unitSarPos.x.z, unitSarPos.x.x))
-		-- if bearing_rad < 0 then
-		-- 	bearing_rad = bearing_rad + (2 * math.pi) 
-		-- end
-		-- local bearing = math.ceil(math.deg(bearing_rad))
-
-
-		-- --    local group_1_pos = Group.getByName('group_1'):getUnits()[1]:getPoint()
-		-- --    local group_2_pos = Group.getByName('group_2'):getUnits()[1]:getPoint()
-		-- --    local distance = ((group_1_pos.x - group_2_pos.x)^2 + (group_1_pos.z - group_2_pos.z)^2)^0.5
-		-- local bearing_vector = {
-		-- 	x = PosEjectedPilot.x - Pos_SAR.x, 
-		-- 	y = PosEjectedPilot.y - Pos_SAR.y, 
-		-- 	z = PosEjectedPilot.z - Pos_SAR.z
-		-- 	}
-		-- local bearing_rad = math.atan2(bearing_vector.z, bearing_vector.x)
-		-- if bearing_rad < 0 then
-		-- 		bearing_rad = bearing_rad + (2 * math.pi) 
-		-- end
-		-- local bearing = math.ceil(math.deg(bearing_rad))
-
-
-		local bearing_vector = {
-			x = PosEjectedPilot.x - Pos_SAR.x,
-			y = PosEjectedPilot.y - Pos_SAR.y,
-			z = PosEjectedPilot.z - Pos_SAR.z
-			}
-		local bearing_rad = math.atan2(bearing_vector.z, bearing_vector.x)
-		if bearing_rad < 0 then
-				bearing_rad = bearing_rad + (2 * math.pi)
-		end
-		local bearing = math.ceil(math.deg(bearing_rad))
-
-		local high = math.ceil(SAR_h - ejectedPilot_h)
-		-- local high = SAR_h - ejectedPilot_h 
-		trigger.action.outTextForUnit( SAR_unitId , "Helitacking Distance: "..tostring(distance).." (need <10m) High: "..tostring(high).." (need <45m) Bearing: "..tostring(bearing) , 2 , true)
-
-		if distance <= 10 and high <=45 then
-
-			local speed = Object.getVelocity(unitSAR)
-			speed = math.sqrt(speed.x^2 + speed.y^2 + speed.z^2)
-			speed = math.ceil(speed * 10)/10
-
-			trigger.action.outTextForUnit( SAR_unitId , "Speed: "..tostring(speed) .." ( need < 0.2)" , 2 , false)
-
-			if speed <= 0.2 then
-				despawnSoldierAliasPilot(ejectedPilot.name)
-				outFonction = true
-				return
-			end
-
-		elseif distance > 100 or not SARinAir then	-- high <= 2
-			outFonction = true
-			guideSAR[SAR_unitId] = false
-			return
-		end
-		return timer.getTime() + 1
-	end
-
-	if outFonction then
-		guideSAR[SAR_unitId] = false
-		return
-	end
-
-	--si l helico n est pas posé
-	if not walkEjectedPilot[SAR_unitId] or walkEjectedPilot[SAR_unitId] == nil then
-		timer.scheduleFunction(guidage, nil, timer.getTime() + 1)
-	end
-end
-
---guide le pilote humain SAR vers l ejectedPilot
-function detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
-
-	local outFonction = false
-	local SAR_unitId = Unit.getID(unitSAR)
-
-	env.info( "SAR:humanSarPlayer embarkation PASSE AA ")
-
-	function walk()
-		env.info( "SAR:humanSarPlayer embarkation PASSE BB ")
-		local unitPilot = Unit.getByName(ejectedPilot.name)
-		local PosEjectedPilot = unitPilot:getPoint()
-		local Pos_SAR = unitSAR:getPoint()
-		local SARinAir = unitSAR:inAir()
-
-		local distance = math.ceil(math.sqrt(math.pow(Pos_SAR.x - PosEjectedPilot.x, 2) + math.pow(Pos_SAR.z - PosEjectedPilot.z, 2)))
-
-		trigger.action.outTextForUnit( SAR_unitId , "Embarkation Distance: "..tostring(distance).." (must be <200m)" , 2 , true)
-
-		if distance <= 200 and not SARinAir then
-			env.info( "SAR:humanSarPlayer embarkation PASSE CC ")
-
-			trigger.action.outTextForUnit( SAR_unitId , "Use airborne troops for on-boarding" , 2 , false)
-
-			if distance <= 20 then
-				env.info( "SAR:humanSarPlayer embarkation & StopRadioTransmission PASSE DD "..tostring(ejectedPilot.name))
-				local embarkation = true
-				despawnSoldierAliasPilot(ejectedPilot.name, embarkation )
-				-- StopRadioTransmission(ejectedPilot.name)
-				outFonction = true
-				return
-			end
-
-		elseif distance > 200 or SARinAir then
-			env.info( "SAR:humanSarPlayer embarkation PASSE EE ")
-			outFonction = true
-			walkEjectedPilot[SAR_unitId] = false
-			return
-		end
-		env.info( "SAR:humanSarPlayer embarkation PASSE FF ")
-		return timer.getTime() + 1
-	end
-
-	if outFonction then
-		walkEjectedPilot[SAR_unitId] = false
-		return
-	end
-
-	timer.scheduleFunction(walk, nil, timer.getTime() + 1)
-
-end
-
-function despawn2(unitToDespawn)
+local function despawn2(unitToDespawn)
 	_affiche(unitToDespawn, "DCE_despawn2 B despawn unitToDespawn")
 	if unitToDespawn and unitToDespawn:isExist() then
 		unitToDespawn:destroy()
@@ -1821,7 +1820,7 @@ function despawn2(unitToDespawn)
 	end
 end
 
-function spawnWreck(element)
+local function spawnWreck(element)
 
 	env.info( "DCE_spawnWreck name:  "..tostring(element.name).." countryId: "..tostring(element.countryId))
 
@@ -1877,8 +1876,8 @@ function spawnWreck(element)
 
 end
 
-function getOutGDFM(argGid)
-	env.info( "DCE_getOut A scheduleFunction getOutGDFM ")
+function GetOutGDFM(argGid)
+	env.info( "DCE_getOut A scheduleFunction GetOutGDFM ")
 
 	-- local eventData = {
 	-- 	initiatorPilotName = initiatorPilotName,
@@ -1899,7 +1898,7 @@ function getOutGDFM(argGid)
 		for occurenceN = #key, 1, -1 do
 			-- env.info( "DCE_getOut B1 id_ "..tostring(id_).." occurenceN "..tostring(occurenceN))
 
-			damaged = key[occurenceN]
+			local damaged = key[occurenceN]
 			--si on a un argument, on le test et continue, sinon on continue sans argument
 			-- permet de passer la fonction aussi via la function F10 des joueurs
 
@@ -1991,7 +1990,7 @@ function getOutGDFM(argGid)
 
 							end
 
-							checkImmediatSAR(damaged)
+							CheckImmediatSAR(damaged)
 
 							env.info("DCE_getOut E test despawn ")
 
@@ -2026,7 +2025,7 @@ end
 timer.scheduleFunction(checkAddingManhunt, nil, timer.getTime() + 5)
 timer.scheduleFunction(StopRadioTransmissionSeat, nil, timer.getTime() + 30)
 
-timer.scheduleFunction(getOutGDFM, nil, timer.getTime() + 6)
+timer.scheduleFunction(GetOutGDFM, nil, timer.getTime() + 6)
 
 
 env.info( "DCE_Start LOAD checkAddingManhunt   ")
@@ -2037,5 +2036,5 @@ env.info( "DCE_Start LOAD checkAddingManhunt   ")
 -- trigger.action.outText("FIN LOAD  checkAddingManhunt ", 30)
 
 
-env.info( "DCE_FIN LOAD SAR checkImmediatSAR  ")
--- trigger.action.outText("FIN LOAD SAR checkImmediatSAR ", 30)
+env.info( "DCE_FIN LOAD SAR CheckImmediatSAR  ")
+-- trigger.action.outText("FIN LOAD SAR CheckImmediatSAR ", 30)

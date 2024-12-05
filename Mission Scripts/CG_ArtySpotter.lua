@@ -83,7 +83,7 @@ local outputFormat = "MGRS"
 --local outputFormat = "LL"
 
 -- Fonction pour obtenir toutes les trigger zones dont le nom commence par "Arty_" ou "Arty-" ou "Arty"
-function getArtyTriggerZones()
+local function getArtyTriggerZones()
 
     for i, zone in ipairs(env.mission.triggers.zones) do
         if string.sub(string.lower(zone.name), 1, 4) == artyZonePrefixName then
