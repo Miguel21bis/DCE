@@ -1,0 +1,4012 @@
+mission = 
+{
+	["groundControl"] = 
+	{
+		["passwords"] = 
+		{
+			["artillery_commander"] = {},
+			["instructor"] = {},
+			["observer"] = {},
+			["forward_observer"] = {},
+		}, -- end of ["passwords"]
+		["roles"] = 
+		{
+			["artillery_commander"] = 
+			{
+				["neutrals"] = 0,
+				["blue"] = 0,
+				["red"] = 0,
+			}, -- end of ["artillery_commander"]
+			["instructor"] = 
+			{
+				["neutrals"] = 0,
+				["blue"] = 0,
+				["red"] = 0,
+			}, -- end of ["instructor"]
+			["observer"] = 
+			{
+				["neutrals"] = 0,
+				["blue"] = 0,
+				["red"] = 0,
+			}, -- end of ["observer"]
+			["forward_observer"] = 
+			{
+				["neutrals"] = 0,
+				["blue"] = 0,
+				["red"] = 0,
+			}, -- end of ["forward_observer"]
+		}, -- end of ["roles"]
+		["isPilotControlVehicles"] = false,
+	}, -- end of ["groundControl"]
+	["requiredModules"] = {},
+	["date"] = 
+	{
+		["Day"] = 1,
+		["Year"] = 2020,
+		["Month"] = 6,
+	}, -- end of ["date"]
+	["trig"] = 
+	{
+		["actions"] = {},
+		["events"] = {},
+		["custom"] = {},
+		["func"] = {},
+		["flag"] = {},
+		["conditions"] = {},
+		["customStartup"] = {},
+		["funcStartup"] = {},
+	}, -- end of ["trig"]
+	["maxDictId"] = 5,
+	["result"] = 
+	{
+		["offline"] = 
+		{
+			["conditions"] = {},
+			["actions"] = {},
+			["func"] = {},
+		}, -- end of ["offline"]
+		["total"] = 0,
+		["blue"] = 
+		{
+			["conditions"] = {},
+			["actions"] = {},
+			["func"] = {},
+		}, -- end of ["blue"]
+		["red"] = 
+		{
+			["conditions"] = {},
+			["actions"] = {},
+			["func"] = {},
+		}, -- end of ["red"]
+	}, -- end of ["result"]
+	["pictureFileNameN"] = {},
+	["descriptionNeutralsTask"] = "DictKey_descriptionNeutralsTask_4",
+	["pictureFileNameServer"] = {},
+	["weather"] = 
+	{
+		["wind"] = 
+		{
+			["at8000"] = 
+			{
+				["speed"] = 0,
+				["dir"] = 0,
+			}, -- end of ["at8000"]
+			["at2000"] = 
+			{
+				["speed"] = 0,
+				["dir"] = 0,
+			}, -- end of ["at2000"]
+			["atGround"] = 
+			{
+				["speed"] = 0,
+				["dir"] = 0,
+			}, -- end of ["atGround"]
+		}, -- end of ["wind"]
+		["enable_fog"] = false,
+		["season"] = 
+		{
+			["temperature"] = 20,
+		}, -- end of ["season"]
+		["qnh"] = 760,
+		["cyclones"] = {},
+		["dust_density"] = 0,
+		["enable_dust"] = false,
+		["clouds"] = 
+		{
+			["thickness"] = 200,
+			["density"] = 0,
+			["preset"] = "Preset2",
+			["base"] = 2500,
+			["iprecptns"] = 0,
+		}, -- end of ["clouds"]
+		["atmosphere_type"] = 0,
+		["groundTurbulence"] = 0,
+		["halo"] = 
+		{
+			["preset"] = "auto",
+		}, -- end of ["halo"]
+		["type_weather"] = 0,
+		["modifiedTime"] = false,
+		["name"] = "Winter, clean sky",
+		["fog"] = 
+		{
+			["thickness"] = 0,
+			["visibility"] = 0,
+		}, -- end of ["fog"]
+		["visibility"] = 
+		{
+			["distance"] = 80000,
+		}, -- end of ["visibility"]
+	}, -- end of ["weather"]
+	["theatre"] = "PersianGulf",
+	["triggers"] = 
+	{
+		["zones"] = {},
+	}, -- end of ["triggers"]
+	["map"] = 
+	{
+		["centerY"] = -73761.835143645,
+		["zoom"] = 19866.044809373,
+		["centerX"] = -93384.801301329,
+	}, -- end of ["map"]
+	["coalitions"] = 
+	{
+		["neutrals"] = 
+		{
+			[1] = 91,
+			[2] = 75,
+			[3] = 7,
+			[4] = 70,
+			[5] = 42,
+			[6] = 83,
+			[7] = 23,
+			[8] = 65,
+			[9] = 86,
+			[10] = 64,
+			[11] = 25,
+			[12] = 82,
+			[13] = 63,
+			[14] = 84,
+			[15] = 76,
+			[16] = 29,
+			[17] = 30,
+			[18] = 78,
+			[19] = 87,
+			[20] = 31,
+			[21] = 61,
+			[22] = 32,
+			[23] = 33,
+			[24] = 60,
+			[25] = 17,
+			[26] = 35,
+			[27] = 36,
+			[28] = 59,
+			[29] = 71,
+			[30] = 79,
+			[31] = 58,
+			[32] = 57,
+			[33] = 55,
+			[34] = 56,
+			[35] = 88,
+			[36] = 92,
+			[37] = 73,
+			[38] = 39,
+			[39] = 54,
+			[40] = 77,
+			[41] = 89,
+			[42] = 72,
+			[43] = 41,
+			[44] = 69,
+			[45] = 44,
+			[46] = 85,
+			[47] = 53,
+			[48] = 22,
+			[49] = 52,
+			[50] = 66,
+			[51] = 51,
+			[52] = 68,
+			[53] = 49,
+			[54] = 50,
+			[55] = 48,
+			[56] = 67,
+			[57] = 74,
+			[58] = 90,
+			[59] = 62,
+		}, -- end of ["neutrals"]
+		["blue"] = 
+		{
+			[1] = 6,
+			[2] = 21,
+			[3] = 11,
+			[4] = 8,
+			[5] = 45,
+			[6] = 28,
+			[7] = 13,
+			[8] = 9,
+			[9] = 80,
+			[10] = 5,
+			[11] = 16,
+			[12] = 15,
+			[13] = 20,
+			[14] = 12,
+			[15] = 10,
+			[16] = 40,
+			[17] = 4,
+			[18] = 26,
+			[19] = 46,
+			[20] = 3,
+			[21] = 1,
+			[22] = 2,
+		}, -- end of ["blue"]
+		["red"] = 
+		{
+			[1] = 18,
+			[2] = 24,
+			[3] = 27,
+			[4] = 38,
+			[5] = 81,
+			[6] = 34,
+			[7] = 37,
+			[8] = 19,
+			[9] = 0,
+			[10] = 43,
+			[11] = 47,
+		}, -- end of ["red"]
+	}, -- end of ["coalitions"]
+	["descriptionText"] = "DictKey_descriptionText_1",
+	["pictureFileNameR"] = {},
+	["descriptionBlueTask"] = "DictKey_descriptionBlueTask_3",
+	["goals"] = {},
+	["descriptionRedTask"] = "DictKey_descriptionRedTask_2",
+	["pictureFileNameB"] = {},
+	["coalition"] = 
+	{
+		["neutrals"] = 
+		{
+			["bullseye"] = 
+			{
+				["y"] = 0,
+				["x"] = 0,
+			}, -- end of ["bullseye"]
+			["nav_points"] = {},
+			["name"] = "neutrals",
+			["country"] = {},
+		}, -- end of ["neutrals"]
+		["blue"] = 
+		{
+			["bullseye"] = 
+			{
+				["y"] = 0,
+				["x"] = 0,
+			}, -- end of ["bullseye"]
+			["nav_points"] = {},
+			["name"] = "blue",
+			["country"] = {},
+		}, -- end of ["blue"]
+		["red"] = 
+		{
+			["bullseye"] = 
+			{
+				["y"] = 0,
+				["x"] = 0,
+			}, -- end of ["bullseye"]
+			["nav_points"] = {},
+			["name"] = "red",
+			["country"] = 
+			{
+				[1] = 
+				{
+					["id"] = 0,
+					["name"] = "Russia",
+					["plane"] = 
+					{
+						["group"] = 
+						{
+							[1] = 
+							{
+								["dynSpawnTemplate"] = false,
+								["modulation"] = 0,
+								["tasks"] = {},
+								["radioSet"] = false,
+								["task"] = "CAP",
+								["uncontrolled"] = false,
+								["route"] = 
+								{
+									["points"] = 
+									{
+										[1] = 
+										{
+											["alt"] = 30,
+											["action"] = "From Parking Area",
+											["alt_type"] = "BARO",
+											["speed"] = 138.88888888889,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = 
+													{
+														[1] = 
+														{
+															["enabled"] = true,
+															["key"] = "CAP",
+															["id"] = "EngageTargets",
+															["number"] = 1,
+															["auto"] = true,
+															["params"] = 
+															{
+																["targetTypes"] = 
+																{
+																	[1] = "Air",
+																}, -- end of ["targetTypes"]
+																["priority"] = 0,
+															}, -- end of ["params"]
+														}, -- end of [1]
+														[2] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 2,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 17,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [2]
+														[3] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 3,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = 4,
+																		["name"] = 18,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [3]
+														[4] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 4,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 19,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [4]
+														[5] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 5,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["targetTypes"] = {},
+																		["name"] = 21,
+																		["value"] = "none;",
+																		["noTargetTypes"] = 
+																		{
+																			[1] = "Fighters",
+																			[2] = "Multirole fighters",
+																			[3] = "Bombers",
+																			[4] = "Helicopters",
+																			[5] = "UAVs",
+																			[6] = "Infantry",
+																			[7] = "Fortifications",
+																			[8] = "Tanks",
+																			[9] = "IFV",
+																			[10] = "APC",
+																			[11] = "Artillery",
+																			[12] = "Unarmed vehicles",
+																			[13] = "AAA",
+																			[14] = "SR SAM",
+																			[15] = "MR SAM",
+																			[16] = "LR SAM",
+																			[17] = "Aircraft Carriers",
+																			[18] = "Cruisers",
+																			[19] = "Destroyers",
+																			[20] = "Frigates",
+																			[21] = "Corvettes",
+																			[22] = "Light armed ships",
+																			[23] = "Unarmed ships",
+																			[24] = "Submarines",
+																			[25] = "Cruise missiles",
+																			[26] = "Antiship Missiles",
+																			[27] = "AA Missiles",
+																			[28] = "AG Missiles",
+																			[29] = "SA Missiles",
+																		}, -- end of ["noTargetTypes"]
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [5]
+													}, -- end of ["tasks"]
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "TakeOffParking",
+											["ETA"] = 0,
+											["ETA_locked"] = true,
+											["y"] = -72655.046875,
+											["x"] = -93732.7265625,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+											["airdromeId"] = 14,
+										}, -- end of [1]
+										[2] = 
+										{
+											["alt"] = 2000,
+											["action"] = "Turning Point",
+											["alt_type"] = "BARO",
+											["speed"] = 210.69444444444,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = {},
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "Turning Point",
+											["ETA"] = 12.375376126137,
+											["ETA_locked"] = false,
+											["y"] = -70965.362899519,
+											["x"] = -91686.403536933,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+										}, -- end of [2]
+									}, -- end of ["points"]
+								}, -- end of ["route"]
+								["groupId"] = 1,
+								["hidden"] = false,
+								["units"] = 
+								{
+									[1] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "Iraqi",
+										["skill"] = "High",
+										["parking"] = 7,
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-23MLD",
+										["unitId"] = 1,
+										["psi"] = -0.69022659882782,
+										["onboard_num"] = "010",
+										["parking_id"] = "47",
+										["x"] = -93732.7265625,
+										["name"] = "Aérien_g-1-1",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = "3800",
+											["flare"] = 60,
+											["chaff"] = 60,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -72655.046875,
+										["heading"] = 0.69022659882782,
+										["callsign"] = 100,
+									}, -- end of [1]
+									[2] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "Iraqi",
+										["skill"] = "High",
+										["parking"] = "5",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-23MLD",
+										["unitId"] = 2,
+										["psi"] = -0.69022659882782,
+										["onboard_num"] = "011",
+										["parking_id"] = "45",
+										["x"] = -93548.203125,
+										["name"] = "Aérien_g-1-2",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = "3800",
+											["flare"] = 60,
+											["chaff"] = 60,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -72841.1015625,
+										["heading"] = 0.69022659882782,
+										["callsign"] = 101,
+									}, -- end of [2]
+									[3] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "Iraqi",
+										["skill"] = "High",
+										["parking"] = "6",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-23MLD",
+										["unitId"] = 3,
+										["psi"] = -0.69022659882782,
+										["onboard_num"] = "012",
+										["parking_id"] = "44",
+										["x"] = -93586.015625,
+										["name"] = "Aérien_g-1-3",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = "3800",
+											["flare"] = 60,
+											["chaff"] = 60,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -72865.5078125,
+										["heading"] = 0.69022659882782,
+										["callsign"] = 102,
+									}, -- end of [3]
+									[4] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "Iraqi",
+										["skill"] = "High",
+										["parking"] = 4,
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-23MLD",
+										["unitId"] = 4,
+										["psi"] = -0.69022659882782,
+										["onboard_num"] = "013",
+										["parking_id"] = "46",
+										["x"] = -93511.0078125,
+										["name"] = "Aérien_g-1-4",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = "3800",
+											["flare"] = 60,
+											["chaff"] = 60,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -72815.6015625,
+										["heading"] = 0.69022659882782,
+										["callsign"] = 103,
+									}, -- end of [4]
+								}, -- end of ["units"]
+								["y"] = -72655.046875,
+								["x"] = -93732.7265625,
+								["name"] = "Aérien_g-1",
+								["communication"] = true,
+								["start_time"] = 0,
+								["frequency"] = 254,
+							}, -- end of [1]
+							[2] = 
+							{
+								["dynSpawnTemplate"] = false,
+								["modulation"] = 0,
+								["tasks"] = {},
+								["radioSet"] = false,
+								["task"] = "CAP",
+								["uncontrolled"] = false,
+								["route"] = 
+								{
+									["points"] = 
+									{
+										[1] = 
+										{
+											["alt"] = 30,
+											["action"] = "From Parking Area",
+											["alt_type"] = "BARO",
+											["speed"] = 138.88888888889,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = 
+													{
+														[1] = 
+														{
+															["enabled"] = true,
+															["key"] = "CAP",
+															["id"] = "EngageTargets",
+															["number"] = 1,
+															["auto"] = true,
+															["params"] = 
+															{
+																["targetTypes"] = 
+																{
+																	[1] = "Air",
+																}, -- end of ["targetTypes"]
+																["priority"] = 0,
+															}, -- end of ["params"]
+														}, -- end of [1]
+														[2] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 2,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 17,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [2]
+														[3] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 3,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = 4,
+																		["name"] = 18,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [3]
+														[4] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 4,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 19,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [4]
+														[5] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 5,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["targetTypes"] = {},
+																		["name"] = 21,
+																		["value"] = "none;",
+																		["noTargetTypes"] = 
+																		{
+																			[1] = "Fighters",
+																			[2] = "Multirole fighters",
+																			[3] = "Bombers",
+																			[4] = "Helicopters",
+																			[5] = "UAVs",
+																			[6] = "Infantry",
+																			[7] = "Fortifications",
+																			[8] = "Tanks",
+																			[9] = "IFV",
+																			[10] = "APC",
+																			[11] = "Artillery",
+																			[12] = "Unarmed vehicles",
+																			[13] = "AAA",
+																			[14] = "SR SAM",
+																			[15] = "MR SAM",
+																			[16] = "LR SAM",
+																			[17] = "Aircraft Carriers",
+																			[18] = "Cruisers",
+																			[19] = "Destroyers",
+																			[20] = "Frigates",
+																			[21] = "Corvettes",
+																			[22] = "Light armed ships",
+																			[23] = "Unarmed ships",
+																			[24] = "Submarines",
+																			[25] = "Cruise missiles",
+																			[26] = "Antiship Missiles",
+																			[27] = "AA Missiles",
+																			[28] = "AG Missiles",
+																			[29] = "SA Missiles",
+																		}, -- end of ["noTargetTypes"]
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [5]
+													}, -- end of ["tasks"]
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "TakeOffParking",
+											["ETA"] = 0,
+											["ETA_locked"] = true,
+											["y"] = -72922.8984375,
+											["x"] = -93530.78125,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+											["airdromeId"] = 14,
+										}, -- end of [1]
+										[2] = 
+										{
+											["alt"] = 2000,
+											["action"] = "Turning Point",
+											["alt_type"] = "BARO",
+											["speed"] = 210.69444444444,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = {},
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "Turning Point",
+											["ETA"] = 12.375376126137,
+											["ETA_locked"] = false,
+											["y"] = -71152.763700409,
+											["x"] = -91669.50353575,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+										}, -- end of [2]
+									}, -- end of ["points"]
+								}, -- end of ["route"]
+								["groupId"] = 2,
+								["hidden"] = false,
+								["units"] = 
+								{
+									[1] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "Iraqi",
+										["skill"] = "High",
+										["parking"] = 50,
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-23MLD",
+										["unitId"] = 5,
+										["psi"] = -0.76030493931986,
+										["onboard_num"] = "014",
+										["parking_id"] = "43",
+										["x"] = -93530.78125,
+										["name"] = "Aérien_g-2-1",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = "3800",
+											["flare"] = 60,
+											["chaff"] = 60,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -72922.8984375,
+										["heading"] = 0.76030493931986,
+										["callsign"] = 104,
+									}, -- end of [1]
+									[2] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "Iraqi",
+										["skill"] = "High",
+										["parking"] = 9,
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-23MLD",
+										["unitId"] = 6,
+										["psi"] = -0.76030493931986,
+										["onboard_num"] = "015",
+										["parking_id"] = "42",
+										["x"] = -93490.078125,
+										["name"] = "Aérien_g-2-2",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = "3800",
+											["flare"] = 60,
+											["chaff"] = 60,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -72985.984375,
+										["heading"] = 0.76030493931986,
+										["callsign"] = 104,
+									}, -- end of [2]
+									[3] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "Iraqi",
+										["skill"] = "High",
+										["parking"] = 8,
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-23MLD",
+										["unitId"] = 7,
+										["psi"] = -0.76030493931986,
+										["onboard_num"] = "016",
+										["parking_id"] = "41",
+										["x"] = -93450.328125,
+										["name"] = "Aérien_g-2-3",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = "3800",
+											["flare"] = 60,
+											["chaff"] = 60,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73049.34375,
+										["heading"] = 0.76030493931986,
+										["callsign"] = 104,
+									}, -- end of [3]
+									[4] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "Iraqi",
+										["skill"] = "High",
+										["parking"] = 10,
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-23MLD",
+										["unitId"] = 8,
+										["psi"] = -0.76030493931986,
+										["onboard_num"] = "017",
+										["parking_id"] = "40",
+										["x"] = -93408.4765625,
+										["name"] = "Aérien_g-2-4",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = "3800",
+											["flare"] = 60,
+											["chaff"] = 60,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73111.5703125,
+										["heading"] = 0.76030493931986,
+										["callsign"] = 104,
+									}, -- end of [4]
+								}, -- end of ["units"]
+								["y"] = -72922.8984375,
+								["x"] = -93530.78125,
+								["name"] = "Aérien_g-2",
+								["communication"] = true,
+								["start_time"] = 0,
+								["frequency"] = 254,
+							}, -- end of [2]
+							[3] = 
+							{
+								["dynSpawnTemplate"] = false,
+								["modulation"] = 0,
+								["tasks"] = {},
+								["radioSet"] = false,
+								["task"] = "CAP",
+								["uncontrolled"] = false,
+								["route"] = 
+								{
+									["points"] = 
+									{
+										[1] = 
+										{
+											["alt"] = 30,
+											["action"] = "From Parking Area",
+											["alt_type"] = "BARO",
+											["speed"] = 138.88888888889,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = 
+													{
+														[1] = 
+														{
+															["enabled"] = true,
+															["key"] = "CAP",
+															["id"] = "EngageTargets",
+															["number"] = 1,
+															["auto"] = true,
+															["params"] = 
+															{
+																["targetTypes"] = 
+																{
+																	[1] = "Air",
+																}, -- end of ["targetTypes"]
+																["priority"] = 0,
+															}, -- end of ["params"]
+														}, -- end of [1]
+														[2] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 2,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 17,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [2]
+														[3] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 3,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = 4,
+																		["name"] = 18,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [3]
+														[4] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 4,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 19,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [4]
+														[5] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 5,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["targetTypes"] = {},
+																		["name"] = 21,
+																		["value"] = "none;",
+																		["noTargetTypes"] = 
+																		{
+																			[1] = "Fighters",
+																			[2] = "Multirole fighters",
+																			[3] = "Bombers",
+																			[4] = "Helicopters",
+																			[5] = "UAVs",
+																			[6] = "Infantry",
+																			[7] = "Fortifications",
+																			[8] = "Tanks",
+																			[9] = "IFV",
+																			[10] = "APC",
+																			[11] = "Artillery",
+																			[12] = "Unarmed vehicles",
+																			[13] = "AAA",
+																			[14] = "SR SAM",
+																			[15] = "MR SAM",
+																			[16] = "LR SAM",
+																			[17] = "Aircraft Carriers",
+																			[18] = "Cruisers",
+																			[19] = "Destroyers",
+																			[20] = "Frigates",
+																			[21] = "Corvettes",
+																			[22] = "Light armed ships",
+																			[23] = "Unarmed ships",
+																			[24] = "Submarines",
+																			[25] = "Cruise missiles",
+																			[26] = "Antiship Missiles",
+																			[27] = "AA Missiles",
+																			[28] = "AG Missiles",
+																			[29] = "SA Missiles",
+																		}, -- end of ["noTargetTypes"]
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [5]
+													}, -- end of ["tasks"]
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "TakeOffParking",
+											["ETA"] = 0,
+											["ETA_locked"] = true,
+											["y"] = -73415.765625,
+											["x"] = -93247.484375,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+											["airdromeId"] = 14,
+										}, -- end of [1]
+										[2] = 
+										{
+											["alt"] = 2000,
+											["action"] = "Turning Point",
+											["alt_type"] = "BARO",
+											["speed"] = 220.97222222222,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = {},
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "Turning Point",
+											["ETA"] = 12.375376126137,
+											["ETA_locked"] = false,
+											["y"] = -71601.150956319,
+											["x"] = -91389.406119397,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+										}, -- end of [2]
+									}, -- end of ["points"]
+								}, -- end of ["route"]
+								["groupId"] = 3,
+								["hidden"] = false,
+								["units"] = 
+								{
+									[1] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "16",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 9,
+										["psi"] = -0.77356446018047,
+										["onboard_num"] = "018",
+										["parking_id"] = "36",
+										["x"] = -93247.484375,
+										["name"] = "Aérien_g-3-1",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["ammo_type"] = 1,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73415.765625,
+										["heading"] = 0.77356446018047,
+										["callsign"] = 106,
+									}, -- end of [1]
+									[2] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "15",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 10,
+										["psi"] = -0.77356446018047,
+										["onboard_num"] = "019",
+										["parking_id"] = "35",
+										["x"] = -93209.9609375,
+										["name"] = "Aérien_g-3-2",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73391.234375,
+										["heading"] = 0.77356446018047,
+										["callsign"] = 107,
+									}, -- end of [2]
+									[3] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "28",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 11,
+										["psi"] = -0.77356446018047,
+										["onboard_num"] = "020",
+										["parking_id"] = "33",
+										["x"] = -93200.71875,
+										["name"] = "Aérien_g-3-3",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73488.53125,
+										["heading"] = 0.77356446018047,
+										["callsign"] = 108,
+									}, -- end of [3]
+									[4] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "14",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 12,
+										["psi"] = -0.77356446018047,
+										["onboard_num"] = "021",
+										["parking_id"] = "34",
+										["x"] = -93172.2265625,
+										["name"] = "Aérien_g-3-4",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73366.796875,
+										["heading"] = 0.77356446018047,
+										["callsign"] = 109,
+									}, -- end of [4]
+								}, -- end of ["units"]
+								["y"] = -73415.765625,
+								["x"] = -93247.484375,
+								["name"] = "Aérien_g-3",
+								["communication"] = true,
+								["start_time"] = 0,
+								["frequency"] = 124,
+							}, -- end of [3]
+							[4] = 
+							{
+								["dynSpawnTemplate"] = false,
+								["modulation"] = 0,
+								["tasks"] = {},
+								["radioSet"] = false,
+								["task"] = "CAP",
+								["uncontrolled"] = false,
+								["route"] = 
+								{
+									["points"] = 
+									{
+										[1] = 
+										{
+											["alt"] = 30,
+											["action"] = "From Parking Area",
+											["alt_type"] = "BARO",
+											["speed"] = 138.88888888889,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = 
+													{
+														[1] = 
+														{
+															["enabled"] = true,
+															["key"] = "CAP",
+															["id"] = "EngageTargets",
+															["number"] = 1,
+															["auto"] = true,
+															["params"] = 
+															{
+																["targetTypes"] = 
+																{
+																	[1] = "Air",
+																}, -- end of ["targetTypes"]
+																["priority"] = 0,
+															}, -- end of ["params"]
+														}, -- end of [1]
+														[2] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 2,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 17,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [2]
+														[3] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 3,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = 4,
+																		["name"] = 18,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [3]
+														[4] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 4,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 19,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [4]
+														[5] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 5,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["targetTypes"] = {},
+																		["name"] = 21,
+																		["value"] = "none;",
+																		["noTargetTypes"] = 
+																		{
+																			[1] = "Fighters",
+																			[2] = "Multirole fighters",
+																			[3] = "Bombers",
+																			[4] = "Helicopters",
+																			[5] = "UAVs",
+																			[6] = "Infantry",
+																			[7] = "Fortifications",
+																			[8] = "Tanks",
+																			[9] = "IFV",
+																			[10] = "APC",
+																			[11] = "Artillery",
+																			[12] = "Unarmed vehicles",
+																			[13] = "AAA",
+																			[14] = "SR SAM",
+																			[15] = "MR SAM",
+																			[16] = "LR SAM",
+																			[17] = "Aircraft Carriers",
+																			[18] = "Cruisers",
+																			[19] = "Destroyers",
+																			[20] = "Frigates",
+																			[21] = "Corvettes",
+																			[22] = "Light armed ships",
+																			[23] = "Unarmed ships",
+																			[24] = "Submarines",
+																			[25] = "Cruise missiles",
+																			[26] = "Antiship Missiles",
+																			[27] = "AA Missiles",
+																			[28] = "AG Missiles",
+																			[29] = "SA Missiles",
+																		}, -- end of ["noTargetTypes"]
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [5]
+													}, -- end of ["tasks"]
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "TakeOffParking",
+											["ETA"] = 0,
+											["ETA_locked"] = true,
+											["y"] = -73300.328125,
+											["x"] = -93286.046875,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+											["airdromeId"] = 14,
+										}, -- end of [1]
+										[2] = 
+										{
+											["alt"] = 2000,
+											["action"] = "Turning Point",
+											["alt_type"] = "BARO",
+											["speed"] = 220.97222222222,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = {},
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "Turning Point",
+											["ETA"] = 12.375376126137,
+											["ETA_locked"] = false,
+											["y"] = -71482.667037847,
+											["x"] = -91424.422279559,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+										}, -- end of [2]
+									}, -- end of ["points"]
+								}, -- end of ["route"]
+								["groupId"] = 4,
+								["hidden"] = false,
+								["units"] = 
+								{
+									[1] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "13",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 13,
+										["psi"] = -0.77344980713034,
+										["onboard_num"] = "022",
+										["parking_id"] = "37",
+										["x"] = -93286.046875,
+										["name"] = "Aérien_g-4-1",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["ammo_type"] = 1,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73300.328125,
+										["heading"] = 0.77344980713034,
+										["callsign"] = 105,
+									}, -- end of [1]
+									[2] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "12",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 14,
+										["psi"] = -0.77344980713034,
+										["onboard_num"] = "023",
+										["parking_id"] = "38",
+										["x"] = -93326.421875,
+										["name"] = "Aérien_g-4-2",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73237.0546875,
+										["heading"] = 0.77344980713034,
+										["callsign"] = 105,
+									}, -- end of [2]
+									[3] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "11",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 15,
+										["psi"] = -0.77344980713034,
+										["onboard_num"] = "024",
+										["parking_id"] = "39",
+										["x"] = -93367.296875,
+										["name"] = "Aérien_g-4-3",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73174.4140625,
+										["heading"] = 0.77344980713034,
+										["callsign"] = 105,
+									}, -- end of [3]
+									[4] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "27",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 16,
+										["psi"] = -0.77344980713034,
+										["onboard_num"] = "025",
+										["parking_id"] = "32",
+										["x"] = -93163.140625,
+										["name"] = "Aérien_g-4-4",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73464.140625,
+										["heading"] = 0.77344980713034,
+										["callsign"] = 105,
+									}, -- end of [4]
+								}, -- end of ["units"]
+								["y"] = -73300.328125,
+								["x"] = -93286.046875,
+								["name"] = "Aérien_g-4",
+								["communication"] = true,
+								["start_time"] = 0,
+								["frequency"] = 124,
+							}, -- end of [4]
+							[5] = 
+							{
+								["dynSpawnTemplate"] = false,
+								["modulation"] = 0,
+								["tasks"] = {},
+								["radioSet"] = false,
+								["task"] = "CAP",
+								["uncontrolled"] = false,
+								["route"] = 
+								{
+									["points"] = 
+									{
+										[1] = 
+										{
+											["alt"] = 30,
+											["action"] = "From Parking Area",
+											["alt_type"] = "BARO",
+											["speed"] = 138.88888888889,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = 
+													{
+														[1] = 
+														{
+															["enabled"] = true,
+															["key"] = "CAP",
+															["id"] = "EngageTargets",
+															["number"] = 1,
+															["auto"] = true,
+															["params"] = 
+															{
+																["targetTypes"] = 
+																{
+																	[1] = "Air",
+																}, -- end of ["targetTypes"]
+																["priority"] = 0,
+															}, -- end of ["params"]
+														}, -- end of [1]
+														[2] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 2,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 17,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [2]
+														[3] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 3,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = 4,
+																		["name"] = 18,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [3]
+														[4] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 4,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 19,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [4]
+														[5] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 5,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["targetTypes"] = {},
+																		["name"] = 21,
+																		["value"] = "none;",
+																		["noTargetTypes"] = 
+																		{
+																			[1] = "Fighters",
+																			[2] = "Multirole fighters",
+																			[3] = "Bombers",
+																			[4] = "Helicopters",
+																			[5] = "UAVs",
+																			[6] = "Infantry",
+																			[7] = "Fortifications",
+																			[8] = "Tanks",
+																			[9] = "IFV",
+																			[10] = "APC",
+																			[11] = "Artillery",
+																			[12] = "Unarmed vehicles",
+																			[13] = "AAA",
+																			[14] = "SR SAM",
+																			[15] = "MR SAM",
+																			[16] = "LR SAM",
+																			[17] = "Aircraft Carriers",
+																			[18] = "Cruisers",
+																			[19] = "Destroyers",
+																			[20] = "Frigates",
+																			[21] = "Corvettes",
+																			[22] = "Light armed ships",
+																			[23] = "Unarmed ships",
+																			[24] = "Submarines",
+																			[25] = "Cruise missiles",
+																			[26] = "Antiship Missiles",
+																			[27] = "AA Missiles",
+																			[28] = "AG Missiles",
+																			[29] = "SA Missiles",
+																		}, -- end of ["noTargetTypes"]
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [5]
+													}, -- end of ["tasks"]
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "TakeOffParking",
+											["ETA"] = 0,
+											["ETA_locked"] = true,
+											["y"] = -73583.796875,
+											["x"] = -93138.5078125,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+											["airdromeId"] = 14,
+										}, -- end of [1]
+										[2] = 
+										{
+											["alt"] = 2000,
+											["action"] = "Turning Point",
+											["alt_type"] = "BARO",
+											["speed"] = 220.97222222222,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = {},
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "Turning Point",
+											["ETA"] = 12.375376126137,
+											["ETA_locked"] = false,
+											["y"] = -71768.530672013,
+											["x"] = -91285.871242226,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+										}, -- end of [2]
+									}, -- end of ["points"]
+								}, -- end of ["route"]
+								["groupId"] = 5,
+								["hidden"] = false,
+								["units"] = 
+								{
+									[1] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "17",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 17,
+										["psi"] = -0.77521003230507,
+										["onboard_num"] = "026",
+										["parking_id"] = "30",
+										["x"] = -93138.5078125,
+										["name"] = "Aérien_g-5-1",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["ammo_type"] = 1,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73583.796875,
+										["heading"] = 0.77521003230507,
+										["callsign"] = 110,
+									}, -- end of [1]
+									[2] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "18",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 18,
+										["psi"] = -0.77521003230507,
+										["onboard_num"] = "027",
+										["parking_id"] = "29",
+										["x"] = -93100.859375,
+										["name"] = "Aérien_g-5-2",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73559.40625,
+										["heading"] = 0.77521003230507,
+										["callsign"] = 110,
+									}, -- end of [2]
+									[3] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "23",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 19,
+										["psi"] = -0.77521003230507,
+										["onboard_num"] = "028",
+										["parking_id"] = "27",
+										["x"] = -93091.609375,
+										["name"] = "Aérien_g-5-3",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73656.0546875,
+										["heading"] = 0.77521003230507,
+										["callsign"] = 110,
+									}, -- end of [3]
+									[4] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "19",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 20,
+										["psi"] = -0.77521003230507,
+										["onboard_num"] = "029",
+										["parking_id"] = "28",
+										["x"] = -93063.2578125,
+										["name"] = "Aérien_g-5-4",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73534.875,
+										["heading"] = 0.77521003230507,
+										["callsign"] = 110,
+									}, -- end of [4]
+								}, -- end of ["units"]
+								["y"] = -73583.796875,
+								["x"] = -93138.5078125,
+								["name"] = "Aérien_g-5",
+								["communication"] = true,
+								["start_time"] = 0,
+								["frequency"] = 124,
+							}, -- end of [5]
+							[6] = 
+							{
+								["dynSpawnTemplate"] = false,
+								["modulation"] = 0,
+								["tasks"] = {},
+								["radioSet"] = false,
+								["task"] = "CAP",
+								["uncontrolled"] = false,
+								["route"] = 
+								{
+									["points"] = 
+									{
+										[1] = 
+										{
+											["alt"] = 30,
+											["action"] = "From Parking Area",
+											["alt_type"] = "BARO",
+											["speed"] = 138.88888888889,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = 
+													{
+														[1] = 
+														{
+															["enabled"] = true,
+															["key"] = "CAP",
+															["id"] = "EngageTargets",
+															["number"] = 1,
+															["auto"] = true,
+															["params"] = 
+															{
+																["targetTypes"] = 
+																{
+																	[1] = "Air",
+																}, -- end of ["targetTypes"]
+																["priority"] = 0,
+															}, -- end of ["params"]
+														}, -- end of [1]
+														[2] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 2,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 17,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [2]
+														[3] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 3,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = 4,
+																		["name"] = 18,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [3]
+														[4] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 4,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 19,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [4]
+														[5] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 5,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["targetTypes"] = {},
+																		["name"] = 21,
+																		["value"] = "none;",
+																		["noTargetTypes"] = 
+																		{
+																			[1] = "Fighters",
+																			[2] = "Multirole fighters",
+																			[3] = "Bombers",
+																			[4] = "Helicopters",
+																			[5] = "UAVs",
+																			[6] = "Infantry",
+																			[7] = "Fortifications",
+																			[8] = "Tanks",
+																			[9] = "IFV",
+																			[10] = "APC",
+																			[11] = "Artillery",
+																			[12] = "Unarmed vehicles",
+																			[13] = "AAA",
+																			[14] = "SR SAM",
+																			[15] = "MR SAM",
+																			[16] = "LR SAM",
+																			[17] = "Aircraft Carriers",
+																			[18] = "Cruisers",
+																			[19] = "Destroyers",
+																			[20] = "Frigates",
+																			[21] = "Corvettes",
+																			[22] = "Light armed ships",
+																			[23] = "Unarmed ships",
+																			[24] = "Submarines",
+																			[25] = "Cruise missiles",
+																			[26] = "Antiship Missiles",
+																			[27] = "AA Missiles",
+																			[28] = "AG Missiles",
+																			[29] = "SA Missiles",
+																		}, -- end of ["noTargetTypes"]
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [5]
+													}, -- end of ["tasks"]
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "TakeOffParking",
+											["ETA"] = 0,
+											["ETA_locked"] = true,
+											["y"] = -73631.4921875,
+											["x"] = -93054.171875,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+											["airdromeId"] = 14,
+										}, -- end of [1]
+										[2] = 
+										{
+											["alt"] = 2000,
+											["action"] = "Turning Point",
+											["alt_type"] = "BARO",
+											["speed"] = 220.97222222222,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = {},
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "Turning Point",
+											["ETA"] = 12.375376126137,
+											["ETA_locked"] = false,
+											["y"] = -71810.382128236,
+											["x"] = -91200.818282804,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+										}, -- end of [2]
+									}, -- end of ["points"]
+								}, -- end of ["route"]
+								["groupId"] = 6,
+								["hidden"] = false,
+								["units"] = 
+								{
+									[1] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "24",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 21,
+										["psi"] = -0.77662335748508,
+										["onboard_num"] = "030",
+										["parking_id"] = "26",
+										["x"] = -93054.171875,
+										["name"] = "Aérien_g-6-1",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["ammo_type"] = 1,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73631.4921875,
+										["heading"] = 0.77662335748508,
+										["callsign"] = 111,
+									}, -- end of [1]
+									[2] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "25",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 22,
+										["psi"] = -0.77662335748508,
+										["onboard_num"] = "031",
+										["parking_id"] = "25",
+										["x"] = -93016.234375,
+										["name"] = "Aérien_g-6-2",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73606.9296875,
+										["heading"] = 0.77662335748508,
+										["callsign"] = 111,
+									}, -- end of [2]
+									[3] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "21",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 23,
+										["psi"] = -0.77662335748508,
+										["onboard_num"] = "032",
+										["parking_id"] = "23",
+										["x"] = -92992.53125,
+										["name"] = "Aérien_g-6-3",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73726.1875,
+										["heading"] = 0.77662335748508,
+										["callsign"] = 111,
+									}, -- end of [3]
+									[4] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "20",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 24,
+										["psi"] = -0.77662335748508,
+										["onboard_num"] = "033",
+										["parking_id"] = "24",
+										["x"] = -93030.09375,
+										["name"] = "Aérien_g-6-4",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73750.25,
+										["heading"] = 0.77662335748508,
+										["callsign"] = 111,
+									}, -- end of [4]
+								}, -- end of ["units"]
+								["y"] = -73631.4921875,
+								["x"] = -93054.171875,
+								["name"] = "Aérien_g-6",
+								["communication"] = true,
+								["start_time"] = 0,
+								["frequency"] = 124,
+							}, -- end of [6]
+							[7] = 
+							{
+								["dynSpawnTemplate"] = false,
+								["modulation"] = 0,
+								["tasks"] = {},
+								["radioSet"] = false,
+								["task"] = "CAP",
+								["uncontrolled"] = false,
+								["route"] = 
+								{
+									["points"] = 
+									{
+										[1] = 
+										{
+											["alt"] = 30,
+											["action"] = "From Parking Area",
+											["alt_type"] = "BARO",
+											["speed"] = 138.88888888889,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = 
+													{
+														[1] = 
+														{
+															["enabled"] = true,
+															["key"] = "CAP",
+															["id"] = "EngageTargets",
+															["number"] = 1,
+															["auto"] = true,
+															["params"] = 
+															{
+																["targetTypes"] = 
+																{
+																	[1] = "Air",
+																}, -- end of ["targetTypes"]
+																["priority"] = 0,
+															}, -- end of ["params"]
+														}, -- end of [1]
+														[2] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 2,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 17,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [2]
+														[3] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 3,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = 4,
+																		["name"] = 18,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [3]
+														[4] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 4,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 19,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [4]
+														[5] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 5,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["targetTypes"] = {},
+																		["name"] = 21,
+																		["value"] = "none;",
+																		["noTargetTypes"] = 
+																		{
+																			[1] = "Fighters",
+																			[2] = "Multirole fighters",
+																			[3] = "Bombers",
+																			[4] = "Helicopters",
+																			[5] = "UAVs",
+																			[6] = "Infantry",
+																			[7] = "Fortifications",
+																			[8] = "Tanks",
+																			[9] = "IFV",
+																			[10] = "APC",
+																			[11] = "Artillery",
+																			[12] = "Unarmed vehicles",
+																			[13] = "AAA",
+																			[14] = "SR SAM",
+																			[15] = "MR SAM",
+																			[16] = "LR SAM",
+																			[17] = "Aircraft Carriers",
+																			[18] = "Cruisers",
+																			[19] = "Destroyers",
+																			[20] = "Frigates",
+																			[21] = "Corvettes",
+																			[22] = "Light armed ships",
+																			[23] = "Unarmed ships",
+																			[24] = "Submarines",
+																			[25] = "Cruise missiles",
+																			[26] = "Antiship Missiles",
+																			[27] = "AA Missiles",
+																			[28] = "AG Missiles",
+																			[29] = "SA Missiles",
+																		}, -- end of ["noTargetTypes"]
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [5]
+													}, -- end of ["tasks"]
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "TakeOffParking",
+											["ETA"] = 0,
+											["ETA_locked"] = true,
+											["y"] = -73439.4140625,
+											["x"] = -93125.2890625,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+											["airdromeId"] = 14,
+										}, -- end of [1]
+										[2] = 
+										{
+											["alt"] = 2000,
+											["action"] = "Turning Point",
+											["alt_type"] = "BARO",
+											["speed"] = 220.97222222222,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = {},
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "Turning Point",
+											["ETA"] = 12.375376126137,
+											["ETA_locked"] = false,
+											["y"] = -71618.675457794,
+											["x"] = -91257.520255752,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+										}, -- end of [2]
+									}, -- end of ["points"]
+								}, -- end of ["route"]
+								["groupId"] = 7,
+								["hidden"] = false,
+								["units"] = 
+								{
+									[1] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "26",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 25,
+										["psi"] = -0.77264838458239,
+										["onboard_num"] = "034",
+										["parking_id"] = "31",
+										["x"] = -93125.2890625,
+										["name"] = "Aérien_g-7-1",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["ammo_type"] = 1,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73439.4140625,
+										["heading"] = 0.77264838458239,
+										["callsign"] = 112,
+									}, -- end of [1]
+									[2] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "22",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 26,
+										["psi"] = -0.77264838458239,
+										["onboard_num"] = "035",
+										["parking_id"] = "22",
+										["x"] = -92954.671875,
+										["name"] = "Aérien_g-7-2",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73701.6484375,
+										["heading"] = 0.77264838458239,
+										["callsign"] = 112,
+									}, -- end of [2]
+									[3] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "29",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 27,
+										["psi"] = -0.77264838458239,
+										["onboard_num"] = "036",
+										["parking_id"] = "21",
+										["x"] = -92966.6875,
+										["name"] = "Aérien_g-7-3",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -73998.8671875,
+										["heading"] = 0.77264838458239,
+										["callsign"] = 112,
+									}, -- end of [3]
+									[4] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "30",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 28,
+										["psi"] = -0.77264838458239,
+										["onboard_num"] = "037",
+										["parking_id"] = "20",
+										["x"] = -93066.765625,
+										["name"] = "Aérien_g-7-4",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -74065.2265625,
+										["heading"] = 0.77264838458239,
+										["callsign"] = 112,
+									}, -- end of [4]
+								}, -- end of ["units"]
+								["y"] = -73439.4140625,
+								["x"] = -93125.2890625,
+								["name"] = "Aérien_g-7",
+								["communication"] = true,
+								["start_time"] = 0,
+								["frequency"] = 124,
+							}, -- end of [7]
+							[8] = 
+							{
+								["dynSpawnTemplate"] = false,
+								["modulation"] = 0,
+								["tasks"] = {},
+								["radioSet"] = false,
+								["task"] = "CAP",
+								["uncontrolled"] = false,
+								["route"] = 
+								{
+									["points"] = 
+									{
+										[1] = 
+										{
+											["alt"] = 30,
+											["action"] = "From Parking Area",
+											["alt_type"] = "BARO",
+											["speed"] = 138.88888888889,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = 
+													{
+														[1] = 
+														{
+															["enabled"] = true,
+															["key"] = "CAP",
+															["id"] = "EngageTargets",
+															["number"] = 1,
+															["auto"] = true,
+															["params"] = 
+															{
+																["targetTypes"] = 
+																{
+																	[1] = "Air",
+																}, -- end of ["targetTypes"]
+																["priority"] = 0,
+															}, -- end of ["params"]
+														}, -- end of [1]
+														[2] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 2,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 17,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [2]
+														[3] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 3,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = 4,
+																		["name"] = 18,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [3]
+														[4] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 4,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 19,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [4]
+														[5] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 5,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["targetTypes"] = {},
+																		["name"] = 21,
+																		["value"] = "none;",
+																		["noTargetTypes"] = 
+																		{
+																			[1] = "Fighters",
+																			[2] = "Multirole fighters",
+																			[3] = "Bombers",
+																			[4] = "Helicopters",
+																			[5] = "UAVs",
+																			[6] = "Infantry",
+																			[7] = "Fortifications",
+																			[8] = "Tanks",
+																			[9] = "IFV",
+																			[10] = "APC",
+																			[11] = "Artillery",
+																			[12] = "Unarmed vehicles",
+																			[13] = "AAA",
+																			[14] = "SR SAM",
+																			[15] = "MR SAM",
+																			[16] = "LR SAM",
+																			[17] = "Aircraft Carriers",
+																			[18] = "Cruisers",
+																			[19] = "Destroyers",
+																			[20] = "Frigates",
+																			[21] = "Corvettes",
+																			[22] = "Light armed ships",
+																			[23] = "Unarmed ships",
+																			[24] = "Submarines",
+																			[25] = "Cruise missiles",
+																			[26] = "Antiship Missiles",
+																			[27] = "AA Missiles",
+																			[28] = "AG Missiles",
+																			[29] = "SA Missiles",
+																		}, -- end of ["noTargetTypes"]
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [5]
+													}, -- end of ["tasks"]
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "TakeOffParking",
+											["ETA"] = 0,
+											["ETA_locked"] = true,
+											["y"] = -74131.7734375,
+											["x"] = -93166.5859375,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+											["airdromeId"] = 14,
+										}, -- end of [1]
+										[2] = 
+										{
+											["alt"] = 2000,
+											["action"] = "Turning Point",
+											["alt_type"] = "BARO",
+											["speed"] = 220.97222222222,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = {},
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "Turning Point",
+											["ETA"] = 12.375376126137,
+											["ETA_locked"] = false,
+											["y"] = -72305.849368041,
+											["x"] = -91311.522134749,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+										}, -- end of [2]
+									}, -- end of ["points"]
+								}, -- end of ["route"]
+								["groupId"] = 8,
+								["hidden"] = false,
+								["units"] = 
+								{
+									[1] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "31",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 29,
+										["psi"] = -0.77748204804425,
+										["onboard_num"] = "038",
+										["parking_id"] = "19",
+										["x"] = -93166.5859375,
+										["name"] = "Aérien_g-8-1",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["ammo_type"] = 1,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -74131.7734375,
+										["heading"] = 0.77748204804425,
+										["callsign"] = 113,
+									}, -- end of [1]
+									[2] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "32",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 30,
+										["psi"] = -0.77748204804425,
+										["onboard_num"] = "039",
+										["parking_id"] = "18",
+										["x"] = -93268.15625,
+										["name"] = "Aérien_g-8-2",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -74195.6484375,
+										["heading"] = 0.77748204804425,
+										["callsign"] = 113,
+									}, -- end of [2]
+									[3] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "34",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 31,
+										["psi"] = -0.77748204804425,
+										["onboard_num"] = "040",
+										["parking_id"] = "16",
+										["x"] = -93066.546875,
+										["name"] = "Aérien_g-8-3",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -74286.0859375,
+										["heading"] = 0.77748204804425,
+										["callsign"] = 113,
+									}, -- end of [3]
+									[4] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "35",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 32,
+										["psi"] = -0.77748204804425,
+										["onboard_num"] = "041",
+										["parking_id"] = "15",
+										["x"] = -92967.390625,
+										["name"] = "Aérien_g-8-4",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -74218.4609375,
+										["heading"] = 0.77748204804425,
+										["callsign"] = 113,
+									}, -- end of [4]
+								}, -- end of ["units"]
+								["y"] = -74131.7734375,
+								["x"] = -93166.5859375,
+								["name"] = "Aérien_g-8",
+								["communication"] = true,
+								["start_time"] = 0,
+								["frequency"] = 124,
+							}, -- end of [8]
+							[9] = 
+							{
+								["dynSpawnTemplate"] = false,
+								["modulation"] = 0,
+								["tasks"] = {},
+								["radioSet"] = false,
+								["task"] = "CAP",
+								["uncontrolled"] = false,
+								["route"] = 
+								{
+									["points"] = 
+									{
+										[1] = 
+										{
+											["alt"] = 30,
+											["action"] = "From Parking Area",
+											["alt_type"] = "BARO",
+											["speed"] = 138.88888888889,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = 
+													{
+														[1] = 
+														{
+															["enabled"] = true,
+															["key"] = "CAP",
+															["id"] = "EngageTargets",
+															["number"] = 1,
+															["auto"] = true,
+															["params"] = 
+															{
+																["targetTypes"] = 
+																{
+																	[1] = "Air",
+																}, -- end of ["targetTypes"]
+																["priority"] = 0,
+															}, -- end of ["params"]
+														}, -- end of [1]
+														[2] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 2,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 17,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [2]
+														[3] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 3,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = 4,
+																		["name"] = 18,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [3]
+														[4] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 4,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 19,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [4]
+														[5] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 5,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["targetTypes"] = {},
+																		["name"] = 21,
+																		["value"] = "none;",
+																		["noTargetTypes"] = 
+																		{
+																			[1] = "Fighters",
+																			[2] = "Multirole fighters",
+																			[3] = "Bombers",
+																			[4] = "Helicopters",
+																			[5] = "UAVs",
+																			[6] = "Infantry",
+																			[7] = "Fortifications",
+																			[8] = "Tanks",
+																			[9] = "IFV",
+																			[10] = "APC",
+																			[11] = "Artillery",
+																			[12] = "Unarmed vehicles",
+																			[13] = "AAA",
+																			[14] = "SR SAM",
+																			[15] = "MR SAM",
+																			[16] = "LR SAM",
+																			[17] = "Aircraft Carriers",
+																			[18] = "Cruisers",
+																			[19] = "Destroyers",
+																			[20] = "Frigates",
+																			[21] = "Corvettes",
+																			[22] = "Light armed ships",
+																			[23] = "Unarmed ships",
+																			[24] = "Submarines",
+																			[25] = "Cruise missiles",
+																			[26] = "Antiship Missiles",
+																			[27] = "AA Missiles",
+																			[28] = "AG Missiles",
+																			[29] = "SA Missiles",
+																		}, -- end of ["noTargetTypes"]
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [5]
+													}, -- end of ["tasks"]
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "TakeOffParking",
+											["ETA"] = 0,
+											["ETA_locked"] = true,
+											["y"] = -74350.6953125,
+											["x"] = -93167.578125,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+											["airdromeId"] = 14,
+										}, -- end of [1]
+										[2] = 
+										{
+											["alt"] = 2000,
+											["action"] = "Turning Point",
+											["alt_type"] = "BARO",
+											["speed"] = 220.97222222222,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = {},
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "Turning Point",
+											["ETA"] = 12.375376126137,
+											["ETA_locked"] = false,
+											["y"] = -72535.357353782,
+											["x"] = -91312.872181724,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+										}, -- end of [2]
+									}, -- end of ["points"]
+								}, -- end of ["route"]
+								["groupId"] = 9,
+								["hidden"] = false,
+								["units"] = 
+								{
+									[1] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "33",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 33,
+										["psi"] = -0.77467173184721,
+										["onboard_num"] = "042",
+										["parking_id"] = "17",
+										["x"] = -93167.578125,
+										["name"] = "Aérien_g-9-1",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["ammo_type"] = 1,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -74350.6953125,
+										["heading"] = 0.77467173184721,
+										["callsign"] = 114,
+									}, -- end of [1]
+									[2] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "36",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 34,
+										["psi"] = -0.77467173184721,
+										["onboard_num"] = "043",
+										["parking_id"] = "14",
+										["x"] = -92869.6796875,
+										["name"] = "Aérien_g-9-2",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -74147.6015625,
+										["heading"] = 0.77467173184721,
+										["callsign"] = 114,
+									}, -- end of [2]
+									[3] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "43",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 35,
+										["psi"] = -0.77467173184721,
+										["onboard_num"] = "044",
+										["parking_id"] = "13",
+										["x"] = -92410.21875,
+										["name"] = "Aérien_g-9-3",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -74892.4765625,
+										["heading"] = 0.77467173184721,
+										["callsign"] = 114,
+									}, -- end of [3]
+									[4] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "42",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 36,
+										["psi"] = -0.77467173184721,
+										["onboard_num"] = "045",
+										["parking_id"] = "12",
+										["x"] = -92393.9765625,
+										["name"] = "Aérien_g-9-4",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -74917.7421875,
+										["heading"] = 0.77467173184721,
+										["callsign"] = 114,
+									}, -- end of [4]
+								}, -- end of ["units"]
+								["y"] = -74350.6953125,
+								["x"] = -93167.578125,
+								["name"] = "Aérien_g-9",
+								["communication"] = true,
+								["start_time"] = 0,
+								["frequency"] = 124,
+							}, -- end of [9]
+							[10] = 
+							{
+								["dynSpawnTemplate"] = false,
+								["modulation"] = 0,
+								["tasks"] = {},
+								["radioSet"] = false,
+								["task"] = "CAP",
+								["uncontrolled"] = false,
+								["route"] = 
+								{
+									["points"] = 
+									{
+										[1] = 
+										{
+											["alt"] = 30,
+											["action"] = "From Parking Area",
+											["alt_type"] = "BARO",
+											["speed"] = 138.88888888889,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = 
+													{
+														[1] = 
+														{
+															["enabled"] = true,
+															["key"] = "CAP",
+															["id"] = "EngageTargets",
+															["number"] = 1,
+															["auto"] = true,
+															["params"] = 
+															{
+																["targetTypes"] = 
+																{
+																	[1] = "Air",
+																}, -- end of ["targetTypes"]
+																["priority"] = 0,
+															}, -- end of ["params"]
+														}, -- end of [1]
+														[2] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 2,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 17,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [2]
+														[3] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 3,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = 4,
+																		["name"] = 18,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [3]
+														[4] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 4,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 19,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [4]
+														[5] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 5,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["targetTypes"] = {},
+																		["name"] = 21,
+																		["value"] = "none;",
+																		["noTargetTypes"] = 
+																		{
+																			[1] = "Fighters",
+																			[2] = "Multirole fighters",
+																			[3] = "Bombers",
+																			[4] = "Helicopters",
+																			[5] = "UAVs",
+																			[6] = "Infantry",
+																			[7] = "Fortifications",
+																			[8] = "Tanks",
+																			[9] = "IFV",
+																			[10] = "APC",
+																			[11] = "Artillery",
+																			[12] = "Unarmed vehicles",
+																			[13] = "AAA",
+																			[14] = "SR SAM",
+																			[15] = "MR SAM",
+																			[16] = "LR SAM",
+																			[17] = "Aircraft Carriers",
+																			[18] = "Cruisers",
+																			[19] = "Destroyers",
+																			[20] = "Frigates",
+																			[21] = "Corvettes",
+																			[22] = "Light armed ships",
+																			[23] = "Unarmed ships",
+																			[24] = "Submarines",
+																			[25] = "Cruise missiles",
+																			[26] = "Antiship Missiles",
+																			[27] = "AA Missiles",
+																			[28] = "AG Missiles",
+																			[29] = "SA Missiles",
+																		}, -- end of ["noTargetTypes"]
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [5]
+													}, -- end of ["tasks"]
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "TakeOffParking",
+											["ETA"] = 0,
+											["ETA_locked"] = true,
+											["y"] = -74968.0546875,
+											["x"] = -92361.0703125,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+											["airdromeId"] = 14,
+										}, -- end of [1]
+										[2] = 
+										{
+											["alt"] = 2000,
+											["action"] = "Turning Point",
+											["alt_type"] = "BARO",
+											["speed"] = 220.97222222222,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = {},
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "Turning Point",
+											["ETA"] = 12.375376126137,
+											["ETA_locked"] = false,
+											["y"] = -73155.947471413,
+											["x"] = -90498.797419395,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+										}, -- end of [2]
+									}, -- end of ["points"]
+								}, -- end of ["route"]
+								["groupId"] = 10,
+								["hidden"] = false,
+								["units"] = 
+								{
+									[1] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "40",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 37,
+										["psi"] = -0.77174618430975,
+										["onboard_num"] = "046",
+										["parking_id"] = "10",
+										["x"] = -92361.0703125,
+										["name"] = "Aérien_g-10-1",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["ammo_type"] = 1,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -74968.0546875,
+										["heading"] = 0.77174618430975,
+										["callsign"] = 115,
+									}, -- end of [1]
+									[2] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "41",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 38,
+										["psi"] = -0.77174618430975,
+										["onboard_num"] = "047",
+										["parking_id"] = "11",
+										["x"] = -92377.6484375,
+										["name"] = "Aérien_g-10-2",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -74942.921875,
+										["heading"] = 0.77174618430975,
+										["callsign"] = 115,
+									}, -- end of [2]
+									[3] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "37",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 39,
+										["psi"] = -0.77174618430975,
+										["onboard_num"] = "048",
+										["parking_id"] = "07",
+										["x"] = -92321.4296875,
+										["name"] = "Aérien_g-10-3",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -75170.703125,
+										["heading"] = 0.77174618430975,
+										["callsign"] = 115,
+									}, -- end of [3]
+									[4] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "38",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 40,
+										["psi"] = -0.77174618430975,
+										["onboard_num"] = "049",
+										["parking_id"] = "08",
+										["x"] = -92380.546875,
+										["name"] = "Aérien_g-10-4",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -75232.515625,
+										["heading"] = 0.77174618430975,
+										["callsign"] = 115,
+									}, -- end of [4]
+								}, -- end of ["units"]
+								["y"] = -74968.0546875,
+								["x"] = -92361.0703125,
+								["name"] = "Aérien_g-10",
+								["communication"] = true,
+								["start_time"] = 0,
+								["frequency"] = 124,
+							}, -- end of [10]
+							[11] = 
+							{
+								["dynSpawnTemplate"] = false,
+								["modulation"] = 0,
+								["tasks"] = {},
+								["radioSet"] = false,
+								["task"] = "CAP",
+								["uncontrolled"] = false,
+								["route"] = 
+								{
+									["points"] = 
+									{
+										[1] = 
+										{
+											["alt"] = 30,
+											["action"] = "From Parking Area",
+											["alt_type"] = "BARO",
+											["speed"] = 138.88888888889,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = 
+													{
+														[1] = 
+														{
+															["enabled"] = true,
+															["key"] = "CAP",
+															["id"] = "EngageTargets",
+															["number"] = 1,
+															["auto"] = true,
+															["params"] = 
+															{
+																["targetTypes"] = 
+																{
+																	[1] = "Air",
+																}, -- end of ["targetTypes"]
+																["priority"] = 0,
+															}, -- end of ["params"]
+														}, -- end of [1]
+														[2] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 2,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 17,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [2]
+														[3] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 3,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = 4,
+																		["name"] = 18,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [3]
+														[4] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 4,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 19,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [4]
+														[5] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 5,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["targetTypes"] = {},
+																		["name"] = 21,
+																		["value"] = "none;",
+																		["noTargetTypes"] = 
+																		{
+																			[1] = "Fighters",
+																			[2] = "Multirole fighters",
+																			[3] = "Bombers",
+																			[4] = "Helicopters",
+																			[5] = "UAVs",
+																			[6] = "Infantry",
+																			[7] = "Fortifications",
+																			[8] = "Tanks",
+																			[9] = "IFV",
+																			[10] = "APC",
+																			[11] = "Artillery",
+																			[12] = "Unarmed vehicles",
+																			[13] = "AAA",
+																			[14] = "SR SAM",
+																			[15] = "MR SAM",
+																			[16] = "LR SAM",
+																			[17] = "Aircraft Carriers",
+																			[18] = "Cruisers",
+																			[19] = "Destroyers",
+																			[20] = "Frigates",
+																			[21] = "Corvettes",
+																			[22] = "Light armed ships",
+																			[23] = "Unarmed ships",
+																			[24] = "Submarines",
+																			[25] = "Cruise missiles",
+																			[26] = "Antiship Missiles",
+																			[27] = "AA Missiles",
+																			[28] = "AG Missiles",
+																			[29] = "SA Missiles",
+																		}, -- end of ["noTargetTypes"]
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [5]
+													}, -- end of ["tasks"]
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "TakeOffParking",
+											["ETA"] = 0,
+											["ETA_locked"] = true,
+											["y"] = -75270.234375,
+											["x"] = -92480.5234375,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+											["airdromeId"] = 14,
+										}, -- end of [1]
+										[2] = 
+										{
+											["alt"] = 2000,
+											["action"] = "Turning Point",
+											["alt_type"] = "BARO",
+											["speed"] = 220.97222222222,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = {},
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "Turning Point",
+											["ETA"] = 12.375376126137,
+											["ETA_locked"] = false,
+											["y"] = -73460.768332579,
+											["x"] = -90617.711052048,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+										}, -- end of [2]
+									}, -- end of ["points"]
+								}, -- end of ["route"]
+								["groupId"] = 11,
+								["hidden"] = false,
+								["units"] = 
+								{
+									[1] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "39",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 41,
+										["psi"] = -0.77087241540562,
+										["onboard_num"] = "050",
+										["parking_id"] = "09",
+										["x"] = -92480.5234375,
+										["name"] = "Aérien_g-11-1",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["ammo_type"] = 1,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -75270.234375,
+										["heading"] = 0.77087241540562,
+										["callsign"] = 116,
+									}, -- end of [1]
+									[2] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "44",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 42,
+										["psi"] = -0.77087241540562,
+										["onboard_num"] = "051",
+										["parking_id"] = "06",
+										["x"] = -92184.296875,
+										["name"] = "Aérien_g-11-2",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -75476.1328125,
+										["heading"] = 0.77087241540562,
+										["callsign"] = 116,
+									}, -- end of [2]
+									[3] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "45",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 43,
+										["psi"] = -0.77087241540562,
+										["onboard_num"] = "052",
+										["parking_id"] = "05",
+										["x"] = -91881.9140625,
+										["name"] = "Aérien_g-11-3",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["ammo_type"] = 1,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -75455.484375,
+										["heading"] = 0.77087241540562,
+										["callsign"] = 116,
+									}, -- end of [3]
+								}, -- end of ["units"]
+								["y"] = -75270.234375,
+								["x"] = -92480.5234375,
+								["name"] = "Aérien_g-11",
+								["communication"] = true,
+								["start_time"] = 0,
+								["frequency"] = 124,
+							}, -- end of [11]
+							[12] = 
+							{
+								["dynSpawnTemplate"] = false,
+								["modulation"] = 0,
+								["tasks"] = {},
+								["radioSet"] = false,
+								["task"] = "CAP",
+								["uncontrolled"] = false,
+								["route"] = 
+								{
+									["points"] = 
+									{
+										[1] = 
+										{
+											["alt"] = 30,
+											["action"] = "From Parking Area",
+											["alt_type"] = "BARO",
+											["speed"] = 138.88888888889,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = 
+													{
+														[1] = 
+														{
+															["enabled"] = true,
+															["key"] = "CAP",
+															["id"] = "EngageTargets",
+															["number"] = 1,
+															["auto"] = true,
+															["params"] = 
+															{
+																["targetTypes"] = 
+																{
+																	[1] = "Air",
+																}, -- end of ["targetTypes"]
+																["priority"] = 0,
+															}, -- end of ["params"]
+														}, -- end of [1]
+														[2] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 2,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 17,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [2]
+														[3] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 3,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = 4,
+																		["name"] = 18,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [3]
+														[4] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 4,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["value"] = true,
+																		["name"] = 19,
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [4]
+														[5] = 
+														{
+															["enabled"] = true,
+															["auto"] = true,
+															["id"] = "WrappedAction",
+															["number"] = 5,
+															["params"] = 
+															{
+																["action"] = 
+																{
+																	["id"] = "Option",
+																	["params"] = 
+																	{
+																		["targetTypes"] = {},
+																		["name"] = 21,
+																		["value"] = "none;",
+																		["noTargetTypes"] = 
+																		{
+																			[1] = "Fighters",
+																			[2] = "Multirole fighters",
+																			[3] = "Bombers",
+																			[4] = "Helicopters",
+																			[5] = "UAVs",
+																			[6] = "Infantry",
+																			[7] = "Fortifications",
+																			[8] = "Tanks",
+																			[9] = "IFV",
+																			[10] = "APC",
+																			[11] = "Artillery",
+																			[12] = "Unarmed vehicles",
+																			[13] = "AAA",
+																			[14] = "SR SAM",
+																			[15] = "MR SAM",
+																			[16] = "LR SAM",
+																			[17] = "Aircraft Carriers",
+																			[18] = "Cruisers",
+																			[19] = "Destroyers",
+																			[20] = "Frigates",
+																			[21] = "Corvettes",
+																			[22] = "Light armed ships",
+																			[23] = "Unarmed ships",
+																			[24] = "Submarines",
+																			[25] = "Cruise missiles",
+																			[26] = "Antiship Missiles",
+																			[27] = "AA Missiles",
+																			[28] = "AG Missiles",
+																			[29] = "SA Missiles",
+																		}, -- end of ["noTargetTypes"]
+																	}, -- end of ["params"]
+																}, -- end of ["action"]
+															}, -- end of ["params"]
+														}, -- end of [5]
+													}, -- end of ["tasks"]
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "TakeOffParking",
+											["ETA"] = 0,
+											["ETA_locked"] = true,
+											["y"] = -75618.5,
+											["x"] = -91775.453125,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+											["airdromeId"] = 14,
+										}, -- end of [1]
+										[2] = 
+										{
+											["alt"] = 2000,
+											["action"] = "Turning Point",
+											["alt_type"] = "BARO",
+											["speed"] = 220.97222222222,
+											["task"] = 
+											{
+												["id"] = "ComboTask",
+												["params"] = 
+												{
+													["tasks"] = {},
+												}, -- end of ["params"]
+											}, -- end of ["task"]
+											["type"] = "Turning Point",
+											["ETA"] = 12.375376126137,
+											["ETA_locked"] = false,
+											["y"] = -73841.827091588,
+											["x"] = -89948.607762273,
+											["speed_locked"] = true,
+											["formation_template"] = "",
+										}, -- end of [2]
+									}, -- end of ["points"]
+								}, -- end of ["route"]
+								["groupId"] = 13,
+								["hidden"] = false,
+								["units"] = 
+								{
+									[1] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "48",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 49,
+										["psi"] = -0.77147587721625,
+										["onboard_num"] = "053",
+										["parking_id"] = "02",
+										["x"] = -91775.453125,
+										["name"] = "Aérien_g-12-1",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["ammo_type"] = 1,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -75618.5,
+										["heading"] = 0.77147587721625,
+										["callsign"] = 117,
+									}, -- end of [1]
+									[2] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "47",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 50,
+										["psi"] = -0.77147587721625,
+										["onboard_num"] = "054",
+										["parking_id"] = "03",
+										["x"] = -91805.5078125,
+										["name"] = "Aérien_g-12-2",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -75572.7109375,
+										["heading"] = 0.77147587721625,
+										["callsign"] = 117,
+									}, -- end of [2]
+									[3] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "49",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 51,
+										["psi"] = -0.77147587721625,
+										["onboard_num"] = "055",
+										["parking_id"] = "01",
+										["x"] = -91745.53125,
+										["name"] = "Aérien_g-12-3",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -75664.6875,
+										["heading"] = 0.77147587721625,
+										["callsign"] = 117,
+									}, -- end of [3]
+									[4] = 
+									{
+										["alt"] = 30,
+										["alt_type"] = "BARO",
+										["livery_id"] = "afghanistan (1)",
+										["skill"] = "High",
+										["parking"] = "46",
+										["speed"] = 138.88888888889,
+										["type"] = "MiG-21Bis",
+										["unitId"] = 52,
+										["psi"] = -0.77147587721625,
+										["onboard_num"] = "056",
+										["parking_id"] = "04",
+										["x"] = -91838.046875,
+										["name"] = "Aérien_g-12-4",
+										["payload"] = 
+										{
+											["pylons"] = {},
+											["fuel"] = 2280,
+											["flare"] = 40,
+											["chaff"] = 18,
+											["gun"] = 100,
+										}, -- end of ["payload"]
+										["y"] = -75521.953125,
+										["heading"] = 0.77147587721625,
+										["callsign"] = 117,
+									}, -- end of [4]
+								}, -- end of ["units"]
+								["y"] = -75618.5,
+								["x"] = -91775.453125,
+								["name"] = "Aérien_g-12",
+								["communication"] = true,
+								["start_time"] = 0,
+								["frequency"] = 124,
+							}, -- end of [12]
+						}, -- end of ["group"]
+					}, -- end of ["plane"]
+				}, -- end of [1]
+			}, -- end of ["country"]
+		}, -- end of ["red"]
+	}, -- end of ["coalition"]
+	["sortie"] = "DictKey_sortie_5",
+	["version"] = 23,
+	["trigrules"] = {},
+	["currentKey"] = 454,
+	["failures"] = 
+	{
+		["APU_Fire"] = 
+		{
+			["hh"] = 0,
+			["prob"] = 100,
+			["enable"] = false,
+			["mmint"] = 1,
+			["id"] = "APU_Fire",
+			["mm"] = 0,
+		}, -- end of ["APU_Fire"]
+		["LeftEngine_Fire"] = 
+		{
+			["hh"] = 0,
+			["prob"] = 100,
+			["enable"] = false,
+			["mmint"] = 1,
+			["id"] = "LeftEngine_Fire",
+			["mm"] = 0,
+		}, -- end of ["LeftEngine_Fire"]
+		["MainReducer_Fire"] = 
+		{
+			["hh"] = 0,
+			["prob"] = 100,
+			["enable"] = false,
+			["mmint"] = 1,
+			["id"] = "MainReducer_Fire",
+			["mm"] = 0,
+		}, -- end of ["MainReducer_Fire"]
+		["RightEngine_Fire"] = 
+		{
+			["hh"] = 0,
+			["prob"] = 100,
+			["enable"] = false,
+			["mmint"] = 1,
+			["id"] = "RightEngine_Fire",
+			["mm"] = 0,
+		}, -- end of ["RightEngine_Fire"]
+	}, -- end of ["failures"]
+	["forcedOptions"] = {},
+	["start_time"] = 28800,
+} -- end of mission
