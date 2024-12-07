@@ -208,6 +208,8 @@ Data_AddPropAircraft = {
 		["FlareMultiTime"] = 1,
 		["RWR_type"] = "ALR_300",
 		["INSStartMode"] = 1,  -- fast/slow alignment, information will be adapted according to the player's choice in conf_mod (alignment_Mode)
+		["IFFMode4Disabled"] = 1,
+		["MissSimplLock"] = 1,
 	},
 
 	["AH-64D_BLK_II"] = {							--AH-64D Apache
@@ -305,7 +307,8 @@ Data_AddPropAircraft = {
 		["TrackAirTargets"] = true,
 		["NetCrewControlPriority"] = 0,
 		["HideAngleBoxes"] = false,
-		["NS430allow"] = true,					
+		["NS430allow"] = true,
+		["HumanOrchestra"] = false,		
 	},
 	["Mi-8MT"] = {							--Mi-8MT
 		["LeftEngineResource"] = 90,

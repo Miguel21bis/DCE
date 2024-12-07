@@ -1094,7 +1094,7 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 
 				local logStr = "ComboTask = " .. TableSerialization(ComboTask, 0)
 				local FlightNameClean = FlightName:gsub('[%p%c%s]', '_')
-				local logFile = io.open(path.."Debug\\"..FlightNameClean.."_"..w.."_".. "AirGroundAttackTask".."_"..tostring(current_time)..".lua", "w")
+				local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..w.."_".. "AirGroundAttackTask".."_"..tostring(current_time)..".lua", "w")
 				logFile:write(logStr)
 				logFile:close()
 			end
@@ -1232,7 +1232,7 @@ function SetEgressTask(AcName)																		--global because it needs to be 
 
 			local logStr = "EgressTask = " .. TableSerialization(EgressTask, 0)
 			local FlightNameClean = AcName:gsub('[%p%c%s]', '_')
-			local logFile = io.open(path.."Debug\\"..FlightNameClean.."_".. "AirGroundAttackTask_EgressTask".."_"..tostring(current_time)..".lua", "w")
+			local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_".. "AirGroundAttackTask_EgressTask".."_"..tostring(current_time)..".lua", "w")
 			logFile:write(logStr)
 			logFile:close()
 		end

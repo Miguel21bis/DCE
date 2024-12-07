@@ -115,7 +115,7 @@ function Moonphase(day,month,year)
 	
 	local Timestamp = os.time({year= camp.date.year, month= camp.date.month, day= camp.date.day, hour= camp.date.hour, minute= camp.date.minute})
 	
-	local NameTheatre =  string.lower(mission.theatre)
+	-- local NameTheatre =  string.lower(mission.theatre)
 
 	local locationBis = {}
 
