@@ -451,7 +451,7 @@ for side, units in pairs(oob_air) do																								--iterate through al
 						PlayerSquad = unit
 					end
 					-- if overRideReady or unit.roster.ready > 0 then																				--has ready aircraft
-					if unit.roster.ready > 0 then
+					-- if unit.roster.ready > 0 then
 
 						if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "A")
 						and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name  )
@@ -1556,7 +1556,7 @@ for side, units in pairs(oob_air) do																								--iterate through al
 								end
 							end
 						end
-					end
+					-- end
 				end
 			end
 		end
@@ -2119,9 +2119,9 @@ for sideName, draftT in pairs(Draft_sorties) do
 																elseif task == "Strike"  then
 																	escort_num = 4
 																end
+																
 																--ici 4 Mi24 redemandé
 																-- mais c'est 4 de trop, 4 sont déjà pris en main strike
-
 																if escort_num > Aircraft_availability[unit.name].available then					--if more escorts are requested than available
 																	escort_num = Aircraft_availability[unit.name].available						--reduce requested escorts to number of available escorts
 																	escort_num = math.floor(escort_num / 2) * 2										--round down to even number

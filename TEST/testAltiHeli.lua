@@ -1,98 +1,8 @@
 
+local FpsLeak_B
 
-function pairsByKeys (t, f)
-    local a = {}
-	local initType
-	local dontSort = false
-    for n in pairs(t) do initType = type(n) break end
-	for n in pairs(t) do 
-		table.insert(a, n) 
-		if type(n) ~= initType then dontSort = true end
-	end
-	if not dontSort then 
-		table.sort(a, f) 
-	end
-    local i = 0      -- iterator variable
-    local iter = function ()   -- iterator function
-        i = i + 1
-        if a[i] == nil then return nil
-        else return a[i], t[a[i]]
-        end
-    end
-    return iter
-end
+dofile("UTIL_Functions.lua")
 
-
---function to make a deep copy of a table
-    function deepcopy(orig)
-        local orig_type = type(orig)
-        local copy
-        if orig_type == 'table' then
-            copy = {}
-            for orig_key, orig_value in next, orig, nil do
-                copy[deepcopy(orig_key)] = deepcopy(orig_value)
-            end
-            setmetatable(copy, deepcopy(getmetatable(orig)))
-        else -- number, string, boolean, etc
-            copy = orig
-        end
-        return copy
-    end
-
-    function TableSerialization(t, i, params)
-	
-        local crlf = ""
-        local tab1 = ""
-        for n = 1, i do																	--controls the indent for the current text line
-            tab1 = tab1 .. "\t"
-        end
-    
-        local text = "\n"..crlf..tab1.."{\n"..crlf
-    
-        local tab = ""
-        for n = 1, i + 1 do																	--controls the indent for the current text line
-            tab = tab .. "\t"
-        end
-    
-        -- if params then
-        -- 	table.sort(t, function(a,b) return a[params] > b[params]  end)
-        -- end
-    
-        for k,v in pairsByKeys(t) do
-            if type(k) == "string" then
-                text = text .. tab .. '["' .. k .. '"] = '
-            else
-                text = text .. tab .. "[" .. k .. "] = "
-            end
-            if type(v) == "string" then
-                text = text .. '"' .. v .. '",\n'..crlf
-            elseif type(v) == "number" then
-                text = text .. v .. ",\n"..crlf
-            elseif type(v) == "table" then
-                text = text .. TableSerialization(v, i + 1)
-            elseif type(v) == "boolean" then
-                if v == true then
-                    text = text .. "true,\n"..crlf
-                else
-                    text = text .. "false,\n"..crlf
-                end
-            elseif type(v) == "function" then
-                text = text .. v .. ",\n"..crlf
-            elseif v == nil then
-                text = text .. "nil,\n"..crlf
-            end
-        end
-        tab = ""
-        for n = 1, i do																		--indent for closing bracket is one less then previous text line
-            tab = tab .. "\t"
-        end
-        if i == 0 then
-            text = text .. tab .. "}\n"		..crlf												--the last bracket should not be followed by an comma
-        else
-            text = text .. tab .. "},\n"	..crlf												--all brackets with indent higher than 0 are followed by a comma
-        end
-        return text
-    end
 
     LastInjectFlightPlan = {
         [100005] = {
@@ -355,7 +265,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 
     local logStr = "Mission = " .. TableSerialization(copyRoute, 0)
     local grpnameClean = grpname:gsub('[%p%c%s]', '_')
-    local logFile = io.open(path.."TEST\\"..grpnameClean.."_".. "Custom_Altitude_copyRoute_B1.lua", "w")
+    local logFile = io.open(path.."TEST\\"..grpnameClean.."_".. "Custom_Altitude_copyRoute_B1.lua", "w") or error("Failed to open debug file")
     logFile:write(logStr)
     logFile:close()	
 
@@ -376,7 +286,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
     print("F #copyRoute "..tostring(#copyRoute))
     local logStr = "Mission = " .. TableSerialization(copyRoute, 0)
     local grpnameClean = grpname:gsub('[%p%c%s]', '_')
-    local logFile = io.open(path.."TEST\\"..grpnameClean.."_".. "Custom_Altitude_copyRoute_FF.lua", "w")
+    local logFile = io.open(path.."TEST\\"..grpnameClean.."_".. "Custom_Altitude_copyRoute_FF.lua", "w") or error("Failed to open debug file")
     logFile:write(logStr)
     logFile:close()	
 

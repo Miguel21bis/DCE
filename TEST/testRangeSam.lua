@@ -1,7 +1,6 @@
 
-math.pow = function(x, y)
-    return x ^ y
-end
+
+dofile("UTIL_Functions.lua")
 
 print("ACRF10_avoidArea START SCRIPT ")
 
@@ -38,11 +37,7 @@ DCS_ENI_Side = {
 -- 	SHIP          = 3,
 -- 	STRUCTURE     = 4
 --   }
-DCS_CategoryById = {
-	[0] = Airplane,
-	[1] = Helicopters,
 
-}
 
 camp = {
 ["groundthreats"] = 

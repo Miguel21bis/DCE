@@ -121,7 +121,7 @@ end
 -- Exemple d'utilisation
 local function main()
     local file1 = "missionA" -- Chemin vers le premier fichier Lua
-    local file2 = "missionC" -- Chemin vers le deuxième fichier Lua
+    local file2 = "missionB" -- Chemin vers le deuxième fichier Lua
 
     local table1 = loadLuaFile(file1)
     local table2 = loadLuaFile(file2)

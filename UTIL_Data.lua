@@ -37,11 +37,11 @@ versionDCE["UTIL_Data.lua"] = "1.14.83"
 -- 	["F/A-18C"] = true,
 -- 	["A-10C"] = true,
 -- 	["A-10C_2"] = true,
-	
+
 -- 	["MQ-9 Reaper"] = true,	
 
 -- 	["AH-64D_BLK_II"] = true,
-	
+
 -- 	["JF-17"] = true,
 -- }
 
@@ -96,12 +96,12 @@ EctedPilotFrequency = {
 
 Data_divers = {
 
-	["MosquitoFBMkVI"] = 
+	["MosquitoFBMkVI"] =
 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
-	},	
+	},
 	["SpitfireLFMkIX"] = 	{
 		instrumentUnits = "imperial",
 		playable = true,
@@ -109,7 +109,7 @@ Data_divers = {
 	["SpitfireLFMkIXCW"] = 	{
 		instrumentUnits = "imperial",
 	},
-	
+
 	["P-47D-30bl1"] =	{
 		instrumentUnits = "imperial",
 	},
@@ -119,7 +119,7 @@ Data_divers = {
 	},
 	["P-47D-40"] = 	{
 		instrumentUnits = "imperial",
-	},		
+	},
 	["P-51D"] = 	{
 		instrumentUnits = "imperial",
 	},
@@ -130,18 +130,18 @@ Data_divers = {
 	},
 	["TF-51D"] = 	{
 		instrumentUnits = "imperial",
-	},	
+	},
 
 	["A-20G"] = 	{
 		instrumentUnits = "imperial",
 	},
 	["B-17G"] = 	{
 		instrumentUnits = "imperial",
-	},		
+	},
 	["C-47"] = {
 		instrumentUnits = "imperial",
-	},		
-	
+	},
+
 	["Bf-109K-4"] = 	{
 		instrumentUnits = "metric",
 		playable = true,
@@ -155,31 +155,31 @@ Data_divers = {
 	["Ju-88A4"] = 	{
 		instrumentUnits = "metric",
 	},
-			
+
 	["I-16"] = 	{
 		instrumentUnits = "russian",
 	},
 	["Yak-52"] = 	{
 		instrumentUnits = "russian",
 	},
-			
-	
+
+
 	["Tornado GR4"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-	},	
+	},
 	["Tornado IDS"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-	},	
-	
+	},
+
 	["AV8BNA"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
 		vCruise = 230,
 		hCruise = 4500,
-	},	
+	},
 	["A-4E-C"] = 	{--mod
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -194,7 +194,7 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		vCruise = 216,
 		hCruise = 10670,
-	},	
+	},
 	["EA_6B"] = 	{					--Mod
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -202,13 +202,13 @@ Data_divers = {
 		vCruise = 215,
 		hCruise = 9140,
 	},
-	
+
 	["VSN_F100"] = 	{				--Mod
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
 		EPLRS_Capacity = false,
 	},
-	
+
 	["VSN_F105D"] = 	{				--Mod
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
@@ -224,9 +224,9 @@ Data_divers = {
 			CAS = true,
 			RunwayAttack = true,
 			AntishipStrike = true,
-		},	
+		},
 	},
-	
+
 	["VSN_F105G"] = 	{				--Mod
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
@@ -244,7 +244,7 @@ Data_divers = {
 			AntishipStrike = true,
 		},
 	},
-	
+
 	["Bronco-OV-10A"] = 	{				--Mod
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
@@ -252,14 +252,14 @@ Data_divers = {
 		vCruise = 110,
 		hCruise = 4570,
 	},
-	
+
 	["vwv_a1_skyraider"] = 	{				--Mod
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
 		EPLRS_Capacity = false,
 	},
-	
-	
+
+
 	["A-10A"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -267,7 +267,7 @@ Data_divers = {
 		vCruise = 154,
 		hCruise = 7600,
 	},
-	
+
 	["A-10C"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = true,
@@ -278,7 +278,7 @@ Data_divers = {
 		playable = true,
 		vCruise = 154,
 		hCruise = 7600,
-	},	
+	},
 	["A-10C_2"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = true,
@@ -293,13 +293,13 @@ Data_divers = {
 		playable = true,
 		vCruise = 154,
 		hCruise = 7600,
-	},	
-	
+	},
+
 	["F-86F Sabre"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
-	},	
+	},
 	["F-4E"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -334,7 +334,7 @@ Data_divers = {
 		},
 		vCruise = 215,--a peaufiner
 		hCruise = 9000,--a peaufiner
-	},	
+	},
 	["F-5E-3"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -346,11 +346,11 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
 		EPLRS_Capacity = false,
-	},	
+	},
 	["F-14"] = 	{--Common aircraft definitions
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-	},		
+	},
 	["F-14A-135-GR"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -380,10 +380,10 @@ Data_divers = {
 			AFAC = true,
 			SEAD = true,
 		},
-		
+
 		vCruise = 230,
 		hCruise = 9140,
-	},	
+	},
 	["F-14B"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -415,7 +415,7 @@ Data_divers = {
 		},
 		vCruise = 230,
 		hCruise = 9140,
-	},			
+	},
 	["F-15C"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = true,
@@ -425,7 +425,7 @@ Data_divers = {
 		},
 		vCruise = 265,
 		hCruise = 12000,
-	},	
+	},
 	["F-15E"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = true,
@@ -457,7 +457,7 @@ Data_divers = {
 		playable = true,
 		vCruise = 220,
 		hCruise = 9140,
-	},	
+	},
 	["F-16C bl.52d"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = true,
@@ -467,7 +467,7 @@ Data_divers = {
 		},
 		vCruise = 220,
 		hCruise = 9140,
-	},	
+	},
 	["F/A-18C"]  = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = true,
@@ -475,7 +475,7 @@ Data_divers = {
 			type = "Link16",
 			isDonnor = true,
 		},
-	},	
+	},
 	["FA-18C_hornet"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = true,
@@ -488,15 +488,15 @@ Data_divers = {
 		},
 		dataCartridge = true,
 		playable = true,
-	},	
-	
+	},
+
 	["F-117A"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		flyingAlone = true,
 		vCruise = 260,
 		hCruise = 12500,
-	},	
+	},
 	["B-1B"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -507,7 +507,7 @@ Data_divers = {
 		flyingAlone = true,
 		vCruise = 250,
 		hCruise = 9150,
-	},	
+	},
 	["B-52H"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -518,24 +518,24 @@ Data_divers = {
 		flyingAlone = true,
 		vCruise = 250,
 		hCruise = 12000,
-	},	
+	},
 	["H-6J"] = 	{
 		instrumentUnits = "metric",
-		EPLRS_Capacity = false,		
+		EPLRS_Capacity = false,
 	},
-	
+
 	["AJS37"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
 		vCruise = 240,
 		hCruise = 7500,
-	},	
+	},
 	["MB-339A"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
-	},	
+	},
 	["MirageF1"] = {--mod
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -552,13 +552,13 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		-- 		3 types : Mirage-F1CE, Mirage-F1EE, Mirage-F1BE 
 		-- Le futur devrait être le F-1M ... le plus moderne mais pas pour tout de suite je pense ...
-	},	
+	},
 	["Mirage-F1CE"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failues ...
 		playable = true,
-	},	
+	},
 	["Mirage-F1EE"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -572,13 +572,13 @@ Data_divers = {
 			}
 		},
 		playable = true,
-	},	
+	},
 	["Mirage-F1BE"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failues ...
 		playable = true,
-	},	
+	},
 
 	["M-2000C"] = {
 		instrumentUnits = "imperial",
@@ -596,7 +596,7 @@ Data_divers = {
 				["InitHotDrift"] = 0,
 			}
 		}
-	},	
+	},
 
 	["SA342"] = {
 		instrumentUnits = "metric",
@@ -608,35 +608,35 @@ Data_divers = {
 		inheritedFrom = "SA342",	--copy radio frequency, failues ...
 		inherited_APA_From = "SA342",	--copy AddPropAircraft
 		playable = true,
-	},	
+	},
 	["SA342Mistral"] = {
 		instrumentUnits = "metric",
 		EPLRS_Capacity = false,
 		inheritedFrom = "SA342",	--copy radio frequency, failues ...
 		inherited_APA_From = "SA342",	--copy AddPropAircraft
 		playable = true,
-	},	
+	},
 	["SA342L"] = {
 		instrumentUnits = "metric",
 		EPLRS_Capacity = false,
 		inheritedFrom = "SA342",	--copy radio frequency, failues ...
 		inherited_APA_From = "SA342",	--copy AddPropAircraft
 		playable = true,
-	},	
+	},
 	["SA342Minigun"] = {
 		instrumentUnits = "metric",
 		inheritedFrom = "SA342",
 		EPLRS_Capacity = false,
-	},	
+	},
 	["AH-1W"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-	},	
+	},
 	["UH-1H"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
-	},	
+	},
 	["SH-3D"] = {--mod
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -663,7 +663,7 @@ Data_divers = {
 	},
 	["SH-60B"] = {
 		instrumentUnits = "imperial",
-	},	
+	},
 	["UH-60L"] = {
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
@@ -672,7 +672,7 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
-	},	
+	},
 	["OH-6A"] = {
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
@@ -693,12 +693,12 @@ Data_divers = {
 			isReceiver = true,
 		},
 		playable = true,
-	},	
+	},
 	["AH-64A"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-	},	
-	
+	},
+
 
 	["JF-17"] = {
 		instrumentUnits = "imperial",
@@ -708,25 +708,25 @@ Data_divers = {
 	["L-39"] = {--Common aircraft definitions
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-	},	
+	},
 	["L-39C"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		inheritedFrom = "L-39",	--copy radio frequency, failues ...
 		playable = true,
-	},	
+	},
 	["L-39ZA"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		inheritedFrom = "L-39",	--copy radio frequency, failues ...
 		playable = true,
-	},	
-	
+	},
+
 	["MiG-15bis"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
-	},	
+	},
 
 	["vwv_mig17f"] = {   --Mod
 		instrumentUnits = "russian",
@@ -746,16 +746,16 @@ Data_divers = {
 				["NAV_Initial_Hdg"] = 0,
 			}
 		},
-	},	
+	},
 	["MiG-21Bis"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
-	},	
+	},
 	["MiG-23MLD"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-	},	
+	},
 	["MiG-25PD"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
@@ -763,7 +763,7 @@ Data_divers = {
 	["MiG-27K"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-	},	
+	},
 	["MiG-29A"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
@@ -777,69 +777,81 @@ Data_divers = {
 	["MiG-31"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-	},	
+	},
 	["Su-17M4"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-	},	
+		vCruise = 210,
+		hCruise = 7500,
+	},
 	["Su-24M"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-	},	
+		vCruise = 240,
+		hCruise = 8000,
+	},
 	["Su-25"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
-	},	
+		vCruise = 180,
+		hCruise = 5000,
+	},
 
 	["Su-25T"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		inheritedFrom = "Su-25",	--copy radio frequency, failues ...
 		playable = true,
+		vCruise = 185,
+		hCruise = 5000,
 	},
 	["Su-30"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
+		vCruise = 230,
+		hCruise = 10000,
 	},
 	["Su-34"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-	},	
+		vCruise = 250,
+		hCruise = 9500,
+	},
 	["Ka-27"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-	},	
+	},
 	["Mi-8MT"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
-	},	
+	},
 	["Mi-24V"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-	},	
+	},
 	["Mi-24P"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
-	},	
+	},
 	["Mi-28N"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-	},	
+	},
 	["Ka-50"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
-	},	
+	},
 	["Ka-50_3"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
-	},	
-	
-	
+	},
+
+
 	["E-3A"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = true,
@@ -849,7 +861,7 @@ Data_divers = {
 		},
 		vCruise = 230,
 		hCruise = 9150,
-	},	
+	},
 	["E-2C"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = true,
@@ -859,23 +871,23 @@ Data_divers = {
 		},
 		vCruise = 145,
 		hCruise = 7600,
-	},	
+	},
 	["A-50"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		vCruise = 205,
 		hCruise = 9150,
-	},	
+	},
 
 	["S-3B Tanker"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		flyingAlone = true,
-	},	
+	},
 	["KC135MPRS"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-	},	
+	},
 	["KC-135"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -883,31 +895,31 @@ Data_divers = {
 			type = "Link16",
 			isDonnor = true,
 		},
-	},		
+	},
 	["KC130"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-	},	
+	},
 	["IL-78M"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-	},	
-	
+	},
+
 	["MiG-25RBT"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		flyingAlone = true,
-	},	
+	},
 	["Su-24MR"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-	},	
-	
+	},
+
 	["Tu-22M3"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		flyingAlone = true,
-	},	
+	},
 	["Tu-95MS"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
@@ -917,20 +929,20 @@ Data_divers = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		flyingAlone = true,
-	},	
+	},
 	["Tu-160"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		flyingAlone = true,
 	},
-	
+
 
 	["C-130"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		vCruise = 140,
 		hCruise = 7620,
-	},	
+	},
 	["Hercules"] = {			--Mod
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -940,21 +952,21 @@ Data_divers = {
 	["C-17A"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-	},	
+	},
 	["An-30M"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-	},	
+	},
 	["An-26B"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		vCruise = 123,
 		hCruise = 7500,
-	},	
+	},
 	["IL-76MD"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-	},	
+	},
 
 
 }
@@ -964,7 +976,7 @@ PayloadType = {
 	["C-17A"] = 70000,					--max 77000 mais longue piste � pr�voir
 	["C-130"] = 19000,					--Kg
 	["Hercules"] = 19000,
-	
+
 	["CH-47D"] = 10000,
 	["CH-47F"] = 10000,
 	["CH-53E"] = 14000,					--16000 en externe
@@ -979,7 +991,7 @@ PayloadType = {
 	["An-30M"] = 5000,
 	["An-26B"] = 5500,
 	["IL-76MD"] = 40000,
-	["Yak-40"] = 2700,	
+	["Yak-40"] = 2700,
 
 	["Ka-27"] = 4000,
 	["Mi-8MT"] = 4000,
@@ -996,14 +1008,14 @@ IsHelicopter = {
 
 	["UH-1H"] = {},
 	["AH-1W"] = {},
-	
+
 	["vwv_sh2f"] = {},                            --mod
 	["vwv_hh2d"] = {},                            --mod
 
 	["CH-47D"] = {},
 	["CH-47F"] = {},
 	["CH-53E"] = {},
-	["SH-3D"] = 
+	["SH-3D"] =
 	{
 		hHover = 2500,
 	},
@@ -1012,11 +1024,11 @@ IsHelicopter = {
 	["UH-60L"] = {},
 
 	["AH-64A"] = {},
-	["AH-64D"] = 
+	["AH-64D"] =
 	{
 		hHover = 3505,
 	},
-	["AH-64D_BLK_II"] = 
+	["AH-64D_BLK_II"] =
 	{
 		["hHover"] = 2990,
 	},
@@ -1030,20 +1042,20 @@ IsHelicopter = {
 	["Ka-50"] = {},
 	["Ka-50_3"] = {},
 
-	["Mi-8MT"] = 
+	["Mi-8MT"] =
 	{
 		hHover = 3960,
 	},
-	["Mi-24P"] = 
+	["Mi-24P"] =
 	{
 		hHover = 1500,
 	},
 	["Mi-24V"] = {},
-	["Mi-26"] = 
+	["Mi-26"] =
 	{
 		hHover = 1500,
 	},
-	
+
 }
 
 --CustomTasksScript:
@@ -1075,14 +1087,14 @@ GoupTask = {
 	["Ground Attack"] = {
 		["Bombing"] = true,
 		["AttackMapObject"] = true,
-		["CarpetBombing"] = true,	
+		["CarpetBombing"] = true,
 		["AttackGroup"] = true,
-		["AttackUnit"] = true,	
+		["AttackUnit"] = true,
 	},
 	["Runway Attack"] = {
 		["Bombing"] = true,
 		["AttackMapObject"] = true,
-		["BombingRunway"] = true,	
+		["BombingRunway"] = true,
 	},
 	["Intercept"] = {
 		["EngageTargetsInZone"] = true,
@@ -1141,10 +1153,10 @@ StrikeDegradedMode = {
 	["Antiship Strike"] = {
 		["AttackGroup"] = true,
 		["AttackUnit"] = true,
-	},	
+	},
 }
-	
-	
+
+
 GoupTaskByTypeTarget = {
 	["DynamicGroup"] = {
 		["CAS"] = {
@@ -1194,11 +1206,11 @@ GoupTaskByTypeTarget = {
 		},
 	},
 	["Ship"] = {
-		
+
 		["Antiship Strike"] = {
 			["AttackGroup"] = true,
 			["AttackUnit"] = true,
-		},		
+		},
 		-- ["CAS"] = {
 			-- ["AttackGroup"] = true,
 			-- ["AttackUnit"] = true,
@@ -1228,8 +1240,8 @@ GoupTaskByTypeTarget = {
 			-- ["EngageTargetsInZone"] = true,
 		-- },
 	-- },
-	
-	["Fighter Sweep"] = {		
+
+	["Fighter Sweep"] = {
 		["Fighter Sweep"] = {
 			["EngageTargetsInZone"] = true,
 		},
@@ -1250,90 +1262,90 @@ GoupTaskByTypeTarget = {
 			["EngageTargetsInZone"] = true,
 		},
 	},
-	
-	["SEAD"] = {		
+
+	["SEAD"] = {
 		["SEAD"] = {
 			["EngageTargets"] = true,
 		},
 	},
-	["AWACS"] = {		
+	["AWACS"] = {
 		["AWACS"] = {
 			["AWACS"] = true,
 		},
 	},
-	["AFAC"] = {		
+	["AFAC"] = {
 		["AFAC"] = {
 			["AFAC"] = true,
 		},
 	},
-	["Transport"] = {		
+	["Transport"] = {
 		["Transport"] = {
 			["Transport"] = true,
 		},
 	},
-	["Reconnaissance"] = {		
+	["Reconnaissance"] = {
 		["Reconnaissance"] = {
 			["Reconnaissance"] = true,
 		},
 	},
-	["Refueling"] = {		
+	["Refueling"] = {
 		["Refueling"] = {
 			["Tanker"] = true,
 		},
 	},
-	["Laser Illumination"] = {		
+	["Laser Illumination"] = {
 		["AFAC"] = {
 			["EngageTargetsInZone"] = true,
 		},
-	},	
-	["Escort Jammer"] = {		
+	},
+	["Escort Jammer"] = {
 		["Ground Attack"] = {
 			["Bombing"] = true,
 		},
-	},		
-	["SAR"] = {		
+	},
+	["SAR"] = {
 		["Transport"] = {
 			["Transport"] = true,
 		},
-	},	
-	["CSAR"] = {		
+	},
+	["CSAR"] = {
 		["Transport"] = {
 			["Transport"] = true,
 		},
-	},	
+	},
 }
 
-TaskByPlane = {	
+TaskByPlane = {
 	["Nothing"] = {
-		["MosquitoFBMkVI"] = true,	
+		["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
-		
+
 		["P-47D-30bl1"] = true,
 		["P-47D-30"] = true,
-		["P-47D-40"] = true,		
+		["P-47D-40"] = true,
 		["P-51D"] = true,
 		["P-51D-30-NA"] = true,
-		["TF-51D"] = true,	
+		["TF-51D"] = true,
 
 		["A-20G"] = true,
-		["B-17G"] = true,		
+		["B-17G"] = true,
 		["C-47"] = true,
-		
-		
+
+
 		["Bf-109K-4"] = true,
 		["FW-190A8"] = true,
 		["FW-190D9"] = true,
 		["Ju-88A4"] = true,
-				
+
 		["I-16"] = true,
 		["Yak-52"] = true,
-		
+
 		["MQ-9 Reaper"] = true,
-		
+
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
-		
+
 		["AV8BNA"] = true,
 		["A-4E-C"] = true,				--Mod
 		["A-6E"] = true,				--Mod
@@ -1346,27 +1358,27 @@ TaskByPlane = {
 		["VSN_F100"] = true,			--Mod
 		["VSN_F105D"] = true,			--Mod
 		["VSN_F105G"] = true,			--Mod
-				
+
 		["F-86F Sabre"] = true,
 		["F-4E"] = true,
-		["F-4E-45MC"] = true,		
+		["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
 		["F-14A-135-GR"] = true,
-		["F-14B"] = true,		
+		["F-14B"] = true,
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
 		["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
 		["FA-18C_hornet"] = true,
-		
+
 		["F-117A"] = true,
 		["B-1B"] = true,
 		["B-52H"] = true,
-		
+
 		["H-6J"] = true,
-		
+
 		["AJS37"] = true,
 		["MB-339A"] = true,
 		["MirageF1"] = true,			--Mod
@@ -1374,7 +1386,7 @@ TaskByPlane = {
 		["Mirage-F1EE"] = true,
 		["MirageF1CT"] = true,			--Mod
 		["M-2000C"] = true,
-		
+
 		["SA342M"] = true,
 		["SA342Mistral"] = true,
 		["SA342Minigun"] = true,
@@ -1389,12 +1401,12 @@ TaskByPlane = {
 		["AH-64A"] = true,
 		["OH-6A"] = true,				--Mod
 		["OH58D"] = true,
-		
+
 
 		["JF-17"] = true,
 		["L-39C"] = true,
 		["L-39ZA"] = true,
-		
+
 		["MiG-15bis"] = true,
 		["vwv_mig17f"] = true,			--Mod
 		["MiG-19P"] = true,
@@ -1405,12 +1417,12 @@ TaskByPlane = {
 		["MiG-29A"] = true,
 		["MiG-29S"] = true,
 		["MiG-31"] = true,
-		
+
 		["Su-24M"] = true,
 		["Su-27"] = true,
 		["Su-30"] = true,
 		["Su-34"] = true,
-		
+
 		["Ka-27"] = true,
 		["Mi-8MT"] = true,
 		["Mi-24V"] = true,
@@ -1418,22 +1430,22 @@ TaskByPlane = {
 		["Mi-28N"] = true,
 		["Ka-50"] = true,
 		["Ka-50_3"] = true,
-		
-		
+
+
 		["E-3A"] = true,
 		["E-2C"] = true,
 		["A-50"] = true,
 
 		["S-3B Tanker"] = true,
 		["KC135MPRS"] = true,
-		["KC-135"] = true,	
+		["KC-135"] = true,
 		["KC130"] = true,
 		["IL-78M"] = true,
-		
+
 		["MiG-25RBT"] = true,
 		["Su-24MR"] = true,
 		["Tu-142"] = true,
-		
+
 
 		["C-130"] = true,
 		["Hercules"] = true,		--Mod
@@ -1442,90 +1454,90 @@ TaskByPlane = {
 		["An-26B"] = true,
 		["IL-76MD"] = true,
 
-	},	
-	
-	
+	},
+
+
 	["AFAC"] = {
 		["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
-		
+
 		["P-47D-30bl1"] = true,
 		["P-47D-30"] = true,
 		["P-47D-40"] = true,
 		["P-51D"] = true,
-		["P-51D-30-NA"] = true,	
-		
+		["P-51D-30-NA"] = true,
+
 		["Bf-109K-4"] = true,
 		["FW-190A8"] = true,
 		["FW-190D9"] = true,
-		
+
 		["C-47"] = true,
-		
+
 		["MQ-9 Reaper"] = true,
-		
+
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
-		
+
 		["A-4E-C"] = true,				--Mod
 		["A-10C"] = true,
 		["A-10C_2"] = true,
 		["A-10A"] = true,
 		["Bronco-OV-10A"] = true,		--Mod
 		["vwv_a1_skyraider"] = true,	--Mod
-	
+
 		["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		
-		
+
+
 		["Yak-52"] = true,
 		["JF-17"] = true,
 		["L-39ZA"] = true,
 		["MiG-15bis"] = true,
 		["vwv_mig17f"] = true,			--Mod
 		["Su-24M"] = true,
-		
+
 		["Mirage-F1CE"] = true,
 		["Mirage-F1EE"] = true,
-		
+
 		["Mi-8MT"] = true,
 		["Ka-50"] = true,
 		["Ka-50_3"] = true,
 		["Mi-24P"] = true,
 		["Mi-28N"] = true,
-		
+
 		["AH-64A"] = true,
-		
+
 		["SA342M"] = true,
 		["SA342Mistral"] = true,
 		["SA342Minigun"] = true,
 		["SA342L"] = true,
-		
+
 		["OH58D"] = true,
 		["OH-6A"] = true,			--Mod
-		
+
 
 	},
 	["CAS"] = {
 		["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
-		
+
 		["A-20G"] = true,
-		
+
 		["P-47D-30bl1"] = true,
 		["P-47D-30"] = true,
 		["P-47D-40"] = true,
 		["P-51D"] = true,
-		["P-51D-30-NA"] = true,	
-		
+		["P-51D-30-NA"] = true,
+
 		["Bf-109K-4"] = true,
 		["FW-190A8"] = true,
 		["FW-190D9"] = true,
 		["Ju-88A4"] = true,
-		
+
 		["I-16"] = true,
-		
+
 		["A-4E-C"] = true,			--Mod
 		["A-6E"] = true,			--Mod
 		["A-10C"] = true,
@@ -1536,7 +1548,7 @@ TaskByPlane = {
 		["VSN_F100"] = true,			--Mod
 		["VSN_F105D"] = true,			--Mod
 		["VSN_F105G"] = true,			--Mod
-		
+
 		["AJS37"] = true,
 		["AV8BNA"] = true,
 		["MB-339A"] = true,
@@ -1544,19 +1556,19 @@ TaskByPlane = {
 		["Mirage-F1CE"] = true,
 		["Mirage-F1EE"] = true,
 		["MirageF1CT"] = true,			--Mod
-		
-		
+
+
 		["B-1B"] = true,
 		["B-52H"] = true,
-		
+
 		["H-6J"] = true,
-		
+
 		["F-86F Sabre"] = true,
-		
+
 		["F-4E"] = true,
 		["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
-		["F-14B"] = true,		
+		["F-14B"] = true,
 		["F-14A-135-GR"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
@@ -1564,7 +1576,7 @@ TaskByPlane = {
 		["F-16C bl.52d"] = true,
 		["FA-18C_hornet"] = true,
 		["M-2000C"] = true,
-		
+
 		["AH-1W"] = true,
 		["UH-1H"] = true,
 		["SA342M"] = true,
@@ -1573,36 +1585,36 @@ TaskByPlane = {
 		["AH-64D_BLK_II"] = true,
 		["OH58D"] = true,
 		["OH-6A"] = true,			--Mod
-		
+
 		["JF-17"] = true,
 		["L-39C"] = true,
 		["L-39ZA"] = true,
 		["MiG-15bis"] = true,
 		["vwv_mig17f"] = true,			--Mod
 		["MiG-19P"] = true,
-		["MiG-21Bis"] = true,	
+		["MiG-21Bis"] = true,
 		["MiG-23MLD"] = true,
 		["MiG-27K"] = true,
 		["MiG-29A"] = true,
-		
-		
+
+
 		["Su-17M4"] = true,
 		["Su-24M"] = true,
-		["Su-25"] = true,		
+		["Su-25"] = true,
 		["Su-25T"] = true,
 		["Su-27"] = true,
 		["Su-30"] = true,
 		["Su-34"] = true,
-		
-		
-		
+
+
+
 		["Mi-8MT"] = true,
 		["Mi-24V"] = true,
 		["Mi-24P"] = true,
 		["Mi-28N"] = true,
 		["Ka-50"] = true,
 		["Ka-50_3"] = true,
-		
+
 
 	},
 
@@ -1610,23 +1622,23 @@ TaskByPlane = {
 		["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
-		
+
 		["A-20G"] = true,
-		
+
 		["P-47D-30bl1"] = true,
 		["P-47D-30"] = true,
 		["P-47D-40"] = true,
 		["P-51D"] = true,
 		["P-51D-30-NA"] = true,
-		
+
 		["Bf-109K-4"] = true,
 		["FW-190A8"] = true,
 		["FW-190D9"] = true,
 		["Ju-88A4"] = true,
-		
+
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
-		
+
 		["A-4E-C"] = true,				--Mod
 		["A-10C"] = true,
 		["A-10C_2"] = true,
@@ -1635,11 +1647,11 @@ TaskByPlane = {
 		["AJS37"] = true,
 		["AV8BNA"] = true,
 		["B-52H"] = true,
-		
+
 		["H-6J"] = true,
-		
+
 		["F-86F Sabre"] = true,
-		
+
 		["F-4E"] = true,
 		["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
@@ -1648,15 +1660,15 @@ TaskByPlane = {
 		["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
 		["FA-18C_hornet"] = true,
-		["MB-339A"] = true,		
+		["MB-339A"] = true,
 		--["Mirage-F1CE"] = true,		--not yet				 
 		["MirageF1CT"] = true,			--Mod
-		
+
 		["AH-1W"] = true,
 		["AH-64D_BLK_II"] = true,
 		["AH-64A"] = true,
 		["SH-3D"] = true,				--Mod
-		
+
 		["JF-17"] = true,
 		["L-39C"] = true,
 		["L-39ZA"] = true,
@@ -1665,19 +1677,19 @@ TaskByPlane = {
 		["MiG-27K"] = true,
 		["MiG-29A"] = true,
 		["Su-17M4"] = true,
-		["Su-24M"] = true,		
+		["Su-24M"] = true,
 		["Su-25"] = true,
 		["Su-25T"] = true,
 		["Su-25TM"] = true,
 		["Su-34"] = true,
-	
+
 		["Su-27"] = true,
 		["Su-30"] = true,
-		
-		["Tu-22M3"] = true,		
+
+		["Tu-22M3"] = true,
 		["Tu-142"] = true,
 
-		
+
 		["Mi-8MT"] = true,
 		["Mi-24V"] = true,
 		["Mi-24P"] = true,
@@ -1692,26 +1704,26 @@ TaskByPlane = {
 		["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
-		
+
 		["P-47D-30bl1"] = true,
 		["P-47D-30"] = true,
 		["P-47D-40"] = true,
 		["P-51D"] = true,
 		["P-51D-30-NA"] = true,
-		
+
 		["A-20G"] = true,
 		["B-17G"] = true,
-		
+
 		["Bf-109K-4"] = true,
 		["FW-190A8"] = true,
 		["FW-190D9"] = true,
 		["Ju-88A4"] = true,
-		
+
 		["I-16"] = true,
-		
+
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
-		
+
 		["A-4E-C"] = true,				--Mod
 		["A-6E"] = true,				--Mod
 		["EA_6B"] = true,				--Mod
@@ -1725,14 +1737,14 @@ TaskByPlane = {
 		["VSN_F100"] = true,			--Mod
 		["VSN_F105D"] = true,			--Mod
 		["VSN_F105G"] = true,			--Mod
-		
+
 		["B-1B"] = true,
 		["B-52H"] = true,
-		
+
 		["H-6J"] = true,
-		
+
 		["F-86F Sabre"] = true,
-		
+
 		["F-4E"] = true,
 		["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
@@ -1749,17 +1761,17 @@ TaskByPlane = {
 		["Mirage-F1EE"] = true,
 		["MirageF1CT"] = true,			--Mod
 		["M-2000C"] = true,
-		
+
 		["AH-1W"] = true,
 		["UH-1H"] = true,
 		["SA342M"] = true,
 		["SA342Minigun"] = true,
-		["SA342L"] = true,		
+		["SA342L"] = true,
 		["AH-64D_BLK_II"] = true,
 		["AH-64A"] = true,
 		["OH58D"] = true,
 		["OH-6A"] = true,			--Mod
-		
+
 		["JF-17"] = true,
 		["L-39C"] = true,
 		["L-39ZA"] = true,
@@ -1771,7 +1783,7 @@ TaskByPlane = {
 		["MiG-25RBT"] = true,
 		["MiG-27K"] = true,
 		["MiG-29A"] = true,
-		
+
 		["Su-17M4"] = true,
 		["Su-24M"] = true,
 		["Su-25"] = true,
@@ -1780,18 +1792,18 @@ TaskByPlane = {
 		["Su-30"] = true,
 		["Su-34"] = true,
 		["Tu-22M3"] = true,
-		
+
 		["Mi-8MT"] = true,
 		["Mi-24V"] = true,
 		["Mi-24P"] = true,
 		["Mi-28N"] = true,
 		["Ka-50"] = true,
 		["Ka-50_3"] = true,
-		
-		
-		
+
+
+
 	},
-	
+
 	["Runway Attack"] = {
 		["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
@@ -1801,19 +1813,19 @@ TaskByPlane = {
 		["P-47D-30"] = true,
 		["P-47D-40"] = true,
 		["P-51D"] = true,
-		["P-51D-30-NA"] = true,				
-		
+		["P-51D-30-NA"] = true,
+
 		["A-20G"] = true,
 		["B-17G"] = true,
-		
+
 		["Bf-109K-4"] = true,
 		["FW-190A8"] = true,
 		["FW-190D9"] = true,
 		["Ju-88A4"] = true,
-		
+
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
-		
+
 		["A-4E-C"] = true,					--Mod
 		["A-6E"] = true,					--Mod
 		["A-10C"] = true,
@@ -1822,12 +1834,12 @@ TaskByPlane = {
 		["vwv_a1_skyraider"] = true,		--Mod
 		["AJS37"] = true,
 		["AV8BNA"] = true,
-		
+
 		["B-1B"] = true,
 		["B-52H"] = true,
-		
+
 		["H-6J"] = true,
-		
+
 		["F-14A-135-GR"] = true,
 		["F-14B"] = true,
 		["F-15E"] = true,
@@ -1835,15 +1847,15 @@ TaskByPlane = {
 		["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
 		["FA-18C_hornet"] = true,
-		
+
 		["MB-339A"] = true,
 		["MirageF1"] = true,			--Mod
 		["Mirage-F1CE"] = true,
 		["Mirage-F1EE"] = true,
 		["MirageF1CT"] = true,			--Mod
 		["M-2000C"] = true,
-		
-		
+
+
 		["JF-17"] = true,
 		["L-39C"] = true,
 		["L-39ZA"] = true,
@@ -1860,7 +1872,7 @@ TaskByPlane = {
 
 
 	},
-	
+
 	["Escort"] = {
 		["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
@@ -1870,39 +1882,39 @@ TaskByPlane = {
 		["P-47D-30"] = true,
 		["P-47D-40"] = true,
 		["P-51D"] = true,
-		["P-51D-30-NA"] = true,				
-		
+		["P-51D-30-NA"] = true,
+
 		-- ["C-47"] = true,				--C47 en escorte? mais ils sont fou chez ED :p
-		
+
 		["Bf-109K-4"] = true,
 		["FW-190A8"] = true,
 		["FW-190D9"] = true,
-		
+
 		["I-16"] = true,
-		
-		
+
+
 		["A-4E-C"] = true,				--Mod
 		["AV8BNA"] = true,
-		
+
 		["F-86F Sabre"] = true,
 		["F-4E"] = true,
 		["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
 		["F-14A-135-GR"] = true,
-		["F-14B"] = true,		
+		["F-14B"] = true,
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
 		["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
 		["FA-18C_hornet"] = true,
-		
+
 		["MirageF1"] = true,			--Mod
 		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,		
+		["Mirage-F1EE"] = true,
 		["M-2000C"] = true,
-		
+
 		["AH-1W"] = true,
 		["SA342M"] = true,
 		["SA342Mistral"] = true,
@@ -1910,7 +1922,7 @@ TaskByPlane = {
 		["SA342L"] = true,
 		["AH-64D_BLK_II"] = true,
 		["OH58D"] = true,
-		
+
 		["Yak-52"] = true,
 		["JF-17"] = true,
 		["MiG-15bis"] = true,
@@ -1922,28 +1934,28 @@ TaskByPlane = {
 		["MiG-29A"] = true,
 		["MiG-29S"] = true,
 		["MiG-31"] = true,
-		
+
 		["Su-27"] = true,
 		["Su-30"] = true,
-		
+
 		["Mi-24P"] = true,
 		["Mi-28N"] = true,
 		["Ka-50"] = true,
 		["Ka-50_3"] = true,
 	},
-	
+
 	["Pinpoint Strike"] = {
 		["AJS37"] = true,
 		["AV8BNA"] = true,
-		
+
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
-		
+
 		["B-1B"] = true,
 		["B-52H"] = true,
-		
+
 		["H-6J"] = true,
-		
+
 		["F-4E"] = true,
 		["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
@@ -1960,7 +1972,7 @@ TaskByPlane = {
 		["Mirage-F1EE"] = true,
 		["MirageF1CT"] = true,			--Mod
 		["M-2000C"] = true,
-		
+
 		["JF-17"] = true,
 		["MiG-27K"] = true,
 		["Su-17M4"] = true,
@@ -1976,29 +1988,29 @@ TaskByPlane = {
 		["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
-		
+
 		["P-47D-30bl1"] = true,
 		["P-47D-30"] = true,
 		["P-47D-40"] = true,
-		
+
 		["Bf-109K-4"] = true,
 		["FW-190A8"] = true,
 		["FW-190D9"] = true,
-		
+
 		["I-16"] = true,
-		
-		
+
+
 		["AJS37"] = true,
-		
+
 		["F-86F Sabre"] = true,
-		
+
 		["AV8BNA"] = true,
 		["F-4E"] = true,
 		["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
-		["F-14A-135-GR"] = true,		
-		["F-14B"] = true,		
+		["F-14A-135-GR"] = true,
+		["F-14B"] = true,
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
@@ -2009,7 +2021,7 @@ TaskByPlane = {
 		["Mirage-F1CE"] = true,
 		["Mirage-F1EE"] = true,
 		["M-2000C"] = true,
-		
+
 		["JF-17"] = true,
 		["MiG-15bis"] = true,
 		["vwv_mig17f"] = true,			--Mod
@@ -2035,28 +2047,28 @@ TaskByPlane = {
 		["P-47D-30"] = true,
 		["P-47D-40"] = true,
 		["P-51D"] = true,
-		["P-51D-30-NA"] = true,	
+		["P-51D-30-NA"] = true,
 
-		
+
 		["Bf-109K-4"] = true,
 		["FW-190A8"] = true,
 		["FW-190D9"] = true,
-		
+
 		["I-16"] = true,
-		
-		
+
+
 		["AJS37"] = true,
 		["A-4E-C"] = true,				--Mod
 		["AV8BNA"] = true,
-		
+
 		["F-86F Sabre"] = true,
-		
+
 		["F-4E"] = true,
 		["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
 		["F-14A-135-GR"] = true,
-		["F-14B"] = true,	
+		["F-14B"] = true,
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
@@ -2068,7 +2080,7 @@ TaskByPlane = {
 		["Mirage-F1CE"] = true,
 		["Mirage-F1EE"] = true,
 		["M-2000C"] = true,
-		
+
 		["Yak-52"] = true,
 		["JF-17"] = true,
 		["L-39C"] = true,
@@ -2092,25 +2104,25 @@ TaskByPlane = {
 		["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
-		
+
 		["P-47D-30bl1"] = true,
 		["P-47D-30"] = true,
 		["P-47D-40"] = true,
 		["P-51D"] = true,
-		["P-51D-30-NA"] = true,	
-		
-		
+		["P-51D-30-NA"] = true,
+
+
 		["Bf-109K-4"] = true,
 		["FW-190A8"] = true,
 		["FW-190D9"] = true,
-		
+
 		["I-16"] = true,
-		
-		
+
+
 		["AJS37"] = true,
-		
+
 		["F-86F Sabre"] = true,
-		
+
 		["AV8BNA"] = true,
 		["F-4E"] = true,
 		["F-4E-45MC"] = true,
@@ -2129,7 +2141,7 @@ TaskByPlane = {
 		["Mirage-F1CE"] = true,
 		["Mirage-F1EE"] = true,
 		["M-2000C"] = true,
-		
+
 		["JF-17"] = true,
 		["MiG-15bis"] = true,
 		["vwv_mig17f"] = true,			--Mod
@@ -2146,15 +2158,15 @@ TaskByPlane = {
 
 	},
 
-	
+
 	["Reconnaissance"] = {
-		["TF-51D"] = true,	
+		["TF-51D"] = true,
 		["FW-190A8"] = true,
 		["I-16"] = true,
-		
+
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
-		
+
 		["A-4E-C"] = true,				--Mod
 		["AJS37"] = true,
 		["F-4E"] = true,
@@ -2171,36 +2183,36 @@ TaskByPlane = {
 		["SA342L"] = true,
 		["OH58D"] = true,
 		["OH-6A"] = true,			--Mod
-		
+
 		["JF-17"] = true,
 		["MiG-21Bis"] = true,
 		["MiG-25RBT"] = true,
 		["Su-24MR"] = true,
 		["Tu-142"] = true,
 	},
-	
-	
+
+
 	["Refueling"] = {
 		["A-4E-C"] = true,				--Mod
 		["S-3B Tanker"] = true,
 		["KC135MPRS"] = true,
-		["KC-135"] = true,	
+		["KC-135"] = true,
 		["KC130"] = true,
 		["IL-78M"] = true,
 	},
-	
-	["AWACS"] = {		
+
+	["AWACS"] = {
 		["E-3A"] = true,
 		["E-2C"] = true,
-		["A-50"] = true,	
+		["A-50"] = true,
 	},
 
 	["SEAD"] = {
 		["AJS37"] = true,
-		
+
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
-		
+
 		["A-4E-C"] = true,				--Mod	
 		--["A-6E"] = true,				--no weapon				 
 		["EA_6B"] = true,				--Mod
@@ -2213,9 +2225,9 @@ TaskByPlane = {
 		["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
 		["FA-18C_hornet"] = true,
-		
+
 		["JF-17"] = true,
-		
+
 		["Su-17M4"] = true,
 		["Su-24M"] = true,
 		["Su-25T"] = true,
@@ -2225,13 +2237,13 @@ TaskByPlane = {
 
 
 	},
-	
+
 	["Transport"] = {
 		["C-47"] = true,
 		["C-130"] = true,
 		["Hercules"] = true,		--Mod
 		["C-17A"] = true,
-		
+
 		["UH-1H"] = true,
 		["vwv_sh2f"] = true,			--Mod
 		["vwv_hh2d"] = true,			--Mod
@@ -2244,12 +2256,12 @@ TaskByPlane = {
 		["SH-60B"] = true,
 		["OH58D"] = true,
 		["OH-6A"] = true,			--Mod
-			
-		
+
+
 		["An-26B"] = true,
 		["An-30M"] = true,
 		["IL-76MD"] = true,
-		
+
 		["Ka-27"] = true,
 		["Mi-8MT"] = true,
 		["Mi-24V"] = true,
@@ -2263,35 +2275,35 @@ TaskByPlane = {
 
 function IsWesternCountry(country)
     return not (
-		 ("Russia" 			== country) or 
-		 ("Ukraine" 		== country) or 
-		 ("Insurgents" 		== country) or 
-		 ("Abkhazia" 		== country) or 
-		 ("South Ossetia" 	== country) or 
-		 ("China" 			== country) or 
+		 ("Russia" 			== country) or
+		 ("Ukraine" 		== country) or
+		 ("Insurgents" 		== country) or
+		 ("Abkhazia" 		== country) or
+		 ("South Ossetia" 	== country) or
+		 ("China" 			== country) or
 		 ("Belarus" 		== country) or
-		 ("USSR" 			== country) or 
-		 ("Yugoslavia"		== country) or 
-		 ("GDR"				== country) 
-		 
+		 ("USSR" 			== country) or
+		 ("Yugoslavia"		== country) or
+		 ("GDR"				== country)
+
 	)
 end
 
 
 -- WestCallsign = {	
-	
+
 	-- ["Argentina"] = "west", 
 	-- ["Bolivia"] = "west", 
 	-- ["Chile"] = "west", 
 	-- ["Cuba"] = "west", 
 	-- ["Honduras"] = "west", 
 	-- ["Mexico"] = "west", 
-	
+
 	-- ["Australia"] = "west", 
 	-- ["Belgium"] = "west",
 	-- ["Canada"] = "west", 
-	
-	
+
+
 	-- ["CJTF Blue"] = "west",	
 	-- ["Croatia"] = "west",
 	-- ["Cyprus"] = "west",
@@ -2300,22 +2312,22 @@ end
 	-- ["France"] = "west", 
 	-- ["Georgia"] = "west",
 	-- ["Greece"] = "west",
-	
+
 	-- ["India"] = "west",
 	-- ["Iran"] = "west",
 	-- ["Israel"] = "west",
 	-- ["Italy"] = "west", 
-	
+
 	-- ["Norway"] = "west", 
 	-- ["Pakistan"] = "west",
 
 	-- ["South Korea"] = "west", 
 	-- ["Spain"] = "west", 
 	-- ["Sweden"] = "west",
-	
+
 	-- ["The Netherlands"] = "west", 
 	-- ["Turkey"] = "west",
-	
+
 	-- ["UK"] = "west",
 	-- ["United Arab Emirates"] = "west",
 	-- ["USA"] = "west", 
@@ -2469,19 +2481,19 @@ TabTask = {
 		["Intercept"] = "i",
 	["l"] = "Laser Illumination",
 		["Laser Illumination"] = "l",
-	["r"] = "Reconnaissance",	
-		["Reconnaissance"] = "r",	
+	["r"] = "Reconnaissance",
+		["Reconnaissance"] = "r",
 	["s"] = "Strike",
 		["Strike"] = "s",
 	["ra"] = "Runway Attack",
 		["Runway Attack"] = "ra",
 	["t"] = "Transport",
 		["Transport"] = "t",
-	["u"] = "Refueling",	
+	["u"] = "Refueling",
 		["Refueling"] = "u",
-	["sa"] = "SAR",	
+	["sa"] = "SAR",
 		["SAR"] = "sa",
-	["cs"] = "CSAR",	
+	["cs"] = "CSAR",
 		["CSAR"] = "cs",
 }
 
@@ -2660,7 +2672,7 @@ Failures = {
 		'DMT_FAILURE_TOTAL',	--('DMT Camera Failure'),			
 		'ARBS_FAILURE_TOTAL',--('ARBS Failure'),					
 		'FLIR_FAILURE_TOTAL',--('NAVFLIR Failure'),				
-		
+
 		-- AFT Avionics Bay
 		'ADC_FAILURE_TOTAL',	--('Air Data Computer Failure'),		
 		'MSC_FAILURE_TOTAL',	--('Mission Systems Computer Failure'),
@@ -2672,7 +2684,7 @@ Failures = {
 		'INS_FAILURE_ATTITUDE',--('INS Attitude Failure'),			
 		'COM2_FAILURE_TOTAL',--('Radio 2 Failure'),				
 		'SMS_FAILURE_TOTAL',	--('Weapons Controller Failure'),	
-		
+
 		-- Weapons Stations
 		'STATION_1_FAILURE',	--('Station 1 Failure'),				
 		'STATION_2_FAILURE',	--('Station 2 Failure'),				
@@ -2684,7 +2696,7 @@ Failures = {
 		'STRAKE_LEFT_FAILURE',--('Gun Pod Left Failure'),			
 		'STRAKE_RIGHT_FAILURE',--('Gun Pod Right Failure'),			
 	},
-	["C-101"] = 
+	["C-101"] =
 	{
 		"generator_fail",--("Generator failure"),	
 		"starter_fail",  --("Starter failure"),		
@@ -2727,7 +2739,7 @@ Failures = {
 		"vor_fail",--("VOR receiver nav signal fail"), 
 		"tacan_fail",--("TACAN receiver nav signal fail"), 
 	},
-	["C-101CC"] = 
+	["C-101CC"] =
 	{
 		"generator_fail",--("Generator failure"),	
 		"starter_fail",  --("Starter failure"),		
@@ -2820,13 +2832,13 @@ Failures = {
 		'OIL_SYSTEM_FAIL_050',
 		'OIL_SYSTEM_FAIL_100',
 		'BATT_FAIL',
-		'TRN_FAIL',	
+		'TRN_FAIL',
 		'TRN_FAIL_AUX',
 		'ENG_ALT_1_FAIL',
 		'ENG_ALT_2_FAIL',
 		'HYD_ALT_1_FAIL',
-		'HYD_ALT_2_FAIL',	
-		'INS_PART_FAIL',	
+		'HYD_ALT_2_FAIL',
+		'INS_PART_FAIL',
 		'INS_GYROS_FAIL',
 		'INS_TOTAL_FAIL',
 		'RWR_FAILURE_SENSOR_TAIL',
@@ -2835,16 +2847,16 @@ Failures = {
 		'RWR_FAILURE_TOTAL',
 		'IFF_FAILURE_MAIN',
 	},
-	["Mirage-F1"] = 
+	["Mirage-F1"] =
 	{
-		"battery_fail", 
+		"battery_fail",
 		"alt1_fail",
 		"alt2_fail",
 		"tr1_fail",
 		"tr2_fail",
 		"triphase_inv_fail",
 		"miss_bus_fail",
-		
+
 		"left_fuel_pump_fail",
 		"right_fuel_pump_fail",
 		"detotalizer_fail",
@@ -2868,7 +2880,7 @@ Failures = {
 		"left_feeder_leaks",
 		"right_feeder_leaks",
 		"fuel_accu_leaks",
-		
+
 		"left_airbrake_fail",
 		"right_airbrake_fail",
 		"gear_lever_fail",
@@ -2894,14 +2906,14 @@ Failures = {
 		"slat_outer_left_stuck",
 		"slat_outer_right_stuck",
 		"slats_stuck",
-		
+
 		"pitot_heat_fail",
 		"altitude_chain_fail",
 		"mach_chain_fail",
 		"incidometer_fail",
 		"incidometer_blockage_fail",
 		"anemo_central_fail",
-		
+
 		"trim_pitch_fail",
 		"trim_roll_fail",
 		"trim_yaw_fail",
@@ -2911,7 +2923,7 @@ Failures = {
 		"pilot_aids_2_fail",
 		"pitch_chain_fail",
 		"ap_global_fail",
-		
+
 		"broken_guards",
 		"oil_fail",
 		"nosecone_stuck",
@@ -2930,7 +2942,7 @@ Failures = {
 		"cabin_temp_fail",
 		"equip_temp_fail",
 		"oxygen_regulator_fail",
-		
+
 		"gyros_general_BSM_fail",
 		"gyros_main_att_fail",
 		"gyros_main_fail",
@@ -2938,7 +2950,7 @@ Failures = {
 		"gyros_att_indicator",
 		"gyros_temp_drift",
 		"BARAX_fail",
-		
+
 	},
 
 	["F-4E-45-MC"] =
@@ -3059,7 +3071,7 @@ Failures = {
 		[114] = "/F-4E-45-MC/EO TGT Designator System/Pave Spike:System Damage",
 	},
 
-	["F-14"] = 
+	["F-14"] =
 	{
         'RADAR_FAILURE_TOTAL', --('Radar: Total') -- 0
         'DDD_FAILURE_TOTAL', --('DDD: Total')
@@ -3165,7 +3177,7 @@ Failures = {
         'VDI_FAILURE_TOTAL', --('VDI: Total')
         -- RIO TID bowl
         'TID_FAILURE_TOTAL', --('TID: Total')
-        
+
         -- Wings
         'W_S_L', --('Wings: Left Sweep Failure')
         'W_S_R', --('Wings: Right Sweep Failure')
@@ -3187,7 +3199,7 @@ Failures = {
 
        -- Emergency Gear Handle
        'EMERGENCY_GEAR_LEVER_PULLED', --('Emergency Gear Handle: Pulled'),    enable = false, hh = 0, mm = 0, mmint = 1, prob = 100},
-       
+
     },
 	["F-15ESE"] = {
 		--'AAQ13_FLIR_SENSOR_FAIL',	--('AN/AAQ13 FLIR sensor fail'),
@@ -3252,7 +3264,7 @@ Failures = {
 		-- sensors
 		'Failure_Sens_LeftPitotHeater', --('Left PITOT Heater FAILURE'),								
 		'Failure_Sens_RightPitotHeater', --('Right PITOT Heater FAILURE'),							
-	},	
+	},
 	["F-86F"] = {
 		-- electric system
 		'es_damage_Generator',	--('Generator FAILURE'), 		
@@ -3266,7 +3278,7 @@ Failures = {
 		-- power plant
 		'pp_damage_BladesBrake',	--('Engine: Blades Brake'),		 
 		'pp_damage_Ignition',	--('Engine: Ignition FAILURE'),	 
-		
+
 		'pp_damage_MainMaxFreq',		--('Main Fuel: Max Freq. Limiter FAILURE'),
 		'pp_damage_MainMaxNormFreq',	--('Main Fuel: Max Normalized Freq. Limiter FAILURE'),
 		'pp_damage_MainMaxTempr',	--('Main Fuel: Max Temperature Limiter FAILURE'),
@@ -3322,7 +3334,7 @@ Failures = {
 		-- Weapon System
 		'GSH23_CHARGED_FAILURE',		--('GSh-23l Charge FAILURE'),	
 	},
-	["MB-339A"] = 
+	["MB-339A"] =
 	{
 		 "1",--("Starter/Generator 1 failure"),		
 		 "2",--("Generator 2 failure"),		
@@ -3387,11 +3399,11 @@ Failures = {
 		'Rectifier Unit',
 		'AC Generator',
 		'DC Generator',
-		'Transmission',		
+		'Transmission',
 		'Hydraulic Reserve',
 		'Tail Rotor',
-		'Engine Oil',	
-	},	
+		'Engine Oil',
+	},
 	["AH-64D_BLK_II"] =
 	{
 		'APU_Fire',--('APU Fire'),
@@ -3413,7 +3425,7 @@ Failures = {
 		'SOPLO_FAILURE_PARTIAL',--('Engine Nozzle'), -- 9
 		'RADAR_FAILURE_TOTAL',--('Radar'), -- 10
 		'KPP_FAILURE_PARTIAL',--('Kpp'), -- 11
-		
+
 		'LANDING_LIGHTS_FAILURE',--('Landing lights failure'), -- 12, 03. Dec 2014
 	},
 
@@ -3746,27 +3758,27 @@ Failures = {
 }
 
 DataCountry = {
-	
+
 	{id = 0, name = "Russia"},
-	{id = 1, name = "Ukraine"}, 
+	{id = 1, name = "Ukraine"},
 	{id = 2, name = "USA"},
 	{id = 3, name = "Turkey"},
-	{id = 4, name = "UK"}, 
-	{id = 5, name = "France"}, 
-	{id = 6, name = "Germany"}, 
-	{id = 7, name = "US Aggressors"}, 
-	{id = 8, name = "Canada"}, 
-	{id = 9, name = "Spain"}, 
-	{id = 10, name = "The Netherlands"}, 
-	{id = 11, name = "Belgium"}, 
-	{id = 12, name = "Norway"}, 
-	{id = 13, name = "Denmark"}, 
-	{id = 14, name = ""}, 
-	{id = 15, name = "Israel"}, 
-	{id = 16, name = "Georgia"}, 
-	{id = 17, name = "Insurgents"}, 
-	{id = 18, name = "Abkhazia"}, 
-	{id = 19, name = "South Ossetia"}, 
+	{id = 4, name = "UK"},
+	{id = 5, name = "France"},
+	{id = 6, name = "Germany"},
+	{id = 7, name = "US Aggressors"},
+	{id = 8, name = "Canada"},
+	{id = 9, name = "Spain"},
+	{id = 10, name = "The Netherlands"},
+	{id = 11, name = "Belgium"},
+	{id = 12, name = "Norway"},
+	{id = 13, name = "Denmark"},
+	{id = 14, name = ""},
+	{id = 15, name = "Israel"},
+	{id = 16, name = "Georgia"},
+	{id = 17, name = "Insurgents"},
+	{id = 18, name = "Abkhazia"},
+	{id = 19, name = "South Ossetia"},
 	{id = 20, name = "Italy"},
 
 	{id = 21, name = "Italy"},

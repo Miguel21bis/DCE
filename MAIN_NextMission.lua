@@ -45,8 +45,7 @@ versionDCE["MAIN_NextMission.lua"] = "1.35.211"
 -- modification M00_b		Integration de conf_mod
 -- -------------------------------------------------------------------------------------------------------	
 
-NameTheatreLower =  string.lower(mission.theatre)
-NameTheatre =  mission.theatre
+
 
 Brief = {
 	red = {},
@@ -150,6 +149,10 @@ if mission.version < 19 then --19ok 18bad
 	os.execute 'pause'
 	os.exit()
 end
+
+
+NameTheatreLower =  string.lower(mission.theatre)
+NameTheatre =  mission.theatre
 
 
 local trig_n = #mission.trigrules + 1
