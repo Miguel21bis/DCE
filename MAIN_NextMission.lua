@@ -45,6 +45,8 @@ versionDCE["MAIN_NextMission.lua"] = "1.35.211"
 -- modification M00_b		Integration de conf_mod
 -- -------------------------------------------------------------------------------------------------------	
 
+NameTheatreLower =  string.lower(mission.theatre)
+NameTheatre =  mission.theatre
 
 Brief = {
 	red = {},
@@ -149,7 +151,7 @@ if mission.version < 19 then --19ok 18bad
 	os.exit()
 end
 
-NameTheatre =  string.lower(mission.theatre)
+
 local trig_n = #mission.trigrules + 1
 
 ---- add trigger to destory scenery objects -----
@@ -447,7 +449,7 @@ camp.SC_CarrierIntoWind = string.lower(mission_ini.SC_CarrierIntoWind)					-- mo
 camp.debug = Debug.debug
 -- camp.makeCampaign = Debug.makeCampaign
 camp.debugInGamePopup = Debug.debugInGamePopup
-camp.theatre = NameTheatre
+camp.theatre = NameTheatreLower
 camp.EctedPilotFrequency = EctedPilotFrequency
 
 camp.spotter = mission_ini.spotter

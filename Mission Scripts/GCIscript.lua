@@ -255,7 +255,7 @@ local function GCI_Cycle()
 					env.info("DCE_Gci Passe B_C2 track_side "..tostring(track_side).." ourSideOfBorder: "..tostring(ourSideOfBorder))
 
 					if ourSideOfBorder  then
-						env.info( "DCE_SAR_AddSoldierAliasManhunt? G ourSideOfBorder  ")
+						env.info( "DCE_Gci Passe B_C2? G ourSideOfBorder  ")
 						ourSideOfBorder = true
 					end
 				else
@@ -406,9 +406,13 @@ local function GCI_Cycle()
 											--export custom mission log
 											local logStr = "descIntercept = " .. TableSerialization(descIntercept, 0)
 											local FlightNameClean = selected_flight:gsub('[%p%c%s]', '_')
-											local logFile = io.open(path.."Debug\\"..FlightNameClean.."_".. "DESCRIPT_INTER".."_"..tostring(current_time)..".lua", "w")
-											logFile:write(logStr)
-											logFile:close()
+											local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_".. "DESCRIPT_INTER".."_"..tostring(current_time)..".lua", "w")
+											if logFile then
+												logFile:write(logStr)
+												logFile:close()
+											else
+												env.info("DCE_DESCRIPT_INTER: Failed to open log file for writing.")
+											end
 										end
 
 										-- env.info( " A intercept target_name : "..tostring(target_name) )
@@ -604,9 +608,13 @@ local function GCI_Cycle()
 											--export custom mission log
 											local logStr = "ComboTask = " .. TableSerialization(Mission, 0)
 											local FlightNameClean = selected_flight:gsub('[%p%c%s]', '_')
-											local logFile = io.open(path.."Debug\\"..FlightNameClean.."_".. "INTERCEPTOR".."_"..tostring(current_time)..".lua", "w")
-											logFile:write(logStr)
-											logFile:close()
+											local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_".. "INTERCEPTOR".."_"..tostring(current_time)..".lua", "w")
+											if logFile then
+												logFile:write(logStr)
+												logFile:close()
+											else
+												env.info("DCE_INTERCEPTOR: Failed to open log file for writing.")
+											end
 										end
 									
 									end
@@ -624,9 +632,13 @@ local function GCI_Cycle()
 									if camp.debug then
 										--export custom mission log
 										local logStr = "GCI = " .. TableSerialization(GCI, 0)
-										local logFile = io.open(path.."Debug\\GCI".."_".. "TABLE".."_"..tostring(current_time)..".lua", "w")
-										logFile:write(logStr)
-										logFile:close()
+										local logFile = io.open(PathDCE.."Debug\\GCI".."_".. "TABLE".."_"..tostring(current_time)..".lua", "w")
+										if logFile then
+											logFile:write(logStr)
+											logFile:close()
+										else
+											env.info("DCE_GCI TABLE: Failed to open log file for writing.")
+										end
 									end
 
 									break

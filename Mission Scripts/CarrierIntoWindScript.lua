@@ -15,10 +15,10 @@ versionDCE["Mission Scripts\CarrierIntoWindScript.lua"] = "1.4.12"
 
 
 
-function rad2Deg(_rad)
-	radToDeg = _rad * (180/math.pi)
-	return radToDeg
-end 
+-- function radToDeg(_rad)
+-- 	radToDeg = _rad * (180/math.pi)
+-- 	return radToDeg
+-- end
 
 Vmax = 10																				--valeur limité pour spawner les F14 sans explosion
 windDeck = 9																			--valeur limité pour spawner les F14 sans explosion
@@ -27,26 +27,26 @@ function ChangeValue()
 	Vmax = camp.CV_Vmax																--standard maxiumum speed value of carrier: 30 kts
 	windDeck = camp.CV_windDeck														--standard desired wind over deck value: 27 kts
 end
-	
+
 
 timer.scheduleFunction(ChangeValue, nil, timer.getTime() + 28)							--pendant les 28 premieres secondes, la vitesse est faible pour éviter les collisions lors du spawn
 
-	
---function to make a deep copy of a table
-local function Deepcopy(orig)
-    local orig_type = type(orig)
-    local copy
-    if orig_type == 'table' then
-        copy = {}
-        for orig_key, orig_value in next, orig, nil do
-            copy[Deepcopy(orig_key)] = Deepcopy(orig_value)
-        end
-        setmetatable(copy, Deepcopy(getmetatable(orig)))
-    else -- number, string, boolean, etc
-        copy = orig
-    end
-    return copy
-end
+
+-- --function to make a deep copy of a table
+-- local function Deepcopy(orig)
+--     local orig_type = type(orig)
+--     local copy
+--     if orig_type == 'table' then
+--         copy = {}
+--         for orig_key, orig_value in next, orig, nil do
+--             copy[Deepcopy(orig_key)] = Deepcopy(orig_value)
+--         end
+--         setmetatable(copy, Deepcopy(getmetatable(orig)))
+--     else -- number, string, boolean, etc
+--         copy = orig
+--     end
+--     return copy
+-- end
 
 --table to store carrier names with flight ops ongoing
 local FlightOpsOngoing = {}
@@ -55,8 +55,8 @@ local FlightOpsOngoing = {}
 function TurnIntoWind(GroupName, pos, heading)
 	-- local Vmax = 10																			--standard maxiumum speed value of carrier: 30 kts		Vmax = 15.4333
 	-- local windDeck = 9																			--standard desired wind over deck value: 27 kts		windDeck = 13.89
-	local duration = 0 
-	
+	local duration = 0
+
 	if type(GroupName) == "table" then
 		-- _affiche(GroupName, "GroupName")
 		duration = GroupName[4]
@@ -65,19 +65,19 @@ function TurnIntoWind(GroupName, pos, heading)
 		local groupCarrier = Group.getByName(GroupName)
 		local carrier = groupCarrier:getUnit(1)
 		pos = carrier:getPoint()
-		
+
 	end
 
 	local groupCarrier = Group.getByName(GroupName)
-	local carrier = groupCarrier:getUnit(1)	
+	local carrier = groupCarrier:getUnit(1)
 	local carrierName = carrier:getName()													--get carrier name
 	local Desc = carrier:getDesc()
 	local txt = ""
-	
+
 	if heading == nil or not heading then
-		heading = rad2Deg(GetHeadingByPos(carrier))
+		heading = radToDeg(GetHeadingByPos(carrier))
 	end
-	
+
 	local typeName = Group.getByName(GroupName):getUnit(1):getTypeName()
 	if typeName == "LHA_Tarawa" then																--here it is possible to define individual values for specific carrier types
 		Vmax = 12.3467																				--Tarawa max speed 24 kts 
@@ -86,12 +86,12 @@ function TurnIntoWind(GroupName, pos, heading)
 		Vmax = 16.3889																				--Kuznetsov max speed 32 kts 
 		windDeck = 99																				--Kuznetsov should get as much wind over deck as possible
 	end
-	
+
 	pos.y = 10																						--set altitute to 10m above sea level to measure wind
 	local wind = atmosphere.getWind(pos)															--measure wind at this position
 	local windV = math.sqrt(math.pow(wind.x, 2) + math.pow(wind.z, 2))								--calculate wind speed in m/s
 	local speed = windDeck - windV																	--movement speed into wind to get the required wind over deck
-	
+
 	local moveVec																					--normalized movement vector to create straight wind over deck
 	if windV < 0.5 then																				--if there is almost no wind, keep moving in current direction
 		txt = "It is not necessary to turn, the wind is less than 0.5 m/s."
@@ -108,21 +108,21 @@ function TurnIntoWind(GroupName, pos, heading)
 			z = wind.z / windV * -1
 		}
 	end
-	
+
 	if speed < 0 then																				--if speed is negative (more wind than required wind over deck)
 		moveVec.x = moveVec.x * -1																	--switch direction and move with wind
 		moveVec.z = moveVec.z * -1																	--switch direction and move with wind
 		speed = speed * -1																			--make speed positive again
 	end
-	
+
 	if speed > Vmax then																			--if required speed is higher than maximum possible speed
 		speed = Vmax																				--set speed to maximum speed
 	elseif speed < 5.14444 then																		--if speed is lower than 10 kts
 		speed = 5.14444																				--set speed to at least 10 knots for good maneuvering
 	end
-	
+
 	-- Miguel21 modification M36.d	(d: add timer) MenuRadio request manual TurnIntoWind
-	if duration then 
+	if duration then
 		timer.scheduleFunction(ResumeRoute, {GroupName, nil, carrierName}, timer.getTime() + (duration*60))	--schedule resume carrier on route
 		-- env.info( "TurnIntoWind ResumeRoute? duration: "..tostring(duration))
 	end
@@ -140,11 +140,11 @@ function TurnIntoWind(GroupName, pos, heading)
 			end
 		end
 	end
-	
+
 	--update first _route point to current position
 	_route[1].x = pos.x
 	_route[1].y = pos.z
-	
+
 	--define new group _route, create a waypoint to turn into wind
 	if _route[2] then																				--if there is a waypoint 2, modify it
 		_route[2].x = pos.x + moveVec.x * 200000														--point 200 km away
@@ -175,7 +175,7 @@ function TurnIntoWind(GroupName, pos, heading)
 			['speed_locked'] = true,
 		}
 	end
-	
+
 	-- CIWS_Debug02	transforms an angle of more than 90° into 2 WPT of less than 90°
 	local h1 = heading																-- cap actuel heading
 	local h2 = GetHeading(_route[1],_route[2] )										-- direction a prendre Heading
@@ -185,13 +185,13 @@ function TurnIntoWind(GroupName, pos, heading)
 	env.info(txt)
 	trigger.action.outText(txt, 15)
 	-- env.info( "TurnIntoWind SECOND h1: "..h1.." |h2: "..h2.." |angle: "..angle.." |bearing: "..bearing )
-	
+
 	if angle > 90 or angle < -90 then
 		if angle > 90 then bearing = h1 + 90
 		elseif angle < -90 then bearing = h1 - 90 end
 		-- intercalWP = GetOffsetPoint(point, bearing, distance)
 		local intercalWP = GetOffsetPoint(_route[1], bearing, 3500)
-		
+
 		local intercalRoute = {
 			['alt'] = 0,
 			['type'] = 'Turning Point',
@@ -212,7 +212,7 @@ function TurnIntoWind(GroupName, pos, heading)
 			},
 			['speed_locked'] = true,
 		}
-		
+
 		-- table.insert(maTable, 5, "très")
 		table.insert(_route, 2, intercalRoute)
 	end
@@ -226,7 +226,7 @@ function TurnIntoWind(GroupName, pos, heading)
 			}
 		}
 	}
-	
+
 	local ctr = Group.getByName(GroupName):getController()
 	Controller.setTask(ctr, Mission)
 end
@@ -242,14 +242,14 @@ function ResumeRoute(arg)
 		local heading = nil
 
 		local groupCarrier = Group.getByName(GroupName)
-		local carrier = groupCarrier:getUnit(1)	
+		local carrier = groupCarrier:getUnit(1)
 		local Desc = carrier:getDesc()
 		local heading = GetHeadingByPos(carrier)
 		local pos = carrier:getPoint()
 
-		heading = rad2Deg(heading)
+		heading = radToDeg(heading)
 		-- env.info( "ResumeRoute radToDegheading : "..tostring(heading) )
-		
+
 		--search original group _route
 		local _route = {}																				--variable to store a copy of the group route
 		for coalition_name,coal in pairs(env.mission.coalition) do
@@ -264,10 +264,10 @@ function ResumeRoute(arg)
 				end
 			end
 		end
-		
+
 		--remove first _route point
-		table.remove(_route, 1)	
-		
+		table.remove(_route, 1)
+
 		--search close waypoint in _route to continue from current position (first waypoint that subsequent waypoint is further away)
 		local dist_to_wp = 10000000
 		for n = 1, #_route do																			--find closest waypoint from current position (stop searching when first distance increase is found, regardless if later waypoints are even closer)
@@ -286,22 +286,22 @@ function ResumeRoute(arg)
 					dist_to_wp = dist
 				end
 			end
-		end	
-		
+		end
+
 		-- CIWS_Debug02	transforms an angle of more than 90° into 2 WPT of less than 90°
 		local h1 = heading																-- cap actuel heading
 		local h2 = GetHeading(_route[1],_route[2] )										-- direction a prendre Heading
 		local angle = GetDeltaHeadingIM(h1, h2)
 		local bearing = 0
-		
+
 		-- env.info( "ResumeRoute SECOND h1: "..h1.." |h2: "..h2.." |angle: "..angle.." |bearing: "..bearing )
-		
+
 		if angle > 90 or angle < -90 then
 			if angle > 90 then bearing = h1 + 90
 			elseif angle < -90 then bearing = h1 - 90 end
 			-- intercalWP = GetOffsetPoint(point, bearing, distance)
 			local intercalWP = GetOffsetPoint(_route[1], bearing, 3500)
-			
+
 			local intercalRoute = {
 				['alt'] = 0,
 				['type'] = 'Turning Point',
@@ -322,11 +322,11 @@ function ResumeRoute(arg)
 				},
 				['speed_locked'] = true,
 			}
-			
+
 			-- table.insert(maTable, 5, "très")
 			table.insert(_route, 2, intercalRoute)
 		end
-		
+
 		local Mission = {
 			id = 'Mission',
 			params = {
@@ -355,15 +355,15 @@ function CollectEngineStatus:onEvent(event)
 			EngineOn[event.initiator:getName()] = nil
 		end
 	end
-end														
+end
 
 --function to enable carriers to turn into wind during flight ops
 function CarrierIntoWind(GroupName)
 	world.addEventHandler(CollectEngineStatus)														--start collection of aircraft startup/shutdown status to detect start/end of flight ops
-	
+
 	--reccuring function to check if there are aircraft to launch or recover
 	local function CheckFlightOps()
-		
+
 		local group = Group.getByName(GroupName)													--get carrier group
 		if group then																				--group exists
 			local carrier = group:getUnit(1)														--get group leader (assumed to be the carrier)
@@ -371,8 +371,8 @@ function CarrierIntoWind(GroupName)
 			local carrierPos = carrier:getPoint()													--get position of carrier
 			local carrierHeading = GetHeadingByPos(carrier)
 			local carrierCoal = carrier:getCoalition()												--get coalition of carrier
-			local FlightOps = false																		
-			
+			local FlightOps = false
+
 			--search for aircraft around carrier
 			local function Found(u)
 				local coal = u:getCoalition()														--get coalition of units
@@ -407,7 +407,7 @@ function CarrierIntoWind(GroupName)
 				}
 			}
 			world.searchObjects(Object.Category.UNIT, SearchArea, Found)
-			
+
 			if FlightOps then																		--there are flight ops
 				if FlightOpsOngoing[carrierName] ~= true then										--carrier is not currently conducting flight ops
 					-- trigger.action.outText("Turn Into Wind", 5)
@@ -429,7 +429,7 @@ function CarrierIntoWind(GroupName)
 					-- env.info("CWS o Flight Ops ")
 				end
 			end
-			
+
 			return timer.getTime() + 2																--repeat function every 30 seconds
 		end
 	end
@@ -438,5 +438,5 @@ function CarrierIntoWind(GroupName)
 		timer.scheduleFunction(CheckFlightOps, nil, timer.getTime() + 30)								--schedule function
 		-- timer.scheduleFunction(CheckFlightOps, nil, timer.getTime() + 2)								--schedule function
 	end
-	
+
 end
