@@ -4510,20 +4510,23 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							local parkParameters = GetParkingId( flight[f].parking_id, flight[f].base)
 
-							_affiche(parkParameters, "parkParameters B")
-
 							if parkParameters and parkParameters["parking_id"] then
-								units[n]["heading"] = parkParameters["heading"]
-								units[n]["parking"] = parkParameters["parking"]
 								units[n]["parking_id"] = parkParameters["parking_id"]
-								units[n]["x"] = parkParameters["x"]
-								units[n]["y"] = parkParameters["y"]
-								if n==1 then
-									waypoints[1].x = parkParameters["x"]
-									waypoints[1].y = parkParameters["y"]
-								end
 							end
 
+							-- local parkParameters = GetParkingId( flight[f].parking_id, flight[f].base)
+
+							-- if parkParameters and parkParameters["parking_id"] then
+							-- 	units[n]["heading"] = parkParameters["heading"]
+							-- 	units[n]["parking"] = parkParameters["parking"]
+							-- 	units[n]["parking_id"] = parkParameters["parking_id"]
+							-- 	units[n]["x"] = parkParameters["x"]
+							-- 	units[n]["y"] = parkParameters["y"]
+							-- 	if n==1 then
+							-- 		waypoints[1].x = parkParameters["x"]
+							-- 		waypoints[1].y = parkParameters["y"]
+							-- 	end
+							-- end
 
 
 						elseif flight[f]["parkAlertSAR"] and flight[f]["parkAlertSAR"][n] then
@@ -5283,7 +5286,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						elseif group.route.points[1].action ~= "Turning Point" then
 
 							group['lateActivation'] = false
-							group['uncontrolled'] = true																							--make group uncontrolled						
+							group['uncontrolled'] = true
+							group['start_time'] = spawn_time - 15		--evite le BUG actuel de la Polka sur parking
 
 							Start_set_ai_task(group, spawn_time, debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
 						end
@@ -6651,7 +6655,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 					if a_activate2 == 0 then
-						info01 = info01.." |+|ATTENTION VOL sans  a_activate_group "
+						info01 = info01.." |+|ATTENTION VOL sans a_activate_group "
 					elseif a_activate2 > 1 then
 						info01 = info01.." |+|ATTENTION VOL (many times) "..a_activate2.." a_activate_group "
 						print("AtoFP "..group.name.." |+|ATTENTION VOL (many times) "..a_activate2.." a_activate_group ")

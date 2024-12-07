@@ -2338,37 +2338,36 @@ function GetParkingId(parkingId, baseName)
 
 	ParkOccupied[baseName][s] = true
 
-	local parkParameters = {}
+	return tostring(s)
 
-	if ParkListPosition and NameTheatre then
+	-- local parkParameters = {}
 
-		local airdromeId = db_airbases[baseName].airdromeId
+	-- if ParkListPosition and NameTheatre then
 
-		if airdromeId and ParkListPosition[NameTheatre] and ParkListPosition[NameTheatre][airdromeId] then
+	-- 	local airdromeId = db_airbases[baseName].airdromeId
 
-			for n, parkList in pairs(ParkListPosition[NameTheatre][airdromeId]) do
-				if s == tostring(parkList["parking_id"]) then
-					parkParameters = {
-						["heading"] = parkList["heading"],
-						["parking"] = parkList["parking"],
-						["parking_id"] = parkList["parking_id"],
-						["x"] = parkList["x"],
-						["y"] = parkList["y"],
-					}
-				end
-			end
-		end
-	end
+	-- 	if airdromeId and ParkListPosition[NameTheatre] and ParkListPosition[NameTheatre][airdromeId] then
+
+	-- 		for n, parkList in pairs(ParkListPosition[NameTheatre][airdromeId]) do
+	-- 			if s == tostring(parkList["parking_id"]) then
+	-- 				parkParameters = {
+	-- 					["heading"] = parkList["heading"],
+	-- 					["parking"] = parkList["parking"],
+	-- 					["parking_id"] = parkList["parking_id"],
+	-- 					["x"] = parkList["x"],
+	-- 					["y"] = parkList["y"],
+	-- 				}
+	-- 			end
+	-- 		end
+	-- 	end
+	-- end
+
+	-- return parkParameters
 
 	-- if not parkParameters.parking_id then
 	-- 	parkParameters["parking_id"] = s
 	-- end
 
-	-- return tostring(parkParameters)
-
-	_affiche(parkParameters, "parkParameters A")
-
-	return parkParameters
 
 end
 

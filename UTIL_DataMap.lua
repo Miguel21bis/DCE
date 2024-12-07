@@ -1951,7 +1951,7 @@ LocationForEphemeris = {
     },
 }
 
-ParkListPosition = 
+ParkListPositionOLD = 
 {
 	["PersianGulf"] = 
 	{
