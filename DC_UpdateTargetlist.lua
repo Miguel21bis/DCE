@@ -311,10 +311,6 @@ local function checkRequiredModules()
 end
 
 
--- print("DcUpdateTargetlist Initialisation AcceptedMission? "..tostring(AcceptedMission))
--- os.execute 'pause'
-
-
 checkRequiredModules()
 
 if Debug.checkTargetName and (Firstmission_flag or Skipmission_flag) then

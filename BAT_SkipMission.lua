@@ -1,13 +1,13 @@
 --To manually re-generate and replace the current campaign mission. For contingency only, not required for normal campaign play.
 --Initiated by RedoMission.bat
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M80_a
+-- last modification: springCleaning
 if not versionDCE then versionDCE = {} end
-versionDCE["BAT_SkipMission.lua"] = "1.14.96"
+versionDCE["BAT_SkipMission.lua"] = "1.14.97"
 -------------------------------------------------------------------------------------------------------
 -- adjustment_n				(n targetList numeric)(m BAT)(l Playable_m from Data_divers)(k BugList)(j PairsByKeys)(i global TabTask)(h Skipmission_flag)(g mise a niveau)(e: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form) 
 -- debug_d					(cd: EndMission)
--- cleancode_c
+-- cleancode_d				(d springCleaning)
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M61_a		SAR
 -- modification M56_a		AssignCallnameSquad
@@ -143,7 +143,7 @@ end
 
 
 if versionPackageICM then
-	print("0A0= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
+	print("0B0= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
 	print("= = = = = = = = = = = = = Script Version : "..tostring(showVersion).." = = Lua Version : "..tostring(_VERSION))
 	print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
 	print()
@@ -432,6 +432,7 @@ if input == "y" or input == "yes" then
 			camp.versionPackageICM = tostring(versionPackageICM)											-- modification M35 version ScriptsMod -- ajoute la version du script dans camp_status pour utilisation en fin de mission																				--set amount of players
 			dofile("../../../ScriptsMod."..versionPackageICM.."/MAIN_NextMission.lua")																--generate mission
 
+
 			if EndCampaign or camp.endCampaign then 																			-- debug01.b EndMission
 				local EndInfo
 				if EndCampaign == nil then
@@ -445,11 +446,15 @@ if input == "y" or input == "yes" then
 				if AcceptMission() then
 					print("\nMultiplayerCampaign Next mission generated.\n")								--confirmation text
 					break
+				else
+					print("\nDebug A: AcceptMission() .\n")	
 				end
 			elseif SinglePlayer and PlayerFlight  then														--mission has a player flight
 				if AcceptMission() then
 					print("\nNext mission generated.\n")													--confirmation text
 					break
+				else
+					print("\nDebug B: AcceptMission() .\n")	
 				end
 			elseif StopBug then																			--mission has a player flight
 				print("\n\n StopBug .\n")																--confirmation text
@@ -480,10 +485,14 @@ if input == "y" or input == "yes" then
 					print("Not enough ready aircraft for all clients.\n\n")
 				elseif Playability_criterium.intercept == nil then
 					print("Ground alert intercept duty without launch.\n\n")
+				else
+					print("\nDebug C: Playability_criterium .\n")
+					_affiche(Playability_criterium, "Playability_criterium")
 				end
 			end
+
 			if showVersion  then
-				print("= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
+				print("0B1= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
 				print("= = = = = = = = = = = = = Script Version : "..tostring(showVersion).." = = Lua Version : "..tostring(_VERSION))
 				print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
 				print()

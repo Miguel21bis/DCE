@@ -223,6 +223,7 @@ function PairsByKeys (t, f)
 end
 
 
+--function to turn a table into a string
 function TableSerialization(t, i, params)
 
 	local crlf = ""
@@ -241,14 +242,20 @@ function TableSerialization(t, i, params)
 	-- if params then
 	-- 	table.sort(t, function(a,b) return a[params] > b[params]  end)
 	-- end
-
+	local stop = false
 	for k,v in PairsByKeys(t) do
 		if type(k) == "string" then
+			k = string.gsub(k, "\n", "\\\n" )
+			k = string.gsub(k, "\"", "\\\"" )
+			k = string.gsub(k, "'", "\\\'" )
 			text = text .. tab .. '["' .. k .. '"] = '
 		else
 			text = text .. tab .. "[" .. k .. "] = "
 		end
 		if type(v) == "string" then
+			v = string.gsub(v, "\n", "\\\n" )
+			v = string.gsub(v, "\"", "\\\"" )
+			v = string.gsub(v, "'", "\\\'" )
 			text = text .. '"' .. v .. '",\n'..crlf
 		elseif type(v) == "number" then
 			text = text .. v .. ",\n"..crlf
@@ -554,7 +561,7 @@ end
 -- _affiche (a b)     typeName MiG-23MLD
 -- _affiche (a b)     category 0
 
-local hotSpotAirDefence = {
+local hotSpotAirDefense = {
     red = {},
     blue = {},
 }
@@ -604,9 +611,9 @@ local function hotSpotSAM()
         end
 
         -- Sauvegarder les clusters comme des hotspots
-        hotSpotAirDefence[side] = {}
+        hotSpotAirDefense[side] = {}
         for _, cluster in ipairs(clusters) do
-            table.insert(hotSpotAirDefence[side], { x = cluster.centerX, y = cluster.centerY })
+            table.insert(hotSpotAirDefense[side], { x = cluster.centerX, y = cluster.centerY })
         end
     end
 end
@@ -616,7 +623,7 @@ local function chooseBestHotspot(actualPos, side)
     local bestHotSpot = nil
     local shortestDistance = math.huge
 
-    for _, hotspot in ipairs(hotSpotAirDefence[side]) do
+    for _, hotspot in ipairs(hotSpotAirDefense[side]) do
         local dist = calculateDistance(actualPos.x, actualPos.y, hotspot.x, hotspot.y)
         if dist < shortestDistance then
             shortestDistance = dist
@@ -1482,102 +1489,88 @@ local function bingo(gpGid, groupMission)
 
 				tabBingoPlane[gpGid][callSign] = true																	-- la callSign � d�ja indiqu� qu'il �tait Bingo
 
-				-- if not humainUnit or humainUnit == nil then
-					local report = " not humainUnit "
-					local cntrl = unit:getController()
 
-					-- cntrl:resetTask()
+				local report = " not humainUnit "
+				local cntrl = unit:getController()
 
-					-- env.info( "DCE_Bingo BB    hasTask? "..tostring(cntrl:hasTask()))
+				report = report.." RTB_ON_BINGO & PROHIBIT_AB "
 
-					-- cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, true)
-					-- cntrl:setOption(AI.Option.Air.id.PROHIBIT_AB, true)
-					-- cntrl:setOption(AI.Option.Air.id.PROHIBIT_JETT, false)
-					-- cntrl:setOption(AI.Option.Air.id.JETT_TANKS_IF_EMPTY, true)
+				local unitName =  unit:getName()
 
+				env.info( "DCE_Bingo CC      report "..tostring(groupMission.id_).." "..tostring(unitName).." "..callSign.." report "..tostring(report) )
 
+				local description = unit:getDesc()
+				_affiche(description, "description function bingo()")
 
-					report = report.." RTB_ON_BINGO & PROHIBIT_AB "
+				local breaktab = false
+				local rtbGroup = {
+					name = "",
+					from = 0,
+					to = 0
+				}
 
-					local unitName =  unit:getName()
+				for _coalition, coalition in pairs(env.mission.coalition) do
 
-					env.info( "DCE_Bingo CC      report "..tostring(groupMission.id_).." "..tostring(unitName).." "..callSign.." report "..tostring(report) )
+					for Ncountry, _country in pairs(coalition.country) do
+						if _country.plane then
+							for Ngroup, _group in pairs(_country.plane.group) do
+								if _group.groupId and _group.groupId == groupMission.id_ then
 
-					local description = unit:getDesc()
-					_affiche(description, "description function bingo()")
+									rtbGroup.name = _group.name
 
-					local breaktab = false
-					local rtbGroup = {
-						name = "",
-						from = 0,
-						to = 0
-					}
-
-					for _coalition, coalition in pairs(env.mission.coalition) do
-						-- if _coalition == camp.player.side then
-							for Ncountry, _country in pairs(coalition.country) do
-								if _country.plane then
-									for Ngroup, _group in pairs(_country.plane.group) do
-										if _group.groupId and _group.groupId == groupMission.id_ then
-
-											rtbGroup.name = _group.name
-
-											--Split
-											for key, value in ipairs(_group.route.points) do
-												if value.name == 'Split' then
-													rtbGroup.to = key
-													rtbGroup.from = key - 1
-												end
-											end
-
-											if rtbGroup.to == 0 then
-												for key, value in ipairs(_group.route.points) do
-													if value.type == 'Land' then
-														rtbGroup.to = key
-														rtbGroup.from = key - 1
-													end
-												end
-											end
-
-											breaktab = true
-											break
+									--Split
+									for key, value in ipairs(_group.route.points) do
+										if value.name == 'Split' then
+											rtbGroup.to = key
+											rtbGroup.from = key - 1
 										end
 									end
+
+									if rtbGroup.to == 0 then
+										for key, value in ipairs(_group.route.points) do
+											if value.type == 'Land' then
+												rtbGroup.to = key
+												rtbGroup.from = key - 1
+											end
+										end
+									end
+
+									breaktab = true
+									break
 								end
-								if breaktab then break end
 							end
-						-- end
+						end
 						if breaktab then break end
 					end
 
-					env.info( "DCE_Bingo DD        rtbGroup from "..tostring( rtbGroup.from).." to "..tostring( rtbGroup.to))
+					if breaktab then break end
+				end
 
-					if rtbGroup.to ~= 0 then
-						local switchtask = {
-								id = "SwitchWaypoint",
-									params = {
-										goToWaypointIndex = rtbGroup.to,
-										fromWaypointIndex = rtbGroup.from
-								}
+				env.info( "DCE_Bingo DD        rtbGroup from "..tostring( rtbGroup.from).." to "..tostring( rtbGroup.to))
+
+				if rtbGroup.to ~= 0 then
+					local switchtask = {
+							id = "SwitchWaypoint",
+								params = {
+									goToWaypointIndex = rtbGroup.to,
+									fromWaypointIndex = rtbGroup.from
 							}
+						}
 
 
-						cntrl:resetTask()
+					cntrl:resetTask()
 
-						cntrl:setCommand(switchtask)
+					cntrl:setCommand(switchtask)
 
-						cntrl:setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2)
-						cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, true) -- Désactiver l'engagement A/A
-						cntrl:setOption(AI.Option.Air.id.PROHIBIT_JETT, false)
-						cntrl:setOption(AI.Option.Air.id.PROHIBIT_AB, true)
-						cntrl:setOption(AI.Option.Air.id.JETT_TANKS_IF_EMPTY, true)
+					cntrl:setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2)
+					cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, true) -- Désactiver l'engagement A/A
+					cntrl:setOption(AI.Option.Air.id.PROHIBIT_JETT, false)
+					cntrl:setOption(AI.Option.Air.id.PROHIBIT_AB, true)
+					cntrl:setOption(AI.Option.Air.id.JETT_TANKS_IF_EMPTY, true)
 
-						env.info( "DCE_Bingo EE        goToWaypointIndex "..tostring(unitName).." "..callSign.." goToWaypointIndex "..tostring(rtbGroup.to) )
-						_affiche(switchtask, "switchtask function bingo()")
-					end
-
-				-- end
-
+					env.info( "DCE_Bingo EE        goToWaypointIndex "..tostring(unitName).." "..callSign.." goToWaypointIndex "..tostring(rtbGroup.to) )
+					_affiche(switchtask, "switchtask function bingo()")
+				end
 			end
 		end
 
@@ -3087,13 +3080,13 @@ end
 hotSpotSAM()
 
 if camp.debug then
-	local logStr = "hotSpotAirDefence = " .. TableSerialization(hotSpotAirDefence, 0)
-	local logFile = io.open(PathDCE.."Debug\\".."hotSpotAirDefence.lua", "w")
+	local logStr = "hotSpotAirDefense = " .. TableSerialization(hotSpotAirDefense, 0)
+	local logFile = io.open(PathDCE.."Debug\\".."hotSpotAirDefense.lua", "w")
 	if logFile then
 		logFile:write(logStr)
 		logFile:close()
 	else
-		env.info("DCE_hotSpotAirDefence: Failed to open log file for writing.")
+		env.info("DCE_hotSpotAirDefense: Failed to open log file for writing.")
 	end
 end
 

@@ -1877,7 +1877,7 @@ local function spawnWreck(element)
 end
 
 function GetOutGDFM(argGid)
-	env.info( "DCE_getOut A scheduleFunction GetOutGDFM ")
+	-- env.info( "DCE_getOut A scheduleFunction GetOutGDFM ")
 
 	-- local eventData = {
 	-- 	initiatorPilotName = initiatorPilotName,

@@ -74,7 +74,7 @@ GCI = {
 -- end
 --function to return heading between two vector2 points
 function GetHeadingIM(p1, p2)
-									
+
 	local deltax = p2.x - p1.x
 	local deltay = p2.y - p1.y
 	if (deltax > 0) and (deltay == 0) then
@@ -109,7 +109,7 @@ local target_tracks = {
 
 local function GCI_Cycle()
 	local current_time = timer.getTime()
-	
+
 	--remove old targets from target_tracks
 	ErrorMsg = "Remove old tracks."																--Error message in case follow on code fails
 	for track_side, side in pairs(target_tracks) do												--iterate through sides in target tracks table
@@ -121,21 +121,21 @@ local function GCI_Cycle()
 			end
 		end
 	end
-	
+
 	--update assigned interceptors table
 	ErrorMsg = "Update interceptor table."														--Error message in case follow on code fails
 	for side_name, side in pairs(GCI.Interceptor) do											--iterate through sides in Interceptor table	
 		for base_name, base in pairs(side.base) do													--iterate through bases in Interceptor table
-			
+
 			--trigger.action.outText(side_name .." / " .. base_name .. ": Ready: " .. #base.ready .. " / Ready15: " .. #base.ready15 .. " / Ready30: " .. #base.ready30, 5)	--FOR DEBGUG
-			
+
 			--move ready 15 flights to ready
 			while #base.ready < base.ready_n and base.ready15[1] and base.ready15[1].time + 1800 < current_time do		--less interceptor flights are ready than planned AND ready15 flights exist AND flight must be in ready15 since 15 minutes to move up (when coming from ready30, otherwise time is -900 for no delay)														
 				base.ready15[1].time = current_time												--reset timer so that flight will not become ready until 15 minutes have passed
 				table.insert(base.ready, base.ready15[1])										--move ready15 flight to ready
 				table.remove(base.ready15, 1)													--move ready15 flight to ready		
 			end
-			
+
 			--move ready 30 flights to ready 15
 			while #base.ready15 < base.ready15_n and base.ready30[1] and base.ready30[1].time + 3600 < current_time do							--less interceptor flights are ready15 than planned AND ready30 flights exist															
 				base.ready30[1].time = current_time												--set timer so that flight will not become ready15 until 15 minutes have passed
@@ -143,7 +143,7 @@ local function GCI_Cycle()
 				table.remove(base.ready30, 1)													--move ready30 flight to ready15	
 			end
 		end
-			
+
 		for flight_name, flight in pairs(side.assigned) do										--iterate through assigned interceptors
 			ErrorMsg = "Update interceptor table: "	.. 	flight_name								--Error message in case follow on code fails
 			local group = Group.getByName(flight_name)											--get group of flight
@@ -161,7 +161,7 @@ local function GCI_Cycle()
 			end
 		end
 	end
-	
+
 	--EWR target detection
 	ErrorMsg = "EWR target detection."																--Error message in case follow on code fails
 	for ewr_side, ewr_table in pairs(GCI.EWR) do													--iterate through sides in EWR table
@@ -194,14 +194,14 @@ local function GCI_Cycle()
 							if unitCat and (unitCat == Unit.Category.AIRPLANE or unitCat == Unit.Category.HELICOPTER) then
 								local target_name = targets[t].object:getGroup():getName()			--get target group name
 								-- env.info("              B_C object:getGroup():getName() |"..tostring(target_name).."| t: "..t)
-								
+
 								if track_update[target_name] == nil then							--the target track for this group has not yet been updated
 									track_update[target_name] = true								--the target track for this group is updated
 									local target_number = targets[t].object:getGroup():getUnits()	--get target group size
 									local target_point = targets[t].object:getPoint()				--get target point
 									local target_typeName = targets[t].object:getGroup():getUnit(1):getTypeName()
 									ErrorMsg = "EWR target detection: " .. ewr_name	.. "; Target: " .. target_name 	--Error message in case follow on code fails
-									
+
 									if target_tracks[ewr_side][target_name] then					--existing track
 										if target_tracks[ewr_side][target_name].time > current_time - 30 then	--last detection was within 30 seconds
 											target_tracks[ewr_side][target_name].history = target_tracks[ewr_side][target_name].history + 1		--increase detection history by one
@@ -232,19 +232,19 @@ local function GCI_Cycle()
 			end
 		end
 	end
-	
+
 	--assign interceptors to targets
 	ErrorMsg = "Assign interceptors."																--Error message in case follow on code fails
 	for track_side, side in pairs(target_tracks) do													--iterate throug sides in target_tracks table
-		env.info("DCE_Gci Passe B_A track_side "..tostring(track_side))
-		
+		-- env.info("DCE_Gci Passe B_A track_side "..tostring(track_side))
+
 		for target_name, target in pairs(side) do													--iterate through targets
-			-- env.info("DCE_Gci  Passe B_B target_name "..tostring(target_name).." target.history "..tostring(target.history))
-			
+			env.info("DCE_Gci  Passe B_B target_name "..tostring(target_name).." target.history "..tostring(target.history))
+
 			ErrorMsg = "Assign interceptors; Target: " .. target_name								--Error message in case follow on code fails
 			if target.history > 0 then																--target was detected at least two times in sequence
-				-- env.info("DCE_Gci   Passe B_C target.assigned "..tostring(target.assigned).." target.number "..tostring(target.number))
-				
+				env.info("DCE_Gci   Passe B_C target.assigned "..tostring(target.assigned).." target.number "..tostring(target.number))
+
 				--ne declenche les intercepteur que si les ENI franchissent la frontiere
 				local ourSideOfBorder = false
 
@@ -252,10 +252,10 @@ local function GCI_Cycle()
 
 					ourSideOfBorder =  CheckPointInPoly2(target.point, camp.boundary[track_side])
 
-					env.info("DCE_Gci Passe B_C2 track_side "..tostring(track_side).." ourSideOfBorder: "..tostring(ourSideOfBorder))
+					-- env.info("DCE_Gci Passe B_C2 track_side "..tostring(track_side).." ourSideOfBorder: "..tostring(ourSideOfBorder))
 
 					if ourSideOfBorder  then
-						env.info( "DCE_Gci Passe B_C2? G ourSideOfBorder  ")
+						-- env.info( "DCE_Gci Passe B_C2? G ourSideOfBorder  ")
 						ourSideOfBorder = true
 					end
 				else
@@ -264,34 +264,34 @@ local function GCI_Cycle()
 
 				if ourSideOfBorder and target.assigned < target.number then												--if target has less interceptors assigned than it has aircraft in group
 					-- env.info("DCE_Gci    Passe B_D target.assigned ")
-					
+
 					--find all flights in range to intercept target
 					local eligible_flights = {}														--table of flights eligible for interception of this target
 					for base_name, base in pairs(GCI.Interceptor[track_side].base) do				--iterate through bases in GCI table
 						-- env.info("DCE_Gci     Passe B_E base_name "..tostring(base_name))
-						
+
 						for flight_n, flight in pairs(base.ready) do								--iterate through ready interceptor flights
 							-- env.info("DCE_Gci      Passe B_E flight.time "..tostring(flight.time).." + 900 <? "..tostring(current_time))
-							
+
 							if flight.time + 900 < current_time then								--interceptor flight has moved to ready status (from ready15) longer than 15 minutes ago and is ready for action (time is -900 for flight starting ready at mission start).
 								-- env.info("DCE_Gci       Passe B_E current_time "..tostring(current_time).." >= tot_from "..tostring(flight.tot_from))
 								-- env.info("DCE_Gci       Passe B_F current_time "..tostring(current_time).." <= tot_to "..tostring(flight.tot_to))
-								
+
 								ErrorMsg = "Assign interceptors; Target: " .. target_name .. "; Interceptor: " .. flight.name						--Error message in case follow on code fails
 								if current_time >= flight.tot_from and current_time <= flight.tot_to then											--flight can operate at current time							
 									local distance = math.sqrt(math.pow(target.point.x - flight.x, 2) + math.pow(target.point.z - flight.y, 2))		--distance between interceptor airbase and target
 									-- env.info("DCE_Gci        Passe B_G distance "..tostring(distance).." flight.range <? "..tostring(flight.range))
-										
+
 									if distance < flight.range then									--target is in interception range
 										env.info("DCE_Gci        ___    Passe B_H ")
-										
+
 										eligible_flights[flight.name] = distance					--store flight name and interception distance in table
 									end
 								end
 							end
 						end
 					end
-					
+
 					--select the flight closest to target for interception
 					local selected_flight															--currently selected flight for interception
 					local selected_distance = 9999999												--interception distance of currently selected flight
@@ -300,59 +300,59 @@ local function GCI_Cycle()
 							selected_flight = flight_name											--select this flight instead
 							selected_distance = distance											--make this the new distance
 						end
-					end				
-					
+					end
+
 					--assign selected flight to target
 					ErrorMsg = "Assign interceptors; Target: " .. target_name .. "; Select Flight."					--Error message in case follow on code fails
 					if selected_flight then
 						-- env.info("DCE_Gci Passe C_A ")
-						
+
 						for base_name, base in pairs(GCI.Interceptor[track_side].base) do				--iterate through bases in GCI table
 							-- env.info("DCE_Gci Passe  C_B ")
-							
+
 							for flight_n, flight in pairs(base.ready) do								--iterate through ready interceptor flights						
 								-- env.info("DCE_Gci Passe   C_C flight.name "..tostring(flight.name).." selected_flight "..tostring(selected_flight))
-								
+
 								if flight.name == selected_flight then									--find selected interceptor flight in ready table
 									-- env.info("DCE_Gci Passe      ___ C_D ")
-									
+
 									trigger.action.setUserFlag(flight.flag, true)						--set flag true to launch interceptor
-									
-									
+
+
 									-- modification M11.j : Multiplayer
-									
+
 									-- trigger.action.outText(selected_flight .. " 01 launched to intercept " .. target_name, 15)	--FOR DEBUG
 									-- env.info(selected_flight .. " 01 launched to intercept " .. target_name)
 									local idInfo = Group.getByName(selected_flight):getID()
 									local _side = Group.getByName(selected_flight):getCoalition()
-									
+
 									-- on replace les vecteurs dans un repere x/y/z/
 									local newTarget = {}
 									newTarget.point = {}
 									newTarget.point.x = target.point.x
 									newTarget.point.y = target.point.z
 									newTarget.point.z = target.point.y
-									
+
 									target.altitude = math.floor(target.point.y / 1000) * 1000
 									target.distance_Km = math.floor(selected_distance / 10000) * 10
 									target.distance = selected_distance
 									local testBearing = math.floor(GetHeadingIM(flight, newTarget.point))
 									target.bearing = math.floor(GetHeading({x=flight.x, y=flight.y}, {x=target.point.x, y=target.point.z} ))
 
-									
+
 
 									env.info(selected_flight .. " launched to intercept: " .. target.number .." | "..target.typeName.." |Bearing: "..target.bearing.. " |testBearing: "..testBearing.." |Angel: "..target.altitude.." |Distance: "..target.distance_Km.." Km")
-									
+
 									trigger.action.outTextForGroup(idInfo, selected_flight .. " launched to intercept: " .. target.number .." "..target.typeName.." Bearing: "..target.bearing.." Angel: "..target.altitude.." Distance: "..target.distance_Km.." Km", 60 , true)
 
 									-- trigger.action.outSoundForCoalition(_side, "l10n/DEFAULT/alarme.wav" )
-									
+
 									trigger.action.outSoundForGroup(idInfo, "l10n/DEFAULT/alarme.wav" )
-									
+
 									--***********************************************************************************
 									--***********************************************************************************
 									-- local heading1 = GetHeading(FlightSAR, {x=pt_dest.x2d, y=pt_dest.y2d})
-									
+
 									-- env.info( "GCI PASSE A distance: "..tostring(target.distance).." altitude: "..target.altitude)
 									local distance2 = target.distance/3
 									local weaponType = 1069547520					--automatique
@@ -371,7 +371,7 @@ local function GCI_Cycle()
 									-- env.info( "GCI PASSE C "..tostring(distance2))
 
 									local point_2 = GetOffsetPoint(flight, target.bearing, distance2)
-									
+
 									-- env.info( "GCI point_2 x "..tostring(point_2.x).." distance2: "..tostring(distance2))
 
 									local distance3 = (target.distance/3)*2
@@ -387,10 +387,10 @@ local function GCI_Cycle()
 									--assign mission task to interceptor flight
 									ErrorMsg = "Assign interceptors; Target: " .. target_name .. "; Selected Flight: " .. selected_flight				--Error message in case follow on code fails
 									local function AssignMission()												--function to set interception mission (to be executed with 2 seconds delay, in order for the group to activate first)
-										
+
 										local ctr = Group.getByName(selected_flight):getController()			--get controller of interceptor group
-										
-										local flightAir = Group.getByName(selected_flight)							
+
+										local flightAir = Group.getByName(selected_flight)
 										local leader = flightAir:getUnit(1)
 										local descIntercept = leader:getDesc()
 										--mig23 speedMax0 388 m.s
@@ -417,20 +417,20 @@ local function GCI_Cycle()
 
 										-- env.info( " A intercept target_name : "..tostring(target_name) )
 										local GrpObjt =  Group.getByName(target_name)
-										
+
 										if not GrpObjt or GrpObjt == nil then
 											return
 										end
-										
+
 										-- env.info( " B intercept GrpObjt : "..tostring(GrpObjt) )
 										local target_id = GrpObjt:getID()
 										-- env.info( " C intercept target_id: "..tostring(target_id) )
-										
+
 										local target_id = Group.getByName(target_name):getID()					--get target group ID --TODO BUG 287: attempt to index a nil value stack traceback:
 										local Mission = {														--define mission for interceptor group
-											id = 'Mission', 
+											id = 'Mission',
 											params = {
-												route = { 
+												route = {
 													["points"] = {
 														[1] = {
 															["alt"] = 2000,
@@ -447,7 +447,7 @@ local function GCI_Cycle()
 																["id"] = "ComboTask",
 																["params"] = {
 																	["tasks"] = {
-																		
+
 																		[1] = {
 																			["enabled"] = true,
 																			["number"] = 1,
@@ -460,7 +460,7 @@ local function GCI_Cycle()
 																				["weaponType"] = weaponType,
 																			},
 																		},
-																		
+
 																	},
 																},
 															},
@@ -481,7 +481,7 @@ local function GCI_Cycle()
 																["id"] = "ComboTask",
 																["params"] = {
 																	["tasks"] = {
-																		
+
 																		[1] = {
 																			["enabled"] = true,
 																			["number"] = 1,
@@ -513,7 +513,7 @@ local function GCI_Cycle()
 																				}
 																			}
 																		},
-																		
+
 																	},
 																},
 															},
@@ -534,16 +534,16 @@ local function GCI_Cycle()
 																["id"] = "ComboTask",
 																["params"] = {
 																	["tasks"] = {
-																		[1] = 
+																		[1] =
 																		{
 																			["enabled"] = true,
 																			["key"] = "CAP",
 																			["id"] = "EngageTargets",
 																			["number"] = 1,
 																			["auto"] = true,
-																			["params"] = 
+																			["params"] =
 																			{
-																				["targetTypes"] = 
+																				["targetTypes"] =
 																				{
 																					[1] = "Air",
 																				}, -- end of ["targetTypes"]
@@ -552,7 +552,7 @@ local function GCI_Cycle()
 																			["maxDistEnabled"] = true,
                                                                				["maxDist"] = 40000,
 																		}, -- end of [1]
-																		
+
 																		[2] = {
 																			["number"] = 2,
 																			["auto"] = false,
@@ -603,7 +603,7 @@ local function GCI_Cycle()
 											}
 										}
 										Controller.setTask(ctr, Mission)																			--activate task with mission for interceptor group
-									
+
 										if camp.debug then
 											--export custom mission log
 											local logStr = "ComboTask = " .. TableSerialization(Mission, 0)
@@ -616,19 +616,19 @@ local function GCI_Cycle()
 												env.info("DCE_INTERCEPTOR: Failed to open log file for writing.")
 											end
 										end
-									
+
 									end
-									
+
 									timer.scheduleFunction(AssignMission, nil, timer.getTime() + 2)													--set intercept mission with 2 seconds delay
-									
+
 									ErrorMsg = "Assign interceptors; Target: " .. target_name .. "; Selected Flight: " .. selected_flight .. "; Update GCI Table."				--Error message in case follow on code fails
-									
+
 
 									GCI.Interceptor[track_side].assigned[selected_flight] = GCI.Interceptor[track_side].base[base_name].ready[flight_n]	--move flight from ready to assigned status
 									table.remove(GCI.Interceptor[track_side].base[base_name].ready, flight_n)											--move flight from ready to assigned status
 									GCI.Interceptor[track_side].assigned[selected_flight].target = target_name										--store target name
 									target.assigned = target.assigned + GCI.Interceptor[track_side].assigned[selected_flight].number				--mark target as assigned for interception
-									
+
 									if camp.debug then
 										--export custom mission log
 										local logStr = "GCI = " .. TableSerialization(GCI, 0)
@@ -650,7 +650,7 @@ local function GCI_Cycle()
 			end
 		end
 	end
-	
+
 	ControlTime = timer.getTime()																--update ControlTime to tell ControlFunction() that cylce is still running
 	return timer.getTime() + 18																	--repeat GCI cycle every 18 seconds (revolution time of 1L13 EWR radar)
 end
@@ -663,7 +663,7 @@ local function ControlFunction()
 		trigger.action.outText("GCI_Cycle() Error: " .. ErrorMsg, 60)							--print error
 		env.info("DCE_GCI_Cycle() Error: " .. ErrorMsg)
 	else
-		return timer.getTime() + 15	
+		return timer.getTime() + 15
 	end
 end
-timer.scheduleFunction(ControlFunction, nil, timer.getTime() + 2)	
+timer.scheduleFunction(ControlFunction, nil, timer.getTime() + 2)

@@ -45,6 +45,30 @@ local resStrFunc = loadstring(resStr)()
 
 zipFile:unzClose()
 
+--save new data (remaining files are updated in MAIN_NextMission.lua)
+local client_str = "clientstats = " .. TableSerialization(clientstats, 0)					--make a string
+local clientFile = io.open("Active/clientstats.lua", "w") or error("Failed to open debug file")
+clientFile:write(client_str)																--save new data
+clientFile:close()
+
+local oob_scen_old = loadfile("Active/oob_scen.lua")()										--load oob_scen file
+for scen_name, scen in PairsByKeys(scen_log) do													--iterate through destroyed scenery objects
+	if scen.x and scen.z then																--destroyed scenery object has x and z coordinates
+		if scen.lifePourcent then
+			if scen.lifePourcent == 0 then
+				oob_scen[scen_name] = scen
+			end
+		else
+			oob_scen[scen_name] = scen														--add/update to oob_scen
+		end
+
+	end
+end
+local scen_str = "oob_scen = " .. TableSerialization(oob_scen, 0)							--make a string
+local scenFile = io.open("Active/oob_scen.lua", "w") or error("Failed to open debug file")
+scenFile:write(scen_str)																	--save new data
+scenFile:close()
+
 
 ----- run scripts to accept content of next mission -----
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
@@ -53,48 +77,40 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 
 
 --run log evaluation and status updates
--- print("MainAM AA "..tostring(targetlist.blue[8].elements[2].name).." dead? "..tostring(targetlist.blue[8].elements[2].dead))
 dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_StatsEvaluation.lua")
--- print("MainAM BB "..tostring(targetlist.blue[8].elements[2].name).." dead? "..tostring(targetlist.blue[8].elements[2].dead))
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_DestroyTarget.lua")												--Mod11.j
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
--- print("MainAM DD "..tostring(targetlist.blue[8].elements[2].name).." dead? "..tostring(targetlist.blue[8].elements[2].dead))
 --create and view Debriefing file for mission
 --cette foi-ci, on enregistre les stats, mais sans les montrer
 
 dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
 
---ces fichiers sont loadé par DEBRIEF_StatsEvaluation au dessus
--- require("Active/oob_air")
--- require("Active/oob_ground")
--- require("Init/conf_mod")																				-- modification M00 : need option
-
 --retrocompatibilie location UTIL_DataRadio file
 --recherche en priorit� le fichier radios_freq_compatible dans le dossier ScriptsMod puis dans le dossier campagne
-local RadioFile = "../../../ScriptsMod."..versionPackageICM.."/UTIL_DataRadio.lua"
-local TestPath = io.open(RadioFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
-if TestPath ~= nil then																					--check si le fichier existe dans ScriptsMod
-	io.close(TestPath)
+local radioFile = "../../../ScriptsMod."..versionPackageICM.."/UTIL_DataRadio.lua"
+local testPath = io.open(radioFile, "r")																--cette maniere de chercher la presence d un fichier evite un plantage
+if not testPath then																					--check si le fichier existe dans ScriptsMod
+	io.close(testPath)
 	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataRadio.lua")
-else	
-	local RadioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
-	local TestPath2 = io.open(RadioFile2, "r")
-	if TestPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
-		io.close(TestPath2)
-		dofile(RadioFile2)
+else
+	local radioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
+	local testPath2 = io.open(radioFile2, "r")
+	if testPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
+		io.close(testPath2)
+		dofile(radioFile2)
 	end
 end
 
 local db_airbasesFile = "Active/db_airbases.lua"
-local TestPath = io.open(db_airbasesFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
-if TestPath ~= nil then																					--check si le fichier existe dans ScriptsMod
-	io.close(TestPath)
+testPath = io.open(db_airbasesFile, "r")																--cette maniere de chercher la presence d un fichier evite un plantage
+if testPath ~= nil then																					--check si le fichier existe dans ScriptsMod
+	io.close(testPath)
 	-- dofile("Active/db_airbases.lua")
-else	
+else
 	local db_airbasesFile2 = "Init/db_airbases.lua"
-	local TestPath2 = io.open(db_airbasesFile2, "r")
-	if TestPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
-		io.close(TestPath2)
+	local testPath2 = io.open(db_airbasesFile2, "r")
+	if not testPath2 then																			--check si le fichier exist dans le dossier campagne
+		io.close(testPath2)
 		dofile(db_airbasesFile2)
 		--creer le fichier db_airbases dans Active, meme en cours de campagne, pour garder la retrocompatibilite
 		print("MainA create copie db_airbase from Init")
@@ -131,32 +147,28 @@ mission.currentKey = 1010000															--not clear how this works but is req
 camp.waitingNextGen = true
 
 --si la generation de la mission suivante est repoussee, on sauvegarde le txt cree par les trigger txt precedent
--- if Briefing_text ~= "" then	
-	if camp["Briefing_text"] then 
-		camp["Briefing_text"] = ""..FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. camp["Briefing_text"] .. ": \n \n" 		--add date and time header
-	else 
-		camp["Briefing_text"] = ""..FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ": \n \n" 		--add date and time header
-	end
-	
-	if Briefing_text ~= "" then	
-		-- Briefing_text = Briefing_text:gsub("\n", "\\\n")
-		-- Briefing_text = Briefing_text:gsub("\\n", "\\\n")
-		-- Briefing_text = Briefing_text:gsub("\\\\\n", "\\\n")
-		camp["Briefing_text"] = camp["Briefing_text"] .. Briefing_text
-	end
+if camp["Briefing_text"] then
+	camp["Briefing_text"] = ""..FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. camp["Briefing_text"] .. ": \n \n" 		--add date and time header
+else
+	camp["Briefing_text"] = ""..FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ": \n \n" 		--add date and time header
+end
+
+if Briefing_text ~= "" then
+	camp["Briefing_text"] = camp["Briefing_text"] .. Briefing_text
+end
 
 --si la generation de la mission suivante est repoussee, on sauvegarde le txt cr�e par les trigger txt precedent
-if BriefingImagesR ~= nil or #BriefingImagesR ~= 0 then	
-	if camp["BriefingImagesR"] then 
+if BriefingImagesR ~= nil or #BriefingImagesR ~= 0 then
+	if camp["BriefingImagesR"] then
 		table.insert(camp["BriefingImagesR"], BriefingImagesR)
-	else 
+	else
 		camp["BriefingImagesR"]	 = BriefingImagesR
 	end
 end
-if BriefingImagesB ~= nil or #BriefingImagesB ~= 0 then	
-	if camp["BriefingImagesB"] then 
+if BriefingImagesB ~= nil or #BriefingImagesB ~= 0 then
+	if camp["BriefingImagesB"] then
 		table.insert(camp["BriefingImagesB"], BriefingImagesB)
-	else 
+	else
 		camp["BriefingImagesB"]	 = BriefingImagesB
 	end
 end

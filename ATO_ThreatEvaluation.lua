@@ -17,7 +17,7 @@ versionDCE["ATO_ThreatEvaluation.lua"] = "1.7.53"
 -- modification M34.f custom FrequenceRadio
 CreatePlageFrequency()																--trouve une plage de frequence commune si c'est possible
 
-CreatePlageFrequencyB()	
+CreatePlageFrequencyB()
 
 local reduceCercle = 100
 
@@ -31,29 +31,30 @@ groundthreats = {
 
 local Callsign_west = {
 		JTAC_EWR = {
-			[1] = "Axeman",	
+			[1] = "Axeman",
 			[2] = "Darknight",
 			[3] = "Warrior",
-			[4] = "Pointer",	
-			[5] = "Eyeball",	
-			[6] = "Moonbeam",	
-			[7] = "Whiplash",	
-			[8] = "Finger",	
-			[9] = "Pinpoint",	
-			[10] = "Ferret",	
-			[11] = "Shaba",	
-			[12] = "Playboy",	
-			[13] = "Hammer",	
-			[14] = "Jaguar",	
-			[15] = "Deathstar",	
-			[16] = "Anvil",	
-			[17] = "Firefly",	
-			[18] = "Mantis",	
+			[4] = "Pointer",
+			[5] = "Eyeball",
+			[6] = "Moonbeam",
+			[7] = "Whiplash",
+			[8] = "Finger",
+			[9] = "Pinpoint",
+			[10] = "Ferret",
+			[11] = "Shaba",
+			[12] = "Playboy",
+			[13] = "Hammer",
+			[14] = "Jaguar",
+			[15] = "Deathstar",
+			[16] = "Anvil",
+			[17] = "Firefly",
+			[18] = "Mantis",
 			[19] = "Badger",
 			}
 	}
-	
+
 --function to check if a unit is a threat, assign threat values and add to threats table
+
 local function AddThreat(unit, side, hide)											--unput is side and unit-table from oob_ground	-- modification M28.b : helicoptere see all SAM (on ajoute Hide)							
 
 	local threatentry = {}
@@ -74,7 +75,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 1500,															--maximal threat altitude
 		}
 									-- modification M28.b : helicoptere see all SAM (insertion se fera plus bas avec hide)
-		
+
 	elseif unit.type == "ZSU-23-4 Shilka" or string.find(unit.type, "ZU-23")  then
 		threatentry = {
 			type = unit.type,
@@ -104,7 +105,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			min_alt = 0,
 			max_alt = 4300,
 		}
-		
+
 	elseif unit.type == "Gepard" then
 		threatentry = {
 			type = unit.type,
@@ -120,7 +121,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 3500,
 		}
 
-		
+
 	elseif unit.type == "M1097 Avenger" then
 		threatentry = {
 			type = unit.type,
@@ -136,7 +137,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 3600,
 		}
 
-		
+
 	elseif unit.type == "M48 Chaparral" then
 		threatentry = {
 			type = unit.type,
@@ -152,7 +153,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 3600,
 		}
 
-		
+
 	elseif unit.type == "M6 Linebacker" then
 		threatentry = {
 			type = unit.type,
@@ -168,7 +169,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 3600,
 		}
 
-		
+
 	elseif unit.type == "Stinger manpad" then
 		threatentry = {
 			type = unit.type,
@@ -184,7 +185,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 3600,
 		}
 
-		
+
 	elseif unit.type == "SA-18 Igla-S manpad" then
 		threatentry = {
 			type = unit.type,
@@ -200,7 +201,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 3600,
 		}
 
-		
+
 	elseif unit.type == "Strela-1 9P31" then
 		threatentry = {
 			type = unit.type,
@@ -216,7 +217,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 3600,
 		}
 
-	
+
 	elseif unit.type == "Strela-10M3" then
 		threatentry = {
 			type = unit.type,
@@ -232,7 +233,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 3600,
 		}
 
-		
+
 	elseif unit.type == "2S6 Tunguska" then
 		threatentry = {
 			type = unit.type,
@@ -248,7 +249,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 6500,
 		}
 
-	
+
 	elseif unit.type == "rapier_fsa_blindfire_radar" then
 		threatentry = {
 			type = unit.type,
@@ -264,7 +265,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 3600,
 		}
 
-		
+
 	elseif unit.type == "rapier_fsa_optical_tracker_unit" then
 		threatentry = {
 			type = unit.type,
@@ -280,7 +281,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 3600,
 		}
 
-	
+
 	elseif unit.type == "Roland ADS" then
 		threatentry = {
 			type = unit.type,
@@ -296,7 +297,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 8000,
 		}
 
-	
+
 	elseif unit.type == "HQ-7_STR_SP" then
 		threatentry = {
 			type = unit.type,
@@ -312,7 +313,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 5000,
 		}
 
-	
+
 	elseif unit.type == "HQ-7_LN_SP" then
 		threatentry = {
 			type = unit.type,
@@ -328,7 +329,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 5000,
 		}
 
-		
+
 	elseif unit.type == "Hawk tr" then
 		threatentry = {
 			type = unit.type,
@@ -344,7 +345,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 59000, --22000,
 		}
 
-		
+
 	elseif unit.type == "Patriot str" then
 		threatentry = {
 			type = unit.type,
@@ -360,7 +361,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 32000,
 		}
 
-		
+
 	elseif unit.type == "NASAMS_Radar_MPQ64F1" then
 		threatentry = {
 			type = unit.type,
@@ -376,7 +377,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 15000,
 		}
 
-	
+
 	elseif unit.type == "SNR_75V" then		--SA-2
 		threatentry = {
 			type = unit.type,
@@ -392,7 +393,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 20000,
 		}
 
-	
+
 	elseif unit.type == "snr s-125 tr" then		--SA-3
 		threatentry = {
 			type = unit.type,
@@ -408,7 +409,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 20000,
 		}
 
-		
+
 	elseif unit.type == "Kub 1S91 str" then		--SA-6
 		threatentry = {
 			type = unit.type,
@@ -424,7 +425,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 10000,
 		}
 
-		
+
 	elseif unit.type == "Osa 9A33 ln" then
 		threatentry = {
 			type = unit.type,
@@ -440,7 +441,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 7000,
 		}
 
-		
+
 	elseif unit.type == "SA-11 Buk SR 9S18M1" then
 		threatentry = {
 			type = unit.type,
@@ -456,7 +457,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 24000,
 		}
 
-		
+
 	elseif unit.type == "SA-11 Buk LN 9S18M1" then
 		threatentry = {
 			type = unit.type,
@@ -472,7 +473,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 24000,
 		}
 
-		
+
 	elseif unit.type == "Tor 9A331" then
 		threatentry = {
 			type = unit.type,
@@ -488,7 +489,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 19600,
 		}
 
-			
+
 	elseif unit.type == "S-300PS 40B6M tr" then	--SA-10 radar
 		threatentry = {
 			type = unit.type,
@@ -504,7 +505,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 29000,
 		}
 
-			
+
 	elseif unit.type == "RLS_19J6" then
 		threatentry = {
 			type = unit.type,
@@ -535,7 +536,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 35000,
 		}
 
-	
+
 	elseif unit.type == "052B" then
 		threatentry = {
 			type = unit.type,
@@ -551,7 +552,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 25000,
 		}
 
-	
+
 	elseif unit.type == "052C" then
 		threatentry = {
 			type = unit.type,
@@ -567,7 +568,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 30000,
 		}
 
-		
+
 	elseif unit.type == "054A" then
 		threatentry = {
 			type = unit.type,
@@ -583,7 +584,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 25000,
 		}
 
-		
+
 	elseif unit.type == "MOLNIYA" then
 		threatentry = {
 			type = unit.type,
@@ -599,7 +600,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 1500,
 		}
 
-		
+
 	elseif unit.type == "ALBATROS" then
 		threatentry = {
 			type = unit.type,
@@ -615,7 +616,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 5000,
 		}
 
-		
+
 	elseif unit.type == "REZKY" then
 		threatentry = {
 			type = unit.type,
@@ -631,7 +632,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 5000,
 		}
 
-		
+
 	elseif unit.type == "KUZNECOW" then
 		threatentry = {
 			type = unit.type,
@@ -647,7 +648,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 6000,
 		}
 
-			
+
 	elseif unit.type == "NEUSTRASH" then
 		threatentry = {
 			type = unit.type,
@@ -663,7 +664,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 6000,
 		}
 
-		
+
 	elseif unit.type == "MOSCOW" then
 		threatentry = {
 			type = unit.type,
@@ -679,7 +680,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 27000,
 		}
 
-		
+
 	elseif unit.type == "PIOTR" then
 		threatentry = {
 			type = unit.type,
@@ -695,7 +696,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 27000,
 		}
 
-		
+
 	elseif unit.type == "PERRY" then
 		threatentry = {
 			type = unit.type,
@@ -711,7 +712,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 30000,
 		}
 
-		
+
 	elseif unit.type == "USS_Arleigh_Burke_IIa" then
 		threatentry = {
 			type = unit.type,
@@ -727,7 +728,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 30000,
 		}
 
-		
+
 	elseif unit.type == "TICONDEROG" then
 		threatentry = {
 			type = unit.type,
@@ -743,7 +744,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 30000,
 		}
 
-		
+
 	elseif unit.type == "Stennis" then
 		threatentry = {
 			type = unit.type,
@@ -759,7 +760,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 15000,
 		}
 
-		
+
 	elseif unit.type == "CVN_71" then
 		threatentry = {
 			type = unit.type,
@@ -773,7 +774,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 30,
 			min_alt = 0,
 			max_alt = 15000,
-		}		
+		}
 	elseif unit.type == "CVN_75" then
 		threatentry = {
 			type = unit.type,
@@ -803,7 +804,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 15000,
 		}
 
-		
+
 	elseif unit.type == "VINSON" then
 		threatentry = {
 			type = unit.type,
@@ -819,7 +820,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 15000,
 		}
 
-		
+
 	elseif unit.type == "LHA_Tarawa" then
 		threatentry = {
 			type = unit.type,
@@ -835,13 +836,13 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			max_alt = 15000,
 		}
 
-	
+
 	end
 
 	threatentry["name"] = unit.name
 
 	-- modification M28.b : helicoptere see all SAM
-	if threatentry and threatentry.type then 
+	if threatentry and threatentry.type then
 		threatentry.hidden = hide
 		-- threatentry.range = threatentry.range + 5000		--TODO donne de la place aux planes pour manoeuvrer à coté sans risque d'entrer dans leur range
 		-- threatentry.range = threatentry.range
@@ -850,7 +851,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 
 		-- print("AtoTE Add New element "..#groundthreats[side].." name: "..tostring(threatentry["name"]))
 	end
-	
+
 end
 
 
@@ -905,7 +906,7 @@ local function AddEWR(unit, side, freq, call)
 		}
 		insertEWR = true
 		insertGCi = true
-		
+
 	elseif unit.type == "55G6 EWR" then
 		entry = {
 			type = unit.type,
@@ -922,7 +923,7 @@ local function AddEWR(unit, side, freq, call)
 		}
 		insertEWR = true
 		insertGCi = true
-		
+
 	elseif unit.type == "FPS-117" then
 		entry = {
 			type = unit.type,
@@ -939,7 +940,7 @@ local function AddEWR(unit, side, freq, call)
 		}
 		insertEWR = true
 		insertGCi = true
-		
+
 	elseif unit.type == "FPS-117 Dome" then
 		entry = {
 			type = unit.type,
@@ -955,8 +956,8 @@ local function AddEWR(unit, side, freq, call)
 			-- [call] = true,
 		}
 		insertEWR = true
-		insertGCi = true		
-		
+		insertGCi = true
+
 	elseif unit.type == "p-19 s-125 sr" then		--SA-5 SA-2 radar						--Participe � la chaine de detection
 		entry = {
 			type = unit.type,
@@ -973,7 +974,7 @@ local function AddEWR(unit, side, freq, call)
 		}
 		insertEWR = true
 		insertGCi = true
-	
+
 	elseif unit.type == "Dog Ear radar" then								--Participe � la chaine de detection
 		entry = {
 			type = unit.type,
@@ -990,10 +991,10 @@ local function AddEWR(unit, side, freq, call)
 		}
 		insertEWR = true
 		insertGCi = true
-	
+
 	--M07.g
 	elseif unit.type == "SNR_75V" then										--Participe � la chaine de detection
-		insertGCi = true	
+		insertGCi = true
 	elseif unit.type == "snr s-125 tr" then										--Participe � la chaine de detection
 		insertGCi = true
 	elseif unit.type == "RPC_5N62V" then	--SA-5		radar							--Participe � la chaine de detection
@@ -1003,7 +1004,7 @@ local function AddEWR(unit, side, freq, call)
 	elseif unit.type == "Patriot str" then										--Participe � la chaine de detection
 		insertGCi = true
 	elseif unit.type == "NASAMS_Radar_MPQ64F1" then										--Participe � la chaine de detection
-		insertGCi = true	
+		insertGCi = true
 	elseif unit.type == "Hawk tr" then										--Participe � la chaine de detection
 		insertGCi = true
 	elseif unit.type == "TICONDEROG" then										--Participe � la chaine de detection
@@ -1028,26 +1029,27 @@ local function AddEWR(unit, side, freq, call)
 		insertGCi = true
 	elseif unit.type == "KUZNECOW" then										--Participe � la chaine de detection
 		insertGCi = true
-	else 
+	else
 		-- print("AtoTE ATTENTION, not found "..tostring(unit.type).." in data ATO_ThreatEvaluation. Side: "..tostring(side).." freq: "..tostring(freq).." call: "..tostring(call)) 
 		return false
 			-- os.execute 'pause'
 	end
 
-	if unit.dead == nil or unit.dead == false then
-		if insertEWR then
-			if entry.callsign ~= nil and entry.callsign ~= nil then
-				table.insert(ewr[side], entry)
-				ewr[side][#ewr[side]][call] = true
-			else
-				return false
-			end
-		end
-		if insertGCi then
-			GCI.EWR[side][unit.name] = true
+
+	if insertEWR then
+		if entry.callsign ~= nil and entry.callsign ~= nil then
+			table.insert(ewr[side], entry)
+			ewr[side][#ewr[side]][call] = true
+		else
+			return false
 		end
 	end
-	-- _affiche(GCI , "AtoTE passe 00bb GCI ")
+	if insertGCi then
+		GCI.EWR[side][unit.name] = true
+	end
+
+
+	-- _affiche(GCI , "AtoTE passe 00bc GCI ")
 end
 
 local ewrFreqDejaTraite = {}
@@ -1060,14 +1062,14 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 				local ewr_freq = nil							--group has a communications frequency
 				local ewr_call = nil							--group has a communications callsign
 				local tempFreq = nil
-				
+
 				--check la presences d'une task EWR en ne parsant QUE le wpt 1
 				for t = 1, #group.route.points[1].task.params.tasks do												--Iterate through WP1 tasks of group
 					if group.route.points[1].task.params.tasks[t].id == "EWR" then									--If there is a EWR task
 						ewr_task = true																				--set ewr_task true									
 						-- print("AtoTE EWR B "..tostring(group.name))							
 					end
-				end	
+				end
 					-- {
 						-- ["number"] = 2,
 						-- ["auto"] = false,
@@ -1079,63 +1081,60 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 							-- ["callname"] = 3,
 						-- }, -- end of ["params"]
 					-- }, -- end of [2]
-				
+
 				--on recommence la boucle, car id = EWR peut etre en dernier, et on louperait les freq et name
-				for t = 1, #group.route.points[1].task.params.tasks do		
+				for t = 1, #group.route.points[1].task.params.tasks do
 					-- camp west, si utilisation des EWR, pour que les indicatifs soient bien pris en compte, l'enregistrement par DCS est comme ci dessus, il n'y a pas de SetCallsign
 					if group.route.points[1].task.params.tasks[t].params.callname then							--if group has a callsign set									
 						ewr_call = group.route.points[1].task.params.tasks[t].params.callname					--set callname modification M07f
-						ewr_call = Callsign_west.JTAC_EWR[ewr_call]									
+						ewr_call = Callsign_west.JTAC_EWR[ewr_call]
 					end
-					
+
 					if group.route.points[1].task.params.tasks[t].params.action and ewr_task then
 						if group.route.points[1].task.params.tasks[t].params.action.id == "SetCallsign" then							--if group has a callsign set
 							-- ewr_call = group.route.points[1].task.params.tasks[t].params.action.params.callsign						--set callsign
-						
+
 							if group.route.points[1].task.params.tasks[t].params.action.params.callsign then
 								ewr_call = group.route.points[1].task.params.tasks[t].params.action.params.callsign						--set callsign
 
 							elseif group.route.points[1].task.params.tasks[t].params.action.params.callname then						-- callname is Callsign_west
 								ewr_call = group.route.points[1].task.params.tasks[t].params.action.params.callname						--set callname modification M07e
 								ewr_call = Callsign_west.JTAC_EWR[ewr_call]
-							end										
-							-- print("AtoTE  EWR C  ewr_call "..tostring(ewr_call))									
-						end																	
+							end
+								
+						end
 
 						if group.route.points[1].task.params.tasks[t].params.action.id == "SetFrequency" then							--if group has a frequency set										
 							ewr_freq = GetFrequency(sidename, group.name, "EWR")
-							-- print("AtoTE  EWR D  GetFrequency "..ewr_freq)									
-							
 							tempFreq = group.route.points[1].task.params.tasks[t].params.action.params.frequency
-							
+
 							for Mgroup_n, Mgroup in pairs(mission.coalition[sidename].country[country_n].vehicle.group) do				-- M34.b, verifie si le Num du group OOB, correspond au Num du groupe mission
 								if group.groupId == Mgroup.groupId then
-									-- print("AtoTE  EWR E1 OLD params.frequency "..tostring(Mgroup.route.points[1].task.params.tasks[t].params.action.params.frequency))
-
 									Mgroup.route.points[1].task.params.tasks[t].params.action.params.frequency = ewr_freq * 1000000 	-- met à jour la table mission qui est déjà en mémoire
-								
-									ewr_freq = tostring(ewr_freq)									
-									-- print("AtoTE  EWR E2 NEW params.frequency "..tostring(Mgroup.route.points[1].task.params.tasks[t].params.action.params.frequency))
 
+									ewr_freq = tostring(ewr_freq)
+									
 								end
 							end
-						end								
+						end
 					end
 				end
-						
-						
+
+
 				--parse toutes les unités car le/les radars ne sont pas forcement en position 1
 				local testAdd = false
 				local EwrAdd = false
 				for unit_n, unit in pairs(group.units) do				--Iterate through all units			
-					AddThreat(unit, sidename, group.hidden)
-					
-					if not ewrFreqDejaTraite[sidename]then ewrFreqDejaTraite[sidename]= {} end																										
-					if not ewrFreqDejaTraite[sidename][group.groupId] then 
-						
-						--tente d'ajouter cette unité dans la table EWR du script GCI inGame
-						--si elle est reconnue EWR, elle sera ajoutée
-						-- if ewr_call ~= nil then
+					if not unit.dead then
+
+						AddThreat(unit, sidename, group.hidden)
+
+						if not ewrFreqDejaTraite[sidename]then ewrFreqDejaTraite[sidename]= {} end
+						if not ewrFreqDejaTraite[sidename][group.groupId] then
+
+							--tente d'ajouter cette unité dans la table EWR du script GCI inGame
+							--si elle est reconnue EWR, elle sera ajoutée
+
 							testAdd = AddEWR(unit, sidename, ewr_freq, ewr_call)	--Add to EWR table
 							if testAdd ~= false then
 								ewrFreqDejaTraite[sidename][group.groupId] = true
@@ -1144,21 +1143,22 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 							elseif ewrFreqDejaTraite[sidename][group.groupId] then
 								InsertBugList("no callsign planned for this EWR name "..tostring(unit.name).." type "..tostring(unit.type))
 							end
-						-- end
-					else
-						-- print("AtoTE  EWR _Z_  ")
-						-- ewr_freq = nil
-						-- ewr_call = nil
-						-- tempFreq = nil
-					end			
-				end				
+
+						else
+							-- print("AtoTE  EWR _Z_  ")
+							-- ewr_freq = nil
+							-- ewr_call = nil
+							-- tempFreq = nil
+						end
+					end
+				end
 			end
 		end
 		if country.ship then												--If country has ships
 			for group_n, group in pairs(country.ship.group) do				--Iterate through all groups
 				if group.hidden == false then								--group is not hidden
 					for unit_n, unit in pairs(group.units) do				--Iterate through all units
-						if unit.dead ~= true then							--If unit is not dead
+						if not unit.dead then							--If unit is not dead
 							AddThreat(unit, sidename)						--Evaluate unit as threat and add to groundthreats table
 							AddEWR(unit, sidename)							--Evaluate unit as EWR and add to EWR table
 						end
@@ -1186,8 +1186,8 @@ for side,unit in pairs(oob_air) do																--iterate through all sides
 	for n = 1, #unit do																			--iterate through all units
 		if unit[n].inactive ~= true and unit[n].roster.ready > 0 and db_airbases[unit[n].base] and db_airbases[unit[n].base].inactive ~= true and db_airbases[unit[n].base].x and db_airbases[unit[n].base].y then		--if unit is active and has ready aircraft and its airbase is active
 			for task,task_bool in pairs(unit[n].tasks) do										--iterate through all tasks of unit			
-				if task_bool then				
-					if  db_loadouts[unit[n].type] then						
+				if task_bool then
+					if  db_loadouts[unit[n].type] then
 						if  db_loadouts[unit[n].type][task] then							--task is true and db_loadouts has such tasks
 							for loadout_name, loadout in pairs(db_loadouts[unit[n].type][task]) do		--iterate through all loadout.descriptions for a given aircraft type
 								if (Daytime == "day" and loadout.day) or (Daytime == "night" and loadout.night) or (Daytime == "night-day" and (loadout.day or loadout.night)) or (Daytime == "day-night" and (loadout.day or loadout.night)) then	--loadout works for current time of day
@@ -1204,7 +1204,7 @@ for side,unit in pairs(oob_air) do																--iterate through all sides
 										-- 		min_alt = 0,
 										-- 		max_alt = 30000,
 										-- 	}
-											
+
 											-- table.insert(ewr[side], entry)
 										if task == "Escort" then											--if loadout is CAP
 											local entry = {													--define fighterthreats table entry
@@ -1218,7 +1218,7 @@ for side,unit in pairs(oob_air) do																--iterate through all sides
 												range = loadout.range,										--Fighter action radius
 												LDSD = loadout.LDSD,										--Look Down/Shoot Down
 											}
-											
+
 											table.insert(fighterthreats[side], entry)
 										elseif task == "Fighter Sweep" then											--if loadout is CAP
 											local entry = {													--define fighterthreats table entry
@@ -1232,7 +1232,7 @@ for side,unit in pairs(oob_air) do																--iterate through all sides
 												range = loadout.range,										--Fighter action radius
 												LDSD = loadout.LDSD,										--Look Down/Shoot Down
 											}
-											
+
 											table.insert(fighterthreats[side], entry)
 										elseif task == "CAP" then											--if loadout is CAP
 											local entry = {													--define fighterthreats table entry
@@ -1246,7 +1246,7 @@ for side,unit in pairs(oob_air) do																--iterate through all sides
 												range = loadout.range,										--Fighter action radius
 												LDSD = loadout.LDSD,										--Look Down/Shoot Down
 											}
-											
+
 											table.insert(CAPthreats[side], entry)
 											table.insert(fighterthreats[side], entry)
 										elseif task == "Intercept" then										--if loadout is Intercept
@@ -1260,7 +1260,7 @@ for side,unit in pairs(oob_air) do																--iterate through all sides
 												level =  loadout.firepower * (unit[n].roster.ready / 3),
 												range = loadout.range,										--Fighter action radius
 											}
-											
+
 											table.insert(fighterthreats[side], entry)
 										end
 									end
@@ -1287,7 +1287,7 @@ for side, threats in pairs(CAPthreats) do
 	for key, value in ipairs(threats) do
 		if value.class == "CAP" then
 			table.insert(CAPthreatsSort[side], value)
-		end 
+		end
 
 	end
 end
@@ -1302,7 +1302,7 @@ for side, targets in pairs(targetlist) do																--iterate through all s
 			local entry = {													--define fighterthreats table entry
 				name = tostring(target.titleName),										--unit name
 				class = "AWACS",											--class
-				x = target.x,							
+				x = target.x,
 				y = target.y,
 				level = 0,
 				range =  650000,
@@ -1310,7 +1310,7 @@ for side, targets in pairs(targetlist) do																--iterate through all s
 				min_alt = 0,
 				max_alt = 40000,
 			}
-			
+
 			table.insert(ewr[side], entry)
 
 		elseif  target.task == "CAP" and target.inactive ~= false then											--if loadout is CAP
@@ -1319,13 +1319,13 @@ for side, targets in pairs(targetlist) do																--iterate through all s
 					name = tostring(target.titleName),										--unit name
 					class = "CAP",												--class
 					info  = "AddCAP by target position",
-					x = target.x,							
+					x = target.x,
 					y = target.y,
 					level =  CAPthreatsSort[side][1].level,
 					range = target.radius,										--Fighter action radius
 					LDSD = CAPthreatsSort[side][1].LDSD,										--Look Down/Shoot Down
 				}
-			
+
 				table.insert(fighterthreats[side], entry)
 			end
 		end
@@ -1338,7 +1338,7 @@ end
 --add avoidance zones to threattable
 for zone_n,zone in pairs(mission.triggers.zones) do												--iterate through all trigger zones
 	if string.find(zone.name, "AvoidanceZone") then												--zone is named as avoidance zone
-	
+
 		local threatentry = {																	--define threattable entry
 			type = "TriggerZone",
 			class = "AvoidanceZone",
@@ -1421,20 +1421,20 @@ sumCercleSAM = sumCercleSAM + #groundthreats["red"]
 --supprime les cercles dans les cercles pour eviter d'en avoir beaucoup beaucoup
 if sumCercleSAM >= reduceCercle then
 	local copyThreats = Deepcopy(groundthreats)
-	for sideThreat, threats in pairs(groundthreats) do	
+	for sideThreat, threats in pairs(groundthreats) do
 		for n=#threats-1, 2, -1 do
-			for copyThreats_n, 	copyThreat in pairs(copyThreats[sideThreat]) do 			
+			for copyThreats_n, 	copyThreat in pairs(copyThreats[sideThreat]) do
 				if  threats[n]  and threats[n].x and threats[n].range < 10000  then
 					local allIn = true
 					for r=0, 360, 90 do
 						local testPoint = GetOffsetPoint(threats[n], r, threats[n].range)
-						if not CheckPointInCercle(testPoint, copyThreat) then 
+						if not CheckPointInCercle(testPoint, copyThreat) then
 							allIn = false
 							break
 						end
 					end
-					
-					if allIn then 
+
+					if allIn then
 						-- print("AtoTE remove "..tostring(threats[n].type))
 						table.remove(threats, n)
 					end
@@ -1446,14 +1446,14 @@ end
 
 
 
-				
+
 if Debug.debug then
 	local camp_str = "threatgroundthreats_AtoTE = " .. TableSerialization(groundthreats, 0)						--make a string
 	local campFile = io.open("Debug/threat_groundthreats_AtoTE.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
 
-	
+
 	local camp_str = "threatgroundthreatsALL_AtoTE = " .. TableSerialization(GroundthreatsAll, 0)						--make a string
 	local campFile = io.open("Debug/threat_groundthreatsALL_AtoTE.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data

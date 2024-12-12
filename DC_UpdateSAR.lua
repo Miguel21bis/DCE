@@ -686,7 +686,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
 
                         -- if debugDcUS then print("DcUS IF_111A status ~= POW and inTheEnemyCamp ") end
 
-                        _affiche(nbAMI_ENI, "nbAMI_ENI")
+                        -- _affiche(nbAMI_ENI, "nbAMI_ENI")
 
 						if nbAMI_ENI[sideName][500] >= 2  then
 							element.status = "EVAC_possible"

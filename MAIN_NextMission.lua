@@ -721,17 +721,10 @@ end
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Debug.lua")
 
 
---TODO groundthreats introuvable
--- print("MainNE A groundthreats "..tostring(groundthreats.blue[1].type))
 camp["groundthreats"] = groundthreats
-
--- print("MainNE A groundthreats "..tostring(camp.groundthreats.blue[1].type))
-
--- os.execute 'pause'
 
 
 mission.currentKey = 1010000															--not clear how this works but is required for multiplyer clients to be available for selection on mission start
-
 
 --########   1   ##############
 --check les doublons de name, groupId et unitId
@@ -873,7 +866,6 @@ for nError , refName in pairs(groupIdError) do
 	-- end
 end
 print()
-
 
 --renumerote automatiquement le uniId en doublon
 for nErrorB , refNameB in pairs(unitIdError) do
@@ -1325,3 +1317,5 @@ end
 -- 	campFile:write(camp_str)															--save new data
 -- 	campFile:close()
 -- end
+
+print("camp.time B  "..tostring(camp.time).." "..FormatTime(camp.time, "hh:mm"))

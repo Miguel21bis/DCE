@@ -5598,7 +5598,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						if polkaOff then
 							group['lateActivation'] = false
 							group['uncontrolled'] = false
-							activate_group_withFlag(group, camp.SAR.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
+							activate_group_withFlag(group, GCI.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
 
 						else
 							group['uncontrolled'] = true											--make interceptor groups uncontrolled at mission start

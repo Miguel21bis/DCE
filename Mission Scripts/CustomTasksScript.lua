@@ -3549,17 +3549,17 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 			end
 
 
-			if camp.debug then
-				local logStr = "Mission = " .. TableSerialization(copyRoute, 0)
-				local grpnameClean = grpname:gsub('[%p%c%s]', '_')
-				local logFile = io.open(PathDCE.."Debug\\"..grpnameClean.."_".. "Custom_Altitude_copyRoute_"..current_time..".lua", "w")
-				if logFile then
-					logFile:write(logStr)
-					logFile:close()
-				else
-					env.info("DCE_Custom_Altitude_copyRoute: Failed to open log file for writing.")
-				end
-			end
+			-- if camp.debug then
+			-- 	local logStr = "Mission = " .. TableSerialization(copyRoute, 0)
+			-- 	local grpnameClean = grpname:gsub('[%p%c%s]', '_')
+			-- 	local logFile = io.open(PathDCE.."Debug\\"..grpnameClean.."_".. "Custom_Altitude_copyRoute_"..current_time..".lua", "w")
+			-- 	if logFile then
+			-- 		logFile:write(logStr)
+			-- 		logFile:close()
+			-- 	else
+			-- 		env.info("DCE_Custom_Altitude_copyRoute: Failed to open log file for writing.")
+			-- 	end
+			-- end
 
 			--cherche la prochaine action pour ne pas trop calculer de wpt intermedaire
 			local nWptNextCustom = 9999

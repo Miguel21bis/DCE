@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.80.490"
+versionDCE["UTIL_Changelog.lua"] = "20.80.491"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.80.490"
+VersionDCE["UTIL_Changelog.txt"] = "20.80.491"
 --[[
 
 
@@ -9,6 +9,10 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 - [stats]	stats for your own package are rarely displayed
+
+==:20.80.491:==
+491 fixed	[time]	wrong time jump between missions
+
 
 ==:20.80.490:==
 490 fixed	[cleaning]	Many Global variables have been renamed to start with a capital letter.
