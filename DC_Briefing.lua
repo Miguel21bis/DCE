@@ -1025,7 +1025,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 					-- modification M27 	movedBullseye
 					if Brief[sideName] then
-						local s = "Bullseye:\n"
+						s = "Bullseye:\n"
 						s = s.." bullseye Name " .. ReplaceBaseName(Brief[sideName].bullseye.name)
 						if Brief[sideName]["bullseye"].lat then
 							s = s.." " .. Format_dms(Brief[sideName]["bullseye"].lat ,Brief[sideName]["bullseye"].lon ,4)  .." \n"
@@ -1038,7 +1038,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 						--Navigation overview
 						s = "Flightplan:\n"																	--make a list with details of the player waypoints
 
-						local entries = {																			--list entries that are making up the navigaion overview
+						entries = {																			--list entries that are making up the navigaion overview
 							[1] = {
 								lookup = "number",																	--lookup in the player.waypoints table
 								header = "WP",																		--name which should be displayer in the list header

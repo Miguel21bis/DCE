@@ -239,11 +239,11 @@ local function GCI_Cycle()
 		-- env.info("DCE_Gci Passe B_A track_side "..tostring(track_side))
 
 		for target_name, target in pairs(side) do													--iterate through targets
-			env.info("DCE_Gci  Passe B_B target_name "..tostring(target_name).." target.history "..tostring(target.history))
+			-- env.info("DCE_Gci  Passe B_B target_name "..tostring(target_name).." target.history "..tostring(target.history))
 
 			ErrorMsg = "Assign interceptors; Target: " .. target_name								--Error message in case follow on code fails
 			if target.history > 0 then																--target was detected at least two times in sequence
-				env.info("DCE_Gci   Passe B_C target.assigned "..tostring(target.assigned).." target.number "..tostring(target.number))
+				-- env.info("DCE_Gci   Passe B_C target.assigned "..tostring(target.assigned).." target.number "..tostring(target.number))
 
 				--ne declenche les intercepteur que si les ENI franchissent la frontiere
 				local ourSideOfBorder = false

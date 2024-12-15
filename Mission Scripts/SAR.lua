@@ -1,15 +1,15 @@
--- initie par MAIN_NextMission
 -- auteur : Miguel21
 -- 
 -- .
 ------------------------------------------------------------------------------------------------------- 
--- last modification M61_j
+-- last modification cleanCode_c debug_a
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\SAR.lua"] = "1.3.20"
+versionDCE["Mission Scripts\SAR.lua"] = "1.4.23"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_b
--- adjustment_g						(if exist)(f don't spawn a manhunt in the ENI camp)(e CVN to CV)(c ajust nb of ManHunt)								
--- modification M61_j				SAR (j noSAR in wrongSide)(i correction 100 to 200m)(g guideTreuilSAR)(e: add MGRS_Chute_10KM)(b debug)
+-- cleanCode_c				(c springCleaning)
+-- debug_a	 				(a: getOut land.getSurfaceType() error GroundDamagedFlyingMachine)
+-- adjustment_g				(if exist)(f don't spawn a manhunt in the ENI camp)(e CVN to CV)(c ajust nb of ManHunt)								
+-- modification M61_j		SAR (j noSAR in wrongSide)(i correction 100 to 200m)(g guideTreuilSAR)(e: add MGRS_Chute_10KM)(b debug)
 -------------------------------------------------------------------------------------------------------
 
 
@@ -460,7 +460,6 @@ function AddSoldierAliasManhunt(EjectedPilot)
 
 		local pointSelected = PosEjectedPilot
 		repeat
-			-- local testLand = land.getSurfaceType({x = testX, y = testY})
 
 			portionCercle = portionCercle + 1
 			-- local distance = math.random(35, 65)
@@ -1891,9 +1890,9 @@ function GetOutGDFM(argGid)
 	-- 	gpGid = gpGid,
 	-- }
 
-	--table.insert(groundDamagedFlyingMachine[event.initiator.id_], eventData)
+	--table.insert(GroundDamagedFlyingMachine[event.initiator.id_], eventData)
 
-	for id_, key in pairs(groundDamagedFlyingMachine) do
+	for id_, key in pairs(GroundDamagedFlyingMachine) do
 
 		for occurenceN = #key, 1, -1 do
 			-- env.info( "DCE_getOut B1 id_ "..tostring(id_).." occurenceN "..tostring(occurenceN))
@@ -1947,9 +1946,9 @@ function GetOutGDFM(argGid)
 							local side = coalitionIdNumeric[tonumber(damaged.initiatorSIDE)]
 
 							if damaged.unit:getPlayerName()	then
-								env.info( "DCE_EJECT EventT :radioTransmission frequency A  "..tostring(camp.EctedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..damaged.initiator))
+								env.info( "DCE_getOut EventT :radioTransmission frequency A  "..tostring(camp.EctedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..damaged.initiator))
 								trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', damaged, 0, true, camp.EctedPilotFrequency[side].GuardEjection, 1, 'GuardEjection'..damaged.initiator)
-								env.info( "DCE_EJECT EventT :radioTransmission frequency B  "..tostring(camp.EctedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..damaged.initiator))
+								env.info( "DCE_getOut EventT :radioTransmission frequency B  "..tostring(camp.EctedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..damaged.initiator))
 							end
 
 							damaged.x = damaged.crashPoint.x
@@ -1980,7 +1979,9 @@ function GetOutGDFM(argGid)
 
 							damaged.name = damaged.name:gsub('[%p%c%s]', '_')
 
-							local typeLand = land.getSurfaceType({x =damaged.x, y = damaged.y})
+							local typeLand = land.getSurfaceType({x =damaged.x2d, y = damaged.y2d})
+
+							env.info("DCE_getOut E test typeLand "..tostring(typeLand))
 
 							if typeLand ~= 3 and typeLand ~= 5  then
 
@@ -1992,7 +1993,7 @@ function GetOutGDFM(argGid)
 
 							CheckImmediatSAR(damaged)
 
-							env.info("DCE_getOut E test despawn ")
+							env.info("DCE_getOut F test despawn ")
 
 							timer.scheduleFunction(despawn2, damaged.unit, timer.getTime() + 30)
 

@@ -1261,9 +1261,11 @@ do
 	--build the list		
 	for n = 1, #entries[1].values do															--iterate through number of values (number of units)
 		for e = 1, #entries do																	--iterate through entries
-			s = s .. entries[e].values[n]														--add value to list
+			local writeValue = entries[e].values[n]
+			if entries[e].values[n] == 0 then writeValue = "-" end
+			s = s .. writeValue														--add value to list
 			if e < #entries then																--if this is not the last header, add spaces to the next header	
-				local space = entries[e].str_length + 5 - string.len(tostring(entries[e].values[n]))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
+				local space = entries[e].str_length + 5 - string.len(tostring(writeValue))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
 				for m = 1, space do
 					s = s .. " "																--add one space for every missing letter
 				end

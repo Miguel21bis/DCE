@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.80.491"
+versionDCE["UTIL_Changelog.lua"] = "20.80.492"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.80.491"
+VersionDCE["UTIL_Changelog.txt"] = "20.80.492"
 --[[
 
 
@@ -10,8 +10,10 @@ known issues:
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 - [stats]	stats for your own package are rarely displayed
 
-==:20.80.491:==
-491 fixed	[time]	wrong time jump between missions
+==:20.80.492:==
+493 fixed	[briefing][METAR]	cloud altitudes above 10000ft were not displayed
+492 fixed	[briefing]	overwrite old briefing info from hours before mission generation
+491 fixed	[time]		wrong time jump between missions
 
 
 ==:20.80.490:==

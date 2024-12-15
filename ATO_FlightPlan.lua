@@ -6297,7 +6297,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				end	-- fin RECOVERY
 
-				-- modification M33.e 	Custom Briefing (e: Divert/CV possible)
+				-- modification M33_e 	Custom Briefing (e: Divert/CV possible)
 				-- place dans une table les bases proches des WPT
 				local TabBaseByWPT = {}
 				if flight[f].player or flight[f].client then
@@ -7345,7 +7345,7 @@ if camp.player then
 					table.insert(camp.player.pack[role], Deepcopy(flight[f]))							--insert flight into player package to list it in player briefing
 				end
 				if flight[f].player or flight[f].client then
-					-- modification M33.b 	Custom Briefing (onBoardNum)
+					-- modification M33_b 	Custom Briefing (onBoardNum)
 					if flight[f].target_name == camp.player.target.titleName and camp.player.pack_n == p and not breakloop then
 						for _side,side in pairs(mission.coalition) do
 							for _country,country in pairs(side.country) do
@@ -7430,7 +7430,7 @@ if camp.client then
 						-- table.insert(pack_.pack[role], Deepcopy(flight[f]))							--insert flight into player package to list it in player briefing
 					-- end	
 					if flight[f].client  then
-						-- modification M33.b 	Custom Briefing (onBoardNum)
+						-- modification M33_b 	Custom Briefing (onBoardNum)
 						if flight[f].target_name == pack_.target.titleName and pack_.pack_n == p and not breakloop then
 
 							for _side,side in pairs(mission.coalition) do

@@ -13,7 +13,7 @@ versionDCE["DC_NavalEnvironment.lua"] = "1.12.33"
 -- modification M45_a		compatible with 2.7.0
 -- modification M40_i		Pedro Helicopter (i use new follow task)
 -- modification M36_f		(f boats start upwind)(d: add timer) MenuRadio request manual TurnIntoWind
--- modification M33_e.b		Custom Briefing (e: CV Manual Freq)
+-- modification M33_e		Custom Briefing (e: CV Manual Freq)
 -- modification M11_a		Multiplayer
 ------------------------------------------------------------------------------------------------------- 
 

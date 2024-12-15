@@ -27,6 +27,8 @@ if not camp.debugInGamePopup then
 	env.setErrorMessageBoxEnabled(false)
 end
 
+
+
 env.info("ACRF10 version of Lua _VERSION "..tostring(_VERSION))
 
 for k, v in pairs(AI.Option.Air.val) do
@@ -39,10 +41,17 @@ env.info("Constante AAA_EVADE_FIRE : " .. tostring(AI.Option.Air.val.REACTION_ON
 env.info("Valeur EVADE_FIRE : " ..        tostring(AI.Option.Air.val.REACTION_ON_THREAT.EVADE_FIRE))
 env.info("ACRF10 start loading ACRF10 script ")
 
+env.info("Object.Category.UNIT : " .. tostring(Object.Category.UNIT))
+env.info("Object.Category.WEAPON : " ..  tostring(Object.Category.WEAPON))
+env.info("Object.Category.STATIC : " .. tostring(Object.Category.STATIC))
+env.info("Object.Category.BASE : " ..  tostring(Object.Category.BASE))
+env.info("Object.Category.SCENERY : " .. tostring(Object.Category.SCENERY))
+env.info("Object.Category.Cargo : " ..  tostring(Object.Category.Cargo))
+
 
 LastInjectFlightPlan = {}																--garde les derniers plan de vol injecté
 tabBingoPlane = {}
-groundDamagedFlyingMachine = {}
+GroundDamagedFlyingMachine = {}
 
 coalitionId = {
 	["0"] = "neutral",
@@ -83,11 +92,29 @@ DCS_CategoryById = {
 
 }
 
+Object_Category = {
+	[1] = "UNIT",
+	[2] = "WEAPON",
+	[3] = "STATIC",
+	[4] = "BASE",
+	[5] = "SCENERY",
+	[6] = "Cargo",
+}
+
+Unit_Category = {
+	[0] = "AIRPLANE",
+	[1] = "HELICOPTER",
+	[2] = "GROUND_UNIT",
+	[3] = "SHIP",
+	[4] = "STRUCTURE",
+  }
+
 local radioCommands = {}
 local flightPlanTimer = {}
 local commandDB = {}
 local tabJockerPlane = {}
 local var_TPN_alreadyAdded = false
+local EWR_optionPlayer = {}
 
 
 
@@ -474,6 +501,12 @@ local function localGetPlayerObj()
 		end
 	end
 	return playerObj
+end
+
+local function setErrorMessageBoxShedul()
+	if not camp.debugInGamePopup then
+		env.setErrorMessageBoxEnabled(false)
+	end
 end
 
 function FctRemovePlane(_unit)
@@ -1956,6 +1989,25 @@ function RtbSEADPack(PlayerGroup)
 	end
 end
 
+function EWR_ON(playerName)
+	if not EWR_optionPlayer[playerName] then
+		EWR_optionPlayer[playerName] = {
+			EWR_on = true,
+		}
+	else
+		EWR_optionPlayer[playerName].EWR_on = true
+	end
+end
+
+function EWR_OFF(playerName)
+	if not EWR_optionPlayer[playerName] then
+		EWR_optionPlayer[playerName] = {
+			EWR_on = false,
+		}
+	else
+		EWR_optionPlayer[playerName].EWR_on = false
+	end
+end
 
 function ReFueling(PlayerGroup)
 
@@ -2377,7 +2429,7 @@ function getOut(gid)
 end
 
 local function getLL_TargetPosition()
-	trigger.action.outText("DCE_getLL_TargetPosition Init ", 15)
+	-- trigger.action.outText("DCE_getLL_TargetPosition Init ", 15)
 	-- [357797] = 
 	-- {
 	-- 	[1] = 
@@ -2392,7 +2444,7 @@ local function getLL_TargetPosition()
 	-- 	},
 
 	if camp.targetPos then
-		trigger.action.outText("DCE_getLL_TargetPosition START ", 15)
+		-- trigger.action.outText("DCE_getLL_TargetPosition START ", 15)
 		for key_x, searchPos_s in pairs(camp.targetPos) do
 			for posN, searchPos in pairs(searchPos_s) do
 				if searchPos.x and searchPos.y then
@@ -2420,7 +2472,7 @@ local function getLL_TargetPosition()
 		env.info("DCE_LL_KnownPositions: Failed to open log file for writing.")
 	end
 
-	trigger.action.outText("DCE_getLL_TargetPosition End ", 15)
+	-- trigger.action.outText("DCE_getLL_TargetPosition End ", 15)
 
 	-- if camp.targetPos then
 	-- 	for campName, targets in pairs(camp.targetPos) do
@@ -2668,13 +2720,19 @@ if camp.makeCampaign then
 	-- logFile:close()
 end
 
-local function addFuncs(gid, Group)
+local function addFuncs(gid, groupObject, playerName)
 
 	env.info("DCE_addFuncs PASSE   _A gid "..tostring(gid).." Group "..tostring(Group))
 
 	if gid and Group then
 
 		env.info("DCE_addFuncs PASSE   _B  ")
+
+		if not EWR_optionPlayer[playerName] then
+			EWR_optionPlayer[playerName] = {
+				EWR_on = false,
+			}
+		end
 
 		-- -- supprime les anciens items de la commande F10
 		-- missionCommands.removeItemForGroup(gid, {"Urgent_Refueling"})
@@ -2701,19 +2759,36 @@ local function addFuncs(gid, Group)
 
 		missionCommands.removeItemForGroup(gid, {"CarrierIntoWind"})
 		missionCommands.removeItemForGroup(gid, {"Urgent request"})
-
+		missionCommands.removeItemForGroup(gid, {"EWR"})
 
 		local subR_A = missionCommands.addSubMenuForGroup(gid, "Urgent request", nil)
 
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Urgent_Refueling", subR_A, ReFueling, Group )
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Urgent_RequestCAP", subR_A, RequestCAP, Group)
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Package_All_RTB", subR_A, RtbPack, Group)
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Package_Strike_RTB", subR_A, RtbStrikePack, Group)
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Package_SEAD_RTB", subR_A, RtbSEADPack, Group)
+		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Urgent_Refueling", subR_A, ReFueling, groupObject )
+		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Urgent_RequestCAP", subR_A, RequestCAP, groupObject)
+		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Package_All_RTB", subR_A, RtbPack, groupObject)
+		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Package_Strike_RTB", subR_A, RtbStrikePack, groupObject)
+		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Package_SEAD_RTB", subR_A, RtbSEADPack, groupObject)
 		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Get out of the cockpit", subR_A, getOut, gid)
 
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "BullsEye_LongLat", nil, BullsEye, Group)
+		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "BullsEye_LongLat", nil, BullsEye, groupObject)
 
+
+		-- local subR = missionCommands.addSubMenu('Root SubMenu')
+		-- local subN1 = missionCommands.addSubMenu('SubMenu within RootSubmenu', subR)
+		-- local subN2 = missionCommands.addSubMenu('we must go deeper', subN1)
+		-- local subN3 = missionCommands.addSubMenu('Go take a UX class', subN2)
+
+		local subR_B1 = missionCommands.addSubMenuForGroup(gid, "EWR", nil)
+		local subR_B2 = missionCommands.addSubMenuForGroup(gid, "EWR ON", subR_B1)
+		local subR_B3 = missionCommands.addSubMenuForGroup(gid, "EWR OFF", subR_B1)
+
+		for pName, value in pairs(EWR_optionPlayer) do
+			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, tostring(pName) .." EWR ON", subR_B2, EWR_ON,  pName )
+		end
+
+		for pName, value in pairs(EWR_optionPlayer) do
+			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, tostring(pName) .." EWR OFF", subR_B3, EWR_OFF,  pName )
+		end
 
 		env.info("DCE_addFuncs PASSE   _C  ")
 
@@ -2729,11 +2804,11 @@ local function addFuncs(gid, Group)
 								local carrier = groupCarrier:getUnit(1)															--get group leader (assumed to be the carrier)								
 								local Desc = carrier:getDesc()
 								if Desc.attributes.AircraftCarrier or Desc.attributes["Aircraft Carriers"] then
-									local carrierPos = carrier:getPoint()														--get position of carrier
-									local GroupName = group.name
-									radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, group.name.." Into Wind 30mn", subR, TurnIntoWind, {GroupName, nil, nil, 30} )	-- modification M36.d	(d: add timer) MenuRadio request manual TurnIntoWind
-									radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, group.name.." Into Wind 60mn", subR, TurnIntoWind, {GroupName, nil, nil, 60} )
-									radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, group.name.." Resume Route", subR, ResumeRoute, {group.name, nil} )
+									-- local carrierPos = carrier:getPoint()														--get position of carrier
+									local groupName = group.name
+									radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, group.name.." Into Wind 30mn", subR, TurnIntoWind, {groupName, nil, nil, 30} )	-- modification M36.d	(d: add timer) MenuRadio request manual TurnIntoWind
+									radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, group.name.." Into Wind 60mn", subR, TurnIntoWind, {groupName, nil, nil, 60} )
+									radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, group.name.." Resume Route", subR, ResumeRoute, {groupName, nil} )
 								end
 							end
 						end
@@ -2743,10 +2818,10 @@ local function addFuncs(gid, Group)
 		end
 
 		-- sar_F10(Group)
-		timer.scheduleFunction(sar_F10, {gid, Group}, timer.getTime() + 2)
+		timer.scheduleFunction(sar_F10, {gid, groupObject}, timer.getTime() + 2)
 
 		-- AFAC_F10(Group)
-		timer.scheduleFunction(AFAC_F10, Group, timer.getTime() + 2)
+		timer.scheduleFunction(AFAC_F10, groupObject, timer.getTime() + 2)
 
 
 		-- The solution is to use env.mission.coalition where you find all object informations even groupId
@@ -2857,20 +2932,24 @@ local function toggleGroupVisibility(groupData)
     end
 end
 
--- Basculer l'état de visibilité des unités au sol
-local function toggleGroundUnits()
-    env.info("Toggling ground units visibility...")
-    for _, groupData in pairs(groundGroups) do
-        toggleGroupVisibility(groupData)
-    end
-end
+--************************************
+-- -- Basculer l'état de visibilité des unités au sol
+-- local function toggleGroundUnits()
+--     env.info("Toggling ground units visibility...")
+--     for _, groupData in pairs(groundGroups) do
+--         toggleGroupVisibility(groupData)
+--     end
+-- end
 
 -- -- Planification initiale et exécution toutes les 10 minutes
 -- local function scheduleToggle()
 --     toggleGroundUnits()
---     return timer.getTime() + 1200 -- 600 secondes = 10 minutes
+--     -- return timer.getTime() + 1200 -- 600 secondes = 10 minutes
 -- end
+--************************************
 
+
+--************************************
 -- -- Planification de la collecte initiale après 10 secondes
 -- timer.scheduleFunction(function()
 --     collectGroundGroups()
@@ -2878,13 +2957,343 @@ end
 -- end, nil, timer.getTime() + 10)
 
 
-
+collectGroundGroups()
+timer.scheduleFunction(scheduleToggle, nil, timer.getTime() + 360) -- Commence le cycle après 10 minutes
 
 
 --////////////////////////////////////////////////////////////////////////////////////////////
 --test BULLE (fin)
 --////////////////////////////////////////////////////////////////////////////////////////////
 
+
+--////////////////////////////////////////////////////////////////////////////////////////////
+--test EWR (start)
+--recupere les data de tous les aéronefs
+--////////////////////////////////////////////////////////////////////////////////////////////
+
+local function speakEWR()
+	local target_tracks = {
+		["blue"] = {},
+		["red"] = {}
+	}
+
+	--EWR target detection
+	ErrorMsg = "DCE_speakEWR target detection."																--Error message in case follow on code fails
+	for ewr_side, ewr_table in pairs(GCI.EWR) do													--iterate through sides in EWR table
+		for ewr_name, bool in pairs(ewr_table) do													--iterate through EWR radars	
+			ErrorMsg = "DCE_speakEWR target detection: "	.. ewr_name											--Error message in case follow on code fails
+			local unit = Unit.getByName(ewr_name)													--get EWR unit
+			if unit then																			--if unit exists
+				local ctr = unit:getGroup():getController()											--get unit controller
+				local targets = ctr:getDetectedTargets()											--get detected targets of this EWR
+
+				for t = 1, #targets do																--iterate through detected targets
+					if targets[t].object then
+						local target = targets[t].object
+						local objCat
+
+						if target then
+							objCat = Object.getCategory(target)
+							-- env.info("DCE_EventsTracker Object Category "..tostring(objCat).." _: "..tostring(Object_Category[objCat]))
+						end
+
+
+						if objCat and objCat == Object.Category.UNIT then
+
+							-- local unitCat = Unit.getCategory(target) -- toujours cassé
+
+							local desc = target:getDesc()
+							local unitCat = desc.category
+
+							-- env.info("DCE_EventsTracker Unit Category "..tostring(unitCat).." _: "..tostring(Unit_Category[unitCat]))
+
+
+							if unitCat and (unitCat == Unit.Category.AIRPLANE or unitCat == Unit.Category.HELICOPTER) then
+
+								if target:isActive() and target:inAir() then
+
+									local target_unitId = target:getID()
+
+									local target_point = target:getPoint()
+
+									local target_pos = target:getPosition() -- Obtenir la position et l'orientation de la cible
+
+									-- Heading (cap)
+									local heading = math.atan2(target_pos.x.z, target_pos.x.x)
+									heading = math.deg(heading) -- Conversion en degrés
+									if heading < 0 then
+										heading = heading + 360 -- Ajuster pour avoir un angle positif (0-360°)
+									end
+									-- Arrondi au multiple de 5 le plus proche
+									heading = math.floor((heading + 2.5) / 5) * 5
+
+									local target_coalition = target:getCoalition() -- Récupère la coalition de la cible
+
+									local target_typeName = Object.getTypeName(target)
+
+									target_tracks[ewr_side][target_unitId] = {
+										point = target_point,
+										category = unitCat,
+										qte = 1,
+										heading = heading,
+										coalition = target_coalition,
+										typeName = target_typeName,
+										position = target_pos,
+									}
+								end
+
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	-- _affiche(target_tracks, "DCE_speakEWR target_tracks")
+
+
+
+	--##############################################################
+	--regroupement des tracks, pour eviter d'en avoir de trop
+	--################################################################
+	local groupedTracks = {} -- Table pour stocker les groupes regroupés
+	local groupingDistance = 3000 -- Distance maximale en mètres
+	local altitudeTolerance = 1500 -- Tolérance d'altitude en mètres
+	local orientationTolerance = 180 -- Tolérance de cap en degrés
+
+	-- Fonction pour calculer la distance entre deux points 3D
+	local function getDistance3D(point1, point2)
+		local dx = point1.x - point2.x
+		local dy = point1.y - point2.y
+		local dz = point1.z - point2.z
+		return math.sqrt(dx^2 + dy^2 + dz^2)
+	end
+
+	-- Parcourir chaque coalition dans target_tracks
+	for coalitionName, coalitionTracks in pairs(target_tracks) do
+		groupedTracks[coalitionName] = {} -- Initialiser la table pour cette coalition
+
+		-- Itérer sur les avions de la coalition
+		for trackId, trackData in pairs(coalitionTracks) do
+			local foundGroup = false
+
+			-- Vérifier si ce track correspond à un groupe existant
+			for _, group in ipairs(groupedTracks[coalitionName]) do
+				if getDistance3D(group.point, trackData.point) <= groupingDistance
+					and math.abs(group.point.y - trackData.point.y) <= altitudeTolerance
+					and math.abs((group.heading - trackData.heading) % 360) <= orientationTolerance
+					and group.typeName == trackData.typeName then
+
+					-- Incrémenter le nombre d'avions dans le groupe
+					group.qte = group.qte + 1
+					foundGroup = true
+					break
+				end
+			end
+
+			-- Si aucun groupe trouvé, créer un nouveau groupe avec les données de cet avion
+			if not foundGroup then
+				table.insert(groupedTracks[coalitionName], {
+					category = trackData.category,
+					coalition = trackData.coalition,
+					heading = trackData.heading,
+					point = trackData.point,
+					qte = 1, -- Initialement 1 avion
+					typeName = trackData.typeName,
+					position = trackData.position,
+				})
+			end
+		end
+	end
+
+	-- Résultat
+	-- env.info("Regroupement terminé. Nombre de groupes par coalition :")
+	-- for coalitionName, groups in pairs(groupedTracks) do
+	-- 	env.info(coalitionName .. ": " .. tostring(#groups) .. " groupes")
+	-- end
+	--##############################################################
+	--################################################################
+
+
+	-- if camp.debug then
+	-- 	local current_time = timer.getTime()
+	-- 	local logStr = "groupedTracks = " .. TableSerialization(groupedTracks, 0)
+	-- 	local logFile = io.open(PathDCE.."Debug\\".. "_groupedTracks_"..current_time..".lua", "w")
+	-- 	if logFile then
+	-- 		logFile:write(logStr)
+	-- 		logFile:close()
+	-- 	else
+	-- 		env.info("DCE_Custom_Altitude_: Failed to open log file for writing.")
+	-- 	end
+	-- end
+
+	local function roundTo2NmUp(number)
+		-- Diviser le nombre par 2 pour travailler avec des pas de 2 NM
+		local scaled = number / 2
+		-- Arrondir à l'entier supérieur le plus proche
+		local rounded = math.ceil(scaled)
+		-- Revenir à l'échelle d'origine en multipliant par 2
+		return rounded * 2
+	end
+
+
+	local function calculateAspect(myPos, enemy)
+		local aspect = "UNKNOWN"
+
+		-- Récupérer la position et l'orientation de l'ennemi
+		-- local enemyPos = enemy:getPosition()
+		-- local forward = enemyPos.x -- Forward vector (direction de l'ennemi)
+		-- local targetPos = enemy:getPoint() -- Position de l'ennemi
+
+		local enemyPos = enemy.position
+		local forward = enemyPos.x -- Forward vector (direction de l'ennemi)
+		local targetPos = enemy.point -- Position de l'ennemi
+
+		-- Calcul du vecteur relatif de l'ennemi à moi
+		local dx = myPos.x - targetPos.x
+		local dz = myPos.z - targetPos.z
+		local relative = {x = dx, z = dz}
+
+		-- Produit scalaire pour l'angle
+		local dot_product = forward.x * relative.x + forward.z * relative.z
+		local magnitude_forward = math.sqrt(forward.x^2 + forward.z^2)
+		local magnitude_relative = math.sqrt(relative.x^2 + relative.z^2)
+		local angle = math.deg(math.acos(dot_product / (magnitude_forward * magnitude_relative)))
+
+		-- Produit vectoriel pour le signe
+		local cross_product = forward.x * relative.z - forward.z * relative.x
+		if cross_product < 0 then
+			angle = -angle -- Angle négatif si à gauche
+		end
+
+		-- Déterminer l'aspect en fonction des seuils logiques
+		if angle > -25 and angle < 25 then
+			aspect = "HOT" -- Approche directe
+		elseif angle > -70 and angle < 70 then
+			aspect = "FLANK" -- Oblique
+		elseif angle > -110 and angle < 110 then
+			aspect = "BEAM" -- Perpendiculaire
+		elseif angle > -180 and angle < 180 then
+			aspect = "DRAG" -- S'éloigne obliquement
+		else
+			aspect = "COLD" -- Fuite directe
+		end
+
+		return aspect, angle
+	end
+
+
+	-- Définir les camps et catégories à parcourir
+	local coalitions = {coalition.side.BLUE, coalition.side.RED}
+	local categories = {Group.Category.AIRPLANE, Group.Category.HELICOPTER}
+
+	-- Itérer sur chaque camp pour trouver les joueurs
+	for _, sideNum in ipairs(coalitions) do
+		-- Itérer sur chaque catégorie
+		for _, category in ipairs(categories) do
+			-- Obtenir les groupes pour le camp et la catégorie
+			local groups = coalition.getGroups(sideNum, category)
+
+			for _, gp in pairs(groups) do
+
+				local wingman = gp:getUnits()
+
+				for _, _unit in ipairs(wingman) do
+					if _unit and _unit:isActive()  then --and _unit:inAir()
+						local playerName =  _unit:getPlayerName()
+
+						-- pour eviter des calculs inutil, une fois qu'on a les joueurs on cherche la distance pour reclasser la table en fonction de ça
+						-- a faire pour chaque joueur, afin que l'information qui lui soit donné correspondent
+						if playerName and EWR_optionPlayer[playerName].EWR_on then
+							local player = _unit
+							local playerId = Unit.getID(player)
+							local playerPoint = player:getPoint()				--get target point
+
+							local targetTracks_km_thisPlayer = {}
+
+							for  _, targets in pairs(groupedTracks) do
+								for _, target in pairs(targets) do
+
+									if target and type(target) == "table" and target.point.x and target.point.y then
+
+										-- Calcul de la distance
+										local dx = target.point.x - playerPoint.x
+										local dz = target.point.z - playerPoint.z
+										local distance = math.sqrt(dx^2 + dz^2)
+
+										target.distance = distance
+										table.insert(targetTracks_km_thisPlayer, target)
+									end
+								end
+							end
+
+							-- triage de la table en fonction de la distance
+							table.sort(targetTracks_km_thisPlayer, function(a,b) return a.distance < b.distance  end)
+
+							local i = 1
+							for _, target in pairs(targetTracks_km_thisPlayer) do
+								-- Conversion des distances
+								local distanceKm = math.floor(target.distance / 1000) -- En kilomètres
+								local distanceNm = roundTo2NmUp(target.distance / 1852) -- En miles nautiques, arrondi à 2 Nm près
+								local altitudeFt = math.floor((target.point.y * 3.281) / 1000) * 1000 -- Altitude en pieds
+
+
+								-- Calcul du bearing
+								local dx = target.point.x - playerPoint.x
+								local dz = target.point.z - playerPoint.z
+								local angleRad = math.atan2(dz, dx) -- Angle en radians
+								local bearing = math.deg(angleRad) -- Conversion en degrés
+								if bearing < 0 then
+									bearing = bearing + 360 -- Ajuster pour un cap de 0 à 360°
+								end
+
+								-- Arrondi au multiple de 5 le plus proche
+								bearing = math.floor((bearing + 2.5) / 5) * 5
+
+								local player_coalition = player:getCoalition()
+								local aspect = ""
+								local status = "Contact"
+								if target.coalition and target.coalition ~= 0 and target.coalition ~= player_coalition then
+									status = "ENEMY"
+									aspect = calculateAspect(playerPoint, target)
+								else
+									status = "Friend"
+								end
+
+								local catTarget = "aircraft"
+								if target.category and target.category == Unit.Category.HELICOPTER  then
+									catTarget = "helicopter"
+								end
+
+
+
+								-- env.info(target.qte.." "..status.." "..catTarget.." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft")
+
+								-- Affichage si la distance est dans les limites
+								if distanceKm <= 100 then
+									trigger.action.outTextForUnit(playerId, target.qte.." "..status.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft", 20, false)
+									-- trigger.action.outTextForUnit(unitId, "Target Bearing: "..tostring(bearing).." |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft", 8, false)
+								end
+
+								i = i + 1
+								if i > 5 then break end
+							end
+						end
+
+					end
+				end
+			end
+		end
+	end
+
+	return timer.getTime() + 30
+
+end
+
+
+--////////////////////////////////////////////////////////////////////////////////////////////
+--test EWR (fin)
 
 
 EventHandler2 = {}
@@ -2908,13 +3317,13 @@ function EventHandler2:onEvent(event)
 		if event.initiator and Object.getCategory(event.initiator) ~= Object.Category.STATIC and event.initiator:getPlayerName() then
 			env.info("DCE_EventHandler2 PASSE BIRTH 001b ")
 
-			local Gname = event.initiator:getPlayerName()
-			local Uid = event.initiator:getID()
-			local Group = event.initiator:getGroup()
+			local playerName = event.initiator:getPlayerName()
+			-- local Uid = event.initiator:getID()
+			local groupObject = event.initiator:getGroup()
 			local gpGid = event.initiator:getGroup():getID()
 
-			if gpGid and Group and Gname  then
-				addFuncs(gpGid, Group)
+			if gpGid and groupObject and playerName  then
+				addFuncs(gpGid, groupObject, playerName)
 			end
 		end
 	elseif not event.place then
@@ -2923,15 +3332,16 @@ function EventHandler2:onEvent(event)
 
 			_affiche(event, "event event.subPlace ")
 			if event.initiator and event.initiator:getPlayerName() then
-				local Gname = event.initiator:getPlayerName()
+				local playerName = event.initiator:getPlayerName()
 				local Uid = event.initiator:getID()
-				local Group = event.initiator:getGroup()
+				local groupObject = event.initiator:getGroup()
 
 				if Group then
 					-- local gpGid = event.initiator:getGroup():getID()		--1299: attempt to index a nil value
 					local gpGid =Group:getID()		--1300: attempt to index a nil value
-					if gpGid  and Group and Gname then
-						addFuncs(gpGid, Group)
+					if gpGid and Group and groupObject then
+						-- addFuncs(gpGid, Group)
+						addFuncs(gpGid, groupObject, playerName)
 					end
 				end
 			end
@@ -2941,10 +3351,10 @@ function EventHandler2:onEvent(event)
 			env.info("DCE_EventHandler2 PASSE 003 LAND or CRASH")
 
 			if event.initiator  then
-				env.info( "DCE_groundDamagedFlyingMachine B getPlayerName detected ? ")
+				env.info( "DCE_GroundDamagedFlyingMachine B getPlayerName detected ? ")
 
 				local initDesc = event.initiator:getDesc()
-				_affiche(initDesc, "DCE_groundDamagedFlyingMachine initDesc")
+				_affiche(initDesc, "DCE_GroundDamagedFlyingMachine initDesc")
 
 				local initiatorPilotName = event.initiator:getPlayerName()
 				local unitName = event.initiator:getName()
@@ -2958,9 +3368,9 @@ function EventHandler2:onEvent(event)
 
 
 
-				env.info( "DCE_groundDamagedFlyingMachine C1 initiatorPilotName "..tostring(initiatorPilotName).." lifePourcent: "..tostring(lifePourcent))
-				env.info( "DCE_groundDamagedFlyingMachine C2 init_life "..tostring(init_life).." life: "..tostring(life))
-				env.info( "DCE_groundDamagedFlyingMachine C3 event.initiator._id "..tostring(event.initiator._id))
+				env.info( "DCE_GroundDamagedFlyingMachine C1 initiatorPilotName "..tostring(initiatorPilotName).." lifePourcent: "..tostring(lifePourcent))
+				env.info( "DCE_GroundDamagedFlyingMachine C2 init_life "..tostring(init_life).." life: "..tostring(life))
+				env.info( "DCE_GroundDamagedFlyingMachine C3 event.initiator.id_ "..tostring(event.initiator.id_))
 
 				if initiatorPilotName and initiatorPilotName ~= "" then
 					isPlayer = true
@@ -2968,7 +3378,7 @@ function EventHandler2:onEvent(event)
 
 				--TODO ajouter une proximité Base & Farp pour ne pas le faire dessus
 				if lifePourcent < 100 then
-					env.info( "DCE_groundDamagedFlyingMachine D detected ? event.initiator.id_ "..tostring(event.initiator.id_))
+					env.info( "DCE_GroundDamagedFlyingMachine D detected ? event.initiator.id_ "..tostring(event.initiator.id_))
 
 					local Group = event.initiator:getGroup()
 					local gpGid = Group:getID()
@@ -2990,17 +3400,17 @@ function EventHandler2:onEvent(event)
 						categoryId = categoryId,
 					}
 
-					-- if not groundDamagedFlyingMachine[gpGid] then groundDamagedFlyingMachine[gpGid] = {} end
-					-- table.insert(groundDamagedFlyingMachine[gpGid], eventData)
+					-- if not GroundDamagedFlyingMachine[gpGid] then GroundDamagedFlyingMachine[gpGid] = {} end
+					-- table.insert(GroundDamagedFlyingMachine[gpGid], eventData)
 
 
 
-					if not groundDamagedFlyingMachine[event.initiator.id_] then groundDamagedFlyingMachine[event.initiator.id_] = {} end
-					table.insert(groundDamagedFlyingMachine[event.initiator.id_], eventData)
+					if not GroundDamagedFlyingMachine[event.initiator.id_] then GroundDamagedFlyingMachine[event.initiator.id_] = {} end
+					table.insert(GroundDamagedFlyingMachine[event.initiator.id_], eventData)
 
 					-- local current_time = timer.getTime()
 					-- if camp.debug then
-					-- 	local logStr = "DamagedFM = " .. TableSerialization(groundDamagedFlyingMachine, 0)
+					-- 	local logStr = "DamagedFM = " .. TableSerialization(GroundDamagedFlyingMachine, 0)
 					-- 	local grpnameClean = unitName:gsub('[%p%c%s]', '_')
 					-- 	local logFile = io.open(PathDCE.."Debug\\"..event.initiator.id_.."_"..grpnameClean.."_".. "DamagedFM_"..current_time..".lua", "w")
 					-- 	logFile:write(logStr)
@@ -3021,17 +3431,19 @@ world.addEventHandler(EventHandler2)
 
 --sur certaines map en solo (Syria) l'evenement Birth n'est pas detectée
 local function timerPlayerMenu(arg)
-	if (radioCommands == nil or #radioCommands == 0) and timer.getTime() < 10   then
-		local Uid, Group, gpGid
+	if (radioCommands == nil or #radioCommands == 0) and timer.getTime() < 10 then
+		local Uid, groupObject, gpGid, playerName
 		local playerObj = localGetPlayerObj()
 		if playerObj then
-			Uid = playerObj:getID()
-			Group = playerObj:getGroup()
+			-- Uid = playerObj:getID()
+			playerName = playerObj:getPlayerName()
+			groupObject = playerObj:getGroup()
 			gpGid = playerObj:getGroup():getID()
 		end
 
 		if gpGid and Group then
-			addFuncs(gpGid, Group)
+			-- addFuncs(gpGid, Group)
+			addFuncs(gpGid, groupObject, playerName)
 		end
 	end
 end
@@ -3100,10 +3512,16 @@ timer.scheduleFunction(avoidArea, nil, timer.getTime() + 5)
 
 timer.scheduleFunction(getLL_TargetPosition, nil, timer.getTime() + 20)
 
+timer.scheduleFunction(speakEWR, nil, timer.getTime() + 30)
+
+timer.scheduleFunction(setErrorMessageBoxShedul, nil, timer.getTime() + 30)
+
 
 
 _affiche(AI.Option.Air.val, "AI.Option.Air.val")
 
 _affiche(DCS_CategoryById, "DCE_DCS_CategoryById")
+
+_affiche(Object.Category, "Object.Category")
 
 env.info("ACRF10 end of loading AdCR10 script ")

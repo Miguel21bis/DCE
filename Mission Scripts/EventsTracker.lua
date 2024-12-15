@@ -22,9 +22,6 @@ versionDCE["Mission Scripts\EventsTracker.lua"] = "1.12.71"
 -- modification M18_g		despawn (g info bad coalition)(e: option confMod)(d: active unit) (cf despawn/destroy Plane on BaseAirStart) destroy Plane Landing CV + FARP 
 ------------------------------------------------------------------------------------------------------- 
 
-if not camp.debugInGamePopup then
-	env.setErrorMessageBoxEnabled(false)
-end
 
 env.info("DCETestingConstante: Unit.Category.AIRPLANE "..tostring(Unit.Category.AIRPLANE))
 env.info("DCETestingConstante: Unit.Category.HELICOPTER "..tostring(Unit.Category.HELICOPTER))
@@ -356,12 +353,39 @@ function eventHandlerDCE:onEvent(event)
 	-- S_EVENT_POSTPONED_LAND = 56, 
 	-- S_EVENT_MAX = 57,
 
-	env.info( "EventT  id: "..tostring(event.id).."_type_"..tostring(log_entry.type))
+	env.info( "DCE_EventsTracker  id: "..tostring(event.id).." _type_ : "..tostring(log_entry.type))
 	-- _affiche(event, "event EventTracker")
 	-- trigger.action.outText("EventT  id: "..tostring(event.id).."_type_"..tostring(log_entry.type), 3)
 
+	if event and event.id and Info_event and Info_event[tonumber(event.id)] then
+		local idLabel = tostring(Info_event[tonumber(event.id)])
+		env.info("DCE_EventsTracker event.id "..tostring(event.id).." " ..idLabel)
+	end
+
 	if not eventIdTotal[event.id] then eventIdTotal[event.id] = 0 end
 	eventIdTotal[event.id] = eventIdTotal[event.id] + 1
+
+	--recupere le camp une fois pour toute:
+	local initiatorSideName
+	local targetSideName
+	if event.initiator then
+		local cat = Object.getCategory(event.initiator)
+		env.info("DCE_EventsTracker initiator Category "..tostring(cat).." _: "..tostring(Object_Category[cat]))
+		if cat ~= Object.Category.SCENERY then
+			local initiatorCoalition = event.initiator:getCoalition()
+			initiatorSideName = coalitionIdNumeric[tonumber(initiatorCoalition)]
+		end
+	end
+
+	if event.target then
+		local cat = Object.getCategory(event.target)
+		env.info("DCE_EventsTracker target Category "..tostring(cat).." _: "..tostring(Object_Category[cat]))
+		if cat ~= Object.Category.SCENERY then
+			local targetCoalition = event.initiator:getCoalition()
+			targetSideName = coalitionIdNumeric[tonumber(targetCoalition)]
+		end
+	end
+
 
 	if log_entry.type == "eject"  then
 		if event.initiator then
@@ -446,11 +470,17 @@ function eventHandlerDCE:onEvent(event)
 
 				table.insert(EjectionSeatFrequency, ejectionSeatTemp)
 			end
+			if initiatorSideName then 
+				log_entry.initiatorSideName = initiatorSideName
+			end
+			if targetSideName then 
+				log_entry.targetSideName = targetSideName
+			end
 		end
-	end
+	-- end
 
 
-	if log_entry.type == "pilot seat separation"  then
+	elseif log_entry.type == "pilot seat separation"  then
 		env.info( "DCE_EventT  PASSE A pilot seat separation, id: "..tostring(event.id).."_type_"..tostring(log_entry.type))
 
 		if event.initiator then
@@ -513,13 +543,19 @@ function eventHandlerDCE:onEvent(event)
 
 				-- CheckImmediatSAR(event, selectedEjection)
 			end
+			if initiatorSideName then 
+				log_entry.initiatorSideName = initiatorSideName
+			end
+			if targetSideName then 
+				log_entry.targetSideName = targetSideName
+			end
 		else
 			env.info( "DCE_EventT  PASSE M pilot seat separation, id: "..tostring(event.id).."_type_"..tostring(log_entry.type))
 			_affiche(event, "BUG pilot seat separation event ")
 		end
-	end
+	-- end
 
-	if  log_entry.type == "pilot land"  then
+	elseif  log_entry.type == "pilot land"  then
 		if event.initiator then
 			local ptEvent = event.initiator:getPoint()
 			if ptEvent  and  ptEvent.x then
@@ -605,11 +641,17 @@ function eventHandlerDCE:onEvent(event)
 					end
 				end
 			end
+			if initiatorSideName then 
+				log_entry.initiatorSideName = initiatorSideName
+			end
+			if targetSideName then 
+				log_entry.targetSideName = targetSideName
+			end
 		end
-	end
+	-- end
 
 
-	if log_entry.type == "pilot dead"  then --log_entry.type == "pilot dead" or 
+	elseif log_entry.type == "pilot dead"  then --log_entry.type == "pilot dead" or 
 
 		if event.initiator then
 			local ptEvent = event.initiator:getPoint()
@@ -623,10 +665,18 @@ function eventHandlerDCE:onEvent(event)
 				-- trigger.action.smoke(PilotVec3, trigger.smokeColor.Blue)
 			end
 		end
-	end
+
+		if initiatorSideName then 
+			log_entry.initiatorSideName = initiatorSideName
+		end
+		if targetSideName then 
+			log_entry.targetSideName = targetSideName
+		end
+
+	-- end
 
 	-- miguel modification M18.d destroy Plane Landing CV
-	if (log_entry.type == "land" and event.place)  then										--hit event with initiator or any other event (excludes hit events without initiator, like collisions)		
+	elseif (log_entry.type == "land" and event.place)  then										--hit event with initiator or any other event (excludes hit events without initiator, like collisions)		
 		env.info("DCE_Landing Passe 00 ")
 
 		if event.initiator then
@@ -651,7 +701,7 @@ function eventHandlerDCE:onEvent(event)
 			-- 	SHIP = 2,
 			-- }
 			-- if event.place:getCategory() == Airbase.Category.SHIP    and not event.initiator:getPlayerName() then 
-			if Airbase.getCategory(event.place) == Airbase.Category.SHIP    and not event.initiator:getPlayerName() then 											-- category ship
+			if Airbase.getCategory(event.place) == Airbase.Category.SHIP and not event.initiator:getPlayerName() then 											-- category ship
 				env.info("DCE_Landing Passe C ")
 
 				--relance un Pedro si c'est un Pedro qui se pose
@@ -740,11 +790,19 @@ function eventHandlerDCE:onEvent(event)
 
 			timer.scheduleFunction(health1s, {healthTemp, event}, timer.getTime() + 1)
 		end
-	end
+	-- end
 
 	-- debug ET01.g
-	if log_entry.type and ((log_entry.type == "hit" and event.initiator) or log_entry.type ~= "hit" ) then												--hit event with initiator or any other event (excludes hit events without initiator, like collisions) 	
+	elseif log_entry.type and ((log_entry.type == "hit" and event.initiator) or log_entry.type ~= "hit" ) then												--hit event with initiator or any other event (excludes hit events without initiator, like collisions) 	
 		if event.initiator	then																													--event has an initiator	
+			
+			if event and event.id and Info_event and Info_event[tonumber(event.id)] then
+				local idLabel = tostring(Info_event[tonumber(event.id)])
+				env.info("DCE_EventsTracker event.id "..tostring(event.id).." " ..idLabel)
+			end
+
+			_affiche(event.initiator, "DCE_EventsTracker event.initiator")
+			
 			local initDesc = event.initiator:getDesc()																									--debug ET01	
 			if initDesc.displayName then
 				log_entry.initiator = event.initiator:getName()																							--store initiator name
@@ -761,6 +819,13 @@ function eventHandlerDCE:onEvent(event)
 
 			if Object.getCategory(event.initiator) ~= Object.Category.SCENERY and not initDesc.missileCategory  then   --and event.initiator:getID()				--initator is not a scenery object debug_ET01.h
 				log_entry.initiatorMissionID = event.initiator:getID()																					--store ID
+			end
+
+			if initiatorSideName then 
+				log_entry.initiatorSideName = initiatorSideName
+			end
+			if targetSideName then 
+				log_entry.targetSideName = targetSideName
 			end
 		end
 		if event.target   then																														--event has a target
@@ -861,22 +926,6 @@ function eventHandlerDCE:onEvent(event)
 		end
 		table.insert(CustomLog, log_entry)																					--add log entry to custom log
 	end
-
-	-- --Xsecondes apres le hit, la valeur est plus proche de la réalité
-	-- function addHitXs(hitTemp)
-	-- 	if scenLog and scenLog[hitTemp.scenaryName] and scenLog[hitTemp.scenaryName].event == "S_EVENT_DEAD" then
-	-- 		env.info( "DCE_EventT addHit1s  B return S_EVENT_DEAD "..tostring(hitTemp.scenaryName))
-	-- 		return
-	-- 	end
-
-	-- 	local lifeActual = hitTemp.objScen:getLife()
-	-- 	local lifePourcent = (lifeActual/hitTemp.hightLife) * 100
-
-
-	-- 	scenLog[hitTemp.scenaryName]["life_Xs_"..math.floor(timer.getTime())] = lifeActual
-	-- 	scenLog[hitTemp.scenaryName]["lifePourcent_Xs_"..math.floor(timer.getTime())] = lifePourcent
-
-	-- end
 
 	--mission end
 	if event.id == world.event.S_EVENT_MISSION_END then
@@ -1032,6 +1081,8 @@ function eventHandlerDCE:onEvent(event)
 						z = initPoint.z,
 						description = descr,
 						event = "S_EVENT_HIT",
+						initiatorSideName = initiatorSideName,
+						targetSideName = targetSideName
 					}
 
 					timer.scheduleFunction(addHit1s, hitTemp, timer.getTime() + 1)

@@ -1,9 +1,9 @@
 --To evaluate the DCS debrief.log, update the campaign status files/OOBs, generate a Debriefing and initiate generation of next campaign mission
 --Initiated by MissionEnd.lua running from within DCS
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  springCleaning
+-- last modification:  springCleaning M33_n
 if not versionDCE then versionDCE = {} end
-versionDCE["DEBRIEF_Master.lua"] = "1.16.122"
+versionDCE["DEBRIEF_Master.lua"] = "1.17.136"
 -------------------------------------------------------------------------------------------------------
 -- adjustment_n				(n new targetlist)(m oob_scen ==0)(l AcceptedMission again)(k BugList)(j PairsByKeys)(i global TabTask)(g mise a niveau)(e: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form) 
 -- debug_d	 				(cd: EndMission)
@@ -19,20 +19,25 @@ versionDCE["DEBRIEF_Master.lua"] = "1.16.122"
 -- modification M40_f		Template Active GroundGroup moving front (f: sideBase)
 -- modification M38_x		Check and Help CampaignMaker
 -- modification M35_f		version ScriptsMod + camp (f camp.version)(e: ScriptsMod_version from UTIL_Changelog)
+-- modification M33_n 		Custom Briefing (n don't overwrite old briefing info)
 -- modification M14			Versionning
 -- modification M11A_b_l	Multiplayer (bl MP overRide) (g %target alive)(t:display name )(s: T choice bug)(q: displays all tasks of several squadrons)
 -------------------------------------------------------------------------------------------------------
 
 BugList = {}
 AcceptedMission = false
-DebuGenTxt = ""					--debug cumulutatif de ATO_Generator
+DebuGenTxt = ""																				--debug cumulutatif de ATO_Generator
 MissionInstance = 0
 TimeAlreadyAdded = false
+
+Briefing_status = ""																		--text string to be added to next briefing (status reports are amended for each mission generation attempt until mission is succesfully generated)
+Briefing_oob_text_red = ""																	--text string to be added to next briefing (red repair and reinforcements)
+Briefing_oob_text_blue = ""																	--text string to be added to next briefing (blue repair and reinforcements)
 
 local function AcceptMission()
 	local m = ""
 	repeat
-		print("\n\n Night or Day ? : "..Daytime)													-- info day or not
+		print("\n\n Night or Day ? : "..Daytime)											-- info day or not
 		print("\n\nAccept Mission ?:")
 
 		print("a".." - Accept mission")
@@ -213,10 +218,9 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_StatsEvaluation.lua"
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_DestroyTarget.lua")												--Mod11.j
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
 
---update campaign time
-local elapsed_time = math.floor(events[#events].t - events[1].t)								--mission runtime in seconds
-camp.time = camp.time + elapsed_time															--add mission time to campaign time
-
+-- --update campaign time
+-- local elapsed_time = math.floor(events[#events].t - events[1].t)								--mission runtime in seconds
+-- camp.time = camp.time + elapsed_time															--add mission time to campaign time
 
 --create and view Debriefing file for mission
 dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
@@ -292,6 +296,10 @@ until input == "y" or input == "yes" or input == "n" or input == "no"
 print("\n\n")
 
 if input == "y" or input == "yes" then
+
+
+	Briefing_oob_text_red = FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year).. ".\n"
+	Briefing_oob_text_blue = FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year).. ".\n"
 
 	AcceptedMission = true
 	dofile("../../../ScriptsMod."..versionPackageICM.."/MAIN_AcceptMission.lua")
@@ -575,10 +583,10 @@ if input == "y" or input == "yes" then
 	-- camp.mission = camp.mission + 1	
 
 	--generate next campaign mission
-	Briefing_status = ""																		--text string to be added to next briefing (status reports are amended for each mission generation attempt until mission is succesfully generated)
-	Briefing_oob_text_red = ""																	--text string to be added to next briefing (red repair and reinforcements)
-	Briefing_oob_text_blue = ""																	--text string to be added to next briefing (blue repair and reinforcements)
+
 	PlayerFlight = false																		--variable to control mission generation loop
+	Briefing_oob_text_red = Briefing_oob_text_red .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year).. ".\n"
+	Briefing_oob_text_blue = Briefing_oob_text_blue .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year).. ".\n"
 
 	repeat
 		print("Generating Next Mission.\n")

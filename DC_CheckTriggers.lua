@@ -2,12 +2,12 @@
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification: debug_g
+-- last modification: cleanCode_g M33_n
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_CheckTriggers.lua"] = "1.16.93"
+versionDCE["DC_CheckTriggers.lua"] = "1.16.95"
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_f
+-- cleanCode_g				(g springCleaning)
 -- adjustment_m				(m add new country if template need)(L win totalAirUnitAliveBySide)(k \\" to \")(j moveToAnotherBaseOrDeactivate name & attributes)(i add moveToAnotherBaseOrDeactivate)(h taskSelected)(g airReinforceDelay)(f add targetIsActive)(e check found activate target)(d totalAirUnitAliveBySide)(c add automaticReinforce) (a boat CampTotalTimeS)
 -- debug_g					(fg -nan(ind) Return.BaseAlive)(e link of briefing)(d: ensures that DCE chooses between several ship patrol areas)(a: n'ajoute pas le texte s'il existe d�j�)
 -- modification M73_d		automatic squad transfer based on available/unavailable runways/bases (c disabledByDCE)
@@ -20,7 +20,7 @@ versionDCE["DC_CheckTriggers.lua"] = "1.16.93"
 -- modification M48_h		Accept result mission (h: debug firstNews) (g: addImage trigger)(f: debug)(d: garde en memoire le txt camp["Briefing_text"])
 -- modification M40_l		Template Active GroundGroup moving front (l: TemplateDeactivate)(k: update route)(ij: bug insert) (fgh: sideBase)(e: heading unite & group)(d: movedXY bug) (c: new unitId) (b: bug 2.7)
 -- modification M38_j		Check and Help CampaignMaker (ij more info)(h: KillTarget step by step)
--- modification M33_m 		Custom Briefing (lm: use  DictKey_descriptionText)
+-- modification M33_n 		Custom Briefing (n don't overwrite old briefing info)(lm: use  DictKey_descriptionText)
 -- modification M19_f		RepairGround
 -- modification M11			Multiplayer
 ------------------------------------------------------------------------------------------------------- 
@@ -440,7 +440,7 @@ Action = {}
 		end
 
 		if clear then
-			Briefing_status = ""												--clear briefing text from previous mission instances
+			-- Briefing_status = ""												--clear briefing text from previous mission instances
 			Briefing_text = Briefing_text .. arg .. " \n \n"					--add trigger text to briefing text of this mission instance with double new line
 			-- print("DcCT PASSE C "..Briefing_text)
 		else
@@ -873,6 +873,7 @@ Action = {}
 		return transfertOk
 	end
 
+
 	--set unit playable
 	function Action.AirUnitPlayer(unitName, state)
 		for side_name,side in pairs(oob_air) do									--iterate through sides in oob_air
@@ -883,6 +884,7 @@ Action = {}
 			end
 		end
 	end
+
 
 	--send reinforcement aircraft from one unit to another
 	function Action.AirUnitReinforce(sourceName, destName)						--(sourceName, destName, destNumber) destNumber => deprecated
@@ -1016,17 +1018,20 @@ Action = {}
 
 				local text
 				if trans == 1 then
-					text = "" .. trans .. " replacement " .. ReplaceTypeName(destUnit.type) .. " has been transferred from " .. sourceName .. " to " .. destName .. " (maxtrans: " .. maxtrans ..  " Reserve: " .. sourceUnitRosterReserve ..  " normal.assigned: " .. destUnit.number ..")".. ". \n \n"	--text to be added to briefing/oob
-				else
-					text = "" .. trans .. " replacement " .. ReplaceTypeName(destUnit.type) .. " have been transferred from " .. sourceName .. " to " .. destName .. " (request: " .. request ..") (maxtrans: " .. maxtrans ..  " Reserve: " .. sourceUnitRosterReserve ..  " normal.assigned: " .. destUnit.number ..")".. ". \n \n"	--text to be added to briefing/oob
+					text = "" .. trans .. " replacement " .. ReplaceTypeName(destUnit.type) .. " has been transferred from " .. sourceName .. " to " .. destName .. ". \n \n"	--text to be added to briefing/oob
+				elseif trans > 1 then
+				-- else
+					text = "" .. trans .. " replacement " .. ReplaceTypeName(destUnit.type) .. " have been transferred from " .. sourceName .. " to " .. destName .. ". \n \n"	--text to be added to briefing/oob
 				end
 
-				if debugKT then print("DcCT "..tostring(text)) end
+				if text then
+					if debugKT then print("DcCT "..tostring(text)) end
 
-				if destSide == "blue" then										--side is blue
-					Briefing_oob_text_blue = Briefing_oob_text_blue .. text		--add to blue briefing oob text
-				elseif destSide == "red" then									--side is red
-					Briefing_oob_text_red = Briefing_oob_text_red .. text		--add to red briefing oob text
+					if destSide == "blue" then										--side is blue
+						Briefing_oob_text_blue = Briefing_oob_text_blue .. text		--add to blue briefing oob text
+					elseif destSide == "red" then									--side is red
+						Briefing_oob_text_red = Briefing_oob_text_red .. text		--add to red briefing oob text
+					end
 				end
 			end
 		end
@@ -2024,14 +2029,16 @@ if Briefing_status == nil then													--if briefing status string does not 
 	Briefing_oob_text_red = ""													--text string to be added to next briefing (red repair and reinforcements)
 	Briefing_oob_text_blue = ""													--text string to be added to next briefing (blue repair and reinforcements)
 end
-if BriefingImagesB == nil then
+
+if not BriefingImagesB then
 	BriefingImagesB = { }															--global table to hold information about briefing images to be added to miz mission file
 end
-if BriefingImagesR == nil then
+
+if not BriefingImagesR then
   BriefingImagesR = { }                             --global table to hold information about briefing images to be added to miz mission file
 end
 
-if camp.Briefing_text and camp.Briefing_text ~= nil and camp.Briefing_text ~= "" then
+if camp.Briefing_text and camp.Briefing_text ~= "" then
 	Briefing_text = camp.Briefing_text																--briefing text to be added this mission instance
 else
 
@@ -2217,44 +2224,6 @@ for baseName, base in pairs(db_airbases) do
 	end
 end
 
--- -- --**********************************************************************************
--- -- --active/desactive une base et ses unites/target si aucune unité n'est dessus
--- -- --**********************************************************************************
--- for db_baseName, db_base in pairs(db_airbases) do	
--- 	local foundUnitOnThisBase = false
--- 	for side_name, sideAir in pairs(oob_air) do						
--- 		for unit_n, unit in pairs(sideAir) do	
-
--- 			if unit.base == db_baseName and not unit.inactive then	
--- 				ActivateBaseAndAssociatedTargets(db_baseName, true)									
--- 				foundUnitOnThisBase = true
--- 				break									
--- 			end
-
--- 		end
--- 		if foundUnitOnThisBase then break end
--- 	end
-
--- 	--si une option existe sur 
--- 	-- 'Action.AirUnitBase("450 M-E/P-2", "Paphos Airbase")',
--- 	if not foundUnitOnThisBase then
--- 		ActivateBaseAndAssociatedTargets(db_baseName, false)	
--- 		-- if debugKT then print(" 	aucune unité, on desactive la base "..db_baseName) end	
--- 	end
--- end
-
-
-
--- --add date and time header for this mission instance briefing text
--- if Briefing_text ~= "" then														--brefing text from this mission instance exists and should be added to Briefing_status text
--- 	-- print("DcCT AVANT Briefing_text ")
--- 	-- print(tostring(Briefing_text))
-
--- 	Briefing_status = Briefing_status .. FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ": \n \n" .. Briefing_text		--add date and time, then add briefing text of this mission instance
--- 	-- print("DcCT APRES Briefing_text ")
--- 	-- print(tostring(Briefing_status))
--- 	-- os.execute 'pause'
--- end
 
 if debugKT then
 	_affiche(camp.flag, "Marqueur ou  CampFlag")

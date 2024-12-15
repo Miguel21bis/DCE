@@ -2,16 +2,16 @@
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification: adjustment_h
+-- last modification: cleanCode_e debug_e
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_Weather.lua"] = "1.6.22"
+versionDCE["DC_Weather.lua"] = "1.6.24"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_d						
--- adjustment_h						(h baseChoice)(f \\\n to \n)(e debug info)(d preset = nil)(c adds METAR to dynamic cloud presets, where possible) (b CampTotalTimeS)(a: high 2 days max)
--- debug_d							(d very bad weather during a cold sector)%chance pHigh pLow 
--- miguel21 modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
--- miguel21 modification M51_c		Moonphase
--- miguel21 modification M45_e		compatible with 2.7.0s  (e: debug cleaning)(d: less clounds in the PG)(c: debugWeather)
+-- cleanCode_e				(e springCleaning)					
+-- adjustment_h				(h baseChoice)(f \\\n to \n)(e debug info)(d preset = nil)(c adds METAR to dynamic cloud presets, where possible) (b CampTotalTimeS)(a: high 2 days max)
+-- debug_e					(e: cloud/METAR altitudes above 10000ft were not displayed)(d very bad weather during a cold sector)%chance pHigh pLow 
+-- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
+-- modification M51_c		Moonphase
+-- modification M45_e		compatible with 2.7.0s  (e: debug cleaning)(d: less clounds in the PG)(c: debugWeather)
 ------------------------------------------------------------------------------------------------------- 
 
 
@@ -1738,7 +1738,7 @@ for placeName, place in pairs(db_airbases) do
 			ceilingMeter =  math.floor(ceilingMeter / 100)
 		end
 
-		local	ceilingFt = baseIni * 3.28084
+		local ceilingFt = baseIni * 3.28084
 		if ceilingFt < 100 then
 			--
 		elseif ceilingFt < 1000 then
@@ -1767,10 +1767,13 @@ for placeName, place in pairs(db_airbases) do
 
 				local stringBase = math.floor((layer.base * 10) - deltaBase)
 				local baseCloud = ""
+
 				if stringBase < 10 then
 					baseCloud = "00"..stringBase
 				elseif stringBase < 100 then
 					baseCloud = "0" .. stringBase
+				else
+					baseCloud = "" .. stringBase
 				end
 
 
