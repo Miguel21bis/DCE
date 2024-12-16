@@ -1,11 +1,11 @@
 --To assign the player to a flight in the ATO
 --Initiated by Main_NextMission.lua 
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  cleanCode_e
+-- last modification:  cleancode_f
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_PlayerAssign.lua"] = "1.9.72"
+versionDCE["ATO_PlayerAssign.lua"] = "1.9.73"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_e
+-- cleancode_f				(f springCleaning)
 -- adjustment_d				(b: use io.stdin:read)(a:robust form) 
 -- Debug_b					(b number of aircraft assigned to MP)(a: supprime la table camp.player qui garde par erreur celle du dossier Active)
 -- modification M61_a		SAR

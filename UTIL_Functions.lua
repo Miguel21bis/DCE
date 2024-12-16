@@ -1,10 +1,10 @@
 --Various functions
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M80_a
+-- last modification: M80_a cleancode_g
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Functions.lua"] = "1.17.128"
+versionDCE["UTIL_Functions.lua"] = "1.17.129"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_f						
+-- cleancode_g				(g springCleaning)					
 -- adjustment_o				(n loadout code)(m Disp_time)(l add AFAC task)(k FormatTime)(i add InsertBugList(txt))(h use IsWesternCountry)(fg: add Loadout tiers)(e todo)(d:CheckConfModMaster )(c: fire Playable_m from conf_mod)
 -- debug_i					(i planeType)(h Tha\'lah)(g string.gsub(v, "\"", "\\\"" ))(f new generateId)(d UH to HF) Angle et Bearing des statics sur PA
 -- modification M80_a		use various tables, such as base name or aircraft type aliases

@@ -2,10 +2,11 @@
 --Returns route points, route lenght and route threat level (unavoided threats)
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  adjustment_n
+-- last modification:  cleancode_a
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_RouteGenerator.lua"] = "1.7.47"
+versionDCE["ATO_RouteGenerator.lua"] = "1.8.48"
 ------------------------------------------------------------------------------------------------------- 
+-- cleancode_a				(d springCleaning)
 -- adjustment_n				(n create assemblyPoint)(m add AFAC task)(l alti heli)k alti station on target)(j does not fly over the target)(i escort Transport)(h alti escorte helicoptere)(fg add axis patern)(e unit.helicopter)(d escort too low) (c: climb refueling)(a:alti diff en fonction du role dans le meme package)
 -- Debug_e					(e SEAD SAm)(d route[m + 1])(c:supprime trop de waypoint lors de l'escorte)(b:quand les EWR sont d�truit: on active les CAP, si les CAP on besoin d'EWR c'est nul)(a:target ligne 473 Reconnaissance)
 -- modification M66_a		add Runway Attack

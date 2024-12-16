@@ -1,11 +1,12 @@
 --explication
 ------------------------------------------------------------------------------------------------------- 
+-- cleancode_a				(a springCleaning)
 -- last modification: adjustment_c
 if not versionDCE then versionDCE = {} end
-versionDCE["DCEM_Function.lua"] = "1.1.4"
+versionDCE["DCEM_Function.lua"] = "1.2.5"
 -------------------------------------------------------------------------------------------------------
 -- adjustment_c			(c playerSide)(b add tabSquad)(a SAR & CSAR)
--- modification 
+-- cleancode_a			(a springCleaning)
 -------------------------------------------------------------------------------------------------------
 
 -- local pathScriptsMod = "C:/Users/Miguel/Saved Games/DCS_Installer/Mods/tech/DCE/ScriptsMod.NG"

@@ -1,14 +1,14 @@
 --Various DATA map 
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  updateData_r
+-- last modification:  cleanCode_a
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_DataMap.lua"] = "1.3.21"   
-
+versionDCE["UTIL_DataMap.lua"] = "1.4.22"
 ------------------------------------------------------------------------------------------------------- 
--- modification M78_b		LatLon positions added and unit display removed on MAP F10 (a UTM_Zone)
--- adjustment_a				(a middle of caucasus)
 -- updateData_r				(r marianaislands)(p syria AltitudeFloor)(o: add sinai)
+-- adjustment_a				(a middle of caucasus)
+-- cleanCode_a				(a springCleaning)
+-- modification M78_b		LatLon positions added and unit display removed on MAP F10 (a UTM_Zone)
 ------------------------------------------------------------------------------------------------------- 
 
 -- altitude plancher pour spawner des avions recovery client (sera surement utiliser pour spawn IA aussi, mais plus tard)

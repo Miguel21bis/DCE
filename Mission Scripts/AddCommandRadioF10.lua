@@ -5,14 +5,15 @@
 --player can request emergency resupply with S-3B's
 -- It is possible to send the whole PACK in RTB to avoid unnecessary losses. 
 ------------------------------------------------------------------------------------------------------- 
--- last modification  M78_a
+-- last modification  cleanCode_b adjustment_h M81_a
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\AddCommandRadioF10.lua"] = "1.12.44"
+versionDCE["Mission Scripts\AddCommandRadioF10.lua"] = "1.13.46"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_a				(a: remove RemovePlane)
--- adjustment_g				(g force RTB if bingo)(f ENI table)(e: add sar_F10)(d GetHeading)(c coalitionIdNumeric)(b group Item Radio)(a: ajust function trigo)
+-- cleanCode_b				(b springCleaning)(a: remove RemovePlane)
+-- adjustment_h				(h avoid SAM zone)(g force RTB if bingo)(f ENI table)(e: add sar_F10)(d GetHeading)(c coalitionIdNumeric)(b group Item Radio)(a: ajust function trigo)
 -- debug_g					(g no menu in SP)(f getCategory)(e getHeading Z)(d: tanker exist)n'affiche pas les messages d'error sauf à la fin de mission
 -- debug_bonfor_a			RTB from to inversé
+-- modification M81_a		text announcement of contacts as seen by EWR and SAM radar
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a dcs_to_gps)
 -- modification M69_a		getOut (a allows you to remove the pilot from a crashed helicopter, for immediate or later recovery)
 -- modification M68_a		add AFAC task
@@ -2957,8 +2958,8 @@ end
 -- end, nil, timer.getTime() + 10)
 
 
-collectGroundGroups()
-timer.scheduleFunction(scheduleToggle, nil, timer.getTime() + 360) -- Commence le cycle après 10 minutes
+-- collectGroundGroups()
+-- timer.scheduleFunction(scheduleToggle, nil, timer.getTime() + 360) -- Commence le cycle après 10 minutes
 
 
 --////////////////////////////////////////////////////////////////////////////////////////////

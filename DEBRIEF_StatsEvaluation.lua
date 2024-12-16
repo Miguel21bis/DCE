@@ -1,12 +1,12 @@
 --To evaluate the DCS debrief.log and update the campaign status files
 --Initiated by DEBRIEF_Master.lua
 -------------------------------------------------------------------------------------------------------
--- last modification:  debug_j
+-- last modification:  cleancode_h
 if not versionDCE then versionDCE = {} end
-versionDCE["DEBRIEF_StatsEvaluation.lua"] = "1.8.64"
+versionDCE["DEBRIEF_StatsEvaluation.lua"] = "1.8.65"
 ------------------------------------------------------------------------------------------------------- 
 -- debug_j						(j element.x)(i inconnu events[e].initiator)(g mission+1) hit name)(h take debrief camp_status)(g some kills are not counted)(f debrief bug)(e initiatorPilotName)(c:equipage compte 2X)(b transport)(a: nom cible peut ressembler à nom AirUnit)
--- cleanCode_g
+-- cleancode_h					(h springCleaning)
 -- adjustment_i					(i Debug/statsClientDetails) (g soldat inconnu)(f reveals the SAM that have already fired)
 -- modification M66_a			bombOnRunway
 -- modification M61_a			SAR

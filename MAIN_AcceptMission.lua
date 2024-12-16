@@ -1,12 +1,12 @@
 --To generate a new mission file. Unzips template mission, defines content of next missions and packs a new mission file
 --Initiated by Debrief_Master.lua, BAT_FirstMission.lua or BAT_RedoMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification M34_Bl
+-- last modification cleanCode_g
 if not versionDCE then versionDCE = {} end
-versionDCE["MAIN_AcceptMission.lua"] = "1.10.63"
+versionDCE["MAIN_AcceptMission.lua"] = "1.10.64"
 ------------------------------------------------------------------------------------------------------- 
 
--- cleanCode_f				(e: os.remove)
+-- cleanCode_g				(g springCleaning)(e: os.remove)
 -- debug_a					(a endCampaign)
 -- adjustment_g				(f currentKey)(e not DC_Weather)(d PairsByKeys)(c move UpdateSar & correct Brief Systeme)(b: don't load UTIL_Debug)(a: don't load Ini/db_airbase)
 -- modification M63_a		compatible Datacard Generator or CombatFlite

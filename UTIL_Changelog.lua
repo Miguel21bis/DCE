@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.80.492"
+versionDCE["UTIL_Changelog.lua"] = "20.80.494"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.80.492"
+VersionDCE["UTIL_Changelog.txt"] = "20.80.494"
 --[[
 
 
@@ -10,7 +10,17 @@ known issues:
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 - [stats]	stats for your own package are rarely displayed
 
-==:20.80.492:==
+==:20.81.501:==
+501 added [EWR]	text announcement of multiple environmental contacts, friend and foe alike. And only those detected by all EWRs and SAM radar. Activate in menu F10 (testing) (M81)
+500 modified [IA]	interceptors and CAPs turn around when they enter a SAM zone, then position themselves above their own SAM zone before (normally) returning to combat. (testing)
+499 modified	[loadout]
+				-- V 174 - Su-17M4 (modification of certain speeds and altitudes)
+				-- V 173 - code_loadout =  { "All" }, correction ! thanks BAMSE
+498 fixed [METAR]	cloud/METAR altitudes above 10000ft were not displayed
+497 fixed [target]	some destruction is not taken into account by DCE
+496 modified [target]	even more attention to target priorities, as the campaignMaker intended
+495 modified [MP] a higher probability of obtaining a flight in MP
+494 modified [parking]	aircraft dance on the parking lot and disappear (DCS bug)
 493 fixed	[briefing][METAR]	cloud altitudes above 10000ft were not displayed
 492 fixed	[briefing]	overwrite old briefing info from hours before mission generation
 491 fixed	[time]		wrong time jump between missions

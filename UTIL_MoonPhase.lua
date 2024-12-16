@@ -9,11 +9,11 @@ https://easydomoticz.com/forum/viewtopic.php?f=17&t=8789
 --]]
 
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  M51_d cleanCode_b
+-- last modification:  cleanCode_c
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_MoonPhase.lua"] = "1.3.7"
+versionDCE["UTIL_MoonPhase.lua"] = "1.3.8"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_b
+-- cleanCode_c			(c springCleaning)
 -- adjustment_a			(a add english info)
 -- modification M51_d  (d: actic circle)(c: NVG info)(b: Moonphase) (a: Moonphase)
 ------------------------------------------------------------------------------------------------------- 

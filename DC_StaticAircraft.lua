@@ -1,11 +1,12 @@
 --To add unused ready aircraft as uncontrolled static aircraft to mission
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  adjustment_f
+-- last modification:  cleancode_a
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_StaticAircraft.lua"] = "1.2.10"
+versionDCE["DC_StaticAircraft.lua"] = "1.3.11"
 ------------------------------------------------------------------------------------------------------- 
 -- adjustment_f				(f new GenerateID func)(e properties)(c: skin: evite le bug table vide)(b: nb de static en fonction de la place restante)(a: Static disparaissent au bout de 3mn)
+-- cleancode_a				(a springCleaning)
 -- modification M43_d		assignation des numeros de parking du type C08 (d: bug static, solution : NbPlaneTot)
 ------------------------------------------------------------------------------------------------------- 
 

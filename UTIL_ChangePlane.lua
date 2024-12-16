@@ -1,15 +1,15 @@
 --gives the player the possibility to change planes during the campaign.
 ------------------------------------------------------------------------------------------------------- 
--- last modification: debug_a
+-- last modification: cleanCode_b
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_ChangePlane.lua"] = "1.5.7"
+versionDCE["UTIL_ChangePlane.lua"] = "1.5.8"
 -------------------------------------------------------------------------------------------------------
 
--- cleanCode_a
+-- cleanCode_b				(b springCleaning)
 -- adjustment_a
--- debug_a							(a recipient == nil)
--- Miguel21 modification M63_a		compatible Datacard Generator or CombatFlite
--- miguel21 modification M55_c		player can change the type of plane (c:triggers part)(b:same Side)
+-- debug_a					(a recipient == nil)
+-- modification M63_a		compatible Datacard Generator or CombatFlite
+-- modification M55_c		player can change the type of plane (c:triggers part)(b:same Side)
 -------------------------------------------------------------------------------------------------------
 
 

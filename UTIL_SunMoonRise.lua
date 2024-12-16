@@ -1,11 +1,11 @@
 ---@diagnostic disable: param-type-mismatch, lowercase-global
 
 ------------------------------------------------------------------------------------------------------- 
--- Last modification M53_b
+-- Last modification cleanCode_a
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_SunMoonRise.lua"] = "1.2.4"
+versionDCE["UTIL_SunMoonRise.lua"] = "1.3.5"
 ------------------------------------------------------------------------------------------------------- 
--- -- cleanCode
+-- cleanCode_a
 -- -- adjustment
 -- miguel21 modification M53_b			automatic update of the conf_mod file (b conf_mod reconfiguration)
 -- miguel21 modification M51_b      (b: Moonphase) (a: Moonphase)

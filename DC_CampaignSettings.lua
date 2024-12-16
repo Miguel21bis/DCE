@@ -48,14 +48,14 @@ si le joueur repasse (a n'importe quel moment de la campagne) une variable � "
 
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleanCode_c adjustment_f
+-- last modification: cleancode_d
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_CampaignSettings.lua"] = "1.4.18"
+versionDCE["DC_CampaignSettings.lua"] = "1.4.19"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_c 	:
--- adjustment_f	:		(f InitNumber)(d prend en compte l ancien transfert)(c: slider_PercentPlane)
--- miguel21 modification M53_b	automatic update of the conf_mod file (b conf_mod reconfiguration)
--- Miguel21 modification M52_f	campaign player's choices  (f bug transfert)(e bug sourceName01) (d: corrige automatic bug CVN & debug CVN)(c: debug)(b: difficult� de campagne)(a: dur�e de la campagne)
+-- cleancode_d			(d springCleaning)	
+-- adjustment_f			(f InitNumber)(d prend en compte l ancien transfert)(c: slider_PercentPlane)
+-- modification M53_b	automatic update of the conf_mod file (b conf_mod reconfiguration)
+-- modification M52_f	campaign player's choices  (f bug transfert)(e bug sourceName01) (d: corrige automatic bug CVN & debug CVN)(c: debug)(b: difficult� de campagne)(a: dur�e de la campagne)
 ------------------------------------------------------------------------------------------------------- 
 
 --[[

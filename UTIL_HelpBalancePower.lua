@@ -1,11 +1,12 @@
 -- helps the CampaignMaker to balance the campaign
 --
 ------------------------------------------------------------------------------------------------------- 
--- Last Modification adjustment_a
+-- Last Modification cleancode_a
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_HelpBalancePower.lua"] = "1.3.7"
+versionDCE["UTIL_HelpBalancePower.lua"] = "1.4.8"
 ------------------------------------------------------------------------------------------------------- 
 -- adjustment_a				(a: depreciated variable capability)
+-- cleancode_a				(a springCleaning)	
 -- modification M56_a		AssignCallnameSquad
 -- modification M38_e		helps to balance the game
 ------------------------------------------------------------------------------------------------------- 

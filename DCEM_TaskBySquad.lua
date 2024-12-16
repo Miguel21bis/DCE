@@ -1,11 +1,10 @@
 --explication
 ------------------------------------------------------------------------------------------------------- 
--- last modification: 
+-- last modification: cleancode_a
 if not versionDCE then versionDCE = {} end
-versionDCE["DCEM_TaskBySquad.lua"] = "1.1.1"
+versionDCE["DCEM_TaskBySquad.lua"] = "1.1.2"
 -------------------------------------------------------------------------------------------------------
--- adjustment_
--- modification 
+-- cleancode_a			(a springCleaning)
 -------------------------------------------------------------------------------------------------------
 
 -- local pathScriptsMod = "C:/Users/Miguel/Saved Games/DCS_Installer/Mods/tech/DCE/ScriptsMod.NG"

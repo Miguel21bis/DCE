@@ -1,13 +1,13 @@
 --Moving ships and carriers as airbases
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: debug_g adjustment_c
+-- last modification: dcleancode_c
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_NavalEnvironment.lua"] = "1.12.33"
+versionDCE["DC_NavalEnvironment.lua"] = "1.12.34"
 ------------------------------------------------------------------------------------------------------- 
 -- debug_g					(g #route<1)(f: wpt en dehors du polygone)(e: TACAN)(d: staticPos)(c: Angle et Bearing des statics sur PA)
 -- DC_NE_Debug_b			(b: maximizes the distance between two ship turns) (a: transforms an angle of more than 90� into 2 WPT of less than 90�)
--- cleanCode_b
+-- cleancode_c				(c springCleaning)
 -- adjustment_c				(c no CVN turn to avoid INS offset) (b CVN to CV)(a clean conf_mod)
 -- modification M62_b		allows you to use third party files that Data information without being overwritten by central information updates (b SC_CarrierIntoWind active this file)
 -- modification M45_a		compatible with 2.7.0

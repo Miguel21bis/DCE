@@ -1,11 +1,11 @@
 --Various debug file exports
 --Initiated by MAIN_NextMission.lua (unless disabled there)
 -------------------------------------------------------------------------------------------------------
--- last modification: cleanCode_a
+-- last modification: cleancode_b
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Debug.lua"] = "1.3.9"
+versionDCE["UTIL_Debug.lua"] = "1.3.10"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_a
+-- cleancode_b		(b springCleaning)
 -- adjustment_g		(f targetName)(e Package_freq)(ac affiche le nombre d element dans la mission)
 ------------------------------------------------------------------------------------------------------- 
 

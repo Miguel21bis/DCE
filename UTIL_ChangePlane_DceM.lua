@@ -1,12 +1,12 @@
 ---@diagnostic disable: undefined-global, need-check-nil, lowercase-global
 --gives the player the possibility to change planes during the campaign.
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleanCode_a
+-- last modification: cleanCode_b
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_ChangePlane_DceM.lua"] = "1.3.7"
+versionDCE["UTIL_ChangePlane_DceM.lua"] = "1.3.8"
 -------------------------------------------------------------------------------------------------------
 -- adjustment_c				(b Playable_m from Data_divers)
--- cleanCode_a				
+-- cleanCode_b				(b springCleaning)
 -- modification M55_c		player can change the type of plane (c:triggers part)(b:same Side)
 -------------------------------------------------------------------------------------------------------
 

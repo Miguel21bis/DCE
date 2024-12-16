@@ -1,12 +1,13 @@
 --To create the Debriefing text for the mission
 --Initiated by DEBRIEF_Master.lua
 -------------------------------------------------------------------------------------------------------
--- last modification: adjustment_a
+-- last modification: cleancode_a adjustment_b
 if not versionDCE then versionDCE = {} end
-versionDCE["DEBRIEF_Text.lua"] = "1.3.3"
+versionDCE["DEBRIEF_Text.lua"] = "1.4.4"
 ------------------------------------------------------------------------------------------------------- 
 -- debug_a                  (a: neutral side) 
--- adjustment_a				(a priority numeric targetTable)
+-- cleancode_a				(a springCleaning)
+-- adjustment_b				(a priority numeric targetTable)
 -- modification M61_a		SAR
 ------------------------------------------------------------------------------------------------------- 
 
@@ -209,9 +210,11 @@ do
 		--build the list		
 		for n = 1, #entries[1].values do															--iterate through number of values (number of units)
 			for e = 1, #entries do																	--iterate through entries
-				t = t .. entries[e].values[n]														--add value to list
+				local writeValue = entries[e].values[n]
+				if entries[e].values[n] == 0 then writeValue = "-" end
+				t = t .. writeValue														--add value to list
 				if e < #entries then																--if this is not the last header, add spaces to the next header	
-					local space = entries[e].str_length + 5 - string.len(tostring(entries[e].values[n]))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
+					local space = entries[e].str_length + 5 - string.len(tostring(writeValue))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
 					for m = 1, space do
 						t = t .. " "																--add one space for every missing letter
 					end
@@ -939,9 +942,11 @@ do
 		--build the list		
 		for n = 1, #entries[side_name][1].values do													--iterate through number of values (number of units)
 			for e = 1, #entries[side_name] do														--iterate through entries
-				s = s .. entries[side_name][e].values[n]											--add value to list
+				local writeValue = entries[side_name][e].values[n]
+				if writeValue == 0 then writeValue = "-" end
+				s = s .. writeValue											--add value to list
 				if e < #entries[side_name] then														--if this is not the last header, add spaces to the next header	
-					local space = entries[side_name][e].str_length + 5 - string.len(tostring(entries[side_name][e].values[n]))		--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
+					local space = entries[side_name][e].str_length + 5 - string.len(tostring(writeValue))		--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
 					for m = 1, space do
 						s = s .. " "																--add one space for every missing letter
 					end
@@ -1052,7 +1057,9 @@ do
 		--build the list		
 		for n = 1, #entries[1].values do															--iterate through number of values (number of units)
 			for e = 1, #entries do																	--iterate through entries
-				s = s .. entries[e].values[n]														--add value to list
+				local writeValue = entries[e].values[n]
+				if writeValue == 0 then writeValue = "-" end	
+				s = s .. writeValue														--add value to list
 				if e < #entries then																--if this is not the last header, add spaces to the next header	
 					local space = entries[e].str_length + 3 - string.len(tostring(entries[e].values[n]))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
 					for m = 1, space do

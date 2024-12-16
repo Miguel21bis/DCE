@@ -1,11 +1,11 @@
 --To create the briefing for the next mission
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M80_a
+-- last modification: cleancode_d M80_a
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_Briefing.lua"] = "1.24.154"
+versionDCE["DC_Briefing.lua"] = "1.24.155"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_d						
+-- cleancode_d				(d springCleaning)						
 -- adjustment_b				(b \\" to \")(a add AFAC task)
 -- Debug_h					(h nbPasse)(g mission h)(f mission.maxDictId)(e intercept navigation) (d: affiche info MP)(c: camp.date.day)  (b: Mi8 & Mi24)(a: add Mig21 Channel 00)
 

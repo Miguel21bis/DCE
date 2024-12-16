@@ -1,11 +1,12 @@
 --To put vehicles and ships from ground OOB into next mission
 --Initiated by MAIN_NextMission.lua
 -------------------------------------------------------------------------------------------------------
--- last modification: debug_a
+-- last modification: cleancode_a
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_UpdateOOBGround.lua"] = "1.3.10"
+versionDCE["DC_UpdateOOBGround.lua"] = "1.4.11"
 ------------------------------------------------------------------------------------------------------- 
 -- debug_a					(a id duplicates)
+-- cleancode_a				(a springCleaning)
 -- modification M64_c		adds elements of a new base_mission (c ship)(b: update Type & groupId)
 -- modification M33_f		frequence des FARP selon db_airbase
 ------------------------------------------------------------------------------------------------------- 
@@ -368,8 +369,8 @@ end
 
 local name = {}
 local groupIdError = {}
-local GroupId_2 = {}
-local UnitId_2 = {}
+local groupId_2 = {}
+local unitId_2 = {}
 
 for side_name, side in pairs(oob_ground) do														--iterate through countries
 	for country_n, country_ in pairs(side) do
@@ -386,8 +387,8 @@ for side_name, side in pairs(oob_ground) do														--iterate through count
 							-- os.execute 'pause'
 						end
 
-						if not  GroupId_2[group_.groupId] then
-							GroupId_2[group_.groupId] = group_.groupId
+						if not  groupId_2[group_.groupId] then
+							groupId_2[group_.groupId] = group_.groupId
 						else
 						-- 	print("DcUOOBG error, duplicate of |"..categorie.."| GroupId |".. GroupId[group_.groupId].."|and|"..tostring(group_.name)
 						-- )
@@ -400,8 +401,8 @@ for side_name, side in pairs(oob_ground) do														--iterate through count
 						end
 
 						for unitN, unit in ipairs(group_.units) do
-							if not  UnitId_2[unit.unitId] then
-								UnitId_2[unit.unitId] = unit.UnitId
+							if not  unitId_2[unit.unitId] then
+								unitId_2[unit.unitId] = unit.UnitId
 							else
 								-- print("DcUOOBG error, duplicate of |"..categorie.."| UnitId |".. name[group_.UnitId] .."|and|"..tostring(group_.name))
 								-- os.execute 'pause'

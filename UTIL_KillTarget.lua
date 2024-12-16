@@ -1,12 +1,12 @@
 -- helps the CampaignMaker 
 --
 ------------------------------------------------------------------------------------------------------- 
--- Last Modification adjustment_b
+-- Last Modification cleanCode_b
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_KillTarget.lua"] = "1.6.20"
+versionDCE["UTIL_KillTarget.lua"] = "1.6.21"
 ------------------------------------------------------------------------------------------------------- 
 -- Debug_c
--- cleanCode_a
+-- cleanCode_b				(b springCleaning)
 -- adjustment_b				(b target boucle) (a Firstmission_flag
 -- modification M61_a		SAR
 -- modification M56_a		AssignCallnameSquad

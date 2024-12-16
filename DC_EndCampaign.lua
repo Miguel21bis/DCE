@@ -1,12 +1,12 @@
 --To delete mission content and prevent campaign progression if the campaign has ended
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: debug_g
+-- last modification: cleancode_c
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_EndCampaign.lua"] = "1.2.7"
+versionDCE["DC_EndCampaign.lua"] = "1.2.8"
 ------------------------------------------------------------------------------------------------------- 
 -- debug_g 			(g bug end campaign)(f mission.maxDictId)(d: EndMission not remove static (FARPS))(c: oldImage)(ab: EndMission)
--- cleanCode_b
+-- cleancode_c		(c springCleaning)
 -- -------------------------------------------------------------------------------------------------------
 
 

@@ -2,11 +2,11 @@
 --Initiated by EventsTracker.lua running from within DCS if the mission was a first campaign mission
 --Initated by BAT_FirstMission.lua if a campaign is reset manually
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  M34_Bl
+-- last modification:  cleanCode_a
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_ResetCampaign.lua"] = "1.12.58"
+versionDCE["UTIL_ResetCampaign.lua"] = "1.12.59"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_a			en attente d utilisation)
+-- cleanCode_a			(a springCleaning)
 -- adjustment_c			(c targetList)(b PairsByKeys)(a Firstmission_flag)
 -- modification M63_a	compatible Datacard Generator or CombatFlite
 -- modification M61_a	SAR

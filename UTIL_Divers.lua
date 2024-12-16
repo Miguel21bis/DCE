@@ -3,14 +3,13 @@
 -- avec la commmande w2
 -- Supprime un Groupe entier en donnant son numero de groupe
 ------------------------------------------------------------------------------------------------------- 
--- Last Modification M38_n
+-- Last Modification cleancode_a
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Divers.lua"] = "1.1.20"
+versionDCE["UTIL_Divers.lua"] = "1.3.22"
 ------------------------------------------------------------------------------------------------------- 
--- Debug_
--- cleanCode_
--- adjustment_a						(a ajout dataMap)
--- miguel21 modification M38_n		Check and Help CampaignMaker (n: delete Ngroug)
+-- cleancode_a				(a springCleaning)
+-- adjustment_a				(a ajout dataMap)
+-- modification M38_n		Check and Help CampaignMaker (n: delete Ngroug)
 ------------------------------------------------------------------------------------------------------- 
 
 

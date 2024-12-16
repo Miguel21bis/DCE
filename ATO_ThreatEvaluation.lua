@@ -1,11 +1,11 @@
 --To check oob_ground for threats and rate and store them in a table for later mission plannning
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  debug_b
+-- last modification:  cleancode_g
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_ThreatEvaluation.lua"] = "1.7.53"
+versionDCE["ATO_ThreatEvaluation.lua"] = "1.7.54"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_f
+-- cleancode_g				(g springCleaning)
 -- debug_b					(b EWR again)(a Freq EWR)
 -- Reglage_k				(k: ZSU_57_2)(j station awacs position)(debug alti)(g SetFrequency only EWR)(f: add FPS-117 EWR)(e SEAD_offset CVN)(c: more info)(b: ajout des CVN_71/CVN_75 et SA-5)
 -- modification M38_h		Check and Help CampaignMaker (h: loadout info)

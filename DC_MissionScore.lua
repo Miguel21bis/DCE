@@ -3,10 +3,12 @@
 --For DCE campaigns, the first mission must always advance in stage (have a score of >50), all subsequent missions must always stay in stage (have a score of 50)
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification
+-- last modification cleancode_a
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_MissionScore.lua"] = "1.1.2"
+versionDCE["DC_MissionScore.lua"] = "1.1.3"
 ------------------------------------------------------------------------------------------------------- 
+
+-- cleancode_a				(a springCleaning)
 
 --define the mission score
 do

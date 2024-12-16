@@ -1,13 +1,13 @@
 --To update the targetlist (target position, alive precentage)
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M78_a
+-- last modification: cleancode_d debug_d
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_UpdateTargetlist.lua"] = "1.11.47"
+versionDCE["DC_UpdateTargetlist.lua"] = "1.11.49"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_c
+-- cleancode_d				(d springCleaning)
 -- adjustment_a				(a GroundTarget.percent = 100 & Error_05 )
--- debug_c					(bc InsertBugList)(a -nan(ind))
+-- debug_d					(d updateAlive)(bc InsertBugList)(a -nan(ind))
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (camp.targetPos)
 -- modification M74_a		mix static, vehicle and map elements in a Target.
 -- modification M70_a		GroundZoneTarget (adds the possibility of counting unit completeness by zone) 
@@ -132,8 +132,12 @@ end
 
 local function updateAlive(target)
 	local nbDead = 0
+	local nbdead_last = 0
 	local nbMainObjective = 0
 	target.alive = 100
+	target.dead_last = 0
+
+	--si l'element comporte des nbMainObjective
 	for _elementN, element in pairs(target.elements) do
 		if element.mainObjective then
 			nbMainObjective = nbMainObjective + 1
@@ -142,11 +146,11 @@ local function updateAlive(target)
 			nbDead = nbDead + 1
 		end
 	end
-	if nbDead>0 then
+	if nbDead > 0 then
 		target.alive = 100 - (nbDead/ nbMainObjective)*100
 	end
 
-	local nbdead_last = 0
+
 	for _elementN, element in pairs(target.elements) do
 		if element.dead_last and element.mainObjective then
 			nbdead_last = nbdead_last + 1
@@ -155,6 +159,23 @@ local function updateAlive(target)
 	if nbdead_last > 0 then
 		target.dead_last =  (nbdead_last/ nbMainObjective)*100
 	end
+
+	if nbMainObjective == 0 then
+		for _elementN, element in pairs(target.elements) do
+			if element.dead then
+				target.alive = target.alive - 100 / #target.elements
+			end
+		end
+
+		for _elementN, element in pairs(target.elements) do
+			if element.dead_last then
+				target.dead_last = target.dead_last + 100 / #target.elements
+			end
+		end
+	end
+
+	if nbdead_last > 100 then nbdead_last = 100 end
+
 	return target
 end
 
@@ -1176,6 +1197,8 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 				target.ATO = false															--remove target from ATO
 			end
 
+
+			--calcul le nombre de cible encore intacte, pour stat DEBUG
 			if target.inactive ~= true then													--target is active
 				if 	target.task and target.task == "Strike" or target.task == "Anti-ship Strike" or target.task == "Runway Attack" then
 					GroundTarget[side_name].total = GroundTarget[side_name].total + 1			--count the number of all ground targets for each side
