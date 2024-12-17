@@ -4,15 +4,15 @@
 ------------------------------------------------------------------------------------------------------- 
 -- MBot version 20200111
 -------------------------------------------------------------------------------------------------------
--- last modification  M61_j
+-- last modification  M61_j cleanCode_g
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\EventsTracker.lua"] = "1.12.71"
+versionDCE["Mission Scripts\EventsTracker.lua"] = "1.12.72"
 ------------------------------------------------------------------------------------------------------- 
 
 -- test_b 					(b: saved game on another DD)
 -- Reglage_d 				(d modified TableSerialization)(c CVN to CV)(a: global pathD)
 -- debug_p					(op prohibited character of player names)(n getCategory)(m Pedro cycle)(n scene life0)(m escorte)(jkl wrong caratere in player names)(i: base.side = base.coalition)(b: n'affiche pas les messages d'error sauf � la fin de mission)
--- cleanCode_f 
+-- cleanCode_g				(g springCleaning)
 -- modification M62_a		compatible Datacard Generator or CombatFlite
 -- modification M61_j		SAR (j noSAR in wrongSide)
 -- modification M50_c		Records landings for later use in logistics (C-130, Transport...) (bc: caractere interdit)

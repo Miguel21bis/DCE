@@ -1,18 +1,23 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.80.494"
+versionDCE["UTIL_Changelog.lua"] = "20.80.503"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.80.494"
+VersionDCE["UTIL_Changelog.txt"] = "20.80.503"
 --[[
 
 
 known issues:
+- [EWR text]: EWR also announces you as a friendly contact
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 - [stats]	stats for your own package are rarely displayed
 
-==:20.81.501:==
-501 added [EWR]	text announcement of multiple environmental contacts, friend and foe alike. And only those detected by all EWRs and SAM radar. Activate in menu F10 (testing) (M81)
+==:20.81.503:==
+503 fixed [helico]	it's sometimes impossible to get out of a damaged helicopter on some maps
+502 added [EWR]	text announcement of multiple environmental contacts, friend and foe alike. And only those detected by all EWRs and SAM radar. Activate in menu F10 (testing) (M81)
+501 modified [intercept]	prohibiting interceptors from entering the enemy zone, by boundary design.
+							Longer time spacing, to avoid all interceptors taking off in 15 minutes, leaving the zone unprotected for the rest of the mission.
 500 modified [IA]	interceptors and CAPs turn around when they enter a SAM zone, then position themselves above their own SAM zone before (normally) returning to combat. (testing)
+
 499 modified	[loadout]
 				-- V 174 - Su-17M4 (modification of certain speeds and altitudes)
 				-- V 173 - code_loadout =  { "All" }, correction ! thanks BAMSE
@@ -25,8 +30,6 @@ known issues:
 492 fixed	[briefing]	overwrite old briefing info from hours before mission generation
 491 fixed	[time]		wrong time jump between missions
 
-
-==:20.80.490:==
 490 fixed	[cleaning]	Many Global variables have been renamed to start with a capital letter.
 489 fixed	[SAR]	SARs no longer take off
 488 fixed	[GCI]	interceptors go into the enemy camp

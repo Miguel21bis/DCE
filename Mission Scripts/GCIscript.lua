@@ -2,14 +2,14 @@
 --Script attached to mission and executed via trigger
 --Requires GCIdata.lua to be attached and run in mission in order to get access to table GCI
 ------------------------------------------------------------------------------------------------------- 
--- last modification adjustment_c
+-- last modification cleanCode_b
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\GCIscript.lua"] = "1.4.19"
+versionDCE["Mission Scripts\GCIscript.lua"] = "1.4.20"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_a
--- debug_c							(c getcategory again)(b unit category, tks ldnz)(a getheading Z)
--- adjustment_c						(c no Inter In Bad Side) in wrongSide)(b: intercept)(a recherche blocage)
--- modification M11_j				Multiplayer
+-- cleanCode_b					(b springCleaning)
+-- debug_c						(c getcategory again)(b unit category, tks ldnz)(a getheading Z)
+-- adjustment_c					(c no Inter In Bad Side) in wrongSide)(b: intercept)(a recherche blocage)
+-- modification M11_j			Multiplayer
 ------------------------------------------------------------------------------------------------------- 
 
 

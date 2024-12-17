@@ -6,9 +6,11 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\AirGroundAttackScript.lua"] = "1.1.1"
+versionDCE["Mission Scripts\AirGroundAttackScript.lua"] = "1.2.2"
 ------------------------------------------------------------------------------------------------------- 
--- Miguel21 modification M65_a		add AirGroundAttackTask Mbot s file
+
+-- cleanCode_b				(b springCleaning)
+-- modification M65_a		add AirGroundAttackTask Mbot s file
 
 ---------------------------------------------------------------------------------------------------------------------------------
 -- AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, OffsetAngle, ClimbAngle, PopAlt, AttackDist, Reattack) --
@@ -1095,8 +1097,14 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 				local logStr = "ComboTask = " .. TableSerialization(ComboTask, 0)
 				local FlightNameClean = FlightName:gsub('[%p%c%s]', '_')
 				local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..w.."_".. "AirGroundAttackTask".."_"..tostring(current_time)..".lua", "w")
-				logFile:write(logStr)
-				logFile:close()
+				-- logFile:write(logStr)
+				-- logFile:close()
+				if logFile then
+					logFile:write(logStr)
+					logFile:close()
+				else
+					env.info("DCE_avoidArea: Failed to open log file for writing.")
+				end
 			end
 
 			--set the completed ComboTask for each individual group member
@@ -1233,8 +1241,14 @@ function SetEgressTask(AcName)																		--global because it needs to be 
 			local logStr = "EgressTask = " .. TableSerialization(EgressTask, 0)
 			local FlightNameClean = AcName:gsub('[%p%c%s]', '_')
 			local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_".. "AirGroundAttackTask_EgressTask".."_"..tostring(current_time)..".lua", "w")
-			logFile:write(logStr)
-			logFile:close()
+			-- logFile:write(logStr)
+			-- logFile:close()
+			if logFile then
+				logFile:write(logStr)
+				logFile:close()
+			else
+				env.info("DCE_avoidArea: Failed to open log file for writing.")
+			end
 		end
 
 	end

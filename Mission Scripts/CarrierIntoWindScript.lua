@@ -1,13 +1,14 @@
 --To turn carriers into wind for flight ops and resume route later
 --Script attached to mission and executed via trigger
 ------------------------------------------------------------------------------------------------------- 
--- last  Revision  adjustment_c
+-- last  Revision  cleanCode_a
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\CarrierIntoWindScript.lua"] = "1.4.12"
+versionDCE["Mission Scripts\CarrierIntoWindScript.lua"] = "1.5.13"
 ------------------------------------------------------------------------------------------------------- 
 -- adjustment_c					(c CVN to CV)(a: ajust function trigo)
--- miguel21 modification M45	compatible with 2.7.0
--- Miguel21 modification M36_d	(d: add timer) MenuRadio request manual TurnIntoWind
+-- cleanCode_a					(a springCleaning)
+-- modification M45				compatible with 2.7.0
+-- modification M36_d			(d: add timer) MenuRadio request manual TurnIntoWind
 -- CIWS_Debug02_b				transforms an angle of more than 90° into 2 WPT of less than 90°
 -- CIWS_Debug01_b				SuperCarrier don't turn
 ------------------------------------------------------------------------------------------------------- 

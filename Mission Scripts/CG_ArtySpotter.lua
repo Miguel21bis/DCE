@@ -3,11 +3,11 @@
 -- original code by ************ Carsten Gurk aka Don Rudi ***************
 -- modified by Miguel & Cef with kind permission of Don Rudi :)
 ------------------------------------------------------------------------------------------------------- 
--- last modification   M77_m
+-- last modification   cleanCode_a
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\CG_ArtySpotter.lua"] = "1.4.14"
+versionDCE["Mission Scripts\CG_ArtySpotter.lua"] = "1.4.15"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_				
+-- cleanCode_a				(a springCleaning)				
 -- adjustment_						
 -- debug_
 -- modification M77_m		CG_ArtySpotter (m subMenu)(l spotterAircraft)(i boundary)(h camp.spotter)(g tempo)(f smoke & remains)(e lineOfSight)(d artyZone)(c timeImpact)(b qty_Total_Shells)(a responseTimeVar)	

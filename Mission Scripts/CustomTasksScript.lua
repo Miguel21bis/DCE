@@ -2,12 +2,12 @@
 --Script attached to mission and executed via trigger
 --Functions accessed via LUA Run Script on waypoint
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  M61_j
+-- last modification:  cleanCode_b
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\CustomTasksScript.lua"] = "1.9.38"
+versionDCE["Mission Scripts\CustomTasksScript.lua"] = "1.9.39"
 ------------------------------------------------------------------------------------------------------- 
 -- Reglage_n				(n force RTB)(m stopcondition)(l escorte)(k CVN to CV)(j altitudeEnabled true)(h GetHeading)(global path)(f rejoin debug)(e more scheduleFunction) (d landingImpossible denivelé)(c: limit =  1 ?)(b: orbit infini) all ["groupAttack"] = false,
--- cleanCode_a
+-- cleanCode_b				(b springCleaning)
 -- Debug_h					(fgh: CAS AttackUnit)(e: static id -1)(d: Checking) creates custom files to observe (c: Helicopter)(b: strike bombing)(a: strike ASM B52)
 
 -- modification M74_a		mix static, vehicle and map elements in a Target.
