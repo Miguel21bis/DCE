@@ -192,6 +192,20 @@ end
 do
 	local s = ""
 
+	--Assign briefing text to mission file
+	-- if Briefing_text_playable ~= "" and PlayerFlight then
+		-- if Briefing_text == "" then
+			-- Briefing_status = Briefing_status .." #B1# ".. FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ":\n\n"		--add date and time header
+		-- end
+		-- print("camp.time D "..tostring(camp.time))
+		-- print("camp.time D "..tostring(FormatTime(camp.time, "hh:mm")))
+		-- Briefing_status = Briefing_status .. Briefing_text_playable									--add briefing text 
+	-- end
+
+	-- s = Briefing_status
+
+	s =  FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ":\n\n"		--add date and time header
+
 	-- camp["Briefing_text"] = " "..FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ": \\\n \\\n" 		--add date and time header
 
 
@@ -441,15 +455,15 @@ do
 	end
 
 
-	--Assign briefing text to mission file
-	if Briefing_text_playable ~= "" and PlayerFlight then											--there is briefing text which is only added if the mission is actually playable
-		if Briefing_text == "" then																	--there was no briefing text for this mission instance yet
-			Briefing_status = Briefing_status .." ".. FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ":\n\n"		--add date and time header
-		end
-		print("camp.time D "..tostring(camp.time))
-		print("camp.time D "..tostring(FormatTime(camp.time, "hh:mm")))
-		Briefing_status = Briefing_status .. Briefing_text_playable									--add briefing text 
-	end
+	-- --Assign briefing text to mission file
+	-- if Briefing_text_playable ~= "" and PlayerFlight then											--there is briefing text which is only added if the mission is actually playable
+	-- 	if Briefing_text == "" then																	--there was no briefing text for this mission instance yet
+	-- 		Briefing_status = Briefing_status .." ".. FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ":\n\n"		--add date and time header
+	-- 	end
+	-- 	print("camp.time D "..tostring(camp.time))
+	-- 	print("camp.time D "..tostring(FormatTime(camp.time, "hh:mm")))
+	-- 	Briefing_status = Briefing_status .. Briefing_text_playable									--add briefing text 
+	-- end
 
 	if camp["Briefing_text"] and not TaskRefused then
 		local briefTemp = camp["Briefing_text"]
@@ -458,7 +472,10 @@ do
 		mission.descriptionText = "\n"
 	end
 
-	mission.descriptionText = mission.descriptionText ..Briefing_status .. "\n" .. s
+	-- mission.descriptionText = mission.descriptionText ..Briefing_status .. "\n" .. s
+
+	mission.descriptionText = mission.descriptionText .. "\n" .. s
+
 end
 -- print("DCB Briefing_text 4 "..tostring(camp["Briefing_text"]))
 -- os.execute 'pause'

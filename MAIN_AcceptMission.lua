@@ -147,11 +147,11 @@ mission.currentKey = 1010000															--not clear how this works but is req
 camp.waitingNextGen = true
 
 --si la generation de la mission suivante est repoussee, on sauvegarde le txt cree par les trigger txt precedent
-if camp["Briefing_text"] then
-	camp["Briefing_text"] = ""..FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. camp["Briefing_text"] .. ": \n \n" 		--add date and time header
-else
-	camp["Briefing_text"] = ""..FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ": \n \n" 		--add date and time header
-end
+-- if camp["Briefing_text"] then
+-- 	camp["Briefing_text"] = " #Mam1# "..FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. camp["Briefing_text"] .. ": \n \n" 		--add date and time header
+-- else
+-- 	camp["Briefing_text"] = " #Mam2# "..FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ": \n \n" 		--add date and time header
+-- end
 
 if Briefing_text ~= "" then
 	camp["Briefing_text"] = camp["Briefing_text"] .. Briefing_text

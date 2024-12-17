@@ -298,8 +298,8 @@ print("\n\n")
 if input == "y" or input == "yes" then
 
 
-	Briefing_oob_text_red = FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year).. ".\n"
-	Briefing_oob_text_blue = FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year).. ".\n"
+	-- Briefing_oob_text_red = FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year).. ".\n"
+	-- Briefing_oob_text_blue = FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year).. ".\n"
 
 	AcceptedMission = true
 	dofile("../../../ScriptsMod."..versionPackageICM.."/MAIN_AcceptMission.lua")

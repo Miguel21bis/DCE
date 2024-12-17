@@ -1,11 +1,11 @@
 --To evaluate the DCS debrief.log and update the campaign status files
 --Initiated by DEBRIEF_Master.lua
 -------------------------------------------------------------------------------------------------------
--- last modification:  cleancode_h
+-- last modification:  cleancode_h debug_k
 if not versionDCE then versionDCE = {} end
-versionDCE["DEBRIEF_StatsEvaluation.lua"] = "1.8.65"
+versionDCE["DEBRIEF_StatsEvaluation.lua"] = "1.8.66"
 ------------------------------------------------------------------------------------------------------- 
--- debug_j						(j element.x)(i inconnu events[e].initiator)(g mission+1) hit name)(h take debrief camp_status)(g some kills are not counted)(f debrief bug)(e initiatorPilotName)(c:equipage compte 2X)(b transport)(a: nom cible peut ressembler à nom AirUnit)
+-- debug_k						(k task inc)(j element.x)(i inconnu events[e].initiator)(g mission+1) hit name)(h take debrief camp_status)(g some kills are not counted)(f debrief bug)(e initiatorPilotName)(c:equipage compte 2X)(b transport)(a: nom cible peut ressembler à nom AirUnit)
 -- cleancode_h					(h springCleaning)
 -- adjustment_i					(i Debug/statsClientDetails) (g soldat inconnu)(f reveals the SAM that have already fired)
 -- modification M66_a			bombOnRunway
@@ -385,10 +385,13 @@ for e = 1, #events do
 							AddPackstats(events[e].initiator, "lost")											--check if loss was in player package
 
 							--client stats for crashes
-							if client_control[events[e].initiator] and ( (events[e].t - clientstats[client_control[events[e].initiator]].score_last.Time_Crash) >   30) then											--if crashed aircraft is a client
+							-- if client_control[events[e].initiator] and ( (events[e].t - clientstats[client_control[events[e].initiator]].score_last.Time_Crash) >   30) then											--if crashed aircraft is a client
 
+							if client_control[events[e].initiator]  then											--if crashed aircraft is a client
+
+								
 								clientstats[client_control[events[e].initiator]].crash = clientstats[client_control[events[e].initiator]].crash + 1	--store crash for client
-								clientstats[client_control[events[e].initiator]].score_last.crash =  1			--store crash for client
+								clientstats[client_control[events[e].initiator]].score_last.crash =  clientstats[client_control[events[e].initiator]].score_last.crash + 1			--store crash for client
 								clientstats[client_control[events[e].initiator]].score_last.Time_Crash = events[e].t
 
 							end
@@ -461,7 +464,7 @@ for e = 1, #events do
 								-- if not clientstatsDetail[client_hit_table[events[e].initiator]] then clientstatsDetail[client_hit_table[events[e].initiator]] = {} end
 								-- table.insert(clientstatsDetail[client_hit_table[events[e].initiator]], item)
 
-								print("DebriefSE B3 ")
+								-- print("DebriefSE B3 ")
 
 							-- end
 						-- end
@@ -480,7 +483,7 @@ for e = 1, #events do
 						if client_control[events[e].target] and ( (events[e].t - clientstats[client_control[events[e].target]].score_last.Time_Crash) >   30) then											--if crashed aircraft is a client
 
 							clientstats[client_control[events[e].target]].crash = clientstats[client_control[events[e].target]].crash + 1	--store crash for client
-							clientstats[client_control[events[e].target]].score_last.crash =  1			--store crash for client
+							clientstats[client_control[events[e].target]].score_last.crash =  clientstats[client_control[events[e].target]].score_last.crash + 1			--store crash for client
 							clientstats[client_control[events[e].target]].score_last.Time_Crash = events[e].t
 
 						end
@@ -574,7 +577,7 @@ for e = 1, #events do
 
 		if targetIsPlane and last_Mission then
 
-			local task = ""
+			local task = "inc"
 			local targetName = ""
 			local lostType = ""
 			local tagbreak = false
@@ -611,6 +614,8 @@ for e = 1, #events do
 
 			if tagbreak == false then _affiche(events[e], "DebriefSE NothingFound in relation to last_Mission ") end
 
+			if not task then task = "inc" end
+
 			if not camp.statLost then camp.statLost = {} end
 			if not camp.statLost[targetSide] then camp.statLost[targetSide] = {} end
 			if not camp.statLost[targetSide][targetName] then camp.statLost[targetSide][targetName] = {} end
@@ -643,7 +648,7 @@ for e = 1, #events do
 		if client_control[events[e].initiator] and ( (events[e].t - clientstats[client_control[events[e].initiator]].score_last.Time_Eject) >   30)  then														--if ejected pilot is a client
 
 			clientstats[client_control[events[e].initiator]].eject = clientstats[client_control[events[e].initiator]].eject + 1	--store ejection for client
-			clientstats[client_control[events[e].initiator]].score_last.eject =  1						--store eject for client
+			clientstats[client_control[events[e].initiator]].score_last.eject =  clientstats[client_control[events[e].initiator]].score_last.eject + 1						--store eject for client
 			clientstats[client_control[events[e].initiator]].score_last.Time_Eject = events[e].t
 		end
 		statutObject[events[e].initiator].eject = true
@@ -651,7 +656,7 @@ for e = 1, #events do
 		--client stats for dead pilots
 		if client_control[events[e].initiator] and ( (events[e].t - clientstats[client_control[events[e].initiator]].score_last.Time_Dead) >   30) then														--if dead pilot is a client
 			clientstats[client_control[events[e].initiator]].dead = clientstats[client_control[events[e].initiator]].dead + 1	--store death for client
-			clientstats[client_control[events[e].initiator]].score_last.dead =  1						--store dead pilot for client
+			clientstats[client_control[events[e].initiator]].score_last.dead =  clientstats[client_control[events[e].initiator]].score_last.dead + 1						--store dead pilot for client
 			clientstats[client_control[events[e].initiator]].score_last.Time_Dead = events[e].t
 		end
 		statutObject[events[e].initiator]["pilot dead"] =  true
