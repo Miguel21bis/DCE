@@ -1,13 +1,13 @@
 -- updates the situation of the rejected pilots
 -- fill in the useful tables during the game
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  cleanCode_a
+-- last modification:  cleanCode_a debug_g
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_UpdateSAR.lua"] = "1.4.17"
+versionDCE["DC_UpdateSAR.lua"] = "1.4.18"
 -------------------------------------------------------------------------------------------------------
 -- adjustement_g			(f coldAtStart)(d: enregistre les ref des circles dans la mission)(c inTheEnemyCamp)(b detect not camp_ZoneSAR.blue )(a boundary)
 -- cleanCode_a
--- debug_f 					(f loss boundary)(e empty table)(d id duplicates)(c il reste des MIA)(b: camp_ZoneSAR)
+-- debug_g 					(g aliasYear Unix time 1970)(f loss boundary)(e empty table)(d id duplicates)(c il reste des MIA)(b: camp_ZoneSAR)
 -- modification M61_d		SAR	 (d theatre)
 -------------------------------------------------------------------------------------------------------
 
@@ -461,7 +461,13 @@ camp.boundary = boundary
 --selectionne la base la plus proche pour leur porter secours
 --defini si le pilot est capturé ou récupérable
 
-local timeActualCampaignSecond = os.time{day=camp.date.day, year=camp.date.year, month=camp.date.month}
+-- Remplace une année inférieure à 1970 par 1970 pour éviter les problèmes avec os.time
+local aliasYear = camp.date.year
+if aliasYear and aliasYear < 1970 then
+    aliasYear = 1970
+end
+
+local timeActualCampaignSecond = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month}
 
 if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
     for sideName, sideSAR in pairs(camp_ZoneSAR) do
@@ -581,10 +587,20 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                         print("DcUS AA initChoicePOW "..tostring(element.initChoicePOW))
                     end
 
+                    local aliasInitYear = camp.dateInit.year
+                    if aliasInitYear < 1970 then
+                        aliasInitYear = 1970
+                    end
+                
+                    local aliasYear = camp.date.year
+                    if aliasYear < 1970 then
+                        aliasYear = 1970
+                    end
+
                     --ajoute et met à jour le nb de jour depuis son ejection
                     if not element.ejectNbDay then
                         if element.year and element.month and element.day then
-                            local timeEjectSecond = os.time{day=element.day, year=element.year, month=element.month}
+                            local timeEjectSecond = os.time{day=element.day, year=aliasYear, month=element.month}
                             local daysfrom = os.difftime(timeActualCampaignSecond, timeEjectSecond) / (24 * 60 * 60) -- seconds in a day 
                             element.ejectNbDay = daysfrom
                         else
@@ -592,7 +608,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                         end
                     else
                         if element.year and element.month and element.day then
-                            local timeEjectSecond = os.time{day=element.day, year=element.year, month=element.month}
+                            local timeEjectSecond = os.time{day=element.day, year=aliasYear, month=element.month}
                             local daysfrom = os.difftime(timeActualCampaignSecond, timeEjectSecond) / (24 * 60 * 60) -- seconds in a day 
                             element.ejectNbDay = tonumber(daysfrom)
                         end

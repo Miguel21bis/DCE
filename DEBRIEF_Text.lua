@@ -35,16 +35,10 @@ end
 -- player package evaluation ---------------------------------------------------------------------------------- 
 do
 
-
-	-- local _Str = "targetlistB = " .. TableSerialization(targetlist, 0)
-	-- local trigFile = io.open("Debug/targetlistB.lua", "w")
-	-- trigFile:write(_Str)
-	-- trigFile:close()
-
 	local s = ""
 
 	--function to build a list of the target and target element status
-	local function TargetStats(target_name)
+	local function targetStats(target_name)
 		local t = ""
 
 		local targetSelect = {}
@@ -123,8 +117,14 @@ do
 		return t
 	end
 
+
+
+	--################################################################################
+	--################################################################################
+
+
 	--function to build a list of stats of all aircraft within a package
-	local function PackageStats()
+	local function packageStats()
 		local t = "Package:\n"
 
 		--define list entries
@@ -163,10 +163,23 @@ do
 			},
 		}
 		--add list values
+		local campPlayerData 
+
+		if camp.client then
+			campPlayerData = camp.client[1].pack
+		elseif camp.player then
+			campPlayerData = camp.player
+		end
+
 		for role_name, role in pairs(camp.player.pack) do
+		-- for role_name, role in pairs(campPlayerData) do
+			-- print("role_name "..role_name)
 			for flight_n, flight in ipairs(role) do
+				-- print("flight_n "..flight_n)
 				for n = 1, flight.number do
 					local unit_name = "Pack " .. camp.player.pack_n .. " - " .. flight.name .. " - " .. flight.task .. " " .. flight_n .. "-" .. n
+					-- print("unit_name "..unit_name.." kills_air "..packstats[unit_name].kills_air)
+					-- local unit_name = flight.name
 					local callsign = string.sub(flight.callsign, 1, -2) .. n
 					table.insert(entries[1].values, callsign)
 					table.insert(entries[2].values, ReplaceTypeName(flight.type))
@@ -226,6 +239,13 @@ do
 		return t
 	end
 
+	--################################################################################
+	--################################################################################
+
+
+
+
+
 	local player_task = camp.player.pack[camp.player.role][camp.player.flight].task								--player task
 	local target_name = camp.player.pack[camp.player.role][camp.player.flight].target_name						--name of player package target
 
@@ -273,7 +293,7 @@ do
 				s = s .. "Your package has scored " .. pack_kills_air .. " air-air kills while sustaining " .. pack_lost .. " losses.\n\n"
 			end
 		end
-		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
+		s = s .. packageStats() .. "\n\n"																			--add stats list for each aircraft in package
 
 	--Intercept
 	elseif player_task == "Intercept" then
@@ -291,7 +311,7 @@ do
 				s = s .. "Your package has scored " .. pack_kills_air .. " air-air kills while sustaining " .. pack_lost .. " losses.\n\n"
 			end
 		end
-		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
+		s = s .. packageStats() .. "\n\n"																			--add stats list for each aircraft in package
 	--SAR
 	elseif player_task == "SAR" then
 		s = s .. "Add txt here "
@@ -314,7 +334,7 @@ do
 				s = s .. "Your package has scored " .. pack_kills_air .. " air-air kills while sustaining " .. pack_lost .. " losses.\n\n"
 			end
 		end
-		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
+		s = s .. packageStats() .. "\n\n"																			--add stats list for each aircraft in package
 
 	--Airbase Strike
 	elseif target_class == "airbase" then
@@ -371,7 +391,7 @@ do
 				s = s .. "Your package has sustained " .. pack_lost .. " losses without destroying any aircraft.\n\n"
 			end
 		end
-		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
+		s = s .. packageStats() .. "\n\n"																			--add stats list for each aircraft in package
 
 	--Strike
 	elseif player_task == "Strike" then
@@ -410,7 +430,7 @@ do
 		end
 
 		--list the target
-		s = s .. TargetStats(target_name)
+		s = s .. targetStats(target_name)
 
 		--air-air stats
 		if pack_kills_air == 0 then
@@ -426,7 +446,7 @@ do
 				s = s .. "Your package has scored " .. pack_kills_air .. " air-air kills while sustaining " .. pack_lost .. " losses.\n\n"
 			end
 		end
-		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
+		s = s .. packageStats() .. "\n\n"																			--add stats list for each aircraft in package
 
 	--Anti-ship Strike
 	elseif player_task == "Anti-ship Strike" then
@@ -465,7 +485,7 @@ do
 		end
 
 		--list the target
-		s = s .. TargetStats(target_name)
+		s = s .. targetStats(target_name)
 
 		--air-air stats
 		if pack_kills_air == 0 then
@@ -481,7 +501,7 @@ do
 				s = s .. "Your package has scored " .. pack_kills_air .. " air-air kills while sustaining " .. pack_lost .. " losses.\n\n"
 			end
 		end
-		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
+		s = s .. packageStats() .. "\n\n"																			--add stats list for each aircraft in package
 
 	--Escort
 	elseif player_task == "Escort" then
@@ -524,7 +544,7 @@ do
 			end
 
 			--list the target
-			s = s .. TargetStats(target_name)
+			s = s .. targetStats(target_name)
 		end
 
 		--air-air stats
@@ -541,7 +561,7 @@ do
 				s = s .. "Your package has scored " .. pack_kills_air .. " air-air kills while sustaining " .. pack_lost .. " losses.\n\n"
 			end
 		end
-		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
+		s = s .. packageStats() .. "\n\n"																			--add stats list for each aircraft in package
 
 	--SEAD
 	elseif player_task == "SEAD" then
@@ -584,7 +604,7 @@ do
 			end
 
 			--list the target
-			s = s .. TargetStats(target_name)
+			s = s .. targetStats(target_name)
 		end
 
 		--air-air stats
@@ -601,7 +621,7 @@ do
 				s = s .. "Your package has scored " .. pack_kills_air .. " air-air kills while sustaining " .. pack_lost .. " losses.\n\n"
 			end
 		end
-		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
+		s = s .. packageStats() .. "\n\n"																			--add stats list for each aircraft in package
 
 	--Escort Jammer
 	elseif player_task == "Escort Jammer" then
@@ -642,7 +662,7 @@ do
 			end
 
 			--list the target
-			s = s .. TargetStats(target_name)
+			s = s .. targetStats(target_name)
 		end
 
 		--air-air stats
@@ -659,7 +679,7 @@ do
 				s = s .. "Your package has scored " .. pack_kills_air .. " air-air kills while sustaining " .. pack_lost .. " losses.\n\n"
 			end
 		end
-		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
+		s = s .. packageStats() .. "\n\n"																			--add stats list for each aircraft in package
 
 	--Flare Illumination
 	elseif player_task == "Flare Illumination" then
@@ -700,7 +720,7 @@ do
 			end
 
 			--list the target
-			s = s .. TargetStats(target_name)
+			s = s .. targetStats(target_name)
 		end
 
 		--air-air stats
@@ -717,7 +737,7 @@ do
 				s = s .. "Your package has scored " .. pack_kills_air .. " air-air kills while sustaining " .. pack_lost .. " losses.\n\n"
 			end
 		end
-		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
+		s = s .. packageStats() .. "\n\n"																			--add stats list for each aircraft in package
 
 	--Laser Illumination
 	elseif player_task == "Laser Illumination" then
@@ -758,7 +778,7 @@ do
 			end
 
 			--list the target
-			s = s .. TargetStats(target_name)
+			s = s .. targetStats(target_name)
 		end
 
 		--air-air stats
@@ -775,36 +795,36 @@ do
 				s = s .. "Your package has scored " .. pack_kills_air .. " air-air kills while sustaining " .. pack_lost .. " losses.\n\n"
 			end
 		end
-		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
+		s = s .. packageStats() .. "\n\n"																			--add stats list for each aircraft in package
 
 	--Reconnaissance
 	elseif player_task == "Reconnaissance" then
 		s = s .. "You have been tasked with reconnaissance of " .. target_name .. ".\n\n"
-		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
+		s = s .. packageStats() .. "\n\n"																			--add stats list for each aircraft in package
 
 	--AWACAS
 	elseif player_task == "AWACS" then
 		s = s .. "You have been tasked with an AWACS patrol at " .. target_name .. ".\n\n"
-		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
+		s = s .. packageStats() .. "\n\n"																			--add stats list for each aircraft in package
 
 	--Refuelling
 	elseif player_task == "Refueling" then
 		s = s .. "You have been tasked with a refuelling mission at " .. target_name .. ".\n\n"
-		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
+		s = s .. packageStats() .. "\n\n"																			--add stats list for each aircraft in package
 
 	--Transport
 	elseif player_task == "Transport" then
 		local from = camp.player.pack[camp.player.role][camp.player.flight].target.base
 		local to = camp.player.pack[camp.player.role][camp.player.flight].target.destination
 		s = s .. "You have been tasked with a transport  mission from " .. from .. " to " .. to .. ".\n\n"
-		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
+		s = s .. packageStats() .. "\n\n"																			--add stats list for each aircraft in package
 
 	--Ferry/Nothing
 	elseif player_task == "Nothing" then
 		local from = camp.player.pack[camp.player.role][camp.player.flight].target.base
 		local to = camp.player.pack[camp.player.role][camp.player.flight].target.destination
 		s = s .. "You have been tasked with a ferry flight from " .. from .. " to " .. to .. ".\n\n"
-		s = s .. PackageStats() .. "\n\n"																			--add stats list for each aircraft in package
+		s = s .. packageStats() .. "\n\n"																			--add stats list for each aircraft in package
 
 	end
 

@@ -5,13 +5,13 @@
 --player can request emergency resupply with S-3B's
 -- It is possible to send the whole PACK in RTB to avoid unnecessary losses. 
 ------------------------------------------------------------------------------------------------------- 
--- last modification  cleanCode_b adjustment_h M81_a
+-- last modification  cleanCode_b adjustment_h M81_a debug_h
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\AddCommandRadioF10.lua"] = "1.13.46"
+versionDCE["Mission Scripts\AddCommandRadioF10.lua"] = "1.13.47"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_b				(b springCleaning)(a: remove RemovePlane)
 -- adjustment_h				(h avoid SAM zone)(g force RTB if bingo)(f ENI table)(e: add sar_F10)(d GetHeading)(c coalitionIdNumeric)(b group Item Radio)(a: ajust function trigo)
--- debug_g					(g no menu in SP)(f getCategory)(e getHeading Z)(d: tanker exist)n'affiche pas les messages d'error sauf à la fin de mission
+-- debug_h					(h A/A off sur avoidZone)(g no menu in SP)(f getCategory)(e getHeading Z)(d: tanker exist)n'affiche pas les messages d'error sauf à la fin de mission
 -- debug_bonfor_a			RTB from to inversé
 -- modification M81_a		text announcement of contacts as seen by EWR and SAM radar
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a dcs_to_gps)
@@ -922,7 +922,27 @@ local function avoidArea()
 																	['tasks'] = {
 																		[1] =
 																		{
-																			["number"] = 1,
+																			["enabled"] = true,
+																			["name"] = "Interdiction combat AA",
+																			["id"] = "WrappedAction",
+																			["auto"] = false,
+																			["number"] = 2,
+																			["params"] = 
+																			{
+																				["action"] = 
+																				{
+																					["id"] = "Option",
+																					["params"] = 
+																					{
+																						["name"] = 14,
+																						["value"] = false,
+																					}, -- end of ["params"]
+																				}, -- end of ["action"]
+																			}, -- end of ["params"]
+																		}, -- end of [2]
+																		[2] =
+																		{
+																			["number"] = 2,
 																			["auto"] = false,
 																			["id"] = "WrappedAction",
 																			["name"] = "regleEngagement: feu a volonté",
@@ -940,7 +960,7 @@ local function avoidArea()
 																				}, -- end of ["action"]
 																			}, -- end of ["params"]
 																		}, -- end of [1]
-																		[2] =
+																		[3] =
 																		{
 																			["enabled"] = true,
 																			["auto"] = false,
@@ -960,7 +980,7 @@ local function avoidArea()
 																				}, -- end of ["action"]
 																			}, -- end of ["params"]
 																		}, -- end of [2]
-																		[3] = {
+																		[4] = {
 																			['enabled'] = true,
 																			['auto'] = false,
 																			['id'] = 'ControlledTask',
@@ -982,7 +1002,7 @@ local function avoidArea()
 																				},
 																			},
 																		},
-																		[4] = {
+																		[5] = {
 																			['enabled'] = true,
 																			['auto'] = false,
 																			['id'] = 'ControlledTask',
@@ -1007,7 +1027,7 @@ local function avoidArea()
 																	},
 																},
 															},
-															-- cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, false)
+															
 														},
 
 														{

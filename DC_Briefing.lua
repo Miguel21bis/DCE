@@ -95,54 +95,6 @@ local function FreqCapability(TestFreq, RadioPlane, Nradio, info)
 end
 
 
-local function FreqCapabilityB(TestFreq, RadioPlane)
-	-- local waves  = ""
-
-	if type(TestFreq) ~= "number" then
-		return false
-	end
-	-- modification M34.n (n: bestCapability)
-	for Nradio, Nradio_ in pairs(RadioPlane) do
-		for wave, freqRange in pairs(Nradio_) do
-			if type(freqRange)  == "table"  then
-				if  tonumber(TestFreq) < freqRange.max and  tonumber(TestFreq) > freqRange.min then
-					-- if RadioPlane[Nradio] and RadioPlane[Nradio][wave] and (TestFreq > RadioPlane[Nradio][wave].min and TestFreq < RadioPlane[Nradio][wave].max)	 then		
-						return Nradio
-					-- end 
-				end
-			end
-		end
-	end
-
-
-
-	-- if TestFreq >= 225 then
-		-- waves = "UHF" 
-	-- elseif TestFreq >= 100 and TestFreq < 225 then
-		-- waves = "VHF" 
-	-- elseif TestFreq >= 20 and TestFreq < 100 then
-		-- waves = "LVHF"
-		-- if RadioPlane[Nradio] and not RadioPlane[Nradio][waves] then waves = "LVHF" end
-	-- elseif TestFreq >= 1 and TestFreq < 20 then
-		-- waves = "HF"
-	-- else
-		-- print()
-		-- print("********************ATTENTION******************")
-		-- print("***************Note for the Campaign Maker*****")
-		-- print("Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(TestFreq).." Info: "..tostring(info))
-		-- _affiche(RadioPlane, "RadioPlane")
-		-- print("********************ATTENTION******************")
-		-- print()
-		-- os.execute 'pause'
-	-- end 
-
-	-- if RadioPlane[Nradio] and RadioPlane[Nradio][waves] and (TestFreq > RadioPlane[Nradio][waves].min and TestFreq < RadioPlane[Nradio][waves].max)	 then		
-		-- return true
-	-- else 
-		-- return false
-	-- end
-end
-
 local function writeWordsNicelyTidy(entries)
 	local txt = ""
 
@@ -192,22 +144,7 @@ end
 do
 	local s = ""
 
-	--Assign briefing text to mission file
-	-- if Briefing_text_playable ~= "" and PlayerFlight then
-		-- if Briefing_text == "" then
-			-- Briefing_status = Briefing_status .." #B1# ".. FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ":\n\n"		--add date and time header
-		-- end
-		-- print("camp.time D "..tostring(camp.time))
-		-- print("camp.time D "..tostring(FormatTime(camp.time, "hh:mm")))
-		-- Briefing_status = Briefing_status .. Briefing_text_playable									--add briefing text 
-	-- end
-
-	-- s = Briefing_status
-
 	s =  FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ":\n\n"		--add date and time header
-
-	-- camp["Briefing_text"] = " "..FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ": \\\n \\\n" 		--add date and time header
-
 
 	if AirLiftObjectif and next(AirLiftObjectif) ~= nil then
 		s = "AirLift:\n\n"
@@ -425,45 +362,9 @@ do
 
 		s = s .. txt .. "\n"
 
-		-- --determine maximum string length for each entry
-		-- for e = 1, #entries do																		--iterate through entries
-		-- 	entries[e].str_length = string.len(entries[e].header) + 1									--store string length of header for this entry
-		-- 	for n = 1, #entries[e].values do														--iterate through values of this entry
-		-- 		local l = string.len(tostring(entries[e].values[n])) + 1 								--get string length of value of this entry
-		-- 		if l > entries[e].str_length then													--if the string length is larger than the previous
-		-- 			entries[e].str_length = l														--make it the new length (find the largest)
-		-- 		end
-		-- 	end
-		-- end
-
-		-- --build the list		
-		-- for n = 1, #entries[1].values do														
-		-- 	for e = 1, #entries do																	
-		-- 		s = s .. tostring(entries[e].values[n])													
-		-- 		if e < #entries then																
-		-- 			local space = entries[e].str_length + 0 - string.len(tostring(entries[e].values[n]))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
-		-- 			for m = 1, space * 1.0 do													
-		-- 				s = s .. " "																--add 1.5 spaces for every missing letter
-		-- 			end
-		-- 		end
-		-- 	end
-		-- 	s = s .. "\n"																			
-		-- end
-
-
 		s = s .. "\n\n"																			--make a new line after each side
 	end
 
-
-	-- --Assign briefing text to mission file
-	-- if Briefing_text_playable ~= "" and PlayerFlight then											--there is briefing text which is only added if the mission is actually playable
-	-- 	if Briefing_text == "" then																	--there was no briefing text for this mission instance yet
-	-- 		Briefing_status = Briefing_status .." ".. FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ":\n\n"		--add date and time header
-	-- 	end
-	-- 	print("camp.time D "..tostring(camp.time))
-	-- 	print("camp.time D "..tostring(FormatTime(camp.time, "hh:mm")))
-	-- 	Briefing_status = Briefing_status .. Briefing_text_playable									--add briefing text 
-	-- end
 
 	if camp["Briefing_text"] and not TaskRefused then
 		local briefTemp = camp["Briefing_text"]
@@ -472,24 +373,16 @@ do
 		mission.descriptionText = "\n"
 	end
 
-	-- mission.descriptionText = mission.descriptionText ..Briefing_status .. "\n" .. s
-
 	mission.descriptionText = mission.descriptionText .. "\n" .. s
 
 end
--- print("DCB Briefing_text 4 "..tostring(camp["Briefing_text"]))
--- os.execute 'pause'
+
 
 -- modification M11B. : Multiplayer
 local briefing = {
 				  ["blue"] = "",
 					["red"] = "",
 				  }
-
-	--	pack.main[1].route[1].eta
-
-	-- table.sort(ATO["blue"], function(a,b) return a.main[1].route[1].eta > b.main[1].route[1].eta  end)
-	-- table.sort(ATO["red"], function(a,b) return a.main[1].route[1].eta > b.main[1].route[1].eta  end)
 
 local briefPlaneTaskTarget = {}																			--evite la répétition des briefings surtout en MP
 
@@ -515,12 +408,73 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 					briefPlaneTaskTarget[value] = true													--evite la répétition des briefings surtout en MP
 
-					local Tplayer = {}
+					local tempPlayer = {}
 
 					if flight[f].client then
-						Tplayer = camp.client[flight[f].IdClient]
+						tempPlayer = Deepcopy(camp.client[flight[f].IdClient])
+
+						print("DcB tempPlayer.pack_n "..tostring(tempPlayer.pack_n))
+						tempPlayer.pack = camp.client.pack[tempPlayer.pack_n]
+
+						-- tempPlayer = Deepcopy(camp.client)
+
+						local tagBreak
+						--##parse mission table:
+						for _side, side in pairs(mission.coalition) do
+							for countryN, country in pairs(side.country) do						
+								for category, groups in pairs(country) do						
+									if (category == "plane" or category == "helicopter" ) and type(groups) == "table" and groups["group"]  then	--and groups[1].units
+										for Ngroup, group in pairs(groups["group"]) do
+											for unitN, unit in pairs(group.units) do
+												-- print("unit.name "..tostring(unit.name).." ==tempPlayer.unitname? "..tostring(tempPlayer.unitname))
+												if unit.name == tempPlayer.unitname then
+													tempPlayer["waypoints"] = group.route.points
+													tempPlayer["group"] = group
+													tagBreak = true
+													break
+												end
+
+											end
+											if tagBreak then break end
+										end
+									end
+									if tagBreak then break end
+								end
+								if tagBreak then break end
+							end
+							if tagBreak then break end
+						end
+
+
+
 					elseif flight[f].player then
-						Tplayer = camp.player
+						tempPlayer = camp.player
+						local tagBreak
+						--##parse mission table:
+						for _side, side in pairs(mission.coalition) do
+							for countryN, country in pairs(side.country) do						
+								for category, groups in pairs(country) do						
+									if (category == "plane" or category == "helicopter" ) and type(groups) == "table" and groups["group"]  then	--and groups[1].units
+										for Ngroup, group in pairs(groups["group"]) do
+											for unitN, unit in pairs(group.units) do
+											
+												if unit.name == tempPlayer.unitname then
+													tempPlayer["waypoints"] = group.route.points
+													tempPlayer["group"] = group
+													tagBreak = true
+													break
+												end
+
+											end
+											if tagBreak then break end
+										end
+									end
+									if tagBreak then break end
+								end
+								if tagBreak then break end
+							end
+							if tagBreak then break end
+						end
 					end
 
 					local s =""
@@ -554,7 +508,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 						--sum together packages package sortie numbers
 						local ATOList = {}
-						for pack_n,pack in pairs(ATO[Tplayer.side]) do												--go through ATO on player side
+						for pack_n,pack in pairs(ATO[tempPlayer.side]) do												--go through ATO on player side
 
 							--package time on target
 							local tot = FormatTime(camp.time + pack.main[1].route[1].eta, "hh:mm:ss")				--time on target (use first wapoint if no Target or Station WP is found below)
@@ -654,24 +608,35 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 					--recupere les units des instruments de l'avion
 					local unitsUse = mission_ini.units
-					-- print("DcB type "..tostring (Tplayer.pack[Tplayer.role][Tplayer.flight].type))
-					if Data_divers and Data_divers[Tplayer.pack[Tplayer.role][Tplayer.flight].type] then
-						if Data_divers[Tplayer.pack[Tplayer.role][Tplayer.flight].type].instrumentUnits then
-							if Data_divers[Tplayer.pack[Tplayer.role][Tplayer.flight].type].instrumentUnits ~= nil then
-								unitsUse = Data_divers[Tplayer.pack[Tplayer.role][Tplayer.flight].type].instrumentUnits
-							end
+					-- print("DcB type "..tostring (tempPlayer.pack[tempPlayer.role][tempPlayer.flight].type))
+					-- if Data_divers and Data_divers[tempPlayer.pack[tempPlayer.role][tempPlayer.flight].type] then
+					-- 	if Data_divers[tempPlayer.pack[tempPlayer.role][tempPlayer.flight].type].instrumentUnits then
+					-- 		if Data_divers[tempPlayer.pack[tempPlayer.role][tempPlayer.flight].type].instrumentUnits ~= nil then
+					-- 			unitsUse = Data_divers[tempPlayer.pack[tempPlayer.role][tempPlayer.flight].type].instrumentUnits
+					-- 		end
+					-- 	end
+					-- end
+					if Data_divers and Data_divers[tempPlayer.type] then
+						if Data_divers[tempPlayer.type].instrumentUnits then
+							unitsUse = Data_divers[tempPlayer.type].instrumentUnits
+							
 						end
 					end
 
+
 					--Mission overview					
-					local squad = Tplayer.pack[Tplayer.role][Tplayer.flight].name
-					local target_name = Tplayer.pack[Tplayer.role][Tplayer.flight].target_name									--get the target of the player flight
-					local player_task = Tplayer.pack[Tplayer.role][Tplayer.flight].task											--get the task of the player flight
-					local target = Tplayer.pack[Tplayer.role][Tplayer.flight].target											--get target table
-					local time_start = FormatTime(camp.time + Tplayer.waypoints[1].ETA, "hh:mm")								--player spawn time
+					-- local squad = tempPlayer.pack[tempPlayer.role][tempPlayer.flight].name
+					-- local target_name = tempPlayer.pack[tempPlayer.role][tempPlayer.flight].target_name									--get the target of the player flight
+					-- local player_task = tempPlayer.pack[tempPlayer.role][tempPlayer.flight].task											--get the task of the player flight
+					-- local target = tempPlayer.pack[tempPlayer.role][tempPlayer.flight].target											--get target table
+					local squad = tempPlayer.squadName
+					local target_name = tempPlayer.target.titleName									--get the target of the player flight
+					local player_task = tempPlayer.task											--get the task of the player flight
+					local target = tempPlayer.target											--get target table
+					local time_start = FormatTime(camp.time + tempPlayer.waypoints[1].ETA, "hh:mm")								--player spawn time
 					local time_launch
 
-					local s = "\n\n\n\n".."\n"
+					s = "\n\n\n\n".."\n"
 					local sBrief = "_________________________________________ BRIEFING Part: _______________________________________\n"
 					s = s..sBrief
 					local sName = " "..tostring(flight[f].type).." "..squad.." "..player_task.." "
@@ -687,38 +652,38 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					s = s.."________________________________________________________________________________________________\n"
 					s = s.."\n"
 
-					if Tplayer.pack[Tplayer.role][Tplayer.flight].target.picture  then
-						if  type(Tplayer.pack[Tplayer.role][Tplayer.flight].target.picture) == "table" and Tplayer.pack[Tplayer.role][Tplayer.flight].target.picture[1]  ~= "" then
+					if tempPlayer.target.picture  then
+						if  type(tempPlayer.target.picture) == "table" and tempPlayer.target.picture[1]  ~= "" then
 							if not target_picture[sideName] then target_picture[sideName] = {} end
-							target_picture[sideName] = Tplayer.pack[Tplayer.role][Tplayer.flight].target.picture						--get the target picture M05
-						elseif  type(Tplayer.pack[Tplayer.role][Tplayer.flight].target.picture) ~= "table" and Tplayer.pack[Tplayer.role][Tplayer.flight].target.picture  ~= "" then
+							target_picture[sideName] = tempPlayer.target.picture						--get the target picture M05
+						elseif  type(tempPlayer.target.picture) ~= "table" and tempPlayer.target.picture  ~= "" then
 							if not target_picture[sideName] then target_picture[sideName] = {} end
-							target_picture[sideName] = Tplayer.pack[Tplayer.role][Tplayer.flight].target.picture						--get the target picture M05
+							target_picture[sideName] = tempPlayer.target.picture						--get the target picture M05
 						end
 					end
 
-					if Tplayer.waypoints[2] then
-						time_launch = FormatTime(camp.time + Tplayer.waypoints[2].ETA , "hh:mm")								--player take off time
+					if tempPlayer.waypoints[2] then
+						time_launch = FormatTime(camp.time + tempPlayer.waypoints[2].ETA , "hh:mm")								--player take off time
 					end
 
-					local time_target = FormatTime(camp.time + Tplayer.waypoints[Tplayer.tgt_wp].ETA, "hh:mm")					--player time on target
+					local time_target = FormatTime(camp.time + tempPlayer.waypoints[tempPlayer.tgt_wp].ETA, "hh:mm")					--player time on target
 
 					--CAP
 					if player_task == "CAP" then
-						local time_station = FormatTime(camp.time + Tplayer.waypoints[Tplayer.tgt_wp + 1].ETA, "hh:mm")			--player time to leave stations (for CAP, AWACS and Refueling)
+						local time_station = FormatTime(camp.time + tempPlayer.waypoints[tempPlayer.tgt_wp + 1].ETA, "hh:mm")			--player time to leave stations (for CAP, AWACS and Refueling)
 						s = s .. "You are tasked to perform a Combat Air Patrol " .. target.text .. " from " .. time_target .. " to " .. time_station .. ". Engage all hostile aircraft threatening friendly forces in your CAP area.\n"
 
 					--Intercept
 					elseif player_task == "Intercept" then
 
-						local airbase = Tplayer.pack[Tplayer.role][Tplayer.flight].base
+						local airbase = tempPlayer.airbase
 
-						if Tplayer.tgt_pack then	 --ATO[Tplayer.tgt_side][Tplayer.tgt_pack]
+						if tempPlayer.tgt_pack then	 --ATO[tempPlayer.tgt_side][tempPlayer.tgt_pack]
 
-							local tgt_heading = GetHeading(Tplayer.waypoints[1], ATO[Tplayer.tgt_side][Tplayer.tgt_pack].main[1].route[1])
-							local tgt_distance = GetDistance(Tplayer.waypoints[1], ATO[Tplayer.tgt_side][Tplayer.tgt_pack].main[1].route[1])
+							local tgt_heading = GetHeading(tempPlayer.waypoints[1], ATO[tempPlayer.tgt_side][tempPlayer.tgt_pack].main[1].route[1])
+							local tgt_distance = GetDistance(tempPlayer.waypoints[1], ATO[tempPlayer.tgt_side][tempPlayer.tgt_pack].main[1].route[1])
 							local tgt_n = 0
-							for role, flight in pairs (ATO[Tplayer.tgt_side][Tplayer.tgt_pack]) do
+							for role, flight in pairs (ATO[tempPlayer.tgt_side][tempPlayer.tgt_pack]) do
 								for n = 1, #flight do
 									tgt_n = tgt_n + flight[n].number
 								end
@@ -839,12 +804,12 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 					--AWACS
 					elseif player_task == "AWACS" then
-						local time_station = FormatTime(camp.time + Tplayer.waypoints[Tplayer.tgt_wp + 1].ETA, "hh:mm")		--player time to leave stations (for CAP, AWACS and Refueling)
+						local time_station = FormatTime(camp.time + tempPlayer.waypoints[tempPlayer.tgt_wp + 1].ETA, "hh:mm")		--player time to leave stations (for CAP, AWACS and Refueling)
 						s = s .. "You are tasked to perform a AWACS patrol " .. target.text .. " from " .. time_target .. " to " .. time_station .. ".\n"
 
 					--Refueling
 					elseif player_task == "Refueling" then
-						local time_station = FormatTime(camp.time + Tplayer.waypoints[Tplayer.tgt_wp + 1].ETA, "hh:mm")		--player time to leave stations (for CAP, AWACS and Refueling)
+						local time_station = FormatTime(camp.time + tempPlayer.waypoints[tempPlayer.tgt_wp + 1].ETA, "hh:mm")		--player time to leave stations (for CAP, AWACS and Refueling)
 						s = s .. "You are tasked to perform tanker support " .. target.text .. " from " .. time_target .. " to " .. time_station .. ". Provide fuel to friendly aircraft in your patrol area.\n"
 
 					--Transport
@@ -856,7 +821,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 						s = s .. "Ferry flight from " .. target.base .. " to " .. target.destination .. ".\n"
 					--SAR
 					elseif player_task == "SAR" then
-						local airbase = Tplayer.pack[Tplayer.role][Tplayer.flight].base
+						local airbase = tempPlayer.airbase
 						s = s .. "You are assigned to ground alert SAR duty at " .. airbase ..  ".\n"
 					--CSAR
 					elseif player_task == "CSAR" then
@@ -865,7 +830,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					end
 
 					if (player_task == "Strike" or player_task == "Anti-ship Strike") then
-						for targetN, target in ipairs(targetlist[Tplayer.side]) do
+						for targetN, target in ipairs(targetlist[tempPlayer.side]) do
 							local precisionGPS = 8
 							local attributMaster = ""
 							if target.attributes then
@@ -926,7 +891,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 
 					--Package overview
-					-- if PlayerFlight and Tplayer.side == sideName then																			--if the mission has a player flight
+					-- if PlayerFlight and tempPlayer.side == sideName then																			--if the mission has a player flight
 					-- if flight[f].player or flight[f].client then
 						local s = "Package:\n"																		--make a list of the details of all flights in the player package
 
@@ -964,7 +929,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 						}
 
 						--collect the maximum string length of each entry in the list
-						for role_name,role in pairs(Tplayer.pack) do											--iterate through roles in the player package
+						for role_name,role in pairs(tempPlayer.pack) do											--iterate through roles in the player package
 							for flight_n,flight in pairs(role) do													--iterate through the flights in all roles
 								for e = 1, #entries do																--iterate through all entries
 									local value = ReplaceTypeName(flight[entries[e].lookup])
@@ -990,7 +955,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 						s = s .. "\n"
 
 						--build the overview list with the entries of all flights
-						for role_name,role in pairs(Tplayer.pack) do											--iterate through roles in the player package	
+						for role_name,role in pairs(tempPlayer.pack) do											--iterate through roles in the player package	
 							for flight_n,_flight in pairs(role) do													--iterate through flights in all roles
 								for e = 1, #entries do																--iterate through all entries
 									if type(_flight[entries[e].lookup]) == "string" or type(_flight[entries[e].lookup]) == "number" then	--entry is a string or number
@@ -1022,7 +987,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					local s = "Flight:\n"																		--make a list of the details of all flights in the player package
 						s = s.."CallSign    Designated aircraft number \n"
 
-					for role_name,role in pairs(Tplayer.pack) do												--iterate through roles in the player package	
+					for role_name,role in pairs(tempPlayer.pack) do												--iterate through roles in the player package	
 						for flight_n,_flight in pairs(role) do													--iterate through flights in all roles
 							if _flight.units	 then
 								for u=1 , #_flight.units do
@@ -1089,19 +1054,19 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 						}
 
 						--collect the maximum string length of each entry in the list	
-						for w = 1, #Tplayer.waypoints do														--iterate through the waypoints
+						for w = 1, #tempPlayer.waypoints do														--iterate through the waypoints
 							for e = 1, #entries do																	--iterate through all entries
 								local entry																			--lookup of entry e of WP w
 								if entries[e].lookup == "number" then
 									entry = w - 1																	--waypoint number, starts with 0
 								elseif entries[e].lookup == "ETA" then
-									entry = FormatTime(camp.time + Tplayer.waypoints[w][entries[e].lookup], "hh:mm:ss")	--format the time in the hh:mm:ss format
+									entry = FormatTime(camp.time + tempPlayer.waypoints[w][entries[e].lookup], "hh:mm:ss")	--format the time in the hh:mm:ss format
 								elseif entries[e].lookup == "alt" then
-									entry = FormatAlt(Tplayer.waypoints[w][entries[e].lookup], unitsUse)					--format altitude in meters or feet
+									entry = FormatAlt(tempPlayer.waypoints[w][entries[e].lookup], unitsUse)					--format altitude in meters or feet
 								elseif entries[e].lookup == "speed" then
-									entry = FormatSpeed(Tplayer.waypoints[w][entries[e].lookup], unitsUse)				--format speed in kph or kts
+									entry = FormatSpeed(tempPlayer.waypoints[w][entries[e].lookup], unitsUse)				--format speed in kph or kts
 								else
-									entry = Tplayer.waypoints[w][entries[e].lookup]								--no special formating
+									entry = tempPlayer.waypoints[w][entries[e].lookup]								--no special formating
 								end
 								local l = string.len(tostring(entry)) + 3 												--get the string length
 								if l > entries[e].str_length then													--if the string length is larger than the previous
@@ -1124,22 +1089,22 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 						--build the overview list with the entries of all waypoints
 						local WP_num = 0																			--waypoint number, starts with 0
-						for w = 1, #Tplayer.waypoints do														--iterate through all waypoints
-							if Tplayer.waypoints[w].briefing_name ~= "Taxi" then								--do not list taxi waypoint in overview
+						for w = 1, #tempPlayer.waypoints do														--iterate through all waypoints
+							if tempPlayer.waypoints[w].briefing_name ~= "Taxi" then								--do not list taxi waypoint in overview
 								for e = 1, #entries do																--iterate through all entries
 									local entry
 									if entries[e].lookup == "number" then
 										entry = WP_num
 										WP_num = WP_num + 1
 									elseif entries[e].lookup == "ETA" then
-										-- entry = FormatTime(camp.time + Tplayer.waypoints[w][entries[e].lookup], "hh:mm:ss")	--format the time in the hh:mm:ss format
-										entry = FormatTime(camp.time + Tplayer.waypoints[w][entries[e].lookup], "hh:mm")	--format the time in the hh:mm:ss format
+										-- entry = FormatTime(camp.time + tempPlayer.waypoints[w][entries[e].lookup], "hh:mm:ss")	--format the time in the hh:mm:ss format
+										entry = FormatTime(camp.time + tempPlayer.waypoints[w][entries[e].lookup], "hh:mm")	--format the time in the hh:mm:ss format
 									elseif entries[e].lookup == "alt" then
-										entry = FormatAlt(Tplayer.waypoints[w][entries[e].lookup], unitsUse)				--format altitude in meters or feet
+										entry = FormatAlt(tempPlayer.waypoints[w][entries[e].lookup], unitsUse)				--format altitude in meters or feet
 									elseif entries[e].lookup == "speed" then
-										entry = FormatSpeed(Tplayer.waypoints[w][entries[e].lookup], unitsUse)			--format speed in kph or kts
+										entry = FormatSpeed(tempPlayer.waypoints[w][entries[e].lookup], unitsUse)			--format speed in kph or kts
 									else
-										entry = Tplayer.waypoints[w][entries[e].lookup]							--no special formating
+										entry = tempPlayer.waypoints[w][entries[e].lookup]							--no special formating
 									end
 									s = s .. tostring(entry)
 									if e ~= #entries then															--if this is not the last entry of the waypoint, add spaces to the next entry	
@@ -1153,9 +1118,9 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 							end
 						end
 						-- M58 flight plan, heading, Dist, ETE
-						if Tplayer.waypoints[#Tplayer.waypoints].briefing_name == "Land" and Tplayer.waypoints[#Tplayer.waypoints]["TotFlightDist"]then
+						if tempPlayer.waypoints[#tempPlayer.waypoints].briefing_name == "Land" and tempPlayer.waypoints[#tempPlayer.waypoints]["TotFlightDist"]then
 							s = s.. "\n"
-							s = s .. "                                                           TOTAL   "..Tplayer.waypoints[#Tplayer.waypoints]["TotFlightDist"] .." / "..Tplayer.waypoints[#Tplayer.waypoints]["TotFlightTime"] .. "\n"
+							s = s .. "                                                           TOTAL   "..tempPlayer.waypoints[#tempPlayer.waypoints]["TotFlightDist"] .." / "..tempPlayer.waypoints[#tempPlayer.waypoints]["TotFlightTime"] .. "\n"
 
 						end
 					end
@@ -1167,7 +1132,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					--flight[f].helicopter
 					for side_name,side in pairs(oob_air) do
 						for n,unit in pairs(side) do
-							if unit.name == Tplayer.pack[Tplayer.role][Tplayer.flight].name and (unit.helicopter or unit.refuelable == false)  then
+							if unit.name == tempPlayer.unitname and (unit.helicopter or unit.refuelable == false)  then
 								refuelable = false
 							end
 						end
@@ -1176,33 +1141,33 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					--Radio navigation
 
 					local s = "Radio Navigation:\n"
-					s = s .."Base: ".. ReplaceBaseName(Tplayer.pack[Tplayer.role][Tplayer.flight].base)
+					s = s .."Base: ".. ReplaceBaseName(tempPlayer.airbase)
 					--homebase TACAN
-					if db_airbases[Tplayer.pack[Tplayer.role][Tplayer.flight].base].TACAN then
-						s = s .. " TACAN: " .. db_airbases[Tplayer.pack[Tplayer.role][Tplayer.flight].base].TACAN
+					if db_airbases[tempPlayer.airbase].TACAN then
+						s = s .. " TACAN: " .. db_airbases[tempPlayer.airbase].TACAN
 					end
-					if db_airbases[Tplayer.pack[Tplayer.role][Tplayer.flight].base].tacan then
-						s = s .. " TACAN: " .. db_airbases[Tplayer.pack[Tplayer.role][Tplayer.flight].base].tacan
+					if db_airbases[tempPlayer.airbase].tacan then
+						s = s .. " TACAN: " .. db_airbases[tempPlayer.airbase].tacan
 					end
-					if db_airbases[Tplayer.pack[Tplayer.role][Tplayer.flight].base].VOR then										--M33.d02
-						s = s .. " VOR: " .. db_airbases[Tplayer.pack[Tplayer.role][Tplayer.flight].base].VOR
+					if db_airbases[tempPlayer.airbase].VOR then										--M33.d02
+						s = s .. " VOR: " .. db_airbases[tempPlayer.airbase].VOR
 					end
-					if db_airbases[Tplayer.pack[Tplayer.role][Tplayer.flight].base].NDB then
-						s = s .. " NDB: " .. db_airbases[Tplayer.pack[Tplayer.role][Tplayer.flight].base].NDB
+					if db_airbases[tempPlayer.airbase].NDB then
+						s = s .. " NDB: " .. db_airbases[tempPlayer.airbase].NDB
 					end
-					if db_airbases[Tplayer.pack[Tplayer.role][Tplayer.flight].base].ILS then
-						s = s .. " ILS: " .. db_airbases[Tplayer.pack[Tplayer.role][Tplayer.flight].base].ILS
+					if db_airbases[tempPlayer.airbase].ILS then
+						s = s .. " ILS: " .. db_airbases[tempPlayer.airbase].ILS
 					end
 					--carrier ICLS
-					if db_airbases[Tplayer.pack[Tplayer.role][Tplayer.flight].base].icls then
-						s = s .. " ICLS: Channel " .. db_airbases[Tplayer.pack[Tplayer.role][Tplayer.flight].base].icls
+					if db_airbases[tempPlayer.airbase].icls then
+						s = s .. " ICLS: Channel " .. db_airbases[tempPlayer.airbase].icls
 					end
 					s = s .. "\n"
 
 					--Divert BASE	M33.d				
-					if Tplayer.pack[Tplayer.role][Tplayer.flight].divert then
-						for Divert, _base in pairs(Tplayer.pack[Tplayer.role][Tplayer.flight].divert) do
-							if Divert ~= Tplayer.pack[Tplayer.role][Tplayer.flight].base then
+					if tempPlayer.divert then
+						for Divert, _base in pairs(tempPlayer.divert) do
+							if Divert ~= tempPlayer.unitname then
 								s = s .."Divert: ".. ReplaceBaseName(_base)
 								--Divert TACAN
 								if db_airbases[_base].TACAN then
@@ -1240,7 +1205,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					--tanker TACAN
 					local tanker_TACAN = {}
 					if refuelable then
-						for pack_n,pack in pairs(ATO[Tplayer.side]) do																		--iterate through packages in player side
+						for pack_n,pack in pairs(ATO[tempPlayer.side]) do																		--iterate through packages in player side
 							for role_name,role in pairs(pack) do																				--iterate through roles in package
 								if role[1] and role[1].task == "Refueling" then																	--if first flight is tanker
 									if role[1].tacan then																						--tanker has a tacan channel
@@ -1261,14 +1226,14 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 						-- MC = -1										-- MC ModChannel
 					-- end
 
-					for u = 1, #Tplayer.group["units"] do
+					for u = 1, #tempPlayer.group["units"] do
 						for n = 1, #camp.radio[sideName] do																		--do it for all the radios
 							if 	frequency[inheritedType] then
 								for ir=1, #frequency[inheritedType].radio do
 									if frequency[inheritedType].radio[ir].nbCanal > 0 then
-										if not Tplayer.group["units"][u]["Radio"] then Tplayer.group["units"][u]["Radio"] = {} end
+										if not tempPlayer.group["units"][u]["Radio"] then tempPlayer.group["units"][u]["Radio"] = {} end
 
-										Tplayer.group["units"][u]["Radio"][ir] = {
+										tempPlayer.group["units"][u]["Radio"][ir] = {
 											["channels"] = {},
 										}
 									end
@@ -1286,7 +1251,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					local ATC_Divert_freq = {}
 					local All_freq = {}
 
-					for pack_n,pack in pairs(ATO[Tplayer.side]) do														--iterate through packages in player side
+					for pack_n,pack in pairs(ATO[tempPlayer.side]) do														--iterate through packages in player side
 						for role_name,role in pairs(pack) do															--iterate through roles in package													--iterate through the flights in role
 							if role[1] and role[1].task == "AWACS" then													--if first flight is AWACS
 								for f = 1 , #role do
@@ -1365,7 +1330,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 							elseif role[1] and role[1].task == "CAP" then												--if first flight is tanker
 								CAP_freq[role[1].callsign] = role[1].frequency											--store callsign and frequency
 
-							elseif role[1]  and  string.find(role[1].task,"Strike") and pack_n ~= Tplayer.pack_n then								--and  string.find(role[1].task,"Strike")
+							elseif role[1]  and  string.find(role[1].task,"Strike") and pack_n ~= tempPlayer.pack_n then								--and  string.find(role[1].task,"Strike")
 
 								if not All_freq[role[1].callsign] then All_freq[role[1].callsign] = {} end
 
@@ -1377,7 +1342,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					end
 
 					-- tanker_freq					
-					local tempEWR = ewr[Tplayer.side]
+					local tempEWR = ewr[tempPlayer.side]
 
 					-- modification M34.g change freq EWR + custom FrequenceRadio (g: utilise les indicatifs WEST pour EWR)
 					local ComparePossible = true
@@ -1434,9 +1399,9 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					end
 
 					--Divert BASE	M33.d				
-					if Tplayer.pack[Tplayer.role][Tplayer.flight].divert then
-						for Divert, _base in pairs(Tplayer.pack[Tplayer.role][Tplayer.flight].divert) do
-							if Divert ~= Tplayer.pack[Tplayer.role][Tplayer.flight].base then
+					if tempPlayer.divert then
+						for Divert, _base in pairs(tempPlayer.divert) do
+							if Divert ~= tempPlayer.unitname then
 								local landingPossible = false
 								local divertLowerStr = string.lower(Divert)
 								if string.find(divertLowerStr, "farp") or  string.find(divertLowerStr, "lha") then
@@ -1485,18 +1450,18 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					-- for Nradio = 1, 3 do
 					for Nradio = 1, #radioP do
 
-						local freqA = tonumber(Tplayer.group.frequency)
+						local freqA = tonumber(tempPlayer.group.frequency)
 						entry = {name = "", call = "", freq = "",radio = ""}
 						entry["name"] = "Package: "
 						entry["call"] = ""
 						entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 						if FreqCapability(freqA, radioP, Nradio, "") then
-							if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #Tplayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+							if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 								if radioP[Nradio].startCanal == 0 then MC = -1 end
 								-- if camp.radio[sideName][Nradio]  then
-								table.insert(Tplayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-								entry["radio"] = RadName[Nradio].." / Channel " .. #Tplayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+								table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+								entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
 								local entryCopy = Deepcopy(entry)
 								table.insert(entriesRadio[Nradio], entryCopy)
 							elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
@@ -1511,7 +1476,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					--ATC_freq*******************************************************************
 					entry = {name = "", call = "", freq = "",radio = ""}
 					--ATC_frequency = {"4.725", "40.350", "120.200", "251.900" }
-					local ATC_freqTemp = db_airbases[Tplayer.pack[Tplayer.role][Tplayer.flight].base].ATC_frequency
+					local ATC_freqTemp = db_airbases[tempPlayer.airbase].ATC_frequency
 					local freqA = 0
 					--M34.o (o: all ATC freq in array)
 					if type(ATC_freqTemp) == "table" then
@@ -1525,21 +1490,21 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 							end
 						end
 					else
-						freqA = tonumber(db_airbases[Tplayer.pack[Tplayer.role][Tplayer.flight].base].ATC_frequency) or 0
+						freqA = tonumber(db_airbases[tempPlayer.airbase].ATC_frequency) or 0
 					end
 
 					for Nradio = 1, #radioP do
 						entry = {name = "", call = "", freq = "",radio = ""}
 						entry["name"] = "ATC: "
-						entry["call"] = ReplaceBaseName(Tplayer.pack[Tplayer.role][Tplayer.flight].base)
+						entry["call"] = ReplaceBaseName(tempPlayer.airbase)
 						entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 						if FreqCapability(freqA, radioP, Nradio, "") then
-							if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #Tplayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+							if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 								if radioP[Nradio].startCanal == 0 then MC = -1 end
 								-- if camp.radio[sideName][Nradio]  then
-								table.insert(Tplayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-								entry["radio"] = RadName[Nradio].." / Channel " .. #Tplayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+								table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+								entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
 								local entryCopy = Deepcopy(entry)
 								table.insert(entriesRadio[Nradio], entryCopy)
 							elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
@@ -1566,12 +1531,12 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 									if FreqCapability(freqA, radioP, Nradio, "") then
-										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #Tplayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 											if radioP[Nradio] and radioP[Nradio].nbCanal > 0 then
 												if radioP[Nradio].startCanal == 0 then MC = -1 end
 												-- if camp.radio[sideName][Nradio]  then
-												table.insert(Tplayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-												entry["radio"] = RadName[Nradio].." / Channel " .. #Tplayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+												table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+												entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
 												local entryCopy = Deepcopy(entry)
 												table.insert(entriesRadio[Nradio], entryCopy)
 											elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
@@ -1601,10 +1566,10 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 									if FreqCapability(freqA, radioP, Nradio, "") then
-										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #Tplayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 											if radioP[Nradio].startCanal == 0 then MC = -1 end
-											table.insert(Tplayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-											entry["radio"] = RadName[Nradio].." / Channel " .. #Tplayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+											table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+											entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
 											local entryCopy = Deepcopy(entry)
 											table.insert(entriesRadio[Nradio], entryCopy)
 										elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
@@ -1632,10 +1597,10 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 									entry["freq"] = string.format("%02.3f", freqA).. " MHz"
 
 									if FreqCapability(freqA, radioP, Nradio, "") then
-										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #Tplayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 											if radioP[Nradio].startCanal == 0 then MC = -1 end
-											table.insert(Tplayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-											entry["radio"] = RadName[Nradio].." / Channel " .. #Tplayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+											table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+											entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
 											local entryCopy = Deepcopy(entry)
 											table.insert(entriesRadio[Nradio], entryCopy)
 										elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
@@ -1663,10 +1628,10 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 									entry["freq"] = string.format("%02.3f", freqA).. " MHz"
 
 									if FreqCapability(freqA, radioP, Nradio, "") then
-										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #Tplayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 											if radioP[Nradio].startCanal == 0 then MC = -1 end
-											table.insert(Tplayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-											entry["radio"] = RadName[Nradio].." / Channel " .. #Tplayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+											table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+											entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
 											local entryCopy = Deepcopy(entry)
 											table.insert(entriesRadio[Nradio], entryCopy)
 										elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
@@ -1701,10 +1666,10 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 								if FreqCapability(freqA, radioP, Nradio, "") then
-									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #Tplayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 										if radioP[Nradio].startCanal == 0 then MC = -1 end
-										table.insert(Tplayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-										entry["radio"] = RadName[Nradio].." / Channel " .. #Tplayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+										table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+										entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
 										local entryCopy = Deepcopy(entry)
 										table.insert(entriesRadio[Nradio], entryCopy)
 									elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
@@ -1738,10 +1703,10 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 								if FreqCapability(freqA, radioP, Nradio, "") then
-									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #Tplayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 										if radioP[Nradio].startCanal == 0 then MC = -1 end
-										table.insert(Tplayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-										entry["radio"] = RadName[Nradio].." / Channel " .. #Tplayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+										table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+										entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
 										local entryCopy = Deepcopy(entry)
 										table.insert(entriesRadio[Nradio], entryCopy)
 									elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
@@ -1765,10 +1730,10 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 								if FreqCapability(freqA, radioP, Nradio, "") then
-									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #Tplayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 										if radioP[Nradio].startCanal == 0 then MC = -1 end
-										table.insert(Tplayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-										entry["radio"] = RadName[Nradio].." / Channel " .. #Tplayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+										table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+										entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
 										local entryCopy = Deepcopy(entry)
 										table.insert(entriesRadio[Nradio], entryCopy)
 									elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
@@ -1804,10 +1769,10 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 									if FreqCapability(freqA, radioP, Nradio, "") then
-										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #Tplayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 											if radioP[Nradio].startCanal == 0 then MC = -1 end
-											table.insert(Tplayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-											entry["radio"] = RadName[Nradio].." / Channel " .. #Tplayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+											table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+											entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
 											local entryCopy = Deepcopy(entry)
 											table.insert(entriesRadio[Nradio], entryCopy)
 										elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
@@ -1832,11 +1797,11 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 							entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 							if FreqCapability(freqA, radioP, Nradio, "") then
-								if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #Tplayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+								if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 									if radioP[Nradio].startCanal == 0 then MC = -1 end
 									-- if camp.radio[sideName][Nradio]  then
-									table.insert(Tplayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-									entry["radio"] = RadName[Nradio].." / Channel " .. #Tplayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+									table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+									entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
 									local entryCopy = Deepcopy(entry)
 									table.insert(entriesRadio[Nradio], entryCopy)
 								elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
@@ -1859,11 +1824,11 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 								if FreqCapability(freqA, radioP, Nradio, "") then
-									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #Tplayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 										if radioP[Nradio].startCanal == 0 then MC = -1 end
 										-- if camp.radio[sideName][Nradio]  then
-										table.insert(Tplayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-										entry["radio"] = RadName[Nradio].." / Channel " .. #Tplayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+										table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+										entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
 										local entryCopy = Deepcopy(entry)
 										table.insert(entriesRadio[Nradio], entryCopy)
 									elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
@@ -1903,10 +1868,10 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 									if FreqCapability(freqA, radioP, Nradio, "ATC "..tostring(baseName)) then
-										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #Tplayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 											if radioP[Nradio].startCanal == 0 then MC = -1 end
-											table.insert(Tplayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-											entry["radio"] = RadName[Nradio].." / Channel " .. #Tplayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+											table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+											entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
 											local entryCopy = Deepcopy(entry)
 											table.insert(entriesRadio[Nradio], entryCopy)
 										end
@@ -1928,11 +1893,11 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 								if FreqCapability(freqA, radioP, Nradio, "") then
-									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #Tplayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 										if radioP[Nradio].startCanal == 0 then MC = -1 end
 										-- if camp.radio[sideName][Nradio]  then
-										table.insert(Tplayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-										entry["radio"] = RadName[Nradio].." / Channel " .. #Tplayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+										table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+										entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
 										local entryCopy = Deepcopy(entry)
 										table.insert(entriesRadio[Nradio], entryCopy)
 									elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
@@ -1957,9 +1922,9 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					s = s .."\n"
 
 					-- recopie l'assignation radio aux autres ailier client
-					for u = 2, #Tplayer.group.units do
-						if Tplayer.group["units"][u]["skill"] == "Client" or Tplayer.group["units"][u]["skill"] == "Player" then
-							Tplayer.group["units"][u]["Radio"] = Tplayer.group["units"][1]["Radio"]
+					for u = 2, #tempPlayer.group.units do
+						if tempPlayer.group["units"][u]["skill"] == "Client" or tempPlayer.group["units"][u]["skill"] == "Player" then
+							tempPlayer.group["units"][u]["Radio"] = tempPlayer.group["units"][1]["Radio"]
 						end
 					end
 
@@ -1969,18 +1934,18 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 							for country_n,country in pairs(coal.country) do
 								if country.plane then
 									for group_n,group in pairs(country.plane.group) do
-										if group.name == "Recovery "..Tplayer.group.name  then
+										if group.name == "Recovery "..tempPlayer.group.name  then
 											for w = 1, #group.units do
-												group["units"][w]["Radio"] = Tplayer.group["units"][1]["Radio"]
+												group["units"][w]["Radio"] = tempPlayer.group["units"][1]["Radio"]
 											end
 										end
 									end
 								end
 								if country.helicopter then
 									for group_n,group in pairs(country.helicopter.group) do
-										if group.name == "Recovery "..Tplayer.group.name  then
+										if group.name == "Recovery "..tempPlayer.group.name  then
 											for w = 1, #group.units do
-												group["units"][w]["Radio"] = Tplayer.group["units"][1]["Radio"]
+												group["units"][w]["Radio"] = tempPlayer.group["units"][1]["Radio"]
 											end
 										end
 									end
@@ -2060,7 +2025,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 						for side , pPA in pairs(PlacePA) do
 							if sideName == side then																	--if camp.player.side == side then
 								for base , Tmn in pairs(pPA) do
-									if base == Tplayer.pack[Tplayer.role][Tplayer.flight].base then
+									if base == tempPlayer.unitname then
 										s = s..ReplaceBaseName(base).." Takeoff time on the platform at ...\n"
 										for sec, name in PairsByKeys(Tmn) do
 											if tabNam[name] ~= true then
@@ -2141,16 +2106,16 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 					-- --recupere les units des instruments de l'avion
 					-- local unitsUse = mission_ini.units
-					-- -- print("DcB type "..tostring (Tplayer.pack[Tplayer.role][Tplayer.flight].type))
-					-- if Data_divers and Data_divers[Tplayer.pack[Tplayer.role][Tplayer.flight].type] then
-					-- 	if Data_divers[Tplayer.pack[Tplayer.role][Tplayer.flight].type].instrumentUnits then
-					-- 		if Data_divers[Tplayer.pack[Tplayer.role][Tplayer.flight].type].instrumentUnits ~= nil then
-					-- 			unitsUse = Data_divers[Tplayer.pack[Tplayer.role][Tplayer.flight].type].instrumentUnits
+					-- -- print("DcB type "..tostring (tempPlayer.pack[tempPlayer.role][tempPlayer.flight].type))
+					-- if Data_divers and Data_divers[tempPlayer.pack[tempPlayer.role][tempPlayer.flight].type] then
+					-- 	if Data_divers[tempPlayer.pack[tempPlayer.role][tempPlayer.flight].type].instrumentUnits then
+					-- 		if Data_divers[tempPlayer.pack[tempPlayer.role][tempPlayer.flight].type].instrumentUnits ~= nil then
+					-- 			unitsUse = Data_divers[tempPlayer.pack[tempPlayer.role][tempPlayer.flight].type].instrumentUnits
 					-- 		end
 					-- 	end
 					-- end
 
-					local lMetar = TabMetar[Tplayer.pack[Tplayer.role][Tplayer.flight].base][unitsUse]
+					local lMetar = TabMetar[tempPlayer.airbase][unitsUse]
 
 					print(lMetar)
 
@@ -2259,23 +2224,6 @@ if BriefingImagesR and camp.BriefingImagesR and not TaskRefused then
 	end
 	camp.BriefingImagesR = nil
 end
-
-
--- if BriefingImagesR and camp.BriefingImagesR and not TaskRefused then
-	-- for iCamp = 1, #camp.BriefingImagesR do 	
-		-- local found = false
-		-- for iBase = 1, #BriefingImagesR do 
-			-- if BriefingImagesR[iBase] == camp.BriefingImagesR[iCamp]  then
-				-- found = true
-				-- break
-			-- end
-		-- end
-		-- if not found then
-			-- table.insert(BriefingImagesR, camp.BriefingImagesR[iCamp])
-		-- end
-	-- end
-	-- camp.BriefingImagesR = nil
--- end
 
 
 for n = 1, #BriefingImagesB do
