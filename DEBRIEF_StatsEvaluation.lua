@@ -1,11 +1,11 @@
 --To evaluate the DCS debrief.log and update the campaign status files
 --Initiated by DEBRIEF_Master.lua
 -------------------------------------------------------------------------------------------------------
--- last modification:  cleancode_h debug_k
+-- last modification:  cleancode_h debug_l
 if not versionDCE then versionDCE = {} end
-versionDCE["DEBRIEF_StatsEvaluation.lua"] = "1.8.66"
+versionDCE["DEBRIEF_StatsEvaluation.lua"] = "1.8.67"
 ------------------------------------------------------------------------------------------------------- 
--- debug_k						(k task inc)(j element.x)(i inconnu events[e].initiator)(g mission+1) hit name)(h take debrief camp_status)(g some kills are not counted)(f debrief bug)(e initiatorPilotName)(c:equipage compte 2X)(b transport)(a: nom cible peut ressembler à nom AirUnit)
+-- debug_l						(l package stats)(k task inc)(j element.x)(i inconnu events[e].initiator)(g mission+1) hit name)(h take debrief camp_status)(g some kills are not counted)(f debrief bug)(e initiatorPilotName)(c:equipage compte 2X)(b transport)(a: nom cible peut ressembler à nom AirUnit)
 -- cleancode_h					(h springCleaning)
 -- adjustment_i					(i Debug/statsClientDetails) (g soldat inconnu)(f reveals the SAM that have already fired)
 -- modification M66_a			bombOnRunway
@@ -233,41 +233,55 @@ local function AddClient(name)
 end
 
 
-if camp.client then
-	-- local testN = 999
-	-- --recupere la plus petite valeur de pack, le strike est surement dedans
-	-- for _N, value in pairs(camp.MultiPlayer.pack_n) do
-		-- N_Pack = tonumber(_N)
-		-- if testN > N_Pack then
-			-- testN = N_Pack	
-		-- end
-	-- end	
-	-- local packN = testN	
-	-- camp.player = camp.client[packN]
+-- if camp.client then
+-- 	-- local testN = 999
+-- 	-- --recupere la plus petite valeur de pack, le strike est surement dedans
+-- 	-- for _N, value in pairs(camp.MultiPlayer.pack_n) do
+-- 		-- N_Pack = tonumber(_N)
+-- 		-- if testN > N_Pack then
+-- 			-- testN = N_Pack	
+-- 		-- end
+-- 	-- end	
+-- 	-- local packN = testN	
+-- 	-- camp.player = camp.client[packN]
 
 
-	local packN = 1
-	--recupere la valeur du pack qui est striker
-	for nClient, pack_ in pairs(camp.client) do
-		if string.find(pack_["pack"]["main"][1]["task"] , "Strike") then
-			packN = nClient
-			break
-		end
-	end
+-- 	local packN = 1
+-- 	--recupere la valeur du pack qui est striker
+-- 	for nClient, pack_ in pairs(camp.client) do
+-- 		if string.find(pack_["pack"]["main"][1]["task"] , "Strike") then
+-- 			packN = nClient
+-- 			break
+-- 		end
+-- 	end
 
-	camp.player = camp.client[packN]
+-- 	camp.player = camp.client[packN]
 
-end
+-- end
 
 -- local camp_str = "DEBRIEF_States = " .. TableSerialization(camp.player, 0)						--make a string
 -- local campFile = io.open("DebugDEBRIEF_States.lua", "w")										--open targetlist file
 -- campFile:write(camp_str)																		--save new data
 -- campFile:close()
 
-for role_name, role in pairs(camp.player.pack) do														--iterate through roles in player package
-	for flight_n, flight in pairs(role) do																--iterate through flights
+
+-- pack_n
+camp.player.pack = camp.player.pack[camp.player.pack_n]
+
+
+for roleName, role in pairs(camp.player.pack) do														--iterate through roles in player package
+	for flightN, flight in pairs(role) do																--iterate through flights
 		for n = 1, flight.number do
-			local unitname = "Pack " .. camp.player.pack_n .. " - " .. flight.name .. " - " .. flight.task .. " " .. flight_n .. "-" .. n
+			-- local unitname = "Pack " .. camp.player.pack_n .. " - " .. flight.name .. " - " .. flight.task .. " " .. flightN .. "-" .. n
+
+			-- print("DebriefSE roleName "..tostring(roleName).." flightN "..flightN)
+
+			if not flight.units then
+				_affiche(flight, 'flight')
+			end
+
+			local unitname = flight.units[n].name
+
 			packstats[unitname] = {
 				kills_air = 0,
 				kills_ground = 0,
@@ -280,6 +294,9 @@ end
 -- end
 --function to check if a kill loss is attributed to the player package
 local function AddPackstats(unitname, event)
+	
+	unitname = unitname:gsub("Recovery ", "")
+	
 	if packstats[unitname] then																			--aircraft was part of the package
 		if event == "kill_air" then
 			packstats[unitname].kills_air = packstats[unitname].kills_air + 1

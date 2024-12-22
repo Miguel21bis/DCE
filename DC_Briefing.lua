@@ -1,13 +1,13 @@
 --To create the briefing for the next mission
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleancode_d M80_a
+-- last modification: cleancode_d M80_a debug_i
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_Briefing.lua"] = "1.24.155"
+versionDCE["DC_Briefing.lua"] = "1.24.156"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_d				(d springCleaning)						
 -- adjustment_b				(b \\" to \")(a add AFAC task)
--- Debug_h					(h nbPasse)(g mission h)(f mission.maxDictId)(e intercept navigation) (d: affiche info MP)(c: camp.date.day)  (b: Mi8 & Mi24)(a: add Mig21 Channel 00)
+-- debug_i					(i package stats)(h nbPasse)(g mission h)(f mission.maxDictId)(e intercept navigation) (d: affiche info MP)(c: camp.date.day)  (b: Mi8 & Mi24)(a: add Mig21 Channel 00)
 
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)

@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.80.505"
+versionDCE["UTIL_Changelog.lua"] = "20.80.506"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.80.505"
+VersionDCE["UTIL_Changelog.txt"] = "20.80.506"
 --[[
 
 
@@ -9,9 +9,9 @@ known issues:
 - [EWR text]: EWR also announces you as a friendly contact
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
-- [stats]	stats for your own package are rarely displayed
 
-==:20.81.505:==
+==:20.81.506:==
+506 fixed [stats]	stats for your own package are rarely displayed
 505 fixed [inter]	interceptors and CAPs ordered to leave a SAM zone no longer return to combat
 504 fixed [inter]	campaigns with dates prior to 1970 can freeze. Because of UNIX time
 

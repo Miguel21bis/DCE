@@ -1,11 +1,11 @@
 --To create the Debriefing text for the mission
 --Initiated by DEBRIEF_Master.lua
 -------------------------------------------------------------------------------------------------------
--- last modification: cleancode_a adjustment_b
+-- last modification: cleancode_a adjustment_b debug_b
 if not versionDCE then versionDCE = {} end
-versionDCE["DEBRIEF_Text.lua"] = "1.4.4"
+versionDCE["DEBRIEF_Text.lua"] = "1.4.5"
 ------------------------------------------------------------------------------------------------------- 
--- debug_a                  (a: neutral side) 
+-- debug_b                  (b package stats)(a: neutral side) 
 -- cleancode_a				(a springCleaning)
 -- adjustment_b				(a priority numeric targetTable)
 -- modification M61_a		SAR
@@ -177,9 +177,9 @@ do
 			for flight_n, flight in ipairs(role) do
 				-- print("flight_n "..flight_n)
 				for n = 1, flight.number do
-					local unit_name = "Pack " .. camp.player.pack_n .. " - " .. flight.name .. " - " .. flight.task .. " " .. flight_n .. "-" .. n
+					-- local unit_name = "Pack " .. camp.player.pack_n .. " - " .. flight.name .. " - " .. flight.task .. " " .. flight_n .. "-" .. n
 					-- print("unit_name "..unit_name.." kills_air "..packstats[unit_name].kills_air)
-					-- local unit_name = flight.name
+					local unit_name = flight.units[n].name
 					local callsign = string.sub(flight.callsign, 1, -2) .. n
 					table.insert(entries[1].values, callsign)
 					table.insert(entries[2].values, ReplaceTypeName(flight.type))
@@ -188,11 +188,20 @@ do
 					table.insert(entries[5].values, packstats[unit_name].kills_ground)
 					table.insert(entries[6].values, packstats[unit_name].kills_ship)
 					table.insert(entries[7].values, packstats[unit_name].lost)
-					if flight.player and n == 1 then
+
+					if flight.units[n].skill == "Player" then
 						table.insert(entries[8].values, "(Player)")
+					elseif flight.units[n].skill == "Client" then
+						table.insert(entries[8].values, "(Client)")
 					else
 						table.insert(entries[8].values, "")
 					end
+
+					-- if flight.player and n == 1 then
+					-- 	table.insert(entries[8].values, "(Player)")
+					-- else
+					-- 	table.insert(entries[8].values, "")
+					-- end
 				end
 			end
 		end
@@ -245,6 +254,8 @@ do
 
 
 
+-- print("camp.player.role "..tostring(camp.player.role))
+-- print("camp.player.flight "..tostring(camp.player.flight))
 
 	local player_task = camp.player.pack[camp.player.role][camp.player.flight].task								--player task
 	local target_name = camp.player.pack[camp.player.role][camp.player.flight].target_name						--name of player package target

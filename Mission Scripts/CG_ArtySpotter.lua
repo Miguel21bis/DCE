@@ -1162,9 +1162,14 @@ local function CGAS_timerPlayerMenu(arg)
 
 		local playerObj = getPlayerControlledUnit()
 		if playerObj then
+			
+			
+
 			local initiatorName = playerObj:getPlayerName()
 			local Uid = playerObj:getID()
 			local gpGid = playerObj:getGroup():getID()
+
+			missionCommands.removeItemForGroup(gpGid, {"Artillery Init"})
 
 			env.info("CG_ArtySpotter: CGAS_timerPlayerMenu: playerObj: "..tostring(playerObj))
 			env.info("CG_ArtySpotter: CGAS_timerPlayerMenu: initiatorName: "..tostring(initiatorName))

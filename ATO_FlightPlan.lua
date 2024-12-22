@@ -1,9 +1,9 @@
 --To create the flight plans in the mission file for all flights in the ATO
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleancode_n Debug_y
+-- last modification: cleancode_n debug_z
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_FlightPlan.lua"] = "1.58.283"
+versionDCE["ATO_FlightPlan.lua"] = "1.58.284"
 ------------------------------------------------------------------------------------------------------- 
 
 -- SomethingSimple_a		(a add randomizeSkills)
@@ -13,7 +13,7 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.283"
 -- mouvedOption_CM_01_c		(c: manage les options de west callSign) (b: previent le CampaignMaker d'une nation manquante)
 -- adjustment_Aa            	(y AddPropAircraft for all)(x largage d urgence if not heli)(CVN to CV)(t adjustment_e)(s No ATE if antiShip + B52 ASM)(r dont prune target mission)(q id_task)(modified jettison)(O escort Transport)(n is_helicopter)(m: less fuel for Tanker/Awacs already in the area)(l AltitudeFloor helicopter)(k landing after spawn)(j cheat_Mod_Eye)(i: skin: evite le bug table vide)(h: spawnAir +30s)(e: customScript on IP)(d: ajuster à 0 l'alti des joueurs Attack Landing) (b: ATO_lock sur les xpt Join) (ag: ne pas larguer les emports en cas d'urgence)
 -- cleancode_n				(n springCleaning)
--- Debug_y					(y polka on parking)(x frequency SA342)(w no recalculates all speeds)(v formation heli)(u activate*2)(t wpt speed eta)(s pilotEjected n) (r callsign_eastbug, thks ldnz)(o DeactivateBeacon MPRS)(n Tacan Tanker)(m TACAN)(l: fromParking MP)(k:etagement des roles)(j:landing task transport sur la base de destination )(i:gestion des apparitions décalé au sol et en vol)(h:vi trop faible pour les escorteurs des strike trop lent)(g:MP, alti vi unite)(f:strike ASM B52)(e:Escorte)(d:Gun = 0 uniquement sur un Flight)(c:Antiship strike)(b: Interceptor error nb trigger) (a: alti flight ai en multijoueur)
+-- debug_z					(z package stats)(y polka on parking)(x frequency SA342)(w no recalculates all speeds)(v formation heli)(u activate*2)(t wpt speed eta)(s pilotEjected n) (r callsign_eastbug, thks ldnz)(o DeactivateBeacon MPRS)(n Tacan Tanker)(m TACAN)(l: fromParking MP)(k:etagement des roles)(j:landing task transport sur la base de destination )(i:gestion des apparitions décalé au sol et en vol)(h:vi trop faible pour les escorteurs des strike trop lent)(g:MP, alti vi unite)(f:strike ASM B52)(e:Escorte)(d:Gun = 0 uniquement sur un Flight)(c:Antiship strike)(b: Interceptor error nb trigger) (a: alti flight ai en multijoueur)
 
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)
 -- modification M74_a		mix static, vehicle and map elements in a Target.

@@ -1,13 +1,13 @@
 --To assign the player to a flight in the ATO
 --Initiated by Main_NextMission.lua 
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  cleancode_f
+-- last modification:  cleancode_f debug_c
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_PlayerAssign.lua"] = "1.9.73"
+versionDCE["ATO_PlayerAssign.lua"] = "1.9.74"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_f				(f springCleaning)
 -- adjustment_d				(b: use io.stdin:read)(a:robust form) 
--- Debug_b					(b number of aircraft assigned to MP)(a: supprime la table camp.player qui garde par erreur celle du dossier Active)
+-- debug_c					(c package stats)(b number of aircraft assigned to MP)(a: supprime la table camp.player qui garde par erreur celle du dossier Active)
 -- modification M61_a		SAR
 -- modification M48_f		Accept result mission (d: garde en memoire le txt camp["Briefing_text"])
 -- modification M38_t		Check and Help CampaignMaker (t id info)
@@ -229,33 +229,16 @@ end
 local r
 TaskRefused = false
 
--- print()
-
 if Multi.Group then
 	for i = 1, #Multi.Group do
 		Multi.Group[i].counted = nil
 	end
 end
 
---permet de garder la demande initial en multi
--- if Multi.Group and not MultiInit then
--- 	MultiInit = Deepcopy(Multi) 
--- elseif Multi.Group and MultiInit then
--- 	Multi = Deepcopy(MultiInit) 
--- end 
-
--- local camp_str = "playable_AtoPA = " .. TableSerialization(playable, 0)														--make a string
--- local campFile = io.open("Debug/playable_AtoPA.lua", "w")																	--open targetlist file
--- campFile:write(camp_str)																									--save new data
--- campFile:close()
-
 --fait une copie de Multi pour eviter de perdre le nombre d'avion
 local MultiBIS = Deepcopy(Multi)
-
 local creaClientFlight = {}																									--crée une table pour dérouler plus tard les flight selectionnable
-
 local sum
--- local playability_Multi = {}
 
 if debugAssign then
 	_affiche(MultiBIS, "MultiBIS AtoPA")
@@ -302,6 +285,19 @@ if #playable > 0 then
 				AllCoopPossible = false
 				if Debug.debug then
 					print("AtoPA for this aircraft: "..tostring(MultiBIS.Group[k].PlaneType).." no flight possible or not NotAssigned:  "..tostring(MultiBIS.Group[k].NotAssigned))
+					_affiche(MultiBIS,"MultiBIS")
+
+					for sideName, units in pairs(oob_air) do
+						for unitN, unit in pairs(units) do
+							if unit.type == MultiBIS.Group[k].PlaneType and not unit.inactive then
+								
+								_affiche(Aircraft_availability[unit.name], "Aircraft_availability[unit.name]")
+
+							end
+						end
+					end
+					
+
 					os.execute 'pause'
 				end
 
@@ -363,7 +359,7 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 			print("\n\n Day or Night? : "..Daytime)														-- info day or not
 			print("\n\nAvailable tasks:")
 			for index = 1, #playable do
-				io.write(index.." - "..playable[index].base.." - "..playable[index].unitname )
+				io.write(index.." - "..playable[index].base.." - "..playable[index].type.." "..playable[index].unitname )
 				if playable[index].target_name ~= nil then  io.write(" - "..playable[index].target_name) end
 				io.write("\n")
 				tabIndex[index] = true
@@ -456,7 +452,7 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 					if Debug.Generator.affiche then
 						info = " "..playable[index].id.." "
 					end
-					io.write(Nindex..""..info.."(Nb: "..playable[index].number..") ".." -  Pack : "..playable[index].packN.." - "..playable[index].base.." - "..playable[index].unitname )
+					io.write(Nindex..""..info.."(Nb: "..playable[index].number..") ".." -  Pack : "..playable[index].packN.." - "..playable[index].base.." - "..playable[index].type.." - "..playable[index].unitname )
 					if playable[index].target_name ~= nil then  io.write(" - "..playable[index].target_name) end
 					io.write("\n")
 
