@@ -18,7 +18,8 @@ for side_name, side in pairs(ATO) do										--Iterate through sides in ATO
 	for pack_n, pack in pairs(side) do										--Iterate through packages
 		for role_name, role in pairs(pack) do								--Iterate throug roles
 			for flight_n, flight in pairs(role) do							--Iterate through flights
-				if count[flight.name] then									--Unit already has a count entry
+			-- print("DcSA "..side_name.." "..pack_n.." "..role_name.." "..flight_n)	
+			if count[flight.name] then									--Unit already has a count entry
 					count[flight.name] = count[flight.name] + flight.number	--Sum number
 				else														--Unit has no count entry
 					count[flight.name] = flight.number						--Create count entry

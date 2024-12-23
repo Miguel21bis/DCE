@@ -329,9 +329,11 @@ end
 --table to hold availability of aircraft
 if not camp.Aircraft_availability and not camp.aircraft_availability then
 	camp.Aircraft_availability = {}
+	-- print("passe A Aircraft_availability")
 elseif  camp.aircraft_availability then
-	Aircraft_availability = Deepcopy(camp.aircraft_availability)
+	camp.Aircraft_availability = Deepcopy(camp.aircraft_availability)
 	camp.aircraft_availability = nil
+	-- print("passe B Aircraft_availability")
 end
 Aircraft_availability = camp.Aircraft_availability																				--link to table for easier reference
 

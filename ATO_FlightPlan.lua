@@ -63,11 +63,11 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.284"
 DebugFLIGHT = ""
 TabLPark	= {}
 TargetList_InThisMission = {}			-- garde en mémoire les targets pour eviter de les pruner plus tard
+TabDivert = {}							--liste des pistes de deroutement
 
 local debugStart = true					--NE PAS CHANGER, les infos restent seulement dans le fichier debugGenMission
 local debugTxt_AtoFP = ""
-local tabCallSignFligt = {}
-local tabDivert = {}					-- modification M33.c 	Custom Briefing (onBoardNum)	
+local tabCallSignFligt = {}	
 local PlayerTask = ""
 local tempBaseAirStart = {}
 local tempDeckPlace = {}
@@ -5047,6 +5047,12 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					group.hidden = false														--unhide group
 				end
 
+				flight[f].groupName = groupName
+
+
+
+
+
 				-- modification M31 	Remove all static aircraft from the deck
 				if  mission_ini.CV_CleanDeck == true and string.find(flight[f].base,"CV") then
 					DeleteStaticOnCV(flight[f].base)
@@ -5067,6 +5073,9 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						SpawnAir = true
 					end
 				end
+
+
+
 
 				--||||||| INFORMATIOn TUTORIAL TUTORIEL
 				--||||||| START seulement utile au sol
@@ -5090,6 +5099,9 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				--||||||| lateActivation
 				--||||||| a_activate_group (fait apparaitre l'avion sans pilote)
 				--||||||| (START + a_set_ai_task) (pilote + demarrage)
+
+
+
 
 				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("") end
 				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP FirstMsg " .. groupName) end
@@ -6240,10 +6252,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							groupRTB.route.points[1].y = newPoint.y
 						end
 
-
-						-- if is_helicopter then print("AtoFp altiFloor passe EEEE2 altFloor "..tostring(altFloor).." "..tostring(flight[f].type)) end
-						-- if is_helicopter then print("AtoFp altiFloor passe EEEE2 testN "..tostring(testN).." Heading "..tostring(Heading)) end
-
 						if altFloor == -1 then altFloor = 600 end
 					else
 						altFloor = findCorrectAltitude(0)
@@ -6255,7 +6263,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						elseif flight[f].loadout.hCruise then
 							altFloor = flight[f].loadout.hCruise
 						end
-						-- if is_helicopter then print("AtoFp altiFloor passe FFF altFloor "..tostring(altFloor)) end
 					end
 
 					if altFloor > -1 then
@@ -6266,12 +6273,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						elseif groupRTB.route.points[1]["alt"] < altFloor + 200 then
 							groupRTB.route.points[1]["alt"] =  altFloor + 200 + ((Pn-1) * 200) + (altRole * 5)
 						end
-
-
-						-- if is_helicopter then 
-						-- 	print("AtoFp altiFloor passe GGG altFloor "..tostring(altFloor)) 
-						-- 	os.execute 'pause'
-						-- end
 					end
 
 					for n = 1, #groupRTB.units do
@@ -6365,45 +6366,16 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 
-					--TODO refaire ce bordel avec le nom du groupe comme key
-					-- creer une table en evitant les doublons
+
+					-- creer une table globale en evitant les doublons
 					for wp, TabBase in pairs(TabBaseByWPT) do
-						if flight[f].player then
+						-- if flight[f].player then
 
-							if not tabDivert["player"] then tabDivert["player"] = {} end
-							if not tabDivert["player"]["pack"] then tabDivert["player"]["pack"] = {} end
-							if not tabDivert["player"]["pack"][role] then tabDivert["player"]["pack"][role] = {} end
-							if not tabDivert["player"]["pack"][role][f] then tabDivert["player"]["pack"][role][f] = {} end
-							if not tabDivert["player"]["pack"][role][f]["base"] then tabDivert["player"]["pack"][role][f]["base"] = {} end
+							if not TabDivert[p] then TabDivert[p] = {} end
 
-							if not tabDivert["player"]["pack"][role][f].base[TabBase.baseName] then
-								tabDivert["player"]["pack"][role][f].base[TabBase.baseName] = TabBase.baseName
+							if not TabDivert[p][TabBase.baseName] then
+								TabDivert[p][TabBase.baseName] = TabBase.baseName
 							end
-						end
-						-- elseif flight[f].client then
-
-						-- 	if not tabDivert["client"] then tabDivert["client"] = {} end
-						-- 	if not tabDivert["client"]["pack"] then tabDivert["client"]["pack"] = {} end
-						-- 	if not tabDivert["client"]["pack"][role] then tabDivert["client"]["pack"][role] = {} end
-						-- 	if not tabDivert["client"]["pack"][role][f] then tabDivert["client"]["pack"][role][f] = {} end
-						-- 	if not tabDivert["client"]["pack"][role][f]["base"] then tabDivert["client"]["pack"][role][f]["base"] = {} end
-
-						-- 	if not tabDivert["client"]["pack"][role][f].base[TabBase.baseName] then
-						-- 		tabDivert["client"]["pack"][role][f].base[TabBase.baseName] = TabBase.baseName
-						-- 	end
-						-- end
-						-- elseif flight[f].client then
-
-						-- 	if not tabDivert["client"]												then tabDivert["client"] = {} end
-						-- 	if not tabDivert["client"][flight[f].IdClient]							then tabDivert["client"][flight[f].IdClient] = {} end
-						-- 	if not tabDivert["client"][flight[f].IdClient]["pack"]					then tabDivert["client"][flight[f].IdClient]["pack"] = {} end
-						-- 	if not tabDivert["client"][flight[f].IdClient]["pack"][role]			then tabDivert["client"][flight[f].IdClient]["pack"][role] = {} end
-						-- 	if not tabDivert["client"][flight[f].IdClient]["pack"][role][f]			then tabDivert["client"][flight[f].IdClient]["pack"][role][f] = {} end
-						-- 	if not tabDivert["client"][flight[f].IdClient]["pack"][role][f]["base"]	then tabDivert["client"][flight[f].IdClient]["pack"][role][f]["base"] = {} end
-
-						-- 	if not tabDivert["client"][flight[f].IdClient]["pack"][role][f]["base"][TabBase.baseName] then
-						-- 		tabDivert["client"][flight[f].IdClient]["pack"][role][f]["base"][TabBase.baseName] = TabBase.baseName
-						-- 	end
 						-- end
 					end
 				end
@@ -6458,38 +6430,14 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						['type'] = 'Turning Point',
 
 					}
-
 					table.insert(group.route.points, 2, neWpt )
-
 				end
 
 
 				--ajoute ici les Custom_Altitude car les num de wpt ne change plus
 				if is_helicopter and not flight[f].client and not flight[f].player  then
 					for n = 2, #group.route.points   do
-						-- if n == 2 then
-						-- 	local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
-						-- 	local task_entry = {	
-						-- 		["enabled"] = true,
-						-- 		["auto"] = false,
-						-- 		["id"] = "WrappedAction",
-						-- 		["number"] = #group.route.points[n]["task"]["params"]["tasks"] + 1,
-						-- 		["params"] = 
-						-- 		{
-						-- 			["action"] = 
-						-- 			{
-						-- 				["id"] = "Script",
-						-- 				["params"] = 
-						-- 				{
-						-- 					["command"] = "Custom_Altitude('" .. grpname .. "',  '  nil  ', '" .. n .. "')",
-						-- 				},
-						-- 			},
-						-- 		},
-						-- 	}
-						-- 	table.insert(group.route.points[n]["task"]["params"]["tasks"], task_entry)
 
-
-						-- else
 						if group.route.points[n].briefing_name == "Egress" then
 
 							-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
@@ -6515,26 +6463,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 				end
-					-- 	local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
-					-- 	local task_entry = {	
-					-- 		["enabled"] = true,
-					-- 		["auto"] = false,
-					-- 		["id"] = "WrappedAction",
-					-- 		["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-					-- 		["params"] = 
-					-- 		{
-					-- 			["action"] = 
-					-- 			{
-					-- 				["id"] = "Script",
-					-- 				["params"] = 
-					-- 				{
-					-- 					-- ["command"] = "Custom_Altitude('" .. grpname .. "')",
-					-- 					["command"] = "Custom_Altitude('" .. grpname .. "',  '  nil  ', '" .. w .. "')",
-					-- 				},
-					-- 			},
-					-- 		},
-					-- 	}
-					-- 	table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
 
 				------ add group to mission -----
@@ -6646,11 +6574,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					if flight[f].player == true then
 						camp.player.group = mission.coalition[side].country[addKeyCoalition].plane.group[#mission.coalition[side].country[addKeyCoalition].plane.group]		--store a link to the player group in mission
 					end
-					-- modification M11B. : Multiplayer--briefing
-					-- TODO revoir client
-					-- if flight[f].client == true then
-					-- 	camp.client[flight[f].IdClient].group = mission.coalition[side].country[addKeyCoalition].plane.group[#mission.coalition[side].country[addKeyCoalition].plane.group]		--store a link to the player group in mission
-					-- end
 
 					if groupRTB.groupId then
 						table.insert(mission.coalition[side].country[addKeyCoalition].plane.group, groupRTB)
@@ -6666,24 +6589,26 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					if flight[f].player == true then
 						camp.player.group = mission.coalition[side].country[addKeyCoalition].helicopter.group[#mission.coalition[side].country[addKeyCoalition].helicopter.group]		--store a link to the player group in mission
-					-- modification M11B. : Multiplayer--briefing	
 					end
-					---- TODO revoir client
-					-- if flight[f].client == true then
-					-- 	camp.client[flight[f].IdClient].group = mission.coalition[side].country[addKeyCoalition].helicopter.group[#mission.coalition[side].country[addKeyCoalition].helicopter.group]		--store a link to the player group in mission
-					-- end
+
 					if groupRTB.groupId then
 						table.insert(mission.coalition[side].country[addKeyCoalition].helicopter.group, groupRTB)
 					end
 				end
 
+
+
+
+
+--***************************--DEBUG INFO
+				--***************************--DEBUG INFO
+--***************************--DEBUG INFO
+
 				local debugTempFLIGHT = ""
-				-- local idSol = "SolRIEN"
 				local ETA = -1
 				local NbEta = "ETA "
 
 				if spawn_time ~= nil then
-					-- ETA = spawn_time
 					ETA = group.start_time
 				end
 
@@ -7364,11 +7289,11 @@ end
 
 
 ----- make a copy of player package for easy reference in briefing -----
-local breakloop = false
+
 if camp.player then
-	if not camp.player.pack then camp.player.pack = {} end
-	if not camp.player.pack[camp.player.pack_n] then
-		camp.player.pack[camp.player.pack_n] = Deepcopy(ATO[camp.player.side][camp.player.pack_n])
+	if not camp.player.package then camp.player.package = {} end
+	if not camp.player.package[camp.player.pack_n] then
+		camp.player.package[camp.player.pack_n] = Deepcopy(ATO[camp.player.side][camp.player.pack_n])
 	end
 
 	--for multi-package strikes, add flights from other packages with the same target to player package to enrich the briefiing
@@ -7376,45 +7301,8 @@ if camp.player then
 		for role,flight in pairs(ATO[camp.player.side][p]) do					--iterate through roles in package (main, SEAD, escort)		
 			for f = 1, #flight do												--iterate through flights in roles
 				if flight[f].target_name == camp.player.target.titleName and camp.player.pack_n ~= p then	--flights that have the same target as player but are not in the player package
-					table.insert(camp.player.pack[role], Deepcopy(flight[f]))							--insert flight into player package to list it in player briefing
+					table.insert(camp.player.package[role], Deepcopy(flight[f]))							--insert flight into player package to list it in player briefing
 				end
-				if flight[f].player or flight[f].client then
-					-- modification M33_b 	Custom Briefing (onBoardNum)
-					if flight[f].target_name == camp.player.target.titleName and camp.player.pack_n == p and not breakloop then
-						for _side,side in pairs(mission.coalition) do
-							for _country,country in pairs(side.country) do
-								if country.plane and _side == camp.player.side then
-									for Ngroup,group in pairs(country.plane.group) do
-										if group.units and ( group.units[1].skill == "Player" or group.units[1].skill == "Client" ) then
-
-											--TODO encore utile?
-											-- camp.player.pack[camp.player.pack_n][role][f].units = group.units
-
-											if tabDivert and tabDivert["player"] then
-
-												camp.player.pack[role][f]["divert"] = tabDivert["player"]["pack"][role][f].base
-
-											end
-											-- breakloop = true
-										end
-									end
-								end
-								if country.helicopter and _side == camp.player.side then
-									for Ngroup,group in pairs(country.helicopter.group) do
-										if group.units and ( group.units[1].skill == "Player" or group.units[1].skill == "Client" ) then
-											-- camp.player.pack[camp.player.pack_n][role][f].units = group.units
-											if tabDivert and tabDivert["player"] then
-												camp.player.pack[camp.player.pack_n][role][f]["divert"] = tabDivert["player"]["pack"][role][f].base
-											end
-											-- breakloop = true
-										end
-									end
-								end
-							end
-						end
-					end
-				end
-
 			end
 		end
 	end
@@ -7425,122 +7313,14 @@ if camp.client then
 
 	-- camp.client.pack = Deepcopy(ATO[camp.client.side][camp.client.pack_n])
 	for c = 1, #camp.client do
-		if not camp.client.pack then camp.client.pack = {} end
-		if not camp.client.pack[camp.client[c].pack_n] then
-			camp.client.pack[camp.client[c].pack_n] = Deepcopy(ATO[camp.client[c].side][camp.client[c].pack_n])	--pack_n
+		if not camp.client.package then camp.client.package = {} end
+		if not camp.client.package[camp.client[c].pack_n] then
+			camp.client.package[camp.client[c].pack_n] = Deepcopy(ATO[camp.client[c].side][camp.client[c].pack_n])	--pack_n
 		end
-
-
 	end
-
-	--TODO revoir divert , util pour briefing, mais ne dois pas rester dans camp_status pour eviter de le surcharger
-		-- if  tabDivert["client"] then
-		-- 	if pack_ and PlayerFlight then
-		-- 		for i = 1, #camp.client do
-		-- 			if tabDivert["client"][i] and tabDivert["client"][i]["pack"]  and tabDivert["client"][i]["pack"][role] and tabDivert["client"][i]["pack"][role][f] then
-		-- 				camp.client[i]["pack"][role][f]["divert"] = tabDivert["client"][i]["pack"][role][f]["base"]
-		-- 			end
-		-- 		end
-		-- 	end
-		-- end
-
-	-- for p = 1, #ATO[camp.client.side] do
-	-- 	for role,flight in pairs(ATO[camp.client.side][p]) do
-	-- 		for f = 1, #flight do
-	-- 			if flight[f].target_name == camp.client.target.titleName and camp.client.pack_n ~= p then
-	-- 				local copyFlight = Deepcopy(flight[f])
-	-- 				if copyFlight and copyFlight.target then copyFlight.target = nil end
-	-- 				if copyFlight and copyFlight.route then copyFlight.route = nil end
-	-- 				if copyFlight and copyFlight.loadout then copyFlight.loadout = nil end
-	-- 				table.insert(camp.client.pack[role], Deepcopy(flight[f]))
-	-- 			end				
-	-- 		end
-	-- 	end
-	-- end
 end
 
 
--- if camp.client then
-
--- 	-- for c = 1, #camp.client do
--- 	-- 	camp.client[c].pack = Deepcopy(ATO[camp.client[c].side][camp.client[c].pack_n])	--pack_n
--- 	-- end
--- 	--for multi-package strikes, add flights from other packages with the same target to player package to enrich the briefiing
--- 	for c, pack_ in pairs(camp.client) do
--- 		for p = 1, #ATO[pack_.side] do										--iterate through packages in player side	
--- 			for role,flight in pairs(ATO[pack_.side][p]) do					--iterate through roles in package (main, SEAD, escort)		
--- 				for f = 1, #flight do												--iterate through flights in roles
--- 					-- if flight[f].target_name == pack_.target.titleName and pack_.pack_n ~= p then	--flights that have the same target as player but are not in the player package
--- 						-- table.insert(pack_.pack[role], Deepcopy(flight[f]))							--insert flight into player package to list it in player briefing
--- 					-- end	
--- 					if flight[f].client  then
--- 						-- modification M33_b 	Custom Briefing (onBoardNum)
--- 						if flight[f].target_name == pack_.target.titleName and pack_.pack_n == p and not breakloop then
-
--- 							for _side,side in pairs(mission.coalition) do
--- 								for _country,country in pairs(side.country) do
--- 									if country.plane and _side == pack_.side then
--- 										for Ngroup,group in pairs(country.plane.group) do
--- 											-- if group.units and ( group.units[1].skill == "Client" ) and (group.units[1].type == pack_.pack[role][f].type)  then
--- 											local egual = false
--- 											if type(tonumber( group.units[1].callsign)) == "number" and type(tonumber(pack_.pack[role][f].callsign)) == "number" then
--- 												if group.units[1].callsign == pack_.pack[role][f].callsign then egual = true end
--- 											elseif type(tonumber( group.units[1].callsign)) ~= "number" and type(tonumber(pack_.pack[role][f].callsign)) ~= "number" then
--- 												if group.units[1].callsign.name == pack_.pack[role][f].callsign then egual = true end
--- 											end
--- 											if group.units and ( group.units[1].skill == "Client" ) and egual  then
--- 												pack_.pack[role][f].units = group.units
--- 												if tabDivert then
--- 													-- if  tabDivert["client"] then
--- 													-- 	if pack_ and PlayerFlight then
--- 													-- 		for i = 1, #camp.client do
--- 													-- 			if tabDivert["client"][i] and tabDivert["client"][i]["pack"]  and tabDivert["client"][i]["pack"][role] and tabDivert["client"][i]["pack"][role][f] then
--- 													-- 				camp.client[i]["pack"][role][f]["divert"] = tabDivert["client"][i]["pack"][role][f]["base"]
--- 													-- 			end
--- 													-- 		end
--- 													-- 	end
--- 													-- end
--- 												end
--- 											end
--- 										end
--- 									end
--- 									if country.helicopter and _side == pack_.side then
--- 										for Ngroup,group in pairs(country.helicopter.group) do
--- 											local egual = false
--- 											-- local testNumber = tonumber(group.units[1].callsign)
--- 											-- if type(testNumber) == "number" and type(pack_.pack[role][f].callsign)== "number" then
--- 											if type(tonumber(group.units[1].callsign)) == "number" and type(tonumber(pack_.pack[role][f].callsign)) == "number" then
--- 												if group.units[1].callsign == pack_.pack[role][f].callsign then egual = true end
--- 											elseif type(tonumber(group.units[1].callsign)) ~= "number" and type(tonumber(pack_.pack[role][f].callsign)) ~= "number" then
--- 												if group.units[1].callsign.name == pack_.pack[role][f].callsign then egual = true end
--- 											end
-
--- 											if group.units and ( group.units[1].skill == "Client" ) and egual  then
--- 												pack_.pack[role][f].units = group.units
-
--- 												if tabDivert then
--- 													if  tabDivert["client"] then
--- 														if pack_ and PlayerFlight then
--- 															for i = 1, #camp.client do
--- 																if tabDivert["client"][i] and tabDivert["client"][i]["pack"]  and tabDivert["client"][i]["pack"][role] and tabDivert["client"][i]["pack"][role][f] then
--- 																	camp.client[i]["pack"][role][f]["divert"] = tabDivert["client"][i]["pack"][role][f]["base"]
--- 																end
--- 															end
--- 														end
--- 													end
--- 												end
--- 											end
--- 										end
--- 									end
--- 								end
--- 							end
--- 						end
--- 					end
--- 				end
--- 			end
--- 		end
--- 	end
--- end
 
 local function ShipFindByName(name)
 	for coal_name,coal in pairs(oob_ground) do												--go through sides(red/blue)	

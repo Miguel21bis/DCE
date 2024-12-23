@@ -413,8 +413,8 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					if flight[f].client then
 						tempPlayer = Deepcopy(camp.client[flight[f].IdClient])
 
-						print("DcB tempPlayer.pack_n "..tostring(tempPlayer.pack_n))
-						tempPlayer.pack = camp.client.pack[tempPlayer.pack_n]
+						-- print("DcB tempPlayer.pack_n "..tostring(tempPlayer.pack_n))
+						tempPlayer.package = camp.client.package[tempPlayer.pack_n]
 
 						-- tempPlayer = Deepcopy(camp.client)
 
@@ -449,6 +449,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 					elseif flight[f].player then
 						tempPlayer = camp.player
+						tempPlayer.package = camp.player.package[tempPlayer.pack_n]
 						local tagBreak
 						--##parse mission table:
 						for _side, side in pairs(mission.coalition) do
@@ -891,93 +892,91 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 
 					--Package overview
-					-- if PlayerFlight and tempPlayer.side == sideName then																			--if the mission has a player flight
-					-- if flight[f].player or flight[f].client then
-						local s = "Package:\n"																		--make a list of the details of all flights in the player package
+					s = "Package:\n"																		--make a list of the details of all flights in the player package
 
-						local entries = {																			--list entries that are making up the package overview
-							[1] = {
-								lookup = "task",																	--lookup in the ATO flight table
-								header = "Task",																	--name which should be displayer in the list header
-								str_length = 4,																		--string length of largest entry of this type (default the string length of the header)
-							},
-							[2] = {
-								lookup = "number",
-								header = "Num",
-								str_length = 3,
-							},
-							[3] = {
-								lookup = "type",
-								header = "Type",
-								str_length = 4,
-							},
-							[4] = {
-								lookup = "base",
-								header = "Base",
-								str_length = 4,
-							},
-							[5] = {
-								lookup = "callsign",
-								header = "Callsign",
-								str_length = 8,
-							},
-							[6] = {
-								lookup = "player",
-								header = "",
-								str_length = 0,
-							},
-						}
+					local entries = {																			--list entries that are making up the package overview
+						[1] = {
+							lookup = "task",																	--lookup in the ATO flight table
+							header = "Task",																	--name which should be displayer in the list header
+							str_length = 4,																		--string length of largest entry of this type (default the string length of the header)
+						},
+						[2] = {
+							lookup = "number",
+							header = "Num",
+							str_length = 3,
+						},
+						[3] = {
+							lookup = "type",
+							header = "Type",
+							str_length = 4,
+						},
+						[4] = {
+							lookup = "base",
+							header = "Base",
+							str_length = 4,
+						},
+						[5] = {
+							lookup = "callsign",
+							header = "Callsign",
+							str_length = 8,
+						},
+						[6] = {
+							lookup = "player",
+							header = "",
+							str_length = 0,
+						},
+					}
 
-						--collect the maximum string length of each entry in the list
-						for role_name,role in pairs(tempPlayer.pack) do											--iterate through roles in the player package
-							for flight_n,flight in pairs(role) do													--iterate through the flights in all roles
-								for e = 1, #entries do																--iterate through all entries
-									local value = ReplaceTypeName(flight[entries[e].lookup])
-									value = ReplaceBaseName(flight[entries[e].lookup])
-									local l = string.len(tostring(value))	 + 3										--get the string length of the current entry for this flight
-									if l > entries[e].str_length then												--if the string length is larger than the previous
-										entries[e].str_length = l													--make it the new length (find the largest)
-									end
+					--collect the maximum string length of each entry in the list
+					for role_name,role in pairs(tempPlayer.package) do											--iterate through roles in the player package
+						for flight_n,flight in pairs(role) do													--iterate through the flights in all roles
+							for e = 1, #entries do																--iterate through all entries
+								local value = ReplaceTypeName(flight[entries[e].lookup])
+								value = ReplaceBaseName(flight[entries[e].lookup])
+								local l = string.len(tostring(value))	 + 3										--get the string length of the current entry for this flight
+								if l > entries[e].str_length then												--if the string length is larger than the previous
+									entries[e].str_length = l													--make it the new length (find the largest)
 								end
 							end
 						end
+					end
 
-						--build the list header
-						for e = 1, #entries do																		--iterate through all entries
-							s = s .. entries[e].header																--add entry of this flight to list
-							if e ~= #entries then																	--if this is not the last entry of the flight, add spaces to the next entry	
-								local space = entries[e].str_length + 0 - string.len(tostring(entries[e].header))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
-								for n = 1, space * 1.0 do
-									s = s .. " "																	--add 1.5 spaces for every missing letter
-								end
+					--build the list header
+					for e = 1, #entries do																		--iterate through all entries
+						s = s .. entries[e].header																--add entry of this flight to list
+						if e ~= #entries then																	--if this is not the last entry of the flight, add spaces to the next entry	
+							local space = entries[e].str_length + 0 - string.len(tostring(entries[e].header))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
+							for n = 1, space * 1.0 do
+								s = s .. " "																	--add 1.5 spaces for every missing letter
 							end
 						end
-						s = s .. "\n"
+					end
+					s = s .. "\n"
 
-						--build the overview list with the entries of all flights
-						for role_name,role in pairs(tempPlayer.pack) do											--iterate through roles in the player package	
-							for flight_n,_flight in pairs(role) do													--iterate through flights in all roles
-								for e = 1, #entries do																--iterate through all entries
-									if type(_flight[entries[e].lookup]) == "string" or type(_flight[entries[e].lookup]) == "number" then	--entry is a string or number
-										local value = ReplaceTypeName(_flight[entries[e].lookup])
-										s = s .. value																--add entry of this flight to list
-										if e ~= #entries then																			--if this is not the last entry of the flight, add spaces to the next entry	
-											local space = entries[e].str_length + 0 - string.len(tostring(value))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
-											for n = 1, space * 1.0 do
-												s = s .. " "														--add 1.5 spaces for every missing letter
-											end
+					--build the overview list with the entries of all flights
+					for role_name,role in pairs(tempPlayer.package) do											--iterate through roles in the player package	
+						for flight_n,_flight in pairs(role) do													--iterate through flights in all roles
+							for e = 1, #entries do																--iterate through all entries
+								if type(_flight[entries[e].lookup]) == "string" or type(_flight[entries[e].lookup]) == "number" then	--entry is a string or number
+									local value = ReplaceTypeName(_flight[entries[e].lookup])
+									s = s .. value																--add entry of this flight to list
+									if e ~= #entries then																			--if this is not the last entry of the flight, add spaces to the next entry	
+										local space = entries[e].str_length + 0 - string.len(tostring(value))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
+										for n = 1, space * 1.0 do
+											s = s .. " "														--add 1.5 spaces for every missing letter
 										end
-									elseif _flight[entries[e].lookup] then											--entry is true (player marking)
-										local client = ""
-										if flight[f].player then client = "player" end
-										if flight[f].client then client = "client" end
-										s = s .. "("..client..")"															--add player flight marking
 									end
+								elseif _flight[entries[e].lookup] then											--entry is true (player marking)
+									local client = ""
+									if flight[f].player then client = "player" end
+									if flight[f].client then client = "client" end
+									s = s .. "("..client..")"															--add player flight marking
 								end
-								s = s .. "\n"																		--make a new line after each flight
 							end
+							s = s .. "\n"																		--make a new line after each flight
 						end
-						if allowedBrief then  briefing[sideName] = briefing[sideName] .. s .. "\n\n" s="" end													--add package overview string to briefing string
+					end
+					if allowedBrief then  briefing[sideName] = briefing[sideName] .. s .. "\n\n" s="" end													--add package overview string to briefing string
 
 
 
@@ -987,7 +986,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					local s = "Flight:\n"																		--make a list of the details of all flights in the player package
 						s = s.."CallSign    Designated aircraft number \n"
 
-					for role_name,role in pairs(tempPlayer.pack) do												--iterate through roles in the player package	
+					for role_name,role in pairs(tempPlayer.package) do												--iterate through roles in the player package	
 						for flight_n,_flight in pairs(role) do													--iterate through flights in all roles
 							if _flight.units	 then
 								for u=1 , #_flight.units do
@@ -1146,7 +1145,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 					--Radio navigation
 
-					local s = "Radio Navigation:\n"
+					s = "Radio Navigation:\n"
 					s = s .."Base: ".. ReplaceBaseName(tempPlayer.airbase)
 					--homebase TACAN
 					if db_airbases[tempPlayer.airbase].TACAN then
@@ -1171,8 +1170,8 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					s = s .. "\n"
 
 					--Divert BASE	M33.d				
-					if tempPlayer.divert then
-						for Divert, _base in pairs(tempPlayer.divert) do
+					if TabDivert[tempPlayer.pack_n] then
+						for Divert, _base in pairs(TabDivert[tempPlayer.pack_n]) do
 							if Divert ~= tempPlayer.unitname then
 								s = s .."Divert: ".. ReplaceBaseName(_base)
 								--Divert TACAN
@@ -1226,7 +1225,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 
 					--Communication
-					local s = "Communication:\n"																		--overview of relevant comms frequencies
+					s = "Communication:\n"																		--overview of relevant comms frequencies
 					local MC = 0
 					-- if  flight[f].type == "MiG-21Bis" or flight[f].type == "Mi-8MT" or flight[f].type == "Mi-24P"  then			-- add Mig21 Mi-8 Mi-24 Channel 00
 						-- MC = -1										-- MC ModChannel
@@ -1438,8 +1437,8 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					end
 
 					--build list
-					local s = "Communication:\n"
-					local entries = {}
+					s = "Communication:\n"
+					entries = {}
 					local entry = {name = "", call = "", freq = "",radio = ""}
 					local  u = 1
 
