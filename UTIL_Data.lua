@@ -1,11 +1,11 @@
 --Various DATA
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification: updateData_Bd
+-- last modification: updateData_Be
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Data.lua"] = "1.14.83"
+versionDCE["UTIL_Data.lua"] = "1.14.84"
 ------------------------------------------------------------------------------------------------------- 
--- updateData_Bd			(Bd flyingAlone)(CH-47F H-6J)(a OH-58)(z F-4E-45MC)(UH-60L)(x hHover)(w reaper)(v Hercules)(u tabTask)(t add is_helicopter table)(s F1EE)(r F-16C_50)(q): Add helicos  (p): Add WOC80)(o: transfer the dataMap to another file)
+-- updateData_Be			(e Tu_22D)(Bd flyingAlone)(CH-47F H-6J)(a OH-58)(z F-4E-45MC)(UH-60L)(x hHover)(w reaper)(v Hercules)(u tabTask)(t add is_helicopter table)(s F1EE)(r F-16C_50)(q): Add helicos  (p): Add WOC80)(o: transfer the dataMap to another file)
 -- debug_c					(c OH-6A)(b requiredModulesSpecialName)(a add IsWesternCountry function)
 -- cleanCode_a				(a: repetition)
 -- adjustment_e				(e delete EPLRS_Capacity table)(d CVN to CV)(bombing on Group&Unit)(b: Syria nnTimeZone +3 & GudautaGPS )
@@ -523,7 +523,11 @@ Data_divers = {
 		instrumentUnits = "metric",
 		EPLRS_Capacity = false,
 	},
-
+	["tu_22D"] = 	{
+		instrumentUnits = "metric",
+		EPLRS_Capacity = false,
+		flyingAlone = true,
+	},
 	["AJS37"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -1453,6 +1457,7 @@ TaskByPlane = {
 		["An-30M"] = true,
 		["An-26B"] = true,
 		["IL-76MD"] = true,
+		["tu_22D"] = true,
 
 	},
 
@@ -1562,6 +1567,7 @@ TaskByPlane = {
 		["B-52H"] = true,
 
 		["H-6J"] = true,
+		["tu_22D"] = true,				--Mod
 
 		["F-86F Sabre"] = true,
 
@@ -1688,6 +1694,7 @@ TaskByPlane = {
 
 		["Tu-22M3"] = true,
 		["Tu-142"] = true,
+		["tu_22D"] = true,				--Mod
 
 
 		["Mi-8MT"] = true,
@@ -1742,6 +1749,7 @@ TaskByPlane = {
 		["B-52H"] = true,
 
 		["H-6J"] = true,
+		["tu_22D"] = true,				--Mod
 
 		["F-86F Sabre"] = true,
 
@@ -1839,6 +1847,7 @@ TaskByPlane = {
 		["B-52H"] = true,
 
 		["H-6J"] = true,
+		["tu_22D"] = true,					--Mod
 
 		["F-14A-135-GR"] = true,
 		["F-14B"] = true,
@@ -1955,6 +1964,7 @@ TaskByPlane = {
 		["B-52H"] = true,
 
 		["H-6J"] = true,
+		["tu_22D"] = true,				--Mod
 
 		["F-4E"] = true,
 		["F-4E-45MC"] = true,
@@ -2189,6 +2199,7 @@ TaskByPlane = {
 		["MiG-25RBT"] = true,
 		["Su-24MR"] = true,
 		["Tu-142"] = true,
+		["tu_22D"] = true,				--Mod
 	},
 
 

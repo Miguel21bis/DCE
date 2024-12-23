@@ -4,11 +4,12 @@
  
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.174"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.175"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
+-- V175 - tu-22D War over Chad Campaign
 -- V 174 - Su-17M4 (modification of certain speeds and altitudes)
 -- V 173 - code_loadout =  { "All" }, correction ! thanks BAMSE
 -- V 172 - Crusader - Skyraider - MiG-17F - HH-2D - SH-2F
@@ -3680,6 +3681,153 @@ db_all_loadouts = {
 					fuel = 50000,
 					flare = 48,
 					chaff = 48,
+					gun = 100,
+				},
+			},
+		},
+	},
+	["tu_22D"] = {
+		Strike = {
+			["WOT87 - Strike bombs - Low"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+				},
+				attributes =  { "soft", "Structure", "SAM" },
+				code_loadout =  { "WOT87" },
+				weaponType = "Bombs",
+				expend = "All",
+				day = true,
+				range = 900000,
+				firepower = 1,
+				vCruise = 250,
+				vAttack = 300,
+				hCruise = 4096,
+				hAttack = 1000,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = 
+						{
+						["CLSID"] = "{FA673F4C-D9E4-4993-AA7A-019A92F3C005}",
+						}, -- end of [1]
+						[2] = 
+						{
+						["CLSID"] = "<CLEAN>",
+						}, -- end of [2]
+					},
+					fuel = 42500,
+					flare = 0,
+					chaff = 45,
+					gun = 100,
+				},
+			},
+			["WOT87 Strike bombs - High"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+				},
+				attributes =  { "soft", "Structure", "SAM" },
+				code_loadout =  { "WOT87" },
+				weaponType = "Bombs",
+				expend = "All",
+				day = true,
+				range = 900000,
+				firepower = 1,
+				vCruise = 250,
+				vAttack = 300,
+				hCruise = 6096,
+				hAttack = 6096,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = 
+						{
+						["CLSID"] = "{FA673F4C-D9E4-4993-AA7A-019A92F3C005}",
+						}, -- end of [1]
+						[2] = 
+						{
+						["CLSID"] = "<CLEAN>",
+						}, -- end of [2]
+					},
+					fuel = 42500,
+					flare = 0,
+					chaff = 45,
+					gun = 100,
+				},
+			},
+		},
+		["Runway Attack"] = {
+			["RAttack bombs - Low"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+				},
+				attributes =  { "Runway" },
+				code_loadout =  { "WOT87" },
+				weaponType = "Bombs",
+				expend = "All",
+				night = true,
+				range = 900000,
+				firepower = 1,
+				vCruise = 250,
+				vAttack = 300,
+				hCruise = 4096,
+				hAttack = 4000,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = 
+						{
+						["CLSID"] = "{FA673F4C-D9E4-4993-AA7A-019A92F3C005}",
+						}, -- end of [1]
+						[2] = 
+						{
+						["CLSID"] = "<CLEAN>",
+						}, -- end of [2]
+					},
+					fuel = 42500,
+					flare = 0,
+					chaff = 45,
+					gun = 100,
+				},
+			},
+			["RAttack bombs - High"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+				},
+				attributes =  { "Runway" },
+				code_loadout =  { "WOT87" },
+				weaponType = "Bombs",
+				expend = "All",
+				day = true,
+				night = true,
+				range = 900000,
+				firepower = 5,
+				vCruise = 250,
+				vAttack = 300,
+				hCruise = 6096,
+				hAttack = 6096,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = 
+						{
+						["CLSID"] = "{FA673F4C-D9E4-4993-AA7A-019A92F3C005}",
+						}, -- end of [1]
+						[2] = 
+						{
+						["CLSID"] = "<CLEAN>",
+						}, -- end of [2]
+					},
+					fuel = 42500,
+					flare = 0,
+					chaff = 45,
 					gun = 100,
 				},
 			},

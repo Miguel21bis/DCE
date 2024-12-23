@@ -1007,13 +1007,19 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 					-- modification M27 	movedBullseye
 					if Brief[sideName] then
-						s = "Bullseye:\n"
-						s = s.." bullseye Name " .. ReplaceBaseName(Brief[sideName].bullseye.name)
-						if Brief[sideName]["bullseye"].lat then
-							s = s.." " .. Format_dms(Brief[sideName]["bullseye"].lat ,Brief[sideName]["bullseye"].lon ,4)  .." \n"
+						if Brief[sideName].bullseye then
+							s = "Bullseye:\n"
+							s = s.." bullseye Name " .. ReplaceBaseName(Brief[sideName].bullseye.name)
+							if Brief[sideName]["bullseye"].lat then
+								s = s.." " .. Format_dms(Brief[sideName]["bullseye"].lat ,Brief[sideName]["bullseye"].lon ,4)  .." \n"
+							end
+							s = s.." \n"
+							if allowedBrief then  briefing[sideName] = briefing[sideName] .. s .. "\n\n" s="" end
+						else
+							print("\r\n ***ATTENTION***.")
+							print("You need to add the bulleyes parameters to your map, in the conf_mod, in the “movedBullseye” table.")
+							os.execute 'pause'
 						end
-						s = s.." \n"
-						if allowedBrief then  briefing[sideName] = briefing[sideName] .. s .. "\n\n" s="" end
 					end
 
 					if player_task ~= "Intercept" and  player_task ~= "SAR" then

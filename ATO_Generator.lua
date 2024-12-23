@@ -1,13 +1,13 @@
 --To create the Air Tasking Order
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  cleancode_d adjustment_Ab M11A_bk
+-- last modification:  cleancode_d adjustment_Ab M11A_bk Debug_t
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_Generator.lua"] = "1.20.133"
+versionDCE["ATO_Generator.lua"] = "1.20.134"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_d				(d springCleaning)
 -- adjustment_Ab			(b target priority (again))(low Red flight)(score & sort)(a country table)(z target priority)(y nb of Cap & Firepower)(v: depreciated variable capability)(u score & strikeOnlyWithEscorte)(minscore)(s tasks table)(op ne donne pas tout en CAP)(o info loadout)(N ne donne pas tout en CAP)(lM: MP) (ghi:donne une alti aléatoire) (f:altitude en fonction diff entre role)(e: random loadout temp)(cd:support équitable entre escadron)(b: TASK Coef)(a: escort mandatory or not)
--- Debug_s					(s no Choice Plane MP with SEAD)(r priority again)(q sort C broken)(p multipack broken)(o #Draft_sorties)(n db_loadouts)(m strikeOnlyWithEscorte)(l AltitudeFloorNew)(k too tanker&Awacs)(jk number entre 0 et1)(i info2000)(h:reecriture loadout_eligible) (f:interdit l'escorte avion/helico)(de:correction targetName)(c: mauvaise insertion dans la base)(b: haut score)(a: Fin de campagne)
+-- Debug_t					(t boost priority in MP)(s no Choice Plane MP with SEAD)(r priority again)(q sort C broken)(p multipack broken)(o #Draft_sorties)(n db_loadouts)(m strikeOnlyWithEscorte)(l AltitudeFloorNew)(k too tanker&Awacs)(jk number entre 0 et1)(i info2000)(h:reecriture loadout_eligible) (f:interdit l'escorte avion/helico)(de:correction targetName)(c: mauvaise insertion dans la base)(b: haut score)(a: Fin de campagne)
 -- modification M68_a		add AFAC task
 -- modification M61_a		SAR
 -- modification M56_b		AssignCallnameSquad (b: callsignId)
@@ -2802,7 +2802,6 @@ local function createATO_table(draftPriority)
 														for supportTask, supportPart in pairs(draft.support) do
 
 															if supportTask == taskLearning then
-																tempInfo = tempInfo .. " |passe A| "
 																--avant d'interdire, on regarde si un squad possede la capacité du task
 																local taskRequireInSide
 																for squadN, squad in pairs(oob_air[side]) do

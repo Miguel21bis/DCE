@@ -7362,14 +7362,6 @@ if #TableTransportPilotNames >= 1  then
 	camp["TableTransportPilotNames"] = TableTransportPilotNames	-- modification M60 CTLD
 end
 
--- TODO revoir client
--- -- modification M11B. : Multiplayer--briefing	
--- if camp.client and PlayerFlight then
--- 	for i = 1, Multi.NbGroup do
--- 		camp.client[i].pack = Deepcopy(ATO[camp.client[i].side][camp.client[i].pack_n])
--- 	end
--- end
-
 
 ----- make a copy of player package for easy reference in briefing -----
 local breakloop = false
@@ -7441,6 +7433,7 @@ if camp.client then
 
 	end
 
+	--TODO revoir divert , util pour briefing, mais ne dois pas rester dans camp_status pour eviter de le surcharger
 		-- if  tabDivert["client"] then
 		-- 	if pack_ and PlayerFlight then
 		-- 		for i = 1, #camp.client do

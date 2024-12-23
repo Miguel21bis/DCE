@@ -11,11 +11,11 @@ known issues:
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
 ==:20.81.506:==
-506 fixed [stats]	stats for your own package are rarely displayed
+506 fixed [debriefing][stats]	stats for your own package are rarely displayed
 505 fixed [inter]	interceptors and CAPs ordered to leave a SAM zone no longer return to combat
 504 fixed [inter]	campaigns with dates prior to 1970 can freeze. Because of UNIX time
 
-==:20.81.503:==
+
 503 fixed [helico]	it's sometimes impossible to get out of a damaged helicopter on some maps
 502 added [EWR]	text announcement of multiple environmental contacts, friend and foe alike. And only those detected by all EWRs and SAM radar. Activate in menu F10 (testing) (M81)
 501 modified [intercept]	prohibiting interceptors from entering the enemy zone, by boundary design.
@@ -23,6 +23,7 @@ known issues:
 500 modified [IA]	interceptors and CAPs turn around when they enter a SAM zone, then position themselves above their own SAM zone before (normally) returning to combat. (testing)
 
 499 modified	[loadout]
+				-- V175 - tu-22D War over Chad Campaign
 				-- V 174 - Su-17M4 (modification of certain speeds and altitudes)
 				-- V 173 - code_loadout =  { "All" }, correction ! thanks BAMSE
 498 fixed [METAR]	cloud/METAR altitudes above 10000ft were not displayed
