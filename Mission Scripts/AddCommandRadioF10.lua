@@ -115,7 +115,22 @@ local flightPlanTimer = {}
 local commandDB = {}
 local tabJockerPlane = {}
 local var_TPN_alreadyAdded = false
-local EWR_optionPlayer = {}
+
+EWR_optionPlayer = {}
+
+EWR_optionPlayer["OBT_test"] = {
+	EWR_on = true,
+}
+EWR_optionPlayer["Recovery Pack 5 - 14th Squadron - Escort 1-2"] = {
+	EWR_on = true,
+}
+EWR_optionPlayer["Pack 5 - 70 Squadron - Strike 1-4"] = {
+	EWR_on = true,
+}
+EWR_optionPlayer["Pack 5 - 70 Squadron - Strike 1-2"] = {
+	EWR_on = true,
+}
+
 
 
 
@@ -685,7 +700,7 @@ local function avoidArea()
 
 		local groups = coalition.getGroups(sideNum, Group.Category.AIRPLANE)
 
-		for i, gp in pairs(groups) do
+		for _, gp in pairs(groups) do
 			local gpName = Group.getName(gp)
 			local gpGid = Group.getID(gp)
 			local nowTime = timer.getTime()
@@ -791,7 +806,7 @@ local function avoidArea()
 
 																		if value.task.params and value.task.params.tasks then
 
-																			for i, valueTasks in ipairs(value.task.params.tasks) do
+																			for _, valueTasks in ipairs(value.task.params.tasks) do
 
 																				if valueTasks.params.task.id == "EngageTargetsInZone" then
 
@@ -3212,21 +3227,40 @@ local function speakEWR()
 	-- Itérer sur chaque camp pour trouver les joueurs
 	for _, sideNum in ipairs(coalitions) do
 		-- Itérer sur chaque catégorie
-		for _, category in ipairs(categories) do
+		for categoryN, category in ipairs(categories) do
+			env.info("DCE_EWR_Magic A categoryN: "..tostring(categoryN))
+
 			-- Obtenir les groupes pour le camp et la catégorie
 			local groups = coalition.getGroups(sideNum, category)
 
-			for _, gp in pairs(groups) do
+			for gpN, gp in pairs(groups) do
+				env.info("DCE_EWR_Magic B gpN: "..tostring(gpN))
 
 				local wingman = gp:getUnits()
 
-				for _, _unit in ipairs(wingman) do
+				for winmanN, _unit in ipairs(wingman) do
+					env.info("DCE_EWR_Magic C winmanN: "..tostring(winmanN))
+
 					if _unit and _unit:isActive()  then --and _unit:inAir()
 						local playerName =  _unit:getPlayerName()
+						local unitName = _unit:getName()
+
+						env.info("DCE_EWR_Magic D unitName: "..tostring(unitName))
+
+						local passPlayer = false
+						if playerName and EWR_optionPlayer[playerName] and EWR_optionPlayer[playerName].EWR_on then
+							passPlayer = true
+						end
+
+						if unitName and EWR_optionPlayer[unitName] and EWR_optionPlayer[unitName].EWR_on then
+							passPlayer = true
+						end
 
 						-- pour eviter des calculs inutil, une fois qu'on a les joueurs on cherche la distance pour reclasser la table en fonction de ça
 						-- a faire pour chaque joueur, afin que l'information qui lui soit donné correspondent
-						if playerName and EWR_optionPlayer[playerName].EWR_on then
+						
+						-- if playerName and EWR_optionPlayer[playerName].EWR_on then
+						if passPlayer then
 							local player = _unit
 							local playerId = Unit.getID(player)
 							local playerPoint = player:getPoint()				--get target point
@@ -3253,7 +3287,9 @@ local function speakEWR()
 							table.sort(targetTracks_km_thisPlayer, function(a,b) return a.distance < b.distance  end)
 
 							local i = 1
-							for _, target in pairs(targetTracks_km_thisPlayer) do
+							for trackN, target in pairs(targetTracks_km_thisPlayer) do
+								env.info("DCE_EWR_Magic E trackN: "..tostring(trackN))
+
 								-- Conversion des distances
 								local distanceKm = math.floor(target.distance / 1000) -- En kilomètres
 								local distanceNm = roundTo2NmUp(target.distance / 1852) -- En miles nautiques, arrondi à 2 Nm près

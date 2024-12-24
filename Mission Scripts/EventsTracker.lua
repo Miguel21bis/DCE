@@ -370,19 +370,28 @@ function eventHandlerDCE:onEvent(event)
 	local targetSideName
 	if event.initiator then
 		local cat = Object.getCategory(event.initiator)
-		env.info("DCE_EventsTracker initiator Category "..tostring(cat).." _: "..tostring(Object_Category[cat]))
-		if cat ~= Object.Category.SCENERY then
-			local initiatorCoalition = event.initiator:getCoalition()
-			initiatorSideName = coalitionIdNumeric[tonumber(initiatorCoalition)]
+		--DCE_EventsTracker initiator Category 0 _: nil
+		env.info("DCE_EventsTracker initiator Category: "..tostring(cat))
+		if Object_Category[cat] then
+			env.info("DCE_EventsTracker initiator Object_Category :  _:_ "..tostring(Object_Category[cat]))
+		
+			if cat ~= Object.Category.SCENERY then
+				local initiatorCoalition = event.initiator:getCoalition()
+				initiatorSideName = coalitionIdNumeric[tonumber(initiatorCoalition)]
+			end
 		end
 	end
 
 	if event.target then
 		local cat = Object.getCategory(event.target)
-		env.info("DCE_EventsTracker target Category "..tostring(cat).." _: "..tostring(Object_Category[cat]))
-		if cat ~= Object.Category.SCENERY then
-			local targetCoalition = event.initiator:getCoalition()
-			targetSideName = coalitionIdNumeric[tonumber(targetCoalition)]
+		env.info("DCE_EventsTracker target Category: "..tostring(cat))
+		if Object_Category[cat] then
+			env.info("DCE_EventsTracker Object_Category :  _:_ "..tostring(Object_Category[cat]))
+		
+			if cat ~= Object.Category.SCENERY then
+				local targetCoalition = event.target:getCoalition()
+				targetSideName = coalitionIdNumeric[tonumber(targetCoalition)]
+			end
 		end
 	end
 
@@ -1043,6 +1052,17 @@ function eventHandlerDCE:onEvent(event)
 			else
 				env.info("DCE_eventIdTotal: Failed to open log file for writing.")
 			end
+
+			
+
+			local fileStr = "EWR_optionPlayer = " .. TableSerialization(EWR_optionPlayer, 0)
+			local fileFile = io.open(PathDCE.."Debug\\" .. "EWR_optionPlayer.lua", "w")
+			if fileFile then
+				fileFile:write(fileStr)
+				fileFile:close()
+			else
+				env.info("DCE_EWR_optionPlayer: Failed to open log file for writing.")
+			end			
 		end
 
 		-- os.execute('start "EventPath" cmd  /k "c: & cd '..path..' & call \Init\\path.bat && pause"')
