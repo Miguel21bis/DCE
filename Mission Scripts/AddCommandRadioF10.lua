@@ -3261,11 +3261,16 @@ local function speakEWR()
 						
 						-- if playerName and EWR_optionPlayer[playerName].EWR_on then
 						if passPlayer then
+							local locTimer = timer.getTime()
+							
 							local player = _unit
 							local playerId = Unit.getID(player)
 							local playerPoint = player:getPoint()				--get target point
 
 							local targetTracks_km_thisPlayer = {}
+
+							env.info("DCE_EWR_Magic D2 passPlayer: OK locTimer: "..tostring(locTimer) .." unitName: "..tostring(unitName).." playerId: "..tostring(playerId))
+
 
 							for  _, targets in pairs(groupedTracks) do
 								for _, target in pairs(targets) do
@@ -3288,7 +3293,7 @@ local function speakEWR()
 
 							local i = 1
 							for trackN, target in pairs(targetTracks_km_thisPlayer) do
-								env.info("DCE_EWR_Magic E trackN: "..tostring(trackN))
+								env.info("DCE_EWR_Magic E locTimer: "..tostring(locTimer) .." trackN: "..tostring(trackN).." playerId: "..tostring(playerId))
 
 								-- Conversion des distances
 								local distanceKm = math.floor(target.distance / 1000) -- En kilomètres
@@ -3328,13 +3333,13 @@ local function speakEWR()
 								-- env.info(target.qte.." "..status.." "..catTarget.." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft")
 
 								-- Affichage si la distance est dans les limites
-								if distanceKm <= 100 then
+								if (distanceKm > 2 and distanceKm <= 100) or (distanceKm <= 2 and status == "ENEMY" )  then
 									trigger.action.outTextForUnit(playerId, target.qte.." "..status.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft", 20, false)
-									-- trigger.action.outTextForUnit(unitId, "Target Bearing: "..tostring(bearing).." |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft", 8, false)
+									env.info("i: "..i.." playerId: "..playerId.." locTimer: ".. locTimer.." || "..target.qte.." "..status.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft")
+									i = i + 1
+									if i > 5 then break end
 								end
 
-								i = i + 1
-								if i > 5 then break end
 							end
 						end
 
