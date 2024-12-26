@@ -3235,8 +3235,14 @@ local function speakEWR()
 
 			for gpN, gp in pairs(groups) do
 				env.info("DCE_EWR_Magic B gpN: "..tostring(gpN))
+				_affiche(gp, "DCE_EWR_Magic B2 gp")
+
+				local gpGid = gp:getID()
+				env.info("DCE_EWR_Magic B3 gpGid: "..tostring(gpGid))
+
 
 				local wingman = gp:getUnits()
+				_affiche(wingman, "DCE_EWR_Magic B4 wingman")
 
 				for winmanN, _unit in ipairs(wingman) do
 					env.info("DCE_EWR_Magic C winmanN: "..tostring(winmanN))
@@ -3246,6 +3252,9 @@ local function speakEWR()
 						local unitName = _unit:getName()
 
 						env.info("DCE_EWR_Magic D unitName: "..tostring(unitName))
+
+						local unitId = _unit:getID()
+						env.info("DCE_EWR_Magic D2 unitId: "..tostring(unitId))
 
 						local passPlayer = false
 						if playerName and EWR_optionPlayer[playerName] and EWR_optionPlayer[playerName].EWR_on then
