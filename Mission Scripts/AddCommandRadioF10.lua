@@ -118,18 +118,18 @@ local var_TPN_alreadyAdded = false
 
 EWR_optionPlayer = {}
 
-EWR_optionPlayer["OBT_test"] = {
-	EWR_on = true,
-}
-EWR_optionPlayer["Recovery Pack 5 - 14th Squadron - Escort 1-2"] = {
-	EWR_on = true,
-}
-EWR_optionPlayer["Pack 5 - 70 Squadron - Strike 1-4"] = {
-	EWR_on = true,
-}
-EWR_optionPlayer["Pack 5 - 70 Squadron - Strike 1-2"] = {
-	EWR_on = true,
-}
+-- EWR_optionPlayer["OBT_test"] = {
+-- 	EWR_on = true,
+-- }
+-- EWR_optionPlayer["ArealTest-2"] = {
+-- 	EWR_on = true,
+-- }
+-- EWR_optionPlayer["Pack 5 - 70 Squadron - Strike 1-4"] = {
+-- 	EWR_on = true,
+-- }
+-- EWR_optionPlayer["Pack 5 - 70 Squadron - Strike 1-2"] = {
+-- 	EWR_on = true,
+-- }
 
 
 
@@ -942,12 +942,12 @@ local function avoidArea()
 																			["id"] = "WrappedAction",
 																			["auto"] = false,
 																			["number"] = 2,
-																			["params"] = 
+																			["params"] =
 																			{
-																				["action"] = 
+																				["action"] =
 																				{
 																					["id"] = "Option",
-																					["params"] = 
+																					["params"] =
 																					{
 																						["name"] = 14,
 																						["value"] = false,
@@ -1042,7 +1042,7 @@ local function avoidArea()
 																	},
 																},
 															},
-															
+
 														},
 
 														{
@@ -3223,63 +3223,70 @@ local function speakEWR()
 	-- Définir les camps et catégories à parcourir
 	local coalitions = {coalition.side.BLUE, coalition.side.RED}
 	local categories = {Group.Category.AIRPLANE, Group.Category.HELICOPTER}
+	local locTimer = timer.getTime()
 
 	-- Itérer sur chaque camp pour trouver les joueurs
 	for _, sideNum in ipairs(coalitions) do
 		-- Itérer sur chaque catégorie
 		for categoryN, category in ipairs(categories) do
-			env.info("DCE_EWR_Magic A categoryN: "..tostring(categoryN))
+			-- env.info("DCE_EWR_Magic A categoryN: "..tostring(categoryN))
 
 			-- Obtenir les groupes pour le camp et la catégorie
 			local groups = coalition.getGroups(sideNum, category)
 
 			for gpN, gp in pairs(groups) do
-				env.info("DCE_EWR_Magic B gpN: "..tostring(gpN))
-				_affiche(gp, "DCE_EWR_Magic B2 gp")
+				-- env.info("DCE_EWR_Magic B categoryN: "..tostring(categoryN) .." gpN: "..tostring(gpN))
+				-- _affiche(gp, "DCE_EWR_Magic B2 gp")
 
-				local gpGid = gp:getID()
-				env.info("DCE_EWR_Magic B3 gpGid: "..tostring(gpGid))
+				-- local gpGid = gp:getID()
+				-- env.info("DCE_EWR_Magic B3 categoryN: "..tostring(categoryN) .." gpN: "..tostring(gpN).." gpGid: "..tostring(gpGid))
 
 
 				local wingman = gp:getUnits()
-				_affiche(wingman, "DCE_EWR_Magic B4 wingman")
+				-- _affiche(wingman, "DCE_EWR_Magic B4 wingman")
 
 				for winmanN, _unit in ipairs(wingman) do
-					env.info("DCE_EWR_Magic C winmanN: "..tostring(winmanN))
+					-- env.info("DCE_EWR_Magic C winmanN: "..tostring(winmanN))
 
 					if _unit and _unit:isActive()  then --and _unit:inAir()
 						local playerName =  _unit:getPlayerName()
 						local unitName = _unit:getName()
 
-						env.info("DCE_EWR_Magic D unitName: "..tostring(unitName))
+						-- env.info("DCE_EWR_Magic D categoryN: "..tostring(categoryN) .." gpN: "..tostring(gpN).." gpGid: "..tostring(gpGid).." unitName: "..tostring(unitName))
 
-						local unitId = _unit:getID()
-						env.info("DCE_EWR_Magic D2 unitId: "..tostring(unitId))
+						-- local unitId = _unit:getID()
 
-						local passPlayer = false
+						-- local passPlayer = false
+						local trucName
 						if playerName and EWR_optionPlayer[playerName] and EWR_optionPlayer[playerName].EWR_on then
-							passPlayer = true
+							-- passPlayer = true
+							trucName = playerName
 						end
 
 						if unitName and EWR_optionPlayer[unitName] and EWR_optionPlayer[unitName].EWR_on then
-							passPlayer = true
+							-- passPlayer = true
+							trucName = unitName
 						end
+
+						-- env.info("DCE_EWR_Magic D1 categoryN: "..tostring(categoryN) .." gpN: "..tostring(gpN).." gpGid: "..tostring(gpGid).." !trucName!: "..tostring(trucName).." unitId: "..tostring(unitId))
+
+						-- if EWR_optionPlayer[trucName] then
+						-- 	env.info("DCE_EWR_Magic D2 lasTime: "..tostring(EWR_optionPlayer[trucName]["lasTime"]).." locTimer: "..tostring(locTimer))
+						-- end
 
 						-- pour eviter des calculs inutil, une fois qu'on a les joueurs on cherche la distance pour reclasser la table en fonction de ça
 						-- a faire pour chaque joueur, afin que l'information qui lui soit donné correspondent
-						
+
 						-- if playerName and EWR_optionPlayer[playerName].EWR_on then
-						if passPlayer then
-							local locTimer = timer.getTime()
-							
+						-- if passPlayer and ( not EWR_optionPlayer[trucName]["lasTime"] or EWR_optionPlayer[trucName]["lasTime"] +15  < locTimer) then
+
+						if EWR_optionPlayer[trucName] and ( not EWR_optionPlayer[trucName]["lasTime"] or EWR_optionPlayer[trucName]["lasTime"] +15  < locTimer) then
+
 							local player = _unit
 							local playerId = Unit.getID(player)
 							local playerPoint = player:getPoint()				--get target point
 
 							local targetTracks_km_thisPlayer = {}
-
-							env.info("DCE_EWR_Magic D2 passPlayer: OK locTimer: "..tostring(locTimer) .." unitName: "..tostring(unitName).." playerId: "..tostring(playerId))
-
 
 							for  _, targets in pairs(groupedTracks) do
 								for _, target in pairs(targets) do
@@ -3302,7 +3309,7 @@ local function speakEWR()
 
 							local i = 1
 							for trackN, target in pairs(targetTracks_km_thisPlayer) do
-								env.info("DCE_EWR_Magic E locTimer: "..tostring(locTimer) .." trackN: "..tostring(trackN).." playerId: "..tostring(playerId))
+								-- env.info("DCE_EWR_Magic E locTimer: "..tostring(locTimer) .." trackN: "..tostring(trackN).." playerId: "..tostring(playerId))
 
 								-- Conversion des distances
 								local distanceKm = math.floor(target.distance / 1000) -- En kilomètres
@@ -3338,15 +3345,13 @@ local function speakEWR()
 								end
 
 
-
-								-- env.info(target.qte.." "..status.." "..catTarget.." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft")
-
 								-- Affichage si la distance est dans les limites
-								if (distanceKm > 2 and distanceKm <= 100) or (distanceKm <= 2 and status == "ENEMY" )  then
+								if (distanceKm > 2 and distanceKm <= 150) or (distanceKm <= 2 and status == "ENEMY" )   then
 									trigger.action.outTextForUnit(playerId, target.qte.." "..status.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft", 20, false)
-									env.info("i: "..i.." playerId: "..playerId.." locTimer: ".. locTimer.." || "..target.qte.." "..status.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft")
+									-- env.info("i: "..i.." playerId: "..playerId.." locTimer: ".. locTimer.." || "..target.qte.." "..status.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft")
+									EWR_optionPlayer[trucName]["lasTime"] = locTimer
 									i = i + 1
-									if i > 5 then break end
+									if i > 7 then break end
 								end
 
 							end

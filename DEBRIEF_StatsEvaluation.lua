@@ -266,7 +266,7 @@ end
 
 
 -- pack_n
-camp.player.pack = camp.player.pack[camp.player.pack_n]
+camp.player.pack = camp.player.package[camp.player.pack_n]
 
 
 for roleName, role in pairs(camp.player.pack) do														--iterate through roles in player package
