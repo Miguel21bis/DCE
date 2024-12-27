@@ -385,6 +385,28 @@ repeat
 		elseif choix1 == "w" then
 			UTIL_KillTarget = true
 		elseif choix1 == "w2" then
+
+			-- Ecran N°3 Selection nb of Flight
+			repeat
+				print("Tools menu: \n")
+				print("Select :\n"..
+				"A: DelGroup  \n"..
+				"B: fuelConsumption \n"
+				)
+
+				local choix2 = io.stdin:read()
+
+				if (choix2 == "a" or  choix2 == "b") then
+					if choix2 == "a" then
+						ArgTools= "DelGroup"
+					elseif choix2 == "b" then
+						ArgTools= "fuelConsumption"
+					end
+				else
+					print("\nInvalid entry.\n")
+				end
+			until (choix2 == "a" or  choix2 == "b")
+
 			dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Divers.lua")
 			os.execute 'pause'
 			break
