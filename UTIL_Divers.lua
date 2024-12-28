@@ -249,11 +249,12 @@ elseif ArgTools == "fuelConsumption" then
 			if countryTab.helicopter then countryTab.helicopter = nil end
 			if countryTab.ship then countryTab.ship = nil end
 			if countryTab.static then countryTab.static = nil end
+			if countryTab.vehicle then countryTab.vehicle = nil end
 			if countryTab.plane then countryTab.plane = {} end
 		end
 	end
 
-	
+
 	mission["failures"] =
 	{
 	}
@@ -268,85 +269,279 @@ elseif ArgTools == "fuelConsumption" then
 
 	local groupEntries = {}
 
+	local nbGroup = 1
 
-	for type , loadouts in PairsByKeys(SelectedLoadout) do
+	for typePlane , loadouts in PairsByKeys(SelectedLoadout) do
 		for loadoutName , loadout in PairsByKeys(loadouts) do
 			-- io.write(i.." : ( "..type.." )("..loadoutName..")".."\n")
 
+			if not mission["coalition"]["red"]["country"][1]["plane"] then mission["coalition"]["red"]["country"][1]["plane"] = {} end
+			if not mission["coalition"]["red"]["country"][1]["plane"]["group"] then 
+				mission["coalition"]["red"]["country"][1]["plane"] =
+				{
+					["group"] = {}
+			
+				}
+			end
+
 			local altTest = loadout.hCruise + 3000
 			local viTest = loadout.vCruise + 50
+
 
 			for i = 1, 6 do
 				viTest = loadout.vCruise + 50
 
 				for k = 1, 6 do
 
-					
+
+
+					local init_x = mission.coalition.red.bullseye.x + (nbGroup * 1000 )
+					local init_y = mission.coalition.red.bullseye.y + (nbGroup * 1000 )
+
+					local bis_x = init_x
+					local bis_y = init_y + (nbGroup * 100000 )
+
+					local route = 
+					{
+						["points"] = 
+						{
+							[1] = 
+							{
+								["ETA"] = 0,
+								["ETA_locked"] = true,
+								["action"] = "Turning Point",
+								["alt"] = altTest,
+								["alt_type"] = "RADIO",
+								["formation_template"] = "",
+								["name"] = "",
+								["speed"] = viTest,
+								["speed_locked"] = true,
+								["task"] =
+								{
+									["id"] = "ComboTask",
+									["params"] =
+									{
+										["tasks"] = {}
+									},
+								},
+								["type"] = "Turning Point",
+								["x"] = init_x,
+								["y"] = init_y,
+							},
+							[2] = 
+							{
+								["ETA"] = 100000/viTest,
+								["ETA_locked"] = false,
+								["action"] = "Turning Point",
+								["alt"] = altTest,
+								["alt_type"] = "BARO",
+								["formation_template"] = "",
+								["name"] = "",
+								["speed"] = viTest,
+								["speed_locked"] = true,
+								["task"] =
+								{
+									["id"] = "ComboTask",
+									["params"] =
+									{
+										["tasks"] = {}
+									},
+								},
+								["type"] = "Turning Point",
+								["x"] = bis_x,
+								["y"] = bis_y,
+							},
+						},
+					}
 
 					local n = 1
 					local units = {}
+
+					local groupName = "FuelConsumption - " .. nbGroup
 
 					local unitName = groupName .. "-" .. n
 
 					units[n] =
 					{
-						["alt"] = waypoints[1].alt,
+						["alt"] = altTest,
+						["speed"] = viTest,
 						["heading"] = 0,
-						["callsign"] = GetCallsign(flight[f].country, f, n, "Nothing", 1),
+						-- ["callsign"] = GetCallsign(flight[f].country, f, n, "Nothing", 1),
 						["psi"] = 0,
-						["livery_id"] = flight[f].livery,
-						["type"] = flight[f].type,
-						["x"] = define_x ,
-						["y"] = define_y ,
+						-- ["livery_id"] = flight[f].livery,
+						["type"] = typePlane,
+						["x"] = init_x ,
+						["y"] = init_y ,
 						["name"] = unitName,
-						-- ["payload"] = flight[f].loadout.stores,
 						["payload"] = {
 							["pylons"] = loadout.stores.pylons,
-							["fuel"] = fuelTemp,
+							["fuel"] = loadout.stores.fuel,
 							["flare"] = loadout.stores.flare,
 							["chaff"] = loadout.stores.chaff,
-							["gun"] =  loadout.stores.gun,										-- ATO_FP_Debug04 Gun = 0 uniquement sur un Flight
+							["gun"] =  loadout.stores.gun,
 							['DCE_payloadtName'] = loadout.name,
 						},
 						["AddPropAircraft"] = loadout.AddPropAircraft,
-						["speed"] = waypoints[1].speed,
 						["unitId"] = GenerateIDUnit(unitName),
-						["alt_type"] = waypoints[1].alt_type,
+						["alt_type"] = "BARO",
 						["skill"] = "High",
 						["hardpoint_racks"] = true,
-		
+
 					}
 
 
+					local groupEntries =
+					{
+						-- ['frequency'] = frequencyIni +1,
+						['taskSelected'] = true,
+						['modulation'] = 0,
+						['groupId'] = GenerateIDGroup(),
+						['tasks'] = {
+						},
+						['route'] = route,
+						['hidden'] = true,
+						['units'] = units,
+						['radioSet'] = true,
+						["name"] = groupName,
+						['communication'] = true,
+						['x'] = init_x,
+						['y'] = init_y,
+						['start_time'] = 1,	
+						['task'] = 0,
+						['uncontrolled'] = false,
+	
+					}
+
+
+
 				
+					table.insert(mission["coalition"]["red"]["country"][1]["plane"]["group"], groupEntries)
+
 					viTest = viTest - 15
+					nbGroup = nbGroup + 1
 				end
 
 				altTest = altTest - 1000
-			
+
 			end
 
-			
+
 
 		end
 
 	end
 
-
-	mission["coalition"]["red"]["plane"] =
+	local trig_n =  #mission.trig.actions + 1
+	mapResource =
 	{
-		["group"] = groupEntries
+	} -- end of mapResource
+
+	local filename = "collectFuelData.lua"
+	local cond = ""
+	local rule = nil
+
+	cond = "return(true)"
+	rule = nil
+
+	local predicate = ""
+
+	local predicate1 = "triggerStart"
+	local predicate2 = 'a_do_script_file'
+
+	mission.maxDictId = mission.maxDictId + 1
+	trig_n = trig_n + 1
+	mapResource["ResKey_Action_" .. mission.maxDictId] = filename
+	mission.trig.funcStartup[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
+	mission.trig.flag[trig_n] = true
+	mission.trig.conditions[trig_n] = cond
+
+	mission.trig.actions[trig_n] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_" .. mission.maxDictId .. "\"));"
+
+
+	mission.trigrules[trig_n] = {
+		['rules'] = { rule },
+		['eventlist'] = '',
+		['comment'] = 'Trigger ' .. trig_n,
+		['predicate'] = predicate1,
+		['actions'] = {
+			[1] = {
+				['file'] = 'ResKey_Action_' .. mission.maxDictId,
+				['predicate'] = predicate2,
+				['ai_task'] = {
+					[1] = '',
+					[2] = '',
+				},
+			},
+		},
 	}
 
 
+	print("UtilDivers ajout avec (normalement du succes^^) de "..nbGroup.." groupe d'avion")
+
+
+	----- convert tables back to strings for insertion into content files -----
+	local misStr = "mission = " .. TableSerialization(mission, 0)
+	local optStr = "options = " .. TableSerialization(options, 0)
+	local warStr = "warehouses = " .. TableSerialization(warehouses, 0)
+	local dicStr = "dictionary = " .. TableSerialization(dictionary, 0)
+	local resStr = "mapResource = " .. TableSerialization(mapResource, 0)
+	-- local gciStr = "GCI = " .. TableSerialization(GCI, 0)
+
+	----- create temporary content files of new mission file -----
+	local misFile = io.open("misFile.lua", "w") or error("Failed to open debug file")
+	misFile:write(misStr)
+	misFile:close()
+
+	local optFile = io.open("optFile.lua", "w") or error("Failed to open debug file")
+	optFile:write(optStr)
+	optFile:close()
+
+	local warFile = io.open("warFile.lua", "w") or error("Failed to open debug file")
+	warFile:write(warStr)
+	warFile:close()
+
+	local dicFile = io.open("dicFile.lua", "w") or error("Failed to open debug file")
+	dicFile:write(dicStr)
+	dicFile:close()
+
+	local resFile = io.open("resFile.lua", "w")	 or error("Failed to open debug file")
+	resFile:write(resStr)
+	resFile:close()
+
+	-- local gciFile = io.open("GCIdata.lua", "w") or error("Failed to open debug file")
+	-- gciFile:write(gciStr)
+	-- gciFile:close()
+
+
+	-- local miz = minizip.zipCreate("Debug/mission_fuelConsumption.miz")
+	local miz = minizip.zipCreate("mission_fuelConsumption.miz")
+
+	miz:zipAddFile("mission", "misFile.lua")
+	miz:zipAddFile("options", "optFile.lua")
+	miz:zipAddFile("warehouses", "warFile.lua")
+	miz:zipAddFile("l10n/DEFAULT/dictionary", "dicFile.lua")
+	miz:zipAddFile("l10n/DEFAULT/mapResource", "resFile.lua")
+
+	-- miz:zipAddFile("l10n/DEFAULT/GCIdata.lua", "GCIdata.lua")
+	miz:zipAddFile("l10n/DEFAULT/GCIscript.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/collectFuelData.lua")
+	
+	miz:zipClose()
 
 
 
 
+	----- remove temporary content files -----
+	os.remove("misFile.lua")
+	os.remove("optFile.lua")
+	os.remove("warFile.lua")
+	os.remove("dicFile.lua")
+	os.remove("resFile.lua")
+	os.remove("GCIdata.lua")
 
-
-
-
+	local miss_str = "mission = " .. TableSerialization(mission, 0)
+	local missFile = io.open("Debug/mission_fuelConsumption.lua", "w") or error("Failed to open debug file")
+	missFile:write(miss_str)
+	missFile:close()
 
 	os.execute 'pause'
 	os.exit()

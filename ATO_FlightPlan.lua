@@ -2607,15 +2607,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					end
 
-					-- --target WP to be removed for non-player A-G attacks
-					-- if flight[f].route[w].id == "Target" then											--WP is target WP
-					-- 	if flight[f].task ~= "Reconnaissance" and flight[f].task ~= "Laser Illumination" then		--target WP is removed for all A-G tasks except recon or laser illumination
-					-- 		if flight[f].player ~= true and flight[f].client ~= true then											--not the player flight (player always gets a target WP)
-					-- 			target_wp_remove = w
-					-- 		end
-					-- 	end
-					-- end
-
 					--formations
 					if flight[f].route[w].id == "Departure" or flight[f].route[w].id == "Spawn" then
 						local task_entry = {}
@@ -2667,30 +2658,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 					end
-
-					--ATO_FP_Reglage01 : emport, ne pas larguer les emports en cas d'urgence
-					-- if flight[f].route[w].id == "Departure" or flight[f].route[w].id == "Spawn" then
-						-- local task_entry = {
-							-- ["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-							-- ["enabled"] = true,
-							-- ["auto"] = false,
-							-- ["id"] = "WrappedAction",
-							-- ["name"] = "emergency jettison",
-							-- ["params"] = 
-							-- {
-								-- ["action"] = 
-								-- {
-									-- ["id"] = "Option",
-									-- ["params"] = 
-									-- {
-										-- ["value"] = true,
-										-- ["name"] = 15,
-									-- }, -- end of ["params"]
-								-- }, -- end of ["action"]
-							-- }, -- end of ["params"],
-						-- }
-						-- table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-					-- end
 
 
 					-- modif Miguel M01 : ajout datalink EPLRS Capacity
@@ -2760,30 +2727,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 
-					-- --determine une nouvelle altitude pour ne pas prendre une montagne
-					-- if flight[f].route[w].id == "Spawn" then
-					-- 	local nameTheatre =  string.lower(mission.theatre)
-					-- 	local altFloor = 0 
-					-- 	if AltitudeFloor and AltitudeFloor[nameTheatre] then					
-					-- 		for level, poly in pairs(AltitudeFloor[nameTheatre]) do
-					-- 			local result = CheckPointInPolygon(waypoints[1], poly)
-					-- 			if result and altFloor < level then								
-					-- 				altFloor = level
-					-- 			end
-					-- 			if is_helicopter and altFloor > 4000 then
-					-- 				altFloor = altFloor - 2000
-					-- 			end
-					-- 		end
-					-- 	end	
-
-					-- 	if altFloor ~= 0 then
-					-- 		if waypoints[1]["alt"] < altFloor + 200 then							
-					-- 			waypoints[1]["alt"] =  altFloor + 200 + ((Pn-1) * 200) + (altRole * 50) 
-					-- 		end
-					-- 	end
-
-					-- end
-
 					--*************************************************************************************
 					--attack tasks
 					--*************************************************************************************
@@ -2839,126 +2782,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					-- if  flight[f].route[w].id == "IP" then
 					if  flight[f].route[w].id == "Attack" then
-
-						----*********************************Strike class == nil*******************************************
-						-- if flight[f].task == "Strike" and flight[f].target.class == nil then									--Tasks against scenery objects with multiple target sub-elements
-						-- 	if not (flight[f].player or flight[f].client) then
-						-- 		local task_entry = {																				--task is a command to run LUA code
-						-- 			["enabled"] = true,
-						-- 			["auto"] = false,
-						-- 			["id"] = "WrappedAction",
-						-- 			["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-						-- 			["params"] = 
-						-- 			{
-						-- 				["action"] = 
-						-- 				{
-						-- 					["id"] = "Script",
-						-- 					["params"] = 
-						-- 					{
-						-- 						["command"] = "CustomMapObjectAttack('" .. grpname .. "', {" .. tgtlist .. "}, '" .. ExpendQty .. "', '" .. weaponType .. "', '" .. attackType .. "', '" .. attackAlt .. "', '" .. GoupTaskTemp ..  "')",	--this is a custom written task to allow all aircraft in flight to attack multiple static objects simultenously
-						-- 					},
-						-- 				},
-						-- 			},
-						-- 		}
-						-- 		table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-						-- 	end
-						-- 	--this is only to display attack markers in mission editor, task will be replaced in game by CustomMapObjectAttack
-						-- 	-----------------------------------------------------------------------
-						-- 	for n,e in ipairs(target_element) do
-
-						-- 		local TaskFrom =  " TaskFrom "..debug.getinfo(1).currentline
-						-- 		local task_entry = createBombingChapter(id_task, flight[f], waypoints[w], weaponType, attackType, attackAlt, e, TaskFrom, typeCible)
-						-- 		table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-
-						-- 	end
-
-
-						----*********************************Strike vehicle*******************************************
-						-- elseif flight[f].task == "Strike" and flight[f].target.class == "vehicle" then
-
-						-- 	if is_helicopter or  AGAS_ready == false  then
-						-- 		-- print("AtoFp flight[f].task: "..flight[f].task.." GoupTaskTemp: "..tostring(GoupTaskTemp))
-
-						-- 		if not (flight[f].player or flight[f].client) then
-						-- 			local task_entry = {																				--task is a command to run LUA code
-						-- 				["enabled"] = true,
-						-- 				["auto"] = false,
-						-- 				["id"] = "WrappedAction",
-						-- 				["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-						-- 				["params"] = 
-						-- 				{
-						-- 					["action"] = 
-						-- 					{
-						-- 						["id"] = "Script",
-						-- 						["params"] = 
-						-- 						{
-						-- 							["command"] = "CustomGroupAttack('" .. grpname .. "', '" .. flight[f].target.name .. "', '" .. ExpendQty .. "', '" .. weaponType .. "', '" .. attackType .. "', '" .. attackAlt .. "', '" .. GoupTaskTemp ..  "')", 
-						-- 						},
-						-- 					},
-						-- 				},
-						-- 			}
-						-- 			table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-						-- 		end
-
-						-- 		if id_task == "AttackGroup" then
-
-						-- 			local TaskFrom =  " TaskFrom "..debug.getinfo(1).currentline
-						-- 			local task_entry = createBombingChapter(id_task, flight[f], waypoints[w], weaponType, attackType, attackAlt, nil, TaskFrom, typeCible)
-						-- 			table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-
-
-						-- 		else 
-
-						-- 			local target_element = {}																			--table to hold the target element number to be struck
-						-- 			for e = 1, #flight[f].target.elements do															--iterate trough all target elements
-						-- 				if flight[f].target.elements[e].dead ~= true then												--pick only elements that are not dead
-						-- 					table.insert(target_element, e)																--add to target element table
-						-- 				end
-						-- 			end
-						-- 			for n = 1, (f - 1) * 4 do																			--shift the order of target elements for subsequent flights in package, so that each flights starts attacking different elements (flight 1: element 1-4, flight 2: element 5-8, etc)
-						-- 				table.insert(target_element, target_element[1])													--shift element order, copy first element to back
-						-- 				table.remove(target_element, 1)																	--delete first element
-						-- 			end
-
-						-- 			for n,e in ipairs(target_element) do
-						-- 				local TaskFrom =  " TaskFrom "..debug.getinfo(1).currentline
-						-- 				local task_entry = createBombingChapter(id_task, flight[f], waypoints[w], weaponType, attackType, attackAlt, e, TaskFrom, typeCible)
-						-- 				table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-						-- 			end	
-						-- 		end
-						-- 	else
-
-
-						-- 		if not (flight[f].player or flight[f].client) then
-
-						-- 			local task_entry = {																				--task is a command to run LUA code
-						-- 				["enabled"] = true,
-						-- 				["auto"] = false,
-						-- 				["id"] = "WrappedAction",
-						-- 				["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-						-- 				["params"] = 
-						-- 				{
-						-- 					["action"] = 
-						-- 					{
-						-- 						["id"] = "Script",
-						-- 						["params"] = 
-						-- 						{
-						-- 										--AirGroundAttackTask(FlightName,				 Target,						 WeaponType,string			 ExpendQty,string		 Dive,			 OffsetAngle, 			ClimbAngle, 		PopAlt, 		AttackDist, 			Reattack,			 Debug)
-						-- 							["command"] = "AirGroundAttackTask('" .. grpname .. "', '" .. flight[f].target.name .. "', '" .. WeaponType_ .. "', '"  .. ExpendQty .. "', " .. tostring(Dive) .. ", " .. tostring(OffsetAngle) .. ", " .. tostring(ClimbAngle) ..", " .. tostring(PopAlt) ..", " .. tostring(AttackDist) ..", " .. tostring(Reattack) .. ", " .. tostring(DebugTask) ..  ")", 
-						-- 						},
-						-- 					},
-						-- 				},
-						-- 			}
-						-- 			table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-						-- 		end
-						-- 	end
-
-							---------------------------------------------------------------------------------------------------
-							---------------------------------------------------------------------------------------------------
-
-
-						--*********************************Strike static*******************************************
-						-- elseif flight[f].task == "Strike" and flight[f].target.class == "static" then
 
 							--*********************************Strike MEDLEY*******************************************
 						if flight[f].task == "Strike" and (flight[f].target.class == nil or flight[f].target.class ~= "airbase") then
