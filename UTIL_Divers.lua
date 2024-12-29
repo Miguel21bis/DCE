@@ -144,8 +144,8 @@ elseif ArgTools == "fuelConsumption" then
 		for unitType , byTasks in PairsByKeys(typeTaskLoadout) do
 			for task , loadouts in PairsByKeys(byTasks) do
 				for loadoutName , loadout in PairsByKeys(loadouts) do
-
-					io.write(i.." : ( "..unitType.." )( "..task..")("..loadoutName..")")
+					local testHcruise = tostring(loadout.hCruise)
+					io.write(i.." : ( "..unitType.." )( "..task..")("..loadoutName..")(hCruise: "..tostring(testHcruise).." m)")
 
 					tabIndex[i]= {
 						[unitType] = {
@@ -276,36 +276,41 @@ elseif ArgTools == "fuelConsumption" then
 			-- io.write(i.." : ( "..type.." )("..loadoutName..")".."\n")
 
 			if not mission["coalition"]["red"]["country"][1]["plane"] then mission["coalition"]["red"]["country"][1]["plane"] = {} end
-			if not mission["coalition"]["red"]["country"][1]["plane"]["group"] then 
+			if not mission["coalition"]["red"]["country"][1]["plane"]["group"] then
 				mission["coalition"]["red"]["country"][1]["plane"] =
 				{
 					["group"] = {}
-			
+
 				}
 			end
 
-			local altTest = loadout.hCruise + 3000
-			local viTest = loadout.vCruise + 50
+			local altTest
+			local viTest
 
+			for vi = 1, 10 do
 
-			for i = 1, 6 do
-				viTest = loadout.vCruise + 50
+				if nbGroup == 1 then
+					altTest = loadout.hCruise
+					viTest = loadout.vCruise
+				elseif nbGroup == 2 then
+					altTest = loadout.hCruise - 3048
+				else
+					viTest = loadout.vCruise - 25
+				end
 
-				for k = 1, 6 do
-
-
+				for ai = 1, 10 do
 
 					local init_x = mission.coalition.red.bullseye.x + (nbGroup * 1000 )
 					local init_y = mission.coalition.red.bullseye.y + (nbGroup * 1000 )
 
-					local bis_x = init_x
-					local bis_y = init_y + (nbGroup * 100000 )
+					local bis_x = init_x + 300000
+					local bis_y = init_y
 
-					local route = 
+					local route =
 					{
-						["points"] = 
+						["points"] =
 						{
-							[1] = 
+							[1] =
 							{
 								["ETA"] = 0,
 								["ETA_locked"] = true,
@@ -328,7 +333,7 @@ elseif ArgTools == "fuelConsumption" then
 								["x"] = init_x,
 								["y"] = init_y,
 							},
-							[2] = 
+							[2] =
 							{
 								["ETA"] = 100000/viTest,
 								["ETA_locked"] = false,
@@ -358,8 +363,15 @@ elseif ArgTools == "fuelConsumption" then
 					local units = {}
 
 					local groupName = "FuelConsumption - " .. nbGroup
+					if nbGroup == 1 then
+						groupName = "ORIGINE LOADOUT "..nbGroup.." alt: "..altTest.." Vi: "..viTest
+					elseif nbGroup >= 2 then
+						groupName = "OrReglage LOADOUT "..nbGroup.." alt: "..altTest.." Vi: "..viTest
+					end
 
-					local unitName = groupName .. "-" .. n
+					local unitName = groupName .. " -n- " .. n
+
+					print(unitName)
 
 					units[n] =
 					{
@@ -399,48 +411,196 @@ elseif ArgTools == "fuelConsumption" then
 						['tasks'] = {
 						},
 						['route'] = route,
-						['hidden'] = true,
+						-- ['hidden'] = true,
 						['units'] = units,
 						['radioSet'] = true,
 						["name"] = groupName,
 						['communication'] = true,
 						['x'] = init_x,
 						['y'] = init_y,
-						['start_time'] = 1,	
+						['start_time'] = 1,
 						['task'] = 0,
 						['uncontrolled'] = false,
-	
+
 					}
 
 
-
-				
 					table.insert(mission["coalition"]["red"]["country"][1]["plane"]["group"], groupEntries)
 
-					viTest = viTest - 15
+					if nbGroup >= 2 then
+						viTest = viTest + 5
+					end
+
 					nbGroup = nbGroup + 1
+
 				end
 
-				altTest = altTest - 1000
+				if nbGroup >= 2 then
+					altTest = altTest + 30.48
+				elseif nbGroup == 2 then
+					break
+				end
 
 			end
 
+		--****************************************************************************
+		print("**************")
+		--****************************************************************************
+			altTest = 3280.84
+			-- viTest
+
+			for vi = 1, 10 do
+
+				viTest = 110
+
+				for ai = 1, 15 do
+
+					local init_x = mission.coalition.red.bullseye.x + (nbGroup * 1000 )
+					local init_y = mission.coalition.red.bullseye.y + (nbGroup * 1000 )
+
+					local bis_x = init_x + 300000
+					local bis_y = init_y
+
+					local route =
+					{
+						["points"] =
+						{
+							[1] =
+							{
+								["ETA"] = 0,
+								["ETA_locked"] = true,
+								["action"] = "Turning Point",
+								["alt"] = altTest,
+								["alt_type"] = "RADIO",
+								["formation_template"] = "",
+								["name"] = "",
+								["speed"] = viTest,
+								["speed_locked"] = true,
+								["task"] =
+								{
+									["id"] = "ComboTask",
+									["params"] =
+									{
+										["tasks"] = {}
+									},
+								},
+								["type"] = "Turning Point",
+								["x"] = init_x,
+								["y"] = init_y,
+							},
+							[2] =
+							{
+								["ETA"] = 100000/viTest,
+								["ETA_locked"] = false,
+								["action"] = "Turning Point",
+								["alt"] = altTest,
+								["alt_type"] = "BARO",
+								["formation_template"] = "",
+								["name"] = "",
+								["speed"] = viTest,
+								["speed_locked"] = true,
+								["task"] =
+								{
+									["id"] = "ComboTask",
+									["params"] =
+									{
+										["tasks"] = {}
+									},
+								},
+								["type"] = "Turning Point",
+								["x"] = bis_x,
+								["y"] = bis_y,
+							},
+						},
+					}
+
+					local n = 1
+					local units = {}
+
+					local groupName = "FuelConsumption - " .. nbGroup
+
+					groupName = groupName.." alt: "..altTest.." Vi: "..viTest
+
+					local unitName = groupName .. " -n- " .. n
+
+					print(unitName)
+
+					units[n] =
+					{
+						["alt"] = altTest,
+						["speed"] = viTest,
+						["heading"] = 0,
+						-- ["callsign"] = GetCallsign(flight[f].country, f, n, "Nothing", 1),
+						["psi"] = 0,
+						-- ["livery_id"] = flight[f].livery,
+						["type"] = typePlane,
+						["x"] = init_x ,
+						["y"] = init_y ,
+						["name"] = unitName,
+						["payload"] = {
+							["pylons"] = loadout.stores.pylons,
+							["fuel"] = loadout.stores.fuel,
+							["flare"] = loadout.stores.flare,
+							["chaff"] = loadout.stores.chaff,
+							["gun"] =  loadout.stores.gun,
+							['DCE_payloadtName'] = loadout.name,
+						},
+						["AddPropAircraft"] = loadout.AddPropAircraft,
+						["unitId"] = GenerateIDUnit(unitName),
+						["alt_type"] = "BARO",
+						["skill"] = "High",
+						["hardpoint_racks"] = true,
+
+					}
 
 
+					local groupEntries =
+					{
+						-- ['frequency'] = frequencyIni +1,
+						['taskSelected'] = true,
+						['modulation'] = 0,
+						['groupId'] = GenerateIDGroup(),
+						['tasks'] = {
+						},
+						['route'] = route,
+						-- ['hidden'] = true,
+						['units'] = units,
+						['radioSet'] = true,
+						["name"] = groupName,
+						['communication'] = true,
+						['x'] = init_x,
+						['y'] = init_y,
+						['start_time'] = 1,
+						['task'] = 0,
+						['uncontrolled'] = false,
+
+					}
+
+
+					table.insert(mission["coalition"]["red"]["country"][1]["plane"]["group"], groupEntries)
+
+					viTest = viTest + 20
+
+					nbGroup = nbGroup + 1
+
+				end
+
+				altTest = altTest + 609.6
+
+			end
 		end
 
 	end
 
-	local trig_n =  #mission.trig.actions + 1
+	-- local trig_n =  #mission.trig.actions + 1
+	local trig_n =  1
 	mapResource =
 	{
 	} -- end of mapResource
 
 	local filename = "collectFuelData.lua"
-	local cond = ""
 	local rule = nil
 
-	cond = "return(true)"
 	rule = nil
 
 	local predicate = ""
@@ -449,11 +609,10 @@ elseif ArgTools == "fuelConsumption" then
 	local predicate2 = 'a_do_script_file'
 
 	mission.maxDictId = mission.maxDictId + 1
-	trig_n = trig_n + 1
 	mapResource["ResKey_Action_" .. mission.maxDictId] = filename
 	mission.trig.funcStartup[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
 	mission.trig.flag[trig_n] = true
-	mission.trig.conditions[trig_n] = cond
+	mission.trig.conditions[trig_n] = "return(true)"
 
 	mission.trig.actions[trig_n] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_" .. mission.maxDictId .. "\"));"
 
@@ -467,12 +626,29 @@ elseif ArgTools == "fuelConsumption" then
 			[1] = {
 				['file'] = 'ResKey_Action_' .. mission.maxDictId,
 				['predicate'] = predicate2,
-				['ai_task'] = {
-					[1] = '',
-					[2] = '',
-				},
+				-- ['ai_task'] = {
+				-- 	[1] = '',
+				-- 	[2] = '',
+				-- },
 			},
 		},
+	}
+
+	mission["forcedOptions"] =
+	{
+		["RBDAI"] = true,
+		["accidental_failures"] = false,
+		["birds"] = 0,
+		["civTraffic"] = "",
+		["cockpitStatusBarAllowed"] = false,
+		["cockpitVisualRM"] = true,
+		["externalViews"] = true,
+		["labels"] = 0,
+		["miniHUD"] = false,
+		["optionsView"] = "optview_all",
+		["permitCrash"] = true,
+		["userMarks"] = true,
+		["wakeTurbulence"] = false,
 	}
 
 
@@ -523,8 +699,8 @@ elseif ArgTools == "fuelConsumption" then
 	miz:zipAddFile("l10n/DEFAULT/mapResource", "resFile.lua")
 
 	-- miz:zipAddFile("l10n/DEFAULT/GCIdata.lua", "GCIdata.lua")
-	miz:zipAddFile("l10n/DEFAULT/GCIscript.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/collectFuelData.lua")
-	
+	miz:zipAddFile("l10n/DEFAULT/collectFuelData.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/collectFuelData.lua")
+
 	miz:zipClose()
 
 
