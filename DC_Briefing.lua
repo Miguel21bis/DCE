@@ -414,7 +414,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 						tempPlayer = Deepcopy(camp.client[flight[f].IdClient])
 
 						-- print("DcB tempPlayer.pack_n "..tostring(tempPlayer.pack_n))
-						tempPlayer.package = camp.client.package[tempPlayer.pack_n]
+						tempPlayer.package = Deepcopy(camp.client.package[tempPlayer.pack_n])
 
 						-- tempPlayer = Deepcopy(camp.client)
 
@@ -448,8 +448,8 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 
 					elseif flight[f].player then
-						tempPlayer = camp.player
-						tempPlayer.package = camp.player.package[tempPlayer.pack_n]
+						tempPlayer = Deepcopy(camp.player)
+						tempPlayer.package = Deepcopy(camp.player.package[tempPlayer.pack_n])
 						local tagBreak
 						--##parse mission table:
 						for _side, side in pairs(mission.coalition) do

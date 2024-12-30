@@ -67,7 +67,7 @@ TabDivert = {}							--liste des pistes de deroutement
 
 local debugStart = true					--NE PAS CHANGER, les infos restent seulement dans le fichier debugGenMission
 local debugTxt_AtoFP = ""
-local tabCallSignFligt = {}	
+local tabCallSignFligt = {}
 local PlayerTask = ""
 local tempBaseAirStart = {}
 local tempDeckPlace = {}
@@ -1577,7 +1577,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				--pour eviter le pb du flight 2 du main(strike) qui peut etre en comflit avec une escorte strike 		
 				local tempNumFlight = f
 				local groupName = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. tempNumFlight
-				repeat			
+				repeat
 					groupName = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. tempNumFlight
 					tempNumFlight = tempNumFlight + 1
 				until not allFlightName_AtoFP[groupName]
@@ -2083,6 +2083,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 				for w = 1, #flight[f].route do
+
 					local atlTemp = flight[f].route[w].alt
 					if is_helicopter then
 						if IsHelicopter[flight[f].type].hHover then
@@ -3445,22 +3446,32 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					-- if flight[f].route[w].id == "Departure" then
 					if flight[f].route[w].id == "Assemble" then
 						if flight[f].number > 1 or (#flight > 1 and flight[f].loadout.tStation == nil) or flight[f].target.firepower.packmax then		--orbit on departure only for flights larger than 1-ship, flights that are part of a package (but no on-station tasks) or multi-packages
+
+							local altitude = AltitudeCruise * 2/3
 							local speed = pack[p].main[1].loadout.vCruise
+
 							if flight[f].loadout.vCruise then
 								speed = flight[f].loadout.vCruise
-								if Data_divers and Data_divers[flight[f].type] and Data_divers[flight[f].type].vCruise then
+								if Data_divers and Data_divers[flight[f].type] and Data_divers[flight[f].type].vCruise and speed > Data_divers[flight[f].type].vCruise then
 									speed = Data_divers[flight[f].type].vCruise
 								end
 							end
 
-							local altitude = AltitudeCruise
+							speed = speed * (1 - 10/100)		--on soustrait 10% de la valeur de cruise
+
 							if is_helicopter then altitude = 150 end
+
 							if Data_divers and Data_divers[flight[f].type] and Data_divers[flight[f].type].hCruise then
 								altitude = Data_divers[flight[f].type].hCruise
 							end
+
 							if flight[f].loadout.heavy_load then
 								altitude = altitude /2
+							else
+								altitude = altitude * 2/3
 							end
+
+							waypoints[w].alt = altitude
 
 							-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
 							local task_entry = {

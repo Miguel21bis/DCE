@@ -62,7 +62,7 @@ SkillWish = {
 }
 
 PlacePA = {}
-AltitudeCruise = 5400			--for Helicopter
+AltitudeCruise = 5400			--for plane without hcruise
 
 --Check_TaskPossibleByPlane
 ----- unpack template mission file ----

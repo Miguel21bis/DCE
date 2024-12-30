@@ -785,8 +785,8 @@ Data_divers = {
 	["Su-17M4"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-		vCruise = 210,
-		hCruise = 7500,
+		vCruise = 180,
+		hCruise = 6358,
 	},
 	["Su-24M"] = {
 		instrumentUnits = "russian",
