@@ -755,10 +755,14 @@ Data_divers = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
+		vCruise = 225,
+		hCruise = 7548,
 	},
 	["MiG-23MLD"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
+		vCruise = 183,
+		hCruise = 7547,
 	},
 	["MiG-25PD"] = {
 		instrumentUnits = "russian",

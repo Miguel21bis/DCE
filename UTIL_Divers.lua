@@ -145,7 +145,8 @@ elseif ArgTools == "fuelConsumption" then
 			for task , loadouts in PairsByKeys(byTasks) do
 				for loadoutName , loadout in PairsByKeys(loadouts) do
 					local testHcruise = tostring(loadout.hCruise)
-					io.write(i.." : ( "..unitType.." )( "..task..")("..loadoutName..")(hCruise: "..tostring(testHcruise).." m)")
+					local test_vCruise = tostring(loadout.vCruise)
+					io.write(i.." : ( "..unitType.." )( "..task..")("..loadoutName..")(hCruise: "..tostring(testHcruise).." m)(vCruise: "..tostring(test_vCruise).." m/s)")
 
 					tabIndex[i]= {
 						[unitType] = {
@@ -287,6 +288,19 @@ elseif ArgTools == "fuelConsumption" then
 			local altTest
 			local viTest
 
+			if not loadout.hCruise then
+				if Data_divers and Data_divers[typePlane] and Data_divers[typePlane].hCruise then
+					loadout.hCruise = Data_divers[typePlane].hCruise
+				end
+			end
+			
+			if not loadout.vCruise then
+				if Data_divers and Data_divers[typePlane] and Data_divers[typePlane].vCruise then
+					loadout.vCruise = Data_divers[typePlane].vCruise
+				end
+			end
+
+
 			for vi = 1, 10 do
 
 				if nbGroup == 1 then
@@ -300,8 +314,8 @@ elseif ArgTools == "fuelConsumption" then
 
 				for ai = 1, 10 do
 
-					local init_x = mission.coalition.red.bullseye.x + (nbGroup * 1000 )
-					local init_y = mission.coalition.red.bullseye.y + (nbGroup * 1000 )
+					local init_x = mission.coalition.red.bullseye.x + (nbGroup * 500 )
+					local init_y = mission.coalition.red.bullseye.y + (nbGroup * 500 )
 
 					local bis_x = init_x + 300000
 					local bis_y = init_y
@@ -455,8 +469,8 @@ elseif ArgTools == "fuelConsumption" then
 
 				for ai = 1, 15 do
 
-					local init_x = mission.coalition.red.bullseye.x + (nbGroup * 1000 )
-					local init_y = mission.coalition.red.bullseye.y + (nbGroup * 1000 )
+					local init_x = mission.coalition.red.bullseye.x + (nbGroup * 500 )
+					local init_y = mission.coalition.red.bullseye.y + (nbGroup * 500 )
 
 					local bis_x = init_x + 300000
 					local bis_y = init_y

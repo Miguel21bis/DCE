@@ -387,10 +387,12 @@ function eventHandlerDCE:onEvent(event)
 		env.info("DCE_EventsTracker target Category: "..tostring(cat))
 		if Object_Category[cat] then
 			env.info("DCE_EventsTracker Object_Category :  _:_ "..tostring(Object_Category[cat]))
-		
+
 			if cat ~= Object.Category.SCENERY then
-				local targetCoalition = event.target:getCoalition()
-				targetSideName = coalitionIdNumeric[tonumber(targetCoalition)]
+				if event.target:isExist() then
+					local targetCoalition = event.target:getCoalition()
+					targetSideName = coalitionIdNumeric[tonumber(targetCoalition)]
+				end
 			end
 		end
 	end
