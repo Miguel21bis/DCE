@@ -2310,6 +2310,29 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					elseif waypoints[w]["name"] == "Join"  then
 						waypoints[w].ETA_locked = true
 						waypoints[w].speed_locked = false
+
+						local task_entry =
+						{
+							["enabled"] = true,
+							["auto"] = false,
+							["id"] = "WrappedAction",
+							["name"] = "interdire la pc",
+							["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+							["params"] =
+							{
+								["action"] =
+								{
+									["id"] = "Option",
+									["params"] =
+									{
+										["value"] = false,
+										["name"] = 16,
+									},
+								},
+							},
+						}
+						table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+
 					elseif waypoints[w]["name"] == "Assemble"  then
 						waypoints[w].ETA_locked = false
 						waypoints[w].speed_locked = true
@@ -3447,6 +3470,31 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					if flight[f].route[w].id == "Assemble" then
 						if flight[f].number > 1 or (#flight > 1 and flight[f].loadout.tStation == nil) or flight[f].target.firepower.packmax then		--orbit on departure only for flights larger than 1-ship, flights that are part of a package (but no on-station tasks) or multi-packages
 
+						
+							local task_entry =
+							{
+								["enabled"] = true,
+								["auto"] = false,
+								["id"] = "WrappedAction",
+								["name"] = "interdire la pc",
+								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+								["params"] =
+								{
+									["action"] =
+									{
+										["id"] = "Option",
+										["params"] =
+										{
+											["value"] = true,
+											["name"] = 16,
+										},
+									},
+								},
+							}
+							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+
+
+
 							local altitude = AltitudeCruise * 2/3
 							local speed = pack[p].main[1].loadout.vCruise
 
@@ -3473,8 +3521,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							waypoints[w].alt = altitude
 
-							-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
-							local task_entry = {
+							task_entry =
+							{
 								["enabled"] = true,
 								["auto"] = false,
 								["id"] = "WrappedAction",
@@ -3492,6 +3540,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								},
 							}
 							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+
 						end
 					end
 

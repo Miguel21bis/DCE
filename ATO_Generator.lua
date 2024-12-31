@@ -1107,11 +1107,6 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																								end
 																							end
 
-																							-- print("AtoG exAA target_name "..tostring(target_name).." Task: "..tostring(task))
-																							-- _affiche(route, "route")
-																							-- _affiche(unit.name, "unit")
-																							-- _affiche(unit_loadouts[l], "unit_loadouts[l]")
-
 																							DebugRoute = false
 																						end
 
@@ -1144,7 +1139,7 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																							TrackPlayability(unit.player, "target_range")												--track playabilty criterium has been met
 
 																							--determine number of aircraft needed for sortie
-																							local aircraft_requested = target.firepower.max / unit_loadouts[l].firepower					--how many aircraft are needed to satisfy the maximum firepower requirement of the target
+																							local aircraft_requested = target.firepower.min / unit_loadouts[l].firepower					--how many aircraft are needed to satisfy the maximum firepower requirement of the target
 
 																							if task == "Transport" then
 																								if multiPlaneSet and multiPlaneSet[side] and multiPlaneSet[side][unit.type]  and multiPlaneSet[side][unit.type][task]
@@ -2107,8 +2102,8 @@ for sideName, draftT in pairs(Draft_sorties) do
 
 
 
-																		if escort_num > draft.number * 3 then											--when more escorts 3 times escorts than escorted aircraft
-																			escort_num = draft.number * 3												--limit escort number to 3 times escorted aircraft
+																		if escort_num > draft.number * 2.5 then											--when more escorts 2 times escorts than escorted aircraft
+																			escort_num = draft.number * 2.5												--limit escort number to 2 times escorted aircraft
 																		end
 																		-- if escort_num > campMod.Setting_Generation.limit_escort then
 																		-- 	escort_num = campMod.Setting_Generation.limit_escort
@@ -3006,7 +3001,6 @@ local function createATO_table(draftPriority)
 
 
 														--si c'est un task d'une demande MP, on chunte la restrition plus loin
-														--TODO pourquoi causes: n'en a toujours que 2 (alors que là, il y a 4)
 														--TODO pourquoi le coef est plus important sur d'autre élément que lorsqu'on demande notre target?
 														local MultiPlayerOveRide  = false
 														if multiPlaneSet[side] and multiPlaneSet[side][draft.type] then
@@ -3027,7 +3021,7 @@ local function createATO_table(draftPriority)
 
 															local TabRejected = {}
 															TabRejected["sujet"]  = support.id.." type: "..support.type.." we don't accept a single aircraft as escort "..supportName
-															TabRejected["cause"] = { support.number, dispoTmp[support.name].aircraft_available, dispoTmp[support.name].unassigned, supportName, draft.task  }
+															TabRejected["cause"] = { "support.number: ",support.number, "unassigned:" , tostring(dispoTmp[support.name].unassigned), " available: ", tostring(dispoTmp[support.name].aircraft_available), "supportName: ", tostring(supportName), " task: ", tostring(draft.task)  }
 															TabRejected["ligne"]  = debug.getinfo(1).currentline
 															table.insert(draft["rejected"], TabRejected)
 														else
@@ -3126,33 +3120,6 @@ local function createATO_table(draftPriority)
 											end
 
 
-											--utilité?
-											-- if support_available and draft.loadout.support then																									--main body loadout support requirements
-											-- 	if tracing then txtTracing = txtTracing .. "Passe 2A "..tostring(support_available).."\n" end 
-
-											-- 	for supportTask, bool in pairs(draft.loadout.support) do																		--iterate through support requirements of loadout
-											-- 		if tracing then txtTracing = txtTracing .. "Passe 2B "..tostring(supportTask).."\n" end
-
-											-- 		if bool and draft.support and  draft.support[supportTask]  then
-											-- 			-- si draft.support[supportTask].NbTotalSupport existe, c'est propablement qu'une unite possede ce task
-											-- 			if  draft.support[supportTask].NbTotalSupport and draft.support[supportTask].NbTotalSupport <= 0  then
-
-											-- 				if tracing then txtTracing = txtTracing .. "Passe 2C EJECT".."\n" end
-
-											-- 				support_available = false																							--necessary support is not available
-
-											-- 				local TabRejected = {}
-											-- 				TabRejected["sujet"]  = draft.id.." type: ".." aucun SUPPORT"
-											-- 				TabRejected["cause"] = { [1] =  draft.support[supportTask], [2] = "", }
-											-- 				TabRejected["ligne"]  = debug.getinfo(1).currentline														
-											-- 				table.insert(draft["rejected"], TabRejected)
-											-- 			end
-
-											-- 		end
-											-- 	end
-											-- end
-
-
 											for _p,_support in pairs(draft.support) do																							--iterate through support in draft sortie
 												tmpTxt = tmpTxt .."_B1_"
 												if support_available and type(_support) == "table" then
@@ -3210,8 +3177,7 @@ local function createATO_table(draftPriority)
 										and ( Debug.Generator.SpySquad and Debug.Generator.SpySquad == draft.name
 										or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
 										then
-											-- Aircraft_availability[draft.name].serviceable > (Aircraft_availability[draft.name].available / denom_NeDonnePasTOUT )
-
+											
 											DebuGenTxt = DebuGenTxt.."\n"..(tostring(draft.id).." AtoG passe C_02b serviceable: "
 														..tostring(Aircraft_availability[draft.name].serviceable)
 														.." |available: "..tostring(Aircraft_availability[draft.name].available)
@@ -3220,47 +3186,24 @@ local function createATO_table(draftPriority)
 
 										-- modification M11.u : Multiplayer	(u: reserve avion Escorte)
 										-- interdit aux possible avion d'escorte de tout donner dans CAP ou Intercept
-										-- if not MultiPlayerOveRide and (draft.task == "CAP" or draft.task == "Intercept" )  and (Aircraft_availability[draft.name].serviceable > (Aircraft_availability[draft.name].available / denom_NeDonnePasTOUT )) then	--> (Aircraft_availability[draft.name].available / 3 ))
-
+										
 										if not MultiPlayerOveRide and (draft.task == "CAP" or draft.task == "Intercept" )   then
 
 											for n_squad, squad in pairs(oob_air[side]) do
-												if squad.type == draft.type and squad.name == draft.name
-												and ((squad.tasks["Escort"] and squad.tasks["Escort"] == true)
-												or  (squad.tasks["SEAD"] and squad.tasks["SEAD"] == true)
-												or  (squad.tasks["Strike"] and squad.tasks["Strike"] == true)  )
+												if squad.type == draft.type and squad.name == draft.name and ((squad.tasks["Escort"] and squad.tasks["Escort"] == true)
+												or  (squad.tasks["SEAD"] and squad.tasks["SEAD"] == true) or  (squad.tasks["Strike"] and squad.tasks["Strike"] == true)  )
 												then
-													-- if Aircraft_availability[draft.name].unassigned - draft.number <= Aircraft_availability[draft.name].serviceable/2 then
-														-- print("AtoG Passe E Escort? "..tostring(squad.tasks["Escort"]).." SEAD? "..tostring(squad.tasks["SEAD"]).." Strike? "..tostring(squad.tasks["Strike"]))
-													-- local serciMini = 9999
-
-													-- local serciMini = 3
-													-- if Aircraft_availability[draft.name].serviceable and Aircraft_availability[draft.name].serviceable > 2 then
-													-- 	serciMini = math.random(1,Aircraft_availability[draft.name].serviceable/2)
-													-- 	print("AtoG Passe D "..serciMini)
-													-- end
-
-													-- if Aircraft_availability[draft.name].unassigned - draft.number <= serciMini then
-
+													
 													local test_Aircraftnumber = draft.number
 													local test = false
-													-- repeat
-														-- if Aircraft_availability[draft.name].unassigned - test_Aircraftnumber <= Aircraft_availability[draft.name].serviceable/denom_NeDonnePasTOUT then
-														if Aircraft_availability[draft.name].unassigned - test_Aircraftnumber < 4 then
-															test_Aircraftnumber = test_Aircraftnumber -2
-														else
-															test = true
-														end
 
-													-- until  test_Aircraftnumber <= 2 or test
+													if Aircraft_availability[draft.name].unassigned - test_Aircraftnumber < 4 then
+														test_Aircraftnumber = test_Aircraftnumber -2
+													else
+														test = true
+													end
 
 													draft.number = test_Aircraftnumber
-
-													-- if draft.number < 2 then
-													-- 	print("AtoG B draft.number "..draft.type.." "..tostring(draft.number))
-
-													-- 	draft.number = 2
-													-- end
 
 													if not test then
 														support_available = false
@@ -3275,17 +3218,12 @@ local function createATO_table(draftPriority)
 
 														local TabRejected = {}
 														TabRejected["sujet"]  = draft.id.." NE DONNE PAS TOUT en CAP ou Intercept ()support_available if Aircraft_availability[draft.name].unassigned - draft.number <= Aircraft_availability[draft.name].serviceable/3"
-														TabRejected["cause"] = { [1] = Aircraft_availability[draft.name].unassigned - draft.number, [2]  = Aircraft_availability[draft.name].serviceable/ denom_NeDonnePasTOUT, }
+														TabRejected["cause"] = { " unassigned - draft.number: ", tostring(Aircraft_availability[draft.name].unassigned - draft.number), "serviceable/ denom_NeDonnePasTOUT: ", tostring(Aircraft_availability[draft.name].serviceable/ denom_NeDonnePasTOUT) }
 														TabRejected["ligne"]  = debug.getinfo(1).currentline
 														table.insert(draft["rejected"], TabRejected)
 
-														-- break_loop = true																		
-														-- break
 													end
 												end
-												-- if break_loop == true then
-												-- 	break																							
-												-- end
 											end
 										end
 
