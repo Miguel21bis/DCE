@@ -556,12 +556,16 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		-- 		3 types : Mirage-F1CE, Mirage-F1EE, Mirage-F1BE 
 		-- Le futur devrait être le F-1M ... le plus moderne mais pas pour tout de suite je pense ...
+		vCruise = 250,
+		hCruise = 7548,
 	},
 	["Mirage-F1CE"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failues ...
 		playable = true,
+		vCruise = 250,
+		hCruise = 7548,
 	},
 	["Mirage-F1EE"] = {
 		instrumentUnits = "imperial",
@@ -576,12 +580,17 @@ Data_divers = {
 			}
 		},
 		playable = true,
+		vCruise = 250,
+		hCruise = 7548,
+		
 	},
 	["Mirage-F1BE"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failues ...
 		playable = true,
+		vCruise = 250,
+		hCruise = 7548,
 	},
 
 	["M-2000C"] = {

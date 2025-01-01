@@ -385,7 +385,7 @@ elseif ArgTools == "fuelConsumption" then
 
 					local unitName = groupName .. " -n- " .. n
 
-					print(unitName)
+					-- print(unitName)
 
 					units[n] =
 					{
@@ -537,7 +537,7 @@ elseif ArgTools == "fuelConsumption" then
 
 					local unitName = groupName .. " -n- " .. n
 
-					print(unitName)
+					-- print(unitName)
 
 					units[n] =
 					{

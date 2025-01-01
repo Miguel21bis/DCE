@@ -114,9 +114,9 @@ local function exportFuelData()
         end
         file:write("}\n")
         file:close()
-        trigger.action.outText("Données exportées dans " .. fileName, 10)
+        trigger.action.outText("Données exportées dans " .. fileName, 1000)
     else
-        trigger.action.outText("Erreur : Impossible d'exporter les données.", 10)
+        trigger.action.outText("Erreur : Impossible d'exporter les données.", 1000)
     end
 end
 
