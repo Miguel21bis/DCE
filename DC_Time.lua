@@ -96,7 +96,7 @@ else	--si la mission est acceptée, on prend juste les infos sans ajouter de tem
 
 	if not Firstmission_flag or (MissionInstance and MissionInstance > 1) then
 		-- Calculer idle_time
-		idle_time = math.random(mission_ini.idle_time_min, mission_ini.idle_time_max)
+		idle_time = math.random(mission_ini.idle_time_min, mission_ini.idle_time_max) + mission_ini.mission_duration
 	end
 
 	camp.time = camp.time + idle_time

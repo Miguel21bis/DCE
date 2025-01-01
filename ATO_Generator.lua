@@ -2102,8 +2102,8 @@ for sideName, draftT in pairs(Draft_sorties) do
 
 
 
-																		if escort_num > draft.number * 2.5 then											--when more escorts 2 times escorts than escorted aircraft
-																			escort_num = draft.number * 2.5												--limit escort number to 2 times escorted aircraft
+																		if escort_num > draft.number * 2 then											--when more escorts 2 times escorts than escorted aircraft
+																			escort_num = draft.number * 2												--limit escort number to 2 times escorted aircraft
 																		end
 																		-- if escort_num > campMod.Setting_Generation.limit_escort then
 																		-- 	escort_num = campMod.Setting_Generation.limit_escort
@@ -2784,6 +2784,8 @@ local function createATO_table(draftPriority)
 										-- 	},
 										-- },
 
+
+										
 										--en fonction du learning des missions passé, interdit une mission si les task support ne sont pas present
 
 										local tempInfo = draft.id.." AtoG NbTotPlanePerTask CALCUL"
@@ -2899,14 +2901,14 @@ local function createATO_table(draftPriority)
 											DebuGenTxt = DebuGenTxt.."\n"..tempInfo
 										end
 
-										--TODO modifie now
+										--TODO bizarre, il s agit du nb d avion du main, pas du support
 										-- if not draft.MainMPOveRide then
 											for unitname,_ in pairs(need) do
 												if need[unitname] > avail[unitname] then																						--more aircraft are needed from this unit across all package tasks than are available
 													support_available = false																									--not enough support available
 													local TabRejected = {}
-													TabRejected["sujet"]  = draft.id.." type: "..draft.type.." AVION SUPPORT INSUFFISANT()support_available if need[unitname] > avail[unitname]"
-													TabRejected["cause"] = { [1] =  need[unitname], [2] = avail[unitname], }
+													TabRejected["sujet"]  = draft.id.." type: "..draft.type.." AVION SUPPORT?Main? INSUFFISANT()support_available if need[unitname] > avail[unitname]"
+													TabRejected["cause"] = { tostring(need[unitname]), tostring(avail[unitname]) }
 													TabRejected["ligne"]  = debug.getinfo(1).currentline
 													table.insert(draft["rejected"], TabRejected)
 												end
@@ -3015,7 +3017,7 @@ local function createATO_table(draftPriority)
 															DebuGenTxt = DebuGenTxt.."\n"..(tostring(draft.id).." AtoG passe C_00_h  we don't accept a single aircraft as escort supportTask "..supportTask.." draft.task "..tostring(draft.task))
 														end
 
-														if (support.number >= 2 and dispoTmp[support.name].unassigned < 2 and draft.task ~= supportTask) and not MultiPlayerOveRide then
+														if (support.number >= 2 and dispoTmp[support.name].unassigned < 2 and draft.task ~= supportTask) and not MultiPlayerOveRide and mission_ini.strikeOnlyWithEscorte then
 
 															support_available = false																									--not enough support available
 
@@ -3455,21 +3457,21 @@ local function createATO_table(draftPriority)
 
 			--######################################################################################################################################
 			--######################################################################################################################################
-													--store time assigned aircraft are unavailable for future missions
-													local operating_hours														--time the unit is operating each day
-													if entry.loadout.day and entry.loadout.night then							--day/night loadout
-														operating_hours = 86400													--full day in seconds
-													elseif entry.loadout.day then												--day loadout
-														operating_hours = mission_ini.dusk - mission_ini.dawn									--Daytime in seconds
-													elseif entry.loadout.night then												--night loadout
-														operating_hours = mission_ini.dawn + (86400 - mission_ini.dusk)						--nighttime in seconds
-													end
-													local time_to_next_mission = operating_hours / entry.loadout.sortie_rate	--time duration until aircraft can do the next mission based on its sortie rate
-													if entry.loadout.tStation and #ATO[side][pack_n][role] == 1 then			--for a flight that has a station time and for the first flight in package
-														time_to_next_mission = time_to_next_mission - entry.loadout.tStation	--remove station time from time to next mission, because flight could airstart current mission at close to end of its station time
-													end
+													-- --store time assigned aircraft are unavailable for future missions
+													-- local operating_hours														--time the unit is operating each day
+													-- if entry.loadout.day and entry.loadout.night then							--day/night loadout
+													-- 	operating_hours = 86400													--full day in seconds
+													-- elseif entry.loadout.day then												--day loadout
+													-- 	operating_hours = mission_ini.dusk - mission_ini.dawn									--Daytime in seconds
+													-- elseif entry.loadout.night then												--night loadout
+													-- 	operating_hours = mission_ini.dawn + (86400 - mission_ini.dusk)						--nighttime in seconds
+													-- end
+													-- local time_to_next_mission = operating_hours / entry.loadout.sortie_rate	--time duration until aircraft can do the next mission based on its sortie rate
+													-- if entry.loadout.tStation and #ATO[side][pack_n][role] == 1 then			--for a flight that has a station time and for the first flight in package
+													-- 	time_to_next_mission = time_to_next_mission - entry.loadout.tStation	--remove station time from time to next mission, because flight could airstart current mission at close to end of its station time
+													-- end
 
-													--boucle transféré apres le ATO_Timing
+													--boucle transféré a la fin de ATO_Timing
 													-- if daysfrom > Aircraft_availability[unit.name].unavailable[u] then
 													-- local unavailable = current_time + time_to_next_mission 					--campaign time until this aircraft unavailable for new mission
 													-- local unavailable = daysfrom + (time_to_next_mission / (24 * 60 * 60))		-- seconds in a day
@@ -3577,7 +3579,7 @@ local function createATO_table(draftPriority)
 												else
 													local TabRejected = {}
 													TabRejected["sujet"]  = draft.id.." IN AddFlight type(supportPart) == table"
-													TabRejected["cause"] = { [1] = support_available, [2]  = "", }
+													TabRejected["cause"] = { "support_available: ", tostring(support_available) }
 													TabRejected["ligne"]  = debug.getinfo(1).currentline
 													table.insert(draft["rejected"], TabRejected)
 												end
@@ -3618,14 +3620,14 @@ local function createATO_table(draftPriority)
 										else
 											local TabRejected = {}
 											TabRejected["sujet"]  = draft.id.." SUPPORT IMPOSSIBLE()if support_available"
-											TabRejected["cause"] = { [1] = support_available, [2]  = "", }
+											TabRejected["cause"] = { "support_available: ", tostring(support_available) }
 											TabRejected["ligne"]  = debug.getinfo(1).currentline
 											table.insert(draft["rejected"], TabRejected)
 										end
 									else
 										local TabRejected = {}
 										TabRejected["sujet"]  = draft.id.." AVIONS INSUFFISANT()if draft.number <= available and limitMP then {draft.number, limitMP}"
-										TabRejected["cause"] = {draft.number, limitMP}
+										TabRejected["cause"] = {"draft.number: ", tostring(draft.number), "limitMP: ", tostring(limitMP)}
 										TabRejected["ligne"]  = debug.getinfo(1).currentline
 										table.insert(draft["rejected"], TabRejected)
 									end
@@ -3633,35 +3635,35 @@ local function createATO_table(draftPriority)
 									--if draft.target.firepower.packmin == nil or available * draft.loadout.firepower >= (draft.target.firepower.packmin - 1) * draft.target.firepower.max + draft.target.firepower.min
 									local TabRejected = {}
 									TabRejected["sujet"]  = draft.id.." FIREPOWER du PACKAGE INSUFFISANT()if  available * draft.loadout.firepower >= (draft.target.firepower.packmin - 1) * draft.target.firepower.max"
-									TabRejected["cause"] = { [1] = available * draft.loadout.firepower, [2]  = (draft.target.firepower.packmin - 1) * draft.target.firepower.max, }
+									TabRejected["cause"] = { [1] = tostring(available * draft.loadout.firepower), [2]  = tostring((draft.target.firepower.packmin - 1) * draft.target.firepower.max), }
 									TabRejected["ligne"]  = debug.getinfo(1).currentline
 									table.insert(draft["rejected"], TabRejected)
 								end
 							else
 								local TabRejected = {}
 								TabRejected["sujet"]  = draft.id.." "..tostring(draft.type).." AVION DISPONIBLE INSUFFISANT "..tostring(draft.name).." ()if available * draft.loadout.firepower >= draft.target.firepower.min and draft.number * draft.loadout.firepower >= draft.target.firepower.min"
-								TabRejected["cause"] = { [1] = available * draft.loadout.firepower, [2]  = draft.target.firepower.min, }
+								TabRejected["cause"] = { [1] = tostring(available * draft.loadout.firepower), [2]  = tostring(draft.target.firepower.min), }
 								TabRejected["ligne"]  = debug.getinfo(1).currentline
 								table.insert(draft["rejected"], TabRejected)
 							end
 						else
 							local TabRejected = {}
 							TabRejected["sujet"]  = draft.id.." FIREPOWER INSUFFISANT (a augmenter dans loadout)if draft.target.firepower.max > 0 and draft.target.firepower.max >= draft.target.firepower.min"
-							TabRejected["cause"] = { [1] = draft.target.firepower.max, [2]  = draft.target.firepower.max, }
+							TabRejected["cause"] = { [1] = tostring(draft.target.firepower.max), [2]  = tostring(draft.target.firepower.max), }
 							TabRejected["ligne"]  = debug.getinfo(1).currentline
 							table.insert(draft["rejected"], TabRejected)
 						end
 					else
 						local TabRejected = {}
 						TabRejected["sujet"]  = draft.id.." MultiPACKAGE A 0 (?)if draft.multipack == nil or draft.multipack > 0 || target_name: "..tostring(draft.target_name).." || multipack: " ..tostring(draft.multipack)
-						TabRejected["cause"] = { [1] = draft.multipack, [2]  = draft.multipack, }
+						TabRejected["cause"] = { [1] = tostring(draft.multipack), [2]  = tostring(draft.multipack), }
 						TabRejected["ligne"]  = debug.getinfo(1).currentline
 						table.insert(draft["rejected"], TabRejected)
 					end
 				else
 					local TabRejected = {}
 					TabRejected["sujet"]  = draft.id.." MENACE TROP IMPORTANTE (descendre minscore ou diminuer Menace AA AS) draft.loadout.minscore <= draft.score"
-					TabRejected["cause"] = { [1] = draft.loadout.minscore, [2]  = draft.score, }
+					TabRejected["cause"] = { [1] = tostring(draft.loadout.minscore), [2]  = tostring(draft.score), }
 					TabRejected["ligne"]  = debug.getinfo(1).currentline
 					table.insert(draft["rejected"], TabRejected)
 				end
@@ -3721,7 +3723,8 @@ local function showAtoSort(newDraftByPriority, tablePrio)
 						" /threatsAir/ "..round(draft.threatsAir)..
 						" /Score/ " ..round(draft.score)..
 						" /Task/ "..draft.task..
-						" /Target/ "..tostring(draft.target_name)
+						" /Target/ "..tostring(draft.target_name)..
+						" /LoadName/ "..tostring(draft.loadout.name)
 						)
 				di = di +1
 				for _PlaneTask, PlaneTask in pairs(draft.support) do
@@ -3736,7 +3739,8 @@ local function showAtoSort(newDraftByPriority, tablePrio)
 									" /Type/ "..task.type..
 									" /Task/ "..task.task..
 									" /NbTotSupt/ " ..tostring(task.NbTotalSupport)..
-									" /Target/ "..task.target_name
+									" /Target/ "..task.target_name..
+									" /LoadName/ "..tostring(task.loadout.name)
 									)
 						end
 					end

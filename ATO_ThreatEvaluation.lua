@@ -1,13 +1,13 @@
 --To check oob_ground for threats and rate and store them in a table for later mission plannning
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  cleancode_g
+-- last modification:  Reglage_i
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_ThreatEvaluation.lua"] = "1.7.54"
+versionDCE["ATO_ThreatEvaluation.lua"] = "1.7.55"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_g				(g springCleaning)
 -- debug_b					(b EWR again)(a Freq EWR)
--- Reglage_k				(k: ZSU_57_2)(j station awacs position)(debug alti)(g SetFrequency only EWR)(f: add FPS-117 EWR)(e SEAD_offset CVN)(c: more info)(b: ajout des CVN_71/CVN_75 et SA-5)
+-- Reglage_i				(i: KS-19 & S-60)(k: ZSU_57_2)(j station awacs position)(debug alti)(g SetFrequency only EWR)(f: add FPS-117 EWR)(e SEAD_offset CVN)(c: more info)(b: ajout des CVN_71/CVN_75 et SA-5)
 -- modification M38_h		Check and Help CampaignMaker (h: loadout info)
 -- modification M34_r		change freq EWR + custom FrequenceRadio (qr debug units[1])(p LVHF)(o: debug boucle 2 unites)(lmn: debug)(k: utilise les indicatifs WEST pour EWR)
 -- modification M28_b		helicoptere see all SAM
@@ -90,7 +90,34 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			min_alt = 0,
 			max_alt = 2000,
 		}
-
+	elseif unit.type == "KS-19" then
+		threatentry = {
+			type = unit.type,
+			class = "AAA",
+			level = 1,
+			SEAD_offset = 0,
+			x = unit.x,
+			y = unit.y,
+			range = 8000,
+			night = false,
+			elevation = 3.5,
+			min_alt = 0,
+			max_alt = 8000,
+		}
+	elseif unit.type == "S-60_Type59_Artillery" then
+		threatentry = {
+			type = unit.type,
+			class = "AAA",
+			level = 1,
+			SEAD_offset = 0,
+			x = unit.x,
+			y = unit.y,
+			range = 4000,
+			night = false,
+			elevation = 3.5,
+			min_alt = 0,
+			max_alt = 4000,
+		}
 	elseif unit.type == "ZSU_57_2" then
 		threatentry = {
 			type = unit.type,

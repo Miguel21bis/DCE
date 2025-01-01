@@ -783,7 +783,7 @@ end
 
 for side, pack in pairs(ATO) do
 	for p = 1, #pack do
-		for role,flight in pairs(pack[p]) do
+		for role, flight in pairs(pack[p]) do
 			for f = 1, #flight do
 				-- print()
 				for u = 1, flight[f].number do
@@ -791,18 +791,37 @@ for side, pack in pairs(ATO) do
 					if not flight[f] or not flight[f].route[1] or not flight[f].route[1].eta then
 						_affiche(flight, "flight[f].route[1].eta")
 					end
+
+					local operating_hours = 86400
+					local time_to_next_mission = operating_hours / flight[f].loadout.sortie_rate	--time duration until aircraft can do the next mission based on its sortie rate
+						
+					-- if entry.loadout.tStation and #ATO[side][pack_n][role] == 1 then			--for a flight that has a station time and for the first flight in package
+					-- 	time_to_next_mission = time_to_next_mission - entry.loadout.tStation	--remove station time from time to next mission, because flight could airstart current mission at close to end of its station time
+					-- end
+
 					local flightStartTime_hour = (CampTotalTimeS / 3600) + (flight[f].route[1].eta / 3600)
 					local flightEndTime_hour = (CampTotalTimeS / 3600) + (flight[f].route[#flight[f].route].eta / 3600)
+
+					--temps calculé par sortie_rate:
+					local nextRate = flightStartTime_hour + time_to_next_mission 
+
+					-- --temps de remise en oeuvre:
+					-- local remiseEnOeuvre = math.random(1800, 14400)/3600
+					-- local downtime_hour = flightEndTime_hour + remiseEnOeuvre
+
 					--temps de remise en oeuvre:
-					local remiseEnOeuvre = math.random(1800, 14400)/3600
-					local downtime_hour = flightEndTime_hour + remiseEnOeuvre
+
+					local downtime_hour = flightEndTime_hour
+					if downtime_hour < nextRate then
+						downtime_hour = nextRate
+					end
 
 					-- print("AtoT Aircraft_availability ________________________ "..flight[f].name.." :flight "..f.."-"..u)
 					-- print("AtoT Aircraft_availability ___________________________ "..flight[f].name.." CampTotalTimeH "..CampTotalTimeS/3600)
 					-- print("AtoT Aircraft_availability ___________________________ "..flight[f].name.." flightStartTime_hour "..flightStartTime_hour)
 
 					if (flight[f].task == "Refueling" or flight[f].task == "AWACS") then
-						if (flightEndTime_hour + remiseEnOeuvre) < ((CampTotalTimeS  + mission_ini.idle_time_min)/ 3600 ) then
+						if downtime_hour < ((CampTotalTimeS  + mission_ini.idle_time_min)/ 3600 ) then
 							-- print("AtoT Aircraft_availability _______table.insert Refueling__AWACS_____ "..flight[f].name.." downtime_hour "..downtime_hour)
 							table.insert(Aircraft_availability[flight[f].name].unavailable, downtime_hour)
 						else
