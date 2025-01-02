@@ -4,7 +4,7 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.176"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.177"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
@@ -42625,7 +42625,7 @@ db_all_loadouts = {
 							CLSID = "{S530F}",
 						},
 						[4] = {
-							CLSID = "PTB-1200-F1",
+							["CLSID"] = "PTB-580G-F1",
 						},
 						[5] = {
 							CLSID = "{S530F}",
@@ -42669,7 +42669,7 @@ db_all_loadouts = {
 							CLSID = "{S530F}",
 						},
 						[4] = {
-							CLSID = "PTB-1200-F1",
+							["CLSID"] = "PTB-580G-F1",
 						},
 						[5] = {
 							CLSID = "{S530F}",
@@ -42711,7 +42711,7 @@ db_all_loadouts = {
 							CLSID = "{S530F}",
 						},
 						[4] = {
-							CLSID = "PTB-1200-F1",
+							["CLSID"] = "PTB-580G-F1",
 						},
 						[5] = {
 							CLSID = "{S530F}",
@@ -42805,7 +42805,7 @@ db_all_loadouts = {
 							CLSID = "{S530F}",
 						},
 						[4] = {
-							CLSID = "PTB-1200-F1",
+							["CLSID"] = "PTB-580G-F1",
 						},
 						[5] = {
 							CLSID = "{S530F}",
