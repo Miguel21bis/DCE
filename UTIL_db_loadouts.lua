@@ -1,14 +1,15 @@
 --Loadouts database
 -------------------------------------------------------------------------------------------------------
 ----OB----
- 
+
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.175"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.176"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
+-- V176 - update of speed/altitude of MirageF1/Mig21/Su17 etc... from IIW following new consumption script 
 -- V175 - tu-22D War over Chad Campaign
 -- V 174 - Su-17M4 (modification of certain speeds and altitudes)
 -- V 173 - code_loadout =  { "All" }, correction ! thanks BAMSE
@@ -42053,11 +42054,11 @@ db_all_loadouts = {
 				weaponType = "Bombs",
 				expend = "All",
 				night = true,
-				range = 300000,
+				range = 536000,
 				firepower = 1,
-				vCruise = 205,
+				vCruise = 220,
 				vAttack = 277.5,
-				hCruise = 8000,
+				hCruise = 7030.48,
 				hAttack = 50,
 				LDSD = true,
 				sortie_rate = 6,
@@ -42192,11 +42193,11 @@ db_all_loadouts = {
 				weaponType = "Bombs",
 				expend = "All",
 				day = true,
-				range = 300000,
+				range = 536000,
 				firepower = 1,
-				vCruise = 205,
+				vCruise = 220,
 				vAttack = 277.5,
-				hCruise = 8000,
+				hCruise = 7030.48,
 				hAttack = 50,
 				LDSD = true,
 				sortie_rate = 6,
@@ -42376,11 +42377,11 @@ db_all_loadouts = {
 				weaponType = "Bombs",
 				expend = "All",
 				day = true,
-				range = 300000,
+				range = 600000,
 				firepower = 1,
-				vCruise = 225,
-				vAttack = 277.5,
-				hCruise = 9100,
+				vCruise = 240,
+				vAttack = 260,
+				hCruise = 7669,
 				hAttack = 4572,
 				LDSD = true,
 				sortie_rate = 6,
@@ -42418,7 +42419,7 @@ db_all_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM", "Structure" },
-				code_loadout =  { "Crisis", "Revenge", "WOC80" },
+				code_loadout =  { "Revenge" },
 				weaponType = "Bombs",
 				expend = "All",
 				day = true,
@@ -42520,7 +42521,7 @@ db_all_loadouts = {
 				firepower = 1,
 				vCruise = 215,
 				vAttack = 277.5,
-				hCruise = 9100,
+				hCruise = 7030,
 				hAttack = 4572,
 				LDSD = true,
 				sortie_rate = 6,

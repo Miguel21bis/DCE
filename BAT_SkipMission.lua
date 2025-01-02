@@ -210,12 +210,15 @@ if input == "y" or input == "yes" then
 			print("Select :\n"..
 				"S (S)ingleplayer  \n"..
 				"D Singleplayer with (D)edicated Server \n"..
-				"DF Singleplayer with (D)edicated Server, (F)ull plane on Deck (Testing: Bug Catapult possible) \n"..
+				"DF Singleplayer with (D)edicated Server, (F)ull plane on Deck \n"..
 				"\n"..
 				"C (C)hange type of plane\n"..
 				"\n"..
 				"T Multiplayer by choice of (T)arget \n"..
-				"N multiplayer by choice of (N)ATO")
+				"N multiplayer by choice of (N)ATO".."\n"..
+				"\n"..
+				"O t(o)ols (tools for CampaignMaker and Coder)"
+			)
 
 			choix1 = io.stdin:read()
 			choix1 = string.lower(choix1)
@@ -408,14 +411,40 @@ if input == "y" or input == "yes" then
 			  SinglePlayer = true
 			  SingleWithDServer = true
 
-			-- modification M38.e Check and helps CampaignMaker
-			elseif choix1 == "w" then
-				UTIL_KillTarget = true
-			elseif choix1 == "w2" then
+			-- -- modification M38.e Check and helps CampaignMaker
+			-- elseif choix1 == "w" then
+			-- 	UTIL_KillTarget = true
+			elseif choix1 == "o" then
+
+				-- Ecran N°3 Selection nb of Flight
+				repeat
+					print("Tools menu: \n")
+					print("Select :\n"..
+					"A: DelGroup  \n"..
+					"B: fuelConsumption \n"..
+					"C: KillTarget \n"
+					)
+	
+					local choix2 = string.lower(io.stdin:read())
+	
+					if (choix2 == "a" or choix2 == "b" or choix2 == "c") then
+						if choix2 == "a" then
+							ArgTools = "DelGroup"
+						elseif choix2 == "b" then
+							ArgTools = "fuelConsumption"
+						elseif choix2 == "c" then
+							ArgTools = "KillTarget"
+						end
+					else
+						print("\nInvalid entry.\n")
+					end
+				until (choix2 == "a" or  choix2 == "b" or choix2 == "c")
+
+				print("ArgTools "..tostring(ArgTools))
+	
 				dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Divers.lua")
 				os.execute 'pause'
 				break
-			--M55_a		player can change the type of plane	
 			elseif choix1 == "c" then
 				dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ChangePlane.lua")
 			end
