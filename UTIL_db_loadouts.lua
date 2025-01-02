@@ -42418,7 +42418,7 @@ db_all_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM", "Structure" },
-				code_loadout =  { "Crisis", "Revenge", "WOC80" },
+				code_loadout =  { "Revenge" },
 				weaponType = "Bombs",
 				expend = "All",
 				day = true,
