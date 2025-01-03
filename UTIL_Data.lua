@@ -770,12 +770,22 @@ Data_divers = {
 	["MiG-23MLD"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-		vCruise = 183,
-		hCruise = 7547,
+		vCruise = 255,
+		hCruise = 7822,
 	},
 	["MiG-25PD"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
+		vCruise = 255,
+		hCruise = 7822,
+	},
+	
+	["MiG-25RBT"] = {
+		instrumentUnits = "russian",
+		EPLRS_Capacity = false,
+		flyingAlone = true,
+		vCruise = 183,
+		hCruise = 7547,
 	},
 	["MiG-27K"] = {
 		instrumentUnits = "russian",
@@ -922,11 +932,6 @@ Data_divers = {
 		EPLRS_Capacity = false,
 	},
 
-	["MiG-25RBT"] = {
-		instrumentUnits = "russian",
-		EPLRS_Capacity = false,
-		flyingAlone = true,
-	},
 	["Su-24MR"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
