@@ -339,8 +339,8 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
-		vCruise = 200,
-		hCruise = 7600,
+		vCruise = 230,
+		hCruise = 5112,
 	},
 	["vwv_crusader"] = 	{				--Mod
 		instrumentUnits = "imperial",
@@ -488,6 +488,8 @@ Data_divers = {
 		},
 		dataCartridge = true,
 		playable = true,
+		vCruise = 230,
+		hCruise = 7548,
 	},
 
 	["F-117A"] = 	{
@@ -532,8 +534,8 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
-		vCruise = 240,
-		hCruise = 7500,
+		vCruise = 200,
+		hCruise = 100,
 	},
 	["MB-339A"] = {
 		instrumentUnits = "imperial",
@@ -789,17 +791,23 @@ Data_divers = {
 	},
 	["MiG-27K"] = {
 		instrumentUnits = "russian",
-		EPLRS_Capacity = false,
+		EPLRS_Capacity = false,		
+		vCruise = 190,
+		hCruise = 6358,
 	},
 	["MiG-29A"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
+		vCruise = 213,
+		hCruise = 7011,
 	},
 	["MiG-29S"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
+		vCruise = 213,
+		hCruise = 7011,
 	},
 	["MiG-31"] = {
 		instrumentUnits = "russian",
@@ -814,8 +822,8 @@ Data_divers = {
 	["Su-24M"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-		vCruise = 240,
-		hCruise = 8000,
+		vCruise = 190,
+		hCruise = 6938,
 	},
 	["Su-25"] = {
 		instrumentUnits = "russian",
@@ -914,6 +922,8 @@ Data_divers = {
 	["KC135MPRS"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
+		vCruise = 185,
+		hCruise = 7345,
 	},
 	["KC-135"] = {
 		instrumentUnits = "imperial",
@@ -922,6 +932,8 @@ Data_divers = {
 			type = "Link16",
 			isDonnor = true,
 		},
+		vCruise = 185,
+		hCruise = 7345,
 	},
 	["KC130"] = {
 		instrumentUnits = "imperial",

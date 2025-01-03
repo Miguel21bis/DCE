@@ -533,6 +533,9 @@ elseif ArgTools == "fuelConsumption" then
 	for typePlane , loadouts in PairsByKeys(SelectedLoadout) do
 		for loadoutName , loadout in PairsByKeys(loadouts) do
 			-- io.write(i.." : ( "..type.." )("..loadoutName..")".."\n")
+			
+			print(typePlane.." ("..loadoutName..")")
+			
 
 			if not mission["coalition"]["red"]["country"][1]["plane"] then mission["coalition"]["red"]["country"][1]["plane"] = {} end
 			if not mission["coalition"]["red"]["country"][1]["plane"]["group"] then
@@ -549,13 +552,19 @@ elseif ArgTools == "fuelConsumption" then
 			if not loadout.hCruise then
 				if Data_divers and Data_divers[typePlane] and Data_divers[typePlane].hCruise then
 					loadout.hCruise = Data_divers[typePlane].hCruise
+					print("hCruise from Data_divers: " ..loadout.hCruise)
 				end
+			else
+				print("loadout.hCruise: " ..loadout.hCruise)
 			end
 			
 			if not loadout.vCruise then
 				if Data_divers and Data_divers[typePlane] and Data_divers[typePlane].vCruise then
 					loadout.vCruise = Data_divers[typePlane].vCruise
+					print("vCruise from Data_divers: " ..loadout.vCruise)
 				end
+			else
+				print("loadout.vCruise: " ..loadout.vCruise)
 			end
 
 
@@ -564,14 +573,17 @@ elseif ArgTools == "fuelConsumption" then
 				if nbGroup == 1 then
 					altTest = loadout.hCruise
 					viTest = loadout.vCruise
-				elseif nbGroup == 2 then
-					altTest = loadout.hCruise - 3048
 				else
 					viTest = loadout.vCruise - 25
 				end
 
 				for ai = 1, 10 do
-
+				
+					if nbGroup == 2 then
+						altTest = loadout.hCruise - 1640
+						if altTest < 100 then altTest = 100 end
+					end
+					
 					local init_x = mission.coalition.red.bullseye.x + (nbGroup * 500 )
 					local init_y = mission.coalition.red.bullseye.y + (nbGroup * 500 )
 
@@ -702,22 +714,27 @@ elseif ArgTools == "fuelConsumption" then
 					if nbGroup >= 2 then
 						viTest = viTest + 5
 					end
+					
+					-- if nbGroup > 2 then
+						-- altTest = altTest + 328.084
+					-- end
 
 					nbGroup = nbGroup + 1
 
+				end --for alti
+
+				if nbGroup > 2 then
+					altTest = altTest + 328.084
+				-- elseif nbGroup == 2 then
+					-- break
 				end
 
-				if nbGroup >= 2 then
-					altTest = altTest + 30.48
-				elseif nbGroup == 2 then
-					break
-				end
+			end -- for speed
 
-			end
-
-		--****************************************************************************
-		print("**************")
-		--****************************************************************************
+			--****************************************************************************
+			print("**************")
+			--****************************************************************************
+			
 			altTest = 3280.84
 			-- viTest
 
