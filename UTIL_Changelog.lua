@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.80.506"
+versionDCE["UTIL_Changelog.lua"] = "20.80.508"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.80.506"
+VersionDCE["UTIL_Changelog.txt"] = "20.80.508"
 --[[
 
 
@@ -10,11 +10,12 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.81.506:==
+==:20.81.508:==
+508 modified [loadout][consumption]	many loadouts updated to take fuel consumption into account. Consumption found thanks to new tool
+507 fixed [code_loadout]	loadout code is sometimes incorrectly recognized
 506 fixed [debriefing][stats]	stats for your own package are rarely displayed
 505 fixed [inter]	interceptors and CAPs ordered to leave a SAM zone no longer return to combat
 504 fixed [inter]	campaigns with dates prior to 1970 can freeze. Because of UNIX time
-
 
 503 fixed [helico]	it's sometimes impossible to get out of a damaged helicopter on some maps
 502 added [EWR]	text announcement of multiple environmental contacts, friend and foe alike. And only those detected by all EWRs and SAM radar. Activate in menu F10 (testing) (M81)

@@ -1012,12 +1012,13 @@ elseif ArgTools == "fuelConsumption" then
 	os.exit()
 
 elseif ArgTools == "KillTarget" then
+
 	--===================================================================================
 	-- Ecran N 0 Choix Num mission
 	print("Actuel Num de mission "..camp.mission)
 	print("Change number of mission or press \"Enter\".\n")				--ask for user confirmation
 
-	dofile("Active/camp_triggers.lua")
+	
 
 	local input, input2
 
@@ -1134,10 +1135,10 @@ elseif ArgTools == "KillTarget" then
 		end
 
 		print()
-		print("(dead)      : tue les targets")
-		print("(actif)     : active/desactive les targets, ajoute/supprime les véhicules/static associé")
-		print("(pourcentA) : desactive les TARGET en masse, par pourcentage")
-		print("(pourcentB) : desactive n'importe quel VEHICULE en random et en masse, par pourcentage")
+		print("(dead)      : kills the numbered taget")
+		print("(actif)     : activate/deactivate targets, add/delete vehicles/static associated")
+		print("(pourcentA) : eactivates TARGET in bulk, by percentage")
+		print("(pourcentB) : deactivates any VEHICLE in random and mass, by percentage")
 		print("(S)         : Stop script ")
 		print()
 
@@ -1153,13 +1154,13 @@ elseif ArgTools == "KillTarget" then
 			if inputString == "s" then
 				break
 			elseif inputString == "pourcenta" then
-				print(" entrer la valeur en pourcentage des groupes ROUGE au sol a désactiver (targetlist.blue)")
+				print(" enter the percentage value of RED ground groups to be deactivated (targetlist.blue)")
 				inputString = string.lower(io.stdin:read())
 				local pourcentDesactive = tonumber(inputString)
 				active = false
 				activeInactiveTarget(nil, active, pourcentDesactive, "blue")
 
-				print(" entrer la valeur en pourcentage des groupes BLUE au sol a désactiver (targetlist.red)")
+				print(" enter the percentage value of BLUE ground groups to be deactivated (targetlist.red)")
 				inputString = string.lower(io.stdin:read())
 				local pourcentDesactive = tonumber(inputString)
 				active = false
@@ -1168,13 +1169,13 @@ elseif ArgTools == "KillTarget" then
 				print("(S) Stop script ?")
 
 			elseif inputString == "pourcentb" then
-				print(" entrer la valeur en pourcentage des groupes BLUE au sol a désactiver")
+				print(" enter the percentage value of BLUE ground groups to be deactivated")
 				inputString = string.lower(io.stdin:read())
 				local pourcentDesactive = tonumber(inputString)
 				active = false
 				checkGroundFirst(  pourcentDesactive, "blue", active)
 
-				print(" entrer la valeur en pourcentage des groupes RED au sol a désactiver")
+				print(" enter the percentage value of RED ground groups to be deactivated")
 				inputString = string.lower(io.stdin:read())
 				local pourcentDesactive = tonumber(inputString)
 				active = false
@@ -1183,7 +1184,7 @@ elseif ArgTools == "KillTarget" then
 				print("(S) Stop script ?")
 
 			elseif inputString == "dead" then
-				print(" entrer le numero de la cible à Killer ")
+				print(" enter the number of the target to Killer ")
 
 				inputString = string.lower(io.stdin:read())
 
@@ -1215,9 +1216,9 @@ elseif ArgTools == "KillTarget" then
 
 
 			elseif inputString == "actif" then
-				print(" entrer le numero de la cible à activer/desactiver ")
-				print(" i: inactiver, a: activer ")
-				print(" 37i: par exemple: desactiver la cible 37 ")
+				print(" enter the number of the target to be activated/deactivated ")
+				print(" i: inactivate, a: activate ")
+				print(" 37i: for example: deactivate target 37 ")
 
 				inputString = string.lower(io.stdin:read())
 
@@ -1284,7 +1285,7 @@ elseif ArgTools == "KillTarget" then
 	until  input2 == "s"
 	io.write( "\n")
 
-	UTIL_KillTarget = false
+	ArgTools = ""
 end
 
 

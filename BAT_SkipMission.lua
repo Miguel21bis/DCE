@@ -442,8 +442,11 @@ if input == "y" or input == "yes" then
 
 				print("ArgTools "..tostring(ArgTools))
 	
-				dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Divers.lua")
-				os.execute 'pause'
+				if ArgTools ~= "KillTarget" then
+					dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Divers.lua")
+					os.execute 'pause'
+				end
+
 				break
 			elseif choix1 == "c" then
 				dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ChangePlane.lua")

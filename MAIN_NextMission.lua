@@ -680,8 +680,9 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
 
-if UTIL_KillTarget then
-	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_KillTarget.lua")
+if ArgTools == "KillTarget" then
+	-- dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_KillTarget.lua")
+	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Divers.lua")
 end
 
 dofile("../../../ScriptsMod."..versionPackageICM.."/ATO_ThreatEvaluation.lua")

@@ -414,8 +414,10 @@ repeat
 				end
 			until (choix2 == "a" or  choix2 == "b" or choix2 == "c")
 
-			dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Divers.lua")
-			os.execute 'pause'
+			if ArgTools ~= "KillTarget" then
+				dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Divers.lua")
+				os.execute 'pause'
+			end
 			break
 		elseif choix1 == "w3" then
 			dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_TestCercle.lua")

@@ -1,12 +1,12 @@
 --Various functions
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M80_a cleancode_g
+-- last modification: debug_j
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Functions.lua"] = "1.17.129"
+versionDCE["UTIL_Functions.lua"] = "1.17.130"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_g				(g springCleaning)					
 -- adjustment_o				(n loadout code)(m Disp_time)(l add AFAC task)(k FormatTime)(i add InsertBugList(txt))(h use IsWesternCountry)(fg: add Loadout tiers)(e todo)(d:CheckConfModMaster )(c: fire Playable_m from conf_mod)
--- debug_i					(i planeType)(h Tha\'lah)(g string.gsub(v, "\"", "\\\"" ))(f new generateId)(d UH to HF) Angle et Bearing des statics sur PA
+-- debug_j					(j code_loadou bestMatch)(i planeType)(h Tha\'lah)(g string.gsub(v, "\"", "\\\"" ))(f new generateId)(d UH to HF) Angle et Bearing des statics sur PA
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)
 -- modification M77_l		CG_ArtySpotter (kl ListSpotterAircraft)
@@ -1946,33 +1946,40 @@ local function buildsLoadout()
 	-- 	end
 	-- end
 
-	-- cherche le code a appliquer au loadout, pour charger le bon..loadout ^^
-	local infoBreak
-	if (not ( campConfMod and  campConfMod.code_loadout) and campaigns_code_loadout )then
-		campConfMod = {}
-		for codeName , names in pairs(campaigns_code_loadout) do
-			if type(names) == "table" then
-				for nameN, name in pairs(names) do
-					-- print("UtilF title "..camp.title.." string.find "..name)
 
-					if  camp.title == name then
-						campConfMod.code_loadout = codeName
-						infoBreak = true
-						break
-					elseif string.match(string.lower(camp.title), string.lower(name)) then
-						campConfMod.code_loadout = codeName
+	-- cherche le code a appliquer au loadout, pour charger le bon..loadout ^^
+	if (not ( campConfMod and  campConfMod.code_loadout) and campaigns_code_loadout )then 
+		local bestMatch = nil
+		local bestMatchCount = 0
+		campConfMod = {}
+
+		-- Parcourir la table des codes
+		for codeName, prefix_s in pairs(campaigns_code_loadout) do
+			if type(prefix_s) == "table" then
+				-- Plusieurs mots-clés à vérifier
+				local matchCount = 0
+				for _, prefix in ipairs(prefix_s) do
+					if string.find(string.lower(camp.title), string.lower(prefix)) then
+						matchCount = matchCount + 1
 					end
 				end
+				-- Mise à jour du meilleur match
+				if matchCount > bestMatchCount then
+					bestMatch = codeName
+					bestMatchCount = matchCount
+				end
 			else
-				if  camp.title == names or string.find(string.lower(camp.title) , string.lower(names)) then
-					campConfMod.code_loadout = codeName
-					break
+				-- Un seul mot-clé à vérifier
+				if string.find(string.lower(camp.title), string.lower(prefix_s)) then
+					if bestMatchCount < 1 then -- Priorité pour les correspondances plus spécifiques
+						bestMatch = codeName
+						bestMatchCount = 1
+					end
 				end
 			end
-			if infoBreak then
-				break
-			end
 		end
+
+		campConfMod.code_loadout = bestMatch
 	end
 
 	if not campConfMod or not campConfMod.code_loadout or campConfMod.code_loadout == nil then
@@ -1980,6 +1987,9 @@ local function buildsLoadout()
 			code_loadout = "all",
 		}
 	end
+
+	-- print("UtilF Z code_loadout "..campConfMod.code_loadout)
+	-- os.execute "pause"
 
 	if Debug.debug then
 		print("UtilF camp.title |"..camp.title.."| campConfMod.code_loadout |"..campConfMod.code_loadout )

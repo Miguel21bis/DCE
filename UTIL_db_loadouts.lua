@@ -37124,7 +37124,6 @@ db_all_loadouts = {
 				adverseWeather = true,
 				firepower = 1.5,
 				range = 504000,
-				firepower = 1,
 				vCruise = 213,
 				vAttack = 213,
 				hCruise = 7011,
