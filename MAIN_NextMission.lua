@@ -16,7 +16,7 @@ versionDCE["MAIN_NextMission.lua"] = "1.35.212"
 -- modification M64_b		adds elements of a new base_mission (b: update Type & groupId)
 -- modification M63_a		compatible Datacard Generator or CombatFlite
 -- modification M62_a		allows you to use third party files that Data information without being overwritten by central information updates
--- modification M61_g		SAR (g EctedPilotFrequency)(c theatre)
+-- modification M61_g		SAR (g EjectedPilotFrequency)(c theatre)
 -- modification M60_d		add CTLD (d always beacon.ogg)(c load_CTLD option)(b debug)
 -- Psyko modification M59_a			silences the tower
 -- Norman99 modification M57_a		Simple Fuel Check Script
@@ -453,7 +453,8 @@ camp.debug = Debug.debug
 -- camp.makeCampaign = Debug.makeCampaign
 camp.debugInGamePopup = Debug.debugInGamePopup
 camp.theatre = NameTheatreLower
-camp.EctedPilotFrequency = EctedPilotFrequency
+camp.EjectedPilotFrequency = EjectedPilotFrequency
+camp.EWR_frequency = ewr
 
 camp.spotter = mission_ini.spotter
 camp.spotterAircraft = ListSpotterAircraft()

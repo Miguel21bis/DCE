@@ -466,11 +466,11 @@ function eventHandlerDCE:onEvent(event)
 				-- }
 
 				if event.initiator and event.initiator:getPlayerName()	then
-					env.info( "DCE_EJECT EventT :radioTransmission frequency A  "..tostring(camp.EctedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..PilotEjection.initiator))
+					env.info( "DCE_EJECT EventT :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..PilotEjection.initiator))
 
-					trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', PilotEjection, 0, true, camp.EctedPilotFrequency[side].GuardEjection, 1, 'GuardEjection'..PilotEjection.initiator)
+					trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', PilotEjection, 0, true, camp.EjectedPilotFrequency[side].GuardEjection, 1, 'GuardEjection'..PilotEjection.initiator)
 
-					env.info( "DCE_EJECT EventT :radioTransmission frequency B  "..tostring(camp.EctedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..PilotEjection.initiator))
+					env.info( "DCE_EJECT EventT :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..PilotEjection.initiator))
 				end
 
 				local ejectionSeatTemp = {

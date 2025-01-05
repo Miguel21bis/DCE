@@ -271,26 +271,38 @@ camp.player.pack = camp.player.package[camp.player.pack_n]
 
 for roleName, role in pairs(camp.player.pack) do														--iterate through roles in player package
 	for flightN, flight in pairs(role) do																--iterate through flights
-		for n = 1, flight.number do
-			-- local unitname = "Pack " .. camp.player.pack_n .. " - " .. flight.name .. " - " .. flight.task .. " " .. flightN .. "-" .. n
+		-- for n = 1, flight.number do
 
-			-- print("DebriefSE roleName "..tostring(roleName).." flightN "..flightN)
+		-- print("DebriefSE roleName "..tostring(roleName).." flightN: "..flightN)
+		-- print("flight: "..tostring(flight))
 
-			if not flight.units then
-				_affiche(flight, 'flight')
+		if type(flight) == "table" and flight.units then
+
+			for unitN, unit in pairs(flight.units) do	
+
+				-- local unitname = "Pack " .. camp.player.pack_n .. " - " .. flight.name .. " - " .. flight.task .. " " .. flightN .. "-" .. n
+
+				-- print(" ............................              DebriefSE roleName "..tostring(roleName).." flightN "..flightN.." unit.name: "..unit.name)
+
+				-- if not flight.units or not flight.units[n] or not flight.units[n].name then
+				-- 	_affiche(flight, 'flight')
+				-- end
+
+				-- local unitname = unit.name
+
+				packstats[unit.name] = {
+					kills_air = 0,
+					kills_ground = 0,
+					kills_ship = 0,
+					lost = 0,
+				}
 			end
-
-			local unitname = flight.units[n].name
-
-			packstats[unitname] = {
-				kills_air = 0,
-				kills_ground = 0,
-				kills_ship = 0,
-				lost = 0,
-			}
 		end
+
 	end
 end
+
+
 -- end
 --function to check if a kill loss is attributed to the player package
 local function AddPackstats(unitname, event)

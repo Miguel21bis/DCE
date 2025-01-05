@@ -177,31 +177,27 @@ do
 			for flight_n, flight in ipairs(role) do
 				-- print("flight_n "..flight_n)
 				for n = 1, flight.number do
-					-- local unit_name = "Pack " .. camp.player.pack_n .. " - " .. flight.name .. " - " .. flight.task .. " " .. flight_n .. "-" .. n
-					-- print("unit_name "..unit_name.." kills_air "..packstats[unit_name].kills_air)
-					local unit_name = flight.units[n].name
-					local callsign = string.sub(flight.callsign, 1, -2) .. n
-					table.insert(entries[1].values, callsign)
-					table.insert(entries[2].values, ReplaceTypeName(flight.type))
-					table.insert(entries[3].values, flight.task)
-					table.insert(entries[4].values, packstats[unit_name].kills_air)
-					table.insert(entries[5].values, packstats[unit_name].kills_ground)
-					table.insert(entries[6].values, packstats[unit_name].kills_ship)
-					table.insert(entries[7].values, packstats[unit_name].lost)
+					if flight.units and flight.units[n] then
+						-- local unit_name = "Pack " .. camp.player.pack_n .. " - " .. flight.name .. " - " .. flight.task .. " " .. flight_n .. "-" .. n
+						-- print("unit_name "..unit_name.." kills_air "..packstats[unit_name].kills_air)
+						local unit_name = flight.units[n].name
+						local callsign = string.sub(flight.callsign, 1, -2) .. n
+						table.insert(entries[1].values, callsign)
+						table.insert(entries[2].values, ReplaceTypeName(flight.type))
+						table.insert(entries[3].values, flight.task)
+						table.insert(entries[4].values, packstats[unit_name].kills_air)
+						table.insert(entries[5].values, packstats[unit_name].kills_ground)
+						table.insert(entries[6].values, packstats[unit_name].kills_ship)
+						table.insert(entries[7].values, packstats[unit_name].lost)
 
-					if flight.units[n].skill == "Player" then
-						table.insert(entries[8].values, "(Player)")
-					elseif flight.units[n].skill == "Client" then
-						table.insert(entries[8].values, "(Client)")
-					else
-						table.insert(entries[8].values, "")
+						if flight.units[n].skill == "Player" then
+							table.insert(entries[8].values, "(Player)")
+						elseif flight.units[n].skill == "Client" then
+							table.insert(entries[8].values, "(Client)")
+						else
+							table.insert(entries[8].values, "")
+						end
 					end
-
-					-- if flight.player and n == 1 then
-					-- 	table.insert(entries[8].values, "(Player)")
-					-- else
-					-- 	table.insert(entries[8].values, "")
-					-- end
 				end
 			end
 		end

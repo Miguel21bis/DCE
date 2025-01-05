@@ -58,7 +58,7 @@ Data_configuration = {
 }
 
 
-EctedPilotFrequency = {
+EjectedPilotFrequency = {
 	blue = {
 		GuardEjection = 243000000,			--frequency used for automatic triggering of the radio beacon during ejection (blue side usually 243)
 		radioBeacon = 121500000,			--think you need a compatible helicopter to listen and follow the frequency (preset Chanel 4 R-852)

@@ -1454,10 +1454,10 @@ function LoopManagedRadioTransmission()
 						z = PosEjectedPilot.z,
 					}
 
-					trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', PilotVec3, 0, true, camp.EctedPilotFrequency[ejectedPilot.side].radioBeacon, 1, 'radioBeacon_'..ejectedPilot.name)
+					trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', PilotVec3, 0, true, camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon, 1, 'radioBeacon_'..ejectedPilot.name)
 					ejectedPilot.radio_on = true
 
-					env.info( "DCE_SAR:LoopManagedRadioTransmission E frequency  "..tostring(camp.EctedPilotFrequency[ejectedPilot.side].radioBeacon).." MGRS_Chute: "..tostring(ejectedPilot.MGRS_Chute).." |MGRS_Chute_10KM: "..tostring(ejectedPilot.MGRS_Chute_10KM).." "..tostring('radio_'..ejectedPilot.name))
+					env.info( "DCE_SAR:LoopManagedRadioTransmission E frequency  "..tostring(camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon).." MGRS_Chute: "..tostring(ejectedPilot.MGRS_Chute).." |MGRS_Chute_10KM: "..tostring(ejectedPilot.MGRS_Chute_10KM).." "..tostring('radio_'..ejectedPilot.name))
 
 				end
 			end
@@ -1946,9 +1946,9 @@ function GetOutGDFM(argGid)
 							local side = coalitionIdNumeric[tonumber(damaged.initiatorSIDE)]
 
 							if damaged.unit:getPlayerName()	then
-								env.info( "DCE_getOut EventT :radioTransmission frequency A  "..tostring(camp.EctedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..damaged.initiator))
-								trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', damaged, 0, true, camp.EctedPilotFrequency[side].GuardEjection, 1, 'GuardEjection'..damaged.initiator)
-								env.info( "DCE_getOut EventT :radioTransmission frequency B  "..tostring(camp.EctedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..damaged.initiator))
+								env.info( "DCE_getOut EventT :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..damaged.initiator))
+								trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', damaged, 0, true, camp.EjectedPilotFrequency[side].GuardEjection, 1, 'GuardEjection'..damaged.initiator)
+								env.info( "DCE_getOut EventT :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..damaged.initiator))
 							end
 
 							damaged.x = damaged.crashPoint.x

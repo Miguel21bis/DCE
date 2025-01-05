@@ -433,6 +433,11 @@ for side, pack in pairs(ATO) do
 					speed = vCruise												-- ATO_T_Debug01 vCruise by default 
 
 					if flight[f].route[w].id == "Station" then					--if WP is the end point of an orbit station
+						
+						if not flight[f].loadout.tStation then
+							flight[f].loadout.tStation = 3600
+						end
+
 						eta = flight[f].route[w - 1].eta + flight[f].loadout.tStation	--WP ETA is orbit start WP ETA plus on station time
 						if eta > mission_ini.dawn and flight[f].loadout.day == false then	--if ETA after dawn and not day capable
 							eta = mission_ini.dawn										--make dawn the orbit end ETA
@@ -626,10 +631,21 @@ for side, pack in pairs(ATO) do
 				--print(tempTxt)
 				debugTxt_AtoT = debugTxt_AtoT ..tempTxt.."\n"
 
+
 				if flight[f].loadout.vCruise then vCruise = flight[f].loadout.vCruise end
 				if flight[f].loadout.vAttack then vAttack = flight[f].loadout.vAttack end
 
 				for w = 1, #flight[f].route do													--iterate through all waypoints
+					
+				
+					if not flight[f].route[w].eta then 
+						-- print(debugTxt_AtoT)
+						-- _affiche(flight)
+
+						flight[f].route[w].eta = 0
+					end
+	
+				
 					if flight[f].route[w].id == "Station" and flight[f].route[w].eta + player_start_shift < 0 then		--Start or end of a station would be shifted before mission start
 						flight[f].route[w].eta = 1												--adjust WP eta to mission start
 					else

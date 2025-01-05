@@ -32,22 +32,24 @@ end
 
 env.info("ACRF10 version of Lua _VERSION "..tostring(_VERSION))
 
-for k, v in pairs(AI.Option.Air.val) do
-    env.info(k .. " = " .. tostring(v))
-end
+-- for k, v in pairs(AI.Option.Air.val) do
+--     env.info(k .. " = " .. tostring(v))
+-- end
 
-env.info("Constante REACTION_ON_THREAT : " .. tostring(AI.Option.Air.id.REACTION_ON_THREAT))
-env.info("Valeur EVADE_FIRE : " .. tostring(AI.Option.Air.val.EVADE_FIRE))
-env.info("Constante AAA_EVADE_FIRE : " .. tostring(AI.Option.Air.val.REACTION_ON_THREAT.AAA_EVADE_FIRE))
-env.info("Valeur EVADE_FIRE : " ..        tostring(AI.Option.Air.val.REACTION_ON_THREAT.EVADE_FIRE))
-env.info("ACRF10 start loading ACRF10 script ")
+-- env.info("Constante REACTION_ON_THREAT : " .. tostring(AI.Option.Air.id.REACTION_ON_THREAT))
+-- env.info("Valeur EVADE_FIRE : " .. tostring(AI.Option.Air.val.EVADE_FIRE))
+-- env.info("Constante AAA_EVADE_FIRE : " .. tostring(AI.Option.Air.val.REACTION_ON_THREAT.AAA_EVADE_FIRE))
+-- env.info("Valeur EVADE_FIRE : " ..        tostring(AI.Option.Air.val.REACTION_ON_THREAT.EVADE_FIRE))
+-- env.info("ACRF10 start loading ACRF10 script ")
 
-env.info("Object.Category.UNIT : " .. tostring(Object.Category.UNIT))
-env.info("Object.Category.WEAPON : " ..  tostring(Object.Category.WEAPON))
-env.info("Object.Category.STATIC : " .. tostring(Object.Category.STATIC))
-env.info("Object.Category.BASE : " ..  tostring(Object.Category.BASE))
-env.info("Object.Category.SCENERY : " .. tostring(Object.Category.SCENERY))
-env.info("Object.Category.Cargo : " ..  tostring(Object.Category.Cargo))
+-- env.info("Object.Category.UNIT : " .. tostring(Object.Category.UNIT))
+-- env.info("Object.Category.WEAPON : " ..  tostring(Object.Category.WEAPON))
+-- env.info("Object.Category.STATIC : " .. tostring(Object.Category.STATIC))
+-- env.info("Object.Category.BASE : " ..  tostring(Object.Category.BASE))
+-- env.info("Object.Category.SCENERY : " .. tostring(Object.Category.SCENERY))
+-- env.info("Object.Category.Cargo : " ..  tostring(Object.Category.Cargo))
+
+SRSAudio = require('SRSAudio') -- Importer le module audio de SR
 
 
 LastInjectFlightPlan = {}																--garde les derniers plan de vol injecté
@@ -1736,7 +1738,7 @@ local function activateRadioBeacon(arguments)
 
 	local pilEjectObj = Unit.getByName(ejectedPilot.name)
 
-	if pilEjectObj and camp.EctedPilotFrequency and camp.EctedPilotFrequency[ejectedPilot.side] then
+	if pilEjectObj and camp.EjectedPilotFrequency and camp.EjectedPilotFrequency[ejectedPilot.side] then
 
 		env.info( "AddCRF10:activateRadioBeacon  pilEjectObj:isExist "..tostring(pilEjectObj:isExist()))
 
@@ -1745,9 +1747,9 @@ local function activateRadioBeacon(arguments)
 
 			env.info( "AddCRF10:activateRadioBeacon  pilEjectPos.y "..tostring(pilEjectPos.y))
 
-			trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', ejectedPilot.position, 0, true, camp.EctedPilotFrequency[ejectedPilot.side].radioBeacon, 1, 'radioBeacon_'..ejectedPilot.name)
+			trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', ejectedPilot.position, 0, true, camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon, 1, 'radioBeacon_'..ejectedPilot.name)
 
-			local freqShow = camp.EctedPilotFrequency[ejectedPilot.side].radioBeacon / 1000000
+			local freqShow = camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon / 1000000
 			trigger.action.outTextForGroup(gpGid, "activate RadioBeacon on : "..freqShow, 45 , true)
 		end
 	else
@@ -3006,18 +3008,43 @@ end
 --test EWR (start)
 --recupere les data de tous les aéronefs
 --////////////////////////////////////////////////////////////////////////////////////////////
+local function EWR_speaking(arg)
 
-local function speakEWR()
+	trigger.action.outTextForUnit(arg[1], arg[2], 20, false)
+end
+
+
+-- Fonction pour envoyer un texte transformé en audio via TTS
+-- local function sendTTSMessage(freq, modulation, text)
+local function sendTTSMessage(arg)
+
+	local freq, modulation, text = arg[1], arg[2],arg[3]
+	
+	local duration = SRSAudio.transmitTTS( -- Utilise la fonction TTS de SRS
+		freq,        -- Fréquence en Hz
+		modulation,  -- "AM" ou "FM"
+		text         -- Texte à convertir en audio
+	)
+	if duration then
+		trigger.action.outText("DCE_sendTTSMessage : Message TTS diffusé sur " .. freq / 1000000 .. " MHz (durée: " .. duration .. " s)", 10)
+	else
+		trigger.action.outText("DCE_sendTTSMessage Erreur lors de la diffusion TTS. freq: "..tostring(freq), 10)
+		trigger.action.outText("DCE_sendTTSMessage Erreur lors de la diffusion TTS. modulation: "..tostring(modulation), 10)
+		trigger.action.outText("DCE_sendTTSMessage Erreur lors de la diffusion TTS. text: "..tostring(text), 10)
+	end
+end
+
+local function EWR_magic()
 	local target_tracks = {
 		["blue"] = {},
 		["red"] = {}
 	}
 
 	--EWR target detection
-	ErrorMsg = "DCE_speakEWR target detection."																--Error message in case follow on code fails
+	ErrorMsg = "DCE_EWR_magic target detection."																--Error message in case follow on code fails
 	for ewr_side, ewr_table in pairs(GCI.EWR) do													--iterate through sides in EWR table
 		for ewr_name, bool in pairs(ewr_table) do													--iterate through EWR radars	
-			ErrorMsg = "DCE_speakEWR target detection: "	.. ewr_name											--Error message in case follow on code fails
+			ErrorMsg = "DCE_EWR_magic target detection: "	.. ewr_name											--Error message in case follow on code fails
 			local unit = Unit.getByName(ewr_name)													--get EWR unit
 			if unit then																			--if unit exists
 				local ctr = unit:getGroup():getController()											--get unit controller
@@ -3086,16 +3113,13 @@ local function speakEWR()
 		end
 	end
 
-	-- _affiche(target_tracks, "DCE_speakEWR target_tracks")
-
-
 
 	--##############################################################
 	--regroupement des tracks, pour eviter d'en avoir de trop
 	--################################################################
 	local groupedTracks = {} -- Table pour stocker les groupes regroupés
-	local groupingDistance = 3000 -- Distance maximale en mètres
-	local altitudeTolerance = 1500 -- Tolérance d'altitude en mètres
+	local groupingDistance = 4000 -- Distance maximale en mètres
+	local altitudeTolerance = 2000 -- Tolérance d'altitude en mètres
 	local orientationTolerance = 180 -- Tolérance de cap en degrés
 
 	-- Fonction pour calculer la distance entre deux points 3D
@@ -3225,60 +3249,27 @@ local function speakEWR()
 	local categories = {Group.Category.AIRPLANE, Group.Category.HELICOPTER}
 	local locTimer = timer.getTime()
 
-	-- Itérer sur chaque camp pour trouver les joueurs
-	for _, sideNum in ipairs(coalitions) do
-		-- Itérer sur chaque catégorie
-		for categoryN, category in ipairs(categories) do
-			-- env.info("DCE_EWR_Magic A categoryN: "..tostring(categoryN))
 
+	for _, sideNum in ipairs(coalitions) do
+		for categoryN, category in ipairs(categories) do
 			-- Obtenir les groupes pour le camp et la catégorie
 			local groups = coalition.getGroups(sideNum, category)
 
 			for gpN, gp in pairs(groups) do
-				-- env.info("DCE_EWR_Magic B categoryN: "..tostring(categoryN) .." gpN: "..tostring(gpN))
-				-- _affiche(gp, "DCE_EWR_Magic B2 gp")
-
-				-- local gpGid = gp:getID()
-				-- env.info("DCE_EWR_Magic B3 categoryN: "..tostring(categoryN) .." gpN: "..tostring(gpN).." gpGid: "..tostring(gpGid))
-
-
 				local wingman = gp:getUnits()
-				-- _affiche(wingman, "DCE_EWR_Magic B4 wingman")
-
 				for winmanN, _unit in ipairs(wingman) do
-					-- env.info("DCE_EWR_Magic C winmanN: "..tostring(winmanN))
-
 					if _unit and _unit:isActive()  then --and _unit:inAir()
 						local playerName =  _unit:getPlayerName()
 						local unitName = _unit:getName()
 
-						-- env.info("DCE_EWR_Magic D categoryN: "..tostring(categoryN) .." gpN: "..tostring(gpN).." gpGid: "..tostring(gpGid).." unitName: "..tostring(unitName))
-
-						-- local unitId = _unit:getID()
-
-						-- local passPlayer = false
 						local trucName
 						if playerName and EWR_optionPlayer[playerName] and EWR_optionPlayer[playerName].EWR_on then
-							-- passPlayer = true
 							trucName = playerName
 						end
 
 						if unitName and EWR_optionPlayer[unitName] and EWR_optionPlayer[unitName].EWR_on then
-							-- passPlayer = true
 							trucName = unitName
 						end
-
-						-- env.info("DCE_EWR_Magic D1 categoryN: "..tostring(categoryN) .." gpN: "..tostring(gpN).." gpGid: "..tostring(gpGid).." !trucName!: "..tostring(trucName).." unitId: "..tostring(unitId))
-
-						-- if EWR_optionPlayer[trucName] then
-						-- 	env.info("DCE_EWR_Magic D2 lasTime: "..tostring(EWR_optionPlayer[trucName]["lasTime"]).." locTimer: "..tostring(locTimer))
-						-- end
-
-						-- pour eviter des calculs inutil, une fois qu'on a les joueurs on cherche la distance pour reclasser la table en fonction de ça
-						-- a faire pour chaque joueur, afin que l'information qui lui soit donné correspondent
-
-						-- if playerName and EWR_optionPlayer[playerName].EWR_on then
-						-- if passPlayer and ( not EWR_optionPlayer[trucName]["lasTime"] or EWR_optionPlayer[trucName]["lasTime"] +15  < locTimer) then
 
 						if EWR_optionPlayer[trucName] and ( not EWR_optionPlayer[trucName]["lasTime"] or EWR_optionPlayer[trucName]["lasTime"] +15  < locTimer) then
 
@@ -3309,8 +3300,6 @@ local function speakEWR()
 
 							local i = 1
 							for trackN, target in pairs(targetTracks_km_thisPlayer) do
-								-- env.info("DCE_EWR_Magic E locTimer: "..tostring(locTimer) .." trackN: "..tostring(trackN).." playerId: "..tostring(playerId))
-
 								-- Conversion des distances
 								local distanceKm = math.floor(target.distance / 1000) -- En kilomètres
 								local distanceNm = roundTo2NmUp(target.distance / 1852) -- En miles nautiques, arrondi à 2 Nm près
@@ -3342,13 +3331,24 @@ local function speakEWR()
 								local catTarget = "aircraft"
 								if target.category and target.category == Unit.Category.HELICOPTER  then
 									catTarget = "helicopter"
+									aspect = ""
 								end
 
 
 								-- Affichage si la distance est dans les limites
 								if (distanceKm > 2 and distanceKm <= 150) or (distanceKm <= 2 and status == "ENEMY" )   then
-									trigger.action.outTextForUnit(playerId, target.qte.." "..status.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft", 20, false)
-									-- env.info("i: "..i.." playerId: "..playerId.." locTimer: ".. locTimer.." || "..target.qte.." "..status.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft")
+									
+									local freq = camp.EWR_frequency[coalitionIdNumeric[sideNum]][1]
+									local speak = target.qte.." "..status.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft"
+									
+									-- trigger.action.outTextForUnit(playerId, speak, 20, false)
+									-- env.info("i: "..i.." playerId: "..playerId.." locTimer: ".. locTimer.." || "..speak)
+									
+									timer.scheduleFunction(EWR_speaking, {playerId, speak}, timer.getTime() + (i*2))
+
+									timer.scheduleFunction(sendTTSMessage, {freq, "AM", speak}, timer.getTime() + (i*2))
+
+									
 									EWR_optionPlayer[trucName]["lasTime"] = locTimer
 									i = i + 1
 									if i > 7 then break end
@@ -3363,7 +3363,7 @@ local function speakEWR()
 		end
 	end
 
-	return timer.getTime() + 30
+	return timer.getTime() + 60
 
 end
 
@@ -3588,7 +3588,7 @@ timer.scheduleFunction(avoidArea, nil, timer.getTime() + 5)
 
 timer.scheduleFunction(getLL_TargetPosition, nil, timer.getTime() + 20)
 
-timer.scheduleFunction(speakEWR, nil, timer.getTime() + 30)
+timer.scheduleFunction(EWR_magic, nil, timer.getTime() + 30)
 
 timer.scheduleFunction(setErrorMessageBoxShedul, nil, timer.getTime() + 30)
 
