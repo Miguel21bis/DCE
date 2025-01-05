@@ -49,7 +49,7 @@ env.info("ACRF10 version of Lua _VERSION "..tostring(_VERSION))
 -- env.info("Object.Category.SCENERY : " .. tostring(Object.Category.SCENERY))
 -- env.info("Object.Category.Cargo : " ..  tostring(Object.Category.Cargo))
 
-SRSAudio = require('SRSAudio') -- Importer le module audio de SR
+-- SRSAudio = require('SRSAudio') -- Importer le module audio de SR
 
 
 LastInjectFlightPlan = {}																--garde les derniers plan de vol injecté
@@ -3338,7 +3338,7 @@ local function EWR_magic()
 								-- Affichage si la distance est dans les limites
 								if (distanceKm > 2 and distanceKm <= 150) or (distanceKm <= 2 and status == "ENEMY" )   then
 									
-									local freq = camp.EWR_frequency[coalitionIdNumeric[sideNum]][1]
+									-- local freq = camp.EWR_frequency[coalitionIdNumeric[sideNum]][1]
 									local speak = target.qte.." "..status.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft"
 									
 									-- trigger.action.outTextForUnit(playerId, speak, 20, false)
@@ -3346,7 +3346,7 @@ local function EWR_magic()
 									
 									timer.scheduleFunction(EWR_speaking, {playerId, speak}, timer.getTime() + (i*2))
 
-									timer.scheduleFunction(sendTTSMessage, {freq, "AM", speak}, timer.getTime() + (i*2))
+									-- timer.scheduleFunction(sendTTSMessage, {freq, "AM", speak}, timer.getTime() + (i*2))
 
 									
 									EWR_optionPlayer[trucName]["lasTime"] = locTimer
