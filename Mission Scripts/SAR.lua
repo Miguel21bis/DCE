@@ -1840,16 +1840,27 @@ local function spawnWreck(element)
 		hidden = false
 	end
 
+	local dead = true
+	local rate = 50
+
+	if element.rate then
+		rate = element.rate
+
+		if element.rate >= 80 then
+			dead = false
+		end
+	end
+
 	local staticObj = {
 		["heading"] = 0,
 		-- ["shape_name"] = "stolovaya",
 		["type"] = tostring(element.aircraftType),
-		["rate"] = 50,
+		["rate"] = rate,
 		["name"] = tostring(wreckName),
 		-- ["category"] = "Helicopters",
 		["y"] = tonumber(element.y2d),
 		["x"] = tonumber(element.x2d),
-		["dead"] = true,
+		["dead"] = dead,
 	}
 
 	staticObj.category = DCS_CategoryById[element.categoryId]
@@ -1860,9 +1871,9 @@ local function spawnWreck(element)
 
 	if camp.debug then
 		local TimeNow = timer.getTime() + 5
-		local logStr = "AddstaticObj = " .. TableSerialization(staticObj, 0)
+		local logStr = "AddstaticObjWreck = " .. TableSerialization(staticObj, 0)
 		local ElementNameClean = element.name:gsub('[%p%c%s]', '_')
-		local logFile = io.open(PathDCE.."Debug\\".."wreckSpawn"..ElementNameClean.."_"..TimeNow.."_".. ".lua", "w")
+		local logFile = io.open(PathDCE.."Debug\\".."spawnWreck"..ElementNameClean.."_"..TimeNow.."_".. ".lua", "w")
 		if logFile then
 			logFile:write(logStr)
 			logFile:close()
@@ -1875,7 +1886,7 @@ local function spawnWreck(element)
 
 end
 
-function GetOutGDFM(argGid)
+function GetOutGDFM(pName)
 	-- env.info( "DCE_getOut A scheduleFunction GetOutGDFM ")
 
 	-- local eventData = {
@@ -1890,62 +1901,159 @@ function GetOutGDFM(argGid)
 	-- 	gpGid = gpGid,
 	-- }
 
-	--table.insert(GroundDamagedFlyingMachine[event.initiator.id_], eventData)
+	if pName then
+	-- Définir les camps et catégories à parcourir
+	local coalitions = {coalition.side.BLUE, coalition.side.RED}
+	local categories = {Group.Category.AIRPLANE, Group.Category.HELICOPTER}
+	local locTimer = timer.getTime()
 
-	for id_, key in pairs(GroundDamagedFlyingMachine) do
 
-		for occurenceN = #key, 1, -1 do
-			env.info( "DCE_getOut B1 id_ "..tostring(id_).." occurenceN "..tostring(occurenceN))
+		for _, sideNum in ipairs(coalitions) do
+			for categoryN, category in ipairs(categories) do
+				-- Obtenir les groupes pour le camp et la catégorie
+				local groups = coalition.getGroups(sideNum, category)
 
-			local damaged = key[occurenceN]
-			--si on a un argument, on le test et continue, sinon on continue sans argument
-			-- permet de passer la fonction aussi via la function F10 des joueurs
+				for gpN, gp in pairs(groups) do
+					local wingman = gp:getUnits()
+					for winmanN, _unit in ipairs(wingman) do
+						if _unit and _unit:isActive()  then --and _unit:inAir()
+							local playerName =  _unit:getPlayerName()
+							local unitName = _unit:getName()
 
-			-- permet de passer la fonction aussi via la function F10 des joueurs
-			--donc si la demande vient d'un joueur, et si l'enregistrement n'est pas un joueur, on passe
+							local trucName
+							if playerName == pName then
+						
+								local player = _unit
+								local playerId = Unit.getID(player)
+								local playerPoint = player:getPoint()				--get target point
 
-			env.info( "DCE_getOut B2 id_ "..tostring(id_).." damaged.gpGid "..tostring(damaged.gpGid))
+								local countryId = player:getCountry()
+								local initiatorSIDE = player:getCoalition()
+								local side = coalitionIdNumeric[tonumber(initiatorSIDE)]
 
-			if damaged.gpGid then
-				if (argGid and argGid == damaged.gpGid and damaged.isPlayer) or ((argGid == nil or argGid  == false) and not damaged.isPlayer)  then
+
+								local infoPlayer = {
+									initiatorPilotName = playerName,
+									unit = player,
+									unitName = unitName,
+									aircraftType = player:getTypeName(),
+									Coalition = player:getCoalition(),
+									initiatorMissionID = player:getID(),
+									initiatorSIDE = player:getCoalition(),
+									countryId = countryId,
+									initiatorCountry = string.lower(country.name[countryId]),
+									side = side,
+									x = playerPoint.x,
+									y = playerPoint.y,
+									z = playerPoint.z,
+									unitId = playerId,
+								}
+
+								env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection).." | "..tostring('GuardEjection'..unitName))
+								trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', player, 0, true, camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection, 1, 'GuardEjection'..unitName)
+								env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection).." | "..tostring('GuardEjection'..unitName))
+
+								--position precise pour le fumigene
+								local PilotVec3 = {
+									x = playerPoint.x,
+									y = land.getHeight({x = playerPoint.x, y = playerPoint.z}),
+									z = playerPoint.z,
+								}
+
+								infoPlayer.x2d = PilotVec3.x + 50
+								infoPlayer.y2d = PilotVec3.z + 50
+								infoPlayer.z2d = PilotVec3.y
+
+
+								local life = player:getLife()
+								local init_life = player:getLife0()
+								local lifePourcent = 100
+								local isPlayer = true
+								if init_life then
+									lifePourcent = life/init_life*100
+									infoPlayer.rate = lifePourcent
+								end
+
+		
+								local current_time = timer.getTime()
+								if camp.debug then
+									local logStr = "GetOutPlayer = " .. TableSerialization(GroundDamagedFlyingMachine, 0)
+									local grpnameClean = playerName:gsub('[%p%c%s]', '_')
+									local logFile = io.open(PathDCE.."Debug\\"..infoPlayer.unitId.."_"..grpnameClean.."_".. "DamagedFM_"..current_time..".lua", "w")
+									if logFile then
+										logFile:write(logStr)
+										logFile:close()
+									else
+										env.info("DCE_GetOutPlayer: Failed to open log file for writing.")
+									end
+								end
+								
+								if PilotVec3.y <= 100 then
+
+									SumSoldierAliasPilot = SumSoldierAliasPilot + 1
+									infoPlayer.SumEjectedPilotDay  = SumSoldierAliasPilot
+
+									infoPlayer.getOutHelicopter  = true
+
+									if infoPlayer.initiatorPilotName then
+										infoPlayer.name = "Mis"..camp.mission.."_Pilot_"..infoPlayer.initiatorPilotName.."_Nb"..tostring(infoPlayer.SumEjectedPilotDay).."_Damaged"
+									end
+
+									infoPlayer.name = infoPlayer.name:gsub('[%p%c%s]', '_')
+
+									local typeLand = land.getSurfaceType({x =infoPlayer.x2d, y = infoPlayer.y2d})
+
+									env.info("DCE_getOut infoPlayer E test typeLand "..tostring(typeLand))
+
+									if typeLand ~= 3 and typeLand ~= 5  then
+
+										AddSoldierAliasPilot(infoPlayer)
+										infoPlayer.createdSoldier = true
+										trigger.action.smoke(PilotVec3, trigger.smokeColor.Red)
+
+									end
+
+									CheckImmediatSAR(infoPlayer)
+
+									env.info("DCE_getOut F test despawn ")
+
+									timer.scheduleFunction(despawn2, infoPlayer.unit, timer.getTime() + 30)
+
+									timer.scheduleFunction(spawnWreck, infoPlayer, timer.getTime() + 35)
+
+									createWreckCrew[infoPlayer.unitName] = true
+
+								end
+
+							end
+						end
+					end
+				end
+			end
+		end
+
+
+	else
+
+		for id_, key in pairs(GroundDamagedFlyingMachine) do
+
+			for occurenceN = #key, 1, -1 do
+				env.info( "DCE_getOut B1 id_ "..tostring(id_).." occurenceN "..tostring(occurenceN))
+
+				local damaged = key[occurenceN]
+				
+				env.info( "DCE_getOut B2 id_ "..tostring(id_).." damaged.gpGid "..tostring(damaged.gpGid))
+
+				if not pName and not damaged.isPlayer then
 
 					env.info( "DCE_getOut C occurenceN: "..occurenceN.." id_: "..tostring(id_).." damaged.gpGid: "..tostring(damaged.gpGid))
-
-					-- if damaged.unit and damaged.unit:isExist() then
-					-- 	env.info( "DCE_getOut C1 occurenceN "..tostring(occurenceN))
-					-- 	env.info( "DCE_getOut C2 isActive "..tostring(damaged.unit:isActive()))
-					-- 	env.info( "DCE_getOut C3 inAir "..tostring(damaged.unit:inAir()))
-
-					-- 	if damaged.unit:isActive() then
-					-- 		env.info( "DCE_getOut C4 isActive "..tostring(damaged.unit:isActive()))
-					-- 	end
-
-					-- else
-					-- 	env.info( "DCE_getOut CCCC4444 introuvable ")
-					-- 	_affiche(damaged, "damaged DCE_getOut CCCC4444 ")
-					-- 	key[occurenceN] = {}
-					-- end
 
 					-- if damaged.unit and damaged.unit:isExist() and damaged.unit:isActive() and not damaged.unit:inAir() then
 					if not damaged.unit or not damaged.unit:inAir() then
 
 						env.info( "DCE_getOut D ")
 
-						-- damaged.initiator = damaged.unit:getName()
-
 						if not createWreckCrew[damaged.unitName] then
-
-							-- damaged.Coalition = damaged.unit:getCoalition()
-							-- damaged.initiatorMissionID = damaged.unit:getID()																					--store ID
-							-- damaged.initiatorSIDE = damaged.unit:getCoalition()
-							-- damaged.countryId = damaged.unit:getCountry()
-
-							-- _affiche(damaged, "damaged DCE_getOut D2 ")
-
-							-- local countryId = damaged.unit:getCountry()
-							-- damaged.initiatorCountry = string.lower(country.name[countryId])
-
-							-- local side = coalitionIdNumeric[tonumber(damaged.initiatorSIDE)]
 
 							if damaged.unit:getPlayerName()	then
 								env.info( "DCE_getOut EventT :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[damaged.side].GuardEjection).." | "..tostring('GuardEjection'..damaged.unitName))
@@ -2002,19 +2110,41 @@ function GetOutGDFM(argGid)
 							timer.scheduleFunction(spawnWreck, damaged, timer.getTime() + 35)
 
 							createWreckCrew[damaged.unitName] = true
+
+							if damaged.initiator.id_ then
+								for n, damageds in pairs(GroundDamagedFlyingMachine) do
+									local toRemove = {} -- Table pour stocker les clés à supprimer
+							
+									for initiatorId, damagedUnit in pairs(damageds) do
+										env.info("DCE_getOut Y S_EVENT_KILL n: " .. n .. " initiatorId: " .. tostring(initiatorId))
+							
+										if initiatorId == damaged.initiator_id_ then
+											env.info("DCE_getOut Z S_EVENT_KILL delete initiatorId: " .. tostring(initiatorId))
+											table.insert(toRemove, initiatorId)
+										end
+									end
+							
+									-- Supprimer les entrées après avoir parcouru la table
+									for _, initiatorId in ipairs(toRemove) do
+										damageds[initiatorId] = nil
+									end
+								end
+							end
+
+
 						end
 					else
 
-						key[occurenceN] = {}
+						key[occurenceN] = nil
 
 					end
 				end
 			end
 		end
-	end
 
-	if argGid == nil or not argGid then
-		return timer.getTime() + 5
+		if not pName then
+			return timer.getTime() + 5
+		end
 	end
 end
 

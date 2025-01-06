@@ -2459,10 +2459,12 @@ function RequestCAP(PlayerGroup)
 end
 
 
-function getOut(gid)
+function getOut(pName)
 	env.info( "DCE_getOut A function getOut(gid) ")
+	
+	trigger.action.outText("Attempted emergency evacuation of the aircraft ", 15)
 
-	GetOutGDFM(gid)
+	GetOutGDFM(pName)
 
 end
 
@@ -2798,6 +2800,7 @@ local function addFuncs(gid, groupObject, playerName)
 		missionCommands.removeItemForGroup(gid, {"CarrierIntoWind"})
 		missionCommands.removeItemForGroup(gid, {"Urgent request"})
 		missionCommands.removeItemForGroup(gid, {"EWR"})
+		missionCommands.removeItemForGroup(gid, {"Get out of the cockpit"})
 
 		local subR_A = missionCommands.addSubMenuForGroup(gid, "Urgent request", nil)
 
@@ -2806,7 +2809,7 @@ local function addFuncs(gid, groupObject, playerName)
 		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Package_All_RTB", subR_A, RtbPack, groupObject)
 		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Package_Strike_RTB", subR_A, RtbStrikePack, groupObject)
 		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Package_SEAD_RTB", subR_A, RtbSEADPack, groupObject)
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Get out of the cockpit", subR_A, getOut, gid)
+		
 
 		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "BullsEye_LongLat", nil, BullsEye, groupObject)
 
@@ -2821,12 +2824,21 @@ local function addFuncs(gid, groupObject, playerName)
 		local subR_B3 = missionCommands.addSubMenuForGroup(gid, "EWR OFF", subR_B1)
 
 		for pName, value in pairs(EWR_optionPlayer) do
-			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, tostring(pName) .." EWR ON", subR_B2, EWR_ON,  pName )
+			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, tostring(pName) .." EWR ON", subR_B2, EWR_ON, pName )
 		end
 
 		for pName, value in pairs(EWR_optionPlayer) do
-			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, tostring(pName) .." EWR OFF", subR_B3, EWR_OFF,  pName )
+			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, tostring(pName) .." EWR OFF", subR_B3, EWR_OFF, pName )
 		end
+
+
+
+		-- radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Get out of the cockpit", subR_A, getOut, gid)
+		local subR_C1 = missionCommands.addSubMenuForGroup(gid, "Get out of the cockpit", nil)
+		for pName, value in pairs(EWR_optionPlayer) do
+			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, tostring(pName) .." Get out", subR_C1, getOut, pName )
+		end
+
 
 		env.info("DCE_addFuncs PASSE   _C  ")
 
@@ -3426,85 +3438,101 @@ function EventHandler2:onEvent(event)
 			or event.id == world.event.S_EVENT_POSTPONED_LAND or event.id == world.event.S_EVENT_EMERGENCY_LANDING then
 			env.info("DCE_EventHandler2 PASSE 003 LAND or CRASH")
 
-			if event.initiator and not event.initiator:inAir()  then
+			if event.initiator then
 
-				env.info( "DCE_GroundDamagedFlyingMachine B getPlayerName detected ? ")
-
-				local initDesc = event.initiator:getDesc()
-				_affiche(initDesc, "DCE_GroundDamagedFlyingMachine initDesc")
-
-				local initiatorPilotName = event.initiator:getPlayerName()
-				local unitName = event.initiator:getName()
-				local life = event.initiator:getLife()
-				local init_life = event.initiator:getLife0()
-				local lifePourcent = 100
-				local isPlayer = false
-				if init_life then
-					lifePourcent = life/init_life*100
-				end
-
-
-				env.info( "DCE_GroundDamagedFlyingMachine C1 initiatorPilotName "..tostring(initiatorPilotName).." lifePourcent: "..tostring(lifePourcent))
-				env.info( "DCE_GroundDamagedFlyingMachine C2 init_life "..tostring(init_life).." life: "..tostring(life))
-				env.info( "DCE_GroundDamagedFlyingMachine C3 event.initiator.id_ "..tostring(event.initiator.id_))
-
-				if initiatorPilotName and initiatorPilotName ~= "" then
-					isPlayer = true
-				end
-
-				--TODO ajouter une proximité Base & Farp pour ne pas le faire dessus
-				if lifePourcent < 100 and lifePourcent >= 1 then
-					env.info( "DCE_GroundDamagedFlyingMachine D detected ? event.initiator.id_ "..tostring(event.initiator.id_))
-
-					local Group = event.initiator:getGroup()
-					local gpGid = Group:getID()
-					local categoryId = event.initiator:getDesc().category
-
-					local countryId = event.initiator:getCountry()
-					local initiatorCountry = string.lower(country.name[countryId])
-					local initiatorSIDE = event.initiator:getCoalition()
-					local side = coalitionIdNumeric[tonumber(initiatorSIDE)]
-
-					local eventData = {
-						initiatorPilotName = initiatorPilotName,
-						isPlayer = isPlayer,
-						unitName = unitName,
-						-- unitGame = event.initiator,
-						-- Uid = event.initiator:getID(),
-						aircraftType = event.initiator:getTypeName(),
-						lifePourcent = lifePourcent,
-						crashPoint = event.initiator:getPoint(),
-						unit = event.initiator,
-						gpGid = gpGid,
-						idLabel= idLabel,
-						categoryId = categoryId,
-						Coalition = event.initiator:getCoalition(),
-						initiatorMissionID = event.initiator:getID(),
-						initiatorSIDE = initiatorSIDE,
-						countryId = countryId,
-						initiatorCountry = initiatorCountry,
-						side = side,
+				local ptEvent = event.initiator:getPoint()
+				local wreckVec3
+				if ptEvent and ptEvent.x then
+					wreckVec3 = {
+						x = ptEvent.x,
+						y = land.getHeight({x = ptEvent.x, y = ptEvent.z}),
+						z = ptEvent.z,
 					}
+					env.info( "DCE_GroundDamagedFlyingMachine B1 wreckVec3 alti "..tostring(wreckVec3.y))
+				end
 
-					-- if not GroundDamagedFlyingMachine[gpGid] then GroundDamagedFlyingMachine[gpGid] = {} end
-					-- table.insert(GroundDamagedFlyingMachine[gpGid], eventData)
+				if wreckVec3.y <= 100 then
+
+					env.info( "DCE_GroundDamagedFlyingMachine B getPlayerName detected ? ")
+
+					local initDesc = event.initiator:getDesc()
+					_affiche(initDesc, "DCE_GroundDamagedFlyingMachine initDesc")
+
+					local initiatorPilotName = event.initiator:getPlayerName()
+					local unitName = event.initiator:getName()
+					local life = event.initiator:getLife()
+					local init_life = event.initiator:getLife0()
+					local lifePourcent = 100
+					local isPlayer = false
+					if init_life then
+						lifePourcent = life/init_life*100
+					end
+
+
+					env.info( "DCE_GroundDamagedFlyingMachine C1 initiatorPilotName "..tostring(initiatorPilotName).." lifePourcent: "..tostring(lifePourcent))
+					env.info( "DCE_GroundDamagedFlyingMachine C2 init_life "..tostring(init_life).." life: "..tostring(life))
+					env.info( "DCE_GroundDamagedFlyingMachine C3 event.initiator.id_ "..tostring(event.initiator.id_))
+
+					if initiatorPilotName and initiatorPilotName ~= "" then
+						isPlayer = true
+					end
+
+					--TODO ajouter une proximité Base & Farp pour ne pas le faire dessus
+					if lifePourcent < 100 and lifePourcent >= 1 then
+						env.info( "DCE_GroundDamagedFlyingMachine D detected ? event.initiator.id_ "..tostring(event.initiator.id_))
+
+						local Group = event.initiator:getGroup()
+						local gpGid = Group:getID()
+						local categoryId = event.initiator:getDesc().category
+
+						local countryId = event.initiator:getCountry()
+						local initiatorCountry = string.lower(country.name[countryId])
+						local initiatorSIDE = event.initiator:getCoalition()
+						local side = coalitionIdNumeric[tonumber(initiatorSIDE)]
+
+						local eventData = {
+							initiatorPilotName = initiatorPilotName,
+							isPlayer = isPlayer,
+							unitName = unitName,
+							-- unitGame = event.initiator,
+							-- Uid = event.initiator:getID(),
+							aircraftType = event.initiator:getTypeName(),
+							lifePourcent = lifePourcent,
+							crashPoint = event.initiator:getPoint(),
+							unit = event.initiator,
+							gpGid = gpGid,
+							idLabel= idLabel,
+							categoryId = categoryId,
+							Coalition = event.initiator:getCoalition(),
+							initiatorMissionID = event.initiator:getID(),
+							initiatorSIDE = initiatorSIDE,
+							countryId = countryId,
+							initiatorCountry = initiatorCountry,
+							side = side,
+							initiator_id_ = event.initiator.id_,
+						}
+
+						-- if not GroundDamagedFlyingMachine[gpGid] then GroundDamagedFlyingMachine[gpGid] = {} end
+						-- table.insert(GroundDamagedFlyingMachine[gpGid], eventData)
 
 
 
-					if not GroundDamagedFlyingMachine[event.initiator.id_] then GroundDamagedFlyingMachine[event.initiator.id_] = {} end
-					table.insert(GroundDamagedFlyingMachine[event.initiator.id_], eventData)
+						if not GroundDamagedFlyingMachine[event.initiator.id_] then GroundDamagedFlyingMachine[event.initiator.id_] = {} end
+						table.insert(GroundDamagedFlyingMachine[event.initiator.id_], eventData)
 
-					local current_time = timer.getTime()
-					if camp.debug then
-						local logStr = "DamagedFM = " .. TableSerialization(GroundDamagedFlyingMachine, 0)
-						local grpnameClean = unitName:gsub('[%p%c%s]', '_')
-						local logFile = io.open(PathDCE.."Debug\\"..event.initiator.id_.."_"..grpnameClean.."_".. "DamagedFM_"..current_time..".lua", "w")
-						if logFile then
-							logFile:write(logStr)
-							logFile:close()
-						else
-							env.info("DCE_GroundDamagedFlyingMachine: Failed to open log file for writing.")
+						local current_time = timer.getTime()
+						if camp.debug then
+							local logStr = "DamagedFM = " .. TableSerialization(GroundDamagedFlyingMachine, 0)
+							local grpnameClean = unitName:gsub('[%p%c%s]', '_')
+							local logFile = io.open(PathDCE.."Debug\\"..event.initiator.id_.."_"..grpnameClean.."_".. "DamagedFM_"..current_time..".lua", "w")
+							if logFile then
+								logFile:write(logStr)
+								logFile:close()
+							else
+								env.info("DCE_GroundDamagedFlyingMachine: Failed to open log file for writing.")
+							end
 						end
+
 					end
 
 					-- local gpGid = event.initiator:getGroup():getID()
