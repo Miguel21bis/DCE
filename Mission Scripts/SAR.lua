@@ -1895,7 +1895,7 @@ function GetOutGDFM(argGid)
 	for id_, key in pairs(GroundDamagedFlyingMachine) do
 
 		for occurenceN = #key, 1, -1 do
-			-- env.info( "DCE_getOut B1 id_ "..tostring(id_).." occurenceN "..tostring(occurenceN))
+			env.info( "DCE_getOut B1 id_ "..tostring(id_).." occurenceN "..tostring(occurenceN))
 
 			local damaged = key[occurenceN]
 			--si on a un argument, on le test et continue, sinon on continue sans argument
@@ -1904,51 +1904,53 @@ function GetOutGDFM(argGid)
 			-- permet de passer la fonction aussi via la function F10 des joueurs
 			--donc si la demande vient d'un joueur, et si l'enregistrement n'est pas un joueur, on passe
 
-			-- env.info( "DCE_getOut B2 id_ "..tostring(id_).." damaged.gpGid "..tostring(damaged.gpGid))
+			env.info( "DCE_getOut B2 id_ "..tostring(id_).." damaged.gpGid "..tostring(damaged.gpGid))
 
 			if damaged.gpGid then
 				if (argGid and argGid == damaged.gpGid and damaged.isPlayer) or ((argGid == nil or argGid  == false) and not damaged.isPlayer)  then
 
 					env.info( "DCE_getOut C occurenceN: "..occurenceN.." id_: "..tostring(id_).." damaged.gpGid: "..tostring(damaged.gpGid))
 
-					if damaged.unit and damaged.unit:isExist() then
-						env.info( "DCE_getOut C1 occurenceN "..tostring(occurenceN))
-						env.info( "DCE_getOut C2 isActive "..tostring(damaged.unit:isActive()))
-						env.info( "DCE_getOut C3 inAir "..tostring(damaged.unit:inAir()))
+					-- if damaged.unit and damaged.unit:isExist() then
+					-- 	env.info( "DCE_getOut C1 occurenceN "..tostring(occurenceN))
+					-- 	env.info( "DCE_getOut C2 isActive "..tostring(damaged.unit:isActive()))
+					-- 	env.info( "DCE_getOut C3 inAir "..tostring(damaged.unit:inAir()))
 
-						if damaged.unit:isActive() then
-							env.info( "DCE_getOut C4 isActive "..tostring(damaged.unit:isActive()))
-						end
+					-- 	if damaged.unit:isActive() then
+					-- 		env.info( "DCE_getOut C4 isActive "..tostring(damaged.unit:isActive()))
+					-- 	end
 
-					else
-						env.info( "DCE_getOut CCCC4444 introuvable ")
-						_affiche(damaged, "damaged DCE_getOut CCCC4444 ")
-						key[occurenceN] = {}
-					end
+					-- else
+					-- 	env.info( "DCE_getOut CCCC4444 introuvable ")
+					-- 	_affiche(damaged, "damaged DCE_getOut CCCC4444 ")
+					-- 	key[occurenceN] = {}
+					-- end
 
-					if damaged.unit and damaged.unit:isExist() and damaged.unit:isActive() and not damaged.unit:inAir() then
+					-- if damaged.unit and damaged.unit:isExist() and damaged.unit:isActive() and not damaged.unit:inAir() then
+					if not damaged.unit or not damaged.unit:inAir() then
+
 						env.info( "DCE_getOut D ")
 
-						damaged.initiator = damaged.unit:getName()
+						-- damaged.initiator = damaged.unit:getName()
 
-						if not createWreckCrew[damaged.initiator] then
+						if not createWreckCrew[damaged.unitName] then
 
-							damaged.Coalition = damaged.unit:getCoalition()
-							damaged.initiatorMissionID = damaged.unit:getID()																					--store ID
-							damaged.initiatorSIDE = damaged.unit:getCoalition()
-							damaged.countryId = damaged.unit:getCountry()
+							-- damaged.Coalition = damaged.unit:getCoalition()
+							-- damaged.initiatorMissionID = damaged.unit:getID()																					--store ID
+							-- damaged.initiatorSIDE = damaged.unit:getCoalition()
+							-- damaged.countryId = damaged.unit:getCountry()
 
 							-- _affiche(damaged, "damaged DCE_getOut D2 ")
 
-							local countryId = damaged.unit:getCountry()
-							damaged.initiatorCountry = string.lower(country.name[countryId])
+							-- local countryId = damaged.unit:getCountry()
+							-- damaged.initiatorCountry = string.lower(country.name[countryId])
 
-							local side = coalitionIdNumeric[tonumber(damaged.initiatorSIDE)]
+							-- local side = coalitionIdNumeric[tonumber(damaged.initiatorSIDE)]
 
 							if damaged.unit:getPlayerName()	then
-								env.info( "DCE_getOut EventT :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..damaged.initiator))
-								trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', damaged, 0, true, camp.EjectedPilotFrequency[side].GuardEjection, 1, 'GuardEjection'..damaged.initiator)
-								env.info( "DCE_getOut EventT :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..damaged.initiator))
+								env.info( "DCE_getOut EventT :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[damaged.side].GuardEjection).." | "..tostring('GuardEjection'..damaged.unitName))
+								trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', damaged, 0, true, camp.EjectedPilotFrequency[damaged.side].GuardEjection, 1, 'GuardEjection'..damaged.unitName)
+								env.info( "DCE_getOut EventT :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[damaged.side].GuardEjection).." | "..tostring('GuardEjection'..damaged.unitName))
 							end
 
 							damaged.x = damaged.crashPoint.x
@@ -1974,7 +1976,7 @@ function GetOutGDFM(argGid)
 							if damaged.initiatorPilotName then
 								damaged.name = "Mis"..camp.mission.."_Pilot_"..damaged.initiatorPilotName.."_Nb"..tostring(damaged.SumEjectedPilotDay).."_Damaged"
 							else
-								damaged.name = "Mis"..camp.mission.."_Pilot_"..damaged.initiator.."_Nb"..tostring(damaged.SumEjectedPilotDay).."_Damaged"
+								damaged.name = "Mis"..camp.mission.."_Pilot_"..damaged.unitName.."_Nb"..tostring(damaged.SumEjectedPilotDay).."_Damaged"
 							end
 
 							damaged.name = damaged.name:gsub('[%p%c%s]', '_')
@@ -1999,7 +2001,7 @@ function GetOutGDFM(argGid)
 
 							timer.scheduleFunction(spawnWreck, damaged, timer.getTime() + 35)
 
-							createWreckCrew[damaged.initiator] = true
+							createWreckCrew[damaged.unitName] = true
 						end
 					else
 

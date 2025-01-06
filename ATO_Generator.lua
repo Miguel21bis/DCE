@@ -39,6 +39,8 @@ local testCode = false	-- false: petite campagne comme Tchad/ true: grande campa
 
 local multipackByTargetName = {}
 
+local bias = 4 -- Pondération pour target.firepower : plus grand = plus proche de `min
+
 --calcul le nb d'avion en tout
 local nbBeforPlaneActifTotal = {
 	blue = {
@@ -367,6 +369,20 @@ if Debug.debug and Debug.Generator.affiche then
 	_affiche(Multi, "ATO_G Multi")
 	_affiche(multiPlaneSet, "ATO_G multiPlaneSet B")
 	-- os.execute 'pause'
+end
+
+if Debug.debug then
+	for side, units in pairs(oob_air) do
+		if units and units ~= nil then
+			for unitN, unit in pairs(units) do
+				if unit.player then
+					if Debug.debug then
+						print("AtoG playable "..unit.type.." ready "..unit.roster.ready)
+					end
+				end
+			end
+		end
+	end
 end
 
 if Multi and Multi.Group then
@@ -1139,7 +1155,13 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																							TrackPlayability(unit.player, "target_range")												--track playabilty criterium has been met
 
 																							--determine number of aircraft needed for sortie
-																							local aircraft_requested = target.firepower.min / unit_loadouts[l].firepower					--how many aircraft are needed to satisfy the maximum firepower requirement of the target
+																							-- local aircraft_requested = target.firepower.max / unit_loadouts[l].firepower
+																							-- local aircraft_requested = target.firepower.min / unit_loadouts[l].firepower					--how many aircraft are needed to satisfy the maximum firepower requirement of the target
+
+																							-- print("min: "..tostring(target.firepower.min) .. " "..tostring(target.firepower.max))
+
+																							local aircraft_requested = GetWeightedRandom(target.firepower.min, target.firepower.max, bias)
+																							-- print(string.format("Valeur générée : %.2f", aircraft_requested))
 
 																							if task == "Transport" then
 																								if multiPlaneSet and multiPlaneSet[side] and multiPlaneSet[side][unit.type]  and multiPlaneSet[side][unit.type][task]

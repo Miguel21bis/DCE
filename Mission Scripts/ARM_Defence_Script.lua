@@ -117,7 +117,7 @@ do
 							}
 
 							if math.random(1,10) > 1 then																--90% chance that ARM launch is detected by target
-								local probaTurnOff = 100
+								local probaTurnOff = 75
 
 								if descRadarSam and descRadarSam.typeName and SAM_AMM[descRadarSam.typeName] then
 									probaTurnOff = 25

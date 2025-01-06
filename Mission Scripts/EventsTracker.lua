@@ -805,7 +805,7 @@ function eventHandlerDCE:onEvent(event)
 
 	-- debug ET01.g
 	elseif log_entry.type and ((log_entry.type == "hit" and event.initiator) or log_entry.type ~= "hit" ) then												--hit event with initiator or any other event (excludes hit events without initiator, like collisions) 	
-		if event.initiator	then																													--event has an initiator	
+		if event.initiator then																													--event has an initiator	
 			
 			if event and event.id and Info_event and Info_event[tonumber(event.id)] then
 				local idLabel = tostring(Info_event[tonumber(event.id)])
@@ -839,6 +839,7 @@ function eventHandlerDCE:onEvent(event)
 				log_entry.targetSideName = targetSideName
 			end
 		end
+		
 		if event.target   then																														--event has a target
 
 			-- Object.Category

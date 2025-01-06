@@ -3314,6 +3314,14 @@ function NewPosLatLon(latA, lonA, distance, azimut)
     return latB, lonB
 end
 
+function GetWeightedRandom(min, max, bias)
+    -- Génère un nombre aléatoire entre 0 et 1
+    local randomValue = math.random()
+    -- Applique une pondération exponentielle (plus le biais est grand, plus c'est proche de min)
+    local weightedValue = randomValue ^ bias
+    -- Remap pour correspondre à l'échelle entre min et max
+    return min + (max - min) * weightedValue
+end
 
 
 
