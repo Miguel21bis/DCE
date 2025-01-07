@@ -527,6 +527,18 @@ local function setErrorMessageBoxShedul()
 	end
 end
 
+function getGroupById(groupId)
+    for coalitionId = 1, 2 do -- 1 = Red, 2 = Blue
+        local groups = coalition.getGroups(coalitionId)
+        for _, group in ipairs(groups) do
+            if group:getID() == groupId then
+                return group
+            end
+        end
+    end
+    return nil -- Groupe introuvable
+end
+
 function FctRemovePlane(_unit)
 	_unit:destroy()
 end
@@ -2459,13 +2471,30 @@ function RequestCAP(PlayerGroup)
 end
 
 
-function getOut(pName)
+function getOut(arg)
 	env.info( "DCE_getOut A function getOut(gid) ")
-	
-	trigger.action.outText("Attempted emergency evacuation of the aircraft ", 15)
 
-	GetOutGDFM(pName)
+	local groupObj = arg[1]
+	local pName = arg[2]
 
+	local wingman = groupObj:getUnits()
+	local playerName
+	local playerObj
+	local playerId
+
+	for w = 1, #wingman do
+		playerName = wingman[w]:getPlayerName()
+
+		if playerName == pName then
+			playerObj = wingman[w]
+			playerId = Unit.getID(playerObj)
+
+			env.info( "DCE_getOut B Attempted emergency evacuation of the aircraft ")
+			trigger.action.outTextForUnit(playerId, "Attempted emergency evacuation of the aircraft ", 15)
+			
+			GetOutGDFM({pName, playerObj, playerId})
+		end
+	end
 end
 
 local function getLL_TargetPosition()
@@ -2809,7 +2838,7 @@ local function addFuncs(gid, groupObject, playerName)
 		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Package_All_RTB", subR_A, RtbPack, groupObject)
 		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Package_Strike_RTB", subR_A, RtbStrikePack, groupObject)
 		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Package_SEAD_RTB", subR_A, RtbSEADPack, groupObject)
-		
+
 
 		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "BullsEye_LongLat", nil, BullsEye, groupObject)
 
@@ -2834,9 +2863,9 @@ local function addFuncs(gid, groupObject, playerName)
 
 
 		-- radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Get out of the cockpit", subR_A, getOut, gid)
-		local subR_C1 = missionCommands.addSubMenuForGroup(gid, "Get out of the cockpit", nil)
+		local subR_C1 = missionCommands.addSubMenuForGroup(gid, "Get out of the cockpit", subR_A)
 		for pName, value in pairs(EWR_optionPlayer) do
-			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, tostring(pName) .." Get out", subR_C1, getOut, pName )
+			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, tostring(pName) .." Get out", subR_C1, getOut, {groupObject ,pName} )
 		end
 
 
@@ -3031,7 +3060,7 @@ end
 local function sendTTSMessage(arg)
 
 	local freq, modulation, text = arg[1], arg[2],arg[3]
-	
+
 	local duration = SRSAudio.transmitTTS( -- Utilise la fonction TTS de SRS
 		freq,        -- Fréquence en Hz
 		modulation,  -- "AM" ou "FM"
@@ -3349,21 +3378,21 @@ local function EWR_magic()
 
 								-- Affichage si la distance est dans les limites
 								if (distanceKm > 2 and distanceKm <= 150) or (distanceKm <= 2 and status == "ENEMY" )   then
-									
+
 									-- local freq = camp.EWR_frequency[coalitionIdNumeric[sideNum]][1]
 									local speak = target.qte.." "..status.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft"
-									
+
 									-- trigger.action.outTextForUnit(playerId, speak, 20, false)
 									-- env.info("i: "..i.." playerId: "..playerId.." locTimer: ".. locTimer.." || "..speak)
-									
-									timer.scheduleFunction(EWR_speaking, {playerId, speak}, timer.getTime() + (i*2))
+
+									timer.scheduleFunction(EWR_speaking, {playerId, speak}, timer.getTime() + (i*3))
 
 									-- timer.scheduleFunction(sendTTSMessage, {freq, "AM", speak}, timer.getTime() + (i*2))
 
-									
+
 									EWR_optionPlayer[trucName]["lasTime"] = locTimer
 									i = i + 1
-									if i > 7 then break end
+									if i > 6 then break end
 								end
 
 							end
@@ -3438,7 +3467,7 @@ function EventHandler2:onEvent(event)
 			or event.id == world.event.S_EVENT_POSTPONED_LAND or event.id == world.event.S_EVENT_EMERGENCY_LANDING then
 			env.info("DCE_EventHandler2 PASSE 003 LAND or CRASH")
 
-			if event.initiator then
+			if event.initiator and not event.initiator:getPlayerName() then
 
 				local ptEvent = event.initiator:getPoint()
 				local wreckVec3
@@ -3542,45 +3571,27 @@ function EventHandler2:onEvent(event)
 		end
 	elseif event.id == world.event.S_EVENT_DEAD or event.id == world.event.S_EVENT_PILOT_DEAD or event.id == world.event.S_EVENT_KILL then
 
-		-- if event.initiator and event.initiator.id_ then
-
-		-- 	for n, damageds in pairs(GroundDamagedFlyingMachine) do
-
-		-- 		for initiatorId, damaged in pairs(damageds) do
-
-		-- 			env.info("DCE_GroundDamagedFlyingMachine S_EVENT_KILL n: "..n.." initiatorId: "..tostring(initiatorId))
-
-		-- 			if initiatorId == event.initiator.id_ then
-						
-		-- 				env.info("DCE_GroundDamagedFlyingMachine S_EVENT_KILL delete initiatorId: "..tostring(initiatorId))
-
-		-- 				table.remove(damaged, initiatorId)
-		-- 			end
-
-		-- 		end
-		-- 	end
-		-- end
-
+		--TODO controler si c'est utile
 		if event.initiator and event.initiator.id_ then
 			for n, damageds in pairs(GroundDamagedFlyingMachine) do
 				local toRemove = {} -- Table pour stocker les clés à supprimer
-		
+
 				for initiatorId, damaged in pairs(damageds) do
 					env.info("DCE_GroundDamagedFlyingMachine S_EVENT_KILL n: " .. n .. " initiatorId: " .. tostring(initiatorId))
-		
+
 					if initiatorId == event.initiator.id_ then
 						env.info("DCE_GroundDamagedFlyingMachine S_EVENT_KILL delete initiatorId: " .. tostring(initiatorId))
 						table.insert(toRemove, initiatorId)
 					end
 				end
-		
+
 				-- Supprimer les entrées après avoir parcouru la table
 				for _, initiatorId in ipairs(toRemove) do
 					damageds[initiatorId] = nil
 				end
 			end
 		end
-		
+
 
 	end
 end

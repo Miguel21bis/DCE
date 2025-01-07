@@ -1448,13 +1448,13 @@ function LoopManagedRadioTransmission()
 
 					local PosEjectedPilot = unitPilot:getPoint()
 
-					local PilotVec3 = {
+					local pilotVec3 = {
 						x = PosEjectedPilot.x,
 						y = land.getHeight({x = PosEjectedPilot.x, y = PosEjectedPilot.z}),
 						z = PosEjectedPilot.z,
 					}
 
-					trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', PilotVec3, 0, true, camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon, 1, 'radioBeacon_'..ejectedPilot.name)
+					trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', pilotVec3, 0, true, camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon, 1, 'radioBeacon_'..ejectedPilot.name)
 					ejectedPilot.radio_on = true
 
 					env.info( "DCE_SAR:LoopManagedRadioTransmission E frequency  "..tostring(camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon).." MGRS_Chute: "..tostring(ejectedPilot.MGRS_Chute).." |MGRS_Chute_10KM: "..tostring(ejectedPilot.MGRS_Chute_10KM).." "..tostring('radio_'..ejectedPilot.name))
@@ -1727,12 +1727,12 @@ function LoopSAR()
 
 														if distance <= 3000 and distance > 1000 and not ejectedPilot.smokeOK then
 															--active fumigene
-															local PilotVec3 = {
+															local pilotVec3 = {
 																x = PosEjectedPilot.x,
 																y = land.getHeight({x = PosEjectedPilot.x, y = PosEjectedPilot.z}),
 																z = PosEjectedPilot.z,
 															}
-															trigger.action.smoke(PilotVec3, trigger.smokeColor.Red)
+															trigger.action.smoke(pilotVec3, trigger.smokeColor.Red)
 															ejectedPilot.smokeOK = true
 
 														elseif distance <= 1000 and distance > 450 then
@@ -1886,8 +1886,12 @@ local function spawnWreck(element)
 
 end
 
-function GetOutGDFM(pName)
+function GetOutGDFM(arg)
 	-- env.info( "DCE_getOut A scheduleFunction GetOutGDFM ")
+
+	local pName = arg[1]
+	local player = arg[2]
+	local playerId = arg[3]
 
 	-- local eventData = {
 	-- 	initiatorPilotName = initiatorPilotName,
@@ -1902,135 +1906,137 @@ function GetOutGDFM(pName)
 	-- }
 
 	if pName then
-	-- Définir les camps et catégories à parcourir
-	local coalitions = {coalition.side.BLUE, coalition.side.RED}
-	local categories = {Group.Category.AIRPLANE, Group.Category.HELICOPTER}
-	local locTimer = timer.getTime()
+	-- -- Définir les camps et catégories à parcourir
+	-- local coalitions = {coalition.side.BLUE, coalition.side.RED}
+	-- local categories = {Group.Category.AIRPLANE, Group.Category.HELICOPTER}
+	-- local locTimer = timer.getTime()
 
 
-		for _, sideNum in ipairs(coalitions) do
-			for categoryN, category in ipairs(categories) do
-				-- Obtenir les groupes pour le camp et la catégorie
-				local groups = coalition.getGroups(sideNum, category)
+	-- 	for _, sideNum in ipairs(coalitions) do
+	-- 		for categoryN, category in ipairs(categories) do
+	-- 			-- Obtenir les groupes pour le camp et la catégorie
+	-- 			local groups = coalition.getGroups(sideNum, category)
 
-				for gpN, gp in pairs(groups) do
-					local wingman = gp:getUnits()
-					for winmanN, _unit in ipairs(wingman) do
-						if _unit and _unit:isActive()  then --and _unit:inAir()
-							local playerName =  _unit:getPlayerName()
-							local unitName = _unit:getName()
+	-- 			for gpN, gp in pairs(groups) do
+	-- 				local wingman = gp:getUnits()
+	-- 				for winmanN, _unit in ipairs(wingman) do
+	-- 					if _unit and _unit:isActive()  then --and _unit:inAir()
+	-- 						local playerName =  _unit:getPlayerName()
+	-- 						local unitName = _unit:getName()
 
-							local trucName
-							if playerName == pName then
+	-- 						local trucName
+	-- 						if playerName == pName then
 						
-								local player = _unit
-								local playerId = Unit.getID(player)
-								local playerPoint = player:getPoint()				--get target point
+								-- local player = _unit
+								-- local playerId = Unit.getID(player)
 
-								local countryId = player:getCountry()
-								local initiatorSIDE = player:getCoalition()
-								local side = coalitionIdNumeric[tonumber(initiatorSIDE)]
+		local unitName = player:getName()
+		local playerPoint = player:getPoint()				--get target point
 
-
-								local infoPlayer = {
-									initiatorPilotName = playerName,
-									unit = player,
-									unitName = unitName,
-									aircraftType = player:getTypeName(),
-									Coalition = player:getCoalition(),
-									initiatorMissionID = player:getID(),
-									initiatorSIDE = player:getCoalition(),
-									countryId = countryId,
-									initiatorCountry = string.lower(country.name[countryId]),
-									side = side,
-									x = playerPoint.x,
-									y = playerPoint.y,
-									z = playerPoint.z,
-									unitId = playerId,
-								}
-
-								env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection).." | "..tostring('GuardEjection'..unitName))
-								trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', player, 0, true, camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection, 1, 'GuardEjection'..unitName)
-								env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection).." | "..tostring('GuardEjection'..unitName))
-
-								--position precise pour le fumigene
-								local PilotVec3 = {
-									x = playerPoint.x,
-									y = land.getHeight({x = playerPoint.x, y = playerPoint.z}),
-									z = playerPoint.z,
-								}
-
-								infoPlayer.x2d = PilotVec3.x + 50
-								infoPlayer.y2d = PilotVec3.z + 50
-								infoPlayer.z2d = PilotVec3.y
+		local countryId = player:getCountry()
+		local initiatorSIDE = player:getCoalition()
+		local side = coalitionIdNumeric[tonumber(initiatorSIDE)]
 
 
-								local life = player:getLife()
-								local init_life = player:getLife0()
-								local lifePourcent = 100
-								local isPlayer = true
-								if init_life then
-									lifePourcent = life/init_life*100
-									infoPlayer.rate = lifePourcent
-								end
+		local infoPlayer = {
+			initiatorPilotName = pName,
+			unit = player,
+			unitName = unitName,
+			aircraftType = player:getTypeName(),
+			Coalition = player:getCoalition(),
+			initiatorMissionID = player:getID(),
+			initiatorSIDE = player:getCoalition(),
+			countryId = countryId,
+			initiatorCountry = string.lower(country.name[countryId]),
+			side = side,
+			x = playerPoint.x,
+			y = playerPoint.y,
+			z = playerPoint.z,
+			unitId = playerId,
+		}
 
-		
-								local current_time = timer.getTime()
-								if camp.debug then
-									local logStr = "GetOutPlayer = " .. TableSerialization(GroundDamagedFlyingMachine, 0)
-									local grpnameClean = playerName:gsub('[%p%c%s]', '_')
-									local logFile = io.open(PathDCE.."Debug\\"..infoPlayer.unitId.."_"..grpnameClean.."_".. "DamagedFM_"..current_time..".lua", "w")
-									if logFile then
-										logFile:write(logStr)
-										logFile:close()
-									else
-										env.info("DCE_GetOutPlayer: Failed to open log file for writing.")
-									end
-								end
-								
-								if PilotVec3.y <= 100 then
+		env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection).." | "..tostring('GuardEjection'..unitName))
+		trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', player, 0, true, camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection, 1, 'GuardEjection'..unitName)
+		env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection).." | "..tostring('GuardEjection'..unitName))
 
-									SumSoldierAliasPilot = SumSoldierAliasPilot + 1
-									infoPlayer.SumEjectedPilotDay  = SumSoldierAliasPilot
+		--position precise pour le fumigene
+		local pilotVec3 = {
+			x = playerPoint.x,
+			y = land.getHeight({x = playerPoint.x, y = playerPoint.z}),
+			z = playerPoint.z,
+		}
 
-									infoPlayer.getOutHelicopter  = true
+		infoPlayer.x2d = pilotVec3.x + 50
+		infoPlayer.y2d = pilotVec3.z + 50
+		infoPlayer.z2d = pilotVec3.y
 
-									if infoPlayer.initiatorPilotName then
-										infoPlayer.name = "Mis"..camp.mission.."_Pilot_"..infoPlayer.initiatorPilotName.."_Nb"..tostring(infoPlayer.SumEjectedPilotDay).."_Damaged"
-									end
 
-									infoPlayer.name = infoPlayer.name:gsub('[%p%c%s]', '_')
+		local life = player:getLife()
+		local init_life = player:getLife0()
+		local lifePourcent = 100
+		local isPlayer = true
+		if init_life then
+			lifePourcent = life/init_life*100
+			infoPlayer.rate = lifePourcent
+		end
 
-									local typeLand = land.getSurfaceType({x =infoPlayer.x2d, y = infoPlayer.y2d})
 
-									env.info("DCE_getOut infoPlayer E test typeLand "..tostring(typeLand))
-
-									if typeLand ~= 3 and typeLand ~= 5  then
-
-										AddSoldierAliasPilot(infoPlayer)
-										infoPlayer.createdSoldier = true
-										trigger.action.smoke(PilotVec3, trigger.smokeColor.Red)
-
-									end
-
-									CheckImmediatSAR(infoPlayer)
-
-									env.info("DCE_getOut F test despawn ")
-
-									timer.scheduleFunction(despawn2, infoPlayer.unit, timer.getTime() + 30)
-
-									timer.scheduleFunction(spawnWreck, infoPlayer, timer.getTime() + 35)
-
-									createWreckCrew[infoPlayer.unitName] = true
-
-								end
-
-							end
-						end
-					end
-				end
+		local current_time = timer.getTime()
+		if camp.debug then
+			local logStr = "GetOutPlayer = " .. TableSerialization(GroundDamagedFlyingMachine, 0)
+			local grpnameClean = pName:gsub('[%p%c%s]', '_')
+			local logFile = io.open(PathDCE.."Debug\\"..infoPlayer.unitId.."_"..grpnameClean.."_".. "DamagedFM_"..current_time..".lua", "w")
+			if logFile then
+				logFile:write(logStr)
+				logFile:close()
+			else
+				env.info("DCE_GetOutPlayer: Failed to open log file for writing.")
 			end
 		end
+		
+		if pilotVec3.y <= 100 then
+
+			SumSoldierAliasPilot = SumSoldierAliasPilot + 1
+			infoPlayer.SumEjectedPilotDay  = SumSoldierAliasPilot
+
+			infoPlayer.getOutHelicopter  = true
+
+			if infoPlayer.initiatorPilotName then
+				infoPlayer.name = "Mis"..camp.mission.."_Pilot_"..infoPlayer.initiatorPilotName.."_Nb"..tostring(infoPlayer.SumEjectedPilotDay).."_Damaged"
+			end
+
+			infoPlayer.name = infoPlayer.name:gsub('[%p%c%s]', '_')
+
+			local typeLand = land.getSurfaceType({x =infoPlayer.x2d, y = infoPlayer.y2d})
+
+			env.info("DCE_getOut infoPlayer E test typeLand "..tostring(typeLand))
+
+			if typeLand ~= 3 and typeLand ~= 5  then
+
+				AddSoldierAliasPilot(infoPlayer)
+				infoPlayer.createdSoldier = true
+				trigger.action.smoke(pilotVec3, trigger.smokeColor.Red)
+
+			end
+
+			CheckImmediatSAR(infoPlayer)
+
+			env.info("DCE_getOut F test despawn ")
+
+			timer.scheduleFunction(despawn2, infoPlayer.unit, timer.getTime() + 30)
+
+			timer.scheduleFunction(spawnWreck, infoPlayer, timer.getTime() + 35)
+
+			createWreckCrew[infoPlayer.unitName] = true
+
+		end
+
+						-- 	end
+						-- end
+		-- 			end
+		-- 		end
+		-- 	end
+		-- end
 
 
 	else
@@ -2066,15 +2072,15 @@ function GetOutGDFM(pName)
 							damaged.z = damaged.crashPoint.z
 
 							--position precise pour le fumigene
-							local PilotVec3 = {
+							local pilotVec3 = {
 								x = damaged.crashPoint.x,
 								y = land.getHeight({x = damaged.crashPoint.x, y = damaged.crashPoint.z}),
 								z = damaged.crashPoint.z,
 							}
 
-							damaged.x2d = PilotVec3.x + 50
-							damaged.y2d = PilotVec3.z + 50
-							damaged.z2d = PilotVec3.y
+							damaged.x2d = pilotVec3.x + 50
+							damaged.y2d = pilotVec3.z + 50
+							damaged.z2d = pilotVec3.y
 
 							SumSoldierAliasPilot = SumSoldierAliasPilot + 1
 							damaged.SumEjectedPilotDay  = SumSoldierAliasPilot
@@ -2097,7 +2103,7 @@ function GetOutGDFM(pName)
 
 								AddSoldierAliasPilot(damaged)
 								damaged.createdSoldier = true
-								trigger.action.smoke(PilotVec3, trigger.smokeColor.Red)
+								trigger.action.smoke(pilotVec3, trigger.smokeColor.Red)
 
 							end
 
