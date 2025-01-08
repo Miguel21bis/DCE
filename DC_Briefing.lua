@@ -2030,7 +2030,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 						for side , pPA in pairs(PlacePA) do
 							if sideName == side then																	--if camp.player.side == side then
 								for base , Tmn in pairs(pPA) do
-									if base == tempPlayer.unitname then
+									if base == tempPlayer.airbase then
 										s = s..ReplaceBaseName(base).." Takeoff time on the platform at ...\n"
 										for sec, name in PairsByKeys(Tmn) do
 											if tabNam[name] ~= true then

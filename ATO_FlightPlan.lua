@@ -7516,4 +7516,6 @@ if Debug.debug then
 		campFile:close()
 	end
 
+	-- _affiche(PlacePA, "AtoFp PlacePA")
+
 end
