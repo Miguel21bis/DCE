@@ -279,6 +279,27 @@ end
 	-- Ecran N 00 Choix accept result mission or not	
 --ask for input to save results 
 
+if Debug.debug or mission_ini.backupAllMissionFiles then
+
+	local filesName = {
+		"MissionEventsLog.lua",
+		"scen_destroyed.lua",
+		"camp_status.lua",
+		"zoneSAR.lua",
+	}
+
+	-- Créer le répertoire "mission_0n" s'il n'existe pas
+	local folderName =  "Debug\\mission_" .. string.format("%02d", camp.mission)
+
+	os.execute('md "' .. folderName .. '" > nul 2>&1') -- Utilise `md` pour Windows	
+	for fileN, fileName in pairs(filesName) do
+		local sourcePath = "..\\" ..camp.title .."\\".. fileName
+		-- Copier fileName dans folderName
+		local destinationPath = folderName .. "\\" .. fileName
+		os.execute('copy "' .. sourcePath .. '" "' .. destinationPath ..  '" > nul 2>&1') -- Utilise `copy`		
+	end
+end
+
 print("\nAccept mission results? y(es)/n(o):\n")						--ask for user confirmation
 
 local input
@@ -651,12 +672,12 @@ if input == "y" or input == "yes" then
 			print("= = = = = = = = = = = = = Script Version : "..tostring(showVersion).." = = Lua Version : "..tostring(_VERSION))
 			print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
 			print()
-		
+
 		else
 			print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
 		end
 
-		
+
 		if Debug.debug and Debug.AfficheFlight then
 			os.execute 'pause'
 		end

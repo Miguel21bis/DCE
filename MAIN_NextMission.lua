@@ -1314,10 +1314,77 @@ if camp_ZoneSAR then
 end
 
 -- if Debug.debug then
+-- 	local fileName
+-- 	local folderName = "/Debug"
+-- 	if Firstmission_flag then
+-- 		fileName =  camp.title.."_first.miz"
+
+-- 		-- créer ici le repertoire "mission_01" si il n'existe pas
+-- 		folderName = folderName.."/mission_01"
+
+-- 		--copy fileName dans folderName:
+
+-- 		--copy le repertoire "Active" dans folderName
+
+-- 	else
+
+-- 		fileName =  camp.title.."_ongoing.miz"
+
+-- 		-- créer ici le repertoire "mission_n" si il n'existe pas
+-- 		folderName = folderName.."/mission_"..camp.mission
+
+-- 		--copy fileName dans folderName:
+
+-- 		-- copy le repertoire "Active" dans folderName
+
+-- 	end
+-- end
+
+if Debug.debug or mission_ini.backupAllMissionFiles then
+    local fileName
+    local folderName = "Debug" -- Pas de `/` au début pour chemin relatif sous Windows
+
+    if Firstmission_flag then
+        fileName = camp.title .. "_first.miz"
+
+        -- Créer le répertoire "mission_01" s'il n'existe pas
+        folderName = folderName .. "\\mission_01"
+        os.execute('md "' .. folderName .. '" > nul 2>&1') -- Utilise `md` pour Windows
+
+        -- Copier fileName dans folderName
+        local sourcePath = "..\\" .. fileName -- Normaliser pour Windows
+        local destinationPath = folderName .. "\\" .. fileName
+        os.execute('copy "' .. sourcePath .. '" "' .. destinationPath .. '" > nul 2>&1') -- Utilise `copy`
+
+        -- Copier le répertoire "Active" dans folderName
+        local activeFolder = "Active" -- Normaliser pour Windows
+         os.execute('xcopy "' .. activeFolder .. '" "' .. folderName .. '\\Active" /E /I /Y /Q')
+
+    else
+        fileName = camp.title .. "_ongoing.miz"
+
+        -- Créer le répertoire "mission_n" s'il n'existe pas
+        folderName = folderName .. "\\mission_" .. string.format("%02d", camp.mission)
+        os.execute('md "' .. folderName .. '" > nul 2>&1')
+
+        -- Copier fileName dans folderName
+        local sourcePath = "..\\" .. fileName
+        local destinationPath = folderName .. "\\" .. fileName
+        os.execute('copy "' .. sourcePath .. '" "' .. destinationPath .. '" > nul 2>&1')
+
+        -- Copier le répertoire "Active" dans folderName
+        local activeFolder = "Active"
+         os.execute('xcopy "' .. activeFolder .. '" "' .. folderName .. '\\Active" /E /I /Y /Q')
+    end
+end
+
+
+
+-- if Debug.debug then
 -- 	local camp_str = "mission = " .. TableSerialization(mission, 0)						--make a string
 -- 	local campFile = io.open("Debug/mission_MainNM.lua", "w") or error("Failed to open debug file")
 -- 	campFile:write(camp_str)															--save new data
 -- 	campFile:close()
 -- end
 
-print("camp.time B  "..tostring(camp.time).." "..FormatTime(camp.time, "hh:mm"))
+-- print("camp.time B  "..tostring(camp.time).." "..FormatTime(camp.time, "hh:mm"))

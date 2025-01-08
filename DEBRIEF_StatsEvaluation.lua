@@ -1012,8 +1012,9 @@ for scen_name,scen in pairs(scen_log) do													--iterate through destroyed
 							-- scen.lifePourcent < 100 and
 							-- if   (scen.x <= element.x + 50 and scen.x > element.x - 50) and (scen.z <= element.y + 50 and scen.z > element.y - 50) then								
 							if (scen.x <= element.x + 100 and scen.x > element.x - 100) and (scen.z <= element.y + 100 and scen.z > element.y - 100) then
-								-- if element.dead and element.CheckDay and element.CheckDay < camp.date.CampTotalTimeS then
-								if element.dead then											--element was already dead previously
+								--plus bas, ne pas l'enlever, car il peut y avoir plusieurs detection de destruction, et cela fausse le resultat car detecté déjà detruit
+								if element.dead and element.CheckDay and element.CheckDay < camp.date.CampTotalTimeS then
+								-- if element.dead then											--element was already dead previously
 									element.dead_last = false									--mark element as not died in last mission
 								else
 									element.dead = true											--mark element as dead
@@ -1053,7 +1054,7 @@ for scen_name,scen in pairs(scen_log) do													--iterate through destroyed
 											end
 										end
 									end
-									-- break
+									-- break								
 								end
 							end
 						end
@@ -1269,26 +1270,27 @@ end
 		-- 	},
 		-- }
 
-	--supprime les nouveaux rNewTasks s'ils leurs ajouts sont vieux (date de plus de x mission)
-	if camp.newTaskRequest then
-		for rSide, rSides in pairs(camp.newTaskRequest) do
-			for rTypeName, rTypes in pairs(rSides) do
-				for taskName, NewTasks in pairs(rTypes) do
-					for newTaskName, missionNumber in pairs(NewTasks) do
-						if missionNumber + 4 < camp.mission  then
-							NewTasks[newTaskName] = nil
-						end
+--supprime les nouveaux rNewTasks s'ils leurs ajouts sont vieux (date de plus de x mission)
+if camp.newTaskRequest then
+	for rSide, rSides in pairs(camp.newTaskRequest) do
+		for rTypeName, rTypes in pairs(rSides) do
+			for taskName, NewTasks in pairs(rTypes) do
+				for newTaskName, missionNumber in pairs(NewTasks) do
+					if missionNumber + 4 < camp.mission  then
+						NewTasks[newTaskName] = nil
 					end
 				end
 			end
 		end
 	end
+end
 
-
---local _Str = "targetlistA = " .. TableSerialization(targetlist, 0)
---local trigFile = io.open("Debug/targetlistA.lua", "w")
---trigFile:write(_Str)
---trigFile:close()
+if Debug.debug  then
+	local _Str = "targetlistA = " .. TableSerialization(targetlist, 0)
+	local trigFile = io.open("Debug/targetlist_DEBRIEF_StatsEvaluation.lua", "w") or error("Failed to open debug file")
+	trigFile:write(_Str)
+	trigFile:close()
+end
 
 if Debug.debug and camp.statLost then
 	local _Str = "statLost = " .. TableSerialization(camp.statLost, 0)

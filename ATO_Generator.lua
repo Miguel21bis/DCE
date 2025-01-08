@@ -1106,7 +1106,7 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																								DebuGenTxt = DebuGenTxt.."\n"..("______________ToTarget "..tostring(ToTarget).." <=? "..tostring(unit_loadouts[l].range))
 																								DebuGenTxt = DebuGenTxt.."\n"..("______________minrange? "..tostring(unit_loadouts[l].minrange))
 																								DebuGenTxt = DebuGenTxt.."\n"..("______________ToTarget * 1.5 "..tostring(ToTarget * 1.5).." >? "..tostring(unit_loadouts[l].minrange))
-																								DebugRoute = true
+																								-- DebugRoute = true
 																							end
 
 																							-- print("                    AtoG ToTarget "..tostring(ToTarget).." <=?? unit_loadouts[l].range: "..tostring(unit_loadouts[l].range) )
@@ -3938,13 +3938,13 @@ if Debug.debug then
 	local show = false
 	local resultPourcent =  nbAfterPlaneActifTotal.blue.used / nbBeforPlaneActifTotal.blue.ready * 100
 	if resultPourcent < 40 then
-		print("AtoG caution, not enough blue aircraft used compared to available aircraft. Maybe a bug? "..resultPourcent.." %")
+		print("AtoG caution, not enough BLUE aircraft used compared to available aircraft. Maybe a bug? "..resultPourcent.." %")
 		show = true
 	end
 
-	local resultPourcent =  nbAfterPlaneActifTotal.red.used / nbBeforPlaneActifTotal.red.ready * 100
+	resultPourcent =  nbAfterPlaneActifTotal.red.used / nbBeforPlaneActifTotal.red.ready * 100
 	if resultPourcent < 40 then
-		print("AtoG caution, not enough red aircraft used compared to available aircraft. Maybe a bug? "..resultPourcent.." %")
+		print("AtoG caution, not enough RED aircraft used compared to available aircraft. Maybe a bug? "..resultPourcent.." %")
 		show = true
 	end
 

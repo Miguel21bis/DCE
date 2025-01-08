@@ -1670,7 +1670,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 	end
 	route.lenght = route_lenght
 
-	if  DebugRoute  then
+	if DebugRoute then
 		print("AtoRG passe BB route.lenght "..tostring(route.lenght))
 	end
 

@@ -267,7 +267,7 @@ do
 			break
 		end
 	end
-
+	
 	-- local target_alive = targetlist[camp.player.side][target_name].alive										--alive percentage of player package target (if applicable)
 	-- local target_hit = targetlist[camp.player.side][target_name].dead_last										--percentage destroyed in this mission
 	local target_class = camp.player.pack[camp.player.role][camp.player.flight].target.class					--target class

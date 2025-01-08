@@ -1,13 +1,13 @@
 --To generate a new mission file. Unzips template mission, defines content of next missions and packs a new mission file
 --Initiated by Debrief_Master.lua, BAT_FirstMission.lua or BAT_RedoMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification cleanCode_g
+-- last modification debug_b
 if not versionDCE then versionDCE = {} end
-versionDCE["MAIN_AcceptMission.lua"] = "1.10.64"
+versionDCE["MAIN_AcceptMission.lua"] = "1.10.65"
 ------------------------------------------------------------------------------------------------------- 
 
 -- cleanCode_g				(g springCleaning)(e: os.remove)
--- debug_a					(a endCampaign)
+-- debug_b					(b Briefing_text)(a endCampaign)
 -- adjustment_g				(f currentKey)(e not DC_Weather)(d PairsByKeys)(c move UpdateSar & correct Brief Systeme)(b: don't load UTIL_Debug)(a: don't load Ini/db_airbase)
 -- modification M63_a		compatible Datacard Generator or CombatFlite
 -- modification M61_a		SAR
@@ -153,9 +153,17 @@ camp.waitingNextGen = true
 -- 	camp["Briefing_text"] = " #Mam2# "..FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ": \n \n" 		--add date and time header
 -- end
 
-if Briefing_text ~= "" then
-	camp["Briefing_text"] = camp["Briefing_text"] .. Briefing_text
+if Briefing_text and Briefing_text ~= "" then
+
+	if camp["Briefing_text"] then
+		camp["Briefing_text"] = camp["Briefing_text"] .. Briefing_text
+	else
+		camp["Briefing_text"] = Briefing_text
+	end
+
 end
+
+
 
 --si la generation de la mission suivante est repoussee, on sauvegarde le txt cr�e par les trigger txt precedent
 if BriefingImagesR ~= nil or #BriefingImagesR ~= 0 then
