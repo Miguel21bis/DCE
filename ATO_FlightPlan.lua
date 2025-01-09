@@ -2070,17 +2070,16 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					os.execute 'pause'
 				end
 
-				-- print("AtoFP passe #2 typeCible "..typeCible.." || "..flight[f].type.." "..GoupTaskTemp.." "..tostring(flight[f].target.name))
-
+				
+				---========================-----========================--
 				----- define waypoints -----
+				------========================-----========================--
 				local egress_wp													--local variable to store the Egress WP
 				local target_wp_remove											--local variable for the target waypoint to be potentially removed for standoff ground attacks
 				local spawn_time = flight[f].route[1].eta --spawn_time_bug											--local variable to store spawn time
 				local departure_time											--local variable to store departure time
 				local waypoints = {}											--define waypoints of flight
 				local wptTargetPass = false										--detecte le passage du wpt Target
-
-
 
 				for w = 1, #flight[f].route do
 
@@ -2580,7 +2579,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 								local departure_timeB = mission_ini.startup_time_player + 600
 
-								waypoints[w]["ETA"] = mission_ini.startup_time_player + 1200
+								waypoints[w].ETA = mission_ini.startup_time_player + 1200
 
 								--ajoute un waypoint intermediaire avec une orbit
 								local wptOrbit = {
@@ -4016,7 +4015,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					table.remove(waypoints, 1)
 
-					waypoints[1]["ETA"] = spawn_time
+					-- waypoints[1].ETA = spawn_time	--NE PAS METTRE ça, ça rend le decollage en retard
 					waypoints[1].ETA_locked = true
 					waypoints[1].speed_locked = true
 
@@ -5010,7 +5009,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					group.start_time = 0	--start_time_bug group.start_time = 1
-					group['route']['points'][1]["ETA"] = 0
+					group['route']['points'][1].ETA = 0
 
 					local PlayerSixPack = {}
 					if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe PlayerClient AddtimingDeckCata "..spawn_time) end
@@ -6908,7 +6907,7 @@ function AF_spawnOn(where, groupName)
 					if group.name ==  groupName then
 						group.route.points[1]['action'] = action
 						group.route.points[1]['type'] = actionType
-						group['route']['points'][1]["ETA"] = 0
+						group['route']['points'][1].ETA = 0
 						group['uncontrolled'] = false
 						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFp AF_spawnOn Find "..group.units[1].type.." "..group.name.." "..group.route.points[1]['type']) end
 					end
@@ -6918,7 +6917,7 @@ function AF_spawnOn(where, groupName)
 					if group.name ==  groupName then
 						group.route.points[1]['action'] = action
 						group.route.points[1]['type'] = actionType
-						group['route']['points'][1]["ETA"] = 0
+						group['route']['points'][1].ETA = 0
 						group['uncontrolled'] = false
 						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFp AF_spawnOn Find "..group.units[1].type.." "..group.name.." "..group.route.points[1]['type']) end
 					end
@@ -6965,7 +6964,7 @@ for CV, SixPack in pairs(testSixPack) do
 									group['tasks'] = {}
 									break
 								end
-								group['route']['points'][1]["ETA"] = 0
+								group['route']['points'][1].ETA = 0
 								group['start_time'] = 0
 								modify_activate_group_time(group, -1, debug.getinfo(1).currentline)								--supprime le triger activate
 								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFp SixPack Find "..group.name) end
@@ -6976,7 +6975,7 @@ for CV, SixPack in pairs(testSixPack) do
 					elseif country.helicopter  then
 						for Ngroup,group in pairs(country.helicopter.group) do
 							if group.name ==  sixpackWiner then
-								group['route']['points'][1]["ETA"] = 0
+								group['route']['points'][1].ETA = 0
 								group['start_time'] = 0
 								modify_activate_group_time(group, -1, debug.getinfo(1).currentline)								--supprime le triger activate
 								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFp SixPack Find "..group.name) end
