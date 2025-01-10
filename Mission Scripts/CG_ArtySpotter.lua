@@ -968,20 +968,20 @@ local function onPlayerAddMarker(event)
 
 		if event.initiator and Object.getCategory(event.initiator) ~= Object.Category.STATIC and event.initiator:getPlayerName() then
 
-			local groupId = event.initiator:getGroup():getID()
+			local gpGid = event.initiator:getGroup():getID()
 			local Uid = event.initiator:getID()
 			local initiatorName = event.initiator:getPlayerName()
 
-			missionCommands.removeItemForGroup(gpGid, {"Artillery Init"})
-
-			env.info("CG_ArtySpotter: S_EVENT_BIRTH: groupId: "..tostring(groupId))
+			env.info("CG_ArtySpotter: S_EVENT_BIRTH: groupId: "..tostring(gpGid))
 			env.info("CG_ArtySpotter: S_EVENT_BIRTH: Uid: "..tostring(Uid))
 			env.info("CG_ArtySpotter: S_EVENT_BIRTH: initiatorName: "..tostring(initiatorName))
+
+			missionCommands.removeItemForGroup(gpGid, {"Artillery Init"})
 
 			if not menuRadioInit then menuRadioInit = {} end
 			menuRadioInit[initiatorName] = {}
 
-			menuRadioInit[initiatorName] = missionCommands.addCommandForGroup(groupId, 'Artillery Init', nil, menuAccueil, Uid)
+			menuRadioInit[initiatorName] = missionCommands.addCommandForGroup(gpGid, 'Artillery Init', nil, menuAccueil, Uid)
 
 		end
 

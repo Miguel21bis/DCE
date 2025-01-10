@@ -31,9 +31,9 @@ env.info("DCETestingConstante: Unit.Category.STRUCTURE "..tostring(Unit.Category
 
 -- Last_AddSoldierAliasPilot = 0
 
-EjectionSeatFrequency = {}
-SumSoldierAliasPilot = 0
-CustomLog = {}
+-- EjectionSeatFrequency = {}
+-- SumSoldierAliasPilot = 0
+-- CustomLog = {}
 
 local scenLog = {}
 local eventIdTotal = {}
@@ -422,6 +422,7 @@ function eventHandlerDCE:onEvent(event)
 					PilotEjection.initiatorPilotName = event.initiator:getPlayerName()
 					if PilotEjection.initiatorPilotName then
 						PilotEjection.initiatorPilotName = PilotEjection.initiatorPilotName:gsub('[%p]', '_')
+						log_entry.initiatorPilotName = PilotEjection.initiatorPilotName
 					end
 					PilotEjection.Coalition = event.initiator:getCoalition()
 				end
@@ -480,6 +481,9 @@ function eventHandlerDCE:onEvent(event)
 				}
 
 				table.insert(EjectionSeatFrequency, ejectionSeatTemp)
+
+				table.insert(CustomLog, log_entry)	
+
 			end
 			if initiatorSideName then
 				log_entry.initiatorSideName = initiatorSideName

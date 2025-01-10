@@ -13,7 +13,7 @@ versionDCE["Mission Scripts\SAR.lua"] = "1.4.23"
 -------------------------------------------------------------------------------------------------------
 
 
-zoneSAR = {}																									--table enumérant les helico SAR pour eviter d'en envoyer plusieurs aux memes endroits
+-- zoneSAR = {}																									--table enumérant les helico SAR pour eviter d'en envoyer plusieurs aux memes endroits
 
 local nbManhunt = {
 	[1] = 0,
@@ -1711,17 +1711,17 @@ function LoopSAR()
 						if units_SAR then
 							for n=1, #units_SAR do
 								unitSAR = units_SAR[n]
-								_affiche(unitSAR, "DCE_SAR:LoopSAR unitSAR")
+								-- _affiche(unitSAR, "DCE_SAR:LoopSAR unitSAR")
 								if unitSAR then
 									SAR_Coalition = tostring(unitSAR:getCoalition())
 									local humanSarPlayer = unitSAR:getPlayerName()
-									env.info("DCE_SAR:LoopSAR humanSarPlayer "..tostring(humanSarPlayer))
+									-- env.info("DCE_SAR:LoopSAR humanSarPlayer "..tostring(humanSarPlayer))
 
 									if  unitSAR:isActive() and  string.lower(coalition_name) ==  coalitionId[SAR_Coalition] then
 										local Pos_SAR = unitSAR:getPoint()
 										local  SAR_unitId = Unit.getID(unitSAR)
 										local SAR_Name = unitSAR:getName()
-										env.info("DCE_SAR:SAR_Name humanSarPlayer "..tostring(SAR_Name))
+										-- env.info("DCE_SAR:SAR_Name humanSarPlayer "..tostring(SAR_Name))
 
 										if not walkEjectedPilot[SAR_unitId] then walkEjectedPilot[SAR_unitId] = false end
 										if not guideSAR[SAR_unitId] then guideSAR[SAR_unitId] = false end

@@ -56,6 +56,14 @@ LastInjectFlightPlan = {}																--garde les derniers plan de vol inject
 tabBingoPlane = {}
 GroundDamagedFlyingMachine = {}
 
+
+EjectionSeatFrequency = {}
+SumSoldierAliasPilot = 0
+CustomLog = {}
+
+zoneSAR = {}																									--table enumérant les helico SAR pour eviter d'en envoyer plusieurs aux memes endroits
+
+
 coalitionId = {
 	["0"] = "neutral",
 	["1"] = "red",
