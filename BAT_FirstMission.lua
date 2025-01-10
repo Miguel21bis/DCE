@@ -1,15 +1,14 @@
 --To manually generate the first campaign mission and reset the campaign to initial status. For manual use by campaign designer only, not required for normal campaign play.
 --Initiated by FirstMission.bat
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleancode_d M80_a
+-- last modification: cleancode_d M80_a adjustment_p
 if not versionDCE then versionDCE = {} end
 versionDCE["BAT_FirstMission.lua"] = "1.13.98"
 -------------------------------------------------------------------------------------------------------
--- adjustment_o				(o full targetList)(n targetList numeric)(m BAT)(l Playable_m from Data_divers)(k BugList)(j PairsByKeys)(i global TabTask)(h Firstmission_flag)(g mise a niveau)(d: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form)
+-- adjustment_p				(p tools)(o full targetList)(n targetList numeric)(m BAT)(l Playable_m from Data_divers)(k BugList)(j PairsByKeys)(i global TabTask)(h Firstmission_flag)(g mise a niveau)(d: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form)
 -- cleancode_d				(d springCleaning)
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M61_c		SAR (c DEV creation fichier cercle commande: w3)
--- modification M56_a		AssignCallnameSquad
 -- modification M55_a		player can change the type of plane
 -- modification M47_c		keeps the history of the campaign files (c: save debugging information during mission generation)
 -- modification M46_d		singlePlayer with dedicated server (c: DF choice)(c: D choice with AI AirSpawn)
@@ -386,34 +385,43 @@ repeat
 		--M55_a		player can change the type of plane
 		elseif choix1 == "c" then
 			dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ChangePlane.lua")
-		-- elseif choix1 == "w" then
-		-- 	UTIL_KillTarget = true
+
 		elseif choix1 == "o" then
 
+			local tabIndexTools = {
+				["a"] = true,
+				["b"] = true,
+				["c"] = true,
+				["d"] = true,
+			}
 			-- Ecran N°3 Selection nb of Flight
 			repeat
 				print("Tools menu: \n")
 				print("Select :\n"..
 				"A: DelGroup  \n"..
 				"B: fuelConsumption \n"..
-				"C: KillTarget \n"
+				"C: KillTarget \n"..
+				"D: help balance Power \n"
 				)
 
 				local choix2 = string.lower(io.stdin:read())
 
-				if (choix2 == "a" or choix2 == "b" or choix2 == "c") then
+				if tabIndexTools[choix2] then
 					if choix2 == "a" then
 						ArgTools = "DelGroup"
 					elseif choix2 == "b" then
 						ArgTools = "fuelConsumption"
 					elseif choix2 == "c" then
 						ArgTools = "KillTarget"
+					elseif choix2 == "d" then
+						ArgTools = "helpBalancePower"
 					end
 				else
 					print("\nInvalid entry.\n")
 				end
-			until (choix2 == "a" or  choix2 == "b" or choix2 == "c")
+			until tabIndexTools[choix2]
 
+			--killTarget doit etre lancé plus tard par MAIN_NextMission.lua
 			if ArgTools ~= "KillTarget" then
 				dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Divers.lua")
 				os.execute 'pause'
@@ -423,14 +431,7 @@ repeat
 			dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_TestCercle.lua")
 			os.execute 'pause'																					--pause command window for user to read text
 			os.exit()
-		-- modification M38.e Check and helps to balance the game for CampaignMaker
-		elseif choix1 == "z" then
-		  	repeat
-				dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_HelpBalancePower.lua")
-				os.execute 'pause'
-			until 1 == 2
 		end
-		-- print("Z.\n")
 	until tabIndex01[choix1]
 
 	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ResetCampaign.lua")					--reset campaign status files. Required for first mission to generate according to initial status	

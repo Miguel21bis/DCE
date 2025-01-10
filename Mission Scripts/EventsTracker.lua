@@ -367,15 +367,15 @@ function eventHandlerDCE:onEvent(event)
 
 	--recupere le camp une fois pour toute:
 	local initiatorSideName
-	local targetSideName
+	local targetSideName local initiatorObjCategory local targetObjCategory
 	if event.initiator then
-		local cat = Object.getCategory(event.initiator)
+		initiatorObjCategory = Object.getCategory(event.initiator)
 		--DCE_EventsTracker initiator Category 0 _: nil
-		env.info("DCE_EventsTracker initiator Category: "..tostring(cat))
-		if Object_Category[cat] then
-			env.info("DCE_EventsTracker initiator Object_Category :  _:_ "..tostring(Object_Category[cat]))
-		
-			if cat ~= Object.Category.SCENERY then
+		env.info("DCE_EventsTracker initiator Category: "..tostring(initiatorObjCategory))
+		if Object_Category[initiatorObjCategory] then
+			env.info("DCE_EventsTracker initiator Object_Category :  _:_ "..tostring(Object_Category[initiatorObjCategory]))
+
+			if initiatorObjCategory ~= Object.Category.SCENERY then
 				local initiatorCoalition = event.initiator:getCoalition()
 				initiatorSideName = coalitionIdNumeric[tonumber(initiatorCoalition)]
 			end
@@ -383,12 +383,12 @@ function eventHandlerDCE:onEvent(event)
 	end
 
 	if event.target then
-		local cat = Object.getCategory(event.target)
-		env.info("DCE_EventsTracker target Category: "..tostring(cat))
-		if Object_Category[cat] then
-			env.info("DCE_EventsTracker Object_Category :  _:_ "..tostring(Object_Category[cat]))
-
-			if cat ~= Object.Category.SCENERY then
+		targetObjCategory = Object.getCategory(event.target)
+		env.info("DCE_EventsTracker target Category: "..tostring(targetObjCategory))
+		if Object_Category[targetObjCategory] then
+			env.info("DCE_EventsTracker Object_Category :  _:_ "..tostring(Object_Category[targetObjCategory]))
+			-- static:getDesc().category
+			if targetObjCategory ~= Object.Category.SCENERY then
 				if event.target:isExist() then
 					local targetCoalition = event.target:getCoalition()
 					targetSideName = coalitionIdNumeric[tonumber(targetCoalition)]
@@ -481,10 +481,10 @@ function eventHandlerDCE:onEvent(event)
 
 				table.insert(EjectionSeatFrequency, ejectionSeatTemp)
 			end
-			if initiatorSideName then 
+			if initiatorSideName then
 				log_entry.initiatorSideName = initiatorSideName
 			end
-			if targetSideName then 
+			if targetSideName then
 				log_entry.targetSideName = targetSideName
 			end
 		end
@@ -554,10 +554,10 @@ function eventHandlerDCE:onEvent(event)
 
 				-- CheckImmediatSAR(event, selectedEjection)
 			end
-			if initiatorSideName then 
+			if initiatorSideName then
 				log_entry.initiatorSideName = initiatorSideName
 			end
-			if targetSideName then 
+			if targetSideName then
 				log_entry.targetSideName = targetSideName
 			end
 		else
@@ -652,10 +652,10 @@ function eventHandlerDCE:onEvent(event)
 					end
 				end
 			end
-			if initiatorSideName then 
+			if initiatorSideName then
 				log_entry.initiatorSideName = initiatorSideName
 			end
-			if targetSideName then 
+			if targetSideName then
 				log_entry.targetSideName = targetSideName
 			end
 		end
@@ -677,10 +677,10 @@ function eventHandlerDCE:onEvent(event)
 			end
 		end
 
-		if initiatorSideName then 
+		if initiatorSideName then
 			log_entry.initiatorSideName = initiatorSideName
 		end
-		if targetSideName then 
+		if targetSideName then
 			log_entry.targetSideName = targetSideName
 		end
 
@@ -805,15 +805,15 @@ function eventHandlerDCE:onEvent(event)
 
 	-- debug ET01.g
 	elseif log_entry.type and ((log_entry.type == "hit" and event.initiator) or log_entry.type ~= "hit" ) then												--hit event with initiator or any other event (excludes hit events without initiator, like collisions) 	
-		if event.initiator then																													--event has an initiator	
-			
+		if event.initiator and initiatorObjCategory ~= 0 then																													--event has an initiator	
+
 			if event and event.id and Info_event and Info_event[tonumber(event.id)] then
 				local idLabel = tostring(Info_event[tonumber(event.id)])
 				env.info("DCE_EventsTracker event.id "..tostring(event.id).." " ..idLabel)
 			end
 
 			_affiche(event.initiator, "DCE_EventsTracker event.initiator")
-			
+
 			local initDesc = event.initiator:getDesc()																									--debug ET01	
 			if initDesc.displayName then
 				log_entry.initiator = event.initiator:getName()																							--store initiator name
@@ -832,14 +832,14 @@ function eventHandlerDCE:onEvent(event)
 				log_entry.initiatorMissionID = event.initiator:getID()																					--store ID
 			end
 
-			if initiatorSideName then 
+			if initiatorSideName then
 				log_entry.initiatorSideName = initiatorSideName
 			end
-			if targetSideName then 
+			if targetSideName then
 				log_entry.targetSideName = targetSideName
 			end
 		end
-		
+
 		if event.target   then																														--event has a target
 
 			-- Object.Category
@@ -1056,7 +1056,7 @@ function eventHandlerDCE:onEvent(event)
 				env.info("DCE_eventIdTotal: Failed to open log file for writing.")
 			end
 
-			
+
 
 			local fileStr = "EWR_optionPlayer = " .. TableSerialization(EWR_optionPlayer, 0)
 			local fileFile = io.open(PathDCE.."Debug\\" .. "EWR_optionPlayer.lua", "w")
@@ -1065,7 +1065,7 @@ function eventHandlerDCE:onEvent(event)
 				fileFile:close()
 			else
 				env.info("DCE_EWR_optionPlayer: Failed to open log file for writing.")
-			end			
+			end
 		end
 
 		-- os.execute('start "EventPath" cmd  /k "c: & cd '..path..' & call \Init\\path.bat && pause"')

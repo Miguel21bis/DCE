@@ -1,16 +1,16 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.80.508"
+versionDCE["UTIL_Changelog.lua"] = "20.80.509"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.80.508"
+VersionDCE["UTIL_Changelog.txt"] = "20.80.509"
 --[[
 
 
 known issues:
-- [EWR text]: EWR also announces you as a friendly contact
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.81.508:==
+==:20.81.509:==
+509 fixed [callsign]	callsign for wingman doesn't make sense
 508 modified [loadout][consumption]	many loadouts updated to take fuel consumption into account. Consumption found thanks to new tool
 507 fixed [code_loadout]	loadout code is sometimes incorrectly recognized
 506 fixed [debriefing][stats]	stats for your own package are rarely displayed

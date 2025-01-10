@@ -1,16 +1,15 @@
 --To manually re-generate and replace the current campaign mission. For contingency only, not required for normal campaign play.
 --Initiated by RedoMission.bat
 ------------------------------------------------------------------------------------------------------- 
--- last modification: springCleaning
+-- last modification: springCleaning adjustment_o
 if not versionDCE then versionDCE = {} end
-versionDCE["BAT_SkipMission.lua"] = "1.14.97"
+versionDCE["BAT_SkipMission.lua"] = "1.14.98"
 -------------------------------------------------------------------------------------------------------
--- adjustment_n				(n targetList numeric)(m BAT)(l Playable_m from Data_divers)(k BugList)(j PairsByKeys)(i global TabTask)(h Skipmission_flag)(g mise a niveau)(e: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form) 
+-- adjustment_o				(o tools)(n targetList numeric)(m BAT)(l Playable_m from Data_divers)(k BugList)(j PairsByKeys)(i global TabTask)(h Skipmission_flag)(g mise a niveau)(e: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form) 
 -- debug_d					(cd: EndMission)
 -- cleancode_d				(d springCleaning)
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M61_a		SAR
--- modification M56_a		AssignCallnameSquad
 -- modification M55_a		player can change the type of plane
 -- modification M47_d		keeps the history of the campaign files (d: debug) (c: save debugging information during mission generation)
 -- modification M46_d		singlePlayer with dedicated server (c: DF choice)(c: D choice with AI AirSpawn)
@@ -434,13 +433,15 @@ if input == "y" or input == "yes" then
 							ArgTools = "fuelConsumption"
 						elseif choix2 == "c" then
 							ArgTools = "KillTarget"
+						elseif choix2 == "d" then
+							ArgTools = "helpBalancePower"
 						end
 					else
 						print("\nInvalid entry.\n")
 					end
 				until (choix2 == "a" or  choix2 == "b" or choix2 == "c")
 
-				print("ArgTools "..tostring(ArgTools))
+				-- print("ArgTools "..tostring(ArgTools))
 	
 				if ArgTools ~= "KillTarget" then
 					dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Divers.lua")

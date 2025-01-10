@@ -3,13 +3,13 @@
 -- original code by ************ Carsten Gurk aka Don Rudi ***************
 -- modified by Miguel & Cef with kind permission of Don Rudi :)
 ------------------------------------------------------------------------------------------------------- 
--- last modification   cleanCode_a debug_b
+-- last modification   cleanCode_a debug_c
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\CG_ArtySpotter.lua"] = "1.4.16"
+versionDCE["Mission Scripts\CG_ArtySpotter.lua"] = "1.4.17"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_a				(a springCleaning)				
 -- adjustment_						
--- debug_b					(b removeItemForGroup Init)
+-- debug_c					(c removeItemForGroup Init)
 -- modification M77_m		CG_ArtySpotter (m subMenu)(l spotterAircraft)(i boundary)(h camp.spotter)(g tempo)(f smoke & remains)(e lineOfSight)(d artyZone)(c timeImpact)(b qty_Total_Shells)(a responseTimeVar)	
 ------------------------------------------------------------------------------------------------------- 
 local version = "script merge 2.3_f_15h.00"
@@ -329,6 +329,8 @@ local function removeMenuItems(initiatorName)
 
 		local Uid = artyTasks[initiatorName].initiator:getID()
 		local gpGid = artyTasks[initiatorName].initiator:getGroup():getID()
+
+		missionCommands.removeItemForGroup(gpGid, {"Artillery Init"})
 
 
 		env.info("CG_ArtySpotter: CGAS_timerPlayerMenu: Uid: "..tostring(Uid))
@@ -969,6 +971,8 @@ local function onPlayerAddMarker(event)
 			local groupId = event.initiator:getGroup():getID()
 			local Uid = event.initiator:getID()
 			local initiatorName = event.initiator:getPlayerName()
+
+			missionCommands.removeItemForGroup(gpGid, {"Artillery Init"})
 
 			env.info("CG_ArtySpotter: S_EVENT_BIRTH: groupId: "..tostring(groupId))
 			env.info("CG_ArtySpotter: S_EVENT_BIRTH: Uid: "..tostring(Uid))

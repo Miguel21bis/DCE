@@ -3487,7 +3487,7 @@ function EventHandler2:onEvent(event)
 					local initDesc = event.initiator:getDesc()
 					_affiche(initDesc, "DCE_GroundDamagedFlyingMachine initDesc")
 
-					local initiatorPilotName = event.initiator:getPlayerName()
+					-- local initiatorPilotName = event.initiator:getPlayerName()
 					local unitName = event.initiator:getName()
 					local life = event.initiator:getLife()
 					local init_life = event.initiator:getLife0()
@@ -3498,13 +3498,13 @@ function EventHandler2:onEvent(event)
 					end
 
 
-					env.info( "DCE_GroundDamagedFlyingMachine C1 initiatorPilotName "..tostring(initiatorPilotName).." lifePourcent: "..tostring(lifePourcent))
+					-- env.info( "DCE_GroundDamagedFlyingMachine C1 initiatorPilotName "..tostring(initiatorPilotName).." lifePourcent: "..tostring(lifePourcent))
 					env.info( "DCE_GroundDamagedFlyingMachine C2 init_life "..tostring(init_life).." life: "..tostring(life))
 					env.info( "DCE_GroundDamagedFlyingMachine C3 event.initiator.id_ "..tostring(event.initiator.id_))
 
-					if initiatorPilotName and initiatorPilotName ~= "" then
-						isPlayer = true
-					end
+					-- if initiatorPilotName and initiatorPilotName ~= "" then
+					-- 	isPlayer = true
+					-- end
 
 					--TODO ajouter une proximité Base & Farp pour ne pas le faire dessus
 					if lifePourcent < 100 and lifePourcent >= 1 then
@@ -3520,8 +3520,8 @@ function EventHandler2:onEvent(event)
 						local side = coalitionIdNumeric[tonumber(initiatorSIDE)]
 
 						local eventData = {
-							initiatorPilotName = initiatorPilotName,
-							isPlayer = isPlayer,
+							-- initiatorPilotName = initiatorPilotName,
+							-- isPlayer = isPlayer,
 							unitName = unitName,
 							-- unitGame = event.initiator,
 							-- Uid = event.initiator:getID(),

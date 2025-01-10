@@ -79,7 +79,7 @@ function DespawnSoldierAliasPilot(EjectedPilotName, embarkation)
 			if ejectedPilot.name and ejectedPilot.name == EjectedPilotName    then	--and ejectedPilot.embarked ~= true
 
 				env.info( "DCE_SAR: the pilot :"..EjectedPilotName.." is on board ".." ejectedPilot.Coalition: "..tostring(ejectedPilot.Coalition))
-				-- trigger.action.outText("SAR: the pilot:"..EjectedPilotName.." is on board", 10)
+				-- trigger.action.outText("DCE_SAR: the pilot:"..EjectedPilotName.." is on board", 10)
 
 				if ejectedPilot.Coalition then
 					trigger.action.outTextForCoalition(ejectedPilot.Coalition, "SAR Coalition: the pilot:"..EjectedPilotName.." is on board", 10)
@@ -1516,10 +1516,12 @@ local function detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
 	local outFonction = false
 	local SAR_unitId = Unit.getID(unitSAR)
 
-	env.info( "SAR:humanSarPlayer embarkation PASSE AA ")
+	env.info( "DCE_SAR:humanSarPlayer embarkation PASSE AA ")
+	_affiche(unitSAR, "DCE_SAR unitSAR")
+	_affiche(ejectedPilot, "DCE_SAR ejectedPilot")
 
 	local function walk()
-		env.info( "SAR:humanSarPlayer embarkation PASSE BB ")
+		env.info( "DCE_SAR:humanSarPlayer embarkation PASSE BB ")
 		local unitPilot = Unit.getByName(ejectedPilot.name)
 		local PosEjectedPilot = unitPilot:getPoint()
 		local Pos_SAR = unitSAR:getPoint()
@@ -1527,15 +1529,16 @@ local function detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
 
 		local distance = math.ceil(math.sqrt(math.pow(Pos_SAR.x - PosEjectedPilot.x, 2) + math.pow(Pos_SAR.z - PosEjectedPilot.z, 2)))
 
-		trigger.action.outTextForUnit( SAR_unitId , "Embarkation Distance: "..tostring(distance).." (must be <200m)" , 2 , true)
+		trigger.action.outTextForUnit( SAR_unitId , "PilotEmbarkation Embarkation Distance: "..tostring(distance).." (must be <200m)" , 2 , true)
 
 		if distance <= 200 and not SARinAir then
-			env.info( "SAR:humanSarPlayer embarkation PASSE CC ")
+			env.info( "DCE_SAR:humanSarPlayer PilotEmbarkation PASSE CC ")
 
-			trigger.action.outTextForUnit( SAR_unitId , "Use airborne troops for on-boarding" , 2 , false)
+			trigger.action.outTextForUnit( SAR_unitId , "PilotEmbarkation Use airborne troops for on-boarding" , 2 , false)
 
 			if distance <= 20 then
-				env.info( "SAR:humanSarPlayer embarkation & StopRadioTransmission PASSE DD "..tostring(ejectedPilot.name))
+				env.info( "DCE_SAR:humanSarPlayer PilotEmbarkation & StopRadioTransmission PASSE DD "..tostring(ejectedPilot.name))
+				trigger.action.outTextForUnit( SAR_unitId , "DCE_SAR:humanSarPlayer PilotEmbarkation & StopRadioTransmission PASSE DD "..tostring(ejectedPilot.name) , 15 , false)
 				local embarkation = true
 				DespawnSoldierAliasPilot(ejectedPilot.name, embarkation )
 				-- StopRadioTransmission(ejectedPilot.name)
@@ -1544,12 +1547,12 @@ local function detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
 			end
 
 		elseif distance > 200 or SARinAir then
-			env.info( "SAR:humanSarPlayer embarkation PASSE EE ")
+			env.info( "DCE_SAR:humanSarPlayer PilotEmbarkation PASSE EE ")
 			outFonction = true
 			walkEjectedPilot[SAR_unitId] = false
 			return
 		end
-		env.info( "SAR:humanSarPlayer embarkation PASSE FF ")
+		env.info( "DCE_SAR:humanSarPlayer PilotEmbarkation PASSE FF ")
 		return timer.getTime() + 1
 	end
 
@@ -1558,7 +1561,11 @@ local function detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
 		return
 	end
 
-	timer.scheduleFunction(walk, nil, timer.getTime() + 1)
+	if unitSAR:isActive() then
+		timer.scheduleFunction(walk, nil, timer.getTime() + 1)
+	else
+		return
+	end
 
 end
 
@@ -1704,14 +1711,18 @@ function LoopSAR()
 						if units_SAR then
 							for n=1, #units_SAR do
 								unitSAR = units_SAR[n]
+								_affiche(unitSAR, "DCE_SAR:LoopSAR unitSAR")
 								if unitSAR then
 									SAR_Coalition = tostring(unitSAR:getCoalition())
 									local humanSarPlayer = unitSAR:getPlayerName()
+									env.info("DCE_SAR:LoopSAR humanSarPlayer "..tostring(humanSarPlayer))
 
 									if  unitSAR:isActive() and  string.lower(coalition_name) ==  coalitionId[SAR_Coalition] then
 										local Pos_SAR = unitSAR:getPoint()
 										local  SAR_unitId = Unit.getID(unitSAR)
 										local SAR_Name = unitSAR:getName()
+										env.info("DCE_SAR:SAR_Name humanSarPlayer "..tostring(SAR_Name))
+
 										if not walkEjectedPilot[SAR_unitId] then walkEjectedPilot[SAR_unitId] = false end
 										if not guideSAR[SAR_unitId] then guideSAR[SAR_unitId] = false end
 
@@ -1889,9 +1900,15 @@ end
 function GetOutGDFM(arg)
 	-- env.info( "DCE_getOut A scheduleFunction GetOutGDFM ")
 
-	local pName = arg[1]
-	local player = arg[2]
-	local playerId = arg[3]
+	local pName
+	local player
+	local playerId
+
+	if arg and arg[1] then
+		pName = arg[1]
+		player = arg[2]
+		playerId = arg[3]
+	end
 
 	-- local eventData = {
 	-- 	initiatorPilotName = initiatorPilotName,

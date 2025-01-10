@@ -1,9 +1,9 @@
 --To create the flight plans in the mission file for all flights in the ATO
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleancode_n debug_z
+-- last modification: cleancode_n debug_z M56_c
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_FlightPlan.lua"] = "1.58.284"
+versionDCE["ATO_FlightPlan.lua"] = "1.58.285"
 ------------------------------------------------------------------------------------------------------- 
 
 -- SomethingSimple_a		(a add randomizeSkills)
@@ -26,7 +26,7 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.284"
 -- modification M61_k		SAR (k use parkAlertSAR for all Heli)(j bug parkAlertSAR.occupied)(debug SAR on CV)(f radio_start)(d theatre)
 -- modification M60_c		add CTLD (c load_CTLD option)(b bug vehicul)(a JTAC)
 -- modification M58_a		flight plan, heading, Dist, ETE
--- modification M56_b		AssignCallnameSquad (b: callsignId)
+-- modification M56_c		AssignCallnameSquad (c callsign_flight)(b: callsignId)
 -- modification M54_d		revoir CustomTaskScript et TaskBombing (c: "Guided bombs 268402702)(b: debug No XY)
 -- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
 -- modification M52_b		campaign player's choices  (b: difficulté de campagne)(a: durée de la campagne)
@@ -380,6 +380,7 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 					testCall = flight_["callsign"]..callsign_flight
 					if not tabCallSignFligt[testCall] then
 						tabCallSignFligt[testCall] = true
+						flight_["callsign_flight"] = callsign_flight
 						foundCsf = true
 						break
 					end
@@ -389,14 +390,13 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 				if not foundCsf then
 					callsign_flight = math.random(1, 9)
 					testCall = flight_["callsign"]..callsign_flight
+					flight_["callsign_flight"] = callsign_flight
 					tabCallSignFligt[testCall] = true
 				end
-				-- callsign_flight = math.random(0, 8)			
-				-- callsign_flight = callsign_flight + 1
-				-- if callsign_flight > 9 then
-					-- callsign_flight = 1
-				-- end							
+				
 			end
+
+			callsign_flight = flight_["callsign_flight"]
 			callsign_nb = flight_["callsignId"]
 			_name = flight_["callsign"] .. callsign_flight .. aircraft_n
 
@@ -450,10 +450,7 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 					testCall = Callsign_west[category][Callsign_west_counter[category]]..callsign_flight
 					tabCallSignFligt[testCall] = true
 				end
-				-- callsign_flight = callsign_flight + 1
-				-- if callsign_flight > 9 then
-					-- callsign_flight = 1
-				-- end
+
 			end
 
 			callsign_nb = Callsign_west_counter[category]
@@ -473,18 +470,6 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 			callsign_east_counter = callsign_east_counter + 1
 		end
 		callsign = 90 + callsign_east_counter * 10 + aircraft_n
-
-		-- --Mod_ldnz
-		-- if aircraft_n == 1 then
-		-- 	callsign_east_counter = callsign_east_counter + 1
-		-- end
-
-		-- local callsign_temp = 90 + callsign_east_counter * 10 + aircraft_n
-		-- print("FIXING UP Callsign " .. callsign_temp)
-		-- local hundreds = math.floor(callsign_temp / 100)
-		-- local tens = math.floor((callsign_temp % 100) / 10)
-		-- local ones = math.floor(callsign_temp  % 10)
-		-- print("Got " .. hundreds .. " " .. tens .. " " .. ones)
 
 		-- callsign = {
 		-- 	[3] = hundreds,
@@ -4399,6 +4384,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								--groups.xy se fera plus loin, dans le code, avec waypoints[1].xy comme ref
 								waypoints[1].action = "From Ground Area"
 								waypoints[1].type = "TakeOffGround"
+								waypoints[1].airdromeId = nil
 								waypoints[1].x = flight[f]["parkAlertSAR"][n].x
 								waypoints[1].y = flight[f]["parkAlertSAR"][n].y
 								units[n].x = flight[f]["parkAlertSAR"][n].x
@@ -4423,6 +4409,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								--groups.xy se fera plus loin, dans le code, avec waypoints[1].xy comme ref
 								waypoints[1].action = "From Ground Area"
 								waypoints[1].type = "TakeOffGround"
+								waypoints[1].airdromeId = nil
 								waypoints[1].x = flight[f]["parkAlertSAR"][n].x
 								waypoints[1].y = flight[f]["parkAlertSAR"][n].y
 								units[n].x = flight[f]["parkAlertSAR"][n].x
@@ -4472,6 +4459,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								--groups.xy se fera plus loin, dans le code, avec waypoints[1].xy comme ref
 								waypoints[1].action = "From Ground Area"
 								waypoints[1].type = "TakeOffGround"
+								waypoints[1].airdromeId = nil
 								waypoints[1].x = flight[f]["parkAlertSAR"][n].x
 								waypoints[1].y = flight[f]["parkAlertSAR"][n].y
 								units[n].x = flight[f]["parkAlertSAR"][n].x
@@ -5285,6 +5273,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							waypoints[1].action = "From Ground Area"
 							waypoints[1].type = "TakeOffGround"
 
+							waypoints[1].airdromeId = nil
+
 							group.units[1].x = ParkSarAirBase[flight[f].base][nPk].x
 							group.units[1].y = ParkSarAirBase[flight[f].base][nPk].y
 
@@ -5356,6 +5346,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							waypoints[1].action = "From Ground Area"
 							waypoints[1].type = "TakeOffGround"
+
+							waypoints[1].airdromeId = nil
 
 							group.units[1].x = ParkSarAirBase[flight[f].base][nPk].x
 							group.units[1].y = ParkSarAirBase[flight[f].base][nPk].y

@@ -615,11 +615,9 @@ if TestPathADD_addData ~= nil  then														--check si le fichier existe da
 
 end
 
--- if not UTIL_KillTarget and (Skipmission_flag or Firstmission_flag)  then
-	require("Active/oob_air")
-	require("Active/oob_ground")
-	require("Init/conf_mod")
--- end																				-- modification M00 : need option
+require("Active/oob_air")
+require("Active/oob_ground")
+require("Init/conf_mod")
 
 
 --si Active/camp_ZoneSAR n'existe pas, on le créer
@@ -633,7 +631,7 @@ if TestPathZoneSAR == nil  then														--check si le fichier existe dans S
         ["neutrals"] = {},
     }
 
-elseif not UTIL_KillTarget then	--TODO attention, controler si l'actualité des ejectedPilot soit bien mise à jour
+elseif ArgTools ~= "KillTarget" then	--TODO attention, controler si l'actualité des ejectedPilot soit bien mise à jour
 	require("Active/camp_ZoneSAR")
 end
 --assign les callsign par squad west
@@ -682,7 +680,6 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
 
 if ArgTools == "KillTarget" then
-	-- dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_KillTarget.lua")
 	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Divers.lua")
 end
 
