@@ -71,7 +71,13 @@ for N_Pilot, ejectedPilot in ipairs(camp.SAR.pilotEjected) do
 	end
 end
 
-function DespawnSoldierAliasPilot(EjectedPilotName, embarkation)
+function DespawnSoldierAliasPilot(arg)
+	local EjectedPilotName = arg[1]
+	local embarkation = arg[2]
+	local humanSarPlayer = arg[3]
+	local SAR_Name = arg[4]
+	
+
 	env.info("DCE_DespawnSoldierAliasPilot START "..tostring(EjectedPilotName))
 
 	for MGRS_Chute, zone in pairs(zoneSAR) do
@@ -91,8 +97,10 @@ function DespawnSoldierAliasPilot(EjectedPilotName, embarkation)
 				local log_entry = {}
 				log_entry.type = "embarkedEjectedPilot"
 				log_entry.t = timer.getTime()
-				log_entry.initiatorPilotName = tostring(ejectedPilot.initiatorPilotName)
-				log_entry.initiator = ejectedPilot.name
+				log_entry.targetPilotName = ejectedPilot.initiatorPilotName
+				log_entry.target = ejectedPilot.name
+				log_entry.initiatorPilotName = humanSarPlayer
+				log_entry.initiator = SAR_Name
 
 				table.insert(CustomLog, log_entry)
 
@@ -1515,6 +1523,8 @@ local function detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
 
 	local outFonction = false
 	local SAR_unitId = Unit.getID(unitSAR)
+	local humanSarPlayer = unitSAR:getPlayerName()
+	local SAR_Name = unitSAR:getName()
 
 	env.info( "DCE_SAR:humanSarPlayer embarkation PASSE AA ")
 	_affiche(unitSAR, "DCE_SAR unitSAR")
@@ -1532,27 +1542,27 @@ local function detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
 		trigger.action.outTextForUnit( SAR_unitId , "PilotEmbarkation Embarkation Distance: "..tostring(distance).." (must be <200m)" , 2 , true)
 
 		if distance <= 200 and not SARinAir then
-			env.info( "DCE_SAR:humanSarPlayer PilotEmbarkation PASSE CC ")
+			env.info( "DCE_SAR:humanSarPlayer SAR : "..tostring(humanSarPlayer).." PilotEmbarkation PASSE CC ")
 
 			trigger.action.outTextForUnit( SAR_unitId , "PilotEmbarkation Use airborne troops for on-boarding" , 2 , false)
 
 			if distance <= 20 then
-				env.info( "DCE_SAR:humanSarPlayer PilotEmbarkation & StopRadioTransmission PASSE DD "..tostring(ejectedPilot.name))
-				trigger.action.outTextForUnit( SAR_unitId , "DCE_SAR:humanSarPlayer PilotEmbarkation & StopRadioTransmission PASSE DD "..tostring(ejectedPilot.name) , 15 , false)
+				env.info( "DCE_SAR:humanSarPlayer SAR : "..tostring(humanSarPlayer).." PilotEmbarkation & StopRadioTransmission PASSE DD "..tostring(ejectedPilot.name))
+				-- trigger.action.outTextForUnit( SAR_unitId , "DCE_SAR:humanSarPlayer PilotEmbarkation & StopRadioTransmission PASSE DD "..tostring(ejectedPilot.name) , 15 , false)
 				local embarkation = true
-				DespawnSoldierAliasPilot(ejectedPilot.name, embarkation )
+				DespawnSoldierAliasPilot({ejectedPilot.name, embarkation, humanSarPlayer, SAR_Name  } )
 				-- StopRadioTransmission(ejectedPilot.name)
 				outFonction = true
 				return
 			end
 
 		elseif distance > 200 or SARinAir then
-			env.info( "DCE_SAR:humanSarPlayer PilotEmbarkation PASSE EE ")
+			env.info( "DCE_SAR:humanSarPlayer SAR : "..tostring(humanSarPlayer).."PilotEmbarkation PASSE EE ")
 			outFonction = true
 			walkEjectedPilot[SAR_unitId] = false
 			return
 		end
-		env.info( "DCE_SAR:humanSarPlayer PilotEmbarkation PASSE FF ")
+		env.info( "DCE_SAR:humanSarPlayer SAR : "..tostring(humanSarPlayer).." PilotEmbarkation PASSE FF ")
 		return timer.getTime() + 1
 	end
 
@@ -1574,6 +1584,8 @@ local function guideTreuilSAR(unitSAR, PosEjectedPilot, ejectedPilot)
 
 	local outFonction = false
 	local SAR_unitId = Unit.getID(unitSAR)
+	local humanSarPlayer = unitSAR:getPlayerName()
+	local SAR_Name = unitSAR:getName()
 
 	local function guidage()
 
@@ -1632,7 +1644,8 @@ local function guideTreuilSAR(unitSAR, PosEjectedPilot, ejectedPilot)
 			trigger.action.outTextForUnit( SAR_unitId , "Speed: "..tostring(speed) .." ( need < 0.2)" , 2 , false)
 
 			if speed <= 0.2 then
-				DespawnSoldierAliasPilot(ejectedPilot.name)
+				local embarkation = true
+				DespawnSoldierAliasPilot({ejectedPilot.name, embarkation, humanSarPlayer, SAR_Name})
 				outFonction = true
 				return
 			end
@@ -1719,16 +1732,16 @@ function LoopSAR()
 
 									if  unitSAR:isActive() and  string.lower(coalition_name) ==  coalitionId[SAR_Coalition] then
 										local Pos_SAR = unitSAR:getPoint()
-										local  SAR_unitId = Unit.getID(unitSAR)
+										local SAR_unitId = Unit.getID(unitSAR)
 										local SAR_Name = unitSAR:getName()
 										-- env.info("DCE_SAR:SAR_Name humanSarPlayer "..tostring(SAR_Name))
 
-										if not walkEjectedPilot[SAR_unitId] then walkEjectedPilot[SAR_unitId] = false end
-										if not guideSAR[SAR_unitId] then guideSAR[SAR_unitId] = false end
+										-- if not walkEjectedPilot[SAR_unitId] then walkEjectedPilot[SAR_unitId] = false end
+										-- if not guideSAR[SAR_unitId] then guideSAR[SAR_unitId] = false end
 
 										for MGRS_Chute, zone in pairs(zoneSAR) do
 											for N_Pilot, ejectedPilot in ipairs(zone) do
-												if ejectedPilot.name and ejectedPilot.embarked ~= true and ejectedPilot.side == coalition_name  then
+												if ejectedPilot.name and not ejectedPilot.embarked and ejectedPilot.side == coalition_name  then
 													local unitPilot = Unit.getByName(ejectedPilot.name)
 
 													if unitPilot then
@@ -1753,7 +1766,7 @@ function LoopSAR()
 																env.info( "DCE_humanSarPlayer detected "..tostring(humanSarPlayer).." SAR_unitId: "..tostring(SAR_unitId))
 
 															end
-														elseif distance <= 450 and not ejectedPilot.embarked and not humanSarPlayer and ( ejectedPilot.scheduleEmbarkedOK == nil or ejectedPilot.scheduleEmbarkedOK == false) then
+														elseif distance <= 450 and not humanSarPlayer and ( ejectedPilot.scheduleEmbarkedOK == nil or ejectedPilot.scheduleEmbarkedOK == false) then
 
 															ejectedPilot.scheduleEmbarkedOK = true
 
@@ -1765,7 +1778,7 @@ function LoopSAR()
 																--TODO placer ici un script d immobilisation de l helico pour occuper le pilote humain a piloter son appareil :)
 
 																env.info( "DCE_SAR:LoopSTARt timer.scheduleFunction(DespawnSoldierAliasPilot "..tostring(ejectedPilot.name))
-																timer.scheduleFunction(DespawnSoldierAliasPilot, ejectedPilot.name, timer.getTime() + 150)
+																timer.scheduleFunction(DespawnSoldierAliasPilot, {ejectedPilot.name, nil, true , SAR_Name}, timer.getTime() + 150)
 
 															else
 																env.info( "DCE_SAR:Pilot.landingPossible, helico: |"..tostring(humanSarPlayer).."| |"..tostring(SAR_Name).."| DEVRAIT se poser pour recuperer "..tostring(ejectedPilot.name))
@@ -1774,7 +1787,7 @@ function LoopSAR()
 																	StopRadioTransmission(ejectedPilot.name)
 																end
 															end
-														elseif distance <= 450 and not ejectedPilot.embarked and humanSarPlayer then
+														elseif distance <= 450 and humanSarPlayer then
 															local h = math.ceil(Pos_SAR.y - land.getHeight({x = Pos_SAR.x, y = Pos_SAR.z}))
 															local SARinAir = unitSAR:inAir()
 															env.info( "DCE_SAR:humanSarPlayer Pilot.landingPossible, helico: |"..tostring(humanSarPlayer).."| |"..tostring(SAR_Name).."| HumainPilot se pose ou fait hoover pour recuperer "..tostring(ejectedPilot.name))
@@ -1783,16 +1796,20 @@ function LoopSAR()
 
 															-- l helicopter tente un helitreuillage
 															-- if h > 3 and distance <= 100 and (guideSAR[SAR_unitId] == nil or guideSAR[SAR_unitId] == false) then
-															if SARinAir and distance <= 100 and (guideSAR[SAR_unitId] == nil or guideSAR[SAR_unitId] == false) then
-																env.info( "DCE_SAR:humanSarPlayer SAR tries helitacking")
+															if SARinAir then 
+																if distance <= 100 and not guideSAR[SAR_unitId] then
+																	env.info( "DCE_SAR:humanSarPlayer SAR tries helitacking")
 
-																guideSAR[SAR_unitId] = true
-																guideTreuilSAR(unitSAR, PosEjectedPilot, ejectedPilot)
+																	guideSAR[SAR_unitId] = true
+																	guideTreuilSAR(unitSAR, PosEjectedPilot, ejectedPilot)
+																elseif distance > 100 then
+																	guideSAR[SAR_unitId] = false
+																end
 
 
 															--l helicoptere est considéré posé
 															-- elseif h <= 3 and distance <= 200 and (walkEjectedPilot[SAR_unitId] == nil or walkEjectedPilot[SAR_unitId] == false) then
-															elseif not SARinAir and distance <= 200 and (walkEjectedPilot[SAR_unitId] == nil or walkEjectedPilot[SAR_unitId] == false) then
+															elseif not SARinAir and distance <= 200 and not walkEjectedPilot[SAR_unitId] then
 																trigger.action.outTextForUnit( SAR_unitId ,  "you are less than 200m from the wrecked pilot, he should be walking towards you: ", 2 , true)
 																env.info( "DCE_SAR:humanSarPlayer SAR attempts ground embarkation")
 

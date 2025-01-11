@@ -1978,6 +1978,7 @@ for sideName, draftT in pairs(Draft_sorties) do
 											or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
 											then
 												DebuGenTxt = DebuGenTxt.."\n"..(tostring(draft.id).." AtoG II passe B_15 threats.SEAD_offset?: "..tostring(draft.route.threats.SEAD_offset).." support_requirement?: "..tostring(support_requirement).." "..unit.type.." MP_Game: "..tostring(MP_Game))
+												-- DebuGenTxt = DebuGenTxt.._afficheTXT(draft.route.threats)
 											end
 
 											if support_requirement or MP_Game then																	--go ahead with this support task
@@ -2059,6 +2060,14 @@ for sideName, draftT in pairs(Draft_sorties) do
 
 														if weather_eligible or SupportMPOveRide then												--continue of this loadout is eligible for weather
 
+															if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "B")
+															and (Debug.Generator.SpySquad and (Debug.Generator.SpySquad == unit.name or Debug.Generator.SpySquad == draft.name)  and  (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
+															or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
+															then
+																
+															end
+
+															
 															TrackPlayability(unit.player, "weather")												--track playabilty criterium has been met								
 															--get airbase position
 															local airbasePoint = {																	--get the x-y coordinates of the airbase where the unit is located

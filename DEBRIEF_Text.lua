@@ -1143,47 +1143,51 @@ do
 
 	--define list entries
 	local entries = {
-		[1] = {
+		{
 			header = "Name",
 			values = {},
 		},
-		[2] = {
+		{
 			header = "Missions",
 			values = {},
 		},
-		[3] = {
+		{
 			header = "Kills Air",
 			values = {},
 		},
-		[4] = {
+		{
 			header = "Kills Ground",
 			values = {},
 		},
-		[5] = {
+		{
 			header = "Kills Ship",
 			values = {},
 		},
-		[6] = {
+		{
+			header = "Rescue",
+			values = {},
+		},
+		{
 			header = "Crashed",
 			values = {},
 		},
-		[7] = {
+		{
 			header = "Ejected",
 			values = {},
 		},
-		[8] = {
+		{
 			header = "MIA",
 			values = {},
 		},
-		[9] = {
+		{
 			header = "Rescued",
 			values = {},
 		},
-		[10] = {
+		{
 			header = "POW",
 			values = {},
 		},
-		[11] = {
+		{
 			header = "Dead",
 			values = {},
 		},
@@ -1233,40 +1237,55 @@ do
 		else
 			table.insert(entries[5].values, client.kills_ship)
 		end
-		if client.score_last.crash > 0 then
-			table.insert(entries[6].values, client.crash .. " (+" .. client.score_last.crash .. ")")
+
+		
+		if client.score_last.rescue > 0 then
+			table.insert(entries[6].values, client.rescue .. " (+" .. client.score_last.rescue .. ")")
 		else
-			table.insert(entries[6].values, client.crash)
+			table.insert(entries[6].values, client.rescue)
+		end
+
+		if client.score_last.crash > 0 then
+			table.insert(entries[7].values, client.crash .. " (+" .. client.score_last.crash .. ")")
+		else
+			table.insert(entries[7].values, client.crash)
 		end
 		if client.score_last.eject > 0 then
-			table.insert(entries[7].values, client.eject .. " (+" .. client.score_last.eject .. ")")
+			table.insert(entries[8].values, client.eject .. " (+" .. client.score_last.eject .. ")")
 		else
-			table.insert(entries[7].values, client.eject)
+			table.insert(entries[8].values, client.eject)
 		end
 
 		if client.score_last.MIA > 0 then
-			table.insert(entries[8].values, client.MIA .. " (+" .. client.score_last.MIA .. ")")
+			table.insert(entries[9].values, client.MIA .. " (+" .. client.score_last.MIA .. ")")
 		else
-			table.insert(entries[8].values, client.MIA)
+			table.insert(entries[9].values, client.MIA)
 		end
 
 		if client.score_last.rescued > 0 then
-			table.insert(entries[9].values, client.rescued .. " (+" .. client.score_last.rescued .. ")")
+			table.insert(entries[10].values, client.rescued .. " (+" .. client.score_last.rescued .. ")")
 		else
-			table.insert(entries[9].values, client.rescued)
+			table.insert(entries[10].values, client.rescued)
 		end
 
 		if client.score_last.POW > 0 then
-			table.insert(entries[10].values, client.POW .. " (+" .. client.score_last.POW .. ")")
+			table.insert(entries[11].values, client.POW .. " (+" .. client.score_last.POW .. ")")
 		else
-			table.insert(entries[10].values, client.POW)
+			table.insert(entries[11].values, client.POW)
 		end
 
 		if client.score_last.dead > 0 then
-			table.insert(entries[11].values, client.dead .. " (+" .. client.score_last.dead .. ")")
+			table.insert(entries[12].values, client.dead .. " (+" .. client.score_last.dead .. ")")
 		else
-			table.insert(entries[11].values, client.dead)
+			table.insert(entries[12].values, client.dead)
 		end
+	end
+
+	if Debug.debug then
+		local camp_str = "entries = " .. TableSerialization(entries, 0)						--make a string
+		local campFile = io.open("Debug/DEBRIEF_TXT.lua", "w") or error("Failed to open debug file")
+		campFile:write(camp_str)															--save new data
+		campFile:close()
 	end
 
 	--determine maximum string length for each entry

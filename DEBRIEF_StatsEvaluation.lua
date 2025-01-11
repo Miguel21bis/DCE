@@ -126,8 +126,62 @@ for side_name, targets in pairs(targetlist) do													--iterate through tar
 end
 
 
+local initTabValues = {
+	kills_air = 0,
+	kills_ground = 0,
+	kills_ship = 0,
+	mission = 0,
+	crash = 0,
+	eject = 0,
+	dead = 0,
+	POW = 0,
+	MIA = 0,
+	rescued = 0,
+	rescue = 0,
+	-- score_last = {
+	-- 	kills_air = 0,
+	-- 	kills_ground = 0,
+	-- 	kills_ship = 0,
+	-- 	mission = 0,
+	-- 	crash = 0,
+	-- 	Time_Crash = 0,
+	-- 	eject = 0,
+	-- 	Time_Eject = 0,
+	-- 	POW = 0,
+	-- 	Time_POW = 0,
+	-- 	MIA = 0,
+	-- 	rescued = 0,
+	-- 	Time_rescued = 0,
+	-- 	rescue = 0,
+	-- 	Time_rescue = 0,
+	-- 	Time_MIA = 0,
+	-- 	dead = 0,
+	-- 	Time_Dead = 0,
+	-- }
+}
+
+--ajoute les key manquantes si cette update se fait en cours de campaggne
+for init_k, init_v in pairs(initTabValues) do
+	if type(init_v) ~= "table" then
+		for client, clientStat in pairs(clientstats) do
+			for client_k, client_v in pairs(clientStat) do
+				if type(client_v) ~= "table" then
+
+					if not clientStat[init_k] then
+						clientStat[init_k] = 0
+					end
+
+				end
+			end
+		end
+	end
+
+end
+
 --reset client last mission stats
 for k,v in pairs(clientstats) do
+
+
 	v.score_last = {
 		kills_air = 0,
 		kills_ground = 0,
@@ -139,7 +193,9 @@ for k,v in pairs(clientstats) do
 		POW = 0,
 		MIA = 0,
 		rescued = 0,
+		rescue = 0,
 
+		Time_rescue = 0,
 		Time_rescued = 0,
 		Time_Crash = 0,
 		Time_Eject = 0,
@@ -172,6 +228,7 @@ local function AddClient(name)
 		POW = 0,
 		MIA = 0,
 		rescued = 0,
+		rescue = 0,
 		score_last = {
 			kills_air = 0,
 			kills_ground = 0,
@@ -186,6 +243,8 @@ local function AddClient(name)
 			MIA = 0,
 			rescued = 0,
 			Time_rescued = 0,
+			rescue = 0,
+			Time_rescue = 0,
 			Time_MIA = 0,
 			dead = 0,
 			Time_Dead = 0,
@@ -478,7 +537,7 @@ for e = 1, #events do
 						-- if side_name ~= killer_side_name then												--make sure that hitting unit is not on same side as dead unit (friendly fire gives no kills)
 							-- killer_unit.score.kills_ground = killer_unit.score.kills_ground + 1				--award ground kill to air unit
 							-- killer_unit.score_last.kills_ground = killer_unit.score_last.kills_ground + 1
-							
+
 							-- addPackstats(hit_table[events[e].initiator], "kill_ground")						--y'a erreur et bug là
 							addPackstats(hit_table[events[e].target], "kill_ground")						--check if kill was in player package
 
@@ -716,15 +775,24 @@ for e = 1, #events do
 		statutObject[events[e].initiator].takeoff = true
 
 	elseif events[e].type == "embarkedEjectedPilot" then
-		if client_control[events[e].initiator] and ( (events[e].t - clientstats[client_control[events[e].initiator]].score_last.Time_rescued ) >   30) then
-			if clientstats[client_control[events[e].initiator]].score_last.rescued  == 0 then
-				clientstats[client_control[events[e].initiator]].rescued  = clientstats[client_control[events[e].initiator]].rescued  + 1
-				clientstats[client_control[events[e].initiator]].score_last.rescued  = 1
-				clientstats[client_control[events[e].initiator]].score_last.Time_rescued =  events[e].t
+		--le sauver est l'initiator
+		if client_control[events[e].initiator] and ( (events[e].t - clientstats[client_control[events[e].initiator]].score_last.Time_rescue ) >   30) then
+			-- if clientstats[client_control[events[e].initiator]].score_last.rescue  == 0 then
+				clientstats[client_control[events[e].initiator]].rescue  = clientstats[client_control[events[e].initiator]].rescue  + 1
+				clientstats[client_control[events[e].initiator]].score_last.rescue  = clientstats[client_control[events[e].initiator]].score_last.rescue + 1
+				clientstats[client_control[events[e].initiator]].score_last.Time_rescue =  events[e].t
+			-- end
+		end
+		--le pilote sauvé est le target
+		if client_control[events[e].target] and ( (events[e].t - clientstats[client_control[events[e].target]].score_last.Time_rescued ) >   30) then
+			-- if clientstats[client_control[events[e].target]].score_last.rescued  == 0 then
+				clientstats[client_control[events[e].target]].rescued  = clientstats[client_control[events[e].target]].rescued  + 1
+				clientstats[client_control[events[e].target]].score_last.rescued  = clientstats[client_control[events[e].target]].score_last.rescued + 1
+				clientstats[client_control[events[e].target]].score_last.Time_rescued =  events[e].t
 
-				clientstats[client_control[events[e].initiator]].MIA = clientstats[client_control[events[e].initiator]].MIA - 1
-				clientstats[client_control[events[e].initiator]].score_last.MIA =  -1
-			end
+				clientstats[client_control[events[e].target]].MIA = clientstats[client_control[events[e].target]].MIA - 1
+				clientstats[client_control[events[e].target]].score_last.MIA =  -1
+			-- end
 		end
 
 	elseif events[e].type == "land" then
@@ -773,8 +841,8 @@ for e = 1, #events do
 			clientstats[client_control[events[e].initiator]].score_last.Time_Dead = events[e].t
 			statutObject[events[e].initiator]["pilot dead"] =  true
 		end
-		
-		
+
+
 		--ground/naval/static loss events																--iterate through all the sub-tables of the oob_ground files and try to find the matching unitId of the dead unit (vehicle/ship/static)
 		local debugShow = false
 
@@ -1319,3 +1387,10 @@ local _Str = "statLost = " .. TableSerialization(clientstatsDetail, 0)
 local trigFile = io.open("Debug/statsClientDetails.lua", "w") or error("Failed to open debug file")
 trigFile:write(_Str)
 trigFile:close()
+
+if Debug.debug then
+	local camp_str = "clientstats = " .. TableSerialization(clientstats, 0)						--make a string
+	local campFile = io.open("Debug/DEBRIEF_clientstats.lua", "w") or error("Failed to open debug file")
+	campFile:write(camp_str)															--save new data
+	campFile:close()
+end

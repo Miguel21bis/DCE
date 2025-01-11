@@ -866,20 +866,22 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 
 	end
 
-	threatentry["name"] = unit.name
+	
 
-	-- modification M28.b : helicoptere see all SAM
 	if threatentry and threatentry.type then
+		
+		
+		threatentry["name"] = unit.name
 		threatentry.hidden = hide
 		-- threatentry.range = threatentry.range + 5000		--TODO donne de la place aux planes pour manoeuvrer à coté sans risque d'entrer dans leur range
 		-- threatentry.range = threatentry.range
 
 		table.insert(groundthreats[side], threatentry)
 
-		-- print("AtoTE Add New element "..#groundthreats[side].." name: "..tostring(threatentry["name"]))
+		print("AtoTE Add New element "..#groundthreats[side].." name: "..tostring(threatentry["name"]).." "..tostring(threatentry.hidden))
 	end
 
-end
+end -- fin local function AddThreat(unit, side, hide)
 
 
 --table to store ewr
@@ -1154,6 +1156,8 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 				for unit_n, unit in pairs(group.units) do				--Iterate through all units			
 					if not unit.dead then
 
+						print("AtoTE group.name "..group.name.." group.hidden: "..tostring(group.hidden))
+						print(" - - - AtoTE unit.name "..unit.name.." group.hidden: "..tostring(group.hidden))
 						AddThreat(unit, sidename, group.hidden)
 
 						if not ewrFreqDejaTraite[sidename]then ewrFreqDejaTraite[sidename]= {} end
