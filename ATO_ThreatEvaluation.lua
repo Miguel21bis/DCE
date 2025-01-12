@@ -59,6 +59,9 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 
 	local threatentry = {}
 
+	--tout ce qui est mobile et peu ou pas rayonnant est considéré caché, on ne peut pas prévoir leur position à l'avance
+	-- on ne peut plus se fier au hidden du group, cache depuis les positions affiché en lat lont, on les cache tous, systematiquement
+	local hiddenValue = true
 
 	if unit.type == "Vulcan" then
 		threatentry = {
@@ -73,6 +76,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 3,															--sensor elevation above ground
 			min_alt = 0,															--minimal threat altitute
 			max_alt = 1500,															--maximal threat altitude
+			hidden = hiddenValue,
 		}
 									-- modification M28.b : helicoptere see all SAM (insertion se fera plus bas avec hide)
 
@@ -89,6 +93,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 3.5,
 			min_alt = 0,
 			max_alt = 2000,
+			hidden = hiddenValue,
 		}
 	elseif unit.type == "KS-19" then
 		threatentry = {
@@ -103,6 +108,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 3.5,
 			min_alt = 0,
 			max_alt = 8000,
+			hidden = hiddenValue,
 		}
 	elseif unit.type == "S-60_Type59_Artillery" then
 		threatentry = {
@@ -117,6 +123,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 3.5,
 			min_alt = 0,
 			max_alt = 4000,
+			hidden = hiddenValue,
 		}
 	elseif unit.type == "ZSU_57_2" then
 		threatentry = {
@@ -131,6 +138,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 3.5,
 			min_alt = 0,
 			max_alt = 4300,
+			hidden = hiddenValue,
 		}
 
 	elseif unit.type == "Gepard" then
@@ -146,6 +154,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 4,
 			min_alt = 0,
 			max_alt = 3500,
+			hidden = hiddenValue,
 		}
 
 
@@ -162,6 +171,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 3,
 			min_alt = 0,
 			max_alt = 3600,
+			hidden = hiddenValue,
 		}
 
 
@@ -178,10 +188,11 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 3,
 			min_alt = 0,
 			max_alt = 3600,
+			hidden = hiddenValue,
 		}
 
 
-	elseif unit.type == "M6 Linebacker" then
+	elseif unit.type == "M6 Linebacker" then	--Le M6 Linebacker est issu d'une conversion du M2A2 ODS Bradley
 		threatentry = {
 			type = unit.type,
 			class = "SAM",
@@ -194,6 +205,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 3,
 			min_alt = 0,
 			max_alt = 3600,
+			hidden = hiddenValue,
 		}
 
 
@@ -210,6 +222,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 3,
 			min_alt = 0,
 			max_alt = 3600,
+			hidden = hiddenValue,
 		}
 
 
@@ -226,6 +239,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 3,
 			min_alt = 0,
 			max_alt = 3600,
+			hidden = hiddenValue,
 		}
 
 
@@ -242,6 +256,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 3,
 			min_alt = 0,
 			max_alt = 3600,
+			hidden = hiddenValue,
 		}
 
 
@@ -258,6 +273,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 3.5,
 			min_alt = 0,
 			max_alt = 3600,
+			hidden = hiddenValue,
 		}
 
 
@@ -274,6 +290,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 3.5,
 			min_alt = 0,
 			max_alt = 6500,
+			hidden = hiddenValue,
 		}
 
 
@@ -290,6 +307,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 2.5,
 			min_alt = 0,
 			max_alt = 3600,
+			hidden = hiddenValue,
 		}
 
 
@@ -306,6 +324,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 1.5,
 			min_alt = 0,
 			max_alt = 3600,
+			hidden = hiddenValue,
 		}
 
 
@@ -322,6 +341,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 4,
 			min_alt = 0,
 			max_alt = 8000,
+			hidden = hiddenValue,
 		}
 
 
@@ -338,6 +358,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 4,
 			min_alt = 0,
 			max_alt = 5000,
+			hidden = hiddenValue,
 		}
 
 
@@ -354,6 +375,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 4,
 			min_alt = 0,
 			max_alt = 5000,
+			hidden = hiddenValue,
 		}
 
 
@@ -370,6 +392,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 3,
 			min_alt = 0,
 			max_alt = 59000, --22000,
+			hidden = false,
 		}
 
 
@@ -386,10 +409,11 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 6,
 			min_alt = 0,
 			max_alt = 32000,
+			hidden = false,
 		}
 
 
-	elseif unit.type == "NASAMS_Radar_MPQ64F1" then
+	elseif unit.type == "NASAMS_Radar_MPQ64F1" then	--NASAMS
 		threatentry = {
 			type = unit.type,
 			class = "SAM",
@@ -402,6 +426,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 4,
 			min_alt = 0,
 			max_alt = 15000,
+			hidden = false,
 		}
 
 
@@ -418,6 +443,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 3,
 			min_alt = 50,
 			max_alt = 20000,
+			hidden = false,
 		}
 
 
@@ -434,6 +460,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 3,
 			min_alt = 50,
 			max_alt = 20000,
+			hidden = false,
 		}
 
 
@@ -450,6 +477,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 6,
 			min_alt = 0,
 			max_alt = 10000,
+			hidden = false,
 		}
 
 
@@ -466,10 +494,11 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 5.5,
 			min_alt = 0,
 			max_alt = 7000,
+			hidden = hiddenValue,
 		}
 
 
-	elseif unit.type == "SA-11 Buk SR 9S18M1" then
+	elseif unit.type == "SA-11 Buk SR 9S18M1" then		--SA-11
 		threatentry = {
 			type = unit.type,
 			class = "SAM",
@@ -482,10 +511,11 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 7,
 			min_alt = 0,
 			max_alt = 24000,
+			hidden = false,
 		}
 
 
-	elseif unit.type == "SA-11 Buk LN 9S18M1" then
+	elseif unit.type == "SA-11 Buk LN 9S18M1" then		--SA-11
 		threatentry = {
 			type = unit.type,
 			class = "SAM",
@@ -498,6 +528,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 7,
 			min_alt = 0,
 			max_alt = 24000,
+			hidden = false,
 		}
 
 
@@ -514,6 +545,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 5,
 			min_alt = 0,
 			max_alt = 19600,
+			hidden = hiddenValue,
 		}
 
 
@@ -530,10 +562,11 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 27.5,
 			min_alt = 0,
 			max_alt = 29000,
+			hidden = false,
 		}
 
 
-	elseif unit.type == "RLS_19J6" then
+	elseif unit.type == "RLS_19J6" then --SA-5 RLS 19J6 (P-14 Tall King) : Détection et surveillance initiales (alerte précoce).
 		threatentry = {
 			type = unit.type,
 			class = "SAM",
@@ -546,9 +579,10 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 27.5,
 			min_alt = 0,
 			max_alt = 35000,
+			hidden = false,
 		}
 
-	elseif unit.type == "RPC_5N62V" then --SA-5
+	elseif unit.type == "RPC_5N62V" then --SA-5 RPC 5N62V (Square Pair) : Poursuite et guidage des missiles.
 		threatentry = {
 			type = unit.type,
 			class = "SAM",
@@ -561,10 +595,11 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 27.5,
 			min_alt = 0,
 			max_alt = 35000,
+			hidden = false,
 		}
 
 
-	elseif unit.type == "052B" then
+	elseif unit.type == "052B" then	--Destroyer Chinois Polyvalent
 		threatentry = {
 			type = unit.type,
 			class = "SAM",
@@ -577,6 +612,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 20,
 			min_alt = 0,
 			max_alt = 25000,
+			hidden = false,
 		}
 
 
@@ -593,6 +629,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 25,
 			min_alt = 0,
 			max_alt = 30000,
+			hidden = false,
 		}
 
 
@@ -609,6 +646,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 20,
 			min_alt = 0,
 			max_alt = 25000,
+			hidden = false,
 		}
 
 
@@ -625,6 +663,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 10,
 			min_alt = 0,
 			max_alt = 1500,
+			hidden = false,
 		}
 
 
@@ -641,6 +680,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 20,
 			min_alt = 0,
 			max_alt = 5000,
+			hidden = false,
 		}
 
 
@@ -657,6 +697,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 20,
 			min_alt = 0,
 			max_alt = 5000,
+			hidden = false,
 		}
 
 
@@ -673,6 +714,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 20,
 			min_alt = 0,
 			max_alt = 6000,
+			hidden = false,
 		}
 
 
@@ -689,6 +731,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 20,
 			min_alt = 0,
 			max_alt = 6000,
+			hidden = false,
 		}
 
 
@@ -705,6 +748,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 25,
 			min_alt = 0,
 			max_alt = 27000,
+			hidden = false,
 		}
 
 
@@ -721,6 +765,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 30,
 			min_alt = 0,
 			max_alt = 27000,
+			hidden = false,
 		}
 
 
@@ -737,6 +782,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 20,
 			min_alt = 0,
 			max_alt = 30000,
+			hidden = false,
 		}
 
 
@@ -753,6 +799,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 25,
 			min_alt = 0,
 			max_alt = 30000,
+			hidden = false,
 		}
 
 
@@ -769,6 +816,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 25,
 			min_alt = 0,
 			max_alt = 30000,
+			hidden = false,
 		}
 
 
@@ -785,6 +833,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 30,
 			min_alt = 0,
 			max_alt = 15000,
+			hidden = false,
 		}
 
 
@@ -801,6 +850,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 30,
 			min_alt = 0,
 			max_alt = 15000,
+			hidden = false,
 		}
 	elseif unit.type == "CVN_75" then
 		threatentry = {
@@ -815,6 +865,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 30,
 			min_alt = 0,
 			max_alt = 15000,
+			hidden = false,
 		}
 	elseif unit.type == "CVN_72" then
 		threatentry = {
@@ -829,6 +880,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 30,
 			min_alt = 0,
 			max_alt = 15000,
+			hidden = false,
 		}
 
 
@@ -845,6 +897,7 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 30,
 			min_alt = 0,
 			max_alt = 15000,
+			hidden = false,
 		}
 
 
@@ -861,24 +914,25 @@ local function AddThreat(unit, side, hide)											--unput is side and unit-ta
 			elevation = 30,
 			min_alt = 0,
 			max_alt = 15000,
+			hidden = false,
 		}
 
 
 	end
 
-	
+
 
 	if threatentry and threatentry.type then
-		
-		
+
+
 		threatentry["name"] = unit.name
-		threatentry.hidden = hide
+		-- threatentry.hidden = hide
 		-- threatentry.range = threatentry.range + 5000		--TODO donne de la place aux planes pour manoeuvrer à coté sans risque d'entrer dans leur range
 		-- threatentry.range = threatentry.range
 
 		table.insert(groundthreats[side], threatentry)
 
-		print("AtoTE Add New element "..#groundthreats[side].." name: "..tostring(threatentry["name"]).." "..tostring(threatentry.hidden))
+		-- print("AtoTE Add New element "..#groundthreats[side].." name: "..tostring(threatentry["name"]).." "..tostring(threatentry.hidden))
 	end
 
 end -- fin local function AddThreat(unit, side, hide)
@@ -1130,7 +1184,6 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 								ewr_call = group.route.points[1].task.params.tasks[t].params.action.params.callname						--set callname modification M07e
 								ewr_call = Callsign_west.JTAC_EWR[ewr_call]
 							end
-								
 						end
 
 						if group.route.points[1].task.params.tasks[t].params.action.id == "SetFrequency" then							--if group has a frequency set										
@@ -1142,7 +1195,7 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 									Mgroup.route.points[1].task.params.tasks[t].params.action.params.frequency = ewr_freq * 1000000 	-- met à jour la table mission qui est déjà en mémoire
 
 									ewr_freq = tostring(ewr_freq)
-									
+
 								end
 							end
 						end
@@ -1156,8 +1209,8 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 				for unit_n, unit in pairs(group.units) do				--Iterate through all units			
 					if not unit.dead then
 
-						print("AtoTE group.name "..group.name.." group.hidden: "..tostring(group.hidden))
-						print(" - - - AtoTE unit.name "..unit.name.." group.hidden: "..tostring(group.hidden))
+						-- print("AtoTE group.name "..group.name.." group.hidden: "..tostring(group.hidden))
+						-- print(" - - - AtoTE unit.name "..unit.name.." group.hidden: "..tostring(group.hidden))
 						AddThreat(unit, sidename, group.hidden)
 
 						if not ewrFreqDejaTraite[sidename]then ewrFreqDejaTraite[sidename]= {} end

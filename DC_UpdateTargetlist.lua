@@ -716,9 +716,9 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 									target.y = group.y										--add y coordinate of target
 
 									--TODO revoir ça et ajouter certainement un fix&noHidden dans les param des gros SAM
-									-- if target.lat and target.lon then
-									-- 	group.hidden = true
-									-- end
+									if target.lat and target.lon then
+										group.hidden = true
+									end
 
 									if not target.elements then target.elements = {} end	--add elements table
 									-- target.dead_last = 0									--Introduce percentage of elements that died in last mission (for Debriefing)

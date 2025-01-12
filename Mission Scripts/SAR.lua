@@ -74,9 +74,9 @@ end
 function DespawnSoldierAliasPilot(arg)
 	local EjectedPilotName = arg[1]
 	local embarkation = arg[2]
-	local humanSarPlayer = arg[3]
+	local _SAR_Player = arg[3]
 	local SAR_Name = arg[4]
-	
+
 
 	env.info("DCE_DespawnSoldierAliasPilot START "..tostring(EjectedPilotName))
 
@@ -91,7 +91,7 @@ function DespawnSoldierAliasPilot(arg)
 					trigger.action.outTextForCoalition(ejectedPilot.Coalition, "SAR Coalition: the pilot:"..EjectedPilotName.." is on board", 10)
 				end
 
-				ejectedPilot.embarked = true
+				ejectedPilot.embarked = embarkation
 				ejectedPilot.status = "rescued"
 
 				local log_entry = {}
@@ -99,7 +99,7 @@ function DespawnSoldierAliasPilot(arg)
 				log_entry.t = timer.getTime()
 				log_entry.targetPilotName = ejectedPilot.initiatorPilotName
 				log_entry.target = ejectedPilot.name
-				log_entry.initiatorPilotName = humanSarPlayer
+				log_entry.initiatorPilotName = _SAR_Player
 				log_entry.initiator = SAR_Name
 
 				table.insert(CustomLog, log_entry)
@@ -109,9 +109,9 @@ function DespawnSoldierAliasPilot(arg)
 				local soldier = Unit.getByName(EjectedPilotName)
 
 				if soldier and soldier:isExist()  then
-					if not embarkation or embarkation == nil then
+					-- if not embarkation or embarkation == nil then
 						soldier:destroy()
-					end
+					-- end
 					-- trigger.action.outText("DespawnSoldierAliasPilot "..tostring(EjectedPilot.name), 30)
 
 					StopRadioTransmission(EjectedPilotName)
@@ -1402,9 +1402,9 @@ local function checkAddingManhunt()
 		if not nbOfTargetMan[MGRS_Chute] then nbOfTargetMan[MGRS_Chute] = 0 end
 		for N_Pilot, ejectedPilot in ipairs(zone) do
 			if ejectedPilot.name and ejectedPilot.embarked ~= true and ( not nbOfTargetMan[MGRS_Chute] or nbOfTargetMan[MGRS_Chute] < 2 )   then
-				local unitPilot = Unit.getByName(ejectedPilot.name)
+				local unitEjectPilot = Unit.getByName(ejectedPilot.name)
 
-				if unitPilot and ejectedPilot.Coalition and  nbManhunt[ejectedPilot.Coalition] and  nbManhunt[ejectedPilot.Coalition] < 19 then
+				if unitEjectPilot and ejectedPilot.Coalition and  nbManhunt[ejectedPilot.Coalition] and  nbManhunt[ejectedPilot.Coalition] < 19 then
 					env.info( "")
 					env.info( "DCE_SAR:checkAddingManhunt   ejectedPilot.name | "..tostring(ejectedPilot.name).." ejectedPilot.inTheEnemyCamp "..tostring( ejectedPilot.inTheEnemyCamp))
 
@@ -1426,7 +1426,7 @@ local function checkAddingManhunt()
 						env.info( "DCE_SAR:checkAddingManhunt EEE "..tostring(MGRS_Chute).." | "..tostring(ejectedPilot.name))
 						env.info( "DCE_SAR:checkAddingManhunt timer.scheduleFunction(DespawnSoldierAliasPilot "..tostring(ejectedPilot.name))
 
-						timer.scheduleFunction(AddSoldierAliasManhunt, unitPilot, timer.getTime() + 2)
+						timer.scheduleFunction(AddSoldierAliasManhunt, unitEjectPilot, timer.getTime() + 2)
 						nbOfTargetMan[MGRS_Chute] = nbOfTargetMan[MGRS_Chute] + 1
 					end
 
@@ -1445,16 +1445,16 @@ function LoopManagedRadioTransmission()
 		for N_Pilot, ejectedPilot in ipairs(zone) do
 			if ejectedPilot.name and (not ejectedPilot.radio_on or ejectedPilot.radio_on == nil) and ejectedPilot.embarked ~= true   then
 
-				local unitPilot = Unit.getByName(ejectedPilot.name)
+				local unitEjectPilot = Unit.getByName(ejectedPilot.name)
 				local actualTime = timer.getTime()
 
-				-- env.info( "LoopManagedRadioTransmission D "..tostring(unitPilot).."|"..tostring(ejectedPilot.radio_start).."|"..tostring("<?").."|"..tostring(actualTime).."|")
+				-- env.info( "LoopManagedRadioTransmission D "..tostring(unitEjectPilot).."|"..tostring(ejectedPilot.radio_start).."|"..tostring("<?").."|"..tostring(actualTime).."|")
 
-				if unitPilot and ejectedPilot.radio_start and ejectedPilot.radio_start <= actualTime then
+				if unitEjectPilot and ejectedPilot.radio_start and ejectedPilot.radio_start <= actualTime then
 
 
 
-					local PosEjectedPilot = unitPilot:getPoint()
+					local PosEjectedPilot = unitEjectPilot:getPoint()
 
 					local pilotVec3 = {
 						x = PosEjectedPilot.x,
@@ -1518,51 +1518,51 @@ function StopRadioTransmissionSeat()
 	return timer.getTime() + 5
 end
 
---guide le pilote humain SAR vers l ejectedPilot
+
 local function detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
 
 	local outFonction = false
 	local SAR_unitId = Unit.getID(unitSAR)
-	local humanSarPlayer = unitSAR:getPlayerName()
+	local _SAR_Player = unitSAR:getPlayerName()
 	local SAR_Name = unitSAR:getName()
 
-	env.info( "DCE_SAR:humanSarPlayer embarkation PASSE AA ")
+	env.info( "DCE_SAR:_SAR_Player embarkation PASSE AA ")
 	_affiche(unitSAR, "DCE_SAR unitSAR")
 	_affiche(ejectedPilot, "DCE_SAR ejectedPilot")
 
 	local function walk()
-		env.info( "DCE_SAR:humanSarPlayer embarkation PASSE BB ")
-		local unitPilot = Unit.getByName(ejectedPilot.name)
-		local PosEjectedPilot = unitPilot:getPoint()
+		env.info( "DCE_SAR:_SAR_Player embarkation PASSE BB ")
+		local unitEjectPilot = Unit.getByName(ejectedPilot.name)
+		local PosEjectedPilot = unitEjectPilot:getPoint()
 		local Pos_SAR = unitSAR:getPoint()
-		local SARinAir = unitSAR:inAir()
+		local _SARinAir = unitSAR:inAir()
 
 		local distance = math.ceil(math.sqrt(math.pow(Pos_SAR.x - PosEjectedPilot.x, 2) + math.pow(Pos_SAR.z - PosEjectedPilot.z, 2)))
 
 		trigger.action.outTextForUnit( SAR_unitId , "PilotEmbarkation Embarkation Distance: "..tostring(distance).." (must be <200m)" , 2 , true)
 
-		if distance <= 200 and not SARinAir then
-			env.info( "DCE_SAR:humanSarPlayer SAR : "..tostring(humanSarPlayer).." PilotEmbarkation PASSE CC ")
+		if distance <= 200 and not _SARinAir then
+			env.info( "DCE_SAR:_SAR_Player SAR : "..tostring(_SAR_Player).." PilotEmbarkation PASSE CC ")
 
 			trigger.action.outTextForUnit( SAR_unitId , "PilotEmbarkation Use airborne troops for on-boarding" , 2 , false)
 
 			if distance <= 20 then
-				env.info( "DCE_SAR:humanSarPlayer SAR : "..tostring(humanSarPlayer).." PilotEmbarkation & StopRadioTransmission PASSE DD "..tostring(ejectedPilot.name))
-				-- trigger.action.outTextForUnit( SAR_unitId , "DCE_SAR:humanSarPlayer PilotEmbarkation & StopRadioTransmission PASSE DD "..tostring(ejectedPilot.name) , 15 , false)
+				env.info( "DCE_SAR:_SAR_Player SAR : "..tostring(_SAR_Player).." PilotEmbarkation & StopRadioTransmission PASSE DD "..tostring(ejectedPilot.name))
+				-- trigger.action.outTextForUnit( SAR_unitId , "DCE_SAR:_SAR_Player PilotEmbarkation & StopRadioTransmission PASSE DD "..tostring(ejectedPilot.name) , 15 , false)
 				local embarkation = true
-				DespawnSoldierAliasPilot({ejectedPilot.name, embarkation, humanSarPlayer, SAR_Name  } )
+				DespawnSoldierAliasPilot({ejectedPilot.name, embarkation, _SAR_Player, SAR_Name  } )
 				-- StopRadioTransmission(ejectedPilot.name)
 				outFonction = true
 				return
 			end
 
-		elseif distance > 200 or SARinAir then
-			env.info( "DCE_SAR:humanSarPlayer SAR : "..tostring(humanSarPlayer).."PilotEmbarkation PASSE EE ")
+		elseif distance > 200 or _SARinAir then
+			env.info( "DCE_SAR:_SAR_Player SAR : "..tostring(_SAR_Player).."PilotEmbarkation PASSE EE ")
 			outFonction = true
 			walkEjectedPilot[SAR_unitId] = false
 			return
 		end
-		env.info( "DCE_SAR:humanSarPlayer SAR : "..tostring(humanSarPlayer).." PilotEmbarkation PASSE FF ")
+		env.info( "DCE_SAR:_SAR_Player SAR : "..tostring(_SAR_Player).." PilotEmbarkation PASSE FF ")
 		return timer.getTime() + 1
 	end
 
@@ -1584,7 +1584,7 @@ local function guideTreuilSAR(unitSAR, PosEjectedPilot, ejectedPilot)
 
 	local outFonction = false
 	local SAR_unitId = Unit.getID(unitSAR)
-	local humanSarPlayer = unitSAR:getPlayerName()
+	local _SAR_Player = unitSAR:getPlayerName()
 	local SAR_Name = unitSAR:getName()
 
 	local function guidage()
@@ -1595,7 +1595,7 @@ local function guideTreuilSAR(unitSAR, PosEjectedPilot, ejectedPilot)
 		local ejectedPilot_h = land.getHeight({x = PosEjectedPilot.x, y = PosEjectedPilot.z})
 
 		local SAR_h = math.ceil(Pos_SAR.y)
-		local SARinAir = unitSAR:inAir()
+		local _SARinAir = unitSAR:inAir()
 
 		-- local unitSarPos = unitSAR:getPosition()
    		-- local bearing_rad = math.atan2(unitSarPos.x.z, unitSarPos.x.x))
@@ -1644,13 +1644,13 @@ local function guideTreuilSAR(unitSAR, PosEjectedPilot, ejectedPilot)
 			trigger.action.outTextForUnit( SAR_unitId , "Speed: "..tostring(speed) .." ( need < 0.2)" , 2 , false)
 
 			if speed <= 0.2 then
-				local embarkation = true
-				DespawnSoldierAliasPilot({ejectedPilot.name, embarkation, humanSarPlayer, SAR_Name})
+				local embarkation = false	--il n'est pas embaqué au sol, mais helitreuillé
+				DespawnSoldierAliasPilot({ejectedPilot.name, embarkation, _SAR_Player, SAR_Name})
 				outFonction = true
 				return
 			end
 
-		elseif distance > 100 or not SARinAir then	-- high <= 2
+		elseif distance > 100 or not _SARinAir then	-- high <= 2
 			outFonction = true
 			guideSAR[SAR_unitId] = false
 			return
@@ -1705,48 +1705,34 @@ function LoopSAR()
 				for group_n, group in ipairs(country.helicopter.group) do
 					local gpSAR = Group.getByName(group.name)
 
-
 					if gpSAR then
 
 						local units_SAR = gpSAR:getUnits()
 						local unitSAR
 						local SAR_Coalition
 
-						-- local unitSAR = units_SAR[1]
-						-- local SAR_Coalition = tostring(unitSAR:getCoalition())
-
-						-- local coalitionId = {
-						-- 		["0"] = "neutral",
-						-- 		["1"] = "red",
-						-- 		["2"] = "blue",
-						-- }
-
 						if units_SAR then
 							for n=1, #units_SAR do
 								unitSAR = units_SAR[n]
-								-- _affiche(unitSAR, "DCE_SAR:LoopSAR unitSAR")
+								
 								if unitSAR then
 									SAR_Coalition = tostring(unitSAR:getCoalition())
-									local humanSarPlayer = unitSAR:getPlayerName()
-									-- env.info("DCE_SAR:LoopSAR humanSarPlayer "..tostring(humanSarPlayer))
-
+									local _SAR_Player = unitSAR:getPlayerName()
+									
 									if  unitSAR:isActive() and  string.lower(coalition_name) ==  coalitionId[SAR_Coalition] then
 										local Pos_SAR = unitSAR:getPoint()
 										local SAR_unitId = Unit.getID(unitSAR)
 										local SAR_Name = unitSAR:getName()
-										-- env.info("DCE_SAR:SAR_Name humanSarPlayer "..tostring(SAR_Name))
-
-										-- if not walkEjectedPilot[SAR_unitId] then walkEjectedPilot[SAR_unitId] = false end
-										-- if not guideSAR[SAR_unitId] then guideSAR[SAR_unitId] = false end
+										
 
 										for MGRS_Chute, zone in pairs(zoneSAR) do
 											for N_Pilot, ejectedPilot in ipairs(zone) do
 												if ejectedPilot.name and not ejectedPilot.embarked and ejectedPilot.side == coalition_name  then
-													local unitPilot = Unit.getByName(ejectedPilot.name)
+													local unitEjectPilot = Unit.getByName(ejectedPilot.name)
 
-													if unitPilot then
+													if unitEjectPilot then
 
-														local PosEjectedPilot = unitPilot:getPoint()
+														local PosEjectedPilot = unitEjectPilot:getPoint()
 														local distance = math.sqrt(math.pow(Pos_SAR.x - PosEjectedPilot.x, 2) + math.pow(Pos_SAR.z - PosEjectedPilot.z, 2))
 
 														if distance <= 3000 and distance > 1000 and not ejectedPilot.smokeOK then
@@ -1756,17 +1742,41 @@ function LoopSAR()
 																y = land.getHeight({x = PosEjectedPilot.x, y = PosEjectedPilot.z}),
 																z = PosEjectedPilot.z,
 															}
-															trigger.action.smoke(pilotVec3, trigger.smokeColor.Red)
+
+															-- Obtenir le vecteur du vent à la position du pilote
+															local windVec3 = atmosphere.getWind(pilotVec3)
+
+															-- Calculer la direction opposée au vent (normalisée)
+															local windMagnitude = math.sqrt(windVec3.x^2 + windVec3.z^2) -- Norme du vent dans le plan horizontal
+															local windDirectionOpposite = {
+																x = -windVec3.x / windMagnitude, -- Normaliser le vent en X
+																z = -windVec3.z / windMagnitude, -- Normaliser le vent en Z
+															}
+
+															-- Distance pour placer le fumigène (10 mètres par exemple)
+															local smokeOffsetDistance = 10
+															local smokePosition = {
+																x = pilotVec3.x + windDirectionOpposite.x * smokeOffsetDistance,
+																y = pilotVec3.y,
+																z = pilotVec3.z + windDirectionOpposite.z * smokeOffsetDistance,
+															}
+
+															-- Placer le fumigène
+															trigger.action.smoke(smokePosition, trigger.smokeColor.Red)
+
+															-- Indiquer que le fumigène a été placé
 															ejectedPilot.smokeOK = true
 
 														elseif distance <= 1000 and distance > 450 then
-															if humanSarPlayer then
+
+															if _SAR_Player then
 																ejectedPilot.landingPossible = true
-																-- trigger.action.outTextForUnit( SAR_unitId , "ForUnit humanSarPlayer detected "..tostring(humanSarPlayer) , 2 , false)
-																env.info( "DCE_humanSarPlayer detected "..tostring(humanSarPlayer).." SAR_unitId: "..tostring(SAR_unitId))
+																-- trigger.action.outTextForUnit( SAR_unitId , "ForUnit _SAR_Player detected "..tostring(_SAR_Player) , 2 , false)
+																env.info( "DCE__SAR_Player detected "..tostring(_SAR_Player).." SAR_unitId: "..tostring(SAR_unitId))
 
 															end
-														elseif distance <= 450 and not humanSarPlayer and ( ejectedPilot.scheduleEmbarkedOK == nil or ejectedPilot.scheduleEmbarkedOK == false) then
+
+														elseif distance <= 450 and not _SAR_Player and not ejectedPilot.scheduleEmbarkedOK then
 
 															ejectedPilot.scheduleEmbarkedOK = true
 
@@ -1775,30 +1785,31 @@ function LoopSAR()
 															timer.scheduleFunction(StopRadioTransmission, ejectedPilot.name, timer.getTime() + 149)
 
 															if not ejectedPilot.landingPossible then
-																--TODO placer ici un script d immobilisation de l helico pour occuper le pilote humain a piloter son appareil :)
-
 																env.info( "DCE_SAR:LoopSTARt timer.scheduleFunction(DespawnSoldierAliasPilot "..tostring(ejectedPilot.name))
-																timer.scheduleFunction(DespawnSoldierAliasPilot, {ejectedPilot.name, nil, true , SAR_Name}, timer.getTime() + 150)
+																local embarkation = false	--il n'est pas embaqué au sol, mais helitreuillé
+																timer.scheduleFunction(DespawnSoldierAliasPilot, {ejectedPilot.name, embarkation, nil , SAR_Name}, timer.getTime() + 150)
 
 															else
-																env.info( "DCE_SAR:Pilot.landingPossible, helico: |"..tostring(humanSarPlayer).."| |"..tostring(SAR_Name).."| DEVRAIT se poser pour recuperer "..tostring(ejectedPilot.name))
+																env.info( "DCE_SAR:Pilot.landingPossible, helico: |"..tostring(_SAR_Player).."| |"..tostring(SAR_Name).."| DEVRAIT se poser pour recuperer "..tostring(ejectedPilot.name))
 
-																if not unitPilot:isExist()  then
+																if not unitEjectPilot:isExist()  then
 																	StopRadioTransmission(ejectedPilot.name)
 																end
 															end
-														elseif distance <= 450 and humanSarPlayer then
-															local h = math.ceil(Pos_SAR.y - land.getHeight({x = Pos_SAR.x, y = Pos_SAR.z}))
-															local SARinAir = unitSAR:inAir()
-															env.info( "DCE_SAR:humanSarPlayer Pilot.landingPossible, helico: |"..tostring(humanSarPlayer).."| |"..tostring(SAR_Name).."| HumainPilot se pose ou fait hoover pour recuperer "..tostring(ejectedPilot.name))
 
-															env.info( "DCE_SAR:humanSarPlayer".." Hauteur?: "..h.." SARinAir?: "..tostring(SARinAir).." "..distance.." guideSAR "..tostring(guideSAR[SAR_unitId]).." walkEjectedPilot "..tostring(walkEjectedPilot[SAR_unitId]))
+														elseif distance <= 450 and _SAR_Player then
+
+															local h = math.ceil(Pos_SAR.y - land.getHeight({x = Pos_SAR.x, y = Pos_SAR.z}))
+															local _SARinAir = unitSAR:inAir()
+															env.info( "DCE_SAR:_SAR_Player Pilot.landingPossible, helico: |"..tostring(_SAR_Player).."| |"..tostring(SAR_Name).."| HumainPilot se pose ou fait hoover pour recuperer "..tostring(ejectedPilot.name))
+
+															env.info( "DCE_SAR:_SAR_Player".." Hauteur?: "..h.." _SARinAir?: "..tostring(_SARinAir).." "..distance.." guideSAR "..tostring(guideSAR[SAR_unitId]).." walkEjectedPilot "..tostring(walkEjectedPilot[SAR_unitId]))
 
 															-- l helicopter tente un helitreuillage
 															-- if h > 3 and distance <= 100 and (guideSAR[SAR_unitId] == nil or guideSAR[SAR_unitId] == false) then
-															if SARinAir then 
+															if _SARinAir then
 																if distance <= 100 and not guideSAR[SAR_unitId] then
-																	env.info( "DCE_SAR:humanSarPlayer SAR tries helitacking")
+																	env.info( "DCE_SAR:_SAR_Player SAR tries helitacking")
 
 																	guideSAR[SAR_unitId] = true
 																	guideTreuilSAR(unitSAR, PosEjectedPilot, ejectedPilot)
@@ -1809,12 +1820,17 @@ function LoopSAR()
 
 															--l helicoptere est considéré posé
 															-- elseif h <= 3 and distance <= 200 and (walkEjectedPilot[SAR_unitId] == nil or walkEjectedPilot[SAR_unitId] == false) then
-															elseif not SARinAir and distance <= 200 and not walkEjectedPilot[SAR_unitId] then
-																trigger.action.outTextForUnit( SAR_unitId ,  "you are less than 200m from the wrecked pilot, he should be walking towards you: ", 2 , true)
-																env.info( "DCE_SAR:humanSarPlayer SAR attempts ground embarkation")
+															elseif not _SARinAir then
 
-																walkEjectedPilot[SAR_unitId] = true
-																detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
+																guideSAR[SAR_unitId] = false	-- le player s'est posé
+
+																if  distance <= 200 and not walkEjectedPilot[SAR_unitId] then
+																	trigger.action.outTextForUnit( SAR_unitId ,  "you are less than 200m from the wrecked pilot, he should be walking towards you: ", 2 , true)
+																	env.info( "DCE_SAR:_SAR_Player SAR attempts ground embarkation")
+
+																	walkEjectedPilot[SAR_unitId] = true
+																	detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
+																end
 
 															end
 
@@ -1940,29 +1956,6 @@ function GetOutGDFM(arg)
 	-- }
 
 	if pName then
-	-- -- Définir les camps et catégories à parcourir
-	-- local coalitions = {coalition.side.BLUE, coalition.side.RED}
-	-- local categories = {Group.Category.AIRPLANE, Group.Category.HELICOPTER}
-	-- local locTimer = timer.getTime()
-
-
-	-- 	for _, sideNum in ipairs(coalitions) do
-	-- 		for categoryN, category in ipairs(categories) do
-	-- 			-- Obtenir les groupes pour le camp et la catégorie
-	-- 			local groups = coalition.getGroups(sideNum, category)
-
-	-- 			for gpN, gp in pairs(groups) do
-	-- 				local wingman = gp:getUnits()
-	-- 				for winmanN, _unit in ipairs(wingman) do
-	-- 					if _unit and _unit:isActive()  then --and _unit:inAir()
-	-- 						local playerName =  _unit:getPlayerName()
-	-- 						local unitName = _unit:getName()
-
-	-- 						local trucName
-	-- 						if playerName == pName then
-						
-								-- local player = _unit
-								-- local playerId = Unit.getID(player)
 
 		local unitName = player:getName()
 		local playerPoint = player:getPoint()				--get target point
@@ -2027,7 +2020,7 @@ function GetOutGDFM(arg)
 				env.info("DCE_GetOutPlayer: Failed to open log file for writing.")
 			end
 		end
-		
+
 		if pilotVec3.y <= 100 then
 
 			SumSoldierAliasPilot = SumSoldierAliasPilot + 1
@@ -2049,9 +2042,39 @@ function GetOutGDFM(arg)
 
 				AddSoldierAliasPilot(infoPlayer)
 				infoPlayer.createdSoldier = true
-				trigger.action.smoke(pilotVec3, trigger.smokeColor.Red)
+
+				-- Obtenir le vecteur du vent à la position du pilote
+				local windVec3 = atmosphere.getWind(pilotVec3)
+
+				-- Calculer la direction opposée au vent (normalisée)
+				local windMagnitude = math.sqrt(windVec3.x^2 + windVec3.z^2) -- Norme du vent dans le plan horizontal
+				local windDirectionOpposite = {
+					x = -windVec3.x / windMagnitude, -- Normaliser le vent en X
+					z = -windVec3.z / windMagnitude, -- Normaliser le vent en Z
+				}
+
+				-- Distance pour placer le fumigène (10 mètres par exemple)
+				local smokeOffsetDistance = 10
+				local smokePosition = {
+					x = pilotVec3.x + windDirectionOpposite.x * smokeOffsetDistance,
+					y = pilotVec3.y,
+					z = pilotVec3.z + windDirectionOpposite.z * smokeOffsetDistance,
+				}
+
+				-- Placer le fumigène
+				trigger.action.smoke(smokePosition, trigger.smokeColor.Red)
 
 			end
+
+
+			local log_entry = {
+				type = "eject",
+				initiator = unitName,
+				initiatorPilotName = pName,
+				t = timer.getTime(),
+			}
+
+			table.insert(CustomLog, log_entry)	
 
 			CheckImmediatSAR(infoPlayer)
 
@@ -2065,14 +2088,6 @@ function GetOutGDFM(arg)
 
 		end
 
-						-- 	end
-						-- end
-		-- 			end
-		-- 		end
-		-- 	end
-		-- end
-
-
 	else
 
 		for id_, key in pairs(GroundDamagedFlyingMachine) do
@@ -2081,7 +2096,7 @@ function GetOutGDFM(arg)
 				env.info( "DCE_getOut B1 id_ "..tostring(id_).." occurenceN "..tostring(occurenceN))
 
 				local damaged = key[occurenceN]
-				
+
 				env.info( "DCE_getOut B2 id_ "..tostring(id_).." damaged.gpGid "..tostring(damaged.gpGid))
 
 				if not pName and not damaged.isPlayer then
@@ -2137,7 +2152,28 @@ function GetOutGDFM(arg)
 
 								AddSoldierAliasPilot(damaged)
 								damaged.createdSoldier = true
-								trigger.action.smoke(pilotVec3, trigger.smokeColor.Red)
+								-- trigger.action.smoke(pilotVec3, trigger.smokeColor.Red)
+
+								-- Obtenir le vecteur du vent à la position du pilote
+								local windVec3 = atmosphere.getWind(pilotVec3)
+
+								-- Calculer la direction opposée au vent (normalisée)
+								local windMagnitude = math.sqrt(windVec3.x^2 + windVec3.z^2) -- Norme du vent dans le plan horizontal
+								local windDirectionOpposite = {
+									x = -windVec3.x / windMagnitude, -- Normaliser le vent en X
+									z = -windVec3.z / windMagnitude, -- Normaliser le vent en Z
+								}
+
+								-- Distance pour placer le fumigène (10 mètres par exemple)
+								local smokeOffsetDistance = 10
+								local smokePosition = {
+									x = pilotVec3.x + windDirectionOpposite.x * smokeOffsetDistance,
+									y = pilotVec3.y,
+									z = pilotVec3.z + windDirectionOpposite.z * smokeOffsetDistance,
+								}
+
+								-- Placer le fumigène
+								trigger.action.smoke(smokePosition, trigger.smokeColor.Red)
 
 							end
 
@@ -2154,16 +2190,16 @@ function GetOutGDFM(arg)
 							if damaged.initiator.id_ then
 								for n, damageds in pairs(GroundDamagedFlyingMachine) do
 									local toRemove = {} -- Table pour stocker les clés à supprimer
-							
+
 									for initiatorId, damagedUnit in pairs(damageds) do
 										env.info("DCE_getOut Y S_EVENT_KILL n: " .. n .. " initiatorId: " .. tostring(initiatorId))
-							
+
 										if initiatorId == damaged.initiator_id_ then
 											env.info("DCE_getOut Z S_EVENT_KILL delete initiatorId: " .. tostring(initiatorId))
 											table.insert(toRemove, initiatorId)
 										end
 									end
-							
+
 									-- Supprimer les entrées après avoir parcouru la table
 									for _, initiatorId in ipairs(toRemove) do
 										damageds[initiatorId] = nil

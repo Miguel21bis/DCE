@@ -403,7 +403,7 @@ function eventHandlerDCE:onEvent(event)
 			local ptEvent = event.initiator:getPoint()
 			local PilotEjection = {}
 			local side
-			if ptEvent  and  ptEvent.x then
+			if ptEvent and ptEvent.x then
 
 				PilotEjection = {
 					x = ptEvent.x,
@@ -492,8 +492,6 @@ function eventHandlerDCE:onEvent(event)
 				log_entry.targetSideName = targetSideName
 			end
 		end
-	-- end
-
 
 	elseif log_entry.type == "pilot seat separation"  then
 		env.info( "DCE_EventT  PASSE A pilot seat separation, id: "..tostring(event.id).."_type_"..tostring(log_entry.type))
@@ -535,7 +533,6 @@ function eventHandlerDCE:onEvent(event)
 
 				local infoPilot = {}
 				if selected_distance <= 4000 then
-					-- log_entry.initiatorPilotName = selectedEjection.initiatorPilotName:gsub('[%c]', '_')
 					log_entry.initiatorPilotName = selectedEjection.initiatorPilotName
 					log_entry.initiator = selectedEjection.initiator
 
@@ -609,13 +606,8 @@ function eventHandlerDCE:onEvent(event)
 
 					selectedEjection = tabEjection[ejectN]
 
-					-- log_entry.initiatorPilotName = selectedEjection.initiatorPilotName:gsub('[%c]', '_')
 					log_entry.initiatorPilotName = selectedEjection.initiatorPilotName
 					log_entry.initiator = selectedEjection.initiator
-
-					-- selectedEjection.x = ptEvent.x
-					-- selectedEjection.y = ptEvent.y
-					-- selectedEjection.z = ptEvent.z
 
 					--on change la position, car le vent peut pousser le parachute de la mere vers la terre
 					selectedEjection.x = PilotVec3.x
@@ -761,13 +753,12 @@ function eventHandlerDCE:onEvent(event)
 
 			end
 			if Object.getCategory(event.initiator) == Object.Category.UNIT and event.initiator:getPlayerName() then			--initiator is a unit debug_ET01.h
-				-- log_entry.initiatorPilotName = event.initiator:getPlayerName()
 				log_entry.initiatorPilotName = event.initiator:getPlayerName()
 				if log_entry.initiatorPilotName then
 					log_entry.initiatorPilotName = log_entry.initiatorPilotName:gsub("'", '')
 					log_entry.initiatorPilotName = log_entry.initiatorPilotName:gsub("\"", '')
 				end
-				-- log_entry.initiatorPilotName = event.initiator:getPlayerName():gsub('[%c]', '_')																		--store player name
+				
 			end
 			if Object.getCategory(event.initiator) ~= Object.Category.SCENERY and event.initiator:getID() then				--initator is not a scenery object debug_ET01.h
 				log_entry.initiatorMissionID = event.initiator:getID()																					--store ID
@@ -823,13 +814,11 @@ function eventHandlerDCE:onEvent(event)
 				log_entry.initiator = event.initiator:getName()																							--store initiator name
 			end
 			if Object.getCategory(event.initiator) == Object.Category.UNIT  then										--initiator is a unit debug_ET01.h
-				-- log_entry.initiatorPilotName = event.initiator:getPlayerName()
 				log_entry.initiatorPilotName = event.initiator:getPlayerName()
 				if log_entry.initiatorPilotName then
 					log_entry.initiatorPilotName = log_entry.initiatorPilotName:gsub("'", '')
 					log_entry.initiatorPilotName = log_entry.initiatorPilotName:gsub("\"", '')
 				end
-				-- log_entry.initiatorPilotName = event.initiator:getPlayerName():gsub('[%c]', '_')																		--store player name
 			end
 
 			if Object.getCategory(event.initiator) ~= Object.Category.SCENERY and not initDesc.missileCategory  then   --and event.initiator:getID()				--initator is not a scenery object debug_ET01.h
