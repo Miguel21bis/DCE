@@ -1813,7 +1813,7 @@ local function sar_F10(arg)
 
 			local pilEjectObj = Unit.getByName(ejectPilot.name)
 
-			if not ejectPilot.embarked and ejectPilot.side == coalitionIdNumeric[playerCoal] and pilEjectObj:isExist()  then
+			if not ejectPilot.embarked and ejectPilot.side == coalitionIdNumeric[playerCoal] and pilEjectObj and pilEjectObj:isExist()  then
 				local pilEjectPos = pilEjectObj:getPoint()
 				local distance = math.floor(math.sqrt(math.pow(pilEjectPos.x - playerPos.x, 2) + math.pow(pilEjectPos.z - playerPos.z, 2)))
 				distance = math.ceil(distance / 1000)

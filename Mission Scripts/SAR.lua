@@ -1531,6 +1531,11 @@ local function detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
 	_affiche(ejectedPilot, "DCE_SAR ejectedPilot")
 
 	local function walk()
+
+		if not unitSAR or not unitSAR:isActive()  then 
+			return
+		end
+
 		env.info( "DCE_SAR:_SAR_Player embarkation PASSE BB ")
 		local unitEjectPilot = Unit.getByName(ejectedPilot.name)
 		local PosEjectedPilot = unitEjectPilot:getPoint()
@@ -1541,8 +1546,10 @@ local function detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
 
 		trigger.action.outTextForUnit( SAR_unitId , "PilotEmbarkation Embarkation Distance: "..tostring(distance).." (must be <200m)" , 2 , true)
 
+		env.info( "DCE_SAR:_SAR_Player BB2 _SARinAir : "..tostring(_SARinAir))
+
 		if distance <= 200 and not _SARinAir then
-			env.info( "DCE_SAR:_SAR_Player SAR : "..tostring(_SAR_Player).." PilotEmbarkation PASSE CC ")
+			env.info( "DCE_SAR:_SAR_Player SAR : "..tostring(_SAR_Player).." PilotEmbarkation PASSE CC _SARinAir "..tostring(_SARinAir))
 
 			trigger.action.outTextForUnit( SAR_unitId , "PilotEmbarkation Use airborne troops for on-boarding" , 2 , false)
 
@@ -1553,6 +1560,7 @@ local function detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
 				DespawnSoldierAliasPilot({ejectedPilot.name, embarkation, _SAR_Player, SAR_Name  } )
 				-- StopRadioTransmission(ejectedPilot.name)
 				outFonction = true
+				walkEjectedPilot[SAR_unitId] = false
 				return
 			end
 
@@ -1647,6 +1655,7 @@ local function guideTreuilSAR(unitSAR, PosEjectedPilot, ejectedPilot)
 				local embarkation = false	--il n'est pas embaqué au sol, mais helitreuillé
 				DespawnSoldierAliasPilot({ejectedPilot.name, embarkation, _SAR_Player, SAR_Name})
 				outFonction = true
+				guideSAR[SAR_unitId] = false
 				return
 			end
 
@@ -1746,23 +1755,37 @@ function LoopSAR()
 															-- Obtenir le vecteur du vent à la position du pilote
 															local windVec3 = atmosphere.getWind(pilotVec3)
 
-															-- Calculer la direction opposée au vent (normalisée)
-															local windMagnitude = math.sqrt(windVec3.x^2 + windVec3.z^2) -- Norme du vent dans le plan horizontal
-															local windDirectionOpposite = {
-																x = -windVec3.x / windMagnitude, -- Normaliser le vent en X
-																z = -windVec3.z / windMagnitude, -- Normaliser le vent en Z
-															}
+															-- Calculer la norme du vent dans le plan horizontal
+															local windMagnitude = math.sqrt(windVec3.x^2 + windVec3.z^2)
 
-															-- Distance pour placer le fumigène (10 mètres par exemple)
-															local smokeOffsetDistance = 10
-															local smokePosition = {
-																x = pilotVec3.x + windDirectionOpposite.x * smokeOffsetDistance,
-																y = pilotVec3.y,
-																z = pilotVec3.z + windDirectionOpposite.z * smokeOffsetDistance,
-															}
+															-- Position de décalage pour le fumigène
+															local smokeOffsetDistance = 30
+															local smokePosition
 
-															-- Placer le fumigène
-															trigger.action.smoke(smokePosition, trigger.smokeColor.Red)
+															if windMagnitude > 0 then
+																-- Normaliser la direction opposée au vent
+																local windDirectionOpposite = {
+																	x = -windVec3.x / windMagnitude,
+																	z = -windVec3.z / windMagnitude,
+																}
+
+																-- Calculer la position du fumigène
+																smokePosition = {
+																	x = pilotVec3.x + windDirectionOpposite.x * smokeOffsetDistance,
+																	y = pilotVec3.y,
+																	z = pilotVec3.z + windDirectionOpposite.z * smokeOffsetDistance,
+																}
+															else
+																-- Si le vent est nul, placer le fumigène 10 mètres au nord du pilote
+																smokePosition = {
+																	x = pilotVec3.x,
+																	y = pilotVec3.y,
+																	z = pilotVec3.z + smokeOffsetDistance,
+																}
+															end
+
+															    -- Placer le fumigène
+    														trigger.action.smoke(smokePosition, trigger.smokeColor.Red)
 
 															-- Indiquer que le fumigène a été placé
 															ejectedPilot.smokeOK = true
@@ -2046,22 +2069,36 @@ function GetOutGDFM(arg)
 				-- Obtenir le vecteur du vent à la position du pilote
 				local windVec3 = atmosphere.getWind(pilotVec3)
 
-				-- Calculer la direction opposée au vent (normalisée)
-				local windMagnitude = math.sqrt(windVec3.x^2 + windVec3.z^2) -- Norme du vent dans le plan horizontal
-				local windDirectionOpposite = {
-					x = -windVec3.x / windMagnitude, -- Normaliser le vent en X
-					z = -windVec3.z / windMagnitude, -- Normaliser le vent en Z
-				}
+				-- Calculer la norme du vent dans le plan horizontal
+				local windMagnitude = math.sqrt(windVec3.x^2 + windVec3.z^2)
 
-				-- Distance pour placer le fumigène (10 mètres par exemple)
-				local smokeOffsetDistance = 10
-				local smokePosition = {
-					x = pilotVec3.x + windDirectionOpposite.x * smokeOffsetDistance,
-					y = pilotVec3.y,
-					z = pilotVec3.z + windDirectionOpposite.z * smokeOffsetDistance,
-				}
+				-- Position de décalage pour le fumigène
+				local smokeOffsetDistance = 30
+				local smokePosition
 
-				-- Placer le fumigène
+				if windMagnitude > 0 then
+					-- Normaliser la direction opposée au vent
+					local windDirectionOpposite = {
+						x = -windVec3.x / windMagnitude,
+						z = -windVec3.z / windMagnitude,
+					}
+
+					-- Calculer la position du fumigène
+					smokePosition = {
+						x = pilotVec3.x + windDirectionOpposite.x * smokeOffsetDistance,
+						y = pilotVec3.y,
+						z = pilotVec3.z + windDirectionOpposite.z * smokeOffsetDistance,
+					}
+				else
+					-- Si le vent est nul, placer le fumigène 10 mètres au nord du pilote
+					smokePosition = {
+						x = pilotVec3.x,
+						y = pilotVec3.y,
+						z = pilotVec3.z + smokeOffsetDistance,
+					}
+				end
+
+					-- Placer le fumigène
 				trigger.action.smoke(smokePosition, trigger.smokeColor.Red)
 
 			end
@@ -2152,27 +2189,39 @@ function GetOutGDFM(arg)
 
 								AddSoldierAliasPilot(damaged)
 								damaged.createdSoldier = true
-								-- trigger.action.smoke(pilotVec3, trigger.smokeColor.Red)
-
 								-- Obtenir le vecteur du vent à la position du pilote
 								local windVec3 = atmosphere.getWind(pilotVec3)
 
-								-- Calculer la direction opposée au vent (normalisée)
-								local windMagnitude = math.sqrt(windVec3.x^2 + windVec3.z^2) -- Norme du vent dans le plan horizontal
-								local windDirectionOpposite = {
-									x = -windVec3.x / windMagnitude, -- Normaliser le vent en X
-									z = -windVec3.z / windMagnitude, -- Normaliser le vent en Z
-								}
+								-- Calculer la norme du vent dans le plan horizontal
+								local windMagnitude = math.sqrt(windVec3.x^2 + windVec3.z^2)
 
-								-- Distance pour placer le fumigène (10 mètres par exemple)
-								local smokeOffsetDistance = 10
-								local smokePosition = {
-									x = pilotVec3.x + windDirectionOpposite.x * smokeOffsetDistance,
-									y = pilotVec3.y,
-									z = pilotVec3.z + windDirectionOpposite.z * smokeOffsetDistance,
-								}
+								-- Position de décalage pour le fumigène
+								local smokeOffsetDistance = 30
+								local smokePosition
 
-								-- Placer le fumigène
+								if windMagnitude > 0 then
+									-- Normaliser la direction opposée au vent
+									local windDirectionOpposite = {
+										x = -windVec3.x / windMagnitude,
+										z = -windVec3.z / windMagnitude,
+									}
+
+									-- Calculer la position du fumigène
+									smokePosition = {
+										x = pilotVec3.x + windDirectionOpposite.x * smokeOffsetDistance,
+										y = pilotVec3.y,
+										z = pilotVec3.z + windDirectionOpposite.z * smokeOffsetDistance,
+									}
+								else
+									-- Si le vent est nul, placer le fumigène 10 mètres au nord du pilote
+									smokePosition = {
+										x = pilotVec3.x,
+										y = pilotVec3.y,
+										z = pilotVec3.z + smokeOffsetDistance,
+									}
+								end
+
+									-- Placer le fumigène
 								trigger.action.smoke(smokePosition, trigger.smokeColor.Red)
 
 							end
