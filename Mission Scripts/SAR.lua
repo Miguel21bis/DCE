@@ -2188,7 +2188,7 @@ function GetOutGDFM(arg)
 
 							env.info("DCE_getOut E test typeLand "..tostring(typeLand))
 
-							if typeLand ~= 3 and typeLand ~= 5  then
+							if typeLand ~= land.SurfaceType.WATER and typeLand ~= land.SurfaceType.RUNWAY  then
 
 								AddSoldierAliasPilot(damaged)
 								damaged.createdSoldier = true
@@ -2239,7 +2239,7 @@ function GetOutGDFM(arg)
 
 							createWreckCrew[damaged.unitName] = true
 
-							if damaged.initiator.id_ then
+							if damaged.initiator and damaged.initiator.id_ then
 								for n, damageds in pairs(GroundDamagedFlyingMachine) do
 									local toRemove = {} -- Table pour stocker les clés à supprimer
 

@@ -1806,7 +1806,7 @@ function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)
 				-- cat = Group.getCategory(flight)	--ne fonctionne plus (ne pas prendre getCategory pour les unit)
 
 				--detecte si l'helico se pose proche d'une FARP BASE
-				local desc = flight:getDesc()
+				local desc = element:getDesc()
 				cat = desc.category
 
 				-- if unitCat and ( unitCat == Unit.Category.HELICOPTER) then	--unitCat == Unit.Category.AIRPLANE or

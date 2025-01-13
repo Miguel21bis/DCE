@@ -640,7 +640,7 @@ function eventHandlerDCE:onEvent(event)
 					env.info( "DCE_EvenT: createdSoldier? SurfaceType? "..tostring(selectedEjection.SurfaceType))
 					-- trigger.action.outText("EvenT:  createdSoldier? SurfaceType? "..tostring(selectedEjection.SurfaceType), 30)
 
-					if selectedEjection.SurfaceType ~= 3 and selectedEjection.SurfaceType ~= 5  then
+					if selectedEjection.SurfaceType ~= land.SurfaceType.WATER and selectedEjection.SurfaceType ~= land.SurfaceType.RUNWAY  then 
 
 						AddSoldierAliasPilot(selectedEjection)
 						selectedEjection.createdSoldier = true
