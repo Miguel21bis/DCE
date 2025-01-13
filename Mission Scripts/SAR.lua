@@ -1532,7 +1532,7 @@ local function detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
 
 	local function walk()
 
-		if not unitSAR or not unitSAR:isActive()  then 
+		if not unitSAR or not unitSAR:isActive()  then
 			return
 		end
 
@@ -1723,16 +1723,16 @@ function LoopSAR()
 						if units_SAR then
 							for n=1, #units_SAR do
 								unitSAR = units_SAR[n]
-								
+
 								if unitSAR then
 									SAR_Coalition = tostring(unitSAR:getCoalition())
 									local _SAR_Player = unitSAR:getPlayerName()
-									
+
 									if  unitSAR:isActive() and  string.lower(coalition_name) ==  coalitionId[SAR_Coalition] then
 										local Pos_SAR = unitSAR:getPoint()
 										local SAR_unitId = Unit.getID(unitSAR)
 										local SAR_Name = unitSAR:getName()
-										
+
 
 										for MGRS_Chute, zone in pairs(zoneSAR) do
 											for N_Pilot, ejectedPilot in ipairs(zone) do
@@ -1795,7 +1795,7 @@ function LoopSAR()
 															if _SAR_Player then
 																ejectedPilot.landingPossible = true
 																-- trigger.action.outTextForUnit( SAR_unitId , "ForUnit _SAR_Player detected "..tostring(_SAR_Player) , 2 , false)
-																env.info( "DCE__SAR_Player detected "..tostring(_SAR_Player).." SAR_unitId: "..tostring(SAR_unitId))
+																env.info( "DCE_SAR_Player detected "..tostring(_SAR_Player).." SAR_unitId: "..tostring(SAR_unitId))
 
 															end
 
@@ -1826,11 +1826,14 @@ function LoopSAR()
 															local _SARinAir = unitSAR:inAir()
 															env.info( "DCE_SAR:_SAR_Player Pilot.landingPossible, helico: |"..tostring(_SAR_Player).."| |"..tostring(SAR_Name).."| HumainPilot se pose ou fait hoover pour recuperer "..tostring(ejectedPilot.name))
 
-															env.info( "DCE_SAR:_SAR_Player".." Hauteur?: "..h.." _SARinAir?: "..tostring(_SARinAir).." "..distance.." guideSAR "..tostring(guideSAR[SAR_unitId]).." walkEjectedPilot "..tostring(walkEjectedPilot[SAR_unitId]))
+															env.info( "DCE_SAR:_SAR_Player Hauteur?: "..h.." _SARinAir?: "..tostring(_SARinAir).." "..distance.." guideSAR "..tostring(guideSAR[SAR_unitId]).." walkEjectedPilot "..tostring(walkEjectedPilot[SAR_unitId]))
 
 															-- l helicopter tente un helitreuillage
 															-- if h > 3 and distance <= 100 and (guideSAR[SAR_unitId] == nil or guideSAR[SAR_unitId] == false) then
 															if _SARinAir then
+																
+																walkEjectedPilot[SAR_unitId] = false
+
 																if distance <= 100 and not guideSAR[SAR_unitId] then
 																	env.info( "DCE_SAR:_SAR_Player SAR tries helitacking")
 
@@ -2111,7 +2114,7 @@ function GetOutGDFM(arg)
 				t = timer.getTime(),
 			}
 
-			table.insert(CustomLog, log_entry)	
+			table.insert(CustomLog, log_entry)
 
 			CheckImmediatSAR(infoPlayer)
 
@@ -2141,7 +2144,7 @@ function GetOutGDFM(arg)
 					env.info( "DCE_getOut C occurenceN: "..occurenceN.." id_: "..tostring(id_).." damaged.gpGid: "..tostring(damaged.gpGid))
 
 					-- if damaged.unit and damaged.unit:isExist() and damaged.unit:isActive() and not damaged.unit:inAir() then
-					if not damaged.unit or not damaged.unit:inAir() then
+					if damaged and damaged.unit or not damaged.unit:inAir() then
 
 						env.info( "DCE_getOut D ")
 

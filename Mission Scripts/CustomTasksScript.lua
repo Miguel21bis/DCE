@@ -1803,7 +1803,13 @@ function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)
 			if element and element:getPlayerName() == nil and not RTB then
 				gpGid = Group.getID(flight)
 				callSign = Unit.getCallsign(element)
-				cat = Group.getCategory(flight)
+				-- cat = Group.getCategory(flight)	--ne fonctionne plus (ne pas prendre getCategory pour les unit)
+
+				--detecte si l'helico se pose proche d'une FARP BASE
+				local desc = flight:getDesc()
+				cat = desc.category
+
+				-- if unitCat and ( unitCat == Unit.Category.HELICOPTER) then	--unitCat == Unit.Category.AIRPLANE or
 
 				if tabBingoPlane[gpGid] and tabBingoPlane[gpGid][callSign] then
 					RTB = true
@@ -1816,7 +1822,7 @@ function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)
 				local pos = element:getPoint()								--get position
 				local task_entry = {}
 
-				if cat == 0 then  --Airplane
+				if cat == Unit.Category.AIRPLANE then  --0 Airplane
 					task_entry = {										--define engage task		
 						id = 'ControlledTask',
 						params = {
@@ -1841,7 +1847,7 @@ function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)
 							}
 						}
 					}
-				elseif cat == 1 then  -- helo
+				elseif cat == Unit.Category.HELICOPTER then  -- 1 helo
 					task_entry = {										--define engage task		
 						id = 'ControlledTask',
 						params = {

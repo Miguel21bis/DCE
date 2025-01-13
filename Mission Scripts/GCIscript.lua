@@ -177,56 +177,59 @@ local function GCI_Cycle()
 
 						local desc = targets[t].object:getDesc()
 						local txtA = ""
-						-- if desc and desc.category then txtA = desc.category end
-						-- env.info("DCE_Gci B_A   getDesc "..tostring(txtA))
 
 						--desc.category donne ceci:
 						--{AIRPLANE = 0, WEAPON = 1, GROUND_UNIT = 2, SHIP = 3
 						-- la suite non BASE = 4, SCENERY = 5, CARGO = 6,}
 
 						-- if Object.getCategory(targets[t].object) == Object.Category.UNIT then		-- ==1 object is a unit
-						if desc.category and desc.category == 0 then	--is AIRPLANE
+						-- if desc.category and desc.category == 0 then	--is AIRPLANE
 
-							local unitCat = Unit.getCategory(targets[t].object)
-							-- -- Unit.Category = { AIRPLANE = 0, HELICOPTER = 1, GROUND_UNIT = 2, SHIP = 3, STRUCTURE = 4 }
-							-- env.info("          B_B Unit.getCategory() unitCat |"..tostring(unitCat))
 
-							if unitCat and (unitCat == Unit.Category.AIRPLANE or unitCat == Unit.Category.HELICOPTER) then
-								local target_name = targets[t].object:getGroup():getName()			--get target group name
-								-- env.info("              B_C object:getGroup():getName() |"..tostring(target_name).."| t: "..t)
+							-- local unitCat = Unit.getCategory(targets[t].object)
 
-								if track_update[target_name] == nil then							--the target track for this group has not yet been updated
-									track_update[target_name] = true								--the target track for this group is updated
-									local target_number = targets[t].object:getGroup():getUnits()	--get target group size
-									local target_point = targets[t].object:getPoint()				--get target point
-									local target_typeName = targets[t].object:getGroup():getUnit(1):getTypeName()
-									ErrorMsg = "EWR target detection: " .. ewr_name	.. "; Target: " .. target_name 	--Error message in case follow on code fails
+						local unitCat = desc.category
 
-									if target_tracks[ewr_side][target_name] then					--existing track
-										if target_tracks[ewr_side][target_name].time > current_time - 30 then	--last detection was within 30 seconds
-											target_tracks[ewr_side][target_name].history = target_tracks[ewr_side][target_name].history + 1		--increase detection history by one
-										else																	--last detection is older than 30 seconds
-											target_tracks[ewr_side][target_name].history = 0					--reset detection history to 0
-										end
-										target_tracks[ewr_side][target_name].number = #target_number
-										target_tracks[ewr_side][target_name].time = current_time
-										target_tracks[ewr_side][target_name].point = target_point
-										target_tracks[ewr_side][target_name].category = desc.category
-									else															--new track
-										target_tracks[ewr_side][target_name] = {
-											number = #target_number,								--number of aircraft in traget group
-											time = current_time,									--time of current detection
-											point = target_point,									--position of this target group
-											typeName = target_typeName,
-											history = 0,											--number of detections in sequence
-											assigned = 0,											--number of interceptors assigned to this target group
-											category = unitCat,
-										}
 
+						-- -- Unit.Category = { AIRPLANE = 0, HELICOPTER = 1, GROUND_UNIT = 2, SHIP = 3, STRUCTURE = 4 }
+						-- env.info("          B_B Unit.getCategory() unitCat |"..tostring(unitCat))
+
+						if unitCat and (unitCat == Unit.Category.AIRPLANE or unitCat == Unit.Category.HELICOPTER) then
+							local target_name = targets[t].object:getGroup():getName()			--get target group name
+							-- env.info("              B_C object:getGroup():getName() |"..tostring(target_name).."| t: "..t)
+
+							if track_update[target_name] == nil then							--the target track for this group has not yet been updated
+								track_update[target_name] = true								--the target track for this group is updated
+								local target_number = targets[t].object:getGroup():getUnits()	--get target group size
+								local target_point = targets[t].object:getPoint()				--get target point
+								local target_typeName = targets[t].object:getGroup():getUnit(1):getTypeName()
+								ErrorMsg = "EWR target detection: " .. ewr_name	.. "; Target: " .. target_name 	--Error message in case follow on code fails
+
+								if target_tracks[ewr_side][target_name] then					--existing track
+									if target_tracks[ewr_side][target_name].time > current_time - 30 then	--last detection was within 30 seconds
+										target_tracks[ewr_side][target_name].history = target_tracks[ewr_side][target_name].history + 1		--increase detection history by one
+									else																	--last detection is older than 30 seconds
+										target_tracks[ewr_side][target_name].history = 0					--reset detection history to 0
 									end
+									target_tracks[ewr_side][target_name].number = #target_number
+									target_tracks[ewr_side][target_name].time = current_time
+									target_tracks[ewr_side][target_name].point = target_point
+									target_tracks[ewr_side][target_name].category = desc.category
+								else															--new track
+									target_tracks[ewr_side][target_name] = {
+										number = #target_number,								--number of aircraft in traget group
+										time = current_time,									--time of current detection
+										point = target_point,									--position of this target group
+										typeName = target_typeName,
+										history = 0,											--number of detections in sequence
+										assigned = 0,											--number of interceptors assigned to this target group
+										category = unitCat,
+									}
+
 								end
 							end
 						end
+						-- end
 					end
 				end
 			end

@@ -268,27 +268,9 @@ local function AddClient(name)
 				clientstats[name][key] = 0
 			end
 		end
-
-		-- --ajoute les clefs manquantes de la table score_last  pour rétrocomtabilité
-		-- for key, value in pairs(tabValues.score_last) do
-		-- 	local foundKey = false
-		-- 	for clientK, clientV in pairs(clientstats[name].score_last) do
-		-- 		if key == clientK then
-		-- 			foundKey = true
-		-- 			print("DebriefSE foundKey "..key)
-		-- 			break
-		-- 		end
-
-		-- 	end
-		-- 	if not foundKey then
-		-- 		print("DebriefSE NOT foundKey "..key)
-		-- 		os.execute 'pause'
-		-- 		clientstats[name].score_last[key] = 0
-		-- 	end
-		-- end
-
-
 	end
+
+	
 end
 
 
@@ -388,9 +370,10 @@ end
 
 --prepare client stats
 for e = 1, #events do																					--iterate through all events
-	-- if events[e].initiatorPilotName then
-	-- 	print("DebriefSE e: "..tostring(e).." initiatorPilotName: "..tostring( events[e].initiatorPilotName).." initiator: "..tostring(events[e].initiator))
-	-- end
+	if events[e].initiatorPilotName then
+		print("DebriefSE e: "..tostring(e).." initiatorPilotName: "..tostring( events[e].initiatorPilotName).." initiator: "..tostring(events[e].initiator))
+	end
+	_affiche(events[e], "prepare client stats events[e]")
 
 	if events[e].initiator and string.find(events[e].initiator, "parachut") then
 		events[e].initiator = tostring(events[e].initiatorPilotName)
@@ -775,24 +758,29 @@ for e = 1, #events do
 		statutObject[events[e].initiator].takeoff = true
 
 	elseif events[e].type == "embarkedEjectedPilot" then
-		--le sauver est l'initiator
-		if client_control[events[e].initiator] and ( (events[e].t - clientstats[client_control[events[e].initiator]].score_last.Time_rescue ) >   30) then
-			-- if clientstats[client_control[events[e].initiator]].score_last.rescue  == 0 then
-				clientstats[client_control[events[e].initiator]].rescue  = clientstats[client_control[events[e].initiator]].rescue  + 1
-				clientstats[client_control[events[e].initiator]].score_last.rescue  = clientstats[client_control[events[e].initiator]].score_last.rescue + 1
-				clientstats[client_control[events[e].initiator]].score_last.Time_rescue =  events[e].t
-			-- end
+		--l'initiator sauve quelqu'un
+		if client_control[events[e].initiator] and ( (events[e].t - clientstats[client_control[events[e].initiator]].score_last.Time_rescue ) > 30) then
+			clientstats[client_control[events[e].initiator]].rescue  = clientstats[client_control[events[e].initiator]].rescue  + 1
+			clientstats[client_control[events[e].initiator]].score_last.rescue  = clientstats[client_control[events[e].initiator]].score_last.rescue + 1
+			clientstats[client_control[events[e].initiator]].score_last.Time_rescue =  events[e].t
 		end
 		--le pilote sauvé est le target
-		if client_control[events[e].target] and ( (events[e].t - clientstats[client_control[events[e].target]].score_last.Time_rescued ) >   30) then
-			-- if clientstats[client_control[events[e].target]].score_last.rescued  == 0 then
-				clientstats[client_control[events[e].target]].rescued  = clientstats[client_control[events[e].target]].rescued  + 1
-				clientstats[client_control[events[e].target]].score_last.rescued  = clientstats[client_control[events[e].target]].score_last.rescued + 1
-				clientstats[client_control[events[e].target]].score_last.Time_rescued =  events[e].t
+		if client_control[events[e].target] and ( (events[e].t - clientstats[client_control[events[e].target]].score_last.Time_rescued ) > 30) then
+			clientstats[client_control[events[e].target]].rescued  = clientstats[client_control[events[e].target]].rescued  + 1
+			clientstats[client_control[events[e].target]].score_last.rescued  = clientstats[client_control[events[e].target]].score_last.rescued + 1
+			clientstats[client_control[events[e].target]].score_last.Time_rescued =  events[e].t
 
-				clientstats[client_control[events[e].target]].MIA = clientstats[client_control[events[e].target]].MIA - 1
-				clientstats[client_control[events[e].target]].score_last.MIA =  -1
-			-- end
+			clientstats[client_control[events[e].target]].MIA = clientstats[client_control[events[e].target]].MIA - 1
+			clientstats[client_control[events[e].target]].score_last.MIA =  -1
+		end
+		--le pilote sauvé est le target (prise en compte du PilotName s'il existe)
+		if clientstats[events[e].targetPilotName] and ( (events[e].t - clientstats[events[e].targetPilotName].score_last.Time_rescued ) > 30) then
+			clientstats[events[e].targetPilotName].rescued  = clientstats[events[e].targetPilotName].rescued  + 1
+			clientstats[events[e].targetPilotName].score_last.rescued  = clientstats[events[e].targetPilotName].score_last.rescued + 1
+			clientstats[events[e].targetPilotName].score_last.Time_rescued =  events[e].t
+
+			clientstats[events[e].targetPilotName].MIA = clientstats[events[e].targetPilotName].MIA - 1
+			clientstats[events[e].targetPilotName].score_last.MIA =  -1
 		end
 
 	elseif events[e].type == "land" then
@@ -1024,9 +1012,7 @@ if camp_ZoneSAR then
 						clientstats[ejectedPilot.initiatorPilotName].score_last.POW = 1					--store mission for client
 					end
 				end
-
 			end
-
 		end
 	end
 else

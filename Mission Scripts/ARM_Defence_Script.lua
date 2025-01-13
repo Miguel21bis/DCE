@@ -100,7 +100,7 @@ do
 						-- print("DCETestingConstante: Unit.Category.STRUCTURE "..tostring(Unit.Category.STRUCTURE))
 
 
-					if Object.getCategory(tgt) ~= 5 then														--target is not a scenery object
+					if Object.getCategory(tgt) ~= Object.Category.SCENERY then														--target is not a scenery object
 						-- env.info("DCE_ARM_S_EVENT          E ")
 
 						if tgt:getDesc().category ~= 3 then															--target is not a ship	-- bug AGM-154 :31: in function 'getDesc' Static doesn't exist

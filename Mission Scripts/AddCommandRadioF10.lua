@@ -120,6 +120,13 @@ Unit_Category = {
 	[4] = "STRUCTURE",
   }
 
+--   land.SurfaceType 
+--   LAND             1
+--   SHALLOW_WATER    2
+--   WATER            3 
+--   ROAD             4
+--   RUNWAY           5
+
 local radioCommands = {}
 local flightPlanTimer = {}
 local commandDB = {}

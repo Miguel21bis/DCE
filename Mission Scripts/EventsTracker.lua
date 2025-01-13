@@ -353,13 +353,13 @@ function eventHandlerDCE:onEvent(event)
 	-- S_EVENT_POSTPONED_LAND = 56, 
 	-- S_EVENT_MAX = 57,
 
-	env.info( "DCE_EventsTracker  id: "..tostring(event.id).." _type_ : "..tostring(log_entry.type))
+	if camp.debug then  env.info( "DCE_EventsTracker  id: "..tostring(event.id).." _type_ : "..tostring(log_entry.type)) end
 	-- _affiche(event, "event EventTracker")
 	-- trigger.action.outText("EventT  id: "..tostring(event.id).."_type_"..tostring(log_entry.type), 3)
 
 	if event and event.id and Info_event and Info_event[tonumber(event.id)] then
 		local idLabel = tostring(Info_event[tonumber(event.id)])
-		env.info("DCE_EventsTracker event.id "..tostring(event.id).." " ..idLabel)
+		if camp.debug then  env.info("DCE_EventsTracker event.id "..tostring(event.id).." " ..idLabel) end
 	end
 
 	if not eventIdTotal[event.id] then eventIdTotal[event.id] = 0 end
@@ -371,9 +371,9 @@ function eventHandlerDCE:onEvent(event)
 	if event.initiator then
 		initiatorObjCategory = Object.getCategory(event.initiator)
 		--DCE_EventsTracker initiator Category 0 _: nil
-		env.info("DCE_EventsTracker initiator Category: "..tostring(initiatorObjCategory))
+		if camp.debug then  env.info("DCE_EventsTracker initiator Category: "..tostring(initiatorObjCategory)) end
 		if Object_Category[initiatorObjCategory] then
-			env.info("DCE_EventsTracker initiator Object_Category :  _:_ "..tostring(Object_Category[initiatorObjCategory]))
+			if camp.debug then  env.info("DCE_EventsTracker initiator Object_Category :  _:_ "..tostring(Object_Category[initiatorObjCategory])) end
 
 			if initiatorObjCategory ~= Object.Category.SCENERY then
 				local initiatorCoalition = event.initiator:getCoalition()
@@ -384,9 +384,9 @@ function eventHandlerDCE:onEvent(event)
 
 	if event.target then
 		targetObjCategory = Object.getCategory(event.target)
-		env.info("DCE_EventsTracker target Category: "..tostring(targetObjCategory))
+		if camp.debug then  env.info("DCE_EventsTracker target Category: "..tostring(targetObjCategory)) end
 		if Object_Category[targetObjCategory] then
-			env.info("DCE_EventsTracker Object_Category :  _:_ "..tostring(Object_Category[targetObjCategory]))
+			if camp.debug then  env.info("DCE_EventsTracker Object_Category :  _:_ "..tostring(Object_Category[targetObjCategory])) end
 			-- static:getDesc().category
 			if targetObjCategory ~= Object.Category.SCENERY then
 				if event.target:isExist() then
@@ -482,7 +482,7 @@ function eventHandlerDCE:onEvent(event)
 
 				table.insert(EjectionSeatFrequency, ejectionSeatTemp)
 
-				table.insert(CustomLog, log_entry)	
+				-- table.insert(CustomLog, log_entry)
 
 			end
 			if initiatorSideName then
@@ -655,8 +655,6 @@ function eventHandlerDCE:onEvent(event)
 				log_entry.targetSideName = targetSideName
 			end
 		end
-	-- end
-
 
 	elseif log_entry.type == "pilot dead"  then --log_entry.type == "pilot dead" or 
 
@@ -683,120 +681,168 @@ function eventHandlerDCE:onEvent(event)
 	-- end
 
 	-- miguel modification M18.d destroy Plane Landing CV
-	elseif (log_entry.type == "land" and event.place)  then										--hit event with initiator or any other event (excludes hit events without initiator, like collisions)		
-		env.info("DCE_Landing Passe 00 ")
+	elseif log_entry.type == "land" then										--hit event with initiator or any other event (excludes hit events without initiator, like collisions)		
+		env.info("DCE_EventsTracker Landing Passe 00 ")
 
 		if event.initiator then
-			env.info("DCE_Landing Passe 01 ")
 
-			local s =""
-			s = s.." Object.getCategory "..Object.getCategory(event.initiator)
-			s = s.." "..event.initiator:getName()
-			-- s = s.." "..event.place:getCategory()
-			s = s.." Airbase.getCategory "..Airbase.getCategory(event.place)
-			s = s.." "..event.place:getName()
-			s = s.." "..event.initiator:getID()
-			s = s.." "..event.initiator:getTypeName()
+			local playerName = event.initiator:getPlayerName()
 
-			local BasePlace = tostring(event.place:getTypeName())
+			if event.place then
 
-			env.info("DCE_Landing Passe A "..tostring(s))
+				env.info("DCE_EventsTracker Landing Passe 01 ")
 
-			-- Airbase.Category = {
-			-- 	AIRDROME = 0,
-			-- 	HELIPAD = 1, 
-			-- 	SHIP = 2,
-			-- }
-			-- if event.place:getCategory() == Airbase.Category.SHIP    and not event.initiator:getPlayerName() then 
-			if Airbase.getCategory(event.place) == Airbase.Category.SHIP and not event.initiator:getPlayerName() then 											-- category ship
-				env.info("DCE_Landing Passe C ")
+				local s =""
+				s = s.." Object.getCategory "..Object.getCategory(event.initiator)
+				s = s.." "..event.initiator:getName()
+				-- s = s.." "..event.place:getCategory()
+				s = s.." Airbase.getCategory "..Airbase.getCategory(event.place)
+				s = s.." "..event.place:getName()
+				s = s.." "..event.initiator:getID()
+				s = s.." "..event.initiator:getTypeName()
 
-				--relance un Pedro si c'est un Pedro qui se pose
-				if string.find(event.initiator:getName(), "Pedro") then
-
-					table.insert(despawn, event.initiator)
-
-					--["name"] = "Unit_Pedro_CVN-71 Theodore Roosevelt_1",
-					local cvName = event.initiator:getName()
-					env.info("DCE_Pedro landing Passe D1 "..tostring(cvName))
-
-					cvName = cvName:gsub( "Unit_Pedro_", "")
-					cvName, _ = cvName:match("([^,]+)_([^,]+)")
-					env.info("DCE_Pedro landing Passe D2 "..tostring(cvName))
-
-					NeedPedro(cvName, event)
-
-					env.info("DCE_TryStart Passe D3 NeedPedro cvName: "..tostring(cvName))
-					-- trigger.action.outText("TryStart NeedPedro ", 30)
-
-				elseif camp.CV_despawnAfterLanding then
-					env.info("DCE_Despawn Add Table CV despawn "..s)
-					table.insert(despawn, event.initiator)
-				end
-
-			elseif  string.find(event.place:getName(),"FARP")   and not event.initiator:getPlayerName() then 											-- category ship
-				env.info("DCE_Despawn Add Table FARP despawn "..s)
-				table.insert(despawn, event.initiator)
-
-			end
-
-			env.info("DCE_Landing Passe E ")
-
-			-- modification M50.a Records landings
-			local initDesc = event.initiator:getDesc()
-			if initDesc.displayName then
-				log_entry.initiator = event.initiator:getName()																							--store initiator name
-				log_entry.type_name = event.initiator:getTypeName()
-				log_entry.place = event.place:getTypeName()
-				log_entry.place = string.gsub(log_entry.place, "'", "")
-				-- log_entry.Desc = initDesc
-
-			end
-			if Object.getCategory(event.initiator) == Object.Category.UNIT and event.initiator:getPlayerName() then			--initiator is a unit debug_ET01.h
-				log_entry.initiatorPilotName = event.initiator:getPlayerName()
-				if log_entry.initiatorPilotName then
-					log_entry.initiatorPilotName = log_entry.initiatorPilotName:gsub("'", '')
-					log_entry.initiatorPilotName = log_entry.initiatorPilotName:gsub("\"", '')
-				end
+				local BasePlace = tostring(event.place:getTypeName())
 				
-			end
-			if Object.getCategory(event.initiator) ~= Object.Category.SCENERY and event.initiator:getID() then				--initator is not a scenery object debug_ET01.h
-				log_entry.initiatorMissionID = event.initiator:getID()																					--store ID
-			end
 
-			local initPoint = event.initiator:getPoint()
-			if initPoint and initPoint.x then
-				log_entry.x = initPoint.x
-				log_entry.y = initPoint.y
-				log_entry.z = initPoint.z
-			end
+				env.info("DCE_EventsTracker Landing Passe A "..tostring(s))
 
-			table.insert(CustomLog, log_entry)
-			env.info("DCE_Landing fin Passe Y ")
+				-- Airbase.Category = {
+				-- 	AIRDROME = 0,
+				-- 	HELIPAD = 1, 
+				-- 	SHIP = 2,
+				-- }
+				-- if event.place:getCategory() == Airbase.Category.SHIP    and not event.initiator:getPlayerName() then 
+				if Airbase.getCategory(event.place) == Airbase.Category.SHIP and not playerName then 											-- category ship
+					env.info("DCE_EventsTracker Landing Passe C ")
+
+					--relance un Pedro si c'est un Pedro qui se pose
+					if string.find(event.initiator:getName(), "Pedro") then
+
+						table.insert(despawn, event.initiator)
+
+						--["name"] = "Unit_Pedro_CVN-71 Theodore Roosevelt_1",
+						local cvName = event.initiator:getName()
+						env.info("DCE_EventsTracker Landing Pedro landing Passe D1 "..tostring(cvName))
+
+						cvName = cvName:gsub( "Unit_Pedro_", "")
+						cvName, _ = cvName:match("([^,]+)_([^,]+)")
+						env.info("DCE_EventsTracker Landing Pedro landing Passe D2 "..tostring(cvName))
+
+						NeedPedro(cvName, event)
+
+						env.info("DCE_EventsTracker Landing ryStart Passe D3 NeedPedro cvName: "..tostring(cvName))
+						-- trigger.action.outText("TryStart NeedPedro ", 30)
+
+					elseif camp.CV_despawnAfterLanding then
+						env.info("DCE_EventsTracker Landing Despawn Add Table CV despawn "..s)
+						table.insert(despawn, event.initiator)
+					end
+
+				elseif  string.find(event.place:getName(),"FARP") and not playerName then 											-- category ship
+					env.info("DCE_EventsTracker Landing Despawn Add Table FARP despawn "..s)
+					table.insert(despawn, event.initiator)
+
+				end
+
+				env.info("DCE_EventsTracker Landing Passe E ")
+
+				-- modification M50.a Records landings
+				local initDesc = event.initiator:getDesc()
+				if initDesc.displayName then
+					log_entry.initiator = event.initiator:getName()																							--store initiator name
+					log_entry.type_name = event.initiator:getTypeName()
+					log_entry.place = event.place:getTypeName()
+					log_entry.place = string.gsub(log_entry.place, "'", "")
+					-- log_entry.Desc = initDesc
+
+				end
+				if Object.getCategory(event.initiator) == Object.Category.UNIT and playerName then			--initiator is a unit debug_ET01.h
+					log_entry.initiatorPilotName = event.initiator:getPlayerName()
+					if log_entry.initiatorPilotName then
+						log_entry.initiatorPilotName = log_entry.initiatorPilotName:gsub("'", '')
+						log_entry.initiatorPilotName = log_entry.initiatorPilotName:gsub("\"", '')
+					end
+					
+				end
+				if Object.getCategory(event.initiator) ~= Object.Category.SCENERY and event.initiator:getID() then				--initator is not a scenery object debug_ET01.h
+					log_entry.initiatorMissionID = event.initiator:getID()																					--store ID
+				end
+
+				local initPoint = event.initiator:getPoint()
+				if initPoint and initPoint.x then
+					log_entry.x = initPoint.x
+					log_entry.y = initPoint.y
+					log_entry.z = initPoint.z
+				end
+
+				-- table.insert(CustomLog, log_entry)
+				env.info("DCE_EventsTracker Landing fin Passe Y ")
+			else
+
+				--detecte si l'helico se pose proche d'une FARP BASE
+				local desc = event.initiator:getDesc()
+				local unitCat = desc.category
+
+				--TODO trouver l'argument atterrissage vertical pour Harrier
+				if unitCat and ( unitCat == Unit.Category.HELICOPTER) then	--unitCat == Unit.Category.AIRPLANE or
+					local landerUnitPoint = event.initiator:getPoint()
+
+					if runwayLife then
+						for Id, base in pairs(runwayLife) do 						
+							local distance = GetDistance({x=landerUnitPoint.x, y=landerUnitPoint.z}, {x=base.point.x, y=base.point.z })
+							local landSurfaceType = land.getSurfaceType({x = landerUnitPoint.x, y = landerUnitPoint.z})
+
+							if distance <= 3000 and landSurfaceType ~= land.SurfaceType.WATER then
+								env.info("DCE_EventsTracker landedNearBase "..tostring(base.name))
+								trigger.action.outText("DCE_EventsTracker landedNearBase "..tostring(base.name), 15)
+								log_entry.subType = "landedNearBase"
+								break
+							end
+						end
+					end
+				end
+
+
+				env.info("DCE_EventsTracker Passe 12 ")
+
+				local life = event.initiator:getLife()																	--get current life of unit
+				local init_life = event.initiator:getLife0()															--get initial life of unit
+				log_entry.health = math.ceil(100 / init_life * life)												--store unit health to log entry
+
+				local healthTemp = {
+					PilotName = playerName,
+					typeEvent = log_entry.type,
+					life = life,
+					objSujet = event.initiator,
+					health0 = init_life,
+					health = log_entry.health,
+				}
+
+				timer.scheduleFunction(health1s, {healthTemp, event}, timer.getTime() + 1)
+			end
 		end
 
-	elseif (log_entry.type == "land")  then
-		env.info("DCE_Landing Passe 11 ")
+	-- elseif (log_entry.type == "land")  then
+	-- 	env.info("DCE_Landing Passe 11 ")
 
-		if event.initiator then
-			env.info("DCE_Landing Passe 12 ")
+	-- 	if event.initiator then
+	-- 		env.info("DCE_Landing Passe 12 ")
 
-			local life = event.initiator:getLife()																	--get current life of unit
-			local init_life = event.initiator:getLife0()															--get initial life of unit
-			log_entry.health = math.ceil(100 / init_life * life)												--store unit health to log entry
+	-- 		local life = event.initiator:getLife()																	--get current life of unit
+	-- 		local init_life = event.initiator:getLife0()															--get initial life of unit
+	-- 		log_entry.health = math.ceil(100 / init_life * life)												--store unit health to log entry
 
-			local healthTemp = {
-				PilotName = event.initiator:getPlayerName(),
-				typeEvent = log_entry.type,
-				life = life,
-				objSujet = event.initiator,
-				health0 = init_life,
-				health = log_entry.health,
-			}
+	-- 		local healthTemp = {
+	-- 			PilotName = event.initiator:getPlayerName(),
+	-- 			typeEvent = log_entry.type,
+	-- 			life = life,
+	-- 			objSujet = event.initiator,
+	-- 			health0 = init_life,
+	-- 			health = log_entry.health,
+	-- 		}
 
-			timer.scheduleFunction(health1s, {healthTemp, event}, timer.getTime() + 1)
-		end
-	-- end
+	-- 		timer.scheduleFunction(health1s, {healthTemp, event}, timer.getTime() + 1)
+	-- 	end
 
 	-- debug ET01.g
 	elseif log_entry.type and ((log_entry.type == "hit" and event.initiator) or log_entry.type ~= "hit" ) then												--hit event with initiator or any other event (excludes hit events without initiator, like collisions) 	
@@ -804,10 +850,10 @@ function eventHandlerDCE:onEvent(event)
 
 			if event and event.id and Info_event and Info_event[tonumber(event.id)] then
 				local idLabel = tostring(Info_event[tonumber(event.id)])
-				env.info("DCE_EventsTracker event.id "..tostring(event.id).." " ..idLabel)
+				env.info("DCE_EventsTracker HIT A event.id "..tostring(event.id).." " ..idLabel)
 			end
 
-			_affiche(event.initiator, "DCE_EventsTracker event.initiator")
+			_affiche(event.initiator, "DCE_EventsTracker HIT B event.initiator")
 
 			local initDesc = event.initiator:getDesc()																									--debug ET01	
 			if initDesc.displayName then
@@ -833,7 +879,7 @@ function eventHandlerDCE:onEvent(event)
 			end
 		end
 
-		if event.target   then																														--event has a target
+		if event.target then																														--event has a target
 
 			-- Object.Category
 			-- UNIT    1
@@ -844,14 +890,14 @@ function eventHandlerDCE:onEvent(event)
 			-- Cargo   6
 
 			local targetCategory = Object.getCategory(event.target)
-			-- env.info( "DCE_EventT (type == hit) targetCategory| "..tostring(targetCategory))
+			env.info( "DCE_EventsTracker HIT C targetCategory| "..tostring(targetCategory))
 
-			if targetCategory and ( targetCategory == 1 or targetCategory == 3 or targetCategory == 4)  then
-				--Function also works with Unit, Static Object, Airbase
+			if targetCategory and ( targetCategory == Object.Category.UNIT or targetCategory == Object.Category.STATIC or targetCategory == Object.Category.BASE)  then
+				--Function also works with UNIT, STATIC, BASE
 				log_entry.target = event.target:getName()
-				env.info( "DCE_EventT (type == hit) |getName_716| "..tostring(log_entry.target))
+				env.info( "DCE_EventsTracker HIT D log_entry.target "..tostring(log_entry.target))
 
-				if targetCategory == 3 and log_entry.target ~= nil and log_entry.target ~= "" then
+				if targetCategory == Object.Category.STATIC and log_entry.target ~= nil and log_entry.target ~= "" then
 					-- StaticObject.Category = {
 					-- 	"VOID": 0,
 					-- 	"UNIT": 1,
@@ -862,7 +908,7 @@ function eventHandlerDCE:onEvent(event)
 					-- 	"CARGO": 6 
 					--    }
 
-					env.info( "DCE_EventT (type == hit) |getName_729| "..tostring(log_entry.target))
+					env.info( "DCE_EventsTracker HIT E log_entry.target "..tostring(log_entry.target))
 
 					-- local staticDesc = StaticObject.getDesc(event.target)
 					local staticDesc = event.target:getDesc()
@@ -872,9 +918,9 @@ function eventHandlerDCE:onEvent(event)
 
 					log_entry.targetMissionID = event.target:getID()
 
-					env.info( "DCE_EventT (type == hit) |staticCategory| "..tostring(staticCategory))
+					env.info( "DCE_EventsTracker HIT F |staticCategory| "..tostring(staticCategory))
 
-				elseif targetCategory and ( targetCategory == 1  or targetCategory == 4)  then
+				elseif targetCategory and ( targetCategory == Object.Category.UNIT  or targetCategory == Object.Category.BASE)  then
 
 					log_entry.targetMissionID = event.target:getID()
 
@@ -893,10 +939,21 @@ function eventHandlerDCE:onEvent(event)
 
 			if targetCategory and targetCategory == Object.Category.UNIT then												--target is a unit
 				log_entry.targetPilotName = event.target:getPlayerName()													--store player name
+				env.info( "DCE_EventsTracker HIT M |log_entry.type| "..tostring(log_entry.type))
+
 				if log_entry.type == "hit" then																				--log entry is a hit event	
 					-- if event.target:getGroup():getCategory() == 0 or event.target:getGroup():getCategory() == 1 then		--hit unit is aircraft or helo
-					if Group.getCategory(event.target:getGroup()) == 0 or Group.getCategory(event.target:getGroup()) == 1 then
-						local life = event.target:getLife()																	--get current life of unit
+					
+					local desc = event.target:getDesc()
+					local unitCat = desc.category
+
+					env.info( "DCE_EventsTracker HIT N |unitCat| "..tostring(unitCat))
+
+					if unitCat and (unitCat == Unit.Category.AIRPLANE or unitCat == Unit.Category.HELICOPTER) then
+					-- if Group.getCategory(event.target:getGroup()) == 0 or Group.getCategory(event.target:getGroup()) == 1 then
+					env.info( "DCE_EventsTracker HIT O |log_entry.targetPilotName| "..tostring(log_entry.targetPilotName))
+					
+					local life = event.target:getLife()																	--get current life of unit
 						local init_life = event.target:getLife0()															--get initial life of unit
 						log_entry.health = math.ceil(100 / init_life * life)												--store unit health to log entry
 
@@ -929,8 +986,12 @@ function eventHandlerDCE:onEvent(event)
 			end
 
 		end
-		table.insert(CustomLog, log_entry)																					--add log entry to custom log
+		-- table.insert(CustomLog, log_entry)																					--add log entry to custom log
 	end
+
+	--*********************insert CustomLog ********************
+	table.insert(CustomLog, log_entry)
+	--*********************insert CustomLog ********************
 
 	--mission end
 	if event.id == world.event.S_EVENT_MISSION_END then
