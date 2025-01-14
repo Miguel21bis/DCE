@@ -3583,7 +3583,7 @@ db_all_loadouts = {
 		},
 		["Anti-ship Strike"] = {
 			["Antiship  Kh-22N*3"] = {
-				minscore = 0.3,
+				minscore = 0.03,
 				support = {
 					Escort = true,
 					SEAD = false,

@@ -12,6 +12,7 @@ versionDCE["Mission Scripts\GCIscript.lua"] = "1.4.20"
 -- modification M11_j			Multiplayer
 ------------------------------------------------------------------------------------------------------- 
 
+env.info("DCE_GCI INIT loading GCIScript")
 
 --example of data structure for table GCI supplied by GCIdata.lua
 --[[
@@ -109,7 +110,6 @@ local target_tracks = {
 
 local function GCI_Cycle()
 	local current_time = timer.getTime()
-
 	--remove old targets from target_tracks
 	ErrorMsg = "Remove old tracks."																--Error message in case follow on code fails
 	for track_side, side in pairs(target_tracks) do												--iterate through sides in target tracks table
@@ -126,9 +126,6 @@ local function GCI_Cycle()
 	ErrorMsg = "Update interceptor table."														--Error message in case follow on code fails
 	for side_name, side in pairs(GCI.Interceptor) do											--iterate through sides in Interceptor table	
 		for base_name, base in pairs(side.base) do													--iterate through bases in Interceptor table
-
-			--trigger.action.outText(side_name .." / " .. base_name .. ": Ready: " .. #base.ready .. " / Ready15: " .. #base.ready15 .. " / Ready30: " .. #base.ready30, 5)	--FOR DEBGUG
-
 			--move ready 15 flights to ready
 			while #base.ready < base.ready_n and base.ready15[1] and base.ready15[1].time + 1800 < current_time do		--less interceptor flights are ready than planned AND ready15 flights exist AND flight must be in ready15 since 15 minutes to move up (when coming from ready30, otherwise time is -900 for no delay)														
 				base.ready15[1].time = current_time												--reset timer so that flight will not become ready until 15 minutes have passed
@@ -174,30 +171,13 @@ local function GCI_Cycle()
 				local track_update = {}																--local table to store which group tracks were already updated (to prevent multiple detected targets from the same group to update same track)
 				for t = 1, #targets do																--iterate through detected targets
 					if targets[t].object then
-
 						local desc = targets[t].object:getDesc()
 						local txtA = ""
 
-						--desc.category donne ceci:
-						--{AIRPLANE = 0, WEAPON = 1, GROUND_UNIT = 2, SHIP = 3
-						-- la suite non BASE = 4, SCENERY = 5, CARGO = 6,}
-
-						-- if Object.getCategory(targets[t].object) == Object.Category.UNIT then		-- ==1 object is a unit
-						-- if desc.category and desc.category == 0 then	--is AIRPLANE
-
-
-							-- local unitCat = Unit.getCategory(targets[t].object)
-
 						local unitCat = desc.category
-
-
-						-- -- Unit.Category = { AIRPLANE = 0, HELICOPTER = 1, GROUND_UNIT = 2, SHIP = 3, STRUCTURE = 4 }
-						-- env.info("          B_B Unit.getCategory() unitCat |"..tostring(unitCat))
 
 						if unitCat and (unitCat == Unit.Category.AIRPLANE or unitCat == Unit.Category.HELICOPTER) then
 							local target_name = targets[t].object:getGroup():getName()			--get target group name
-							-- env.info("              B_C object:getGroup():getName() |"..tostring(target_name).."| t: "..t)
-
 							if track_update[target_name] == nil then							--the target track for this group has not yet been updated
 								track_update[target_name] = true								--the target track for this group is updated
 								local target_number = targets[t].object:getGroup():getUnits()	--get target group size
@@ -229,7 +209,6 @@ local function GCI_Cycle()
 								end
 							end
 						end
-						-- end
 					end
 				end
 			end
@@ -239,34 +218,67 @@ local function GCI_Cycle()
 	--assign interceptors to targets
 	ErrorMsg = "Assign interceptors."																--Error message in case follow on code fails
 	for track_side, side in pairs(target_tracks) do													--iterate throug sides in target_tracks table
-		-- env.info("DCE_Gci Passe B_A track_side "..tostring(track_side))
-
 		for target_name, target in pairs(side) do													--iterate through targets
-			-- env.info("DCE_Gci  Passe B_B target_name "..tostring(target_name).." target.history "..tostring(target.history))
-
 			ErrorMsg = "Assign interceptors; Target: " .. target_name								--Error message in case follow on code fails
 			if target.history > 0 then																--target was detected at least two times in sequence
-				-- env.info("DCE_Gci   Passe B_C target.assigned "..tostring(target.assigned).." target.number "..tostring(target.number))
-
 				--ne declenche les intercepteur que si les ENI franchissent la frontiere
+				-- ou si le target est entre chez nous et chez eux (zone tampon ou eau international)
 				local ourSideOfBorder = false
+				local enemySideOfBorder = false
+				local authorizedInter = false
 
 				if camp.boundary and camp.boundary[track_side] and camp.boundary[track_side] ~= nil then
 
 					ourSideOfBorder =  CheckPointInPoly2(target.point, camp.boundary[track_side])
 
-					-- env.info("DCE_Gci Passe B_C2 track_side "..tostring(track_side).." ourSideOfBorder: "..tostring(ourSideOfBorder))
+					enemySideOfBorder =  CheckPointInPoly2(target.point, camp.boundary[DCS_ENI_Side[track_side]])
 
-					if ourSideOfBorder  then
-						-- env.info( "DCE_Gci Passe B_C2? G ourSideOfBorder  ")
-						ourSideOfBorder = true
+					if enemySideOfBorder then
+						--pour info
+						env.info("DCE_Gci     Passe A_0 enemySideOfBorder "..tostring(enemySideOfBorder))
+					end
+
+					if ourSideOfBorder then
+
+						authorizedInter = true
+						env.info("DCE_Gci     Passe A_1 ourSideOfBorder "..tostring(ourSideOfBorder))
+
+					elseif not ourSideOfBorder and not enemySideOfBorder then
+
+						authorizedInter = true
+						env.info("DCE_Gci     Passe A_2 zone tampon authorizedInter "..tostring(authorizedInter))
+
+					else
+						-- --check si le target est sur la mere
+						-- local surfaceType = land.getSurfaceType({x = target.point.x, y = target.point.z})
+						-- if surfaceType == land.SurfaceType.WATER then
+						-- 	local landFound = false
+
+						-- 	for _, rad in ipairs({0, math.pi / 2, math.pi, 3 * math.pi / 2}) do
+						-- 		local dist = 10000
+						-- 		local sondageLand = GetOffsetPoint({x=target.point.x, y=target.point.z}, rad, dist)
+						-- 		surfaceType = land.getSurfaceType(sondageLand)
+
+						-- 		if surfaceType ~= land.SurfaceType.WATER then
+						-- 			landFound = true
+						-- 			break
+						-- 		end
+						-- 	end
+							
+
+						-- 	if not landFound then
+						-- 		authorizedInter = true
+						-- 		env.info("DCE_Gci Passe B_C10 WATER sur, No Land Found ")
+						-- 	end
+							
+						-- end
 					end
 				else
-					ourSideOfBorder = true
+					authorizedInter = true
 				end
 
-				if ourSideOfBorder and target.assigned < target.number then												--if target has less interceptors assigned than it has aircraft in group
-					-- env.info("DCE_Gci    Passe B_D target.assigned ")
+				if authorizedInter and target.assigned < target.number then												--if target has less interceptors assigned than it has aircraft in group
+					env.info("DCE_Gci    Passe B_D target.assigned ")
 
 					--find all flights in range to intercept target
 					local eligible_flights = {}														--table of flights eligible for interception of this target
@@ -286,7 +298,7 @@ local function GCI_Cycle()
 									-- env.info("DCE_Gci        Passe B_G distance "..tostring(distance).." flight.range <? "..tostring(flight.range))
 
 									if distance < flight.range then									--target is in interception range
-										env.info("DCE_Gci        ___    Passe B_H ")
+										-- env.info("DCE_Gci        ___    Passe B_H ")
 
 										eligible_flights[flight.name] = distance					--store flight name and interception distance in table
 									end
@@ -344,7 +356,7 @@ local function GCI_Cycle()
 
 
 
-									env.info(selected_flight .. " launched to intercept: " .. target.number .." | "..target.typeName.." |Bearing: "..target.bearing.. " |testBearing: "..testBearing.." |Angel: "..target.altitude.." |Distance: "..target.distance_Km.." Km")
+									env.info("DCE_Gci "..selected_flight .. " launched to intercept: " .. target.number .." | "..target.typeName.." |Bearing: "..target.bearing.. " |testBearing: "..testBearing.." |Angel: "..target.altitude.." |Distance: "..target.distance_Km.." Km")
 
 									trigger.action.outTextForGroup(idInfo, selected_flight .. " launched to intercept: " .. target.number .." "..target.typeName.." Bearing: "..target.bearing.." Angel: "..target.altitude.." Distance: "..target.distance_Km.." Km", 60 , true)
 
@@ -670,3 +682,5 @@ local function ControlFunction()
 	end
 end
 timer.scheduleFunction(ControlFunction, nil, timer.getTime() + 2)
+
+env.info("DCE_GCI FIN Loading GCIScript")

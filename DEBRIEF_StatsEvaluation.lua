@@ -371,9 +371,9 @@ end
 --prepare client stats
 for e = 1, #events do																					--iterate through all events
 	if events[e].initiatorPilotName then
-		print("DebriefSE e: "..tostring(e).." initiatorPilotName: "..tostring( events[e].initiatorPilotName).." initiator: "..tostring(events[e].initiator))
+		-- print("DebriefSE e: "..tostring(e).." initiatorPilotName: "..tostring( events[e].initiatorPilotName).." initiator: "..tostring(events[e].initiator))
 	end
-	_affiche(events[e], "prepare client stats events[e]")
+	-- _affiche(events[e], "prepare client stats events[e]")
 
 	if events[e].initiator and string.find(events[e].initiator, "parachut") then
 		events[e].initiator = tostring(events[e].initiatorPilotName)
