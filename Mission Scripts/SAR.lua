@@ -91,6 +91,10 @@ function DespawnSoldierAliasPilot(arg)
 					trigger.action.outTextForCoalition(ejectedPilot.Coalition, "SAR Coalition: the pilot:"..EjectedPilotName.." is on board", 10)
 				end
 
+				EjectedPilotOnBoard[SAR_Name] = EjectedPilotOnBoard[SAR_Name] or {}
+				table.insert(EjectedPilotOnBoard[SAR_Name],EjectedPilotName)
+				_affiche(EjectedPilotOnBoard)
+
 				ejectedPilot.embarked = embarkation
 				ejectedPilot.status = "rescued"
 
@@ -1560,7 +1564,9 @@ local function detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
 				DespawnSoldierAliasPilot({ejectedPilot.name, embarkation, _SAR_Player, SAR_Name  } )
 				-- StopRadioTransmission(ejectedPilot.name)
 				outFonction = true
-				table.insert(EjectedPilotOnBoard[SAR_Name],ejectedPilot.name)
+				-- EjectedPilotOnBoard[SAR_Name] = EjectedPilotOnBoard[SAR_Name] or {}
+				-- table.insert(EjectedPilotOnBoard[SAR_Name],ejectedPilot.name)
+				-- _affiche(EjectedPilotOnBoard)
 
 				walkEjectedPilot[SAR_unitId] = false
 				return
@@ -1656,6 +1662,9 @@ local function guideTreuilSAR(unitSAR, PosEjectedPilot, ejectedPilot)
 			if speed <= 0.2 then
 				local embarkation = false	--il n'est pas embaqué au sol, mais helitreuillé
 				DespawnSoldierAliasPilot({ejectedPilot.name, embarkation, _SAR_Player, SAR_Name})
+				-- EjectedPilotOnBoard[SAR_Name] = EjectedPilotOnBoard[SAR_Name] or {}
+				-- table.insert(EjectedPilotOnBoard[SAR_Name],ejectedPilot.name)
+				-- _affiche(EjectedPilotOnBoard)
 				outFonction = true
 				guideSAR[SAR_unitId] = false
 				return
@@ -1734,7 +1743,7 @@ function LoopSAR()
 										local Pos_SAR = unitSAR:getPoint()
 										local SAR_unitId = Unit.getID(unitSAR)
 										local SAR_Name = unitSAR:getName()
-
+										local _SARinAir = unitSAR:inAir()
 
 										for MGRS_Chute, zone in pairs(zoneSAR) do
 											for N_Pilot, ejectedPilot in ipairs(zone) do
@@ -1746,7 +1755,7 @@ function LoopSAR()
 														local PosEjectedPilot = unitEjectPilot:getPoint()
 														local distance = math.sqrt(math.pow(Pos_SAR.x - PosEjectedPilot.x, 2) + math.pow(Pos_SAR.z - PosEjectedPilot.z, 2))
 
-														if distance <= 3000 and distance > 1000 and not ejectedPilot.smokeOK then
+														if distance <= 3000 and distance > 1000 and not ejectedPilot.smokeOK and _SARinAir then
 															--active fumigene
 															local pilotVec3 = {
 																x = PosEjectedPilot.x,
@@ -1774,16 +1783,16 @@ function LoopSAR()
 																-- Calculer la position du fumigène
 																smokePosition = {
 																	x = pilotVec3.x + windDirectionOpposite.x * smokeOffsetDistance,
-																	y = pilotVec3.y,
 																	z = pilotVec3.z + windDirectionOpposite.z * smokeOffsetDistance,
 																}
+																smokePosition.y = land.getHeight({x = smokePosition.x, y = smokePosition.z})
 															else
 																-- Si le vent est nul, placer le fumigène 10 mètres au nord du pilote
 																smokePosition = {
 																	x = pilotVec3.x,
-																	y = pilotVec3.y,
 																	z = pilotVec3.z + smokeOffsetDistance,
 																}
+																smokePosition.y = land.getHeight({x = smokePosition.x, y = smokePosition.z})
 															end
 
 															    -- Placer le fumigène
@@ -1825,7 +1834,7 @@ function LoopSAR()
 														elseif distance <= 450 and _SAR_Player then
 
 															local h = math.ceil(Pos_SAR.y - land.getHeight({x = Pos_SAR.x, y = Pos_SAR.z}))
-															local _SARinAir = unitSAR:inAir()
+															-- local _SARinAir = unitSAR:inAir()
 															env.info( "DCE_SAR:_SAR_Player Pilot.landingPossible, helico: |"..tostring(_SAR_Player).."| |"..tostring(SAR_Name).."| HumainPilot se pose ou fait hoover pour recuperer "..tostring(ejectedPilot.name))
 
 															env.info( "DCE_SAR:_SAR_Player Hauteur?: "..h.." _SARinAir?: "..tostring(_SARinAir).." "..distance.." guideSAR "..tostring(guideSAR[SAR_unitId]).." walkEjectedPilot "..tostring(walkEjectedPilot[SAR_unitId]))

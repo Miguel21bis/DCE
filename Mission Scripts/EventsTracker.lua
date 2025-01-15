@@ -384,9 +384,19 @@ function eventHandlerDCE:onEvent(event)
 
 	if event.target then
 		targetObjCategory = Object.getCategory(event.target)
+
+		local targetDesc = event.target:getDesc()
+		_affiche(targetDesc, "targetDesc")
+
+		local targetObjCategory2 = targetDesc.category
+
 		if camp.debug then  env.info("DCE_EventsTracker target Category: "..tostring(targetObjCategory)) end
+		if camp.debug then  env.info("DCE_EventsTracker target targetObjCategory2: "..tostring(targetObjCategory2)) end
+
 		if Object_Category[targetObjCategory] then
-			if camp.debug then  env.info("DCE_EventsTracker Object_Category :  _:_ "..tostring(Object_Category[targetObjCategory])) end
+			if camp.debug then  env.info("DCE_EventsTracker target Object_Category :  _:_ "..tostring(Object_Category[targetObjCategory])) end
+			-- if camp.debug then  env.info("DCE_EventsTracker target targetObjCategory2 :  _:_ "..tostring(Object_Category[targetObjCategory2])) end
+
 			-- static:getDesc().category
 			if targetObjCategory ~= Object.Category.SCENERY then
 				if event.target:isExist() then
@@ -704,7 +714,7 @@ function eventHandlerDCE:onEvent(event)
 				s = s.." "..event.initiator:getID()
 				s = s.." "..event.initiator:getTypeName()
 
-				local BasePlace = tostring(event.place:getTypeName())
+				local baseTypName = tostring(event.place:getTypeName())
 				local baseCat = Airbase.getCategory(event.place)
 				
 
@@ -757,9 +767,11 @@ function eventHandlerDCE:onEvent(event)
 				if initDesc.displayName then
 					log_entry.initiator = event.initiator:getName()																							--store initiator name
 					log_entry.type_name = event.initiator:getTypeName()
-					log_entry.place = event.place:getTypeName()
+					log_entry.place = baseTypName
 					-- log_entry.place = string.gsub(log_entry.place, "'", "")
 					log_entry.place = CleanName(log_entry.place)
+					log_entry.placeCoalition = log_entry.place:getCoalition()
+
 					
 				end
 
@@ -786,6 +798,9 @@ function eventHandlerDCE:onEvent(event)
 				env.info("DCE_EventsTracker Landing fin Passe Y ")
 
 				env.info("DCE_EventsTracker Passe 12 ")
+				env.info("DCE_EventsTracker landedNearBase "..tostring(baseTypName).." placeCoalition: "..tostring(log_entry.placeCoalition))
+				trigger.action.outText("DCE_EventsTracker landedNearBase "..tostring(baseTypName), 30)
+
 
 				local life = event.initiator:getLife()																	--get current life of unit
 				local init_life = event.initiator:getLife0()															--get initial life of unit
@@ -858,16 +873,27 @@ function eventHandlerDCE:onEvent(event)
 					log_entry.initiatorPilotName = CleanName(log_entry.initiatorPilotName)
 				end
 				
-				if log_entry.type == "unit lost" then
+				if log_entry.type == "unit lost" and camp.SAR and camp.SAR.pilotEjected then
 					if unitCat and (unitCat == Unit.Category.HELICOPTER) then
+						env.info("DCE_EventsTracker unit lost A "..tostring(unitCat).." initiator: "..tostring(log_entry.initiator))
+						_affiche(EjectedPilotOnBoard, "EjectedPilotOnBoard")
+
 						if log_entry.initiator and EjectedPilotOnBoard[log_entry.initiator] then
+							env.info("DCE_EventsTracker unit lost B SAR_Name "..tostring(log_entry.initiator))
+
 							-- Itérer en boucle inversée pour supprimer des éléments dans une table indexée numériquement
 							for i = #EjectedPilotOnBoard[log_entry.initiator], 1, -1 do
-								local ejectedPilot_OB = EjectedPilotOnBoard[log_entry.initiator][i]
+								local ejectedPilot_OB_name = EjectedPilotOnBoard[log_entry.initiator][i]
+
+								env.info("DCE_EventsTracker unit lost C ejectedPilot_On Board "..tostring(ejectedPilot_OB_name))
 				
 								-- Parcourir les pilotes éjectés dans la campagne
-								for pilotN, ejectedPilot_camp in pairs(camp.pilotEjected) do
-									if ejectedPilot_camp.name == ejectedPilot_OB.name then
+								for pilotN, ejectedPilot_camp in pairs(camp.SAR.pilotEjected) do
+									env.info("DCE_EventsTracker unit lost D pilotN "..tostring(pilotN).." ejectedPilot_camp.name: "..tostring(ejectedPilot_camp.name).." ==ejectedPilot_OB_name? "..tostring(ejectedPilot_OB_name))
+
+									if ejectedPilot_camp.name == ejectedPilot_OB_name then
+										env.info("DCE_EventsTracker unit lost E ejectedPilot_camp.name dead "..tostring(ejectedPilot_camp.name))
+
 										-- Marquer le pilote dans la campagne comme "mort"
 										ejectedPilot_camp.status = "dead"
 										-- Supprimer l'entrée de la table
@@ -1212,7 +1238,7 @@ function eventHandlerDCE:onEvent(event)
 	elseif event.id == world.event.S_EVENT_DEAD then
 		if event.initiator then
 			if Object.getCategory(event.initiator) == 5 then							--if initiator is a scenery object
-				local scenaryName = event.target:getName()
+				local scenaryName = event.initiator:getName()
 				
 				if scenLog[scenaryName] then
 					local initPoint = event.initiator:getPoint()				--get point of dead scenery object
@@ -1231,7 +1257,7 @@ function eventHandlerDCE:onEvent(event)
 		if event.initiator then
 			if Object.getCategory(event.initiator) == 5 then							--if initiator is a scenery object
 				
-				local scenaryName = event.target:getName()
+				local scenaryName = event.initiator:getName()
 				
 				if scenLog[scenaryName] then
 					local initPoint = event.initiator:getPoint()				--get point of dead scenery object
@@ -1251,7 +1277,7 @@ function eventHandlerDCE:onEvent(event)
 	elseif event.id == world.event.S_EVENT_KILL then
 		if event.initiator then
 			if Object.getCategory(event.initiator) == 5 then							--if initiator is a scenery object
-				local scenaryName = event.target:getName()
+				local scenaryName = event.initiator:getName()
 
 				if scenLog[scenaryName] then
 					local initPoint = event.initiator:getPoint()				--get point of dead scenery object
