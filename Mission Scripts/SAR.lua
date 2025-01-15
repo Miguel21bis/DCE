@@ -1560,6 +1560,8 @@ local function detectsEjectedPilotEmbarkation(unitSAR, ejectedPilot)
 				DespawnSoldierAliasPilot({ejectedPilot.name, embarkation, _SAR_Player, SAR_Name  } )
 				-- StopRadioTransmission(ejectedPilot.name)
 				outFonction = true
+				table.insert(EjectedPilotOnBoard[SAR_Name],ejectedPilot.name)
+
 				walkEjectedPilot[SAR_unitId] = false
 				return
 			end
@@ -2019,8 +2021,9 @@ function GetOutGDFM(arg)
 			z = playerPoint.z,
 		}
 
-		infoPlayer.x2d = pilotVec3.x + 50
-		infoPlayer.y2d = pilotVec3.z + 50
+		--position futur de l ejectedPilot
+		infoPlayer.x2d = pilotVec3.x + 150
+		infoPlayer.y2d = pilotVec3.z + 150
 		infoPlayer.z2d = pilotVec3.y
 
 
@@ -2047,6 +2050,7 @@ function GetOutGDFM(arg)
 			end
 		end
 
+		--si l'helico ne vole pas
 		if pilotVec3.y <= 100 then
 
 			SumSoldierAliasPilot = SumSoldierAliasPilot + 1
@@ -2058,7 +2062,8 @@ function GetOutGDFM(arg)
 				infoPlayer.name = "Mis"..camp.mission.."_Pilot_"..infoPlayer.initiatorPilotName.."_Nb"..tostring(infoPlayer.SumEjectedPilotDay).."_Damaged"
 			end
 
-			infoPlayer.name = infoPlayer.name:gsub('[%p%c%s]', '_')
+			-- infoPlayer.name = infoPlayer.name:gsub('[%p%c%s]', '_')
+			infoPlayer.name = CleanName(infoPlayer.name)
 
 			local typeLand = land.getSurfaceType({x =infoPlayer.x2d, y = infoPlayer.y2d})
 
@@ -2182,7 +2187,8 @@ function GetOutGDFM(arg)
 								damaged.name = "Mis"..camp.mission.."_Pilot_"..damaged.unitName.."_Nb"..tostring(damaged.SumEjectedPilotDay).."_Damaged"
 							end
 
-							damaged.name = damaged.name:gsub('[%p%c%s]', '_')
+							-- damaged.name = damaged.name:gsub('[%p%c%s]', '_')
+							damaged.name = CleanName(damaged.name)
 
 							local typeLand = land.getSurfaceType({x =damaged.x2d, y = damaged.y2d})
 

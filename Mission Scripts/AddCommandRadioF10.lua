@@ -60,9 +60,8 @@ GroundDamagedFlyingMachine = {}
 EjectionSeatFrequency = {}
 SumSoldierAliasPilot = 0
 CustomLog = {}
-
 zoneSAR = {}																									--table enumérant les helico SAR pour eviter d'en envoyer plusieurs aux memes endroits
-
+EjectedPilotOnBoard = {}
 
 coalitionId = {
 	["0"] = "neutral",
@@ -408,51 +407,7 @@ local function getOppositePointOnCircle(posA, centerCircle)
     local by = 2 * centerCircle.y - posA.y
     return bx, by
 end
--- --function to return heading between two vector2 points
--- -- return une valeur en degré par rapport au nord géographique (pas le cercle trigonometrique)
--- function GetHeading(p1, p2)
 
--- 	-- env.info( "ACRF10  p1.x "..tostring(p1.x).." p1.y: "..tostring(p1.y))
--- 	-- env.info( "ACRF10  p2.x "..tostring(p2.x).." p1.y: "..tostring(p2.y))
-
--- 	local deltax = p2.x - p1.x
--- 	local deltay = p2.y - p1.y
--- 	local result 
--- 	if (deltax > 0) and (deltay == 0) then
--- 		result =  0
--- 	elseif (deltax > 0) and (deltay > 0) then
--- 		result =  math.deg(math.atan(deltay / deltax))
--- 	elseif (deltax == 0) and (deltay > 0) then
--- 		result =  90
--- 	elseif (deltax < 0) and (deltay > 0) then
--- 		result =  90 - math.deg(math.atan(deltax / deltay))
--- 	elseif (deltax < 0) and (deltay == 0) then
--- 		result =  180
--- 	elseif (deltax < 0) and (deltay < 0) then
--- 		result =  180 + math.deg(math.atan(deltay / deltax))
--- 	elseif (deltax == 0) and (deltay < 0) then
--- 		result =  270
--- 	elseif (deltax > 0) and (deltay < 0) then
--- 		result =  270 - math.deg(math.atan(deltax / deltay))
--- 	else
--- 		result =  0
--- 	end
-
--- 	-- --https://www.mathepower.com/fr/fonctionslineaires.php
-
--- 	env.info( "ACRF10  result "..tostring(result))
-
--- 	return result 
-
--- end
-
---function to return heading between two vector2 points
--- function GetHeading2(p1, p2)
-
-	-- local dir = math.atan2(p1, p2)
-	-- return dir
-
--- end
 
 --function to return a new point offset from an initial point
 	-- angle en degré avec nord geographique (pas trigonometrique)
@@ -552,6 +507,15 @@ function getGroupById(groupId)
         end
     end
     return nil -- Groupe introuvable
+end
+
+--nettoie les noms de certain caractere spéciaux (" et ')
+function CleanName(name)
+
+	name = name:gsub("['\"]", '')
+
+	return name
+
 end
 
 function FctRemovePlane(_unit)
@@ -3355,6 +3319,7 @@ local function EWR_magic()
 							table.sort(targetTracks_km_thisPlayer, function(a,b) return a.distance < b.distance  end)
 
 							local i = 1
+							local plotContactDetected = {}
 							for trackN, target in pairs(targetTracks_km_thisPlayer) do
 								-- Conversion des distances
 								local distanceKm = math.floor(target.distance / 1000) -- En kilomètres
@@ -3376,39 +3341,62 @@ local function EWR_magic()
 
 								local player_coalition = player:getCoalition()
 								local aspect = ""
-								local status = "Contact"
+								local side = "Contact"
 								if target.coalition and target.coalition ~= 0 and target.coalition ~= player_coalition then
-									status = "ENEMY"
+									side = "ENEMY"
 									aspect = calculateAspect(playerPoint, target)
 								else
-									status = "Friend"
+									side = "Friend"
 								end
 
 								local catTarget = "aircraft"
-								if target.category and target.category == Unit.Category.HELICOPTER  then
+								if target.category and target.category == Unit.Category.HELICOPTER then
 									catTarget = "helicopter"
 									aspect = ""
 								end
 
 
 								-- Affichage si la distance est dans les limites
-								if (distanceKm > 2 and distanceKm <= 150) or (distanceKm <= 2 and status == "ENEMY" )   then
+								if (distanceKm > 2 and distanceKm <= 150) or (distanceKm <= 2 and side == "ENEMY" ) then
 
 									-- local freq = camp.EWR_frequency[coalitionIdNumeric[sideNum]][1]
-									local speak = target.qte.." "..status.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft"
+									local speak = target.qte.." "..side.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft"
 
-									-- trigger.action.outTextForUnit(playerId, speak, 20, false)
-									-- env.info("i: "..i.." playerId: "..playerId.." locTimer: ".. locTimer.." || "..speak)
+									plotContactDetected[distanceKm][side] = {
+										speak = speak,
+										qte = target.qte,
+										target_point = target.point,
+										playerPoint = playerPoint,
+									}
 
-									timer.scheduleFunction(EWR_speaking, {playerId, speak}, timer.getTime() + (i*3))
-
+									-- timer.scheduleFunction(EWR_speaking, {playerId, speak}, timer.getTime() + (i*3))
 									-- timer.scheduleFunction(sendTTSMessage, {freq, "AM", speak}, timer.getTime() + (i*2))
 
-
-									EWR_optionPlayer[trucName]["lasTime"] = locTimer
-									i = i + 1
-									if i > 6 then break end
+									-- EWR_optionPlayer[trucName]["lasTime"] = locTimer
+									-- i = i + 1
+									-- if i > 6 then break end
 								end
+
+								-- -- Affichage si la distance est dans les limites
+								-- if (plotContactDetected ) then
+
+								-- 	for side, 
+
+								-- 	plotContactDetected[distanceKm][side] = {
+								-- 		speak = speak,
+								-- 		qte = target.qte,
+								-- 		target_point = target.point,
+								-- 		playerPoint = playerPoint,
+								-- 	}
+
+								-- 	timer.scheduleFunction(EWR_speaking, {playerId, speak}, timer.getTime() + (i*3))
+								-- 	-- timer.scheduleFunction(sendTTSMessage, {freq, "AM", speak}, timer.getTime() + (i*2))
+
+
+								-- 	EWR_optionPlayer[trucName]["lasTime"] = locTimer
+								-- 	i = i + 1
+								-- 	if i > 6 then break end
+								-- end
 
 							end
 						end

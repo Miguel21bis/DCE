@@ -235,18 +235,18 @@ local function GCI_Cycle()
 
 					if enemySideOfBorder then
 						--pour info
-						env.info("DCE_Gci     Passe A_0 enemySideOfBorder "..tostring(enemySideOfBorder))
+						-- env.info("DCE_Gci     Passe A_0 enemySideOfBorder "..tostring(enemySideOfBorder))
 					end
 
 					if ourSideOfBorder then
 
 						authorizedInter = true
-						env.info("DCE_Gci     Passe A_1 ourSideOfBorder "..tostring(ourSideOfBorder))
+						-- env.info("DCE_Gci     Passe A_1 ourSideOfBorder "..tostring(ourSideOfBorder))
 
 					elseif not ourSideOfBorder and not enemySideOfBorder then
 
 						authorizedInter = true
-						env.info("DCE_Gci     Passe A_2 zone tampon authorizedInter "..tostring(authorizedInter))
+						-- env.info("DCE_Gci     Passe A_2 zone tampon authorizedInter "..tostring(authorizedInter))
 
 					else
 						-- --check si le target est sur la mere
@@ -278,7 +278,7 @@ local function GCI_Cycle()
 				end
 
 				if authorizedInter and target.assigned < target.number then												--if target has less interceptors assigned than it has aircraft in group
-					env.info("DCE_Gci    Passe B_D target.assigned ")
+					-- env.info("DCE_Gci    Passe B_D target.assigned ")
 
 					--find all flights in range to intercept target
 					local eligible_flights = {}														--table of flights eligible for interception of this target
