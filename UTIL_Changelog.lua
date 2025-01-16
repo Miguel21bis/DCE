@@ -10,7 +10,9 @@ known issues:
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
 ==:20.81.509:==
-509 fixed [callsign]	callsign for wingman doesn't make sense
+pb d'horaire de décollage
+510 fixed [callsign]	callsign for wingman doesn't make sense
+509 modified [consumption] prohibits PC after takeoff. Don't worry, we reinstated it later (I think ^^).
 508 modified [loadout][consumption]	many loadouts updated to take fuel consumption into account. Consumption found thanks to new tool
 507 fixed [code_loadout]	loadout code is sometimes incorrectly recognized
 506 fixed [debriefing][stats]	stats for your own package are rarely displayed

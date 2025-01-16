@@ -714,7 +714,8 @@ function eventHandlerDCE:onEvent(event)
 				s = s.." "..event.initiator:getID()
 				s = s.." "..event.initiator:getTypeName()
 
-				local baseTypName = tostring(event.place:getTypeName())
+				log_entry.place = event.place:getName()
+				log_entry.placeTypeName = tostring(event.place:getTypeName())
 				local baseCat = Airbase.getCategory(event.place)
 				
 
@@ -767,12 +768,16 @@ function eventHandlerDCE:onEvent(event)
 				if initDesc.displayName then
 					log_entry.initiator = event.initiator:getName()																							--store initiator name
 					log_entry.type_name = event.initiator:getTypeName()
-					log_entry.place = baseTypName
-					-- log_entry.place = string.gsub(log_entry.place, "'", "")
-					log_entry.place = CleanName(log_entry.place)
-					log_entry.placeCoalition = log_entry.place:getCoalition()
 
+					-- log_entry.place = string.gsub(log_entry.place, "'", "")
+
+					-- log_entry.placeTypeName = baseTypName
+					log_entry.placeTypeName = CleanName(log_entry.placeTypeName)
 					
+					log_entry.placeCoalition = event.place:getCoalition()
+
+					log_entry.place = CleanName(log_entry.place)
+	
 				end
 
 				if Object.getCategory(event.initiator) == Object.Category.UNIT and playerName then			--initiator is a unit debug_ET01.h
@@ -798,8 +803,8 @@ function eventHandlerDCE:onEvent(event)
 				env.info("DCE_EventsTracker Landing fin Passe Y ")
 
 				env.info("DCE_EventsTracker Passe 12 ")
-				env.info("DCE_EventsTracker landedNearBase "..tostring(baseTypName).." placeCoalition: "..tostring(log_entry.placeCoalition))
-				trigger.action.outText("DCE_EventsTracker landedNearBase "..tostring(baseTypName), 30)
+				env.info("DCE_EventsTracker landedNearBase "..tostring(log_entry.placeTypeName).." placeCoalition: "..tostring(log_entry.placeCoalition))
+				trigger.action.outText("DCE_EventsTracker landedNearBase "..tostring(log_entry.placeTypeName), 30)
 
 
 				local life = event.initiator:getLife()																	--get current life of unit

@@ -3323,6 +3323,26 @@ function GetWeightedRandom(min, max, bias)
     return min + (max - min) * weightedValue
 end
 
+-- Fonction pour vérifier l'existence d'un fichier
+function FileExists(path)
+    local file = io.open(path, "r")
+    if file then
+        file:close()
+        return true
+    end
+    return false
+end
+
+-- Écriture sécurisée dans un fichier
+function WriteToFile(path, content)
+    local file, err = io.open(path, "w")
+    if not file then
+        error("Impossible d'ouvrir le fichier '" .. path .. "' pour écriture : " .. tostring(err))
+    end
+    file:write(content)
+    file:close()
+end
+
 
 
 

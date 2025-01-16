@@ -563,26 +563,47 @@ end
 
 
 
--- modification M49.c big central db_loadout (c: loadout statistics)
-local loadoutFile01 = "../../../Missions/Campaigns/"..camp.title.."/Active/Loadouts_archive.lua"
-local TestPathloadout = io.open(loadoutFile01, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
-if TestPathloadout == nil or Firstmission_flag then																	--check si le fichier existe dans ScriptsMod
-	local loadout_str = "Loadouts_archive = " .. TableSerialization(db_loadouts, 0)						--make a string
-	local loadoutFile = io.open(loadoutFile01, "w")	 or error("Failed to open loadoutFile file")
+-- -- modification M49.c big central db_loadout (c: loadout statistics)
+-- local loadoutFile01 = "../../../Missions/Campaigns/"..camp.title.."/Active/Loadouts_archive.lua"
+-- local TestPathloadout = io.open(loadoutFile01, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
+-- if TestPathloadout == nil or Firstmission_flag then																	--check si le fichier existe dans ScriptsMod
+-- 	local loadout_str = "Loadouts_archive = " .. TableSerialization(db_loadouts, 0)						--make a string
+-- 	local loadoutFile = io.open(loadoutFile01, "w")	 or error("Failed to open loadoutFile file")
 
-	if not loadoutFile or loadoutFile == nil then
-		print("MainNM Tthis campaign folder  |"..camp.title.."|  does not exist ")
-		os.execute 'pause'
-	else
-		loadoutFile:write(loadout_str)
-		loadoutFile:close()
-	end
+-- 	if not loadoutFile or loadoutFile == nil then
+-- 		print("MainNM Tthis campaign folder  |"..camp.title.."|  does not exist ")
+-- 		os.execute 'pause'
+-- 	else
+-- 		loadoutFile:write(loadout_str)
+-- 		loadoutFile:close()
+-- 	end
+-- end
+-- if TestPathloadout ~= nil then
+-- 	TestPathloadout:close()
+-- end
+
+-- Vérification et création du fichier de loadout
+local loadoutFile01 = "../../../Missions/Campaigns/" .. camp.title .. "/Active/Loadouts_archive.lua"
+
+if not FileExists(loadoutFile01) or Firstmission_flag then
+    -- Sérialisation des données
+    local loadout_str = "Loadouts_archive = " .. TableSerialization(db_loadouts, 0)
+
+    -- Essayez d'écrire dans le fichier
+    local success, err = pcall(function()
+        WriteToFile(loadoutFile01, loadout_str)
+    end)
+
+    if not success then
+        print("Erreur lors de l'écriture dans le fichier : " .. tostring(err))
+        os.exit(1) -- Quitte le script proprement en cas d'erreur
+    else
+        print("Fichier créé avec succès : " .. loadoutFile01)
+    end
 end
 
-if TestPathloadout ~= nil then
-	TestPathloadout:close()
-end
--- print("passe loadout BB") os.execute 'pause'
+
+
 
 EPLRS_Capacity = {}
 for planeType, value in PairsByKeys(Data_divers) do
