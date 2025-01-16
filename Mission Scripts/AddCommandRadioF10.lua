@@ -3037,8 +3037,16 @@ end
 --recupere les data de tous les aéronefs
 --////////////////////////////////////////////////////////////////////////////////////////////
 local function EWR_speaking(arg)
+	local i = 6
+	if arg[3] then 
+		i = arg[3]
+	end 
+	local speakingTime = 30
 
-	trigger.action.outTextForUnit(arg[1], arg[2], 30, false)
+	speakingTime = speakingTime - i*3
+
+	trigger.action.outTextForUnit(arg[1], arg[2], speakingTime, false)
+
 end
 
 
@@ -3334,7 +3342,10 @@ local function EWR_magic()
 							table.sort(targetTracks_km_thisPlayer, function(a,b) return a.distance < b.distance  end)
 
 							local i = 1
-							local plotContactDetected = {}
+							local plotContactDetected = {
+								red = {},
+								blue = {},
+							}
 							for trackN, target in pairs(targetTracks_km_thisPlayer) do
 								-- Conversion des distances
 								local distanceKm = math.floor(target.distance / 1000) -- En kilomètres
@@ -3390,7 +3401,6 @@ local function EWR_magic()
 								else
 									-- Affichage si la distance est dans les limites
 									if (distanceKm > 2 and distanceKm <= 150) or (distanceKm <= 2 and sideIFF == "ENEMY" ) then
-
 										-- local freq = camp.EWR_frequency[coalitionIdNumeric[sideNum]][1]
 										local speak = target.qte.." "..sideIFF.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft"
 
@@ -3404,25 +3414,21 @@ local function EWR_magic()
 										}
 
 										table.insert(plotContactDetected[sideContact], annonce)
+										
 									end
-
-
 								end
-
 							end
-
 
 							-- Affichage si la distance est dans les limites
 							if (plotContactDetected ) then
 								local bearingFriend = {}
 								for annonceN, annonce in pairs(plotContactDetected[sideENI]) do
-
-									timer.scheduleFunction(EWR_speaking, {playerId, annonce, i}, timer.getTime() + (i*3))
+									timer.scheduleFunction(EWR_speaking, {playerId, annonce.speak, i}, timer.getTime() + (i*3))
 									-- timer.scheduleFunction(sendTTSMessage, {freq, "AM", speak}, timer.getTime() + (i*2))
 									
 									EWR_optionPlayer[trucName]["lasTime"] = locTimer
 									i = i + 1
-									if i > 6 then break end
+									if i >= 4 then break end
 										
 									if i == 1 then
 										bearingFriend[1] = annonce.bearing
@@ -3433,7 +3439,11 @@ local function EWR_magic()
 								end
 
 								for j = 1, #bearingFriend do
+									env.info("DCE_plotContactDetected_b passe C_A j: "..tostring(j))
+
 									for annonceN, annonce in pairs(plotContactDetected[sidePlayer]) do
+										env.info("DCE_plotContactDetected_b passe C_B annonce: "..tostring(annonce.speak))
+
 										-- Normaliser les angles
 										local bearingFriendAngle = normalizeAngle(bearingFriend[j].bearing)
 										local annonceAngle = normalizeAngle(annonce.bearing)
@@ -3443,7 +3453,7 @@ local function EWR_magic()
 										diff = math.min(diff, 360 - diff) -- Prendre en compte l'enroulement
 								
 										if diff <= 20 then
-											timer.scheduleFunction(EWR_speaking, {playerId, annonce, i}, timer.getTime() + (i * 3))
+											timer.scheduleFunction(EWR_speaking, {playerId, annonce.speak, i}, timer.getTime() + (i * 3))
 											-- timer.scheduleFunction(sendTTSMessage, {freq, "AM", speak}, timer.getTime() + (i*2))
 										end
 									end
