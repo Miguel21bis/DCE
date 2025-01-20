@@ -3,11 +3,12 @@
 --Version 21.12.2014
 --This script gives radars a chance to detect anti-radar missiles launched against them and to shut down for self-preservation
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  Reglage_b
+-- last modification:  cleanCode_a
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\ARM_Defence_Script.lua"] = "1.2.5"
+versionDCE["Mission Scripts\ARM_Defence_Script.lua"] = "1.3.6"
 ------------------------------------------------------------------------------------------------------- 
  
+-- cleanCode_a			 
 -- Reglage_b			(b more difficult with Patriot&Sa10)(a: RadarOn 6 a 9mn)			
 -- Debug_b 				(b getCategory)(a:AGM-154 :31:  'getDesc' Static doesn't exist)
 ------------------------------------------------------------------------------------------------------- 	
@@ -46,7 +47,7 @@ do
 			if tgt and tgt:isExist() then
 				
 				local desc = wep:getDesc()
-				-- env.info("DCE_ARM_S_EVENT       C ")
+				env.info("DCE_ARM_S_EVENT       C ")
 				-- _affiche(desc, "DCE desc weapon ArmDS")
 
 				-- Weapon.MissileCategory = {
@@ -80,30 +81,14 @@ do
 					-- SCENERY 5
 					-- Cargo   6
 
-						--desc.category donne ceci:
-						--{AIRPLANE = 0, WEAPON = 1, GROUND_UNIT = 2, SHIP = 3
-						-- la suite non BASE = 4, SCENERY = 5, CARGO = 6,}
+					local objCat = Object.getCategory(tgt)
 
-						--a tester
-						-- Unit.Category = {
-						-- 	AIRPLANE,
-						-- 	HELICOPTER,
-						-- 	GROUND_UNIT,
-						-- 	SHIP,
-						-- 	STRUCTURE
-						--   }
+					if objCat ~= Object.Category.SCENERY then														--target is not a scenery object
+						env.info("DCE_ARM_S_EVENT          E Object_Category: "..tostring(Object_Category[objCat]))
 
-						-- print("DCETestingConstante: Unit.Category.AIRPLANE "..tostring(Unit.Category.AIRPLANE))
-						-- print("DCETestingConstante: Unit.Category.HELICOPTER "..tostring(Unit.Category.HELICOPTER))
-						-- print("DCETestingConstante: Unit.Category.GROUND_UNIT "..tostring(Unit.Category.GROUND_UNIT))
-						-- print("DCETestingConstante: Unit.Category.SHIP "..tostring(Unit.Category.SHIP))
-						-- print("DCETestingConstante: Unit.Category.STRUCTURE "..tostring(Unit.Category.STRUCTURE))
-
-
-					if Object.getCategory(tgt) ~= Object.Category.SCENERY then														--target is not a scenery object
-						-- env.info("DCE_ARM_S_EVENT          E ")
-
-						if tgt:getDesc().category ~= 3 then															--target is not a ship	-- bug AGM-154 :31: in function 'getDesc' Static doesn't exist
+						local unitCat = tgt:getDesc().category
+						env.info("DCE_ARM_S_EVENT          E unitCat: "..tostring(unitCat))
+						if unitCat ~= 3 then															--target is not a ship	-- bug AGM-154 :31: in function 'getDesc' Static doesn't exist
 							-- trigger.action.outText("ARM Launch", 3)	--DEBUG
 							-- env.info("DCE_ARM_               F Launch")
 							

@@ -1,13 +1,13 @@
 --To define Time on target for all packages and ETA for all aircraft waypoints
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  cleancode_d
+-- last modification:  adjustment_h
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_Timing.lua"] = "1.7.67"
+versionDCE["ATO_Timing.lua"] = "1.7.68"
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_d				(d springCleaning)
--- adjustment_g				(g add AFAC task)(f not standoff in cap)(d escort Transport)(c airstart for Fuel)(b attempts to "dilute" all packages throughout the duration of the mission)(a gives more time to set up the player flight (SP and MP))						
+-- adjustment_h				(h fuel consumption)(g add AFAC task)(f not standoff in cap)(d escort Transport)(c airstart for Fuel)(b attempts to "dilute" all packages throughout the duration of the mission)(a gives more time to set up the player flight (SP and MP))						
 -- Debug_k					(k latest = nil)(j time between CAPs too long)(i client Transport)(h tot bug with same target_name)(g escort/transport)(f add offset role == Anti-ship Strike)(e retablit ate<0 jusqu'a wpt 1) (d: tot transport bug)(c: speed trop faible pour les escort : = flight[f].loadout.vCruise * (1 - 10/100)) (c: Spawn before Departure) (a: vCruise by default) 
 -- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
 -- modification M17_b		Option F-14B

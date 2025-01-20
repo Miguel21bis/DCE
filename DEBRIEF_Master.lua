@@ -1,9 +1,9 @@
 --To evaluate the DCS debrief.log, update the campaign status files/OOBs, generate a Debriefing and initiate generation of next campaign mission
 --Initiated by MissionEnd.lua running from within DCS
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  springCleaning M33_n
+-- last modification:  M47_e
 if not versionDCE then versionDCE = {} end
-versionDCE["DEBRIEF_Master.lua"] = "1.17.136"
+versionDCE["DEBRIEF_Master.lua"] = "1.17.137"
 -------------------------------------------------------------------------------------------------------
 -- adjustment_n				(n new targetlist)(m oob_scen ==0)(l AcceptedMission again)(k BugList)(j PairsByKeys)(i global TabTask)(g mise a niveau)(e: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form) 
 -- debug_d	 				(cd: EndMission)
@@ -14,7 +14,7 @@ versionDCE["DEBRIEF_Master.lua"] = "1.17.136"
 -- modification M55_a		player can change the type of plane
 -- modification M50_b		Records landings (b: add data file payload)
 -- modification M48_a		Accept result mission
--- modification M47_c		keeps the history of the campaign files (c: save debugging information during mission generation)
+-- modification M47_e		saves missions played and their files (e: creates a folder for each mission-n in \Debug)(c: save debugging information during mission generation)
 -- modification M46_d		singlePlayer with dedicated server (c: DF choice)(c: D choice with AI AirSpawn)
 -- modification M40_f		Template Active GroundGroup moving front (f: sideBase)
 -- modification M38_x		Check and Help CampaignMaker
@@ -418,7 +418,7 @@ if input == "y" or input == "yes" then
 						local Ckey = 0
 						print() print(side..":")
 						for key, target in ipairs(targets) do
-							if target.inactive ~= true and target.ATO  and ( target.task == "Strike" or target.task == "Anti-ship Strike" or target.task == "CSAR") then
+							if target.inactive ~= true and target.ATO  and ( string.find(target.task, "Strike") or target.task == "Runway Attack" or target.task == "CSAR") then
 								if side == "red" then
 									Ckey = key + #targetlist["blue"]															--permet de n'afficher qu'un nombre continue pour les 2 camps
 								else

@@ -235,7 +235,7 @@ if input == "y" or input == "yes" then
 						local Ckey = 0
 						print() print(side..":")
 						for key, target in ipairs(targetSide) do
-							if target.inactive ~= true and target.ATO and ( target.task == "Strike" or target.task == "Anti-ship Strike" or target.task == "CSAR") then
+							if target.inactive ~= true and target.ATO and ( string.find(target.task, "Strike") or target.task == "Runway Attack" or target.task == "CSAR") then
 								if side == "red" then
 									Ckey = key + #targetlist["blue"]															--permet de n'afficher qu'un nombre continue pour les 2 camps
 								else

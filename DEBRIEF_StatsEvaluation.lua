@@ -1059,7 +1059,7 @@ for hit_unit,hitter in pairs(hit_table) do													--iterate through all rem
 	end
 end
 
-
+local rayonDamaged = 1000
 --evaluate destroyed scenery objects
 for scen_name,scen in pairs(scen_log) do													--iterate through destroyed scenery objects
 	-- if scen.x and scen.z and (scen.lifeActual1s /scen.hightLife < 0.75) then																--scenery object has x and z coordinates
@@ -1079,7 +1079,7 @@ for scen_name,scen in pairs(scen_log) do													--iterate through destroyed
 							-- if math.floor(scen.x) == math.floor(element.x) and math.floor(scen.z) == math.floor(element.y) then		--dead scenery is this element						
 							-- scen.lifePourcent < 100 and
 							-- if   (scen.x <= element.x + 50 and scen.x > element.x - 50) and (scen.z <= element.y + 50 and scen.z > element.y - 50) then								
-							if (scen.x <= element.x + 100 and scen.x > element.x - 100) and (scen.z <= element.y + 100 and scen.z > element.y - 100) then
+							if (scen.x <= element.x + rayonDamaged and scen.x > element.x - rayonDamaged) and (scen.z <= element.y + rayonDamaged and scen.z > element.y - rayonDamaged) then
 								--plus bas, ne pas l'enlever, car il peut y avoir plusieurs detection de destruction, et cela fausse le resultat car detecté déjà detruit
 								if element.dead and element.CheckDay and element.CheckDay < camp.date.CampTotalTimeS then
 								-- if element.dead then											--element was already dead previously

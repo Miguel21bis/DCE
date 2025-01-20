@@ -6,7 +6,7 @@ versionDCE["UTIL_Functions.lua"] = "1.17.130"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_g				(g springCleaning)					
 -- adjustment_o				(n loadout code)(m Disp_time)(l add AFAC task)(k FormatTime)(i add InsertBugList(txt))(h use IsWesternCountry)(fg: add Loadout tiers)(e todo)(d:CheckConfModMaster )(c: fire Playable_m from conf_mod)
--- debug_j					(j code_loadou bestMatch)(i planeType)(h Tha\'lah)(g string.gsub(v, "\"", "\\\"" ))(f new generateId)(d UH to HF) Angle et Bearing des statics sur PA
+-- debug_j					(j code_loadout bestMatch)(i planeType)(h Tha\'lah)(g string.gsub(v, "\"", "\\\"" ))(f new generateId)(d UH to HF) Angle et Bearing des statics sur PA
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)
 -- modification M77_l		CG_ArtySpotter (kl ListSpotterAircraft)

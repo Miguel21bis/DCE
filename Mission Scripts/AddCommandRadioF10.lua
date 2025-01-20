@@ -1228,7 +1228,7 @@ function AirRetreat()
 					for t = 1, #targets do																--iterate through detected targets
 						if targets[t].object and current_time >  RetreatTimeGp[gpGid].rTime then
 							local objCat = Object.getCategory(targets[t].object)								--get object category
-							if objCat == 1 then															--object is a _unit
+							if objCat == Object.Category.UNIT then															--object is a _unit
 								local desc = targets[t].object:getDesc()								--get descriptor descriptor
 								local descAwacs = _unit:getDesc()
 
@@ -1275,7 +1275,7 @@ function AirRetreat()
 								-- _affiche (a b)     typeName MiG-23MLD
 								-- _affiche (a b)     category 0
 
-								if desc.category == 0 and (desc.attributes["Battle airplanes"] or desc.attributes.Fighters)  then												--descriptor category is airplane 
+								if desc.category == Unit.Category.AIRPLANE and (desc.attributes["Battle airplanes"] or desc.attributes.Fighters)  then												--descriptor category is airplane 
 									--TODO ajouter ici les attributs interressant des chasseurs et non des transports
 									--To know what attributes the object type has, look for the unit type script in sub-directories planes/, helicopter/s, vehicles, navy/ of ./Scripts/Database/ directory.
 									--and desc.attributs ~= "Battleplane" and desc.attributs ~= "Fighter"

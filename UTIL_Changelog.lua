@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.80.509"
+versionDCE["UTIL_Changelog.lua"] = "20.80.524"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.80.509"
+VersionDCE["UTIL_Changelog.txt"] = "20.80.524"
 --[[
 
 
@@ -9,31 +9,52 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.81.509:==
-pb d'horaire de décollage
-510 fixed [callsign]	callsign for wingman doesn't make sense
-509 modified [consumption] prohibits PC after takeoff. Don't worry, we reinstated it later (I think ^^).
-508 modified [loadout][consumption]	many loadouts updated to take fuel consumption into account. Consumption found thanks to new tool
-507 fixed [code_loadout]	loadout code is sometimes incorrectly recognized
-506 fixed [debriefing][stats]	stats for your own package are rarely displayed
-505 fixed [inter]	interceptors and CAPs ordered to leave a SAM zone no longer return to combat
-504 fixed [inter]	campaigns with dates prior to 1970 can freeze. Because of UNIX time
+==:20.81.524:==
 
-503 fixed [helico]	it's sometimes impossible to get out of a damaged helicopter on some maps
-502 added [EWR]	text announcement of multiple environmental contacts, friend and foe alike. And only those detected by all EWRs and SAM radar. Activate in menu F10 (testing) (M81)
-501 modified [intercept]	prohibiting interceptors from entering the enemy zone, by boundary design.
-							Longer time spacing, to avoid all interceptors taking off in 15 minutes, leaving the zone unprotected for the rest of the mission.
-500 modified [IA]	interceptors and CAPs turn around when they enter a SAM zone, then position themselves above their own SAM zone before (normally) returning to combat. (testing)
+524 modified	[loadout]
+				-- V178 - Tu-22M3 no escort and Minscore 0.1  for TF-80-Full
+				-- V177 - Mirage F-1EE big Fuel tank
+				-- V176 - update of speed/altitude of MirageF1/Mig21/Su17 etc... from IIW following new consumption script 
+523 modified	[consumption]	prohibits PC after takeoff. Don't worry, we reinstated it later (I think ^^).
+522 modified	[loadout][consumption]	many loadouts updated to take fuel consumption into account. Consumption found thanks to new tool
+					(there are still many, many loadouts to modify in the future)
+521 fixed	[code_loadout]	loadout code is sometimes incorrectly recognized
+520 fixed	[generator][MP]	there's never a “runway attack” spot for players
+519 fixed	[generator]	it is sometimes impossible to generate a mission, as the generator skips missions one after the other
+518 fixed	[generator][SEAD][MP]	there are never any SEAD (“client”) flights for PMs
+517 fixed	[generator][SEAD][IA]	There are very few IA SEAD flights, if any.
+516 modified	[helico][get-out]the “Get Out” menu F10 (essentially) for human helicopters has been revised: you can now leave a grounded helicopter even if it's undamaged. 
+				Note that there's no confirmation of the action once you've clicked: you're free of your module ^^ . 
+				This action creates an EjectedPilot that can be rescue later.
+515 fixed	[helico]	despawn problem
+514 fixed	[helico][SAR]	SAR flights are not activated						
+513 added	[debug]		creates a folder for each mission-n in \Debug, very useful for debugging
+512 modified	[generator]	added tools mission (campaignMaker)
+511 fixed	[generator]	take-off time does not match
+510 fixed	[generator][callsign]	callsign for wingman doesn't make sense
+509 fixed	[debriefing][stats]	stats for your own package are rarely displayed
+508 fixed	[debriefing][stats]	rescue” and ‘kill’ not counted correctly
+507 fixed	[debriefing][stats]	rounding problem refusing a 100% destroyed target
+506 fixed	[inter]		interceptors and CAPs ordered to leave a SAM zone no longer return to combat
+505 fixed	[inter]		campaigns with dates prior to 1970 can freeze. Because of UNIX time
+504 fixed	[inter]		some missile detections caused the interceptor script to fail
+
+503 fixed	[helico]	it's sometimes impossible to get out of a damaged helicopter on some maps
+502 added	[EWR]		text announcement of multiple environmental contacts, friend and foe alike. And only those detected by all EWRs and SAM radar. 
+				Activate in menu F10 (testing) (M81)
+501 modified	[intercept]	prohibiting interceptors from entering the enemy zone, by boundary design.
+				Longer time spacing, to avoid all interceptors taking off in 15 minutes, leaving the zone unprotected for the rest of the mission.
+500 modified	[IA]		interceptors and CAPs turn around when they enter a SAM zone, then position themselves above their own SAM zone before (normally) returning to combat.
 
 499 modified	[loadout]
 				-- V175 - tu-22D War over Chad Campaign
 				-- V 174 - Su-17M4 (modification of certain speeds and altitudes)
 				-- V 173 - code_loadout =  { "All" }, correction ! thanks BAMSE
-498 fixed [METAR]	cloud/METAR altitudes above 10000ft were not displayed
-497 fixed [target]	some destruction is not taken into account by DCE
-496 modified [target]	even more attention to target priorities, as the campaignMaker intended
-495 modified [MP] a higher probability of obtaining a flight in MP
-494 modified [parking]	aircraft dance on the parking lot and disappear (DCS bug)
+498 fixed	[METAR]	cloud/METAR altitudes above 10000ft were not displayed
+497 fixed	[target]	some destruction is not taken into account by DCE
+496 modified	[target]	even more attention to target priorities, as the campaignMaker intended
+495 modified	[MP] a higher probability of obtaining a flight in MP
+494 modified	[parking]	aircraft dance on the parking lot and disappear (DCS bug)
 493 fixed	[briefing][METAR]	cloud altitudes above 10000ft were not displayed
 492 fixed	[briefing]	overwrite old briefing info from hours before mission generation
 491 fixed	[time]		wrong time jump between missions

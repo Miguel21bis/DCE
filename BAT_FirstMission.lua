@@ -3,7 +3,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification: cleancode_d M80_a adjustment_p
 if not versionDCE then versionDCE = {} end
-versionDCE["BAT_FirstMission.lua"] = "1.13.98"
+versionDCE["BAT_FirstMission.lua"] = "1.13.99"
 -------------------------------------------------------------------------------------------------------
 -- adjustment_p				(p tools)(o full targetList)(n targetList numeric)(m BAT)(l Playable_m from Data_divers)(k BugList)(j PairsByKeys)(i global TabTask)(h Firstmission_flag)(g mise a niveau)(d: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form)
 -- cleancode_d				(d springCleaning)
@@ -209,7 +209,7 @@ repeat
 					local Ckey = 0
 					print() print(side..":")
 					for key, target in ipairs(targetSide) do
-						if target.inactive ~= true  and ( target.task == "Strike" or target.task == "Anti-ship Strike" or target.task == "CSAR") then
+						if target.inactive ~= true  and ( string.find(target.task, "Strike") or target.task == "Runway Attack" or target.task == "CSAR") then
 							if side == "red" then
 								Ckey = key + #targetlist["blue"]															--permet de n'afficher qu'un nombre continue pour les 2 camps
 							else

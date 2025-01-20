@@ -4,11 +4,13 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.177"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.178"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
+-- V178 - Tu-22M3 no escort and Minscore 0.1  for TF-80-Full
+-- V177 - Mirage F-1EE big Fuel tank
 -- V176 - update of speed/altitude of MirageF1/Mig21/Su17 etc... from IIW following new consumption script 
 -- V175 - tu-22D War over Chad Campaign
 -- V 174 - Su-17M4 (modification of certain speeds and altitudes)
@@ -3583,13 +3585,55 @@ db_all_loadouts = {
 		},
 		["Anti-ship Strike"] = {
 			["Antiship  Kh-22N*3"] = {
-				minscore = 0.03,
+				minscore = 0.3,
 				support = {
 					Escort = true,
 					SEAD = false,
 				},
 				attributes =  { "ship" },
-				code_loadout =  { "TF", "TF80s", "TF80sRED", "TF80sI", "Caucasus", "WOC80" },
+				code_loadout =  { "TF", "Caucasus", "WOC80" },
+				weaponType = "ASM",
+				expend = "All",
+				day = true,
+				night = true,
+				adverseWeather = true,
+				range = 900000,
+				firepower = 1,
+				vCruise = 250,
+				vAttack = 300,
+				hCruise = 6096,
+				hAttack = 6096,
+				standoff = 200000,
+				ingress = 50000,
+				egress = 10000,
+				MaxAttackOffset = 60,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = {
+							CLSID = "{12429ECF-03F0-4DF6-BCBD-5D38B6343DE1}",
+						},
+						[3] = {
+							CLSID = "{12429ECF-03F0-4DF6-BCBD-5D38B6343DE1}",
+						},
+						[5] = {
+							CLSID = "{12429ECF-03F0-4DF6-BCBD-5D38B6343DE1}",
+						},
+					},
+					fuel = 50000,
+					flare = 48,
+					chaff = 48,
+					gun = 100,
+				},
+			},
+			["Antiship TF80s Kh-22N*3"] = {
+				minscore = 0.1,
+				support = {
+					Escort = false,
+					SEAD = false,
+				},
+				attributes =  { "ship" },
+				code_loadout =  { "TF80s", "TF80sRED", "TF80sI" },
 				weaponType = "ASM",
 				expend = "All",
 				day = true,

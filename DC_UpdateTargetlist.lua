@@ -1,13 +1,13 @@
 --To update the targetlist (target position, alive precentage)
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleancode_d debug_d
+-- last modification: debug_e
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_UpdateTargetlist.lua"] = "1.11.49"
+versionDCE["DC_UpdateTargetlist.lua"] = "1.11.50"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_d				(d springCleaning)
 -- adjustment_a				(a GroundTarget.percent = 100 & Error_05 )
--- debug_d					(d updateAlive)(bc InsertBugList)(a -nan(ind))
+-- debug_e					(e updateAlive)(d updateAlive)(bc InsertBugList)(a -nan(ind))
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (camp.targetPos)
 -- modification M74_a		mix static, vehicle and map elements in a Target.
 -- modification M70_a		GroundZoneTarget (adds the possibility of counting unit completeness by zone) 
@@ -131,6 +131,7 @@ local function checkElementXY(targetElement, targetside)
 end
 
 local function updateAlive(target)
+
 	local nbDead = 0
 	local nbdead_last = 0
 	local nbMainObjective = 0
@@ -146,6 +147,7 @@ local function updateAlive(target)
 			nbDead = nbDead + 1
 		end
 	end
+
 	if nbDead > 0 then
 		target.alive = 100 - (nbDead/ nbMainObjective)*100
 	end
@@ -159,6 +161,7 @@ local function updateAlive(target)
 	if nbdead_last > 0 then
 		target.dead_last =  (nbdead_last/ nbMainObjective)*100
 	end
+
 
 	if nbMainObjective == 0 then
 		for _elementN, element in pairs(target.elements) do
@@ -175,6 +178,8 @@ local function updateAlive(target)
 	end
 
 	if nbdead_last > 100 then nbdead_last = 100 end
+
+	if target.alive < 1 then target.alive = 0 end
 
 	return target
 end

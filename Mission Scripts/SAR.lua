@@ -1102,11 +1102,11 @@ function CheckImmediatSAR(EjectedPilot)
 				for base_name, base in pairs(camp.SAR.alertSAR[EjectedPilot.side].base) do
 					for flight_n, flight in pairs(base.ready) do
 						if flight.name == selected_flight then
-							env.info( "CheckImmediatSAR? JJ    ")
+							env.info( "CheckImmediatSAR? JJ    selected_flight: "..tostring(selected_flight))
 							trigger.action.setUserFlag(flight.flag, true)		--set flag true to launch SAR Alert					
 
-							local idInfo = Group.getByName(selected_flight):getID()
-							local _side = Group.getByName(selected_flight):getCoalition()
+							-- local idInfo = Group.getByName(selected_flight):getID()
+							-- local _side = Group.getByName(selected_flight):getCoalition()
 
 							env.info( "DCE_CheckImmediatSAR? YY launch SAR Alert   ")
 
@@ -1278,8 +1278,8 @@ function PedroSAR(arg)
 									["id"] = "Script",
 									["params"] =
 									{
-										-- ["command"] = "Custom_RTB_2_CV(\"Group_Pedro_CV-71 Theodore Roosevelt_1\",  \"CV-71 Theodore Roosevelt\",  \"46.25\",  \"60\")",
-										["command"] = 'Custom_RTB_2_CV("' .. grpname .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
+										-- ["command"] = "Custom_RTB_2_Base(\"Group_Pedro_CV-71 Theodore Roosevelt_1\",  \"CV-71 Theodore Roosevelt\",  \"46.25\",  \"60\")",
+										["command"] = 'Custom_RTB_2_Base("' .. grpname .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
 									}, -- end of ["params"]
 								}, -- end of ["action"]
 							}, -- end of ["params"]
@@ -1319,7 +1319,7 @@ function PedroSAR(arg)
 								["id"] = "Script",
 								["params"] =
 								{
-									["command"] = 'Custom_RTB_2_CV("' .. grpname .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
+									["command"] = 'Custom_RTB_2_Base("' .. grpname .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
 								},
 							},
 						},
@@ -1359,7 +1359,7 @@ function PedroSAR(arg)
 								["id"] = "Script",
 								["params"] =
 								{
-									["command"] = 'Custom_RTB_2_CV("' .. grpname .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
+									["command"] = 'Custom_RTB_2_Base("' .. grpname .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
 								},
 							},
 						},
@@ -1891,7 +1891,11 @@ function LoopSAR()
 end
 
 
-local function despawn2(unitToDespawn)
+local function despawn2(arg)
+	local unitToDespawn = arg[1]
+	local from = arg[2]
+	env.info("DCE_despawn2 A tentative despawn2() from "..tostring(from))
+
 	_affiche(unitToDespawn, "DCE_despawn2 B despawn unitToDespawn")
 	if unitToDespawn and unitToDespawn:isExist() then
 		unitToDespawn:destroy()
@@ -2134,7 +2138,7 @@ function GetOutGDFM(arg)
 
 			env.info("DCE_getOut F test despawn ")
 
-			timer.scheduleFunction(despawn2, infoPlayer.unit, timer.getTime() + 30)
+			timer.scheduleFunction(despawn2, {infoPlayer.unit, "GetOutGDFM if pName" }, timer.getTime() + 30)
 
 			timer.scheduleFunction(spawnWreck, infoPlayer, timer.getTime() + 35)
 
@@ -2147,28 +2151,20 @@ function GetOutGDFM(arg)
 		for id_, key in pairs(GroundDamagedFlyingMachine) do
 
 			for occurenceN = #key, 1, -1 do
-				env.info( "DCE_getOut B1 id_ "..tostring(id_).." occurenceN "..tostring(occurenceN))
-
 				local damaged = key[occurenceN]
 
-				env.info( "DCE_getOut B2 id_ "..tostring(id_).." damaged.gpGid "..tostring(damaged.gpGid))
-
 				if not pName and not damaged.isPlayer then
-
-					env.info( "DCE_getOut C occurenceN: "..occurenceN.." id_: "..tostring(id_).." damaged.gpGid: "..tostring(damaged.gpGid))
 
 					-- if damaged.unit and damaged.unit:isExist() and damaged.unit:isActive() and not damaged.unit:inAir() then
 					if damaged and damaged.unit or not damaged.unit:inAir() then
 
-						env.info( "DCE_getOut D ")
-
 						if not createWreckCrew[damaged.unitName] then
 
-							if damaged.unit:getPlayerName()	then
-								env.info( "DCE_getOut EventT :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[damaged.side].GuardEjection).." | "..tostring('GuardEjection'..damaged.unitName))
-								trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', damaged, 0, true, camp.EjectedPilotFrequency[damaged.side].GuardEjection, 1, 'GuardEjection'..damaged.unitName)
-								env.info( "DCE_getOut EventT :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[damaged.side].GuardEjection).." | "..tostring('GuardEjection'..damaged.unitName))
-							end
+							-- if damaged.unit:getPlayerName()	then
+							-- 	env.info( "DCE_getOut EventT :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[damaged.side].GuardEjection).." | "..tostring('GuardEjection'..damaged.unitName))
+							-- 	trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', damaged, 0, true, camp.EjectedPilotFrequency[damaged.side].GuardEjection, 1, 'GuardEjection'..damaged.unitName)
+							-- 	env.info( "DCE_getOut EventT :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[damaged.side].GuardEjection).." | "..tostring('GuardEjection'..damaged.unitName))
+							-- end
 
 							damaged.x = damaged.crashPoint.x
 							damaged.y = damaged.crashPoint.y
@@ -2200,8 +2196,6 @@ function GetOutGDFM(arg)
 							damaged.name = CleanName(damaged.name)
 
 							local typeLand = land.getSurfaceType({x =damaged.x2d, y = damaged.y2d})
-
-							env.info("DCE_getOut E test typeLand "..tostring(typeLand))
 
 							if typeLand ~= land.SurfaceType.WATER and typeLand ~= land.SurfaceType.RUNWAY  then
 
@@ -2246,9 +2240,7 @@ function GetOutGDFM(arg)
 
 							CheckImmediatSAR(damaged)
 
-							env.info("DCE_getOut F test despawn ")
-
-							timer.scheduleFunction(despawn2, damaged.unit, timer.getTime() + 30)
+							timer.scheduleFunction(despawn2, {damaged.unit, "GetOutGDFM, else IA" }, timer.getTime() + 30)
 
 							timer.scheduleFunction(spawnWreck, damaged, timer.getTime() + 35)
 
@@ -2259,10 +2251,7 @@ function GetOutGDFM(arg)
 									local toRemove = {} -- Table pour stocker les clés à supprimer
 
 									for initiatorId, damagedUnit in pairs(damageds) do
-										env.info("DCE_getOut Y S_EVENT_KILL n: " .. n .. " initiatorId: " .. tostring(initiatorId))
-
 										if initiatorId == damaged.initiator_id_ then
-											env.info("DCE_getOut Z S_EVENT_KILL delete initiatorId: " .. tostring(initiatorId))
 											table.insert(toRemove, initiatorId)
 										end
 									end

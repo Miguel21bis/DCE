@@ -13,6 +13,8 @@ versionDCE["Mission Scripts\GCIscript.lua"] = "1.4.20"
 ------------------------------------------------------------------------------------------------------- 
 
 env.info("DCE_GCI INIT loading GCIScript")
+env.info("DCE_GCI Unit.Category.AIRPLANE A: "..tostring(Unit.Category.AIRPLANE))
+env.info("DCE_GCI Unit.Category.HELICOPTER B: "..tostring(Unit.Category.HELICOPTER))
 
 --example of data structure for table GCI supplied by GCIdata.lua
 --[[
@@ -170,19 +172,35 @@ local function GCI_Cycle()
 				local targets = ctr:getDetectedTargets()											--get detected targets of this EWR
 				local track_update = {}																--local table to store which group tracks were already updated (to prevent multiple detected targets from the same group to update same track)
 				for t = 1, #targets do																--iterate through detected targets
-					if targets[t].object then
-						local desc = targets[t].object:getDesc()
+					--le radar peut aussi detecter les missiles, il faut donc prouver que c'est une unité avant toute chose
+					if targets[t].object and Object.getCategory(targets[t].object) == Object.Category.UNIT then
+						
+						local objCat = Object.getCategory(targets[t].object)
+						
+						local targetDesc = targets[t].object:getDesc()
 						local txtA = ""
 
-						local unitCat = desc.category
+						local targetCat = targetDesc.category
+						-- env.info("DCE_GCI Passe C targetCat "..tostring(targetCat))
 
-						if unitCat and (unitCat == Unit.Category.AIRPLANE or unitCat == Unit.Category.HELICOPTER) then
-							local target_name = targets[t].object:getGroup():getName()			--get target group name
+						-- _affiche(targetDesc, "DCE_GCI targetDesc C")
+
+						local isExist = targets[t].object:isExist()
+						local inAir = targets[t].object:inAir()
+
+						if isExist and inAir and targetCat and (targetCat == Unit.Category.AIRPLANE or targetCat == Unit.Category.HELICOPTER) then
+							-- env.info("DCE_GCI Passe D ")
+							local targetGpObject = targets[t].object:getGroup()
+							local target_name = targetGpObject:getName()			--get target group name
+							-- env.info("DCE_GCI Passe D² ")
+
 							if track_update[target_name] == nil then							--the target track for this group has not yet been updated
+								-- env.info("Passe E "..tostring(target_name))	
 								track_update[target_name] = true								--the target track for this group is updated
-								local target_number = targets[t].object:getGroup():getUnits()	--get target group size
+								local target_number = targetGpObject:getUnits()	--get target group size
 								local target_point = targets[t].object:getPoint()				--get target point
-								local target_typeName = targets[t].object:getGroup():getUnit(1):getTypeName()
+								local target_typeName = targetGpObject:getUnit(1):getTypeName()
+								-- env.info("DCE_GCI Passe G "..tostring(target_typeName))
 								ErrorMsg = "EWR target detection: " .. ewr_name	.. "; Target: " .. target_name 	--Error message in case follow on code fails
 
 								if target_tracks[ewr_side][target_name] then					--existing track
@@ -194,7 +212,7 @@ local function GCI_Cycle()
 									target_tracks[ewr_side][target_name].number = #target_number
 									target_tracks[ewr_side][target_name].time = current_time
 									target_tracks[ewr_side][target_name].point = target_point
-									target_tracks[ewr_side][target_name].category = desc.category
+									target_tracks[ewr_side][target_name].category = targetDesc.category
 								else															--new track
 									target_tracks[ewr_side][target_name] = {
 										number = #target_number,								--number of aircraft in traget group
@@ -203,7 +221,7 @@ local function GCI_Cycle()
 										typeName = target_typeName,
 										history = 0,											--number of detections in sequence
 										assigned = 0,											--number of interceptors assigned to this target group
-										category = unitCat,
+										category = targetCat,
 									}
 
 								end
@@ -278,28 +296,15 @@ local function GCI_Cycle()
 				end
 
 				if authorizedInter and target.assigned < target.number then												--if target has less interceptors assigned than it has aircraft in group
-					-- env.info("DCE_Gci    Passe B_D target.assigned ")
-
 					--find all flights in range to intercept target
 					local eligible_flights = {}														--table of flights eligible for interception of this target
 					for base_name, base in pairs(GCI.Interceptor[track_side].base) do				--iterate through bases in GCI table
-						-- env.info("DCE_Gci     Passe B_E base_name "..tostring(base_name))
-
 						for flight_n, flight in pairs(base.ready) do								--iterate through ready interceptor flights
-							-- env.info("DCE_Gci      Passe B_E flight.time "..tostring(flight.time).." + 900 <? "..tostring(current_time))
-
 							if flight.time + 900 < current_time then								--interceptor flight has moved to ready status (from ready15) longer than 15 minutes ago and is ready for action (time is -900 for flight starting ready at mission start).
-								-- env.info("DCE_Gci       Passe B_E current_time "..tostring(current_time).." >= tot_from "..tostring(flight.tot_from))
-								-- env.info("DCE_Gci       Passe B_F current_time "..tostring(current_time).." <= tot_to "..tostring(flight.tot_to))
-
 								ErrorMsg = "Assign interceptors; Target: " .. target_name .. "; Interceptor: " .. flight.name						--Error message in case follow on code fails
 								if current_time >= flight.tot_from and current_time <= flight.tot_to then											--flight can operate at current time							
 									local distance = math.sqrt(math.pow(target.point.x - flight.x, 2) + math.pow(target.point.z - flight.y, 2))		--distance between interceptor airbase and target
-									-- env.info("DCE_Gci        Passe B_G distance "..tostring(distance).." flight.range <? "..tostring(flight.range))
-
 									if distance < flight.range then									--target is in interception range
-										-- env.info("DCE_Gci        ___    Passe B_H ")
-
 										eligible_flights[flight.name] = distance					--store flight name and interception distance in table
 									end
 								end
@@ -320,24 +325,11 @@ local function GCI_Cycle()
 					--assign selected flight to target
 					ErrorMsg = "Assign interceptors; Target: " .. target_name .. "; Select Flight."					--Error message in case follow on code fails
 					if selected_flight then
-						-- env.info("DCE_Gci Passe C_A ")
-
 						for base_name, base in pairs(GCI.Interceptor[track_side].base) do				--iterate through bases in GCI table
-							-- env.info("DCE_Gci Passe  C_B ")
-
 							for flight_n, flight in pairs(base.ready) do								--iterate through ready interceptor flights						
-								-- env.info("DCE_Gci Passe   C_C flight.name "..tostring(flight.name).." selected_flight "..tostring(selected_flight))
-
 								if flight.name == selected_flight then									--find selected interceptor flight in ready table
-									-- env.info("DCE_Gci Passe      ___ C_D ")
-
 									trigger.action.setUserFlag(flight.flag, true)						--set flag true to launch interceptor
-
-
-									-- modification M11.j : Multiplayer
-
 									-- trigger.action.outText(selected_flight .. " 01 launched to intercept " .. target_name, 15)	--FOR DEBUG
-									-- env.info(selected_flight .. " 01 launched to intercept " .. target_name)
 									local idInfo = Group.getByName(selected_flight):getID()
 									local _side = Group.getByName(selected_flight):getCoalition()
 
@@ -383,11 +375,7 @@ local function GCI_Cycle()
 										weaponType = 4194304						--Short Range Missile (Fox2)
 									end
 
-									-- env.info( "GCI PASSE C "..tostring(distance2))
-
 									local point_2 = GetOffsetPoint(flight, target.bearing, distance2)
-
-									-- env.info( "GCI point_2 x "..tostring(point_2.x).." distance2: "..tostring(distance2))
 
 									local distance3 = (target.distance/3)*2
 									local point_3 = GetOffsetPoint(flight, target.bearing, distance3)
@@ -395,8 +383,6 @@ local function GCI_Cycle()
 									point_3.y = point_3.y + 1000
 									local distAfterPt3 = math.sqrt(math.pow(point_2.x - point_3.x, 2) + math.pow(point_2.y - point_3.y, 2))
 									local distRTB = math.sqrt(math.pow(point_3.x - flight.x, 2) + math.pow(point_3.y - flight.y, 2))
-									-- env.info( "GCI point_3 x "..tostring(point_2.x).." distAfterPt3: "..tostring(distAfterPt3))
-
 									local speed = 250      --mur du son 350 Atl0 293 Atl10000m
 
 									--assign mission task to interceptor flight

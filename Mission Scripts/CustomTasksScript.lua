@@ -2,12 +2,12 @@
 --Script attached to mission and executed via trigger
 --Functions accessed via LUA Run Script on waypoint
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  cleanCode_b
+-- last modification:  cleanCode_c
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\CustomTasksScript.lua"] = "1.9.39"
+versionDCE["Mission Scripts\CustomTasksScript.lua"] = "1.9.40"
 ------------------------------------------------------------------------------------------------------- 
 -- Reglage_n				(n force RTB)(m stopcondition)(l escorte)(k CVN to CV)(j altitudeEnabled true)(h GetHeading)(global path)(f rejoin debug)(e more scheduleFunction) (d landingImpossible denivelé)(c: limit =  1 ?)(b: orbit infini) all ["groupAttack"] = false,
--- cleanCode_b				(b springCleaning)
+-- cleanCode_c				(c GetCategory)(b springCleaning)
 -- Debug_h					(fgh: CAS AttackUnit)(e: static id -1)(d: Checking) creates custom files to observe (c: Helicopter)(b: strike bombing)(a: strike ASM B52)
 
 -- modification M74_a		mix static, vehicle and map elements in a Target.
@@ -3376,10 +3376,11 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 	env.info( "current_time: "..tostring(current_time).." Custom_Altitude, B wptAlti  |"..tostring(grpname).." |wptAlti: "..tostring(wptAlti))
 
 	local function Execute()
-		local current_time = timer.getTime()
+		current_time = timer.getTime()
 		local flight = Group.getByName(grpname)
 
-		local selectedMember = flight:getUnits(1)
+		-- local selectedMember = flight:getUnits(1)
+		local selectedMember 
 		local wingman = flight:getUnits()
 		-- for memberN, _unit in ipairs(wingman) do											
 			-- if _unit and _unit:isActive() and _unit:inAir() then
@@ -3388,12 +3389,13 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 		-- end
 
 		for memberN, _unit in ipairs(wingman) do
-			if _unit and _unit:isActive() and _unit:inAir() then
+			if _unit and _unit:isExist() and _unit:isActive()  and _unit:inAir() then
 				selectedMember = _unit
+				break
 			end
 		end
 
-		if not selectedMember or not selectedMember:isExist() then
+		if not selectedMember then
 			env.info(" Custom_Altitude, C1 selectedMember Erreur : selectedMember est invalide ou inexistant.")
 
 			return
@@ -3403,7 +3405,6 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 
 
 		local ctr = selectedMember:getGroup():getController()
-		local current_time = timer.getTime()
 		local actualPosition = selectedMember:getPoint()
 		local actualPositionXY = {
 			x = actualPosition.x,

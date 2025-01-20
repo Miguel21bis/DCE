@@ -3,12 +3,13 @@
 -- avec la commmande w2
 -- Supprime un Groupe entier en donnant son numero de groupe
 ------------------------------------------------------------------------------------------------------- 
--- Last Modification cleancode_a
+-- Last Modification updateFunction_d
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Divers.lua"] = "1.3.22"
+versionDCE["UTIL_Divers.lua"] = "1.4.26"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_a				(a springCleaning)
 -- adjustment_a				(a ajout dataMap)
+-- updateFunction_d			(d helpBalancePower())(c KillTarget())(b fuelConsumption())(a DelGroup())
 -- modification M38_n		Check and Help CampaignMaker (n: delete Ngroug)
 ------------------------------------------------------------------------------------------------------- 
 
