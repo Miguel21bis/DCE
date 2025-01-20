@@ -308,7 +308,7 @@ do
 
 		for targetN, target in ipairs(targetSide) do															--iterate through sort table
 			if target.inactive ~= true then														--target is active
-				if target.alive then																--target is a ground target
+				if target.alive and target.type ~= "Ejected Pilot" then																--target is a ground target
 					if target.hidden == nil or target.hidden == false then						--target is not hidden
 						-- s = s .. "- " .. target.titleName .. " (" .. math.ceil(target.alive) .. "%)"	--\n"		--add target name and alive percentage
 						local entry =  "- " .. target.titleName 		--add target name and alive percentage

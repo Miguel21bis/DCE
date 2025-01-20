@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.80.524"
+versionDCE["UTIL_Changelog.lua"] = "20.81.524"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.80.524"
+VersionDCE["UTIL_Changelog.txt"] = "20.81.524"
 --[[
 
 
