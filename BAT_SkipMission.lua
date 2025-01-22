@@ -225,9 +225,9 @@ if input == "y" or input == "yes" then
 			if choix1 == "n" or  choix1 == "t"  then
 				if choix1 == "t"  then
 
-				--[[
-				--===================================================================================
-				-- Ecran N°2 Selection du Target	
+					--[[
+					--===================================================================================
+					-- Ecran N°2 Selection du Target	
 					print("choose a Single target")
 
 					local tabIndex = {}
@@ -313,72 +313,39 @@ if input == "y" or input == "yes" then
 
 					io.write( "\n")
 				end	--if choix1 == "t"  then
-				]]--
+					]]--
 
-					-- Fonction pour afficher les cibles CSAR (pilotes éjectés)
-					local function showCSARTargets(targetlist)
-						local tabIndex = {}
-						local Ckey = 0
 
-						print("\n--- Rescue Mission: Choose an ejected pilot ---")
-						for side, targetSide in pairs(targetlist) do
-							print("\n"..side.." side:")
-							for key, target in ipairs(targetSide) do
-								if target.inactive ~= true 
-								and target.ATO 
-								and target.task == "CSAR"
-								and target.type == "Ejected Pilot"
-								then
-									if side == "red" then
-										Ckey = key + #targetlist["blue"]
-									else
-										Ckey = key
-									end
+				
+					-- local tabIndex = {}
 
-									io.write(Ckey.." "..side.." "..tostring(target.titleName).."  "..tostring(target.alive).." %  X"..tostring(target.priority).."\n")
-									tabIndex[Ckey] = {side = side}
-								end
-							end
-						end
-
-						return tabIndex
-					end
-
-					-- Fonction pour afficher les cibles standard (Strike, Runway Attack, etc.)
-					local function showStandardTargets(targetlist)
-						local tabIndex = {}
-						local Ckey = 0
-
-						print("\n--- Choose a single target ---")
-						for side, targetSide in pairs(targetlist) do
-							print("\n"..side.." side:")
-							for key, target in ipairs(targetSide) do
-								if target.inactive ~= true 
-								and target.ATO 
-								and (string.find(target.task, "Strike") or target.task == "Runway Attack")
-								and target.type ~= "Ejected Pilot"
-								then
-									if side == "red" then
-										Ckey = key + #targetlist["blue"]
-									else
-										Ckey = key
-									end
-									
-									io.write(Ckey.." "..side.." "..tostring(target.titleName).."  "..tostring(target.alive).." %  X"..tostring(target.priority).."\n")
-									tabIndex[Ckey] = {side = side}
-								end
-							end
-						end
-
-						return tabIndex
-					end
-
-					-- Menu principal
-					local function mainMenu()
-						print("\n--- Target Selection Menu ---")
-						print("1. Select a standard target")
-						print("2. Rescue an ejected pilot (CSAR)")
+					-- Fonction pour afficher le menu de sélection du camp
+					local function selectCamp()
+						print("\n--- Select Coalition ---")
+						print("1. targets in the RED camp")
+						print("2. targets in the BLUE camp")
 						print("3. Exit")
+
+						local choice
+						repeat
+							io.write("\nEnter your choice (1-3): ")
+							choice = tonumber(io.stdin:read())
+						until choice == 1 or choice == 2 or choice == 3
+
+						if choice == 1 then return "blue"
+						elseif choice == 2 then return "red"
+						else
+							print("Exiting selection.")
+							return nil
+						end
+					end
+
+					-- Fonction pour afficher le menu de sélection de la mission
+					local function selectMissionType()
+						print("\n--- Select Mission Type ---")
+						print("1. Standard targets (Strike's, Runway Attack)")
+						print("2. Rescue mission (CSAR)")
+						print("3. Back to coalition selection")
 
 						local choice
 						repeat
@@ -389,39 +356,86 @@ if input == "y" or input == "yes" then
 						return choice
 					end
 
-					-- Sélection des cibles en fonction du choix de l'utilisateur
-					local function selectTarget(targetlist)
-						local choice = mainMenu()
+					-- Fonction pour afficher les cibles standard (Strike, Runway Attack)
+					local function showStandardTargets(targetlist, side)
+						print("\n--- select a target in the "..side.." side ---")
+						local tabIndex = {}
+						local Ckey = 0
 
-						if choice == 1 then
-							local tabIndex = showStandardTargets(targetlist)
-							io.write("\nEnter target number: ")
-						elseif choice == 2 then
-							local tabIndex = showCSARTargets(targetlist)
-							io.write("\nEnter pilot number to rescue: ")
-						elseif choice == 3 then
-							print("Exiting target selection.")
+						for key, target in ipairs(targetlist[side]) do
+							if target.inactive ~= true and target.ATO 
+							and (string.find(target.task, "Strike") or target.task == "Runway Attack")
+							and target.type ~= "Ejected Pilot"
+							then
+								Ckey = key
+								io.write(Ckey.." "..side.." "..tostring(target.titleName).."  "..tostring(target.alive).."%  X"..tostring(target.priority).."\n")
+								tabIndex[Ckey] = target
+							end
+						end
+
+						return tabIndex
+					end
+
+					-- Fonction pour afficher les cibles de type CSAR (pilotes éjectés)
+					local function showCSARTargets(targetlist, side)
+						print("\n--- Select the pilot to be rescued, who has fallen into the "..DCS_ENI_Side[side].." side  ---")
+						local tabIndex = {}
+						local Ckey = 0
+
+						for key, target in ipairs(targetlist[side]) do
+							if target.inactive ~= true and target.ATO 
+							and target.task == "CSAR" and target.type == "Ejected Pilot"
+							then
+								Ckey = key
+								io.write(Ckey.." "..side.." "..tostring(target.titleName).."  "..tostring(target.alive).."%  X"..tostring(target.priority).."\n")
+								tabIndex[Ckey] = target
+							end
+						end
+
+						return tabIndex
+					end
+
+					-- Fonction principale pour la sélection des cibles
+					local function selectTarget(targetlist)
+						local side = selectCamp()
+						if not side then return end -- Quitter si l'utilisateur choisit "Exit"
+
+						local missionChoice = selectMissionType()
+
+						local tabIndex = {}
+						if missionChoice == 1 then
+							tabIndex = showStandardTargets(targetlist, side)
+						elseif missionChoice == 2 then
+							tabIndex = showCSARTargets(targetlist, side)
+						else
+							return selectTarget(targetlist) -- Retourner au choix du camp
+						end
+
+						if next(tabIndex) == nil then
+							print("\nNo available targets for this selection.")
 							return
 						end
 
-						-- Récupérer l'entrée utilisateur et traiter la sélection
+						-- Sélection de la cible spécifique
 						local input
 						repeat
+							io.write("\nEnter target number: ")
 							input = tonumber(io.stdin:read())
 							if not input or not tabIndex[input] then
 								print("\nInvalid entry. Please enter a valid target number.")
 							end
 						until input and tabIndex[input]
 
-						local side = tabIndex[input].side
+						local selectedTarget = tabIndex[input]
 						Multi.Target = Multi.Target or {}
-						Multi.Target[side] = targetlist[side][input].titleName
+						Multi.Target[side] = selectedTarget.titleName
 
-						print("\nSelected Target: "..targetlist[side][input].titleName)
+						print("\nSelected Target: "..selectedTarget.titleName)
 					end
 
-					-- Exécution du script
+					-- Exécution de la sélection
 					selectTarget(targetlist)
+
 					io.write( "\n")
 				end	--if choix1 == "t"  then
 
