@@ -12,7 +12,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  M53_b
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\ATC_ShutUp_GENERIC.lua"] = "1.2.3"
+versionDCE["Mission Scripts/ATC_ShutUp_GENERIC.lua"] = "1.2.4"
 ------------------------------------------------------------------------------------------------------- 
 -- Psyko modification       M59_a			silences the tower
 -- miguel21 modification    M53_b			automatic update of the conf_mod file (b conf_mod reconfiguration)

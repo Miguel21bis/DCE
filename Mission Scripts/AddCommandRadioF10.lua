@@ -7,7 +7,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification  cleanCode_b adjustment_h M81_a debug_h
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\AddCommandRadioF10.lua"] = "1.13.47"
+versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "1.13.48"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_b				(b springCleaning)(a: remove RemovePlane)
 -- adjustment_h				(h avoid SAM zone)(g force RTB if bingo)(f ENI table)(e: add sar_F10)(d GetHeading)(c coalitionIdNumeric)(b group Item Radio)(a: ajust function trigo)
@@ -3052,23 +3052,23 @@ end
 
 -- Fonction pour envoyer un texte transformé en audio via TTS
 -- local function sendTTSMessage(freq, modulation, text)
-local function sendTTSMessage(arg)
+-- local function sendTTSMessage(arg)
 
-	local freq, modulation, text = arg[1], arg[2],arg[3]
+-- 	local freq, modulation, text = arg[1], arg[2],arg[3]
 
-	local duration = SRSAudio.transmitTTS( -- Utilise la fonction TTS de SRS
-		freq,        -- Fréquence en Hz
-		modulation,  -- "AM" ou "FM"
-		text         -- Texte à convertir en audio
-	)
-	if duration then
-		trigger.action.outText("DCE_sendTTSMessage : Message TTS diffusé sur " .. freq / 1000000 .. " MHz (durée: " .. duration .. " s)", 10)
-	else
-		trigger.action.outText("DCE_sendTTSMessage Erreur lors de la diffusion TTS. freq: "..tostring(freq), 10)
-		trigger.action.outText("DCE_sendTTSMessage Erreur lors de la diffusion TTS. modulation: "..tostring(modulation), 10)
-		trigger.action.outText("DCE_sendTTSMessage Erreur lors de la diffusion TTS. text: "..tostring(text), 10)
-	end
-end
+-- 	local duration = SRSAudio.transmitTTS( -- Utilise la fonction TTS de SRS
+-- 		freq,        -- Fréquence en Hz
+-- 		modulation,  -- "AM" ou "FM"
+-- 		text         -- Texte à convertir en audio
+-- 	)
+-- 	if duration then
+-- 		trigger.action.outText("DCE_sendTTSMessage : Message TTS diffusé sur " .. freq / 1000000 .. " MHz (durée: " .. duration .. " s)", 10)
+-- 	else
+-- 		trigger.action.outText("DCE_sendTTSMessage Erreur lors de la diffusion TTS. freq: "..tostring(freq), 10)
+-- 		trigger.action.outText("DCE_sendTTSMessage Erreur lors de la diffusion TTS. modulation: "..tostring(modulation), 10)
+-- 		trigger.action.outText("DCE_sendTTSMessage Erreur lors de la diffusion TTS. text: "..tostring(text), 10)
+-- 	end
+-- end
 
 
 

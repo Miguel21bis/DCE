@@ -4,7 +4,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification cleanCode_c debug_a
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\SAR.lua"] = "1.4.23"
+versionDCE["Mission Scripts/SAR.lua"] = "1.4.24"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_c				(c springCleaning)
 -- debug_a	 				(a: getOut land.getSurfaceType() error GroundDamagedFlyingMachine)

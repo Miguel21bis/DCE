@@ -5,7 +5,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification cleanCode_b
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\Pedro.lua"] = "1.5.15"
+versionDCE["Mission Scripts/Pedro.lua"] = "1.5.16"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_b				(b springCleaning)
 -- adjustment_a				(CVN to CV)

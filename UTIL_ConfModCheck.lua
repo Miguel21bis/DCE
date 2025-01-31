@@ -25,7 +25,7 @@ versionDCE["UTIL_ConfModCheck.lua"] = "1.38.118"
 -- modification M08_b		Hotstart  
 ------------------------------------------------------------------------------------------------------- 
 
-
+--START_PARSING
 mission_ini_check = {
 	--***number of ground elements (FPS like)***
 	PruneScriptConf = {
@@ -177,6 +177,28 @@ campMod_check = {
 	
 	--***other repair options with a different logic***
 	RepairRunwayPerDay = 25,				-- (1 to 100 [%])	[default: 25]	% per day for runway repairs
+
+	--***repair option***.
+	-- object = {minimumDestroyed,	 reinforceDelay,	killTargetValue,	repairChance,			repairValue,	 	arg}
+	-- object = {(% de l'unité) ;	(Nbre d'heures) ;	(% de l'unité) ;	(% de probabilité) ;	(rien compris);		autre}
+	-- RepairOption = {
+	-- 	blue = {
+	-- 		airbase = {25,12,20,15,0},
+	-- 		runWay = {25,12,20,15,0},
+	-- 		SAM = {25,12,20,15,0},
+	-- 		EWR = {25,12,20,15,0},
+	-- 		bridge = {25,12,20,15,0},
+	-- 		generic = {25,12,20,15,0},
+	-- 	},
+	-- 	red = {
+	-- 		airbase = {25,12,20,15,0},
+	-- 		runWay = {25,12,20,15,0},
+	-- 		SAM = {25,12,20,15,0},
+	-- 		EWR = {25,12,20,15,0},
+	-- 		bridge = {25,12,20,15,0},
+	-- 		generic = {25,12,20,15,0},
+	-- 	},
+	-- },
 
 	----attention, name of the map in lower case 
 	movedBullseye = { 						-- modification M27 	movedBullseye

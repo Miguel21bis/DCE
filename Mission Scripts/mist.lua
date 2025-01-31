@@ -33,7 +33,7 @@ Official Releases <https://github.com/mrSkortch/MissionScriptingTools/tree/maste
 
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\mist.lua"] = "4.5.122"
+versionDCE["Mission Scripts/mist.lua"] = "4.5.122"
 ------------------------------------------------------------------------------------------------------- 
 
 mist = {}

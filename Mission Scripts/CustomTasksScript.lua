@@ -4,7 +4,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  cleanCode_c
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\CustomTasksScript.lua"] = "1.9.40"
+versionDCE["Mission Scripts/CustomTasksScript.lua"] = "1.9.41"
 ------------------------------------------------------------------------------------------------------- 
 -- Reglage_n				(n force RTB)(m stopcondition)(l escorte)(k CVN to CV)(j altitudeEnabled true)(h GetHeading)(global path)(f rejoin debug)(e more scheduleFunction) (d landingImpossible denivelé)(c: limit =  1 ?)(b: orbit infini) all ["groupAttack"] = false,
 -- cleanCode_c				(c GetCategory)(b springCleaning)

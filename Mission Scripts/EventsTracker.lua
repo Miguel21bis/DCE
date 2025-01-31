@@ -6,7 +6,7 @@
 -------------------------------------------------------------------------------------------------------
 -- last modification  debug_q
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\EventsTracker.lua"] = "1.12.73"
+versionDCE["Mission Scripts/EventsTracker.lua"] = "1.12.74"
 ------------------------------------------------------------------------------------------------------- 
 
 -- test_b 					(b: saved game on another DD)

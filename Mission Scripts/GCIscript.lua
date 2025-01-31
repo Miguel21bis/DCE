@@ -4,7 +4,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification cleanCode_b
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\GCIscript.lua"] = "1.4.20"
+versionDCE["Mission Scripts/GCIscript.lua"] = "1.4.21"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_b					(b springCleaning)
 -- debug_c						(c getcategory again)(b unit category, tks ldnz)(a getheading Z)

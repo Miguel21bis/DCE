@@ -1,9 +1,9 @@
 --To create the flight plans in the mission file for all flights in the ATO
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleancode_n debug_z M56_c
+-- last modification: cleancode_n debug_Aa M56_c
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_FlightPlan.lua"] = "1.58.285"
+versionDCE["ATO_FlightPlan.lua"] = "1.58.286"
 ------------------------------------------------------------------------------------------------------- 
 
 -- SomethingSimple_a		(a add randomizeSkills)
@@ -11,9 +11,9 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.285"
 -- Eagle_01 Modification E01_c
 
 -- mouvedOption_CM_01_c		(c: manage les options de west callSign) (b: previent le CampaignMaker d'une nation manquante)
--- adjustment_Aa            	(y AddPropAircraft for all)(x largage d urgence if not heli)(CVN to CV)(t adjustment_e)(s No ATE if antiShip + B52 ASM)(r dont prune target mission)(q id_task)(modified jettison)(O escort Transport)(n is_helicopter)(m: less fuel for Tanker/Awacs already in the area)(l AltitudeFloor helicopter)(k landing after spawn)(j cheat_Mod_Eye)(i: skin: evite le bug table vide)(h: spawnAir +30s)(e: customScript on IP)(d: ajuster à 0 l'alti des joueurs Attack Landing) (b: ATO_lock sur les xpt Join) (ag: ne pas larguer les emports en cas d'urgence)
+-- adjustment_Aa            	(y AddPropAircraft for all)(x largage d urgence if not heli)(CVN to CV)(t adjustment_e)(s No ATE if antiShip + B52 ASM)
 -- cleancode_n				(n springCleaning)
--- debug_z					(z package stats)(y polka on parking)(x frequency SA342)(w no recalculates all speeds)(v formation heli)(u activate*2)(t wpt speed eta)(s pilotEjected n) (r callsign_eastbug, thks ldnz)(o DeactivateBeacon MPRS)(n Tacan Tanker)(m TACAN)(l: fromParking MP)(k:etagement des roles)(j:landing task transport sur la base de destination )(i:gestion des apparitions décalé au sol et en vol)(h:vi trop faible pour les escorteurs des strike trop lent)(g:MP, alti vi unite)(f:strike ASM B52)(e:Escorte)(d:Gun = 0 uniquement sur un Flight)(c:Antiship strike)(b: Interceptor error nb trigger) (a: alti flight ai en multijoueur)
+-- debug_Aa					(a flight delayed)(z package stats)(y polka on parking)(x frequency SA342)(w no recalculates all speeds)
 
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)
 -- modification M74_a		mix static, vehicle and map elements in a Target.
@@ -4001,6 +4001,11 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					table.remove(waypoints, 1)
 
 					-- waypoints[1].ETA = spawn_time	--NE PAS METTRE ça, ça rend le decollage en retard
+
+					if flight[f].player or flight[f].client then
+						waypoints[1].ETA = 0
+					end
+
 					waypoints[1].ETA_locked = true
 					waypoints[1].speed_locked = true
 
@@ -6479,11 +6484,10 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 --***************************--DEBUG INFO
 
 				local debugTempFLIGHT = ""
-				local ETA = -1
-				local NbEta = "ETA "
+				local start_time = -1
 
 				if spawn_time ~= nil then
-					ETA = group.start_time
+					start_time = group.start_time
 				end
 
 				local info01 = ""
@@ -6597,10 +6601,10 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				if group.lateActivation then
 					if a_activate then
 						if c_time then
-							if activateSecondes == math.floor(ETA)   then
+							if activateSecondes == math.floor(start_time)   then
 								info03 = "SOL/VOL decale_A"
 							else
-								info03 = "ATTENTION SECONDES a_activate_group "..group.groupId .." |activateSecondes ~= "..activateSecondes .." |ETA: "..ETA
+								info03 = "ATTENTION SECONDES a_activate_group "..group.groupId .." |activateSecondes ~= "..activateSecondes .." |ETA: "..start_time
 							end
 						elseif c_flag then
 							info03 = "VOL FLAG decale _B"
@@ -6690,6 +6694,10 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					InfoFlight = InfoFlight.."\n"..("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ")
 				end
 
+				if (units[1].skill == "Player" or units[1].skill == "Client") and group.route.points[1]["ETA"] > 1 then
+					InfoFlight = InfoFlight.."\n\n\n".."ATTENTION Player/Client delayed start ETA1: "..group.route.points[1]["ETA"].."\n\n\n"
+				end
+
 				local groupInfo = ""
 				if debugStart then
 					groupInfo = info01
@@ -6722,7 +6730,9 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					.." "..group.name
 					.." "..flight[f].base
 					.." "..flight[f].target_name
-					.." "..NbEta.. math.floor(ETA)
+					.." ".." start_time: ".. math.floor(start_time)
+					.." ETA1: "..group.route.points[1]["ETA"]
+					.." ETA2: "..group.route.points[2]["ETA"]
 					.." "..group.frequency
 					.." "..info06
 

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification  
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/collectFuelFata.lua"] = "1.1.1"
+versionDCE["Mission Scripts/collectFuelData.lua"] = "1.1.2"
 ------------------------------------------------------------------------------------------------------- 
 ---
 

@@ -5,7 +5,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification   cleanCode_a debug_c
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\CG_ArtySpotter.lua"] = "1.4.17"
+versionDCE["Mission Scripts/CG_ArtySpotter.lua"] = "1.4.18"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_a				(a springCleaning)				
 -- adjustment_						

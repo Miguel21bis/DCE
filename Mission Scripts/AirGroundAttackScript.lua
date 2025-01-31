@@ -6,7 +6,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\AirGroundAttackScript.lua"] = "1.2.2"
+versionDCE["Mission Scripts/AirGroundAttackScript.lua"] = "1.2.3"
 ------------------------------------------------------------------------------------------------------- 
 
 -- cleanCode_b				(b springCleaning)

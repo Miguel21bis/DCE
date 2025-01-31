@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.81.524"
+versionDCE["UTIL_Changelog.lua"] = "20.81.525"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.81.524"
+VersionDCE["UTIL_Changelog.txt"] = "20.81.525"
 --[[
 
 
@@ -9,7 +9,11 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.81.524:==
+==:20.81.525:==
+
+525 fixed	[flight]	flight delayed
+
+
 
 524 modified	[loadout]
 				-- V178 - Tu-22M3 no escort and Minscore 0.1  for TF-80-Full

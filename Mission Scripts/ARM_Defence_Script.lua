@@ -5,7 +5,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  cleanCode_a
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\ARM_Defence_Script.lua"] = "1.3.6"
+versionDCE["Mission Scripts/ARM_Defence_Script.lua"] = "1.3.7"
 ------------------------------------------------------------------------------------------------------- 
  
 -- cleanCode_a			 

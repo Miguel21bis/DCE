@@ -3,7 +3,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last  Revision  cleanCode_a
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\CarrierIntoWindScript.lua"] = "1.5.13"
+versionDCE["Mission Scripts/CarrierIntoWindScript.lua"] = "1.5.14"
 ------------------------------------------------------------------------------------------------------- 
 -- adjustment_c					(c CVN to CV)(a: ajust function trigo)
 -- cleanCode_a					(a springCleaning)
