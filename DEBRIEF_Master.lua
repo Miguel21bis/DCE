@@ -110,6 +110,8 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 
+UpdateConfMod()
+
 --load status file to be updated
 require("Active/oob_ground")																	--load ground oob
 require("Active/oob_air")																		--load air oob

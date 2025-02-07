@@ -30,7 +30,7 @@ mission_ini_check = {
 	--***number of ground elements (FPS like)***
 	PruneScriptConf = {
 		PruneScript = true,						-- (true/false)				[default: true]		activate or not the script (and the associated options) allowing to prune the number of units on the ground to improve the FPS (mod Tomsk M09)
-		PruneAggressiveness = 1.8,				-- (0 to 3)					[default: 1.8]		How aggressive should the pruning be [0 to 3], larger numbers will remove more units 0 : no pruning at all
+		PruneAggressiveness = 1.9,				-- (0 to 3)					[default: 1.8]		How aggressive should the pruning be [0 to 3], larger numbers will remove more units 0 : no pruning at all
 		PruneStatic = true,						-- (true/false)				[default: true]		Should ALL parked (static) aircraft be pruned [MP: recommend: true]
 		ForcedPruneSam = false,					-- (true/false)				[default: false]	PBO_CEF wanted to keep some actives SAMs, this option desactivates them too. 	
 	},
@@ -159,46 +159,42 @@ campMod_check = {
 	--***loadout options***
 	selectLoadout = "central",				-- ("central"/"init")		[default: "central"] (init: for old campaigns, if the loadout file is located in the /Init folder)
 
-	--***repair option***
-	airReinforceDelay = 12,					-- (number [hours])	[default: 12]	delays between aircraft transfers to reinforce Air units
-	groundReinforceDelay = 12,				-- (number [hours])	[default: 12]	delays between ground unit repairs
-	
-	RepairBaseMinimumDestroyed = 20,		-- (1 to 100 [%])	[default: 20]	does not repair if Base % life is less than 
-	RepairMinimumDestroyed = 25,			-- (1 to 100 [%])	[default: 25]	does not repair if target % life is less than 
-	
+	-- --***OLD repair option***
+	-- RepairBaseMinimumDestroyed = 20,		-- (1 to 100 [%])	[default: 20]	does not repair if Base % life is less than 
 	-- targetSpecificRepairValue = xx		-- to have a customized repair value for a target, to be added to the targetlist_init file.
-	RepairSAM = 15,							-- (1 to 100 [%])	[default: 15]	% chance of unit being repaired/replaced
-	RepairAirbase = 12,						-- (1 to 100 [%])	[default: 12]	% chance of unit being repaired/replaced
-	RepairStation = 8,						-- (1 to 100 [%])	[default: 8]	% chance of unit being repaired/replaced
-	RepairBridge = 8,						-- (1 to 100 [%])	[default: 8]	% chance of unit being repaired/replaced
-	Repair = 2,								-- (1 to 100 [%])	[default: 2]	% chance of unit being repaired/replaced	
-	
-	KillTargetValue = 30,					-- (1 to 100 [%])	[default: 30] si la vie du Target est < 20%, on d�clare les survivants mort, pour �viter d'y retourner.
-	
-	--***other repair options with a different logic***
-	RepairRunwayPerDay = 25,				-- (1 to 100 [%])	[default: 25]	% per day for runway repairs
+
+	-- --***OLD other repair options with a different logic***
+	-- RepairRunwayPerDay = 25,				-- (1 to 100 [%])	[default: 25]	% per day for runway repairs
 
 	--***repair option***.
-	-- object = {minimumDestroyed,	 reinforceDelay,	killTargetValue,	repairChance,			repairValue,	 	arg}
-	-- object = {(% de l'unité) ;	(Nbre d'heures) ;	(% de l'unité) ;	(% de probabilité) ;	(rien compris);		autre}
-	-- RepairOption = {
-	-- 	blue = {
-	-- 		airbase = {25,12,20,15,0},
-	-- 		runWay = {25,12,20,15,0},
-	-- 		SAM = {25,12,20,15,0},
-	-- 		EWR = {25,12,20,15,0},
-	-- 		bridge = {25,12,20,15,0},
-	-- 		generic = {25,12,20,15,0},
-	-- 	},
-	-- 	red = {
-	-- 		airbase = {25,12,20,15,0},
-	-- 		runWay = {25,12,20,15,0},
-	-- 		SAM = {25,12,20,15,0},
-	-- 		EWR = {25,12,20,15,0},
-	-- 		bridge = {25,12,20,15,0},
-	-- 		generic = {25,12,20,15,0},
-	-- 	},
-	-- },
+	-- object = {			1			;		2			;		 	3		;		4		;				5		}
+	-- object = {minimumRepairThreshold	;	deathPoint		;	 reinforceDelay;	repairChance;			repairValue}
+	-- object = {	(% de l'unité) 		;	(% de l'unité) ;	(Nbre d'heures) ;	(% de probabilité) ;	(valeur de réparation/Day)}
+
+			-- minimumRepairThreshold : à partir de cette valeur l'unité n'est plus réparée mais vivante 
+			-- deathPoint : à partir de cette valeur l'unité est mise à 0 et donc détruite
+			-- repairValue: valeur de réparation pour une cible entiere/jour ou moment de réparation
+
+	RepairOption = {
+		blue = {
+			airUnit = {0,0,12,0,0},
+			airbase = {20,20,12,0,0},
+			runway = {25,20,12,0,25},
+			sam = {25,20,12,15,0},
+			ewr = {25,20,12,15,0},
+			bridge = {25,20,12,8,0},
+			generic = {25,20,12,2,0},
+		},
+		red = {
+			airUnit = {0,0,12,0,0},
+			airbase = {20,20,12,0,0},
+			runway = {25,20,12,25,0},
+			sam = {25,20,12,15,0},
+			ewr = {25,20,12,15,0},
+			bridge = {25,20,12,8,0},
+			generic = {25,20,12,2,0},
+		},
+	},
 
 	----attention, name of the map in lower case 
 	movedBullseye = { 						-- modification M27 	movedBullseye
@@ -245,24 +241,6 @@ campMod_check = {
 			rayon  = 200,					-- distance en Km autour de laquelle on peut placer le bullsEye
 		},
 	},
-	
-	-- reglage composition Package
-	-- Setting_Generation= {
-	-- 	["limit_escort"] = 99,				-- (default : 99)(recommended : 8), limit escort number to
-	-- },
 
 }
 
--- modif M05.b : ajout picture Briefing + pictures Target
-
--- pictureBrief = {
-	-- ["blue"] = {
-		 -- "FrontlineGulf.png",
-		 -- "TF-Infos.png",
-		 -- "TF-71.png",
-	-- },
-	-- ["red"] = {
-		 -- "FrontlineGulf.png",
-		 -- "TF-71.png",
-	-- },
--- }

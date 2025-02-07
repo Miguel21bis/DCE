@@ -37,6 +37,29 @@ end
 if camp.flag == nil then
 	camp.flag = {}
 end
+
+if not camp.automaticReinforce then
+	camp.automaticReinforce = {
+		blue = 0,
+		red = 0,
+		neutral = 0,
+	}
+end
+
+if type(camp.automaticReinforce) ~= "table" then
+
+	local tempValue = Deepcopy(camp.automaticReinforce)
+
+	camp.automaticReinforce = {
+		blue = tempValue,
+		red = tempValue,
+		neutral = tempValue,
+	}
+end
+
+-- _affiche(camp.automaticReinforce, "camp.automaticReinforce")
+-- os.execute 'pause'
+
 local old_flag = Deepcopy(camp.flag)												--copy campaign flags, so that modifications of flags do not affect condition of subsequent campaign triggers in same mission
 
 
@@ -1103,55 +1126,37 @@ Action = {}
 			end
 
 			for targetN, target in pairs(targets) do		--Iterat through all targets
-				local attibut = {}
-
-				if target.attributes and type(target.attributes) == "table" then
-					for key, value in pairs(target.attributes) do
-						if value and value ~= "" then
-							attibut[string.upper(value)] =  true
+				
+				local attribut = "generic"	
+				if target.attributes then 
+					for attributN, attributName in pairs(target.attributes) do
+						attributName = string.lower(attributName)
+						if Attribut2Target[attributName] then
+							attribut = Attribut2Target[attributName]
+							break
+						end
+					end
+					if not attribut then
+						for attributN, attributName in pairs(target.attributes) do
+							attributName = string.lower(attributName)
+							for key , correspondanceName in pairs(Attribut2Target) do
+								if string.match(correspondanceName, attributName) then
+									attribut = correspondanceName
+									-- print("DcCT B3    FOUND attribut ... "..tostring(attribut) )
+									break
+								end
+							end
+	
 						end
 					end
 				end
+				
+				-- local repairChance = 0
+				local minimumRepairThreshold = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][1]
 
+				local repairChance = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][4]
 
-
-				if target.alive and not attibut["RUNWAY"]   then
-
-					local prob = 0
-					local aliveMiniForRepair = campMod.RepairMinimumDestroyed
-
-					-- if target.attributes and target.attributes[1] then
-						-- print("DcCT NAME: target_name "..target_name)
-						-- print("DcCT NAME: attributes "..tostring(target.attributes[1]))
-
-
-
-						if target.targetSpecificRepairValue then prob = target.targetSpecificRepairValue
-						elseif attibut["SAM"] or attibut["EWR"] then
-							prob = campMod.RepairSAM
-
-						elseif attibut["AIRBASE"] or attibut["STRUCTURE"]  then
-							prob = campMod.RepairAirbase
-							aliveMiniForRepair = campMod.RepairBaseMinimumDestroyed
-
-						elseif attibut["STATION"]  then
-							prob = campMod.RepairStation
-
-						elseif attibut["BRIDGE"]  then
-							prob = campMod.RepairBridge
-
-						else
-
-							prob = campMod.Repair
-						end
-					-- else
-						-- print("DcCT ELSE no attribute "..target_name)
-						-- os.execute 'pause'
-					-- end
-
-					-- print("DcCT target_name "..tostring(target_name).." aliveMiniForRepair "..aliveMiniForRepair)
-					-- _affiche(attibut, "attibut DcCT")
-					-- os.execute 'pause'
+				if target.alive and attribut ~= "runway"  then
 
 					if target.elements   then
 						for e = 1, #target.elements do												--Iterate through elements of target
@@ -1168,20 +1173,21 @@ Action = {}
 							end
 
 
-							if  target.alive < 100 and target.alive >= aliveMiniForRepair   then
+							if  target.alive < 100 and target.alive >= minimumRepairThreshold   then
 								if  target.elements[e].dead  then
 									if target.elements[e].CheckDay then
-										if	CampTotalTimeS >= target.elements[e].CheckDay + (campMod.groundReinforceDelay * 3600) then
+										-- if	CampTotalTimeS >= target.elements[e].CheckDay + (campMod.groundReinforceDelay * 3600) then
+										if	CampTotalTimeS >= target.elements[e].CheckDay + (campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][2] * 3600) then
 
 											local test_prob = math.random(1,100)
 
 											if Debug.AfficheSol or debugKT then
 												print("Dc_CT Debug CampTotalTimeS >= CheckDay : "..target.titleName .. " "..target.elements[e].name)
-												print("Dc_CT Debug test_prob <= prob : "..test_prob .. " "..prob)
+												print("Dc_CT Debug test_prob <= prob : "..test_prob .. " "..repairChance)
 												-- os.execute 'pause'
 											end
 
-											if test_prob <= prob   then
+											if test_prob <= repairChance   then
 												forcedReAlive = true
 												temp_dead = nil
 												temp_dead_last = false
@@ -1228,7 +1234,8 @@ Action = {}
 								local endfunction = false
 								for c = 1, #oob_ground[groundside] do													--iterate through countries in side
 									for typename,typetable in pairs(oob_ground[groundside][c]) do						--iterate through country table content
-										if typename == "vehicle" or typename == "ship" then			--for vehciles or ships
+									--TODO, voir si il ne faut pas ajouter les static ici	
+									if typename == "vehicle" or typename == "ship" then			--for vehciles or ships
 											for group_n,group in pairs(typetable.group) do			--iterate through groups	
 												for unit_n,unit in pairs(group.units) do			--iterate through groups	
 													if  target.elements[e].name == unit.name then
@@ -1259,66 +1266,71 @@ Action = {}
 							end
 						end
 
-					end
+					-- end
 
-				elseif attibut == "RUNWAY" and target.alive  and  target.alive < 100 and target.alive > campMod.RepairBaseMinimumDestroyed and  target.CheckDay then   --
-					local oldVAlive = target.alive
-					if CampTotalTimeS >= target.CheckDay + 3600 then
-						local repairRunwayPerDay
-						if db_airbases[target.db_airbaseName] and db_airbases[target.db_airbaseName].customRepairRunwayPerDay then
-							repairRunwayPerDay = db_airbases[target.db_airbaseName].customRepairRunwayPerDay
-						else
-							repairRunwayPerDay = campMod.RepairRunwayPerDay
-						end
+					-- attribut == "runway"
 
-						target.alive = math.ceil(target.alive + repairRunwayPerDay * (((CampTotalTimeS - target.CheckDay )/ 3600)/24))
-						target.CheckDay = CampTotalTimeS
-
-						if target.alive > 100  then --or  target.alive >= 50
-							target.alive = 100
-
-						end
-
-
-						Action.Text(target.name.." repair in progress, old value: "..oldVAlive.." new value "..target.alive)
-
-						local nbRunwayPartDead = #target.elements -  (#target.elements * target.alive/100)
-
-						if Debug.AfficheSol or debugKT then
-							print("Dc_CT repair Runway "..target.name.." old value: "..oldVAlive.." new value "..target.alive )
-							print("Dc_CT repairRunwayPerDay "..repairRunwayPerDay)
-							print("Dc_CT RUNWAY repair: "..target.name.." new value: "..target.alive.." nbRunwayPartDead: "..nbRunwayPartDead )
-							-- os.execute 'pause'
-						end
-
-
-						--raz tout
-						for i=1, #target.elements do
-							target.elements[i].dead = nil
-							target.elements[i].dead_last = nil
-							target.elements[i].CheckDay = nil
-						end
-
-						for i=1, #target.elements do
-
-							if i > nbRunwayPartDead then break end
-
-							target.elements[i].dead = true
-							target.elements[i].dead_last = true
-							target.elements[i].CheckDay = CampTotalTimeS
-
-						end
-
-						--runway réparé
-						if oldVAlive < 50 and target.alive >= 50 then
-							if attibut ~= nil  and attibut == "RUNWAY" then
-								if debugKT then print(" 	->RUNWAY Action.ActivateBaseAndItsUnits  active: TRUE "..target.name) end
-
-								Action.ActivateBaseAndItsUnits(target.db_airbaseName,true)
-								Action.Text(target.db_airbaseName.." runway is repaired and can be used again.")
+					-- elseif attibut == "RUNWAY" and target.alive  and  target.alive < 100 and target.alive > campMod.RepairBaseMinimumDestroyed and  target.CheckDay then
+					elseif attribut == "runway" and target.alive  and  target.alive < 100 and target.alive > campMod.RepairBaseMinimumDestroyed and  target.CheckDay then 
+						local oldVAlive = target.alive
+						if CampTotalTimeS >= target.CheckDay + 3600 then
+							local repairRunwayPerDay
+							if db_airbases[target.db_airbaseName] and db_airbases[target.db_airbaseName].customRepairRunwayPerDay then
+								repairRunwayPerDay = db_airbases[target.db_airbaseName].customRepairRunwayPerDay
+							else
+								-- repairRunwayPerDay = campMod.RepairRunwayPerDay
+								repairRunwayPerDay = campMod.RepairOption[DCS_ENI_Side[side_name]]["runway"][5]
 							end
-						end
 
+							target.alive = math.ceil(target.alive + repairRunwayPerDay * (((CampTotalTimeS - target.CheckDay )/ 3600)/24))
+							target.CheckDay = CampTotalTimeS
+
+							if target.alive > 100  then --or  target.alive >= 50
+								target.alive = 100
+
+							end
+
+
+							Action.Text(target.name.." repair in progress, old value: "..oldVAlive.." new value "..target.alive)
+
+							local nbRunwayPartDead = #target.elements -  (#target.elements * target.alive/100)
+
+							if Debug.AfficheSol or debugKT then
+								print("Dc_CT repair Runway "..target.name.." old value: "..oldVAlive.." new value "..target.alive )
+								print("Dc_CT repairRunwayPerDay "..repairRunwayPerDay)
+								print("Dc_CT RUNWAY repair: "..target.name.." new value: "..target.alive.." nbRunwayPartDead: "..nbRunwayPartDead )
+								-- os.execute 'pause'
+							end
+
+
+							--raz tout
+							for i=1, #target.elements do
+								target.elements[i].dead = nil
+								target.elements[i].dead_last = nil
+								target.elements[i].CheckDay = nil
+							end
+
+							for i=1, #target.elements do
+
+								if i > nbRunwayPartDead then break end
+
+								target.elements[i].dead = true
+								target.elements[i].dead_last = true
+								target.elements[i].CheckDay = CampTotalTimeS
+
+							end
+
+							--runway réparé
+							if oldVAlive < 50 and target.alive >= 50 then
+								if attribut ~= nil  and attribut == "runway" then
+									if debugKT then print(" 	->RUNWAY Action.ActivateBaseAndItsUnits  active: TRUE "..target.name) end
+
+									Action.ActivateBaseAndItsUnits(target.db_airbaseName,true)
+									Action.Text(target.db_airbaseName.." runway is repaired and can be used again.")
+								end
+							end
+
+						end
 					end
 				end
 			end
@@ -2023,82 +2035,82 @@ Action = {}
 	end
 ----- run campaign triggers -----
 
---define variables to persist across multiple mission generation attempts
-if Briefing_status == nil then													--if briefing status string does not exist yet it must be created
-	Briefing_status = ""														--text string to be added to briefing
-	Briefing_oob_text_red = ""													--text string to be added to next briefing (red repair and reinforcements)
-	Briefing_oob_text_blue = ""													--text string to be added to next briefing (blue repair and reinforcements)
-end
+	--define variables to persist across multiple mission generation attempts
+	if Briefing_status == nil then													--if briefing status string does not exist yet it must be created
+		Briefing_status = ""														--text string to be added to briefing
+		Briefing_oob_text_red = ""													--text string to be added to next briefing (red repair and reinforcements)
+		Briefing_oob_text_blue = ""													--text string to be added to next briefing (blue repair and reinforcements)
+	end
 
-if not BriefingImagesB then
-	BriefingImagesB = { }															--global table to hold information about briefing images to be added to miz mission file
-end
+	if not BriefingImagesB then
+		BriefingImagesB = { }															--global table to hold information about briefing images to be added to miz mission file
+	end
 
-if not BriefingImagesR then
-  BriefingImagesR = { }                             --global table to hold information about briefing images to be added to miz mission file
-end
+	if not BriefingImagesR then
+	BriefingImagesR = { }                             --global table to hold information about briefing images to be added to miz mission file
+	end
 
-if camp.Briefing_text and camp.Briefing_text ~= "" then
-	Briefing_text = camp.Briefing_text																--briefing text to be added this mission instance
-else
+	if camp.Briefing_text and camp.Briefing_text ~= "" then
+		Briefing_text = camp.Briefing_text																--briefing text to be added this mission instance
+	else
 
-	Briefing_text = ""
+		Briefing_text = ""
 
-	-- print("DcCT reset Briefing_text 2")
-	-- os.execute 'pause'
-end
+		-- print("DcCT reset Briefing_text 2")
+		-- os.execute 'pause'
+	end
 
-Briefing_text_playable = ""														--briefing text to be added only if this mission instance results in a playable mission
+	Briefing_text_playable = ""														--briefing text to be added only if this mission instance results in a playable mission
 
---go through campaign triggers
-for trigger_name,trigger in pairs(camp_triggers) do								--iterate through triggers
-	if debugKT then print("DcCT passe 00 trigger_name: "..tostring(trigger_name)) end
-	if trigger.active then														--trigger is active
-		if debugKT then print("DcCT passe 01 if trigger.active: trigger.condition: "..tostring(trigger.condition)) end
-		local condition = loadstring("if " .. trigger.condition .." then return true end")	--make a function from the string condition
-		if type(condition) == "function" and condition() then														--if the trigger condition is true
-			if debugKT then print(" -> :DcCT passe 02 passe  condition()trigger_name: "..tostring(trigger_name)) end
-			if type(trigger.action) == "table" then								--multiple actions
-				for i,action in ipairs(trigger.action) do
-					if debugKT then print(" 	---> : "..tostring(trigger.action[i])) end
-					local f = loadstring(action)()								--run the trigger action
+	--go through campaign triggers
+	for trigger_name,trigger in pairs(camp_triggers) do								--iterate through triggers
+		if debugKT then print("DcCT passe 00 trigger_name: "..tostring(trigger_name)) end
+		if trigger.active then														--trigger is active
+			if debugKT then print("DcCT passe 01 if trigger.active: trigger.condition: "..tostring(trigger.condition)) end
+			local condition = loadstring("if " .. trigger.condition .." then return true end")	--make a function from the string condition
+			if type(condition) == "function" and condition() then														--if the trigger condition is true
+				if debugKT then print(" -> :DcCT passe 02 passe  condition()trigger_name: "..tostring(trigger_name)) end
+				if type(trigger.action) == "table" then								--multiple actions
+					for i,action in ipairs(trigger.action) do
+						if debugKT then print(" 	---> : "..tostring(trigger.action[i])) end
+						local f = loadstring(action)()								--run the trigger action
+					end
+				else																--single action
+					if debugKT then print(" 	---> : "..tostring(trigger.action)) end
+					local f = loadstring(trigger.action)()							--run the trigger action
 				end
-			else																--single action
-				if debugKT then print(" 	---> : "..tostring(trigger.action)) end
-				local f = loadstring(trigger.action)()							--run the trigger action
-			end
-			if trigger.once then												--trigger should only fire once
-				trigger.active = false											--set trigger inactive
+				if trigger.once then												--trigger should only fire once
+					trigger.active = false											--set trigger inactive
+				end
 			end
 		end
 	end
-end
 
 
-
-if not  camp.automaticReinforce then
-	camp.automaticReinforce = 0
-elseif type(camp.automaticReinforce) == "table" then
-	camp.automaticReinforce = 0
-end
-
-if debugKT then print("camp.automaticReinforce "..tostring(CampTotalTimeS).." >=? "..tostring(camp.automaticReinforce).." + "..tostring(campMod.airReinforceDelay).." *3600?".." cad: "..(camp.automaticReinforce + (campMod.airReinforceDelay * 3600))) end
+-- if debugKT then print("camp.automaticReinforce "..tostring(CampTotalTimeS).." >=? "..tostring(camp.automaticReinforce).." + "..tostring(campMod.airReinforceDelay).." *3600?".." cad: "..(camp.automaticReinforce + (campMod.airReinforceDelay * 3600))) end
 
 
 --**********************************************************************************
 --recompletement automatique des unités AIR
 --**********************************************************************************
-if CampTotalTimeS >= camp.automaticReinforce + campMod.airReinforceDelay * 3600 then
+-- if CampTotalTimeS >= camp.automaticReinforce + campMod.airReinforceDelay * 3600 then
+
+-- _affiche(camp.automaticReinforce, "camp.automaticReinforce")
+
 	for side_name, side in pairs(oob_air) do
-		for unit_n, unit in pairs(side) do
-			if unit.roster.reserve and unit.roster.reserve > 0 then -- not unit.inactive and 
-				Action.AirUnitReinforce(unit.name, "")
-				if debugKT then print("DcCT automaticReinforce "..tostring(unit.name)) end
+		-- print("DcCT side_name "..tostring(side_name))
+		-- print("DcCT camp.automaticReinforce "..tostring(camp.automaticReinforce[side_name]))
+		if side_name ~= "neutral" and CampTotalTimeS >= camp.automaticReinforce[side_name] + campMod.RepairOption[side_name]["airUnit"][3] * 3600 then
+			for unit_n, unit in pairs(side) do
+				if unit.roster.reserve and unit.roster.reserve > 0 then -- not unit.inactive and 
+					Action.AirUnitReinforce(unit.name, "")
+					if debugKT then print("DcCT automaticReinforce "..tostring(unit.name)) end
+				end
 			end
+			camp.automaticReinforce[side_name] = CampTotalTimeS
 		end
 	end
-	camp.automaticReinforce = CampTotalTimeS
-end
+
 
 -- --**********************************************************************************
 -- --recompletement automatique des unités SOL
@@ -2169,57 +2181,69 @@ for baseName, base in pairs(db_airbases) do
 			base.runwayAlive = 100
 		end
 	end
+
 	--base détruite
-	if base.baseAlive and base.baseAlive < campMod.RepairBaseMinimumDestroyed and not base.inactive   then
-		if debugKT then print(baseName.." 	airbase < 20 || airbase is destroyed and will not be able to support air units anymore. ") end
 
-		Action.ActivateBaseAndItsUnits(baseName, false )
-		Action.Text(baseName.." airbase is destroyed and will not be able to support air units anymore.")
+	if base.side then
+	
+		-- if base.baseAlive and base.baseAlive < campMod.RepairBaseMinimumDestroyed and not base.inactive   then
+		if base.baseAlive and base.baseAlive < campMod.RepairOption[base.side]["airbase"][1] and not base.inactive then
+			if debugKT then print(baseName.." 	airbase < 20 || airbase is destroyed and will not be able to support air units anymore. ") end
 
-	elseif base.runwayAlive then
-		--runway gravement endommagé, irréparable
-		if  base.runwayAlive < campMod.RepairBaseMinimumDestroyed then
-			if debugKT then print(baseName.." .runwayAlive < 20 || runway is completely destroyed and the base is not able to support planes  anymore.") end
+			Action.ActivateBaseAndItsUnits(baseName, false )
+			Action.Text(baseName.." airbase is destroyed and will not be able to support air units anymore.")
 
-			Action.ActivateBaseAndItsUnits(baseName, true )
+		elseif base.runwayAlive then
+			--runway gravement endommagé, irréparable
+			-- if base.runwayAlive < campMod.RepairBaseMinimumDestroyed then
+			if base.runwayAlive < campMod.RepairOption[base.side]["runway"][1] then
+				if debugKT then print(baseName.." .runwayAlive < 20 || runway is completely destroyed and the base is not able to support planes  anymore.") end
 
-			if base.runwayTxt == nil or base.runwayTxt ~= "<"..campMod.RepairBaseMinimumDestroyed then
-				base.runwayTxt = "<"..campMod.RepairBaseMinimumDestroyed
-				Action.Text(baseName.." runway is completely destroyed and the base is not able to support planes anymore.")
-			end
+				Action.ActivateBaseAndItsUnits(baseName, true )
 
-			--runway endommagé mais base encore active (les avions ne peuvent plus décoller, les helico si)
-		elseif  base.runwayAlive < 50 then
-			if debugKT then print(baseName.." .runwayAlive < 50 || runway is badly damaged and it will require major repairs before it can be used again.") end
+				-- if base.runwayTxt == nil or base.runwayTxt ~= "<"..campMod.RepairBaseMinimumDestroyed then
+				-- 	base.runwayTxt = "<"..campMod.RepairBaseMinimumDestroyed
+				-- 	Action.Text(baseName.." runway is completely destroyed and the base is not able to support planes anymore.")
+				-- end
 
-			Action.ActivateBaseAndItsUnits(baseName, true )
+				if base.runwayTxt == nil or base.runwayTxt ~= "<"..campMod.RepairOption[base.side]["runway"][1] then
+					base.runwayTxt = "<"..campMod.RepairOption[base.side]["runway"][1]
+					Action.Text(baseName.." runway is completely destroyed and the base is not able to support planes anymore.")
+				end
 
-			if base.runwayTxt == nil or base.runwayTxt ~= "<50" then
-				base.runwayTxt = "<50"
-				Action.Text(baseName.." runway is badly damaged and it will require major repairs before it can be used again.")
-			end
+				--runway endommagé mais base encore active (les avions ne peuvent plus décoller, les helico si)
+			elseif  base.runwayAlive < 50 then
+				if debugKT then print(baseName.." .runwayAlive < 50 || runway is badly damaged and it will require major repairs before it can be used again.") end
 
-			--réparation du runway
-		elseif  base.runwayAlive >= 50 then
-			if debugKT then print(baseName.." .runwayAlive >= 50 || runway is repaired and can be used again..") end
+				Action.ActivateBaseAndItsUnits(baseName, true )
 
-			Action.ActivateBaseAndItsUnits(baseName, true )
+				if base.runwayTxt == nil or base.runwayTxt ~= "<50" then
+					base.runwayTxt = "<50"
+					Action.Text(baseName.." runway is badly damaged and it will require major repairs before it can be used again.")
+				end
 
-			if  base.runwayTxt == "<50" or base.runwayTxt == "<"..campMod.RepairBaseMinimumDestroyed then
-				base.runwayTxt = ">=50"
-				Action.Text(baseName.." runway is repaired and can be used again.")
+				--réparation du runway
+			elseif  base.runwayAlive >= 50 then
+				if debugKT then print(baseName.." .runwayAlive >= 50 || runway is repaired and can be used again..") end
+
+				Action.ActivateBaseAndItsUnits(baseName, true )
+
+				-- if  base.runwayTxt == "<50" or base.runwayTxt == "<"..campMod.RepairBaseMinimumDestroyed then
+				if  base.runwayTxt == "<50" or base.runwayTxt == "<"..campMod.RepairOption[base.side]["runway"][1] then
+					base.runwayTxt = ">=50"
+					Action.Text(baseName.." runway is repaired and can be used again.")
+				end
 			end
 		end
-	end
 
-	local testBaseAlive = Return.BaseAlive(baseName)
-	if testBaseAlive then
-		if testBaseAlive <= campMod.RepairBaseMinimumDestroyed and not base.inactive then
-			if debugKT then print(" 	airbase < RepairBaseMinimumDestroyed  active: FALSE "..baseName) end
+		local testBaseAlive = Return.BaseAlive(baseName)
+		if testBaseAlive then
+			if testBaseAlive <= campMod.RepairOption[base.side]["airbase"][1] and not base.inactive then
+				if debugKT then print(" 	airbase < RepairBaseMinimumDestroyed  active: FALSE "..baseName) end
 
-
-			Action.ActivateBaseAndItsUnits(baseName, false)
-			Action.Text(baseName.." airbase is destroyed and will not be able to support air units.")
+				Action.ActivateBaseAndItsUnits(baseName, false)
+				Action.Text(baseName.." airbase is destroyed and will not be able to support air units.")
+			end
 		end
 	end
 end

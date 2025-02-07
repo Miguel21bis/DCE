@@ -31,6 +31,22 @@ DCS_ENI_Side = {
 	["red"] = "blue"
 	}
 
+	-- airbase = { 25, 12, 20, 15, 0 },
+	-- runWay = { 25, 12, 20, 15, 0 },
+	-- SAM = { 25, 12, 20, 15, 0 },
+	-- EWR = { 25, 12, 20, 15, 0 },
+	-- bridge = { 25, 12, 20, 15, 0 },
+	-- generic = { 25, 12, 20, 15, 0 },
+
+Attribut2Target = {
+	["airbase"] = "airbase",
+	["base"] = "airbase",	
+	["Runway"] = "runway",
+	["sam"] = "sam",
+	["ewr"] = "ewr",
+	["bridge"] = "bridge",
+}
+
 
 AllIdGroup = {}
 AllIdUnit = {}
@@ -2537,1153 +2553,598 @@ function CheckConfModMaster()
 	end
 end
 
---CoPilot
-function UpdateConfMod_Copilot()
-    local function loadConfigWithStructure(filePath)
-        local config = {}
-        local structure = {}
-        local stack = {}
-        local currentTable = config
-        local currentKey = nil
 
-        for line in io.lines(filePath) do
-            line = line:gsub("_check", "")  -- Supprimer "_check"
-
-            -- Ignorer les lignes commentées
-            if line:match("^%s*%-%-") then
-                table.insert(structure, line)
-            else
-                -- Réinitialiser les tables config et structure
-                if line:match("START_PARSING") then
-                    config = {}
-                    structure = {}
-                    stack = {}
-                    currentTable = config
-                    currentKey = nil
-                end
-
-                table.insert(structure, line)
-
-                -- Détecter les tables et sous-tables
-                local tableStart = line:match("(%S+)%s*=%s*{")
-                local singleLineTable = line:match("(%S+)%s*=%s*{(.-)}%s*,?%s*$")
-                local key, value, comment = line:match('(%S+)%s*=%s*(.-)%s*%-%-%s*(.*)')
-                local tableEnd = line:match("^%s*}%s*[,]?")
-
-                if singleLineTable then
-                    local name, contents = line:match("(%S+)%s*=%s*{(.-)}")
-                    local newTable = {}
-                    for value in contents:gmatch("[^,]+") do
-                        value = value:match("^%s*(.-)%s*$") -- Supprimer les espaces blancs avant et après
-                        table.insert(newTable, tonumber(value) or value)
-                    end
-                    currentTable[name] = newTable
-                elseif tableStart then
-                    local newTable = {}
-                    if currentKey then
-                        currentTable[currentKey] = newTable
-                    else
-                        currentTable[tableStart] = newTable
-                    end
-                    table.insert(stack, currentTable)
-                    currentTable = newTable
-                    currentKey = tableStart
-                elseif tableEnd then
-                    currentTable = table.remove(stack)
-                    currentKey = nil
-                elseif key and value then
-                    currentTable[key] = { value = value, comment = comment or "" }
-                end
-            end
-        end
-
-        return config, structure
-    end
-
-    local function removeObsoleteEntries(clientConfig, referenceConfig)
-        local cleanedConfig = {}
-
-        for key, value in pairs(clientConfig) do
-            local cleanKey = key:gsub("_check$", "")  -- Supprimer le suffixe "_check" pour comparaison
-            if referenceConfig[cleanKey] then
-                if type(value) == "table" then
-                    cleanedConfig[key] = removeObsoleteEntries(value, referenceConfig[cleanKey] or {})
-                else
-                    cleanedConfig[key] = value
-                end
-            end
-        end
-
-        return cleanedConfig
-    end
-
-    -- Chemins des fichiers de configuration
-    local clientConfigPath = "Init/conf_mod.lua"
-    local defaultConfigPath = "../../../ScriptsMod." .. versionPackageICM .. "/UTIL_ConfModCheck.lua"
-
-    -- Charger les fichiers de configuration client et par défaut
-    local clientConfig, _ = loadConfigWithStructure(clientConfigPath)
-    local defaultConfig, defaultStructure = loadConfigWithStructure(defaultConfigPath)
-
-    -- Nettoyer les variables obsolètes du client
-    clientConfig = removeObsoleteEntries(clientConfig, defaultConfig)
-
-    -- Nouvelle fonction pour insérer les nouvelles tables et variables manquantes dans la structure
-    local function updateConfiguration(clientConfig, defaultConfig)
-        local function deepCopy(orig)
-            local orig_type = type(orig)
-            local copy
-            if orig_type == 'table' then
-                copy = {}
-                for orig_key, orig_value in next, orig, nil do
-                    copy[deepCopy(orig_key)] = deepCopy(orig_value)
-                end
-                setmetatable(copy, deepCopy(getmetatable(orig)))
-            else -- number, string, boolean, etc
-                copy = orig
-            end
-            return copy
-        end
-
-        local function mergeTables(clientTable, defaultTable)
-            for key, value in pairs(defaultTable) do
-                if type(value) == "table" then
-                    if not clientTable[key] then
-                        clientTable[key] = deepCopy(value)
-                    else
-                        mergeTables(clientTable[key], value)
-                    end
-                else
-                    if clientTable[key] == nil then
-                        clientTable[key] = value
-                    end
-                end
-            end
-        end
-
-        mergeTables(clientConfig, defaultConfig)
-    end
-
-    -- Mettre à jour la configuration client avec les valeurs par défaut manquantes
-    updateConfiguration(clientConfig, defaultConfig)
-
-    -- Fonction pour sauvegarder la nouvelle configuration mise à jour
-    local function saveUpdatedConfig(filePath, updatedConfig)
-        local function tableToString(tbl, indent)
-            indent = indent or 0
-            local toWrite = ""
-            local padding = string.rep("    ", indent)
-            local lastKey
-
-            for k, v in pairs(tbl) do
-                lastKey = k
-            end
-
-            toWrite = toWrite .. "{\n"
-
-            for k, v in pairs(tbl) do
-                local keyStr = tostring(k)
-                toWrite = toWrite .. padding .. "    " .. keyStr .. " = "
-                if type(v) == "table" and v.value ~= nil and v.comment ~= nil then
-                    toWrite = toWrite .. v.value .. " -- " .. v.comment
-                elseif type(v) == "table" and #v > 0 then
-                    toWrite = toWrite .. "{"
-                    for i, item in ipairs(v) do
-                        if type(item) == "string" then
-                            toWrite = toWrite .. "\"" .. item .. "\""
-                        else
-                            toWrite = toWrite .. tostring(item)
-                        end
-                        if i < #v then
-                            toWrite = toWrite .. ", "
-                        end
-                    end
-                    toWrite = toWrite .. "}"
-                elseif type(v) == "table" then
-                    toWrite = toWrite .. tableToString(v, indent + 1)
-                elseif type(v) == "string" then
-                    toWrite = toWrite .. "\"" .. v .. "\""
-                else
-                    toWrite = toWrite .. tostring(v)
-                end
-
-                if k ~= lastKey then
-                    toWrite = toWrite .. ","
-                end
-                toWrite = toWrite .. "\n"
-            end
-
-            toWrite = toWrite .. padding .. "}"
-
-            return toWrite
-        end
-
-        local file = io.open(filePath, "w")
-        if not file then error("Cannot open file for writing: " .. filePath) end
-
-        for k, v in pairs(updatedConfig) do
-            file:write(k .. " = ")
-            if type(v) == "table" then
-                file:write(tableToString(v, 1))
-            else
-                file:write(tostring(v))
-            end
-            file:write("\n")
-        end
-
-        file:close()
-    end
-
-    -- Sauvegarde de la configuration mise à jour
-    saveUpdatedConfig(clientConfigPath, clientConfig)
-
-    print("Configuration updated successfully!")
-    os.execute 'pause'
-end
-
-
-function UpdateConfModVA_1_11()
-    --version UpdateConfMod VA_1.11
+--met à jour automatiquement le conf_mod en fonction des nouveautés apporté par UTIL_ConfModCheck
+function UpdateConfMod()
+    --version UpdateConfMod VA_1.12
     
     -- Fonction pour charger la configuration avec la structure
-    local function loadConfigWithStructure(filePath)
-        --version loadConfigWithStructure VA_1.11
-        local config = {}
-        local structure = {}
-        local stack = {}
-        local currentTable = config
-        local currentKey = nil
-
-        for line in io.lines(filePath) do
-            line = line:gsub("_check", "")  -- Supprimer "_check"
-
-            -- Ignorer les lignes commentées
-            if line:match("^%s*%-%-") then
-                table.insert(structure, line)
-            -- Ignorer les lignes versionDCE
-            elseif line:match("versionDCE") then
-                
-            else
-                -- Réinitialiser les tables config et structure
-                if line:match("START_PARSING") then
-                    config = {}
-                    structure = {}
-                    stack = {}
-                    currentTable = config
-                    currentKey = nil
-                end
-
-                table.insert(structure, line)
-
-                -- Détecter les tables et sous-tables
-                local tableStart = line:match("(%S+)%s*=%s*{")
-                local singleLineTable = line:match("(%S+)%s*=%s*{(.-)}%s*,?%s*$")
-                local key, value, comment = line:match('(%S+)%s*=%s*(.-)%s*%-%-%s*(.*)')
-                local tableEnd = line:match("^%s*}%s*[,]?")
-
-                if singleLineTable then
-                    local name, contents = line:match("(%S+)%s*=%s*{(.-)}")
-                    local newTable = {}
-                    for value in contents:gmatch("[^,]+") do
-                        value = value:match("^%s*(.-)%s*$") -- Supprimer les espaces blancs avant et après
-                        table.insert(newTable, tonumber(value) or value)
-                    end
-                    currentTable[name] = newTable
-                elseif tableStart then
-                    local newTable = {}
-                    currentTable[tableStart] = newTable
-                    table.insert(stack, currentTable)
-                    currentTable = newTable
-                    currentKey = tableStart
-                elseif tableEnd then
-                    currentTable = table.remove(stack)
-                    currentKey = nil
-                elseif key and value then
-                    currentTable[key] = { value = value, comment = comment or "" }
-                end
-            end
-        end
-
-        return config, structure
-    end
-
-    -- Fonction pour supprimer les clés obsolètes
-    local function removeObsoleteEntries(clientConfig, referenceConfig)
-        --version removeObsoleteEntries VA_1.11
-        local function deepClean(clientTable, referenceTable)
-            for key, value in pairs(clientTable) do
-                if type(value) == "table" then
-                    if not referenceTable[key] then
-                        clientTable[key] = nil  -- Supprime la table complète si elle est absente du modèle
-                    else
-                        deepClean(value, referenceTable[key])  -- Nettoie récursivement les sous-tables
-                    end
-                elseif not referenceTable[key] then
-                    clientTable[key] = nil  -- Supprime les variables obsolètes
-                end
-            end
-        end
-
-        deepClean(clientConfig, referenceConfig)
-        return clientConfig
-    end
-
-    -- Nouvelle fonction pour insérer les nouvelles tables et variables manquantes dans la structure
-    local function updateConfiguration(clientConfig, defaultConfig)
-        --version updateConfiguration VA_1.11
-        local function deepCopy(orig)
-            local orig_type = type(orig)
-            local copy
-            if orig_type == 'table' then
-                copy = {}
-                for orig_key, orig_value in next, orig, nil do
-                    copy[deepCopy(orig_key)] = deepCopy(orig_value)
-                end
-                setmetatable(copy, deepCopy(getmetatable(orig)))
-            else -- number, string, boolean, etc
-                copy = orig
-            end
-            return copy
-        end
-
-        local function mergeTables(clientTable, defaultTable)
-            for key, value in pairs(defaultTable) do
-                if type(value) == "table" then
-                    if not clientTable[key] then
-                        clientTable[key] = deepCopy(value)
-                    else
-                        mergeTables(clientTable[key], value)
-                    end
-                else
-                    if clientTable[key] == nil then
-                        clientTable[key] = value
-                    end
-                end
-            end
-        end
-
-        mergeTables(clientConfig, defaultConfig)
-    end
-
-    -- Fonction pour sauvegarder la configuration mise à jour
-    local function saveUpdatedConfig(filePath, updatedConfig, structure)
-		-- version saveUpdatedConfig VA_1.16
-		local file = io.open(filePath, "w")
-		if not file then error("Cannot open file for writing: " .. filePath) end
-	
-		local indentLevel = 0
-		local stack = {}  -- Suivi des tables imbriquées
-		local currentTable = updatedConfig  -- Pointeur sur la table en cours d'écriture
-	
-		-- Fonction d'indentation
-		local function getIndent(level)
-			return string.rep("\t", level)  -- Utilisation de tabulations pour respecter le format d'origine
-		end
-	
-		-- Fonction pour récupérer la valeur correcte
-		local function getFormattedValue(value)
-			if type(value) == "string" then
-				return '"' .. value .. '"'
-			elseif type(value) == "table" then
-				return "{ " .. table.concat(value, ", ") .. " }"
-			else
-				return tostring(value)
-			end
-		end
-	
-		for _, line in ipairs(structure) do
-			local trimmedLine = line:match("^%s*(.-)%s*$")  -- Supprimer espaces début/fin
-	
-			-- Conserver les commentaires et lignes vides
-			if trimmedLine:match("^%-%-") or trimmedLine == "" then
-				file:write(line .. "\n")
-	
-			-- Détection de déclaration de table
-			elseif trimmedLine:match("(%S+)%s*=%s*{") then
-				local key = trimmedLine:match("(%S+)%s*=%s*{")
-				if currentTable[key] then
-					file:write(getIndent(indentLevel) .. line .. "\n")
-					table.insert(stack, { name = key, table = currentTable })
-					currentTable = currentTable[key]
-					indentLevel = indentLevel + 1
-				end
-	
-			-- Détection des fermetures de table
-			elseif trimmedLine:match("^%s*}%s*[,]?") then
-				if #stack > 0 then
-					local popped = table.remove(stack)
-					currentTable = popped.table
-					indentLevel = indentLevel - 1
-				end
-				file:write(getIndent(indentLevel) .. line .. "\n")
-	
-			-- Vérification des affectations de variables
-			else
-				local key, value, comment = line:match('(%S+)%s*=%s*(.-)%s*%-%-%s*(.*)')
-				if not key then
-					key, value = line:match('(%S+)%s*=%s*(.-)%s*$')
-				end
-	
-				if key then
-					local newValue = currentTable
-					for _, tableKey in ipairs(stack) do
-						if newValue[tableKey.name] then
-							newValue = newValue[tableKey.name]
-						else
-							newValue = nil
-							break
-						end
-					end
-	
-					if newValue and newValue[key] then
-						local entry = newValue[key]
-						local formattedValue = entry.value or entry -- Vérifier si c'est une table avec `value`
-						formattedValue = getFormattedValue(formattedValue)
-	
-						-- Restaurer les commentaires d'origine
-						if comment then
-							file:write(getIndent(indentLevel) .. key .. " = " .. formattedValue .. " -- " .. comment .. "\n")
-						else
-							file:write(getIndent(indentLevel) .. key .. " = " .. formattedValue .. "\n")
-						end
-					else
-						file:write(getIndent(indentLevel) .. line .. "\n")  -- Conserver les lignes inconnues
-					end
-				end
-			end
-		end
-	
-		-- Vérification finale : s'assurer que toutes les tables sont bien fermées
-		while #stack > 0 do
-			local popped = table.remove(stack)
-			indentLevel = indentLevel - 1
-			file:write(getIndent(indentLevel) .. "}\n")
-		end
-	
-		file:close()
-	end
-	
-
-    -- Chemins des fichiers de configuration
-    local clientConfigPath = "Init/conf_mod.lua"
-    local defaultConfigPath = "../../../ScriptsMod." .. versionPackageICM .. "/UTIL_ConfModCheck.lua"
-
-    -- Charger les fichiers de configuration client et par défaut
-    local clientConfig, _ = loadConfigWithStructure(clientConfigPath)
-    local defaultConfig, defaultStructure = loadConfigWithStructure(defaultConfigPath)
-
-    -- Nettoyer les variables obsolètes du client
-    clientConfig = removeObsoleteEntries(clientConfig, defaultConfig)
-
-	local camp_str = "clientConfig = " .. TableSerialization(clientConfig, 0)						--make a string
-	local campFile = io.open("Debug/CONFMOD_CLIENT_B.lua", "w")  or error("Failed to open debug file")
-	campFile:write(camp_str)																		--save new data
-	campFile:close()
-
-	local camp_str = "defaultConfig = " .. TableSerialization(defaultConfig, 0)						--make a string
-	local campFile = io.open("Debug/CONFMOD_MAITRE_.lua", "w")  or error("Failed to open debug file")
-	campFile:write(camp_str)																		--save new data
-	campFile:close()
-
-	local camp_str = "defaultStructure = " .. TableSerialization(defaultStructure, 0)						--make a string
-	local campFile = io.open("Debug/CONFMOD_structure_MAITRE_.lua", "w")  or error("Failed to open debug file")
-	campFile:write(camp_str)																		--save new data
-	campFile:close()
-
-	print("Step ONE!")
-    os.execute 'pause'
-
-    -- Mettre à jour la configuration client avec les valeurs par défaut manquantes
-    updateConfiguration(clientConfig, defaultConfig)
-
-    -- Sauvegarder la configuration mise à jour
-    saveUpdatedConfig(clientConfigPath, clientConfig, defaultStructure)
-
-    print("Configuration updated successfully!")
-    os.execute 'pause'
-end
-
-
-
-
-
---ChtGPT et copilot
-function UpdateConfModV1_10()
-
-	--version UpdateConfMod VA_1.10
-
-    local function loadConfigWithStructure(filePath)
-        local config = {}
-        local structure = {}
-        local stack = {}
-        local currentTable = config
-        local currentKey = nil
-
-        for line in io.lines(filePath) do
-            line = line:gsub("_check", "")  -- Supprimer "_check"
-
-            -- Ignorer les lignes commentées
-            if line:match("^%s*%-%-") then
-                table.insert(structure, line)
-            -- Ignorer les lignes versionDCE
-            elseif line:match("versionDCE") then
-                
-            else
-                -- Réinitialiser les tables config et structure
-                if line:match("START_PARSING") then
-                    config = {}
-                    structure = {}
-                    stack = {}
-                    currentTable = config
-                    currentKey = nil
-                end
-
-                table.insert(structure, line)
-
-                -- Détecter les tables et sous-tables
-                local tableStart = line:match("(%S+)%s*=%s*{")
-                local singleLineTable = line:match("(%S+)%s*=%s*{(.-)}%s*,?%s*$")
-                local key, value, comment = line:match('(%S+)%s*=%s*(.-)%s*%-%-%s*(.*)')
-                local tableEnd = line:match("^%s*}%s*[,]?")
-
-                if singleLineTable then
-                    local name, contents = line:match("(%S+)%s*=%s*{(.-)}")
-                    local newTable = {}
-                    for value in contents:gmatch("[^,]+") do
-                        value = value:match("^%s*(.-)%s*$") -- Supprimer les espaces blancs avant et après
-                        table.insert(newTable, tonumber(value) or value)
-                    end
-                    currentTable[name] = newTable
-                elseif tableStart then
-                    local newTable = {}
-                    currentTable[tableStart] = newTable
-                    table.insert(stack, currentTable)
-                    currentTable = newTable
-                    currentKey = tableStart
-                elseif tableEnd then
-                    currentTable = table.remove(stack)
-                    currentKey = nil
-                elseif key and value then
-                    currentTable[key] = { value = value, comment = comment or "" }
-                end
-            end
-        end
-
-        return config, structure
-    end
-
-    -- Fonction pour supprimer les clés obsolètes
-    local function removeObsoleteEntries(clientConfig, referenceConfig)
-        local function deepClean(clientTable, referenceTable)
-            for key, value in pairs(clientTable) do
-                if type(value) == "table" then
-                    if not referenceTable[key] then
-                        clientTable[key] = nil  -- Supprime la table complète si elle est absente du modèle
-                    else
-                        deepClean(value, referenceTable[key])  -- Nettoie récursivement les sous-tables
-                    end
-                elseif not referenceTable[key] then
-                    clientTable[key] = nil  -- Supprime les variables obsolètes
-                end
-            end
-        end
-
-        deepClean(clientConfig, referenceConfig)
-        return clientConfig
-    end
-
-    -- Chemins des fichiers de configuration
-    local clientConfigPath = "Init/conf_mod.lua"
-    local defaultConfigPath = "../../../ScriptsMod." .. versionPackageICM .. "/UTIL_ConfModCheck.lua"
-
-    -- Charger les fichiers de configuration client et par défaut
-    local clientConfig, _ = loadConfigWithStructure(clientConfigPath)
-    local defaultConfig, defaultStructure = loadConfigWithStructure(defaultConfigPath)
-
-    -- Nettoyer les variables obsolètes du client
-    clientConfig = removeObsoleteEntries(clientConfig, defaultConfig)
-
-    -- Nouvelle fonction pour insérer les nouvelles tables et variables manquantes dans la structure
-    local function updateConfiguration(clientConfig, defaultConfig)
-        local function deepCopy(orig)
-            local orig_type = type(orig)
-            local copy
-            if orig_type == 'table' then
-                copy = {}
-                for orig_key, orig_value in next, orig, nil do
-                    copy[deepCopy(orig_key)] = deepCopy(orig_value)
-                end
-                setmetatable(copy, deepCopy(getmetatable(orig)))
-            else -- number, string, boolean, etc
-                copy = orig
-            end
-            return copy
-        end
-
-        local function mergeTables(clientTable, defaultTable)
-            for key, value in pairs(defaultTable) do
-                if type(value) == "table" then
-                    if not clientTable[key] then
-                        clientTable[key] = deepCopy(value)
-                    else
-                        mergeTables(clientTable[key], value)
-                    end
-                else
-                    if clientTable[key] == nil then
-                        clientTable[key] = value
-                    end
-                end
-            end
-        end
-
-        mergeTables(clientConfig, defaultConfig)
-    end
-
-    -- Mettre à jour la configuration client avec les valeurs par défaut manquantes
-	local function saveUpdatedConfig(filePath, updatedConfig, structure)
-		-- version VB_1.16
-		local file = io.open(filePath, "w")
-		if not file then error("Cannot open file for writing: " .. filePath) end
-	
-		local indentLevel = 0
-		local stack = {}
-		local currentTable = updatedConfig
-	
-		local function getIndent(level)
-			return string.rep("\t", level)
-		end
-	
-		for _, line in ipairs(structure) do
-			local trimmedLine = line:match("^%s*(.-)%s*$")
-	
-			if trimmedLine:match("^%-%-") or trimmedLine == "" then
-				file:write(line .. "\n")
-	
-			elseif trimmedLine:match("(%S+)%s*=%s*{") then
-				local key = trimmedLine:match("(%S+)%s*=%s*{")
-				if currentTable[key] then
-					file:write(getIndent(indentLevel) .. line .. "\n")
-					table.insert(stack, { name = key, table = currentTable })
-					currentTable = currentTable[key]
-					indentLevel = indentLevel + 1
-				end
-	
-			elseif trimmedLine:match("^%s*}%s*[,]?") then
-				if #stack > 0 then
-					local popped = table.remove(stack)
-					currentTable = popped.table
-					indentLevel = indentLevel - 1
-				end
-				file:write(getIndent(indentLevel) .. line .. "\n")
-	
-			else
-				local key, value, comment = line:match('(%S+)%s*=%s*(.-)%s*%-%-%s*(.*)')
-				if not key then
-					key, value = line:match('(%S+)%s*=%s*(.-)%s*$')
-				end
-	
-				if key then
-					local newValue = currentTable
-					for _, tableKey in ipairs(stack) do
-						if newValue[tableKey.name] then
-							newValue = newValue[tableKey.name]
-						else
-							newValue = nil
-							break
-						end
-					end
-	
-					if newValue and newValue[key] then
-						local entry = newValue[key]
-						local formattedValue = entry.value or entry
-						if type(formattedValue) == "string" then
-							formattedValue = '"' .. formattedValue .. '"'
-						end
-	
-						if comment then
-							file:write(getIndent(indentLevel) .. key .. " = " .. formattedValue .. " -- " .. comment .. "\n")
-						else
-							file:write(getIndent(indentLevel) .. key .. " = " .. formattedValue .. "\n")
-						end
-					else
-						file:write(getIndent(indentLevel) .. line .. "\n")
-					end
-				end
-			end
-		end
-	
-		file:close()
-	end
-	
-	
-	
-	
-	
-    -- Mettre à jour la configuration client avec les valeurs par défaut manquantes
-    updateConfiguration(clientConfig, defaultConfig)
-
-    -- Sauvegarde de la configuration mise à jour
-    saveUpdatedConfig(clientConfigPath, clientConfig, defaultStructure)
-
-    print("Configuration updated successfully!")
-    os.execute 'pause'
-end
-
-
-function UpdateConfMod_V1_9()
-
-	--version 1.9
-
-    local function loadConfigWithStructure(filePath)
-        local config = {}
-        local structure = {}
-        local stack = {}
-        local currentTable = config
-        local currentKey = nil
-
-        for line in io.lines(filePath) do
-            line = line:gsub("_check", "")  -- Supprimer "_check"
-
-            -- Ignorer les lignes commentées
-            if line:match("^%s*%-%-") then
-                table.insert(structure, line)
-            -- Ignorer les lignes versionDCE
-            elseif line:match("versionDCE") then
-                
-            else
-                -- Réinitialiser les tables config et structure
-                if line:match("START_PARSING") then
-                    config = {}
-                    structure = {}
-                    stack = {}
-                    currentTable = config
-                    currentKey = nil
-                end
-
-                table.insert(structure, line)
-
-                -- Détecter les tables et sous-tables
-                local tableStart = line:match("(%S+)%s*=%s*{")
-                local singleLineTable = line:match("(%S+)%s*=%s*{(.-)}%s*,?%s*$")
-                local key, value, comment = line:match('(%S+)%s*=%s*(.-)%s*%-%-%s*(.*)')
-                local tableEnd = line:match("^%s*}%s*[,]?")
-
-                if singleLineTable then
-                    local name, contents = line:match("(%S+)%s*=%s*{(.-)}")
-                    local newTable = {}
-                    for value in contents:gmatch("[^,]+") do
-                        value = value:match("^%s*(.-)%s*$") -- Supprimer les espaces blancs avant et après
-                        table.insert(newTable, tonumber(value) or value)
-                    end
-                    currentTable[name] = newTable
-                elseif tableStart then
-                    local newTable = {}
-                    currentTable[tableStart] = newTable
-                    table.insert(stack, currentTable)
-                    currentTable = newTable
-                    currentKey = tableStart
-                elseif tableEnd then
-                    currentTable = table.remove(stack)
-                    currentKey = nil
-                elseif key and value then
-                    currentTable[key] = { value = value, comment = comment or "" }
-                end
-            end
-        end
-
-        return config, structure
-    end
-
-    -- Fonction pour supprimer les clés obsolètes
-    local function removeObsoleteEntries(clientConfig, referenceConfig)
-        local function deepClean(clientTable, referenceTable)
-            for key, value in pairs(clientTable) do
-                if type(value) == "table" then
-                    if not referenceTable[key] then
-                        clientTable[key] = nil  -- Supprime la table complète si elle est absente du modèle
-                    else
-                        deepClean(value, referenceTable[key])  -- Nettoie récursivement les sous-tables
-                    end
-                elseif not referenceTable[key] then
-                    clientTable[key] = nil  -- Supprime les variables obsolètes
-                end
-            end
-        end
-
-        deepClean(clientConfig, referenceConfig)
-        return clientConfig
-    end
-
-    -- Chemins des fichiers de configuration
-    local clientConfigPath = "Init/conf_mod.lua"
-    local defaultConfigPath = "../../../ScriptsMod." .. versionPackageICM .. "/UTIL_ConfModCheck.lua"
-
-    -- Charger les fichiers de configuration client et par défaut
-    local clientConfig, _ = loadConfigWithStructure(clientConfigPath)
-    local defaultConfig, defaultStructure = loadConfigWithStructure(defaultConfigPath)
-
-    -- Nettoyer les variables obsolètes du client
-    clientConfig = removeObsoleteEntries(clientConfig, defaultConfig)
-
-    -- Nouvelle fonction pour insérer les nouvelles tables et variables manquantes dans la structure
-    local function updateConfiguration(clientConfig, defaultConfig)
-        local function deepCopy(orig)
-            local orig_type = type(orig)
-            local copy
-            if orig_type == 'table' then
-                copy = {}
-                for orig_key, orig_value in next, orig, nil do
-                    copy[deepCopy(orig_key)] = deepCopy(orig_value)
-                end
-                setmetatable(copy, deepCopy(getmetatable(orig)))
-            else -- number, string, boolean, etc
-                copy = orig
-            end
-            return copy
-        end
-
-        local function mergeTables(clientTable, defaultTable)
-            for key, value in pairs(defaultTable) do
-                if type(value) == "table" then
-                    if not clientTable[key] then
-                        clientTable[key] = deepCopy(value)
-                    else
-                        mergeTables(clientTable[key], value)
-                    end
-                else
-                    if clientTable[key] == nil then
-                        clientTable[key] = value
-                    end
-                end
-            end
-        end
-
-        mergeTables(clientConfig, defaultConfig)
-    end
-
-    -- Mettre à jour la configuration client avec les valeurs par défaut manquantes
-    updateConfiguration(clientConfig, defaultConfig)
-
-    local function saveUpdatedConfig(filePath, updatedConfig)
-        local function tableToString(tbl, indent)
-            indent = indent or 0
-            local toWrite = ""
-            local padding = string.rep("    ", indent)
-            local lastKey
-
-            for k, v in pairs(tbl) do
-                lastKey = k
-            end
-
-            toWrite = toWrite .. "{\n"
-
-            for k, v in pairs(tbl) do
-                local keyStr = tostring(k)
-                toWrite = toWrite .. padding .. "    " .. keyStr .. " = "
-                if type(v) == "table" and v.value ~= nil and v.comment ~= nil then
-                    toWrite = toWrite .. v.value .. " -- " .. v.comment
-                elseif type(v) == "table" and #v > 0 then
-                    toWrite = toWrite .. "{"
-                    for i, item in ipairs(v) do
-                        if type(item) == "string" then
-                            toWrite = toWrite .. "\"" .. item .. "\""
-                        else
-                            toWrite = toWrite .. tostring(item)
-                        end
-                        if i < #v then
-                            toWrite = toWrite .. ", "
-                        end
-                    end
-                    toWrite = toWrite .. "}"
-                elseif type(v) == "table" then
-                    toWrite = toWrite .. tableToString(v, indent + 1)
-                elseif type(v) == "string" then
-                    toWrite = toWrite .. "\"" .. v .. "\""
-                else
-                    toWrite = toWrite .. tostring(v)
-                end
-
-                if k ~= lastKey then
-                    toWrite = toWrite .. ","
-                end
-                toWrite = toWrite .. "\n"
-            end
-
-            toWrite = toWrite .. padding .. "}"
-
-            return toWrite
-        end
-
-        local file = io.open(filePath, "w")
-        if not file then error("Cannot open file for writing: " .. filePath) end
-
-        for k, v in pairs(updatedConfig) do
-            file:write(k .. " = ")
-            if type(v) == "table" then
-                file:write(tableToString(v, 1))
-            else
-                file:write(tostring(v))
-            end
-            file:write("\n")
-        end
-
-        file:close()
-    end
-
-    -- Sauvegarde de la configuration mise à jour
-    saveUpdatedConfig(clientConfigPath, clientConfig)
-
-    print("Configuration updated successfully!")
-    os.execute 'pause'
-end
-
-
- 	-- -- Fonction pour insérer les nouvelles tables et variables manquantes dans la structure
-	--  local function updateConfiguration(structure, clientConfig, defaultConfig)
-	-- 	local updatedStructure = {}
-	-- 	local inTable = nil
-
-	-- 	for _, line in ipairs(structure) do
-	-- 		local tableStart = line:match("(%S+)%s*=%s*{")
-	-- 		local tableEnd = line:match("^}")
-			
-	-- 		-- Suppression des redondances (ex. : éviter red et ["red"])
-	-- 		if not tableEnd or (tableEnd and not inTable) then
-	-- 			table.insert(updatedStructure, line)
-	-- 		end
-
-	-- 		if tableStart then
-	-- 			inTable = tableStart:gsub("_check$", "")  -- Supprimer "_check"
-	-- 		elseif tableEnd then
-	-- 			-- Fin d'une table, insérer les éléments manquants si nécessaire
-	-- 			if inTable and defaultConfig[inTable] then
-	-- 				for key, value in pairs(defaultConfig[inTable]) do
-	-- 					if not clientConfig[inTable] or not clientConfig[inTable][key] then
-	-- 						table.insert(updatedStructure, string.format("\t%s = %s,  -- [default value]", key, tostring(value.value)))
-	-- 					end
-	-- 				end
-	-- 			end
-	-- 			inTable = nil
-	-- 		end
-	-- 	end
-
-	-- 	-- Ajouter les tables absentes au bon format
-	-- 	for key, value in pairs(defaultConfig) do
-	-- 		local cleanKey = key:gsub("_check$", "")  
-	-- 		if not clientConfig[cleanKey] then
-	-- 			table.insert(updatedStructure, cleanKey .. " = {")
-	-- 			for subKey, subValue in pairs(value) do
-	-- 				table.insert(updatedStructure, string.format("\t%s = %s,  -- [default value]", subKey, tostring(subValue.value)))
-	-- 			end
-	-- 			table.insert(updatedStructure, "},\n")
-	-- 		else
-	-- 			-- Ajout des éléments manquants dans les tables existantes
-	-- 			for subKey, subValue in pairs(value) do
-	-- 				if not clientConfig[cleanKey][subKey] then
-	-- 					table.insert(updatedStructure, string.format("\t%s = %s,  -- [default value]", subKey, tostring(subValue.value)))
-	-- 				end
-	-- 			end
-	-- 		end
-	-- 	end
-
-	-- 	return updatedStructure
-	-- end
-    -- -- Générer la structure mise à jour
-    -- local updatedConfigStructure = updateConfiguration(defautStructure, clientConfig, defaultConfig)
-
-    -- -- Fonction pour sauvegarder la nouvelle configuration mise à jour
-    -- local function saveUpdatedConfig(filePath, updatedStructure)
-    --     local file = io.open(filePath, "w")
-    --     if not file then error("Cannot open file for writing: " .. filePath) end
-
-    --     for _, line in ipairs(updatedStructure) do
-    --         file:write(line:gsub(",,", ",") .. "\n")  -- Corrige les erreurs de syntaxe
-    --     end
-
-    --     file:close()
-    -- end
-
-    -- -- Sauvegarde de la configuration mise à jour
-    -- saveUpdatedConfig(clientConfigPath, updatedConfigStructure)
-
-    -- print("Configuration updated successfully!")
-    -- os.execute 'pause'
--- end
-
-
-
-function UpdateConfMod_A()
-
-	local function loadConfigWithStructure(filePath)
+	local function loadConfigWithStructureVA_1_37b(filePath)
+		-- version loadConfigWithStructure VA_1_37b
 		local config = {}
 		local structure = {}
 		local stack = {}
 		local currentTable = config
 		local currentKey = nil
+		local i = 1
 	
 		for line in io.lines(filePath) do
 			line = line:gsub("_check", "")  -- Supprimer "_check"
+			
+			-- 🔍 Debug
+			print("\n🔍 lCWS A "..line)
 	
-			-- Réinitialiser les tables config et structure
-			if line:match("START_PARSING") then
-				config = {}
-				structure = {}
-				stack = {}
-				currentTable = config
-				currentKey = nil
-			end
+			-- Ignorer les lignes commentées
+			if line:match("^%s*%-%-") then
+				table.insert(structure, line)
 	
-			table.insert(structure, line)
+			-- Ignorer les lignes versionDCE
+			elseif line:match("versionDCE") then
+			else
+				-- Réinitialiser les tables config et structure
+				if line:match("START_PARSING") then
+					config = {}
+					structure = {}
+					stack = {}
+					currentTable = config
+					currentKey = nil
+				end
+				
+				table.insert(structure, line)
 	
-			-- Détecter les tables et sous-tables
-			local tableStart = line:match("(%S+)%s*=%s*{")
-			local key, value, comment = line:match('(%S+)%s*=%s*(.-)%s*%-%-%s*(.*)')
-			local tableEnd = line:match("^}%s*,")
+				-- 📌 Détection de structures Lua complexes
+				local tableStart = line:match("(%S+)%s*=%s*{")
+				local tableEnd = line:match("^%s*}%s*[,]?")
+				local listValue = line:match('^%s*"(.-)",?%s*$')
+				local singleLineTable = line:match("(%S+)%s*=%s*{(.-)}%s*,?%s*$")
+				
+				local key, value, comment = line:match('(%S+)%s*=%s*([^%s,]+)%s*,?%s*%-%-%s*(.*)')
 	
-			if tableStart then
-				local newTable = {}
-				currentTable[tableStart] = newTable
-				table.insert(stack, currentTable)
-				currentTable = newTable
-				currentKey = tableStart
-			elseif tableEnd then
-				currentTable = table.remove(stack)
-				currentKey = nil
-			elseif key and value then
-				currentTable[key] = { value = value, comment = comment or "" }
+				if not key then
+					key, value = line:match('(%S+)%s*=%s*([^%s,]+)')  -- 🔄 Si pas de commentaire, matcher normalement
+				end
+	
+				if singleLineTable then
+					-- print("lCWS G _i_: "..i)
+					-- ✅ Correction : Capturer les tables sur une ligne
+					local name, contents = line:match("(%S+)%s*=%s*{(.-)}")
+					local newTable = {}
+					for value in contents:gmatch("[^,]+") do
+						value = value:match("^%s*(.-)%s*$") -- Supprimer les espaces blancs avant et après
+						newTable[#newTable + 1] = tonumber(value) or value
+					end
+					currentTable[name] = newTable
+
+				-- ✅ Détection des tables
+				elseif tableStart then
+					print("📌 TABLE détectée:", tableStart)
+	
+					if not currentTable[tableStart] then
+						currentTable[tableStart] = {}  -- 🛠️ Créer la table si elle n'existe pas
+					end
+	
+					table.insert(stack, currentTable)
+					currentTable = currentTable[tableStart]
+					currentKey = tableStart
+	
+				-- ✅ Détection des fermetures de table
+				elseif tableEnd then
+					print("📌 TABLE fermée:", currentKey)
+					currentTable = table.remove(stack)
+					currentKey = nil
+				
+				-- ✅ Détection des listes de strings
+				elseif listValue then
+					print("📌 LISTE détectée pour:", currentKey)
+	
+					if not currentKey then
+						print("❌ ERREUR: Aucun currentKey défini pour `" .. listValue .. "`")
+					else
+						-- if currentTable[currentKey] == nil then
+						-- 	currentTable[currentKey] = {}  -- 📌 Créer une liste vide si nécessaire
+						-- end
+	
+						table.insert(currentTable, listValue)
+						print("✅ Ajouté dans `"..currentKey.."` :", listValue)
+					end
+				
+				-- ✅ Détection des valeurs indexées ([1] = "...")
+				elseif line:match("^%s*%[%d+%]%s*=%s*") then
+					local index, listValue = line:match("^%s*%[(%d+)%]%s*=%s*\"(.-)\"")
+					if index and listValue then
+						print("📌 INDEXÉ: "..index.." → "..listValue)
+	
+						if not currentKey then
+							print("❌ ERREUR: Aucun currentKey défini pour `["..index.."]`")
+						else
+							if currentTable[currentKey] == nil then
+								currentTable[currentKey] = {}  -- 📌 Créer une liste vide si nécessaire
+							end
+	
+							currentTable[currentKey][tonumber(index)] = listValue
+							print("✅ Ajouté dans `"..currentKey.."` :", listValue)
+						end
+					end
+				
+				-- ✅ Détection des variables normales
+				elseif key and value then
+					print("📌 VARIABLE détectée:", key, "=", value)
+					value = value:gsub("[\",]+$", "")  -- 🔄 Nettoyer les guillemets et virgules parasites
+					currentTable[key] = tonumber(value) or value
+				end
 			end
 		end
 	
 		return config, structure
 	end
+	
+	local function loadConfigWithStructure(filePath)
+		-- version loadConfigWithStructure VA_1.38b
+		local config = {}
+		local structure = {}
+		local stack = {}
+		local currentTable = config
+		local currentKey = nil
+		local pendingTable = nil -- Stocker temporairement le nom d'une table qui attend `{`
+	
+		for line in io.lines(filePath) do
+			line = line:gsub("_check", "") -- Supprimer "_check"
+	
+			-- print("\nLCWS A "..line) -- Debug simple sans icône
+	
+			-- Ignorer les lignes commentées
+			if line:match("^%s*%-%-") then
+				table.insert(structure, line)
+	
+			-- Ignorer les lignes versionDCE
+			elseif line:match("versionDCE") then
+				
+			else
+				table.insert(structure, line) -- Stockage brut de la structure du fichier
+				
+				-- Détection des structures Lua
+				local singleLineTable = line:match("(%S+)%s*=%s*{(.-)}%s*,?%s*$")
+				local tableStart = line:match("(%S+)%s*=%s*{")
+				local tableEnd = line:match("^%s*}%s*[,]?")
+				local listValue = line:match('^%s*"(.-)",?%s*$')
+				local tableStartUnique = line:match('%["([^"]+)"%]%s*=%s*$') or line:match("(%S+)%s*=%s*$")
+
+
+				-- print("lCWS E1 tableStart?: "..tostring(tableStart))
+				-- print("lCWS E2 singleLineTable?: "..tostring(singleLineTable))
+				-- print("lCWS E6 tableEnd?: "..tostring(tableEnd))
+				-- print("lCWS E7 tableStartUnique?: "..tostring(tableStartUnique))
+				-- print("lCWS E8 currentKey?: "..tostring(currentKey))
 		
+	
+				local key, value, comment = line:match('(%S+)%s*=%s*(["]?[%w%s%p]+["]?)%s*,?%s*%-%-%s*(.*)')
+				-- print("lCWS AA1 value?: "..tostring(value))
+				if not key then
+					key, value = line:match('(%S+)%s*=%s*(["]?[%w%s%p]+["]?)%s*,?')
+					-- print("lCWS AA2 value?: "..tostring(value))
+					
+				end
+
+	
+				-- 1️⃣ Tables sur une seule ligne (ex: `x = {1, 2, 3}`)
+				if singleLineTable then
+					-- print("LCWS B ")
+					local name, contents = line:match("(%S+)%s*=%s*{(.-)}")
+					local newTable = {}
+					for value in contents:gmatch("[^,]+") do
+						value = value:match("^%s*(.-)%s*$") -- Supprimer les espaces blancs
+						newTable[#newTable + 1] = tonumber(value) or value
+					end
+					currentTable[name] = newTable
+	
+				-- 2️⃣ `pictureBrief =` suivi de `{` sur la ligne suivante
+				elseif tableStartUnique then
+					-- print("LCWS C ")
+					pendingTable = tableStartUnique -- Retenir le nom de la table
+	
+				elseif line:match("^%s*{%s*$") and pendingTable then
+					-- print("\nLCWS D ")
+					currentTable[pendingTable] = {} -- Créer la table
+					table.insert(stack, { table = currentTable, key = currentKey }) -- Sauvegarde du contexte
+					currentTable = currentTable[pendingTable]
+					currentKey = pendingTable
+					pendingTable = nil -- Réinitialisation
+	
+				-- 3️⃣ Tables classiques (`key = {`)
+				elseif tableStart then
+					-- print("LCWS E ")
+				
+					if not currentTable[tableStart] then
+						currentTable[tableStart] = {} -- Créer la table si elle n'existe pas
+					end
+					table.insert(stack, { table = currentTable, key = currentKey })
+					currentTable = currentTable[tableStart]
+					currentKey = tableStart
+				
+	
+				-- 4️⃣ `blue = {` et `red = {` sous `pictureBrief`
+				elseif (line:match("^%s*(blue|red)%s*=%s*{") or line:match("^%s*%[%d+%]%s*=%s*{")) and currentKey == "pictureBrief" then
+					-- print("LCWS F ")
+					local subKey = line:match("^%s*(blue|red)%s*=%s*{") or line:match("^%s*%[(%d+)%]%s*=%s*{")
+					if not currentTable[subKey] then
+						currentTable[subKey] = {}
+					end
+					table.insert(stack, { table = currentTable, key = currentKey })
+					currentTable = currentTable[subKey]
+					currentKey = subKey
+	
+				-- 5️⃣ Fermeture de table (`}`)
+				elseif tableEnd then
+					-- print("LCWS G ")
+					if #stack > 0 then
+						local popped = table.remove(stack)
+						currentTable = popped.table
+						currentKey = popped.key
+					end
+	
+				-- 6️⃣ Détection des listes `"texte",`
+				elseif listValue then
+					-- print("LCWS H ")
+
+					table.insert(currentTable, listValue)
+	
+				-- 7️⃣ Détection des valeurs indexées `[1] = "..."``
+				elseif line:match("^%s*%[%d+%]%s*=%s*") then
+					-- print("LCWS I ")
+					local index, listValue = line:match("^%s*%[(%d+)%]%s*=%s*\"(.-)\"")
+					if index and listValue and currentKey then
+						
+						currentTable[tonumber(index)] = listValue
+						
+					end
+				-- 8️⃣ Variables classiques `key = value`
+				elseif key and value then
+					-- ✅ Suppression propre des `,` et espaces parasites en fin de valeur
+					value = value:match("^%s*(.-)%s*$") -- Trim des espaces inutiles
+					value = value:gsub(",%s*$", "")     -- Supprimer `,` en fin de ligne
+				
+					-- ✅ Conversion propre en nombre
+					local numValue = tonumber(value)
+					-- print("LCWS J2 "..tostring(value))
+					currentTable[key] = numValue or value  -- Si c'est un nombre, on le stocke en tant que nombre
+				
+					
+				end
+			end
+		end
+	
+		return config, structure
+	end
 	
 	
 
     -- Fonction pour supprimer les clés obsolètes
     local function removeObsoleteEntries(clientConfig, referenceConfig)
-        local cleanedConfig = {}
+        --version removeObsoleteEntries VA_1.12
+        local function deepClean(clientTable, referenceTable)
+            for key, value in pairs(clientTable) do
+                if key ~= "pictureBrief" then
+					if type(value) == "table" then
+						if not referenceTable[key] then
+							clientTable[key] = nil  -- Supprime la table complète si elle est absente du modèle
+						else
+							deepClean(value, referenceTable[key])  -- Nettoie récursivement les sous-tables
+						end
+					elseif not referenceTable[key] then
+						clientTable[key] = nil  -- Supprime les variables obsolètes
+					end
+				else
 
-        for key, value in pairs(clientConfig) do
-            local cleanKey = key:gsub("_check$", "")  -- Supprimer le suffixe "_check" pour comparaison
-            if referenceConfig[cleanKey] then
-                cleanedConfig[key] = value
+				end
             end
         end
 
-        return cleanedConfig
+        deepClean(clientConfig, referenceConfig)
+        return clientConfig
     end
 
+    -- Nouvelle fonction pour insérer les nouvelles tables et variables manquantes dans la structure
+	local function updateConfiguration(clientConfig, defaultConfig)
+		-- version updateConfiguration VA_1.34 (Ajout du retour clientConfig)
+		local function deepCopy(orig)
+			local copy
+			if type(orig) == 'table' then
+				copy = {}
+				for orig_key, orig_value in pairs(orig) do
+					copy[orig_key] = deepCopy(orig_value)
+				end
+				setmetatable(copy, deepCopy(getmetatable(orig)))
+			else
+				copy = orig
+			end
+			return copy
+		end
+	
+		local function mergeTables(clientTable, defaultTable)
+			for key, defaultValue in pairs(defaultTable) do
+				local clientValue = clientTable[key]
+		
+				-- 🚨 Exception : `pictureBrief` doit rester **intact**
+				if key == "pictureBrief" then
+					print("🚨 `pictureBrief` préservé, aucune modification !")
+					if type(clientValue) ~= "table" then
+						clientTable[key] = {}  -- Assurer que c'est bien une table
+					end
+				elseif type(defaultValue) == "table" then
+					if not clientValue then
+						clientTable[key] = deepCopy(defaultValue)
+					elseif type(clientValue) == "table" then
+						mergeTables(clientValue, defaultValue)
+					end
+				else
+					if clientValue == nil then
+						clientTable[key] = defaultValue
+					end
+				end
+			end
+		end
+		
+		
+		
+		mergeTables(clientConfig, defaultConfig)
+
+		return clientConfig  -- ✅ Ajout du retour de la table mise à jour !
+	end
+	
+
+	
+	local function saveUpdatedConfig(filePath, updatedConfig, structure)
+
+		-- version saveUpdatedConfig VA_1.50 (Correction des valeurs sous forme de table et commentaires)
+		local file = io.open(filePath, "w")
+		if not file then error("Cannot open file for writing: " .. filePath) end
+	
+		local indentLevel = 0
+		local stack = {}  -- Suivi des tables imbriquées
+	
+		-- ✅ Fonction d'indentation stricte
+		local function getIndent(level)
+			return string.rep("\t", level)
+		end
+	
+		-- ✅ Fonction pour récupérer la vraie valeur (sans toujours mettre des strings)
+		local function getFormattedValue(value)
+			-- print("\nGFV value type:", type(value), " value:", tostring(value))
+		
+			-- ✅ Si `value` est une table contenant { value = ..., comment = ... }
+			if type(value) == "table" and value.value ~= nil then
+				-- print("GFV_A1 Found { value = ..., comment = ... }, extracting value...")
+				return getFormattedValue(value.value) -- Récupérer directement `value`
+			end
+		
+			-- ✅ Gestion des types normaux (string, booléens, nombres)
+			if type(value) == "string" then
+				if value == "true" or value == "false" then
+					-- print("GFV_B Boolean string:", value)
+					return value -- Garder sans guillemets
+				elseif tonumber(value) then
+					-- print("GFV_C Number as string:", value)
+					return value -- Convertir en nombre
+				else
+					-- print("GFV_D Normal string:", value)
+					return '"' .. value:gsub('"', '') .. '"' -- Supprime les doubles guillemets parasites
+				end
+			elseif type(value) == "boolean" then
+				-- print("GFV_E Boolean:", value)
+				return tostring(value)
+			elseif type(value) == "number" then
+				-- print("GFV_F Number:", value)
+				return value
+			-- elseif type(value) == "table" then
+			-- 	-- print("GFV_G Detected table")
+			-- 	if next(value) then
+			-- 		local formattedTable = {}
+			-- 		for k, v in pairs(value) do
+			-- 			-- print("GFV_G1 Table key:", k, "value:", v)
+			-- 			table.insert(formattedTable, getFormattedValue(v))
+			-- 		end
+			-- 		return "{ " .. table.concat(formattedTable, ", ") .. " }"
+			-- 	else
+			-- 		-- print("GFV_G2 Empty table")
+			-- 		return "{}"
+			-- 	end
+			elseif type(value) == "table" then
+				-- 🔍 Vérifier si c'est une liste indexée
+				local isArray = (#value > 0) and (next(value, #value) == nil)
+			
+				if isArray then
+					return "{ " .. table.concat(value, ", ") .. " }"  -- ✅ Format propre des listes !
+				else
+					local formattedTable = {}
+					for k, v in pairs(value) do
+						table.insert(formattedTable, "[" .. tostring(k) .. "] = " .. getFormattedValue(v))
+					end
+					return "{ " .. table.concat(formattedTable, ", ") .. " }"
+				end
+		
+		
+			
+			else
+				-- print("GFV_H Unknown type:", type(value))
+				return tostring(value)
+			end
+		end
+		
+	
+		local function writeStructureLines(currentTable, structure, level)
+			
+			local maxKeyLength = 0
+			local maxValueLength = 0
+			
+			for i, line in ipairs(structure) do
+				local trimmedLine = line:match("^%s*(.-)%s*$") -- Supprimer espaces début/fin
+				-- print("A "..line)
+
+				local key, value, comment = line:match('(%S+)%s*=%s*([^%s,]+)%s*,?%s*%-%-%s*(.*)')
+				if not key then
+					key, value = line:match('(%S+)%s*=%s*([^%s,]+)')
+				end
+	
+				-- ✅ Conserver les commentaires et lignes vides
+				if trimmedLine:match("^%-%-") or trimmedLine == "" then
+					-- print("B "..getIndent(level) .. line .. "\n")
+					file:write(getIndent(level) .. line .. "\n")
+	
+				-- ✅ Détection des tables sur une seule ligne
+				elseif trimmedLine:match("(%S+)%s*=%s*{.-}%s*,?%s*$") then
+					local key = trimmedLine:match("(%S+)%s*=%s*{")
+					local clientValue = currentTable[key]
+					if clientValue then
+						-- print("C1 "..getIndent(level) .. key .. " = " .. getFormattedValue(clientValue) .. ",\n")
+						file:write(getIndent(level) .. key .. " = " .. getFormattedValue(clientValue) .. ",\n")
+					end
+	
+				-- ✅ Détection de déclaration de table avec indentation correcte
+				elseif trimmedLine:match("(%S+)%s*=%s*{") then
+					local key = trimmedLine:match("(%S+)%s*=%s*{")
+					local clientValue = currentTable[key]
+					if clientValue and type(clientValue) == "table" and next(clientValue) then
+						-- print("D1 "..getIndent(level) .. key .. " = {\n")
+						file:write(getIndent(level) .. key .. " = {\n")
+						table.insert(stack, { name = key, table = currentTable })
+						currentTable = clientValue
+						level = level + 1
+						-- print("D2 #stack "..tostring(#stack))
+					end
+	
+					-- ✅ Détection des fermetures de table
+					elseif trimmedLine:match("^%s*}%s*[,]?") then
+						-- print("E1 #stack "..tostring(#stack))
+						if #stack > 0 then
+							local popped = table.remove(stack)
+							currentTable = popped.table
+							level = level - 1
+						end
+
+						-- 🏗 Vérifier si on doit ajouter une virgule après `}`
+						local nextLine = structure[i + 1] or ""
+						local addComma = not nextLine:match("^%s*}%s*$")
+
+						if level > 0 then
+							-- print("E2 "..getIndent(level) .. "}" .. (addComma and "," or "") .. "\n")
+							-- print("E2 "..getIndent(level) .. "}" .. (addComma and ",") .. "\n")
+							-- file:write(getIndent(level) .. "}" .. (addComma and ",") .. "\n")
+							file:write(getIndent(level) .. "}" .. (addComma and "," or "") .. "\n")
+						else
+							-- print("E3 "..getIndent(level) .. "}\n")
+							file:write(getIndent(level) .. "}\n")
+						end
+	
+				-- ✅ Gestion des affectations (Valeur + Commentaire propre)
+				else
+					local key, value, comment = line:match('(%S+)%s*=%s*(.-)%s*%-%-%s*(.*)')
+					if not key then
+						key, value = line:match('(%S+)%s*=%s*(.-)%s*$')
+					end
+
+					if key then
+						local clientValue = currentTable[key] or value
+						local formattedValue = getFormattedValue(clientValue)
+
+						-- 📏 Calcul de la largeur max des clés pour un alignement automatique
+						local keyColumnWidth = 0  
+						for k, _ in pairs(currentTable) do
+							if type(k) == "string" then
+								keyColumnWidth = math.max(keyColumnWidth, #k)
+							end
+						end
+						keyColumnWidth = keyColumnWidth + 2  -- Ajout de 2 espaces pour plus de lisibilité
+
+					
+						-- 🏗 Ajustement de l'alignement
+						local spacingAfterKey = string.rep(" ", keyColumnWidth - #key)
+
+						local spacingAfterEqual = " "  
+						local valueColumnWidth = 8  -- 🛠 Réduit l'espace après la valeur
+						local spacingAfterValue = string.rep(" ", math.max(1, valueColumnWidth - #tostring(formattedValue))) 
+					
+						-- 📝 Vérifier si on ajoute une virgule
+						local nextLine = structure[i + 1] or ""
+						local addComma = not nextLine:match("^%s*}%s*$")
+					
+						-- 📌 Écriture avec **espacement plus serré**
+						if comment then
+							file:write(getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and "," or "") .. spacingAfterValue .. "-- " .. comment .. "\n")
+						else
+							file:write(getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and ",") .. "\n")
+						end
+					end
+				end
+			end
+	
+			-- ✅ Vérification finale : s'assurer que toutes les tables sont bien fermées
+			while #stack > 0 do
+				local popped = table.remove(stack)
+				level = level - 1
+				file:write(getIndent(level) .. "}\n")
+			end
+
+			-- 🖼️ Ajout manuel de `pictureBrief` à la fin si présent
+			if currentTable.pictureBrief then
+				file:write("\n" .. getIndent(level) .. "pictureBrief = {\n")
+				level = level + 1
+				
+				for category, images in pairs(currentTable.pictureBrief) do
+					file:write(getIndent(level) .. category .. " = {\n")
+					for _, image in ipairs(images) do
+						file:write(getIndent(level + 1) .. '"' .. image .. '",\n')
+					end
+					file:write(getIndent(level) .. "},\n")  -- Fermeture de `blue` ou `red`
+				end
+
+				level = level - 1
+				file:write(getIndent(level) .. "}\n")  -- Fermeture de `pictureBrief`
+			end
+
+		end
+	
+		-- ✅ Écrire la structure dans le fichier en respectant les valeurs du client
+		writeStructureLines(updatedConfig, structure, indentLevel)
+	
+		file:close()
+	end
+	
     -- Chemins des fichiers de configuration
     local clientConfigPath = "Init/conf_mod.lua"
     local defaultConfigPath = "../../../ScriptsMod." .. versionPackageICM .. "/UTIL_ConfModCheck.lua"
 
+
     -- Charger les fichiers de configuration client et par défaut
     local clientConfig, _ = loadConfigWithStructure(clientConfigPath)
-    local defaultConfig, defautStructure = loadConfigWithStructure(defaultConfigPath)
 
-	local camp_str = "clientConfig = " .. TableSerialization(clientConfig, 0)						--make a string
-	local campFile = io.open("Debug/CONFMOD_CLIENT_A.lua", "w")  or error("Failed to open debug file")
-	campFile:write(camp_str)																		--save new data
-	campFile:close()
+	-- 🌟 Sauvegarde `pictureBrief` original AVANT toute modification
+	local backupPictureBrief = clientConfig.pictureBrief and Deepcopy(clientConfig.pictureBrief) or nil
+
+    local defaultConfig, defaultStructure = loadConfigWithStructure(defaultConfigPath)
 
     -- Nettoyer les variables obsolètes du client
     clientConfig = removeObsoleteEntries(clientConfig, defaultConfig)
 
-	-- local camp_str = "clientConfig = " .. TableSerialization(clientConfig, 0)						--make a string
-	-- local campFile = io.open("Debug/CONFMOD_CLIENT_B.lua", "w")  or error("Failed to open debug file")
-	-- campFile:write(camp_str)																		--save new data
-	-- campFile:close()
+	-- Mettre à jour la configuration client avec les valeurs par défaut manquantes
+	clientConfig = updateConfiguration(clientConfig, defaultConfig)
 
-	-- local camp_str = "defaultConfig = " .. TableSerialization(defaultConfig, 0)						--make a string
-	-- local campFile = io.open("Debug/CONFMOD_MAITRE_.lua", "w")  or error("Failed to open debug file")
-	-- campFile:write(camp_str)																		--save new data
-	-- campFile:close()
-
-	-- local camp_str = "defautStructure = " .. TableSerialization(defautStructure, 0)						--make a string
-	-- local campFile = io.open("Debug/CONFMOD_structure_MAITRE_.lua", "w")  or error("Failed to open debug file")
-	-- campFile:write(camp_str)																		--save new data
-	-- campFile:close()
-
- 	-- Fonction pour insérer les nouvelles tables et variables manquantes dans la structure
-	local function updateConfiguration(structure, clientConfig, defaultConfig)
-		local updatedStructure = {}
-		local inTable = nil
-
-		for _, line in ipairs(structure) do
-			local tableStart = line:match("(%S+)%s*=%s*{")
-			local tableEnd = line:match("^}")
-			
-			-- Suppression des redondances (ex. : éviter red et ["red"])
-			if not tableEnd or (tableEnd and not inTable) then
-				table.insert(updatedStructure, line)
-			end
-
-			if tableStart then
-				inTable = tableStart:gsub("_check$", "")  -- Supprimer "_check"
-			elseif tableEnd then
-				-- Fin d'une table, insérer les éléments manquants si nécessaire
-				if inTable and defaultConfig[inTable] then
-					for key, value in pairs(defaultConfig[inTable]) do
-						if not clientConfig[inTable] or not clientConfig[inTable][key] then
-							table.insert(updatedStructure, string.format("\t%s = %s,  -- [default value]", key, tostring(value.value)))
-						end
-					end
-				end
-				inTable = nil
-			end
-		end
-
-		-- Ajouter les tables absentes au bon format
-		for key, value in pairs(defaultConfig) do
-			local cleanKey = key:gsub("_check$", "")  
-			if not clientConfig[cleanKey] then
-				table.insert(updatedStructure, cleanKey .. " = {")
-				for subKey, subValue in pairs(value) do
-					table.insert(updatedStructure, string.format("\t%s = %s,  -- [default value]", subKey, tostring(subValue.value)))
-				end
-				table.insert(updatedStructure, "},\n")
-			else
-				-- Ajout des éléments manquants dans les tables existantes
-				for subKey, subValue in pairs(value) do
-					if not clientConfig[cleanKey][subKey] then
-						table.insert(updatedStructure, string.format("\t%s = %s,  -- [default value]", subKey, tostring(subValue.value)))
-					end
-				end
-			end
-		end
-
-		return updatedStructure
+	if backupPictureBrief then
+		print("🔄 Restauration de `pictureBrief` après traitement !")
+		clientConfig.pictureBrief = backupPictureBrief
 	end
+	
+
+	-- Sauvegarder la configuration mise à jour
+	-- clientConfigPath = "Init/conf_mod_BBB.lua"
+	saveUpdatedConfig(clientConfigPath, clientConfig, defaultStructure)
 
 
-    -- Générer la structure mise à jour
-    local updatedConfigStructure = updateConfiguration(defautStructure, clientConfig, defaultConfig)
-
-    -- Fonction pour sauvegarder la nouvelle configuration mise à jour
-    local function saveUpdatedConfig(filePath, updatedStructure)
-        local file = io.open(filePath, "w")
-        if not file then error("Cannot open file for writing: " .. filePath) end
-
-        for _, line in ipairs(updatedStructure) do
-            file:write(line:gsub(",,", ",") .. "\n")  -- Corrige les erreurs de syntaxe
-        end
-
-        file:close()
-    end
-
-    -- Sauvegarde de la configuration mise à jour
-    saveUpdatedConfig(clientConfigPath, updatedConfigStructure)
-
-    print("Configuration updated successfully!")
-    os.execute 'pause'
-end
-
-
+	dofile("Init/conf_mod.lua")
+end	
 
 
   --a function that automatically updates the conf_mod keeping as much as possible the old settings of the player
-function UpdateConfMod()
+function UpdateConfMod_OLD_INIT()
 
 	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ConfModCheck.lua")
 	local confModCheck = {

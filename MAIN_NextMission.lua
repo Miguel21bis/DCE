@@ -434,15 +434,15 @@ if 	not mission_ini  or mission_ini == nil  then
 	dofile("Init/conf_mod.lua")
 end
 
-if Firstmission_flag  or Skipmission_flag then
-	local needUpdate = CheckConfModMaster()													-- modification M38.d Check and Help CampaignMaker
-	if needUpdate > 0 then																	-- modification M53_a	automatic update of the conf_mod file	
+-- if Firstmission_flag  or Skipmission_flag then
+-- 	local needUpdate = CheckConfModMaster()													-- modification M38.d Check and Help CampaignMaker
+-- 	if needUpdate > 0 then																	-- modification M53_a	automatic update of the conf_mod file	
 		UpdateConfMod()
 		if Firstmission_flag then
 			ModifiCampInit()
 		end
-	end
-end
+-- 	end
+-- end
 
 camp.SC_FullPlaneOnDeck = mission_ini.SC_FullPlaneOnDeck								-- modification M37.d SuperCarrier
 camp.CV_Vmax = Data_configuration.CV_Vmax												-- modification M37.d SuperCarrier

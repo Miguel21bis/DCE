@@ -1150,7 +1150,7 @@ if camp.runwayLife then
 		if runway.life < 3600 and runway.name then
 			for side_name, targets in pairs(targetlist) do											--iterate through targetlist
 				for targetN, target in pairs(targets) do										--iterate through targets				
-					if target.db_airbaseName and target.db_airbaseName == runway.name and target.attributes[1] == "Runway" then		--if the target has subelements and is a scenery object target (element has x coordinate)
+					if target.db_airbaseName and target.db_airbaseName == runway.name and string.lower(target.attributes[1]) == "runway" then		--if the target has subelements and is a scenery object target (element has x coordinate)
 
 						local aliveTemp = math.floor((runway.life/3600) * 100)
 

@@ -1177,11 +1177,34 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 				target = updateAlive(target)
 			end
 
-			local attibut
-			if target.attributes and target.attributes[1] then attibut = string.upper(target.attributes[1]) end
+			local attribut = "generic"
+			if target.attributes then 
+				for attributN, attributName in pairs(target.attributes) do
+					attributName = string.lower(attributName)
+					if Attribut2Target[attributName] then
+						attribut = Attribut2Target[attributName]
+						break
+					end
+				end
+				if not attribut then
+					for attributN, attributName in pairs(target.attributes) do
+						attributName = string.lower(attributName)
+						for key , correspondanceName in pairs(Attribut2Target) do
+							if string.match(correspondanceName, attributName) then
+								attribut = correspondanceName
+								break
+							end
+						end
 
-			-- modification M26  destroys targets if below a certain value
-			if target.alive <= campMod.KillTargetValue and target.alive > 0 and attibut ~= "RUNWAY" then					--if target alive is lower than 0 (due to rounding errors)
+					end
+				end
+			end
+
+			
+			local KillTargetLocal = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][2]
+
+			if target.alive <= KillTargetLocal and target.alive > 0 and attribut ~= "runway" then
+				
 				checkBug2("DC_UT target.name target.alive <= 20 "..target.titleName.." "..tostring(target.alive))
 				KillTarget(target.titleName, target.name)															--set target alive 0
 				target.alive = 0
