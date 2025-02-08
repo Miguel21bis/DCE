@@ -167,19 +167,29 @@ campMod_check = {
 	-- RepairRunwayPerDay = 25,				-- (1 to 100 [%])	[default: 25]	% per day for runway repairs
 
 	--***repair option***.
-	-- object = {			1			;		2			;		 	3		;		4		;				5		}
-	-- object = {minimumRepairThreshold	;	deathPoint		;	 reinforceDelay;	repairChance;			repairValue}
-	-- object = {	(% de l'unité) 		;	(% de l'unité) ;	(Nbre d'heures) ;	(% de probabilité) ;	(valeur de réparation/Day)}
+	-- object = {			1			;		2			;			3		;		4		;			5		}
+	-- object = {minimumRepairThreshold	;	deathPoint		;	 reinforceDelay;	repairChance;		repairValue	}
+	-- object = {	(% de l'unité) 		;	(% de l'unité) ;	(Nbre d'heures) ;	(% de proba) ;	(valeur de rép/Day)}
 
 			-- minimumRepairThreshold : à partir de cette valeur l'unité n'est plus réparée mais vivante 
 			-- deathPoint : à partir de cette valeur l'unité est mise à 0 et donc détruite
 			-- repairValue: valeur de réparation pour une cible entiere/jour ou moment de réparation
 
+	-- runway = {			1			;		2			;		 3			;		4		;		5				;		6		}
+	-- runway = {		not used		;	deathPoint		;	 not used		;	not used	;	repairValue			;	runwayOk	}
+	-- runway = {	(% de l'unité) 		;	(% de l'unité) ;	(Nbre d'heures) ;	(% de proba);	(value de rép/Day)	;	(% du Runway)}
+
+	-- runway = {0,20,12,0,25,50},
+			-- Runway < 20 ou à "deathPoint" : piste HS DEFINITIVEMENT, (Base Active, Plane Off, Heli On)
+			-- repairRunwayPerDay = campMod.RepairOption[DCS_ENI_Side[side_name]]["runway"][5]
+			-- Runway > 50 (ou runwayOk)la piste est PRATICABLE, REPARATION en cours , (Base Active, Plane On, Heli On)
+
+
 	RepairOption = {
 		blue = {
 			airUnit = {0,0,12,0,0},
 			airbase = {20,20,12,0,0},
-			runway = {25,20,12,0,25},
+			runway = {0,20,0,0,25,50},
 			sam = {25,20,12,15,0},
 			ewr = {25,20,12,15,0},
 			bridge = {25,20,12,8,0},
@@ -188,7 +198,7 @@ campMod_check = {
 		red = {
 			airUnit = {0,0,12,0,0},
 			airbase = {20,20,12,0,0},
-			runway = {25,20,12,25,0},
+			runway = {0,20,0,0,25,50},
 			sam = {25,20,12,15,0},
 			ewr = {25,20,12,15,0},
 			bridge = {25,20,12,8,0},

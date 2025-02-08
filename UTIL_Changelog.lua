@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.81.525"
+versionDCE["UTIL_Changelog.lua"] = "20.82.526"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.81.525"
+VersionDCE["UTIL_Changelog.txt"] = "20.82.526"
 --[[
 
 
@@ -9,12 +9,12 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.81.525:==
+==:20.82.526:==
 
+526 add	[campaignMaker]	Action.UnitResuscitateOrKill(unitName, liveOrKill, liveValue) (M82)
 525 fixed	[flight]	flight delayed
 
-
-
+==:20.81.524:==
 524 modified	[loadout]
 				-- V178 - Tu-22M3 no escort and Minscore 0.1  for TF-80-Full
 				-- V177 - Mirage F-1EE big Fuel tank

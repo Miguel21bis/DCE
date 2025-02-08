@@ -27,6 +27,56 @@ versionDCE["DC_CheckTriggers.lua"] = "1.16.95"
 ------------------------------------------------------------------------------------------------------- 
 
 
+
+--List of Return functions to build conditions:
+--Return.Time()												returns time of day in seconds
+--Return.Day()												returns day of month
+--Return.Month()											returns month as number
+--Return.Year()												returns year as number
+--Return.Mission()											returns campaign mission number
+--Return.CampFlag(flag-n)									returns value of campaign flag
+--Return.AirUnitActive("UnitName")							returned boolean whether the air unit is active			
+--Return.AirUnitReady("UnitName")							returns amount of ready aircraft in unit
+--Return.AirUnitAlive("UnitName")							returns amount of ready and damaged aircraft in unit
+--Return.AirUnitBase("UnitName")							returns the name of the airbase the unit operats from
+--Return.AirUnitPlayer("UnitName")							returns boolean whether the air units is playable
+--Return.TargetAlive("TargetName")							returns percentage of alive sub elements in target
+--Return.UnitDead(unitname)									(ADD) return vehicle/ship units dead (ADD)
+--Return.GroupHidden("GroupName")							returns group hidden status
+--Return.GroupProbability("GroupName")						returns group spawn probability value between 0 and 1
+--Return.ShipGroupInPoly(GroupName, PolyZonesTable)			(ADD) return boolean whether ship group is in polygon (ADD)
+
+--List of Action functions for trigger actions:
+--Action.None()
+--Action.Text("your briefing text")
+--Action.TextPlayMission(arg)																--add trigger text to briefing text of this mission only if it is playable
+--Action.SetCampFlag(flag-n, boolean/number)												--
+--Action.AddCampFlag(flag-n, number)														--
+--Action.AddImage("filname.jpg")															--
+--Action.CampaignEnd("win"/"draw"/"loss")													--
+--Action.TargetActive("TargetName", boolean)												--
+--Action.AirUnitActive("UnitName", boolean)													--
+
+--Action.UnitResuscitateOrKill("UnitName", boolean, value)								--
+
+--Action.AirUnitBase("UnitName", "BaseName")												--
+--Action.AirUnitPlayer("UnitName", boolean)													--
+--Action.AirUnitReinforce("SourceUnitName", "DestinationUnitName", destNumber)				--
+--Action.AirUnitRepair()																	--
+--Action.GroundUnitRepair()																	-- (ADD) M19.f : Repair Ground
+--Action.AddGroundTargetIntel("sideName")													--
+--Action.GroupHidden("GroupName", boolean)													--
+--Action.GroupProbability("GroupName", number 0-1)											--
+--Action.GroupMove(GroupName, ZoneName)														-- (ADD) move vehicle group to refpoint (See the DC_CheckTriggers.lua file for more explanation)
+--Action.GroupSlave(GroupName, master, bearing, distance)									-- (ADD)
+--Action.ShipMission(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTime)				-- (ADD) assign and run a movement mission to a ship group (See the DC_CheckTriggers.lua file for more explanation)
+--Action.TemplateActive(TabFile)															-- (ADD) M40 : Template Active GroundGroup moving front (single file : active template) (if tab file: random activation)
+
+
+
+--Important notes:
+--for condition and action strings: outside with single quotes '', inside with double quotes ""!
+
 local debugKT = false
 
 if not TaskRefused and not camp.waitingNextGen and not (EndCampaign or camp.endCampaign ) and not Firstmission_flag   then
@@ -1116,6 +1166,209 @@ Action = {}
 	end
 
 
+	function Action.UnitResuscitateOrKill(targettName, liveOrKill, liveValue)
+	
+		-- print()
+		-- print("DcCT UnitResuscitateOrKill A0 check Target:  ... "..tostring(targettName) )
+
+		for side_name, targets in pairs(targetlist) do
+
+			local foundTarget
+
+			local groundside = "red"
+			if side_name == "red" then
+				groundside = "blue"
+			end
+			
+			for targetN, target in pairs(targets) do
+
+				-- print("DcCT UnitResuscitateOrKill A1 target.name:  ... "..tostring(target.name).." ==? "..tostring(targettName) )
+
+				if target.name == targettName then
+					foundTarget = true
+					local attribut
+
+					-- print("DcCT UnitResuscitateOrKill A2 found Target:  ... "..tostring(targettName) )
+
+					--dans le cas d'un ressucitage :
+					if liveOrKill == true then
+				
+						
+						-- if target.attributes then 
+						-- 	for attributN, attributName in pairs(target.attributes) do
+						-- 		-- print("DcCT A    attributName ... "..tostring(attributName) )
+						-- 		attributName = string.lower(attributName)
+								
+						-- 		if Attribut2Target[attributName] then
+						-- 			attribut = Attribut2Target[attributName]
+						-- 			-- print("DcCT B    ASSIGN attribut ... "..tostring(attribut) )
+						-- 			break
+						-- 		end
+						-- 	end
+						-- 	if not attribut then
+						-- 		for attributN, attributName in pairs(target.attributes) do
+						-- 			-- print("DcCT C    attributName ... "..tostring(attributName) )
+						-- 			attributName = string.lower(attributName)
+									
+						-- 			for key , correspondanceName in pairs(Attribut2Target) do
+						-- 				-- print("DcCT D    attributName ... "..tostring(attributName) )
+										
+						-- 				if string.match(correspondanceName, attributName) then
+						-- 					attribut = correspondanceName
+						-- 					-- print("DcCT E    FOUND attribut ... "..tostring(attribut) )
+						-- 					break
+						-- 				end
+						-- 			end
+			
+						-- 		end
+						-- 	end
+						-- end	
+						-- if not attribut then
+						-- 	attribut = "generic"	
+						-- end
+
+						-- print("DcCT UnitResuscitateOrKill A attribut ... "..tostring(attribut) )
+
+						-- if attribut ~= "runway" and target.alive < 100  then
+						if target.alive < 100  then
+
+							if target.elements then
+
+								local nbRessucitatMax = math.floor(#target.elements * liveValue/100)
+								local nbLiving = 0
+								
+								--calcul le nb de mort à ressuciter
+								for e = 1, #target.elements do
+									if not target.elements[e].dead  then
+										nbLiving = nbLiving + 1
+									end
+								end
+
+								nbRessucitatMax = nbRessucitatMax - nbLiving
+
+								for e = 1, #target.elements do
+
+									local forcedReAlive = false
+
+									if target.elements[e].dead then
+							
+										nbRessucitatMax = nbRessucitatMax - 1
+										
+										if nbRessucitatMax < 0 then
+											break
+										end
+									
+										forcedReAlive = true
+									
+										local text = "" .. target.elements[e].name .. " from ".. target.titleName .. " have been repaired and returned back to service. \n \n"
+
+										if Debug.AfficheSol or debugKT then
+											print("Dc_CT Debug Resurrection: "..target.titleName .. " "..target.elements[e].name)
+											print("Dc_CT Debug "..text)
+										end
+
+										if side_name == "blue" then									--side is blue
+											Briefing_oob_text_blue = Briefing_oob_text_blue .. text	--add to blue briefing oob text
+										elseif side_name == "red" then								--side is red
+											Briefing_oob_text_red = Briefing_oob_text_red .. text	--add to red briefing oob text
+										end
+
+
+										target.elements[e].dead = nil
+										target.elements[e].CheckDay = nil
+										
+										target.alive = math.floor(target.alive + (1/#target.elements *100))
+										if target.alive > 100 then  target.alive = 100 end
+
+										if Debug.AfficheSol or debugKT then
+											print("Dc_CT Debug D² : "..target.titleName .. " alive: "..target.alive)
+										end
+
+										target.dead_last = math.floor(target.dead_last -  (1/#target.elements *100))
+										if target.dead_last < 0 then  target.dead_last = 0 end
+
+								
+									end
+
+									if forcedReAlive then
+										-- print("DcCT UnitResuscitateOrKill M1 cherche "..tostring(target.elements[e].name ))
+										local endfunction = false
+
+										for c = 1, #oob_ground[groundside] do
+											for category, groups in pairs(oob_ground[groundside][c]) do
+												if type(groups) == "table" and groups["group"]  then	--and groups[1].units
+													for groupN, group in pairs(groups["group"]) do
+														for unitN, unit in pairs(group.units) do
+															if  target.elements[e].name == unit.name then
+
+																-- print("DcCT UnitResuscitateOrKill ? Found  oob_ground..unit.name "..tostring(unit.name ))
+
+																unit['dead'] = nil
+																unit['dead_last'] = nil
+																unit.CheckDay = nil
+
+																endfunction = true
+															end
+															if endfunction then  break end
+														end
+														if endfunction then  break end
+													end
+													if endfunction then  break end
+												end
+												if endfunction then break end	
+											end
+											if endfunction then  break end
+										end
+									end
+								end
+							end
+						end
+					elseif liveOrKill == false then
+
+						if target.elements then
+
+							for e = 1, #target.elements do
+								target.elements[e].dead = true
+								target.elements[e].CheckDay = CampTotalTimeS
+
+								local endfunction = false
+								for c = 1, #oob_ground[groundside] do
+									for category, groups in pairs(oob_ground[groundside][c]) do
+										if type(groups) == "table" and groups["group"]  then	--and groups[1].units
+											for groupN, group in pairs(groups["group"]) do
+												for unitN, unit in pairs(group.units) do
+													if  target.elements[e].name == unit.name then
+														if not unit['dead'] then
+															unit['dead'] = true
+															unit['dead_last'] = true
+															unit.CheckDay = CampTotalTimeS
+														end
+
+														endfunction = true
+													end
+													if endfunction then  break end
+												end
+												if endfunction then  break end
+											end
+											if endfunction then  break end
+										end
+										if endfunction then break end	
+									end
+									if endfunction then  break end
+								end
+
+
+							end
+						end
+
+					end
+				end
+				if foundTarget then return end
+			end
+		end
+	end	
+
+
 	-- Miguel21 modification M19.f : Repair Ground
 	function Action.GroundUnitRepair()
 
@@ -1127,7 +1380,7 @@ Action = {}
 
 			for targetN, target in pairs(targets) do		--Iterat through all targets
 				
-				local attribut = "generic"	
+				local attribut 
 				if target.attributes then 
 					for attributN, attributName in pairs(target.attributes) do
 						attributName = string.lower(attributName)
@@ -1150,8 +1403,12 @@ Action = {}
 						end
 					end
 				end
+				if not attribut then
+					attribut = "generic"	
+				end
 				
-				-- local repairChance = 0
+				-- print("side_name "..tostring(side_name))
+				-- print("attribut "..tostring(attribut))
 				local minimumRepairThreshold = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][1]
 
 				local repairChance = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][4]
@@ -1274,12 +1531,11 @@ Action = {}
 					elseif attribut == "runway" and target.alive  and  target.alive < 100 and target.alive > campMod.RepairBaseMinimumDestroyed and  target.CheckDay then 
 						local oldVAlive = target.alive
 						if CampTotalTimeS >= target.CheckDay + 3600 then
-							local repairRunwayPerDay
+							
+							local repairRunwayPerDay = campMod.RepairOption[DCS_ENI_Side[side_name]]["runway"][5]
+							
 							if db_airbases[target.db_airbaseName] and db_airbases[target.db_airbaseName].customRepairRunwayPerDay then
 								repairRunwayPerDay = db_airbases[target.db_airbaseName].customRepairRunwayPerDay
-							else
-								-- repairRunwayPerDay = campMod.RepairRunwayPerDay
-								repairRunwayPerDay = campMod.RepairOption[DCS_ENI_Side[side_name]]["runway"][5]
 							end
 
 							target.alive = math.ceil(target.alive + repairRunwayPerDay * (((CampTotalTimeS - target.CheckDay )/ 3600)/24))
@@ -2035,56 +2291,63 @@ Action = {}
 	end
 ----- run campaign triggers -----
 
-	--define variables to persist across multiple mission generation attempts
-	if Briefing_status == nil then													--if briefing status string does not exist yet it must be created
-		Briefing_status = ""														--text string to be added to briefing
-		Briefing_oob_text_red = ""													--text string to be added to next briefing (red repair and reinforcements)
-		Briefing_oob_text_blue = ""													--text string to be added to next briefing (blue repair and reinforcements)
-	end
+--define variables to persist across multiple mission generation attempts
+if Briefing_status == nil then													--if briefing status string does not exist yet it must be created
+	Briefing_status = ""														--text string to be added to briefing
+	Briefing_oob_text_red = ""													--text string to be added to next briefing (red repair and reinforcements)
+	Briefing_oob_text_blue = ""													--text string to be added to next briefing (blue repair and reinforcements)
+end
 
-	if not BriefingImagesB then
-		BriefingImagesB = { }															--global table to hold information about briefing images to be added to miz mission file
-	end
+if not BriefingImagesB then
+	BriefingImagesB = { }															--global table to hold information about briefing images to be added to miz mission file
+end
 
-	if not BriefingImagesR then
-	BriefingImagesR = { }                             --global table to hold information about briefing images to be added to miz mission file
-	end
+if not BriefingImagesR then
+BriefingImagesR = { }                             --global table to hold information about briefing images to be added to miz mission file
+end
 
-	if camp.Briefing_text and camp.Briefing_text ~= "" then
-		Briefing_text = camp.Briefing_text																--briefing text to be added this mission instance
-	else
+if camp.Briefing_text and camp.Briefing_text ~= "" then
+	Briefing_text = camp.Briefing_text																--briefing text to be added this mission instance
+else
 
-		Briefing_text = ""
+	Briefing_text = ""
 
-		-- print("DcCT reset Briefing_text 2")
-		-- os.execute 'pause'
-	end
+	-- print("DcCT reset Briefing_text 2")
+	-- os.execute 'pause'
+end
 
-	Briefing_text_playable = ""														--briefing text to be added only if this mission instance results in a playable mission
+Briefing_text_playable = ""														--briefing text to be added only if this mission instance results in a playable mission
 
-	--go through campaign triggers
-	for trigger_name,trigger in pairs(camp_triggers) do								--iterate through triggers
-		if debugKT then print("DcCT passe 00 trigger_name: "..tostring(trigger_name)) end
-		if trigger.active then														--trigger is active
-			if debugKT then print("DcCT passe 01 if trigger.active: trigger.condition: "..tostring(trigger.condition)) end
-			local condition = loadstring("if " .. trigger.condition .." then return true end")	--make a function from the string condition
-			if type(condition) == "function" and condition() then														--if the trigger condition is true
-				if debugKT then print(" -> :DcCT passe 02 passe  condition()trigger_name: "..tostring(trigger_name)) end
-				if type(trigger.action) == "table" then								--multiple actions
-					for i,action in ipairs(trigger.action) do
-						if debugKT then print(" 	---> : "..tostring(trigger.action[i])) end
-						local f = loadstring(action)()								--run the trigger action
-					end
-				else																--single action
-					if debugKT then print(" 	---> : "..tostring(trigger.action)) end
-					local f = loadstring(trigger.action)()							--run the trigger action
+--go through campaign triggers
+for trigger_name,trigger in pairs(camp_triggers) do								--iterate through triggers
+	
+if debugKT then print("DcCT passe 00 trigger_name: "..tostring(trigger_name)) end
+	
+	if trigger.active then														--trigger is active
+		
+		if debugKT then print("DcCT passe 01 if trigger.active: trigger.condition: "..tostring(trigger.condition)) end
+		
+		local condition = loadstring("if " .. trigger.condition .." then return true end")	--make a function from the string condition
+		if type(condition) == "function" and condition() then														--if the trigger condition is true
+			
+		if debugKT then print(" -> :DcCT passe 02 passe  condition()trigger_name: "..tostring(trigger_name)) end
+			
+			if type(trigger.action) == "table" then								--multiple actions
+				for i,action in ipairs(trigger.action) do
+					if debugKT then print(" 	---> : "..tostring(trigger.action[i])) end
+					local f = loadstring(action)()								--run the trigger action
 				end
-				if trigger.once then												--trigger should only fire once
-					trigger.active = false											--set trigger inactive
-				end
+			else																--single action
+				if debugKT then print(" 	---> : "..tostring(trigger.action)) end
+				local f = loadstring(trigger.action)()							--run the trigger action
 			end
+			if trigger.once then												--trigger should only fire once
+				trigger.active = false											--set trigger inactive
+			end
+			
 		end
 	end
+end
 
 
 -- if debugKT then print("camp.automaticReinforce "..tostring(CampTotalTimeS).." >=? "..tostring(camp.automaticReinforce).." + "..tostring(campMod.airReinforceDelay).." *3600?".." cad: "..(camp.automaticReinforce + (campMod.airReinforceDelay * 3600))) end
@@ -2097,31 +2360,19 @@ Action = {}
 
 -- _affiche(camp.automaticReinforce, "camp.automaticReinforce")
 
-	for side_name, side in pairs(oob_air) do
-		-- print("DcCT side_name "..tostring(side_name))
-		-- print("DcCT camp.automaticReinforce "..tostring(camp.automaticReinforce[side_name]))
-		if side_name ~= "neutral" and CampTotalTimeS >= camp.automaticReinforce[side_name] + campMod.RepairOption[side_name]["airUnit"][3] * 3600 then
-			for unit_n, unit in pairs(side) do
-				if unit.roster.reserve and unit.roster.reserve > 0 then -- not unit.inactive and 
-					Action.AirUnitReinforce(unit.name, "")
-					if debugKT then print("DcCT automaticReinforce "..tostring(unit.name)) end
-				end
+for side_name, side in pairs(oob_air) do
+	-- print("DcCT side_name "..tostring(side_name))
+	-- print("DcCT camp.automaticReinforce "..tostring(camp.automaticReinforce[side_name]))
+	if side_name ~= "neutral" and CampTotalTimeS >= camp.automaticReinforce[side_name] + campMod.RepairOption[side_name]["airUnit"][3] * 3600 then
+		for unit_n, unit in pairs(side) do
+			if unit.roster.reserve and unit.roster.reserve > 0 then -- not unit.inactive and 
+				Action.AirUnitReinforce(unit.name, "")
+				if debugKT then print("DcCT automaticReinforce "..tostring(unit.name)) end
 			end
-			camp.automaticReinforce[side_name] = CampTotalTimeS
 		end
+		camp.automaticReinforce[side_name] = CampTotalTimeS
 	end
-
-
--- --**********************************************************************************
--- --recompletement automatique des unités SOL
--- --**********************************************************************************
--- if CampTotalTimeS >= camp.automaticReinforce + campMod.groundReinforceDelay * 3600 then
-
--- 	Action.GroundUnitRepair()
--- 	if debugKT then print("DcCT Action.GroundUnitRepair() ") end
-
--- 	camp.automaticReinforce = CampTotalTimeS
--- end
+end
 
 
 -- --**********************************************************************************
@@ -2136,19 +2387,19 @@ Action = {}
 
 
 	-- Destruction d'une base : 
-	-- BaseAlive < 20 ou à "RepairBaseMinimumDestroyed" : base HS DEFINITIVEMENT (Base Inactive, Plane Off, Heli Off)
+	-- BaseAlive < 20 ou à "minimumRepairThreshold" : base HS DEFINITIVEMENT (Base Inactive, Plane Off, Heli Off)
 	-- XXXX airbase is destroyed and will not be able to support air units anymore.
 
 	-- Destruction d'une piste : 
-	-- Runway < 20 ou à "RepairBaseMinimumDestroyed" : piste HS DEFINITIVEMENT, (Base Active, Plane Off, Heli On)
+	-- Runway < 20 ou à "deathPoint" : piste HS DEFINITIVEMENT, (Base Active, Plane Off, Heli On)
 	-- XXXX runway is completely destroyed and the base is not able to support planes  anymore ...
 
 	-- Endommagement d'une piste :
-	--  Runway >= 20 et <= 50 : la piste est HS pour les avions mais reste REPARABLE, (Base Active, Plane Off, Heli On)
+	--  Runway >= 20 et <= 50 (ou runwayOk): la piste est HS pour les avions mais reste REPARABLE, (Base Active, Plane Off, Heli On)
 	-- XXXX runway is badly damaged and it will require major repairs before it can be used again
 
 	-- Réparation d'une piste :
-	-- Runway > 50 la piste est PRATICABLE, REPARATION en cours , (Base Active, Plane On, Heli On)
+	-- Runway > 50 (ou runwayOk)la piste est PRATICABLE, REPARATION en cours , (Base Active, Plane On, Heli On)
 	-- XXXX runway is repaired and can be used again.
 
 
@@ -2186,6 +2437,15 @@ for baseName, base in pairs(db_airbases) do
 
 	if base.side then
 	
+		local baseDeathPoint = campMod.RepairOption[base.side]["airbase"][1]
+		local runwayDeathPoint = campMod.RepairOption[base.side]["runway"][2]
+		local runwayOk = campMod.RepairOption[base.side]["runway"][6]
+
+		-- print("base.side: "..tostring(base.side))
+		-- print("runwayOk: "..tostring(runwayOk))
+
+		-- _affiche(campMod.RepairOption, "campMod.RepairOption")
+
 		-- if base.baseAlive and base.baseAlive < campMod.RepairBaseMinimumDestroyed and not base.inactive   then
 		if base.baseAlive and base.baseAlive < campMod.RepairOption[base.side]["airbase"][1] and not base.inactive then
 			if debugKT then print(baseName.." 	airbase < 20 || airbase is destroyed and will not be able to support air units anymore. ") end
@@ -2196,7 +2456,7 @@ for baseName, base in pairs(db_airbases) do
 		elseif base.runwayAlive then
 			--runway gravement endommagé, irréparable
 			-- if base.runwayAlive < campMod.RepairBaseMinimumDestroyed then
-			if base.runwayAlive < campMod.RepairOption[base.side]["runway"][1] then
+			if base.runwayAlive < runwayDeathPoint then
 				if debugKT then print(baseName.." .runwayAlive < 20 || runway is completely destroyed and the base is not able to support planes  anymore.") end
 
 				Action.ActivateBaseAndItsUnits(baseName, true )
@@ -2206,13 +2466,14 @@ for baseName, base in pairs(db_airbases) do
 				-- 	Action.Text(baseName.." runway is completely destroyed and the base is not able to support planes anymore.")
 				-- end
 
-				if base.runwayTxt == nil or base.runwayTxt ~= "<"..campMod.RepairOption[base.side]["runway"][1] then
-					base.runwayTxt = "<"..campMod.RepairOption[base.side]["runway"][1]
+				if base.runwayTxt == nil or base.runwayTxt ~= "<"..runwayDeathPoint then
+					base.runwayTxt = "<"..runwayDeathPoint
 					Action.Text(baseName.." runway is completely destroyed and the base is not able to support planes anymore.")
 				end
 
 				--runway endommagé mais base encore active (les avions ne peuvent plus décoller, les helico si)
-			elseif  base.runwayAlive < 50 then
+			-- elseif  base.runwayAlive < 50 then
+			elseif  base.runwayAlive < runwayOk then
 				if debugKT then print(baseName.." .runwayAlive < 50 || runway is badly damaged and it will require major repairs before it can be used again.") end
 
 				Action.ActivateBaseAndItsUnits(baseName, true )
@@ -2223,13 +2484,13 @@ for baseName, base in pairs(db_airbases) do
 				end
 
 				--réparation du runway
-			elseif  base.runwayAlive >= 50 then
+			elseif  base.runwayAlive >= runwayOk then
 				if debugKT then print(baseName.." .runwayAlive >= 50 || runway is repaired and can be used again..") end
 
 				Action.ActivateBaseAndItsUnits(baseName, true )
 
 				-- if  base.runwayTxt == "<50" or base.runwayTxt == "<"..campMod.RepairBaseMinimumDestroyed then
-				if  base.runwayTxt == "<50" or base.runwayTxt == "<"..campMod.RepairOption[base.side]["runway"][1] then
+				if  base.runwayTxt == "<50" or base.runwayTxt == "<"..runwayDeathPoint then
 					base.runwayTxt = ">=50"
 					Action.Text(baseName.." runway is repaired and can be used again.")
 				end
@@ -2238,7 +2499,7 @@ for baseName, base in pairs(db_airbases) do
 
 		local testBaseAlive = Return.BaseAlive(baseName)
 		if testBaseAlive then
-			if testBaseAlive <= campMod.RepairOption[base.side]["airbase"][1] and not base.inactive then
+			if testBaseAlive <= baseDeathPoint and not base.inactive then
 				if debugKT then print(" 	airbase < RepairBaseMinimumDestroyed  active: FALSE "..baseName) end
 
 				Action.ActivateBaseAndItsUnits(baseName, false)

@@ -1177,29 +1177,46 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 				target = updateAlive(target)
 			end
 
-			local attribut = "generic"
+			-- print("DcCT 00    target.name ... "..tostring(target.name) )
+
+			local attribut
 			if target.attributes then 
 				for attributN, attributName in pairs(target.attributes) do
+					-- print("DcCT A    attributName ... "..tostring(attributName) )
 					attributName = string.lower(attributName)
+					
 					if Attribut2Target[attributName] then
 						attribut = Attribut2Target[attributName]
+						-- print("DcCT B    ASSIGN attribut ... "..tostring(attribut) )
 						break
 					end
 				end
 				if not attribut then
 					for attributN, attributName in pairs(target.attributes) do
+						-- print("DcCT C    attributName ... "..tostring(attributName) )
 						attributName = string.lower(attributName)
+						
 						for key , correspondanceName in pairs(Attribut2Target) do
+							-- print("DcCT D    attributName ... "..tostring(attributName) )
+							
 							if string.match(correspondanceName, attributName) then
 								attribut = correspondanceName
+								-- print("DcCT E    FOUND attribut ... "..tostring(attribut) )
 								break
 							end
 						end
 
 					end
 				end
+			end	
+			if not attribut then
+				attribut = "generic"	
 			end
 
+
+			-- print("side_name "..tostring(side_name))
+			-- print("attribut "..tostring(attribut))
+			-- _affiche(campMod.RepairOption, "campMod.RepairOption")
 			
 			local KillTargetLocal = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][2]
 
