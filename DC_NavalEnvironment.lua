@@ -599,19 +599,19 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 						for basename,base in pairs(db_airbases) do							--go through airbases
 							for u = 1, #group.units do										--go through units in group
 
-								-- print("DcNE passe A base.unitname "..tostring(base.unitname).." uName "..tostring(group.units[u].name).." u: "..u )
+								-- print("DcNE passe BA base.unitname "..tostring(base.unitname).." uName "..tostring(group.units[u].name).." u: "..u )
 
 								if base.unitname == group.units[u].name then				--if unit is an airbase (carrier)	
 									base.x = group.units[u].x								--update airbase (carrier) position
 									base.y = group.units[u].y								--update airbase (carrier) position
-									-- print("DcNE passe B "..base.unitname.." "..base.x)
+									-- print("DcNE passe BB "..base.unitname.." "..base.x)
 								end
 
 								--dans le cas, où il y aurait 2 CV dans le group
 								if u > 1 and base.unitname == group.units[u].name then				--if unit is an airbase (carrier)	
 									base.x = group.units[1].x								--update airbase (carrier) position
 									base.y = group.units[1].y								--update airbase (carrier) position
-									-- print("DcNE passe C "..base.unitname.." "..base.x)
+									-- print("DcNE passe BC "..base.unitname.." "..base.x)
 								end
 							end
 						end
@@ -635,12 +635,16 @@ end
 
 for basename,base in pairs(db_airbases) do															--iterate through airbases
 	if base.unitname then																			--if airbase is a carrier, find the unit in the OOB Ground
+		-- print("DcNE C unitName "..tostring(base.unitname) )
+		
 		for coal_name,coal in pairs(oob_ground) do													--go through sides(red/blue)	
 			for country_n,country in ipairs(coal) do												--go through countries
 				if country.ship then																--country has ships
 					for groupn,group in pairs(country.ship.group) do								--group table
 						for unitn,unit in pairs(group.units) do										--units table
 							if unit.name == base.unitname then										--respective unit found
+								-- print("DcNE J unit.name "..tostring(unit.name) )
+							
 								base.airdromeId = unit.unitId
 								base.x = unit.x
 								base.y = unit.y
@@ -694,6 +698,8 @@ for basename,base in pairs(db_airbases) do															--iterate through airba
 										},
 									}
 								end
+
+								-- print("DcNE Zbase.x "..tostring(base.x) )
 
 							end
 						end

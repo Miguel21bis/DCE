@@ -722,7 +722,6 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/DC_StaticAircraft.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Prune.lua")					-- Tomsk modification M09 Integration de  Prune Script
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Briefing.lua")
 
-
 --supprime l'ancien fichier
 --recherche Debug/BugList.lua
 local testFile = "Debug/BugList.lua"

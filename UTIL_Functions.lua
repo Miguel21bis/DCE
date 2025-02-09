@@ -3964,6 +3964,15 @@ function WriteToFile(path, content)
     file:close()
 end
 
+function checkTarawa(txt)
+
+	for basename, base in pairs(db_airbases) do															--iterate through airbases
+		if base.unitname and base.unitname == "LHA_Tarawa" then																			--if airbase is a carrier, find the unit in the OOB Ground
+			print("UtilF LHA_Tarawa "..txt.." "..tostring(base.x) )
+		end
+	end
+end
+
 
 
 

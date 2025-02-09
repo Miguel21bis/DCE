@@ -1,13 +1,13 @@
 -- updates the situation of the rejected pilots
 -- fill in the useful tables during the game
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  cleanCode_a debug_g
+-- last modification:  debug_h
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_UpdateSAR.lua"] = "1.4.18"
+versionDCE["DC_UpdateSAR.lua"] = "1.4.19"
 -------------------------------------------------------------------------------------------------------
 -- adjustement_g			(f coldAtStart)(d: enregistre les ref des circles dans la mission)(c inTheEnemyCamp)(b detect not camp_ZoneSAR.blue )(a boundary)
 -- cleanCode_a
--- debug_g 					(g aliasYear Unix time 1970)(f loss boundary)(e empty table)(d id duplicates)(c il reste des MIA)(b: camp_ZoneSAR)
+-- debug_h 					(h base.x)(g aliasYear Unix time 1970)(f loss boundary)(e empty table)(d id duplicates)(c il reste des MIA)(b: camp_ZoneSAR)
 -- modification M61_d		SAR	 (d theatre)
 -------------------------------------------------------------------------------------------------------
 
@@ -1066,15 +1066,18 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                                     if unit.base and db_airbases[unit.base]  and not db_airbases[unit.base].x then
                                         print("DcUSAR not xy on "..unit.base)
                                     end
-                                    local distance = math.sqrt(math.pow(element.x2d -  db_airbases[unit.base].x, 2) + math.pow(element.y2d -  db_airbases[unit.base].y, 2))
-                                    if distance <= selectedDistance then
-                                        selectedDistance = distance
-                                        selectedUnitName = unit.name
 
-                                        if debugDcUS then
-                                            print("DcUS EE_1 selectedUnitSAR "..tostring(element.MGRS_Chute )..tostring(element.name).." SUnitName: "..selectedUnitName.." "..selectedDistance)
+                                    if unit.base and db_airbases[unit.base] and db_airbases[unit.base].x then
+                                        local distance = math.sqrt(math.pow(element.x2d -  db_airbases[unit.base].x, 2) + math.pow(element.y2d -  db_airbases[unit.base].y, 2))
+                                        if distance <= selectedDistance then
+                                            selectedDistance = distance
+                                            selectedUnitName = unit.name
+
+                                            if debugDcUS then
+                                                print("DcUS EE_1 selectedUnitSAR "..tostring(element.MGRS_Chute )..tostring(element.name).." SUnitName: "..selectedUnitName.." "..selectedDistance)
+                                            end
+
                                         end
-
                                     end
                                 end
                             end

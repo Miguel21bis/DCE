@@ -1,11 +1,11 @@
 --To put vehicles and ships from ground OOB into next mission
 --Initiated by MAIN_NextMission.lua
 -------------------------------------------------------------------------------------------------------
--- last modification: cleancode_a
+-- last modification: debug_b
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_UpdateOOBGround.lua"] = "1.4.11"
+versionDCE["DC_UpdateOOBGround.lua"] = "1.4.12"
 ------------------------------------------------------------------------------------------------------- 
--- debug_a					(a id duplicates)
+-- debug_b					(ShipHealth < 66%)(a id duplicates)
 -- cleancode_a				(a springCleaning)
 -- modification M64_c		adds elements of a new base_mission (c ship)(b: update Type & groupId)
 -- modification M33_f		frequence des FARP selon db_airbase
@@ -30,26 +30,26 @@ end
 
 
 --disable carriers as air bases if they are damaged, destroyed or do not have a 100% probability
-for basename,base in pairs(db_airbases) do															--iterate through airbases
-	if base.unitname then																			--if airbase is a carrier, find the unit in the OOB Ground
-		for coal_name,coal in pairs(oob_ground) do													--go through sides(red/blue)	
-			for country_n,country in ipairs(coal) do												--go through countries
-				if country.ship then																--country has ships
-					for groupn,group in pairs(country.ship.group) do								--group table
-						for unitn,unit in pairs(group.units) do										--units table
-							if unit.name == base.unitname then										--respective unit found
-								if unit.dead or (camp.ShipHealth and camp.ShipHealth[unit.name] and camp.ShipHealth[unit.name] < 66) or (group.probability and group.probability < 1) then	 --unit is dead, damaged or its group has a probability that is not 100%
-									base.x = nil													--remove base coordinates to prevent sortie generation from this abse
-									base.y = nil
-								end
-							end
-						end
-					end
-				end
-			end
-		end
-	end
-end
+-- for basename,base in pairs(db_airbases) do															--iterate through airbases
+-- 	if base.unitname then																			--if airbase is a carrier, find the unit in the OOB Ground
+-- 		for coal_name,coal in pairs(oob_ground) do													--go through sides(red/blue)	
+-- 			for country_n,country in ipairs(coal) do												--go through countries
+-- 				if country.ship then																--country has ships
+-- 					for groupn,group in pairs(country.ship.group) do								--group table
+-- 						for unitn,unit in pairs(group.units) do										--units table
+-- 							if unit.name == base.unitname then										--respective unit found
+-- 								if unit.dead or (camp.ShipHealth and camp.ShipHealth[unit.name] and camp.ShipHealth[unit.name] < 66) or (group.probability and group.probability < 1) then	 --unit is dead, damaged or its group has a probability that is not 100%
+-- 									base.x = nil													--remove base coordinates to prevent sortie generation from this abse
+-- 									base.y = nil
+-- 								end
+-- 							end
+-- 						end
+-- 					end
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+-- end
 
 function GetNewId(allIdUsed, max, min)
 	--renumerote automatiquement le groupId en doublon

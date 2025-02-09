@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.82.526"
+versionDCE["UTIL_Changelog.lua"] = "20.82.527"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.82.526"
+VersionDCE["UTIL_Changelog.txt"] = "20.82.527"
 --[[
 
 
@@ -9,8 +9,9 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.82.526:==
+==:20.82.527:==
 
+527 fixed	[debrief]	debriefing is blocked on a base.x position issue with damaged CVN/LHA
 526 add	[campaignMaker]	Action.UnitResuscitateOrKill(unitName, liveOrKill, liveValue) (M82)
 525 fixed	[flight]	flight delayed
 
