@@ -566,11 +566,17 @@ for side, pack in pairs(ATO) do
 							-- os.execute 'pause'
 						end
 
-						if flight[f].player == true and w - 1 == 1 then				--for player flight and first waypoint
+						-- if flight[f].player == true and w - 1 == 1 then				--for player flight and first waypoint
+						-- 	player_start_shift = 0 - eta							--time shift to start player at mission start
+							
+						-- elseif flight[f].client == true and w - 1 == 1 then				--for player flight and first waypoint
+						-- 	-- player_start_shift = 0 - eta							--time shift to start player at mission start
+
+						if (flight[f].player or flight[f].client) and w - 1 == 1 then				--for player flight and first waypoint
 							player_start_shift = 0 - eta							--time shift to start player at mission start
+							
 						elseif flight[f].client == true and w - 1 == 1 then				--for player flight and first waypoint
 							-- player_start_shift = 0 - eta							--time shift to start player at mission start
-
 
 							if eta < 0 then
 								-- print("AtoT [eta < 0 ]")

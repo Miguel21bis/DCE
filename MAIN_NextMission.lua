@@ -51,9 +51,7 @@ Brief = {
 	red = {},
 	blue = {},
 }
-
 Briefing_text = ""
-
 
 -- par défaut, on assigne une valeur superieur au camp du joueur, qu'il soit rouge ou bleu.
 SkillWish = {
@@ -63,6 +61,8 @@ SkillWish = {
 
 PlacePA = {}
 AltitudeCruise = 5400			--for plane without hcruise
+TaxiTime = 3000
+if mission_ini.startup_time_player then mission_ini.startup_time_player = mission_ini.startup_time_player + TaxiTime end
 
 --Check_TaskPossibleByPlane
 ----- unpack template mission file ----

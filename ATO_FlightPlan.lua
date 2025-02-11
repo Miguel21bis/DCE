@@ -3997,14 +3997,18 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					waypoints[2].helipadId = waypoints[1].helipadId
 					waypoints[2].action = waypoints[1]["action"]
 					waypoints[2].type = waypoints[1]["type"]
+					waypoints[2].ETA = waypoints[1].ETA
 
 					table.remove(waypoints, 1)
 
 					-- waypoints[1].ETA = spawn_time	--NE PAS METTRE ça, ça rend le decollage en retard
 
-					if flight[f].player or flight[f].client then
-						waypoints[1].ETA = 0
-					end
+					-- if flight[f].player or flight[f].client then
+					-- 	waypoints[1].ETA = 0
+					-- 	Display(waypoints[1])
+					-- 	Display(waypoints[2])
+					-- 	os.execute 'pause'
+					-- end
 
 					waypoints[1].ETA_locked = true
 					waypoints[1].speed_locked = true

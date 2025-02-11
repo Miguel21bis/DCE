@@ -910,8 +910,20 @@ function ReplaceBaseName(s)
 	end
 end
 
+-- Fonction récursive pour itérer sur la table
+function Display(t, indent)
+    indent = indent or ""
+    for key, value in pairs(t) do
+        if type(value) == "table" then
+            print(indent .. tostring(key) .. ":")
+            Display(value, indent .. "  ")
+        else
+            print(indent .. tostring(key) .. ": " .. tostring(value))
+        end
+    end
+end
 
- function _affiche(_table, titre, prof)
+function _affiche(_table, titre, prof)
 
  if not prof or prof == nil then prof = 999 end 						-- prof = profondeur de niveau dans la hierarchie
   print()
@@ -2557,127 +2569,36 @@ end
 --met à jour automatiquement le conf_mod en fonction des nouveautés apporté par UTIL_ConfModCheck
 function UpdateConfMod()
     --version UpdateConfMod VA_1.12
-    
-    -- Fonction pour charger la configuration avec la structure
-	local function loadConfigWithStructureVA_1_37b(filePath)
-		-- version loadConfigWithStructure VA_1_37b
-		local config = {}
-		local structure = {}
-		local stack = {}
-		local currentTable = config
-		local currentKey = nil
-		local i = 1
-	
-		for line in io.lines(filePath) do
-			line = line:gsub("_check", "")  -- Supprimer "_check"
-			
-			-- 🔍 Debug
-			print("\n🔍 lCWS A "..line)
-	
-			-- Ignorer les lignes commentées
-			if line:match("^%s*%-%-") then
-				table.insert(structure, line)
-	
-			-- Ignorer les lignes versionDCE
-			elseif line:match("versionDCE") then
-			else
-				-- Réinitialiser les tables config et structure
-				if line:match("START_PARSING") then
-					config = {}
-					structure = {}
-					stack = {}
-					currentTable = config
-					currentKey = nil
-				end
-				
-				table.insert(structure, line)
-	
-				-- 📌 Détection de structures Lua complexes
-				local tableStart = line:match("(%S+)%s*=%s*{")
-				local tableEnd = line:match("^%s*}%s*[,]?")
-				local listValue = line:match('^%s*"(.-)",?%s*$')
-				local singleLineTable = line:match("(%S+)%s*=%s*{(.-)}%s*,?%s*$")
-				
-				local key, value, comment = line:match('(%S+)%s*=%s*([^%s,]+)%s*,?%s*%-%-%s*(.*)')
-	
-				if not key then
-					key, value = line:match('(%S+)%s*=%s*([^%s,]+)')  -- 🔄 Si pas de commentaire, matcher normalement
-				end
-	
-				if singleLineTable then
-					-- print("lCWS G _i_: "..i)
-					-- ✅ Correction : Capturer les tables sur une ligne
-					local name, contents = line:match("(%S+)%s*=%s*{(.-)}")
-					local newTable = {}
-					for value in contents:gmatch("[^,]+") do
-						value = value:match("^%s*(.-)%s*$") -- Supprimer les espaces blancs avant et après
-						newTable[#newTable + 1] = tonumber(value) or value
-					end
-					currentTable[name] = newTable
 
-				-- ✅ Détection des tables
-				elseif tableStart then
-					print("📌 TABLE détectée:", tableStart)
 	
-					if not currentTable[tableStart] then
-						currentTable[tableStart] = {}  -- 🛠️ Créer la table si elle n'existe pas
-					end
-	
-					table.insert(stack, currentTable)
-					currentTable = currentTable[tableStart]
-					currentKey = tableStart
-	
-				-- ✅ Détection des fermetures de table
-				elseif tableEnd then
-					print("📌 TABLE fermée:", currentKey)
-					currentTable = table.remove(stack)
-					currentKey = nil
-				
-				-- ✅ Détection des listes de strings
-				elseif listValue then
-					print("📌 LISTE détectée pour:", currentKey)
-	
-					if not currentKey then
-						print("❌ ERREUR: Aucun currentKey défini pour `" .. listValue .. "`")
-					else
-						-- if currentTable[currentKey] == nil then
-						-- 	currentTable[currentKey] = {}  -- 📌 Créer une liste vide si nécessaire
-						-- end
-	
-						table.insert(currentTable, listValue)
-						print("✅ Ajouté dans `"..currentKey.."` :", listValue)
-					end
-				
-				-- ✅ Détection des valeurs indexées ([1] = "...")
-				elseif line:match("^%s*%[%d+%]%s*=%s*") then
-					local index, listValue = line:match("^%s*%[(%d+)%]%s*=%s*\"(.-)\"")
-					if index and listValue then
-						print("📌 INDEXÉ: "..index.." → "..listValue)
-	
-						if not currentKey then
-							print("❌ ERREUR: Aucun currentKey défini pour `["..index.."]`")
-						else
-							if currentTable[currentKey] == nil then
-								currentTable[currentKey] = {}  -- 📌 Créer une liste vide si nécessaire
-							end
-	
-							currentTable[currentKey][tonumber(index)] = listValue
-							print("✅ Ajouté dans `"..currentKey.."` :", listValue)
-						end
-					end
-				
-				-- ✅ Détection des variables normales
-				elseif key and value then
-					print("📌 VARIABLE détectée:", key, "=", value)
-					value = value:gsub("[\",]+$", "")  -- 🔄 Nettoyer les guillemets et virgules parasites
-					currentTable[key] = tonumber(value) or value
-				end
+	-- local weather_override = {
+	-- 	temperature = 20,  -- 🌡️ Température en degrés Celsius
+	-- 	wind_speed = 5,    -- 🌬️ Vitesse du vent (m/s)
+	-- 	wind_dir = 180,    -- 🧭 Direction du vent
+	-- 	turbulence = 0,    -- 🌪️ Pas de turbulence
+	-- }
+
+	local weather_override = {
+		pHigh = 20,				--probability of high pressure weather system
+		pLow = 80,					--probability of low pressure weather system
+		refTemp = 18,				--average day max temperature
+	}
+    
+	local function deepCopy(orig)
+		local copy
+		if type(orig) == 'table' then
+			copy = {}
+			for orig_key, orig_value in pairs(orig) do
+				copy[orig_key] = deepCopy(orig_value)
 			end
+			setmetatable(copy, deepCopy(getmetatable(orig)))
+		else
+			copy = orig
 		end
-	
-		return config, structure
+		return copy
 	end
-	
+
+    -- Fonction pour charger la configuration avec la structure	
 	local function loadConfigWithStructure(filePath)
 		-- version loadConfigWithStructure VA_1.38b
 		local config = {}
@@ -2816,14 +2737,52 @@ function UpdateConfMod()
 		return config, structure
 	end
 	
+	-- ✅ Fonction pour récupérer la vraie valeur (sans toujours mettre des strings)
+	local function getFormattedValue(value)
 	
+		-- ✅ Si `value` est une table contenant { value = ..., comment = ... }
+		if type(value) == "table" and value.value ~= nil then
+			return getFormattedValue(value.value) -- Récupérer directement `value`
+		end
+	
+		-- ✅ Gestion des types normaux (string, booléens, nombres)
+		if type(value) == "string" then
+			if value == "true" or value == "false" then
+				return value -- Garder sans guillemets
+			elseif tonumber(value) then
+				return value -- Convertir en nombre
+			else
+				return '"' .. value:gsub('"', '') .. '"' -- Supprime les doubles guillemets parasites
+			end
+		elseif type(value) == "boolean" then
+			return tostring(value)
+		elseif type(value) == "number" then
+			return value
+		elseif type(value) == "table" then
+			-- 🔍 Vérifier si c'est une liste indexée
+			local isArray = (#value > 0) and (next(value, #value) == nil)
+		
+			if isArray then
+				return "{ " .. table.concat(value, ", ") .. " }"  -- ✅ Format propre des listes !
+			else
+				local formattedTable = {}
+				for k, v in pairs(value) do
+					table.insert(formattedTable, "[" .. tostring(k) .. "] = " .. getFormattedValue(v))
+				end
+				return "{ " .. table.concat(formattedTable, ", ") .. " }"
+			end
+
+		else
+			return tostring(value)
+		end
+	end
 
     -- Fonction pour supprimer les clés obsolètes
     local function removeObsoleteEntries(clientConfig, referenceConfig)
         --version removeObsoleteEntries VA_1.12
         local function deepClean(clientTable, referenceTable)
             for key, value in pairs(clientTable) do
-                if key ~= "pictureBrief" then
+                if key ~= "pictureBrief" and key ~= "movedBullseye" then
 					if type(value) == "table" then
 						if not referenceTable[key] then
 							clientTable[key] = nil  -- Supprime la table complète si elle est absente du modèle
@@ -2843,48 +2802,153 @@ function UpdateConfMod()
         return clientConfig
     end
 
+	local function mergeTables(clientTable, defaultTable, structure)
+		for key, defaultValue in pairs(defaultTable) do
+			local clientValue = clientTable[key]
+	
+			-- 🖼️ `pictureBrief` ne doit pas être touché
+			if key == "pictureBrief" then
+				print("[mergeTables] A `pictureBrief` préservé")
+	
+			-- 🌍 `movedBullseye` doit fusionner **ET** accepter de nouvelles maps
+			elseif key == "movedBullseye" and type(defaultValue) == "table" then
+				print("[mergeTables] B Fusion `movedBullseye`")
+				if type(clientValue) ~= "table" then
+					print("[mergeTables] C `movedBullseye` absent dans clientTable, création")
+					clientTable[key] = {}
+				end
+	
+				-- 🔄 Fusion normale des maps existantes
+				mergeTables(clientValue, defaultValue, structure)
+	
+				-- ✅ Ajouter les nouvelles maps du client qui n'existent pas dans `defaultTable`
+				for mapName, mapData in pairs(clientValue) do
+					print("[mergeTables] D Map détectée :", mapName)
+					if not defaultValue[mapName] then
+						print("[mergeTables] E Nouvelle map ajoutée :", mapName)
+						defaultValue[mapName] = deepCopy(mapData) -- Ajoute la map à `config_default`
+						
+						-- 🏗 Ajouter aussi `mapName` à `structure` pour garantir l'écriture
+						table.insert(structure, "\t" .. mapName .. " = {")
+						table.insert(structure, "\t\tpos = {")
+						table.insert(structure, "\t\t\tx = " .. getFormattedValue(mapData.pos.x) .. ",")
+						table.insert(structure, "\t\t\ty = " .. getFormattedValue(mapData.pos.y) .. ",")
+						table.insert(structure, "\t\t},")
+						table.insert(structure, "\t\trayon = " .. getFormattedValue(mapData.rayon) .. ",")
+						table.insert(structure, "\t},")
+					end
+				end
+	
+			-- 🌦️ `weather` doit **toujours** être remplacé par `weather_override`
+			elseif key == "weather" then
+				print("[mergeTables] 🌦 Application de `weather_override`")
+				clientTable[key] = deepCopy(weather_override)
+	
+			-- 🔀 Fusion normale des sous-tables
+			elseif type(defaultValue) == "table" then
+				if not clientValue then
+					print("[mergeTables] 🆕 Copie de la table absente :", key)
+					clientTable[key] = deepCopy(defaultValue)
+				elseif type(clientValue) == "table" then
+					mergeTables(clientValue, defaultValue, structure)
+				end
+	
+			-- 📝 Valeur simple : on applique la valeur par défaut si absente
+			else
+				if clientValue == nil then
+					print("[mergeTables] 📝 Valeur par défaut appliquée :", key)
+					clientTable[key] = defaultValue
+				end
+			end
+		end
+	end
+
     -- Nouvelle fonction pour insérer les nouvelles tables et variables manquantes dans la structure
 	local function updateConfiguration(clientConfig, defaultConfig)
 		-- version updateConfiguration VA_1.34 (Ajout du retour clientConfig)
-		local function deepCopy(orig)
-			local copy
-			if type(orig) == 'table' then
-				copy = {}
-				for orig_key, orig_value in pairs(orig) do
-					copy[orig_key] = deepCopy(orig_value)
-				end
-				setmetatable(copy, deepCopy(getmetatable(orig)))
-			else
-				copy = orig
-			end
-			return copy
-		end
 	
-		local function mergeTables(clientTable, defaultTable)
-			for key, defaultValue in pairs(defaultTable) do
-				local clientValue = clientTable[key]
+		-- local function mergeTables(clientTable, defaultTable)
+		-- 	for key, defaultValue in pairs(defaultTable) do
+		-- 		local clientValue = clientTable[key]
 		
-				-- 🚨 Exception : `pictureBrief` doit rester **intact**
-				if key == "pictureBrief" then
-					print("🚨 `pictureBrief` préservé, aucune modification !")
-					if type(clientValue) ~= "table" then
-						clientTable[key] = {}  -- Assurer que c'est bien une table
-					end
-				elseif type(defaultValue) == "table" then
-					if not clientValue then
-						clientTable[key] = deepCopy(defaultValue)
-					elseif type(clientValue) == "table" then
-						mergeTables(clientValue, defaultValue)
-					end
-				else
-					if clientValue == nil then
-						clientTable[key] = defaultValue
-					end
-				end
-			end
-		end
+		-- 		-- 🚨 Exception : `pictureBrief` doit rester **intact**
+		-- 		if key == "pictureBrief" then
+		-- 			print("🚨 `pictureBrief` préservé, aucune modification !")
+		-- 			if type(clientValue) ~= "table" then
+		-- 				clientTable[key] = {}  -- Assurer que c'est bien une table
+		-- 			end
+		-- 		elseif type(defaultValue) == "table" then
+		-- 			if not clientValue then
+		-- 				clientTable[key] = deepCopy(defaultValue)
+		-- 			elseif type(clientValue) == "table" then
+		-- 				mergeTables(clientValue, defaultValue)
+		-- 			end
+		-- 		else
+		-- 			if clientValue == nil then
+		-- 				clientTable[key] = defaultValue
+		-- 			end
+		-- 		end
+		-- 	end
+		-- end
+
 		
 		
+
+		-- local function mergeTables(clientTable, defaultTable)
+		-- 	-- version mergeTables VA_1.12 (Debug movedBullseye & weather)
+		
+		-- 	for key, defaultValue in pairs(defaultTable) do
+		-- 		local clientValue = clientTable[key]
+		
+		-- 		-- 🚨 Vérif de `pictureBrief`
+		-- 		if key == "pictureBrief" then
+		-- 			print("[mergeTables] A `pictureBrief` préservé")
+		
+		-- 		-- 🌍 Vérif de `movedBullseye`
+		-- 		elseif key == "movedBullseye" and type(defaultValue) == "table" then
+		-- 			print("[mergeTables] B Fusion `movedBullseye` en cours...key: "..tostring(key))
+		-- 			if type(clientValue) ~= "table" then
+		-- 				print("[mergeTables] C `movedBullseye` absent dans clientTable, création key: "..tostring(key))
+		-- 				clientTable[key] = {}  -- Créer `movedBullseye` si absent
+		-- 			end
+		
+		-- 			-- 🔄 Fusionner les maps existantes
+		-- 			mergeTables(clientValue, defaultValue)
+
+		-- 			-- ✅ Ajouter les nouvelles maps du client qui n'existent pas dans `defaultTable`
+		-- 			for mapName, mapData in pairs(clientValue) do
+		-- 				print("[mergeTables] D  map ? :", mapName)
+
+		-- 				if not defaultValue[mapName] then
+		-- 					print("[mergeTables] E Nouvelle map ajoutée :", mapName)
+		-- 					clientTable[key][mapName] = deepCopy(mapData)  -- 🔥 Ajouter à `clientTable`, pas `defaultTable`
+		-- 				end
+		-- 			end
+
+		
+		-- 		-- 🌦 Vérif de `weather`
+		-- 		elseif key == "weather" then
+		-- 			print("[mergeTables] 🌦 Application de `weather_override`")
+		-- 			clientTable[key] = deepCopy(weather_override) -- **Force les valeurs définies**
+		
+		-- 		-- 🔀 Fusion normale des sous-tables
+		-- 		elseif type(defaultValue) == "table" then
+		-- 			if not clientValue then
+		-- 				print("[mergeTables] 🆕 Copie de la table absente :", key)
+		-- 				clientTable[key] = deepCopy(defaultValue)
+		-- 			elseif type(clientValue) == "table" then
+		-- 				mergeTables(clientValue, defaultValue)
+		-- 			end
+		
+		-- 		-- 📝 Prendre la valeur par défaut si absente
+		-- 		else
+		-- 			if clientValue == nil then
+		-- 				print("[mergeTables] 📝 Valeur par défaut appliquée :", key)
+		-- 				clientTable[key] = defaultValue
+		-- 			end
+		-- 		end
+		-- 	end
+		-- end
 		
 		mergeTables(clientConfig, defaultConfig)
 
@@ -2894,8 +2958,14 @@ function UpdateConfMod()
 
 	
 	local function saveUpdatedConfig(filePath, updatedConfig, structure)
-
 		-- version saveUpdatedConfig VA_1.50 (Correction des valeurs sous forme de table et commentaires)
+
+		if updatedConfig.weather then
+			for key, forcedValue in pairs(weather_override) do
+				updatedConfig.weather[key] = forcedValue  -- **Écrase l'existant OU ajoute si absent**
+			end
+		end
+
 		local file = io.open(filePath, "w")
 		if not file then error("Cannot open file for writing: " .. filePath) end
 	
@@ -2907,68 +2977,45 @@ function UpdateConfMod()
 			return string.rep("\t", level)
 		end
 	
-		-- ✅ Fonction pour récupérer la vraie valeur (sans toujours mettre des strings)
-		local function getFormattedValue(value)
-			-- print("\nGFV value type:", type(value), " value:", tostring(value))
-		
-			-- ✅ Si `value` est une table contenant { value = ..., comment = ... }
-			if type(value) == "table" and value.value ~= nil then
-				-- print("GFV_A1 Found { value = ..., comment = ... }, extracting value...")
-				return getFormattedValue(value.value) -- Récupérer directement `value`
-			end
-		
-			-- ✅ Gestion des types normaux (string, booléens, nombres)
-			if type(value) == "string" then
-				if value == "true" or value == "false" then
-					-- print("GFV_B Boolean string:", value)
-					return value -- Garder sans guillemets
-				elseif tonumber(value) then
-					-- print("GFV_C Number as string:", value)
-					return value -- Convertir en nombre
-				else
-					-- print("GFV_D Normal string:", value)
-					return '"' .. value:gsub('"', '') .. '"' -- Supprime les doubles guillemets parasites
-				end
-			elseif type(value) == "boolean" then
-				-- print("GFV_E Boolean:", value)
-				return tostring(value)
-			elseif type(value) == "number" then
-				-- print("GFV_F Number:", value)
-				return value
-			-- elseif type(value) == "table" then
-			-- 	-- print("GFV_G Detected table")
-			-- 	if next(value) then
-			-- 		local formattedTable = {}
-			-- 		for k, v in pairs(value) do
-			-- 			-- print("GFV_G1 Table key:", k, "value:", v)
-			-- 			table.insert(formattedTable, getFormattedValue(v))
-			-- 		end
-			-- 		return "{ " .. table.concat(formattedTable, ", ") .. " }"
-			-- 	else
-			-- 		-- print("GFV_G2 Empty table")
-			-- 		return "{}"
-			-- 	end
-			elseif type(value) == "table" then
-				-- 🔍 Vérifier si c'est une liste indexée
-				local isArray = (#value > 0) and (next(value, #value) == nil)
+		-- -- ✅ Fonction pour récupérer la vraie valeur (sans toujours mettre des strings)
+		-- local function getFormattedValue(value)
 			
-				if isArray then
-					return "{ " .. table.concat(value, ", ") .. " }"  -- ✅ Format propre des listes !
-				else
-					local formattedTable = {}
-					for k, v in pairs(value) do
-						table.insert(formattedTable, "[" .. tostring(k) .. "] = " .. getFormattedValue(v))
-					end
-					return "{ " .. table.concat(formattedTable, ", ") .. " }"
-				end
+		-- 	-- ✅ Si `value` est une table contenant { value = ..., comment = ... }
+		-- 	if type(value) == "table" and value.value ~= nil then
+		-- 		return getFormattedValue(value.value) -- Récupérer directement `value`
+		-- 	end
 		
-		
+		-- 	-- ✅ Gestion des types normaux (string, booléens, nombres)
+		-- 	if type(value) == "string" then
+		-- 		if value == "true" or value == "false" then
+		-- 			return value -- Garder sans guillemets
+		-- 		elseif tonumber(value) then
+		-- 			return value -- Convertir en nombre
+		-- 		else
+		-- 			return '"' .. value:gsub('"', '') .. '"' -- Supprime les doubles guillemets parasites
+		-- 		end
+		-- 	elseif type(value) == "boolean" then
+		-- 		return tostring(value)
+		-- 	elseif type(value) == "number" then
+		-- 		return value
+		-- 	elseif type(value) == "table" then
+		-- 		-- 🔍 Vérifier si c'est une liste indexée
+		-- 		local isArray = (#value > 0) and (next(value, #value) == nil)
 			
-			else
-				-- print("GFV_H Unknown type:", type(value))
-				return tostring(value)
-			end
-		end
+		-- 		if isArray then
+		-- 			return "{ " .. table.concat(value, ", ") .. " }"  -- ✅ Format propre des listes !
+		-- 		else
+		-- 			local formattedTable = {}
+		-- 			for k, v in pairs(value) do
+		-- 				table.insert(formattedTable, "[" .. tostring(k) .. "] = " .. getFormattedValue(v))
+		-- 			end
+		-- 			return "{ " .. table.concat(formattedTable, ", ") .. " }"
+		-- 		end
+
+		-- 	else
+		-- 		return tostring(value)
+		-- 	end
+		-- end
 		
 	
 		local function writeStructureLines(currentTable, structure, level)
@@ -3042,6 +3089,8 @@ function UpdateConfMod()
 						key, value = line:match('(%S+)%s*=%s*(.-)%s*$')
 					end
 
+					-- print("F1 ")
+
 					if key then
 						local clientValue = currentTable[key] or value
 						local formattedValue = getFormattedValue(clientValue)
@@ -3069,8 +3118,10 @@ function UpdateConfMod()
 					
 						-- 📌 Écriture avec **espacement plus serré**
 						if comment then
+							-- print("F2 "..getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and "," or "") .. spacingAfterValue .. "-- " .. comment .. "\n")
 							file:write(getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and "," or "") .. spacingAfterValue .. "-- " .. comment .. "\n")
 						else
+							-- print("F3 "..getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and ",") .. "\n")
 							file:write(getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and ",") .. "\n")
 						end
 					end
@@ -3101,8 +3152,13 @@ function UpdateConfMod()
 				file:write(getIndent(level) .. "}\n")  -- Fermeture de `pictureBrief`
 			end
 
+	
 		end
 	
+		-- print("[saveUpdatedConfig] 🔍 Contenu final avant écriture :")
+		-- Display(updatedConfig, "FINAL")
+
+
 		-- ✅ Écrire la structure dans le fichier en respectant les valeurs du client
 		writeStructureLines(updatedConfig, structure, indentLevel)
 	
@@ -3115,12 +3171,15 @@ function UpdateConfMod()
 
 
     -- Charger les fichiers de configuration client et par défaut
-    local clientConfig, _ = loadConfigWithStructure(clientConfigPath)
+    local clientConfig, clientStructure = loadConfigWithStructure(clientConfigPath)
 
 	-- 🌟 Sauvegarde `pictureBrief` original AVANT toute modification
 	local backupPictureBrief = clientConfig.pictureBrief and Deepcopy(clientConfig.pictureBrief) or nil
 
     local defaultConfig, defaultStructure = loadConfigWithStructure(defaultConfigPath)
+
+	mergeTables(clientConfig, defaultConfig, clientStructure)
+
 
     -- Nettoyer les variables obsolètes du client
     clientConfig = removeObsoleteEntries(clientConfig, defaultConfig)
@@ -3129,7 +3188,7 @@ function UpdateConfMod()
 	clientConfig = updateConfiguration(clientConfig, defaultConfig)
 
 	if backupPictureBrief then
-		print("🔄 Restauration de `pictureBrief` après traitement !")
+		-- print("🔄 Restauration de `pictureBrief` après traitement !")
 		clientConfig.pictureBrief = backupPictureBrief
 	end
 	
@@ -3137,7 +3196,6 @@ function UpdateConfMod()
 	-- Sauvegarder la configuration mise à jour
 	-- clientConfigPath = "Init/conf_mod_BBB.lua"
 	saveUpdatedConfig(clientConfigPath, clientConfig, defaultStructure)
-
 
 	dofile("Init/conf_mod.lua")
 end	
@@ -3964,7 +4022,7 @@ function WriteToFile(path, content)
     file:close()
 end
 
-function checkTarawa(txt)
+function CheckTarawa(txt)
 
 	for basename, base in pairs(db_airbases) do															--iterate through airbases
 		if base.unitname and base.unitname == "LHA_Tarawa" then																			--if airbase is a carrier, find the unit in the OOB Ground

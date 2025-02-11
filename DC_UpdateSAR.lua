@@ -1063,9 +1063,9 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                                         os.execute 'pause'
                                     end
 
-                                    if unit.base and db_airbases[unit.base]  and not db_airbases[unit.base].x then
-                                        print("DcUSAR not xy on "..unit.base)
-                                    end
+                                    -- if unit.base and db_airbases[unit.base]  and not db_airbases[unit.base].x then
+                                    --     print("DcUSAR not base.x on "..unit.base)
+                                    -- end
 
                                     if unit.base and db_airbases[unit.base] and db_airbases[unit.base].x then
                                         local distance = math.sqrt(math.pow(element.x2d -  db_airbases[unit.base].x, 2) + math.pow(element.y2d -  db_airbases[unit.base].y, 2))

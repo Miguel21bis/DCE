@@ -3,13 +3,13 @@
 --This file is updated automatically if new items are added, keeping the old player options
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M78_a
+-- last modification: reglage_m
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_ConfModCheck.lua"] = "1.38.118"
+versionDCE["UTIL_ConfModCheck.lua"] = "1.38.119"
 ------------------------------------------------------------------------------------------------------- 		
 -- SomethingSimple_a		(a add randomizeSkills)
 -- cleanCode_b		
--- Reglage_n				(n CVN to CV)(m remove jettison line)(l Add spyTarget)(j: new slider_PercentPlane)(i TheChannel)(h strikeOnlyWithEscorte = false)(g: PruneScriptConf)(f: Init/loadout selection)(e: remet WestCallsign dans ATO_FlightPlan)(d: delete DeltaMn table)(c: fire Playable_m from conf_mod)(b: CJTF Blue)(a: United Arab Emirates)
+-- reglage_m				(m Kola)(n CVN to CV)(m remove jettison line)(l Add spyTarget)(j: new slider_PercentPlane)(i TheChannel)(h strikeOnlyWithEscorte = false)(g: PruneScriptConf)(f: Init/loadout selection)(e: remet WestCallsign dans ATO_FlightPlan)(d: delete DeltaMn table)(c: fire Playable_m from conf_mod)(b: CJTF Blue)(a: United Arab Emirates)
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 
 -- modification M77_c		CG_ArtySpotter (c camp.spotter)
 -- modification M72_a		alignment_Mode
@@ -250,6 +250,13 @@ campMod_check = {
 				},
 			rayon  = 200,					-- distance en Km autour de laquelle on peut placer le bullsEye
 		},
+		Kola = {
+            pos = {
+                x = 00132610,				--Murmansk International
+                y = 00408650,				--Murmansk International
+                },
+            rayon   = 200,					-- distance en Km autour de laquelle on peut placer le bullsEye
+        },
 	},
 
 }
