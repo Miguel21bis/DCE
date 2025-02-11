@@ -1095,11 +1095,11 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 						--build the overview list with the entries of all waypoints
 						local WP_num = 0																			--waypoint number, starts with 0
 						for w = 1, #tempPlayer.waypoints do														--iterate through all waypoints
-							if tempPlayer.waypoints[w].briefing_name == "Departure" then
+							-- if tempPlayer.waypoints[w].briefing_name == "Departure" then
 								
-								tempPlayer.waypoints[w].ETA = tempPlayer.waypoints[w].ETA + mission_ini.startup_time_player
+							-- 	tempPlayer.waypoints[w].ETA = tempPlayer.waypoints[w].ETA + mission_ini.startup_time_player
 
-							end
+							-- end
 						
 							if tempPlayer.waypoints[w].briefing_name ~= "Taxi" then								--do not list taxi waypoint in overview
 								for e = 1, #entries do																--iterate through all entries

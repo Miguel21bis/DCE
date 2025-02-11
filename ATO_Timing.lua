@@ -1,13 +1,13 @@
 --To define Time on target for all packages and ETA for all aircraft waypoints
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  adjustment_h
+-- last modification:  adjustment_i
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_Timing.lua"] = "1.7.68"
+versionDCE["ATO_Timing.lua"] = "1.7.69"
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_d				(d springCleaning)
--- adjustment_h				(h fuel consumption)(g add AFAC task)(f not standoff in cap)(d escort Transport)(c airstart for Fuel)(b attempts to "dilute" all packages throughout the duration of the mission)(a gives more time to set up the player flight (SP and MP))						
+-- adjustment_i				(i subtract time for taxi)(h fuel consumption)(g add AFAC task)(f not standoff in cap)(d escort Transport)(c airstart for Fuel)(b attempts to "dilute" all packages throughout the duration of the mission)(a gives more time to set up the player flight (SP and MP))						
 -- Debug_k					(k latest = nil)(j time between CAPs too long)(i client Transport)(h tot bug with same target_name)(g escort/transport)(f add offset role == Anti-ship Strike)(e retablit ate<0 jusqu'a wpt 1) (d: tot transport bug)(c: speed trop faible pour les escort : = flight[f].loadout.vCruise * (1 - 10/100)) (c: Spawn before Departure) (a: vCruise by default) 
 -- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
 -- modification M17_b		Option F-14B
@@ -524,76 +524,42 @@ for side, pack in pairs(ATO) do
 							-- speed = vCruise * (1 - 10/100)									--speed to Join Point is 3/4 of cruise speed to allow for the climb
 							speed = vCruise * (1 - 10/100)
 							tempTxt = tempTxt.."\nAtoT_eta speed_H "..speed
-						-- elseif (flight[f].route[w].id == "Join") and  flight[f].helicopter then          -- modification M06.e : helicoptere playable
-						-- 	speed = vCruise 
-						-- 	tempTxt = tempTxt.."\nAtoT_eta speed_I "..speed
 						end
 
 						if speed < flight[f].loadout.vCruise * (1 - 10/100) then
-							-- print("AtoRG passe speed < flight[f]..vCruise "..tostring(speed).." < ".. flight[f].loadout.vCruise * (1 - 10/100) )
 							speed = flight[f].loadout.vCruise * (1 - 10/100)
-							-- print("AtoRG result: "..tostring(speed).." ==? ".. flight[f].loadout.vCruise * (1 - 10/100) )
-							tempTxt = tempTxt.."\nAtoT_eta speed_J "..speed
+							
 						end
-
-						--print(tempTxt)
-						debugTxt_AtoT = debugTxt_AtoT ..tempTxt.."\n"
 
 						local leg = GetDistance(flight[f].route[w], flight[f].route[w - 1])	--measure lenght of the previous route leg
 
-						tempTxt ="AtoT_eta eta "..eta.."  leg "..leg.." speed "..speed.." "..flight[f].route[w-1].id
-						--print(tempTxt)
-						debugTxt_AtoT = debugTxt_AtoT ..tempTxt.."\n"
-
 						eta = eta - leg / speed										--calcualte ETA at previous waypoint
 
-						tempTxt ="AtoT_eta ____________________________________________  eta "..eta
-						--print(tempTxt)
-						debugTxt_AtoT = debugTxt_AtoT ..tempTxt.."\n"
-
 						if w - 1 == 1 then											--WP is first WP
-							tempTxt ="AtoT_eta if w - 1 == 1 eta "..eta.." start_up_time "..start_up_time
-							--print(tempTxt)
-							debugTxt_AtoT = debugTxt_AtoT ..tempTxt.."\n"
 							eta = eta - start_up_time								--subtract time for start up
+						end
+						if w - 1 == 2 then											--WP is 2 WP
+							eta = eta - 300								--subtract time for taxi
 						end
 
 						flight[f].route[w - 1].eta = eta							--set ETA at previous waypoint
 						flight[f].route[w].speed = speed							--set NEWSPEED
 
-						if w >= 3 and flight[f].route[w - 2] == flight[f].route[w - 1] then
-							tempTxt = tempTxt.."\nAtoT_eta tw = target_wp, 2, -1 eta "..eta.." id: "..flight[f].route[w - 1].id
-							-- os.execute 'pause'
-						end
-
-						-- if flight[f].player == true and w - 1 == 1 then				--for player flight and first waypoint
-						-- 	player_start_shift = 0 - eta							--time shift to start player at mission start
-							
-						-- elseif flight[f].client == true and w - 1 == 1 then				--for player flight and first waypoint
-						-- 	-- player_start_shift = 0 - eta							--time shift to start player at mission start
-
 						if (flight[f].player or flight[f].client) and w - 1 == 1 then				--for player flight and first waypoint
-							player_start_shift = 0 - eta							--time shift to start player at mission start
+							player_start_shift = 0 - eta											--time shift to start player at mission start
 							
-						elseif flight[f].client == true and w - 1 == 1 then				--for player flight and first waypoint
-							-- player_start_shift = 0 - eta							--time shift to start player at mission start
-
-							if eta < 0 then
-								-- print("AtoT [eta < 0 ]")
-								-- if  player_start_shift == 0  then 
-									-- player_start_shift =  math.abs(eta)
-									-- print("AtoT  if player_start_shift == 0 then => player_start_shift "..tostring(player_start_shift))
-								-- else
-								if math.abs(eta) > player_start_shift then
-									player_start_shift =  math.abs(eta)
-								end
-							else
-								if  player_start_shift == 0  then
-									player_start_shift = 0 - eta
-								elseif  player_start_shift < 0 and (0 - eta) > player_start_shift then
-									player_start_shift = 0 - eta
-								end
-							end
+							-- if eta < 0 then
+							-- 	print("AtoT [eta < 0 ]")
+							-- 	if math.abs(eta) > player_start_shift then
+							-- 		player_start_shift =  math.abs(eta)
+							-- 	end
+							-- else
+							-- 	if  player_start_shift == 0  then
+							-- 		player_start_shift = 0 - eta
+							-- 	elseif  player_start_shift < 0 and (0 - eta) > player_start_shift then
+							-- 		player_start_shift = 0 - eta
+							-- 	end
+							-- end
 						end
 					end
 				end
@@ -631,48 +597,30 @@ for side, pack in pairs(ATO) do
 		TOTtable[side][pack[p].main[1].target_name] = TOTtable[side][pack[p].main[1].target_name] + player_start_shift	--adjust stored TOT of target for player shift
 
 
-		for role,flight in pairs(pack[p]) do													--iterate through roles in package (main, SEAD, escort)
-			for f = 1, #flight do																--iterate through all flights
-				tempTxt = "AtoT_eta - typeC "..flight[f].type.." target_name "..tostring(flight[f].target_name).."_"..f
-				--print(tempTxt)
-				debugTxt_AtoT = debugTxt_AtoT ..tempTxt.."\n"
-
-
+		for role,flight in pairs(pack[p]) do
+			for f = 1, #flight do
+				
 				if flight[f].loadout.vCruise then vCruise = flight[f].loadout.vCruise end
 				if flight[f].loadout.vAttack then vAttack = flight[f].loadout.vAttack end
 
-				for w = 1, #flight[f].route do													--iterate through all waypoints
-					
-				
+				for w = 1, #flight[f].route do
 					if not flight[f].route[w].eta then 
-						-- print(debugTxt_AtoT)
-						-- _affiche(flight)
-
 						flight[f].route[w].eta = 0
 					end
 	
-				
 					if flight[f].route[w].id == "Station" and flight[f].route[w].eta + player_start_shift < 0 then		--Start or end of a station would be shifted before mission start
-						flight[f].route[w].eta = 1												--adjust WP eta to mission start
+						flight[f].route[w].eta = 1																		--adjust WP eta to mission start
 					else
-						flight[f].route[w].eta = flight[f].route[w].eta + player_start_shift	--adjust WP eta by time difference for player to start at mission start
-						tempTxt = "AtoT_eta + player_start_shift player_start_shift "..player_start_shift.." eta "..flight[f].route[w].eta.." "..flight[f].route[w].id
-						--print(tempTxt)
-						debugTxt_AtoT = debugTxt_AtoT ..tempTxt.."\n"
+						flight[f].route[w].eta = flight[f].route[w].eta + player_start_shift							--adjust WP eta by time difference for player to start at mission start
 					end
 				end
 
 				--Air starts
 				local airstart = 0															--if TOT causes a take off before mission start, flight becomes air start and this variable gets the number of the spawn WP
 
-				--Debug_b		for w = target_wp - 1, 1, -1 do	 	
 				local deltaETA = 0
 				for w = target_wp - 1, 1, -1 do													--iterate through waypoints backwards
-					-- if not flight[f].route[w] then
-					-- 	print("AtoT target_wp: "..tostring(target_wp).." w: "..w)
-					-- 	_affiche(flight, "AtoT bug 453")
-					-- end
-					if flight[f].route[w].eta < 0 and not flight[f].client then					--ETA before mission start
+					if flight[f].route[w].eta < 0 and not (flight[f].client or flight[f].player) then					--ETA before mission start
 						deltaETA = flight[f].route[1].eta
 
 						--find flight position at mission start and make it a WP
@@ -718,8 +666,8 @@ for side, pack in pairs(ATO) do
 						end
 						airstart = w															--store the number of the spawn WP (WPs ahead will be removed)
 						break
-					elseif flight[f].route[w].eta < 0 and  flight[f].client then
-						-- print("AtoT Alert SPAWNING ETA <0 "..tostring(flight[f].route[w].eta))						
+					elseif flight[f].route[w].eta < 0 and (flight[f].client or flight[f].player) then
+						print("AtoT Alert SPAWNING ETA <0 "..tostring(flight[f].route[w].eta))						
 						-- if  flight[f].route[w].eta < Correction_startup_time_player  then						
 							-- Correction_startup_time_player = flight[f].route[w].eta					
 						-- end					

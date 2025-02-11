@@ -2808,13 +2808,13 @@ function UpdateConfMod()
 	
 			-- 🖼️ `pictureBrief` ne doit pas être touché
 			if key == "pictureBrief" then
-				print("[mergeTables] A `pictureBrief` préservé")
+				-- print("[mergeTables] A `pictureBrief` préservé")
 	
 			-- 🌍 `movedBullseye` doit fusionner **ET** accepter de nouvelles maps
 			elseif key == "movedBullseye" and type(defaultValue) == "table" then
-				print("[mergeTables] B Fusion `movedBullseye`")
+				-- print("[mergeTables] B Fusion `movedBullseye`")
 				if type(clientValue) ~= "table" then
-					print("[mergeTables] C `movedBullseye` absent dans clientTable, création")
+					-- print("[mergeTables] C `movedBullseye` absent dans clientTable, création")
 					clientTable[key] = {}
 				end
 	
@@ -2823,9 +2823,9 @@ function UpdateConfMod()
 	
 				-- ✅ Ajouter les nouvelles maps du client qui n'existent pas dans `defaultTable`
 				for mapName, mapData in pairs(clientValue) do
-					print("[mergeTables] D Map détectée :", mapName)
+					-- print("[mergeTables] D Map détectée :", mapName)
 					if not defaultValue[mapName] then
-						print("[mergeTables] E Nouvelle map ajoutée :", mapName)
+						-- print("[mergeTables] E Nouvelle map ajoutée :", mapName)
 						defaultValue[mapName] = deepCopy(mapData) -- Ajoute la map à `config_default`
 						
 						-- 🏗 Ajouter aussi `mapName` à `structure` pour garantir l'écriture
@@ -2841,13 +2841,13 @@ function UpdateConfMod()
 	
 			-- 🌦️ `weather` doit **toujours** être remplacé par `weather_override`
 			elseif key == "weather" then
-				print("[mergeTables] 🌦 Application de `weather_override`")
+				-- print("[mergeTables] 🌦 Application de `weather_override`")
 				clientTable[key] = deepCopy(weather_override)
 	
 			-- 🔀 Fusion normale des sous-tables
 			elseif type(defaultValue) == "table" then
 				if not clientValue then
-					print("[mergeTables] 🆕 Copie de la table absente :", key)
+					-- print("[mergeTables] 🆕 Copie de la table absente :", key)
 					clientTable[key] = deepCopy(defaultValue)
 				elseif type(clientValue) == "table" then
 					mergeTables(clientValue, defaultValue, structure)
@@ -2856,7 +2856,7 @@ function UpdateConfMod()
 			-- 📝 Valeur simple : on applique la valeur par défaut si absente
 			else
 				if clientValue == nil then
-					print("[mergeTables] 📝 Valeur par défaut appliquée :", key)
+					-- print("[mergeTables] 📝 Valeur par défaut appliquée :", key)
 					clientTable[key] = defaultValue
 				end
 			end

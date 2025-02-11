@@ -58,7 +58,7 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.286"
 -- modification M01_b		Ajout datalink (b: UTIL_Data file)
 ------------------------------------------------------------------------------------------------------- 	
 
-
+predeterminedCallsign = true
 
 DebugFLIGHT = ""
 TabLPark	= {}
@@ -368,102 +368,135 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 			category = "generic"
 		end
 
-		--M56_b
-		--si le callsign à déjà été défini par AssignCallnameSquad() ou oob_air_init
-		if flight_ and flight_["callsign"] and flight_["callsignId"]  then
+		if predeterminedCallsign and  flight_.loadout.predeterminedCallsign then
+			
+			callsign_flight = flight_.loadout.predeterminedCallsign.groupNumber
 
-			if aircraft_n == 1 then
+			local nb_unite 
 
-				local ii = 1
-				repeat
-					callsign_flight = math.random(1, 9)
-					testCall = flight_["callsign"]..callsign_flight
-					if not tabCallSignFligt[testCall] then
-						tabCallSignFligt[testCall] = true
-						flight_["callsign_flight"] = callsign_flight
-						foundCsf = true
-						break
-					end
-					ii = ii + 1
-				until ii > 30 or foundCsf
-				--si le random non tuilé ne fonctionne pas, tant pis, on prend au pif
-				if not foundCsf then
-					callsign_flight = math.random(1, 9)
-					testCall = flight_["callsign"]..callsign_flight
-					flight_["callsign_flight"] = callsign_flight
+			local ii = 1
+			repeat
+				nb_unite = math.random(1, 9)
+
+				testCall = Callsign_west[category][Callsign_west_counter[category]]..callsign_flight
+				if not tabCallSignFligt[testCall] then
 					tabCallSignFligt[testCall] = true
+					foundCsf = true
+					break
 				end
-				
-			end
+				ii = ii + 1
+			until ii > 1 or foundCsf
 
-			callsign_flight = flight_["callsign_flight"]
-			callsign_nb = flight_["callsignId"]
-			_name = flight_["callsign"] .. callsign_flight .. aircraft_n
+			callsign_nb = Callsign_west_counter[category]
+			_name = Callsign_west[category][Callsign_west_counter[category]] .. callsign_flight .. nb_unite
 
+			callsign = {
+				[1] = callsign_nb,
+				[2] =  callsign_flight,
+				[3] =  nb_unite,
+				name = _name
+			}
+
+			return callsign
 		else
-			if flight_n == 1 and aircraft_n == 1 then
-				Callsign_west_counter[category] = Callsign_west_counter[category] + 1
-				if Callsign_west_counter[category] > #Callsign_west[category] then
-					Callsign_west_counter[category] = 1
+
+			--M56_b
+			--si le callsign à déjà été défini par AssignCallnameSquad() ou oob_air_init
+			if flight_ and flight_["callsign"] and flight_["callsignId"]  then
+
+				if aircraft_n == 1 then
+
+					local ii = 1
+					repeat
+						callsign_flight = math.random(1, 9)
+						testCall = flight_["callsign"]..callsign_flight
+						if not tabCallSignFligt[testCall] then
+							tabCallSignFligt[testCall] = true
+							flight_["callsign_flight"] = callsign_flight
+							foundCsf = true
+							break
+						end
+						ii = ii + 1
+					until ii > 30 or foundCsf
+					--si le random non tuilé ne fonctionne pas, tant pis, on prend au pif
+					if not foundCsf then
+						callsign_flight = math.random(1, 9)
+						testCall = flight_["callsign"]..callsign_flight
+						flight_["callsign_flight"] = callsign_flight
+						tabCallSignFligt[testCall] = true
+					end
+					
 				end
-				callsign_flight = math.random(0, 8)
-			end
 
-			if aircraft_n == 1 then
-				if not callsign_flight then
-					print()
-					print("********************ATTENTION******************")
-					print("***************Note for the Campaign Maker*****The nation of a previous aircraft misfiled in the table  conf_mod/campMod.WestCallsign or ATO_FlightPlan/country****************")
-					print("********************ATTENTION******************")
-					print()
-					os.execute 'pause'
+				callsign_flight = flight_["callsign_flight"]
+				callsign_nb = flight_["callsignId"]
+				_name = flight_["callsign"] .. callsign_flight .. aircraft_n
+
+			else
+				if flight_n == 1 and aircraft_n == 1 then
+					Callsign_west_counter[category] = Callsign_west_counter[category] + 1
+					if Callsign_west_counter[category] > #Callsign_west[category] then
+						Callsign_west_counter[category] = 1
+					end
+					callsign_flight = math.random(0, 8)
 				end
 
-				local ii = 1
-				repeat
-					callsign_flight = math.random(1, 9)
-
-					if not Callsign_west[category] or not Callsign_west_counter[category] or not Callsign_west[category][Callsign_west_counter[category]] then
-
-						print("AtoFp Error GetCal..callsign: "..tostring(category))
-						_affiche(Callsign_west , "Callsign_west")
-
-						_affiche(Callsign_west_counter, "Callsign_west_counter ")
-
+				if aircraft_n == 1 then
+					if not callsign_flight then
+						print()
+						print("********************ATTENTION******************")
+						print("***************Note for the Campaign Maker*****The nation of a previous aircraft misfiled in the table  conf_mod/campMod.WestCallsign or ATO_FlightPlan/country****************")
+						print("********************ATTENTION******************")
+						print()
 						os.execute 'pause'
 					end
 
+					local ii = 1
+					repeat
+						callsign_flight = math.random(1, 9)
 
-					testCall = Callsign_west[category][Callsign_west_counter[category]]..callsign_flight
-					if not tabCallSignFligt[testCall] then
+						if not Callsign_west[category] or not Callsign_west_counter[category] or not Callsign_west[category][Callsign_west_counter[category]] then
+
+							print("AtoFp Error GetCal..callsign: "..tostring(category))
+							_affiche(Callsign_west , "Callsign_west")
+
+							_affiche(Callsign_west_counter, "Callsign_west_counter ")
+
+							os.execute 'pause'
+						end
+
+
+						testCall = Callsign_west[category][Callsign_west_counter[category]]..callsign_flight
+						if not tabCallSignFligt[testCall] then
+							tabCallSignFligt[testCall] = true
+							foundCsf = true
+							break
+						end
+						ii = ii + 1
+					until ii > 1 or foundCsf
+
+					--si le random non tuilé ne fonctionne pas, tant pis, on prend au pif
+					if not foundCsf then
+						callsign_flight = math.random(1, 9)
+						-- testCall = flight_["callsign"]..callsign_flight
+						testCall = Callsign_west[category][Callsign_west_counter[category]]..callsign_flight
 						tabCallSignFligt[testCall] = true
-						foundCsf = true
-						break
 					end
-					ii = ii + 1
-				until ii > 1 or foundCsf
 
-				--si le random non tuilé ne fonctionne pas, tant pis, on prend au pif
-				if not foundCsf then
-					callsign_flight = math.random(1, 9)
-					-- testCall = flight_["callsign"]..callsign_flight
-					testCall = Callsign_west[category][Callsign_west_counter[category]]..callsign_flight
-					tabCallSignFligt[testCall] = true
 				end
+
+				callsign_nb = Callsign_west_counter[category]
+				_name = Callsign_west[category][Callsign_west_counter[category]] .. callsign_flight .. aircraft_n
 
 			end
 
-			callsign_nb = Callsign_west_counter[category]
-			_name = Callsign_west[category][Callsign_west_counter[category]] .. callsign_flight .. aircraft_n
-
+			callsign = {
+				[1] = callsign_nb,
+				[2] =  callsign_flight,
+				[3] =  aircraft_n,
+				name = _name
+			}
 		end
-
-		callsign = {
-			[1] = callsign_nb,
-			[2] =  callsign_flight,
-			[3] =  aircraft_n,
-			name = _name
-		}
 
 	else
 		if aircraft_n == 1 then
@@ -4003,12 +4036,12 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					-- waypoints[1].ETA = spawn_time	--NE PAS METTRE ça, ça rend le decollage en retard
 
-					-- if flight[f].player or flight[f].client then
-					-- 	waypoints[1].ETA = 0
-					-- 	Display(waypoints[1])
-					-- 	Display(waypoints[2])
-					-- 	os.execute 'pause'
-					-- end
+					if flight[f].player or flight[f].client then
+						waypoints[1].ETA = 0
+						-- Display(waypoints[1])
+						-- Display(waypoints[2])
+						-- os.execute 'pause'
+					end
 
 					waypoints[1].ETA_locked = true
 					waypoints[1].speed_locked = true
