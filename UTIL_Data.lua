@@ -1,11 +1,11 @@
 --Various DATA
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification: updateData_Be
+-- last modification: updateData_Bf
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Data.lua"] = "1.14.84"
+versionDCE["UTIL_Data.lua"] = "1.14.85"
 ------------------------------------------------------------------------------------------------------- 
--- updateData_Be			(e Tu_22D)(Bd flyingAlone)(CH-47F H-6J)(a OH-58)(z F-4E-45MC)(UH-60L)(x hHover)(w reaper)(v Hercules)(u tabTask)(t add is_helicopter table)(s F1EE)(r F-16C_50)(q): Add helicos  (p): Add WOC80)(o: transfer the dataMap to another file)
+-- updateData_Bf			(f refuellingReceptacleType)(e Tu_22D)(Bd flyingAlone)(CH-47F H-6J)(a OH-58)(z F-4E-45MC)(UH-60L)(x hHover)(w reaper)(v Hercules)(u tabTask)(t add is_helicopter table)(s F1EE)(r F-16C_50)(q): Add helicos  (p): Add WOC80)(o: transfer the dataMap to another file)
 -- debug_c					(c OH-6A)(b requiredModulesSpecialName)(a add IsWesternCountry function)
 -- cleanCode_a				(a: repetition)
 -- adjustment_e				(e delete EPLRS_Capacity table)(d CVN to CV)(bombing on Group&Unit)(b: Syria nnTimeZone +3 & GudautaGPS )
@@ -179,6 +179,7 @@ Data_divers = {
 		playable = true,
 		vCruise = 230,
 		hCruise = 4500,
+		refuellingReceptacleType = "drogue"
 	},
 	["A-4E-C"] = 	{--mod
 		instrumentUnits = "imperial",
@@ -187,6 +188,7 @@ Data_divers = {
 		playable = true,
 		vCruise = 221,
 		hCruise = 10630,--TODO a confirmer
+		refuellingReceptacleType = "drogue"
 	},
 	["A-6E"] = 	{				--Mod
 		instrumentUnits = "imperial",
@@ -266,6 +268,7 @@ Data_divers = {
 		playable = true,
 		vCruise = 154,
 		hCruise = 7600,
+		refuellingReceptacleType = "probe"
 	},
 
 	["A-10C"] = 	{
@@ -278,6 +281,7 @@ Data_divers = {
 		playable = true,
 		vCruise = 154,
 		hCruise = 7600,
+		refuellingReceptacleType = "probe"
 	},
 	["A-10C_2"] = 	{
 		instrumentUnits = "imperial",
@@ -293,6 +297,7 @@ Data_divers = {
 		playable = true,
 		vCruise = 154,
 		hCruise = 7600,
+		refuellingReceptacleType = "probe"
 	},
 
 	["F-86F Sabre"] = 	{
@@ -334,6 +339,7 @@ Data_divers = {
 		},
 		vCruise = 215,--a peaufiner
 		hCruise = 9000,--a peaufiner
+		refuellingReceptacleType = "probe"
 	},
 	["F-5E-3"] = 	{
 		instrumentUnits = "imperial",
@@ -383,6 +389,7 @@ Data_divers = {
 
 		vCruise = 230,
 		hCruise = 9140,
+		refuellingReceptacleType = "drogue"
 	},
 	["F-14B"] = 	{
 		instrumentUnits = "imperial",
@@ -415,6 +422,7 @@ Data_divers = {
 		},
 		vCruise = 230,
 		hCruise = 9140,
+		refuellingReceptacleType = "drogue"
 	},
 	["F-15C"] = 	{
 		instrumentUnits = "imperial",
@@ -442,6 +450,7 @@ Data_divers = {
 		playable = true,
 		vCruise = 250,
 		hCruise = 12670,
+		refuellingReceptacleType = "probe"
 	},
 	["F-16C_50"] = 	{
 		instrumentUnits = "imperial",
@@ -457,6 +466,7 @@ Data_divers = {
 		playable = true,
 		vCruise = 220,
 		hCruise = 9140,
+		refuellingReceptacleType = "probe"
 	},
 	["F-16C bl.52d"] = 	{
 		instrumentUnits = "imperial",
@@ -490,6 +500,7 @@ Data_divers = {
 		playable = true,
 		vCruise = 230,
 		hCruise = 7548,
+		refuellingReceptacleType = "drogue"
 	},
 
 	["F-117A"] = 	{
@@ -568,6 +579,7 @@ Data_divers = {
 		playable = true,
 		vCruise = 250,
 		hCruise = 7548,
+		refuellingReceptacleType = "drogue"
 	},
 	["Mirage-F1EE"] = {
 		instrumentUnits = "imperial",
@@ -584,6 +596,7 @@ Data_divers = {
 		playable = true,
 		vCruise = 250,
 		hCruise = 7548,
+		refuellingReceptacleType = "drogue"
 		
 	},
 	["Mirage-F1BE"] = {
@@ -593,6 +606,7 @@ Data_divers = {
 		playable = true,
 		vCruise = 250,
 		hCruise = 7548,
+		refuellingReceptacleType = "drogue"
 	},
 
 	["M-2000C"] = {
@@ -610,7 +624,8 @@ Data_divers = {
 				["ForceINSRules"] = true,
 				["InitHotDrift"] = 0,
 			}
-		}
+		},
+		refuellingReceptacleType = "drogue"
 	},
 
 	["SA342"] = {
@@ -918,12 +933,14 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		flyingAlone = true,
+		refuellingType = "drogue"
 	},
 	["KC135MPRS"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		vCruise = 185,
 		hCruise = 7345,
+		refuellingType = "drogue"
 	},
 	["KC-135"] = {
 		instrumentUnits = "imperial",
@@ -934,6 +951,7 @@ Data_divers = {
 		},
 		vCruise = 185,
 		hCruise = 7345,
+		refuellingType = "probe"
 	},
 	["KC130"] = {
 		instrumentUnits = "imperial",

@@ -413,6 +413,13 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					if flight[f].client then
 						tempPlayer = Deepcopy(camp.client[flight[f].IdClient])
 
+						if debug.debug then
+							local camp_str = "mission = " .. TableSerialization(mission, 0)
+							local campFile = io.open("Debug/tempPlayer_A_client.lua", "w") or error("Échec d'ouverture du fichier ATO_AtoG")
+							campFile:write(camp_str)
+							campFile:close()
+						end
+
 						-- print("DcB tempPlayer.pack_n "..tostring(tempPlayer.pack_n))
 						tempPlayer.package = Deepcopy(camp.client.package[tempPlayer.pack_n])
 
@@ -421,15 +428,15 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 						local tagBreak
 						--##parse mission table:
 						for _side, side in pairs(mission.coalition) do
-							for countryN, country in pairs(side.country) do						
-								for category, groups in pairs(country) do						
+							for countryN, country in pairs(side.country) do
+								for category, groups in pairs(country) do
 									if (category == "plane" or category == "helicopter" ) and type(groups) == "table" and groups["group"]  then	--and groups[1].units
 										for Ngroup, group in pairs(groups["group"]) do
 											for unitN, unit in pairs(group.units) do
 												-- print("unit.name "..tostring(unit.name).." ==tempPlayer.unitname? "..tostring(tempPlayer.unitname))
 												if unit.name == tempPlayer.unitname then
-													tempPlayer["waypoints"] = group.route.points
-													tempPlayer["group"] = group
+													tempPlayer["waypoints"] = Deepcopy(group.route.points)
+													tempPlayer["group"] = Deepcopy(group)
 													tagBreak = true
 													break
 												end
@@ -450,18 +457,27 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					elseif flight[f].player then
 						tempPlayer = Deepcopy(camp.player)
 						tempPlayer.package = Deepcopy(camp.player.package[tempPlayer.pack_n])
+
+						if debug.debug then
+							local camp_str = "mission = " .. TableSerialization(mission, 0)
+							local campFile = io.open("Debug/tempPlayer_A_player.lua", "w") or error("Échec d'ouverture du fichier ATO_AtoG")
+							campFile:write(camp_str)
+							campFile:close()
+						end
+
+						
 						local tagBreak
 						--##parse mission table:
 						for _side, side in pairs(mission.coalition) do
-							for countryN, country in pairs(side.country) do						
-								for category, groups in pairs(country) do						
+							for countryN, country in pairs(side.country) do
+								for category, groups in pairs(country) do
 									if (category == "plane" or category == "helicopter" ) and type(groups) == "table" and groups["group"]  then	--and groups[1].units
 										for Ngroup, group in pairs(groups["group"]) do
 											for unitN, unit in pairs(group.units) do
-											
+
 												if unit.name == tempPlayer.unitname then
-													tempPlayer["waypoints"] = group.route.points
-													tempPlayer["group"] = group
+													tempPlayer["waypoints"] = Deepcopy(group.route.points)
+													tempPlayer["group"] = Deepcopy(group)
 													tagBreak = true
 													break
 												end
@@ -620,7 +636,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					if Data_divers and Data_divers[tempPlayer.type] then
 						if Data_divers[tempPlayer.type].instrumentUnits then
 							unitsUse = Data_divers[tempPlayer.type].instrumentUnits
-							
+
 						end
 					end
 
@@ -1095,12 +1111,19 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 						--build the overview list with the entries of all waypoints
 						local WP_num = 0																			--waypoint number, starts with 0
 						for w = 1, #tempPlayer.waypoints do														--iterate through all waypoints
-							-- if tempPlayer.waypoints[w].briefing_name == "Departure" then
-								
-							-- 	tempPlayer.waypoints[w].ETA = tempPlayer.waypoints[w].ETA + mission_ini.startup_time_player
 
-							-- end
-						
+							if tempPlayer.waypoints[w].briefing_name == "Departure" then
+								tempPlayer.waypoints[w].ETA = tempPlayer.waypoints[w].ETA + mission_ini.startup_time_player
+
+								if debug.debug then
+									local camp_str = "mission = " .. TableSerialization(mission, 0)
+									local campFile = io.open("Debug/tempPlayer_B.lua", "w") or error("Échec d'ouverture du fichier ATO_AtoG")
+									campFile:write(camp_str)
+									campFile:close()
+								end
+
+							end
+
 							if tempPlayer.waypoints[w].briefing_name ~= "Taxi" then								--do not list taxi waypoint in overview
 								for e = 1, #entries do																--iterate through all entries
 									local entry
@@ -1289,28 +1312,43 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 									table.insert(AWACS_freq, tabElement)
 								end
 							elseif role[1] and role[1].task == "Refueling" then											--if first flight is tanker
-								for f = 1 , #role do
-									local time = ""
-									local occurence = 0
 
-									for w , wpt in ipairs(role[f].route) do
-										if wpt.id == "Station" and occurence == 0 then
-											time = FormatTime(camp.time + wpt.eta, "hh:mm")
-											occurence = occurence + 1
-										elseif wpt.id == "Station" and occurence == 1 then
-											time = time .. " "..FormatTime(camp.time + wpt.eta, "hh:mm")
-											occurence = occurence + 1
+								if Data_divers[tempPlayer.type] and Data_divers[tempPlayer.type].refuellingReceptacleType then
+
+									-- print("DcB A1 role[f].type: "..tostring(role[f].type).." "..tostring(Data_divers[role[f].type].refuellingType))
+
+									-- print("DcB A2 tempPlayer.type: "..tostring(tempPlayer.type).." "..tostring(Data_divers[tempPlayer.type].refuellingReceptacleType))
+									
+
+									if Data_divers[role[f].type] and Data_divers[role[f].type].refuellingType and
+										Data_divers[role[f].type].refuellingType == Data_divers[tempPlayer.type].refuellingReceptacleType then
+
+											-- print("DcB B ")
+
+										for f = 1 , #role do
+											local time = ""
+											local occurence = 0
+
+											for w , wpt in ipairs(role[f].route) do
+												if wpt.id == "Station" and occurence == 0 then
+													time = FormatTime(camp.time + wpt.eta, "hh:mm")
+													occurence = occurence + 1
+												elseif wpt.id == "Station" and occurence == 1 then
+													time = time .. " "..FormatTime(camp.time + wpt.eta, "hh:mm")
+													occurence = occurence + 1
+												end
+											end
+
+											local tabElement = {
+												['callsign'] = role[f].callsign,
+												['freq'] = role[f].frequency,															--store callsign and frequency
+												['type'] = role[f].type,
+												['time'] = time,
+												['flight'] = f,
+											}
+											table.insert(tanker_freq, tabElement)
 										end
 									end
-
-									local tabElement = {
-										['callsign'] = role[f].callsign,
-										['freq'] = role[f].frequency,															--store callsign and frequency
-										['type'] = role[f].type,
-										['time'] = time,
-										['flight'] = f,
-									}
-									table.insert(tanker_freq, tabElement)
 								end
 							elseif role[1] and role[1].task == "AFAC" then											--if first flight is tanker
 								for f = 1 , #role do
@@ -1758,6 +1796,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 					--***************************************************************************
 					--tanker_freq			
+					-- Display(tanker_freq, "DcB tanker_freq")
 					local copy_tanker_freq = Deepcopy(tanker_freq)
 					if refuelable then
 						for vN, value in pairs(tanker_freq) do

@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.82.528"
+versionDCE["UTIL_Changelog.lua"] = "20.82.529"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.82.528"
+VersionDCE["UTIL_Changelog.txt"] = "20.82.529"
 --[[
 
 
@@ -9,8 +9,15 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.82.528:==
+==:20.82.529:==
 
+529 add	[callSign]		assign a specific callSign (e.g. Tanker) to a target to have consistent callSigns according to the chosen pattern
+						add this to a target pattern/tanker in the targetList :
+						predeterminedCallsign =  {
+							groupNumber = 6,
+							name = "Shell",
+						},
+529 fixed	[radio]		tanker frequencies are not grouped by identical targets or patterns
 528 fixed	[generator]	take-off time does not match (again...)
 527 fixed	[debrief]	debriefing is blocked on a base.x position issue with damaged CVN/LHA
 526 add	[campaignMaker]	Action.UnitResuscitateOrKill(unitName, liveOrKill, liveValue) (M82)

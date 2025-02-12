@@ -1,12 +1,12 @@
 --Various functions
 ------------------------------------------------------------------------------------------------------- 
--- last modification: debug_j
+-- last modification: debug_k
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Functions.lua"] = "1.17.130"
+versionDCE["UTIL_Functions.lua"] = "1.17.131"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_g				(g springCleaning)					
 -- adjustment_o				(n loadout code)(m Disp_time)(l add AFAC task)(k FormatTime)(i add InsertBugList(txt))(h use IsWesternCountry)(fg: add Loadout tiers)(e todo)(d:CheckConfModMaster )(c: fire Playable_m from conf_mod)
--- debug_j					(j code_loadout bestMatch)(i planeType)(h Tha\'lah)(g string.gsub(v, "\"", "\\\"" ))(f new generateId)(d UH to HF) Angle et Bearing des statics sur PA
+-- debug_k					(k Package_freq-targetname)(j code_loadout bestMatch)(i planeType)(h Tha\'lah)(g string.gsub(v, "\"", "\\\"" ))(f new generateId)(d UH to HF) Angle et Bearing des statics sur PA
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)
 -- modification M77_l		CG_ArtySpotter (kl ListSpotterAircraft)
@@ -415,21 +415,56 @@ function TableSerializationLoadout(t, i, iTotal)
 	return text
 end
 
---function to make a deep copy of a table
-function Deepcopy(orig)
-    local orig_type = type(orig)
-    local copy
-    if orig_type == 'table' then
-        copy = {}
-        for orig_key, orig_value in next, orig, nil do
-            copy[Deepcopy(orig_key)] = Deepcopy(orig_value)
-        end
-        setmetatable(copy, Deepcopy(getmetatable(orig)))
-    else -- number, string, boolean, etc
-        copy = orig
+function Deepcopy(orig, copies)
+    copies = copies or {}  -- Table pour suivre les références déjà copiées
+
+    if type(orig) ~= 'table' then return orig end  -- Copie simple des types de base
+
+    if copies[orig] then return copies[orig] end  -- Si déjà copié, éviter boucle infinie
+
+    local copy = {}
+    copies[orig] = copy  -- Stocker la copie pour éviter de repasser sur la même table
+
+    for orig_key, orig_value in pairs(orig) do
+        copy[Deepcopy(orig_key, copies)] = Deepcopy(orig_value, copies)
     end
+
+    setmetatable(copy, Deepcopy(getmetatable(orig), copies))
     return copy
 end
+
+
+-- --function to make a deep copy of a table
+-- function Deepcopy(orig)
+--     -- local orig_type = type(orig)
+--     -- local copy
+--     -- if orig_type == 'table' then
+--     --     copy = {}
+--     --     for orig_key, orig_value in next, orig, nil do
+--     --         copy[Deepcopy(orig_key)] = Deepcopy(orig_value)
+--     --     end
+--     --     setmetatable(copy, Deepcopy(getmetatable(orig)))
+--     -- else -- number, string, boolean, etc
+--     --     copy = orig
+--     -- end
+--     -- return copy
+
+
+
+-- 		local copy
+-- 		if type(orig) == 'table' then
+-- 			copy = {}
+-- 			for orig_key, orig_value in pairs(orig) do
+-- 				copy[orig_key] = Deepcopy(orig_value)
+-- 			end
+-- 			setmetatable(copy, Deepcopy(getmetatable(orig)))
+-- 		else
+-- 			copy = orig
+-- 		end
+-- 		return copy
+	
+
+-- end
 
 
 --function to return heading between two vector2 points
@@ -1481,8 +1516,9 @@ end
 -- from ATO_ThreatEvaluation pour asssigner une frequence EWR al�atoire
 -- from ATO_FlightPlan pour assigner une freqence de groupe
 function GetFrequency(side, targetname, task, type, waves, overide)
-	-- if Debug.debug then print("UtilF GetFrequency PASSE 000 type "..tostring(type)) end
-
+	if Debug.debug then print("UtilF GetFrequency 000 side "..tostring(side).." targetname "..tostring(targetname)
+		.." task "..tostring(task).." type "..tostring(type).." waves "..tostring(waves).." overide "..tostring(overide)) end
+	
 	local freq
 	local nRadio = 1																					--chose frequency range from radio 1
 	if camp.radio[side] and camp.radio[side][2] and (task == "EWR" or task == "AWACS" or task == "Refueling" or task == "AFAC") then			--if player has two radions, chose frequency range from AWACS and tanker from radio 2
@@ -1525,15 +1561,30 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 	end
 
 	--si la freq package a déjà été désignée, on la reprend
-	if task ~= "coalition" and overide ~= nil then
+	if task ~= "coalition" and overide == nil then
+
+		if Debug.debug then print("UtilF GetFrequency 001 targetname? "..tostring(targetname)) end
+
 		if Package_freq[side]["UHF"][targetname] and freqValide(Package_freq[side]["UHF"][targetname]) then
+			
+			if Debug.debug then print("UtilF GetFrequency return B1 Package_freq "..tostring(Package_freq[side]["UHF"][targetname])) end
 			return Package_freq[side]["UHF"][targetname]															--return frequency
+		
 		elseif Package_freq[side]["VHF"][targetname] and freqValide(Package_freq[side]["VHF"][targetname]) then
+			
+			if Debug.debug then print("UtilF GetFrequency return B2 Package_freq "..tostring(Package_freq[side]["VHF"][targetname])) end
 			return Package_freq[side]["VHF"][targetname]															--return frequency
+		
 		elseif Package_freq[side]["LVHF"][targetname] and freqValide(Package_freq[side]["LVHF"][targetname]) then
+			
+			if Debug.debug then print("UtilF GetFrequency return B3 Package_freq "..tostring(Package_freq[side]["LVHF"][targetname])) end
 			return Package_freq[side]["LVHF"][targetname]
+		
 		elseif Package_freq[side]["HF"][targetname] and freqValide(Package_freq[side]["HF"][targetname]) then
+			
+			if Debug.debug then print("UtilF GetFrequency return B4 Package_freq "..tostring(Package_freq[side]["HF"][targetname])) end
 			return Package_freq[side]["HF"][targetname]
+		
 		end
 	end
 
@@ -1552,6 +1603,8 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 
 				Assigned_freq[freq] = true												--mark frequency in use
 				Package_freq[side][range][targetname] = freq							--store frequency for package
+				
+				if Debug.debug then print("UtilF GetFrequency return C1 Package_freq "..tostring(freq)) end
 				return freq																--return frequency
 			end
 
@@ -1569,8 +1622,12 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 					until Assigned_freq[freq] == nil										--repeat until a frequency is found that is not yet in use
 
 					Assigned_freq[freq] = true												--mark frequency in use
+
+					if Debug.debug then print("UtilF GetFrequency return C2 HF Package_freq "..tostring(freq)) end
 					return freq																--return frequency
 				else
+
+					if Debug.debug then print("UtilF GetFrequency return C2 HF 0") end
 					return 0
 				end
 			elseif range == "UHF"  then
@@ -1586,8 +1643,12 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 					until Assigned_freq[freq] == nil and (freq<242.9 or freq>243.1)			--repeat until a frequency is found that is not yet in use
 
 					Assigned_freq[freq] = true												--mark frequency in use
+
+					if Debug.debug then print("UtilF GetFrequency return D1 UHF Package_freq "..tostring(freq)) end
 					return freq																--return frequency
 				else
+
+					if Debug.debug then print("UtilF GetFrequency return D2 UHF 0") end
 					return 0
 				end
 			elseif range == "VHF"  then
@@ -1603,8 +1664,12 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 					until Assigned_freq[freq] == nil and (freq<121.45 or freq>121.55)	and freq ~= 123.1			--repeat until a frequency is found that is not yet in use
 
 					Assigned_freq[freq] = true												--mark frequency in use
+
+					if Debug.debug then print("UtilF GetFrequency return E1 VHF Package_freq "..tostring(freq)) end
 					return freq																--return frequency
 				else
+
+					if Debug.debug then print("UtilF GetFrequency return E2 VHF 0") end
 					return 0
 				end
 			elseif range == "LVHF" then
@@ -1618,13 +1683,19 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 						freq = freq + deci + mil											--combine to complete frequency
 					until Assigned_freq[freq] == nil										--repeat until a frequency is found that is not yet in use
 					Assigned_freq[freq] = true												--mark frequency in use
+
+					if Debug.debug then print("UtilF GetFrequency return F1 LVHF Package_freq "..tostring(freq)) end
 					return freq																--return frequency
 				else
+
+					if Debug.debug then print("UtilF GetFrequency return F2 LVHF 0") end
 					return 0
 				end
 			end
 		elseif range == "UHF" and task ~= "EWR" then
 			-- if camp.radio[side][nRadio] and camp.radio[side][nRadio][range]	and frequency[type] and frequency[type]["radio"] and frequency[type]["radio"][nRadio] and frequency[type]["radio"][nRadio][range]  then		--Cherche d'abord une frequence UHF commune
+			if Debug.debug then print("UtilF GetFrequency return G0 UHF non  EWR frequency[type] "..tostring(frequency[type])) end
+
 			if frequency[type] and frequency[type]["radio"]   then
 				for radioN = 1, #frequency[type]["radio"] do
 					local passe = true
@@ -1653,12 +1724,17 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 
 							Assigned_freq[freq] = true												--mark frequency in use
 							Package_freq[side][range][targetname] = freq							--store frequency for package
+
+							if Debug.debug then print("UtilF GetFrequency return G1 UHF non  EWR Package_freq "..tostring(freq)) end
 							return freq
 						end
 					end
 				end
 			end
 		elseif range == "VHF" then
+
+			if Debug.debug then print("UtilF GetFrequency return H0 VHF non  EWR frequency[type] "..tostring(frequency[type])) end
+
 			if frequency[type] and frequency[type]["radio"]   then
 				for radioN = 1, #frequency[type]["radio"] do
 					local passe = true
@@ -1691,6 +1767,8 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 							if overide ~= nil then
 								Package_freq[side][range][targetname] = freq							--store frequency for package
 							end
+							
+							if Debug.debug then print("UtilF GetFrequency return H1 VHF Package_freq "..tostring(freq)) end
 							return freq
 						end
 					end
@@ -1710,6 +1788,9 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 
 							Assigned_freq[freq] = true												--mark frequency in use
 							Package_freq[side][range][targetname] = freq							--store frequency for package
+							
+							
+							if Debug.debug then print("UtilF GetFrequency return I LVHF Package_freq "..tostring(freq)) end
 							return freq
 						end
 					end
@@ -1733,6 +1814,8 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 
 				Assigned_freq[freq] = true												--mark frequency in use
 				Package_freq[side][range][targetname] = freq							--store frequency for package
+				
+				if Debug.debug then print("UtilF GetFrequency return J HF Package_freq "..tostring(freq)) end
 				return freq																--return frequency				
 			end
 		end
@@ -1741,7 +1824,10 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 	--TODO faire des functions pour nettoyer ce code
 	if type and type ~= nil and  task ~= "coalition" then --and  waves ~= nil 
 		if frequency[type] and frequency[type].prefFreqPackage then
+
 			local result = GetLocFrequency(side, targetname, frequency[type].prefFreqPackage.nRadio, type, frequency[type].prefFreqPackage.range)
+
+			if Debug.debug then print("UtilF GetFrequency return >K result "..tostring(result)) end
 			return result
 		end
 	end
@@ -1777,10 +1863,17 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 			result = GetLocFrequency(side, targetname, nRadio, type,  "UHF")
 		end
 	elseif task == "coalition" then
+
 		result = GetLocFrequency(side, "", "", type,  waves)
+
+		if Debug.debug then print("UtilF GetFrequency return L result "..tostring(result)) end
 		return result
+
 	elseif task == "group" then   --prend obligatoirement le channel 1 de la radio 1
+
 		result = GetLocFrequency(side, targetname, 1, type,  waves)
+
+		if Debug.debug then print("UtilF GetFrequency return M result "..tostring(result)) end
 		return result
 	else
 		result = GetLocFrequency(side, targetname, nRadio, type,  waves)
@@ -1788,17 +1881,17 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 	end
 
 	if result then
-		-- if Debug.debug then print("UtilF GetFrequency PASSE return A "..tostring(result)) end
+		if Debug.debug then print("UtilF GetFrequency PASSE return O "..tostring(result)) end
 		return result
 	else
 		result = GetLocFrequency(side, targetname, nRadio, type,  "UHF")
 		if result then
-			-- if Debug.debug then print("UtilF GetFrequency PASSE return B UHF "..tostring(result)) end
+			if Debug.debug then print("UtilF GetFrequency PASSE return P UHF "..tostring(result)) end
 			return result
 		else
 			result = GetLocFrequency(side, targetname, nRadio, type,  "LVHF")
 			if result then
-				-- if Debug.debug then print("UtilF GetFrequency PASSE return C LVHF "..tostring(result)) end
+				if Debug.debug then print("UtilF GetFrequency PASSE return Q LVHF "..tostring(result)) end
 				return result
 			else
 				if not camp.radio[side] then camp.radio[side] = {} end
@@ -1809,11 +1902,16 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 					max = 136,
 				}
 				result = GetLocFrequency(side, targetname, nRadio, type,  "VHF")
-				-- if Debug.debug then print("UtilF GetFrequency PASSE return D VHF  "..tostring(result)) end
+				if Debug.debug then print("UtilF GetFrequency PASSE return R VHF  "..tostring(result)) end
 
 				if result then
+
+					if Debug.debug then print("UtilF GetFrequency return S result "..tostring(result)) end
 					return result
 				else
+					
+					--TODO ajouter ici (ou ailleurs) une condition pour utiliser la bande de freq preféré du joueur
+
 					camp.radio[side][nRadio]["UHF"] = {
 						min = 225,
 						max = 300,
@@ -1830,7 +1928,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 					Assigned_freq[freq] = true												--mark frequency in use
 					Package_freq[side][range][targetname] = freq							--store frequency for package
 
-					-- if Debug.debug then print("UtilF GetFrequency PASSE return D UHF  "..tostring(result)) end
+					if Debug.debug then print("UtilF GetFrequency PASSE return Z UHF  "..tostring(freq)) end
 					return freq
 				end
 			end

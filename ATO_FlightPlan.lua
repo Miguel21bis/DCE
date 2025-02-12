@@ -1,9 +1,9 @@
 --To create the flight plans in the mission file for all flights in the ATO
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleancode_n debug_Aa M56_c
+-- last modification: adjustment_Ab
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_FlightPlan.lua"] = "1.58.286"
+versionDCE["ATO_FlightPlan.lua"] = "1.58.287"
 ------------------------------------------------------------------------------------------------------- 
 
 -- SomethingSimple_a		(a add randomizeSkills)
@@ -11,7 +11,7 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.286"
 -- Eagle_01 Modification E01_c
 
 -- mouvedOption_CM_01_c		(c: manage les options de west callSign) (b: previent le CampaignMaker d'une nation manquante)
--- adjustment_Aa            	(y AddPropAircraft for all)(x largage d urgence if not heli)(CVN to CV)(t adjustment_e)(s No ATE if antiShip + B52 ASM)
+-- adjustment_Ab            	(b predeterminedCallsign)(y AddPropAircraft for all)(x largage d urgence if not heli)(CVN to CV)(t adjustment_e)(s No ATE if antiShip + B52 ASM)
 -- cleancode_n				(n springCleaning)
 -- debug_Aa					(a flight delayed)(z package stats)(y polka on parking)(x frequency SA342)(w no recalculates all speeds)
 
@@ -359,7 +359,9 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 
 	local callsign
 	if style == "west" then
+
 		local category
+
 		if task == "AWACS" then
 			category = "AWACS"
 		elseif task == "Refueling" then
@@ -368,15 +370,15 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 			category = "generic"
 		end
 
-		if predeterminedCallsign and  flight_.loadout.predeterminedCallsign then
-			
-			callsign_flight = flight_.loadout.predeterminedCallsign.groupNumber
+		if predeterminedCallsign and flight_.target.predeterminedCallsign then
 
-			local nb_unite 
+			callsign_flight = flight_.target.predeterminedCallsign.groupNumber
+
+			local nb_unite
 
 			local ii = 1
 			repeat
-				nb_unite = math.random(1, 9)
+				nb_unite = math.random(2, 9)
 
 				testCall = Callsign_west[category][Callsign_west_counter[category]]..callsign_flight
 				if not tabCallSignFligt[testCall] then
@@ -3987,11 +3989,14 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				--store player waypoints for briefing creation
 				if flight[f].player == true then
+					
 					camp.player.waypoints = Deepcopy(waypoints)
 					if camp.player.waypoints[2] then
 						camp.player.waypoints[2].speed = 0
 						camp.player.waypoints[2].alt = 0
 					end
+
+					
 					-- if camp.player.waypoints[3] then
 						-- camp.player.waypoints[3].speed = pack[p].main[1].loadout.vCruise / 4 * 3
 					-- end
@@ -4810,8 +4815,10 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 				----- define group -----
+				-------- define group -----
+				-------- define group -----
+				---
 				local testFreqency = GetFrequency(side, flight[f].target_name, flight[f].task, type_withData, nil)
-
 
 				--certain plane ne peuvent pas dépasser les valeurs de la radio 1 pour la frequence générale (exemple M-2000)
 				local info = ""
@@ -4864,6 +4871,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 				end
+
 
 				if tonumber(testFreqency) == 243 or tonumber(testFreqency) == 121.5 then
 					print("ATTENTION GUARD Frequence "..tostring(testFreqency))
@@ -6488,7 +6496,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					table.insert(mission.coalition[side].country[addKeyCoalition].plane.group, group)
 
 					if flight[f].player == true then
-						camp.player.group = mission.coalition[side].country[addKeyCoalition].plane.group[#mission.coalition[side].country[addKeyCoalition].plane.group]		--store a link to the player group in mission
+						camp.player.group = Deepcopy(mission.coalition[side].country[addKeyCoalition].plane.group[#mission.coalition[side].country[addKeyCoalition].plane.group])		--store a link to the player group in mission
 					end
 
 					if groupRTB.groupId then
@@ -6504,7 +6512,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					table.insert(mission.coalition[side].country[addKeyCoalition].helicopter.group, group)
 
 					if flight[f].player == true then
-						camp.player.group = mission.coalition[side].country[addKeyCoalition].helicopter.group[#mission.coalition[side].country[addKeyCoalition].helicopter.group]		--store a link to the player group in mission
+						camp.player.group = Deepcopy(mission.coalition[side].country[addKeyCoalition].helicopter.group[#mission.coalition[side].country[addKeyCoalition].helicopter.group])		--store a link to the player group in mission
 					end
 
 					if groupRTB.groupId then
