@@ -1,9 +1,9 @@
 --To create the flight plans in the mission file for all flights in the ATO
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: adjustment_Ab
+-- last modification: adjustment_Ac
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_FlightPlan.lua"] = "1.58.287"
+versionDCE["ATO_FlightPlan.lua"] = "1.58.288"
 ------------------------------------------------------------------------------------------------------- 
 
 -- SomethingSimple_a		(a add randomizeSkills)
@@ -11,7 +11,7 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.287"
 -- Eagle_01 Modification E01_c
 
 -- mouvedOption_CM_01_c		(c: manage les options de west callSign) (b: previent le CampaignMaker d'une nation manquante)
--- adjustment_Ab            	(b predeterminedCallsign)(y AddPropAircraft for all)(x largage d urgence if not heli)(CVN to CV)(t adjustment_e)(s No ATE if antiShip + B52 ASM)
+-- adjustment_Ac            (c TACAN_byTarget)(b predeterminedCallsign)(y AddPropAircraft for all)(x largage d urgence if not heli)(CVN to CV)(t adjustment_e)(s No ATE if antiShip + B52 ASM)
 -- cleancode_n				(n springCleaning)
 -- debug_Aa					(a flight delayed)(z package stats)(y polka on parking)(x frequency SA342)(w no recalculates all speeds)
 
@@ -64,10 +64,12 @@ DebugFLIGHT = ""
 TabLPark	= {}
 TargetList_InThisMission = {}			-- garde en mémoire les targets pour eviter de les pruner plus tard
 TabDivert = {}							--liste des pistes de deroutement
+TACAN_byTarget = {}						--liste les TACAN pour un meme parttern , util pour les multiples tanker
 
 local debugStart = true					--NE PAS CHANGER, les infos restent seulement dans le fichier debugGenMission
 local debugTxt_AtoFP = ""
-local tabCallSignFligt = {}
+local callSignFlight = {}
+local callSignFlightUnite = {}
 local PlayerTask = ""
 local tempBaseAirStart = {}
 local tempDeckPlace = {}
@@ -343,7 +345,10 @@ end
 local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 	local style
 	local callsign_flight = 0
+
 	local testCall = ""
+	local testCallFlightUnite = ""
+
 	local callsign_nb = 0
 	local _name = ""
 	local foundCsf = false
@@ -379,15 +384,13 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 			local ii = 1
 			repeat
 				nb_unite = math.random(2, 9)
-
 				testCall = Callsign_west[category][Callsign_west_counter[category]]..callsign_flight
-				if not tabCallSignFligt[testCall] then
-					tabCallSignFligt[testCall] = true
-					foundCsf = true
-					break
-				end
+				testCallFlightUnite = testCall..nb_unite
 				ii = ii + 1
-			until ii > 1 or foundCsf
+			until ii > 100 or not callSignFlightUnite[testCallFlightUnite]
+
+			callSignFlight[testCall] = true
+			callSignFlightUnite[testCallFlightUnite] = true
 
 			callsign_nb = Callsign_west_counter[category]
 			_name = Callsign_west[category][Callsign_west_counter[category]] .. callsign_flight .. nb_unite
@@ -412,8 +415,8 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 					repeat
 						callsign_flight = math.random(1, 9)
 						testCall = flight_["callsign"]..callsign_flight
-						if not tabCallSignFligt[testCall] then
-							tabCallSignFligt[testCall] = true
+						if not callSignFlight[testCall] then
+							callSignFlight[testCall] = true
 							flight_["callsign_flight"] = callsign_flight
 							foundCsf = true
 							break
@@ -425,7 +428,7 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 						callsign_flight = math.random(1, 9)
 						testCall = flight_["callsign"]..callsign_flight
 						flight_["callsign_flight"] = callsign_flight
-						tabCallSignFligt[testCall] = true
+						callSignFlight[testCall] = true
 					end
 					
 				end
@@ -469,20 +472,20 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 
 
 						testCall = Callsign_west[category][Callsign_west_counter[category]]..callsign_flight
-						if not tabCallSignFligt[testCall] then
-							tabCallSignFligt[testCall] = true
+						if not callSignFlight[testCall] then
+							callSignFlight[testCall] = true
 							foundCsf = true
 							break
 						end
 						ii = ii + 1
-					until ii > 1 or foundCsf
+					until ii > 100 or foundCsf
 
 					--si le random non tuilé ne fonctionne pas, tant pis, on prend au pif
 					if not foundCsf then
 						callsign_flight = math.random(1, 9)
 						-- testCall = flight_["callsign"]..callsign_flight
 						testCall = Callsign_west[category][Callsign_west_counter[category]]..callsign_flight
-						tabCallSignFligt[testCall] = true
+						callSignFlight[testCall] = true
 					end
 
 				end
@@ -777,13 +780,19 @@ end
 -- _affiche(channel_tacan, "channel_tacan")
 -- os.execute 'pause'
 
-local function GetTankerTACAN()
+local function GetTankerTACAN(tarnetName)
 	local channel
+
+	if TACAN_byTarget[tarnetName] then
+		return TACAN_byTarget[tarnetName]
+	end
+
 	repeat
 		channel = math.random(37, 67)											--find random TACAN channel
 	until channel_tacan[channel] == nil											--repeat until channel is found that is not in use yet
 
 	channel_tacan[channel] = true												--mark channel in use
+	TACAN_byTarget[tarnetName] = channel
 	return channel																--return channel
 end
 
@@ -912,7 +921,7 @@ function SpawnOn(spawn, waypoints, group, Pn, spawnTime, from, flight, f, role)
 	-- 	is_helicopter = true
 	-- end
 
-	if  spawn == "air" then
+	if spawn == "air" then
 		if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP spawnOair AIR from: "..tostring(from)) end
 		if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP spawnOair AIR from: "..tostring(from)) end
 
@@ -3438,26 +3447,31 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						elseif flight[f].task == "AFAC" then
 							-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
-							local laserCode1 = 0
-							local laserCode2 = 0
-							local laserCode3 = 0
-							local LaserCode = ""
 
-							if not pack[p].main[f].target.LaserCode then
+							if Data_divers[flight[f].type] and Data_divers[flight[f].type].laserDesignator then
+							
+								local laserCode1 = 0
+								local laserCode2 = 0
+								local laserCode3 = 0
+								local LaserCode = ""
 
-								laserCode1 = math.random(1,7)
-								laserCode2 = math.random(1,8)
-								laserCode3 = math.random(1,8)
+								if not pack[p].main[f].target.LaserCode then
 
-								LaserCode = 1 .. laserCode1 .. laserCode2 .. laserCode3
+									laserCode1 = math.random(1,7)
+									laserCode2 = math.random(1,8)
+									laserCode3 = math.random(1,8)
 
-								flight[f].target.LaserCode = LaserCode																--store laser code for flight target
+									LaserCode = 1 .. laserCode1 .. laserCode2 .. laserCode3
 
-								for ff = 1, #pack[p].main do																		--iterate through all main body flights
-									pack[p].main[ff].target.LaserCode = LaserCode													--store laser code in all main body flights
+									flight[f].target.LaserCode = LaserCode																--store laser code for flight target
+
+									for ff = 1, #pack[p].main do																		--iterate through all main body flights
+										pack[p].main[ff].target.LaserCode = LaserCode													--store laser code in all main body flights
+									end
+								else
+									flight[f].target.LaserCode = pack[p].main[f].target.LaserCode
 								end
-							else
-								flight[f].target.LaserCode = pack[p].main[f].target.LaserCode
+
 							end
 
 							local task_entry = {																				--task is a command to run LUA code
@@ -3472,7 +3486,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 										["id"] = "Script",
 										["params"] =
 										{
-											["command"] = "CustomLaserDesignationAFAC('" .. groupName .. "', '" .. flight[f].target.x .. "', '" .. flight[f].target.y .. "',  '" .. flight[f].target.LaserCode .. "')",
+											["command"] = "CustomDesignationAFAC('" .. groupName .. "', '" .. flight[f].target.x .. "', '" .. flight[f].target.y .. "',  '" .. tostring(flight[f].target.LaserCode) .. "')",
 											-- ["command"] = "CustomLaserDesignation('" .. grpname .. "', '" .. tgt .. "', '" .. class .. "', '" .. flight[f].target.LaserCode .. "')",	--this is a custom written task to allow coordinates bombing of target poistion at time of attack
 										},
 									},
@@ -3569,7 +3583,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						if flight[f].task == "Refueling" then
 							if flight[f].type == "KC-135" or flight[f].type == "KC130" or flight[f].type == "KC135BDA" or flight[f].type == "S-3B Tanker" or flight[f].type == "KC135MPRS" then	--only specific tanker types have air-air TACAN
 								if flight[1].tacan == nil then
-									flight[1].tacan = GetTankerTACAN()															--get new channel for first flight in pack only, all other flights will use same channel
+									flight[1].tacan = GetTankerTACAN(flight[f].target_name)															--get new channel for first flight in pack only, all other flights will use same channel
 								end
 
 								-- local unitIdTemp = GenerateIDUnit("AtoFP ".. "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight) .. "-1")
@@ -4866,7 +4880,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						if testFreqency < frequency[type_withData].onlyVariableFrequency.min
 						or testFreqency > frequency[type_withData].onlyVariableFrequency.max
 						then
-							print("AtoFp frequency "..tostring(testFreqency).." BUG with "..tostring(type_withData))
+							print("AtoFp frequency BUG with "..tostring(type_withData).." frequency: "..tostring(testFreqency))
 							os.execute 'pause'
 						end
 					end
@@ -7563,5 +7577,7 @@ if Debug.debug then
 	end
 
 	-- _affiche(PlacePA, "AtoFp PlacePA")
+
+	Display(channel_tacan, "Atofp channel_tacan")
 
 end

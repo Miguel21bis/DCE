@@ -4,7 +4,7 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.178"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.179"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
@@ -646,7 +646,142 @@ db_all_loadouts = {
 			},
 		},
 	},
+	["vwv_o-1"] = {
+		AFAC = {
+			["AFAC NAM - Day Smoke Rockets"] = {
+				minscore = 0.3,
+				support = {
+					SEAD = false,
+					Escort = false,
+					["Escort Jammer"] = false,
+				},
+				country = {
+					[1] = "USA",
+				},
+				attributes =  { "" },
+				code_loadout =  { "NAM" },
+				weaponType = "Rockets",
+				expend = "Auto",
+				day = true,
+				night = false,
+				adverseWeather = true,
+				range = 200000,
+				firepower = 1,
+				vCruise = 80,
+				vAttack = 80,
+				hCruise = 3315.2,
+				hAttack = 200,
+				sortie_rate = 6,
+				tStation = 18000,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{LAU68_FFAR_WP156}",
+					["num"] = 2,
+				},
+				[2] = {
+					["CLSID"] = "{LAU68_FFAR_WP156}",
+					["num"] = 3,
+				},
+					},
+					fuel = 160,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+			["AFAC NAM - Night  Flares"] = {
+				minscore = 0.3,
+				support = {
+					SEAD = false,
+					Escort = false,
+					["Escort Jammer"] = false,
+				},
+				country = {
+					[1] = "USA",
+				},
+				attributes =  { "" },
+				code_loadout =  { "NAM" },
+				weaponType = "Rockets",
+				expend = "Auto",
+				day = false,
+				night = true,
+				adverseWeather = false,
+				range = 200000,
+				firepower = 1,
+				vCruise = 80,
+				vAttack = 80,
+				hCruise = 3315.2,
+				hAttack = 200,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+					["num"] = 3,
+				},
+				[2] = {
+					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+					["num"] = 2,
+				},
+					},
+					fuel = 160,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+	},	
 	["Bronco-OV-10A"] = {
+		AFAC = {
+			["AFAC NAM Smoke rockets - FT"] = {
+				-- minscore = 0.3,
+				support = {
+					SEAD = false,
+					Escort = false,
+					["Escort Jammer"] = false,
+				},
+				country = {
+					[1] = "USA",
+				},
+				attributes =  { "" },
+				code_loadout =  { "NAM" },
+				weaponType = "Rockets",
+				expend = "Auto",
+				day = true,
+				night = false,
+				adverseWeather = true,
+				range = 400000,
+				firepower = 1,
+				vCruise = 154.16666666667,
+				vAttack = 154.16666666667,
+				hCruise = 3315.2,
+				hAttack = 200,
+				sortie_rate = 6,
+				tStation = 18000,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "LAU3_WP156",
+					["num"] = 6,
+				},
+				[2] = {
+					["CLSID"] = "{150gal}",
+					["num"] = 4,
+				},
+				[3] = {
+					["CLSID"] = "LAU3_WP156",
+					["num"] = 2,
+				},
+					},
+					fuel = 940,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},	
 		Strike = {
 			["NAM - AG - Mk-82HDx4"] = {
 				minscore = 0.3,
@@ -658,14 +793,14 @@ db_all_loadouts = {
 				country = {
 					[1] = "USA",
 				},
-				attributes =  { "soft" },
+				attributes =  { "" },
 				code_loadout =  { "NAM" },
 				weaponType = "Bombs",
 				expend = "All",
 				day = true,
 				night = true,
 				adverseWeather = true,
-				range = 300000,
+				range = 100000,
 				firepower = 1,
 				vCruise = 154.16666666667,
 				vAttack = 154.16666666667,
@@ -747,14 +882,14 @@ db_all_loadouts = {
 				country = {
 					[1] = "USA",
 				},
-				attributes =  { "soft" },
+				attributes =  { "" },
 				code_loadout =  { "NAM" },
 				weaponType = "Bombs",
 				expend = "All",
 				day = true,
 				night = true,
 				adverseWeather = true,
-				range = 450000,
+				range = 100000,
 				firepower = 1,
 				vCruise = 154.16666666667,
 				vAttack = 154.16666666667,
@@ -793,25 +928,105 @@ db_all_loadouts = {
 		},
 	},
 	["vwv_a1_skyraider"] = {
-		Strike = {
-			["NAM-AG-Bombs 500lbs*8 - Rkt*14 - FT*3"] = {
+		AFAC = {
+			["AFAC NAM- Flares - Smoke rockets - FT*3"] = {
 				minscore = 0.3,
 				support = {
-					SEAD = true,
+					SEAD = false,
 					Escort = false,
 					["Escort Jammer"] = false,
 				},
 				country = {
 					[1] = "USA",
 				},
-				attributes =  { "soft" },
+				attributes =  { "" },
+				code_loadout =  { "NAM" },
+				weaponType = "Rockets",
+				expend = "Auto",
+				day = true,
+				night = true,
+				adverseWeather = true,
+				range = 200000,
+				firepower = 1,
+				vCruise = 154.16666666667,
+				vAttack = 154.16666666667,
+				hCruise = 3315.2,
+				hAttack = 200,
+				sortie_rate = 6,
+				tStation = 18000,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+					["num"] = 15,
+				},
+				[2] = {
+					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+					["num"] = 1,
+				},
+				[3] = {
+					["CLSID"] = "{3DFB7321-AB0E-11d7-9897-000476191836}",
+					["num"] = 14,
+				},
+				[4] = {
+					["CLSID"] = "{3DFB7321-AB0E-11d7-9897-000476191836}",
+					["num"] = 2,
+				},
+				[5] = {
+					["CLSID"] = "{AV8BNA_AERO1D}",
+					["num"] = 9,
+				},
+				[6] = {
+					["CLSID"] = "{AV8BNA_AERO1D}",
+					["num"] = 7,
+				},
+				[7] = {
+					["CLSID"] = "{AV8BNA_AERO1D}",
+					["num"] = 8,
+				},
+				[8] = {
+					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+					["num"] = 13,
+				},
+				[9] = {
+					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+					["num"] = 3,
+				},
+				[10] = {
+					["CLSID"] = "{3DFB7321-AB0E-11d7-9897-000476191836}",
+					["num"] = 12,
+				},
+				[11] = {
+					["CLSID"] = "{3DFB7321-AB0E-11d7-9897-000476191836}",
+					["num"] = 4,
+				},
+					},
+					fuel = 1036,
+					flare = 240,
+					chaff = 240,
+					gun = 100,
+				},
+			},
+		},	
+		Strike = {
+			["NAM-AG-Bombs 500lbs*8 - Rkt*14 - FT*3"] = {
+				minscore = 0.3,
+				support = {
+					SEAD = false,
+					Escort = false,
+					["Escort Jammer"] = false,
+				},
+				country = {
+					[1] = "USA",
+				},
+				attributes =  { "" },
 				code_loadout =  { "NAM" },
 				weaponType = "Bombs",
 				expend = "All",
 				day = true,
 				night = true,
 				adverseWeather = true,
-				range = 300000,
+				range = 200000,
 				firepower = 1,
 				vCruise = 154.16666666667,
 				vAttack = 154.16666666667,
@@ -977,7 +1192,7 @@ db_all_loadouts = {
 				country = {
 					[1] = "USA",
 				},
-				attributes =  { "soft" },
+				attributes =  { "" },
 				code_loadout =  { "NAM" },
 				weaponType = "rockets",
 				expend = "Auto",
@@ -6947,6 +7162,66 @@ db_all_loadouts = {
 		},
 	},
 	["F-4E-45MC"] = {
+		Reconnaissance = {
+			["Reco - NAM - Pod - AIM-7E*1 - ECM - AIM-9B*2 - FT*3"] = {
+				support = {
+					Escort = false,
+					SEAD = false,
+				},
+				attributes =  { },
+				code_loadout =  { "NAM" },
+				night = true,
+				adverseWeather = true,
+				range = 600000,
+				firepower = 10,
+				vCruise = 250,
+				vAttack = 350,
+				hCruise = 10096,
+				hAttack = 10096,
+				tStation = 2000,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = {
+					["CLSID"] = "{HB_PAVE_SPIKE_FAST_ON_ADAPTER_IN_AERO7}",
+					["num"] = 6,
+				},
+				[2] = {
+					["CLSID"] = "{F4_SARGENT_TANK_600_GAL}",
+					["num"] = 7,
+				},
+				[3] = {
+					["CLSID"] = "{F4_SARGENT_TANK_370_GAL}",
+					["num"] = 1,
+				},
+				[4] = {
+					["CLSID"] = "{F4_SARGENT_TANK_370_GAL_R}",
+					["num"] = 13,
+				},
+				[5] = {
+					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["num"] = 8,
+				},
+				[6] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 2,
+				},
+				[7] = {
+					["CLSID"] = "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}",
+					["num"] = 11,
+				},
+				[8] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 4,
+				},
+					},
+					fuel = 5510.5,
+					flare = 30,
+					chaff = 120,
+					gun = 100,
+				},
+			},
+		},
 		Strike = {
 			-- ["Crisis - AG - LR - TPod - GBU-10x2 -  AIM-7Mx3 - FTx3 - DP"] = {
 				-- minscore = 0.3,
@@ -8610,6 +8885,91 @@ db_all_loadouts = {
 			-- },
 		},
 		["Anti-ship Strike"] = {
+			["Anti-Ship Strike NAM - AIM_9B*4 - AIM-7E*3 - ECM - AGM-65A*2 - FT*3"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				country = {
+					[1] = "USA",
+				},
+				attributes =  { "ship" },
+				code_loadout =  { "NAM" },
+				weaponType = "ASM",
+				expend = "Auto",
+				day = true,
+				night = true,
+				adverseWeather = true,
+				range = 900000,
+				firepower = 1,
+				vCruise = 250,
+				vAttack = 300,
+				hCruise = 6096,
+				hAttack = 6096,
+				standoff = 10000,
+				sortie_rate = 10,
+				stores = {
+					pylons = {
+						[1] = {
+					["CLSID"] = "{F4_SARGENT_TANK_370_GAL_R}",
+					["num"] = 13,
+				},
+				[2] = {
+					["CLSID"] = "{F4_SARGENT_TANK_370_GAL}",
+					["num"] = 1,
+				},
+				[3] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 12,
+				},
+				[4] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 10,
+				},
+				[5] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 4,
+				},
+				[6] = {
+					["CLSID"] = "{AIM-9B}",
+					["num"] = 2,
+				},
+				[7] = {
+					["CLSID"] = "{HB_F4E_AGM-65A_LAU117_SWA}",
+					["num"] = 3,
+				},
+				[8] = {
+					["CLSID"] = "{HB_F4E_AGM-65A_LAU117_SWA}",
+					["num"] = 11,
+				},
+				[9] = {
+					["CLSID"] = "{F4_SARGENT_TANK_600_GAL}",
+					["num"] = 7,
+				},
+				[10] = {
+					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["num"] = 8,
+				},
+				[11] = {
+					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["num"] = 9,
+				},
+				[12] = {
+					["CLSID"] = "{HB_ALQ-131_ON_ADAPTER_IN_AERO7}",
+					["num"] = 6,
+				},
+				[13] = {
+					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["num"] = 5,
+				},
+					},
+					fuel = 5510.5,
+					flare = 30,
+					chaff = 120,
+					gun = 100,
+				},
+			},
 			-- ["Anti-Ship Strike Crisis - AG - LR - ECM - AGM-65Bx6 - AIM-7Mx3 - FTx3 - DP"] = {
 				-- minscore = 0.3,
 				-- support = {
@@ -37619,7 +37979,7 @@ db_all_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { },
-				code_loadout =  { "WOB", "NAM" },
+				code_loadout =  { "WOB" },
 				day = true,
 				night = true,
 				adverseWeather = true,
@@ -37668,6 +38028,32 @@ db_all_loadouts = {
 				},
 				attributes =  { },
 				code_loadout =  { "Crisis" },
+				day = true,
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 154.16666666667,
+				vAttack = 154.16666666667,
+				hCruise = 100,
+				hAttack = 100,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					},
+					fuel = "20830",
+					flare = 60,
+					chaff = 120,
+					gun = 100,
+				},
+			},
+			["NAM transport"] = {
+				support = {
+					Escort = false,
+					SEAD = false,
+				},
+				attributes =  { },
+				code_loadout =  { "NAM" },
 				day = true,
 				night = true,
 				adverseWeather = true,

@@ -1179,10 +1179,13 @@ for side, units in pairs(oob_air) do																								--iterate through al
 
 																							local flights_requested
 																							if  task == "AWACS" or task == "Refueling" or task == "AFAC" then									--multiple flights are required to continously cover a station for the duration of the mission
+																								if not unit_loadouts[l].tStation then print("this variable <<tStation>> is missing  in this aircraft's "..task.." loadout "..unit.type) os.execute 'pause' end	
 																								flights_requested = math.ceil((tot_to - tot_from) / unit_loadouts[l].tStation) + 1			--how many flights are needed to keep continous coverage of station, plus 1 for on station before mission start
 																								aircraft_requested = aircraft_requested * flights_requested									--total number of requested aircraft is number of aircraft needed to statisfy firepower requirement of station * number of flights needed for continous coverage
 																							end
 																							if task == "CAP"  then									--multiple flights are required to continously cover a station for the duration of the mission
+																								if not unit_loadouts[l].tStation then print("this variable <<tStation>> is missing in this aircraft's "..task.." loadout "..unit.type) os.execute 'pause' end
+																							
 																								local station = unit_loadouts[l].tStation * 0.75
 																								flights_requested = math.ceil((tot_to - tot_from) / station)
 																								aircraft_requested = aircraft_requested * flights_requested									--total number of requested aircraft is number of aircraft needed to statisfy firepower requirement of station * number of flights needed for continous coverage

@@ -1240,17 +1240,19 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					local tanker_TACAN = {}
 					if refuelable then
 						for pack_n,pack in pairs(ATO[tempPlayer.side]) do																		--iterate through packages in player side
-							for role_name,role in pairs(pack) do																				--iterate through roles in package
-								if role[1] and role[1].task == "Refueling" then																	--if first flight is tanker
-									if role[1].tacan then																						--tanker has a tacan channel
-										s = s .. "Tanker " .. role[1].callsign .. ", TACAN " .. role[1].tacan .. "Y / TKR\n"					--add TACAN informaion									
-										tanker_TACAN[role[1].callsign] = role[1].tacan .. "Y"
+							for role_name, roles in pairs(pack) do																				--iterate through roles in package
+								for n, role in pairs(roles) do	
+									if role and role.task == "Refueling" then																	--if first flight is tanker
+										if role.tacan then																						--tanker has a tacan channel
+											s = s .. "Tanker " .. role.callsign .. ", TACAN " .. role.tacan .. "Y "..tostring(role.target.text).."\n"					--add TACAN informaion									
+											tanker_TACAN[role.callsign] = role.tacan .. "Y"
+										end
 									end
 								end
 							end
 						end
 					end
-					if allowedBrief then  briefing[sideName] = briefing[sideName] .. s ..  "\n\n" s="" end
+					if allowedBrief then briefing[sideName] = briefing[sideName] .. s ..  "\n\n" s="" end
 
 
 					--Communication
@@ -1345,6 +1347,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 												['type'] = role[f].type,
 												['time'] = time,
 												['flight'] = f,
+												['text'] = role[f].target.text,
 											}
 											table.insert(tanker_freq, tabElement)
 										end
@@ -1813,16 +1816,18 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 							end
 							if value.flight == 1 then
 								for Nradio = 1, #radioP do
+									local postTxt = ""
+									if value.text then postTxt = value.text end
 									entry = {name = "", call = "", freq = "", radio = ""}
-									entry["name"] = "Tanker: "..tostring(tanker_TACAN[callINI]).." "..value.type
+									entry["name"] = "Tanker: "..tostring(tanker_TACAN[callINI]).." "..value.type.." "..postTxt
 									entry["call"] = call
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 									if FreqCapability(freqA, radioP, Nradio, "") then
-										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] < radioP[Nradio].nbCanal then
 											if radioP[Nradio].startCanal == 0 then MC = -1 end
 											table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-											entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+											entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] + MC
 											local entryCopy = Deepcopy(entry)
 											table.insert(entriesRadio[Nradio], entryCopy)
 										elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then

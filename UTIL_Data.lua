@@ -3,7 +3,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification: updateData_Bf
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Data.lua"] = "1.14.85"
+versionDCE["UTIL_Data.lua"] = "1.14.86"
 ------------------------------------------------------------------------------------------------------- 
 -- updateData_Bf			(f refuellingReceptacleType)(e Tu_22D)(Bd flyingAlone)(CH-47F H-6J)(a OH-58)(z F-4E-45MC)(UH-60L)(x hHover)(w reaper)(v Hercules)(u tabTask)(t add is_helicopter table)(s F1EE)(r F-16C_50)(q): Add helicos  (p): Add WOC80)(o: transfer the dataMap to another file)
 -- debug_c					(c OH-6A)(b requiredModulesSpecialName)(a add IsWesternCountry function)
@@ -253,9 +253,17 @@ Data_divers = {
 		EPLRS_Capacity = true,
 		vCruise = 110,
 		hCruise = 4570,
+		laserDesignator = false,
 	},
 
 	["vwv_a1_skyraider"] = 	{				--Mod
+		instrumentUnits = "imperial",
+		requiredModules = true,						--itsModule
+		EPLRS_Capacity = false,
+		laserDesignator = false,
+	},
+	
+	["vwv_o-1"] = 	{			                 	--Mod
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
 		EPLRS_Capacity = false,
@@ -298,6 +306,13 @@ Data_divers = {
 		vCruise = 154,
 		hCruise = 7600,
 		refuellingReceptacleType = "probe"
+	},
+
+	["MQ-9 Reaper"] = 	{
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		playable = false,
+		laserDesignator = true,
 	},
 
 	["F-86F Sabre"] = 	{
@@ -1407,6 +1422,7 @@ TaskByPlane = {
 		["A-10C_2"] = true,
 		["Bronco-OV-10A"] = true,		--Mod
 		["vwv_a1_skyraider"] = true,	--Mod
+		["vwv_o-1"] = true,         	--Mod
 		["VSN_F100"] = true,			--Mod
 		["VSN_F105D"] = true,			--Mod
 		["VSN_F105G"] = true,			--Mod
@@ -1538,6 +1554,7 @@ TaskByPlane = {
 		["A-10A"] = true,
 		["Bronco-OV-10A"] = true,		--Mod
 		["vwv_a1_skyraider"] = true,	--Mod
+		["vwv_o-1"] = true,         	--Mod
 
 		["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,

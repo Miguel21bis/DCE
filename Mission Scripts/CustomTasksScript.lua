@@ -2,16 +2,16 @@
 --Script attached to mission and executed via trigger
 --Functions accessed via LUA Run Script on waypoint
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  cleanCode_c
+-- last modification:  M68_b
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/CustomTasksScript.lua"] = "1.9.41"
+versionDCE["Mission Scripts/CustomTasksScript.lua"] = "1.9.43"
 ------------------------------------------------------------------------------------------------------- 
 -- Reglage_n				(n force RTB)(m stopcondition)(l escorte)(k CVN to CV)(j altitudeEnabled true)(h GetHeading)(global path)(f rejoin debug)(e more scheduleFunction) (d landingImpossible denivelé)(c: limit =  1 ?)(b: orbit infini) all ["groupAttack"] = false,
 -- cleanCode_c				(c GetCategory)(b springCleaning)
 -- Debug_h					(fgh: CAS AttackUnit)(e: static id -1)(d: Checking) creates custom files to observe (c: Helicopter)(b: strike bombing)(a: strike ASM B52)
 
 -- modification M74_a		mix static, vehicle and map elements in a Target.
--- modification M68_a		add AFAC task
+-- modification M68_b		add AFAC task (b CustomDesignation)
 -- modification M61_j		SAR (j noSAR in wrongSide)(d Custom_Altitude-follow the valleys)(b debug+shifts task injections) 
 -- modification M54_b		revoir CustomTaskScript et TaskBombing (b: add duration)
 -- modification M45_a		compatible with 2.7.0
@@ -1298,123 +1298,130 @@ function CustomFlareAttack(FlightName, tgt_x, tgt_y, grp_name, expend, weaponTyp
 end
 
 
------ target laser illumination -----
-function CustomLaserDesignation(FlightName, target, class, LaserCode)
+----- target laser/fumigene illumination -----
+function CustomDesignation(FlightName, target, class, laserCode)
 	if varFpsLeak then return end
 	local laser														--variable to hold the laser spot
 
-	if class == "vehicle" then										--target is a vehicle/ship group
+	if laserCode and laserCode ~= "nil" then
 
-		local function DesignationCycle()							--laser designation cycle function
-			if laser and laser ~= nil then											--if there is already an existing laser spot
-				laser:destroy()										--destroy it
+
+		if class == "vehicle" then										--target is a vehicle/ship group
+
+			local function DesignationCycle()							--laser designation cycle function
+				if laser and laser ~= nil then											--if there is already an existing laser spot
+					laser:destroy()										--destroy it
+				end
+
+				local group = Group.getByName(target)					--get target group
+				local units = group:getUnits()							--get target units
+
+				local flight = Group.getByName(FlightName)				--get group of designating flight
+				if flight then
+					local wingman = flight:getUnits()						--get list of units from designating flights
+
+					if wingman[1] and units[1] then							--if target group has a leader unit left
+						local pos = units[1]:getPoint()						--get target position
+						laser = Spot.createLaser(wingman[1], nil, pos, laserCode)	--start laser spot
+					end
+				end
+
+				if laser and laser ~= nil then											--if there is a new laser spot
+					return timer.getTime() + 2							--repeat designation cylce in 2 seconds
+				else													--if no laser spot was created
+					return												--stop designation cycle
+				end
 			end
+			timer.scheduleFunction(DesignationCycle, nil, timer.getTime() + 1)	--start designation cylce
 
-			local group = Group.getByName(target)					--get target group
-			local units = group:getUnits()							--get target units
+		elseif class == "static" then									--targets are static objects
+			local u = 0													--TargetList counter
 
-			local flight = Group.getByName(FlightName)				--get group of designating flight
-			if flight then
+			local function DesignationCycle()							--laser designation cycle function
+				if laser and laser ~= nil then											--if there is already an existing laser spot
+					laser:destroy()										--destroy it
+				end
+
+				repeat
+					u = u + 1											--iterate through all target elements
+				until StaticObject.getByName(target[u]) or u == #target		--repeat until first alive static object is found in TargetList or end of TargetList is reached
+
+				local static = StaticObject.getByName(target[u])		--get static object
+
+				local flight = Group.getByName(FlightName)				--get group of designating flight
 				local wingman = flight:getUnits()						--get list of units from designating flights
 
-				if wingman[1] and units[1] then							--if target group has a leader unit left
-					local pos = units[1]:getPoint()						--get target position
-					laser = Spot.createLaser(wingman[1], nil, pos, LaserCode)	--start laser spot
-				end
-			end
-
-			if laser and laser ~= nil then											--if there is a new laser spot
-				return timer.getTime() + 2							--repeat designation cylce in 2 seconds
-			else													--if no laser spot was created
-				return												--stop designation cycle
-			end
-		end
-		timer.scheduleFunction(DesignationCycle, nil, timer.getTime() + 1)	--start designation cylce
-
-	elseif class == "static" then									--targets are static objects
-		local u = 0													--TargetList counter
-
-		local function DesignationCycle()							--laser designation cycle function
-			if laser and laser ~= nil then											--if there is already an existing laser spot
-				laser:destroy()										--destroy it
-			end
-
-			repeat
-				u = u + 1											--iterate through all target elements
-			until StaticObject.getByName(target[u]) or u == #target		--repeat until first alive static object is found in TargetList or end of TargetList is reached
-
-			local static = StaticObject.getByName(target[u])		--get static object
-
-			local flight = Group.getByName(FlightName)				--get group of designating flight
-			local wingman = flight:getUnits()						--get list of units from designating flights
-
-			if wingman[1] and static then							--if flight leader and static object are alive
-				local pos = static:getPoint()						--get target position
-				laser = Spot.createLaser(wingman[1], nil, pos, LaserCode)	--start laser spot
-			end
-
-			if laser and laser ~= nil then											--if there is a new laser spot
-				return timer.getTime() + 2							--repeat designation cylce in 2 seconds
-			else													--if no laser spot was created
-				return												--stop designation cycle
-			end
-		end
-		timer.scheduleFunction(DesignationCycle, nil, timer.getTime() + 1)	--start designation cylce
-
-	elseif class == "scenery" then									--targets are scenery objects
-		local u = 0													--TargetList counter
-
-		local function DesignationCycle()							--laser designation cycle function
-			if laser and laser ~= nil then											--if there is already an existing laser spot
-				laser:destroy()										--destroy it
-			end
-
-			repeat
-				u = u + 1											--iterate through all target elements
-
-				local scenery
-				local function IfFound(obj)							--function to run if scenery object is found
-					scenery = obj									--store scenery object
+				if wingman[1] and static then							--if flight leader and static object are alive
+					local pos = static:getPoint()						--get target position
+					laser = Spot.createLaser(wingman[1], nil, pos, laserCode)	--start laser spot
 				end
 
-				local SearchArea = {								--scenery object search area centered on target position
-					id = world.VolumeType.SPHERE,
-					params = {
-						point = {
-							x = target[u].x,
-							y = land.getHeight({x = target[u].x, y = target[u].y}),
-							z = target[u].y
-						},
-						radius = 1
+				if laser and laser ~= nil then											--if there is a new laser spot
+					return timer.getTime() + 2							--repeat designation cylce in 2 seconds
+				else													--if no laser spot was created
+					return												--stop designation cycle
+				end
+			end
+			timer.scheduleFunction(DesignationCycle, nil, timer.getTime() + 1)	--start designation cylce
+
+		elseif class == "scenery" then									--targets are scenery objects
+			local u = 0													--TargetList counter
+
+			local function DesignationCycle()							--laser designation cycle function
+				if laser and laser ~= nil then											--if there is already an existing laser spot
+					laser:destroy()										--destroy it
+				end
+
+				repeat
+					u = u + 1											--iterate through all target elements
+
+					local scenery
+					local function IfFound(obj)							--function to run if scenery object is found
+						scenery = obj									--store scenery object
+					end
+
+					local SearchArea = {								--scenery object search area centered on target position
+						id = world.VolumeType.SPHERE,
+						params = {
+							point = {
+								x = target[u].x,
+								y = land.getHeight({x = target[u].x, y = target[u].y}),
+								z = target[u].y
+							},
+							radius = 1
+						}
 					}
-				}
-				world.searchObjects(Object.Category.SCENERY, SearchArea, IfFound)	--search for scenery object at target position
-			until scenery or u == #target							--repeat until first alive scenery object is found in TargetList or end of TargetList is reached
+					world.searchObjects(Object.Category.SCENERY, SearchArea, IfFound)	--search for scenery object at target position
+				until scenery or u == #target							--repeat until first alive scenery object is found in TargetList or end of TargetList is reached
 
-			local flight = Group.getByName(FlightName)				--get group of designating flight
-			local wingman = flight:getUnits()						--get list of units from designating flights
+				local flight = Group.getByName(FlightName)				--get group of designating flight
+				local wingman = flight:getUnits()						--get list of units from designating flights
 
-			if wingman[1]	then									--if flight leader is alive
-				local pos = {										--get target position
-					x = target[u].x,
-					y = land.getHeight({x = target[u].x, y = target[u].y}),
-					z = target[u].y
-				}
-				laser = Spot.createLaser(wingman[1], nil, pos, LaserCode)	--start laser spot
+				if wingman[1]	then									--if flight leader is alive
+					local pos = {										--get target position
+						x = target[u].x,
+						y = land.getHeight({x = target[u].x, y = target[u].y}),
+						z = target[u].y
+					}
+					laser = Spot.createLaser(wingman[1], nil, pos, laserCode)	--start laser spot
+				end
+
+				if laser and laser ~= nil  then											--if there is a new laser spot
+					return timer.getTime() + 2							--repeat designation cylce in 2 seconds
+				else													--if no laser spot was created
+					return												--stop designation cycle
+				end
 			end
-
-			if laser and laser ~= nil  then											--if there is a new laser spot
-				return timer.getTime() + 2							--repeat designation cylce in 2 seconds
-			else													--if no laser spot was created
-				return												--stop designation cycle
-			end
+			timer.scheduleFunction(DesignationCycle, nil, timer.getTime() + 1)	--start designation cylce
 		end
-		timer.scheduleFunction(DesignationCycle, nil, timer.getTime() + 1)	--start designation cylce
 	end
+
+
+
 end
 
 ----- target laser illumination -----
-function CustomLaserDesignationAFAC(AfacFlightName, refX, refY, LaserCode)
+function CustomLaserDesignationAFAC(AfacFlightName, refX, refY, laserCode)
 	if varFpsLeak then return end
 
 	env.info("DCE_CustomLaserDesignationAFAC AA : START "..tostring(AfacFlightName))
@@ -1605,7 +1612,7 @@ function CustomLaserDesignationAFAC(AfacFlightName, refX, refY, LaserCode)
 
 							env.info("DCE_CustomLaserDesignationAFAC :JJJ_2  meme cible "..tostring(unitGroundSelected_B[i].unitTypeName).." "..tostring(unitGroundSelected_B[i].UnitId) )
 							if AFAC_available[AfacFlightName] and AFAC_available[AfacFlightName]["gpGid"] then
-								trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC Same Target : "..tostring(unitGroundSelected_B[i].unitTypeName).." LaserCode: "..tostring(LaserCode), 15, false)
+								trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC Same Target : "..tostring(unitGroundSelected_B[i].unitTypeName).." laserCode: "..tostring(laserCode), 15, false)
 							end
 
 							if unitGroundSelected_B[i].LLpos and AFAC_available[AfacFlightName] and AFAC_available[AfacFlightName]["gpGid"]  then
@@ -1671,7 +1678,7 @@ function CustomLaserDesignationAFAC(AfacFlightName, refX, refY, LaserCode)
 
 					if  unitGroundSelected_B[actuelTarget] and laser == nil then
 						local pos = unitGroundSelected_B[actuelTarget].unitPos
-						laser = Spot.createLaser(unitAFAC, nil, pos, LaserCode)	--start laser spot
+						laser = Spot.createLaser(unitAFAC, nil, pos, laserCode)	--start laser spot
 
 						laseUnitId = unitGroundSelected_B[actuelTarget].UnitId
 
@@ -1683,9 +1690,9 @@ function CustomLaserDesignationAFAC(AfacFlightName, refX, refY, LaserCode)
 
 						unitGroundSelected_B[actuelTarget]["TimeLase"] = timer.getTime()
 
-						env.info("DCE_CustomLaserDesignationAFAC : LL createLaser LaserCode: "..tostring(LaserCode))
+						env.info("DCE_CustomLaserDesignationAFAC : LL createLaser laserCode: "..tostring(laserCode))
 						if AFAC_available[AfacFlightName] and AFAC_available[AfacFlightName]["gpGid"] then
-							trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC createLaser LaserCode: "..tostring(LaserCode), 30, false)
+							trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC createLaser laserCode: "..tostring(laserCode), 30, false)
 							trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC target position: "..tostring(LLpos), 30, false)
 						end
 
@@ -1705,9 +1712,9 @@ function CustomLaserDesignationAFAC(AfacFlightName, refX, refY, LaserCode)
 
 						unitGroundSelected_B[actuelTarget]["TimeLase"] = timer.getTime()
 
-						env.info("DCE_CustomLaserDesignationAFAC : LL setPoint LaserCode: "..tostring(LaserCode))
+						env.info("DCE_CustomLaserDesignationAFAC : LL setPoint laserCode: "..tostring(laserCode))
 						if AFAC_available[AfacFlightName] and AFAC_available[AfacFlightName]["gpGid"] then
-							trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC setPoint LaserCode: "..tostring(LaserCode), 30, false)
+							trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC setPoint laserCode: "..tostring(laserCode), 30, false)
 							trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC target position: "..tostring(LLpos), 30, false)
 						end
 					end
