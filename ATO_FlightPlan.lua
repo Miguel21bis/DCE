@@ -83,6 +83,15 @@ local baseIsCarrier
 local allFlightName_AtoFP = {}
 
 local polkaOff = true					--evite la dance des aeronefs sur le parking (Inter et SAR compris)
+-- local proximityAircraft = {}			--ajoute la position en spawn de départ, des tankers, pour tenter de les éloigner les uns des autres
+
+-- Table des avions de ravitaillement déjà enregistrés
+local proximityAircraft = {}
+
+-- Distance minimale entre tankers (15 km)
+local OFFSET_DISTANCE = 15000
+-- Angle initial
+local currentHeading = 0  -- On démarre vers le Nord
 
 if not camp.SAR then camp.SAR = {} end
 camp.SAR.helicopter = {}
@@ -339,6 +348,44 @@ for i=1, 4 do
 			end
 		end
 	end
+end
+
+
+-- Ajout d'un tanker avec rotation du cap
+function AddTanker(groupName, startX, startY)
+    local newPosition = { x = startX, y = startY }
+    local count = 0
+
+    -- Comptage des tankers existants
+    for _, _ in pairs(proximityAircraft) do
+        count = count + 1
+    end
+
+    -- Décale chaque nouveau tanker
+    if count > 0 then
+        newPosition = GetOffsetPoint(newPosition, currentHeading, OFFSET_DISTANCE)
+
+        -- On fait tourner le cap de 90°
+        currentHeading = (currentHeading + 90) % 360
+    end
+
+    -- Vérifier que la nouvelle position respecte bien 15 km d’écart
+    for _, tanker in pairs(proximityAircraft) do
+        local dx = newPosition.x - tanker.x
+        local dy = newPosition.y - tanker.y
+        local distance = math.sqrt(dx * dx + dy * dy)
+
+        -- Si un tanker est trop proche, on ajuste en le repoussant
+        if distance < OFFSET_DISTANCE then
+            print("⚠️ Ajustement de la position pour éviter un chevauchement")
+            newPosition = GetOffsetPoint(newPosition, currentHeading, OFFSET_DISTANCE)
+        end
+    end
+
+    -- Ajout du tanker dans la table
+    proximityAircraft[groupName] = newPosition
+
+    print("✅ Tanker ajouté:", groupName, "Position:", newPosition.x, newPosition.y, "Cap:", currentHeading)
 end
 
 
@@ -3446,7 +3493,28 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
 						elseif flight[f].task == "AFAC" then
-							-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
+							
+							local task_entry = {
+								["enabled"] = true,
+								["name"] = "evitement horizontal des tirs AAA",
+								["auto"] = false,
+								["id"] = "WrappedAction",
+								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+								["params"] =
+								{
+									["action"] =
+									{
+										["id"] = "Option",
+										["params"] = 
+										{
+											["value"] = 5,
+											["name"] = 1,
+										},
+									},
+								},
+							}
+							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+
 
 							if Data_divers[flight[f].type] and Data_divers[flight[f].type].laserDesignator then
 							
@@ -3474,7 +3542,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							end
 
-							local task_entry = {																				--task is a command to run LUA code
+							task_entry = {																				--task is a command to run LUA code
 								["enabled"] = true,
 								["auto"] = false,
 								["id"] = "WrappedAction",
@@ -3493,7 +3561,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								},
 							}
 							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-
 
 						end
 					end
@@ -3525,7 +3592,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								},
 							}
 							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-
 
 
 							local altitude = AltitudeCruise * 2/3
@@ -4341,15 +4407,14 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 
-					if  (flight[f].player or flight[f].client) and n == 2 then
+					if (flight[f].player or flight[f].client) and n == 2 then
 						mSkill = 4
 					end
-					-- mSkill = math.floor(mSkill) + 1					
+			
 					mSkill = math.floor(mSkill)
 
 					if mSkill <= 1 then mSkill = 1
 					elseif mSkill >= 4 then mSkill = 4
-					-- else mSkill = mSkill
 					end
 
 					local skill = ""
@@ -4359,6 +4424,13 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						skill = flight[f].skill
 					end
 
+					--overide skill pour les AFAC qui ne sont pas des manches et prennent tous les risques
+					if flight[f].task == "AFAC" then
+						skill = skillTab[4]
+					end
+
+
+					--gerer le kero au Spawn
 					local fuelTemp = flight[f].loadout.stores.fuel
 					if (flight[f].task == "Refueling" or flight[f].task == "AWACS")
 						and waypoints[1].briefing_name and  waypoints[1].briefing_name == "Spawn"
@@ -4367,13 +4439,20 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						fuelTemp = fuelTemp * 0.75
 					end
 
+					--generation du name
 					local unitName = groupName .. "-" .. n
-
 					local unitIdTemp = 1
 					if not UnitByName[unitName] then
 						unitIdTemp = GenerateIDUnit(unitName)
 					end
 
+					if flight[f].route[1].id == "Spawn" and flight[f].task == "Refueling" then
+
+						AddTanker(groupName, waypoints[1]["x"], waypoints[1]["y"])
+
+					end
+
+					--position de départ
 					local define_x = waypoints[1]["x"]
 					local define_y = waypoints[1]["y"]
 
