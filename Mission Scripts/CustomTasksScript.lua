@@ -1299,7 +1299,7 @@ end
 
 
 ----- target laser/fumigene illumination -----
-function CustomDesignation(FlightName, target, class, laserCode)
+function CustomLaserDesignation(FlightName, target, class, laserCode)
 	if varFpsLeak then return end
 	local laser														--variable to hold the laser spot
 
@@ -1308,7 +1308,7 @@ function CustomDesignation(FlightName, target, class, laserCode)
 
 		if class == "vehicle" then										--target is a vehicle/ship group
 
-			local function DesignationCycle()							--laser designation cycle function
+			local function designationCycle()							--laser designation cycle function
 				if laser and laser ~= nil then											--if there is already an existing laser spot
 					laser:destroy()										--destroy it
 				end
@@ -1332,12 +1332,12 @@ function CustomDesignation(FlightName, target, class, laserCode)
 					return												--stop designation cycle
 				end
 			end
-			timer.scheduleFunction(DesignationCycle, nil, timer.getTime() + 1)	--start designation cylce
+			timer.scheduleFunction(designationCycle, nil, timer.getTime() + 1)	--start designation cylce
 
 		elseif class == "static" then									--targets are static objects
 			local u = 0													--TargetList counter
 
-			local function DesignationCycle()							--laser designation cycle function
+			local function designationCycle()							--laser designation cycle function
 				if laser and laser ~= nil then											--if there is already an existing laser spot
 					laser:destroy()										--destroy it
 				end
@@ -1362,12 +1362,12 @@ function CustomDesignation(FlightName, target, class, laserCode)
 					return												--stop designation cycle
 				end
 			end
-			timer.scheduleFunction(DesignationCycle, nil, timer.getTime() + 1)	--start designation cylce
+			timer.scheduleFunction(designationCycle, nil, timer.getTime() + 1)	--start designation cylce
 
 		elseif class == "scenery" then									--targets are scenery objects
 			local u = 0													--TargetList counter
 
-			local function DesignationCycle()							--laser designation cycle function
+			local function designationCycle()							--laser designation cycle function
 				if laser and laser ~= nil then											--if there is already an existing laser spot
 					laser:destroy()										--destroy it
 				end
@@ -1412,7 +1412,7 @@ function CustomDesignation(FlightName, target, class, laserCode)
 					return												--stop designation cycle
 				end
 			end
-			timer.scheduleFunction(DesignationCycle, nil, timer.getTime() + 1)	--start designation cylce
+			timer.scheduleFunction(designationCycle, nil, timer.getTime() + 1)	--start designation cylce
 		end
 	end
 
@@ -1421,34 +1421,35 @@ function CustomDesignation(FlightName, target, class, laserCode)
 end
 
 ----- target laser illumination -----
-function CustomLaserDesignationAFAC(AfacFlightName, refX, refY, laserCode)
+function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	if varFpsLeak then return end
 
-	env.info("DCE_CustomLaserDesignationAFAC AA : START "..tostring(AfacFlightName))
-	trigger.action.outText("AFAC : START "..tostring(AfacFlightName), 15)
+	env.info("DCE_CustomDesignationAFAC AA : START "..tostring(afacFlightName))
+	trigger.action.outText("AFAC : START "..tostring(afacFlightName), 15)
 
 	local laser														--variable to hold the laser spot
+	local smokeDuration = 300
 
-	local flightGroup = Group.getByName(AfacFlightName)
+	local flightGroup = Group.getByName(afacFlightName)
 	local Coalition = flightGroup:getCoalition()
 	local unitsAFAC = flightGroup:getUnits()
 	local unitAFAC = unitsAFAC[1]
 
-	if unitAFAC and  unitAFAC:isExist()  then
-		AFAC_available[AfacFlightName] = {
+	if unitAFAC and unitAFAC:isExist()  then
+		AFAC_available[afacFlightName] = {
 				["unitAFAC"] = unitAFAC,
 				-- ["gpGid"] = 0,
 			}
 	else
-		AFAC_available[AfacFlightName] = nil
+		AFAC_available[afacFlightName] = nil
 	end
 
 	--recupere les dynamique
-	local GroundGroups = coalition.getGroups(coalitionIdNumericENI[Coalition], Group.Category.GROUND)
+	local groundGroups = coalition.getGroups(coalitionIdNumericENI[Coalition], Group.Category.GROUND)
 	local unitGroundSelected_A = {}
 	local unitGroundSelected_B = {}
 
-	for i, gp in pairs(GroundGroups) do
+	for i, gp in pairs(groundGroups) do
 		local gpName = Group.getName(gp)
 		local units = gp:getUnits()
 
@@ -1467,11 +1468,11 @@ function CustomLaserDesignationAFAC(AfacFlightName, refX, refY, laserCode)
 				local unitTypeName = _unit:getTypeName()
 
 				local distance = math.floor(math.sqrt(math.pow(unitPos.x - refX, 2) + math.pow(unitPos.z - refY, 2)))
-				env.info("DCE_CustomLaserDesignationAFAC :DD_2a  "..distance)
+				env.info("DCE_CustomDesignationAFAC :DD_2a  "..distance)
 
 				if distance < 50000 then
 
-					env.info("DCE_CustomLaserDesignationAFAC :EEa  "..tostring(unitTypeName))
+					env.info("DCE_CustomDesignationAFAC :EEa  "..tostring(unitTypeName))
 
 					local item = {
 						unitGround = _unit,
@@ -1500,52 +1501,47 @@ function CustomLaserDesignationAFAC(AfacFlightName, refX, refY, laserCode)
 
 	for i, static in pairs(statics) do
 		local stName = Object.getName(static)
-		-- local units = gp:getUnits()
 
-		-- for n=1, #units do
+		env.info("DCE_CustomDesignationAFAC :BB1  "..stName)
 
-			-- local _unit = units[n]
-			env.info("DCE_CustomLaserDesignationAFAC :BB1  "..stName)
+		local stLife = static:getLife()
+		env.info("DCE_CustomDesignationAFAC :BB2  "..stLife)
 
-			local stLife = static:getLife()
-			env.info("DCE_CustomLaserDesignationAFAC :BB2  "..stLife)
+		if  stLife > 0  then
 
-			if  stLife > 0  then
+			env.info("DCE_CustomDesignationAFAC :CC  "..stName)
 
-				env.info("DCE_CustomLaserDesignationAFAC :CC  "..stName)
+			local description = static:getDesc()
 
-				local description = static:getDesc()
+			local life = description.life
+			local unitPos = static:getPoint()
+			local UnitId = static:getID()
+			local unitTypeName = static:getTypeName()
 
-				local life = description.life
-				local unitPos = static:getPoint()
-				local UnitId = static:getID()
-				local unitTypeName = static:getTypeName()
+			local distance = math.floor(math.sqrt(math.pow(unitPos.x - refX, 2) + math.pow(unitPos.z - refY, 2)))
+			env.info("DCE_CustomDesignationAFAC :DD_2b  "..distance)
 
-				local distance = math.floor(math.sqrt(math.pow(unitPos.x - refX, 2) + math.pow(unitPos.z - refY, 2)))
-				env.info("DCE_CustomLaserDesignationAFAC :DD_2b  "..distance)
+			if distance < 50000 then
 
-				if distance < 50000 then
+				env.info("DCE_CustomDesignationAFAC :EEb  "..tostring(unitTypeName))
 
-					env.info("DCE_CustomLaserDesignationAFAC :EEb  "..tostring(unitTypeName))
+				local item = {
+					unitGround = static,
+					unitTypeName = unitTypeName,
+					name = stName,
+					unitPos = unitPos,
+					desc = description,
+					distance = distance,
+					life = life,
+					UnitId = UnitId,
+					isStatic = true,
 
-					local item = {
-						unitGround = static,
-						unitTypeName = unitTypeName,
-						name = stName,
-						unitPos = unitPos,
-						desc = description,
-						distance = distance,
-						life = life,
-						UnitId = UnitId,
-						isStatic = true,
+				}
 
-					}
+				table.insert(unitGroundSelected_A, item)
 
-					table.insert(unitGroundSelected_A, item)
-
-				end
 			end
-		-- end
+		end
 	end
 
 	table.sort(unitGroundSelected_A, function(a,b) return a.distance < b.distance  end)
@@ -1555,82 +1551,95 @@ function CustomLaserDesignationAFAC(AfacFlightName, refX, refY, laserCode)
 	end
 	unitGroundSelected_A = nil
 
-	-- table.sort(unitGroundSelected_B, function(a,b) return a.life > b.life  end)
+	env.info("DCE_CustomDesignationAFAC :FF  "..tostring(#unitGroundSelected_B))
 
-	env.info("DCE_CustomLaserDesignationAFAC :FF  "..tostring(#unitGroundSelected_B))
-
-	for i, target in pairs(unitGroundSelected_B) do
-
+	for _, target in pairs(unitGroundSelected_B) do
 		_affiche(target, "unitGroundSelected_B.target CustomLaserDesignationAFAC")
 	end
 
 	local actuelTarget = 0
-	local nextTarget = 0
-	local laseUnitId = 0
+	local designUnitId = 0
 
-	local function DesignationCycle()							--laser designation cycle function
 
-		_affiche(AFAC_available, "AFAC_available DesignationCycle")
+	local function designationCycle()							--laser/Smoke designation cycle function
 
-		if AFAC_available[AfacFlightName] and AFAC_available[AfacFlightName]["gpGid"] then
-			env.info("DCE_CustomLaserDesignationAFAC :GG1 ")
-			-- trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC : passe GG1", 15, false)	
-		end
-		if unitAFAC and  unitAFAC:isExist()  then
+		local timerDesignate = 0
+
+		_affiche(AFAC_available, "AFAC_available designationCycle")
+
+		-- if AFAC_available[afacFlightName] and AFAC_available[afacFlightName]["gpGid"] then
+		-- 	env.info("DCE_CustomDesignationAFAC :GG1 ")
+		-- 	trigger.action.outTextForGroup(AFAC_available[afacFlightName]["gpGid"],"AFAC : passe GG1", 15, false)	
+		-- end
+
+
+		if unitAFAC and unitAFAC:isExist() then
 
 			--detecte si l'AFAC rentre:
-			local AfacPos = unitAFAC:getPoint()
-			local distAFAC_Pattern = math.floor(math.sqrt(math.pow(AfacPos.x - refX, 2) + math.pow(AfacPos.z - refY, 2)))
+			local afacPos = unitAFAC:getPoint()
+			local distAFAC_Pattern = math.floor(math.sqrt(math.pow(afacPos.x - refX, 2) + math.pow(afacPos.z - refY, 2)))
 
-			env.info("DCE_CustomLaserDesignationAFAC :GG2 distAFAC_Pattern "..tostring(distAFAC_Pattern))
-			-- trigger.action.outText("AFAC : passe GG2 distance: "..tostring(distAFAC_Pattern), 15)	
+			env.info("DCE_CustomDesignationAFAC :GG2 distAFAC_Pattern "..tostring(distAFAC_Pattern))
+			trigger.action.outText("AFAC : passe GG2 distance: "..tostring(distAFAC_Pattern), 15)	
 
-			if  distAFAC_Pattern < 150000 then
+			if distAFAC_Pattern < 150000 then
 
 				for i, target in pairs(unitGroundSelected_B) do
 
 					if i >= #unitGroundSelected_B then
-						env.info("DCE_CustomLaserDesignationAFAC :II plus aucune cible dans la table ")
-						if AFAC_available[AfacFlightName] and AFAC_available[AfacFlightName]["gpGid"] then
-							trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC : plus aucune cible dans la table", 15, false)
+
+						env.info("DCE_CustomDesignationAFAC :II plus aucune cible dans la table ")
+						
+						-- if AFAC_available[afacFlightName] and AFAC_available[afacFlightName]["gpGid"] then
+						-- 	trigger.action.outTextForGroup(AFAC_available[afacFlightName]["gpGid"],"AFAC : plus aucune cible dans la table", 15, false)
+						-- end
+
+						if AFAC_available[afacFlightName] and AFAC_available[afacFlightName] then
+							trigger.action.outTextForGroup(AFAC_available[afacFlightName],"AFAC : plus aucune cible dans la table", 15, false)
 						end
-							if laser and laser ~= nil  then
-								laser:destroy()
-								laseUnitId = 0
-							end
+
+						if laser and laser ~= nil  then
+							laser:destroy()
+							designUnitId = 0
+						end
+
 						return
+
 					elseif not target.isStatic and (not target.unitGround:isExist() or not target.unitGround:isActive() or target.unitGround:getLife() <= 0) then
 
-						env.info("DCE_CustomLaserDesignationAFAC cette cible est déjà détruite :JJa "..tostring(unitGroundSelected_B[i].unitTypeName).." "..tostring(unitGroundSelected_B[i].UnitId))
+						env.info("DCE_CustomDesignationAFAC cette cible notStatic est déjà détruite :JJa "..tostring(unitGroundSelected_B[i].unitTypeName).." "..tostring(unitGroundSelected_B[i].UnitId))
 
-					elseif target.isStatic and (not Object.isExist(target.unitGround) or  target.unitGround:getLife() <= 0) then
+					elseif target.isStatic and (not Object.isExist(target.unitGround) or target.unitGround:getLife() <= 0) then
 
-						env.info("DCE_CustomLaserDesignationAFAC cette cible est déjà détruite :JJb "..tostring(unitGroundSelected_B[i].unitTypeName).." "..tostring(unitGroundSelected_B[i].UnitId))
+						env.info("DCE_CustomDesignationAFAC cette cible isStatic est déjà détruite :JJb "..tostring(unitGroundSelected_B[i].unitTypeName).." "..tostring(unitGroundSelected_B[i].UnitId))
 
 					else
-						if unitGroundSelected_B[i].UnitId == laseUnitId then
 
-							env.info("DCE_CustomLaserDesignationAFAC :JJJ_2  meme cible "..tostring(unitGroundSelected_B[i].unitTypeName).." "..tostring(unitGroundSelected_B[i].UnitId) )
-							if AFAC_available[AfacFlightName] and AFAC_available[AfacFlightName]["gpGid"] then
-								trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC Same Target : "..tostring(unitGroundSelected_B[i].unitTypeName).." laserCode: "..tostring(laserCode), 15, false)
+						if unitGroundSelected_B[i].UnitId == designUnitId then
+
+							env.info("DCE_CustomDesignationAFAC :JJJ_2  meme cible "..tostring(unitGroundSelected_B[i].unitTypeName).." "..tostring(unitGroundSelected_B[i].UnitId) )
+							
+							if AFAC_available[afacFlightName] and AFAC_available[afacFlightName]["gpGid"] then
+								trigger.action.outTextForGroup(AFAC_available[afacFlightName]["gpGid"],"AFAC Same Target : "..tostring(unitGroundSelected_B[i].unitTypeName).." laserCode: "..tostring(laserCode), 15, false)
 							end
 
-							if unitGroundSelected_B[i].LLpos and AFAC_available[AfacFlightName] and AFAC_available[AfacFlightName]["gpGid"]  then
-								trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC Target Position: "..tostring(unitGroundSelected_B[i].LLpos), 15, false)
+							if unitGroundSelected_B[i].LLpos and AFAC_available[afacFlightName] and AFAC_available[afacFlightName]["gpGid"]  then
+								trigger.action.outTextForGroup(AFAC_available[afacFlightName]["gpGid"],"AFAC Target Position: "..tostring(unitGroundSelected_B[i].LLpos), 15, false)
 							end
 							break
-						elseif unitGroundSelected_B[i].UnitId ~= laseUnitId then
+
+						elseif unitGroundSelected_B[i].UnitId ~= designUnitId then
 							-- nextTarget = i
 							actuelTarget = i
 
-							env.info("DCE_CustomLaserDesignationAFAC :JJJ_3  nouvelle cible UnitId "..tostring(unitGroundSelected_B[i].unitTypeName).." "..tostring(unitGroundSelected_B[i].UnitId).." ~= ? laseUnitId"..tostring(laseUnitId))
-							if AFAC_available[AfacFlightName] and AFAC_available[AfacFlightName]["gpGid"] then
-								trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC NEW Target : "..tostring(unitGroundSelected_B[i].unitTypeName), 15, false)
+							env.info("DCE_CustomDesignationAFAC :JJJ_3  nouvelle cible UnitId "..tostring(unitGroundSelected_B[i].unitTypeName).." "..tostring(unitGroundSelected_B[i].UnitId).." ~= ? designUnitId"..tostring(designUnitId))
+							if AFAC_available[afacFlightName] and AFAC_available[afacFlightName]["gpGid"] then
+								trigger.action.outTextForGroup(AFAC_available[afacFlightName]["gpGid"],"AFAC NEW Target : "..tostring(unitGroundSelected_B[i].unitTypeName), 15, false)
 							end
 
 							break
 						else
-							env.info("DCE_CustomLaserDesignationAFAC :JJJ_4  ELSE BUG i "..i)
+							env.info("DCE_CustomDesignationAFAC :JJJ_4  ELSE BUG i "..i)
 							_affiche(unitGroundSelected_B[i], "unitGroundSelected_B[i] bug")
 							trigger.action.outText("AFAC BUG detecté", 15)
 							break
@@ -1659,15 +1668,15 @@ function CustomLaserDesignationAFAC(AfacFlightName, refX, refY, laserCode)
 				-- 		for r = 1, 8 do
 				-- 			local rand = math.random(1, #nbActifTarget)
 
-				-- 			env.info("DCE_CustomLaserDesignationAFAC r: "..r.." :rand A "..tostring(rand).." nbActifTarget[rand]: "..tostring(nbActifTarget[rand]))
+				-- 			env.info("DCE_CustomDesignationAFAC r: "..r.." :rand A "..tostring(rand).." nbActifTarget[rand]: "..tostring(nbActifTarget[rand]))
 
 				-- 			unitGroundSelected_B[nbActifTarget[rand]].unitGround:destroy()
 
-				-- 			env.info("DCE_CustomLaserDesignationAFAC :kill pour test B "..unitGroundSelected_B[nbActifTarget[rand]].UnitId)
+				-- 			env.info("DCE_CustomDesignationAFAC :kill pour test B "..unitGroundSelected_B[nbActifTarget[rand]].UnitId)
 				-- 			trigger.action.outText("AFAC kill pour test "..unitGroundSelected_B[nbActifTarget[rand]].UnitId, 15)
 				-- 		end
 				-- 	else
-				-- 		env.info("DCE_CustomLaserDesignationAFAC :kill pour test C "..unitGroundSelected_B[actuelTarget].UnitId)
+				-- 		env.info("DCE_CustomDesignationAFAC :kill pour test C "..unitGroundSelected_B[actuelTarget].UnitId)
 				-- 		unitGroundSelected_B[actuelTarget].unitGround:destroy()
 				-- 	end
 
@@ -1676,104 +1685,132 @@ function CustomLaserDesignationAFAC(AfacFlightName, refX, refY, laserCode)
 
 				if unitAFAC then
 
-					if  unitGroundSelected_B[actuelTarget] and laser == nil then
+					if unitGroundSelected_B[actuelTarget] and designUnitId == nil then
 						local pos = unitGroundSelected_B[actuelTarget].unitPos
-						laser = Spot.createLaser(unitAFAC, nil, pos, laserCode)	--start laser spot
 
-						laseUnitId = unitGroundSelected_B[actuelTarget].UnitId
+						if laserCode and laserCode ~= "nil" and laser == nil then				
+							laser = Spot.createLaser(unitAFAC, nil, pos, laserCode)	--start laser spot
+						elseif laserCode == "nil" then
+							trigger.action.smoke(pos, trigger.smokeColor.Red)
+							timerDesignate = timer.getTime()
+							env.info("DCE_CustomDesignationAFAC K create smokeColor.Red ")
+							trigger.action.outTextForGroup(AFAC_available[afacFlightName]["gpGid"],"DCE_CustomDesignationAFAC K nextUnit create smokeColor.Red ", 15, false)
+						end
+							
 
+						designUnitId = unitGroundSelected_B[actuelTarget].UnitId
 						local LLposNstring, LLposEstring = LLtool.LLstrings(pos)
-
 						local LLpos = ' N ' .. LLposNstring .. '   E ' .. LLposEstring
-
 						unitGroundSelected_B[actuelTarget]["LLpos"] = LLpos
-
 						unitGroundSelected_B[actuelTarget]["TimeLase"] = timer.getTime()
 
-						env.info("DCE_CustomLaserDesignationAFAC : LL createLaser laserCode: "..tostring(laserCode))
-						if AFAC_available[AfacFlightName] and AFAC_available[AfacFlightName]["gpGid"] then
-							trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC createLaser laserCode: "..tostring(laserCode), 30, false)
-							trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC target position: "..tostring(LLpos), 30, false)
+						if laserCode and laserCode ~= "nil" then				
+							env.info("DCE_CustomDesignationAFAC : LL createLaser laserCode: "..tostring(laserCode))
+							trigger.action.outTextForGroup(AFAC_available[afacFlightName]["gpGid"],"AFAC createLaser laserCode: "..tostring(laserCode), 30, false)
 						end
 
-					elseif  unitGroundSelected_B[actuelTarget]  and laseUnitId ~= unitGroundSelected_B[actuelTarget].UnitId then
+						if AFAC_available[afacFlightName] and AFAC_available[afacFlightName]["gpGid"] then						
+							trigger.action.outTextForGroup(AFAC_available[afacFlightName]["gpGid"],"AFAC target position: "..tostring(LLpos), 30, false)
+						end
 
+					elseif unitGroundSelected_B[actuelTarget] and designUnitId ~= unitGroundSelected_B[actuelTarget].UnitId then
 
 						local pos = unitGroundSelected_B[actuelTarget].unitPos
-						laser:setPoint(pos)
+						
+						if laserCode and laserCode ~= "nil" then	
+							laser:setPoint(pos)
+						else
+							trigger.action.smoke(pos, trigger.smokeColor.Red)
+							timerDesignate = timer.getTime()
+							env.info("DCE_CustomDesignationAFAC M create smokeColor.Red ")
+							trigger.action.outTextForGroup(AFAC_available[afacFlightName]["gpGid"],"DCE_CustomDesignationAFAC M nextUnit create smokeColor.Red ", 15, false)
+						end
 
-						laseUnitId = unitGroundSelected_B[actuelTarget].UnitId
+						designUnitId = unitGroundSelected_B[actuelTarget].UnitId
 
 						local LLposNstring, LLposEstring = LLtool.LLstrings(pos)
-
 						local LLpos = ' N ' .. LLposNstring .. '   E ' .. LLposEstring
-
 						unitGroundSelected_B[actuelTarget]["LLpos"] = LLpos
-
 						unitGroundSelected_B[actuelTarget]["TimeLase"] = timer.getTime()
 
-						env.info("DCE_CustomLaserDesignationAFAC : LL setPoint laserCode: "..tostring(laserCode))
-						if AFAC_available[AfacFlightName] and AFAC_available[AfacFlightName]["gpGid"] then
-							trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC setPoint laserCode: "..tostring(laserCode), 30, false)
-							trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC target position: "..tostring(LLpos), 30, false)
+						env.info("DCE_CustomDesignationAFAC : LL setPoint laserCode: "..tostring(laserCode))
+
+						if AFAC_available[afacFlightName] and AFAC_available[afacFlightName]["gpGid"] then
+							if laserCode and laserCode ~= "nil" then
+								trigger.action.outTextForGroup(AFAC_available[afacFlightName]["gpGid"],"AFAC setPoint laserCode: "..tostring(laserCode), 30, false)
+							end
+							trigger.action.outTextForGroup(AFAC_available[afacFlightName]["gpGid"],"AFAC target position: "..tostring(LLpos), 30, false)
 						end
 					end
 				end
 
-			else
+			else --if distAFAC_Pattern < 150000 then
 
 				_affiche(unitAFAC, "unitAFAC")
-				env.info("DCE_CustomLaserDesignationAFAC :ZZ  Reaper  Trop loin, fin du laser distAFAC_Pattern > 150km? "..tostring(distAFAC_Pattern))
-				if AFAC_available[AfacFlightName] and AFAC_available[AfacFlightName]["gpGid"] then
-					trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC DCE_CustomLaserDesignationAFAC :ZZ  Reaper Trop loin, fin du laser distAFAC_Pattern > 150km? "..tostring(distAFAC_Pattern), 15, false)
+				env.info("DCE_CustomDesignationAFAC :ZZ  Reaper  Trop loin, fin du laser distAFAC_Pattern > 150km? "..tostring(distAFAC_Pattern))
+				if AFAC_available[afacFlightName] and AFAC_available[afacFlightName]["gpGid"] then
+					trigger.action.outTextForGroup(AFAC_available[afacFlightName]["gpGid"],"AFAC DCE_CustomDesignationAFAC :ZZ  AFAC Trop loin, fin du laser distAFAC_Pattern > 150km? "..tostring(distAFAC_Pattern), 15, false)
 				end
 				if laser and laser ~= nil  then
 					laser:destroy()
-					laseUnitId = 0
+					designUnitId = 0
 
-					env.info("DCE_CustomLaserDesignationAFAC :ZZ2  laser:destroy()	 ")
+					env.info("DCE_CustomDesignationAFAC :ZZ2  laser:destroy()	 ")
 
 				end
 			end
 
-		else
+		else	--if unitAFAC and unitAFAC:isExist()  then
+
+		
 			_affiche(unitAFAC, "unitAFAC")
-			env.info("DCE_CustomLaserDesignationAFAC :ZZ  Reaper Dead  ")
-			if AFAC_available[AfacFlightName] and AFAC_available[AfacFlightName]["gpGid"] then
-				trigger.action.outTextForGroup(AFAC_available[AfacFlightName]["gpGid"],"AFAC DCE_CustomLaserDesignationAFAC :ZZ  Reaper Dead or not isExist ", 15, false)
+			env.info("DCE_CustomDesignationAFAC :ZZ  Reaper Dead  ")
+			if AFAC_available[afacFlightName] and AFAC_available[afacFlightName]["gpGid"] then
+				trigger.action.outTextForGroup(AFAC_available[afacFlightName]["gpGid"],"AFAC DCE_CustomDesignationAFAC :ZZ  Reaper Dead or not isExist ", 15, false)
 			end
 			if laser and laser ~= nil  then
 				laser:destroy()
-				laseUnitId = 0
-				env.info("DCE_CustomLaserDesignationAFAC :ZZ2  laser:destroy()	 ")
+				designUnitId = 0
+				env.info("DCE_CustomDesignationAFAC :ZZ2  laser:destroy()	 ")
 			end
 
-			if AFAC_available[AfacFlightName]  then
-				AFAC_available[AfacFlightName] = nil
+			if AFAC_available[afacFlightName]  then
+				AFAC_available[afacFlightName] = nil
 			end
 			return
+
 		end
 
 
 
 		if laser and laser ~= nil then											--if there is a new laser spot
-			env.info("DCE_CustomLaserDesignationAFAC :MM  ")
+			
+			env.info("DCE_CustomDesignationAFAC :Z return Laser timer  ")
+			return timer.getTime() + 60							--repeat designation cylce in 60 seconds										--stop designation cycle
+		end
 
-			return timer.getTime() + 60							--repeat designation cylce in 2 seconds										--stop designation cycle
+		if timer.getTime() > timerDesignate + smokeDuration then
+			
+			env.info("DCE_CustomDesignationAFAC :Z return smoke timer  ")
+			return timer.getTime() + 60
 		end
 	end
 
+
+
 	--detecte si l'AFAC rentre:
-	local AfacPos = unitAFAC:getPoint()
-	local distAFAC_Pattern = math.floor(math.sqrt(math.pow(AfacPos.x - refX, 2) + math.pow(AfacPos.z - refY, 2)))
+	-- local afacPos = unitAFAC:getPoint()
+	-- local distAFAC_Pattern = math.floor(math.sqrt(math.pow(afacPos.x - refX, 2) + math.pow(afacPos.z - refY, 2)))
 
-	timer.scheduleFunction(DesignationCycle, nil, timer.getTime() + 60)	--start designation cylce
+	timer.scheduleFunction(designationCycle, nil, timer.getTime() + 15)	--start designation cylce
 
 
-	env.info("DCE_CustomLaserDesignationAFAC : FIN "..tostring(AfacFlightName))
-	trigger.action.outText("AFAC : FIN "..tostring(AfacFlightName), 15)
+	env.info("DCE_CustomDesignationAFAC : FIN "..tostring(afacFlightName))
+	trigger.action.outText("AFAC : FIN "..tostring(afacFlightName), 15)
 
 end
+
+
 ----- search then engage task -----
 --allows to engage targets within a set distance from own group. CAUTION: Once this function is running, it group can no longer receive waypoint actions (DCS treats engage task set via script as never completed)!
 function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)

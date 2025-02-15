@@ -148,7 +148,7 @@ frequency = {
 			max = 156,
 		},
 		prefFreqPackage = {
-			nRadio = 1,
+			nRadio = 2,
 			range = "VHF",
 			},
 		radio = {						--range of radio frequencies of player aircraft
@@ -168,7 +168,7 @@ frequency = {
 				},
 				nbCanal = 0,
 				manual = true,
-				name = "UHF",
+				name = "VHF",
 			},
 		},
 	},
