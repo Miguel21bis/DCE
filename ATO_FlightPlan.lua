@@ -352,7 +352,7 @@ end
 
 
 -- Ajout d'un tanker avec rotation du cap
-function AddTanker(groupName, startX, startY)
+local function addAndSpaceTankers(groupName, startX, startY)
     local newPosition = { x = startX, y = startY }
     local count = 0
 
@@ -386,6 +386,8 @@ function AddTanker(groupName, startX, startY)
     proximityAircraft[groupName] = newPosition
 
     print("✅ Tanker ajouté:", groupName, "Position:", newPosition.x, newPosition.y, "Cap:", currentHeading)
+
+	return newPosition.x, newPosition.y
 end
 
 
@@ -4448,7 +4450,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					if flight[f].route[1].id == "Spawn" and flight[f].task == "Refueling" then
 
-						AddTanker(groupName, waypoints[1]["x"], waypoints[1]["y"])
+						waypoints[1].x, waypoints[1].y = addAndSpaceTankers(groupName, waypoints[1].x, waypoints[1].y)
 
 					end
 
