@@ -1695,28 +1695,33 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				-- }, -- end of ["requiredModules"]
 
 				if Data_divers[flight[f].type] and Data_divers[flight[f].type].requiredModules then
+
+					local nameOfModule = flight[f].type
+					if Data_divers[flight[f].type].moduleName then
+						nameOfModule = Data_divers[flight[f].type].moduleName
+					end
 					local entry = {
-						["name"] = tostring(flight[f].type),
+						["name"] = tostring(nameOfModule),
 						["origine"] = {
-							"Data_divers: "..flight[f].type,
+							"Data_divers: "..nameOfModule,
 						}
 					}
 
-					local typeNameRequire = flight[f].type
+					-- local typeNameRequire = flight[f].type
 					if  Data_divers[flight[f].type].requiredModulesSpecialName then
-						typeNameRequire = Data_divers[flight[f].type].requiredModulesSpecialName
+						nameOfModule = Data_divers[flight[f].type].requiredModulesSpecialName
 					end
 
-					if ListRequiredModules[typeNameRequire] then
+					if ListRequiredModules[nameOfModule] then
 
-						for n, from in pairs(ListRequiredModules[typeNameRequire].origine) do
+						for n, from in pairs(ListRequiredModules[nameOfModule].origine) do
 
-							if from ~= "Data_divers: "..typeNameRequire then
-								table.insert(ListRequiredModules[typeNameRequire].origine, "Data_divers: "..typeNameRequire )
+							if from ~= "Data_divers: "..nameOfModule then
+								table.insert(ListRequiredModules[nameOfModule].origine, "Data_divers: "..nameOfModule )
 							end
 						end
 					else
-						ListRequiredModules[typeNameRequire] = entry
+						ListRequiredModules[nameOfModule] = entry
 					end
 				end
 

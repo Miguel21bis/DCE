@@ -261,12 +261,14 @@ Data_divers = {
 		requiredModules = true,						--itsModule
 		EPLRS_Capacity = false,
 		laserDesignator = false,
+		moduleName = "tetet_a-1_skyraider",
 	},
 	
 	["vwv_o-1"] = 	{			                 	--Mod
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
 		EPLRS_Capacity = false,
+		moduleName = "tetet_O1",
 	},
 
 
