@@ -545,7 +545,7 @@ Data_divers = {
 			type = "Link16",
 			isDonnor = true,
 		},
-		flyingAlone = true,
+		-- flyingAlone = true,
 		vCruise = 250,
 		hCruise = 12000,
 	},

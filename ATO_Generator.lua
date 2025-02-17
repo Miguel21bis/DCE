@@ -771,7 +771,7 @@ for side, units in pairs(oob_air) do																								--iterate through al
 											tot_from = tot_from + 86400
 										end
 
-										if  tot_to ~= 0 then
+										if tot_to ~= 0 then
 											-- print("AAA BBB")
 											-- if tot_from ~= 0 or tot_to ~= 0 then																	--loadout has an eligible time on target
 											if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "A")

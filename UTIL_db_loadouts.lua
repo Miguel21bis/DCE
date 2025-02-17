@@ -13377,7 +13377,7 @@ db_all_loadouts = {
 				day = true,
 				night = true,
 				adverseWeather = true,
-				range = 500000,
+				range = 1000000,
 				firepower = 2,
 				vCruise = 270,
 				sortie_rate = 12,
@@ -22590,6 +22590,45 @@ db_all_loadouts = {
 	},
 	["B-52H"] = {
 		Strike = {
+			["NAM 80s AG Mk-82x51"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = false,
+					["Escort Jammer"] = true,
+				},
+				attributes =  { "SAM", "soft", "Bridge", "Base" },
+				code_loadout =  {  "NAM" },
+				weaponType = "Bombs",
+				expend = "All",
+				night = true,
+				day = true,
+				adverseWeather = true,
+				range = 14000000,
+				firepower = 10,
+				vCruise = 231.25,
+				vAttack = 256.94444444444,
+				hCruise = 7315.2,
+				hAttack = 7315.2,
+				sortie_rate = 1.5,
+				stores = {
+					pylons = {
+						[1] = {
+							CLSID = "{585D626E-7F42-4073-AB70-41E728C333E2}",
+						},
+						[2] = {
+							CLSID = "{6C47D097-83FF-4FB2-9496-EAB36DDF0B05}",
+						},
+						[3] = {
+							CLSID = "{585D626E-7F42-4073-AB70-41E728C333E2}",
+						},
+					},
+					fuel = "141135",
+					flare = 192,
+					chaff = 1125,
+					gun = 100,
+				},
+			},
 			["80s AG Mk-82x51"] = {
 				minscore = 0.3,
 				support = {
@@ -22597,7 +22636,7 @@ db_all_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { "SAM", "soft", "Bridge", "Base" },
-				code_loadout =  { "TF80sI", "WOC80", "TF80s", "NAM" },
+				code_loadout =  { "TF80sI", "WOC80", "TF80s" },
 				weaponType = "Bombs",
 				expend = "All",
 				night = true,
@@ -22627,6 +22666,42 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
+			["NAM Mk-84*18"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = false,
+					["Escort Jammer"] = true,
+				},
+				attributes =  { "Structure", "SAM", "soft", "Bridge", "Base" },
+				code_loadout =  {  "NAM" },
+				weaponType = "Bombs",
+				expend = "All",
+				night = true,
+				day = true,
+				adverseWeather = true,
+				range = 14000000,
+				firepower = 10,
+				vCruise = 231.25,
+				vAttack = 256.94444444444,
+				hCruise = 7315.2,
+				hAttack = 7315.2,
+				sortie_rate = 1.5,
+				stores = {
+					pylons = {
+						[1] = {
+							CLSID = "{696CFFC4-0BDE-42A8-BE4B-0BE3D9DD723C}",
+						},
+						[3] = {
+							CLSID = "{696CFFC4-0BDE-42A8-BE4B-0BE3D9DD723C}",
+						},
+					},
+					fuel = "141135",
+					flare = 192,
+					chaff = 1125,
+					gun = 100,
+				},
+			},
 			["Mk-84*18"] = {
 				minscore = 0.3,
 				support = {
@@ -22634,7 +22709,7 @@ db_all_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { "Structure", "SAM", "soft", "Bridge", "Base" },
-				code_loadout =  { "TF80sI", "WOC80", "TF80s", "NAM" },
+				code_loadout =  { "TF80sI", "WOC80", "TF80s" },
 				weaponType = "Bombs",
 				expend = "All",
 				night = true,

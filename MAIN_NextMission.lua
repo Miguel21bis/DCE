@@ -1110,8 +1110,8 @@ if ListRequiredModules then
 			end
 		end
 	end
-	Display(mission.requiredModules, "MainNM mission.requiredModules")
-	os.execute 'pause'
+	-- Display(mission.requiredModules, "MainNM mission.requiredModules")
+	-- os.execute 'pause'
 end
 
 ----- convert tables back to strings for insertion into content files -----
