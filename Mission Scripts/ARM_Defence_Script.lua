@@ -27,15 +27,14 @@ local jammers = {}
 local function checkMissileProximity()
     if #activeMissiles == 0 then
         env.info("ARM_Jammer Fin de la surveillance des missiles (plus de missiles actifs)")
-		trigger.action.outText(" Fin de la surveillance des missiles (plus de missiles actifs)",20)
-        return
+        return -- On arrête la boucle si plus de missiles
     end
 
     -- Vérification des distances missile ↔ jammer
     for i = #activeMissiles, 1, -1 do
         local missile = activeMissiles[i]
 
-        -- ⚠️ Vérification stricte : si le missile n'existe plus, on le supprime
+        -- Vérification stricte : si le missile n'existe plus, on le supprime
         if not missile or not missile:isExist() or not missile.getPoint then
             table.remove(activeMissiles, i)
         else
@@ -47,15 +46,19 @@ local function checkMissileProximity()
                 local dz = posMissile.z - posJammer.z
                 local distance = math.sqrt(dx * dx + dy * dy + dz * dz)
 
-                if distance < 40000 then
-                    --  Explosion du missile avec protection contre le crash
+                if distance < 10000 then
+                    -- Vérification avant destruction
                     if missile and missile:isExist() then
-                        trigger.action.explosion(posMissile, 200)
                         missile:destroy()
-                        env.info("ARM_Jammer Missile détruit proche du Jammer !")
-						trigger.action.outText("Missile détruit proche du Jammer",20)
                     end
                     
+                    -- Explosion après suppression
+                    -- trigger.action.explosion(posMissile, 5)
+
+
+                    env.info("ARM_Jammer Missile détruit proche du Jammer !")
+                    trigger.action.outText("Missile détruit proche du Jammer", 20)
+
                     -- Suppression du missile suivi
                     table.remove(activeMissiles, i)
                     break
@@ -64,12 +67,11 @@ local function checkMissileProximity()
         end
     end
 
-    --  Relancer la vérification seulement s'il reste des missiles actifs
+    -- Relancer la vérification seulement s'il reste des missiles actifs
     if #activeMissiles > 0 then
         timer.scheduleFunction(checkMissileProximity, {}, timer.getTime() + 0.2)
     else
         env.info("ARM_Jammer Surveillance arrêtée (plus de missiles actifs)")
-		trigger.action.outText(" Surveillance arrêtée (plus de missiles actifs)",20)
     end
 end
 
@@ -245,6 +247,7 @@ function ARM_Shot_EventHandler:onEvent(event)
 			trigger.action.outText("Missile SAM détecté ! Suivi activé.",20)
 
             -- Ajout du missile dans la table des missiles actifs
+            -- Ajout du missile dans la table des missiles actifs
             table.insert(activeMissiles, wep)
 
             -- Actualisation de la liste des jammers
@@ -262,10 +265,10 @@ function ARM_Shot_EventHandler:onEvent(event)
                 end
             end
 
-            --  Démarrage de la surveillance si ce n'est pas déjà fait
+            -- Démarrage de la surveillance si ce n'est pas déjà fait
             if #activeMissiles == 1 then
                 env.info("ARM_Jammer Démarrage de la surveillance des missiles...")
-				trigger.action.outText("Démarrage de la surveillance des missiles...",20)
+				trigger.action.outText("Démarrage de la surveillance des missiles.",20)
                 checkMissileProximity()
             end
         end

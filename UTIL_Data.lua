@@ -201,8 +201,8 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		requiredModules = true,						--itsModule
-		vCruise = 215,
-		hCruise = 9140,
+		vCruise = 216,
+		hCruise = 10670,
 	},
 
 	["VSN_F100"] = 	{				--Mod
