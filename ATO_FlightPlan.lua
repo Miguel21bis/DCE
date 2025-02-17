@@ -385,7 +385,7 @@ local function addAndSpaceTankers(groupName, startX, startY)
     -- Ajout du tanker dans la table
     proximityAircraft[groupName] = newPosition
 
-    print("✅ Tanker ajouté:", groupName, "Position:", newPosition.x, newPosition.y, "Cap:", currentHeading)
+    -- print(" Tanker ajouté:", groupName, "Position:", newPosition.x, newPosition.y, "Cap:", currentHeading)
 
 	return newPosition.x, newPosition.y
 end

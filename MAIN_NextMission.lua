@@ -598,7 +598,7 @@ if not FileExists(loadoutFile01) or Firstmission_flag then
         print("Erreur lors de l'écriture dans le fichier : " .. tostring(err))
         os.exit(1) -- Quitte le script proprement en cas d'erreur
     else
-        print("Fichier créé avec succès : " .. loadoutFile01)
+        -- print("Fichier créé avec succès : " .. loadoutFile01)
     end
 end
 

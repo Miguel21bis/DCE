@@ -25,6 +25,55 @@ local jammers = {}
 
 -- 🔹 Fonction de surveillance active
 local function checkMissileProximity()
+    if #activeMissiles == 0 then
+        env.info("ARM_Jammer Fin de la surveillance des missiles (plus de missiles actifs)")
+		trigger.action.outText(" Fin de la surveillance des missiles (plus de missiles actifs)",20)
+        return
+    end
+
+    -- Vérification des distances missile ↔ jammer
+    for i = #activeMissiles, 1, -1 do
+        local missile = activeMissiles[i]
+
+        -- ⚠️ Vérification stricte : si le missile n'existe plus, on le supprime
+        if not missile or not missile:isExist() or not missile.getPoint then
+            table.remove(activeMissiles, i)
+        else
+            local posMissile = missile:getPoint()
+            
+            for _, posJammer in ipairs(jammers) do
+                local dx = posMissile.x - posJammer.x
+                local dy = posMissile.y - posJammer.y
+                local dz = posMissile.z - posJammer.z
+                local distance = math.sqrt(dx * dx + dy * dy + dz * dz)
+
+                if distance < 40000 then
+                    --  Explosion du missile avec protection contre le crash
+                    if missile and missile:isExist() then
+                        trigger.action.explosion(posMissile, 200)
+                        missile:destroy()
+                        env.info("ARM_Jammer Missile détruit proche du Jammer !")
+						trigger.action.outText("Missile détruit proche du Jammer",20)
+                    end
+                    
+                    -- Suppression du missile suivi
+                    table.remove(activeMissiles, i)
+                    break
+                end
+            end
+        end
+    end
+
+    --  Relancer la vérification seulement s'il reste des missiles actifs
+    if #activeMissiles > 0 then
+        timer.scheduleFunction(checkMissileProximity, {}, timer.getTime() + 0.2)
+    else
+        env.info("ARM_Jammer Surveillance arrêtée (plus de missiles actifs)")
+		trigger.action.outText(" Surveillance arrêtée (plus de missiles actifs)",20)
+    end
+end
+
+local function checkMissileProximityOLD()
 	if #activeMissiles == 0 then
 		env.info("ARM_Jammer Fin de la surveillance des missiles (plus de missiles actifs)")
 		trigger.action.outText("Fin de la surveillance des missiles (plus de missiles actifs)",20)
@@ -46,8 +95,8 @@ local function checkMissileProximity()
 				local dz = posMissile.z - posJammer.z
 				local distance = math.sqrt(dx * dx + dy * dy + dz * dz)
 
-				if distance < 2000 then
-					-- 💥 Explosion du missile
+				if distance < 40000 then
+					--  Explosion du missile
 					trigger.action.explosion(posMissile, 200)
 					missile:destroy()
 					env.info("ARM_Jammer Missile détruit proche du Jammer !")
@@ -93,6 +142,8 @@ function ARM_Shot_EventHandler:onEvent(event)
 		local wep = event.weapon																			--Get the weapon of the launch event
 		local tgt = wep:getTarget()																			--Get the target of the weapon
 		
+		if not wep or not wep.getDesc then return end
+
 		-- if event.initiator and Object.getCategory(event.initiator) == Object.Category.UNIT  then										--initiator is a unit debug_ET01.h
 		-- 	env.info("DCE_ARM_S_EVENT A SHOT getPlayerName "..tostring( event.initiator:getPlayerName()))
 		-- end
@@ -186,89 +237,68 @@ function ARM_Shot_EventHandler:onEvent(event)
 			end
 		end
 
-		-- local desc = wep:getDesc()
-		-- env.info("DCE_ARM_S_EVENT       C ")
 		
+
+		local desc = wep:getDesc()
+		if desc.missileCategory == 2 and (desc.guidance == 3 or desc.guidance == 4) then
+            env.info("ARM_Jammer Missile SAM détecté ! Suivi activé.")
+			trigger.action.outText("Missile SAM détecté ! Suivi activé.",20)
+
+            -- Ajout du missile dans la table des missiles actifs
+            table.insert(activeMissiles, wep)
+
+            -- Actualisation de la liste des jammers
+            jammers = {}
+            for _, sideNum in ipairs({coalition.side.BLUE, coalition.side.RED}) do
+                local groups = coalition.getGroups(sideNum, Group.Category.AIRPLANE)
+                for _, gp in pairs(groups) do
+                    if string.find(Group.getName(gp), "Jammer") then
+                        for _, unit in ipairs(gp:getUnits()) do
+                            if unit and unit:isActive() and unit:inAir() then
+                                table.insert(jammers, unit:getPoint())
+                            end
+                        end
+                    end
+                end
+            end
+
+            --  Démarrage de la surveillance si ce n'est pas déjà fait
+            if #activeMissiles == 1 then
+                env.info("ARM_Jammer Démarrage de la surveillance des missiles...")
+				trigger.action.outText("Démarrage de la surveillance des missiles...",20)
+                checkMissileProximity()
+            end
+        end
 
 		-- if desc.missileCategory == 2 and (desc.guidance == 3 or desc.guidance == 4) then
+		-- 	env.info("ARM_Jammer Missile SAM détecté ! Suivi activé.")
+		-- 	trigger.action.outText("Missile SAM détecté ! Suivi activé.",20)
 
-		-- 	-- local posMissile = wep:getPoint()
+		-- 	-- Ajout du missile dans la table des missiles actifs
+		-- 	table.insert(activeMissiles, wep)
 
+		-- 	-- Actualisation de la liste des jammers
+		-- 	jammers = {}
 		-- 	for _, sideNum in ipairs({coalition.side.BLUE, coalition.side.RED}) do
-
 		-- 		local groups = coalition.getGroups(sideNum, Group.Category.AIRPLANE)
-		
 		-- 		for _, gp in pairs(groups) do
-		-- 			local gpName = Group.getName(gp)
-		-- 			-- local gpGid = Group.getID(gp)
-		-- 			-- local nowTime = timer.getTime()
-		
-		
-		-- 			if string.find(gpName,"Jammer") then
-		-- 				local units = gp:getUnits()
-		
-		-- 				for unitN, unit in ipairs(units) do
-		
+		-- 			if string.find(Group.getName(gp), "Jammer") then
+		-- 				for _, unit in ipairs(gp:getUnits()) do
 		-- 					if unit and unit:isActive() and unit:inAir() then
-		-- 						local posJammer = unit:getPoint()
-					
-
+		-- 						table.insert(jammers, unit:getPoint())
 		-- 					end
 		-- 				end
 		-- 			end
 		-- 		end
 		-- 	end
-		
-		-- end
 
-		
-
-
-
-
-		-- -- 🔹 Détection des tirs de missiles ARM
-		-- ARM_Shot_EventHandler = {}
-		-- function ARM_Shot_EventHandler:onEvent(event)
-		-- 	if event.id == world.event.S_EVENT_SHOT then
-		-- 		local wep = event.weapon
-		-- 		if not wep then return end -- Éviter les erreurs si l'objet est invalide
-
-		local desc = wep:getDesc()
-		if desc.missileCategory == 2 and (desc.guidance == 3 or desc.guidance == 4) then
-			env.info("ARM_Jammer Missile SAM détecté ! Suivi activé.")
-			trigger.action.outText("Missile SAM détecté ! Suivi activé.",20)
-
-			-- Ajout du missile dans la table des missiles actifs
-			table.insert(activeMissiles, wep)
-
-			-- Actualisation de la liste des jammers
-			jammers = {}
-			for _, sideNum in ipairs({coalition.side.BLUE, coalition.side.RED}) do
-				local groups = coalition.getGroups(sideNum, Group.Category.AIRPLANE)
-				for _, gp in pairs(groups) do
-					if string.find(Group.getName(gp), "Jammer") then
-						for _, unit in ipairs(gp:getUnits()) do
-							if unit and unit:isActive() and unit:inAir() then
-								table.insert(jammers, unit:getPoint())
-							end
-						end
-					end
-				end
-			end
-
-			-- 🚀 Démarrage de la surveillance si ce n'est pas déjà fait
-			if #activeMissiles == 1 then
-				env.info("ARM_Jammer Démarrage de la surveillance des missiles...")
-				trigger.action.outText("Démarrage de la surveillance des missiles...",20)
-				checkMissileProximity()
-			end
-		end
+		-- 	--  Démarrage de la surveillance si ce n'est pas déjà fait
+		-- 	if #activeMissiles == 1 then
+		-- 		env.info("ARM_Jammer Démarrage de la surveillance des missiles...")
+		-- 		trigger.action.outText("Démarrage de la surveillance des missiles...",20)
+		-- 		checkMissileProximity()
 		-- 	end
 		-- end
-
-		-- -- 🔹 Ajout de l'Event Handler au monde DCS
-		-- world.addEventHandler(ARM_Shot_EventHandler)
-
 
 
 
