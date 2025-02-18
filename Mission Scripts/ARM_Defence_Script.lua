@@ -23,6 +23,12 @@ local activeMissiles = {}
 -- 🔹 Table des Jammers (actualisée à chaque tir de missile)
 local jammers = {}
 
+local function makeExplosion(posMissile)
+
+	trigger.action.explosion(posMissile, 5)
+
+end
+
 -- 🔹 Fonction de surveillance active
 local function checkMissileProximity()
     if #activeMissiles == 0 then
@@ -54,6 +60,8 @@ local function checkMissileProximity()
                     
                     -- Explosion après suppression
                     -- trigger.action.explosion(posMissile, 5)
+
+					timer.scheduleFunction(makeExplosion, {posMissile}, timer.getTime() + 0.5)
 
 
                     env.info("ARM_Jammer Missile détruit proche du Jammer !")

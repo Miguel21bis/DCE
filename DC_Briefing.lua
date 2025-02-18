@@ -411,7 +411,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					local tempPlayer = {}
 
 					if flight[f].client then
-						tempPlayer = Deepcopy(camp.client[flight[f].IdClient])
+						tempPlayer = camp.client[flight[f].IdClient]
 
 						if debug.debug then
 							local camp_str = "mission = " .. TableSerialization(mission, 0)
@@ -421,7 +421,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 						end
 
 						-- print("DcB tempPlayer.pack_n "..tostring(tempPlayer.pack_n))
-						tempPlayer.package = Deepcopy(camp.client.package[tempPlayer.pack_n])
+						tempPlayer.package = camp.client.package[tempPlayer.pack_n]
 
 						-- tempPlayer = Deepcopy(camp.client)
 
@@ -435,8 +435,8 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 											for unitN, unit in pairs(group.units) do
 												-- print("unit.name "..tostring(unit.name).." ==tempPlayer.unitname? "..tostring(tempPlayer.unitname))
 												if unit.name == tempPlayer.unitname then
-													tempPlayer["waypoints"] = Deepcopy(group.route.points)
-													tempPlayer["group"] = Deepcopy(group)
+													tempPlayer["waypoints"] = group.route.points
+													tempPlayer["group"] = group
 													tagBreak = true
 													break
 												end
@@ -455,8 +455,8 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 
 					elseif flight[f].player then
-						tempPlayer = Deepcopy(camp.player)
-						tempPlayer.package = Deepcopy(camp.player.package[tempPlayer.pack_n])
+						tempPlayer = camp.player
+						tempPlayer.package = camp.player.package[tempPlayer.pack_n]
 
 						if debug.debug then
 							local camp_str = "mission = " .. TableSerialization(mission, 0)
@@ -476,8 +476,8 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 											for unitN, unit in pairs(group.units) do
 
 												if unit.name == tempPlayer.unitname then
-													tempPlayer["waypoints"] = Deepcopy(group.route.points)
-													tempPlayer["group"] = Deepcopy(group)
+													tempPlayer["waypoints"] = group.route.points
+													tempPlayer["group"] = group
 													tagBreak = true
 													break
 												end
@@ -1112,18 +1112,6 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 						local WP_num = 0																			--waypoint number, starts with 0
 						for w = 1, #tempPlayer.waypoints do														--iterate through all waypoints
 
-							if tempPlayer.waypoints[w].briefing_name == "Departure" then
-								tempPlayer.waypoints[w].ETA = tempPlayer.waypoints[w].ETA + mission_ini.startup_time_player
-
-								if debug.debug then
-									local camp_str = "mission = " .. TableSerialization(mission, 0)
-									local campFile = io.open("Debug/tempPlayer_B.lua", "w") or error("Échec d'ouverture du fichier ATO_AtoG")
-									campFile:write(camp_str)
-									campFile:close()
-								end
-
-							end
-
 							if tempPlayer.waypoints[w].briefing_name ~= "Taxi" then								--do not list taxi waypoint in overview
 								for e = 1, #entries do																--iterate through all entries
 									local entry
@@ -1131,8 +1119,13 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 										entry = WP_num
 										WP_num = WP_num + 1
 									elseif entries[e].lookup == "ETA" then
+										local modifiefDepartureETA = 0
+										if tempPlayer.waypoints[w].briefing_name == "Departure" then
+											modifiefDepartureETA = tempPlayer.waypoints[w].ETA + mission_ini.startup_time_player
+										end
+										
 										-- entry = FormatTime(camp.time + tempPlayer.waypoints[w][entries[e].lookup], "hh:mm:ss")	--format the time in the hh:mm:ss format
-										entry = FormatTime(camp.time + tempPlayer.waypoints[w][entries[e].lookup], "hh:mm")	--format the time in the hh:mm:ss format
+										entry = FormatTime(camp.time + tempPlayer.waypoints[w][entries[e].lookup] + modifiefDepartureETA, "hh:mm")	--format the time in the hh:mm:ss format
 									elseif entries[e].lookup == "alt" then
 										entry = FormatAlt(tempPlayer.waypoints[w][entries[e].lookup], unitsUse)				--format altitude in meters or feet
 									elseif entries[e].lookup == "speed" then
