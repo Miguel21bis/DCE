@@ -4,7 +4,7 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.179"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.180"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
@@ -7214,6 +7214,10 @@ db_all_loadouts = {
 					["CLSID"] = "{AIM-9B}",
 					["num"] = 4,
 				},
+				[14] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
+				},
 					},
 					fuel = 5510.5,
 					flare = 30,
@@ -8174,6 +8178,7 @@ db_all_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				country = {
 					[1] = "USA",
@@ -8282,6 +8287,10 @@ db_all_loadouts = {
 						["function_delay_ctrl_M905"] = 0,
 					},
 				},
+				[14] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
+				},
 					},
 					fuel = 5510.5,
 					flare = 30,
@@ -8294,6 +8303,7 @@ db_all_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				country = {
 					[1] = "USA",
@@ -8375,6 +8385,10 @@ db_all_loadouts = {
 						["function_delay_ctrl_M904E4"] = 0,
 						["function_delay_ctrl_M905"] = 0,
 					},
+				},
+				[14] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
 				},
 					},
 					fuel = 5510.5,
@@ -8388,6 +8402,7 @@ db_all_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				country = {
 					[1] = "USA",
@@ -8470,6 +8485,10 @@ db_all_loadouts = {
 						["function_delay_ctrl_M905"] = 0,
 					},
 				},
+				[14] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
+				},
 					},
 					fuel = 5510.5,
 					flare = 30,
@@ -8482,6 +8501,7 @@ db_all_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				country = {
 					[1] = "USA",
@@ -8590,6 +8610,10 @@ db_all_loadouts = {
 						["function_delay_ctrl_M904E4"] = 0,
 						["function_delay_ctrl_M905"] = 0,
 					},
+				},
+				[14] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
 				},
 					},
 					fuel = 5510.5,
@@ -8890,6 +8914,7 @@ db_all_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = false,
+					["Escort Jammer"] = true,
 				},
 				country = {
 					[1] = "USA",
@@ -8962,6 +8987,10 @@ db_all_loadouts = {
 				[13] = {
 					["CLSID"] = "{HB_F4E_AIM-7E}",
 					["num"] = 5,
+				},
+				[14] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
 				},
 					},
 					fuel = 5510.5,
@@ -9540,6 +9569,10 @@ db_all_loadouts = {
 					["CLSID"] = "<CLEAN>",
 					["num"] = 1,
 				},
+				[14] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
+				},
 					},
 					fuel = 5510.5,
 					flare = 30,
@@ -9996,6 +10029,10 @@ db_all_loadouts = {
 					["CLSID"] = "<CLEAN>",
 					["num"] = 1,
 				},
+				[14] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
+				},
 					},
 					fuel = 5510.5,
 					flare = 30,
@@ -10424,6 +10461,10 @@ db_all_loadouts = {
 						["rf_upper_limit_ctrl_Mk25"] = 6000000000,
 					},
 				},
+				[14] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
+				},
 					},
 					fuel = 5510.5,
 					flare = 30,
@@ -10828,6 +10869,10 @@ db_all_loadouts = {
 						["function_delay_ctrl_M905"] = 0,
 					},
 				},
+				[14] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
+				},
 					},
 					fuel = 5510.5,
 					flare = 30,
@@ -11153,6 +11198,10 @@ db_all_loadouts = {
 					["CLSID"] = "<CLEAN>",
 					["num"] = 1,
 				},
+				[14] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
+				},
 					},
 					fuel = 5510.5,
 					flare = 30,
@@ -11443,6 +11492,10 @@ db_all_loadouts = {
 				[11] = {
 					["CLSID"] = "<CLEAN>",
 					["num"] = 1,
+				},
+				[14] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
 				},
 					},
 					fuel = 5510.5,

@@ -410,20 +410,33 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 					local tempPlayer = {}
 
+					--CLIENT************************************************
 					if flight[f].client then
-						tempPlayer = camp.client[flight[f].IdClient]
 
-						if debug.debug then
-							local camp_str = "mission = " .. TableSerialization(mission, 0)
-							local campFile = io.open("Debug/tempPlayer_A_client.lua", "w") or error("Échec d'ouverture du fichier ATO_AtoG")
-							campFile:write(camp_str)
-							campFile:close()
-						end
+						-- local camp_str = "camp.client = " .. TableSerialization(camp.client, 0)						--make a string
+						-- local campFile = io.open("Debug/CAMPclientBriefingCC.lua", "w")	 or error("Failed to open debug file")
+						-- campFile:write(camp_str)																		--save new data
+						-- campFile:close()
+
+						--attention, ne pas enlever Deepcopy ici
+						tempPlayer = Deepcopy(camp.client[flight[f].IdClient])
+
+						-- local camp_str = "camp.client = " .. TableSerialization(camp.client, 0)						--make a string
+						-- local campFile = io.open("Debug/CAMPclientBriefingDD.lua", "w")	 or error("Failed to open debug file")
+						-- campFile:write(camp_str)																		--save new data
+						-- campFile:close()
+
+						-- local camp_str = "tempPlayer = " .. TableSerialization(tempPlayer, 0)						--make a string
+						-- local campFile = io.open("Debug/CAMP_tempPlayer_clientBriefingEE.lua", "w")	 or error("Failed to open debug file")
+						-- campFile:write(camp_str)																		--save new data
+						-- campFile:close()
 
 						-- print("DcB tempPlayer.pack_n "..tostring(tempPlayer.pack_n))
-						tempPlayer.package = camp.client.package[tempPlayer.pack_n]
 
-						-- tempPlayer = Deepcopy(camp.client)
+
+						tempPlayer.package = {
+							[tempPlayer.pack_n] = Deepcopy(camp.client.package[tempPlayer.pack_n]),
+						}
 
 						local tagBreak
 						--##parse mission table:
@@ -433,8 +446,9 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 									if (category == "plane" or category == "helicopter" ) and type(groups) == "table" and groups["group"]  then	--and groups[1].units
 										for Ngroup, group in pairs(groups["group"]) do
 											for unitN, unit in pairs(group.units) do
-												-- print("unit.name "..tostring(unit.name).." ==tempPlayer.unitname? "..tostring(tempPlayer.unitname))
 												if unit.name == tempPlayer.unitname then
+
+													--attention, ne PAS mettre Deepcopy ici, sinon les canaux de frequence ne pourront se mettre à jour
 													tempPlayer["waypoints"] = group.route.points
 													tempPlayer["group"] = group
 													tagBreak = true
@@ -453,19 +467,13 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 						end
 
 
-
+					--*** PLAYER ************************************************
 					elseif flight[f].player then
-						tempPlayer = camp.player
-						tempPlayer.package = camp.player.package[tempPlayer.pack_n]
 
-						if debug.debug then
-							local camp_str = "mission = " .. TableSerialization(mission, 0)
-							local campFile = io.open("Debug/tempPlayer_A_player.lua", "w") or error("Échec d'ouverture du fichier ATO_AtoG")
-							campFile:write(camp_str)
-							campFile:close()
-						end
+						--attention, ne pas enlever Deepcopy ici
+						tempPlayer = Deepcopy(camp.player)
+						tempPlayer.package[tempPlayer.pack_n] = Deepcopy(camp.player.package[tempPlayer.pack_n])
 
-						
 						local tagBreak
 						--##parse mission table:
 						for _side, side in pairs(mission.coalition) do
@@ -476,6 +484,8 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 											for unitN, unit in pairs(group.units) do
 
 												if unit.name == tempPlayer.unitname then
+
+													--attention, ne PAS mettre Deepcopy ici, sinon les canaux de frequence ne pourront se mettre à jour
 													tempPlayer["waypoints"] = group.route.points
 													tempPlayer["group"] = group
 													tagBreak = true
@@ -1315,12 +1325,14 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 									-- print("DcB A2 tempPlayer.type: "..tostring(tempPlayer.type).." "..tostring(Data_divers[tempPlayer.type].refuellingReceptacleType))
 									
 
-									if Data_divers[role[f].type] and Data_divers[role[f].type].refuellingType and
-										Data_divers[role[f].type].refuellingType == Data_divers[tempPlayer.type].refuellingReceptacleType then
+									if Data_divers[role[1].type] and Data_divers[role[1].type].refuellingType and
+										Data_divers[role[1].type].refuellingType == Data_divers[tempPlayer.type].refuellingReceptacleType then
 
 											-- print("DcB B ")
 
 										for f = 1 , #role do
+											
+											
 											local time = ""
 											local occurence = 0
 

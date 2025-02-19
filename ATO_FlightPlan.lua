@@ -82,7 +82,7 @@ local baseIsFARP
 local baseIsCarrier
 local allFlightName_AtoFP = {}
 
-local polkaOff = true					--evite la dance des aeronefs sur le parking (Inter et SAR compris)
+local polkaOff = false					--evite la dance des aeronefs sur le parking (Inter et SAR compris)
 -- local proximityAircraft = {}			--ajoute la position en spawn de départ, des tankers, pour tenter de les éloigner les uns des autres
 
 -- Table des avions de ravitaillement déjà enregistrés
@@ -7347,8 +7347,13 @@ if camp.client then
 			camp.client.package[camp.client[c].pack_n] = Deepcopy(ATO[camp.client[c].side][camp.client[c].pack_n])	--pack_n
 		end
 	end
-end
 
+	local camp_str = "camp.client = " .. TableSerialization(camp.client, 0)						--make a string
+	local campFile = io.open("Debug/CAMPclientBB.lua", "w")	 or error("Failed to open debug file")
+	campFile:write(camp_str)																		--save new data
+	campFile:close()
+
+end
 
 
 local function ShipFindByName(name)

@@ -558,6 +558,13 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 		end
 	end
 
+	if Debug.debug and camp.client then
+		local camp_str = "camp.client = " .. TableSerialization(camp.client, 0)
+		local campFile = io.open("Debug/CAMPclient0.lua", "w") or error("Échec d'ouverture du fichier ATO_AtoG")
+		campFile:write(camp_str)
+		campFile:close()
+	end
+
 
 	if TaskRefused == true then
 		PlayerFlight = false																--set true to end mission generation loop

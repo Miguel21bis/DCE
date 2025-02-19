@@ -404,7 +404,7 @@ if Multi and Multi.Group then
 	--augmente la priority de la cible choisie
 	for kGroupN, multiGroup in pairs(Multi.Group) do
 		for targetN, target in pairs(targetlist[multiGroup.side]) do
-			if not target.inactive and not target.priorityINIT and target.titleName == Multi.Target[multiGroup.side] then
+			if not target.inactive and not target.priorityINIT and Multi.Target and target.titleName == Multi.Target[multiGroup.side] then
 				target.priorityINIT = target.priority
 				target.priority = target.priority * 4
 				break
@@ -4142,7 +4142,7 @@ if Debug.Generator and Debug.debug then
 	debugGenMFile:close()
 end
 
-if debug.debug then
+if Debug.debug then
 	local camp_str = "ATO_ATO_PA = " .. TableSerialization(ATO, 0)
 	local campFile = io.open("Debug/ATO_AtoG.lua", "w") or error("Échec d'ouverture du fichier ATO_AtoG")
 	campFile:write(camp_str)

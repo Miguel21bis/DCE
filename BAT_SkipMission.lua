@@ -484,7 +484,7 @@ if input == "y" or input == "yes" then
 				for nSide , oob_airSide in PairsByKeys(oob_air) do
 					print() print(nSide..":")
 					for m , unit in PairsByKeys(oob_airSide) do
-						if Playable_m[unit.type]  and unit.inactive ~= true then
+						if Playable_m[unit.type] and unit.inactive ~= true then
 							for taskStr , nbool in PairsByKeys(oob_air[nSide][m].tasks) do
 								taskStr = tostring(taskStr)
 
@@ -511,7 +511,8 @@ if input == "y" or input == "yes" then
 						io.write(" (1 to 8): ("..IndexStringType.."): "..unitType..":")
 
 						for taskStr , nbool in PairsByKeys(TabType) do
-							if   nbool == true then
+							-- print("BatSM taskStr "..tostring(taskStr))
+							if nbool == true then
 								io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
 								local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
 								tabIndex[tostring(1)..IndexStringType..TabTask[taskStr]] = true
