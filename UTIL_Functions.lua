@@ -40,7 +40,7 @@ DCS_ENI_Side = {
 
 Attribut2Target = {
 	["airbase"] = "airbase",
-	["base"] = "airbase",	
+	["base"] = "airbase",
 	["Runway"] = "runway",
 	["sam"] = "sam",
 	["ewr"] = "ewr",
@@ -462,7 +462,7 @@ end
 -- 			copy = orig
 -- 		end
 -- 		return copy
-	
+
 
 -- end
 
@@ -1538,7 +1538,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 	if Debug.debug then print() end
 	if Debug.debug then print("UtilF_Debug GetFrequency 000 side "..tostring(side).." targetname "..tostring(targetname)
 		.." task "..tostring(task).." type "..tostring(type).." waves "..tostring(waves).." overide "..tostring(overide)) end
-	
+
 	local freq
 	local nRadio = 1																					--chose frequency range from radio 1
 	if camp.radio[side] and camp.radio[side][2] and (task == "EWR" or task == "AWACS" or task == "Refueling" or task == "AFAC") then			--if player has two radions, chose frequency range from AWACS and tanker from radio 2
@@ -1586,25 +1586,25 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 		if Debug.debug then print("UtilF_Debug GetFrequency 001 targetname? "..tostring(targetname)) end
 
 		if Package_freq[side]["UHF"][targetname] and freqValide(Package_freq[side]["UHF"][targetname]) then
-			
+
 			if Debug.debug then print("UtilF_Debug GetFrequency return B1 Package_freq "..tostring(Package_freq[side]["UHF"][targetname])) end
 			return Package_freq[side]["UHF"][targetname]															--return frequency
-		
+
 		elseif Package_freq[side]["VHF"][targetname] and freqValide(Package_freq[side]["VHF"][targetname]) then
-			
+
 			if Debug.debug then print("UtilF_Debug GetFrequency return B2 Package_freq "..tostring(Package_freq[side]["VHF"][targetname])) end
 			return Package_freq[side]["VHF"][targetname]															--return frequency
-		
+
 		elseif Package_freq[side]["LVHF"][targetname] and freqValide(Package_freq[side]["LVHF"][targetname]) then
-			
+
 			if Debug.debug then print("UtilF_Debug GetFrequency return B3 Package_freq "..tostring(Package_freq[side]["LVHF"][targetname])) end
 			return Package_freq[side]["LVHF"][targetname]
-		
+
 		elseif Package_freq[side]["HF"][targetname] and freqValide(Package_freq[side]["HF"][targetname]) then
-			
+
 			if Debug.debug then print("UtilF_Debug GetFrequency return B4 Package_freq "..tostring(Package_freq[side]["HF"][targetname])) end
 			return Package_freq[side]["HF"][targetname]
-		
+
 		end
 	end
 
@@ -1623,7 +1623,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 
 				Assigned_freq[freq] = true												--mark frequency in use
 				Package_freq[side][range][targetname] = freq							--store frequency for package
-				
+
 				if Debug.debug then print("UtilF_Debug GetFrequency return C1 Package_freq "..tostring(freq)) end
 				return freq																--return frequency
 			end
@@ -1753,8 +1753,8 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 			end
 		elseif range == "VHF" then
 
-			if Debug.debug then 
-				print("UtilF_Debug GetFrequency return H0 VHF non  EWR frequency[type] "..tostring(frequency[type])) 
+			if Debug.debug then
+				print("UtilF_Debug GetFrequency return H0 VHF non  EWR frequency[type] "..tostring(frequency[type]))
 				Display(frequency[type], "utilF frequency[type]")
 
 				end
@@ -1791,7 +1791,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 							if overide ~= nil then
 								Package_freq[side][range][targetname] = freq							--store frequency for package
 							end
-							
+
 							if Debug.debug then print("UtilF_Debug GetFrequency return H1 VHF Package_freq "..tostring(freq)) end
 							return freq
 						end
@@ -1812,8 +1812,8 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 
 							Assigned_freq[freq] = true												--mark frequency in use
 							Package_freq[side][range][targetname] = freq							--store frequency for package
-							
-							
+
+
 							if Debug.debug then print("UtilF_Debug GetFrequency return I LVHF Package_freq "..tostring(freq)) end
 							return freq
 						end
@@ -1838,7 +1838,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 
 				Assigned_freq[freq] = true												--mark frequency in use
 				Package_freq[side][range][targetname] = freq							--store frequency for package
-				
+
 				if Debug.debug then print("UtilF_Debug GetFrequency return J HF Package_freq "..tostring(freq)) end
 				return freq																--return frequency				
 			end
@@ -1933,7 +1933,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 					if Debug.debug then print("UtilF_Debug GetFrequency return S result "..tostring(result)) end
 					return result
 				else
-					
+
 					--TODO ajouter ici (ou ailleurs) une condition pour utiliser la bande de freq preféré du joueur
 
 					camp.radio[side][nRadio]["UHF"] = {
@@ -2098,7 +2098,7 @@ local function buildsLoadout()
 
 
 	-- cherche le code a appliquer au loadout, pour charger le bon..loadout ^^
-	if (not ( campConfMod and  campConfMod.code_loadout) and campaigns_code_loadout )then 
+	if (not ( campConfMod and  campConfMod.code_loadout) and campaigns_code_loadout )then
 		local bestMatch = nil
 		local bestMatchCount = 0
 		campConfMod = {}
@@ -2692,20 +2692,25 @@ end
 function UpdateConfMod()
     --version UpdateConfMod VA_1.12
 
-	
 	-- local weather_override = {
-	-- 	temperature = 20,  -- 🌡️ Température en degrés Celsius
-	-- 	wind_speed = 5,    -- 🌬️ Vitesse du vent (m/s)
-	-- 	wind_dir = 180,    -- 🧭 Direction du vent
-	-- 	turbulence = 0,    -- 🌪️ Pas de turbulence
+	-- 	pHigh = 20,				--probability of high pressure weather system
+	-- 	pLow = 80,					--probability of low pressure weather system
+	-- 	refTemp = 18,				--average day max temperature
 	-- }
 
-	local weather_override = {
-		pHigh = 20,				--probability of high pressure weather system
-		pLow = 80,					--probability of low pressure weather system
-		refTemp = 18,				--average day max temperature
-	}
-    
+	local weather_override
+
+	if camp.mission == 1 then
+		if camp.weather and camp.weather.pHigh then
+			weather_override = camp.weather
+		else
+			dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ConfModCheck.lua")
+			weather_override = mission_ini_check.weather
+
+		end
+	end
+
+
 	local function deepCopy(orig)
 		local copy
 		if type(orig) == 'table' then
@@ -2729,22 +2734,22 @@ function UpdateConfMod()
 		local currentTable = config
 		local currentKey = nil
 		local pendingTable = nil -- Stocker temporairement le nom d'une table qui attend `{`
-	
+
 		for line in io.lines(filePath) do
 			line = line:gsub("_check", "") -- Supprimer "_check"
-	
+
 			-- print("\nLCWS A "..line) -- Debug simple sans icône
-	
+
 			-- Ignorer les lignes commentées
 			if line:match("^%s*%-%-") then
 				table.insert(structure, line)
-	
+
 			-- Ignorer les lignes versionDCE
 			elseif line:match("versionDCE") then
-				
+
 			else
 				table.insert(structure, line) -- Stockage brut de la structure du fichier
-				
+
 				-- Détection des structures Lua
 				local singleLineTable = line:match("(%S+)%s*=%s*{(.-)}%s*,?%s*$")
 				local tableStart = line:match("(%S+)%s*=%s*{")
@@ -2758,17 +2763,17 @@ function UpdateConfMod()
 				-- print("lCWS E6 tableEnd?: "..tostring(tableEnd))
 				-- print("lCWS E7 tableStartUnique?: "..tostring(tableStartUnique))
 				-- print("lCWS E8 currentKey?: "..tostring(currentKey))
-		
-	
+
+
 				local key, value, comment = line:match('(%S+)%s*=%s*(["]?[%w%s%p]+["]?)%s*,?%s*%-%-%s*(.*)')
 				-- print("lCWS AA1 value?: "..tostring(value))
 				if not key then
 					key, value = line:match('(%S+)%s*=%s*(["]?[%w%s%p]+["]?)%s*,?')
 					-- print("lCWS AA2 value?: "..tostring(value))
-					
+
 				end
 
-	
+
 				-- 1️⃣ Tables sur une seule ligne (ex: `x = {1, 2, 3}`)
 				if singleLineTable then
 					-- print("LCWS B ")
@@ -2779,12 +2784,12 @@ function UpdateConfMod()
 						newTable[#newTable + 1] = tonumber(value) or value
 					end
 					currentTable[name] = newTable
-	
+
 				-- 2️⃣ `pictureBrief =` suivi de `{` sur la ligne suivante
 				elseif tableStartUnique then
 					-- print("LCWS C ")
 					pendingTable = tableStartUnique -- Retenir le nom de la table
-	
+
 				elseif line:match("^%s*{%s*$") and pendingTable then
 					-- print("\nLCWS D ")
 					currentTable[pendingTable] = {} -- Créer la table
@@ -2792,19 +2797,19 @@ function UpdateConfMod()
 					currentTable = currentTable[pendingTable]
 					currentKey = pendingTable
 					pendingTable = nil -- Réinitialisation
-	
+
 				-- 3️⃣ Tables classiques (`key = {`)
 				elseif tableStart then
 					-- print("LCWS E ")
-				
+
 					if not currentTable[tableStart] then
 						currentTable[tableStart] = {} -- Créer la table si elle n'existe pas
 					end
 					table.insert(stack, { table = currentTable, key = currentKey })
 					currentTable = currentTable[tableStart]
 					currentKey = tableStart
-				
-	
+
+
 				-- 4️⃣ `blue = {` et `red = {` sous `pictureBrief`
 				elseif (line:match("^%s*(blue|red)%s*=%s*{") or line:match("^%s*%[%d+%]%s*=%s*{")) and currentKey == "pictureBrief" then
 					-- print("LCWS F ")
@@ -2815,7 +2820,7 @@ function UpdateConfMod()
 					table.insert(stack, { table = currentTable, key = currentKey })
 					currentTable = currentTable[subKey]
 					currentKey = subKey
-	
+
 				-- 5️⃣ Fermeture de table (`}`)
 				elseif tableEnd then
 					-- print("LCWS G ")
@@ -2824,50 +2829,50 @@ function UpdateConfMod()
 						currentTable = popped.table
 						currentKey = popped.key
 					end
-	
+
 				-- 6️⃣ Détection des listes `"texte",`
 				elseif listValue then
 					-- print("LCWS H ")
 
 					table.insert(currentTable, listValue)
-	
+
 				-- 7️⃣ Détection des valeurs indexées `[1] = "..."``
 				elseif line:match("^%s*%[%d+%]%s*=%s*") then
 					-- print("LCWS I ")
 					local index, listValue = line:match("^%s*%[(%d+)%]%s*=%s*\"(.-)\"")
 					if index and listValue and currentKey then
-						
+
 						currentTable[tonumber(index)] = listValue
-						
+
 					end
 				-- 8️⃣ Variables classiques `key = value`
 				elseif key and value then
-					-- ✅ Suppression propre des `,` et espaces parasites en fin de valeur
+					--   Suppression propre des `,` et espaces parasites en fin de valeur
 					value = value:match("^%s*(.-)%s*$") -- Trim des espaces inutiles
 					value = value:gsub(",%s*$", "")     -- Supprimer `,` en fin de ligne
-				
-					-- ✅ Conversion propre en nombre
+
+					--   Conversion propre en nombre
 					local numValue = tonumber(value)
 					-- print("LCWS J2 "..tostring(value))
 					currentTable[key] = numValue or value  -- Si c'est un nombre, on le stocke en tant que nombre
-				
-					
+
+
 				end
 			end
 		end
-	
+
 		return config, structure
 	end
-	
-	-- ✅ Fonction pour récupérer la vraie valeur (sans toujours mettre des strings)
+
+	--   Fonction pour récupérer la vraie valeur (sans toujours mettre des strings)
 	local function getFormattedValue(value)
-	
-		-- ✅ Si `value` est une table contenant { value = ..., comment = ... }
+
+		--   Si `value` est une table contenant { value = ..., comment = ... }
 		if type(value) == "table" and value.value ~= nil then
 			return getFormattedValue(value.value) -- Récupérer directement `value`
 		end
-	
-		-- ✅ Gestion des types normaux (string, booléens, nombres)
+
+		--   Gestion des types normaux (string, booléens, nombres)
 		if type(value) == "string" then
 			if value == "true" or value == "false" then
 				return value -- Garder sans guillemets
@@ -2881,11 +2886,11 @@ function UpdateConfMod()
 		elseif type(value) == "number" then
 			return value
 		elseif type(value) == "table" then
-			-- 🔍 Vérifier si c'est une liste indexée
+			--   Vérifier si c'est une liste indexée
 			local isArray = (#value > 0) and (next(value, #value) == nil)
-		
+
 			if isArray then
-				return "{ " .. table.concat(value, ", ") .. " }"  -- ✅ Format propre des listes !
+				return "{ " .. table.concat(value, ", ") .. " }"  --   Format propre des listes !
 			else
 				local formattedTable = {}
 				for k, v in pairs(value) do
@@ -2927,30 +2932,30 @@ function UpdateConfMod()
 	local function mergeTables(clientTable, defaultTable, structure)
 		for key, defaultValue in pairs(defaultTable) do
 			local clientValue = clientTable[key]
-	
-			-- 🖼️ `pictureBrief` ne doit pas être touché
+
+			--   `pictureBrief` ne doit pas être touché
 			if key == "pictureBrief" then
 				-- print("[mergeTables] A `pictureBrief` préservé")
-	
-			-- 🌍 `movedBullseye` doit fusionner **ET** accepter de nouvelles maps
+
+			--   `movedBullseye` doit fusionner **ET** accepter de nouvelles maps
 			elseif key == "movedBullseye" and type(defaultValue) == "table" then
 				-- print("[mergeTables] B Fusion `movedBullseye`")
 				if type(clientValue) ~= "table" then
 					-- print("[mergeTables] C `movedBullseye` absent dans clientTable, création")
 					clientTable[key] = {}
 				end
-	
-				-- 🔄 Fusion normale des maps existantes
+
+				--   Fusion normale des maps existantes
 				mergeTables(clientValue, defaultValue, structure)
-	
-				-- ✅ Ajouter les nouvelles maps du client qui n'existent pas dans `defaultTable`
+
+				--   Ajouter les nouvelles maps du client qui n'existent pas dans `defaultTable`
 				for mapName, mapData in pairs(clientValue) do
 					-- print("[mergeTables] D Map détectée :", mapName)
 					if not defaultValue[mapName] then
 						-- print("[mergeTables] E Nouvelle map ajoutée :", mapName)
 						defaultValue[mapName] = deepCopy(mapData) -- Ajoute la map à `config_default`
-						
-						-- 🏗 Ajouter aussi `mapName` à `structure` pour garantir l'écriture
+
+						--   Ajouter aussi `mapName` à `structure` pour garantir l'écriture
 						table.insert(structure, "\t" .. mapName .. " = {")
 						table.insert(structure, "\t\tpos = {")
 						table.insert(structure, "\t\t\tx = " .. getFormattedValue(mapData.pos.x) .. ",")
@@ -2960,25 +2965,23 @@ function UpdateConfMod()
 						table.insert(structure, "\t},")
 					end
 				end
-	
-			-- 🌦️ `weather` doit **toujours** être remplacé par `weather_override`
-			elseif key == "weather" then
-				-- print("[mergeTables] 🌦 Application de `weather_override`")
+
+			--  ️ `weather` doit **toujours** être remplacé par `weather_override`
+			elseif key == "weather" and weather_override then
 				clientTable[key] = deepCopy(weather_override)
-	
-			-- 🔀 Fusion normale des sous-tables
+			--   Fusion normale des sous-tables
 			elseif type(defaultValue) == "table" then
 				if not clientValue then
-					-- print("[mergeTables] 🆕 Copie de la table absente :", key)
+					-- print("[mergeTables]   Copie de la table absente :", key)
 					clientTable[key] = deepCopy(defaultValue)
 				elseif type(clientValue) == "table" then
 					mergeTables(clientValue, defaultValue, structure)
 				end
-	
-			-- 📝 Valeur simple : on applique la valeur par défaut si absente
+
+			--   Valeur simple : on applique la valeur par défaut si absente
 			else
 				if clientValue == nil then
-					-- print("[mergeTables] 📝 Valeur par défaut appliquée :", key)
+					-- print("[mergeTables]   Valeur par défaut appliquée :", key)
 					clientTable[key] = defaultValue
 				end
 			end
@@ -2987,98 +2990,14 @@ function UpdateConfMod()
 
     -- Nouvelle fonction pour insérer les nouvelles tables et variables manquantes dans la structure
 	local function updateConfiguration(clientConfig, defaultConfig)
-		-- version updateConfiguration VA_1.34 (Ajout du retour clientConfig)
-	
-		-- local function mergeTables(clientTable, defaultTable)
-		-- 	for key, defaultValue in pairs(defaultTable) do
-		-- 		local clientValue = clientTable[key]
-		
-		-- 		-- 🚨 Exception : `pictureBrief` doit rester **intact**
-		-- 		if key == "pictureBrief" then
-		-- 			print("🚨 `pictureBrief` préservé, aucune modification !")
-		-- 			if type(clientValue) ~= "table" then
-		-- 				clientTable[key] = {}  -- Assurer que c'est bien une table
-		-- 			end
-		-- 		elseif type(defaultValue) == "table" then
-		-- 			if not clientValue then
-		-- 				clientTable[key] = deepCopy(defaultValue)
-		-- 			elseif type(clientValue) == "table" then
-		-- 				mergeTables(clientValue, defaultValue)
-		-- 			end
-		-- 		else
-		-- 			if clientValue == nil then
-		-- 				clientTable[key] = defaultValue
-		-- 			end
-		-- 		end
-		-- 	end
-		-- end
 
-		
-		
-
-		-- local function mergeTables(clientTable, defaultTable)
-		-- 	-- version mergeTables VA_1.12 (Debug movedBullseye & weather)
-		
-		-- 	for key, defaultValue in pairs(defaultTable) do
-		-- 		local clientValue = clientTable[key]
-		
-		-- 		-- 🚨 Vérif de `pictureBrief`
-		-- 		if key == "pictureBrief" then
-		-- 			print("[mergeTables] A `pictureBrief` préservé")
-		
-		-- 		-- 🌍 Vérif de `movedBullseye`
-		-- 		elseif key == "movedBullseye" and type(defaultValue) == "table" then
-		-- 			print("[mergeTables] B Fusion `movedBullseye` en cours...key: "..tostring(key))
-		-- 			if type(clientValue) ~= "table" then
-		-- 				print("[mergeTables] C `movedBullseye` absent dans clientTable, création key: "..tostring(key))
-		-- 				clientTable[key] = {}  -- Créer `movedBullseye` si absent
-		-- 			end
-		
-		-- 			-- 🔄 Fusionner les maps existantes
-		-- 			mergeTables(clientValue, defaultValue)
-
-		-- 			-- ✅ Ajouter les nouvelles maps du client qui n'existent pas dans `defaultTable`
-		-- 			for mapName, mapData in pairs(clientValue) do
-		-- 				print("[mergeTables] D  map ? :", mapName)
-
-		-- 				if not defaultValue[mapName] then
-		-- 					print("[mergeTables] E Nouvelle map ajoutée :", mapName)
-		-- 					clientTable[key][mapName] = deepCopy(mapData)  -- 🔥 Ajouter à `clientTable`, pas `defaultTable`
-		-- 				end
-		-- 			end
-
-		
-		-- 		-- 🌦 Vérif de `weather`
-		-- 		elseif key == "weather" then
-		-- 			print("[mergeTables] 🌦 Application de `weather_override`")
-		-- 			clientTable[key] = deepCopy(weather_override) -- **Force les valeurs définies**
-		
-		-- 		-- 🔀 Fusion normale des sous-tables
-		-- 		elseif type(defaultValue) == "table" then
-		-- 			if not clientValue then
-		-- 				print("[mergeTables] 🆕 Copie de la table absente :", key)
-		-- 				clientTable[key] = deepCopy(defaultValue)
-		-- 			elseif type(clientValue) == "table" then
-		-- 				mergeTables(clientValue, defaultValue)
-		-- 			end
-		
-		-- 		-- 📝 Prendre la valeur par défaut si absente
-		-- 		else
-		-- 			if clientValue == nil then
-		-- 				print("[mergeTables] 📝 Valeur par défaut appliquée :", key)
-		-- 				clientTable[key] = defaultValue
-		-- 			end
-		-- 		end
-		-- 	end
-		-- end
-		
 		mergeTables(clientConfig, defaultConfig)
 
-		return clientConfig  -- ✅ Ajout du retour de la table mise à jour !
+		return clientConfig  --   Ajout du retour de la table mise à jour !
 	end
-	
 
-	
+
+
 	local function saveUpdatedConfig(filePath, updatedConfig, structure)
 		-- version saveUpdatedConfig VA_1.50 (Correction des valeurs sous forme de table et commentaires)
 
@@ -3090,61 +3009,21 @@ function UpdateConfMod()
 
 		local file = io.open(filePath, "w")
 		if not file then error("Cannot open file for writing: " .. filePath) end
-	
+
 		local indentLevel = 0
 		local stack = {}  -- Suivi des tables imbriquées
-	
-		-- ✅ Fonction d'indentation stricte
+
+		--   Fonction d'indentation stricte
 		local function getIndent(level)
 			return string.rep("\t", level)
 		end
-	
-		-- -- ✅ Fonction pour récupérer la vraie valeur (sans toujours mettre des strings)
-		-- local function getFormattedValue(value)
-			
-		-- 	-- ✅ Si `value` est une table contenant { value = ..., comment = ... }
-		-- 	if type(value) == "table" and value.value ~= nil then
-		-- 		return getFormattedValue(value.value) -- Récupérer directement `value`
-		-- 	end
-		
-		-- 	-- ✅ Gestion des types normaux (string, booléens, nombres)
-		-- 	if type(value) == "string" then
-		-- 		if value == "true" or value == "false" then
-		-- 			return value -- Garder sans guillemets
-		-- 		elseif tonumber(value) then
-		-- 			return value -- Convertir en nombre
-		-- 		else
-		-- 			return '"' .. value:gsub('"', '') .. '"' -- Supprime les doubles guillemets parasites
-		-- 		end
-		-- 	elseif type(value) == "boolean" then
-		-- 		return tostring(value)
-		-- 	elseif type(value) == "number" then
-		-- 		return value
-		-- 	elseif type(value) == "table" then
-		-- 		-- 🔍 Vérifier si c'est une liste indexée
-		-- 		local isArray = (#value > 0) and (next(value, #value) == nil)
-			
-		-- 		if isArray then
-		-- 			return "{ " .. table.concat(value, ", ") .. " }"  -- ✅ Format propre des listes !
-		-- 		else
-		-- 			local formattedTable = {}
-		-- 			for k, v in pairs(value) do
-		-- 				table.insert(formattedTable, "[" .. tostring(k) .. "] = " .. getFormattedValue(v))
-		-- 			end
-		-- 			return "{ " .. table.concat(formattedTable, ", ") .. " }"
-		-- 		end
 
-		-- 	else
-		-- 		return tostring(value)
-		-- 	end
-		-- end
-		
-	
+
 		local function writeStructureLines(currentTable, structure, level)
-			
+
 			local maxKeyLength = 0
 			local maxValueLength = 0
-			
+
 			for i, line in ipairs(structure) do
 				local trimmedLine = line:match("^%s*(.-)%s*$") -- Supprimer espaces début/fin
 				-- print("A "..line)
@@ -3153,13 +3032,13 @@ function UpdateConfMod()
 				if not key then
 					key, value = line:match('(%S+)%s*=%s*([^%s,]+)')
 				end
-	
-				-- ✅ Conserver les commentaires et lignes vides
+
+				--   Conserver les commentaires et lignes vides
 				if trimmedLine:match("^%-%-") or trimmedLine == "" then
 					-- print("B "..getIndent(level) .. line .. "\n")
 					file:write(getIndent(level) .. line .. "\n")
-	
-				-- ✅ Détection des tables sur une seule ligne
+
+				--   Détection des tables sur une seule ligne
 				elseif trimmedLine:match("(%S+)%s*=%s*{.-}%s*,?%s*$") then
 					local key = trimmedLine:match("(%S+)%s*=%s*{")
 					local clientValue = currentTable[key]
@@ -3167,8 +3046,8 @@ function UpdateConfMod()
 						-- print("C1 "..getIndent(level) .. key .. " = " .. getFormattedValue(clientValue) .. ",\n")
 						file:write(getIndent(level) .. key .. " = " .. getFormattedValue(clientValue) .. ",\n")
 					end
-	
-				-- ✅ Détection de déclaration de table avec indentation correcte
+
+				--   Détection de déclaration de table avec indentation correcte
 				elseif trimmedLine:match("(%S+)%s*=%s*{") then
 					local key = trimmedLine:match("(%S+)%s*=%s*{")
 					local clientValue = currentTable[key]
@@ -3180,8 +3059,8 @@ function UpdateConfMod()
 						level = level + 1
 						-- print("D2 #stack "..tostring(#stack))
 					end
-	
-					-- ✅ Détection des fermetures de table
+
+					--   Détection des fermetures de table
 					elseif trimmedLine:match("^%s*}%s*[,]?") then
 						-- print("E1 #stack "..tostring(#stack))
 						if #stack > 0 then
@@ -3190,7 +3069,7 @@ function UpdateConfMod()
 							level = level - 1
 						end
 
-						-- 🏗 Vérifier si on doit ajouter une virgule après `}`
+						--   Vérifier si on doit ajouter une virgule après `}`
 						local nextLine = structure[i + 1] or ""
 						local addComma = not nextLine:match("^%s*}%s*$")
 
@@ -3203,8 +3082,8 @@ function UpdateConfMod()
 							-- print("E3 "..getIndent(level) .. "}\n")
 							file:write(getIndent(level) .. "}\n")
 						end
-	
-				-- ✅ Gestion des affectations (Valeur + Commentaire propre)
+
+				--   Gestion des affectations (Valeur + Commentaire propre)
 				else
 					local key, value, comment = line:match('(%S+)%s*=%s*(.-)%s*%-%-%s*(.*)')
 					if not key then
@@ -3218,7 +3097,7 @@ function UpdateConfMod()
 						local formattedValue = getFormattedValue(clientValue)
 
 						-- 📏 Calcul de la largeur max des clés pour un alignement automatique
-						local keyColumnWidth = 0  
+						local keyColumnWidth = 0
 						for k, _ in pairs(currentTable) do
 							if type(k) == "string" then
 								keyColumnWidth = math.max(keyColumnWidth, #k)
@@ -3226,18 +3105,18 @@ function UpdateConfMod()
 						end
 						keyColumnWidth = keyColumnWidth + 2  -- Ajout de 2 espaces pour plus de lisibilité
 
-					
-						-- 🏗 Ajustement de l'alignement
+
+						--   Ajustement de l'alignement
 						local spacingAfterKey = string.rep(" ", keyColumnWidth - #key)
 
-						local spacingAfterEqual = " "  
+						local spacingAfterEqual = " "
 						local valueColumnWidth = 8  -- 🛠 Réduit l'espace après la valeur
-						local spacingAfterValue = string.rep(" ", math.max(1, valueColumnWidth - #tostring(formattedValue))) 
-					
-						-- 📝 Vérifier si on ajoute une virgule
+						local spacingAfterValue = string.rep(" ", math.max(1, valueColumnWidth - #tostring(formattedValue)))
+
+						--   Vérifier si on ajoute une virgule
 						local nextLine = structure[i + 1] or ""
 						local addComma = not nextLine:match("^%s*}%s*$")
-					
+
 						-- 📌 Écriture avec **espacement plus serré**
 						if comment then
 							-- print("F2 "..getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and "," or "") .. spacingAfterValue .. "-- " .. comment .. "\n")
@@ -3249,19 +3128,19 @@ function UpdateConfMod()
 					end
 				end
 			end
-	
-			-- ✅ Vérification finale : s'assurer que toutes les tables sont bien fermées
+
+			--   Vérification finale : s'assurer que toutes les tables sont bien fermées
 			while #stack > 0 do
 				local popped = table.remove(stack)
 				level = level - 1
 				file:write(getIndent(level) .. "}\n")
 			end
 
-			-- 🖼️ Ajout manuel de `pictureBrief` à la fin si présent
+			--   Ajout manuel de `pictureBrief` à la fin si présent
 			if currentTable.pictureBrief then
 				file:write("\n" .. getIndent(level) .. "pictureBrief = {\n")
 				level = level + 1
-				
+
 				for category, images in pairs(currentTable.pictureBrief) do
 					file:write(getIndent(level) .. category .. " = {\n")
 					for _, image in ipairs(images) do
@@ -3274,19 +3153,19 @@ function UpdateConfMod()
 				file:write(getIndent(level) .. "}\n")  -- Fermeture de `pictureBrief`
 			end
 
-	
+
 		end
-	
-		-- print("[saveUpdatedConfig] 🔍 Contenu final avant écriture :")
+
+		-- print("[saveUpdatedConfig]   Contenu final avant écriture :")
 		-- Display(updatedConfig, "FINAL")
 
 
-		-- ✅ Écrire la structure dans le fichier en respectant les valeurs du client
+		--   Écrire la structure dans le fichier en respectant les valeurs du client
 		writeStructureLines(updatedConfig, structure, indentLevel)
-	
+
 		file:close()
 	end
-	
+
     -- Chemins des fichiers de configuration
     local clientConfigPath = "Init/conf_mod.lua"
     local defaultConfigPath = "../../../ScriptsMod." .. versionPackageICM .. "/UTIL_ConfModCheck.lua"
@@ -3310,17 +3189,17 @@ function UpdateConfMod()
 	clientConfig = updateConfiguration(clientConfig, defaultConfig)
 
 	if backupPictureBrief then
-		-- print("🔄 Restauration de `pictureBrief` après traitement !")
+		-- print("  Restauration de `pictureBrief` après traitement !")
 		clientConfig.pictureBrief = backupPictureBrief
 	end
-	
+
 
 	-- Sauvegarder la configuration mise à jour
 	-- clientConfigPath = "Init/conf_mod_BBB.lua"
 	saveUpdatedConfig(clientConfigPath, clientConfig, defaultStructure)
 
 	dofile("Init/conf_mod.lua")
-end	
+end
 
 
   --a function that automatically updates the conf_mod keeping as much as possible the old settings of the player
@@ -3423,17 +3302,17 @@ function UpdateConfMod_OLD_INIT()
 
 		local check = {}
 		if (nTable[1] == "mission_ini" or nTable[1] == "mission_forcedOptions" or nTable[1] == "Debug" or nTable[1] == "campMod" ) and varName then
-				
-			if nTable[1] == "mission_ini" then 
+
+			if nTable[1] == "mission_ini" then
 				tableId = mission_ini												-- donne le nom de la clef
-				
-			elseif nTable[1] == "mission_forcedOptions" then 
+
+			elseif nTable[1] == "mission_forcedOptions" then
 				tableId = mission_forcedOptions						-- donne le nom de la clef
-				
-			elseif nTable[1] == "Debug" then 
+
+			elseif nTable[1] == "Debug" then
 				tableId = Debug														-- donne le nom de la clef
-				
-			elseif nTable[1] == "campMod" then 
+
+			elseif nTable[1] == "campMod" then
 				tableId = campMod													-- donne le nom de la clef
 
 			end
@@ -3586,6 +3465,8 @@ function UpdateConfMod_OLD_INIT()
 	dofile("Init/conf_mod.lua")
 end
 
+
+--reecrit le fichier camp_ini en ne gardant que les variables utile, les autres ayant été transférée dans conf_mo
 function ModifiCampInit()
 
 	-- camp = {
@@ -3612,6 +3493,10 @@ function ModifiCampInit()
 		"day",
 		"year",
 		"month",
+		"weather",
+		"pHigh",
+		"pLow",
+		"refTemp",
 		"time",
 		"variation"
 	}

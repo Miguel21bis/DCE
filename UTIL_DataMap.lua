@@ -20,7 +20,7 @@ versionDCE["UTIL_DataMap.lua"] = "1.4.22"
 -- floor altitude to spawn client recovery aircraft (will probably be used to spawn AI too, but later)
 -- It is possible to nest the zones, the plane will spawn at the high
 AltitudeFloor = {
-	["caucasus"] = {											--name of map string.lower
+	["Caucasus"] = {											
 		[5700] = {												--altidue floor (the highest point of this area) 5700
 			[1] = {	
 				[1] = {
@@ -942,7 +942,7 @@ AltitudeFloor = {
 			}, -- end of [15]
 		}
 	},
-	["syria"] = {											--name of map string.lower
+	["Syria"] = {	
 		[1005] = {												--altidue floor (the highest point of this area) 1005
 			[1] = {
 				["y"] = -345382.98797674,
@@ -1770,7 +1770,7 @@ AltitudeFloor = {
 	},
 
 		
-	["falklands"] = {											--name of map string.lower
+	["Falklands"] = {
 		[800] = {												--altidue floor (the highest point of this area) 800
 			[1] = {
 				x =	76054,
@@ -1812,8 +1812,8 @@ AltitudeFloor = {
 
 
 LocationForEphemeris = {
-	--attention, name of the map in lower case 
-	["caucasus"] = {								--gudauta --attention, name of the map in lower case 
+
+	["Caucasus"] = {								--gudauta
 		-- nnLatitude = 43.10195,
 		-- nnLongitude = 40.62242,
 	--42.85111105317177, 44.306503449987765 --Barzikau, Ossétie-du-Nord-Alanie
@@ -1832,7 +1832,7 @@ LocationForEphemeris = {
 		-- scaleLat = 1.134194,						-- flat map, no MERCATO or other projection, so to find the right value, we use a scale adapted to each MAP.
 		-- scaleLon = 0.941787, 						-- flat map, no MERCATO or other projection, so to find the right value, we use a scale adapted to each MAP.
 	},
-	["persiangulf"] = {							
+	["PersianGulf"] = {							
 		nnLatitude = 24.568892,
 		nnLongitude = 54.756338,
 		nnTimeZone = 4,
@@ -1858,7 +1858,7 @@ LocationForEphemeris = {
 		-- UTM_Zone = 7,
 		-- UTM_hemisphere = "N",
 	-- },
-	["syria"] = {									--attention, name of the map in lower case 
+	["Syria"] = { 
 		nnLatitude = 33.497162,
 		nnLongitude = 36.316573,
 		nnTimeZone = 3,								--2
@@ -1871,7 +1871,7 @@ LocationForEphemeris = {
 		UTM_Zone = 36,
 		UTM_hemisphere = "N",
 	},
-	["marianaislands"] = {								--ile de Guam 
+	["MarianaIslands"] = {								--ile de Guam 
 		nnLatitude = 13.444304,
 		nnLongitude = 144.793732,
 		nnTimeZone = 10,								--
@@ -1884,7 +1884,7 @@ LocationForEphemeris = {
 		UTM_Zone = 55,
 		UTM_hemisphere = "N",
 	},
-	["normandy"] = {								--Caen --attention, name of the map in lower case 
+	["Normandy"] = { 
 		nnLatitude = 49.184171, 					--49.18417106729151, -0.36709560270994507
 		nnLongitude = -0.367095,
 		nnTimeZone = 0,								--2
@@ -1897,7 +1897,7 @@ LocationForEphemeris = {
 		UTM_Zone = 31,
 		UTM_hemisphere = "N",
 	},
-	["TheChannel"] = {								--Caen --attention, name of the map in lower case 
+	["TheChannel"] = {
 		nnLatitude = 49.184171, 					--49.18417106729151, -0.36709560270994507
 		nnLongitude = -0.367095,
 		nnTimeZone = 0,								--2
@@ -1910,7 +1910,7 @@ LocationForEphemeris = {
 		UTM_Zone = 31,
 		UTM_hemisphere = "N",
 	},
-	["falklands"] = {								--attention, name of the map in lower case 
+	["Falklands"] = {
 		nnLatitude = -51.563412, 					
 		nnLongitude = -59.820557,
 		nnTimeZone = -3,								
@@ -1923,7 +1923,7 @@ LocationForEphemeris = {
 		UTM_Zone = 21,
 		UTM_hemisphere = "S",
 	},
-	["sinaimap"] = {								--attention, name of the map in lower case 
+	["SinaiMap"] = { 
 		nnLatitude = 29.973007, 		--29.973007359606896, 32.58923334381327			
 		nnLongitude = 32.589233,
 		nnTimeZone = 2,								
@@ -1936,7 +1936,7 @@ LocationForEphemeris = {
 		UTM_Zone = 36,
 		UTM_hemisphere = "N",
 	},
-	["Kola"] = {                                --attention, name of the map in lower case 
+	["Kola"] = { 
         nnLatitude = 68.229291,         --29.973007359606896, 32.58923334381327
         nnLongitude = 24.800681,
         nnTimeZone = 2,

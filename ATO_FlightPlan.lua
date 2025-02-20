@@ -58,7 +58,6 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.288"
 -- modification M01_b		Ajout datalink (b: UTIL_Data file)
 ------------------------------------------------------------------------------------------------------- 	
 
-predeterminedCallsign = true
 
 DebugFLIGHT = ""
 TabLPark	= {}
@@ -424,7 +423,7 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 			category = "generic"
 		end
 
-		if predeterminedCallsign and flight_.target.predeterminedCallsign then
+		if flight_.target.predeterminedCallsign then
 
 			callsign_flight = flight_.target.predeterminedCallsign.groupNumber
 
@@ -919,6 +918,9 @@ local function fct_movedBullseye(side, nameTheatre)
 			end
 		end
 	end
+
+	return mission.coalition[side].bullseye, Brief[side].bullseye
+
 end
 
 --modify_activate_group_time
@@ -1635,17 +1637,16 @@ end
 for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 	--M27 Randomly moves the 2 BullsEye
-	local nameTheatre =  string.lower(mission.theatre)
+	-- local nameTheatre =  string.lower(mission.theatre)
+	local nameTheatre = mission.theatre
 	if campMod.movedBullseye[nameTheatre] or mission_ini.movedBullseye == false then
-		fct_movedBullseye(side, nameTheatre)
+		mission.coalition[side].bullseye, Brief[side].bullseye = fct_movedBullseye(side, nameTheatre)
 	end
 
 	for p = 1, #pack do															--iterate through packages in sides		
 		local Pn = 0															--variable to count flights in package	
 		for role,flight in pairs(pack[p]) do									--iterate through roles in package (main, SEAD, escort)		
 
-			-- local addNflight = 0
-			-- if role ~= "main" then addNflight = 1 end
 			for f = 1, #flight do												--iterate through flights in roles
 
 				local FARP_MorePlace = false

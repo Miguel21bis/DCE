@@ -206,50 +206,64 @@ campMod_check = {
 		},
 	},
 
-	----attention, name of the map in lower case 
+
 	movedBullseye = { 						-- modification M27 	movedBullseye
-		caucasus = {						--attention, name of the map in lower case 
+		Caucasus = {						
 			pos = {
 				x = -281713,				-- centre du rayon autour de laquelle on s'autorise � placer le nouveau BullsEye ['Senaki-Kolkhi']
 				y = 647369,					-- centre du rayon autour de laquelle on s'autorise � placer le nouveau BullsEye ['Senaki-Kolkhi']
 			},
 			rayon = 200,					-- distance en Km autour de laquelle on peut placer le bullsEye
 		},
-		persiangulf = {						--attention, name of the map in lower case 
+		PersianGulf = {						
 			pos = {
 				x =	64800.714844,			-- Qeshm Island
 				y = -33383.481445,			-- Qeshm Island
 			},
 			rayon = 200,					-- distance en Km autour de laquelle on peut placer le bullsEye
 		},
-		syria = {							--attention, name of the map in lower case 
+		Syria = {							
 			pos = {
 				x =	-22163,					-- Israel Line 974
 				y = -11800,					-- Israel Line 974
 			},
 			rayon = 200,					-- distance en Km autour de laquelle on peut placer le bullsEye
 		},
-		normandy = {						--attention, name of the map in lower case 
+		MarianaIslands = {
+			pos = {
+					x = 0,
+					y = 0,
+				},
+			rayon = 200,					-- distance en Km autour de laquelle on peut placer le bullsEye
+		},
+		Normandy = {					
 			pos = {
 					x = -26144.085385954,	
 					y = -41381.855008994,		
 				},
 			rayon = 200,					-- distance en Km autour de laquelle on peut placer le bullsEye
 		},
-		TheChannel = {						--attention, name of the map in lower case 
+		TheChannel = {						
 			pos = {
 					y = -15831.502170023,	--Manston
 					x = 52281.058730041,	--Manston		
 				},
 			rayon = 200,					-- distance en Km autour de laquelle on peut placer le bullsEye
 		},
-		falklands = {						--attention, name of the map in lower case 
+		Falklands = {						
 			pos = {
 				x  = 72705,					--Falklands	
 				y  = -31294,				--Falklands		
 				},
 			rayon  = 200,					-- distance en Km autour de laquelle on peut placer le bullsEye
 		},
+		SinaiMap = {						
+			pos = {
+				x  = 677526,				
+				y  = 3542227,						
+				},
+			rayon  = 400,					-- distance en Km autour de laquelle on peut placer le bullsEye
+		},		
 		Kola = {
             pos = {
                 x = 00132610,				--Murmansk International

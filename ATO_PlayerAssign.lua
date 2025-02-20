@@ -726,17 +726,17 @@ else
 end
 
 -- local camp_str = "playable_ATO_PA = " .. TableSerialization(playable, 0)						--make a string
--- local campFile = io.open("Debug/playable_ATO_PA.lua", "w")										--open targetlist file
+-- local campFile = io.open("Debug/playable_ATO_PA.lua", "w") or error("Failed to open debug file")
 -- campFile:write(camp_str)																		--save new data
 -- campFile:close()
 
 -- local camp_str = "camp_ATO_PA = " .. TableSerialization(camp, 0)						--make a string
--- local campFile = io.open("Debug/camp_ATO_PA.lua", "w")										--open targetlist file
+-- local campFile = io.open("Debug/camp_ATO_PA.lua", "w") or error("Failed to open debug file")
 -- campFile:write(camp_str)																		--save new data
 -- campFile:close()
 
 
 -- local camp_str = "ATO_ATO_PA = " .. TableSerialization(ATO, 0)						--make a string
--- local campFile = io.open("Debug/ATO_AtoPA.lua", "w")										--open targetlist file
+-- local campFile = io.open("Debug/ATO_AtoPA.lua", "w")	 or error("Failed to open debug file")
 -- campFile:write(camp_str)																		--save new data
 -- campFile:close()

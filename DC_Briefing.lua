@@ -1,13 +1,13 @@
 --To create the briefing for the next mission
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleancode_d M80_a debug_i
+-- last modification: debug_j
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_Briefing.lua"] = "1.24.156"
+versionDCE["DC_Briefing.lua"] = "1.24.157"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_d				(d springCleaning)						
 -- adjustment_b				(b \\" to \")(a add AFAC task)
--- debug_i					(i package stats)(h nbPasse)(g mission h)(f mission.maxDictId)(e intercept navigation) (d: affiche info MP)(c: camp.date.day)  (b: Mi8 & Mi24)(a: add Mig21 Channel 00)
+-- debug_j					(j tempPlayer.package)(i package stats)(h nbPasse)(g mission h)(f mission.maxDictId)(e intercept navigation) (d: affiche info MP)(c: camp.date.day)  (b: Mi8 & Mi24)(a: add Mig21 Channel 00)
 
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)
@@ -386,9 +386,9 @@ local briefing = {
 
 local briefPlaneTaskTarget = {}																			--evite la répétition des briefings surtout en MP
 
-for sideName, pack in pairs(ATO) do																		--iterate through sides in ATO
-	for p = 1, #pack do																					--iterate through packages in sides
-		for role,flight in pairs(pack[p]) do															--iterate through roles in package (main, SEAD, escort)		
+for sideName, packs in pairs(ATO) do																		--iterate through sides in ATO
+	for p = 1, #packs do																					--iterate through packages in sides
+		for _role,flight in pairs(packs[p]) do															--iterate through roles in package (main, SEAD, escort)		
 			for f = 1, #flight do
 
 				local value = flight[f].type..""..flight[f].task..""..flight[f].target_name
@@ -470,9 +470,22 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					--*** PLAYER ************************************************
 					elseif flight[f].player then
 
+						local camp_str = "camp.player = " .. TableSerialization(camp.player, 0)						--make a string
+						local campFile = io.open("Debug/CAMP_PlayerBriefingAA.lua", "w")	 or error("Failed to open debug file")
+						campFile:write(camp_str)																		--save new data
+						campFile:close()
+
 						--attention, ne pas enlever Deepcopy ici
 						tempPlayer = Deepcopy(camp.player)
-						tempPlayer.package[tempPlayer.pack_n] = Deepcopy(camp.player.package[tempPlayer.pack_n])
+
+						tempPlayer.package = {
+							[tempPlayer.pack_n] = Deepcopy(camp.player.package[tempPlayer.pack_n]),
+						}
+
+						local camp_str = "tempPlayer = " .. TableSerialization(tempPlayer, 0)						--make a string
+						local campFile = io.open("Debug/CAMPtempPlayerBriefingDD.lua", "w")	 or error("Failed to open debug file")
+						campFile:write(camp_str)																		--save new data
+						campFile:close()
 
 						local tagBreak
 						--##parse mission table:
@@ -917,7 +930,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 
 
 
-					--Package overview
+					--Package overview ********************************************************************
 					s = "Package:\n"																		--make a list of the details of all flights in the player package
 
 					local entries = {																			--list entries that are making up the package overview
@@ -954,11 +967,11 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					}
 
 					--collect the maximum string length of each entry in the list
-					for role_name,role in pairs(tempPlayer.package) do											--iterate through roles in the player package
-						for flight_n,flight in pairs(role) do													--iterate through the flights in all roles
+					for role_name,role in pairs(tempPlayer.package[tempPlayer.pack_n]) do											--iterate through roles in the player package
+						for flight_n,flight2 in pairs(role) do													--iterate through the flights in all roles
 							for e = 1, #entries do																--iterate through all entries
-								local value = ReplaceTypeName(flight[entries[e].lookup])
-								value = ReplaceBaseName(flight[entries[e].lookup])
+								local value = ReplaceTypeName(flight2[entries[e].lookup])
+								value = ReplaceBaseName(flight2[entries[e].lookup])
 								local l = string.len(tostring(value))	 + 3										--get the string length of the current entry for this flight
 								if l > entries[e].str_length then												--if the string length is larger than the previous
 									entries[e].str_length = l													--make it the new length (find the largest)
@@ -980,11 +993,11 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 					s = s .. "\n"
 
 					--build the overview list with the entries of all flights
-					for role_name,role in pairs(tempPlayer.package) do											--iterate through roles in the player package	
-						for flight_n,_flight in pairs(role) do													--iterate through flights in all roles
+					for role_name,role in pairs(tempPlayer.package[tempPlayer.pack_n]) do											--iterate through roles in the player package	
+						for flight_n,flight2 in pairs(role) do													--iterate through flights in all roles
 							for e = 1, #entries do																--iterate through all entries
-								if type(_flight[entries[e].lookup]) == "string" or type(_flight[entries[e].lookup]) == "number" then	--entry is a string or number
-									local value = ReplaceTypeName(_flight[entries[e].lookup])
+								if type(flight2[entries[e].lookup]) == "string" or type(flight2[entries[e].lookup]) == "number" then	--entry is a string or number
+									local value = ReplaceTypeName(flight2[entries[e].lookup])
 									s = s .. value																--add entry of this flight to list
 									if e ~= #entries then																			--if this is not the last entry of the flight, add spaces to the next entry	
 										local space = entries[e].str_length + 0 - string.len(tostring(value))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
@@ -992,7 +1005,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 											s = s .. " "														--add 1.5 spaces for every missing letter
 										end
 									end
-								elseif _flight[entries[e].lookup] then											--entry is true (player marking)
+								elseif flight2[entries[e].lookup] then											--entry is true (player marking)
 									local client = ""
 									if flight[f].player then client = "player" end
 									if flight[f].client then client = "client" end
@@ -1002,17 +1015,15 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 							s = s .. "\n"																		--make a new line after each flight
 						end
 					end
-					if allowedBrief then  briefing[sideName] = briefing[sideName] .. s .. "\n\n" s="" end													--add package overview string to briefing string
 
+					if allowedBrief then briefing[sideName] = briefing[sideName] .. s .. "\n\n" s="" end													--add package overview string to briefing string
 
+					--Flight overview*********************************************************************
 
-					--Flight overview
-					-- modification M33 	Custom Briefing (onBoardNum)
+					s = "Flight:\n"																		--make a list of the details of all flights in the player package
+					s = s.."CallSign    Designated aircraft number \n"
 
-					local s = "Flight:\n"																		--make a list of the details of all flights in the player package
-						s = s.."CallSign    Designated aircraft number \n"
-
-					for role_name,role in pairs(tempPlayer.package) do												--iterate through roles in the player package	
+					for role_name,role in pairs(tempPlayer.package[tempPlayer.pack_n]) do												--iterate through roles in the player package	
 						for flight_n,_flight in pairs(role) do													--iterate through flights in all roles
 							if _flight.units	 then
 								for u=1 , #_flight.units do
@@ -1025,7 +1036,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 							end
 						end
 					end
-					if allowedBrief then  briefing[sideName] = briefing[sideName] .. s .. "\n\n" s="" end
+					if allowedBrief then briefing[sideName] = briefing[sideName] .. s .. "\n\n" s="" end
 
 
 
@@ -1162,7 +1173,7 @@ for sideName, pack in pairs(ATO) do																		--iterate through sides in 
 						end
 					end
 
-					if allowedBrief then  briefing[sideName] = briefing[sideName] .. s .. "\n\n"	s="" end													--add navigation overview string to briefing string
+					if allowedBrief then briefing[sideName] = briefing[sideName] .. s .. "\n\n"	s="" end													--add navigation overview string to briefing string
 
 
 					local refuelable = true

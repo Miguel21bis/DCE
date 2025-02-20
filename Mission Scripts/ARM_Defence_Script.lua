@@ -17,19 +17,19 @@ versionDCE["Mission Scripts/ARM_Defence_Script.lua"] = "2.4.8"
 
 
 
--- 🔹 Table globale des missiles en cours de suivi
+--  Table globale des missiles en cours de suivi
 local activeMissiles = {}
 
--- 🔹 Table des Jammers (actualisée à chaque tir de missile)
+--  Table des Jammers (actualisée à chaque tir de missile)
 local jammers = {}
 
 local function makeExplosion(posMissile)
 
-	trigger.action.explosion(posMissile, 5)
+	trigger.action.explosion(posMissile, 10)
 
 end
 
--- 🔹 Fonction de surveillance active
+--  Fonction de surveillance active
 local function checkMissileProximity()
     if #activeMissiles == 0 then
         env.info("ARM_Jammer Fin de la surveillance des missiles (plus de missiles actifs)")
@@ -53,19 +53,27 @@ local function checkMissileProximity()
                 local distance = math.sqrt(dx * dx + dy * dy + dz * dz)
 
                 if distance < 10000 then
-                    -- Vérification avant destruction
-                    if missile and missile:isExist() then
-                        missile:destroy()
-                    end
-                    
-                    -- Explosion après suppression
-                    -- trigger.action.explosion(posMissile, 5)
 
-					timer.scheduleFunction(makeExplosion, {posMissile}, timer.getTime() + 0.5)
+					local valueRandom = math.random(0,100)
+
+					if valueRandom > 5 then
+						-- Vérification avant destruction
+						if missile and missile:isExist() then
+							missile:destroy()
+						end
+						
+						-- Explosion après suppression
+						-- trigger.action.explosion(posMissile, 5)
+
+						timer.scheduleFunction(makeExplosion, {posMissile}, timer.getTime() + 0.5)
 
 
-                    env.info("ARM_Jammer Missile détruit proche du Jammer !")
-                    trigger.action.outText("Missile détruit proche du Jammer", 20)
+						env.info("ARM_Jammer Missile détruit proche du Jammer !")
+						trigger.action.outText("Missile détruit proche du Jammer", 20)
+					else
+						env.info("ARM_Jammer Missile passe !")
+						trigger.action.outText("Missile passe", 20)
+					end
 
                     -- Suppression du missile suivi
                     table.remove(activeMissiles, i)

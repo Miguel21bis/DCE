@@ -511,7 +511,7 @@ if input == "y" or input == "yes" then
 						io.write(" (1 to 8): ("..IndexStringType.."): "..unitType..":")
 
 						for taskStr , nbool in PairsByKeys(TabType) do
-							-- print("BatSM taskStr "..tostring(taskStr))
+							
 							if nbool == true then
 								io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
 								local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
