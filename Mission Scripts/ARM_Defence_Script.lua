@@ -29,6 +29,16 @@ local function makeExplosion(posMissile)
 
 end
 
+local function missileDisappearTimer(missile)
+
+	if missile and missile:isExist() then
+		local posMissile = missile:getPoint()
+		missile:destroy()
+
+		timer.scheduleFunction(makeExplosion, posMissile, timer.getTime() + 0.3)
+	end
+end
+
 --  Fonction de surveillance active
 local function checkMissileProximity()
     if #activeMissiles == 0 then
@@ -58,14 +68,20 @@ local function checkMissileProximity()
 
 					if valueRandom > 5 then
 						-- Vérification avant destruction
-						if missile and missile:isExist() then
-							missile:destroy()
-						end
+						-- if missile and missile:isExist() then
+						-- 	missile:destroy()
+						-- end
 						
 						-- Explosion après suppression
 						-- trigger.action.explosion(posMissile, 5)
 
-						timer.scheduleFunction(makeExplosion, {posMissile}, timer.getTime() + 0.5)
+						-- timer.scheduleFunction(makeExplosion, posMissile, timer.getTime() + 0.5)
+
+						local deltaTimeUnit = math.random(0,5)
+						local deltaTimeDiz = math.random(0,9)
+						local deltaTime = tonumber(deltaTimeUnit.."."..deltaTimeDiz)
+
+						timer.scheduleFunction(missileDisappearTimer, missile, timer.getTime() + deltaTime)
 
 
 						env.info("ARM_Jammer Missile détruit proche du Jammer !")

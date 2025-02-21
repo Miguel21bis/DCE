@@ -2998,29 +2998,7 @@ local function toggleGroupVisibility(groupData)
     end
 end
 
---************************************
--- -- Basculer l'état de visibilité des unités au sol
--- local function toggleGroundUnits()
---     env.info("Toggling ground units visibility...")
---     for _, groupData in pairs(groundGroups) do
---         toggleGroupVisibility(groupData)
---     end
--- end
 
--- -- Planification initiale et exécution toutes les 10 minutes
--- local function scheduleToggle()
---     toggleGroundUnits()
---     -- return timer.getTime() + 1200 -- 600 secondes = 10 minutes
--- end
---************************************
-
-
---************************************
--- -- Planification de la collecte initiale après 10 secondes
--- timer.scheduleFunction(function()
---     collectGroundGroups()
---     timer.scheduleFunction(scheduleToggle, nil, timer.getTime() + 10) -- Commence le cycle après 10 minutes
--- end, nil, timer.getTime() + 10)
 
 
 -- collectGroundGroups()
@@ -3030,6 +3008,9 @@ end
 --////////////////////////////////////////////////////////////////////////////////////////////
 --test BULLE (fin)
 --////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 
 
 --////////////////////////////////////////////////////////////////////////////////////////////
@@ -3750,6 +3731,31 @@ timer.scheduleFunction(EWR_magic, nil, timer.getTime() + 30)
 
 timer.scheduleFunction(setErrorMessageBoxShedul, nil, timer.getTime() + 30)
 
+
+
+--************************************
+-- Basculer l'état de visibilité des unités au sol
+local function toggleGroundUnits()
+    env.info("Toggling ground units visibility...")
+    for _, groupData in pairs(groundGroups) do
+        toggleGroupVisibility(groupData)
+    end
+end
+
+-- Planification initiale et exécution toutes les 10 minutes
+local function scheduleToggle()
+    toggleGroundUnits()
+    return timer.getTime() + 60 -- 600 secondes = 10 minutes
+end
+--************************************
+
+
+--************************************
+-- Planification de la collecte initiale après 10 secondes
+timer.scheduleFunction(function()
+    collectGroundGroups()
+    timer.scheduleFunction(scheduleToggle, nil, timer.getTime() + 20) -- Commence le cycle après 20 secondes
+end, nil, timer.getTime() + 10)
 
 
 _affiche(AI.Option.Air.val, "AI.Option.Air.val")
