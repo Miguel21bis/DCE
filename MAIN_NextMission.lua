@@ -1018,29 +1018,27 @@ for side_name, side in pairs(mission.coalition) do																--iterate thro
 	end
 end
 
--- --supprime les informations de DCE dans le fichier mission
--- for side_name, side in pairs(mission.coalition) do																--iterate through sides
--- 	for country_n, country_ in pairs(side.country) do															--iterate through countries
--- 		for categorie, categorie_ in pairs(country_) do
--- 			if type(categorie_) == "table" and categorie_.group then
--- 				for _group, group in pairs(categorie_) do
--- 					for groupN, group_ in pairs(group) do
+--supprime les informations de DCE dans le fichier mission
 
+if Debug.allUnhide then
+	for side_name, side in pairs(mission.coalition) do																--iterate through sides
+		for country_n, country_ in pairs(side.country) do															--iterate through countries
+			for categorie, categorie_ in pairs(country_) do
+				if type(categorie_) == "table" and categorie_.group then
+					for _group, groups in pairs(categorie_) do
+						for groupN, group in pairs(groups) do
 
+							if group.hidden then
+								group.hidden = false
+							end
 
--- 						for unitN, unit in ipairs(group_.units) do
-
--- 							-- if unit.dead_last then
--- 							-- 	unit.dead_last = nil
--- 							-- end
--- 						end
--- 					end	
--- 				end
--- 			end
--- 		end
--- 	end
--- end
-
+						end	
+					end
+				end
+			end
+		end
+	end
+end
 
 --met à jour ce lien dans le fichier mission
 local changedFilePlayed = {}

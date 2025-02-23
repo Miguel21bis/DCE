@@ -181,7 +181,7 @@ local function GCI_Cycle()
 						local txtA = ""
 
 						local targetCat = targetDesc.category
-						-- env.info("DCE_GCI Passe C targetCat "..tostring(targetCat))
+						env.info("DCE_GCI Passe C targetCat "..tostring(targetCat))
 
 						-- _affiche(targetDesc, "DCE_GCI targetDesc C")
 
@@ -189,18 +189,18 @@ local function GCI_Cycle()
 						local inAir = targets[t].object:inAir()
 
 						if isExist and inAir and targetCat and (targetCat == Unit.Category.AIRPLANE or targetCat == Unit.Category.HELICOPTER) then
-							-- env.info("DCE_GCI Passe D ")
+							env.info("DCE_GCI Passe D ")
 							local targetGpObject = targets[t].object:getGroup()
 							local target_name = targetGpObject:getName()			--get target group name
-							-- env.info("DCE_GCI Passe D² ")
+							env.info("DCE_GCI Passe D² ")
 
 							if track_update[target_name] == nil then							--the target track for this group has not yet been updated
-								-- env.info("Passe E "..tostring(target_name))	
+								env.info("Passe E "..tostring(target_name))	
 								track_update[target_name] = true								--the target track for this group is updated
 								local target_number = targetGpObject:getUnits()	--get target group size
 								local target_point = targets[t].object:getPoint()				--get target point
 								local target_typeName = targetGpObject:getUnit(1):getTypeName()
-								-- env.info("DCE_GCI Passe G "..tostring(target_typeName))
+								env.info("DCE_GCI Passe G "..tostring(target_typeName))
 								ErrorMsg = "EWR target detection: " .. ewr_name	.. "; Target: " .. target_name 	--Error message in case follow on code fails
 
 								if target_tracks[ewr_side][target_name] then					--existing track
@@ -253,13 +253,13 @@ local function GCI_Cycle()
 
 					if enemySideOfBorder then
 						--pour info
-						-- env.info("DCE_Gci     Passe A_0 enemySideOfBorder "..tostring(enemySideOfBorder))
+						env.info("DCE_Gci     Passe A_0 enemySideOfBorder "..tostring(enemySideOfBorder))
 					end
 
 					if ourSideOfBorder then
 
 						authorizedInter = true
-						-- env.info("DCE_Gci     Passe A_1 ourSideOfBorder "..tostring(ourSideOfBorder))
+						env.info("DCE_Gci     Passe A_1 ourSideOfBorder "..tostring(ourSideOfBorder))
 
 					elseif not ourSideOfBorder and not enemySideOfBorder then
 
@@ -330,8 +330,28 @@ local function GCI_Cycle()
 								if flight.name == selected_flight then									--find selected interceptor flight in ready table
 									trigger.action.setUserFlag(flight.flag, true)						--set flag true to launch interceptor
 									-- trigger.action.outText(selected_flight .. " 01 launched to intercept " .. target_name, 15)	--FOR DEBUG
-									local idInfo = Group.getByName(selected_flight):getID()
-									local _side = Group.getByName(selected_flight):getCoalition()
+									
+									local groupObj = Group.getByName(selected_flight)
+
+									if groupObj then
+										local isExist = groupObj:isExist()
+										-- local inAir = targets[t].object:inAir()
+										if not isExist then 
+											env.info("DCE_Gci group doesnt exist, break "..tostring(selected_flight))
+											break
+
+										end
+									else
+
+										env.info("DCE_Gci groupObj doesnt exist, break "..tostring(selected_flight))
+										break
+									end
+									
+									local idInfo = groupObj:getID()
+									local _side = groupObj:getCoalition()
+
+									-- local idInfo = Group.getByName(selected_flight):getID()
+									-- local _side = Group.getByName(selected_flight):getCoalition()
 
 									-- on replace les vecteurs dans un repere x/y/z/
 									local newTarget = {}
@@ -360,18 +380,18 @@ local function GCI_Cycle()
 									--***********************************************************************************
 									-- local heading1 = GetHeading(FlightSAR, {x=pt_dest.x2d, y=pt_dest.y2d})
 
-									-- env.info( "GCI PASSE A distance: "..tostring(target.distance).." altitude: "..target.altitude)
+									env.info( "GCI PASSE A distance: "..tostring(target.distance).." altitude: "..target.altitude)
 									local distance2 = target.distance/3
 									local weaponType = 1069547520					--automatique
 									local point_1 = GetOffsetPoint(flight, target.bearing, distance2/2)
 
 									if target.category == 0 then             --avion
 										distance2 = (target.distance/3)*2
-										-- env.info( "GCI PASSE B avion "..tostring(distance2))
+										env.info( "GCI PASSE B avion "..tostring(distance2))
 										weaponType = 1069547520					--automatique
 									elseif  target.category == 1 then             --helico
 										distance2 = target.distance/3
-										-- env.info( "GCI PASSE B helico "..tostring(distance2))
+										env.info( "GCI PASSE B helico "..tostring(distance2))
 										weaponType = 4194304						--Short Range Missile (Fox2)
 									end
 
@@ -387,6 +407,7 @@ local function GCI_Cycle()
 
 									--assign mission task to interceptor flight
 									ErrorMsg = "Assign interceptors; Target: " .. target_name .. "; Selected Flight: " .. selected_flight				--Error message in case follow on code fails
+									
 									local function AssignMission()												--function to set interception mission (to be executed with 2 seconds delay, in order for the group to activate first)
 
 										local ctr = Group.getByName(selected_flight):getController()			--get controller of interceptor group
@@ -423,11 +444,11 @@ local function GCI_Cycle()
 											return
 										end
 
-										-- env.info( " B intercept GrpObjt : "..tostring(GrpObjt) )
+										env.info( " B intercept GrpObjt : "..tostring(GrpObjt) )
 										local target_id = GrpObjt:getID()
-										-- env.info( " C intercept target_id: "..tostring(target_id) )
+										env.info( " C intercept target_id: "..tostring(target_id) )
 
-										local target_id = Group.getByName(target_name):getID()					--get target group ID --TODO BUG 287: attempt to index a nil value stack traceback:
+										target_id = Group.getByName(target_name):getID()					--get target group ID --TODO BUG 287: attempt to index a nil value stack traceback:
 										local Mission = {														--define mission for interceptor group
 											id = 'Mission',
 											params = {

@@ -4,7 +4,7 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.180"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.181"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
@@ -1299,7 +1299,7 @@ db_all_loadouts = {
 					["CLSID"] = "{AGM_45A}",
 					["num"] = 9,
 					["settings"] = {
-						["EAS_bypass_ctrl"] = 1,
+						["EAS_bypass_ctrl"] = 0,
 						["NFP_rfgu_type"] = 1,
 						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
 						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
@@ -1309,7 +1309,7 @@ db_all_loadouts = {
 					["CLSID"] = "{AGM_45A}",
 					["num"] = 3,
 					["settings"] = {
-						["EAS_bypass_ctrl"] = 1,
+						["EAS_bypass_ctrl"] = 0,
 						["NFP_rfgu_type"] = 1,
 						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
 						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
@@ -1789,7 +1789,7 @@ db_all_loadouts = {
 							["CLSID"] = "{AGM_45A}",
 							["num"] = 8,
 							["settings"] = {
-								["EAS_bypass_ctrl"] = 1,
+								["EAS_bypass_ctrl"] = 0,
 								["NFP_rfgu_type"] = 1,
 								["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
 								["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
@@ -1819,7 +1819,7 @@ db_all_loadouts = {
 							["CLSID"] = "{AGM_45A}",
 							["num"] = 5,
 							["settings"] = {
-								["EAS_bypass_ctrl"] = 1,
+								["EAS_bypass_ctrl"] = 0,
 								["NFP_rfgu_type"] = 1,
 								["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
 								["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
@@ -10425,7 +10425,7 @@ db_all_loadouts = {
 					["CLSID"] = "{LAU_34_AGM_45A}",
 					["num"] = 13,
 					["settings"] = {
-						["EAS_bypass_ctrl"] = 1,
+						["EAS_bypass_ctrl"] = 0,
 						["NFP_rfgu_type"] = 5,
 						["rf_lower_limit_ctrl_Mk25"] = 4000000000,
 						["rf_upper_limit_ctrl_Mk25"] = 6000000000,
@@ -10435,7 +10435,7 @@ db_all_loadouts = {
 					["CLSID"] = "{LAU_34_AGM_45A}",
 					["num"] = 1,
 					["settings"] = {
-						["EAS_bypass_ctrl"] = 1,
+						["EAS_bypass_ctrl"] = 0,
 						["NFP_rfgu_type"] = 5,
 						["rf_lower_limit_ctrl_Mk25"] = 4000000000,
 						["rf_upper_limit_ctrl_Mk25"] = 6000000000,
@@ -13355,7 +13355,7 @@ db_all_loadouts = {
 		SEAD = {
 			["Old TF SEAD AGM-88*4, ECM"] = {
 				attributes =  { },
-				code_loadout =  { "All" },
+				code_loadout =  { "TF", "TF80s" },
 				day = true,
 				night = true,
 				adverseWeather = true,
@@ -13387,9 +13387,72 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
+			["NAM SEAD AGM-45*4, ECM"] = {
+				attributes =  { },
+				code_loadout =  { "NAM" },
+				day = true,
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 2,
+				vCruise = 205.5,
+				sortie_rate = 12,
+				stores = {
+					pylons = {
+						[1] = {
+							["CLSID"] = "{AGM_45A}",
+					["num"] = 1,
+					["settings"] = {
+						["EAS_bypass_ctrl"] = 0,
+						["NFP_rfgu_type"] = 1,
+						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
+						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
+					},
+						},
+						[2] = {
+							["CLSID"] = "{AGM_45A}",
+					["num"] = 2,
+					["settings"] = {
+						["EAS_bypass_ctrl"] = 0,
+						["NFP_rfgu_type"] = 1,
+						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
+						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
+					},
+						},
+						[3] = {
+							["CLSID"] = "{EA6B_ANALQ992}",
+					["num"] = 3,
+						},
+						[4] = {
+							["CLSID"] = "{AGM_45A}",
+					["num"] = 4,
+					["settings"] = {
+						["EAS_bypass_ctrl"] = 0,
+						["NFP_rfgu_type"] = 1,
+						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
+						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
+					},
+						},
+						[5] = {
+							["CLSID"] = "{AGM_45A}",
+					["num"] = 5,
+					["settings"] = {
+						["EAS_bypass_ctrl"] = 0,
+						["NFP_rfgu_type"] = 1,
+						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
+						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
+					},
+						},
+					},
+					fuel = 6994,
+					flare = 30,
+					chaff = 30,
+					gun = 100,
+				},
+			},
 			["SEAD 80s AGM-88x2,EPx3"] = {
 				attributes =  { },
-				code_loadout =  { "All" },
+				code_loadout =  { "TF", "TF80s" },
 				day = true,
 				night = true,
 				adverseWeather = true,
@@ -13425,7 +13488,7 @@ db_all_loadouts = {
 		["Escort Jammer"] = {
 			["EPx3-SEAD"] = {
 				attributes =  { },
-				code_loadout =  { "All" },
+				code_loadout =  { "TF", "TF80s" },
 				attackType = "Dive",
 				day = true,
 				night = true,
@@ -13447,6 +13510,35 @@ db_all_loadouts = {
 						},
 						[4] = {
 							CLSID = "{B06DD79A-F21E-4EB9-BD9D-AB3844618C93}",
+						},
+						[5] = {
+							CLSID = "{EA6B_ANALQ991}",
+						},
+					},
+					fuel = 6994,
+					flare = 30,
+					chaff = 30,
+					gun = 100,
+				},
+			},
+			["NAM-EPx3-SEAD"] = {
+				attributes =  { },
+				code_loadout =  { "NAM" },
+				attackType = "Dive",
+				day = true,
+				night = true,
+				adverseWeather = true,
+				range = 1000000,
+				firepower = 2,
+				vCruise = 205.5,
+				sortie_rate = 12,
+				stores = {
+					pylons = {
+						[1] = {
+							CLSID = "{EA6B_ANALQ991}",
+						},
+						[3] = {
+							CLSID = "{EA6B_ANALQ992}",
 						},
 						[5] = {
 							CLSID = "{EA6B_ANALQ991}",
@@ -23101,7 +23193,7 @@ db_all_loadouts = {
 					["CLSID"] = "{AGM_45A}",
 					["num"] = 4,
 					["settings"] = {
-						["EAS_bypass_ctrl"] = 1,
+						["EAS_bypass_ctrl"] = 0,
 						["NFP_rfgu_type"] = 1,
 						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
 						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
@@ -23111,7 +23203,7 @@ db_all_loadouts = {
 					["CLSID"] = "{AGM_45A}",
 					["num"] = 2,
 					["settings"] = {
-						["EAS_bypass_ctrl"] = 1,
+						["EAS_bypass_ctrl"] = 0,
 						["NFP_rfgu_type"] = 1,
 						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
 						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
