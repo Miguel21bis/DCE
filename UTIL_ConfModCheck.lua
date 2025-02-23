@@ -135,13 +135,14 @@ mission_forcedOptions_check = {
 
 Debug_check = {
 	debug = false,								-- (true/false) (replaces the variable Init/camp/debug), when the mission was created and creates some files in the /debug folder During the DCE/DCS game, enter information in the DCS log and/or in the /Debug folder of the campaign.								
+	allUnhide = false,							-- (true/false) displays all groups on the F10 map
 	debugInGamePopup = false,					-- (true/false) popup the lua/DCS bug window in game, be careful, it blocks the game
 
 	AfficheFailure = false,                     -- (true/false) displays Random failure info
 	AfficheFlight = false,						-- (true/false) displays generated package/flight info
 	AfficheSol = false,							-- (true/false) affiche les infos des cibles encore intactes
 	Generator  = {
-		affiche = false,						-- (true/false) affiche les infos des premiers vols cr��s dans ATO_Generator
+		affiche = false,						-- (true/false) saves all ATO_Generator information in the file Debug/AtoGenerator_Debug.txt
 		chapter  = "A",							-- affiche les infos des 3 parties de ATO_Generator (ABC)
 		nb = 50,								-- nb de vol à afficher
 		SpySquad = "111.Filo",					-- affiche le passage de ce squad dans ATO_Generator

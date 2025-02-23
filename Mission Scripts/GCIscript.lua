@@ -330,8 +330,28 @@ local function GCI_Cycle()
 								if flight.name == selected_flight then									--find selected interceptor flight in ready table
 									trigger.action.setUserFlag(flight.flag, true)						--set flag true to launch interceptor
 									-- trigger.action.outText(selected_flight .. " 01 launched to intercept " .. target_name, 15)	--FOR DEBUG
-									local idInfo = Group.getByName(selected_flight):getID()
-									local _side = Group.getByName(selected_flight):getCoalition()
+									
+									local groupObj = Group.getByName(selected_flight)
+
+									if groupObj then
+										local isExist = groupObj:isExist()
+										-- local inAir = targets[t].object:inAir()
+										if not isExist then 
+											env.info("DCE_Gci group doesnt exist, break "..tostring(selected_flight))
+											break
+
+										end
+									else
+
+										env.info("DCE_Gci groupObj doesnt exist, break "..tostring(selected_flight))
+										break
+									end
+									
+									local idInfo = groupObj:getID()
+									local _side = groupObj:getCoalition()
+
+									-- local idInfo = Group.getByName(selected_flight):getID()
+									-- local _side = Group.getByName(selected_flight):getCoalition()
 
 									-- on replace les vecteurs dans un repere x/y/z/
 									local newTarget = {}
@@ -387,6 +407,7 @@ local function GCI_Cycle()
 
 									--assign mission task to interceptor flight
 									ErrorMsg = "Assign interceptors; Target: " .. target_name .. "; Selected Flight: " .. selected_flight				--Error message in case follow on code fails
+									
 									local function AssignMission()												--function to set interception mission (to be executed with 2 seconds delay, in order for the group to activate first)
 
 										local ctr = Group.getByName(selected_flight):getController()			--get controller of interceptor group
@@ -427,7 +448,7 @@ local function GCI_Cycle()
 										local target_id = GrpObjt:getID()
 										env.info( " C intercept target_id: "..tostring(target_id) )
 
-										local target_id = Group.getByName(target_name):getID()					--get target group ID --TODO BUG 287: attempt to index a nil value stack traceback:
+										target_id = Group.getByName(target_name):getID()					--get target group ID --TODO BUG 287: attempt to index a nil value stack traceback:
 										local Mission = {														--define mission for interceptor group
 											id = 'Mission',
 											params = {

@@ -26,6 +26,8 @@ local jammers = {}
 local function makeExplosion(posMissile)
 
 	trigger.action.explosion(posMissile, 10)
+	env.info("ARM_Jammer Missile explosion !")
+	trigger.action.outText("ARM_Jammer Missile explosion", 20)
 
 end
 
@@ -36,6 +38,9 @@ local function missileDisappearTimer(missile)
 		missile:destroy()
 
 		timer.scheduleFunction(makeExplosion, posMissile, timer.getTime() + 0.3)
+
+		env.info("ARM_Jammer Missile disparait proche du Jammer !")
+		-- trigger.action.outText("Missile détruit proche du Jammer", 20)
 	end
 end
 
@@ -84,11 +89,11 @@ local function checkMissileProximity()
 						timer.scheduleFunction(missileDisappearTimer, missile, timer.getTime() + deltaTime)
 
 
-						env.info("ARM_Jammer Missile détruit proche du Jammer !")
-						trigger.action.outText("Missile détruit proche du Jammer", 20)
+						env.info("ARM_Jammer Missile sera détruit dans "..tostring(deltaTime))
+						trigger.action.outText("ARM_Jammer Missile sera détruit dans "..tostring(deltaTime), 20)
 					else
-						env.info("ARM_Jammer Missile passe !")
-						trigger.action.outText("Missile passe", 20)
+						env.info("ARM_Jammer Missile ira au BUT !")
+						trigger.action.outText("Missile ira au BUT", 20)
 					end
 
                     -- Suppression du missile suivi
@@ -276,7 +281,7 @@ function ARM_Shot_EventHandler:onEvent(event)
 		local desc = wep:getDesc()
 		if desc.missileCategory == 2 and (desc.guidance == 3 or desc.guidance == 4) then
             env.info("ARM_Jammer Missile SAM détecté ! Suivi activé.")
-			trigger.action.outText("Missile SAM détecté ! Suivi activé.",20)
+			-- trigger.action.outText("Missile SAM détecté ! Suivi activé.",20)
 
             -- Ajout du missile dans la table des missiles actifs
             -- Ajout du missile dans la table des missiles actifs
@@ -300,7 +305,7 @@ function ARM_Shot_EventHandler:onEvent(event)
             -- Démarrage de la surveillance si ce n'est pas déjà fait
             if #activeMissiles == 1 then
                 env.info("ARM_Jammer Démarrage de la surveillance des missiles...")
-				trigger.action.outText("Démarrage de la surveillance des missiles.",20)
+				-- trigger.action.outText("ARM_Jammer Démarrage de la surveillance des missiles.",20)
                 checkMissileProximity()
             end
         end
