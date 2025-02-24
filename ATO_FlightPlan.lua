@@ -37,8 +37,8 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.288"
 -- modification M42_b		LiveryModex
 -- modification M40_i		Pedro Helicopter (i use new follow task)
 -- modification M38_e		Check and Help CampaignMaker (e: loadout Task?)
--- modification M34_Bj		Custom FrequenceRadio (j inheritedType)(i: FreqCapability2 et bug freqence invalid)(g group Frequency canal1 radio1)(f more Divert, more Coalition, bug list Freq)(Be sautomatically selects the correct range ex Mig19)(Bd bug Guard)
--- modification M33_k		Custom Briefing (k debug MP)(j debug Client)(h: debug)(g: not airbase)(f: Divert/CV possible)(d: Divert)(c: Alignement du txt)(onBoardNum)
+-- modification M34_Bj		Custom FrequenceRadio (j inheritedType)(i: FreqCapability2 et bug freqence invalid)(g group Frequency canal1 radio1)(f more divert, more Coalition, bug list Freq)(Be sautomatically selects the correct range ex Mig19)(Bd bug Guard)
+-- modification M33_k		Custom Briefing (k debug MP)(j debug Client)(h: debug)(g: not airbase)(f: divert/CV possible)(d: divert)(c: Alignement du txt)(onBoardNum)
 -- modification M31			Remove all static aircraft from the deck
 -- modification M30_b		Desactive TriggerStart
 -- modification M27_d		movedBullseye (d: selectedBullseye in db_airbases)(c: does not include carriers)
@@ -2159,7 +2159,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				----- define waypoints -----
 				------========================-----========================--
 				local egress_wp													--local variable to store the Egress WP
-				local target_wp_remove											--local variable for the target waypoint to be potentially removed for standoff ground attacks
+				-- local target_wp_remove											--local variable for the target waypoint to be potentially removed for standoff ground attacks
 				local spawn_time = flight[f].route[1].eta --spawn_time_bug											--local variable to store spawn time
 				local departure_time											--local variable to store departure time
 				local waypoints = {}											--define waypoints of flight
@@ -2464,6 +2464,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 
+					-- ** OrbitPosition **
 					if (waypoints[w]["name"] == "IP" ) and flight[f].task == "Escort" then --or waypoints[w]["name"] == "Egress"
 
 						-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
@@ -2511,7 +2512,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						waypoints[w].speed_locked = true
 					end
 
-					--altitudes below 1000m are AGL instead of MSL
+					-- ** altitudes below 1000m are AGL instead of MSL
 					if waypoints[w]["alt"] <= 1000 and not is_helicopter then
 						waypoints[w]["alt_type"] = "RADIO"
 					elseif is_helicopter and flight[f].route[w].id == "Departure" then
@@ -2520,7 +2521,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						waypoints[w]["alt_type"] = "RADIO"
 					end
 
-					--take off and landing
+					-- ** take off and landing
 					if (flight[f].route[w].id == "Taxi" and flight[f].route[w].eta >= 0) or (flight[f].route[w].id == "Intercept" or flight[f].route[w].id == "SAR")  then
 						if  ( not flight[f].player and not flight[f].client) and db_airbases[flight[f].base].AI_Spawn and string.upper(db_airbases[flight[f].base].AI_Spawn) ~= "PARKING" then
 							if string.upper(db_airbases[flight[f].base].AI_Spawn) == "AIR" then
@@ -2714,11 +2715,11 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					end
 
-					--formations
+					-- ** formations et largage d'urgence
 					if flight[f].route[w].id == "Departure" or flight[f].route[w].id == "Spawn" then
 						local task_entry = {}
 						if is_helicopter then
-							task_entry = {															--Spread Four Close
+							task_entry = {															--helicopter Spread Four Close
 							["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 							["auto"] = false,
 							["id"] = "WrappedAction",
@@ -2739,35 +2740,89 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							},
 						}
 						else
-							task_entry = {															--Spread Four Close
-							["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-							["auto"] = false,
-							["id"] = "WrappedAction",
-							["name"] = "Spread Four Close",
-							["enabled"] = true,
-							["params"] =
-							{
-								["action"] =
-								{
-									["id"] = "Option",
-									["name"] = "Formation",
+
+							
+							if Data_divers[flight[f].type].heavyBomber then
+								--formation
+								task_entry = {															--formation bomber moderne 100*100
+									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+									["auto"] = false,
+									["id"] = "WrappedAction",
+									["name"] = "formation bomber moderne 100*100",
+									["enabled"] = true,
 									["params"] =
 									{
-										["variantIndex"] = 1,
-										["name"] = 5,
-										["formationIndex"] = 7,
-										["value"] = 458753,
+										["action"] =
+										{
+											["id"] = "Option",
+											["name"] = "Formation",
+											["params"] =
+											{
+												["variantIndex"] = 1,
+												["name"] = 5,
+												["formationIndex"] = 17,
+												["value"] = 1114113,
+											},
+										},
 									},
-								},
-							},
-						}
-						end
+								}
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
-						table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-					end
+								--largage d'urgence
+								task_entry = {
+									["enabled"] = true,
+									["auto"] = false,
+									["id"] = "WrappedAction",
+									["name"] = "emergency jettison",
+									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+									["params"] =
+									{
+										["action"] =
+										{
+											["id"] = "Option",
+											["params"] =
+											{
+												["value"] = false,			--false interdit le largage d'urgence
+												["name"] = 15,
+											},
+										},
+									},
+								}
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+
+							else
+
+								task_entry = {															--Spread Four Close
+									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+									["auto"] = false,
+									["id"] = "WrappedAction",
+									["name"] = "Spread Four Close",
+									["enabled"] = true,
+									["params"] =
+									{
+										["action"] =
+										{
+											["id"] = "Option",
+											["name"] = "Formation",
+											["params"] =
+											{
+												["variantIndex"] = 1,
+												["name"] = 5,
+												["formationIndex"] = 7,
+												["value"] = 458753,
+											},
+										},
+									},
+								}
+
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+
+							end --heavyBomber or not
+						end -- is plane
+					end --if Departure or Spawn
 
 
-					-- modif Miguel M01 : ajout datalink EPLRS Capacity
+					--  **  datalink EPLRS Capacity
 					if (flight[f].route[w].id == "Departure"  or flight[f].route[w].id == "Spawn") and camp.date.year >= 1996 then
 						--M01_b	
 						if EPLRS_Capacity[flight[f].type] then
@@ -2799,7 +2854,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					elseif role == "Escort" then
 						altRole = 2
 					end
-					--determine une nouvelle altitude pour ne pas prendre une montagne
+					-- **  ALTITUDE determine une nouvelle altitude pour ne pas prendre une montagne
 					if flight[f].route[w].id == "Spawn" then
 						local nameTheatre =  string.lower(mission.theatre)
 						local altFloor = 0
@@ -2839,13 +2894,13 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					--*************************************************************************************
 
 					-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
-					local ExpendQty = flight[f].loadout.expend
-					local WeaponType_ = flight[f].loadout.weaponType
+					local expendQty = flight[f].loadout.expend
+					local weaponType_ = flight[f].loadout.weaponType
 					local attackType = flight[f].loadout.attackType or "nil"
 					local attackAlt = flight[f].loadout.attackAlt or flight[f].loadout.hAttack
-					local Dive = nil
+					local dive = nil
 					if flight[f].loadout.attackType and  string.lower( flight[f].loadout.attackType) == "dive"  then
-						Dive = true
+						dive = true
 					end
 
 					local AGAS_ready = false
@@ -2887,123 +2942,128 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						InsertBugList("no known runway element for the target "..tostring(flight[f].target_name))
 					end
 
-					-- if  flight[f].route[w].id == "IP" then
-					if  flight[f].route[w].id == "Attack" then
+					--SEAD switch from IP to egress
+					if flight[f].route[w].id == "IP" then
 
-							--*********************************Strike MEDLEY*******************************************
-						if flight[f].task == "Strike" and (flight[f].target.class == nil or flight[f].target.class ~= "airbase") then
-							-- print("AtoFp flight[f].name |"..tostring(flight[f].name.."| target_name |"..tostring(flight[f].target_name)))
-							local target_e = {}																			--table to hold the target element number to be struck
-							local target_elements = {}
-							if flight[f].target and not flight[f].target.elements then
-								_affiche(flight[f].target, "flight[f].target")
-							end
-							for e = 1, #flight[f].target.elements do															--iterate trough all target elements
-								if flight[f].target.elements[e].dead ~= true then												--pick only elements that are not dead
-									table.insert(target_e, e)																--add to target element table
-								end
-								if flight[f].target.elements[e].dead ~= true then												--pick only elements that are not dead
-									table.insert(target_elements, flight[f].target.elements[e])																--add to target element table
-								end
-							end
-							for n = 1, (f - 1) * 4 do																			--shift the order of target elements for subsequent flights in package, so that each flights starts attacking different elements (flight 1: element 1-4, flight 2: element 5-8, etc)
-								table.insert(target_e, target_e[1])													--shift element order, copy first element to back
-								table.remove(target_e, 1)																	--delete first element
-							end
-
-							local tgtlist = ""																					--list of of names of all target elements
-							for n,e in ipairs(target_e) do
-								tgtlist = tgtlist .. "{'" .. flight[f].target.elements[e].name .. "','" .. tostring(flight[f].target.elements[e].class) .. "','" .. tostring(flight[f].target.elements[e].x) .. "','" .. tostring(flight[f].target.elements[e].y) .. "'}, "
-							end
-
-							if is_helicopter or AGAS_ready == false  then
-								if not (flight[f].player or flight[f].client) then
-									local task_entry = {																				--task is a command to run LUA code
-										["enabled"] = true,
-										["auto"] = false,
-										["id"] = "WrappedAction",
-										["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-										["params"] =
-										{
-											["action"] =
-											{
-												["id"] = "Script",
-												["params"] =
-												{
-													["command"] = "CustomMixClassAttack('" .. groupName .. "', {" .. tgtlist .. "}, '" .. ExpendQty .. "', '" .. weaponType .. "', '" .. attackType .. "', '" .. attackAlt .. "', '" .. GoupTaskTemp ..  "')",	--this is a custom written task to allow all aircraft in flight to attack multiple static objects simultenously
-												},
-
-											},
-										},
-									}
-									table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-
-								end
-
-							else
-
-								if not (flight[f].player or flight[f].client) then
-
-									local task_entry = {																				--task is a command to run LUA code
-										["enabled"] = true,
-										["auto"] = false,
-										["id"] = "WrappedAction",
-										["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-										["params"] =
-										{
-											["action"] =
-											{
-												["id"] = "Script",
-												["params"] =
-												{
-																--AirGroundAttackTask(FlightName,				 Target,						 WeaponType,string			 ExpendQty,string		 Dive,			 OffsetAngle, 			ClimbAngle, 		PopAlt, 		AttackDist, 			Reattack,			 Debug)
-													["command"] = "AirGroundAttackTask('" .. groupName .. "', {" .. tgtlist .. "}, '" .. WeaponType_ .. "', '"  .. ExpendQty .. "', " .. tostring(Dive) .. ", " .. tostring(OffsetAngle) .. ", " .. tostring(ClimbAngle) ..", " .. tostring(PopAlt) ..", " .. tostring(AttackDist) ..", " .. tostring(Reattack) .. ", " .. tostring(DebugTask) ..  ")",
-												},
-											},
-										},
-									}
-									table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-								end
-							end
-
-							if flight[f].player or flight[f].client then
-								for n, target_element in ipairs(target_elements) do
-									-- print("AtoFP target_element.name "..tostring(target_element.name))
-									local TaskFrom =  " TaskFrom "..debug.getinfo(1).currentline
-									local task_entry = createBombingChapter(id_task, flight[f],waypoints[w], weaponType, attackType, attackAlt, target_element, TaskFrom, typeCible)
-									-- print("AtoFP "..tostring(target_element.name))
-									-- _affiche(task_entry, "task_entry B2")
-									table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-								end
-							end
-
-						--*********************************Strike airbase*******************************************
-						elseif flight[f].task == "Strike" and flight[f].target.class == "airbase" then
-							---- "airbase" 					
-
-							if is_helicopter or  AGAS_ready == false  then
-
-								local task_entry = {																				--task is a command to run LUA code
-									["enabled"] = true,
-									["auto"] = false,
-									["id"] = "WrappedAction",
-									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+						--largage d'urgence
+						local task_entry = {
+							["enabled"] = true,
+							["auto"] = false,
+							["id"] = "WrappedAction",
+							["name"] = "emergency jettison",
+							["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+							["params"] =
+							{
+								["action"] =
+								{
+									["id"] = "Option",
 									["params"] =
 									{
-										["action"] =
-										{
-											["id"] = "Script",
+										["value"] = false,			--false interdit le largage d'urgence
+										["name"] = 15,
+									},
+								},
+							},
+						}
+						table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+					
+					elseif  flight[f].route[w].id == "Attack" then
+
+							--*********************************Strike MEDLEY*******************************************
+						if flight[f].task == "Strike" then
+							
+
+							if flight[f].target.class == nil or flight[f].target.class ~= "airbase" and attackType ~= "Carpet" then
+							
+								local target_e = {}																			--table to hold the target element number to be struck
+								local target_elements = {}
+								if flight[f].target and not flight[f].target.elements then
+									_affiche(flight[f].target, "flight[f].target")
+								end
+								for e = 1, #flight[f].target.elements do															--iterate trough all target elements
+									if flight[f].target.elements[e].dead ~= true then												--pick only elements that are not dead
+										table.insert(target_e, e)																--add to target element table
+									end
+									if flight[f].target.elements[e].dead ~= true then												--pick only elements that are not dead
+										table.insert(target_elements, flight[f].target.elements[e])																--add to target element table
+									end
+								end
+								for n = 1, (f - 1) * 4 do																			--shift the order of target elements for subsequent flights in package, so that each flights starts attacking different elements (flight 1: element 1-4, flight 2: element 5-8, etc)
+									table.insert(target_e, target_e[1])													--shift element order, copy first element to back
+									table.remove(target_e, 1)																	--delete first element
+								end
+
+								local tgtlist = ""																					--list of of names of all target elements
+								for n,e in ipairs(target_e) do
+									tgtlist = tgtlist .. "{'" .. flight[f].target.elements[e].name .. "','" .. tostring(flight[f].target.elements[e].class) .. "','" .. tostring(flight[f].target.elements[e].x) .. "','" .. tostring(flight[f].target.elements[e].y) .. "'}, "
+								end
+
+								if is_helicopter or AGAS_ready == false  then
+									if not (flight[f].player or flight[f].client) then
+										local task_entry = {																				--task is a command to run LUA code
+											["enabled"] = true,
+											["auto"] = false,
+											["id"] = "WrappedAction",
+											["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 											["params"] =
 											{
-												["command"] = "CustomAirbaseAttack('" .. groupName .. "', {x = " .. flight[f].target.x .. ", y = " .. flight[f].target.y .. "}, '" .. ExpendQty .. "', '" .. weaponType .. "', '" .. attackType .. "', " .. attackAlt .. ")",
-											},
-										},
-									},
-								}
-								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-							else
+												["action"] =
+												{
+													["id"] = "Script",
+													["params"] =
+													{
+														["command"] = "CustomMixClassAttack('" .. groupName .. "', {" .. tgtlist .. "}, '" .. expendQty .. "', '" .. weaponType .. "', '" .. attackType .. "', '" .. attackAlt .. "', '" .. GoupTaskTemp ..  "')",	--this is a custom written task to allow all aircraft in flight to attack multiple static objects simultenously
+													},
 
-								if not (flight[f].player or flight[f].client) then
+												},
+											},
+										}
+										table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+
+									end
+
+								else
+
+									if not (flight[f].player or flight[f].client) then
+
+										local task_entry = {																				--task is a command to run LUA code
+											["enabled"] = true,
+											["auto"] = false,
+											["id"] = "WrappedAction",
+											["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+											["params"] =
+											{
+												["action"] =
+												{
+													["id"] = "Script",
+													["params"] =
+													{
+																	--AirGroundAttackTask(FlightName,				 Target,						 WeaponType,string			 expendQty,string		 dive,			 OffsetAngle, 			ClimbAngle, 		PopAlt, 		AttackDist, 			Reattack,			 Debug)
+														["command"] = "AirGroundAttackTask('" .. groupName .. "', {" .. tgtlist .. "}, '" .. weaponType_ .. "', '"  .. expendQty .. "', " .. tostring(dive) .. ", " .. tostring(OffsetAngle) .. ", " .. tostring(ClimbAngle) ..", " .. tostring(PopAlt) ..", " .. tostring(AttackDist) ..", " .. tostring(Reattack) .. ", " .. tostring(DebugTask) ..  ")",
+													},
+												},
+											},
+										}
+										table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+									end
+								end
+
+								if flight[f].player or flight[f].client then
+									for n, target_element in ipairs(target_elements) do
+										-- print("AtoFP target_element.name "..tostring(target_element.name))
+										local TaskFrom =  " TaskFrom "..debug.getinfo(1).currentline
+										local task_entry = createBombingChapter(id_task, flight[f],waypoints[w], weaponType, attackType, attackAlt, target_element, TaskFrom, typeCible)
+										-- print("AtoFP "..tostring(target_element.name))
+										-- _affiche(task_entry, "task_entry B2")
+										table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+									end
+								end
+							
+							--*********************************Strike airbase*******************************************
+							elseif flight[f].target.class == "airbase" then
+								---- "airbase" 					
+
+								if is_helicopter or  AGAS_ready == false  then
 
 									local task_entry = {																				--task is a command to run LUA code
 										["enabled"] = true,
@@ -3017,20 +3077,74 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 												["id"] = "Script",
 												["params"] =
 												{
-																--AirGroundAttackTask(FlightName,				 Target,															 WeaponType,string			 ExpendQty,string		 Dive,			 OffsetAngle, 			ClimbAngle, 		PopAlt, 		AttackDist, 			Reattack,			 Debug)
-													["command"] = "AirGroundAttackTask('" .. groupName .. "', {x = " .. flight[f].target.x .. ", y = " .. flight[f].target.y .. "}, '" .. WeaponType_ .. "', '"  .. ExpendQty .. "', " .. tostring(Dive) .. ", " .. tostring(OffsetAngle) .. ", " .. tostring(ClimbAngle) ..", " .. tostring(PopAlt) ..", " .. tostring(AttackDist) ..", " .. tostring(Reattack) .. ", " .. tostring(DebugTask) ..  ")",
+													["command"] = "CustomAirbaseAttack('" .. groupName .. "', {x = " .. flight[f].target.x .. ", y = " .. flight[f].target.y .. "}, '" .. expendQty .. "', '" .. weaponType .. "', '" .. attackType .. "', " .. attackAlt .. ")",
 												},
 											},
 										},
 									}
 									table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+								else
+
+									if not (flight[f].player or flight[f].client) then
+
+										local task_entry = {																				--task is a command to run LUA code
+											["enabled"] = true,
+											["auto"] = false,
+											["id"] = "WrappedAction",
+											["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+											["params"] =
+											{
+												["action"] =
+												{
+													["id"] = "Script",
+													["params"] =
+													{
+																	--AirGroundAttackTask(FlightName,				 Target,															 WeaponType,string			 expendQty,string		 dive,			 OffsetAngle, 			ClimbAngle, 		PopAlt, 		AttackDist, 			Reattack,			 Debug)
+														["command"] = "AirGroundAttackTask('" .. groupName .. "', {x = " .. flight[f].target.x .. ", y = " .. flight[f].target.y .. "}, '" .. weaponType_ .. "', '"  .. expendQty .. "', " .. tostring(dive) .. ", " .. tostring(OffsetAngle) .. ", " .. tostring(ClimbAngle) ..", " .. tostring(PopAlt) ..", " .. tostring(AttackDist) ..", " .. tostring(Reattack) .. ", " .. tostring(DebugTask) ..  ")",
+													},
+												},
+											},
+										}
+										table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+									end
 								end
-							end
+							
 
 							--TODO a voir pour airbase pour les IA du joueur
 								-- local TaskFrom =  " TaskFrom "..debug.getinfo(1).currentline
 								-- local task_entry = createBombingChapter(id_task, flight[f], waypoints[w], weaponType, attackType, attackAlt, nil, TaskFrom, typeCible, typeCible)
 								-- table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+
+
+								--********************************* CarpetBombing *******************************************
+							elseif attackType == "Carpet" then
+								
+								if not (flight[f].player or flight[f].client) then
+
+									local task_entry = {																				--task is a command to run LUA code
+										["enabled"] = true,
+										["auto"] = false,
+										["id"] = "CarpetBombing",
+										["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+										["params"] =
+										{
+											["attackType"] = "Carpet",
+											["attackQtyLimit"] = false,
+											["attackQty"] = 1,
+											["expend"] = tostring(expendQty),
+											["y"] = flight[f].target.y,
+											["x"] = flight[f].target.x,
+											["carpetLength"] = 500,
+											["groupAttack"] = false,
+											["altitudeEnabled"] = false,
+											["weaponType"] = weaponType,
+											["altitude"] = attackAlt,
+										},
+									}
+									table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+								end
+								
+							end
 
 						--*********************************Runway Attack*******************************************
 						elseif flight[f].task == "Runway Attack" then
@@ -3048,8 +3162,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 											["id"] = "Script",
 											["params"] =
 											{
-												["command"] = "CustomMapObjectAttack('" .. groupName .. "', {" .. tgtlist .. "}, '" .. ExpendQty .. "', '" .. weaponType .. "', '" .. attackType .. "', '" .. attackAlt .. "', '" .. GoupTaskTemp ..  "')",
-												-- ["command"] = "CustomStaticAttack('" .. grpname .. "', {" .. tgtlist .. "}, '" .. ExpendQty .. "', '" .. weaponType .. "', '" .. attackType .. "', '" .. attackAlt .. "', '" .. GoupTaskTemp ..  "')",	--this is a custom written task to allow all aircraft in flight to attack multiple static objects simultenously
+												["command"] = "CustomMapObjectAttack('" .. groupName .. "', {" .. tgtlist .. "}, '" .. expendQty .. "', '" .. weaponType .. "', '" .. attackType .. "', '" .. attackAlt .. "', '" .. GoupTaskTemp ..  "')",
+												-- ["command"] = "CustomStaticAttack('" .. grpname .. "', {" .. tgtlist .. "}, '" .. expendQty .. "', '" .. weaponType .. "', '" .. attackType .. "', '" .. attackAlt .. "', '" .. GoupTaskTemp ..  "')",	--this is a custom written task to allow all aircraft in flight to attack multiple static objects simultenously
 											},
 
 										},
@@ -3116,8 +3230,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 												["id"] = "Script",
 												["params"] =
 												{
-																--AirGroundAttackTask(FlightName,				 Target,						 WeaponType,string			 ExpendQty,string		 Dive,			 OffsetAngle, 			ClimbAngle, 		PopAlt, 		AttackDist, 			Reattack,			 Debug)
-													["command"] = "AirGroundAttackTask('" .. groupName .. "', '" .. flight[f].target.name .. "', '" .. WeaponType_ .. "', '"  .. ExpendQty .. "', " .. tostring(Dive) .. ", " .. tostring(OffsetAngle) .. ", " .. tostring(ClimbAngle) ..", " .. tostring(PopAlt) ..", " .. tostring(AttackDist) ..", " .. tostring(Reattack) .. ", " .. tostring(DebugTask) ..  ")",
+																--AirGroundAttackTask(FlightName,				 Target,						 WeaponType,string			 expendQty,string		 dive,			 OffsetAngle, 			ClimbAngle, 		PopAlt, 		AttackDist, 			Reattack,			 Debug)
+													["command"] = "AirGroundAttackTask('" .. groupName .. "', '" .. flight[f].target.name .. "', '" .. weaponType_ .. "', '"  .. expendQty .. "', " .. tostring(dive) .. ", " .. tostring(OffsetAngle) .. ", " .. tostring(ClimbAngle) ..", " .. tostring(PopAlt) ..", " .. tostring(AttackDist) ..", " .. tostring(Reattack) .. ", " .. tostring(DebugTask) ..  ")",
 												},
 											},
 										},
@@ -3418,6 +3532,39 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								}
 							}
 							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+						end
+
+					elseif flight[f].task == "Escort Jammer" then
+						
+						local alreadyTreated
+						
+						if (flight[f].route[w].id == "IP" or flight[f].route[w].id == "Target") and not alreadyTreated  then
+
+							local task_entry = {
+								["enabled"] = true,
+								["auto"] = false,
+								["id"] = "Follow",
+								["number"] = 1,
+								["params"] =
+								{
+									["lastWptIndexFlagChangedManually"] = true,
+									["groupId"] = "toBeDefinedLater",
+									["lastWptIndex"] = "toBeDefinedLater",
+									["lastWptIndexFlag"] = true,
+									["pos"] =
+									{
+										["y"] = -600,
+										["x"] = -600,
+										["z"] = -600,
+									}, -- end of ["pos"]
+								}, -- end of ["params"]
+							}
+								
+							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+							alreadyTreated = true
+
+							flight[f]["mustFolloW"] = pack[p]["main"][1].groupName
+
 						end
 					end
 
@@ -4096,24 +4243,24 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				-- end
 
 
-				--remove target WP for certain flights
-				if target_wp_remove then
-					table.remove(waypoints, target_wp_remove)
+				-- --remove target WP for certain flights
+				-- if target_wp_remove then
+				-- 	table.remove(waypoints, target_wp_remove)
 
-					for w = target_wp_remove, #waypoints do												--adjust stop condition WPs
-						if waypoints[w]["task"]["params"]["tasks"] then									--WP has tasks
-							for task_n,task in ipairs(waypoints[w]["task"]["params"]["tasks"]) do		--go through tasks
-								if task["params"]["stopCondition"] and task["params"]["stopCondition"]["lastWaypoint"] then					--task has a last waypoint stop condition
-									task["params"]["stopCondition"]["lastWaypoint"] = task["params"]["stopCondition"]["lastWaypoint"] - 1	--decreas last WP number by one to account for the removed WP
-								end
-								if task["params"]["action"] and task["params"]["action"]["id"] == "SwitchWaypoint" then						--task is a switch WP
-									task["params"]["action"]["params"]["fromWaypointIndex"] = task["params"]["action"]["params"]["fromWaypointIndex"] - 1
-									task["params"]["action"]["params"]["goToWaypointIndex"] = task["params"]["action"]["params"]["goToWaypointIndex"] - 1
-								end
-							end
-						end
-					end
-				end
+				-- 	for w = target_wp_remove, #waypoints do												--adjust stop condition WPs
+				-- 		if waypoints[w]["task"]["params"]["tasks"] then									--WP has tasks
+				-- 			for task_n,task in ipairs(waypoints[w]["task"]["params"]["tasks"]) do		--go through tasks
+				-- 				if task["params"]["stopCondition"] and task["params"]["stopCondition"]["lastWaypoint"] then					--task has a last waypoint stop condition
+				-- 					task["params"]["stopCondition"]["lastWaypoint"] = task["params"]["stopCondition"]["lastWaypoint"] - 1	--decreas last WP number by one to account for the removed WP
+				-- 				end
+				-- 				if task["params"]["action"] and task["params"]["action"]["id"] == "SwitchWaypoint" then						--task is a switch WP
+				-- 					task["params"]["action"]["params"]["fromWaypointIndex"] = task["params"]["action"]["params"]["fromWaypointIndex"] - 1
+				-- 					task["params"]["action"]["params"]["goToWaypointIndex"] = task["params"]["action"]["params"]["goToWaypointIndex"] - 1
+				-- 				end
+				-- 			end
+				-- 		end
+				-- 	end
+				-- end
 
 				--remove taxi waypoint
 				if waypoints[1].name == "Taxi" then
@@ -4208,7 +4355,10 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						},
 					},
 				}
-				table.insert(waypoints[1]["task"]["params"]["tasks"], task_entry)
+
+				if flight[f].type ~= "B-52H" or not Data_divers[flight[f].type].heavyBomber then
+					table.insert(waypoints[1]["task"]["params"]["tasks"], task_entry)
+				end
 
 				--ATO_FP_Reglage01 : emport, ne pas larguer les emports en cas d'urgence pour les Strike
 				--first waypoint restrict jettison for SEAD
@@ -4217,8 +4367,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				if not is_helicopter then
 					if flight[f].task == "SEAD" or flight[f].task == "Strike" or flight[f].task == "Anti-ship Strike" or flight[f].task == "Flare Illumination" or flight[f].task == "Laser Illumination" then
 						--interdit le largage des charges s'il y a une escorte
-						if pack[p]["Escort"][1] and pack[p]["Escort"][1].firepower > 2 then
-							local task_entry = {
+						if pack[p]["Escort"][1]  then	--and pack[p]["Escort"][1].firepower > 2
+							task_entry = {
 								["enabled"] = true,
 								["auto"] = false,
 								["id"] = "WrappedAction",
@@ -4231,7 +4381,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 										["id"] = "Option",
 										["params"] =
 										{
-											["value"] = false,		--true: autorise le largage d urgence, false interdit le largage
+											["value"] = false,		--interdit le largage d urgence
 											["name"] = 15,
 										},
 									},
@@ -4240,7 +4390,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							table.insert(waypoints[1]["task"]["params"]["tasks"], task_entry)
 						else
 							--autorise le largage des charges s'il n'y a pas d'escorte
-							local task_entry = {
+							task_entry = {
 								["enabled"] = true,
 								["auto"] = false,
 								["id"] = "WrappedAction",
@@ -4266,7 +4416,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				--first waypoint restrict air-air
 				if flight[f].loadout.restrict_aa then
-					local task_entry = {
+					task_entry = {
 						["enabled"] = true,
 						["auto"] = false,
 						["id"] = "WrappedAction",
@@ -4289,7 +4439,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				--first waypoint no RTB on bingo
 				if flight[f].airdromeId == nil then
-					local task_entry = {
+					task_entry = {
 						["enabled"] = true,
 						["auto"] = false,
 						["id"] = "WrappedAction",
@@ -4328,10 +4478,10 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							waypoints[n]["alt"] = altEjected
 
 							--demande à tous les ejectedPilot de la zone d'allumer leur radio à 10mn avant l'eta
-							for p=1, #camp.SAR.pilotEjected do
-								if camp.SAR.pilotEjected[p].MGRS_Chute == flight[f].target_name
-								and camp.SAR.pilotEjected[p].side == side then
-									camp.SAR.pilotEjected[p].radio_start = waypoints[n].ETA - 600
+							for m=1, #camp.SAR.pilotEjected do
+								if camp.SAR.pilotEjected[m].MGRS_Chute == flight[f].target_name
+								and camp.SAR.pilotEjected[m].side == side then
+									camp.SAR.pilotEjected[m].radio_start = waypoints[n].ETA - 600
 								end
 							end
 						end
@@ -5011,6 +5161,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe group[x] BB "..tostring(group["x"])) end
 
+				flight[f].groupId = group.groupId
+
 				--ajoute la frequence à l AFAC
 				if flight[f].task == "AFAC"  then
 					for w=1, #waypoints do
@@ -5048,9 +5200,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				--======================================
 				group['task'] = GoupTaskTemp
-
-				-- print("AtoFP task GoupTaskTemp "..tostring(GoupTaskTemp))
-
 
 				---- unhide player package -----
 				if mission_ini.cheat_Mod_Eye  then																--debug is on
@@ -6346,7 +6495,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				end	-- fin RECOVERY
 
-				-- modification M33_e 	Custom Briefing (e: Divert/CV possible)
+				-- modification M33_e 	Custom Briefing (e: divert/CV possible)
 				-- place dans une table les bases proches des WPT
 				local TabBaseByWPT = {}
 				if flight[f].player or flight[f].client then
@@ -6625,9 +6774,9 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 
---***************************--DEBUG INFO
-				--***************************--DEBUG INFO
---***************************--DEBUG INFO
+	--***************************--DEBUG INFO
+					--***************************--DEBUG INFO
+	--***************************--DEBUG INFO
 
 				local debugTempFLIGHT = ""
 				local start_time = -1
@@ -6927,6 +7076,73 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				if Multi.NbGroup >= 1 and not Debug.AfficheFlight then
 					print(InfoFlight)
+				end
+			end
+		end
+	end
+end
+
+
+function GeWpindex(groupIdCheck, wpLabel)
+
+	for _side, side in pairs(mission.coalition) do
+		for countryN, country in pairs(side.country) do
+			for category, groups in pairs(country) do
+				if type(groups) == "table" and groups["group"]  then
+					for Ngroup, group in pairs(groups["group"]) do
+						if group.groupId == groupIdCheck then
+							for unitN, unit in pairs(group.units) do
+								for pointN, waypoint in pairs(group.route.points) do
+									if waypoint.briefing_name and waypoint.briefing_name == wpLabel then
+										return pointN
+									end
+
+								end
+
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+
+end
+
+
+-- following
+for side, pack in pairs(ATO) do
+	for p = 1, #pack do
+		for role, flight in pairs(pack[p]) do
+			for f = 1, #flight do
+				if flight[f]["mustFolloW"] then
+
+					flight[f]["mustFolloW_groupId"] = pack[p]["main"][1].groupId
+
+					for countryN, country in pairs(mission.coalition[side].country) do
+						for category, groups in pairs(country) do
+							if type(groups) == "table" and groups["group"]  then	--and groups[1].units							
+								for Ngroup, group in pairs(groups["group"]) do
+
+									if group.groupId == flight[f].groupId then
+
+										for pointN, waypoint in pairs(group.route.points) do
+											if waypoint["task"] and waypoint["task"]["params"] and waypoint["task"]["params"]["tasks"] then
+												for taskN, task_ in pairs(waypoint["task"]["params"]["tasks"]) do
+													if task_.id == "Follow" then
+														task_["params"].groupId = flight[f]["mustFolloW_groupId"]
+														task_["params"].lastWptIndex = GeWpindex(flight[f]["mustFolloW_groupId"], "Egress")
+													end
+												end
+											end
+
+										end
+									end
+								end
+							end
+						end
+					end
 				end
 			end
 		end

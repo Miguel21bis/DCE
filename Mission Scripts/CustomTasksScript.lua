@@ -23,8 +23,8 @@ versionDCE["Mission Scripts/CustomTasksScript.lua"] = "1.9.43"
 AFAC_available = {}				--liste les AFAC en position
 
 
-local varFpsLeak = true
-local varFpsLeak_B = true
+local varFpsLeak = false
+local varFpsLeak_B = false
 local selectedTransport = 0			--util pour embarked
 local agendaSeconde = {}
 local AttackCounter	= {}													--table to count how many flights have already attacked and distribute subsequent attacks accordingly
@@ -1972,6 +1972,10 @@ function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)
 	-- timer.scheduleFunction(ApplyEngageTargetsInZoneTask, nil, timer.getTime() + 1)			--schedule function
 end
 
+
+----------------------------------------------------------------------------------------------------
+----- Follow task -----
+----------------------------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------------------------
 ----- orbit position task -----

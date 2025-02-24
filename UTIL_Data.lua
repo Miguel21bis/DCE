@@ -537,6 +537,7 @@ Data_divers = {
 		flyingAlone = true,
 		vCruise = 250,
 		hCruise = 9150,
+		heavyBomber = true,
 	},
 	["B-52H"] = 	{
 		instrumentUnits = "imperial",
@@ -548,6 +549,7 @@ Data_divers = {
 		-- flyingAlone = true,
 		vCruise = 250,
 		hCruise = 12000,
+		heavyBomber = true,
 	},
 	["H-6J"] = 	{
 		instrumentUnits = "metric",
@@ -988,21 +990,25 @@ Data_divers = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		flyingAlone = true,
+		heavyBomber = true,
 	},
 	["Tu-95MS"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		flyingAlone = true,
+		heavyBomber = true,
 	},
 	["Tu-142"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		flyingAlone = true,
+		heavyBomber = true,
 	},
 	["Tu-160"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		flyingAlone = true,
+		heavyBomber = true,
 	},
 
 

@@ -3369,8 +3369,9 @@ local function createATO_table(draftPriority)
 														else
 															assigned = 2																--else assign flight of 1 aicraft
 														end
-													elseif (entry.type == "S-3B" or entry.type == "F-117A" or entry.type == "B-1B" or entry.type == "B-52H" or entry.type == "Tu-22M3" or entry.type == "Tu-95MS" or entry.type == "Tu-142" or entry.type == "Tu-160" or entry.type == "MiG-25RBT")
-														and entry.task ~= "Runway Attack" then	--for bombers
+													-- elseif (entry.type == "S-3B" or entry.type == "F-117A" or entry.type == "B-1B" or entry.type == "B-52H" or entry.type == "Tu-22M3" or entry.type == "Tu-95MS" or entry.type == "Tu-142" or entry.type == "Tu-160" or entry.type == "MiG-25RBT")
+													-- and entry.task ~= "Runway Attack" then	--for bombers	
+													elseif Data_divers[entry.type].flyingAlone and entry.task ~= "Runway Attack" then	--for bombers
 														assigned = 1																	--assigne one aircraft per flight
 													elseif entry.task == "Reconnaissance" then											--for recon
 														if assign == 1 then																--if there is one aircraft left to assign

@@ -1838,7 +1838,9 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 end
 
 
+
 function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainUnit)																					--get the escort route given the escort start point and an existing package route
+	
 	local before = os.clock()
 	--make a local copy of the route table forwarded as function argument (otherwise the original route gets adjusted
 	-- local MainUnitHelicopter = mainUnit.helicopter
@@ -1865,15 +1867,18 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 			randomAlti = math.random(0, 700)
 		end
 	end
+
+
+	--******************* w route ************************
 	for w = 1, #route do
 
-		local higher = 0
+		-- local higher = 0
 
-		if task == "SEAD" then
-			higher = 304
-		elseif task == "Escort" then
-			higher = 608
-		end
+		-- if task == "SEAD" then
+		-- 	higher = 304
+		-- elseif task == "Escort" then
+		-- 	higher = 608
+		-- end
 
 		if not IsHelicopter[unitEscort.type]  then
 			-- -- on ne l'applique pas � un groupe volant sous les radars
@@ -1904,13 +1909,14 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 		end
 	end
 
+
 	--adjust route for escort joining the package
 	local join_distance = 99999999																								--shortest distance from escort start point to package route leg
-	local WP
+	local jointWP
 	for n = 4, #route - 1 do																									--iterate through route points from Join Point on
 		if GetTangentDistance(route[n], route[n + 1], basePoint) < join_distance then											--distance to this route leg is shorter than to previous leg
 			join_distance = GetTangentDistance(route[n], route[n + 1], basePoint)												--set new shortest join distance
-			WP = n
+			jointWP = n
 		else																													--distance to this route leg is longer than to previous leg
 			break																												--stop searching
 		end
@@ -1938,11 +1944,12 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 		route[3].alt = basePoint.h
 	end
 
+
 	if not IsHelicopter[unitEscort.type] then
 		local heading = 0
 		for n, wpt in ipairs(route) do
 			if wpt.id == "Join" then
-				heading = GetHeading(route[WP], basePoint)
+				heading = GetHeading(route[jointWP], basePoint)
 				break
 			end
 		end
@@ -1963,22 +1970,23 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 		end
 	end
 
-	if GetDistance(basePoint, route[WP]) == join_distance then																	--shortest distance to route leg is to first leg waypoint
-		route[4].x = route[WP].x
-		route[4].y = route[WP].y
-		for n = WP, 5, -1 do
+
+	if GetDistance(basePoint, route[jointWP]) == join_distance then																	--shortest distance to route leg is to first leg waypoint
+		route[4].x = route[jointWP].x
+		route[4].y = route[jointWP].y
+		for n = jointWP, 5, -1 do
 			-- table.remove(route, n)	-- ATO_RG_Debug03 supprime trop de waypoint lors de l'escorte
 		end
-	elseif GetDistance(basePoint, route[WP + 1]) == join_distance then															--shortest distance to route leg is to second leg waypoint
-		route[4].x = route[WP + 1].x
-		route[4].y = route[WP + 1].y
-		for n = WP + 1, 5, -1 do
+	elseif GetDistance(basePoint, route[jointWP + 1]) == join_distance then															--shortest distance to route leg is to second leg waypoint
+		route[4].x = route[jointWP + 1].x
+		route[4].y = route[jointWP + 1].y
+		for n = jointWP + 1, 5, -1 do
 			-- table.remove(route, n)	-- ATO_RG_Debug03 supprime trop de waypoint lors de l'escorte
 		end
 	else																														--shortest distance to route leg is between first and second leg waypoint
 		local join_heading
-		local heading1 = GetHeading(route[WP], route[WP + 1])
-		local heading2 = GetHeading(route[WP], basePoint)
+		local heading1 = GetHeading(route[jointWP], route[jointWP + 1])
+		local heading2 = GetHeading(route[jointWP], basePoint)
 		if heading1 - heading2 > 180 then
 			heading1 = heading1 - 360
 		elseif heading2 - heading1 > 180 then
@@ -1989,20 +1997,21 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 		else
 			join_heading = heading1 + 90
 		end
-		local mod_joinPoint = GetOffsetPoint(basePoint, join_heading, join_distance)											--modify the Joint Point to be between route leg WP 1 and 2
+		local mod_joinPoint = GetOffsetPoint(basePoint, join_heading, join_distance)											--modify the Joint Point to be between route leg jointWP 1 and 2
 		route[4].x = mod_joinPoint.x
 		route[4].y = mod_joinPoint.y
-		for n = WP, 5, -1 do
+		for n = jointWP, 5, -1 do
 			-- table.remove(route, n)	-- ATO_RG_Debug03 supprime trop de waypoint lors de l'escorte
 		end
 	end
+
 
 	--adjust route for escort to leave the package
 	local split_distance = 99999999																								--shortest distance from escort end point to package route leg
 	for n = #route - 1, 2, -1 do																								--iterate backwards through route points from Split Point on
 		if GetTangentDistance(route[n], route[n - 1], basePoint) < split_distance then											--distance to this route leg is shorter than to previous leg
 			split_distance = GetTangentDistance(route[n], route[n - 1], basePoint)												--set new shortest split distance
-			WP = n
+			jointWP = n
 		else																													--distance to this route leg is longer than to previous leg
 			break																												--stop searching
 		end
@@ -2011,27 +2020,27 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 		end
 	end
 
-	if mainUnit.task ~= "Transport" and mainUnit.task ~= "Nothing" then
 
+	if mainUnit.task ~= "Transport" and mainUnit.task ~= "Nothing" then
 		route[#route].x = basePoint.x																								--modify route to end at escort land point
 		route[#route].y = basePoint.y
 
-		if GetDistance(basePoint, route[WP]) == split_distance then
-			route[#route - 1].x = route[WP].x
-			route[#route - 1].y = route[WP].y
-			for n = #route - 2, WP, -1 do
+		if GetDistance(basePoint, route[jointWP]) == split_distance then
+			route[#route - 1].x = route[jointWP].x
+			route[#route - 1].y = route[jointWP].y
+			for n = #route - 2, jointWP, -1 do
 				table.remove(route, n)
 			end
-		elseif GetDistance(basePoint, route[WP - 1]) == split_distance then
-			route[#route - 1].x = route[WP - 1].x
-			route[#route - 1].y = route[WP - 1].y
-			for n = #route - 2, WP - 1, -1 do
+		elseif GetDistance(basePoint, route[jointWP - 1]) == split_distance then
+			route[#route - 1].x = route[jointWP - 1].x
+			route[#route - 1].y = route[jointWP - 1].y
+			for n = #route - 2, jointWP - 1, -1 do
 				table.remove(route, n)
 			end
 		else																														--if a point between last Nav and Split Point is closest to escort land point
 			local split_heading
-			local heading1 = GetHeading(route[WP], route[WP - 1])
-			local heading2 = GetHeading(route[WP], basePoint)
+			local heading1 = GetHeading(route[jointWP], route[jointWP - 1])
+			local heading2 = GetHeading(route[jointWP], basePoint)
 			if heading1 - heading2 > 180 then
 				heading1 = heading1 - 360
 			elseif heading2 - heading1 > 180 then
@@ -2045,7 +2054,7 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 			local mod_splitPoint = GetOffsetPoint(basePoint, split_heading, split_distance)											--modify the Split Point to be between last Nav and old Split Point
 			route[#route - 1].x = mod_splitPoint.x
 			route[#route - 1].y = mod_splitPoint.y
-			for n = #route - 2, WP, -1 do
+			for n = #route - 2, jointWP, -1 do
 				table.remove(route, n)
 			end
 		end

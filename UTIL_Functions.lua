@@ -977,7 +977,25 @@ function Display(t, indent)
     end
 end
 
-function _affiche(_table, titre, prof)
+function _affiche(t, indent)
+    indent = indent or ""
+
+    if type(t) ~= "table" then
+        print(indent .. tostring(t)) -- Affiche directement la valeur si ce n'est pas une table
+        return
+    end
+
+    for key, value in pairs(t) do
+        if type(value) == "table" then
+            print(indent .. tostring(key) .. ":")
+            Display(value, indent .. "  ")
+        else
+            print(indent .. tostring(key) .. ": " .. tostring(value))
+        end
+    end
+end
+
+function _afficheOLD(_table, titre, prof)
 
  if not prof or prof == nil then prof = 999 end 						-- prof = profondeur de niveau dans la hierarchie
   print()

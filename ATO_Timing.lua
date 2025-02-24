@@ -698,12 +698,12 @@ for side, pack in pairs(ATO) do
 					end
 				end
 				-- if flight[f].task == "SEAD" or flight[f].task == "Escort Jammer" then
-				if  flight[f].task == "Escort Jammer" then
-					table.remove(flight[f].route, flight_tgt_wp)								--remove target WP from route
-					if flight[f].player then													--if this is the player flight
-						camp.player.tgt_wp = camp.player.tgt_wp - 1								--update the target WP (IP for Escort and SEAD)
-					end
-				end
+				-- if  flight[f].task == "Escort Jammer" then
+				-- 	table.remove(flight[f].route, flight_tgt_wp)								--remove target WP from route
+				-- 	if flight[f].player then													--if this is the player flight
+				-- 		camp.player.tgt_wp = camp.player.tgt_wp - 1								--update the target WP (IP for Escort and SEAD)
+				-- 	end
+				-- end
 
 
 				if #flight[f].route > 2 then

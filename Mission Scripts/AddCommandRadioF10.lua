@@ -53,6 +53,18 @@ env.info("ACRF10 version of Lua _VERSION "..tostring(_VERSION))
 -- SRSAudio = require('SRSAudio') -- Importer le module audio de SR
 
 
+
+-- Distance seuil pour activation/désactivation (en mètres)
+local ACTIVATION_DISTANCE = 60000 
+
+-- Liste des unités à exclure
+local excludedUnitTypes = {
+	["FPS-117"] = true,
+	["55G6 EWR"] = true,
+	["1L13 EWR"] = true,
+	["FPS-117 Dome"] = true
+}
+
 LastInjectFlightPlan = {}																--garde les derniers plan de vol injecté
 tabBingoPlane = {}
 GroundDamagedFlyingMachine = {}
@@ -3642,501 +3654,10 @@ timer.scheduleFunction(setErrorMessageBoxShedul, nil, timer.getTime() + 30)
 
 
 
-
---////////////////////////////////////////////////////////////////////////////////////////////
---test BULLE (debut) IIbis
---ENLEVE TOUT
---////////////////////////////////////////////////////////////////////////////////////////////
-
-
--- -- Table des objets statiques classés par type
--- local staticTypesTable = {}
--- local staticTypeKeys = {}
--- local currentStaticTypeIndex = 1
-
--- -- local function displayFPS()
-
--- -- 	local stats = DCS.getPerformanceStats()
--- -- 	trigger.action.outText("FPS: " .. tostring(stats.FPS), 5)
--- -- 	env.info("DCE_Bulle FPS: " .. tostring(stats.FPS))
-
-
--- -- end
-
--- -- 📌 Fonction pour trier `staticTypesTable` par nombre décroissant
--- local function sortStaticTypes()
---     local sortableList = {}
-
---     -- 🔹 Convertir en liste triable
---     for typeName, count in pairs(staticTypesTable) do
---         table.insert(sortableList, { type = typeName, count = count })
---     end
-
---     -- 🔹 Trier par nombre décroissant (les plus nombreux en premier)
---     table.sort(sortableList, function(a, b) return a.count > b.count end)
-
---     return sortableList
--- end
-
--- -- 🔻 **Créer la table des types d'objets statiques et les trier** 🔻
--- local function classifyStaticObjects()
---     staticTypesTable = {}
---     local typeCounts = {} -- Table pour stocker le nombre d'instances par type
-
---     -- 🔹 Organisation des objets statiques par type
---     for staticName, staticData in pairs(staticObjects) do
---         local typeName = staticData.type
---         if not staticTypesTable[typeName] then
---             staticTypesTable[typeName] = {}
---             typeCounts[typeName] = 0 -- Initialisation du compteur
---         end
---         table.insert(staticTypesTable[typeName], staticName)
---         typeCounts[typeName] = typeCounts[typeName] + 1 -- Compter les occurrences
---     end
-
---     -- 🔹 Tri des types par nombre d'instances (du plus grand au plus petit)
---     staticTypeKeys = {} -- Réinitialiser la liste triée
---     for typeName, _ in pairs(staticTypesTable) do
---         table.insert(staticTypeKeys, typeName)
---     end
---     table.sort(staticTypeKeys, function(a, b)
---         return typeCounts[a] > typeCounts[b] -- Trier du plus grand au plus petit
---     end)
-
---     env.info("DCE_Bulle - Classification des statiques terminée. " .. tostring(#staticTypeKeys) .. " types trouvés.")
---     trigger.action.outText("DCE_Bulle - Classification des statiques terminée.: " .. tostring(#staticTypeKeys) .. " types trouvés.", 4)
-
---     -- 🔹 Debugging : Sauvegarde de la table triée
---     if camp.debug then
---         local current_time = timer.getTime()
---         local logStr = "staticTypesTable = " .. TableSerialization(staticTypesTable, 0)
---         local logFile = io.open(PathDCE.."Debug\\DCE_Bulle".."_".. "staticTypesTable"..current_time..".lua", "w")
---         if logFile then
---             logFile:write(logStr)
---             logFile:close()
---         else
---             env.info("DCE_Bulle: Failed to open log file for writing.")
---         end
---     end
--- end
-
--- -- 🔻 **Supprime tous les objets d'un type donné** 🔻
--- local function deleteStaticsByType(typeName)
---     if not staticTypesTable[typeName] then
---         env.warning("DCE_Bulle - Aucun objet statique du type " .. typeName .. " trouvé.")
---         return
---     end
-
---     env.info("DCE_Bulle - Suppression des objets du type : " .. typeName)
---     trigger.action.outText("DCE_Bulle - Suppression des objets du type : " .. typeName, 4)
-
---     local j = 0
---     for _, staticName in ipairs(staticTypesTable[typeName]) do
---         local static = StaticObject.getByName(staticName)
---         if static and static:isExist() then
---             static:destroy()
---             env.info("DCE_Bulle - StaticObject supprimé : " .. staticName)
---             j = j + 1
---         end
---     end
-
---     env.info("DCE_Bulle - Nombre d'objets de type " .. typeName .. " supprimé : " .. j)
---     trigger.action.outText("DCE_Bulle - Nombre supprimé: " .. j, 4)
--- end
-
--- -- 🔻 **Suppression progressive des statiques toutes les 30 secondes** 🔻
--- local function cycleStaticDeletion()
---     if #staticTypeKeys == 0 then
---         env.warning("DCE_Bulle - Aucun type statique trouvé pour suppression.")
---         return nil
---     end
-
---     local typeName = staticTypeKeys[currentStaticTypeIndex]
---     env.info("DCE_Bulle - Suppression des statiques du type : " .. typeName)
---     deleteStaticsByType(typeName)
-
---     -- 🔹 Passer au type suivant pour le prochain cycle
---     currentStaticTypeIndex = currentStaticTypeIndex + 1
---     if currentStaticTypeIndex > #staticTypeKeys then
---         currentStaticTypeIndex = 1 -- Revenir au premier type après avoir bouclé
---     end
-
---     -- 🔹 Planifier le prochain cycle dans 30 secondes
---     return timer.getTime() + 10
--- end
-
--- -- 🔻 **Lancer la suppression progressive des statiques** 🔻
--- local function startStaticDeletionCycle()
---     classifyStaticObjects() -- Classer les objets statiques par type
---     currentStaticTypeIndex = 1 -- Réinitialisation de l'index de cycle
---     timer.scheduleFunction(cycleStaticDeletion, nil, timer.getTime() + 5) -- Premier cycle dans 5s
--- end
-
--- -- 🔻 **Planification initiale après collecte des objets** 🔻
--- timer.scheduleFunction(function()
---     env.info("DCE_Bulle - Démarrage de la collecte et classification des statiques...")
---     collectStaticObjects()
---     classifyStaticObjects()
---     env.info("DCE_Bulle - Suppression progressive des statiques activée.")
---     startStaticDeletionCycle()
--- end, nil, timer.getTime() + 10)
-
-
-
---////////////////////////////////////////////////////////////////////////////////////////////
---test BULLE (fin) IIbis
---ENLEVE TOUT
---////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
---////////////////////////////////////////////////////////////////////////////////////////////
---test BULLE (debut) II
---////////////////////////////////////////////////////////////////////////////////////////////
-
-
--- -- Fonction pour obtenir le heading correctement
--- local function getHeadingDCE(unit)
---     local unitpos = unit:getPosition()
---     local heading
---     if unitpos then
---         heading = math.atan2(unitpos.x.z, unitpos.x.x)
---         if heading < 0 then
---             heading = heading + 2 * math.pi
---         end
---     end
---     return heading
--- end
-
--- local function tablelength(T)
--- 	local count = 0
--- 	for _ in pairs(T) do
--- 	  count = count + 1
--- 	end
--- 	return count
---   end
-
--- -- Liste des groupes au sol et leurs états d'origine
--- local groundGroups = {} -- Stocke les groupes actifs
--- -- local savedGroups = {} -- Stocke les infos pour recréer les groupes supprimés
-
--- -- Collecte des groupes dynamiques au sol
--- local function collectGroundGroups()
---     groundGroups = {}
---     local totalGroups = 0
---     local validGroups = 0
-
---     local function addGroupsFromCoalition(side)
---         -- Récupère uniquement les groupes dynamiques au sol
---         local allGroups = coalition.getGroups(side, Group.Category.GROUND)
---         totalGroups = totalGroups + #allGroups
-
---         for _, group in ipairs(allGroups) do
---             if group and group:isExist() then
---                 local groupName = group:getName()
---                 local units = group:getUnits()
-
---                 if #units > 0 then
---                     -- Récupère le pays depuis la première unité du groupe
---                     local firstUnit = units[1]
---                     local country = firstUnit and firstUnit:getCountry() or nil
-
---                     if country then
---                         -- Sauvegarde la structure du groupe pour le recréer plus tard
---                         local groupData = {
---                             name = groupName,
---                             country = country,
---                             units = {}
---                         }
-
---                         for _, unit in ipairs(units) do
---                             local pos = unit:getPoint()
---                             table.insert(groupData.units, {
---                                 name = unit:getName(),
---                                 type = unit:getTypeName(),
---                                 x = pos.x,
---                                 y = pos.z,
---                                 heading = math.deg(math.atan2(unit:getVelocity().z, unit:getVelocity().x))
---                             })
---                         end
-
---                         groundGroups[groupName] = groupData
---                         env.info("Added ground vehicle group: " .. groupName)
---                         validGroups = validGroups + 1
---                     else
---                         env.warning("Impossible de récupérer le pays pour " .. groupName)
---                     end
---                 else
---                     env.info("Skipped group (no units): " .. groupName)
---                 end
---             end
---         end
---     end
-
---     -- Ajout des groupes des deux coalitions
---     addGroupsFromCoalition(coalition.side.RED)  
---     addGroupsFromCoalition(coalition.side.BLUE) 
-
---     env.info("Total groups found: " .. tostring(totalGroups))
---     env.info("Ground vehicle groups collected: " .. tostring(validGroups))
--- end
-
-
-
--- -- Liste des groupes et objets statiques sauvegardés (désactivés temporairement)
--- local savedGroups = {}
--- local savedStatics = {}
-
--- -- Liste des objets statiques collectés
--- local staticObjects = {}
-
--- -- 🔻 **Collecte des objets statiques au démarrage** 🔻
--- local function collectStaticObjects()
---     staticObjects = {}
-
---     for _, side in pairs({ coalition.side.RED, coalition.side.BLUE }) do
---         local allStatics = coalition.getStaticObjects(side)
---         for _, static in ipairs(allStatics) do
---             if static and static:isExist() then
---                 local staticName = static:getName()
---                 staticObjects[staticName] = {
---                     name = staticName,
---                     country = static:getCountry(),
---                     type = static:getTypeName(),
---                     x = static:getPoint().x,
---                     y = static:getPoint().z,
---                     heading = getHeadingDCE(static)
---                 }
---                 env.info("DCE_Bulle Collected static object: " .. staticName)
---             end
---         end
---     end
-
---     -- env.info("DCE_Bulle Total static objects collected: A " .. tostring(#staticObjects))
-
--- 	local nombreElements = tablelength(staticObjects)
-
--- 	env.info("DCE_Bulle Total static objects collected: B " .. tostring(nombreElements))
-
--- 	if camp.debug then
--- 		local current_time = timer.getTime()
--- 		local logStr = "OrbitPosition = " .. TableSerialization(staticObjects, 0)
--- 		local logFile = io.open(PathDCE.."Debug\\DCE_Bulle".."_".. "staticObjects"..current_time..".lua", "w")
--- 		if logFile then
--- 			logFile:write(logStr)
--- 			logFile:close()
--- 		else
--- 			env.info("DCE_Bulle: Failed to open log file for writing.")
--- 		end
--- 	end
-
--- end
-
-
--- -- 🔻 **Désactiver un groupe ou un objet statique** 🔻
--- local function disableGroup(groupData)
---     if not groupData or not groupData.name then
---         env.warning("DCE_Bulle Erreur : groupData invalide dans disableGroup")
---         return
---     end
-
---     local group = Group.getByName(groupData.name)
---     if group and group:isExist() then
---         -- 🔹 **Sauvegarde du groupe avant suppression**
---         local unitsData = {}
---         local foundCountry
---         for _, unit in ipairs(group:getUnits()) do
---             table.insert(unitsData, {
---                 name = unit:getName(),
---                 type = unit:getTypeName(),
---                 x = unit:getPoint().x,
---                 y = unit:getPoint().z,
---                 heading = getHeadingDCE(unit),
---                 skill = "Average",
---                 playerCanDrive = true,
---             })
---             foundCountry = unit:getCountry()
---         end
-
---         savedGroups[groupData.name] = {
---             name = groupData.name,
---             country = foundCountry,
---             category = Group.Category.GROUND,
---             units = unitsData,
---             task = "Ground Nothing",
---             visible = false,
---             hidden = false,
---             start_time = 0,
---         }
-
---         group:destroy()
---         trigger.action.outText("Group " .. groupData.name .. " DISABLED", 2)
---         env.info("DCE_Bulle Group " .. groupData.name .. " has been disabled (destroyed)")
-
---     elseif staticObjects[groupData.name] then
---         -- 🔹 **Gestion des objets statiques**
---         local staticData = staticObjects[groupData.name]
---         savedStatics[groupData.name] = staticData
---         local static = StaticObject.getByName(groupData.name)
---         if static then
---             static:destroy()
---             trigger.action.outText("Static Object " .. groupData.name .. " DISABLED", 2)
---             env.info("DCE_Bulle Static Object has been disabled (destroyed): " .. groupData.name )
---         end
---     else
---         env.warning("DCE_Bulle Group/Static Object " .. groupData.name .. " does not exist or is already destroyed")
---         trigger.action.outText("DCE_Bulle Group/Static Object ".. " does not exist or is already destroyed" .. groupData.name , 2)
---     end
--- end
-
--- -- 🔻 **Réactiver un groupe ou un objet statique** 🔻
--- local function enableGroup(groupData)
---     if not groupData or not groupData.name then
---         env.info("DCE_Bulle C1 Erreur : groupData invalide dans enableGroup")
---         return
---     end
-
---     if savedGroups[groupData.name] then
---         local groupInfo = savedGroups[groupData.name]
-
---         local newGroup = {
---             name = groupInfo.name,
---             groupId = nil,
---             country = groupInfo.country,
---             category = Group.Category.GROUND,
---             task = groupInfo.task or "Ground Nothing",
---             start_time = 0,
---             visible = false,
---             hidden = false,
---             units = {},
---         }
-
---         for _, unit in ipairs(groupInfo.units) do
---             table.insert(newGroup.units, {
---                 name = unit.name,
---                 type = unit.type,
---                 x = unit.x,
---                 y = unit.y,
---                 heading = unit.heading,
---                 skill = unit.skill or "Average",
---                 playerCanDrive = unit.playerCanDrive or true,
---                 transportable = { randomTransportable = false },
---             })
---         end
-
---         local status, err = pcall(function()
---             coalition.addGroup(groupInfo.country, Group.Category.GROUND, newGroup)
---         end)
-
---         if status then
---             savedGroups[groupData.name] = nil
---             env.info("DCE_Bulle Group " .. groupData.name .. " has been reactivated")
---             trigger.action.outText("DCE_Bulle Group " .. groupData.name .. " has been reactivated", 4)
---         else
---             env.warning("DCE_Bulle Erreur lors de la recréation du groupe " .. groupData.name .. " : " .. tostring(err))
---         end
-
---     elseif savedStatics[groupData.name] then
---         local staticInfo = savedStatics[groupData.name]
-
---         local status, err = pcall(function()
---             coalition.addStaticObject(staticInfo.country, {
---                 name = staticInfo.name,
---                 type = staticInfo.type,
---                 x = staticInfo.x,
---                 y = staticInfo.y,
---                 heading = staticInfo.heading
---             })
---         end)
-
---         if status then
---             savedStatics[groupData.name] = nil
---             env.info("DCE_Bulle Static Object " .. groupData.name .. " has been reactivated")
---             trigger.action.outText("DCE_Bulle Static Object " .. groupData.name .. " has been reactivated", 4)
---         else
---             env.warning("DCE_Bulle Erreur lors de la recréation du Static Object " .. groupData.name .. " : " .. tostring(err))
---         end
---     else
---         env.info("DCE_Bulle C9 - Le groupe/statique " .. groupData.name .. " n'était pas sauvegardé !")
---         trigger.action.outText("DCE_Bulle Group/Static Object " .. groupData.name .. " was not saved before!", 4)
---     end
--- end
-
--- -- 🔻 **Basculer entre désactivation et réactivation (Véhicules + Statiques)** 🔻
--- local function toggleGroundUnits()
---     local hasGroups = next(groundGroups) ~= nil
---     local hasStatics = next(staticObjects) ~= nil
-
---     if not hasGroups and not hasStatics then
---         env.warning("DCE_Bulle D2 Aucun groupe ni objet statique trouvé pour basculer la visibilité !")
---         trigger.action.outText("DCE_Bulle D2 Aucun groupe ni objet statique trouvé pour basculer la visibilité ", 10)
---         return
---     end
-
---     -- Déterminer l'état de visibilité actuel (en se basant sur n'importe quelle unité sauvegardée)
---     local isDisabled = next(savedGroups) ~= nil or next(savedStatics) ~= nil
-
---     env.info("DCE_Bulle D1 Toggled visibility to " .. tostring(not isDisabled))
---     trigger.action.outText("DCE_Bulle D1 Toggled visibility to " .. tostring(not isDisabled), 10)
-
---     -- 🔹 **Traitement des unités mobiles (véhicules)**
---     for _, groupData in pairs(groundGroups) do
---         if groupData and groupData.name then
---             if savedGroups[groupData.name] then
---                 enableGroup(groupData) -- Réactiver
---             else
---                 disableGroup(groupData) -- Désactiver
---             end
---         else
---             env.warning("DCE_Bulle Erreur : groupData invalide dans toggleGroundUnits")
---         end
---     end
-
---     -- 🔹 **Traitement des objets statiques**
---     for staticName, staticData in pairs(staticObjects) do
---         if savedStatics[staticName] then
---             enableGroup({ name = staticName }) -- Réactiver
---         else
---             disableGroup({ name = staticName }) -- Désactiver
---         end
---     end
--- end
-
-
--- -- Planification toutes les 2 minutes
--- local function scheduleToggle()
---     env.info("DCE_Bulle 01 Planification du prochain basculement dans 2 minutes...")
---     toggleGroundUnits()
---     return timer.getTime() + 15
--- end
-
--- -- 🔻 **Planification initiale et collecte des objets statiques** 🔻
--- timer.scheduleFunction(function()
---     env.info("DCE_Bulle 02 Démarrage de la collecte des groupes au sol et statiques...")
---     collectStaticObjects()
---     collectGroundGroups()
---     env.info("DCE_Bulle 03 Collecte terminée, planification du premier basculement dans 20 secondes...")
---     timer.scheduleFunction(scheduleToggle, nil, timer.getTime() + 20)
--- end, nil, timer.getTime() + 10)
-
-
---////////////////////////////////////////////////////////////////////////////////////////////
---test BULLE (fin) II
---////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
 --////////////////////////////////////////////////////////////////////////////////////////////
 --test BULLE (debut) IV
 --avec distance avion
 --////////////////////////////////////////////////////////////////////////////////////////////
-
--- Distance seuil pour activation/désactivation (en mètres)
-local ACTIVATION_DISTANCE = 50000 
 
 
 -- Fonction pour obtenir le heading correctement
@@ -4163,9 +3684,13 @@ local function tablelength(T)
   -- Liste des groupes et objets statiques sauvegardés (désactivés temporairement)
 local savedGroups = {}
 local savedStatics = {}
--- Liste des objets statiques collectés
 local staticObjects = {}
+-- Liste des groupes au sol et leurs états d'origine
+local groundGroups = {} -- Stocke les groupes actifs
 
+
+
+--/////////////////////////////////////// DCE_Bulle /////////////////////////////////////////////////////
 local function DCE_Bulle()
 
 	-- 🔻 **Collecte des objets statiques au démarrage** 🔻
@@ -4209,152 +3734,81 @@ local function DCE_Bulle()
 		end
 	end
 
-	-- Liste des groupes au sol et leurs états d'origine
-	local groundGroups = {} -- Stocke les groupes actifs
-	-- local savedGroups = {} -- Stocke les infos pour recréer les groupes supprimés
-
-	-- Liste des unités à exclure
-local excludedUnitTypes = {
-    ["FPS-117"] = true,
-    ["55G6 EWR"] = true,
-    ["1L13 EWR"] = true,
-    ["FPS-117 Dome"] = true
-}
-
--- 🔻 **Collecte des groupes dynamiques au sol avec exclusion** 🔻
-local function collectGroundGroups()
-    groundGroups = {}
-    local totalGroups = 0
-    local validGroups = 0
-
-    local function addGroupsFromCoalition(side)
-        -- Récupère uniquement les groupes dynamiques au sol
-        local allGroups = coalition.getGroups(side, Group.Category.GROUND)
-        totalGroups = totalGroups + #allGroups
-
-        for _, group in ipairs(allGroups) do
-            if group and group:isExist() then
-                local groupName = group:getName()
-                local units = group:getUnits()
-                local excludeGroup = false -- Flag pour exclure un groupe entier
-
-                if #units > 0 then
-                    -- Vérifie si le groupe contient une unité interdite
-                    for _, unit in ipairs(units) do
-                        if excludedUnitTypes[unit:getTypeName()] then
-                            excludeGroup = true
-                            env.info("DCE_Bulle - Exclusion du groupe : " .. groupName .. " (contient " .. unit:getTypeName() .. ")")
-                            break
-                        end
-                    end
-
-                    if not excludeGroup then
-                        -- Récupère le pays depuis la première unité du groupe
-                        local firstUnit = units[1]
-                        local country = firstUnit and firstUnit:getCountry() or nil
-
-                        if country then
-                            -- Sauvegarde la structure du groupe pour le recréer plus tard
-                            local groupData = {
-                                name = groupName,
-                                country = country,
-                                units = {}
-                            }
-
-                            for _, unit in ipairs(units) do
-                                local pos = unit:getPoint()
-                                table.insert(groupData.units, {
-                                    name = unit:getName(),
-                                    type = unit:getTypeName(),
-                                    x = pos.x,
-                                    y = pos.z,
-                                    heading = math.deg(math.atan2(unit:getVelocity().z, unit:getVelocity().x))
-                                })
-                            end
-
-                            groundGroups[groupName] = groupData
-                            env.info("Added ground vehicle group: " .. groupName)
-                            validGroups = validGroups + 1
-                        else
-                            env.warning("Impossible de récupérer le pays pour " .. groupName)
-                        end
-                    end
-                else
-                    env.info("Skipped group (no units): " .. groupName)
-                end
-            end
-        end
-    end
-
-    -- Ajout des groupes des deux coalitions
-    addGroupsFromCoalition(coalition.side.RED)  
-    addGroupsFromCoalition(coalition.side.BLUE) 
-
-    env.info("Total groups found: " .. tostring(totalGroups))
-    env.info("Ground vehicle groups collected (après exclusion) : " .. tostring(validGroups))
-end
 
 
-	-- -- Collecte des groupes dynamiques au sol
-	-- local function collectGroundGroups()
-	-- 	groundGroups = {}
-	-- 	local totalGroups = 0
-	-- 	local validGroups = 0
+	-- 🔻 **Collecte des groupes dynamiques au sol avec exclusion** 🔻
+	local function collectGroundGroups()
+		groundGroups = {}
+		local totalGroups = 0
+		local validGroups = 0
 
-	-- 	local function addGroupsFromCoalition(side)
-	-- 		-- Récupère uniquement les groupes dynamiques au sol
-	-- 		local allGroups = coalition.getGroups(side, Group.Category.GROUND)
-	-- 		totalGroups = totalGroups + #allGroups
+		local function addGroupsFromCoalition(side)
+			-- Récupère uniquement les groupes dynamiques au sol
+			local allGroups = coalition.getGroups(side, Group.Category.GROUND)
+			totalGroups = totalGroups + #allGroups
 
-	-- 		for _, group in ipairs(allGroups) do
-	-- 			if group and group:isExist() then
-	-- 				local groupName = group:getName()
-	-- 				local units = group:getUnits()
+			for _, group in ipairs(allGroups) do
+				if group and group:isExist() then
+					local groupName = group:getName()
+					local units = group:getUnits()
+					local excludeGroup = false -- Flag pour exclure un groupe entier
 
-	-- 				if #units > 0 then
-	-- 					-- Récupère le pays depuis la première unité du groupe
-	-- 					local firstUnit = units[1]
-	-- 					local country = firstUnit and firstUnit:getCountry() or nil
+					if #units > 0 then
+						-- Vérifie si le groupe contient une unité interdite
+						for _, unit in ipairs(units) do
+							if excludedUnitTypes[unit:getTypeName()] then
+								excludeGroup = true
+								env.info("DCE_Bulle - Exclusion du groupe : " .. groupName .. " (contient " .. unit:getTypeName() .. ")")
+								break
+							end
+						end
 
-	-- 					if country then
-	-- 						-- Sauvegarde la structure du groupe pour le recréer plus tard
-	-- 						local groupData = {
-	-- 							name = groupName,
-	-- 							country = country,
-	-- 							units = {}
-	-- 						}
+						if not excludeGroup then
+							-- Récupère le pays depuis la première unité du groupe
+							local firstUnit = units[1]
+							local country = firstUnit and firstUnit:getCountry() or nil
 
-	-- 						for _, unit in ipairs(units) do
-	-- 							local pos = unit:getPoint()
-	-- 							table.insert(groupData.units, {
-	-- 								name = unit:getName(),
-	-- 								type = unit:getTypeName(),
-	-- 								x = pos.x,
-	-- 								y = pos.z,
-	-- 								heading = math.deg(math.atan2(unit:getVelocity().z, unit:getVelocity().x))
-	-- 							})
-	-- 						end
+							if country then
+								-- Sauvegarde la structure du groupe pour le recréer plus tard
+								local groupData = {
+									name = groupName,
+									country = country,
+									units = {}
+								}
 
-	-- 						groundGroups[groupName] = groupData
-	-- 						env.info("Added ground vehicle group: " .. groupName)
-	-- 						validGroups = validGroups + 1
-	-- 					else
-	-- 						env.warning("Impossible de récupérer le pays pour " .. groupName)
-	-- 					end
-	-- 				else
-	-- 					env.info("Skipped group (no units): " .. groupName)
-	-- 				end
-	-- 			end
-	-- 		end
-	-- 	end
+								for _, unit in ipairs(units) do
+									local pos = unit:getPoint()
+									table.insert(groupData.units, {
+										name = unit:getName(),
+										type = unit:getTypeName(),
+										x = pos.x,
+										y = pos.z,
+										heading = math.deg(math.atan2(unit:getVelocity().z, unit:getVelocity().x))
+									})
+								end
 
-	-- 	-- Ajout des groupes des deux coalitions
-	-- 	addGroupsFromCoalition(coalition.side.RED)  
-	-- 	addGroupsFromCoalition(coalition.side.BLUE) 
+								groundGroups[groupName] = groupData
+								env.info("Added ground vehicle group: " .. groupName)
+								validGroups = validGroups + 1
+							else
+								env.warning("Impossible de récupérer le pays pour " .. groupName)
+							end
+						end
+					else
+						env.info("Skipped group (no units): " .. groupName)
+					end
+				end
+			end
+		end
 
-	-- 	env.info("Total groups found: " .. tostring(totalGroups))
-	-- 	env.info("Ground vehicle groups collected: " .. tostring(validGroups))
-	-- end
+		-- Ajout des groupes des deux coalitions
+		addGroupsFromCoalition(coalition.side.RED)  
+		addGroupsFromCoalition(coalition.side.BLUE) 
+
+		env.info("Total groups found: " .. tostring(totalGroups))
+		env.info("Ground vehicle groups collected (après exclusion) : " .. tostring(validGroups))
+	end
+
 
 	-- 🔻 **Récupérer tous les avions (joueurs et IA) en vol** 🔻
 	local function getAllAircrafts()
