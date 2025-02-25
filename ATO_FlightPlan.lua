@@ -2837,32 +2837,52 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
-								-- ** reaction to threat **
-								local task_entry = {
-									["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
-									["auto"] = false,
-									["id"] = "WrappedAction",
-									["name"] = "reaction to threats, avoidance of fire (Departure/Spawn)",
-									["enabled"] = true,
-									["params"] =
-									{
-										["action"] =
+								if flight[f].task ~= "SEAD" then
+									-- ** reaction to threat **
+									local task_entry = {
+										["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
+										["auto"] = false,
+										["id"] = "WrappedAction",
+										["name"] = "reaction to threats, avoidance of fire (Departure/Spawn)",
+										["enabled"] = true,
+										["params"] =
 										{
-											["id"] = "Option",
-											["params"] =
+											["action"] =
 											{
-												["value"] = 2,
-												["name"] = 1,
+												["id"] = "Option",
+												["params"] =
+												{
+													["value"] = 2,
+													["name"] = 1,
+												},
 											},
 										},
-									},
-								}
+									}
 
-								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+									table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+								end
 
 							end --heavyBomber or not
 
 							if flight[f].task == "SEAD" then
+
+								task_entry = {
+									["enabled"] = true,
+									["key"] = "SEAD",
+									["id"] = "EngageTargets",
+									["number"] = 1,
+									["auto"] = true,
+									["params"] = 
+									{
+										["targetTypes"] = 
+										{
+											[1] = "Air Defence",
+										}, -- end of ["targetTypes"]
+										["priority"] = 0,
+									}, -- end of ["params"]
+								}
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+								
 								--largage d'urgence
 								task_entry = {
 									["enabled"] = true,
