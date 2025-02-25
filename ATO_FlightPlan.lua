@@ -2315,7 +2315,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					end
 
-					--store spawn and departure time for flight
+					-- ************* store spawn and departure time for flight *************
 					if flight[f].route[w].id == "Taxi" or flight[f].route[w].id == "Spawn" or flight[f].route[w].id == "SAR"then
 						-- spawn_time = flight[f].route[w].eta --spawn_time_bug
 						departure_time = flight[f].route[w].eta
@@ -2323,16 +2323,13 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						departure_time = flight[f].route[w].eta
 					end
 
-					-- if departure_time == nil then
-					-- 	_affiche(flight[f], "flight[f] departure_time == nil")
-					-- end
 					if flight[f].route[w].id == "Join" then
 						waypoints[w]["hCruiseREF"] = flight[f].route[w].hCruiseREF
 						waypoints[w]["test"] = flight[f].route[w].test
 					end
 
 
-					--alter departure alt (spawn and orbit) to prevent collisions of multiple packages
+					-- ************* alter departure alt (spawn and orbit) to prevent collisions of multiple packages *************
 					if flight[f].route[w].id == "Departure" and flight[f].route[w - 1] and flight[f].route[w].id == "Spawn" then							--for departure waypoints that come after spwn waypoints
 						waypoints[w]["alt"] = waypoints[w - 1]["alt"]																						--use same altitude as departure as for spawn
 					elseif  w < #flight[f].route then
@@ -2386,7 +2383,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 
-					--set attack speed for attack, target and egress waypoints
+					-- ************* set attack speed for attack, target and egress waypoints *************
 					if waypoints[w]["name"] == "Attack" or waypoints[w]["name"] == "Target" or waypoints[w]["name"] == "Egress" then
 						waypoints[w].ETA_locked = false
 						waypoints[w].speed_locked = true
@@ -2399,7 +2396,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							["enabled"] = true,
 							["auto"] = false,
 							["id"] = "WrappedAction",
-							["name"] = "interdire la pc",
+							["name"] = "autorise la pc (name == Join)",
 							["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 							["params"] =
 							{
@@ -2423,13 +2420,13 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						-- waypoints[w]["speed"] = pack[p].main[1].loadout.vCruise / 4 * 3					--set NEWSPEED
 					end
 
-					--sets the speed_locked values for the CAP only (it can arrive late ^^)
+					-- ************* sets the speed_locked values for the CAP only (it can arrive late ^^) *************
 					if flight[f].task == "CAP" and waypoints[w]["name"] ~= "Land" and waypoints[w]["name"] ~= "Departure" and waypoints[w]["name"] ~= "Taxi" then
 						waypoints[w].ETA_locked = false
 						waypoints[w].speed_locked = true
 					end
 
-					-- ATO_FP_Debug08 vi trop faible pour les escorteurs des strike trop lent 					
+					-- *************  ATO_FP_Debug08 vi trop faible pour les escorteurs des strike trop lent 					
 					if 	w>1 and flight[f].loadout.vCruise and waypoints[w]["speed"] < flight[f].loadout.vCruise / 4 * 3 then
 						if Debug.debug then
 							print("AtoFP vi trop faible w: "..w.." waypoints[w][speed]: "..waypoints[w]["speed"].." vCruise3/4 "..tostring(flight[f].loadout.vCruise / 4 * 3))
@@ -2445,13 +2442,12 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					end
 
-					--attack waypoint is a fly over point
+					-- ************* attack waypoint is a fly over point *************
 					if waypoints[w]["name"] == "Attack" then
 						waypoints[w].action = "Fly Over Point"
 					end
 
-					--ATO_FP_Reglage_d
-					--requetes des joueurs, assigner l'altitude des wpt landing et attack
+					-- ************* requetes des joueurs, assigner l'altitude des wpt landing et attack *************
 					if flight[f].player or flight[f].client then
 						if waypoints[w]["briefing_name"] == "Target" or  waypoints[w]["briefing_name"] == "Attack" then
 							waypoints[w]["alt"] = 0
@@ -2464,7 +2460,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 
-					-- ** OrbitPosition **
+					-- ************* OrbitPosition  *************
 					if (waypoints[w]["name"] == "IP" ) and flight[f].task == "Escort" then --or waypoints[w]["name"] == "Egress"
 
 						-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
@@ -2489,7 +2485,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					end
 
-					--player flight WP ETA
+					-- ************* player flight WP ETA *************
 					if flight[f].player then
 						if waypoints[w]["name"] == "Target" or waypoints[w]["name"] == "Station" then
 							waypoints[w].ETA_locked = true
@@ -2512,7 +2508,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						waypoints[w].speed_locked = true
 					end
 
-					-- ** altitudes below 1000m are AGL instead of MSL
+					-- ************* altitudes below 1000m are AGL instead of MSL *************
 					if waypoints[w]["alt"] <= 1000 and not is_helicopter then
 						waypoints[w]["alt_type"] = "RADIO"
 					elseif is_helicopter and flight[f].route[w].id == "Departure" then
@@ -2521,7 +2517,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						waypoints[w]["alt_type"] = "RADIO"
 					end
 
-					-- ** take off and landing
+					-- ************* take off and landing *************
 					if (flight[f].route[w].id == "Taxi" and flight[f].route[w].eta >= 0) or (flight[f].route[w].id == "Intercept" or flight[f].route[w].id == "SAR")  then
 						if  ( not flight[f].player and not flight[f].client) and db_airbases[flight[f].base].AI_Spawn and string.upper(db_airbases[flight[f].base].AI_Spawn) ~= "PARKING" then
 							if string.upper(db_airbases[flight[f].base].AI_Spawn) == "AIR" then
@@ -2715,7 +2711,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					end
 
-					-- ** formations et largage d'urgence
+					-- ************* formations et largage d'urgence *************
 					if flight[f].route[w].id == "Departure" or flight[f].route[w].id == "Spawn" then
 						local task_entry = {}
 						if is_helicopter then
@@ -2773,7 +2769,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 									["enabled"] = true,
 									["auto"] = false,
 									["id"] = "WrappedAction",
-									["name"] = "emergency jettison",
+									["name"] = "emergency jettison: FALSE (Departure/Spawn, heavyBomber)",
 									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 									["params"] =
 									{
@@ -2790,13 +2786,37 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								}
 								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
-							else
 
+								--reaction to Threats
+								task_entry = {
+									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+									["auto"] = false,
+									["id"] = "WrappedAction",
+									["name"] = "reaction to Threats, passive defense (Departure/Spawn)",
+									["enabled"] = true,
+									["params"] =
+									{
+										["action"] =
+										{
+											["id"] = "Option",
+											["params"] =
+											{
+												["value"] = 1,
+												["name"] = 1,
+											},
+										},
+									},
+								}
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+
+							else	-- FIN heavyBomber
+
+								-- ** formation **
 								task_entry = {															--Spread Four Close
 									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 									["auto"] = false,
 									["id"] = "WrappedAction",
-									["name"] = "Spread Four Close",
+									["name"] = "Spread Four Close (Departure/Spawn)",
 									["enabled"] = true,
 									["params"] =
 									{
@@ -2817,13 +2837,60 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
+								-- ** reaction to threat **
+								local task_entry = {
+									["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
+									["auto"] = false,
+									["id"] = "WrappedAction",
+									["name"] = "reaction to threats, avoidance of fire (Departure/Spawn)",
+									["enabled"] = true,
+									["params"] =
+									{
+										["action"] =
+										{
+											["id"] = "Option",
+											["params"] =
+											{
+												["value"] = 2,
+												["name"] = 1,
+											},
+										},
+									},
+								}
+
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+
 							end --heavyBomber or not
+
+							if flight[f].task == "SEAD" then
+								--largage d'urgence
+								task_entry = {
+									["enabled"] = true,
+									["auto"] = false,
+									["id"] = "WrappedAction",
+									["name"] = "emergency jettison: FALSE (Departure/Spawn, SEAD)",
+									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+									["params"] =
+									{
+										["action"] =
+										{
+											["id"] = "Option",
+											["params"] =
+											{
+												["value"] = false,			--false interdit le largage d'urgence
+												["name"] = 15,
+											},
+										},
+									},
+								}
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+							end
 						end -- is plane
 					end --if Departure or Spawn
 
 
-					--  **  datalink EPLRS Capacity
-					if (flight[f].route[w].id == "Departure"  or flight[f].route[w].id == "Spawn") and camp.date.year >= 1996 then
+					-- ************* datalink EPLRS Capacity *************
+					if (flight[f].route[w].id == "Departure" or flight[f].route[w].id == "Spawn") and camp.date.year >= 1996 then
 						--M01_b	
 						if EPLRS_Capacity[flight[f].type] then
 							local task_entry = {
@@ -2854,7 +2921,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					elseif role == "Escort" then
 						altRole = 2
 					end
-					-- **  ALTITUDE determine une nouvelle altitude pour ne pas prendre une montagne
+					-- ************* ALTITUDE determine une nouvelle altitude pour ne pas prendre une montagne
 					if flight[f].route[w].id == "Spawn" then
 						local nameTheatre =  string.lower(mission.theatre)
 						local altFloor = 0
@@ -2942,7 +3009,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						InsertBugList("no known runway element for the target "..tostring(flight[f].target_name))
 					end
 
-					--SEAD switch from IP to egress
+					-- ************* SEAD switch from IP to egress *************
 					if flight[f].route[w].id == "IP" then
 
 						--largage d'urgence
@@ -2950,7 +3017,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							["enabled"] = true,
 							["auto"] = false,
 							["id"] = "WrappedAction",
-							["name"] = "emergency jettison",
+							["name"] = "emergency jettison : FALSE (id == IP)",
 							["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 							["params"] =
 							{
@@ -3175,8 +3242,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						--*********************************Anti-ship Strike*******************************************
 						elseif flight[f].task == "Anti-ship Strike" then
 
-							if is_helicopter or  AGAS_ready == false  then
-
+							if is_helicopter or AGAS_ready == false  then
 
 								local task_entry = {															--Spread Four Close
 									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
@@ -3346,6 +3412,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
 
+						--Custom_SAR
 						elseif flight[f].task == "CSAR" and not flight[f].player and not flight[f].client then
 
 							-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
@@ -3373,7 +3440,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 
-					--SEAD engage tasks for each route segment
+					-- ************* SEAD engage tasks for each route segment *************
 					if flight[f].task == "SEAD" then
 						if flight[f].route[w].SEAD_radius then
 							local task_entry = {
@@ -3414,7 +3481,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							end
 							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 						end
-					--Escort and Fighter Sweep Custom Search and Engage Task
+					-- ************* Escort and Fighter Sweep Custom Search and Engage Task CustomSearchThenEngage *************
 					elseif flight[f].task == "Fighter Sweep" then
 						-- if flight[f].route[w].id == "Join" or (flight[f].route[w].id == "Spawn" and (flight[f].route[w + 1].id ~= "Join" and flight[f].route[w + 1].id ~= "Departure")) then
 
@@ -3569,7 +3636,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 
-					--station tasks
+					-- ************* station tasks *************
 					if flight[f].route[w].id == "Station" and flight[f].route[w + 1].id == "Station" then
 						if flight[f].task == "CAP" then
 							local task_entry = {
@@ -3720,8 +3787,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 
-					--orbit on departure
-					-- if flight[f].route[w].id == "Departure" then
+					-- ************* orbit on departure *************
 					if flight[f].route[w].id == "Assemble" then
 						if flight[f].number > 1 or (#flight > 1 and flight[f].loadout.tStation == nil) or flight[f].target.firepower.packmax then		--orbit on departure only for flights larger than 1-ship, flights that are part of a package (but no on-station tasks) or multi-packages
 
@@ -3731,7 +3797,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								["enabled"] = true,
 								["auto"] = false,
 								["id"] = "WrappedAction",
-								["name"] = "interdire la pc",
+								["name"] = "interdit la pc (id == Assemble)",
 								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 								["params"] =
 								{
@@ -3798,7 +3864,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 
-					--A-A TACAN for tankers, activate TACAN on first orbit WP
+					-- ************* A-A TACAN for tankers, activate TACAN on first orbit WP *************
 					--w == 1 : suite au bug des tacan qui ne s'active plus en cours du plan de vol, sauf sur le wpt 0
 					if (flight[f].route[w].id == "Station" and flight[f].route[w + 1].id == "Station") or w == 1 then
 						if flight[f].task == "Refueling" then
@@ -3844,9 +3910,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 
-					--A-A TACAN for tankers, deactivate beacon on second orbit WP
+					-- ************* A-A TACAN for tankers, deactivate beacon on second orbit WP *************
 					--A-A TACAN for tankers, deactivate beacon after 2 wpt on orbit WP
-					-- if flight[f].route[w].id == "Station" and flight[f].route[w - 1].id == "Station" then
 					if w > 2 and (flight[f].route[w-1].id == "Station" and flight[f].route[w - 2].id == "Station") then
 						if flight[f].task == "Refueling" then
 							if flight[f].type == "KC-135" or flight[f].type == "KC135MPRS"  or flight[f].type == "KC130" or flight[f].type == "KC135BDA" or flight[f].type == "S-3B Tanker" then	--only specific tanker types have air-air TACAN			
@@ -3871,7 +3936,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 
-					--orbit on station
+					-- ************* orbit on station
 					if flight[f].route[w].id == "Station" and flight[f].route[w + 1].id == "Station" then
 						local tempAltitude = flight[f].loadout.hAttack
 						if flight[f].target.alt then
@@ -3904,7 +3969,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 					end
 
-					--SEAD switch from IP to egress
+					-- ************* SEAD switch from IP to egress
 					if flight[f].route[w].id == "IP" and flight[f].task == "SEAD" then
 						local speed = pack[p].main[1].loadout.vCruise
 						if flight[f].loadout.vCruise and flight[f].loadout.vCruise < speed then
@@ -3989,7 +4054,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 					end
 
-					--rejoin flight on egress
+					-- ************* rejoin flight on egress *************
 					if (flight[f].task == "Strike" or flight[f].task == "Anti-ship Strike" ) and flight[f].route[w].id == "Egress" then
 						-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
 						local task_entry = {																				--task is a command to run LUA code
@@ -4012,18 +4077,19 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 					end
 
-					--allow weapon jettison from egress on
-					-- if mission_ini.AIemergencyLaunch then
 
+					-- ************* allow weapon jettison from egress on *************
 
-					if flight[f].route[w].id == "Egress" and (flight[f].task == "SEAD" or flight[f].task == "Strike" or flight[f].task == "Anti-ship Strike" or flight[f].task == "Flare Illumination" or flight[f].task == "Laser Illumination")
+					if flight[f].route[w].id == "Egress" 
+						and (flight[f].task == "SEAD" or flight[f].task == "Strike" or flight[f].task == "Anti-ship Strike" or flight[f].task == "Flare Illumination" or flight[f].task == "Laser Illumination")
 						and not is_helicopter then
+
 						if flight[f].player ~= true and flight[f].client ~= true then
 							local task_entry = {
 								["enabled"] = true,
 								["auto"] = false,
 								["id"] = "WrappedAction",
-								["name"] = "emergency jettison",
+								["name"] = "emergency jettison TRUE : Egress",
 								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 								["params"] =
 								{
@@ -4215,14 +4281,22 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				end	-- Fin de Route
 
-				--lock ETA and speed of first waypoint
+
+				-- ************* Fin de Route *************
+				-- ************* Fin de Route *************
+				-- ************* Fin de Route *************
+
+
+
+
+				-- ************* lock ETA and speed of first waypoint *************
 				waypoints[1].ETA_locked = true
 				waypoints[1].speed_locked = true
 				if waypoints[1]["speed"] == nil then
 					waypoints[1]["speed"] = 1
 				end
 
-				--store player waypoints for briefing creation
+				-- ************* store player waypoints for briefing creation *************
 				if flight[f].player == true then
 					
 					camp.player.waypoints = Deepcopy(waypoints)
@@ -4237,32 +4311,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					-- end
 				end
 
-				-- TODO revoir client
-				-- if flight[f].client and flight[f].IdClient then
-				-- 	camp.client[flight[f].IdClient].waypoints = Deepcopy(waypoints)
-				-- end
 
-
-				-- --remove target WP for certain flights
-				-- if target_wp_remove then
-				-- 	table.remove(waypoints, target_wp_remove)
-
-				-- 	for w = target_wp_remove, #waypoints do												--adjust stop condition WPs
-				-- 		if waypoints[w]["task"]["params"]["tasks"] then									--WP has tasks
-				-- 			for task_n,task in ipairs(waypoints[w]["task"]["params"]["tasks"]) do		--go through tasks
-				-- 				if task["params"]["stopCondition"] and task["params"]["stopCondition"]["lastWaypoint"] then					--task has a last waypoint stop condition
-				-- 					task["params"]["stopCondition"]["lastWaypoint"] = task["params"]["stopCondition"]["lastWaypoint"] - 1	--decreas last WP number by one to account for the removed WP
-				-- 				end
-				-- 				if task["params"]["action"] and task["params"]["action"]["id"] == "SwitchWaypoint" then						--task is a switch WP
-				-- 					task["params"]["action"]["params"]["fromWaypointIndex"] = task["params"]["action"]["params"]["fromWaypointIndex"] - 1
-				-- 					task["params"]["action"]["params"]["goToWaypointIndex"] = task["params"]["action"]["params"]["goToWaypointIndex"] - 1
-				-- 				end
-				-- 			end
-				-- 		end
-				-- 	end
-				-- end
-
-				--remove taxi waypoint
+				-- ************* remove taxi waypoint *************
 				if waypoints[1].name == "Taxi" then
 
 					waypoints[2]["airdromeId"] = waypoints[1]["airdromeId"]
@@ -4305,7 +4355,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 				end
 
-				--add descend waypoint
+				-- ************* add descend waypoint *************
 				if flight[f].player ~= true and flight[f].client ~= true then																--for AI flights only
 					for w = 3, #waypoints do
 						if waypoints[w].alt < waypoints[w - 1].alt and waypoints[w]["type"] ~= "Land" then		--for any descend waypoint that is not the landing waypoint
@@ -4334,131 +4384,137 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 				end
+				
 
-				--first waypoint reaction to threat
-				local task_entry = {
-					["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
-					["auto"] = false,
-					["id"] = "WrappedAction",
-					["name"] = "reaction to threats, avoidance of fire",
-					["enabled"] = true,
-					["params"] =
-					{
-						["action"] =
-						{
-							["id"] = "Option",
-							["params"] =
-							{
-								["value"] = 2,
-								["name"] = 1,
-							},
-						},
-					},
-				}
 
-				if flight[f].type ~= "B-52H" or not Data_divers[flight[f].type].heavyBomber then
-					table.insert(waypoints[1]["task"]["params"]["tasks"], task_entry)
-				end
+				-- -- ************* first waypoint reaction to threat *************
+				-- local task_entry = {
+				-- 	["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
+				-- 	["auto"] = false,
+				-- 	["id"] = "WrappedAction",
+				-- 	["name"] = "reaction to threats, avoidance of fire W1",
+				-- 	["enabled"] = true,
+				-- 	["params"] =
+				-- 	{
+				-- 		["action"] =
+				-- 		{
+				-- 			["id"] = "Option",
+				-- 			["params"] =
+				-- 			{
+				-- 				["value"] = 2,
+				-- 				["name"] = 1,
+				-- 			},
+				-- 		},
+				-- 	},
+				-- }
 
-				--ATO_FP_Reglage01 : emport, ne pas larguer les emports en cas d'urgence pour les Strike
-				--first waypoint restrict jettison for SEAD
-				-- if mission_ini.AIemergencyLaunch then
+				-- if flight[f].type ~= "B-52H" or not Data_divers[flight[f].type].heavyBomber then
+				-- 	table.insert(waypoints[1]["task"]["params"]["tasks"], task_entry)
+				-- end
 
-				if not is_helicopter then
-					if flight[f].task == "SEAD" or flight[f].task == "Strike" or flight[f].task == "Anti-ship Strike" or flight[f].task == "Flare Illumination" or flight[f].task == "Laser Illumination" then
-						--interdit le largage des charges s'il y a une escorte
-						if pack[p]["Escort"][1]  then	--and pack[p]["Escort"][1].firepower > 2
-							task_entry = {
-								["enabled"] = true,
-								["auto"] = false,
-								["id"] = "WrappedAction",
-								["name"] = "emergency jettison",
-								["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
-								["params"] =
-								{
-									["action"] =
-									{
-										["id"] = "Option",
-										["params"] =
-										{
-											["value"] = false,		--interdit le largage d urgence
-											["name"] = 15,
-										},
-									},
-								},
-							}
-							table.insert(waypoints[1]["task"]["params"]["tasks"], task_entry)
-						else
-							--autorise le largage des charges s'il n'y a pas d'escorte
-							task_entry = {
-								["enabled"] = true,
-								["auto"] = false,
-								["id"] = "WrappedAction",
-								["name"] = "emergency jettison",
-								["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
-								["params"] =
-								{
-									["action"] =
-									{
-										["id"] = "Option",
-										["params"] =
-										{
-											["value"] = true,		--true: autorise le largage d urgence, false interdit le largage
-											["name"] = 15,
-										},
-									},
-								},
-							}
-							table.insert(waypoints[1]["task"]["params"]["tasks"], task_entry)
-						end
-					end
-				end
 
-				--first waypoint restrict air-air
-				if flight[f].loadout.restrict_aa then
-					task_entry = {
-						["enabled"] = true,
-						["auto"] = false,
-						["id"] = "WrappedAction",
-						["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
-						["params"] =
-						{
-							["action"] =
-							{
-								["id"] = "Option",
-								["params"] =
-								{
-									["value"] = true,
-									["name"] = 14,
-								},
-							},
-						},
-					}
-					table.insert(waypoints[1]["task"]["params"]["tasks"], task_entry)
-				end
+				-- ************* first waypoint restrict jettison for SEAD
+				
+				-- if not is_helicopter then
+				-- 	if flight[f].task == "Strike" or flight[f].task == "Anti-ship Strike" or flight[f].task == "Flare Illumination" or flight[f].task == "Laser Illumination" then
+				-- 		--interdit le largage des charges s'il y a une escorte
+				-- 		if pack[p]["Escort"][1] or Data_divers[flight[f].type].heavyBomber then	--and pack[p]["Escort"][1].firepower > 2
+				-- 			task_entry = {
+				-- 				["enabled"] = true,
+				-- 				["auto"] = false,
+				-- 				["id"] = "WrappedAction",
+				-- 				["name"] = "emergency jettison : FALSE (task == SEAD/Strike/etc)",
+				-- 				["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
+				-- 				["params"] =
+				-- 				{
+				-- 					["action"] =
+				-- 					{
+				-- 						["id"] = "Option",
+				-- 						["params"] =
+				-- 						{
+				-- 							["value"] = false,		--interdit le largage d urgence
+				-- 							["name"] = 15,
+				-- 						},
+				-- 					},
+				-- 				},
+				-- 			}
+				-- 			table.insert(waypoints[1]["task"]["params"]["tasks"], task_entry)
+				-- 		else
+				-- 			--autorise le largage des charges s'il n'y a pas d'escorte
+				-- 			task_entry = {
+				-- 				["enabled"] = true,
+				-- 				["auto"] = false,
+				-- 				["id"] = "WrappedAction",
+				-- 				["name"] = "emergency jettison : TRUE (if no ESCORTE and task == SEAD/Strike/etc)",
+				-- 				["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
+				-- 				["params"] =
+				-- 				{
+				-- 					["action"] =
+				-- 					{
+				-- 						["id"] = "Option",
+				-- 						["params"] =
+				-- 						{
+				-- 							["value"] = true,		--true: autorise le largage d urgence, false interdit le largage
+				-- 							["name"] = 15,
+				-- 						},
+				-- 					},
+				-- 				},
+				-- 			}
+				-- 			table.insert(waypoints[1]["task"]["params"]["tasks"], task_entry)
+				-- 		end
+				-- 	end
+				-- end
 
-				--first waypoint no RTB on bingo
-				if flight[f].airdromeId == nil then
-					task_entry = {
-						["enabled"] = true,
-						["auto"] = false,
-						["id"] = "WrappedAction",
-						["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
-						["params"] =
-						{
-							["action"] =
-							{
-								["id"] = "Option",
-								["params"] =
-								{
-									["value"] = false,
-									["name"] = 6,
-								},
-							},
-						},
-					}
-					table.insert(waypoints[1]["task"]["params"]["tasks"], task_entry)
-				end
+				-- --first waypoint restrict air-air
+				-- if flight[f].loadout.restrict_aa then
+				-- 	task_entry = {
+				-- 		["enabled"] = true,
+				-- 		["auto"] = false,
+				-- 		["id"] = "WrappedAction",
+				-- 		["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
+				-- 		["params"] =
+				-- 		{
+				-- 			["action"] =
+				-- 			{
+				-- 				["id"] = "Option",
+				-- 				["params"] =
+				-- 				{
+				-- 					["value"] = true,
+				-- 					["name"] = 14,
+				-- 				},
+				-- 			},
+				-- 		},
+				-- 	}
+				-- 	table.insert(waypoints[1]["task"]["params"]["tasks"], task_entry)
+				-- end
+
+
+
+
+
+				-- --first waypoint no RTB on bingo
+				-- if flight[f].airdromeId == nil then
+				-- 	task_entry = {
+				-- 		["enabled"] = true,
+				-- 		["auto"] = false,
+				-- 		["id"] = "WrappedAction",
+				-- 		["name"] = "RTB on bingo : NO",
+				-- 		["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
+				-- 		["params"] =
+				-- 		{
+				-- 			["action"] =
+				-- 			{
+				-- 				["id"] = "Option",
+				-- 				["params"] =
+				-- 				{
+				-- 					["value"] = false,
+				-- 					["name"] = 6,
+				-- 				},
+				-- 			},
+				-- 		},
+				-- 	}
+				-- 	table.insert(waypoints[1]["task"]["params"]["tasks"], task_entry)
+				-- end
 
 
 				if flight[f].task == "CSAR" then
