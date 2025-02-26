@@ -69,6 +69,7 @@ mission_ini_check = {
 		pHigh = 50,								--(1 to 100 [%])			[default: 50]		probability of high pressure weather system
 		pLow = 50,								--(1 to 100 [%])			[default: 50]		probability of low pressure weather system
 		refTemp = 20,							--(1 to 100 [T°])			[default: 20]		average day max temperature
+		weatherChangeRate = 1,					--(0.25 to 2)				[default:  1]		coefficient changing the speed at which the weather changes, example,  coef 1: changes every 48 hours on average, coef 0.25, changes every every 12h
 	},
 
 	--***difficulty option***

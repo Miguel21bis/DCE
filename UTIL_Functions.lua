@@ -3515,6 +3515,7 @@ function ModifiCampInit()
 		"pHigh",
 		"pLow",
 		"refTemp",
+		"weatherChangeRate",
 		"time",
 		"variation"
 	}

@@ -15,19 +15,20 @@ versionDCE["DC_Weather.lua"] = "1.6.24"
 ------------------------------------------------------------------------------------------------------- 
 
 
-	-- WindDirection = camp.weather.direction													--recupere la vrai direction du vent (aéronautique)
+local debugWeather = false
+
+
+
 TabMetar = {}
 
-local debugWeather = false
 local debugTxt = ""
-
 local PresetChoice = 0
 local showOne = false
 local showOneNight = false
 local baseChoice
-
 local foundSinglePlayer = {}
-local FieldElevation = 0												--elevation of players airfield used for minimum cloud base
+local fieldElevation = 0												--elevation of players airfield used for minimum cloud base
+
 for side,unit in pairs(oob_air) do										--iterate through all sides
 	for n = 1, #unit do													--iterate through all units
 		if unit[n].player then											--find player unit			
@@ -36,16 +37,16 @@ for side,unit in pairs(oob_air) do										--iterate through all sides
 				os.execute 'pause'
 			end
 			if db_airbases[unit[n].base].elevation then
-				FieldElevation = db_airbases[unit[n].base].elevation		--get field elevation of player base
+				fieldElevation = db_airbases[unit[n].base].elevation		--get field elevation of player base
 			end
-			if FieldElevation == nil then
-				FieldElevation = 0
+			if fieldElevation == nil then
+				fieldElevation = 0
 			end
 
 			foundSinglePlayer = {
 				place = unit[n].base,
 				type = unit[n].type,
-				FieldElevation = FieldElevation
+				fieldElevation = fieldElevation
 			}
 
 			break
@@ -252,6 +253,14 @@ if elapsed_time > camp.weather.zoneEnd then										--active weather zone has e
 		camp.weather.zoneEnd = elapsed_time + math.random(21600, 172800)		--set duration of current weather zone (between 6 and 48 hours for warm sector)
 		camp.weather.zoneTemp = camp.weather.zoneNextTemp						--make next weather zone temperature the current temperature
 	end
+
+	if mission_ini.weather.weatherChangeRate then
+		camp.weather.zoneEnd = camp.weather.zoneEnd - elapsed_time
+		camp.weather.zoneEnd = camp.weather.zoneEnd * mission_ini.weather.weatherChangeRate
+		camp.weather.zoneEnd = camp.weather.zoneEnd + elapsed_time
+	end
+
+
 
 	--Next zone
 	camp.weather.zoneNextTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)			--Set temperature of next weather zone (+/- 5°C of reference tempereature)
@@ -1138,8 +1147,8 @@ elseif camp.weather.zone == "low front cold" then
 
 	--clouds
 	PresetChoice = math.random(28, 30)
-	if FieldElevation >= preset[PresetChoice].altiMin and FieldElevation <= preset[PresetChoice].altiMax then
-		baseChoice =  math.random(FieldElevation, preset[PresetChoice].altiMax)
+	if fieldElevation >= preset[PresetChoice].altiMin and fieldElevation <= preset[PresetChoice].altiMax then
+		baseChoice =  math.random(fieldElevation, preset[PresetChoice].altiMax)
 	else
 		baseChoice =  math.random(preset[PresetChoice].altiMin, preset[PresetChoice].altiMax)
 	end
@@ -1147,7 +1156,7 @@ elseif camp.weather.zone == "low front cold" then
 	mission.weather["clouds"] = {
 		["thickness"] = math.random(4000, 8000),
 		["density"] = math.random(9, 10),
-		-- ["base"] = FieldElevation + math.random(100, 500),
+		-- ["base"] = fieldElevation + math.random(100, 500),
 		["base"] = baseChoice,
 		["iprecptns"] = math.random(1, 2),
 		["preset"] = preset[PresetChoice].name,
@@ -1266,8 +1275,8 @@ elseif camp.weather.zone == "low front warm" then
 
 	-- PresetChoice = math.random(10, 20)
 	-- baseChoice =  math.random(preset[PresetChoice].altiMin, preset[PresetChoice].altiMax)
-	if FieldElevation >= preset[PresetChoice].altiMin and FieldElevation <= preset[PresetChoice].altiMax then
-		baseChoice =  math.random(FieldElevation, preset[PresetChoice].altiMax)
+	if fieldElevation >= preset[PresetChoice].altiMin and fieldElevation <= preset[PresetChoice].altiMax then
+		baseChoice =  math.random(fieldElevation, preset[PresetChoice].altiMax)
 	else
 		baseChoice =  math.random(preset[PresetChoice].altiMin, preset[PresetChoice].altiMax)
 	end
@@ -1275,7 +1284,7 @@ elseif camp.weather.zone == "low front warm" then
 	mission.weather["clouds"] = {
 		["thickness"] = math.ceil(strength * 200),
 		["density"] = dens,
-		-- ["base"] = FieldElevation + 100 + math.ceil(8000 - strength * 800),
+		-- ["base"] = fieldElevation + 100 + math.ceil(8000 - strength * 800),
 		["base"] = baseChoice,
 		["preset"] = preset[PresetChoice].name,
 	}
@@ -2009,7 +2018,7 @@ for placeName, place in pairs(db_airbases) do
 		-- foundSinglePlayer = {
 		-- 	place = unit[n].base,
 		-- 	type = unit[n].type,
-		-- 	FieldElevation = FieldElevation
+		-- 	fieldElevation = fieldElevation
 		-- }
 
 		if not showOne then
@@ -2043,6 +2052,67 @@ for placeName, place in pairs(db_airbases) do
 	end   -- end of unite
 end   --end db_airbase
 
+
+local s = ""
+local remain = math.ceil((camp.weather.zoneEnd - elapsed_time) / 3600)		--hours until end of weather zone					
+local duration = math.ceil((camp.weather.zoneEnd - camp.weather.zoneStart) / 3600)					--duration of the weather zone in hours
+local passed = 100 / duration * remain																--percentage of zone passage
+
+if camp.weather.zone == "high" then
+	if mission.weather["enable_fog"] == false then
+		s = s .. "Good flying weather due to influence of a high pressure system in theater of operations"
+		if remain < 6 then
+			s = s .. ". Change of general weather situation imminent. "
+		elseif remain < 25 then
+			s = s .. ", expected to remain in effect for next " .. remain .. " hours. "
+		elseif remain < 48 then
+			s = s .. ", expected to remain dominant for another day. "
+		else
+			s = s .. ", expected to remain dominant for next " .. math.floor(remain / 24) .. " days. "
+		end
+	else
+		s = s .. "Ground fog conditions. "
+	end
+
+elseif camp.weather.zone == "low front cold" then
+	s = s .. "Low pressure system dominating theater of operations. Currently poor flying weather due to passage of cold front. Weather improvement expected within next " .. remain .. " hours. "
+
+elseif camp.weather.zone == "low front warm" then
+	s = s .. "Low pressure system dominating theater of operations. "
+	if passed < 50 then
+		s = s .. "Currently increasingly poor flying weather due to the passage of warm front. Expected to clear up after " .. remain .. " hours. "
+	else
+		s = s .. "Weather expected to deteriorate within next " .. remain .. " hours due to approach of warm front. "
+	end
+
+elseif camp.weather.zone == "low sector cold" then
+	s = s .. "Low pressure system dominating theater of operations. Currently fair flying weather in cold sector"
+	if remain < 6 then
+		s = s .. ". Change of general weather situation imminent. "
+	elseif remain < 25 then
+		s = s .. ", expected to remain in effect for next " .. remain .. " hours. "
+	elseif remain < 48 then
+		s = s .. ", expected to remain stable for another day. "
+	else
+		s = s .. ", expected to remain stable for next " .. math.floor(remain / 24) .. " days. "
+	end
+
+elseif camp.weather.zone == "low sector warm" then
+	s = s .. "Low pressure system dominating theater of operations. Currently fair flying weather in warm sector"
+	if remain < 6 then
+		s = s .. ". Change of general weather situation imminent. "
+	elseif remain < 25 then
+		s = s .. ", expected to remain in effect for next " .. remain .. " hours. "
+	elseif remain < 48 then
+		s = s .. ", expected to remain stable for another day. "
+	else
+		s = s .. ", expected to remain stable for next " .. math.floor(remain / 24) .. " days. "
+	end
+
+end
+
+camp.weather.brief = tostring(s)
+
 -- if debugWeather then
 -- 	print()
 -- 	print("---")
@@ -2070,7 +2140,14 @@ end
 camp["debugTraceability"]["weather"] = debugTxt
 
 if debugWeather then
+	print()
+	print("elapsed_time: "..elapsed_time)
+	print("camp.weather.zoneEnd "..camp.weather.zoneEnd)
+	print("remain "..remain)
+	print()
+	_affiche(camp.date, "camp.date FINAL: ")
 	print(debugTxt)
+	_affiche(camp.weather, "camp.weather FINAL: ")
 	os.execute 'pause'
 end
 

@@ -1893,7 +1893,20 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 			-- 		route[w].alt = loadouts.hCruise + higher
 			-- 	end
 			-- end
-			route[w].alt = randomAlti
+
+			if loadouts.hAttack then
+
+				-- ne pas avoir d'avion haute altitude en escorte TBA
+				if route[w].id == "IP" or route[w].id == "Attack" or route[w].id == "Target" or route[w].id == "Egress" then
+					route[w].alt = loadouts.hAttack
+				end
+
+			else
+				route[w].alt = randomAlti
+			end
+
+
+			
 		else
 			route[w].alt = randomAlti
 		end

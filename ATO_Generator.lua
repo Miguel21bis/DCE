@@ -1160,13 +1160,15 @@ for side, units in pairs(oob_air) do																								--iterate through al
 
 																							-- print("min: "..tostring(target.firepower.min) .. " "..tostring(target.firepower.max))
 
-																							local aircraft_requested = GetWeightedRandom(target.firepower.min, target.firepower.max, bias)
+																							local firepowerRequest = GetWeightedRandom(target.firepower.min, target.firepower.max, bias)
 																							-- print(string.format("Valeur générée : %.2f", aircraft_requested))
+
+																							local aircraft_requested = firepowerRequest / unit_loadouts[l].firepower
 
 																							if task == "Transport" then
 																								if multiPlaneSet and multiPlaneSet[side] and multiPlaneSet[side][unit.type]  and multiPlaneSet[side][unit.type][task]
 																								and task_bool
-																								and aircraft_requested <  multiPlaneSet[side][unit.type][task].NbPlane
+																								and aircraft_requested < multiPlaneSet[side][unit.type][task].NbPlane
 																								and task == "Transport"
 																								then
 																									aircraft_requested =  multiPlaneSet[side][unit.type][task].NbPlane
