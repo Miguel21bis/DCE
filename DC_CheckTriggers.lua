@@ -63,15 +63,15 @@ versionDCE["DC_CheckTriggers.lua"] = "1.16.95"
 --Action.AirUnitPlayer("UnitName", boolean)													--
 --Action.AirUnitReinforce("SourceUnitName", "DestinationUnitName", destNumber)				--
 --Action.AirUnitRepair()																	--
---Action.GroundUnitRepair()																	-- (ADD) M19.f : Repair Ground
+--Action.GroundUnitRepair()																	-- Repair Ground
 --Action.AddGroundTargetIntel("sideName")													--
 --Action.GroupHidden("GroupName", boolean)													--
 --Action.GroupProbability("GroupName", number 0-1)											--
---Action.GroupMove(GroupName, ZoneName)														-- (ADD) move vehicle group to refpoint (See the DC_CheckTriggers.lua file for more explanation)
+--Action.GroupMove(GroupName, ZoneName)														-- move vehicle group to refpoint (See the DC_CheckTriggers.lua file for more explanation)
 --Action.GroupSlave(GroupName, master, bearing, distance)									-- (ADD)
---Action.ShipMission(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTime)				-- (ADD) assign and run a movement mission to a ship group (See the DC_CheckTriggers.lua file for more explanation)
---Action.TemplateActive(TabFile)															-- (ADD) M40 : Template Active GroundGroup moving front (single file : active template) (if tab file: random activation)
-
+--Action.ShipMission(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTime)				-- assign and run a movement mission to a ship group (See the DC_CheckTriggers.lua file for more explanation)
+--Action.TemplateActive(TabFile)															-- Template Active GroundGroup moving front (single file : active template) (if tab file: random activation)
+--Action.SetWeather( "weather = { pHigh = 78, etc... }" )									-- modifies conf_mod weather parameters during the campaign
 
 
 --Important notes:
@@ -599,6 +599,26 @@ Action = {}
 			end
 		end
 	end
+
+	--set target priority
+	function Action.SetWeather(new_Weather)
+
+		loadstring(new_Weather)()
+
+		---@diagnostic disable-next-line: undefined-global
+		if weather.pHigh then mission_ini.weather.pHigh = weather.pHigh end
+		---@diagnostic disable-next-line: undefined-global
+		if weather.pLow then mission_ini.weather.pLow = weather.pLow end
+		---@diagnostic disable-next-line: undefined-global
+		if weather.refTemp then mission_ini.weather.refTemp = weather.refTemp end
+		---@diagnostic disable-next-line: undefined-global
+		if weather.weatherChangeRate then mission_ini.weather.weatherChangeRate = weather.weatherChangeRate end
+
+		UpdateConfMod(mission_ini.weather)
+
+	end
+
+	
 
 	--set unit active/inactive
 	function Action.AirUnitActive(unitName, state)

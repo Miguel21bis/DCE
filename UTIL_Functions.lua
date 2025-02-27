@@ -2707,7 +2707,7 @@ end
 
 
 --met à jour automatiquement le conf_mod en fonction des nouveautés apporté par UTIL_ConfModCheck
-function UpdateConfMod()
+function UpdateConfMod(setWeather)
     --version UpdateConfMod VA_1.12
 
 	-- local weather_override = {
@@ -2726,6 +2726,11 @@ function UpdateConfMod()
 			weather_override = mission_ini_check.weather
 
 		end
+	end
+
+	--mis à jour via camp_triggers et DC_CheckTriggers
+	if setWeather then
+		weather_override = setWeather
 	end
 
 

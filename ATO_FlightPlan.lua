@@ -5976,12 +5976,14 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					-- Initialize base tables if not already set
 					if GCI.Interceptor[side].base[flight[f].base] == nil then
+						local targetPlane = flight[f].target.targetPlane
 						GCI.Interceptor[side].base[flight[f].base] = {
 							ready30 = {},
 							ready15 = {},
 							ready15_n = 0,
 							ready = {},
 							ready_n = 0,
+							targetPlane = targetPlane,
 							assign_index = 1  -- New variable to track insertion index
 						}
 					end

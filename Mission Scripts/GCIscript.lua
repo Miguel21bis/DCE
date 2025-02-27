@@ -213,6 +213,7 @@ local function GCI_Cycle()
 									target_tracks[ewr_side][target_name].time = current_time
 									target_tracks[ewr_side][target_name].point = target_point
 									target_tracks[ewr_side][target_name].category = targetDesc.category
+									-- target_tracks[ewr_side][target_name].target_Type = targetDesc.typeName
 								else															--new track
 									target_tracks[ewr_side][target_name] = {
 										number = #target_number,								--number of aircraft in traget group
@@ -222,6 +223,7 @@ local function GCI_Cycle()
 										history = 0,											--number of detections in sequence
 										assigned = 0,											--number of interceptors assigned to this target group
 										category = targetCat,
+										-- target_Type = targetDesc.typeName,
 									}
 
 								end
@@ -298,18 +300,34 @@ local function GCI_Cycle()
 				if authorizedInter and target.assigned < target.number then												--if target has less interceptors assigned than it has aircraft in group
 					--find all flights in range to intercept target
 					local eligible_flights = {}														--table of flights eligible for interception of this target
+					local goodTargetType = true
 					for base_name, base in pairs(GCI.Interceptor[track_side].base) do				--iterate through bases in GCI table
-						for flight_n, flight in pairs(base.ready) do								--iterate through ready interceptor flights
-							if flight.time + 900 < current_time then								--interceptor flight has moved to ready status (from ready15) longer than 15 minutes ago and is ready for action (time is -900 for flight starting ready at mission start).
-								ErrorMsg = "Assign interceptors; Target: " .. target_name .. "; Interceptor: " .. flight.name						--Error message in case follow on code fails
-								if current_time >= flight.tot_from and current_time <= flight.tot_to then											--flight can operate at current time							
-									local distance = math.sqrt(math.pow(target.point.x - flight.x, 2) + math.pow(target.point.z - flight.y, 2))		--distance between interceptor airbase and target
-									if distance < flight.range then									--target is in interception range
-										eligible_flights[flight.name] = distance					--store flight name and interception distance in table
+						
+						if base.targetPlane then 
+							goodTargetType = false
+							for tPlaneN, tPlane in pairs(base.targetPlane) do
+								if tPlane == target.typeName then
+									goodTargetType = true
+									return
+								end
+							end
+						end
+					
+						if goodTargetType then
+							for flight_n, flight in pairs(base.ready) do								--iterate through ready interceptor flights
+								if flight.time + 900 < current_time then								--interceptor flight has moved to ready status (from ready15) longer than 15 minutes ago and is ready for action (time is -900 for flight starting ready at mission start).
+									ErrorMsg = "Assign interceptors; Target: " .. target_name .. "; Interceptor: " .. flight.name						--Error message in case follow on code fails
+									if current_time >= flight.tot_from and current_time <= flight.tot_to then											--flight can operate at current time							
+										local distance = math.sqrt(math.pow(target.point.x - flight.x, 2) + math.pow(target.point.z - flight.y, 2))		--distance between interceptor airbase and target
+										if distance < flight.range then									--target is in interception range
+											eligible_flights[flight.name] = distance					--store flight name and interception distance in table
+										end
 									end
 								end
 							end
 						end
+
+
 					end
 
 					--select the flight closest to target for interception

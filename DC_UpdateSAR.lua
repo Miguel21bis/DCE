@@ -376,7 +376,7 @@ local foundBoundary = false
 -- creation des frontieres en fonction des dessins dans base_Mission red et blue qui comporte le nom border ou boundary
 if  tableDrawings and tableDrawings.layers then
     for Nlayers, layer in ipairs( tableDrawings.layers) do
-        if (layer.name == "Red" or layer.name == "Blue" or layer.name == "Neutral" ) and  layer.objects and #layer.objects >= 1 then
+        if (layer.name == "Red" or layer.name == "Blue" or layer.name == "Neutral" ) and layer.objects and #layer.objects >= 1 then
             for Nobjet, objet in ipairs(layer.objects) do
                 local testName = string.lower(objet.name)
                  if ( string.find( testName , "border") or string.find( testName , "boundary") or string.find( testName , "frontline")   ) and #objet.points >= 3 then

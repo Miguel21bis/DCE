@@ -901,7 +901,7 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name  and  Debug.Generator.SpyTask == task
 																or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == target_name ))
 																then
-																	DebuGenTxt = DebuGenTxt.."\n"..("AtoG passe A_10c Befor Condition loadout_eligible?: "..tostring(loadout_eligible).." || "..target_name)
+																	DebuGenTxt = DebuGenTxt.."\n"..("AtoG passe A_10c Befor Condition loadout_eligible?: "..tostring(loadout_eligible).." |unit.name: "..unit.name.." |target_name: "..target_name.." |target.base: "..target.base.." |unit.base: "..unit.base)
 																end
 
 																if loadout_eligible then
