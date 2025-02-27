@@ -3710,7 +3710,7 @@ local function DCE_Bulle()
 						y = static:getPoint().z,
 						heading = getHeadingDCE(static)
 					}
-					env.info("DCE_Bulle Collected static object: " .. staticName)
+					-- env.info("DCE_Bulle Collected static object: " .. staticName)
 				end
 			end
 		end
@@ -3719,7 +3719,7 @@ local function DCE_Bulle()
 
 		local nombreElements = tablelength(staticObjects)
 
-		env.info("DCE_Bulle Total static objects collected: B " .. tostring(nombreElements))
+		-- env.info("DCE_Bulle Total static objects collected: B " .. tostring(nombreElements))
 
 		if camp.debug then
 			local current_time = timer.getTime()
@@ -3729,7 +3729,7 @@ local function DCE_Bulle()
 				logFile:write(logStr)
 				logFile:close()
 			else
-				env.info("DCE_Bulle: Failed to open log file for writing.")
+				-- env.info("DCE_Bulle: Failed to open log file for writing.")
 			end
 		end
 	end

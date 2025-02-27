@@ -12,6 +12,8 @@ versionDCE["Mission Scripts/GCIscript.lua"] = "1.4.21"
 -- modification M11_j			Multiplayer
 ------------------------------------------------------------------------------------------------------- 
 
+ControlTime = 0
+
 env.info("DCE_GCI INIT loading GCIScript")
 env.info("DCE_GCI Unit.Category.AIRPLANE A: "..tostring(Unit.Category.AIRPLANE))
 env.info("DCE_GCI Unit.Category.HELICOPTER B: "..tostring(Unit.Category.HELICOPTER))
@@ -181,7 +183,7 @@ local function GCI_Cycle()
 						local txtA = ""
 
 						local targetCat = targetDesc.category
-						env.info("DCE_GCI Passe C targetCat "..tostring(targetCat))
+						-- env.info("DCE_GCI A_C targetCat "..tostring(targetCat))
 
 						-- _affiche(targetDesc, "DCE_GCI targetDesc C")
 
@@ -189,18 +191,17 @@ local function GCI_Cycle()
 						local inAir = targets[t].object:inAir()
 
 						if isExist and inAir and targetCat and (targetCat == Unit.Category.AIRPLANE or targetCat == Unit.Category.HELICOPTER) then
-							env.info("DCE_GCI Passe D ")
 							local targetGpObject = targets[t].object:getGroup()
 							local target_name = targetGpObject:getName()			--get target group name
-							env.info("DCE_GCI Passe D² ")
+							-- env.info("DCE_GCI A_D² ")
 
 							if track_update[target_name] == nil then							--the target track for this group has not yet been updated
-								env.info("Passe E "..tostring(target_name))	
+								-- env.info("DCE_GCI A_E "..tostring(target_name))	
 								track_update[target_name] = true								--the target track for this group is updated
 								local target_number = targetGpObject:getUnits()	--get target group size
 								local target_point = targets[t].object:getPoint()				--get target point
 								local target_typeName = targetGpObject:getUnit(1):getTypeName()
-								env.info("DCE_GCI Passe G "..tostring(target_typeName))
+								-- env.info("DCE_GCI A_G "..tostring(target_typeName))
 								ErrorMsg = "EWR target detection: " .. ewr_name	.. "; Target: " .. target_name 	--Error message in case follow on code fails
 
 								if target_tracks[ewr_side][target_name] then					--existing track
@@ -238,9 +239,15 @@ local function GCI_Cycle()
 	--assign interceptors to targets
 	ErrorMsg = "Assign interceptors."																--Error message in case follow on code fails
 	for track_side, side in pairs(target_tracks) do													--iterate throug sides in target_tracks table
+		-- env.info("DCE_Gci B_A "..track_side)
+
 		for target_name, target in pairs(side) do													--iterate through targets
+			-- env.info("DCE_Gci B_B ")
 			ErrorMsg = "Assign interceptors; Target: " .. target_name								--Error message in case follow on code fails
+			
 			if target.history > 0 then																--target was detected at least two times in sequence
+				-- env.info("DCE_Gci B_C ")
+
 				--ne declenche les intercepteur que si les ENI franchissent la frontiere
 				-- ou si le target est entre chez nous et chez eux (zone tampon ou eau international)
 				local ourSideOfBorder = false
@@ -248,6 +255,7 @@ local function GCI_Cycle()
 				local authorizedInter = false
 
 				if camp.boundary and camp.boundary[track_side] and camp.boundary[track_side] ~= nil then
+					-- env.info("DCE_Gci B_D ")
 
 					ourSideOfBorder =  CheckPointInPoly2(target.point, camp.boundary[track_side])
 
@@ -255,18 +263,18 @@ local function GCI_Cycle()
 
 					if enemySideOfBorder then
 						--pour info
-						env.info("DCE_Gci     Passe A_0 enemySideOfBorder "..tostring(enemySideOfBorder))
+						-- env.info("DCE_Gci B_E enemySideOfBorder "..tostring(enemySideOfBorder))
 					end
 
 					if ourSideOfBorder then
 
 						authorizedInter = true
-						env.info("DCE_Gci     Passe A_1 ourSideOfBorder "..tostring(ourSideOfBorder))
+						-- env.info("DCE_Gci B_F ourSideOfBorder "..tostring(ourSideOfBorder))
 
 					elseif not ourSideOfBorder and not enemySideOfBorder then
 
 						authorizedInter = true
-						-- env.info("DCE_Gci     Passe A_2 zone tampon authorizedInter "..tostring(authorizedInter))
+						-- env.info("DCE_Gci B_G zone tampon authorizedInter "..tostring(authorizedInter))
 
 					else
 						-- --check si le target est sur la mere
@@ -297,29 +305,40 @@ local function GCI_Cycle()
 					authorizedInter = true
 				end
 
+				-- env.info("DCE_Gci B_H authorizedInter: "..tostring(authorizedInter))
+
 				if authorizedInter and target.assigned < target.number then												--if target has less interceptors assigned than it has aircraft in group
 					--find all flights in range to intercept target
 					local eligible_flights = {}														--table of flights eligible for interception of this target
 					local goodTargetType = true
 					for base_name, base in pairs(GCI.Interceptor[track_side].base) do				--iterate through bases in GCI table
-						
 						if base.targetPlane then 
 							goodTargetType = false
 							for tPlaneN, tPlane in pairs(base.targetPlane) do
 								if tPlane == target.typeName then
 									goodTargetType = true
-									return
+									break
 								end
 							end
 						end
 					
+						-- env.info("DCE_Gci B_K goodTargetType: "..tostring(goodTargetType))
+
 						if goodTargetType then
+							-- env.info("DCE_Gci B_L")
 							for flight_n, flight in pairs(base.ready) do								--iterate through ready interceptor flights
+								-- env.info("DCE_Gci B_L2")
+
 								if flight.time + 900 < current_time then								--interceptor flight has moved to ready status (from ready15) longer than 15 minutes ago and is ready for action (time is -900 for flight starting ready at mission start).
 									ErrorMsg = "Assign interceptors; Target: " .. target_name .. "; Interceptor: " .. flight.name						--Error message in case follow on code fails
+									-- env.info("DCE_Gci B_L3")
 									if current_time >= flight.tot_from and current_time <= flight.tot_to then											--flight can operate at current time							
 										local distance = math.sqrt(math.pow(target.point.x - flight.x, 2) + math.pow(target.point.z - flight.y, 2))		--distance between interceptor airbase and target
+										-- env.info("DCE_Gci B_L4")
+										
 										if distance < flight.range then									--target is in interception range
+											-- env.info("DCE_Gci B_L5")
+											
 											eligible_flights[flight.name] = distance					--store flight name and interception distance in table
 										end
 									end
@@ -340,12 +359,22 @@ local function GCI_Cycle()
 						end
 					end
 
+					-- env.info("DCE_Gci N selected_flight: "..tostring(selected_flight))
+
 					--assign selected flight to target
 					ErrorMsg = "Assign interceptors; Target: " .. target_name .. "; Select Flight."					--Error message in case follow on code fails
 					if selected_flight then
+						-- env.info("DCE_Gci O1 selected_flight: "..tostring(selected_flight))
+
 						for base_name, base in pairs(GCI.Interceptor[track_side].base) do				--iterate through bases in GCI table
+							-- env.info("DCE_Gci O2 base_name: "..tostring(base_name))
+						
 							for flight_n, flight in pairs(base.ready) do								--iterate through ready interceptor flights						
+								-- env.info("DCE_Gci O3 flight_n: "..tostring(flight_n))
+								
 								if flight.name == selected_flight then									--find selected interceptor flight in ready table
+									-- env.info("DCE_Gci O4 flight.name: "..tostring(flight.name))
+									
 									trigger.action.setUserFlag(flight.flag, true)						--set flag true to launch interceptor
 									-- trigger.action.outText(selected_flight .. " 01 launched to intercept " .. target_name, 15)	--FOR DEBUG
 									
@@ -355,13 +384,13 @@ local function GCI_Cycle()
 										local isExist = groupObj:isExist()
 										-- local inAir = targets[t].object:inAir()
 										if not isExist then 
-											env.info("DCE_Gci group doesnt exist, break "..tostring(selected_flight))
+											env.info("DCE_Gci B_ group doesnt exist, break "..tostring(selected_flight))
 											break
 
 										end
 									else
 
-										env.info("DCE_Gci groupObj doesnt exist, break "..tostring(selected_flight))
+										env.info("DCE_Gci B_ groupObj doesnt exist, break "..tostring(selected_flight))
 										break
 									end
 									
