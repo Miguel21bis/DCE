@@ -12,6 +12,8 @@ versionDCE["Mission Scripts/GCIscript.lua"] = "1.4.21"
 -- modification M11_j			Multiplayer
 ------------------------------------------------------------------------------------------------------- 
 
+env.info("DCE_GCI version of GCIscript "..tostring(versionDCE["Mission Scripts/GCIscript.lua"]))
+
 ControlTime = 0
 
 env.info("DCE_GCI INIT loading GCIScript")

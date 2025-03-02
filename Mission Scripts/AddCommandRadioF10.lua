@@ -31,7 +31,8 @@ end
 
 
 
-env.info("ACRF10 version of Lua _VERSION "..tostring(_VERSION))
+env.info("DCE_ACRF10 version of Lua _VERSION "..tostring(_VERSION))
+env.info("DCE_ACRF10 version of AddCommandRadioF10 "..tostring(versionDCE["Mission Scripts/AddCommandRadioF10.lua"]))
 
 -- for k, v in pairs(AI.Option.Air.val) do
 --     env.info(k .. " = " .. tostring(v))
