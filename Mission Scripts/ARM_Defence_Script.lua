@@ -3,13 +3,13 @@
 --Version 21.12.2014
 --This script gives radars a chance to detect anti-radar missiles launched against them and to shut down for self-preservation
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  M83_a
+-- last modification:  M83_b
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/ARM_Defence_Script.lua"] = "2.4.8"
+versionDCE["Mission Scripts/ARM_Defence_Script.lua"] = "2.4.9"
 ------------------------------------------------------------------------------------------------------- 
 
 -- cleanCode_a	
--- modification M83_a	Jammer checkMissileProximity		 
+-- modification M83_b	Jammer checkMissileProximity (b B-52)		 
 -- Reglage_b			(b more difficult with Patriot&Sa10)(a: RadarOn 6 a 9mn)			
 -- Debug_b 				(b getCategory)(a:AGM-154 :31:  'getDesc' Static doesn't exist)
 ------------------------------------------------------------------------------------------------------- 	

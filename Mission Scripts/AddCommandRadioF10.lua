@@ -5,15 +5,15 @@
 --player can request emergency resupply with S-3B's
 -- It is possible to send the whole PACK in RTB to avoid unnecessary losses. 
 ------------------------------------------------------------------------------------------------------- 
--- last modification  M84_a
+-- last modification  M84_b
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "1.14.49"
+versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "1.14.50"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_b				(b springCleaning)(a: remove RemovePlane)
 -- adjustment_h				(h avoid SAM zone)(g force RTB if bingo)(f ENI table)(e: add sar_F10)(d GetHeading)(c coalitionIdNumeric)(b group Item Radio)(a: ajust function trigo)
 -- debug_h					(h A/A off sur avoidZone)(g no menu in SP)(f getCategory)(e getHeading Z)(d: tanker exist)n'affiche pas les messages d'error sauf à la fin de mission
 -- debug_bonfor_a			RTB from to inversé
--- modification M84_a		DCE_Bulle
+-- modification M84_b		DCE_Bulle (b  adjust)
 -- modification M81_a		text announcement of contacts as seen by EWR and SAM radar
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a dcs_to_gps)
 -- modification M69_a		getOut (a allows you to remove the pilot from a crashed helicopter, for immediate or later recovery)
