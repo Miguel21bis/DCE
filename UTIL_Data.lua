@@ -263,7 +263,12 @@ Data_divers = {
 		laserDesignator = false,
 		moduleName = "tetet_a-1_skyraider",
 	},
-	
+	["vwv_crusader"] = 	{				--Mod
+		instrumentUnits = "imperial",
+		requiredModules = true,						--itsModule
+		EPLRS_Capacity = false,
+		moduleName = "tetet_crusader",
+	},
 	["vwv_o-1"] = 	{			                 	--Mod
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
@@ -364,11 +369,6 @@ Data_divers = {
 		playable = true,
 		vCruise = 230,
 		hCruise = 5112,
-	},
-	["vwv_crusader"] = 	{				--Mod
-		instrumentUnits = "imperial",
-		requiredModules = true,						--itsModule
-		EPLRS_Capacity = false,
 	},
 	["F-14"] = 	{--Common aircraft definitions
 		instrumentUnits = "imperial",
