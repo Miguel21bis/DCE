@@ -170,69 +170,71 @@ for side, units in pairs(oob_air) do																								--iterate through al
 		-- ["Anti-ship Strike"] = {
 
 	for unitN, unit in pairs(units) do
-		if type(unit.tasks) == "table" then
-			for task, task_bool in pairs(unit.tasks) do
-				if task_bool and task ~= "Spotter" then
+		if not unit.inactive then
+			if type(unit.tasks) == "table" then
+				for task, task_bool in pairs(unit.tasks) do
+					if task_bool and task ~= "Spotter" then
 
-					local foundTaskAndCountry = false
+						local foundTaskAndCountry = false
 
-					if db_loadouts[unit.type] and db_loadouts[unit.type] ~= nil then
+						if db_loadouts[unit.type] and db_loadouts[unit.type] ~= nil then
 
-						if db_loadouts[unit.type][task] and db_loadouts[unit.type][task] ~= nil then
+							if db_loadouts[unit.type][task] and db_loadouts[unit.type][task] ~= nil then
 
-							for loadout_name, ltable in pairs(db_loadouts[unit.type][task]) do
-								if ltable and type(ltable) == "table" then
+								for loadout_name, ltable in pairs(db_loadouts[unit.type][task]) do
+									if ltable and type(ltable) == "table" then
 
-									local countryEligible = false
-									if ltable.country == nil  then
-										countryEligible = true
-										foundTaskAndCountry = true
-									elseif type(ltable.country) == "string" then
-										if string.lower(ltable.country) == string.lower(unit.country) or string.lower(ltable.country) == "all" then
+										local countryEligible = false
+										if ltable.country == nil  then
 											countryEligible = true
 											foundTaskAndCountry = true
-										end
-
-									elseif type(ltable.country) == "table" then
-										for n, countryLabel in pairs(ltable.country) do
-											if string.lower(countryLabel) == string.lower(unit.country) or string.lower(countryLabel) == "all" then
+										elseif type(ltable.country) == "string" then
+											if string.lower(ltable.country) == string.lower(unit.country) or string.lower(ltable.country) == "all" then
 												countryEligible = true
 												foundTaskAndCountry = true
-												break
+											end
+
+										elseif type(ltable.country) == "table" then
+											for n, countryLabel in pairs(ltable.country) do
+												if string.lower(countryLabel) == string.lower(unit.country) or string.lower(countryLabel) == "all" then
+													countryEligible = true
+													foundTaskAndCountry = true
+													break
+												end
 											end
 										end
-									end
 
 
-									if countryEligible then
-										--creation table du nombre d'avion dispo pour une task
-										if unit.roster and unit.roster.ready then
-											if not totalPlanePerTask[side][task] then totalPlanePerTask[side][task] = 0 end
-											totalPlanePerTask[side][task] = totalPlanePerTask[side][task] +	unit.roster.ready
+										if countryEligible then
+											--creation table du nombre d'avion dispo pour une task
+											if unit.roster and unit.roster.ready then
+												if not totalPlanePerTask[side][task] then totalPlanePerTask[side][task] = 0 end
+												totalPlanePerTask[side][task] = totalPlanePerTask[side][task] +	unit.roster.ready
+											end
 										end
+									else
+										print("AtoG error: "..unit.type.." not found in db_loadouts")
+										os.execute 'pause'
+										error = error + 1
 									end
-								else
-									print("AtoG error: "..unit.type.." not found in db_loadouts")
-									os.execute 'pause'
-									error = error + 1
 								end
+
+							elseif task ~= "Spotter" then
+
+								print("AtoG error: no task |"..tostring(task).."| in the loadout for this unit:? "..tostring(unit.type))
+								os.execute 'pause'
 							end
 
-						elseif task ~= "Spotter" then
-
-							print("AtoG error: no task |"..tostring(task).."| in the loadout for this unit:? "..tostring(unit.type))
+						else
+							print("AtoG error: "..unit.type.." not found in db_loadouts. A problem with the campaigns_code_loadout code? "..tostring(campConfMod.code_loadout))
 							os.execute 'pause'
 						end
 
-					else
-						print("AtoG error: "..unit.type.." not found in db_loadouts. A problem with the campaigns_code_loadout code? "..tostring(campConfMod.code_loadout))
-						os.execute 'pause'
-					end
-
-					if not foundTaskAndCountry then
-						print("AtoG error: "..unit.type.." "..task.." not found in db_loadouts for this country: "..tostring(unit.country))
-						os.execute 'pause'
-						error = error + 1
+						if not foundTaskAndCountry then
+							print("AtoG error: "..unit.type.." "..task.." not found in db_loadouts for this country: "..tostring(unit.country))
+							os.execute 'pause'
+							error = error + 1
+						end
 					end
 				end
 			end

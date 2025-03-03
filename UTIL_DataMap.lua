@@ -1,11 +1,11 @@
 --Various DATA map 
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  cleanCode_a
+-- last modification:  updateData_s
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_DataMap.lua"] = "1.4.22"
+versionDCE["UTIL_DataMap.lua"] = "1.4.23"
 ------------------------------------------------------------------------------------------------------- 
--- updateData_r				(r marianaislands)(p syria AltitudeFloor)(o: add sinai)
+-- updateData_s				(s Afghanistan)(r marianaislands)(p syria AltitudeFloor)(o: add sinai)
 -- adjustment_a				(a middle of caucasus)
 -- cleanCode_a				(a springCleaning)
 -- modification M78_b		LatLon positions added and unit display removed on MAP F10 (a UTM_Zone)
@@ -1948,6 +1948,19 @@ LocationForEphemeris = {
 		origin_lon = 22.499997,						--original longitude of point x = 0 and y = 0
 		UTM_Zone = 34,
 		UTM_hemisphere = "N",
+    },
+	["Afghanistan"] = {                                    --attention, name of the map in lower case 
+        nnLatitude = 33.391110,
+        nnLongitude = 62.260830,
+        nnTimeZone = 4.5,                                --2
+        nnShiftTz =  false,
+        nnTimeLZero = 0,
+        nnTimeStyle = 1,
+        --N 35°01'18.90"   E 35°54'02.01"    FAIT
+        origin_lat = 33.940772,                        --original latitude of point x = 0 and y = 0
+        origin_lon = 66.207623,                        --original longitude of point x = 0 and y = 0
+        UTM_Zone = 41,
+        UTM_hemisphere = "N",
     },
 }
 

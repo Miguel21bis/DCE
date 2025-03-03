@@ -273,6 +273,13 @@ campMod_check = {
                 },
             rayon   = 200,					-- distance en Km autour de laquelle on peut placer le bullsEye
         },
+		Afghanistan = {
+            pos = {
+				x  = -64063.440649033,                                --26144.085385954,
+                y  = -368210.59078097,                                --41381.855008994,
+                },
+            rayon   = 200,					-- distance en Km autour de laquelle on peut placer le bullsEye
+        },
 	},
 
 }

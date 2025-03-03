@@ -1234,7 +1234,7 @@ function CreatePlageFrequency()																				--trouve une plage de frequen
 	local activeVHF = false
 	camp.radio = {}
 
-	local TempRadio = {
+	local tempRadio = {
 		["blue"] = {
 			-- [1] = {
 			-- },
@@ -1254,11 +1254,11 @@ function CreatePlageFrequency()																				--trouve une plage de frequen
 						for bandFreq, value in pairs(frequency[sqd.type].radio[n]) do
 							if bandFreq == "HF" or bandFreq == "VHF" or bandFreq == "UHF" or bandFreq == "LVHF"  then			--or bandFreq == "FM"					
 
-								if not TempRadio[side][n] then TempRadio[side][n] = {} end
-								if not TempRadio[side][n][bandFreq] then TempRadio[side][n][bandFreq] = {} end
+								if not tempRadio[side][n] then tempRadio[side][n] = {} end
+								if not tempRadio[side][n][bandFreq] then tempRadio[side][n][bandFreq] = {} end
 
-								TempRadio[side][n][bandFreq].min = value.min
-								TempRadio[side][n][bandFreq].max = value.max
+								tempRadio[side][n][bandFreq].min = value.min
+								tempRadio[side][n][bandFreq].max = value.max
 							end
 						end
 					end
@@ -1278,24 +1278,24 @@ function CreatePlageFrequency()																				--trouve une plage de frequen
 								for bandFreq , value in pairs(_bandFreq) do
 									if bandFreq == "HF" or bandFreq == "LVHF" or bandFreq == "VHF" or bandFreq == "UHF" then
 
-										if not TempRadio[side][nr] then TempRadio[side][nr] = {} end
-										if not TempRadio[side][nr][bandFreq] then TempRadio[side][nr][bandFreq] = {} end
-										if not TempRadio[side][nr][bandFreq].min then TempRadio[side][nr][bandFreq].min = value.min  end
-										if not TempRadio[side][nr][bandFreq].max then TempRadio[side][nr][bandFreq].max = value.max  end
+										if not tempRadio[side][nr] then tempRadio[side][nr] = {} end
+										if not tempRadio[side][nr][bandFreq] then tempRadio[side][nr][bandFreq] = {} end
+										if not tempRadio[side][nr][bandFreq].min then tempRadio[side][nr][bandFreq].min = value.min  end
+										if not tempRadio[side][nr][bandFreq].max then tempRadio[side][nr][bandFreq].max = value.max  end
 
-										if (value.min < TempRadio[side][nr][bandFreq].max)  then								--si une plage radio est en dehors des autres, on privil�gie le joueur
-											if value.min > TempRadio[side][nr][bandFreq].min then
-												TempRadio[side][nr][bandFreq].min =  value.min
+										if (value.min < tempRadio[side][nr][bandFreq].max)  then								--si une plage radio est en dehors des autres, on privil�gie le joueur
+											if value.min > tempRadio[side][nr][bandFreq].min then
+												tempRadio[side][nr][bandFreq].min =  value.min
 											end
 
-											if (value.max < TempRadio[side][nr][bandFreq].max) and (value.max > TempRadio[side][nr][bandFreq].min )  then
-												TempRadio[side][nr][bandFreq].max =  value.max
+											if (value.max < tempRadio[side][nr][bandFreq].max) and (value.max > tempRadio[side][nr][bandFreq].min )  then
+												tempRadio[side][nr][bandFreq].max =  value.max
 											end
 										end
 
-										if sqd.player and TempRadio[side][1][bandFreq] then
+										if sqd.player and tempRadio[side][1][bandFreq] then
 											-- print("sqd.type "..tostring(sqd.type))
-											TempRadio[side][1][bandFreq]["player"] = true
+											tempRadio[side][1][bandFreq]["player"] = true
 										end
 
 									end
@@ -1312,7 +1312,7 @@ function CreatePlageFrequency()																				--trouve une plage de frequen
 		end
 	end
 
-	camp.radio = TempRadio
+	camp.radio = tempRadio
 	-- _affiche(camp.radio, "UTIL_F camp.radio")
 
 
@@ -1320,7 +1320,7 @@ function CreatePlageFrequency()																				--trouve une plage de frequen
 
 	camp.radioC = {}
 
-	local TempRadio = {
+	tempRadio = {
 		["blue"] = {},
 		["red"] = {},
 	}
@@ -1333,8 +1333,8 @@ function CreatePlageFrequency()																				--trouve une plage de frequen
 						for bandFreq, value in pairs(frequency[sqd.type].radio[n]) do
 							if bandFreq == "HF" or bandFreq == "VHF" or bandFreq == "UHF" or bandFreq == "LVHF"  then			--or bandFreq == "FM"					
 
-								if not TempRadio[side][bandFreq] then
-									TempRadio[side][bandFreq] = {
+								if not tempRadio[side][bandFreq] then
+									tempRadio[side][bandFreq] = {
 										min = value.min,
 										max = value.max,
 									}
@@ -1352,38 +1352,40 @@ function CreatePlageFrequency()																				--trouve une plage de frequen
 		for n, sqd in pairs(oob_side) do
 			if not sqd.inactive then
 				if frequency[sqd.type] then
-					for typeRadio , PlaneFreqRadio in pairs(frequency[sqd.type]) do
+					-- print("sqd.type "..tostring(sqd.type))
+					
+					for typeRadio, PlaneFreqRadio in pairs(frequency[sqd.type]) do
 						if typeRadio == "radio" and type(PlaneFreqRadio) == "table" then
 							for nr , _bandFreq in pairs(PlaneFreqRadio) do	--for nr , value in pairs(frequency[sqd.type].radio) do
 								for bandFreq , value in pairs(_bandFreq) do
 									if bandFreq == "HF" or bandFreq == "LVHF" or bandFreq == "VHF" or bandFreq == "UHF" then
 
-										if not TempRadio[side][bandFreq] then
-											TempRadio[side][bandFreq] = {
+										if not tempRadio[side][bandFreq] then
+											tempRadio[side][bandFreq] = {
 												min = value.min,
 												max = value.max,
 											}
 										end
 
-										if (value.min < TempRadio[side][bandFreq].max)  then								--si une plage radio est en dehors des autres, on privil�gie le joueur
-											if value.min > TempRadio[side][bandFreq].min then
-												TempRadio[side][bandFreq].min =  value.min
+										if (value.min < tempRadio[side][bandFreq].max)  then								--si une plage radio est en dehors des autres, on privil�gie le joueur
+											if value.min > tempRadio[side][bandFreq].min then
+												tempRadio[side][bandFreq].min =  value.min
 											end
 
-											if (value.max < TempRadio[side][bandFreq].max) and (value.max > TempRadio[side][bandFreq].min )  then
-												TempRadio[side][bandFreq].max =  value.max
+											if (value.max < tempRadio[side][bandFreq].max) and (value.max > tempRadio[side][bandFreq].min )  then
+												tempRadio[side][bandFreq].max =  value.max
 											end
 										end
 
-										if sqd.player and TempRadio[side][bandFreq] then
-											TempRadio[side][bandFreq]["player"] = true
+										if sqd.player and tempRadio[side][bandFreq] then
+											tempRadio[side][bandFreq]["player"] = true
 										end
 
 									end
 								end
 							end
 						elseif typeRadio == "frequency"  then											-- frequence de base utilis� par FC3 ou gazelle
-								print("UTIL_F Type No Frequency FC3? "..sqd.type)
+							print("UTIL_F Type No Frequency FC3? "..sqd.type)
 						end
 					end
 				else
@@ -1393,8 +1395,9 @@ function CreatePlageFrequency()																				--trouve une plage de frequen
 		end
 	end
 
-	camp.radioC = TempRadio
-	-- _affiche(camp.radio, "UTIL_F camp.radio")
+	camp.radioC = tempRadio
+	-- _affiche(camp.radioC, "UTIL_F camp.radio" )
+	-- os.execute 'pause'
 end
 
 
@@ -1402,7 +1405,7 @@ function CreatePlageFrequencyB()																				--trouve une plage de freque
 	local activeVHF = false
 	camp.radioB = {}
 
-	local TempRadioB = {
+	local tempRadioB = {
 		["blue"] = {
 			-- [1] = {
 			-- },
@@ -1422,11 +1425,11 @@ function CreatePlageFrequencyB()																				--trouve une plage de freque
 						-- for bandFreq, value in pairs(frequency[sqd.type].radio[n]) do
 							-- if bandFreq == "FM" or bandFreq == "VHF" or bandFreq == "UHF" or bandFreq == "LVHF" or bandFreq == "HF" then								
 
-								-- if not TempRadio[side][n] then TempRadio[side][n] = {} end	
-								-- if not TempRadio[side][n][bandFreq] then TempRadio[side][n][bandFreq] = {} end
+								-- if not tempRadio[side][n] then tempRadio[side][n] = {} end	
+								-- if not tempRadio[side][n][bandFreq] then tempRadio[side][n][bandFreq] = {} end
 
-								-- TempRadio[side][n][bandFreq].min = value.min
-								-- TempRadio[side][n][bandFreq].max = value.max
+								-- tempRadio[side][n][bandFreq].min = value.min
+								-- tempRadio[side][n][bandFreq].max = value.max
 							-- end
 						-- end					
 					-- end				
@@ -1447,23 +1450,23 @@ function CreatePlageFrequencyB()																				--trouve une plage de freque
 									if bandFreq == "HF" or bandFreq == "LVHF" or bandFreq == "VHF" or bandFreq == "UHF" then
 
 
-										if not TempRadioB[side][bandFreq] then TempRadioB[side][bandFreq] = {} end
-										if not TempRadioB[side][bandFreq].min then TempRadioB[side][bandFreq].min = value.min  end
-										if not TempRadioB[side][bandFreq].max then TempRadioB[side][bandFreq].max = value.max  end
+										if not tempRadioB[side][bandFreq] then tempRadioB[side][bandFreq] = {} end
+										if not tempRadioB[side][bandFreq].min then tempRadioB[side][bandFreq].min = value.min  end
+										if not tempRadioB[side][bandFreq].max then tempRadioB[side][bandFreq].max = value.max  end
 
-										if (value.min < TempRadioB[side][bandFreq].max)  then								--si une plage radio est en dehors des autres, on privil�gie le joueur
-											if value.min > TempRadioB[side][bandFreq].min then
-												TempRadioB[side][bandFreq].min =  value.min
+										if (value.min < tempRadioB[side][bandFreq].max)  then								--si une plage radio est en dehors des autres, on privil�gie le joueur
+											if value.min > tempRadioB[side][bandFreq].min then
+												tempRadioB[side][bandFreq].min =  value.min
 											end
 
-											if (value.max < TempRadioB[side][bandFreq].max) and (value.max > TempRadioB[side][bandFreq].min )  then
-												TempRadioB[side][bandFreq].max =  value.max
+											if (value.max < tempRadioB[side][bandFreq].max) and (value.max > tempRadioB[side][bandFreq].min )  then
+												tempRadioB[side][bandFreq].max =  value.max
 											end
 										end
 
-										if sqd.player and TempRadioB[side][bandFreq] then
+										if sqd.player and tempRadioB[side][bandFreq] then
 											-- print("sqd.type "..tostring(sqd.type))
-											TempRadioB[side][bandFreq]["player"] = true
+											tempRadioB[side][bandFreq]["player"] = true
 											camp.radioWavePlayer = bandFreq
 										end
 
@@ -1481,7 +1484,7 @@ function CreatePlageFrequencyB()																				--trouve une plage de freque
 		end
 	end
 
-	camp.radioB = TempRadioB
+	camp.radioB = tempRadioB
 	-- _affiche(camp.radioB, "UTIL_F camp.radioB")
 
 end
@@ -1749,7 +1752,9 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 								if freqRange and camp.radioC[side][range].min < freqRange.min then rangeMin = freqRange.min end
 								if freqRange and camp.radioC[side][range].max > freqRange.max then rangeMax = freqRange.max end
 
-								freq = math.random(camp.radioC[side][range].min, camp.radioC[side][range].max - 1)
+								-- freq = math.random(camp.radioC[side][range].min, camp.radioC[side][range].max - 1)
+								freq = math.random(rangeMin, rangeMax)
+
 								local deci = math.random(0, 9) / 10									--random first decimal place
 								-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
 								local mil = 00														--impossible pour certain avions, comme le M2000
@@ -2073,6 +2078,15 @@ local function buildsLoadout()
 		dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_db_loadouts.lua")
 	end
 
+	-- Fonction pour compter les mots dans une chaîne
+	local function word_count(input)
+		local count = 0
+		for word in string.gmatch(input, "%S+") do
+			count = count + 1
+		end
+		return count
+	end
+
 
 	-- --si ADD_loadouts existe, on le precharge pour prendre en compte son/ses codes code_loadout que l'on ajoutera au central
 	-- local loadoutFile02 = "../../../Missions/Campaigns/"..camp.title.."/Init/ADD_loadouts.lua"
@@ -2127,21 +2141,42 @@ local function buildsLoadout()
 				-- Plusieurs mots-clés à vérifier
 				local matchCount = 0
 				for _, prefix in ipairs(prefix_s) do
+					-- print("choiceLoadout B1 _: "..tostring(_).." prefix: "..tostring(prefix))
+
 					if string.find(string.lower(camp.title), string.lower(prefix)) then
 						matchCount = matchCount + 1
+						-- print("choiceLoadout B2 matchCount: "..tostring(matchCount).." prefix: "..tostring(prefix))
+
 					end
 				end
 				-- Mise à jour du meilleur match
 				if matchCount > bestMatchCount then
 					bestMatch = codeName
 					bestMatchCount = matchCount
+					-- print("choiceLoadout C bestMatchCount: "..tostring(bestMatchCount).." bestMatch: "..tostring(bestMatch))
 				end
 			else
 				-- Un seul mot-clé à vérifier
 				if string.find(string.lower(camp.title), string.lower(prefix_s)) then
+					-- print("choiceLoadout D1 title: "..tostring(camp.title).." prefix_s: "..tostring(prefix_s))
+
+					
+					local number_of_words = word_count(prefix_s)
+					if number_of_words > bestMatchCount then
+						bestMatch = codeName
+						bestMatchCount = 1
+						-- print("choiceLoadout D2 bestMatchCount: "..tostring(bestMatchCount).." bestMatch: "..tostring(bestMatch))
+
+					elseif prefix_s == camp.title then
+						bestMatch = codeName
+						bestMatchCount = 100
+						-- print("choiceLoadout D3 bestMatchCount: "..tostring(bestMatchCount).." bestMatch: "..tostring(bestMatch))
+					end
+
 					if bestMatchCount < 1 then -- Priorité pour les correspondances plus spécifiques
 						bestMatch = codeName
 						bestMatchCount = 1
+						-- print("choiceLoadout D4 bestMatchCount: "..tostring(bestMatchCount).." bestMatch: "..tostring(bestMatch))
 					end
 				end
 			end
@@ -2155,9 +2190,6 @@ local function buildsLoadout()
 			code_loadout = "all",
 		}
 	end
-
-	-- print("UtilF Z code_loadout "..campConfMod.code_loadout)
-	-- os.execute "pause"
 
 	if Debug.debug then
 		print("UtilF camp.title |"..camp.title.."| campConfMod.code_loadout |"..campConfMod.code_loadout )

@@ -902,6 +902,7 @@ frequency = {
 				nbCanal = 20,
 				startCanal = 0,
 				name = "RS-832 V/UHF",
+				emergencyFreq = 121.5
 			},
 		},
 	},

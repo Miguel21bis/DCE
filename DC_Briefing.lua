@@ -40,7 +40,7 @@ local target_picture = {}
 mission.sortie = camp.title .. " - " .. camp.mission
 
 
-local function FreqCapability(TestFreq, RadioPlane, Nradio, info)
+local function freqCapability(TestFreq, RadioPlane, Nradio, info)
 	local waves  = ""
 
 	if type(TestFreq) == "table" then
@@ -92,6 +92,22 @@ local function FreqCapability(TestFreq, RadioPlane, Nradio, info)
 	else
 		return false
 	end
+end
+
+local function hasAnEmergencyFreq(radioPlane)
+
+	_affiche(radioPlane, "DcBr_radioPlane ")
+	-- os.execute 'pause'
+
+	for nRadio, values in pairs(radioPlane) do
+		for key, value in pairs(values) do
+			if key  == "emergencyFreq" then
+				return value
+					
+			end
+		end
+	end
+
 end
 
 
@@ -1300,15 +1316,21 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					local CAP_freq = {}
 					local ATC_Divert_freq = {}
 					local All_freq = {}
+					local emergencyFreq
+
+
+					--make AWACS_freq table
+					--make tanker_freq table
+					--make AFAC_freq table
 
 					for pack_n,pack in pairs(ATO[tempPlayer.side]) do														--iterate through packages in player side
 						for role_name,role in pairs(pack) do															--iterate through roles in package													--iterate through the flights in role
 							if role[1] and role[1].task == "AWACS" then													--if first flight is AWACS
-								for f = 1 , #role do
+								for fr = 1 , #role do
 									local time = ""
 									local occurence = 0
 
-									for w , wpt in ipairs(role[f].route) do
+									for w , wpt in ipairs(role[fr].route) do
 										if wpt.id == "Station" and occurence == 0 then
 											time = FormatTime(camp.time + wpt.eta, "hh:mm")
 											occurence = occurence + 1
@@ -1319,11 +1341,11 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									end
 
 									local tabElement = {
-										['callsign'] = role[f].callsign,
-										['freq'] = role[f].frequency,																	--store callsign and frequency
-										['type'] = role[f].type,
+										['callsign'] = role[fr].callsign,
+										['freq'] = role[fr].frequency,																	--store callsign and frequency
+										['type'] = role[fr].type,
 										['time'] = time,
-										['flight'] = f,
+										['flight'] = fr,
 									}
 									table.insert(AWACS_freq, tabElement)
 								end
@@ -1331,23 +1353,16 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 								if Data_divers[tempPlayer.type] and Data_divers[tempPlayer.type].refuellingReceptacleType then
 
-									-- print("DcB A1 role[f].type: "..tostring(role[f].type).." "..tostring(Data_divers[role[f].type].refuellingType))
-
-									-- print("DcB A2 tempPlayer.type: "..tostring(tempPlayer.type).." "..tostring(Data_divers[tempPlayer.type].refuellingReceptacleType))
-									
-
 									if Data_divers[role[1].type] and Data_divers[role[1].type].refuellingType and
 										Data_divers[role[1].type].refuellingType == Data_divers[tempPlayer.type].refuellingReceptacleType then
 
-											-- print("DcB B ")
-
-										for f = 1 , #role do
+										for fr = 1 , #role do
 											
 											
 											local time = ""
 											local occurence = 0
 
-											for w , wpt in ipairs(role[f].route) do
+											for w , wpt in ipairs(role[fr].route) do
 												if wpt.id == "Station" and occurence == 0 then
 													time = FormatTime(camp.time + wpt.eta, "hh:mm")
 													occurence = occurence + 1
@@ -1358,23 +1373,23 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 											end
 
 											local tabElement = {
-												['callsign'] = role[f].callsign,
-												['freq'] = role[f].frequency,															--store callsign and frequency
-												['type'] = role[f].type,
+												['callsign'] = role[fr].callsign,
+												['freq'] = role[fr].frequency,															--store callsign and frequency
+												['type'] = role[fr].type,
 												['time'] = time,
-												['flight'] = f,
-												['text'] = role[f].target.text,
+												['flight'] = fr,
+												['text'] = role[fr].target.text,
 											}
 											table.insert(tanker_freq, tabElement)
 										end
 									end
 								end
 							elseif role[1] and role[1].task == "AFAC" then											--if first flight is tanker
-								for f = 1 , #role do
+								for fr = 1 , #role do
 									local time = ""
 									local occurence = 0
 
-									for w , wpt in ipairs(role[f].route) do
+									for w , wpt in ipairs(role[fr].route) do
 										if wpt.id == "Station" and occurence == 0 then
 											time = FormatTime(camp.time + wpt.eta, "hh:mm")
 											occurence = occurence + 1
@@ -1385,11 +1400,11 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									end
 
 									local tabElement = {
-										['callsign'] = role[f].callsign,
-										['freq'] = role[f].frequency,															--store callsign and frequency
-										['type'] = role[f].type,
+										['callsign'] = role[fr].callsign,
+										['freq'] = role[fr].frequency,															--store callsign and frequency
+										['type'] = role[fr].type,
 										['time'] = time,
-										['flight'] = f,
+										['flight'] = fr,
 										['LaserCode'] = role[1].target.LaserCode,
 									}
 									table.insert(AFAC_freq, tabElement)
@@ -1409,25 +1424,24 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						end
 					end
 
-					-- tanker_freq					
+					--make EWR_freq table				
 					local tempEWR = ewr[tempPlayer.side]
 
 					-- modification M34.g change freq EWR + custom FrequenceRadio (g: utilise les indicatifs WEST pour EWR)
-					local ComparePossible = true
+					local comparePossible = true
 					for z=1, #tempEWR do
 						if type(tempEWR[z].callsign) ~= "number" then
-							ComparePossible = false
+							comparePossible = false
 						end
 					end
 
-					if ComparePossible then																				--sort by name, if name is a number
+					if comparePossible then																				--sort by name, if name is a number
 						table.sort(tempEWR, function(a,b) return a.callsign < b.callsign  end)
 					end
 
 					EWR_freq = {}
 					for ewr_n,ewr in ipairs(tempEWR) do																	--iterate through EWR on player side
 						if ewr.frequency and ewr.callsign then															--if EWR has a freqency and callsign
-							--   modification EWR M07.g
 							EWR_freqT = {}
 							EWR_freqT[ewr.callsign] = {}
 
@@ -1466,7 +1480,8 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						end
 					end
 
-					--Divert BASE	M33.d				
+					--Divert BASE
+					--make ATC_Divert_freq table
 					if tempPlayer.divert then
 						for Divert, _base in pairs(tempPlayer.divert) do
 							if Divert ~= tempPlayer.unitname then
@@ -1483,12 +1498,12 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								if landingPossible then
 									for i=1, #radioP do
 										if db_airbases[_base].ATC_frequency and type(db_airbases[_base].ATC_frequency)~= "table" then
-											if FreqCapability(db_airbases[_base].ATC_frequency, radioP, i, "Divert: ") then
+											if freqCapability(db_airbases[_base].ATC_frequency, radioP, i, "Divert: ") then
 												ATC_Divert_freq[Divert] = db_airbases[_base].ATC_frequency
 											end
 										elseif db_airbases[_base].ATC_frequency and type(db_airbases[_base].ATC_frequency)== "table" then
 											for n , freq in ipairs(db_airbases[_base].ATC_frequency) do
-												if FreqCapability(freq, radioP, i, "Divert: ") then
+												if freqCapability(freq, radioP, i, "Divert: ") then
 													ATC_Divert_freq[Divert] = db_airbases[_base].ATC_frequency
 												end
 											end
@@ -1499,7 +1514,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						end
 					end
 
-					--build list
+					
+					--found soviet emergencyFreq
+					emergencyFreq = hasAnEmergencyFreq(radioP)
+
+
+					--***************************************************************************				
+					--******************** build list ********************
+					--***************************************************************************	
+
 					s = "Communication:\n"
 					entries = {}
 					local entry = {name = "", call = "", freq = "",radio = ""}
@@ -1512,10 +1535,11 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						[4] = {},
 						[5] = {},
 					}
-					--***************************************************************************
-					--PACKAGE_freq***************************************************************
 
-					-- for Nradio = 1, 3 do
+
+					--***************************************************************************
+					--PACKAGE_freq ***************************************************************
+
 					for Nradio = 1, #radioP do
 
 						local freqA = tonumber(tempPlayer.group.frequency)
@@ -1524,7 +1548,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						entry["call"] = ""
 						entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-						if FreqCapability(freqA, radioP, Nradio, "") then
+						if freqCapability(freqA, radioP, Nradio, "") then
 							if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 								if radioP[Nradio].startCanal == 0 then MC = -1 end
 								-- if camp.radio[sideName][Nradio]  then
@@ -1567,7 +1591,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						entry["call"] = ReplaceBaseName(tempPlayer.airbase)
 						entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-						if FreqCapability(freqA, radioP, Nradio, "") then
+						if freqCapability(freqA, radioP, Nradio, "") then
 							if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 								if radioP[Nradio].startCanal == 0 then MC = -1 end
 								-- if camp.radio[sideName][Nradio]  then
@@ -1579,6 +1603,38 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								local entryCopy = Deepcopy(entry)
 								table.insert(entriesRadio[Nradio], entryCopy)
 							end
+						end
+					end
+
+					--***************************************************************************
+					--Soviet Emergency 121.5 ****************************************************
+					if emergencyFreq then
+						freqA = tonumber(emergencyFreq)
+						local call = ""
+						local lib = ""
+						
+						for Nradio = 1, #radioP do
+							entry = {name = "", call = "", freq = "",radio = ""}
+							entry["name"] = "Emergency :"
+							entry["call"] = call
+							entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+							if freqCapability(freqA, radioP, Nradio, "") then
+								if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 then
+										if radioP[Nradio].startCanal == 0 then MC = -1 end
+										-- if camp.radio[sideName][Nradio]  then
+										table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+										entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+										local entryCopy = Deepcopy(entry)
+										table.insert(entriesRadio[Nradio], entryCopy)
+									elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
+										local entryCopy = Deepcopy(entry)
+										table.insert(entriesRadio[Nradio], entryCopy)
+									end
+								end
+							end
+
 						end
 					end
 
@@ -1598,7 +1654,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["call"] = call
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-									if FreqCapability(freqA, radioP, Nradio, "") then
+									if freqCapability(freqA, radioP, Nradio, "") then
 										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 											if radioP[Nradio] and radioP[Nradio].nbCanal > 0 then
 												if radioP[Nradio].startCanal == 0 then MC = -1 end
@@ -1633,7 +1689,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["call"] = call
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-									if FreqCapability(freqA, radioP, Nradio, "") then
+									if freqCapability(freqA, radioP, Nradio, "") then
 										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 											if radioP[Nradio].startCanal == 0 then MC = -1 end
 											table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
@@ -1664,7 +1720,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["call"] = call
 									entry["freq"] = string.format("%02.3f", freqA).. " MHz"
 
-									if FreqCapability(freqA, radioP, Nradio, "") then
+									if freqCapability(freqA, radioP, Nradio, "") then
 										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 											if radioP[Nradio].startCanal == 0 then MC = -1 end
 											table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
@@ -1695,7 +1751,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["call"] = call
 									entry["freq"] = string.format("%02.3f", freqA).. " MHz"
 
-									if FreqCapability(freqA, radioP, Nradio, "") then
+									if freqCapability(freqA, radioP, Nradio, "") then
 										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 											if radioP[Nradio].startCanal == 0 then MC = -1 end
 											table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
@@ -1733,7 +1789,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["call"] = call
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-								if FreqCapability(freqA, radioP, Nradio, "") then
+								if freqCapability(freqA, radioP, Nradio, "") then
 									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 										if radioP[Nradio].startCanal == 0 then MC = -1 end
 										table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
@@ -1770,7 +1826,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["call"] = call
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-								if FreqCapability(freqA, radioP, Nradio, "") then
+								if freqCapability(freqA, radioP, Nradio, "") then
 									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 										if radioP[Nradio].startCanal == 0 then MC = -1 end
 										table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
@@ -1797,7 +1853,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["call"] = call
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-								if FreqCapability(freqA, radioP, Nradio, "") then
+								if freqCapability(freqA, radioP, Nradio, "") then
 									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 										if radioP[Nradio].startCanal == 0 then MC = -1 end
 										table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
@@ -1839,7 +1895,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["call"] = call
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-									if FreqCapability(freqA, radioP, Nradio, "") then
+									if freqCapability(freqA, radioP, Nradio, "") then
 										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] < radioP[Nradio].nbCanal then
 											if radioP[Nradio].startCanal == 0 then MC = -1 end
 											table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
@@ -1867,7 +1923,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							entry["call"] = call
 							entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-							if FreqCapability(freqA, radioP, Nradio, "") then
+							if freqCapability(freqA, radioP, Nradio, "") then
 								if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 									if radioP[Nradio].startCanal == 0 then MC = -1 end
 									-- if camp.radio[sideName][Nradio]  then
@@ -1894,7 +1950,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["call"] = ReplaceBaseName(call)
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-								if FreqCapability(freqA, radioP, Nradio, "") then
+								if freqCapability(freqA, radioP, Nradio, "") then
 									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 										if radioP[Nradio].startCanal == 0 then MC = -1 end
 										-- if camp.radio[sideName][Nradio]  then
@@ -1910,6 +1966,8 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							end
 						end
 					end
+
+					--***************************************************************************
 					--ATC all freq
 					for Nradio = 1, #radioP do
 
@@ -1938,7 +1996,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["call"] = ReplaceBaseName(baseName)
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-									if FreqCapability(freqA, radioP, Nradio, "ATC "..tostring(baseName)) then
+									if freqCapability(freqA, radioP, Nradio, "ATC "..tostring(baseName)) then
 										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 											if radioP[Nradio].startCanal == 0 then MC = -1 end
 											table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
@@ -1963,7 +2021,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["call"] = call
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-								if FreqCapability(freqA, radioP, Nradio, "") then
+								if freqCapability(freqA, radioP, Nradio, "") then
 									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 										if radioP[Nradio].startCanal == 0 then MC = -1 end
 										-- if camp.radio[sideName][Nradio]  then
