@@ -99,14 +99,22 @@ local function hasAnEmergencyFreq(radioPlane)
 	_affiche(radioPlane, "DcBr_radioPlane ")
 	-- os.execute 'pause'
 
+	local emergencyFreq = 0
+	local emergencyPreset = 0
+
 	for nRadio, values in pairs(radioPlane) do
 		for key, value in pairs(values) do
 			if key  == "emergencyFreq" then
-				return value
+				emergencyFreq = value
+					
+			elseif key  == "emergencyFreq" then
+				emergencyPreset = value
 					
 			end
 		end
 	end
+
+	return emergencyFreq, emergencyPreset
 
 end
 
@@ -1316,7 +1324,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					local CAP_freq = {}
 					local ATC_Divert_freq = {}
 					local All_freq = {}
-					local emergencyFreq
+					-- local emergencyFreq
 
 
 					--make AWACS_freq table
@@ -1516,7 +1524,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 					
 					--found soviet emergencyFreq
-					emergencyFreq = hasAnEmergencyFreq(radioP)
+					local emergencyFreq, emergencyPreset = hasAnEmergencyFreq(radioP)
 
 
 					--***************************************************************************				
@@ -1538,7 +1546,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 
 					--***************************************************************************
-					--PACKAGE_freq ***************************************************************
+					--PACKAGE_freq **************************************************************
 
 					for Nradio = 1, #radioP do
 
@@ -1609,32 +1617,48 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					--***************************************************************************
 					--Soviet Emergency 121.5 ****************************************************
 					if emergencyFreq then
-						freqA = tonumber(emergencyFreq)
+						freqA = tonumber(emergencyFreq) or 0
 						local call = ""
 						local lib = ""
 						
-						for Nradio = 1, #radioP do
-							entry = {name = "", call = "", freq = "",radio = ""}
-							entry["name"] = "Emergency :"
-							entry["call"] = call
-							entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+						if freqA > 0 then
+							for Nradio = 1, #radioP do
+								entry = {name = "", call = "", freq = "",radio = ""}
+								entry["name"] = "Emergency :"
+								entry["call"] = call
+								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-							if freqCapability(freqA, radioP, Nradio, "") then
-								if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
-									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 then
-										if radioP[Nradio].startCanal == 0 then MC = -1 end
-										-- if camp.radio[sideName][Nradio]  then
-										table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-										entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
-										local entryCopy = Deepcopy(entry)
-										table.insert(entriesRadio[Nradio], entryCopy)
-									elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
-										local entryCopy = Deepcopy(entry)
-										table.insert(entriesRadio[Nradio], entryCopy)
+								local numPreset
+
+								if freqCapability(freqA, radioP, Nradio, "") then
+									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] < radioP[Nradio].nbCanal then
+										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 then
+											if radioP[Nradio].startCanal == 0 then MC = -1 end
+
+											--ça ne marche pas, on perd trop de temps dessus ..
+											-- if emergencyPreset then
+											-- 	table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], emergencyPreset,  freqA)
+											-- 	numPreset = #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] + MC
+											-- 	entry["radio"] = RadName[Nradio].." / Channel " .. emergencyPreset
+											-- 	local entryCopy = Deepcopy(entry)
+											-- 	table.insert(entriesRadio[Nradio], emergencyPreset, entryCopy)
+											-- else
+												table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+												numPreset = #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] + MC
+												entry["radio"] = RadName[Nradio].." / Channel " .. numPreset
+												local entryCopy = Deepcopy(entry)
+												table.insert(entriesRadio[Nradio], entryCopy)
+											-- end
+											
+											
+
+										elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
+											local entryCopy = Deepcopy(entry)
+											table.insert(entriesRadio[Nradio], emergencyPreset, entryCopy)
+										end
 									end
 								end
 							end
-
 						end
 					end
 

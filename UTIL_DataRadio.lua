@@ -780,7 +780,7 @@ frequency = {
 			},
 		},
 	},
-	["CH-47F"] = {
+	["CH-47Fbl1"] = {
 		radio = {						--range of radio frequencies of player aircraft
 			[1] = {						--radio 2 AN/ARC 186(V) VHF AM # 1  VHF FM #2
 				LVHF = {
@@ -902,7 +902,8 @@ frequency = {
 				nbCanal = 20,
 				startCanal = 0,
 				name = "RS-832 V/UHF",
-				emergencyFreq = 121.5
+				emergencyFreq = 121.5,
+				emergencyPreset = 2,
 			},
 		},
 	},

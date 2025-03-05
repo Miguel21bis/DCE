@@ -705,7 +705,7 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 	},
-	["CH-47F"] = {
+	["CH-47Fbl1"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
@@ -1053,7 +1053,7 @@ PayloadType = {
 	["Hercules"] = 19000,
 
 	["CH-47D"] = 10000,
-	["CH-47F"] = 10000,
+	["CH-47Fbl1"] = 10000,
 	["CH-53E"] = 14000,					--16000 en externe
 	["SH-3D"] = 2700,
 	["SH-60B"] = 1800,
@@ -1088,7 +1088,7 @@ IsHelicopter = {
 	["vwv_hh2d"] = {},                            --mod
 
 	["CH-47D"] = {},
-	["CH-47F"] = {},
+	["CH-47Fbl1"] = {},
 	["CH-53E"] = {},
 	["SH-3D"] =
 	{
@@ -1472,7 +1472,7 @@ TaskByPlane = {
 		["vwv_sh2f"] = true,			--Mod
 		["vwv_hh2d"] = true,			--Mod
 		["CH-47D"] = true,
-		["CH-47F"] = true,
+		["CH-47Fbl1"] = true,
 		["AH-64D_BLK_II"] = true,
 		["AH-64A"] = true,
 		["OH-6A"] = true,				--Mod
@@ -2332,7 +2332,7 @@ TaskByPlane = {
 		["vwv_sh2f"] = true,			--Mod
 		["vwv_hh2d"] = true,			--Mod
 		["CH-47D"] = true,
-		["CH-47F"] = true,
+		["CH-47Fbl1"] = true,
 		["CH-53E"] = true,
 		["UH-60A"] = true,
 		["UH-60L"] = true,			--Mod

@@ -37304,7 +37304,7 @@ db_all_loadouts = {
 			},
 		},
 	},
-	["CH-47F"] = {
+	["CH-47Fbl1"] = {
 		CSAR = {
 			["CSAR test"] = {
 				minscore = 0.3,

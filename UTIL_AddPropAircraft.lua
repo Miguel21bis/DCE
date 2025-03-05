@@ -264,7 +264,7 @@ Data_AddPropAircraft = {
 		["FuelProbeEnabled"] = false,
 		["NetCrewControlPriority"] = 1,					
 	},
-	["CH-47F"] = {
+	["CH-47Fbl1"] = {
 		["NetCrewControlPriority"] = 1,					
 	},
 	--inherited_APA_From

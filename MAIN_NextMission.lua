@@ -122,6 +122,21 @@ end
 
 local zipFile = minizip.unzOpen("Init/base_mission.miz", 'rb')
 
+local old_miz = minizip.unzOpen("Init/base_mission.miz", 'rb')
+local existing_files = {}
+
+if old_miz then
+    old_miz:unzGoToFirstFile()
+    repeat
+        local filename = old_miz:unzGetCurrentFileName()
+        if filename:match("^l10n/DEFAULT/") then  -- Filtrer les fichiers sous l10n/DEFAULT
+            local file_content = old_miz:unzReadAllCurrentFile()
+            existing_files[filename] = file_content
+        end
+    until not old_miz:unzGoToNextFile()
+    old_miz:unzClose()
+end
+
 zipFile:unzLocateFile('mission')
 local misStr = zipFile:unzReadAllCurrentFile()
 local misStrFunc = loadstring(misStr)()
@@ -140,7 +155,11 @@ local dicStrFunc = loadstring(dicStr)()
 
 zipFile:unzLocateFile('l10n/DEFAULT/mapResource')
 local resStr = zipFile:unzReadAllCurrentFile()
-local resStrFunc = loadstring(resStr)()
+loadstring(resStr)()
+local oldMapResource = Deepcopy(mapResource)
+_affiche(resStr, "MainNM resStr ")
+_affiche(mapResource, "MainNM mapResource ")
+os.execute 'pause'
 
 zipFile:unzClose()
 
@@ -1041,27 +1060,44 @@ if Debug.allUnhide then
 end
 
 --met à jour ce lien dans le fichier mission
+--FARP-Paphos-Beacon etc example
 local changedFilePlayed = {}
-for side_name, side in pairs(mission.coalition) do																--iterate through sides
-	for country_n, country in pairs(side.country) do															--iterate through countries
+for side_name, side in pairs(mission.coalition) do
+	for country_n, country in pairs(side.country) do
 		if type(country) == "table" then
 			for typeChapter, chapter in pairs(country) do
 				if type(chapter) == "table" then
-					for groupN, group in ipairs(chapter.group) do														--iterate through vehicle groups
+					for groupN, group in ipairs(chapter.group) do
 						if group.route.points[1]  and group.route.points[1].task then
 							if group.route.points[1].task.params.tasks then
 								for taskN, task in ipairs(group.route.points[1].task.params.tasks) do
 									if task.params and task.params.action and task.params.action.id and task.params.action.id == "TransmitMessage" then
-										mission.maxDictId = mission.maxDictId + 1
-										task.params.action.params.subtitle = "DictKey_subtitle_"..mission.maxDictId
-										dictionary["DictKey_subtitle_" .. mission.maxDictId] = ""
+										
+										print("MainNM A1 action.file "..tostring(task.params.action.file))
+										print("MainNM A2 oldMapResource "..tostring(oldMapResource[task.params.action.params.file]))
 
-										mission.maxDictId = mission.maxDictId + 1
-										task.params.action.params.file = "ResKey_advancedFile_"..mission.maxDictId
+										if oldMapResource[task.params.action.params.file] == "beacon.ogg" then
+											print("MainNM B")
+											mission.maxDictId = mission.maxDictId + 1
+											task.params.action.params.subtitle = "DictKey_subtitle_"..mission.maxDictId
+											dictionary["DictKey_subtitle_" .. mission.maxDictId] = ""
 
-										mapResource["ResKey_advancedFile_" .. mission.maxDictId] = "beacon.ogg"
+											mission.maxDictId = mission.maxDictId + 1
+											task.params.action.params.file = "ResKey_advancedFile_"..mission.maxDictId
 
-										table.insert(changedFilePlayed, group.groupId)
+											mapResource["ResKey_advancedFile_" .. mission.maxDictId] = "beacon.ogg"
+
+											table.insert(changedFilePlayed, group.groupId)
+
+										else
+											print("MainNM C")
+											--garde le nom du fichier autre que beacon
+											mission.maxDictId = mission.maxDictId + 1
+											task.params.action.params.subtitle = "DictKey_subtitle_"..mission.maxDictId
+											mission.maxDictId = mission.maxDictId + 1
+											task.params.action.params.file = "ResKey_advancedFile_"..mission.maxDictId
+											mapResource["ResKey_advancedFile_" .. mission.maxDictId] = oldMapResource[task.params.action.params.file]
+										end
 
 									end
 								end
@@ -1186,6 +1222,9 @@ else																				--is false if script is launched from Debrief_Master.lua
 	miz = minizip.zipCreate("../" .. camp.title .. "_ongoing.miz")
 end
 
+for filename, content in pairs(existing_files) do
+    miz:zipAddFileFromString(filename, content)  -- Réécriture des fichiers originaux
+end
 
 miz:zipAddFile("mission", "misFile.lua")
 miz:zipAddFile("options", "optFile.lua")
@@ -1223,32 +1262,84 @@ if mission_ini.load_CTLD then
 	miz:zipAddFile("l10n/DEFAULT/CTLD.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/CTLD.lua")											-- modification M60 CTLD
 end
 
-local BriefingImages = {}
+
+local screenTemp = {}
 local findValue
-for _i,_filename in ipairs(BriefingImagesB) do
+
+for _, filename in ipairs(BriefingImagesB) do
 	findValue = false
-	for i,filename in ipairs(BriefingImages) do
-		if _filename == filename then findValue = true    break end
+
+	for _, fileTemp in ipairs(screenTemp) do
+		if filename == fileTemp then
+			findValue = true
+			break
+		end
 	end
+
 	if not findValue then
-		table.insert(BriefingImages, _filename)
-	end
-end
-for _i,_filename in ipairs(BriefingImagesR) do
-	findValue = false
-	for i,filename in ipairs(BriefingImages) do
-		if _filename == filename then findValue = true  break end
-	end
-	if not findValue then
-		table.insert(BriefingImages, _filename)
+		table.insert(screenTemp, filename)
 	end
 end
 
-for i,filename in ipairs(BriefingImages) do											-- M05.b : ajout picture Briefing + pictures Target
-	if type(filename) == "string" and string.len(filename) > 0 then 				-- M05.c : ajout picture Briefing (c: correction path vide)
-		miz:zipAddFile("l10n/DEFAULT/" .. filename, "Images/" .. filename)
+
+
+for _,  filename in ipairs(BriefingImagesR) do
+	findValue = false
+
+	for _, fileTemp in ipairs(screenTemp) do
+		if filename == fileTemp then
+			findValue = true
+			break
+		end
+	end
+
+	if not findValue then
+		table.insert(screenTemp, filename)
 	end
 end
+
+-- Fonction de similarité (basique, mais efficace pour ce cas)
+local function areSimilar(str1, str2)
+    if #str1 == #str2 then
+        return true
+    elseif math.abs(#str1 - #str2) <= 3 then -- Tolérance sur la longueur
+        return true
+    end
+    return false
+end
+
+for _, filename in ipairs(screenTemp) do
+    if type(filename) == "string" and string.len(filename) > 0 then
+        local file_path = "Images/" .. filename
+
+        -- Vérification d'existence du fichier
+        local file = io.open(file_path, "rb")
+        if file then
+            file:close()
+
+            -- On extrait juste le nom du fichier sans le chemin
+            local actual = file_path:sub(8) -- Supprime "Images/"
+            local expected = filename
+
+            -- Vérification uniquement si les noms semblent similaires
+            if areSimilar(expected, actual) and expected ~= actual then
+                print("  Potential problem with encoding or invisible characters :")
+                print(" -> Expected name : " .. expected)
+                print(" -> Real name    : " .. actual)
+                print(" -> Bytes expected:", string.byte(expected, 1, #expected))
+                print(" -> Bytes real   :", string.byte(actual, 1, #actual))
+            end
+
+            -- Ajout au zip si tout va bien
+            miz:zipAddFile("l10n/DEFAULT/" .. filename, file_path)
+        else
+            print("  File not found : " .. file_path)
+        end
+    end
+end
+
+
+
 
 miz:zipAddFile("l10n/DEFAULT/alarme.wav" , "Sounds/alarme.wav")
 

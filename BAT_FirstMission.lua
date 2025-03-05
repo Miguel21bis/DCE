@@ -304,9 +304,9 @@ repeat
 				-- display le tableau des choix d'avion et de task
 				--tabTaskAvailable[nSide][unit.type][taskStr]
 				for nSide , unit_type in PairsByKeys(tabTaskAvailable) do
-					print() print(nSide..":")
-					for unitType , TabType in PairsByKeys(unit_type) do
-
+					-- print() print(nSide..":")
+					for unitType , tabType in PairsByKeys(unit_type) do
+						-- print("BatFM unitType "..tostring(unitType))
 						local IndexStringType = string.lower(string.char(ti))
 						if not playable_type[IndexStringType] then playable_type[IndexStringType] = {} end
 						playable_type[IndexStringType]["type"] = unitType
@@ -314,8 +314,10 @@ repeat
 
 						io.write(" (1 to 8): ("..IndexStringType.."): "..unitType..":")
 
-						for taskStr , nbool in PairsByKeys(TabType) do
-							if   nbool == true then
+						for taskStr , nbool in PairsByKeys(tabType) do
+							-- print("BatFM taskStr "..tostring(taskStr))
+							-- print("BatFM TabTask[taskStr] "..tostring(TabTask[taskStr]))
+							if nbool == true then
 								io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
 								local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
 								tabIndex[tostring(1)..IndexStringType..TabTask[taskStr]] = true
