@@ -1222,9 +1222,9 @@ else																				--is false if script is launched from Debrief_Master.lua
 	miz = minizip.zipCreate("../" .. camp.title .. "_ongoing.miz")
 end
 
-for filename, content in pairs(existing_files) do
-    miz:zipAddFileFromString(filename, content)  -- Réécriture des fichiers originaux
-end
+-- for filename, content in pairs(existing_files) do
+--     miz:zipAddFileFromString(filename, content)  -- Réécriture des fichiers originaux
+-- end
 
 miz:zipAddFile("mission", "misFile.lua")
 miz:zipAddFile("options", "optFile.lua")
