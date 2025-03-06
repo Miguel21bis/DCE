@@ -157,9 +157,9 @@ zipFile:unzLocateFile('l10n/DEFAULT/mapResource')
 local resStr = zipFile:unzReadAllCurrentFile()
 loadstring(resStr)()
 local oldMapResource = Deepcopy(mapResource)
-_affiche(resStr, "MainNM resStr ")
-_affiche(mapResource, "MainNM mapResource ")
-os.execute 'pause'
+-- _affiche(resStr, "MainNM resStr ")
+-- _affiche(mapResource, "MainNM mapResource ")
+-- os.execute 'pause'
 
 zipFile:unzClose()
 
@@ -1061,7 +1061,6 @@ end
 
 --met à jour ce lien dans le fichier mission
 --FARP-Paphos-Beacon etc example
-local changedFilePlayed = {}
 for side_name, side in pairs(mission.coalition) do
 	for country_n, country in pairs(side.country) do
 		if type(country) == "table" then
@@ -1073,11 +1072,7 @@ for side_name, side in pairs(mission.coalition) do
 								for taskN, task in ipairs(group.route.points[1].task.params.tasks) do
 									if task.params and task.params.action and task.params.action.id and task.params.action.id == "TransmitMessage" then
 										
-										print("MainNM A1 action.file "..tostring(task.params.action.file))
-										print("MainNM A2 oldMapResource "..tostring(oldMapResource[task.params.action.params.file]))
-
 										if oldMapResource[task.params.action.params.file] == "beacon.ogg" then
-											print("MainNM B")
 											mission.maxDictId = mission.maxDictId + 1
 											task.params.action.params.subtitle = "DictKey_subtitle_"..mission.maxDictId
 											dictionary["DictKey_subtitle_" .. mission.maxDictId] = ""
@@ -1087,16 +1082,18 @@ for side_name, side in pairs(mission.coalition) do
 
 											mapResource["ResKey_advancedFile_" .. mission.maxDictId] = "beacon.ogg"
 
-											table.insert(changedFilePlayed, group.groupId)
-
+											
 										else
-											print("MainNM C")
 											--garde le nom du fichier autre que beacon
+											local tempOldFile = Deepcopy(oldMapResource[task.params.action.params.file])
+
 											mission.maxDictId = mission.maxDictId + 1
 											task.params.action.params.subtitle = "DictKey_subtitle_"..mission.maxDictId
 											mission.maxDictId = mission.maxDictId + 1
 											task.params.action.params.file = "ResKey_advancedFile_"..mission.maxDictId
-											mapResource["ResKey_advancedFile_" .. mission.maxDictId] = oldMapResource[task.params.action.params.file]
+
+											mapResource["ResKey_advancedFile_" .. mission.maxDictId] = tempOldFile
+
 										end
 
 									end
@@ -1222,9 +1219,40 @@ else																				--is false if script is launched from Debrief_Master.lua
 	miz = minizip.zipCreate("../" .. camp.title .. "_ongoing.miz")
 end
 
--- for filename, content in pairs(existing_files) do
---     miz:zipAddFileFromString(filename, content)  -- Réécriture des fichiers originaux
--- end
+
+
+
+for filename, content in pairs(existing_files) do
+    if content then
+        if filename:match("mapResource") or filename:match("dictionary") then
+            -- Ajouter directement dans le .miz sans sauvegarde sur disque
+            -- miz:zipAddFileFromString(filename, content)
+        else
+            -- Extraire uniquement le nom du fichier (supprimer "l10n/DEFAULT/")
+            local temp_filename = filename:match("[^/]+$")  
+
+            -- Écrire dans le répertoire courant
+            local temp_file = io.open(temp_filename, "wb")  
+            if temp_file then
+                temp_file:write(content)
+                temp_file:close()
+                
+                -- Ajouter au fichier .miz avec son chemin original
+                miz:zipAddFile(filename, temp_filename)
+
+                -- Supprimer le fichier temporaire
+                os.remove(temp_filename)
+            else
+                print("⚠️ Impossible d'écrire le fichier temporaire : " .. temp_filename)
+            end
+        end
+    else
+        print("⚠️ Contenu vide ou nil pour le fichier : " .. filename)
+    end
+end
+
+
+
 
 miz:zipAddFile("mission", "misFile.lua")
 miz:zipAddFile("options", "optFile.lua")

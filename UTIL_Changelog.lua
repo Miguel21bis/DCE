@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.84.531"
+versionDCE["UTIL_Changelog.lua"] = "20.85.533"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.84.531"
+VersionDCE["UTIL_Changelog.txt"] = "20.85.533"
 --[[
 
 
@@ -9,8 +9,14 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.84.531:==
+==:20.85.533:==
 
+533	mod		[inter]		interceptors only take off if a type of aircraft to be intercepted is detected
+				["Kien An Airbase Alert"] = {
+					task = "Intercept",
+					targetPlane = {"B-52H", "A-6E", "VSN_F105D" },
+			
+532	 add	[file]		keeps files already added to base_mission M85
 531	 add	[FPS]		DCE Bulle par activation, désactivation des vehicules et static M84
 530	 add	[Jammer]		Jammer checkMissileProximity  M83
 529 add	[callSign]		assign a specific callSign (e.g. Tanker) to a target to have consistent callSigns according to the chosen pattern

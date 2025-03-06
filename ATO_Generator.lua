@@ -3329,6 +3329,9 @@ local function createATO_table(draftPriority)
 											--add flights of 1, 2 or 4 aircraft to package
 											local function AddFlight(assign, role, entry)
 
+												-- if not Data_divers[entry.type] then
+												
+												-- end
 												local assigned
 												while assign > 0 do																		--loop as long as there are aircraft to assign
 
@@ -3375,7 +3378,7 @@ local function createATO_table(draftPriority)
 														end
 													-- elseif (entry.type == "S-3B" or entry.type == "F-117A" or entry.type == "B-1B" or entry.type == "B-52H" or entry.type == "Tu-22M3" or entry.type == "Tu-95MS" or entry.type == "Tu-142" or entry.type == "Tu-160" or entry.type == "MiG-25RBT")
 													-- and entry.task ~= "Runway Attack" then	--for bombers	
-													elseif Data_divers[entry.type].flyingAlone and entry.task ~= "Runway Attack" then	--for bombers
+													elseif (Data_divers[entry.type] and Data_divers[entry.type].flyingAlone) and entry.task ~= "Runway Attack" then	--for bombers
 														assigned = 1																	--assigne one aircraft per flight
 													elseif entry.task == "Reconnaissance" then											--for recon
 														if assign == 1 then																--if there is one aircraft left to assign

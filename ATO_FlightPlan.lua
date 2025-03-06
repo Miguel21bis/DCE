@@ -376,7 +376,7 @@ local function addAndSpaceTankers(groupName, startX, startY)
 
         -- Si un tanker est trop proche, on ajuste en le repoussant
         if distance < OFFSET_DISTANCE then
-            print("⚠️ Ajustement de la position pour éviter un chevauchement")
+            -- print("⚠️ Ajustement de la position pour éviter un chevauchement")
             newPosition = GetOffsetPoint(newPosition, currentHeading, OFFSET_DISTANCE)
         end
     end
@@ -2738,7 +2738,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						else
 
 							
-							if Data_divers[flight[f].type].heavyBomber then
+							if Data_divers[flight[f].type] and Data_divers[flight[f].type].heavyBomber then
 								--formation
 								task_entry = {															--formation bomber moderne 100*100
 									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
@@ -3507,7 +3507,10 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						if flight[f].route[w].id == "Spawn" or flight[f].route[w].id == "Departure" then
 							local searchTime = flight[f].route[#flight[f].route].eta
-							-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
+							if not flight[f].loadout.standoff then 
+								print("no standoff in the loadout of the task ..Fighter Sweep.. of the type: "..tostring(flight[f].type))
+								os.execute "pause"
+							end 
 							local task_entry = {
 								["enabled"] = true,
 								["auto"] = false,
@@ -3537,8 +3540,13 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 									target = "Helicopters"
 								end
 
+								if not flight[f].loadout.standoff then 
+									print("no standoff in the loadout of the task ..Escort.. of the type: "..tostring(flight[f].type))
+									os.execute "pause"
+								end 
+
 								local searchTime = flight[f].route[#flight[f].route].eta
-								-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
+								
 								local task_entry = {
 									["enabled"] = true,
 									["auto"] = false,
@@ -4889,7 +4897,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							--ajoute AddPropAircraft aux types joueur/client
 							units[n]["AddPropAircraft"] = Deepcopy(Data_AddPropAircraft[type_withProp])
 
-							if Data_divers[flight[f].type].alignment_PropAircraft and Data_divers[flight[f].type].alignment_PropAircraft[mission_ini.alignment_Mode] then
+							if Data_divers[flight[f].type] and Data_divers[flight[f].type].alignment_PropAircraft and Data_divers[flight[f].type].alignment_PropAircraft[mission_ini.alignment_Mode] then
 
 								--règle la/les valeurs des variables de vitesse d'alignement dans la table AddPropAircraft 
 								for key, value in pairs(Data_divers[flight[f].type].alignment_PropAircraft[mission_ini.alignment_Mode]) do

@@ -56,7 +56,7 @@ env.info("DCE_ACRF10 version of AddCommandRadioF10 "..tostring(versionDCE["Missi
 
 
 -- Distance seuil pour activation/désactivation (en mètres)
-local ACTIVATION_DISTANCE = 60000 
+local ACTIVATION_DISTANCE = 100000
 
 -- Liste des unités à exclure
 local excludedUnitTypes = {
@@ -4030,11 +4030,11 @@ local function DCE_Bulle()
 
 		if activationN > 0 then
 			env.info("DCE_Bulle - Activation de N objet : " .. activationN)
-			trigger.action.outText("DCE_Bulle - Activation de N objet : " .. activationN, 6)
+			-- trigger.action.outText("DCE_Bulle - Activation de N objet : " .. activationN, 6)
 		end
 		if deActivate > 0 then
 			env.info("DCE_Bulle - Suppresion de N objet : " .. deActivate)
-			trigger.action.outText("DCE_Bulle - Suppresion de N objet : " .. deActivate, 6)
+			-- trigger.action.outText("DCE_Bulle - Suppresion de N objet : " .. deActivate, 6)
 		end
 
 

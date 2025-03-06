@@ -96,7 +96,7 @@ end
 
 local function hasAnEmergencyFreq(radioPlane)
 
-	_affiche(radioPlane, "DcBr_radioPlane ")
+	-- _affiche(radioPlane, "DcBr_radioPlane ")
 	-- os.execute 'pause'
 
 	local emergencyFreq = 0
@@ -415,7 +415,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 		for _role,flight in pairs(packs[p]) do															--iterate through roles in package (main, SEAD, escort)		
 			for f = 1, #flight do
 
-				local value = flight[f].type..""..flight[f].task..""..flight[f].target_name
+				local idName = flight[f].type..""..flight[f].task..""..flight[f].target_name
 				local allowedBrief = false																--evite la répétition des briefings surtout en MP
 
 				-- inheritedFrom 
@@ -426,11 +426,11 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 				if PlayerFlight and (flight[f].player or flight[f].client)  then
 
-					if not briefPlaneTaskTarget[value] then
+					if not briefPlaneTaskTarget[idName] then
 						allowedBrief = true
 					end
 
-					briefPlaneTaskTarget[value] = true													--evite la répétition des briefings surtout en MP
+					briefPlaneTaskTarget[idName] = true													--evite la répétition des briefings surtout en MP
 
 					local tempPlayer = {}
 
@@ -747,9 +747,9 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							local tgt_heading = GetHeading(tempPlayer.waypoints[1], ATO[tempPlayer.tgt_side][tempPlayer.tgt_pack].main[1].route[1])
 							local tgt_distance = GetDistance(tempPlayer.waypoints[1], ATO[tempPlayer.tgt_side][tempPlayer.tgt_pack].main[1].route[1])
 							local tgt_n = 0
-							for role, flight in pairs (ATO[tempPlayer.tgt_side][tempPlayer.tgt_pack]) do
-								for n = 1, #flight do
-									tgt_n = tgt_n + flight[n].number
+							for role, flightInter in pairs (ATO[tempPlayer.tgt_side][tempPlayer.tgt_pack]) do
+								for n = 1, #flightInter do
+									tgt_n = tgt_n + flightInter[n].number
 								end
 							end
 							if tgt_n == 1 then
@@ -994,9 +994,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					for role_name,role in pairs(tempPlayer.package[tempPlayer.pack_n]) do											--iterate through roles in the player package
 						for flight_n,flight2 in pairs(role) do													--iterate through the flights in all roles
 							for e = 1, #entries do																--iterate through all entries
-								local value = ReplaceTypeName(flight2[entries[e].lookup])
-								value = ReplaceBaseName(flight2[entries[e].lookup])
-								local l = string.len(tostring(value))	 + 3										--get the string length of the current entry for this flight
+								local value = flight2[entries[e].lookup]
+								
+								if entries[e].header == "Type" then
+									value = ReplaceTypeName(flight2[entries[e].lookup])
+								elseif entries[e].header == "Base" then
+									value = ReplaceBaseName(flight2[entries[e].lookup])
+								end
+								
+								local l = string.len(tostring(value)) + 3										--get the string length of the current entry for this flight
 								if l > entries[e].str_length then												--if the string length is larger than the previous
 									entries[e].str_length = l													--make it the new length (find the largest)
 								end
@@ -1008,7 +1014,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					for e = 1, #entries do																		--iterate through all entries
 						s = s .. entries[e].header																--add entry of this flight to list
 						if e ~= #entries then																	--if this is not the last entry of the flight, add spaces to the next entry	
-							local space = entries[e].str_length + 0 - string.len(tostring(entries[e].header))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
+							space = entries[e].str_length + 0 - string.len(tostring(entries[e].header))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
 							for n = 1, space * 1.0 do
 								s = s .. " "																	--add 1.5 spaces for every missing letter
 							end
@@ -1021,10 +1027,18 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						for flight_n,flight2 in pairs(role) do													--iterate through flights in all roles
 							for e = 1, #entries do																--iterate through all entries
 								if type(flight2[entries[e].lookup]) == "string" or type(flight2[entries[e].lookup]) == "number" then	--entry is a string or number
-									local value = ReplaceTypeName(flight2[entries[e].lookup])
+									
+									local value = flight2[entries[e].lookup]
+								
+									if entries[e].header == "Type" then
+										value = ReplaceTypeName(flight2[entries[e].lookup])
+									elseif entries[e].header == "Base" then
+										value = ReplaceBaseName(flight2[entries[e].lookup])
+									end
+									
 									s = s .. value																--add entry of this flight to list
 									if e ~= #entries then																			--if this is not the last entry of the flight, add spaces to the next entry	
-										local space = entries[e].str_length + 0 - string.len(tostring(value))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
+										space = entries[e].str_length + 0 - string.len(tostring(value))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
 										for n = 1, space * 1.0 do
 											s = s .. " "														--add 1.5 spaces for every missing letter
 										end
