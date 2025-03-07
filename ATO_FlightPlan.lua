@@ -1,9 +1,9 @@
 --To create the flight plans in the mission file for all flights in the ATO
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: adjustment_Ac
+-- last modification: adjustment_Ad
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_FlightPlan.lua"] = "1.58.288"
+versionDCE["ATO_FlightPlan.lua"] = "1.58.289"
 ------------------------------------------------------------------------------------------------------- 
 
 -- SomethingSimple_a		(a add randomizeSkills)
@@ -11,7 +11,7 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.288"
 -- Eagle_01 Modification E01_c
 
 -- mouvedOption_CM_01_c		(c: manage les options de west callSign) (b: previent le CampaignMaker d'une nation manquante)
--- adjustment_Ac            (c TACAN_byTarget)(b predeterminedCallsign)(y AddPropAircraft for all)(x largage d urgence if not heli)(CVN to CV)(t adjustment_e)(s No ATE if antiShip + B52 ASM)
+-- adjustment_Ad            (d Fighter Sweep standoff)(c TACAN_byTarget)(b predeterminedCallsign)(y AddPropAircraft for all)(x largage d urgence if not heli)(CVN to CV)(t adjustment_e)(s No ATE if antiShip + B52 ASM)
 -- cleancode_n				(n springCleaning)
 -- debug_Aa					(a flight delayed)(z package stats)(y polka on parking)(x frequency SA342)(w no recalculates all speeds)
 
@@ -3523,7 +3523,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 										["id"] = "Script",
 										["params"] =
 										{
-											["command"] = "CustomSearchThenEngage('" .. groupName .. "', " .. flight[f].loadout.standoff .. ", 'Air'," .. searchTime .. ")",
+											["command"] = "CustomSearchThenEngage('" .. groupName .. "', " .. tostring(flight[f].loadout.standoff) .. ", 'Air'," .. searchTime .. ")",
 										},
 									},
 								},
@@ -3559,7 +3559,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 											["id"] = "Script",
 											["params"] =
 											{
-												["command"] = "CustomSearchThenEngage('" .. groupName .. "', " .. flight[f].loadout.standoff .. ", 'Air'," .. searchTime .. ")",
+												["command"] = "CustomSearchThenEngage('" .. groupName .. "', " .. tostring(flight[f].loadout.standoff) .. ", 'Air'," .. searchTime .. ")",
 											},
 										},
 									},
@@ -4886,12 +4886,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					--prend en compte en priorité la version AddProp du loadout
 					if units[n]["AddPropAircraft"] == false or units[n]["AddPropAircraft"] == nil then
-
-						-- -- inheritedFrom
-						-- local type_withData= flight[f].type
-						-- if Data_divers and Data_divers.inheritedFrom then
-						-- 	type_withData= Data_divers.inheritedFrom
-						-- end
 
 						if Data_AddPropAircraft[type_withProp]  then
 							--ajoute AddPropAircraft aux types joueur/client

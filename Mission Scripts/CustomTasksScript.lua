@@ -1816,8 +1816,8 @@ end
 function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)
 	if varFpsLeak then return end
 
-	if not Radius or Radius == nil or Radius <= 80000 then
-		Radius = 80000
+	if not Radius or Radius == nil or Radius <= 40000 then
+		Radius = 40000
 	end
 	if not searchTime or searchTime == nil then
 		searchTime = timer.getTime() + 1800

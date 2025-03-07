@@ -56,7 +56,11 @@ env.info("DCE_ACRF10 version of AddCommandRadioF10 "..tostring(versionDCE["Missi
 
 
 -- Distance seuil pour activation/désactivation (en mètres)
+local useBubble_DisableEnable_Group = false
+local useBubble_Mouve_Group = true
 local ACTIVATION_DISTANCE = 100000
+local FAR_AWAY_X = 1000000  -- Coordonnée X lointaine
+local FAR_AWAY_Y = 1000000  -- Coordonnée Y lointaine
 
 -- Liste des unités à exclure
 local excludedUnitTypes = {
@@ -3692,9 +3696,9 @@ local groundGroups = {} -- Stocke les groupes actifs
 
 
 --/////////////////////////////////////// DCE_Bulle /////////////////////////////////////////////////////
-local function DCE_Bulle()
+local function DCE_BulleBy_DE()
 
-	-- 🔻 **Collecte des objets statiques au démarrage** 🔻
+	--  **Collecte des objets statiques au démarrage** 
 	local function collectStaticObjects()
 		staticObjects = {}
 
@@ -3711,16 +3715,11 @@ local function DCE_Bulle()
 						y = static:getPoint().z,
 						heading = getHeadingDCE(static)
 					}
-					-- env.info("DCE_Bulle Collected static object: " .. staticName)
 				end
 			end
 		end
 
-		-- env.info("DCE_Bulle Total static objects collected: A " .. tostring(#staticObjects))
-
 		local nombreElements = tablelength(staticObjects)
-
-		-- env.info("DCE_Bulle Total static objects collected: B " .. tostring(nombreElements))
 
 		if camp.debug then
 			local current_time = timer.getTime()
@@ -3737,7 +3736,7 @@ local function DCE_Bulle()
 
 
 
-	-- 🔻 **Collecte des groupes dynamiques au sol avec exclusion** 🔻
+	--  **Collecte des groupes dynamiques au sol avec exclusion** 
 	local function collectGroundGroups()
 		groundGroups = {}
 		local totalGroups = 0
@@ -3759,7 +3758,7 @@ local function DCE_Bulle()
 						for _, unit in ipairs(units) do
 							if excludedUnitTypes[unit:getTypeName()] then
 								excludeGroup = true
-								env.info("DCE_Bulle - Exclusion du groupe : " .. groupName .. " (contient " .. unit:getTypeName() .. ")")
+								-- env.info("DCE_Bulle - Exclusion du groupe : " .. groupName .. " (contient " .. unit:getTypeName() .. ")")
 								break
 							end
 						end
@@ -3789,14 +3788,14 @@ local function DCE_Bulle()
 								end
 
 								groundGroups[groupName] = groupData
-								env.info("Added ground vehicle group: " .. groupName)
+								-- env.info("Added ground vehicle group: " .. groupName)
 								validGroups = validGroups + 1
 							else
 								env.warning("Impossible de récupérer le pays pour " .. groupName)
 							end
 						end
 					else
-						env.info("Skipped group (no units): " .. groupName)
+						-- env.info("Skipped group (no units): " .. groupName)
 					end
 				end
 			end
@@ -3811,7 +3810,7 @@ local function DCE_Bulle()
 	end
 
 
-	-- 🔻 **Récupérer tous les avions (joueurs et IA) en vol** 🔻
+	--  **Récupérer tous les avions (joueurs et IA) en vol** 
 	local function getAllAircrafts()
 		local aircrafts = {}
 
@@ -3832,7 +3831,7 @@ local function DCE_Bulle()
 	end
 
 
-	-- 🔻 **Désactiver un groupe ou un objet statique** 🔻
+	--  **Désactiver un groupe ou un objet statique** 
 	local function disableGroup(groupData)
 		if not groupData or not groupData.name then
 			env.warning("DCE_Bulle Erreur : groupData invalide dans disableGroup")
@@ -3841,7 +3840,7 @@ local function DCE_Bulle()
 
 		local group = Group.getByName(groupData.name)
 		if group and group:isExist() then
-			-- 🔹 **Sauvegarde du groupe avant suppression**
+			--  **Sauvegarde du groupe avant suppression**
 			local unitsData = {}
 			local foundCountry
 			for _, unit in ipairs(group:getUnits()) do
@@ -3873,7 +3872,7 @@ local function DCE_Bulle()
 			-- env.info("DCE_Bulle Group " .. groupData.name .. " has been disabled (destroyed)")
 
 		elseif staticObjects[groupData.name] then
-			-- 🔹 **Gestion des objets statiques**
+			--  **Gestion des objets statiques**
 			local staticData = staticObjects[groupData.name]
 			savedStatics[groupData.name] = staticData
 			local static = StaticObject.getByName(groupData.name)
@@ -3888,7 +3887,7 @@ local function DCE_Bulle()
 		end
 	end
 
-	-- 🔻 **Réactiver un groupe ou un objet statique** 🔻
+	--  **Réactiver un groupe ou un objet statique** 
 	local function enableGroup(groupData)
 		if not groupData or not groupData.name then
 			env.info("DCE_Bulle C1 Erreur : groupData invalide dans enableGroup")
@@ -3961,7 +3960,7 @@ local function DCE_Bulle()
 		end
 	end
 
-	-- 🔻 **Calculer la distance entre un point et l'avion le plus proche** 🔻
+	--  **Calculer la distance entre un point et l'avion le plus proche** 
 	local function getNearestAircraftDistance(targetX, targetY)
 		local aircrafts = getAllAircrafts()
 		local minDistance = math.huge -- Distance infinie par défaut
@@ -3980,14 +3979,14 @@ local function DCE_Bulle()
 		return minDistance
 	end
 
-	-- 🔻 **Vérifier et basculer les unités selon leur distance aux avions** 🔻
+	--  **Vérifier et basculer les unités selon leur distance aux avions** 
 	local function updateUnitVisibility()
 		env.info("DCE_Bulle - Vérification des distances et basculement des unités...")
 
 		local activationN = 0
 		local deActivate = 0
 
-		-- 🔹 **Véhicules dynamiques**
+		--  **Véhicules dynamiques**
 		for groupName, groupData in pairs(groundGroups) do
 			if groupData and groupData.units then
 				local firstUnit = groupData.units[1] -- Prendre la première unité comme référence
@@ -4009,7 +4008,7 @@ local function DCE_Bulle()
 			end
 		end
 
-		-- 🔹 **Objets statiques**
+		--  **Objets statiques**
 		for staticName, staticData in pairs(staticObjects) do
 			local distance = getNearestAircraftDistance(staticData.x, staticData.y)
 
@@ -4040,14 +4039,14 @@ local function DCE_Bulle()
 
 	end
 
-	-- 🔻 **Planification du check toutes les 30 secondes** 🔻
+	--  **Planification du check toutes les 30 secondes** 
 	local function scheduleUnitCheck()
 		env.info("DCE_Bulle - Planification de la vérification des unités dans 30 secondes...")
 		updateUnitVisibility()
 		return timer.getTime() + 30
 	end
 
-	-- 🔻 **Planification initiale après collecte des unités et statiques** 🔻
+	--  **Planification initiale après collecte des unités et statiques** 
 	timer.scheduleFunction(function()
 		env.info("DCE_Bulle - Démarrage de la collecte des groupes au sol et statiques...")
 		collectStaticObjects()
@@ -4058,8 +4057,273 @@ local function DCE_Bulle()
 
 end
 
--- 🔻 **Planification initiale après collecte des unités et statiques** 🔻
-timer.scheduleFunction(DCE_Bulle, nil, timer.getTime() + 20) -- start après 5 sec
+
+--/////////////////////////////////////// DCE_Bulle /////////////////////////////////////////////////////
+local function DCE_BulleBy_Mouve()
+
+	--  **Collecte des objets statiques au démarrage** 
+	local function collectStaticObjects()
+		staticObjects = {}
+
+		for _, side in pairs({ coalition.side.RED, coalition.side.BLUE }) do
+			local allStatics = coalition.getStaticObjects(side)
+			for _, static in ipairs(allStatics) do
+				if static and static:isExist() then
+					local staticName = static:getName()
+					staticObjects[staticName] = {
+						name = staticName,
+						country = static:getCountry(),
+						type = static:getTypeName(),
+						x = static:getPoint().x,
+						y = static:getPoint().z,
+						heading = getHeadingDCE(static)
+					}
+				end
+			end
+		end
+
+		local nombreElements = tablelength(staticObjects)
+
+		if camp.debug then
+			local current_time = timer.getTime()
+			local logStr = "OrbitPosition = " .. TableSerialization(staticObjects, 0)
+			local logFile = io.open(PathDCE.."Debug\\DCE_Bulle".."_".. "staticObjects"..current_time..".lua", "w")
+			if logFile then
+				logFile:write(logStr)
+				logFile:close()
+			else
+				-- env.info("DCE_Bulle: Failed to open log file for writing.")
+			end
+		end
+	end
+
+
+
+	--  **Collecte des groupes dynamiques au sol avec exclusion** 
+	local function collectGroundGroups()
+		groundGroups = {}
+		local totalGroups = 0
+		local validGroups = 0
+
+		local function addGroupsFromCoalition(side)
+			-- Récupère uniquement les groupes dynamiques au sol
+			local allGroups = coalition.getGroups(side, Group.Category.GROUND)
+			totalGroups = totalGroups + #allGroups
+
+			for _, group in ipairs(allGroups) do
+				if group and group:isExist() then
+					local groupName = group:getName()
+					local units = group:getUnits()
+					local excludeGroup = false -- Flag pour exclure un groupe entier
+
+					if #units > 0 then
+						-- Vérifie si le groupe contient une unité interdite
+						for _, unit in ipairs(units) do
+							if excludedUnitTypes[unit:getTypeName()] then
+								excludeGroup = true
+								-- env.info("DCE_Bulle - Exclusion du groupe : " .. groupName .. " (contient " .. unit:getTypeName() .. ")")
+								break
+							end
+						end
+
+						if not excludeGroup then
+							-- Récupère le pays depuis la première unité du groupe
+							local firstUnit = units[1]
+							local country = firstUnit and firstUnit:getCountry() or nil
+
+							if country then
+								-- Sauvegarde la structure du groupe pour le recréer plus tard
+								local groupData = {
+									name = groupName,
+									country = country,
+									units = {}
+								}
+
+								for _, unit in ipairs(units) do
+									local pos = unit:getPoint()
+									table.insert(groupData.units, {
+										name = unit:getName(),
+										type = unit:getTypeName(),
+										x = pos.x,
+										y = pos.z,
+										heading = math.deg(math.atan2(unit:getVelocity().z, unit:getVelocity().x))
+									})
+								end
+
+								groundGroups[groupName] = groupData
+								-- env.info("Added ground vehicle group: " .. groupName)
+								validGroups = validGroups + 1
+							else
+								env.warning("Impossible de récupérer le pays pour " .. groupName)
+							end
+						end
+					else
+						-- env.info("Skipped group (no units): " .. groupName)
+					end
+				end
+			end
+		end
+
+		-- Ajout des groupes des deux coalitions
+		addGroupsFromCoalition(coalition.side.RED)  
+		addGroupsFromCoalition(coalition.side.BLUE) 
+
+		env.info("Total groups found: " .. tostring(totalGroups))
+		env.info("Ground vehicle groups collected (après exclusion) : " .. tostring(validGroups))
+	end
+
+
+	--  **Récupérer tous les avions (joueurs et IA) en vol** 
+	local function getAllAircrafts()
+		local aircrafts = {}
+
+		for _, side in pairs({ coalition.side.RED, coalition.side.BLUE }) do
+			local airGroups = coalition.getGroups(side, Group.Category.AIRPLANE) -- Récupère tous les groupes aériens
+			for _, group in ipairs(airGroups) do
+				if group and group:isExist() then
+					for _, unit in ipairs(group:getUnits()) do
+						if unit and unit:isExist() then
+							table.insert(aircrafts, unit)
+						end
+					end
+				end
+			end
+		end
+
+		return aircrafts
+	end
+
+
+	-- Table pour stocker les positions d'origine des groupes et objets
+	local originalPositions = {}
+
+	--  **Déplacer un groupe/unité statique très loin** 
+	local function moveFarAway(groupData)
+		if not groupData or not groupData.name then return end
+
+		if not originalPositions[groupData.name] then
+			-- Sauvegarder la position initiale uniquement la première fois
+			originalPositions[groupData.name] = {}
+			for _, unit in ipairs(groupData.units or {}) do
+				originalPositions[groupData.name][unit.name] = {
+					x = unit.x,
+					y = unit.y
+				}
+			end
+		end
+
+		-- Déplacer toutes les unités du groupe
+		for _, unit in ipairs(groupData.units or {}) do
+			unit.x = FAR_AWAY_X
+			unit.y = FAR_AWAY_Y
+		end
+
+		-- Appliquer le déplacement
+		local group = Group.getByName(groupData.name)
+		if group and group:isExist() then
+			group:destroy()
+			coalition.addGroup(groupData.country, Group.Category.GROUND, groupData)
+		end
+
+		env.info("DCE_Bulle - Déplacement très loin du groupe : " .. groupData.name)
+	end
+
+	--  **Ramener un groupe/unité statique à sa position d'origine** 
+	local function moveBackToOriginalPosition(groupData)
+		if not groupData or not groupData.name then return end
+		if not originalPositions[groupData.name] then return end
+
+		-- Restaurer la position d'origine
+		for _, unit in ipairs(groupData.units or {}) do
+			local originalPos = originalPositions[groupData.name][unit.name]
+			if originalPos then
+				unit.x = originalPos.x
+				unit.y = originalPos.y
+			end
+		end
+
+		-- Appliquer le déplacement
+		local group = Group.getByName(groupData.name)
+		if group and group:isExist() then
+			group:destroy()
+			coalition.addGroup(groupData.country, Group.Category.GROUND, groupData)
+		end
+
+		env.info("DCE_Bulle - Restauration du groupe : " .. groupData.name)
+	end
+
+	--  **Calculer la distance entre un point et l'avion le plus proche** 
+	local function getNearestAircraftDistance(targetX, targetY)
+		local aircrafts = getAllAircrafts()
+		local minDistance = math.huge 
+
+		for _, aircraft in ipairs(aircrafts) do
+			local pos = aircraft:getPoint()
+			local dx = pos.x - targetX
+			local dy = pos.z - targetY
+			local distance = math.sqrt(dx * dx + dy * dy)
+
+			if distance < minDistance then
+				minDistance = distance
+			end
+		end
+
+		return minDistance
+	end
+
+	--  **Vérifier et déplacer les unités/statics selon leur distance aux avions** 
+	local function updateUnitVisibility()
+		env.info("DCE_Bulle - Vérification des distances et basculement des unités...")
+
+		--  **Véhicules dynamiques**
+		for groupName, groupData in pairs(groundGroups) do
+			if groupData and groupData.units then
+				local firstUnit = groupData.units[1]
+				local distance = getNearestAircraftDistance(firstUnit.x, firstUnit.y)
+
+				if distance < ACTIVATION_DISTANCE then
+					moveBackToOriginalPosition(groupData)
+				else
+					moveFarAway(groupData)
+				end
+			end
+		end
+
+		--  **Objets statiques**
+		for staticName, staticData in pairs(staticObjects) do
+			local distance = getNearestAircraftDistance(staticData.x, staticData.y)
+
+			if distance < ACTIVATION_DISTANCE then
+				moveBackToOriginalPosition({ name = staticName, units = { staticData } })
+			else
+				moveFarAway({ name = staticName, units = { staticData } })
+			end
+		end
+	end
+
+	--  **Planification du check toutes les 30 secondes** 
+	local function scheduleUnitCheck()
+		env.info("DCE_Bulle - Planification de la vérification des unités dans 30 secondes...")
+		updateUnitVisibility()
+		return timer.getTime() + 30
+	end
+
+	--  **Planification initiale après collecte des unités et statiques** 
+	timer.scheduleFunction(function()
+		env.info("DCE_Bulle - Démarrage de la collecte des groupes au sol et statiques...")
+		collectStaticObjects()
+		collectGroundGroups()
+		env.info("DCE_Bulle - Vérification et activation de la surveillance des unités...")
+		timer.scheduleFunction(scheduleUnitCheck, nil, timer.getTime() + 5)
+	end, nil, timer.getTime() + 10)
+
+
+end
+
+--  **Planification initiale après collecte des unités et statiques** 
+if useBubble_Mouve_Group then
+	timer.scheduleFunction(DCE_BulleBy_Mouve, nil, timer.getTime() + 20) -- start après 5 sec
+end
 
 
 
@@ -4069,7 +4333,14 @@ timer.scheduleFunction(DCE_Bulle, nil, timer.getTime() + 20) -- start après 5 s
 --////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
+--  **Planification initiale après collecte des unités et statiques** 
+if useBubble_DisableEnable_Group then
+	timer.scheduleFunction(DCE_BulleBy_DE, nil, timer.getTime() + 20) -- start après 5 sec
+end
+--////////////////////////////////////////////////////////////////////////////////////////////
+--test BULLE (fin) IV
+--avec distance avion
+--////////////////////////////////////////////////////////////////////////////////////////////
 
 _affiche(AI.Option.Air.val, "AI.Option.Air.val")
 
