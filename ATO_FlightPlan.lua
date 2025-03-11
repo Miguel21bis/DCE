@@ -117,10 +117,8 @@ if Multi.NbGroup >= 1 then
 end
 
 ----- Desactive USN Mod -----modification M23
-if not mission_ini.Keep_USNdeckCrew then
-	mission.requiredModules = {
-		['USN-Deckcrew'] = nil,
-	}
+if not mission_ini.Keep_USNdeckCrew and mission.requiredModules['USN-Deckcrew'] then
+	mission.requiredModules['USN-Deckcrew'] =  nil
 end
 
 -- ["requiredModules"] = 
@@ -2164,7 +2162,9 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				local departure_time											--local variable to store departure time
 				local waypoints = {}											--define waypoints of flight
 				local wptTargetPass = false										--detecte le passage du wpt Target
-
+						
+				local alreadyTreated
+				
 				for w = 1, #flight[f].route do
 
 					local atlTemp = flight[f].route[w].alt
@@ -2737,14 +2737,65 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						}
 						else
 
-							
+							--************* largage d'urgence *************
+							if (Data_divers[flight[f].type] and Data_divers[flight[f].type].heavyBomber)
+								or flight[f].task == "SEAD" or flight[f].task == "Escort Jammer" then
+
+								--largage d'urgence FALSE *************
+								task_entry = {
+									["enabled"] = true,
+									["auto"] = false,
+									["id"] = "WrappedAction",
+									["name"] = "emergency jettison: FALSE (Departure/Spawn, SEAD)",
+									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+									["params"] =
+									{
+										["action"] =
+										{
+											["id"] = "Option",
+											["params"] =
+											{
+												["value"] = false,
+												["name"] = 15,
+											},
+										},
+									},
+								}
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+							else
+
+								--largage d'urgence TRUE *************
+								task_entry = {
+									["enabled"] = true,
+									["auto"] = false,
+									["id"] = "WrappedAction",
+									["name"] = "emergency jettison: TRUE (Departure/Spawn)",
+									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+									["params"] =
+									{
+										["action"] =
+										{
+											["id"] = "Option",
+											["params"] =
+											{
+												["value"] = true,
+												["name"] = 15,
+											},
+										},
+									},
+								}
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+							end
+
+
+							--************* formation *************
 							if Data_divers[flight[f].type] and Data_divers[flight[f].type].heavyBomber then
-								--formation
+								--formation formation bomber moderne 100*100 *************
 								task_entry = {															--formation bomber moderne 100*100
 									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 									["auto"] = false,
 									["id"] = "WrappedAction",
-									["name"] = "formation bomber moderne 100*100",
+									["name"] = "formation bomber moderne 100*100  (Departure/Spawn)",
 									["enabled"] = true,
 									["params"] =
 									{
@@ -2764,54 +2815,9 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								}
 								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
-								--largage d'urgence
-								task_entry = {
-									["enabled"] = true,
-									["auto"] = false,
-									["id"] = "WrappedAction",
-									["name"] = "emergency jettison: FALSE (Departure/Spawn, heavyBomber)",
-									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-									["params"] =
-									{
-										["action"] =
-										{
-											["id"] = "Option",
-											["params"] =
-											{
-												["value"] = false,			--false interdit le largage d'urgence
-												["name"] = 15,
-											},
-										},
-									},
-								}
-								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+							else
 
-
-								--reaction to Threats
-								task_entry = {
-									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-									["auto"] = false,
-									["id"] = "WrappedAction",
-									["name"] = "reaction to Threats, passive defense (Departure/Spawn)",
-									["enabled"] = true,
-									["params"] =
-									{
-										["action"] =
-										{
-											["id"] = "Option",
-											["params"] =
-											{
-												["value"] = 1,
-												["name"] = 1,
-											},
-										},
-									},
-								}
-								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-
-							else	-- FIN heavyBomber
-
-								-- ** formation **
+								-- ** formation Spread Four Close
 								task_entry = {															--Spread Four Close
 									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 									["auto"] = false,
@@ -2837,33 +2843,63 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
-								if flight[f].task ~= "SEAD" then
-									-- ** reaction to threat **
-									local task_entry = {
-										["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
-										["auto"] = false,
-										["id"] = "WrappedAction",
-										["name"] = "reaction to threats, avoidance of fire (Departure/Spawn)",
-										["enabled"] = true,
-										["params"] =
-										{
-											["action"] =
-											{
-												["id"] = "Option",
-												["params"] =
-												{
-													["value"] = 2,
-													["name"] = 1,
-												},
-											},
-										},
-									}
-
-									table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-								end
 
 							end --heavyBomber or not
 
+
+							--************* reaction to thread *************
+
+							if Data_divers[flight[f].type] and Data_divers[flight[f].type].heavyBomber then
+
+								--reaction to Threats passive defense
+								task_entry = {
+									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+									["auto"] = false,
+									["id"] = "WrappedAction",
+									["name"] = "reaction to Threats, passive defense (Departure/Spawn)",
+									["enabled"] = true,
+									["params"] =
+									{
+										["action"] =
+										{
+											["id"] = "Option",
+											["params"] =
+											{
+												["value"] = 1,
+												["name"] = 1,
+											},
+										},
+									},
+								}
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+
+							elseif flight[f].task ~= "SEAD" then
+								-- ** reaction to threat avoidance of fire
+								task_entry = {
+									["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
+									["auto"] = false,
+									["id"] = "WrappedAction",
+									["name"] = "reaction to threats, avoidance of fire (Departure/Spawn)",
+									["enabled"] = true,
+									["params"] =
+									{
+										["action"] =
+										{
+											["id"] = "Option",
+											["params"] =
+											{
+												["value"] = 2,
+												["name"] = 1,
+											},
+										},
+									},
+								}
+
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+							
+							end
+
+							--************* EngageTargets *************
 							if flight[f].task == "SEAD" then
 
 								task_entry = {
@@ -2883,27 +2919,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								}
 								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 								
-								--largage d'urgence
-								task_entry = {
-									["enabled"] = true,
-									["auto"] = false,
-									["id"] = "WrappedAction",
-									["name"] = "emergency jettison: FALSE (Departure/Spawn, SEAD)",
-									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-									["params"] =
-									{
-										["action"] =
-										{
-											["id"] = "Option",
-											["params"] =
-											{
-												["value"] = false,			--false interdit le largage d'urgence
-												["name"] = 15,
-											},
-										},
-									},
-								}
-								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 							end
 						end -- is plane
 					end --if Departure or Spawn
@@ -3631,14 +3646,13 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					elseif flight[f].task == "Escort Jammer" then
 						
-						local alreadyTreated
-						
 						if (flight[f].route[w].id == "IP" or flight[f].route[w].id == "Target") and not alreadyTreated  then
 
 							local task_entry = {
 								["enabled"] = true,
 								["auto"] = false,
 								["id"] = "Follow",
+								["name"] = "Follow : (id == IP or Target)",
 								["number"] = 1,
 								["params"] =
 								{
@@ -6159,6 +6173,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 										["enabled"] = true,
 										["auto"] = false,
 										["id"] = "Follow",
+										["name"] = "Follow : (id == SAR) wpt1",
 										["number"] = 1,
 										["params"] =
 										{
@@ -6209,6 +6224,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 										["enabled"] = true,
 										["auto"] = false,
 										["id"] = "Follow",
+										["name"] = "Follow : (id == SAR) wpt2",
 										["number"] = 1,
 										["params"] =
 										{

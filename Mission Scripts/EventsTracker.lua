@@ -876,14 +876,15 @@ function eventHandlerDCE:onEvent(event)
 
 			if event and event.id and Info_event and Info_event[tonumber(event.id)] then
 				local idLabel = tostring(Info_event[tonumber(event.id)])
-				env.info("DCE_EventsTracker HIT A event.id "..tostring(event.id).." " ..idLabel)
+				env.info("DCE_EventsTracker HitOrAll A event.id "..tostring(event.id).." " ..idLabel)
 			end
 
-			_affiche(event.initiator, "DCE_EventsTracker HIT B event.initiator")
+			-- _affiche(event.initiator, "DCE_EventsTracker HitOrAll B event.initiator")
 
-			local initDesc = event.initiator:getDesc()																									--debug ET01	
+			local initDesc = event.initiator:getDesc()
 			if initDesc.displayName then
-				log_entry.initiator = event.initiator:getName()																							--store initiator name
+				-- _affiche(initDesc, "DCE_EventsTracker HitOrAll C initDesc")
+				log_entry.initiator = event.initiator:getName()
 			end
 			
 			if Object.getCategory(event.initiator) == Object.Category.UNIT  then										--initiator is a unit debug_ET01.h
@@ -899,24 +900,24 @@ function eventHandlerDCE:onEvent(event)
 				
 				if log_entry.type == "unit lost" and camp.SAR and camp.SAR.pilotEjected then
 					if unitCat and (unitCat == Unit.Category.HELICOPTER) then
-						env.info("DCE_EventsTracker unit lost A "..tostring(unitCat).." initiator: "..tostring(log_entry.initiator))
-						_affiche(EjectedPilotOnBoard, "EjectedPilotOnBoard")
+						env.info("DCE_EventsTracker HitOrAll D unit lost_A "..tostring(unitCat).." initiator: "..tostring(log_entry.initiator))
+						_affiche(EjectedPilotOnBoard, " HitOrAll D lost_A EjectedPilotOnBoard")
 
 						if log_entry.initiator and EjectedPilotOnBoard[log_entry.initiator] then
-							env.info("DCE_EventsTracker unit lost B SAR_Name "..tostring(log_entry.initiator))
+							env.info("DCE_EventsTracker HitOrAll E lost_B _Name "..tostring(log_entry.initiator))
 
 							-- Itérer en boucle inversée pour supprimer des éléments dans une table indexée numériquement
 							for i = #EjectedPilotOnBoard[log_entry.initiator], 1, -1 do
 								local ejectedPilot_OB_name = EjectedPilotOnBoard[log_entry.initiator][i]
 
-								env.info("DCE_EventsTracker unit lost C ejectedPilot_On Board "..tostring(ejectedPilot_OB_name))
+								env.info("DCE_EventsTracker HitOrAll F lost_C unit lost C ejectedPilot_On Board "..tostring(ejectedPilot_OB_name))
 				
 								-- Parcourir les pilotes éjectés dans la campagne
 								for pilotN, ejectedPilot_camp in pairs(camp.SAR.pilotEjected) do
-									env.info("DCE_EventsTracker unit lost D pilotN "..tostring(pilotN).." ejectedPilot_camp.name: "..tostring(ejectedPilot_camp.name).." ==ejectedPilot_OB_name? "..tostring(ejectedPilot_OB_name))
+									env.info("DCE_EventsTracker HitOrAll G lost_D pilotN "..tostring(pilotN).." ejectedPilot_camp.name: "..tostring(ejectedPilot_camp.name).." ==ejectedPilot_OB_name? "..tostring(ejectedPilot_OB_name))
 
 									if ejectedPilot_camp.name == ejectedPilot_OB_name then
-										env.info("DCE_EventsTracker unit lost E ejectedPilot_camp.name dead "..tostring(ejectedPilot_camp.name))
+										env.info("DCE_EventsTracker HitOrAll H lost_E ejectedPilot_camp.name dead "..tostring(ejectedPilot_camp.name))
 
 										-- Marquer le pilote dans la campagne comme "mort"
 										ejectedPilot_camp.status = "dead"
@@ -931,8 +932,11 @@ function eventHandlerDCE:onEvent(event)
 				end
 			end
 
-			if Object.getCategory(event.initiator) ~= Object.Category.SCENERY and not initDesc.missileCategory  then   --and event.initiator:getID()				--initator is not a scenery object debug_ET01.h
+			if initDesc.category and (initDesc.category ~= 0) and Object.getCategory(event.initiator) ~= Object.Category.SCENERY and not initDesc.missileCategory  then				--initator is not a scenery object debug_ET01.h
 				log_entry.initiatorMissionID = event.initiator:getID()																					--store ID
+				
+				env.info("DCE_EventsTracker HitOrAll H initiatorMissionID getID "..tostring(log_entry.initiatorMissionID))
+				
 			end
 
 			if initiatorSideName then
@@ -943,6 +947,8 @@ function eventHandlerDCE:onEvent(event)
 			end
 
 		end
+
+
 
 		if event.target then																														--event has a target
 
@@ -955,12 +961,12 @@ function eventHandlerDCE:onEvent(event)
 			-- Cargo   6
 
 			local targetCategory = Object.getCategory(event.target)
-			env.info( "DCE_EventsTracker HIT C targetCategory| "..tostring(targetCategory))
+			env.info( "DCE_EventsTracker HitOrAll_Tgt A targetCategory| "..tostring(targetCategory))
 
 			if targetCategory and ( targetCategory == Object.Category.UNIT or targetCategory == Object.Category.STATIC or targetCategory == Object.Category.BASE)  then
 				--Function also works with UNIT, STATIC, BASE
 				log_entry.target = event.target:getName()
-				env.info( "DCE_EventsTracker HIT D log_entry.target "..tostring(log_entry.target))
+				env.info( "DCE_EventsTracker HitOrAll_Tgt B log_entry.target "..tostring(log_entry.target))
 
 				if targetCategory == Object.Category.STATIC and log_entry.target ~= nil and log_entry.target ~= "" then
 					-- StaticObject.Category = {
@@ -973,7 +979,7 @@ function eventHandlerDCE:onEvent(event)
 					-- 	"CARGO": 6 
 					--    }
 
-					env.info( "DCE_EventsTracker HIT E log_entry.target "..tostring(log_entry.target))
+					env.info( "DCE_EventsTracker HitOrAll_Tgt C log_entry.target "..tostring(log_entry.target))
 
 					-- local staticDesc = StaticObject.getDesc(event.target)
 					local staticDesc = event.target:getDesc()
@@ -983,7 +989,7 @@ function eventHandlerDCE:onEvent(event)
 
 					log_entry.targetMissionID = event.target:getID()
 
-					env.info( "DCE_EventsTracker HIT F |staticCategory| "..tostring(staticCategory))
+					env.info( "DCE_EventsTracker HitOrAll D |staticCategory| "..tostring(staticCategory))
 
 				elseif targetCategory == Object.Category.UNIT  or targetCategory == Object.Category.BASE then
 
@@ -1004,7 +1010,7 @@ function eventHandlerDCE:onEvent(event)
 
 			if targetCategory and targetCategory == Object.Category.UNIT then												--target is a unit
 				log_entry.targetPilotName = event.target:getPlayerName()													--store player name
-				env.info( "DCE_EventsTracker HIT M |log_entry.type| "..tostring(log_entry.type))
+				env.info( "DCE_EventsTracker HitOrAll_Tgt A |log_entry.type| "..tostring(log_entry.type))
 					
 				local desc = event.target:getDesc()
 				local unitCat = desc.category
@@ -1013,11 +1019,11 @@ function eventHandlerDCE:onEvent(event)
 					-- if event.target:getGroup():getCategory() == 0 or event.target:getGroup():getCategory() == 1 then		--hit unit is aircraft or helo
 
 
-					env.info( "DCE_EventsTracker HIT N |unitCat| "..tostring(unitCat))
+					env.info( "DCE_EventsTracker HIT_Only B |unitCat| "..tostring(unitCat))
 
 					if unitCat and (unitCat == Unit.Category.AIRPLANE or unitCat == Unit.Category.HELICOPTER) then
 						-- if Group.getCategory(event.target:getGroup()) == 0 or Group.getCategory(event.target:getGroup()) == 1 then
-						env.info( "DCE_EventsTracker HIT O |log_entry.targetPilotName| "..tostring(log_entry.targetPilotName))
+						env.info( "DCE_EventsTracker HIT_Only C |log_entry.targetPilotName| "..tostring(log_entry.targetPilotName))
 						
 						local life = event.target:getLife()																	--get current life of unit
 						local init_life = event.target:getLife0()															--get initial life of unit

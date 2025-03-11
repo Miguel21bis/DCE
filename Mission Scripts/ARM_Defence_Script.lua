@@ -267,12 +267,15 @@ function ARM_Shot_EventHandler:onEvent(event)
                         end
                     elseif gpName then
                         for _, unit in ipairs(gp:getUnits()) do
-                            if unit and unit:isActive() and unit:inAir() and unit:getTypeName() == "B-52H" then
-                                local entry = {
-                                    unit = unit,
-                                    dist = jammerDist_B52,
-                                }
-                                table.insert(jammers, entry)
+                            if unit and unit:isActive() and unit:inAir() then
+								local typeName = unit:getTypeName()
+								if typeName == "B-52H" or typeName == "VSN_F105G" then
+									local entry = {
+										unit = unit,
+										dist = jammerDist_B52,
+									}
+									table.insert(jammers, entry)
+								end
                             end
                         end
                     end

@@ -56,9 +56,9 @@ env.info("DCE_ACRF10 version of AddCommandRadioF10 "..tostring(versionDCE["Missi
 
 
 -- Distance seuil pour activation/désactivation (en mètres)
-local useBubble_DisableEnable_Group = false
-local useBubble_Mouve_Group = true
-local ACTIVATION_DISTANCE = 100000
+local useBubble_DisableEnable_Group = true
+local useBubble_Mouve_Group = false
+local ACTIVATION_DISTANCE = 60000
 local FAR_AWAY_X = 1000000  -- Coordonnée X lointaine
 local FAR_AWAY_Y = 1000000  -- Coordonnée Y lointaine
 
@@ -3887,10 +3887,66 @@ local function DCE_BulleBy_DE()
 		end
 	end
 
-	--  **Réactiver un groupe ou un objet statique** 
+
+
+	local spawnQueue = {}  -- File d’attente pour la création progressive (groupes + statiques)
+	local SPAWN_DELAY = 0.02  -- Délai entre chaque création (en secondes)
+
+	--  **Ajoute un élément (groupe ou statique) à la file d’attente** 
+	local function queueSpawn(elementData, isStatic)
+		table.insert(spawnQueue, { data = elementData, isStatic = isStatic })
+	end
+
+	--  **Spawn progressif des groupes et objets statiques** 
+	local function processSpawnQueue()
+		if #spawnQueue == 0 then
+			env.info("DCE_Bulle -E1- Tous les groupes et statiques ont été créés.")
+			return  -- Plus rien à créer
+		end
+
+		local spawnItem = table.remove(spawnQueue, 1)  -- Prend le premier élément de la file
+		local elementData = spawnItem.data
+		local isStatic = spawnItem.isStatic
+
+		if isStatic then
+			env.info("DCE_Bulle -E2- Création différée de l'objet statique : " .. elementData.name)
+			local status, err = pcall(function()
+				coalition.addStaticObject(elementData.country, {
+					name = elementData.name,
+					type = elementData.type,
+					x = elementData.x,
+					y = elementData.y,
+					heading = elementData.heading
+				})
+			end)
+
+			if not status then
+				env.warning("DCE_Bulle -E3- Erreur lors de la création de l'objet statique " .. elementData.name .. " : " .. tostring(err))
+			end
+		else
+			env.info("DCE_Bulle -E4- Création différée du groupe : " .. elementData.name)
+			local status, err = pcall(function()
+				coalition.addGroup(elementData.country, Group.Category.GROUND, elementData)
+			end)
+
+			if not status then
+				env.warning("DCE_Bulle -E5- Erreur lors de la création du groupe " .. elementData.name .. " : " .. tostring(err))
+			end
+		end
+
+		-- Planifie le spawn du prochain élément
+		if #spawnQueue > 0 then
+			timer.scheduleFunction(processSpawnQueue, nil, timer.getTime() + SPAWN_DELAY)
+		else
+			env.info("DCE_Bulle -E1- Tous les groupes et statiques ont été créés.")
+		end
+		
+	end
+
+	--  **Réactiver un groupe ou un objet statique (file d’attente au lieu de spawn direct)** 
 	local function enableGroup(groupData)
 		if not groupData or not groupData.name then
-			env.info("DCE_Bulle C1 Erreur : groupData invalide dans enableGroup")
+			env.info("DCE_Bulle G1 - Erreur : groupData invalide dans enableGroup")
 			return
 		end
 
@@ -3922,43 +3978,118 @@ local function DCE_BulleBy_DE()
 				})
 			end
 
-			local status, err = pcall(function()
-				coalition.addGroup(groupInfo.country, Group.Category.GROUND, newGroup)
-			end)
+			-- Ajoute le groupe dans la file d’attente pour un spawn différé
+			queueSpawn(newGroup, false)
+			savedGroups[groupData.name] = nil
 
-			if status then
-				savedGroups[groupData.name] = nil
-				-- env.info("DCE_Bulle Group " .. groupData.name .. " has been reactivated")
-				-- trigger.action.outText("DCE_Bulle Group " .. groupData.name .. " has been reactivated", 4)
-			else
-				env.warning("DCE_Bulle Erreur lors de la recréation du groupe " .. groupData.name .. " : " .. tostring(err))
+			env.info("DCE_Bulle -G2- #spawnQueue " .. tostring(#spawnQueue))
+
+			-- Démarre le traitement si ce n'est pas déjà fait
+			if #spawnQueue == 1 then
+				env.info("DCE_Bulle -G3- Début du spawn progressif")
+				if #spawnQueue == 1 then
+					env.info("DCE_Bulle -G3- Début du spawn progressif")
+					timer.scheduleFunction(processSpawnQueue, nil, timer.getTime() + SPAWN_DELAY)
+				end
+				
 			end
 
 		elseif savedStatics[groupData.name] then
+			env.info("DCE_Bulle -G4- Ajout à la file d'attente de l'objet statique : " .. groupData.name)
 			local staticInfo = savedStatics[groupData.name]
 
-			local status, err = pcall(function()
-				coalition.addStaticObject(staticInfo.country, {
-					name = staticInfo.name,
-					type = staticInfo.type,
-					x = staticInfo.x,
-					y = staticInfo.y,
-					heading = staticInfo.heading
-				})
-			end)
+			-- Ajoute le statique dans la file d’attente
+			queueSpawn(staticInfo, true)
+			savedStatics[groupData.name] = nil
 
-			if status then
-				savedStatics[groupData.name] = nil
-				-- env.info("DCE_Bulle Static Object " .. groupData.name .. " has been reactivated")
-				-- trigger.action.outText("DCE_Bulle Static Object " .. groupData.name .. " has been reactivated", 4)
-			else
-				env.warning("DCE_Bulle Erreur lors de la recréation du Static Object " .. groupData.name .. " : " .. tostring(err))
+			-- Démarre le traitement si ce n'est pas déjà fait
+			if #spawnQueue == 1 then
+				env.info("DCE_Bulle -G5- Début du spawn progressif des statiques")
+				if #spawnQueue == 1 then
+					env.info("DCE_Bulle -G3- Début du spawn progressif")
+					timer.scheduleFunction(processSpawnQueue, nil, timer.getTime() + SPAWN_DELAY)
+				end
+				
 			end
 		else
-			env.info("DCE_Bulle C9 - Le groupe/statique " .. groupData.name .. " n'était pas sauvegardé !")
-			-- trigger.action.outText("DCE_Bulle Group/Static Object " .. groupData.name .. " was not saved before!", 4)
+			env.info("DCE_Bulle -G7- Le groupe/statique " .. groupData.name .. " n'était pas sauvegardé !")
 		end
 	end
+
+
+
+	-- --  **Réactiver un groupe ou un objet statique** 
+	-- local function enableGroup(groupData)
+	-- 	if not groupData or not groupData.name then
+	-- 		env.info("DCE_Bulle C1 Erreur : groupData invalide dans enableGroup")
+	-- 		return
+	-- 	end
+
+	-- 	if savedGroups[groupData.name] then
+	-- 		local groupInfo = savedGroups[groupData.name]
+
+	-- 		local newGroup = {
+	-- 			name = groupInfo.name,
+	-- 			groupId = nil,
+	-- 			country = groupInfo.country,
+	-- 			category = Group.Category.GROUND,
+	-- 			task = groupInfo.task or "Ground Nothing",
+	-- 			start_time = 0,
+	-- 			visible = false,
+	-- 			hidden = false,
+	-- 			units = {},
+	-- 		}
+
+	-- 		for _, unit in ipairs(groupInfo.units) do
+	-- 			table.insert(newGroup.units, {
+	-- 				name = unit.name,
+	-- 				type = unit.type,
+	-- 				x = unit.x,
+	-- 				y = unit.y,
+	-- 				heading = unit.heading,
+	-- 				skill = unit.skill or "Average",
+	-- 				playerCanDrive = unit.playerCanDrive or true,
+	-- 				transportable = { randomTransportable = false },
+	-- 			})
+	-- 		end
+
+	-- 		local status, err = pcall(function()
+	-- 			coalition.addGroup(groupInfo.country, Group.Category.GROUND, newGroup)
+	-- 		end)
+
+	-- 		if status then
+	-- 			savedGroups[groupData.name] = nil
+	-- 			-- env.info("DCE_Bulle Group " .. groupData.name .. " has been reactivated")
+	-- 			-- trigger.action.outText("DCE_Bulle Group " .. groupData.name .. " has been reactivated", 4)
+	-- 		else
+	-- 			env.warning("DCE_Bulle Erreur lors de la recréation du groupe " .. groupData.name .. " : " .. tostring(err))
+	-- 		end
+
+	-- 	elseif savedStatics[groupData.name] then
+	-- 		local staticInfo = savedStatics[groupData.name]
+
+	-- 		local status, err = pcall(function()
+	-- 			coalition.addStaticObject(staticInfo.country, {
+	-- 				name = staticInfo.name,
+	-- 				type = staticInfo.type,
+	-- 				x = staticInfo.x,
+	-- 				y = staticInfo.y,
+	-- 				heading = staticInfo.heading
+	-- 			})
+	-- 		end)
+
+	-- 		if status then
+	-- 			savedStatics[groupData.name] = nil
+	-- 			-- env.info("DCE_Bulle Static Object " .. groupData.name .. " has been reactivated")
+	-- 			-- trigger.action.outText("DCE_Bulle Static Object " .. groupData.name .. " has been reactivated", 4)
+	-- 		else
+	-- 			env.warning("DCE_Bulle Erreur lors de la recréation du Static Object " .. groupData.name .. " : " .. tostring(err))
+	-- 		end
+	-- 	else
+	-- 		env.info("DCE_Bulle C9 - Le groupe/statique " .. groupData.name .. " n'était pas sauvegardé !")
+	-- 		-- trigger.action.outText("DCE_Bulle Group/Static Object " .. groupData.name .. " was not saved before!", 4)
+	-- 	end
+	-- end
 
 	--  **Calculer la distance entre un point et l'avion le plus proche** 
 	local function getNearestAircraftDistance(targetX, targetY)
@@ -3981,7 +4112,7 @@ local function DCE_BulleBy_DE()
 
 	--  **Vérifier et basculer les unités selon leur distance aux avions** 
 	local function updateUnitVisibility()
-		env.info("DCE_Bulle - Vérification des distances et basculement des unités...")
+		env.info("DCE_Bulle -H1- Vérification des distances et basculement des unités...")
 
 		local activationN = 0
 		local deActivate = 0
@@ -3994,13 +4125,13 @@ local function DCE_BulleBy_DE()
 
 				if distance < ACTIVATION_DISTANCE then
 					if savedGroups[groupName] then
-						-- env.info("DCE_Bulle - Activation du groupe terrestre : " .. groupName)
+						env.info("DCE_Bulle -H2- Activation du groupe terrestre : " .. groupName)
 						activationN = activationN+1
 						enableGroup(groupData)
 					end
 				else
 					if not savedGroups[groupName] then
-						-- env.info("DCE_Bulle - Désactivation du groupe terrestre : " .. groupName)
+						env.info("DCE_Bulle -H3- Désactivation du groupe terrestre : " .. groupName)
 						deActivate = deActivate+1
 						disableGroup(groupData)
 					end
@@ -4014,13 +4145,13 @@ local function DCE_BulleBy_DE()
 
 			if distance < ACTIVATION_DISTANCE then
 				if savedStatics[staticName] then
-					-- env.info("DCE_Bulle - Activation de l'objet statique : " .. staticName)
+					env.info("DCE_Bulle -H4- Activation de l'objet statique : " .. staticName)
 					activationN = activationN+1
 					enableGroup({ name = staticName }) -- Réactivation
 				end
 			else
 				if not savedStatics[staticName] then
-					-- env.info("DCE_Bulle - Désactivation de l'objet statique : " .. staticName)
+					env.info("DCE_Bulle -H5- Désactivation de l'objet statique : " .. staticName)
 					deActivate = deActivate+1
 					disableGroup({ name = staticName }) -- Désactivation
 				end
@@ -4028,11 +4159,11 @@ local function DCE_BulleBy_DE()
 		end
 
 		if activationN > 0 then
-			env.info("DCE_Bulle - Activation de N objet : " .. activationN)
+			env.info("DCE_Bulle -H6- Activation de N objet : " .. activationN)
 			-- trigger.action.outText("DCE_Bulle - Activation de N objet : " .. activationN, 6)
 		end
 		if deActivate > 0 then
-			env.info("DCE_Bulle - Suppresion de N objet : " .. deActivate)
+			env.info("DCE_Bulle -H7- Suppresion de N objet : " .. deActivate)
 			-- trigger.action.outText("DCE_Bulle - Suppresion de N objet : " .. deActivate, 6)
 		end
 
@@ -4168,8 +4299,8 @@ local function DCE_BulleBy_Mouve()
 		addGroupsFromCoalition(coalition.side.RED)  
 		addGroupsFromCoalition(coalition.side.BLUE) 
 
-		env.info("Total groups found: " .. tostring(totalGroups))
-		env.info("Ground vehicle groups collected (après exclusion) : " .. tostring(validGroups))
+		env.info("DCE_Bulle - Total groups found: " .. tostring(totalGroups))
+		env.info("DCE_Bulle - Ground vehicle groups collected (après exclusion) : " .. tostring(validGroups))
 	end
 
 
@@ -4193,94 +4324,143 @@ local function DCE_BulleBy_Mouve()
 		return aircrafts
 	end
 
-
+	
 	-- Table pour stocker les positions d'origine des groupes et objets
 	local originalPositions = {}
-
-	--  **Déplacer un groupe/unité statique très loin** 
+	
+	--  **Déplacer un groupe très loin (téléportation directe)** 
 	local function moveFarAway(groupData)
+		env.info("DCE_Bulle -D1- tente moveFarAway() de : " .. tostring(groupData.name))
 		if not groupData or not groupData.name then return end
+		env.info("DCE_Bulle -D2- tente moveFarAway() de : " .. tostring(groupData.name))
+	
+		-- Vérification si c'est un objet statique
+		local isStatic = staticObjects[groupData.name] ~= nil
+		env.info("DCE_Bulle -D3- isStatic? : " .. tostring(isStatic))
+	
+		-- -- Récupération de l'objet
+		-- local obj = isStatic and StaticObject.getByName(groupData.name) or Group.getByName(groupData.name)
+		-- if not obj or not obj:isExist() then return end
+		-- env.info("DCE_Bulle -D3- Objet trouvé pour déplacement : " .. groupData.name)
 
+		-- Récupération de l'objet
+		local obj
+
+		if isStatic then
+			obj = StaticObject.getByName(groupData.name)
+			env.info("DCE_Bulle -D4- Objet trouvé isStatic : " .. groupData.name)
+		else
+			obj = Group.getByName(groupData.name)
+			env.info("DCE_Bulle -D5- Objet non trouvé ELSE : " .. groupData.name)
+		end
+
+		-- -- Débogage: Afficher le nom de l'objet et si il a été trouvé
+		-- if obj then
+		-- 	env.info("DCE_Bulle -D3- Objet trouvé : " .. groupData.name)
+		-- else
+		-- 	env.info("DCE_Bulle -D3- Objet non trouvé : " .. groupData.name)
+		-- end
+
+		-- Vérifier si l'objet existe
+		if not obj or not obj:isExist() then
+			-- Débogage: Afficher si l'objet n'existe pas
+			env.info("DCE_Bulle -D6- Objet n'existe pas ou est nil RETURN : " .. (obj and groupData.name or "nil"))
+			return
+		end
+
+		-- Objet trouvé et existe
+		env.info("DCE_Bulle -D7- Objet trouvé pour déplacement : " .. groupData.name)
+	
+		-- Sauvegarde de la position initiale
 		if not originalPositions[groupData.name] then
-			-- Sauvegarder la position initiale uniquement la première fois
-			originalPositions[groupData.name] = {}
-			for _, unit in ipairs(groupData.units or {}) do
-				originalPositions[groupData.name][unit.name] = {
-					x = unit.x,
-					y = unit.y
-				}
+			originalPositions[groupData.name] = { x = groupData.units[1].x, y = groupData.units[1].y }
+		end
+	
+		-- Déplacement direct de toutes les unités du groupe
+		for _, unit in ipairs(groupData.units or {}) do
+			local newPos = { x = FAR_AWAY_X, y = FAR_AWAY_Y, z = 0 }
+			if isStatic then
+				obj:setPoint(newPos)
+			else
+				unit:setPoint(newPos)
 			end
 		end
-
-		-- Déplacer toutes les unités du groupe
-		for _, unit in ipairs(groupData.units or {}) do
-			unit.x = FAR_AWAY_X
-			unit.y = FAR_AWAY_Y
-		end
-
-		-- Appliquer le déplacement
-		local group = Group.getByName(groupData.name)
-		if group and group:isExist() then
-			group:destroy()
-			coalition.addGroup(groupData.country, Group.Category.GROUND, groupData)
-		end
-
-		env.info("DCE_Bulle - Déplacement très loin du groupe : " .. groupData.name)
+	
+		-- Marquer comme éloigné pour éviter de le redéplacer en boucle
+		groupData.isFarAway = true
+	
+		env.info("DCE_Bulle -D fin- Déplacement très loin du groupe/statique : " .. groupData.name)
 	end
-
-	--  **Ramener un groupe/unité statique à sa position d'origine** 
+	
+	--  **Ramener un groupe à sa position d'origine** 
 	local function moveBackToOriginalPosition(groupData)
+		env.info("DCE_Bulle -E1- tente moveBackToOriginalPosition() de : " .. tostring(groupData.name))
 		if not groupData or not groupData.name then return end
+		env.info("DCE_Bulle -E2- tente moveBackToOriginalPosition() de : " .. tostring(groupData.name))
+	
+		-- Vérification si c'est un objet statique
+		local isStatic = staticObjects[groupData.name] ~= nil
+	
+		-- Récupération de l'objet
+		local obj = isStatic and StaticObject.getByName(groupData.name) or Group.getByName(groupData.name)
+		if not obj or not obj:isExist() then return end
+		env.info("DCE_Bulle -E3- Objet trouvé pour retour à la position initiale : " .. groupData.name)
+	
+		-- Vérifier si une position d'origine est enregistrée
 		if not originalPositions[groupData.name] then return end
-
-		-- Restaurer la position d'origine
+	
+		-- Déplacement direct vers la position d'origine
 		for _, unit in ipairs(groupData.units or {}) do
-			local originalPos = originalPositions[groupData.name][unit.name]
-			if originalPos then
-				unit.x = originalPos.x
-				unit.y = originalPos.y
+			local originalPos = { x = originalPositions[groupData.name].x, y = originalPositions[groupData.name].y, z = 0 }
+			if isStatic then
+				obj:setPoint(originalPos)
+			else
+				unit:setPoint(originalPos)
 			end
 		end
-
-		-- Appliquer le déplacement
-		local group = Group.getByName(groupData.name)
-		if group and group:isExist() then
-			group:destroy()
-			coalition.addGroup(groupData.country, Group.Category.GROUND, groupData)
-		end
-
-		env.info("DCE_Bulle - Restauration du groupe : " .. groupData.name)
+	
+		-- Marquer comme revenu
+		groupData.isFarAway = false
+	
+		env.info("DCE_Bulle - Restauration du groupe/statique : " .. groupData.name)
 	end
-
+	
 	--  **Calculer la distance entre un point et l'avion le plus proche** 
 	local function getNearestAircraftDistance(targetX, targetY)
 		local aircrafts = getAllAircrafts()
 		local minDistance = math.huge 
-
+	
 		for _, aircraft in ipairs(aircrafts) do
 			local pos = aircraft:getPoint()
 			local dx = pos.x - targetX
 			local dy = pos.z - targetY
 			local distance = math.sqrt(dx * dx + dy * dy)
-
+	
 			if distance < minDistance then
 				minDistance = distance
 			end
 		end
-
+	
 		return minDistance
 	end
-
+	
 	--  **Vérifier et déplacer les unités/statics selon leur distance aux avions** 
 	local function updateUnitVisibility()
 		env.info("DCE_Bulle - Vérification des distances et basculement des unités...")
-
+	
 		--  **Véhicules dynamiques**
 		for groupName, groupData in pairs(groundGroups) do
 			if groupData and groupData.units then
-				local firstUnit = groupData.units[1]
-				local distance = getNearestAircraftDistance(firstUnit.x, firstUnit.y)
 
+				-- Sauvegarde de la position initiale
+				if not originalPositions[groupData.name] then
+					originalPositions[groupData.name] = { x = groupData.units[1].x, y = groupData.units[1].y }
+				end
+
+
+				local firstUnit = groupData.units[1]
+				local distance = getNearestAircraftDistance(originalPositions[groupName].x, originalPositions[groupName].y)
+	
 				if distance < ACTIVATION_DISTANCE then
 					moveBackToOriginalPosition(groupData)
 				else
@@ -4288,11 +4468,17 @@ local function DCE_BulleBy_Mouve()
 				end
 			end
 		end
-
+	
 		--  **Objets statiques**
 		for staticName, staticData in pairs(staticObjects) do
-			local distance = getNearestAircraftDistance(staticData.x, staticData.y)
 
+			-- Sauvegarde de la position initiale
+			if not originalPositions[staticData.name] then
+				originalPositions[staticData.name] = { x = staticData.units[1].x, y = staticData.units[1].y }
+			end
+
+			local distance = getNearestAircraftDistance(originalPositions[staticName].x, originalPositions[staticName].y)
+	
 			if distance < ACTIVATION_DISTANCE then
 				moveBackToOriginalPosition({ name = staticName, units = { staticData } })
 			else
@@ -4300,14 +4486,14 @@ local function DCE_BulleBy_Mouve()
 			end
 		end
 	end
-
+	
 	--  **Planification du check toutes les 30 secondes** 
 	local function scheduleUnitCheck()
 		env.info("DCE_Bulle - Planification de la vérification des unités dans 30 secondes...")
 		updateUnitVisibility()
 		return timer.getTime() + 30
 	end
-
+	
 	--  **Planification initiale après collecte des unités et statiques** 
 	timer.scheduleFunction(function()
 		env.info("DCE_Bulle - Démarrage de la collecte des groupes au sol et statiques...")
@@ -4316,11 +4502,13 @@ local function DCE_BulleBy_Mouve()
 		env.info("DCE_Bulle - Vérification et activation de la surveillance des unités...")
 		timer.scheduleFunction(scheduleUnitCheck, nil, timer.getTime() + 5)
 	end, nil, timer.getTime() + 10)
+	
+
 
 
 end
 
---  **Planification initiale après collecte des unités et statiques** 
+-- --  **Planification initiale après collecte des unités et statiques** 
 if useBubble_Mouve_Group then
 	timer.scheduleFunction(DCE_BulleBy_Mouve, nil, timer.getTime() + 20) -- start après 5 sec
 end

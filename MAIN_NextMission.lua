@@ -1139,7 +1139,7 @@ if ListRequiredModules then
 			end
 		end
 	end
-	-- Display(mission.requiredModules, "MainNM mission.requiredModules")
+	-- _affiche(mission.requiredModules, "MainNM mission.requiredModules ")
 	-- os.execute 'pause'
 end
 
