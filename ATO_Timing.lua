@@ -419,9 +419,9 @@ for side, pack in pairs(ATO) do
 					flight[f].route[#flight[f].route].eta = eta					--set ETA for target WP (desitination WP)
 					target_wp = #flight[f].route								--store target WP number (destination WP)
 					if flight[f].player then									--if this is the player flight
-						camp.player.tgt_wp = #flight[f].route					--store the target wp for the player
+						camp.player.tgt_wp = #flight[f].route - 1					--store the target wp for the player
 					elseif flight[f].client then								--if this is the player flight
-						camp.client[flight[f].IdClient].tgt_wp = #flight[f].route								--store the target wp for the player
+						camp.client[flight[f].IdClient].tgt_wp = #flight[f].route - 1								--store the target wp for the player
 					end
 				end
 
@@ -618,7 +618,20 @@ for side, pack in pairs(ATO) do
 
 				local deltaETA = 0
 				for w = target_wp - 1, 1, -1 do													--iterate through waypoints backwards
-					if flight[f].route[w].eta < 0 and not (flight[f].client or flight[f].player) then					--ETA before mission start
+					
+					if flight[f] then
+						if flight[f].route[w] then
+						else
+							print("Bug with flight[f].route[w] w: "..w)
+							_affiche(flight, "flightAtoT ")
+						end
+
+					else
+						print("Bug with flight[f] f: "..f)
+						_affiche(flight, "flightAtoT ")
+					end
+				
+					if flight[f].route[w].eta < 0 and not (flight[f].client or flight[f].player) then		--ETA before mission start
 						deltaETA = flight[f].route[1].eta
 
 						--find flight position at mission start and make it a WP

@@ -672,7 +672,7 @@ function CustomMixClassAttack(FlightName, TargetList, expend, weaponType, attack
 				idTypeStrike  = "Bombing"
 
 				env.info("DCE_CustomMixClassAttack MapObject found BB2 |"..tostring(targetName).."|")
-				_affiche(targetTemp, "targetName Unit.getByName")
+				-- _affiche(targetTemp, "targetName Unit.getByName")
 
 			elseif  targetClass == "nil" then
 				targetTempPos ={
@@ -683,7 +683,7 @@ function CustomMixClassAttack(FlightName, TargetList, expend, weaponType, attack
 				idTypeStrike  = "Bombing"
 
 				env.info("DCE_CustomMixClassAttack MapObject found BB22 |"..tostring(targetName).."|")
-				_affiche(targetTemp, "targetName Unit.getByName")
+				-- _affiche(targetTemp, "targetName Unit.getByName")
 
 			else --if targetClass == "vehicle" then
 				targetTemp = Unit.getByName(targetName)
@@ -698,7 +698,7 @@ function CustomMixClassAttack(FlightName, TargetList, expend, weaponType, attack
 					idTypeStrike  = "Bombing"
 
 					env.info("DCE_CustomMixClassAttack vehicle found BB3 |"..tostring(targetName).."|")
-					_affiche(targetTemp, "targetName Unit.getByName")
+					-- _affiche(targetTemp, "targetName Unit.getByName")
 				end
 			end
 

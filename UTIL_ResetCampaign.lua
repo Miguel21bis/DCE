@@ -30,6 +30,9 @@ require("Init/camp_init")
 if not ChangePlane then
 	require("Init/oob_air_init")
 	require("Init/camp_triggers_init")
+else
+	-- require("Active/oob_air")
+	-- require("Active/camp_triggers")	
 end
 require("Init/db_airbases")
 -- require("Init/targetlist_init") déjà appelé par BAT_FirstMission
@@ -77,8 +80,10 @@ for side,unit in pairs(oob_air) do																	----update oob_air to add ros
 		end
 	end
 end
+
 table.sort(oob_air.blue, function(a, b) return a.type:upper() < b.type:upper() end)
 table.sort(oob_air.red, function(a, b) return a.type:upper() < b.type:upper() end)
+
 local air_str = "oob_air = " .. TableSerialization(oob_air, 0)										--make a string
 local airFile = io.open("Active/oob_air.lua", "w") or error("Failed to open debug file")
 airFile:write(air_str)																				--write initial data

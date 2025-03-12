@@ -38,16 +38,17 @@ local function cmp(a, b)
    return a < b
 end
 
-local playerPlane,playerSquad,playerCountry,playerSide
+local playerPlane, playerSquad, playerCountry, playerSide
 
 --affiche le type d'avion selectionné et son squadron
-for side, squadTL in  pairs(oob_air) do
+for side, squadTL in pairs(oob_air) do
 	for squad_n, squad in  pairs(squadTL) do
 		if squad.player then
 			playerPlane = squad.type
 			playerSquad = squad.name
 			playerCountry = squad.country
 			playerSide = side
+			break
 		end
 	end
 end
@@ -58,13 +59,13 @@ local oobAirSide = oob_air[playerSide]
 table.sort(oobAirSide, function(a, b) return a.type:upper() < b.type:upper() end)
 
 local nType = 1
-local TabSquad = {}
+local tabSquad = {}
 -- for nSide , oob_airSide in pairs(oob_air) do														--pour afficher l'exemple de selection du premier avion pr�sent�
 	-- if nSide == playerSide then
 		-- for i,v in ipairs(animals) do print(v.name) end
 		for m , unit in ipairs(oobAirSide) do
 			if Playable_m[unit.type] and unit.inactive ~= true  then
-				table.insert(TabSquad,nType, unit.name)
+				table.insert(tabSquad,nType, unit.name)
 
 				io.write("\n"..nType .." | "..unit.type .." | "..unit.name.." | "..unit.country)
 
@@ -79,9 +80,9 @@ io.write( "\n")
 repeat
 	local input = tonumber(io.stdin:read())
 
-	if  TabSquad[input] then
+	if  tabSquad[input] then
 		oldSquadName = playerSquad
-		newSquadName = TabSquad[input]
+		newSquadName = tabSquad[input]
 
 		--supprime le player de l'ancien squad
 		for side, squadTL in  pairs(oob_air) do
@@ -104,7 +105,7 @@ repeat
 	else
 		print("\nInvalid entry.\n")
 	end
-until   TabSquad[input]
+until tabSquad[input]
 
 ----- save updated oob_air files  -----
 local air_str = "oob_air = " .. TableSerialization(oob_air, 0)								--make a string
@@ -128,7 +129,7 @@ airFile:close()
 -- RadioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
 
 -- oldSquadName = playerSquad
--- newSquadName = TabSquad[input]
+-- newSquadName = tabSquad[input]
 
 local oldSquadNameInit = oldSquadName
 
@@ -246,15 +247,12 @@ local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to op
 trigFile:write(trigStr)
 trigFile:close()
 
-
-
 ChangePlane = true
 if Skipmission_flag then
 	dofile("../../../ScriptsMod."..versionPackageICM.."/BAT_SkipMission.lua")
 elseif Firstmission_flag then
 	dofile("../../../ScriptsMod."..versionPackageICM.."/BAT_FirstMission.lua")
 end
-
 
 
 -- local test_str = "oob_air = " .. TableSerialization(oob_air, 0)						--make a string

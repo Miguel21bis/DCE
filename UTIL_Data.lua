@@ -209,6 +209,7 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
 		EPLRS_Capacity = false,
+		playable = true,
 	},
 
 	["VSN_F105D"] = 	{				--Mod
@@ -227,6 +228,7 @@ Data_divers = {
 			RunwayAttack = true,
 			AntishipStrike = true,
 		},
+		playable = true,
 	},
 
 	["VSN_F105G"] = 	{				--Mod
@@ -245,6 +247,7 @@ Data_divers = {
 			RunwayAttack = true,
 			AntishipStrike = true,
 		},
+		playable = true,
 	},
 
 	["Bronco-OV-10A"] = 	{				--Mod
@@ -254,6 +257,7 @@ Data_divers = {
 		vCruise = 110,
 		hCruise = 4570,
 		laserDesignator = false,
+		playable = true,
 	},
 
 	["vwv_a1_skyraider"] = 	{				--Mod
@@ -268,6 +272,7 @@ Data_divers = {
 		requiredModules = true,						--itsModule
 		EPLRS_Capacity = false,
 		moduleName = "tetet_crusader",
+		-- playable = true,
 	},
 	["vwv_o-1"] = 	{			                 	--Mod
 		instrumentUnits = "imperial",
@@ -2553,12 +2558,16 @@ SpecificCallnames = {
 TabTask = {
 	["a"] = "Anti-ship Strike",
 		["Anti-ship Strike"] = "a",
+	["af"] = "AFAC",
+		["AFAC"] = "af",
 	["c"] = "CAP",
 		["CAP"] = "c",
 	["d"] = "SEAD",
 		["SEAD"] = "d",
 	["e"] = "Escort",
 		["Escort"] = "e",
+	["ej"] = "Escort Jammer",
+		["Escort Jammer"] = "ej",
 	["f"] = "Fighter Sweep",
 		["Fighter Sweep"] = "f",
 	["i"] = "Intercept",

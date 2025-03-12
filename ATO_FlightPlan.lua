@@ -1699,6 +1699,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					if Data_divers[flight[f].type].moduleName then
 						nameOfModule = Data_divers[flight[f].type].moduleName
 					end
+
 					local entry = {
 						["name"] = tostring(nameOfModule),
 						["origine"] = {
@@ -1712,13 +1713,20 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					if ListRequiredModules[nameOfModule] then
-
+						
+						local alreadyInside = false
 						for n, from in pairs(ListRequiredModules[nameOfModule].origine) do
 
-							if from ~= "Data_divers: "..nameOfModule then
-								table.insert(ListRequiredModules[nameOfModule].origine, "Data_divers: "..nameOfModule )
+							if from == "Data_divers: "..nameOfModule then
+								alreadyInside = true
+								break
 							end
 						end
+
+						if not alreadyInside then
+							table.insert(ListRequiredModules[nameOfModule].origine, "Data_divers: "..nameOfModule )
+						end
+
 					else
 						ListRequiredModules[nameOfModule] = entry
 					end

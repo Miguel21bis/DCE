@@ -1896,7 +1896,7 @@ local function despawn2(arg)
 	local from = arg[2]
 	env.info("DCE_despawn2 A tentative despawn2() from "..tostring(from))
 
-	_affiche(unitToDespawn, "DCE_despawn2 B despawn unitToDespawn")
+	-- _affiche(unitToDespawn, "DCE_despawn2 B despawn unitToDespawn")
 	if unitToDespawn and unitToDespawn:isExist() then
 		unitToDespawn:destroy()
 

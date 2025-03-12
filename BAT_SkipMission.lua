@@ -498,7 +498,8 @@ if input == "y" or input == "yes" then
 				end
 
 				-- display le tableau des choix d'avion et de task
-				--tabTaskAvailable[nSide][unit.type][taskStr]
+				local tabBug = {}
+
 				for nSide , unit_type in PairsByKeys(tabTaskAvailable) do
 					print() print(nSide..":")
 					for unitType , TabType in PairsByKeys(unit_type) do
@@ -512,7 +513,7 @@ if input == "y" or input == "yes" then
 
 						for taskStr , nbool in PairsByKeys(TabType) do
 							
-							if nbool == true then
+							if TabTask[taskStr] and nbool == true then
 								io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
 								local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
 								tabIndex[tostring(1)..IndexStringType..TabTask[taskStr]] = true
@@ -523,7 +524,9 @@ if input == "y" or input == "yes" then
 								tabIndex[tostring(6)..IndexStringType..TabTask[taskStr]] = true
 								tabIndex[tostring(7)..IndexStringType..TabTask[taskStr]] = true
 								tabIndex[tostring(8)..IndexStringType..TabTask[taskStr]] = true
-
+							
+							elseif not TabTask[taskStr] then
+								table.insert(tabBug,taskStr )
 							end
 						end
 						io.write("\n")
@@ -532,6 +535,14 @@ if input == "y" or input == "yes" then
 				end
 
 				io.write( "\n")
+
+				if next(tabBug) == nil then
+					-- print("La table est vide.")
+				else
+					for _, bug in ipairs(tabBug) do
+						print("Bug with: "..bug)
+					end
+				end
 			--===================================================================================
 				-- Ecran N°5 Selection Nombre d'avion Multiplayer
 					repeat

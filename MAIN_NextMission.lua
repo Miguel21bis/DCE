@@ -1131,7 +1131,7 @@ if ListRequiredModules then
 				print("Note that this mission requires these modules:")
 				infoShow = true
 			end
-			print(" - "..tostring(module.name))
+			print("\n - "..tostring(module.name))
 
 			for n, origine in pairs(module.origine) do
 				print(" - -------==> from: "..tostring(origine))

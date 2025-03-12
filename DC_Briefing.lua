@@ -415,7 +415,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 		for _role,flight in pairs(packs[p]) do															--iterate through roles in package (main, SEAD, escort)		
 			for f = 1, #flight do
 
-				local idName = flight[f].type..""..flight[f].task..""..flight[f].target_name
+				local idName = flight[f].type..flight[f].task..flight[f].target_name
 				local allowedBrief = false																--evite la répétition des briefings surtout en MP
 
 				-- inheritedFrom 
@@ -424,7 +424,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					inheritedType = Data_divers[flight[f].type].inheritedFrom
 				end
 
-				if PlayerFlight and (flight[f].player or flight[f].client)  then
+				if PlayerFlight and (flight[f].player or flight[f].client) then
 
 					if not briefPlaneTaskTarget[idName] then
 						allowedBrief = true
@@ -437,26 +437,8 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					--CLIENT************************************************
 					if flight[f].client then
 
-						-- local camp_str = "camp.client = " .. TableSerialization(camp.client, 0)						--make a string
-						-- local campFile = io.open("Debug/CAMPclientBriefingCC.lua", "w")	 or error("Failed to open debug file")
-						-- campFile:write(camp_str)																		--save new data
-						-- campFile:close()
-
 						--attention, ne pas enlever Deepcopy ici
 						tempPlayer = Deepcopy(camp.client[flight[f].IdClient])
-
-						-- local camp_str = "camp.client = " .. TableSerialization(camp.client, 0)						--make a string
-						-- local campFile = io.open("Debug/CAMPclientBriefingDD.lua", "w")	 or error("Failed to open debug file")
-						-- campFile:write(camp_str)																		--save new data
-						-- campFile:close()
-
-						-- local camp_str = "tempPlayer = " .. TableSerialization(tempPlayer, 0)						--make a string
-						-- local campFile = io.open("Debug/CAMP_tempPlayer_clientBriefingEE.lua", "w")	 or error("Failed to open debug file")
-						-- campFile:write(camp_str)																		--save new data
-						-- campFile:close()
-
-						-- print("DcB tempPlayer.pack_n "..tostring(tempPlayer.pack_n))
-
 
 						tempPlayer.package = {
 							[tempPlayer.pack_n] = Deepcopy(camp.client.package[tempPlayer.pack_n]),
@@ -703,7 +685,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					s = "\n\n\n\n".."\n"
 					local sBrief = "_________________________________________ BRIEFING Part: _______________________________________\n"
 					s = s..sBrief
-					local sName = " "..tostring(flight[f].type).." "..squad.." "..player_task.." "
+					local sName = " "..ReplaceTypeName(flight[f].type).." "..squad.." "..player_task.." "
 					local space = string.len(tostring(sBrief)) - string.len(tostring(sName))									--calculate number of spaces that need 
 					for n = 1, (space / 2)-1  do
 						s = s .. "_"
@@ -878,11 +860,11 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 					--Transport
 					elseif player_task == "Transport" then
-						s = s .. "Fly a transport mission from " .. target.base .. " to " .. target.destination .. ".\n"
+						s = s .. "Fly a transport mission from " .. ReplaceBaseName(target.base) .. " to " .. ReplaceBaseName(target.destination) .. ".\n"
 
 					--Nothing/Ferry
 					elseif player_task == "Nothing" then
-						s = s .. "Ferry flight from " .. target.base .. " to " .. target.destination .. ".\n"
+						s = s .. "Ferry flight from " .. ReplaceBaseName(target.base) .. " to " .. ReplaceBaseName(target.destination) .. ".\n"
 					--SAR
 					elseif player_task == "SAR" then
 						local airbase = tempPlayer.airbase
@@ -1310,9 +1292,6 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					--Communication
 					s = "Communication:\n"																		--overview of relevant comms frequencies
 					local MC = 0
-					-- if  flight[f].type == "MiG-21Bis" or flight[f].type == "Mi-8MT" or flight[f].type == "Mi-24P"  then			-- add Mig21 Mi-8 Mi-24 Channel 00
-						-- MC = -1										-- MC ModChannel
-					-- end
 
 					for u = 1, #tempPlayer.group["units"] do
 						for n = 1, #camp.radio[sideName] do																		--do it for all the radios

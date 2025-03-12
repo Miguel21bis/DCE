@@ -675,14 +675,14 @@ db_all_loadouts = {
 				tStation = 18000,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{LAU68_FFAR_WP156}",
-					["num"] = 2,
-				},
-				[2] = {
-					["CLSID"] = "{LAU68_FFAR_WP156}",
-					["num"] = 3,
-				},
+						[1] = {
+							["CLSID"] = "{LAU68_FFAR_WP156}",
+							["num"] = 2,
+						},
+						[2] = {
+							["CLSID"] = "{LAU68_FFAR_WP156}",
+							["num"] = 3,
+						},
 					},
 					fuel = 160,
 					flare = 0,
@@ -714,16 +714,17 @@ db_all_loadouts = {
 				hCruise = 3315.2,
 				hAttack = 200,
 				sortie_rate = 6,
+				tStation = 18000,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
-					["num"] = 3,
-				},
-				[2] = {
-					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
-					["num"] = 2,
-				},
+						[1] = {
+							["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+							["num"] = 3,
+						},
+						[2] = {
+							["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+							["num"] = 2,
+						},
 					},
 					fuel = 160,
 					flare = 0,
@@ -762,18 +763,18 @@ db_all_loadouts = {
 				tStation = 18000,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "LAU3_WP156",
-					["num"] = 6,
-				},
-				[2] = {
-					["CLSID"] = "{150gal}",
-					["num"] = 4,
-				},
-				[3] = {
-					["CLSID"] = "LAU3_WP156",
-					["num"] = 2,
-				},
+						[1] = {
+							["CLSID"] = "LAU3_WP156",
+							["num"] = 6,
+						},
+						[2] = {
+							["CLSID"] = "{150gal}",
+							["num"] = 4,
+						},
+						[3] = {
+							["CLSID"] = "LAU3_WP156",
+							["num"] = 2,
+						},
 					},
 					fuel = 940,
 					flare = 0,
@@ -809,62 +810,62 @@ db_all_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{Mk82SNAKEYE}",
-					["num"] = 6,
-					["settings"] = {
-						["NFP_VIS_DrawArgNo_57"] = 0,
-						["NFP_fuze_type_nose"] = "M904E4",
-						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 2,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
-					},
-				},
-				[2] = {
-					["CLSID"] = "{Mk82SNAKEYE}",
-					["num"] = 2,
-					["settings"] = {
-						["NFP_VIS_DrawArgNo_57"] = 0,
-						["NFP_fuze_type_nose"] = "M904E4",
-						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 2,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
-					},
-				},
-				[3] = {
-					["CLSID"] = "{150gal}",
-					["num"] = 4,
-				},
-				[4] = {
-					["CLSID"] = "{Mk82SNAKEYE}",
-					["num"] = 5,
-					["settings"] = {
-						["NFP_VIS_DrawArgNo_57"] = 0,
-						["NFP_fuze_type_nose"] = "M904E4",
-						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 2,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
-					},
-				},
-				[5] = {
-					["CLSID"] = "{Mk82SNAKEYE}",
-					["num"] = 3,
-					["settings"] = {
-						["NFP_VIS_DrawArgNo_57"] = 0,
-						["NFP_fuze_type_nose"] = "M904E4",
-						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 2,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
-					},
-				},
+						[1] = {
+							["CLSID"] = "{Mk82SNAKEYE}",
+							["num"] = 6,
+							["settings"] = {
+								["NFP_VIS_DrawArgNo_57"] = 0,
+								["NFP_fuze_type_nose"] = "M904E4",
+								["NFP_fuze_type_tail"] = "M905",
+								["arm_delay_ctrl_M904E4"] = 2,
+								["arm_delay_ctrl_M905"] = 4,
+								["function_delay_ctrl_M904E4"] = 0,
+								["function_delay_ctrl_M905"] = 0,
+							},
+						},
+						[2] = {
+							["CLSID"] = "{Mk82SNAKEYE}",
+							["num"] = 2,
+							["settings"] = {
+								["NFP_VIS_DrawArgNo_57"] = 0,
+								["NFP_fuze_type_nose"] = "M904E4",
+								["NFP_fuze_type_tail"] = "M905",
+								["arm_delay_ctrl_M904E4"] = 2,
+								["arm_delay_ctrl_M905"] = 4,
+								["function_delay_ctrl_M904E4"] = 0,
+								["function_delay_ctrl_M905"] = 0,
+							},
+						},
+						[3] = {
+							["CLSID"] = "{150gal}",
+							["num"] = 4,
+						},
+						[4] = {
+							["CLSID"] = "{Mk82SNAKEYE}",
+							["num"] = 5,
+							["settings"] = {
+								["NFP_VIS_DrawArgNo_57"] = 0,
+								["NFP_fuze_type_nose"] = "M904E4",
+								["NFP_fuze_type_tail"] = "M905",
+								["arm_delay_ctrl_M904E4"] = 2,
+								["arm_delay_ctrl_M905"] = 4,
+								["function_delay_ctrl_M904E4"] = 0,
+								["function_delay_ctrl_M905"] = 0,
+							},
+						},
+						[5] = {
+							["CLSID"] = "{Mk82SNAKEYE}",
+							["num"] = 3,
+							["settings"] = {
+								["NFP_VIS_DrawArgNo_57"] = 0,
+								["NFP_fuze_type_nose"] = "M904E4",
+								["NFP_fuze_type_tail"] = "M905",
+								["arm_delay_ctrl_M904E4"] = 2,
+								["arm_delay_ctrl_M905"] = 4,
+								["function_delay_ctrl_M904E4"] = 0,
+								["function_delay_ctrl_M905"] = 0,
+							},
+						},
 					},
 					fuel = 940,
 					flare = 0,
@@ -898,26 +899,26 @@ db_all_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "LAU3_WP156",
-					["num"] = 6,
-				},
-				[2] = {
-					["CLSID"] = "LAU3_WP156",
-					["num"] = 2,
-				},
-				[3] = {
-					["CLSID"] = "{150gal}",
-					["num"] = 4,
-				},
-				[4] = {
-					["CLSID"] = "LAU3_WP156",
-					["num"] = 5,
-				},
-				[5] = {
-					["CLSID"] = "LAU3_WP156",
-					["num"] = 3,
-				},
+						[1] = {
+							["CLSID"] = "LAU3_WP156",
+							["num"] = 6,
+						},
+						[2] = {
+							["CLSID"] = "LAU3_WP156",
+							["num"] = 2,
+						},
+						[3] = {
+							["CLSID"] = "{150gal}",
+							["num"] = 4,
+						},
+						[4] = {
+							["CLSID"] = "LAU3_WP156",
+							["num"] = 5,
+						},
+						[5] = {
+							["CLSID"] = "LAU3_WP156",
+							["num"] = 3,
+						},
 					},
 					fuel = 940,
 					flare = 0,
@@ -956,50 +957,50 @@ db_all_loadouts = {
 				tStation = 18000,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
-					["num"] = 15,
-				},
-				[2] = {
-					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
-					["num"] = 1,
-				},
-				[3] = {
-					["CLSID"] = "{3DFB7321-AB0E-11d7-9897-000476191836}",
-					["num"] = 14,
-				},
-				[4] = {
-					["CLSID"] = "{3DFB7321-AB0E-11d7-9897-000476191836}",
-					["num"] = 2,
-				},
-				[5] = {
-					["CLSID"] = "{AV8BNA_AERO1D}",
-					["num"] = 9,
-				},
-				[6] = {
-					["CLSID"] = "{AV8BNA_AERO1D}",
-					["num"] = 7,
-				},
-				[7] = {
-					["CLSID"] = "{AV8BNA_AERO1D}",
-					["num"] = 8,
-				},
-				[8] = {
-					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
-					["num"] = 13,
-				},
-				[9] = {
-					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
-					["num"] = 3,
-				},
-				[10] = {
-					["CLSID"] = "{3DFB7321-AB0E-11d7-9897-000476191836}",
-					["num"] = 12,
-				},
-				[11] = {
-					["CLSID"] = "{3DFB7321-AB0E-11d7-9897-000476191836}",
-					["num"] = 4,
-				},
+						[1] = {
+							["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+							["num"] = 15,
+						},
+						[2] = {
+							["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+							["num"] = 1,
+						},
+						[3] = {
+							["CLSID"] = "{3DFB7321-AB0E-11d7-9897-000476191836}",
+							["num"] = 14,
+						},
+						[4] = {
+							["CLSID"] = "{3DFB7321-AB0E-11d7-9897-000476191836}",
+							["num"] = 2,
+						},
+						[5] = {
+							["CLSID"] = "{AV8BNA_AERO1D}",
+							["num"] = 9,
+						},
+						[6] = {
+							["CLSID"] = "{AV8BNA_AERO1D}",
+							["num"] = 7,
+						},
+						[7] = {
+							["CLSID"] = "{AV8BNA_AERO1D}",
+							["num"] = 8,
+						},
+						[8] = {
+							["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+							["num"] = 13,
+						},
+						[9] = {
+							["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+							["num"] = 3,
+						},
+						[10] = {
+							["CLSID"] = "{3DFB7321-AB0E-11d7-9897-000476191836}",
+							["num"] = 12,
+						},
+						[11] = {
+							["CLSID"] = "{3DFB7321-AB0E-11d7-9897-000476191836}",
+							["num"] = 4,
+						},
 					},
 					fuel = 1036,
 					flare = 240,
@@ -1035,146 +1036,146 @@ db_all_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{AN-M64}",
-					["num"] = 15,
-					["settings"] = {
-						["NFP_PRESID"] = "WWII_B_A_GPMedium",
-						["NFP_PRESVER"] = 1,
-						["NFP_fuze_type_nose"] = 1,
-						["NFP_fuze_type_tail"] = 1,
-						["function_delay_ctrl_ANM101A2"] = 0,
-						["function_delay_ctrl_ANM103A1"] = 0,
-						["vane_rev_threshold_ctrl_ANM101A2"] = 160,
-						["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
-					},
-				},
-				[2] = {
-					["CLSID"] = "{AN-M64}",
-					["num"] = 1,
-					["settings"] = {
-						["NFP_PRESID"] = "WWII_B_A_GPMedium",
-						["NFP_PRESVER"] = 1,
-						["NFP_fuze_type_nose"] = 1,
-						["NFP_fuze_type_tail"] = 1,
-						["function_delay_ctrl_ANM101A2"] = 0,
-						["function_delay_ctrl_ANM103A1"] = 0,
-						["vane_rev_threshold_ctrl_ANM101A2"] = 160,
-						["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
-					},
-				},
-				[3] = {
-					["CLSID"] = "{AN-M64}",
-					["num"] = 14,
-					["settings"] = {
-						["NFP_PRESID"] = "WWII_B_A_GPMedium",
-						["NFP_PRESVER"] = 1,
-						["NFP_fuze_type_nose"] = 1,
-						["NFP_fuze_type_tail"] = 1,
-						["function_delay_ctrl_ANM101A2"] = 0,
-						["function_delay_ctrl_ANM103A1"] = 0,
-						["vane_rev_threshold_ctrl_ANM101A2"] = 160,
-						["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
-					},
-				},
-				[4] = {
-					["CLSID"] = "{AN-M64}",
-					["num"] = 2,
-					["settings"] = {
-						["NFP_PRESID"] = "WWII_B_A_GPMedium",
-						["NFP_PRESVER"] = 1,
-						["NFP_fuze_type_nose"] = 1,
-						["NFP_fuze_type_tail"] = 1,
-						["function_delay_ctrl_ANM101A2"] = 0,
-						["function_delay_ctrl_ANM103A1"] = 0,
-						["vane_rev_threshold_ctrl_ANM101A2"] = 160,
-						["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
-					},
-				},
-				[5] = {
-					["CLSID"] = "{AN-M64}",
-					["num"] = 13,
-					["settings"] = {
-						["NFP_PRESID"] = "WWII_B_A_GPMedium",
-						["NFP_PRESVER"] = 1,
-						["NFP_fuze_type_nose"] = 1,
-						["NFP_fuze_type_tail"] = 1,
-						["function_delay_ctrl_ANM101A2"] = 0,
-						["function_delay_ctrl_ANM103A1"] = 0,
-						["vane_rev_threshold_ctrl_ANM101A2"] = 160,
-						["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
-					},
-				},
-				[6] = {
-					["CLSID"] = "{AN-M64}",
-					["num"] = 3,
-					["settings"] = {
-						["NFP_PRESID"] = "WWII_B_A_GPMedium",
-						["NFP_PRESVER"] = 1,
-						["NFP_fuze_type_nose"] = 1,
-						["NFP_fuze_type_tail"] = 1,
-						["function_delay_ctrl_ANM101A2"] = 0,
-						["function_delay_ctrl_ANM103A1"] = 0,
-						["vane_rev_threshold_ctrl_ANM101A2"] = 160,
-						["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
-					},
-				},
-				[7] = {
-					["CLSID"] = "{AN-M64}",
-					["num"] = 12,
-					["settings"] = {
-						["NFP_PRESID"] = "WWII_B_A_GPMedium",
-						["NFP_PRESVER"] = 1,
-						["NFP_fuze_type_nose"] = 1,
-						["NFP_fuze_type_tail"] = 1,
-						["function_delay_ctrl_ANM101A2"] = 0,
-						["function_delay_ctrl_ANM103A1"] = 0,
-						["vane_rev_threshold_ctrl_ANM101A2"] = 160,
-						["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
-					},
-				},
-				[8] = {
-					["CLSID"] = "{AN-M64}",
-					["num"] = 4,
-					["settings"] = {
-						["NFP_PRESID"] = "WWII_B_A_GPMedium",
-						["NFP_PRESVER"] = 1,
-						["NFP_fuze_type_nose"] = 1,
-						["NFP_fuze_type_tail"] = 1,
-						["function_delay_ctrl_ANM101A2"] = 0,
-						["function_delay_ctrl_ANM103A1"] = 0,
-						["vane_rev_threshold_ctrl_ANM101A2"] = 160,
-						["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
-					},
-				},
-				[9] = {
-					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
-					["num"] = 11,
-				},
-				[10] = {
-					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
-					["num"] = 5,
-				},
-				[11] = {
-					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
-					["num"] = 10,
-				},
-				[12] = {
-					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
-					["num"] = 6,
-				},
-				[13] = {
-					["CLSID"] = "{AV8BNA_AERO1D}",
-					["num"] = 9,
-				},
-				[14] = {
-					["CLSID"] = "{AV8BNA_AERO1D}",
-					["num"] = 7,
-				},
-				[15] = {
-					["CLSID"] = "{AV8BNA_AERO1D}",
-					["num"] = 8,
-				},
+						[1] = {
+							["CLSID"] = "{AN-M64}",
+							["num"] = 15,
+							["settings"] = {
+								["NFP_PRESID"] = "WWII_B_A_GPMedium",
+								["NFP_PRESVER"] = 1,
+								["NFP_fuze_type_nose"] = 1,
+								["NFP_fuze_type_tail"] = 1,
+								["function_delay_ctrl_ANM101A2"] = 0,
+								["function_delay_ctrl_ANM103A1"] = 0,
+								["vane_rev_threshold_ctrl_ANM101A2"] = 160,
+								["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
+							},
+						},
+						[2] = {
+							["CLSID"] = "{AN-M64}",
+							["num"] = 1,
+							["settings"] = {
+								["NFP_PRESID"] = "WWII_B_A_GPMedium",
+								["NFP_PRESVER"] = 1,
+								["NFP_fuze_type_nose"] = 1,
+								["NFP_fuze_type_tail"] = 1,
+								["function_delay_ctrl_ANM101A2"] = 0,
+								["function_delay_ctrl_ANM103A1"] = 0,
+								["vane_rev_threshold_ctrl_ANM101A2"] = 160,
+								["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
+							},
+						},
+						[3] = {
+							["CLSID"] = "{AN-M64}",
+							["num"] = 14,
+							["settings"] = {
+								["NFP_PRESID"] = "WWII_B_A_GPMedium",
+								["NFP_PRESVER"] = 1,
+								["NFP_fuze_type_nose"] = 1,
+								["NFP_fuze_type_tail"] = 1,
+								["function_delay_ctrl_ANM101A2"] = 0,
+								["function_delay_ctrl_ANM103A1"] = 0,
+								["vane_rev_threshold_ctrl_ANM101A2"] = 160,
+								["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
+							},
+						},
+						[4] = {
+							["CLSID"] = "{AN-M64}",
+							["num"] = 2,
+							["settings"] = {
+								["NFP_PRESID"] = "WWII_B_A_GPMedium",
+								["NFP_PRESVER"] = 1,
+								["NFP_fuze_type_nose"] = 1,
+								["NFP_fuze_type_tail"] = 1,
+								["function_delay_ctrl_ANM101A2"] = 0,
+								["function_delay_ctrl_ANM103A1"] = 0,
+								["vane_rev_threshold_ctrl_ANM101A2"] = 160,
+								["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
+							},
+						},
+						[5] = {
+							["CLSID"] = "{AN-M64}",
+							["num"] = 13,
+							["settings"] = {
+								["NFP_PRESID"] = "WWII_B_A_GPMedium",
+								["NFP_PRESVER"] = 1,
+								["NFP_fuze_type_nose"] = 1,
+								["NFP_fuze_type_tail"] = 1,
+								["function_delay_ctrl_ANM101A2"] = 0,
+								["function_delay_ctrl_ANM103A1"] = 0,
+								["vane_rev_threshold_ctrl_ANM101A2"] = 160,
+								["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
+							},
+						},
+						[6] = {
+							["CLSID"] = "{AN-M64}",
+							["num"] = 3,
+							["settings"] = {
+								["NFP_PRESID"] = "WWII_B_A_GPMedium",
+								["NFP_PRESVER"] = 1,
+								["NFP_fuze_type_nose"] = 1,
+								["NFP_fuze_type_tail"] = 1,
+								["function_delay_ctrl_ANM101A2"] = 0,
+								["function_delay_ctrl_ANM103A1"] = 0,
+								["vane_rev_threshold_ctrl_ANM101A2"] = 160,
+								["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
+							},
+						},
+						[7] = {
+							["CLSID"] = "{AN-M64}",
+							["num"] = 12,
+							["settings"] = {
+								["NFP_PRESID"] = "WWII_B_A_GPMedium",
+								["NFP_PRESVER"] = 1,
+								["NFP_fuze_type_nose"] = 1,
+								["NFP_fuze_type_tail"] = 1,
+								["function_delay_ctrl_ANM101A2"] = 0,
+								["function_delay_ctrl_ANM103A1"] = 0,
+								["vane_rev_threshold_ctrl_ANM101A2"] = 160,
+								["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
+							},
+						},
+						[8] = {
+							["CLSID"] = "{AN-M64}",
+							["num"] = 4,
+							["settings"] = {
+								["NFP_PRESID"] = "WWII_B_A_GPMedium",
+								["NFP_PRESVER"] = 1,
+								["NFP_fuze_type_nose"] = 1,
+								["NFP_fuze_type_tail"] = 1,
+								["function_delay_ctrl_ANM101A2"] = 0,
+								["function_delay_ctrl_ANM103A1"] = 0,
+								["vane_rev_threshold_ctrl_ANM101A2"] = 160,
+								["vane_rev_threshold_ctrl_FD_0_ANM103A1"] = 300,
+							},
+						},
+						[9] = {
+							["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+							["num"] = 11,
+						},
+						[10] = {
+							["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+							["num"] = 5,
+						},
+						[11] = {
+							["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+							["num"] = 10,
+						},
+						[12] = {
+							["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+							["num"] = 6,
+						},
+						[13] = {
+							["CLSID"] = "{AV8BNA_AERO1D}",
+							["num"] = 9,
+						},
+						[14] = {
+							["CLSID"] = "{AV8BNA_AERO1D}",
+							["num"] = 7,
+						},
+						[15] = {
+							["CLSID"] = "{AV8BNA_AERO1D}",
+							["num"] = 8,
+						},
 					},
 					fuel = 1036,
 					flare = 240,
@@ -1208,66 +1209,66 @@ db_all_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
-					["num"] = 15,
-				},
-				[2] = {
-					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
-					["num"] = 1,
-				},
-				[3] = {
-					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
-					["num"] = 14,
-				},
-				[4] = {
-					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
-					["num"] = 2,
-				},
-				[5] = {
-					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
-					["num"] = 13,
-				},
-				[6] = {
-					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
-					["num"] = 3,
-				},
-				[7] = {
-					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
-					["num"] = 12,
-				},
-				[8] = {
-					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
-					["num"] = 4,
-				},
-				[9] = {
-					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
-					["num"] = 11,
-				},
-				[10] = {
-					["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
-					["num"] = 5,
-				},
-				[11] = {
-					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
-					["num"] = 10,
-				},
-				[12] = {
-					["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
-					["num"] = 6,
-				},
-				[13] = {
-					["CLSID"] = "{AV8BNA_AERO1D}",
-					["num"] = 9,
-				},
-				[14] = {
-					["CLSID"] = "{AV8BNA_AERO1D}",
-					["num"] = 7,
-				},
-				[15] = {
-					["CLSID"] = "{AV8BNA_AERO1D}",
-					["num"] = 8,
-				},
+						[1] = {
+							["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+							["num"] = 15,
+						},
+						[2] = {
+							["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+							["num"] = 1,
+						},
+						[3] = {
+							["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+							["num"] = 14,
+						},
+						[4] = {
+							["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+							["num"] = 2,
+						},
+						[5] = {
+							["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+							["num"] = 13,
+						},
+						[6] = {
+							["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+							["num"] = 3,
+						},
+						[7] = {
+							["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+							["num"] = 12,
+						},
+						[8] = {
+							["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+							["num"] = 4,
+						},
+						[9] = {
+							["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+							["num"] = 11,
+						},
+						[10] = {
+							["CLSID"] = "{CAE48299-A294-4bad-8EE6-89EFC5DCDF00}",
+							["num"] = 5,
+						},
+						[11] = {
+							["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+							["num"] = 10,
+						},
+						[12] = {
+							["CLSID"] = "{A021F29D-18AB-4d3e-985C-FC9C60E35E9E}",
+							["num"] = 6,
+						},
+						[13] = {
+							["CLSID"] = "{AV8BNA_AERO1D}",
+							["num"] = 9,
+						},
+						[14] = {
+							["CLSID"] = "{AV8BNA_AERO1D}",
+							["num"] = 7,
+						},
+						[15] = {
+							["CLSID"] = "{AV8BNA_AERO1D}",
+							["num"] = 8,
+						},
 					},
 					fuel = 1036,
 					flare = 240,
@@ -1295,42 +1296,42 @@ db_all_loadouts = {
 				sortie_rate = 12,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{AGM_45A}",
-					["num"] = 9,
-					["settings"] = {
-						["EAS_bypass_ctrl"] = 0,
-						["NFP_rfgu_type"] = 1,
-						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
-						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
-					},
-				},
-				[2] = {
-					["CLSID"] = "{AGM_45A}",
-					["num"] = 3,
-					["settings"] = {
-						["EAS_bypass_ctrl"] = 0,
-						["NFP_rfgu_type"] = 1,
-						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
-						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
-					},
-				},
-				[3] = {
-					["CLSID"] = "{VSN_F1001000_ptb}",
-					["num"] = 8,
-				},
-				[4] = {
-					["CLSID"] = "{VSN_F1001000_ptb}",
-					["num"] = 4,
-				},
-				[5] = {
-					["CLSID"] = "<CLEAN>",
-					["num"] = 7,
-				},
-				[6] = {
-					["CLSID"] = "<CLEAN>",
-					["num"] = 5,
-				},
+						[1] = {
+							["CLSID"] = "{AGM_45A}",
+							["num"] = 9,
+							["settings"] = {
+								["EAS_bypass_ctrl"] = 0,
+								["NFP_rfgu_type"] = 1,
+								["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
+								["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
+							},
+						},
+						[2] = {
+							["CLSID"] = "{AGM_45A}",
+							["num"] = 3,
+							["settings"] = {
+								["EAS_bypass_ctrl"] = 0,
+								["NFP_rfgu_type"] = 1,
+								["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
+								["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
+							},
+						},
+						[3] = {
+							["CLSID"] = "{VSN_F1001000_ptb}",
+							["num"] = 8,
+						},
+						[4] = {
+							["CLSID"] = "{VSN_F1001000_ptb}",
+							["num"] = 4,
+						},
+						[5] = {
+							["CLSID"] = "<CLEAN>",
+							["num"] = 7,
+						},
+						[6] = {
+							["CLSID"] = "<CLEAN>",
+							["num"] = 5,
+						},
 					},
 					fuel = 3397,
 					flare = 15,
@@ -1367,30 +1368,30 @@ db_all_loadouts = {
 				sortie_rate = 8,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{LAU3_FFAR_MK1HE}",
-					["num"] = 9,
-				},
-				[2] = {
-					["CLSID"] = "{LAU3_FFAR_MK1HE}",
-					["num"] = 3,
-				},
-				[3] = {
-					["CLSID"] = "{VSN_F1001000_ptb}",
-					["num"] = 8,
-				},
-				[4] = {
-					["CLSID"] = "{VSN_F1001000_ptb}",
-					["num"] = 4,
-				},
-				[5] = {
-					["CLSID"] = "{LAU3_FFAR_MK1HE}",
-					["num"] = 7,
-				},
-				[6] = {
-					["CLSID"] = "{LAU3_FFAR_MK1HE}",
-					["num"] = 5,
-				},
+						[1] = {
+							["CLSID"] = "{LAU3_FFAR_MK1HE}",
+							["num"] = 9,
+						},
+						[2] = {
+							["CLSID"] = "{LAU3_FFAR_MK1HE}",
+							["num"] = 3,
+						},
+						[3] = {
+							["CLSID"] = "{VSN_F1001000_ptb}",
+							["num"] = 8,
+						},
+						[4] = {
+							["CLSID"] = "{VSN_F1001000_ptb}",
+							["num"] = 4,
+						},
+						[5] = {
+							["CLSID"] = "{LAU3_FFAR_MK1HE}",
+							["num"] = 7,
+						},
+						[6] = {
+							["CLSID"] = "{LAU3_FFAR_MK1HE}",
+							["num"] = 5,
+						},
 					},
 					fuel = 3397,
 					flare = 15,
@@ -1424,48 +1425,48 @@ db_all_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "<CLEAN>",
-					["num"] = 9,
-				},
-				[2] = {
-					["CLSID"] = "<CLEAN>",
-					["num"] = 3,
-				},
-				[3] = {
-					["CLSID"] = "{VSN_F1001000_ptb}",
-					["num"] = 8,
-				},
-				[4] = {
-					["CLSID"] = "{VSN_F1001000_ptb}",
-					["num"] = 4,
-				},
-				[5] = {
-					["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
-					["num"] = 7,
-					["settings"] = {
-						["NFP_VIS_DrawArgNo_57"] = 0,
-						["NFP_fuze_type_nose"] = "M904E4",
-						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 2,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
-					},
-				},
-				[6] = {
-					["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
-					["num"] = 5,
-					["settings"] = {
-						["NFP_VIS_DrawArgNo_57"] = 0,
-						["NFP_fuze_type_nose"] = "M904E4",
-						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 2,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
-					},
-				},
+						[1] = {
+							["CLSID"] = "<CLEAN>",
+							["num"] = 9,
+						},
+						[2] = {
+							["CLSID"] = "<CLEAN>",
+							["num"] = 3,
+						},
+						[3] = {
+							["CLSID"] = "{VSN_F1001000_ptb}",
+							["num"] = 8,
+						},
+						[4] = {
+							["CLSID"] = "{VSN_F1001000_ptb}",
+							["num"] = 4,
+						},
+						[5] = {
+							["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
+							["num"] = 7,
+							["settings"] = {
+								["NFP_VIS_DrawArgNo_57"] = 0,
+								["NFP_fuze_type_nose"] = "M904E4",
+								["NFP_fuze_type_tail"] = "M905",
+								["arm_delay_ctrl_M904E4"] = 2,
+								["arm_delay_ctrl_M905"] = 4,
+								["function_delay_ctrl_M904E4"] = 0,
+								["function_delay_ctrl_M905"] = 0,
+							},
+						},
+						[6] = {
+							["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
+							["num"] = 5,
+							["settings"] = {
+								["NFP_VIS_DrawArgNo_57"] = 0,
+								["NFP_fuze_type_nose"] = "M904E4",
+								["NFP_fuze_type_tail"] = "M905",
+								["arm_delay_ctrl_M904E4"] = 2,
+								["arm_delay_ctrl_M905"] = 4,
+								["function_delay_ctrl_M904E4"] = 0,
+								["function_delay_ctrl_M905"] = 0,
+							},
+						},
 					},
 					fuel = 3397,
 					flare = 15,
@@ -1499,48 +1500,48 @@ db_all_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "<CLEAN>",
-					["num"] = 9,
-				},
-				[2] = {
-					["CLSID"] = "<CLEAN>",
-					["num"] = 3,
-				},
-				[3] = {
-					["CLSID"] = "{VSN_F1001000_ptb}",
-					["num"] = 8,
-				},
-				[4] = {
-					["CLSID"] = "{VSN_F1001000_ptb}",
-					["num"] = 4,
-				},
-				[5] = {
-					["CLSID"] = "{D5D51E24-348C-4702-96AF-97A714E72697}",
-					["num"] = 7,
-					["settings"] = {
-						["NFP_VIS_DrawArgNo_57"] = 0,
-						["NFP_fuze_type_nose"] = "M904E4",
-						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 2,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
-					},
-				},
-				[6] = {
-					["CLSID"] = "{D5D51E24-348C-4702-96AF-97A714E72697}",
-					["num"] = 5,
-					["settings"] = {
-						["NFP_VIS_DrawArgNo_57"] = 0,
-						["NFP_fuze_type_nose"] = "M904E4",
-						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 2,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
-					},
-				},
+						[1] = {
+							["CLSID"] = "<CLEAN>",
+							["num"] = 9,
+						},
+						[2] = {
+							["CLSID"] = "<CLEAN>",
+							["num"] = 3,
+						},
+						[3] = {
+							["CLSID"] = "{VSN_F1001000_ptb}",
+							["num"] = 8,
+						},
+						[4] = {
+							["CLSID"] = "{VSN_F1001000_ptb}",
+							["num"] = 4,
+						},
+						[5] = {
+							["CLSID"] = "{D5D51E24-348C-4702-96AF-97A714E72697}",
+							["num"] = 7,
+							["settings"] = {
+								["NFP_VIS_DrawArgNo_57"] = 0,
+								["NFP_fuze_type_nose"] = "M904E4",
+								["NFP_fuze_type_tail"] = "M905",
+								["arm_delay_ctrl_M904E4"] = 2,
+								["arm_delay_ctrl_M905"] = 4,
+								["function_delay_ctrl_M904E4"] = 0,
+								["function_delay_ctrl_M905"] = 0,
+							},
+						},
+						[6] = {
+							["CLSID"] = "{D5D51E24-348C-4702-96AF-97A714E72697}",
+							["num"] = 5,
+							["settings"] = {
+								["NFP_VIS_DrawArgNo_57"] = 0,
+								["NFP_fuze_type_nose"] = "M904E4",
+								["NFP_fuze_type_tail"] = "M905",
+								["arm_delay_ctrl_M904E4"] = 2,
+								["arm_delay_ctrl_M905"] = 4,
+								["function_delay_ctrl_M904E4"] = 0,
+								["function_delay_ctrl_M905"] = 0,
+							},
+						},
 					},
 					fuel = 3397,
 					flare = 15,
@@ -1578,26 +1579,26 @@ db_all_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{VSN_F105_MK82_6}",
-					["num"] = 7,
-				},
-				[2] = {
-					["CLSID"] = "{VSN_F105_MK82_6}",
-					["num"] = 5,
-				},
-				[3] = {
-					["CLSID"] = "{VSN_F105G_Center_PTB}",
-					["num"] = 6,
-				},
-				[4] = {
-					["CLSID"] = "<CLEAN>",
-					["num"] = 8,
-				},
-				[5] = {
-					["CLSID"] = "<CLEAN>",
-					["num"] = 4,
-				},
+						[1] = {
+							["CLSID"] = "{VSN_F105_MK82_6}",
+							["num"] = 7,
+						},
+						[2] = {
+							["CLSID"] = "{VSN_F105_MK82_6}",
+							["num"] = 5,
+						},
+						[3] = {
+							["CLSID"] = "{VSN_F105G_Center_PTB}",
+							["num"] = 6,
+						},
+						[4] = {
+							["CLSID"] = "<CLEAN>",
+							["num"] = 8,
+						},
+						[5] = {
+							["CLSID"] = "<CLEAN>",
+							["num"] = 4,
+						},
 					},
 					fuel = 4986,
 					flare = 15,
@@ -1631,44 +1632,44 @@ db_all_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{BRU-42_3*Mk-83}",
-					["num"] = 7,
-				},
-				[2] = {
-					["CLSID"] = "{BRU-42_3*Mk-83}",
-					["num"] = 5,
-				},
-				[3] = {
-					["CLSID"] = "{VSN_F105G_Center_PTB}",
-					["num"] = 6,
-				},
-				[4] = {
-					["CLSID"] = "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}",
-					["num"] = 8,
-					["settings"] = {
-						["NFP_VIS_DrawArgNo_57"] = 0,
-						["NFP_fuze_type_nose"] = "M904E4",
-						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 2,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
-					},
-				},
-				[5] = {
-					["CLSID"] = "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}",
-					["num"] = 4,
-					["settings"] = {
-						["NFP_VIS_DrawArgNo_57"] = 0,
-						["NFP_fuze_type_nose"] = "M904E4",
-						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 2,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
-					},
-				},
+						[1] = {
+							["CLSID"] = "{BRU-42_3*Mk-83}",
+							["num"] = 7,
+						},
+						[2] = {
+							["CLSID"] = "{BRU-42_3*Mk-83}",
+							["num"] = 5,
+						},
+						[3] = {
+							["CLSID"] = "{VSN_F105G_Center_PTB}",
+							["num"] = 6,
+						},
+						[4] = {
+							["CLSID"] = "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}",
+							["num"] = 8,
+							["settings"] = {
+								["NFP_VIS_DrawArgNo_57"] = 0,
+								["NFP_fuze_type_nose"] = "M904E4",
+								["NFP_fuze_type_tail"] = "M905",
+								["arm_delay_ctrl_M904E4"] = 2,
+								["arm_delay_ctrl_M905"] = 4,
+								["function_delay_ctrl_M904E4"] = 0,
+								["function_delay_ctrl_M905"] = 0,
+							},
+						},
+						[5] = {
+							["CLSID"] = "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}",
+							["num"] = 4,
+							["settings"] = {
+								["NFP_VIS_DrawArgNo_57"] = 0,
+								["NFP_fuze_type_nose"] = "M904E4",
+								["NFP_fuze_type_tail"] = "M905",
+								["arm_delay_ctrl_M904E4"] = 2,
+								["arm_delay_ctrl_M905"] = 4,
+								["function_delay_ctrl_M904E4"] = 0,
+								["function_delay_ctrl_M905"] = 0,
+							},
+						},
 					},
 					fuel = 4986,
 					flare = 15,
@@ -1702,62 +1703,62 @@ db_all_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
-					["num"] = 7,
-					["settings"] = {
-						["NFP_VIS_DrawArgNo_57"] = 0,
-						["NFP_fuze_type_nose"] = "M904E4",
-						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 2,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
-					},
-				},
-				[2] = {
-					["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
-					["num"] = 5,
-					["settings"] = {
-						["NFP_VIS_DrawArgNo_57"] = 0,
-						["NFP_fuze_type_nose"] = "M904E4",
-						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 2,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
-					},
-				},
-				[3] = {
-					["CLSID"] = "{VSN_F105G_Center_PTB}",
-					["num"] = 6,
-				},
-				[4] = {
-					["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
-					["num"] = 8,
-					["settings"] = {
-						["NFP_VIS_DrawArgNo_57"] = 0,
-						["NFP_fuze_type_nose"] = "M904E4",
-						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 2,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
-					},
-				},
-				[5] = {
-					["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
-					["num"] = 4,
-					["settings"] = {
-						["NFP_VIS_DrawArgNo_57"] = 0,
-						["NFP_fuze_type_nose"] = "M904E4",
-						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 2,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
-					},
-				},
+						[1] = {
+							["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
+							["num"] = 7,
+							["settings"] = {
+								["NFP_VIS_DrawArgNo_57"] = 0,
+								["NFP_fuze_type_nose"] = "M904E4",
+								["NFP_fuze_type_tail"] = "M905",
+								["arm_delay_ctrl_M904E4"] = 2,
+								["arm_delay_ctrl_M905"] = 4,
+								["function_delay_ctrl_M904E4"] = 0,
+								["function_delay_ctrl_M905"] = 0,
+							},
+						},
+						[2] = {
+							["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
+							["num"] = 5,
+							["settings"] = {
+								["NFP_VIS_DrawArgNo_57"] = 0,
+								["NFP_fuze_type_nose"] = "M904E4",
+								["NFP_fuze_type_tail"] = "M905",
+								["arm_delay_ctrl_M904E4"] = 2,
+								["arm_delay_ctrl_M905"] = 4,
+								["function_delay_ctrl_M904E4"] = 0,
+								["function_delay_ctrl_M905"] = 0,
+							},
+						},
+						[3] = {
+							["CLSID"] = "{VSN_F105G_Center_PTB}",
+							["num"] = 6,
+						},
+						[4] = {
+							["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
+							["num"] = 8,
+							["settings"] = {
+								["NFP_VIS_DrawArgNo_57"] = 0,
+								["NFP_fuze_type_nose"] = "M904E4",
+								["NFP_fuze_type_tail"] = "M905",
+								["arm_delay_ctrl_M904E4"] = 2,
+								["arm_delay_ctrl_M905"] = 4,
+								["function_delay_ctrl_M904E4"] = 0,
+								["function_delay_ctrl_M905"] = 0,
+							},
+						},
+						[5] = {
+							["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
+							["num"] = 4,
+							["settings"] = {
+								["NFP_VIS_DrawArgNo_57"] = 0,
+								["NFP_fuze_type_nose"] = "M904E4",
+								["NFP_fuze_type_tail"] = "M905",
+								["arm_delay_ctrl_M904E4"] = 2,
+								["arm_delay_ctrl_M905"] = 4,
+								["function_delay_ctrl_M904E4"] = 0,
+								["function_delay_ctrl_M905"] = 0,
+							},
+						},
 					},
 					fuel = 4986,
 					flare = 15,
@@ -1782,41 +1783,41 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 						[1] = {
-					["CLSID"] = "{AGM_45A}",
-					["num"] = 8,
-					["settings"] = {
-						["EAS_bypass_ctrl"] = 1,
-						["NFP_PRESID"] = "AGM_45",
-						["NFP_PRESVER"] = 1,
-						["NFP_rfgu_type"] = 1,
-						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
-						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
-					},
-				},
-				[2] = {
-					["CLSID"] = "{VSN_F105G_PTB}",
-					["num"] = 7,
-				},
-				[3] = {
-					["CLSID"] = "{VSN_F105G_PTB}",
-					["num"] = 5,
-				},
-				[4] = {
-					["CLSID"] = "{AGM_45A}",
-					["num"] = 4,
-					["settings"] = {
-						["EAS_bypass_ctrl"] = 1,
-						["NFP_PRESID"] = "AGM_45",
-						["NFP_PRESVER"] = 1,
-						["NFP_rfgu_type"] = 1,
-						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
-						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
-					},
-				},
-				[5] = {
-					["CLSID"] = "{VSN_F105G_Center_PTB}",
-					["num"] = 6,
-				},
+							["CLSID"] = "{AGM_45A}",
+							["num"] = 8,
+							["settings"] = {
+								["EAS_bypass_ctrl"] = 1,
+								["NFP_PRESID"] = "AGM_45",
+								["NFP_PRESVER"] = 1,
+								["NFP_rfgu_type"] = 1,
+								["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
+								["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
+							},
+						},
+						[2] = {
+							["CLSID"] = "{VSN_F105G_PTB}",
+							["num"] = 7,
+						},
+						[3] = {
+							["CLSID"] = "{VSN_F105G_PTB}",
+							["num"] = 5,
+						},
+						[4] = {
+							["CLSID"] = "{AGM_45A}",
+							["num"] = 4,
+							["settings"] = {
+								["EAS_bypass_ctrl"] = 1,
+								["NFP_PRESID"] = "AGM_45",
+								["NFP_PRESVER"] = 1,
+								["NFP_rfgu_type"] = 1,
+								["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
+								["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
+							},
+						},
+						[5] = {
+							["CLSID"] = "{VSN_F105G_Center_PTB}",
+							["num"] = 6,
+						},
 					},
 					fuel = 4986,
 					flare = 15,
@@ -1968,14 +1969,14 @@ db_all_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{3C612111-C7AD-476E-8A8E-2485812F4E5C}",
-					["num"] = 2,
-				},
-				[2] = {
-					["CLSID"] = "{3C612111-C7AD-476E-8A8E-2485812F4E5C}",
-					["num"] = 1,
-				},
+						[1] = {
+							["CLSID"] = "{3C612111-C7AD-476E-8A8E-2485812F4E5C}",
+							["num"] = 2,
+						},
+						[2] = {
+							["CLSID"] = "{3C612111-C7AD-476E-8A8E-2485812F4E5C}",
+							["num"] = 1,
+						},
 					},
 					fuel = 1140,
 					flare = 0,
@@ -2076,13 +2077,13 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 						[1] = {
-					["CLSID"] = "{3C612111-C7AD-476E-8A8E-2485812F4E5C}",
-					["num"] = 2,
-				},
-				[2] = {
-					["CLSID"] = "{3C612111-C7AD-476E-8A8E-2485812F4E5C}",
-					["num"] = 1,
-				},
+							["CLSID"] = "{3C612111-C7AD-476E-8A8E-2485812F4E5C}",
+							["num"] = 2,
+						},
+						[2] = {
+							["CLSID"] = "{3C612111-C7AD-476E-8A8E-2485812F4E5C}",
+							["num"] = 1,
+						},
 					},
 					fuel = 1140,
 					flare = 0,

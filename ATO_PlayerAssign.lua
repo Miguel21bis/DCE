@@ -284,7 +284,7 @@ if #playable > 0 then
 			else
 				AllCoopPossible = false
 				if Debug.debug then
-					print("AtoPA for this aircraft: "..tostring(MultiBIS.Group[k].PlaneType).." no flight possible or not NotAssigned:  "..tostring(MultiBIS.Group[k].NotAssigned))
+					print("AtoPA   no flight possible or not NotAssigned:  "..tostring(MultiBIS.Group[k].NotAssigned).." for this aircraft: "..tostring(MultiBIS.Group[k].PlaneType))
 					_affiche(MultiBIS,"MultiBIS")
 
 					for sideName, units in pairs(oob_air) do

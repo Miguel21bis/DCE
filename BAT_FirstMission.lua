@@ -65,7 +65,9 @@ end
 
 dofile("Init/conf_mod.lua")
 dofile("Init/camp_init.lua")
-if not ChangePlane then
+if ChangePlane then
+	require("Active/oob_air")
+else
 	require("Init/oob_air_init")
 end
 dofile("Init/db_airbases.lua")
