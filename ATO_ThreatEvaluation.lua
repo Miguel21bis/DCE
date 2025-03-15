@@ -29,29 +29,29 @@ groundthreats = {
 	}
 }
 
-local Callsign_west = {
-		JTAC_EWR = {
-			[1] = "Axeman",
-			[2] = "Darknight",
-			[3] = "Warrior",
-			[4] = "Pointer",
-			[5] = "Eyeball",
-			[6] = "Moonbeam",
-			[7] = "Whiplash",
-			[8] = "Finger",
-			[9] = "Pinpoint",
-			[10] = "Ferret",
-			[11] = "Shaba",
-			[12] = "Playboy",
-			[13] = "Hammer",
-			[14] = "Jaguar",
-			[15] = "Deathstar",
-			[16] = "Anvil",
-			[17] = "Firefly",
-			[18] = "Mantis",
-			[19] = "Badger",
-			}
-	}
+-- local Callsign_west = {
+-- 		JTAC_EWR = {
+-- 			[1] = "Axeman",
+-- 			[2] = "Darknight",
+-- 			[3] = "Warrior",
+-- 			[4] = "Pointer",
+-- 			[5] = "Eyeball",
+-- 			[6] = "Moonbeam",
+-- 			[7] = "Whiplash",
+-- 			[8] = "Finger",
+-- 			[9] = "Pinpoint",
+-- 			[10] = "Ferret",
+-- 			[11] = "Shaba",
+-- 			[12] = "Playboy",
+-- 			[13] = "Hammer",
+-- 			[14] = "Jaguar",
+-- 			[15] = "Deathstar",
+-- 			[16] = "Anvil",
+-- 			[17] = "Firefly",
+-- 			[18] = "Mantis",
+-- 			[19] = "Badger",
+-- 			}
+-- 	}
 
 --function to check if a unit is a threat, assign threat values and add to threats table
 

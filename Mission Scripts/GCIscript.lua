@@ -12,7 +12,7 @@ versionDCE["Mission Scripts/GCIscript.lua"] = "1.4.22"
 -- modification M11_j			Multiplayer
 ------------------------------------------------------------------------------------------------------- 
 
-env.info("DCE_GCI version of GCIscript "..tostring(versionDCE["Mission Scripts/GCIscript.lua"]))
+env.info("DCE_GCI START LOADING GCIscript.lua "..tostring(versionDCE["Mission Scripts/GCIscript.lua"]))
 
 ControlTime = 0
 
@@ -739,4 +739,4 @@ local function ControlFunction()
 end
 timer.scheduleFunction(ControlFunction, nil, timer.getTime() + 2)
 
-env.info("DCE_GCI FIN Loading GCIScript")
+env.info("DCE_GCI END OF LOADING GCIScript")

@@ -22,12 +22,13 @@ versionDCE["Mission Scripts/EventsTracker.lua"] = "1.12.74"
 -- modification M18_g		despawn (g info bad coalition)(e: option confMod)(d: active unit) (cf despawn/destroy Plane on BaseAirStart) destroy Plane Landing CV + FARP 
 ------------------------------------------------------------------------------------------------------- 
 
+env.info("DCE_EventT START LOADING EventsTracker.lua "..tostring(versionDCE["Mission Scripts/EventsTracker.lua"]))
 
-env.info("DCETestingConstante: Unit.Category.AIRPLANE "..tostring(Unit.Category.AIRPLANE))
-env.info("DCETestingConstante: Unit.Category.HELICOPTER "..tostring(Unit.Category.HELICOPTER))
-env.info("DCETestingConstante: Unit.Category.GROUND_UNIT "..tostring(Unit.Category.GROUND_UNIT))
-env.info("DCETestingConstante: Unit.Category.SHIP "..tostring(Unit.Category.SHIP))
-env.info("DCETestingConstante: Unit.Category.STRUCTURE "..tostring(Unit.Category.STRUCTURE))
+env.info("DCET_testingConstante: Unit.Category.AIRPLANE "..tostring(Unit.Category.AIRPLANE))
+env.info("DCET_testingConstante: Unit.Category.HELICOPTER "..tostring(Unit.Category.HELICOPTER))
+env.info("DCET_testingConstante: Unit.Category.GROUND_UNIT "..tostring(Unit.Category.GROUND_UNIT))
+env.info("DCET_testingConstante: Unit.Category.SHIP "..tostring(Unit.Category.SHIP))
+env.info("DCET_testingConstante: Unit.Category.STRUCTURE "..tostring(Unit.Category.STRUCTURE))
 
 -- Last_AddSoldierAliasPilot = 0
 
@@ -222,6 +223,9 @@ function eventHandlerDCE:onEvent(event)
 		-- _affiche(event, "EventT  PASSE 00b event INCONNU")
 	end
 
+	--https://flightcontrol-master.github.io/MOOSE_DOCS_DEVELOP/Documentation/DCS.html
+	--https://wiki.hoggitworld.com/view/DCS_enum_world
+
 	Info_event = {
 		[0] =  "S_EVENT_INVALID",
 		[1] = "S_EVENT_SHOT",
@@ -274,84 +278,19 @@ function eventHandlerDCE:onEvent(event)
 		[48] = "S_EVENT_WEAPON_DROP",
 		[49] = "S_EVENT_UNIT_TASK_TIMEOUT",
 		[50] = "S_EVENT_UNIT_TASK_STAGE",
-		[51] = "S_EVENT_MAC_SUBTASK_SCORE",
-		[52] = "S_EVENT_MAC_EXTRA_SCORE",
-		[53] = "S_EVENT_MISSION_RESTART",
-		[54] = "S_EVENT_MISSION_WINNER",
-		[55] = "S_EVENT_POSTPONED_TAKEOFF",
-		[56] = "S_EVENT_POSTPONED_LAND",
-		[57] = "S_EVENT_MAX",
+		[51] = "S_EVENT_MAC_EXTRA_SCORE",
+		[52] = "S_EVENT_MISSION_RESTART",
+		[53] = "S_EVENT_MISSION_WINNER",
+		[54] = "S_EVENT_RUNWAY_TAKEOFF",
+		[55] = "S_EVENT_RUNWAY_TOUCH",
+		[56] = "S_EVENT_MAC_LMS_RESTART",
+		[57] = "S_EVENT_SIMULATION_FREEZE",
+		[58] = "S_EVENT_SIMULATION_UNFREEZE",
+		[59] = "S_EVENT_HUMAN_AIRCRAFT_REPAIR_START",
+		[60] = "S_EVENT_HUMAN_AIRCRAFT_REPAIR_FINISH",
+		[61] = "S_EVENT_MAX",
 	}
-	-- 0 =  S_EVENT_INVALID"
-	-- 1 = "S_EVENT_SHOT"
-	-- 2 = "S_EVENT_HIT"
-	-- 3 = "S_EVENT_TAKEOFF"
-	-- 4 = "S_EVENT_LAND"
-	-- 5 = "S_EVENT_CRASH"
-	-- 6 = "S_EVENT_EJECTION"
-	-- 7 = "S_EVENT_REFUELING"
-	-- 8 = "S_EVENT_DEAD"
-	-- 9 = "S_EVENT_PILOT_DEAD"
-	-- 10 = "S_EVENT_BASE_CAPTURED"
-	-- 11 = "S_EVENT_MISSION_START"
-	-- 12 = "S_EVENT_MISSION_END"
-	-- 13 = "S_EVENT_TOOK_CONTROL"
-	-- 14 = "S_EVENT_REFUELING_STOP"
-	-- 15 = "S_EVENT_BIRTH"
-	-- 16 = "S_EVENT_HUMAN_FAILURE"
-	-- 17 = "S_EVENT_DETAILED_FAILURE"
-	-- 18 = "S_EVENT_ENGINE_STARTUP"
-	-- 19 = "S_EVENT_ENGINE_SHUTDOWN"
-	-- 20 = "S_EVENT_PLAYER_ENTER_UNIT"
-	-- 21 = "S_EVENT_PLAYER_LEAVE_UNIT"
-	-- 22 = "S_EVENT_PLAYER_COMMENT"
-	-- 23 = "S_EVENT_SHOOTING_START"
-	-- 24 = "S_EVENT_SHOOTING_END"
-	-- 25 = "S_EVENT_MARK_ADDED"
-	-- 26 = "S_EVENT_MARK_CHANGE"
-	-- 27 = "S_EVENT_MARK_REMOVED"
-	-- 28 = "S_EVENT_KILL"
-	-- 29 = "S_EVENT_SCORE"
-	-- 30 = "S_EVENT_UNIT_LOST"
-	-- 31 = "S_EVENT_LANDING_AFTER_EJECTION"
-	-- 32 = "S_EVENT_PARATROOPER_LENDING"
-	-- 33 = "S_EVENT_DISCARD_CHAIR_AFTER_EJECTION"
-	-- 34 = "S_EVENT_WEAPON_ADD"
-	-- 35 = "S_EVENT_TRIGGER_ZONE"
-	-- 36 = "S_EVENT_LANDING_QUALITY_MARK"
-	-- 37 = "S_EVENT_BDA"
-					-- _affiche (a b)     time 3490.471
-					-- _affiche(a c)           initiator id_
-					-- _affiche(d)                16794881
-					-- _affiche(a c)           target id_
-					-- _affiche(d)                16883201
-					-- _affiche(a c)           weapon id_
-					-- _affiche(d)                16918785
-					-- _affiche (a b)     id 37
-					-- _affiche (a b)     weapon_name FAB_500
-
- -- S_EVENT_AI_ABORT_MISSION = 38
--- S_EVENT_DAYNIGHT = 39
-
-	-- S_EVENT_FLIGHT_TIME = 40, 
-	-- S_EVENT_PLAYER_SELF_KILL_PILOT = 41, 
-	-- S_EVENT_PLAYER_CAPTURE_AIRFIELD = 42, 
-	-- S_EVENT_EMERGENCY_LANDING = 43,
-	 -- when AI aircraft lands on belly or ditch on water. Support for player will be added later
-	-- S_EVENT_UNIT_CREATE_TASK = 44,
-	-- S_EVENT_UNIT_DELETE_TASK = 45,
-	-- S_EVENT_SIMULATION_START = 46,
-	-- S_EVENT_WEAPON_REARM = 47,
-	-- S_EVENT_WEAPON_DROP = 48,
-	-- S_EVENT_UNIT_TASK_TIMEOUT = 49,
-	-- S_EVENT_UNIT_TASK_STAGE = 50,
-	-- S_EVENT_MAC_SUBTASK_SCORE = 51, 
-	-- S_EVENT_MAC_EXTRA_SCORE = 52,
-	-- S_EVENT_MISSION_RESTART = 53,
-	-- S_EVENT_MISSION_WINNER = 54, 
-	-- S_EVENT_POSTPONED_TAKEOFF = 55, 
-	-- S_EVENT_POSTPONED_LAND = 56, 
-	-- S_EVENT_MAX = 57,
+	
 
 	-- if camp.debug then  
 	-- 	env.info( "DCE_EventsTracker  id: "..tostring(event.id).." _type_ : "..tostring(log_entry.type)) 
@@ -365,14 +304,14 @@ function eventHandlerDCE:onEvent(event)
 		if Info_event then
 			
 			if Info_event[tonumber(event.id)] then
-				-- local idLabel = tostring(Info_event[tonumber(event.id)])
-				-- if camp.debug then
-				-- 	env.info("DCE_EventsTracker event.id "..tostring(event.id).." " ..idLabel) 
+				local idLabel = tostring(Info_event[tonumber(event.id)])
+				if camp.debug then
+					env.info("DCE_EventsTracker event.id "..tostring(event.id).." " ..idLabel) 
 
-				-- end
+				end
 			else
 				if camp.debug then
-					env.info("DCE_EventsTracker this is a new id "..tostring(event.id))
+					env.info("DCE_EventsTracker this is a  NEW ID "..tostring(event.id))
 				end
 			end
 		end
@@ -1415,7 +1354,10 @@ timer.scheduleFunction(CheckRtbAirbase, nil, timer.getTime() + 5)
 
 timer.scheduleFunction(despawnIA, nil, timer.getTime() + 10)
 
+_affiche(world.event, "DCE world.event")
 
+
+env.info("DCE_EventT END OF LOADING EventsTracker script ")
 
 
 

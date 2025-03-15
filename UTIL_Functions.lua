@@ -977,6 +977,8 @@ function Display(t, indent)
     end
 end
 
+
+
 function _affiche(t, indent)
     indent = indent or ""
 
@@ -994,6 +996,8 @@ function _affiche(t, indent)
         end
     end
 end
+
+
 
 function _afficheOLD(_table, titre, prof)
 
@@ -1353,7 +1357,7 @@ function CreatePlageFrequency()																				--trouve une plage de frequen
 			if not sqd.inactive then
 				if frequency[sqd.type] then
 					-- print("sqd.type "..tostring(sqd.type))
-					
+
 					for typeRadio, PlaneFreqRadio in pairs(frequency[sqd.type]) do
 						if typeRadio == "radio" and type(PlaneFreqRadio) == "table" then
 							for nr , _bandFreq in pairs(PlaneFreqRadio) do	--for nr , value in pairs(frequency[sqd.type].radio) do
@@ -2160,7 +2164,7 @@ local function buildsLoadout()
 				if string.find(string.lower(camp.title), string.lower(prefix_s)) then
 					-- print("choiceLoadout D1 title: "..tostring(camp.title).." prefix_s: "..tostring(prefix_s))
 
-					
+
 					local number_of_words = word_count(prefix_s)
 					if number_of_words > bestMatchCount then
 						bestMatch = codeName
@@ -2812,14 +2816,6 @@ function UpdateConfMod(setWeather)
 				local listValue = line:match('^%s*"(.-)",?%s*$')
 				local tableStartUnique = line:match('%["([^"]+)"%]%s*=%s*$') or line:match("(%S+)%s*=%s*$")
 
-
-				-- print("lCWS E1 tableStart?: "..tostring(tableStart))
-				-- print("lCWS E2 singleLineTable?: "..tostring(singleLineTable))
-				-- print("lCWS E6 tableEnd?: "..tostring(tableEnd))
-				-- print("lCWS E7 tableStartUnique?: "..tostring(tableStartUnique))
-				-- print("lCWS E8 currentKey?: "..tostring(currentKey))
-
-
 				local key, value, comment = line:match('(%S+)%s*=%s*(["]?[%w%s%p]+["]?)%s*,?%s*%-%-%s*(.*)')
 				-- print("lCWS AA1 value?: "..tostring(value))
 				if not key then
@@ -2829,7 +2825,7 @@ function UpdateConfMod(setWeather)
 				end
 
 
-				-- 1️⃣ Tables sur une seule ligne (ex: `x = {1, 2, 3}`)
+				--  Tables sur une seule ligne (ex: `x = {1, 2, 3}`)
 				if singleLineTable then
 					-- print("LCWS B ")
 					local name, contents = line:match("(%S+)%s*=%s*{(.-)}")
@@ -2840,7 +2836,7 @@ function UpdateConfMod(setWeather)
 					end
 					currentTable[name] = newTable
 
-				-- 2️⃣ `pictureBrief =` suivi de `{` sur la ligne suivante
+				--`pictureBrief =` suivi de `{` sur la ligne suivante
 				elseif tableStartUnique then
 					-- print("LCWS C ")
 					pendingTable = tableStartUnique -- Retenir le nom de la table
@@ -2853,7 +2849,7 @@ function UpdateConfMod(setWeather)
 					currentKey = pendingTable
 					pendingTable = nil -- Réinitialisation
 
-				-- 3️⃣ Tables classiques (`key = {`)
+				--Tables classiques (`key = {`)
 				elseif tableStart then
 					-- print("LCWS E ")
 
@@ -2865,7 +2861,7 @@ function UpdateConfMod(setWeather)
 					currentKey = tableStart
 
 
-				-- 4️⃣ `blue = {` et `red = {` sous `pictureBrief`
+				--`blue = {` et `red = {` sous `pictureBrief`
 				elseif (line:match("^%s*(blue|red)%s*=%s*{") or line:match("^%s*%[%d+%]%s*=%s*{")) and currentKey == "pictureBrief" then
 					-- print("LCWS F ")
 					local subKey = line:match("^%s*(blue|red)%s*=%s*{") or line:match("^%s*%[(%d+)%]%s*=%s*{")
@@ -2876,7 +2872,7 @@ function UpdateConfMod(setWeather)
 					currentTable = currentTable[subKey]
 					currentKey = subKey
 
-				-- 5️⃣ Fermeture de table (`}`)
+				--Fermeture de table (`}`)
 				elseif tableEnd then
 					-- print("LCWS G ")
 					if #stack > 0 then
@@ -2885,13 +2881,13 @@ function UpdateConfMod(setWeather)
 						currentKey = popped.key
 					end
 
-				-- 6️⃣ Détection des listes `"texte",`
+				--Détection des listes `"texte",`
 				elseif listValue then
 					-- print("LCWS H ")
 
 					table.insert(currentTable, listValue)
 
-				-- 7️⃣ Détection des valeurs indexées `[1] = "..."``
+				--Détection des valeurs indexées `[1] = "..."``
 				elseif line:match("^%s*%[%d+%]%s*=%s*") then
 					-- print("LCWS I ")
 					local index, listValue = line:match("^%s*%[(%d+)%]%s*=%s*\"(.-)\"")
@@ -2900,7 +2896,7 @@ function UpdateConfMod(setWeather)
 						currentTable[tonumber(index)] = listValue
 
 					end
-				-- 8️⃣ Variables classiques `key = value`
+				--Variables classiques `key = value`
 				elseif key and value then
 					--   Suppression propre des `,` et espaces parasites en fin de valeur
 					value = value:match("^%s*(.-)%s*$") -- Trim des espaces inutiles
@@ -3021,10 +3017,10 @@ function UpdateConfMod(setWeather)
 					end
 				end
 
-			--  ️ `weather` doit **toujours** être remplacé par `weather_override`
+			-- `weather` doit **toujours** être remplacé par `weather_override`
 			elseif key == "weather" and weather_override then
 				clientTable[key] = deepCopy(weather_override)
-			--   Fusion normale des sous-tables
+			-- Fusion normale des sous-tables
 			elseif type(defaultValue) == "table" then
 				if not clientValue then
 					-- print("[mergeTables]   Copie de la table absente :", key)
@@ -3033,7 +3029,7 @@ function UpdateConfMod(setWeather)
 					mergeTables(clientValue, defaultValue, structure)
 				end
 
-			--   Valeur simple : on applique la valeur par défaut si absente
+			-- Valeur simple : on applique la valeur par défaut si absente
 			else
 				if clientValue == nil then
 					-- print("[mergeTables]   Valeur par défaut appliquée :", key)
@@ -3056,9 +3052,9 @@ function UpdateConfMod(setWeather)
 	local function saveUpdatedConfig(filePath, updatedConfig, structure)
 		-- version saveUpdatedConfig VA_1.50 (Correction des valeurs sous forme de table et commentaires)
 
-		if updatedConfig.weather then
+		if updatedConfig.mission_ini.weather then
 			for key, forcedValue in pairs(weather_override) do
-				updatedConfig.weather[key] = forcedValue  -- **Écrase l'existant OU ajoute si absent**
+				updatedConfig.mission_ini.weather[key] = forcedValue  -- **Écrase l'existant OU ajoute si absent**
 			end
 		end
 
@@ -3074,12 +3070,9 @@ function UpdateConfMod(setWeather)
 		end
 
 
-		local function writeStructureLines(currentTable, structure, level)
+		local function writeStructureLines(currentTable, structureLocal, level)
 
-			local maxKeyLength = 0
-			local maxValueLength = 0
-
-			for i, line in ipairs(structure) do
+			for i, line in ipairs(structureLocal) do
 				local trimmedLine = line:match("^%s*(.-)%s*$") -- Supprimer espaces début/fin
 				-- print("A "..line)
 
@@ -3095,7 +3088,7 @@ function UpdateConfMod(setWeather)
 
 				--   Détection des tables sur une seule ligne
 				elseif trimmedLine:match("(%S+)%s*=%s*{.-}%s*,?%s*$") then
-					local key = trimmedLine:match("(%S+)%s*=%s*{")
+					key = trimmedLine:match("(%S+)%s*=%s*{")
 					local clientValue = currentTable[key]
 					if clientValue then
 						-- print("C1 "..getIndent(level) .. key .. " = " .. getFormattedValue(clientValue) .. ",\n")
@@ -3104,7 +3097,7 @@ function UpdateConfMod(setWeather)
 
 				--   Détection de déclaration de table avec indentation correcte
 				elseif trimmedLine:match("(%S+)%s*=%s*{") then
-					local key = trimmedLine:match("(%S+)%s*=%s*{")
+					key = trimmedLine:match("(%S+)%s*=%s*{")
 					local clientValue = currentTable[key]
 					if clientValue and type(clientValue) == "table" and next(clientValue) then
 						-- print("D1 "..getIndent(level) .. key .. " = {\n")
@@ -3125,13 +3118,11 @@ function UpdateConfMod(setWeather)
 						end
 
 						--   Vérifier si on doit ajouter une virgule après `}`
-						local nextLine = structure[i + 1] or ""
+						local nextLine = structureLocal[i + 1] or ""
 						local addComma = not nextLine:match("^%s*}%s*$")
 
 						if level > 0 then
 							-- print("E2 "..getIndent(level) .. "}" .. (addComma and "," or "") .. "\n")
-							-- print("E2 "..getIndent(level) .. "}" .. (addComma and ",") .. "\n")
-							-- file:write(getIndent(level) .. "}" .. (addComma and ",") .. "\n")
 							file:write(getIndent(level) .. "}" .. (addComma and "," or "") .. "\n")
 						else
 							-- print("E3 "..getIndent(level) .. "}\n")
@@ -3140,42 +3131,59 @@ function UpdateConfMod(setWeather)
 
 				--   Gestion des affectations (Valeur + Commentaire propre)
 				else
-					local key, value, comment = line:match('(%S+)%s*=%s*(.-)%s*%-%-%s*(.*)')
-					if not key then
-						key, value = line:match('(%S+)%s*=%s*(.-)%s*$')
-					end
 
-					-- print("F1 ")
+					key, value, comment = line:match('(%S+)%s*=%s*([^,%s]+)%s*,?%s*%-%-%s*(.*)')
+					-- print("F1a key: "..tostring(key).." value: |"..tostring(value).."|")
+					
+					if not key then
+						key, value = line:match('(%S+)%s*=%s*([^,%s]+)%s*,?%s*$') -- Capture sans commentaire
+						-- print("F1b key: "..tostring(key).." value: |"..tostring(value).."|")
+					end
+					
 
 					if key then
+						-- print("F1c key: "..tostring(key).." currentTable[key]: "..tostring(currentTable[key]).." value: |"..tostring(value).."|")
+
 						local clientValue = currentTable[key] or value
 						local formattedValue = getFormattedValue(clientValue)
 
-						-- 📏 Calcul de la largeur max des clés pour un alignement automatique
-						local keyColumnWidth = 0
+						-- -- Calcul de la largeur max des clés pour un alignement automatique
+						-- local keyColumnWidth = 0
+						-- for k, _ in pairs(currentTable) do
+						-- 	if type(k) == "string" then
+						-- 		keyColumnWidth = math.max(keyColumnWidth, #k)
+						-- 	end
+						-- end
+						-- keyColumnWidth = keyColumnWidth + 2  -- Ajout de 2 espaces pour plus de lisibilité
+
+						-- 📏 Calcul de la largeur max des clés pour aligner les `=`
+						local maxKeyLength = 0
 						for k, _ in pairs(currentTable) do
 							if type(k) == "string" then
-								keyColumnWidth = math.max(keyColumnWidth, #k)
+								maxKeyLength = math.max(maxKeyLength, #k)
 							end
 						end
-						keyColumnWidth = keyColumnWidth + 2  -- Ajout de 2 espaces pour plus de lisibilité
+						local spacingAfterKey = string.rep(" ", math.max(1, maxKeyLength - #key + 2)) -- Ajoute 2 espaces pour lisibilité
 
 
-						--   Ajustement de l'alignement
-						local spacingAfterKey = string.rep(" ", keyColumnWidth - #key)
+
+						-- --   Ajustement de l'alignement
+						-- local spacingAfterKey = string.rep(" ", keyColumnWidth - #key)
 
 						local spacingAfterEqual = " "
 						local valueColumnWidth = 8  -- 🛠 Réduit l'espace après la valeur
 						local spacingAfterValue = string.rep(" ", math.max(1, valueColumnWidth - #tostring(formattedValue)))
 
 						--   Vérifier si on ajoute une virgule
-						local nextLine = structure[i + 1] or ""
+						local nextLine = structureLocal[i + 1] or ""
 						local addComma = not nextLine:match("^%s*}%s*$")
 
-						-- 📌 Écriture avec **espacement plus serré**
+						-- Écriture avec **espacement plus serré**
 						if comment then
 							-- print("F2 "..getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and "," or "") .. spacingAfterValue .. "-- " .. comment .. "\n")
-							file:write(getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and "," or "") .. spacingAfterValue .. "-- " .. comment .. "\n")
+							-- file:write(getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and "," or "") .. spacingAfterValue .. "-- " .. comment .. "\n")
+							file:write(getIndent(level) .. key .. spacingAfterKey .. "= " .. formattedValue .. (addComma and "," or "") .. spacingAfterValue .. "-- " .. comment .. "\n")
+
 						else
 							-- print("F3 "..getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and ",") .. "\n")
 							file:write(getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and ",") .. "\n")
@@ -3201,7 +3209,7 @@ function UpdateConfMod(setWeather)
 					for _, image in ipairs(images) do
 						file:write(getIndent(level + 1) .. '"' .. image .. '",\n')
 					end
-					file:write(getIndent(level) .. "},\n")  -- Fermeture de `blue` ou `red`
+					file:write(getIndent(level) .. "},--pictureBrief\n")  -- Fermeture de `blue` ou `red`
 				end
 
 				level = level - 1
@@ -3210,10 +3218,6 @@ function UpdateConfMod(setWeather)
 
 
 		end
-
-		-- print("[saveUpdatedConfig]   Contenu final avant écriture :")
-		-- Display(updatedConfig, "FINAL")
-
 
 		--   Écrire la structure dans le fichier en respectant les valeurs du client
 		writeStructureLines(updatedConfig, structure, indentLevel)

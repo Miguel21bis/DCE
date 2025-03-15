@@ -12,32 +12,34 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/Fuel_Check.lua"] = "0.1.3"
+versionDCE["Mission Scripts/Fuel_Check.lua"] = "0.1.4"
 ------------------------------------------------------------------------------------------------------- 
--- Reglage_b						(b: test all plane(description.fuelMassMax))
+-- Reglage_c						(c: Player & Client)(b: test all plane(description.fuelMassMax))
 ------------------------------------------------------------------------------------------------------- 
 
-Units = "imperial"
+local imperialMetric = "imperial"
 
-function FuelCheck()														-- create fuel check function	
+function FuelCheck(data)														-- create fuel check function	
 	local coef  = 1
-	if Units == "imperial" then	
+	if imperialMetric == "imperial" then
 		 coef  =  2.205
 	end
-	
-	local pu = world.getPlayer()											-- get player unit
-	local pg = Unit.getGroup(pu)											-- get player group		
-	local wingman = pg:getUnits()
-	
-	for n = 2, #wingman do			
-		local Nwingman = pg:getUnit(n)		
-		local qty = Nwingman:getFuel()		
-		local description = Nwingman:getDesc()		
+
+	-- local pu = world.getPlayer()											-- get player unit
+	-- local pg = Unit.getGroup(pu)											-- get player group		
+	-- local wingman = pg:getUnits()
+
+	for _, unit in pairs(data.groupObject:getUnits()) do
+	-- for n = 2, #wingman do
+		-- local Nwingman = pg:getUnit(n)
+		local qty = unit:getFuel()
+		local description = unit:getDesc()
 		qty = qty * description.fuelMassMax * coef							--F14 7348 kg
-		qty = math.floor(qty/100)/10		
-		trigger.action.outText(Unit.getName(Nwingman)..":  "..qty,10,false)
-	end	
+		qty = math.floor(qty/100)/10
+		-- trigger.action.outText(Unit.getName(Nwingman)..":  "..qty,10,false)
+		trigger.action.outTextForGroup(data.gpGid, Unit.getName(unit)..":  "..qty, 10, false)
+	end
 end
 
-missionCommands.addCommand("Fuel Check",nil,FuelCheck)						-- add fuel check item to F10 menu & call fuelcheck function
+-- missionCommands.addCommand("Fuel Check",nil,FuelCheck)						-- add fuel check item to F10 menu & call fuelcheck function
 

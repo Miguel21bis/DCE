@@ -14,7 +14,7 @@ versionDCE["Mission Scripts/ARM_Defence_Script.lua"] = "2.4.9"
 -- Debug_b 				(b getCategory)(a:AGM-154 :31:  'getDesc' Static doesn't exist)
 ------------------------------------------------------------------------------------------------------- 	
 
-env.info("DCE_ARM version of ARM_Defence_Script "..tostring(versionDCE["Mission Scripts/ARM_Defence_Script.lua"]))
+env.info("DCE_ARM START LOADING ARM_Defence_Script.lua "..tostring(versionDCE["Mission Scripts/ARM_Defence_Script.lua"]))
 
 --  Table globale des missiles en cours de suivi
 local activeMissiles = {}
@@ -323,3 +323,5 @@ function ARM_Shot_EventHandler:onEvent(event)
 	end
 end
 world.addEventHandler(ARM_Shot_EventHandler)
+
+env.info("DCE_ARM END OF LOADING ARM_Defence_Script ")

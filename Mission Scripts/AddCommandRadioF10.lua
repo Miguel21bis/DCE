@@ -32,7 +32,7 @@ end
 
 
 env.info("DCE_ACRF10 version of Lua _VERSION "..tostring(_VERSION))
-env.info("DCE_ACRF10 version of AddCommandRadioF10 "..tostring(versionDCE["Mission Scripts/AddCommandRadioF10.lua"]))
+env.info("DCE_ACRF10 START LOADING AddCommandRadioF10.lua "..tostring(versionDCE["Mission Scripts/AddCommandRadioF10.lua"]))
 
 -- for k, v in pairs(AI.Option.Air.val) do
 --     env.info(k .. " = " .. tostring(v))
@@ -72,15 +72,15 @@ local excludedUnitTypes = {
 	["FPS-117 Dome"] = true
 }
 
-LastInjectFlightPlan = {}																--garde les derniers plan de vol injecté
-tabBingoPlane = {}
+LastInjectFlightPlan = {}					--garde les derniers plan de vol injecté
+BingoPlaneTab = {}
 GroundDamagedFlyingMachine = {}
 
 
 EjectionSeatFrequency = {}
 SumSoldierAliasPilot = 0
 CustomLog = {}
-zoneSAR = {}																									--table enumérant les helico SAR pour eviter d'en envoyer plusieurs aux memes endroits
+zoneSAR = {}								--table enumérant les helico SAR pour eviter d'en envoyer plusieurs aux memes endroits
 EjectedPilotOnBoard = {}
 
 coalitionId = {
@@ -167,10 +167,27 @@ EWR_optionPlayer = {}
 -- 	EWR_on = true,
 -- }
 
+function _affiche(t, indent)
+    indent = indent or ""
+
+    if type(t) ~= "table" then
+        env.info(indent .. tostring(t)) -- Affiche directement la valeur si ce n'est pas une table
+        return
+    end
+
+    for key, value in pairs(t) do
+        if type(value) == "table" then
+            env.info(indent .. tostring(key) .. ":")
+            _affiche(value, indent .. "  ") -- Correction : appel récursif correct
+        else
+            env.info(indent .. tostring(key) .. ": " .. tostring(value))
+        end
+    end
+end
 
 
 
-function _affiche(_table, titre, prof)
+function _afficheOLD(_table, titre, prof)
 
 	--export custom mission log
 	local logExp = "logExp  "
@@ -538,7 +555,7 @@ function CleanName(name)
 
 end
 
-function normalizeAngle(angle)
+function NormalizeAngle(angle)
     return (angle % 360 + 360) % 360
 end
 
@@ -550,12 +567,12 @@ function FctRemovePlane(_unit)
 	_unit:destroy()
 end
 
-function RemovePlane(PlayerGroup)
+function RemovePlane(playerGroup)
 
-	local PlayerUnits = PlayerGroup:getUnits()
-	local PlayerUnit = PlayerUnits[1]
-	local PlayerUnitPoint = PlayerUnit:getPoint()
-	local Coalition = PlayerUnit:getCoalition()
+	local playerUnits = playerGroup:getUnits()
+	local playerUnit = playerUnits[1]
+	local playerUnitPoint = playerUnit:getPoint()
+	local Coalition = playerUnit:getCoalition()
 	missionCommands.removeItem( {"nearby aircraft"})
 	local requestM = missionCommands.addSubMenu('nearby aircraft'  )
 	local RPlane = {}
@@ -573,10 +590,10 @@ function RemovePlane(PlayerGroup)
 				-- _affiche(description, "description")
 
 				local unitPos = _unit:getPoint()
-				local  gpGid = Group.getID(gp)
-				local  UnitId = Unit.getID(_unit)
+				local gpGid = Group.getID(gp)
+				local UnitId = Unit.getID(_unit)
 				local unitCallsign = _unit:getCallsign()
-				local distance = math.floor(math.sqrt(math.pow(unitPos.x - PlayerUnitPoint.x, 2) + math.pow(unitPos.z - PlayerUnitPoint.z, 2)))
+				local distance = math.floor(math.sqrt(math.pow(unitPos.x - playerUnitPoint.x, 2) + math.pow(unitPos.z - playerUnitPoint.z, 2)))
 				if distance <= 900 then
 					env.info(gpName.." "..unitCallsign.." "..distance.."m ")
 					-- trigger.action.outText(gpName.." "..unitCallsign.." "..distance.."m ", 15)	--FOR DEBUG
@@ -1179,10 +1196,10 @@ local function avoidArea()
 									end
 
 									if camp.debug then
-										local TimeSearchEngage = timer.getTime() + 5
+										local timeSearchEngage = timer.getTime() + 5
 										local logStr = "flightPlan = " .. TableSerialization(flightPlan, 0)
-										local FlightNameClean = unitName:gsub('[%p%c%s]', '_')
-										local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_avoidArea.lua", "w")
+										local flightNameClean = unitName:gsub('[%p%c%s]', '_')
+										local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_"..timeSearchEngage.."_avoidArea.lua", "w")
 
 										if logFile then
 											logFile:write(logStr)
@@ -1296,7 +1313,6 @@ function AirRetreat()
 								-- _affiche (a b)     category 0
 
 								if desc.category == Unit.Category.AIRPLANE and (desc.attributes["Battle airplanes"] or desc.attributes.Fighters)  then												--descriptor category is airplane 
-									--TODO ajouter ici les attributs interressant des chasseurs et non des transports
 									--To know what attributes the object type has, look for the unit type script in sub-directories planes/, helicopter/s, vehicles, navy/ of ./Scripts/Database/ directory.
 									--and desc.attributs ~= "Battleplane" and desc.attributs ~= "Fighter"
 
@@ -1550,29 +1566,29 @@ end
 
 local function bingo(gpGid, groupMission)
 
-	for index, unit in pairs(groupMission:getUnits()) do
+	for _, unit in pairs(groupMission:getUnits()) do
 
-		local humainUnit = ""
+		local humainUnit
 
 		if unit and unit:getPlayerName() then
 			humainUnit = unit:getPlayerName()
 		end
 
 		local callSign = Unit.getCallsign(unit)
-		if not tabBingoPlane[gpGid] then tabBingoPlane[gpGid] = {} end
+		if not BingoPlaneTab[gpGid] then BingoPlaneTab[gpGid] = {} end
 		if not tabJockerPlane[gpGid] then tabJockerPlane[gpGid] = {} end
 
-		local  gpName = Group.getName(groupMission)
+		local gpName = Group.getName(groupMission)
 		-- env.info( " bingo() gpName  "..tostring(gpName).." groupMission.id_ "..tostring(groupMission.id_) )
 		-- _affiche(groupMission, "groupMission function bingo(gpGid, groupMission)")
 
 
-		if tabBingoPlane[gpGid] and not tabBingoPlane[gpGid][callSign] then												-- si le callSign a deja dit qu'il etait Bingo, on l'oublie		
+		if BingoPlaneTab[gpGid] and not BingoPlaneTab[gpGid][callSign] then												-- si le callSign a deja dit qu'il etait Bingo, on l'oublie		
 			if Unit.getFuel(unit) <=  0.34 then																			-- Sur F14, 4000lbs/16000lbs = 0.25%
 				trigger.action.outTextForGroup(gpGid, callSign .." Bingo Fuel", 15 , true)
 				-- env.info( "DCE_Bingo AA Unit.getFuel(unit)  "..tostring(groupMission.id_).." gpName: "..tostring(gpName).." callSign: "..callSign.." humainUnit? "..tostring(humainUnit) )
 
-				tabBingoPlane[gpGid][callSign] = true																	-- la callSign � d�ja indiqu� qu'il �tait Bingo
+				BingoPlaneTab[gpGid][callSign] = true																	-- la callSign � d�ja indiqu� qu'il �tait Bingo
 
 
 				local report = " not humainUnit "
@@ -1694,54 +1710,63 @@ end
 
 
 	--************* AFAC PART ****************************************
-function AFAC_com(arg)
-	local AFAC_Name = arg[1]
-	local gpGid = arg[2]
-	local radioOn = arg[3]
+function AFAC_com(afacData)
 
-	if radioOn == true then
-		AFAC_available[AFAC_Name]["gpGid"] = gpGid
-		trigger.action.outTextForGroup(gpGid,"AFAC radio On, waiting ...", 15, false)
+	-- local AFAC_Name = arg[1]
+	-- local gpGid = arg[2]
+	-- local radioOn = arg[3]
+
+	if afacData.radioOn == true then
+		AFAC_available[afacData.AFAC_Name]["gpGid"] = afacData.gpGid
+		trigger.action.outTextForGroup(afacData.gpGid,"AFAC radio On, waiting ...", 15, false)
 		_affiche(AFAC_available, "AFAC_available radioOn")
-	elseif radioOn == false then
-		if AFAC_available[AFAC_Name]["gpGid"] and AFAC_available[AFAC_Name]["gpGid"] == gpGid  then
-			AFAC_available[AFAC_Name]["gpGid"] = nil
+	elseif afacData.radioOn == false then
+		if AFAC_available[afacData.AFAC_Name]["gpGid"] and AFAC_available[afacData.AFAC_Name]["gpGid"] == afacData.gpGid  then
+			AFAC_available[afacData.AFAC_Name]["gpGid"] = nil
 		end
-		trigger.action.outTextForGroup(gpGid,"AFAC radio Off", 15, false)
+		trigger.action.outTextForGroup(afacData.gpGid,"AFAC radio Off", 15, false)
 		_affiche(AFAC_available, "AFAC_available radioOff")
 	end
-
 
 end
 
 function AFAC_F10(playerGroup)
 
 	local gpGid = playerGroup:getID()
-	local menuAFAC
+	local menuAFAC_A
+	local menuAFAC_B
 	missionCommands.removeItemForGroup(gpGid, {"AFAC"})
 
-	-- AFAC_available[FlightName] = nil
 	if AFAC_available then
+
 		for AFAC_Name, AFAC in pairs(AFAC_available) do
 			if AFAC_Name and type(AFAC_Name) == "string" then
-				menuAFAC = missionCommands.addSubMenuForGroup(gpGid, "AFAC")
+				menuAFAC_A = missionCommands.addSubMenuForGroup(gpGid, "AFAC")
 				break
 			end
 		end
 
+		for afacName, AFAC in pairs(AFAC_available) do
+			if afacName and type(afacName) == "string" then
 
-		for AFAC_Name, AFAC in pairs(AFAC_available) do
-			if AFAC_Name and type(AFAC_Name) == "string" then
-				missionCommands.addCommandForGroup(gpGid, "AFAC radio On ", menuAFAC, AFAC_com, {AFAC_Name, gpGid, true}  )
-				missionCommands.addCommandForGroup(gpGid, "AFAC radio Off ", menuAFAC, AFAC_com, {AFAC_Name, gpGid, false}  )
+				menuAFAC_B = missionCommands.addSubMenuForGroup(gpGid, tostring(afacName), menuAFAC_A)
+
+				local afacData = {
+					AFAC_Name = afacName,
+					gpGid = gpGid,
+					radioOn = true,
+				}
+				
+				missionCommands.addCommandForGroup(gpGid, "AFAC radio On ", menuAFAC_B, AFAC_com, afacData )
+
+				afacData.radioOn = false
+				missionCommands.addCommandForGroup(gpGid, "AFAC radio Off ", menuAFAC_B, AFAC_com, afacData)
 
 				--table missionCommands.addCommandForGroup(number groupId , string name , table/nil path , function functionToRun , any anyArguement)
 				--      missionCommands.addCommandForGroup(gpGid, txt, ejctedPilRadioON, activateRadioBeacon, {gpGid, ejectPil}  )
 			end
 		end
-
 	end
-
 
 end
 
@@ -1852,7 +1877,7 @@ end
 
 
 
-function BullsEye(PlayerGroup)
+function BullsEye(playerGroup)
 
 	-- ['coalition'] = {
 			-- ['blue'] = {
@@ -1860,11 +1885,11 @@ function BullsEye(PlayerGroup)
 					-- ['y'] = 635639.37385346,
 					-- ['x'] = -317948.32727306,
 				-- },
-	local gpGid = PlayerGroup:getID()
-	local PlayerUnits = PlayerGroup:getUnits()
-	local PlayerUnit = PlayerUnits[1]
+	local gpGid = playerGroup:getID()
+	local playerUnits = playerGroup:getUnits()
+	local playerUnit = playerUnits[1]
 
-	local Coalition = PlayerUnit:getCoalition()
+	local Coalition = playerUnit:getCoalition()
 
 	local sideT = {
 		[0] = "neutral",
@@ -1908,7 +1933,7 @@ end
 
 
 
-function RtbPack(PlayerGroup)
+function RtbPack(playerGroup)
 
 	for _coalition, coalition in pairs(env.mission.coalition) do
 		if _coalition == camp.player.side then
@@ -1958,7 +1983,7 @@ function RtbPack(PlayerGroup)
 end
 
 
-function RtbStrikePack(PlayerGroup)
+function RtbStrikePack(playerGroup)
 
 	for _coalition, coalition in pairs(env.mission.coalition) do
 		if _coalition == camp.player.side then
@@ -2000,7 +2025,7 @@ function RtbStrikePack(PlayerGroup)
 end
 
 
-function RtbSEADPack(PlayerGroup)
+function RtbSEADPack(playerGroup)
 
 	for _coalition, coalition in pairs(env.mission.coalition) do
 		if _coalition == camp.player.side then
@@ -2061,7 +2086,7 @@ function EWR_OFF(playerName)
 	end
 end
 
-function ReFueling(PlayerGroup)
+function ReFueling(playerGroup)
 
 	local player = {
 		["point"] = {}
@@ -2074,22 +2099,22 @@ function ReFueling(PlayerGroup)
 		["gpName"] = ""
 	}
 
-	local PlayerUnits = PlayerGroup:getUnits()
-	local PlayerUnit = PlayerUnits[1]
-	local uid = PlayerUnit:getID()
+	local playerUnits = playerGroup:getUnits()
+	local playerUnit = playerUnits[1]
+	local uid = playerUnit:getID()
 
 	-- fichier miz:
 		-- plan haut, droite, alti : x/y/z
 	-- vue F10 et vector3d:
 		-- plan haut, droite, alti : x/z/y
 
-	local PtempPoint = PlayerUnit:getPoint()
+	local PtempPoint = playerUnit:getPoint()
 			player.point.x = PtempPoint.x
 			player.point.y = PtempPoint.z
 			player.point.z = PtempPoint.y
-	local Coalition = PlayerUnit:getCoalition()
+	local Coalition = playerUnit:getCoalition()
 	local groups = coalition.getGroups(Coalition, Group.Category.AIRPLANE)
-	local speed = PlayerUnit:getVelocity()
+	local speed = playerUnit:getVelocity()
 	player.speed = math.sqrt(speed.x^2 + speed.y^2 + speed.z^2)
 	-- local groups = coalition.getGroups(coalition.side.BLUE, Group.Category.AIRPLANE)
 	local selected_distance = 99999999
@@ -2256,7 +2281,7 @@ function ReFueling(PlayerGroup)
 		Controller.setTask(tanker.ctr, Mission)																			--activate task with mission for interceptor group							
 end
 
-function RequestCAP(PlayerGroup)
+function RequestCAP(playerGroup)
 	-- modification M36	Help CAP 
 	local player = {
 		["point"] = {}
@@ -2269,23 +2294,23 @@ function RequestCAP(PlayerGroup)
 		["gpName"] = ""
 	}
 
-	local PlayerUnits = PlayerGroup:getUnits()
-	local PlayerUnit = PlayerUnits[1]
-	local uid = PlayerUnit:getID()
+	local playerUnits = playerGroup:getUnits()
+	local playerUnit = playerUnits[1]
+	local uid = playerUnit:getID()
 
 	-- fichier miz:
 		-- plan haut, droite, alti : x/y/z
 	-- vue F10 et vector3d:
 		-- plan haut, droite, alti : x/z/y
 
-	local PtempPoint = PlayerUnit:getPoint()
+	local PtempPoint = playerUnit:getPoint()
 			player.point.x = PtempPoint.x
 			player.point.y = PtempPoint.z
 			player.point.z = PtempPoint.y
 
-	local Coalition = PlayerUnit:getCoalition()
+	local Coalition = playerUnit:getCoalition()
 	local groups = coalition.getGroups(Coalition, Group.Category.AIRPLANE)
-	local speed = PlayerUnit:getVelocity()
+	local speed = playerUnit:getVelocity()
 	player.speed = math.sqrt(speed.x^2 + speed.y^2 + speed.z^2)
 
 	-- local groups = coalition.getGroups(coalition.side.BLUE, Group.Category.AIRPLANE)
@@ -2825,13 +2850,19 @@ local function addFuncs(gid, groupObject, playerName)
 
 
 
-		-- supprime les anciens items de la commande F10
-		missionCommands.removeItemForGroup(gid, {"BullsEye_LongLat"})
+		-- supprime les anciens items de la commande F10**************************************
 
-		missionCommands.removeItemForGroup(gid, {"CarrierIntoWind"})
+		missionCommands.removeItemForGroup(gid, {"Fuel Check"})
 		missionCommands.removeItemForGroup(gid, {"Urgent request"})
+		missionCommands.removeItemForGroup(gid, {"BullsEye_LongLat"})
 		missionCommands.removeItemForGroup(gid, {"EWR"})
 		missionCommands.removeItemForGroup(gid, {"Get out of the cockpit"})
+		missionCommands.removeItemForGroup(gid, {"CarrierIntoWind"})
+
+
+
+		-- ajoute les nouvelles commandes F10 **************************************
+		missionCommands.addCommandForGroup(gid, "Fuel Check", nil, FuelCheck, {gid = gid, groupObject = groupObject })
 
 		local subR_A = missionCommands.addSubMenuForGroup(gid, "Urgent request", nil)
 
@@ -2912,10 +2943,10 @@ local function addFuncs(gid, groupObject, playerName)
 		 -- commandDB['RTB'] = missionCommands.addCommandForGroup(gid,"Package_RTB", nil, RtbPack, Group)
 
 		 if camp.debug then
-			local TimeSearchEngage = timer.getTime()
+			local timeSearchEngage = timer.getTime()
 			local logStr = "radioCommands = " .. TableSerialization(radioCommands, 0)
-			local FlightNameClean = "radioCommands"
-			local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_radioCommands.lua", "w")
+			local flightNameClean = "radioCommands"
+			local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_"..timeSearchEngage.."_".. "_radioCommands.lua", "w")
 			if logFile then
 				logFile:write(logStr)
 				logFile:close()
@@ -3347,8 +3378,8 @@ local function EWR_magic()
 										env.info("DCE_plotContactDetected_b passe C_B annonce: "..tostring(annonce.speak))
 
 										-- Normaliser les angles
-										local bearingFriendAngle = normalizeAngle(bearingFriend[j].bearing)
-										local annonceAngle = normalizeAngle(annonce.bearing)
+										local bearingFriendAngle = NormalizeAngle(bearingFriend[j].bearing)
+										local annonceAngle = NormalizeAngle(annonce.bearing)
 								
 										-- Calculer la différence absolue en tenant compte du cercle
 										local diff = math.abs(annonceAngle - bearingFriendAngle)
@@ -3394,10 +3425,10 @@ function EventHandler2:onEvent(event)
 	-- end
 
 	if event.id == world.event.S_EVENT_BIRTH then
-		env.info("DCE_EventHandler2 PASSE BIRTH 001a ")
+		-- env.info("DCE_EventHandler2 PASSE BIRTH 001a ")
 
 		if event.initiator and Object.getCategory(event.initiator) ~= Object.Category.STATIC and event.initiator:getPlayerName() then
-			env.info("DCE_EventHandler2 PASSE BIRTH 001b ")
+			-- env.info("DCE_EventHandler2 PASSE BIRTH 001b ")
 
 			local playerName = event.initiator:getPlayerName()
 			-- local Uid = event.initiator:getID()
@@ -3410,9 +3441,9 @@ function EventHandler2:onEvent(event)
 		end
 	elseif not event.place then
 		if event.subPlace then
-			env.info("DCE_EventHandler2 PASSE 002 subPlace")																								--debug ET01	
+			-- env.info("DCE_EventHandler2 PASSE 002 subPlace")																								--debug ET01	
 
-			_affiche(event, "event event.subPlace ")
+			-- _affiche(event, "event event.subPlace ")
 			if event.initiator and event.initiator:getPlayerName() then
 				local playerName = event.initiator:getPlayerName()
 				-- local Uid = event.initiator:getID()
@@ -3430,7 +3461,7 @@ function EventHandler2:onEvent(event)
 
 		elseif event.id == world.event.S_EVENT_LAND or event.id == world.event.S_EVENT_CRASH or event.id == world.event.S_EVENT_DETAILED_FAILURE or event.id == world.event.S_EVENT_AI_ABORT_MISSION
 			or event.id == world.event.S_EVENT_POSTPONED_LAND or event.id == world.event.S_EVENT_EMERGENCY_LANDING then
-			env.info("DCE_EventHandler2 PASSE 003 LAND or CRASH")
+			-- env.info("DCE_EventHandler2 PASSE 003 LAND or CRASH")
 
 			if event.initiator and not event.initiator:getPlayerName() then
 
@@ -3564,21 +3595,18 @@ end
 world.addEventHandler(EventHandler2)
 
 
-
 --sur certaines map en solo (Syria) l'evenement Birth n'est pas detectée
 local function timerPlayerMenu(arg)
 	if (radioCommands == nil or #radioCommands == 0) and timer.getTime() < 10 then
 		local Uid, groupObject, gpGid, playerName
 		local playerObj = localGetPlayerObj()
 		if playerObj then
-			-- Uid = playerObj:getID()
 			playerName = playerObj:getPlayerName()
 			groupObject = playerObj:getGroup()
 			gpGid = playerObj:getGroup():getID()
 		end
 
 		if gpGid and Group then
-			-- addFuncs(gpGid, Group)
 			addFuncs(gpGid, groupObject, playerName)
 		end
 	end
@@ -3588,35 +3616,27 @@ function LoopPilot()
 
 	local groups = coalition.getGroups(coalition.side.BLUE, Group.Category.AIRPLANE)
 
-	for i, gp in pairs(groups) do
-		-- local  gpName = Group.getName(gp)
+	for _, gp in pairs(groups) do
 		local  gpGid = Group.getID(gp)
-
-		if gpGid  and gp then
+		if gpGid and gp then
 			bingo(gpGid, gp)
 		end
 	end
 
 	groups = coalition.getGroups(coalition.side.RED, Group.Category.AIRPLANE)
 
-	for i, gp in pairs(groups) do
-		-- local  gpName = Group.getName(gp)
+	for _, gp in pairs(groups) do
 		local  gpGid = Group.getID(gp)
-
-		if gpGid  and gp then
+		if gpGid and gp then
 			bingo(gpGid, gp)
 		end
 	end
-
-
 
 	if camp.TableTransportPilotNames and ctld and ctld.alreadyInitialized and not var_TPN_alreadyAdded then
 		for n=1, #camp.TableTransportPilotNames do
 			ctld.transportPilotNames[#ctld.transportPilotNames +1 ] = camp.TableTransportPilotNames[n]
 		end
-
 		env.info( "AdCR10 add  ctld.transportPilotNames ")
-
 		var_TPN_alreadyAdded = true
 	end
 
@@ -4458,4 +4478,4 @@ _affiche(DCS_CategoryById, "DCE_DCS_CategoryById")
 
 _affiche(Object.Category, "Object.Category")
 
-env.info("ACRF10 end of loading AdCR10 script ")
+env.info("ACRF10 END OF LOADING AdCR10 script ")
