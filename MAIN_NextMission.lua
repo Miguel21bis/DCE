@@ -414,8 +414,8 @@ end
 
 
 AddFileTrigger("camp_status.lua")
+AddFileTrigger("AddCommandRadioF10.lua")
 AddFileTrigger("EventsTracker.lua")
-AddFileTrigger("AddCommandRadioF10.lua")											-- Modification	M29
 AddFileTrigger("Fuel_Check.lua")													-- Norman99 Modification	M57
 AddFileTrigger("ATC_ShutUp_GENERIC.lua")											-- Psyko Modification		M59
 AddFileTrigger("GCIdata.lua")
@@ -423,9 +423,9 @@ AddFileTrigger("GCIscript.lua")
 AddFileTrigger("ARM_Defence_Script.lua")
 AddFileTrigger("CustomTasksScript.lua")
 AddFileTrigger("CarrierIntoWindScript.lua")
-AddFileTrigger("Pedro.lua")															-- modification M40 Pedro
-AddFileTrigger("SAR.lua")															-- modification M61 SAR
-AddFileTrigger("Cercle_City.lua")													-- modification M61 SAR
+AddFileTrigger("Pedro.lua")
+AddFileTrigger("SAR.lua")
+AddFileTrigger("Cercle_City.lua")
 AddFileTrigger("AirGroundAttackScript.lua")
 AddFileTrigger("bombOnRunway.lua")
 AddFileTrigger("beacon.ogg", nil, nil, "a_out_sound_c")

@@ -3924,7 +3924,7 @@ local function DCE_BulleBy_DE()
 		local isStatic = spawnItem.isStatic
 
 		if isStatic then
-			env.info("DCE_Bulle -E2- Création différée de l'objet statique : " .. elementData.name)
+			-- env.info("DCE_Bulle -E2- Création différée de l'objet statique : " .. elementData.name)
 			local status, err = pcall(function()
 				coalition.addStaticObject(elementData.country, {
 					name = elementData.name,
@@ -3939,7 +3939,7 @@ local function DCE_BulleBy_DE()
 				env.warning("DCE_Bulle -E3- Erreur lors de la création de l'objet statique " .. elementData.name .. " : " .. tostring(err))
 			end
 		else
-			env.info("DCE_Bulle -E4- Création différée du groupe : " .. elementData.name)
+			-- env.info("DCE_Bulle -E4- Création différée du groupe : " .. elementData.name)
 			local status, err = pcall(function()
 				coalition.addGroup(elementData.country, Group.Category.GROUND, elementData)
 			end)
@@ -4054,7 +4054,7 @@ local function DCE_BulleBy_DE()
 
 	--  **Vérifier et basculer les unités selon leur distance aux avions** 
 	local function updateUnitVisibility()
-		env.info("DCE_Bulle -H1- Vérification des distances et basculement des unités...")
+		-- env.info("DCE_Bulle -H1- Vérification des distances et basculement des unités...")
 
 		local activationN = 0
 		local deActivate = 0
@@ -4067,13 +4067,13 @@ local function DCE_BulleBy_DE()
 
 				if distance < ACTIVATION_DISTANCE then
 					if savedGroups[groupName] then
-						env.info("DCE_Bulle -H2- Activation du groupe terrestre : " .. groupName)
+						-- env.info("DCE_Bulle -H2- Activation du groupe terrestre : " .. groupName)
 						activationN = activationN+1
 						enableGroup(groupData)
 					end
 				else
 					if not savedGroups[groupName] then
-						env.info("DCE_Bulle -H3- Désactivation du groupe terrestre : " .. groupName)
+						-- env.info("DCE_Bulle -H3- Désactivation du groupe terrestre : " .. groupName)
 						deActivate = deActivate+1
 						disableGroup(groupData)
 					end
@@ -4087,13 +4087,13 @@ local function DCE_BulleBy_DE()
 
 			if distance < ACTIVATION_DISTANCE then
 				if savedStatics[staticName] then
-					env.info("DCE_Bulle -H4- Activation de l'objet statique : " .. staticName)
+					-- env.info("DCE_Bulle -H4- Activation de l'objet statique : " .. staticName)
 					activationN = activationN+1
 					enableGroup({ name = staticName }) -- Réactivation
 				end
 			else
 				if not savedStatics[staticName] then
-					env.info("DCE_Bulle -H5- Désactivation de l'objet statique : " .. staticName)
+					-- env.info("DCE_Bulle -H5- Désactivation de l'objet statique : " .. staticName)
 					deActivate = deActivate+1
 					disableGroup({ name = staticName }) -- Désactivation
 				end
@@ -4472,10 +4472,10 @@ end
 --avec distance avion
 --////////////////////////////////////////////////////////////////////////////////////////////
 
-_affiche(AI.Option.Air.val, "AI.Option.Air.val")
+_affiche(AI.Option.Air.val, "AI.Option.Air.val ")
 
-_affiche(DCS_CategoryById, "DCE_DCS_CategoryById")
+_affiche(DCS_CategoryById, "DCE_DCS_CategoryById ")
 
-_affiche(Object.Category, "Object.Category")
+_affiche(Object.Category, "Object.Category ")
 
-env.info("ACRF10 END OF LOADING AdCR10 script ")
+env.info("DCE_ACRF10 END OF LOADING AdCR10 script ")

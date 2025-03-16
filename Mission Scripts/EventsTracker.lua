@@ -24,25 +24,40 @@ versionDCE["Mission Scripts/EventsTracker.lua"] = "1.12.74"
 
 env.info("DCE_EventT START LOADING EventsTracker.lua "..tostring(versionDCE["Mission Scripts/EventsTracker.lua"]))
 
+_affiche(world.event, "DCE_EventT world.event ")
+
+Info_event_B = {}
+
+for eventName, eventId in pairs(world.event) do
+	table.insert(Info_event_B, eventId, eventName)
+end
+
+
+
+if camp.debug then
+	local logStr = "Info_event_B = " .. TableSerialization(Info_event_B, 0)
+	local logFile = io.open(PathDCE.."Debug\\Info_event_B.lua", "w")
+	if logFile then
+		logFile:write(logStr)
+		logFile:close()
+	else
+		env.info("DCE_EventT Info_event_B: Failed to open log file for writing.")
+	end
+end
+
+
+
 env.info("DCET_testingConstante: Unit.Category.AIRPLANE "..tostring(Unit.Category.AIRPLANE))
 env.info("DCET_testingConstante: Unit.Category.HELICOPTER "..tostring(Unit.Category.HELICOPTER))
 env.info("DCET_testingConstante: Unit.Category.GROUND_UNIT "..tostring(Unit.Category.GROUND_UNIT))
 env.info("DCET_testingConstante: Unit.Category.SHIP "..tostring(Unit.Category.SHIP))
 env.info("DCET_testingConstante: Unit.Category.STRUCTURE "..tostring(Unit.Category.STRUCTURE))
 
--- Last_AddSoldierAliasPilot = 0
-
--- EjectionSeatFrequency = {}
--- SumSoldierAliasPilot = 0
--- CustomLog = {}
-
 local scenLog = {}
 local eventIdTotal = {}
 local tabEjection = {}
 local despawn = {}
 local eventHandlerDCE = {}
-
-
 
 local function WarningText()
 	local text = "WARNING:\n"
@@ -326,9 +341,9 @@ function eventHandlerDCE:onEvent(event)
 	if event.initiator then
 		initiatorObjCategory = Object.getCategory(event.initiator)
 		--DCE_EventsTracker initiator Category 0 _: nil
-		if camp.debug then  env.info("DCE_EventsTracker initiator Category: "..tostring(initiatorObjCategory)) end
+		if camp.debug then env.info("DCE_EventsTracker initiator Category: "..tostring(initiatorObjCategory)) end
 		if Object_Category[initiatorObjCategory] then
-			if camp.debug then  env.info("DCE_EventsTracker initiator Object_Category :  _:_ "..tostring(Object_Category[initiatorObjCategory])) end
+			if camp.debug then env.info("DCE_EventsTracker initiator Object_Category :  _:_ "..tostring(Object_Category[initiatorObjCategory])) end
 
 			if initiatorObjCategory ~= Object.Category.SCENERY then
 				local initiatorCoalition = event.initiator:getCoalition()
@@ -1354,16 +1369,5 @@ timer.scheduleFunction(CheckRtbAirbase, nil, timer.getTime() + 5)
 
 timer.scheduleFunction(despawnIA, nil, timer.getTime() + 10)
 
-_affiche(world.event, "DCE world.event")
-
-
 env.info("DCE_EventT END OF LOADING EventsTracker script ")
-
-
-
-
-
-
-
-
 
