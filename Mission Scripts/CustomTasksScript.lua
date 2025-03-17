@@ -1424,9 +1424,21 @@ end
 function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	if varFpsLeak then return end
 
-	local function distanceVisibilite(altitude)
-		local k = 60 / math.sqrt(7620)  -- Coefficient basé sur la première donnée
-		return k * math.sqrt(altitude)
+	-- local function distanceVisibilite(altitude)
+	-- 	local k = 60 / math.sqrt(7620)  -- Coefficient basé sur la première donnée
+	-- 	return k * math.sqrt(altitude)
+	-- end
+
+	local function distanceVisibilite(altitude_avion, altitude_terrain)
+		-- Vérifie que l'altitude de l'avion est au-dessus du terrain
+		if altitude_avion <= altitude_terrain then
+			return 0  -- Si l'avion est au sol ou en dessous du terrain, il ne voit rien
+		end
+		
+		local hauteur_effective = altitude_avion - altitude_terrain
+		local k = 60000 / math.sqrt(7620)  -- Conversion en mètres (60 km -> 60000 m)
+		
+		return k * math.sqrt(hauteur_effective)
 	end
 
 	env.info("DCE_CustomDesignationAFAC() AA : START "..tostring(afacFlightName))
@@ -1445,14 +1457,21 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 				["unitAFAC"] = unitAFAC,
 				-- ["gpGid"] = 0,
 			}
+			env.info("DCE_CustomDesignationAFAC() AAb : unitAFAC:isExist "..tostring(afacFlightName))
 	else
 		AFAC_available[afacFlightName] = nil
+		env.info("DCE_CustomDesignationAFAC() AAc : else "..tostring(afacFlightName))
 	end
+
+	_affiche(AFAC_available, "CTS_AFAC_available ")
 
 	local afacPos = unitAFAC:getPoint()
 	local afacAlt = afacPos.y
-	local distVisibility = distanceVisibilite(afacAlt)
-	env.info("DCE_CustomDesignationAFAC() BB : afacFlightName "..tostring(afacFlightName).." afacAlt: "..tostring(afacAlt).." distVisibility: "..tostring(distVisibility))
+
+	local terrainAlt = land.getHeight({x = afacPos.x, y = afacPos.z})
+
+	local distVisibility = distanceVisibilite(afacAlt, terrainAlt)
+	env.info("DCE_CustomDesignationAFAC() BB : afacFlightName "..tostring(afacFlightName).." afacAlt: "..tostring(afacAlt).." terrainAlt: "..tostring(terrainAlt).." distVisibility: "..tostring(distVisibility))
 
 	--recupere les dynamique ****
 	local groundGroups = coalition.getGroups(coalitionIdNumericENI[Coalition], Group.Category.GROUND)
@@ -1521,10 +1540,31 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 			-- env.info("DCE_CD_AFAC() :CC  "..stName)
 
-			local description = static:getDesc()
-			_affiche(description , "CTS_description ")
+			local desc = static:getDesc()
+			-- _affiche(desc , "CTS_desc ")
 
-			local life = description.life
+			--typeName: Camouflage04
+			--["type"] = "Camouflage04",
+
+			-- 2025-03-17 17:46:19.194 INFO    SCRIPTING (Main): DCE_CustomDesignationAFAC() AA : START Pack 22 - 504th FAC - AFAC 1
+			-- 2025-03-17 17:46:19.194 INFO    SCRIPTING (Main): DCE_CustomDesignationAFAC() BB : afacFlightName Pack 22 - 504th FAC - AFAC 1 afacAlt: 593.51824187668 distVisibility: 16.745217794847
+			-- 2025-03-17 17:46:19.198 INFO    SCRIPTING (Main): CTS_description life: 2
+			-- 2025-03-17 17:46:19.198 INFO    SCRIPTING (Main): CTS_description _origin: Massun92-Assetpack
+			-- 2025-03-17 17:46:19.198 INFO    SCRIPTING (Main): CTS_description category: 4
+			-- 2025-03-17 17:46:19.198 INFO    SCRIPTING (Main): CTS_description displayName: M92 Camouflage 04
+			-- 2025-03-17 17:46:19.198 INFO    SCRIPTING (Main): CTS_description typeName: Camouflage04
+			-- 2025-03-17 17:46:19.198 INFO    SCRIPTING (Main): CTS_description box:
+			-- 2025-03-17 17:46:19.198 INFO    SCRIPTING (Main): CTS_description   min:
+			-- 2025-03-17 17:46:19.198 INFO    SCRIPTING (Main): CTS_description     y: -1
+			-- 2025-03-17 17:46:19.198 INFO    SCRIPTING (Main): CTS_description     x: -7.0383772850037
+			-- 2025-03-17 17:46:19.198 INFO    SCRIPTING (Main): CTS_description     z: -5.4064841270447
+			-- 2025-03-17 17:46:19.198 INFO    SCRIPTING (Main): CTS_description   max:
+			-- 2025-03-17 17:46:19.198 INFO    SCRIPTING (Main): CTS_description     y: 3.2793908119202
+			-- 2025-03-17 17:46:19.198 INFO    SCRIPTING (Main): CTS_description     x: 7.0352449417114
+			-- 2025-03-17 17:46:19.198 INFO    SCRIPTING (Main): CTS_description     z: 5.4133296012878
+			-- 2025-03-17 17:46:19.198 INFO    SCRIPTING (Main): CTS_description life: 2
+
+			local life = desc.life
 			local unitPos = static:getPoint()
 			local UnitId = static:getID()
 			local unitTypeName = static:getTypeName()
@@ -1533,24 +1573,30 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 			-- env.info("DCE_CD_AFAC() :DD_2b  "..distance)
 
 			-- if category ~= "Fortifications" and distance < 50000 then
-			if distance < distVisibility then
+			if distance < distVisibility and not string.find(string.lower(desc.typeName) , "sandbag") then
 
-				-- env.info("DCE_CD_AFAC() :EEb  "..tostring(unitTypeName))
+				local lineOfSight = land.isVisible(afacPos, unitPos)
 
-				local item = {
-					unitGround = static,
-					unitTypeName = unitTypeName,
-					name = stName,
-					unitPos = unitPos,
-					desc = description,
-					distance = distance,
-					life = life,
-					UnitId = UnitId,
-					isStatic = true,
+				if lineOfSight then
+					env.info("DCE_CD_AFAC() :EEb  "..tostring(unitTypeName).." desc.typeName: "..tostring(desc.typeName))
 
-				}
+					local item = {
+						unitGround = static,
+						unitTypeName = unitTypeName,
+						name = stName,
+						unitPos = unitPos,
+						desc = desc,
+						distance = distance,
+						life = life,
+						UnitId = UnitId,
+						isStatic = true,
 
-				table.insert(unitGroundSelected_A, item)
+					}
+
+					table.insert(unitGroundSelected_A, item)
+				else
+					env.info("DCE_CD_AFAC() :EEc lineOfSight OFF  "..tostring(unitTypeName).." lineOfSight: "..tostring(lineOfSight))
+				end
 
 			end
 		end

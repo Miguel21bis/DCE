@@ -4,7 +4,7 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.183"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.184"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
@@ -1921,6 +1921,30 @@ db_all_loadouts = {
 					chaff = 0,
 					gun = 100,				
 				},
+			},
+		},
+		["Fighter Sweep"] = {
+			["Fighter Sweep - MiG-17"] = {
+				self_escort = true,
+				attributes =  { },
+				code_loadout =  { "All" },
+				day = true,
+				range = 250000,
+				firepower = 1,
+				vCruise = 200,
+				vAttack = 213.86666666667,
+				hCruise = 800,
+				hAttack = 800,
+				sortie_rate = 2,
+				standoff = false,
+				stores = {
+					pylons = {
+					},
+					fuel = 1172,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},	
 			},
 		},
 		CAP = {
@@ -5262,6 +5286,37 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
+			["NAM sweep-AA-2Bx2"] = {
+				attributes =  { },
+				code_loadout =  { "NAM" },
+				day = true,
+				night = false,
+				adverseWeather = false,
+				range = 600000,
+				firepower = 1,
+				vCruise = 250,
+				vAttack = 350,
+				hCruise = 800,
+				hAttack = 800,
+				standoff = 20000,
+				sortie_rate = 2,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{R-3S}",
+					["num"] = 4,
+				},
+				[2] = {
+					["CLSID"] = "{R-3S}",
+					["num"] = 2,
+				},
+					},
+					fuel = 2280,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},			
+			},
 			["R-60*4, R-3R*2, Fuel_450*1"] = {
 				attributes =  { },
 				code_loadout =  { "IIW", "WOB" },
@@ -7093,7 +7148,7 @@ db_all_loadouts = {
 		},
 		CAP = {
 			["CAP - Crusader"] = {
-				attributes =  { },
+				attributes =  {"CV CAP"},
 				code_loadout =  { "All" },
 				day = true,
 				range = 370000,

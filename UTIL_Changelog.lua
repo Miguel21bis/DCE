@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.85.533"
+versionDCE["UTIL_Changelog.lua"] = "20.85.534"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.85.533"
+VersionDCE["UTIL_Changelog.txt"] = "20.85.534"
 --[[
 
 
@@ -9,8 +9,9 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.85.533:==
+==:20.85.534:==
 
+534	fixed	[generator][inter]		choosing interceptor causes mission generation to crash
 533	mod		[inter]		interceptors only take off if a type of aircraft to be intercepted is detected
 				["Kien An Airbase Alert"] = {
 					task = "Intercept",

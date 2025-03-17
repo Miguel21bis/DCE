@@ -1,9 +1,9 @@
 --To create the flight plans in the mission file for all flights in the ATO
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: adjustment_Ad
+-- last modification: adjustment_Ad debug_Ab
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_FlightPlan.lua"] = "1.58.289"
+versionDCE["ATO_FlightPlan.lua"] = "1.58.290"
 ------------------------------------------------------------------------------------------------------- 
 
 -- SomethingSimple_a		(a add randomizeSkills)
@@ -13,7 +13,7 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.289"
 -- mouvedOption_CM_01_c		(c: manage les options de west callSign) (b: previent le CampaignMaker d'une nation manquante)
 -- adjustment_Ad            (d Fighter Sweep standoff)(c TACAN_byTarget)(b predeterminedCallsign)(y AddPropAircraft for all)(x largage d urgence if not heli)(CVN to CV)(t adjustment_e)(s No ATE if antiShip + B52 ASM)
 -- cleancode_n				(n springCleaning)
--- debug_Aa					(a flight delayed)(z package stats)(y polka on parking)(x frequency SA342)(w no recalculates all speeds)
+-- debug_Ab					(b Seasick intercept)(a flight delayed)(z package stats)(y polka on parking)(x frequency SA342)(w no recalculates all speeds)
 
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)
 -- modification M74_a		mix static, vehicle and map elements in a Target.
@@ -7654,7 +7654,7 @@ if camp.player then
 	--for multi-package strikes, add flights from other packages with the same target to player package to enrich the briefiing
 	for p = 1, #ATO[camp.player.side] do										--iterate through packages in player side	
 		for role,flight in pairs(ATO[camp.player.side][p]) do					--iterate through roles in package (main, SEAD, escort)		
-			print("AtoFP role: "..role)
+			-- print("AtoFP role: "..role)
 			for f = 1, #flight do												--iterate through flights in roles
 				if flight[f].target_name == camp.player.target.titleName and camp.player.pack_n ~= p then	--flights that have the same target as player but are not in the player package
 					table.insert(camp.player.package[camp.player.pack_n][role], Deepcopy(flight[f]))							--insert flight into player package to list it in player briefing
