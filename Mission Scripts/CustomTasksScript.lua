@@ -1424,6 +1424,11 @@ end
 function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	if varFpsLeak then return end
 
+	local function distanceVisibilite(altitude)
+		local k = 60 / math.sqrt(7620)  -- Coefficient basé sur la première donnée
+		return k * math.sqrt(altitude)
+	end
+
 	env.info("DCE_CustomDesignationAFAC() AA : START "..tostring(afacFlightName))
 	trigger.action.outText("AFAC : START "..tostring(afacFlightName), 15)
 
@@ -1444,6 +1449,11 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		AFAC_available[afacFlightName] = nil
 	end
 
+	local afacPos = unitAFAC:getPoint()
+	local afacAlt = afacPos.y
+	local distVisibility = distanceVisibilite(afacAlt)
+	env.info("DCE_CustomDesignationAFAC() BB : afacFlightName "..tostring(afacFlightName).." afacAlt: "..tostring(afacAlt).." distVisibility: "..tostring(distVisibility))
+
 	--recupere les dynamique ****
 	local groundGroups = coalition.getGroups(coalitionIdNumericENI[Coalition], Group.Category.GROUND)
 	local unitGroundSelected_A = {}
@@ -1451,31 +1461,31 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	for i, gp in pairs(groundGroups) do
 		local gpName = Group.getName(gp)
-		local units = gp:getUnits()
+		local groundUnits = gp:getUnits()
 
-		for n=1, #units do
+		for n=1, #groundUnits do
 
-			local _unit = units[n]
-			if  _unit:isActive()  then
+			local grndUnit = groundUnits[n]
+			if  grndUnit:isActive()  then
 
-				local description = _unit:getDesc()
+				local description = grndUnit:getDesc()
 
 				local life = description.life
-				local unitPos = _unit:getPoint()
+				local unitPos = grndUnit:getPoint()
 				local gpGid = Group.getID(gp)
-				local UnitId = Unit.getID(_unit)
-				local unitCallsign = _unit:getCallsign()
-				local unitTypeName = _unit:getTypeName()
+				local UnitId = Unit.getID(grndUnit)
+				local unitCallsign = grndUnit:getCallsign()
+				local unitTypeName = grndUnit:getTypeName()
 
 				local distance = math.floor(math.sqrt(math.pow(unitPos.x - refX, 2) + math.pow(unitPos.z - refY, 2)))
 				-- env.info("DCE_CD_AFAC() :DD_2a  "..distance)
 
-				if distance < 50000 then
+				if distance < distVisibility then
 
 					-- env.info("DCE_CD_AFAC() :EEa  "..tostring(unitTypeName))
 
 					local item = {
-						unitGround = _unit,
+						unitGround = grndUnit,
 						unitTypeName = unitTypeName,
 						unitPos = unitPos,
 						desc = description,
@@ -1512,6 +1522,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 			-- env.info("DCE_CD_AFAC() :CC  "..stName)
 
 			local description = static:getDesc()
+			_affiche(description , "CTS_description ")
 
 			local life = description.life
 			local unitPos = static:getPoint()
@@ -1521,7 +1532,8 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 			local distance = math.floor(math.sqrt(math.pow(unitPos.x - refX, 2) + math.pow(unitPos.z - refY, 2)))
 			-- env.info("DCE_CD_AFAC() :DD_2b  "..distance)
 
-			if distance < 50000 then
+			-- if category ~= "Fortifications" and distance < 50000 then
+			if distance < distVisibility then
 
 				-- env.info("DCE_CD_AFAC() :EEb  "..tostring(unitTypeName))
 

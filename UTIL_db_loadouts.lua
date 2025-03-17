@@ -10,7 +10,10 @@ versionDCE["UTIL_db_loadouts.lua"] = "1.3.183"
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
 -- V183 - Cusader Range
-
+-- V182 Escort Jammer for F-105G
+-- V181 - Loft Shrike for NAM - EA-6B Shrike
+-- V180 - Escort jammer for F-4E
+-- V 179 - vwv-o-1 and AFAC loaouts for Bronco O-1 and Skyraider for NAM
 -- V178 - Tu-22M3 no escort and Minscore 0.1  for TF-80-Full
 -- V177 - Mirage F-1EE big Fuel tank
 -- V176 - update of speed/altitude of MirageF1/Mig21/Su17 etc... from IIW following new consumption script 

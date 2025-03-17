@@ -2725,7 +2725,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						if is_helicopter then
 							task_entry = {															--helicopter Spread Four Close
 							["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-							["auto"] = false,
+							["auto"] = true,
 							["id"] = "WrappedAction",
 							["name"] = "Formation Coin",
 							["enabled"] = true,
@@ -2752,7 +2752,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								--largage d'urgence FALSE *************
 								task_entry = {
 									["enabled"] = true,
-									["auto"] = false,
+									["auto"] = true,
 									["id"] = "WrappedAction",
 									["name"] = "emergency jettison: FALSE (Departure/Spawn, SEAD)",
 									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
@@ -2775,7 +2775,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								--largage d'urgence TRUE *************
 								task_entry = {
 									["enabled"] = true,
-									["auto"] = false,
+									["auto"] = true,
 									["id"] = "WrappedAction",
 									["name"] = "emergency jettison: TRUE (Departure/Spawn)",
 									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
@@ -2801,7 +2801,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								--formation formation bomber moderne 100*100 *************
 								task_entry = {															--formation bomber moderne 100*100
 									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-									["auto"] = false,
+									["auto"] = true,
 									["id"] = "WrappedAction",
 									["name"] = "formation bomber moderne 100*100  (Departure/Spawn)",
 									["enabled"] = true,
@@ -2828,7 +2828,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								-- ** formation Spread Four Close
 								task_entry = {															--Spread Four Close
 									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-									["auto"] = false,
+									["auto"] = true,
 									["id"] = "WrappedAction",
 									["name"] = "Spread Four Close (Departure/Spawn)",
 									["enabled"] = true,
@@ -2862,7 +2862,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								--reaction to Threats passive defense
 								task_entry = {
 									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-									["auto"] = false,
+									["auto"] = true,
 									["id"] = "WrappedAction",
 									["name"] = "reaction to Threats, passive defense (Departure/Spawn)",
 									["enabled"] = true,
@@ -2885,7 +2885,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								-- ** reaction to threat avoidance of fire
 								task_entry = {
 									["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
-									["auto"] = false,
+									["auto"] = true,
 									["id"] = "WrappedAction",
 									["name"] = "reaction to threats, avoidance of fire (Departure/Spawn)",
 									["enabled"] = true,
@@ -2966,7 +2966,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 					-- ************* ALTITUDE determine une nouvelle altitude pour ne pas prendre une montagne
 					if flight[f].route[w].id == "Spawn" then
-						local nameTheatre =  string.lower(mission.theatre)
+						-- local nameTheatre =  string.lower(mission.theatre)
 						local altFloor = 0
 
 						if AltitudeFloorNew then
