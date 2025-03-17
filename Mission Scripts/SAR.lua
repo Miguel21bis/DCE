@@ -13,7 +13,8 @@ versionDCE["Mission Scripts/SAR.lua"] = "1.4.24"
 -------------------------------------------------------------------------------------------------------
 
 
--- zoneSAR = {}																									--table enumérant les helico SAR pour eviter d'en envoyer plusieurs aux memes endroits
+env.info("DCE_SAR START LOADING SAR.lua "..tostring(versionDCE["Mission Scripts/SAR.lua"]))
+
 
 local nbManhunt = {
 	[1] = 0,
@@ -2288,18 +2289,9 @@ end
 
 
 timer.scheduleFunction(checkAddingManhunt, nil, timer.getTime() + 5)
+
 timer.scheduleFunction(StopRadioTransmissionSeat, nil, timer.getTime() + 30)
 
 timer.scheduleFunction(GetOutGDFM, nil, timer.getTime() + 6)
 
-
-env.info( "DCE_Start LOAD checkAddingManhunt   ")
--- trigger.action.outText("Start LOAD  checkAddingManhunt ", 30)
-
-
--- env.info( "FIN LOAD checkAddingManhunt   ")
--- trigger.action.outText("FIN LOAD  checkAddingManhunt ", 30)
-
-
-env.info( "DCE_FIN LOAD SAR CheckImmediatSAR  ")
--- trigger.action.outText("FIN LOAD SAR CheckImmediatSAR ", 30)
+env.info("DCE_SAR END OF LOADING SAR.lua ")

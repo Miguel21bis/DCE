@@ -5,11 +5,11 @@
 --player can request emergency resupply with S-3B's
 -- It is possible to send the whole PACK in RTB to avoid unnecessary losses. 
 ------------------------------------------------------------------------------------------------------- 
--- last modification  M84_b
+-- last modification  M84_b cleanCode_c
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "1.14.50"
+versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "1.14.51"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_b				(b springCleaning)(a: remove RemovePlane)
+-- cleanCode_c				(b springCleaning)(a: remove RemovePlane)
 -- adjustment_h				(h avoid SAM zone)(g force RTB if bingo)(f ENI table)(e: add sar_F10)(d GetHeading)(c coalitionIdNumeric)(b group Item Radio)(a: ajust function trigo)
 -- debug_h					(h A/A off sur avoidZone)(g no menu in SP)(f getCategory)(e getHeading Z)(d: tanker exist)n'affiche pas les messages d'error sauf à la fin de mission
 -- debug_bonfor_a			RTB from to inversé
@@ -153,6 +153,23 @@ local tabJockerPlane = {}
 local var_TPN_alreadyAdded = false
 
 EWR_optionPlayer = {}
+
+-----*********check path**************---------
+env.info( "DCE_Bat_Path  "..tostring(camp.path) )
+
+PathDD = "c:"
+--prepare campaign path
+PathDCE = string.gsub(camp.path, "/", "\\")																		--replace slashes in campaign path with double-backslashes
+if  string.sub (camp.path, 2, 2) ~= ":" then																	--si le chemin est differen de C:\Users ou D:\Users
+	PathDCE = os.getenv('USERPROFILE') .. "\\" .. PathDCE														--get path of windows userprofile and add to campaign path	
+else
+	PathDD = string.sub (camp.path, 1, 2)
+end
+
+PathDCE = PathDCE .."Mods\\tech\\DCE\\Missions\\Campaigns\\"..camp.title.."\\"
+env.info( "DCE_PathDCE "..tostring(PathDCE) )
+env.info( "DCE_PathDD "..tostring(PathDD) )
+-----*********check PathDCE**************---------
 
 -- EWR_optionPlayer["OBT_test"] = {
 -- 	EWR_on = true,
@@ -4010,7 +4027,7 @@ local function DCE_BulleBy_DE()
 			end
 
 		elseif savedStatics[groupData.name] then
-			env.info("DCE_Bulle -G4- Ajout à la file d'attente de l'objet statique : " .. groupData.name)
+			-- env.info("DCE_Bulle -G4- Ajout à la file d'attente de l'objet statique : " .. groupData.name)
 			local staticInfo = savedStatics[groupData.name]
 
 			-- Ajoute le statique dans la file d’attente

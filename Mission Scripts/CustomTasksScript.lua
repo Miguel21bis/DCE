@@ -1468,11 +1468,11 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 				local unitTypeName = _unit:getTypeName()
 
 				local distance = math.floor(math.sqrt(math.pow(unitPos.x - refX, 2) + math.pow(unitPos.z - refY, 2)))
-				env.info("DCE_CD_AFAC() :DD_2a  "..distance)
+				-- env.info("DCE_CD_AFAC() :DD_2a  "..distance)
 
 				if distance < 50000 then
 
-					env.info("DCE_CD_AFAC() :EEa  "..tostring(unitTypeName))
+					-- env.info("DCE_CD_AFAC() :EEa  "..tostring(unitTypeName))
 
 					local item = {
 						unitGround = _unit,
@@ -1583,7 +1583,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 			local afacPos = unitAFAC:getPoint()
 			local distAFAC_Pattern = math.floor(math.sqrt(math.pow(afacPos.x - refX, 2) + math.pow(afacPos.z - refY, 2)))
 
-			env.info("DCE_CD_AFAC() :GG2 distAFAC_Pattern "..tostring(distAFAC_Pattern))
+			-- env.info("DCE_CD_AFAC() :GG2 distAFAC_Pattern "..tostring(distAFAC_Pattern))
 			-- trigger.action.outText("AFAC : passe GG2 distance: "..tostring(distAFAC_Pattern), 15)
 
 			if distAFAC_Pattern < 150000 then

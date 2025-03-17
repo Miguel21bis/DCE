@@ -7646,12 +7646,18 @@ if camp.player then
 		camp.player.package[camp.player.pack_n] = Deepcopy(ATO[camp.player.side][camp.player.pack_n])
 	end
 
+	local camp_str = "camp.player = " .. TableSerialization(camp.player, 0)						--make a string
+	local campFile = io.open("Debug/CAMP_player_AA.lua", "w")	 or error("Failed to open debug file")
+	campFile:write(camp_str)																		--save new data
+	campFile:close()
+
 	--for multi-package strikes, add flights from other packages with the same target to player package to enrich the briefiing
 	for p = 1, #ATO[camp.player.side] do										--iterate through packages in player side	
 		for role,flight in pairs(ATO[camp.player.side][p]) do					--iterate through roles in package (main, SEAD, escort)		
+			print("AtoFP role: "..role)
 			for f = 1, #flight do												--iterate through flights in roles
 				if flight[f].target_name == camp.player.target.titleName and camp.player.pack_n ~= p then	--flights that have the same target as player but are not in the player package
-					table.insert(camp.player.package[role], Deepcopy(flight[f]))							--insert flight into player package to list it in player briefing
+					table.insert(camp.player.package[camp.player.pack_n][role], Deepcopy(flight[f]))							--insert flight into player package to list it in player briefing
 				end
 			end
 		end

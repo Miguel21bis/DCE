@@ -15,7 +15,7 @@ versionDCE["Mission Scripts\bombOnRunway.lua"] = "1.4.10"
 -- modification M66_b		bombOnRunway (b:explode trigger)					
 ------------------------------------------------------------------------------------------------------- 
 
-env.info("load bombOnRunway Start")
+env.info("DCE_bombOnRunway START LOADING bombOnRunway.lua "..tostring(versionDCE["Mission Scripts/bombOnRunway.lua"]))
 
 
 runwayLife = {} 						-- nome das bases incluso FARP
@@ -222,4 +222,4 @@ timer.scheduleFunction(CheckAllBase, nil, timer.getTime() + 60)
 timer.scheduleFunction(makeRunwayCratere, "repeat", timer.getTime() + 300)
 
 
-env.info("load bombOnRunway FIN ")
+env.info("DCE_bombOnRunway END OF LOADING bombOnRunway.lua ")

@@ -4,15 +4,15 @@
 ------------------------------------------------------------------------------------------------------- 
 -- MBot version 20200111
 -------------------------------------------------------------------------------------------------------
--- last modification  debug_q
+-- last modification  debug_q cleanCode_h
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/EventsTracker.lua"] = "1.12.74"
+versionDCE["Mission Scripts/EventsTracker.lua"] = "1.12.75"
 ------------------------------------------------------------------------------------------------------- 
 
 -- test_b 					(b: saved game on another DD)
 -- Reglage_d 				(d modified TableSerialization)(c CVN to CV)(a: global pathD)
 -- debug_q					(q CleanName)(op prohibited character of player names)(n getCategory)(m Pedro cycle)(n scene life0)(m escorte)(jkl wrong caratere in player names)(i: base.side = base.coalition)(b: n'affiche pas les messages d'error sauf � la fin de mission)
--- cleanCode_g				(g springCleaning)
+-- cleanCode_h				(g springCleaning)
 -- modification M62_a		compatible Datacard Generator or CombatFlite
 -- modification M61_j		SAR (j noSAR in wrongSide)
 -- modification M50_c		Records landings for later use in logistics (C-130, Transport...) (bc: caractere interdit)
@@ -69,22 +69,22 @@ local ErrorMessage = timer.scheduleFunction(WarningText, {}, timer.getTime() + 1
 local check = os.time()															--run random os function. If os functions are sanitized this will fail and stop the script
 timer.removeFunction(ErrorMessage)												--if the script continues to here, os functions work and the sdchedzled warning message is removed
 
------*********check path**************---------
-env.info( "DCE_Bat_Path  "..tostring(camp.path) )
+-- -----*********check path**************---------
+-- env.info( "DCE_Bat_Path  "..tostring(camp.path) )
 
-local pathDD = "c:"
---prepare campaign path
-PathDCE = string.gsub(camp.path, "/", "\\")																		--replace slashes in campaign path with double-backslashes
-if  string.sub (camp.path, 2, 2) ~= ":" then																		--si le chemin est differen de C:\Users ou D:\Users
-	PathDCE = os.getenv('USERPROFILE') .. "\\" .. PathDCE																	--get path of windows userprofile and add to campaign path	
-else
-	pathDD = string.sub (camp.path, 1, 2)
-end
+-- PathDD = "c:"
+-- --prepare campaign path
+-- PathDCE = string.gsub(camp.path, "/", "\\")																		--replace slashes in campaign path with double-backslashes
+-- if  string.sub (camp.path, 2, 2) ~= ":" then																		--si le chemin est differen de C:\Users ou D:\Users
+-- 	PathDCE = os.getenv('USERPROFILE') .. "\\" .. PathDCE																	--get path of windows userprofile and add to campaign path	
+-- else
+-- 	PathDD = string.sub (camp.path, 1, 2)
+-- end
 
-PathDCE = PathDCE .."Mods\\tech\\DCE\\Missions\\Campaigns\\"..camp.title.."\\"											-- modification M35.b version ScriptsMod
-env.info( "DCE_PathDCE "..tostring(PathDCE) )
-env.info( "DCE_pathDD "..tostring(pathDD) )
------*********check PathDCE**************---------
+-- PathDCE = PathDCE .."Mods\\tech\\DCE\\Missions\\Campaigns\\"..camp.title.."\\"											-- modification M35.b version ScriptsMod
+-- env.info( "DCE_PathDCE "..tostring(PathDCE) )
+-- env.info( "DCE_PathDD "..tostring(PathDD) )
+-- -----*********check PathDCE**************---------
 
 local function health1s(arg)
 
@@ -1104,7 +1104,7 @@ function eventHandlerDCE:onEvent(event)
 		-- os.execute('start "EventPath" cmd  /k "c: & cd '..path..' & call \Init\\path.bat && pause"')
 
 		--Launch external LUA environment to evaluate debrief.log, update campaign status files and generate the next campaign mission
-		os.execute('start "Debriefing" cmd  /k "set \"DCSDIR=%cd%\" &  ' .. pathDD .. ' & cd ' .. PathDCE .. ' & call \"%DCSDIR%\\bin\\luae.exe\" ..\\..\\..\\ScriptsMod.'..camp.versionPackageICM..'\\DEBRIEF_Master.lua"')
+		os.execute('start "Debriefing" cmd  /k "set \"DCSDIR=%cd%\" &  ' .. PathDD .. ' & cd ' .. PathDCE .. ' & call \"%DCSDIR%\\bin\\luae.exe\" ..\\..\\..\\ScriptsMod.'..camp.versionPackageICM..'\\DEBRIEF_Master.lua"')
 
 	--collect destroyed scenery objects
 	elseif event.id == world.event.S_EVENT_HIT then
