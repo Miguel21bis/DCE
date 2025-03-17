@@ -4,10 +4,12 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.182"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.183"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
+
+-- V183 - Cusader Range
 
 -- V178 - Tu-22M3 no escort and Minscore 0.1  for TF-80-Full
 -- V177 - Mirage F-1EE big Fuel tank
@@ -7000,7 +7002,7 @@ db_all_loadouts = {
 				attributes =  { },
 				code_loadout =  { "All" },
 				day = true,
-				range = 250000,
+				range = 370000,
 				firepower = 1,
 				vCruise = 245,
 				vAttack = 277.5,
@@ -7047,7 +7049,7 @@ db_all_loadouts = {
 				attributes =  { },
 				code_loadout =  { "All" },
 				day = true,
-				range = 250000,
+				range = 370000,
 				firepower = 1,
 				vCruise = 245,
 				standoff = 80000,
@@ -7091,7 +7093,7 @@ db_all_loadouts = {
 				attributes =  { },
 				code_loadout =  { "All" },
 				day = true,
-				range = 250000,
+				range = 370000,
 				firepower = 1,
 				vCruise = 245,
 				vAttack = 277.5,
@@ -7139,7 +7141,7 @@ db_all_loadouts = {
 				attributes =  { },
 				code_loadout =  { "All" },
 				day = true,
-				range = 150000,
+				range = 300000,
 				firepower = 1,
 				sortie_rate = 6,
 				stores = {
