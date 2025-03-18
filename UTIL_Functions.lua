@@ -3052,7 +3052,7 @@ function UpdateConfMod(setWeather)
 	local function saveUpdatedConfig(filePath, updatedConfig, structure)
 		-- version saveUpdatedConfig VA_1.50 (Correction des valeurs sous forme de table et commentaires)
 
-		if updatedConfig.mission_ini.weather then
+		if updatedConfig.mission_ini.weather and weather_override then
 			for key, forcedValue in pairs(weather_override) do
 				updatedConfig.mission_ini.weather[key] = forcedValue  -- **Écrase l'existant OU ajoute si absent**
 			end
