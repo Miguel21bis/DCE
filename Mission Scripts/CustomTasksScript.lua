@@ -2063,7 +2063,6 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	elseif laserCode == "nil" then
 		trigger.action.smoke(targetPos, trigger.smokeColor.Red)
 		env.info("DCE_CD_AFAC() K create smokeColor.Red ")
-		
 	end
 
 	local LLposNstring, LLposEstring = LLtool.LLstrings(targetPos)
@@ -2114,9 +2113,16 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		return
 	end
 
+	local i = 1
+	while newRoute[i] do
+		if newRoute[i]["briefing_name"] == "Station" then
+			break -- Arrête la suppression dès qu'on trouve "Station"
+		end
+		table.remove(newRoute, i) -- Supprime l'élément à l'index `i`
+	end
+
 	local current_time = timer.getTime()
 
-	-- ajoute comme premier wpt leur position initial pour garder la fonction AWACS
 	local frstWPT = {
 		['alt'] = afacPos.y,
 		['type'] = 'Turning Point',
@@ -2132,7 +2138,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 			['id'] = 'ComboTask',
 			['params'] = {
 				['tasks'] = {
-					[1] = 
+					[1] =
 					{
 						["auto"] = true,
 						["enabled"] = true,
@@ -2214,51 +2220,72 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 				},
 			},
 		},
-		['ETA'] = 0,
+		['ETA'] = 1,
 	}
 
 
 	table.insert(newRoute, 1, frstWPT)
 
-	--modifie les coordonées du premier wpt initial
-	newRoute[2].x = targetPos.x
-	newRoute[2].y = targetPos.z
-	newRoute[2].alt = afacPos.y
-	newRoute[2].speed_locked = true
-	newRoute[2].ETA_locked = false
-	newRoute[2].speed = descAfac.speedMax * 2/3
-	newRoute[2].ETA = current_time + 60
 
-	local idTasks = #newRoute[2].task.params.tasks
-	local orbitRetreat = {
-
-				['enabled'] = true,
-				['auto'] = false,
-				['id'] = 'ControlledTask',
-				['number'] = idTasks+2,
-				['params'] = {
-					['task'] = {
-						['id'] = 'Orbit',
+	local secondtWPT = {
+		['alt'] = afacPos.y,
+		['type'] = 'Turning Point',
+		['action'] = 'Turning Point',
+		['alt_type'] = 'BARO',
+		['speed_locked'] = true,
+		['y'] = targetPos.z + 2000,
+		['x'] = targetPos.x + 2000,
+		['formation_template'] = '',
+		['speed'] = descAfac.speedMax * 2/3,
+		['ETA_locked'] = false,
+		['task'] = {
+			['id'] = 'ComboTask',
+			['params'] = {
+				['tasks'] = {
+					[1] = 
+					{
+						['enabled'] = true,
+						['auto'] = false,
+						['id'] = 'ControlledTask',
+						['number'] = 1,
 						['params'] = {
-							['altitude'] = afacPos.y,
-							['pattern'] = 'Circle',
-							['speed'] = descAfac.speedMax * 2/3,
+							['task'] = {
+								['id'] = 'Orbit',
+								['params'] = {
+									['altitude'] = afacPos.y,
+									['pattern'] = 'Circle',
+									['speed'] = descAfac.speedMax * 2/3,
+								},
+							},
+							['stopCondition'] = {
+								['time'] = current_time + 300,
+							},
 						},
 					},
-					['stopCondition'] = {
-						['time'] = current_time + 300,
-					},
 				},
+			},
+		},
+		['ETA'] = current_time + 60,
+	}
 
-			}
+	table.insert(newRoute, 2, secondtWPT)
 
-			newRoute[2].task.params.tasks[idTasks +1] =  orbitRetreat
+	--************* recalcul les ETA ********************
+	i = 1
+	while newRoute[i] do
+		if i > 1  then
+			local deltaTime = newRoute["points"][i]["ETA"] - newRoute["points"][i-1]["ETA"]
+			local deltaDist = GetDistance({x=newRoute["points"][i].x, y=newRoute["points"][i].y },  {x=newRoute["points"][i-1].x, y=newRoute["points"][i-1].y })
+			local ETA_minimum = deltaDist / descAfac.speedMax * 2/3 
 
+			if deltaTime < ETA_minimum then
+				newRoute["points"][i]["ETA"] = ETA_minimum
+			end
 
-	--renumerote les number des task																	
-	for i=1, #newRoute[1].task.params.tasks do
-		newRoute[1].task.params.tasks[i].number = i
+		end
 	end
+	--************* recalcul les ETA FIN ********************
+
 
 	local Mission = {														--define mission for retreat AWACS
 			id = 'Mission',
@@ -2270,17 +2297,17 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		}
 
 
-		if camp.debug then
-			local logStr = "afac = " .. TableSerialization(Mission, 0)
-			local FlightNameClean = afacFlightName:gsub('[%p%c%s]', '_')
-			local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_AFAC_"..current_time..".lua", "w")
-			if logFile then
-				logFile:write(logStr)
-				logFile:close()
-			else
-				env.info("DCE_OrbitPosition: Failed to open log file for writing.")
-			end
+	if camp.debug then
+		local logStr = "afac = " .. TableSerialization(Mission, 0)
+		local FlightNameClean = afacFlightName:gsub('[%p%c%s]', '_')
+		local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_AFAC_"..current_time..".lua", "w")
+		if logFile then
+			logFile:write(logStr)
+			logFile:close()
+		else
+			env.info("DCE_OrbitPosition: Failed to open log file for writing.")
 		end
+	end
 
 	Controller.setTask(ctr, Mission)										--activate task with mission for retreat AWACS
 
