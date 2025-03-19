@@ -2195,22 +2195,22 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 							},
 						},
 					},
-					[4] = 
-					{
-						["auto"] = true,
-						["enabled"] = true,
-						["id"] = "FAC",
-						["number"] = 4,
-						["params"] = 
-						{
-							["callname"] = 1,
-							["datalink"] = true,
-							["designation"] = "Auto",
-							["frequency"] = 267000000,
-							["modulation"] = 0,
-							["number"] = 4,
-						},
-					},
+					-- [4] = 
+					-- {
+					-- 	["auto"] = true,
+					-- 	["enabled"] = true,
+					-- 	["id"] = "FAC",
+					-- 	["number"] = 4,
+					-- 	["params"] = 
+					-- 	{
+					-- 		["callname"] = 1,
+					-- 		["datalink"] = true,
+					-- 		-- ["designation"] = "Auto",
+					-- 		["frequency"] = 267000000,
+					-- 		["modulation"] = 0,
+					-- 		["number"] = 4,
+					-- 	},
+					-- },
 				},
 			},
 		},
