@@ -1887,7 +1887,6 @@ end
 function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	if varFpsLeak then return end
 
-
 	local function distanceVisibilite(altitude_avion, altitude_terrain)
 		-- Vérifie que l'altitude de l'avion est au-dessus du terrain
 		if altitude_avion <= altitude_terrain then
@@ -2089,15 +2088,23 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	_affiche(descAfac, "DCE_CTS descAfac ")
 	local newRoute = {}
 
+	env.info("DCE_CD_AFAC() passe A ")
+
 	local foundAfacRoute
 	for _, coalition in pairs(env.mission.coalition) do
+		env.info("DCE_CD_AFAC() passe B ")
 		for Ncountry, _country in pairs(coalition.country) do
+			env.info("DCE_CD_AFAC() passe C ")
 			if _country.plane then
+				env.info("DCE_CD_AFAC() passe D ")
 				for Ngroup, _group in pairs(_country.plane.group) do
+					env.info("DCE_CD_AFAC() passe E ")
 					if _group.name and _group.name == afacFlightName then
+						env.info("DCE_CD_AFAC() passe F ")
 						--copie de l'ancienne route
 						newRoute = Deepcopy(_group.route.points)
 						foundAfacRoute = true
+						env.info("DCE_CD_AFAC() passe G ")
 						break
 					end
 				end
@@ -2107,11 +2114,14 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		if foundAfacRoute then break end
 	end
 
+	env.info("DCE_CD_AFAC() passe H ")
 
 	if not foundAfacRoute then 
 		env.info("DCE_CD_AFAC() :foundAfacRoute NOT FOUND ")
 		return
 	end
+
+	env.info("DCE_CD_AFAC() passe I ")
 
 	local i = 1
 	while newRoute[i] do
@@ -2122,6 +2132,8 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	end
 
 	local current_time = timer.getTime()
+
+	env.info("DCE_CD_AFAC() passe J ")
 
 	local frstWPT = {
 		['alt'] = afacPos.y,
@@ -2141,9 +2153,9 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 					[1] =
 					{
 						["auto"] = true,
-						["enabled"] = true,
+						["enabled"] = false,
 						["id"] = "WrappedAction",
-						["name"] = "emergency jettison: TRUE (Departure/Spawn)",
+						["name"] = "INTERDIRE emergency jettison: TRUE (Departure/Spawn)",
 						["number"] = 1,
 						["params"] = 
 						{
@@ -2161,33 +2173,10 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 					[2] = 
 					{
 						["auto"] = true,
-						["enabled"] = true,
-						["id"] = "WrappedAction",
-						["name"] = "Spread Four Close (Departure/Spawn)",
-						["number"] = 2,
-						["params"] = 
-						{
-							["action"] = 
-							{
-								["id"] = "Option",
-								["name"] = "Formation",
-								["params"] = 
-								{
-									["formationIndex"] = 7,
-									["name"] = 5,
-									["value"] = 458753,
-									["variantIndex"] = 1,
-								},
-							},
-						},
-					},
-					[3] = 
-					{
-						["auto"] = true,
-						["enabled"] = true,
+						["enabled"] = false,
 						["id"] = "WrappedAction",
 						["name"] = "reaction to threats, avoidance of fire (Departure/Spawn)",
-						["number"] = 3,
+						["number"] = 2,
 						["params"] = 
 						{
 							["action"] = 
@@ -2223,9 +2212,11 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		['ETA'] = 1,
 	}
 
+	env.info("DCE_CD_AFAC() passe K ")
 
 	table.insert(newRoute, 1, frstWPT)
 
+	env.info("DCE_CD_AFAC() passe L ")
 
 	local secondtWPT = {
 		['alt'] = afacPos.y,
@@ -2258,7 +2249,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 								},
 							},
 							['stopCondition'] = {
-								['time'] = current_time + 300,
+								['duration'] = 300,
 							},
 						},
 					},
@@ -2268,24 +2259,47 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		['ETA'] = current_time + 60,
 	}
 
+	env.info("DCE_CD_AFAC() passe M ")
+
 	table.insert(newRoute, 2, secondtWPT)
 
-	--************* recalcul les ETA ********************
+	env.info("DCE_CD_AFAC() passe O ")
+	
 	i = 1
-	while newRoute[i] do
-		if i > 1  then
-			local deltaTime = newRoute["points"][i]["ETA"] - newRoute["points"][i-1]["ETA"]
-			local deltaDist = GetDistance({x=newRoute["points"][i].x, y=newRoute["points"][i].y },  {x=newRoute["points"][i-1].x, y=newRoute["points"][i-1].y })
-			local ETA_minimum = deltaDist / descAfac.speedMax * 2/3 
-
-			if deltaTime < ETA_minimum then
-				newRoute["points"][i]["ETA"] = ETA_minimum
+	while newRoute[i] do  -- Vérifie bien newRoute, pas newRoute[i]
+		env.info("DCE_CD_AFAC() passe O1 ")
+	
+		if i > 1 then
+			env.info("DCE_CD_AFAC() passe O2 ")
+	
+			local deltaTime = newRoute[i]["ETA"] - newRoute[i-1]["ETA"]
+			env.info("DCE_CD_AFAC() passe O3 deltaTime: "..tostring(deltaTime))
+	
+			local deltaDist = GetDistance(
+				{x = newRoute[i].x, y = newRoute[i].y },
+				{x = newRoute[i-1].x, y = newRoute[i-1].y }
+			)
+			env.info("DCE_CD_AFAC() passe O4 deltaDist: "..tostring(deltaDist))
+	
+			local ETA_minimum
+			if deltaDist and descAfac.speedMax then
+				ETA_minimum = deltaDist / (descAfac.speedMax * 2/3)
+				env.info("DCE_CD_AFAC() passe O5 ETA_minimum: "..tostring(ETA_minimum))
+			else
+				env.info("DCE_CD_AFAC() passe O6 RETURN ")
+				return
 			end
-
+	
+			if deltaTime < ETA_minimum then
+				newRoute[i]["ETA"] = ETA_minimum
+			end
 		end
+	
+		i = i + 1  -- 🔥 Ajout de l'incrémentation pour éviter la boucle infinie !
 	end
-	--************* recalcul les ETA FIN ********************
+	
 
+	env.info("DCE_CD_AFAC() passe P ")
 
 	local Mission = {														--define mission for retreat AWACS
 			id = 'Mission',
@@ -2296,6 +2310,8 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 			}
 		}
 
+
+		env.info("DCE_CD_AFAC() passe Q ")
 
 	if camp.debug then
 		local logStr = "afac = " .. TableSerialization(Mission, 0)

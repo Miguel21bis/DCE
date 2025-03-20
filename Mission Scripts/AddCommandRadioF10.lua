@@ -3651,17 +3651,17 @@ local function DCE_BulleBy_DE()
 
 		local nombreElements = tablelength(staticObjects)
 
-		if camp.debug then
-			local current_time = timer.getTime()
-			local logStr = "OrbitPosition = " .. TableSerialization(staticObjects, 0)
-			local logFile = io.open(PathDCE.."Debug\\DCE_Bulle".."_".. "staticObjects"..current_time..".lua", "w")
-			if logFile then
-				logFile:write(logStr)
-				logFile:close()
-			else
-				-- env.info("DCE_Bulle: Failed to open log file for writing.")
-			end
-		end
+		-- if camp.debug then
+		-- 	local current_time = timer.getTime()
+		-- 	local logStr = "OrbitPosition = " .. TableSerialization(staticObjects, 0)
+		-- 	local logFile = io.open(PathDCE.."Debug\\DCE_Bulle".."_".. "staticObjects"..current_time..".lua", "w")
+		-- 	if logFile then
+		-- 		logFile:write(logStr)
+		-- 		logFile:close()
+		-- 	else
+		-- 		-- env.info("DCE_Bulle: Failed to open log file for writing.")
+		-- 	end
+		-- end
 	end
 
 
