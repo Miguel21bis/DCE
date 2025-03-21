@@ -1990,18 +1990,18 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		local stName = Object.getName(static)
 
 		local stLife = static:getLife()
-		
+
 		if stLife > 0 then
 
 			local desc = static:getDesc()
-			
+
 			local life = desc.life
 			local unitPos = static:getPoint()
 			local UnitId = static:getID()
 			local unitTypeName = static:getTypeName()
 
 			local distance = math.floor(math.sqrt(math.pow(unitPos.x - refX, 2) + math.pow(unitPos.z - refY, 2)))
-			
+
 			if distance < distVisibility and not string.find(string.lower(desc.typeName) , "sandbag") then
 
 				local lineOfSight = land.isVisible(afacPos, unitPos)
@@ -2078,7 +2078,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		if target.LLpos then
 			trigger.action.outTextForGroup(gpGid,"AFAC Target Position: "..tostring(target.LLpos), 30, false)
 		end
-		
+
 	end
 
 
@@ -2116,7 +2116,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	env.info("DCE_CD_AFAC() passe H ")
 
-	if not foundAfacRoute then 
+	if not foundAfacRoute then
 		env.info("DCE_CD_AFAC() :foundAfacRoute NOT FOUND ")
 		return
 	end
@@ -2125,13 +2125,18 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	local i = 1
 	while newRoute[i] do
+		env.info("DCE_CD_AFAC() passe I2 i:  "..i.." briefing_name? "..tostring(newRoute[i]["briefing_name"]))
 		if newRoute[i]["briefing_name"] == "Station" then
+			env.info("DCE_CD_AFAC() passe break i "..i)
 			break -- Arrête la suppression dès qu'on trouve "Station"
 		end
+		env.info("DCE_CD_AFAC() passe I3 remove i "..i)
 		table.remove(newRoute, i) -- Supprime l'élément à l'index `i`
 	end
 
 	local current_time = timer.getTime()
+
+	-- newRoute = {}
 
 	env.info("DCE_CD_AFAC() passe J ")
 
@@ -2146,6 +2151,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		['formation_template'] = '',
 		['speed'] = descAfac.speedMax * 2/3,
 		['ETA_locked'] = true,
+		["name"] = "first_WPT_AFAC",
 		['task'] = {
 			['id'] = 'ComboTask',
 			['params'] = {
@@ -2157,12 +2163,12 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 						["id"] = "WrappedAction",
 						["name"] = "INTERDIRE emergency jettison: TRUE (Departure/Spawn)",
 						["number"] = 1,
-						["params"] = 
+						["params"] =
 						{
-							["action"] = 
+							["action"] =
 							{
 								["id"] = "Option",
-								["params"] = 
+								["params"] =
 								{
 									["name"] = 15,
 									["value"] = true,
@@ -2170,19 +2176,19 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 							},
 						},
 					},
-					[2] = 
+					[2] =
 					{
 						["auto"] = true,
 						["enabled"] = false,
 						["id"] = "WrappedAction",
 						["name"] = "reaction to threats, avoidance of fire (Departure/Spawn)",
 						["number"] = 2,
-						["params"] = 
+						["params"] =
 						{
-							["action"] = 
+							["action"] =
 							{
 								["id"] = "Option",
-								["params"] = 
+								["params"] =
 								{
 									["name"] = 1,
 									["value"] = 2,
@@ -2209,7 +2215,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 				},
 			},
 		},
-		['ETA'] = 1,
+		['ETA'] = current_time + 1,
 	}
 
 	env.info("DCE_CD_AFAC() passe K ")
@@ -2224,63 +2230,74 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		['action'] = 'Turning Point',
 		['alt_type'] = 'BARO',
 		['speed_locked'] = true,
-		['y'] = targetPos.z + 2000,
-		['x'] = targetPos.x + 2000,
+		['y'] = targetPos.z ,
+		['x'] = targetPos.x ,
 		['formation_template'] = '',
 		['speed'] = descAfac.speedMax * 2/3,
 		['ETA_locked'] = false,
-		['task'] = {
-			['id'] = 'ComboTask',
-			['params'] = {
-				['tasks'] = {
+		["name"] = "second_WPT_AFAC",
+		["task"] = 
+		{
+			["id"] = "ComboTask",
+			["params"] = 
+			{
+				["tasks"] = 
+				{
 					[1] = 
 					{
-						['enabled'] = true,
-						['auto'] = false,
-						['id'] = 'ControlledTask',
-						['number'] = 1,
-						['params'] = {
-							['task'] = {
-								['id'] = 'Orbit',
-								['params'] = {
-									['altitude'] = afacPos.y,
-									['pattern'] = 'Circle',
-									['speed'] = descAfac.speedMax * 2/3,
-								},
-							},
-							['stopCondition'] = {
-								['duration'] = 300,
-							},
-						},
-					},
-				},
-			},
-		},
+						["number"] = 1,
+						["auto"] = false,
+						["id"] = "Orbit",
+						["enabled"] = true,
+						["params"] = 
+						{
+							["altitude"] = afacPos.y,
+							["pattern"] = "Circle",
+							["speed"] = descAfac.speedMax * 2/3,
+						}, -- end of ["params"]
+					}, -- end of [1]
+				}, -- end of ["tasks"]
+			}, -- end of ["params"]
+		}, -- end of ["task"]
+
 		['ETA'] = current_time + 60,
 	}
 
+
 	env.info("DCE_CD_AFAC() passe M ")
+
+
 
 	table.insert(newRoute, 2, secondtWPT)
 
+		-- for k=1, #newRoute[1].task.params.tasks do
+	-- 	newRoute[1].task.params.tasks[k].number = i
+	-- end
+	-- for k=1, #newRoute[2].task.params.tasks do
+	-- 	newRoute[2].task.params.tasks[k].number = i
+	-- end
+
+
+
 	env.info("DCE_CD_AFAC() passe O ")
-	
+
+	--recalcul les ETA 
 	i = 1
 	while newRoute[i] do  -- Vérifie bien newRoute, pas newRoute[i]
 		env.info("DCE_CD_AFAC() passe O1 ")
-	
+
 		if i > 1 then
 			env.info("DCE_CD_AFAC() passe O2 ")
-	
+
 			local deltaTime = newRoute[i]["ETA"] - newRoute[i-1]["ETA"]
 			env.info("DCE_CD_AFAC() passe O3 deltaTime: "..tostring(deltaTime))
-	
+
 			local deltaDist = GetDistance(
 				{x = newRoute[i].x, y = newRoute[i].y },
 				{x = newRoute[i-1].x, y = newRoute[i-1].y }
 			)
 			env.info("DCE_CD_AFAC() passe O4 deltaDist: "..tostring(deltaDist))
-	
+
 			local ETA_minimum
 			if deltaDist and descAfac.speedMax then
 				ETA_minimum = deltaDist / (descAfac.speedMax * 2/3)
@@ -2289,19 +2306,19 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 				env.info("DCE_CD_AFAC() passe O6 RETURN ")
 				return
 			end
-	
+
 			if deltaTime < ETA_minimum then
 				newRoute[i]["ETA"] = ETA_minimum
 			end
 		end
-	
-		i = i + 1  -- 🔥 Ajout de l'incrémentation pour éviter la boucle infinie !
+
+		i = i + 1
 	end
-	
+
 
 	env.info("DCE_CD_AFAC() passe P ")
 
-	local Mission = {														--define mission for retreat AWACS
+	local newMission = {														--define mission for retreat AWACS
 			id = 'Mission',
 			params = {
 				route = {
@@ -2311,21 +2328,22 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		}
 
 
+		_affiche(ctr, "DCE_CD_AFAC ctr ")
 		env.info("DCE_CD_AFAC() passe Q ")
 
 	if camp.debug then
-		local logStr = "afac = " .. TableSerialization(Mission, 0)
+		local logStr = "afac = " .. TableSerialization(newMission, 0)
 		local FlightNameClean = afacFlightName:gsub('[%p%c%s]', '_')
 		local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_AFAC_"..current_time..".lua", "w")
 		if logFile then
 			logFile:write(logStr)
 			logFile:close()
 		else
-			env.info("DCE_OrbitPosition: Failed to open log file for writing.")
+			env.info("DCE_CD_AFAC: Failed to open log file for writing.")
 		end
 	end
 
-	Controller.setTask(ctr, Mission)										--activate task with mission for retreat AWACS
+	Controller.setTask(ctr, newMission)										--activate task with mission for retreat AWACS
 
 
 

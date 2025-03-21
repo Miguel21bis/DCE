@@ -4,16 +4,13 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.184"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.185"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
 -- V183 - Cusader Range
--- V182 Escort Jammer for F-105G
--- V181 - Loft Shrike for NAM - EA-6B Shrike
--- V180 - Escort jammer for F-4E
--- V 179 - vwv-o-1 and AFAC loaouts for Bronco O-1 and Skyraider for NAM
+
 -- V178 - Tu-22M3 no escort and Minscore 0.1  for TF-80-Full
 -- V177 - Mirage F-1EE big Fuel tank
 -- V176 - update of speed/altitude of MirageF1/Mig21/Su17 etc... from IIW following new consumption script 
@@ -22859,7 +22856,7 @@ db_all_loadouts = {
 	},
 	["B-52H"] = {
 		Strike = {
-			["NAM 80s AG Mk-82x51"] = {
+			["NAM 80s AG Mk-82x45"] = {
 				minscore = 0.3,
 				support = {
 					Escort = true,
@@ -22885,14 +22882,47 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 						[1] = {
-							CLSID = "{585D626E-7F42-4073-AB70-41E728C333E2}",
-						},
-						[2] = {
-							CLSID = "{6C47D097-83FF-4FB2-9496-EAB36DDF0B05}",
-						},
-						[3] = {
-							CLSID = "{585D626E-7F42-4073-AB70-41E728C333E2}",
-						},
+					["CLSID"] = "{585D626E-7F42-4073-AB70-41E728C333E2}",
+					["num"] = 3,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+						["arm_delay_ctrl_M904E4"] = 4,
+						["arm_delay_ctrl_M905"] = 4,
+						["function_delay_ctrl_M904E4"] = 0,
+						["function_delay_ctrl_M905"] = 0,
+					},
+				},
+				[2] = {
+					["CLSID"] = "{585D626E-7F42-4073-AB70-41E728C333E2}",
+					["num"] = 1,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+						["arm_delay_ctrl_M904E4"] = 4,
+						["arm_delay_ctrl_M905"] = 4,
+						["function_delay_ctrl_M904E4"] = 0,
+						["function_delay_ctrl_M905"] = 0,
+					},
+				},
+				[3] = {
+					["CLSID"] = "{6C47D097-83FF-4FB2-9496-EAB36DDF0B05}",
+					["num"] = 2,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+						["arm_delay_ctrl_M904E4"] = 4,
+						["arm_delay_ctrl_M905"] = 4,
+						["function_delay_ctrl_M904E4"] = 0,
+						["function_delay_ctrl_M905"] = 0,
+					},
+				},
 					},
 					fuel = "141135",
 					flare = 192,
@@ -22900,7 +22930,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["80s AG Mk-82x51"] = {
+			["80s AG Mk-82x45"] = {
 				minscore = 0.3,
 				support = {
 					Escort = true,
@@ -22921,23 +22951,56 @@ db_all_loadouts = {
 				sortie_rate = 1.5,
 				stores = {
 					pylons = {
-						[1] = {
-							CLSID = "{585D626E-7F42-4073-AB70-41E728C333E2}",
-						},
-						[2] = {
-							CLSID = "{6C47D097-83FF-4FB2-9496-EAB36DDF0B05}",
-						},
-						[3] = {
-							CLSID = "{585D626E-7F42-4073-AB70-41E728C333E2}",
-						},
+					[1] = {
+					["CLSID"] = "{585D626E-7F42-4073-AB70-41E728C333E2}",
+					["num"] = 3,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+						["arm_delay_ctrl_M904E4"] = 4,
+						["arm_delay_ctrl_M905"] = 4,
+						["function_delay_ctrl_M904E4"] = 0,
+						["function_delay_ctrl_M905"] = 0,
 					},
+				},
+				[2] = {
+					["CLSID"] = "{585D626E-7F42-4073-AB70-41E728C333E2}",
+					["num"] = 1,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+						["arm_delay_ctrl_M904E4"] = 4,
+						["arm_delay_ctrl_M905"] = 4,
+						["function_delay_ctrl_M904E4"] = 0,
+						["function_delay_ctrl_M905"] = 0,
+					},
+				},
+				[3] = {
+					["CLSID"] = "{6C47D097-83FF-4FB2-9496-EAB36DDF0B05}",
+					["num"] = 2,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+						["arm_delay_ctrl_M904E4"] = 4,
+						["arm_delay_ctrl_M905"] = 4,
+						["function_delay_ctrl_M904E4"] = 0,
+						["function_delay_ctrl_M905"] = 0,
+					},
+					},
+				},
 					fuel = "141135",
 					flare = 192,
 					chaff = 1125,
 					gun = 100,
 				},
 			},
-			["NAM Mk-84*18"] = {
+			["NAM Mk-84*12"] = {
 				minscore = 0.3,
 				support = {
 					Escort = true,
@@ -22963,11 +23026,33 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 						[1] = {
-							CLSID = "{696CFFC4-0BDE-42A8-BE4B-0BE3D9DD723C}",
-						},
-						[3] = {
-							CLSID = "{696CFFC4-0BDE-42A8-BE4B-0BE3D9DD723C}",
-						},
+					["CLSID"] = "{696CFFC4-0BDE-42A8-BE4B-0BE3D9DD723C}",
+					["num"] = 3,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+						["arm_delay_ctrl_M904E4"] = 4,
+						["arm_delay_ctrl_M905"] = 4,
+						["function_delay_ctrl_M904E4"] = 0,
+						["function_delay_ctrl_M905"] = 0,
+					},
+				},
+				[2] = {
+					["CLSID"] = "{696CFFC4-0BDE-42A8-BE4B-0BE3D9DD723C}",
+					["num"] = 1,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+						["arm_delay_ctrl_M904E4"] = 4,
+						["arm_delay_ctrl_M905"] = 4,
+						["function_delay_ctrl_M904E4"] = 0,
+						["function_delay_ctrl_M905"] = 0,
+					},
+				},
 					},
 					fuel = "141135",
 					flare = 192,
@@ -22975,7 +23060,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["Mk-84*18"] = {
+			["Mk-84*12"] = {
 				minscore = 0.3,
 				support = {
 					Escort = true,
@@ -22997,11 +23082,33 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 						[1] = {
-							CLSID = "{696CFFC4-0BDE-42A8-BE4B-0BE3D9DD723C}",
-						},
-						[3] = {
-							CLSID = "{696CFFC4-0BDE-42A8-BE4B-0BE3D9DD723C}",
-						},
+					["CLSID"] = "{696CFFC4-0BDE-42A8-BE4B-0BE3D9DD723C}",
+					["num"] = 3,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+						["arm_delay_ctrl_M904E4"] = 4,
+						["arm_delay_ctrl_M905"] = 4,
+						["function_delay_ctrl_M904E4"] = 0,
+						["function_delay_ctrl_M905"] = 0,
+					},
+				},
+				[2] = {
+					["CLSID"] = "{696CFFC4-0BDE-42A8-BE4B-0BE3D9DD723C}",
+					["num"] = 1,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+						["arm_delay_ctrl_M904E4"] = 4,
+						["arm_delay_ctrl_M905"] = 4,
+						["function_delay_ctrl_M904E4"] = 0,
+						["function_delay_ctrl_M905"] = 0,
+					},
+				},
 					},
 					fuel = "141135",
 					flare = 192,
@@ -23009,7 +23116,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["Strike TF  AGM-86C*20"] = {
+			["Strike TF  AGM-86D*30"] = {
 				minscore = 0.3,
 				support = {
 					Escort = false,
@@ -23036,14 +23143,17 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 						[1] = {
-							CLSID = "{45447F82-01B5-4029-A572-9AAD28AF0275}",
-						},
-						[2] = {
-							CLSID = "{8DCAF3A3-7FCF-41B8-BB88-58DEDA878EDE}",
-						},
-						[3] = {
-							CLSID = "{45447F82-01B5-4029-A572-9AAD28AF0275}",
-						},
+					["CLSID"] = "{45447F82-01B5-4029-A572-9AAD28AF0275}",
+					["num"] = 3,
+				},
+				[2] = {
+					["CLSID"] = "{45447F82-01B5-4029-A572-9AAD28AF0275}",
+					["num"] = 1,
+				},
+				[3] = {
+					["CLSID"] = "{8DCAF3A3-7FCF-41B8-BB88-58DEDA878EDE}",
+					["num"] = 2,
+				},
 					},
 					fuel = "141135",
 					flare = 192,
@@ -23051,7 +23161,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["Strike TF medium  AGM-86C*20"] = {
+			["Strike TF medium  AGM-86D*30"] = {
 				minscore = 0.3,
 				support = {
 					Escort = false,
@@ -23078,14 +23188,17 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 						[1] = {
-							CLSID = "{45447F82-01B5-4029-A572-9AAD28AF0275}",
-						},
-						[2] = {
-							CLSID = "{8DCAF3A3-7FCF-41B8-BB88-58DEDA878EDE}",
-						},
-						[3] = {
-							CLSID = "{45447F82-01B5-4029-A572-9AAD28AF0275}",
-						},
+					["CLSID"] = "{45447F82-01B5-4029-A572-9AAD28AF0275}",
+					["num"] = 3,
+				},
+				[2] = {
+					["CLSID"] = "{45447F82-01B5-4029-A572-9AAD28AF0275}",
+					["num"] = 1,
+				},
+				[3] = {
+					["CLSID"] = "{8DCAF3A3-7FCF-41B8-BB88-58DEDA878EDE}",
+					["num"] = 2,
+				},
 					},
 					fuel = "141135",
 					flare = 192,
