@@ -799,16 +799,17 @@ Action = {}
 			end
 		end
 
-		for sidename, targets in pairs(targetlist) do
-			for targetN, target in pairs(targets) do
-				if target.db_airbaseName == baseName then
-					if target.inactive ~= inactive then
-						target.inactive = inactive
-						if debugKT then print("		 		->ActivateBaseAndItsUnits targetlist "..baseName.." target.inactive?: "..tostring(target.inactive)) end
-					end
-				end
-			end
-		end
+		--attention, ce script active automatiquement les targets des bases, ce qui nest pas toujours voulue (NAM)
+		-- for sidename, targets in pairs(targetlist) do
+		-- 	for targetN, target in pairs(targets) do
+		-- 		if target.db_airbaseName == baseName then
+		-- 			if target.inactive ~= inactive then
+		-- 				target.inactive = inactive
+		-- 				if debugKT then print("		 		->ActivateBaseAndItsUnits targetlist "..baseName.." target.inactive?: "..tostring(target.inactive)) end
+		-- 			end
+		-- 		end
+		-- 	end
+		-- end
 
 		if debugKT then print(" 	->FIN function Action.ActivateBaseAndItsUnits   "..baseName) end
 

@@ -564,13 +564,6 @@ for side, units in pairs(oob_air) do																								--iterate through al
 
 						local aircraft_available = unit.roster.ready - #Aircraft_availability[unit.name].unavailable			--number of available aircraft
 
-						-- if aircraft_available < 1 then
-						-- 	print("AtoGen "..tostring(unit.name))
-						-- 	print("AtoGen CampTotalTimeS "..tostring(CampTotalTimeS))
-
-						-- 	_affiche(Aircraft_availability[unit.name], "AtoG Aircraft_availability[unit.name]")
-						-- 	os.execute 'pause'
-						-- end
 						if aircraft_serviceable < aircraft_available then
 							aircraft_available = aircraft_serviceable
 						end
@@ -693,13 +686,7 @@ for side, units in pairs(oob_air) do																								--iterate through al
 										end
 									end
 
-									-- local test_str = "unit_loadouts = " .. TableSerializationLoadout(unit_loadouts, 0, 0)						--make a string	
-									-- local testFile = io.open("Debug/loadouts_unit_loadouts.lua", "w")								--open targetlist file
-									-- testFile:write(test_str)															--save new data
-									-- testFile:close()
-
-									-- os.execute 'pause'
-									-- ATO_G_adjustment.e (e: random loadout temp)
+									
 									--mix the list of available loadouts so that you don't always have the same ones 
 									--https://programming-idioms.org/idiom/10/shuffle-a-list/1313/lua
 									for i = #unit_loadouts, 2, -1 do
@@ -804,10 +791,12 @@ for side, units in pairs(oob_air) do																								--iterate through al
 
 														-- print("AtoG priority "..tostring(target.priority).." "..tostring(target.titleName))
 
-														if target.inactive ~= true and target.ATO then											--if target is active and should be added to ATO
+														if not target.inactive and target.ATO then											--if target is active and should be added to ATO
+															print("AAA BBB CCC DDD "..target.titleName)
+															
 															if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "A")
-															and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name  and  Debug.Generator.SpyTask == task
-															or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == target.titleName ))
+																and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name  and  Debug.Generator.SpyTask == task
+																or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == target.titleName ))
 															then
 																DebuGenTxt = DebuGenTxt.."\n\n"..("AtoG passe A_07 :"..unit.type.." "..target.titleName.." Befor task Condition: "..target.task .." ==? task? "..task.." || "..target_name)
 															end

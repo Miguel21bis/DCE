@@ -1133,11 +1133,12 @@ function AirRetreat()
 
 		local gpName = Group.getName(gp)
 
-		if   string.find(gpName,"AWACS") then
+		if string.find(gpName,"AWACS") then
 			local units = gp:getUnits()
 			local _unit = units[1]
 
-			if _unit and _unit:getTypeName() == "E-2C" and _unit:isActive() and _unit:inAir() then
+			-- if _unit and _unit:getTypeName() == "E-2C" and _unit:isActive() and _unit:inAir() then
+			if _unit and _unit:isActive() and _unit:inAir() then
 				local awacs_point = _unit:getPoint()
 				local  gpGid = Group.getID(gp)
 				local nameAwacs =  _unit:getName()
@@ -1412,8 +1413,8 @@ function AirRetreat()
 																table.insert(retreatRoute[2].task.params.tasks, 1, TaskAwacs)
 
 																--renumerote les number des task																	
-																for i=1, #retreatRoute[1].task.params.tasks do
-																	retreatRoute[1].task.params.tasks[i].number = i
+																for j=1, #retreatRoute[1].task.params.tasks do
+																	retreatRoute[1].task.params.tasks[j].number = i
 																end
 
 																local Mission = {														--define mission for retreat AWACS
@@ -2817,8 +2818,8 @@ local function addFuncs(gid, groupObject, playerName)
 		-- sar_F10(Group)
 		timer.scheduleFunction(sar_F10, {gid, groupObject}, timer.getTime() + 2)
 
-		-- AFAC_F10(Group)
-		timer.scheduleFunction(AFAC_F10, groupObject, timer.getTime() + 2)
+		-- -- AFAC_F10(Group)
+		-- timer.scheduleFunction(AFAC_F10, groupObject, timer.getTime() + 2)
 
 
 		-- The solution is to use env.mission.coalition where you find all object informations even groupId
@@ -3498,6 +3499,29 @@ local function timerPlayerMenu(arg)
 	end
 end
 
+
+
+local function loopAFAC()
+	-- if (radioCommands == nil or #radioCommands == 0) and timer.getTime() < 10 then
+		local Uid, groupObject, gpGid, playerName
+		local playerObj = localGetPlayerObj()
+		if playerObj then
+			playerName = playerObj:getPlayerName()
+			groupObject = playerObj:getGroup()
+			gpGid = playerObj:getGroup():getID()
+		end
+
+		if gpGid and groupObject then
+			-- AFAC_F10(Group)
+			timer.scheduleFunction(AFAC_F10, groupObject, timer.getTime() + 2)
+		end
+	-- end
+
+	
+
+
+end
+
 function LoopPilot()
 
 	local groups = coalition.getGroups(coalition.side.BLUE, Group.Category.AIRPLANE)
@@ -3526,7 +3550,8 @@ function LoopPilot()
 		var_TPN_alreadyAdded = true
 	end
 
-	return timer.getTime() + 15
+
+	return timer.getTime() + 120
 
 end
 
@@ -3548,6 +3573,8 @@ timer.scheduleFunction(timerPlayerMenu, nil, timer.getTime() + 5)
 
 timer.scheduleFunction(LoopPilot, nil, timer.getTime() + 15)
 
+timer.scheduleFunction(loopAFAC, nil, timer.getTime() + 60)
+
 timer.scheduleFunction(AirRetreat, nil, timer.getTime() + 5)
 
 timer.scheduleFunction(avoidArea, nil, timer.getTime() + 5)
@@ -3557,6 +3584,7 @@ timer.scheduleFunction(getLL_TargetPosition, nil, timer.getTime() + 20)
 timer.scheduleFunction(EWR_magic, nil, timer.getTime() + 30)
 
 timer.scheduleFunction(setErrorMessageBoxShedul, nil, timer.getTime() + 30)
+
 
 
 
@@ -3623,17 +3651,17 @@ local function DCE_BulleBy_DE()
 
 		local nombreElements = tablelength(staticObjects)
 
-		if camp.debug then
-			local current_time = timer.getTime()
-			local logStr = "OrbitPosition = " .. TableSerialization(staticObjects, 0)
-			local logFile = io.open(PathDCE.."Debug\\DCE_Bulle".."_".. "staticObjects"..current_time..".lua", "w")
-			if logFile then
-				logFile:write(logStr)
-				logFile:close()
-			else
-				-- env.info("DCE_Bulle: Failed to open log file for writing.")
-			end
-		end
+		-- if camp.debug then
+		-- 	local current_time = timer.getTime()
+		-- 	local logStr = "OrbitPosition = " .. TableSerialization(staticObjects, 0)
+		-- 	local logFile = io.open(PathDCE.."Debug\\DCE_Bulle".."_".. "staticObjects"..current_time..".lua", "w")
+		-- 	if logFile then
+		-- 		logFile:write(logStr)
+		-- 		logFile:close()
+		-- 	else
+		-- 		-- env.info("DCE_Bulle: Failed to open log file for writing.")
+		-- 	end
+		-- end
 	end
 
 
