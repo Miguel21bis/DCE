@@ -792,7 +792,7 @@ for side, units in pairs(oob_air) do																								--iterate through al
 														-- print("AtoG priority "..tostring(target.priority).." "..tostring(target.titleName))
 
 														if not target.inactive and target.ATO then											--if target is active and should be added to ATO
-															print("AAA BBB CCC DDD "..target.titleName)
+															-- print("AAA BBB CCC DDD "..target.titleName)
 															
 															if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "A")
 																and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name  and  Debug.Generator.SpyTask == task

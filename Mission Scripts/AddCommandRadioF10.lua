@@ -50,6 +50,7 @@ local excludedUnitTypes = {
 LastInjectFlightPlan = {}					--garde les derniers plan de vol injecté
 BingoPlaneTab = {}
 GroundDamagedFlyingMachine = {}
+AFACTargetStatus = {}					--table used by AFACs to monitor the status of targets and move on to the next ones
 
 
 EjectionSeatFrequency = {}

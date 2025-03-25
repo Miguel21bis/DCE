@@ -835,7 +835,7 @@ Action = {}
 				for unit_n, unit in pairs(air) do
 					if unit.name == unitName and unit.base ~= baseDestination then
 						unit.base = baseDestination										--set new airbase for unit
-						ActivateBaseAndAssociatedTargets(baseDestination, true)
+						-- ActivateBaseAndAssociatedTargets(baseDestination, true)
 						Action.Text(unitName.."  moveToAnotherBase."..baseDestination)
 					end
 				end

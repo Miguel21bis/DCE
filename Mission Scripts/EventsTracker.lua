@@ -305,7 +305,7 @@ function eventHandlerDCE:onEvent(event)
 		[60] = "S_EVENT_HUMAN_AIRCRAFT_REPAIR_FINISH",
 		[61] = "S_EVENT_MAX",
 	}
-	
+
 
 	-- if camp.debug then  
 	-- 	env.info( "DCE_EventsTracker  id: "..tostring(event.id).." _type_ : "..tostring(log_entry.type)) 
@@ -317,11 +317,11 @@ function eventHandlerDCE:onEvent(event)
 
 	if event and event.id then
 		if Info_event then
-			
+
 			if Info_event[tonumber(event.id)] then
 				local idLabel = tostring(Info_event[tonumber(event.id)])
 				if camp.debug then
-					env.info("DCE_EventsTracker event.id "..tostring(event.id).." " ..idLabel) 
+					env.info("DCE_EventsTracker event.id "..tostring(event.id).." " ..idLabel)
 
 				end
 			else
@@ -335,9 +335,13 @@ function eventHandlerDCE:onEvent(event)
 	if not eventIdTotal[event.id] then eventIdTotal[event.id] = 0 end
 	eventIdTotal[event.id] = eventIdTotal[event.id] + 1
 
-	--recupere le camp une fois pour toute:
+	--recupere le SIDE une fois pour toute:
 	local initiatorSideName
-	local targetSideName local initiatorObjCategory local targetObjCategory
+	local targetSideName
+
+	local initiatorObjCategory
+	local targetObjCategory
+
 	if event.initiator then
 		initiatorObjCategory = Object.getCategory(event.initiator)
 		--DCE_EventsTracker initiator Category 0 _: nil
@@ -356,11 +360,11 @@ function eventHandlerDCE:onEvent(event)
 		targetObjCategory = Object.getCategory(event.target)
 
 		if camp.debug then  env.info("DCE_EventsTracker target Category: "..tostring(targetObjCategory)) end
-		
+
 		if Object_Category[targetObjCategory] then
 			local targetDesc = event.target:getDesc()
 			-- _affiche(targetDesc, "DCE_EventsTracker targetDesc")
-			
+
 			local targetObjCategory2 = targetDesc.category
 			if camp.debug then  env.info("DCE_EventsTracker target targetObjCategory2: "..tostring(targetObjCategory2)) end
 
@@ -606,7 +610,7 @@ function eventHandlerDCE:onEvent(event)
 					end
 
 					selectedEjection.name = CleanName(selectedEjection.name)
-					
+
 					-- _affiche(selectedEjection, " selectedEjection |pilot land")
 
 					CheckImmediatSAR(selectedEjection)
@@ -614,7 +618,7 @@ function eventHandlerDCE:onEvent(event)
 					env.info( "DCE_EvenT: createdSoldier? SurfaceType? "..tostring(selectedEjection.SurfaceType))
 					-- trigger.action.outText("EvenT:  createdSoldier? SurfaceType? "..tostring(selectedEjection.SurfaceType), 30)
 
-					if selectedEjection.SurfaceType ~= land.SurfaceType.WATER and selectedEjection.SurfaceType ~= land.SurfaceType.RUNWAY  then 
+					if selectedEjection.SurfaceType ~= land.SurfaceType.WATER and selectedEjection.SurfaceType ~= land.SurfaceType.RUNWAY  then
 						AddSoldierAliasPilot(selectedEjection)
 						selectedEjection.createdSoldier = true
 					end
@@ -674,7 +678,7 @@ function eventHandlerDCE:onEvent(event)
 				s = s.."| "..event.initiator:getID()
 				s = s.."| "..event.initiator:getTypeName()
 
-				
+
 				-- env.info("DCE_EventsTracker Landing Passe A "..tostring(s))
 
 				log_entry.place = event.place:getName()
@@ -688,14 +692,14 @@ function eventHandlerDCE:onEvent(event)
 				-- _affiche(placeDesc, "DCE_EventsTracker Landing placeDesc")
 
 				-- env.info("DCE_EventsTracker Landing Passe A² "..tostring(baseCoalition))
-				
+
 				-- Airbase.Category = {
 				-- 	AIRDROME = 0,
 				-- 	HELIPAD = 1, 
 				-- 	SHIP = 2,
 				-- }
 				-- if event.place:getCategory() == Airbase.Category.SHIP    and not event.initiator:getPlayerName() then 
-				if not playerName then 
+				if not playerName then
 					if placeDesc.category == Airbase.Category.SHIP then 											-- category ship
 						-- env.info("DCE_EventsTracker Landing Passe C ")
 
@@ -715,10 +719,10 @@ function eventHandlerDCE:onEvent(event)
 							NeedPedro(cvName, event)
 
 							-- env.info("DCE_EventsTracker Landing ryStart Passe D3 NeedPedro cvName: "..tostring(cvName))
-							
+
 						end
 
-						if initDesc.category == Unit.Category.HELICOPTER then 
+						if initDesc.category == Unit.Category.HELICOPTER then
 							-- env.info("DCE_EventsTracker Landing Add Table Despawn SHIP HELICOPTER "..s)
 							table.insert(despawn, event.initiator)
 						end
@@ -733,20 +737,20 @@ function eventHandlerDCE:onEvent(event)
 				-- env.info("DCE_EventsTracker Landing Passe E ")
 
 				-- modification M50.a Records landings
-				
+
 				if initDesc.displayName then
 					log_entry.initiator = event.initiator:getName()																							--store initiator name
 					log_entry.type_name = event.initiator:getTypeName()
 
-					log_entry.placeTypeName = CleanName(log_entry.placeTypeName)				
+					log_entry.placeTypeName = CleanName(log_entry.placeTypeName)
 					log_entry.placeCoalition = Airbase.getCoalition(event.place)
 					log_entry.place = CleanName(log_entry.place)
-	
+
 				end
 
 				if Object.getCategory(event.initiator) == Object.Category.UNIT and playerName then			--initiator is a unit debug_ET01.h
 					log_entry.initiatorPilotName = playerName
-					log_entry.initiatorPilotName = log_entry.initiatorPilotName:gsub("['\"]", '')				
+					log_entry.initiatorPilotName = log_entry.initiatorPilotName:gsub("['\"]", '')
 				end
 
 				if Object.getCategory(event.initiator) ~= Object.Category.SCENERY and event.initiator:getID() then				--initator is not a scenery object debug_ET01.h
@@ -781,52 +785,42 @@ function eventHandlerDCE:onEvent(event)
 				}
 
 				timer.scheduleFunction(health1s, {healthTemp, event}, timer.getTime() + 1)
-				
+
 			end
 		end
 
 	elseif log_entry.type and ((log_entry.type == "hit" and event.initiator) or log_entry.type ~= "hit" ) then												--hit event with initiator or any other event (excludes hit events without initiator, like collisions) 	
+
 		if event.initiator and initiatorObjCategory ~= 0 then																													--event has an initiator	
 
 			if event and event.id and Info_event and Info_event[tonumber(event.id)] then
 				local idLabel = tostring(Info_event[tonumber(event.id)])
-				-- env.info("DCE_EventsTracker HitOrAll A event.id "..tostring(event.id).." " ..idLabel)
 			end
 
 			local initDesc = event.initiator:getDesc()
 			if initDesc.displayName then
 				log_entry.initiator = event.initiator:getName()
 			end
-			
+
 			if Object.getCategory(event.initiator) == Object.Category.UNIT  then										--initiator is a unit debug_ET01.h
-				
+
 				local unitCat = initDesc.category
 				log_entry.initiatorPilotName = event.initiator:getPlayerName()
 
 				if log_entry.initiatorPilotName then
 					log_entry.initiatorPilotName = CleanName(log_entry.initiatorPilotName)
 				end
-				
+
 				if log_entry.type == "unit lost" and camp.SAR and camp.SAR.pilotEjected then
 					if unitCat and (unitCat == Unit.Category.HELICOPTER) then
-						-- env.info("DCE_EventsTracker HitOrAll D unit lost_A "..tostring(unitCat).." initiator: "..tostring(log_entry.initiator))
-						
 						if log_entry.initiator and EjectedPilotOnBoard[log_entry.initiator] then
-							-- env.info("DCE_EventsTracker HitOrAll E lost_B _Name "..tostring(log_entry.initiator))
-
 							-- Itérer en boucle inversée pour supprimer des éléments dans une table indexée numériquement
 							for i = #EjectedPilotOnBoard[log_entry.initiator], 1, -1 do
 								local ejectedPilot_OB_name = EjectedPilotOnBoard[log_entry.initiator][i]
 
-								-- env.info("DCE_EventsTracker HitOrAll F lost_C unit lost C ejectedPilot_On Board "..tostring(ejectedPilot_OB_name))
-				
 								-- Parcourir les pilotes éjectés dans la campagne
 								for pilotN, ejectedPilot_camp in pairs(camp.SAR.pilotEjected) do
-									-- env.info("DCE_EventsTracker HitOrAll G lost_D pilotN "..tostring(pilotN).." ejectedPilot_camp.name: "..tostring(ejectedPilot_camp.name).." ==ejectedPilot_OB_name? "..tostring(ejectedPilot_OB_name))
-
 									if ejectedPilot_camp.name == ejectedPilot_OB_name then
-										-- env.info("DCE_EventsTracker HitOrAll H lost_E ejectedPilot_camp.name dead "..tostring(ejectedPilot_camp.name))
-
 										-- Marquer le pilote dans la campagne comme "mort"
 										ejectedPilot_camp.status = "dead"
 										-- Supprimer l'entrée de la table
@@ -840,9 +834,20 @@ function eventHandlerDCE:onEvent(event)
 				end
 			end
 
+			if log_entry.type == "unit lost" and initiatorObjCategory and initiatorObjCategory == Object.Category.STATIC or initiatorObjCategory == Object.Category.UNIT then
+				local targetMissionID = event.target:getID()
+				env.info( "DCE_EventT  unitLost_A  targetMissionID: "..tostring(targetMissionID) )
+
+				if targetMissionID and AFACTargetStatus[targetMissionID] then
+					env.info( "DCE_EventT  unitLost_B  targetMissionID: "..tostring(targetMissionID) )
+
+					trigger.action.setUserFlag("targetDestroyed_Flag_"..targetMissionID, true)
+					AFACTargetStatus[targetMissionID] = nil
+				end
+			end
+
 			if initDesc.category and (initDesc.category ~= 0) and Object.getCategory(event.initiator) ~= Object.Category.SCENERY and not initDesc.missileCategory  then				--initator is not a scenery object debug_ET01.h
-				log_entry.initiatorMissionID = event.initiator:getID()																					--store ID
-				-- env.info("DCE_EventsTracker HitOrAll H initiatorMissionID getID "..tostring(log_entry.initiatorMissionID))
+				log_entry.initiatorMissionID = event.initiator:getID()
 			end
 
 			if initiatorSideName then
@@ -866,42 +871,24 @@ function eventHandlerDCE:onEvent(event)
 			-- SCENERY 5
 			-- Cargo   6
 
-			local targetCategory = Object.getCategory(event.target)
-			env.info( "DCE_EventsTracker HitOrAll_Tgt A targetCategory| "..tostring(targetCategory))
-
-			if targetCategory and ( targetCategory == Object.Category.UNIT or targetCategory == Object.Category.STATIC or targetCategory == Object.Category.BASE)  then
+			if targetObjCategory and ( targetObjCategory == Object.Category.UNIT or targetObjCategory == Object.Category.STATIC or targetObjCategory == Object.Category.BASE)  then
 				--Function also works with UNIT, STATIC, BASE
 				log_entry.target = event.target:getName()
-				env.info( "DCE_EventsTracker HitOrAll_Tgt B log_entry.target "..tostring(log_entry.target))
 
-				if targetCategory == Object.Category.STATIC and log_entry.target ~= nil and log_entry.target ~= "" then
-					-- StaticObject.Category = {
-					-- 	"VOID": 0,
-					-- 	"UNIT": 1,
-					-- 	"WEAPON": 2,
-					-- 	"STATIC": 3,
-					-- 	"BASE": 4,
-					-- 	"SCENERY": 5,
-					-- 	"CARGO": 6 
-					--    }
-
-					env.info( "DCE_EventsTracker HitOrAll_Tgt C log_entry.target "..tostring(log_entry.target))
-
-					-- local staticDesc = StaticObject.getDesc(event.target)
-					local staticDesc = event.target:getDesc()
-					-- _affiche(staticDesc, "EventsT staticDesc")
-
-					local staticCategory = event.target:getDesc().category
-
+				if targetObjCategory == Object.Category.STATIC or targetObjCategory == Object.Category.UNIT  or targetObjCategory == Object.Category.BASE then
 					log_entry.targetMissionID = event.target:getID()
-
-					env.info( "DCE_EventsTracker HitOrAll D |staticCategory| "..tostring(staticCategory))
-
-				elseif targetCategory == Object.Category.UNIT  or targetCategory == Object.Category.BASE then
-
-					log_entry.targetMissionID = event.target:getID()
-
 				end
+
+
+				-- if targetObjCategory == Object.Category.STATIC and log_entry.target ~= nil and log_entry.target ~= "" then
+
+				-- 	log_entry.targetMissionID = event.target:getID()
+
+				-- elseif targetObjCategory == Object.Category.UNIT  or targetObjCategory == Object.Category.BASE then
+
+				-- 	log_entry.targetMissionID = event.target:getID()
+
+				-- end
 			else
 				log_entry.target = ""
 			end
@@ -914,23 +901,13 @@ function eventHandlerDCE:onEvent(event)
 			-- 	TRAIN         = 4
 			--   }
 
-			if targetCategory and targetCategory == Object.Category.UNIT then												--target is a unit
+			if targetObjCategory and targetObjCategory == Object.Category.UNIT then												--target is a unit
 				log_entry.targetPilotName = event.target:getPlayerName()													--store player name
-				env.info( "DCE_EventsTracker HitOrAll_Tgt A |log_entry.type| "..tostring(log_entry.type))
-					
 				local desc = event.target:getDesc()
 				local unitCat = desc.category
 
 				if log_entry.type == "hit" then																				--log entry is a hit event	
-					-- if event.target:getGroup():getCategory() == 0 or event.target:getGroup():getCategory() == 1 then		--hit unit is aircraft or helo
-
-
-					env.info( "DCE_EventsTracker HIT_Only B |unitCat| "..tostring(unitCat))
-
 					if unitCat and (unitCat == Unit.Category.AIRPLANE or unitCat == Unit.Category.HELICOPTER) then
-						-- if Group.getCategory(event.target:getGroup()) == 0 or Group.getCategory(event.target:getGroup()) == 1 then
-						env.info( "DCE_EventsTracker HIT_Only C |log_entry.targetPilotName| "..tostring(log_entry.targetPilotName))
-						
 						local life = event.target:getLife()																	--get current life of unit
 						local init_life = event.target:getLife0()															--get initial life of unit
 						log_entry.health = math.ceil(100 / init_life * life)												--store unit health to log entry
@@ -945,9 +922,6 @@ function eventHandlerDCE:onEvent(event)
 						}
 
 						timer.scheduleFunction(health1s, {healthTemp, event}, timer.getTime() + 1)
-
-						-- local pos = Unit.getByName('whatever'):getPoint()
-						-- local agl = pos.y - land.getHeight({x=pos.x, y = pos.z})
 
 						local pos = event.target:getPoint()
 						if pos and pos.x then
@@ -965,7 +939,6 @@ function eventHandlerDCE:onEvent(event)
 			end
 
 		end
-		-- table.insert(CustomLog, log_entry)																					--add log entry to custom log
 	end
 
 	--*********************insert CustomLog ********************
@@ -1175,7 +1148,7 @@ function eventHandlerDCE:onEvent(event)
 		if event.initiator then
 			if Object.getCategory(event.initiator) == 5 then							--if initiator is a scenery object
 				local scenaryName = event.initiator:getName()
-				
+
 				if scenLog[scenaryName] then
 					local initPoint = event.initiator:getPoint()				--get point of dead scenery object
 					scenLog[scenaryName].x = initPoint.x
@@ -1192,9 +1165,9 @@ function eventHandlerDCE:onEvent(event)
 	elseif event.id == world.event.S_EVENT_UNIT_LOST then
 		if event.initiator then
 			if Object.getCategory(event.initiator) == 5 then							--if initiator is a scenery object
-				
+
 				local scenaryName = event.initiator:getName()
-				
+
 				if scenLog[scenaryName] then
 					local initPoint = event.initiator:getPoint()				--get point of dead scenery object
 					scenLog[scenaryName].x = initPoint.x
@@ -1309,13 +1282,13 @@ local function CheckRtbAirbase()
 										local alti = unitAeroPoint.y - base.elevation
 										if alti <= 1000 and unitAeroFuel <= 0.75 then
 											local distance = math.floor(math.sqrt(math.pow(base.x - unitAeroPoint.x, 2) + math.pow(base.y - unitAeroPoint.z, 2)))
-											
+
 											env.info( "DCE_EventsTracker.lua file PASSE 11 SPAWN BaseAirStart "..tostring(group.units[n].name)
 													.." ||Alti: "..tostring(alti)
 													.." ||Fuel: "..tostring(unitAeroFuel)
 													.." ||distance: "..tostring(distance)
 												)
-											
+
 											if distance <= 20000 then
 												unitAero:destroy()
 											end

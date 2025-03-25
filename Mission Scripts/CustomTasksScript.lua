@@ -1933,7 +1933,9 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	local distVisibility = distanceVisibilite(afacAlt, terrainAlt)
 	env.info("DCE_CustomDesignationAFAC() BB : afacFlightName "..tostring(afacFlightName).." afacAlt: "..tostring(afacAlt).." terrainAlt: "..tostring(terrainAlt).." distVisibility: "..tostring(distVisibility))
 
+	--****--****--****--**** ********--****--****--**** ********--****--****--**** ********--****--****--**** ****
 	--**** recupere les dynamique ****
+	--****--****--****--**** ********--****--****--**** ********--****--****--**** ********--****--****--**** ****
 	local groundGroups = coalition.getGroups(coalitionIdNumericENI[coalitionForce], Group.Category.GROUND)
 	local unitGroundSelected_A = {}
 	local unitGroundSelected_B = {}
@@ -1983,8 +1985,9 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	end
 
 
-
+	--****--****--****--**** ********--****--****--**** ********--****--****--**** ********--****--****--**** ****
 	--**** recupere les static ****
+	--****--****--****--**** ********--****--****--**** ********--****--****--**** ********--****--****--**** ****
 	local statics = coalition.getStaticObjects(coalitionIdNumericENI[coalitionForce])
 	for _, static in pairs(statics) do
 		local stName = Object.getName(static)
@@ -2042,15 +2045,18 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	env.info("DCE_CD_AFAC() :FF nb of unitGroundSelected_B: "..tostring(#unitGroundSelected_B))
 
 
-
+	--**** choisi THE target ^^ ****
 	local target = next(unitGroundSelected_B) and unitGroundSelected_B[next(unitGroundSelected_B)] or nil
 
 	if not target then return end
 
 	env.info("DCE_CD_AFAC() : J target actuel "..tostring(target.unitTypeName).." "..tostring(target.UnitId) )
 
-	local gpGid
+	-- set la partie FLAG du target pour suivre son etat et déclencher l'arret de l orbit et le passage au target suivant
+	trigger.action.setUserFlag("targetDestroyed_Flag_"..target.UnitId, false)
+	AFACTargetStatus[target.UnitId] = true
 
+	local gpGid
 	if AFAC_available[afacFlightName] and AFAC_available[afacFlightName]["gpGid"] then
 		gpGid = AFAC_available[afacFlightName]["gpGid"]
 	end
@@ -2236,29 +2242,57 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		['speed'] = descAfac.speedMax * 2/3,
 		['ETA_locked'] = false,
 		["name"] = "second_WPT_AFAC",
-		["task"] = 
+		["task"] =
 		{
 			["id"] = "ComboTask",
-			["params"] = 
+			["params"] =
 			{
-				["tasks"] = 
+				["tasks"] =
 				{
-					[1] = 
+					[1] =
 					{
 						["number"] = 1,
 						["auto"] = false,
-						["id"] = "Orbit",
+						["id"] = "ControlledTask",
+						["name"] = "orbit Ancre marqueur 222 est on",
 						["enabled"] = true,
-						["params"] = 
+						["params"] =
 						{
-							["altitude"] = afacPos.y,
-							["pattern"] = "Circle",
-							["speed"] = descAfac.speedMax * 2/3,
+							["task"] =
+							{
+								["id"] = "Orbit",
+								["params"] =
+								{
+									["altitude"] = afacPos.y,
+									["pattern"] = "Anchored",
+									["hotLegDir"] = 2.6354471705114,
+									["speed"] = descAfac.speedMax * 2/3,
+									["legLength"] = 5550,
+									["clockWise"] = true,
+									["width"] = 1850,
+								}, -- end of ["params"]
+							}, -- end of ["task"]
+							["stopCondition"] =
+							{
+								["userFlag"] = "targetDestroyed_Flag_"..target.UnitId,
+								["userFlagValue"] = true,
+							}, -- end of ["stopCondition"]
 						}, -- end of ["params"]
-					}, -- end of [1]
-				}, -- end of ["tasks"]
-			}, -- end of ["params"]
-		}, -- end of ["task"]
+
+						-- ["number"] = 1,
+						-- ["auto"] = false,
+						-- ["id"] = "Orbit",
+						-- ["enabled"] = true,
+						-- ["params"] = 
+						-- {
+						-- 	["altitude"] = afacPos.y,
+						-- 	["pattern"] = "Circle",
+						-- 	["speed"] = descAfac.speedMax * 2/3,
+						-- }, -- end of ["params"]
+					},
+				},
+			},
+		},
 
 		['ETA'] = current_time + 60,
 	}
