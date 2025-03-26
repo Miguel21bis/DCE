@@ -2158,7 +2158,11 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		['speed'] = descAfac.speedMax * 2/3,
 		['ETA_locked'] = true,
 		["name"] = "first_WPT_AFAC",
-		['task'] = {
+		["task"] = 
+		{
+		}, -- end of ["task"]
+
+		-- ['task'] = {
 			-- ['id'] = 'ComboTask',
 			-- ['params'] = {
 			-- 	['tasks'] = {
@@ -2220,7 +2224,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 					-- },
 			-- 	},
 			-- },
-		},
+		-- },
 		['ETA'] = current_time + 1,
 	}
 
@@ -2249,9 +2253,9 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 			{
 				["tasks"] =
 				{
-					[1] =
+					[2] =
 					{
-						["number"] = 1,
+						["number"] = 2,
 						["auto"] = false,
 						["id"] = "ControlledTask",
 						["name"] = "orbit Ancre marqueur 222 est on",
@@ -2278,6 +2282,25 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 								-- ["userFlagValue"] = true,
 							}, -- end of ["stopCondition"]
 						}, -- end of ["params"]
+						[1] = 
+						{
+							["number"] = 1,
+							["auto"] = false,
+							["id"] = "WrappedAction",
+							["name"] = "partie script",
+							["enabled"] = true,
+							["params"] = 
+							{
+								["action"] = 
+								{
+									["id"] = "Script",
+									["params"] = 
+									{
+										["command"] = "env.info(\"DCE_AFAC_Mission secondtWPT \")",
+									}, -- end of ["params"]
+								}, -- end of ["action"]
+							}, -- end of ["params"]
+						}, -- end of [1]
 
 						-- ["number"] = 1,
 						-- ["auto"] = false,
