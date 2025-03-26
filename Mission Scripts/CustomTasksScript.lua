@@ -2054,7 +2054,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	-- set la partie FLAG du target pour suivre son etat et déclencher l'arret de l orbit et le passage au target suivant
 	trigger.action.setUserFlag("targetDestroyed_Flag_"..target.UnitId, false)
-	AFACTargetStatus[target.UnitId] = true
+	AFACTargetStatus[target.UnitId] = target
 
 	local gpGid
 	if AFAC_available[afacFlightName] and AFAC_available[afacFlightName]["gpGid"] then

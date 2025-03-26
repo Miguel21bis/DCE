@@ -3588,6 +3588,30 @@ timer.scheduleFunction(setErrorMessageBoxShedul, nil, timer.getTime() + 30)
 
 
 
+local function explodeOnPoint()
+
+	-- AFACTargetStatus[target.UnitId] 
+
+	for target_UnitId, target in pairs(AFACTargetStatus) do
+
+		_affiche(target.unitPos, "DCE_explodeOnPoint target.unitPos ")
+
+		trigger.action.explosion(target.unitPos, 100)
+
+	
+	end
+
+	return timer.getTime() + 400
+
+end
+
+
+
+
+timer.scheduleFunction(explodeOnPoint, nil, timer.getTime() + 400)
+
+
+
 
 
 --////////////////////////////////////////////////////////////////////////////////////////////

@@ -363,7 +363,7 @@ function eventHandlerDCE:onEvent(event)
 
 		if Object_Category[targetObjCategory] then
 			local targetDesc = event.target:getDesc()
-			-- _affiche(targetDesc, "DCE_EventsTracker targetDesc")
+			_affiche(targetDesc, "DCE_EventsTracker targetDesc")
 
 			local targetObjCategory2 = targetDesc.category
 			if camp.debug then  env.info("DCE_EventsTracker target targetObjCategory2: "..tostring(targetObjCategory2)) end
@@ -834,15 +834,15 @@ function eventHandlerDCE:onEvent(event)
 				end
 			end
 
-			if log_entry.type == "unit lost" and initiatorObjCategory and initiatorObjCategory == Object.Category.STATIC or initiatorObjCategory == Object.Category.UNIT then
-				local targetMissionID = event.target:getID()
-				env.info( "DCE_EventT  unitLost_A  targetMissionID: "..tostring(targetMissionID) )
+			if log_entry.type == "unit lost" and initiatorObjCategory and (initiatorObjCategory == Object.Category.STATIC or initiatorObjCategory == Object.Category.UNIT) then
+				local victimMissionID = event.initiator:getID()
+				env.info( "DCE_EventT  unitLost_A  victimMissionID: "..tostring(victimMissionID) )
 
-				if targetMissionID and AFACTargetStatus[targetMissionID] then
-					env.info( "DCE_EventT  unitLost_B  targetMissionID: "..tostring(targetMissionID) )
+				if victimMissionID and AFACTargetStatus[victimMissionID] then
+					env.info( "DCE_EventT  unitLost_B  victimMissionID: "..tostring(victimMissionID) )
 
-					trigger.action.setUserFlag("targetDestroyed_Flag_"..targetMissionID, true)
-					AFACTargetStatus[targetMissionID] = nil
+					trigger.action.setUserFlag("targetDestroyed_Flag_"..victimMissionID, true)
+					AFACTargetStatus[victimMissionID] = nil
 				end
 			end
 
