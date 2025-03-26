@@ -2159,55 +2159,55 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		['ETA_locked'] = true,
 		["name"] = "first_WPT_AFAC",
 		['task'] = {
-			['id'] = 'ComboTask',
-			['params'] = {
-				['tasks'] = {
-					[1] =
-					{
-						["auto"] = true,
-						["enabled"] = false,
-						["id"] = "WrappedAction",
-						["name"] = "INTERDIRE emergency jettison: TRUE (Departure/Spawn)",
-						["number"] = 1,
-						["params"] =
-						{
-							["action"] =
-							{
-								["id"] = "Option",
-								["params"] =
-								{
-									["name"] = 15,
-									["value"] = true,
-								},
-							},
-						},
-					},
-					[2] =
-					{
-						["auto"] = true,
-						["enabled"] = false,
-						["id"] = "WrappedAction",
-						["name"] = "reaction to threats, avoidance of fire (Departure/Spawn)",
-						["number"] = 2,
-						["params"] =
-						{
-							["action"] =
-							{
-								["id"] = "Option",
-								["params"] =
-								{
-									["name"] = 1,
-									["value"] = 2,
-								},
-							},
-						},
-					},
-					-- [4] = 
+			-- ['id'] = 'ComboTask',
+			-- ['params'] = {
+			-- 	['tasks'] = {
+					-- [1] =
+					-- {
+					-- 	["auto"] = false,
+					-- 	["enabled"] = true,
+					-- 	["id"] = "WrappedAction",
+					-- 	-- ["name"] = "INTERDIRE emergency jettison: TRUE (Departure/Spawn)",
+					-- 	["number"] = 1,
+					-- 	["params"] =
+					-- 	{
+					-- 		["action"] =
+					-- 		{
+					-- 			["id"] = "Option",
+					-- 			["params"] =
+					-- 			{
+					-- 				["name"] = 15,
+					-- 				["value"] = true,
+					-- 			},
+					-- 		},
+					-- 	},
+					-- },
+					-- [1] =
+					-- {
+					-- 	["auto"] = false,
+					-- 	["enabled"] = true,
+					-- 	["id"] = "WrappedAction",
+					-- 	-- ["name"] = "reaction to threats  avoidance of fire (Departure/Spawn)",
+					-- 	["number"] = 1,
+					-- 	["params"] =
+					-- 	{
+					-- 		["action"] =
+					-- 		{
+					-- 			["id"] = "Option",
+					-- 			["params"] =
+					-- 			{
+					-- 				["name"] = 1,
+					-- 				["value"] = 2,
+					-- 			},
+					-- 		},
+					-- 	},
+					-- },
+					-- [3] = 
 					-- {
 					-- 	["auto"] = true,
-					-- 	["enabled"] = true,
+					-- 	["enabled"] = false,
 					-- 	["id"] = "FAC",
-					-- 	["number"] = 4,
+					-- 	["number"] = 3,
 					-- 	["params"] = 
 					-- 	{
 					-- 		["callname"] = 1,
@@ -2218,8 +2218,8 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 					-- 		["number"] = 4,
 					-- 	},
 					-- },
-				},
-			},
+			-- 	},
+			-- },
 		},
 		['ETA'] = current_time + 1,
 	}
@@ -2275,7 +2275,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 							["stopCondition"] =
 							{
 								["userFlag"] = "targetDestroyed_Flag_"..target.UnitId,
-								["userFlagValue"] = true,
+								-- ["userFlagValue"] = true,
 							}, -- end of ["stopCondition"]
 						}, -- end of ["params"]
 
@@ -2304,6 +2304,8 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	table.insert(newRoute, 2, secondtWPT)
 
+
+	
 		-- for k=1, #newRoute[1].task.params.tasks do
 	-- 	newRoute[1].task.params.tasks[k].number = i
 	-- end

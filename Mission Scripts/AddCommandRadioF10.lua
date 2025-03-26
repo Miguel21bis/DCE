@@ -866,7 +866,7 @@ local function avoidArea()
 																			["name"] = "Interdiction combat AA",
 																			["id"] = "WrappedAction",
 																			["auto"] = false,
-																			["number"] = 2,
+																			["number"] = 1,
 																			["params"] =
 																			{
 																				["action"] =
@@ -906,7 +906,7 @@ local function avoidArea()
 																			["auto"] = false,
 																			["id"] = "WrappedAction",
 																			["name"] = "interdire la pc",
-																			["number"] = 2,
+																			["number"] = 3,
 																			["params"] =
 																			{
 																				["action"] =
@@ -924,7 +924,7 @@ local function avoidArea()
 																			['enabled'] = true,
 																			['auto'] = false,
 																			['id'] = 'ControlledTask',
-																			['number'] = 3,
+																			['number'] = 4,
 																			['params'] = {
 																				['task'] = {
 																					['id'] = 'EngageTargetsInZone',
@@ -946,7 +946,7 @@ local function avoidArea()
 																			['enabled'] = true,
 																			['auto'] = false,
 																			['id'] = 'ControlledTask',
-																			['number'] = 4,
+																			['number'] = 5,
 																			['params'] = {
 																				['task'] = {
 																					['id'] = 'Orbit',
