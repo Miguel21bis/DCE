@@ -1540,6 +1540,7 @@ TaskByPlane = {
 
 
 	["AFAC"] = {
+		["F-4E-45MC"] = true,
 		["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,

@@ -7280,6 +7280,67 @@ db_all_loadouts = {
 		},
 	},
 	["F-4E-45MC"] = {
+		AFAC = {
+			["AFAC test - NAM - Pod - AIM-7E*1 - ECM - AIM-9B*2 - FT*3"] = {
+				attributes =  { },
+				code_loadout =  { "All" },
+				day = true,
+				night = true,
+				adverseWeather = true,
+				range = 900000,
+				firepower = 1,
+				vCruise = 250,
+				vAttack = 350,
+				hCruise = 10096,
+				hAttack = 10096,
+				tStation = 18000,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = {
+					["CLSID"] = "{HB_PAVE_SPIKE_FAST_ON_ADAPTER_IN_AERO7}",
+					["num"] = 6,
+						},
+						[2] = {
+							["CLSID"] = "{F4_SARGENT_TANK_600_GAL}",
+							["num"] = 7,
+						},
+						[3] = {
+							["CLSID"] = "{F4_SARGENT_TANK_370_GAL}",
+							["num"] = 1,
+						},
+						[4] = {
+							["CLSID"] = "{F4_SARGENT_TANK_370_GAL_R}",
+							["num"] = 13,
+						},
+						[5] = {
+							["CLSID"] = "{HB_F4E_AIM-7E}",
+							["num"] = 8,
+						},
+						[6] = {
+							["CLSID"] = "{AIM-9B}",
+							["num"] = 2,
+						},
+						[7] = {
+							["CLSID"] = "{6D21ECEA-F85B-4E8D-9D51-31DC9B8AA4EF}",
+							["num"] = 11,
+						},
+						[8] = {
+							["CLSID"] = "{AIM-9B}",
+							["num"] = 4,
+						},
+						[14] = {
+							["CLSID"] = "{HB_ALE_40_30_60}",
+							["num"] = 14,
+						},
+					},
+					fuel = 5510.5,
+					flare = 30,
+					chaff = 120,
+					gun = 100,
+				},
+			},
+		},
 		Reconnaissance = {
 			["Reco - NAM - Pod - AIM-7E*1 - ECM - AIM-9B*2 - FT*3"] = {
 				support = {
