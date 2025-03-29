@@ -39,17 +39,17 @@ require("Init/db_airbases")
 
 --retrocompatibilie location UTIL_DataRadio file
 --recherche en priorite le fichier UTIL_DataRadio dans le dossier ScriptsMod puis dans le dossier campagne
-local RadioFile = "../../../ScriptsMod."..versionPackageICM.."/UTIL_DataRadio.lua"
-local TestPath = io.open(RadioFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
-if TestPath ~= nil then																					--check si le fichier existe dans ScriptsMod
-	io.close(TestPath)
+local radioFile = "../../../ScriptsMod."..versionPackageICM.."/UTIL_DataRadio.lua"
+local testPath = io.open(radioFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
+if testPath ~= nil then																					--check si le fichier existe dans ScriptsMod
+	io.close(testPath)
 	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataRadio.lua")
 else	
-	local RadioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
-	local TestPath2 = io.open(RadioFile2, "r")
-	if TestPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
-		io.close(TestPath2)
-		dofile(RadioFile2)
+	local radioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
+	local testPath2 = io.open(radioFile2, "r")
+	if testPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
+		io.close(testPath2)
+		dofile(radioFile2)
 	end
 end
 
@@ -120,15 +120,26 @@ local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open
 trigFile:write(airbases_Str)
 trigFile:close()
 
-local scen_str = "oob_scen = {}"
-local scenFile = io.open("Active/oob_scen.lua", "w") or error("Failed to open debug file")
-scenFile:write(scen_str)																			--write initial file
-scenFile:close()
+-- local scen_str = "oob_scen = {}"
+-- local scenFile = io.open("Active/oob_scen.lua", "w") or error("Failed to open debug file")
+-- scenFile:write(scen_str)																			--write initial file
+-- scenFile:close()
 
 local ZoneSAR_str = "camp_ZoneSAR = {}"																--make a string
 local ZoneSARFile = io.open("Active/camp_ZoneSAR.lua", "w") or error("Failed to open debug file")
 ZoneSARFile:write(ZoneSAR_str)																		--save new data
 ZoneSARFile:close()
+
+--supprime le fichier 
+-- Vérifie si le fichier existe en tentant de l'ouvrir
+local file = io.open("Active/PayloadRestricted.lua", "r")
+
+if file then
+    file:close()  -- Ferme le fichier (important avant suppression)
+    -- Supprime le fichier
+    os.remove("Active/PayloadRestricted.lua")
+end
+
 
 
 --create new oob_ground (requires extraction of data of init mission)

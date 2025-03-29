@@ -71,23 +71,23 @@ local minizip = require('minizip')
 --ajoutes les restrictions de loadout dans la table PayloadRestricted
 
 local restrictedPathActive = "Active/PayloadRestricted.lua"
-local TestPath = io.open(restrictedPathActive, "r")
+local testPath = io.open(restrictedPathActive, "r")
 
-if  TestPath ~= nil then
-	io.close(TestPath)
+if testPath ~= nil then
+	io.close(testPath)
 
 	dofile("Active/PayloadRestricted.lua")
 end
 
 
-if not PayloadRestricted then
+if not PayloadRestricted or next(PayloadRestricted) == nil then
 
 	PayloadRestricted = {}
 
 	local restrictedPath = "Init/restricted_loadout.miz"
-	local testPath = io.open(restrictedPath, "r")
+	testPath = io.open(restrictedPath, "r")
 
-	if  testPath ~= nil then
+	if testPath ~= nil then
 		io.close(testPath)
 
 		local zipFileResticted = minizip.unzOpen("Init/restricted_loadout.miz", 'rb')
