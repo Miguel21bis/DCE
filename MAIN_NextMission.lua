@@ -68,58 +68,6 @@ if mission_ini.startup_time_player then mission_ini.startup_time_player = missio
 ----- unpack template mission file ----
 local minizip = require('minizip')
 
---ajoutes les restrictions de loadout dans la table PayloadRestricted
-
-local restrictedPathActive = "Active/PayloadRestricted.lua"
-local testPath = io.open(restrictedPathActive, "r")
-
-if testPath ~= nil then
-	io.close(testPath)
-
-	dofile("Active/PayloadRestricted.lua")
-end
-
-
-if not PayloadRestricted or next(PayloadRestricted) == nil then
-
-	PayloadRestricted = {}
-
-	local restrictedPath = "Init/restricted_loadout.miz"
-	testPath = io.open(restrictedPath, "r")
-
-	if testPath ~= nil then
-		io.close(testPath)
-
-		local zipFileResticted = minizip.unzOpen("Init/restricted_loadout.miz", 'rb')
-
-		zipFileResticted:unzLocateFile('mission')
-		local misResticted = zipFileResticted:unzReadAllCurrentFile()
-		local misRestictedFunc = loadstring(misResticted)()
-
-
-		for _side, side in pairs(mission.coalition) do
-			for countryN, country in pairs(side.country) do
-				for category, groups in pairs(country) do
-					if type(groups) == "table" and groups["group"]  then	--and groups[1].units
-						for Ngroup, group in pairs(groups["group"]) do
-							for Nunit, unit in pairs(group.units) do
-
-								if unit.payload and unit.payload.restricted then
-									PayloadRestricted[unit.type] = unit.payload.restricted
-								end
-
-							end
-						end
-					end
-				end
-			end
-		end
-
-		mission = nil
-
-	end
-end
-
 local zipFile = minizip.unzOpen("Init/base_mission.miz", 'rb')
 
 local old_miz = minizip.unzOpen("Init/base_mission.miz", 'rb')
@@ -410,6 +358,64 @@ function AddFileTriggerTempo(filename, time, predicat0, ActionPredicate0)
 	mission.trigrules[trig_n]['actions'] = Table_trigrulesAction
 
 	-- table.insert(mission.trigrules[trig_n]['actions'], trigrulesAction)
+end
+
+
+
+
+--ajoutes les restrictions de loadout dans la table PayloadRestricted
+local function makePayloadRestricted()
+	local restrictedPathActive = "Active/PayloadRestricted.lua"
+	local testPath = io.open(restrictedPathActive, "r")
+
+	if testPath ~= nil then
+		io.close(testPath)
+		dofile(restrictedPathActive)
+	end
+
+	if not PayloadRestricted or next(PayloadRestricted) == nil then
+		PayloadRestricted = {}
+
+		local restrictedPath = "Init/restricted_loadout.miz"
+		testPath = io.open(restrictedPath, "r")
+
+		if testPath ~= nil then
+			io.close(testPath)
+
+			local zipFileResticted = minizip.unzOpen(restrictedPath, 'rb')
+			zipFileResticted:unzLocateFile('mission')
+
+			local misRestricted = zipFileResticted:unzReadAllCurrentFile()
+
+			-- Création d'un environnement vide pour éviter d'affecter `mission`
+			local env = {}
+			local func = loadstring(misRestricted)
+			if func then
+				setfenv(func, env) -- Exécute dans un environnement isolé
+				func()
+			end
+
+			-- La mission extraite est maintenant stockée dans env.mission
+			if env.mission then
+				for _side, side in pairs(env.mission.coalition) do
+					for countryN, country in pairs(side.country) do
+						for category, groups in pairs(country) do
+							if type(groups) == "table" and groups["group"] then
+								for Ngroup, group in pairs(groups["group"]) do
+									for Nunit, unit in pairs(group.units) do
+										if unit.payload and unit.payload.restricted then
+											PayloadRestricted[unit.type] = unit.payload.restricted
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	return PayloadRestricted
 end
 
 
@@ -715,6 +721,11 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
+
+
+PayloadRestricted = makePayloadRestricted()
+
+
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
 
 if ArgTools == "KillTarget" then

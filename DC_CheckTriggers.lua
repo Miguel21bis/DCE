@@ -1806,49 +1806,61 @@ Action = {}
 	function Action.RestrictedLoadout(file)
 		-- restricted_loadout.miz
 
-		local missionFromBaseMission = mission
-
+		-- local missionFromBaseMission = mission  -- Sauvegarde la mission principale
+	
 		local PayloadRestricted = {}
-
-		local restrictedPath = "Loadouts/"..file
-		local TestPath = io.open(restrictedPath, "r")
-
-		if  TestPath ~= nil then
-			io.close(TestPath)
+	
+		local restrictedPath = "Loadouts/" .. file
+		local testPath = io.open(restrictedPath, "r")
+	
+		if testPath ~= nil then
+			io.close(testPath)
 
 			local zipFileResticted = minizip.unzOpen(restrictedPath, 'rb')
-
+	
 			zipFileResticted:unzLocateFile('mission')
-			local misResticted = zipFileResticted:unzReadAllCurrentFile()
-			local misRestictedFunc = loadstring(misResticted)()
-
-			for _side, side in pairs(mission.coalition) do
-				for countryN, country in pairs(side.country) do
-					for category, groups in pairs(country) do
-						if type(groups) == "table" and groups["group"]  then
-							for Ngroup, group in pairs(groups["group"]) do
-								for Nunit, unit in pairs(group.units) do
-
-									if unit.payload and unit.payload.restricted then
-										PayloadRestricted[unit.type] = unit.payload.restricted
+			local misRestricted = zipFileResticted:unzReadAllCurrentFile()
+	
+			-- Création d'un environnement vide pour éviter d'écraser `mission`
+			local env = {}
+			local func = loadstring(misRestricted)
+			if func then
+				setfenv(func, env) -- Exécute dans un environnement isolé
+				func()
+			end
+	
+			-- La mission extraite est maintenant stockée dans env.mission
+			if env.mission then
+				for _side, side in pairs(env.mission.coalition) do
+					for countryN, country in pairs(side.country) do
+						for category, groups in pairs(country) do
+							if type(groups) == "table" and groups["group"] then
+								for Ngroup, group in pairs(groups["group"]) do
+									for Nunit, unit in pairs(group.units) do
+										if unit.payload and unit.payload.restricted then
+											PayloadRestricted[unit.type] = unit.payload.restricted
+										end
 									end
-
 								end
 							end
 						end
 					end
 				end
 			end
-
-			mission = missionFromBaseMission
-
+	
+			-- La mission principale reste inchangée, inutile de la restaurer
+			-- mission = missionFromBaseMission  <-- Plus besoin !
+	
+			-- Sérialisation des restrictions et sauvegarde dans un fichier
 			local data_str = "PayloadRestricted = " .. TableSerialization(PayloadRestricted, 0)
 			local dataFile = io.open("Active/PayloadRestricted.lua", "w") or error("Failed to open debug file")
 			dataFile:write(data_str)
 			dataFile:close()
 
 		end
+
 	end
+	
 
 	--Miguel21 modification M40
 	--TemplateActive
