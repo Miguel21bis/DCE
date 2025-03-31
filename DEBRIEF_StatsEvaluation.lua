@@ -1059,12 +1059,12 @@ for hit_unit,hitter in pairs(hit_table) do													--iterate through all rem
 	end
 end
 
-local rayonDamaged = 1000
+local rayonDamaged = 50
 --evaluate destroyed scenery objects
 for scen_name,scen in pairs(scen_log) do													--iterate through destroyed scenery objects
 	-- if scen.x and scen.z and (scen.lifeActual1s /scen.hightLife < 0.75) then																--scenery object has x and z coordinates
 	local passePourcent = false
-	if scen.lifePourcent and scen.lifePourcent <= 99 then
+	if scen.lifePourcent and scen.lifePourcent <= 75 then
 		passePourcent = true
 	end
 	if scen.x and scen.z and passePourcent then
