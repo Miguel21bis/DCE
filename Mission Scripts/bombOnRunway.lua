@@ -53,6 +53,7 @@ function cleanWorksiteVehicles()
 		
 		local element = StaticObject.getByName(worker)
 		element:destroy()
+		env.info("DCE_cleanWorksiteVehicles despawn ")
 	end
 
 	WorksiteVehicles = {}

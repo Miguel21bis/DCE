@@ -1311,6 +1311,7 @@ function CustomLaserDesignation(FlightName, target, class, laserCode)
 			local function designationCycle()							--laser designation cycle function
 				if laser and laser ~= nil then											--if there is already an existing laser spot
 					laser:destroy()										--destroy it
+					env.info("DCE_CustomLaserDesignation laser/destroy ")
 				end
 
 				local group = Group.getByName(target)					--get target group
@@ -1340,6 +1341,7 @@ function CustomLaserDesignation(FlightName, target, class, laserCode)
 			local function designationCycle()							--laser designation cycle function
 				if laser and laser ~= nil then											--if there is already an existing laser spot
 					laser:destroy()										--destroy it
+					env.info("DCE_CustomLaserDesignation designationCycle static/laser/destroy ")
 				end
 
 				repeat
@@ -1370,6 +1372,7 @@ function CustomLaserDesignation(FlightName, target, class, laserCode)
 			local function designationCycle()							--laser designation cycle function
 				if laser and laser ~= nil then											--if there is already an existing laser spot
 					laser:destroy()										--destroy it
+					env.info("DCE_CustomLaserDesignation designationCycle scenerylaser/destroy ")
 				end
 
 				repeat
@@ -1662,6 +1665,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 
 						if laser and laser ~= nil  then
 							laser:destroy()
+							env.info("DCE_CustomLaserDesignation CustomDesignationAFAC ")
 							designUnitId = 0
 						end
 
@@ -1825,7 +1829,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 					laser:destroy()
 					designUnitId = 0
 
-					env.info("DCE_AFAC () :ZZ2  laser:destroy()	 ")
+					env.info("DCE_AFAC () :ZZ2  laser:destroy	 ")
 
 				end
 			end
@@ -1841,7 +1845,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 			if laser and laser ~= nil  then
 				laser:destroy()
 				designUnitId = 0
-				env.info("DCE_AFAC () :ZZ2  laser:destroy()	 ")
+				env.info("DCE_AFAC () :ZZ2  laser:destroy	 ")
 			end
 
 			if AFAC_available[afacFlightName]  then

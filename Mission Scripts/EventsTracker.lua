@@ -1291,6 +1291,7 @@ local function CheckRtbAirbase()
 
 											if distance <= 20000 then
 												unitAero:destroy()
+												env.info("DCE_CheckRtbAirbase despawn ")
 											end
 										end
 									end
@@ -1325,7 +1326,8 @@ local function despawnIA()
 		if despawn[n]:isExist() then
 			despawn[n]:destroy()
 			-- trigger.action.outText("despawn "..n, 30)
-			env.info("DCE_despawn "..n)
+			-- env.info("DCE_despawn "..n)
+			env.info("DCE_despawnIA despawn "..n)
 		end
 			reset = true
 	end

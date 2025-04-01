@@ -452,6 +452,7 @@ end
 
 function FctRemovePlane(_unit)
 	_unit:destroy()
+	env.info("DCE_FctRemovePlane despawn ")
 end
 
 function RemovePlane(playerGroup)
@@ -3824,7 +3825,7 @@ local function DCE_BulleBy_DE()
 
 			group:destroy()
 			-- trigger.action.outText("Group " .. groupData.name .. " DISABLED", 2)
-			-- env.info("DCE_Bulle Group " .. groupData.name .. " has been disabled (destroyed)")
+			env.info("DCE_Bulle Group " .. groupData.name .. " has been disabled (destroyed)")
 
 		elseif staticObjects[groupData.name] then
 			--  **Gestion des objets statiques**
@@ -3834,7 +3835,7 @@ local function DCE_BulleBy_DE()
 			if static then
 				static:destroy()
 				-- trigger.action.outText("Static Object " .. groupData.name .. " DISABLED", 2)
-				-- env.info("DCE_Bulle Static Object has been disabled (destroyed): " .. groupData.name )
+				env.info("DCE_Bulle Static Object has been disabled (destroyed): " .. groupData.name )
 			end
 		else
 			env.warning("DCE_Bulle Group/Static Object " .. groupData.name .. " does not exist or is already destroyed")
