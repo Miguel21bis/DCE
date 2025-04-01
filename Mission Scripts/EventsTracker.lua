@@ -1283,15 +1283,16 @@ local function CheckRtbAirbase()
 										if alti <= 1000 and unitAeroFuel <= 0.75 then
 											local distance = math.floor(math.sqrt(math.pow(base.x - unitAeroPoint.x, 2) + math.pow(base.y - unitAeroPoint.z, 2)))
 
-											env.info( "DCE_EventsTracker.lua file PASSE 11 SPAWN BaseAirStart "..tostring(group.units[n].name)
+											
+											if distance <= 20000 then
+
+												env.info( "DCE_CheckRtbAirbase despawn/destroy BaseAirStart "..tostring(group.units[n].name)
 													.." ||Alti: "..tostring(alti)
 													.." ||Fuel: "..tostring(unitAeroFuel)
 													.." ||distance: "..tostring(distance)
 												)
-
-											if distance <= 20000 then
 												unitAero:destroy()
-												env.info("DCE_CheckRtbAirbase despawn ")
+
 											end
 										end
 									end
@@ -1327,7 +1328,7 @@ local function despawnIA()
 			despawn[n]:destroy()
 			-- trigger.action.outText("despawn "..n, 30)
 			-- env.info("DCE_despawn "..n)
-			env.info("DCE_despawnIA despawn "..n)
+			env.info("DCE_despawnIA despawn/destroy "..n)
 		end
 			reset = true
 	end

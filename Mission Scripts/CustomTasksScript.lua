@@ -2093,7 +2093,8 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 
 	--************///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	local ctr = unitAFAC:getController()
+	-- local ctr = unitAFAC:getController()
+	local ctr = flightGroup:getController() -- Récupère le contrôleur du GROUPE (sinon, l injectrion de task sur l unit leader fait planter DCS)
 	local descAfac = unitAFAC:getDesc()
 	_affiche(descAfac, "DCE_CTS descAfac ")
 	local newRoute = {}
@@ -2146,7 +2147,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	local current_time = timer.getTime()
 
-	newRoute = {}
+	-- newRoute = {}
 
 	env.info("DCE_AFAC () passe J ")
 
@@ -2165,73 +2166,73 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		['ETA_locked'] = true,
 		["name"] = "first_WPT_AFAC",
 		['ETA'] = current_time + 1,
-		['task'] = 
-		{
-		},
-
-		-- ['task'] = {
-		-- 	['id'] = 'ComboTask',
-		-- 	['params'] = {
-		-- 		['tasks'] = {
-		-- 			[1] =
-		-- 			{
-		-- 				["auto"] = true,
-		-- 				["enabled"] = true,
-		-- 				["id"] = "WrappedAction",
-		-- 				-- ["name"] = "INTERDIRE emergency jettison: TRUE (Departure/Spawn)",
-		-- 				["number"] = 1,
-		-- 				["params"] =
-		-- 				{
-		-- 					["action"] =
-		-- 					{
-		-- 						["id"] = "Option",
-		-- 						["params"] =
-		-- 						{
-		-- 							["name"] = 15,
-		-- 							["value"] = true,
-		-- 						},
-		-- 					},
-		-- 				},
-		-- 			},
-		-- 			[2] =
-		-- 			{
-		-- 				["auto"] = true,
-		-- 				["enabled"] = true,
-		-- 				["id"] = "WrappedAction",
-		-- 				-- ["name"] = "reaction to threats  avoidance of fire (Departure/Spawn)",
-		-- 				["number"] = 2,
-		-- 				["params"] =
-		-- 				{
-		-- 					["action"] =
-		-- 					{
-		-- 						["id"] = "Option",
-		-- 						["params"] =
-		-- 						{
-		-- 							["name"] = 1,
-		-- 							["value"] = 2,
-		-- 						},
-		-- 					},
-		-- 				},
-		-- 			},
-		-- 			-- [3] = 
-		-- 			-- {
-		-- 			-- 	["auto"] = true,
-		-- 			-- 	["enabled"] = false,
-		-- 			-- 	["id"] = "FAC",
-		-- 			-- 	["number"] = 3,
-		-- 			-- 	["params"] = 
-		-- 			-- 	{
-		-- 			-- 		["callname"] = 1,
-		-- 			-- 		["datalink"] = true,
-		-- 			-- 		-- ["designation"] = "Auto",
-		-- 			-- 		["frequency"] = 267000000,
-		-- 			-- 		["modulation"] = 0,
-		-- 			-- 		["number"] = 4,
-		-- 			-- 	},
-		-- 			-- },
-		-- 		},
-		-- 	},
+		-- ['task'] = 
+		-- {
 		-- },
+
+		['task'] = {
+			['id'] = 'ComboTask',
+			['params'] = {
+				['tasks'] = {
+					[1] =
+					{
+						["auto"] = true,
+						["enabled"] = true,
+						["id"] = "WrappedAction",
+						["name"] = "INTERDIRE emergency jettison: TRUE (Departure/Spawn)",
+						["number"] = 1,
+						["params"] =
+						{
+							["action"] =
+							{
+								["id"] = "Option",
+								["params"] =
+								{
+									["name"] = 15,
+									["value"] = true,
+								},
+							},
+						},
+					},
+					[2] =
+					{
+						["auto"] = true,
+						["enabled"] = true,
+						["id"] = "WrappedAction",
+						["name"] = "reaction to threats  avoidance of fire (Departure/Spawn)",
+						["number"] = 2,
+						["params"] =
+						{
+							["action"] =
+							{
+								["id"] = "Option",
+								["params"] =
+								{
+									["name"] = 1,
+									["value"] = 2,
+								},
+							},
+						},
+					},
+					-- [3] = 
+					-- {
+					-- 	["auto"] = true,
+					-- 	["enabled"] = false,
+					-- 	["id"] = "FAC",
+					-- 	["number"] = 3,
+					-- 	["params"] = 
+					-- 	{
+					-- 		["callname"] = 1,
+					-- 		["datalink"] = true,
+					-- 		-- ["designation"] = "Auto",
+					-- 		["frequency"] = 267000000,
+					-- 		["modulation"] = 0,
+					-- 		["number"] = 4,
+					-- 	},
+					-- },
+				},
+			},
+		},
 		
 	}
 
@@ -2303,7 +2304,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 							["stopCondition"] =
 							{
 								["userFlag"] = "targetDestroyed_Flag_"..target.UnitId,
-								-- ["userFlagValue"] = true,
+								["userFlagValue"] = true,
 							}, -- end of ["stopCondition"]
 						}, -- end of ["params"]
 					},
@@ -2319,7 +2320,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 
 	
-		-- for k=1, #newRoute[1].task.params.tasks do
+	-- for k=1, #newRoute[1].task.params.tasks do
 	-- 	newRoute[1].task.params.tasks[k].number = i
 	-- end
 	-- for k=1, #newRoute[2].task.params.tasks do
@@ -2388,11 +2389,11 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	end
 
 	ctr:resetTask() -- Efface les tâches existantes
-	env.info("DCE_AFAC  Tâches réinitialisées, prêtes pour la nouvelle mission.")
+	env.info("DCE_AFAC  Y Tâches réinitialisées, prêtes pour la nouvelle mission.")
 
 	Controller.setTask(ctr, newMission)										--activate task with mission for retreat AWACS
 
-
+	env.info("DCE_AFAC  Z")
 
 
 

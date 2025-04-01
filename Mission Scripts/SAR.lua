@@ -116,7 +116,7 @@ function DespawnSoldierAliasPilot(arg)
 				if soldier and soldier:isExist()  then
 					-- if not embarkation or embarkation == nil then
 						soldier:destroy()
-						env.info("DCE_DespawnSoldierAliasPilot despawn ")
+						env.info("DCE_DespawnSoldierAliasPilot despawn/destroy ")
 					-- end
 					-- trigger.action.outText("DespawnSoldierAliasPilot "..tostring(EjectedPilot.name), 30)
 
@@ -1901,7 +1901,7 @@ local function despawn2(arg)
 	-- _affiche(unitToDespawn, "DCE_despawn2 B despawn unitToDespawn")
 	if unitToDespawn and unitToDespawn:isExist() then
 		unitToDespawn:destroy()
-		env.info("DCE_despawn2 despawn ")
+		env.info("DCE_despawn2 despawn/destroy ")
 	end
 end
 

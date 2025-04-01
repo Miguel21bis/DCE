@@ -452,7 +452,7 @@ end
 
 function FctRemovePlane(_unit)
 	_unit:destroy()
-	env.info("DCE_FctRemovePlane despawn ")
+	env.info("DCE_FctRemovePlane despawn/destroy ")
 end
 
 function RemovePlane(playerGroup)
@@ -1150,6 +1150,7 @@ function AirRetreat()
 
 				if _unit and current_time >  RetreatTimeGp[gpGid].rTime then							--if _unit exists
 					local ctr = _unit:getGroup():getController()										--get _unit controller
+					local ctrGroup = gp:getController() -- Récupère le contrôleur du GROUPE (sinon, l injectrion de task sur l unit leader fait planter DCS)
 					local targets = ctr:getDetectedTargets()											--get detected targets of this EWR
 					for t = 1, #targets do																--iterate through detected targets
 						if targets[t].object and current_time >  RetreatTimeGp[gpGid].rTime then
@@ -1374,25 +1375,25 @@ function AirRetreat()
 																local idTasks = #retreatRoute[2].task.params.tasks
 																local orbitRetreat = {
 
-																			['enabled'] = true,
-																			['auto'] = false,
-																			['id'] = 'ControlledTask',
-																			['number'] = idTasks+2,
+																	['enabled'] = true,
+																	['auto'] = false,
+																	['id'] = 'ControlledTask',
+																	['number'] = idTasks+2,
+																	['params'] = {
+																		['task'] = {
+																			['id'] = 'Orbit',
 																			['params'] = {
-																				['task'] = {
-																					['id'] = 'Orbit',
-																					['params'] = {
-																						['altitude'] = 7315.2,
-																						['pattern'] = 'Circle',
-																						['speed'] = 138.889,
-																					},
-																				},
-																				['stopCondition'] = {
-																					['time'] = RetreatTimeGp[gpGid].rTime,
-																				},
+																				['altitude'] = 7315.2,
+																				['pattern'] = 'Circle',
+																				['speed'] = 138.889,
 																			},
+																		},
+																		['stopCondition'] = {
+																			['time'] = RetreatTimeGp[gpGid].rTime,
+																		},
+																	},
 
-																		}
+																}
 
 																retreatRoute[2].task.params.tasks[idTasks +1] =  orbitRetreat
 
@@ -1419,7 +1420,7 @@ function AirRetreat()
 																	retreatRoute[1].task.params.tasks[j].number = i
 																end
 
-																local Mission = {														--define mission for retreat AWACS
+																local mission = {														--define mission for retreat AWACS
 																		id = 'Mission',
 																		params = {
 																			route = {
@@ -1429,12 +1430,12 @@ function AirRetreat()
 																	}
 
 
-																-- local logStr = "Mission = " .. TableSerialization(Mission, 0)
+																-- local logStr = "mission = " .. TableSerialization(mission, 0)
 																-- local logFile = io.open(PathDCE.."_"..nameAwacs.."_".. "Mission_AWACSretreatRoute.lua", "w")
 																-- logFile:write(logStr)
 																-- logFile:close()	
 
-																Controller.setTask(ctr, Mission)										--activate task with mission for retreat AWACS
+																Controller.setTask(ctrGroup, mission)										--activate task with mission for retreat AWACS
 															end
 														end
 													end
@@ -1455,7 +1456,7 @@ end
 
 local function bingo(gpGid, groupMission)
 
-	for _, unit in pairs(groupMission:getUnits()) do
+	for n, unit in pairs(groupMission:getUnits()) do
 
 		local humainUnit
 
@@ -1481,13 +1482,20 @@ local function bingo(gpGid, groupMission)
 
 
 				local report = " not humainUnit "
-				local cntrl = unit:getController()
+				-- local cntrl = unit:getController()
+				local cntrl
+
+				--for the leader, the task has to be set on the group level
+				if n == 1 then
+					cntrl = groupMission:getController()
+				else
+					cntrl = unit:getController()
+				end
 
 				report = report.." RTB_ON_BINGO & PROHIBIT_AB "
 
 				local unitName =  unit:getName()
-
-				-- env.info( "DCE_Bingo CC      report "..tostring(groupMission.id_).." "..tostring(unitName).." "..callSign.." report "..tostring(report) )
+				env.info( "DCE_Bingo CC      report "..tostring(groupMission.id_).." "..tostring(unitName).." "..callSign.." report "..tostring(report) )
 
 				local description = unit:getDesc()
 				-- _affiche(description, "description function bingo()")
@@ -1844,7 +1852,14 @@ function RtbPack(playerGroup)
 								local function Execute()
 									local wingman = _group:getUnits()								--get list of units from attacking flights
 									for n = 1, #wingman do											--iterate through wingmen in flight
-										local cntrl = wingman[n]:getController()					--get controller of individual aircraft in flight
+										local cntrl
+										
+										if n == 1 then
+											cntrl = _group:getController()
+										else
+											cntrl = wingman[n]:getController()
+										end
+										
 										cntrl:resetTask()											--reset task (wingman will rejoin with leader)
 									end
 								end
@@ -3825,7 +3840,7 @@ local function DCE_BulleBy_DE()
 
 			group:destroy()
 			-- trigger.action.outText("Group " .. groupData.name .. " DISABLED", 2)
-			env.info("DCE_Bulle Group " .. groupData.name .. " has been disabled (destroyed)")
+			-- env.info("DCE_Bulle Group " .. groupData.name .. " has been disabled (destroyed)")
 
 		elseif staticObjects[groupData.name] then
 			--  **Gestion des objets statiques**
@@ -3835,7 +3850,7 @@ local function DCE_BulleBy_DE()
 			if static then
 				static:destroy()
 				-- trigger.action.outText("Static Object " .. groupData.name .. " DISABLED", 2)
-				env.info("DCE_Bulle Static Object has been disabled (destroyed): " .. groupData.name )
+				-- env.info("DCE_Bulle Static Object has been disabled (destroyed): " .. groupData.name )
 			end
 		else
 			env.warning("DCE_Bulle Group/Static Object " .. groupData.name .. " does not exist or is already destroyed")
