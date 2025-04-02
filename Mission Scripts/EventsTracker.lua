@@ -841,7 +841,7 @@ function eventHandlerDCE:onEvent(event)
 				if victimMissionID and AFACTargetStatus[victimMissionID] then
 					env.info( "DCE_EventT  unitLost_B  victimMissionID: "..tostring(victimMissionID) )
 
-					trigger.action.setUserFlag("targetDestroyed_Flag_"..victimMissionID, true)
+					trigger.action.setUserFlag("targetDestroyed_Flag_"..victimMissionID, 1)
 					AFACTargetStatus[victimMissionID] = nil
 				end
 			end

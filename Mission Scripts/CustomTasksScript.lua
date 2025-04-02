@@ -2056,8 +2056,11 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	env.info("DCE_AFAC () : J target actuel "..tostring(target.unitTypeName).." "..tostring(target.UnitId) )
 
+	local checkFlag = trigger.misc.getUserFlag("targetDestroyed_Flag_"..target.UnitId )
+	env.info("DCE_AFAC () : J2 getUserFlag "..tostring("targetDestroyed_Flag_"..target.UnitId).." "..tostring(checkFlag) )
+
 	-- set la partie FLAG du target pour suivre son etat et déclencher l'arret de l orbit et le passage au target suivant
-	trigger.action.setUserFlag("targetDestroyed_Flag_"..target.UnitId, false)
+	trigger.action.setUserFlag("targetDestroyed_Flag_"..target.UnitId, 0)
 	AFACTargetStatus[target.UnitId] = target
 
 	local checkFlag = trigger.misc.getUserFlag("targetDestroyed_Flag_"..target.UnitId )
@@ -2099,7 +2102,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	-- local ctr = unitAFAC:getController()
 	local ctr = flightGroup:getController() -- Récupère le contrôleur du GROUPE (sinon, l injectrion de task sur l unit leader fait planter DCS)
 	local descAfac = unitAFAC:getDesc()
-	_affiche(descAfac, "DCE_CTS descAfac ")
+	-- _affiche(descAfac, "DCE_CTS descAfac ")
 	local newRoute = {}
 
 	env.info("DCE_AFAC () passe A ")
@@ -2150,7 +2153,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	local current_time = timer.getTime()
 
-	-- newRoute = {}
+	newRoute = {}
 
 	env.info("DCE_AFAC () passe J ")
 
@@ -2276,7 +2279,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 								["id"] = "Script",
 								["params"] = 
 								{
-									["command"] = "env.info(\"DCE_AFAC_Mission secondtWPT \")",
+									["command"] = "env.info(\"DCE_AFAC_Mission secondtWPT A \")",
 								}, -- end of ["params"]
 							}, -- end of ["action"]
 						}, -- end of ["params"]
@@ -2310,6 +2313,44 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 								["userFlagValue"] = true,
 							}, -- end of ["stopCondition"]
 						}, -- end of ["params"]
+					},
+					[3] = 
+					{
+						["number"] = 31,
+						["auto"] = false,
+						["id"] = "WrappedAction",
+						["name"] = "partie script",
+						["enabled"] = true,
+						["params"] = 
+						{
+							["action"] = 
+							{
+								["id"] = "Script",
+								["params"] = 
+								{
+									["command"] = "env.info(\"DCE_AFAC_Mission secondtWPT B \")",
+								}, -- end of ["params"]
+							}, -- end of ["action"]
+						}, -- end of ["params"]
+					}, -- end of [1]
+					[4] = 
+					{
+						["auto"] = false,
+						["enabled"] = true,
+						["id"] = "WrappedAction",
+						["number"] = 4,
+						["params"] = 
+						{
+							["action"] = 
+							{
+								["id"] = "Script",
+								["params"] = 
+								{
+									--afacFlightName, refX, refY
+									["command"] = "CustomDesignationAFAC('" .. afacFlightName .. "', '" .. refX .. "', '" .. refY .. "',  ' nil ')",
+								},
+							},
+						},
 					},
 				},
 			},
