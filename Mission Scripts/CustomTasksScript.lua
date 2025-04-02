@@ -2060,6 +2060,9 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	trigger.action.setUserFlag("targetDestroyed_Flag_"..target.UnitId, false)
 	AFACTargetStatus[target.UnitId] = target
 
+	local checkFlag = trigger.misc.getUserFlag("targetDestroyed_Flag_"..target.UnitId )
+	env.info("DCE_AFAC () : K getUserFlag "..tostring("targetDestroyed_Flag_"..target.UnitId).." "..tostring(checkFlag) )
+
 	local gpGid
 	if AFAC_available[afacFlightName] and AFAC_available[afacFlightName]["gpGid"] then
 		gpGid = AFAC_available[afacFlightName]["gpGid"]

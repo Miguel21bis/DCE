@@ -4,7 +4,7 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.185"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.186"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
@@ -6287,7 +6287,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM - AG - AIM-9Bx2 - FTx2 - Mk-82LDx7"] = {
+			["NAM - AG - AIM-9Jx2 - FTx2 - Mk-82LDx7"] = {
 				minscore = 0.3,
 				support = {
 					Escort = true,
@@ -6312,11 +6312,11 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 				[1] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 7,
 				},
 				[2] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 1,
 				},
 				[3] = {
@@ -6374,7 +6374,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM - AG - AIM-9Bx2 - FTx2 - Mk-82HDx7"] = {
+			["NAM - AG - AIM-9Jx2 - FTx2 - Mk-82HDx7"] = {
 				minscore = 0.3,
 				support = {
 					Escort = true,
@@ -6399,11 +6399,11 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 				[1] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 7,
 				},
 				[2] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 1,
 				},
 				[3] = {
@@ -6461,7 +6461,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM - AG - AIM-9Bx2 - FTx2 - Mk-84LD"] = {
+			["NAM - AG - AIM-9Jx2 - FTx2 - Mk-84LD"] = {
 				minscore = 0.3,
 				support = {
 					Escort = true,
@@ -6486,11 +6486,11 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 				[1] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 7,
 				},
 				[2] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 1,
 				},
 				[3] = {
@@ -6522,7 +6522,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM - AG - AIM-9Bx2 - FT - LAU-2x4"] = {
+			["NAM - AG - AIM-9Jx2 - FT - LAU-2x4"] = {
 				minscore = 0.3,
 				support = {
 					Escort = true,
@@ -6547,11 +6547,11 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 				[1] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 7,
 				},
 				[2] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 1,
 				},
 				[3] = {
@@ -7076,19 +7076,19 @@ db_all_loadouts = {
 					["num"] = 1,
 					},
 					[3] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 5,
 					},
 					[4] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 2,
 					},
 					[5] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 4,
 					},
 					[6] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 3,
 					},
 				},				
@@ -7120,19 +7120,19 @@ db_all_loadouts = {
 					["num"] = 1,
 					},
 					[3] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 5,
 					},
 					[4] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 2,
 					},
 					[5] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 4,
 					},
 					[6] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 3,
 					},
 				},				
@@ -7168,19 +7168,19 @@ db_all_loadouts = {
 					["num"] = 1,
 					},
 					[3] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 5,
 					},
 					[4] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 2,
 					},
 					[5] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 4,
 					},
 					[6] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 3,
 					},
 				},
@@ -7210,19 +7210,19 @@ db_all_loadouts = {
 					["num"] = 1,
 					},
 					[3] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 5,
 					},
 					[4] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 2,
 					},
 					[5] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 4,
 					},
 					[6] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 3,
 					},
 					},
@@ -7281,7 +7281,7 @@ db_all_loadouts = {
 	},
 	["F-4E-45MC"] = {
 		AFAC = {
-			["AFAC test - NAM - Pod - AIM-7E*1 - ECM - AIM-9B*2 - FT*3"] = {
+			["AFAC test - NAM - Pod - AIM-7E-2-2*1 - ECM - AIM-9J*2 - FT*3"] = {
 				attributes =  { },
 				code_loadout =  { "All" },
 				day = true,
@@ -7314,11 +7314,11 @@ db_all_loadouts = {
 							["num"] = 13,
 						},
 						[5] = {
-							["CLSID"] = "{HB_F4E_AIM-7E}",
+							["CLSID"] = "{HB_F4E_AIM-7E-2}",
 							["num"] = 8,
 						},
 						[6] = {
-							["CLSID"] = "{AIM-9B}",
+							["CLSID"] = "{AIM-9J}",
 							["num"] = 2,
 						},
 						[7] = {
@@ -7326,7 +7326,7 @@ db_all_loadouts = {
 							["num"] = 11,
 						},
 						[8] = {
-							["CLSID"] = "{AIM-9B}",
+							["CLSID"] = "{AIM-9J}",
 							["num"] = 4,
 						},
 						[14] = {
@@ -7342,7 +7342,7 @@ db_all_loadouts = {
 			},
 		},
 		Reconnaissance = {
-			["Reco - NAM - Pod - AIM-7E*1 - ECM - AIM-9B*2 - FT*3"] = {
+			["Reco - NAM - Pod - AIM-7E-2-2*1 - ECM - AIM-9J*2 - FT*3"] = {
 				support = {
 					Escort = false,
 					SEAD = false,
@@ -7378,11 +7378,11 @@ db_all_loadouts = {
 					["num"] = 13,
 				},
 				[5] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 8,
 				},
 				[6] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 2,
 				},
 				[7] = {
@@ -7390,7 +7390,7 @@ db_all_loadouts = {
 					["num"] = 11,
 				},
 				[8] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 4,
 				},
 				[14] = {
@@ -8352,7 +8352,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM AG - AIM-9Bx4 - AIM-7Ex4 - FT - Mk-82LDx16"] = {
+			["NAM AG - AIM-9Jx4 - AIM-7E-2x4 - FT - Mk-82LDx16"] = {
 				minscore = 0.3,
 				support = {
 					Escort = true,
@@ -8379,11 +8379,11 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 						[1] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 12,
 				},
 				[2] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 10,
 				},
 				[3] = {
@@ -8391,27 +8391,27 @@ db_all_loadouts = {
 					["num"] = 7,
 				},
 				[4] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 4,
 				},
 				[5] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 2,
 				},
 				[6] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 9,
 				},
 				[7] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 8,
 				},
 				[8] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 6,
 				},
 				[9] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 5,
 				},
 				[10] = {
@@ -8477,7 +8477,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM AG - AIM-9Bx4 - AIM-7Ex4 - FT - Mk-84LDx2"] = {
+			["NAM AG - AIM-9Jx4 - AIM-7E-2x4 - FT - Mk-84LDx2"] = {
 				minscore = 0.3,
 				support = {
 					Escort = true,
@@ -8504,11 +8504,11 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 				[1] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 12,
 				},
 				[2] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 10,
 				},
 				[3] = {
@@ -8516,27 +8516,27 @@ db_all_loadouts = {
 					["num"] = 7,
 				},
 				[4] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 4,
 				},
 				[5] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 2,
 				},
 				[6] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 9,
 				},
 				[7] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 8,
 				},
 				[8] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 6,
 				},
 				[9] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 5,
 				},
 				[10] = {
@@ -8576,7 +8576,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM AG - AIM-9Bx4 - AIM-7Ex4 - FT - Mk-83LDx4"] = {
+			["NAM AG - AIM-9Jx4 - AIM-7E-2x4 - FT - Mk-83LDx4"] = {
 				minscore = 0.3,
 				support = {
 					Escort = true,
@@ -8603,11 +8603,11 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 				[1] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 12,
 				},
 				[2] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 10,
 				},
 				[3] = {
@@ -8615,27 +8615,27 @@ db_all_loadouts = {
 					["num"] = 7,
 				},
 				[4] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 4,
 				},
 				[5] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 2,
 				},
 				[6] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 9,
 				},
 				[7] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 8,
 				},
 				[8] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 6,
 				},
 				[9] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 5,
 				},
 				[10] = {
@@ -8675,7 +8675,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},			
-			["NAM AG - AIM-9Bx4 - AIM-7Ex4 - FT - Mk-82HDx16"] = {
+			["NAM AG - AIM-9Jx4 - AIM-7E-2x4 - FT - Mk-82HDx16"] = {
 				minscore = 0.3,
 				support = {
 					Escort = true,
@@ -8703,11 +8703,11 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 				[1] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 12,
 				},
 				[2] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 10,
 				},
 				[3] = {
@@ -8715,27 +8715,27 @@ db_all_loadouts = {
 					["num"] = 7,
 				},
 				[4] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 4,
 				},
 				[5] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 2,
 				},
 				[6] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 9,
 				},
 				[7] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 8,
 				},
 				[8] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 6,
 				},
 				[9] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 5,
 				},
 				[10] = {
@@ -8801,7 +8801,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},			
-			-- ["NAM AG - GBU - AIM-9Bx4 - AIM-7Ex3 - FT - TP - GBU-12x6"] = {
+			-- ["NAM AG - GBU - AIM-9Jx4 - AIM-7E-2x3 - FT - TP - GBU-12x6"] = {
 				-- minscore = 0.3,
 				-- support = {
 					-- Escort = true,
@@ -8826,11 +8826,11 @@ db_all_loadouts = {
 				-- stores = {
 					-- pylons = {
 				-- [1] = {
-					-- ["CLSID"] = "{AIM-9B}",
+					-- ["CLSID"] = "{AIM-9J}",
 					-- ["num"] = 12,
 				-- },
 				-- [2] = {
-					-- ["CLSID"] = "{AIM-9B}",
+					-- ["CLSID"] = "{AIM-9J}",
 					-- ["num"] = 10,
 				-- },
 				-- [3] = {
@@ -8838,19 +8838,19 @@ db_all_loadouts = {
 					-- ["num"] = 7,
 				-- },
 				-- [4] = {
-					-- ["CLSID"] = "{AIM-9B}",
+					-- ["CLSID"] = "{AIM-9J}",
 					-- ["num"] = 4,
 				-- },
 				-- [5] = {
-					-- ["CLSID"] = "{AIM-9B}",
+					-- ["CLSID"] = "{AIM-9J}",
 					-- ["num"] = 2,
 				-- },
 				-- [6] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E}",
+					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					-- ["num"] = 9,
 				-- },
 				-- [7] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E}",
+					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					-- ["num"] = 8,
 				-- },
 				-- [8] = {
@@ -8858,7 +8858,7 @@ db_all_loadouts = {
 					-- ["num"] = 6,
 				-- },
 				-- [9] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E}",
+					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					-- ["num"] = 5,
 				-- },
 				-- [10] = {
@@ -8912,7 +8912,7 @@ db_all_loadouts = {
 					-- gun = 100,
 				-- },
 			-- },
-			-- ["NAM AG - GBU - AIM-9Bx4 - AIM-7Ex3 - FT - TP - GBU-10x2"] = {
+			-- ["NAM AG - GBU - AIM-9Jx4 - AIM-7E-2x3 - FT - TP - GBU-10x2"] = {
 				-- minscore = 0.3,
 				-- support = {
 					-- Escort = true,
@@ -8937,11 +8937,11 @@ db_all_loadouts = {
 				-- stores = {
 					-- pylons = {
 				-- [1] = {
-					-- ["CLSID"] = "{AIM-9B}",
+					-- ["CLSID"] = "{AIM-9J}",
 					-- ["num"] = 12,
 				-- },
 				-- [2] = {
-					-- ["CLSID"] = "{AIM-9B}",
+					-- ["CLSID"] = "{AIM-9J}",
 					-- ["num"] = 10,
 				-- },
 				-- [3] = {
@@ -8949,19 +8949,19 @@ db_all_loadouts = {
 					-- ["num"] = 7,
 				-- },
 				-- [4] = {
-					-- ["CLSID"] = "{AIM-9B}",
+					-- ["CLSID"] = "{AIM-9J}",
 					-- ["num"] = 4,
 				-- },
 				-- [5] = {
-					-- ["CLSID"] = "{AIM-9B}",
+					-- ["CLSID"] = "{AIM-9J}",
 					-- ["num"] = 2,
 				-- },
 				-- [6] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E}",
+					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					-- ["num"] = 9,
 				-- },
 				-- [7] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E}",
+					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					-- ["num"] = 8,
 				-- },
 				-- [8] = {
@@ -8969,7 +8969,7 @@ db_all_loadouts = {
 					-- ["num"] = 6,
 				-- },
 				-- [9] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E}",
+					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					-- ["num"] = 5,
 				-- },
 				-- [10] = {
@@ -9001,7 +9001,7 @@ db_all_loadouts = {
 					-- gun = 100,
 				-- },
 			-- },
-			-- ["NAM AG - AIM-7Ex4 - FT - AGM-62x4"] = {
+			-- ["NAM AG - AIM-7E-2x4 - FT - AGM-62x4"] = {
 				-- minscore = 0.3,
 				-- support = {
 					-- Escort = true,
@@ -9048,19 +9048,19 @@ db_all_loadouts = {
 					-- ["num"] = 2,
 				-- },
 				-- [6] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E}",
+					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					-- ["num"] = 9,
 				-- },
 				-- [7] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E}",
+					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					-- ["num"] = 8,
 				-- },
 				-- [8] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E}",
+					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					-- ["num"] = 6,
 				-- },
 				-- [9] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E}",
+					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					-- ["num"] = 5,
 				-- },
 				-- [10] = {
@@ -9088,11 +9088,11 @@ db_all_loadouts = {
 			-- },
 		},
 		["Anti-ship Strike"] = {
-			["Anti-Ship Strike NAM - AIM_9B*4 - AIM-7E*3 - ECM - AGM-65A*2 - FT*3"] = {
+			["NAM AG - AIM-9Jx4 - AIM-7E-2x4 - FT - Mk-82LDx16"] = {
 				minscore = 0.3,
 				support = {
 					Escort = true,
-					SEAD = false,
+					SEAD = true,
 					["Escort Jammer"] = true,
 				},
 				country = {
@@ -9100,72 +9100,107 @@ db_all_loadouts = {
 				},
 				attributes =  { "ship" },
 				code_loadout =  { "NAM" },
-				weaponType = "ASM",
-				expend = "Auto",
+				weaponType = "Bombs",
+				expend = "All",
+				attackType = "Dive",
 				day = true,
-				night = true,
-				adverseWeather = true,
-				range = 900000,
+				range = 500000,
 				firepower = 1,
-				vCruise = 250,
-				vAttack = 300,
-				hCruise = 6096,
-				hAttack = 6096,
-				standoff = 10000,
-				sortie_rate = 10,
+				vCruise = 245,
+				vAttack = 277.5,
+				hCruise = 5486.4,
+				hAttack = 4572,
+				LDSD = true,
+				sortie_rate = 6,
 				stores = {
 					pylons = {
 						[1] = {
-					["CLSID"] = "{F4_SARGENT_TANK_370_GAL_R}",
-					["num"] = 13,
-				},
-				[2] = {
-					["CLSID"] = "{F4_SARGENT_TANK_370_GAL}",
-					["num"] = 1,
-				},
-				[3] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 12,
 				},
-				[4] = {
-					["CLSID"] = "{AIM-9B}",
+				[2] = {
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 10,
 				},
-				[5] = {
-					["CLSID"] = "{AIM-9B}",
-					["num"] = 4,
-				},
-				[6] = {
-					["CLSID"] = "{AIM-9B}",
-					["num"] = 2,
-				},
-				[7] = {
-					["CLSID"] = "{HB_F4E_AGM-65A_LAU117_SWA}",
-					["num"] = 3,
-				},
-				[8] = {
-					["CLSID"] = "{HB_F4E_AGM-65A_LAU117_SWA}",
-					["num"] = 11,
-				},
-				[9] = {
+				[3] = {
 					["CLSID"] = "{F4_SARGENT_TANK_600_GAL}",
 					["num"] = 7,
 				},
-				[10] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
-					["num"] = 8,
+				[4] = {
+					["CLSID"] = "{AIM-9J}",
+					["num"] = 4,
 				},
-				[11] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+				[5] = {
+					["CLSID"] = "{AIM-9J}",
+					["num"] = 2,
+				},
+				[6] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 9,
 				},
-				[12] = {
-					["CLSID"] = "{HB_ALQ-131_ON_ADAPTER_IN_AERO7}",
+				[7] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 8,
+				},
+				[8] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 6,
 				},
-				[13] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+				[9] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 5,
+				},
+				[10] = {
+					["CLSID"] = "{HB_F4E_MK-82_6x}",
+					["num"] = 13,
+					["settings"] = {
+						["NFP_VIS_DrawArgNo_57"] = 0,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+						["arm_delay_ctrl_M904E4"] = 2,
+						["arm_delay_ctrl_M905"] = 4,
+						["function_delay_ctrl_M904E4"] = 0,
+						["function_delay_ctrl_M905"] = 0,
+					},
+				},
+				[11] = {
+					["CLSID"] = "{HB_F4E_MK-82_6x}",
+					["num"] = 1,
+					["settings"] = {
+						["NFP_VIS_DrawArgNo_57"] = 0,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+						["arm_delay_ctrl_M904E4"] = 2,
+						["arm_delay_ctrl_M905"] = 4,
+						["function_delay_ctrl_M904E4"] = 0,
+						["function_delay_ctrl_M905"] = 0,
+					},
+				},
+				[12] = {
+					["CLSID"] = "{HB_F4E_MK-82_2x_SWA}",
+					["num"] = 11,
+					["settings"] = {
+						["NFP_VIS_DrawArgNo_57"] = 0,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+						["arm_delay_ctrl_M904E4"] = 2,
+						["arm_delay_ctrl_M905"] = 4,
+						["function_delay_ctrl_M904E4"] = 0,
+						["function_delay_ctrl_M905"] = 0,
+					},
+				},
+				[13] = {
+					["CLSID"] = "{HB_F4E_MK-82_2x_SWA}",
+					["num"] = 3,
+					["settings"] = {
+						["NFP_VIS_DrawArgNo_57"] = 0,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+						["arm_delay_ctrl_M904E4"] = 2,
+						["arm_delay_ctrl_M905"] = 4,
+						["function_delay_ctrl_M904E4"] = 0,
+						["function_delay_ctrl_M905"] = 0,
+					},
 				},
 				[14] = {
 					["CLSID"] = "{HB_ALE_40_30_60}",
@@ -9178,6 +9213,96 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
+			-- ["Anti-Ship Strike NAM - AIM_9B*4 - AIM-7E-2*3 - ECM - AGM-65A*2 - FT*3"] = {
+				-- minscore = 0.3,
+				-- support = {
+					-- Escort = true,
+					-- SEAD = false,
+					-- ["Escort Jammer"] = true,
+				-- },
+				-- country = {
+					-- [1] = "USA",
+				-- },
+				-- attributes =  { "ship" },
+				-- code_loadout =  { "NAM" },
+				-- weaponType = "ASM",
+				-- expend = "Auto",
+				-- day = true,
+				-- night = true,
+				-- adverseWeather = true,
+				-- range = 900000,
+				-- firepower = 1,
+				-- vCruise = 250,
+				-- vAttack = 300,
+				-- hCruise = 6096,
+				-- hAttack = 6096,
+				-- standoff = 10000,
+				-- sortie_rate = 10,
+				-- stores = {
+					-- pylons = {
+						-- [1] = {
+					-- ["CLSID"] = "{F4_SARGENT_TANK_370_GAL_R}",
+					-- ["num"] = 13,
+				-- },
+				-- [2] = {
+					-- ["CLSID"] = "{F4_SARGENT_TANK_370_GAL}",
+					-- ["num"] = 1,
+				-- },
+				-- [3] = {
+					-- ["CLSID"] = "{AIM-9J}",
+					-- ["num"] = 12,
+				-- },
+				-- [4] = {
+					-- ["CLSID"] = "{AIM-9J}",
+					-- ["num"] = 10,
+				-- },
+				-- [5] = {
+					-- ["CLSID"] = "{AIM-9J}",
+					-- ["num"] = 4,
+				-- },
+				-- [6] = {
+					-- ["CLSID"] = "{AIM-9J}",
+					-- ["num"] = 2,
+				-- },
+				-- [7] = {
+					-- ["CLSID"] = "{HB_F4E_AGM-65A_LAU117_SWA}",
+					-- ["num"] = 3,
+				-- },
+				-- [8] = {
+					-- ["CLSID"] = "{HB_F4E_AGM-65A_LAU117_SWA}",
+					-- ["num"] = 11,
+				-- },
+				-- [9] = {
+					-- ["CLSID"] = "{F4_SARGENT_TANK_600_GAL}",
+					-- ["num"] = 7,
+				-- },
+				-- [10] = {
+					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					-- ["num"] = 8,
+				-- },
+				-- [11] = {
+					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					-- ["num"] = 9,
+				-- },
+				-- [12] = {
+					-- ["CLSID"] = "{HB_ALQ-131_ON_ADAPTER_IN_AERO7}",
+					-- ["num"] = 6,
+				-- },
+				-- [13] = {
+					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					-- ["num"] = 5,
+				-- },
+				-- [14] = {
+					-- ["CLSID"] = "{HB_ALE_40_30_60}",
+					-- ["num"] = 14,
+				-- },
+					-- },
+					-- fuel = 5510.5,
+					-- flare = 30,
+					-- chaff = 120,
+					-- gun = 100,
+				-- },
+			-- },
 			-- ["Anti-Ship Strike Crisis - AG - LR - ECM - AGM-65Bx6 - AIM-7Mx3 - FTx3 - DP"] = {
 				-- minscore = 0.3,
 				-- support = {
@@ -9356,7 +9481,7 @@ db_all_loadouts = {
 					-- gun = 100,
 				-- },
 			-- },
-			-- ["Anti-Ship Strike Crisis - Iran - AG - LR - AGM-65Ax6 - AIM-7Ex3 - FTx3 - DP"] = {
+			-- ["Anti-Ship Strike Crisis - Iran - AG - LR - AGM-65Ax6 - AIM-7E-2x3 - FTx3 - DP"] = {
 				-- minscore = 0.3,
 				-- support = {
 					-- Escort = true,
@@ -9395,19 +9520,19 @@ db_all_loadouts = {
 							-- CLSID = "<CLEAN>",
 						-- },
 						-- [5] = {
-							-- CLSID = "{HB_F4E_AIM-7E}",
+							-- CLSID = "{HB_F4E_AIM-7E-2}",
 						-- },
 						-- [6] = {
-							-- CLSID = "{HB_F4E_AIM-7E}",
+							-- CLSID = "{HB_F4E_AIM-7E-2}",
 						-- },
 						-- [7] = {
 							-- CLSID = "{F4_SARGENT_TANK_600_GAL}",
 						-- },
 						-- [8] = {
-							-- CLSID = "{HB_F4E_AIM-7E}",
+							-- CLSID = "{HB_F4E_AIM-7E-2}",
 						-- },
 						-- [9] = {
-							-- CLSID = "{HB_F4E_AIM-7E}",
+							-- CLSID = "{HB_F4E_AIM-7E-2}",
 						-- },
 						-- [10] = {
 							-- CLSID = "<CLEAN>",
@@ -9687,7 +9812,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM AA - Escort - AIM-9Bx4 - AIM-7Ex4 - FT"] = {
+			["NAM AA - Escort - AIM-9Jx4 - AIM-7E-2x4 - FT"] = {
 				country = {
 					[1] = "USA",
 				},
@@ -9705,11 +9830,11 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 				[1] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 12,
 				},
 				[2] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 10,
 				},
 				[3] = {
@@ -9717,27 +9842,27 @@ db_all_loadouts = {
 					["num"] = 7,
 				},
 				[4] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 4,
 				},
 				[5] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 2,
 				},
 				[6] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 9,
 				},
 				[7] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 8,
 				},
 				[8] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 6,
 				},
 				[9] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 5,
 				},
 				[10] = {
@@ -10143,7 +10268,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM AA - CAP - AIM-9Bx4 - AIM-7Ex4 - FT"] = {
+			["NAM AA - CAP - AIM-9Jx4 - AIM-7E-2x4 - FT"] = {
 				country = {
 					[1] = "USA",
 				},
@@ -10165,11 +10290,11 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 				[1] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 12,
 				},
 				[2] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 10,
 				},
 				[3] = {
@@ -10177,27 +10302,27 @@ db_all_loadouts = {
 					["num"] = 7,
 				},
 				[4] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 4,
 				},
 				[5] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 2,
 				},
 				[6] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 9,
 				},
 				[7] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 8,
 				},
 				[8] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 6,
 				},
 				[9] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 5,
 				},
 				[10] = {
@@ -10545,7 +10670,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM AG - SEAD - AIM-9Bx4 - AIM-7Ex4 - FT - AGM-45x4"] = {
+			["NAM AG - SEAD - AIM-9Jx4 - AIM-7E-2x4 - FT - AGM-45x4"] = {
 				country = {
 					[1] = "USA",
 				},
@@ -10565,11 +10690,11 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 				[1] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 12,
 				},
 				[2] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 10,
 				},
 				[3] = {
@@ -10577,27 +10702,27 @@ db_all_loadouts = {
 					["num"] = 7,
 				},
 				[4] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 4,
 				},
 				[5] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 2,
 				},
 				[6] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 9,
 				},
 				[7] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 8,
 				},
 				[8] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 6,
 				},
 				[9] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 5,
 				},
 				[10] = {
@@ -10934,7 +11059,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM AG - Runway Attack - AIM-9Bx4 - AIM-7Ex4 - FT - Mk-82HDx16"] = {
+			["NAM AG - Runway Attack - AIM-9Jx4 - AIM-7E-2x4 - FT - Mk-82HDx16"] = {
 				minscore = 0.3,
 				support = {
 					Escort = true,
@@ -10961,11 +11086,11 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 				[1] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 12,
 				},
 				[2] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 10,
 				},
 				[3] = {
@@ -10973,27 +11098,27 @@ db_all_loadouts = {
 					["num"] = 7,
 				},
 				[4] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 4,
 				},
 				[5] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 2,
 				},
 				[6] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 9,
 				},
 				[7] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 8,
 				},
 				[8] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 6,
 				},
 				[9] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 5,
 				},
 				[10] = {
@@ -11313,7 +11438,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM AA - Fighter Sweep - AIM-9Bx4 - AIM-7Ex4 - FT"] = {
+			["NAM AA - Fighter Sweep - AIM-9Jx4 - AIM-7E-2x4 - FT"] = {
 				country = {
 					[1] = "USA",
 				},
@@ -11334,11 +11459,11 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 				[1] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 12,
 				},
 				[2] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 10,
 				},
 				[3] = {
@@ -11346,27 +11471,27 @@ db_all_loadouts = {
 					["num"] = 7,
 				},
 				[4] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 4,
 				},
 				[5] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 2,
 				},
 				[6] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 9,
 				},
 				[7] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 8,
 				},
 				[8] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 6,
 				},
 				[9] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 5,
 				},
 				[10] = {
@@ -11613,7 +11738,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM AA - Intercept - AIM-9Bx4 - AIM-7Ex4 - FT"] = {
+			["NAM AA - Intercept - AIM-9Jx4 - AIM-7E-2x4 - FT"] = {
 				country = {
 					[1] = "USA",
 				},
@@ -11629,11 +11754,11 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 				[1] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 12,
 				},
 				[2] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 10,
 				},
 				[3] = {
@@ -11641,27 +11766,27 @@ db_all_loadouts = {
 					["num"] = 7,
 				},
 				[4] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 4,
 				},
 				[5] = {
-					["CLSID"] = "{AIM-9B}",
+					["CLSID"] = "{AIM-9J}",
 					["num"] = 2,
 				},
 				[6] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 9,
 				},
 				[7] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 8,
 				},
 				[8] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 6,
 				},
 				[9] = {
-					["CLSID"] = "{HB_F4E_AIM-7E}",
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
 					["num"] = 5,
 				},
 				[10] = {
@@ -23464,7 +23589,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM - SEAD - AIM-9Bx2 - FT - AGM-45x2"] = {
+			["NAM - SEAD - AIM-9Jx2 - FT - AGM-45x2"] = {
 				attributes =  { },
 				country = {
 					[1] = "USA",
@@ -23486,11 +23611,11 @@ db_all_loadouts = {
 					["num"] = 3,
 				},
 				[2] = {
-					["CLSID"] = "{GAR-8}",
+					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 5,
 				},
 				[3] = {
-					["CLSID"] = "{GAR-8}",
+					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 1,
 				},
 				[4] = {
@@ -23880,7 +24005,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM - AG - AIM-9Bx2 - FTx2 - Mk-82LDx6"] = {
+			["NAM - AG - AIM-9Jx2 - FTx2 - Mk-82LDx6"] = {
 				minscore = 0.3,
 				support = {
 					SEAD = true,
@@ -23915,11 +24040,11 @@ db_all_loadouts = {
 					["num"] = 4,
 				},
 				[3] = {
-					["CLSID"] = "{GAR-8}",
+					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 5,
 				},
 				[4] = {
-					["CLSID"] = "{GAR-8}",
+					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 1,
 				},
 				[5] = {
@@ -23933,7 +24058,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM - AG - AIM-9Bx2 - FT - Mk-20x4"] = {
+			["NAM - AG - AIM-9Jx2 - FT - Mk-20x4"] = {
 				minscore = 0.3,
 				support = {
 					SEAD = true,
@@ -23968,11 +24093,11 @@ db_all_loadouts = {
 					["num"] = 4,
 				},
 				[3] = {
-					["CLSID"] = "{GAR-8}",
+					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 5,
 				},
 				[4] = {
-					["CLSID"] = "{GAR-8}",
+					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 1,
 				},
 				[5] = {
@@ -23986,7 +24111,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM - AG - AIM-9Bx2 - FTx2 - Mk-82HDx6"] = {
+			["NAM - AG - AIM-9Jx2 - FTx2 - Mk-82HDx6"] = {
 				minscore = 0.3,
 				support = {
 					SEAD = true,
@@ -24021,11 +24146,11 @@ db_all_loadouts = {
 					["num"] = 4,
 				},
 				[3] = {
-					["CLSID"] = "{GAR-8}",
+					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 5,
 				},
 				[4] = {
-					["CLSID"] = "{GAR-8}",
+					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 1,
 				},
 				[5] = {
@@ -24039,7 +24164,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM - AG - AIM-9Bx2 - FTx2 - Mk-77x2 Napalm"] = {
+			["NAM - AG - AIM-9Jx2 - FTx2 - Mk-77x2 Napalm"] = {
 				minscore = 0.3,
 				support = {
 					SEAD = true,
@@ -24074,11 +24199,11 @@ db_all_loadouts = {
 					["num"] = 4,
 				},
 				[3] = {
-					["CLSID"] = "{GAR-8}",
+					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 5,
 				},
 				[4] = {
-					["CLSID"] = "{GAR-8}",
+					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 1,
 				},
 				[5] = {
@@ -24092,7 +24217,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM - AG - AIM-9Bx2 - FTx2 - Mk-83LDx3"] = {
+			["NAM - AG - AIM-9Jx2 - FTx2 - Mk-83LDx3"] = {
 				minscore = 0.3,
 				support = {
 					SEAD = true,
@@ -24127,11 +24252,11 @@ db_all_loadouts = {
 					["num"] = 4,
 				},
 				[3] = {
-					["CLSID"] = "{GAR-8}",
+					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 5,
 				},
 				[4] = {
-					["CLSID"] = "{GAR-8}",
+					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 1,
 				},
 				[5] = {
@@ -24145,7 +24270,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM - AG - AIM-9Bx2 - FT - Mk-84LDx2"] = {
+			["NAM - AG - AIM-9Jx2 - FT - Mk-84LDx2"] = {
 				minscore = 0.3,
 				support = {
 					SEAD = true,
@@ -24189,11 +24314,11 @@ db_all_loadouts = {
 					},
 				},
 				[3] = {
-					["CLSID"] = "{GAR-8}",
+					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 5,
 				},
 				[4] = {
-					["CLSID"] = "{GAR-8}",
+					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 1,
 				},
 				[5] = {
@@ -24216,7 +24341,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM - AG - AIM-9Bx2 - FT - LAU-10x4"] = {
+			["NAM - AG - AIM-9Jx2 - FT - LAU-10x4"] = {
 				minscore = 0.3,
 				support = {
 					SEAD = true,
@@ -24251,11 +24376,11 @@ db_all_loadouts = {
 					["num"] = 4,
 				},
 				[3] = {
-					["CLSID"] = "{GAR-8}",
+					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 5,
 				},
 				[4] = {
-					["CLSID"] = "{GAR-8}",
+					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 1,
 				},
 				[5] = {
@@ -24269,7 +24394,7 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM - AG - AIM-9Bx2 - FT - LAU-2x4"] = {
+			["NAM - AG - AIM-9Jx2 - FT - LAU-2x4"] = {
 				minscore = 0.3,
 				support = {
 					SEAD = true,
@@ -24304,11 +24429,11 @@ db_all_loadouts = {
 					["num"] = 4,
 				},
 				[3] = {
-					["CLSID"] = "{GAR-8}",
+					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 5,
 				},
 				[4] = {
-					["CLSID"] = "{GAR-8}",
+					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 1,
 				},
 				[5] = {
