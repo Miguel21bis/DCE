@@ -363,7 +363,7 @@ function eventHandlerDCE:onEvent(event)
 
 		if Object_Category[targetObjCategory] then
 			local targetDesc = event.target:getDesc()
-			_affiche(targetDesc, "DCE_EventsTracker targetDesc")
+			-- _affiche(targetDesc, "DCE_EventsTracker targetDesc ")
 
 			local targetObjCategory2 = targetDesc.category
 			if camp.debug then  env.info("DCE_EventsTracker target targetObjCategory2: "..tostring(targetObjCategory2)) end

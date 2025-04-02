@@ -1466,7 +1466,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 		env.info("DCE_CustomDesignationAFAC() AAc : else "..tostring(afacFlightName))
 	end
 
-	_affiche(AFAC_available, "CTS_AFAC_available ")
+	-- _affiche(AFAC_available, "CTS_AFAC_available ")
 
 	local afacPos = unitAFAC:getPoint()
 	local afacAlt = afacPos.y
@@ -1474,7 +1474,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 	local terrainAlt = land.getHeight({x = afacPos.x, y = afacPos.z})
 
 	local distVisibility = distanceVisibilite(afacAlt, terrainAlt)
-	env.info("DCE_CustomDesignationAFAC() BB : afacFlightName "..tostring(afacFlightName).." afacAlt: "..tostring(afacAlt).." terrainAlt: "..tostring(terrainAlt).." distVisibility: "..tostring(distVisibility))
+	-- env.info("DCE_CustomDesignationAFAC() BB : afacFlightName "..tostring(afacFlightName).." afacAlt: "..tostring(afacAlt).." terrainAlt: "..tostring(terrainAlt).." distVisibility: "..tostring(distVisibility))
 
 	--recupere les dynamique ****
 	local groundGroups = coalition.getGroups(coalitionIdNumericENI[coalitionForce], Group.Category.GROUND)
@@ -1500,11 +1500,8 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 				local unitTypeName = grndUnit:getTypeName()
 
 				local distance = math.floor(math.sqrt(math.pow(unitPos.x - refX, 2) + math.pow(unitPos.z - refY, 2)))
-				-- env.info("DCE_AFAC () :DD_2a  "..distance)
-
+				
 				if distance < distVisibility then
-
-					-- env.info("DCE_AFAC () :EEa  "..tostring(unitTypeName))
 
 					local item = {
 						unitGround = grndUnit,
@@ -1534,14 +1531,8 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 	for _, static in pairs(statics) do
 		local stName = Object.getName(static)
 
-		-- env.info("DCE_AFAC () :BB1  "..stName)
-
 		local stLife = static:getLife()
-		-- env.info("DCE_AFAC () :BB2  "..stLife)
-
 		if stLife > 0 then
-
-			-- env.info("DCE_AFAC () :CC  "..stName)
 
 			local desc = static:getDesc()
 			-- _affiche(desc , "CTS_desc ")
@@ -1573,16 +1564,13 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 			local unitTypeName = static:getTypeName()
 
 			local distance = math.floor(math.sqrt(math.pow(unitPos.x - refX, 2) + math.pow(unitPos.z - refY, 2)))
-			-- env.info("DCE_AFAC () :DD_2b  "..distance)
-
+			
 			-- if category ~= "Fortifications" and distance < 50000 then
 			if distance < distVisibility and not string.find(string.lower(desc.typeName) , "sandbag") then
 
 				local lineOfSight = land.isVisible(afacPos, unitPos)
 
 				if lineOfSight then
-					env.info("DCE_AFAC () :EEb  "..tostring(unitTypeName).." desc.typeName: "..tostring(desc.typeName))
-
 					local item = {
 						unitGround = static,
 						unitTypeName = unitTypeName,
@@ -1598,7 +1586,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 
 					table.insert(unitGroundSelected_A, item)
 				else
-					env.info("DCE_AFAC () :EEc lineOfSight OFF  "..tostring(unitTypeName).." lineOfSight: "..tostring(lineOfSight))
+					-- env.info("DCE_AFAC () :EEc lineOfSight OFF  "..tostring(unitTypeName).." lineOfSight: "..tostring(lineOfSight))
 				end
 
 			end
@@ -1653,7 +1641,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 
 					if i >= #unitGroundSelected_B then
 
-						env.info("DCE_AFAC () :II plus aucune cible dans la table ")
+						-- env.info("DCE_AFAC () :II plus aucune cible dans la table ")
 
 						-- if AFAC_available[afacFlightName] and AFAC_available[afacFlightName]["gpGid"] then
 						-- 	trigger.action.outTextForGroup(AFAC_available[afacFlightName]["gpGid"],"AFAC : plus aucune cible dans la table", 15, false)
@@ -1665,7 +1653,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 
 						if laser and laser ~= nil  then
 							laser:destroy()
-							env.info("DCE_CustomLaserDesignation CustomDesignationAFAC ")
+							-- env.info("DCE_CustomLaserDesignation CustomDesignationAFAC ")
 							designUnitId = 0
 						end
 
@@ -2375,26 +2363,26 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	--recalcul les ETA 
 	i = 1
 	while newRoute[i] do  -- Vérifie bien newRoute, pas newRoute[i]
-		env.info("DCE_AFAC () passe O1 ")
+		-- env.info("DCE_AFAC () passe O1 ")
 
 		if i > 1 then
-			env.info("DCE_AFAC () passe O2 ")
+			-- env.info("DCE_AFAC () passe O2 ")
 
 			local deltaTime = newRoute[i]["ETA"] - newRoute[i-1]["ETA"]
-			env.info("DCE_AFAC () passe O3 deltaTime: "..tostring(deltaTime))
+			-- env.info("DCE_AFAC () passe O3 deltaTime: "..tostring(deltaTime))
 
 			local deltaDist = GetDistance(
 				{x = newRoute[i].x, y = newRoute[i].y },
 				{x = newRoute[i-1].x, y = newRoute[i-1].y }
 			)
-			env.info("DCE_AFAC () passe O4 deltaDist: "..tostring(deltaDist))
+			-- env.info("DCE_AFAC () passe O4 deltaDist: "..tostring(deltaDist))
 
 			local ETA_minimum
 			if deltaDist and descAfac.speedMax then
 				ETA_minimum = deltaDist / (descAfac.speedMax * 2/3)
-				env.info("DCE_AFAC () passe O5 ETA_minimum: "..tostring(ETA_minimum))
+				-- env.info("DCE_AFAC () passe O5 ETA_minimum: "..tostring(ETA_minimum))
 			else
-				env.info("DCE_AFAC () passe O6 RETURN ")
+				-- env.info("DCE_AFAC () passe O6 RETURN ")
 				return
 			end
 
@@ -2417,7 +2405,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		}
 
 
-	_affiche(ctr, "DCE_AFAC  ctr ")
+	-- _affiche(ctr, "DCE_AFAC  ctr ")
 	env.info("DCE_AFAC () passe Q ")
 
 	if camp.debug then

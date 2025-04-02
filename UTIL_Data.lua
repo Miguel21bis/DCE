@@ -267,6 +267,15 @@ Data_divers = {
 		laserDesignator = false,
 		moduleName = "tetet_a-1_skyraider",
 	},
+
+	["vwv_ra-5"] = 	{				--Mod
+		instrumentUnits = "imperial",
+		requiredModules = true,						--itsModule
+		EPLRS_Capacity = false,
+		laserDesignator = false,
+		moduleName = "tetet_ra5",
+	},
+
 	["vwv_crusader"] = 	{				--Mod
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
@@ -1445,6 +1454,7 @@ TaskByPlane = {
 		["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
+		["vwv_ra-5"] = true,		--Mod
 		["F-14A-135-GR"] = true,
 		["F-14B"] = true,
 		["F-15C"] = true,
@@ -2261,6 +2271,7 @@ TaskByPlane = {
 		["F-4E"] = true,
 		["F-4E-45MC"] = true,
 		["vwv_crusader"] = true,		--Mod
+		["vwv_ra-5"] = true,		--Mod
 		["F-15E"] = true,
 		["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,

@@ -269,7 +269,7 @@ function ARM_Shot_EventHandler:onEvent(event)
                         for _, unit in ipairs(gp:getUnits()) do
                             if unit and unit:isActive() and unit:inAir() then
 								local typeName = unit:getTypeName()
-								if typeName == "B-52H" or typeName == "VSN_F105G" then
+								if typeName == "B-52H" or typeName == "VSN_F105G" or typeName == "vwv_ra-5" then
 									local entry = {
 										unit = unit,
 										dist = jammerDist_B52,
