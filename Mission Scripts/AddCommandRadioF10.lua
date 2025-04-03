@@ -3617,14 +3617,14 @@ local function explodeOnPoint()
 	
 	end
 
-	return timer.getTime() + 60
+	return timer.getTime() + 300
 
 end
 
 
 
 
-timer.scheduleFunction(explodeOnPoint, nil, timer.getTime() + 60)
+timer.scheduleFunction(explodeOnPoint, nil, timer.getTime() + 300)
 
 
 

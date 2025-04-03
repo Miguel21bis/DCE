@@ -2061,9 +2061,11 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	local targetPos = target.unitPos
 
+	env.info("DCE_AFAC () K2 laserCode "..tostring(laserCode))
+
 	if laserCode and laserCode ~= "nil" and laser == nil then
 		laser = Spot.createLaser(unitAFAC, nil, targetPos, laserCode)	--start laser spot
-	elseif laserCode == "nil" then
+	else
 		trigger.action.smoke(targetPos, trigger.smokeColor.Red)
 		env.info("DCE_AFAC () K create smokeColor.Red ")
 	end
@@ -2381,7 +2383,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 								["params"] = 
 								{
 									--afacFlightName, refX, refY
-									["command"] = "CustomDesignationAFAC('" .. afacFlightName .. "', '" .. refX .. "', '" .. refY .. "',  ' nil ')",
+									["command"] = "CustomDesignationAFAC('" .. afacFlightName .. "', '" .. refX .. "', '" .. refY .. "',  'nil')",
 								},
 							},
 						},

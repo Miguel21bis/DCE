@@ -7283,7 +7283,7 @@ db_all_loadouts = {
 		Reconnaissance = {
 			["Reco NAM High"] = {
 				support = {
-					Escort = true,
+					Escort = false,
 					SEAD = false,
 					["Escort Jammer"] = true,
 				},
