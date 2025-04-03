@@ -2145,7 +2145,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	env.info("DCE_AFAC () passe J ")
 
-	local frstWPT = {
+	local newWpt = {
 
 		['y'] = afacPos.z,
 		['x'] = afacPos.x,
@@ -2158,12 +2158,8 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		['speed_locked'] = true,
 		['formation_template'] = '',
 		['ETA_locked'] = true,
-		["name"] = "first_WPT_AFAC",
+		["name"] = "AFAC_WPT1",
 		['ETA'] = current_time + 1,
-		-- ['task'] = 
-		-- {
-		-- },
-
 		['task'] = {
 			['id'] = 'ComboTask',
 			['params'] = {
@@ -2231,10 +2227,10 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	}
 
 
-	table.insert(newRoute, 1, frstWPT)
+	table.insert(newRoute, 1, newWpt)
 
 
-	local secondtWPT = {
+	newWpt = {
 		['alt'] = afacPos.y,
 		['type'] = 'Turning Point',
 		['action'] = 'Turning Point',
@@ -2245,7 +2241,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		['formation_template'] = '',
 		['speed'] = descAfac.speedMax * 2/3,
 		['ETA_locked'] = false,
-		["name"] = "second_WPT_AFAC",
+		["name"] = "AFAC_WPT2",
 		["task"] =
 		{
 			["id"] = "ComboTask",
@@ -2267,7 +2263,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 								["id"] = "Script",
 								["params"] = 
 								{
-									["command"] = "env.info(\"DCE_AFAC_Mission secondtWPT A \")",
+									["command"] = "env.info(\"DCE_AFAC_Mission WPT2 C \")",
 								}, -- end of ["params"]
 							}, -- end of ["action"]
 						}, -- end of ["params"]
@@ -2304,7 +2300,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 					},
 					[3] = 
 					{
-						["number"] = 31,
+						["number"] = 3,
 						["auto"] = false,
 						["id"] = "WrappedAction",
 						["name"] = "partie script",
@@ -2316,17 +2312,67 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 								["id"] = "Script",
 								["params"] = 
 								{
-									["command"] = "env.info(\"DCE_AFAC_Mission secondtWPT B \")",
+									["command"] = "env.info(\"DCE_AFAC_Mission WPT2 D \")",
 								}, -- end of ["params"]
 							}, -- end of ["action"]
 						}, -- end of ["params"]
 					}, -- end of [1]
-					[4] = 
+				},
+			},
+		},
+
+		['ETA'] = current_time + 60,
+	}
+
+
+	table.insert(newRoute, 2, newWpt)
+
+
+	
+	newWpt = {
+		['alt'] = afacPos.y,
+		['type'] = 'Turning Point',
+		['action'] = 'Turning Point',
+		['alt_type'] = 'BARO',
+		['speed_locked'] = true,
+		['y'] = refY ,
+		['x'] = refX ,
+		['formation_template'] = '',
+		['speed'] = descAfac.speedMax * 2/3,
+		['ETA_locked'] = false,
+		["name"] = "AFAC_WPT3",
+		["task"] =
+		{
+			["id"] = "ComboTask",
+			["params"] =
+			{
+				["tasks"] =
+				{
+					[1] = 
+					{
+						["number"] = 1,
+						["auto"] = false,
+						["id"] = "WrappedAction",
+						["name"] = "partie script",
+						["enabled"] = true,
+						["params"] = 
+						{
+							["action"] = 
+							{
+								["id"] = "Script",
+								["params"] = 
+								{
+									["command"] = "env.info(\"DCE_AFAC_Mission WPT3 E \")",
+								}, -- end of ["params"]
+							}, -- end of ["action"]
+						}, -- end of ["params"]
+					}, -- end of [1]
+					[2] = 
 					{
 						["auto"] = false,
 						["enabled"] = true,
 						["id"] = "WrappedAction",
-						["number"] = 4,
+						["number"] = 2,
 						["params"] = 
 						{
 							["action"] = 
@@ -2340,16 +2386,34 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 							},
 						},
 					},
+					[3] = 
+					{
+						["number"] = 3,
+						["auto"] = false,
+						["id"] = "WrappedAction",
+						["name"] = "partie script",
+						["enabled"] = true,
+						["params"] = 
+						{
+							["action"] = 
+							{
+								["id"] = "Script",
+								["params"] = 
+								{
+									["command"] = "env.info(\"DCE_AFAC_Mission WPT3 F \")",
+								}, -- end of ["params"]
+							}, -- end of ["action"]
+						}, -- end of ["params"]
+					}, -- end of [1]
 				},
 			},
 		},
 
-		['ETA'] = current_time + 60,
+		['ETA'] = current_time + 70,
 	}
 
 
-	table.insert(newRoute, 2, secondtWPT)
-
+	table.insert(newRoute, 3, newWpt)
 
 	
 	-- for k=1, #newRoute[1].task.params.tasks do
