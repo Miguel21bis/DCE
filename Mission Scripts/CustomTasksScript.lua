@@ -1896,7 +1896,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	trigger.action.outText("AFAC : START "..tostring(afacFlightName), 15)
 
 	local laser														--variable to hold the laser spot
-	local smokeDuration = 300
+	-- local smokeDuration = 300
 
 	local flightGroup = Group.getByName(afacFlightName)
 	local coalitionForce = flightGroup:getCoalition()
@@ -2044,15 +2044,9 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	env.info("DCE_AFAC () : J target actuel "..tostring(target.unitTypeName).." "..tostring(target.UnitId) )
 
-	local checkFlag = trigger.misc.getUserFlag("targetDestroyed_Flag_"..target.UnitId )
-	env.info("DCE_AFAC () : J2 getUserFlag "..tostring("targetDestroyed_Flag_"..target.UnitId).." "..tostring(checkFlag) )
-
-	-- set la partie FLAG du target pour suivre son etat et déclencher l'arret de l orbit et le passage au target suivant
+	-- set la partie FLAG du target pour suivre son etat et déclenché l'arret de l orbit et le passage au target suivant
 	trigger.action.setUserFlag("targetDestroyed_Flag_"..target.UnitId, 0)
-	AFACTargetStatus[target.UnitId] = target
-
-	local checkFlag = trigger.misc.getUserFlag("targetDestroyed_Flag_"..target.UnitId )
-	env.info("DCE_AFAC () : K getUserFlag "..tostring("targetDestroyed_Flag_"..target.UnitId).." "..tostring(checkFlag) )
+	AFAC_targetStatus[target.UnitId] = target
 
 	local gpGid
 	if AFAC_available[afacFlightName] and AFAC_available[afacFlightName]["gpGid"] then
@@ -2068,6 +2062,12 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	else
 		trigger.action.smoke(targetPos, trigger.smokeColor.Red)
 		env.info("DCE_AFAC () K create smokeColor.Red ")
+		if not AFAC_smokeTiming[afacFlightName] then AFAC_smokeTiming[afacFlightName] = {} end
+		AFAC_smokeTiming[afacFlightName] = {
+			time = timer.getTime(),
+			targetPos = targetPos,
+			sideNum = coalitionForce,
+		}
 	end
 
 	local LLposNstring, LLposEstring = LLtool.LLstrings(targetPos)
@@ -2476,8 +2476,8 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	if camp.debug then
 		local logStr = "afac = " .. TableSerialization(newMission, 0)
-		local FlightNameClean = afacFlightName:gsub('[%p%c%s]', '_')
-		local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_AFAC_"..current_time..".lua", "w")
+		local flightNameClean = afacFlightName:gsub('[%p%c%s]', '_')
+		local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_AFAC_"..current_time..".lua", "w")
 		if logFile then
 			logFile:write(logStr)
 			logFile:close()

@@ -50,7 +50,8 @@ local excludedUnitTypes = {
 LastInjectFlightPlan = {}					--garde les derniers plan de vol injecté
 BingoPlaneTab = {}
 GroundDamagedFlyingMachine = {}
-AFACTargetStatus = {}					--table used by AFACs to monitor the status of targets and move on to the next ones
+AFAC_targetStatus = {}					--table used by AFACs to monitor the status of targets and move on to the next ones
+AFAC_smokeTiming = {}
 
 
 EjectionSeatFrequency = {}
@@ -1121,11 +1122,11 @@ local function avoidArea()
 
 
 	-- end
-	return timer.getTime() + 1
+	return timer.getTime() + 5
 end
 
 -- modification M32	E-2C automatic retreat 
-function AirRetreat()
+local function airRetreat()
 
 	local current_time = timer.getTime()
 
@@ -1451,7 +1452,7 @@ function AirRetreat()
 			end
 		end
 	end
-	return timer.getTime() + 1
+	return timer.getTime() + 31
 end
 
 local function bingo(gpGid, groupMission)
@@ -2472,252 +2473,8 @@ local function getLL_TargetPosition()
 		env.info("DCE_LL_KnownPositions: Failed to open log file for writing.")
 	end
 
-	-- trigger.action.outText("DCE_getLL_TargetPosition End ", 15)
-
-	-- if camp.targetPos then
-	-- 	for campName, targets in pairs(camp.targetPos) do
-	-- 		for targetName, target in pairs(targets) do
-	-- 			if target.x and target.y then
-	-- 				local posXZ = {
-	-- 					x = target.x,
-	-- 					y = land.getHeight(target),
-	-- 					z = target.y,
-	-- 				}
-
-	-- 				local LLposN, LLposE = coord.LOtoLL(posXZ)
-	-- 				target.lat = LLposN
-	-- 				target.lon = LLposE
-	-- 				target.elevation = posXZ.y
-
-	-- 				if target.elements then
-	-- 					for i, element in pairs(target.elements) do
-	-- 						if element.x and element.x ~= 0 and element.y and element.y ~= 0 then
-
-	-- 							local elementPosXZ = {
-	-- 								x = target.x,
-	-- 								y = land.getHeight(element),
-	-- 								z = target.y,
-	-- 							}
-
-	-- 							local LLposN, LLposE = coord.LOtoLL(elementPosXZ)
-	-- 							element.lat = LLposN
-	-- 							element.lon = LLposE
-	-- 							element.elevation = elementPosXZ.y
-
-	-- 						end
-	-- 					end
-	-- 				end
-
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
-
-	-- if camp.debug then
-	-- 	--export custom mission log
-	-- 	local logStr = "targetPos = " .. TableSerialization(camp.targetPos, 0)
-	-- 	local logFile = io.open(PathDCE.."Debug\\".."targetPos"..".lua", "w")
-	-- 	logFile:write(logStr)
-	-- 	logFile:close()
-	-- end
 
 
-end
-
---dans le cas de la creation de campagne, ceci permet de recuperer les positions GPS lat lon de toutes les unités, afin d'afficher ces position des la premiere mission
-if camp.makeCampaign then
-
-	-- local LL_KnownPositionsTable = {}
-
-	-- -- Lire le fichier oobground.lua et charger la table
-	-- local fileName = PathDCE.."Active\\".."oob_ground.lua"
-
-	-- local oob_ground = assert(loadfile(fileName)) -- Charge le fichier
-
-	-- for sideName, country in pairs(oob_ground) do																				
-	-- 	for typeName, typeTable in pairs(country) do						
-	-- 		if typeName == "vehicle" or typeName == "ship" or typeName == "static" then			
-	-- 			for groupN, group in pairs(typeTable.group) do
-
-	-- 				if group.x and group.y then
-	-- 					local addItem = true
-	-- 					local elevation = math.ceil(land.getHeight(group)) 
-	-- 					local posXZ = {
-	-- 						x = group.x,
-	-- 						y = elevation,
-	-- 						z = group.y,
-	-- 					}
-
-	-- 					local LLposN, LLposE = coord.LOtoLL(posXZ)
-	-- 					LLposN = math.floor(LLposN)
-	-- 					LLposE = math.floor(LLposE)
-
-	-- 					local xKey = math.abs(group.x)
-
-	-- 					if not LL_KnownPositionsTable[xKey] then 
-	-- 						LL_KnownPositionsTable[xKey] = {} 
-	-- 						addItem = true
-	-- 					else
-	-- 						for n, llPos in pairs(LL_KnownPositionsTable[xKey]) do
-	-- 							if LLposN == llPos.lat and LLposE == llPos.lon then
-	-- 								addItem = false
-	-- 								break
-	-- 							end 
-	-- 						end
-	-- 					end
-
-	-- 					if addItem == true then
-	-- 						local posLL = {
-	-- 							lat = LLposE,
-	-- 							lon = LLposE,
-	-- 							elevation = elevation,
-	-- 						}
-	-- 						table.insert(LL_KnownPositionsTable[xKey], posLL)
-	-- 					end
-
-	-- 					for unitN, unit in pairs(group.units) do			
-	-- 						if unit.x and unit.y then					
-	-- 							local addItem = true
-	-- 							local elevation = math.ceil(land.getHeight(unit)) 
-	-- 							local posXZ = {
-	-- 								x = unit.x,
-	-- 								y = elevation,
-	-- 								z = unit.y,
-	-- 							}
-
-	-- 							local LLposN, LLposE = coord.LOtoLL(posXZ)
-	-- 							LLposN = math.floor(LLposN)
-	-- 							LLposE = math.floor(LLposE)
-
-	-- 							local xKey = math.abs(unit.x)
-
-	-- 							if not LL_KnownPositionsTable[xKey] then 
-	-- 								LL_KnownPositionsTable[xKey] = {} 
-	-- 								addItem = true
-	-- 							else
-	-- 								for n, llPos in pairs(LL_KnownPositionsTable[xKey]) do
-	-- 									if LLposN == llPos.lat and LLposE == llPos.lon then
-	-- 										addItem = false
-	-- 										break
-	-- 									end 
-	-- 								end
-	-- 							end
-
-	-- 							if addItem == true then
-	-- 								local posLL = {
-	-- 									lat = LLposE,
-	-- 									lon = LLposE,
-	-- 									elevation = elevation,
-	-- 								}
-	-- 								table.insert(LL_KnownPositionsTable[xKey], posLL)
-	-- 							end
-	-- 						end
-	-- 					end
-	-- 				end
-	-- 			end
-	-- 		end
-	-- 	end
-
-
-	-- 	--***************************************************************************
-	-- 	-- Lire le fichier targetlist pour ajouter les xy des elements de la map
-	-- 	local fileName = PathDCE.."Active\\".."targetlist.lua"
-
-	-- 	local targetList = assert(loadfile(fileName)) -- Charge le fichier
-
-	-- 	for campName, targets in pairs(targetList) do
-	-- 		for targetName, target in pairs(targets) do
-	-- 			if target.x and target.y then
-	-- 				local addItem = true
-	-- 				local elevation = math.ceil(land.getHeight(target)) 
-	-- 				local posXZ = {
-	-- 					x = target.x,
-	-- 					y = elevation,
-	-- 					z = target.y,
-	-- 				}
-
-	-- 				local LLposN, LLposE = coord.LOtoLL(posXZ)
-	-- 				LLposN = math.floor(LLposN)
-	-- 				LLposE = math.floor(LLposE)
-
-	-- 				local xKey = math.abs(math.floor(target.x))
-
-	-- 				if not LL_KnownPositionsTable[xKey] then 
-	-- 					LL_KnownPositionsTable[xKey] = {} 
-	-- 					addItem = true
-	-- 				else
-	-- 					for n, llPos in pairs(LL_KnownPositionsTable[xKey]) do
-	-- 						if LLposN == llPos.lat and LLposE == llPos.lon then
-	-- 							addItem = false
-	-- 							break
-	-- 						end 
-	-- 					end
-	-- 				end
-
-	-- 				if addItem == true then
-	-- 					local posLL = {
-	-- 						x = math.floor(target.x),
-	-- 						y = math.floor(target.y),
-	-- 						lat = LLposE,
-	-- 						lon = LLposE,
-	-- 						elevation = elevation,
-	-- 					}
-	-- 					table.insert(LL_KnownPositionsTable[xKey], posLL)
-	-- 				end
-
-	-- 				if target.elements then
-	-- 					for i, element in pairs(target.elements) do
-	-- 						if element.x and element.x ~= 0 and element.y and element.y ~= 0 then
-	-- 							local addItem = true
-	-- 							local elevation = math.ceil(land.getHeight(element)) 
-	-- 							local elementPosXZ = {
-	-- 								x = element.x,
-	-- 								y = elevation,
-	-- 								z = element.y,
-	-- 							}
-
-	-- 							local LLposN, LLposE = coord.LOtoLL(elementPosXZ)
-	-- 							local xKey = math.abs(math.floor(element.x))
-
-	-- 							if not LL_KnownPositionsTable[xKey] then 
-	-- 								LL_KnownPositionsTable[xKey] = {} 
-	-- 								addItem = true
-	-- 							else
-	-- 								for n, llPos in pairs(LL_KnownPositionsTable[xKey]) do
-	-- 									if LLposN == llPos.lat and LLposE == llPos.lon then
-	-- 										addItem = false
-	-- 										break
-	-- 									end 
-	-- 								end
-	-- 							end
-
-	-- 							if addItem == true then
-	-- 								local posLL = {
-	-- 									x = math.floor(target.x),
-	-- 									y = math.floor(target.y),
-	-- 									lat = LLposE,
-	-- 									lon = LLposE,
-	-- 									elevation = elevation,
-	-- 								}
-	-- 								table.insert(LL_KnownPositionsTable[xKey], posLL)
-	-- 							end
-
-	-- 						end
-	-- 					end
-	-- 				end
-
-	-- 			end
-	-- 		end
-	-- 	end
-
-	-- end
-
-
-	-- --export custom mission log
-	-- local logStr = "LL_KnownPositions = " .. TableSerialization(LL_KnownPositionsTable, 0)
-	-- local logFile = io.open(PathDCE.."Init\\".."LL_KnownPositionsTable.lua", "w")
-	-- logFile:write(logStr)
-	-- logFile:close()
 end
 
 local function addFuncs(gid, groupObject, playerName)
@@ -3517,29 +3274,78 @@ local function timerPlayerMenu(arg)
 end
 
 
+local function loopAFAC_CAS()
 
-local function loopAFAC()
-	-- if (radioCommands == nil or #radioCommands == 0) and timer.getTime() < 10 then
-		local Uid, groupObject, gpGid, playerName
-		local playerObj = localGetPlayerObj()
-		if playerObj then
-			playerName = playerObj:getPlayerName()
-			groupObject = playerObj:getGroup()
-			gpGid = playerObj:getGroup():getID()
+	for _, sideNum in ipairs({coalition.side.BLUE, coalition.side.RED}) do
+
+		local groups = coalition.getGroups(sideNum, Group.Category.AIRPLANE)
+
+		for _, gp in pairs(groups) do
+			local gpName = Group.getName(gp)
+		
+			if string.find(gpName,"Strike") then
+				local wingman = gp:getUnits()
+				for wingmanN, unit in ipairs(wingman) do
+
+					for afacFlightName, value in pairs(AFAC_available) do
+
+						if sideNum == value.sideNum then
+
+							if (value.time + 300) < timer.getTime() then
+
+								local flightGroup = Group.getByName(afacFlightName)
+								-- local coalitionForce = flightGroup:getCoalition()
+								local unitsAFAC = flightGroup:getUnits()
+								local unitAFAC = unitsAFAC[1]
+							
+								if unitAFAC and unitAFAC:isExist() then
+									
+									local afacPos = unitAFAC:getPoint()
+									local unit_Pos = unit:getPoint()
+
+									local distance = math.sqrt((afacPos.x - unit_Pos.x)^2 + (afacPos.z - unit_Pos.z)^2)
+
+									if distance <= 10000 then
+
+										trigger.action.smoke(value.targetPos, trigger.smokeColor.Red)
+										env.info("DCE_loopAFAC_CAS K create smokeColor.Red ")
+		
+										if not AFAC_smokeTiming[afacFlightName] then AFAC_smokeTiming[afacFlightName] = {} end
+										
+										AFAC_smokeTiming[afacFlightName] = {
+											time = timer.getTime(),
+											targetPos = value.targetPos,
+											sideNum = sideNum,
+										}
+									end
+								end
+							end
+						end
+					end
+				end
+			end
 		end
+	end
 
-		if gpGid and groupObject then
-			-- AFAC_F10(Group)
-			timer.scheduleFunction(AFAC_F10, groupObject, timer.getTime() + 2)
-		end
-	-- end
-
-	
-
-
+	return timer.getTime() + 17
 end
 
-function LoopPilot()
+local function loopAFAC()
+
+	local groupObject, gpGid
+	local playerObj = localGetPlayerObj()
+	if playerObj then
+		groupObject = playerObj:getGroup()
+		gpGid = playerObj:getGroup():getID()
+	end
+
+	if gpGid and groupObject then
+		-- AFAC_F10(Group)
+		timer.scheduleFunction(AFAC_F10, groupObject, timer.getTime() + 2)
+	end
+end
+
+local function loopPilot()
 
 	local groups = coalition.getGroups(coalition.side.BLUE, Group.Category.AIRPLANE)
 
@@ -3588,27 +3394,29 @@ end
 
 timer.scheduleFunction(timerPlayerMenu, nil, timer.getTime() + 5)
 
-timer.scheduleFunction(LoopPilot, nil, timer.getTime() + 15)
+timer.scheduleFunction(loopPilot, nil, timer.getTime() + 15)
 
-timer.scheduleFunction(loopAFAC, nil, timer.getTime() + 60)
+timer.scheduleFunction(loopAFAC, nil, timer.getTime() + 61)
 
-timer.scheduleFunction(AirRetreat, nil, timer.getTime() + 5)
+timer.scheduleFunction(loopAFAC_CAS, nil, timer.getTime() + 63)
 
-timer.scheduleFunction(avoidArea, nil, timer.getTime() + 5)
+timer.scheduleFunction(airRetreat, nil, timer.getTime() + 6)
 
-timer.scheduleFunction(getLL_TargetPosition, nil, timer.getTime() + 20)
+timer.scheduleFunction(avoidArea, nil, timer.getTime() + 7)
 
-timer.scheduleFunction(EWR_magic, nil, timer.getTime() + 30)
+timer.scheduleFunction(getLL_TargetPosition, nil, timer.getTime() + 21)
 
-timer.scheduleFunction(setErrorMessageBoxShedul, nil, timer.getTime() + 30)
+timer.scheduleFunction(EWR_magic, nil, timer.getTime() + 31)
+
+timer.scheduleFunction(setErrorMessageBoxShedul, nil, timer.getTime() + 32)
 
 
 
 local function explodeOnPoint()
 
-	-- AFACTargetStatus[target.UnitId] 
+	-- AFAC_targetStatus[target.UnitId] 
 
-	for target_UnitId, target in pairs(AFACTargetStatus) do
+	for target_UnitId, target in pairs(AFAC_targetStatus) do
 
 		_affiche(target.unitPos, "DCE_explodeOnPoint target.unitPos ")
 

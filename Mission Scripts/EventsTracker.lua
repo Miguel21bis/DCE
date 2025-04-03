@@ -838,11 +838,11 @@ function eventHandlerDCE:onEvent(event)
 				local victimMissionID = event.initiator:getID()
 				env.info( "DCE_EventT  unitLost_A  victimMissionID: "..tostring(victimMissionID) )
 
-				if victimMissionID and AFACTargetStatus[victimMissionID] then
+				if victimMissionID and AFAC_targetStatus[victimMissionID] then
 					env.info( "DCE_EventT  unitLost_B  victimMissionID: "..tostring(victimMissionID) )
 
 					trigger.action.setUserFlag("targetDestroyed_Flag_"..victimMissionID, 1)
-					AFACTargetStatus[victimMissionID] = nil
+					AFAC_targetStatus[victimMissionID] = nil
 				end
 			end
 
