@@ -1,13 +1,14 @@
 --To manually re-generate and replace the current campaign mission. For contingency only, not required for normal campaign play.
 --Initiated by RedoMission.bat
 ------------------------------------------------------------------------------------------------------- 
--- last modification: springCleaning adjustment_o
+-- last modification: M85_a
 if not versionDCE then versionDCE = {} end
-versionDCE["BAT_SkipMission.lua"] = "1.14.98"
+versionDCE["BAT_SkipMission.lua"] = "1.15.99"
 -------------------------------------------------------------------------------------------------------
 -- adjustment_o				(o tools)(n targetList numeric)(m BAT)(l Playable_m from Data_divers)(k BugList)(j PairsByKeys)(i global TabTask)(h Skipmission_flag)(g mise a niveau)(e: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form) 
 -- debug_d					(cd: EndMission)
 -- cleancode_d				(d springCleaning)
+-- modification M85_a		new variables added to conf_mod (RepairOption, current_date, weather, etc.)
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M61_a		SAR
 -- modification M55_a		player can change the type of plane
@@ -23,8 +24,9 @@ versionDCE["BAT_SkipMission.lua"] = "1.14.98"
 BugList = {}
 Skipmission_flag = true
 DebuGenTxt = ""					--debug cumulutatif de ATO_Generator
+Playable_m = {}
 
-local function AcceptMission()
+local function acceptMission()
 	local m = ""
 	repeat
 		print("\n\n Night or Day ? : "..Daytime)													-- info day or not
@@ -61,6 +63,10 @@ versionPackageICM = os.getenv('versionPackageICM')														-- modification 
 dofile("Init/conf_mod.lua")
 dofile("Active/camp_status.lua")
 
+if mission_ini.current_date and mission_ini.current_date.year then
+	camp.date = mission_ini.current_date
+end
+
 if not ChangePlane then
 	require("Active/oob_air")
 end
@@ -77,15 +83,15 @@ if FileExists(testFile) then
 end
 
 local db_airbasesFile = "Active/db_airbases.lua"
-local TestPath = io.open(db_airbasesFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
-if TestPath ~= nil then																					--check si le fichier existe dans ScriptsMod
-	io.close(TestPath)
+local testPath = io.open(db_airbasesFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
+if testPath ~= nil then																					--check si le fichier existe dans ScriptsMod
+	io.close(testPath)
 	dofile("Active/db_airbases.lua")
 else
 	local db_airbasesFile2 = "Init/db_airbases.lua"
-	local TestPath2 = io.open(db_airbasesFile2, "r")
-	if TestPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
-		io.close(TestPath2)
+	local testPath2 = io.open(db_airbasesFile2, "r")
+	if testPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
+		io.close(testPath2)
 		dofile(db_airbasesFile2)
 		--creer le fichier db_airbases dans Active, meme en cours de campagne, pour garder la retrocompatibilite
 		local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
@@ -99,7 +105,6 @@ if not targetlist.blue[1] then
 	TargetlistToNum()
 end
 
-Playable_m = {}
 
 for planeType, value in PairsByKeys(Data_divers) do
 	if value.playable then
@@ -111,9 +116,9 @@ end
 local showVersion = versionPackageICM
 
 local verScriptsModPath = "../../../ScriptsMod."..versionPackageICM.."/UTIL_Changelog.lua"
-local TestPath = io.open(verScriptsModPath, "r")
-if  TestPath ~= nil then
-	io.close(TestPath)
+local testPath = io.open(verScriptsModPath, "r")
+if  testPath ~= nil then
+	io.close(testPath)
 	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Changelog.lua")
 	if versionDCE then
 		showVersion = showVersion.." ("..versionDCE["UTIL_Changelog.lua"]..")"
@@ -656,14 +661,14 @@ if input == "y" or input == "yes" then
 				print("\n This campaign is a ".. tostring(EndInfo).."  \nEND OF THE CAMPAIGN, SEE THE BRIEFING IN THE MISSION..\n")					-- end of camapaign
 				break
 			elseif Multi.NbGroup >= 1 and PlayerFlight then
-				if AcceptMission() then
+				if acceptMission() then
 					print("\nMultiplayerCampaign Next mission generated.\n")								--confirmation text
 					break
 				else
 					print("\nDebug A: AcceptMission() .\n")	
 				end
 			elseif SinglePlayer and PlayerFlight  then														--mission has a player flight
-				if AcceptMission() then
+				if acceptMission() then
 					print("\nNext mission generated.\n")													--confirmation text
 					break
 				else

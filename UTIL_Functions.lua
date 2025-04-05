@@ -1,13 +1,13 @@
 --Various functions
 ------------------------------------------------------------------------------------------------------- 
--- last modification: debug_k
+-- last modification: M85_a
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Functions.lua"] = "1.17.131"
+versionDCE["UTIL_Functions.lua"] = "1.18.132"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_g				(g springCleaning)					
 -- adjustment_o				(n loadout code)(m Disp_time)(l add AFAC task)(k FormatTime)(i add InsertBugList(txt))(h use IsWesternCountry)(fg: add Loadout tiers)(e todo)(d:CheckConfModMaster )(c: fire Playable_m from conf_mod)
 -- debug_k					(k Package_freq-targetname)(j code_loadout bestMatch)(i planeType)(h Tha\'lah)(g string.gsub(v, "\"", "\\\"" ))(f new generateId)(d UH to HF) Angle et Bearing des statics sur PA
--- modification M80_a		use various tables, such as base name or aircraft type aliases
+-- modification M85_a		new variables added to conf_mod (RepairOption, current_date, weather, etc.)
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)
 -- modification M77_l		CG_ArtySpotter (kl ListSpotterAircraft)
 -- modification M63_a		compatible Datacard Generator or CombatFlite
@@ -2743,7 +2743,7 @@ end
 
 
 --met à jour automatiquement le conf_mod en fonction des nouveautés apporté par UTIL_ConfModCheck
-function UpdateConfMod(setWeather)
+function UpdateConfMod(setWeather, setDate)
     --version UpdateConfMod VA_1.12
 
 	-- local weather_override = {
@@ -2753,6 +2753,7 @@ function UpdateConfMod(setWeather)
 	-- }
 
 	local weather_override
+	local date_override
 
 	if camp.mission == 1 then
 		if camp.weather and camp.weather.pHigh then
@@ -2762,11 +2763,35 @@ function UpdateConfMod(setWeather)
 			weather_override = mission_ini_check.weather
 
 		end
+
+		if camp.date and camp.date.year then
+			date_override = camp.date
+		else
+			dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ConfModCheck.lua")
+			date_override = mission_ini_check.date
+
+		end
+
+	else
+
+		if camp.date and camp.date.year then
+			date_override = camp.date
+			print("date_override 3 ")
+		else
+			dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ConfModCheck.lua")
+			date_override = mission_ini_check.date
+			print("date_override 4 ")
+		end
 	end
 
 	--mis à jour via camp_triggers et DC_CheckTriggers
 	if setWeather then
 		weather_override = setWeather
+	end
+
+	--mis à jour via camp_triggers et DC_CheckTriggers
+	if setDate then
+		date_override = setDate
 	end
 
 
@@ -3020,6 +3045,9 @@ function UpdateConfMod(setWeather)
 			-- `weather` doit **toujours** être remplacé par `weather_override`
 			elseif key == "weather" and weather_override then
 				clientTable[key] = deepCopy(weather_override)
+			-- `weather` doit **toujours** être remplacé par `weather_override`
+			elseif key == "current_date" and date_override then
+				clientTable[key] = deepCopy(date_override)
 			-- Fusion normale des sous-tables
 			elseif type(defaultValue) == "table" then
 				if not clientValue then
@@ -3055,6 +3083,15 @@ function UpdateConfMod(setWeather)
 		if updatedConfig.mission_ini.weather and weather_override then
 			for key, forcedValue in pairs(weather_override) do
 				updatedConfig.mission_ini.weather[key] = forcedValue  -- **Écrase l'existant OU ajoute si absent**
+			end
+		end
+
+		
+		if updatedConfig.mission_ini.date and date_override then
+			print("date_override 6 ")
+			for key, forcedValue in pairs(date_override) do
+				updatedConfig.mission_ini.date[key] = forcedValue  -- **Écrase l'existant OU ajoute si absent**
+				print("date_override 7 ")
 			end
 		end
 

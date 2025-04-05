@@ -1500,7 +1500,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 				local unitTypeName = grndUnit:getTypeName()
 
 				local distance = math.floor(math.sqrt(math.pow(unitPos.x - refX, 2) + math.pow(unitPos.z - refY, 2)))
-				
+
 				if distance < distVisibility then
 
 					local item = {
@@ -1564,7 +1564,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 			local unitTypeName = static:getTypeName()
 
 			local distance = math.floor(math.sqrt(math.pow(unitPos.x - refX, 2) + math.pow(unitPos.z - refY, 2)))
-			
+
 			-- if category ~= "Fortifications" and distance < 50000 then
 			if distance < distVisibility and not string.find(string.lower(desc.typeName) , "sandbag") then
 
@@ -1825,7 +1825,6 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 		else	--if unitAFAC and unitAFAC:isExist()  then
 
 
-			-- _affiche(unitAFAC, "unitAFAC ")
 			env.info("DCE_AFAC () :ZZ  Reaper Dead  ")
 			if AFAC_available[afacFlightName] and AFAC_available[afacFlightName]["gpGid"] then
 				trigger.action.outTextForGroup(AFAC_available[afacFlightName]["gpGid"],"AFAC DCE_CD_AFAC() :ZZ  Reaper Dead or not isExist ", 15, false)
@@ -1846,13 +1845,11 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 
 
 		if laser and laser ~= nil then											--if there is a new laser spot
-
 			env.info("DCE_AFAC () :Z return Laser timer  ")
 			return timer.getTime() + 60							--repeat designation cylce in 60 seconds										--stop designation cycle
 		end
 
 		if timer.getTime() > timerDesignate + smokeDuration then
-
 			env.info("DCE_AFAC () :Z return smoke timer  ")
 			return timer.getTime() + 60
 		end
@@ -1893,11 +1890,9 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 
 	env.info("DCE_CustomDesignationAFAC() AA : START "..tostring(afacFlightName))
-	trigger.action.outText("AFAC : START "..tostring(afacFlightName), 15)
+	-- trigger.action.outText("AFAC : START "..tostring(afacFlightName), 15)
 
 	local laser														--variable to hold the laser spot
-	-- local smokeDuration = 300
-
 	local flightGroup = Group.getByName(afacFlightName)
 	local coalitionForce = flightGroup:getCoalition()
 	local unitsAFAC = flightGroup:getUnits()
@@ -1908,14 +1903,12 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 				["unitAFAC"] = unitAFAC,
 				-- ["gpGid"] = 0,
 			}
-			env.info("DCE_CustomDesignationAFAC() AAb : unitAFAC:isExist "..tostring(afacFlightName))
+			-- env.info("DCE_CustomDesignationAFAC() AAb : unitAFAC:isExist "..tostring(afacFlightName))
 	else
 		AFAC_available[afacFlightName] = nil
 		env.info("DCE_CustomDesignationAFAC() AAc : else "..tostring(afacFlightName))
 		return
 	end
-
-	_affiche(AFAC_available, "CTS_AFAC_available ")
 
 	local afacPos = unitAFAC:getPoint()
 	local afacAlt = afacPos.y
@@ -1923,7 +1916,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	local terrainAlt = land.getHeight({x = afacPos.x, y = afacPos.z})
 
 	local distVisibility = distanceVisibilite(afacAlt, terrainAlt)
-	env.info("DCE_CustomDesignationAFAC() BB : afacFlightName "..tostring(afacFlightName).." afacAlt: "..tostring(afacAlt).." terrainAlt: "..tostring(terrainAlt).." distVisibility: "..tostring(distVisibility))
+	-- env.info("DCE_CustomDesignationAFAC() BB : afacFlightName "..tostring(afacFlightName).." afacAlt: "..tostring(afacAlt).." terrainAlt: "..tostring(terrainAlt).." distVisibility: "..tostring(distVisibility))
 
 	--****--****--****--**** ********--****--****--**** ********--****--****--**** ********--****--****--**** ****
 	--**** recupere les dynamique ****
@@ -2002,7 +1995,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 				local lineOfSight = land.isVisible(afacPos, unitPos)
 
 				if lineOfSight then
-					env.info("DCE_AFAC () :EEb  "..tostring(unitTypeName).." desc.typeName: "..tostring(desc.typeName))
+					-- env.info("DCE_AFAC () :EEb  "..tostring(unitTypeName).." desc.typeName: "..tostring(desc.typeName))
 
 					local item = {
 						unitGround = static,
@@ -2019,7 +2012,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 					table.insert(unitGroundSelected_A, item)
 				else
-					env.info("DCE_AFAC () :EEc lineOfSight OFF  "..tostring(unitTypeName).." lineOfSight: "..tostring(lineOfSight))
+					-- env.info("DCE_AFAC () :EEc lineOfSight OFF  "..tostring(unitTypeName).." lineOfSight: "..tostring(lineOfSight))
 				end
 
 			end
@@ -2034,17 +2027,20 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	end
 	unitGroundSelected_A = nil
 
-	env.info("DCE_AFAC () :FF nb of unitGroundSelected_B: "..tostring(#unitGroundSelected_B))
+	-- env.info("DCE_AFAC () :FF nb of unitGroundSelected_B: "..tostring(#unitGroundSelected_B))
 
 
 	--**** choisi THE target ^^ ****
 	local target = next(unitGroundSelected_B) and unitGroundSelected_B[next(unitGroundSelected_B)] or nil
 
-	if not target then return end
+	if not target then
+		env.info("DCE_AFAC () : not target RETURN ")
+		return
+	end
 
-	env.info("DCE_AFAC () : J target actuel "..tostring(target.unitTypeName).." "..tostring(target.UnitId) )
+	-- env.info("DCE_AFAC () : J target actuel "..tostring(target.unitTypeName).." "..tostring(target.UnitId) )
 
-	-- set la partie FLAG du target pour suivre son etat et déclenché l'arret de l orbit et le passage au target suivant
+	-- set la partie FLAG du target pour suivre son etat et déclencher l'arret de l orbit et le passage au target suivant
 	trigger.action.setUserFlag("targetDestroyed_Flag_"..target.UnitId, 0)
 	AFAC_targetStatus[target.UnitId] = target
 
@@ -2055,9 +2051,8 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	local targetPos = target.unitPos
 
-	env.info("DCE_AFAC () K2 laserCode "..tostring(laserCode))
-
 	if laserCode and laserCode ~= "nil" and laser == nil then
+		env.info("DCE_AFAC () : J createLaser laserCode: "..tostring(laserCode))
 		laser = Spot.createLaser(unitAFAC, nil, targetPos, laserCode)	--start laser spot
 	else
 		trigger.action.smoke(targetPos, trigger.smokeColor.Red)
@@ -2073,11 +2068,9 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	local LLposNstring, LLposEstring = LLtool.LLstrings(targetPos)
 	local LLpos = ' N ' .. LLposNstring .. '   E ' .. LLposEstring
 	target["LLpos"] = LLpos
-	-- target["TimeLase"] = timer.getTime()
 
 	if gpGid then
 		if laserCode and laserCode ~= "nil"  then
-			env.info("DCE_AFAC () : LL createLaser laserCode: "..tostring(laserCode))
 			trigger.action.outTextForGroup(gpGid,"AFAC createLaser laserCode: "..tostring(laserCode), 30, false)
 		end
 
@@ -2093,25 +2086,17 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	local ctr = flightGroup:getController() -- Récupère le contrôleur du GROUPE (sinon, l injectrion de task sur l unit leader fait planter DCS)
 	local descAfac = unitAFAC:getDesc()
 	-- _affiche(descAfac, "DCE_CTS descAfac ")
-	local newRoute = {}
-
-	env.info("DCE_AFAC () passe A ")
+	local modFPlan = {}
 
 	local foundAfacRoute
 	for _, coalition in pairs(env.mission.coalition) do
-		env.info("DCE_AFAC () passe B ")
 		for Ncountry, _country in pairs(coalition.country) do
-			env.info("DCE_AFAC () passe C ")
 			if _country.plane then
-				env.info("DCE_AFAC () passe D ")
 				for Ngroup, _group in pairs(_country.plane.group) do
-					env.info("DCE_AFAC () passe E ")
 					if _group.name and _group.name == afacFlightName then
-						env.info("DCE_AFAC () passe F ")
 						--copie de l'ancienne route
-						newRoute = Deepcopy(_group.route.points)
+						modFPlan = Deepcopy(_group.route.points)
 						foundAfacRoute = true
-						env.info("DCE_AFAC () passe G ")
 						break
 					end
 				end
@@ -2121,303 +2106,300 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		if foundAfacRoute then break end
 	end
 
-	env.info("DCE_AFAC () passe H ")
-
 	if not foundAfacRoute then
-		env.info("DCE_AFAC () :foundAfacRoute NOT FOUND ")
+		env.info("DCE_AFAC () : not foundAfacRoute RETURN ")
 		return
 	end
 
-	env.info("DCE_AFAC () passe I ")
 
 	local i = 1
-	while newRoute[i] do
-		env.info("DCE_AFAC () passe I2 i:  "..i.." briefing_name? "..tostring(newRoute[i]["briefing_name"]))
-		if newRoute[i]["briefing_name"] == "Station" then
-			env.info("DCE_AFAC () passe break i "..i)
+	while modFPlan[i] do
+		if modFPlan[i]["briefing_name"] == "Station" then
+			-- env.info("DCE_AFAC () passe break i "..i)
 			break -- Arrête la suppression dès qu'on trouve "Station"
 		end
-		env.info("DCE_AFAC () passe I3 remove i "..i)
-		table.remove(newRoute, i) -- Supprime l'élément à l'index `i`
+		table.remove(modFPlan, i) -- Supprime l'élément à l'index `i`
 	end
 
 	local current_time = timer.getTime()
 
-	newRoute = {}
+	local new_way = {
+		[1] = {
+			['y'] = afacPos.z,
+			['x'] = afacPos.x,
+			['speed'] = descAfac.speedMax * 2/3,
+			['action'] = 'Turning Point',
+			['alt'] = afacPos.y,
 
-	env.info("DCE_AFAC () passe J ")
-
-	local newWpt = {
-
-		['y'] = afacPos.z,
-		['x'] = afacPos.x,
-		['speed'] = descAfac.speedMax * 2/3,
-		['action'] = 'Turning Point',
-		['alt'] = afacPos.y,
-
-		['type'] = 'Turning Point',
-		['alt_type'] = 'BARO',
-		['speed_locked'] = true,
-		['formation_template'] = '',
-		['ETA_locked'] = true,
-		["name"] = "AFAC_WPT1",
-		['ETA'] = current_time + 1,
-		['task'] = {
-			['id'] = 'ComboTask',
-			['params'] = {
-				['tasks'] = {
-					[1] =
-					{
-						["auto"] = true,
-						["enabled"] = true,
-						["id"] = "WrappedAction",
-						["name"] = "INTERDIRE emergency jettison: TRUE (Departure/Spawn)",
-						["number"] = 1,
-						["params"] =
+			['type'] = 'Turning Point',
+			['alt_type'] = 'BARO',
+			['speed_locked'] = true,
+			['formation_template'] = '',
+			['ETA_locked'] = true,
+			["name"] = "AFAC_WPT1",
+			['ETA'] = current_time + 1,
+			['task'] = {
+				['id'] = 'ComboTask',
+				['params'] = {
+					['tasks'] = {
+						[1] =
 						{
-							["action"] =
+							["auto"] = true,
+							["enabled"] = true,
+							["id"] = "WrappedAction",
+							["name"] = "INTERDIRE emergency jettison: TRUE (Departure/Spawn)",
+							["number"] = 1,
+							["params"] =
 							{
-								["id"] = "Option",
-								["params"] =
+								["action"] =
 								{
-									["name"] = 15,
-									["value"] = true,
+									["id"] = "Option",
+									["params"] =
+									{
+										["name"] = 15,
+										["value"] = true,
+									},
 								},
 							},
 						},
-					},
-					[2] =
-					{
-						["auto"] = true,
-						["enabled"] = true,
-						["id"] = "WrappedAction",
-						["name"] = "reaction to threats  avoidance of fire (Departure/Spawn)",
-						["number"] = 2,
-						["params"] =
+						[2] =
 						{
-							["action"] =
+							["auto"] = true,
+							["enabled"] = true,
+							["id"] = "WrappedAction",
+							["name"] = "reaction to threats  avoidance of fire (Departure/Spawn)",
+							["number"] = 2,
+							["params"] =
 							{
-								["id"] = "Option",
-								["params"] =
+								["action"] =
 								{
-									["name"] = 1,
-									["value"] = 2,
+									["id"] = "Option",
+									["params"] =
+									{
+										["name"] = 1,
+										["value"] = 2,
+									},
 								},
 							},
 						},
+						-- [3] = 
+						-- {
+						-- 	["auto"] = true,
+						-- 	["enabled"] = false,
+						-- 	["id"] = "FAC",
+						-- 	["number"] = 3,
+						-- 	["params"] = 
+						-- 	{
+						-- 		["callname"] = 1,
+						-- 		["datalink"] = true,
+						-- 		-- ["designation"] = "Auto",
+						-- 		["frequency"] = 267000000,
+						-- 		["modulation"] = 0,
+						-- 		["number"] = 4,
+						-- 	},
+						-- },
 					},
-					-- [3] = 
-					-- {
-					-- 	["auto"] = true,
-					-- 	["enabled"] = false,
-					-- 	["id"] = "FAC",
-					-- 	["number"] = 3,
-					-- 	["params"] = 
-					-- 	{
-					-- 		["callname"] = 1,
-					-- 		["datalink"] = true,
-					-- 		-- ["designation"] = "Auto",
-					-- 		["frequency"] = 267000000,
-					-- 		["modulation"] = 0,
-					-- 		["number"] = 4,
-					-- 	},
-					-- },
 				},
 			},
 		},
-		
-	}
-
-
-	table.insert(newRoute, 1, newWpt)
-
-
-	newWpt = {
-		['alt'] = afacPos.y,
-		['type'] = 'Turning Point',
-		['action'] = 'Turning Point',
-		['alt_type'] = 'BARO',
-		['speed_locked'] = true,
-		['y'] = targetPos.z ,
-		['x'] = targetPos.x ,
-		['formation_template'] = '',
-		['speed'] = descAfac.speedMax * 2/3,
-		['ETA_locked'] = false,
-		["name"] = "AFAC_WPT2",
-		["task"] =
-		{
-			["id"] = "ComboTask",
-			["params"] =
+		[2] = {
+			['alt'] = afacPos.y,
+			['type'] = 'Turning Point',
+			['action'] = 'Turning Point',
+			['alt_type'] = 'BARO',
+			['speed_locked'] = true,
+			['y'] = targetPos.z ,
+			['x'] = targetPos.x ,
+			['formation_template'] = '',
+			['speed'] = descAfac.speedMax * 2/3,
+			['ETA_locked'] = false,
+			["name"] = "AFAC_WPT2",
+			["task"] =
 			{
-				["tasks"] =
+				["id"] = "ComboTask",
+				["params"] =
 				{
-					[1] = 
+					["tasks"] =
 					{
-						["number"] = 1,
-						["auto"] = false,
-						["id"] = "WrappedAction",
-						["name"] = "partie script",
-						["enabled"] = true,
-						["params"] = 
+						[1] =
 						{
-							["action"] = 
+							["number"] = 1,
+							["auto"] = false,
+							["id"] = "WrappedAction",
+							["name"] = "partie script",
+							["enabled"] = true,
+							["params"] =
 							{
-								["id"] = "Script",
-								["params"] = 
+								["action"] =
 								{
-									["command"] = "env.info(\"DCE_AFAC_Mission WPT2 C \")",
-								}, -- end of ["params"]
-							}, -- end of ["action"]
-						}, -- end of ["params"]
-					}, -- end of [1]
-					[2] =
-					{
-						["number"] = 2,
-						["auto"] = false,
-						["id"] = "ControlledTask",
-						["name"] = "orbit Ancre marqueur 222 est on",
-						["enabled"] = true,
-						["params"] =
+									["id"] = "Script",
+									["params"] =
+									{
+										["command"] = "env.info(\"DCE_AFAC_Mission WPT2 C \")",
+									}, -- end of ["params"]
+								}, -- end of ["action"]
+							}, -- end of ["params"]
+						}, -- end of [1]
+						[2] =
 						{
-							["task"] =
+							["number"] = 2,
+							["auto"] = false,
+							["id"] = "ControlledTask",
+							["name"] = "orbit Ancre marqueur 222 est on",
+							["enabled"] = true,
+							["params"] =
 							{
-								["id"] = "Orbit",
-								["params"] =
+								["task"] =
 								{
-									["altitude"] = afacPos.y,
-									["pattern"] = "Anchored",
-									["hotLegDir"] = 2.6354471705114,
-									["speed"] = descAfac.speedMax * 2/3,
-									["legLength"] = 5550,
-									["clockWise"] = true,
-									["width"] = 1850,
-								}, -- end of ["params"]
-							}, -- end of ["task"]
-							["stopCondition"] =
+									["id"] = "Orbit",
+									["params"] =
+									{
+										["altitude"] = afacPos.y,
+										["pattern"] = "Anchored",
+										["hotLegDir"] = 2.6354471705114,
+										["speed"] = descAfac.speedMax * 2/3,
+										["legLength"] = 5550,
+										["clockWise"] = true,
+										["width"] = 1850,
+									}, -- end of ["params"]
+								}, -- end of ["task"]
+								["stopCondition"] =
+								{
+									["userFlag"] = "targetDestroyed_Flag_"..target.UnitId,
+									["userFlagValue"] = true,
+								}, -- end of ["stopCondition"]
+							}, -- end of ["params"]
+						},
+						[3] =
+						{
+							["number"] = 3,
+							["auto"] = false,
+							["id"] = "WrappedAction",
+							["name"] = "partie script",
+							["enabled"] = true,
+							["params"] =
 							{
-								["userFlag"] = "targetDestroyed_Flag_"..target.UnitId,
-								["userFlagValue"] = true,
-							}, -- end of ["stopCondition"]
-						}, -- end of ["params"]
+								["action"] =
+								{
+									["id"] = "Script",
+									["params"] =
+									{
+										["command"] = "env.info(\"DCE_AFAC_Mission WPT2 D \")",
+									}, -- end of ["params"]
+								}, -- end of ["action"]
+							}, -- end of ["params"]
+						}, -- end of [1]
 					},
-					[3] = 
-					{
-						["number"] = 3,
-						["auto"] = false,
-						["id"] = "WrappedAction",
-						["name"] = "partie script",
-						["enabled"] = true,
-						["params"] = 
-						{
-							["action"] = 
-							{
-								["id"] = "Script",
-								["params"] = 
-								{
-									["command"] = "env.info(\"DCE_AFAC_Mission WPT2 D \")",
-								}, -- end of ["params"]
-							}, -- end of ["action"]
-						}, -- end of ["params"]
-					}, -- end of [1]
 				},
 			},
+
+			['ETA'] = current_time + 60,
 		},
-
-		['ETA'] = current_time + 60,
-	}
-
-
-	table.insert(newRoute, 2, newWpt)
-
-
-	
-	newWpt = {
-		['alt'] = afacPos.y,
-		['type'] = 'Turning Point',
-		['action'] = 'Turning Point',
-		['alt_type'] = 'BARO',
-		['speed_locked'] = true,
-		['y'] = refY ,
-		['x'] = refX ,
-		['formation_template'] = '',
-		['speed'] = descAfac.speedMax * 2/3,
-		['ETA_locked'] = false,
-		["name"] = "AFAC_WPT3",
-		["task"] =
-		{
-			["id"] = "ComboTask",
-			["params"] =
+		[3] = {
+			['alt'] = afacPos.y,
+			['type'] = 'Turning Point',
+			['action'] = 'Turning Point',
+			['alt_type'] = 'BARO',
+			['speed_locked'] = true,
+			['y'] = refY ,
+			['x'] = refX ,
+			['formation_template'] = '',
+			['speed'] = descAfac.speedMax * 2/3,
+			['ETA_locked'] = false,
+			["name"] = "AFAC_WPT3",
+			["task"] =
 			{
-				["tasks"] =
+				["id"] = "ComboTask",
+				["params"] =
 				{
-					[1] = 
+					["tasks"] =
 					{
-						["number"] = 1,
-						["auto"] = false,
-						["id"] = "WrappedAction",
-						["name"] = "partie script",
-						["enabled"] = true,
-						["params"] = 
+						[1] =
 						{
-							["action"] = 
+							["number"] = 1,
+							["auto"] = false,
+							["id"] = "WrappedAction",
+							["name"] = "partie script",
+							["enabled"] = true,
+							["params"] =
 							{
-								["id"] = "Script",
-								["params"] = 
+								["action"] =
 								{
-									["command"] = "env.info(\"DCE_AFAC_Mission WPT3 E \")",
-								}, -- end of ["params"]
-							}, -- end of ["action"]
-						}, -- end of ["params"]
-					}, -- end of [1]
-					[2] = 
-					{
-						["auto"] = false,
-						["enabled"] = true,
-						["id"] = "WrappedAction",
-						["number"] = 2,
-						["params"] = 
+									["id"] = "Script",
+									["params"] =
+									{
+										["command"] = "env.info(\"DCE_AFAC_Mission WPT3 E \")",
+									}, -- end of ["params"]
+								}, -- end of ["action"]
+							}, -- end of ["params"]
+						}, -- end of [1]
+						[2] =
 						{
-							["action"] = 
+							["auto"] = false,
+							["enabled"] = true,
+							["id"] = "WrappedAction",
+							["number"] = 2,
+							["params"] =
 							{
-								["id"] = "Script",
-								["params"] = 
+								["action"] =
 								{
-									--afacFlightName, refX, refY
-									["command"] = "CustomDesignationAFAC('" .. afacFlightName .. "', '" .. refX .. "', '" .. refY .. "',  'nil')",
+									["id"] = "Script",
+									["params"] =
+									{
+										--afacFlightName, refX, refY
+										["command"] = "CustomDesignationAFAC('" .. afacFlightName .. "', '" .. refX .. "', '" .. refY .. "',  'nil')",
+									},
 								},
 							},
 						},
-					},
-					[3] = 
-					{
-						["number"] = 3,
-						["auto"] = false,
-						["id"] = "WrappedAction",
-						["name"] = "partie script",
-						["enabled"] = true,
-						["params"] = 
+						[3] =
 						{
-							["action"] = 
+							["number"] = 3,
+							["auto"] = false,
+							["id"] = "WrappedAction",
+							["name"] = "partie script",
+							["enabled"] = true,
+							["params"] =
 							{
-								["id"] = "Script",
-								["params"] = 
+								["action"] =
 								{
-									["command"] = "env.info(\"DCE_AFAC_Mission WPT3 F \")",
-								}, -- end of ["params"]
-							}, -- end of ["action"]
-						}, -- end of ["params"]
-					}, -- end of [1]
+									["id"] = "Script",
+									["params"] =
+									{
+										["command"] = "env.info(\"DCE_AFAC_Mission WPT3 F \")",
+									}, -- end of ["params"]
+								}, -- end of ["action"]
+							}, -- end of ["params"]
+						}, -- end of [1]
+					},
 				},
 			},
+
+			['ETA'] = current_time + 70,
 		},
 
-		['ETA'] = current_time + 70,
 	}
 
 
-	table.insert(newRoute, 3, newWpt)
+	local newRoute = {} -- Nouvelle table
 
-	
+	-- Ajouter les éléments de new_way en premier
+	for j = 1, 3 do
+		newRoute[j] = new_way[j]
+	end
+
+	-- Trouver le prochain index de modFPlan (le plus petit disponible)
+	local startIndex = 4
+	for _, v in ipairs(modFPlan) do
+		newRoute[startIndex] = v
+		startIndex = startIndex + 1
+	end
+
+	-- Remplacer modFPlan par newRoute
+	modFPlan = newRoute
+
+
+
 	-- for k=1, #newRoute[1].task.params.tasks do
 	-- 	newRoute[1].task.params.tasks[k].number = i
 	-- end
@@ -2426,34 +2408,29 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	-- end
 
 
-	--recalcul les ETA 
+	-- recalcul les ETA
 	i = 1
-	while newRoute[i] do  -- Vérifie bien newRoute, pas newRoute[i]
-		-- env.info("DCE_AFAC () passe O1 ")
+	while modFPlan[i] do
+		if i > 3 then break end  -- Arrêter la boucle après le 3ème enregistrement
 
 		if i > 1 then
-			-- env.info("DCE_AFAC () passe O2 ")
-
-			local deltaTime = newRoute[i]["ETA"] - newRoute[i-1]["ETA"]
-			-- env.info("DCE_AFAC () passe O3 deltaTime: "..tostring(deltaTime))
-
+			local deltaTime = modFPlan[i]["ETA"] - modFPlan[i-1]["ETA"]
 			local deltaDist = GetDistance(
-				{x = newRoute[i].x, y = newRoute[i].y },
-				{x = newRoute[i-1].x, y = newRoute[i-1].y }
+				{x = modFPlan[i].x, y = modFPlan[i].y },
+				{x = modFPlan[i-1].x, y = modFPlan[i-1].y }
 			)
-			-- env.info("DCE_AFAC () passe O4 deltaDist: "..tostring(deltaDist))
 
 			local ETA_minimum
 			if deltaDist and descAfac.speedMax then
 				ETA_minimum = deltaDist / (descAfac.speedMax * 2/3)
-				-- env.info("DCE_AFAC () passe O5 ETA_minimum: "..tostring(ETA_minimum))
 			else
-				-- env.info("DCE_AFAC () passe O6 RETURN ")
-				return
+				-- Sortir uniquement de la boucle, mais pas de la fonction
+				env.info("DCE_AFAC () passe O6 ERROR BREAK ")
+				break
 			end
 
 			if deltaTime < ETA_minimum then
-				newRoute[i]["ETA"] = ETA_minimum
+				modFPlan[i]["ETA"] = ETA_minimum
 			end
 		end
 
@@ -2465,14 +2442,10 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 			params = {
 				airborne = true,
 				route = {
-					points = newRoute
+					points = modFPlan
 				},
 			}
 		}
-
-
-	-- _affiche(ctr, "DCE_AFAC  ctr ")
-	env.info("DCE_AFAC () passe Q ")
 
 	if camp.debug then
 		local logStr = "afac = " .. TableSerialization(newMission, 0)
@@ -2486,27 +2459,10 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		end
 	end
 
-	ctr:resetTask() -- Efface les tâches existantes
-	env.info("DCE_AFAC  Y Tâches réinitialisées, prêtes pour la nouvelle mission.")
+	ctr:resetTask() 			-- Efface les tâches existantes
+	ctr:setTask(newMission)
 
-	Controller.setTask(ctr, newMission)										--activate task with mission for retreat AWACS
-
-	env.info("DCE_AFAC  Z")
-
-
-
-	-- if laser and laser ~= nil then											--if there is a new laser spot
-
-	-- 	env.info("DCE_AFAC () :Z return Laser timer  ")
-	-- 	return timer.getTime() + 60							--repeat designation cylce in 60 seconds										--stop designation cycle
-	-- end
-
-	-- if timer.getTime() > timerDesignate + smokeDuration then
-
-	-- 	env.info("DCE_AFAC () :Z return smoke timer  ")
-	-- 	return timer.getTime() + 60
-	-- end
-
+	env.info("DCE_AFAC Z nouvelle mission injectee")
 
 end
 
@@ -3440,7 +3396,7 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 	env.info( "Custom_SAR A0 current_time: "..tostring(current_time).." grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(mgrsChute))
 
 	local function Execute()
-		local current_time = timer.getTime()
+		current_time = timer.getTime()
 		env.info( "Custom_SAR B1, current_time: "..tostring(current_time))
 		env.info( "Custom_SAR BB2, grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(mgrsChute).."|"..tostring(current_time))
 
@@ -3479,7 +3435,7 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 
 		--TODO CV est aussi une base, il faut donc lui coller l'alti, ici aussi
 
-		if Base  then
+		if Base then
 			posBase = Base:getPoint()
 			uId = Base:getID()
 
@@ -4067,7 +4023,7 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 
 		end
 
-		local Mission = {
+		local mission = {
 			id = 'Mission',
 			params = {
 				route = {
@@ -4077,7 +4033,7 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 		}
 
 		if camp.debug then
-			local logStr = "Custom_SAR = " .. TableSerialization(Mission, 0)
+			local logStr = "Custom_SAR = " .. TableSerialization(mission, 0)
 			local grpnameClean = grpname:gsub('[%p%c%s]', '_')
 			local logFile = io.open(PathDCE.."Debug\\"..grpnameClean.."_".. "Custom_SAR_"..current_time..".lua", "w")
 			if logFile then
@@ -4090,10 +4046,10 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 		env.info( "Custom_SAR, PASSE setTask PathDCE: "..tostring(PathDCE))
 
 		--ajoute le plan de vol dans db, pour utiliser plus tard si necessaire, car DCS ne garde pas en env.mission les plan de vol ajouté à l'arrache
-		LastInjectFlightPlan[gpGid] = Mission
+		LastInjectFlightPlan[gpGid] = mission
 
 		local ctr = flight:getController()
-		Controller.setTask(ctr, Mission)
+		Controller.setTask(ctr, mission)
 
 	end     --fin Execute
 
@@ -4173,7 +4129,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 
 		env.info( "current_time: "..tostring(current_time).." Custom_Altitude, C3 str_selectedMember |"..tostring(str_selectedMember))
 
-		local str_selectedMember = selectedMember:getTypeName()
+		-- local str_selectedMember = selectedMember:getTypeName()
 		if type(str_selectedMember) ~= "string" then
 			env.info("Custom_Altitude, C4 Erreur : str_selectedMember n'est pas une chaîne.")
 			return

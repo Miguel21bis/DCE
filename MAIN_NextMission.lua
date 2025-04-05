@@ -45,6 +45,8 @@ versionDCE["MAIN_NextMission.lua"] = "1.35.213"
 -- modification M00_b		Integration de conf_mod
 -- -------------------------------------------------------------------------------------------------------	
 
+-- print("MainNM A camp.date.day: "..tostring(camp.date.day))
+-- print("MainNM A mission_ini.current_date.day: "..tostring(mission_ini.current_date.day))
 
 
 Brief = {
@@ -117,6 +119,8 @@ if mission.version < 19 then --19ok 18bad
 	os.exit()
 end
 
+-- print("MainNM B camp.date.day: "..tostring(camp.date.day))
+-- print("MainNM B mission_ini.current_date.day: "..tostring(mission_ini.current_date.day))
 
 NameTheatreLower =  string.lower(mission.theatre)
 NameTheatre =  mission.theatre
@@ -659,10 +663,13 @@ if TestPathADD_addData ~= nil  then														--check si le fichier existe da
 
 end
 
+-- print("MainNM D camp.date.day: "..tostring(camp.date.day))
+
 require("Active/oob_air")
 require("Active/oob_ground")
 require("Init/conf_mod")
 
+-- print("MainNM E camp.date.day: "..tostring(camp.date.day))
 
 --si Active/camp_ZoneSAR n'existe pas, on le créer
 local ZoneSARFile = "../../../Missions/Campaigns/"..camp.title.."/Active/camp_ZoneSAR.lua"
@@ -698,6 +705,8 @@ else
 	end
 end
 
+-- print("MainNM F camp.date.day: "..tostring(camp.date.day))
+
 GetAllId()
 
 require("Active/camp_triggers")
@@ -722,6 +731,7 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
 
+-- print("MainNM I camp.date.day: "..tostring(camp.date.day))
 
 PayloadRestricted = makePayloadRestricted()
 
@@ -749,6 +759,8 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/ATO_FlightPlan.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_StaticAircraft.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Prune.lua")					-- Tomsk modification M09 Integration de  Prune Script
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Briefing.lua")
+
+-- print("MainNM J camp.date.day: "..tostring(camp.date.day))
 
 --supprime l'ancien fichier
 --recherche Debug/BugList.lua
@@ -1524,6 +1536,7 @@ if Debug.debug or mission_ini.backupAllMissionFiles then
 end
 
 
+-- print("MainNM Z camp.date.day: "..tostring(camp.date.day))
 
 -- if Debug.debug then
 -- 	local camp_str = "mission = " .. TableSerialization(mission, 0)						--make a string

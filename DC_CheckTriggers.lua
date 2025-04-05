@@ -614,7 +614,7 @@ Action = {}
 		---@diagnostic disable-next-line: undefined-global
 		if weather.weatherChangeRate then mission_ini.weather.weatherChangeRate = weather.weatherChangeRate end
 
-		UpdateConfMod(mission_ini.weather)
+		UpdateConfMod(mission_ini.weather, nil)
 
 	end
 

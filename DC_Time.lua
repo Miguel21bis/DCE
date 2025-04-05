@@ -2,13 +2,14 @@
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  springCleaning debug_g
+-- last modification:  M85_a
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_Time.lua"] = "1.5.17"
+versionDCE["DC_Time.lua"] = "1.6.18"
 ------------------------------------------------------------------------------------------------------- 
 -- debug_g 					(fg wrong time jump between missions)(e aliasYear)(d advances 2 times)(c hourlyTolerance work)(b: bug idle_time fin de mission)(a n'avance pas le temps entre accept mission et next)
 -- adjustment_f				(f hoursFrom)(d: CampTotalTimeS)((c_Skipmission_flag)b diminue time entre tentative pour avoir le lev� de soleil)(a CampTotalTimeS)
 -- cleancode_a				(a springCleaning)
+-- modification M85_a		new variables added to conf_mod (RepairOption, current_date, weather, etc.)
 -- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
 -- modification M25_b 		onlyDayMission.
 ------------------------------------------------------------------------------------------------------- 
@@ -23,6 +24,12 @@ local hoursFrom
 local referenceTime
 local idle_time = 0
 local overnightTime = 0
+
+if camp.mission > 1 and mission_ini.current_date and mission_ini.current_date.year then
+	camp.date.day = mission_ini.current_date.day
+	camp.date.month = mission_ini.current_date.month
+	camp.date.year = mission_ini.current_date.year
+end
 
 --campaign day counter
 if camp.day == nil then																			--if counter does not exist yet
@@ -220,3 +227,6 @@ else
 end
 
 TimeAlreadyAdded = true
+
+--mise à jour de date dans confMod
+UpdateConfMod(nil, camp.date )

@@ -44,7 +44,8 @@ local excludedUnitTypes = {
 	["FPS-117"] = true,
 	["55G6 EWR"] = true,
 	["1L13 EWR"] = true,
-	["FPS-117 Dome"] = true
+	["FPS-117 Dome"] = true,
+	["TACAN_beacon"] = true,
 }
 
 LastInjectFlightPlan = {}					--garde les derniers plan de vol injecté
@@ -640,6 +641,7 @@ local function avoidArea()
 			end
 
 			if (string.find(gpName,"CAP") or string.find(gpName,"Intercept")) and passTimer then
+
 				local wingman = gp:getUnits()
 
 				for wingmanN, _unit in ipairs(wingman) do
@@ -672,7 +674,15 @@ local function avoidArea()
 							end
 						end
 
-						local ctr = _unit:getGroup():getController()
+						-- local ctr = _unit:getGroup():getController()
+
+						local ctr
+						if wingmanN == 1 then												--for leader
+							ctr = gp:getController()							--get controller of group
+						else														--for wingmen
+							ctr = wingman[wingmanN]:getController()						--get controller of individual aircraft in flight
+							ctr:setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2) 	--set to evade fire again, as controller for individual unit does not take over options from parent group
+						end
 
 						local ENI_side = DCS_ENI_Side[coalitionIdNumeric[sideNum]]
 
@@ -781,15 +791,12 @@ local function avoidArea()
 														fromWaypointIndex = CAP_group.from
 												}
 											}
+
+										ctr:resetTask()
+										ctr:setCommand(switchtask)
 									end
 
-									-- env.info( "ACRF10_avoidArea K0_______ currentPointXY.y: "..tostring(currentPointXY.y).." threat.name "..tostring(threat.name))
-
 									local pointOfCoverage = chooseBestHotspot(currentPointXY, coalitionIdNumeric[sideNum])
-
-									-- _affiche(pointOfCoverage, "ACRF10_avoidArea pointOfCoverage")
-
-
 									local altCircle = Hcruise + (math.random(1,10) * 10)
 									local timeCircle = current_time
 
@@ -987,25 +994,13 @@ local function avoidArea()
 										-- env.info( "ACRF10_avoidArea K2_______ #CAP_group.sation1: "..tostring(#CAP_group.sation1))
 										if CAP_group.sation1 ~= nil and CAP_group.sation2 ~= nil and CAP_group.orbitCAP.altitude ~= 0 then
 
-											-- env.info( "ACRF10_avoidArea K3A_______ ##flightPlan.params.route.points: "..tostring(#flightPlan.params.route.points).." type"..tostring(flightPlan.params.route.points[#flightPlan.params.route.points].type))
-
-											-- table.insert(flightPlan.params.route.points, #flightPlan.params.route.points - 1, CAP_group.sation1)
-
-											-- env.info( "ACRF10_avoidArea K3B_______ ##flightPlan.params.route.points: "..tostring(#flightPlan.params.route.points).." type"..tostring(flightPlan.params.route.points[#flightPlan.params.route.points].type))
-
-											-- table.insert(flightPlan.params.route.points, #flightPlan.params.route.points - 1, CAP_group.sation2)
-
 											local numPoints = #flightPlan.params.route.points
 											local indexForStation1 = numPoints
 											local indexForStation2 = numPoints +1 -- Station2 viendra après Station1
 
-											-- env.info("ACRF10_avoidArea K3A_______ ##flightPlan.params.route.points: " .. tostring(numPoints) .. " type " .. tostring(flightPlan.params.route.points[numPoints].type))
-
 											-- Insérer station1 et station2 à des indices fixes
 											table.insert(flightPlan.params.route.points, indexForStation1, CAP_group.sation1)
 											table.insert(flightPlan.params.route.points, indexForStation2, CAP_group.sation2)
-
-											-- env.info("ACRF10_avoidArea K3B_______ ##flightPlan.params.route.points: " .. tostring(#flightPlan.params.route.points) .. " type " .. tostring(flightPlan.params.route.points[#flightPlan.params.route.points].type))
 
 										end
 
@@ -1100,15 +1095,10 @@ local function avoidArea()
 										env.info("DCE_avoidArea ZZZ " .. tostring(unitName))
 									end
 
-
-
 									break -- il est entre dans une zone interdite, on l evacue et on s arrete là
 								end
-
 							end
-
 						end
-
 					end
 				end
 			end
@@ -3276,6 +3266,8 @@ end
 
 local function loopAFAC_CAS()
 
+	if next(AFAC_available) == nil then return timer.getTime() + 17 end
+
 	for _, sideNum in ipairs({coalition.side.BLUE, coalition.side.RED}) do
 
 		local groups = coalition.getGroups(sideNum, Group.Category.AIRPLANE)
@@ -3317,6 +3309,7 @@ local function loopAFAC_CAS()
 											targetPos = value.targetPos,
 											sideNum = sideNum,
 										}
+
 									end
 								end
 							end

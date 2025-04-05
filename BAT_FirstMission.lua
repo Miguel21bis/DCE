@@ -1,12 +1,13 @@
 --To manually generate the first campaign mission and reset the campaign to initial status. For manual use by campaign designer only, not required for normal campaign play.
 --Initiated by FirstMission.bat
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleancode_d M80_a adjustment_p
+-- last modification: M85_a
 if not versionDCE then versionDCE = {} end
-versionDCE["BAT_FirstMission.lua"] = "1.13.99"
+versionDCE["BAT_FirstMission.lua"] = "1.14.100"
 -------------------------------------------------------------------------------------------------------
 -- adjustment_p				(p tools)(o full targetList)(n targetList numeric)(m BAT)(l Playable_m from Data_divers)(k BugList)(j PairsByKeys)(i global TabTask)(h Firstmission_flag)(g mise a niveau)(d: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form)
 -- cleancode_d				(d springCleaning)
+-- modification M85_a		new variables added to conf_mod (RepairOption, current_date, weather, etc.)
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M61_c		SAR (c DEV creation fichier cercle commande: w3)
 -- modification M55_a		player can change the type of plane
@@ -25,8 +26,9 @@ Firstmission_flag = true
 DebuGenTxt = ""					--debug cumulutatif de ATO_Generator
 mission = {}					--pour declarer la table globale et calmer les inquietudes d'IDE ^^
 oob_air = {}					--pour declarer la table globale et calmer les inquietudes d'IDE ^^
+Playable_m = {}
 
-local function AcceptMission()
+local function acceptMission()
 	local m = ""
 	repeat
 		print("\n\n Night or Day ? : "..Daytime)													-- info day or not
@@ -65,6 +67,11 @@ end
 
 dofile("Init/conf_mod.lua")
 dofile("Init/camp_init.lua")
+
+if mission_ini.current_date and mission_ini.current_date.year then
+	camp.date = mission_ini.current_date
+end
+
 if ChangePlane then
 	require("Active/oob_air")
 else
@@ -87,8 +94,6 @@ if not targetlist.blue[1] then
 	TargetlistToNum()
 end
 
-Playable_m = {}
-
 for planeType, value in PairsByKeys(Data_divers) do
 	if value.playable then
 		Playable_m[planeType] = true
@@ -100,9 +105,9 @@ end
 local showVersion = versionPackageICM
 
 local verScriptsModPath = "../../../ScriptsMod."..versionPackageICM.."/UTIL_Changelog.lua"
-local TestPath = io.open(verScriptsModPath, "r")
-if  TestPath ~= nil then
-	io.close(TestPath)
+local testPath = io.open(verScriptsModPath, "r")
+if  testPath ~= nil then
+	io.close(testPath)
 	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Changelog.lua")
 	if versionDCE then
 		showVersion = showVersion.." ("..versionDCE["UTIL_Changelog.lua"]..")"
@@ -145,7 +150,6 @@ print("Reset the campaign and generate a new first mission.\n")
 
 local input
 local choix1
-local playable_type = {}
 
 SinglePlayer = false
 if Multi == nil then
@@ -178,7 +182,7 @@ repeat
 	}
 
 	repeat
-		-- print("C.\n")
+		
 		if choix1 == nil then
 			print("Select :\n"..
 				"S (S)ingleplayer  \n"..
@@ -193,12 +197,11 @@ repeat
 				"O t(o)ols (tools for CampaignMaker and Coder)"
 			)
 
-			-- choix1 = io.read()
 			choix1 = io.stdin:read()
 		end
 
 		choix1 = string.lower(choix1)
-		-- print("D.\n")
+		
 		if choix1 == "n" or  choix1 == "t"  then
 			if choix1 == "t"  then
 				--===================================================================================
@@ -304,7 +307,6 @@ repeat
 				end
 
 				-- display le tableau des choix d'avion et de task
-				--tabTaskAvailable[nSide][unit.type][taskStr]
 				for nSide , unit_type in PairsByKeys(tabTaskAvailable) do
 					-- print() print(nSide..":")
 					for unitType , tabType in PairsByKeys(unit_type) do
@@ -449,12 +451,12 @@ repeat
 		dofile("../../../ScriptsMod."..versionPackageICM.."/MAIN_NextMission.lua")						--generate mission
 
 		if Multi.NbGroup >= 1 and PlayerFlight then
-			if AcceptMission() then
+			if acceptMission() then
 				 print("\nMultiplayerCampaign Next mission generated.\n")								--confirmation text
 				 break
 			end
 		elseif SinglePlayer and PlayerFlight  then														--mission has a player flight
-			if AcceptMission() then
+			if acceptMission() then
 				 print("\nCampaign reset and first campaign mission re-generated.\n")					--confirmation text
 				 break
 			end

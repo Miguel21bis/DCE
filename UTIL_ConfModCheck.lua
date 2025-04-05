@@ -72,6 +72,13 @@ mission_ini_check = {
 		weatherChangeRate = 1,					--(0.25 to 2)				[default:  1]		coefficient changing the speed at which the weather changes, example,  coef 1: changes every 48 hours on average, coef 0.25, changes every every 12h
 	},
 
+	--***current date during this campaign***
+	current_date = {
+		day = 10,
+		year = 1965,
+		month = 7,
+	},
+
 	--***difficulty option***
 	slider_CampaignDuration  = false,			-- (false/1/2/3/4)			[default: false]	(false: no change)(1: fast)(2: medium)(3: long/recommended)(4: very long)			influences the length of the campaign
 	slider_EnemyLevel = false,					-- (false/1/2/3/4)			[default: false]	(false: no change)(1: easy)(2: medium)(3: difficult/recommended)(4: very difficult)	changes the level of pilots, number of planes etc...
