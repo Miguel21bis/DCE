@@ -702,10 +702,44 @@ for side, units in pairs(oob_air) do																								--iterate through al
 											DebuGenTxt = DebuGenTxt.."\n\n"..("AtoG passe A_05 "..unit.type.." "..unit_loadouts[l].loadout_name.." Befor Loadouts Day/Night Condition")
 										end
 
+										if unit_loadouts[l].day == nil then
+											unit_loadouts[l].day = true
+										end
+
 										--get possible Time on Target
 										local tot_from = 0																						--earliest Time on Target for this loadout
 										local tot_to = 0																						--latest Time on target for this loadout
-										-- local tot_to =mission_ini.mission_duration
+
+										--*/***/*/*/*/**/*/*/*/*
+
+										-- tot_from = 0																						--from mission start
+										-- tot_to = mission_ini.mission_duration																		--to mission end
+										-- if task == "Intercept" or task == "SAR" then																			--for interceptors, tot_to is not limitted by mission duration
+										-- 	tot_to = 999999
+										-- end
+
+										-- if unit_loadouts[l].night then																		--loadout is night capable
+										-- 	if Daytime == "day-night" then
+										-- 		tot_from = mission_ini.dusk - camp.time																--from dusk
+										-- 		tot_to = mission_ini.mission_duration																	--to mission end
+										-- 		if task == "Intercept" or task == "SAR" then																		--for interceptors, tot_to is not limitted by mission duration
+										-- 			tot_to = mission_ini.dawn - camp.time
+										-- 		end
+										-- 	elseif Daytime == "night" then
+										-- 		tot_from = 0																					--from mission start
+										-- 		tot_to = mission_ini.mission_duration																	--to mission end
+										-- 		if task == "Intercept"  or task == "SAR" then																		--for interceptors, tot_to is not limitted by mission duration
+										-- 			tot_to = mission_ini.dawn - camp.time
+										-- 		end
+										-- 	elseif Daytime == "night-day" then
+										-- 		tot_from = 0																					--from mission start
+										-- 		tot_to = mission_ini.dawn - camp.time																	--to dawn
+										-- 	end
+										-- end
+
+
+										--*/***/*/*/*/**/*/*/*/*
+
 										if unit_loadouts[l].day and unit_loadouts[l].night then													--loadout is day and night capable
 											tot_from = 0																						--from mission start
 											tot_to = mission_ini.mission_duration																		--to mission end
@@ -748,11 +782,7 @@ for side, units in pairs(oob_air) do																								--iterate through al
 											end
 										end
 
-										-- if tot_to == 0 then
-										-- 	print("AtoG Daytime "..tostring(Daytime).." loadoutName: "..tostring(unit_loadouts[l].name))
-										-- 	os.execute 'pause'
-										-- end
-
+										
 										if tot_to < 0 then
 											tot_to = tot_to + 86400
 										end

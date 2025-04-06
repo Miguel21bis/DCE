@@ -1560,9 +1560,9 @@ end
 -- from ATO_ThreatEvaluation pour asssigner une frequence EWR al�atoire
 -- from ATO_FlightPlan pour assigner une freqence de groupe
 function GetFrequency(side, targetname, task, type, waves, overide)
-	if Debug.debug then print() end
-	if Debug.debug then print("UtilF_Debug GetFrequency 000 side "..tostring(side).." targetname "..tostring(targetname)
-		.." task "..tostring(task).." type "..tostring(type).." waves "..tostring(waves).." overide "..tostring(overide)) end
+	-- if Debug.debug then print() end
+	-- if Debug.debug then print("UtilF_Debug GetFrequency 000 side "..tostring(side).." targetname "..tostring(targetname)
+	-- 	.." task "..tostring(task).." type "..tostring(type).." waves "..tostring(waves).." overide "..tostring(overide)) end
 
 	local freq
 	local nRadio = 1																					--chose frequency range from radio 1
@@ -1608,26 +1608,26 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 	--si la freq package a déjà été désignée, on la reprend
 	if task ~= "coalition" and overide == nil then
 
-		if Debug.debug then print("UtilF_Debug GetFrequency 001 targetname? "..tostring(targetname)) end
+		-- if Debug.debug then print("UtilF_Debug GetFrequency 001 targetname? "..tostring(targetname)) end
 
 		if Package_freq[side]["UHF"][targetname] and freqValide(Package_freq[side]["UHF"][targetname]) then
 
-			if Debug.debug then print("UtilF_Debug GetFrequency return B1 Package_freq "..tostring(Package_freq[side]["UHF"][targetname])) end
+			-- if Debug.debug then print("UtilF_Debug GetFrequency return B1 Package_freq "..tostring(Package_freq[side]["UHF"][targetname])) end
 			return Package_freq[side]["UHF"][targetname]															--return frequency
 
 		elseif Package_freq[side]["VHF"][targetname] and freqValide(Package_freq[side]["VHF"][targetname]) then
 
-			if Debug.debug then print("UtilF_Debug GetFrequency return B2 Package_freq "..tostring(Package_freq[side]["VHF"][targetname])) end
+			-- if Debug.debug then print("UtilF_Debug GetFrequency return B2 Package_freq "..tostring(Package_freq[side]["VHF"][targetname])) end
 			return Package_freq[side]["VHF"][targetname]															--return frequency
 
 		elseif Package_freq[side]["LVHF"][targetname] and freqValide(Package_freq[side]["LVHF"][targetname]) then
 
-			if Debug.debug then print("UtilF_Debug GetFrequency return B3 Package_freq "..tostring(Package_freq[side]["LVHF"][targetname])) end
+			-- if Debug.debug then print("UtilF_Debug GetFrequency return B3 Package_freq "..tostring(Package_freq[side]["LVHF"][targetname])) end
 			return Package_freq[side]["LVHF"][targetname]
 
 		elseif Package_freq[side]["HF"][targetname] and freqValide(Package_freq[side]["HF"][targetname]) then
 
-			if Debug.debug then print("UtilF_Debug GetFrequency return B4 Package_freq "..tostring(Package_freq[side]["HF"][targetname])) end
+			-- if Debug.debug then print("UtilF_Debug GetFrequency return B4 Package_freq "..tostring(Package_freq[side]["HF"][targetname])) end
 			return Package_freq[side]["HF"][targetname]
 
 		end
@@ -1649,7 +1649,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 				Assigned_freq[freq] = true												--mark frequency in use
 				Package_freq[side][range][targetname] = freq							--store frequency for package
 
-				if Debug.debug then print("UtilF_Debug GetFrequency return C1 Package_freq "..tostring(freq)) end
+				-- if Debug.debug then print("UtilF_Debug GetFrequency return C1 Package_freq "..tostring(freq)) end
 				return freq																--return frequency
 			end
 
@@ -1668,11 +1668,11 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 
 					Assigned_freq[freq] = true												--mark frequency in use
 
-					if Debug.debug then print("UtilF_Debug GetFrequency return C2 HF Package_freq "..tostring(freq)) end
+					-- if Debug.debug then print("UtilF_Debug GetFrequency return C2 HF Package_freq "..tostring(freq)) end
 					return freq																--return frequency
 				else
 
-					if Debug.debug then print("UtilF_Debug GetFrequency return C2 HF 0") end
+					-- if Debug.debug then print("UtilF_Debug GetFrequency return C2 HF 0") end
 					return 0
 				end
 			elseif range == "UHF"  then
@@ -1689,11 +1689,11 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 
 					Assigned_freq[freq] = true												--mark frequency in use
 
-					if Debug.debug then print("UtilF_Debug GetFrequency return D1 UHF Package_freq "..tostring(freq)) end
+					-- if Debug.debug then print("UtilF_Debug GetFrequency return D1 UHF Package_freq "..tostring(freq)) end
 					return freq																--return frequency
 				else
 
-					if Debug.debug then print("UtilF_Debug GetFrequency return D2 UHF 0") end
+					-- if Debug.debug then print("UtilF_Debug GetFrequency return D2 UHF 0") end
 					return 0
 				end
 			elseif range == "VHF"  then
@@ -1710,11 +1710,11 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 
 					Assigned_freq[freq] = true												--mark frequency in use
 
-					if Debug.debug then print("UtilF_Debug GetFrequency return E1 VHF Package_freq "..tostring(freq)) end
+					-- if Debug.debug then print("UtilF_Debug GetFrequency return E1 VHF Package_freq "..tostring(freq)) end
 					return freq																--return frequency
 				else
 
-					if Debug.debug then print("UtilF_Debug GetFrequency return E2 VHF 0") end
+					-- if Debug.debug then print("UtilF_Debug GetFrequency return E2 VHF 0") end
 					return 0
 				end
 			elseif range == "LVHF" then
@@ -1729,17 +1729,16 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 					until Assigned_freq[freq] == nil										--repeat until a frequency is found that is not yet in use
 					Assigned_freq[freq] = true												--mark frequency in use
 
-					if Debug.debug then print("UtilF_Debug GetFrequency return F1 LVHF Package_freq "..tostring(freq)) end
+					-- if Debug.debug then print("UtilF_Debug GetFrequency return F1 LVHF Package_freq "..tostring(freq)) end
 					return freq																--return frequency
 				else
 
-					if Debug.debug then print("UtilF_Debug GetFrequency return F2 LVHF 0") end
+					-- if Debug.debug then print("UtilF_Debug GetFrequency return F2 LVHF 0") end
 					return 0
 				end
 			end
 		elseif range == "UHF" and task ~= "EWR" then
-			-- if camp.radio[side][nRadio] and camp.radio[side][nRadio][range]	and frequency[type] and frequency[type]["radio"] and frequency[type]["radio"][nRadio] and frequency[type]["radio"][nRadio][range]  then		--Cherche d'abord une frequence UHF commune
-			if Debug.debug then print("UtilF_Debug GetFrequency return G0 UHF non  EWR frequency[type] "..tostring(frequency[type])) end
+			-- if Debug.debug then print("UtilF_Debug GetFrequency return G0 UHF non  EWR frequency[type] "..tostring(frequency[type])) end
 
 			if frequency[type] and frequency[type]["radio"]   then
 				for radioN = 1, #frequency[type]["radio"] do
@@ -1772,7 +1771,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 							Assigned_freq[freq] = true												--mark frequency in use
 							Package_freq[side][range][targetname] = freq							--store frequency for package
 
-							if Debug.debug then print("UtilF_Debug GetFrequency return G1 UHF non  EWR Package_freq "..tostring(freq)) end
+							-- if Debug.debug then print("UtilF_Debug GetFrequency return G1 UHF non  EWR Package_freq "..tostring(freq)) end
 							return freq
 						end
 					end
@@ -1780,11 +1779,10 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 			end
 		elseif range == "VHF" then
 
-			if Debug.debug then
-				print("UtilF_Debug GetFrequency return H0 VHF non  EWR frequency[type] "..tostring(frequency[type]))
-				Display(frequency[type], "utilF frequency[type]")
-
-				end
+			-- if Debug.debug then
+			-- 	print("UtilF_Debug GetFrequency return H0 VHF non  EWR frequency[type] "..tostring(frequency[type]))
+			-- 	Display(frequency[type], "utilF frequency[type]")
+			-- end
 
 			if frequency[type] and frequency[type]["radio"]   then
 				for radioN = 1, #frequency[type]["radio"] do
@@ -1819,7 +1817,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 								Package_freq[side][range][targetname] = freq							--store frequency for package
 							end
 
-							if Debug.debug then print("UtilF_Debug GetFrequency return H1 VHF Package_freq "..tostring(freq)) end
+							-- if Debug.debug then print("UtilF_Debug GetFrequency return H1 VHF Package_freq "..tostring(freq)) end
 							return freq
 						end
 					end
@@ -1841,7 +1839,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 							Package_freq[side][range][targetname] = freq							--store frequency for package
 
 
-							if Debug.debug then print("UtilF_Debug GetFrequency return I LVHF Package_freq "..tostring(freq)) end
+							-- if Debug.debug then print("UtilF_Debug GetFrequency return I LVHF Package_freq "..tostring(freq)) end
 							return freq
 						end
 					end
@@ -1866,7 +1864,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 				Assigned_freq[freq] = true												--mark frequency in use
 				Package_freq[side][range][targetname] = freq							--store frequency for package
 
-				if Debug.debug then print("UtilF_Debug GetFrequency return J HF Package_freq "..tostring(freq)) end
+				-- if Debug.debug then print("UtilF_Debug GetFrequency return J HF Package_freq "..tostring(freq)) end
 				return freq																--return frequency				
 			end
 		end
@@ -1878,7 +1876,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 
 			local result = GetLocFrequency(side, targetname, frequency[type].prefFreqPackage.nRadio, type, frequency[type].prefFreqPackage.range)
 
-			if Debug.debug then print("UtilF_Debug GetFrequency return >K result "..tostring(result)) end
+			-- if Debug.debug then print("UtilF_Debug GetFrequency return >K result "..tostring(result)) end
 			return result
 		end
 	end
@@ -1917,14 +1915,14 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 
 		result = GetLocFrequency(side, "", "", type,  waves)
 
-		if Debug.debug then print("UtilF_Debug GetFrequency return L result "..tostring(result)) end
+		-- if Debug.debug then print("UtilF_Debug GetFrequency return L result "..tostring(result)) end
 		return result
 
 	elseif task == "group" then   --prend obligatoirement le channel 1 de la radio 1
 
 		result = GetLocFrequency(side, targetname, 1, type,  waves)
 
-		if Debug.debug then print("UtilF_Debug GetFrequency return M result "..tostring(result)) end
+		-- if Debug.debug then print("UtilF_Debug GetFrequency return M result "..tostring(result)) end
 		return result
 	else
 		result = GetLocFrequency(side, targetname, nRadio, type,  waves)
@@ -1932,17 +1930,17 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 	end
 
 	if result then
-		if Debug.debug then print("UtilF_Debug GetFrequency PASSE return O "..tostring(result)) end
+		-- if Debug.debug then print("UtilF_Debug GetFrequency PASSE return O "..tostring(result)) end
 		return result
 	else
 		result = GetLocFrequency(side, targetname, nRadio, type,  "UHF")
 		if result then
-			if Debug.debug then print("UtilF_Debug GetFrequency PASSE return P UHF "..tostring(result)) end
+			-- if Debug.debug then print("UtilF_Debug GetFrequency PASSE return P UHF "..tostring(result)) end
 			return result
 		else
 			result = GetLocFrequency(side, targetname, nRadio, type,  "LVHF")
 			if result then
-				if Debug.debug then print("UtilF_Debug GetFrequency PASSE return Q LVHF "..tostring(result)) end
+				-- if Debug.debug then print("UtilF_Debug GetFrequency PASSE return Q LVHF "..tostring(result)) end
 				return result
 			else
 				if not camp.radio[side] then camp.radio[side] = {} end
@@ -1953,11 +1951,11 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 					max = 136,
 				}
 				result = GetLocFrequency(side, targetname, nRadio, type,  "VHF")
-				if Debug.debug then print("UtilF_Debug GetFrequency PASSE return R VHF  "..tostring(result)) end
+				-- if Debug.debug then print("UtilF_Debug GetFrequency PASSE return R VHF  "..tostring(result)) end
 
 				if result then
 
-					if Debug.debug then print("UtilF_Debug GetFrequency return S result "..tostring(result)) end
+					-- if Debug.debug then print("UtilF_Debug GetFrequency return S result "..tostring(result)) end
 					return result
 				else
 
@@ -1979,7 +1977,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 					Assigned_freq[freq] = true												--mark frequency in use
 					Package_freq[side][range][targetname] = freq							--store frequency for package
 
-					if Debug.debug then print("UtilF_Debug GetFrequency PASSE return Z UHF  "..tostring(freq)) end
+					-- if Debug.debug then print("UtilF_Debug GetFrequency PASSE return Z UHF  "..tostring(freq)) end
 					return freq
 				end
 			end
@@ -2792,6 +2790,7 @@ function UpdateConfMod(setWeather, setDate)
 	--mis à jour via camp_triggers et DC_CheckTriggers
 	if setDate then
 		date_override = setDate
+		camp.date = setDate
 	end
 
 

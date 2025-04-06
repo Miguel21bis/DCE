@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.85.534"
+versionDCE["UTIL_Changelog.lua"] = "20.86.536"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.85.534"
+VersionDCE["UTIL_Changelog.txt"] = "20.86.536"
 --[[
 
 
@@ -9,8 +9,14 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.85.534:==
+==:20.86.536:==
 
+536	mod		[loadout]M86	change of logic for the “day” variable: day will always be considered true (even if it's not in the loadout). 
+						However, if you want ONLY a night loadout, set this:
+							night = true,
+						and 
+							day = false,
+535	mod		[date]M85	new variables added to conf_mod (RepairOption, current_date, weather, etc.) 
 534	fixed	[generator][inter]		choosing interceptor causes mission generation to crash
 533	mod		[inter]		interceptors only take off if a type of aircraft to be intercepted is detected
 				["Kien An Airbase Alert"] = {
