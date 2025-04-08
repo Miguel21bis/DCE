@@ -105,23 +105,60 @@ end
 
 -- sorts tables alphabetically, to be used in a "for" loop instead of pairs or ipairs
 -- http://www.lua.org/pil/19.3.html
-function PairsByKeys (t, f)
-    local a = {}
-	local initType
-	local dontSort = false
-    for n in pairs(t) do initType = type(n) break end
-	for n in pairs(t) do
-		table.insert(a, n)
-		if type(n) ~= initType then dontSort = true end
-	end
-	if not dontSort then
-		table.sort(a, f)
-	end
-    local i = 0      -- iterator variable
-    local iter = function ()   -- iterator function
+-- function PairsByKeys (t, f)
+--     local a = {}
+-- 	local initType
+-- 	local dontSort = false
+--     for n in pairs(t) do initType = type(n) break end
+-- 	for n in pairs(t) do
+-- 		table.insert(a, n)
+-- 		if type(n) ~= initType then dontSort = true end
+-- 	end
+-- 	if not dontSort then
+-- 		table.sort(a, f)
+-- 	end
+--     local i = 0      -- iterator variable
+--     local iter = function ()   -- iterator function
+--         i = i + 1
+--         if a[i] == nil then return nil
+--         else return a[i], t[a[i]]
+--         end
+--     end
+--     return iter
+-- end
+
+--function to sort tables alphabetically, to be used in a "for" loop instead of pairs or ipairs
+-- Fonction pour trier les clés numériques dans l'ordre croissant
+function PairsByKeys(t, f)
+    local numericKeys = {}
+    local otherKeys = {}
+    local initType
+
+    -- Séparer les clés numériques des autres
+    for n in pairs(t) do
+        initType = type(n)
+        if initType == "number" then
+            table.insert(numericKeys, n)
+        else
+            table.insert(otherKeys, n)
+        end
+    end
+
+    -- Trier les clés numériques
+    table.sort(numericKeys, f)
+
+    -- Concaténer les clés non numériques (non triées)
+    for _, key in ipairs(otherKeys) do
+        table.insert(numericKeys, key)
+    end
+
+    local i = 0 -- Variable d'itération
+    local iter = function() -- Fonction d'itération
         i = i + 1
-        if a[i] == nil then return nil
-        else return a[i], t[a[i]]
+        if numericKeys[i] == nil then
+            return nil
+        else
+            return numericKeys[i], t[numericKeys[i]]
         end
     end
     return iter
@@ -171,8 +208,84 @@ function TableSerializationAG(t, i)
 	return text
 end
 
+-- Fonction pour vérifier si une table est strictement numérique
+local function IsSequentialTable(t)
+    local count = 0
+    for k, _ in pairs(t) do
+        if type(k) ~= "number" or k ~= math.floor(k) then
+            return false
+        end
+        count = count + 1
+    end
+    return count == #t -- Vérifie qu'il n'y a pas de "trous" dans les indices
+end
+
+-- Fonction pour sérialiser une table en chaîne
+-- Fonction pour sérialiser une table en chaîne avec une option pour afficher les indices des tables séquentielles
+function TableSerialization(t, i, options)
+	-- Si options est un booléen, on le traite comme la valeur de writeNumericTable
+	local writeNumericTable = options
+	if type(options) == "table" then
+		writeNumericTable = options.writeNumericTable
+	elseif options == nil then
+		writeNumericTable = true -- Valeur par défaut si options n'est pas fourni
+	end
+	
+    local crlf = ""
+    local tab1 = string.rep("\t", i) -- Indentation
+    local text = "\n" .. crlf .. tab1 .. "{\n" .. crlf
+
+    local tab = string.rep("\t", i + 1)
+
+    if not writeNumericTable and IsSequentialTable(t) then
+        -- Si la table est strictement numérique et numericTable est false, on n'affiche pas les indices
+        for _, v in ipairs(t) do
+            if type(v) == "table" then
+                text = text .. tab .. TableSerialization(v, i + 1, writeNumericTable) .. ",\n"
+            elseif type(v) == "string" then
+                v = string.gsub(v, "\n", "\\\n")
+                v = string.gsub(v, "\"", "\\\"")
+                v = string.gsub(v, "'", "\\\'")
+                text = text .. tab .. '"' .. v .. '",\n'
+            elseif type(v) == "number" or type(v) == "boolean" then
+                text = text .. tab .. tostring(v) .. ",\n"
+            elseif v == nil then
+                text = text .. tab .. "nil,\n"
+            end
+        end
+    else
+        -- Sinon, on affiche les clés comme d'habitude
+        for k, v in PairsByKeys(t) do
+            if type(k) == "string" then
+                k = string.gsub(k, "\n", "\\\n")
+                k = string.gsub(k, "\"", "\\\"")
+                k = string.gsub(k, "'", "\\\'")
+                text = text .. tab .. '["' .. k .. '"] = '
+            else
+                text = text .. tab .. "[" .. k .. "] = "
+            end
+
+            if type(v) == "table" then
+                text = text .. TableSerialization(v, i + 1, writeNumericTable) .. ",\n"
+            elseif type(v) == "string" then
+                v = string.gsub(v, "\n", "\\\n")
+                v = string.gsub(v, "\"", "\\\"")
+                v = string.gsub(v, "'", "\\\'")
+                text = text .. '"' .. v .. '",\n'
+            elseif type(v) == "number" or type(v) == "boolean" then
+                text = text .. tostring(v) .. ",\n"
+            elseif v == nil then
+                text = text .. "nil,\n"
+            end
+        end
+    end
+
+    text = text .. tab1 .. "}"
+    return text
+end
+
 --function to turn a table into a string
-function TableSerialization(t, i, params)
+function TableSerialization_TEMP1(t, i, params)
 
 	local crlf = ""
 	local tab1 = ""
@@ -231,6 +344,62 @@ function TableSerialization(t, i, params)
 		text = text .. tab .. "},\n"	..crlf												--all brackets with indent higher than 0 are followed by a comma
 	end
 	return text
+end
+
+-- Fonction pour sérialiser une table en chaîne
+function TableSerializationAG_triggers(t, i)
+    local text = "{\n"
+    local tab = string.rep("\t", i + 1)
+
+    if IsSequentialTable(t) then
+        -- Si la table est strictement numérique, on n'affiche pas les indices
+        for _, v in ipairs(t) do
+            if type(v) == "string" then
+                text = text .. tab .. "'" .. v .. "',\n"
+            elseif type(v) == "number" then
+                text = text .. tab .. v .. ",\n"
+            elseif type(v) == "table" then
+                text = text .. tab .. TableSerializationAG(v, i + 1)
+            elseif type(v) == "boolean" then
+                text = text .. tab .. tostring(v) .. ",\n"
+            elseif type(v) == "function" then
+                text = text .. tab .. tostring(v) .. ",\n"
+            elseif v == nil then
+                text = text .. tab .. "nil,\n"
+            end
+        end
+    else
+        -- Sinon, on affiche les clés triées
+        for k, v in PairsByKeys(t) do
+            if type(k) == "string" then
+                text = text .. tab .. "['" .. k .. "'] = "
+            else
+                text = text .. tab .. "[" .. k .. "] = "
+            end
+
+            if type(v) == "string" then
+                text = text .. "'" .. v .. "',\n"
+            elseif type(v) == "number" then
+                text = text .. v .. ",\n"
+            elseif type(v) == "table" then
+                text = text .. TableSerializationAG(v, i + 1)
+            elseif type(v) == "boolean" then
+                text = text .. tostring(v) .. ",\n"
+            elseif type(v) == "function" then
+                text = text .. tostring(v) .. ",\n"
+            elseif v == nil then
+                text = text .. "nil,\n"
+            end
+        end
+    end
+
+    tab = string.rep("\t", i)
+    if i == 0 then
+        text = text .. tab .. "}\n" -- La dernière accolade ne doit pas être suivie d'une virgule
+    else
+        text = text .. tab .. "},\n" -- Toutes les autres accolades sont suivies d'une virgule
+    end
+    return text
 end
 
 local loadoutStructures = {

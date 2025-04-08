@@ -110,7 +110,11 @@ clientFile:write(client_str)																		--write initial file
 clientFile:close()
 
 -- require("Init/camp_triggers_init")																	--open campaign trigger file
-local trigStr = "camp_triggers = " .. TableSerializationAG(camp_triggers, 0)							--write
+-- local trigStr = "camp_triggers = " .. TableSerializationAG(camp_triggers, 0)							--write
+-- local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to open debug file")
+-- trigFile:write(trigStr)
+-- trigFile:close()
+local trigStr = "camp_triggers = " .. TableSerializationAG_triggers(camp_triggers, 0)							--write
 local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to open debug file")
 trigFile:write(trigStr)
 trigFile:close()

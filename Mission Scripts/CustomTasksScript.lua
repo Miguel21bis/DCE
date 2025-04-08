@@ -53,7 +53,7 @@ function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackTyp
 	-- ROCKET    2
 	-- BOMB      3
 
-	local function Execute(arg)
+	local function execute(arg)
 		local cntrl = arg[1]
 		local ComboTask = arg[2]
 		local n = arg[3]
@@ -273,10 +273,10 @@ function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackTyp
 			else
 				agendaSeconde[nextSecond] = true
 			end
-			timer.scheduleFunction(Execute, {cntrl, ComboTask, n} ,nextSecond)
-			-- timer.scheduleFunction(Execute, {cntrl, ComboTask, n} , timer.getTime() + n*0.5)
+			timer.scheduleFunction(execute, {cntrl, ComboTask, n} ,nextSecond)
+			-- timer.scheduleFunction(execute, {cntrl, ComboTask, n} , timer.getTime() + n*0.5)
 
-		end		--local function Execute(n)
+		end		--local function execute(n)
 	end
 end
 
@@ -287,7 +287,7 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 	if varFpsLeak then return end
 	env.info("DCE_CustomStaticAttack | start| "..tostring(FlightName))
 
-	local function Execute(arg)
+	local function execute(arg)
 		local cntrl = arg[1]
 		local ComboTask = arg[2]
 		local n = arg[3]
@@ -426,8 +426,8 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 
 			if StaticTemp then							--make sure that static object still exists
 
-				-- local TargetID = StaticObject.getByName(TargetList[num]):getID()	--get static object ID
-				local TargetID = StaticTemp:getID()	--get static object ID
+				-- local targetID = StaticObject.getByName(TargetList[num]):getID()	--get static object ID
+				local targetID = StaticTemp:getID()	--get static object ID
 
 				local task_entry = {									--define attack task
 					["enabled"] = true,
@@ -454,7 +454,7 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 				-- --auto expend
 				-- if expend == "Auto" and id_task == "CAS" then
 					-- task_entry["id"] = "AttackUnit"
-					-- task_entry.params["unitId"] = TargetID
+					-- task_entry.params["unitId"] = targetID
 					-- task_entry.params["attackQtyLimit"] = false
 				-- end
 
@@ -462,7 +462,7 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 				--auto expend
 				if  idTypeStrike == "AttackUnit" then
 					task_entry["id"] = "AttackUnit"
-					task_entry.params["unitId"] = tonumber(TargetID)
+					task_entry.params["unitId"] = tonumber(targetID)
 					task_entry.params["attackQtyLimit"] = false
 					task_entry.params["x"] = nil
 					task_entry.params["y"] = nil
@@ -490,7 +490,7 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 				-- 	agendaSeconde[nextSecond] = true
 				-- end
 
-				-- timer.scheduleFunction(Execute, {cntrl, ComboTask, n} , nextSecond)	
+				-- timer.scheduleFunction(execute, {cntrl, ComboTask, n} , nextSecond)	
 
 			end
 		end
@@ -507,39 +507,40 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 			agendaSeconde[nextSecond] = true
 		end
 
-		timer.scheduleFunction(Execute, {cntrl, ComboTask, n} , nextSecond)
+		timer.scheduleFunction(execute, {cntrl, ComboTask, n} , nextSecond)
 
 	end
 end
 
 ----- attack multiple all class objects -----
 --allows each wingman of a flight to attack its own individual target simultaneously, then proceed to Egress point to join up (flight would not climb during egress if wingmen would joing leader imediately after attack)
-function CustomMixClassAttack(FlightName, TargetList, expend, weaponType, attackType, attackAlt, id_task)
+function CustomMixClassAttack(flightName, targetList, expend, weaponType, attackType, attackAlt, id_task)
 	if varFpsLeak then return end
-	env.info("DCE_CustomMixClassAttack | start| "..tostring(FlightName))
+	env.info("DCE_CustomMixClassAttack | start| "..tostring(flightName))
 
-	local function Execute(arg)
+	--{cntrl, comboTask, n}
+	local function execute(arg)
 		local cntrl = arg[1]
-		local ComboTask = arg[2]
+		local comboTask = arg[2]
 		local n = arg[3]
 		local current_time = timer.getTime()
 
 		if camp.debug then
 			--export custom mission log
-			local logStr = "ComboTask = " .. TableSerialization(ComboTask, 0)
-			local FlightNameClean = FlightName:gsub('[%p%c%s]', '_')
-			local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..n.."_".. "CustomMixClasscAttack_"..tostring(current_time)..".lua", "w")
+			local logStr = "ComboTask = " .. TableSerialization(comboTask, 0)
+			local flightNameClean = flightName:gsub('[%p%c%s]', '_')
+			local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_"..n.."_".. "CustomMixClasscAttack_"..tostring(current_time)..".lua", "w")
 			if logFile then
 				logFile:write(logStr)
 				logFile:close()
 			else
-				env.info("DCE_CustomMixClassAttack: Failed to open log file for writing.")
+				-- env.info("DCE_CustomMixClassAttack: Failed to open log file for writing.")
 			end
 		end
 
-		cntrl:pushTask(ComboTask)									--push task to front of task list	
+		cntrl:pushTask(comboTask)									--push task to front of task list	
 
-		env.info("DCE_CustomMixClassAttack | fin")
+		-- env.info("DCE_CustomMixClassAttack | fin")
 	end
 
 	local idTypeStrike  = "Bombing"
@@ -547,20 +548,20 @@ function CustomMixClassAttack(FlightName, TargetList, expend, weaponType, attack
 	-- 	idTypeStrike  = "AttackUnit"  --TODO a confirmer que cela fonctionne sur un static	
 	-- end
 
-	if AttackCounter[TargetList[1]] then									--counter with number of flights that have already attacked this target
-		AttackCounter[TargetList[1]] = AttackCounter[TargetList[1]] + 1		--increase counter by one
+	if AttackCounter[targetList[1]] then									--counter with number of flights that have already attacked this target
+		AttackCounter[targetList[1]] = AttackCounter[targetList[1]] + 1		--increase counter by one
 	else																	--no flight has attacked this target yet
-		AttackCounter[TargetList[1]] = 1									--set to one
+		AttackCounter[targetList[1]] = 1									--set to one
 	end
-	local AttackN = AttackCounter[TargetList[1]]
+	local AttackN = AttackCounter[targetList[1]]
 
-	env.info("DCE_CustomMixClassAttack : AttackN "..tostring(AttackN))
+	-- env.info("DCE_CustomMixClassAttack : AttackN "..tostring(AttackN))
 
 	if attackType ~= "Dive" then
 		attackType = nil
 	end
 
-	local flight = Group.getByName(FlightName)						--get group of attacking flight
+	local flight = Group.getByName(flightName)						--get group of attacking flight
 	local wingman = flight:getUnits()								--get list of units from attacking flights
 
 	local EgressWP
@@ -569,8 +570,8 @@ function CustomMixClassAttack(FlightName, TargetList, expend, weaponType, attack
 		for country_n,country in pairs(coal.country) do
 			if country.plane then
 				for group_n,group in pairs(country.plane.group) do
-					-- if FlightName == env.getValueDictByKey(group.name) then								--find group in env.mission
-					if FlightName == group.name then
+					-- if flightName == env.getValueDictByKey(group.name) then								--find group in env.mission
+					if flightName == group.name then
 						for w = 1, #group.route.points do												--iterate through all group waypoints
 							-- if string.find(env.getValueDictByKey(group.route.points[w].name), "Egress") then		--find egress waypoint
 							if string.find(group.route.points[w].name, "Egress") then
@@ -587,8 +588,8 @@ function CustomMixClassAttack(FlightName, TargetList, expend, weaponType, attack
 			end
 			if country.helicopter then
 				for group_n,group in pairs(country.helicopter.group) do
-					-- if FlightName == env.getValueDictByKey(group.name) then								--find group in env.mission
-					if FlightName == group.name then
+					-- if flightName == env.getValueDictByKey(group.name) then								--find group in env.mission
+					if flightName == group.name then
 						for w = 1, #group.route.points do												--iterate through all group waypoints
 							-- if string.find(env.getValueDictByKey(group.route.points[w].name), "Egress") then		--find egress waypoint
 							if string.find(group.route.points[w].name, "Egress") then
@@ -621,31 +622,31 @@ function CustomMixClassAttack(FlightName, TargetList, expend, weaponType, attack
 			cntrl:setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2) 	--set to evade fire again, as controller for individual unit does not take over options from parent group
 		end
 
-		local ComboTask = {											--define combo task to hold multiple attack tasks
+		local comboTask = {											--define combo task to hold multiple attack tasks
 			id = 'ComboTask',
 			params = {
 				tasks = {},
 			},
 		}
 
-		for t = 1, #TargetList do									--iterate thourgh targets
+		for t = 1, #targetList do									--iterate thourgh targets
 
 			--each wingman gets one attack task for each target	
-			local num = t + math.ceil((n - 1) * (#TargetList / #wingman))	--distribute target numbers across flight
+			local num = t + math.ceil((n - 1) * (#targetList / #wingman))	--distribute target numbers across flight
 			num = num + AttackN - 1											--increase target number to adjust for previous attacks
-			while num > #TargetList do
-				num = num - #TargetList
+			while num > #targetList do
+				num = num - #targetList
 			end
 
-			local targetName = TargetList[num][1]
-			local targetClass = TargetList[num][2]
-			local targetX = tostring(TargetList[num][3])
-			local targetY = tostring(TargetList[num][4])
+			local targetName = targetList[num][1]
+			local targetClass = targetList[num][2]
+			local targetX = tostring(targetList[num][3])
+			local targetY = tostring(targetList[num][4])
 			local targetTemp = false
 			local targetTempPos = {}
-			local TargetID
+			local targetID
 
-			env.info("DCE_CustomMixClassAttack :targetName AA |"..tostring(targetName).."|targetClass: "..tostring(targetClass))
+			-- env.info("DCE_CustomMixClassAttack :targetName AA |"..tostring(targetName).."|targetClass: "..tostring(targetClass))
 
 			if targetClass == "static" then
 				targetTemp = StaticObject.getByName(targetName)
@@ -655,12 +656,12 @@ function CustomMixClassAttack(FlightName, TargetList, expend, weaponType, attack
 						y = targetTemp:getPoint().z,
 					}
 					-- idTypeStrike  = "AttackUnit"
-					-- TargetID = targetTemp:getID()
+					-- targetID = targetTemp:getID()
 
 					idTypeStrike  = "Bombing"
 
-					env.info("DCE_CustomMixClassAttack static found BB1 |"..tostring(targetName).."|")
-					_affiche(targetTemp, "targetName StaticObject.getByName")
+					-- env.info("DCE_CustomMixClassAttack static found BB1 |"..tostring(targetName).."|")
+					-- _affiche(targetTemp, "targetName StaticObject.getByName")
 				end
 
 			elseif (targetClass == "MapObject" or targetClass == nil or targetClass == "nil") then
@@ -671,9 +672,8 @@ function CustomMixClassAttack(FlightName, TargetList, expend, weaponType, attack
 				targetTemp = true
 				idTypeStrike  = "Bombing"
 
-				env.info("DCE_CustomMixClassAttack MapObject found BB2 |"..tostring(targetName).."|")
-				-- _affiche(targetTemp, "targetName Unit.getByName")
-
+				-- env.info("DCE_CustomMixClassAttack MapObject found BB2 |"..tostring(targetName).."|")
+				
 			elseif  targetClass == "nil" then
 				targetTempPos ={
 					x = targetX,
@@ -682,9 +682,8 @@ function CustomMixClassAttack(FlightName, TargetList, expend, weaponType, attack
 				targetTemp = true
 				idTypeStrike  = "Bombing"
 
-				env.info("DCE_CustomMixClassAttack MapObject found BB22 |"..tostring(targetName).."|")
-				-- _affiche(targetTemp, "targetName Unit.getByName")
-
+				-- env.info("DCE_CustomMixClassAttack MapObject found BB22 |"..tostring(targetName).."|")
+				
 			else --if targetClass == "vehicle" then
 				targetTemp = Unit.getByName(targetName)
 				if targetTemp then
@@ -693,26 +692,23 @@ function CustomMixClassAttack(FlightName, TargetList, expend, weaponType, attack
 						y = targetTemp:getPoint().z,
 					}
 					-- idTypeStrike  = "AttackUnit"
-					-- TargetID = targetTemp:getID()
+					-- targetID = targetTemp:getID()
 
 					idTypeStrike  = "Bombing"
 
-					env.info("DCE_CustomMixClassAttack vehicle found BB3 |"..tostring(targetName).."|")
-					-- _affiche(targetTemp, "targetName Unit.getByName")
+					-- env.info("DCE_CustomMixClassAttack vehicle found BB3 |"..tostring(targetName).."|")
 				end
 			end
 
 			if targetTemp then							--make sure that static object still exists
-				env.info("DCE_CustomMixClassAttack: DD1 ")
-
-				-- local TargetID = targetTemp:getID()	--get static object ID
+				-- env.info("DCE_CustomMixClassAttack: DD1 ")
 
 				local task_entry = {									--define attack task
 					["enabled"] = true,
 					["auto"] = false,
 					["id"] = idTypeStrike,
 					["name"] = "task: "..tostring(id_task).." class: "..tostring(targetClass),
-					["number"] = #ComboTask.params.tasks + 1,
+					["number"] = #comboTask.params.tasks + 1,
 					["params"] = {
 						["x"] = targetTempPos.x,
 						["y"] = targetTempPos.y,
@@ -733,15 +729,15 @@ function CustomMixClassAttack(FlightName, TargetList, expend, weaponType, attack
 				--auto expend
 				if  idTypeStrike == "AttackUnit" then
 					task_entry["id"] = "AttackUnit"
-					task_entry.params["unitId"] = tonumber(TargetID)
+					task_entry.params["unitId"] = tonumber(targetID)
 					task_entry.params["attackQtyLimit"] = false
 					task_entry.params["x"] = nil
 					task_entry.params["y"] = nil
 				end
 
-				env.info("DCE_CustomMixClassAttack: DD2 |"..tostring(FlightName).."| |"..tostring(task_entry["id"]))
+				-- env.info("DCE_CustomMixClassAttack: DD2 |"..tostring(FlightName).."| |"..tostring(task_entry["id"]))
 
-				table.insert(ComboTask.params.tasks, task_entry)
+				table.insert(comboTask.params.tasks, task_entry)
 
 			end
 		end
@@ -758,7 +754,7 @@ function CustomMixClassAttack(FlightName, TargetList, expend, weaponType, attack
 			agendaSeconde[nextSecond] = true
 		end
 
-		timer.scheduleFunction(Execute, {cntrl, ComboTask, n} , nextSecond)
+		timer.scheduleFunction(execute, {cntrl, comboTask, n} , nextSecond)
 
 	end
 end
@@ -770,7 +766,7 @@ function CustomMapObjectAttack(FlightName, TargetList, expend, weaponType, attac
 
 	local idTypeStrike  = "Bombing"
 
-	local function Execute(arg)
+	local function execute(arg)
 		local cntrl = arg[1]
 		local ComboTask = arg[2]
 		local n = arg[3]
@@ -941,7 +937,7 @@ function CustomMapObjectAttack(FlightName, TargetList, expend, weaponType, attac
 			agendaSeconde[nextSecond] = true
 		end
 
-		timer.scheduleFunction(Execute, {cntrl, ComboTask, n} , nextSecond)
+		timer.scheduleFunction(execute, {cntrl, ComboTask, n} , nextSecond)
 
 
 	end
@@ -1138,12 +1134,12 @@ function CustomRejoin(FlightName)
 
 	env.info("DCE_CustomRejoin | start| "..tostring(FlightName))
 
-	local function Execute(cntrl)
+	local function execute(cntrl)
 		cntrl:resetTask()												--reset task (wingman will rejoin with leader)
 
 		if camp.debug then
 
-			env.info("DCE_CustomRejoin | Execute | cntrl:resetTask()| "..tostring(cntrl).." actualtime: "..tostring(timer.getTime()))
+			env.info("DCE_CustomRejoin | execute | cntrl:resetTask()| "..tostring(cntrl).." actualtime: "..tostring(timer.getTime()))
 			_affiche(cntrl, "DCE_CustomRejoin cntrl")
 
 		end
@@ -1166,8 +1162,8 @@ function CustomRejoin(FlightName)
 		else
 			agendaSeconde[nextSecond] = true
 		end
-		env.info("DCE_CustomRejoin: | next_Execute| "..tostring(FlightName).." wingman: "..n.." actualtime: "..tostring(timer.getTime()).." nextSecond: "..tostring(nextSecond))
-		timer.scheduleFunction(Execute, cntrl, nextSecond)
+		env.info("DCE_CustomRejoin: | next_execute| "..tostring(FlightName).." wingman: "..n.." actualtime: "..tostring(timer.getTime()).." nextSecond: "..tostring(nextSecond))
+		timer.scheduleFunction(execute, cntrl, nextSecond)
 	end
 
 end
@@ -2647,7 +2643,7 @@ function OrbitPosition(FlightName, Alt, Speed, UntilTime)
 		..tostring(Speed).."|UntilTime|"..tostring(UntilTime).."|current_time0|"..tostring(current_time0)
 	)
 
-	local function Execute()
+	local function execute()
 		env.info("DCE_Orbit B ")
 
 		if flight then														--group still exists
@@ -2703,7 +2699,7 @@ function OrbitPosition(FlightName, Alt, Speed, UntilTime)
 		end
 	end
 
-	timer.scheduleFunction(Execute, nil, timer.getTime() + 2)
+	timer.scheduleFunction(execute, nil, timer.getTime() + 2)
 
 end
 
@@ -2717,7 +2713,7 @@ function Custom_RTB_2_Base(grpname, BaseName, speed, alt)
 	if varFpsLeak_B then return end
 	env.info( "Custom_RTB_2_Base A, grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(speed).."|"..tostring(alt))
 
-	local function Execute()
+	local function execute()
 
 		local flight = Group.getByName(grpname)								--get Group
 		local gpGid = Group.getID(flight)
@@ -2851,7 +2847,7 @@ function Custom_RTB_2_Base(grpname, BaseName, speed, alt)
 		end
 	end
 
-	timer.scheduleFunction(Execute, nil, timer.getTime() + 1)
+	timer.scheduleFunction(execute, nil, timer.getTime() + 1)
 
 end	--Custom_RTB_2_Base
 
@@ -2867,7 +2863,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 	local current_time = timer.getTime()
 	env.info( "current_time: "..tostring(current_time).." Custom_AddWptSAR A, grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(speed).."|"..tostring(alt))
 
-	local function Execute()
+	local function execute()
 		local current_time = timer.getTime()
 		env.info( "current_time: "..tostring(current_time).." Custom_AddWptSAR B, grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(speed).."|"..tostring(alt))
 
@@ -3379,7 +3375,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 		end
 	end
 
-	timer.scheduleFunction(Execute, nil, timer.getTime() + 1)
+	timer.scheduleFunction(execute, nil, timer.getTime() + 1)
 
 
 end	--Custom_AddWptSAR
@@ -3395,7 +3391,7 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 	local current_time = timer.getTime()
 	env.info( "Custom_SAR A0 current_time: "..tostring(current_time).." grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(mgrsChute))
 
-	local function Execute()
+	local function execute()
 		current_time = timer.getTime()
 		env.info( "Custom_SAR B1, current_time: "..tostring(current_time))
 		env.info( "Custom_SAR BB2, grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(mgrsChute).."|"..tostring(current_time))
@@ -4051,9 +4047,9 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 		local ctr = flight:getController()
 		Controller.setTask(ctr, mission)
 
-	end     --fin Execute
+	end     --fin execute
 
-	timer.scheduleFunction(Execute, nil, timer.getTime() + 1)
+	timer.scheduleFunction(execute, nil, timer.getTime() + 1)
 
 end	--Custom_SAR
 
@@ -4079,7 +4075,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 	local current_time = timer.getTime()
 	env.info( "current_time: "..tostring(current_time).." Custom_Altitude, B wptAlti  |"..tostring(grpname).." |wptAlti: "..tostring(wptAlti))
 
-	local function Execute()
+	local function execute()
 		current_time = timer.getTime()
 		local flight = Group.getByName(grpname)
 
@@ -4606,7 +4602,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 		agendaSeconde[nextSecond] = true
 	end
 
-	timer.scheduleFunction(Execute, nil, nextSecond)
+	timer.scheduleFunction(execute, nil, nextSecond)
 
-	-- timer.scheduleFunction(Execute, nil, timer.getTime() + 1)
+	-- timer.scheduleFunction(execute, nil, timer.getTime() + 1)
 end

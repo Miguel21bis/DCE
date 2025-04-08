@@ -780,8 +780,8 @@ local function startSAR(arg)
 
 	if camp.debug then
 		local logStr = "Start_SAR = " .. TableSerialization(Mission, 0)
-		local FlightNameClean = FlightSAR.name:gsub('[%p%c%s]', '_')
-		local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_".. "Start_SAR"..current_time..".lua", "w")
+		local flightNameClean = FlightSAR.name:gsub('[%p%c%s]', '_')
+		local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_".. "Start_SAR"..current_time..".lua", "w")
 		if logFile then
 			logFile:write(logStr)
 			logFile:close()
@@ -798,27 +798,27 @@ local function startSAR(arg)
 end
 
 
-function CheckImmediatSAR(EjectedPilot)
+function CheckImmediatSAR(ejectedPilot)
 
-	env.info( "DCE_CheckImmediatSAR A "..tostring(EjectedPilot.name))
+	env.info( "DCE_CheckImmediatSAR A "..tostring(ejectedPilot.name))
 
 	local pt_chute = {}
 	-- local initDesc = Event.initiator:getDesc()	
 
-	if EjectedPilot.initiatorSIDE then
-		if EjectedPilot.initiatorSIDE == 0 then
-			EjectedPilot.initiatorSIDE = "neutrals"
-		elseif EjectedPilot.initiatorSIDE == 1 then
-			EjectedPilot.initiatorSIDE = "red"
-		elseif EjectedPilot.initiatorSIDE == 2 then
-			EjectedPilot.initiatorSIDE = "blue"
+	if ejectedPilot.initiatorSIDE then
+		if ejectedPilot.initiatorSIDE == 0 then
+			ejectedPilot.initiatorSIDE = "neutrals"
+		elseif ejectedPilot.initiatorSIDE == 1 then
+			ejectedPilot.initiatorSIDE = "red"
+		elseif ejectedPilot.initiatorSIDE == 2 then
+			ejectedPilot.initiatorSIDE = "blue"
 		end
 	end
 
 	local isExist = false
 
-	-- if EjectedPilot.unit then
-	-- 	isExist = Unit.isExist(EjectedPilot.unit)
+	-- if ejectedPilot.unit then
+	-- 	isExist = Unit.isExist(ejectedPilot.unit)
 	-- end 
 
 	-- if damaged.unit and damaged.unit:isExist() then
@@ -831,20 +831,20 @@ function CheckImmediatSAR(EjectedPilot)
 	-- 	end
 	-- end
 
-	-- if EjectedPilot and EjectedPilot.x then
-	-- 	env.info( "DCE_CheckImmediatSAR B :isExist(): "..tostring(EjectedPilot.unit:isExist()))
+	-- if ejectedPilot and ejectedPilot.x then
+	-- 	env.info( "DCE_CheckImmediatSAR B :isExist(): "..tostring(ejectedPilot.unit:isExist()))
 	-- end
 
-	if EjectedPilot and EjectedPilot.x  then -- and EjectedPilot.unit:isExist()  --and isExist
+	if ejectedPilot and ejectedPilot.x  then -- and ejectedPilot.unit:isExist()  --and isExist
 
-		env.info( "DCE_CheckImmediatSAR C "..tostring(EjectedPilot.name))
+		env.info( "DCE_CheckImmediatSAR C "..tostring(ejectedPilot.name))
 
-		local grid = coord.LLtoMGRS(coord.LOtoLL(EjectedPilot))
+		local grid = coord.LLtoMGRS(coord.LOtoLL(ejectedPilot))
 
 		if grid  then
 			env.info( "DCE_CheckImmediatSAR  A1 grid found ")
 		else
-			grid = EjectedPilot.grid
+			grid = ejectedPilot.grid
 			env.info( "DCE_CheckImmediatSAR  A2 grid else ")
 		end
 
@@ -874,60 +874,60 @@ function CheckImmediatSAR(EjectedPilot)
 		local MGRS_Chute = grid.UTMZone.."_"..grid.MGRSDigraph.."_"..subdiv_E_Alpha.."_"..subdiv_N_Alpha
 		local MGRS_Chute_10KM = grid.UTMZone.."_"..grid.MGRSDigraph.."_"..subdiv_E_Num.."_"..subdiv_N_Num
 
-		env.info( "DCE_CheckImmediatSAR? A4 Start if EjectedPilot MGRS_Chute "..MGRS_Chute)
-		env.info( "DCE_CheckImmediatSAR? A5 Start if EjectedPilot MGRS_Chute_10KM "..MGRS_Chute_10KM)
+		env.info( "DCE_CheckImmediatSAR? A4 Start if ejectedPilot MGRS_Chute "..MGRS_Chute)
+		env.info( "DCE_CheckImmediatSAR? A5 Start if ejectedPilot MGRS_Chute_10KM "..MGRS_Chute_10KM)
 
 		local t = timer.getTime()
 
-		EjectedPilot.x2d = EjectedPilot.x
-		EjectedPilot.y2d = EjectedPilot.z
-		EjectedPilot.z2d = land.getHeight({x = EjectedPilot.x, y = EjectedPilot.z})
-		-- EjectedPilot.name = "Mis"..camp.mission.."_M"..camp.date.month.."_D"..camp.date.day.."_H"..camp.date.hour.."_Mn"..camp.date.minute.."_Pilot_"..EjectedPilot.initiator.."_Nb"..tostring(EjectedPilot.SumEjectedPilotDay)
+		ejectedPilot.x2d = ejectedPilot.x
+		ejectedPilot.y2d = ejectedPilot.z
+		ejectedPilot.z2d = land.getHeight({x = ejectedPilot.x, y = ejectedPilot.z})
+		-- ejectedPilot.name = "Mis"..camp.mission.."_M"..camp.date.month.."_D"..camp.date.day.."_H"..camp.date.hour.."_Mn"..camp.date.minute.."_Pilot_"..ejectedPilot.initiator.."_Nb"..tostring(ejectedPilot.SumejectedPilotDay)
 
-		-- if EjectedPilot.initiatorPilotName then
-		-- 	EjectedPilot.name = "Mis"..camp.mission.."_Pilot_"..EjectedPilot.initiatorPilotName.."_Nb"..tostring(EjectedPilot.SumEjectedPilotDay)
+		-- if ejectedPilot.initiatorPilotName then
+		-- 	ejectedPilot.name = "Mis"..camp.mission.."_Pilot_"..ejectedPilot.initiatorPilotName.."_Nb"..tostring(ejectedPilot.SumejectedPilotDay)
 		-- else
-		-- 	EjectedPilot.name = "Mis"..camp.mission.."_Pilot_"..EjectedPilot.initiator.."_Nb"..tostring(EjectedPilot.SumEjectedPilotDay)
+		-- 	ejectedPilot.name = "Mis"..camp.mission.."_Pilot_"..ejectedPilot.initiator.."_Nb"..tostring(ejectedPilot.SumejectedPilotDay)
 		-- end
 
-		-- EjectedPilot.name = EjectedPilot.name:gsub('[%p%c%s]', '_')
+		-- ejectedPilot.name = ejectedPilot.name:gsub('[%p%c%s]', '_')
 
-		EjectedPilot.year = camp.date.year
-		EjectedPilot.month = camp.date.month
-		EjectedPilot.day = camp.date.day
-		EjectedPilot.hour = camp.date.hour
+		ejectedPilot.year = camp.date.year
+		ejectedPilot.month = camp.date.month
+		ejectedPilot.day = camp.date.day
+		ejectedPilot.hour = camp.date.hour
 
 
-		EjectedPilot.nameId = EjectedPilot.initiatorMissionID
-		EjectedPilot.MGRS_Chute = MGRS_Chute
-		EjectedPilot.MGRS_Chute_10KM = MGRS_Chute_10KM
-		EjectedPilot.groupSAR = ""
-		EjectedPilot.status = "MIA"
-		EjectedPilot.side = EjectedPilot.initiatorSIDE
-		EjectedPilot.country = EjectedPilot.initiatorCountry
+		ejectedPilot.nameId = ejectedPilot.initiatorMissionID
+		ejectedPilot.MGRS_Chute = MGRS_Chute
+		ejectedPilot.MGRS_Chute_10KM = MGRS_Chute_10KM
+		ejectedPilot.groupSAR = ""
+		ejectedPilot.status = "MIA"
+		ejectedPilot.side = ejectedPilot.initiatorSIDE
+		ejectedPilot.country = ejectedPilot.initiatorCountry
 
-		EjectedPilot.embarkAndSafe = false
-		EjectedPilot.smokeOK = false
-		EjectedPilot.embarked = false
-		EjectedPilot.landingPossible = false
+		ejectedPilot.embarkAndSafe = false
+		ejectedPilot.smokeOK = false
+		ejectedPilot.embarked = false
+		ejectedPilot.landingPossible = false
 
-		EjectedPilot.initChoicePOW = false
+		ejectedPilot.initChoicePOW = false
 
-		EjectedPilot.radio_start = 0
+		ejectedPilot.radio_start = 0
 
-		env.info( "DCE_CheckImmediatSAR? BB EjectedPilot.name "..EjectedPilot.name)
+		env.info( "DCE_CheckImmediatSAR? BB ejectedPilot.name "..ejectedPilot.name)
 
 		--ajoute à la queue le crash suivant dans la table zoneSAR
 		if not zoneSAR[MGRS_Chute] then zoneSAR[MGRS_Chute] = {} end
-		table.insert( zoneSAR[MGRS_Chute], EjectedPilot)
+		table.insert( zoneSAR[MGRS_Chute], ejectedPilot)
 
-		--si EjectedPilot est chez l'ENI, on ne lance pas de SAR
+		--si ejectedPilot est chez l'ENI, on ne lance pas de SAR
 		-- on lancera une CSAR dans les missions suivantes
 
 		local wrongSide = false
-		local ENI_Side = DCS_ENI_Side[EjectedPilot.side]
+		local ENI_Side = DCS_ENI_Side[ejectedPilot.side]
 		if camp.boundary and camp.boundary[ENI_Side] and camp.boundary[ENI_Side] ~= nil then
-			wrongSide =  CheckPointInPoly2({x=EjectedPilot.x2d,y=EjectedPilot.y2d} , camp.boundary[ENI_Side])
+			wrongSide =  CheckPointInPoly2({x=ejectedPilot.x2d,y=ejectedPilot.y2d} , camp.boundary[ENI_Side])
 			env.info( "DCE_CheckImmediatSAR C ?  boundary wrongSide ? __"..tostring(wrongSide))
 			if wrongSide  then
 				env.info( "DCE_CheckImmediatSAR? D boundary rightSideOfBorder __FALSE__ Return ")
@@ -936,9 +936,9 @@ function CheckImmediatSAR(EjectedPilot)
 		end
 
 		-- local rightSideOfBorder
-		-- if camp.boundary and camp.boundary[EjectedPilot.side] and camp.boundary[EjectedPilot.side] ~= nil then
-		-- 	rightSideOfBorder =  CheckPointInPoly2({x=EjectedPilot.x2d,y=EjectedPilot.y2d}, camp.boundary[EjectedPilot.side])
-		-- 	env.info( "DCE_CheckImmediatSAR? CC boundary rightSideOfBorder __"..tostring(rightSideOfBorder).."__ EjectedPilot.side: "..tostring(EjectedPilot.side))
+		-- if camp.boundary and camp.boundary[ejectedPilot.side] and camp.boundary[ejectedPilot.side] ~= nil then
+		-- 	rightSideOfBorder =  CheckPointInPoly2({x=ejectedPilot.x2d,y=ejectedPilot.y2d}, camp.boundary[ejectedPilot.side])
+		-- 	env.info( "DCE_CheckImmediatSAR? CC boundary rightSideOfBorder __"..tostring(rightSideOfBorder).."__ ejectedPilot.side: "..tostring(ejectedPilot.side))
 		-- 	if rightSideOfBorder == nil or rightSideOfBorder == false then
 		-- 		env.info( "DCE_CheckImmediatSAR? DD boundary rightSideOfBorder __FALSE__ Return ")
 		-- 		return
@@ -946,7 +946,7 @@ function CheckImmediatSAR(EjectedPilot)
 		-- end
 
 
-		--si EjectedPilot sur une VILLE on ne lance pas de SAR ni de CSAR
+		--si ejectedPilot sur une VILLE on ne lance pas de SAR ni de CSAR
 		local NameTheatre =  string.lower(env.mission.theatre)
 		env.info( "DCE_CheckImmediatSAR? NameTheatre "..tostring(NameTheatre))
 		if circleCity[NameTheatre] then
@@ -960,10 +960,10 @@ function CheckImmediatSAR(EjectedPilot)
 
 				-- env.info( "CheckImmediatSAR? Passe 2  mission2d_x: "..tostring(mission2d_x).." |mission2d_y: "..tostring(mission2d_y))
 
-				if math.abs(EjectedPilot.x2d - mission2d_x) <= 50000 and math.abs(EjectedPilot.y2d - mission2d_y) <= 50000 then
+				if math.abs(ejectedPilot.x2d - mission2d_x) <= 50000 and math.abs(ejectedPilot.y2d - mission2d_y) <= 50000 then
 					env.info( "DCE_CheckImmediatSAR? Passe 3 <= 50000  ")
 
-					local result = math.pow ((EjectedPilot.x2d - mission2d_x), 2) + math.pow((EjectedPilot.y2d - mission2d_y), 2) <= math.pow((circle.radius * 47.229042083728), 2)
+					local result = math.pow ((ejectedPilot.x2d - mission2d_x), 2) + math.pow((ejectedPilot.y2d - mission2d_y), 2) <= math.pow((circle.radius * 47.229042083728), 2)
 					env.info( "DCE_CheckImmediatSAR? Passe 4 result?  "..tostring(result))
 
 					local debugA = type(result)
@@ -971,27 +971,27 @@ function CheckImmediatSAR(EjectedPilot)
 
 					if result then
 
-						--le soldierEjectedPilot est déjà dans une zone CITY 
+						--le soldierejectedPilot est déjà dans une zone CITY 
 						-- pas de SAR ni CSAR
 
 						-- rightSideOfBorder =  CheckPointInPoly2(pointSelected, camp.boundary[manhuntSide])
 
 						local rightSideOfBorder
-						if camp.boundary and camp.boundary[EjectedPilot.side] and camp.boundary[EjectedPilot.side] ~= nil then
-							rightSideOfBorder =  CheckPointInPoly2({x=EjectedPilot.x2d,y=EjectedPilot.y2d}, camp.boundary[EjectedPilot.side])
+						if camp.boundary and camp.boundary[ejectedPilot.side] and camp.boundary[ejectedPilot.side] ~= nil then
+							rightSideOfBorder =  CheckPointInPoly2({x=ejectedPilot.x2d,y=ejectedPilot.y2d}, camp.boundary[ejectedPilot.side])
 
 						end
 
 						env.info("DCE_SAR zone CITY rightSideOfBorde B? "..tostring(rightSideOfBorder))
 						if rightSideOfBorder then
-							EjectedPilot.status = "Rescued"
+							ejectedPilot.status = "Rescued"
 							env.info("DCE_SAR zone CITY Rescued B ")
 						else
-							EjectedPilot.status = "MIA"
+							ejectedPilot.status = "MIA"
 							env.info("DCE_SAR zone CITY POW B ")
 						end
 
-						EjectedPilot.landingPossible = false
+						ejectedPilot.landingPossible = false
 						return
 
 					end
@@ -1002,7 +1002,7 @@ function CheckImmediatSAR(EjectedPilot)
 
 		--regarde la partie aéronaval, pour voir si c'est le pedro qui y va
 
-		local groups = coalition.getGroups(EjectedPilot.Coalition, Group.Category.SHIP)
+		local groups = coalition.getGroups(ejectedPilot.Coalition, Group.Category.SHIP)
 		local selected_distance = 60000
 		local selectedPoint = {}
 
@@ -1027,17 +1027,17 @@ function CheckImmediatSAR(EjectedPilot)
 
 				local uId = _unit:getID()
 
-				local TtempPoint = _unit:getPoint()
-				BaseHelico.x = TtempPoint.x
-				BaseHelico.y = TtempPoint.z
-				BaseHelico.z = TtempPoint.y
+				local tempPoint = _unit:getPoint()
+				BaseHelico.x = tempPoint.x
+				BaseHelico.y = tempPoint.z
+				BaseHelico.z = tempPoint.y
 				BaseHelico.name = uName
 				BaseHelico.Id = tonumber(uId)
 
 				local description = _unit:getDesc()
 
 				if _unit:isActive() then
-					local distance = math.sqrt(math.pow(BaseHelico.x - EjectedPilot.x2d, 2) + math.pow(BaseHelico.y - EjectedPilot.y2d, 2))
+					local distance = math.sqrt(math.pow(BaseHelico.x - ejectedPilot.x2d, 2) + math.pow(BaseHelico.y - ejectedPilot.y2d, 2))
 					if distance < selected_distance then
 						selected_distance = distance
 						selectedPoint = BaseHelico
@@ -1053,29 +1053,29 @@ function CheckImmediatSAR(EjectedPilot)
 			--6000 -> 30 s
 			--m 	-> x s
 			local tempReact = (selected_distance * 30) / 6000
-			timer.scheduleFunction(PedroSAR, {selectedPoint, EjectedPilot}, timer.getTime() + tempReact)
+			timer.scheduleFunction(PedroSAR, {selectedPoint, ejectedPilot}, timer.getTime() + tempReact)
 
-		-- elseif zoneSAR[EjectedPilot.MGRS_Chute] == nil or ( zoneSAR[EjectedPilot.MGRS_Chute] and zoneSAR[EjectedPilot.MGRS_Chute].groupSAR and  zoneSAR[EjectedPilot.MGRS_Chute].groupSAR == "" ) then
-		elseif  zoneSAR[EjectedPilot.MGRS_Chute].groupSAR == "" or zoneSAR[EjectedPilot.MGRS_Chute].groupSAR == nil or zoneSAR[EjectedPilot.MGRS_Chute].groupSAR == false then
+		-- elseif zoneSAR[ejectedPilot.MGRS_Chute] == nil or ( zoneSAR[ejectedPilot.MGRS_Chute] and zoneSAR[ejectedPilot.MGRS_Chute].groupSAR and  zoneSAR[ejectedPilot.MGRS_Chute].groupSAR == "" ) then
+		elseif  zoneSAR[ejectedPilot.MGRS_Chute].groupSAR == "" or zoneSAR[ejectedPilot.MGRS_Chute].groupSAR == nil or zoneSAR[ejectedPilot.MGRS_Chute].groupSAR == false then
 			env.info( "DCE_CheckImmediatSAR? FFa >6000 donc TERRESTRE?   ")
 
 			--find all flights in range to Ejected Pilot and hover ceiling
 			local eligible_flights = {}
-			for base_name, base in pairs(camp.SAR.alertSAR[EjectedPilot.side].base) do
+			for base_name, base in pairs(camp.SAR.alertSAR[ejectedPilot.side].base) do
 				env.info( "DCE_CheckImmediatSAR? FFb  base_name "..tostring(base_name))
 				for flight_n, flight in ipairs(base.ready) do
 
-					local distance = math.sqrt(math.pow(flight.x - EjectedPilot.x2d, 2) + math.pow(flight.y - EjectedPilot.y2d, 2))
+					local distance = math.sqrt(math.pow(flight.x - ejectedPilot.x2d, 2) + math.pow(flight.y - ejectedPilot.y2d, 2))
 
 					if distance >= flight.range  then
 						env.info( "DCE_CheckImmediatSAR? trop loin : "..tostring(distance).." > flight.range: "..tostring(flight.range))
 					end
 
-					if EjectedPilot.z2d >= flight.hHover then
-						env.info( "DCE_CheckImmediatSAR? trop haut : "..tostring(EjectedPilot.z2d).." > flight.hHover: "..tostring(flight.hHover))
+					if ejectedPilot.z2d >= flight.hHover then
+						env.info( "DCE_CheckImmediatSAR? trop haut : "..tostring(ejectedPilot.z2d).." > flight.hHover: "..tostring(flight.hHover))
 					end
 
-					if distance < flight.range and EjectedPilot.z2d < flight.hHover then
+					if distance < flight.range and ejectedPilot.z2d < flight.hHover then
 						eligible_flights[flight.name] = distance
 						env.info( "DCE_CheckImmediatSAR? FFc eligible_flights?   "..tostring(flight.name).."|distance: "..tostring(distance))
 					end
@@ -1101,7 +1101,7 @@ function CheckImmediatSAR(EjectedPilot)
 			--assign selected flight to rescue
 			if selected_flight then
 				env.info( "DCE_CheckImmediatSAR? II   ")
-				for base_name, base in pairs(camp.SAR.alertSAR[EjectedPilot.side].base) do
+				for base_name, base in pairs(camp.SAR.alertSAR[ejectedPilot.side].base) do
 					for flight_n, flight in pairs(base.ready) do
 						if flight.name == selected_flight then
 							env.info( "CheckImmediatSAR? JJ    selected_flight: "..tostring(selected_flight))
@@ -1112,14 +1112,14 @@ function CheckImmediatSAR(EjectedPilot)
 
 							env.info( "DCE_CheckImmediatSAR? YY launch SAR Alert   ")
 
-							timer.scheduleFunction(startSAR, {flight, EjectedPilot}, timer.getTime() + 30)
+							timer.scheduleFunction(startSAR, {flight, ejectedPilot}, timer.getTime() + 30)
 
-							if not zoneSAR[EjectedPilot.MGRS_Chute].groupSAR or zoneSAR[EjectedPilot.MGRS_Chute].groupSAR == nil then
-								zoneSAR[EjectedPilot.MGRS_Chute].groupSAR = "Group_"..flight.name
+							if not zoneSAR[ejectedPilot.MGRS_Chute].groupSAR or zoneSAR[ejectedPilot.MGRS_Chute].groupSAR == nil then
+								zoneSAR[ejectedPilot.MGRS_Chute].groupSAR = "Group_"..flight.name
 							end
 
-							table.insert(camp.SAR.alertSAR[EjectedPilot.side].assigned, flight )
-							table.remove( camp.SAR.alertSAR[EjectedPilot.side].base[base_name].ready, flight_n)											--move flight from ready to assigned status
+							table.insert(camp.SAR.alertSAR[ejectedPilot.side].assigned, flight )
+							table.remove( camp.SAR.alertSAR[ejectedPilot.side].base[base_name].ready, flight_n)											--move flight from ready to assigned status
 						end
 					end
 				end
@@ -1128,6 +1128,7 @@ function CheckImmediatSAR(EjectedPilot)
 	end
 end
 
+--{selectedPoint, ejectedPilot}
 function PedroSAR(arg)
 	local pt_start = arg[1]
 	local pt_dest = arg[2]
@@ -1139,28 +1140,42 @@ function PedroSAR(arg)
 		nb = #ListPedro[pt_start.name]
 	end
 
-	local FlightName = "Pedro_"..pt_start.name.."_"..tostring(nb)
+	_affiche(ListPedro, "DCE_PedroSAR A0 ListPedro")
+
+	-- ["name"] = "Unit_Pedro_CV-59 Forrestal_1",
+	-- Pedro_CV-59 Forrestal_1
+	-- Unit_Pedro_CV-59 Forrestal_1
+
+	local flightName = "Unit_Pedro_"..tostring(pt_start.name).."_"..tostring(nb)
+
+	env.info("DCE_PedroSAR A flightName: "..tostring(flightName))
 
 	local current_time = timer.getTime() +1
 	local speed = 75		-- v = m/s 46
 
-	local uPedro = Unit.getByName("Unit_"..FlightName)
-	local TtempPoint = uPedro:getPoint()
-	pt_start.x = TtempPoint.x
-	pt_start.y = TtempPoint.z
-	pt_start.z = TtempPoint.y
+	local uPedro = Unit.getByName(flightName)
+
+	if not uPedro then 
+		env.info("DCE_PedroSAR B return flightName: "..tostring(flightName))
+		return
+	end
+
+	local tempPoint = uPedro:getPoint()
+	pt_start.x = tempPoint.x
+	pt_start.y = tempPoint.z
+	pt_start.z = tempPoint.y
 
 	local alt = 60
 
 	local distance01 = math.sqrt(math.pow(pt_start.x - pt_dest.x2d, 2) + math.pow(pt_start.y - pt_dest.y2d, 2))		--distance between tanker and player
-	local destName
-	if not pt_dest.name or pt_dest.name == "" then
-		destName = math.floor(pt_dest.x)
-	else
-		destName = pt_dest.name
-	end
+	-- local destName
+	-- if not pt_dest.name or pt_dest.name == "" then
+	-- 	destName = math.floor(pt_dest.x)
+	-- else
+	-- 	destName = pt_dest.name
+	-- end
 
-	local grpname = "Group_"..FlightName
+	local grpname = "Group_"..flightName
 	local route = {}
 	route = {
 			[1] =
@@ -1267,25 +1282,25 @@ function PedroSAR(arg)
 								}, -- end of ["stopCondition"]
 							}, -- end of ["params"]
 						}, -- end of [1]
-						[2] =
-						{
-							["enabled"] = true,
-							["auto"] = false,
-							["id"] = "WrappedAction",
-							["number"] = 2,
-							["params"] =
-							{
-								["action"] =
-								{
-									["id"] = "Script",
-									["params"] =
-									{
-										-- ["command"] = "Custom_RTB_2_Base(\"Group_Pedro_CV-71 Theodore Roosevelt_1\",  \"CV-71 Theodore Roosevelt\",  \"46.25\",  \"60\")",
-										["command"] = 'Custom_RTB_2_Base("' .. grpname .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
-									}, -- end of ["params"]
-								}, -- end of ["action"]
-							}, -- end of ["params"]
-						}, -- end of [2]
+						-- [2] =
+						-- {
+						-- 	["enabled"] = true,
+						-- 	["auto"] = false,
+						-- 	["id"] = "WrappedAction",
+						-- 	["number"] = 2,
+						-- 	["params"] =
+						-- 	{
+						-- 		["action"] =
+						-- 		{
+						-- 			["id"] = "Script",
+						-- 			["params"] =
+						-- 			{
+						-- 				-- ["command"] = "Custom_RTB_2_Base(\"Group_Pedro_CV-71 Theodore Roosevelt_1\",  \"CV-71 Theodore Roosevelt\",  \"46.25\",  \"60\")",
+						-- 				["command"] = 'Custom_RTB_2_Base("' .. grpname .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
+						-- 			}, -- end of ["params"]
+						-- 		}, -- end of ["action"]
+						-- 	}, -- end of ["params"]
+						-- }, -- end of [2]
 					}, -- end of ["tasks"]
 				}, -- end of ["params"]
 			}, -- end of ["task"]
@@ -1382,7 +1397,7 @@ function PedroSAR(arg)
 	} -- end of ["route"]
 
 
-	local Mission = {
+	local mission = {
 		id = 'Mission',
 		params = {
 			route = {
@@ -1391,10 +1406,11 @@ function PedroSAR(arg)
 		}
 	}
 
-	local ctr = Group.getByName("Group_"..FlightName):getController()
+	local ctr = Group.getByName("Group_"..flightName):getController()
 
-	-- local ctr = value.Pedro_group:getController()
-	Controller.setTask(ctr, Mission)
+	ctr:resetTask()
+	ctr:setTask(mission)
+
 end	--function PedroSAR(arg)
 
 

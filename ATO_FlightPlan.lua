@@ -425,13 +425,28 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 
 			callsign_flight = flight_.target.predeterminedCallsign.groupNumber
 
+			if callsign_flight <= 9 then
+				callsign_flight = callsign_flight * 10
+			end
+
 			local nb_unite
 
+			-- local ii = 1
+			-- repeat
+			-- 	nb_unite = math.random(2, 9)
+			-- 	testCall = Callsign_west[category][Callsign_west_counter[category]]..callsign_flight
+			-- 	testCallFlightUnite = testCall..nb_unite
+			-- 	ii = ii + 1
+			-- until ii > 100 or not callSignFlightUnite[testCallFlightUnite]
+
+			-- les tanker ne fonctionne pas avec Texaco 4.5
+			-- mais Texaco 45.1
+			--dans un group de 1, l'unité doit toujours etre à 1
 			local ii = 1
 			repeat
 				nb_unite = math.random(2, 9)
-				testCall = Callsign_west[category][Callsign_west_counter[category]]..callsign_flight
-				testCallFlightUnite = testCall..nb_unite
+				testCall = Callsign_west[category][Callsign_west_counter[category]]..(callsign_flight + nb_unite)
+				testCallFlightUnite = testCall..1
 				ii = ii + 1
 			until ii > 100 or not callSignFlightUnite[testCallFlightUnite]
 
@@ -439,12 +454,12 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 			callSignFlightUnite[testCallFlightUnite] = true
 
 			callsign_nb = Callsign_west_counter[category]
-			_name = Callsign_west[category][Callsign_west_counter[category]] .. callsign_flight .. nb_unite
+			_name = Callsign_west[category][Callsign_west_counter[category]] .. callsign_flight .. 1
 
 			callsign = {
 				[1] = callsign_nb,
 				[2] =  callsign_flight,
-				[3] =  nb_unite,
+				[3] =  1,
 				name = _name
 			}
 

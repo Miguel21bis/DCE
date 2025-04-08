@@ -1439,13 +1439,18 @@ local tgtFile = io.open("Active/targetlist.lua", "w") or error("Failed to open d
 tgtFile:write(tgt_str)																		--save new data
 tgtFile:close()
 
-local trigStr = "camp_triggers = " .. TableSerializationAG(camp_triggers, 0)
+local trigStr = "camp_triggers = " .. TableSerializationAG_triggers(camp_triggers, 0)
 local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to open debug file")
 trigFile:write(trigStr)
 trigFile:close()
 
 
-local miss_str = "last_Mission = " .. TableSerialization(mission, 0)						--make a string
+-- local miss_str = "last_Mission = " .. TableSerialization(mission, 0)						--make a string
+-- local missFile = io.open("Active/last_Mission.lua", "w") or error("Failed to open debug file")
+-- missFile:write(miss_str)															--save new data
+-- missFile:close()
+
+local miss_str = "last_Mission = " .. TableSerialization(mission, 0, { writeNumericTable = true })						--make a string
 local missFile = io.open("Active/last_Mission.lua", "w") or error("Failed to open debug file")
 missFile:write(miss_str)															--save new data
 missFile:close()

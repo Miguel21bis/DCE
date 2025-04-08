@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.86.536"
+versionDCE["UTIL_Changelog.lua"] = "20.87.536"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.86.536"
+VersionDCE["UTIL_Changelog.txt"] = "20.87.536"
 --[[
 
 
@@ -9,23 +9,23 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.86.536:==
+==:20.87.536:==
 
-536	mod		[loadout]M86	change of logic for the “day” variable: day will always be considered true (even if it's not in the loadout). 
+536	mod		[loadout][M87]	change of logic for the “day” variable: day will always be considered true (even if it's not in the loadout). 
 						However, if you want ONLY a night loadout, set this:
 							night = true,
 						and 
 							day = false,
-535	mod		[date]M85	new variables added to conf_mod (RepairOption, current_date, weather, etc.) 
+535	mod		[date][M86]	new variables added to conf_mod (RepairOption, current_date, weather, etc.) 
 534	fixed	[generator][inter]		choosing interceptor causes mission generation to crash
 533	mod		[inter]		interceptors only take off if a type of aircraft to be intercepted is detected
 				["Kien An Airbase Alert"] = {
 					task = "Intercept",
 					targetPlane = {"B-52H", "A-6E", "VSN_F105D" },
 			
-532	 add	[file]		keeps files already added to base_mission M85
-531	 add	[FPS]		DCE Bulle par activation, désactivation des vehicules et static M84
-530	 add	[Jammer]		Jammer checkMissileProximity  M83
+532	 add	[file][M85]		keeps files already added to base_mission
+531	 add	[FPS][M84]		DCE Bulle par activation, désactivation des vehicules et static
+530	 add	[Jammer][M83]		Jammer checkMissileProximity  M83
 529 add	[callSign]		assign a specific callSign (e.g. Tanker) to a target to have consistent callSigns according to the chosen pattern
 						add this to a target pattern/tanker in the targetList :
 						predeterminedCallsign =  {
@@ -35,7 +35,7 @@ known issues:
 529 fixed	[radio]		tanker frequencies are not grouped by identical targets or patterns
 528 fixed	[generator]	take-off time does not match (again...)
 527 fixed	[debrief]	debriefing is blocked on a base.x position issue with damaged CVN/LHA
-526 add	[campaignMaker]	Action.UnitResuscitateOrKill(unitName, liveOrKill, liveValue) (M82)
+526 add	[campaignMaker][M82]	Action.UnitResuscitateOrKill(unitName, liveOrKill, liveValue)
 525 fixed	[flight]	flight delayed
 
 ==:20.81.524:==

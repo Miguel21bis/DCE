@@ -1270,7 +1270,7 @@ local function airRetreat()
 																retreatRoute = Deepcopy(_group.route.points)
 
 																-- ajoute comme premier wpt leur position initial pour garder la fonction AWACS
-																local FirstWPT = {
+																local firstWPT = {
 																	['alt'] = awacs_point.y,
 																	['type'] = 'Turning Point',
 																	['action'] = 'Turning Point',
@@ -1352,7 +1352,7 @@ local function airRetreat()
 																}
 
 
-																table.insert(retreatRoute, 1, FirstWPT)
+																table.insert(retreatRoute, 1, firstWPT)
 
 																--modifie les coordonées du premier wpt initial
 																retreatRoute[2].x = xRetreat
@@ -1644,7 +1644,7 @@ function AFAC_F10(playerGroup)
 					gpGid = gpGid,
 					radioOn = true,
 				}
-				
+
 				missionCommands.addCommandForGroup(gpGid, "AFAC radio On ", menuAFAC_B, AFAC_com, afacData )
 
 				afacData.radioOn = false
@@ -1844,13 +1844,13 @@ function RtbPack(playerGroup)
 									local wingman = _group:getUnits()								--get list of units from attacking flights
 									for n = 1, #wingman do											--iterate through wingmen in flight
 										local cntrl
-										
+
 										if n == 1 then
 											cntrl = _group:getController()
 										else
 											cntrl = wingman[n]:getController()
 										end
-										
+
 										cntrl:resetTask()											--reset task (wingman will rejoin with leader)
 									end
 								end
@@ -2413,7 +2413,7 @@ function getOut(arg)
 
 			env.info( "DCE_getOut B Attempted emergency evacuation of the aircraft ")
 			trigger.action.outTextForUnit(playerId, "Attempted emergency evacuation of the aircraft ", 15)
-			
+
 			GetOutGDFM({pName, playerObj, playerId})
 		end
 	end
@@ -2622,9 +2622,9 @@ end
 --////////////////////////////////////////////////////////////////////////////////////////////
 local function EWR_speaking(arg)
 	local i = 6
-	if arg[3] then 
+	if arg[3] then
 		i = arg[3]
-	end 
+	end
 	local speakingTime = 30
 
 	speakingTime = speakingTime - i*3
@@ -2998,7 +2998,7 @@ local function EWR_magic()
 										}
 
 										table.insert(plotContactDetected[sideContact], annonce)
-										
+
 									end
 								end
 							end
@@ -3009,11 +3009,11 @@ local function EWR_magic()
 								for annonceN, annonce in pairs(plotContactDetected[sideENI]) do
 									timer.scheduleFunction(EWR_speaking, {playerId, annonce.speak, i}, timer.getTime() + (i*3))
 									-- timer.scheduleFunction(sendTTSMessage, {freq, "AM", speak}, timer.getTime() + (i*2))
-									
+
 									EWR_optionPlayer[trucName]["lasTime"] = locTimer
 									i = i + 1
 									if i >= 4 then break end
-										
+
 									if i == 1 then
 										bearingFriend[1] = annonce.bearing
 									elseif i == 2 then
@@ -3031,18 +3031,18 @@ local function EWR_magic()
 										-- Normaliser les angles
 										local bearingFriendAngle = NormalizeAngle(bearingFriend[j].bearing)
 										local annonceAngle = NormalizeAngle(annonce.bearing)
-								
+
 										-- Calculer la différence absolue en tenant compte du cercle
 										local diff = math.abs(annonceAngle - bearingFriendAngle)
 										diff = math.min(diff, 360 - diff) -- Prendre en compte l'enroulement
-								
+
 										if diff <= 20 then
 											timer.scheduleFunction(EWR_speaking, {playerId, annonce.speak, i}, timer.getTime() + (i * 3))
 											-- timer.scheduleFunction(sendTTSMessage, {freq, "AM", speak}, timer.getTime() + (i*2))
 										end
 									end
 								end
-								
+
 							end
 						end
 					end
@@ -3274,7 +3274,7 @@ local function loopAFAC_CAS()
 
 		for _, gp in pairs(groups) do
 			local gpName = Group.getName(gp)
-		
+
 			if string.find(gpName,"Strike") then
 				local wingman = gp:getUnits()
 				for wingmanN, unit in ipairs(wingman) do
@@ -3289,9 +3289,9 @@ local function loopAFAC_CAS()
 								-- local coalitionForce = flightGroup:getCoalition()
 								local unitsAFAC = flightGroup:getUnits()
 								local unitAFAC = unitsAFAC[1]
-							
+
 								if unitAFAC and unitAFAC:isExist() then
-									
+
 									local afacPos = unitAFAC:getPoint()
 									local unit_Pos = unit:getPoint()
 
@@ -3301,9 +3301,9 @@ local function loopAFAC_CAS()
 
 										trigger.action.smoke(value.targetPos, trigger.smokeColor.Red)
 										env.info("DCE_loopAFAC_CAS K create smokeColor.Red ")
-		
+
 										if not AFAC_smokeTiming[afacFlightName] then AFAC_smokeTiming[afacFlightName] = {} end
-										
+
 										AFAC_smokeTiming[afacFlightName] = {
 											time = timer.getTime(),
 											targetPos = value.targetPos,
@@ -3415,7 +3415,7 @@ local function explodeOnPoint()
 
 		trigger.action.explosion(target.unitPos, 100)
 
-	
+
 	end
 
 	return timer.getTime() + 300
@@ -3574,8 +3574,8 @@ local function DCE_BulleBy_DE()
 		end
 
 		-- Ajout des groupes des deux coalitions
-		addGroupsFromCoalition(coalition.side.RED)  
-		addGroupsFromCoalition(coalition.side.BLUE) 
+		addGroupsFromCoalition(coalition.side.RED)
+		addGroupsFromCoalition(coalition.side.BLUE)
 
 		env.info("Total groups found: " .. tostring(totalGroups))
 		env.info("Ground vehicle groups collected (après exclusion) : " .. tostring(validGroups))
@@ -3609,6 +3609,8 @@ local function DCE_BulleBy_DE()
 			env.warning("DCE_Bulle Erreur : groupData invalide dans disableGroup")
 			return
 		end
+
+		groupData["respawnTime"] = 0
 
 		local group = Group.getByName(groupData.name)
 		if group and group:isExist() then
@@ -3662,7 +3664,7 @@ local function DCE_BulleBy_DE()
 
 
 	local spawnQueue = {}  -- File d’attente pour la création progressive (groupes + statiques)
-	
+
 	--  **Ajoute un élément (groupe ou statique) à la file d’attente** 
 	local function queueSpawn(elementData, isStatic)
 		table.insert(spawnQueue, { data = elementData, isStatic = isStatic })
@@ -3711,15 +3713,18 @@ local function DCE_BulleBy_DE()
 		else
 			env.info("DCE_Bulle -E6- Tous les groupes et statiques ont été créés.")
 		end
-		
+
 	end
 
 	--  **Réactiver un groupe ou un objet statique (file d’attente au lieu de spawn direct)** 
 	local function enableGroup(groupData)
+
 		if not groupData or not groupData.name then
 			env.info("DCE_Bulle G1 - Erreur : groupData invalide dans enableGroup")
 			return
 		end
+
+		groupData["respawnTime"] = timer.getTime()
 
 		if savedGroups[groupData.name] then
 			local groupInfo = savedGroups[groupData.name]
@@ -3762,7 +3767,7 @@ local function DCE_BulleBy_DE()
 					env.info("DCE_Bulle -G3- Début du spawn progressif")
 					timer.scheduleFunction(processSpawnQueue, nil, timer.getTime() + SPAWN_DELAY)
 				end
-				
+
 			end
 
 		elseif savedStatics[groupData.name] then
@@ -3780,7 +3785,7 @@ local function DCE_BulleBy_DE()
 					env.info("DCE_Bulle -G6- Début du spawn progressif")
 					timer.scheduleFunction(processSpawnQueue, nil, timer.getTime() + SPAWN_DELAY)
 				end
-				
+
 			end
 		else
 			env.info("DCE_Bulle -G7- Le groupe/statique " .. groupData.name .. " n'était pas sauvegardé !")
@@ -3828,10 +3833,12 @@ local function DCE_BulleBy_DE()
 						enableGroup(groupData)
 					end
 				else
-					if not savedGroups[groupName] then
-						-- env.info("DCE_Bulle -H3- Désactivation du groupe terrestre : " .. groupName)
-						deActivate = deActivate+1
-						disableGroup(groupData)
+					if not groupData.respawnTime or (groupData.respawnTime < timer.getTime() + 900) then
+						if not savedGroups[groupName] then
+							-- env.info("DCE_Bulle -H3- Désactivation du groupe terrestre : " .. groupName)
+							deActivate = deActivate + 1
+							disableGroup(groupData)
+						end
 					end
 				end
 			end
