@@ -232,7 +232,7 @@ frequency = {
 				},
 				nbCanal = 18,
 				manual = true,
-				name = "UHF AN/ARC-164 COMM",
+				name = "UHF COMM",
 			},
 			[2] = {						--radio 2
 				UHF = {
@@ -241,7 +241,7 @@ frequency = {
 				},
 				nbCanal = 20,
 				manual = false,
-				name = "UHF AN/ARC-164 AUX",
+				name = "UHF AUX",
 			},
 		},
 	},

@@ -445,7 +445,8 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 			local ii = 1
 			repeat
 				nb_unite = math.random(2, 9)
-				testCall = Callsign_west[category][Callsign_west_counter[category]]..(callsign_flight + nb_unite)
+				callsign_flight = callsign_flight + nb_unite
+				testCall = Callsign_west[category][Callsign_west_counter[category]]..callsign_flight
 				testCallFlightUnite = testCall..1
 				ii = ii + 1
 			until ii > 100 or not callSignFlightUnite[testCallFlightUnite]
@@ -842,18 +843,26 @@ end
 -- os.execute 'pause'
 
 local function GetTankerTACAN(tarnetName)
+
+	print("AtoFP A GetTankerTACAN tarnetName: "..tarnetName  )
+
 	local channel
 
 	if TACAN_byTarget[tarnetName] then
+		print("AtoFP B GetTankerTACAN return "..TACAN_byTarget[tarnetName]  )
 		return TACAN_byTarget[tarnetName]
 	end
 
 	repeat
-		channel = math.random(37, 67)											--find random TACAN channel
+		-- channel = math.random(37, 67)											--find random TACAN channel
+		channel = math.random(1, 63)
 	until channel_tacan[channel] == nil											--repeat until channel is found that is not in use yet
 
-	channel_tacan[channel] = true												--mark channel in use
+	channel_tacan[channel] = tarnetName												--mark channel in use
 	TACAN_byTarget[tarnetName] = channel
+	
+	print("AtoFP C  return channel: "..channel  )
+
 	return channel																--return channel
 end
 
@@ -3967,9 +3976,9 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 										},
 									},
 								}
-								if task_entry.params.action.params.frequency > 1150000000 then
-									task_entry.params.action.params.frequency = task_entry.params.action.params.frequency - 126000000
-								end
+								-- if task_entry.params.action.params.frequency > 1150000000 then
+								-- 	task_entry.params.action.params.frequency = task_entry.params.action.params.frequency - 126000000
+								-- end
 								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 							end
 						end
@@ -8011,6 +8020,9 @@ if Debug.debug then
 
 	-- _affiche(PlacePA, "AtoFp PlacePA")
 
-	Display(channel_tacan, "Atofp channel_tacan")
+	-- _affiche(channel_tacan, "Atofp channel_tacan ")
+
+	-- _affiche(TACAN_byTarget, "Atofp TACAN_byTarget ")
+	
 
 end

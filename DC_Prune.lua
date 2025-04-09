@@ -7,13 +7,13 @@
 -- How close any flight passes to the unit when that flight is flying along the waypoints.
 -- Whether that unit is close to any 'Target' or 'Attack' waypoint
 -------------------------------------------------------------------------------------------------------
--- last modification: cleancode_a
+-- last modification: cleancode_b
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_Prune.lua"] = "1.7.24"
+versionDCE["DC_Prune.lua"] = "1.7.25"
 -------------------------------------------------------------------------------------------------------
 -- Reglage_g		(g targetList_InThisMission)(f debug file)(g add 9A33)(f ZSU_57_2)(e dont prune target mission)(d unit FARP)(c: scud)(b: add FPS-117 & FUG & FUSE) (a: ajust PruneScriptConf)
 -- debug_g			(g function entry)(f: keept EWR)(e: prune category tag)(d: Static Plane Bug + Heli)(c: Package avion supprimé)(b: FARP)(a: helicopter)
--- cleancode_a		(a springCleaning)
+-- cleancode_b		(a springCleaning)
 -- M23_a			Désactive USN Mod
 -- M21_a			Ajout Convoy (interdit à Prune de les Pruner..)
 -- Z02_a			DontPrunSAM et prend en compte la position des intercepteur qui n'ont qu'un seul waypoint
@@ -22,10 +22,10 @@ versionDCE["DC_Prune.lua"] = "1.7.24"
 
 local cibleTrouve = {}
 
-local PruneScript =				mission_ini.PruneScriptConf.PruneScript
+local pruneScript =				mission_ini.PruneScriptConf.PruneScript
 local pruneAggressiveness =		mission_ini.PruneScriptConf.PruneAggressiveness
 local pruneStatic =				mission_ini.PruneScriptConf.PruneStatic
-local PruneSam =				mission_ini.PruneScriptConf.ForcedPruneSam
+local pruneSam =				mission_ini.PruneScriptConf.ForcedPruneSam
 
 -- work out which side has 'players'
 local function findPlayerSide()
@@ -171,7 +171,7 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 	end
 
 	if pruneStatic and (category == 'plane' or category == 'helicopter') and stringStarts(unit.name, 'Static') then
-		-- print("DC_P_T  Prune static planes "..unit.name )
+		print("DC_P_T  Prune static planes "..unit.name )
 		return false -- Prune static planes
 	elseif  (category == 'plane' or category == 'helicopter') and not string.find(unit.name,"Static") then
 		-- print("DC_P_T  keep plane and helicopter: "..unit.name )
@@ -203,7 +203,7 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 		return true
 	end
 	-- Z02 : SAM
-	if stringStarts(unit.name, 'DontPrune') and PruneSam == false then
+	if stringStarts(unit.name, 'DontPrune') and pruneSam == false then
 	-- print("DC_P_ DontPrune")
 		return true
 	end
@@ -454,7 +454,7 @@ end
 
 
 -- Tomsk modification V9 Integration de Prune Script
-if PruneScript == true then
+if pruneScript == true then
 	local _Count = NbPlane()
 	print ("Number of plane Before Prune: ".._Count.NbPlane.." PlaneStatic: ".._Count.NbPlaneStatic.." Nb Helic: ".._Count.NbHeli.." HeliStatic ".._Count.NbHeliStatic)
 	prune()

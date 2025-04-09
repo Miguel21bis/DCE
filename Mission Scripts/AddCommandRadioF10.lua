@@ -3404,28 +3404,15 @@ timer.scheduleFunction(EWR_magic, nil, timer.getTime() + 31)
 timer.scheduleFunction(setErrorMessageBoxShedul, nil, timer.getTime() + 32)
 
 
-
-local function explodeOnPoint()
-
-	-- AFAC_targetStatus[target.UnitId] 
-
-	for target_UnitId, target in pairs(AFAC_targetStatus) do
-
-		_affiche(target.unitPos, "DCE_explodeOnPoint target.unitPos ")
-
-		trigger.action.explosion(target.unitPos, 100)
-
-
-	end
-
-	return timer.getTime() + 300
-
-end
-
-
-
-
-timer.scheduleFunction(explodeOnPoint, nil, timer.getTime() + 300)
+-- --test pour exploser les unités detecté, afin de passer au suivant
+-- local function explodeOnPoint()
+-- 	for target_UnitId, target in pairs(AFAC_targetStatus) do
+-- 		-- _affiche(target.unitPos, "DCE_explodeOnPoint target.unitPos ")
+-- 		trigger.action.explosion(target.unitPos, 100)
+-- 	end
+-- 	return timer.getTime() + 300
+-- end
+-- timer.scheduleFunction(explodeOnPoint, nil, timer.getTime() + 300)
 
 
 

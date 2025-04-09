@@ -922,13 +922,17 @@ for side, units in pairs(oob_air) do																								--iterate through al
 																and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name  and  Debug.Generator.SpyTask == task
 																or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == target_name ))
 																then
-																	DebuGenTxt = DebuGenTxt.."\n"..("AtoG passe A_10c Befor Condition loadout_eligible?: "..tostring(loadout_eligible).." |unit.name: "..unit.name.." |target_name: "..target_name.." |target.base: "..target.base.." |unit.base: "..unit.base)
+																	DebuGenTxt = DebuGenTxt.."\n"..("AtoG passe A_10c Befor Condition loadout_eligible?: "..tostring(loadout_eligible).." |unit.name: "..unit.name.." |target_name: "..target_name.." |target.base: "..tostring(target.base).." |unit.base: "..unit.base)
 																end
 
 																if loadout_eligible then
 																--continue if loadout is eligible
 
-																	if ( (task == "Intercept" and target.base == unit.base) or (task == "SAR" and target.base == unit.base) ) or (task == "Transport" and target.base == unit.base) or (task == "Nothing" and target.base == unit.base) or (task ~= "Intercept" and task ~= "Transport" and task ~= "Nothing" and task ~= "SAR") then	--intercept and transport missions are only assigned to units of a certain base as per targetlist	
+																	if ( target.base 
+																		and  ((task == "Intercept" and target.base == unit.base) or (task == "SAR" and target.base == unit.base) ) or (task == "Transport" and target.base == unit.base) or (task == "Nothing" and target.base == unit.base)
+																		) 
+																		or (task ~= "Intercept" and task ~= "Transport" and task ~= "Nothing" and task ~= "SAR") then	--intercept and transport missions are only assigned to units of a certain base as per targetlist	
+																		
 																		TrackPlayability(unit.player, "target")																							--track playabilty criterium has been met
 																		if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "A")
 																		and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name  and  Debug.Generator.SpyTask == task

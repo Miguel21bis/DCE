@@ -1910,14 +1910,14 @@ db_all_loadouts = {
 				self_escort = true,
 				attributes =  { },
 				code_loadout =  { "All" },
-								range = 250000,
+				range = 250000,
 				firepower = 1,
 				vCruise = 200,
 				vAttack = 213.86666666667,
 				hCruise = 800,
 				hAttack = 800,
 				sortie_rate = 2,
-				standoff = false,
+				standoff = 20000,
 				stores = {
 					pylons = {
 					},
