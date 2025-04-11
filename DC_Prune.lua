@@ -171,7 +171,7 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 	end
 
 	if pruneStatic and (category == 'plane' or category == 'helicopter') and stringStarts(unit.name, 'Static') then
-		print("DC_P_T  Prune static planes "..unit.name )
+		-- print("DC_P_T  Prune static planes "..unit.name )
 		return false -- Prune static planes
 	elseif  (category == 'plane' or category == 'helicopter') and not string.find(unit.name,"Static") then
 		-- print("DC_P_T  keep plane and helicopter: "..unit.name )

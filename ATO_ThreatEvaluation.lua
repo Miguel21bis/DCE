@@ -1,12 +1,12 @@
 --To check oob_ground for threats and rate and store them in a table for later mission plannning
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  Reglage_i
+-- last modification:  debug_c
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_ThreatEvaluation.lua"] = "1.7.55"
+versionDCE["ATO_ThreatEvaluation.lua"] = "1.7.56"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_g				(g springCleaning)
--- debug_b					(b EWR again)(a Freq EWR)
+-- debug_c					(c Fighterthreats & country table(b EWR again)(a Freq EWR)
 -- Reglage_i				(i: KS-19 & S-60)(k: ZSU_57_2)(j station awacs position)(debug alti)(g SetFrequency only EWR)(f: add FPS-117 EWR)(e SEAD_offset CVN)(c: more info)(b: ajout des CVN_71/CVN_75 et SA-5)
 -- modification M38_h		Check and Help CampaignMaker (h: loadout info)
 -- modification M34_r		change freq EWR + custom FrequenceRadio (qr debug units[1])(p LVHF)(o: debug boucle 2 unites)(lmn: debug)(k: utilise les indicatifs WEST pour EWR)
@@ -1254,7 +1254,7 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 end
 
 --table to store fighter threats (CAP and intercept)
-fighterthreats = {
+Fighterthreats = {
 	blue = {},																					--blue threats (to red)
 	red = {}																					--red threats (to blue)
 }
@@ -1265,19 +1265,40 @@ CAPthreats = {
 }
 
 
---find AWACS, CAP and interceptors in aircraft units and populate ewr/fighterthreats table
-for side,unit in pairs(oob_air) do																--iterate through all sides
+--find AWACS, CAP and interceptors in aircraft units and populate ewr/Fighterthreats table
+for side, unit in pairs(oob_air) do																--iterate through all sides
 	for n = 1, #unit do																			--iterate through all units
 		if unit[n].inactive ~= true and unit[n].roster.ready > 0 and db_airbases[unit[n].base] and db_airbases[unit[n].base].inactive ~= true and db_airbases[unit[n].base].x and db_airbases[unit[n].base].y then		--if unit is active and has ready aircraft and its airbase is active
-			for task,task_bool in pairs(unit[n].tasks) do										--iterate through all tasks of unit			
+			for task, task_bool in pairs(unit[n].tasks) do										--iterate through all tasks of unit			
 				if task_bool then
-					if  db_loadouts[unit[n].type] then
-						if  db_loadouts[unit[n].type][task] then							--task is true and db_loadouts has such tasks
+					if db_loadouts[unit[n].type] then
+						if db_loadouts[unit[n].type][task] then							--task is true and db_loadouts has such tasks
 							for loadout_name, loadout in pairs(db_loadouts[unit[n].type][task]) do		--iterate through all loadout.descriptions for a given aircraft type
+								
+								if loadout.day == nil then
+									loadout.day = true
+								end
+							
 								if (Daytime == "day" and loadout.day) or (Daytime == "night" and loadout.night) or (Daytime == "night-day" and (loadout.day or loadout.night)) or (Daytime == "day-night" and (loadout.day or loadout.night)) then	--loadout works for current time of day
-									if loadout.country == nil or loadout.country == unit[n].country then	--loadout is country unspecific or applies to unit country
+									local passCountry = false
+									if not loadout.country then 
+										passCountry = true
+									else
+										if type(loadout.country) == "table" then
+											for i = 1, #loadout.country do
+												if loadout.country[i] == unit[n].country then
+													passCountry = true
+												end
+											end
+										else
+											if loadout.country == unit[n].country then passCountry = true end
+										end
+									end
+ 
+									if passCountry then	--loadout is country unspecific or applies to unit country
+										
 										-- if task == "AWACS" then												--if loadout is AWACS
-										-- 	local entry = {													--define fighterthreats table entry
+										-- 	local entry = {													--define Fighterthreats table entry
 										-- 		name = unit[n].name,										--unit name
 										-- 		class = "AWACS",											--class
 										-- 		x = db_airbases[unit[n].base].x,							--unit homebase position
@@ -1291,7 +1312,7 @@ for side,unit in pairs(oob_air) do																--iterate through all sides
 
 											-- table.insert(ewr[side], entry)
 										if task == "Escort" then											--if loadout is CAP
-											local entry = {													--define fighterthreats table entry
+											local entry = {													--define Fighterthreats table entry
 												name = unit[n].name,										--unit name
 												type =  unit[n].type,
 												class = "CAP",												--class
@@ -1303,9 +1324,11 @@ for side,unit in pairs(oob_air) do																--iterate through all sides
 												LDSD = loadout.LDSD,										--Look Down/Shoot Down
 											}
 
-											table.insert(fighterthreats[side], entry)
+											table.insert(Fighterthreats[side], entry)
+											-- print("AtoTE J table.insert Escort")
+
 										elseif task == "Fighter Sweep" then											--if loadout is CAP
-											local entry = {													--define fighterthreats table entry
+											local entry = {													--define Fighterthreats table entry
 												name = unit[n].name,										--unit name
 												type =  unit[n].type,
 												class = "CAP",												--class
@@ -1317,9 +1340,11 @@ for side,unit in pairs(oob_air) do																--iterate through all sides
 												LDSD = loadout.LDSD,										--Look Down/Shoot Down
 											}
 
-											table.insert(fighterthreats[side], entry)
+											table.insert(Fighterthreats[side], entry)
+											-- print("AtoTE J table.insert Fighter Sweep")
+
 										elseif task == "CAP" then											--if loadout is CAP
-											local entry = {													--define fighterthreats table entry
+											local entry = {													--define Fighterthreats table entry
 												name = unit[n].name,										--unit name
 												type =  unit[n].type,
 												class = "CAP",												--class
@@ -1332,9 +1357,11 @@ for side,unit in pairs(oob_air) do																--iterate through all sides
 											}
 
 											table.insert(CAPthreats[side], entry)
-											table.insert(fighterthreats[side], entry)
+											table.insert(Fighterthreats[side], entry)
+											-- print("AtoTE J table.insert CAP")
+
 										elseif task == "Intercept" then										--if loadout is Intercept
-											local entry = {													--define fighterthreats table entry
+											local entry = {													--define Fighterthreats table entry
 												name = unit[n].name,										--unit name
 												type =  unit[n].type,
 												class = "Intercept",										--class
@@ -1345,7 +1372,9 @@ for side,unit in pairs(oob_air) do																--iterate through all sides
 												range = loadout.range,										--Fighter action radius
 											}
 
-											table.insert(fighterthreats[side], entry)
+											table.insert(Fighterthreats[side], entry)
+											-- print("AtoTE J table.insert Intercept")
+
 										end
 									end
 								end
@@ -1378,12 +1407,12 @@ end
 table.sort(CAPthreatsSort["blue"], function(a,b) return a.level > b.level  end)
 table.sort(CAPthreatsSort["red"], function(a,b) return a.level > b.level  end)
 
---find AWACS, CAP and interceptors in aircraft units and populate ewr/fighterthreats table
+--find AWACS, CAP and interceptors in aircraft units and populate ewr/Fighterthreats table
 for side, targets in pairs(targetlist) do																--iterate through all sides
 	for targetN, target in pairs(targets) do
 		if target.task == "AWACS" and target.inactive ~= true  then		--if unit is active and has ready aircraft and its airbase is active
 
-			local entry = {													--define fighterthreats table entry
+			local entry = {													--define Fighterthreats table entry
 				name = tostring(target.titleName),										--unit name
 				class = "AWACS",											--class
 				x = target.x,
@@ -1399,7 +1428,7 @@ for side, targets in pairs(targetlist) do																--iterate through all s
 
 		elseif  target.task == "CAP" and target.inactive ~= false then											--if loadout is CAP
 			if CAPthreatsSort[side] and CAPthreatsSort[side][1] then
-				local entry = {													--define fighterthreats table entry
+				local entry = {													--define Fighterthreats table entry
 					name = tostring(target.titleName),										--unit name
 					class = "CAP",												--class
 					info  = "AddCAP by target position",
@@ -1410,7 +1439,7 @@ for side, targets in pairs(targetlist) do																--iterate through all s
 					LDSD = CAPthreatsSort[side][1].LDSD,										--Look Down/Shoot Down
 				}
 
-				table.insert(fighterthreats[side], entry)
+				table.insert(Fighterthreats[side], entry)
 			end
 		end
 	end
@@ -1418,7 +1447,7 @@ end
 
 
 
--- _affiche(fighterthreats, "ATO_TE fighterthreats")
+-- _affiche(Fighterthreats, "ATO_TE Fighterthreats")
 --add avoidance zones to threattable
 for zone_n,zone in pairs(mission.triggers.zones) do												--iterate through all trigger zones
 	if string.find(zone.name, "AvoidanceZone") then												--zone is named as avoidance zone
@@ -1538,24 +1567,24 @@ if Debug.debug then
 	campFile:close()
 
 
-	local camp_str = "threatgroundthreatsALL_AtoTE = " .. TableSerialization(GroundthreatsAll, 0)						--make a string
-	local campFile = io.open("Debug/threat_groundthreatsALL_AtoTE.lua", "w") or error("Failed to open debug file")
+	camp_str = "threatgroundthreatsALL_AtoTE = " .. TableSerialization(GroundthreatsAll, 0)						--make a string
+	campFile = io.open("Debug/threat_groundthreatsALL_AtoTE.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
 
-	local camp_str = "GCI_AtoTE = " .. TableSerialization(GCI, 0)						--make a string
-	local campFile = io.open("Debug/threat_GCI_AtoTE.lua", "w") or error("Failed to open debug file")
+	camp_str = "GCI_AtoTE = " .. TableSerialization(GCI, 0)						--make a string
+	campFile = io.open("Debug/threat_GCI_AtoTE.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
 
 
-	local camp_str = "fighterthreats_AtoTE = " .. TableSerialization(fighterthreats, 0)						--make a string
-	local campFile = io.open("Debug/threat_fighterthreats_AtoTE.lua", "w") or error("Failed to open debug file")
+	camp_str = "Fighterthreats_AtoTE = " .. TableSerialization(Fighterthreats, 0)						--make a string
+	campFile = io.open("Debug/threat_Fighterthreats_AtoTE.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
 
-	local camp_str = "ewr_AtoTE = " .. TableSerialization(ewr, 0)						--make a string
-	local campFile = io.open("Debug/threat_EWR_AtoTE.lua", "w") or error("Failed to open debug file")
+	camp_str = "ewr_AtoTE = " .. TableSerialization(ewr, 0)						--make a string
+	campFile = io.open("Debug/threat_EWR_AtoTE.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
 

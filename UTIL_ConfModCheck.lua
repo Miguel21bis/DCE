@@ -155,7 +155,7 @@ Debug_check = {
 		nb = 50,								-- nb de vol à afficher
 		SpySquad = "111.Filo",					-- affiche le passage de ce squad dans ATO_Generator
 		SpyTask = "CAP",						-- affiche le passage de ce squad ET de son Task dans ATO_Generator
-		SpyTarget = "Hawk Site North West",		-- affiche le passage de ce Target dans ATO_Generator
+		SpyTarget = "",							-- affiche le passage de ce Target dans ATO_Generator
 	},
 	checkTargetName = false,					-- (true/false)	[default: false]	checks whether the target exists in oob_ground or in a template
 	checkTargetName2Space = false,				-- (true/false)	[default: false]	FirsMission Alert if target names contain 2 consecutive spaces	

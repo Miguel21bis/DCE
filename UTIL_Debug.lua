@@ -23,7 +23,7 @@ if Debug.debug then
 
 
 	local ground_str = "groundthreats = " .. TableSerialization(groundthreats, 0)
-	local air_str = "fighterthreats = " .. TableSerialization(fighterthreats, 0)
+	local air_str = "Fighterthreats = " .. TableSerialization(Fighterthreats, 0)
 	local ewr_str = "ewr = " .. TableSerialization(ewr, 0)
 	local threatFile = io.open("Debug/threat_UtilDebug.lua", "w") or error("Failed to open debug file")
 	threatFile:write(ground_str .. "\n\n" .. air_str .. "\n\n" .. ewr_str)

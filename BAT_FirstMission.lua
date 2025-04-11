@@ -23,10 +23,20 @@ versionDCE["BAT_FirstMission.lua"] = "1.14.100"
 
 BugList = {}
 Firstmission_flag = true
+Playable_m = {}
 DebuGenTxt = ""					--debug cumulutatif de ATO_Generator
+SinglePlayer = false
+MissionInstance = 0
+
+Multi =
+{
+	NbGroup = 0,
+}
+
+
 mission = {}					--pour declarer la table globale et calmer les inquietudes d'IDE ^^
 oob_air = {}					--pour declarer la table globale et calmer les inquietudes d'IDE ^^
-Playable_m = {}
+
 
 local function acceptMission()
 	local m = ""
@@ -100,7 +110,7 @@ for planeType, value in PairsByKeys(Data_divers) do
 	end
 end
 
----
+
 
 local showVersion = versionPackageICM
 
@@ -150,14 +160,6 @@ print("Reset the campaign and generate a new first mission.\n")
 
 local input
 local choix1
-
-SinglePlayer = false
-if Multi == nil then
-	Multi =
-	{
-		NbGroup = 0,
-	}
-end
 
 -- print("B.\n")
 repeat
@@ -442,7 +444,6 @@ repeat
 
 	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ResetCampaign.lua")					--reset campaign status files. Required for first mission to generate according to initial status	
 
-	MissionInstance = 0
 	print("\n\n")
 	repeat
 		print("Generating First Mission.\n")
