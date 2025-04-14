@@ -30,7 +30,7 @@ if Debug.debug then
 	threatFile:close()
 	
 	
-	local available_str = "Aircraft_availability = " .. TableSerialization(Aircraft_availability, 0)
+	local available_str = "Aircraft_availability = " .. TableSerialization(AcftAvail, 0)
 	local availableFile = io.open("Debug/AircraftAvailability_UtilDebug.lua", "w") or error("Failed to open debug threat_UtilDebug file")
 	availableFile:write(available_str)
 	availableFile:close()

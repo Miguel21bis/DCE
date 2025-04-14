@@ -24,7 +24,6 @@ versionDCE["BAT_FirstMission.lua"] = "1.14.100"
 BugList = {}
 Firstmission_flag = true
 Playable_m = {}
-DebuGenTxt = ""					--debug cumulutatif de ATO_Generator
 SinglePlayer = false
 MissionInstance = 0
 

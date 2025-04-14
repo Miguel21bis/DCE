@@ -4303,6 +4303,21 @@ function CheckTarawa(txt)
 	end
 end
 
+function FoundSquadSide(squadName)
+	--local squadName = "VFA-113"
+	local foundSide = false
+	for side, unit in pairs(oob_air) do
+		for n = 1, #unit do
+			if unit[n].name == squadName then
+				foundSide = side
+				break
+			end
+		end
+	end
+
+	return foundSide
+end
+
 
 
 

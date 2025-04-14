@@ -7124,40 +7124,44 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				local groupInfo = ""
 				if debugStart then
 					groupInfo = info01
-					.." "..info02
-					.." "..info03
+					.." |"..info02
+					.." |"..info03
 					-- .." "..info04
-					.." "..info05
+					.." |"..info05
+					.." |"..info06
+
 
 					-- .."  ".." // "..units[1].skill
-					.." "..info06
+
 					-- .." UAlt ".." // "..units[1].alt
 					-- .." WPptAlt".." // "..tostring(group['route']['points'][1]["alt"])
-					.."  ".."Type: "..tostring(group['route']['points'][1]["type"])
+					-- .."  ".."Type: "..tostring(group['route']['points'][1]["type"])
 					-- .."  unCont: "..tostring(group.uncontrolled)
-					.."  lateA: "..tostring(group.lateActivation)
+					.."  |lateA: "..tostring(group.lateActivation)
 
 					-- .."  ".." // "..group.frequency
 
 
 					-- .." WAlt ".." // "..info01
 					-- .." "..groupInfo
-					.." ETA1: "..group.route.points[1]["ETA"]
+					-- .." |ETA1: "..group.route.points[1]["ETA"]
 				end
 
 				InfoFlight = InfoFlight.."\n"
 					..""..flight[f].id
-					.." Pack: "..p.." Nb "
-					.." "..flight[f].number
-					.." "..flight[f].type
-					.." "..group.name
-					.." "..flight[f].base
-					.." "..flight[f].target_name
-					.." ".." start_time: ".. math.floor(start_time)
-					.." ETA1: "..group.route.points[1]["ETA"]
-					.." ETA2: "..group.route.points[2]["ETA"]
-					.." "..group.frequency
-					.." "..info06
+					.." |Pack: "..p
+					.." |Nb "..flight[f].number
+					.." | "..flight[f].type
+					.." | "..group.name
+					.." | "..flight[f].base
+					.." | "..flight[f].target_name
+					.." |start_time: ".. math.floor(start_time)
+					.." |ETA1: "..group.route.points[1]["ETA"]
+					.." |ETA2: "..group.route.points[2]["ETA"]
+					.." | "..group.frequency
+					.." |threatsG: "..flight[f].threatsGround
+					.." |threatsA: "..flight[f].threatsAir
+					.." |score: "..flight[f].score
 
 
 

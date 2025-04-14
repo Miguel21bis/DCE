@@ -23,7 +23,6 @@ versionDCE["BAT_SkipMission.lua"] = "1.15.99"
 
 BugList = {}
 Skipmission_flag = true
-DebuGenTxt = ""					--debug cumulutatif de ATO_Generator
 Playable_m = {}
 
 local function acceptMission()

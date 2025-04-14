@@ -797,23 +797,23 @@ for side, pack in pairs(ATO) do
 						downtime_hour = nextRate
 					end
 
-					-- print("AtoT Aircraft_availability ________________________ "..flight[f].name.." :flight "..f.."-"..u)
-					-- print("AtoT Aircraft_availability ___________________________ "..flight[f].name.." CampTotalTimeH "..CampTotalTimeS/3600)
-					-- print("AtoT Aircraft_availability ___________________________ "..flight[f].name.." flightStartTime_hour "..flightStartTime_hour)
+					-- print("AtoT AcftAvail ________________________ "..flight[f].name.." :flight "..f.."-"..u)
+					-- print("AtoT AcftAvail ___________________________ "..flight[f].name.." CampTotalTimeH "..CampTotalTimeS/3600)
+					-- print("AtoT AcftAvail ___________________________ "..flight[f].name.." flightStartTime_hour "..flightStartTime_hour)
 
 					if (flight[f].task == "Refueling" or flight[f].task == "AWACS") then
 						if downtime_hour < ((CampTotalTimeS  + mission_ini.idle_time_min)/ 3600 ) then
-							-- print("AtoT Aircraft_availability _______table.insert Refueling__AWACS_____ "..flight[f].name.." downtime_hour "..downtime_hour)
-							table.insert(Aircraft_availability[flight[f].name].unavailable, downtime_hour)
+							-- print("AtoT AcftAvail _______table.insert Refueling__AWACS_____ "..flight[f].name.." downtime_hour "..downtime_hour)
+							table.insert(AcftAvail[flight[f].name].unavailable, downtime_hour)
 						else
-							-- print("AtoT Aircraft_availability _______Refueling__AWACS____*******_______________ dont insert OVERTIME "..flight[f].name.." downtime_hour "..downtime_hour.."******************")
+							-- print("AtoT AcftAvail _______Refueling__AWACS____*******_______________ dont insert OVERTIME "..flight[f].name.." downtime_hour "..downtime_hour.."******************")
 						end
 					else
 						-- if flightEndTime_hour < ((CampTotalTimeS  + mission_ini.mission_duration)/ 3600 ) then
-							-- print("AtoT Aircraft_availability __________table.insert_________________ "..flight[f].name.." downtime_hour "..downtime_hour)
-							table.insert(Aircraft_availability[flight[f].name].unavailable, downtime_hour)						--insert unavailable time into unavailable table of this unit
+							-- print("AtoT AcftAvail __________table.insert_________________ "..flight[f].name.." downtime_hour "..downtime_hour)
+							table.insert(AcftAvail[flight[f].name].unavailable, downtime_hour)						--insert unavailable time into unavailable table of this unit
 						-- else
-						-- 	-- print("AtoT Aircraft_availability ___________________________*******_______________ dont insert OVERTIME "..flight[f].name.." downtime_hour "..downtime_hour.."******************")
+						-- 	-- print("AtoT AcftAvail ___________________________*******_______________ dont insert OVERTIME "..flight[f].name.." downtime_hour "..downtime_hour.."******************")
 						-- end						
 					end
 				end
@@ -825,10 +825,10 @@ end
 -- --complete unit unavailable table with zero entries for unassigned aircraft
 -- for side,unit in pairs(oob_air) do																					--iterate through all sides
 -- 	for n = 1, #unit do																								--iterate through all units
--- 		if Aircraft_availability[unit[n].name] and Aircraft_availability[unit[n].name].unavailable then
--- 			for u = 1, unit[n].roster.ready - #Aircraft_availability[unit[n].name].unavailable do					--for all ready aircraft that are not assigned to the ATO			
--- 				table.insert(Aircraft_availability[unit[n].name].unavailable, 0)									--insert a zero unavilable entry
--- 				print("AtoT Aircraft_availability __________table.insert_0________________ "..unit[n].name.." "..u)
+-- 		if AcftAvail[unit[n].name] and AcftAvail[unit[n].name].unavailable then
+-- 			for u = 1, unit[n].roster.ready - #AcftAvail[unit[n].name].unavailable do					--for all ready aircraft that are not assigned to the ATO			
+-- 				table.insert(AcftAvail[unit[n].name].unavailable, 0)									--insert a zero unavilable entry
+-- 				print("AtoT AcftAvail __________table.insert_0________________ "..unit[n].name.." "..u)
 -- 			end
 -- 		end
 -- 	end
@@ -856,7 +856,7 @@ if Debug.debug then
 	campFile:write(camp_str)
 	campFile:close()
 
-	local test_str = "Aircraft_availability = " .. TableSerialization(Aircraft_availability, 0)
+	local test_str = "AcftAvail = " .. TableSerialization(AcftAvail, 0)
 	local testFile = io.open("Debug/Aircraft_availability_AtoT.lua", "w") or error("Failed to open debug file")
 	testFile:write(test_str)
 	testFile:close()

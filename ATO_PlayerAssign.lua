@@ -291,7 +291,7 @@ if #playable > 0 then
 						for unitN, unit in pairs(units) do
 							if unit.type == MultiBIS.Group[k].PlaneType and not unit.inactive then
 								
-								_affiche(Aircraft_availability[unit.name], "Aircraft_availability[unit.name]")
+								_affiche(AcftAvail[unit.name], "Aircraft_availability[unit.name]")
 
 							end
 						end

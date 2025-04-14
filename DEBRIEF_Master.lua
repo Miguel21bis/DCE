@@ -26,7 +26,6 @@ versionDCE["DEBRIEF_Master.lua"] = "1.17.137"
 
 BugList = {}
 AcceptedMission = false
-DebuGenTxt = ""																				--debug cumulutatif de ATO_Generator
 MissionInstance = 0
 TimeAlreadyAdded = false
 
