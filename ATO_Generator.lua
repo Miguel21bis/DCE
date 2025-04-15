@@ -445,10 +445,10 @@ for side, units in pairs(oob_air) do
 	end
 	local draftId = 1
 	if Debug.Generator.affiche then
-		debugLog("AtoG passe A_0 chapter: "..Debug.Generator.chapter.." SpySquad:  "..Debug.Generator.SpySquad.." SpyTask: "..Debug.Generator.SpyTask)
+		debugLog(draftId.." AtoG passe A_0 chapter: "..Debug.Generator.chapter.." SpySquad:  "..Debug.Generator.SpySquad.." SpyTask: "..Debug.Generator.SpyTask)
 
 		if Debug.Generator.SpyTarget then
-			debugLog("\n\n"..Debug.Generator.SpyTarget)
+			debugLog(draftId.." \n\n"..Debug.Generator.SpyTarget)
 		end
 	end
 
@@ -806,7 +806,7 @@ for side, units in pairs(oob_air) do
 																or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == target.titleName ))
 
 															if isDebugModeA then
-																debugLog(" AtoG passe A_07c :"..unit.type.." "..target.titleName.." Befor task Condition: "..target.task .." ==? task? "..task.." || "..target_name)
+																debugLog(draftId.."  AtoG passe A_07c :"..unit.type.." "..target.titleName.." Befor task Condition: "..target.task .." ==? task? "..task.." || "..target_name)
 															end
 
 															if target.task == task then															--if target is valid for aircaft-loadout															
@@ -833,7 +833,7 @@ for side, units in pairs(oob_air) do
 																		for loadout_attribute_number, loadout_attribute in ipairs(unit_loadouts[l].attributes) do				--Iterate through loadout attributes												
 
 																			if isDebugModeA then
-																				debugLog(" AtoG passe A_10b Befor loadout_eligible: target_attribute?: "..tostring(target_attribute).."  || loadout_attribute: "..tostring(loadout_attribute).." || "..target_name.." || "..tostring(unit_loadouts[l].name) )
+																				debugLog(draftId.."  AtoG passe A_10b Befor loadout_eligible: target_attribute?: "..tostring(target_attribute).."  || loadout_attribute: "..tostring(loadout_attribute).." || "..target_name.." || "..tostring(unit_loadouts[l].name) )
 																			end
 
 																			if target_attribute == loadout_attribute then														--if match is found													
@@ -3516,7 +3516,7 @@ local function createATO_table(draftPriority)
 								end
 							else
 								local tabRejected = {}
-								tabRejected["sujet"]  = draft.id.." "..tostring(draft.type).." AVION DISPONIBLE INSUFFISANT "..tostring(draft.name).." ()if available * draft.loadout.firepower >= draft.target.firepower.min and draft.number * draft.loadout.firepower >= draft.target.firepower.min"
+								tabRejected["sujet"]  = draft.id.." "..tostring(draft.type).." AVION DISPONIBLE INSUFFISANT "..tostring(draft.name).." available: "..tostring(available).." draft.loadout.firepower: "..tostring(draft.loadout.firepower.." firepowerMin: "..tostring(draft.target.firepower.min))
 								tabRejected["cause"] = { [1] = tostring(available * draft.loadout.firepower), [2]  = tostring(draft.target.firepower.min), }
 								tabRejected["ligne"]  = debug.getinfo(1).currentline
 								table.insert(draft["rejected"], tabRejected)
@@ -3587,7 +3587,8 @@ local function showAtoSort(newDraftByPriority, tablePrio)
 			end
 
 			if di < Debug.Generator.nb or draft.name == showSquad or nameOK  then
-				debugLog(	side.." tablePrio: "..tablePrio.." C N° " .. draft_n..
+				debugLog("")
+				debugLog("/n"..	side.." tablePrio: "..tablePrio.." C N° " .. draft_n..
 						-- " /support/ " ..tostring(draft.support)..
 						" /Id" ..tostring(draft.id)..
 						" /Prioriry/ " ..tostring(draft.priorityIni)..
@@ -3795,7 +3796,7 @@ if Debug.debug then
 	local resultPourcent2 =  checkNbPlane.blue.thisMission.used / (checkNbPlane.blue.beforMission.ready - checkNbPlane.blue.beforMission.alreadyInFlight) * 100
 	print("AtoG caution 2, not enough BLUE aircraft used compared to available aircraft. Maybe a bug? "..resultPourcent2.." %")
 
-	if resultPourcent < 40 then
+	if resultPourcent < 75 then
 		print("AtoG caution, not enough BLUE aircraft used compared to available aircraft. Maybe a bug? "..resultPourcent.." %")
 		show = true
 	end
@@ -3804,7 +3805,7 @@ if Debug.debug then
 	local resultPourcent2 =  checkNbPlane.red.thisMission.used / (checkNbPlane.red.beforMission.ready - checkNbPlane.red.beforMission.alreadyInFlight) * 100
 	print("AtoG caution 2, not enough RED aircraft used compared to available aircraft. Maybe a bug? "..resultPourcent2.." %")
 
-	if resultPourcent < 40 then
+	if resultPourcent < 75 then
 		print("AtoG caution, not enough RED aircraft used compared to available aircraft. Maybe a bug? "..resultPourcent.." %")
 		show = true
 	end

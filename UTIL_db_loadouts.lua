@@ -23700,7 +23700,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 1600000,
-				firepower = 0.5,
+				firepower = 1,
 				vCruise = 200,
 				vAttack = 350,
 				hCruise = 4500,
@@ -23708,26 +23708,26 @@ db_all_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{Mk-82_MER_6_C}",
-					["num"] = 3,
-				},
-				[2] = {
-					["CLSID"] = "{DFT-300gal_LR}",
-					["num"] = 4,
-				},
-				[3] = {
-					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
-					["num"] = 5,
-				},
-				[4] = {
-					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
-					["num"] = 1,
-				},
-				[5] = {
-					["CLSID"] = "{DFT-300gal_LR}",
-					["num"] = 2,
-				},
+					[1] = {
+						["CLSID"] = "{Mk-82_MER_6_C}",
+						["num"] = 3,
+					},
+					[2] = {
+						["CLSID"] = "{DFT-300gal_LR}",
+						["num"] = 4,
+					},
+					[3] = {
+						["CLSID"] = "{AIM-9J-ON-ADAPTER}",
+						["num"] = 5,
+					},
+					[4] = {
+						["CLSID"] = "{AIM-9J-ON-ADAPTER}",
+						["num"] = 1,
+					},
+					[5] = {
+						["CLSID"] = "{DFT-300gal_LR}",
+						["num"] = 2,
+					},
 					},
 					fuel = 1555,
 					flare = 30,
@@ -23752,7 +23752,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 1600000,
-				firepower = 0.5,
+				firepower = 1,
 				vCruise = 200,
 				vAttack = 350,
 				hCruise = 4500,
@@ -23760,26 +23760,26 @@ db_all_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{DFT-300gal}",
-					["num"] = 3,
-				},
-				[2] = {
-					["CLSID"] = "{Mk-20_TER_2_R}",
-					["num"] = 4,
-				},
-				[3] = {
-					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
-					["num"] = 5,
-				},
-				[4] = {
-					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
-					["num"] = 1,
-				},
-				[5] = {
-					["CLSID"] = "{Mk-20_TER_2_L}",
-					["num"] = 2,
-				},
+					[1] = {
+						["CLSID"] = "{DFT-300gal}",
+						["num"] = 3,
+					},
+					[2] = {
+						["CLSID"] = "{Mk-20_TER_2_R}",
+						["num"] = 4,
+					},
+					[3] = {
+						["CLSID"] = "{AIM-9J-ON-ADAPTER}",
+						["num"] = 5,
+					},
+					[4] = {
+						["CLSID"] = "{AIM-9J-ON-ADAPTER}",
+						["num"] = 1,
+					},
+					[5] = {
+						["CLSID"] = "{Mk-20_TER_2_L}",
+						["num"] = 2,
+					},
 					},
 					fuel = 1555,
 					flare = 30,
@@ -23804,7 +23804,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 1600000,
-				firepower = 0.5,
+				firepower = 1,
 				vCruise = 200,
 				vAttack = 350,
 				hCruise = 4500,
@@ -23812,26 +23812,26 @@ db_all_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{Mk-82 Snakeye_MER_6_C}",
-					["num"] = 3,
-				},
-				[2] = {
-					["CLSID"] = "{DFT-300gal_LR}",
-					["num"] = 4,
-				},
-				[3] = {
-					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
-					["num"] = 5,
-				},
-				[4] = {
-					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
-					["num"] = 1,
-				},
-				[5] = {
-					["CLSID"] = "{DFT-300gal_LR}",
-					["num"] = 2,
-				},
+					[1] = {
+						["CLSID"] = "{Mk-82 Snakeye_MER_6_C}",
+						["num"] = 3,
+					},
+					[2] = {
+						["CLSID"] = "{DFT-300gal_LR}",
+						["num"] = 4,
+					},
+					[3] = {
+						["CLSID"] = "{AIM-9J-ON-ADAPTER}",
+						["num"] = 5,
+					},
+					[4] = {
+						["CLSID"] = "{AIM-9J-ON-ADAPTER}",
+						["num"] = 1,
+					},
+					[5] = {
+						["CLSID"] = "{DFT-300gal_LR}",
+						["num"] = 2,
+					},
 					},
 					fuel = 1555,
 					flare = 30,
@@ -23856,7 +23856,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 1600000,
-				firepower = 0.5,
+				firepower = 1,
 				vCruise = 200,
 				vAttack = 350,
 				hCruise = 4500,
@@ -23864,26 +23864,26 @@ db_all_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{Mk-77 mod 1_TER_2_C}",
-					["num"] = 3,
-				},
-				[2] = {
-					["CLSID"] = "{DFT-300gal_LR}",
-					["num"] = 4,
-				},
-				[3] = {
-					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
-					["num"] = 5,
-				},
-				[4] = {
-					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
-					["num"] = 1,
-				},
-				[5] = {
-					["CLSID"] = "{DFT-300gal_LR}",
-					["num"] = 2,
-				},
+					[1] = {
+						["CLSID"] = "{Mk-77 mod 1_TER_2_C}",
+						["num"] = 3,
+					},
+					[2] = {
+						["CLSID"] = "{DFT-300gal_LR}",
+						["num"] = 4,
+					},
+					[3] = {
+						["CLSID"] = "{AIM-9J-ON-ADAPTER}",
+						["num"] = 5,
+					},
+					[4] = {
+						["CLSID"] = "{AIM-9J-ON-ADAPTER}",
+						["num"] = 1,
+					},
+					[5] = {
+						["CLSID"] = "{DFT-300gal_LR}",
+						["num"] = 2,
+					},
 					},
 					fuel = 1555,
 					flare = 30,
@@ -23908,7 +23908,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 1600000,
-				firepower = 0.5,
+				firepower = 1,
 				vCruise = 200,
 				vAttack = 350,
 				hCruise = 4500,
@@ -23916,26 +23916,26 @@ db_all_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{Mk-83_TER_3_C}",
-					["num"] = 3,
-				},
-				[2] = {
-					["CLSID"] = "{DFT-300gal_LR}",
-					["num"] = 4,
-				},
-				[3] = {
-					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
-					["num"] = 5,
-				},
-				[4] = {
-					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
-					["num"] = 1,
-				},
-				[5] = {
-					["CLSID"] = "{DFT-300gal_LR}",
-					["num"] = 2,
-				},
+					[1] = {
+						["CLSID"] = "{Mk-83_TER_3_C}",
+						["num"] = 3,
+					},
+					[2] = {
+						["CLSID"] = "{DFT-300gal_LR}",
+						["num"] = 4,
+					},
+					[3] = {
+						["CLSID"] = "{AIM-9J-ON-ADAPTER}",
+						["num"] = 5,
+					},
+					[4] = {
+						["CLSID"] = "{AIM-9J-ON-ADAPTER}",
+						["num"] = 1,
+					},
+					[5] = {
+						["CLSID"] = "{DFT-300gal_LR}",
+						["num"] = 2,
+					},
 					},
 					fuel = 1555,
 					flare = 30,
@@ -23960,7 +23960,7 @@ db_all_loadouts = {
 				night = true,
 				adverseWeather = true,
 				range = 1600000,
-				firepower = 0.5,
+				firepower = 1,
 				vCruise = 200,
 				vAttack = 350,
 				hCruise = 4500,
@@ -23968,32 +23968,32 @@ db_all_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{DFT-300gal}",
-					["num"] = 3,
-				},
-				[2] = {
-					["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
-					["num"] = 4,
-					["settings"] = {
-						["NFP_VIS_DrawArgNo_57"] = 0,
-						["NFP_fuze_type_nose"] = "M904E4",
-						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 2,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
+					[1] = {
+						["CLSID"] = "{DFT-300gal}",
+						["num"] = 3,
 					},
-				},
-				[3] = {
-					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
-					["num"] = 5,
-				},
-				[4] = {
-					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
-					["num"] = 1,
-				},
-				[5] = {
+					[2] = {
+						["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
+						["num"] = 4,
+						["settings"] = {
+							["NFP_VIS_DrawArgNo_57"] = 0,
+							["NFP_fuze_type_nose"] = "M904E4",
+							["NFP_fuze_type_tail"] = "M905",
+							["arm_delay_ctrl_M904E4"] = 2,
+							["arm_delay_ctrl_M905"] = 4,
+							["function_delay_ctrl_M904E4"] = 0,
+							["function_delay_ctrl_M905"] = 0,
+						},
+					},
+					[3] = {
+						["CLSID"] = "{AIM-9J-ON-ADAPTER}",
+						["num"] = 5,
+					},
+					[4] = {
+						["CLSID"] = "{AIM-9J-ON-ADAPTER}",
+						["num"] = 1,
+					},
+					[5] = {
 					["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
 					["num"] = 2,
 					["settings"] = {
@@ -24038,26 +24038,26 @@ db_all_loadouts = {
 				sortie_rate = 8,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{DFT-300gal}",
-					["num"] = 3,
-				},
-				[2] = {
-					["CLSID"] = "{LAU-10 ZUNI_TER_2_R}",
-					["num"] = 4,
-				},
-				[3] = {
-					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
-					["num"] = 5,
-				},
-				[4] = {
-					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
-					["num"] = 1,
-				},
-				[5] = {
-					["CLSID"] = "{LAU-10 ZUNI_TER_2_L}",
-					["num"] = 2,
-				},
+					[1] = {
+						["CLSID"] = "{DFT-300gal}",
+						["num"] = 3,
+					},
+					[2] = {
+						["CLSID"] = "{LAU-10 ZUNI_TER_2_R}",
+						["num"] = 4,
+					},
+					[3] = {
+						["CLSID"] = "{AIM-9J-ON-ADAPTER}",
+						["num"] = 5,
+					},
+					[4] = {
+						["CLSID"] = "{AIM-9J-ON-ADAPTER}",
+						["num"] = 1,
+					},
+					[5] = {
+						["CLSID"] = "{LAU-10 ZUNI_TER_2_L}",
+						["num"] = 2,
+					},
 					},
 					fuel = 1555,
 					flare = 30,
@@ -24081,7 +24081,7 @@ db_all_loadouts = {
 				expend = "All",
 				night = true,
 				range = 600000,
-				firepower = 0.5,
+				firepower = 1,
 				vCruise = 200,
 				vAttack = 350,
 				hCruise = 4500,
@@ -24090,26 +24090,26 @@ db_all_loadouts = {
 				sortie_rate = 8,
 				stores = {
 					pylons = {
-				[1] = {
-					["CLSID"] = "{DFT-300gal}",
-					["num"] = 3,
-				},
-				[2] = {
-					["CLSID"] = "{LAU-3 FFAR Mk1 HE_TER_2_R}",
-					["num"] = 4,
-				},
-				[3] = {
-					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
-					["num"] = 5,
-				},
-				[4] = {
-					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
-					["num"] = 1,
-				},
-				[5] = {
-					["CLSID"] = "{LAU-3 FFAR Mk1 HE_TER_2_L}",
-					["num"] = 2,
-				},
+					[1] = {
+						["CLSID"] = "{DFT-300gal}",
+						["num"] = 3,
+					},
+					[2] = {
+						["CLSID"] = "{LAU-3 FFAR Mk1 HE_TER_2_R}",
+						["num"] = 4,
+					},
+					[3] = {
+						["CLSID"] = "{AIM-9J-ON-ADAPTER}",
+						["num"] = 5,
+					},
+					[4] = {
+						["CLSID"] = "{AIM-9J-ON-ADAPTER}",
+						["num"] = 1,
+					},
+					[5] = {
+						["CLSID"] = "{LAU-3 FFAR Mk1 HE_TER_2_L}",
+						["num"] = 2,
+					},
 					},
 					fuel = 1555,
 					flare = 30,
