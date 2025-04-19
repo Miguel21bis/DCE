@@ -4,7 +4,7 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.187"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.188"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
@@ -4115,6 +4115,99 @@ db_all_loadouts = {
 			},
 		},
 	},
+	["vwv_mig21mf"] = {
+		CAP = {
+			["NAM - AA CAP  AA-2B*2"] = {
+				attributes =  { "" },
+				code_loadout =  { "NAM" },
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 200,
+				vAttack = 220,
+				hCruise = 4000,
+				hAttack = 4200,
+				standoff = 1000,
+				tStation = 2000,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = {
+					["CLSID"] = "{R-3S}",
+					["num"] = 4,
+					},
+					[2] = {
+					["CLSID"] = "{R-3S}",
+					["num"] = 1,
+					},
+					},
+					fuel = 2600,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+		["Fighter Sweep"] = {
+			["NAM - AA Sweep AA-2B*2"] = {
+				attributes =  { },
+				code_loadout =  { "NAM" },
+				night = false,
+				adverseWeather = false,
+				range = 500000,
+				firepower = 1,
+				vCruise = 250,
+				vAttack = 350,
+				hCruise = 500,
+				hAttack = 500,
+				standoff = 1000,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = {
+					["CLSID"] = "{R-3S}",
+					["num"] = 4,
+					},
+					[2] = {
+					["CLSID"] = "{R-3S}",
+					["num"] = 1,
+					},
+					},
+					fuel = 2600,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},	
+		Intercept = {
+			["NAM - AA Inter AA-2B*2"] = {
+				attributes =  { },
+				code_loadout =  { "NAM" },
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = {
+					["CLSID"] = "{R-3S}",
+					["num"] = 4,
+					},
+					[2] = {
+					["CLSID"] = "{R-3S}",
+					["num"] = 1,
+					},
+					},
+					fuel = 2600,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+	},
 	["MiG-21Bis"] = {
 		Strike = {
 			["IPW - Strike - R-3R*1, R-3S*1, FT800L, FAB-500*2"] = {
@@ -7194,8 +7287,8 @@ db_all_loadouts = {
 				firepower = 10,
 				vCruise = 205.55555555556,
 				vAttack = 352.52777777778,
-				hCruise = 500,
-				hAttack = 500,
+				hCruise = 300,
+				hAttack = 300,
 				tStation = 2000,
 				sortie_rate = 6,
 				stores = {

@@ -1,11 +1,11 @@
 --Various DATA
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification: updateData_Bf
+-- last modification: updateData_Bg
 if not versionDCE then versionDCE = {} end
 versionDCE["UTIL_Data.lua"] = "1.14.86"
 ------------------------------------------------------------------------------------------------------- 
--- updateData_Bf			(f refuellingReceptacleType)(e Tu_22D)(Bd flyingAlone)(CH-47F H-6J)(a OH-58)(z F-4E-45MC)(UH-60L)(x hHover)(w reaper)(v Hercules)(u tabTask)(t add is_helicopter table)(s F1EE)(r F-16C_50)(q): Add helicos  (p): Add WOC80)(o: transfer the dataMap to another file)
+-- updateData_Bg			(g vwv_mig21mf)(f refuellingReceptacleType)(e Tu_22D)(Bd flyingAlone)(CH-47F H-6J)(a OH-58)(z F-4E-45MC)(UH-60L)(x hHover)(w reaper)(v Hercules)(u tabTask)(t add is_helicopter table)(s F1EE)(r F-16C_50)(q): Add helicos  (p): Add WOC80)(o: transfer the dataMap to another file)
 -- debug_c					(c OH-6A)(b requiredModulesSpecialName)(a add IsWesternCountry function)
 -- cleanCode_a				(a: repetition)
 -- adjustment_e				(e delete EPLRS_Capacity table)(d CVN to CV)(bombing on Group&Unit)(b: Syria nnTimeZone +3 & GudautaGPS )
@@ -266,6 +266,13 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		laserDesignator = false,
 		moduleName = "tetet_a-1_skyraider",
+		radio = {
+			frequency = 127.5,  -- Radio Freq
+			editable = true,
+			minFrequency = 100.000,
+			maxFrequency = 156.000,
+			modulation = MODULATION_AM
+		},
 	},
 
 	["vwv_ra-5"] = 	{				--Mod
@@ -282,14 +289,42 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		moduleName = "tetet_crusader",
 		-- playable = true,
+		radio = {
+			frequency = 127.5,  -- Radio Freq
+			editable = true,
+			minFrequency = 100.000,
+			maxFrequency = 156.000,
+			modulation = MODULATION_AM
+		},
 	},
 	["vwv_o-1"] = 	{			                 	--Mod
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
 		EPLRS_Capacity = false,
 		moduleName = "tetet_O1",
+		radio =
+		{
+			frequency = 127.5,  -- Radio Freq
+			editable = true,
+			minFrequency = 100.000,
+			maxFrequency = 156.000,
+			modulation = MODULATION_AM
+		},
 	},
 
+	["vwv_mig21mf"] = 	{			                 	--Mod
+		instrumentUnits = "imperial",
+		requiredModules = true,						--itsModule
+		EPLRS_Capacity = false,
+		moduleName = "tetet_mig21mf",
+		radio = {
+			frequency = 127.5, -- Radio Freq
+			editable = true,
+			minFrequency = 100.000,
+			maxFrequency = 156.000,
+			modulation = MODULATION_AM,
+		},
+	},
 
 	["A-10A"] = 	{
 		instrumentUnits = "imperial",
@@ -791,10 +826,18 @@ Data_divers = {
 		playable = true,
 	},
 
-	["vwv_mig17f"] = {   --Mod
+	["vwv_mig17f"] = 	{			                 	--Mod
 		instrumentUnits = "russian",
-		EPLRS_Capacity = false,
 		requiredModules = true,						--itsModule
+		EPLRS_Capacity = false,
+		moduleName = "tetet_mig17f",
+		radio = {
+			frequency = 127.5, -- Radio Freq
+			editable = true,
+			minFrequency = 100.000,
+			maxFrequency = 156.000,
+			modulation = MODULATION_AM,
+		},
 	},
 
 	["MiG-19P"] = {
@@ -1502,6 +1545,7 @@ TaskByPlane = {
 		["vwv_mig17f"] = true,			--Mod
 		["MiG-19P"] = true,
 		["MiG-21Bis"] = true,
+		["vwv_mig21mf"] = true,			--Mod
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-27K"] = true,
@@ -2027,6 +2071,7 @@ TaskByPlane = {
 		["vwv_mig17f"] = true,			--Mod
 		["MiG-19P"] = true,
 		["MiG-21Bis"] = true,
+		["vwv_mig21mf"] = true,			--Mod
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-29A"] = true,
@@ -2126,6 +2171,7 @@ TaskByPlane = {
 		["vwv_mig17f"] = true,			--Mod
 		["MiG-19P"] = true,
 		["MiG-21Bis"] = true,
+		["vwv_mig21mf"] = true,			--Mod
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-29A"] = true,
@@ -2188,6 +2234,7 @@ TaskByPlane = {
 		["vwv_mig17f"] = true,			--Mod
 		["MiG-19P"] = true,
 		["MiG-21Bis"] = true,
+		["vwv_mig21mf"] = true,			--Mod
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-29A"] = true,
@@ -2246,6 +2293,7 @@ TaskByPlane = {
 		["vwv_mig17f"] = true,			--Mod
 		["MiG-19P"] = true,
 		["MiG-21Bis"] = true,
+		["vwv_mig21mf"] = true,			--Mod
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-29A"] = true,

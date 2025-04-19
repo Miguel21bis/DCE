@@ -51,6 +51,7 @@ local excludedUnitTypes = {
 LastInjectFlightPlan = {}					--garde les derniers plan de vol injecté
 BingoPlaneTab = {}
 GroundDamagedFlyingMachine = {}
+AFAC_available = {}				--liste les AFAC en position
 AFAC_targetStatus = {}					--table used by AFACs to monitor the status of targets and move on to the next ones
 AFAC_smokeTiming = {}
 
@@ -3336,6 +3337,7 @@ local function loopAFAC()
 		-- AFAC_F10(Group)
 		timer.scheduleFunction(AFAC_F10, groupObject, timer.getTime() + 2)
 	end
+	return timer.getTime() + 10
 end
 
 local function loopPilot()

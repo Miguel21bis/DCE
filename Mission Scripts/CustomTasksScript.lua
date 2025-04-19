@@ -19,10 +19,6 @@ versionDCE["Mission Scripts/CustomTasksScript.lua"] = "1.9.43"
 ------------------------------------------------------------------------------------------------------- 
 
 
-
-AFAC_available = {}				--liste les AFAC en position
-
-
 local varFpsLeak = false
 local varFpsLeak_B = false
 local selectedTransport = 0			--util pour embarked
