@@ -84,6 +84,7 @@ for side, pack in pairs(ATO) do
 		if pack[p].main[1].tot then																				--package already has a tot (target package for player intercept)
 			tot = pack[p].main[1].tot																			--set package tot
 			TOTtable[side][pack[p].main[1].target_name] = tot															--store TOT for target
+			print("AtoT Aa  tot   "..tostring(tot) )
 		elseif TOTtable[side][pack[p].main[1].target_name] then														--target already has a TOT assigned from another package
 			if pack[p].main[1].loadout.standoff == nil or pack[p].main[1].loadout.standoff <= 15000 then		--if package overflies the target, add 15 seconds tot interval between multi-packages
 				TOTtable[side][pack[p].main[1].target_name] = TOTtable[side][pack[p].main[1].target_name] + 15
@@ -106,15 +107,15 @@ for side, pack in pairs(ATO) do
 				end
 
 				tot = randtot
-				-- print("AtoT Ab tot < earliest tot: "..tostring(tot).." |randtot: "..tostring(randtot) )
+				print("AtoT Ab tot < earliest tot: "..tostring(tot).." |randtot: "..tostring(randtot) )
 
 			elseif tot > latest	then																			--if this tot is too late for this package
-				tot = pack[p].latest																			--give package the latest possible tot
-				-- print("AtoT Ac  tot > latest  "..tostring(tot) )
+				tot = latest																			--give package the latest possible tot
+				print("AtoT Ac  tot > latest  "..tostring(tot) )
 			end
 			if earliest > latest then																			--if there is no valid TOT
 				tot = earliest
-				-- print("AtoT Ad earliest  "..tostring(earliest) .." >latest ".. tostring(latest))
+				print("AtoT Ad earliest  "..tostring(earliest) .." >latest ".. tostring(latest))
 			end
 		else
 			-- local earliest = pack[p].main[1].tot_from + 2400 + mission_ini.startup_time_player		--600	
@@ -143,7 +144,7 @@ for side, pack in pairs(ATO) do
 
 			if earliest > latest then																			--if there is no valid TOT
 				tot = earliest
-				-- print("AtoT E  earliest > latest  "..tostring(earliest) .." > ".. tostring(latest))
+				print("AtoT Ba  earliest > latest  "..tostring(earliest) .." > ".. tostring(latest))
 			else
 
 				--divise le temps possible par quartTime
@@ -189,6 +190,7 @@ for side, pack in pairs(ATO) do
 				-- randtot = math.random(earliest, latest)
 				-- randtot = math.random(earliest, latest)																--set random tot
 				tot = randtot
+				print("AtoT Ba  tot   "..tostring(tot) )
 
 			end
 			TOTtable[side][pack[p].main[1].target_name] = tot															--store TOT for target
@@ -360,6 +362,7 @@ for side, pack in pairs(ATO) do
 
 						tot = flight[f].tot_from + (f - 1) * flight[f].loadout.tStation + 1							--flight TOT (+1 second so that first flight spanwns at mission start a little ahead of station)
 						tot = tot - partial_station																	--remove time that the first flight was already on station at mission start
+						print("AtoT Ca  tot   "..tostring(tot) )
 					else																							--station cannot be covered continously
 						if f == 1 then																				--for first flight in package
 							local from = flight[f].tot_from - flight[f].loadout.tStation							--first possible station start
@@ -377,6 +380,7 @@ for side, pack in pairs(ATO) do
 						else
 							tot = tot + flight[f].tot_to / #flight
 						end
+						print("AtoT Cb  tot   "..tostring(tot) )
 					end
 				end
 
@@ -386,6 +390,7 @@ for side, pack in pairs(ATO) do
 					else
 						tot = tot +  (flight[f].loadout.tStation * #flight) - flight[f].loadout.tStation
 					end
+					print("AtoT D  tot   "..tostring(tot) )
 				end
 
 				--flight TOT for interceptors
@@ -393,6 +398,9 @@ for side, pack in pairs(ATO) do
 					flight[f].route[1].eta = 0									--interceptors only have one waypoint and start at mission start (but idle until activated by EWR)
 				end
 				--find target WP
+				if not tot then
+					_affiche(flight[f], "Bug TOT with: ")
+				end
 				local eta = tot + flight[f].eta_offset							--Make ETA at target the TOT plus ETA offset for flight tSeparation within package
 
 				if role == "main" and f == 1 then

@@ -45,6 +45,30 @@ versionDCE["UTIL_Data.lua"] = "1.14.86"
 -- 	["JF-17"] = true,
 -- }
 
+AFAC = "AFAC"
+CAS = "CAS"
+AntishipStrike = "Antiship Strike"
+GroundAttack = "Ground Attack"
+RunwayAttack = "Runway Attack"
+Escort = "Escort"
+PinpointStrike = "Pinpoint Strike"
+Intercept = "Intercept"
+CAP = "CAP"
+FighterSweep = "Fighter Sweep"
+Reconnaissance = "Reconnaissance"
+Refueling = "Refueling"
+AWACS = "AWACS"
+SEAD = "SEAD"
+Transport = "Transport"
+
+
+
+
+function aircraft_task(taskName)
+
+	return taskName
+end
+
 Data_configuration = {
 	CV_Vmax = 15.4,								--10-- (default : 15.4333( m/s):30kts), can have bp with F14, go down to 10 m/s
 	CV_windDeck = 13.8,							--9-- (default : 13.89( m/s):27kts), can have bp with F14, go down to 9 m/s
@@ -73,6 +97,986 @@ EjectedPilotFrequency = {
 	},
 }
 
+
+TaskByPlane = {
+	["Nothing"] = {
+		["MosquitoFBMkVI"] = true,
+		["SpitfireLFMkIX"] = true,
+		["SpitfireLFMkIXCW"] = true,
+
+		["P-47D-30bl1"] = true,
+		["P-47D-30"] = true,
+		["P-47D-40"] = true,
+		["P-51D"] = true,
+		["P-51D-30-NA"] = true,
+		["TF-51D"] = true,
+
+		["A-20G"] = true,
+		["B-17G"] = true,
+		["C-47"] = true,
+
+
+		["Bf-109K-4"] = true,
+		["FW-190A8"] = true,
+		["FW-190D9"] = true,
+		["Ju-88A4"] = true,
+
+		["I-16"] = true,
+		["Yak-52"] = true,
+
+		["MQ-9 Reaper"] = true,
+
+		["Tornado GR4"] = true,
+		["Tornado IDS"] = true,
+
+		["AV8BNA"] = true,
+		["A-4E-C"] = true,				--Mod
+		["A-6E"] = true,				--Mod
+		["EA_6B"] = true,				--Mod
+		["A-10C"] = true,
+		["A-10A"] = true,
+		["A-10C_2"] = true,
+		["Bronco-OV-10A"] = true,		--Mod
+		["vwv_a1_skyraider"] = true,	--Mod
+		["vwv_o-1"] = true,         	--Mod
+		["VSN_F100"] = true,			--Mod
+		["VSN_F105D"] = true,			--Mod
+		["VSN_F105G"] = true,			--Mod
+
+		["F-86F Sabre"] = true,
+		["F-4E"] = true,
+		["F-4E-45MC"] = true,
+		["F-5E-3"] = true,
+		["vwv_crusader"] = true,		--Mod
+		["vwv_ra-5"] = true,		--Mod
+		["F-14A-135-GR"] = true,
+		["F-14B"] = true,
+		["F-15C"] = true,
+		["F-15E"] = true,
+		["F-15ESE"] = true,
+		["F-16C_50"] = true,
+		["F-16C bl.52d"] = true,
+		["FA-18C_hornet"] = true,
+
+		["F-117A"] = true,
+		["B-1B"] = true,
+		["B-52H"] = true,
+
+		["H-6J"] = true,
+
+		["AJS37"] = true,
+		["MB-339A"] = true,
+		["MirageF1"] = true,			--Mod
+		["Mirage-F1CE"] = true,
+		["Mirage-F1EE"] = true,
+		["MirageF1CT"] = true,			--Mod
+		["M-2000C"] = true,
+
+		["SA342M"] = true,
+		["SA342Mistral"] = true,
+		["SA342Minigun"] = true,
+		["SA342L"] = true,
+		["AH-1W"] = true,
+		["UH-1H"] = true,
+		["vwv_sh2f"] = true,			--Mod
+		["vwv_hh2d"] = true,			--Mod
+		["CH-47D"] = true,
+		["CH-47Fbl1"] = true,
+		["AH-64D_BLK_II"] = true,
+		["AH-64A"] = true,
+		["OH-6A"] = true,				--Mod
+		["OH58D"] = true,
+
+
+		["JF-17"] = true,
+		["L-39C"] = true,
+		["L-39ZA"] = true,
+
+		["MiG-15bis"] = true,
+		["vwv_mig17f"] = true,			--Mod
+		["MiG-19P"] = true,
+		["MiG-21Bis"] = true,
+		["vwv_mig21mf"] = true,			--Mod
+--		["vwv_mig21pfm"] = true,			--Mod
+		["MiG-23MLD"] = true,
+		["MiG-25PD"] = true,
+		["MiG-27K"] = true,
+		["MiG-29A"] = true,
+		["MiG-29S"] = true,
+		["MiG-31"] = true,
+
+		["Su-24M"] = true,
+		["Su-27"] = true,
+		["Su-30"] = true,
+		["Su-34"] = true,
+
+		["Ka-27"] = true,
+		["Mi-8MT"] = true,
+		["Mi-24V"] = true,
+		["Mi-24P"] = true,
+		["Mi-28N"] = true,
+		["Ka-50"] = true,
+		["Ka-50_3"] = true,
+
+
+		["E-3A"] = true,
+		["E-2C"] = true,
+		["A-50"] = true,
+
+		["S-3B Tanker"] = true,
+		["KC135MPRS"] = true,
+		["KC-135"] = true,
+		["KC130"] = true,
+		["IL-78M"] = true,
+
+		["MiG-25RBT"] = true,
+		["Su-24MR"] = true,
+		["Tu-142"] = true,
+
+
+		["C-130"] = true,
+		["Hercules"] = true,		--Mod
+		["C-17A"] = true,
+		["An-30M"] = true,
+		["An-26B"] = true,
+		["IL-76MD"] = true,
+		["tu_22D"] = true,
+
+	},
+
+
+	["AFAC"] = {
+		["F-4E-45MC"] = true,
+		["MosquitoFBMkVI"] = true,
+		["SpitfireLFMkIX"] = true,
+		["SpitfireLFMkIXCW"] = true,
+
+		["P-47D-30bl1"] = true,
+		["P-47D-30"] = true,
+		["P-47D-40"] = true,
+		["P-51D"] = true,
+		["P-51D-30-NA"] = true,
+
+		["Bf-109K-4"] = true,
+		["FW-190A8"] = true,
+		["FW-190D9"] = true,
+
+		["C-47"] = true,
+
+		["MQ-9 Reaper"] = true,
+
+		["Tornado GR4"] = true,
+		["Tornado IDS"] = true,
+
+		["A-4E-C"] = true,				--Mod
+		["A-10C"] = true,
+		["A-10C_2"] = true,
+		["A-10A"] = true,
+		["Bronco-OV-10A"] = true,		--Mod
+		["vwv_a1_skyraider"] = true,	--Mod
+		["vwv_o-1"] = true,         	--Mod
+
+		["F-16C_50"] = true,
+		["F-16C bl.52d"] = true,
+
+
+		["Yak-52"] = true,
+		["JF-17"] = true,
+		["L-39ZA"] = true,
+		["MiG-15bis"] = true,
+		["vwv_mig17f"] = true,			--Mod
+		["Su-24M"] = true,
+
+		["Mirage-F1CE"] = true,
+		["Mirage-F1EE"] = true,
+
+		["Mi-8MT"] = true,
+		["Ka-50"] = true,
+		["Ka-50_3"] = true,
+		["Mi-24P"] = true,
+		["Mi-28N"] = true,
+
+		["AH-64A"] = true,
+
+		["SA342M"] = true,
+		["SA342Mistral"] = true,
+		["SA342Minigun"] = true,
+		["SA342L"] = true,
+
+		["OH58D"] = true,
+		["OH-6A"] = true,			--Mod
+
+
+	},
+	["CAS"] = {
+		["MosquitoFBMkVI"] = true,
+		["SpitfireLFMkIX"] = true,
+		["SpitfireLFMkIXCW"] = true,
+
+		["A-20G"] = true,
+
+		["P-47D-30bl1"] = true,
+		["P-47D-30"] = true,
+		["P-47D-40"] = true,
+		["P-51D"] = true,
+		["P-51D-30-NA"] = true,
+
+		["Bf-109K-4"] = true,
+		["FW-190A8"] = true,
+		["FW-190D9"] = true,
+		["Ju-88A4"] = true,
+
+		["I-16"] = true,
+
+		["A-4E-C"] = true,			--Mod
+		["A-6E"] = true,			--Mod
+		["A-10C"] = true,
+		["A-10C_2"] = true,
+		["A-10A"] = true,
+		["Bronco-OV-10A"] = true,		--Mod
+		["vwv_a1_skyraider"] = true,	--Mod
+		["VSN_F100"] = true,			--Mod
+		["VSN_F105D"] = true,			--Mod
+		["VSN_F105G"] = true,			--Mod
+
+		["AJS37"] = true,
+		["AV8BNA"] = true,
+		["MB-339A"] = true,
+		["MirageF1"] = true,			--Mod
+		["Mirage-F1CE"] = true,
+		["Mirage-F1EE"] = true,
+		["MirageF1CT"] = true,			--Mod
+
+
+		["B-1B"] = true,
+		["B-52H"] = true,
+
+		["H-6J"] = true,
+		["tu_22D"] = true,				--Mod
+
+		["F-86F Sabre"] = true,
+
+		["F-4E"] = true,
+		["F-4E-45MC"] = true,
+		["F-5E-3"] = true,
+		["F-14B"] = true,
+		["F-14A-135-GR"] = true,
+		["F-15E"] = true,
+		["F-15ESE"] = true,
+		["F-16C_50"] = true,
+		["F-16C bl.52d"] = true,
+		["FA-18C_hornet"] = true,
+		["M-2000C"] = true,
+
+		["AH-1W"] = true,
+		["UH-1H"] = true,
+		["SA342M"] = true,
+		["SA342Minigun"] = true,
+		["SA342L"] = true,
+		["AH-64D_BLK_II"] = true,
+		["OH58D"] = true,
+		["OH-6A"] = true,			--Mod
+
+		["JF-17"] = true,
+		["L-39C"] = true,
+		["L-39ZA"] = true,
+		["MiG-15bis"] = true,
+		["vwv_mig17f"] = true,			--Mod
+		["MiG-19P"] = true,
+		["MiG-21Bis"] = true,
+		["MiG-23MLD"] = true,
+		["MiG-27K"] = true,
+		["MiG-29A"] = true,
+
+
+		["Su-17M4"] = true,
+		["Su-24M"] = true,
+		["Su-25"] = true,
+		["Su-25T"] = true,
+		["Su-27"] = true,
+		["Su-30"] = true,
+		["Su-34"] = true,
+
+
+
+		["Mi-8MT"] = true,
+		["Mi-24V"] = true,
+		["Mi-24P"] = true,
+		["Mi-28N"] = true,
+		["Ka-50"] = true,
+		["Ka-50_3"] = true,
+
+
+	},
+
+	["Antiship Strike"] = {
+		["MosquitoFBMkVI"] = true,
+		["SpitfireLFMkIX"] = true,
+		["SpitfireLFMkIXCW"] = true,
+
+		["A-20G"] = true,
+
+		["P-47D-30bl1"] = true,
+		["P-47D-30"] = true,
+		["P-47D-40"] = true,
+		["P-51D"] = true,
+		["P-51D-30-NA"] = true,
+
+		["Bf-109K-4"] = true,
+		["FW-190A8"] = true,
+		["FW-190D9"] = true,
+		["Ju-88A4"] = true,
+
+		["Tornado GR4"] = true,
+		["Tornado IDS"] = true,
+
+		["A-4E-C"] = true,				--Mod
+		["A-10C"] = true,
+		["A-10C_2"] = true,
+		["A-10A"] = true,
+		["vwv_a1_skyraider"] = true,	--Mod
+		["AJS37"] = true,
+		["AV8BNA"] = true,
+		["B-52H"] = true,
+
+		["H-6J"] = true,
+
+		["F-86F Sabre"] = true,
+
+		["F-4E"] = true,
+		["F-4E-45MC"] = true,
+		["F-5E-3"] = true,
+		["F-14A-135-GR"] = true,
+		["F-14B"] = true,
+		["F-16C_50"] = true,
+		["F-16C bl.52d"] = true,
+		["FA-18C_hornet"] = true,
+		["MB-339A"] = true,
+		--["Mirage-F1CE"] = true,		--not yet				 
+		["MirageF1CT"] = true,			--Mod
+
+		["AH-1W"] = true,
+		["AH-64D_BLK_II"] = true,
+		["AH-64A"] = true,
+		["SH-3D"] = true,				--Mod
+
+		["JF-17"] = true,
+		["L-39C"] = true,
+		["L-39ZA"] = true,
+		["vwv_mig17f"] = true,			--Mod
+		["MiG-19P"] = true,
+		["MiG-27K"] = true,
+		["MiG-29A"] = true,
+		["Su-17M4"] = true,
+		["Su-24M"] = true,
+		["Su-25"] = true,
+		["Su-25T"] = true,
+		["Su-25TM"] = true,
+		["Su-34"] = true,
+
+		["Su-27"] = true,
+		["Su-30"] = true,
+
+		["Tu-22M3"] = true,
+		["Tu-142"] = true,
+		["tu_22D"] = true,				--Mod
+
+
+		["Mi-8MT"] = true,
+		["Mi-24V"] = true,
+		["Mi-24P"] = true,
+		["Mi-28N"] = true,
+		["Ka-50"] = true,
+		["Ka-50_3"] = true,
+
+
+	},
+
+	["Ground Attack"] = {
+		["MosquitoFBMkVI"] = true,
+		["SpitfireLFMkIX"] = true,
+		["SpitfireLFMkIXCW"] = true,
+
+		["P-47D-30bl1"] = true,
+		["P-47D-30"] = true,
+		["P-47D-40"] = true,
+		["P-51D"] = true,
+		["P-51D-30-NA"] = true,
+
+		["A-20G"] = true,
+		["B-17G"] = true,
+
+		["Bf-109K-4"] = true,
+		["FW-190A8"] = true,
+		["FW-190D9"] = true,
+		["Ju-88A4"] = true,
+
+		["I-16"] = true,
+
+		["Tornado GR4"] = true,
+		["Tornado IDS"] = true,
+
+		["A-4E-C"] = true,				--Mod
+		["A-6E"] = true,				--Mod
+		["EA_6B"] = true,				--Mod
+		["Bronco-OV-10A"] = true,		--Mod
+		["vwv_a1_skyraider"] = true,	--Mod
+		["A-10C"] = true,
+		["A-10C_2"] = true,
+		["A-10A"] = true,
+		["AJS37"] = true,
+		["AV8BNA"] = true,
+		["VSN_F100"] = true,			--Mod
+		["VSN_F105D"] = true,			--Mod
+		["VSN_F105G"] = true,			--Mod
+
+		["B-1B"] = true,
+		["B-52H"] = true,
+
+		["H-6J"] = true,
+		["tu_22D"] = true,				--Mod
+
+		["F-86F Sabre"] = true,
+
+		["F-4E"] = true,
+		["F-4E-45MC"] = true,
+		["F-5E-3"] = true,
+		["F-14A-135-GR"] = true,
+		["F-14B"] = true,
+		["F-15E"] = true,
+		["F-15ESE"] = true,
+		["F-16C_50"] = true,
+		["F-16C bl.52d"] = true,
+		["FA-18C_hornet"] = true,
+		["MB-339A"] = true,
+		["MirageF1"] = true,			--Mod
+		["Mirage-F1CE"] = true,
+		["Mirage-F1EE"] = true,
+		["MirageF1CT"] = true,			--Mod
+		["M-2000C"] = true,
+
+		["AH-1W"] = true,
+		["UH-1H"] = true,
+		["SA342M"] = true,
+		["SA342Minigun"] = true,
+		["SA342L"] = true,
+		["AH-64D_BLK_II"] = true,
+		["AH-64A"] = true,
+		["OH58D"] = true,
+		["OH-6A"] = true,			--Mod
+
+		["JF-17"] = true,
+		["L-39C"] = true,
+		["L-39ZA"] = true,
+		["MiG-15bis"] = true,
+		["vwv_mig17f"] = true,			--Mod
+		["MiG-19P"] = true,
+		["MiG-21Bis"] = true,
+		["MiG-23MLD"] = true,
+		["MiG-25RBT"] = true,
+		["MiG-27K"] = true,
+		["MiG-29A"] = true,
+
+		["Su-17M4"] = true,
+		["Su-24M"] = true,
+		["Su-25"] = true,
+		["Su-25T"] = true,
+		["Su-27"] = true,
+		["Su-30"] = true,
+		["Su-34"] = true,
+		["Tu-22M3"] = true,
+
+		["Mi-8MT"] = true,
+		["Mi-24V"] = true,
+		["Mi-24P"] = true,
+		["Mi-28N"] = true,
+		["Ka-50"] = true,
+		["Ka-50_3"] = true,
+
+
+
+	},
+
+	["Runway Attack"] = {
+		["MosquitoFBMkVI"] = true,
+		["SpitfireLFMkIX"] = true,
+		["SpitfireLFMkIXCW"] = true,
+
+		["P-47D-30bl1"] = true,
+		["P-47D-30"] = true,
+		["P-47D-40"] = true,
+		["P-51D"] = true,
+		["P-51D-30-NA"] = true,
+
+		["A-20G"] = true,
+		["B-17G"] = true,
+
+		["Bf-109K-4"] = true,
+		["FW-190A8"] = true,
+		["FW-190D9"] = true,
+		["Ju-88A4"] = true,
+
+		["Tornado GR4"] = true,
+		["Tornado IDS"] = true,
+
+		["A-4E-C"] = true,					--Mod
+		["A-6E"] = true,					--Mod
+		["A-10C"] = true,
+		["A-10C_2"] = true,
+		["A-10A"] = true,
+		["vwv_a1_skyraider"] = true,		--Mod
+		["AJS37"] = true,
+		["AV8BNA"] = true,
+
+		["B-1B"] = true,
+		["B-52H"] = true,
+
+		["H-6J"] = true,
+		["tu_22D"] = true,					--Mod
+
+		["F-14A-135-GR"] = true,
+		["F-14B"] = true,
+		["F-15E"] = true,
+		["F-15ESE"] = true,
+		["F-16C_50"] = true,
+		["F-16C bl.52d"] = true,
+		["FA-18C_hornet"] = true,
+
+		["MB-339A"] = true,
+		["MirageF1"] = true,			--Mod
+		["Mirage-F1CE"] = true,
+		["Mirage-F1EE"] = true,
+		["MirageF1CT"] = true,			--Mod
+		["M-2000C"] = true,
+
+
+		["JF-17"] = true,
+		["L-39C"] = true,
+		["L-39ZA"] = true,
+		["Su-17M4"] = true,
+		["Su-24M"] = true,
+		["Su-25"] = true,
+		["Su-25T"] = true,
+		["Su-27"] = true,
+		["Su-30"] = true,
+		["Su-34"] = true,
+		["MiG-29A"] = true,
+		["Tu-22M3"] = true,
+		["MiG-27K"] = true,
+
+
+	},
+
+	["Escort"] = {
+		["MosquitoFBMkVI"] = true,
+		["SpitfireLFMkIX"] = true,
+		["SpitfireLFMkIXCW"] = true,
+
+		["P-47D-30bl1"] = true,
+		["P-47D-30"] = true,
+		["P-47D-40"] = true,
+		["P-51D"] = true,
+		["P-51D-30-NA"] = true,
+
+		-- ["C-47"] = true,				--C47 en escorte? mais ils sont fou chez ED :p
+
+		["Bf-109K-4"] = true,
+		["FW-190A8"] = true,
+		["FW-190D9"] = true,
+
+		["I-16"] = true,
+
+
+		["A-4E-C"] = true,				--Mod
+		["AV8BNA"] = true,
+
+		["F-86F Sabre"] = true,
+		["F-4E"] = true,
+		["F-4E-45MC"] = true,
+		["F-5E-3"] = true,
+		["vwv_crusader"] = true,		--Mod
+		["F-14A-135-GR"] = true,
+		["F-14B"] = true,
+		["F-15C"] = true,
+		["F-15E"] = true,
+		["F-15ESE"] = true,
+		["F-16C_50"] = true,
+		["F-16C bl.52d"] = true,
+		["FA-18C_hornet"] = true,
+
+		["MirageF1"] = true,			--Mod
+		["Mirage-F1CE"] = true,
+		["Mirage-F1EE"] = true,
+		["M-2000C"] = true,
+
+		["AH-1W"] = true,
+		["SA342M"] = true,
+		["SA342Mistral"] = true,
+		["SA342Minigun"] = true,
+		["SA342L"] = true,
+		["AH-64D_BLK_II"] = true,
+		["OH58D"] = true,
+
+		["Yak-52"] = true,
+		["JF-17"] = true,
+		["MiG-15bis"] = true,
+		["vwv_mig17f"] = true,			--Mod
+		["MiG-19P"] = true,
+		["MiG-21Bis"] = true,
+		["vwv_mig21mf"] = true,			--Mod
+--		["vwv_mig21pfm"] = true,			--Mod
+		["MiG-23MLD"] = true,
+		["MiG-25PD"] = true,
+		["MiG-29A"] = true,
+		["MiG-29S"] = true,
+		["MiG-31"] = true,
+
+		["Su-27"] = true,
+		["Su-30"] = true,
+
+		["Mi-24P"] = true,
+		["Mi-28N"] = true,
+		["Ka-50"] = true,
+		["Ka-50_3"] = true,
+	},
+
+	["Pinpoint Strike"] = {
+		["AJS37"] = true,
+		["AV8BNA"] = true,
+
+		["Tornado GR4"] = true,
+		["Tornado IDS"] = true,
+
+		["B-1B"] = true,
+		["B-52H"] = true,
+
+		["H-6J"] = true,
+		["tu_22D"] = true,				--Mod
+
+		["F-4E"] = true,
+		["F-4E-45MC"] = true,
+		["F-5E-3"] = true,
+		["F-14A-135-GR"] = true,
+		["F-14B"] = true,
+		["F-15E"] = true,
+		["F-15ESE"] = true,
+		["F-16C_50"] = true,
+		["F-16C bl.52d"] = true,
+		["FA-18C_hornet"] = true,
+		["F-117A"] = true,
+
+		["Mirage-F1CE"] = true,
+		["Mirage-F1EE"] = true,
+		["MirageF1CT"] = true,			--Mod
+		["M-2000C"] = true,
+
+		["JF-17"] = true,
+		["MiG-27K"] = true,
+		["Su-17M4"] = true,
+		["Su-24M"] = true,
+		["Su-25"] = true,
+		["Su-25T"] = true,
+		["Su-30"] = true,
+		["Su-34"] = true,
+
+	},
+
+	["Intercept"] = {
+		["MosquitoFBMkVI"] = true,
+		["SpitfireLFMkIX"] = true,
+		["SpitfireLFMkIXCW"] = true,
+
+		["P-47D-30bl1"] = true,
+		["P-47D-30"] = true,
+		["P-47D-40"] = true,
+
+		["Bf-109K-4"] = true,
+		["FW-190A8"] = true,
+		["FW-190D9"] = true,
+
+		["I-16"] = true,
+
+
+		["AJS37"] = true,
+
+		["F-86F Sabre"] = true,
+
+		["AV8BNA"] = true,
+		["F-4E"] = true,
+		["F-4E-45MC"] = true,
+		["F-5E-3"] = true,
+		["vwv_crusader"] = true,		--Mod
+		["F-14A-135-GR"] = true,
+		["F-14B"] = true,
+		["F-15C"] = true,
+		["F-15E"] = true,
+		["F-15ESE"] = true,
+		["F-16C_50"] = true,
+		["F-16C bl.52d"] = true,
+		["FA-18C_hornet"] = true,
+		["MirageF1"] = true,			--Mod
+		["Mirage-F1CE"] = true,
+		["Mirage-F1EE"] = true,
+		["M-2000C"] = true,
+
+		["JF-17"] = true,
+		["MiG-15bis"] = true,
+		["vwv_mig17f"] = true,			--Mod
+		["MiG-19P"] = true,
+		["MiG-21Bis"] = true,
+		["vwv_mig21mf"] = true,			--Mod
+--		["vwv_mig21pfm"] = true,			--Mod
+		["MiG-23MLD"] = true,
+		["MiG-25PD"] = true,
+		["MiG-29A"] = true,
+		["MiG-29S"] = true,
+		["MiG-31"] = true,
+		["Su-27"] = true,
+		["Su-30"] = true,
+
+
+	},
+
+	["CAP"] = {
+		["MosquitoFBMkVI"] = true,
+		["SpitfireLFMkIX"] = true,
+		["SpitfireLFMkIXCW"] = true,
+
+		["P-47D-30bl1"] = true,
+		["P-47D-30"] = true,
+		["P-47D-40"] = true,
+		["P-51D"] = true,
+		["P-51D-30-NA"] = true,
+
+
+		["Bf-109K-4"] = true,
+		["FW-190A8"] = true,
+		["FW-190D9"] = true,
+
+		["I-16"] = true,
+
+
+		["AJS37"] = true,
+		["A-4E-C"] = true,				--Mod
+		["AV8BNA"] = true,
+
+		["F-86F Sabre"] = true,
+
+		["F-4E"] = true,
+		["F-4E-45MC"] = true,
+		["F-5E-3"] = true,
+		["vwv_crusader"] = true,		--Mod
+		["F-14A-135-GR"] = true,
+		["F-14B"] = true,
+		["F-15C"] = true,
+		["F-15E"] = true,
+		["F-15ESE"] = true,
+		["F-16C_50"] = true,
+		["F-16C bl.52d"] = true,
+		["FA-18C_hornet"] = true,
+
+		["MirageF1"] = true,			--Mod
+		["Mirage-F1CE"] = true,
+		["Mirage-F1EE"] = true,
+		["M-2000C"] = true,
+
+		["Yak-52"] = true,
+		["JF-17"] = true,
+		["L-39C"] = true,
+		["L-39ZA"] = true,
+		["MiG-15bis"] = true,
+		["vwv_mig17f"] = true,			--Mod
+		["MiG-19P"] = true,
+		["MiG-21Bis"] = true,
+		["vwv_mig21mf"] = true,			--Mod
+--		["vwv_mig21pfm"] = true,			--Mod
+		["MiG-23MLD"] = true,
+		["MiG-25PD"] = true,
+		["MiG-29A"] = true,
+		["MiG-29S"] = true,
+		["MiG-31"] = true,
+		["Su-27"] = true,
+		["Su-30"] = true,
+
+
+	},
+
+	["Fighter Sweep"] = {
+		["MosquitoFBMkVI"] = true,
+		["SpitfireLFMkIX"] = true,
+		["SpitfireLFMkIXCW"] = true,
+
+		["P-47D-30bl1"] = true,
+		["P-47D-30"] = true,
+		["P-47D-40"] = true,
+		["P-51D"] = true,
+		["P-51D-30-NA"] = true,
+
+
+		["Bf-109K-4"] = true,
+		["FW-190A8"] = true,
+		["FW-190D9"] = true,
+
+		["I-16"] = true,
+
+
+		["AJS37"] = true,
+
+		["F-86F Sabre"] = true,
+
+		["AV8BNA"] = true,
+		["F-4E"] = true,
+		["F-4E-45MC"] = true,
+		["F-5E-3"] = true,
+		["vwv_crusader"] = true,		--Mod
+		["F-14A-135-GR"] = true,
+		["F-14B"] = true,
+		["F-15C"] = true,
+		["F-15E"] = true,
+		["F-15ESE"] = true,
+		["F-16C_50"] = true,
+		["F-16C bl.52d"] = true,
+		["FA-18C_hornet"] = true,
+
+		["MirageF1"] = true,			--Mod
+		["Mirage-F1CE"] = true,
+		["Mirage-F1EE"] = true,
+		["M-2000C"] = true,
+
+		["JF-17"] = true,
+		["MiG-15bis"] = true,
+		["vwv_mig17f"] = true,			--Mod
+		["MiG-19P"] = true,
+		["MiG-21Bis"] = true,
+		["vwv_mig21mf"] = true,			--Mod
+--		["vwv_mig21pfm"] = true,			--Mod
+		["MiG-23MLD"] = true,
+		["MiG-25PD"] = true,
+		["MiG-29A"] = true,
+		["MiG-29S"] = true,
+		["MiG-31"] = true,
+		["Su-27"] = true,
+		["Su-30"] = true,
+
+
+	},
+
+
+	["Reconnaissance"] = {
+		["TF-51D"] = true,
+		["FW-190A8"] = true,
+		["I-16"] = true,
+
+		["Tornado GR4"] = true,
+		["Tornado IDS"] = true,
+
+		["A-4E-C"] = true,				--Mod
+		["AJS37"] = true,
+		["F-4E"] = true,
+		["F-4E-45MC"] = true,
+		["vwv_crusader"] = true,		--Mod
+		["vwv_ra-5"] = true,		--Mod
+		["F-15E"] = true,
+		["F-16C_50"] = true,
+		["F-16C bl.52d"] = true,
+		["FA-18C_hornet"] = true,
+
+		["SA342M"] = true,
+		["SA342Mistral"] = true,
+		["SA342Minigun"] = true,
+		["SA342L"] = true,
+		["OH58D"] = true,
+		["OH-6A"] = true,			--Mod
+
+		["JF-17"] = true,
+		["MiG-21Bis"] = true,
+		["MiG-25RBT"] = true,
+		["Su-24MR"] = true,
+		["Tu-142"] = true,
+		["tu_22D"] = true,				--Mod
+	},
+
+
+	["Refueling"] = {
+		["A-4E-C"] = true,				--Mod
+		["S-3B Tanker"] = true,
+		["KC135MPRS"] = true,
+		["KC-135"] = true,
+		["KC130"] = true,
+		["IL-78M"] = true,
+	},
+
+	["AWACS"] = {
+		["E-3A"] = true,
+		["E-2C"] = true,
+		["A-50"] = true,
+	},
+
+	["SEAD"] = {
+		["AJS37"] = true,
+
+		["Tornado GR4"] = true,
+		["Tornado IDS"] = true,
+
+		["A-4E-C"] = true,				--Mod	
+		--["A-6E"] = true,				--no weapon				 
+		["EA_6B"] = true,				--Mod
+		["VSN_F100"] = true,			--Mod
+		["VSN_F105G"] = true,			--Mod
+
+		["AV8BNA"] = true,
+		["F-4E"] = true,
+		["F-4E-45MC"] = true,
+		["F-16C_50"] = true,
+		["F-16C bl.52d"] = true,
+		["FA-18C_hornet"] = true,
+
+		["JF-17"] = true,
+
+		["Su-17M4"] = true,
+		["Su-24M"] = true,
+		["Su-25T"] = true,
+		["Su-30"] = true,
+		["Su-34"] = true,
+		["MiG-27K"] = true,
+
+
+	},
+
+	["Transport"] = {
+		["C-47"] = true,
+		["C-130"] = true,
+		["Hercules"] = true,		--Mod
+		["C-17A"] = true,
+
+		["UH-1H"] = true,
+		["vwv_sh2f"] = true,			--Mod
+		["vwv_hh2d"] = true,			--Mod
+		["CH-47D"] = true,
+		["CH-47Fbl1"] = true,
+		["CH-53E"] = true,
+		["UH-60A"] = true,
+		["UH-60L"] = true,			--Mod
+		["SH-3D"] = true,			--Mod
+		["SH-60B"] = true,
+		["OH58D"] = true,
+		["OH-6A"] = true,			--Mod
+
+
+		["An-26B"] = true,
+		["An-30M"] = true,
+		["IL-76MD"] = true,
+
+		["Ka-27"] = true,
+		["Mi-8MT"] = true,
+		["Mi-24V"] = true,
+		["Mi-24P"] = true,
+		["Mi-26"] = true,
+
+
+	},
+
+}
 
 -- Data_divers = {}
 --instrumentUnits = "imperial" or  metric or russian (metric and QNH in mmHg)
@@ -218,16 +1222,17 @@ Data_divers = {
 		requiredModulesSpecialName = "VSN_F105",	--if the aircraft type name does not match the requested module name
 		EPLRS_Capacity = false,
 		Tasks = {
-			CAP = true,
-			Escort = true,
-			FighterSweep = true,
-			Intercept = true,
-			Reconnaissance = true,
-			GroundAttack = true,
-			CAS = true,
-			RunwayAttack = true,
-			AntishipStrike = true,
-		},
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(Reconnaissance),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+		  --aircraft_task(AFAC),
+			aircraft_task(RunwayAttack),
+			aircraft_task(AntishipStrike),
+	  },	
 		playable = true,
 	},
 
@@ -237,16 +1242,17 @@ Data_divers = {
 		requiredModulesSpecialName = "VSN_F105",	--if the aircraft type name does not match the requested module name
 		EPLRS_Capacity = false,
 		Tasks = {
-			CAP = true,
-			Escort = true,
-			FighterSweep = true,
-			Intercept = true,
-			Reconnaissance = true,
-			GroundAttack = true,
-			CAS = true,
-			RunwayAttack = true,
-			AntishipStrike = true,
-		},
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(Reconnaissance),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+		  --aircraft_task(AFAC),
+			aircraft_task(RunwayAttack),
+			aircraft_task(AntishipStrike),
+	  },	
 		playable = true,
 	},
 
@@ -381,18 +1387,18 @@ Data_divers = {
 			},
 		},
 		Tasks = {
-			CAP = true,
-			Escort = true,
-			FighterSweep = true,
-			Intercept = true,
-			GroundAttack = true,
-			RunwayAttack = true,
-			PinpointStrike = true,
-			CAS = true,
-			AFAC = true,
-			SEAD = true,
-			AntishipStrike = true,
-			Reconnaissance = true,
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(GroundAttack),
+			aircraft_task(RunwayAttack),
+			aircraft_task(PinpointStrike),
+			aircraft_task(CAS),
+			aircraft_task(AFAC),
+			aircraft_task(SEAD),
+			aircraft_task(AntishipStrike),
+			aircraft_task(Reconnaissance),
 		},
 		vCruise = 215,--a peaufiner
 		hCruise = 9000,--a peaufiner
@@ -423,21 +1429,20 @@ Data_divers = {
 				["INSAlignmentStored"] = false,
 			},
 		},
-		Tasks =
-		{
-			CAP = true,
-			Escort = true,
-			FighterSweep = true,
-			Intercept = true,
-			Reconnaissance = true,
-			GroundAttack = true,
-			RunwayAttack = true,
-			PinpointStrike = true,
-			AntishipStrike = true,
-			CAS = true,
-			AFAC = true,
-			SEAD = true,
-		},
+		Tasks = {
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(Reconnaissance),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+		  	aircraft_task(AFAC),
+			aircraft_task(RunwayAttack),
+			aircraft_task(PinpointStrike),
+			aircraft_task(AntishipStrike),
+			aircraft_task(SEAD),
+	  	},
 
 		vCruise = 230,
 		hCruise = 9140,
@@ -457,21 +1462,20 @@ Data_divers = {
 				["INSAlignmentStored"] = false,
 			},
 		},
-		Tasks =
-		{
-			CAP = true,
-			Escort = true,
-			FighterSweep = true,
-			Intercept = true,
-			Reconnaissance = true,
-			GroundAttack = true,
-			RunwayAttack = true,
-			PinpointStrike = true,
-			AntishipStrike = true,
-			CAS = true,
-			AFAC = true,
-			SEAD = true,
-		},
+		Tasks = {
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(Reconnaissance),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+		  	aircraft_task(AFAC),
+			aircraft_task(RunwayAttack),
+			aircraft_task(PinpointStrike),
+			aircraft_task(AntishipStrike),
+			aircraft_task(SEAD),
+	  	},
 		vCruise = 230,
 		hCruise = 9140,
 		refuellingReceptacleType = "drogue"
@@ -760,10 +1764,10 @@ Data_divers = {
 	["OH-6A"] = {
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
-		Tasks = {
-			Transport = true,
-			Reconnaissance = true,
-		},
+		Tasks = {                     -- defined in db_units_planes.lua
+		aircraft_task(Transport), --31
+		aircraft_task(Reconnaissance),
+	},
 		playable = true,
 	},
 	["AH-64D_BLK_II"] = {
@@ -851,6 +1855,15 @@ Data_divers = {
 			minFrequency = 100.000,
 			maxFrequency = 156.000,
 			modulation = MODULATION_AM,
+		},
+		Tasks = {
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(AntishipStrike),
 		},
 	},
 
@@ -1462,980 +2475,7 @@ GoupTaskByTypeTarget = {
 	},
 }
 
-TaskByPlane = {
-	["Nothing"] = {
-		["MosquitoFBMkVI"] = true,
-		["SpitfireLFMkIX"] = true,
-		["SpitfireLFMkIXCW"] = true,
 
-		["P-47D-30bl1"] = true,
-		["P-47D-30"] = true,
-		["P-47D-40"] = true,
-		["P-51D"] = true,
-		["P-51D-30-NA"] = true,
-		["TF-51D"] = true,
-
-		["A-20G"] = true,
-		["B-17G"] = true,
-		["C-47"] = true,
-
-
-		["Bf-109K-4"] = true,
-		["FW-190A8"] = true,
-		["FW-190D9"] = true,
-		["Ju-88A4"] = true,
-
-		["I-16"] = true,
-		["Yak-52"] = true,
-
-		["MQ-9 Reaper"] = true,
-
-		["Tornado GR4"] = true,
-		["Tornado IDS"] = true,
-
-		["AV8BNA"] = true,
-		["A-4E-C"] = true,				--Mod
-		["A-6E"] = true,				--Mod
-		["EA_6B"] = true,				--Mod
-		["A-10C"] = true,
-		["A-10A"] = true,
-		["A-10C_2"] = true,
-		["Bronco-OV-10A"] = true,		--Mod
-		["vwv_a1_skyraider"] = true,	--Mod
-		["vwv_o-1"] = true,         	--Mod
-		["VSN_F100"] = true,			--Mod
-		["VSN_F105D"] = true,			--Mod
-		["VSN_F105G"] = true,			--Mod
-
-		["F-86F Sabre"] = true,
-		["F-4E"] = true,
-		["F-4E-45MC"] = true,
-		["F-5E-3"] = true,
-		["vwv_crusader"] = true,		--Mod
-		["vwv_ra-5"] = true,		--Mod
-		["F-14A-135-GR"] = true,
-		["F-14B"] = true,
-		["F-15C"] = true,
-		["F-15E"] = true,
-		["F-15ESE"] = true,
-		["F-16C_50"] = true,
-		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
-
-		["F-117A"] = true,
-		["B-1B"] = true,
-		["B-52H"] = true,
-
-		["H-6J"] = true,
-
-		["AJS37"] = true,
-		["MB-339A"] = true,
-		["MirageF1"] = true,			--Mod
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
-		["MirageF1CT"] = true,			--Mod
-		["M-2000C"] = true,
-
-		["SA342M"] = true,
-		["SA342Mistral"] = true,
-		["SA342Minigun"] = true,
-		["SA342L"] = true,
-		["AH-1W"] = true,
-		["UH-1H"] = true,
-		["vwv_sh2f"] = true,			--Mod
-		["vwv_hh2d"] = true,			--Mod
-		["CH-47D"] = true,
-		["CH-47Fbl1"] = true,
-		["AH-64D_BLK_II"] = true,
-		["AH-64A"] = true,
-		["OH-6A"] = true,				--Mod
-		["OH58D"] = true,
-
-
-		["JF-17"] = true,
-		["L-39C"] = true,
-		["L-39ZA"] = true,
-
-		["MiG-15bis"] = true,
-		["vwv_mig17f"] = true,			--Mod
-		["MiG-19P"] = true,
-		["MiG-21Bis"] = true,
-		["vwv_mig21mf"] = true,			--Mod
-		["MiG-23MLD"] = true,
-		["MiG-25PD"] = true,
-		["MiG-27K"] = true,
-		["MiG-29A"] = true,
-		["MiG-29S"] = true,
-		["MiG-31"] = true,
-
-		["Su-24M"] = true,
-		["Su-27"] = true,
-		["Su-30"] = true,
-		["Su-34"] = true,
-
-		["Ka-27"] = true,
-		["Mi-8MT"] = true,
-		["Mi-24V"] = true,
-		["Mi-24P"] = true,
-		["Mi-28N"] = true,
-		["Ka-50"] = true,
-		["Ka-50_3"] = true,
-
-
-		["E-3A"] = true,
-		["E-2C"] = true,
-		["A-50"] = true,
-
-		["S-3B Tanker"] = true,
-		["KC135MPRS"] = true,
-		["KC-135"] = true,
-		["KC130"] = true,
-		["IL-78M"] = true,
-
-		["MiG-25RBT"] = true,
-		["Su-24MR"] = true,
-		["Tu-142"] = true,
-
-
-		["C-130"] = true,
-		["Hercules"] = true,		--Mod
-		["C-17A"] = true,
-		["An-30M"] = true,
-		["An-26B"] = true,
-		["IL-76MD"] = true,
-		["tu_22D"] = true,
-
-	},
-
-
-	["AFAC"] = {
-		["F-4E-45MC"] = true,
-		["MosquitoFBMkVI"] = true,
-		["SpitfireLFMkIX"] = true,
-		["SpitfireLFMkIXCW"] = true,
-
-		["P-47D-30bl1"] = true,
-		["P-47D-30"] = true,
-		["P-47D-40"] = true,
-		["P-51D"] = true,
-		["P-51D-30-NA"] = true,
-
-		["Bf-109K-4"] = true,
-		["FW-190A8"] = true,
-		["FW-190D9"] = true,
-
-		["C-47"] = true,
-
-		["MQ-9 Reaper"] = true,
-
-		["Tornado GR4"] = true,
-		["Tornado IDS"] = true,
-
-		["A-4E-C"] = true,				--Mod
-		["A-10C"] = true,
-		["A-10C_2"] = true,
-		["A-10A"] = true,
-		["Bronco-OV-10A"] = true,		--Mod
-		["vwv_a1_skyraider"] = true,	--Mod
-		["vwv_o-1"] = true,         	--Mod
-
-		["F-16C_50"] = true,
-		["F-16C bl.52d"] = true,
-
-
-		["Yak-52"] = true,
-		["JF-17"] = true,
-		["L-39ZA"] = true,
-		["MiG-15bis"] = true,
-		["vwv_mig17f"] = true,			--Mod
-		["Su-24M"] = true,
-
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
-
-		["Mi-8MT"] = true,
-		["Ka-50"] = true,
-		["Ka-50_3"] = true,
-		["Mi-24P"] = true,
-		["Mi-28N"] = true,
-
-		["AH-64A"] = true,
-
-		["SA342M"] = true,
-		["SA342Mistral"] = true,
-		["SA342Minigun"] = true,
-		["SA342L"] = true,
-
-		["OH58D"] = true,
-		["OH-6A"] = true,			--Mod
-
-
-	},
-	["CAS"] = {
-		["MosquitoFBMkVI"] = true,
-		["SpitfireLFMkIX"] = true,
-		["SpitfireLFMkIXCW"] = true,
-
-		["A-20G"] = true,
-
-		["P-47D-30bl1"] = true,
-		["P-47D-30"] = true,
-		["P-47D-40"] = true,
-		["P-51D"] = true,
-		["P-51D-30-NA"] = true,
-
-		["Bf-109K-4"] = true,
-		["FW-190A8"] = true,
-		["FW-190D9"] = true,
-		["Ju-88A4"] = true,
-
-		["I-16"] = true,
-
-		["A-4E-C"] = true,			--Mod
-		["A-6E"] = true,			--Mod
-		["A-10C"] = true,
-		["A-10C_2"] = true,
-		["A-10A"] = true,
-		["Bronco-OV-10A"] = true,		--Mod
-		["vwv_a1_skyraider"] = true,	--Mod
-		["VSN_F100"] = true,			--Mod
-		["VSN_F105D"] = true,			--Mod
-		["VSN_F105G"] = true,			--Mod
-
-		["AJS37"] = true,
-		["AV8BNA"] = true,
-		["MB-339A"] = true,
-		["MirageF1"] = true,			--Mod
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
-		["MirageF1CT"] = true,			--Mod
-
-
-		["B-1B"] = true,
-		["B-52H"] = true,
-
-		["H-6J"] = true,
-		["tu_22D"] = true,				--Mod
-
-		["F-86F Sabre"] = true,
-
-		["F-4E"] = true,
-		["F-4E-45MC"] = true,
-		["F-5E-3"] = true,
-		["F-14B"] = true,
-		["F-14A-135-GR"] = true,
-		["F-15E"] = true,
-		["F-15ESE"] = true,
-		["F-16C_50"] = true,
-		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
-		["M-2000C"] = true,
-
-		["AH-1W"] = true,
-		["UH-1H"] = true,
-		["SA342M"] = true,
-		["SA342Minigun"] = true,
-		["SA342L"] = true,
-		["AH-64D_BLK_II"] = true,
-		["OH58D"] = true,
-		["OH-6A"] = true,			--Mod
-
-		["JF-17"] = true,
-		["L-39C"] = true,
-		["L-39ZA"] = true,
-		["MiG-15bis"] = true,
-		["vwv_mig17f"] = true,			--Mod
-		["MiG-19P"] = true,
-		["MiG-21Bis"] = true,
-		["MiG-23MLD"] = true,
-		["MiG-27K"] = true,
-		["MiG-29A"] = true,
-
-
-		["Su-17M4"] = true,
-		["Su-24M"] = true,
-		["Su-25"] = true,
-		["Su-25T"] = true,
-		["Su-27"] = true,
-		["Su-30"] = true,
-		["Su-34"] = true,
-
-
-
-		["Mi-8MT"] = true,
-		["Mi-24V"] = true,
-		["Mi-24P"] = true,
-		["Mi-28N"] = true,
-		["Ka-50"] = true,
-		["Ka-50_3"] = true,
-
-
-	},
-
-	["Antiship Strike"] = {
-		["MosquitoFBMkVI"] = true,
-		["SpitfireLFMkIX"] = true,
-		["SpitfireLFMkIXCW"] = true,
-
-		["A-20G"] = true,
-
-		["P-47D-30bl1"] = true,
-		["P-47D-30"] = true,
-		["P-47D-40"] = true,
-		["P-51D"] = true,
-		["P-51D-30-NA"] = true,
-
-		["Bf-109K-4"] = true,
-		["FW-190A8"] = true,
-		["FW-190D9"] = true,
-		["Ju-88A4"] = true,
-
-		["Tornado GR4"] = true,
-		["Tornado IDS"] = true,
-
-		["A-4E-C"] = true,				--Mod
-		["A-10C"] = true,
-		["A-10C_2"] = true,
-		["A-10A"] = true,
-		["vwv_a1_skyraider"] = true,	--Mod
-		["AJS37"] = true,
-		["AV8BNA"] = true,
-		["B-52H"] = true,
-
-		["H-6J"] = true,
-
-		["F-86F Sabre"] = true,
-
-		["F-4E"] = true,
-		["F-4E-45MC"] = true,
-		["F-5E-3"] = true,
-		["F-14A-135-GR"] = true,
-		["F-14B"] = true,
-		["F-16C_50"] = true,
-		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
-		["MB-339A"] = true,
-		--["Mirage-F1CE"] = true,		--not yet				 
-		["MirageF1CT"] = true,			--Mod
-
-		["AH-1W"] = true,
-		["AH-64D_BLK_II"] = true,
-		["AH-64A"] = true,
-		["SH-3D"] = true,				--Mod
-
-		["JF-17"] = true,
-		["L-39C"] = true,
-		["L-39ZA"] = true,
-		["vwv_mig17f"] = true,			--Mod
-		["MiG-19P"] = true,
-		["MiG-27K"] = true,
-		["MiG-29A"] = true,
-		["Su-17M4"] = true,
-		["Su-24M"] = true,
-		["Su-25"] = true,
-		["Su-25T"] = true,
-		["Su-25TM"] = true,
-		["Su-34"] = true,
-
-		["Su-27"] = true,
-		["Su-30"] = true,
-
-		["Tu-22M3"] = true,
-		["Tu-142"] = true,
-		["tu_22D"] = true,				--Mod
-
-
-		["Mi-8MT"] = true,
-		["Mi-24V"] = true,
-		["Mi-24P"] = true,
-		["Mi-28N"] = true,
-		["Ka-50"] = true,
-		["Ka-50_3"] = true,
-
-
-	},
-
-	["Ground Attack"] = {
-		["MosquitoFBMkVI"] = true,
-		["SpitfireLFMkIX"] = true,
-		["SpitfireLFMkIXCW"] = true,
-
-		["P-47D-30bl1"] = true,
-		["P-47D-30"] = true,
-		["P-47D-40"] = true,
-		["P-51D"] = true,
-		["P-51D-30-NA"] = true,
-
-		["A-20G"] = true,
-		["B-17G"] = true,
-
-		["Bf-109K-4"] = true,
-		["FW-190A8"] = true,
-		["FW-190D9"] = true,
-		["Ju-88A4"] = true,
-
-		["I-16"] = true,
-
-		["Tornado GR4"] = true,
-		["Tornado IDS"] = true,
-
-		["A-4E-C"] = true,				--Mod
-		["A-6E"] = true,				--Mod
-		["EA_6B"] = true,				--Mod
-		["Bronco-OV-10A"] = true,		--Mod
-		["vwv_a1_skyraider"] = true,	--Mod
-		["A-10C"] = true,
-		["A-10C_2"] = true,
-		["A-10A"] = true,
-		["AJS37"] = true,
-		["AV8BNA"] = true,
-		["VSN_F100"] = true,			--Mod
-		["VSN_F105D"] = true,			--Mod
-		["VSN_F105G"] = true,			--Mod
-
-		["B-1B"] = true,
-		["B-52H"] = true,
-
-		["H-6J"] = true,
-		["tu_22D"] = true,				--Mod
-
-		["F-86F Sabre"] = true,
-
-		["F-4E"] = true,
-		["F-4E-45MC"] = true,
-		["F-5E-3"] = true,
-		["F-14A-135-GR"] = true,
-		["F-14B"] = true,
-		["F-15E"] = true,
-		["F-15ESE"] = true,
-		["F-16C_50"] = true,
-		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
-		["MB-339A"] = true,
-		["MirageF1"] = true,			--Mod
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
-		["MirageF1CT"] = true,			--Mod
-		["M-2000C"] = true,
-
-		["AH-1W"] = true,
-		["UH-1H"] = true,
-		["SA342M"] = true,
-		["SA342Minigun"] = true,
-		["SA342L"] = true,
-		["AH-64D_BLK_II"] = true,
-		["AH-64A"] = true,
-		["OH58D"] = true,
-		["OH-6A"] = true,			--Mod
-
-		["JF-17"] = true,
-		["L-39C"] = true,
-		["L-39ZA"] = true,
-		["MiG-15bis"] = true,
-		["vwv_mig17f"] = true,			--Mod
-		["MiG-19P"] = true,
-		["MiG-21Bis"] = true,
-		["MiG-23MLD"] = true,
-		["MiG-25RBT"] = true,
-		["MiG-27K"] = true,
-		["MiG-29A"] = true,
-
-		["Su-17M4"] = true,
-		["Su-24M"] = true,
-		["Su-25"] = true,
-		["Su-25T"] = true,
-		["Su-27"] = true,
-		["Su-30"] = true,
-		["Su-34"] = true,
-		["Tu-22M3"] = true,
-
-		["Mi-8MT"] = true,
-		["Mi-24V"] = true,
-		["Mi-24P"] = true,
-		["Mi-28N"] = true,
-		["Ka-50"] = true,
-		["Ka-50_3"] = true,
-
-
-
-	},
-
-	["Runway Attack"] = {
-		["MosquitoFBMkVI"] = true,
-		["SpitfireLFMkIX"] = true,
-		["SpitfireLFMkIXCW"] = true,
-
-		["P-47D-30bl1"] = true,
-		["P-47D-30"] = true,
-		["P-47D-40"] = true,
-		["P-51D"] = true,
-		["P-51D-30-NA"] = true,
-
-		["A-20G"] = true,
-		["B-17G"] = true,
-
-		["Bf-109K-4"] = true,
-		["FW-190A8"] = true,
-		["FW-190D9"] = true,
-		["Ju-88A4"] = true,
-
-		["Tornado GR4"] = true,
-		["Tornado IDS"] = true,
-
-		["A-4E-C"] = true,					--Mod
-		["A-6E"] = true,					--Mod
-		["A-10C"] = true,
-		["A-10C_2"] = true,
-		["A-10A"] = true,
-		["vwv_a1_skyraider"] = true,		--Mod
-		["AJS37"] = true,
-		["AV8BNA"] = true,
-
-		["B-1B"] = true,
-		["B-52H"] = true,
-
-		["H-6J"] = true,
-		["tu_22D"] = true,					--Mod
-
-		["F-14A-135-GR"] = true,
-		["F-14B"] = true,
-		["F-15E"] = true,
-		["F-15ESE"] = true,
-		["F-16C_50"] = true,
-		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
-
-		["MB-339A"] = true,
-		["MirageF1"] = true,			--Mod
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
-		["MirageF1CT"] = true,			--Mod
-		["M-2000C"] = true,
-
-
-		["JF-17"] = true,
-		["L-39C"] = true,
-		["L-39ZA"] = true,
-		["Su-17M4"] = true,
-		["Su-24M"] = true,
-		["Su-25"] = true,
-		["Su-25T"] = true,
-		["Su-27"] = true,
-		["Su-30"] = true,
-		["Su-34"] = true,
-		["MiG-29A"] = true,
-		["Tu-22M3"] = true,
-		["MiG-27K"] = true,
-
-
-	},
-
-	["Escort"] = {
-		["MosquitoFBMkVI"] = true,
-		["SpitfireLFMkIX"] = true,
-		["SpitfireLFMkIXCW"] = true,
-
-		["P-47D-30bl1"] = true,
-		["P-47D-30"] = true,
-		["P-47D-40"] = true,
-		["P-51D"] = true,
-		["P-51D-30-NA"] = true,
-
-		-- ["C-47"] = true,				--C47 en escorte? mais ils sont fou chez ED :p
-
-		["Bf-109K-4"] = true,
-		["FW-190A8"] = true,
-		["FW-190D9"] = true,
-
-		["I-16"] = true,
-
-
-		["A-4E-C"] = true,				--Mod
-		["AV8BNA"] = true,
-
-		["F-86F Sabre"] = true,
-		["F-4E"] = true,
-		["F-4E-45MC"] = true,
-		["F-5E-3"] = true,
-		["vwv_crusader"] = true,		--Mod
-		["F-14A-135-GR"] = true,
-		["F-14B"] = true,
-		["F-15C"] = true,
-		["F-15E"] = true,
-		["F-15ESE"] = true,
-		["F-16C_50"] = true,
-		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
-
-		["MirageF1"] = true,			--Mod
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
-		["M-2000C"] = true,
-
-		["AH-1W"] = true,
-		["SA342M"] = true,
-		["SA342Mistral"] = true,
-		["SA342Minigun"] = true,
-		["SA342L"] = true,
-		["AH-64D_BLK_II"] = true,
-		["OH58D"] = true,
-
-		["Yak-52"] = true,
-		["JF-17"] = true,
-		["MiG-15bis"] = true,
-		["vwv_mig17f"] = true,			--Mod
-		["MiG-19P"] = true,
-		["MiG-21Bis"] = true,
-		["vwv_mig21mf"] = true,			--Mod
-		["MiG-23MLD"] = true,
-		["MiG-25PD"] = true,
-		["MiG-29A"] = true,
-		["MiG-29S"] = true,
-		["MiG-31"] = true,
-
-		["Su-27"] = true,
-		["Su-30"] = true,
-
-		["Mi-24P"] = true,
-		["Mi-28N"] = true,
-		["Ka-50"] = true,
-		["Ka-50_3"] = true,
-	},
-
-	["Pinpoint Strike"] = {
-		["AJS37"] = true,
-		["AV8BNA"] = true,
-
-		["Tornado GR4"] = true,
-		["Tornado IDS"] = true,
-
-		["B-1B"] = true,
-		["B-52H"] = true,
-
-		["H-6J"] = true,
-		["tu_22D"] = true,				--Mod
-
-		["F-4E"] = true,
-		["F-4E-45MC"] = true,
-		["F-5E-3"] = true,
-		["F-14A-135-GR"] = true,
-		["F-14B"] = true,
-		["F-15E"] = true,
-		["F-15ESE"] = true,
-		["F-16C_50"] = true,
-		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
-		["F-117A"] = true,
-
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
-		["MirageF1CT"] = true,			--Mod
-		["M-2000C"] = true,
-
-		["JF-17"] = true,
-		["MiG-27K"] = true,
-		["Su-17M4"] = true,
-		["Su-24M"] = true,
-		["Su-25"] = true,
-		["Su-25T"] = true,
-		["Su-30"] = true,
-		["Su-34"] = true,
-
-	},
-
-	["Intercept"] = {
-		["MosquitoFBMkVI"] = true,
-		["SpitfireLFMkIX"] = true,
-		["SpitfireLFMkIXCW"] = true,
-
-		["P-47D-30bl1"] = true,
-		["P-47D-30"] = true,
-		["P-47D-40"] = true,
-
-		["Bf-109K-4"] = true,
-		["FW-190A8"] = true,
-		["FW-190D9"] = true,
-
-		["I-16"] = true,
-
-
-		["AJS37"] = true,
-
-		["F-86F Sabre"] = true,
-
-		["AV8BNA"] = true,
-		["F-4E"] = true,
-		["F-4E-45MC"] = true,
-		["F-5E-3"] = true,
-		["vwv_crusader"] = true,		--Mod
-		["F-14A-135-GR"] = true,
-		["F-14B"] = true,
-		["F-15C"] = true,
-		["F-15E"] = true,
-		["F-15ESE"] = true,
-		["F-16C_50"] = true,
-		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
-		["MirageF1"] = true,			--Mod
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
-		["M-2000C"] = true,
-
-		["JF-17"] = true,
-		["MiG-15bis"] = true,
-		["vwv_mig17f"] = true,			--Mod
-		["MiG-19P"] = true,
-		["MiG-21Bis"] = true,
-		["vwv_mig21mf"] = true,			--Mod
-		["MiG-23MLD"] = true,
-		["MiG-25PD"] = true,
-		["MiG-29A"] = true,
-		["MiG-29S"] = true,
-		["MiG-31"] = true,
-		["Su-27"] = true,
-		["Su-30"] = true,
-
-
-	},
-
-	["CAP"] = {
-		["MosquitoFBMkVI"] = true,
-		["SpitfireLFMkIX"] = true,
-		["SpitfireLFMkIXCW"] = true,
-
-		["P-47D-30bl1"] = true,
-		["P-47D-30"] = true,
-		["P-47D-40"] = true,
-		["P-51D"] = true,
-		["P-51D-30-NA"] = true,
-
-
-		["Bf-109K-4"] = true,
-		["FW-190A8"] = true,
-		["FW-190D9"] = true,
-
-		["I-16"] = true,
-
-
-		["AJS37"] = true,
-		["A-4E-C"] = true,				--Mod
-		["AV8BNA"] = true,
-
-		["F-86F Sabre"] = true,
-
-		["F-4E"] = true,
-		["F-4E-45MC"] = true,
-		["F-5E-3"] = true,
-		["vwv_crusader"] = true,		--Mod
-		["F-14A-135-GR"] = true,
-		["F-14B"] = true,
-		["F-15C"] = true,
-		["F-15E"] = true,
-		["F-15ESE"] = true,
-		["F-16C_50"] = true,
-		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
-
-		["MirageF1"] = true,			--Mod
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
-		["M-2000C"] = true,
-
-		["Yak-52"] = true,
-		["JF-17"] = true,
-		["L-39C"] = true,
-		["L-39ZA"] = true,
-		["MiG-15bis"] = true,
-		["vwv_mig17f"] = true,			--Mod
-		["MiG-19P"] = true,
-		["MiG-21Bis"] = true,
-		["vwv_mig21mf"] = true,			--Mod
-		["MiG-23MLD"] = true,
-		["MiG-25PD"] = true,
-		["MiG-29A"] = true,
-		["MiG-29S"] = true,
-		["MiG-31"] = true,
-		["Su-27"] = true,
-		["Su-30"] = true,
-
-
-	},
-
-	["Fighter Sweep"] = {
-		["MosquitoFBMkVI"] = true,
-		["SpitfireLFMkIX"] = true,
-		["SpitfireLFMkIXCW"] = true,
-
-		["P-47D-30bl1"] = true,
-		["P-47D-30"] = true,
-		["P-47D-40"] = true,
-		["P-51D"] = true,
-		["P-51D-30-NA"] = true,
-
-
-		["Bf-109K-4"] = true,
-		["FW-190A8"] = true,
-		["FW-190D9"] = true,
-
-		["I-16"] = true,
-
-
-		["AJS37"] = true,
-
-		["F-86F Sabre"] = true,
-
-		["AV8BNA"] = true,
-		["F-4E"] = true,
-		["F-4E-45MC"] = true,
-		["F-5E-3"] = true,
-		["vwv_crusader"] = true,		--Mod
-		["F-14A-135-GR"] = true,
-		["F-14B"] = true,
-		["F-15C"] = true,
-		["F-15E"] = true,
-		["F-15ESE"] = true,
-		["F-16C_50"] = true,
-		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
-
-		["MirageF1"] = true,			--Mod
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
-		["M-2000C"] = true,
-
-		["JF-17"] = true,
-		["MiG-15bis"] = true,
-		["vwv_mig17f"] = true,			--Mod
-		["MiG-19P"] = true,
-		["MiG-21Bis"] = true,
-		["vwv_mig21mf"] = true,			--Mod
-		["MiG-23MLD"] = true,
-		["MiG-25PD"] = true,
-		["MiG-29A"] = true,
-		["MiG-29S"] = true,
-		["MiG-31"] = true,
-		["Su-27"] = true,
-		["Su-30"] = true,
-
-
-	},
-
-
-	["Reconnaissance"] = {
-		["TF-51D"] = true,
-		["FW-190A8"] = true,
-		["I-16"] = true,
-
-		["Tornado GR4"] = true,
-		["Tornado IDS"] = true,
-
-		["A-4E-C"] = true,				--Mod
-		["AJS37"] = true,
-		["F-4E"] = true,
-		["F-4E-45MC"] = true,
-		["vwv_crusader"] = true,		--Mod
-		["vwv_ra-5"] = true,		--Mod
-		["F-15E"] = true,
-		["F-16C_50"] = true,
-		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
-
-		["SA342M"] = true,
-		["SA342Mistral"] = true,
-		["SA342Minigun"] = true,
-		["SA342L"] = true,
-		["OH58D"] = true,
-		["OH-6A"] = true,			--Mod
-
-		["JF-17"] = true,
-		["MiG-21Bis"] = true,
-		["MiG-25RBT"] = true,
-		["Su-24MR"] = true,
-		["Tu-142"] = true,
-		["tu_22D"] = true,				--Mod
-	},
-
-
-	["Refueling"] = {
-		["A-4E-C"] = true,				--Mod
-		["S-3B Tanker"] = true,
-		["KC135MPRS"] = true,
-		["KC-135"] = true,
-		["KC130"] = true,
-		["IL-78M"] = true,
-	},
-
-	["AWACS"] = {
-		["E-3A"] = true,
-		["E-2C"] = true,
-		["A-50"] = true,
-	},
-
-	["SEAD"] = {
-		["AJS37"] = true,
-
-		["Tornado GR4"] = true,
-		["Tornado IDS"] = true,
-
-		["A-4E-C"] = true,				--Mod	
-		--["A-6E"] = true,				--no weapon				 
-		["EA_6B"] = true,				--Mod
-		["VSN_F100"] = true,			--Mod
-		["VSN_F105G"] = true,			--Mod
-
-		["AV8BNA"] = true,
-		["F-4E"] = true,
-		["F-4E-45MC"] = true,
-		["F-16C_50"] = true,
-		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
-
-		["JF-17"] = true,
-
-		["Su-17M4"] = true,
-		["Su-24M"] = true,
-		["Su-25T"] = true,
-		["Su-30"] = true,
-		["Su-34"] = true,
-		["MiG-27K"] = true,
-
-
-	},
-
-	["Transport"] = {
-		["C-47"] = true,
-		["C-130"] = true,
-		["Hercules"] = true,		--Mod
-		["C-17A"] = true,
-
-		["UH-1H"] = true,
-		["vwv_sh2f"] = true,			--Mod
-		["vwv_hh2d"] = true,			--Mod
-		["CH-47D"] = true,
-		["CH-47Fbl1"] = true,
-		["CH-53E"] = true,
-		["UH-60A"] = true,
-		["UH-60L"] = true,			--Mod
-		["SH-3D"] = true,			--Mod
-		["SH-60B"] = true,
-		["OH58D"] = true,
-		["OH-6A"] = true,			--Mod
-
-
-		["An-26B"] = true,
-		["An-30M"] = true,
-		["IL-76MD"] = true,
-
-		["Ka-27"] = true,
-		["Mi-8MT"] = true,
-		["Mi-24V"] = true,
-		["Mi-24P"] = true,
-		["Mi-26"] = true,
-
-
-	},
-
-}
 
 function IsWesternCountry(country)
     return not (
@@ -4044,3 +4084,16 @@ DataCountry = {
 	{id = 89, name = "Peru"},
 
 }
+
+
+--rempli la table TaskByPlane avec les Tasks qui ne sont rempli que dans Data_divers
+for planeType, planeData in pairs(Data_divers) do
+	if planeData.Tasks then
+		for taskN, task in pairs(planeData.Tasks) do
+			if not TaskByPlane[task][planeType] then
+				TaskByPlane[task][planeType] = true
+			end
+		end
+
+	end
+end

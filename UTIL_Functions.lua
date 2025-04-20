@@ -4319,5 +4319,11 @@ function FoundSquadSide(squadName)
 end
 
 
+local str = "TaskByPlane = " .. TableSerialization(TaskByPlane, 0)						--make a string
+local _file = io.open("Debug/TaskByPlane.lua", "w")  or error("Failed to open debug file")
+_file:write(str)																		--save new data
+_file:close()
+
+
 
 

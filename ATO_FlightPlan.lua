@@ -2179,7 +2179,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 				if not goodTask then
-					print("(Error AtoFp 11  : bad task: remove "..flight[f].task.." of the "..flight[f].type.. "in the oob_air_init.lua file")
+					print("(Error AtoFp 11  : bad task: remove |"..flight[f].task.."| of the |"..flight[f].type.. "| in the oob_air_init.lua file")
 					print("typeCible "..typeCible.." || "..flight[f].type.." "..GoupTaskTemp.." "..tostring(flight[f].target.name))
 					os.execute 'pause'
 				end
