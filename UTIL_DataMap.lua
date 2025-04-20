@@ -1,11 +1,11 @@
 --Various DATA map 
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  updateData_s
+-- last modification:  updateData_t
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_DataMap.lua"] = "1.4.23"
+versionDCE["UTIL_DataMap.lua"] = "1.4.24"
 ------------------------------------------------------------------------------------------------------- 
--- updateData_s				(s Afghanistan)(r marianaislands)(p syria AltitudeFloor)(o: add sinai)
+-- updateData_t				(t GermanyCW)(s Afghanistan)(r marianaislands)(p syria AltitudeFloor)(o: add sinai)
 -- adjustment_a				(a middle of caucasus)
 -- cleanCode_a				(a springCleaning)
 -- modification M78_b		LatLon positions added and unit display removed on MAP F10 (a UTM_Zone)
@@ -1813,6 +1813,19 @@ AltitudeFloor = {
 
 LocationForEphemeris = {
 
+	["Afghanistan"] = {                                    --attention, name of the map in lower case 
+		nnLatitude = 33.391110,
+		nnLongitude = 62.260830,
+		nnTimeZone = 4.5,                                --2
+		nnShiftTz =  false,
+		nnTimeLZero = 0,
+		nnTimeStyle = 1,
+		--N 35°01'18.90"   E 35°54'02.01"    FAIT
+		origin_lat = 33.940772,                        --original latitude of point x = 0 and y = 0
+		origin_lon = 66.207623,                        --original longitude of point x = 0 and y = 0
+		UTM_Zone = 41,
+		UTM_hemisphere = "N",
+	},
 	["Caucasus"] = {								--gudauta
 		-- nnLatitude = 43.10195,
 		-- nnLongitude = 40.62242,
@@ -1832,45 +1845,45 @@ LocationForEphemeris = {
 		-- scaleLat = 1.134194,						-- flat map, no MERCATO or other projection, so to find the right value, we use a scale adapted to each MAP.
 		-- scaleLon = 0.941787, 						-- flat map, no MERCATO or other projection, so to find the right value, we use a scale adapted to each MAP.
 	},
-	["PersianGulf"] = {							
-		nnLatitude = 24.568892,
-		nnLongitude = 54.756338,
-		nnTimeZone = 4,
+	["Falklands"] = {
+		nnLatitude = -51.563412, 					
+		nnLongitude = -59.820557,
+		nnTimeZone = -3,								
 		nnShiftTz =  false,
 		nnTimeLZero = 0,
 		nnTimeStyle = 1,
-		--N 26°10'18.55"   E 56°14'30.95"   FAIT
-		origin_lat = 26.171819, 						--original latitude of point x = 0 and y = 0
-		origin_lon = 56.241931,						--original longitude of point x = 0 and y = 0
-		UTM_Zone = 40,
-		UTM_hemisphere = "N",
+		--S 52°28'28.13"   W 59°10'24.66"   FAIT
+		origin_lat = -52.474481,						--original latitude of point x = 0 and y = 0
+		origin_lon = -59.173517,						--original longitude of point x = 0 and y = 0
+		UTM_Zone = 21,
+		UTM_hemisphere = "S",
 	},
-	-- ["nevada"] = {							
-		-- nnLatitude = 24.568892,        ???
-		-- nnLongitude = 54.756338,       ???
-		-- nnTimeZone = 4,					???
-		-- nnShiftTz =  false,
-		-- nnTimeLZero = 0,
-		-- nnTimeStyle = 1,
-		-- --N 39°49'05.21"   W 114°44'00.28"    FAIT
-		-- origin_lat = 39.818114, 						--original latitude of point x = 0 and y = 0
-		-- origin_lon = -114.733411,						--original longitude of point x = 0 and y = 0
-		-- UTM_Zone = 7,
-		-- UTM_hemisphere = "N",
-	-- },
-	["Syria"] = { 
-		nnLatitude = 33.497162,
-		nnLongitude = 36.316573,
-		nnTimeZone = 3,								--2
-		nnShiftTz =  false,
-		nnTimeLZero = 0,
-		nnTimeStyle = 1,
-		--N 35°01'18.90"   E 35°54'02.01"    FAIT
-		origin_lat = 35.021917,						--original latitude of point x = 0 and y = 0
-		origin_lon = 35.900558,						--original longitude of point x = 0 and y = 0
-		UTM_Zone = 36,
+	["GermanyCW"] = {                                    --attention, name of the map in lower case  52.115732847020396, 11.64182612895749
+        nnLatitude = 52.115732,
+        nnLongitude = 11.641826,
+        nnTimeZone = 2.0,                                --2
+        nnShiftTz =  false,
+        nnTimeLZero = 0,
+        nnTimeStyle = 1,
+        --N 35°01'18.90"   E 35°54'02.01"    FAIT
+        origin_lat = 52.115732,                        --original latitude of point x = 0 and y = 0
+        origin_lon = 11.641826,                       --original longitude of point x = 0 and y = 0
+        UTM_Zone = 32,
+        UTM_hemisphere = "N",
+    },
+	["Kola"] = { 
+        nnLatitude = 68.229291,         --29.973007359606896, 32.58923334381327
+        nnLongitude = 24.800681,
+        nnTimeZone = 2,
+        nnShiftTz =  false,
+        nnTimeLZero = 0,
+        nnTimeStyle = 1,
+		--N 67°59'59.98"   E 22°29'59.99"    FAIT
+		origin_lat = 67.999994,						--original latitude of point x = 0 and y = 0
+		origin_lon = 22.499997,						--original longitude of point x = 0 and y = 0
+		UTM_Zone = 34,
 		UTM_hemisphere = "N",
-	},
+    },
 	["MarianaIslands"] = {								--ile de Guam 
 		nnLatitude = 13.444304,
 		nnLongitude = 144.793732,
@@ -1884,6 +1897,19 @@ LocationForEphemeris = {
 		UTM_Zone = 55,
 		UTM_hemisphere = "N",
 	},
+		-- ["nevada"] = {							
+		-- nnLatitude = 24.568892,        ???
+		-- nnLongitude = 54.756338,       ???
+		-- nnTimeZone = 4,					???
+		-- nnShiftTz =  false,
+		-- nnTimeLZero = 0,
+		-- nnTimeStyle = 1,
+		-- --N 39°49'05.21"   W 114°44'00.28"    FAIT
+		-- origin_lat = 39.818114, 						--original latitude of point x = 0 and y = 0
+		-- origin_lon = -114.733411,						--original longitude of point x = 0 and y = 0
+		-- UTM_Zone = 7,
+		-- UTM_hemisphere = "N",
+	-- },
 	["Normandy"] = { 
 		nnLatitude = 49.184171, 					--49.18417106729151, -0.36709560270994507
 		nnLongitude = -0.367095,
@@ -1895,6 +1921,45 @@ LocationForEphemeris = {
 		origin_lat = 49.484431,						--original latitude of point x = 0 and y = 0
 		origin_lon = -0.300347,						--original longitude of point x = 0 and y = 0
 		UTM_Zone = 31,
+		UTM_hemisphere = "N",
+	},
+	["PersianGulf"] = {							
+		nnLatitude = 24.568892,
+		nnLongitude = 54.756338,
+		nnTimeZone = 4,
+		nnShiftTz =  false,
+		nnTimeLZero = 0,
+		nnTimeStyle = 1,
+		--N 26°10'18.55"   E 56°14'30.95"   FAIT
+		origin_lat = 26.171819, 						--original latitude of point x = 0 and y = 0
+		origin_lon = 56.241931,						--original longitude of point x = 0 and y = 0
+		UTM_Zone = 40,
+		UTM_hemisphere = "N",
+	},
+	["SinaiMap"] = { 
+		nnLatitude = 29.973007, 		--29.973007359606896, 32.58923334381327			
+		nnLongitude = 32.589233,
+		nnTimeZone = 2,								
+		nnShiftTz =  false,
+		nnTimeLZero = 0,
+		nnTimeStyle = 1,
+		--N 30°02'49.89"   E 31°14'41.13"    FAIT
+		origin_lat = 30.047191,						--original latitude of point x = 0 and y = 0
+		origin_lon = 31.244758,						--original longitude of point x = 0 and y = 0
+		UTM_Zone = 36,
+		UTM_hemisphere = "N",
+	},
+	["Syria"] = { 
+		nnLatitude = 33.497162,
+		nnLongitude = 36.316573,
+		nnTimeZone = 3,								--2
+		nnShiftTz =  false,
+		nnTimeLZero = 0,
+		nnTimeStyle = 1,
+		--N 35°01'18.90"   E 35°54'02.01"    FAIT
+		origin_lat = 35.021917,						--original latitude of point x = 0 and y = 0
+		origin_lon = 35.900558,						--original longitude of point x = 0 and y = 0
+		UTM_Zone = 36,
 		UTM_hemisphere = "N",
 	},
 	["TheChannel"] = {
@@ -1910,58 +1975,9 @@ LocationForEphemeris = {
 		UTM_Zone = 31,
 		UTM_hemisphere = "N",
 	},
-	["Falklands"] = {
-		nnLatitude = -51.563412, 					
-		nnLongitude = -59.820557,
-		nnTimeZone = -3,								
-		nnShiftTz =  false,
-		nnTimeLZero = 0,
-		nnTimeStyle = 1,
-		--S 52°28'28.13"   W 59°10'24.66"   FAIT
-		origin_lat = -52.474481,						--original latitude of point x = 0 and y = 0
-		origin_lon = -59.173517,						--original longitude of point x = 0 and y = 0
-		UTM_Zone = 21,
-		UTM_hemisphere = "S",
-	},
-	["SinaiMap"] = { 
-		nnLatitude = 29.973007, 		--29.973007359606896, 32.58923334381327			
-		nnLongitude = 32.589233,
-		nnTimeZone = 2,								
-		nnShiftTz =  false,
-		nnTimeLZero = 0,
-		nnTimeStyle = 1,
-		--N 30°02'49.89"   E 31°14'41.13"    FAIT
-		origin_lat = 30.047191,						--original latitude of point x = 0 and y = 0
-		origin_lon = 31.244758,						--original longitude of point x = 0 and y = 0
-		UTM_Zone = 36,
-		UTM_hemisphere = "N",
-	},
-	["Kola"] = { 
-        nnLatitude = 68.229291,         --29.973007359606896, 32.58923334381327
-        nnLongitude = 24.800681,
-        nnTimeZone = 2,
-        nnShiftTz =  false,
-        nnTimeLZero = 0,
-        nnTimeStyle = 1,
-		--N 67°59'59.98"   E 22°29'59.99"    FAIT
-		origin_lat = 67.999994,						--original latitude of point x = 0 and y = 0
-		origin_lon = 22.499997,						--original longitude of point x = 0 and y = 0
-		UTM_Zone = 34,
-		UTM_hemisphere = "N",
-    },
-	["Afghanistan"] = {                                    --attention, name of the map in lower case 
-        nnLatitude = 33.391110,
-        nnLongitude = 62.260830,
-        nnTimeZone = 4.5,                                --2
-        nnShiftTz =  false,
-        nnTimeLZero = 0,
-        nnTimeStyle = 1,
-        --N 35°01'18.90"   E 35°54'02.01"    FAIT
-        origin_lat = 33.940772,                        --original latitude of point x = 0 and y = 0
-        origin_lon = 66.207623,                        --original longitude of point x = 0 and y = 0
-        UTM_Zone = 41,
-        UTM_hemisphere = "N",
-    },
+
+
+
 }
 
 ParkListPositionOLD = 

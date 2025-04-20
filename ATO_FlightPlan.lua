@@ -6417,9 +6417,11 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				ATO[side][p][role][f].frequency = group.frequency								--store package frequency in ATO
 
+
+
+
 				--M11.r ajoute une copie des avions multijoueur commançant en l'air // retab // recovery
 				local groupRTB = {}
-
 				if mission_ini.MP_PlaneRecovery and Multi.NbGroup >= 1 and (flight[f].client or flight[f].player) then
 
 					groupRTB = Deepcopy(group)
@@ -6475,7 +6477,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						groupRTB.route.points[1].speed_locked = true
 						groupRTB.route.points[1].ETA_locked = true
-						groupRTB.route.points[1]['ETA'] = 60
+						groupRTB.route.points[1]['ETA'] = 1
 						-- groupRTB.route.points[1]['x'] = groupRTB.route.points[1]['x'] + 5000
 						-- groupRTB.route.points[1]['y'] = groupRTB.route.points[1]['y'] + 5000
 
@@ -6492,7 +6494,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						groupRTB.route.points[2] = groupRTB.route.points[1]
 						groupRTB.route.points[2].x = tempWPT['x']
 						groupRTB.route.points[2].y = tempWPT['y']
-						groupRTB.route.points[1]['ETA'] = 70
+						groupRTB.route.points[1]['ETA'] = 10
 						groupRTB.route.points[2].speed_locked = false
 						groupRTB.route.points[2].ETA_locked = true
 					end

@@ -1599,17 +1599,25 @@ end
 
 
 	--************* AFAC PART ****************************************
-function AFAC_com(afacData)
+function AFAC_com(arg)
 
 	-- local AFAC_Name = arg[1]
 	-- local gpGid = arg[2]
 	-- local radioOn = arg[3]
 
-	if afacData.radioOn == true then
+	local afacData = {
+		AFAC_Name = arg[1],
+		gpGid = arg[2],
+		radioOn = arg[3],
+	}
+
+	_affiche(afacData, "AFAC_afacData ")
+
+	if afacData.radioOn  then
 		AFAC_available[afacData.AFAC_Name]["gpGid"] = afacData.gpGid
 		trigger.action.outTextForGroup(afacData.gpGid,"AFAC radio On, waiting ...", 15, false)
 		_affiche(AFAC_available, "AFAC_available radioOn")
-	elseif afacData.radioOn == false then
+	else
 		if AFAC_available[afacData.AFAC_Name]["gpGid"] and AFAC_available[afacData.AFAC_Name]["gpGid"] == afacData.gpGid  then
 			AFAC_available[afacData.AFAC_Name]["gpGid"] = nil
 		end
@@ -1640,16 +1648,24 @@ function AFAC_F10(playerGroup)
 
 				menuAFAC_B = missionCommands.addSubMenuForGroup(gpGid, tostring(afacName), menuAFAC_A)
 
-				local afacData = {
-					AFAC_Name = afacName,
-					gpGid = gpGid,
-					radioOn = true,
-				}
+				-- local afacDataON = {
+				-- 	AFAC_Name = afacName,
+				-- 	gpGid = gpGid,
+				-- 	radioOn = true,
+				-- }
 
-				missionCommands.addCommandForGroup(gpGid, "AFAC radio On ", menuAFAC_B, AFAC_com, afacData )
+				-- missionCommands.addCommandForGroup(gpGid, "AFAC radio On ", menuAFAC_B, AFAC_com, afacDataON )
+				missionCommands.addCommandForGroup(gpGid, "AFAC radio On ", menuAFAC_B, AFAC_com, {afacName, gpGid, true } )
 
-				afacData.radioOn = false
-				missionCommands.addCommandForGroup(gpGid, "AFAC radio Off ", menuAFAC_B, AFAC_com, afacData)
+				--ça, ça ne marche pas, il faut le faire dans la fonction AFAC_com
+				-- afacData.radioOn = false
+				-- local afacDataOFF = {
+				-- 	AFAC_Name = afacName,
+				-- 	gpGid = gpGid,
+				-- 	radioOn = false,
+				-- }
+				-- missionCommands.addCommandForGroup(gpGid, "AFAC radio Off ", menuAFAC_B, AFAC_com, afacDataOFF)
+				missionCommands.addCommandForGroup(gpGid, "AFAC radio Off ", menuAFAC_B, AFAC_com, {afacName, gpGid, false })
 
 				--table missionCommands.addCommandForGroup(number groupId , string name , table/nil path , function functionToRun , any anyArguement)
 				--      missionCommands.addCommandForGroup(gpGid, txt, ejctedPilRadioON, activateRadioBeacon, {gpGid, ejectPil}  )
