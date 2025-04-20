@@ -312,20 +312,6 @@ Data_divers = {
 		},
 	},
 
-	["vwv_mig21mf"] = 	{			                 	--Mod
-		instrumentUnits = "imperial",
-		requiredModules = true,						--itsModule
-		EPLRS_Capacity = false,
-		moduleName = "tetet_mig21mf",
-		radio = {
-			frequency = 127.5, -- Radio Freq
-			editable = true,
-			minFrequency = 100.000,
-			maxFrequency = 156.000,
-			modulation = MODULATION_AM,
-		},
-	},
-
 	["A-10A"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -853,6 +839,35 @@ Data_divers = {
 			}
 		},
 	},
+	
+	["vwv_mig21pfm"] = 	{			                 	--Mod
+		instrumentUnits = "russian",
+		requiredModules = true,						--itsModule
+		EPLRS_Capacity = false,
+		moduleName = "tetet_mig21pfm",
+		radio = {
+			frequency = 127.5, -- Radio Freq
+			editable = true,
+			minFrequency = 100.000,
+			maxFrequency = 156.000,
+			modulation = MODULATION_AM,
+		},
+	},
+
+	["vwv_mig21mf"] = 	{			                 	--Mod
+		instrumentUnits = "russian",
+		requiredModules = true,						--itsModule
+		EPLRS_Capacity = false,
+		moduleName = "tetet_mig21mf",
+		radio = {
+			frequency = 127.5, -- Radio Freq
+			editable = true,
+			minFrequency = 100.000,
+			maxFrequency = 156.000,
+			modulation = MODULATION_AM,
+		},
+	},
+
 	["MiG-21Bis"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,

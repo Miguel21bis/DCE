@@ -4115,6 +4115,99 @@ db_all_loadouts = {
 			},
 		},
 	},
+	["vwv_mig21pfm"] = {
+		CAP = {
+			["NAM - AA CAP  AA-2B*2"] = {
+				attributes =  { "" },
+				code_loadout =  { "NAM" },
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 200,
+				vAttack = 220,
+				hCruise = 4000,
+				hAttack = 4200,
+				standoff = 1000,
+				tStation = 2000,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = {
+					["CLSID"] = "{R-3S}",
+					["num"] = 4,
+					},
+					[2] = {
+					["CLSID"] = "{R-3S}",
+					["num"] = 1,
+					},
+					},
+					fuel = 2350,
+					flare = 0,
+					chaff = 0,
+					gun = 0,
+				},
+			},
+		},
+		["Fighter Sweep"] = {
+			["NAM - AA Sweep AA-2B*2"] = {
+				attributes =  { },
+				code_loadout =  { "NAM" },
+				night = false,
+				adverseWeather = false,
+				range = 500000,
+				firepower = 1,
+				vCruise = 250,
+				vAttack = 350,
+				hCruise = 500,
+				hAttack = 500,
+				standoff = 1000,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = {
+					["CLSID"] = "{R-3S}",
+					["num"] = 4,
+					},
+					[2] = {
+					["CLSID"] = "{R-3S}",
+					["num"] = 1,
+					},
+					},
+					fuel = 2350,
+					flare = 0,
+					chaff = 0,
+					gun = 0,
+				},
+			},
+		},	
+		Intercept = {
+			["NAM - AA Inter AA-2B*2"] = {
+				attributes =  { },
+				code_loadout =  { "NAM" },
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = {
+					["CLSID"] = "{R-3S}",
+					["num"] = 4,
+					},
+					[2] = {
+					["CLSID"] = "{R-3S}",
+					["num"] = 1,
+					},
+					},
+					fuel = 2350,
+					flare = 0,
+					chaff = 0,
+					gun = 0,
+				},
+			},
+		},
+	},
 	["vwv_mig21mf"] = {
 		CAP = {
 			["NAM - AA CAP  AA-2B*2"] = {
