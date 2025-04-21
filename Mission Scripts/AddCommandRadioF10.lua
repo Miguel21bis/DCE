@@ -53,7 +53,7 @@ BingoPlaneTab = {}
 GroundDamagedFlyingMachine = {}
 AFAC_available = {}				--liste les AFAC en position
 AFAC_targetStatus = {}					--table used by AFACs to monitor the status of targets and move on to the next ones
-AFAC_smokeTiming = {}
+-- AFAC_smokeTiming = {}
 
 
 EjectionSeatFrequency = {}
@@ -1599,32 +1599,77 @@ end
 
 
 	--************* AFAC PART ****************************************
-function AFAC_com(arg)
+local function AFAC_com(arg)
 
 	-- local AFAC_Name = arg[1]
 	-- local gpGid = arg[2]
 	-- local radioOn = arg[3]
 
 	local afacData = {
-		AFAC_Name = arg[1],
-		gpGid = arg[2],
-		radioOn = arg[3],
+		AFAC_Name = Deepcopy(arg[1]),
+		gpGid = Deepcopy(arg[2]),
+		radioOn = Deepcopy(arg[3]),
 	}
 
 	_affiche(afacData, "AFAC_afacData ")
 
-	if afacData.radioOn  then
+	if afacData.radioOn and afacData.radioOn == "on"  then
 		AFAC_available[afacData.AFAC_Name]["gpGid"] = afacData.gpGid
 		trigger.action.outTextForGroup(afacData.gpGid,"AFAC radio On, waiting ...", 15, false)
-		_affiche(AFAC_available, "AFAC_available radioOn")
-	else
+		_affiche(AFAC_available, "AFAC_available_radioOn ")
+
+	elseif afacData.radioOn and afacData.radioOn == "off"  then
 		if AFAC_available[afacData.AFAC_Name]["gpGid"] and AFAC_available[afacData.AFAC_Name]["gpGid"] == afacData.gpGid  then
 			AFAC_available[afacData.AFAC_Name]["gpGid"] = nil
 		end
 		trigger.action.outTextForGroup(afacData.gpGid,"AFAC radio Off", 15, false)
-		_affiche(AFAC_available, "AFAC_available radioOff")
+		_affiche(AFAC_available, "AFAC_available_radioOff ")
+	else
+		trigger.action.outTextForGroup(afacData.gpGid,"AFAC radio ?else?", 15, false)
+		_affiche(AFAC_available, "AFAC_available else ")
 	end
 
+end
+
+local function AFAC_Com_ON(arg)
+
+	-- local AFAC_Name = arg[1]
+	-- local gpGid = arg[2]
+	-- local radioOn = arg[3]
+
+	local afacData = {
+		AFAC_Name = Deepcopy(arg[1]),
+		gpGid = Deepcopy(arg[2]),
+		radioOn = Deepcopy(arg[3]),
+	}
+
+	_affiche(afacData, "AFAC_afacData ")
+
+
+	AFAC_available[afacData.AFAC_Name]["gpGid"] = afacData.gpGid
+	trigger.action.outTextForGroup(afacData.gpGid,"AFAC radio On, waiting ...: "..tostring(afacData.AFAC_Name), 15, false)
+	_affiche(AFAC_available, "AFAC_available_radioOn ")
+end
+
+local function AFAC_Com_OFF(arg)
+
+	-- local AFAC_Name = arg[1]
+	-- local gpGid = arg[2]
+	-- local radioOn = arg[3]
+
+	local afacData = {
+		AFAC_Name = Deepcopy(arg[1]),
+		gpGid = Deepcopy(arg[2]),
+		radioOn = Deepcopy(arg[3]),
+	}
+
+	_affiche(afacData, "AFAC_afacData ")
+
+	if AFAC_available[afacData.AFAC_Name]["gpGid"] and AFAC_available[afacData.AFAC_Name]["gpGid"] == afacData.gpGid  then
+		AFAC_available[afacData.AFAC_Name]["gpGid"] = nil
+	end
+	trigger.action.outTextForGroup(afacData.gpGid,"AFAC radio Off : "..tostring(afacData.AFAC_Name), 15, false)
+	_affiche(AFAC_available, "AFAC_available_radioOff ")
 end
 
 function AFAC_F10(playerGroup)
@@ -1636,39 +1681,27 @@ function AFAC_F10(playerGroup)
 
 	if AFAC_available then
 
-		for AFAC_Name, AFAC in pairs(AFAC_available) do
+		for AFAC_Name, _ in pairs(AFAC_available) do
 			if AFAC_Name and type(AFAC_Name) == "string" then
 				menuAFAC_A = missionCommands.addSubMenuForGroup(gpGid, "AFAC")
 				break
 			end
 		end
 
-		for afacName, AFAC in pairs(AFAC_available) do
+		for afacName, _ in pairs(AFAC_available) do
 			if afacName and type(afacName) == "string" then
 
-				menuAFAC_B = missionCommands.addSubMenuForGroup(gpGid, tostring(afacName), menuAFAC_A)
+				-- menuAFAC_B = missionCommands.addSubMenuForGroup(gpGid, tostring(afacName), menuAFAC_A)
 
-				-- local afacDataON = {
-				-- 	AFAC_Name = afacName,
-				-- 	gpGid = gpGid,
-				-- 	radioOn = true,
-				-- }
+				-- Create a unique submenu for each AFAC name
+				local uniqueMenuAFAC = missionCommands.addSubMenuForGroup(gpGid, tostring(afacName), menuAFAC_A)
 
-				-- missionCommands.addCommandForGroup(gpGid, "AFAC radio On ", menuAFAC_B, AFAC_com, afacDataON )
-				missionCommands.addCommandForGroup(gpGid, "AFAC radio On ", menuAFAC_B, AFAC_com, {afacName, gpGid, true } )
+				-- Commande pour activer la radio AFAC
+				radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gpGid, "AFAC radio On (" .. afacName .. ")", uniqueMenuAFAC, AFAC_Com_ON, {afacName, gpGid, "on"})
 
-				--ça, ça ne marche pas, il faut le faire dans la fonction AFAC_com
-				-- afacData.radioOn = false
-				-- local afacDataOFF = {
-				-- 	AFAC_Name = afacName,
-				-- 	gpGid = gpGid,
-				-- 	radioOn = false,
-				-- }
-				-- missionCommands.addCommandForGroup(gpGid, "AFAC radio Off ", menuAFAC_B, AFAC_com, afacDataOFF)
-				missionCommands.addCommandForGroup(gpGid, "AFAC radio Off ", menuAFAC_B, AFAC_com, {afacName, gpGid, false })
+				-- Commande pour désactiver la radio AFAC
+				radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gpGid, "AFAC radio Off (" .. afacName .. ")", uniqueMenuAFAC, AFAC_Com_OFF, {afacName, gpGid, "off"})
 
-				--table missionCommands.addCommandForGroup(number groupId , string name , table/nil path , function functionToRun , any anyArguement)
-				--      missionCommands.addCommandForGroup(gpGid, txt, ejctedPilRadioON, activateRadioBeacon, {gpGid, ejectPil}  )
 			end
 		end
 	end
@@ -3282,51 +3315,57 @@ end
 
 
 local function loopAFAC_CAS()
-
+	
 	if next(AFAC_available) == nil then return timer.getTime() + 17 end
+	
+	-- _affiche(AFAC_available, "DCE_00_AFAC_available ")	
 
 	for _, sideNum in ipairs({coalition.side.BLUE, coalition.side.RED}) do
-
+		
 		local groups = coalition.getGroups(sideNum, Group.Category.AIRPLANE)
 
 		for _, gp in pairs(groups) do
 			local gpName = Group.getName(gp)
-
 			if string.find(gpName,"Strike") then
 				local wingman = gp:getUnits()
 				for wingmanN, unit in ipairs(wingman) do
-
+					-- env.info("DCE_loopAFAC_CAS F  sideNum: "..tostring(sideNum))
 					for afacFlightName, value in pairs(AFAC_available) do
-
+						-- env.info("DCE_loopAFAC_CAS G value.sideNum: "..tostring(value.sideNum).." "..tostring(afacFlightName))
 						if sideNum == value.sideNum then
-
-							if (value.time + 300) < timer.getTime() then
-
+							-- env.info("DCE_loopAFAC_CAS H timer: "..timer.getTime().." >smokeTiming.time? "..tostring(value.smokeTiming.time))
+							
+							
+							if timer.getTime() > (value.smokeTiming.time + 300) then
+								-- env.info("DCE_loopAFAC_CAS I "..tostring(afacFlightName))
 								local flightGroup = Group.getByName(afacFlightName)
-								-- local coalitionForce = flightGroup:getCoalition()
-								local unitsAFAC = flightGroup:getUnits()
-								local unitAFAC = unitsAFAC[1]
+								if flightGroup then
+									-- env.info("DCE_loopAFAC_CAS Ib break "..tostring(afacFlightName))
+									
+									-- local coalitionForce = flightGroup:getCoalition()
+									local unitsAFAC = flightGroup:getUnits()
+									local unitAFAC = unitsAFAC[1]
 
-								if unitAFAC and unitAFAC:isExist() then
+									if unitAFAC and unitAFAC:isExist() then
+										local afacPos = unitAFAC:getPoint()
+										local unit_Pos = unit:getPoint()
 
-									local afacPos = unitAFAC:getPoint()
-									local unit_Pos = unit:getPoint()
+										local distance = math.sqrt((afacPos.x - unit_Pos.x)^2 + (afacPos.z - unit_Pos.z)^2)
 
-									local distance = math.sqrt((afacPos.x - unit_Pos.x)^2 + (afacPos.z - unit_Pos.z)^2)
+										-- env.info("DCE_loopAFAC_CAS J "..tostring(distance))
 
-									if distance <= 10000 then
+										if distance <= 10000 then
 
-										trigger.action.smoke(value.targetPos, trigger.smokeColor.Red)
-										env.info("DCE_loopAFAC_CAS K create smokeColor.Red ")
+											trigger.action.smoke(value.smokeTiming.targetPos, trigger.smokeColor.Red)
+											-- env.info("DCE_loopAFAC_CAS K create smokeColor.Red ")
 
-										if not AFAC_smokeTiming[afacFlightName] then AFAC_smokeTiming[afacFlightName] = {} end
+											AFAC_available[afacFlightName]["smokeTiming"] = {
+												time = timer.getTime(),
+												targetPos = value.smokeTiming.targetPos,
+												sideNum = sideNum,
+											}
 
-										AFAC_smokeTiming[afacFlightName] = {
-											time = timer.getTime(),
-											targetPos = value.targetPos,
-											sideNum = sideNum,
-										}
-
+										end
 									end
 								end
 							end

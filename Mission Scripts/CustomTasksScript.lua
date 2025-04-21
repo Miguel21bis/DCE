@@ -1455,7 +1455,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 			env.info("DCE_CustomDesignationAFAC() AAb : unitAFAC:isExist "..tostring(afacFlightName))
 	else
 		AFAC_available[afacFlightName] = nil
-		env.info("DCE_CustomDesignationAFAC() AAc : else "..tostring(afacFlightName))
+		env.info("DCE_CustomDesignationAFAC() AAc : else AFAC_available = nil "..tostring(afacFlightName))
 	end
 
 	-- _affiche(AFAC_available, "CTS_AFAC_available ")
@@ -1744,7 +1744,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 							trigger.action.smoke(pos, trigger.smokeColor.Red)
 							timerDesignate = timer.getTime()
 							env.info("DCE_AFAC () K create smokeColor.Red ")
-							trigger.action.outTextForGroup(AFAC_available[afacFlightName]["gpGid"],"DCE_AFAC () K nextUnit create smokeColor.Red ", 15, false)
+							trigger.action.outTextForGroup(AFAC_available[afacFlightName][gpGid],"DCE_AFAC () K nextUnit create smokeColor.Red ", 15, false)
 						end
 
 
@@ -1828,6 +1828,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 			end
 
 			if AFAC_available[afacFlightName]  then
+				env.info("DCE_AFAC () :ZZ3 AFAC_available = nil "..tostring(afacFlightName))
 				AFAC_available[afacFlightName] = nil
 			end
 			return
@@ -1891,8 +1892,12 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	local unitAFAC = unitsAFAC[1]
 
 	if unitAFAC and unitAFAC:isExist() then
+
+		local sideNum = unitAFAC:getCoalition()
+		
 		AFAC_available[afacFlightName] = {
 				["unitAFAC"] = unitAFAC,
+				["sideNum"] = sideNum,
 				-- ["gpGid"] = 0,
 			}
 			-- env.info("DCE_CustomDesignationAFAC() AAb : unitAFAC:isExist "..tostring(afacFlightName))
@@ -2049,12 +2054,19 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	else
 		trigger.action.smoke(targetPos, trigger.smokeColor.Red)
 		env.info("DCE_AFAC () K create smokeColor.Red ")
-		if not AFAC_smokeTiming[afacFlightName] then AFAC_smokeTiming[afacFlightName] = {} end
-		AFAC_smokeTiming[afacFlightName] = {
+		-- if not AFAC_smokeTiming[afacFlightName] then AFAC_smokeTiming[afacFlightName] = {} end
+		-- AFAC_smokeTiming[afacFlightName] = {
+		-- 	time = timer.getTime(),
+		-- 	targetPos = targetPos,
+		-- 	sideNum = coalitionForce,
+		-- }
+
+		AFAC_available[afacFlightName]["smokeTiming"] = {
 			time = timer.getTime(),
 			targetPos = targetPos,
 			sideNum = coalitionForce,
 		}
+
 	end
 
 	local LLposNstring, LLposEstring = LLtool.LLstrings(targetPos)
