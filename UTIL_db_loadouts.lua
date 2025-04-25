@@ -4,7 +4,7 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.188"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.189"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
@@ -7163,7 +7163,7 @@ db_all_loadouts = {
 			["Escort - Crusader"] = {
 				attributes =  { },
 				code_loadout =  { "All" },
-								range = 370000,
+								range = 1600000,
 				firepower = 1,
 				vCruise = 245,
 				standoff = 80000,
@@ -7171,11 +7171,11 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 					[1] = {
-					["CLSID"] = "<CLEAN>",
+					["CLSID"] = "{DFT-300gal_LR}",
 					["num"] = 6,
 					},
 					[2] = {
-					["CLSID"] = "<CLEAN>",
+					["CLSID"] = "{DFT-300gal_LR}",
 					["num"] = 1,
 					},
 					[3] = {
@@ -7184,17 +7184,17 @@ db_all_loadouts = {
 					},
 					[4] = {
 					["CLSID"] = "{AIM-9J}",
-					["num"] = 2,
+					["num"] = 4,
 					},
 					[5] = {
 					["CLSID"] = "{AIM-9J}",
-					["num"] = 4,
+					["num"] = 3,
 					},
 					[6] = {
 					["CLSID"] = "{AIM-9J}",
-					["num"] = 3,
+					["num"] = 2,
 					},
-				},				
+					},				
 					fuel = 4096,
 					flare = 120,
 					chaff = 120,

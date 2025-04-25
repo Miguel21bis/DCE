@@ -1673,7 +1673,7 @@ local function AFAC_Com_OFF(arg)
 end
 
 function AFAC_F10(playerGroup)
-
+	--1677: Group doesn't exist
 	local gpGid = playerGroup:getID()
 	local menuAFAC_A
 	local menuAFAC_B
