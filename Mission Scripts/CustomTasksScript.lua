@@ -22,7 +22,6 @@ versionDCE["Mission Scripts/CustomTasksScript.lua"] = "1.9.43"
 local varFpsLeak = false
 local varFpsLeak_B = false
 local selectedTransport = 0			--util pour embarked
-local agendaSeconde = {}
 local AttackCounter	= {}													--table to count how many flights have already attacked and distribute subsequent attacks accordingly
 
 --TODO encore utile?
@@ -259,15 +258,15 @@ function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackTyp
 			end
 
 			local nextSecond = math.ceil(timer.getTime()) + 1
-			if agendaSeconde[nextSecond] then
+			if AgendaSeconde[nextSecond] then
 				local i = 1
 				repeat
 					nextSecond = nextSecond + 1
 					i = i + 1
-				until not agendaSeconde[nextSecond] or i > 1000
-				agendaSeconde[nextSecond] = true
+				until not AgendaSeconde[nextSecond] or i > 1000
+				AgendaSeconde[nextSecond] = true
 			else
-				agendaSeconde[nextSecond] = true
+				AgendaSeconde[nextSecond] = true
 			end
 			timer.scheduleFunction(execute, {cntrl, ComboTask, n} ,nextSecond)
 			-- timer.scheduleFunction(execute, {cntrl, ComboTask, n} , timer.getTime() + n*0.5)
@@ -475,15 +474,15 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 				table.insert(ComboTask.params.tasks, task_entry)
 
 				-- local nextSecond = math.ceil(timer.getTime()) + 1
-				-- if agendaSeconde[nextSecond] then
+				-- if AgendaSeconde[nextSecond] then
 				-- 	local i = 1
 				-- 	repeat
 				-- 		nextSecond = nextSecond + 1
 				-- 		i = i + 1
-				-- 	until not agendaSeconde[nextSecond] or i > 1000	
-				-- 	agendaSeconde[nextSecond] = true
+				-- 	until not AgendaSeconde[nextSecond] or i > 1000	
+				-- 	AgendaSeconde[nextSecond] = true
 				-- else
-				-- 	agendaSeconde[nextSecond] = true
+				-- 	AgendaSeconde[nextSecond] = true
 				-- end
 
 				-- timer.scheduleFunction(execute, {cntrl, ComboTask, n} , nextSecond)	
@@ -492,15 +491,15 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 		end
 
 		local nextSecond = math.ceil(timer.getTime()) + 1
-		if agendaSeconde[nextSecond] then
+		if AgendaSeconde[nextSecond] then
 			local i = 1
 			repeat
 				nextSecond = nextSecond + 1
 				i = i + 1
-			until not agendaSeconde[nextSecond] or i > 1000
-			agendaSeconde[nextSecond] = true
+			until not AgendaSeconde[nextSecond] or i > 1000
+			AgendaSeconde[nextSecond] = true
 		else
-			agendaSeconde[nextSecond] = true
+			AgendaSeconde[nextSecond] = true
 		end
 
 		timer.scheduleFunction(execute, {cntrl, ComboTask, n} , nextSecond)
@@ -739,15 +738,15 @@ function CustomMixClassAttack(flightName, targetList, expend, weaponType, attack
 		end
 
 		local nextSecond = math.ceil(timer.getTime()) + 1
-		if agendaSeconde[nextSecond] then
+		if AgendaSeconde[nextSecond] then
 			local i = 1
 			repeat
 				nextSecond = nextSecond + 1
 				i = i + 1
-			until not agendaSeconde[nextSecond] or i > 1000
-			agendaSeconde[nextSecond] = true
+			until not AgendaSeconde[nextSecond] or i > 1000
+			AgendaSeconde[nextSecond] = true
 		else
-			agendaSeconde[nextSecond] = true
+			AgendaSeconde[nextSecond] = true
 		end
 
 		timer.scheduleFunction(execute, {cntrl, comboTask, n} , nextSecond)
@@ -922,15 +921,15 @@ function CustomMapObjectAttack(FlightName, TargetList, expend, weaponType, attac
 
 
 		local nextSecond = math.ceil(timer.getTime()) + 1
-		if agendaSeconde[nextSecond] then
+		if AgendaSeconde[nextSecond] then
 			local i = 1
 			repeat
 				nextSecond = nextSecond + 1
 				i = i + 1
-			until not agendaSeconde[nextSecond] or i > 1000
-			agendaSeconde[nextSecond] = true
+			until not AgendaSeconde[nextSecond] or i > 1000
+			AgendaSeconde[nextSecond] = true
 		else
-			agendaSeconde[nextSecond] = true
+			AgendaSeconde[nextSecond] = true
 		end
 
 		timer.scheduleFunction(execute, {cntrl, ComboTask, n} , nextSecond)
@@ -1148,15 +1147,15 @@ function CustomRejoin(FlightName)
 		local cntrl = wingman[n]:getController()					--get controller of individual aircraft in flight
 
 		local nextSecond = math.ceil(timer.getTime()) + 1
-		if agendaSeconde[nextSecond] then
+		if AgendaSeconde[nextSecond] then
 			local i = 1
 			repeat
 				nextSecond = nextSecond + 1
 				i = i + 1
-			until not agendaSeconde[nextSecond] or i > 1000
-			agendaSeconde[nextSecond] = true
+			until not AgendaSeconde[nextSecond] or i > 1000
+			AgendaSeconde[nextSecond] = true
 		else
-			agendaSeconde[nextSecond] = true
+			AgendaSeconde[nextSecond] = true
 		end
 		env.info("DCE_CustomRejoin: | next_execute| "..tostring(FlightName).." wingman: "..n.." actualtime: "..tostring(timer.getTime()).." nextSecond: "..tostring(nextSecond))
 		timer.scheduleFunction(execute, cntrl, nextSecond)
@@ -2473,28 +2472,35 @@ end
 
 ----- search then engage task -----
 --allows to engage targets within a set distance from own group. CAUTION: Once this function is running, it group can no longer receive waypoint actions (DCS treats engage task set via script as never completed)!
-function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)
+function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
+-- "CustomSearchThenEngage(\'Pack 7 - 923rd-1 FR - Fighter Sweep 1\', 20000, \'Air\',2864.5791359112)"
 	if varFpsLeak then return end
 
-	if not Radius or Radius == nil or Radius <= 40000 then
-		Radius = 40000
+	env.info( "DCE_CustomSearchThenEngage A start func() "..tostring(flightName).."| radius |"..tostring(radius).."| targetType |"..tostring(targetType).."| searchTime |"..tostring(searchTime))
+
+	if not radius or radius == nil or radius <= 40000 then
+		radius = 40000
 	end
 	if not searchTime or searchTime == nil then
 		searchTime = timer.getTime() + 1800
 	end
 
 	local function ApplyEngageTargetsInZoneTask()							--engage targets in zone task needs to be applied continously to update zone position to group position
-
-		local flight = Group.getByName(FlightName)							--get group
+		local elementInAir = false
+		local flight = Group.getByName(flightName)							--get group
 		if flight then														--group still exists
 
 			local element = flight:getUnit(1)								--get first unit in group
-
-			if not element   then
+			if element and element:isExist() and element:isActive() and element:inAir() then
+				elementInAir = true
+			
+			else 
 				local wingman = flight:getUnits()								--get list of units from attacking flights
 				for n = 2, #wingman do
 					element = flight:getUnit(n)
-					if element then
+					element:isExist()
+					if element and element:isExist() and element:isActive() and element:inAir() then
+						elementInAir = true
 						break
 					end
 				end
@@ -2512,6 +2518,8 @@ function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)
 				--detecte si l'helico se pose proche d'une FARP BASE
 				local desc = element:getDesc()
 				cat = desc.category
+
+				env.info( "DCE_CustomSearchThenEngage B desc.category "..tostring(cat))
 
 				-- if unitCat and ( unitCat == Unit.Category.HELICOPTER) then	--unitCat == Unit.Category.AIRPLANE or
 
@@ -2537,13 +2545,13 @@ function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)
 								["number"] = 1,		--TODO attention, est-ce vraiment le nombre 1?
 								["params"] = {
 									["targetTypes"] = {
-										[1] = TargetType,
+										[1] = targetType,
 									},
 									["x"] = pos.x,
 									["y"] = pos.z,
-									["value"] = TargetType .. ";",
+									["value"] = targetType .. ";",
 									["priority"] = 0,
-									["zoneRadius"] = Radius,
+									["zoneRadius"] = radius,
 								}
 							},
 							stopCondition = {
@@ -2564,7 +2572,7 @@ function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)
 									["targetTypes"] = { "Helicopters"},
 									["x"] = pos.x,
 									["y"] = pos.z,
-									["value"] = TargetType .. ";",
+									["value"] = targetType .. ";",
 									["priority"] = 0,
 									["zoneRadius"] = 15000,
 								}
@@ -2578,59 +2586,69 @@ function CustomSearchThenEngage(FlightName, Radius, TargetType, searchTime)
 
 				cntrl:pushTask(task_entry)									--set task for group
 
-				-- if camp.debug and cat == 1 then
-				-- 	local TimeSearchEngage = timer.getTime() + 5
-				-- 	local logStr = "task_entry = " .. TableSerialization(task_entry, 0)
-				-- 	local FlightNameClean = FlightName:gsub('[%p%c%s]', '_')
-				-- 	local logFile = io.open(path.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_CustomSearchThenEngage.lua", "w")
-				-- 	logFile:write(logStr)
-				-- 	logFile:close()				
+				if camp.debug and cat == 1 then
+					local current_time = timer.getTime() + 5
+					local logStr = "task_entry = " .. TableSerialization(task_entry, 0)
+					local flightNameClean = flightName:gsub('[%p%c%s]', '_')
+					local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_"..current_time.."_".. "_CustomSearchThenEngage.lua", "w")
+					if logFile then
+						logFile:write(logStr)
+						logFile:close()
+					else
+						env.info("DCE_CustomSearchThenEngage : Failed to open log file for writing.")
+					end			
 
-				-- 	env.info( "DCE_CustomSearchThenEngage EEE "..tostring(FlightName).."| TargetType |"..tostring(TargetType).."| Radius |"..tostring(Radius))
-				-- end
-
-				local nextSecond = math.ceil(timer.getTime()) + 60
-				if agendaSeconde[nextSecond] then
-					local i = 1
-					repeat
-						nextSecond = nextSecond + 1
-						i = i + 1
-					until not agendaSeconde[nextSecond] or i > 1000
-					agendaSeconde[nextSecond] = true
-				else
-					agendaSeconde[nextSecond] = true
+					env.info( "DCE_CustomSearchThenEngage C "..tostring(flightName).."| targetType |"..tostring(targetType).."| Radius |"..tostring(radius))
 				end
 
-				return nextSecond									--repeat function every 5 seconds	
+				return timer.getTime() + 60									--repeat function every 5 seconds
+
+				-- local nextSecond = math.ceil(timer.getTime()) + 60
+				-- if AgendaSeconde[nextSecond] then
+				-- 	local i = 1
+				-- 	repeat
+				-- 		nextSecond = nextSecond + 1
+				-- 		i = i + 1
+				-- 	until not AgendaSeconde[nextSecond] or i > 1000
+				-- 	AgendaSeconde[nextSecond] = true
+				-- else
+				-- 	AgendaSeconde[nextSecond] = true
+				-- end
+
+				-- return nextSecond									--repeat function every 5 seconds	
 
 			end
 		end
+		return elementInAir
 	end
 
-	local nextSecond = math.ceil(timer.getTime()) + 1
-	if agendaSeconde[nextSecond] then
+	local nextTenth = (math.ceil(timer.getTime()) + 0.1 ) * 10
+	if ScheduleTenth[nextTenth] then
 		local i = 1
 		repeat
-			nextSecond = nextSecond + 1
+			nextTenth = nextTenth + 1
 			i = i + 1
-		until not agendaSeconde[nextSecond] or i > 1000
-		agendaSeconde[nextSecond] = true
+		until not ScheduleTenth[nextTenth] or i > 1000
+		ScheduleTenth[nextTenth] = true
 	else
-		agendaSeconde[nextSecond] = true
+		ScheduleTenth[nextTenth] = true
 	end
 
-	-- env.info( "DCE_CustomSearchThenEngage GGG "..tostring(FlightName).." timer.getTime(): "..tostring(timer.getTime())
-	-- .." searchTime: "..tostring(searchTime)
-	-- )
 
-	if timer.getTime() > searchTime then
-		env.info( "CustomSearchThenEngage timer.getTime() > searchTime return "..tostring(FlightName).."  searchTime: "..tostring(searchTime))
+	-- if timer.getTime() > searchTime then
+	-- 	env.info( "CustomSearchThenEngage timer.getTime() > searchTime return "..tostring(flightName).."  searchTime: "..tostring(searchTime))
+	-- 	return
+	-- end
+
+	if ApplyEngageTargetsInZoneTask() == false then
+		env.info("DCE_CustomSearchThenEngage Y : elementInAir = false, return.")
 		return
 	end
-	timer.scheduleFunction(ApplyEngageTargetsInZoneTask, nil, nextSecond)			--schedule function
+	timer.scheduleFunction(ApplyEngageTargetsInZoneTask, nil, (nextTenth/10))			--schedule function
 
 	-- timer.scheduleFunction(ApplyEngageTargetsInZoneTask, nil, timer.getTime() + 1)			--schedule function
-end
+
+end --FIN CustomSearchThenEngage
 
 
 ----------------------------------------------------------------------------------------------------
@@ -4594,20 +4612,20 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 
 	local nextSecond = math.ceil(timer.getTime()) + 1
 
-	if agendaSeconde[nextSecond] then
+	if AgendaSeconde[nextSecond] then
 		local i = 1
 		repeat
 			nextSecond = nextSecond + 1
 			i = i + 1
-		until not agendaSeconde[nextSecond] or i > 1000
+		until not AgendaSeconde[nextSecond] or i > 1000
 
-		agendaSeconde[nextSecond] = true
+		AgendaSeconde[nextSecond] = true
 
 		if i > 1000 then
 			env.info( "Custom_Altitude, ERROR BOUCLE ")
 		end
 	else
-		agendaSeconde[nextSecond] = true
+		AgendaSeconde[nextSecond] = true
 	end
 
 	timer.scheduleFunction(execute, nil, nextSecond)

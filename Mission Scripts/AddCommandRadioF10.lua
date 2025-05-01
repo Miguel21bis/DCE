@@ -54,7 +54,8 @@ GroundDamagedFlyingMachine = {}
 AFAC_available = {}				--liste les AFAC en position
 AFAC_targetStatus = {}					--table used by AFACs to monitor the status of targets and move on to the next ones
 -- AFAC_smokeTiming = {}
-
+ScheduleTenth = {}					--table used to schedule the tenth of a second
+AgendaSeconde = {}
 
 EjectionSeatFrequency = {}
 SumSoldierAliasPilot = 0
@@ -3392,7 +3393,7 @@ local function loopAFAC()
 		-- AFAC_F10(Group)
 		timer.scheduleFunction(AFAC_F10, groupObject, timer.getTime() + 2)
 	end
-	return timer.getTime() + 10
+	return timer.getTime() + 61
 end
 
 local function loopPilot()
