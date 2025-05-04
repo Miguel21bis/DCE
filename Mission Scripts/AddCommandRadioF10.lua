@@ -1676,19 +1676,22 @@ end
 function AFAC_F10(playerGroup)
 	--1677: Group doesn't exist
 	local gpGid = playerGroup:getID()
-	local menuAFAC_A
-	local menuAFAC_B
+
 	missionCommands.removeItemForGroup(gpGid, {"AFAC"})
+
+	local menuAFAC_A = missionCommands.addSubMenuForGroup(gpGid, "AFAC")
 
 	if AFAC_available then
 
-		for AFAC_Name, _ in pairs(AFAC_available) do
-			if AFAC_Name and type(AFAC_Name) == "string" then
-				menuAFAC_A = missionCommands.addSubMenuForGroup(gpGid, "AFAC")
-				break
-			end
-		end
+		--ne pas fair ça, cela rend le resultat aélatoire
+		-- for AFAC_Name, _ in pairs(AFAC_available) do
+		-- 	if AFAC_Name and type(AFAC_Name) == "string" then
+		-- 		menuAFAC_A = missionCommands.addSubMenuForGroup(gpGid, "AFAC")
+		-- 		break
+		-- 	end
+		-- end
 
+		local i = 1
 		for afacName, _ in pairs(AFAC_available) do
 			if afacName and type(afacName) == "string" then
 
@@ -1704,6 +1707,7 @@ function AFAC_F10(playerGroup)
 				radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gpGid, "AFAC radio Off (" .. afacName .. ")", uniqueMenuAFAC, AFAC_Com_OFF, {afacName, gpGid, "off"})
 
 			end
+			i = i +1
 		end
 	end
 
