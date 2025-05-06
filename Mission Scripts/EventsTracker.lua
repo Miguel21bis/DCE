@@ -125,7 +125,7 @@ local function health1s(arg)
 
 		local lifeActual1s = healthTemp.objSujet:getLife()		--651: Unit doesn't exist
 		local lifePourcent = (lifeActual1s/healthTemp.health0) * 100
-		local initDesc = healthTemp.objSujet:getDesc()
+		-- local initDesc = healthTemp.objSujet:getDesc()	--tooHeavy
 
 		local health1s_entry = {
 			PilotName = healthTemp.PilotName,
@@ -133,7 +133,7 @@ local function health1s(arg)
 			health0 = healthTemp.health0,
 			lifePourcent = lifePourcent,
 			event = healthTemp.typeEvent,
-			description = initDesc,
+			-- description = initDesc,	--tooHeavy
 		}
 
 		table.insert(CustomLog, health1s_entry)
@@ -149,8 +149,14 @@ local function addHit1s(hitTemp)
 	end
 
 	local lifeActual1s = hitTemp.objScen:getLife()
+	local lifePourcent
 
-	local lifePourcent = (lifeActual1s/hitTemp.hightLife) * 100
+	if  hitTemp.lifeHit > lifeActual1s then
+		lifePourcent = (lifeActual1s/hitTemp.hightLife) * 100
+	else
+		lifePourcent = ( hitTemp.lifeHit/hitTemp.hightLife) * 100
+		env.info( "DCE_EventT addHit1s  C lifeActual1s ERROR "..tostring(hitTemp.scenaryName))
+	end
 
 	scenLog[hitTemp.scenaryName] = {							--add scenery object to table
 		scenaryName = hitTemp.scenaryName,
@@ -164,8 +170,10 @@ local function addHit1s(hitTemp)
 		x = hitTemp.x,
 		y = hitTemp.y,
 		z = hitTemp.z,
-		description = hitTemp.description,
+		-- description = hitTemp.description,	--tooHeavy
 		event = hitTemp.event,
+		explosiveMass = hitTemp.explosiveMass,
+		displayName = hitTemp.displayName,
 	}
 end
 
@@ -307,26 +315,18 @@ function eventHandlerDCE:onEvent(event)
 	}
 
 
-	-- if camp.debug then  
-	-- 	env.info( "DCE_EventsTracker  id: "..tostring(event.id).." _type_ : "..tostring(log_entry.type)) 
-
-	-- end
-
-	-- _affiche(event, "event EventTracker")
-	-- trigger.action.outText("EventT  id: "..tostring(event.id).."_type_"..tostring(log_entry.type), 3)
-
 	if event and event.id then
 		if Info_event then
 
 			if Info_event[tonumber(event.id)] then
 				local idLabel = tostring(Info_event[tonumber(event.id)])
 				if camp.debug then
-					env.info("DCE_EventsTracker event.id "..tostring(event.id).." " ..idLabel)
+					-- env.info("DCE_EventsTracker event.id "..tostring(event.id).." " ..idLabel)
 
 				end
 			else
 				if camp.debug then
-					env.info("DCE_EventsTracker this is a  NEW ID "..tostring(event.id))
+					-- env.info("DCE_EventsTracker this is a  NEW ID "..tostring(event.id))
 				end
 			end
 		end
@@ -345,9 +345,9 @@ function eventHandlerDCE:onEvent(event)
 	if event.initiator then
 		initiatorObjCategory = Object.getCategory(event.initiator)
 		--DCE_EventsTracker initiator Category 0 _: nil
-		if camp.debug then env.info("DCE_EventsTracker initiator Category: "..tostring(initiatorObjCategory)) end
+		-- if camp.debug then env.info("DCE_EventsTracker initiator Category: "..tostring(initiatorObjCategory)) end
 		if Object_Category[initiatorObjCategory] then
-			if camp.debug then env.info("DCE_EventsTracker initiator Object_Category :  _:_ "..tostring(Object_Category[initiatorObjCategory])) end
+			-- if camp.debug then env.info("DCE_EventsTracker initiator Object_Category :  _:_ "..tostring(Object_Category[initiatorObjCategory])) end
 
 			if initiatorObjCategory ~= Object.Category.SCENERY then
 				local initiatorCoalition = event.initiator:getCoalition()
@@ -359,18 +359,16 @@ function eventHandlerDCE:onEvent(event)
 	if event.target then
 		targetObjCategory = Object.getCategory(event.target)
 
-		if camp.debug then  env.info("DCE_EventsTracker target Category: "..tostring(targetObjCategory)) end
+		-- if camp.debug then  env.info("DCE_EventsTracker target Category: "..tostring(targetObjCategory)) end
 
 		if Object_Category[targetObjCategory] then
 			local targetDesc = event.target:getDesc()
-			-- _affiche(targetDesc, "DCE_EventsTracker targetDesc ")
-
+			
 			local targetObjCategory2 = targetDesc.category
-			if camp.debug then  env.info("DCE_EventsTracker target targetObjCategory2: "..tostring(targetObjCategory2)) end
+			-- if camp.debug then  env.info("DCE_EventsTracker target targetObjCategory2: "..tostring(targetObjCategory2)) end
 
-			if camp.debug then  env.info("DCE_EventsTracker target Object_Category :  _:_ "..tostring(Object_Category[targetObjCategory])) end
-			-- if camp.debug then  env.info("DCE_EventsTracker target targetObjCategory2 :  _:_ "..tostring(Object_Category[targetObjCategory2])) end
-
+			-- if camp.debug then  env.info("DCE_EventsTracker target Object_Category :  _:_ "..tostring(Object_Category[targetObjCategory])) end
+			
 			-- static:getDesc().category
 			if targetObjCategory ~= Object.Category.SCENERY then
 				if event.target:isExist() then
@@ -659,15 +657,12 @@ function eventHandlerDCE:onEvent(event)
 
 	-- miguel modification M18.d destroy Plane Landing CV
 	elseif log_entry.type == "land" then										--hit event with initiator or any other event (excludes hit events without initiator, like collisions)		
-		-- env.info("DCE_EventsTracker Landing Passe 00 ")
-
+		
 		if event.initiator then
 
 			local playerName = event.initiator:getPlayerName()
 
 			if event.place then
-
-				-- env.info("DCE_EventsTracker Landing Passe 01 ")
 
 				local s =""
 				s = s.."| Object.getCategory "..Object.getCategory(event.initiator)
@@ -679,8 +674,6 @@ function eventHandlerDCE:onEvent(event)
 				s = s.."| "..event.initiator:getTypeName()
 
 
-				-- env.info("DCE_EventsTracker Landing Passe A "..tostring(s))
-
 				log_entry.place = event.place:getName()
 				log_entry.placeTypeName = tostring(event.place:getTypeName())
 				local baseCoalition = Airbase.getCoalition(event.place)
@@ -688,11 +681,7 @@ function eventHandlerDCE:onEvent(event)
 
 				local initDesc = event.initiator:getDesc()
 				local placeDesc = event.place:getDesc()
-				-- _affiche(initDesc, "DCE_EventsTracker Landing initDesc")
-				-- _affiche(placeDesc, "DCE_EventsTracker Landing placeDesc")
-
-				-- env.info("DCE_EventsTracker Landing Passe A² "..tostring(baseCoalition))
-
+				
 				-- Airbase.Category = {
 				-- 	AIRDROME = 0,
 				-- 	HELIPAD = 1, 
@@ -701,43 +690,31 @@ function eventHandlerDCE:onEvent(event)
 				-- if event.place:getCategory() == Airbase.Category.SHIP    and not event.initiator:getPlayerName() then 
 				if not playerName then
 					if placeDesc.category == Airbase.Category.SHIP then 											-- category ship
-						-- env.info("DCE_EventsTracker Landing Passe C ")
-
+						
 						--relance un Pedro si c'est un Pedro qui se pose
 						if string.find(event.initiator:getName(), "Pedro") then
 
-							-- table.insert(despawn, event.initiator)
-
 							--["name"] = "Unit_Pedro_CVN-71 Theodore Roosevelt_1",
 							local cvName = event.initiator:getName()
-							-- env.info("DCE_EventsTracker Landing Pedro landing Passe D1 "..tostring(cvName))
-
+							
 							cvName = cvName:gsub( "Unit_Pedro_", "")
 							cvName, _ = cvName:match("([^,]+)_([^,]+)")
-							-- env.info("DCE_EventsTracker Landing Pedro landing Passe D2 "..tostring(cvName))
-
+							
 							NeedPedro(cvName, event)
-
-							-- env.info("DCE_EventsTracker Landing ryStart Passe D3 NeedPedro cvName: "..tostring(cvName))
 
 						end
 
 						if initDesc.category == Unit.Category.HELICOPTER then
-							-- env.info("DCE_EventsTracker Landing Add Table Despawn SHIP HELICOPTER "..s)
 							table.insert(despawn, event.initiator)
 						end
 
 					elseif placeDesc.category == Airbase.Category.HELIPAD then 											-- category ship
-						-- env.info("DCE_EventsTracker Landing Despawn Add Table FARP "..s)
 						table.insert(despawn, event.initiator)
 
 					end
 				end
 
-				-- env.info("DCE_EventsTracker Landing Passe E ")
-
-				-- modification M50.a Records landings
-
+				
 				if initDesc.displayName then
 					log_entry.initiator = event.initiator:getName()																							--store initiator name
 					log_entry.type_name = event.initiator:getTypeName()
@@ -763,13 +740,6 @@ function eventHandlerDCE:onEvent(event)
 					log_entry.y = initPoint.y
 					log_entry.z = initPoint.z
 				end
-
-				-- env.info("DCE_EventsTracker Landing fin Passe Y ")
-
-				-- env.info("DCE_EventsTracker Passe 12 ")
-				-- env.info("DCE_EventsTracker landedNearBase "..tostring(log_entry.placeTypeName).." placeCoalition: "..tostring(log_entry.placeCoalition))
-				-- trigger.action.outText("DCE_EventsTracker landedNearBase "..tostring(log_entry.placeTypeName), 30)
-
 
 				local life = event.initiator:getLife()																	--get current life of unit
 				local init_life = event.initiator:getLife0()															--get initial life of unit
@@ -1097,6 +1067,23 @@ function eventHandlerDCE:onEvent(event)
 					local initPoint = event.target:getPoint()				--get point of hit scenery object
 
 					local scenaryName = event.target:getName()
+
+					local wep = event.weapon
+					local descWep = wep:getDesc()
+					-- if descWep and camp.debug then
+					-- 	_affiche(descWep, "DCE_EventsTracker hit descWep ")
+					-- end
+
+					local explosiveMass = 0
+					if descWep and descWep.warhead and descWep.warhead.explosiveMass then
+						explosiveMass = descWep.warhead.explosiveMass
+					end
+
+					local displayName = "inc"
+					if descWep and descWep.displayName then
+						displayName = descWep.displayName
+					end
+
 					local hitTemp = {
 						scenaryName = scenaryName,
 						objScen = event.target,
@@ -1111,36 +1098,14 @@ function eventHandlerDCE:onEvent(event)
 						description = descr,
 						event = "S_EVENT_HIT",
 						initiatorSideName = initiatorSideName,
-						targetSideName = targetSideName
+						targetSideName = targetSideName,
+						explosiveMass = explosiveMass,
+						displayName = displayName,
 					}
 
 					timer.scheduleFunction(addHit1s, hitTemp, timer.getTime() + 1)
 
-					-- scenLog[timer.getTime()] = {							--add scenery object to table
-					-- 	scenaryName = scenaryName,
-					-- 	lifeHit = lifeHit,	
-					-- 	objScen = event.target,	
-					-- 	hightLife = hightLife,
-					-- 	health0 = descr.life,									--store initial health of scenery object
-					-- 	lasthit = event.initiator:getName(),					--store who hit the scenery object
-					-- 	lifeActual = lifeActual,
-					-- 	lifePourcent = lifePourcent,
-					-- 	description = descr,
-					-- 	event = "S_EVENT_HIT_multiple",
-					-- }
 
-
-					-- scenLog[scenaryName] = {							--add scenery object to table
-					-- 	health0 = descr.life,									--store initial health of scenery object
-					-- 	lasthit = event.initiator:getName(),					--store who hit the scenery object
-					-- 	lifeActual = lifeActual,
-					-- 	lifePourcent = lifePourcent,
-					-- 	x = initPoint.x,
-					-- 	y = initPoint.y,
-					-- 	z = initPoint.z,
-					-- 	description = descr,
-					-- }
-					-- scenLog[scenaryName].event = "S_EVENT_HIT"
 				end
 			end
 		end

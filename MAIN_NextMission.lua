@@ -1,14 +1,15 @@
 --To generate a new mission file. Unzips template mission, defines content of next missions and packs a new mission file
 --Initiated by Debrief_Master.lua, BAT_FirstMission.lua or BAT_RedoMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleanCode_h
+-- last modification: M83_c
 if not versionDCE then versionDCE = {} end
-versionDCE["MAIN_NextMission.lua"] = "1.35.213"
+versionDCE["MAIN_NextMission.lua"] = "1.36.216"
 ------------------------------------------------------------------------------------------------------- 
 -- debug_l 					(l endCampaign)(ik error beacon file)(h mission.maxDictId)(g help campaignMaker)(f autolase)(e camp_ZoneSAR in skipmod)(d: oob_ground not in mission)(c: EndMission)
 -- Reglage_e				(e EPLRS_Capacity)(d CVN to CV)(c stop si < 2.7.0 (ver18))(a: Init/loadout selection)
 -- adjustment_g				(g keep original triggers( a_remove_scene_objects ))(e oob_scen ==0)(d currentKey)(c clean conf_mod)(b Firstmission_flag)(a: add Loadout tiers)
 -- cleanCode_h				(ag springCleaning)
+-- modification M83_c		Jammer checkMissileProximity (c all jammer in DataBase)(b B-52)
 -- modification M77_k		CG_ArtySpotter (k ListSpotterAircraft)(c camp.spotter)(b tempo)
 -- modification M71_b		PayloadRestricted  (b Action.RestrictedLoadout(file))
 -- modification M66_a		bombOnRunway
@@ -470,6 +471,14 @@ if Firstmission_flag then
 	ModifiCampInit()
 end
 
+local jammerOnBoard = {}
+for planeType, plane in pairs(Data_divers) do
+	if plane and plane.jammer then
+		jammerOnBoard[planeType] = plane.jammer
+
+	end
+end
+
 
 camp.SC_FullPlaneOnDeck = mission_ini.SC_FullPlaneOnDeck								-- modification M37.d SuperCarrier
 camp.CV_Vmax = Data_configuration.CV_Vmax												-- modification M37.d SuperCarrier
@@ -485,6 +494,9 @@ camp.EWR_frequency = ewr
 
 camp.spotter = mission_ini.spotter
 camp.spotterAircraft = ListSpotterAircraft()
+
+camp.jammerOnBoard = jammerOnBoard
+camp.unitSystem = mission_ini.unitSystem
 
 local nbTotalClient = 0
 for k=1, Multi.NbGroup do

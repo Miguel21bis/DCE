@@ -1457,13 +1457,9 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 		env.info("DCE_CustomDesignationAFAC() AAc : else AFAC_available = nil "..tostring(afacFlightName))
 	end
 
-	-- _affiche(AFAC_available, "CTS_AFAC_available ")
-
 	local afacPos = unitAFAC:getPoint()
 	local afacAlt = afacPos.y
-
 	local terrainAlt = land.getHeight({x = afacPos.x, y = afacPos.z})
-
 	local distVisibility = distanceVisibilite(afacAlt, terrainAlt)
 	-- env.info("DCE_CustomDesignationAFAC() BB : afacFlightName "..tostring(afacFlightName).." afacAlt: "..tostring(afacAlt).." terrainAlt: "..tostring(terrainAlt).." distVisibility: "..tostring(distVisibility))
 
@@ -1868,6 +1864,11 @@ end
 function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	if varFpsLeak then return end
 
+	if LastInjecAFAC[afacFlightName] and LastInjecAFAC[afacFlightName] < timer.getTime() + 30 then
+		env.info("DCE_CustomDesignationAFAC() AFAC 00 BUG RETURN : "..tostring(afacFlightName).." LastInjecAFAC: "..tostring(LastInjecAFAC[afacFlightName]))
+		return
+	end
+
 	local function distanceVisibilite(altitude_avion, altitude_terrain)
 		-- Vérifie que l'altitude de l'avion est au-dessus du terrain
 		if altitude_avion <= altitude_terrain then
@@ -2124,6 +2125,8 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		table.remove(modFPlan, i) -- Supprime l'élément à l'index `i`
 	end
 
+	local targetDestroyed_Flag = "targetDestroyed_Flag_"..target.UnitId
+
 	local current_time = timer.getTime()
 
 	local new_way = {
@@ -2252,6 +2255,22 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 							["enabled"] = true,
 							["params"] =
 							{
+								-- ["task"] =
+								-- {
+								-- 	["id"] = "Orbit",
+								-- 	["params"] =
+								-- 	{
+								-- 		["altitude"] = afacPos.y,
+								-- 		["pattern"] = "Circle",
+								-- 		["speed"] = descAfac.speedMax * 2/3,
+								-- 		["speedEdited"] = true,
+								-- 	}, -- end of ["params"]
+								-- }, -- end of ["task"]
+								-- ["stopCondition"] =
+								-- {
+								-- 	["duration"] = 300,
+								-- }, -- end of ["stopCondition"]
+
 								["task"] =
 								{
 									["id"] = "Orbit",
@@ -2268,7 +2287,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 								}, -- end of ["task"]
 								["stopCondition"] =
 								{
-									["userFlag"] = "targetDestroyed_Flag_"..target.UnitId,
+									["userFlag"] = targetDestroyed_Flag,
 									["userFlagValue"] = true,
 								}, -- end of ["stopCondition"]
 							}, -- end of ["params"]
@@ -2304,11 +2323,12 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 			['action'] = 'Turning Point',
 			['alt_type'] = 'BARO',
 			['speed_locked'] = true,
-			['y'] = refY ,
-			['x'] = refX ,
+			['y'] = tonumber(refY) ,
+			['x'] = tonumber(refX) ,
 			['formation_template'] = '',
 			['speed'] = descAfac.speedMax * 2/3,
 			['ETA_locked'] = false,
+			['ETA'] = current_time + 300,
 			["name"] = "AFAC_WPT3",
 			["task"] =
 			{
@@ -2331,17 +2351,41 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 									["id"] = "Script",
 									["params"] =
 									{
-										["command"] = "env.info(\"DCE_AFAC_Mission WPT3 E \")",
+										-- ["command"] = "env.info(\"DCE_AFAC_Mission WPT3 Ea getUserFlag \"..trigger.misc.getUserFlag( "..targetDestroyed_Flag.. ")\")",
+										["command"] = "env.info(\"DCE_AFAC_Mission WPT3 Ea getUserFlag \" .. trigger.misc.getUserFlag(\""..targetDestroyed_Flag.. "\"))",
 									}, -- end of ["params"]
 								}, -- end of ["action"]
 							}, -- end of ["params"]
 						}, -- end of [1]
+
+
+						
+
 						[2] =
+						{
+							["number"] = 2,
+							["auto"] = false,
+							["id"] = "WrappedAction",
+							["name"] = "partie script",
+							["enabled"] = true,
+							["params"] =
+							{
+								["action"] =
+								{
+									["id"] = "Script",
+									["params"] =
+									{
+										["command"] = "env.info(\"DCE_AFAC_Mission WPT3 Eb \")",
+									}, -- end of ["params"]
+								}, -- end of ["action"]
+							}, -- end of ["params"]
+						}, -- end of [1]
+						[3] =
 						{
 							["auto"] = false,
 							["enabled"] = true,
 							["id"] = "WrappedAction",
-							["number"] = 2,
+							["number"] = 3,
 							["params"] =
 							{
 								["action"] =
@@ -2355,9 +2399,9 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 								},
 							},
 						},
-						[3] =
+						[4] =
 						{
-							["number"] = 3,
+							["number"] = 4,
 							["auto"] = false,
 							["id"] = "WrappedAction",
 							["name"] = "partie script",
@@ -2378,7 +2422,6 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 				},
 			},
 
-			['ETA'] = current_time + 70,
 		},
 
 	}
@@ -2387,19 +2430,24 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	local newRoute = {} -- Nouvelle table
 
 	-- Ajouter les éléments de new_way en premier
-	for j = 1, 3 do
+	for j = 1, #new_way do
 		newRoute[j] = new_way[j]
 	end
 
-	-- Trouver le prochain index de modFPlan (le plus petit disponible)
-	local startIndex = 4
+	-- -- Ajouter les éléments de new_way en premier
+	-- for j = 1, 3 do
+	-- 	newRoute[j] = new_way[j]
+	-- end
+
+	-- ajoute les anciens wpt aux nouveau
+	local startIndex = #new_way +1
 	for _, v in ipairs(modFPlan) do
 		newRoute[startIndex] = v
 		startIndex = startIndex + 1
 	end
 
 	-- Remplacer modFPlan par newRoute
-	modFPlan = newRoute
+	-- modFPlan = newRoute
 
 
 
@@ -2413,14 +2461,17 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	-- recalcul les ETA
 	i = 1
-	while modFPlan[i] do
-		if i > 3 then break end  -- Arrêter la boucle après le 3ème enregistrement
+	while newRoute[i] do
 
-		if i > 1 then
-			local deltaTime = modFPlan[i]["ETA"] - modFPlan[i-1]["ETA"]
+		if i >= 5 then  -- Arrêter la boucle après le 3ème enregistrement
+			break
+		end
+
+		if i >= 2 then
+			local deltaTime = newRoute[i]["ETA"] - newRoute[i-1]["ETA"]
 			local deltaDist = GetDistance(
-				{x = modFPlan[i].x, y = modFPlan[i].y },
-				{x = modFPlan[i-1].x, y = modFPlan[i-1].y }
+				{x = newRoute[i].x, y = newRoute[i].y },
+				{x = newRoute[i-1].x, y = newRoute[i-1].y }
 			)
 
 			local ETA_minimum
@@ -2432,20 +2483,42 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 				break
 			end
 
-			if deltaTime < ETA_minimum then
-				modFPlan[i]["ETA"] = ETA_minimum
+			if ETA_minimum and deltaTime < ETA_minimum then
+				newRoute[i]["ETA"] = newRoute[i-1]["ETA"] + ETA_minimum + 300
 			end
+
+			-- if i >= 4 then
+			-- 	newRoute[i]["ETA_locked"] = false
+			-- 	newRoute[i]["speed_locked"] = true
+			-- 	newRoute[i]["task"] = 
+			-- 	{
+			-- 		["id"] = "ComboTask",
+			-- 		["params"] = 
+			-- 		{
+			-- 			["tasks"] = 
+			-- 			{
+			-- 			},
+			-- 		},
+			-- 	}
+			-- end
 		end
 
 		i = i + 1
 	end
+
+	--test pour trouver le bug de la boucle sans fin
+	-- for j = #newRoute, 1, -1 do
+	-- 	if j > 4 then
+	-- 		newRoute[j] = nil
+	-- 	end
+	-- end
 
 	local newMission = {
 			id = 'Mission',
 			params = {
 				airborne = true,
 				route = {
-					points = modFPlan
+					points = newRoute
 				},
 			}
 		}
@@ -2464,6 +2537,8 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	ctr:resetTask() 			-- Efface les tâches existantes
 	ctr:setTask(newMission)
+
+	LastInjecAFAC[afacFlightName] = timer.getTime() 	--update last injection time
 
 	env.info("DCE_AFAC Z nouvelle mission injectee")
 

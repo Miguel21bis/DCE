@@ -1036,10 +1036,10 @@ function SpawnOn(spawn, waypoints, group, Pn, spawnTime, from, flight, f, role)
 			waypoints[1]["alt"] = alt  + (Pn * 10) + altRole * 33
 		end
 
-		for	n = 2 , #group.units do
+		for	n = 1 , #group.units do
 			if not flight[f].task == "AFAC" then
-				group.units[n].x = ((Pn-1) * 15) + ((f-1) * 15) + group.units[n].x + (15 * n)	--ANTI-COLLISION A
-				group.units[n].y = ((Pn-1) * 15) + ((f-1) * 15) + group.units[n].y + (15 * n)
+				group.units[n].x = ((Pn-1) * 60) + ((f-1) * 120) + group.units[n].x + (120 * n)	--ANTI-COLLISION A
+				group.units[n].y = ((Pn-1) * 60) + ((f-1) * 120) + group.units[n].y + (120 * n)
 			end
 			group.units[n].speed = speed
 
@@ -4744,7 +4744,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					local define_x = waypoints[1]["x"]
 					local define_y = waypoints[1]["y"]
 
-					if n >= 2 and not (is_helicopter and waypoints[1].action == "From Ground Area" and baseIsFARP ) then
+					if  not (is_helicopter and waypoints[1].action == "From Ground Area" and baseIsFARP ) then --n >= 2 and
 						define_x = waypoints[1]["x"] + ((n - 1) * 15) +  ((f-1) * 15) + ((p - 1) * 15) -- ATO_FP_Debug01	--ANTI-COLLISION B
 						define_y = waypoints[1]["y"] + ((n - 1) * 15) +  ((f-1) * 15) + ((p - 1) * 15) --ATO_FP_Debug01 	--ANTI-COLLISION B
 					end
@@ -5311,9 +5311,13 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				-- decale les apparitions en vol pour eviter les collisions en vol
 				if waypoints[1].type == "Turning Point" and waypoints[1]["briefing_name"] == "Spawn" and not flight[f].task == "AFAC"  then
 					for	n = 1 , #group.units do
-						group.units[n].x = ((p-1) * 15) + ((f-1) * 15) + group.units[n].x + (15 * n)	--ANTI-COLLISION C
-						group.units[n].y = ((p-1) * 15) + ((f-1) * 15) + group.units[n].y + (15 * n)	--ANTI-COLLISION C
+						group.units[n].x = ((p-1) * 60) + ((f-1) * 120) + group.units[n].x + (120 * n)	--ANTI-COLLISION C
+						group.units[n].y = ((p-1) * 60) + ((f-1) * 120) + group.units[n].y + (120 * n)	--ANTI-COLLISION C
 					end
+					waypoints[1].x = group.units[1].x
+					waypoints[1].y = group.units[1].y
+					group.x = group.units[1].x
+					group.y = group.units[1].y
 				end
 
 				-- modif M17

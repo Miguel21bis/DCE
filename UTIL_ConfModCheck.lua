@@ -93,6 +93,7 @@ mission_ini_check = {
 	MP_PlaneRecovery = 2,						-- (false/1/2/3 etc)		[defaut: 2]			In multiplayer, this allows you to control an aircraft already in flight in case of a crash.
 	backupAllMissionFiles = false,				-- (true/false)				[default: false]	true: save all missions in the Debriefing directory. false: only the last mission is saved
 	cheat_Mod_Eye = false,						-- (true/false)				[default: false]	allows you to see all friend and foe planes
+	unitSystem = "imperial",					-- ("imperial"/"metric")	[default: "imperial"]	Unit system used in the campaign (metric or imperial)
 
 	--***third-party mod option***
 	silenceATC = "auto",						-- ("auto"/false/true)		[default: "auto"]	auto: silence only MP silences the ATC | useful for many multiplayer flights where the ATC talks and blocks repeatedly (except CV)

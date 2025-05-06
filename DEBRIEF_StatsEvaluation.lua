@@ -1059,7 +1059,7 @@ for hit_unit,hitter in pairs(hit_table) do													--iterate through all rem
 	end
 end
 
-local rayonDamaged = 50
+local rayonDamaged = 10
 --evaluate destroyed scenery objects
 for scen_name,scen in pairs(scen_log) do													--iterate through destroyed scenery objects
 	-- if scen.x and scen.z and (scen.lifeActual1s /scen.hightLife < 0.75) then																--scenery object has x and z coordinates

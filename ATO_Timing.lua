@@ -144,7 +144,7 @@ for side, pack in pairs(ATO) do
 
 			if earliest > latest then																			--if there is no valid TOT
 				tot = earliest
-				print("AtoT Ba  earliest > latest  "..tostring(earliest) .." > ".. tostring(latest))
+				-- print("AtoT Ba  earliest > latest  "..tostring(earliest) .." > ".. tostring(latest))
 			else
 
 				--divise le temps possible par quartTime
@@ -190,7 +190,7 @@ for side, pack in pairs(ATO) do
 				-- randtot = math.random(earliest, latest)
 				-- randtot = math.random(earliest, latest)																--set random tot
 				tot = randtot
-				print("AtoT Ba  tot   "..tostring(tot) )
+				-- print("AtoT Ba  tot   "..tostring(tot) )
 
 			end
 			TOTtable[side][pack[p].main[1].target_name] = tot															--store TOT for target
@@ -362,7 +362,7 @@ for side, pack in pairs(ATO) do
 
 						tot = flight[f].tot_from + (f - 1) * flight[f].loadout.tStation + 1							--flight TOT (+1 second so that first flight spanwns at mission start a little ahead of station)
 						tot = tot - partial_station																	--remove time that the first flight was already on station at mission start
-						print("AtoT Ca  tot   "..tostring(tot) )
+						-- print("AtoT Ca  tot   "..tostring(tot) )
 					else																							--station cannot be covered continously
 						if f == 1 then																				--for first flight in package
 							local from = flight[f].tot_from - flight[f].loadout.tStation							--first possible station start
@@ -380,7 +380,7 @@ for side, pack in pairs(ATO) do
 						else
 							tot = tot + flight[f].tot_to / #flight
 						end
-						print("AtoT Cb  tot   "..tostring(tot) )
+						-- print("AtoT Cb  tot   "..tostring(tot) )
 					end
 				end
 
@@ -390,7 +390,7 @@ for side, pack in pairs(ATO) do
 					else
 						tot = tot +  (flight[f].loadout.tStation * #flight) - flight[f].loadout.tStation
 					end
-					print("AtoT D  tot   "..tostring(tot) )
+					-- print("AtoT D  tot   "..tostring(tot) )
 				end
 
 				--flight TOT for interceptors
@@ -660,12 +660,12 @@ for side, pack in pairs(ATO) do
 						local dist = flight[f].route[w + 1].eta * speed							--distance covered from mission start to first positive ETA
 						if dist > GetDistance(flight[f].route[w], flight[f].route[w + 1]) then	--if distance is ahead of WP (caused by extra minutes at take off WP), keep spawn point over take off point but adjust id and alt for air spawn
 
-							if flight[f].client then
-								print("w "..tostring(w).." "..flight[f].type.." "..flight[f].name)
+							-- if flight[f].client then
+							-- 	print("w "..tostring(w).." "..flight[f].type.." "..flight[f].name)
 
-								print("AtoT Alert SPAWNING "..tostring(dist).." "..tostring(GetDistance(flight[f].route[w], flight[f].route[w + 1])))
+							-- 	print("AtoT Alert SPAWNING "..tostring(dist).." "..tostring(GetDistance(flight[f].route[w], flight[f].route[w + 1])))
 
-							end
+							-- end
 
 							flight[f].route[w].id = "Spawn"
 							flight[f].route[w].name = "Create Spawn Wp in AtoTiming "..tostring(debug.getinfo(1).currentline)

@@ -45,6 +45,11 @@ versionDCE["UTIL_Data.lua"] = "1.14.86"
 -- 	["JF-17"] = true,
 -- }
 
+-- À la louche je pencherais plutôt pour : 
+-- 75% à 10000m pour l’EA-6B
+-- 50% à 4000m pour le F-105G
+-- 40% à 2000m pour le B-52
+
 AFAC = "AFAC"
 CAS = "CAS"
 AntishipStrike = "Antiship Strike"
@@ -145,12 +150,12 @@ TaskByPlane = {
 
 		["F-86F Sabre"] = true,
 		["F-4E"] = true,
-		["F-4E-45MC"] = true,
+		-- ["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
 		["vwv_ra-5"] = true,		--Mod
-		["F-14A-135-GR"] = true,
-		["F-14B"] = true,
+		-- ["F-14A-135-GR"] = true,
+		-- ["F-14B"] = true,
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
@@ -246,7 +251,7 @@ TaskByPlane = {
 
 
 	["AFAC"] = {
-		["F-4E-45MC"] = true,
+		-- ["F-4E-45MC"] = true,
 		["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
@@ -357,10 +362,10 @@ TaskByPlane = {
 		["F-86F Sabre"] = true,
 
 		["F-4E"] = true,
-		["F-4E-45MC"] = true,
+		-- ["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
-		["F-14B"] = true,
-		["F-14A-135-GR"] = true,
+		-- ["F-14B"] = true,
+		-- ["F-14A-135-GR"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
 		["F-16C_50"] = true,
@@ -444,10 +449,10 @@ TaskByPlane = {
 		["F-86F Sabre"] = true,
 
 		["F-4E"] = true,
-		["F-4E-45MC"] = true,
+		-- ["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
-		["F-14A-135-GR"] = true,
-		["F-14B"] = true,
+		-- ["F-14A-135-GR"] = true,
+		-- ["F-14B"] = true,
 		["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
 		["FA-18C_hornet"] = true,
@@ -539,10 +544,10 @@ TaskByPlane = {
 		["F-86F Sabre"] = true,
 
 		["F-4E"] = true,
-		["F-4E-45MC"] = true,
+		-- ["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
-		["F-14A-135-GR"] = true,
-		["F-14B"] = true,
+		-- ["F-14A-135-GR"] = true,
+		-- ["F-14B"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
 		["F-16C_50"] = true,
@@ -634,8 +639,8 @@ TaskByPlane = {
 		["H-6J"] = true,
 		["tu_22D"] = true,					--Mod
 
-		["F-14A-135-GR"] = true,
-		["F-14B"] = true,
+		-- ["F-14A-135-GR"] = true,
+		-- ["F-14B"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
 		["F-16C_50"] = true,
@@ -692,11 +697,11 @@ TaskByPlane = {
 
 		["F-86F Sabre"] = true,
 		["F-4E"] = true,
-		["F-4E-45MC"] = true,
+		-- ["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
-		["F-14A-135-GR"] = true,
-		["F-14B"] = true,
+		-- ["F-14A-135-GR"] = true,
+		-- ["F-14B"] = true,
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
@@ -754,10 +759,10 @@ TaskByPlane = {
 		["tu_22D"] = true,				--Mod
 
 		["F-4E"] = true,
-		["F-4E-45MC"] = true,
+		-- ["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
-		["F-14A-135-GR"] = true,
-		["F-14B"] = true,
+		-- ["F-14A-135-GR"] = true,
+		-- ["F-14B"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
 		["F-16C_50"] = true,
@@ -803,11 +808,11 @@ TaskByPlane = {
 
 		["AV8BNA"] = true,
 		["F-4E"] = true,
-		["F-4E-45MC"] = true,
+		-- ["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
-		["F-14A-135-GR"] = true,
-		["F-14B"] = true,
+		-- ["F-14A-135-GR"] = true,
+		-- ["F-14B"] = true,
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
@@ -863,11 +868,11 @@ TaskByPlane = {
 		["F-86F Sabre"] = true,
 
 		["F-4E"] = true,
-		["F-4E-45MC"] = true,
+		-- ["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
-		["F-14A-135-GR"] = true,
-		["F-14B"] = true,
+		-- ["F-14A-135-GR"] = true,
+		-- ["F-14B"] = true,
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
@@ -926,11 +931,11 @@ TaskByPlane = {
 
 		["AV8BNA"] = true,
 		["F-4E"] = true,
-		["F-4E-45MC"] = true,
+		-- ["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
-		["F-14A-135-GR"] = true,
-		["F-14B"] = true,
+		-- ["F-14A-135-GR"] = true,
+		-- ["F-14B"] = true,
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
@@ -973,7 +978,7 @@ TaskByPlane = {
 		["A-4E-C"] = true,				--Mod
 		["AJS37"] = true,
 		["F-4E"] = true,
-		["F-4E-45MC"] = true,
+		-- ["F-4E-45MC"] = true,
 		["vwv_crusader"] = true,		--Mod
 		["vwv_ra-5"] = true,		--Mod
 		["F-15E"] = true,
@@ -1026,7 +1031,7 @@ TaskByPlane = {
 
 		["AV8BNA"] = true,
 		["F-4E"] = true,
-		["F-4E-45MC"] = true,
+		-- ["F-4E-45MC"] = true,
 		["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
 		["FA-18C_hornet"] = true,
@@ -1207,6 +1212,11 @@ Data_divers = {
 		requiredModules = true,						--itsModule
 		vCruise = 216,
 		hCruise = 10670,
+		jammer = {
+			type = "AN/ALQ-99",
+			efficiency = 95,
+			range = 10000,
+		}
 	},
 
 	["VSN_F100"] = 	{				--Mod
@@ -1254,6 +1264,12 @@ Data_divers = {
 			aircraft_task(AntishipStrike),
 	  },	
 		playable = true,
+		jammer = {
+			type = "AN/ALQ-71",
+			efficiency = 90,
+			range = 4000,
+			power = 90,
+		}
 	},
 
 	["Bronco-OV-10A"] = 	{				--Mod
@@ -1287,6 +1303,11 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		laserDesignator = false,
 		moduleName = "tetet_ra5",
+		jammer = {
+			type = "AN/ALQ-100",
+			efficiency = 86,
+			range = 2000,
+		}
 	},
 
 	["vwv_crusader"] = 	{				--Mod
@@ -1589,6 +1610,11 @@ Data_divers = {
 		vCruise = 250,
 		hCruise = 12000,
 		heavyBomber = true,
+		jammer = {
+			type = "AN/ALT-22",
+			efficiency = 86,
+			range = 2000,
+		}
 	},
 	["H-6J"] = 	{
 		instrumentUnits = "metric",

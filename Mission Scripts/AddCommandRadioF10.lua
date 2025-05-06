@@ -62,6 +62,7 @@ SumSoldierAliasPilot = 0
 CustomLog = {}
 zoneSAR = {}								--table enumérant les helico SAR pour eviter d'en envoyer plusieurs aux memes endroits
 EjectedPilotOnBoard = {}
+LastInjecAFAC = {}					--garde les derniers plan de vol injecté
 
 coalitionId = {
 	["0"] = "neutral",
@@ -2731,7 +2732,6 @@ local function EWR_magic()
 
 						if target then
 							objCat = Object.getCategory(target)
-							-- env.info("DCE_EventsTracker Object Category "..tostring(objCat).." _: "..tostring(Object_Category[objCat]))
 						end
 
 
@@ -2741,9 +2741,6 @@ local function EWR_magic()
 
 							local desc = target:getDesc()
 							local unitCat = desc.category
-
-							-- env.info("DCE_EventsTracker Unit Category "..tostring(unitCat).." _: "..tostring(Unit_Category[unitCat]))
-
 
 							if unitCat and (unitCat == Unit.Category.AIRPLANE or unitCat == Unit.Category.HELICOPTER) then
 
@@ -2984,8 +2981,19 @@ local function EWR_magic()
 							for trackN, target in pairs(targetTracks_km_thisPlayer) do
 								-- Conversion des distances
 								local distanceKm = math.floor(target.distance / 1000) -- En kilomètres
-								local distanceNm = roundTo2NmUp(target.distance / 1852) -- En miles nautiques, arrondi à 2 Nm près
-								local altitudeFt = math.floor((target.point.y * 3.281) / 1000) * 1000 -- Altitude en pieds
+								local displayDistance, displayAltitude, displayDistUnit, displayAltUnit
+
+								if camp.unitSystem and camp.unitSystem == "metric" then
+									displayDistance = math.ceil(target.distance / 4000) * 4000 -- En mètres, arrondi à 4 km près
+									displayAltitude = math.ceil(target.point.y / 1000) * 1000 -- Altitude en mètres, arrondi à 1000m
+									displayDistUnit = "m"
+									displayAltUnit = "m"
+								else
+									displayDistance = roundTo2NmUp(target.distance / 1852) -- En miles nautiques, arrondi à 2 Nm près
+									displayAltitude = math.floor((target.point.y * 3.281) / 1000) * 1000 -- Altitude en pieds	
+									displayDistUnit = "NM"
+									displayAltUnit = "ft"
+								end
 
 
 								-- Calcul du bearing
@@ -3024,7 +3032,7 @@ local function EWR_magic()
 									if (distanceKm > 2 and distanceKm <= 150) or (distanceKm <= 2 and sideIFF == "ENEMY" ) then
 
 										-- local freq = camp.EWR_frequency[coalitionIdNumeric[sideNum]][1]
-										local speak = target.qte.." "..sideIFF.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft"
+										local speak = target.qte.." "..sideIFF.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(displayDistance).." "..displayDistUnit.." | Altitude: "..tostring(displayAltitude).." "..displayAltUnit
 
 										timer.scheduleFunction(EWR_speaking, {playerId, speak}, timer.getTime() + (i*3))
 										-- timer.scheduleFunction(sendTTSMessage, {freq, "AM", speak}, timer.getTime() + (i*2))
@@ -3037,7 +3045,7 @@ local function EWR_magic()
 									-- Affichage si la distance est dans les limites
 									if (distanceKm > 2 and distanceKm <= 150) or (distanceKm <= 2 and sideIFF == "ENEMY" ) then
 										-- local freq = camp.EWR_frequency[coalitionIdNumeric[sideNum]][1]
-										local speak = target.qte.." "..sideIFF.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(distanceNm).." NM | Altitude: "..tostring(altitudeFt).." ft"
+										local speak = target.qte.." "..sideIFF.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(displayDistance).." "..displayDistUnit.." | Altitude: "..tostring(displayAltitude).." "..displayAltUnit
 
 										local annonce = {
 											distanceKm = distanceKm,
