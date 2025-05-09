@@ -4051,29 +4051,118 @@ end
 
 
 	--sort() trie la table alpha en fonction du priority
-function TargetlistToNum()
+function TargetlistToNum(tableWorking)
 	local targetlistTempB = {}
 
-	for target_name, target in pairs(targetlist["blue"]) do
+	for target_name, target in pairs(tableWorking["blue"]) do
 		target.titleName = target_name
 		if not target.name then target.name = target_name end
 		-- print("UtilFct titleName "..tostring(target.titleName))
 		table.insert(targetlistTempB, target)
 	end
 	table.sort(targetlistTempB,  function(a,b)  return a.priority > b.priority  end)
-	targetlist["blue"] = targetlistTempB
+	tableWorking["blue"] = targetlistTempB
 
-	local targetlistTempB = {}
-	for target_name, target in pairs(targetlist["red"]) do
+	targetlistTempB = {}
+	for target_name, target in pairs(tableWorking["red"]) do
 		target.titleName = target_name
 		if not target.name then target.name = target_name end
 		-- print("UtilFct titleName "..tostring(target.titleName))
 		table.insert(targetlistTempB, target)
 	end
 	table.sort(targetlistTempB,  function(a,b)  return a.priority > b.priority  end)
-	targetlist["red"] = targetlistTempB
+	tableWorking["red"] = targetlistTempB
 
 end
+
+function CompareTargetLists(reference, working)
+    local changes = {
+        added = {},    -- Éléments ajoutés
+        removed = {},  -- Éléments supprimés
+    }
+
+    -- Parcourir les éléments de la table de référence pour détecter les suppressions
+    for side, targets in pairs(reference) do
+        for targetName, targetData in pairs(targets) do
+            if not working[side] or not working[side][targetName] then
+ 				-- Si l'élément n'existe pas dans la table de référence, il a été ajouté
+				changes.added[#changes.added + 1] = { side = side, name = targetData.name }
+            end
+        end
+    end
+
+    -- Parcourir les éléments de la table de travail pour détecter les ajouts
+    for side, targets in pairs(working) do
+        for targetName, targetData in pairs(targets) do
+            if not reference[side] or not reference[side][targetName] then
+               
+				-- Si l'élément n'existe pas dans la table de travail, il a été supprimé
+				changes.removed[#changes.removed + 1] = { side = side, name = targetData.name }
+            end
+        end
+    end
+
+    return changes
+end
+
+function CompareTableAlphaNumeric(reference, working)
+    local changes = {
+        added = {},    -- Éléments ajoutés
+        removed = {},  -- Éléments supprimés
+    }
+
+    -- Parcourir les éléments de la table de référence pour détecter les ajouts
+    for refIndex, refData in ipairs(reference) do
+        local found = false
+        for workIndex, workData in ipairs(working) do
+            if refData.name == workData.name then
+                found = true
+                break
+            end
+        end
+        if not found then
+            -- Si l'élément n'existe pas dans la table de travail, il a été ajouté
+            table.insert(changes.added, refData)
+        end
+    end
+
+    -- Parcourir les éléments de la table de travail pour détecter les suppressions
+    for workIndex, workData in ipairs(working) do
+        local found = false
+        for refIndex, refData in ipairs(reference) do
+            if workData.name == refData.name then
+                found = true
+                break
+            end
+        end
+        if not found then
+            -- Si l'élément n'existe pas dans la table de référence, il a été supprimé
+            table.insert(changes.removed, workData)
+        end
+    end
+
+    return changes
+end
+
+-- -- Fonction utilitaire pour comparer deux tables
+-- function CompareTables(t1, t2)
+--     if t1 == t2 then return true end
+--     if type(t1) ~= "table" or type(t2) ~= "table" then return false end
+
+--     for k, v in pairs(t1) do
+--         if type(v) == "table" then
+--             if not CompareTables(v, t2[k]) then return false end
+--         else
+--             if v ~= t2[k] then return false end
+--         end
+--     end
+
+--     for k, v in pairs(t2) do
+--         if t1[k] == nil then return false end
+--     end
+
+--     return true
+-- end
 
 
 function ListSpotterAircraft()

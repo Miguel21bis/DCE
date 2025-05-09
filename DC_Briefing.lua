@@ -904,29 +904,53 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 								s = s .. "\n"
 
-								for elementN, element in pairs(target.elements) do						--list all target elements
-									local ename = element.name			--element name
-									local i = string.find(ename, "#")													--position of # in string
-									if i then
-										if element.type then
-											ename = element.type
+								if #target.elements < 10 then
+									for elementN, element in pairs(target.elements) do						--list all target elements
+										local ename = element.name			--element name
+										local i = string.find(ename, "#")													--position of # in string
+										if i then
+											if element.type then
+												ename = element.type
+											else
+												ename = string.sub(ename, 0, i - 1) 											--only display part of element name before #
+											end
+										end
+										s = s .. "- " .. ename
+										if element.dead == true then			--if the target element is destroyed
+											s = s .. " (destroyed)\n"														--mark as destroyed and make new line
 										else
-											ename = string.sub(ename, 0, i - 1) 											--only display part of element name before #
+											if element.lat and element.lon and attributMaster ~= "soft"  then
+
+												local dms_string =  " " ..Format_dms(element.lat, element.lon, precisionGPS)
+
+												s = s ..dms_string
+
+											end
+											s = s .. "\n"
 										end
 									end
-									s = s .. "- " .. ename
-									if element.dead == true then			--if the target element is destroyed
-										s = s .. " (destroyed)\n"														--mark as destroyed and make new line
-									else
-										if element.lat and element.lon and attributMaster ~= "soft"  then
+								else
+									local listType = {}															--list of types of target elements
+									for elementN, element in pairs(target.elements) do
+										
+										if element.type and not element.dead then
 
-											local dms_string =  " " ..Format_dms(element.lat, element.lon, precisionGPS)
-
-											s = s ..dms_string
-
+											local aliasType = ReplaceTypeName(element.type)
+											
+											if listType[aliasType] then
+												listType[aliasType] = listType[aliasType] + 1
+											else
+												listType[aliasType] = 1
+											end
 										end
-										s = s .. "\n"																	--make new line
 									end
+									
+									for type, nb in pairs(listType) do
+											
+										s = s .. "- " .. type .. "\t(" .. nb .. ")\n"
+										
+									end
+									s = s .. "\n"
 								end
 							end
 						end

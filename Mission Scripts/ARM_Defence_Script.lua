@@ -25,7 +25,7 @@ local jammers = {}
 local function makeExplosion(posMissile)
 
 	trigger.action.explosion(posMissile, 100)
-	env.info("ARM_Jammer D Missile explosion !")
+	-- env.info("ARM_Jammer D Missile explosion !")
 	-- trigger.action.outText("ARM_Jammer Missile explosion", 20)
 
 end
@@ -38,7 +38,7 @@ local function missileDisappearTimer(missile)
 
 		timer.scheduleFunction(makeExplosion, posMissile, timer.getTime() + 0.3)
 
-		env.info("ARM_Jammer C Missile disparait proche du Jammer !")
+		-- env.info("ARM_Jammer C Missile disparait proche du Jammer !")
 		-- trigger.action.outText("Missile détruit proche du Jammer", 20)
 	end
 end
@@ -95,10 +95,10 @@ local function checkMissileProximity()
 
 							timer.scheduleFunction(missileDisappearTimer, missile, timer.getTime() + deltaTime)
 
-							env.info("ARM_Jammer B6 Missile sera détruit dans "..tostring(deltaTime))
+							env.info("ARM_Jammer B6 Missile sera détruit dans "..tostring(deltaTime).." valueRandom: "..tostring(valueRandom).." <=jammer.efficiency: "..tostring(jammer.efficiency))
 							-- trigger.action.outText("ARM_Jammer Missile sera détruit dans "..tostring(deltaTime), 20)
 						else
-							env.info("ARM_Jammer B7 Missile ira au BUT !")
+							env.info("ARM_Jammer B7 Missile ira au BUT ! ".." valueRandom: "..tostring(valueRandom).." <=jammer.efficiency: "..tostring(jammer.efficiency))
 							-- trigger.action.outText("Missile ira au BUT", 20)
 						end
 

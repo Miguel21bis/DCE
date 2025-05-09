@@ -72,9 +72,76 @@ end
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
+
+--pour comparer
+dofile("Init/targetlist_init.lua")
+local targetlist_init = targetlist
+if not targetlist_init.blue[1] then
+	TargetlistToNum(targetlist_init)
+end
+
 dofile("Active/targetlist.lua")
+if not targetlist.blue[1] then
+	TargetlistToNum(targetlist)
+end
+
+local changes = CompareTargetLists(targetlist_init, targetlist)
+
+		-- print("\nAdded targets:")
+		-- for _, added in ipairs(changes.added) do
+		-- 	print("Side:", added.side, "Name:", added.name)
+		-- end
+
+		-- print("\nRemoved targets:")
+		-- for _, removed in ipairs(changes.removed) do
+		-- 	print("Side:", removed.side, "Name:", removed.name)
+		-- end
+
+		-- Ajout des éléments manquants dans targetlist
+		for _, added in ipairs(changes.added) do
+			if not targetlist[added.side] then
+				targetlist[added.side] = {}
+			end
+			-- Insérer l'élément à la fin de la table numérique
+			table.insert(targetlist[added.side], added.data)
+		end
 
 
+-- Charger les fichiers de référence et de travail
+dofile("Init/camp_triggers_init.lua")
+local camp_triggers_init = camp_triggers
+
+dofile("Active/camp_triggers.lua")
+
+-- Comparer les deux tables
+local changes = CompareTableAlphaNumeric(camp_triggers_init, camp_triggers)
+
+-- Afficher les résultats
+print("Added triggers:")
+for _, added in ipairs(changes.added) do
+    print("Name:", added.name)
+end
+
+print("\nRemoved triggers:")
+for _, removed in ipairs(changes.removed) do
+    print("Name:", removed.name)
+end
+
+-- -- Ajouter les éléments manquants dans camp_triggers
+-- for _, added in ipairs(changes.added) do
+--     if not camp_triggers[added.side] then
+--         camp_triggers[added.side] = {}
+--     end
+--     -- Ajouter l'élément manquant
+--     camp_triggers[added.side][added.name] = camp_triggers_init[added.side][added.name]
+-- end
+
+for _, added in ipairs(changes.added) do
+    table.insert(camp_triggers, added)
+end
+
+
+		
 -- Exécution du fichier s'il existe
 local testFile = "Init/various_table.lua"
 if FileExists(testFile) then
@@ -100,9 +167,9 @@ else
 	end
 end
 
-if not targetlist.blue[1] then
-	TargetlistToNum()
-end
+-- if not targetlist.blue[1] then
+-- 	TargetlistToNum(targetlist)
+-- end
 
 
 for planeType, value in PairsByKeys(Data_divers) do
@@ -228,100 +295,6 @@ if input == "y" or input == "yes" then
 
 			if choix1 == "n" or  choix1 == "t"  then
 				if choix1 == "t"  then
-
-					--[[
-					--===================================================================================
-					-- Ecran N°2 Selection du Target	
-					print("choose a Single target")
-
-					local tabIndex = {}
-					-- for side, Targetlist in PairsByKeys(tableTargetlist) do
-					for side, targetSide in pairs(targetlist) do
-						-- local j = 1
-						local Ckey = 0
-						print() print(side..":")
-						for key, target in ipairs(targetSide) do
-							if target.inactive ~= true 
-							and target.ATO 
-							and ( string.find(target.task, "Strike") or target.task == "Runway Attack" or target.task == "CSAR")
-							and target.type ~= "Ejected Pilot"
-							then
-								if side == "red" then
-									Ckey = key + #targetlist["blue"]															--permet de n'afficher qu'un nombre continue pour les 2 camps
-								else
-									Ckey = key
-								end
-								io.write(  Ckey.." "..side.." "..tostring(target.titleName) .."  "..tostring(target.alive).." %  X"..tostring(target.priority).."\n")
-								if not tabIndex[Ckey]  then tabIndex[Ckey] = {} end
-								tabIndex[Ckey]["side"] = side
-								-- j = j+1
-							end
-						end
-						
-						io.write(  " A: "..side.." All ejected pilots ".."\n")
-						
-					end
-
-
-					input = io.stdin:read()
-
-					if string.lower(input) == "a" then
-						for side, targetSide in pairs(targetlist) do
-							-- local j = 1
-							local Ckey = 0
-							print() print(side..":")
-							for key, target in ipairs(targetSide) do
-								if target.inactive ~= true 
-								and target.ATO 
-								and (  target.task == "CSAR")
-								and target.type == "Ejected Pilot"
-								then
-									if side == "red" then
-										Ckey = key + #targetlist["blue"]															--permet de n'afficher qu'un nombre continue pour les 2 camps
-									else
-										Ckey = key
-									end
-									io.write(  Ckey.." "..side.." "..tostring(target.titleName) .."  "..tostring(target.alive).." %  X"..tostring(target.priority).."\n")
-									if not tabIndex[Ckey]  then tabIndex[Ckey] = {} end
-									tabIndex[Ckey]["side"] = side
-									-- j = j+1
-								end
-							end							
-						end
-
-					else
-
-						repeat
-						
-							input = tonumber(io.stdin:read())
-							
-							if (input == nil or input == "") then input = 999 end
-							if input >  #targetlist["blue"] then
-								Ckey = input - #targetlist["blue"]
-							else
-								Ckey = input
-							end
-							if  tabIndex[input] then
-								local side = tabIndex[input]["side"]
-								if not Multi.Target then Multi.Target = {} end
-								if not Multi.Target[side] then Multi.Target[side]= {} end
-								Multi.Target[side] = targetlist[side][Ckey].titleName
-								print("\n"..targetlist[side][Ckey].titleName.."\n")
-							else
-								print("\nInvalid entry.\n")
-							end
-						until  tabIndex[input]
-					end
-
-
-
-					io.write( "\n")
-				end	--if choix1 == "t"  then
-					]]--
-
-
-				
-					-- local tabIndex = {}
 
 					-- Fonction pour afficher le menu de sélection du camp
 					local function selectCamp()

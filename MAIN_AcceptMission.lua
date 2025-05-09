@@ -235,3 +235,11 @@ local ZoneSAR_str = "camp_ZoneSAR = " .. TableSerialization(camp_ZoneSAR, 0)				
 local ZoneSARFile = io.open("Active/camp_ZoneSAR.lua", "w")	 or error("Failed to open debug file")
 ZoneSARFile:write(ZoneSAR_str)																	--save new data
 ZoneSARFile:close()
+
+if TypeAlias then
+	local _str = "TypeAlias = " .. TableSerialization(TypeAlias, 0)
+	local _file = io.open("Active/alias.lua", "w") or error("Failed to open debug file")
+	_file:write(_str)
+	_file:close()
+end
+

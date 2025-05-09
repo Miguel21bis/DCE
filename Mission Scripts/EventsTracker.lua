@@ -170,7 +170,7 @@ local function addHit1s(hitTemp)
 		x = hitTemp.x,
 		y = hitTemp.y,
 		z = hitTemp.z,
-		-- description = hitTemp.description,	--tooHeavy
+		description = hitTemp.description,	--tooHeavy
 		event = hitTemp.event,
 		explosiveMass = hitTemp.explosiveMass,
 		displayName = hitTemp.displayName,
@@ -244,6 +244,7 @@ function eventHandlerDCE:onEvent(event)
 	else
 		-- env.info( "EventT PASSE 00a event INCONNU, id: "..tostring(event.id))
 		-- _affiche(event, "EventT  PASSE 00b event INCONNU")
+		
 	end
 
 	--https://flightcontrol-master.github.io/MOOSE_DOCS_DEVELOP/Documentation/DCS.html
@@ -320,6 +321,12 @@ function eventHandlerDCE:onEvent(event)
 
 			if Info_event[tonumber(event.id)] then
 				local idLabel = tostring(Info_event[tonumber(event.id)])
+
+				if not log_entry.type then
+					log_entry.type = idLabel
+				end
+				
+
 				if camp.debug then
 					-- env.info("DCE_EventsTracker event.id "..tostring(event.id).." " ..idLabel)
 

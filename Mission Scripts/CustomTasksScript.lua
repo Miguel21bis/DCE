@@ -1865,7 +1865,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	if varFpsLeak then return end
 
 	if LastInjecAFAC[afacFlightName] and LastInjecAFAC[afacFlightName] < timer.getTime() + 30 then
-		env.info("DCE_CustomDesignationAFAC() AFAC 00 BUG RETURN : "..tostring(afacFlightName).." LastInjecAFAC: "..tostring(LastInjecAFAC[afacFlightName]))
+		env.info("DCE_CustomDesignationAFAC() DCE_ERROR AFAC 00 BUG RETURN : "..tostring(afacFlightName).." LastInjecAFAC: "..tostring(LastInjecAFAC[afacFlightName]))
 		return
 	end
 
