@@ -4095,10 +4095,49 @@ function CompareTargetLists(reference, working)
     for side, targets in pairs(working) do
         for targetName, targetData in pairs(targets) do
             if not reference[side] or not reference[side][targetName] then
-               
+
 				-- Si l'élément n'existe pas dans la table de travail, il a été supprimé
 				changes.removed[#changes.removed + 1] = { side = side, name = targetData.name }
             end
+        end
+    end
+
+    return changes
+end
+
+function CompareTableNumeric(reference, working)
+    local changes = {
+        added = {},    -- Éléments ajoutés
+        removed = {},  -- Éléments supprimés
+    }
+
+    -- Parcourir les éléments de la table de référence pour détecter les ajouts
+    for refName, refData in ipairs(reference) do
+        local found = false
+        for workName, workData in ipairs(working) do
+            if refName == workName then
+                found = true
+                break
+            end
+        end
+        if not found then
+            -- Si l'élément n'existe pas dans la table de travail, il a été ajouté
+            table.insert(changes.added, refData)
+        end
+    end
+
+    -- Parcourir les éléments de la table de travail pour détecter les suppressions
+    for workName, workData in ipairs(working) do
+        local found = false
+        for refName, refData in ipairs(reference) do
+            if workName == refName then
+                found = true
+                break
+            end
+        end
+        if not found then
+            -- Si l'élément n'existe pas dans la table de référence, il a été supprimé
+            table.insert(changes.removed, workData)
         end
     end
 
@@ -4112,32 +4151,32 @@ function CompareTableAlphaNumeric(reference, working)
     }
 
     -- Parcourir les éléments de la table de référence pour détecter les ajouts
-    for refIndex, refData in ipairs(reference) do
+    for refKey, refData in pairs(reference) do
         local found = false
-        for workIndex, workData in ipairs(working) do
-            if refData.name == workData.name then
+        for workKey, workData in pairs(working) do
+            if refKey == workKey then
                 found = true
                 break
             end
         end
         if not found then
             -- Si l'élément n'existe pas dans la table de travail, il a été ajouté
-            table.insert(changes.added, refData)
+            table.insert(changes.added, { name = refKey, data = refData })
         end
     end
 
     -- Parcourir les éléments de la table de travail pour détecter les suppressions
-    for workIndex, workData in ipairs(working) do
+    for workKey, workData in pairs(working) do
         local found = false
-        for refIndex, refData in ipairs(reference) do
-            if workData.name == refData.name then
+        for refKey, refData in pairs(reference) do
+            if workKey == refKey then
                 found = true
                 break
             end
         end
         if not found then
             -- Si l'élément n'existe pas dans la table de référence, il a été supprimé
-            table.insert(changes.removed, workData)
+            table.insert(changes.removed, { name = workKey, data = workData })
         end
     end
 

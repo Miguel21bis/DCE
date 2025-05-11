@@ -101,30 +101,30 @@ else
 	end
 end
 
-local db_airbasesFile = "Active/db_airbases.lua"
-testPath = io.open(db_airbasesFile, "r")																--cette maniere de chercher la presence d un fichier evite un plantage
-if testPath ~= nil then																					--check si le fichier existe dans ScriptsMod
-	io.close(testPath)
-	-- dofile("Active/db_airbases.lua")
-else
-	local db_airbasesFile2 = "Init/db_airbases.lua"
-	local testPath2 = io.open(db_airbasesFile2, "r")
-	if not testPath2 then																			--check si le fichier exist dans le dossier campagne
-		io.close(testPath2)
-		dofile(db_airbasesFile2)
-		--creer le fichier db_airbases dans Active, meme en cours de campagne, pour garder la retrocompatibilite
-		print("MainA create copie db_airbase from Init")
-		local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
-		local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
-		trigFile:write(airbases_Str)
-		trigFile:close()
-	end
-end
+-- local db_airbasesFile = "Active/db_airbases.lua"
+-- testPath = io.open(db_airbasesFile, "r")																--cette maniere de chercher la presence d un fichier evite un plantage
+-- if testPath ~= nil then																					--check si le fichier existe dans ScriptsMod
+-- 	io.close(testPath)
+-- 	-- dofile("Active/db_airbases.lua")
+-- else
+-- 	local db_airbasesFile2 = "Init/db_airbases.lua"
+-- 	local testPath2 = io.open(db_airbasesFile2, "r")
+-- 	if not testPath2 then																			--check si le fichier exist dans le dossier campagne
+-- 		io.close(testPath2)
+-- 		dofile(db_airbasesFile2)
+-- 		--creer le fichier db_airbases dans Active, meme en cours de campagne, pour garder la retrocompatibilite
+-- 		print("MainA create copie db_airbase from Init")
+-- 		local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
+-- 		local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
+-- 		trigFile:write(airbases_Str)
+-- 		trigFile:close()
+-- 	end
+-- end
 
 
 -- require("Active/targetlist")
 if not targetlist.blue[1] then
-	TargetlistToNum()
+	TargetlistToNum(targetlist)
 end
 
 require("Active/camp_triggers")

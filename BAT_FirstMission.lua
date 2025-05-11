@@ -100,7 +100,7 @@ end
 
 
 if not targetlist.blue[1] then
-	TargetlistToNum()
+	TargetlistToNum(targetlist)
 end
 
 for planeType, value in PairsByKeys(Data_divers) do

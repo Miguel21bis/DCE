@@ -73,7 +73,11 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 
---pour comparer
+
+--****************************************************************************************
+--ajout automatique d'elements en cours de campagne: START
+--****************************************************************************************
+--********************************* targetlist ******************************************************
 dofile("Init/targetlist_init.lua")
 local targetlist_init = targetlist
 if not targetlist_init.blue[1] then
@@ -87,26 +91,36 @@ end
 
 local changes = CompareTargetLists(targetlist_init, targetlist)
 
-		-- print("\nAdded targets:")
-		-- for _, added in ipairs(changes.added) do
-		-- 	print("Side:", added.side, "Name:", added.name)
-		-- end
+-- Afficher les résultats
+for _, added in ipairs(changes.added) do
+	print("Added TargetList: Name:", added.name)
+end
+for _, removed in ipairs(changes.removed) do
+	print("Removed TargetList: Name:", removed.name)
+end
 
-		-- print("\nRemoved targets:")
-		-- for _, removed in ipairs(changes.removed) do
-		-- 	print("Side:", removed.side, "Name:", removed.name)
-		-- end
+-- Ajout des éléments manquants dans targetlist
+for _, added in ipairs(changes.added) do
+	if not targetlist[added.side] then
+		targetlist[added.side] = {}
+	end
+	-- Insérer l'élément à la fin de la table numérique
+	table.insert(targetlist[added.side], added.data)
+end
 
-		-- Ajout des éléments manquants dans targetlist
-		for _, added in ipairs(changes.added) do
-			if not targetlist[added.side] then
-				targetlist[added.side] = {}
+-- Suppression des éléments retirés de targetlist
+for _, removed in ipairs(changes.removed) do
+	if targetlist[removed.side] then
+		for i, target in ipairs(targetlist[removed.side]) do
+			if target.name == removed.name then
+				table.remove(targetlist[removed.side], i)
+				break
 			end
-			-- Insérer l'élément à la fin de la table numérique
-			table.insert(targetlist[added.side], added.data)
 		end
+	end
+end
 
-
+--********************************* camp_triggers ******************************************************
 -- Charger les fichiers de référence et de travail
 dofile("Init/camp_triggers_init.lua")
 local camp_triggers_init = camp_triggers
@@ -114,31 +128,62 @@ local camp_triggers_init = camp_triggers
 dofile("Active/camp_triggers.lua")
 
 -- Comparer les deux tables
-local changes = CompareTableAlphaNumeric(camp_triggers_init, camp_triggers)
+changes = CompareTableNumeric(camp_triggers_init, camp_triggers)
 
 -- Afficher les résultats
-print("Added triggers:")
 for _, added in ipairs(changes.added) do
-    print("Name:", added.name)
+	print("Added triggers: Name:", added.name)
 end
-
-print("\nRemoved triggers:")
 for _, removed in ipairs(changes.removed) do
-    print("Name:", removed.name)
+	print("Removed triggers: Name:", removed.name)
 end
 
--- -- Ajouter les éléments manquants dans camp_triggers
--- for _, added in ipairs(changes.added) do
---     if not camp_triggers[added.side] then
---         camp_triggers[added.side] = {}
---     end
---     -- Ajouter l'élément manquant
---     camp_triggers[added.side][added.name] = camp_triggers_init[added.side][added.name]
--- end
-
+-- Ajouter les éléments manquants dans camp_triggers
 for _, added in ipairs(changes.added) do
-    table.insert(camp_triggers, added)
+	table.insert(camp_triggers, added)
 end
+-- Supprimer les éléments retirés de camp_triggers
+for _, removed in ipairs(changes.removed) do
+	for i, trigger in ipairs(camp_triggers) do
+		if trigger.name == removed.name then
+			table.remove(camp_triggers, i)
+			break
+		end
+	end
+end
+
+
+
+--********************************* db_airbases ******************************************************
+-- Charger les fichiers de référence et de travail
+dofile("Init/db_airbases.lua")
+local db_airbases_init = db_airbases
+
+dofile("Active/db_airbases.lua")
+
+-- Comparer les deux tables
+changes = CompareTableAlphaNumeric(db_airbases_init, db_airbases)
+
+-- Afficher les résultats
+for _, added in ipairs(changes.added) do
+    print("\nAdded db_airbases Name:", added.name)
+end
+for _, removed in ipairs(changes.removed) do
+    print("\nRemoved db_airbases: Name:", removed.name)
+end
+
+-- Ajouter les éléments manquants dans db_airbases
+for _, added in ipairs(changes.added) do
+    db_airbases[added.name] = added.data
+end
+-- Supprimer les éléments retirés de db_airbases
+for _, removed in ipairs(changes.removed) do
+    db_airbases[removed.name] = nil
+end
+
+--****************************************************************************************
+--ajout automatique d'elements en cours de campagne: FIN
+--****************************************************************************************
 
 
 		
@@ -148,27 +193,23 @@ if FileExists(testFile) then
     dofile(testFile)
 end
 
-local db_airbasesFile = "Active/db_airbases.lua"
-local testPath = io.open(db_airbasesFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
-if testPath ~= nil then																					--check si le fichier existe dans ScriptsMod
-	io.close(testPath)
-	dofile("Active/db_airbases.lua")
-else
-	local db_airbasesFile2 = "Init/db_airbases.lua"
-	local testPath2 = io.open(db_airbasesFile2, "r")
-	if testPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
-		io.close(testPath2)
-		dofile(db_airbasesFile2)
-		--creer le fichier db_airbases dans Active, meme en cours de campagne, pour garder la retrocompatibilite
-		local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
-		local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open Active/db_airbases.lua file")
-		trigFile:write(airbases_Str)
-		trigFile:close()
-	end
-end
-
--- if not targetlist.blue[1] then
--- 	TargetlistToNum(targetlist)
+-- local db_airbasesFile = "Active/db_airbases.lua"
+-- local testPath = io.open(db_airbasesFile, "r")																--cette maniere de chercher la presence d un fichier evite un plantage
+-- if testPath ~= nil then																					--check si le fichier existe dans ScriptsMod
+-- 	io.close(testPath)
+-- 	dofile("Active/db_airbases.lua")
+-- else
+-- 	local db_airbasesFile2 = "Init/db_airbases.lua"
+-- 	local testPath2 = io.open(db_airbasesFile2, "r")
+-- 	if testPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
+-- 		io.close(testPath2)
+-- 		dofile(db_airbasesFile2)
+-- 		--creer le fichier db_airbases dans Active, meme en cours de campagne, pour garder la retrocompatibilite
+-- 		local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
+-- 		local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open Active/db_airbases.lua file")
+-- 		trigFile:write(airbases_Str)
+-- 		trigFile:close()
+-- 	end
 -- end
 
 
