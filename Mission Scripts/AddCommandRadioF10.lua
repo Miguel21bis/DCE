@@ -3872,7 +3872,7 @@ local function DCE_BulleBy_DE()
 
 	--  **Vérifier et basculer les unités selon leur distance aux avions** 
 	local function updateUnitVisibility()
-		-- env.info("DCE_Bulle -H1- Vérification des distances et basculement des unités...")
+		env.info("DCE_Bulle -H1- Vérification des distances et basculement des unités...")
 
 		local activationN = 0
 		local deActivate = 0
@@ -3885,14 +3885,14 @@ local function DCE_BulleBy_DE()
 
 				if distance < ACTIVATION_DISTANCE then
 					if savedGroups[groupName] then
-						-- env.info("DCE_Bulle -H2- Activation du groupe terrestre : " .. groupName)
+						env.info("DCE_Bulle -H2- Activation du groupe terrestre : " .. groupName)
 						activationN = activationN+1
 						enableGroup(groupData)
 					end
 				else
 					if not groupData.respawnTime or (groupData.respawnTime < timer.getTime() + 900) then
 						if not savedGroups[groupName] then
-							-- env.info("DCE_Bulle -H3- Désactivation du groupe terrestre : " .. groupName)
+							env.info("DCE_Bulle -H3- Désactivation du groupe terrestre : " .. groupName)
 							deActivate = deActivate + 1
 							disableGroup(groupData)
 						end
@@ -3907,13 +3907,13 @@ local function DCE_BulleBy_DE()
 
 			if distance < ACTIVATION_DISTANCE then
 				if savedStatics[staticName] then
-					-- env.info("DCE_Bulle -H4- Activation de l'objet statique : " .. staticName)
+					env.info("DCE_Bulle -H4- Activation de l'objet statique : " .. staticName)
 					activationN = activationN+1
 					enableGroup({ name = staticName }) -- Réactivation
 				end
 			else
 				if not savedStatics[staticName] then
-					-- env.info("DCE_Bulle -H5- Désactivation de l'objet statique : " .. staticName)
+					env.info("DCE_Bulle -H5- Désactivation de l'objet statique : " .. staticName)
 					deActivate = deActivate+1
 					disableGroup({ name = staticName }) -- Désactivation
 				end

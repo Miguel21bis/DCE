@@ -1146,17 +1146,19 @@ function PedroSAR(arg)
 	-- Pedro_CV-59 Forrestal_1
 	-- Unit_Pedro_CV-59 Forrestal_1
 
-	local flightName = "Unit_Pedro_"..tostring(pt_start.name).."_"..tostring(nb)
+	local name = tostring(pt_start.name).."_"..tostring(nb)
+	local unitName = "Unit_Pedro_"..name
+	local groupName = "Group_Pedro_"..name
 
-	env.info("DCE_PedroSAR A flightName: "..tostring(flightName))
+	env.info("DCE_PedroSAR A name: "..tostring(name).." unitName: "..tostring(unitName).." groupName: "..tostring(groupName))
 
 	local current_time = timer.getTime() +1
 	local speed = 75		-- v = m/s 46
 
-	local uPedro = Unit.getByName(flightName)
+	local uPedro = Unit.getByName(unitName)
 
 	if not uPedro then 
-		env.info("DCE_PedroSAR B return flightName: "..tostring(flightName))
+		env.info("DCE_PedroSAR B return name: "..tostring(name))
 		return
 	end
 
@@ -1175,7 +1177,6 @@ function PedroSAR(arg)
 	-- 	destName = pt_dest.name
 	-- end
 
-	local grpname = "Group_"..flightName
 	local route = {}
 	route = {
 			[1] =
@@ -1201,7 +1202,7 @@ function PedroSAR(arg)
 									['action'] = {
 										['id'] = 'Script',
 										['params'] = {
-											["command"] = "Custom_Altitude('" .. grpname .. "',  '  nil  ', '" .."1".. "')",
+											["command"] = "Custom_Altitude('" .. groupName .. "',  '  nil  ', '" .."1".. "')",
 										},
 									},
 								},
@@ -1296,7 +1297,7 @@ function PedroSAR(arg)
 						-- 			["params"] =
 						-- 			{
 						-- 				-- ["command"] = "Custom_RTB_2_Base(\"Group_Pedro_CV-71 Theodore Roosevelt_1\",  \"CV-71 Theodore Roosevelt\",  \"46.25\",  \"60\")",
-						-- 				["command"] = 'Custom_RTB_2_Base("' .. grpname .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
+						-- 				["command"] = 'Custom_RTB_2_Base("' .. groupName .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
 						-- 			}, -- end of ["params"]
 						-- 		}, -- end of ["action"]
 						-- 	}, -- end of ["params"]
@@ -1336,7 +1337,7 @@ function PedroSAR(arg)
 								["id"] = "Script",
 								["params"] =
 								{
-									["command"] = 'Custom_RTB_2_Base("' .. grpname .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
+									["command"] = 'Custom_RTB_2_Base("' .. groupName .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
 								},
 							},
 						},
@@ -1376,7 +1377,7 @@ function PedroSAR(arg)
 								["id"] = "Script",
 								["params"] =
 								{
-									["command"] = 'Custom_RTB_2_Base("' .. grpname .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
+									["command"] = 'Custom_RTB_2_Base("' .. groupName .. '",  "' .. pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
 								},
 							},
 						},
@@ -1406,7 +1407,7 @@ function PedroSAR(arg)
 		}
 	}
 
-	local ctr = Group.getByName("Group_"..flightName):getController()
+	local ctr = Group.getByName(groupName):getController()
 
 	ctr:resetTask()
 	ctr:setTask(mission)
