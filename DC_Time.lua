@@ -58,15 +58,18 @@ if AcceptedMission and MissionInstance < 2 then
 	-- Modification M25.b OnlyDayMission
 	if mission_ini.onlyDayMission then
 		-- Définir les heures de tolérance pour les missions de jour
-		local HTdawn = mission_ini.dawn - (86400 * (mission_ini.hourlyTolerance / 100))
-		local HTdusk = mission_ini.dusk + (86400 * (mission_ini.hourlyTolerance / 100))
+		local ht_dawn = mission_ini.dawn - (86400 * (mission_ini.hourlyTolerance / 100))
+		local ht_dusk = mission_ini.dusk + (86400 * (mission_ini.hourlyTolerance / 100))
 		local tempTime = Deepcopy(camp.time)
 
 		-- Ajuster le temps jusqu'à la prochaine plage de jour
-		while (tempTime % 86400 < HTdawn or tempTime % 86400 > HTdusk) or (tempTime % 86400 + (mission_ini.mission_duration) < HTdawn or ((tempTime % 86400) + mission_ini.mission_duration > HTdusk)) do
+		while (tempTime % 86400 < ht_dawn or tempTime % 86400 > ht_dusk) or (tempTime % 86400 + (mission_ini.mission_duration) < ht_dawn or ((tempTime % 86400) + mission_ini.mission_duration > ht_dusk)) do
 			overnightTime = overnightTime + 300
 			tempTime = tempTime + 300
 		end
+
+		--ajoute un random de temps pour eviter de toujours commencer au petit matin:
+		tempTime = tempTime + math.random(0, 40000)
 	end
 
 	-- Ajouter addTime à camp.time après tous les ajustements
@@ -111,12 +114,12 @@ else	--si la mission est acceptée, on prend juste les infos sans ajouter de tem
 	-- Modification M25.b OnlyDayMission
 	if mission_ini.onlyDayMission then
 		-- Définir les heures de tolérance pour les missions de jour
-		local HTdawn = mission_ini.dawn - (86400 * (mission_ini.hourlyTolerance / 100))
-		local HTdusk = mission_ini.dusk + (86400 * (mission_ini.hourlyTolerance / 100))
+		local ht_dawn = mission_ini.dawn - (86400 * (mission_ini.hourlyTolerance / 100))
+		local ht_dusk = mission_ini.dusk + (86400 * (mission_ini.hourlyTolerance / 100))
 		local tempTime = Deepcopy(camp.time)
 
 		-- Ajuster le temps jusqu'à la prochaine plage de jour
-		while (tempTime % 86400 < HTdawn or tempTime % 86400 > HTdusk) or (tempTime % 86400 + (mission_ini.mission_duration) < HTdawn or ((tempTime % 86400) + mission_ini.mission_duration > HTdusk)) do
+		while (tempTime % 86400 < ht_dawn or tempTime % 86400 > ht_dusk) or (tempTime % 86400 + (mission_ini.mission_duration) < ht_dawn or ((tempTime % 86400) + mission_ini.mission_duration > ht_dusk)) do
 			overnightTime = overnightTime + 300
 			tempTime = tempTime + 300
 		end

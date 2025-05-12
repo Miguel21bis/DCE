@@ -4083,21 +4083,39 @@ function CompareTargetLists(reference, working)
 
     -- Parcourir les éléments de la table de référence pour détecter les suppressions
     for side, targets in pairs(reference) do
-        for targetName, targetData in pairs(targets) do
-            if not working[side] or not working[side][targetName] then
- 				-- Si l'élément n'existe pas dans la table de référence, il a été ajouté
-				changes.added[#changes.added + 1] = { side = side, name = targetData.name }
+        for refIndex, refData in ipairs(targets) do
+            local found = false
+            if working[side] then
+                for workIndex, workData in ipairs(working[side]) do
+                    if refData.name == workData.name then
+                        found = true
+                        break
+                    end
+                end
+            end
+            if not found then
+				-- Si l'élément n'existe pas dans la table de référence, il a été ajouté
+				table.insert(changes.added, { side = side, data = refData })
+
             end
         end
     end
 
     -- Parcourir les éléments de la table de travail pour détecter les ajouts
     for side, targets in pairs(working) do
-        for targetName, targetData in pairs(targets) do
-            if not reference[side] or not reference[side][targetName] then
-
-				-- Si l'élément n'existe pas dans la table de travail, il a été supprimé
-				changes.removed[#changes.removed + 1] = { side = side, name = targetData.name }
+        for workIndex, workData in ipairs(targets) do
+            local found = false
+            if reference[side] then
+                for refIndex, refData in ipairs(reference[side]) do
+                    if workData.name == refData.name then
+                        found = true
+                        break
+                    end
+                end
+            end
+            if not found then
+                -- Si l'élément n'existe pas dans la table de travail, il a été supprimé
+                table.insert(changes.removed, { side = side, data = workData })
             end
         end
     end

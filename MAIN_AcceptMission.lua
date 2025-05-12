@@ -121,13 +121,123 @@ end
 -- 	end
 -- end
 
+--****************************************************************************************
+--ajout automatique d'elements en cours de campagne: START
+--****************************************************************************************
+--********************************* targetlist ******************************************************
+dofile("Init/targetlist_init.lua")
+local targetlist_init = targetlist
+if not targetlist_init.blue[1] then
+	TargetlistToNum(targetlist_init)
+end
 
--- require("Active/targetlist")
+dofile("Active/targetlist.lua")
 if not targetlist.blue[1] then
 	TargetlistToNum(targetlist)
 end
 
-require("Active/camp_triggers")
+local changes = CompareTargetLists(targetlist_init, targetlist)
+
+-- Afficher les résultats
+for _, added in ipairs(changes.added) do
+	print("Added TargetList: Name:", added.data.name)
+end
+for _, removed in ipairs(changes.removed) do
+	print("Removed TargetList: Name:", removed.data.name)
+end
+
+-- Ajout des éléments manquants dans targetlist
+for _, added in ipairs(changes.added) do
+	if not targetlist[added.side] then
+		targetlist[added.side] = {}
+	end
+	-- Insérer l'élément à la fin de la table numérique
+	table.insert(targetlist[added.side], added.data)
+end
+
+-- -- Suppression des éléments retirés de targetlist
+-- for _, removed in ipairs(changes.removed) do
+-- 	if targetlist[removed.side] then
+-- 		for i, target in ipairs(targetlist[removed.side]) do
+-- 			if target.name == removed.name then
+-- 				table.remove(targetlist[removed.side], i)
+-- 				break
+-- 			end
+-- 		end
+-- 	end
+-- end
+
+--********************************* camp_triggers ******************************************************
+-- Charger les fichiers de référence et de travail
+dofile("Init/camp_triggers_init.lua")
+local camp_triggers_init = camp_triggers
+
+dofile("Active/camp_triggers.lua")
+
+-- Comparer les deux tables
+changes = CompareTableNumeric(camp_triggers_init, camp_triggers)
+
+-- Afficher les résultats
+for _, added in ipairs(changes.added) do
+	print("Added triggers: Name:", added.name)
+end
+for _, removed in ipairs(changes.removed) do
+	print("Removed triggers: Name:", removed.name)
+end
+
+-- Ajouter les éléments manquants dans camp_triggers
+for _, added in ipairs(changes.added) do
+	table.insert(camp_triggers, added)
+end
+-- Supprimer les éléments retirés de camp_triggers
+for _, removed in ipairs(changes.removed) do
+	for i, trigger in ipairs(camp_triggers) do
+		if trigger.name == removed.name then
+			table.remove(camp_triggers, i)
+			break
+		end
+	end
+end
+
+
+
+--********************************* db_airbases ******************************************************
+-- Charger les fichiers de référence et de travail
+dofile("Init/db_airbases.lua")
+local db_airbases_init = db_airbases
+
+dofile("Active/db_airbases.lua")
+
+-- Comparer les deux tables
+changes = CompareTableAlphaNumeric(db_airbases_init, db_airbases)
+
+-- Afficher les résultats
+for _, added in ipairs(changes.added) do
+    print("\nAdded db_airbases Name:", added.name)
+end
+for _, removed in ipairs(changes.removed) do
+    print("\nRemoved db_airbases: Name:", removed.name)
+end
+
+-- Ajouter les éléments manquants dans db_airbases
+for _, added in ipairs(changes.added) do
+    db_airbases[added.name] = added.data
+end
+-- Supprimer les éléments retirés de db_airbases
+for _, removed in ipairs(changes.removed) do
+    db_airbases[removed.name] = nil
+end
+
+--****************************************************************************************
+--ajout automatique d'elements en cours de campagne: FIN
+--****************************************************************************************
+
+-- -- require("Active/targetlist")
+-- if not targetlist.blue[1] then
+-- 	TargetlistToNum(targetlist)
+-- end
+
+-- require("Active/camp_triggers")
 
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Refpoints.lua")			--besoin par NavalEnv
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_MissionScore.lua")

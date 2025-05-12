@@ -45,9 +45,9 @@ else
 
 	GetAllId()
 
-	--TODO attention, surveiller les conséquences de ces lignes plus bas (est-ce que ça double? ou revient à 0?)
-	targetlist = nil
-	dofile("Active/targetlist.lua")
+	-- --TODO attention, surveiller les conséquences de ces lignes plus bas (est-ce que ça double? ou revient à 0?)
+	-- targetlist = nil
+	-- dofile("Active/targetlist.lua")
 
 	clientstats = nil
 	dofile("Active/clientstats.lua")

@@ -79,10 +79,12 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 --****************************************************************************************
 --********************************* targetlist ******************************************************
 dofile("Init/targetlist_init.lua")
-local targetlist_init = targetlist
+local targetlist_init = Deepcopy(targetlist)
 if not targetlist_init.blue[1] then
 	TargetlistToNum(targetlist_init)
 end
+
+targetlist = nil
 
 dofile("Active/targetlist.lua")
 if not targetlist.blue[1] then
@@ -93,10 +95,10 @@ local changes = CompareTargetLists(targetlist_init, targetlist)
 
 -- Afficher les résultats
 for _, added in ipairs(changes.added) do
-	print("Added TargetList: Name:", added.name)
+	print("Added TargetList: Name:", added.data.name)
 end
 for _, removed in ipairs(changes.removed) do
-	print("Removed TargetList: Name:", removed.name)
+	print("Removed TargetList: Name:", removed.data.name)
 end
 
 -- Ajout des éléments manquants dans targetlist
@@ -108,17 +110,23 @@ for _, added in ipairs(changes.added) do
 	table.insert(targetlist[added.side], added.data)
 end
 
--- Suppression des éléments retirés de targetlist
-for _, removed in ipairs(changes.removed) do
-	if targetlist[removed.side] then
-		for i, target in ipairs(targetlist[removed.side]) do
-			if target.name == removed.name then
-				table.remove(targetlist[removed.side], i)
-				break
-			end
-		end
-	end
-end
+-- -- Suppression des éléments retirés de targetlist
+-- for _, removed in ipairs(changes.removed) do
+-- 	if targetlist[removed.side] then
+-- 		for i, target in ipairs(targetlist[removed.side]) do
+-- 			if target.name == removed.name then
+-- 				table.remove(targetlist[removed.side], i)
+-- 				break
+-- 			end
+-- 		end
+-- 	end
+-- end
+
+local tgt_str = "targetlist = " .. TableSerialization(targetlist, 0)						--make a string
+local tgtFile = io.open("Debug/targetlist_MainNextMission.lua", "w") or error("Failed to open debug file")
+tgtFile:write(tgt_str)																		--save new data
+tgtFile:close()
+os.execute 'pause'
 
 --********************************* camp_triggers ******************************************************
 -- Charger les fichiers de référence et de travail
