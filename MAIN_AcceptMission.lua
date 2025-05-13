@@ -142,9 +142,9 @@ local changes = CompareTargetLists(targetlist_init, targetlist)
 for _, added in ipairs(changes.added) do
 	print("Added TargetList: Name:", added.data.name)
 end
-for _, removed in ipairs(changes.removed) do
-	print("Removed TargetList: Name:", removed.data.name)
-end
+-- for _, removed in ipairs(changes.removed) do
+-- 	print("Removed TargetList: Name:", removed.data.name)
+-- end
 
 -- Ajout des éléments manquants dans targetlist
 for _, added in ipairs(changes.added) do

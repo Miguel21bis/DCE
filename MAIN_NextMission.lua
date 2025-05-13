@@ -742,9 +742,9 @@ local changes = CompareTargetLists(targetlist_init, targetlist)
 for _, added in ipairs(changes.added) do
 	print("Added TargetList: Name:", added.data.name)
 end
-for _, removed in ipairs(changes.removed) do
-	print("Removed TargetList: Name:", removed.data.name)
-end
+-- for _, removed in ipairs(changes.removed) do
+-- 	print("Removed TargetList: Name:", removed.data.name)
+-- end
 
 -- Ajout des éléments manquants dans targetlist
 for _, added in ipairs(changes.added) do
@@ -854,8 +854,6 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
 
--- print("MainNM I camp.date.day: "..tostring(camp.date.day))
-
 PayloadRestricted = makePayloadRestricted()
 
 
@@ -883,7 +881,6 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/DC_StaticAircraft.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Prune.lua")					-- Tomsk modification M09 Integration de  Prune Script
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Briefing.lua")
 
--- print("MainNM J camp.date.day: "..tostring(camp.date.day))
 
 --supprime l'ancien fichier
 --recherche Debug/BugList.lua

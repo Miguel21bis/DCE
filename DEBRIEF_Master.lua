@@ -137,9 +137,9 @@ local changes = CompareTargetLists(targetlist_init, targetlist)
 for _, added in ipairs(changes.added) do
 	print("Added TargetList: Name:", added.data.name)
 end
-for _, removed in ipairs(changes.removed) do
-	print("Removed TargetList: Name:", removed.data.name)
-end
+-- for _, removed in ipairs(changes.removed) do
+-- 	print("Removed TargetList: Name:", removed.data.name)
+-- end
 
 -- Ajout des éléments manquants dans targetlist
 for _, added in ipairs(changes.added) do
@@ -161,12 +161,6 @@ end
 -- 		end
 -- 	end
 -- end
-
-local tgt_str = "targetlist = " .. TableSerialization(targetlist, 0)						--make a string
-local tgtFile = io.open("Debug/targetlist_DebriefMaster.lua", "w") or error("Failed to open debug file")
-tgtFile:write(tgt_str)																		--save new data
-tgtFile:close()
-os.execute 'pause'
 
 --********************************* camp_triggers ******************************************************
 -- Charger les fichiers de référence et de travail
