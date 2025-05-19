@@ -1104,7 +1104,7 @@ for side, units in pairs(oob_air) do
 																						if route and route.lenght and route.lenght <= unit_loadouts[l].range * 2 and (unit_loadouts[l].minrange == nil or route.lenght > unit_loadouts[l].minrange * 2) and altiPass then		--if sortie route lenght is within range of aircraft-loadout
 																				
 																							if isDebugModeA then
-																								debugLog(draftId.." AtoG passe A_29 ".." After Range Condition | firepower.max: "..tostring(target.firepower.max).." / loadoutFirepower "..tostring(unit_loadouts[l].firepower))
+																								debugLog(draftId.." AtoG passe A_29 After Range Condition | firepower.max: "..tostring(target.firepower.max).." / loadoutFirepower "..tostring(unit_loadouts[l].firepower))
 																							end
 
 																							TrackPlayability(unit.player, "target_range")												--track playabilty criterium has been met

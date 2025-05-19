@@ -61,9 +61,57 @@ versionPackageICM = os.getenv('versionPackageICM')														-- modification 
 
 dofile("Init/conf_mod.lua")
 dofile("Active/camp_status.lua")
+dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 
 if mission_ini.current_date and mission_ini.current_date.year then
+
+
+	local jumpDate
+	local jumpTime = false
+	if camp.date.day ~= mission_ini.current_date.day or camp.date.month ~= mission_ini.current_date.month or camp.date.year ~= mission_ini.current_date.year then
+		jumpDate = Deepcopy(camp.date)
+		jumpTime = true
+	end
+
 	camp.date = mission_ini.current_date
+
+	local aliasInitYear = camp.dateInit.year
+	if aliasInitYear < 1970 then
+		aliasInitYear = 1970
+	end
+
+	local aliasYear = camp.date.year
+	if aliasYear < 1970 then
+		aliasYear = 1970
+	end
+
+	--calcul le temps de la campagne
+	local referenceTime = os.time{day=camp.dateInit.day, year=aliasInitYear, month=camp.dateInit.month}
+	local actualTime = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month} + camp.time
+	CampTotalTimeS = os.difftime(actualTime, referenceTime) --/ (24 * 60 * 60) -- seconds in a day
+
+	-- if camp.missionHistory and camp.missionHistory[camp.mission] then
+	if jumpTime then
+
+		local aliasJumpYear = jumpDate.year
+		if aliasJumpYear < 1970 then
+			aliasJumpYear = 1970
+		end
+
+		aliasYear = camp.date.year
+		if aliasYear < 1970 then
+			aliasYear = 1970
+		end
+
+		-- detecte s'il y a un saut temporel (changement de la date dans conf_mod)
+		referenceTime = os.time{day=jumpDate.day, year=aliasJumpYear, month=jumpDate.month}
+		actualTime = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month} + camp.time
+		local diffTime = os.difftime(actualTime, referenceTime) --/ (24 * 60 * 60) -- seconds in a day
+
+		if diffTime > mission_ini.mission_duration + mission_ini.idle_time_max then
+			camp.timeJump = true
+		end
+	end
 end
 
 if not ChangePlane then
@@ -71,7 +119,6 @@ if not ChangePlane then
 end
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 
 
 --****************************************************************************************
@@ -196,26 +243,6 @@ if FileExists(testFile) then
     dofile(testFile)
 end
 
--- local db_airbasesFile = "Active/db_airbases.lua"
--- local testPath = io.open(db_airbasesFile, "r")																--cette maniere de chercher la presence d un fichier evite un plantage
--- if testPath ~= nil then																					--check si le fichier existe dans ScriptsMod
--- 	io.close(testPath)
--- 	dofile("Active/db_airbases.lua")
--- else
--- 	local db_airbasesFile2 = "Init/db_airbases.lua"
--- 	local testPath2 = io.open(db_airbasesFile2, "r")
--- 	if testPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
--- 		io.close(testPath2)
--- 		dofile(db_airbasesFile2)
--- 		--creer le fichier db_airbases dans Active, meme en cours de campagne, pour garder la retrocompatibilite
--- 		local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
--- 		local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open Active/db_airbases.lua file")
--- 		trigFile:write(airbases_Str)
--- 		trigFile:close()
--- 	end
--- end
-
-
 for planeType, value in PairsByKeys(Data_divers) do
 	if value.playable then
 		Playable_m[planeType] = true
@@ -223,11 +250,15 @@ for planeType, value in PairsByKeys(Data_divers) do
 end
 
 
+
+--si le joueur fait un saut temporel (via date dans conf_mod) on met a jour les fichiers de la campagne
+UpdateFilesAfterTimeJump()
+
 local showVersion = versionPackageICM
 
 local verScriptsModPath = "../../../ScriptsMod."..versionPackageICM.."/UTIL_Changelog.lua"
 local testPath = io.open(verScriptsModPath, "r")
-if  testPath ~= nil then
+if testPath ~= nil then
 	io.close(testPath)
 	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Changelog.lua")
 	if versionDCE then
@@ -271,10 +302,8 @@ local input
 local choix1
 
 if not ChangePlane then
-	print("Skip current mission and generate next campaign mission. Continue? y(es)/n(o):\n")				--ask for user confirmation
-
-
-	local playable_type = {}
+	print("Actual time: " .. FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year .. ".\n")
+	print("Skip current mission and generate next campaign mission. Continue? y(es)/n(o):\n")
 
 	SinglePlayer = false
 	if Multi == nil then
@@ -340,6 +369,9 @@ if input == "y" or input == "yes" then
 			if choix1 == "n" or  choix1 == "t"  then
 				if choix1 == "t"  then
 
+
+					-- UpdateFilesAfterTimeJump()
+
 					-- Fonction pour afficher le menu de sélection du camp
 					local function selectCamp()
 						print("\n--- Select Coalition ---")
@@ -379,7 +411,13 @@ if input == "y" or input == "yes" then
 
 					-- Fonction pour afficher les cibles standard (Strike, Runway Attack)
 					local function showStandardTargets(targetlist, side)
-						print("\n--- select a target in the "..side.." side ---")
+						print("\n--- Sélectionnez une cible dans le camp "..side.." ---")
+						
+						-- Trier la table par priorité
+						table.sort(targetlist[side], function(a, b)
+							return a.priority > b.priority
+						end)
+
 						local tabIndex = {}
 						local Ckey = 0
 
@@ -733,6 +771,8 @@ if input == "y" or input == "yes" then
 			else
 				print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
 			end
+			
+			camp.timeJump = false
 
 		until 1 == 2
 

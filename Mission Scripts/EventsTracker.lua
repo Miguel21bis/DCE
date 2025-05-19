@@ -151,7 +151,7 @@ local function addHit1s(hitTemp)
 	local lifeActual1s = hitTemp.objScen:getLife()
 	local lifePourcent
 
-	if  hitTemp.lifeHit > lifeActual1s then
+	if hitTemp.lifeHit > lifeActual1s then
 		lifePourcent = (lifeActual1s/hitTemp.hightLife) * 100
 	else
 		lifePourcent = ( hitTemp.lifeHit/hitTemp.hightLife) * 100
@@ -160,6 +160,7 @@ local function addHit1s(hitTemp)
 
 	scenLog[hitTemp.scenaryName] = {							--add scenery object to table
 		scenaryName = hitTemp.scenaryName,
+		sceneryTypeName = hitTemp.sceneryTypeName,
 		lifeActual1s = lifeActual1s,
 		hightLife = hitTemp.hightLife,
 		objScen = hitTemp.objScen,
@@ -170,11 +171,13 @@ local function addHit1s(hitTemp)
 		x = hitTemp.x,
 		y = hitTemp.y,
 		z = hitTemp.z,
-		description = hitTemp.description,	--tooHeavy
 		event = hitTemp.event,
 		explosiveMass = hitTemp.explosiveMass,
-		displayName = hitTemp.displayName,
+		weaponName = hitTemp.weaponName,
 	}
+	if hitTemp.description and camp.debug then
+		scenLog[hitTemp.scenaryName]["description"] = hitTemp.description	--tooHeavy
+	end
 end
 
 --###################  ######   #####################################
@@ -500,8 +503,7 @@ function eventHandlerDCE:onEvent(event)
 					y = land.getHeight({x = ptEvent.x, y = ptEvent.z}),
 					z = ptEvent.z,
 				}
-				-- trigger.action.smoke(PilotVec3, trigger.smokeColor.Green)
-
+				
 				log_entry.initiatorMissionID = event.initiator:getID()
 				log_entry.x = ptEvent.x
 				log_entry.y = ptEvent.y
@@ -562,8 +564,7 @@ function eventHandlerDCE:onEvent(event)
 					y = land.getHeight({x = ptEvent.x, y = ptEvent.z}),
 					z = ptEvent.z,
 				}
-				-- trigger.action.smoke(PilotVec3, trigger.smokeColor.Red) --****************************
-
+				
 				--inscrit position et name dans le log
 				log_entry.initiatorMissionID = event.initiator:getID()
 				log_entry.x = ptEvent.x
@@ -649,7 +650,6 @@ function eventHandlerDCE:onEvent(event)
 					y = land.getHeight({x = ptEvent.x, y = ptEvent.z}),
 					z = ptEvent.z,
 				}
-				-- trigger.action.smoke(PilotVec3, trigger.smokeColor.Blue)
 			end
 		end
 
@@ -1061,7 +1061,7 @@ function eventHandlerDCE:onEvent(event)
 		if event.target and event.initiator then
 			if Object.getCategory(event.target) == 5 then								--if target is a scenery object
 				local descr = event.target:getDesc()
-				if descr.life and descr.life > 19 then							--only store destroyed scenery that had an initial health bigger than 20
+				if descr.life and descr.life > 9 then							--only store destroyed scenery that had an initial health bigger than 20
 					local lifeHit = event.target:getLife()
 					-- local live0 = event.target:getLife0()	--ne fonctionne pas avec scenery object
 					local health0 = descr.life
@@ -1086,13 +1086,19 @@ function eventHandlerDCE:onEvent(event)
 						explosiveMass = descWep.warhead.explosiveMass
 					end
 
-					local displayName = "inc"
+					local weaponName = "inc"
 					if descWep and descWep.displayName then
-						displayName = descWep.displayName
+						weaponName = descWep.displayName
+					end
+
+					local sceneryTypeName = "inc"
+					if descr and descr.typeName then
+						sceneryTypeName = descr.typeName
 					end
 
 					local hitTemp = {
 						scenaryName = scenaryName,
+						sceneryTypeName = sceneryTypeName,
 						objScen = event.target,
 						hightLife = hightLife,
 						health0 = descr.life,									--store initial health of scenery object
@@ -1102,16 +1108,21 @@ function eventHandlerDCE:onEvent(event)
 						x = initPoint.x,
 						y = initPoint.y,
 						z = initPoint.z,
-						description = descr,
+						-- description = descr,
 						event = "S_EVENT_HIT",
 						initiatorSideName = initiatorSideName,
 						targetSideName = targetSideName,
 						explosiveMass = explosiveMass,
-						displayName = displayName,
+						weaponName = weaponName,
+						time = log_entry.t,
+						log_equiv = log_entry,
 					}
 
-					timer.scheduleFunction(addHit1s, hitTemp, timer.getTime() + 1)
+					if descr and camp.debug then
+						hitTemp.description = descr
+					end
 
+					timer.scheduleFunction(addHit1s, hitTemp, timer.getTime() + 1)
 
 				end
 			end

@@ -3175,6 +3175,7 @@ function UpdateConfMod(setWeather, setDate)
 
 	local function mergeTables(clientTable, defaultTable, structure)
 		for key, defaultValue in pairs(defaultTable) do
+
 			local clientValue = clientTable[key]
 
 			--   `pictureBrief` ne doit pas être touché
@@ -3185,8 +3186,9 @@ function UpdateConfMod(setWeather, setDate)
 			elseif key == "movedBullseye" and type(defaultValue) == "table" then
 				-- print("[mergeTables] B Fusion `movedBullseye`")
 				if type(clientValue) ~= "table" then
-					-- print("[mergeTables] C `movedBullseye` absent dans clientTable, création")
+					-- print("[mergeTables] C `movedBullseye` absent dans clientTable, création.."..key)
 					clientTable[key] = {}
+					clientValue = clientTable[key]
 				end
 
 				--   Fusion normale des maps existantes
@@ -3434,7 +3436,6 @@ function UpdateConfMod(setWeather, setDate)
     local clientConfigPath = "Init/conf_mod.lua"
     local defaultConfigPath = "../../../ScriptsMod." .. versionPackageICM .. "/UTIL_ConfModCheck.lua"
 
-
     -- Charger les fichiers de configuration client et par défaut
     local clientConfig, clientStructure = loadConfigWithStructure(clientConfigPath)
 
@@ -3445,8 +3446,7 @@ function UpdateConfMod(setWeather, setDate)
 
 	mergeTables(clientConfig, defaultConfig, clientStructure)
 
-
-    -- Nettoyer les variables obsolètes du client
+	-- Nettoyer les variables obsolètes du client
     clientConfig = removeObsoleteEntries(clientConfig, defaultConfig)
 
 	-- Mettre à jour la configuration client avec les valeurs par défaut manquantes
@@ -3876,22 +3876,23 @@ function AssignCallnameSquad()
 	--https://wiki.hoggitworld.com/view/DCS_enum_callsigns
 
 
+	-- Charger oob_air_init sans écraser oob_air actuel
+	local initOobAir = nil
+	do
+		local tempEnv = {} -- Crée un environnement temporaire pour charger oob_air_init
+		local f = assert(loadfile("Init/oob_air_init.lua"))
+		setfenv(f, tempEnv)
+		f()
+		initOobAir = Deepcopy(tempEnv.oob_air or {}) -- Copie profonde pour éviter les références partagées
+	end
 
-	--si le joueur veut changer de callname � un squad, nous mettons � jour le Active/oob_air par rapport au Init/oob_air_init
-	dofile("Init/oob_air_init.lua")
-	local initOobAir = Deepcopy(oob_air)
-
-	oob_air = nil
-
-	dofile("Active/oob_air.lua")
-
-	for initSide, initUnit in pairs(initOobAir) do
+	-- Comparer et mettre à jour les callsigns si nécessaire
+	for _, initUnit in pairs(initOobAir) do
 		for n = 1, #initUnit do
-			if initUnit[n].callsign then												--si le joueur a enregistr� une callname perso
-				for side, unit in pairs(oob_air) do
+			for _, unit in pairs(oob_air) do
+				if initUnit[n].callsign then -- Si le joueur a enregistré un callsign personnalisé
 					for r = 1, #unit do
-						if unit[r].name == initUnit[n].name and unit[r].callsign ~= initUnit[n].callsign then				--si c'est le meme suad
-
+						if unit[r].name == initUnit[n].name and unit[r].callsign ~= initUnit[n].callsign then -- Si c'est le même squad
 							unit[r].callsign = initUnit[n].callsign
 							-- print("utilFct CORRECTION callsign "..unit[r].callsign)
 							-- os.execute 'pause'
@@ -3904,14 +3905,14 @@ function AssignCallnameSquad()
 
 
 
-	local CallSigneAssigned = {}
+	local callSigneAssigned = {}
 
 	for side,unit in pairs(oob_air) do
 		for n = 1, #unit do
 			--regarde les CallName d�j� attribu� par le concepteur de campagne
 			-- if WestCallsign[unit[n].country] == "west" and unit[n].callsign then
 			if IsWesternCountry(unit[n].country) and unit[n].callsign then
-				CallSigneAssigned[unit[n].callsign] = true
+				callSigneAssigned[unit[n].callsign] = true
 			end
 		end
 	end
@@ -3920,8 +3921,8 @@ function AssignCallnameSquad()
 		for n = 1, #unit_ do
 			local unit = unit_[n]
 			local category
-			if  not unit.inactive then
-				local Imax = 0
+			if not unit.inactive then
+				-- local Imax = 0
 				-- if WestCallsign[unit.country] == "west" and not unit.callsign then
 				if IsWesternCountry(unit.country) and not unit.callsign then
 						local assigneOk = false
@@ -3941,10 +3942,10 @@ function AssignCallnameSquad()
 							repeat
 								local i =  math.random(9, Imax)
 
-								if not CallSigneAssigned[SpecificCallnames[unit.type][unit.country][i]] then
+								if not callSigneAssigned[SpecificCallnames[unit.type][unit.country][i]] then
 									unit.callsign = SpecificCallnames[unit.type][unit.country][i]
 									unit.callsignId = i
-									CallSigneAssigned[unit.callsign] = true
+									callSigneAssigned[unit.callsign] = true
 									assigneOk = true
 									break
 								end
@@ -3962,10 +3963,10 @@ function AssignCallnameSquad()
 							end
 
 							for i = 1, #Callsign_west[category] do
-								if not CallSigneAssigned[Callsign_west[category][i]] then
+								if not callSigneAssigned[Callsign_west[category][i]] then
 									unit.callsign = Callsign_west[category][i]
 									unit.callsignId = i
-									CallSigneAssigned[unit.callsign] = true
+									callSigneAssigned[unit.callsign] = true
 									assigneOk = true
 									break
 								end
@@ -3975,7 +3976,7 @@ function AssignCallnameSquad()
 								local i =  math.random(1, #Callsign_west[category])
 								unit.callsign = Callsign_west[category][i]
 								unit.callsignId = i
-								CallSigneAssigned[unit.callsign] = true
+								callSigneAssigned[unit.callsign] = true
 								assigneOk = true
 								break
 							end
@@ -4465,10 +4466,137 @@ function FoundSquadSide(squadName)
 end
 
 
-local str = "TaskByPlane = " .. TableSerialization(TaskByPlane, 0)						--make a string
-local _file = io.open("Debug/TaskByPlane.lua", "w")  or error("Failed to open debug file")
-_file:write(str)																		--save new data
-_file:close()
+function KillTarget(Target_Name, TargetPName)
+
+	for side_name,side in pairs(oob_ground) do														--side table(red/blue)											
+		for country_n,country in pairs(side) do														--country table (number array)
+			if country.vehicle then																	--if country has vehicles
+				for group_n,group in pairs(country.vehicle.group) do								--groups table (number array)
+					if group.name == Target_Name or group.name == TargetPName then
+						for unit_n,unit in pairs(group.units) do										--units table (number array)					
+
+							if Debug.AfficheSol then print("DC_DT Kill "..unit.name) end
+						
+							unit.dead = true														--mark unit as dead in oob_ground
+							unit.dead_last = true													--mark unit as died in last mission
+							unit.CheckDay = camp.date.CampTotalTimeS  
+						end
+					end
+				end
+			end
+			if country.static then																--if country has static objects	
+				for group_n,group in pairs(country.static.group) do								--groups table (number array)
+					if group.name == Target_Name or group.name == TargetPName then
+						for unit_n,unit in pairs(group.units) do									--units table (number array)
+							if Debug.AfficheSol then print("DC_DT Kill "..unit.name) end
+							
+							if unit.dead ~= true then											--unit is not yet dead (some static objects that are spawned in a destroyed state are logged dead at mission start, these must be excluded here)
+								group.dead = true												--mark group as dead in oob_ground (static objects can be set as group.dead and spawned in a destroyed state)
+								group.hidden = true												--hide dead static object
+								unit.dead = true												--mark unit as dead in oob_ground (this is for the targetlist)
+								unit.dead_last = true
+								unit.CheckDay = camp.date.CampTotalTimeS  
+							end
+						end
+					end
+				end
+			end
+			if country.ship then																--if country has ships
+				for group_n,group in pairs(country.ship.group) do								--groups table (number array)
+					if group.name == Target_Name or group.name == TargetPName then	
+						for unit_n,unit in pairs(group.units) do									--units table (number array)	
+							if Debug.AfficheSol then print("DC_DT Kill "..unit.name) end
+							
+							unit.dead = true													--mark unit as dead in oob_ground
+							unit.dead_last = true												--mark unit as died in last mission
+							unit.CheckDay = camp.date.CampTotalTimeS                              -- ajoute la date de destruction    Miguel21 modification M19 : Repair SAM   
+						end
+					end
+				end
+			end
+		end
+	end
+	
+	for side_name, targets in pairs(targetlist) do											--iterate through targetlist
+		for targetN, target in pairs(targets) do										--iterate through targets
+			if target.titleName == Target_Name or target.titleName == TargetPName then	
+				if target.elements and target.elements[1].x then 						--if the target has subelements and is a scenery object target (element has x coordinate)
+					for element_n,element in pairs(target.elements) do					--iterate through target elements
+						-- if element.dead then											--element was already dead previously
+						-- 	element.dead_last = false									--mark element as not died in last mission
+						-- else
+							if Debug.AfficheSol then print("DC_DT Kill __SCENERY__ "..element.name) end
+							element.dead = true	
+							element.dead_last = true
+							element.CheckDay = camp.date.CampTotalTimeS  
+						-- end
+					end
+				end
+			end
+		end
+	end	
+end
+
+--rafraichit certain fichier si l'utilisateur avance le temps, cela permet de choisir les cibles rafraichi en fonction des triggers actif ou pas
+function UpdateFilesAfterTimeJump()
+
+	----- unpack template mission file ----
+	local minizip = require('minizip')
+
+	local zipFile = minizip.unzOpen("Init/base_mission.miz", 'rb')
+
+	zipFile:unzLocateFile('mission')
+	local misStr = zipFile:unzReadAllCurrentFile()
+	local misStrFunc = loadstring(misStr)()
+
+	zipFile:unzClose()
+
+	local aliasInitYear = camp.dateInit.year
+	if aliasInitYear < 1970 then
+		aliasInitYear = 1970
+	end
+
+	local aliasYear = camp.date.year
+	if aliasYear < 1970 then
+		aliasYear = 1970
+	end
+
+	local referenceTime = os.time{day=camp.dateInit.day, year=aliasInitYear, month=camp.dateInit.month}
+	local actualTime = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month} + camp.time
+	CampTotalTimeS = os.difftime(actualTime, referenceTime) --/ (24 * 60 * 60) -- seconds in a day
+	camp.date.CampTotalTimeS = CampTotalTimeS
+
+
+	require("Active/oob_ground")
+
+	dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
+	dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
+	dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
+	dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateOOBGround.lua")
+
+
+	local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
+	local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
+	trigFile:write(airbases_Str)
+	trigFile:close()
+
+	local ground_str = "oob_ground = " .. TableSerialization(oob_ground, 0)						--make a string
+	local groundFile = io.open("Active/oob_ground.lua", "w") or error("Failed to open debug file")
+	groundFile:write(ground_str)																--save new data
+	groundFile:close()
+
+
+	local tgt_str = "targetlist = " .. TableSerialization(targetlist, 0)						--make a string
+	local tgtFile = io.open("Active/targetlist.lua", "w") or error("Failed to open debug file")
+	tgtFile:write(tgt_str)																		--save new data
+	tgtFile:close()
+
+	local trigStr = "camp_triggers = " .. TableSerializationAG_triggers(camp_triggers, 0)
+	local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to open debug file")
+	trigFile:write(trigStr)
+	trigFile:close()
+
+end
 
 
 

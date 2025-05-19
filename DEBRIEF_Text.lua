@@ -71,7 +71,7 @@ do
 			for m = 1, space do
 				t = t .. " "																		--add one space for every missing letter
 			end
-			t = t .. "(" .. tostring(targetSelect.alive) .. "%)\n"				--Target percentage of alive sub-elements 
+			t = t .. "(" .. tostring(math.ceil(targetSelect.alive)) .. "%)\n"				--Target percentage of alive sub-elements 
 
 			for elementN, element in ipairs(targetSelect.elements) do						--list all target elements
 				local ename = element.name			--element name

@@ -1218,9 +1218,9 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 			-- print("attribut "..tostring(attribut))
 			-- _affiche(campMod.RepairOption, "campMod.RepairOption")
 			
-			local KillTargetLocal = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][2]
+			local killTargetLocal = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][2]
 
-			if target.alive <= KillTargetLocal and target.alive > 0 and attribut ~= "runway" then
+			if target.alive <= killTargetLocal and target.alive > 0 and attribut ~= "runway" then
 				
 				checkBug2("DC_UT target.name target.alive <= 20 "..target.titleName.." "..tostring(target.alive))
 				KillTarget(target.titleName, target.name)															--set target alive 0

@@ -10,7 +10,7 @@ versionDCE["DC_DestroyTarget.lua"] = "1.2.2"
 -- ------------------------------------------------------------------------------------------------------- 
 
 
-function KillTarget(Target_Name, TargetPName)
+function KillTargetOLD(Target_Name, TargetPName)
 
 	for side_name,side in pairs(oob_ground) do														--side table(red/blue)											
 		for country_n,country in pairs(side) do														--country table (number array)

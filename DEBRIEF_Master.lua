@@ -36,6 +36,7 @@ Briefing_oob_text_blue = ""																	--text string to be added to next br
 local function AcceptMission()
 	local m = ""
 	repeat
+		print("Actual time(DebriefMaster A): " .. FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year .. ".\n")
 		print("\n\n Night or Day ? : "..Daytime)											-- info day or not
 		print("\n\nAccept Mission ?:")
 
@@ -108,6 +109,8 @@ end
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
+
+print("Actual time (DebriefMaster B): " .. FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year .. ".\n")
 
 UpdateConfMod()
 
@@ -223,6 +226,8 @@ for _, removed in ipairs(changes.removed) do
     db_airbases[removed.name] = nil
 end
 
+print("Actual time (DebriefMaster C): " .. FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year .. ".\n")
+
 --****************************************************************************************
 --ajout automatique d'elements en cours de campagne: FIN
 --****************************************************************************************
@@ -327,7 +332,7 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 
 --run log evaluation and status updates
 dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_StatsEvaluation.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_DestroyTarget.lua")												--Mod11.j
+-- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_DestroyTarget.lua")												--Mod11.j
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
 
 -- --update campaign time
@@ -922,7 +927,7 @@ if input == "y" or input == "yes" then
 
 
 else
-	camp.waitingNextGen = true
+	-- camp.waitingNextGen = true
 
 	----- convert tables back to strings for insertion into content files -----
 	local cmpStr = "camp = " .. TableSerialization(camp, 0)

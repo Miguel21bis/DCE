@@ -1394,12 +1394,12 @@ Action = {}
 	function Action.GroundUnitRepair()
 
 		for side_name, targets in pairs(targetlist) do
-			local groundside = "red"					--get the opposing side if the group side
+			local groundside = "red"
 			if side_name == "red" then
 				groundside = "blue"
 			end
 
-			for targetN, target in pairs(targets) do		--Iterat through all targets
+			for targetN, target in pairs(targets) do
 				
 				local attribut 
 				if target.attributes then 
@@ -1416,7 +1416,6 @@ Action = {}
 							for key , correspondanceName in pairs(Attribut2Target) do
 								if string.match(correspondanceName, attributName) then
 									attribut = correspondanceName
-									-- print("DcCT B3    FOUND attribut ... "..tostring(attribut) )
 									break
 								end
 							end
@@ -1425,24 +1424,26 @@ Action = {}
 					end
 				end
 				if not attribut then
-					attribut = "generic"	
+					attribut = "generic"
 				end
 				
-				-- print("side_name "..tostring(side_name))
-				-- print("attribut "..tostring(attribut))
 				local minimumRepairThreshold = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][1]
 
 				local repairChance = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][4]
 
+				if target.customRepairOption then
+					minimumRepairThreshold = target.customRepairOption[1]
+					repairChance = target.customRepairOption[4]
+				end
+
 				if target.alive and attribut ~= "runway"  then
 
 					if target.elements   then
-						for e = 1, #target.elements do												--Iterate through elements of target
+						for e = 1, #target.elements do
 							local temp_dead = nil
 							local temp_dead_last = nil
 							local temp_CheckDay = nil
-							-- local prob = 0
-							local forcedReAlive = false												-- M19.f
+							local forcedReAlive = false
 
 							if target.elements[e].dead then
 								temp_dead = target.elements[e].dead
@@ -1450,106 +1451,169 @@ Action = {}
 								temp_CheckDay = target.elements[e].CheckDay
 							end
 
+							--TODO: 1. empecher que les réparations se fassent 2 fois entre chaque génération de misssion -tentative de génération
+							-- TODO: 2. le % alive de l'ensemble d'un target n'est pas bon
 
-							if  target.alive < 100 and target.alive >= minimumRepairThreshold   then
-								if  target.elements[e].dead  then
+							if  target.alive < 100 and target.alive >= minimumRepairThreshold then
+								if target.elements[e].dead then
 									if target.elements[e].CheckDay then
-										-- if	CampTotalTimeS >= target.elements[e].CheckDay + (campMod.groundReinforceDelay * 3600) then
-										if	CampTotalTimeS >= target.elements[e].CheckDay + (campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][2] * 3600) then
+										local repairInterval = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][3] * 3600
+										local lastCheck = target.elements[e].CheckDay
 
-											local test_prob = math.random(1,100)
+										if Debug.AfficheSol or debugKT then
+											print("Dc_CT Debug while A lastCheck: "..lastCheck.." +repairInterval "..repairInterval.." CampTotalTimeS "..CampTotalTimeS)
+										end
 
+
+										-- Boucle sur chaque intervalle de réparation entre CheckDay et maintenant
+										while lastCheck + repairInterval <= CampTotalTimeS do
 											if Debug.AfficheSol or debugKT then
-												print("Dc_CT Debug CampTotalTimeS >= CheckDay : "..target.titleName .. " "..target.elements[e].name)
-												print("Dc_CT Debug test_prob <= prob : "..test_prob .. " "..repairChance)
-												-- os.execute 'pause'
+											print("Dc_CT Debug while B lastCheck: "..lastCheck.." +repairInterval "..repairInterval.." <=? CampTotalTimeS "..CampTotalTimeS)
 											end
 
-											if test_prob <= repairChance   then
+											lastCheck = lastCheck + repairInterval
+											local test_prob = math.random(1,100)
+											if Debug.AfficheSol or debugKT then
+												print("Dc_CT Debug tentative réparation à "..lastCheck.." pour "..target.titleName.." "..target.elements[e].name)
+												print("Dc_CT Debug test_prob  : "..test_prob.." <= prob? "..repairChance)
+											end
+
+											if test_prob <= repairChance then
 												forcedReAlive = true
 												temp_dead = nil
 												temp_dead_last = false
 												temp_CheckDay = nil
 
 												local text = "" .. target.elements[e].name .. " from ".. target.titleName .. " have been repaired and returned back to service. \n \n"
-
 												if Debug.AfficheSol or debugKT then
 													print("Dc_CT Debug Resurrection: "..target.titleName .. " "..target.elements[e].name)
 													print("Dc_CT Debug "..text)
 												end
-
-												if side_name == "blue" then									--side is blue
-													Briefing_oob_text_blue = Briefing_oob_text_blue .. text	--add to blue briefing oob text
-												elseif side_name == "red" then								--side is red
-													Briefing_oob_text_red = Briefing_oob_text_red .. text	--add to red briefing oob text
+												if side_name == "blue" then
+													Briefing_oob_text_blue = Briefing_oob_text_blue .. text
+												elseif side_name == "red" then
+													Briefing_oob_text_red = Briefing_oob_text_red .. text
 												end
-
 
 												target.elements[e].dead = nil
 												target.elements[e].CheckDay = nil
 												target.alive = math.floor(target.alive + (1/#target.elements *100))
-												if target.alive > 100 then  target.alive = 100 end
+												if target.alive > 100 then target.alive = 100 end
 
 												if Debug.AfficheSol or debugKT then
 													print("Dc_CT Debug D² : "..target.titleName .. " alive: "..target.alive)
-													-- os.execute 'pause'
 												end
 
 												target.dead_last = math.floor(target.dead_last -  (1/#target.elements *100))
 												if target.dead_last < 0 then  target.dead_last = 0 end
 
-											else -- sinon on met � jour la date de check pour y revenir seulement un jour apres
-												-- temp_CheckDay = camp.day
-												temp_CheckDay = CampTotalTimeS
-												target.elements[e].CheckDay = temp_CheckDay					-- pour mettre � jour les cible scenary qui ne sont pas dans oob_ground
+												break -- On sort de la boucle si la réparation a réussi
 											end
+										end
+										-- Si aucune réparation n'a eu lieu, on met à jour la date de check pour la prochaine fois
+										if target.elements[e].dead then
+											target.elements[e].CheckDay = lastCheck
 										end
 									end
 								end
 							end
 
+							-- if  target.alive < 100 and target.alive >= minimumRepairThreshold   then
+							-- 	if  target.elements[e].dead  then
+							-- 		if target.elements[e].CheckDay then
+							-- 			-- if	CampTotalTimeS >= target.elements[e].CheckDay + (campMod.groundReinforceDelay * 3600) then
+							-- 			if CampTotalTimeS >= target.elements[e].CheckDay + (campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][3] * 3600) then
+
+							-- 				local test_prob = math.random(1,100)
+
+							-- 				if Debug.AfficheSol or debugKT then
+							-- 					print("Dc_CT Debug CampTotalTimeS >= CheckDay : "..target.titleName .. " "..target.elements[e].name)
+							-- 					print("Dc_CT Debug test_prob <= prob : "..test_prob .. " "..repairChance)
+							-- 					-- os.execute 'pause'
+							-- 				end
+
+							-- 				if test_prob <= repairChance   then
+							-- 					forcedReAlive = true
+							-- 					temp_dead = nil
+							-- 					temp_dead_last = false
+							-- 					temp_CheckDay = nil
+
+							-- 					local text = "" .. target.elements[e].name .. " from ".. target.titleName .. " have been repaired and returned back to service. \n \n"
+
+							-- 					if Debug.AfficheSol or debugKT then
+							-- 						print("Dc_CT Debug Resurrection: "..target.titleName .. " "..target.elements[e].name)
+							-- 						print("Dc_CT Debug "..text)
+							-- 					end
+
+							-- 					if side_name == "blue" then									--side is blue
+							-- 						Briefing_oob_text_blue = Briefing_oob_text_blue .. text	--add to blue briefing oob text
+							-- 					elseif side_name == "red" then								--side is red
+							-- 						Briefing_oob_text_red = Briefing_oob_text_red .. text	--add to red briefing oob text
+							-- 					end
+
+
+							-- 					target.elements[e].dead = nil
+							-- 					target.elements[e].CheckDay = nil
+							-- 					target.alive = math.floor(target.alive + (1/#target.elements *100))
+							-- 					if target.alive > 100 then target.alive = 100 end
+
+							-- 					if Debug.AfficheSol or debugKT then
+							-- 						print("Dc_CT Debug D² : "..target.titleName .. " alive: "..target.alive)
+							-- 						-- os.execute 'pause'
+							-- 					end
+
+							-- 					target.dead_last = math.floor(target.dead_last -  (1/#target.elements *100))
+							-- 					if target.dead_last < 0 then  target.dead_last = 0 end
+
+							-- 				else -- sinon on met � jour la date de check pour y revenir seulement un jour apres
+							-- 					-- temp_CheckDay = camp.day
+							-- 					temp_CheckDay = CampTotalTimeS
+							-- 					target.elements[e].CheckDay = temp_CheckDay					-- pour mettre � jour les cible scenary qui ne sont pas dans oob_ground
+							-- 				end
+							-- 			end
+							-- 		end
+							-- 	end
+							-- end
+
 							if forcedReAlive then
 								local endfunction = false
 								for c = 1, #oob_ground[groundside] do													--iterate through countries in side
-									for typename,typetable in pairs(oob_ground[groundside][c]) do						--iterate through country table content
-									--TODO, voir si il ne faut pas ajouter les static ici	
-									if typename == "vehicle" or typename == "ship" then			--for vehciles or ships
-											for group_n,group in pairs(typetable.group) do			--iterate through groups	
-												for unit_n,unit in pairs(group.units) do			--iterate through groups	
-													if  target.elements[e].name == unit.name then
+									for class ,typetable in pairs(oob_ground[groundside][c]) do						--iterate through country table content
+										
+										if class == "vehicle" or class == "ship" or class == "static" then			--for vehciles or ships
+												for group_n,group in pairs(typetable.group) do			--iterate through groups	
+													for unit_n,unit in pairs(group.units) do			--iterate through groups	
+														if  target.elements[e].name == unit.name then
 
-														if Debug.AfficheSol then
-															if temp_dead then print(" temp_dead "..tostring(temp_dead))  end
-															if temp_dead_last then print(" temp_dead_last "..tostring(temp_dead_last))  end
-															if temp_CheckDay then print(" temp_CheckDay "..tostring(temp_CheckDay))  end
+															if Debug.AfficheSol then
+																if temp_dead then print(" temp_dead "..tostring(temp_dead))  end
+																if temp_dead_last then print(" temp_dead_last "..tostring(temp_dead_last))  end
+																if temp_CheckDay then print(" temp_CheckDay "..tostring(temp_CheckDay))  end
+															end
+
+															group.units[unit_n]['dead'] = temp_dead
+															group.units[unit_n]['dead_last'] = temp_dead_last
+															group.units[unit_n].CheckDay = temp_CheckDay
+
+															endfunction = true
+															-- break
 														end
-
-														 group.units[unit_n]['dead'] = temp_dead
-														 group.units[unit_n]['dead_last'] = temp_dead_last
-														 group.units[unit_n].CheckDay = temp_CheckDay
-
-														endfunction = true
-														-- break
+														if endfunction then  break end
 													end
 													if endfunction then  break end
 												end
 												if endfunction then  break end
 											end
-											if endfunction then  break end
+											-- if endfunction then break end	
 										end
-										-- if endfunction then break end	
-									end
 									if endfunction then  break end
 								end
 							end
 						end
 
-					-- end
-
-					-- attribut == "runway"
 
 					-- elseif attibut == "RUNWAY" and target.alive  and  target.alive < 100 and target.alive > campMod.RepairBaseMinimumDestroyed and  target.CheckDay then
-					elseif attribut == "runway" and target.alive  and  target.alive < 100 and target.alive > campMod.RepairBaseMinimumDestroyed and  target.CheckDay then 
+					elseif attribut == "runway" and target.alive and target.alive < 100 and target.alive > campMod.RepairOption[DCS_ENI_Side[side_name]]["airbase"][1] and target.CheckDay then 
 						local oldVAlive = target.alive
 						if CampTotalTimeS >= target.CheckDay + 3600 then
 							
@@ -1559,6 +1623,7 @@ Action = {}
 								repairRunwayPerDay = db_airbases[target.db_airbaseName].customRepairRunwayPerDay
 							end
 
+							-- TODO, imbitable, a refaire, mais un saut temporel de plusieurs mois/jours est bien pris en comtpe
 							target.alive = math.ceil(target.alive + repairRunwayPerDay * (((CampTotalTimeS - target.CheckDay )/ 3600)/24))
 							target.CheckDay = CampTotalTimeS
 
@@ -1566,7 +1631,6 @@ Action = {}
 								target.alive = 100
 
 							end
-
 
 							Action.Text(target.name.." repair in progress, old value: "..oldVAlive.." new value "..target.alive)
 

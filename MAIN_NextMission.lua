@@ -46,9 +46,6 @@ versionDCE["MAIN_NextMission.lua"] = "1.36.216"
 -- modification M00_b		Integration de conf_mod
 -- -------------------------------------------------------------------------------------------------------	
 
--- print("MainNM A camp.date.day: "..tostring(camp.date.day))
--- print("MainNM A mission_ini.current_date.day: "..tostring(mission_ini.current_date.day))
-
 
 Brief = {
 	red = {},
@@ -119,9 +116,6 @@ if mission.version < 19 then --19ok 18bad
 	os.execute 'pause'
 	os.exit()
 end
-
--- print("MainNM B camp.date.day: "..tostring(camp.date.day))
--- print("MainNM B mission_ini.current_date.day: "..tostring(mission_ini.current_date.day))
 
 NameTheatreLower =  string.lower(mission.theatre)
 NameTheatre =  mission.theatre
@@ -498,6 +492,9 @@ camp.spotterAircraft = ListSpotterAircraft()
 camp.jammerOnBoard = jammerOnBoard
 camp.unitSystem = mission_ini.unitSystem
 
+if not camp.missionHistory then camp.missionHistory = {} end
+camp.missionHistory[camp.mission] = camp.date
+
 local nbTotalClient = 0
 for k=1, Multi.NbGroup do
 	nbTotalClient = nbTotalClient + Multi.Group[k].NbPlane
@@ -675,13 +672,10 @@ if TestPathADD_addData ~= nil  then														--check si le fichier existe da
 
 end
 
--- print("MainNM D camp.date.day: "..tostring(camp.date.day))
-
-require("Active/oob_air")
+-- require("Active/oob_air") --deja appelé par skipmission et debriefMaster
 require("Active/oob_ground")
 require("Init/conf_mod")
 
--- print("MainNM E camp.date.day: "..tostring(camp.date.day))
 
 --si Active/camp_ZoneSAR n'existe pas, on le créer
 local ZoneSARFile = "../../../Missions/Campaigns/"..camp.title.."/Active/camp_ZoneSAR.lua"
@@ -845,7 +839,7 @@ Check_TaskPossibleByPlane()
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Time.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_MoonPhase.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Weather.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_DestroyTarget.lua")					-- Mod26
+-- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_DestroyTarget.lua")					-- Mod26
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_NavalEnvironment.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateSAR.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/ATO_ThreatEvaluation.lua")
@@ -1250,15 +1244,17 @@ for side_name, side in pairs(mission.coalition) do
 	end
 end
 
-if camp.waitingNextGen then
-	camp.waitingNextGen = false
-end
---permet d'avancer l'horaire entre 2 missions
-if Skipmission_flag then
-	if camp.waitingNextGen then
-		camp.waitingNextGen = false
-	end
-end
+-- if camp.waitingNextGen then
+-- 	camp.waitingNextGen = false
+-- end
+-- --permet d'avancer l'horaire entre 2 missions
+-- if Skipmission_flag then
+-- 	if camp.waitingNextGen then
+-- 		camp.waitingNextGen = false
+-- 	end
+-- end
+
+camp.waitingNextGen = false
 
 if not (EndCampaign or camp.endCampaign )then
 	dofile("../../../ScriptsMod."..versionPackageICM.."/DC_EndCampaign.lua")

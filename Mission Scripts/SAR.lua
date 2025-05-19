@@ -1815,7 +1815,7 @@ function LoopSAR()
 															end
 
 															    -- Placer le fumigène
-    														trigger.action.smoke(smokePosition, trigger.smokeColor.Red)
+    														trigger.action.smoke(smokePosition, trigger.smokeColor.Orange)
 
 															-- Indiquer que le fumigène a été placé
 															ejectedPilot.smokeOK = true
@@ -2138,7 +2138,7 @@ function GetOutGDFM(arg)
 				end
 
 					-- Placer le fumigène
-				trigger.action.smoke(smokePosition, trigger.smokeColor.Red)
+				trigger.action.smoke(smokePosition, trigger.smokeColor.Orange)
 
 			end
 
@@ -2252,7 +2252,7 @@ function GetOutGDFM(arg)
 								end
 
 									-- Placer le fumigène
-								trigger.action.smoke(smokePosition, trigger.smokeColor.Red)
+								trigger.action.smoke(smokePosition, trigger.smokeColor.Orange)
 
 							end
 

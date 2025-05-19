@@ -78,7 +78,7 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 
 --run log evaluation and status updates
 dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_StatsEvaluation.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_DestroyTarget.lua")												--Mod11.j
+-- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_DestroyTarget.lua")												--Mod11.j
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
 --create and view Debriefing file for mission
 --cette foi-ci, on enregistre les stats, mais sans les montrer
@@ -232,29 +232,28 @@ end
 --ajout automatique d'elements en cours de campagne: FIN
 --****************************************************************************************
 
--- -- require("Active/targetlist")
--- if not targetlist.blue[1] then
--- 	TargetlistToNum(targetlist)
--- end
 
--- require("Active/camp_triggers")
 
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Refpoints.lua")			--besoin par NavalEnv
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_MissionScore.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Time.lua")				--need if AcceptedMission
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_MoonPhase.lua")
--- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_DestroyTarget.lua")			-- Mod26
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_NavalEnvironment.lua")		--besoin par CheckTrigger pour bouger les navires
+-- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Refpoints.lua")			--besoin par NavalEnv
+-- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_MissionScore.lua")
+
+-- -- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Time.lua")				--need if AcceptedMission
+-- -- dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_MoonPhase.lua")
+
+
+-- --TODO comment se passer de ca??
+-- -- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_NavalEnvironment.lua")		--besoin par CheckTrigger pour bouger les navires
+
+
+-- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
+
+-- --TODO ici la cible Jask repasse à 30%, pourquoi
 -- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
-
---TODO ici la cible Jask repasse à 30%, pourquoi
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateOOBGround.lua")
+-- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateOOBGround.lua")
 
 mission.currentKey = 1010000															--not clear how this works but is required for multiplyer clients to be available for selection on mission start
 
-camp.waitingNextGen = true
+-- camp.waitingNextGen = true
 
 --si la generation de la mission suivante est repoussee, on sauvegarde le txt cree par les trigger txt precedent
 -- if camp["Briefing_text"] then
@@ -276,14 +275,14 @@ end
 
 
 --si la generation de la mission suivante est repoussee, on sauvegarde le txt cr�e par les trigger txt precedent
-if BriefingImagesR ~= nil or #BriefingImagesR ~= 0 then
+if BriefingImagesR ~= nil or (BriefingImagesR and #BriefingImagesR ~= 0) then
 	if camp["BriefingImagesR"] then
 		table.insert(camp["BriefingImagesR"], BriefingImagesR)
 	else
 		camp["BriefingImagesR"]	 = BriefingImagesR
 	end
 end
-if BriefingImagesB ~= nil or #BriefingImagesB ~= 0 then
+if BriefingImagesB ~= nil or (BriefingImagesB and #BriefingImagesB ~= 0) then
 	if camp["BriefingImagesB"] then
 		table.insert(camp["BriefingImagesB"], BriefingImagesB)
 	else

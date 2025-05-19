@@ -97,6 +97,11 @@ if camp.weather == nil then
 	camp.weather = {}
 end
 
+-- efface l'historique de la météo si on a un saut de temps
+if camp.timeJump then
+	camp.weather.zone = nil
+end
+
 --Initial weather 2
 if camp.weather.zone == nil then										--no weather exists yet
 	camp.weather.zoneTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)				--Set temperature of weather zone (+/- 5°C of reference tempereature)
@@ -231,7 +236,9 @@ debugTxt = debugTxt .."DcW camp.weather.zoneTemp: " ..tostring(camp.weather.zone
 debugTxt = debugTxt .."DcW camp.weather.zone: " ..tostring(camp.weather.zone).."\n"
 debugTxt = debugTxt .."DcW camp.weather.zoneNext: " ..camp.weather.zoneNext.."\n"
 
-local elapsed_time = (camp.date.day - 1) * 86400 + camp.time					--elapsed time since campaign start in seconds
+-- local elapsed_time = (camp.date.day - 1) * 86400 + camp.time					--elapsed time since campaign start in seconds
+
+local elapsed_time = CampTotalTimeS												--elapsed time since campaign start in seconds
 
 --Weather change
 if elapsed_time > camp.weather.zoneEnd then										--active weather zone has ended

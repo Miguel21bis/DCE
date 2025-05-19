@@ -3369,8 +3369,8 @@ local function loopAFAC_CAS()
 
 										if distance <= 10000 then
 
-											trigger.action.smoke(value.smokeTiming.targetPos, trigger.smokeColor.Red)
-											-- env.info("DCE_loopAFAC_CAS K create smokeColor.Red ")
+											trigger.action.smoke(value.smokeTiming.targetPos, trigger.smokeColor.Blue)
+											-- env.info("DCE_loopAFAC_CAS K create smokeColor.Blue ")
 
 											AFAC_available[afacFlightName]["smokeTiming"] = {
 												time = timer.getTime(),
