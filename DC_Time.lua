@@ -84,18 +84,26 @@ if mission_ini.onlyDayMission then
 		tempTime = tempTime + 300
 		-- print("DcIme B5 tempTime: ".. tostring(tempTime) .." "..FormatTime(tempTime, "hh:mm").."\n")
 	end
+	
 	print("DcIme B6 onlyDayMission FIN tempTime: ".. tostring(tempTime) .." "..FormatTime(tempTime, "hh:mm").."\n")
 	print("DcIme B6 onlyDayMission FIN overnightTime: ".. tostring(overnightTime) .." "..FormatTime(overnightTime, "hh:mm").."\n")
 
 	--ajoute un random de temps pour eviter de toujours commencer au petit matin:
-	if mission_ini.idle_time_max > 7200 then
-		local nbHour = math.floor(mission_ini.idle_time_max/3600)
-		overnightTime = overnightTime + (math.random(0, nbHour)*3600)
-		print("DcIme B7a onlyDayMission overnightTime: ".. tostring(overnightTime) .. "\n")
-	else
-		overnightTime = overnightTime + math.random(0, mission_ini.idle_time_max)
-		print("DcIme B7b onlyDayMission overnightTime: ".. tostring(overnightTime) .. "\n")
+	if overnightTime > 0 and mission_ini.idle_time_max > 7200 then
+		if mission_ini.idle_time_max > 7200 then
+			local nbHour = math.floor(mission_ini.idle_time_max/3600)
+			overnightTime = overnightTime + (math.random(0, nbHour)*3600)
+			print("DcIme B7a onlyDayMission overnightTime: ".. tostring(overnightTime) .. "\n")
+		else
+			overnightTime = overnightTime + math.random(0, mission_ini.idle_time_max)
+			print("DcIme B7b onlyDayMission overnightTime: ".. tostring(overnightTime) .. "\n")
+		end
+
+		overnightTime = math.floor(overnightTime / 300 + 0.5) * 300
+		print("DcIme B7c onlyDayMission overnightTime: ".. tostring(overnightTime) .. "\n")
+		
 	end
+
 end
 
 -- Ajouter addTime à camp.time après tous les ajustements

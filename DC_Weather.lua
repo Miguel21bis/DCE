@@ -2148,12 +2148,16 @@ camp["debugTraceability"]["weather"] = debugTxt
 
 if debugWeather then
 	print()
+	print("START debugTxt: ")
+	print(debugTxt)
+	print("FIN debugTxt: ")
+	print()
 	print("elapsed_time: "..elapsed_time)
 	print("camp.weather.zoneEnd "..camp.weather.zoneEnd)
 	print("remain "..remain)
 	print()
 	_affiche(camp.date, "camp.date FINAL: ")
-	print(debugTxt)
+	
 	_affiche(camp.weather, "camp.weather FINAL: ")
 	os.execute 'pause'
 end
