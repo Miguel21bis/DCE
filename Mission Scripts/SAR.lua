@@ -500,7 +500,7 @@ function AddSoldierAliasManhunt(EjectedPilot)
 
 			local rightSideOfBorder
 			if camp.boundary and camp.boundary[manhuntSide] and camp.boundary[manhuntSide] ~= nil then
-				rightSideOfBorder =  CheckPointInPoly2(pointSelected, camp.boundary[manhuntSide])
+				rightSideOfBorder =  CheckPointInPoly_XY_2(pointSelected, camp.boundary[manhuntSide])
 				env.info( "DCE_SAR_AddSoldierAliasManhunt?  F2 boundary rightSideOfBorder __"..tostring(rightSideOfBorder).."__ ejectedPilot.side: "..tostring(manhuntSide))
 				if rightSideOfBorder  then
 					env.info( "DCE_SAR_AddSoldierAliasManhunt? G rightSideOfBorder  ")
@@ -927,7 +927,7 @@ function CheckImmediatSAR(ejectedPilot)
 		local wrongSide = false
 		local ENI_Side = DCS_ENI_Side[ejectedPilot.side]
 		if camp.boundary and camp.boundary[ENI_Side] and camp.boundary[ENI_Side] ~= nil then
-			wrongSide =  CheckPointInPoly2({x=ejectedPilot.x2d,y=ejectedPilot.y2d} , camp.boundary[ENI_Side])
+			wrongSide =  CheckPointInPoly_XY_2({x=ejectedPilot.x2d,y=ejectedPilot.y2d} , camp.boundary[ENI_Side])
 			env.info( "DCE_CheckImmediatSAR C ?  boundary wrongSide ? __"..tostring(wrongSide))
 			if wrongSide  then
 				env.info( "DCE_CheckImmediatSAR? D boundary rightSideOfBorder __FALSE__ Return ")
@@ -937,7 +937,7 @@ function CheckImmediatSAR(ejectedPilot)
 
 		-- local rightSideOfBorder
 		-- if camp.boundary and camp.boundary[ejectedPilot.side] and camp.boundary[ejectedPilot.side] ~= nil then
-		-- 	rightSideOfBorder =  CheckPointInPoly2({x=ejectedPilot.x2d,y=ejectedPilot.y2d}, camp.boundary[ejectedPilot.side])
+		-- 	rightSideOfBorder =  CheckPointInPoly_XY_2({x=ejectedPilot.x2d,y=ejectedPilot.y2d}, camp.boundary[ejectedPilot.side])
 		-- 	env.info( "DCE_CheckImmediatSAR? CC boundary rightSideOfBorder __"..tostring(rightSideOfBorder).."__ ejectedPilot.side: "..tostring(ejectedPilot.side))
 		-- 	if rightSideOfBorder == nil or rightSideOfBorder == false then
 		-- 		env.info( "DCE_CheckImmediatSAR? DD boundary rightSideOfBorder __FALSE__ Return ")
@@ -974,11 +974,11 @@ function CheckImmediatSAR(ejectedPilot)
 						--le soldierejectedPilot est déjà dans une zone CITY 
 						-- pas de SAR ni CSAR
 
-						-- rightSideOfBorder =  CheckPointInPoly2(pointSelected, camp.boundary[manhuntSide])
+						-- rightSideOfBorder =  CheckPointInPoly_XY_2(pointSelected, camp.boundary[manhuntSide])
 
 						local rightSideOfBorder
 						if camp.boundary and camp.boundary[ejectedPilot.side] and camp.boundary[ejectedPilot.side] ~= nil then
-							rightSideOfBorder =  CheckPointInPoly2({x=ejectedPilot.x2d,y=ejectedPilot.y2d}, camp.boundary[ejectedPilot.side])
+							rightSideOfBorder =  CheckPointInPoly_XY_2({x=ejectedPilot.x2d,y=ejectedPilot.y2d}, camp.boundary[ejectedPilot.side])
 
 						end
 
@@ -1435,7 +1435,7 @@ local function checkAddingManhunt()
 
 					local rightSideOfBorder
 					if camp.boundary and camp.boundary[ejectedPilot.side] and camp.boundary[ejectedPilot.side] ~= nil then
-						rightSideOfBorder =  CheckPointInPoly2({x=ejectedPilot.x2d,y=ejectedPilot.y2d}, camp.boundary[ejectedPilot.side])
+						rightSideOfBorder =  CheckPointInPoly_XY_2({x=ejectedPilot.x2d,y=ejectedPilot.y2d}, camp.boundary[ejectedPilot.side])
 						env.info( "DCE_checkAddingManhunt?  CCC boundary rightSideOfBorder __"..tostring(rightSideOfBorder).."__ ejectedPilot.side: "..tostring(ejectedPilot.side))
 						if rightSideOfBorder == nil or rightSideOfBorder == false then
 							ejectedPilot.inTheEnemyCamp = true

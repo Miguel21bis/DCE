@@ -379,7 +379,7 @@ function GetDeltaHeadingIM(h1, h2)
 end
 
 --check si un point est dans le polygone
-function CheckPointInPoly2(point, poly)
+function CheckPointInPoly_XY_2(point, poly)
 
     local crossings = 0
 	for n = 1, #poly - 1 do
@@ -401,6 +401,19 @@ function CheckPointInPoly2(point, poly)
 	end
 end
 
+-- Vérifie si un point est dans un polygone (algorithme robuste)
+function CheckPointInPoly_XY_3(point, poly)
+    local inside = false
+    local j = #poly
+    for i = 1, #poly do
+        if ((poly[i].y > point.y) ~= (poly[j].y > point.y)) and
+           (point.x < (poly[j].x - poly[i].x) * (point.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x) then
+            inside = not inside
+        end
+        j = i
+    end
+    return inside
+end
 
 local function localGetPlayerObj()
 	local playerObj = nil

@@ -3548,7 +3548,7 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 					local wrongSide = false
 					local ENI_Side = DCS_ENI_Side[uPilot.side]
 					if camp.boundary and camp.boundary[ENI_Side] and camp.boundary[ENI_Side] ~= nil then
-						wrongSide =  CheckPointInPoly2({x=uPilot.x2d,y=uPilot.y2d} , camp.boundary[ENI_Side])
+						wrongSide =  CheckPointInPoly_XY_2({x=uPilot.x2d,y=uPilot.y2d} , camp.boundary[ENI_Side])
 						env.info( "Custom_SAR DD3?  boundary wrongSide ? __"..tostring(wrongSide))
 						if wrongSide  then
 							authorisesRescue = false
