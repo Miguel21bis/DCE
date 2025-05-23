@@ -241,14 +241,14 @@ local function GCI_Cycle()
 	--assign interceptors to targets
 	ErrorMsg = "Assign interceptors."																--Error message in case follow on code fails
 	for track_side, side in pairs(target_tracks) do													--iterate throug sides in target_tracks table
-		env.info("DCE_Gci B_1 track_side: "..track_side)
+		-- env.info("DCE_Gci B_1 track_side: "..track_side)
 
 		for target_name, target in pairs(side) do													--iterate through targets
-			env.info("DCE_Gci B_2 "..tostring(target_name))
+			-- env.info("DCE_Gci B_2 "..tostring(target_name))
 			ErrorMsg = "Assign interceptors; Target: " .. target_name								--Error message in case follow on code fails
 			
 			if target.history > 0 then																--target was detected at least two times in sequence
-				env.info("DCE_Gci B_3 ")
+				-- env.info("DCE_Gci B_3 ")
 
 				--ne declenche les intercepteur que si les ENI franchissent la frontiere
 				-- ou si le target est entre chez nous et chez eux (zone tampon ou eau international)
@@ -257,7 +257,7 @@ local function GCI_Cycle()
 				local authorizedInter = false
 
 				if camp.boundary and camp.boundary[track_side] and camp.boundary[track_side] ~= nil then
-					env.info("DCE_Gci B_4 ")
+					-- env.info("DCE_Gci B_4 ")
 
 					ourSideOfBorder =  CheckPointInPoly_XY_3({x=target.point.x,y=target.point.z}, camp.boundary[track_side])
 
@@ -271,12 +271,12 @@ local function GCI_Cycle()
 					if ourSideOfBorder then
 
 						authorizedInter = true
-						env.info("DCE_Gci B_6 ourSideOfBorder "..tostring(ourSideOfBorder))
+						-- env.info("DCE_Gci B_6 ourSideOfBorder "..tostring(ourSideOfBorder))
 
 					elseif not ourSideOfBorder and not enemySideOfBorder then
 
 						authorizedInter = true
-						env.info("DCE_Gci B_7 zone tampon authorizedInter "..tostring(authorizedInter))
+						-- env.info("DCE_Gci B_7 zone tampon authorizedInter "..tostring(authorizedInter))
 
 					else
 						-- --check si le target est sur la mere
@@ -307,10 +307,10 @@ local function GCI_Cycle()
 					authorizedInter = true
 				end
 
-				env.info("DCE_Gci B_8 authorizedInter: "..tostring(authorizedInter).." | target.assigned<? "..tostring(target.assigned).." target.number"..tostring(target.number))
+				-- env.info("DCE_Gci B_8 authorizedInter: "..tostring(authorizedInter).." | target.assigned<? "..tostring(target.assigned).." target.number"..tostring(target.number))
 
 				if authorizedInter and target.assigned < target.number then												--if target has less interceptors assigned than it has aircraft in group
-					env.info("DCE_Gci C0 ")	
+					-- env.info("DCE_Gci C0 ")	
 					--find all flights in range to intercept target
 					local eligible_flights = {}														--table of flights eligible for interception of this target
 					local goodTargetType = true
@@ -325,24 +325,24 @@ local function GCI_Cycle()
 							end
 						end
 					
-						env.info("DCE_Gci C1 goodTargetType: "..tostring(goodTargetType))
+						-- env.info("DCE_Gci C1 goodTargetType: "..tostring(goodTargetType))
 
 						if goodTargetType then
-							env.info("DCE_Gci C2 base_name: "..tostring(base_name))
+							-- env.info("DCE_Gci C2 base_name: "..tostring(base_name))
 							for flight_n, flight in pairs(base.ready) do								--iterate through ready interceptor flights
-								env.info("DCE_Gci C3")
+								-- env.info("DCE_Gci C3")
 
 								if flight.time + 900 < current_time then								--interceptor flight has moved to ready status (from ready15) longer than 15 minutes ago and is ready for action (time is -900 for flight starting ready at mission start).
 									ErrorMsg = "Assign interceptors; Target: " .. target_name .. "; Interceptor: " .. flight.name						--Error message in case follow on code fails
 									
-									env.info("DCE_Gci C4 "..tostring(target.point.x).." "..tostring(target.point.z).." "..tostring(flight.x).." "..tostring(flight.y))
+									-- env.info("DCE_Gci C4 "..tostring(target.point.x).." "..tostring(target.point.z).." "..tostring(flight.x).." "..tostring(flight.y))
 
 									-- if current_time >= flight.tot_from and current_time <= flight.tot_to then											--flight can operate at current time							
 										local distance = math.sqrt(math.pow(target.point.x - flight.x, 2) + math.pow(target.point.z - flight.y, 2))		--distance between interceptor airbase and target
-										env.info("DCE_Gci C5 distance: "..tostring(distance).." <?range: "..tostring(flight.range))
+										-- env.info("DCE_Gci C5 distance: "..tostring(distance).." <?range: "..tostring(flight.range))
 										
 										if distance < flight.range then									--target is in interception range
-											env.info("DCE_Gci C6")
+											-- env.info("DCE_Gci C6")
 											
 											eligible_flights[flight.name] = distance					--store flight name and interception distance in table
 										end
@@ -371,16 +371,16 @@ local function GCI_Cycle()
 					local launchedInterceptorOK = false
 
 					if selected_flight then
-						env.info("DCE_Gci D1 target_name: "..tostring(target_name))
+						-- env.info("DCE_Gci D1 target_name: "..tostring(target_name))
 
 						for base_name, base in pairs(GCI.Interceptor[track_side].base) do				--iterate through bases in GCI table
-							env.info("DCE_Gci D2 base_name: "..tostring(base_name))
+							-- env.info("DCE_Gci D2 base_name: "..tostring(base_name))
 						
 							for flight_n, flight in pairs(base.ready) do								--iterate through ready interceptor flights						
-								env.info("DCE_Gci D3 flight_n: "..tostring(flight_n))
+								-- env.info("DCE_Gci D3 flight_n: "..tostring(flight_n))
 								
 								if flight.name == selected_flight then									--find selected interceptor flight in ready table
-									env.info("DCE_Gci D4 flight.name: "..tostring(flight.name))
+									-- env.info("DCE_Gci D4 flight.name: "..tostring(flight.name))
 									
 									trigger.action.setUserFlag(flight.flag, true)						--set flag true to launch interceptor
 									-- trigger.action.outText(selected_flight .. " 01 launched to intercept " .. target_name, 15)	--FOR DEBUG
@@ -391,13 +391,13 @@ local function GCI_Cycle()
 										local isExist = groupObj:isExist()
 										-- local inAir = targets[t].object:inAir()
 										if not isExist then 
-											env.info("DCE_Gci D5 group doesnt exist, break "..tostring(selected_flight))
+											-- env.info("DCE_Gci D5 group doesnt exist, break "..tostring(selected_flight))
 											break
 
 										end
 									else
 
-										env.info("DCE_Gci D6 groupObj doesnt exist, break "..tostring(selected_flight))
+										-- env.info("DCE_Gci D6 groupObj doesnt exist, break "..tostring(selected_flight))
 										break
 									end
 									
@@ -434,18 +434,18 @@ local function GCI_Cycle()
 									--***********************************************************************************
 									-- local heading1 = GetHeading(FlightSAR, {x=pt_dest.x2d, y=pt_dest.y2d})
 
-									env.info( "DCE_Gci D8 distance: "..tostring(target.distance).." altitude: "..target.altitude)
+									-- env.info( "DCE_Gci D8 distance: "..tostring(target.distance).." altitude: "..target.altitude)
 									local distance2 = target.distance/3
 									local weaponType = 1069547520					--automatique
 									local point_1 = GetOffsetPoint(flight, target.bearing, distance2/2)
 
 									if target.category == 0 then             --avion
 										distance2 = (target.distance/3)*2
-										env.info( "DCE_Gci D9 avion "..tostring(distance2))
+										-- env.info( "DCE_Gci D9 avion "..tostring(distance2))
 										weaponType = 1069547520					--automatique
 									elseif  target.category == 1 then             --helico
 										distance2 = target.distance/3
-										env.info( "DCE_Gci D10 helico "..tostring(distance2))
+										-- env.info( "DCE_Gci D10 helico "..tostring(distance2))
 										weaponType = 4194304						--Short Range Missile (Fox2)
 									end
 
@@ -498,9 +498,9 @@ local function GCI_Cycle()
 											return
 										end
 
-										env.info( "DCE_Gci E2 intercept GrpObjt : "..tostring(GrpObjt) )
+										-- env.info( "DCE_Gci E2 intercept GrpObjt : "..tostring(GrpObjt) )
 										local target_id = GrpObjt:getID()
-										env.info( "DCE_Gci E3 intercept target_id: "..tostring(target_id) )
+										-- env.info( "DCE_Gci E3 intercept target_id: "..tostring(target_id) )
 
 										target_id = Group.getByName(target_name):getID()					--get target group ID --TODO BUG 287: attempt to index a nil value stack traceback:
 										local Mission = {														--define mission for interceptor group

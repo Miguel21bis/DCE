@@ -3743,7 +3743,7 @@ local function DCE_BulleBy_DE()
 	--  **Spawn progressif des groupes et objets statiques** 
 	local function processSpawnQueue()
 		if #spawnQueue == 0 then
-			env.info("DCE_Bulle -E1- Tous les groupes et statiques ont été créés.")
+			-- env.info("DCE_Bulle -E1- Tous les groupes et statiques ont été créés.")
 			return  -- Plus rien à créer
 		end
 
@@ -3781,7 +3781,7 @@ local function DCE_BulleBy_DE()
 		if #spawnQueue > 0 then
 			timer.scheduleFunction(processSpawnQueue, nil, timer.getTime() + SPAWN_DELAY)
 		else
-			env.info("DCE_Bulle -E6- Tous les groupes et statiques ont été créés.")
+			-- env.info("DCE_Bulle -E6- Tous les groupes et statiques ont été créés.")
 		end
 
 	end
@@ -3828,13 +3828,13 @@ local function DCE_BulleBy_DE()
 			queueSpawn(newGroup, false)
 			savedGroups[groupData.name] = nil
 
-			env.info("DCE_Bulle -G2- #spawnQueue " .. tostring(#spawnQueue))
+			-- env.info("DCE_Bulle -G2- #spawnQueue " .. tostring(#spawnQueue))
 
 			-- Démarre le traitement si ce n'est pas déjà fait
 			if #spawnQueue == 1 then
-				env.info("DCE_Bulle -G3- Début du spawn progressif")
+				-- env.info("DCE_Bulle -G3- Début du spawn progressif")
 				if #spawnQueue == 1 then
-					env.info("DCE_Bulle -G3- Début du spawn progressif")
+					-- env.info("DCE_Bulle -G3- Début du spawn progressif")
 					timer.scheduleFunction(processSpawnQueue, nil, timer.getTime() + SPAWN_DELAY)
 				end
 
@@ -3850,9 +3850,9 @@ local function DCE_BulleBy_DE()
 
 			-- Démarre le traitement si ce n'est pas déjà fait
 			if #spawnQueue == 1 then
-				env.info("DCE_Bulle -G5- Début du spawn progressif des statiques")
+				-- env.info("DCE_Bulle -G5- Début du spawn progressif des statiques")
 				if #spawnQueue == 1 then
-					env.info("DCE_Bulle -G6- Début du spawn progressif")
+					-- env.info("DCE_Bulle -G6- Début du spawn progressif")
 					timer.scheduleFunction(processSpawnQueue, nil, timer.getTime() + SPAWN_DELAY)
 				end
 
@@ -3885,7 +3885,7 @@ local function DCE_BulleBy_DE()
 
 	--  **Vérifier et basculer les unités selon leur distance aux avions** 
 	local function updateUnitVisibility()
-		env.info("DCE_Bulle -H1- Vérification des distances et basculement des unités...")
+		-- env.info("DCE_Bulle -H1- Vérification des distances et basculement des unités...")
 
 		local activationN = 0
 		local deActivate = 0
@@ -3898,14 +3898,14 @@ local function DCE_BulleBy_DE()
 
 				if distance < ACTIVATION_DISTANCE then
 					if savedGroups[groupName] then
-						env.info("DCE_Bulle -H2- Activation du groupe terrestre : " .. groupName)
+						-- env.info("DCE_Bulle -H2- Activation du groupe terrestre : " .. groupName)
 						activationN = activationN+1
 						enableGroup(groupData)
 					end
 				else
 					if not groupData.respawnTime or (groupData.respawnTime < timer.getTime() + 900) then
 						if not savedGroups[groupName] then
-							env.info("DCE_Bulle -H3- Désactivation du groupe terrestre : " .. groupName)
+							-- env.info("DCE_Bulle -H3- Désactivation du groupe terrestre : " .. groupName)
 							deActivate = deActivate + 1
 							disableGroup(groupData)
 						end
@@ -3920,13 +3920,13 @@ local function DCE_BulleBy_DE()
 
 			if distance < ACTIVATION_DISTANCE then
 				if savedStatics[staticName] then
-					env.info("DCE_Bulle -H4- Activation de l'objet statique : " .. staticName)
+					-- env.info("DCE_Bulle -H4- Activation de l'objet statique : " .. staticName)
 					activationN = activationN+1
 					enableGroup({ name = staticName }) -- Réactivation
 				end
 			else
 				if not savedStatics[staticName] then
-					env.info("DCE_Bulle -H5- Désactivation de l'objet statique : " .. staticName)
+					-- env.info("DCE_Bulle -H5- Désactivation de l'objet statique : " .. staticName)
 					deActivate = deActivate+1
 					disableGroup({ name = staticName }) -- Désactivation
 				end
@@ -3947,17 +3947,17 @@ local function DCE_BulleBy_DE()
 
 	--  **Planification du check toutes les 30 secondes** 
 	local function scheduleUnitCheck()
-		env.info("DCE_Bulle - Planification de la vérification des unités dans 30 secondes...")
+		-- env.info("DCE_Bulle - Planification de la vérification des unités dans 30 secondes...")
 		updateUnitVisibility()
 		return timer.getTime() + 30
 	end
 
 	--  **Planification initiale après collecte des unités et statiques** 
 	timer.scheduleFunction(function()
-		env.info("DCE_Bulle - Démarrage de la collecte des groupes au sol et statiques...")
+		-- env.info("DCE_Bulle - Démarrage de la collecte des groupes au sol et statiques...")
 		collectStaticObjects()
 		collectGroundGroups()
-		env.info("DCE_Bulle - Vérification et activation de la surveillance des unités...")
+		-- env.info("DCE_Bulle - Vérification et activation de la surveillance des unités...")
 		timer.scheduleFunction(scheduleUnitCheck, nil, timer.getTime() + 5) -- Premier check après 5 sec
 	end, nil, timer.getTime() + 10)
 
