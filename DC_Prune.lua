@@ -179,6 +179,18 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 	elseif  stringStarts(unit.name,"Pack") and not string.find(unit.name,"Static") then
 		-- print("DC_P_T  Pack keep plane and helicopter: "..unit.name )
 		return true -- keep plane and helicopter
+		
+	elseif  string.find(unit.name,"VC_")  then
+		-- VC_Khe-Sanh-Troops
+		if string.find(unit.name,"VC_Khe-Sanh") then
+			print("DC_P_T1 -------> KEEP VC_: "..unit.name)
+			return true -- keep VC_Khe-Sanh
+		else
+			print("DC_P_T2 PRUNE VC_: "..unit.name)
+			return false -- Prune VC_ planesname
+		end
+
+
 	elseif  string.find(string.lower(unit.name),"convo") then
 		-- print("DC_P_ keep Convoy")
 		return true -- keep Convoy
