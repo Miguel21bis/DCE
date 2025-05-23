@@ -143,7 +143,7 @@ for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed 
 		local txDestruction = 0
 		if scen.lifePourcent then
 			if scen.lifePourcent <= 50 then
-				-- addToMission = true
+				addToMission = true
 				txDestruction = scen.lifePourcent
 			else
 				oob_scen[scen_name] = nil
@@ -169,13 +169,13 @@ for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed 
 					[4] = 0.15,
 				},
 				["hidden"] = true,
-				["name"] = "SceneryDestroyZone" .. #mission.trigrules[1].actions + 1,
+				["name"] = "SceneryDestroyZone" .. #mission.trigrules[trig_n].actions + 1,
 			}
 
 			--add trigger
-			mission.trig.actions[1] = mission.trig.actions[1] ..  "a_scenery_destruction_zone(" .. zones_n .. ", ".. txDestruction..");"
+			mission.trig.actions[trig_n] = mission.trig.actions[trig_n] ..  "a_scenery_destruction_zone(" .. zones_n .. ", ".. txDestruction..");"
 
-			mission.trigrules[1].actions[#mission.trigrules[1].actions + 1] = {
+			mission.trigrules[trig_n].actions[#mission.trigrules[trig_n].actions + 1] = {
 				["ai_task"] = {
 					[1] = "",
 					[2] = "",
