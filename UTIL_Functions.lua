@@ -75,6 +75,10 @@ Package_freq = {															--table to store frequencies assigned to packages
 	},
 }
 
+--variable pour destructions batiment de DCS
+MinPercentDestroyed = 95		--en pourcentage
+RayonDamaged = 50				--en metres
+
 --function to return txt whith carriage return
 function StringToTxt(text)
 	text = string.gsub(text, "\\n", "\n")

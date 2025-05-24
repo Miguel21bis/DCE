@@ -45,9 +45,9 @@ else
 
 	GetAllId()
 
-	-- --TODO attention, surveiller les conséquences de ces lignes plus bas (est-ce que ça double? ou revient à 0?)
-	-- targetlist = nil
-	-- dofile("Active/targetlist.lua")
+	--TODO attention, surveiller les conséquences de ces lignes plus bas (est-ce que ça double? ou revient à 0?)
+	targetlist = nil
+	dofile("Active/targetlist.lua")
 
 	clientstats = nil
 	dofile("Active/clientstats.lua")
@@ -1059,15 +1059,21 @@ for hit_unit,hitter in pairs(hit_table) do													--iterate through all rem
 	end
 end
 
-local rayonDamaged = 50
+
 --evaluate destroyed scenery objects
-for scen_name,scen in pairs(scen_log) do													--iterate through destroyed scenery objects
+for scen_name, scen in pairs(scen_log) do													--iterate through destroyed scenery objects
 	-- if scen.x and scen.z and (scen.lifeActual1s /scen.hightLife < 0.75) then																--scenery object has x and z coordinates
 	local passePourcent = false
-	if scen.lifePourcent and scen.lifePourcent <= 99 then
+	if scen.lifePourcent and scen.lifePourcent <= MinPercentDestroyed then
 		passePourcent = true
 	end
-	if scen.x and scen.z and passePourcent then
+
+	local isForest = false
+	if scen.sceneryTypeName and string.find(scen.sceneryTypeName, "FOREST")  then
+		isForest = true
+	end
+
+	if scen.x and scen.z and passePourcent and not isForest then
 		for side_name, targets in pairs(targetlist) do											--iterate through targetlist
 			for targetN, target in pairs(targets) do										--iterate through targets				
 				if target.elements  then
@@ -1079,16 +1085,40 @@ for scen_name,scen in pairs(scen_log) do													--iterate through destroyed
 							-- if math.floor(scen.x) == math.floor(element.x) and math.floor(scen.z) == math.floor(element.y) then		--dead scenery is this element						
 							-- scen.lifePourcent < 100 and
 							-- if   (scen.x <= element.x + 50 and scen.x > element.x - 50) and (scen.z <= element.y + 50 and scen.z > element.y - 50) then								
-							if (scen.x <= element.x + rayonDamaged and scen.x > element.x - rayonDamaged) and (scen.z <= element.y + rayonDamaged and scen.z > element.y - rayonDamaged) then
+							
+							local distance = math.floor(math.sqrt((scen.x - element.x)^2 + (scen.z - element.y)^2))					--calculate distance between dead scenery and target element
+							
+							-- print("DebriefSE A distance "..tostring(distance).." between "..tostring(scen.scenaryName).." and "..tostring(element.name))
+
+							if distance <= RayonDamaged  then
+								print("DebriefSE --> B "..tostring(distance).." between "..tostring(scen.scenaryName).." "..tostring(scen.sceneryTypeName).." and "..tostring(element.name))
 								--plus bas, ne pas l'enlever, car il peut y avoir plusieurs detection de destruction, et cela fausse le resultat car detecté déjà detruit
 								if element.dead and element.CheckDay and element.CheckDay < camp.date.CampTotalTimeS then
 								-- if element.dead then											--element was already dead previously
 									element.dead_last = false									--mark element as not died in last mission
+									print("DebriefSE  - --> C "..tostring(scen.scenaryName).." and "..tostring(element.name).." element already dead")
 								else
+									print("DebriefSE  - --> D "..tostring(scen.scenaryName).." and "..tostring(element.name).." element not dead yet")
 									element.dead = true											--mark element as dead
 									element.dead_last = true									--mark element as died in last mission
 									element.CheckDay = camp.date.CampTotalTimeS									-- ajoute la date de destruction		 Miguel21 modification M19.f : Repair SAM	
 
+									scen.lifePourcent = 0
+
+									if not element["idDCS"] then
+										element["idDCS"] = {}
+										print("DebriefSE  - --> D2 ")
+									end									--store idDCS of scenery object in element for later use
+									if not element["idDCS"][scen.scenaryName] then
+										element["idDCS"][scen.scenaryName] = 999999
+										print("DebriefSE  - --> D2 ")
+									end
+
+									if distance < element["idDCS"][scen.scenaryName] then
+										element["idDCS"][scen.scenaryName] = distance
+										print("DebriefSE  - --> D3 ")
+									end
+									
 									--award ground kill to air unit
 									if scen.lasthit ~= nil then																			--check if dead scenery has a hit entry
 										for killer_side_name,killer_side in pairs(oob_air) do											--iterate through all sides

@@ -139,12 +139,18 @@ mission.trigrules[trig_n] = {
 require("Active/oob_scen")
 for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed scenery objects
 	if scen.x and scen.z then														--destroyed scenery object has x and z coordinates
+	
+		local isForest = false
+		if scen.sceneryTypeName and string.find(scen.sceneryTypeName, "FOREST")  then
+			isForest = true
+		end
+	
 		local addToMission = false
 		local txDestruction = 0
-		if scen.lifePourcent then
-			if scen.lifePourcent <= 50 then
+		if scen.lifePourcent and not isForest then
+			if scen.lifePourcent <= MinPercentDestroyed then
 				addToMission = true
-				txDestruction = scen.lifePourcent
+				txDestruction = 100 - scen.lifePourcent -- taux de destruction = 100 - pourcentage de vie
 			else
 				oob_scen[scen_name] = nil
 			end
@@ -491,6 +497,7 @@ camp.spotterAircraft = ListSpotterAircraft()
 
 camp.jammerOnBoard = jammerOnBoard
 camp.unitSystem = mission_ini.unitSystem
+camp.MinPercentDestroyed = MinPercentDestroyed
 
 if not camp.missionHistory then camp.missionHistory = {} end
 camp.missionHistory[camp.mission] = camp.date
@@ -1591,32 +1598,10 @@ if camp_ZoneSAR then
 	ZoneSARFile:close()
 end
 
--- if Debug.debug then
--- 	local fileName
--- 	local folderName = "/Debug"
--- 	if Firstmission_flag then
--- 		fileName =  camp.title.."_first.miz"
 
--- 		-- créer ici le repertoire "mission_01" si il n'existe pas
--- 		folderName = folderName.."/mission_01"
+			
+camp.timeJump = false
 
--- 		--copy fileName dans folderName:
-
--- 		--copy le repertoire "Active" dans folderName
-
--- 	else
-
--- 		fileName =  camp.title.."_ongoing.miz"
-
--- 		-- créer ici le repertoire "mission_n" si il n'existe pas
--- 		folderName = folderName.."/mission_"..camp.mission
-
--- 		--copy fileName dans folderName:
-
--- 		-- copy le repertoire "Active" dans folderName
-
--- 	end
--- end
 
 if Debug.debug or mission_ini.backupAllMissionFiles then
     local fileName

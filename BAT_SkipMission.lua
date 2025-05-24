@@ -771,8 +771,6 @@ if input == "y" or input == "yes" then
 			else
 				print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
 			end
-			
-			camp.timeJump = false
 
 		until 1 == 2
 
