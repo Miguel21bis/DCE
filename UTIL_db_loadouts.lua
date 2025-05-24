@@ -4,11 +4,12 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.190"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.191"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
+-- V191 KC-135 v = 185
 -- V190 A-4E fuel = 2467
 -- V189 - Crusader Escort
 -- V188 - Mod MiG-21MF (TeTe) + PFM (Miguel Mod)
@@ -17335,8 +17336,8 @@ db_all_loadouts = {
 				adverseWeather = true,
 				range = 500000,
 				firepower = 1,
-				vCruise = 200,
-				vAttack = 200,
+				vCruise = 185,
+				vAttack = 185,
 				hCruise = 7000,
 				hAttack = 7000,
 				tStation = 21600,
@@ -17357,8 +17358,8 @@ db_all_loadouts = {
 				adverseWeather = true,
 				range = 1000000,
 				firepower = 1,
-				vCruise = 200,
-				vAttack = 200,
+				vCruise = 185,
+				vAttack = 185,
 				hCruise = 7000,
 				hAttack = 7000,
 				tStation = 21600,
@@ -25731,7 +25732,7 @@ db_all_loadouts = {
 				adverseWeather = true,
 				range = 500000,
 				firepower = 1,
-				vCruise = 200,
+				vCruise = 180,
 				vAttack = 150,
 				hCruise = 1828.8,
 				hAttack = 1828.8,
@@ -32215,8 +32216,8 @@ db_all_loadouts = {
 				adverseWeather = true,
 				range = 500000,
 				firepower = 1,
-				vCruise = 216.66666666667,
-				vAttack = 216.66666666667,
+				vCruise = 185,
+				vAttack = 185,
 				hCruise = 7000,
 				hAttack = 7000,
 				tStation = 21600,
