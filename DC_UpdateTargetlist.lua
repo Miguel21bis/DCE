@@ -1699,6 +1699,41 @@ camp.targetPos = targetPosTemp
 --*********************************************************************************
 
 
+--*********************************************************************************
+--ajoute/enleve des zone de destructions pour correspondre a certaines cibles de targetlist
+--DC_UpdateScen
+--*********************************************************************************
+for targetSide, targets in pairs(targetlist) do
+	for targetN, target in pairs(targets) do
+		if target.class and target.class == "MapObject" then
+			if target.dead then
+				if camp.targetPos[target.x] then
+					oob_scen[target.name] = {
+						x = target.x,
+						y = target.y,
+						lifePourcent = 0,
+						scenaryName = target.name,
+					}
+				end
+			else
+
+				for oob_scenN, scen in pairs(oob_scen) do
+					if scen.x and scen.y then
+						local dist = GetDistance({x=target.x, y=target.y}, {x=scen.x, y=scen.y})
+						if dist < 50 then
+							oob_scen[oob_scenN] = nil									--remove target from oob_scen table if it is close to a target that is not dead
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
+
+
+		
+
 if Debug.debug then
 	_affiche(GroundTarget, " DcUT GroundTarget")
 	_affiche(GroundZoneTarget, " DcUT GroundZoneTarget")

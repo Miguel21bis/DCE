@@ -54,16 +54,16 @@ clientFile:write(client_str)																--save new data
 clientFile:close()
 
 local oob_scen_old = loadfile("Active/oob_scen.lua")()										--load oob_scen file
-for scen_name, scen in PairsByKeys(scen_log) do													--iterate through destroyed scenery objects
+for scen_name, scen in PairsByKeys(scen_log) do												--iterate through destroyed scenery objects
 	if scen.x and scen.z then																--destroyed scenery object has x and z coordinates
-	
+
 		local isForest = false
 		if scen.sceneryTypeName and string.find(scen.sceneryTypeName, "FOREST")  then
 			isForest = true
 		end
-	
+
 		if not isForest then
-			print("Pass MainAM scen_name: "..scen_name.." scen.sceneryTypeName: " .. scen.sceneryTypeName)
+			-- print("Pass MainAM scen_name: "..scen_name.." scen.sceneryTypeName: " .. scen.sceneryTypeName)
 			if scen.lifePourcent then
 				if scen.lifePourcent <= MinPercentDestroyed then
 					oob_scen[scen_name] = scen
@@ -72,9 +72,9 @@ for scen_name, scen in PairsByKeys(scen_log) do													--iterate through de
 				oob_scen[scen_name] = scen														--add/update to oob_scen
 			end
 		end
-
 	end
 end
+
 local scen_str = "oob_scen = " .. TableSerialization(oob_scen, 0)							--make a string
 local scenFile = io.open("Active/oob_scen.lua", "w") or error("Failed to open debug file")
 scenFile:write(scen_str)																	--save new data

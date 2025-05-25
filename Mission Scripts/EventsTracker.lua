@@ -58,6 +58,7 @@ local eventIdTotal = {}
 local tabEjection = {}
 local despawn = {}
 local eventHandlerDCE = {}
+local refuelProgressTimerId = nil
 
 local function WarningText()
 	local text = "WARNING:\n"
@@ -178,6 +179,40 @@ local function addHit1s(hitTemp)
 	if hitTemp.description and camp.debug then
 		scenLog[hitTemp.scenaryName]["description"] = hitTemp.description	--tooHeavy
 	end
+end
+
+-- Fonction périodique pour notifier le joueur pendant le ravitaillement
+local function CheckRefuelProgress()
+    local anyRefueling = false
+    for uid, fuelStart in pairs(RefuelStartByUnit) do
+        local unit = Unit.getByName(uid) or (Unit.getByID and Unit.getByID(uid))
+        if unit and unit:isExist() and unit:inAir() then
+            anyRefueling = true
+            local desc = unit:getDesc()
+            local fuelMassMax = desc and desc.fuelMassMax or 0
+            local fuelNow = unit:getFuel()
+            if fuelMassMax > 0 and fuelNow then
+                local fuelKg = (fuelNow > 1 and fuelMassMax or fuelNow * fuelMassMax)
+                local fuelLbs = fuelKg * 2.20462
+                if not RefuelNotifyByUnit[uid] then
+                    RefuelNotifyByUnit[uid] = math.floor(fuelKg * 2.20462 / 1000) * 1000 + 1000
+                end
+                while fuelLbs >= RefuelNotifyByUnit[uid] do
+                    local playerName = unit.getPlayerName and unit:getPlayerName()
+                    if playerName then
+                        trigger.action.outTextForUnit(uid,
+                            string.format("Fuel on board: %.0f lbs", RefuelNotifyByUnit[uid]), 5)
+                    end
+                    RefuelNotifyByUnit[uid] = RefuelNotifyByUnit[uid] + 1000
+                end
+            end
+        end
+    end
+    if anyRefueling then
+        refuelProgressTimerId = timer.scheduleFunction(CheckRefuelProgress, nil, timer.getTime() + 5)
+    else
+        refuelProgressTimerId = nil -- plus personne ne ravitaille, on arrête le cycle
+    end
 end
 
 --###################  ######   #####################################
@@ -1127,6 +1162,44 @@ function eventHandlerDCE:onEvent(event)
 				end
 			end
 		end
+		if event.weapon then
+			local weaponId = event.weapon:getID() -- ID unique de la bombe
+			local descWep = event.weapon:getDesc()
+			if descWep and descWep.category == Weapon.Category.BOMB then
+				local impactPoint = event.weapon:getPoint()
+				local weaponName = descWep.displayName or "unknown"
+				local explosiveMass = 0
+				local tntEquivalent = 0
+				local warheadMass = 0
+				if descWep.warhead then
+					-- Masse d'explosif (souvent déjà en équivalent TNT dans DCS)
+					explosiveMass = descWep.warhead.explosiveMass or 0
+					-- Masse totale de la charge (utile pour info)
+					warheadMass = descWep.warhead.mass or 0
+					-- Si tu veux calculer un équivalent TNT personnalisé :
+					-- tntEquivalent = explosiveMass * (descWep.warhead.tntFactor or 1)
+					-- Mais en général explosiveMass est déjà l'équivalent TNT
+					tntEquivalent = explosiveMass
+				end
+
+				if camp.Debug then
+					env.info(string.format("DCE_EventT: Bombe %s impact en %0.1f / %0.1f / %0.1f (%.0f kg TNT)", weaponName, impactPoint.x, impactPoint.y, impactPoint.z, tntEquivalent))
+				end
+				-- Log ou traitement
+				scenLog["BOMB_"..tostring(weaponId)] = {
+					event = "BOMB_IMPACT",
+					weaponName = weaponName,
+					explosiveMass = explosiveMass,
+					tntEquivalent = tntEquivalent,
+					warheadMass = warheadMass,
+					x = impactPoint.x,
+					y = impactPoint.z,
+					z = impactPoint.y,
+					initiator = event.initiator and event.initiator:getName() or "unknown",
+					time = timer.getTime(),
+				}
+			end
+		end
 	elseif event.id == world.event.S_EVENT_DEAD then
 		if event.initiator then
 			if Object.getCategory(event.initiator) == 5 then							--if initiator is a scenery object
@@ -1186,8 +1259,44 @@ function eventHandlerDCE:onEvent(event)
 				end
 			end
 		end
-	end
+		elseif event.id == world.event.S_EVENT_REFUELING then
+			if event.initiator and event.initiator:getFuel() then
+				local uid = event.initiator:getID()
+				RefuelStartByUnit[uid] = event.initiator:getFuel()
+				env.info("DCE_EventT: Refuel Start for unit " .. event.initiator:getName() .. " / Fuel before refuel: " .. string.format("%.2f", RefuelStartByUnit[uid] * 100) .. "%")
+				-- Lance le cycle uniquement s'il n'est pas déjà lancé
+				if not refuelProgressTimerId then
+					refuelProgressTimerId = timer.scheduleFunction(CheckRefuelProgress, nil, timer.getTime() + 5)
+				end
+			end
+
+		elseif event.id == world.event.S_EVENT_REFUELING_STOP then
+			if event.initiator and event.initiator:isExist() and event.initiator:getFuel() then
+				local uid = event.initiator:getID()
+				local fuelBefore = RefuelStartByUnit[uid]
+				if fuelBefore then
+					local fuelAfter = event.initiator:getFuel()
+					local fuelTransferred = fuelAfter - fuelBefore
+					local desc = event.initiator:getDesc()
+					local fuelMassMax = desc and desc.fuelMassMax or 0
+					local fuelTransferredKg = math.floor(fuelTransferred * fuelMassMax)
+					local fuelTransferredLbs = math.floor(fuelTransferredKg * 2.20462 + 0.5)
+					local playerName = event.initiator.getPlayerName and event.initiator:getPlayerName()
+					if playerName then
+						trigger.action.outTextForUnit(event.initiator:getID(),
+							string.format("Fuel transferred: %.0f kg (%.0f lbs)", fuelTransferredKg, fuelTransferredLbs), 10)
+						env.info("DCE_EventT: Refuel Stop for unit " .. event.initiator:getName()
+							.. " / Fuel transferred: " .. string.format("%.0f kg (%.0f lbs)", fuelTransferredKg, fuelTransferredLbs))
+					end
+					RefuelStartByUnit[uid] = nil
+					RefuelNotifyByUnit[uid] = nil
+				end
+				-- Le timer s'arrêtera tout seul si plus personne ne ravitaille (voir CheckRefuelProgress)
+			end
+		end
 end
+
+
 world.addEventHandler(eventHandlerDCE)
 
 
