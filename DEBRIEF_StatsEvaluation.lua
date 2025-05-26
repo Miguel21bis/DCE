@@ -1060,6 +1060,119 @@ for hit_unit,hitter in pairs(hit_table) do													--iterate through all rem
 end
 
 
+-- Fonction de distance entre deux points 3D
+local function distanceBombe(a, b)
+    local dx = a.x - b.x
+    local dy = (a.y or 0) - (b.y or 0)
+    local dz = a.z - b.z
+    return math.sqrt(dx*dx + dy*dy + dz*dz)
+end
+
+-- Fonction principale de fusion
+local function fusionner_bombes(scen_log, rayon_max, temps_max)
+	local bombes = {}
+	local autres = {}
+
+	-- Séparation bombes et autres objets
+	for k, v in pairs(scen_log) do
+		if type(v) == "table" and v.event == "BOMB_IMPACT" then
+			table.insert(bombes, {key = k, data = v})
+		else
+			autres[k] = v
+		end
+	end
+
+	local groupes = {}
+	local used = {}
+
+	for i = 1, #bombes do
+		local bi = bombes[i]
+		if not used[bi.key] then
+			local groupe = {bi}
+			used[bi.key] = true
+			for j = i + 1, #bombes do
+				local bj = bombes[j]
+				if not used[bj.key] then
+					local dist = distanceBombe(bi.data, bj.data)
+					local delta_t = math.abs(bi.data.time - bj.data.time)
+					if dist <= rayon_max and delta_t <= temps_max then
+						table.insert(groupe, bj)
+						used[bj.key] = true
+					end
+				end
+			end
+			table.insert(groupes, groupe)
+		end
+	end
+
+    -- Fusion des groupes
+    local resultat = {}
+    local compteur = 1
+
+    for _, groupe in ipairs(groupes) do
+        if #groupe == 1 then
+            local unique = groupe[1]
+            resultat[unique.key] = unique.data
+        else
+            local total_mass = 0
+            local total_x, total_y, total_z, total_t = 0, 0, 0, 0
+            local noms = {}
+
+            for _, item in ipairs(groupe) do
+                local d = item.data
+                total_mass = total_mass + (d.tntEquivalent or d.explosiveMass or d.warheadMass or 0)
+                total_x = total_x + d.x
+                total_y = total_y + (d.y or 0)
+                total_z = total_z + d.z
+                total_t = total_t + d.time
+                noms[d.weaponName or "UNKNOWN"] = true
+            end
+
+            local n = #groupe
+            local key = "BOMB_FUSED_" .. compteur
+            compteur = compteur + 1
+            local noms_concat = ""
+            for name, _ in pairs(noms) do
+                noms_concat = noms_concat .. name .. "+"
+            end
+            noms_concat = noms_concat:sub(1, -2)
+
+            resultat[key] = {
+                event = "BOMB_IMPACT",
+                explosiveMass = total_mass,
+                -- tntEquivalent = total_mass,
+                -- warheadMass = total_mass,
+                weaponName = noms_concat,
+                time = total_t / n,
+                x = total_x / n,
+                y = total_y / n,
+                z = total_z / n,
+                fusionCount = n,
+                fusedFrom = (function()
+                    local f = {}
+                    for _, b in ipairs(groupe) do table.insert(f, b.key) end
+                    return f
+                end)()
+            }
+        end
+    end
+
+    -- Réintégration des autres objets
+    for k, v in pairs(autres) do
+        resultat[k] = v
+    end
+
+    return resultat
+end
+
+-- Exemple d’appel avec rayon de 15 mètres et fenêtre de 2 secondes
+scen_log = fusionner_bombes(scen_log, 100, 2)
+
+local scen_str = "scen_log = " .. TableSerialization(scen_log, 0)							--make a string
+local scenFile = io.open("Debug/scen_log.lua", "w") or error("Failed to open debug file")
+scenFile:write(scen_str)																	--save new data
+scenFile:close()
+
 --evaluate destroyed scenery objects
 for scen_name, scen in pairs(scen_log) do													--iterate through destroyed scenery objects
 	-- if scen.x and scen.z and (scen.lifeActual1s /scen.hightLife < 0.75) then																--scenery object has x and z coordinates
@@ -1073,7 +1186,20 @@ for scen_name, scen in pairs(scen_log) do													--iterate through destroye
 		isForest = true
 	end
 
-	if scen.x and scen.z and passePourcent and not isForest then
+	local bombPass = false
+	if scen.event and scen.event == "BOMB_IMPACT" then
+		bombPass = true
+	end
+
+	if scen.event and scen.event == "BOMB_IMPACT" then
+		local temp = scen.y
+		scen.y = scen.z
+		scen.z = temp
+	end
+
+	if scen.x and scen.z and ((passePourcent and not isForest) or bombPass) then
+	-- if scen.x and scen.z and bombPass then
+	-- if scen.x and scen.z and (passePourcent and not isForest) then
 		for side_name, targets in pairs(targetlist) do											--iterate through targetlist
 			for targetN, target in pairs(targets) do										--iterate through targets				
 				if target.elements  then
@@ -1090,7 +1216,13 @@ for scen_name, scen in pairs(scen_log) do													--iterate through destroye
 							
 							-- print("DebriefSE A distance "..tostring(distance).." between "..tostring(scen.scenaryName).." and "..tostring(element.name))
 
-							if distance <= RayonDamaged  then
+							local correctedRadius = RayonDamaged
+							if scen.explosiveMass then
+								local k_val = 4.0  -- k = 4 par défaut, typique pour bâtiments légers
+								correctedRadius = k_val * (scen.explosiveMass)^(1/3)
+							end
+
+							if distance <= correctedRadius  then
 								print("DebriefSE --> B "..tostring(distance).." between "..tostring(scen.scenaryName).." "..tostring(scen.sceneryTypeName).." and "..tostring(element.name))
 								--plus bas, ne pas l'enlever, car il peut y avoir plusieurs detection de destruction, et cela fausse le resultat car detecté déjà detruit
 								if element.dead and element.CheckDay and element.CheckDay < camp.date.CampTotalTimeS then
@@ -1105,19 +1237,19 @@ for scen_name, scen in pairs(scen_log) do													--iterate through destroye
 
 									scen.lifePourcent = 0
 
-									if not element["idDCS"] then
-										element["idDCS"] = {}
-										print("DebriefSE  - --> D2 ")
-									end									--store idDCS of scenery object in element for later use
-									if not element["idDCS"][scen.scenaryName] then
-										element["idDCS"][scen.scenaryName] = 999999
-										print("DebriefSE  - --> D2 ")
-									end
+									-- if not element["idDCS"] then
+									-- 	element["idDCS"] = {}
+									-- 	print("DebriefSE  - --> D2 ")
+									-- end									--store idDCS of scenery object in element for later use
+									-- if not element["idDCS"][scen.scenaryName] then
+									-- 	element["idDCS"][scen.scenaryName] = 999999
+									-- 	print("DebriefSE  - --> D2 ")
+									-- end
 
-									if distance < element["idDCS"][scen.scenaryName] then
-										element["idDCS"][scen.scenaryName] = distance
-										print("DebriefSE  - --> D3 ")
-									end
+									-- if distance < element["idDCS"][scen.scenaryName] then
+									-- 	element["idDCS"][scen.scenaryName] = distance
+									-- 	print("DebriefSE  - --> D3 ")
+									-- end
 									
 									--award ground kill to air unit
 									if scen.lasthit ~= nil then																			--check if dead scenery has a hit entry

@@ -2564,23 +2564,29 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 		local elementInAir = false
 		local flight = Group.getByName(flightName)							--get group
 		if flight then														--group still exists
-			env.info( "DCE_CustomSearchThenEngage Ba "..flightName)
+			env.info( "DCE_CustomSearchThenEngage B0 "..flightName)
 
 			local element = flight:getUnit(1)								--get first unit in group
+
+			env.info( "DCE_CustomSearchThenEngage B1 element "..tostring(element).." element:isExist() "..tostring(element and element:isExist()).." element:isActive() "..tostring(element and element:isActive()).." element:inAir() "..tostring(element and element:inAir()))
+
 			if element and element:isExist() and element:isActive() and element:inAir() then
 				elementInAir = true
-				env.info( "DCE_CustomSearchThenEngage Bb getUnit(1) elementInAir = true ")
+				env.info( "DCE_CustomSearchThenEngage B1b getUnit(1) elementInAir = true ")
 			else 
 				local wingman = flight:getUnits()								--get list of units from attacking flights
 				for n = 2, #wingman do
 					element = flight:getUnit(n)
+
+					env.info( "DCE_CustomSearchThenEngage B2 element "..tostring(element).." element:isExist() "..tostring(element and element:isExist()).." element:isActive() "..tostring(element and element:isActive()).." element:inAir() "..tostring(element and element:inAir()))
+
 					if element and element:isExist() and element:isActive() and element:inAir() then
 						elementInAir = true
-						env.info( "DCE_CustomSearchThenEngage Bc else n puis break n: "..n)
+						env.info( "DCE_CustomSearchThenEngage B2b else n puis break n: "..n)
 						break
 					end
 				end
-				env.info( "DCE_CustomSearchThenEngage Bd fin else ")
+				env.info( "DCE_CustomSearchThenEngage B99 fin else ")
 			end
 
 			local RTB = false
@@ -2596,12 +2602,16 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 				local desc = element:getDesc()
 				cat = desc.category
 
-				env.info( "DCE_CustomSearchThenEngage C desc.category "..tostring(cat))
-
 				if BingoPlaneTab[gpGid] and BingoPlaneTab[gpGid][callSign] then
 					RTB = true
 					elementInAir = false
+					_affiche(BingoPlaneTab, "DCE_CustomSearchThenEngage C BingoPlaneTab")
 				end
+
+				env.info( "DCE_CustomSearchThenEngage D1 gpGid "..tostring(gpGid).." callSign "..tostring(callSign).." RTB "..tostring(RTB).." elementInAir "..tostring(elementInAir))
+				env.info( "DCE_CustomSearchThenEngage D2 desc.category "..tostring(cat))
+
+
 			end
 
 			if elementInAir and cat and element and element:getPlayerName() == nil and not RTB then
@@ -2615,54 +2625,52 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 						id = 'ControlledTask',
 						params = {
 							task = {
-								["enabled"] = true,
-								["auto"] = false,
-								["id"] = "EngageTargetsInZone",
-								["number"] = 1,		--TODO attention, est-ce vraiment le nombre 1?
-								["params"] = {
-									["targetTypes"] = {
-										[1] = targetType,
-									},
-									["x"] = pos.x,
-									["y"] = pos.z,
-									["value"] = targetType .. ";",
-									["priority"] = 0,
-									["zoneRadius"] = radius,
+								enabled = true,
+								auto = false,
+								id = "EngageTargetsInZone",
+								number = 1,
+								params = {
+									targetTypes = { targetType },
+									x = pos.x,
+									y = pos.z,
+									value = targetType .. ";",
+									priority = 0,
+									zoneRadius = radius,
 								}
 							},
 							stopCondition = {
-								duration = 50,									--task is valid for 6 seconds only (after 5 seconds it is joined by the next iteration with updated zone position)
+								duration = 50,
 							}
 						}
 					}
 				elseif cat == Unit.Category.HELICOPTER then  -- 1 helo
-					task_entry = {										--define engage task		
+					task_entry = {
 						id = 'ControlledTask',
 						params = {
 							task = {
-								["enabled"] = true,
-								["auto"] = false,
-								["id"] = "EngageTargetsInZone",
-								["number"] = 1,		--TODO attention, est-ce vraiment le nombre 1?
-								["params"] = {
-									["targetTypes"] = { "Helicopters"},
-									["x"] = pos.x,
-									["y"] = pos.z,
-									["value"] = targetType .. ";",
-									["priority"] = 0,
-									["zoneRadius"] = 15000,
+								enabled = true,
+								auto = false,
+								id = "EngageTargetsInZone",
+								number = 1,
+								params = {
+									targetTypes = { "Helicopters" },
+									x = pos.x,
+									y = pos.z,
+									value = targetType .. ";",
+									priority = 0,
+									zoneRadius = 15000,
 								}
 							},
 							stopCondition = {
-								duration = 50,									--task is valid for 6 seconds only (after 5 seconds it is joined by the next iteration with updated zone position)
+								duration = 50,
 							}
 						}
 					}
 				end
 
-				cntrl:pushTask(task_entry)									--set task for group
+				cntrl:pushTask(task_entry)
 
-				if camp.debug  then
+				if camp.debug then
 					local current_time = timer.getTime() + 5
 					local logStr = "task_entry = " .. TableSerialization(task_entry, 0)
 					local flightNameClean = flightName:gsub('[%p%c%s]', '_')
@@ -2672,9 +2680,9 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 						logFile:close()
 					else
 						env.info("DCE_CustomSearchThenEngage : Failed to open log file for writing.")
-					end			
+					end
 
-					env.info( "DCE_CustomSearchThenEngage D ACTUALtime: "..timer.getTime().." "..tostring(flightName).."| targetType |"..tostring(targetType).."| Radius |"..tostring(radius))
+					env.info( "DCE_CustomSearchThenEngage M ACTUALtime: "..timer.getTime().." "..tostring(flightName).."| targetType |"..tostring(targetType).."| Radius |"..tostring(radius))
 				end
 
 				return timer.getTime() + 60									--repeat function every 5 seconds
@@ -2702,9 +2710,23 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 	-- 	return
 	-- end
 
+	-- Ajout d'un compteur pour sortir après 3 retours false consécutifs
+	if not CustomSearchThenEngage_falseCount then CustomSearchThenEngage_falseCount = {} end
+	if not CustomSearchThenEngage_falseCount[flightName] then CustomSearchThenEngage_falseCount[flightName] = 0 end
+
 	if ApplyEngageTargetsInZoneTask() == false then
-		env.info("DCE_CustomSearchThenEngage Y : elementInAir = false, return.")
-		return
+		CustomSearchThenEngage_falseCount[flightName] = CustomSearchThenEngage_falseCount[flightName] + 1
+		env.info("DCE_CustomSearchThenEngage Y : elementInAir = false, count = " .. tostring(CustomSearchThenEngage_falseCount[flightName]) .. ", flightName = " .. tostring(flightName))
+		timer.scheduleFunction(ApplyEngageTargetsInZoneTask, nil, timer.getTime() + 120)			--schedule function
+		
+		if CustomSearchThenEngage_falseCount[flightName] >= 10 then
+			CustomSearchThenEngage_falseCount[flightName] = nil
+			env.info("DCE_CustomSearchThenEngage Y : 3x false, return.")
+			return
+		end
+
+	else
+		CustomSearchThenEngage_falseCount[flightName] = 0
 	end
 	timer.scheduleFunction(ApplyEngageTargetsInZoneTask, nil, (nextTenth/10))			--schedule function
 

@@ -4744,7 +4744,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					local define_x = waypoints[1]["x"]
 					local define_y = waypoints[1]["y"]
 
-					if  not (is_helicopter and waypoints[1].action == "From Ground Area" and baseIsFARP ) then --n >= 2 and
+					if not (is_helicopter and waypoints[1].action == "From Ground Area" and baseIsFARP ) then --n >= 2 and
 						define_x = waypoints[1]["x"] + ((n - 1) * 15) +  ((f-1) * 15) + ((p - 1) * 15) -- ATO_FP_Debug01	--ANTI-COLLISION B
 						define_y = waypoints[1]["y"] + ((n - 1) * 15) +  ((f-1) * 15) + ((p - 1) * 15) --ATO_FP_Debug01 	--ANTI-COLLISION B
 					end
@@ -5310,10 +5310,16 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				-- ATO_FP_Debug01 
 				-- decale les apparitions en vol pour eviter les collisions en vol
 				if waypoints[1].type == "Turning Point" and waypoints[1]["briefing_name"] == "Spawn" and not flight[f].task == "AFAC"  then
-					for	n = 1 , #group.units do
-						group.units[n].x = ((p-1) * 60) + ((f-1) * 120) + group.units[n].x + (120 * n)	--ANTI-COLLISION C
-						group.units[n].y = ((p-1) * 60) + ((f-1) * 120) + group.units[n].y + (120 * n)	--ANTI-COLLISION C
+					-- for	n = 1 , #group.units do
+					-- 	group.units[n].x = ((p-1) * 60) + ((f-1) * 120) + group.units[n].x + (120 * n)	--ANTI-COLLISION C
+					-- 	group.units[n].y = ((p-1) * 60) + ((f-1) * 120) + group.units[n].y + (120 * n)	--ANTI-COLLISION C
+					-- end
+					local spacing = 300 -- Mets ici la distance minimale souhaitée (en mètres)
+					for n = 1, #group.units do
+						group.units[n].x = ((p-1) * spacing/1.2) + ((f-1) * spacing) + group.units[n].x + (spacing * n)
+						group.units[n].y = ((p-1) * spacing/1.2) + ((f-1) * spacing) + group.units[n].y + (spacing * n)
 					end
+
 					waypoints[1].x = group.units[1].x
 					waypoints[1].y = group.units[1].y
 					group.x = group.units[1].x

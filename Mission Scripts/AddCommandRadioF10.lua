@@ -468,6 +468,15 @@ function NormalizeAngle(angle)
 end
 
 
+function GenerateIdAleatoire()
+    local chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    local id = ''
+    for i = 1, 10 do
+        local r = math.random(1, #chars)
+        id = id .. chars:sub(r, r)
+    end
+    return id
+end
 
 
 
