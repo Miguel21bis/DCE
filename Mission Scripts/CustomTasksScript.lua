@@ -2564,12 +2564,12 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 		local elementInAir = false
 		local flight = Group.getByName(flightName)							--get group
 		if flight then														--group still exists
-			-- env.info( "DCE_CustomSearchThenEngage Ba "..flightName)
+			env.info( "DCE_CustomSearchThenEngage Ba "..flightName)
 
 			local element = flight:getUnit(1)								--get first unit in group
 			if element and element:isExist() and element:isActive() and element:inAir() then
 				elementInAir = true
-				-- env.info( "DCE_CustomSearchThenEngage Bb getUnit(1) elementInAir = true ")
+				env.info( "DCE_CustomSearchThenEngage Bb getUnit(1) elementInAir = true ")
 			else 
 				local wingman = flight:getUnits()								--get list of units from attacking flights
 				for n = 2, #wingman do
@@ -2580,7 +2580,7 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 						break
 					end
 				end
-				-- env.info( "DCE_CustomSearchThenEngage Bd fin else ")
+				env.info( "DCE_CustomSearchThenEngage Bd fin else ")
 			end
 
 			local RTB = false
@@ -2596,7 +2596,7 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 				local desc = element:getDesc()
 				cat = desc.category
 
-				-- env.info( "DCE_CustomSearchThenEngage C desc.category "..tostring(cat))
+				env.info( "DCE_CustomSearchThenEngage C desc.category "..tostring(cat))
 
 				if BingoPlaneTab[gpGid] and BingoPlaneTab[gpGid][callSign] then
 					RTB = true
@@ -2662,20 +2662,20 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 
 				cntrl:pushTask(task_entry)									--set task for group
 
-				-- if camp.debug  then
-				-- 	local current_time = timer.getTime() + 5
-				-- 	local logStr = "task_entry = " .. TableSerialization(task_entry, 0)
-				-- 	local flightNameClean = flightName:gsub('[%p%c%s]', '_')
-				-- 	local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_"..current_time.."_".. "_CustomSearchThenEngage.lua", "w")
-				-- 	if logFile then
-				-- 		logFile:write(logStr)
-				-- 		logFile:close()
-				-- 	else
-				-- 		env.info("DCE_CustomSearchThenEngage : Failed to open log file for writing.")
-				-- 	end			
+				if camp.debug  then
+					local current_time = timer.getTime() + 5
+					local logStr = "task_entry = " .. TableSerialization(task_entry, 0)
+					local flightNameClean = flightName:gsub('[%p%c%s]', '_')
+					local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_"..current_time.."_".. "_CustomSearchThenEngage.lua", "w")
+					if logFile then
+						logFile:write(logStr)
+						logFile:close()
+					else
+						env.info("DCE_CustomSearchThenEngage : Failed to open log file for writing.")
+					end			
 
-				-- 	env.info( "DCE_CustomSearchThenEngage D ACTUALtime: "..timer.getTime().." "..tostring(flightName).."| targetType |"..tostring(targetType).."| Radius |"..tostring(radius))
-				-- end
+					env.info( "DCE_CustomSearchThenEngage D ACTUALtime: "..timer.getTime().." "..tostring(flightName).."| targetType |"..tostring(targetType).."| Radius |"..tostring(radius))
+				end
 
 				return timer.getTime() + 60									--repeat function every 5 seconds
 

@@ -28,6 +28,9 @@ _affiche(world.event, "DCE_EventT world.event ")
 
 Info_event_B = {}
 
+local hit1sQueue = {}
+local hit1sQueueTimerId = nil
+
 for eventName, eventId in pairs(world.event) do
 	table.insert(Info_event_B, eventId, eventName)
 end
@@ -180,6 +183,24 @@ local function addHit1s(hitTemp)
 		scenLog[hitTemp.scenaryName]["description"] = hitTemp.description	--tooHeavy
 	end
 end
+
+
+local function processhit1sQueue()
+    local batchSize = 10
+    local count = 0
+    while #hit1sQueue > 0 and count < batchSize do
+        local hitTemp = table.remove(hit1sQueue, 1)
+        addHit1s(hitTemp)
+        count = count + 1
+    end
+    if #hit1sQueue > 0 then
+        return timer.getTime() + 0.2
+    else
+        hit1sQueueTimerId = nil -- plus rien à traiter, on arrête le cycle
+        return nil
+    end
+end
+
 
 -- Fonction périodique pour notifier le joueur pendant le ravitaillement
 local function CheckRefuelProgress()
@@ -1159,39 +1180,36 @@ function eventHandlerDCE:onEvent(event)
 
 					timer.scheduleFunction(addHit1s, hitTemp, timer.getTime() + 1)
 
+					-- Ajoute à la file d'attente au lieu d'appeler directement
+          			table.insert(hit1sQueue, hitTemp)
+					if not hit1sQueueTimerId then
+						hit1sQueueTimerId = timer.scheduleFunction(processhit1sQueue, nil, timer.getTime() + 0.1)
+					end
+
 				end
 			end
 		end
 		if event.weapon then
-			local weaponId = event.weapon:getID() -- ID unique de la bombe
 			local descWep = event.weapon:getDesc()
 			if descWep and descWep.category == Weapon.Category.BOMB then
+				local weaponId = event.weapon:getID()
 				local impactPoint = event.weapon:getPoint()
 				local weaponName = descWep.displayName or "unknown"
-				local explosiveMass = 0
-				local tntEquivalent = 0
-				local warheadMass = 0
-				if descWep.warhead then
-					-- Masse d'explosif (souvent déjà en équivalent TNT dans DCS)
-					explosiveMass = descWep.warhead.explosiveMass or 0
-					-- Masse totale de la charge (utile pour info)
-					warheadMass = descWep.warhead.mass or 0
-					-- Si tu veux calculer un équivalent TNT personnalisé :
-					-- tntEquivalent = explosiveMass * (descWep.warhead.tntFactor or 1)
-					-- Mais en général explosiveMass est déjà l'équivalent TNT
-					tntEquivalent = explosiveMass
-				end
+				local explosiveMass = descWep.warhead and descWep.warhead.explosiveMass or 0
+				local tntEquivalent = explosiveMass
+				-- Optionnel : ne log que les bombes > 100kg TNT
+				-- if tntEquivalent < 100 then return end
 
 				if camp.Debug then
-					env.info(string.format("DCE_EventT: Bombe %s impact en %0.1f / %0.1f / %0.1f (%.0f kg TNT)", weaponName, impactPoint.x, impactPoint.y, impactPoint.z, tntEquivalent))
+					env.info(string.format("DCE_EventT: Bombe %s impact en %.1f / %.1f / %.1f (%.0f kg TNT)", weaponName, impactPoint.x, impactPoint.y, impactPoint.z, tntEquivalent))
 				end
-				-- Log ou traitement
-				scenLog["BOMB_"..tostring(weaponId)] = {
+
+				scenLog["BOMB_"..weaponId] = {
 					event = "BOMB_IMPACT",
 					weaponName = weaponName,
 					explosiveMass = explosiveMass,
 					tntEquivalent = tntEquivalent,
-					warheadMass = warheadMass,
+					warheadMass = descWep.warhead and descWep.warhead.mass or 0,
 					x = impactPoint.x,
 					y = impactPoint.z,
 					z = impactPoint.y,
@@ -1284,7 +1302,7 @@ function eventHandlerDCE:onEvent(event)
 					local playerName = event.initiator.getPlayerName and event.initiator:getPlayerName()
 					if playerName then
 						trigger.action.outTextForUnit(event.initiator:getID(),
-							string.format("Fuel transferred: %.0f kg (%.0f lbs)", fuelTransferredKg, fuelTransferredLbs), 10)
+								string.format("Fuel transferred: %.0f lbs", fuelTransferredLbs), 10)
 						env.info("DCE_EventT: Refuel Stop for unit " .. event.initiator:getName()
 							.. " / Fuel transferred: " .. string.format("%.0f kg (%.0f lbs)", fuelTransferredKg, fuelTransferredLbs))
 					end
