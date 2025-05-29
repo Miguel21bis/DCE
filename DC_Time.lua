@@ -39,7 +39,7 @@ if camp.day == nil then
 	camp.day = 1
 end
 
-print("DcIme A camp.timeJump:? ".. tostring(camp.timeJump).." MissionInstance: ".. tostring(MissionInstance))
+print("DcIme A camp.timeJump:? ".. tostring(camp.timeJump).." Mission.MissionInstance: "..camp.mission..".".. tostring(MissionInstance))
 
 if camp.timeJump and (MissionInstance and MissionInstance <= 1) then
 	camp.time = 0

@@ -69,6 +69,13 @@ if mission_ini.current_date and mission_ini.current_date.year then
 	local jumpDate
 	local jumpTime = false
 	if camp.date.day ~= mission_ini.current_date.day or camp.date.month ~= mission_ini.current_date.month or camp.date.year ~= mission_ini.current_date.year then
+		
+		if Debug.debug then
+			print("Jump date from conf_mod: ")
+			_affiche(mission_ini.current_date, "mission_ini.current_date")
+			_affiche(camp.date, "camp.date")
+		end
+		
 		jumpDate = Deepcopy(camp.date)
 		jumpTime = true
 	end

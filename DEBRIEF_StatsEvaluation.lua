@@ -1191,11 +1191,11 @@ for scen_name, scen in pairs(scen_log) do													--iterate through destroye
 		bombPass = true
 	end
 
-	if scen.event and scen.event == "BOMB_IMPACT" then
-		local temp = scen.y
-		scen.y = scen.z
-		scen.z = temp
-	end
+	-- if scen.event and scen.event == "BOMB_IMPACT" then
+	-- 	local temp = scen.y
+	-- 	scen.y = scen.z
+	-- 	scen.z = temp
+	-- end
 
 	if scen.x and scen.z and ((passePourcent and not isForest) or bombPass) then
 	-- if scen.x and scen.z and bombPass then
@@ -1203,27 +1203,23 @@ for scen_name, scen in pairs(scen_log) do													--iterate through destroye
 		for side_name, targets in pairs(targetlist) do											--iterate through targetlist
 			for targetN, target in pairs(targets) do										--iterate through targets				
 				if target.elements  then
-					for element_n,element in pairs(target.elements) do						--iterate through target elements
+					for element_n, element in pairs(target.elements) do						--iterate through target elements
 						if element.x then
 
-							-- print("DebriefSE element E "..tostring(element.name))
-
-							-- if math.floor(scen.x) == math.floor(element.x) and math.floor(scen.z) == math.floor(element.y) then		--dead scenery is this element						
-							-- scen.lifePourcent < 100 and
-							-- if   (scen.x <= element.x + 50 and scen.x > element.x - 50) and (scen.z <= element.y + 50 and scen.z > element.y - 50) then								
-							
 							local distance = math.floor(math.sqrt((scen.x - element.x)^2 + (scen.z - element.y)^2))					--calculate distance between dead scenery and target element
 							
-							-- print("DebriefSE A distance "..tostring(distance).." between "..tostring(scen.scenaryName).." and "..tostring(element.name))
-
 							local correctedRadius = RayonDamaged
-							if scen.explosiveMass then
+							if scen.explosiveMass and not scen.event == "BOMB_IMPACT" then
 								local k_val = 4.0  -- k = 4 par défaut, typique pour bâtiments légers
 								correctedRadius = k_val * (scen.explosiveMass)^(1/3)
 							end
 
+							-- print("DebriefSE -> A "..tostring(distance) .. " <=? "..tostring(correctedRadius).." between "..tostring(scen.scenaryName).." "..tostring(scen.sceneryTypeName).." and "..tostring(element.name))
+
 							if distance <= correctedRadius  then
+								
 								print("DebriefSE --> B "..tostring(distance).." between "..tostring(scen.scenaryName).." "..tostring(scen.sceneryTypeName).." and "..tostring(element.name))
+								
 								--plus bas, ne pas l'enlever, car il peut y avoir plusieurs detection de destruction, et cela fausse le resultat car detecté déjà detruit
 								if element.dead and element.CheckDay and element.CheckDay < camp.date.CampTotalTimeS then
 								-- if element.dead then											--element was already dead previously
@@ -1237,19 +1233,21 @@ for scen_name, scen in pairs(scen_log) do													--iterate through destroye
 
 									scen.lifePourcent = 0
 
-									-- if not element["idDCS"] then
-									-- 	element["idDCS"] = {}
-									-- 	print("DebriefSE  - --> D2 ")
-									-- end									--store idDCS of scenery object in element for later use
-									-- if not element["idDCS"][scen.scenaryName] then
-									-- 	element["idDCS"][scen.scenaryName] = 999999
-									-- 	print("DebriefSE  - --> D2 ")
-									-- end
+									if scen.scenaryName then
+										if not element["idDCS"] then
+											element["idDCS"] = {}
+											print("DebriefSE  - --> D1 scen.scenaryName: "..tostring(scen.scenaryName).." element.name: "..tostring(element.name))
+										end
+										if not element["idDCS"][scen.scenaryName] then
+											element["idDCS"][scen.scenaryName] = 999999
+											print("DebriefSE  - --> D2 ")
+										end
 
-									-- if distance < element["idDCS"][scen.scenaryName] then
-									-- 	element["idDCS"][scen.scenaryName] = distance
-									-- 	print("DebriefSE  - --> D3 ")
-									-- end
+										if distance < element["idDCS"][scen.scenaryName] then
+											element["idDCS"][scen.scenaryName] = distance
+											print("DebriefSE  - --> D3 ")
+										end
+									end
 									
 									--award ground kill to air unit
 									if scen.lasthit ~= nil then																			--check if dead scenery has a hit entry
@@ -1279,12 +1277,10 @@ for scen_name, scen in pairs(scen_log) do													--iterate through destroye
 
 														end
 													end
-													-- break
 												end
 											end
 										end
 									end
-									-- break								
 								end
 							end
 						end

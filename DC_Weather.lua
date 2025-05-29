@@ -22,7 +22,7 @@ local debugWeather = true
 TabMetar = {}
 
 local debugTxt = ""
-local PresetChoice = 0
+local presetChoice = 0
 local showOne = false
 local showOneNight = false
 local baseChoice
@@ -59,7 +59,7 @@ end
 
 
 if camp and camp.weather and camp.weather.zoneEnd then
-	debugTxt = debugTxt .."camp.weather.zoneEnd "..tostring(camp.weather.zoneEnd).."\n"
+	debugTxt = debugTxt .." A0 camp.weather.zoneEnd "..tostring(camp.weather.zoneEnd).."\n"
 end
 -- if debugWeather then print("time              "..tostring((camp.date.day - 1) * 86400 + camp.time)) end
 debugTxt = debugTxt .."time              "..tostring((camp.date.day - 1) * 86400 + camp.time).."\n"
@@ -79,8 +79,8 @@ local probaPlow = (mission_ini.weather.pLow / (mission_ini.weather.pHigh + missi
 -- 	print("DcW probaPlow weather : "..tostring(probaPlow))
 -- end	
 
-debugTxt = debugTxt .."DcW probaPhight weather : "..tostring(probaPhight).."\n"
-debugTxt = debugTxt .."DcW probaPlow weather : "..tostring(probaPlow).."\n"
+debugTxt = debugTxt .."DcW A1 probaPhight weather : "..tostring(probaPhight).."\n"
+debugTxt = debugTxt .."DcW A2 probaPlow weather : "..tostring(probaPlow).."\n"
 
 --Initial weather
 if camp.weather == nil then
@@ -108,156 +108,162 @@ end
 -- si le temps passé est supérieur à 3 fois ce qui etait convenu, on recommence à 0
 if elapsed_time > camp.weather.zoneEnd then
 	local deltaTime = elapsed_time - camp.weather.zoneEnd
-	if debugWeather then print("DcW A deltaTime: "..tostring(deltaTime)) end
+	if debugWeather then print("DcW A10 deltaTime: "..tostring(deltaTime)) end
 
 	if camp.missionHistory and camp.missionHistory[camp.mission-1] then
 		local deltaNexTime = camp.weather.zoneEnd - camp.missionHistory[camp.mission-1]["CampTotalTimeS"]
-		if debugWeather then print("DcW B deltaNexTime "..tostring(deltaNexTime).."deltaNexTime *3 "..tostring(deltaNexTime *3)) end
+		if debugWeather then print("DcW A12 deltaNexTime "..tostring(deltaNexTime).."deltaNexTime *3 "..tostring(deltaNexTime *3)) end
 		
 		if deltaTime > (deltaNexTime *3 ) then
-			if debugWeather then print("DcW C deltaTime *3: "..tostring(deltaNexTime *3)) end
+			if debugWeather then print("DcW A13 deltaTime *3: "..tostring(deltaNexTime *3)) end
 			camp.weather.zone = nil
 		end
 	end
 end
 
---Initial weather 2
-if camp.weather.zone == nil then										--no weather exists yet
-	camp.weather.zoneTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)				--Set temperature of weather zone (+/- 5°C of reference tempereature)
-	camp.weather.zoneNextTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)			--Set temperature of next weather zone (+/- 5°C of reference tempereature)
+-- --Initial weather 2
+-- if camp.weather.zone == nil then										--no weather exists yet
 
-	local randChance = math.random(1, 100)
+-- 	debugTxt = debugTxt .."DcW B1 Initial weather 2 ".."\n"
 
-	-- if debugWeather then print("DcW A camp.weather.zoneTemp: "..tostring(camp.weather.zoneTemp)) end	
-	-- if debugWeather then print("DcW A2 camp.weather.zoneNextTemp: "..tostring(camp.weather.zoneNextTemp)) end
-	-- if debugWeather then print("DcW Initial weather: "..tostring(randChance).. "<=? "..tostring(probaPhight)) end	
+-- 	camp.weather.zoneTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)				--Set temperature of weather zone (+/- 5°C of reference tempereature)
+-- 	camp.weather.zoneNextTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)			--Set temperature of next weather zone (+/- 5°C of reference tempereature)
 
-	debugTxt = debugTxt .."DcW A camp.weather.zoneTemp: "..tostring(camp.weather.zoneTemp).."\n"
-	debugTxt = debugTxt .."DcW A2 camp.weather.zoneNextTemp: "..tostring(camp.weather.zoneNextTemp).."\n"
-	debugTxt = debugTxt .."DcW Initial weather: "..tostring(randChance).. "<=? "..tostring(probaPhight).."\n"
+-- 	local randChance = math.random(1, 100)
 
-	if randChance <= probaPhight   then								--High pressure system
-		-- if debugWeather then print("DcW YES camp.weather.zoneNext = high" ) end
-		debugTxt = debugTxt .."DcW YES camp.weather.zoneNext = high".."\n"
+-- 	debugTxt = debugTxt .."DcW B2 camp.weather.zoneTemp: "..tostring(camp.weather.zoneTemp).."\n"
+-- 	debugTxt = debugTxt .."DcW B3 camp.weather.zoneNextTemp: "..tostring(camp.weather.zoneNextTemp).."\n"
+-- 	debugTxt = debugTxt .."DcW B4 Initial weather: "..tostring(randChance).. "<=? "..tostring(probaPhight).."\n"
 
-		camp.weather.zoneNext = "high"									--set next weather zone
+-- 	if randChance <= probaPhight then								--High pressure system
+-- 		-- if debugWeather then print("DcW YES camp.weather.zoneNext = high" ) end
+-- 		debugTxt = debugTxt .."DcW B5 YES camp.weather.zoneNext = high".."\n"
 
-	else
+-- 		camp.weather.zoneNext = "high"									--set next weather zone
 
-		-- if debugWeather then print("DcW probaPlow weather : "..tostring(probaPlow)) end
-		debugTxt = debugTxt .."DcW probaPlow weather : "..tostring(probaPlow).."\n"
+-- 	else
 
-		local limitA = 0
-		local limitB = 0
-		local limitC = 5
+-- 		-- if debugWeather then print("DcW probaPlow weather : "..tostring(probaPlow)) end
+-- 		debugTxt = debugTxt .."DcW C1 probaPlow weather : "..tostring(probaPlow).."\n"
 
-		--ceci à pour but de mettre un mauvais temps en fonction du random
-		--plus le random est fort, plus le mauvais temps est probable
-		if  probaPlow <= 25  then--faible proba TRES mauvais temps, donc fort proba SIMPLE mauvais temps
-			-- rando = math.random(0,100)
-			limitA = 95
-			limitB = 100
-			limitC = 100
+-- 		local limitA = 0
+-- 		local limitB = 0
+-- 		local limitC = 5
 
-		elseif  probaPlow <= 50  then
-			-- rando = math.random(0,100)
-			limitA = 25
-			limitB = 50
-			limitC = 75
+-- 		--ceci à pour but de mettre un mauvais temps en fonction du random
+-- 		--plus le random est fort, plus le mauvais temps est probable
+-- 		if  probaPlow <= 25  then--faible proba TRES mauvais temps, donc fort proba SIMPLE mauvais temps
+-- 			-- rando = math.random(0,100)
+-- 			limitA = 95
+-- 			limitB = 100
+-- 			limitC = 100
 
-		elseif  probaPlow <= 62  then
-			-- rando = math.random(0,100)
-			limitA = 17
-			limitB = 34
-			limitC = 52
+-- 		elseif  probaPlow <= 50  then
+-- 			-- rando = math.random(0,100)
+-- 			limitA = 25
+-- 			limitB = 50
+-- 			limitC = 75
 
-		elseif  probaPlow <= 75  then
-			-- rando = math.random(0,100)
-			limitA = 9
-			limitB = 18
-			limitC = 29
+-- 		elseif  probaPlow <= 62  then
+-- 			-- rando = math.random(0,100)
+-- 			limitA = 17
+-- 			limitB = 34
+-- 			limitC = 52
 
-		else
-			-- rando = math.random(0,100)
-			limitA = 0
-			limitB = 0
-			limitC = 5
-		end
+-- 		elseif  probaPlow <= 75  then
+-- 			-- rando = math.random(0,100)
+-- 			limitA = 9
+-- 			limitB = 18
+-- 			limitC = 29
 
-		local rando = math.random(0,100)
+-- 		else
+-- 			-- rando = math.random(0,100)
+-- 			limitA = 0
+-- 			limitB = 0
+-- 			limitC = 5
+-- 		end
 
-		-- if debugWeather then print("DcW random (rando) weather : "..tostring(rando)) end
-		debugTxt = debugTxt .."DcW random (rando) weather : "..tostring(rando).."\n"
+-- 		local rando = math.random(0,100)
 
-		-- if debugWeather then print("DcW  choice: "
-		-- 	.. "<=A "..tostring(limitA)
-		-- 	.. "<=B "..tostring(limitB)
-		-- 	.. "<=C "..tostring(limitC)
+-- 		-- if debugWeather then print("DcW random (rando) weather : "..tostring(rando)) end
+-- 		debugTxt = debugTxt .."DcW C2 random (rando) weather : "..tostring(rando).."\n"
 
-		-- ) end
-		debugTxt = debugTxt .."DcW  choice: ".."\n"
-		debugTxt = debugTxt .."<=A "..tostring(limitA).."\n"
-		debugTxt = debugTxt .."<=B "..tostring(limitB).."\n"
-		debugTxt = debugTxt .."<=C "..tostring(limitC).."\n"
+-- 		-- if debugWeather then print("DcW  choice: "
+-- 		-- 	.. "<=A "..tostring(limitA)
+-- 		-- 	.. "<=B "..tostring(limitB)
+-- 		-- 	.. "<=C "..tostring(limitC)
+
+-- 		-- ) end
+-- 		debugTxt = debugTxt .."DcW  choice: ".."\n"
+-- 		debugTxt = debugTxt .."<=A "..tostring(limitA).."\n"
+-- 		debugTxt = debugTxt .."<=B "..tostring(limitB).."\n"
+-- 		debugTxt = debugTxt .."<=C "..tostring(limitC).."\n"
 
 
-		if  rando < limitA  then--rando <= ((probaPlow / 4)*1)
+-- 		if  rando < limitA  then--rando <= ((probaPlow / 4)*1)
 
-			camp.weather.zoneNext = "low sector warm"					--next zone is a warm sector
-			-- if debugWeather then print("DcW probaPlow weather rando: "..tostring(rando).. "<=? limitA "..tostring(limitA)) end
-			debugTxt = debugTxt .."DcW probaPlow weather rando: "..tostring(rando).. "<=? limitA "..tostring(limitA).."\n"
+-- 			camp.weather.zoneNext = "low sector warm"					--next zone is a warm sector
+-- 			debugTxt = debugTxt .."DcW probaPlow weather rando: "..tostring(rando).. "<=? limitA "..tostring(limitA).."\n"
 
-		elseif rando < limitB then
+-- 		elseif rando < limitB then
 
-			camp.weather.zoneNext = "low front warm"					--Next zone is a warm front
-			-- if debugWeather then print("DcW probaPlow weather rando: "..tostring(rando).. "<=?limitB "..tostring(limitB)) end
-			debugTxt = debugTxt .."DcW probaPlow weather rando: "..tostring(rando).. "<=?limitB "..tostring(limitB).."\n"
-		elseif rando < limitC then
+-- 			camp.weather.zoneNext = "low front warm"					--Next zone is a warm front
+-- 			debugTxt = debugTxt .."DcW probaPlow weather rando: "..tostring(rando).. "<=?limitB "..tostring(limitB).."\n"
+-- 		elseif rando < limitC then
 
-			camp.weather.zoneNext = "low sector cold"					--next zone is a cold sector
-			-- if debugWeather then print("DcW probaPlow weather rando: "..tostring(rando).. "<=? limitC "..tostring(limitC)) end
-			debugTxt = debugTxt .."DcW probaPlow weather rando: "..tostring(rando).. "<=? limitC "..tostring(limitC).."\n"
+-- 			camp.weather.zoneNext = "low sector cold"					--next zone is a cold sector
+-- 			debugTxt = debugTxt .."DcW probaPlow weather rando: "..tostring(rando).. "<=? limitC "..tostring(limitC).."\n"
 
-		else  --rando <= probaPlow  then
+-- 		else  --rando <= probaPlow  then
 
-			--TODo pb ici, à 60 % de chance d avoir du mauvais temps, on ne devrait pas avoir l'ultra mauvais temps
-			camp.weather.zoneNext = "low front cold"					--Next zone is a cold front
-			-- if debugWeather then print("DcW probaPlow weather rando: "..tostring(rando).. "<=?Else D ") end
-			debugTxt = debugTxt .."DcW probaPlow weather rando: "..tostring(rando).. "<=?Else D ".."\n"
-		end
-	end
+-- 			--TODo pb ici, à 60 % de chance d avoir du mauvais temps, on ne devrait pas avoir l'ultra mauvais temps
+-- 			camp.weather.zoneNext = "low front cold"					--Next zone is a cold front
+-- 			debugTxt = debugTxt .."DcW probaPlow weather rando: "..tostring(rando).. "<=?Else D ".."\n"
+-- 		end
+-- 	end
 
-		-- local rando = math.random(1,4)
-		-- if debugWeather then print("DcW NO rando: " ..rando) end
+-- 	camp.weather.zoneEnd = -1											--Current (non-existing) zone end negative to trigger weather change
+-- 	InitalW = true
+-- end
 
-		-- if rando == 1 then
-		-- 	camp.weather.zoneNext = "low sector cold"					--next zone is a cold sector
-		-- elseif rando == 2 then
-		-- 	camp.weather.zoneNext = "low sector warm"					--next zone is a warm sector
-		-- elseif rando == 3 then
-		-- 	camp.weather.zoneNext = "low front cold"					--Next zone is a cold front
-		-- elseif rando == 4 then
-		-- 	camp.weather.zoneNext = "low front warm"					--Next zone is a warm front
-		-- end
-	-- end
+-- --Initial weather 2
+if camp.weather.zone == nil then
+    -- Températures de zone
+    camp.weather.zoneTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)
+    camp.weather.zoneNextTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)
 
-	camp.weather.zoneEnd = -1											--Current (non-existing) zone end negative to trigger weather change
-	InitalW = true
+    -- Calcul du ratio de beau temps
+    local pHigh = camp.weather.pHigh or 50
+    local pLow = camp.weather.pLow or 50
+    local total = pHigh + pLow
+    local probaHigh = pHigh / total
+
+    -- Tirage aléatoire
+    local r = math.random()
+    if r < probaHigh * 0.7 then
+        -- Très beau temps (plus rare)
+        camp.weather.zoneNext = "high"
+    elseif r < probaHigh then
+        -- Beau temps mais couvert
+        camp.weather.zoneNext = "low sector warm"
+    else
+        -- Mauvais temps, réparti équitablement
+        local mauvais = { "low front cold", "low front warm", "low sector cold" }
+        camp.weather.zoneNext = mauvais[math.random(1, #mauvais)]
+    end
+
+    camp.weather.zoneEnd = -1
 end
 
-
-
--- if debugWeather then print("DcW camp.weather.zoneTemp: " ..tostring(camp.weather.zoneTemp)) end
--- if debugWeather then print("DcW camp.weather.zone: " ..tostring(camp.weather.zone)) end
--- if debugWeather then print("DcW camp.weather.zoneNext: " ..camp.weather.zoneNext) end
-
-debugTxt = debugTxt .."DcW camp.weather.zoneTemp: " ..tostring(camp.weather.zoneTemp).."\n"
-debugTxt = debugTxt .."DcW camp.weather.zone: " ..tostring(camp.weather.zone).."\n"
-debugTxt = debugTxt .."DcW camp.weather.zoneNext: " ..camp.weather.zoneNext.."\n"
+debugTxt = debugTxt .."DcW D1 camp.weather.zoneTemp: " ..tostring(camp.weather.zoneTemp).."\n"
+debugTxt = debugTxt .."DcW D2 camp.weather.zone: " ..tostring(camp.weather.zone).."\n"
+debugTxt = debugTxt .."DcW D3 camp.weather.zoneNext: " ..camp.weather.zoneNext.."\n"
 
 
 --Weather change
 if elapsed_time > camp.weather.zoneEnd then										--active weather zone has ended
+
+	debugTxt = debugTxt .."DcW E0 Weather change ".."\n"
 
 	--Active zone
 	camp.weather.zone = camp.weather.zoneNext									--make next weather zone the active weather zone
@@ -288,39 +294,130 @@ if elapsed_time > camp.weather.zoneEnd then										--active weather zone has e
 	--Next zone
 	camp.weather.zoneNextTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)			--Set temperature of next weather zone (+/- 5°C of reference tempereature)
 
-	if not InitalW then 																		-- evite de passer 2 fois le random lors de la premiere mission
+	-- if not InitalW then 																		-- evite de passer 2 fois le random lors de la premiere mission
 
-		-- local chance = 100 / (mission_ini.weather.pHigh + mission_ini.weather.pLow) * mission_ini.weather.pHigh					--chance of next weather zone being a high pressure system
-		probaPhight = (mission_ini.weather.pHigh / (mission_ini.weather.pHigh + mission_ini.weather.pLow)) * 100					--chance of next weather zone being a high pressure system
-		local randChance = math.random(1, 100)
-			-- if debugWeather then print("Next zone: "..tostring(randChance).. "<=? "..tostring(probaPhight)) end	
-			debugTxt = debugTxt .."Next zone: "..tostring(randChance).. "<=? "..tostring(probaPhight).."\n"
-		if randChance <= probaPhight   then								--High pressure system
-			camp.weather.zoneNext = "high"									--set next weather zone		
-		else																--Low pressure system
-			if camp.weather.zone == "low front cold" then					--active zone is a cold front
-				camp.weather.zoneNext = "low sector cold"					--next zone is a cold sector
-			elseif camp.weather.zone == "low front warm" then				--active zone is a warm front
-				camp.weather.zoneNext = "low sector warm"					--next zone is a warm sector
-			else															--active zone is a sector (warm or cold), next zone is a front (warm or cold)
-				if camp.weather.zoneTemp > camp.weather.zoneNextTemp then	--Next zone is colder
-					camp.weather.zoneNext = "low front cold"				--Next zone is a cold front
-				elseif camp.weather.zoneTemp < camp.weather.zoneNextTemp then	--Next zone is warmer
-					camp.weather.zoneNext = "low front warm"				--Next zone is a warm front
-				else														--Next zone has same tempreature
-					camp.weather.zoneNext = camp.weather.zone				--Next zone remains the same (warm or cold sectior)
+	-- 	-- local chance = 100 / (mission_ini.weather.pHigh + mission_ini.weather.pLow) * mission_ini.weather.pHigh					--chance of next weather zone being a high pressure system
+	-- 	probaPhight = (mission_ini.weather.pHigh / (mission_ini.weather.pHigh + mission_ini.weather.pLow)) * 100					--chance of next weather zone being a high pressure system
+	-- 	local randChance = math.random(1, 100)
+	-- 		-- if debugWeather then print("Next zone: "..tostring(randChance).. "<=? "..tostring(probaPhight)) end	
+	-- 		debugTxt = debugTxt .."Next zone: "..tostring(randChance).. "<=? "..tostring(probaPhight).."\n"
+	-- 	if randChance <= probaPhight   then								--High pressure system
+	-- 		camp.weather.zoneNext = "high"									--set next weather zone		
+	-- 	else																--Low pressure system
+	-- 		if camp.weather.zone == "low front cold" then					--active zone is a cold front
+	-- 			camp.weather.zoneNext = "low sector cold"					--next zone is a cold sector
+	-- 		elseif camp.weather.zone == "low front warm" then				--active zone is a warm front
+	-- 			camp.weather.zoneNext = "low sector warm"					--next zone is a warm sector
+	-- 		else															--active zone is a sector (warm or cold), next zone is a front (warm or cold)
+	-- 			if camp.weather.zoneTemp > camp.weather.zoneNextTemp then	--Next zone is colder
+	-- 				camp.weather.zoneNext = "low front cold"				--Next zone is a cold front
+	-- 			elseif camp.weather.zoneTemp < camp.weather.zoneNextTemp then	--Next zone is warmer
+	-- 				camp.weather.zoneNext = "low front warm"				--Next zone is a warm front
+	-- 			else														--Next zone has same tempreature
+	-- 				camp.weather.zoneNext = camp.weather.zone				--Next zone remains the same (warm or cold sectior)
+	-- 			end
+	-- 		end
+	-- 	end
+	-- end
+	if not InitalW then  -- évite de passer 2 fois le random lors de la première mission
+
+		local pHigh = mission_ini.weather.pHigh or 50
+		local pLow = mission_ini.weather.pLow or 50
+		local total = pHigh + pLow
+		local probaHigh = pHigh / total
+
+		local r = math.random()
+		debugTxt = debugTxt .."Next zone random: "..tostring(r).." < "..tostring(probaHigh).."\n"
+
+		if r < probaHigh * 0.7 then
+			camp.weather.zoneNext = "high"
+		elseif r < probaHigh then
+			camp.weather.zoneNext = "low sector warm"
+		else
+			-- On choisit le type de mauvais temps en fonction de la tendance thermique
+			if camp.weather.zoneTemp > camp.weather.zoneNextTemp then
+				camp.weather.zoneNext = "low front cold"
+			elseif camp.weather.zoneTemp < camp.weather.zoneNextTemp then
+				camp.weather.zoneNext = "low front warm"
+			else
+				-- Si la température ne change pas, on reste dans le même secteur
+				if camp.weather.zone == "low front cold" then
+					camp.weather.zoneNext = "low sector cold"
+				elseif camp.weather.zone == "low front warm" then
+					camp.weather.zoneNext = "low sector warm"
+				else
+					-- Par défaut, on reste sur la même zone
+					camp.weather.zoneNext = camp.weather.zone
 				end
 			end
 		end
 	end
+
 end
 
-if debugWeather then
-	print("calcul new weather:")
-	_affiche(camp.weather, "camp.weather DcW ")
-end
-debugTxt = debugTxt .."".."\n"
--- if debugWeather then print("camp.weather.zone "..tostring(camp.weather.zone)) end	
+-- if debugWeather then
+-- 	print("calcul new weather:")
+-- 	_affiche(camp.weather, "camp.weather DcW ")
+-- end
+-- debugTxt = debugTxt .."".."\n"
+
+
+	-- ["weather"] = 
+	-- {
+	-- 	["wind"] = 
+	-- 	{
+	-- 		["at8000"] = 
+	-- 		{
+	-- 			["speed"] = 0,
+	-- 			["dir"] = 0,
+	-- 		}, -- end of ["at8000"]
+	-- 		["atGround"] = 
+	-- 		{
+	-- 			["speed"] = 0,
+	-- 			["dir"] = 0,
+	-- 		}, -- end of ["atGround"]
+	-- 		["at2000"] = 
+	-- 		{
+	-- 			["speed"] = 0,
+	-- 			["dir"] = 0,
+	-- 		}, -- end of ["at2000"]
+	-- 	}, -- end of ["wind"]
+	-- 	["enable_fog"] = false,
+	-- 	["season"] = 
+	-- 	{
+	-- 		["temperature"] = 20,
+	-- 	}, -- end of ["season"]
+	-- 	["qnh"] = 760,
+	-- 	["cyclones"] = {},
+	-- 	["dust_density"] = 0,
+	-- 	["enable_dust"] = false,
+	-- 	["clouds"] = 
+	-- 	{
+	-- 		["thickness"] = 200,
+	-- 		["density"] = 0,
+	-- 		["preset"] = "Preset20",
+	-- 		["base"] = 3800,
+	-- 		["iprecptns"] = 0,
+	-- 	}, -- end of ["clouds"]
+	-- 	["atmosphere_type"] = 0,
+	-- 	["groundTurbulence"] = 0,
+	-- 	["halo"] = 
+	-- 	{
+	-- 		["preset"] = "auto",
+	-- 	}, -- end of ["halo"]
+	-- 	["type_weather"] = 0,
+	-- 	["modifiedTime"] = false,
+	-- 	["name"] = "Winter, clean sky",
+	-- 	["fog"] = 
+	-- 	{
+	-- 		["visibility"] = 0,
+	-- 		["thickness"] = 0,
+	-- 	}, -- end of ["fog"]
+	-- 	["visibility"] = 
+	-- 	{
+	-- 		["distance"] = 80000,
+	-- 	}, -- end of ["visibility"]
+	-- }, -- end of ["weather"]
 
 
 -- 1	Light Scattered 1	FEW/SCT 7/8	25%
@@ -350,10 +447,13 @@ debugTxt = debugTxt .."".."\n"
 -- 25	Overcast 5	OVC 12/14 22/25 40/42	87%
 -- 26	Overcast 6	OVC 9/15 BKN 23/25 SCT 32	100%
 -- 27	Overcast 7	OVC 8/15 SCT/BKN 25/26 34/36	100%
--- 28	Overcast and Rain 1	VIS3-5KM RA OVC 3/15 28/30 FEW 40	100%
--- 29	Overcast and Rain 2	VIS 1-5KM RA OVC 3/11 SCT 18/29 FEW 40	100%
--- 30	Overcast and Rain 3	VIS 3.5KM RA OVC 6/18 19/21 SCT 34	100%
-
+-- 28	RainyPreset1/ Overcast and Rain 1/	VIS3-5KM RA OVC 3/15 28/30 FEW 40	100%
+-- 29	RainyPreset2/ Overcast and Rain 2/	VIS 1-5KM RA OVC 3/11 SCT 18/29 FEW 40	100%
+-- 30	RainyPreset3/ Overcast and Rain 3/	VIS 3.5KM RA OVC 6/18 19/21 SCT 34	100%
+-- 31	RainyPreset4/ Light Rain 1/ Two Layers Scattered Large Thick Clouds  \nMETAR: SCT/BKN 18/20 FEW36/38 FEW 40
+-- 32	RainyPreset5/ Light Rain 2/ Three Layers Broken/Overcast \nMETAR: BKN/OVC LYR 7/13 20/22 32/34
+-- 33	RainyPreset6/ Light Rain 3/ Three Layers Overcast At Low Level \nMETAR: OVC 9/16 BKN/OVC LYR 23/24 31/33
+-- 34	NEWRAINPRESET4/ Light Rain 4/ Two Layers Overcast At Low Level \nMETAR: BKN/OVC 7/8 17/19
 
 local preset = {
 	[1] = {
@@ -1068,12 +1168,127 @@ local preset = {
 		},
 		cover = 100,
 	},
+	[31] = {
+		altiMin = 1260,
+		altiMax = 4200,
+		name = "Light Rain 1",
+		-- visibility = 3500,
+		nameVignette = "Two Layers Scattered Large Thick Clouds",
+		nameMETAR = "SCT/BKN 18/20 FEW36/38 FEW 40",
+		layers = {
+			{
+				presetMetar = "SCT/BKN",
+				base = 18,
+				ceiling = 20,
+			},
+			{
+				presetMetar = "FEW3",
+				base = 36,
+				ceiling = 38,
+			},
+			{
+				presetMetar = "SCT",
+				base = 40,
+				ceiling = 0,
+			},
+		},
+	},
+	[32] = {
+		altiMin = 1260,
+		altiMax = 2520,
+		name = "Light Rain 2",
+		-- visibility = 3500,
+		nameVignette = "Three Layers Broken/Overcast",
+		nameMETAR = "BKN/OVC LYR 7/13 20/22 32/34",
+		layers = {
+			{
+				presetMetar = "BKN/OVC LYR",
+				base = 7,
+				ceiling = 13,
+			},
+			{
+				presetMetar = "",
+				base = 20,
+				ceiling = 22,
+			},
+			{
+				presetMetar = "",
+				base = 32,
+				ceiling = 34,
+			},
+		},
+	},
+	[33] = {
+		altiMin = 1260,
+		altiMax = 2940,
+		name = "Light Rain 3",
+		-- visibility = 3500,
+		nameVignette = "Three Layers Overcast At Low Level",
+		nameMETAR = "OVC 9/16 BKN/OVC LYR 23/24 31/33",
+		layers = {
+			{
+				presetMetar = "OVC",
+				base = 9,
+				ceiling = 16,
+			},
+			{
+				presetMetar = "BKN/OVC LYR",
+				base = 23,
+				ceiling = 24,
+			},
+			{
+				presetMetar = "",
+				base = 31,
+				ceiling = 33,
+			},
+		},
+	},
+	[34] = {
+		altiMin = 840,
+		altiMax = 5174,
+		name = "Light Rain 4",
+		-- visibility = 3500,
+		nameVignette = "Two Layers Overcast At Low Level",
+		nameMETAR = "BKN/OVC 7/8 17/19",
+		layers = {
+			{
+				presetMetar = "BKN/OVC",
+				base = 7,
+				ceiling = 8,
+			},
+			{
+				presetMetar = "",
+				base = 17,
+				ceiling = 19,
+			},
+		},
+	},
 }
+
+-- Beau temps
+local highPresets = {3, 4, 5, 6, 10, 31}
+local lowSectorWarmPresets = {1, 2, 7, 8, 9, 11, 12, 13, 18, 19, 23}
+-- Mauvais temps
+local lowFrontColdPresets = {28, 29, 30, 32}
+local lowFrontWarmPresets = {15, 16, 20, 25, 26, 27, 33}
+local lowSectorColdPresets = {14, 17, 21, 22, 24, 34}
+
+
+-- -- pour map desertique:
+-- -- Beau temps
+-- local highPresets = {1, 2, 3, 4, 5, 6, 10, 31}
+-- local lowSectorWarmPresets = {7, 8, 9, 11, 12, 13, 18, 19, 23}
+
+-- -- Mauvais temps
+-- local lowFrontColdPresets = {28, 29, 30, 32}
+-- local lowFrontWarmPresets = {25, 26, 27, 33}
+-- local lowSectorColdPresets = {17, 21, 22, 24, 34}
+
 
 
 --Set current weather
 ----- HIGH -----
-if camp.weather.zone == "high" then
+if camp.weather.zone == "high_OLD" then
 
 	if camp.weather.zoneTemp >= 30 then				--si T° sup= à 30: aucun nuage, on se passe du nouveau systeme de nuage de DCS
 		Rmini = 0
@@ -1088,11 +1303,11 @@ if camp.weather.zone == "high" then
 
 	local presetMiss = ""
 	local baseChoice = 5000							--TODO quelle base est appliquée par l editeur de mission en cas d extreme beau
-	PresetChoice = math.random(Rmini, Rmaxi)
+	presetChoice = math.random(Rmini, Rmaxi)
 
-	if PresetChoice ~= 0 then
-		baseChoice =  math.random(preset[PresetChoice].altiMin, preset[PresetChoice].altiMax)
-		presetMiss = preset[PresetChoice].name
+	if presetChoice ~= 0 then
+		baseChoice =  math.random(preset[presetChoice].altiMin, preset[presetChoice].altiMax)
+		presetMiss = preset[presetChoice].name
 	end
 
 	--clouds
@@ -1161,6 +1376,104 @@ if camp.weather.zone == "high" then
 	mission.weather["qnh"] = math.random(760, 780)
 
 
+	-- HIGH → Anticyclone (hautes pressions, beau temps)
+
+	-- LOW FRONT COLD → Front froid (temps instable, souvent pluie et baisse brutale température)
+
+	-- LOW FRONT WARM → Front chaud (temps nuageux, pluie légère possible, amélioration progressive)
+
+	-- LOW SECTOR COLD → Secteur froid (air froid entre deux fronts, souvent instable)
+
+	-- LOW SECTOR WARM → Secteur chaud (air chaud entre deux fronts, souvent stable mais couvert)
+
+
+----- HIGH -----
+elseif camp.weather.zone == "high" then
+
+	-- local front_remaining = (camp.weather.zoneEnd - elapsed_time) / 3600					--hours until end of cold front
+	-- local front_duration = (camp.weather.zoneEnd - camp.weather.zoneStart) / 3600			--duration of the front in hours
+	-- local strength = 10 - front_remaining * 10 / front_duration								--strength of the front on a scale of 0-10
+
+	--clouds
+	presetChoice = highPresets[math.random(1, #highPresets)]
+
+	if fieldElevation >= preset[presetChoice].altiMin and fieldElevation <= preset[presetChoice].altiMax then
+		baseChoice =  math.random(fieldElevation, preset[presetChoice].altiMax)
+	else
+		baseChoice =  math.random(preset[presetChoice].altiMin, preset[presetChoice].altiMax)
+	end
+
+	mission.weather["clouds"] = {
+		["thickness"] = math.random(4000, 8000),
+		["density"] = math.random(1, 5),
+		-- ["base"] = fieldElevation + math.random(100, 500),
+		["base"] = baseChoice,
+		["iprecptns"] = 0,
+		["preset"] = preset[presetChoice].name,
+	}
+
+	--wind
+	-- local windDir = 180
+	local windDir = math.random(0, 359)
+	local windSpeed = math.random(1, 5)
+	mission.weather["wind"] = {
+		["at8000"] =
+		{
+			["speed"] = windSpeed * 2.5,
+			["dir"] = windDir,
+		},
+		["at2000"] =
+		{
+			["speed"] = windSpeed * 0.8,
+			["dir"] = windDir,
+		},
+		["atGround"] =
+		{
+			["speed"] = windSpeed,
+			["dir"] = windDir,
+		},
+	}
+
+	--turbulence
+	local coef = 1
+	local ponderation = math.random(1, 100)
+	if ponderation <= 8 then
+		coef = 1
+	elseif ponderation < 16 then
+		coef = 2
+	elseif ponderation < 24 then
+		coef = 3
+	elseif ponderation < 32 then
+		coef = 4
+	elseif ponderation < 40 then
+		coef = 5
+	elseif ponderation < 48 then
+		coef = 6
+	elseif ponderation < 56 then
+		coef = 7
+	elseif ponderation < 64 then
+		coef = 8
+	elseif ponderation < 72 then
+		coef = 9
+	elseif ponderation < 80 then
+		coef = 10
+	elseif ponderation < 88 then
+		coef = 11
+	elseif ponderation <= 100 then
+		coef = 12
+	end
+	local max_atGroung = (mission.weather.wind.atGround.speed * coef > 10 and mission.weather.wind.atGround.speed * coef or 11)
+	if max_atGroung <= 10 then max_atGroung = 11 end
+	if max_atGroung > 60 then max_atGroung = 60 end
+	mission.weather["groundTurbulence"] = math.random(10, max_atGroung)--60
+
+	debugTxt = debugTxt .."DcW ponderation LFC "..ponderation.." coef "..coef.." max_atGroung: "..max_atGroung.." groundTurbulence: "..mission.weather["groundTurbulence"].."\n"
+
+	mission.weather["season"]["temperature"] = camp.weather.zoneTemp
+
+	--pressure
+	mission.weather["qnh"] = math.random(760, 780)
+
 ----- COLD FRONT -----
 elseif camp.weather.zone == "low front cold" then
 
@@ -1169,11 +1482,13 @@ elseif camp.weather.zone == "low front cold" then
 	local strength = 10 - front_remaining * 10 / front_duration								--strength of the front on a scale of 0-10
 
 	--clouds
-	PresetChoice = math.random(28, 30)
-	if fieldElevation >= preset[PresetChoice].altiMin and fieldElevation <= preset[PresetChoice].altiMax then
-		baseChoice =  math.random(fieldElevation, preset[PresetChoice].altiMax)
+	-- Pour choisir aléatoirement parmi une liste précise de valeurs, place-les dans un tableau puis utilise math.random sur l'index :
+	presetChoice = lowFrontColdPresets[math.random(1, #lowFrontColdPresets)]
+
+	if fieldElevation >= preset[presetChoice].altiMin and fieldElevation <= preset[presetChoice].altiMax then
+		baseChoice =  math.random(fieldElevation, preset[presetChoice].altiMax)
 	else
-		baseChoice =  math.random(preset[PresetChoice].altiMin, preset[PresetChoice].altiMax)
+		baseChoice =  math.random(preset[presetChoice].altiMin, preset[presetChoice].altiMax)
 	end
 
 	mission.weather["clouds"] = {
@@ -1182,7 +1497,7 @@ elseif camp.weather.zone == "low front cold" then
 		-- ["base"] = fieldElevation + math.random(100, 500),
 		["base"] = baseChoice,
 		["iprecptns"] = math.random(1, 2),
-		["preset"] = preset[PresetChoice].name,
+		["preset"] = preset[presetChoice].name,
 	}
 
 	--wind
@@ -1259,49 +1574,44 @@ elseif camp.weather.zone == "low front warm" then
 	local strength = 10 - front_remaining * 10 / front_duration								--strength of the front on a scale of 0-10
 
 	--clouds
-	-- pondere en fonction des zones desertique (%low weather)
-	-- print("DcW LFW probaPhight "..probaPhight)
-	-- print("DcW LFW AVANT strength "..strength)
-	-- print("DcW LFW  math.random "..math.floor(strength - (strength * probaPhight/100)).." BTW  "..math.ceil(strength))
-
 	strength = math.random(math.floor(strength - (strength * probaPhight/100)), math.ceil(strength))
-
-	-- print("DcW LFW APRES strength "..strength)
 
 	local dens = math.ceil(strength * 1.5)
 	if dens > 10 then
 		dens = 10
 	end
-	-- local conversionDens = math.ceil(dens * 0.8)
-	local conversionDens = math.ceil((0.77777777777778 * dens) + 0.22222222222222)
-	local presetCompatible = {}
-	local maxloop = 1
-	local tolerance = 0
-	repeat
-		for n=1, #preset do
-			if math.ceil(preset[n].cover/10) <= conversionDens + tolerance and math.ceil(preset[n].cover/10) >= conversionDens - tolerance then
-				table.insert(presetCompatible, n )
-			end
-			maxloop = maxloop +1
-		end
-		tolerance = tolerance + 1
-	until #presetCompatible >= 1 or maxloop > 200
+	
+	-- local conversionDens = math.ceil((0.77777777777778 * dens) + 0.22222222222222)
+	-- local presetCompatible = {}
+	-- local maxloop = 1
+	-- local tolerance = 0
+	-- repeat
+	-- 	for n=1, #preset do
+	-- 		if math.ceil(preset[n].cover/10) <= conversionDens + tolerance and math.ceil(preset[n].cover/10) >= conversionDens - tolerance then
+	-- 			table.insert(presetCompatible, n )
+	-- 		end
+	-- 		maxloop = maxloop +1
+	-- 	end
+	-- 	tolerance = tolerance + 1
+	-- until #presetCompatible >= 1 or maxloop > 200
 
-	if #presetCompatible == 0 then
-		presetCompatible = {1, 2, 3}
-		print("DcW PresetCompatible Error")
-		os.execute 'pause'
-	end
+	-- if #presetCompatible == 0 then
+	-- 	presetCompatible = {1, 2, 3}
+	-- 	print("DcW PresetCompatible Error")
+	-- 	os.execute 'pause'
+	-- end
 
-	PresetChoice = math.random(1, #presetCompatible)
-	PresetChoice = presetCompatible[PresetChoice]
+	-- presetChoice = math.random(1, #presetCompatible)
+	-- presetChoice = presetCompatible[presetChoice]
 
-	-- PresetChoice = math.random(10, 20)
-	-- baseChoice =  math.random(preset[PresetChoice].altiMin, preset[PresetChoice].altiMax)
-	if fieldElevation >= preset[PresetChoice].altiMin and fieldElevation <= preset[PresetChoice].altiMax then
-		baseChoice =  math.random(fieldElevation, preset[PresetChoice].altiMax)
+	-- Pour choisir aléatoirement parmi une liste précise de valeurs, place-les dans un tableau puis utilise math.random sur l'index :
+	presetChoice = lowFrontWarmPresets[math.random(1, #lowFrontWarmPresets)]
+
+	-- baseChoice =  math.random(preset[presetChoice].altiMin, preset[presetChoice].altiMax)
+	if fieldElevation >= preset[presetChoice].altiMin and fieldElevation <= preset[presetChoice].altiMax then
+		baseChoice =  math.random(fieldElevation, preset[presetChoice].altiMax)
 	else
-		baseChoice =  math.random(preset[PresetChoice].altiMin, preset[PresetChoice].altiMax)
+		baseChoice =  math.random(preset[presetChoice].altiMin, preset[presetChoice].altiMax)
 	end
 
 	mission.weather["clouds"] = {
@@ -1309,11 +1619,11 @@ elseif camp.weather.zone == "low front warm" then
 		["density"] = dens,
 		-- ["base"] = fieldElevation + 100 + math.ceil(8000 - strength * 800),
 		["base"] = baseChoice,
-		["preset"] = preset[PresetChoice].name,
+		["preset"] = preset[presetChoice].name,
 	}
 
 	--il ne pleut que dans les preset 28/29/30
-	if PresetChoice >= 28 and PresetChoice <= 30 then
+	if presetChoice >= 28 and presetChoice <= 30 then
 		mission.weather["clouds"]["iprecptns"] = math.floor(strength * 0.2)
 	else
 		mission.weather["clouds"]["iprecptns"] = 0
@@ -1384,9 +1694,11 @@ elseif camp.weather.zone == "low front warm" then
 elseif camp.weather.zone == "low sector cold" then
 
 	--clouds
-	-- PresetChoice = math.random(20, 25)
-	PresetChoice = 1
-	baseChoice =  math.random(preset[PresetChoice].altiMin, preset[PresetChoice].altiMax)
+	-- Pour choisir aléatoirement parmi une liste précise de valeurs, place-les dans un tableau puis utilise math.random sur l'index :
+	presetChoice = lowSectorColdPresets[math.random(1, #lowSectorColdPresets)]
+
+	presetChoice = 1
+	baseChoice =  math.random(preset[presetChoice].altiMin, preset[presetChoice].altiMax)
 
 	mission.weather["clouds"] = {
 		["thickness"] = math.random(100, 1000),
@@ -1395,7 +1707,7 @@ elseif camp.weather.zone == "low sector cold" then
 		["base"] = baseChoice,
 
 		["iprecptns"] = 0,
-		["preset"] = preset[PresetChoice].name,
+		["preset"] = preset[presetChoice].name,
 	}
 
 	--wind
@@ -1461,8 +1773,10 @@ elseif camp.weather.zone == "low sector cold" then
 elseif camp.weather.zone == "low sector warm" then
 
 	--clouds
-	PresetChoice = math.random(5, 20)
-	baseChoice =  math.random(preset[PresetChoice].altiMin, preset[PresetChoice].altiMax)
+	-- Pour choisir aléatoirement parmi une liste précise de valeurs, place-les dans un tableau puis utilise math.random sur l'index :
+	presetChoice = lowSectorWarmPresets[math.random(1, #lowSectorWarmPresets)]
+
+	baseChoice =  math.random(preset[presetChoice].altiMin, preset[presetChoice].altiMax)
 
 	mission.weather["clouds"] = {
 		["thickness"] = math.random(100, 1000),
@@ -1470,7 +1784,7 @@ elseif camp.weather.zone == "low sector warm" then
 		-- ["base"] = math.random(4000, 6000),
 		["base"] = baseChoice,
 		["iprecptns"] = 0,
-		["preset"] = preset[PresetChoice].name,
+		["preset"] = preset[presetChoice].name,
 	}
 
 	--wind
@@ -1781,9 +2095,9 @@ for placeName, place in pairs(db_airbases) do
 			ceilingFt =  math.floor(ceilingFt / 100)
 		end
 
-		if PresetChoice > 0 then
+		if presetChoice > 0 then
 			local deltaBase = 0
-			for n, layer in ipairs(preset[PresetChoice].layers) do
+			for n, layer in ipairs(preset[presetChoice].layers) do
 				if n == 1 then
 					deltaBase = (layer.base * 10) - ceilingFt
 				end
@@ -2011,9 +2325,9 @@ for placeName, place in pairs(db_airbases) do
 		if mission.weather["enable_fog"] == true then
 			vis = mission.weather["fog"]["visibility"]
 		end
-		if preset[PresetChoice] and preset[PresetChoice].visibility and preset[PresetChoice].visibility < vis then
-			-- print("DcW PresetChoice "..PresetChoice.." visibility "..preset[PresetChoice].visibility)
-			vis =  preset[PresetChoice].visibility
+		if preset[presetChoice] and preset[presetChoice].visibility and preset[presetChoice].visibility < vis then
+			-- print("DcW presetChoice "..presetChoice.." visibility "..preset[presetChoice].visibility)
+			vis =  preset[presetChoice].visibility
 		end
 
 		for n, level in ipairs(militaryColor) do
@@ -2175,6 +2489,9 @@ if debugWeather then
 	_affiche(camp.date, "camp.date FINAL: ")
 	
 	_affiche(camp.weather, "camp.weather FINAL: ")
+
+	_affiche(mission.weather, "mission.weather: ")
+
 	os.execute 'pause'
 
 
