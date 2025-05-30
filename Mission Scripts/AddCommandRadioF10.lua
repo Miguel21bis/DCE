@@ -33,7 +33,7 @@ end
 env.info("DCE_ACRF10 version of Lua _VERSION "..tostring(_VERSION))
 env.info("DCE_ACRF10 START LOADING AddCommandRadioF10.lua "..tostring(versionDCE["Mission Scripts/AddCommandRadioF10.lua"]))
 
-local useBubble_DisableEnable_Group = true
+local useBubble_DisableEnable_Group = false
 -- Distance seuil pour activation/désactivation (en mètres)
 local ACTIVATION_DISTANCE = 45000
 local SPAWN_DELAY = 0.06  -- Délai entre chaque création (en secondes)

@@ -136,6 +136,20 @@ local function health1s(arg)
 end
 
 --1s apres le hit, la valeur est plus proche de la réalité
+local function schedulHit(hitTemp)
+
+
+	scenLog[hitTemp.scenaryName] = {							--add scenery object to table
+		lifePourcent = 0,
+		x = hitTemp.x,
+		y = hitTemp.y,
+		z = hitTemp.z,
+		event = hitTemp.event,
+	}
+
+end
+
+--1s apres le hit, la valeur est plus proche de la réalité
 local function addHit1s(hitTemp)
 
 	if scenLog and scenLog[hitTemp.scenaryName] and scenLog[hitTemp.scenaryName].event == "S_EVENT_DEAD" then
@@ -230,11 +244,12 @@ local function processhit1sQueue()
     local count = 0
     while #hit1sQueue > 0 and count < batchSize do
         local hitTemp = table.remove(hit1sQueue, 1)
-        addHit1s(hitTemp)
+        -- addHit1s(hitTemp)
+		schedulHit(hitTemp)		--schedule hit 1s after the hit
         count = count + 1
     end
     if #hit1sQueue > 0 then
-        return timer.getTime() + 0.2
+        return timer.getTime() + 0.7
     else
         hit1sQueueTimerId = nil -- plus rien à traiter, on arrête le cycle
         return nil
@@ -1299,83 +1314,114 @@ function eventHandlerDCE:onEvent(event)
 		os.execute('start "Debriefing" cmd  /k "set \"DCSDIR=%cd%\" &  ' .. PathDD .. ' & cd ' .. PathDCE .. ' & call \"%DCSDIR%\\bin\\luae.exe\" ..\\..\\..\\ScriptsMod.'..camp.versionPackageICM..'\\DEBRIEF_Master.lua"')
 
 	--collect destroyed scenery objects
+	-- elseif event.id == world.event.S_EVENT_HIT then
+	-- 	if event.target and event.initiator then
+	-- 		if Object.getCategory(event.target) == 5 and event.target.getDesc then								--if target is a scenery object
+	-- 			local descr = event.target:getDesc()
+	-- 			if descr.life and descr.life > 9 then							--only store destroyed scenery that had an initial health bigger than 20
+	-- 				local lifeHit = event.target:getLife()
+	-- 				-- local live0 = event.target:getLife0()	--ne fonctionne pas avec scenery object
+	-- 				local health0 = descr.life
+	-- 				local hightLife = health0
+	-- 				if lifeHit > hightLife and lifeHit > health0 then
+	-- 					hightLife = lifeHit
+	-- 				end
+	-- 				local lifePourcent = (lifeHit/hightLife) * 100
+
+	-- 				local initPoint = event.target:getPoint()				--get point of hit scenery object
+
+	-- 				local scenaryName = event.target:getName()
+
+	-- 				local wep = event.weapon
+	-- 				local descWep = wep:getDesc()
+	-- 				-- if descWep and camp.debug then
+	-- 				-- 	_affiche(descWep, "DCE_EventsTracker hit descWep ")
+	-- 				-- end
+
+	-- 				local explosiveMass = 0
+	-- 				if descWep and descWep.warhead and descWep.warhead.explosiveMass then
+	-- 					explosiveMass = descWep.warhead.explosiveMass
+	-- 				end
+
+	-- 				local weaponName = "inc"
+	-- 				if descWep and descWep.displayName then
+	-- 					weaponName = descWep.displayName
+	-- 				end
+
+	-- 				local sceneryTypeName = "inc"
+	-- 				if descr and descr.typeName then
+	-- 					sceneryTypeName = descr.typeName
+	-- 				end
+
+	-- 				local hitTemp = {
+	-- 					scenaryName = scenaryName,
+	-- 					sceneryTypeName = sceneryTypeName,
+	-- 					objScen = event.target,
+	-- 					hightLife = hightLife,
+	-- 					health0 = descr.life,									--store initial health of scenery object
+	-- 					lasthit = event.initiator:getName(),					--store who hit the scenery object
+	-- 					lifeHit = lifeHit,
+	-- 					lifePourcent = lifePourcent,
+	-- 					x = initPoint.x,
+	-- 					y = initPoint.y,
+	-- 					z = initPoint.z,
+	-- 					-- description = descr,
+	-- 					event = "S_EVENT_HIT",
+	-- 					initiatorSideName = initiatorSideName,
+	-- 					targetSideName = targetSideName,
+	-- 					explosiveMass = explosiveMass,
+	-- 					weaponName = weaponName,
+	-- 					time = log_entry.t,
+	-- 					log_equiv = log_entry,
+	-- 				}
+
+	-- 				if descr and camp.debug then
+	-- 					hitTemp.description = descr
+	-- 				end
+
+	-- 				-- timer.scheduleFunction(addHit1s, hitTemp, timer.getTime() + 1)
+
+	-- 				-- Ajoute à la file d'attente au lieu d'appeler directement
+    --       			table.insert(hit1sQueue, hitTemp)
+	-- 				if not hit1sQueueTimerId then
+	-- 					hit1sQueueTimerId = timer.scheduleFunction(processhit1sQueue, nil, timer.getTime() + 0.1)
+	-- 				end
+
+	-- 			end
+	-- 		end
+	-- 	end
 	elseif event.id == world.event.S_EVENT_HIT then
 		if event.target and event.initiator then
-			if Object.getCategory(event.target) == 5 and event.target.getDesc then								--if target is a scenery object
-				local descr = event.target:getDesc()
-				if descr.life and descr.life > 9 then							--only store destroyed scenery that had an initial health bigger than 20
-					local lifeHit = event.target:getLife()
-					-- local live0 = event.target:getLife0()	--ne fonctionne pas avec scenery object
-					local health0 = descr.life
-					local hightLife = health0
-					if lifeHit > hightLife and lifeHit > health0 then
-						hightLife = lifeHit
-					end
-					local lifePourcent = (lifeHit/hightLife) * 100
+			if targetObjCategory == Object.Category.SCENERY and event.target.getDesc then
 
-					local initPoint = event.target:getPoint()				--get point of hit scenery object
+				local lifePourcent = 0
 
-					local scenaryName = event.target:getName()
+				local initPoint = event.target:getPoint()
 
-					local wep = event.weapon
-					local descWep = wep:getDesc()
-					-- if descWep and camp.debug then
-					-- 	_affiche(descWep, "DCE_EventsTracker hit descWep ")
-					-- end
+				local scenaryName = event.target:getName()
 
-					local explosiveMass = 0
-					if descWep and descWep.warhead and descWep.warhead.explosiveMass then
-						explosiveMass = descWep.warhead.explosiveMass
-					end
+				local wep = event.weapon
+				local descWep = wep:getDesc()
+				
 
-					local weaponName = "inc"
-					if descWep and descWep.displayName then
-						weaponName = descWep.displayName
-					end
+				local hitTemp = {
+					scenaryName = scenaryName,
+					lasthit = event.initiator:getName(),
+					lifePourcent = lifePourcent,
+					x = initPoint.x,
+					y = initPoint.y,
+					z = initPoint.z,
+					event = "S_EVENT_HIT",
+					
+				}
 
-					local sceneryTypeName = "inc"
-					if descr and descr.typeName then
-						sceneryTypeName = descr.typeName
-					end
-
-					local hitTemp = {
-						scenaryName = scenaryName,
-						sceneryTypeName = sceneryTypeName,
-						objScen = event.target,
-						hightLife = hightLife,
-						health0 = descr.life,									--store initial health of scenery object
-						lasthit = event.initiator:getName(),					--store who hit the scenery object
-						lifeHit = lifeHit,
-						lifePourcent = lifePourcent,
-						x = initPoint.x,
-						y = initPoint.y,
-						z = initPoint.z,
-						-- description = descr,
-						event = "S_EVENT_HIT",
-						initiatorSideName = initiatorSideName,
-						targetSideName = targetSideName,
-						explosiveMass = explosiveMass,
-						weaponName = weaponName,
-						time = log_entry.t,
-						log_equiv = log_entry,
-					}
-
-					if descr and camp.debug then
-						hitTemp.description = descr
-					end
-
-					timer.scheduleFunction(addHit1s, hitTemp, timer.getTime() + 1)
-
-					-- Ajoute à la file d'attente au lieu d'appeler directement
-          			table.insert(hit1sQueue, hitTemp)
-					if not hit1sQueueTimerId then
-						hit1sQueueTimerId = timer.scheduleFunction(processhit1sQueue, nil, timer.getTime() + 0.1)
-					end
-
+				-- Ajoute à la file d'attente au lieu d'appeler directement
+				table.insert(hit1sQueue, hitTemp)
+				if not hit1sQueueTimerId then
+					hit1sQueueTimerId = timer.scheduleFunction(processhit1sQueue, nil, timer.getTime() + 0.1)
 				end
 			end
 		end
-		
 	elseif event.id == world.event.S_EVENT_DEAD then
 		if event.initiator then
 			if initiatorObjCategory == 5 then							--if initiator is a scenery object
