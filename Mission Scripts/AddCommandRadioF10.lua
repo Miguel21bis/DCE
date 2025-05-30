@@ -1477,17 +1477,17 @@ local function bingo(gpGid, groupMission)
 
 	for n, unit in pairs(groupMission:getUnits()) do
 
-		local humainUnit
+		-- local humainUnit
 
-		if unit and unit:getPlayerName() then
-			humainUnit = unit:getPlayerName()
-		end
+		-- if unit and unit:getPlayerName() then
+		-- 	humainUnit = unit:getPlayerName()
+		-- end
 
 		local callSign = Unit.getCallsign(unit)
 		if not BingoPlaneTab[gpGid] then BingoPlaneTab[gpGid] = {} end
 		if not tabJockerPlane[gpGid] then tabJockerPlane[gpGid] = {} end
 
-		local gpName = Group.getName(groupMission)
+		-- local gpName = Group.getName(groupMission)
 		-- env.info( " bingo() gpName  "..tostring(gpName).." groupMission.id_ "..tostring(groupMission.id_) )
 		-- _affiche(groupMission, "groupMission function bingo(gpGid, groupMission)")
 
@@ -1516,7 +1516,7 @@ local function bingo(gpGid, groupMission)
 				local unitName =  unit:getName()
 				env.info( "DCE_Bingo CC      report "..tostring(groupMission.id_).." "..tostring(unitName).." "..callSign.." report "..tostring(report) )
 
-				local description = unit:getDesc()
+				-- local description = unit:getDesc()
 				-- _affiche(description, "description function bingo()")
 
 				local breaktab = false
@@ -1585,7 +1585,15 @@ local function bingo(gpGid, groupMission)
 					cntrl:setOption(AI.Option.Air.id.PROHIBIT_AB, true)
 					cntrl:setOption(AI.Option.Air.id.JETT_TANKS_IF_EMPTY, true)
 
-					-- env.info( "DCE_Bingo EE        goToWaypointIndex "..tostring(unitName).." "..callSign.." goToWaypointIndex "..tostring(rtbGroup.to) )
+	-- RTB_NO							= false,
+	-- RTB_AAR_REFUEL 					= true,
+	-- RTB_IGNORE_AAR					= 2,
+
+					cntrl:setOption(AI.Option.Air.id.RTB_ON_BINGO, 2) -- RTB on Bingo  RTB_IGNORE_AAR
+						--OptionName.RTB_ON_BINGO
+
+
+					env.info( "DCE_Bingo EE        goToWaypointIndex "..tostring(unitName).." "..callSign.." goToWaypointIndex "..tostring(rtbGroup.to) )
 					-- _affiche(switchtask, "switchtask function bingo()")
 				end
 			end
@@ -1594,7 +1602,7 @@ local function bingo(gpGid, groupMission)
 		if tabJockerPlane[gpGid] and not tabJockerPlane[gpGid][callSign] then												-- si le callSign a deja dit qu'il etait Bingo, on l'oublie
 			if Unit.getFuel(unit) <=  0.33 then																			-- Sur F14, 4000lbs/16000lbs = 0.25%
 				trigger.action.outTextForGroup(gpGid, callSign .." Jocker Fuel", 15 , true)
-				env.info( " Unit.getFuel(unit)  "..callSign.." humainUnit? "..tostring(humainUnit) )
+				-- env.info( " Unit.getFuel(unit)  "..callSign.." humainUnit? "..tostring(humainUnit) )
 				tabJockerPlane[gpGid][callSign] = true																	-- la callSign � d�ja indiqu� qu'il �tait Bingo			
 			end
 		end
