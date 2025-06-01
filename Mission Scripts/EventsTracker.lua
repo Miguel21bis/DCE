@@ -30,6 +30,9 @@ Info_event_B = {}
 
 local hit1sQueue = {}
 local hit1sQueueTimerId = nil
+local refuelStartByUnit = {}					--table used to store the start time of refueling for each unit
+local refuelNotifyByUnit = {}				--table used to store the notification time for refueling for each unit
+local tankerToPlane = {}		--table to store refueling units
 
 for eventName, eventId in pairs(world.event) do
 	table.insert(Info_event_B, eventId, eventName)
@@ -352,68 +355,73 @@ end
 local function CheckRefuelProgress()
     local anyRefueling = false
 	env.info("DCE_EventT_Refuel PROGRESS_A0")
+	-- _affiche(refuelStartByUnit, "DCE_EventT_Refuel PROGRESS_A0 refuelStartByUnit")
 
-    for uid, unitFuel in pairs(RefuelStartByUnit) do
-		env.info("DCE_EventT_Refuel PROGRESS_A1 uid "..tostring(uid).." fuelStart "..tostring(unitFuel.fuel))
+    for uid, plane in pairs(refuelStartByUnit) do
 
-		-- RefuelStartByUnit[uid] = {
-		-- 	fuel = event.initiator:getFuel(),
-		-- 	uName = uName,
-		-- }
+		env.info("DCE_EventT_Refuel PROGRESS_A2a plane.uName "..tostring(plane.uName).." plane.fuel "..tostring(plane.fuel))
 
-		env.info("DCE_EventT_Refuel PROGRESS_A2a unitFuel.uName "..tostring(unitFuel.uName).." unitFuel.fuel "..tostring(unitFuel.fuel))
-
-		local unit = nil
-		-- if unitFuel.uName.getByName then
-			unit = Unit.getByName(unitFuel.uName)
-			env.info("DCE_EventT_Refuel PROGRESS_A2b ")
+		local plane_obj = nil
+		-- if plane.uName.getByName then	--ATTENTION, ça ne marche pas pour les string
+			plane_obj = Unit.getByName(plane.uName)
+			-- env.info("DCE_EventT_Refuel PROGRESS_A2b ")
 		-- end
-		env.info("DCE_EventT_Refuel PROGRESS_B0 eee uid "..tostring(uid).." unit "..tostring(unit))
+		env.info("DCE_EventT_Refuel PROGRESS_B0 fff uid "..tostring(uid).." unit "..tostring(plane_obj))
 
-		--  if unit then
-		-- 	env.info("DCE_EventT_Refuel PROGRESS_B1 unit ")
-		--  end
-		-- if unit and unit.isExist and unit:isExist() then
-		-- 	env.info("DCE_EventT_Refuel PROGRESS_B2 isExist ")
-		--  end
-		-- if unit and unit.inAir and unit:inAir() then
-		-- 	env.info("DCE_EventT_Refuel PROGRESS_B3 inAir ")
-		--  end
-
-        if unit and unit.isExist and unit.inAir and unit:isExist() and unit:inAir() then
-			
+		if plane_obj and plane_obj.isExist and plane_obj.inAir and plane_obj:isExist() and plane_obj:inAir() then
 
             anyRefueling = true
-            local desc = unit:getDesc()
-            local fuelMassMax = desc and desc.fuelMassMax or 0
-            local fuelNow = unit:getFuel()
+            -- local desc = plane_obj:getDesc()
+            -- local fuelMassMax = desc and desc.fuelMassMax or 0
+
+			local fuelMassMax = plane.fuelMassMax
+
+            local fuelNow = plane_obj:getFuel()
 			env.info("DCE_EventT_Refuel PROGRESS_C fuelMassMax "..tostring(fuelMassMax).." fuelNow "..tostring(fuelNow))
 
             if fuelMassMax > 0 and fuelNow then
-				env.info("DCE_EventT_Refuel PROGRESS_D")
-                local fuelKg = (fuelNow > 1 and fuelMassMax or fuelNow * fuelMassMax)
-                local fuelLbs = fuelKg * 2.20462
-                if not RefuelNotifyByUnit[uid] then
+				
+                local fuelNowKg = (fuelNow > 1 and fuelMassMax or fuelNow * fuelMassMax)
+                local fuelNowLbs = fuelNowKg * 2.20462
+				local fuel_now
+
+				if not refuelNotifyByUnit[uid] then
 					env.info("DCE_EventT_Refuel PROGRESS_E")
-                    RefuelNotifyByUnit[uid] = math.floor(fuelKg * 2.20462 / 1000) * 1000 + 1000
+                    refuelNotifyByUnit[uid] = {}
+				end
+
+				if plane["unit_kg"] then
+					fuel_now = Deepcopy(fuelNowKg)
+				else
+					fuel_now = Deepcopy(fuelNowLbs)
+				end
+
+                if not refuelNotifyByUnit[uid]["fuel_init"] then
+					env.info("DCE_EventT_Refuel PROGRESS_E")
+                    refuelNotifyByUnit[uid]["fuel_init"] = Deepcopy(fuel_now)
+					refuelNotifyByUnit[uid]["fuel_palier"] = 0
                 end
-                while fuelLbs >= RefuelNotifyByUnit[uid] do
-					
-                    -- local playerName = unit.getPlayerName and unit:getPlayerName()
-					local playerName = unit:getPlayerName()
-					env.info("DCE_EventT_Refuel PROGRESS_F playerName "..tostring(playerName).." RefuelNotifyByUnit[uid] "..tostring(RefuelNotifyByUnit[uid]).." fuelLbs "..tostring(fuelLbs))
-                    if playerName then
-						env.info("DCE_EventT_Refuel PROGRESS_H")
-                        trigger.action.outTextForUnit(uid,
-                            string.format("Fuel on board: %.0f lbs", RefuelNotifyByUnit[uid]), 5)
-                    end
-                    RefuelNotifyByUnit[uid] = RefuelNotifyByUnit[uid] + 1000
+
+				if not refuelNotifyByUnit[uid]["fuel_init"] < (fuel_now - 10) then
+					env.info("DCE_EventT_Refuel PROGRESS_E")
+                    refuelNotifyByUnit[uid]["fuel_init"] = Deepcopy(fuel_now)
+					refuelNotifyByUnit[uid]["fuel_palier"] = 0
+                end
+
+				env.info("DCE_EventT_Refuel PROGRESS_D fuel_now: "..tostring(fuel_now).." >=? .fuel "..tostring(refuelNotifyByUnit[uid]["fuel_init"]))
+
+                -- On affiche seulement les paliers de 1000 lbs ajoutés
+                while fuel_now >= refuelNotifyByUnit[uid]["fuel_init"] + 1000 do
+                    refuelNotifyByUnit[uid]["fuel_init"] = refuelNotifyByUnit[uid]["fuel_init"] + 1000
+					refuelNotifyByUnit[uid]["fuel_palier"] = refuelNotifyByUnit[uid]["fuel_palier"] + 1000
+                    env.info("DCE_EventT_Refuel PROGRESS_F palier atteint : "..tostring(refuelNotifyByUnit[uid]["fuel_palier"]))
+                    trigger.action.outTextForUnit(uid, string.format("%d lbs ajouté", refuelNotifyByUnit[uid]["fuel_palier"]), 5)
                 end
             end
         end
     end
     if anyRefueling then
-		env.info("DCE_EventT_Refuel PROGRESS_Y scheduleFunction ")
+		env.info("DCE_EventT_Refuel PROGRESS_Y scheduleFunction + 5s ")
         refuelProgressTimerId = timer.scheduleFunction(CheckRefuelProgress, nil, timer.getTime() + 5)
     else
 		env.info("DCE_EventT_Refuel PROGRESS_Z NIL")
@@ -486,8 +494,8 @@ function eventHandlerDCE:onEvent(event)
 	-- elseif event.id == world.event.S_EVENT_WEAPON_ADD then						--34
 		-- log_entry.type = "weapon add"
 	else
-		-- env.info( "EventT PASSE 00a event INCONNU, id: "..tostring(event.id))
-		-- _affiche(event, "EventT  PASSE 00b event INCONNU")
+		env.info( "EventT PASSE 00a event INCONNU, id: "..tostring(event.id))
+		_affiche(event, "EventT  PASSE 00b event INCONNU")
 		
 	end
 
@@ -572,12 +580,12 @@ function eventHandlerDCE:onEvent(event)
 				
 
 				if camp.debug then
-					-- env.info("DCE_EventsTracker event.id "..tostring(event.id).." " ..idLabel)
+					env.info("DCE_EventsTracker event.id "..tostring(event.id).." " ..idLabel)
 
 				end
 			else
 				if camp.debug then
-					-- env.info("DCE_EventsTracker this is a  NEW ID "..tostring(event.id))
+					env.info("DCE_EventsTracker this is a  NEW ID "..tostring(event.id))
 				end
 			end
 		end
@@ -1481,54 +1489,166 @@ function eventHandlerDCE:onEvent(event)
 				end
 			end
 		end
-	elseif event.id == world.event.S_EVENT_REFUELING then
-		if event.initiator and event.initiator.getFuel then
-			local uid = event.initiator:getID()
-			local uName = event.initiator:getName()
-			RefuelStartByUnit[uid] = {
-				fuel = event.initiator:getFuel(),
-				uName = uName,
-			}
+		elseif event.id == world.event.S_EVENT_REFUELING then
+			env.info("DCE_EventT_Refuel START_A "..tostring(event.initiator))
 
-			-- env.info("DCE_EventT_Refuel START_A for unit " .. event.initiator:getName() .. " / Fuel before refuel: " .. string.format("%.2f", RefuelStartByUnit[uid] * 100) .. "%")
-			-- env.info("DCE_EventT_Refuel START_A2 refuelProgressTimerId: "..tostring(refuelProgressTimerId))
+			local uid ,uName ,fuelMassMax, playerName
 
-			-- Lance le cycle uniquement s'il n'est pas déjà lancé
-			if not refuelProgressTimerId then
-				env.info("DCE_EventT_Refuel START_B ")
-				refuelProgressTimerId = timer.scheduleFunction(CheckRefuelProgress, nil, timer.getTime() + 5)
+			if event.initiator then
+				env.info("DCE_EventT_Refuel: START_B ")
+
+				local desc = event.initiator:getDesc()
+				_affiche(desc, "START_B2 desc: ")
+
+				if desc then
+					env.info("DCE_EventT_Refuel: START_B3 attributes? "..tostring( desc.attributes)
+					.." Tankers? "..tostring( desc.attributes.Tankers)
+					.." Refuelable? "..tostring( desc.attributes.Refuelable)
+					)
+				end
+
+				-- Détection si c'est un tanker
+				if desc and desc.attributes and desc.attributes.Tankers then
+					env.info("DCE_EventT_Refuel: START_C initiator est un TANKER, recherche du receveur...")
+
+					local tanker = event.initiator
+					local tankerPos = tanker:getPoint()
+					local minDist = 99999
+					local closestUnit = nil
+
+					-- Récupère la coalition du tanker
+					local tankerCoalition = tanker:getCoalition()
+					local coalitionSide = tankerCoalition == coalition.side.BLUE and coalition.side.BLUE or coalition.side.RED
+
+					-- Parcours uniquement les groupes aériens de la coalition du tanker
+					local groups = coalition.getGroups(coalitionSide, Group.Category.AIRPLANE)
+					for _, group in ipairs(groups) do
+						for i = 1, group:getSize() do
+							local unit = group:getUnit(i)
+							if unit and unit:isExist() and unit ~= tanker then
+								local pos = unit:getPoint()
+								local dx = pos.x - tankerPos.x
+								local dz = pos.z - tankerPos.z
+								local dist = math.sqrt(dx*dx + dz*dz)
+								-- On ne prend que l’unité la plus proche à moins de 200m et en vol
+								if dist < 200 and unit:inAir() then
+									if dist < minDist then
+										minDist = dist
+										closestUnit = unit
+										tankerToPlane[tanker:getID()] = closestUnit		-- Enregistre la relation tanker -> receveur
+									end
+								end
+							end
+						end
+					end
+
+					if closestUnit then
+						env.info("DCE_EventT_Refuel: START_D Avion receveur trouvé: " .. closestUnit:getName())
+						uid = closestUnit:getID()
+						uName = closestUnit:getName()
+						desc = closestUnit:getDesc()
+						fuelMassMax = desc and desc.fuelMassMax or 0
+						refuelStartByUnit[uid] = {
+							initfuel = closestUnit:getFuel(),
+							uName = uName,
+							fuelMassMax = fuelMassMax,
+							unit_lbs = true,
+							unit_kg = false,
+							obj_unit = closestUnit,		-- Ajout de l'objet unité pour référence
+						}
+						
+					else
+						env.info("DCE_EventT_Refuel: START_E Aucun receveur trouvé à proximité du tanker.")
+					end
+				else
+					-- Sinon, comportement normal (initiator = receveur)
+					uid = event.initiator:getID()
+					uName = event.initiator:getName()
+					fuelMassMax = desc and desc.fuelMassMax or 0
+					refuelStartByUnit[uid] = {
+						initfuel = event.initiator:getFuel(),
+						uName = uName,
+						fuelMassMax = fuelMassMax,
+						unit_lbs = true,
+						unit_kg = false,
+						obj_unit = event.initiator,		-- Ajout de l'objet unité pour référence
+					}
+				end
+
+				env.info("DCE_EventT_Refuel START_G uid: " .. tostring(uid) .. " / uName: " .. tostring(uName))
+
+				-- _affiche(refuelStartByUnit, "START_F refuelStartByUnit: ")
+
+				if refuelStartByUnit[uid].obj_unit.getPlayerName then
+					playerName = refuelStartByUnit[uid].obj_unit:getPlayerName()
+				end
+				
+				-- trigger.action.outText("(outText ALL) S_EVENT_REFUELING "..tostring(uName).." "..tostring(playerName), 20)
+
+				trigger.action.outTextForUnit(uid, "S_EVENT_REFUELING "..tostring(uName).." "..tostring(playerName), 20)
+
+				if not refuelProgressTimerId then
+					env.info("DCE_EventT_Refuel START_G ")
+					refuelProgressTimerId = timer.scheduleFunction(CheckRefuelProgress, nil, timer.getTime() + 0.01)
+				end
 			end
-		end
+	
 
 	elseif event.id == world.event.S_EVENT_REFUELING_STOP then
 		env.info("DCE_EventT_Refuel STOP_A S_EVENT_REFUELING_STOP")
 
-		if event.initiator and event.initiator.getFuel and event.initiator.isExist and event.initiator:isExist() then
-			local uid = event.initiator:getID()
-			local fuelBefore = RefuelStartByUnit[uid].fuel
+		
 
-			env.info("DCE_EventT_Refuel STOP_B1 uid: " .. tostring(uid) .. " / fuelBefore: " .. tostring(fuelBefore))
-			_affiche(RefuelStartByUnit, "DCE_EventT_Refuel STOP_B2 RefuelStartByUnit")
+		if event.initiator and event.initiator.getID and event.initiator.getFuel and event.initiator.isExist and event.initiator:isExist() then
+			local tanker_uid = event.initiator:getID()
+			local plane_obj
+			local uid
 
-			if fuelBefore then
+			if tankerToPlane[tanker_uid] then
 				
-				local fuelAfter = event.initiator:getFuel()
-				local fuelTransferred = fuelAfter - fuelBefore
-				local desc = event.initiator:getDesc()
-				local fuelMassMax = desc and desc.fuelMassMax or 0
-				local fuelTransferredKg = math.floor(fuelTransferred * fuelMassMax)
-				local fuelTransferredLbs = math.floor(fuelTransferredKg * 2.20462 + 0.5)
-				local playerName = event.initiator.getPlayerName and event.initiator:getPlayerName()
-				env.info("DCE_EventT_Refuel STOP_C playerName: " .. tostring(playerName))
-				if playerName then
-					trigger.action.outTextForUnit(event.initiator:getID(),
-							string.format("Fuel transferred: %.0f lbs", fuelTransferredLbs), 10)
+				plane_obj = tankerToPlane[tanker_uid]
+				uid = plane_obj:getID()
+				tankerToPlane[tanker_uid] = nil
+				env.info("DCE_EventT_Refuel STOP_B tankerToPlane[uid] found: " .. tostring(uid))
+			else
+				
+				plane_obj = event.initiator
+				uid = tanker_uid
+				env.info("DCE_EventT_Refuel STOP_B tankerToPlane[uid] not found: " .. tostring(uid))
+			end
+			
+			if refuelStartByUnit[uid] and refuelStartByUnit[uid].initfuel then
 
-					env.info("DCE_EventT_Refuel Stop for unit " .. event.initiator:getName()
-						.. " / Fuel transferred: " .. string.format("%.0f kg (%.0f lbs)", fuelTransferredKg, fuelTransferredLbs))
+				local fuelBefore = refuelStartByUnit[uid].initfuel
+
+				if fuelBefore then
+					
+					local fuelAfter = plane_obj:getFuel()
+					
+					env.info("DCE_EventT_Refuel STOP_D1 uid: " .. tostring(uid) .. " / fuelBefore: " .. tostring(fuelBefore).. " / fuelAfter: " .. tostring(fuelAfter))
+
+					local fuelTransferred = fuelAfter - fuelBefore
+					local fuelMassMax = refuelStartByUnit[uid].fuelMassMax
+					local fuelTransferredKg = math.floor(fuelTransferred * fuelMassMax)
+					local fuelTransferredLbs = math.floor(fuelTransferredKg * 2.20462 + 0.5)
+					local fuelAfterKg = fuelAfter * fuelMassMax
+					local fuelTotalLbs = math.floor(fuelAfterKg * 2.20462 + 0.5)
+					
+					local playerName = plane_obj.getPlayerName and plane_obj:getPlayerName() or nil
+					
+					if playerName then
+						
+						-- trigger.action.outText(string.format("(outText_All) Total: %.0f lbs, fuel transferred: %.0f lbs", fuelTotalLbs, fuelTransferredLbs), 20)
+
+						trigger.action.outTextForUnit(uid, string.format("Total: %.0f lbs, fuel transferred: %.0f lbs", fuelTotalLbs, fuelTransferredLbs), 20)
+
+						env.info("DCE_EventT_Refuel Stop for unit " .. string.format("(outText_All) Total: %.0f lbs, fuel transferred: %.0f lbs", fuelTotalLbs, fuelTransferredLbs))
+					end
+
+					env.info("DCE_EventT_Refuel STOP_Z refuelStartByUnit[uid] = nil: " .. tostring(uid))
+					refuelStartByUnit[uid] = nil	--TODO, ici il ne doit pas tout supprimer, pb avec uid si c'est le tanker qui est l'initiateur
+					refuelNotifyByUnit[uid] = nil
 				end
-				RefuelStartByUnit[uid] = nil
-				RefuelNotifyByUnit[uid] = nil
 			end
 			-- Le timer s'arrêtera tout seul si plus personne ne ravitaille (voir CheckRefuelProgress)
 		end

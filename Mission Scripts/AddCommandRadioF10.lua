@@ -63,8 +63,6 @@ CustomLog = {}
 zoneSAR = {}								--table enumérant les helico SAR pour eviter d'en envoyer plusieurs aux memes endroits
 EjectedPilotOnBoard = {}
 LastInjecAFAC = {}					--garde les derniers plan de vol injecté
-RefuelStartByUnit = {}					--table used to store the start time of refueling for each unit
-RefuelNotifyByUnit = {}				--table used to store the notification time for refueling for each unit
 SatusGroupAircraft = {}				--table used to store the status of aircraft groups
 
 coalitionId = {

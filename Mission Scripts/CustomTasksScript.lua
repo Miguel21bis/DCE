@@ -3063,7 +3063,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 
 	local function execute()
 		local current_time = timer.getTime()
-		env.info( "current_time: "..tostring(current_time).." Custom_AddWptSAR B, grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(speed).."|"..tostring(alt))
+		-- env.info( "current_time: "..tostring(current_time).." Custom_AddWptSAR B, grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(speed).."|"..tostring(alt))
 
 		local flight = Group.getByName(grpname)
 		local grpSide = tostring(flight:getCoalition())						--obligé pour le string, car 0 est impossible en numerotation de table	
@@ -3078,13 +3078,13 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 				if  baseFullName[BaseName] then
 					BaseName = baseFullName[BaseName]
 					base = Airbase.getByName(BaseName)
-					env.info( "Custom_AddWptSAR B2, BaseName |"..tostring(BaseName).."| base |"..tostring(base))
+					-- env.info( "Custom_AddWptSAR B2, BaseName |"..tostring(BaseName).."| base |"..tostring(base))
 				else
-					env.info( "Custom_AddWptSAR B3, BaseName |"..tostring(BaseName).."| base |"..tostring(base))
+					-- env.info( "Custom_AddWptSAR B3, BaseName |"..tostring(BaseName).."| base |"..tostring(base))
 				end
 			end
 
-			env.info( "Custom_AddWptSAR C, BaseName |"..tostring(BaseName).."| base |"..tostring(base))
+			-- env.info( "Custom_AddWptSAR C, BaseName |"..tostring(BaseName).."| base |"..tostring(base))
 			-- _affiche(base, "Custom_AddWptSAR D base")
 		end
 
@@ -3123,41 +3123,41 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 
 			for MGRS_Chute, zone in pairs(zoneSAR) do
 				for N_Pilot, uPilot in ipairs(zone) do
-					env.info( "Custom_AddWptSAR F  "..tostring(uPilot.name).."|"..tostring(mgrsChute).."|"..tostring(uPilot.status))
+					-- env.info( "Custom_AddWptSAR F  "..tostring(uPilot.name).."|"..tostring(mgrsChute).."|"..tostring(uPilot.status))
 
 					if  string.lower(uPilot.side) ==  coalitionId[grpSide]  then
 						if uPilot.name and uPilot.embarked ~= true  and (uPilot.status ==  "MIA" or uPilot.status ==  "EVAC_possible" )  then
-							env.info( "Custom_AddWptSAR G "..tostring(uPilot.name).."|"..tostring(mgrsChute).."|"..tostring(uPilot.status))
+							-- env.info( "Custom_AddWptSAR G "..tostring(uPilot.name).."|"..tostring(mgrsChute).."|"..tostring(uPilot.status))
 
 							local distance = math.sqrt(math.pow(pt_start.x2d - uPilot.x2d, 2) + math.pow(pt_start.y2d - uPilot.y2d, 2))
 							if distance < selectedDistance then
 								selectedDistance = distance
 								pt_dest = uPilot
 								nb_survivor = nb_survivor + 1
-								env.info( "Custom_AddWptSAR H no_rescue  "..tostring(nb_survivor))
+								-- env.info( "Custom_AddWptSAR H no_rescue  "..tostring(nb_survivor))
 							end
 						end
 					end
 				end
 			end
 
-			env.info( "Custom_AddWptSAR nb_survivor  "..tostring(nb_survivor).." FuelPercent: "..tostring(FuelPercent))
-			env.info( "Custom_AddWptSAR pt_start.c2d  "..tostring(pt_start.x2d).." pt_start.y2d: "..tostring(pt_start.y2d))
+			-- env.info( "Custom_AddWptSAR nb_survivor  "..tostring(nb_survivor).." FuelPercent: "..tostring(FuelPercent))
+			-- env.info( "Custom_AddWptSAR pt_start.c2d  "..tostring(pt_start.x2d).." pt_start.y2d: "..tostring(pt_start.y2d))
 
 			local newRoute = {}
 			if nb_survivor >= 1 and FuelPercent >= 0.5 and selectedDistance < 30001 then
 				if selectedDistance > 30000 then
-					env.info( "Custom_AddWptSAR I, CompteRenduEtonnement distance trop longue, la recuperation devrait etre verticale "..selectedDistance)
+					-- env.info( "Custom_AddWptSAR I, CompteRenduEtonnement distance trop longue, la recuperation devrait etre verticale "..selectedDistance)
 				end
 
-				env.info( "Custom_AddWptSAR J, TENTE nouveau WPT distance "..selectedDistance)
+				-- env.info( "Custom_AddWptSAR J, TENTE nouveau WPT distance "..selectedDistance)
 
 				local distance01 = math.sqrt(math.pow(pt_start.x2d - pt_dest.x2d, 2) + math.pow(pt_start.y2d - pt_dest.y2d, 2))
 
 				-- local distance = math.sqrt(math.pow(copyRoute[n].x - copyRoute[n+1].x, 2) + math.pow(copyRoute[n].y - copyRoute[n+1].y, 2))
 				local heading = GetHeading({x=pt_dest.x2d, y=pt_dest.y2d} , {x=pt_landing.x2d, y=pt_landing.y2d} )
 				local pt_inter = GetOffsetPoint({x=pt_dest.x2d, y=pt_dest.y2d}, heading , 1000 )
-				env.info( "Custom_AddWptSAR K, pt_inter.x "..tostring(pt_inter.x))
+				-- env.info( "Custom_AddWptSAR K, pt_inter.x "..tostring(pt_inter.x))
 
 				pt_inter.alti = land.getHeight({x =pt_inter.x, y = pt_inter.y})
 
@@ -3356,13 +3356,13 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 					local copyRoute = {}
 					local foundAeronef = false
 
-					env.info( "Custom_AddWptSAR CSAR M  "..tostring(gpGid) )
+					-- env.info( "Custom_AddWptSAR CSAR M  "..tostring(gpGid) )
 
 					for tblGrpId, value in pairs(LastInjectFlightPlan) do
-						env.info( "Custom_AddWptSAR CSAR N  tblGrpId "..tostring(tblGrpId) )
+						-- env.info( "Custom_AddWptSAR CSAR N  tblGrpId "..tostring(tblGrpId) )
 
 						if tblGrpId == gpGid then
-							env.info( "Custom_AddWptSAR CSAR O  foundAeronef " )
+							-- env.info( "Custom_AddWptSAR CSAR O  foundAeronef " )
 
 							copyRoute = Deepcopy(value.params.route.points)
 							foundAeronef = true
@@ -3401,7 +3401,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 					--https://stackoverflow.com/questions/12394841/safely-remove-items-from-an-array-table-while-iterating
 					-- nouvelle façon de supprimer des elements d'une table, sans le tps ultra long de table.remove
 					if foundAeronef and attackPoint > 0 then
-						env.info( "Custom_AddWptSAR CSAR P  foundAeronef and attackPoint > 0 " )
+						-- env.info( "Custom_AddWptSAR CSAR P  foundAeronef and attackPoint > 0 " )
 						local n=#copyRoute
 						for i=1,n do
 							if i < attackPoint-1 then
@@ -4280,12 +4280,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 		-- local selectedMember = flight:getUnits(1)
 		local selectedMember
 		local wingman = flight:getUnits()
-		-- for memberN, _unit in ipairs(wingman) do											
-			-- if _unit and _unit:isActive() and _unit:inAir() then
-				-- selectedMember = _unit
-			-- end
-		-- end
-
+		
 		for memberN, _unit in ipairs(wingman) do
 			if _unit and _unit:isExist() and _unit:isActive()  and _unit:inAir() then
 				selectedMember = _unit
@@ -4294,13 +4289,8 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 		end
 
 		if not selectedMember then
-			env.info(" Custom_Altitude, C1 selectedMember Erreur : selectedMember est invalide ou inexistant.")
-
 			return
 		end
-
-		env.info( "current_time: "..tostring(current_time).." Custom_Altitude, C2 selectedMember |"..tostring(selectedMember))
-
 
 		local ctr = selectedMember:getGroup():getController()
 		local actualPosition = selectedMember:getPoint()
@@ -4321,11 +4311,8 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 		local addAlti = 150
 		local str_selectedMember = selectedMember:getTypeName()
 
-		env.info( "current_time: "..tostring(current_time).." Custom_Altitude, C3 str_selectedMember |"..tostring(str_selectedMember))
-
 		-- local str_selectedMember = selectedMember:getTypeName()
 		if type(str_selectedMember) ~= "string" then
-			env.info("Custom_Altitude, C4 Erreur : str_selectedMember n'est pas une chaîne.")
 			return
 		end
 
@@ -4339,20 +4326,15 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 			local foundAeronef = false
 			local copyRoute = {}
 
-			env.info( "Custom_Altitude, D gpGid? |"..tostring(gpGid))
-
 			for tblGrpId, value in pairs(LastInjectFlightPlan) do
 				if tblGrpId == gpGid then
 					copyRoute = Deepcopy(value.params.route.points)
 					foundAeronef = true
-					env.info( "Custom_Altitude, D2_a found LastInjectFlightPlan tblGrpId |"..tostring(tblGrpId))
 					break
 				end
 			end
 
 			if not foundAeronef then
-				env.info( "Custom_Altitude, E |")
-
 				for _coalition, coalition in pairs(env.mission.coalition) do
 					for Ncountry, _country in pairs(coalition.country) do
 						if _country.helicopter then
@@ -4360,7 +4342,6 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 								if _group.groupId == gpGid then
 									copyRoute = Deepcopy(_group.route.points)
 									foundAeronef = true
-									env.info( "Custom_Altitude, D2_b found foundAeronef _group.groupId |"..tostring(_group.groupId ))
 									break
 								end
 							end
@@ -4370,8 +4351,6 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 					if foundAeronef then break end
 				end
 			end
-
-			env.info( "Custom_Altitude, E1a wptTag  "..tostring(wptTag))
 
 			--enleve le script Custom_Altitude pour eviter de le reinjecter et d avoir une boucle
 			if wptTag and wptTag ~= nil then
@@ -4397,14 +4376,10 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 
 					local distance = math.sqrt(math.pow(point.x - actualPosition.x, 2) + math.pow(point.y - actualPosition.z, 2))
 					if distance < 1000 then
-						env.info( "Custom_Altitude, F1_ga   ")
-
 						if point.task and point.task.params and point.task.params.tasks then
 							for Ntask , taskFinal in ipairs(point.task.params.tasks)  do
 								if taskFinal and taskFinal.params and taskFinal.params.action and taskFinal.params.action.id == "Script" then
 									if taskFinal.params.action.params and  taskFinal.params.action.params.command and string.find(taskFinal.params.action.params.command,"Custom_Altitude") then
-
-										env.info( "Custom_Altitude, F1_gb   ")
 
 										point.task.params.tasks[Ntask] = nil
 
@@ -4417,34 +4392,6 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 				end
 			end
 
-			--enleve le script Custom_Altitude pour eviter de le reinjecter et d avoir une boucle
-			-- local deleteBeforHere = false
-			-- for m = #copyRoute, 1, -1 do
-			-- 	--deleteBeforHere
-			-- 	if copyRoute[m].name == "deleteBeforHere" then
-			-- 		deleteBeforHere = true
-			-- 	elseif deleteBeforHere then
-			-- 		table.remove(copyRoute, m)
-			-- 	end
-			-- end
-
-			--enleve le script Custom_Altitude pour eviter de le reinjecter et d avoir une boucle
-			-- if wptTag and wptTag > 0 then
-
-			-- 	-- Créer une copie du tableau pour éviter les problèmes d'indexation
-			-- 	local copy = {}
-			-- 	for i, v in ipairs(copyRoute) do
-			-- 		table.insert(copy, v)
-			-- 	end
-
-			-- 	-- Supprimer les éléments du tableau d'origine
-			-- 	for i = #copy, 1, -1 do
-			-- 		if i <= wptTag then
-			-- 			table.remove(copyRoute, i)
-			-- 		end
-			-- 	end
-			-- end
-
 			if wptTag and wptTag > 0 then
 				for i = #copyRoute, 1, -1 do
 					if i <= wptTag then
@@ -4452,19 +4399,6 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 					end
 				end
 			end
-
-
-			-- if camp.debug then
-			-- 	local logStr = "Mission = " .. TableSerialization(copyRoute, 0)
-			-- 	local grpnameClean = grpname:gsub('[%p%c%s]', '_')
-			-- 	local logFile = io.open(PathDCE.."Debug\\"..grpnameClean.."_".. "Custom_Altitude_copyRoute_"..current_time..".lua", "w")
-			-- 	if logFile then
-			-- 		logFile:write(logStr)
-			-- 		logFile:close()
-			-- 	else
-			-- 		env.info("DCE_Custom_Altitude_copyRoute: Failed to open log file for writing.")
-			-- 	end
-			-- end
 
 			--cherche la prochaine action pour ne pas trop calculer de wpt intermedaire
 			local nWptNextCustom = 9999
@@ -4475,7 +4409,6 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 							if taskFinal.params.action.params and taskFinal.params.action.params.command
 							and ( string.find(taskFinal.params.action.params.command,"Custom_SAR") or string.find(taskFinal.params.action.params.command,"Custom_AddWptSAR")  ) then
 
-								-- env.info( "Custom_Altitude, F1_h find N Next Custom : "..tostring(Npoint))
 								local convertedNpoint = tonumber(Npoint) -- Conversion sécurisée
 								if convertedNpoint then
 									nWptNextCustom = convertedNpoint
@@ -4493,7 +4426,6 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 
 			for n = 1, #copyRoute - 1  do
 				if n > nWptNextCustom then    --ne pas ajouter trop de wpt, sinon ça plante DCS (75 wpt max)
-					-- env.info( "Custom_Altitude, Gb break : "..tostring(n))
 					break
 				end
 
@@ -4732,9 +4664,6 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 						table.insert(copyRoute2, interWpt)
 
 						altiMax = 1
-
-						-- env.info( "CustomTS x #copyRoute2: "..tostring(#copyRoute2))
-
 
 					end
 					if #copyRoute2 > 50 then break end
