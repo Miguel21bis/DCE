@@ -1577,12 +1577,12 @@ Action = {}
 
 							if forcedReAlive then
 								local endfunction = false
-								for c = 1, #oob_ground[groundside] do													--iterate through countries in side
-									for class ,typetable in pairs(oob_ground[groundside][c]) do						--iterate through country table content
+								for c = 1, #oob_ground[groundside] do
+									for class ,typetable in pairs(oob_ground[groundside][c]) do
 										
-										if class == "vehicle" or class == "ship" or class == "static" then			--for vehciles or ships
-												for group_n,group in pairs(typetable.group) do			--iterate through groups	
-													for unit_n,unit in pairs(group.units) do			--iterate through groups	
+										if class == "vehicle" or class == "ship" or class == "static" then
+												for group_n,group in pairs(typetable.group) do
+													for unit_n,unit in pairs(group.units) do	
 														if  target.elements[e].name == unit.name then
 
 															if Debug.AfficheSol then

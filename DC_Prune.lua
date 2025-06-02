@@ -183,10 +183,10 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 	elseif  string.find(unit.name,"VC_")  then
 		-- VC_Khe-Sanh-Troops
 		if string.find(unit.name,"VC_Khe%-Sanh") then
-			print("DC_P_T1 -------> KEEP VC_: "..unit.name)
+			-- print("DC_P_T1 -------> KEEP VC_: "..unit.name)
 			return true -- keep VC_Khe-Sanh
 		else
-			print("DC_P_T2 PRUNE VC_: "..unit.name)
+			-- print("DC_P_T2 PRUNE VC_: "..unit.name)
 			return false -- Prune VC_ planesname
 		end
 

@@ -86,10 +86,10 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 
-
 --run log evaluation and status updates
 dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_StatsEvaluation.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
+
 --create and view Debriefing file for mission
 --cette foi-ci, on enregistre les stats, mais sans les montrer
 
@@ -340,4 +340,6 @@ if TypeAlias then
 	_file:write(_str)
 	_file:close()
 end
+
+-- CheckTarget("Vihn Power Plant", "Main Accept Z")
 

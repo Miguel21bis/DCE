@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.87.536"
+versionDCE["UTIL_Changelog.lua"] = "20.88.536"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.87.536"
+VersionDCE["UTIL_Changelog.txt"] = "20.88.536"
 --[[
 
 
@@ -9,7 +9,9 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.87.536:==
+==:20.88.537:==
+
+537 add		[refuel][M88]	CheckRefuelProgress (in progress)
 
 536	mod		[loadout][M87]	change of logic for the “day” variable: day will always be considered true (even if it's not in the loadout). 
 						However, if you want ONLY a night loadout, set this:

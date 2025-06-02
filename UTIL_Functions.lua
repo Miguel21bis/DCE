@@ -4447,9 +4447,27 @@ end
 
 function CheckTarawa(txt)
 
-	for basename, base in pairs(db_airbases) do															--iterate through airbases
+	for basename, base in pairs(db_airbases) do
 		if base.unitname and base.unitname == "LHA_Tarawa" then																			--if airbase is a carrier, find the unit in the OOB Ground
 			print("UtilF LHA_Tarawa "..txt.." "..tostring(base.x) )
+		end
+	end
+end
+
+function CheckTarget(tgt, txt)
+
+	for sideName, targets in pairs(targetlist) do
+		for targetN, target in pairs(targets) do
+			if target.titleName  == tgt then
+				
+				print("UtilF CheckTarget |"..txt.."| |"..tgt.."| alive?: "..tostring(target.alive) )
+				
+				if target.elements and target.elements[1] then
+				
+					print("UtilF CheckTarget |"..txt.."| |"..target.elements[1].name.."| dead? "..tostring(target.elements[1].dead) )
+
+				end
+			end
 		end
 	end
 end

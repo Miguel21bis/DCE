@@ -460,6 +460,7 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 
+
 if 	not mission_ini  or mission_ini == nil  then
 	dofile("Init/conf_mod.lua")
 end
