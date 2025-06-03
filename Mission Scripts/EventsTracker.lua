@@ -360,77 +360,107 @@ end
 -- Fonction périodique pour notifier le joueur pendant le ravitaillement
 local function CheckRefuelProgress()
     local anyRefueling = false
-	env.info("DCE_EventT_Refuel PROGRESS_A0")
+	-- env.info("DCE_EventT_Refuel PROGRESS_A0")
 
     for uid, plane in pairs(refuelStartByUnit) do
 
-		env.info("DCE_EventT_Refuel PROGRESS_A2a plane.uName "..tostring(plane.uName).." plane.fuel "..tostring(plane.fuel))
+		env.info("DCE_EventT_Refuel PROGRESS_A2 plane.uName "..tostring(plane.uName).." plane.fuel "..tostring(plane.fuel))
 
-		local plane_obj = nil
-		-- if plane.uName.getByName then	--ATTENTION, ça ne marche pas pour les string
-		plane_obj = Unit.getByName(plane.uName)
+		if refuelStartByUnit[uid].status == "REFUELING" then
+			env.info("DCE_EventT_Refuel PROGRESS_A3 REFUELING OK ")
+
+			local plane_obj = nil
+			-- if plane.uName.getByName then	--ATTENTION, ça ne marche pas pour les string
+			plane_obj = Unit.getByName(plane.uName)
+				
+			env.info("DCE_EventT_Refuel PROGRESS_B0 fff uid "..tostring(uid).." unit "..tostring(plane_obj))
+
+			-- -- local timerPass = true
+			-- if  plane.start_time and timer.getTime() > plane.start_time + 120 then
+			-- 	env.info("DCE_EventT_Refuel PROGRESS_B1 getTime "..timer.getTime().." start_time + 120>? "..tostring(plane.start_time + 120))
+			-- 	env.info("DCE_EventT_Refuel PROGRESS_B2plane = nil") 
+			-- 	-- plane = nil -- reset notify after 5 minutes
+			-- 	plane.start_time = timer.getTime()
+			-- 	plane.fuel_palier = 0
+			-- 	plane.fuel_init = nil
+			-- 	-- timerPass = false
+				
+			-- end
+
+			if (plane_obj and plane_obj.isExist and plane_obj.inAir and plane_obj:isExist() and plane_obj:inAir())  then	--and timerPass
+
+				anyRefueling = true
+				local fuelMassMax = plane.fuelMassMax
+				local fuelNowPourcent = plane_obj:getFuel()
+				env.info("DCE_EventT_Refuel PROGRESS_C fuelMassMax "..tostring(fuelMassMax).." fuelNow "..tostring(fuelNowPourcent))
+
+				if fuelMassMax > 0 and fuelNowPourcent then
+					
+					local fuelNowKg = fuelNowPourcent * fuelMassMax
+					local fuelNowLbs = fuelNowKg * 2.20462
+					local fuel_now = Deepcopy(plane["unit_kg"] and fuelNowKg or fuelNowLbs)
+					
+					-- if not refuelNotifyByUnit[uid] then
+					-- 	env.info("DCE_EventT_Refuel PROGRESS_D1")
+					-- 	refuelNotifyByUnit[uid] = {}
+					-- end
+
+					-- local notify = refuelNotifyByUnit[uid]
+
+					-- Initialisation si nécessaire
+					if not plane.fuel_init then
+						env.info("DCE_EventT_Refuel PROGRESS_D2")
+						-- plane.start_time = timer.getTime()
+						plane.fuel_palier = 0
+						plane.fuel_init = Deepcopy(fuel_now)
+					end
+
+					-- -- Réinitialisation toutes les 5 minutes
+					-- if timer.getTime() > plane.start_time + 300 then
+					-- 	env.info("DCE_EventT_Refuel PROGRESS_D3")
+					-- 	plane.start_time = timer.getTime()
+					-- 	plane.fuel_palier = 0
+					-- 	plane.fuel_init = Deepcopy(fuel_now)
+					-- end
+
+					env.info("DCE_EventT_Refuel PROGRESS_D3 add start_time")
+					plane.start_time = timer.getTime()
+
+					_affiche(plane, "DCE_EventT_Refuel PROGRESS_D4 plane ")
+				
+					env.info("DCE_EventT_Refuel PROGRESS_D99 fuel_now: "..tostring(fuel_now).." >=? .fuel "..tostring(plane["fuel_init"] + 1000))
+
+					-- On affiche seulement les paliers de 1000 lbs ajoutés
+					while fuel_now >= plane["fuel_init"] + 1000 do
+						plane["fuel_init"] = plane["fuel_init"] + 1000
+						plane["fuel_palier"] = plane["fuel_palier"] + 1000
+						env.info("DCE_EventT_Refuel PROGRESS_F palier atteint : "..tostring(plane["fuel_palier"]))
+						trigger.action.outTextForUnit(uid, string.format("%d lbs ajouté", plane["fuel_palier"]), 5)
+					end
+				end
+			end
+
+		else 	--refuelStartByUnit[uid].status == "REFUELING_STOP" 
+		
+			env.info("DCE_EventT_Refuel REFUELING_STOP? "..tostring(refuelStartByUnit[uid].status).." PROGRESS_X getTime "..timer.getTime().." start_time + 120>? "..tostring(plane.start_time + 120))
+
+			--TODO ici on sort trop vite, avec Z99 nil
+			if plane.start_time and timer.getTime() > plane.start_time + 120 then
+
+				env.info("DCE_EventT_Refuel PROGRESS_Z88 = nil") 
+				-- plane = nil -- reset notify after 5 minutes
+				-- plane.start_time = timer.getTime()
+				plane.fuel_palier = 0
+				plane.fuel_init = nil
+			end
 			
-		env.info("DCE_EventT_Refuel PROGRESS_B0 fff uid "..tostring(uid).." unit "..tostring(plane_obj))
-
-		local timerPass = true
-		if  refuelNotifyByUnit[uid] and refuelNotifyByUnit[uid].start_time and timer.getTime() > refuelNotifyByUnit[uid].start_time + 300 then
-			refuelNotifyByUnit[uid] = nil -- reset notify after 5 minutes
-			timerPass = false
 		end
-
-		if (plane_obj and plane_obj.isExist and plane_obj.inAir and plane_obj:isExist() and plane_obj:inAir()) and timerPass then
-
-            anyRefueling = true
-           	local fuelMassMax = plane.fuelMassMax
-			 local fuelNowPourcent = plane_obj:getFuel()
-			env.info("DCE_EventT_Refuel PROGRESS_C fuelMassMax "..tostring(fuelMassMax).." fuelNow "..tostring(fuelNowPourcent))
-
-            if fuelMassMax > 0 and fuelNowPourcent then
-				
-                local fuelNowKg = fuelNowPourcent * fuelMassMax
-                local fuelNowLbs = fuelNowKg * 2.20462
-				local fuel_now = Deepcopy(plane["unit_kg"] and fuelNowKg or fuelNowLbs)
-				
-				if not refuelNotifyByUnit[uid] then
-					env.info("DCE_EventT_Refuel PROGRESS_D1")
-					refuelNotifyByUnit[uid] = {}
-				end
-
-				local notify = refuelNotifyByUnit[uid]
-
-				-- Initialisation si nécessaire
-				if not notify.start_time or not notify.fuel_init then
-					env.info("DCE_EventT_Refuel PROGRESS_D2")
-					notify.start_time = timer.getTime()
-					notify.fuel_palier = 0
-					notify.fuel_init = Deepcopy(fuel_now)
-				end
-
-				-- Réinitialisation toutes les 5 minutes
-				if timer.getTime() > notify.start_time + 300 then
-					env.info("DCE_EventT_Refuel PROGRESS_D3")
-					notify.start_time = timer.getTime()
-					notify.fuel_palier = 0
-					notify.fuel_init = Deepcopy(fuel_now)
-				end
-
-				env.info("DCE_EventT_Refuel PROGRESS_D99 fuel_now: "..tostring(fuel_now).." >=? .fuel "..tostring(refuelNotifyByUnit[uid]["fuel_init"]))
-
-                -- On affiche seulement les paliers de 1000 lbs ajoutés
-                while fuel_now >= refuelNotifyByUnit[uid]["fuel_init"] + 1000 do
-                    refuelNotifyByUnit[uid]["fuel_init"] = refuelNotifyByUnit[uid]["fuel_init"] + 1000
-					refuelNotifyByUnit[uid]["fuel_palier"] = refuelNotifyByUnit[uid]["fuel_palier"] + 1000
-                    env.info("DCE_EventT_Refuel PROGRESS_F palier atteint : "..tostring(refuelNotifyByUnit[uid]["fuel_palier"]))
-                    trigger.action.outTextForUnit(uid, string.format("%d lbs ajouté", refuelNotifyByUnit[uid]["fuel_palier"]), 5)
-                end
-            end
-        end
     end
     if anyRefueling then
 		env.info("DCE_EventT_Refuel PROGRESS_Y scheduleFunction + 5s ")
         refuelProgressTimerId = timer.scheduleFunction(CheckRefuelProgress, nil, timer.getTime() + 5)
     else
-		env.info("DCE_EventT_Refuel PROGRESS_Z NIL")
+		env.info("DCE_EventT_Refuel PROGRESS_Z99 NIL")
         refuelProgressTimerId = nil -- plus personne ne ravitaille, on arrête le cycle
     end
 end
@@ -1566,14 +1596,14 @@ function eventHandlerDCE:onEvent(event)
 					env.info("DCE_EventT_Refuel: START_B ")
 
 					local desc = event.initiator:getDesc()
-					_affiche(desc, "START_B2 desc: ")
+					-- _affiche(desc, "START_B2 desc: ")
 
-					if desc then
-						env.info("DCE_EventT_Refuel: START_B3 attributes? "..tostring( desc.attributes)
-						.." Tankers? "..tostring( desc.attributes.Tankers)
-						.." Refuelable? "..tostring( desc.attributes.Refuelable)
-						)
-					end
+					-- if desc then
+					-- 	env.info("DCE_EventT_Refuel: START_B3 attributes? "..tostring( desc.attributes)
+					-- 	.." Tankers? "..tostring( desc.attributes.Tankers)
+					-- 	.." Refuelable? "..tostring( desc.attributes.Refuelable)
+					-- 	)
+					-- end
 
 					-- Détection si c'est un tanker
 					if desc and desc.attributes and desc.attributes.Tankers then
@@ -1616,7 +1646,9 @@ function eventHandlerDCE:onEvent(event)
 							uName = closestUnit:getName()
 							desc = closestUnit:getDesc()
 							fuelMassMax = desc and desc.fuelMassMax or 0
-							refuelStartByUnit[uid] = {
+
+							if not refuelStartByUnit[uid] then
+								refuelStartByUnit[uid] = {
 								initfuel = closestUnit:getFuel(),
 								uName = uName,
 								fuelMassMax = fuelMassMax,
@@ -1624,7 +1656,17 @@ function eventHandlerDCE:onEvent(event)
 								unit_kg = false,
 								obj_unit = closestUnit,		-- Ajout de l'objet unité pour référence
 								-- start_time = timer.getTime(),	-- Enregistre le temps de début du ravitaillement
-							}
+								}
+								env.info("DCE_EventT_Refuel: START_D2 ")
+							else
+								 
+								refuelStartByUnit[uid].start_time = timer.getTime()
+								-- refuelStartByUnit[uid].fuel_palier = 0
+								-- refuelStartByUnit[uid].fuel_init = nil
+								env.info("DCE_EventT_Refuel: START_D3 ")
+								
+							end
+
 							
 						else
 							env.info("DCE_EventT_Refuel: START_E Aucun receveur trouvé à proximité du tanker.")
@@ -1634,15 +1676,24 @@ function eventHandlerDCE:onEvent(event)
 						uid = event.initiator:getID()
 						uName = event.initiator:getName()
 						fuelMassMax = desc and desc.fuelMassMax or 0
-						refuelStartByUnit[uid] = {
-							initfuel = event.initiator:getFuel(),
-							uName = uName,
-							fuelMassMax = fuelMassMax,
-							unit_lbs = true,
-							unit_kg = false,
-							obj_unit = event.initiator,		-- Ajout de l'objet unité pour référence
-							-- start_time = timer.getTime(),	-- Enregistre le temps de début du ravitaillement
-						}
+							if not refuelStartByUnit[uid] then
+								refuelStartByUnit[uid] = {
+								initfuel = event.initiator:getFuel(),
+								uName = uName,
+								fuelMassMax = fuelMassMax,
+								unit_lbs = true,
+								unit_kg = false,
+								obj_unit = event.initiator,		-- Ajout de l'objet unité pour référence
+								-- start_time = timer.getTime(),	-- Enregistre le temps de début du ravitaillement
+								}
+								env.info("DCE_EventT_Refuel: START_F1 ")
+							else
+								 
+								refuelStartByUnit[uid].start_time = timer.getTime()
+								-- refuelStartByUnit[uid].fuel_palier = 0
+								-- refuelStartByUnit[uid].fuel_init = nil
+								env.info("DCE_EventT_Refuel: START_F2 ")
+							end
 					end
 
 					env.info("DCE_EventT_Refuel START_G uid: " .. tostring(uid) .. " / uName: " .. tostring(uName))
@@ -1651,7 +1702,9 @@ function eventHandlerDCE:onEvent(event)
 						playerName = refuelStartByUnit[uid].obj_unit:getPlayerName()
 					end
 					
-					trigger.action.outTextForUnit(uid, "S_EVENT_REFUELING "..tostring(uName).." "..tostring(playerName), 20)
+					refuelStartByUnit[uid].status = "REFUELING"
+
+					-- trigger.action.outTextForUnit(uid, "S_EVENT_REFUELING "..tostring(uName).." "..tostring(playerName), 20)
 
 					if not refuelProgressTimerId then
 						env.info("DCE_EventT_Refuel START_G ")
@@ -1699,6 +1752,8 @@ function eventHandlerDCE:onEvent(event)
 						local fuelTransferredLbs = math.floor(fuelTransferredKg * 2.20462 + 0.5)
 						local fuelAfterKg = fuelAfter * fuelMassMax
 						local fuelTotalLbs = math.floor(fuelAfterKg * 2.20462 + 0.5)
+
+						refuelStartByUnit[uid].status = "REFUELING_STOP"
 						
 						local playerName = plane_obj.getPlayerName and plane_obj:getPlayerName() or nil
 						
@@ -1711,9 +1766,9 @@ function eventHandlerDCE:onEvent(event)
 							env.info("DCE_EventT_Refuel Stop for unit " .. string.format("(outText_All) Total: %.0f lbs, fuel transferred: %.0f lbs", fuelTotalLbs, fuelTransferredLbs))
 						end
 
-						env.info("DCE_EventT_Refuel STOP_Z refuelStartByUnit[uid] = nil: " .. tostring(uid))
+						-- env.info("DCE_EventT_Refuel STOP_Z refuelStartByUnit[uid] = nil: " .. tostring(uid))
 						-- refuelStartByUnit[uid] = nil	--TODO, ici il ne doit pas tout supprimer, pb avec uid si c'est le tanker qui est l'initiateur
-						refuelNotifyByUnit[uid] = nil
+						-- refuelNotifyByUnit[uid] = nil
 					end
 				end
 				-- Le timer s'arrêtera tout seul si plus personne ne ravitaille (voir CheckRefuelProgress)
