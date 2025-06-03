@@ -114,6 +114,7 @@ if Multi.NbGroup >= 1 then
 	mission_forcedOptions.civTraffic = ""					-- Traffic civil routier : ( "" : OFF ) || ( "low" : BAS ) || ( "medium" : MOYEN )|| ( "high" : ELEVE )  [MP: recommend: ""]
 	mission_forcedOptions.birds = 0							-- Collision volatile (probabilit�) ( 0 � 1000 )  [MP: recommend: 0]
 
+	mission.failures = {}
 end
 
 ----- Desactive USN Mod -----modification M23
@@ -160,7 +161,7 @@ if Data_divers and Data_divers[PlayerSquad.type] and Data_divers[PlayerSquad.typ
 end
 
 
-if mission.failures and Failures and Failures[type_withData_player] then
+if  Multi.NbGroup <= 0 and mission.failures and Failures and Failures[type_withData_player] then
 	mission.failures = {}
 
 	-- ["A11_CLOCK_FAILURE"] = 

@@ -281,6 +281,22 @@ function GetDistance(p1, p2)
 	return math.sqrt(math.pow(deltax, 2) + math.pow(deltay, 2))
 end
 
+--proxyBase
+function ProxyBase(selectedEjection)
+    local distanceBase = nil
+    for Id, base in pairs(runwayLife) do 
+        -- On suppose que base.point et selectedEjection ont les champs x et z
+        local dx = base.point.x - selectedEjection.x
+        local dz = base.point.z - selectedEjection.z
+        local tempDistance = math.sqrt(dx * dx + dz * dz)
+
+        if not distanceBase or tempDistance < distanceBase then
+            distanceBase = tempDistance
+        end
+    end
+    return distanceBase
+end
+
 function radToDeg(_rad)
 	Deg = _rad * (180/math.pi)
 	return Deg

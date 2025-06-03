@@ -35,6 +35,11 @@ local refuelStartByUnit = {}					--table used to store the start time of refueli
 local refuelNotifyByUnit = {}				--table used to store the notification time for refueling for each unit
 local tankerToPlane = {}		--table to store refueling units
 
+local BdaFloodGuard = {}
+local bdaCount = {}
+local BDA_THRESHOLD = 20
+local TIME_WINDOW = 2
+
 for eventName, eventId in pairs(world.event) do
 	table.insert(Info_event_B, eventId, eventName)
 end
@@ -430,14 +435,7 @@ local function CheckRefuelProgress()
     end
 end
 
---###################  ######   #####################################
---###################  MAIN   #####################################
---###################  ######   #####################################
-
-function eventHandlerDCE:onEvent(event)
-
-
-	local eventsSurvey = {
+local eventsSurvey = {
 
 		[world.event.S_EVENT_MISSION_START] = true,--
 		[world.event.S_EVENT_MISSION_END] = true,--
@@ -449,6 +447,9 @@ function eventHandlerDCE:onEvent(event)
 
 		[world.event.S_EVENT_SHOT] = true,--
 		[world.event.S_EVENT_HIT] = true,--
+		[world.event.S_EVENT_BDA] = true,--
+		
+
 		[world.event.S_EVENT_DEAD] = true,--
 		[world.event.S_EVENT_KILL] = true,--
 		[world.event.S_EVENT_UNIT_LOST] = true,--
@@ -467,11 +468,7 @@ function eventHandlerDCE:onEvent(event)
 
 	}
 
-
-	--https://flightcontrol-master.github.io/MOOSE_DOCS_DEVELOP/Documentation/DCS.html
-	--https://wiki.hoggitworld.com/view/DCS_enum_world
-
-	Info_event = {
+Info_event = {
 		[0] =  "S_EVENT_INVALID",
 		[1] = "S_EVENT_SHOT",
 		[2] = "S_EVENT_HIT",
@@ -536,6 +533,12 @@ function eventHandlerDCE:onEvent(event)
 		[61] = "S_EVENT_MAX",
 	}
 
+--###################  ######   #####################################
+--###################  MAIN   #####################################
+--###################  ######   #####################################
+
+function eventHandlerDCE:onEvent(event)
+
 
 	-- if event and event.id then
 	-- 	if Info_event then
@@ -560,6 +563,45 @@ function eventHandlerDCE:onEvent(event)
 
 	-- on ne traite et surtout on n'enregistre pas les events interressant pour la DCE, sinon surchage CPU
 	if eventsSurvey[event.id] then
+
+
+		--surveillance des SPAM / FLOOD	
+		if event.id == world.event.S_EVENT_BDA then
+
+			local tgt = event.target
+			local init = event.initiator
+			if not tgt or not init then return end
+
+			local tid = tgt:getID()
+			local now = timer.getTime()
+
+			bdaCount[tid] = bdaCount[tid] or {}
+			local timestamps = bdaCount[tid]
+
+			-- Nettoyage
+			local newTimestamps = {}
+			for _, ts in ipairs(timestamps) do
+				if now - ts < TIME_WINDOW then
+					table.insert(newTimestamps, ts)
+				end
+			end
+			table.insert(newTimestamps, now)
+			bdaCount[tid] = newTimestamps
+
+			-- Détection flood
+			if #newTimestamps >= BDA_THRESHOLD then
+				local tgtName = tgt.getName and tgt:getName() or "unknown"
+				local initName = init.getName and init:getName() or "unknown"
+
+				trigger.action.outText("BDA flood détecté : " .. tgtName .. " & " .. initName .. " supprimés", 20)
+				env.info("[BDA-FLOOD] Détection de flood : " .. tgtName .. " ("..#newTimestamps..")")
+
+				if tgt:isExist() then tgt:destroy() end
+				if init:isExist() and init:getID() ~= tgt:getID() then init:destroy() end
+
+				bdaCount[tid] = nil
+			end
+		end
 		
 		
 		--custom events log
@@ -650,9 +692,9 @@ function eventHandlerDCE:onEvent(event)
 			-- if camp.debug then  env.info("DCE_EventsTracker target Category: "..tostring(targetObjCategory)) end
 
 			if Object_Category[targetObjCategory] then
-				local targetDesc = event.target:getDesc()
+				-- local targetDesc = event.target:getDesc()
 				
-				local targetObjCategory2 = targetDesc.category
+				-- local targetObjCategory2 = targetDesc.category
 				-- if camp.debug then  env.info("DCE_EventsTracker target targetObjCategory2: "..tostring(targetObjCategory2)) end
 
 				-- if camp.debug then  env.info("DCE_EventsTracker target Object_Category :  _:_ "..tostring(Object_Category[targetObjCategory])) end
@@ -666,10 +708,8 @@ function eventHandlerDCE:onEvent(event)
 				-- end
 
 				if event.target.getCoalition then
-					-- if event.target:isExist() then
-						local targetCoalition = event.target:getCoalition()
-						targetSideName = coalitionIdNumeric[tonumber(targetCoalition)]
-					-- end
+					local targetCoalition = event.target:getCoalition()
+					targetSideName = coalitionIdNumeric[tonumber(targetCoalition)]
 				end
 
 			end
@@ -782,12 +822,8 @@ function eventHandlerDCE:onEvent(event)
 			env.info( "DCE_EventT  PASSE A pilot seat separation, id: "..tostring(event.id).."_type_"..tostring(log_entry.type))
 
 			if event.initiator then
-				-- env.info( "DCE_EventT  PASSE B pilot seat separation, id: "..tostring(event.id).."_type_"..tostring(log_entry.type))
-
 				local ptEvent = event.initiator:getPoint()
 				if ptEvent and ptEvent.x then
-
-					-- env.info( "DCE_EventT  PASSE C pilot seat separation, id: "..tostring(event.id).."_type_"..tostring(log_entry.type))
 
 					--active fumigene
 					local PilotVec3 = {
@@ -915,7 +951,11 @@ function eventHandlerDCE:onEvent(event)
 						env.info( "DCE_EvenT: createdSoldier? SurfaceType? "..tostring(selectedEjection.SurfaceType))
 						-- trigger.action.outText("EvenT:  createdSoldier? SurfaceType? "..tostring(selectedEjection.SurfaceType), 30)
 
-						if selectedEjection.SurfaceType ~= land.SurfaceType.WATER and selectedEjection.SurfaceType ~= land.SurfaceType.RUNWAY  then
+
+
+						local distanceBase = ProxyBase(selectedEjection)
+
+						if distanceBase > 6000 and selectedEjection.SurfaceType ~= land.SurfaceType.WATER and selectedEjection.SurfaceType ~= land.SurfaceType.RUNWAY  then
 							AddSoldierAliasPilot(selectedEjection)
 							selectedEjection.createdSoldier = true
 						end

@@ -2215,7 +2215,9 @@ function GetOutGDFM(arg)
 
 							local typeLand = land.getSurfaceType({x =damaged.x2d, y = damaged.y2d})
 
-							if typeLand ~= land.SurfaceType.WATER and typeLand ~= land.SurfaceType.RUNWAY  then
+							local distanceBase = ProxyBase(damaged)
+
+							if distanceBase > 6 and typeLand ~= land.SurfaceType.WATER and typeLand ~= land.SurfaceType.RUNWAY  then
 
 								AddSoldierAliasPilot(damaged)
 								damaged.createdSoldier = true
