@@ -106,7 +106,7 @@ end
 	-- },
 	
 -- si le temps passé est supérieur à 3 fois ce qui etait convenu, on recommence à 0
-if elapsed_time > camp.weather.zoneEnd then
+if elapsed_time and camp.weather.zoneEnd and elapsed_time > camp.weather.zoneEnd then
 	local deltaTime = elapsed_time - camp.weather.zoneEnd
 	if debugWeather then print("DcW A10 deltaTime: "..tostring(deltaTime)) end
 

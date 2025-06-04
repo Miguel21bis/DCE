@@ -279,7 +279,7 @@ function DeleteSoldierAliasPilot(element)
         end
         if found then break end
     end
-
+    return
 end
 
 if not camp_ZoneSAR or camp_ZoneSAR == nil or not camp_ZoneSAR.blue or camp_ZoneSAR.blue == nil  then
@@ -1106,11 +1106,20 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
         for ZoneName, zone in pairs(sideSAR) do
             for Nelement, element in ipairs(zone) do
                 if element.status == "rescued" or element.status == "POW" then
-                    DeleteSoldierAliasPilot(element)
+                    
+                    local result = DeleteSoldierAliasPilot(element)
+                    
+                    if not result then
+                        print("DcUS GG (rescued or POW) No pilot to delete")
+                        -- os.execute 'pause'
+                    else
+                    --    print("DcUS GG Deleted pilot: "..tostring(result))
+                    end
                 end
             end
         end
     end
+
 end
 
 
@@ -1182,7 +1191,13 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
 				-- RUNWAY           5
 
                 -- supprime d'abord le soldat existant, pour actualiser sa position et son status
-                DeleteSoldierAliasPilot(element)
+                local result = DeleteSoldierAliasPilot(element)
+                    if not result then
+                        print("DcUS GG (maj) No pilot to delete "..tostring(element.name))
+                        -- os.execute 'pause'
+                    else
+                    --    print("DcUS GG Deleted pilot: "..tostring(result))
+                    end
 
                 if element.status == "EVAC_possible" and element.SurfaceType ~= 5  then
 

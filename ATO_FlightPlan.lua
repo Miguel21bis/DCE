@@ -8060,8 +8060,8 @@ if Debug.debug then
 
 	-- _affiche(channel_tacan, "Atofp channel_tacan ")
 
-	_affiche(PointOfInterest, "Atofp PointOfInterest ")
+	-- _affiche(PointOfInterest, "Atofp PointOfInterest ")
 	
 
-	os.execute('pause')
+	-- os.execute('pause')
 end

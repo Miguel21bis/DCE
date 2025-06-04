@@ -28,7 +28,7 @@ local pruneStatic =				mission_ini.PruneScriptConf.PruneStatic
 local pruneSam =				mission_ini.PruneScriptConf.ForcedPruneSam
 
 -- Liste des mots-clés à pruner
-local pruneKeywords = { "bag", "wall", "sand", "camouflage", "camouflage", "barrier", "container", "tent", "cargo", "soldier" }
+local pruneKeywords = { "bag", "wall", "sand", "camouflage", "camouflage", "barrier", "container", "tent", "cargo", "soldier" , "vc_" }
 
 -- work out which side has 'players'
 local function findPlayerSide()
@@ -195,10 +195,16 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 
 	-- puis dans keepGroundUnit :
 	elseif isPruneKeyword(lowCaseName) then
-		-- Exception : ne prune pas si c'est VC_Khe-Sanh
-		if string.find(unit.name, "VC_Khe%-Sanh") then
-			-- print("DC_P_T9 ---K----> Keep VC: "..unit.name)
-			return true -- keep
+		if string.find(lowCaseName, "vc_") then
+
+			-- Exception : ne prune pas si c'est VC_Khe-Sanh
+			if string.find(unit.name, "VC_Khe%-Sanh") then
+				-- print("DC_P_T9 ---K----> Keep VC: "..unit.name)
+				return true -- keep
+			end
+
+			-- print("DC_P_T2 -P----P--> Prune vc_: "..lowCaseName)
+			return false -- Prune
 		end
 
 		-- Vérifie la proximité d'un PointOfInterest
@@ -311,7 +317,7 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 
 
 
-	-- print("DC_P keepGroundUnit_A Unit " .. unit.type .. " unit.name" .. unit.name .. " closestWP " .. closestWP .. " closestTarget " .. 
+	-- print("DC_P keepGroundUnit_A Unit " .. unit.type .. " |unit.name: " .. unit.name .. " closestWP " .. closestWP .. " closestTarget " .. 
 	-- 		closestTarget .. " Keep = " .. (keep and "KEEP" or "PRUNE"))
 
 	-- if  unit.category and  keep == false then
