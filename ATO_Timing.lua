@@ -81,6 +81,16 @@ for side, pack in pairs(ATO) do
 		--TODO faire un player start uniquement client
 		local tot = 0 																								--set time on target in seconds after mission start
 
+		if pack[p].main and pack[p].main[1] and pack[p].main[1].tot then
+			-- _affiche(pack[p].main, "AtoT pack[p].main")
+		elseif not pack[p].main then
+			print("DEBUG: pack["..tostring(p).."].main is nil")
+			_affiche(pack[p], "AtoT pack[p] (main missing)")
+		elseif not pack[p].main[1] then
+			print("DEBUG: pack["..tostring(p).."].main[1] is nil")
+			_affiche(pack[p].main, "AtoT pack[p].main (main[1] missing)")
+		end
+
 		if pack[p].main[1].tot then																				--package already has a tot (target package for player intercept)
 			tot = pack[p].main[1].tot																			--set package tot
 			TOTtable[side][pack[p].main[1].target_name] = tot															--store TOT for target

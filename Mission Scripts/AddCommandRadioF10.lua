@@ -153,18 +153,6 @@ env.info( "DCE_PathDCE "..tostring(PathDCE) )
 env.info( "DCE_PathDD "..tostring(PathDD) )
 -----*********check PathDCE**************---------
 
--- EWR_optionPlayer["OBT_test"] = {
--- 	EWR_on = true,
--- }
--- EWR_optionPlayer["ArealTest-2"] = {
--- 	EWR_on = true,
--- }
--- EWR_optionPlayer["Pack 5 - 70 Squadron - Strike 1-4"] = {
--- 	EWR_on = true,
--- }
--- EWR_optionPlayer["Pack 5 - 70 Squadron - Strike 1-2"] = {
--- 	EWR_on = true,
--- }
 
 function _affiche(t, indent)
     indent = indent or ""
@@ -284,17 +272,19 @@ end
 --proxyBase
 function ProxyBase(selectedEjection)
     local distanceBase = nil
+    local baseName = nil
     for Id, base in pairs(runwayLife) do 
-        -- On suppose que base.point et selectedEjection ont les champs x et z
-        local dx = base.point.x - selectedEjection.x
-        local dz = base.point.z - selectedEjection.z
-        local tempDistance = math.sqrt(dx * dx + dz * dz)
-
-        if not distanceBase or tempDistance < distanceBase then
-            distanceBase = tempDistance
+        if base.point and base.point.x and base.point.z then
+            local dx = base.point.x - selectedEjection.x
+            local dz = base.point.z - selectedEjection.z
+            local tempDistance = math.sqrt(dx * dx + dz * dz)
+            if not distanceBase or tempDistance < distanceBase then
+                distanceBase = tempDistance
+                baseName = base.name
+            end
         end
     end
-    return distanceBase
+    return distanceBase, baseName
 end
 
 function radToDeg(_rad)
@@ -3194,13 +3184,17 @@ function EventHandler2:onEvent(event)
 		end
 
 		if event.id == world.event.S_EVENT_BIRTH then
-			if event.initiator and Object.getCategory(event.initiator) ~= Object.Category.STATIC and event.initiator.getPlayerName then
+			if event.initiator and Object.getCategory(event.initiator) ~= Object.Category.STATIC and event.initiator.getPlayerName and event.initiator.getGroup then
 				local playerName = event.initiator:getPlayerName()
 				local groupObject = event.initiator:getGroup()
-				local gpGid = event.initiator:getGroup():getID()
+				-- local gpGid = event.initiator:getGroup():getID()
 
-				if gpGid and groupObject and playerName  then
-					addFuncs(gpGid, groupObject, playerName)
+				if groupObject and groupObject.getID then
+					local gpGid = groupObject:getID()
+
+					if gpGid and groupObject and playerName then
+						addFuncs(gpGid, groupObject, playerName)
+					end
 				end
 			end
 		elseif not event.place then
@@ -3250,67 +3244,67 @@ function EventHandler2:onEvent(event)
 						end
 
 
+
+
 						-- env.info( "DCE_GroundDamagedFlyingMachine C1 initiatorPilotName "..tostring(initiatorPilotName).." lifePourcent: "..tostring(lifePourcent))
 						env.info( "DCE_GroundDamagedFlyingMachine C2 init_life "..tostring(init_life).." life: "..tostring(life))
 						env.info( "DCE_GroundDamagedFlyingMachine C3 event.initiator.id_ "..tostring(event.initiator.id_))
 
 
-						--TODO ajouter une proximité Base & Farp pour ne pas le faire dessus
+						
 						if lifePourcent < 100 and lifePourcent >= 1 then
 							env.info( "DCE_GroundDamagedFlyingMachine D detected ? event.initiator.id_ "..tostring(event.initiator.id_))
 
-							local Group = event.initiator:getGroup()
-							local gpGid = Group:getID()
-							local categoryId = event.initiator:getDesc().category
+							local crashPoint = event.initiator:getPoint()
+							local typeLand = land.getSurfaceType({x =crashPoint.x, y = crashPoint.z})
 
-							local countryId = event.initiator:getCountry()
-							local initiatorCountry = string.lower(country.name[countryId])
-							local initiatorSIDE = event.initiator:getCoalition()
-							local side = coalitionIdNumeric[tonumber(initiatorSIDE)]
+							--TODO ajouter une proximité Base & Farp pour ne pas le faire dessus
+							if typeLand == land.SurfaceType.WATER and typeLand == land.SurfaceType.RUNWAY then
+								
+								local Group = event.initiator:getGroup()
+								local gpGid = Group:getID()
+								local categoryId = event.initiator:getDesc().category
 
-							local eventData = {
-								-- initiatorPilotName = initiatorPilotName,
-								-- isPlayer = isPlayer,
-								unitName = unitName,
-								-- unitGame = event.initiator,
-								-- Uid = event.initiator:getID(),
-								aircraftType = event.initiator:getTypeName(),
-								lifePourcent = lifePourcent,
-								crashPoint = event.initiator:getPoint(),
-								unit = event.initiator,
-								gpGid = gpGid,
-								idLabel= idLabel,
-								categoryId = categoryId,
-								Coalition = event.initiator:getCoalition(),
-								initiatorMissionID = event.initiator:getID(),
-								initiatorSIDE = initiatorSIDE,
-								countryId = countryId,
-								initiatorCountry = initiatorCountry,
-								side = side,
-								initiator_id_ = event.initiator.id_,
-							}
+								local countryId = event.initiator:getCountry()
+								local initiatorCountry = string.lower(country.name[countryId])
+								local initiatorSIDE = event.initiator:getCoalition()
+								local side = coalitionIdNumeric[tonumber(initiatorSIDE)]
 
-							-- if not GroundDamagedFlyingMachine[gpGid] then GroundDamagedFlyingMachine[gpGid] = {} end
-							-- table.insert(GroundDamagedFlyingMachine[gpGid], eventData)
+								local eventData = {
+									unitName = unitName,
+									SurfaceType = typeLand,
+									aircraftType = event.initiator:getTypeName(),
+									lifePourcent = lifePourcent,
+									crashPoint = crashPoint,
+									unit = event.initiator,
+									gpGid = gpGid,
+									idLabel= idLabel,
+									categoryId = categoryId,
+									Coalition = event.initiator:getCoalition(),
+									initiatorMissionID = event.initiator:getID(),
+									initiatorSIDE = initiatorSIDE,
+									countryId = countryId,
+									initiatorCountry = initiatorCountry,
+									side = side,
+									initiator_id_ = event.initiator.id_,
+								}
 
+								if not GroundDamagedFlyingMachine[event.initiator.id_] then GroundDamagedFlyingMachine[event.initiator.id_] = {} end
+								table.insert(GroundDamagedFlyingMachine[event.initiator.id_], eventData)
 
-
-							if not GroundDamagedFlyingMachine[event.initiator.id_] then GroundDamagedFlyingMachine[event.initiator.id_] = {} end
-							table.insert(GroundDamagedFlyingMachine[event.initiator.id_], eventData)
-
-							local current_time = timer.getTime()
-							if camp.debug then
-								local logStr = "DamagedFM = " .. TableSerialization(GroundDamagedFlyingMachine, 0)
-								local grpnameClean = unitName:gsub('[%p%c%s]', '_')
-								local logFile = io.open(PathDCE.."Debug\\"..event.initiator.id_.."_"..grpnameClean.."_".. "DamagedFM_"..current_time..".lua", "w")
-								if logFile then
-									logFile:write(logStr)
-									logFile:close()
-								else
-									env.info("DCE_GroundDamagedFlyingMachine: Failed to open log file for writing.")
+								local current_time = timer.getTime()
+								if camp.debug then
+									local logStr = "DamagedFM = " .. TableSerialization(GroundDamagedFlyingMachine, 0)
+									local grpnameClean = unitName:gsub('[%p%c%s]', '_')
+									local logFile = io.open(PathDCE.."Debug\\"..event.initiator.id_.."_"..grpnameClean.."_".. "DamagedFM_"..current_time..".lua", "w")
+									if logFile then
+										logFile:write(logStr)
+										logFile:close()
+									else
+										env.info("DCE_GroundDamagedFlyingMachine: Failed to open log file for writing.")
+									end
 								end
 							end
-
 						end
 
 					end

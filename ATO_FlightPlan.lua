@@ -62,6 +62,7 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.290"
 DebugFLIGHT = ""
 TabLPark	= {}
 TargetList_InThisMission = {}			-- garde en mémoire les targets pour eviter de les pruner plus tard
+PointOfInterest = {}					-- liste des points d'interet
 TabDivert = {}							--liste des pistes de deroutement
 TACAN_byTarget = {}						--liste les TACAN pour un meme parttern , util pour les multiples tanker
 
@@ -1037,20 +1038,25 @@ function SpawnOn(spawn, waypoints, group, Pn, spawnTime, from, flight, f, role)
 			waypoints[1]["alt"] = alt  + (Pn * 10) + altRole * 33
 		end
 
+		local spacing = 330 -- Mets ici la distance minimale souhaitée (en mètres)
+		if is_helicopter then spacing = 100 end
+
 		for	n = 1 , #group.units do
 			if not flight[f].task == "AFAC" then
-				group.units[n].x = ((Pn-1) * 60) + ((f-1) * 120) + group.units[n].x + (120 * n)	--ANTI-COLLISION A
-				group.units[n].y = ((Pn-1) * 60) + ((f-1) * 120) + group.units[n].y + (120 * n)
+				group.units[n].x = ((Pn-1) * spacing) + ((f-1) * spacing) + group.units[n].x + (spacing * n)	--ANTI-COLLISION A
+				group.units[n].y = ((Pn-1) * spacing) + ((f-1) * spacing) + group.units[n].y + (spacing * n)	--ANTI-COLLISION A
+				group.units[n].alt = ((Pn-1) * spacing/1.2) + ((f-1) * spacing) + waypoints[1]["alt"] + (spacing * n) 		--ANTI-COLLISION A
 			end
 			group.units[n].speed = speed
 
 			if is_helicopter  then
 				-- group.units[n]["alt"] = alt  + (Pn * 10) + altRole * 11
-				group.units[n]["alt"] = waypoints[1]["alt"]
+				group.units[n].alt = ((Pn-1) * spacing/1.2) + ((f-1) * spacing) + waypoints[1]["alt"] + (spacing * n) 		--ANTI-COLLISION A
+				-- group.units[n]["alt"] = waypoints[1]["alt"]
 				group.units[n].speed = speed
 			else
 				-- group.units[n]["alt"] = waypoints[1]["alt"] + (Pn * 500) + altRole * 33
-				group.units[n]["alt"] = waypoints[1]["alt"]
+				-- group.units[n]["alt"] = waypoints[1]["alt"]
 			end
 		end
 
@@ -1638,10 +1644,22 @@ for side, pack in pairs(ATO) do
 	for p = 1, #pack do
 		for role, flight in pairs(pack[p]) do
 			for f = 1, #flight do
-				if flight[f].target and flight[f].target.elements then
-					for elementN, element in ipairs(flight[f].target.elements) do
-						TargetList_InThisMission[element.name] = true
+				if flight[f].target then
+
+					if flight[f].target.x and flight[f].target.task and flight[f].target.task == "Strike" then
+						PointOfInterest[flight[f].target.titleName] = {x=flight[f].target.x,y=flight[f].target.y}
 					end
+
+					if flight[f].target.elements then
+						for elementN, element in ipairs(flight[f].target.elements) do
+							TargetList_InThisMission[element.name] = true
+							
+						end
+					end
+				end
+
+				if flight[f].client or flight[f].player and db_airbases[flight[f].base].x then
+					PointOfInterest[flight[f].base] = {x=db_airbases[flight[f].base].x,y=db_airbases[flight[f].base].y}
 				end
 			end
 		end
@@ -5315,10 +5333,11 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					-- 	group.units[n].x = ((p-1) * 60) + ((f-1) * 120) + group.units[n].x + (120 * n)	--ANTI-COLLISION C
 					-- 	group.units[n].y = ((p-1) * 60) + ((f-1) * 120) + group.units[n].y + (120 * n)	--ANTI-COLLISION C
 					-- end
-					local spacing = 300 -- Mets ici la distance minimale souhaitée (en mètres)
+					local spacing = 330 -- Mets ici la distance minimale souhaitée (en mètres)
 					for n = 1, #group.units do
-						group.units[n].x = ((p-1) * spacing/1.2) + ((f-1) * spacing) + group.units[n].x + (spacing * n)
-						group.units[n].y = ((p-1) * spacing/1.2) + ((f-1) * spacing) + group.units[n].y + (spacing * n)
+						group.units[n].x = ((p-1) * spacing/1.2) + ((f-1) * spacing) + group.units[n].x + (spacing * n) 	--ANTI-COLLISION C
+						group.units[n].y = ((p-1) * spacing/1.2) + ((f-1) * spacing) + group.units[n].y + (spacing * n) 	--ANTI-COLLISION C
+						group.units[n].alt = ((p-1) * spacing/1.2) + ((f-1) * spacing) + waypoints[1]["alt"] + (spacing * n) 	--ANTI-COLLISION C
 					end
 
 					waypoints[1].x = group.units[1].x
@@ -8017,6 +8036,8 @@ for _side, side in pairs(mission.coalition) do
 	end
 end
 
+
+
 if Debug.debug then
 	local camp_str = "ATO_AtoFP = " .. TableSerialization(ATO, 0)						--make a string
 	local campFile = io.open("Debug/ATO_AtoFP.lua", "w")  or error("Failed to open debug file")
@@ -8039,7 +8060,8 @@ if Debug.debug then
 
 	-- _affiche(channel_tacan, "Atofp channel_tacan ")
 
-	-- _affiche(TACAN_byTarget, "Atofp TACAN_byTarget ")
+	_affiche(PointOfInterest, "Atofp PointOfInterest ")
 	
 
+	os.execute('pause')
 end

@@ -1184,7 +1184,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
                 -- supprime d'abord le soldat existant, pour actualiser sa position et son status
                 DeleteSoldierAliasPilot(element)
 
-                if element.status == "EVAC_possible" and  element.SurfaceType ~= 5  then
+                if element.status == "EVAC_possible" and element.SurfaceType ~= 5  then
 
                     local AddPilot = element
                     AddPilot.smokeOK = false

@@ -27,6 +27,9 @@ local pruneAggressiveness =		mission_ini.PruneScriptConf.PruneAggressiveness
 local pruneStatic =				mission_ini.PruneScriptConf.PruneStatic
 local pruneSam =				mission_ini.PruneScriptConf.ForcedPruneSam
 
+-- Liste des mots-clés à pruner
+local pruneKeywords = { "bag", "wall", "sand", "camouflage", "camouflage", "barrier", "container", "tent", "cargo", "soldier" }
+
 -- work out which side has 'players'
 local function findPlayerSide()
 	for side,units in pairs(oob_air) do
@@ -162,6 +165,14 @@ local function waypointPairs(wps, f)
 	end
 end
 
+-- juste avant la fonction keepGroundUnit, tu déclares :
+local function isPruneKeyword(name)
+    for _, kw in ipairs(pruneKeywords) do
+        if string.find(name, kw) then return true end
+    end
+    return false
+end
+
 -- decides whether the given ground unit (which is on side 'unitSide') should be kept or not
 local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, category)
 
@@ -169,6 +180,8 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 
 		return true
 	end
+
+	local lowCaseName = string.lower(unit.name)
 
 	if pruneStatic and (category == 'plane' or category == 'helicopter') and stringStarts(unit.name, 'Static') then
 		-- print("DC_P_T  Prune static planes "..unit.name )
@@ -178,18 +191,29 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 		return true -- keep plane and helicopter
 	elseif  stringStarts(unit.name,"Pack") and not string.find(unit.name,"Static") then
 		-- print("DC_P_T  Pack keep plane and helicopter: "..unit.name )
-		return true -- keep plane and helicopter
-		
-	elseif  string.find(unit.name,"VC_")  then
-		-- VC_Khe-Sanh-Troops
-		if string.find(unit.name,"VC_Khe%-Sanh") then
-			-- print("DC_P_T1 -------> KEEP VC_: "..unit.name)
-			return true -- keep VC_Khe-Sanh
-		else
-			-- print("DC_P_T2 PRUNE VC_: "..unit.name)
-			return false -- Prune VC_ planesname
+		return true -- keep plane and helicopte
+
+	-- puis dans keepGroundUnit :
+	elseif isPruneKeyword(lowCaseName) then
+		-- Exception : ne prune pas si c'est VC_Khe-Sanh
+		if string.find(unit.name, "VC_Khe%-Sanh") then
+			-- print("DC_P_T9 ---K----> Keep VC: "..unit.name)
+			return true -- keep
 		end
 
+		-- Vérifie la proximité d'un PointOfInterest
+		for nPOI, POI in pairs(PointOfInterest) do
+			local distance = GetDistance(POI, unit)
+			-- print("DC_P_T0 ---distance: "..math.floor(distance/1000))
+			if distance < 10000 then
+				-- print("DC_P_T1 ---K----> Keep POI: "..lowCaseName)
+				return true -- keep POI
+			end
+		end
+
+		-- print("DC_P_T2 -P----P--> Prune staticDecor: "..lowCaseName)
+		return false -- Prune
+	
 
 	elseif  string.find(string.lower(unit.name),"convo") then
 		-- print("DC_P_ keep Convoy")
@@ -285,16 +309,20 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 	local rfactor = math.min(math.max(pruneAggressiveness, 0), 3)
 	local keep = closestWP*rfactor <= range[aaType] or closestTarget*rfactor <= 25000
 
-	-- print("DC_P_P Unit " .. unit.type .. " unit.name" .. unit.name .. " closestWP " .. closestWP .. " closestTarget " .. 
-			-- closestTarget .. " Keep = " .. (keep and "KEEP" or "PRUNE"))
+
+
+	-- print("DC_P keepGroundUnit_A Unit " .. unit.type .. " unit.name" .. unit.name .. " closestWP " .. closestWP .. " closestTarget " .. 
+	-- 		closestTarget .. " Keep = " .. (keep and "KEEP" or "PRUNE"))
 
 	-- if  unit.category and  keep == false then
-		-- print("DC_P_P UnitCat " .. unit.category.." " ..unit.type .. " " .. unit.name .. " closestWP " .. closestWP .. " closestTarget " .. 
-				-- closestTarget .. " Keep = " .. (keep and "KEEP" or "PRUNE"))
+	-- 	print("DC_P keepGroundUnit_B UnitCat " .. unit.category.." " ..unit.type .. " " .. unit.name .. " closestWP " .. closestWP .. " closestTarget " .. 
+	-- 			closestTarget .. " Keep = " .. (keep and "KEEP" or "PRUNE"))
 	-- elseif  keep == false then
-		-- print("DC_P_P Unit "..unit.type .. " " .. unit.name .. " closestWP " .. closestWP .. " closestTarget " .. 
-				-- closestTarget .. " Keep = " .. (keep and "KEEP" or "PRUNE"))
+	-- 	print("DC_P keepGroundUnit_C Unit "..unit.type .. " " .. unit.name .. " closestWP " .. closestWP .. " closestTarget " .. 
+	-- 			closestTarget .. " Keep = " .. (keep and "KEEP" or "PRUNE"))
 	-- end
+
+
 	return keep
 end
 
@@ -348,6 +376,7 @@ local function pruneUnits(groundFun, airFun)
 						-- unit['category'] = category
 
 						saved = saved or fun(unit, side, category)
+						
 					end
 					if not saved then
 						totalPruned = totalPruned + #grp.units
@@ -373,6 +402,7 @@ local function pruneUnits(groundFun, airFun)
 			container.group = newGroup
 
 		end
+
 	end
 
 -- M16.d :
@@ -416,12 +446,12 @@ end
 
 function NbPlane()
 	local Count = {
-					NbPlane = 0,
-					NbPlaneStatic = 0,
+			NbPlane = 0,
+			NbPlaneStatic = 0,
 
-					NbHeli = 0,
-					NbHeliStatic = 0,
-				}
+			NbHeli = 0,
+			NbHeliStatic = 0,
+		}
 
 	for side, _coalition in pairs(mission.coalition) do
 		for ci, country in pairs(mission.coalition[side].country) do

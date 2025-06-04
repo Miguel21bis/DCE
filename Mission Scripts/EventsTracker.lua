@@ -27,6 +27,15 @@ env.info("DCE_EventT START LOADING EventsTracker.lua "..tostring(versionDCE["Mis
 
 _affiche(world.event, "DCE_EventT world.event ")
 
+Info_event_C = {}
+
+for eventName, eventId in pairs(world.event) do
+	if not Info_event_C[eventId] then
+		Info_event_C[eventId] = eventName
+	end
+end
+_affiche(Info_event_C, "DCE_EventTInfo_event_C ")
+
 Info_event_B = {}
 
 local hit1sQueue = {}
@@ -442,16 +451,23 @@ local function CheckRefuelProgress()
 
 		else 	--refuelStartByUnit[uid].status == "REFUELING_STOP" 
 		
-			env.info("DCE_EventT_Refuel REFUELING_STOP? "..tostring(refuelStartByUnit[uid].status).." PROGRESS_X getTime "..timer.getTime().." start_time + 120>? "..tostring(plane.start_time + 120))
+			local plane_obj = nil
+			plane_obj = Unit.getByName(plane.uName)
 
-			--TODO ici on sort trop vite, avec Z99 nil
-			if plane.start_time and timer.getTime() > plane.start_time + 120 then
+			if (plane_obj and plane_obj.isExist and plane_obj.inAir and plane_obj:isExist() and plane_obj:inAir())  then
+				
+				anyRefueling = true
 
-				env.info("DCE_EventT_Refuel PROGRESS_Z88 = nil") 
-				-- plane = nil -- reset notify after 5 minutes
-				-- plane.start_time = timer.getTime()
-				plane.fuel_palier = 0
-				plane.fuel_init = nil
+				env.info("DCE_EventT_Refuel REFUELING_STOP? "..tostring(refuelStartByUnit[uid].status).." PROGRESS_X getTime "..timer.getTime().." start_time + 120>? "..tostring(plane.start_time + 120))
+
+				if plane.start_time and timer.getTime() > plane.start_time + 120 then
+
+					env.info("DCE_EventT_Refuel PROGRESS_Z88 = nil") 
+					-- plane = nil -- reset notify after 5 minutes
+					-- plane.start_time = timer.getTime()
+					plane.fuel_palier = 0
+					plane.fuel_init = nil
+				end
 			end
 			
 		end
@@ -978,12 +994,21 @@ function eventHandlerDCE:onEvent(event)
 
 						CheckImmediatSAR(selectedEjection)
 
-						env.info( "DCE_EvenT: createdSoldier? SurfaceType? "..tostring(selectedEjection.SurfaceType))
+						env.info( "DCE_EvenT: pilotLand_B createdSoldier? SurfaceType? "..tostring(selectedEjection.SurfaceType))
 						-- trigger.action.outText("EvenT:  createdSoldier? SurfaceType? "..tostring(selectedEjection.SurfaceType), 30)
 
 
 
-						local distanceBase = ProxyBase(selectedEjection)
+						local distanceBase, baseName = ProxyBase(selectedEjection)
+
+						if distanceBase then
+								distanceBase = math.floor(distanceBase)
+							else
+								distanceBase = 0
+						end
+
+						env.info("DCE_EvenT: pilotLand_C G baseName "..tostring(baseName).." distanceBase "..tostring(distanceBase))
+
 
 						if distanceBase > 6000 and selectedEjection.SurfaceType ~= land.SurfaceType.WATER and selectedEjection.SurfaceType ~= land.SurfaceType.RUNWAY  then
 							AddSoldierAliasPilot(selectedEjection)

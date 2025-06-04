@@ -1735,8 +1735,8 @@ end
 		
 
 if Debug.debug then
-	_affiche(GroundTarget, " DcUT GroundTarget")
-	_affiche(GroundZoneTarget, " DcUT GroundZoneTarget")
+	_affiche(GroundTarget, " DcUT GroundTarget ")
+	_affiche(GroundZoneTarget, " DcUT GroundZoneTarget ")
 
 	local camp_str = "target = " .. TableSerialization(targetlist, 0)						--make a string
 	local campFile = io.open("Debug/targetlist_DcUT.lua", "w") or error("Failed to open debug file")

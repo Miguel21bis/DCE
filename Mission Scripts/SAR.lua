@@ -2215,9 +2215,16 @@ function GetOutGDFM(arg)
 
 							local typeLand = land.getSurfaceType({x =damaged.x2d, y = damaged.y2d})
 
-							local distanceBase = ProxyBase(damaged)
+							local distanceBase, baseName = ProxyBase(damaged)
+							if distanceBase then
+								distanceBase = math.floor(distanceBase)
+							else
+								distanceBase = 0
+							end
 
-							if distanceBase > 6 and typeLand ~= land.SurfaceType.WATER and typeLand ~= land.SurfaceType.RUNWAY  then
+							env.info("DCE_getOut G baseName "..tostring(baseName).." distanceBase "..tostring(distanceBase))
+
+							if distanceBase > 10000 and typeLand ~= land.SurfaceType.WATER and typeLand ~= land.SurfaceType.RUNWAY  then
 
 								AddSoldierAliasPilot(damaged)
 								damaged.createdSoldier = true

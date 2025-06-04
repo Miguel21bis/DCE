@@ -379,8 +379,8 @@ end
 
 
 if Debug.debug and Debug.Generator.affiche then
-	_affiche(Multi, "ATO_G Multi")
-	_affiche(multiPlaneSet, "ATO_G multiPlaneSet B")
+	_affiche(Multi, "ATO_G_A Multi")
+	_affiche(multiPlaneSet, "ATO_G_B multiPlaneSet B")
 	-- os.execute 'pause'
 end
 
@@ -390,7 +390,19 @@ if Debug.debug then
 			for unitN, unit in pairs(units) do
 				if unit.player then
 					if Debug.debug then
-						print("AtoG playable "..unit.type.." ready "..unit.roster.ready)
+						print("ATO_G_C playable "..unit.type.." ready "..unit.roster.ready)
+					end
+				end
+			end
+		end
+	end
+
+	for side, units in pairs(oob_air) do
+		if units and units ~= nil then
+			for unitN, unit in pairs(units) do
+				if unit.player then
+					if Debug.debug then
+						print("ATO_G_D TOUS "..unit.type.." ready "..unit.roster.ready)
 					end
 				end
 			end
@@ -406,7 +418,7 @@ if Multi and Multi.Group then
 					if not unit.inactive and unit.type == multiGroup.PlaneType and side == multiGroup.side and unit.roster.ready < multiGroup.NbPlane   then
 						unit.roster.ready = multiGroup.NbPlane * 2
 						if Debug.debug then
-							print("AtoG A set Nplane "..unit.type.." ready "..unit.roster.ready)
+							print("ATO_G_E set Nplane "..unit.type.." ready "..unit.roster.ready)
 						end
 					end
 				end
@@ -420,7 +432,7 @@ if Multi and Multi.Group then
 			if not target.inactive and not target.priorityINIT and Multi.Target and target.titleName == Multi.Target[multiGroup.side] then
 				target.priorityINIT = target.priority
 				target.priority = target.priority * 4
-				if Debug.debug then print("AtoG B multiGroup target.priority "..target.priority.." titleName "..target.titleName) end
+				if Debug.debug then print("ATO_G_F multiGroup target.priority "..target.priority.." titleName "..target.titleName) end
 				break
 			end
 		end
@@ -567,7 +579,8 @@ for side, units in pairs(oob_air) do
 
 							if DebugAssignAll then print("AtoGen AcftAvail  "..unit.type.." || "..unit.name) end
 
-							if AcftAvail[unit.name].unavailable[u] > ((CampTotalTimeS / 3600)*2)   then
+							-- if AcftAvail[unit.name].unavailable[u] > ((CampTotalTimeS / 3600)*2)   then
+							if AcftAvail[unit.name].unavailable[u] > ((CampTotalTimeS / 3600))   then
 								AcftAvail[unit.name].unavailable[u] = 0
 								-- os.execute 'pause'
 							end
