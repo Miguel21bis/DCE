@@ -2647,8 +2647,8 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 
 	env.info( "DCE_CustomSearchThenEngage A start func() "..tostring(flightName).."| radius |"..tostring(radius).."| targetType |"..tostring(targetType).."| searchTime |"..tostring(searchTime))
 
-	if not radius or radius == nil or radius <= 40000 then
-		radius = 40000
+	if not radius or radius == nil or radius <= 30000 then
+		radius = 30000
 	end
 	if not searchTime or searchTime == nil then
 		searchTime = timer.getTime() + 1800
@@ -2753,6 +2753,10 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 							}
 						}
 					}
+
+									
+				cntrl:setOption(AI.Option.Air.id.PROHIBIT_AG, true)
+				
 				elseif cat == Unit.Category.HELICOPTER then  -- 1 helo
 					task_entry = {
 						id = 'ControlledTask',
@@ -2779,6 +2783,7 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 				end
 
 				cntrl:pushTask(task_entry)
+
 
 				-- if camp.debug then
 				-- 	local current_time = timer.getTime() + 5

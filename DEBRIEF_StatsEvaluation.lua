@@ -93,6 +93,7 @@ for side_name,side in pairs(oob_ground) do													--side table(red/blue)
 			for group_n,group in pairs(country.vehicle.group) do							--groups table (number array)
 				for unit_n,unit in pairs(group.units) do									--units table (number array)	
 					unit.dead_last = false													--reset unit died in last mission
+					if unit.lasthit then unit.lasthit = false end
 				end
 			end
 		end
@@ -117,6 +118,7 @@ for side_name, targets in pairs(targetlist) do													--iterate through tar
 		if target.elements and target.elements[1].x then									--if the target has subelements and is a scenery object target (element has x coordinate)
 			for element_n,element in pairs(target.elements) do								--iterate through target elements
 				element.dead_last = false													--reset element died in last mission
+				element.lasthit = false
 			end
 		end
 	end
@@ -1254,7 +1256,7 @@ for scen_name, scen in pairs(scen_log) do													--iterate through destroye
 								
 								--plus bas, ne pas l'enlever, car il peut y avoir plusieurs detection de destruction, et cela fausse le resultat car detecté déjà detruit
 								if element.dead then	--and element.CheckDay and element.CheckDay < camp.date.CampTotalTimeS 
-									element.dead_last = false									--mark element as not died in last mission
+									-- element.dead_last = false									--mark element as not died in last mission
 									print("DebriefSE  - --> C1 "..tostring(scen.scenaryName).." and "..tostring(element.name).." element already dead (dead?) "..tostring(element.dead).." "..tostring(element.CheckDay).." "..tostring(camp.date.CampTotalTimeS))
 								else
 									print("DebriefSE  - --> C2 "..tostring(scen.scenaryName).." and "..tostring(element.name).." element not dead yet (dead?) "..tostring(element.dead).." "..tostring(element.CheckDay).." "..tostring(camp.date.CampTotalTimeS))
@@ -1280,8 +1282,70 @@ for scen_name, scen in pairs(scen_log) do													--iterate through destroye
 									-- 	end
 									-- end
 									
+									-- --award ground kill to air unit
+									-- if scen.lasthit ~= nil then																			--check if dead scenery has a hit entry
+									-- 	for killer_side_name,killer_side in pairs(oob_air) do											--iterate through all sides
+									-- 		for killer_unit_n,killer_unit in pairs(killer_side) do										--iterate through all air units
+									-- 			if string.find(scen.lasthit, " " .. killer_unit.name .. " ", 1, true) then				--if the hitting unit is part of air unit name
+									-- 				if side_name == killer_side_name then												--make sure that hitting unit is hitting a target of his own side (friendly fire gives no kills)
+									-- 					killer_unit.score.kills_ground = killer_unit.score.kills_ground + 1				--award ground kill to air unit
+									-- 					killer_unit.score_last.kills_ground = killer_unit.score_last.kills_ground + 1
+									-- 					addPackstats(scen.lasthit, "kill_ground", nil)										--check if kill was in player package
+
+									-- 					print("DebriefSE  kill_ground - - --> E")
+
+									-- 					--award ground kill to client
+									-- 					if client_control[scen.lasthit] then											--if dead scenery was hit by a client
+									-- 						clientstats[client_control[scen.lasthit]].kills_ground = clientstats[client_control[scen.lasthit]].kills_ground + 1							--award ground kill to client
+									-- 						clientstats[client_control[scen.lasthit]].score_last.kills_ground = clientstats[client_control[scen.lasthit]].score_last.kills_ground + 1	--award ground kill to client
+
+
+									-- 						local item = {
+									-- 							event = scen_name,
+									-- 							target_name = target.titleName,
+									-- 							element = element,
+									-- 						}
+
+									-- 						if not clientstatsDetail[client_control[scen.lasthit]] then clientstatsDetail[client_control[scen.lasthit]] = {} end
+									-- 						table.insert(clientstatsDetail[client_control[scen.lasthit]], item)
+
+
+									-- 					end
+									-- 				end
+									-- 			end
+									-- 		end
+									-- 	end
+									-- end
+
+									-- si c'est un static batiment, on casse le batiment aussi dans oob_ground
+									if passStructure then
+										for sideName, side in pairs(oob_ground) do
+											for countryN, country in pairs(side) do
+												for class, typetable in pairs(country) do
+													if class == "static" then	--class == "vehicle" or class == "ship" or 
+														for groupN, group in pairs(typetable.group) do
+															for unitN, unit in pairs(group.units) do
+																if  element.name == unit.name then
+																	unit['dead'] = true
+																	unit['dead_last'] = true
+																	unit.CheckDay = camp.date.CampTotalTimeS
+
+																end
+															end
+														end
+													end
+												end
+											end
+										end
+									end
+								end
+
+								if element.dead and not element.lasthit then
 									--award ground kill to air unit
 									if scen.lasthit ~= nil then																			--check if dead scenery has a hit entry
+										
+										element.lasthit = scen.lasthit
+										
 										for killer_side_name,killer_side in pairs(oob_air) do											--iterate through all sides
 											for killer_unit_n,killer_unit in pairs(killer_side) do										--iterate through all air units
 												if string.find(scen.lasthit, " " .. killer_unit.name .. " ", 1, true) then				--if the hitting unit is part of air unit name
@@ -1313,31 +1377,10 @@ for scen_name, scen in pairs(scen_log) do													--iterate through destroye
 												end
 											end
 										end
-									end
-
-									-- si c'est un static batiment, on casse le batiment aussi dans oob_ground
-									if passStructure then
-										for sideName, side in pairs(oob_ground) do
-											for countryN, country in pairs(side) do
-												for class, typetable in pairs(country) do
-													if class == "static" then	--class == "vehicle" or class == "ship" or 
-														for groupN, group in pairs(typetable.group) do
-															for unitN, unit in pairs(group.units) do
-																if  element.name == unit.name then
-																	unit['dead'] = true
-																	unit['dead_last'] = true
-																	unit.CheckDay = camp.date.CampTotalTimeS
-
-																end
-															end
-														end
-													end
-												end
-											end
-										end
-									end
-
+									end	
 								end
+
+
 							end
 						end
 					end
