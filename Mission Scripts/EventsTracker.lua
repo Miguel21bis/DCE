@@ -484,7 +484,7 @@ local eventsSurvey = {
 		[world.event.S_EVENT_REFUELING] = true,--
 		[world.event.S_EVENT_REFUELING_STOP] = true,--
 
-		
+		[world.event.S_EVENT_EJECTION] = true,--
 		[world.event.S_EVENT_PILOT_DEAD] = true,--
 		[world.event.S_EVENT_DISCARD_CHAIR_AFTER_EJECTION] = true,--
 		[world.event.S_EVENT_LANDING_AFTER_EJECTION] = true,--
@@ -562,31 +562,29 @@ Info_event = {
 
 function eventHandlerDCE:onEvent(event)
 
+	if camp.debug then
+		if event and event.id then
+			if Info_event then
 
-	-- if event and event.id then
-	-- 	if Info_event then
+				if Info_event[tonumber(event.id)] then
+					local idLabel = tostring(Info_event[tonumber(event.id)])
 
-	-- 		if Info_event[tonumber(event.id)] then
-	-- 			local idLabel = tostring(Info_event[tonumber(event.id)])
+					env.info("DCE_EventsTracker event.id "..tostring(event.id).." " ..idLabel)
 
-	-- 			if not log_entry.type then
-	-- 				log_entry.type = idLabel
-	-- 			end
-				
-	-- 			if camp.debug then
-	-- 				env.info("DCE_EventsTracker event.id "..tostring(event.id).." " ..idLabel)
-	-- 			end
-	-- 		else
-	-- 			if camp.debug then
-	-- 				env.info("DCE_EventsTracker this is a  NEW ID "..tostring(event.id))
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
+				else
+					env.info("DCE_EventsTracker this is a  NEW ID "..tostring(event.id))
+
+				end
+			end
+		end
+	end
 
 	-- on ne traite et surtout on n'enregistre pas les events interressant pour la DCE, sinon surchage CPU
 	if eventsSurvey[event.id] then
 
+		if camp.debug then
+			env.info("DCE_EventsTracker event.id "..tostring(event.id).." "..tostring(Info_event[event.id]))
+		end
 
 		--surveillance des SPAM / FLOOD	
 		if event.id == world.event.S_EVENT_BDA then
@@ -680,6 +678,9 @@ function eventHandlerDCE:onEvent(event)
 			log_entry.type = "player leave unit"
 		end
 		
+		if camp.debug then
+			env.info("DCE_EventsTracker log_entry.type: "..tostring(log_entry.type).." | "..tostring(log_entry.infoEvent))
+		end
 
 		if not eventIdTotal[event.id] then eventIdTotal[event.id] = 0 end
 		eventIdTotal[event.id] = eventIdTotal[event.id] + 1
@@ -905,8 +906,12 @@ function eventHandlerDCE:onEvent(event)
 			end
 
 		elseif  log_entry.type == "pilot land"  then
+			env.info( "DCE_EvenT: pilotLand_A id: "..tostring(event.id).."_type_"..tostring(log_entry.type))
+
 			if event.initiator then
+				
 				local ptEvent = event.initiator:getPoint()
+
 				if ptEvent  and  ptEvent.x then
 					--active fumigene
 					local PilotVec3 = {
