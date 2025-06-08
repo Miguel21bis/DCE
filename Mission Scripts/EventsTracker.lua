@@ -50,9 +50,10 @@ local tankerToPlane = {}		--table to store refueling units
 -- local TIME_WINDOW = 2
 
 -- Paramètres globaux pour le flood BDA
-local bdaCount = {}
-local BDA_WINDOW = 0.1      -- fenêtre de temps en secondes
-local BDA_THRESHOLD = 10  -- nombre d'événements BDA tolérés dans cette fenêtre
+local bdaTimestamps = {}
+local BDA_WINDOW = 0.2      -- fenêtre de temps en secondes
+local BDA_THRESHOLD = 5    -- nombre d'événements BDA tolérés dans cette fenêtre
+
 
 
 for eventName, eventId in pairs(world.event) do
@@ -592,73 +593,66 @@ function eventHandlerDCE:onEvent(event)
 			env.info("DCE_EventsTracker event.id "..tostring(event.id).." "..tostring(Info_event[event.id]))
 		end
 
-		-- --surveillance des SPAM / FLOOD	
-		-- if event.id == world.event.S_EVENT_BDA then
-
-		-- 	local tgt = event.target
-		-- 	local init = event.initiator
-		-- 	if not tgt or not init then return end
-
-		-- 	local tid = tgt:getID()
-		-- 	local now = timer.getTime()
-
-		-- 	bdaCount[tid] = bdaCount[tid] or {}
-		-- 	local timestamps = bdaCount[tid]
-
-		-- 	-- Nettoyage
-		-- 	local newTimestamps = {}
-		-- 	for _, ts in ipairs(timestamps) do
-		-- 		if now - ts < TIME_WINDOW then
-		-- 			table.insert(newTimestamps, ts)
-		-- 		end
-		-- 	end
-		-- 	table.insert(newTimestamps, now)
-		-- 	bdaCount[tid] = newTimestamps
-
-		-- 	-- Détection flood
-		-- 	if #newTimestamps >= BDA_THRESHOLD then
-		-- 		local tgtName = tgt.getName and tgt:getName() or "unknown"
-		-- 		local initName = init.getName and init:getName() or "unknown"
-
-		-- 		trigger.action.outText("BDA flood détecté : " .. tgtName .. " & " .. initName .. " supprimés", 20)
-		-- 		env.info("[BDA-FLOOD] Détection de flood : " .. tgtName .. " ("..#newTimestamps..")")
-
-		-- 		if tgt:isExist() then tgt:destroy() end
-		-- 		if init:isExist() and init:getID() ~= tgt:getID() then init:destroy() end
-
-		-- 		bdaCount[tid] = nil
-		-- 	end
-		-- end
 		
+        -- Anti-flood BDA (global, sans getID ni getName)
+        if event.id == world.event.S_EVENT_BDA then
 
-       -- Anti-flood BDA (par unité initiatrice)
-        if event.id == world.event.S_EVENT_BDA and event.initiator then
-            local id = event.initiator.getID and event.initiator:getID() or tostring(event.initiator)
+			env.info("[BDA-FLOOD A] S_EVENT_BDA detected ")
+
             local now = timer.getTime()
-            bdaCount[id] = bdaCount[id] or {}
-            local timestamps = bdaCount[id]
+            table.insert(bdaTimestamps, now)
 
             -- Nettoyage des timestamps trop anciens
             local recent = {}
-            for _, t in ipairs(timestamps) do
+            for _, t in ipairs(bdaTimestamps) do
                 if now - t < BDA_WINDOW then
                     table.insert(recent, t)
                 end
             end
-            table.insert(recent, now)
-            bdaCount[id] = recent
+            bdaTimestamps = recent
 
             -- Détection du flood
             if #recent >= BDA_THRESHOLD then
-                local name = event.initiator.getName and event.initiator:getName() or "unknown"
-                trigger.action.outText("BDA FLOOD détecté sur : " .. name, 30)
-                env.info("[BDA-FLOOD] Suppression : " .. name)
-                if event.initiator.isExist and event.initiator:isExist() then
-                    event.initiator:destroy()
-                end
-                bdaCount[id] = nil
+                trigger.action.outText("BDA FLOOD détecté : " .. #recent .. " événements en " .. BDA_WINDOW .. "s", 20)
+                env.info("[BDA-FLOOD B] Seuil atteint : " .. #recent)
+                -- Ici tu peux ajouter une action, par exemple stopper la mission ou loguer plus fort
+
+				local tgt = event.target
+				
+				if tgt then
+
+					local tgtName = tgt.getName and tgt:getName() or "unknown"
+					
+					trigger.action.outText("BDA flood détecté tgtName : " .. tgtName ..  " supprimés", 20)
+					env.info("[BDA-FLOOD C]BDA flood détecté tgtName : " .. tgtName ..  " supprimés")
+
+					if tgt and tgt.isExist then 
+						if tgt:isExist() then tgt:destroy() end
+						env.info("[BDA-FLOOD C]BDA flood détecté tgtName : " .. tgtName ..  " supprimés OK")
+					end
+				end
+
+				local init = event.initiator
+				if init then
+
+					local initName = init.getName and init:getName() or "unknown"
+
+					trigger.action.outText("BDA flood détecté initName: "  .. initName .. " supprimés", 20)
+					env.info("[BDA-FLOOD C]BDA flood détecté initName: " .. initName .. " supprimés")
+
+					if init and init.isExist then 
+						if init:isExist()  then init:destroy() end
+						env.info("[BDA-FLOOD C]BDA flood détecté initName : " .. initName ..  " supprimés OK")
+					end
+
+					
+				end
+
+                bdaTimestamps = {}
             end
         end
+
+   
 		
 		--custom events log
 		local log_entry = {															--create a custom log entry for this event
@@ -1099,29 +1093,36 @@ function eventHandlerDCE:onEvent(event)
 					-- }
 					-- if event.place:getCategory() == Airbase.Category.SHIP    and not event.initiator:getPlayerName() then 
 					if not playerName then
-						if placeDesc.category == Airbase.Category.SHIP then 											-- category ship
-							
-							--relance un Pedro si c'est un Pedro qui se pose
-							if string.find(event.initiator:getName(), "Pedro") then
-
-								--["name"] = "Unit_Pedro_CVN-71 Theodore Roosevelt_1",
-								local cvName = event.initiator:getName()
+						
+						
+						if env.mission.theatre ~= "Kola" then
+							if placeDesc.category == Airbase.Category.SHIP then 											-- category ship
 								
-								cvName = cvName:gsub( "Unit_Pedro_", "")
-								cvName, _ = cvName:match("([^,]+)_([^,]+)")
-								
-								NeedPedro(cvName, event)
+								--relance un Pedro si c'est un Pedro qui se pose
+								if string.find(event.initiator:getName(), "Pedro") then
 
-							end
+									--["name"] = "Unit_Pedro_CVN-71 Theodore Roosevelt_1",
+									local cvName = event.initiator:getName()
+									
+									cvName = cvName:gsub( "Unit_Pedro_", "")
+									cvName, _ = cvName:match("([^,]+)_([^,]+)")
+									
+									NeedPedro(cvName, event)
 
-							if initDesc.category == Unit.Category.HELICOPTER then
+								end
+
+								if initDesc.category == Unit.Category.HELICOPTER then
+									table.insert(despawn, event.initiator)
+								end
+
+							elseif placeDesc.category == Airbase.Category.HELIPAD then 											-- category ship
 								table.insert(despawn, event.initiator)
+
 							end
-
-						elseif placeDesc.category == Airbase.Category.HELIPAD then 											-- category ship
+						else
 							table.insert(despawn, event.initiator)
-
 						end
+						
 					end
 
 					
