@@ -99,6 +99,7 @@ for side_name,side in pairs(oob_ground) do													--side table(red/blue)
 		end
 		if country.static then																--if country has static objects
 			for group_n,group in pairs(country.static.group) do								--groups table (number array)
+				group.dead_last = nil
 				for unit_n,unit in pairs(group.units) do									--units table (number array)	
 					unit.dead_last = false													--reset unit died in last mission
 				end
@@ -113,9 +114,11 @@ for side_name,side in pairs(oob_ground) do													--side table(red/blue)
 		end
 	end
 end
+
 for side_name, targets in pairs(targetlist) do													--iterate through targetlist
 	for targetN, target in pairs(targets) do												--iterate through targets
-		if target.elements and target.elements[1].x then									--if the target has subelements and is a scenery object target (element has x coordinate)
+		target.alive_last = nil
+		if target.elements and target.elements[1].x then									--if the target has subelements and is a scenery object target (element has x coordinate)		
 			for element_n,element in pairs(target.elements) do								--iterate through target elements
 				element.dead_last = false													--reset element died in last mission
 				element.lasthit = false
@@ -123,7 +126,6 @@ for side_name, targets in pairs(targetlist) do													--iterate through tar
 		end
 	end
 end
-
 
 local initTabValues = {
 	kills_air = 0,
@@ -516,30 +518,16 @@ for e = 1, #events do
 					if events[e].target and string.find(events[e].target, "Manhunt") then
 						targetIsPlane = false
 
-						-- if side_name ~= killer_side_name then												--make sure that hitting unit is not on same side as dead unit (friendly fire gives no kills)
-							-- killer_unit.score.kills_ground = killer_unit.score.kills_ground + 1				--award ground kill to air unit
-							-- killer_unit.score_last.kills_ground = killer_unit.score_last.kills_ground + 1
+						addPackstats(hit_table[events[e].target], "kill_ground", events[e])						--check if kill was in player package
 
-							-- addPackstats(hit_table[events[e].initiator], "kill_ground")						--y'a erreur et bug là
-							addPackstats(hit_table[events[e].target], "kill_ground", events[e])						--check if kill was in player package
+						clientstats[client_control[events[e].initiator]].kills_ground = clientstats[client_control[events[e].initiator]].kills_ground + 1							--award gound kill to client
+						clientstats[client_control[events[e].initiator]].score_last.kills_ground = clientstats[client_control[events[e].initiator]].score_last.kills_ground + 1		--award ground kill to client
 
-							--award ground kill to client
-							-- if client_hit_table[events[e].initiator] then									--if dead vehicle was hit by a client
-								clientstats[client_control[events[e].initiator]].kills_ground = clientstats[client_control[events[e].initiator]].kills_ground + 1							--award gound kill to client
-								clientstats[client_control[events[e].initiator]].score_last.kills_ground = clientstats[client_control[events[e].initiator]].score_last.kills_ground + 1		--award ground kill to client
-
-								local item = {
-									event = events[e],
-									unit = events[e].target,
-								}
-
-								-- if not clientstatsDetail[client_hit_table[events[e].initiator]] then clientstatsDetail[client_hit_table[events[e].initiator]] = {} end
-								-- table.insert(clientstatsDetail[client_hit_table[events[e].initiator]], item)
-
-								-- print("DebriefSE B3 ")
-
-							-- end
-						-- end
+						local item = {
+							event = events[e],
+							unit = events[e].target,
+						}
+							
 						tagBreak = true
 						break
 					elseif events[e].target and string.find(events[e].target, " " .. target_unit.name .. " ", 1, true) then		--if the crashed aircraft name is part of air unit name
@@ -842,8 +830,6 @@ for e = 1, #events do
 
 
 		--ground/naval/static loss events																--iterate through all the sub-tables of the oob_ground files and try to find the matching unitId of the dead unit (vehicle/ship/static)
-		local debugShow = false
-
 		if events[e].type == "unit lost" then																		--hit events
 			statutObject[events[e].initiator]["unit lost"] = true
 		end
@@ -942,17 +928,9 @@ for e = 1, #events do
 				if country.static then																--if country has static objects
 					for group_n,group in pairs(country.static.group) do								--groups table (number array)
 						for unit_n,unit in pairs(group.units) do									--units table (number array)
-							local show = false
-							-- if string.find(events[e].initiator, "Khasab ") 
-							-- and string.find(unit.name, "Khasab ") 
-							-- then 
-							-- 	-- print("DebriefSE initiator |"..tostring(events[e].initiator).."| unit.name |"..tostring(unit.name).."|") 
-							-- 	show = true
-							-- end
+						
 							if unit.name == events[e].initiator and not unit.dead then
-								if show then print("DebriefSE    passe AA ") end
 								if unit.dead ~= true then											--unit is not yet dead (some static objects that are spawned in a destroyed state are logged dead at mission start, these must be excluded here)
-									if show then print("DebriefSE       passe BB ") end
 									group.dead = true												--mark group as dead in oob_ground (static objects can be set as group.dead and spawned in a destroyed state)
 									if group.linkOffset then										--static unit was linked to a carrier
 										group.linkOffset = false									--unlink  dead static from carrier
@@ -1185,36 +1163,15 @@ scenFile:close()
 
 --evaluate destroyed scenery objects
 for scen_name, scen in pairs(scen_log) do													--iterate through destroyed scenery objects
-	-- if scen.x and scen.z and (scen.lifeActual1s /scen.hightLife < 0.75) then																--scenery object has x and z coordinates
-	local passeOK = true
-	-- local passePourcent = false
-	-- if scen.lifePourcent and scen.lifePourcent <= MinPercentDestroyed then
-	-- 	passePourcent = true
-	-- 	passeOK = true
-	-- end
 
+	local passeOK = true
 	-- local isForest = false
 	if scen.sceneryTypeName and string.find(scen.sceneryTypeName, "FOREST")  then
-		-- isForest = true
 		passeOK = false
 	end
 
-	-- local bombPass = false
-	-- if scen.event and scen.event == "BOMB_IMPACT" then
-	-- 	bombPass = true
-	-- end
-
-	-- if scen.event and scen.event == "BOMB_IMPACT" then
-	-- 	local temp = scen.y
-	-- 	scen.y = scen.z
-	-- 	scen.z = temp
-	-- end
-
-	print("DebriefSE A scen_name: "..tostring(scen_name).." passeOK: "..tostring(passeOK))
-
 	if scen.x and scen.z and passeOK then
-	-- if scen.x and scen.z and bombPass then
-	-- if scen.x and scen.z and (passePourcent and not isForest) then
+
 		for side_name, targets in pairs(targetlist) do											--iterate through targetlist
 			for targetN, target in pairs(targets) do										--iterate through targets				
 			
@@ -1232,8 +1189,7 @@ for scen_name, scen in pairs(scen_log) do													--iterate through destroye
 					for element_n, element in pairs(target.elements) do						--iterate through target elements
 						if element.x then
 
-							local distance = math.floor(math.sqrt((scen.x - element.x)^2 + (scen.z - element.y)^2))					--calculate distance between dead scenery and target element
-							
+							local distance = math.floor(math.sqrt((scen.x - element.x)^2 + (scen.z - element.y)^2))					--calculate distance between dead scenery and target element						
 							local correctedRadius = RayonDamaged
 							if  scen.event == "BOMB_IMPACT_ZONE" or element.class == "static" then
 								correctedRadius = 15 -- 15 m
@@ -1247,75 +1203,23 @@ for scen_name, scen in pairs(scen_log) do													--iterate through destroye
 								scen.lasthit = scen.initiator
 							end
 
-							
 							if distance <= correctedRadius  then
 								
-								print("DebriefSE --> B1 "..tostring(scen.lasthit).." event?: "..tostring(scen.event).." correctedRadius: "..correctedRadius )
+								-- print("DebriefSE =========--> B1 "..tostring(scen.lasthit).." event?: "..tostring(scen.event).." correctedRadius: "..correctedRadius )
 
-								print("DebriefSE --> B2 distance: "..tostring(distance).." between scenaryName: "..tostring(scen.scenaryName).." sceneryTypeName: "..tostring(scen.sceneryTypeName).." and element.name: "..tostring(element.name))
+								-- print("DebriefSE ========--> B2 distance: "..tostring(distance).." between scenaryName: "..tostring(scen.scenaryName).." sceneryTypeName: "..tostring(scen.sceneryTypeName).." and element.name: "..tostring(element.name))
 								
 								--plus bas, ne pas l'enlever, car il peut y avoir plusieurs detection de destruction, et cela fausse le resultat car detecté déjà detruit
 								if element.dead then	--and element.CheckDay and element.CheckDay < camp.date.CampTotalTimeS 
 									-- element.dead_last = false									--mark element as not died in last mission
-									print("DebriefSE  - --> C1 "..tostring(scen.scenaryName).." and "..tostring(element.name).." element already dead (dead?) "..tostring(element.dead).." "..tostring(element.CheckDay).." "..tostring(camp.date.CampTotalTimeS))
+									-- print("DebriefSE  - --> C1 "..tostring(scen.scenaryName).." and "..tostring(element.name).." element already dead (dead?) "..tostring(element.dead).." "..tostring(element.CheckDay).." "..tostring(camp.date.CampTotalTimeS))
 								else
-									print("DebriefSE  - --> C2 "..tostring(scen.scenaryName).." and "..tostring(element.name).." element not dead yet (dead?) "..tostring(element.dead).." "..tostring(element.CheckDay).." "..tostring(camp.date.CampTotalTimeS))
+									-- print("DebriefSE  - --> C2 "..tostring(scen.scenaryName).." and "..tostring(element.name).." element not dead yet (dead?) "..tostring(element.dead).." "..tostring(element.CheckDay).." "..tostring(camp.date.CampTotalTimeS))
 									element.dead = true											--mark element as dead
 									element.dead_last = true									--mark element as died in last mission
 									element.CheckDay = camp.date.CampTotalTimeS									-- ajoute la date de destruction		 Miguel21 modification M19.f : Repair SAM	
 
 									scen.lifePourcent = 0
-
-									-- if scen.scenaryName then
-									-- 	if not element["idDCS"] then
-									-- 		element["idDCS"] = {}
-									-- 		print("DebriefSE  - --> D1 scen.scenaryName: "..tostring(scen.scenaryName).." element.name: "..tostring(element.name))
-									-- 	end
-									-- 	if not element["idDCS"][scen.scenaryName] then
-									-- 		element["idDCS"][scen.scenaryName] = 999999
-									-- 		print("DebriefSE  - --> D2 ")
-									-- 	end
-
-									-- 	if distance < element["idDCS"][scen.scenaryName] then
-									-- 		element["idDCS"][scen.scenaryName] = distance
-									-- 		print("DebriefSE  - --> D3 ")
-									-- 	end
-									-- end
-									
-									-- --award ground kill to air unit
-									-- if scen.lasthit ~= nil then																			--check if dead scenery has a hit entry
-									-- 	for killer_side_name,killer_side in pairs(oob_air) do											--iterate through all sides
-									-- 		for killer_unit_n,killer_unit in pairs(killer_side) do										--iterate through all air units
-									-- 			if string.find(scen.lasthit, " " .. killer_unit.name .. " ", 1, true) then				--if the hitting unit is part of air unit name
-									-- 				if side_name == killer_side_name then												--make sure that hitting unit is hitting a target of his own side (friendly fire gives no kills)
-									-- 					killer_unit.score.kills_ground = killer_unit.score.kills_ground + 1				--award ground kill to air unit
-									-- 					killer_unit.score_last.kills_ground = killer_unit.score_last.kills_ground + 1
-									-- 					addPackstats(scen.lasthit, "kill_ground", nil)										--check if kill was in player package
-
-									-- 					print("DebriefSE  kill_ground - - --> E")
-
-									-- 					--award ground kill to client
-									-- 					if client_control[scen.lasthit] then											--if dead scenery was hit by a client
-									-- 						clientstats[client_control[scen.lasthit]].kills_ground = clientstats[client_control[scen.lasthit]].kills_ground + 1							--award ground kill to client
-									-- 						clientstats[client_control[scen.lasthit]].score_last.kills_ground = clientstats[client_control[scen.lasthit]].score_last.kills_ground + 1	--award ground kill to client
-
-
-									-- 						local item = {
-									-- 							event = scen_name,
-									-- 							target_name = target.titleName,
-									-- 							element = element,
-									-- 						}
-
-									-- 						if not clientstatsDetail[client_control[scen.lasthit]] then clientstatsDetail[client_control[scen.lasthit]] = {} end
-									-- 						table.insert(clientstatsDetail[client_control[scen.lasthit]], item)
-
-
-									-- 					end
-									-- 				end
-									-- 			end
-									-- 		end
-									-- 	end
-									-- end
 
 									-- si c'est un static batiment, on casse le batiment aussi dans oob_ground
 									if passStructure then
@@ -1354,7 +1258,7 @@ for scen_name, scen in pairs(scen_log) do													--iterate through destroye
 														killer_unit.score_last.kills_ground = killer_unit.score_last.kills_ground + 1
 														addPackstats(scen.lasthit, "kill_ground", nil)										--check if kill was in player package
 
-														print("DebriefSE  kill_ground - - --> E")
+														-- print("DebriefSE  kill_ground - - --> E")
 
 														--award ground kill to client
 														if client_control[scen.lasthit] then											--if dead scenery was hit by a client
@@ -1639,3 +1543,4 @@ if Debug.debug then
 end
 
 -- CheckTarget("Vihn Power Plant", "Debrief Z")
+

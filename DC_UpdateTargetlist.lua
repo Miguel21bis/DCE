@@ -1,13 +1,13 @@
 --To update the targetlist (target position, alive precentage)
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: debug_e
+-- last modification: debug_f
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_UpdateTargetlist.lua"] = "1.11.50"
+versionDCE["DC_UpdateTargetlist.lua"] = "1.11.51"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_d				(d springCleaning)
 -- adjustment_a				(a GroundTarget.percent = 100 & Error_05 )
--- debug_e					(e updateAlive)(d updateAlive)(bc InsertBugList)(a -nan(ind))
+-- debug_f					(f ne detruisait les derniers element dans oob_groud)(e updateAlive)(d updateAlive)(bc InsertBugList)(a -nan(ind))
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (camp.targetPos)
 -- modification M74_a		mix static, vehicle and map elements in a Target.
 -- modification M70_a		GroundZoneTarget (adds the possibility of counting unit completeness by zone) 
@@ -136,7 +136,7 @@ local function updateAlive(target)
 	local nbdead_last = 0
 	local nbMainObjective = 0
 	target.alive = 100
-	target.dead_last = 0
+	target.alive_last = 0
 
 	--si l'element comporte des nbMainObjective
 	for _elementN, element in pairs(target.elements) do
@@ -148,7 +148,7 @@ local function updateAlive(target)
 		end
 	end
 
-	if nbDead > 0 then
+	if nbDead > 0 then	
 		target.alive = 100 - (nbDead/ nbMainObjective)*100
 	end
 
@@ -159,7 +159,7 @@ local function updateAlive(target)
 		end
 	end
 	if nbdead_last > 0 then
-		target.dead_last =  (nbdead_last/ nbMainObjective)*100
+		target.alive_last =  (nbdead_last/ nbMainObjective)*100
 	end
 
 
@@ -172,12 +172,10 @@ local function updateAlive(target)
 
 		for _elementN, element in pairs(target.elements) do
 			if element.dead_last then
-				target.dead_last = target.dead_last + 100 / #target.elements
+				target.alive_last = target.alive_last + 100 / #target.elements
 			end
 		end
 	end
-
-	if nbdead_last > 100 then nbdead_last = 100 end
 
 	if target.alive < 1 then target.alive = 0 end
 
@@ -356,70 +354,70 @@ end
 	-- ["max_y"] = 942610,
 -- }
 
-local box = {	--gulf
-	["min_x"] = -289090,
-	["min_y"] = -840909,
-	["max_x"] = 790909,
-	["max_y"] = 377272,
-}
+-- local box = {	--gulf
+-- 	["min_x"] = -289090,
+-- 	["min_y"] = -840909,
+-- 	["max_x"] = 790909,
+-- 	["max_y"] = 377272,
+-- }
 
-for coal_name,coal in pairs(oob_ground) do										--go through sides(red/blue)	
-	for country_n,country in ipairs(coal) do									--go through countries
-		if country.vehicle then													--country has vehicles
-			for group_n,group in ipairs(country.vehicle.group) do				--go through groups
-				if group.x < box.min_x then
-					box.min_x = group.x
-				end
-				if group.x  > box.max_x then
-					box.max_x = group.x
-				end
-				if group.y <box. min_y then
-					box.min_y = group.y
-				end
-				if group.y  > box.max_y then
-					box.max_y = group.y
-				end
-			end
-		end
+-- for coal_name,coal in pairs(oob_ground) do										--go through sides(red/blue)	
+-- 	for country_n,country in ipairs(coal) do									--go through countries
+-- 		if country.vehicle then													--country has vehicles
+-- 			for group_n,group in ipairs(country.vehicle.group) do				--go through groups
+-- 				if group.x < box.min_x then
+-- 					box.min_x = group.x
+-- 				end
+-- 				if group.x  > box.max_x then
+-- 					box.max_x = group.x
+-- 				end
+-- 				if group.y <box. min_y then
+-- 					box.min_y = group.y
+-- 				end
+-- 				if group.y  > box.max_y then
+-- 					box.max_y = group.y
+-- 				end
+-- 			end
+-- 		end
 
-		if country.ship then													--country has ships
-			for group_n,group in ipairs(country.ship.group) do					--go through groups
-				if group.x < box.min_x then
-					box.min_x = group.x
-				end
-				if group.x  > box.max_x then
-					box.max_x = group.x
-				end
-				if group.y <box. min_y then
-					box.min_y = group.y
-				end
-				if group.y  > box.max_y then
-					box.max_y = group.y
-				end
-			end
-		end
-	end
-end
+-- 		if country.ship then													--country has ships
+-- 			for group_n,group in ipairs(country.ship.group) do					--go through groups
+-- 				if group.x < box.min_x then
+-- 					box.min_x = group.x
+-- 				end
+-- 				if group.x  > box.max_x then
+-- 					box.max_x = group.x
+-- 				end
+-- 				if group.y <box. min_y then
+-- 					box.min_y = group.y
+-- 				end
+-- 				if group.y  > box.max_y then
+-- 					box.max_y = group.y
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+-- end
 
-for base_name,base in pairs(db_airbases) do
+-- for base_name,base in pairs(db_airbases) do
 
-	if base.x and base.x ~= 9999999999 then
-		if base.x < box.min_x then
-			box.min_x = base.x
-		end
-		if base.x  > box.max_x then
-			box.max_x = base.x
-		end
-	end
-	if base.y and base.y ~= 9999999999 then
-		if base.y <box. min_y then
-			box.min_y = base.y
-		end
-		if base.y  > box.max_y then
-			box.max_y = base.y
-		end
-	end
-end
+-- 	if base.x and base.x ~= 9999999999 then
+-- 		if base.x < box.min_x then
+-- 			box.min_x = base.x
+-- 		end
+-- 		if base.x  > box.max_x then
+-- 			box.max_x = base.x
+-- 		end
+-- 	end
+-- 	if base.y and base.y ~= 9999999999 then
+-- 		if base.y <box. min_y then
+-- 			box.min_y = base.y
+-- 		end
+-- 		if base.y  > box.max_y then
+-- 			box.max_y = base.y
+-- 		end
+-- 	end
+-- end
 
 
 if camp_ZoneSAR and camp_ZoneSAR ~= nil then
@@ -545,10 +543,10 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
 end
 
-
 for side_name, targets in pairs(targetlist) do													--Iterate through all side
 	for targetN, target in pairs(targets) do												--Iterat through all targets
 		local maxRange = 0
+		local deadCount = 0
 		if not target.name then
 			target.name = target.titleName
 		end
@@ -664,16 +662,13 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 
 		if target.task == "Strike" then
 			if target.class == nil or  target.class == "vehicle" or  target.class == "static"  then														--For scenery object targets
-				-- if target.CheckDay and target.CheckDay < CampTotalTimeS then
-				-- 	target.dead_last = 0
-				-- 	target.CheckDay = CampTotalTimeS
-				-- end
+				
 				target.alive = 100															--Introduce percentage of alive target elements
 				target.x = 0																--Introduce x coordinate for target
 				target.y = 0																--Introduce y coordinate for target
-				target.dead_last = 0														--Introduce percentage of elements that died in last mission (for Debriefing)
-
-				-- print("DcUT targetName "..side_name.." "..tostring(target.name))
+				target.alive_last = nil														--Introduce percentage of elements that died in last mission (for Debriefing)
+				target.targetDead_last = nil
+				
 				if target.name == nil then
 					_affiche(target, "target nil")
 				end
@@ -726,30 +721,25 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 									end
 
 									if not target.elements then target.elements = {} end	--add elements table
-									-- target.dead_last = 0									--Introduce percentage of elements that died in last mission (for Debriefing)
-
+									
 									for unit_n, unit in pairs(group.units) do				--Iterate through all units of group
 										local alreadyThere = false
 										for elementN, element in pairs(target.elements) do
 											if unit.name == element.name then
 
-												element.dead = unit.dead								--store unit status
-												element.dead_last = unit.dead_last					--store unit dead_last
-												element.CheckDay = unit.CheckDay						-- M19 ajoute la date destruction/ravito pour les futurs check de ravitaillement
+												if not element.dead and unit.dead then
+													target.targetDead_last = true
+												end
+
+												element.dead = Deepcopy(unit.dead)								--store unit status
+												element.dead_last = Deepcopy(unit.dead_last)					--store unit dead_last
+												element.CheckDay = Deepcopy(unit.CheckDay)						-- M19 ajoute la date destruction/ravito pour les futurs check de ravitaillement
 												element.x = unit.x
 												element.y = unit.y
 												element.class = classname
 												element.fromGroupName = true
 												element.type = unit.type
 												element.mainObjective = checkGroup[group.name].MainObjective
-
-
-												if element.dead then											--if target element is dead		
-													target.alive = target.alive - 100 / #target.elements				--reduce target alive percentage	
-												end
-												-- if element.dead_last then
-												-- 	target.dead_last = target.dead_last + 100 / #target.elements		--add target died in last mission percentage
-												-- end
 
 												alreadyThere = true
 												break
@@ -771,8 +761,10 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 												mainObjective = checkGroup[group.name].MainObjective,
 
 											}
+
 											table.insert(target.elements, elementTemp)
 										end
+
 
 										--check range from threat
 										if GroundthreatsAll then
@@ -794,16 +786,6 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 
 									end
 
-									for unit_n, unit in pairs(group.units) do						--Iterate through all units of group
-										if unit.dead then											--Unit is dead
-											target.alive = target.alive - 100 / #target.elements	--reduce target alive percentage	
-										end
-										-- if unit.dead_last then
-										-- 	target.dead_last = target.dead_last + 100 / #target.elements	--add target died in last mission percentage
-										-- end
-									end
-									target.alive = math.floor(target.alive)
-									-- target.dead_last = math.floor(target.dead_last)
 									target.range = maxRange
 								end
 							end
@@ -817,11 +799,6 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 						target.foundOobGround = true
 					end
 				end
-
-				-- if not target.foundOobGround then 
-				-- 	print(" Error_7: this target |"..target.name.."| linked to this objective  (targetlist_ini.lua)|"..target.titleName.."| was not found in the file (oob_groud)") 
-				-- 	-- checkBug3(" Error_8: this base |"..target.name.."| linked to this objective  (targetlist_ini.lua)|"..target.titleName.."| was not found in the file (db_airbase.lua)") 
-				-- end
 
 				target.range = maxRange
 
@@ -844,7 +821,6 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 							end
 
 
-
 							if temp.x == nil then
 								element.class = "MapObject"
 							else
@@ -857,13 +833,6 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 								target.x = element.x										--add x coordinate of target
 								target.y = element.y										--add y coordinate of target
 							end
-
-							if element.dead then											--if target element is dead		
-								target.alive = target.alive - 100 / #target.elements				--reduce target alive percentage	
-							end
-							-- if element.dead_last then
-							-- 	target.dead_last = target.dead_last + 100 / #target.elements		--add target died in last mission percentage
-							-- end
 
 						end
 					end
@@ -955,7 +924,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 							end
 
 							target.elements = {}										--add elements table
-							target.dead_last = 0										--Introduce percentage of elements that died in last mission (for Debriefing)
+							target.alive_last = 0										--Introduce percentage of elements that died in last mission (for Debriefing)
 							for unit_n, unit in pairs(group.units) do					--Iterate through all units of group
 								local temp = {x=0,y=0,class=""}
 								temp.x, temp.y, temp.class = checkElementXY(unit, targetside)
@@ -979,11 +948,11 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 									target.alive = target.alive - 100 / #target.elements	--reduce target alive percentage	
 								end
 								if unit.dead_last then
-									target.dead_last = target.dead_last + 100 / #target.elements	--add target died in last mission percentage
+									target.alive_last = target.alive_last + 100 / #target.elements	--add target died in last mission percentage
 								end
 							end
 							target.alive = math.floor(target.alive)
-							target.dead_last = math.floor(target.dead_last)
+							target.alive_last = math.floor(target.alive_last)
 							-- break
 						end
 					end
@@ -1013,7 +982,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 
 		elseif target.task == "CSAR" then
 			target.alive = 100															--Introduce percentage of alive target elements
-			target.dead_last = 0														--Introduce percentage of elements that died in last mission (for Debriefing)
+			target.alive_last = 0														--Introduce percentage of elements that died in last mission (for Debriefing)
 			for e = 1, #target.elements do												--Iterate through elements of target
 				if not target.elements[e].x then
 					checkBug3(" Error_10: The x and y positions of this SAR position are missing:  '" .. target.titleName .. "!")
@@ -1023,11 +992,11 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 					target.alive = target.alive - 100 / #target.elements				--reduce target alive percentage	
 				end
 				if target.elements[e].dead_last then
-					target.dead_last = target.dead_last + 100 / #target.elements		--add target died in last mission percentage
+					target.alive_last = target.alive_last + 100 / #target.elements		--add target died in last mission percentage
 				end
 			end
 			target.alive = math.floor(target.alive)
-			target.dead_last = math.floor(target.dead_last)
+			target.alive_last = math.floor(target.alive_last)
 
 		elseif target.task == "Runway Attack" then
 			--creation des parties de Runway à bombarder, crée à partir des info runway.hdg et runway.length x et y
@@ -1045,7 +1014,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 					if  target.elements == nil   then
 
 						target.alive = 100
-						target.dead_last = 0
+						-- target.alive_last = 0
 						for iRunway, runway in ipairs(db_airbases[target.db_airbaseName].runways) do
 							if runway.x and runway.x ~= 0 then
 								--pour la map caucasus
@@ -1137,14 +1106,24 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 						end
 
 
+						-- --met à jour target_dead_last pour avoir le (-70%) par exemple dans le DEBRIEF_Text
+						-- for e = 1, #target.elements do												--Iterate through elements of target
+						-- 	if target.elements[e].dead_last then
+						-- 		target.alive_last = target.alive_last + 100 / #target.elements		--add target died in last mission percentage
+						-- 	end
+						-- end
+
+						-- target.alive_last = math.floor(target.alive_last)
+
 						--met à jour target_dead_last pour avoir le (-70%) par exemple dans le DEBRIEF_Text
+						--TODO revoir ça, car dead_last n'est pas utilisé pour ça
 						for e = 1, #target.elements do												--Iterate through elements of target
 							if target.elements[e].dead_last then
-								target.dead_last = target.dead_last + 100 / #target.elements		--add target died in last mission percentage
+								target.alive = target.alive + 100 / #target.elements		--add target died in last mission percentage
 							end
 						end
 
-						target.dead_last = math.floor(target.dead_last)
+						target.alive = math.floor(target.alive)
 					end
 
 				else
@@ -1168,40 +1147,31 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 
 		end
 
+
 		if target.alive then																--target has an alive value (is a ground target)
-		-- if 	target.task and target.task == "Strike" or target.task == "Anti-ship Strike" or target.task == "Runway Attack" then
-			if not target.alive then
-				_affiche(target, "not targetAlive")
-			end
+
 			if target.elements then
 				target = updateAlive(target)
 			end
 
-			-- print("DcCT 00    target.name ... "..tostring(target.name) )
-
 			local attribut
 			if target.attributes then 
 				for attributN, attributName in pairs(target.attributes) do
-					-- print("DcCT A    attributName ... "..tostring(attributName) )
 					attributName = string.lower(attributName)
 					
 					if Attribut2Target[attributName] then
 						attribut = Attribut2Target[attributName]
-						-- print("DcCT B    ASSIGN attribut ... "..tostring(attribut) )
 						break
 					end
 				end
 				if not attribut then
 					for attributN, attributName in pairs(target.attributes) do
-						-- print("DcCT C    attributName ... "..tostring(attributName) )
 						attributName = string.lower(attributName)
 						
 						for key , correspondanceName in pairs(Attribut2Target) do
-							-- print("DcCT D    attributName ... "..tostring(attributName) )
 							
 							if string.match(correspondanceName, attributName) then
 								attribut = correspondanceName
-								-- print("DcCT E    FOUND attribut ... "..tostring(attribut) )
 								break
 							end
 						end
@@ -1212,30 +1182,27 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 			if not attribut then
 				attribut = "generic"	
 			end
-
-
-			-- print("side_name "..tostring(side_name))
-			-- print("attribut "..tostring(attribut))
-			-- _affiche(campMod.RepairOption, "campMod.RepairOption")
 			
 			local killTargetLocal = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][2]
 
 			if target.alive <= killTargetLocal and target.alive > 0 and attribut ~= "runway" then
 				
-				checkBug2("DC_UT target.name target.alive <= 20 "..target.titleName.." "..tostring(target.alive))
 				KillTarget(target.titleName, target.name)															--set target alive 0
+				
 				target.alive = 0
+
+				--ne pas supprimer ce code, car c'est le nom des éléments qui est a supprimer dans oob_ground
 				if target.elements then
 					for element_n,element in pairs(target.elements) do
-						if not element.dead then
-							KillTarget(element.name, target.titleName)
-						end
+						KillTarget(element.name, target.titleName)
 					end
 				end
 			end
+
 			if target.elements then
 				target = updateAlive(target)
 			end
+
 			if target.alive < 0 then														--if target alive is lower than 0 (due to rounding errors)
 				target.alive = 0															--set target alive 0
 			end
@@ -1250,12 +1217,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 					GroundTarget[side_name].total = GroundTarget[side_name].total + 1			--count the number of all ground targets for each side
 					if target.alive > 0 then													--target is not destroyed
 						GroundTarget[side_name].alive = GroundTarget[side_name].alive + 1		--count the number of all alive ground targets for each side
-					else
-						-- _affiche(target, "target non alive>0")
-						-- os.execute 'pause'
 					end
-				else
-					-- print("DcUT ignores this target: ".. target.titleName)
 				end
 			end
 
@@ -1273,15 +1235,10 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 					if target.alive > 0 then													--target is not destroyed
 						GroundZoneTarget[side_name][target.zone].alive = GroundZoneTarget[side_name][target.zone].alive + 1		--count the number of all alive ground targets for each side
 					end
-				else
-					-- print("DcUT ignores this target: ".. target.titleName)
 				end
 			end
-
 		end
 	end
-
-	checkBug2("DC_UT GroundTarget "..side_name.." "..GroundTarget[side_name].total.." Alive: "..GroundTarget[side_name].alive)
 
 
 	if GroundTarget[side_name].total > 0 then

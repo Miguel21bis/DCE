@@ -110,7 +110,7 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 
-print("Actual time (DebriefMaster B): " .. FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year .. ".\n")
+-- print("Actual time (DebriefMaster B): " .. FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year .. ".\n")
 
 UpdateConfMod()
 
@@ -319,12 +319,7 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 
 --run log evaluation and status updates
 dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_StatsEvaluation.lua")
--- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_DestroyTarget.lua")												--Mod11.j
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
-
--- --update campaign time
--- local elapsed_time = math.floor(events[#events].t - events[1].t)								--mission runtime in seconds
--- camp.time = camp.time + elapsed_time															--add mission time to campaign time
 
 --create and view Debriefing file for mission
 dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
@@ -337,9 +332,9 @@ os.execute('start "Debriefing" "notepad.exe" "Debriefing/Debriefing ' .. camp.mi
 local showVersion = versionPackageICM
 
 local verScriptsModPath = "../../../ScriptsMod."..versionPackageICM.."/UTIL_Changelog.lua"
-local TestPath = io.open(verScriptsModPath, "r")
-if  TestPath ~= nil then
-	io.close(TestPath)
+local testPath = io.open(verScriptsModPath, "r")
+if  testPath ~= nil then
+	io.close(testPath)
 	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Changelog.lua")
 	if versionDCE then
 		showVersion = showVersion.." ("..versionDCE["UTIL_Changelog.lua"]..")"

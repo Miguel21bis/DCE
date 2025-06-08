@@ -4488,36 +4488,40 @@ function FoundSquadSide(squadName)
 end
 
 
-function KillTarget(Target_Name, TargetPName)
+function KillTarget(targetName, targetName2)
 
+	local findTarget = false
 	for side_name,side in pairs(oob_ground) do														--side table(red/blue)											
 		for country_n,country in pairs(side) do														--country table (number array)
 			if country.vehicle then																	--if country has vehicles
 				for group_n,group in pairs(country.vehicle.group) do								--groups table (number array)
-					if group.name == Target_Name or group.name == TargetPName then
+					if group.name == targetName or group.name == targetName2 then
 						for unit_n,unit in pairs(group.units) do										--units table (number array)					
-
-							if Debug.AfficheSol then print("DC_DT Kill "..unit.name) end
-						
-							unit.dead = true														--mark unit as dead in oob_ground
-							unit.dead_last = true													--mark unit as died in last mission
-							unit.CheckDay = camp.date.CampTotalTimeS  
+							if not unit.dead then
+								if Debug.AfficheSol then print("DC_DT Kill "..unit.name) end
+							
+								unit.dead = true														--mark unit as dead in oob_ground
+								-- unit.dead_last = true													--mark unit as died in last mission
+								unit.CheckDay = camp.date.CampTotalTimeS
+								findTarget = true
+							end
 						end
 					end
 				end
 			end
 			if country.static then																--if country has static objects	
 				for group_n,group in pairs(country.static.group) do								--groups table (number array)
-					if group.name == Target_Name or group.name == TargetPName then
+					if group.name == targetName or group.name == targetName2 then
 						for unit_n,unit in pairs(group.units) do									--units table (number array)
 							if Debug.AfficheSol then print("DC_DT Kill "..unit.name) end
 							
-							if unit.dead ~= true then											--unit is not yet dead (some static objects that are spawned in a destroyed state are logged dead at mission start, these must be excluded here)
+							if not unit.dead then											--unit is not yet dead (some static objects that are spawned in a destroyed state are logged dead at mission start, these must be excluded here)
 								group.dead = true												--mark group as dead in oob_ground (static objects can be set as group.dead and spawned in a destroyed state)
 								group.hidden = true												--hide dead static object
 								unit.dead = true												--mark unit as dead in oob_ground (this is for the targetlist)
-								unit.dead_last = true
-								unit.CheckDay = camp.date.CampTotalTimeS  
+								-- unit.dead_last = true
+								unit.CheckDay = camp.date.CampTotalTimeS
+								findTarget = true
 							end
 						end
 					end
@@ -4525,13 +4529,14 @@ function KillTarget(Target_Name, TargetPName)
 			end
 			if country.ship then																--if country has ships
 				for group_n,group in pairs(country.ship.group) do								--groups table (number array)
-					if group.name == Target_Name or group.name == TargetPName then	
+					if group.name == targetName or group.name == targetName2 then	
 						for unit_n,unit in pairs(group.units) do									--units table (number array)	
 							if Debug.AfficheSol then print("DC_DT Kill "..unit.name) end
 							
 							unit.dead = true													--mark unit as dead in oob_ground
-							unit.dead_last = true												--mark unit as died in last mission
+							-- unit.dead_last = true												--mark unit as died in last mission
 							unit.CheckDay = camp.date.CampTotalTimeS                              -- ajoute la date de destruction    Miguel21 modification M19 : Repair SAM   
+							findTarget = true
 						end
 					end
 				end
@@ -4539,19 +4544,21 @@ function KillTarget(Target_Name, TargetPName)
 		end
 	end
 	
+	-- if not findTarget then																		--if target was not found in oob_ground
+	-- 	print("Error(UtilFct) Target "..tostring(targetName).." or "..tostring(targetName2).." not found in oob_ground")
+	-- 	os.execute 'pause'
+	-- end
+
 	for side_name, targets in pairs(targetlist) do											--iterate through targetlist
 		for targetN, target in pairs(targets) do										--iterate through targets
-			if target.titleName == Target_Name or target.titleName == TargetPName then	
+			if target.titleName == targetName or target.titleName == targetName2 then	
 				if target.elements and target.elements[1].x then 						--if the target has subelements and is a scenery object target (element has x coordinate)
 					for element_n,element in pairs(target.elements) do					--iterate through target elements
-						-- if element.dead then											--element was already dead previously
-						-- 	element.dead_last = false									--mark element as not died in last mission
-						-- else
-							if Debug.AfficheSol then print("DC_DT Kill __SCENERY__ "..element.name) end
-							element.dead = true	
-							element.dead_last = true
-							element.CheckDay = camp.date.CampTotalTimeS  
-						-- end
+
+						if Debug.AfficheSol then print("DC_DT Kill __SCENERY__ "..element.name) end
+						element.dead = true	
+						element.CheckDay = camp.date.CampTotalTimeS  
+
 					end
 				end
 			end

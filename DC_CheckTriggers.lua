@@ -1305,8 +1305,8 @@ Action = {}
 											print("Dc_CT Debug D² : "..target.titleName .. " alive: "..target.alive)
 										end
 
-										target.dead_last = math.floor(target.dead_last -  (1/#target.elements *100))
-										if target.dead_last < 0 then  target.dead_last = 0 end
+										target.alive_last = math.floor(target.alive_last -  (1/#target.elements *100))
+										if target.alive_last < 0 then  target.alive_last = 0 end
 
 								
 									end
@@ -1460,24 +1460,12 @@ Action = {}
 										local repairInterval = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][3] * 3600
 										local lastCheck = target.elements[e].CheckDay
 
-										if Debug.AfficheSol or debugKT then
-											print("Dc_CT Debug while A lastCheck: "..lastCheck.." +repairInterval "..repairInterval.." CampTotalTimeS "..CampTotalTimeS)
-										end
-
-
 										-- Boucle sur chaque intervalle de réparation entre CheckDay et maintenant
 										while lastCheck + repairInterval <= CampTotalTimeS do
-											if Debug.AfficheSol or debugKT then
-											print("Dc_CT Debug while B lastCheck: "..lastCheck.." +repairInterval "..repairInterval.." <=? CampTotalTimeS "..CampTotalTimeS)
-											end
-
+											
 											lastCheck = lastCheck + repairInterval
 											local test_prob = math.random(1,100)
-											if Debug.AfficheSol or debugKT then
-												print("Dc_CT Debug tentative réparation à "..lastCheck.." pour "..target.titleName.." "..target.elements[e].name)
-												print("Dc_CT Debug test_prob  : "..test_prob.." <= prob? "..repairChance)
-											end
-
+											
 											if test_prob <= repairChance then
 												forcedReAlive = true
 												temp_dead = nil
@@ -1485,10 +1473,7 @@ Action = {}
 												temp_CheckDay = nil
 
 												local text = "" .. target.elements[e].name .. " from ".. target.titleName .. " have been repaired and returned back to service. \n \n"
-												if Debug.AfficheSol or debugKT then
-													print("Dc_CT Debug Resurrection: "..target.titleName .. " "..target.elements[e].name)
-													print("Dc_CT Debug "..text)
-												end
+												
 												if side_name == "blue" then
 													Briefing_oob_text_blue = Briefing_oob_text_blue .. text
 												elseif side_name == "red" then
@@ -1500,12 +1485,8 @@ Action = {}
 												target.alive = math.floor(target.alive + (1/#target.elements *100))
 												if target.alive > 100 then target.alive = 100 end
 
-												if Debug.AfficheSol or debugKT then
-													print("Dc_CT Debug D² : "..target.titleName .. " alive: "..target.alive)
-												end
-
-												target.dead_last = math.floor(target.dead_last -  (1/#target.elements *100))
-												if target.dead_last < 0 then  target.dead_last = 0 end
+												target.alive_last = math.floor(target.alive_last -  (1/#target.elements *100))
+												if target.alive_last < 0 then  target.alive_last = 0 end
 
 												break -- On sort de la boucle si la réparation a réussi
 											end
@@ -1517,63 +1498,6 @@ Action = {}
 									end
 								end
 							end
-
-							-- if  target.alive < 100 and target.alive >= minimumRepairThreshold   then
-							-- 	if  target.elements[e].dead  then
-							-- 		if target.elements[e].CheckDay then
-							-- 			-- if	CampTotalTimeS >= target.elements[e].CheckDay + (campMod.groundReinforceDelay * 3600) then
-							-- 			if CampTotalTimeS >= target.elements[e].CheckDay + (campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][3] * 3600) then
-
-							-- 				local test_prob = math.random(1,100)
-
-							-- 				if Debug.AfficheSol or debugKT then
-							-- 					print("Dc_CT Debug CampTotalTimeS >= CheckDay : "..target.titleName .. " "..target.elements[e].name)
-							-- 					print("Dc_CT Debug test_prob <= prob : "..test_prob .. " "..repairChance)
-							-- 					-- os.execute 'pause'
-							-- 				end
-
-							-- 				if test_prob <= repairChance   then
-							-- 					forcedReAlive = true
-							-- 					temp_dead = nil
-							-- 					temp_dead_last = false
-							-- 					temp_CheckDay = nil
-
-							-- 					local text = "" .. target.elements[e].name .. " from ".. target.titleName .. " have been repaired and returned back to service. \n \n"
-
-							-- 					if Debug.AfficheSol or debugKT then
-							-- 						print("Dc_CT Debug Resurrection: "..target.titleName .. " "..target.elements[e].name)
-							-- 						print("Dc_CT Debug "..text)
-							-- 					end
-
-							-- 					if side_name == "blue" then									--side is blue
-							-- 						Briefing_oob_text_blue = Briefing_oob_text_blue .. text	--add to blue briefing oob text
-							-- 					elseif side_name == "red" then								--side is red
-							-- 						Briefing_oob_text_red = Briefing_oob_text_red .. text	--add to red briefing oob text
-							-- 					end
-
-
-							-- 					target.elements[e].dead = nil
-							-- 					target.elements[e].CheckDay = nil
-							-- 					target.alive = math.floor(target.alive + (1/#target.elements *100))
-							-- 					if target.alive > 100 then target.alive = 100 end
-
-							-- 					if Debug.AfficheSol or debugKT then
-							-- 						print("Dc_CT Debug D² : "..target.titleName .. " alive: "..target.alive)
-							-- 						-- os.execute 'pause'
-							-- 					end
-
-							-- 					target.dead_last = math.floor(target.dead_last -  (1/#target.elements *100))
-							-- 					if target.dead_last < 0 then  target.dead_last = 0 end
-
-							-- 				else -- sinon on met � jour la date de check pour y revenir seulement un jour apres
-							-- 					-- temp_CheckDay = camp.day
-							-- 					temp_CheckDay = CampTotalTimeS
-							-- 					target.elements[e].CheckDay = temp_CheckDay					-- pour mettre � jour les cible scenary qui ne sont pas dans oob_ground
-							-- 				end
-							-- 			end
-							-- 		end
-							-- 	end
-							-- end
 
 							if forcedReAlive then
 								local endfunction = false
@@ -1596,7 +1520,6 @@ Action = {}
 															group.units[unit_n].CheckDay = temp_CheckDay
 
 															endfunction = true
-															-- break
 														end
 														if endfunction then  break end
 													end
@@ -1604,7 +1527,6 @@ Action = {}
 												end
 												if endfunction then  break end
 											end
-											-- if endfunction then break end	
 										end
 									if endfunction then  break end
 								end
@@ -1702,7 +1624,7 @@ Action = {}
 					end
 				end
 
-				if target.alive and target.dead_last > 0 and target.hidden ~= true then			--ground target was hit in last mission and should not be hidden
+				if target.alive and target.targetDead_last and not target.hidden then			--ground target was hit in last mission and should not be hidden
 					if target.alive == 0 then									--target is dead
 						Briefing_text = Briefing_text .. "Intel Update: " .. target.titleName .. " has been destroyed. \n \n"
 					else														--target is still alive

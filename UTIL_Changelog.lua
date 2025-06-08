@@ -10,7 +10,10 @@ known issues:
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
 ==:20.88.537:==
-
+-- ajout des dernieres set meteo
+-- interdit le ravitaillent en vol et le straffing pour les IA
+--revu des stats de bombardement des elements de la MAP
+--erreur sur les stats ground
 537 add		[refuel][M88]	CheckRefuelProgress (in progress)
 
 536	mod		[loadout][M87]	change of logic for the “day” variable: day will always be considered true (even if it's not in the loadout). 

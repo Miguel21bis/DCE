@@ -262,7 +262,7 @@ do
 	for targetN, target in ipairs(targetlist[camp.player.side]) do
 		if target.titleName == target_name and  target.elements  then
 			target_alive = target.alive
-			target_hit = target.dead_last
+			target_hit = target.alive_last
 			targetSelect = target
 			break
 		end
@@ -1048,8 +1048,8 @@ do
 					if target.alive and target.type ~= "Ejected Pilot" then															--if target has an alive value it is a scenery, vehicle or ship target and should be listed
 						table.insert(entries[1].values, target.titleName)
 						table.insert(entries[2].values, math.ceil(target.alive) .. "%")
-						if target.dead_last > 0 then
-							table.insert(entries[3].values, "(-" .. math.ceil(target.dead_last) .. "%)")
+						if target.alive_last > 0 then
+							table.insert(entries[3].values, "(-" .. math.ceil(target.alive_last) .. "%)")
 						else
 							table.insert(entries[3].values, "")
 						end

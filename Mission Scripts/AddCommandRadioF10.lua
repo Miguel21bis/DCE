@@ -460,11 +460,10 @@ end
 
 --nettoie les noms de certain caractere spéciaux (" et ')
 function CleanName(name)
-
-	name = name:gsub("['\"]", '')
-
-	return name
-
+    if type(name) ~= "string" then
+        return ""
+    end
+    return name:gsub("['\"]", '')
 end
 
 function NormalizeAngle(angle)
