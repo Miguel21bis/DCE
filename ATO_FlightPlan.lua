@@ -2895,6 +2895,32 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
 
+
+								-- ** ignorer le ravito Vol WPT1
+								task_entry = {
+									["number"] = 4,
+									["auto"] = false,
+									["id"] = "WrappedAction",
+									["name"] = "BINGO RTB: ignorer le ravito Vol WPT1",
+									["enabled"] = true,
+									["params"] = 
+									{
+										["action"] = 
+										{
+											["id"] = "Option",
+											["params"] = 
+											{
+												["value"] = 2,
+												["name"] = 6,
+											}, -- end of ["params"]
+										}, -- end of ["action"]
+									}, -- end of ["params"]
+								}
+								
+
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+
+
 							end --heavyBomber or not
 
 

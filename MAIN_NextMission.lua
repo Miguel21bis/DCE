@@ -125,19 +125,37 @@ local trig_n = #mission.trigrules + 1
 
 ---- add trigger to destory scenery objects -----
 mission.trig.flag[trig_n] = true
-mission.trig.conditions[trig_n] = "return(true)"
+-- mission.trig.conditions[trig_n] = "return(true)"
+mission.trig.conditions[trig_n] = "return(c_time_after(300) )"
 mission.trig.actions[trig_n] = ""
-mission.trig.funcStartup[trig_n] = "if mission.trig.conditions[1]() then mission.trig.actions[1]() end"
+-- mission.trig.funcStartup[trig_n] = "if mission.trig.conditions["..trig_n.."]() then mission.trig.actions["..trig_n.."]() end"
+mission.trig.func[trig_n] = "if mission.trig.conditions["..trig_n.."]() then mission.trig.actions["..trig_n.."]() end"
 mission.trigrules[trig_n] = {
-	["rules"] = {},
+	-- ["rules"] = {},
+	["rules"] = 
+		{
+			[1] = 
+			{
+				["predicate"] = "c_time_after",
+				["seconds"] = 300,
+			}, -- end of [1]
+		}, -- end of ["rules"]
 	["eventlist"] = "",
 	["actions"] = {},
 	["comment"] = "Scenery Destruction",
-	["predicate"] = "triggerStart",
+	-- ["predicate"] = "triggerStart",
+	["predicate"] = "triggerOnce",
 }
 
-require("Active/oob_scen")
+--attention, ne pas activer ici oob_scen, sinon cela ne prend pas en compte son update
+-- require("Active/oob_scen")
 for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed scenery objects
+	
+	-- if scen_name == "227402185" then
+	-- 	_affiche(scen, "MainNM scen 227402185") --debug
+	-- 	os.execute('pause') --debug
+	-- end
+	
 	if scen.x and scen.z then														--destroyed scenery object has x and z coordinates
 	
 		local isForest = false
@@ -145,8 +163,8 @@ for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed 
 			isForest = true
 		end
 	
-		local txDestruction = 0
-		local radius = 25
+		local txDestruction = 100
+		local radius = 12
 
         if scen.explosiveMass then
             -- Calcul du rayon de destruction total (en mètres) selon la masse d'explosif (TNT)
@@ -185,6 +203,7 @@ for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed 
 					[4] = 0.15,
 				},
 				["hidden"] = true,
+				-- ["name"] = "ScenKillZone_" .. (#mission.trigrules[trig_n].actions + 1).."_"..tostring(scen_name),
 				["name"] = "SceneryDestroyZone" .. #mission.trigrules[trig_n].actions + 1,
 			}
 
@@ -1572,6 +1591,11 @@ local tgt_str = "targetlist = " .. TableSerialization(targetlist, 0)						--make
 local tgtFile = io.open("Active/targetlist.lua", "w") or error("Failed to open debug file")
 tgtFile:write(tgt_str)																		--save new data
 tgtFile:close()
+
+local scen_str = "oob_scen = " .. TableSerialization(oob_scen, 0)							--make a string
+local scenFile = io.open("Active/oob_scen.lua", "w") or error("Failed to open debug file")
+scenFile:write(scen_str)																	--save new data
+scenFile:close()
 
 local trigStr = "camp_triggers = " .. TableSerializationAG_triggers(camp_triggers, 0)
 local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to open debug file")

@@ -1668,13 +1668,18 @@ for oob_scenN, scen in pairs(oob_scen) do
 		-- print("DC_UpdateScen_A1 (-) delete FOREST scen "..scen.sceneryTypeName)
 		oob_scen[oob_scenN] = nil
 	end
+	-- ["event"] = "S_EVENT_HIT",
+	if scen.event and scen.event ==  "S_EVENT_HIT" then
+		print("DC_UpdateScen_A1 (-) delete S_EVENT_HIT scen "..tostring(scen.sceneryTypeName)..tostring(scen.scenaryName))
+		oob_scen[oob_scenN] = nil
+	end
 end
 
 -- 1. Récupérer tous les impacts avec leur rayon
 local impacts = {}
 for name, scen in pairs(oob_scen) do
     if scen.event == "BOMB_IMPACT" then
-        local radius = 25
+        local radius = 12
         if scen.explosiveMass then
             local k = 8
             radius = math.floor(k * (scen.explosiveMass)^(1/3))
