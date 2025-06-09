@@ -25,6 +25,7 @@ if not AcceptedMission or AcceptedMission == nil then
 	clientstats = Deepcopy(clientstats)
 	camp = Deepcopy(camp)
 	camp_ZoneSAR = Deepcopy(camp_ZoneSAR)
+	oob_scen = Deepcopy(oob_scen)
 
 	print()
 else
@@ -62,6 +63,9 @@ else
 		io.close(TestPath)
 		require("Active/camp_ZoneSAR")																--zoneSAR
 	end
+
+	oob_scen = nil
+	dofile("Active/oob_scen.lua")
 
 end
 

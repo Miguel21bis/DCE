@@ -1660,27 +1660,92 @@ camp.targetPos = targetPosTemp
 --ajoute/enleve des zone de destructions pour correspondre a certaines cibles de targetlist
 --DC_UpdateScen
 --*********************************************************************************
+
+-- supprime les arbres detruit
+for oob_scenN, scen in pairs(oob_scen) do
+	-- print("DC_UpdateScen_A1 oob_scenN "..tostring(oob_scenN))
+	if scen.sceneryTypeName and string.find(scen.sceneryTypeName, "FOREST")  then
+		-- print("DC_UpdateScen_A1 (-) delete FOREST scen "..scen.sceneryTypeName)
+		oob_scen[oob_scenN] = nil
+	end
+end
+
+-- 1. Récupérer tous les impacts avec leur rayon
+local impacts = {}
+for name, scen in pairs(oob_scen) do
+    if scen.event == "BOMB_IMPACT" then
+        local radius = 25
+        if scen.explosiveMass then
+            local k = 8
+            radius = math.floor(k * (scen.explosiveMass)^(1/3))
+        end
+        table.insert(impacts, {
+            name = name,
+            x = scen.x,
+            z = scen.z ,
+            radius = radius,
+            isFused = string.find(name, "BOMB_FUSED") and true or false
+        })
+    end
+end
+
+-- 2. Trier par rayon décroissant
+table.sort(impacts, function(a, b) return a.radius > b.radius end)
+
+-- 3. Marquer les petits impacts à supprimer s'ils sont dans un plus grand
+local toRemove = {}
+for i = 1, #impacts do
+    local A = impacts[i]
+    for j = 1, #impacts do
+        local B = impacts[j]
+        if i ~= j and B.radius < A.radius and not toRemove[B.name] then
+            local dist = GetDistance({x=A.x, y=A.z}, {x=B.x, y=B.z})
+            if dist <= A.radius then
+                toRemove[B.name] = true
+            end
+        end
+    end
+end
+
+-- 4. Suppression effective
+for name, _ in pairs(toRemove) do
+    -- print("DC_UpdateScen_A2 (-) delete from BOMB_FUSED name "..name)
+    oob_scen[name] = nil
+end
+
+
+
 for targetSide, targets in pairs(targetlist) do
 	for targetN, target in pairs(targets) do
-		if target.class and target.class == "MapObject" then
-			if target.dead then
-				if camp.targetPos[target.x] then
-					oob_scen[target.name] = {
-						x = target.x,
-						y = target.y,
-						lifePourcent = 0,
-						scenaryName = target.name,
-					}
-				end
-			else
+		if target.elements then
+			for elementN, element in pairs(target.elements) do
+				
+				if element.class and element.class == "MapObject" and element.dead and not oob_scen[element.name] then
+					
+					-- print("DC_UpdateScen_B4a (+) add MapObject scen "..element.name)
 
-				for oob_scenN, scen in pairs(oob_scen) do
-					if scen.x and scen.y then
-						local dist = GetDistance({x=target.x, y=target.y}, {x=scen.x, y=scen.y})
-						if dist < 50 then
-							oob_scen[oob_scenN] = nil									--remove target from oob_scen table if it is close to a target that is not dead
+					oob_scen[element.name] = {
+						x = element.x,
+						z = element.y,
+						lifePourcent = 0,
+						scenaryName = element.name,
+						sceneryTypeName = element.name,
+						event = "FROM_targetlist_MapObject",
+					}
+
+
+					for oob_scenN, scen in pairs(oob_scen) do
+						if scen.x and scen.y then
+							local dist = GetDistance({x=element.x, y=element.y}, {x=scen.x, y=scen.z})
+							if dist < 50 then
+								
+								-- print("DC_UpdateScen_B5 (-) delete PROXY scen "..tostring(scen.sceneryTypeName))
+								
+								oob_scen[oob_scenN] = nil									--remove target from oob_scen table if it is close to a target that is not dead							
+							end
 						end
 					end
+
 				end
 			end
 		end

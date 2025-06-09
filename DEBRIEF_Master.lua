@@ -93,9 +93,9 @@ local SARExport
 
 --zoneSAR = {
 local zoneSARFile = "zoneSAR.lua"
-local TestPath = io.open(zoneSARFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
-if TestPath ~= nil then																					--check si le fichier existe dans ScriptsMod
-	io.close(TestPath)
+local testPath = io.open(zoneSARFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
+if testPath ~= nil then																					--check si le fichier existe dans ScriptsMod
+	io.close(testPath)
 	SARExport = loadfile("zoneSAR.lua")()														--zoneSAR
 end
 
@@ -319,6 +319,7 @@ dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 
 --run log evaluation and status updates
 dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_StatsEvaluation.lua")
+dofile("Active/oob_scen.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
 
 --create and view Debriefing file for mission

@@ -127,6 +127,7 @@ end
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
 
+dofile("Active/oob_scen.lua")
 
 --****************************************************************************************
 --ajout automatique d'elements en cours de campagne: START

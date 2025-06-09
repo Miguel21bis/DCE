@@ -145,27 +145,37 @@ for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed 
 			isForest = true
 		end
 	
-		local addToMission = false
 		local txDestruction = 0
-		if scen.lifePourcent and not isForest then
-			if scen.lifePourcent <= MinPercentDestroyed then
-				addToMission = true
-				txDestruction = 100 - scen.lifePourcent -- taux de destruction = 100 - pourcentage de vie
-			else
-				oob_scen[scen_name] = nil
-			end
-		else
-			-- addToMission = true
-		end
+		local radius = 25
 
-		if addToMission  then
+        if scen.explosiveMass then
+            -- Calcul du rayon de destruction total (en mètres) selon la masse d'explosif (TNT)
+            local k = 8 -- coefficient empirique pour destruction totale
+            radius = math.floor(k * (scen.explosiveMass)^(1/3))
+            -- print("Destruction totale pour "..tostring(scen_name).." : rayon = "..radius.." m (masse TNT = "..scen.explosiveMass.." kg)")
+        end
+
+		-- local addToMission = false
+
+		-- if scen.lifePourcent and not isForest then
+		-- 	if scen.lifePourcent <= MinPercentDestroyed then
+		-- 		addToMission = true
+		-- 		txDestruction = 100 - scen.lifePourcent -- taux de destruction = 100 - pourcentage de vie
+		-- 	else
+		-- 		oob_scen[scen_name] = nil
+		-- 	end
+		-- else
+		-- 	-- addToMission = true
+		-- end
+
+		if not isForest  then
 			local zones_n = #mission.triggers.zones	+ 1									--trigger zone number
 
 			--add trigger zone
 			mission.triggers.zones[zones_n] = {
 				["x"] = scen.x,
 				["y"] = scen.z,
-				["radius"] = 1,
+				["radius"] = radius,
 				["zoneId"] = zones_n,
 				["color"] =
 				{

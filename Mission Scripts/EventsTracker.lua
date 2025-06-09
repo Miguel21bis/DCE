@@ -25,6 +25,8 @@ versionDCE["Mission Scripts/EventsTracker.lua"] = "1.13.76"
 
 env.info("DCE_EventT START LOADING EventsTracker.lua "..tostring(versionDCE["Mission Scripts/EventsTracker.lua"]))
 
+env.info("DCE_EventT env.mission.theatre?: "..tostring(env.mission.theatre ))
+
 _affiche(world.event, "DCE_EventT world.event ")
 
 Info_event_C = {}
@@ -572,15 +574,11 @@ function eventHandlerDCE:onEvent(event)
 	if camp.debug then
 		if event and event.id then
 			if Info_event then
-
 				if Info_event[tonumber(event.id)] then
 					local idLabel = tostring(Info_event[tonumber(event.id)])
-
 					env.info("DCE_EventsTracker event.id "..tostring(event.id).." " ..idLabel)
-
 				else
 					env.info("DCE_EventsTracker this is a  NEW ID "..tostring(event.id))
-
 				end
 			end
 		end
@@ -615,20 +613,23 @@ function eventHandlerDCE:onEvent(event)
             if #recent >= BDA_THRESHOLD then
                 trigger.action.outText("BDA FLOOD détecté : " .. #recent .. " événements en " .. BDA_WINDOW .. "s", 20)
                 env.info("[BDA-FLOOD B] Seuil atteint : " .. #recent)
-                -- Ici tu peux ajouter une action, par exemple stopper la mission ou loguer plus fort
-
+                
 				local tgt = event.target
 				
 				if tgt then
 
 					local tgtName = tgt.getName and tgt:getName() or "unknown"
 					
-					trigger.action.outText("BDA flood détecté tgtName : " .. tgtName ..  " supprimés", 20)
-					env.info("[BDA-FLOOD C]BDA flood détecté tgtName : " .. tgtName ..  " supprimés")
+					trigger.action.outText("BDA flood détecté tgtName : " .. tgtName ..  " sera upprimé", 20)
+					env.info("[BDA-FLOOD C]BDA flood détecté tgtName : " .. tgtName ..  "  sera upprimé")
 
-					if tgt and tgt.isExist then 
+					local isPlayer = tgt.getPlayerName and tgt:getPlayerName()
+
+					if tgt and tgt.isExist and not isPlayer then
 						if tgt:isExist() then tgt:destroy() end
 						env.info("[BDA-FLOOD C]BDA flood détecté tgtName : " .. tgtName ..  " supprimés OK")
+					elseif isPlayer then
+						env.info("[BDA-FLOOD C]BDA flood détecté mais la cible est un joueur : " .. isPlayer ..  " ne sera pas supprimé")
 					end
 				end
 
@@ -637,12 +638,16 @@ function eventHandlerDCE:onEvent(event)
 
 					local initName = init.getName and init:getName() or "unknown"
 
-					trigger.action.outText("BDA flood détecté initName: "  .. initName .. " supprimés", 20)
-					env.info("[BDA-FLOOD C]BDA flood détecté initName: " .. initName .. " supprimés")
+					trigger.action.outText("BDA flood détecté initName: "  .. initName .. " supprimé", 20)
+					env.info("[BDA-FLOOD C]BDA flood détecté initName: " .. initName .. " supprimé")
 
-					if init and init.isExist then 
+					local isPlayer = tgt.getPlayerName and tgt:getPlayerName()
+
+					if init and init.isExist and not isPlayer then
 						if init:isExist()  then init:destroy() end
 						env.info("[BDA-FLOOD C]BDA flood détecté initName : " .. initName ..  " supprimés OK")
+					elseif isPlayer then
+						env.info("[BDA-FLOOD C]BDA flood détecté mais l initiateur est un joueur : " .. isPlayer ..  " ne sera pas supprimé")
 					end
 
 					
@@ -1011,13 +1016,12 @@ function eventHandlerDCE:onEvent(event)
 						-- trigger.action.outText("EvenT:  createdSoldier? SurfaceType? "..tostring(selectedEjection.SurfaceType), 30)
 
 
-
 						local distanceBase, baseName = ProxyBase(selectedEjection)
 
 						if distanceBase then
-								distanceBase = math.floor(distanceBase)
-							else
-								distanceBase = 0
+							distanceBase = math.floor(distanceBase)
+						else
+							distanceBase = 0
 						end
 
 						env.info("DCE_EvenT: pilotLand_C G baseName "..tostring(baseName).." distanceBase "..tostring(distanceBase))
@@ -1093,7 +1097,6 @@ function eventHandlerDCE:onEvent(event)
 					-- }
 					-- if event.place:getCategory() == Airbase.Category.SHIP    and not event.initiator:getPlayerName() then 
 					if not playerName then
-						
 						
 						if env.mission.theatre ~= "Kola" then
 							if placeDesc.category == Airbase.Category.SHIP then 											-- category ship
@@ -1174,19 +1177,12 @@ function eventHandlerDCE:onEvent(event)
 
 			if event.initiator and initiatorObjCategory ~= 0 then																													--event has an initiator	
 
-				-- if event and event.id and Info_event and Info_event[tonumber(event.id)] then
-				-- 	local idLabel = tostring(Info_event[tonumber(event.id)])
-				-- end
-
 				local initDesc = event.initiator:getDesc()
 				if event.initiator.getName then
 					log_entry.initiator = event.initiator:getName()
 				end
-				-- if initDesc.displayName then
-				-- 	log_entry.initiator = event.initiator:getName()
-				-- end
-
-				if initiatorObjCategory == Object.Category.UNIT  then										--initiator is a unit debug_ET01.h
+				
+				if initiatorObjCategory == Object.Category.UNIT then										--initiator is a unit debug_ET01.h
 
 					local unitCat = initDesc.category
 					log_entry.initiatorPilotName = event.initiator:getPlayerName()
@@ -1988,17 +1984,14 @@ local function despawnIA()
 
 	for n = 1, #despawn do
 
-		-- _affiche(despawn, "DCE_despawn")
-
 		env.info("DCE_try despawn "..n)
-		-- trigger.action.outText("despawn "..n, 3)
-		if despawn[n]:isExist() then
+		if despawn[n].isExist and despawn[n]:isExist() then
 			despawn[n]:destroy()
-			-- trigger.action.outText("despawn "..n, 30)
-			-- env.info("DCE_despawn "..n)
 			env.info("DCE_despawnIA despawn/destroy "..n)
 		end
-			reset = true
+
+		reset = true
+		
 	end
 
 	if reset then
