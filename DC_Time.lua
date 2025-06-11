@@ -54,7 +54,7 @@ if camp.timeJump and (MissionInstance and MissionInstance <= 1) then
 		idle_time = math.random(0,23) * 3600
 	end
 
-	print("DcIme A1 idle_time: ".. tostring(idle_time))
+	print("DcIme A1 timeJump: idle_time: ".. tostring(idle_time))
 elseif not camp.timeJump or (MissionInstance and MissionInstance >= 1) then
 	idle_time = mission_ini.mission_duration + math.random(mission_ini.idle_time_min, mission_ini.idle_time_max)
 	print("DcIme A2 idle_time: ".. tostring(idle_time))

@@ -63,6 +63,8 @@ dofile("Init/conf_mod.lua")
 dofile("Active/camp_status.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 
+camp.timeJump = nil
+
 if mission_ini.current_date and mission_ini.current_date.year then
 
 
@@ -71,13 +73,14 @@ if mission_ini.current_date and mission_ini.current_date.year then
 	if camp.date.day ~= mission_ini.current_date.day or camp.date.month ~= mission_ini.current_date.month or camp.date.year ~= mission_ini.current_date.year then
 		
 		if Debug.debug then
-			print("Jump date from conf_mod: ")
+			print("jumpTimeA = true : date from conf_mod: ")
 			_affiche(mission_ini.current_date, "mission_ini.current_date")
 			_affiche(camp.date, "camp.date")
 		end
 		
 		jumpDate = Deepcopy(camp.date)
 		jumpTime = true
+
 	end
 
 	camp.date = mission_ini.current_date
@@ -117,6 +120,11 @@ if mission_ini.current_date and mission_ini.current_date.year then
 
 		if diffTime > mission_ini.mission_duration + mission_ini.idle_time_max then
 			camp.timeJump = true
+			if Debug.debug then
+				_affiche(camp.timeJump, "camp.timeJump")
+				_affiche(camp.timeJump, "camp.timeJump")
+				print("jumpTimeB = true  detected: "..FormatTime(diffTime, "hh:mm").." since last mission.")
+			end
 		end
 	end
 end

@@ -1503,7 +1503,14 @@ local function bingo(gpGid, groupMission)
 				BingoPlaneTab[gpGid][callSign] = true																	-- la callSign � d�ja indiqu� qu'il �tait Bingo
 
 
-				local report = " not humainUnit "
+				local humainUnit
+				if unit and unit.getPlayerName then
+					humainUnit = unit:getPlayerName()
+				end
+				local unitName =  unit:getName()
+				local actualPos = unit:getPoint()
+				
+				local report = " is humainUnit?:  "..tostring(humainUnit)
 				-- local cntrl = unit:getController()
 				local cntrl
 
@@ -1516,7 +1523,6 @@ local function bingo(gpGid, groupMission)
 
 				report = report.." RTB_ON_BINGO & PROHIBIT_AB "
 
-				local unitName =  unit:getName()
 				env.info( "DCE_Bingo CC      report "..tostring(groupMission.id_).." "..tostring(unitName).." "..callSign.." report "..tostring(report) )
 
 				-- local description = unit:getDesc()
@@ -1538,21 +1544,48 @@ local function bingo(gpGid, groupMission)
 
 									rtbGroup.name = _group.name
 
-									--Split
-									for key, value in ipairs(_group.route.points) do
-										if value.name == 'Split' then
-											rtbGroup.to = key
-											rtbGroup.from = key - 1
+									--le wpt le plus proche de l'unit
+									local existIP = 0
+									local wptN_closest = #_group.route.points - 1
+									local closestPoint = 99999999
+									for wptN, wpt in ipairs(_group.route.points) do
+										if wpt.name == 'IP' then
+											existIP = wptN
+											closestPoint = 99999999
+											env.info( "DCE_Bingo D1  passIP existIP: "..tostring(existIP))
+										end
+										--on essai de passer le point IP et le target
+										if existIP > 0 and wptN < existIP + 2 then
+											closestPoint = 99999999
+											env.info( "DCE_Bingo D2  existIP: "..tostring(existIP).." wptN : "..tostring(wptN).." < "..tostring(existIP+2))
+										end
+										local distance  = GetDistance({x=actualPos.x, y=actualPos.z}, {x=wpt.x, y=wpt.y})
+										if distance < closestPoint then
+											closestPoint = distance
+											wptN_closest = wptN
+											env.info( "DCE_Bingo D1  wptN_closest: "..tostring(wptN_closest).." closestPoint: "..tostring(closestPoint))
 										end
 									end
 
-									if rtbGroup.to == 0 then
-										for key, value in ipairs(_group.route.points) do
-											if value.type == 'Land' then
-												rtbGroup.to = key
-												rtbGroup.from = key - 1
-											end
+									rtbGroup.from = wptN_closest
+
+									-- --Split
+									-- for key, value in ipairs(_group.route.points) do
+									-- 	if value.name == 'Split' then
+									-- 		rtbGroup.from = key
+									-- 	end
+									-- end
+
+									
+									for key, value in ipairs(_group.route.points) do
+										if value.type == 'Land' then
+											rtbGroup.to = key
 										end
+									end
+									
+
+									if rtbGroup.to == 0 then
+										rtbGroup.to = #_group.route.points
 									end
 
 									breaktab = true
@@ -1596,7 +1629,7 @@ local function bingo(gpGid, groupMission)
 						--OptionName.RTB_ON_BINGO
 
 
-					env.info( "DCE_Bingo EE        goToWaypointIndex "..tostring(unitName).." "..callSign.." goToWaypointIndex "..tostring(rtbGroup.to) )
+					env.info( "DCE_Bingo EE        SwitchWaypoint "..tostring(unitName).." "..callSign.." |from: "..tostring(rtbGroup.from).." |to: "..tostring(rtbGroup.to) )
 					-- _affiche(switchtask, "switchtask function bingo()")
 				end
 			end
