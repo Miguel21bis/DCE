@@ -69,17 +69,17 @@ if mission_ini.current_date and mission_ini.current_date.year then
 
 
 	local jumpDate
-	local jumpTime = false
+	-- local jumpTime = false
 	if camp.date.day ~= mission_ini.current_date.day or camp.date.month ~= mission_ini.current_date.month or camp.date.year ~= mission_ini.current_date.year then
 		
+		jumpDate = Deepcopy(camp.date)
+		camp.timeJump = true
+
 		if Debug.debug then
-			print("jumpTimeA = true : date from conf_mod: ")
+			print("jumpTimeA : "..tostring(camp.timeJump))
 			_affiche(mission_ini.current_date, "mission_ini.current_date")
 			_affiche(camp.date, "camp.date")
 		end
-		
-		jumpDate = Deepcopy(camp.date)
-		jumpTime = true
 
 	end
 
@@ -101,7 +101,7 @@ if mission_ini.current_date and mission_ini.current_date.year then
 	CampTotalTimeS = os.difftime(actualTime, referenceTime) --/ (24 * 60 * 60) -- seconds in a day
 
 	-- if camp.missionHistory and camp.missionHistory[camp.mission] then
-	if jumpTime then
+	if camp.timeJump then
 
 		local aliasJumpYear = jumpDate.year
 		if aliasJumpYear < 1970 then
@@ -119,10 +119,8 @@ if mission_ini.current_date and mission_ini.current_date.year then
 		local diffTime = os.difftime(actualTime, referenceTime) --/ (24 * 60 * 60) -- seconds in a day
 
 		if diffTime > mission_ini.mission_duration + mission_ini.idle_time_max then
-			camp.timeJump = true
+			-- camp.timeJump = true
 			if Debug.debug then
-				_affiche(camp.timeJump, "camp.timeJump")
-				_affiche(camp.timeJump, "camp.timeJump")
 				print("jumpTimeB = true  detected: "..FormatTime(diffTime, "hh:mm").." since last mission.")
 			end
 		end
