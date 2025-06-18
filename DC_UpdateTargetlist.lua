@@ -810,7 +810,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 							local temp = {x=0,y=0,class=""}
 							temp.x, temp.y, temp.class = checkElementXY(element, targetside)
 
-							if temp.x == nil then
+							if temp.x == nil and element.name then
 								local elementTMP = Deepcopy(element)
 								elementTMP.name = elementTMP.name.."-1"
 								temp.x, temp.y, temp.class = checkElementXY(elementTMP, targetside)

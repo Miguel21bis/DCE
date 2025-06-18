@@ -105,9 +105,6 @@ zipFile:unzLocateFile('l10n/DEFAULT/mapResource')
 local resStr = zipFile:unzReadAllCurrentFile()
 loadstring(resStr)()
 local oldMapResource = Deepcopy(mapResource)
--- _affiche(resStr, "MainNM resStr ")
--- _affiche(mapResource, "MainNM mapResource ")
--- os.execute 'pause'
 
 zipFile:unzClose()
 
@@ -132,9 +129,9 @@ mission.trig.actions[trig_n] = ""
 mission.trig.func[trig_n] = "if mission.trig.conditions["..trig_n.."]() then mission.trig.actions["..trig_n.."]() end"
 mission.trigrules[trig_n] = {
 	-- ["rules"] = {},
-	["rules"] = 
+	["rules"] =
 		{
-			[1] = 
+			[1] =
 			{
 				["predicate"] = "c_time_after",
 				["seconds"] = 300,
@@ -149,20 +146,19 @@ mission.trigrules[trig_n] = {
 
 --attention, ne pas activer ici oob_scen, sinon cela ne prend pas en compte son update
 -- require("Active/oob_scen")
+
+if not oob_scen and Firstmission_flag then
+	require("Active/oob_scen")
+end
 for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed scenery objects
-	
-	-- if scen_name == "227402185" then
-	-- 	_affiche(scen, "MainNM scen 227402185") --debug
-	-- 	os.execute('pause') --debug
-	-- end
-	
+
 	if scen.x and scen.z then														--destroyed scenery object has x and z coordinates
-	
+
 		local isForest = false
 		if scen.sceneryTypeName and string.find(scen.sceneryTypeName, "FOREST")  then
 			isForest = true
 		end
-	
+
 		local txDestruction = 100
 		local radius = 12
 
@@ -1225,7 +1221,7 @@ if Debug.allUnhide then
 								group.hidden = false
 							end
 
-						end	
+						end
 					end
 				end
 			end
@@ -1245,7 +1241,7 @@ for side_name, side in pairs(mission.coalition) do
 							if group.route.points[1].task.params.tasks then
 								for taskN, task in ipairs(group.route.points[1].task.params.tasks) do
 									if task.params and task.params.action and task.params.action.id and task.params.action.id == "TransmitMessage" then
-										
+
 										if oldMapResource[task.params.action.params.file] == "beacon.ogg" then
 											mission.maxDictId = mission.maxDictId + 1
 											task.params.action.params.subtitle = "DictKey_subtitle_"..mission.maxDictId
@@ -1256,7 +1252,7 @@ for side_name, side in pairs(mission.coalition) do
 
 											mapResource["ResKey_advancedFile_" .. mission.maxDictId] = "beacon.ogg"
 
-											
+
 										else
 											--garde le nom du fichier autre que beacon
 											local tempOldFile = Deepcopy(oldMapResource[task.params.action.params.file])
@@ -1405,14 +1401,14 @@ for filename, content in pairs(existing_files) do
             -- miz:zipAddFileFromString(filename, content)
         else
             -- Extraire uniquement le nom du fichier (supprimer "l10n/DEFAULT/")
-            local temp_filename = filename:match("[^/]+$")  
+            local temp_filename = filename:match("[^/]+$")
 
             -- Écrire dans le répertoire courant
-            local temp_file = io.open(temp_filename, "wb")  
+            local temp_file = io.open(temp_filename, "wb")
             if temp_file then
                 temp_file:write(content)
                 temp_file:close()
-                
+
                 -- Ajouter au fichier .miz avec son chemin original
                 miz:zipAddFile(filename, temp_filename)
 
@@ -1634,7 +1630,7 @@ if camp_ZoneSAR then
 end
 
 
-			
+
 camp.timeJump = false
 
 

@@ -63,6 +63,21 @@ dofile("Init/conf_mod.lua")
 dofile("Active/camp_status.lua")
 dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
 
+
+UpdateConfMod()
+
+if not camp.dateInit then
+	local tempCamp = camp
+	dofile("Init/camp_init.lua")
+	local campInit =  Deepcopy(camp)
+	camp = tempCamp
+	camp.dateInit = {
+		day = campInit.date.day,
+		year = campInit.date.year,
+		month = campInit.date.month,
+	}
+end
+
 camp.timeJump = nil
 
 if mission_ini.current_date and mission_ini.current_date.year then

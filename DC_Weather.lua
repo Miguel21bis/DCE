@@ -15,7 +15,7 @@ versionDCE["DC_Weather.lua"] = "1.6.24"
 ------------------------------------------------------------------------------------------------------- 
 
 
-local debugWeather = true
+local debugWeather = false
 
 
 
@@ -104,7 +104,7 @@ end
 	-- 		["day"] = 20,
 	-- 	},
 	-- },
-	
+
 -- si le temps passé est supérieur à 3 fois ce qui etait convenu, on recommence à 0
 if elapsed_time and camp.weather.zoneEnd and elapsed_time > camp.weather.zoneEnd then
 	local deltaTime = elapsed_time - camp.weather.zoneEnd
@@ -113,7 +113,7 @@ if elapsed_time and camp.weather.zoneEnd and elapsed_time > camp.weather.zoneEnd
 	if camp.missionHistory and camp.missionHistory[camp.mission-1] then
 		local deltaNexTime = camp.weather.zoneEnd - camp.missionHistory[camp.mission-1]["CampTotalTimeS"]
 		if debugWeather then print("DcW A12 deltaNexTime "..tostring(deltaNexTime).."deltaNexTime *3 "..tostring(deltaNexTime *3)) end
-		
+
 		if deltaTime > (deltaNexTime *3 ) then
 			if debugWeather then print("DcW A13 deltaTime *3: "..tostring(deltaNexTime *3)) end
 			camp.weather.zone = nil
@@ -1580,7 +1580,7 @@ elseif camp.weather.zone == "low front warm" then
 	if dens > 10 then
 		dens = 10
 	end
-	
+
 	-- local conversionDens = math.ceil((0.77777777777778 * dens) + 0.22222222222222)
 	-- local presetCompatible = {}
 	-- local maxloop = 1
@@ -2487,7 +2487,7 @@ if debugWeather then
 	print("remain "..remain)
 	print()
 	_affiche(camp.date, "camp.date FINAL: ")
-	
+
 	_affiche(camp.weather, "camp.weather FINAL: ")
 
 	_affiche(mission.weather, "mission.weather: ")

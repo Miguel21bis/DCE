@@ -618,7 +618,7 @@ Action = {}
 
 	end
 
-	
+
 
 	--set unit active/inactive
 	function Action.AirUnitActive(unitName, state)
@@ -1188,7 +1188,7 @@ Action = {}
 
 
 	function Action.UnitResuscitateOrKill(targettName, liveOrKill, liveValue)
-	
+
 		-- print()
 		-- print("DcCT UnitResuscitateOrKill A0 check Target:  ... "..tostring(targettName) )
 
@@ -1200,7 +1200,7 @@ Action = {}
 			if side_name == "red" then
 				groundside = "blue"
 			end
-			
+
 			for targetN, target in pairs(targets) do
 
 				-- print("DcCT UnitResuscitateOrKill A1 target.name:  ... "..tostring(target.name).." ==? "..tostring(targettName) )
@@ -1213,13 +1213,13 @@ Action = {}
 
 					--dans le cas d'un ressucitage :
 					if liveOrKill == true then
-				
-						
+
+
 						-- if target.attributes then 
 						-- 	for attributN, attributName in pairs(target.attributes) do
 						-- 		-- print("DcCT A    attributName ... "..tostring(attributName) )
 						-- 		attributName = string.lower(attributName)
-								
+
 						-- 		if Attribut2Target[attributName] then
 						-- 			attribut = Attribut2Target[attributName]
 						-- 			-- print("DcCT B    ASSIGN attribut ... "..tostring(attribut) )
@@ -1230,17 +1230,17 @@ Action = {}
 						-- 		for attributN, attributName in pairs(target.attributes) do
 						-- 			-- print("DcCT C    attributName ... "..tostring(attributName) )
 						-- 			attributName = string.lower(attributName)
-									
+
 						-- 			for key , correspondanceName in pairs(Attribut2Target) do
 						-- 				-- print("DcCT D    attributName ... "..tostring(attributName) )
-										
+
 						-- 				if string.match(correspondanceName, attributName) then
 						-- 					attribut = correspondanceName
 						-- 					-- print("DcCT E    FOUND attribut ... "..tostring(attribut) )
 						-- 					break
 						-- 				end
 						-- 			end
-			
+
 						-- 		end
 						-- 	end
 						-- end	
@@ -1257,7 +1257,7 @@ Action = {}
 
 								local nbRessucitatMax = math.floor(#target.elements * liveValue/100)
 								local nbLiving = 0
-								
+
 								--calcul le nb de mort à ressuciter
 								for e = 1, #target.elements do
 									if not target.elements[e].dead  then
@@ -1272,15 +1272,15 @@ Action = {}
 									local forcedReAlive = false
 
 									if target.elements[e].dead then
-							
+
 										nbRessucitatMax = nbRessucitatMax - 1
-										
+
 										if nbRessucitatMax < 0 then
 											break
 										end
-									
+
 										forcedReAlive = true
-									
+
 										local text = "" .. target.elements[e].name .. " from ".. target.titleName .. " have been repaired and returned back to service. \n \n"
 
 										if Debug.AfficheSol or debugKT then
@@ -1297,7 +1297,7 @@ Action = {}
 
 										target.elements[e].dead = nil
 										target.elements[e].CheckDay = nil
-										
+
 										target.alive = math.floor(target.alive + (1/#target.elements *100))
 										if target.alive > 100 then  target.alive = 100 end
 
@@ -1308,7 +1308,7 @@ Action = {}
 										target.alive_last = math.floor(target.alive_last -  (1/#target.elements *100))
 										if target.alive_last < 0 then  target.alive_last = 0 end
 
-								
+
 									end
 
 									if forcedReAlive then
@@ -1336,7 +1336,7 @@ Action = {}
 													end
 													if endfunction then  break end
 												end
-												if endfunction then break end	
+												if endfunction then break end
 											end
 											if endfunction then  break end
 										end
@@ -1373,7 +1373,7 @@ Action = {}
 											end
 											if endfunction then  break end
 										end
-										if endfunction then break end	
+										if endfunction then break end
 									end
 									if endfunction then  break end
 								end
@@ -1387,7 +1387,7 @@ Action = {}
 				if foundTarget then return end
 			end
 		end
-	end	
+	end
 
 
 	-- Miguel21 modification M19.f : Repair Ground
@@ -1400,9 +1400,9 @@ Action = {}
 			end
 
 			for targetN, target in pairs(targets) do
-				
-				local attribut 
-				if target.attributes then 
+
+				local attribut
+				if target.attributes then
 					for attributN, attributName in pairs(target.attributes) do
 						attributName = string.lower(attributName)
 						if Attribut2Target[attributName] then
@@ -1419,14 +1419,14 @@ Action = {}
 									break
 								end
 							end
-	
+
 						end
 					end
 				end
 				if not attribut then
 					attribut = "generic"
 				end
-				
+
 				local minimumRepairThreshold = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][1]
 
 				local repairChance = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][4]
@@ -1462,10 +1462,10 @@ Action = {}
 
 										-- Boucle sur chaque intervalle de réparation entre CheckDay et maintenant
 										while lastCheck + repairInterval <= CampTotalTimeS do
-											
+
 											lastCheck = lastCheck + repairInterval
 											local test_prob = math.random(1,100)
-											
+
 											if test_prob <= repairChance then
 												forcedReAlive = true
 												temp_dead = nil
@@ -1473,7 +1473,7 @@ Action = {}
 												temp_CheckDay = nil
 
 												local text = "" .. target.elements[e].name .. " from ".. target.titleName .. " have been repaired and returned back to service. \n \n"
-												
+
 												if side_name == "blue" then
 													Briefing_oob_text_blue = Briefing_oob_text_blue .. text
 												elseif side_name == "red" then
@@ -1503,10 +1503,10 @@ Action = {}
 								local endfunction = false
 								for c = 1, #oob_ground[groundside] do
 									for class ,typetable in pairs(oob_ground[groundside][c]) do
-										
+
 										if class == "vehicle" or class == "ship" or class == "static" then
 												for group_n,group in pairs(typetable.group) do
-													for unit_n,unit in pairs(group.units) do	
+													for unit_n,unit in pairs(group.units) do
 														if  target.elements[e].name == unit.name then
 
 															if Debug.AfficheSol then
@@ -1535,12 +1535,12 @@ Action = {}
 
 
 					-- elseif attibut == "RUNWAY" and target.alive  and  target.alive < 100 and target.alive > campMod.RepairBaseMinimumDestroyed and  target.CheckDay then
-					elseif attribut == "runway" and target.alive and target.alive < 100 and target.alive > campMod.RepairOption[DCS_ENI_Side[side_name]]["airbase"][1] and target.CheckDay then 
+					elseif attribut == "runway" and target.alive and target.alive < 100 and target.alive > campMod.RepairOption[DCS_ENI_Side[side_name]]["airbase"][1] and target.CheckDay then
 						local oldVAlive = target.alive
 						if CampTotalTimeS >= target.CheckDay + 3600 then
-							
+
 							local repairRunwayPerDay = campMod.RepairOption[DCS_ENI_Side[side_name]]["runway"][5]
-							
+
 							if db_airbases[target.db_airbaseName] and db_airbases[target.db_airbaseName].customRepairRunwayPerDay then
 								repairRunwayPerDay = db_airbases[target.db_airbaseName].customRepairRunwayPerDay
 							end
@@ -1793,20 +1793,20 @@ Action = {}
 		-- restricted_loadout.miz
 
 		-- local missionFromBaseMission = mission  -- Sauvegarde la mission principale
-	
+
 		local PayloadRestricted = {}
-	
+
 		local restrictedPath = "Loadouts/" .. file
 		local testPath = io.open(restrictedPath, "r")
-	
+
 		if testPath ~= nil then
 			io.close(testPath)
 
 			local zipFileResticted = minizip.unzOpen(restrictedPath, 'rb')
-	
+
 			zipFileResticted:unzLocateFile('mission')
 			local misRestricted = zipFileResticted:unzReadAllCurrentFile()
-	
+
 			-- Création d'un environnement vide pour éviter d'écraser `mission`
 			local env = {}
 			local func = loadstring(misRestricted)
@@ -1814,7 +1814,7 @@ Action = {}
 				setfenv(func, env) -- Exécute dans un environnement isolé
 				func()
 			end
-	
+
 			-- La mission extraite est maintenant stockée dans env.mission
 			if env.mission then
 				for _side, side in pairs(env.mission.coalition) do
@@ -1833,10 +1833,10 @@ Action = {}
 					end
 				end
 			end
-	
+
 			-- La mission principale reste inchangée, inutile de la restaurer
 			-- mission = missionFromBaseMission  <-- Plus besoin !
-	
+
 			-- Sérialisation des restrictions et sauvegarde dans un fichier
 			local data_str = "PayloadRestricted = " .. TableSerialization(PayloadRestricted, 0)
 			local dataFile = io.open("Active/PayloadRestricted.lua", "w") or error("Failed to open debug file")
@@ -1846,7 +1846,7 @@ Action = {}
 		end
 
 	end
-	
+
 
 	--Miguel21 modification M40
 	--TemplateActive
@@ -2339,34 +2339,39 @@ Briefing_text_playable = ""														--briefing text to be added only if thi
 
 --go through campaign triggers
 for trigger_name,trigger in pairs(camp_triggers) do								--iterate through triggers
-	
-if debugKT then print("DcCT passe 00 trigger_name: "..tostring(trigger_name)) end
-	
-	if trigger.active then														--trigger is active
-		
-		if debugKT then print("DcCT passe 01 if trigger.active: trigger.condition: "..tostring(trigger.condition)) end
-		
-		local condition = loadstring("if " .. trigger.condition .." then return true end")	--make a function from the string condition
-		if type(condition) == "function" and condition() then														--if the trigger condition is true
-			
-		if debugKT then print(" -> :DcCT passe 02 passe  condition()trigger_name: "..tostring(trigger_name)) end
-			
-			if type(trigger.action) == "table" then								--multiple actions
-				for i,action in ipairs(trigger.action) do
-					if debugKT then print(" 	---> : "..tostring(trigger.action[i])) end
-					local f = loadstring(action)()								--run the trigger action
+
+	if debugKT then print("DcCT passe 00 trigger_name: "..tostring(trigger_name)) end
+
+		if trigger.active then														--trigger is active
+
+			if debugKT then print("DcCT passe 01 if trigger.active: trigger.condition: "..tostring(trigger.condition)) end
+
+			local conditionStr = trigger.condition
+			-- Remplace campMod.RepairMinimumDestroyed par une valeur numérique (exemple : 20)
+			conditionStr = string.gsub(conditionStr, "campMod.RepairMinimumDestroyed", "20")
+
+
+			local condition = loadstring("if " .. conditionStr .." then return true end")	--make a function from the string condition
+			if type(condition) == "function" and condition() then														--if the trigger condition is true
+
+			if debugKT then print(" -> :DcCT passe 02 passe  condition()trigger_name: "..tostring(trigger_name)) end
+
+				if type(trigger.action) == "table" then								--multiple actions
+					for i,action in ipairs(trigger.action) do
+						if debugKT then print(" 	---> : "..tostring(trigger.action[i])) end
+						local f = loadstring(action)()								--run the trigger action
+					end
+				else																--single action
+					if debugKT then print(" 	---> : "..tostring(trigger.action)) end
+					local f = loadstring(trigger.action)()							--run the trigger action
 				end
-			else																--single action
-				if debugKT then print(" 	---> : "..tostring(trigger.action)) end
-				local f = loadstring(trigger.action)()							--run the trigger action
+				if trigger.once then												--trigger should only fire once
+					trigger.active = false											--set trigger inactive
+				end
+
 			end
-			if trigger.once then												--trigger should only fire once
-				trigger.active = false											--set trigger inactive
-			end
-			
 		end
 	end
-end
 
 
 -- if debugKT then print("camp.automaticReinforce "..tostring(CampTotalTimeS).." >=? "..tostring(camp.automaticReinforce).." + "..tostring(campMod.airReinforceDelay).." *3600?".." cad: "..(camp.automaticReinforce + (campMod.airReinforceDelay * 3600))) end
@@ -2455,7 +2460,7 @@ for baseName, base in pairs(db_airbases) do
 	--base détruite
 
 	if base.side then
-	
+
 		local baseDeathPoint = campMod.RepairOption[base.side]["airbase"][1]
 		local runwayDeathPoint = campMod.RepairOption[base.side]["runway"][2]
 		local runwayOk = campMod.RepairOption[base.side]["runway"][6]

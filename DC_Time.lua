@@ -13,33 +13,24 @@ versionDCE["DC_Time.lua"] = "1.6.18"
 -- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
 -- modification M25_b 		onlyDayMission.
 ------------------------------------------------------------------------------------------------------- 
+---
 --Global variable:
---determine mission time of day
 Daytime	= ""																					--variable what Daytime the is covered in the duration of the mission
 
 --local variable:
 local actualTime
--- local daysfrom
--- local hoursFrom
 local referenceTime
 local idle_time = 0
 local overnightTime = 0
 
-print("DcIme 0a Current date : " ..FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year )
-
--- if camp.mission > 1 and mission_ini.current_date and mission_ini.current_date.year then
--- 	camp.date.day = mission_ini.current_date.day
--- 	camp.date.month = mission_ini.current_date.month
--- 	camp.date.year = mission_ini.current_date.year
--- 	print("DcIme 0b Current date set to: " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year.." time: "..camp.time)
--- end
+-- print("DcIme 0a Current date : " ..FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year )
 
 --campaign day counter
 if camp.day == nil then
 	camp.day = 1
 end
 
-print("DcIme A camp.timeJump:? ".. tostring(camp.timeJump).." Mission.MissionInstance: "..camp.mission..".".. tostring(MissionInstance))
+-- print("DcIme A camp.timeJump:? ".. tostring(camp.timeJump).." Mission.MissionInstance: "..camp.mission..".".. tostring(MissionInstance))
 
 if camp.timeJump and (MissionInstance and MissionInstance <= 1) then
 	camp.time = 0
@@ -54,29 +45,29 @@ if camp.timeJump and (MissionInstance and MissionInstance <= 1) then
 		idle_time = math.random(0,23) * 3600
 	end
 
-	print("DcIme A1 timeJump: idle_time: ".. tostring(idle_time))
+	-- print("DcIme A1 timeJump: idle_time: ".. tostring(idle_time))
 elseif not camp.timeJump or (MissionInstance and MissionInstance >= 1) then
 	idle_time = mission_ini.mission_duration + math.random(mission_ini.idle_time_min, mission_ini.idle_time_max)
-	print("DcIme A2 idle_time: ".. tostring(idle_time))
+	-- print("DcIme A2 idle_time: ".. tostring(idle_time))
 end
 
 camp.time = camp.time + idle_time
 
-print("DcIme B0 camp.time: ".. tostring(camp.time))
+-- print("DcIme B0 camp.time: ".. tostring(camp.time))
 
 -- Modification M25.b OnlyDayMission
 local tempTime = Deepcopy(camp.time)
 
-print("DcIme B3c tempTime: ".. tostring(tempTime) .." "..FormatTime(tempTime, "hh:mm").."\n")
-print("DcIme B3d "..FormatTime(idle_time, "hh:mm") .. "h passed. Next mission scheduled at: " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
+-- print("DcIme B3c tempTime: ".. tostring(tempTime) .." "..FormatTime(tempTime, "hh:mm").."\n")
+-- print("DcIme B3d "..FormatTime(idle_time, "hh:mm") .. "h passed. Next mission scheduled at: " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
 
 if mission_ini.onlyDayMission then
 	-- Définir les heures de tolérance pour les missions de jour
 	local ht_dawn = math.max(0, mission_ini.dawn - (mission_ini.hourlyTolerance * 3600))
 	local ht_dusk = math.min(86400, mission_ini.dusk + (mission_ini.hourlyTolerance * 3600))
-	
-	print("DcIme B4 onlyDayMission ht_dawn: ".. tostring(ht_dawn) .." ht_dusk: ".. tostring(ht_dusk) .. "\n")
-	print("DcIme B4 onlyDayMission ht_dawn: ".. FormatTime(ht_dawn, "hh:mm") .." ht_dusk: ".. FormatTime(ht_dusk, "hh:mm") .. "\n")
+
+	-- print("DcIme B4 onlyDayMission ht_dawn: ".. tostring(ht_dawn) .." ht_dusk: ".. tostring(ht_dusk) .. "\n")
+	-- print("DcIme B4 onlyDayMission ht_dawn: ".. FormatTime(ht_dawn, "hh:mm") .." ht_dusk: ".. FormatTime(ht_dusk, "hh:mm") .. "\n")
 
 	-- Ajuster le temps jusqu'à la prochaine plage de jour
 	while (tempTime % 86400 < ht_dawn or tempTime % 86400 > ht_dusk) or (tempTime % 86400 + (mission_ini.mission_duration) < ht_dawn or ((tempTime % 86400) + mission_ini.mission_duration > ht_dusk)) do
@@ -84,24 +75,24 @@ if mission_ini.onlyDayMission then
 		tempTime = tempTime + 300
 		-- print("DcIme B5 tempTime: ".. tostring(tempTime) .." "..FormatTime(tempTime, "hh:mm").."\n")
 	end
-	
-	print("DcIme B6 onlyDayMission FIN tempTime: ".. tostring(tempTime) .." "..FormatTime(tempTime, "hh:mm").."\n")
-	print("DcIme B6 onlyDayMission FIN overnightTime: ".. tostring(overnightTime) .." "..FormatTime(overnightTime, "hh:mm").."\n")
+
+	-- print("DcIme B6 onlyDayMission FIN tempTime: ".. tostring(tempTime) .." "..FormatTime(tempTime, "hh:mm").."\n")
+	-- print("DcIme B6 onlyDayMission FIN overnightTime: ".. tostring(overnightTime) .." "..FormatTime(overnightTime, "hh:mm").."\n")
 
 	--ajoute un random de temps pour eviter de toujours commencer au petit matin:
 	if overnightTime > 0 and mission_ini.idle_time_max > 7200 then
 		if mission_ini.idle_time_max > 7200 then
 			local nbHour = math.floor(mission_ini.idle_time_max/3600)
 			overnightTime = overnightTime + (math.random(0, nbHour)*3600)
-			print("DcIme B7a onlyDayMission overnightTime: ".. tostring(overnightTime) .. "\n")
+			-- print("DcIme B7a onlyDayMission overnightTime: ".. tostring(overnightTime) .. "\n")
 		else
 			overnightTime = overnightTime + math.random(0, mission_ini.idle_time_max)
-			print("DcIme B7b onlyDayMission overnightTime: ".. tostring(overnightTime) .. "\n")
+			-- print("DcIme B7b onlyDayMission overnightTime: ".. tostring(overnightTime) .. "\n")
 		end
 
 		overnightTime = math.floor(overnightTime / 300 + 0.5) * 300
-		print("DcIme B7c onlyDayMission overnightTime: ".. tostring(overnightTime) .. "\n")
-		
+		-- print("DcIme B7c onlyDayMission overnightTime: ".. tostring(overnightTime) .. "\n")
+
 	end
 
 end
@@ -110,7 +101,7 @@ end
 idle_time = idle_time + overnightTime
 camp.time = camp.time + overnightTime
 
-print("DcIme B8 idle_time "..FormatTime(idle_time, "hh:mm"))
+-- print("DcIme B8 idle_time "..FormatTime(idle_time, "hh:mm"))
 
 while camp.time >= 86400 do																		--repeat as long as time 24 hours or more
 	camp.time = camp.time - 86400																--remove 24 hours from time
@@ -132,7 +123,7 @@ while camp.time >= 86400 do																		--repeat as long as time 24 hours o
 	camp.day = camp.day + 1																		--counter for campaign days
 end
 
-print("DcIme B9 "..FormatTime(idle_time, "hh:mm") .. "h passed. Next mission scheduled at: " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
+-- print("DcIme B9 "..FormatTime(idle_time, "hh:mm") .. "h passed. Next mission scheduled at: " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
 
 
 if not camp.dateInit then
@@ -198,29 +189,11 @@ else																			--current time is between dusk and dawn
 	end
 end
 
-
--- if (Skipmission_flag or Firstmission_flag or (MissionInstance and MissionInstance > 1)) and not camp.waitingNextGen then
--- 	if idle_time > 86400 then
-
--- 		print(Disp_time(idle_time)
--- 		.. " passed. Next mission scheduled at: "
--- 		.. FormatTime(camp.time, "hh:mm") .. ", "
--- 		.. tostring(camp.date.day) .. "."
--- 		.. tostring(camp.date.month) .. "."
--- 		.. tostring(camp.date.year) .. ".\n")
--- 	else
--- 		print(FormatTime(idle_time, "hh:mm") .. "h passed. Next mission scheduled at: " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
--- 	end
--- else
--- 	print("Next mission scheduled at: " .. FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year .. ".\n")
--- end
-
-print(FormatTime(idle_time, "hh:mm") .. "h passed. Next mission scheduled at: " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
-
+-- print(FormatTime(idle_time, "hh:mm") .. "h passed. Next mission scheduled at: " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
 
 TimeAlreadyAdded = true
 
-os.execute 'pause'
+-- os.execute 'pause'
 
 --mise à jour de date dans confMod
 UpdateConfMod(nil, camp.date )

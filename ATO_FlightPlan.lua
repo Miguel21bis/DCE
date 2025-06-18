@@ -846,12 +846,9 @@ end
 
 local function GetTankerTACAN(tarnetName)
 
-	print("AtoFP A GetTankerTACAN tarnetName: "..tarnetName  )
-
 	local channel
 
 	if TACAN_byTarget[tarnetName] then
-		print("AtoFP B GetTankerTACAN return "..TACAN_byTarget[tarnetName]  )
 		return TACAN_byTarget[tarnetName]
 	end
 
@@ -862,8 +859,6 @@ local function GetTankerTACAN(tarnetName)
 
 	channel_tacan[channel] = tarnetName												--mark channel in use
 	TACAN_byTarget[tarnetName] = channel
-	
-	print("AtoFP C  return channel: "..channel  )
 
 	return channel																--return channel
 end
@@ -984,11 +979,11 @@ function SpawnOn(spawn, waypoints, group, Pn, spawnTime, from, flight, f, role)
 	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe A SpawnOn() "..spawn) end
 
 	-- ATO_FP_Debug_k
-	local altRole = 0
+	local alt_Role = 0
 	if role == "SEAD" then
-		altRole = 1
+		alt_Role = 1
 	elseif role == "Escort" then
-		altRole = 2
+		alt_Role = 2
 	end
 
 	-- local is_helicopter = false
@@ -1016,7 +1011,7 @@ function SpawnOn(spawn, waypoints, group, Pn, spawnTime, from, flight, f, role)
 
 		waypoints[1].action = "Turning Point"
 		waypoints[1].type = "Turning Point"
-		waypoints[1]["alt"] = altBase + (Pn * altStep) + (altRole * 33)
+		waypoints[1]["alt"] = altBase + (Pn * altStep) + (alt_Role * 33)
 		waypoints[1]["speed"] = speed
 		-- waypoints[1].ETA = spawnTime
 
@@ -1035,7 +1030,7 @@ function SpawnOn(spawn, waypoints, group, Pn, spawnTime, from, flight, f, role)
 			if db_airbases[flight[f].base].elevation then							--airbase has defined elevation
 				alt = alt + db_airbases[flight[f].base].elevation					--make alt above base
 			end
-			waypoints[1]["alt"] = alt  + (Pn * 10) + altRole * 33
+			waypoints[1]["alt"] = alt  + (Pn * 10) + alt_Role * 33
 		end
 
 		local spacing = 330 -- Mets ici la distance minimale souhaitée (en mètres)
@@ -1050,12 +1045,12 @@ function SpawnOn(spawn, waypoints, group, Pn, spawnTime, from, flight, f, role)
 			group.units[n].speed = speed
 
 			if is_helicopter  then
-				-- group.units[n]["alt"] = alt  + (Pn * 10) + altRole * 11
+				-- group.units[n]["alt"] = alt  + (Pn * 10) + alt_Role * 11
 				group.units[n].alt = ((Pn-1) * spacing/1.2) + ((f-1) * spacing) + waypoints[1]["alt"] + (spacing * n) 		--ANTI-COLLISION A
 				-- group.units[n]["alt"] = waypoints[1]["alt"]
 				group.units[n].speed = speed
 			else
-				-- group.units[n]["alt"] = waypoints[1]["alt"] + (Pn * 500) + altRole * 33
+				-- group.units[n]["alt"] = waypoints[1]["alt"] + (Pn * 500) + alt_Role * 33
 				-- group.units[n]["alt"] = waypoints[1]["alt"]
 			end
 		end

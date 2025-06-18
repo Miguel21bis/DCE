@@ -1496,7 +1496,7 @@ local function bingo(gpGid, groupMission)
 
 
 		if BingoPlaneTab[gpGid] and not BingoPlaneTab[gpGid][callSign] then												-- si le callSign a deja dit qu'il etait Bingo, on l'oublie		
-			if Unit.getFuel(unit) <=  0.34 then																			-- Sur F14, 4000lbs/16000lbs = 0.25%
+			if Unit.getFuel(unit) <=  0.40 then																			-- Sur F14, 4000lbs/16000lbs = 0.25%
 				trigger.action.outTextForGroup(gpGid, callSign .." Bingo Fuel", 15 , true)
 				-- env.info( "DCE_Bingo AA Unit.getFuel(unit)  "..tostring(groupMission.id_).." gpName: "..tostring(gpName).." callSign: "..callSign.." humainUnit? "..tostring(humainUnit) )
 

@@ -255,26 +255,29 @@ for side, units in pairs(oob_air) do
 											end
 										end
 									else
-										print("AtoG error: "..unit.type.." not found in db_loadouts")
-										os.execute 'pause'
+										-- print("AtoG error_A unit.type: |"..unit.type.."| not found in db_loadouts")
+										print("AtoG error_A: no task |"..tostring(task).."| in the loadout for this unit:? "..tostring(unit.type).."|")
+										-- os.execute 'pause'
 										error = error + 1
 									end
 								end
 
 							elseif task ~= "Spotter" then
 
-								print("AtoG error: no task |"..tostring(task).."| in the loadout for this unit:? "..tostring(unit.type))
-								os.execute 'pause'
+								print("AtoG error_B: no task |"..tostring(task).."| in the loadout for this unit:? "..tostring(unit.type).."|")
+								error = error + 1
+								-- os.execute 'pause'
 							end
 
 						else
-							print("AtoG error: "..unit.type.." not found in db_loadouts. A problem with the campaigns_code_loadout code? "..tostring(campConfMod.code_loadout))
-							os.execute 'pause'
+							print("AtoG error_C: |"..unit.type.."| not found in db_loadouts. A problem with the campaigns_code_loadout code? |"..tostring(campConfMod.code_loadout).."|")
+							error = error + 1
+							-- os.execute 'pause'
 						end
 
 						if not foundTaskAndCountry then
-							print("AtoG error: "..unit.type.." "..task.." not found in db_loadouts for this country: "..tostring(unit.country))
-							os.execute 'pause'
+							print("AtoG error_D: |"..unit.type.."| |"..task.."| not found in db_loadouts for this country: |"..tostring(unit.country).."|")
+							-- os.execute 'pause'
 							error = error + 1
 						end
 					end
@@ -284,10 +287,12 @@ for side, units in pairs(oob_air) do
 	end
 end
 
+if error >= 1 and error < 5 then
+	os.execute 'pause'
+end
 
 
-
-if error > 5 then
+if error >= 5 then
 	if string.lower(campMod.selectLoadout) == "init" then
 
 	else
