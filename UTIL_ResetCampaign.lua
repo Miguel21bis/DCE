@@ -39,12 +39,12 @@ require("Init/db_airbases")
 
 --retrocompatibilie location UTIL_DataRadio file
 --recherche en priorite le fichier UTIL_DataRadio dans le dossier ScriptsMod puis dans le dossier campagne
-local radioFile = "../../../ScriptsMod."..versionPackageICM.."/UTIL_DataRadio.lua"
+local radioFile = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua"
 local testPath = io.open(radioFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
 if testPath ~= nil then																					--check si le fichier existe dans ScriptsMod
 	io.close(testPath)
-	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataRadio.lua")
-else	
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
+else
 	local radioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
 	local testPath2 = io.open(radioFile2, "r")
 	if testPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
@@ -56,7 +56,7 @@ end
 if Firstmission_flag then																				--if the script is called by BAT_FirstMission.lua, then FirstMission is true and camp_status is reset to init. When called by DEBRIEF_Master.lua, block is skipped and camp_camp status carried over in mission is used.
 	local camp_str = "camp = " .. TableSerialization(camp, 0)										--make a string of campaign initial status table
 	local campFile = io.open("Active/camp_status.lua", "w") or error("Failed to open debug file")
-	camp.versionPackageICM = tostring(versionPackageICM)											-- modification M35 version ScriptsMod -- ajoute la version du script dans camp_status pour utilisation en fin de mission
+	camp.VersionPackageICM = tostring(VersionPackageICM)											-- modification M35 version ScriptsMod -- ajoute la version du script dans camp_status pour utilisation en fin de mission
 	campFile:write(camp_str)																		--write initial status
 	campFile:close()
 end
@@ -64,7 +64,7 @@ end
 
 -- require("Init/oob_air_init")																		--run initial oob air
 for side,unit in pairs(oob_air) do																	----update oob_air to add roster and score table
-	for n = 1, #unit do	
+	for n = 1, #unit do
 		unit[n].roster = {
 			ready = unit[n].number,																	--number of airframes ready for operations
 			lost = 0,																				--number of airframes lost
@@ -76,7 +76,7 @@ for side,unit in pairs(oob_air) do																	----update oob_air to add ros
 			kills_ship = 0																			--ship kills
 		}
 		if unit[n].reserve then
-			unit[n].roster.reserve = unit[n].reserve		
+			unit[n].roster.reserve = unit[n].reserve
 		end
 	end
 end
@@ -169,7 +169,7 @@ do
 
 	zipFile:unzClose()
 
-	
+
 	oob_ground = {}
 	oob_ground["blue"] = Deepcopy(mission.coalition.blue.country)											--copy mission data
 	oob_ground["red"] = Deepcopy(mission.coalition.red.country)												--copy mission data
@@ -216,7 +216,7 @@ do
 		end
 	end
 
-	
+
 	--save oob_ground status file
 	local ground_str = "oob_ground = " .. TableSerialization(oob_ground, 0)								--make a string
 	local groundFile = io.open("Active/oob_ground.lua", "w") or error("Failed to open debug file")

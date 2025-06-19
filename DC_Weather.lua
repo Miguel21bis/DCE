@@ -31,6 +31,15 @@ local fieldElevation = 0												--elevation of players airfield used for min
 
 local elapsed_time = CampTotalTimeS										--elapsed time since campaign start in seconds
 
+local pHigh = mission_ini.weather.High or 50					--default pressure high value
+local pLow = mission_ini.weather.Low or 50					--default pressure pLow value
+
+if Firstmission_flag and camp.weather then
+	pHigh = camp.weather.pHigh or 50					--default pressure high value
+	pLow = camp.weather.pLow or 50					--default pressure pLow value
+end
+
+
 for side,unit in pairs(oob_air) do										--iterate through all sides
 	for n = 1, #unit do													--iterate through all units
 		if unit[n].player then											--find player unit			
@@ -65,13 +74,16 @@ end
 debugTxt = debugTxt .."time              "..tostring((camp.date.day - 1) * 86400 + camp.time).."\n"
 
 mission.weather["atmosphere_type"] = 0									--set simple weather model
-camp.weather.pHigh = mission_ini.weather.pHigh
-camp.weather.pLow = mission_ini.weather.pLow
+if camp.weather == nil then
+	camp.weather = {}
+end
+camp.weather.pHigh = pHigh
+camp.weather.pLow = pLow
 
 local InitalW = false
 
-local probaPhight = (mission_ini.weather.pHigh / (mission_ini.weather.pHigh + mission_ini.weather.pLow)) * 100					--chance of next weather zone being a high pressure system
-local probaPlow = (mission_ini.weather.pLow / (mission_ini.weather.pHigh + mission_ini.weather.pLow)) * 100
+local probaPhight = (pHigh / (pHigh + pLow)) * 100					--chance of next weather zone being a high pressure system
+local probaPlow = (pLow / (pHigh + pLow)) * 100
 
 -- if debugWeather then 
 -- 	print("DcW camp.weather.zone: "..tostring( camp.weather.zone)) 
@@ -296,8 +308,8 @@ if elapsed_time > camp.weather.zoneEnd then										--active weather zone has e
 
 	-- if not InitalW then 																		-- evite de passer 2 fois le random lors de la premiere mission
 
-	-- 	-- local chance = 100 / (mission_ini.weather.pHigh + mission_ini.weather.pLow) * mission_ini.weather.pHigh					--chance of next weather zone being a high pressure system
-	-- 	probaPhight = (mission_ini.weather.pHigh / (mission_ini.weather.pHigh + mission_ini.weather.pLow)) * 100					--chance of next weather zone being a high pressure system
+	-- 	-- local chance = 100 / (pHigh + pLow) * pHigh					--chance of next weather zone being a high pressure system
+	-- 	probaPhight = (pHigh / (pHigh + pLow)) * 100					--chance of next weather zone being a high pressure system
 	-- 	local randChance = math.random(1, 100)
 	-- 		-- if debugWeather then print("Next zone: "..tostring(randChance).. "<=? "..tostring(probaPhight)) end	
 	-- 		debugTxt = debugTxt .."Next zone: "..tostring(randChance).. "<=? "..tostring(probaPhight).."\n"
@@ -321,8 +333,8 @@ if elapsed_time > camp.weather.zoneEnd then										--active weather zone has e
 	-- end
 	if not InitalW then  -- évite de passer 2 fois le random lors de la première mission
 
-		local pHigh = mission_ini.weather.pHigh or 50
-		local pLow = mission_ini.weather.pLow or 50
+		local pHigh = pHigh or 50
+		local pLow = pLow or 50
 		local total = pHigh + pLow
 		local probaHigh = pHigh / total
 

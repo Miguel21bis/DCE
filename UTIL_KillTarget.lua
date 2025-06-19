@@ -397,9 +397,9 @@ repeat
 
 	local active
 	repeat
-		dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")							--ce n'est pas un doublon, il faut garder les 2 Update
-		dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
-		dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
+		dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")							--ce n'est pas un doublon, il faut garder les 2 Update
+		dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+		dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
 
 
 		
@@ -520,9 +520,9 @@ repeat
 
 
 
-		dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")							--ce n'est pas un doublon, il faut garder les 2 Update
-		dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
-		dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
+		dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")							--ce n'est pas un doublon, il faut garder les 2 Update
+		dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+		dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
 
 
 

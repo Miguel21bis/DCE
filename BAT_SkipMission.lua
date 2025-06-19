@@ -24,6 +24,7 @@ versionDCE["BAT_SkipMission.lua"] = "1.15.99"
 BugList = {}
 Skipmission_flag = true
 Playable_m = {}
+VersionPackageICM = os.getenv('VersionPackageICM')														-- modification M35.b version ScriptsMod
 
 local function acceptMission()
 	local m = ""
@@ -57,11 +58,11 @@ end
 -- random seed -----
 local seed = os.time() -- Récupérer un timestamp en secondes
 math.randomseed(seed)  -- Initialiser le générateur pseudo-aléatoire
-versionPackageICM = os.getenv('versionPackageICM')														-- modification M35.b version ScriptsMod
+
 
 dofile("Init/conf_mod.lua")
 dofile("Active/camp_status.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
 
 UpdateConfMod()
@@ -145,155 +146,30 @@ end
 if not ChangePlane then
 	require("Active/oob_air")
 end
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
 
 dofile("Active/oob_scen.lua")
 
---****************************************************************************************
---ajout automatique d'elements en cours de campagne: START
---****************************************************************************************
---********************************* targetlist ******************************************************
-dofile("Init/targetlist_init.lua")
-local targetlist_init = Deepcopy(targetlist)
-if not targetlist_init.blue[1] then
-	TargetlistToNum(targetlist_init)
-end
 
-targetlist = nil
-
-dofile("Active/targetlist.lua")
-if not targetlist.blue[1] then
-	TargetlistToNum(targetlist)
-end
-
-local changes = CompareTargetLists(targetlist_init, targetlist)
-
--- Afficher les résultats
-for _, added in ipairs(changes.added) do
-	print("Added TargetList: Name:", added.data.name)
-end
--- for _, removed in ipairs(changes.removed) do
--- 	print("Removed TargetList: Name:", removed.data.name)
--- end
-
--- Ajout des éléments manquants dans targetlist
-for _, added in ipairs(changes.added) do
-	if not targetlist[added.side] then
-		targetlist[added.side] = {}
-	end
-	-- Insérer l'élément à la fin de la table numérique
-	table.insert(targetlist[added.side], added.data)
-end
-
--- -- Suppression des éléments retirés de targetlist
--- for _, removed in ipairs(changes.removed) do
--- 	if targetlist[removed.side] then
--- 		for i, target in ipairs(targetlist[removed.side]) do
--- 			if target.name == removed.name then
--- 				table.remove(targetlist[removed.side], i)
--- 				break
--- 			end
--- 		end
--- 	end
--- end
+--***********NEW function***************--
+--***********NEW function***************--
+LoadFileAndUpdate()
+--***********NEW function***************--
+--***********NEW function***************--
 
 
---********************************* camp_triggers ******************************************************
--- Charger les fichiers de référence et de travail
-dofile("Init/camp_triggers_init.lua")
-local camp_triggers_init = camp_triggers
+local showVersion = VersionPackageICM
 
-dofile("Active/camp_triggers.lua")
-
--- Comparer les deux tables
-changes = CompareTableNumeric(camp_triggers_init, camp_triggers)
-
--- Afficher les résultats
-for _, added in ipairs(changes.added) do
-	print("Added triggers: Name:", added.name)
-end
-for _, removed in ipairs(changes.removed) do
-	print("Removed triggers: Name:", removed.name)
-end
-
--- Ajouter les éléments manquants dans camp_triggers
-for _, added in ipairs(changes.added) do
-	table.insert(camp_triggers, added)
-end
--- Supprimer les éléments retirés de camp_triggers
-for _, removed in ipairs(changes.removed) do
-	for i, trigger in ipairs(camp_triggers) do
-		if trigger.name == removed.name then
-			table.remove(camp_triggers, i)
-			break
-		end
-	end
-end
-
-
-
---********************************* db_airbases ******************************************************
--- Charger les fichiers de référence et de travail
-dofile("Init/db_airbases.lua")
-local db_airbases_init = db_airbases
-
-dofile("Active/db_airbases.lua")
-
--- Comparer les deux tables
-changes = CompareTableAlphaNumeric(db_airbases_init, db_airbases)
-
--- Afficher les résultats
-for _, added in ipairs(changes.added) do
-    print("\nAdded db_airbases Name:", added.name)
-end
-for _, removed in ipairs(changes.removed) do
-    print("\nRemoved db_airbases: Name:", removed.name)
-end
-
--- Ajouter les éléments manquants dans db_airbases
-for _, added in ipairs(changes.added) do
-    db_airbases[added.name] = added.data
-end
--- Supprimer les éléments retirés de db_airbases
-for _, removed in ipairs(changes.removed) do
-    db_airbases[removed.name] = nil
-end
-
---****************************************************************************************
---ajout automatique d'elements en cours de campagne: FIN
---****************************************************************************************
-
-
-		
--- Exécution du fichier s'il existe
-local testFile = "Init/various_table.lua"
-if FileExists(testFile) then
-    dofile(testFile)
-end
-
-for planeType, value in PairsByKeys(Data_divers) do
-	if value.playable then
-		Playable_m[planeType] = true
-	end
-end
-
-
-
---si le joueur fait un saut temporel (via date dans conf_mod) on met a jour les fichiers de la campagne
-UpdateFilesAfterTimeJump()
-
-local showVersion = versionPackageICM
-
-local verScriptsModPath = "../../../ScriptsMod."..versionPackageICM.."/UTIL_Changelog.lua"
-local testPath = io.open(verScriptsModPath, "r")
-if testPath ~= nil then
-	io.close(testPath)
-	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Changelog.lua")
-	if versionDCE then
-		showVersion = showVersion.." ("..versionDCE["UTIL_Changelog.lua"]..")"
-	elseif VersionDCE then
-		showVersion = showVersion.." ("..versionDCE["UTIL_Changelog.txt"]..")"
+local changelogPath = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_Changelog.lua"
+local f = io.open(changelogPath, "r")
+if f then
+	f:close()
+	dofile(changelogPath)
+	if versionDCE and versionDCE["UTIL_Changelog.lua"] then
+		showVersion = showVersion .. " (" .. versionDCE["UTIL_Changelog.lua"] .. ")"
+	elseif versionDCE and versionDCE["UTIL_Changelog.txt"] then
+		showVersion = showVersion .. " (" .. versionDCE["UTIL_Changelog.txt"] .. ")"
 	end
 end
 
@@ -305,8 +181,8 @@ local playerInfo = {
 }
 
 -- playerSide = ""
-for side, squadTL in  PairsByKeys(oob_air) do
-	for squad_n, squad in  PairsByKeys(squadTL) do
+for side, squadTL in PairsByKeys(oob_air) do
+	for squad_n, squad in PairsByKeys(squadTL) do
 		if squad.player then
 			playerInfo.planeBAT = squad.type
 			playerInfo.squadBAT = squad.name
@@ -316,7 +192,7 @@ for side, squadTL in  PairsByKeys(oob_air) do
 end
 
 
-if versionPackageICM then
+if VersionPackageICM then
 	print("0B0= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
 	print("= = = = = = = = = = = = = Script Version : "..tostring(showVersion).." = = Lua Version : "..tostring(_VERSION))
 	print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
@@ -712,13 +588,13 @@ if input == "y" or input == "yes" then
 				-- print("ArgTools "..tostring(ArgTools))
 	
 				if ArgTools ~= "KillTarget" then
-					dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Divers.lua")
+					dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Divers.lua")
 					os.execute 'pause'
 				end
 
 				break
 			elseif choix1 == "c" then
-				dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ChangePlane.lua")
+				dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ChangePlane.lua")
 			end
 
 		until tabIndex01[choix1]
@@ -730,8 +606,8 @@ if input == "y" or input == "yes" then
 
 			MissionInstance = MissionInstance + 1															--count the number of times the mission is generated
 
-			camp.versionPackageICM = tostring(versionPackageICM)											-- modification M35 version ScriptsMod -- ajoute la version du script dans camp_status pour utilisation en fin de mission																				--set amount of players
-			dofile("../../../ScriptsMod."..versionPackageICM.."/MAIN_NextMission.lua")																--generate mission
+			camp.VersionPackageICM = tostring(VersionPackageICM)											-- modification M35 version ScriptsMod -- ajoute la version du script dans camp_status pour utilisation en fin de mission																				--set amount of players
+			dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_NextMission.lua")																--generate mission
 
 
 			if EndCampaign or camp.endCampaign then 																			-- debug01.b EndMission

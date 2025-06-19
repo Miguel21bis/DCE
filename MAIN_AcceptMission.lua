@@ -82,26 +82,26 @@ scenFile:close()
 
 
 ----- run scripts to accept content of next mission -----
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
 --run log evaluation and status updates
-dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_StatsEvaluation.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_StatsEvaluation.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
 
 --create and view Debriefing file for mission
 --cette foi-ci, on enregistre les stats, mais sans les montrer
 
-dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
+dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
 
 --retrocompatibilie location UTIL_DataRadio file
 --recherche en priorit� le fichier radios_freq_compatible dans le dossier ScriptsMod puis dans le dossier campagne
-local radioFile = "../../../ScriptsMod."..versionPackageICM.."/UTIL_DataRadio.lua"
+local radioFile = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua"
 local testPath = io.open(radioFile, "r")																--cette maniere de chercher la presence d un fichier evite un plantage
 if not testPath then																					--check si le fichier existe dans ScriptsMod
 	io.close(testPath)
-	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataRadio.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
 else
 	local radioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
 	local testPath2 = io.open(radioFile2, "r")
@@ -230,22 +230,22 @@ end
 
 
 
--- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Refpoints.lua")			--besoin par NavalEnv
--- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_MissionScore.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Refpoints.lua")			--besoin par NavalEnv
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_MissionScore.lua")
 
--- -- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Time.lua")				--need if AcceptedMission
--- -- dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_MoonPhase.lua")
+-- -- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Time.lua")				--need if AcceptedMission
+-- -- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_MoonPhase.lua")
 
 
 -- --TODO comment se passer de ca??
--- -- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_NavalEnvironment.lua")		--besoin par CheckTrigger pour bouger les navires
+-- -- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")		--besoin par CheckTrigger pour bouger les navires
 
 
--- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 
 -- --TODO ici la cible Jask repasse à 30%, pourquoi
--- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
--- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateOOBGround.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")
 
 mission.currentKey = 1010000															--not clear how this works but is required for multiplyer clients to be available for selection on mission start
 

@@ -214,13 +214,13 @@ if EndCampaign or camp.endCampaign then												--if the campaign has ended
 	-- miz:zipAddFile("warehouses", "warFile.lua")
 	-- miz:zipAddFile("l10n/DEFAULT/dictionary", "dicFile.lua")
 	-- miz:zipAddFile("l10n/DEFAULT/mapResource", "resFile.lua")
-	-- miz:zipAddFile("l10n/DEFAULT/EventsTracker.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/EventsTracker.lua")
+	-- miz:zipAddFile("l10n/DEFAULT/EventsTracker.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/EventsTracker.lua")
 
-	-- miz:zipAddFile("l10n/DEFAULT/ARM_Defence_Script.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/ARM_Defence_Script.lua")
-	-- miz:zipAddFile("l10n/DEFAULT/CustomTasksScript.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/CustomTasksScript.lua")
-	-- miz:zipAddFile("l10n/DEFAULT/CarrierIntoWindScript.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/CarrierIntoWindScript.lua")
-	-- miz:zipAddFile("l10n/DEFAULT/AddCommandRadioF10.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/AddCommandRadioF10.lua")				-- Miguel21 Modification M29
-	-- miz:zipAddFile("l10n/DEFAULT/Pedro.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/Pedro.lua")				-- Miguel21 Pedro TEST
+	-- miz:zipAddFile("l10n/DEFAULT/ARM_Defence_Script.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ARM_Defence_Script.lua")
+	-- miz:zipAddFile("l10n/DEFAULT/CustomTasksScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CustomTasksScript.lua")
+	-- miz:zipAddFile("l10n/DEFAULT/CarrierIntoWindScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CarrierIntoWindScript.lua")
+	-- miz:zipAddFile("l10n/DEFAULT/AddCommandRadioF10.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/AddCommandRadioF10.lua")				-- Miguel21 Modification M29
+	-- miz:zipAddFile("l10n/DEFAULT/Pedro.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Pedro.lua")				-- Miguel21 Pedro TEST
 	-- miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "Active/camp_status.lua")
 	-- miz:zipAddFile("l10n/DEFAULT/debugGenMission.txt", "Debug/debugGenMission.txt")
 	-- miz:zipAddFile("l10n/DEFAULT/debugFlight.txt", "Debug/debugFlight.txt")

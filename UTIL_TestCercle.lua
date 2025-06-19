@@ -155,7 +155,7 @@ mission["triggers"] =
 --             ["type"] = 0,
 --         }, -- end of [1]
 
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data_circleSAR_Caucasus.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data_circleSAR_Caucasus.lua")
 
 local n = 0
 for nCircle, circle in ipairs(circleSAR) do                   

@@ -1663,14 +1663,12 @@ camp.targetPos = targetPosTemp
 
 -- supprime les arbres detruit
 for oob_scenN, scen in pairs(oob_scen) do
-	-- print("DC_UpdateScen_A1 oob_scenN "..tostring(oob_scenN))
 	if scen.sceneryTypeName and string.find(scen.sceneryTypeName, "FOREST")  then
-		-- print("DC_UpdateScen_A1 (-) delete FOREST scen "..scen.sceneryTypeName)
 		oob_scen[oob_scenN] = nil
 	end
 	-- ["event"] = "S_EVENT_HIT",
 	if scen.event and scen.event ==  "S_EVENT_HIT" then
-		print("DC_UpdateScen_A1 (-) delete S_EVENT_HIT scen "..tostring(scen.sceneryTypeName)..tostring(scen.scenaryName))
+		-- print("DC_UpdateScen_A1 (-) delete S_EVENT_HIT scen "..tostring(scen.sceneryTypeName)..tostring(scen.scenaryName))
 		oob_scen[oob_scenN] = nil
 	end
 end

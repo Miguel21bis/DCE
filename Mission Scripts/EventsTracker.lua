@@ -766,7 +766,7 @@ function eventHandlerDCE:onEvent(event)
 				-- end
 
 				if event.target.getCoalition then
-					local targetCoalition = event.target:getCoalition()
+					local targetCoalition = event.target:getCoalition()		--ERROR 769: Unit doesn't exist
 					targetSideName = coalitionIdNumeric[tonumber(targetCoalition)]
 				end
 
@@ -1369,8 +1369,8 @@ function eventHandlerDCE:onEvent(event)
 			env.setErrorMessageBoxEnabled(true)																					-- debug_ET02	n'affiche pas les messages d'error sauf � la fin de mission
 
 			-- modification M35.d (d: info log) version ScriptsMod
-			if camp.versionPackageICM then
-				env.info( "DCE_versionPackageICM  "..tostring(camp.versionPackageICM) )
+			if camp.VersionPackageICM then
+				env.info( "DCE_VersionPackageICM  "..tostring(camp.VersionPackageICM) )
 			end
 			if camp.MissionFilename then
 				env.info( "DCE_MissionFilename  "..tostring(camp.MissionFilename) )
@@ -1458,7 +1458,7 @@ function eventHandlerDCE:onEvent(event)
 			-- os.execute('start "EventPath" cmd  /k "c: & cd '..path..' & call \Init\\path.bat && pause"')
 
 			--Launch external LUA environment to evaluate debrief.log, update campaign status files and generate the next campaign mission
-			os.execute('start "Debriefing" cmd  /k "set \"DCSDIR=%cd%\" &  ' .. PathDD .. ' & cd ' .. PathDCE .. ' & call \"%DCSDIR%\\bin\\luae.exe\" ..\\..\\..\\ScriptsMod.'..camp.versionPackageICM..'\\DEBRIEF_Master.lua"')
+			os.execute('start "Debriefing" cmd  /k "set \"DCSDIR=%cd%\" &  ' .. PathDD .. ' & cd ' .. PathDCE .. ' & call \"%DCSDIR%\\bin\\luae.exe\" ..\\..\\..\\ScriptsMod.'..camp.VersionPackageICM..'\\DEBRIEF_Master.lua"')
 
 		--collect destroyed scenery objects
 		-- elseif event.id == world.event.S_EVENT_HIT then

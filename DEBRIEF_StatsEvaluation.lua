@@ -41,7 +41,7 @@ else
 	AllIdGroupImport = false
 	AllIdUnitImport = false
 
-	GetAllId()
+	-- GetAllId()
 
 	--TODO attention, surveiller les conséquences de ces lignes plus bas (est-ce que ça double? ou revient à 0?)
 	targetlist = nil
@@ -71,7 +71,7 @@ end
 
 require("Active/last_Mission")
 
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateSAR.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
 
 -- print("DebriefStatsEvaluation Initialisation AcceptedMission? "..tostring(AcceptedMission))
 -- os.execute 'pause'

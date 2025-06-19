@@ -11,17 +11,17 @@
 		-> ne prend en compte que < ou <=
 	*change le nombre d'avion de reserve, plus il y en a, et plus la campagne dura
 
-**Curseur de difficult� de campagne:**
+**Curseur de difficulté de campagne:**
 	*change le skill des 2 camps
-		par d�faut, celui du joueur est toujours sup�rieur � l'ENI
-		quand le curseur est activ�, le coeficient directeur est comme ceci:
+		par défaut, celui du joueur est toujours supérieur é l'ENI
+		quand le curseur est activé, le coeficient directeur est comme ceci:
 		valeur pour le camp AMI
 			-- 1 (easy player)		70
 			-- 4 (very difficult)	55
 		valeur pour le camp ENI
 			-- 1 (easy player)		30
 			-- 4 (very difficult)	60
-		Calcul� pour que la valeur 3 soit la valeur par defaut (AMI = 60 ENI = 50)
+		Calculé pour que la valeur 3 soit la valeur par defaut (AMI = 60 ENI = 50)
 	
 	*change le nombre d'avion ENI ready (et number de reference)
 		change le nombre d'avion ENI disponible, plus il y en a, et plus ce sera difficile
@@ -35,15 +35,15 @@
 			->fonctionne seulement pour les escadrons ayant une ligne reserve, c'est plus simple (nouveau systeme de gestion reserve)
 		
 **RAZ**
-si le joueur repasse (a n'importe quel moment de la campagne) une variable � "false", les valeurs reprennent la valeur d'origine, moins les avions d�j� perdu
-(sauf les escadrons ayant un escadron de ravitaillement � part, parceque c'est chiant ^^)
+si le joueur repasse (a n'importe quel moment de la campagne) une variable é "false", les valeurs reprennent la valeur d'origine, moins les avions déjé perdu
+(sauf les escadrons ayant un escadron de ravitaillement é part, parceque c'est chiant ^^)
 
 **FAQ**
-*doit on changer la valeur dans le conf_mod seulement au d�but de la campagne?
-	-> non, � tout moment de la campagne, seul un skipMission sera necessaire
+*doit on changer la valeur dans le conf_mod seulement au début de la campagne?
+	-> non, é tout moment de la campagne, seul un skipMission sera necessaire
 
-* le RAZ prent'il en compte les pertes anterieur ou remet-il � 0 les pertes et le stock � full?
-	-> il prend en compte les pertes ant�rieur
+* le RAZ prent'il en compte les pertes anterieur ou remet-il é 0 les pertes et le stock é full?
+	-> il prend en compte les pertes antérieur
 ]]--
 
 ------------------------------------------------------------------------------------------------------- 
@@ -55,7 +55,7 @@ versionDCE["DC_CampaignSettings.lua"] = "1.4.19"
 -- cleancode_d			(d springCleaning)	
 -- adjustment_f			(f InitNumber)(d prend en compte l ancien transfert)(c: slider_PercentPlane)
 -- modification M53_b	automatic update of the conf_mod file (b conf_mod reconfiguration)
--- modification M52_f	campaign player's choices  (f bug transfert)(e bug sourceName01) (d: corrige automatic bug CVN & debug CVN)(c: debug)(b: difficult� de campagne)(a: dur�e de la campagne)
+-- modification M52_f	campaign player's choices  (f bug transfert)(e bug sourceName01) (d: corrige automatic bug CVN & debug CVN)(c: debug)(b: difficulté de campagne)(a: durée de la campagne)
 ------------------------------------------------------------------------------------------------------- 
 
 --[[
@@ -63,7 +63,7 @@ PARTIE slider_CampaignDuration *************************************************
 ]]--
 
 --[[
-droite � 2 points
+droite é 2 points
 trouver le coeficient directeur
 0 = 100
 4 = 0
@@ -139,7 +139,7 @@ for name, trig in pairs(camp_triggers) do
 											end
 										end
 									end								
-									-- -- --recherche le nombre pr�vu de renfort
+									-- -- --recherche le nombre prévu de renfort
 									-- -- GetName = {}
 									-- -- function GetName.AirUnitReinforce(sourceName, destName, destNumber)
 										-- -- oneNb = oneNb + destNumber																	
@@ -170,7 +170,7 @@ for name, trig in pairs(camp_triggers) do
 							
 							--ATTENTION this bug:condition = 'Return.TargetAlive("CVN-71 Theodore Roosevelt") == 0',
 							--This good: condition = 'Return.UnitDead("CVN-71 Theodore Roosevelt")',
-							--ceci r�pare un bug r�curent dans camp_triggers_init qui tente de trouver le %alive d'un target qui n'existe pas, mais l'unit� existe
+							--ceci répare un bug récurent dans camp_triggers_init qui tente de trouver le %alive d'un target qui n'existe pas, mais l'unité existe
 							if(string.find(strMatch, "CV") and string.find(strMatch, "==")) then
 
 								one:gsub("TargetAlive", "UnitDead" )
@@ -301,11 +301,11 @@ end
 	
 	on se base pour une valeur 3 qui correspond aux valeurs de depart de Cef
 	
-	garde la retroCompatibilit� entre les escadron Reserves et la ligne reserve d'un escadron active
+	garde la retroCompatibilité entre les escadron Reserves et la ligne reserve d'un escadron active
 ]]--
 for side,unit in pairs(oob_air) do
 	for n = 1, #unit do
-		--cr�e la nouvelle clef transfert 
+		--crée la nouvelle clef transfert
 		if not unit[n].roster.trans then 
 			unit[n].roster.trans = 0
 		end
@@ -318,14 +318,14 @@ for side,unit in pairs(oob_air) do
 		if mission_ini.slider_CampaignDuration and type(mission_ini.slider_CampaignDuration == "number") then
 			if unit[n].base == 'Reserves' then
 				
-				-- --cr�er une clef init qui fera reference, puisque l'on touchera � celui reserve
+				-- --créer une clef init qui fera reference, puisque l'on touchera é celui reserve
 				-- if not unit[n].InitNumber then 
 				-- 	unit[n].InitNumber = unit[n].number
 				-- end										
 				unit[n].roster.ready =  math.ceil(( unit[n].InitNumber/3) * mission_ini.slider_CampaignDuration) - unit[n].roster.trans
 			elseif unit[n].reserve then
 			
-				--cr�er une clef init qui fera reference, puisque l'on touchera � celui reserve
+				--créer une clef init qui fera reference, puisque l'on touchera é celui reserve
 				if not unit[n].InitReserve then 
 					unit[n].InitReserve = unit[n].reserve
 				end			
@@ -340,13 +340,13 @@ for side,unit in pairs(oob_air) do
 
 			
 			if unit[n].base == 'Reserves'  then
-				-- --cr�er une clef init qui fera reference, puisque l'on touchera � celui reserve
+				-- --créer une clef init qui fera reference, puisque l'on touchera é celui reserve
 				-- if not unit[n].InitNumber then 
 				-- 	unit[n].InitNumber = unit[n].number
 				-- end
 				unit[n].roster.ready = unit[n].InitNumber - transfert
 			elseif unit[n].reserve  then	
-				--cr�er une clef init qui fera reference, puisque l'on touchera � celui reserve
+				--créer une clef init qui fera reference, puisque l'on touchera é celui reserve
 				if not unit[n].InitReserve then 
 					unit[n].InitReserve = unit[n].reserve
 				end	
@@ -360,7 +360,7 @@ end
 --[[
 PARTIE slider_EnemyLevel ***************************************************************************
 ]]--
-for side , oob_airSide in pairs(oob_air) do														--pour afficher l'exemple de selection du premier avion pr�sent�
+for side , oob_airSide in pairs(oob_air) do														--pour afficher l'exemple de selection du premier avion présenté
 	for m , unit in pairs(oob_airSide) do
 		if unit.player  then
 			TypePlanePlayer = unit.type
@@ -423,7 +423,7 @@ for side,unit in pairs(oob_air) do
 				unit[n].roster.trans = 0
 			end
 			if unit[n].reserve then
-				--cr�er une clef init qui fera reference, puisque l'on touchera � celui reserve
+				--créer une clef init qui fera reference, puisque l'on touchera é celui reserve
 				if not unit[n].InitNumber then 
 					unit[n].InitNumber = unit[n].number
 				end
@@ -465,7 +465,7 @@ if mission_ini.slider_PercentPlane and type(mission_ini.slider_PercentPlane == "
 		for n = 1, #unit do
 			if 	not unit[n].inactive then
 
-				--cr�er une clef init qui fera reference, puisque l'on touchera � celui reserve
+				--créer une clef init qui fera reference, puisque l'on touchera é celui reserve
 				if not unit[n].InitNumber then 
 					unit[n].InitNumber = unit[n].number
 				end

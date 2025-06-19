@@ -70,8 +70,8 @@ end
 local seed = os.time() -- Récupérer un timestamp en secondes
 math.randomseed(seed)  -- Initialiser le générateur pseudo-aléatoire
 
-if versionPackageICM == nil then
-	versionPackageICM = os.getenv('versionPackageICM')														-- modification M35.b version ScriptsMod
+if VersionPackageICM == nil then
+	VersionPackageICM = os.getenv('VersionPackageICM')														-- modification M35.b version ScriptsMod
 end
 
 dofile("Init/conf_mod.lua")
@@ -86,11 +86,22 @@ if ChangePlane then
 else
 	require("Init/oob_air_init")
 end
+
 dofile("Init/db_airbases.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
-dofile("Init/targetlist_init.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
+dofile("Init/targetlist_init.lua")--ne pas supprimé, util pour inscrire targetlist dans Active
+if not targetlist.blue[1] then
+	TargetlistToNum(targetlist)
+end
+
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ResetCampaign.lua")					--reset campaign status files. Required for first mission to generate according to initial status	
+
+
+--***********NEW function***************--
+LoadFileAndUpdate()
+--***********NEW function***************--
 
 -- Exécution du fichier s'il existe
 local testFile = "Init/various_table.lua"
@@ -111,13 +122,13 @@ end
 
 
 
-local showVersion = versionPackageICM
+local showVersion = VersionPackageICM
 
-local verScriptsModPath = "../../../ScriptsMod."..versionPackageICM.."/UTIL_Changelog.lua"
+local verScriptsModPath = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_Changelog.lua"
 local testPath = io.open(verScriptsModPath, "r")
 if  testPath ~= nil then
 	io.close(testPath)
-	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Changelog.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Changelog.lua")
 	if versionDCE then
 		showVersion = showVersion.." ("..versionDCE["UTIL_Changelog.lua"]..")"
 	elseif VersionDCE then
@@ -144,7 +155,7 @@ for side, squadTL in  PairsByKeys(oob_air) do
 end
 
 
-if versionPackageICM then
+if VersionPackageICM then
 	print("0A0= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
 	print("= = = = = = = = = = = = = Script Version : "..tostring(showVersion).." = = Lua Version : "..tostring(_VERSION))
 	print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
@@ -391,7 +402,7 @@ repeat
 
 		--M55_a		player can change the type of plane
 		elseif choix1 == "c" then
-			dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ChangePlane.lua")
+			dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ChangePlane.lua")
 
 		elseif choix1 == "o" then
 
@@ -430,25 +441,25 @@ repeat
 
 			--killTarget doit etre lancé plus tard par MAIN_NextMission.lua
 			if ArgTools ~= "KillTarget" then
-				dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Divers.lua")
+				dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Divers.lua")
 				os.execute 'pause'
 			end
 			break
 		elseif choix1 == "w3" then
-			dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_TestCercle.lua")
+			dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_TestCercle.lua")
 			os.execute 'pause'																					--pause command window for user to read text
 			os.exit()
 		end
 	until tabIndex01[choix1]
 
-	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ResetCampaign.lua")					--reset campaign status files. Required for first mission to generate according to initial status	
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ResetCampaign.lua")					--reset campaign status files. Required for first mission to generate according to initial status	
 
 	print("\n\n")
 	repeat
 		print("Generating First Mission.\n")
 
 		MissionInstance = MissionInstance + 1															--count the number of times the mission is generated
-		dofile("../../../ScriptsMod."..versionPackageICM.."/MAIN_NextMission.lua")						--generate mission
+		dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_NextMission.lua")						--generate mission
 
 		if Multi.NbGroup >= 1 and PlayerFlight then
 			if acceptMission() then

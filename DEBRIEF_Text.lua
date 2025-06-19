@@ -250,8 +250,8 @@ do
 
 
 
--- print("camp.player.role "..tostring(camp.player.role))
--- print("camp.player.flight "..tostring(camp.player.flight))
+-- print("DEBRIEF_t A1 camp.player.role "..tostring(camp.player.role))
+-- print("DEBRIEF_t A2 camp.player.flight "..tostring(camp.player.flight))
 
 	local player_task = camp.player.pack[camp.player.role][camp.player.flight].task								--player task
 	local target_name = camp.player.pack[camp.player.role][camp.player.flight].target_name						--name of player package target
@@ -260,7 +260,8 @@ do
 	local target_hit = 0
 	local targetSelect = {}
 	for targetN, target in ipairs(targetlist[camp.player.side]) do
-		if target.titleName == target_name and  target.elements  then
+		if target.titleName == target_name and target.elements  then
+			-- print("DEBRIEF_t B titleName "..tostring(target.titleName).." alive_last: "..tostring(target.alive_last))
 			target_alive = target.alive
 			target_hit = target.alive_last
 			targetSelect = target

@@ -36,8 +36,8 @@ require("Init/conf_mod")															-- Miguel21 modification M00 : need optio
 require("Init/radios_freq_compatible")												-- miguel21 modification M34 custom FrequenceRadio
 require("Active/camp_triggers")
 
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
 
 balance = {}

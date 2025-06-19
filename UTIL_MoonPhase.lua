@@ -111,7 +111,7 @@ function Moonphase(day,month,year)
 
 	-- string.format("%.3f", 5.0)
 
-	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_SunMoonRIse.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_SunMoonRIse.lua")
 
 	local Timestamp = os.time({year= camp.date.year, month= camp.date.month, day= camp.date.day, hour= camp.date.hour, minute= camp.date.minute})
 

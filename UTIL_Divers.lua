@@ -16,9 +16,9 @@ versionDCE["UTIL_Divers.lua"] = "1.4.26"
 
 
 require("Active/oob_ground")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
 
 -- debugKT = true
@@ -989,7 +989,7 @@ elseif ArgTools == "fuelConsumption" then
 	miz:zipAddFile("l10n/DEFAULT/mapResource", "resFile.lua")
 
 	-- miz:zipAddFile("l10n/DEFAULT/GCIdata.lua", "GCIdata.lua")
-	miz:zipAddFile("l10n/DEFAULT/collectFuelData.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/collectFuelData.lua")
+	miz:zipAddFile("l10n/DEFAULT/collectFuelData.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/collectFuelData.lua")
 
 	miz:zipClose()
 
@@ -1145,9 +1145,9 @@ elseif ArgTools == "KillTarget" then
 
 		local active
 		repeat
-			dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")							--ce n'est pas un doublon, il faut garder les 2 Update
-			dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
-			dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
+			dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")							--ce n'est pas un doublon, il faut garder les 2 Update
+			dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+			dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
 
 
 
@@ -1268,9 +1268,9 @@ elseif ArgTools == "KillTarget" then
 
 
 
-			dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")		--ce n'est pas un doublon, il faut garder les 2 Update
-			dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
-			dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
+			dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")		--ce n'est pas un doublon, il faut garder les 2 Update
+			dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+			dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
 
 
 

@@ -360,9 +360,9 @@ trigFile:close()
 
 ChangePlane = true
 if Skipmission_flag then
-	dofile("../../../ScriptsMod."..versionPackageICM.."/BAT_SkipMission.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/BAT_SkipMission.lua")
 elseif Firstmission_flag then
-	dofile("../../../ScriptsMod."..versionPackageICM.."/BAT_FirstMission.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/BAT_FirstMission.lua")
 end
 
 

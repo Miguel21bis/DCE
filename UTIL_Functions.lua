@@ -24,6 +24,27 @@ versionDCE["UTIL_Functions.lua"] = "1.18.132"
 ------------------------------------------------------------------------------------------------------- 
 
 --variable global
+NameTheatreLower = ""
+NameTheatre  = ""
+AllIdGroup = {}
+AllIdUnit = {}
+UnitByName = {}						-- table de tous les unitId généré, utile pour placer le TACAN sur l'unitId qui est demandé avant la génération du l'unité
+Assigned_freq = {}
+MinPercentDestroyed = 95		----variable pour destructions batiment de DCS en pourcentage
+RayonDamaged = 50				----variable pour destructions batiment de DCS en metres
+
+Brief = {
+	red = {},
+	blue = {},
+}
+Briefing_text = ""
+
+-- par défaut, on assigne une valeur superieur au camp du joueur, qu'il soit rouge ou bleu.
+SkillWish = {
+	["red"] = 50,
+	["blue"] = 50,
+}
+
 DCS_Side = {"blue", "red", "neutrals"}
 
 DCS_ENI_Side = {
@@ -48,15 +69,6 @@ Attribut2Target = {
 }
 
 
-AllIdGroup = {}
-AllIdUnit = {}
-UnitByName = {}						-- table de tous les unitId généré, utile pour placer le TACAN sur l'unitId qui est demandé avant la génération du l'unité
-
--- UnitByName = UnitByName or {}						-- table de tous les unitId généré, utile pour placer le TACAN sur l'unitId qui est demandé avant la génération du l'unité
-
-
-
-Assigned_freq = {}
 
 Package_freq = {															--table to store frequencies assigned to packages
 	["blue"] = {
@@ -75,9 +87,6 @@ Package_freq = {															--table to store frequencies assigned to packages
 	},
 }
 
---variable pour destructions batiment de DCS
-MinPercentDestroyed = 95		--en pourcentage
-RayonDamaged = 50				--en metres
 
 --function to return txt whith carriage return
 function StringToTxt(text)
@@ -234,7 +243,7 @@ function TableSerialization(t, i, options)
 	elseif options == nil then
 		writeNumericTable = true -- Valeur par défaut si options n'est pas fourni
 	end
-	
+
     local crlf = ""
     local tab1 = string.rep("\t", i) -- Indentation
     local text = "\n" .. crlf .. tab1 .. "{\n" .. crlf
@@ -822,146 +831,230 @@ end
 
 
 --function to return subsequent IDs
+-- Gestion propre des IDs pour groupes et unités
 
-
---recupere les Id deja utilise pour ne pas creer de doublon
-function GetAllId()
-
-	AllIdGroupImport = false		--deprecate?
-	AllIdUnitImport = false		--deprecate?
-
-	local groupIdError = {}
-	local unitIdError = {}
-
-	--recupere les Id deja utilise pour ne pas creer de doublon
-	for coal_name,coal in pairs(oob_ground) do
-		for countryN, country in pairs(coal) do
-			for category, groups in pairs(country) do
-				if type(groups) == "table" and groups["group"]  then
-					for Ngroup, group in pairs(groups["group"]) do
-
-						if not AllIdGroup[group.groupId] then
-							AllIdGroup[group.groupId] = true
-							AllIdGroupImport = true
-						else
-							table.insert(groupIdError,group.groupId )
-							-- print("UtilF F1 found groupIdError ID "..tostring(group.groupId).." name: "..tostring(group.name))
-						end
-
-						for Nunit, unit in pairs(group.units) do
-
-							if not AllIdUnit[unit.unitId] then
-								AllIdUnit[unit.unitId] = true
-								AllIdUnitImport = true
-							else
-								table.insert(unitIdError, unit.unitId )
-								-- print("UtilF F2 found unitIdError ID "..tostring(unit.unitId).." name: "..tostring(unit.name))
-							end
-						end
-					end
-				end
-			end
-		end
-	end
-
-	if unitIdError and #unitIdError > 0 then
-		for errorN, IdError in pairs(unitIdError) do
-			for coal_name,coal in pairs(oob_ground) do
-				for countryN, country in pairs(coal) do
-					for category, groups in pairs(country) do
-						if type(groups) == "table" and groups["group"]  then
-							for Ngroup, group in pairs(groups["group"]) do
-								for Nunit, unit in pairs(group.units) do
-									if IdError == unit.unitId then
-										unit.unitId = GenerateIDUnit(unit.name)
-										if Debug.debug then
-											print("UtilF PP found NEW ID| "..tostring(unit.unitId).." |unit.NAME:| "..tostring(unit.name))
-										end
-									end
-								end
-							end
-						end
-					end
-				end
-			end
-			-- os.execute 'pause'
-		end
-	end
-
-	if groupIdError and #groupIdError > 0 then
-		for errorN, IdError in pairs(groupIdError) do
-			for coal_name,coal in pairs(oob_ground) do
-				for countryN, country in pairs(coal) do
-					for category, groups in pairs(country) do
-						if type(groups) == "table" and groups["group"]  then
-							for Ngroup, group in pairs(groups["group"]) do
-
-								if IdError == group.groupId then
-									group.groupId = GenerateIDGroup(group.name)
-									if Debug.debug then
-										print("UtilF PP found NEW ID| "..tostring(group.groupId).." |group.NAME:| "..tostring(group.name))
-									end
-								end
-
-							end
-						end
-					end
-				end
-			end
-		end
-	end
-
-end
-
-
+-- Initialisation des tables d'ID
+AllIdGroup = {}
+AllIdUnit = {}
+UnitByName = {}
 
 local idGroupCounter = 100000
-function GenerateIDGroup(name)
-	if not AllIdUnitImport or not AllIdGroupImport then
-		GetAllId()
-	end
-
-	local loop = 1
-	repeat
-		idGroupCounter = idGroupCounter + 1
-		loop = loop+1
-		-- if AllIdGroup[idGroupCounter] then
-		-- 	-- print("UtilF  GenerateIDGroup IDGroup déjà utilisé: "..tostring(idGroupCounter))
-		-- 	-- os.execute 'pause'
-		-- end
-	until not AllIdGroup[idGroupCounter] or loop > 5000
-	if loop > 5000 then
-		print("UtilF Bug GenerateIDGroup idGroupCounter "..tostring(idGroupCounter))
-		os.execute 'pause'
-	end
-	AllIdGroup[idGroupCounter] = true
-
-	-- print("UtilsF passe AA2 idGroupCounter "..idGroupCounter.." NAME: "..tostring(name))
-	return idGroupCounter
-end
-
 local idUnitCounter = 100000
-function GenerateIDUnit(name)
 
-	if not AllIdUnitImport or not AllIdGroupImport then
-		GetAllId()
-	end
-
-	local loop = 1
-	repeat
-		idUnitCounter = idUnitCounter + 1
-		loop = loop+1
-	until not AllIdUnit[idUnitCounter] or loop > 5000
-
-	if loop > 5000 then
-		print("UtilF Bug GenerateIDUnit loop > 5000 "..tostring(idUnitCounter))
-		os.execute 'pause'
-	end
-	AllIdUnit[idUnitCounter] = true
-	UnitByName[name] = idUnitCounter
-
-	return idUnitCounter
+-- Génère un nouvel ID de groupe unique
+function GenerateIDGroup(name)
+    repeat
+        idGroupCounter = idGroupCounter + 1
+    until not AllIdGroup[idGroupCounter]
+    AllIdGroup[idGroupCounter] = true
+    return idGroupCounter
 end
+
+-- Génère un nouvel ID d'unité unique
+function GenerateIDUnit(name)
+    repeat
+        idUnitCounter = idUnitCounter + 1
+    until not AllIdUnit[idUnitCounter]
+    AllIdUnit[idUnitCounter] = true
+    UnitByName[name] = idUnitCounter
+    return idUnitCounter
+end
+
+-- Fonction principale pour détecter et corriger les doublons
+function CheckAndFixAllIds()
+    -- Réinitialise les tables d'ID
+    AllIdGroup = {}
+    AllIdUnit = {}
+    UnitByName = {}
+
+    -- 1. Premier passage : collecte tous les IDs et détecte les doublons
+    local groupIdError = {}
+    local unitIdError = {}
+
+    for coalName, coal in pairs(oob_ground or {}) do
+        for countryN, country in pairs(coal or {}) do
+            for category, groups in pairs(country or {}) do
+                if type(groups) == "table" and groups["group"] then
+                    for groupN, group in pairs(groups["group"] or {}) do
+                        -- Vérifie les doublons de groupId
+                        if AllIdGroup[group.groupId] then
+                            table.insert(groupIdError, group)
+                        else
+                            AllIdGroup[group.groupId] = true
+                        end
+                        -- Vérifie les doublons de unitId
+                        for Nunit, unit in pairs(group.units or {}) do
+                            if AllIdUnit[unit.unitId] then
+                                table.insert(unitIdError, unit)
+                            else
+                                AllIdUnit[unit.unitId] = true
+                                UnitByName[unit.name] = unit.unitId
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    -- 2. Correction des doublons de groupId
+    for _, group in ipairs(groupIdError) do
+        group.groupId = GenerateIDGroup(group.name)
+        if Debug and Debug.debug then
+            print("Nouveau groupId attribué : "..tostring(group.groupId).." pour "..tostring(group.name))
+        end
+    end
+
+    -- 3. Correction des doublons de unitId
+    for _, unit in ipairs(unitIdError) do
+        unit.unitId = GenerateIDUnit(unit.name)
+        if Debug and Debug.debug then
+            print("Nouveau unitId attribué : "..tostring(unit.unitId).." pour "..tostring(unit.name))
+        end
+    end
+end
+
+-- -- Appel de la fonction principale
+-- CheckAndFixAllIds()
+
+-- --recupere les Id deja utilise pour ne pas creer de doublon
+-- function GetAllId()
+
+-- 	AllIdGroupImport = false		--deprecate?
+-- 	AllIdUnitImport = false		--deprecate?
+
+-- 	local groupIdError = {}
+-- 	local unitIdError = {}
+
+-- 	--recupere les Id deja utilise pour ne pas creer de doublon
+-- 	for coalName, coal in pairs(oob_ground) do
+-- 		for countryN, country in pairs(coal) do
+-- 			for category, groups in pairs(country) do
+-- 				if type(groups) == "table" and groups["group"]  then
+-- 					for groupN, group in pairs(groups["group"]) do
+
+-- 						if not AllIdGroup[group.groupId] then
+-- 							AllIdGroup[group.groupId] = true
+-- 							AllIdGroupImport = true
+-- 						else
+-- 							table.insert(groupIdError,group.groupId )
+-- 							-- print("UtilF F1 found groupIdError ID "..tostring(group.groupId).." name: "..tostring(group.name))
+-- 						end
+
+-- 						for Nunit, unit in pairs(group.units) do
+
+-- 							if not AllIdUnit[unit.unitId] then
+-- 								AllIdUnit[unit.unitId] = true
+-- 								AllIdUnitImport = true
+-- 							else
+-- 								table.insert(unitIdError, unit.unitId )
+-- 								-- print("UtilF F2 found unitIdError ID "..tostring(unit.unitId).." name: "..tostring(unit.name))
+-- 							end
+-- 						end
+-- 					end
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+
+-- 	if unitIdError and #unitIdError > 0 then
+-- 		for errorN, IdError in pairs(unitIdError) do
+-- 			for coal_name,coal in pairs(oob_ground) do
+-- 				for countryN, country in pairs(coal) do
+-- 					for category, groups in pairs(country) do
+-- 						if type(groups) == "table" and groups["group"]  then
+-- 							for Ngroup, group in pairs(groups["group"]) do
+-- 								for Nunit, unit in pairs(group.units) do
+-- 									if IdError == unit.unitId then
+-- 										unit.unitId = GenerateIDUnit(unit.name)
+-- 										if Debug.debug then
+-- 											print("UtilF PP found NEW ID| "..tostring(unit.unitId).." |unit.NAME:| "..tostring(unit.name))
+-- 										end
+-- 									end
+-- 								end
+-- 							end
+-- 						end
+-- 					end
+-- 				end
+-- 			end
+-- 			-- os.execute 'pause'
+-- 		end
+-- 	end
+
+-- 	if groupIdError and #groupIdError > 0 then
+-- 		for errorN, IdError in pairs(groupIdError) do
+-- 			for coal_name,coal in pairs(oob_ground) do
+-- 				for countryN, country in pairs(coal) do
+-- 					for category, groups in pairs(country) do
+-- 						if type(groups) == "table" and groups["group"]  then
+-- 							for Ngroup, group in pairs(groups["group"]) do
+
+-- 								if IdError == group.groupId then
+-- 									group.groupId = GenerateIDGroup(group.name)
+-- 									if Debug.debug then
+-- 										print("UtilF PP found NEW ID| "..tostring(group.groupId).." |group.NAME:| "..tostring(group.name))
+-- 									end
+-- 								end
+
+-- 							end
+-- 						end
+-- 					end
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+
+-- end
+
+
+
+-- local idGroupCounter = 100000
+-- function GenerateIDGroup(name)
+-- 	if not AllIdUnitImport or not AllIdGroupImport then
+-- 		GetAllId()
+-- 	end
+
+-- 	local loop = 1
+-- 	repeat
+-- 		idGroupCounter = idGroupCounter + 1
+-- 		loop = loop+1
+-- 		-- if AllIdGroup[idGroupCounter] then
+-- 		-- 	-- print("UtilF  GenerateIDGroup IDGroup déjà utilisé: "..tostring(idGroupCounter))
+-- 		-- 	-- os.execute 'pause'
+-- 		-- end
+-- 	until not AllIdGroup[idGroupCounter] or loop > 5000
+-- 	if loop > 5000 then
+-- 		print("UtilF Bug GenerateIDGroup idGroupCounter "..tostring(idGroupCounter))
+-- 		os.execute 'pause'
+-- 	end
+-- 	AllIdGroup[idGroupCounter] = true
+
+-- 	-- print("UtilsF passe AA2 idGroupCounter "..idGroupCounter.." NAME: "..tostring(name))
+-- 	return idGroupCounter
+-- end
+
+-- local idUnitCounter = 100000
+-- function GenerateIDUnit(name)
+
+-- 	if not AllIdUnitImport or not AllIdGroupImport then
+-- 		GetAllId()
+-- 	end
+
+-- 	local loop = 1
+-- 	repeat
+-- 		idUnitCounter = idUnitCounter + 1
+-- 		loop = loop+1
+-- 	until not AllIdUnit[idUnitCounter] or loop > 5000
+
+-- 	if loop > 5000 then
+-- 		print("UtilF Bug GenerateIDUnit loop > 5000 "..tostring(idUnitCounter))
+-- 		os.execute 'pause'
+-- 	end
+-- 	AllIdUnit[idUnitCounter] = true
+-- 	UnitByName[name] = idUnitCounter
+
+-- 	return idUnitCounter
+-- end
 
 -- id_counter = 100000
 -- function GenerateID()
@@ -1423,19 +1516,19 @@ function CreatePlageFrequency()																				--trouve une plage de frequen
 	}
 
 	-- modification M38.g (g: prise en compte des 3 bandes de fr�quence)(e: priority to the player's frequencies)
-	for side, oob_side in pairs(oob_air) do
-		for n, sqd in pairs(oob_side) do
+	for sideName, oob_side in pairs(oob_air) do
+		for squadronN, sqd in pairs(oob_side) do
 			if not sqd.inactive and sqd.player then
 				if frequency[sqd.type] then
 					for n = 1,  #frequency[sqd.type].radio do
 						for bandFreq, value in pairs(frequency[sqd.type].radio[n]) do
 							if bandFreq == "HF" or bandFreq == "VHF" or bandFreq == "UHF" or bandFreq == "LVHF"  then			--or bandFreq == "FM"					
 
-								if not tempRadio[side][n] then tempRadio[side][n] = {} end
-								if not tempRadio[side][n][bandFreq] then tempRadio[side][n][bandFreq] = {} end
+								if not tempRadio[sideName][n] then tempRadio[sideName][n] = {} end
+								if not tempRadio[sideName][n][bandFreq] then tempRadio[sideName][n][bandFreq] = {} end
 
-								tempRadio[side][n][bandFreq].min = value.min
-								tempRadio[side][n][bandFreq].max = value.max
+								tempRadio[sideName][n][bandFreq].min = value.min
+								tempRadio[sideName][n][bandFreq].max = value.max
 							end
 						end
 					end
@@ -2250,7 +2343,7 @@ local function buildsLoadout()
 		require("Init/db_loadouts")
 	else
 		-- charge le loadout central en premier pour avoir la table de code_loadout
-		dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_db_loadouts.lua")
+		dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_db_loadouts.lua")
 	end
 
 	-- Fonction pour compter les mots dans une chaîne
@@ -2455,7 +2548,7 @@ local function buildsLoadout()
 	-- end
 
 	--routine de verification des code campagne
-	-- dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_db_loadouts.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_db_loadouts.lua")
 
 	if campaigns_code_loadout and not addLoadoutsTag then
 		for planeType, plane  in pairs(db_loadouts) do
@@ -2823,7 +2916,7 @@ end
 
 function CheckConfModMaster()
 
-	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ConfModCheck.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua")
 	local confModCheck = {
 		mission_ini = mission_ini_check,
 		mission_forcedOptions = mission_forcedOptions_check,
@@ -2930,7 +3023,7 @@ function UpdateConfMod(setWeather, setDate)
 		if camp.weather and camp.weather.pHigh then
 			weather_override = camp.weather
 		else
-			dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ConfModCheck.lua")
+			dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua")
 			weather_override = mission_ini_check.weather
 
 		end
@@ -2938,7 +3031,7 @@ function UpdateConfMod(setWeather, setDate)
 		if camp.date and camp.date.year then
 			date_override = camp.date
 		else
-			dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ConfModCheck.lua")
+			dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua")
 			date_override = mission_ini_check.date
 
 		end
@@ -2949,7 +3042,7 @@ function UpdateConfMod(setWeather, setDate)
 			date_override = camp.date
 			print("date_override 3 ")
 		else
-			dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ConfModCheck.lua")
+			dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua")
 			date_override = mission_ini_check.date
 			print("date_override 4 ")
 		end
@@ -3260,12 +3353,12 @@ function UpdateConfMod(setWeather, setDate)
 			end
 		end
 
-		
+
 		if updatedConfig.mission_ini.date and date_override then
-			print("date_override 6 ")
+			-- print("date_override 6 ")
 			for key, forcedValue in pairs(date_override) do
 				updatedConfig.mission_ini.date[key] = forcedValue  -- **Écrase l'existant OU ajoute si absent**
-				print("date_override 7 ")
+				-- print("date_override 7 ")
 			end
 		end
 
@@ -3345,12 +3438,12 @@ function UpdateConfMod(setWeather, setDate)
 
 					key, value, comment = line:match('(%S+)%s*=%s*([^,%s]+)%s*,?%s*%-%-%s*(.*)')
 					-- print("F1a key: "..tostring(key).." value: |"..tostring(value).."|")
-					
+
 					if not key then
 						key, value = line:match('(%S+)%s*=%s*([^,%s]+)%s*,?%s*$') -- Capture sans commentaire
 						-- print("F1b key: "..tostring(key).." value: |"..tostring(value).."|")
 					end
-					
+
 
 					if key then
 						-- print("F1c key: "..tostring(key).." currentTable[key]: "..tostring(currentTable[key]).." value: |"..tostring(value).."|")
@@ -3438,7 +3531,7 @@ function UpdateConfMod(setWeather, setDate)
 
     -- Chemins des fichiers de configuration
     local clientConfigPath = "Init/conf_mod.lua"
-    local defaultConfigPath = "../../../ScriptsMod." .. versionPackageICM .. "/UTIL_ConfModCheck.lua"
+    local defaultConfigPath = "../../../ScriptsMod." .. VersionPackageICM .. "/UTIL_ConfModCheck.lua"
 
     -- Charger les fichiers de configuration client et par défaut
     local clientConfig, clientStructure = loadConfigWithStructure(clientConfigPath)
@@ -3473,7 +3566,7 @@ end
   --a function that automatically updates the conf_mod keeping as much as possible the old settings of the player
 function UpdateConfMod_OLD_INIT()
 
-	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ConfModCheck.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua")
 	local confModCheck = {
 		mission_ini = mission_ini_check,
 		mission_forcedOptions = mission_forcedOptions_check,
@@ -3483,7 +3576,7 @@ function UpdateConfMod_OLD_INIT()
 
 	}
 
-	local monfichier = io.open("../../../ScriptsMod."..versionPackageICM.."/UTIL_ConfModCheck.lua", "r")
+	local monfichier = io.open("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua", "r")
 
 	if not monfichier then return end
 
@@ -4459,11 +4552,11 @@ function CheckTarget(tgt, txt)
 	for sideName, targets in pairs(targetlist) do
 		for targetN, target in pairs(targets) do
 			if target.titleName  == tgt then
-				
+
 				print("UtilF CheckTarget |"..txt.."| |"..tgt.."| alive?: "..tostring(target.alive) )
-				
+
 				if target.elements and target.elements[1] then
-				
+
 					print("UtilF CheckTarget |"..txt.."| |"..target.elements[1].name.."| dead? "..tostring(target.elements[1].dead) )
 
 				end
@@ -4499,7 +4592,7 @@ function KillTarget(targetName, targetName2)
 						for unit_n,unit in pairs(group.units) do										--units table (number array)					
 							if not unit.dead then
 								if Debug.AfficheSol then print("DC_DT Kill "..unit.name) end
-							
+
 								unit.dead = true														--mark unit as dead in oob_ground
 								-- unit.dead_last = true													--mark unit as died in last mission
 								unit.CheckDay = camp.date.CampTotalTimeS
@@ -4514,7 +4607,7 @@ function KillTarget(targetName, targetName2)
 					if group.name == targetName or group.name == targetName2 then
 						for unit_n,unit in pairs(group.units) do									--units table (number array)
 							if Debug.AfficheSol then print("DC_DT Kill "..unit.name) end
-							
+
 							if not unit.dead then											--unit is not yet dead (some static objects that are spawned in a destroyed state are logged dead at mission start, these must be excluded here)
 								group.dead = true												--mark group as dead in oob_ground (static objects can be set as group.dead and spawned in a destroyed state)
 								group.hidden = true												--hide dead static object
@@ -4529,10 +4622,10 @@ function KillTarget(targetName, targetName2)
 			end
 			if country.ship then																--if country has ships
 				for group_n,group in pairs(country.ship.group) do								--groups table (number array)
-					if group.name == targetName or group.name == targetName2 then	
+					if group.name == targetName or group.name == targetName2 then
 						for unit_n,unit in pairs(group.units) do									--units table (number array)	
 							if Debug.AfficheSol then print("DC_DT Kill "..unit.name) end
-							
+
 							unit.dead = true													--mark unit as dead in oob_ground
 							-- unit.dead_last = true												--mark unit as died in last mission
 							unit.CheckDay = camp.date.CampTotalTimeS                              -- ajoute la date de destruction    Miguel21 modification M19 : Repair SAM   
@@ -4543,7 +4636,7 @@ function KillTarget(targetName, targetName2)
 			end
 		end
 	end
-	
+
 	-- if not findTarget then																		--if target was not found in oob_ground
 	-- 	print("Error(UtilFct) Target "..tostring(targetName).." or "..tostring(targetName2).." not found in oob_ground")
 	-- 	os.execute 'pause'
@@ -4551,19 +4644,19 @@ function KillTarget(targetName, targetName2)
 
 	for side_name, targets in pairs(targetlist) do											--iterate through targetlist
 		for targetN, target in pairs(targets) do										--iterate through targets
-			if target.titleName == targetName or target.titleName == targetName2 then	
+			if target.titleName == targetName or target.titleName == targetName2 then
 				if target.elements and target.elements[1].x then 						--if the target has subelements and is a scenery object target (element has x coordinate)
 					for element_n,element in pairs(target.elements) do					--iterate through target elements
 
 						if Debug.AfficheSol then print("DC_DT Kill __SCENERY__ "..element.name) end
-						element.dead = true	
-						element.CheckDay = camp.date.CampTotalTimeS  
+						element.dead = true
+						element.CheckDay = camp.date.CampTotalTimeS
 
 					end
 				end
 			end
 		end
-	end	
+	end
 end
 
 --rafraichit certain fichier si l'utilisateur avance le temps, cela permet de choisir les cibles rafraichi en fonction des triggers actif ou pas
@@ -4598,10 +4691,10 @@ function UpdateFilesAfterTimeJump()
 
 	require("Active/oob_ground")
 
-	dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
-	dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
-	dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
-	dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateOOBGround.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")
 
 
 	local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
@@ -4624,6 +4717,228 @@ function UpdateFilesAfterTimeJump()
 	local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to open debug file")
 	trigFile:write(trigStr)
 	trigFile:close()
+
+end
+
+function LoadFileAndUpdate()
+
+	----- unpack template mission file ----
+	local minizip = require('minizip')
+
+	local zipFile = minizip.unzOpen("Init/base_mission.miz", 'rb')
+
+	zipFile:unzLocateFile('mission')
+	local misStr = zipFile:unzReadAllCurrentFile()
+	local misStrFunc = loadstring(misStr)()
+
+	NameTheatreLower =  string.lower(mission.theatre)
+	NameTheatre =  mission.theatre
+
+	zipFile:unzClose()
+
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
+
+	if not oob_scen and Firstmission_flag then
+		require("Active/oob_scen")
+	end
+
+	
+	UpdateConfMod()
+
+	if Firstmission_flag then
+		ModifiCampInit()
+	end
+
+	--****************************************************************************************
+	--ajout automatique d'elements en cours de campagne: START
+	--****************************************************************************************
+
+
+	--********************************* targetlist ******************************************************
+	dofile("Init/targetlist_init.lua")
+	local targetlist_init = Deepcopy(targetlist)
+	if not targetlist_init.blue[1] then
+		TargetlistToNum(targetlist_init)
+	end
+
+	targetlist = nil
+
+	dofile("Active/targetlist.lua")
+	if not targetlist.blue[1] then
+		TargetlistToNum(targetlist)
+	end
+
+	local changes = CompareTargetLists(targetlist_init, targetlist)
+
+	-- Afficher les résultats
+	for _, added in ipairs(changes.added) do
+		print("Added TargetList: Name:", added.data.name)
+	end
+	-- for _, removed in ipairs(changes.removed) do
+	-- 	print("Removed TargetList: Name:", removed.data.name)
+	-- end
+
+	-- Ajout des éléments manquants dans targetlist
+	for _, added in ipairs(changes.added) do
+		if not targetlist[added.side] then
+			targetlist[added.side] = {}
+		end
+		-- Insérer l'élément à la fin de la table numérique
+		table.insert(targetlist[added.side], added.data)
+	end
+
+	-- -- Suppression des éléments retirés de targetlist
+	-- for _, removed in ipairs(changes.removed) do
+	-- 	if targetlist[removed.side] then
+	-- 		for i, target in ipairs(targetlist[removed.side]) do
+	-- 			if target.name == removed.name then
+	-- 				table.remove(targetlist[removed.side], i)
+	-- 				break
+	-- 			end
+	-- 		end
+	-- 	end
+	-- end
+
+	--********************************* camp_triggers ******************************************************
+	-- Charger les fichiers de référence et de travail
+	dofile("Init/camp_triggers_init.lua")
+	local camp_triggers_init = camp_triggers
+
+	dofile("Active/camp_triggers.lua")
+
+	-- Comparer les deux tables
+	changes = CompareTableNumeric(camp_triggers_init, camp_triggers)
+
+	-- Afficher les résultats
+	for _, added in ipairs(changes.added) do
+		print("Added triggers: Name:", added.name)
+	end
+	for _, removed in ipairs(changes.removed) do
+		print("Removed triggers: Name:", removed.name)
+	end
+
+	-- Ajouter les éléments manquants dans camp_triggers
+	for _, added in ipairs(changes.added) do
+		table.insert(camp_triggers, added)
+	end
+	-- Supprimer les éléments retirés de camp_triggers
+	for _, removed in ipairs(changes.removed) do
+		for i, trigger in ipairs(camp_triggers) do
+			if trigger.name == removed.name then
+				table.remove(camp_triggers, i)
+				break
+			end
+		end
+	end
+
+
+
+	--********************************* db_airbases ******************************************************
+	-- Charger les fichiers de référence et de travail
+	dofile("Init/db_airbases.lua")
+	local db_airbases_init = db_airbases
+
+	dofile("Active/db_airbases.lua")
+
+	-- Comparer les deux tables
+	changes = CompareTableAlphaNumeric(db_airbases_init, db_airbases)
+
+	-- Afficher les résultats
+	for _, added in ipairs(changes.added) do
+		print("\nAdded db_airbases Name:", added.name)
+	end
+	for _, removed in ipairs(changes.removed) do
+		print("\nRemoved db_airbases: Name:", removed.name)
+	end
+
+	-- Ajouter les éléments manquants dans db_airbases
+	for _, added in ipairs(changes.added) do
+		db_airbases[added.name] = added.data
+	end
+	-- Supprimer les éléments retirés de db_airbases
+	for _, removed in ipairs(changes.removed) do
+		db_airbases[removed.name] = nil
+	end
+
+	--****************************************************************************************
+	--ajout automatique d'elements en cours de campagne: FIN
+	--****************************************************************************************
+
+
+
+	-- Exécution du fichier s'il existe
+	local testFile = "Init/various_table.lua"
+	if FileExists(testFile) then
+		dofile(testFile)
+	end
+
+	for planeType, value in PairsByKeys(Data_divers) do
+		if value.playable then
+			Playable_m[planeType] = true
+		end
+	end
+
+	--si le joueur fait un saut temporel (via date dans conf_mod) on met a jour les fichiers de la campagne
+	if not Firstmission_flag then
+		UpdateFilesAfterTimeJump()
+	end
+
+
+
+	--**************INITIALEMENT DANS MAIN_NextMission *****************************
+	--**************INITIALEMENT DANS MAIN_NextMission *****************************
+	require("Active/oob_ground")
+	require("Init/conf_mod")
+
+	-- Si Active/camp_ZoneSAR n'existe pas, on le crée, sinon on le charge
+	local zoneSARFile = "../../../Missions/Campaigns/"..camp.title.."/Active/camp_ZoneSAR.lua"
+	local f = io.open(zoneSARFile, "r")
+	if f then
+		f:close()
+		require("Active/camp_ZoneSAR")
+	else
+		camp_ZoneSAR = { blue = {}, red = {}, neutrals = {} }
+	end
+
+
+
+	-- Recherche prioritaire du fichier UTIL_DataRadio dans ScriptsMod, sinon dans le dossier campagne
+	local radioFile = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua"
+	local radioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
+
+	local function try_dofile(path)
+		local f = io.open(path, "r")
+		if f then f:close(); dofile(path); return true end
+		return false
+	end
+
+	if not try_dofile(radioFile) then
+		try_dofile(radioFile2)
+	end
+
+	print("UTIL_F M targetlist: "..tostring(#targetlist.blue))
+
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CampaignSettings.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Refpoints.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_MissionScore.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
+
+	Check_TaskPossibleByPlane()
+
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Time.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_MoonPhase.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Weather.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+	--**************INITIALEMENT DANS MAIN_NextMission *****************************
+	--**************INITIALEMENT DANS MAIN_NextMission *****************************
 
 end
 

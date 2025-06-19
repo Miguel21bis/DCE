@@ -800,7 +800,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                     end
 
                     if camp.theatre and camp.theatre == "caucasus" then
-                        dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data_circleSAR_Caucasus.lua")
+                        dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data_circleSAR_Caucasus.lua")
 
                         element.theatreCercle = true
 

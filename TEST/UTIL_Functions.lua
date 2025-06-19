@@ -2152,7 +2152,7 @@ end
 
 function CheckConfModMaster()
 
-	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ConfModCheck.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua")
 	local confModCheck = {
 		mission_ini = mission_ini_check,
 		mission_forcedOptions = mission_forcedOptions_check,
@@ -2244,7 +2244,7 @@ end
   --a function that automatically updates the conf_mod keeping as much as possible the old settings of the player
 function UpdateConfMod()
 
-	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ConfModCheck.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua")
 	local confModCheck = {
 		mission_ini = mission_ini_check,
 		mission_forcedOptions = mission_forcedOptions_check,
@@ -2254,7 +2254,7 @@ function UpdateConfMod()
 
 	}
 
-	local monfichier = io.open("../../../ScriptsMod."..versionPackageICM.."/UTIL_ConfModCheck.lua", "r")
+	local monfichier = io.open("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua", "r")
 
 	if not monfichier then return end
 

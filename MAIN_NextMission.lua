@@ -47,17 +47,17 @@ versionDCE["MAIN_NextMission.lua"] = "1.36.216"
 -- -------------------------------------------------------------------------------------------------------	
 
 
-Brief = {
-	red = {},
-	blue = {},
-}
-Briefing_text = ""
+-- Brief = {
+-- 	red = {},
+-- 	blue = {},
+-- }
+-- Briefing_text = ""
 
--- par défaut, on assigne une valeur superieur au camp du joueur, qu'il soit rouge ou bleu.
-SkillWish = {
-	["red"] = 50,
-	["blue"] = 50,
-}
+-- -- par défaut, on assigne une valeur superieur au camp du joueur, qu'il soit rouge ou bleu.
+-- SkillWish = {
+-- 	["red"] = 50,
+-- 	["blue"] = 50,
+-- }
 
 PlacePA = {}
 AltitudeCruise = 5400			--for plane without hcruise
@@ -114,8 +114,8 @@ if mission.version < 19 then --19ok 18bad
 	os.exit()
 end
 
-NameTheatreLower =  string.lower(mission.theatre)
-NameTheatre =  mission.theatre
+-- NameTheatreLower =  string.lower(mission.theatre)
+-- NameTheatre =  mission.theatre
 
 
 local trig_n = #mission.trigrules + 1
@@ -147,9 +147,9 @@ mission.trigrules[trig_n] = {
 --attention, ne pas activer ici oob_scen, sinon cela ne prend pas en compte son update
 -- require("Active/oob_scen")
 
-if not oob_scen and Firstmission_flag then
-	require("Active/oob_scen")
-end
+-- if not oob_scen and Firstmission_flag then
+-- 	require("Active/oob_scen")
+-- end
 for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed scenery objects
 
 	if scen.x and scen.z then														--destroyed scenery object has x and z coordinates
@@ -481,9 +481,9 @@ end
 
 
 ----- run scripts to create content of next mission -----
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
 
 if 	not mission_ini  or mission_ini == nil  then
@@ -491,11 +491,11 @@ if 	not mission_ini  or mission_ini == nil  then
 end
 
 
-UpdateConfMod()
+-- UpdateConfMod()
 
-if Firstmission_flag then
-	ModifiCampInit()
-end
+-- if Firstmission_flag then
+-- 	ModifiCampInit()
+-- end
 
 local jammerOnBoard = {}
 for planeType, plane in pairs(Data_divers) do
@@ -544,20 +544,20 @@ else
 end
 
 
-local verScriptsModPath = "../../../ScriptsMod."..versionPackageICM.."/UTIL_Changelog.lua"
+local verScriptsModPath = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_Changelog.lua"
 local TestPath = io.open(verScriptsModPath, "r")
 if  TestPath ~= nil then
 	io.close(TestPath)
-	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Changelog.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Changelog.lua")
 	camp.ScriptsMod = versionDCE["UTIL_Changelog.lua"]
 
 else
 	--OBSOLETE
-	local verScriptsModPath = "../../../ScriptsMod."..versionPackageICM.."/UTIL_Version.lua"
+	local verScriptsModPath = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_Version.lua"
 	local TestPath = io.open(verScriptsModPath, "r")
 	if  TestPath ~= nil then
 		io.close(TestPath)
-		dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Version.lua")
+		dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Version.lua")
 		camp.ScriptsMod = version_ScriptsMod.ScriptsMod
 	end
 
@@ -569,7 +569,7 @@ if not camp.path or camp.path == nil then												-- modification M35.d versi
 end
 
 -- modification M35.d (d: info log) version ScriptsMod
-camp["versionPackageICM"] = versionPackageICM
+camp["VersionPackageICM"] = VersionPackageICM
 
 if Firstmission_flag then
 	camp["MissionFilename"] =  camp.title.."_first.miz"
@@ -577,79 +577,6 @@ else
 	camp["MissionFilename"] =  camp.title.."_ongoing.miz"
 end
 
-
--- if  campMod.selectLoadout == "init" then
--- 	require("Init/db_loadouts")
--- else
--- 	-- charge le loadout central en premier pour avoir la table de code_loadout
--- 	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_db_loadouts.lua")	
--- end
-
-
--- 	if add_campaigns_code_loadout then
--- 		for codeName , name in pairs(add_campaigns_code_loadout) do
--- 			if not campaigns_code_loadout[codeName] then
--- 				campaigns_code_loadout[codeName] = name
--- 			end
-
--- 		end
--- 	end
--- end
-
--- -- cherche le code a appliquer au loadout, pour charger le bon..loadout ^^
--- if (not ( campConfMod and  campConfMod.code_loadout) and campaigns_code_loadout )then 
--- 	campConfMod = {}
--- 	local maxOcc = 0
--- 	for codeName , name in pairs(campaigns_code_loadout) do			
--- 		local j = 0
--- 		if type(name) == "table" then
--- 			for i=1, #name do
--- 				if  string.find(string.lower(camp.title) , string.lower(name[i])) then
--- 					j = j +1 
--- 					if j == #name and #name > maxOcc then						-- il a trouv� toutes les occurences du nom
--- 						campConfMod.code_loadout = codeName
--- 						maxOcc = #name											--assigne le nomCode seulement � celui qui a le plus d'occurence
--- 					end
--- 				end
--- 			end
--- 		else
--- 			if  string.find(string.lower(camp.title) , string.lower(name)) then
--- 				campConfMod.code_loadout = codeName
--- 			end
--- 		end
--- 	end
--- end
-
--- -- if not campConfMod or not campConfMod.code_loadout or campMod.selectLoadout == "init" then
--- if campMod.selectLoadout == "init" then
--- 	require("Init/db_loadouts")
--- else
--- 	-- modification M49.a big central db_loadout
--- 	--construit la table loadout en fonction du loadout g�n�ral et de la campagne
--- 	db_loadouts = {}
-
-
-
-
-
--- -- modification M49.c big central db_loadout (c: loadout statistics)
--- local loadoutFile01 = "../../../Missions/Campaigns/"..camp.title.."/Active/Loadouts_archive.lua"
--- local TestPathloadout = io.open(loadoutFile01, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
--- if TestPathloadout == nil or Firstmission_flag then																	--check si le fichier existe dans ScriptsMod
--- 	local loadout_str = "Loadouts_archive = " .. TableSerialization(db_loadouts, 0)						--make a string
--- 	local loadoutFile = io.open(loadoutFile01, "w")	 or error("Failed to open loadoutFile file")
-
--- 	if not loadoutFile or loadoutFile == nil then
--- 		print("MainNM Tthis campaign folder  |"..camp.title.."|  does not exist ")
--- 		os.execute 'pause'
--- 	else
--- 		loadoutFile:write(loadout_str)
--- 		loadoutFile:close()
--- 	end
--- end
--- if TestPathloadout ~= nil then
--- 	TestPathloadout:close()
--- end
 
 -- Vérification et création du fichier de loadout
 local loadoutFile01 = "../../../Missions/Campaigns/" .. camp.title .. "/Active/Loadouts_archive.lua"
@@ -705,218 +632,62 @@ if TestPathADD_addData ~= nil  then														--check si le fichier existe da
 
 end
 
--- require("Active/oob_air") --deja appelé par skipmission et debriefMaster
-require("Active/oob_ground")
-require("Init/conf_mod")
-
-
---si Active/camp_ZoneSAR n'existe pas, on le créer
-local ZoneSARFile = "../../../Missions/Campaigns/"..camp.title.."/Active/camp_ZoneSAR.lua"
-local TestPathZoneSAR = io.open(ZoneSARFile, "r")										--cette maniere de chercher la presence d un fichier evite un plantage
-if TestPathZoneSAR == nil  then														--check si le fichier existe dans ScriptsMod
-
-	local camp_ZoneSAR = {
-        ["blue"] = {},
-        ["red"] = {},
-        ["neutrals"] = {},
-    }
-
-elseif ArgTools ~= "KillTarget" then	--TODO attention, controler si l'actualité des ejectedPilot soit bien mise à jour
-	require("Active/camp_ZoneSAR")
-end
---assign les callsign par squad west
+-- --assign les callsign par squad west
 AssignCallnameSquad()
 
 
---retrocompatibilie location UTIL_DataRadio file
---recherche en priorit� le fichier UTIL_DataRadio dans le dossier ScriptsMod puis dans le dossier campagne
-local RadioFile = "../../../ScriptsMod."..versionPackageICM.."/UTIL_DataRadio.lua"
-local TestPath = io.open(RadioFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
-if TestPath ~= nil then																					--check si le fichier existe dans ScriptsMod
-	io.close(TestPath)
-	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataRadio.lua")
-else
-	local RadioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
-	local TestPath2 = io.open(RadioFile2, "r")
-	if TestPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
-		io.close(TestPath2)
-		dofile(RadioFile2)
-	end
-end
 
--- print("MainNM F camp.date.day: "..tostring(camp.date.day))
+-- Appel de la fonction principale
+CheckAndFixAllIds()
 
-GetAllId()
+
 
 --****************************************************************************************
---ajout automatique d'elements en cours de campagne: START
---****************************************************************************************
---********************************* targetlist ******************************************************
-dofile("Init/targetlist_init.lua")
-local targetlist_init = targetlist
-if not targetlist_init.blue[1] then
-	TargetlistToNum(targetlist_init)
-end
-
-dofile("Active/targetlist.lua")
-if not targetlist.blue[1] then
-	TargetlistToNum(targetlist)
-end
-
-local changes = CompareTargetLists(targetlist_init, targetlist)
-
--- Afficher les résultats
-for _, added in ipairs(changes.added) do
-	print("Added TargetList: Name:", added.data.name)
-end
--- for _, removed in ipairs(changes.removed) do
--- 	print("Removed TargetList: Name:", removed.data.name)
--- end
-
--- Ajout des éléments manquants dans targetlist
-for _, added in ipairs(changes.added) do
-	if not targetlist[added.side] then
-		targetlist[added.side] = {}
-	end
-	-- Insérer l'élément à la fin de la table numérique
-	table.insert(targetlist[added.side], added.data)
-end
-
--- -- Suppression des éléments retirés de targetlist
--- for _, removed in ipairs(changes.removed) do
--- 	if targetlist[removed.side] then
--- 		for i, target in ipairs(targetlist[removed.side]) do
--- 			if target.name == removed.name then
--- 				table.remove(targetlist[removed.side], i)
--- 				break
--- 			end
--- 		end
--- 	end
--- end
-
---********************************* camp_triggers ******************************************************
--- Charger les fichiers de référence et de travail
-dofile("Init/camp_triggers_init.lua")
-local camp_triggers_init = camp_triggers
-
-dofile("Active/camp_triggers.lua")
-
--- Comparer les deux tables
-changes = CompareTableNumeric(camp_triggers_init, camp_triggers)
-
--- Afficher les résultats
-for _, added in ipairs(changes.added) do
-	print("Added triggers: Name:", added.name)
-end
-for _, removed in ipairs(changes.removed) do
-	print("Removed triggers: Name:", removed.name)
-end
-
--- Ajouter les éléments manquants dans camp_triggers
-for _, added in ipairs(changes.added) do
-	table.insert(camp_triggers, added)
-end
--- Supprimer les éléments retirés de camp_triggers
-for _, removed in ipairs(changes.removed) do
-	for i, trigger in ipairs(camp_triggers) do
-		if trigger.name == removed.name then
-			table.remove(camp_triggers, i)
-			break
-		end
-	end
-end
-
-
-
---********************************* db_airbases ******************************************************
--- Charger les fichiers de référence et de travail
-dofile("Init/db_airbases.lua")
-local db_airbases_init = db_airbases
-
-dofile("Active/db_airbases.lua")
-
--- Comparer les deux tables
-changes = CompareTableAlphaNumeric(db_airbases_init, db_airbases)
-
--- Afficher les résultats
-for _, added in ipairs(changes.added) do
-    print("\nAdded db_airbases Name:", added.name)
-end
-for _, removed in ipairs(changes.removed) do
-    print("\nRemoved db_airbases: Name:", removed.name)
-end
-
--- Ajouter les éléments manquants dans db_airbases
-for _, added in ipairs(changes.added) do
-    db_airbases[added.name] = added.data
-end
--- Supprimer les éléments retirés de db_airbases
-for _, removed in ipairs(changes.removed) do
-    db_airbases[removed.name] = nil
-end
-
---****************************************************************************************
---ajout automatique d'elements en cours de campagne: FIN
+--transferé dans UTIL_Fonctions LoadFileAndUpdate()
 --****************************************************************************************
 
--- require("Active/camp_triggers")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CampaignSettings.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Refpoints.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_MissionScore.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
 
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CampaignSettings.lua")				-- modification M52_a	modification of the campaign by the player
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Refpoints.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_MissionScore.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
+-- Check_TaskPossibleByPlane()
 
-Check_TaskPossibleByPlane()
-
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Time.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_MoonPhase.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Weather.lua")
--- dofile("../../../ScriptsMod."..versionPackageICM.."/DC_DestroyTarget.lua")					-- Mod26
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_NavalEnvironment.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateSAR.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/ATO_ThreatEvaluation.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_CheckTriggers.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Time.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_MoonPhase.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Weather.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 
 PayloadRestricted = makePayloadRestricted()
 
 
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
+dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
 
 if ArgTools == "KillTarget" then
-	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Divers.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Divers.lua")
 end
 
-dofile("../../../ScriptsMod."..versionPackageICM.."/ATO_ThreatEvaluation.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/ATO_RouteGenerator.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/ATO_Generator.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/ATO_PlayerAssign.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/ATO_Timing.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_AddPropAircraft.lua")		-- modification M17_f	add AddPropAircraft Option all type
-
--- local tgt_str = "targetlist = " .. TableSerialization(targetlist, 0)						--make a string
--- local tgtFile = io.open("Active/targetlist.lua", "w") or error("Failed to open debug file")
--- tgtFile:write(tgt_str)																		--save new data
--- tgtFile:close()
-
-dofile("../../../ScriptsMod."..versionPackageICM.."/ATO_FlightPlan.lua")
-
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_StaticAircraft.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Prune.lua")					-- Tomsk modification M09 Integration de  Prune Script
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_Briefing.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_RouteGenerator.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Generator.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_PlayerAssign.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Timing.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_AddPropAircraft.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_FlightPlan.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_StaticAircraft.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Prune.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Briefing.lua")
 
 
---supprime l'ancien fichier
---recherche Debug/BugList.lua
-local testFile = "Debug/BugList.lua"
-local TestPath = io.open(testFile, "r")										--cette maniere de chercer la presence d un fichier evite un plantage
-if TestPath ~= nil then														--check si le fichier existe 
-	io.close(TestPath)
-	os.remove("Debug/BugList.lua")
-end
+-- Supprime le fichier sans vérifier s'il existe
+os.remove("Debug/BugList.lua")
 
 if BugList and type(BugList) == "table" and #BugList >= 1 then
 	local table_Str = "BugList = " .. TableSerialization(BugList, 0)
@@ -924,7 +695,7 @@ if BugList and type(BugList) == "table" and #BugList >= 1 then
 	bugFile:write(table_Str)
 	bugFile:close()
 end
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Debug.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Debug.lua")
 
 
 camp["groundthreats"] = groundthreats
@@ -1290,7 +1061,7 @@ end
 camp.waitingNextGen = false
 
 if not (EndCampaign or camp.endCampaign )then
-	dofile("../../../ScriptsMod."..versionPackageICM.."/DC_EndCampaign.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_EndCampaign.lua")
 end
 
 if ListRequiredModules then
@@ -1431,35 +1202,35 @@ miz:zipAddFile("options", "optFile.lua")
 miz:zipAddFile("warehouses", "warFile.lua")
 miz:zipAddFile("l10n/DEFAULT/dictionary", "dicFile.lua")
 miz:zipAddFile("l10n/DEFAULT/mapResource", "resFile.lua")
-miz:zipAddFile("l10n/DEFAULT/EventsTracker.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/EventsTracker.lua")
+miz:zipAddFile("l10n/DEFAULT/EventsTracker.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/EventsTracker.lua")
 miz:zipAddFile("l10n/DEFAULT/GCIdata.lua", "GCIdata.lua")
-miz:zipAddFile("l10n/DEFAULT/GCIscript.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/GCIscript.lua")
-miz:zipAddFile("l10n/DEFAULT/ARM_Defence_Script.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/ARM_Defence_Script.lua")
-miz:zipAddFile("l10n/DEFAULT/CustomTasksScript.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/CustomTasksScript.lua")
-miz:zipAddFile("l10n/DEFAULT/AirGroundAttackScript.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/AirGroundAttackScript.lua")
-miz:zipAddFile("l10n/DEFAULT/CarrierIntoWindScript.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/CarrierIntoWindScript.lua")
-miz:zipAddFile("l10n/DEFAULT/AddCommandRadioF10.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/AddCommandRadioF10.lua")				-- Modification M29
-miz:zipAddFile("l10n/DEFAULT/Fuel_Check.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/Fuel_Check.lua")								-- Norman99 modification M57_a
-miz:zipAddFile("l10n/DEFAULT/ATC_ShutUp_GENERIC.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/ATC_ShutUp_GENERIC.lua")				-- Psyko modification M59_a
-miz:zipAddFile("l10n/DEFAULT/Pedro.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/Pedro.lua")										-- Pedro TEST
+miz:zipAddFile("l10n/DEFAULT/GCIscript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/GCIscript.lua")
+miz:zipAddFile("l10n/DEFAULT/ARM_Defence_Script.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ARM_Defence_Script.lua")
+miz:zipAddFile("l10n/DEFAULT/CustomTasksScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CustomTasksScript.lua")
+miz:zipAddFile("l10n/DEFAULT/AirGroundAttackScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/AirGroundAttackScript.lua")
+miz:zipAddFile("l10n/DEFAULT/CarrierIntoWindScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CarrierIntoWindScript.lua")
+miz:zipAddFile("l10n/DEFAULT/AddCommandRadioF10.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/AddCommandRadioF10.lua")				-- Modification M29
+miz:zipAddFile("l10n/DEFAULT/Fuel_Check.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Fuel_Check.lua")								-- Norman99 modification M57_a
+miz:zipAddFile("l10n/DEFAULT/ATC_ShutUp_GENERIC.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ATC_ShutUp_GENERIC.lua")				-- Psyko modification M59_a
+miz:zipAddFile("l10n/DEFAULT/Pedro.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Pedro.lua")										-- Pedro TEST
 miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "Active/camp_status.lua")
 miz:zipAddFile("l10n/DEFAULT/debugGenMission.txt", "Debug/debugGenMission.txt")
 miz:zipAddFile("l10n/DEFAULT/debugFlight.txt", "Debug/debugFlight.txt")
-miz:zipAddFile("l10n/DEFAULT/SAR.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/SAR.lua")
-miz:zipAddFile("l10n/DEFAULT/Cercle_City.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/Cercle_City.lua")
-miz:zipAddFile("l10n/DEFAULT/bombOnRunway.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/bombOnRunway.lua")
-miz:zipAddFile("l10n/DEFAULT/CG_ArtySpotter.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/CG_ArtySpotter.lua")
+miz:zipAddFile("l10n/DEFAULT/SAR.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/SAR.lua")
+miz:zipAddFile("l10n/DEFAULT/Cercle_City.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Cercle_City.lua")
+miz:zipAddFile("l10n/DEFAULT/bombOnRunway.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/bombOnRunway.lua")
+miz:zipAddFile("l10n/DEFAULT/CG_ArtySpotter.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CG_ArtySpotter.lua")
 
 
-miz:zipAddFile("l10n/DEFAULT/beacon.ogg", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/beacon.ogg")											-- modification M60 CTLD
-miz:zipAddFile("l10n/DEFAULT/beaconsilent.ogg", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/beaconsilent.ogg")
-miz:zipAddFile("l10n/DEFAULT/ejectionRadioBeacon.ogg", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/ejectionRadioBeacon.ogg")
+miz:zipAddFile("l10n/DEFAULT/beacon.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/beacon.ogg")											-- modification M60 CTLD
+miz:zipAddFile("l10n/DEFAULT/beaconsilent.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/beaconsilent.ogg")
+miz:zipAddFile("l10n/DEFAULT/ejectionRadioBeacon.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ejectionRadioBeacon.ogg")
 
 if mission_ini.load_mist then
-	miz:zipAddFile("l10n/DEFAULT/mist.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/mist.lua")											-- modification M60 CTLD
+	miz:zipAddFile("l10n/DEFAULT/mist.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/mist.lua")											-- modification M60 CTLD
 end
 if mission_ini.load_CTLD then
-	miz:zipAddFile("l10n/DEFAULT/CTLD.lua", "../../../ScriptsMod."..versionPackageICM.."/Mission Scripts/CTLD.lua")											-- modification M60 CTLD
+	miz:zipAddFile("l10n/DEFAULT/CTLD.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CTLD.lua")											-- modification M60 CTLD
 end
 
 

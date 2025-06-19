@@ -25,6 +25,7 @@ versionDCE["DEBRIEF_Master.lua"] = "1.17.137"
 -------------------------------------------------------------------------------------------------------
 
 BugList = {}
+Playable_m = {}
 AcceptedMission = false
 MissionInstance = 0
 TimeAlreadyAdded = false
@@ -71,8 +72,8 @@ dofile("Init/conf_mod.lua")
 
 --load mission export files
 local testNamePath = "camp_status.lua"
-local TestPath = io.open(testNamePath, "r")
-if  TestPath == nil then
+local testPath = io.open(testNamePath, "r")
+if testPath == nil then
 	local txt = "DEBUG_DebriefMission is a utility that allows you to resume the script at the end of a mission\
 	But it needs the temporary mission end files, which are not present here.\
 	\
@@ -100,17 +101,16 @@ if testPath ~= nil then																					--check si le fichier existe dans Sc
 end
 
 
-versionPackageICM = camp.versionPackageICM
+VersionPackageICM = camp.VersionPackageICM
 
-if not versionPackageICM or versionPackageICM == nil then										-- modification M35.d version ScriptsMod
-	versionPackageICM = os.getenv('versionPackageICM')											-- modification M35.c version ScriptsMod
+if not VersionPackageICM or VersionPackageICM == nil then										-- modification M35.d version ScriptsMod
+	VersionPackageICM = os.getenv('VersionPackageICM')											-- modification M35.c version ScriptsMod
 end
 
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
+camp.timeJump = nil
 
--- print("Actual time (DebriefMaster B): " .. FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year .. ".\n")
+
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
 UpdateConfMod()
 
@@ -118,131 +118,131 @@ UpdateConfMod()
 require("Active/oob_ground")																	--load ground oob
 require("Active/oob_air")																		--load air oob
 
---****************************************************************************************
---ajout automatique d'elements en cours de campagne: START
---****************************************************************************************
---********************************* targetlist ******************************************************
-dofile("Init/targetlist_init.lua")
-local targetlist_init = targetlist
-if not targetlist_init.blue[1] then
-	TargetlistToNum(targetlist_init)
-end
-
-dofile("Active/targetlist.lua")
-if not targetlist.blue[1] then
-	TargetlistToNum(targetlist)
-end
-
-local changes = CompareTargetLists(targetlist_init, targetlist)
-
--- Afficher les résultats
-for _, added in ipairs(changes.added) do
-	print("Added TargetList: Name:", added.data.name)
-end
--- for _, removed in ipairs(changes.removed) do
--- 	print("Removed TargetList: Name:", removed.data.name)
+-- --****************************************************************************************
+-- --ajout automatique d'elements en cours de campagne: START
+-- --****************************************************************************************
+-- --********************************* targetlist ******************************************************
+-- dofile("Init/targetlist_init.lua")
+-- local targetlist_init = targetlist
+-- if not targetlist_init.blue[1] then
+-- 	TargetlistToNum(targetlist_init)
 -- end
 
--- Ajout des éléments manquants dans targetlist
-for _, added in ipairs(changes.added) do
-	if not targetlist[added.side] then
-		targetlist[added.side] = {}
-	end
-	-- Insérer l'élément à la fin de la table numérique
-	table.insert(targetlist[added.side], added.data)
-end
+-- dofile("Active/targetlist.lua")
+-- if not targetlist.blue[1] then
+-- 	TargetlistToNum(targetlist)
+-- end
 
--- -- Suppression des éléments retirés de targetlist
+-- local changes = CompareTargetLists(targetlist_init, targetlist)
+
+-- -- Afficher les résultats
+-- for _, added in ipairs(changes.added) do
+-- 	print("Added TargetList: Name:", added.data.name)
+-- end
+-- -- for _, removed in ipairs(changes.removed) do
+-- -- 	print("Removed TargetList: Name:", removed.data.name)
+-- -- end
+
+-- -- Ajout des éléments manquants dans targetlist
+-- for _, added in ipairs(changes.added) do
+-- 	if not targetlist[added.side] then
+-- 		targetlist[added.side] = {}
+-- 	end
+-- 	-- Insérer l'élément à la fin de la table numérique
+-- 	table.insert(targetlist[added.side], added.data)
+-- end
+
+-- -- -- Suppression des éléments retirés de targetlist
+-- -- for _, removed in ipairs(changes.removed) do
+-- -- 	if targetlist[removed.side] then
+-- -- 		for i, target in ipairs(targetlist[removed.side]) do
+-- -- 			if target.name == removed.name then
+-- -- 				table.remove(targetlist[removed.side], i)
+-- -- 				break
+-- -- 			end
+-- -- 		end
+-- -- 	end
+-- -- end
+
+-- local tgt_str = "targetlist = " .. TableSerialization(targetlist, 0)						--make a string
+-- local tgtFile = io.open("Active/targetlist.lua", "w") or error("Failed to open debug file")
+-- tgtFile:write(tgt_str)																		--save new data
+-- tgtFile:close()
+
+-- --********************************* camp_triggers ******************************************************
+-- -- Charger les fichiers de référence et de travail
+-- dofile("Init/camp_triggers_init.lua")
+-- local camp_triggers_init = camp_triggers
+
+-- dofile("Active/camp_triggers.lua")
+
+-- -- Comparer les deux tables
+-- changes = CompareTableNumeric(camp_triggers_init, camp_triggers)
+
+-- -- Afficher les résultats
+-- for _, added in ipairs(changes.added) do
+-- 	print("Added triggers: Name:", added.name)
+-- end
 -- for _, removed in ipairs(changes.removed) do
--- 	if targetlist[removed.side] then
--- 		for i, target in ipairs(targetlist[removed.side]) do
--- 			if target.name == removed.name then
--- 				table.remove(targetlist[removed.side], i)
--- 				break
--- 			end
+-- 	print("Removed triggers: Name:", removed.name)
+-- end
+
+-- -- Ajouter les éléments manquants dans camp_triggers
+-- for _, added in ipairs(changes.added) do
+-- 	table.insert(camp_triggers, added)
+-- end
+-- -- Supprimer les éléments retirés de camp_triggers
+-- for _, removed in ipairs(changes.removed) do
+-- 	for i, trigger in ipairs(camp_triggers) do
+-- 		if trigger.name == removed.name then
+-- 			table.remove(camp_triggers, i)
+-- 			break
 -- 		end
 -- 	end
 -- end
 
-local tgt_str = "targetlist = " .. TableSerialization(targetlist, 0)						--make a string
-local tgtFile = io.open("Active/targetlist.lua", "w") or error("Failed to open debug file")
-tgtFile:write(tgt_str)																		--save new data
-tgtFile:close()
+-- local trigStr = "camp_triggers = " .. TableSerializationAG_triggers(camp_triggers, 0)
+-- local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to open debug file")
+-- trigFile:write(trigStr)
+-- trigFile:close()
 
---********************************* camp_triggers ******************************************************
--- Charger les fichiers de référence et de travail
-dofile("Init/camp_triggers_init.lua")
-local camp_triggers_init = camp_triggers
+-- --********************************* db_airbases ******************************************************
+-- -- Charger les fichiers de référence et de travail
+-- dofile("Init/db_airbases.lua")
+-- local db_airbases_init = db_airbases
 
-dofile("Active/camp_triggers.lua")
+-- dofile("Active/db_airbases.lua")
 
--- Comparer les deux tables
-changes = CompareTableNumeric(camp_triggers_init, camp_triggers)
+-- -- Comparer les deux tables
+-- changes = CompareTableAlphaNumeric(db_airbases_init, db_airbases)
 
--- Afficher les résultats
-for _, added in ipairs(changes.added) do
-	print("Added triggers: Name:", added.name)
-end
-for _, removed in ipairs(changes.removed) do
-	print("Removed triggers: Name:", removed.name)
-end
+-- -- Afficher les résultats
+-- for _, added in ipairs(changes.added) do
+--     print("\nAdded db_airbases Name:", added.name)
+-- end
+-- for _, removed in ipairs(changes.removed) do
+--     print("\nRemoved db_airbases: Name:", removed.name)
+-- end
 
--- Ajouter les éléments manquants dans camp_triggers
-for _, added in ipairs(changes.added) do
-	table.insert(camp_triggers, added)
-end
--- Supprimer les éléments retirés de camp_triggers
-for _, removed in ipairs(changes.removed) do
-	for i, trigger in ipairs(camp_triggers) do
-		if trigger.name == removed.name then
-			table.remove(camp_triggers, i)
-			break
-		end
-	end
-end
+-- -- Ajouter les éléments manquants dans db_airbases
+-- for _, added in ipairs(changes.added) do
+--     db_airbases[added.name] = added.data
+-- end
+-- -- Supprimer les éléments retirés de db_airbases
+-- for _, removed in ipairs(changes.removed) do
+--     db_airbases[removed.name] = nil
+-- end
 
-local trigStr = "camp_triggers = " .. TableSerializationAG_triggers(camp_triggers, 0)
-local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to open debug file")
-trigFile:write(trigStr)
-trigFile:close()
+-- -- print("Actual time (DebriefMaster C): " .. FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year .. ".\n")
 
---********************************* db_airbases ******************************************************
--- Charger les fichiers de référence et de travail
-dofile("Init/db_airbases.lua")
-local db_airbases_init = db_airbases
+-- local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
+-- local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
+-- trigFile:write(airbases_Str)
+-- trigFile:close()
 
-dofile("Active/db_airbases.lua")
-
--- Comparer les deux tables
-changes = CompareTableAlphaNumeric(db_airbases_init, db_airbases)
-
--- Afficher les résultats
-for _, added in ipairs(changes.added) do
-    print("\nAdded db_airbases Name:", added.name)
-end
-for _, removed in ipairs(changes.removed) do
-    print("\nRemoved db_airbases: Name:", removed.name)
-end
-
--- Ajouter les éléments manquants dans db_airbases
-for _, added in ipairs(changes.added) do
-    db_airbases[added.name] = added.data
-end
--- Supprimer les éléments retirés de db_airbases
-for _, removed in ipairs(changes.removed) do
-    db_airbases[removed.name] = nil
-end
-
--- print("Actual time (DebriefMaster C): " .. FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year .. ".\n")
-
-local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
-local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
-trigFile:write(airbases_Str)
-trigFile:close()
-
---****************************************************************************************
---ajout automatique d'elements en cours de campagne: FIN
---****************************************************************************************
+-- --****************************************************************************************
+-- --ajout automatique d'elements en cours de campagne: FIN
+-- --****************************************************************************************
 
 -- Exécution du fichier s'il existe
 local testFile = "Init/various_table.lua"
@@ -254,19 +254,60 @@ require("Active/clientstats")																	--load clientstats
 
 --camp_ZoneSAR = {
 local zoneSARFile = "Active/camp_ZoneSAR.lua"
-local TestPath = io.open(zoneSARFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
-if TestPath ~= nil then																					--check si le fichier existe dans ScriptsMod
-	io.close(TestPath)
+local testPath = io.open(zoneSARFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
+if testPath ~= nil then																					--check si le fichier existe dans ScriptsMod
+	io.close(testPath)
 	require("Active/camp_ZoneSAR")																--zoneSAR
 end
 
-Playable_m = {}
 
-for planeType, value in PairsByKeys(Data_divers) do
-	if value.playable then
-		Playable_m[planeType] = true
+-- dofile("Init/conf_mod.lua")
+
+--ne pas supprimer, utile pour le fichier statsevaluation
+dofile("Active/db_airbases.lua")
+dofile("Active/targetlist.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
+
+--run log evaluation and status updates
+dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_StatsEvaluation.lua")
+dofile("Active/oob_scen.lua")
+
+--il faut laisser cette ligne, sinon le double appel crée un pb de alive_last
+dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+
+
+--create and view Debriefing file for mission
+dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
+local debriefFile = io.open("Debriefing/Debriefing " .. camp.mission .. ".txt", "w") or error("Failed to open debug file")
+debriefFile:write(Debriefing)																	--write Debriefing text into file (variable Debriefing comes from DEBRIEF_Text.lua)
+debriefFile:close()
+os.execute('start "Debriefing" "notepad.exe" "Debriefing/Debriefing ' .. camp.mission .. '.txt"')	--open the Debriefing file with notepad
+
+
+local showVersion = VersionPackageICM
+
+local changelogPath = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_Changelog.lua"
+local f = io.open(changelogPath, "r")
+if f then
+	f:close()
+	dofile(changelogPath)
+	if versionDCE and versionDCE["UTIL_Changelog.lua"] then
+		showVersion = showVersion.." ("..versionDCE["UTIL_Changelog.lua"]..")"
+	elseif versionDCE and versionDCE["UTIL_Changelog.txt"] then
+		showVersion = showVersion.." ("..versionDCE["UTIL_Changelog.txt"]..")"
 	end
 end
+
+
+
+
+--***********NEW function***************--
+--***********NEW function***************--
+LoadFileAndUpdate()
+--***********NEW function***************--
+--***********NEW function***************--
+
 
 	--Compare les noms des bases de DCS avec ceux enregistré dans DCE		[1] = 
 		-- {
@@ -310,39 +351,13 @@ if Debug.debug then
 end
 
 
+-- Playable_m = {}
 
-dofile("Init/conf_mod.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Data.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_DataMap.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Functions.lua")
-
-
---run log evaluation and status updates
-dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_StatsEvaluation.lua")
-dofile("Active/oob_scen.lua")
-dofile("../../../ScriptsMod."..versionPackageICM.."/DC_UpdateTargetlist.lua")
-
---create and view Debriefing file for mission
-dofile("../../../ScriptsMod."..versionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
-local debriefFile = io.open("Debriefing/Debriefing " .. camp.mission .. ".txt", "w") or error("Failed to open debug file")
-debriefFile:write(Debriefing)																	--write Debriefing text into file (variable Debriefing comes from DEBRIEF_Text.lua)
-debriefFile:close()
-os.execute('start "Debriefing" "notepad.exe" "Debriefing/Debriefing ' .. camp.mission .. '.txt"')	--open the Debriefing file with notepad
-
-
-local showVersion = versionPackageICM
-
-local verScriptsModPath = "../../../ScriptsMod."..versionPackageICM.."/UTIL_Changelog.lua"
-local testPath = io.open(verScriptsModPath, "r")
-if  testPath ~= nil then
-	io.close(testPath)
-	dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_Changelog.lua")
-	if versionDCE then
-		showVersion = showVersion.." ("..versionDCE["UTIL_Changelog.lua"]..")"
-	elseif VersionDCE then
-		showVersion = showVersion.." ("..versionDCE["UTIL_Changelog.txt"]..")"
-	end
-end
+-- for planeType, value in PairsByKeys(Data_divers) do
+-- 	if value.playable then
+-- 		Playable_m[planeType] = true
+-- 	end
+-- end
 
 --affiche le type d'avion selectionné et son squadrons M55_a
 local playerInfo = {
@@ -362,7 +377,7 @@ for side, squadTL in  PairsByKeys(oob_air) do
 	end
 end
 
-if versionPackageICM then
+if VersionPackageICM then
 	-- print("= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." = = = = = = = = = = = = = = = = = =")
 	-- print("= = = = = = = = = = = = = = Version: "..tostring(camp.version))
 	-- print("= = = = = = = = = = = = = Script: "..showVersion)
@@ -423,7 +438,7 @@ if input == "y" or input == "yes" then
 	-- Briefing_oob_text_blue = FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year).. ".\n"
 
 	
-	dofile("../../../ScriptsMod."..versionPackageICM.."/MAIN_AcceptMission.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_AcceptMission.lua")
 
 else
 
@@ -771,7 +786,7 @@ if input == "y" or input == "yes" then
 		  SinglePlayer = true
 		  SingleWithDServer = true
 		elseif choix1 == "c" then
-			dofile("../../../ScriptsMod."..versionPackageICM.."/UTIL_ChangePlane.lua")
+			dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ChangePlane.lua")
 		end
 
 	until tabIndex01[choix1]
@@ -791,7 +806,7 @@ if input == "y" or input == "yes" then
 		print("Generating Next Mission.\n")
 
 		MissionInstance = MissionInstance + 1													--count the number of times the mission is generated															   
-		dofile("../../../ScriptsMod."..versionPackageICM.."/MAIN_NextMission.lua")											--generate next mission
+		dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_NextMission.lua")											--generate next mission
 
 		AcceptedMission = false
 

@@ -1745,7 +1745,7 @@ end
 
 function AFAC_F10(playerGroup)
 	--1677: Group doesn't exist
-	local gpGid = playerGroup:getID()
+	local gpGid = playerGroup:getID()		--ERROR 1748: Group doesn't exist
 
 	missionCommands.removeItemForGroup(gpGid, {"AFAC"})
 

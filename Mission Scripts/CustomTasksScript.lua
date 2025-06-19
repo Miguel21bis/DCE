@@ -2782,7 +2782,7 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 					}
 				end
 
-				cntrl:pushTask(task_entry)
+				cntrl:pushTask(task_entry)		--ERROR 2785: Task id missed
 
 
 				-- if camp.debug then
