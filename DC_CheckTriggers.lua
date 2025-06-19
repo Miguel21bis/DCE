@@ -1438,97 +1438,101 @@ Action = {}
 
 				if target.alive and attribut ~= "runway"  then
 
-					if target.elements   then
+					if target.elements then
 						for e = 1, #target.elements do
-							local temp_dead = nil
-							local temp_dead_last = nil
-							local temp_CheckDay = nil
-							local forcedReAlive = false
+							if target.elements[e] then
+								
+								
+								local temp_dead = nil
+								local temp_dead_last = nil
+								local temp_CheckDay = nil
+								local forcedReAlive = false
 
-							if target.elements[e].dead then
-								temp_dead = target.elements[e].dead
-								temp_dead_last = target.elements[e].dead_last
-								temp_CheckDay = target.elements[e].CheckDay
-							end
-
-							--TODO: 1. empecher que les réparations se fassent 2 fois entre chaque génération de misssion -tentative de génération
-							-- TODO: 2. le % alive de l'ensemble d'un target n'est pas bon
-
-							if  target.alive < 100 and target.alive >= minimumRepairThreshold then
 								if target.elements[e].dead then
-									if target.elements[e].CheckDay then
-										local repairInterval = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][3] * 3600
-										local lastCheck = target.elements[e].CheckDay
+									temp_dead = target.elements[e].dead
+									temp_dead_last = target.elements[e].dead_last
+									temp_CheckDay = target.elements[e].CheckDay
+								end
 
-										-- Boucle sur chaque intervalle de réparation entre CheckDay et maintenant
-										while lastCheck + repairInterval <= CampTotalTimeS do
+								--TODO: 1. empecher que les réparations se fassent 2 fois entre chaque génération de misssion -tentative de génération
+								-- TODO: 2. le % alive de l'ensemble d'un target n'est pas bon
 
-											lastCheck = lastCheck + repairInterval
-											local test_prob = math.random(1,100)
+								if  target.alive < 100 and target.alive >= minimumRepairThreshold then
+									if target.elements[e].dead then
+										if target.elements[e].CheckDay then
+											local repairInterval = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][3] * 3600
+											local lastCheck = target.elements[e].CheckDay
 
-											if test_prob <= repairChance then
-												forcedReAlive = true
-												temp_dead = nil
-												temp_dead_last = false
-												temp_CheckDay = nil
+											-- Boucle sur chaque intervalle de réparation entre CheckDay et maintenant
+											while lastCheck + repairInterval <= CampTotalTimeS do
 
-												local text = "" .. target.elements[e].name .. " from ".. target.titleName .. " have been repaired and returned back to service. \n \n"
+												lastCheck = lastCheck + repairInterval
+												local test_prob = math.random(1,100)
 
-												if side_name == "blue" then
-													Briefing_oob_text_blue = Briefing_oob_text_blue .. text
-												elseif side_name == "red" then
-													Briefing_oob_text_red = Briefing_oob_text_red .. text
+												if test_prob <= repairChance then
+													forcedReAlive = true
+													temp_dead = nil
+													temp_dead_last = false
+													temp_CheckDay = nil
+
+													local text = "" .. target.elements[e].name .. " from ".. target.titleName .. " have been repaired and returned back to service. \n \n"
+
+													if side_name == "blue" then
+														Briefing_oob_text_blue = Briefing_oob_text_blue .. text
+													elseif side_name == "red" then
+														Briefing_oob_text_red = Briefing_oob_text_red .. text
+													end
+
+													target.elements[e].dead = nil
+													target.elements[e].CheckDay = nil
+													target.alive = math.floor(target.alive + (1/#target.elements *100))
+													if target.alive > 100 then target.alive = 100 end
+
+													target.alive_last = math.floor(target.alive_last -  (1/#target.elements *100))
+													if target.alive_last < 0 then  target.alive_last = 0 end
+
+													break -- On sort de la boucle si la réparation a réussi
 												end
-
-												target.elements[e].dead = nil
-												target.elements[e].CheckDay = nil
-												target.alive = math.floor(target.alive + (1/#target.elements *100))
-												if target.alive > 100 then target.alive = 100 end
-
-												target.alive_last = math.floor(target.alive_last -  (1/#target.elements *100))
-												if target.alive_last < 0 then  target.alive_last = 0 end
-
-												break -- On sort de la boucle si la réparation a réussi
 											end
-										end
-										-- Si aucune réparation n'a eu lieu, on met à jour la date de check pour la prochaine fois
-										if target.elements[e].dead then
-											target.elements[e].CheckDay = lastCheck
+											-- Si aucune réparation n'a eu lieu, on met à jour la date de check pour la prochaine fois
+											if target.elements[e].dead then
+												target.elements[e].CheckDay = lastCheck
+											end
 										end
 									end
 								end
-							end
 
-							if forcedReAlive then
-								local endfunction = false
-								for c = 1, #oob_ground[groundside] do
-									for class ,typetable in pairs(oob_ground[groundside][c]) do
+								if forcedReAlive then
+									local endfunction = false
+									for c = 1, #oob_ground[groundside] do
+										for class ,typetable in pairs(oob_ground[groundside][c]) do
 
-										if class == "vehicle" or class == "ship" or class == "static" then
-												for group_n,group in pairs(typetable.group) do
-													for unit_n,unit in pairs(group.units) do
-														if  target.elements[e].name == unit.name then
+											if class == "vehicle" or class == "ship" or class == "static" then
+													for group_n,group in pairs(typetable.group) do
+														for unit_n,unit in pairs(group.units) do
+															if  target.elements[e].name == unit.name then
 
-															if Debug.AfficheSol then
-																if temp_dead then print(" temp_dead "..tostring(temp_dead))  end
-																if temp_dead_last then print(" temp_dead_last "..tostring(temp_dead_last))  end
-																if temp_CheckDay then print(" temp_CheckDay "..tostring(temp_CheckDay))  end
+																if Debug.AfficheSol then
+																	if temp_dead then print(" temp_dead "..tostring(temp_dead))  end
+																	if temp_dead_last then print(" temp_dead_last "..tostring(temp_dead_last))  end
+																	if temp_CheckDay then print(" temp_CheckDay "..tostring(temp_CheckDay))  end
+																end
+
+																group.units[unit_n]['dead'] = temp_dead
+																group.units[unit_n]['dead_last'] = temp_dead_last
+																group.units[unit_n].CheckDay = temp_CheckDay
+
+																endfunction = true
 															end
-
-															group.units[unit_n]['dead'] = temp_dead
-															group.units[unit_n]['dead_last'] = temp_dead_last
-															group.units[unit_n].CheckDay = temp_CheckDay
-
-															endfunction = true
+															if endfunction then  break end
 														end
 														if endfunction then  break end
 													end
 													if endfunction then  break end
 												end
-												if endfunction then  break end
 											end
-										end
-									if endfunction then  break end
+										if endfunction then  break end
+									end
 								end
 							end
 						end
