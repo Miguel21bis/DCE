@@ -1213,7 +1213,7 @@ function Start_set_ai_task(group, aiStart_spawn_time, from)
 
 	group['uncontrolled'] = true
 
-	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe 1C Start_set_ai_task "..tostring(from)) end
+	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP tasks_Start Start_set_ai_task "..tostring(from)) end
 
 	-- local trig_n = Missionfunc + #mission.trig.funcStartup + 1										--next available trigger number
 	trig_n =  #mission.trig.actions + 1
@@ -5865,6 +5865,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						else
 
+							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP tasks_Start "..tostring(debug.getinfo(1).currentline)) end
+
 							group['uncontrolled'] = true
 							group['lateActivation'] = false
 
@@ -5977,7 +5979,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				----- provisions for interceptors/GCI/AWACS -----
 				if flight[f].task == "Intercept" then   --and not flight[f].player 				--and flight[f].client ~= true					
 					GCI.Flag = GCI.Flag + 1															--go to next trigger flag number					
-					if flight[f].client ~= true or LimitedParkTiming then								-- M11 PVP ne copie pas de trigger retardé START pour les clients/joueurs	
+					if not flight[f].player and not flight[f].client and LimitedParkTiming then								-- M11 PVP ne copie pas de trigger retardé START pour les clients/joueurs	
 
 						if polkaOff then
 							group['lateActivation'] = false
@@ -5985,6 +5987,9 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							activate_group_withFlag(group, GCI.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
 
 						else
+							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP tasks_Start "..tostring(debug.getinfo(1).currentline)) end
+
+							
 							group['uncontrolled'] = true											--make interceptor groups uncontrolled at mission start
 							group['lateActivation'] = false
 
