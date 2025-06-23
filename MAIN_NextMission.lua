@@ -1125,6 +1125,9 @@ cmpFile:write(cmpStr)
 cmpFile:close()
 
 
+-- met à jour la date de camp dans conf_mod.lua
+UpdateConfMod(nil, camp.date, "MAIN_NextMission "..debug.getinfo(1).currentline)
+
 ----- create new mission file and add content files -----
 
 local NbMission  = tostring(camp.mission)
@@ -1341,9 +1344,9 @@ end
 table.sort(oob_air.blue, function(a, b) return a.type:upper() < b.type:upper() end)
 table.sort(oob_air.red, function(a, b) return a.type:upper() < b.type:upper() end)
 local air_str = "oob_air = " .. TableSerialization(oob_air, 0)								--make a string
-if TypeAlias then
-	air_str = air_str .. "TypeAlias = " .. TableSerialization(TypeAlias, 0)
-end
+-- if TypeAlias then
+-- 	air_str = air_str .. "TypeAlias = " .. TableSerialization(TypeAlias, 0)
+-- end
 local airFile = io.open("Active/oob_air.lua", "w") or error("Failed to open debug file")
 airFile:write(air_str)																		--save new data
 airFile:close()

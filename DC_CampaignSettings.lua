@@ -76,7 +76,7 @@ if mission_ini.slider_CampaignDuration and mission_ini.slider_CampaignDuration =
 	print("*************** In the conf_mod file, for the option 'slider_CampaignDuration' we expect as value: 'false' or a value between 1 and 4.****************")
 	print("********************ATTENTION******************")
 	print()
-	os.execute 'pause'	
+	os.execute 'pause'
 end
 
 local airUnitReinforce = {}										--creation table qui reinforce qui, pour plus de souplesse d emploi
@@ -87,36 +87,36 @@ local airUnitReinforce = {}										--creation table qui reinforce qui, pour pl
 	puis ne selectionne que les trigger concernant la victoire ou perte de la campagne
 ]]--
 for name, trig in pairs(camp_triggers) do
-	if trig.action and type(trig.action == "table") then			
-		for n = 1, #trig.action do 				
-			if trig.action[n] == 'Action.CampaignEnd("win")' or  trig.action[n] == 'Action.CampaignEnd("loss")' then	
+	if trig.action and type(trig.action == "table") then
+		for n = 1, #trig.action do
+			if trig.action[n] == 'Action.CampaignEnd("win")' or  trig.action[n] == 'Action.CampaignEnd("loss")' then
 				local EndOne, EndTwo = trig.action[n]:match("([^,]+)\"([^,]+)")
-				local EndOne2, winLoss = EndOne:match("([^,]+)\"([^,]+)")															
+				local EndOne2, winLoss = EndOne:match("([^,]+)\"([^,]+)")
 				-- print()
 				-- print("DcCS BEFORE  "..tostring(trig.condition))					
-				
+
 				local s = trig.condition
-				
+
 				local delimiter = " and "
-				local tempConcat = ""					
-				for strMatch in (s..delimiter):gmatch("(.-)"..delimiter) do					
+				local tempConcat = ""
+				for strMatch in (s..delimiter):gmatch("(.-)"..delimiter) do
 					-- print("DcCS strMatch  "..tostring(strMatch))
 					local TrigChanged = false
 					if mission_ini.slider_CampaignDuration and type(mission_ini.slider_CampaignDuration == "number") then
-						
+
 						local stringEgal = ""
-						local stringAnd = ""										
+						local stringAnd = ""
 						local one, two = strMatch:match("([^,]+)<([^,]+)")
 
 						if one == nil and two == nil and  string.find(strMatch, "==") then
 							one, two = strMatch:match("([^,]+)=([^,]+)")
 							-- print("DcCS one  "..tostring(one))
 							-- print("DcCS two  "..tostring(two))
-							
+
 							one = one:gsub( "=", "")
-							
+
 						end
-	
+
 						-- si la condition est une addition de plusieurs additions
 						-- Return.AirUnitReady("23 TFS")
 						local oneNb = 0
@@ -146,12 +146,12 @@ for name, trig in pairs(camp_triggers) do
 									-- -- end
 									-- -- --recherche dans les triggers 
 									-- -- --AirUnitReinforce
-									-- -- for RFname, RFtrig in pairs(camp_triggers) do
+									-- -- for RFname, trigger in pairs(camp_triggers) do
 										-- -- --action = 'Action.AirUnitReinforce("R/335 TFS", "335 TFS", 6)',
-										-- -- if RFtrig.action and type(RFtrig.action) ~= "table" and string.find(RFtrig.action, "Action.AirUnitReinforce") and string.find(RFtrig.action, name3) then
-											-- -- RFtrigCopy = Deepcopy(RFtrig)
-											-- -- RFtrigCopy.action = RFtrigCopy.action:gsub( "Action", "GetName")																																	
-											-- -- local f = loadstring(RFtrigCopy.action)()											
+										-- -- if trigger.action and type(trigger.action) ~= "table" and string.find(trigger.action, "Action.AirUnitReinforce") and string.find(trigger.action, name3) then
+											-- -- triggerCopy = Deepcopy(trigger)
+											-- -- triggerCopy.action = triggerCopy.action:gsub( "Action", "GetName")																																	
+											-- -- local f = loadstring(triggerCopy.action)()											
 										-- -- end
 									-- -- end									
 								end
@@ -159,15 +159,15 @@ for name, trig in pairs(camp_triggers) do
 							-- print("DcCS oneNb  "..tostring(oneNb))
 						end
 						]]--
-						
-						if two and string.find(two, "=") then 
+
+						if two and string.find(two, "=") then
 							stringEgal = "="
 						end
-						
+
 						--condition = 'GroundTarget["blue"].percent < 45',
 						--condition = 'Return.TargetAlive("Lar Airbase") < 4 						
-						if one and (string.find(strMatch, "percent") or  string.find(strMatch, "TargetAlive")) then 
-							
+						if one and (string.find(strMatch, "percent") or  string.find(strMatch, "TargetAlive")) then
+
 							--ATTENTION this bug:condition = 'Return.TargetAlive("CVN-71 Theodore Roosevelt") == 0',
 							--This good: condition = 'Return.UnitDead("CVN-71 Theodore Roosevelt")',
 							--ceci répare un bug récurent dans camp_triggers_init qui tente de trouver le %alive d'un target qui n'existe pas, mais l'unité existe
@@ -176,13 +176,13 @@ for name, trig in pairs(camp_triggers) do
 								one:gsub("TargetAlive", "UnitDead" )
 								tempConcat = one
 								trig.condition = tempConcat
-								
+
 								-- print("DcCS trig.condition "..tostring(trig.condition))
 							end
-						elseif string.find(strMatch, "AirUnitReady") or string.find(strMatch, "AirUnitAlive")  then	
-							
+						elseif string.find(strMatch, "AirUnitReady") or string.find(strMatch, "AirUnitAlive")  then
+
 							-- print("DcCS passe 02 strMatch/AirUnitReady/AirUnitAlive "..tostring(strMatch))
-							
+
 							--[[
 							two = oneNb - (( oneNb/4) * mission_ini.slider_CampaignDuration)
 							
@@ -195,10 +195,10 @@ for name, trig in pairs(camp_triggers) do
 							if two >= oneNb then two = oneNb - 2 end
 							if two <= 0 then two = 2 end
 							]]--
-						elseif not string.find(strMatch, "ShipHealth") and string.find(strMatch, "<") then					
+						elseif not string.find(strMatch, "ShipHealth") and string.find(strMatch, "<") then
 							-- TrigChanged = true
 							-- -- print("DcCS passe 03 strMatch/not/ShipHealth "..tostring(strMatch))
-							
+
 							-- two = tonumber(two) * mission_ini.slider_CampaignDuration							
 							-- if two >= 100 then
 								-- print()
@@ -217,7 +217,7 @@ for name, trig in pairs(camp_triggers) do
 						if TrigChanged  then
 							trig.condition = ""
 							tempConcat = one.." <"..stringEgal .." ".. tostring(two).." "
-							
+
 							if string.find(s, " and ") then stringAnd = " and " end
 							if trig.condition ~= "" then
 								trig.condition = trig.condition..stringAnd..tempConcat
@@ -229,15 +229,15 @@ for name, trig in pairs(camp_triggers) do
 								trig.InitCondition = s
 							end
 						end
-						
+
 					elseif mission_ini.slider_CampaignDuration == false and trig.InitCondition then
 						trig.condition = trig.InitCondition
 					end
 
-					
 
 
-				end					
+
+				end
 				-- print("DcCS AFTER  "..tostring(trig.condition))					
 				break
 			end
@@ -248,21 +248,21 @@ end
 --recherche le nombre prevu de renfort
 --recherche dans les triggers 
 --AirUnitReinforce
-for RFname, RFtrig in pairs(camp_triggers) do
+for RFname, trigger in pairs(camp_triggers) do
 	--action = 'Action.AirUnitReinforce("R/335 TFS", "335 TFS", 6)',
-	if RFtrig.action and type(RFtrig.action) ~= "table" and string.find(RFtrig.action, "Action.AirUnitReinforce")  then
-		
-		-- print("DcCS RFtrig.action "..tostring(RFtrig.action))
+	if trigger.action and type(trigger.action) ~= "table" and type(trigger.action) == "string" and string.find(trigger.action, "Action.AirUnitReinforce")  then
+
+		-- print("DcCS trigger.action "..tostring(trigger.action))
 		local sourceName01, destName, dechet02
 		local dechet01, sourceName
 
-		if string.find(RFtrig.action, ",") then
-			-- print("DcCS A RFtrig.action "..tostring(RFtrig.action))
-			sourceName01, destName = RFtrig.action:match("([^,]+),([^,]+)")
+		if string.find(trigger.action, ",") then
+			-- print("DcCS A trigger.action "..tostring(trigger.action))
+			sourceName01, destName = trigger.action:match("([^,]+),([^,]+)")
 			dechet01, sourceName = sourceName01:match("([^,]+)\"([^,]+)")
 		else
-			-- print("DcCS B else RFtrig.action "..tostring(RFtrig.action))
-			destName = RFtrig.action:gsub( "\"", "")
+			-- print("DcCS B else trigger.action "..tostring(trigger.action))
+			destName = trigger.action:gsub( "\"", "")
 			sourceName = destName
 		end
 
@@ -275,8 +275,8 @@ for RFname, RFtrig in pairs(camp_triggers) do
 		if destName ~= nil and  string.find(destName, ",") then
 			destName, dechet02 = destName:match("([^,]+),([^,]+)")
 			destName = destName:gsub( "\"", "")
-		end	
-		
+		end
+
 		--trim
 		destName = string.gsub(destName, '%s+', '')
 		destName = string.gsub(destName, '[ \t]+%f[\r\n%z]', '')
@@ -284,15 +284,10 @@ for RFname, RFtrig in pairs(camp_triggers) do
 		sourceName = string.gsub(sourceName, '%s+', '')
 		sourceName = string.gsub(sourceName, '[ \t]+%f[\r\n%z]', '')
 
-
-
-		-- print("DcCS sourceName |"..tostring(sourceName).."|")
-		-- print("DcCS destName |"..tostring(destName).."|")
-			
 		if destName ~=nil and   sourceName ~= nil then
 			airUnitReinforce[destName] = sourceName
-		end	
-	
+		end
+
 	end
 end
 
@@ -306,50 +301,50 @@ end
 for side,unit in pairs(oob_air) do
 	for n = 1, #unit do
 		--crée la nouvelle clef transfert
-		if not unit[n].roster.trans then 
+		if not unit[n].roster.trans then
 			unit[n].roster.trans = 0
 		end
 
 		--creer une clef init qui fera reference
-		if not unit[n].InitNumber then 
+		if not unit[n].InitNumber then
 			unit[n].InitNumber = unit[n].number
 		end
 
 		if mission_ini.slider_CampaignDuration and type(mission_ini.slider_CampaignDuration == "number") then
 			if unit[n].base == 'Reserves' then
-				
+
 				-- --créer une clef init qui fera reference, puisque l'on touchera é celui reserve
 				-- if not unit[n].InitNumber then 
 				-- 	unit[n].InitNumber = unit[n].number
 				-- end										
 				unit[n].roster.ready =  math.ceil(( unit[n].InitNumber/3) * mission_ini.slider_CampaignDuration) - unit[n].roster.trans
 			elseif unit[n].reserve then
-			
+
 				--créer une clef init qui fera reference, puisque l'on touchera é celui reserve
-				if not unit[n].InitReserve then 
+				if not unit[n].InitReserve then
 					unit[n].InitReserve = unit[n].reserve
-				end			
+				end
 				unit[n].roster.reserve =  math.ceil(( unit[n].InitReserve/3) * mission_ini.slider_CampaignDuration) - unit[n].roster.trans
 			end
 		elseif mission_ini.slider_CampaignDuration == false then		--retabli les valeurs d'origine si le joueur le souhaite
-			
+
 			local transfert = 0
 			if unit[n].roster.trans then
 				transfert = unit[n].roster.trans
 			end
 
-			
+
 			if unit[n].base == 'Reserves'  then
 				-- --créer une clef init qui fera reference, puisque l'on touchera é celui reserve
 				-- if not unit[n].InitNumber then 
 				-- 	unit[n].InitNumber = unit[n].number
 				-- end
 				unit[n].roster.ready = unit[n].InitNumber - transfert
-			elseif unit[n].reserve  then	
+			elseif unit[n].reserve  then
 				--créer une clef init qui fera reference, puisque l'on touchera é celui reserve
-				if not unit[n].InitReserve then 
+				if not unit[n].InitReserve then
 					unit[n].InitReserve = unit[n].reserve
-				end	
+				end
 				unit[n].roster.reserve =   unit[n].InitReserve - transfert
 			end
 		end
@@ -384,8 +379,8 @@ if mission_ini.slider_EnemyLevel and type(mission_ini.slider_EnemyLevel == "numb
 	-- print()
 	-- print("DcCSPARTIE slider_EnemyLevel ***************************************************************************")
 	-- print("DcCS slider_EnemyLevel:  "..tostring(mission_ini.slider_EnemyLevel))
-	
-	for side, wish in pairs(SkillWish) do		
+
+	for side, wish in pairs(SkillWish) do
 		--change la valeur Skill
 		if side == SidePlayer then
 			-- 1 (easy player)		70
@@ -395,8 +390,8 @@ if mission_ini.slider_EnemyLevel and type(mission_ini.slider_EnemyLevel == "numb
 			-- 1 (easy player)		30
 			-- 4 (very difficult)	60
 			SkillWish[side] = ((10 * mission_ini.slider_EnemyLevel) + 20)											--change la valeur Skill du camp adverse
-		end		
-		
+		end
+
 		if SkillWish[side] < 0 then
 			SkillWish[side] = 0
 		elseif SkillWish[side] > 100 then
@@ -404,7 +399,7 @@ if mission_ini.slider_EnemyLevel and type(mission_ini.slider_EnemyLevel == "numb
 		end
 		-- print("DcCS AFTER Skill "..tostring(side).." "..tostring(SkillWish[side]))
 	end
-end	
+end
 	--[[
 		change le nombre d'avion ENI disponible, plus il y en a, et plus ce sera difficile
 		1	0.8
@@ -415,39 +410,39 @@ end
 		https://www.dcode.fr/recherche-equation-fonction
 		0.13x+0.65
 	]]--
-	
+
 for side,unit in pairs(oob_air) do
 	if side ~= SidePlayer then
 		for n = 1, #unit do
-			if not unit[n].roster.trans then 
+			if not unit[n].roster.trans then
 				unit[n].roster.trans = 0
 			end
 			if unit[n].reserve then
 				--créer une clef init qui fera reference, puisque l'on touchera é celui reserve
-				if not unit[n].InitNumber then 
+				if not unit[n].InitNumber then
 					unit[n].InitNumber = unit[n].number
 				end
-				
+
 				if mission_ini.slider_EnemyLevel and type(mission_ini.slider_EnemyLevel == "number") then
-	
+
 					--change la valeur ready:
-					unit[n].roster.ready =  math.floor( unit[n].InitNumber * (mission_ini.slider_EnemyLevel * 0.19 + 0.55)) - unit[n].roster.lost  - unit[n].roster.damaged + unit[n].roster.trans					
+					unit[n].roster.ready =  math.floor( unit[n].InitNumber * (mission_ini.slider_EnemyLevel * 0.19 + 0.55)) - unit[n].roster.lost  - unit[n].roster.damaged + unit[n].roster.trans
 					--change la valeur number, qui sert de reference pour le recompletement
-					unit[n].number =  math.floor( unit[n].InitNumber * (mission_ini.slider_EnemyLevel * 0.19 + 0.55))														
-				elseif  mission_ini.slider_EnemyLevel == false then					
-					
-					
+					unit[n].number =  math.floor( unit[n].InitNumber * (mission_ini.slider_EnemyLevel * 0.19 + 0.55))
+				elseif  mission_ini.slider_EnemyLevel == false then
+
+
 					--change la valeur ready:
-					unit[n].roster.ready =   unit[n].InitNumber  - unit[n].roster.lost  - unit[n].roster.damaged + unit[n].roster.trans					
+					unit[n].roster.ready =   unit[n].InitNumber  - unit[n].roster.lost  - unit[n].roster.damaged + unit[n].roster.trans
 					--change la valeur number, qui sert de reference pour le recompletement
-					unit[n].number =  unit[n].InitNumber	
+					unit[n].number =  unit[n].InitNumber
 
 					-- print("DcCampaignSetting slider_EnemyLevel "..unit[n].name.." InitNumber: "..unit[n].InitNumber.." number: "..unit[n].number)	
 				end
-			end												
+			end
 		end
 	end
-end	
+end
 
 
 -- for n=1, #oob_air.red do
@@ -466,7 +461,7 @@ if mission_ini.slider_PercentPlane and type(mission_ini.slider_PercentPlane == "
 			if 	not unit[n].inactive then
 
 				--créer une clef init qui fera reference, puisque l'on touchera é celui reserve
-				if not unit[n].InitNumber then 
+				if not unit[n].InitNumber then
 					unit[n].InitNumber = unit[n].number
 				end
 				NbTotalAeronefInit = NbTotalAeronefInit + unit[n].InitNumber
@@ -479,12 +474,12 @@ if mission_ini.slider_PercentPlane and type(mission_ini.slider_PercentPlane == "
 					-- 	print("K3 roster.ready: "..tostring(unit[n].roster.ready))
 					-- 	_affiche(unit[n].roster, "AA unit[n].roster")
 					-- end
-					
+
 					local transfert = 0
 					if airUnitReinforce[unit[n].name] then
 						for Vside, Vunit in pairs(view_oob_air) do
 							for m = 1, #Vunit do
-								if Vunit[m].name == airUnitReinforce[unit[n].name] then									
+								if Vunit[m].name == airUnitReinforce[unit[n].name] then
 									transfert = Vunit[m].roster.trans
 									-- print("DcCS found name "..unit[n].name.." transfert: "..transfert)
 								end
@@ -493,21 +488,21 @@ if mission_ini.slider_PercentPlane and type(mission_ini.slider_PercentPlane == "
 						end
 					else
 						transfert = unit[n].roster.trans
-						
+
 					end
 
 					-- print("DcCampaignSetting "..unit[n].name.." transfert: "..transfert)
 
 					--change la valeur ready:
-					unit[n].roster.ready =  math.ceil( unit[n].InitNumber * coef) - (unit[n].roster.lost * coef)  - (unit[n].roster.damaged * coef) + (transfert * coef)					
+					unit[n].roster.ready =  math.ceil( unit[n].InitNumber * coef) - (unit[n].roster.lost * coef)  - (unit[n].roster.damaged * coef) + (transfert * coef)
 					-- unit[n].roster.ready =  math.ceil( unit[n].InitNumber * coef) - (unit[n].roster.lost)  - (unit[n].roster.damaged ) + (transfert )					
 					if unit[n].roster.ready < 0 then
 						unit[n].roster.ready = 0
 					end
 					--change la valeur number, qui sert de reference pour le recompletement
-					unit[n].number =  math.ceil( unit[n].InitNumber * coef)														
+					unit[n].number =  math.ceil( unit[n].InitNumber * coef)
 					NbTotalAeronefAfter = NbTotalAeronefAfter + unit[n].number
-					
+
 					-- print("DcCampaignSetting "..unit[n].name.." InitNumber: "..unit[n].InitNumber.." number: "..unit[n].number)
 
 					-- if unit[n].name == "EC 1-12" then
@@ -517,7 +512,7 @@ if mission_ini.slider_PercentPlane and type(mission_ini.slider_PercentPlane == "
 				end
 			end
 		end
-	end	
+	end
 	-- print("DcCampaignSetting NbTotalAeronefInit: "..NbTotalAeronefInit.." NbTotalAeronefAfter: "..NbTotalAeronefAfter)	
 
 end

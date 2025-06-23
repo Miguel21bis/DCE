@@ -109,9 +109,6 @@ until tabSquad[input]
 
 ----- save updated oob_air files  -----
 local air_str = "oob_air = " .. TableSerialization(oob_air, 0)								--make a string
-if TypeAlias then
-	air_str = air_str .. "TypeAlias = " .. TableSerialization(TypeAlias, 0)
-end
 local airFile = io.open("Active/oob_air.lua", "w") or error("Failed to open debug file")
 airFile:write(air_str)																		--save new data
 airFile:close()
@@ -131,8 +128,6 @@ airFile:close()
 -- oldSquadName = playerSquad
 -- newSquadName = tabSquad[input]
 
-local oldSquadNameInit = oldSquadName
-
 -- if Skipmission_flag then
 -- 	-- dofile("../../../Missions/Campaigns/"..camp.title.."/Active/camp_triggers.lua")	
 -- 	dofile("Active/camp_triggers.lua")
@@ -141,123 +136,124 @@ local oldSquadNameInit = oldSquadName
 -- 	-- dofile("Init/camp_triggers.lua")	
 -- end
 
---****************************************************************************************
---ajout automatique d'elements en cours de campagne: START
---****************************************************************************************
---********************************* targetlist ******************************************************
-dofile("Init/targetlist_init.lua")
-local targetlist_init = targetlist
-if not targetlist_init.blue[1] then
-	TargetlistToNum(targetlist_init)
-end
-
-dofile("Active/targetlist.lua")
-if not targetlist.blue[1] then
-	TargetlistToNum(targetlist)
-end
-
-local changes = CompareTargetLists(targetlist_init, targetlist)
-
--- Afficher les résultats
-for _, added in ipairs(changes.added) do
-	print("Added TargetList: Name:", added.data.name)
-end
--- for _, removed in ipairs(changes.removed) do
--- 	print("Removed TargetList: Name:", removed.data.name)
+-- --****************************************************************************************
+-- --ajout automatique d'elements en cours de campagne: START
+-- --****************************************************************************************
+-- --********************************* targetlist ******************************************************
+-- dofile("Init/targetlist_init.lua")
+-- local targetlist_init = targetlist
+-- if not targetlist_init.blue[1] then
+-- 	TargetlistToNum(targetlist_init)
 -- end
 
--- Ajout des éléments manquants dans targetlist
-for _, added in ipairs(changes.added) do
-	if not targetlist[added.side] then
-		targetlist[added.side] = {}
-	end
-	-- Insérer l'élément à la fin de la table numérique
-	table.insert(targetlist[added.side], added.data)
-end
+-- dofile("Active/targetlist.lua")
+-- if not targetlist.blue[1] then
+-- 	TargetlistToNum(targetlist)
+-- end
 
--- -- Suppression des éléments retirés de targetlist
+-- local changes = CompareTargetLists(targetlist_init, targetlist)
+
+-- -- Afficher les résultats
+-- for _, added in ipairs(changes.added) do
+-- 	print("Added TargetList: Name:", added.data.name)
+-- end
+-- -- for _, removed in ipairs(changes.removed) do
+-- -- 	print("Removed TargetList: Name:", removed.data.name)
+-- -- end
+
+-- -- Ajout des éléments manquants dans targetlist
+-- for _, added in ipairs(changes.added) do
+-- 	if not targetlist[added.side] then
+-- 		targetlist[added.side] = {}
+-- 	end
+-- 	-- Insérer l'élément à la fin de la table numérique
+-- 	table.insert(targetlist[added.side], added.data)
+-- end
+
+-- -- -- Suppression des éléments retirés de targetlist
+-- -- for _, removed in ipairs(changes.removed) do
+-- -- 	if targetlist[removed.side] then
+-- -- 		for i, target in ipairs(targetlist[removed.side]) do
+-- -- 			if target.name == removed.name then
+-- -- 				table.remove(targetlist[removed.side], i)
+-- -- 				break
+-- -- 			end
+-- -- 		end
+-- -- 	end
+-- -- end
+
+-- --********************************* camp_triggers ******************************************************
+-- -- Charger les fichiers de référence et de travail
+-- dofile("Init/camp_triggers_init.lua")
+-- local camp_triggers_init = camp_triggers
+
+-- dofile("Active/camp_triggers.lua")
+
+-- -- Comparer les deux tables
+-- changes = CompareTableNumeric(camp_triggers_init, camp_triggers)
+
+-- -- Afficher les résultats
+-- for _, added in ipairs(changes.added) do
+-- 	print("Added triggers: Name:", added.name)
+-- end
 -- for _, removed in ipairs(changes.removed) do
--- 	if targetlist[removed.side] then
--- 		for i, target in ipairs(targetlist[removed.side]) do
--- 			if target.name == removed.name then
--- 				table.remove(targetlist[removed.side], i)
--- 				break
--- 			end
+-- 	print("Removed triggers: Name:", removed.name)
+-- end
+
+-- -- Ajouter les éléments manquants dans camp_triggers
+-- for _, added in ipairs(changes.added) do
+-- 	table.insert(camp_triggers, added)
+-- end
+-- -- Supprimer les éléments retirés de camp_triggers
+-- for _, removed in ipairs(changes.removed) do
+-- 	for i, trigger in ipairs(camp_triggers) do
+-- 		if trigger.name == removed.name then
+-- 			table.remove(camp_triggers, i)
+-- 			break
 -- 		end
 -- 	end
 -- end
 
---********************************* camp_triggers ******************************************************
--- Charger les fichiers de référence et de travail
-dofile("Init/camp_triggers_init.lua")
-local camp_triggers_init = camp_triggers
-
-dofile("Active/camp_triggers.lua")
-
--- Comparer les deux tables
-changes = CompareTableNumeric(camp_triggers_init, camp_triggers)
-
--- Afficher les résultats
-for _, added in ipairs(changes.added) do
-	print("Added triggers: Name:", added.name)
-end
-for _, removed in ipairs(changes.removed) do
-	print("Removed triggers: Name:", removed.name)
-end
-
--- Ajouter les éléments manquants dans camp_triggers
-for _, added in ipairs(changes.added) do
-	table.insert(camp_triggers, added)
-end
--- Supprimer les éléments retirés de camp_triggers
-for _, removed in ipairs(changes.removed) do
-	for i, trigger in ipairs(camp_triggers) do
-		if trigger.name == removed.name then
-			table.remove(camp_triggers, i)
-			break
-		end
-	end
-end
 
 
+-- --********************************* db_airbases ******************************************************
+-- -- Charger les fichiers de référence et de travail
+-- dofile("Init/db_airbases.lua")
+-- local db_airbases_init = db_airbases
 
---********************************* db_airbases ******************************************************
--- Charger les fichiers de référence et de travail
-dofile("Init/db_airbases.lua")
-local db_airbases_init = db_airbases
+-- dofile("Active/db_airbases.lua")
 
-dofile("Active/db_airbases.lua")
+-- -- Comparer les deux tables
+-- changes = CompareTableAlphaNumeric(db_airbases_init, db_airbases)
 
--- Comparer les deux tables
-changes = CompareTableAlphaNumeric(db_airbases_init, db_airbases)
+-- -- Afficher les résultats
+-- for _, added in ipairs(changes.added) do
+--     print("\nAdded db_airbases Name:", added.name)
+-- end
+-- for _, removed in ipairs(changes.removed) do
+--     print("\nRemoved db_airbases: Name:", removed.name)
+-- end
 
--- Afficher les résultats
-for _, added in ipairs(changes.added) do
-    print("\nAdded db_airbases Name:", added.name)
-end
-for _, removed in ipairs(changes.removed) do
-    print("\nRemoved db_airbases: Name:", removed.name)
-end
+-- -- Ajouter les éléments manquants dans db_airbases
+-- for _, added in ipairs(changes.added) do
+--     db_airbases[added.name] = added.data
+-- end
+-- -- Supprimer les éléments retirés de db_airbases
+-- for _, removed in ipairs(changes.removed) do
+--     db_airbases[removed.name] = nil
+-- end
 
--- Ajouter les éléments manquants dans db_airbases
-for _, added in ipairs(changes.added) do
-    db_airbases[added.name] = added.data
-end
--- Supprimer les éléments retirés de db_airbases
-for _, removed in ipairs(changes.removed) do
-    db_airbases[removed.name] = nil
-end
+-- --****************************************************************************************
+-- --ajout automatique d'elements en cours de campagne: FIN
+-- --****************************************************************************************
 
---****************************************************************************************
---ajout automatique d'elements en cours de campagne: FIN
---****************************************************************************************
-
+LoadFileAndUpdate()
 
 local Reinforce = {}
 --recherche l'escadron de ravitaillement, s'il existe
 --['action'] = 'Action.AirUnitReinforce("R/3.IAP", "3.IAP", 12)',
 for name, trig in pairs(camp_triggers) do
-	if trig.action and  type(trig.action) ~= "table" then
+	if trig.action and type(trig.action) ~= "table" and type(trig.action) == "string" then
 		if string.find(trig.action, "Action.AirUnitReinforce")  then
 			local s  = ""
 

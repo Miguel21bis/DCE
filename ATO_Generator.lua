@@ -465,7 +465,8 @@ for side, units in pairs(oob_air) do
 		end
 	end
 
-	if units and units ~= nil then
+	if units then
+
 		for unitN, unit in pairs(units) do
 			local overRideMP_A = false
 
@@ -474,9 +475,9 @@ for side, units in pairs(oob_air) do
 				os.execute 'pause'
 			end
 
-
-			if unit.inactive ~= true then																						--if unit is active
-				local ClientPlayer = false
+			if not unit.inactive then
+				
+				local clientPlayer = false
 
 				local isDebugModeA = Debug.Generator.affiche and string.find(Debug.Generator.chapter, "A")
 					and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name )
@@ -488,6 +489,7 @@ for side, units in pairs(oob_air) do
 				TrackPlayability(unit.player, "active_unit")																		--track playabilty criterium has been met
 
 				if db_airbases[unit.base] and db_airbases[unit.base].inactive ~= true and db_airbases[unit.base].x and db_airbases[unit.base].y then	--base exists and is active and has a position value (carrier that exists)
+					
 					if isDebugModeA then
 						debugLog(draftId.." AtoG passe A_01 "..unit.type.." Befor roster.ready Condition  ")
 					end
@@ -507,7 +509,7 @@ for side, units in pairs(oob_air) do
 					end
 
 					if Multi.NbGroup == 0 then
-						ClientPlayer = unit.player
+						clientPlayer = unit.player
 					end
 
 					if unit.player then
@@ -538,8 +540,8 @@ for side, units in pairs(oob_air) do
 						end
 
 						if AcftAvail[unit.name].unavailable == nil then												--unit has no unavailable table yet
-							if unit.unavailable then																				--there are preset unavailabilities in oob_air
-								AcftAvail[unit.name].unavailable = unit.unavailable								--use this as initial unavailability
+							if unit.unavailable then																--there are preset unavailabilities in oob_air
+								AcftAvail[unit.name].unavailable = unit.unavailable									--use this as initial unavailability
 							else
 								AcftAvail[unit.name].unavailable = {}												--create an empty unavailable table
 							end
@@ -556,14 +558,14 @@ for side, units in pairs(oob_air) do
 						if multiPlaneSet and multiPlaneSet[side] and multiPlaneSet[side][unit.type]   then
 							aircraft_serviceable = unit.roster.ready
 						else
-							for s = 1, unit.roster.ready do																			--iterate through ready aircraft
+							for s = 1, unit.roster.ready do																				--iterate through ready aircraft
 								if math.random(1, 100) <= serviceability * 100 then														--default 80% chance that it is mission ready
 									aircraft_serviceable = aircraft_serviceable + 1														--sum serviceable aircraft
 								end
 							end
 						end
 
-						AcftAvail[unit.name].ready = unit.roster.ready											--store ready aircraft un availability table
+						AcftAvail[unit.name].ready = unit.roster.ready												--store ready aircraft un availability table
 						AcftAvail[unit.name].serviceable = aircraft_serviceable										--store serviceable aircraft in availability table
 
 						if DebugAssignAll then
@@ -599,6 +601,9 @@ for side, units in pairs(oob_air) do
 						AcftAvail[unit.name].available = aircraft_available											--store available aircraft in availability table
 						AcftAvail[unit.name].assigned = 0
 						AcftAvail[unit.name].unassigned = aircraft_available										--store unassigned aircraft in availability table
+
+						-- _affiche(AcftAvail[unit.name], "AcftAvail "..unit.name..": ")
+
 						if aircraft_available > 0 then																				--unit has available aircraft
 							if isDebugModeA then
 								debugLog(draftId.." AtoG passe A_03 ".." Befor tasks Boucle ")
@@ -1214,7 +1219,7 @@ for side, units in pairs(oob_air) do
 																										aircraft_assign = multiPlaneSet[side][unit.type][task].NbPlane
 																										debugMulti = debugMulti.."\n"..("AtoG passe A_AAh "..unit.type.." aircraft_assign: "..tostring(aircraft_assign))
 																									end
-																									ClientPlayer = true
+																									clientPlayer = true
 																								end
 																							end
 
@@ -1236,13 +1241,13 @@ for side, units in pairs(oob_air) do
 																								local idTemp = "id"..#Draft_sorties[side]+1
 
 																								if isDebugModeA then
-																									debugLog(draftId.." AtoG passe A_30a "..idTemp.." ClientPlayer: "..tostring(ClientPlayer) .. " overRideMP_A: "
+																									debugLog(draftId.." AtoG passe A_30a "..idTemp.." clientPlayer: "..tostring(clientPlayer) .. " overRideMP_A: "
 																									.. tostring(overRideMP_A).." idTemp: "..tostring(idTemp).." aircraft_assign: "..tostring(aircraft_assign).." |Nb Draft "..tostring(#Draft_sorties[side]))
 																								end
 
 																								local draftSortiesEntry = {
 																									name = unit.name,
-																									playable = ClientPlayer, 					--unit.player,
+																									playable = clientPlayer, 					--unit.player,
 																									type = unit.type,
 																									modification = unit.modification,
 																									callsign = unit.callsign,

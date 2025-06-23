@@ -77,6 +77,10 @@ versionDCE["DC_CheckTriggers.lua"] = "1.16.95"
 --Important notes:
 --for condition and action strings: outside with single quotes '', inside with double quotes ""!
 
+if Debug.debug then
+	print("START DC_CheckTriggers.lua "..versionDCE["DC_CheckTriggers.lua"])
+end
+
 local debugKT = false
 
 if not TaskRefused and not camp.waitingNextGen and not (EndCampaign or camp.endCampaign ) and not Firstmission_flag   then
@@ -614,7 +618,8 @@ Action = {}
 		---@diagnostic disable-next-line: undefined-global
 		if weather.weatherChangeRate then mission_ini.weather.weatherChangeRate = weather.weatherChangeRate end
 
-		UpdateConfMod(mission_ini.weather, nil)
+		UpdateConfMod(mission_ini.weather, nil,  "DC_CheckTriggers "..debug.getinfo(1).currentline)
+		
 
 	end
 
@@ -982,8 +987,7 @@ Action = {}
 
 	--send reinforcement aircraft from one unit to another
 	function Action.AirUnitReinforce(sourceName, destName)						--(sourceName, destName, destNumber) destNumber => deprecated
-		-- print("DcCT passe 00 sourceName "..tostring(sourceName).." destName: "..tostring(destName))
-
+		
 		local sourceUnit
 		local destUnit
 		local destSide
@@ -1120,6 +1124,7 @@ Action = {}
 
 				if text then
 					if debugKT then print("DcCT "..tostring(text)) end
+					print("DcCT "..tostring(text))
 
 					if destSide == "blue" then										--side is blue
 						Briefing_oob_text_blue = Briefing_oob_text_blue .. text		--add to blue briefing oob text
@@ -1128,6 +1133,8 @@ Action = {}
 					end
 				end
 			end
+		else
+			-- print("DcCT FULL_PLANE"..tostring(destUnit.roster.ready).." < "..tostring(destUnit.number).." "..destName	)
 		end
 	end
 
@@ -1288,9 +1295,10 @@ Action = {}
 											print("Dc_CT Debug "..text)
 										end
 
-										if side_name == "blue" then									--side is blue
+										--attention, ici les camps sont inversé, c'est le camp du target, ou la targetlist d'un camp (trouc de ouf)
+										if side_name == "red" then									--side is blue
 											Briefing_oob_text_blue = Briefing_oob_text_blue .. text	--add to blue briefing oob text
-										elseif side_name == "red" then								--side is red
+										elseif side_name == "blue" then								--side is red
 											Briefing_oob_text_red = Briefing_oob_text_red .. text	--add to red briefing oob text
 										end
 
@@ -1457,13 +1465,14 @@ Action = {}
 								--TODO: 1. empecher que les réparations se fassent 2 fois entre chaque génération de misssion -tentative de génération
 								-- TODO: 2. le % alive de l'ensemble d'un target n'est pas bon
 
-								if  target.alive < 100 and target.alive >= minimumRepairThreshold then
+								if target.alive < 100 and target.alive >= minimumRepairThreshold then
 									if target.elements[e].dead then
 										if target.elements[e].CheckDay then
 											local repairInterval = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][3] * 3600
 											local lastCheck = target.elements[e].CheckDay
 
 											-- Boucle sur chaque intervalle de réparation entre CheckDay et maintenant
+											--Compatible avec les sauts temporels
 											while lastCheck + repairInterval <= CampTotalTimeS do
 
 												lastCheck = lastCheck + repairInterval
@@ -1477,9 +1486,10 @@ Action = {}
 
 													local text = "" .. target.elements[e].name .. " from ".. target.titleName .. " have been repaired and returned back to service. \n \n"
 
-													if side_name == "blue" then
+													--attention, ici les camps sont inversé, c'est le camp du target, ou la targetlist d'un camp (trouc de ouf)
+													if side_name == "red" then
 														Briefing_oob_text_blue = Briefing_oob_text_blue .. text
-													elseif side_name == "red" then
+													elseif side_name == "blue" then
 														Briefing_oob_text_red = Briefing_oob_text_red .. text
 													end
 
@@ -2388,18 +2398,72 @@ for trigger_name,trigger in pairs(camp_triggers) do								--iterate through tri
 
 -- _affiche(camp.automaticReinforce, "camp.automaticReinforce")
 
+-- for side_name, side in pairs(oob_air) do
+-- 	print("DcCT side_name "..tostring(side_name))
+-- 	print("DcCT CampTotalTimeS :"..CampTotalTimeS.." >=?    campMod.RepairOption[side_name][airUnit][3] *3600 "
+-- 		..tostring(campMod.RepairOption[side_name]["airUnit"][3] * 3600).." ?")
+
+-- 	if side_name ~= "neutral" then
+-- 		if CampTotalTimeS >=  campMod.RepairOption[side_name]["airUnit"][3] * 3600 then
+-- 			for unit_n, unit in pairs(side) do
+-- 				if unit.roster.reserve and unit.roster.reserve > 0 then -- not unit.inactive and 
+-- 					Action.AirUnitReinforce(unit.name, "")
+-- 					if debugKT then print("DcCT automaticReinforce "..tostring(unit.name)) end
+-- 					print("DcCT automaticReinforce "..tostring(unit.name))
+-- 				end
+-- 			end
+-- 			camp.automaticReinforce[side_name] = CampTotalTimeS
+-- 		end
+-- 	end
+-- end
+
+-- for side_name, side in pairs(oob_air) do
+-- 	print("DcCT side_name "..tostring(side_name))
+
+-- 	if side_name ~= "neutral" then
+		
+-- 		-- print("dcct campMod.RepairOption[side_name][airUnit][3] : "..campMod.RepairOption[side_name]["airUnit"][3])
+-- 		print("DcCT CampTotalTimeS : "..CampTotalTimeS.." >=? camp.automaticReinforce ")
+-- 		print("DcCT camp.automaticReinforce : "..tostring(camp.automaticReinforce[side_name]) )
+-- 		print("DcCT campMod.RepairOption[side_name][airUnit][3] *3600 ")
+-- 		print("DcCT ---------CALCul-------------------------------------- : "..(camp.automaticReinforce[side_name] 
+-- 				+ 
+-- 				(campMod.RepairOption[side_name]["airUnit"][3] * 3600))
+-- 				)
+
+-- 		if CampTotalTimeS >= camp.automaticReinforce[side_name] + campMod.RepairOption[side_name]["airUnit"][3] * 3600 then
+-- 			for unit_n, unit in pairs(side) do
+-- 				if unit.roster.reserve and unit.roster.reserve > 0 then -- not unit.inactive and 
+-- 					Action.AirUnitReinforce(unit.name, "")
+-- 					if debugKT then print("DcCT automaticReinforce "..tostring(unit.name)) end
+-- 					print("DcCT automaticReinforce "..tostring(unit.name))
+-- 				end
+-- 			end
+-- 			-- camp.automaticReinforce[side_name] = CampTotalTimeS
+-- 			camp.automaticReinforce[side_name] = camp.automaticReinforce[side_name] + campMod.RepairOption[side_name]["airUnit"][3] * 3600
+-- 		end
+-- 	end
+-- end
+
+
+
+--Compatible avec les sauts temporels
 for side_name, side in pairs(oob_air) do
-	-- print("DcCT side_name "..tostring(side_name))
-	-- print("DcCT camp.automaticReinforce "..tostring(camp.automaticReinforce[side_name]))
-	if side_name ~= "neutral" and CampTotalTimeS >= camp.automaticReinforce[side_name] + campMod.RepairOption[side_name]["airUnit"][3] * 3600 then
-		for unit_n, unit in pairs(side) do
-			if unit.roster.reserve and unit.roster.reserve > 0 then -- not unit.inactive and 
-				Action.AirUnitReinforce(unit.name, "")
-				if debugKT then print("DcCT automaticReinforce "..tostring(unit.name)) end
-			end
-		end
-		camp.automaticReinforce[side_name] = CampTotalTimeS
-	end
+    print("DcCT side_name "..tostring(side_name))
+
+    if side_name ~= "neutral" then
+        local interval = campMod.RepairOption[side_name]["airUnit"][3] * 3600
+        while CampTotalTimeS >= camp.automaticReinforce[side_name] + interval do
+            for unit_n, unit in pairs(side) do
+                if unit.roster.reserve and unit.roster.reserve > 0 then
+                    Action.AirUnitReinforce(unit.name, "")
+                    if debugKT then print("DcCT automaticReinforce "..tostring(unit.name)) end
+                    -- print("DcCT automaticReinforce "..tostring(unit.name))
+                end
+            end
+            camp.automaticReinforce[side_name] = camp.automaticReinforce[side_name] + interval
+        end
+    end
 end
 
 

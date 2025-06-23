@@ -3007,7 +3007,7 @@ end
 
 
 --met à jour automatiquement le conf_mod en fonction des nouveautés apporté par UTIL_ConfModCheck
-function UpdateConfMod(setWeather, setDate)
+function UpdateConfMod(setWeather, setDate, from)
     --version UpdateConfMod VA_1.12
 
 	-- local weather_override = {
@@ -3015,6 +3015,10 @@ function UpdateConfMod(setWeather, setDate)
 	-- 	pLow = 80,					--probability of low pressure weather system
 	-- 	refTemp = 18,				--average day max temperature
 	-- }
+
+	if Debug.debug then
+		print("UpdateConfMod() from "..tostring(from))
+	end
 
 	local weather_override
 	local date_override
@@ -3038,14 +3042,17 @@ function UpdateConfMod(setWeather, setDate)
 
 	else
 
-		if camp.date and camp.date.year then
-			date_override = camp.date
-			print("date_override 3 ")
-		else
+		-- if camp.date and camp.date.year then
+		-- 	date_override = camp.date
+		-- 	print("date_override 3 ")
+		-- else
 			dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua")
 			date_override = mission_ini_check.date
-			print("date_override 4 ")
-		end
+			
+			if Debug.debug then
+				print("date_override 4 date_override = mission_ini_check.date ")
+			end
+		-- end
 	end
 
 	--mis à jour via camp_triggers et DC_CheckTriggers
@@ -3057,6 +3064,11 @@ function UpdateConfMod(setWeather, setDate)
 	if setDate then
 		date_override = setDate
 		camp.date = setDate
+
+		if Debug.debug then
+			print("date_override 5: camp.date = setDate ")
+			_affiche(setDate, "date_override 5: setDate ")
+		end
 	end
 
 
@@ -3558,270 +3570,6 @@ function UpdateConfMod(setWeather, setDate)
 	-- Sauvegarder la configuration mise à jour
 	-- clientConfigPath = "Init/conf_mod_BBB.lua"
 	saveUpdatedConfig(clientConfigPath, clientConfig, defaultStructure)
-
-	dofile("Init/conf_mod.lua")
-end
-
-
-  --a function that automatically updates the conf_mod keeping as much as possible the old settings of the player
-function UpdateConfMod_OLD_INIT()
-
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua")
-	local confModCheck = {
-		mission_ini = mission_ini_check,
-		mission_forcedOptions = mission_forcedOptions_check,
-		-- campaign_ini = campaign_ini_check,
-		Debug = Debug_check,
-		campMod = campMod_check,
-
-	}
-
-	local monfichier = io.open("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua", "r")
-
-	if not monfichier then return end
-
-	io.input(monfichier)
-
-	local tableName, tableNameSub, tableId
-	local txt = ""
-	local nTable = {}
-	local n = 0
-	local ligne = 0
-
-	for line in io.lines() do
-		local one, two, com, com1, com2, varName, str_length, result, comTemp, com1a, com2b, showVarName
-		local firstTab = ""
-		local nextTab = ""
-
-		ligne = ligne +1
-		--cherche le nom de la table "principal" dans le fichier de ref UTIL_ConfModCheck
-		if string.find(line, "=") and string.find(line, "{") and not string.find(line, "versionDCE")  then
-			n = n +1																								--compte le nombre de sous table
-			one, two = line:match("(.*)=(.*)")																		--s�pare la ligne en 2, au niveau de =
-			if string.find(one, "_check") and not string.find(one, "%-%-") then										--trouve le nom d'une table principale, finissant par _check
-				tableName = one:gsub("_check", "")
-				tableName = tableName:gsub("	", "")
-				tableName = tableName:gsub(" ", "")
-				nTable[n] = tableName																				--compte le nombre de sous-table, ici, on ajoute n+1
-				txt = txt ..""..tableName.." = {\n"
-			--cherche le nom de la table "secondaire n+1"
-			elseif not string.find(one, "%-%-") then																--si la ligne n'est pas un commentaire
-				tableNameSub = one:gsub("	", "")
-				tableNameSub = tableNameSub:gsub(" ", "")
-				nTable[n] = tableNameSub
-				for m = 2, n do
-					firstTab = firstTab.."	"
-				end
-				txt = txt ..firstTab..tableNameSub.." = {\n"
-			end
-
-			--colle les valeurs weather de campaign_ini
-			if nTable[2] == "weather" then
-				-- if 
-			end
-
-		--cherche le nom de la variable (key)
-		elseif string.find(line, "=") and string.find(line, ",") and not string.find(line, "{") then
-			one, two = line:match("(.*)=(.*)")																		--s�pare la ligne en 2, au niveau de =
-
-			if  not string.find(one, "%-%-") then
-				varName = one:gsub("	", "")
-				showVarName = varName
-
-				if string.find(varName, "%[") then																--si la key est une autre table, on enleve les crochets, guillemet				
-					varName = varName:gsub("%[", "")
-					varName = varName:gsub("%]", "")
-					varName = varName:gsub("\"", "")
-
-					if string.sub(varName, -1) == " " then
-						varName = varName:sub(1, -2)
-					end
-				else
-					varName = varName:gsub(" ", "")
-
-				end
-			end
-			--traitement du commentaire avec la valeur de la variable
-			com1, com2 = two:match("(.*)-(.*)")
-			if com2 and string.find(com2, "%-%-") then
-				comTemp, com2 = com2:match("(.*)-(.*)")
-			end
-
-		elseif string.find(line, "}") and not string.find(line, "=") then
-			nTable[n] = nil																								--supprime la sous-table, comme si on fermait par }
-			n = n -1																									--ferme la sous table ou l'iteration
-			txt = txt ..""..line.."\n"
-		else
-			txt = txt ..""..line.."\n"
-		end
-
-		if not com2 or com2 == nil then
-			com2 = ""
-		end
-
-		-- _affiche(nTable, "UtilF AA nTable")
-
-		local check = {}
-		if (nTable[1] == "mission_ini" or nTable[1] == "mission_forcedOptions" or nTable[1] == "Debug" or nTable[1] == "campMod" ) and varName then
-
-			if nTable[1] == "mission_ini" then
-				tableId = mission_ini												-- donne le nom de la clef
-
-			elseif nTable[1] == "mission_forcedOptions" then
-				tableId = mission_forcedOptions						-- donne le nom de la clef
-
-			elseif nTable[1] == "Debug" then
-				tableId = Debug														-- donne le nom de la clef
-
-			elseif nTable[1] == "campMod" then
-				tableId = campMod													-- donne le nom de la clef
-
-			end
-
-			--test si les sous table existent
-			-- si elle n'existe pas, on load la table _check � la place
-			local notLoad = false
-			local testSubTableId = Deepcopy(tableId)
-			if #nTable >=2 then																						--iteration des cascades de sous table
-				for n = 2, #nTable do
-					if  testSubTableId[nTable[n]] == nil then
-						notLoad = true
-					else
-						testSubTableId =  testSubTableId[nTable[n]]													--prend la valeur de la table du joueur  n-1
-					end
-				end
-			end
-
-			--la table est inconnue dans le conf_mod du joueur, donc  on load la table _check � la place
-			if not tableId or notLoad then
-				if nTable[1] == "mission_ini" then tableId = mission_ini_check
-				elseif nTable[1] == "mission_forcedOptions" then tableId = mission_forcedOptions_check
-				elseif nTable[1] == "Debug" then tableId = Debug_check
-				elseif nTable[1] == "campMod" then tableId = campMod_check
-				-- elseif nTable[1] == "campaign_ini" then tableId = campaign_ini_check
-				end
-			end
-
-			_affiche(tableId, "UtilF BB tableIdA")
-
-			print()
-			print("#nTable "..tostring(#nTable))
-
-			for m = 1, n do
-				firstTab = firstTab.."	"
-			end
-			if #nTable >=2 then																						--iteration des cascades de sous table
-				for m = 2, #nTable do
-					print("m "..m)
-					_affiche(nTable[m], "UtilF CC nTable[m]")
-
-					tableId =  tableId[nTable[m]]																	--prend la valeur de la table n-1
-				end
-			end
-
-			if camp.weather then
-				if tableId.pHigh and camp.weather.pHigh then  tableId.pHigh = camp.weather.pHigh  end
-				if tableId.pLow and camp.weather.pLow then tableId.pLow = camp.weather.pLow end
-				if tableId.refTemp and camp.weather.refTemp then tableId.refTemp = camp.weather.refTemp end
-			end
-
-			-- on lui colle la value du conf_mod player
-			if  not tableId[varName] then
-				if com1 then
-					com1a, com2b = com1:match("(.*),(.*)")
-
-					com1a = com1a:gsub(" ", "")
-					if  not string.find(com1a, "true") and not string.find(com1a, "false") and not string.find(com1a, ".") and not string.find(com1a, "\"") and  type(com1a) ~= "number" then
-						com1a = "\""..com1a.."\""
-					end
-					tableId[varName] = com1a
-
-					if varName == "selectLoadout" and mission_ini.SelectLoadout then tableId[varName] = "\""..mission_ini.SelectLoadout.."\"" end
-				else
-					if n == 2 then
-						--si la ligne est inconnue (donc la variable) du conf_mod joueur, on lui colle la valeur du UTIL_ConfModCheck
-						tableId[varName] = confModCheck[nTable[1]][nTable[n]][varName]
-					elseif n == 3 then
-						tableId[varName] = confModCheck[nTable[1]][nTable[n-1]][nTable[n]][varName]
-					elseif n== 4 then
-						tableId[varName] = confModCheck[nTable[1]][nTable[n-2]][nTable[n-1]][nTable[n]][varName]
-					end
-				end
-			end
-
-			-- --récupère et format la valeur de la variable
-			-- local resultNumber = tonumber(tableId[varName])
-			-- local varIsStrBoolean = false
-
-			-- if  type(tableId[varName]) ~= "boolean"	and not (string.find(tableId[varName], "true") or string.find(tableId[varName], "false"))
-			-- and  not resultNumber then
-			-- 	if com1a and not string.find(com1a, "\"") then
-			-- 		result = tableId[varName]
-			-- 	end
-
-			-- 	if not string.find(tableId[varName], "\"") then
-			-- 		result = "\""..tableId[varName].."\""
-			-- 	else
-			-- 		result = tableId[varName]
-			-- 	end
-			-- else
-			-- 	result = tableId[varName]
-			-- end
-
-			--récupère et format la valeur de la variable
-			local resultNumber
-			local varIsStrBoolean = false
-			local foundComma = false
-
-			if tableId and varName and tableId[varName] then
-				local checkValue = tableId[varName]
-				resultNumber = tonumber(checkValue)
-
-				-- print("UtilF varName: "..tostring(varName) .. " |:| "..tostring(tableId[varName]) )
-				if checkValue and type(checkValue) == "string" then
-					if string.find(checkValue, "\"") then
-						foundComma = true
-					end
-					if (checkValue == "true" or checkValue == "false") then
-						varIsStrBoolean = true
-					end
-
-				end
-			end
-
-			if  type(tableId[varName]) ~= "boolean" and not varIsStrBoolean and not resultNumber then
-				if com1a and not string.find(com1a, "\"") then
-					result = tableId[varName]
-				end
-
-				if not foundComma then
-					result = "\""..tableId[varName].."\""
-				else
-					result = tableId[varName]
-				end
-			else
-				result = tableId[varName]
-			end
-
-
-			--calcul l'espace necessaire pour afficher les commentaires
-			str_length = string.len(tostring(firstTab..showVarName.." = "..tostring(result)))
-			for n = 1, 14 - math.floor(str_length/4) do
-				nextTab = nextTab .. "	"
-			end
-
-			txt = txt..firstTab..showVarName.." = "..tostring(result)..","..nextTab.."--"..com2.."\n"
-		end
-	end
-
-	io.close(monfichier)
-
-	txt = txt.. "pictureBrief = " .. TableSerialization(pictureBrief, 0)
-
-	local updateFile = io.open("Init/conf_mod.lua", "w") or error("Failed to open debug file")
-	updateFile:write(txt)																		--save new data
-
-	io.close(updateFile)
 
 	dofile("Init/conf_mod.lua")
 end
@@ -4673,19 +4421,7 @@ function UpdateFilesAfterTimeJump()
 
 	zipFile:unzClose()
 
-	local aliasInitYear = camp.dateInit.year
-	if aliasInitYear < 1970 then
-		aliasInitYear = 1970
-	end
-
-	local aliasYear = camp.date.year
-	if aliasYear < 1970 then
-		aliasYear = 1970
-	end
-
-	local referenceTime = os.time{day=camp.dateInit.day, year=aliasInitYear, month=camp.dateInit.month}
-	local actualTime = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month} + camp.time
-	CampTotalTimeS = os.difftime(actualTime, referenceTime) --/ (24 * 60 * 60) -- seconds in a day
+	CampTotalTimeS = SecondsBetween(camp.dateInit, camp.date)
 	camp.date.CampTotalTimeS = CampTotalTimeS
 
 
@@ -4739,12 +4475,12 @@ function LoadFileAndUpdate()
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
 
+
 	if not oob_scen and Firstmission_flag then
 		require("Active/oob_scen")
 	end
 
-	
-	UpdateConfMod()
+	UpdateConfMod(nil, camp.date, "UTIL_Functions/LoadFileAndUpdate() "..debug.getinfo(1).currentline)
 
 	if Firstmission_flag then
 		ModifiCampInit()
@@ -4841,8 +4577,6 @@ function LoadFileAndUpdate()
 
 	dofile("Active/db_airbases.lua")
 
-	-- Comparer les deux tables
-	changes = CompareTableAlphaNumeric(db_airbases_init, db_airbases)
 
 	-- Afficher les résultats
 	for _, added in ipairs(changes.added) do
@@ -4860,6 +4594,87 @@ function LoadFileAndUpdate()
 	for _, removed in ipairs(changes.removed) do
 		db_airbases[removed.name] = nil
 	end
+	
+
+	--********************************* oob_air ******************************************************
+	dofile("Init/oob_air_init.lua")
+	local oob_air_init = oob_air
+
+	dofile("Active/oob_air.lua")
+	-- oob_air est maintenant la version active
+
+	-- for sideN, side in pairs(DCS_Side) do
+	for _, side in ipairs(DCS_Side) do
+		if oob_air_init[side] and oob_air[side] then
+			-- Construire un index par nom pour la table active
+			local activeByName = {}
+			for _, unit in pairs(oob_air[side]) do
+				if unit.name then
+					activeByName[unit.name] = true
+				end
+			end
+
+			-- Parcourir les unités de l'init et ajouter celles absentes dans l'actif
+			for _, unitInit in pairs(oob_air_init[side]) do
+				if unitInit.name and not activeByName[unitInit.name] then
+
+					unitInit.roster = {
+						ready = unitInit.number,																	--number of airframes ready for operations
+						lost = 0,																				--number of airframes lost
+						damaged = 0																				--number of airframes damaged
+					}
+					unitInit.score = {
+						kills_air = 0,																			--air kills
+						kills_ground = 0,																		--ground kills
+						kills_ship = 0																			--ship kills
+					}
+					if unitInit.reserve then
+						unitInit.roster.reserve = unitInit.reserve
+					end
+
+
+					-- Trouver le prochain index numérique libre
+					local idx = #oob_air[side] + 1
+					oob_air[side][idx] = unitInit
+					print("Ajouté à oob_air["..side.."] : "..unitInit.name)
+				end
+			end
+		end
+	end
+
+	for side, sideTab in pairs(oob_air_init) do
+		if oob_air[side] then
+			for _, unitInit in pairs(sideTab) do
+				local found = false
+				for _, unitActive in pairs(oob_air[side]) do
+					if unitActive.name == unitInit.name then
+						found = true
+						if unitActive.number ~= unitInit.number then
+							if unitInit.number > unitActive.number then
+								if Debug and Debug.debug then
+									print("Check/MAJ oob_air oob_air_init/number to Active/number pour "..tostring(unitInit.type).." || "..unitActive.name.." ("..side..") : "..tostring(unitInit.number).." -> "..tostring(unitActive.number).." = "..tostring(unitInit.number))
+								end
+								unitActive.number = unitInit.number
+								unitActive.number = unitInit.number
+								if unitActive.rooster and unitActive.rooster.ready then
+									unitActive.rooster.ready = unitInit.number
+								end
+							else
+								if Debug and Debug.debug then
+									print("Check ---- oob_air_init/number to Active/number ----- pour "..tostring(unitInit.type).." || "..unitActive.name.." ("..side..") : "..tostring(unitInit.number ).." -> "..tostring(unitActive.number))
+								end
+							end
+						end
+						break
+					end
+				end
+				if not found and Debug and Debug.debug then
+					print("Unité "..unitInit.name.." ("..side..") non trouvée dans Active/oob_air")
+				end
+			end
+		end
+	end
+
 
 	--****************************************************************************************
 	--ajout automatique d'elements en cours de campagne: FIN
@@ -4871,6 +4686,13 @@ function LoadFileAndUpdate()
 	local testFile = "Init/various_table.lua"
 	if FileExists(testFile) then
 		dofile(testFile)
+	else
+		if TypeAlias then	
+			local _str = "TypeAlias = " .. TableSerialization(TypeAlias, 0)
+			local _file = io.open("Init/various_table.lua", "w") or error("Failed to open debug file")
+			_file:write(_str)
+			_file:close()
+		end
 	end
 
 	for planeType, value in PairsByKeys(Data_divers) do
@@ -4917,7 +4739,7 @@ function LoadFileAndUpdate()
 		try_dofile(radioFile2)
 	end
 
-	print("UTIL_F M targetlist: "..tostring(#targetlist.blue))
+	-- print("UTIL_F M targetlist: "..tostring(#targetlist.blue))
 
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CampaignSettings.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Refpoints.lua")
@@ -4941,6 +4763,55 @@ function LoadFileAndUpdate()
 	--**************INITIALEMENT DANS MAIN_NextMission *****************************
 
 end
+
+-- Calcule le nombre de jours entre deux dates (YYYY, MM, DD)
+function SecondsBetween(date1,date2)
+
+	
+	local y1 = date1.year
+	local m1 = date1.month
+	local d1 = date1.day
+
+	local y2 = date2.year
+	local m2 = date2.month
+	local d2 = date2.day
+
+    local function isLeap(year)
+        return (year % 4 == 0 and year % 100 ~= 0) or (year % 400 == 0)
+    end
+    local monthDays = {31,28,31,30,31,30,31,31,30,31,30,31}
+    local function daysInYear(y)
+        return isLeap(y) and 366 or 365
+    end
+    local function daysSinceYearStart(y, m, d)
+        local days = d
+        for i=1,m-1 do
+            days = days + monthDays[i]
+            if i == 2 and isLeap(y) then days = days + 1 end
+        end
+        return days
+    end
+
+    -- Si la date 2 est avant la date 1, inverse
+    if y2 < y1 or (y2 == y1 and m2 < m1) or (y2 == y1 and m2 == m1 and d2 < d1) then
+        y1, m1, d1, y2, m2, d2 = y2, m2, d2, y1, m1, d1
+    end
+
+    local days = 0
+    -- Ajoute les jours restants de la première année
+    days = days + (daysInYear(y1) - daysSinceYearStart(y1, m1, d1) + 1)
+    -- Ajoute les jours des années intermédiaires
+    for y = y1+1, y2-1 do
+        days = days + daysInYear(y)
+    end
+    -- Ajoute les jours écoulés dans la dernière année
+    days = days + daysSinceYearStart(y2, m2, d2) - 1
+
+	local deltaTimeSeconds = days * 24 * 3600 
+
+    return deltaTimeSeconds
+end
+
 
 
 

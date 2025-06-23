@@ -13,7 +13,11 @@ versionDCE["DC_Time.lua"] = "1.6.18"
 -- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
 -- modification M25_b 		onlyDayMission.
 ------------------------------------------------------------------------------------------------------- 
----
+
+if Debug.debug then
+	print("START DC_Time.lua "..versionDCE["DC_Time.lua"])
+end
+
 --Global variable:
 Daytime	= ""																					--variable what Daytime the is covered in the duration of the mission
 
@@ -149,24 +153,30 @@ if not camp.dateInit then
 	}
 end
 
-local aliasInitYear = camp.dateInit.year
-if aliasInitYear < 1970 then
-	aliasInitYear = 1970
-end
+-- local aliasInitYear = camp.dateInit.year
+-- if aliasInitYear < 1970 then
+-- 	aliasInitYear = 1970
+-- end
 
-local aliasYear = camp.date.year
-if aliasYear < 1970 then
-	aliasYear = 1970
-end
+-- local aliasYear = camp.date.year
+-- if aliasYear < 1970 then
+-- 	aliasYear = 1970
+-- end
 
-referenceTime = os.time{day=camp.dateInit.day, year=aliasInitYear, month=camp.dateInit.month}
-actualTime = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month} + camp.time
-CampTotalTimeS = os.difftime(actualTime, referenceTime) --/ (24 * 60 * 60) -- seconds in a day
+-- referenceTime = os.time{day=camp.dateInit.day, year=aliasInitYear, month=camp.dateInit.month}
+-- actualTime = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month} + camp.time
+-- CampTotalTimeS = os.difftime(actualTime, referenceTime) --/ (24 * 60 * 60) -- seconds in a day
+
+CampTotalTimeS = SecondsBetween(camp.dateInit, camp.date)
+
+
 camp.date.CampTotalTimeS = CampTotalTimeS
 -- daysfrom = CampTotalTimeS/ (24 * 60 * 60) -- seconds in a day
 -- hoursFrom = CampTotalTimeS/ (3600) -- seconds to hours
 
-
+if Debug.debug then
+	print("DcIme E2 CampTotalTimeS "..CampTotalTimeS)
+end
 
 mission["start_time"] = camp.time																--set mission start time
 mission["date"]["Day"] = camp.date.day															--set mission day
@@ -204,7 +214,8 @@ print(FormatTime(idle_time, "hh:mm") .. "h passed. Next mission scheduled at: " 
 
 TimeAlreadyAdded = true
 
+--mise à jour de date dans confMod
+UpdateConfMod(nil, camp.date, "DC_Time "..debug.getinfo(1).currentline )
+
 os.execute 'pause'
 
---mise à jour de date dans confMod
-UpdateConfMod(nil, camp.date )

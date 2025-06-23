@@ -301,9 +301,9 @@ cmpFile:close()
 table.sort(oob_air.blue, function(a, b) return a.type:upper() < b.type:upper() end)
 table.sort(oob_air.red, function(a, b) return a.type:upper() < b.type:upper() end)
 local air_str = "oob_air = " .. TableSerialization(oob_air, 0)								--make a string
-if TypeAlias then
-	air_str = air_str .. "TypeAlias = " .. TableSerialization(TypeAlias, 0)
-end
+-- if TypeAlias then
+-- 	air_str = air_str .. "TypeAlias = " .. TableSerialization(TypeAlias, 0)
+-- end
 local airFile = io.open("Active/oob_air.lua", "w") or error("Failed to open debug file")
 airFile:write(air_str)																		--save new data
 airFile:close()
@@ -334,12 +334,11 @@ local ZoneSARFile = io.open("Active/camp_ZoneSAR.lua", "w")	 or error("Failed to
 ZoneSARFile:write(ZoneSAR_str)																	--save new data
 ZoneSARFile:close()
 
-if TypeAlias then
-	local _str = "TypeAlias = " .. TableSerialization(TypeAlias, 0)
-	local _file = io.open("Active/alias.lua", "w") or error("Failed to open debug file")
-	_file:write(_str)
-	_file:close()
-end
+-- if TypeAlias then
+-- 	local _str = "TypeAlias = " .. TableSerialization(TypeAlias, 0)
+-- 	local _file = io.open("Active/alias.lua", "w") or error("Failed to open debug file")
+-- 	_file:write(_str)
+-- 	_file:close()
+-- end
 
--- CheckTarget("Vihn Power Plant", "Main Accept Z")
 

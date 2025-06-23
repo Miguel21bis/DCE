@@ -112,7 +112,7 @@ camp.timeJump = nil
 
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
-UpdateConfMod()
+UpdateConfMod(nil, nil, "DEBRIEF_Master "..debug.getinfo(1).currentline)
 
 --load status file to be updated
 require("Active/oob_ground")																	--load ground oob

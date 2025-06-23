@@ -65,7 +65,7 @@ dofile("Active/camp_status.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
 
-UpdateConfMod()
+UpdateConfMod(nil, nil, "BAT_SkipMission "..debug.getinfo(1).currentline)
 
 if not camp.dateInit then
 	local tempCamp = camp
@@ -83,12 +83,20 @@ camp.timeJump = nil
 
 if mission_ini.current_date and mission_ini.current_date.year then
 
+	print()
+	_affiche(camp.dateInit, "camp.dateInit ")
+	print()
+	_affiche(mission_ini.current_date, "mission_ini.current_date ")
+	print()
+	_affiche(camp.date, "camp.date ")
+	print()
 
-	local jumpDate
+
+	local old_Date
 	-- local jumpTime = false
 	if camp.date.day ~= mission_ini.current_date.day or camp.date.month ~= mission_ini.current_date.month or camp.date.year ~= mission_ini.current_date.year then
 		
-		jumpDate = Deepcopy(camp.date)
+		old_Date = Deepcopy(camp.date)
 		camp.timeJump = true
 
 		if Debug.debug then
@@ -99,40 +107,52 @@ if mission_ini.current_date and mission_ini.current_date.year then
 
 	end
 
+	--changement de date, on prend celle de conf_mod
 	camp.date = mission_ini.current_date
 
-	local aliasInitYear = camp.dateInit.year
-	if aliasInitYear < 1970 then
-		aliasInitYear = 1970
-	end
+	-- local aliasInitYear = camp.dateInit.year
+	-- if aliasInitYear < 1970 then
+	-- 	aliasInitYear = 1970
+	-- end
 
-	local aliasYear = camp.date.year
-	if aliasYear < 1970 then
-		aliasYear = 1970
-	end
+	-- local aliasYear = camp.date.year
+	-- if aliasYear < 1970 then
+	-- 	aliasYear = 1970
+	-- end
 
 	--calcul le temps de la campagne
-	local referenceTime = os.time{day=camp.dateInit.day, year=aliasInitYear, month=camp.dateInit.month}
-	local actualTime = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month} + camp.time
-	CampTotalTimeS = os.difftime(actualTime, referenceTime) --/ (24 * 60 * 60) -- seconds in a day
+	-- local init_Time = os.time{day=camp.dateInit.day, year=aliasInitYear, month=camp.dateInit.month}
+	-- local newActualTime = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month} + camp.time
+	-- CampTotalTimeS = os.difftime(newActualTime, init_Time)
+
+
+	CampTotalTimeS = SecondsBetween(camp.dateInit, camp.date)
+
+	if Debug.debug then
+		print("jumpTimeB CampTotalTimeS "..CampTotalTimeS)
+	end
 
 	-- if camp.missionHistory and camp.missionHistory[camp.mission] then
 	if camp.timeJump then
 
-		local aliasJumpYear = jumpDate.year
-		if aliasJumpYear < 1970 then
-			aliasJumpYear = 1970
-		end
+		-- local aliasJumpYear = old_Date.year
+		-- if aliasJumpYear < 1970 then
+		-- 	aliasJumpYear = 1970
+		-- end
 
-		aliasYear = camp.date.year
-		if aliasYear < 1970 then
-			aliasYear = 1970
-		end
+		-- aliasYear = camp.date.year
+		-- if aliasYear < 1970 then
+		-- 	aliasYear = 1970
+		-- end
 
 		-- detecte s'il y a un saut temporel (changement de la date dans conf_mod)
-		referenceTime = os.time{day=jumpDate.day, year=aliasJumpYear, month=jumpDate.month}
-		actualTime = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month} + camp.time
-		local diffTime = os.difftime(actualTime, referenceTime) --/ (24 * 60 * 60) -- seconds in a day
+		-- local referenceTime = os.time{day=old_Date.day, year=aliasJumpYear, month=old_Date.month}
+		-- -- local actualTime = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month} + camp.time
+		-- local diffTime = os.difftime(newActualTime, referenceTime) --/ (24 * 60 * 60) -- seconds in a day
+
+		local diffTime = SecondsBetween(old_Date, camp.date)
+
+		print("jumpTime D diffTime "..diffTime)
 
 		if diffTime > mission_ini.mission_duration + mission_ini.idle_time_max then
 			-- camp.timeJump = true
@@ -141,6 +161,11 @@ if mission_ini.current_date and mission_ini.current_date.year then
 			end
 		end
 	end
+end
+
+if Debug.debug then
+	print("jumpTimeE CampTotalTimeS "..CampTotalTimeS)
+	print("jumpTimeF camp.timeJump "..tostring(camp.timeJump))
 end
 
 if not ChangePlane then
