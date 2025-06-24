@@ -4764,7 +4764,7 @@ function LoadFileAndUpdate(from)
 
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CampaignSettings.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Refpoints.lua")
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_MissionScore.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_MissionScore.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
 

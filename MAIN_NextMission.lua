@@ -654,6 +654,8 @@ CheckAndFixAllIds()
 
 -- Check_TaskPossibleByPlane()
 
+dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_MissionScore.lua")
+
 if MissionInstance >= 2 then
 	if Debug.debug then
 		print("MissionInstance "..MissionInstance)
