@@ -654,19 +654,24 @@ CheckAndFixAllIds()
 
 -- Check_TaskPossibleByPlane()
 
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Time.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_MoonPhase.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Weather.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+if MissionInstance >= 2 then
+	if Debug.debug then
+		print("MissionInstance "..MissionInstance)
+		print("LOAD DC_Time from "..tostring("MAIN_NextMission "..debug.getinfo(1).currentline))
+	end
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Time.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_MoonPhase.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Weather.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+end
 
 PayloadRestricted = makePayloadRestricted()
-
 
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
 
@@ -1343,10 +1348,8 @@ end
 ----- save updated status files  -----
 table.sort(oob_air.blue, function(a, b) return a.type:upper() < b.type:upper() end)
 table.sort(oob_air.red, function(a, b) return a.type:upper() < b.type:upper() end)
+
 local air_str = "oob_air = " .. TableSerialization(oob_air, 0)								--make a string
--- if TypeAlias then
--- 	air_str = air_str .. "TypeAlias = " .. TableSerialization(TypeAlias, 0)
--- end
 local airFile = io.open("Active/oob_air.lua", "w") or error("Failed to open debug file")
 airFile:write(air_str)																		--save new data
 airFile:close()
@@ -1404,8 +1407,8 @@ if camp_ZoneSAR then
 end
 
 
-
-camp.timeJump = false
+--reset TimeJump pour eviter les erreurs de mission suivante
+TimeJump = false
 
 
 if Debug.debug or mission_ini.backupAllMissionFiles then

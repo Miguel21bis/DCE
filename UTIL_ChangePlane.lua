@@ -247,7 +247,7 @@ airFile:close()
 -- --ajout automatique d'elements en cours de campagne: FIN
 -- --****************************************************************************************
 
-LoadFileAndUpdate()
+LoadFileAndUpdate("UTIL_ChangePlane "..debug.getinfo(1).currentline)
 
 local Reinforce = {}
 --recherche l'escadron de ravitaillement, s'il existe

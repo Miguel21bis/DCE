@@ -18,6 +18,9 @@ versionDCE["MAIN_AcceptMission.lua"] = "1.10.65"
 -- modification M34_Bl		custom FrequenceRadio (l new file name)
 -- -------------------------------------------------------------------------------------------------------
 
+-- print("MAIN_AM targetlist F1: "..tostring(camp_triggers))
+-- print("MAIN_AM targetlist F2: "..tostring(camp_triggers[1]["name"]))
+
 ----- unpack template mission file ----
 local minizip = require('minizip')
 
@@ -300,10 +303,9 @@ cmpFile:close()
 ----- save updated status files  -----
 table.sort(oob_air.blue, function(a, b) return a.type:upper() < b.type:upper() end)
 table.sort(oob_air.red, function(a, b) return a.type:upper() < b.type:upper() end)
+
+
 local air_str = "oob_air = " .. TableSerialization(oob_air, 0)								--make a string
--- if TypeAlias then
--- 	air_str = air_str .. "TypeAlias = " .. TableSerialization(TypeAlias, 0)
--- end
 local airFile = io.open("Active/oob_air.lua", "w") or error("Failed to open debug file")
 airFile:write(air_str)																		--save new data
 airFile:close()
@@ -313,16 +315,18 @@ local groundFile = io.open("Active/oob_ground.lua", "w") or error("Failed to ope
 groundFile:write(ground_str)																--save new data
 groundFile:close()
 
+-- print("MAIN_AM targetlist M1: "..tostring(camp_triggers))
+-- print("MAIN_AM targetlist M2: "..tostring(camp_triggers[1]["name"]))
 
 local tgt_str = "targetlist = " .. TableSerialization(targetlist, 0)						--make a string
 local tgtFile = io.open("Active/targetlist.lua", "w") or error("Failed to open debug file")
 tgtFile:write(tgt_str)																		--save new data
 tgtFile:close()
 
-local trigStr = "camp_triggers = " .. TableSerializationAG(camp_triggers, 0)
-local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to open debug file")
-trigFile:write(trigStr)
-trigFile:close()
+-- local trigStr = "camp_triggers = " .. TableSerializationAG(camp_triggers, 0)
+-- local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to open debug file")
+-- trigFile:write(trigStr)
+-- trigFile:close()
 
 local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
 local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
@@ -333,6 +337,21 @@ local ZoneSAR_str = "camp_ZoneSAR = " .. TableSerialization(camp_ZoneSAR, 0)				
 local ZoneSARFile = io.open("Active/camp_ZoneSAR.lua", "w")	 or error("Failed to open debug file")
 ZoneSARFile:write(ZoneSAR_str)																	--save new data
 ZoneSARFile:close()
+
+_affiche(camp.date, "camp.date")
+print("MAIN_AM BEFORE LoadFileAndUpdate()")
+-- os.execute 'pause'
+
+--***********NEW function***************--
+--***********NEW function***************--
+LoadFileAndUpdate("MAIN_AcceptMission "..debug.getinfo(1).currentline)
+--***********NEW function***************--
+--***********NEW function***************--
+
+_affiche(camp.date, "camp.date")
+print("MAIN_AM AFTER LoadFileAndUpdate()")
+-- os.execute 'pause'
+
 
 -- if TypeAlias then
 -- 	local _str = "TypeAlias = " .. TableSerialization(TypeAlias, 0)

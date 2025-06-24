@@ -100,7 +100,7 @@ if camp.weather == nil then
 end
 
 -- efface l'historique de la météo si on a un saut de temps
-if camp.timeJump then
+if TimeJump then
 	camp.weather.zone = nil
 end
 

@@ -1074,41 +1074,62 @@ function Disp_time(time)
 
 --function to return various date and time formats of a number in seconds
 function FormatTime(t, form)
-	local hour
-	local minute
-	local second
+    local day = math.floor(t / 86400)
+    local hour = math.floor((t % 86400) / 3600)
+    local minute = math.floor((t % 3600) / 60)
+    local second = math.floor(t % 60)
 
-	if t >= 86400 then
-		t= t - 86400
-	end
+    local dayStr = string.format("%02d", day)
+    local hourStr = string.format("%02d", hour + day * 24) -- total heures pour hh:mm
+    local hourOnlyStr = string.format("%02d", hour)
+    local minuteStr = string.format("%02d", minute)
+    local secondStr = string.format("%02d", second)
 
-	hour = math.floor(t / 3600)
-	t = t - hour * 3600
-	if hour < 10 then
-		hour = "0" .. hour
-	end
-
-	minute = math.floor(t / 60)
-	t = t - minute * 60
-	if minute < 10 then
-		minute = "0" .. minute
-	end
-
-	second = math.floor(t)
-	if second < 10 then
-		second = "0" .. second
-	end
-
-	if form == "hh:mm" then
-		minute =  math.floor(minute + 0.5)
-		if minute < 10 then
-			minute = "0" .. minute
-		end
-		return hour .. ":" .. minute
-	elseif form == "hh:mm:ss" then
-		return hour .. ":" .. minute .. ":" .. second
-	end
+    if form == "dd:hh:mm" then
+        return dayStr .. "d " .. hourOnlyStr .. "h " .. minuteStr
+    elseif form == "hh:mm" then
+        return hourStr .. "h " .. minuteStr
+    elseif form == "hh:mm:ss" then
+        return hourStr .. "h " .. minuteStr .. "mn " .. secondStr
+    end
 end
+
+-- function FormatTime(t, form)
+-- 	local hour
+-- 	local minute
+-- 	local second
+
+-- 	if t >= 86400 then
+-- 		t= t - 86400
+-- 	end
+
+-- 	hour = math.floor(t / 3600)
+-- 	t = t - hour * 3600
+-- 	if hour < 10 then
+-- 		hour = "0" .. hour
+-- 	end
+
+-- 	minute = math.floor(t / 60)
+-- 	t = t - minute * 60
+-- 	if minute < 10 then
+-- 		minute = "0" .. minute
+-- 	end
+
+-- 	second = math.floor(t)
+-- 	if second < 10 then
+-- 		second = "0" .. second
+-- 	end
+
+-- 	if form == "hh:mm" then
+-- 		minute =  math.floor(minute + 0.5)
+-- 		if minute < 10 then
+-- 			minute = "0" .. minute
+-- 		end
+-- 		return hour .. ":" .. minute
+-- 	elseif form == "hh:mm:ss" then
+-- 		return hour .. ":" .. minute .. ":" .. second
+-- 	end
+-- end
 
 
 --function to format date
@@ -3016,9 +3037,9 @@ function UpdateConfMod(setWeather, setDate, from)
 	-- 	refTemp = 18,				--average day max temperature
 	-- }
 
-	if Debug.debug then
-		print("UpdateConfMod() from "..tostring(from))
-	end
+	-- if Debug.debug then
+	-- 	print("UpdateConfMod() from "..tostring(from))
+	-- end
 
 	local weather_override
 	local date_override
@@ -3065,10 +3086,10 @@ function UpdateConfMod(setWeather, setDate, from)
 		date_override = setDate
 		camp.date = setDate
 
-		if Debug.debug then
-			print("date_override 5: camp.date = setDate ")
-			_affiche(setDate, "date_override 5: setDate ")
-		end
+		-- if Debug.debug then
+		-- 	print("date_override 5: camp.date = setDate ")
+		-- 	_affiche(setDate, "date_override 5: setDate ")
+		-- end
 	end
 
 
@@ -4456,7 +4477,7 @@ function UpdateFilesAfterTimeJump()
 
 end
 
-function LoadFileAndUpdate()
+function LoadFileAndUpdate(from)
 
 	----- unpack template mission file ----
 	local minizip = require('minizip')
@@ -4749,6 +4770,9 @@ function LoadFileAndUpdate()
 
 	Check_TaskPossibleByPlane()
 
+	if Debug.debug then
+		print("LOAD LoadFileAndUpdate() from "..tostring(from))
+	end
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Time.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_MoonPhase.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Weather.lua")

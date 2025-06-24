@@ -23,8 +23,11 @@ versionDCE["BAT_SkipMission.lua"] = "1.15.99"
 
 BugList = {}
 Skipmission_flag = true
+MissionInstance = 0
 Playable_m = {}
+SinglePlayer = false
 VersionPackageICM = os.getenv('VersionPackageICM')														-- modification M35.b version ScriptsMod
+TimeJump = false
 
 local function acceptMission()
 	local m = ""
@@ -79,28 +82,17 @@ if not camp.dateInit then
 	}
 end
 
-camp.timeJump = nil
-
 if mission_ini.current_date and mission_ini.current_date.year then
 
-	print()
-	_affiche(camp.dateInit, "camp.dateInit ")
-	print()
-	_affiche(mission_ini.current_date, "mission_ini.current_date ")
-	print()
-	_affiche(camp.date, "camp.date ")
-	print()
-
-
 	local old_Date
-	-- local jumpTime = false
+
 	if camp.date.day ~= mission_ini.current_date.day or camp.date.month ~= mission_ini.current_date.month or camp.date.year ~= mission_ini.current_date.year then
 		
 		old_Date = Deepcopy(camp.date)
-		camp.timeJump = true
+		TimeJump = true
 
 		if Debug.debug then
-			print("jumpTimeA : "..tostring(camp.timeJump))
+			print("jumpTimeA : "..tostring(TimeJump))
 			_affiche(mission_ini.current_date, "mission_ini.current_date")
 			_affiche(camp.date, "camp.date")
 		end
@@ -110,63 +102,30 @@ if mission_ini.current_date and mission_ini.current_date.year then
 	--changement de date, on prend celle de conf_mod
 	camp.date = mission_ini.current_date
 
-	-- local aliasInitYear = camp.dateInit.year
-	-- if aliasInitYear < 1970 then
-	-- 	aliasInitYear = 1970
-	-- end
-
-	-- local aliasYear = camp.date.year
-	-- if aliasYear < 1970 then
-	-- 	aliasYear = 1970
-	-- end
-
-	--calcul le temps de la campagne
-	-- local init_Time = os.time{day=camp.dateInit.day, year=aliasInitYear, month=camp.dateInit.month}
-	-- local newActualTime = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month} + camp.time
-	-- CampTotalTimeS = os.difftime(newActualTime, init_Time)
-
-
 	CampTotalTimeS = SecondsBetween(camp.dateInit, camp.date)
 
-	if Debug.debug then
-		print("jumpTimeB CampTotalTimeS "..CampTotalTimeS)
-	end
+	-- if Debug.debug then
+	-- 	print("jumpTimeB CampTotalTimeS "..CampTotalTimeS)
+	-- end
 
-	-- if camp.missionHistory and camp.missionHistory[camp.mission] then
-	if camp.timeJump then
-
-		-- local aliasJumpYear = old_Date.year
-		-- if aliasJumpYear < 1970 then
-		-- 	aliasJumpYear = 1970
-		-- end
-
-		-- aliasYear = camp.date.year
-		-- if aliasYear < 1970 then
-		-- 	aliasYear = 1970
-		-- end
-
-		-- detecte s'il y a un saut temporel (changement de la date dans conf_mod)
-		-- local referenceTime = os.time{day=old_Date.day, year=aliasJumpYear, month=old_Date.month}
-		-- -- local actualTime = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month} + camp.time
-		-- local diffTime = os.difftime(newActualTime, referenceTime) --/ (24 * 60 * 60) -- seconds in a day
+	if TimeJump then
 
 		local diffTime = SecondsBetween(old_Date, camp.date)
 
 		print("jumpTime D diffTime "..diffTime)
 
 		if diffTime > mission_ini.mission_duration + mission_ini.idle_time_max then
-			-- camp.timeJump = true
-			if Debug.debug then
-				print("jumpTimeB = true  detected: "..FormatTime(diffTime, "hh:mm").." since last mission.")
-			end
+			-- if Debug.debug then
+			-- 	print("jumpTimeB = true  detected: "..FormatTime(diffTime, "hh:mm").." since last mission.")
+			-- end
 		end
 	end
 end
 
-if Debug.debug then
-	print("jumpTimeE CampTotalTimeS "..CampTotalTimeS)
-	print("jumpTimeF camp.timeJump "..tostring(camp.timeJump))
-end
+-- if Debug.debug then
+-- 	print("jumpTimeE CampTotalTimeS "..CampTotalTimeS)
+-- 	print("jumpTimeF TimeJump "..tostring(TimeJump))
+-- end
 
 if not ChangePlane then
 	require("Active/oob_air")
@@ -179,7 +138,7 @@ dofile("Active/oob_scen.lua")
 
 --***********NEW function***************--
 --***********NEW function***************--
-LoadFileAndUpdate()
+LoadFileAndUpdate("BAT_SkipMission "..debug.getinfo(1).currentline)
 --***********NEW function***************--
 --***********NEW function***************--
 
@@ -624,7 +583,6 @@ if input == "y" or input == "yes" then
 
 		until tabIndex01[choix1]
 
-		MissionInstance = 0
 		print("\n\n")
 		repeat
 			print("Generating Next Mission.\n")

@@ -181,13 +181,22 @@ do
 
 	s = s.."Order of Battle:\n\n"																--make lists of the air order of battle for all sides
 
-	--air units
-	for side_name,side in pairs(oob_air) do															--iterate through sides in oob_air
+	--air units****************************************************************************
+	for side_name, side in pairs(oob_air) do															--iterate through sides in oob_air
 		if side_name == "blue" then
-			s = s .. "Blue Air Units:\n"															--side header
-		else
-			s = s .. "Red Air Units:\n"															--side header
+			s = s .. "\nBlue Air Units:\n"															--side header
+		elseif side_name == "red" then
+			s = s .. "\nRed Air Units:\n"															--side header
 		end
+
+		 -- Crée une copie triée des unités
+		local sorted_units = {}
+		for _, unit in pairs(side) do
+			table.insert(sorted_units, unit)
+		end
+		table.sort(sorted_units, function(a, b)
+			return tostring(a.name) < tostring(b.name)
+		end)
 
 		--define list entries
 		local entries = {
@@ -218,7 +227,7 @@ do
 		}
 
 		--add list values
-		for unit_n,unit in ipairs(side) do															--iterate through units
+		for unit_n,unit in ipairs(sorted_units) do															--iterate through units
 			if unit.inactive ~= true then															--unit is active
 				table.insert(entries[1].values, unit.name)											--unit name
 				table.insert(entries[2].values, ReplaceTypeName(unit.type))							--unit type
@@ -229,76 +238,116 @@ do
 			end
 		end
 
-		--determine maximum string length for each entry
-		for e = 1, #entries do																		--iterate through entries
-			entries[e].str_length = string.len(entries[e].header)									--store string length of header for this entry
-			for n = 1, #entries[e].values do														--iterate through values of this entry
-				local l = string.len(tostring(entries[e].values[n]))								--get string length of value of this entry
-				if l > entries[e].str_length then													--if the string length is larger than the previous
-					entries[e].str_length = l														--make it the new length (find the largest)
+		-- Détermine la largeur max de chaque colonne
+		for e = 1, #entries do
+			entries[e].str_length = string.len(entries[e].header)
+			for n = 1, #entries[e].values do
+				local l = string.len(tostring(entries[e].values[n]))
+				if l > entries[e].str_length then
+					entries[e].str_length = l
 				end
 			end
 		end
 
-		--build the list header
-		for e = 1, #entries do																		--iterate through entries
-			s = s .. entries[e].header																--add header
-			if e < #entries then																	--if this is not the last header, add spaces to the next header	
-				local space = entries[e].str_length + 3 - string.len(entries[e].header)				--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
-				for m = 1, space * 1.5 do
-					s = s .. " "																	--add 1.5 spaces for every missing letter
-				end
-			end
+		-- Prépare le format string pour chaque colonne
+		local formatStr = ""
+		for e = 1, #entries do
+			formatStr = formatStr .. "%-" .. (entries[e].str_length + 2) .. "s"
 		end
-		s = s .. "\n"
+		formatStr = formatStr .. "\n"
 
-		--build the list		
-		for n = 1, #entries[1].values do															--iterate through number of values (number of units)
-			for e = 1, #entries do																	--iterate through entries
-				s = s .. entries[e].values[n]														--add value to list
-				if e < #entries then																--if this is not the last header, add spaces to the next header	
-					local space = entries[e].str_length + 3 - string.len(tostring(entries[e].values[n]))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
-					for m = 1, space * 1.5 do
-						s = s .. " "																--add 1.5 spaces for every missing letter
-					end
-				end
+		-- Affiche l'entête
+		local headers = {}
+		for e = 1, #entries do
+			table.insert(headers, entries[e].header)
+		end
+		s = s .. string.format(formatStr, unpack(headers))
+
+		-- Affiche les lignes
+		for n = 1, #entries[1].values do
+			local row = {}
+			for e = 1, #entries do
+				table.insert(row, tostring(entries[e].values[n]))
 			end
-			s = s .. "\n"																			--make a new line after each unit
+			s = s .. string.format(formatStr, unpack(row))
 		end
 
-		--add oob description text (reinforcements and repairs)
-		if PlayerFlight and camp.player and camp.player.side == side_name then										--only do it for player side
-			if side_name == "blue" then
-				if Briefing_oob_text_blue ~= "" then
-					s = s .. "\n" .. Briefing_oob_text_blue .. "\n"
-				else
-					s = s .. "\n\n"
-				end
-			elseif side_name == "red" then
-				if Briefing_oob_text_red ~= "" then
-					s = s .. "\n" .. Briefing_oob_text_red .. "\n"
-				else
-					s = s .. "\n\n"
-				end
-			end
-		elseif PlayerFlight and camp.client and camp.client.side == side_name then										--only do it for player side
-			if side_name == "blue" then
-				if Briefing_oob_text_blue ~= "" then
-					s = s .. "\n" .. Briefing_oob_text_blue .. "\n"
-				else
-					s = s .. "\n\n"
-				end
-			elseif side_name == "red" then
-				if Briefing_oob_text_red ~= "" then
-					s = s .. "\n" .. Briefing_oob_text_red .. "\n"
-				else
-					s = s .. "\n\n"
-				end
-			end
-		else
-			s = s .. "\n\n"																		--make a new line after each side
-		end
+		-- --determine maximum string length for each entry
+		-- for e = 1, #entries do																		--iterate through entries
+		-- 	entries[e].str_length = string.len(entries[e].header)									--store string length of header for this entry
+		-- 	for n = 1, #entries[e].values do														--iterate through values of this entry
+		-- 		local l = string.len(tostring(entries[e].values[n]))								--get string length of value of this entry
+		-- 		if l > entries[e].str_length then													--if the string length is larger than the previous
+		-- 			entries[e].str_length = l														--make it the new length (find the largest)
+		-- 		end
+		-- 	end
+		-- end
+
+		-- --build the list header
+		-- for e = 1, #entries do																		--iterate through entries
+		-- 	s = s .. entries[e].header																--add header
+		-- 	if e < #entries then																	--if this is not the last header, add spaces to the next header	
+		-- 		local space = entries[e].str_length + 3 - string.len(entries[e].header)				--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
+		-- 		for m = 1, space * 1.5 do
+		-- 			s = s .. " "																	--add 1.5 spaces for every missing letter
+		-- 		end
+		-- 	end
+		-- end
+		-- s = s .. "\n"
+
+		-- --build the list		
+		-- for n = 1, #entries[1].values do															--iterate through number of values (number of units)
+		-- 	for e = 1, #entries do																	--iterate through entries
+		-- 		s = s .. entries[e].values[n]														--add value to list
+		-- 		if e < #entries then																--if this is not the last header, add spaces to the next header	
+		-- 			local space = entries[e].str_length + 3 - string.len(tostring(entries[e].values[n]))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
+		-- 			for m = 1, space * 1.5 do
+		-- 				s = s .. " "																--add 1.5 spaces for every missing letter
+		-- 			end
+		-- 		end
+		-- 	end
+		-- 	s = s .. "\n"																			--make a new line after each unit
+		-- end
+
+		-- --add oob description text (reinforcements and repairs)
+		-- if PlayerFlight and camp.player and camp.player.side == side_name then										--only do it for player side
+		-- 	if side_name == "blue" then
+		-- 		if Briefing_oob_text_blue ~= "" then
+		-- 			s = s .. "\n" .. Briefing_oob_text_blue .. "\n"
+		-- 		else
+		-- 			s = s .. "\n\n"
+		-- 		end
+		-- 	elseif side_name == "red" then
+		-- 		if Briefing_oob_text_red ~= "" then
+		-- 			s = s .. "\n" .. Briefing_oob_text_red .. "\n"
+		-- 		else
+		-- 			s = s .. "\n\n"
+		-- 		end
+		-- 	end
+		-- elseif PlayerFlight and camp.client and camp.client.side == side_name then										--only do it for player side
+		-- 	if side_name == "blue" then
+		-- 		if Briefing_oob_text_blue ~= "" then
+		-- 			s = s .. "\n" .. Briefing_oob_text_blue .. "\n"
+		-- 		else
+		-- 			s = s .. "\n\n"
+		-- 		end
+		-- 	elseif side_name == "red" then
+		-- 		if Briefing_oob_text_red ~= "" then
+		-- 			s = s .. "\n" .. Briefing_oob_text_red .. "\n"
+		-- 		else
+		-- 			s = s .. "\n\n"
+		-- 		end
+		-- 	end
+		-- else
+		-- 	s = s .. "\n\n"																		--make a new line after each side
+		-- end
+
+		s = s .. "\n\n"																		--make a new line after each side
+
 	end
+
+	--FIN air units****************************************************************************
+
 
 
 	--ground targets
@@ -488,10 +537,10 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							[tempPlayer.pack_n] = Deepcopy(camp.player.package[tempPlayer.pack_n]),
 						}
 
-						local camp_str = "tempPlayer = " .. TableSerialization(tempPlayer, 0)						--make a string
-						local campFile = io.open("Debug/CAMPtempPlayerBriefingDD.lua", "w")	 or error("Failed to open debug file")
-						campFile:write(camp_str)																		--save new data
-						campFile:close()
+						-- local camp_str = "tempPlayer = " .. TableSerialization(tempPlayer, 0)						--make a string
+						-- local campFile = io.open("Debug/CAMPtempPlayerBriefingDD.lua", "w")	 or error("Failed to open debug file")
+						-- campFile:write(camp_str)																		--save new data
+						-- campFile:close()
 
 						local tagBreak
 						--##parse mission table:
@@ -534,19 +583,23 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 						--define list entries
 						local entries = {
-							[1] = {
+							{
+								header = "Pack",
+								values = {},
+							},
+							{
 								header = "Sorties",
 								values = {},
 							},
-							[2] = {
+							{
 								header = "Type(main)",
 								values = {},
 							},
-							[3] = {
+							{
 								header = "Mission",
 								values = {},
 							},
-							[4] = {
+							{
 								header = "TOT",
 								values = {},
 							},
@@ -566,9 +619,9 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 							--package sortie number
 							local sortie_n = 0																		--number of aircraft (sorties) in package
-							for role,flight in pairs(pack) do														--iterate through roles in package
-								for n = 1, #flight do																--iterate through flights in role
-									sortie_n = sortie_n + flight[n].number											--count number of aircraft
+							for role, _flight in pairs(pack) do														--iterate through roles in package
+								for n = 1, #_flight do																--iterate through flights in role
+									sortie_n = sortie_n + _flight[n].number											--count number of aircraft
 								end
 							end
 
@@ -599,10 +652,11 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 						--add list values
 						for pack_n,pack in pairs(ATOList) do														--iterate through packages
-							table.insert(entries[1].values, pack.sortie_n)											--number of sorties in package
-							table.insert(entries[2].values, pack.type)
-							table.insert(entries[3].values, pack.target_name)										--package target
-							table.insert(entries[4].values, pack.tot)												--package time on target
+							table.insert(entries[1].values, pack_n)
+							table.insert(entries[2].values, pack.sortie_n)											--number of sorties in package
+							table.insert(entries[3].values, pack.type)
+							table.insert(entries[4].values, pack.target_name)										--package target
+							table.insert(entries[5].values, pack.tot)												--package time on target
 						end
 
 						--determine maximum string length for each entry

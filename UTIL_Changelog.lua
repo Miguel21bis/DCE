@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.88.536"
+versionDCE["UTIL_Changelog.lua"] = "20.88.545"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.88.536"
+VersionDCE["UTIL_Changelog.txt"] = "20.88.545"
 --[[
 
 
@@ -9,8 +9,12 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.88.537:==
--- ajout des dernieres set meteo
+==:20.88.545:==
+-- campaign peut etre update en cours, par modification des fichiers de Init
+-- bug 1970 again
+-- saut temporel possible 
+-- bug sur inter player
+-- ajout des dernieres set meteo + gros bug sur le random weather
 -- interdit le ravitaillent en vol et le straffing pour les IA
 --revu des stats de bombardement des elements de la MAP
 --erreur sur les stats ground

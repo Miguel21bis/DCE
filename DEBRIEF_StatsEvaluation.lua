@@ -18,7 +18,7 @@ versionDCE["DEBRIEF_StatsEvaluation.lua"] = "1.8.67"
 --Global variable
 packstats = {}	--track stats for player package
 
-if not AcceptedMission or AcceptedMission == nil then
+if not AcceptedMission then
 	oob_air = Deepcopy(oob_air)
 	oob_ground = Deepcopy(oob_ground)
 	targetlist = Deepcopy(targetlist)
@@ -58,9 +58,9 @@ else
 	camp_ZoneSAR = nil
 
 	local zoneSARFile = "Active/camp_ZoneSAR.lua"
-	local TestPath = io.open(zoneSARFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
-	if TestPath ~= nil then																					--check si le fichier existe dans ScriptsMod
-		io.close(TestPath)
+	local testPath = io.open(zoneSARFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
+	if testPath ~= nil then																					--check si le fichier existe dans ScriptsMod
+		io.close(testPath)
 		require("Active/camp_ZoneSAR")																--zoneSAR
 	end
 
@@ -68,6 +68,9 @@ else
 	dofile("Active/oob_scen.lua")
 
 end
+
+-- print(" targetlist D1: "..tostring(camp_triggers))
+-- print(" targetlist D2: "..tostring(camp_triggers[1]["name"]))
 
 require("Active/last_Mission")
 
@@ -1546,5 +1549,8 @@ if Debug.debug then
 	campFile:close()
 end
 
+
+-- print(" targetlist E1: "..tostring(camp_triggers))
+-- print(" targetlist E2: "..tostring(camp_triggers[1]["name"]))
 -- CheckTarget("Vihn Power Plant", "Debrief Z")
 

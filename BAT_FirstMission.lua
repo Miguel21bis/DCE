@@ -100,7 +100,7 @@ dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ResetCampaign.lua")				
 
 
 --***********NEW function***************--
-LoadFileAndUpdate()
+LoadFileAndUpdate("BAT_FirstMission "..debug.getinfo(1).currentline)
 --***********NEW function***************--
 
 -- Exécution du fichier s'il existe

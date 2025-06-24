@@ -1124,8 +1124,7 @@ Action = {}
 
 				if text then
 					if debugKT then print("DcCT "..tostring(text)) end
-					print("DcCT "..tostring(text))
-
+					
 					if destSide == "blue" then										--side is blue
 						Briefing_oob_text_blue = Briefing_oob_text_blue .. text		--add to blue briefing oob text
 					elseif destSide == "red" then									--side is red
@@ -2449,7 +2448,7 @@ for trigger_name,trigger in pairs(camp_triggers) do								--iterate through tri
 
 --Compatible avec les sauts temporels
 for side_name, side in pairs(oob_air) do
-    print("DcCT side_name "..tostring(side_name))
+    -- print("DcCT side_name "..tostring(side_name))
 
     if side_name ~= "neutral" then
         local interval = campMod.RepairOption[side_name]["airUnit"][3] * 3600
