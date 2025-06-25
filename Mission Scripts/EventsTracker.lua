@@ -45,16 +45,12 @@ local hit1sQueueTimerId = nil
 local refuelStartByUnit = {}					--table used to store the start time of refueling for each unit
 local refuelNotifyByUnit = {}				--table used to store the notification time for refueling for each unit
 local tankerToPlane = {}		--table to store refueling units
-
--- local BdaFloodGuard = {}
--- local bdaCount = {}
--- local BDA_THRESHOLD = 20
--- local TIME_WINDOW = 2
+local survey_EVENT_BDA = false	--
 
 -- Paramètres globaux pour le flood BDA
 local bdaTimestamps = {}
-local BDA_WINDOW = 0.2      -- fenêtre de temps en secondes
-local BDA_THRESHOLD = 5    -- nombre d'événements BDA tolérés dans cette fenêtre
+local BDA_WINDOW = 0.4      -- fenêtre de temps en secondes
+local BDA_THRESHOLD = 15    -- nombre d'événements BDA tolérés dans cette fenêtre
 
 
 
@@ -595,66 +591,80 @@ function eventHandlerDCE:onEvent(event)
         -- Anti-flood BDA (global, sans getID ni getName)
         if event.id == world.event.S_EVENT_BDA then
 
-			env.info("[BDA-FLOOD A] S_EVENT_BDA detected ")
+			if survey_EVENT_BDA then
 
-            local now = timer.getTime()
-            table.insert(bdaTimestamps, now)
-
-            -- Nettoyage des timestamps trop anciens
-            local recent = {}
-            for _, t in ipairs(bdaTimestamps) do
-                if now - t < BDA_WINDOW then
-                    table.insert(recent, t)
-                end
-            end
-            bdaTimestamps = recent
-
-            -- Détection du flood
-            if #recent >= BDA_THRESHOLD then
-                trigger.action.outText("BDA FLOOD détecté : " .. #recent .. " événements en " .. BDA_WINDOW .. "s", 20)
-                env.info("[BDA-FLOOD B] Seuil atteint : " .. #recent)
-                
-				local tgt = event.target
-				
-				if tgt then
-
-					local tgtName = tgt.getName and tgt:getName() or "unknown"
-					
-					trigger.action.outText("BDA flood détecté tgtName : " .. tgtName ..  " sera upprimé", 20)
-					env.info("[BDA-FLOOD C]BDA flood détecté tgtName : " .. tgtName ..  "  sera upprimé")
-
-					local isPlayer = tgt.getPlayerName and tgt:getPlayerName()
-
-					if tgt and tgt.isExist and not isPlayer then
-						if tgt:isExist() then tgt:destroy() end
-						env.info("[BDA-FLOOD C]BDA flood détecté tgtName : " .. tgtName ..  " supprimés OK")
-					elseif isPlayer then
-						env.info("[BDA-FLOOD C]BDA flood détecté mais la cible est un joueur : " .. isPlayer ..  " ne sera pas supprimé")
-					end
+				-- Vérification du flood BDA
+				if not bdaTimestamps then
+					bdaTimestamps = {}
 				end
 
-				local init = event.initiator
-				if init then
+				env.info("[BDA-FLOOD A] S_EVENT_BDA detected ")
 
-					local initName = init.getName and init:getName() or "unknown"
+				local now = timer.getTime()
+				table.insert(bdaTimestamps, now)
 
-					trigger.action.outText("BDA flood détecté initName: "  .. initName .. " supprimé", 20)
-					env.info("[BDA-FLOOD C]BDA flood détecté initName: " .. initName .. " supprimé")
+				-- Nettoyage des timestamps trop anciens
+				local recent = {}
+				for _, t in ipairs(bdaTimestamps) do
+					if now - t < BDA_WINDOW then
+						table.insert(recent, t)
+					end
+				end
+				bdaTimestamps = recent
 
-					local isPlayer = tgt.getPlayerName and tgt:getPlayerName()
+				-- Détection du flood
+				if #recent >= BDA_THRESHOLD then
+					trigger.action.outText("BDA FLOOD détecté : " .. #recent .. " événements en " .. BDA_WINDOW .. "s", 20)
+					env.info("[BDA-FLOOD B] Seuil atteint : " .. #recent)
+					
+					local tgt = event.target
+					
+					if tgt then
 
-					if init and init.isExist and not isPlayer then
-						if init:isExist()  then init:destroy() end
-						env.info("[BDA-FLOOD C]BDA flood détecté initName : " .. initName ..  " supprimés OK")
-					elseif isPlayer then
-						env.info("[BDA-FLOOD C]BDA flood détecté mais l initiateur est un joueur : " .. isPlayer ..  " ne sera pas supprimé")
+						local tgtName = tgt.getName and tgt:getName() or "unknown"
+						
+						trigger.action.outText("BDA flood détecté tgtName : " .. tgtName ..  " sera upprimé", 20)
+						env.info("[BDA-FLOOD C]BDA flood détecté tgtName : " .. tgtName ..  "  sera upprimé")
+
+						local isPlayer = tgt.getPlayerName and tgt:getPlayerName()
+						if not isPlayer and tgt.getName then
+							isPlayer = Players[tgt:getName()]
+						end
+
+						if tgt and tgt.isExist and not isPlayer then
+							if tgt:isExist() then tgt:destroy() end
+							env.info("[BDA-FLOOD C]BDA flood détecté tgtName : " .. tgtName ..  " supprimés OK")
+						elseif isPlayer then
+							env.info("[BDA-FLOOD C]BDA flood détecté mais la cible est un joueur : " .. tostring(isPlayer) ..  " ne sera pas supprimé")
+						end
 					end
 
-					
-				end
+					local init = event.initiator
+					if init then
 
-                bdaTimestamps = {}
-            end
+						local initName = init.getName and init:getName() or "unknown"
+
+						trigger.action.outText("BDA flood détecté initName: "  .. initName .. " supprimé", 20)
+						env.info("[BDA-FLOOD C]BDA flood détecté initName: " .. initName .. " supprimé")
+
+						local isPlayer = init.getPlayerName and init:getPlayerName()
+						if not isPlayer and init.getName then
+							isPlayer = Players[init:getName()]
+						end
+
+						if init and init.isExist and not isPlayer then
+							if init:isExist() then init:destroy() end
+							env.info("[BDA-FLOOD C]BDA flood détecté initName : " .. initName ..  " supprimés OK")
+						elseif isPlayer then
+							env.info("[BDA-FLOOD C]BDA flood détecté mais l initiateur est un joueur : " .. isPlayer ..  " ne sera pas supprimé")
+						end
+
+						
+					end
+
+					bdaTimestamps = {}
+				end
+			end
         end
 
    

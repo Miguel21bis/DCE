@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.88.545"
+versionDCE["UTIL_Changelog.lua"] = "20.88.546"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.88.545"
+VersionDCE["UTIL_Changelog.txt"] = "20.88.546"
 --[[
 
 
@@ -9,33 +9,34 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.88.545:==
--- campaign peut etre update en cours, par modification des fichiers de Init
--- bug 1970 again
--- saut temporel possible 
--- bug sur inter player
--- ajout des dernieres set meteo + gros bug sur le random weather
--- interdit le ravitaillent en vol et le straffing pour les IA
---revu des stats de bombardement des elements de la MAP
---erreur sur les stats ground
-537 add		[refuel][M88]	CheckRefuelProgress (in progress)
-
-536	mod		[loadout][M87]	change of logic for the “day” variable: day will always be considered true (even if it's not in the loadout). 
+==:20.88.546:==
+546	fixed		[campaign]	campaign peut etre update en cours, par modification des fichiers de Init
+545	fixed		[date]	bug 1970 again
+544	add			[date][time jump}	time jump possible with conf_mod (change date in conf_mod then make a SkipMission.BAT) 
+543	fixed		[inter]	player interceptors are "delayed
+542	fixed		[weather]	added latest weather presets + big bug on random weather
+541	fixed		[AI]	prohibits in-flight refuelling and straffing for AIs
+540	fixed		[debrief][stats]	revision of MAP's building destruction detection and statistics code
+539	fixed		[debrief][stats]	ground unit destruction stats error
+538 fixed		[refuel][M88]	CheckRefuelProgress (in progress)
+537	mod		[loadout][M87]	change of logic for the “day” variable: day will always be considered true (even if it's not in the loadout). 
 						However, if you want ONLY a night loadout, set this:
 							night = true,
 						and 
 							day = false,
-535	mod		[date][M86]	new variables added to conf_mod (RepairOption, current_date, weather, etc.) 
-534	fixed	[generator][inter]		choosing interceptor causes mission generation to crash
-533	mod		[inter]		interceptors only take off if a type of aircraft to be intercepted is detected
-				["Kien An Airbase Alert"] = {
+536	mod		[date][M86]	new variables added to conf_mod (RepairOption, current_date, weather, etc.) 
+535	fixed	[generator][inter]		choosing interceptor causes mission generation to crash
+534	mod		[inter]		interceptors only take off if a type of aircraft to be intercepted is detected
+				in targetList: ["Kien An Airbase Alert"] = {
 					task = "Intercept",
 					targetPlane = {"B-52H", "A-6E", "VSN_F105D" },
+					...
 			
-532	 add	[file][M85]		keeps files already added to base_mission
-531	 add	[FPS][M84]		DCE Bulle par activation, désactivation des vehicules et static
-530	 add	[Jammer][M83]		Jammer checkMissileProximity  M83
-529 add	[callSign]		assign a specific callSign (e.g. Tanker) to a target to have consistent callSigns according to the chosen pattern
+533	 add	[file][M85]		keeps files already added to base_mission
+---
+532	 add	[FPS][M84]		DCE Bubble by activating, deactivating vehicles and static
+531	 add	[Jammer][M83]		Jammer checkMissileProximity  M83
+530 add	[callSign]		assign a specific callSign (e.g. Tanker) to a target to have consistent callSigns according to the chosen pattern
 						add this to a target pattern/tanker in the targetList :
 						predeterminedCallsign =  {
 							groupNumber = 6,

@@ -64,6 +64,7 @@ zoneSAR = {}								--table enumérant les helico SAR pour eviter d'en envoyer p
 EjectedPilotOnBoard = {}
 LastInjecAFAC = {}					--garde les derniers plan de vol injecté
 SatusGroupAircraft = {}				--table used to store the status of aircraft groups
+Players = {}					--table used to store player units
 
 coalitionId = {
 	["0"] = "neutral",
@@ -3193,6 +3194,8 @@ end
 
 local eventsSurvey2 = {
 	[world.event.S_EVENT_BIRTH] = true,--
+	[world.event.S_EVENT_PLAYER_LEAVE_UNIT] = true,--
+	
 	[world.event.S_EVENT_DEAD] = true,--
 	[world.event.S_EVENT_LAND] = true,--
 	[world.event.S_EVENT_CRASH] = true,--
@@ -3219,8 +3222,7 @@ function EventHandler2:onEvent(event)
 			if event.initiator and Object.getCategory(event.initiator) ~= Object.Category.STATIC and event.initiator.getPlayerName and event.initiator.getGroup then
 				local playerName = event.initiator:getPlayerName()
 				local groupObject = event.initiator:getGroup()
-				-- local gpGid = event.initiator:getGroup():getID()
-
+				
 				if groupObject and groupObject.getID then
 					local gpGid = groupObject:getID()
 
@@ -3229,6 +3231,19 @@ function EventHandler2:onEvent(event)
 					end
 				end
 			end
+
+			if event.initiator then
+				local unit = event.initiator
+				if unit and unit.getPlayerName and unit:getPlayerName() then
+					local name = unit:getPlayerName()
+					local uName = unit:getName()
+					env.info("DCE_EventHandler2 Joueur détecté: " .. name .. " (unité: " .. uName .. ")")
+					Players[uName] = name
+				end
+			end
+			
+
+
 		elseif not event.place then
 			if event.subPlace then
 				if event.initiator and event.initiator.getPlayerName then
