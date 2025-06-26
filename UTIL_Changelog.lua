@@ -10,6 +10,7 @@ known issues:
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
 ==:20.88.546:==
+anticollision au spawn air
 546	fixed		[campaign]	campaign peut etre update en cours, par modification des fichiers de Init
 545	fixed		[date]	bug 1970 again
 544	add			[date][time jump}	time jump possible with conf_mod (change date in conf_mod then make a SkipMission.BAT) 

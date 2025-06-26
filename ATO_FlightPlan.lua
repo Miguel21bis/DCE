@@ -1178,34 +1178,29 @@ local function activate_group_time_after(group, AirSpawnTime, from)
 
 	-- group['lateActivation'] = true --incompatible avec l'activation sur sixpack
 
-	-- if not group["TrigActivate"]  then
-		-- group["TrigActivate"] = true ATTENTION semble incompatible avec les orbites (infini)
-		-- local trig_n = Missionfunc + #mission.trig.funcStartup + 1										--next available trigger number
-		trig_n =  #mission.trig.actions + 1
-		Missionfunc = Missionfunc + 1 																	--M11.o
-		mission.trig.func[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
-		mission.trig.flag[trig_n] = true
-		mission.trig.conditions[trig_n] = "return(c_time_after(" .. AirSpawnTime .. ") )"
-		mission.trig.actions[trig_n] = "a_activate_group(" .. group.groupId .. "); mission.trig.func[" .. trig_n .. "]=nil;"	-- ATO_FP_Debug02 Interceptor error nb trigger
-		mission.trigrules[trig_n] = {
-			['rules'] = {
-				[1] = {
-					["seconds"] = AirSpawnTime,
-					["predicate"] = "c_time_after",
-				},
+	trig_n =  #mission.trig.actions + 1
+	Missionfunc = Missionfunc + 1 
+	mission.trig.func[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
+	mission.trig.flag[trig_n] = true
+	mission.trig.conditions[trig_n] = "return(c_time_after(" .. AirSpawnTime .. ") )"
+	mission.trig.actions[trig_n] = "a_activate_group(" .. group.groupId .. "); mission.trig.func[" .. trig_n .. "]=nil;"
+	mission.trigrules[trig_n] = {
+		['rules'] = {
+			[1] = {
+				["seconds"] = AirSpawnTime,
+				["predicate"] = "c_time_after",
 			},
-			['eventlist'] = '',
-			['comment'] = 'Trigger ' .. trig_n,
-			['predicate'] = 'triggerOnce',
-			['actions'] = {
-				[1] = {
-					["group"] = group.groupId,
-					["predicate"] = "a_activate_group",
-				},
-			}
+		},
+		['eventlist'] = '',
+		['comment'] = 'Trigger ' .. trig_n,
+		['predicate'] = 'triggerOnce',
+		['actions'] = {
+			[1] = {
+				["group"] = group.groupId,
+				["predicate"] = "a_activate_group",
+			},
 		}
-
-	-- end
+	}
 end
 
 --Start_set_ai_task
@@ -1221,7 +1216,7 @@ function Start_set_ai_task(group, aiStart_spawn_time, from)
 	mission.trig.func[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
 	mission.trig.flag[trig_n] = true
 	mission.trig.conditions[trig_n] = "return(c_time_after(" .. aiStart_spawn_time .. ") )"
-	mission.trig.actions[trig_n] = "a_set_ai_task(" .. group.groupId .. ", 1); mission.trig.func[" .. trig_n .. "]=nil;"				-- ATO_FP_Debug02 Interceptor error nb trigger
+	mission.trig.actions[trig_n] = "a_set_ai_task(" .. group.groupId .. ", 1); mission.trig.func[" .. trig_n .. "]=nil;"
 	mission.trigrules[trig_n] = {
 		['rules'] = {
 			[1] = {
@@ -1897,6 +1892,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							--s'il n'y a plus de place, on le dit (LimitedParkTiming) et on arrete de compter
 							if db_airbases[flight[f].base].LimitedParkNb and  TabLPark[flight[f].base][mn] + flight[f].number > db_airbases[flight[f].base].LimitedParkNb then
 								LimitedParkTiming = true
+								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe LimitedParkNb A "..tostring(db_airbases[flight[f].base].LimitedParkNb) ) end
 								break
 							else
 								--si il reste de la place, on ajoute la somme 
@@ -1929,6 +1925,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							if freeParkSpace >= flight[f].number then
 								--il y a donc de la place sur les parking SAR (ParkSarAirBase), on enleve donc la limite LimitedParkTiming
 								LimitedParkTiming = false
+								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe LimitedParkNb B "..tostring(db_airbases[flight[f].base].LimitedParkNb) ) end
 
 								--TODO enlever ceci: ai décollage
 								-- ["helipadId"] = 1665,
@@ -5507,7 +5504,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						--si multi ou ddserverAirAir: les IA en vol
 						-- single ou ddserver : on gere les taxiing cata
-						if  (SinglePlayer  or  SingleWithDServer) and not SingleWithDServerAiAir then
+						if (SinglePlayer or SingleWithDServer) and not SingleWithDServerAiAir then
 							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe CC SinglePlayer "..tostring(waypoints[1]["type"])) end
 
 
@@ -5785,7 +5782,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 				end
 
-				if (flight[f].task == "SAR" and conditionUno)  then			--or flight[f].task == "CSAR" 		
+				if (flight[f].task == "SAR" and conditionUno) then			--or flight[f].task == "CSAR" 		
 					camp.SAR.Flag = camp.SAR.Flag + 1								--go to next trigger flag number					
 
 					-- ParkSarAirBase
@@ -5977,9 +5974,9 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				end
 				----- provisions for interceptors/GCI/AWACS -----
-				if flight[f].task == "Intercept" then   --and not flight[f].player 				--and flight[f].client ~= true					
+				if flight[f].task == "Intercept" then				
 					GCI.Flag = GCI.Flag + 1															--go to next trigger flag number					
-					if not flight[f].player and not flight[f].client and LimitedParkTiming then								-- M11 PVP ne copie pas de trigger retardé START pour les clients/joueurs	
+					if not flight[f].player and not flight[f].client then	-- and LimitedParkTiming							-- M11 PVP ne copie pas de trigger retardé START pour les clients/joueurs	
 
 						if polkaOff then
 							group['lateActivation'] = false
@@ -6115,52 +6112,11 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						base.assign_index = base.assign_index % 3 + 1
 					end
 
-
-					-- if GCI.Interceptor[side].base[flight[f].base] == nil then
-					-- 	GCI.Interceptor[side].base[flight[f].base] = {
-					-- 		ready30 = {},
-					-- 		ready15 = {},
-					-- 		ready15_n = 0,
-					-- 		ready = {},
-					-- 		ready_n = 0,
-					-- 	}
-					-- end
-
-					-- if flight[f].player or flight[f].client then										
-
-					-- 	table.insert(GCI.Interceptor[side].base[flight[f].base].ready, t)
-					-- 	GCI.Interceptor[side].base[flight[f].base].ready_n = GCI.Interceptor[side].base[flight[f].base].ready_n + 1
-
-					-- elseif #GCI.Interceptor[side].base[flight[f].base].ready == #GCI.Interceptor[side].base[flight[f].base].ready15 and #GCI.Interceptor[side].base[flight[f].base].ready == #GCI.Interceptor[side].base[flight[f].base].ready30 then
-
-					-- 	table.insert(GCI.Interceptor[side].base[flight[f].base].ready, t)
-					-- 	GCI.Interceptor[side].base[flight[f].base].ready_n = GCI.Interceptor[side].base[flight[f].base].ready_n + 1
-
-					-- elseif #GCI.Interceptor[side].base[flight[f].base].ready15 == #GCI.Interceptor[side].base[flight[f].base].ready30 then
-
-					-- 	table.insert(GCI.Interceptor[side].base[flight[f].base].ready15, t)
-					-- 	GCI.Interceptor[side].base[flight[f].base].ready15_n = GCI.Interceptor[side].base[flight[f].base].ready15_n + 1
-
-					-- else
-					-- 	table.insert(GCI.Interceptor[side].base[flight[f].base].ready30, t)
-					-- end
-
 				elseif flight[f].task == "AWACS" then
 					GCI.EWR[side][units[1].name] = true											--add AWACS to EWR table
 				end
 
-				-- -- si multijoueur, les Flight AI commencent en vol + M11.n
-				-- if ((flight[f].type == 'F-14B' or flight[f].type == 'FA-18C_hornet') and Multi.NbGroup >= 1 and flight[f].player ~= true and flight[f].client ~= true 
-				-- and string.find(flight[f].base,"CV") and flight[f].task ~= "Intercept") then
-					-- if camp.startup then										--if player value defined in camp
-						-- spawn_time = spawn_time + camp.startup						--if in-flight departure, the time initially added is deleted.
-					-- else
-						-- spawn_time = spawn_time + 300								--if in-flight departure, the time initially added is deleted.
-					-- end
-				-- end
-
-
-				if flight[f].task == "SAR" and (pedroOK[flight[f].base] == nil  and db_airbases[flight[f].base].unitname) then
+				if flight[f].task == "SAR" and (pedroOK[flight[f].base] == nil and db_airbases[flight[f].base].unitname) then
 
 					--recherche le nombre de wpt du CV pour que le pedro le suive
 					local PedroLinkCV = {}
