@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.88.546"
+versionDCE["UTIL_Changelog.lua"] = "20.88.547"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.88.546"
+VersionDCE["UTIL_Changelog.txt"] = "20.88.547"
 --[[
 
 
@@ -9,14 +9,15 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.88.546:==
+==:20.88.547:==
 anticollision au spawn air
-546	fixed		[campaign]	campaign peut etre update en cours, par modification des fichiers de Init
-545	fixed		[date]	bug 1970 again
-544	add			[date][time jump}	time jump possible with conf_mod (change date in conf_mod then make a SkipMission.BAT) 
-543	fixed		[inter]	player interceptors are "delayed
-542	fixed		[weather]	added latest weather presets + big bug on random weather
-541	fixed		[AI]	prohibits in-flight refuelling and straffing for AIs
+547	fixed		[campaign]	campaign peut etre update en cours, par modification des fichiers de Init
+546	fixed		[date]	bug 1970 again
+545	add			[date][time jump}	time jump possible with conf_mod (change date in conf_mod then make a SkipMission.BAT) 
+544	fixed		[inter]	player interceptors are "delayed
+543	fixed		[weather]	added latest weather presets + big bug on random weather
+542	fixed		[AI]	prohibits in-flight refuelling and straffing for AIs
+541	fixed		[scen]	map buildings are not destroyed when they should be
 540	fixed		[debrief][stats]	revision of MAP's building destruction detection and statistics code
 539	fixed		[debrief][stats]	ground unit destruction stats error
 538 fixed		[refuel][M88]	CheckRefuelProgress (in progress)

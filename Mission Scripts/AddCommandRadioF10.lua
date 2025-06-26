@@ -1477,170 +1477,274 @@ local function airRetreat()
 	return timer.getTime() + 31
 end
 
+
+
 local function bingo(gpGid, groupMission)
 
-	for n, unit in pairs(groupMission:getUnits()) do
+	if groupMission.getUnits then
+		for n, unit in pairs(groupMission:getUnits()) do
 
-		-- local humainUnit
+			local callSign = Unit.getCallsign(unit)
+			if not BingoPlaneTab[gpGid] then BingoPlaneTab[gpGid] = {} end
+			if not tabJockerPlane[gpGid] then tabJockerPlane[gpGid] = {} end
 
-		-- if unit and unit:getPlayerName() then
-		-- 	humainUnit = unit:getPlayerName()
-		-- end
-
-		local callSign = Unit.getCallsign(unit)
-		if not BingoPlaneTab[gpGid] then BingoPlaneTab[gpGid] = {} end
-		if not tabJockerPlane[gpGid] then tabJockerPlane[gpGid] = {} end
-
-		-- local gpName = Group.getName(groupMission)
-		-- env.info( " bingo() gpName  "..tostring(gpName).." groupMission.id_ "..tostring(groupMission.id_) )
-		-- _affiche(groupMission, "groupMission function bingo(gpGid, groupMission)")
+			-- local gpName = Group.getName(groupMission)
+			-- env.info( " bingo() gpName  "..tostring(gpName).." groupMission.id_ "..tostring(groupMission.id_) )
+			-- _affiche(groupMission, "groupMission function bingo(gpGid, groupMission)")
 
 
-		if BingoPlaneTab[gpGid] and not BingoPlaneTab[gpGid][callSign] then												-- si le callSign a deja dit qu'il etait Bingo, on l'oublie		
-			if Unit.getFuel(unit) <=  0.40 then																			-- Sur F14, 4000lbs/16000lbs = 0.25%
-				trigger.action.outTextForGroup(gpGid, callSign .." Bingo Fuel", 15 , true)
-				-- env.info( "DCE_Bingo AA Unit.getFuel(unit)  "..tostring(groupMission.id_).." gpName: "..tostring(gpName).." callSign: "..callSign.." humainUnit? "..tostring(humainUnit) )
+			
 
-				BingoPlaneTab[gpGid][callSign] = true																	-- la callSign � d�ja indiqu� qu'il �tait Bingo
-
-
-				local humainUnit
-				if unit and unit.getPlayerName then
-					humainUnit = unit:getPlayerName()
-				end
-				local unitName =  unit:getName()
-				local actualPos = unit:getPoint()
+			if BingoPlaneTab[gpGid] and not BingoPlaneTab[gpGid][callSign] then												-- si le callSign a deja dit qu'il etait Bingo, on l'oublie		
 				
-				local report = " is humainUnit?:  "..tostring(humainUnit)
-				-- local cntrl = unit:getController()
-				local cntrl
+				local fuelRemainingPercent = Unit.getFuel(unit) 
 
-				--for the leader, the task has to be set on the group level
-				if n == 1 then
-					cntrl = groupMission:getController()
-				else
-					cntrl = unit:getController()
-				end
+				-- if fuelRemainingPercent <=  0.35 then
+				-- 	trigger.action.outTextForGroup(gpGid, callSign .." Bingo Fuel", 15 , true)
+				-- end
 
-				report = report.." RTB_ON_BINGO & PROHIBIT_AB "
+				if fuelRemainingPercent <=  0.50 then																			-- Sur F14, 4000lbs/16000lbs = 0.25%
+					
+					local toRTB
+					local distanceToBase_Km = 0
+					local cruiseSpeed = 300
+					local speedMini = 999999
+					local speedMax = 0
 
-				env.info( "DCE_Bingo CC      report "..tostring(groupMission.id_).." "..tostring(unitName).." "..callSign.." report "..tostring(report) )
+					--calcul de la distance restante vers la base
+					for coalitionN, coalition in pairs(env.mission.coalition) do
+						for countryN, state in pairs(coalition.country) do
+							if state.plane then
+								for groupN, _group in pairs(state.plane.group) do
+									if _group.task ~= "Transport" and _group.groupId and _group.groupId == groupMission.id_ then
+										if _group.route.points[1].type == 'TakeOff' then
+											--on prend le premier wpt de la route
+											local firstWPT = _group.route.points[1]
+											local firstWPTPos = {x=firstWPT.x, y=firstWPT.y}
+											local actualPos = unit:getPoint()
+											distanceToBase_Km = GetDistance(firstWPTPos, {x=actualPos.x, y=actualPos.z})
+											env.info( "DCE_Bingo D1  distanceToBase: "..tostring(distanceToBase_Km).." groupMission.id_: "..tostring(groupMission.id_) )
+										else
+											--on prend le premier wpt de la route
+											local lastWPT = _group.route.points[#_group.route.points]
+											local firstWPTPos = {x=lastWPT.x, y=lastWPT.y}
+											local actualPos = unit:getPoint()
+											distanceToBase_Km = GetDistance(firstWPTPos, {x=actualPos.x, y=actualPos.z})
+											env.info( "DCE_Bingo D2  distanceToBase: "..tostring(distanceToBase_Km).." groupMission.id_: "..tostring(groupMission.id_) )
+										end	
 
-				-- local description = unit:getDesc()
-				-- _affiche(description, "description function bingo()")
 
-				local breaktab = false
-				local rtbGroup = {
-					name = "",
-					from = 0,
-					to = 0
-				}
+										-- for wptN, wpt in ipairs(_group.route.points) do
+										-- 	if  wpt.speed > 10 then
+										-- 		if wpt.speed < speedMini then
+										-- 			speedMini = wpt.speed
+										-- 		end
+										-- 		if wpt.speed < speedMax then
+										-- 			speedMax = wpt.speed
+										-- 		end
+										-- 	end
 
-				for _coalition, coalition in pairs(env.mission.coalition) do
+										-- end
 
-					for Ncountry, _country in pairs(coalition.country) do
-						if _country.plane then
-							for Ngroup, _group in pairs(_country.plane.group) do
-								if _group.groupId and _group.groupId == groupMission.id_ then
-
-									rtbGroup.name = _group.name
-
-									--le wpt le plus proche de l'unit
-									local existIP = 0
-									local wptN_closest = #_group.route.points - 1
-									local closestPoint = 99999999
-									for wptN, wpt in ipairs(_group.route.points) do
-										if wpt.name == 'IP' then
-											existIP = wptN
-											closestPoint = 99999999
-											env.info( "DCE_Bingo D1  passIP existIP: "..tostring(existIP))
-										end
-										--on essai de passer le point IP et le target
-										if existIP > 0 and wptN < existIP + 2 then
-											closestPoint = 99999999
-											env.info( "DCE_Bingo D2  existIP: "..tostring(existIP).." wptN : "..tostring(wptN).." < "..tostring(existIP+2))
-										end
-										local distance  = GetDistance({x=actualPos.x, y=actualPos.z}, {x=wpt.x, y=wpt.y})
-										if distance < closestPoint then
-											closestPoint = distance
-											wptN_closest = wptN
-											env.info( "DCE_Bingo D1  wptN_closest: "..tostring(wptN_closest).." closestPoint: "..tostring(closestPoint))
-										end
+										-- if speedMini == speedMax then
+										-- 	cruiseSpeed = speedMax*2/3
+										-- end
+										
 									end
-
-									rtbGroup.from = wptN_closest
-
-									-- --Split
-									-- for key, value in ipairs(_group.route.points) do
-									-- 	if value.name == 'Split' then
-									-- 		rtbGroup.from = key
-									-- 	end
-									-- end
-
-									
-									for key, value in ipairs(_group.route.points) do
-										if value.type == 'Land' then
-											rtbGroup.to = key
-										end
-									end
-									
-
-									if rtbGroup.to == 0 then
-										rtbGroup.to = #_group.route.points
-									end
-
-									breaktab = true
-									break
 								end
 							end
 						end
-						if breaktab then break end
 					end
 
-					if breaktab then break end
-				end
+					-- calcul de l'autonomie de carburant pour le retour
+					if unit.getDesc then
+						local unitDesc = unit:getDesc()
+						if unitDesc and unitDesc.fuelMassMax and unitDesc.range then
+							local fuelMass = fuelRemainingPercent * unitDesc.fuelMassMax
+							env.info("DCE_Bingo D3  fuelMass: "..tostring(fuelMass).." fuelRemainingPercent: "..tostring(fuelRemainingPercent))
 
-				-- env.info( "DCE_Bingo DD        rtbGroup from "..tostring( rtbGroup.from).." to "..tostring( rtbGroup.to))
+							if distanceToBase_Km > 0 and fuelMass > 0 then
+								local conso_moyenne_kg_par_km = unitDesc.fuelMassMax / unitDesc.range
+								local distancePossible = fuelMass / conso_moyenne_kg_par_km
 
-				if rtbGroup.to ~= 0 then
-					local switchtask = {
-							id = "SwitchWaypoint",
-								params = {
-									goToWaypointIndex = rtbGroup.to,
-									fromWaypointIndex = rtbGroup.from
-							}
+								if distancePossible < (distanceToBase_Km + 200) then
+									env.info("DCE_Bingo D4 toRTB=true  distancePossible: "..tostring(distancePossible).." < distanceToBase: "..tostring(distanceToBase_Km))
+									toRTB = true
+								end
+							end
+						else
+							env.info("DCE_Bingo D5  unitDesc invalid or missing fuelMassMax/range")
+						end
+					else
+						env.info("DCE_Bingo D6  unit:getDesc() is nil")
+					end
+
+					-- --cacul de l'autonomie de carburant pour le retour
+					-- if unit.getDesc then
+					-- 	local unitDesc = unit:getDesc()
+					-- 	if unitDesc and unitDesc.fuelMassMax then
+					-- 		local fuelMass = fuelRemainingPercent * unitDesc.fuelMassMax
+					-- 		env.info( "DCE_Bingo D3  fuelMass: "..tostring(fuelMass).." fuelRemainingPercent: "..tostring(fuelRemainingPercent) )
+					-- 		if distanceToBase_Km > 0 and fuelMass > 0 then
+								
+					-- 			local conso_moyenne_kg_par_km = unitDesc.fuelMassMax / unitDesc.range
+					-- 			local distancePossible = conso_moyenne_kg_par_km * (cruiseSpeed / 1000) -- en km
+
+					-- 			if distancePossible < (distanceToBase_Km + 200) then
+					-- 				env.info( "DCE_Bingo D4 toRTB=true  distancePossible: "..tostring(distanceToBase_Km).." < distanceToBase: "..tostring(distanceToBase_Km) )
+					-- 				toRTB = true
+					-- 			end
+					-- 		end
+					-- 	end
+					-- else
+					-- 	env.info( "DCE_Bingo D5  unit:getDesc() is nil" )
+					-- end
+				
+					if toRTB then
+					
+						trigger.action.outTextForGroup(gpGid, callSign .." low fuel: RTB", 15 , true)
+						
+						BingoPlaneTab[gpGid][callSign] = true																	-- la callSign � d�ja indiqu� qu'il �tait Bingo
+
+
+						local humainUnit
+						if unit and unit.getPlayerName then
+							humainUnit = unit:getPlayerName()
+						end
+						local unitName = unit:getName()
+						local actualPos = unit:getPoint()
+						
+						local report = " is humainUnit?:  "..tostring(humainUnit)
+						local cntrl
+
+						--for the leader, the task has to be set on the group level
+						if n == 1 then
+							cntrl = groupMission:getController()
+						else
+							cntrl = unit:getController()
+						end
+
+						report = report.." RTB_ON_BINGO & PROHIBIT_AB "
+
+						env.info( "DCE_Bingo CC      report "..tostring(groupMission.id_).." "..tostring(unitName).." "..callSign.." report "..tostring(report) )
+
+						-- local description = unit:getDesc()
+						-- _affiche(description, "description function bingo()")
+
+						local breaktab = false
+						local rtbGroup = {
+							name = "",
+							from = 0,
+							to = 0
 						}
 
+						for _coalition, coalition in pairs(env.mission.coalition) do
 
-					cntrl:resetTask()
+							for Ncountry, _country in pairs(coalition.country) do
+								if _country.plane then
+									for Ngroup, _group in pairs(_country.plane.group) do
+										if _group.groupId and _group.groupId == groupMission.id_ then
 
-					cntrl:setCommand(switchtask)
+											rtbGroup.name = _group.name
 
-					cntrl:setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2)
-					cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, true) -- Désactiver l'engagement A/A
-					cntrl:setOption(AI.Option.Air.id.PROHIBIT_JETT, false)
-					cntrl:setOption(AI.Option.Air.id.PROHIBIT_AB, true)
-					cntrl:setOption(AI.Option.Air.id.JETT_TANKS_IF_EMPTY, true)
+											--le wpt le plus proche de l'unit
+											local existIP = 0
+											local wptN_closest = #_group.route.points - 1
+											local closestPoint = 99999999
+											for wptN, wpt in ipairs(_group.route.points) do
+												if wpt.name == 'IP' then
+													existIP = wptN
+													closestPoint = 99999999
+													env.info( "DCE_Bingo D1  passIP existIP: "..tostring(existIP))
+												end
+												--on essai de passer le point IP et le target
+												if existIP > 0 and wptN < existIP + 2 then
+													closestPoint = 99999999
+													env.info( "DCE_Bingo D2  existIP: "..tostring(existIP).." wptN : "..tostring(wptN).." < "..tostring(existIP+2))
+												end
+												local distance  = GetDistance({x=actualPos.x, y=actualPos.z}, {x=wpt.x, y=wpt.y})
+												if distance < closestPoint then
+													closestPoint = distance
+													wptN_closest = wptN
+													env.info( "DCE_Bingo D1  wptN_closest: "..tostring(wptN_closest).." closestPoint: "..tostring(closestPoint))
+												end
+											end
 
-	-- RTB_NO							= false,
-	-- RTB_AAR_REFUEL 					= true,
-	-- RTB_IGNORE_AAR					= 2,
+											rtbGroup.from = wptN_closest
 
-					cntrl:setOption(AI.Option.Air.id.RTB_ON_BINGO, 2) -- RTB on Bingo  RTB_IGNORE_AAR
-						--OptionName.RTB_ON_BINGO
+											-- --Split
+											-- for key, value in ipairs(_group.route.points) do
+											-- 	if value.name == 'Split' then
+											-- 		rtbGroup.from = key
+											-- 	end
+											-- end
+
+											
+											for key, value in ipairs(_group.route.points) do
+												if value.type == 'Land' then
+													rtbGroup.to = key
+												end
+											end
+											
+
+											if rtbGroup.to == 0 then
+												rtbGroup.to = #_group.route.points
+											end
+
+											breaktab = true
+											break
+										end
+									end
+								end
+								if breaktab then break end
+							end
+
+							if breaktab then break end
+						end
+
+						-- env.info( "DCE_Bingo DD        rtbGroup from "..tostring( rtbGroup.from).." to "..tostring( rtbGroup.to))
+
+						if rtbGroup.to ~= 0 then
+							local switchtask = {
+									id = "SwitchWaypoint",
+										params = {
+											goToWaypointIndex = rtbGroup.to,
+											fromWaypointIndex = rtbGroup.from
+									}
+								}
 
 
-					env.info( "DCE_Bingo EE        SwitchWaypoint "..tostring(unitName).." "..callSign.." |from: "..tostring(rtbGroup.from).." |to: "..tostring(rtbGroup.to) )
-					-- _affiche(switchtask, "switchtask function bingo()")
+							cntrl:resetTask()
+
+							cntrl:setCommand(switchtask)
+
+							cntrl:setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2)
+							cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, true) -- Désactiver l'engagement A/A
+							cntrl:setOption(AI.Option.Air.id.PROHIBIT_JETT, false)
+							cntrl:setOption(AI.Option.Air.id.PROHIBIT_AB, true)
+							cntrl:setOption(AI.Option.Air.id.JETT_TANKS_IF_EMPTY, true)
+
+			-- RTB_NO							= false,
+			-- RTB_AAR_REFUEL 					= true,
+			-- RTB_IGNORE_AAR					= 2,
+
+							cntrl:setOption(AI.Option.Air.id.RTB_ON_BINGO, 2) -- RTB on Bingo  RTB_IGNORE_AAR
+								--OptionName.RTB_ON_BINGO
+
+
+							env.info( "DCE_Bingo EE        SwitchWaypoint "..tostring(unitName).." "..callSign.." |from: "..tostring(rtbGroup.from).." |to: "..tostring(rtbGroup.to) )
+							-- _affiche(switchtask, "switchtask function bingo()")
+						end
+					end
 				end
 			end
-		end
 
-		if tabJockerPlane[gpGid] and not tabJockerPlane[gpGid][callSign] then												-- si le callSign a deja dit qu'il etait Bingo, on l'oublie
-			if Unit.getFuel(unit) <=  0.33 then																			-- Sur F14, 4000lbs/16000lbs = 0.25%
-				trigger.action.outTextForGroup(gpGid, callSign .." Jocker Fuel", 15 , true)
-				-- env.info( " Unit.getFuel(unit)  "..callSign.." humainUnit? "..tostring(humainUnit) )
-				tabJockerPlane[gpGid][callSign] = true																	-- la callSign � d�ja indiqu� qu'il �tait Bingo			
+			if tabJockerPlane[gpGid] and not tabJockerPlane[gpGid][callSign] then												-- si le callSign a deja dit qu'il etait Bingo, on l'oublie
+				if Unit.getFuel(unit) <=  0.30 then																			-- Sur F14, 4000lbs/16000lbs = 0.25%
+					trigger.action.outTextForGroup(gpGid, callSign .." Jocker Fuel", 15 , true)
+					-- env.info( " Unit.getFuel(unit)  "..callSign.." humainUnit? "..tostring(humainUnit) )
+					tabJockerPlane[gpGid][callSign] = true																	-- la callSign � d�ja indiqu� qu'il �tait Bingo			
+				end
 			end
 		end
 	end
