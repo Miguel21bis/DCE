@@ -4663,38 +4663,39 @@ function LoadFileAndUpdate(from)
 		end
 	end
 
-	for side, sideTab in pairs(oob_air_init) do
-		if oob_air[side] then
-			for _, unitInit in pairs(sideTab) do
-				local found = false
-				for _, unitActive in pairs(oob_air[side]) do
-					if unitActive.name == unitInit.name then
-						found = true
-						if unitActive.number ~= unitInit.number then
-							if unitInit.number > unitActive.number then
-								if Debug and Debug.debug then
-									print("Check/MAJ oob_air oob_air_init/number to Active/number pour "..tostring(unitInit.type).." || "..unitActive.name.." ("..side..") : "..tostring(unitInit.number).." -> "..tostring(unitActive.number).." = "..tostring(unitInit.number))
-								end
-								unitActive.number = unitInit.number
-								unitActive.number = unitInit.number
-								if unitActive.rooster and unitActive.rooster.ready then
-									unitActive.rooster.ready = unitInit.number
-								end
-							else
-								if Debug and Debug.debug then
-									print("Check ---- oob_air_init/number to Active/number ----- pour "..tostring(unitInit.type).." || "..unitActive.name.." ("..side..") : "..tostring(unitInit.number ).." -> "..tostring(unitActive.number))
-								end
-							end
-						end
-						break
-					end
-				end
-				if not found and Debug and Debug.debug then
-					print("Unité "..unitInit.name.." ("..side..") non trouvée dans Active/oob_air")
-				end
-			end
-		end
-	end
+	--petit code pour remettre les stock init comme au debut
+	-- for side, sideTab in pairs(oob_air_init) do
+	-- 	if oob_air[side] then
+	-- 		for _, unitInit in pairs(sideTab) do
+	-- 			local found = false
+	-- 			for _, unitActive in pairs(oob_air[side]) do
+	-- 				if unitActive.name == unitInit.name then
+	-- 					found = true
+	-- 					if unitActive.number ~= unitInit.number then
+	-- 						if unitInit.number > unitActive.number then
+	-- 							if Debug and Debug.debug then
+	-- 								print("Check/MAJ oob_air oob_air_init/number to Active/number pour "..tostring(unitInit.type).." || "..unitActive.name.." ("..side..") : "..tostring(unitInit.number).." -> "..tostring(unitActive.number).." = "..tostring(unitInit.number))
+	-- 							end
+	-- 							unitActive.number = unitInit.number
+	-- 							unitActive.number = unitInit.number
+	-- 							if unitActive.rooster and unitActive.rooster.ready then
+	-- 								unitActive.rooster.ready = unitInit.number
+	-- 							end
+	-- 						else
+	-- 							if Debug and Debug.debug then
+	-- 								print("Check ---- oob_air_init/number to Active/number ----- pour "..tostring(unitInit.type).." || "..unitActive.name.." ("..side..") : "..tostring(unitInit.number ).." -> "..tostring(unitActive.number))
+	-- 							end
+	-- 						end
+	-- 					end
+	-- 					break
+	-- 				end
+	-- 			end
+	-- 			if not found and Debug and Debug.debug then
+	-- 				print("Unité "..unitInit.name.." ("..side..") non trouvée dans Active/oob_air")
+	-- 			end
+	-- 		end
+	-- 	end
+	-- end
 
 
 	--****************************************************************************************
