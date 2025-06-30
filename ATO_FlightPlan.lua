@@ -2374,7 +2374,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					-- ************* alter departure alt (spawn and orbit) to prevent collisions of multiple packages *************
 					if flight[f].route[w].id == "Departure" and flight[f].route[w - 1] and flight[f].route[w].id == "Spawn" then							--for departure waypoints that come after spwn waypoints
-						waypoints[w]["alt"] = waypoints[w - 1]["alt"]																						--use same altitude as departure as for spawn
+						waypoints[w].alt = waypoints[w - 1]["alt"]																						--use same altitude as departure as for spawn
 					elseif  w < #flight[f].route then
 
 						if flight[f].route[w + 1] == nil then
@@ -2399,7 +2399,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 										[1] = waypoints[w]["ETA"],									--store time of departure
 									}
 								}
-								waypoints[w]["alt"] = alt											--set departure altitude
+								waypoints[w].alt = alt											--set departure altitude
 							else																	--airbase has departure altitute entries
 								local DepartureAlt
 								repeat
@@ -2421,7 +2421,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 										end
 									end
 								until DepartureAlt													--repeat until a departure altitude has been found
-								waypoints[w]["alt"] = DepartureAlt									--set departure altitude
+								waypoints[w].alt = DepartureAlt									--set departure altitude
 							end
 						end
 					end
@@ -2493,12 +2493,12 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					-- ************* requetes des joueurs, assigner l'altitude des wpt landing et attack *************
 					if flight[f].player or flight[f].client then
 						if waypoints[w]["briefing_name"] == "Target" or  waypoints[w]["briefing_name"] == "Attack" then
-							waypoints[w]["alt"] = 0
+							waypoints[w].alt = 0
 						elseif waypoints[w]["briefing_name"] == "Land" then
 							if db_airbases[flight[f].base].elevation then
-								waypoints[w]["alt"] =  db_airbases[flight[f].base].elevation
+								waypoints[w].alt =  db_airbases[flight[f].base].elevation
 							else
-								waypoints[w]["alt"] = 0
+								waypoints[w].alt = 0
 							end
 						end
 					end
@@ -2641,7 +2641,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							waypoints[w].type = "Turning Point"
 							waypoints[w].action = "Turning Point"
 							-- waypoints[w]["speed"] = flight[f].loadout.vCruise / 3 * 2			--set NEWSPEED
-							waypoints[w]["alt"] = 500 + db_airbases[flight[f].base].elevation
+							waypoints[w].alt = 500 + db_airbases[flight[f].base].elevation
 							waypoints[w].ETA_locked = false
 							waypoints[w].speed_locked = true
 
@@ -2678,12 +2678,13 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							if baseIsCarrier then
 								waypoints[w].linkUnit = flight[f].airdromeId
 								waypoints[w].helipadId = flight[f].airdromeId
+								waypoints[w].alt = 0
 							else
 								waypoints[w]["airdromeId"] = flight[f].airdromeId
 								--ATO_FP_Debug10
 								if flight[f].task == "Nothing" or flight[f].task == "Transport" then
 									waypoints[w]["airdromeId"] = db_airbases[flight[f].target.destination].airdromeId
-									waypoints[w]["alt"] = 500 + db_airbases[flight[f].target.destination].elevation
+									waypoints[w].alt = 500 + db_airbases[flight[f].target.destination].elevation
 								end
 							end
 
@@ -6184,7 +6185,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					group.units[1].alt = alt
-					group.units[1].speed = 41.66666666666
+					group.units[1].speed = 41.7
 					group.units[1].x = pos.x
 					group.units[1].y = pos.y
 					group.units[1].name = "Unit_Pedro_"..PedroLinkCV.Uname.."_1"

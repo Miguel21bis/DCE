@@ -22,6 +22,8 @@ versionDCE["UTIL_Functions.lua"] = "1.18.132"
 -- modification M34_Bk		custom FrequenceRadio (k FreqCapability)(FreqCapability2)(Bd_z guard)(debug Tanker NoRadio)(q: LVHF & CommunFrequency)(p: mil impossible M2000)(mno: freq group bug)(i  3 frequency bands)(g: VHF helicopter)(h: bug Gazelle)
 -- modification M17_f		Option F-14B & All AddPropAircraft
 ------------------------------------------------------------------------------------------------------- 
+--local variable
+local adjust_DCE_GC22 = true				-- variable pour ajuster les GC22, si false, ne pas ajuster
 
 --variable global
 NameTheatreLower = ""
@@ -4663,40 +4665,41 @@ function LoadFileAndUpdate(from)
 		end
 	end
 
-	--petit code pour remettre les stock init comme au debut
-	-- for side, sideTab in pairs(oob_air_init) do
-	-- 	if oob_air[side] then
-	-- 		for _, unitInit in pairs(sideTab) do
-	-- 			local found = false
-	-- 			for _, unitActive in pairs(oob_air[side]) do
-	-- 				if unitActive.name == unitInit.name then
-	-- 					found = true
-	-- 					if unitActive.number ~= unitInit.number then
-	-- 						if unitInit.number > unitActive.number then
-	-- 							if Debug and Debug.debug then
-	-- 								print("Check/MAJ oob_air oob_air_init/number to Active/number pour "..tostring(unitInit.type).." || "..unitActive.name.." ("..side..") : "..tostring(unitInit.number).." -> "..tostring(unitActive.number).." = "..tostring(unitInit.number))
-	-- 							end
-	-- 							unitActive.number = unitInit.number
-	-- 							unitActive.number = unitInit.number
-	-- 							if unitActive.rooster and unitActive.rooster.ready then
-	-- 								unitActive.rooster.ready = unitInit.number
-	-- 							end
-	-- 						else
-	-- 							if Debug and Debug.debug then
-	-- 								print("Check ---- oob_air_init/number to Active/number ----- pour "..tostring(unitInit.type).." || "..unitActive.name.." ("..side..") : "..tostring(unitInit.number ).." -> "..tostring(unitActive.number))
-	-- 							end
-	-- 						end
-	-- 					end
-	-- 					break
-	-- 				end
-	-- 			end
-	-- 			if not found and Debug and Debug.debug then
-	-- 				print("Unité "..unitInit.name.." ("..side..") non trouvée dans Active/oob_air")
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
-
+	-- petit code pour remettre les stock init comme au debut
+	if adjust_DCE_GC22 then
+		for side, sideTab in pairs(oob_air_init) do
+			if oob_air[side] then
+				for _, unitInit in pairs(sideTab) do
+					local found = false
+					for _, unitActive in pairs(oob_air[side]) do
+						if unitActive.name == unitInit.name then
+							found = true
+							if unitActive.number ~= unitInit.number then
+								if unitInit.number > unitActive.number then
+									if Debug and Debug.debug then
+										print("Check/MAJ oob_air oob_air_init/number to Active/number pour "..tostring(unitInit.type).." || "..unitActive.name.." ("..side..") : "..tostring(unitInit.number).." -> "..tostring(unitActive.number).." = "..tostring(unitInit.number))
+									end
+									unitActive.number = unitInit.number
+									unitActive.number = unitInit.number
+									if unitActive.rooster and unitActive.rooster.ready then
+										unitActive.rooster.ready = unitInit.number
+									end
+								else
+									if Debug and Debug.debug then
+										print("Check ---- oob_air_init/number to Active/number ----- pour "..tostring(unitInit.type).." || "..unitActive.name.." ("..side..") : "..tostring(unitInit.number ).." -> "..tostring(unitActive.number))
+									end
+								end
+							end
+							break
+						end
+					end
+					if not found and Debug and Debug.debug then
+						print("Unité "..unitInit.name.." ("..side..") non trouvée dans Active/oob_air")
+					end
+				end
+			end
+		end
+	end
 
 	--****************************************************************************************
 	--ajout automatique d'elements en cours de campagne: FIN
