@@ -106,10 +106,10 @@ local function hasAnEmergencyFreq(radioPlane)
 		for key, value in pairs(values) do
 			if key  == "emergencyFreq" then
 				emergencyFreq = value
-					
+
 			elseif key  == "emergencyFreq" then
 				emergencyPreset = value
-					
+
 			end
 		end
 	end
@@ -605,29 +605,66 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							},
 						}
 
-						--sum together packages package sortie numbers
-						local ATOList = {}
-						for pack_n,pack in pairs(ATO[tempPlayer.side]) do												--go through ATO on player side
-
-							--package time on target
-							local tot = FormatTime(camp.time + pack.main[1].route[1].eta, "hh:mm:ss")				--time on target (use first wapoint if no Target or Station WP is found below)
-							for wp_n,wp in pairs(pack.main[1].route) do												--iterate through waypoints of first main flight
-								if wp.id == "Target" or wp.id == "Station" then										--if wp is target or station
-									tot = FormatTime(camp.time + wp.eta, "hh:mm:ss")								--make this the time on target			
+						-- 1. Copier les packages dans une table temporaire
+						local sorted_packs = {}
+                        for packN, pack in pairs(ATO[tempPlayer.side]) do
+                            pack.main[1].TOT = camp.time + pack.main[1].route[1].eta
+							pack.main[1].init_packN = packN --store the original package number
+							for wpN, wp in pairs(pack.main[1].route) do --iterate through waypoints of first main flight
+								if wp.id == "Target" or wp.id == "Station" then --if wp is target or station
+									pack.main[1].TOT = camp.time + wp.eta
 								end
 							end
+                            table.insert(sorted_packs, pack)
+                        end
+
+                        if Debug.debug then
+							local _str = "sorted_packs = " .. TableSerialization(sorted_packs, 0)
+							local _file = io.open("Debug/BRIEFING_sorted_packs.lua", "w") or error("Échec d'ouverture du fichier ATO_AtoG")
+							_file:write(_str)
+							_file:close()
+                        end
+						
+						-- 2. Trier selon le eta du premier waypoint du main
+						table.sort(sorted_packs, function(a, b)
+							local eta_a = a.main[1].TOT or 0
+							local eta_b = b.main[1].TOT or 0
+							return eta_a < eta_b
+                        end)
+
+						--sum together packages package sortie numbers
+						local ATOList = {}
+						for newSortN, pack in ipairs(sorted_packs) do --go through ATO on player side
+
+							-- --package time on target
+							-- local tot = FormatTime(camp.time + pack.main[1].route[1].eta, "hh:mm:ss")				--time on target (use first wapoint if no Target or Station WP is found below)
+							-- for wp_n,wp in pairs(pack.main[1].route) do												--iterate through waypoints of first main flight
+							-- 	if wp.id == "Target" or wp.id == "Station" then										--if wp is target or station
+							-- 		tot = FormatTime(camp.time + wp.eta, "hh:mm:ss")								--make this the time on target			
+							-- 	end
+                            -- end
+
+							--package time on target
+							local tot = FormatTime(pack.main[1].TOT, "hh:mm") --time on target (use first wapoint if no Target or Station WP is found below)
 
 							--package sortie number
 							local sortie_n = 0																		--number of aircraft (sorties) in package
-							for role, _flight in pairs(pack) do														--iterate through roles in package
-								for n = 1, #_flight do																--iterate through flights in role
-									sortie_n = sortie_n + _flight[n].number											--count number of aircraft
+							for role, flights in pairs(pack) do														--iterate through roles in package
+								print("newSortN: " ..
+									tostring(newSortN) .. "role: " .. tostring(role) .. " _flight: " .. tostring(flights))
+								-- for n, flight_ in ipairs(flights) do        --iterate through flights in role
+								-- 	sortie_n = sortie_n + flight.number --count number of aircraft
+                                -- end
+								
+								for n = 1, #flights do --iterate through flights in role
+									sortie_n = sortie_n + flights[n].number --count number of aircraft
 								end
 							end
 
 							if #ATOList == 0 then																	--ATOList is still empty
 								ATOList[#ATOList + 1] = {
 									target_name = pack.main[1].target_name,
+									init_packN = pack.main[1].init_packN,
 									sortie_n = sortie_n,
 									tot = tot,
 									type = ReplaceTypeName(pack.main[1].type),
@@ -641,6 +678,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									if a == #ATOList then															--no package with same target was found in ATOList
 										ATOList[#ATOList + 1] = {
 											target_name = pack.main[1].target_name,
+											init_packN = pack.main[1].init_packN,
 											sortie_n = sortie_n,
 											tot = tot,
 											type = ReplaceTypeName(pack.main[1].type),
@@ -651,8 +689,9 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						end
 
 						--add list values
-						for pack_n,pack in pairs(ATOList) do														--iterate through packages
-							table.insert(entries[1].values, pack_n)
+						for newSortN, pack in pairs(ATOList) do														--iterate through packages
+							-- table.insert(entries[1].values, pack_n)
+							table.insert(entries[1].values, pack.init_packN)
 							table.insert(entries[2].values, pack.sortie_n)											--number of sorties in package
 							table.insert(entries[3].values, pack.type)
 							table.insert(entries[4].values, pack.target_name)										--package target
@@ -708,14 +747,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 					--recupere les units des instruments de l'avion
 					local unitsUse = mission_ini.units
-					-- print("DcB type "..tostring (tempPlayer.pack[tempPlayer.role][tempPlayer.flight].type))
-					-- if Data_divers and Data_divers[tempPlayer.pack[tempPlayer.role][tempPlayer.flight].type] then
-					-- 	if Data_divers[tempPlayer.pack[tempPlayer.role][tempPlayer.flight].type].instrumentUnits then
-					-- 		if Data_divers[tempPlayer.pack[tempPlayer.role][tempPlayer.flight].type].instrumentUnits ~= nil then
-					-- 			unitsUse = Data_divers[tempPlayer.pack[tempPlayer.role][tempPlayer.flight].type].instrumentUnits
-					-- 		end
-					-- 	end
-					-- end
+
 					if Data_divers and Data_divers[tempPlayer.type] then
 						if Data_divers[tempPlayer.type].instrumentUnits then
 							unitsUse = Data_divers[tempPlayer.type].instrumentUnits
@@ -725,10 +757,6 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 
 					--Mission overview					
-					-- local squad = tempPlayer.pack[tempPlayer.role][tempPlayer.flight].name
-					-- local target_name = tempPlayer.pack[tempPlayer.role][tempPlayer.flight].target_name									--get the target of the player flight
-					-- local player_task = tempPlayer.pack[tempPlayer.role][tempPlayer.flight].task											--get the task of the player flight
-					-- local target = tempPlayer.pack[tempPlayer.role][tempPlayer.flight].target											--get target table
 					local squad = tempPlayer.squadName
 					local target_name = tempPlayer.target.titleName									--get the target of the player flight
 					local player_task = tempPlayer.task											--get the task of the player flight
@@ -986,11 +1014,11 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								else
 									local listType = {}															--list of types of target elements
 									for elementN, element in pairs(target.elements) do
-										
+
 										if element.type and not element.dead then
 
 											local aliasType = ReplaceTypeName(element.type)
-											
+
 											if listType[aliasType] then
 												listType[aliasType] = listType[aliasType] + 1
 											else
@@ -998,11 +1026,11 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 											end
 										end
 									end
-									
+
 									for type, nb in pairs(listType) do
-											
+
 										s = s .. "- " .. type .. "\t(" .. nb .. ")\n"
-										
+
 									end
 									s = s .. "\n"
 								end
@@ -1015,7 +1043,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 
 					--Package overview ********************************************************************
-					s = "Package:\n"																		--make a list of the details of all flights in the player package
+					s = "Package: "..p.."\n"																		--make a list of the details of all flights in the player package
 
 					local entries = {																			--list entries that are making up the package overview
 						[1] = {
@@ -1055,13 +1083,13 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						for flight_n,flight2 in pairs(role) do													--iterate through the flights in all roles
 							for e = 1, #entries do																--iterate through all entries
 								local value = flight2[entries[e].lookup]
-								
+
 								if entries[e].header == "Type" then
 									value = ReplaceTypeName(flight2[entries[e].lookup])
 								elseif entries[e].header == "Base" then
 									value = ReplaceBaseName(flight2[entries[e].lookup])
 								end
-								
+
 								local l = string.len(tostring(value)) + 3										--get the string length of the current entry for this flight
 								if l > entries[e].str_length then												--if the string length is larger than the previous
 									entries[e].str_length = l													--make it the new length (find the largest)
@@ -1087,15 +1115,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						for flight_n,flight2 in pairs(role) do													--iterate through flights in all roles
 							for e = 1, #entries do																--iterate through all entries
 								if type(flight2[entries[e].lookup]) == "string" or type(flight2[entries[e].lookup]) == "number" then	--entry is a string or number
-									
+
 									local value = flight2[entries[e].lookup]
-								
+
 									if entries[e].header == "Type" then
 										value = ReplaceTypeName(flight2[entries[e].lookup])
 									elseif entries[e].header == "Base" then
 										value = ReplaceBaseName(flight2[entries[e].lookup])
 									end
-									
+
 									s = s .. value																--add entry of this flight to list
 									if e ~= #entries then																			--if this is not the last entry of the flight, add spaces to the next entry	
 										space = entries[e].str_length + 0 - string.len(tostring(value))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
@@ -1118,25 +1146,60 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 					--Flight overview*********************************************************************
 
-					s = "Flight:\n"																		--make a list of the details of all flights in the player package
-					s = s.."CallSign    Designated aircraft number \n"
+					-- s = "Flight:\n"																		--make a list of the details of all flights in the player package
+					-- s = s.."Role 	CallSign    Designated aircraft number \n"
 
-					for role_name,role in pairs(tempPlayer.package[tempPlayer.pack_n]) do												--iterate through roles in the player package	
-						for flight_n,_flight in pairs(role) do													--iterate through flights in all roles
-							if _flight.units	 then
-								for u=1 , #_flight.units do
-									if type(_flight.units[u].callsign) == "table" then
-										s = s.. tostring(_flight.units[u].callsign.name).."       "..tostring(_flight.units[u].onboard_num).. "\n"
-									else
-										s = s.. tostring(_flight.units[u].callsign) .."       "..tostring(_flight.units[u].onboard_num).. "\n"
+					-- for role_name, role in pairs(tempPlayer.package[tempPlayer.pack_n]) do												--iterate through roles in the player package	
+					-- 	for flight_n, _flight in pairs(role) do													--iterate through flights in all roles
+					-- 		if _flight.units then
+					-- 			for u=1 , #_flight.units do
+					-- 				if type(_flight.units[u].callsign) == "table" then
+					-- 					s = s.."       ".. tostring(role_name).."       ".. tostring(_flight.units[u].callsign.name).."       "..tostring(_flight.units[u].onboard_num).. "\n"
+					-- 				else
+					-- 					s = s.."       ".. tostring(role_name).."       ".. tostring(_flight.units[u].callsign) .."       "..tostring(_flight.units[u].onboard_num).. "\n"
+					-- 				end
+					-- 			end
+					-- 		end
+					-- 	end
+					-- end
+					-- if allowedBrief then briefing[sideName] = briefing[sideName] .. s .. "\n\n" s="" end
+
+					-- Collecte des données
+					local rows = {}
+					local headers = {"Role", "CallSign", "Designated aircraft number"}
+					local colWidths = {#headers[1], #headers[2], #headers[3]}
+
+					for role_name, role in pairs(tempPlayer.package[tempPlayer.pack_n]) do
+						for _, _flight in pairs(role) do
+							if _flight.units then
+								for u = 1, #_flight.units do
+									local callsign = _flight.units[u].callsign
+									if type(callsign) == "table" then callsign = callsign.name end
+									local row = {tostring(role_name), tostring(callsign), tostring(_flight.units[u].onboard_num)}
+									-- Mise à jour des largeurs max
+									for i = 1, 3 do
+										if #row[i] > colWidths[i] then colWidths[i] = #row[i] end
 									end
+									table.insert(rows, row)
 								end
 							end
 						end
 					end
-					if allowedBrief then briefing[sideName] = briefing[sideName] .. s .. "\n\n" s="" end
 
+					-- Construction du format string
+					local fmt = string.format("%%-%ds  %%-%ds  %%-%ds\n", colWidths[1], colWidths[2], colWidths[3])
 
+					-- Construction du texte final
+					s = "Flight:\n"
+					s = s .. string.format(fmt, unpack(headers))
+					for _, row in ipairs(rows) do
+						s = s .. string.format(fmt, unpack(row))
+					end
+
+					if allowedBrief then briefing[sideName] = briefing[sideName] .. s .. "\n\n" s = "" end
+
+					--Flight overview*********************************************************************
+					--*********END****************
 
 
 					-- modification M27 	movedBullseye
@@ -1242,7 +1305,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 										if tempPlayer.waypoints[w].briefing_name == "Departure" then
 											modifiefDepartureETA = tempPlayer.waypoints[w].ETA + mission_ini.startup_time_player
 										end
-										
+
 										-- entry = FormatTime(camp.time + tempPlayer.waypoints[w][entries[e].lookup], "hh:mm:ss")	--format the time in the hh:mm:ss format
 										entry = FormatTime(camp.time + tempPlayer.waypoints[w][entries[e].lookup] + modifiefDepartureETA, "hh:mm")	--format the time in the hh:mm:ss format
 									elseif entries[e].lookup == "alt" then
@@ -1353,7 +1416,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					if refuelable then
 						for pack_n,pack in pairs(ATO[tempPlayer.side]) do																		--iterate through packages in player side
 							for role_name, roles in pairs(pack) do																				--iterate through roles in package
-								for n, role in pairs(roles) do	
+								for n, role in pairs(roles) do
 									if role and role.task == "Refueling" then																	--if first flight is tanker
 										if role.tacan then																						--tanker has a tacan channel
 											s = s .. "Tanker " .. role.callsign .. ", TACAN " .. role.tacan .. "Y "..tostring(role.target.text).."\n"					--add TACAN informaion									
@@ -1436,8 +1499,8 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 										Data_divers[role[1].type].refuellingType == Data_divers[tempPlayer.type].refuellingReceptacleType then
 
 										for fr = 1 , #role do
-											
-											
+
+
 											local time = ""
 											local occurence = 0
 
@@ -1593,7 +1656,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						end
 					end
 
-					
+
 					--found soviet emergencyFreq
 					local emergencyFreq, emergencyPreset = hasAnEmergencyFreq(radioP)
 
@@ -1691,7 +1754,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						freqA = tonumber(emergencyFreq) or 0
 						local call = ""
 						local lib = ""
-						
+
 						if freqA > 0 then
 							for Nradio = 1, #radioP do
 								entry = {name = "", call = "", freq = "",radio = ""}
@@ -1720,8 +1783,8 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 												local entryCopy = Deepcopy(entry)
 												table.insert(entriesRadio[Nradio], entryCopy)
 											-- end
-											
-											
+
+
 
 										elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
 											local entryCopy = Deepcopy(entry)

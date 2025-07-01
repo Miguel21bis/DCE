@@ -10,6 +10,7 @@ known issues:
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
 ==:20.88.547:==
+WPT Before Landing
 anticollision au spawn air
 547	fixed		[campaign]	campaign peut etre update en cours, par modification des fichiers de Init
 546	fixed		[date]	bug 1970 again

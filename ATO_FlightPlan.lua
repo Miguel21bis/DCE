@@ -2674,7 +2674,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							waypoints[w].action = "Landing"
 							-- waypoints[w].ETA_locked = true		--ceci n'est pas une bonne idée, le DCS bloque
 							waypoints[w].ETA_locked = false
-							waypoints[w].speed_locked = true
+                            waypoints[w].speed_locked = true
+							
 							if baseIsCarrier then
 								waypoints[w].linkUnit = flight[f].airdromeId
 								waypoints[w].helipadId = flight[f].airdromeId
@@ -4355,13 +4356,13 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								end
 								waypoints[w]["name"] = waypoints[w]["name"] .. "" .. heading .. " / " .. distance.." / "..ete			--add heading and distance to waypoint name
 
-								if  waypoints[w].briefing_name == "Land"  then
+								if waypoints[w].briefing_name == "Land"  then
 									local tempTime = 0
 									local tempTimeStr = ""
 									for ww = 1, #waypoints do
 										if waypoints[ww].briefing_name == "Departure" then
-											 tempTime =   waypoints[w].ETA - waypoints[ww].ETA
-											 break
+											tempTime =   waypoints[w].ETA - waypoints[ww].ETA
+											break
 										end
 									end
 									if tempTime ~= 0 then
@@ -4497,136 +4498,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 				end
 				
-
-
-				-- -- ************* first waypoint reaction to threat *************
-				-- local task_entry = {
-				-- 	["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
-				-- 	["auto"] = false,
-				-- 	["id"] = "WrappedAction",
-				-- 	["name"] = "reaction to threats, avoidance of fire W1",
-				-- 	["enabled"] = true,
-				-- 	["params"] =
-				-- 	{
-				-- 		["action"] =
-				-- 		{
-				-- 			["id"] = "Option",
-				-- 			["params"] =
-				-- 			{
-				-- 				["value"] = 2,
-				-- 				["name"] = 1,
-				-- 			},
-				-- 		},
-				-- 	},
-				-- }
-
-				-- if flight[f].type ~= "B-52H" or not Data_divers[flight[f].type].heavyBomber then
-				-- 	table.insert(waypoints[1]["task"]["params"]["tasks"], task_entry)
-				-- end
-
-
-				-- ************* first waypoint restrict jettison for SEAD
-				
-				-- if not is_helicopter then
-				-- 	if flight[f].task == "Strike" or flight[f].task == "Anti-ship Strike" or flight[f].task == "Flare Illumination" or flight[f].task == "Laser Illumination" then
-				-- 		--interdit le largage des charges s'il y a une escorte
-				-- 		if pack[p]["Escort"][1] or Data_divers[flight[f].type].heavyBomber then	--and pack[p]["Escort"][1].firepower > 2
-				-- 			task_entry = {
-				-- 				["enabled"] = true,
-				-- 				["auto"] = false,
-				-- 				["id"] = "WrappedAction",
-				-- 				["name"] = "emergency jettison : FALSE (task == SEAD/Strike/etc)",
-				-- 				["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
-				-- 				["params"] =
-				-- 				{
-				-- 					["action"] =
-				-- 					{
-				-- 						["id"] = "Option",
-				-- 						["params"] =
-				-- 						{
-				-- 							["value"] = false,		--interdit le largage d urgence
-				-- 							["name"] = 15,
-				-- 						},
-				-- 					},
-				-- 				},
-				-- 			}
-				-- 			table.insert(waypoints[1]["task"]["params"]["tasks"], task_entry)
-				-- 		else
-				-- 			--autorise le largage des charges s'il n'y a pas d'escorte
-				-- 			task_entry = {
-				-- 				["enabled"] = true,
-				-- 				["auto"] = false,
-				-- 				["id"] = "WrappedAction",
-				-- 				["name"] = "emergency jettison : TRUE (if no ESCORTE and task == SEAD/Strike/etc)",
-				-- 				["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
-				-- 				["params"] =
-				-- 				{
-				-- 					["action"] =
-				-- 					{
-				-- 						["id"] = "Option",
-				-- 						["params"] =
-				-- 						{
-				-- 							["value"] = true,		--true: autorise le largage d urgence, false interdit le largage
-				-- 							["name"] = 15,
-				-- 						},
-				-- 					},
-				-- 				},
-				-- 			}
-				-- 			table.insert(waypoints[1]["task"]["params"]["tasks"], task_entry)
-				-- 		end
-				-- 	end
-				-- end
-
-				-- --first waypoint restrict air-air
-				-- if flight[f].loadout.restrict_aa then
-				-- 	task_entry = {
-				-- 		["enabled"] = true,
-				-- 		["auto"] = false,
-				-- 		["id"] = "WrappedAction",
-				-- 		["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
-				-- 		["params"] =
-				-- 		{
-				-- 			["action"] =
-				-- 			{
-				-- 				["id"] = "Option",
-				-- 				["params"] =
-				-- 				{
-				-- 					["value"] = true,
-				-- 					["name"] = 14,
-				-- 				},
-				-- 			},
-				-- 		},
-				-- 	}
-				-- 	table.insert(waypoints[1]["task"]["params"]["tasks"], task_entry)
-				-- end
-
-
-
-
-
-				-- --first waypoint no RTB on bingo
-				-- if flight[f].airdromeId == nil then
-				-- 	task_entry = {
-				-- 		["enabled"] = true,
-				-- 		["auto"] = false,
-				-- 		["id"] = "WrappedAction",
-				-- 		["name"] = "RTB on bingo : NO",
-				-- 		["number"] = #waypoints[1]["task"]["params"]["tasks"] + 1,
-				-- 		["params"] =
-				-- 		{
-				-- 			["action"] =
-				-- 			{
-				-- 				["id"] = "Option",
-				-- 				["params"] =
-				-- 				{
-				-- 					["value"] = false,
-				-- 					["name"] = 6,
-				-- 				},
-				-- 			},
-				-- 		},
-				-- 	}
-				-- 	table.insert(waypoints[1]["task"]["params"]["tasks"], task_entry)
-				-- end
 
 
 				if flight[f].task == "CSAR" then
@@ -6304,8 +6175,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 				-- si multijoueur, les Flight AI commencent en vol + M11.j
-				if ( (Multi.NbGroup >= 1 or SingleWithDServerAiAir) and not flight[f].player and not flight[f].client  and string.find(flight[f].base,"CV") and flight[f].task ~= "Intercept") then
-					if  waypoints[1]["type"] ~= "Turning Point" then 					-- si le vol a deja ete deplace pour un commencement en vol, on ne recommence pas le d�calage lat�ral
+				if ((Multi.NbGroup >= 1 or SingleWithDServerAiAir) and not flight[f].player and not flight[f].client and baseIsCarrier and flight[f].task ~= "Intercept") then
+					if waypoints[1]["type"] ~= "Turning Point" then 					-- si le vol a deja ete deplace pour un commencement en vol, on ne recommence pas le d�calage lat�ral
 						local BugFrom =  " si multijoueur, les Flight AI commencent en vol "..debug.getinfo(1).currentline
 						-- SpawnOn( "air", waypoints, group, Pn, spawn_time + 300, BugFrom, flight, f)	
 
@@ -6322,7 +6193,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 				elseif (flight[f].type == 'F-14B' or flight[f].type == 'FA-18C_hornet') and flight[f].client
-					and string.find(flight[f].base,"CV") and flight[f].task ~= "Intercept" then
+					and baseIsCarrier and flight[f].task ~= "Intercept" then
 
 					if not waypoints[1]['linkUnit'] then waypoints[1]['linkUnit'] = waypoints[#waypoints]['linkUnit'] end
 					if not waypoints[1]['helipadId'] then waypoints[1]['helipadId'] = waypoints[#waypoints]['helipadId'] end

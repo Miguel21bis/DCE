@@ -1840,7 +1840,7 @@ end
 
 
 function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainUnit)																					--get the escort route given the escort start point and an existing package route
-	
+
 	local before = os.clock()
 	--make a local copy of the route table forwarded as function argument (otherwise the original route gets adjusted
 	-- local MainUnitHelicopter = mainUnit.helicopter
@@ -1906,7 +1906,7 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 			end
 
 
-			
+
 		else
 			route[w].alt = randomAlti
 		end
@@ -1918,7 +1918,7 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 		end
 
 		if route[w].id == "Land" then
-			route[w].alt =  basePoint.h
+			route[w].alt = basePoint.h
 		end
 	end
 
@@ -2034,46 +2034,11 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 	end
 
 
-	if mainUnit.task ~= "Transport" and mainUnit.task ~= "Nothing" then
-		route[#route].x = basePoint.x																								--modify route to end at escort land point
-		route[#route].y = basePoint.y
+	if mainUnit.task == "Transport" or mainUnit.task == "Nothing" then
 
-		if GetDistance(basePoint, route[jointWP]) == split_distance then
-			route[#route - 1].x = route[jointWP].x
-			route[#route - 1].y = route[jointWP].y
-			for n = #route - 2, jointWP, -1 do
-				table.remove(route, n)
-			end
-		elseif GetDistance(basePoint, route[jointWP - 1]) == split_distance then
-			route[#route - 1].x = route[jointWP - 1].x
-			route[#route - 1].y = route[jointWP - 1].y
-			for n = #route - 2, jointWP - 1, -1 do
-				table.remove(route, n)
-			end
-		else																														--if a point between last Nav and Split Point is closest to escort land point
-			local split_heading
-			local heading1 = GetHeading(route[jointWP], route[jointWP - 1])
-			local heading2 = GetHeading(route[jointWP], basePoint)
-			if heading1 - heading2 > 180 then
-				heading1 = heading1 - 360
-			elseif heading2 - heading1 > 180 then
-				heading2 = heading2 - 360
-			end
-			if heading1 <= heading2 then
-				split_heading = heading1 - 90
-			else
-				split_heading = heading1 + 90
-			end
-			local mod_splitPoint = GetOffsetPoint(basePoint, split_heading, split_distance)											--modify the Split Point to be between last Nav and old Split Point
-			route[#route - 1].x = mod_splitPoint.x
-			route[#route - 1].y = mod_splitPoint.y
-			for n = #route - 2, jointWP, -1 do
-				table.remove(route, n)
-			end
-		end
-	else
+		--comme le groupe Transport n'a pas de retour vers sa base de départ, on se doit d'en créer pour ses escortes
 		--ajoute le wpt land
-		table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Land", alt =  basePoint.h})
+		table.insert(route, { x = basePoint.x, y = basePoint.y, id = "Land", alt = basePoint.h })
 
 		--renomme l'ancien wpt land en attack
 		route[#route - 1].id = "Target"
@@ -2081,7 +2046,7 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 
 		--renomme le wpt join en TransmitMessage
 		local altMax = 0
-		for n=1, #route do
+		for n = 1, #route do
 			if route[n].id == "Split" then
 				route[n].id = "Nav"
 			end
@@ -2091,32 +2056,93 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 		end
 
 		--ajoute le WPT Egress pour obtenir un CERCLE d'attente
-		local egressPoint = {}																							--point where package splits to land on individual airbases		
+		local egressPoint = {} --point where package splits to land on individual airbases		
 		do
 			local heading = GetHeading(targetPoint, route[#route - 2])
 			egressPoint = GetOffsetPoint(targetPoint, heading, 5000)
 		end
 
-		table.insert(route, #route, {x = egressPoint.x, y = egressPoint.y, id = "Egress", alt = altMax})
+		table.insert(route, #route, { x = egressPoint.x, y = egressPoint.y, id = "Egress", alt = altMax })
 
 		--ajoute un WPT Split
-		local splitPoint = {}																							--point where package splits to land on individual airbases		
+		local newPoint = {} --point where package splits to land on individual airbases		
 		do
 			local heading = GetHeading(basePoint, targetPoint)
 
-			local distance = math.abs((altMax - basePoint.h) * 4)												--distance to descend from cruise alt to base elevation with 15� pitch (make sure distance is positive)
-			if distance >= GetDistance(basePoint, targetPoint) then															--descend distance bigger than distance to last WP
-				distance = GetDistance(basePoint, targetPoint) / 3 * 2														--join point is 2/3 to last WP
-			elseif distance < 15000 then																				--descend distance less than 15 km
-				distance = 15000																						--split point should be at least 15 km from base
+			local distance = math.abs((altMax - basePoint.h) * 4) --distance to descend from cruise alt to base elevation with 15� pitch (make sure distance is positive)
+			if distance >= GetDistance(basePoint, targetPoint) then --descend distance bigger than distance to last WP
+				distance = GetDistance(basePoint, targetPoint) / 3 * 2 --join point is 2/3 to last WP
+			elseif distance < 15000 then                     --descend distance less than 15 km
+				distance = 15000                             --split point should be at least 15 km from base
 			end
 
-			splitPoint = GetOffsetPoint(basePoint, heading, distance)													--define split point
+			newPoint = GetOffsetPoint(basePoint, heading, distance) --define split point
 		end
 
-		table.insert(route, #route, {x = splitPoint.x, y = splitPoint.y, id = "Split", alt = altMax})
+        table.insert(route, #route, { x = newPoint.x, y = newPoint.y, id = "Split", alt = altMax })
 
-		-- _affiche(route, "AtoRG route")
+	else	--pour les escortes de tous les autres task main
+
+		route[#route].x = basePoint.x																								--modify route to end at escort land point
+		route[#route].y = basePoint.y
+
+        if GetDistance(basePoint, route[jointWP]) == split_distance then
+            route[#route - 1].x = route[jointWP].x
+            route[#route - 1].y = route[jointWP].y
+            for n = #route - 2, jointWP, -1 do
+                table.remove(route, n)
+            end
+        elseif GetDistance(basePoint, route[jointWP - 1]) == split_distance then
+            route[#route - 1].x = route[jointWP - 1].x
+            route[#route - 1].y = route[jointWP - 1].y
+            for n = #route - 2, jointWP - 1, -1 do
+                table.remove(route, n)
+            end
+        else --if a point between last Nav and Split Point is closest to escort land point
+            local split_heading
+            local heading1 = GetHeading(route[jointWP], route[jointWP - 1])
+            local heading2 = GetHeading(route[jointWP], basePoint)
+            if heading1 - heading2 > 180 then
+                heading1 = heading1 - 360
+            elseif heading2 - heading1 > 180 then
+                heading2 = heading2 - 360
+            end
+            if heading1 <= heading2 then
+                split_heading = heading1 - 90
+            else
+                split_heading = heading1 + 90
+            end
+            local mod_splitPoint = GetOffsetPoint(basePoint, split_heading, split_distance) --modify the Split Point to be between last Nav and old Split Point
+            route[#route - 1].x = mod_splitPoint.x
+            route[#route - 1].y = mod_splitPoint.y
+            for n = #route - 2, jointWP, -1 do
+                table.remove(route, n)
+            end
+        end
+
+		--ajoute un WPT descent, proche de la base si necessaire, cela permet aux escortes (notamment) de se poser correctement.
+		local newPoint = {}
+		local heading
+        if IsHelicopter[unitEscort.type] then
+            if GetDistance(basePoint, route[#route - 1]) > 5000 then
+                heading = GetHeading(basePoint, route[#route - 1])
+                newPoint = GetOffsetPoint(basePoint, heading, 10000)
+				table.insert(route, #route,
+				{ x = newPoint.x, y = newPoint.y, id = "WPT Before Landind", alt = route[#route - 1].alt })
+            end
+        else
+            -- print("AtoRG: unitEscort.task: " ..
+            -- tostring(unitEscort.task) .. " target_name: " .. tostring(unitEscort.target_name))
+            -- print("AtoRG: GetDistance: " .. GetDistance(basePoint, route[#route - 1]))
+            if GetDistance(basePoint, route[#route - 1]) > 30000 then
+                heading = GetHeading(basePoint, route[#route - 1])
+                newPoint = GetOffsetPoint(basePoint, heading, 30000)
+				table.insert(route, #route,
+				{ x = newPoint.x, y = newPoint.y, id = "WPT Before Landing", alt = route[#route - 1].alt })
+                -- print("AtoRG: WPT Before Landing added at " .. newPoint.x .. ", " .. newPoint.y)
+                -- os.execute 'pause'
+            end
+        end
 	end
 
 	--measure lenght of complete route
@@ -2126,14 +2152,14 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 	end
 	route.lenght = route_lenght
 
-	if  DebugRoute  then
+	if DebugRoute then
 		print("AtoRG passe CC route.lenght "..tostring(route.lenght))
 	end
 
 	-- if i_timmer01 >= 10  then io.write("|") i_timmer01 = 0 end
 
 	local after = os.clock()
-	if  debugRoute and after >= before + deltaT  then print() print("|EscorteRoute: "..before.."-"..after.." |") end
+	if debugRoute and after >= before + deltaT  then print() print("|EscorteRoute: "..before.."-"..after.." |") end
 
 	return route
 end

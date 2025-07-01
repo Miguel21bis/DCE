@@ -16,7 +16,7 @@ versionDCE["ATO_PlayerAssign.lua"] = "1.9.74"
 -- modification M11A_bf		Multiplayer (f: interceptor)(bd wingmen)(wxy: force same package)
 ------------------------------------------------------------------------------------------------------- 
 
-local debugAssign = false
+local debugAssign = Debug.debug
 local allFlightName = {}
 
 if DebugAssignAll then
