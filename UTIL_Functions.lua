@@ -3071,7 +3071,7 @@ function UpdateConfMod(setWeather, setDate, from)
 		-- else
 			dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua")
 			date_override = mission_ini_check.date
-			
+
 			if Debug.debug then
 				print("date_override 4 date_override = mission_ini_check.date ")
 			end
@@ -4481,6 +4481,8 @@ end
 
 function LoadFileAndUpdate(from)
 
+    FromFile = "UTIL_Functions/LoadFileAndUpdate()" -- file name for debug
+
 	----- unpack template mission file ----
 	local minizip = require('minizip')
 
@@ -4494,6 +4496,10 @@ function LoadFileAndUpdate(from)
 	NameTheatre =  mission.theatre
 
 	zipFile:unzClose()
+
+	print("Test Time UtilF B : " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
+	print("Test Time UtilF B  : " .. FormatTime(mission["start_time"], "hh:mm"))
+	_affiche(mission["date"], "MAIUtilFN_NM B: mission[date] ")
 
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
@@ -4617,7 +4623,7 @@ function LoadFileAndUpdate(from)
 	for _, removed in ipairs(changes.removed) do
 		db_airbases[removed.name] = nil
 	end
-	
+
 
 	--********************************* oob_air ******************************************************
 	dofile("Init/oob_air_init.lua")
@@ -4705,14 +4711,12 @@ function LoadFileAndUpdate(from)
 	--ajout automatique d'elements en cours de campagne: FIN
 	--****************************************************************************************
 
-
-
 	-- Exécution du fichier s'il existe
 	local testFile = "Init/various_table.lua"
 	if FileExists(testFile) then
 		dofile(testFile)
 	else
-		if TypeAlias then	
+		if TypeAlias then
 			local _str = "TypeAlias = " .. TableSerialization(TypeAlias, 0)
 			local _file = io.open("Init/various_table.lua", "w") or error("Failed to open debug file")
 			_file:write(_str)
@@ -4764,8 +4768,6 @@ function LoadFileAndUpdate(from)
 		try_dofile(radioFile2)
 	end
 
-	-- print("UTIL_F M targetlist: "..tostring(#targetlist.blue))
-
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CampaignSettings.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Refpoints.lua")
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_MissionScore.lua")
@@ -4774,14 +4776,16 @@ function LoadFileAndUpdate(from)
 
 	Check_TaskPossibleByPlane()
 
-	if Debug.debug then
-		print("LOAD LoadFileAndUpdate() from "..tostring(from))
-	end
+    if Debug.debug then
+        print("LOAD LoadFileAndUpdate() from " .. tostring(from))
+    end
+	
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Time.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_MoonPhase.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Weather.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
+
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
@@ -4790,12 +4794,16 @@ function LoadFileAndUpdate(from)
 	--**************INITIALEMENT DANS MAIN_NextMission *****************************
 	--**************INITIALEMENT DANS MAIN_NextMission *****************************
 
+	print("Test Time UtilF G : " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
+	print("Test Time UtilF G  : " .. FormatTime(mission["start_time"], "hh:mm"))
+	_affiche(mission["date"], "UtilF G: mission[date] ")
+
 end
 
 -- Calcule le nombre de jours entre deux dates (YYYY, MM, DD)
 function SecondsBetween(date1,date2)
 
-	
+
 	local y1 = date1.year
 	local m1 = date1.month
 	local d1 = date1.day
@@ -4835,7 +4843,7 @@ function SecondsBetween(date1,date2)
     -- Ajoute les jours écoulés dans la dernière année
     days = days + daysSinceYearStart(y2, m2, d2) - 1
 
-	local deltaTimeSeconds = days * 24 * 3600 
+	local deltaTimeSeconds = days * 24 * 3600
 
     return deltaTimeSeconds
 end

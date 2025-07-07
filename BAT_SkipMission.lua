@@ -21,6 +21,8 @@ versionDCE["BAT_SkipMission.lua"] = "1.15.99"
 -- modification M11A_b_l	Multiplayer (bl MP overRide)(g %target alive)(y: force same package)(x: only active Target)(t:display name )(s: T choice bug)(r: targets already destroyed)(q: displays all tasks of several squadrons)
 -------------------------------------------------------------------------------------------------------
 
+FromFile = "BAT_SkipMission.lua"																	-- file name for debug
+
 BugList = {}
 Skipmission_flag = true
 MissionInstance = 0
@@ -87,7 +89,7 @@ if mission_ini.current_date and mission_ini.current_date.year then
 	local old_Date
 
 	if camp.date.day ~= mission_ini.current_date.day or camp.date.month ~= mission_ini.current_date.month or camp.date.year ~= mission_ini.current_date.year then
-		
+
 		old_Date = Deepcopy(camp.date)
 		TimeJump = true
 
@@ -104,15 +106,11 @@ if mission_ini.current_date and mission_ini.current_date.year then
 
 	CampTotalTimeS = SecondsBetween(camp.dateInit, camp.date)
 
-	-- if Debug.debug then
-	-- 	print("jumpTimeB CampTotalTimeS "..CampTotalTimeS)
-	-- end
-
 	if TimeJump then
 
 		local diffTime = SecondsBetween(old_Date, camp.date)
 
-		print("jumpTime D diffTime "..diffTime)
+		-- print("jumpTime D diffTime "..diffTime)
 
 		if diffTime > mission_ini.mission_duration + mission_ini.idle_time_max then
 			-- if Debug.debug then
@@ -301,7 +299,7 @@ if input == "y" or input == "yes" then
 					-- Fonction pour afficher les cibles standard (Strike, Runway Attack)
 					local function showStandardTargets(targetlist, side)
 						print("\n--- Sélectionnez une cible dans le camp "..side.." ---")
-						
+
 						-- Trier la table par priorité
 						table.sort(targetlist[side], function(a, b)
 							return a.priority > b.priority
@@ -311,7 +309,7 @@ if input == "y" or input == "yes" then
 						local Ckey = 0
 
 						for key, target in ipairs(targetlist[side]) do
-							if target.inactive ~= true and target.ATO 
+							if target.inactive ~= true and target.ATO
 							and (string.find(target.task, "Strike") or target.task == "Runway Attack")
 							and target.type ~= "Ejected Pilot"
 							then
@@ -331,7 +329,7 @@ if input == "y" or input == "yes" then
 						local Ckey = 0
 
 						for key, target in ipairs(targetlist[side]) do
-							if target.inactive ~= true and target.ATO 
+							if target.inactive ~= true and target.ATO
 							and target.task == "CSAR" and target.type == "Ejected Pilot"
 							then
 								Ckey = key
@@ -460,7 +458,7 @@ if input == "y" or input == "yes" then
 						io.write(" (1 to 8): ("..IndexStringType.."): "..unitType..":")
 
 						for taskStr , nbool in PairsByKeys(TabType) do
-							
+
 							if TabTask[taskStr] and nbool == true then
 								io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
 								local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
@@ -472,7 +470,7 @@ if input == "y" or input == "yes" then
 								tabIndex[tostring(6)..IndexStringType..TabTask[taskStr]] = true
 								tabIndex[tostring(7)..IndexStringType..TabTask[taskStr]] = true
 								tabIndex[tostring(8)..IndexStringType..TabTask[taskStr]] = true
-							
+
 							elseif not TabTask[taskStr] then
 								table.insert(tabBug,taskStr )
 							end
@@ -551,9 +549,9 @@ if input == "y" or input == "yes" then
 					"B: fuelConsumption \n"..
 					"C: KillTarget \n"
 					)
-	
+
 					local choix2 = string.lower(io.stdin:read())
-	
+
 					if (choix2 == "a" or choix2 == "b" or choix2 == "c") then
 						if choix2 == "a" then
 							ArgTools = "DelGroup"
@@ -570,7 +568,7 @@ if input == "y" or input == "yes" then
 				until (choix2 == "a" or  choix2 == "b" or choix2 == "c")
 
 				-- print("ArgTools "..tostring(ArgTools))
-	
+
 				if ArgTools ~= "KillTarget" then
 					dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Divers.lua")
 					os.execute 'pause'
@@ -607,14 +605,14 @@ if input == "y" or input == "yes" then
 					print("\nMultiplayerCampaign Next mission generated.\n")								--confirmation text
 					break
 				else
-					print("\nDebug A: AcceptMission() .\n")	
+					print("\nDebug A: AcceptMission() .\n")
 				end
 			elseif SinglePlayer and PlayerFlight  then														--mission has a player flight
 				if acceptMission() then
 					print("\nNext mission generated.\n")													--confirmation text
 					break
 				else
-					print("\nDebug B: AcceptMission() .\n")	
+					print("\nDebug B: AcceptMission() .\n")
 				end
 			elseif StopBug then																			--mission has a player flight
 				print("\n\n StopBug .\n")																--confirmation text
