@@ -212,10 +212,17 @@ end
 
 print(FormatTime(idle_time, "dd:hh:mm") .. " passed. Next mission scheduled at: " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
 
+-- print("Test Time DC_Time  X : " .. FormatTime(mission["start_time"], "hh:mm"))
+-- _affiche(mission["date"], "Test Time DC_Time Xb: mission[date] ")
+
+
 TimeAlreadyAdded = true
 
 --mise à jour de date dans confMod
-UpdateConfMod(nil, camp.date, "DC_Time "..debug.getinfo(1).currentline )
+UpdateConfMod(nil, camp.date, "DC_Time " .. debug.getinfo(1).currentline)
+
+-- print("Test Time DC_Time  Y : " .. FormatTime(mission["start_time"], "hh:mm"))
+-- _affiche(mission["date"], "Test Time DC_Time Yb: mission[date] ")
 
 -- os.execute 'pause'
 

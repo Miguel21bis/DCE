@@ -618,12 +618,12 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
                             table.insert(sorted_packs, pack)
                         end
 
-                        if Debug.debug then
-							local _str = "sorted_packs = " .. TableSerialization(sorted_packs, 0)
-							local _file = io.open("Debug/BRIEFING_sorted_packs.lua", "w") or error("Échec d'ouverture du fichier ATO_AtoG")
-							_file:write(_str)
-							_file:close()
-                        end
+                        -- if Debug.debug then
+						-- 	local _str = "sorted_packs = " .. TableSerialization(sorted_packs, 0)
+						-- 	local _file = io.open("Debug/BRIEFING_sorted_packs.lua", "w") or error("Échec d'ouverture du fichier ATO_AtoG")
+						-- 	_file:write(_str)
+						-- 	_file:close()
+                        -- end
 						
 						-- 2. Trier selon le eta du premier waypoint du main
 						table.sort(sorted_packs, function(a, b)
@@ -650,8 +650,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							--package sortie number
 							local sortie_n = 0																		--number of aircraft (sorties) in package
 							for role, flights in pairs(pack) do														--iterate through roles in package
-								print("newSortN: " ..
-									tostring(newSortN) .. "role: " .. tostring(role) .. " _flight: " .. tostring(flights))
+								
 								-- for n, flight_ in ipairs(flights) do        --iterate through flights in role
 								-- 	sortie_n = sortie_n + flight.number --count number of aircraft
                                 -- end

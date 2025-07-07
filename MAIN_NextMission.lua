@@ -46,30 +46,17 @@ versionDCE["MAIN_NextMission.lua"] = "1.36.216"
 -- modification M00_b		Integration de conf_mod
 -- -------------------------------------------------------------------------------------------------------	
 
-
--- Brief = {
--- 	red = {},
--- 	blue = {},
--- }
--- Briefing_text = ""
-
--- -- par défaut, on assigne une valeur superieur au camp du joueur, qu'il soit rouge ou bleu.
--- SkillWish = {
--- 	["red"] = 50,
--- 	["blue"] = 50,
--- }
-
 PlacePA = {}
 AltitudeCruise = 5400			--for plane without hcruise
 TaxiTime = 3000
+EPLRS_Capacity = {}
+
 if mission_ini.startup_time_player then mission_ini.startup_time_player = mission_ini.startup_time_player + TaxiTime end
 
 --Check_TaskPossibleByPlane
 ----- unpack template mission file ----
 local minizip = require('minizip')
-
 local zipFile = minizip.unzOpen("Init/base_mission.miz", 'rb')
-
 local old_miz = minizip.unzOpen("Init/base_mission.miz", 'rb')
 local existing_files = {}
 
@@ -85,9 +72,10 @@ if old_miz then
     old_miz:unzClose()
 end
 
-zipFile:unzLocateFile('mission')
-local misStr = zipFile:unzReadAllCurrentFile()
-local misStrFunc = loadstring(misStr)()
+--déjà appeler par LoadFileAndUpdate(), et ceci ecrase le mission["start_time"]
+-- zipFile:unzLocateFile('mission')
+-- local misStr = zipFile:unzReadAllCurrentFile()
+-- local misStrFunc = loadstring(misStr)()
 
 zipFile:unzLocateFile('options')
 local optStr = zipFile:unzReadAllCurrentFile()
@@ -113,10 +101,6 @@ if mission.version < 19 then --19ok 18bad
 	os.execute 'pause'
 	os.exit()
 end
-
--- NameTheatreLower =  string.lower(mission.theatre)
--- NameTheatre =  mission.theatre
-
 
 local trig_n = #mission.trigrules + 1
 
@@ -468,7 +452,6 @@ AddFileTrigger("beacon.ogg", nil, nil, "a_out_sound_c")
 AddFileTrigger("beaconsilent.ogg", nil, nil, "a_out_sound_c")
 -- AddFileTrigger("CG_ArtySpotter.lua")												--https://www.digitalcombatsimulator.com/fr/files/3339128/
 
-
 AddFileTriggerTempo("CG_ArtySpotter.lua", 2, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})
 
 
@@ -600,8 +583,6 @@ end
 
 
 
-
-EPLRS_Capacity = {}
 for planeType, value in PairsByKeys(Data_divers) do
 	if value.EPLRS_Capacity then
 		EPLRS_Capacity[planeType] = true
@@ -690,8 +671,7 @@ dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_AddPropAircraft.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_FlightPlan.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_StaticAircraft.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Prune.lua")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Briefing.lua")
-
+dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Briefing.lua")
 
 -- Supprime le fichier sans vérifier s'il existe
 os.remove("Debug/BugList.lua")
@@ -1055,15 +1035,6 @@ for side_name, side in pairs(mission.coalition) do
 	end
 end
 
--- if camp.waitingNextGen then
--- 	camp.waitingNextGen = false
--- end
--- --permet d'avancer l'horaire entre 2 missions
--- if Skipmission_flag then
--- 	if camp.waitingNextGen then
--- 		camp.waitingNextGen = false
--- 	end
--- end
 
 camp.waitingNextGen = false
 
@@ -1092,6 +1063,7 @@ if ListRequiredModules then
 	-- _affiche(mission.requiredModules, "MainNM mission.requiredModules ")
 	-- os.execute 'pause'
 end
+
 
 ----- convert tables back to strings for insertion into content files -----
 local misStr = "mission = " .. TableSerialization(mission, 0)
@@ -1203,8 +1175,6 @@ for filename, content in pairs(existing_files) do
         print("⚠️ Contenu vide ou nil pour le fichier : " .. filename)
     end
 end
-
-
 
 
 miz:zipAddFile("mission", "misFile.lua")
@@ -1451,8 +1421,6 @@ if Debug.debug or mission_ini.backupAllMissionFiles then
     end
 end
 
-
--- print("MainNM Z camp.date.day: "..tostring(camp.date.day))
 
 -- if Debug.debug then
 -- 	local camp_str = "mission = " .. TableSerialization(mission, 0)						--make a string
