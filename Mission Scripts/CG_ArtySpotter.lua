@@ -37,14 +37,11 @@ local user_smokeOn = true					-- activate or deactivate the red smoke during “
 -- variable modified by environment DCE ****************************************************
 if camp.spotter then
 	user_quantity = camp.spotter.qtyBySalve
--- <<<<<<< HEAD
 	-- if camp.spotter.markerPrefix ~= nil then
 	-- 	user_markerPrefix = camp.spotter.markerPrefix
 	-- end
--- =======
 	-- user_markerPrefix = camp.spotter.markerPrefix
 	user_markerPrefix = (camp.spotter.markerPrefix and camp.spotter.markerPrefix ~= "" and camp.spotter.markerPrefix) or "fire mission"
--- >>>>>>> aa3262083b96233b6e799e00414b6b639895d157
 	user_qty_Total_Shells = camp.spotter.qtyTotalShells
 	user_spottingDistance = camp.spotter.spottingDistance
 	user_smokeOn = camp.spotter.smokeOn
