@@ -46,10 +46,6 @@ versionDCE["MAIN_NextMission.lua"] = "1.36.216"
 -- modification M00_b		Integration de conf_mod
 -- -------------------------------------------------------------------------------------------------------	
 
-print("Test Time MAIN_NM  A : " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
-print("Test Time MAIN_NM  A  : " .. FormatTime(mission["start_time"], "hh:mm"))
-_affiche(mission["date"], "MAIN_NM A: mission[date] ")
-
 PlacePA = {}
 AltitudeCruise = 5400			--for plane without hcruise
 TaxiTime = 3000
@@ -105,11 +101,6 @@ if mission.version < 19 then --19ok 18bad
 	os.execute 'pause'
 	os.exit()
 end
-
-print("Test Time MAIN_NM  B : " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
-print("Test Time MAIN_NM  B  : " .. FormatTime(mission["start_time"], "hh:mm"))
-_affiche(mission["date"], "MAIN_NM B: mission[date] ")
-
 
 local trig_n = #mission.trigrules + 1
 
@@ -461,10 +452,6 @@ AddFileTrigger("beacon.ogg", nil, nil, "a_out_sound_c")
 AddFileTrigger("beaconsilent.ogg", nil, nil, "a_out_sound_c")
 -- AddFileTrigger("CG_ArtySpotter.lua")												--https://www.digitalcombatsimulator.com/fr/files/3339128/
 
-print("Test Time MAIN_NM  C : " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
-print("Test Time MAIN_NM  C  : " .. FormatTime(mission["start_time"], "hh:mm"))
-_affiche(mission["date"], "MAIN_NM C: mission[date] ")
-
 AddFileTriggerTempo("CG_ArtySpotter.lua", 2, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})
 
 
@@ -648,10 +635,6 @@ CheckAndFixAllIds()
 
 -- Check_TaskPossibleByPlane()
 
-print("Test Time MAIN_NM  D : " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
-print("Test Time MAIN_NM  D  : " .. FormatTime(mission["start_time"], "hh:mm"))
-_affiche(mission["date"], "MAIN_NM D: mission[date] ")
-
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_MissionScore.lua")
 
 if MissionInstance >= 2 then
@@ -678,9 +661,6 @@ dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")		--
 if ArgTools == "KillTarget" then
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Divers.lua")
 end
-print("Test Time MAIN_NM  F : " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
-print("Test Time MAIN_NM  F  : " .. FormatTime(mission["start_time"], "hh:mm"))
-_affiche(mission["date"], "MAIN_NM F: mission[date] ")
 
 dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_RouteGenerator.lua")
@@ -692,10 +672,6 @@ dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_FlightPlan.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_StaticAircraft.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Prune.lua")
 dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Briefing.lua")
-
-print("Test Time MAIN_NM  G : " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
-print("Test Time MAIN_NM  G  : " .. FormatTime(mission["start_time"], "hh:mm"))
-_affiche(mission["date"], "MAIN_NM G: mission[date] ")
 
 -- Supprime le fichier sans vérifier s'il existe
 os.remove("Debug/BugList.lua")

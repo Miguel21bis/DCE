@@ -2937,7 +2937,7 @@ end
 
 
 
-function CheckConfModMaster()
+function CheckConfModMaster_OLD()
 
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua")
 	local confModCheck = {
@@ -3471,17 +3471,24 @@ function UpdateConfMod(setWeather, setDate, from)
 				--   Gestion des affectations (Valeur + Commentaire propre)
 				else
 
-					key, value, comment = line:match('(%S+)%s*=%s*([^,%s]+)%s*,?%s*%-%-%s*(.*)')
+					-- key, value, comment = line:match('(%S+)%s*=%s*([^,%s]+)%s*,?%s*%-%-%s*(.*)')
 					-- print("F1a key: "..tostring(key).." value: |"..tostring(value).."|")
 
-					if not key then
-						key, value = line:match('(%S+)%s*=%s*([^,%s]+)%s*,?%s*$') -- Capture sans commentaire
-						-- print("F1b key: "..tostring(key).." value: |"..tostring(value).."|")
-					end
+					-- if not key then
+					-- 	key, value = line:match('(%S+)%s*=%s*([^,%s]+)%s*,?%s*$') -- Capture sans commentaire
+					-- 	print("F1b key: "..tostring(key).." value: |"..tostring(value).."|")
+					-- end
 
+					key, value, comment = line:match('([%w_%[%]"]+)%s*=%s*("?.-"?),?%s*%-%-%s*(.*)')
+					-- print("F1a key: " .. tostring(key) .. " value: |" .. tostring(value) .. "|")
 
+                    if not key then
+                        key, value = line:match('([%w_%[%]"]+)%s*=%s*("?.-"?),?')
+                        -- print("F1b key: " .. tostring(key) .. " value: |" .. tostring(value) .. "|")
+                    end
+					
 					if key then
-						-- print("F1c key: "..tostring(key).." currentTable[key]: "..tostring(currentTable[key]).." value: |"..tostring(value).."|")
+						-- print("G key: "..tostring(key).." currentTable[key]: "..tostring(currentTable[key]).." value: |"..tostring(value).."|")
 
 						local clientValue = currentTable[key] or value
 						local formattedValue = getFormattedValue(clientValue)
@@ -3519,12 +3526,12 @@ function UpdateConfMod(setWeather, setDate, from)
 
 						-- Écriture avec **espacement plus serré**
 						if comment then
-							-- print("F2 "..getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and "," or "") .. spacingAfterValue .. "-- " .. comment .. "\n")
+							-- print("H2 "..getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and "," or "") .. spacingAfterValue .. "-- " .. comment .. "\n")
 							-- file:write(getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and "," or "") .. spacingAfterValue .. "-- " .. comment .. "\n")
 							file:write(getIndent(level) .. key .. spacingAfterKey .. "= " .. formattedValue .. (addComma and "," or "") .. spacingAfterValue .. "-- " .. comment .. "\n")
 
 						else
-							-- print("F3 "..getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and ",") .. "\n")
+							-- print("H3 "..getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and ",") .. "\n")
 							file:write(getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and ",") .. "\n")
 						end
 					end
@@ -3571,7 +3578,7 @@ function UpdateConfMod(setWeather, setDate, from)
     -- Charger les fichiers de configuration client et par défaut
     local clientConfig, clientStructure = loadConfigWithStructure(clientConfigPath)
 
-	-- 🌟 Sauvegarde `pictureBrief` original AVANT toute modification
+	-- Sauvegarde `pictureBrief` original AVANT toute modification
 	local backupPictureBrief = clientConfig.pictureBrief and Deepcopy(clientConfig.pictureBrief) or nil
 
     local defaultConfig, defaultStructure = loadConfigWithStructure(defaultConfigPath)
@@ -4497,13 +4504,8 @@ function LoadFileAndUpdate(from)
 
 	zipFile:unzClose()
 
-	print("Test Time UtilF B : " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
-	print("Test Time UtilF B  : " .. FormatTime(mission["start_time"], "hh:mm"))
-	_affiche(mission["date"], "MAIUtilFN_NM B: mission[date] ")
-
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
-
 
 	if not oob_scen and Firstmission_flag then
 		require("Active/oob_scen")
@@ -4793,10 +4795,6 @@ function LoadFileAndUpdate(from)
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 	--**************INITIALEMENT DANS MAIN_NextMission *****************************
 	--**************INITIALEMENT DANS MAIN_NextMission *****************************
-
-	print("Test Time UtilF G : " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
-	print("Test Time UtilF G  : " .. FormatTime(mission["start_time"], "hh:mm"))
-	_affiche(mission["date"], "UtilF G: mission[date] ")
 
 end
 
