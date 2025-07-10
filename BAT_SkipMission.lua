@@ -110,8 +110,6 @@ if mission_ini.current_date and mission_ini.current_date.year then
 
 		local diffTime = SecondsBetween(old_Date, camp.date)
 
-		-- print("jumpTime D diffTime "..diffTime)
-
 		if diffTime > mission_ini.mission_duration + mission_ini.idle_time_max then
 			-- if Debug.debug then
 			-- 	print("jumpTimeB = true  detected: "..FormatTime(diffTime, "hh:mm").." since last mission.")
@@ -120,17 +118,9 @@ if mission_ini.current_date and mission_ini.current_date.year then
 	end
 end
 
--- if Debug.debug then
--- 	print("jumpTimeE CampTotalTimeS "..CampTotalTimeS)
--- 	print("jumpTimeF TimeJump "..tostring(TimeJump))
--- end
-
 if not ChangePlane then
 	require("Active/oob_air")
 end
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
-
 dofile("Active/oob_scen.lua")
 
 

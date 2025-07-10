@@ -10,6 +10,7 @@ known issues:
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
 ==:20.88.547:==
+bug assignation du joueur en multi
 suppression des alias de oob_air_init, transfert automatique vers \Init\various_table.lua
 WPT Before Landing
 anticollision au spawn air

@@ -241,41 +241,82 @@ local creaClientFlight = {}																									--crée une table pour déro
 local sum
 
 if debugAssign then
-	_affiche(MultiBIS, "MultiBIS AtoPA")
-	_affiche(playable, "playable AtoPA")
+	_affiche(MultiBIS, "MultiBIS AtoPA ")
+	_affiche(playable, "playable AtoPA ")
 end
 
 if #playable > 0 then
-	for i=1, #playable do																									--check si un group à trouver son avion		
-		for k=1, MultiBIS.NbGroup do
-			if playable[i].type ==  MultiBIS.Group[k].PlaneType and not MultiBIS.Group[k].counted then
-
-				-- playability_Multi[k] = 0
-
-				if not MultiBIS.Group[k].NotAssigned then MultiBIS.Group[k].NotAssigned = Deepcopy(MultiBIS.Group[k].NbPlane) end
-
-				local nbPlaneFlight = playable[i].number
-
-				if playable[i].number >=  MultiBIS.Group[k].NotAssigned then
-					nbPlaneFlight = Deepcopy(MultiBIS.Group[k].NotAssigned)
-					MultiBIS.Group[k].NotAssigned = 0
-				else
-					MultiBIS.Group[k].NotAssigned = MultiBIS.Group[k].NotAssigned - playable[i].number
+	for i = 1, #playable do
+		for k = 1, MultiBIS.NbGroup do
+			local group = MultiBIS.Group[k]
+			if playable[i].type == group.PlaneType and not group.counted then
+				if group.NotAssigned == nil then
+					group.NotAssigned = Deepcopy(group.NbPlane)
 				end
 
-				-- playability_Multi[k] = 1																				--propose ce choix au joueur						
-				local tabTemp = Deepcopy(MultiBIS.Group[k])
-				table.insert(creaClientFlight, tabTemp)
-				creaClientFlight[#creaClientFlight]["NbPlane"] = nbPlaneFlight							 				--TODO ce number pourrait reprendre l'historique						
+				local nbPlaneFlight = playable[i].number
+				if nbPlaneFlight >= group.NotAssigned then
+					nbPlaneFlight = group.NotAssigned
+					group.NotAssigned = 0
+				else
+					group.NotAssigned = group.NotAssigned - nbPlaneFlight
+				end
 
+				-- Cherche si une entrée existe déjà dans creaClientFlight
+				local found = false
+				for _, entry in ipairs(creaClientFlight) do
+					if entry.PlaneType == group.PlaneType and entry.task == group.task and entry.side == group.side then
+						entry.NbPlane = entry.NbPlane + nbPlaneFlight
+						entry.NotAssigned = group.NotAssigned
+						found = true
+						break
+					end
+				end
 
-				if MultiBIS.Group[k].NotAssigned <= 0 then
-					MultiBIS.Group[k].counted = true
+				if not found then
+					local tabTemp = Deepcopy(group)
+					tabTemp.NbPlane = nbPlaneFlight
+					table.insert(creaClientFlight, tabTemp)
+				end
+
+				if group.NotAssigned <= 0 then
+					group.counted = true
 					playable[i].counted = true
 				end
 			end
 		end
 	end
+	
+	-- for i=1, #playable do																									--check si un group à trouver son avion		
+	-- 	for k=1, MultiBIS.NbGroup do
+	-- 		if playable[i].type == MultiBIS.Group[k].PlaneType and not MultiBIS.Group[k].counted then
+
+	-- 			-- playability_Multi[k] = 0
+
+	-- 			if not MultiBIS.Group[k].NotAssigned then MultiBIS.Group[k].NotAssigned = Deepcopy(MultiBIS.Group[k].NbPlane) end
+
+	-- 			local nbPlaneFlight = playable[i].number
+
+	-- 			if playable[i].number >=  MultiBIS.Group[k].NotAssigned then
+	-- 				nbPlaneFlight = Deepcopy(MultiBIS.Group[k].NotAssigned)
+	-- 				MultiBIS.Group[k].NotAssigned = 0
+	-- 			else
+	-- 				MultiBIS.Group[k].NotAssigned = MultiBIS.Group[k].NotAssigned - playable[i].number
+	-- 			end
+
+	-- 			-- playability_Multi[k] = 1																				--propose ce choix au joueur						
+	-- 			local tabTemp = Deepcopy(MultiBIS.Group[k])
+	-- 			table.insert(creaClientFlight, tabTemp)
+	-- 			creaClientFlight[#creaClientFlight]["NbPlane"] = nbPlaneFlight							 				--TODO ce number pourrait reprendre l'historique						
+
+
+	-- 			if MultiBIS.Group[k].NotAssigned <= 0 then
+	-- 				MultiBIS.Group[k].counted = true
+	-- 				playable[i].counted = true
+	-- 			end
+	-- 		end
+	-- 	end
+	-- end
 
 	if MultiBIS.Group then
 		AllCoopPossible = true
@@ -310,7 +351,7 @@ if #playable > 0 then
 
 	if debugAssign then
 		-- _affiche(playability_Multi, "playability_Multi Before  AtoPA")
-		_affiche(creaClientFlight, "creaClientFlight  AtoPA")
+		_affiche(creaClientFlight, "creaClientFlight  AtoPA ")
 		print("AtoPA AllCoopPossible "..tostring(AllCoopPossible))
 	end
 end
@@ -341,8 +382,8 @@ if #playable > 0 and not AllCoopPossible then
 		end
 	end
 else
-	if  debugAssign then
-		_affiche(Playability_criterium, "Playability_criterium AtoPA")
+	if debugAssign then
+		_affiche(Playability_criterium, "Playability_criterium AtoPA ")
 		os.execute 'pause'
 	end
 end
