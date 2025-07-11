@@ -66,6 +66,7 @@ LastInjecAFAC = {}					--garde les derniers plan de vol injecté
 SatusGroupAircraft = {}				--table used to store the status of aircraft groups
 Players = {}					--table used to store player units
 AvgConsumptionKgPerKm = {}				--table used to store the available distance in km for each unitCat
+TypePedroByCV = {}         --table used to store the type of Pedro by CV
 
 coalitionId = {
 	["0"] = "neutral",

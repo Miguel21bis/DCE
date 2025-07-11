@@ -175,8 +175,20 @@ end
 
 
 
-local function createPedro(CV_Name)
+local function createPedro(arg)
 
+    local CV_Name = arg[1]
+	local parameters = arg[2]
+
+	-- TypePedroByCV[cvName] = {
+	-- 	type = _group.units[1].type,
+	-- 	payload = _group.units[1].payload,
+	-- 	livery_id = _group.units[1].livery_id,
+	-- 	AddPropAircraft = _group.units[1].AddPropAircraft,
+	-- 	callsign = _group.units[1].callsign,
+	-- }
+
+	--TODO ajouter ici une condition de distance pour ne pas annoncer le spawn à tout le monde, mais seulement aux joueurs proches du CV
 	env.info( "Attention, Pedro's helicopter will spawning on the CV "..tostring(CV_Name))
 	trigger.action.outText("Attention, Pedro's helicopter will spawning on the CV "..tostring(CV_Name), 30)
 
@@ -216,8 +228,6 @@ local function createPedro(CV_Name)
 		headingCV = Heading
 	end
 
-	-- TODO crée un Pedro selon le bon type d'helico en place
-
 	local pt_dest = GetOffsetPoint(pt_start, headingCV, 300)
 
 	local groupData = {
@@ -237,7 +247,7 @@ local function createPedro(CV_Name)
 		{
 			[1] =
 			{
-				["type"] = "SH-60B",
+				["type"] = tostring(parameters.type),
 				["skill"] = "High",
 				["y"] = satarty,
 				["x"] = satartx,
@@ -245,21 +255,21 @@ local function createPedro(CV_Name)
 				["heading"] = 0,
 				["alt"] = 60,
 				["alt_type"] = "BARO",
-				["livery_id"] = "Navy Version 1",
-				["ropeLength"] = 15,
+				["livery_id"] = tostring(parameters.livery_id),
+				-- ["ropeLength"] = 15,
 				["speed"] = 20,
 				["psi"] = -0,
-				["payload"] =
-				{
-					["pylons"] =
-					{
-					}, -- end of ["pylons"]
-					["fuel"] = "1100",
-					["flare"] = 30,
-					["chaff"] = 30,
-					["gun"] = 100,
-				}, -- end of ["payload"]
-				["onboard_num"] =  tostring(math.random(10, 20)),
+				["payload"] = parameters.payload,
+				-- {
+				-- 	["pylons"] =
+				-- 	{
+				-- 	}, -- end of ["pylons"]
+				-- 	["fuel"] = "1100",
+				-- 	["flare"] = 30,
+				-- 	["chaff"] = 30,
+				-- 	["gun"] = 100,
+				-- }, -- end of ["payload"]
+				["onboard_num"] =  tostring(math.random(700, 710)),
 
 			}, -- end of [1]
 		}, -- end of ["units"]
@@ -272,29 +282,29 @@ local function createPedro(CV_Name)
 		["frequency"] = 243,
 	} -- end of [1]
 
-
-	-- local logStr = "create_Pedro = " .. TableSerialization(groupData, 0)
-	-- local FlightNameClean = pt_start.PedroName:gsub('[%p%c%s]', '_')
-	-- local logFile = io.open(PathDCE ..FlightNameClean.."_".. "create_Pedro.lua", "w")
-	-- logFile:write(logStr)
-	-- logFile:close()
+	if camp.debug then
+		local logStr = "Mission = " .. TableSerialization(groupData, 0)
+		local grpnameClean = pt_start.PedroName:gsub('[%p%c%s]', '_')
+		local logFile = io.open(PathDCE .. "Debug\\" .. grpnameClean .. "_create_Pedro_" .. current_time .. ".lua", "w")
+		if logFile then
+			logFile:write(logStr)
+			logFile:close()
+		else
+			env.info("DCE_create_Pedro_: Failed to open log file for writing.")
+		end
+	end
 
 	coalition.addGroup(country.id.USA, Group.Category.HELICOPTER, groupData)
 
 	env.info( "createPedroR passe B2 ")
-	-- trigger.action.outText("createPedro passe B2", 30)
-
 
 	timer.scheduleFunction(injecteRoutePedro, {pt_start, pt_dest}, timer.getTime() + 1)
 
 end
 
-function NeedPedro(CV_Name,Event)
-	-- --TODO erreur, rechercher le CV d origine et pas une base de deroutement
-	-- local CV_Name = Event.place:getName()
-
+function NeedPedro(CV_Name, parameters)
 	if CV_Name  then
-		timer.scheduleFunction(createPedro, CV_Name, timer.getTime() + 30)
+		timer.scheduleFunction(createPedro, { CV_Name, parameters }, timer.getTime() + 30)
 	end
 end
 

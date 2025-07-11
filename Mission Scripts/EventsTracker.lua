@@ -1119,8 +1119,34 @@ function eventHandlerDCE:onEvent(event)
 									
 									cvName = cvName:gsub( "Unit_Pedro_", "")
 									cvName, _ = cvName:match("([^,]+)_([^,]+)")
-									
-									NeedPedro(cvName, event)
+
+									--cherche le type d'helico et les parametres de store et autre à lui coller pour creer un autre Pedro identique
+									if not TypePedroByCV[cvName] then
+
+										for coalitionN, coalition in pairs(env.mission.coalition) do
+											for countryN, state in pairs(coalition.country) do
+												if state.helicopter then
+													for groupN, _group in pairs(state.helicopter.group) do
+														if _group.task == "Transport" and _group.name:find(cvName) and _group.name:find("Pedro") then
+															
+															TypePedroByCV[cvName] = {
+																type = _group.units[1].type,
+																payload = _group.units[1].payload,
+																livery_id = _group.units[1].livery_id,
+																AddPropAircraft = _group.units[1].AddPropAircraft,
+																callsign = _group.units[1].callsign,
+															}
+															break
+
+															
+														end
+													end
+												end
+											end
+										end
+									end
+								
+									NeedPedro(cvName, TypePedroByCV[cvName])
 
 								end
 
