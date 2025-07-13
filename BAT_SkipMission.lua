@@ -451,7 +451,7 @@ if input == "y" or input == "yes" then
 
 							if TabTask[taskStr] and nbool == true then
 								io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
-								local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
+								-- local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
 								tabIndex[tostring(1)..IndexStringType..TabTask[taskStr]] = true
 								tabIndex[tostring(2)..IndexStringType..TabTask[taskStr]] = true
 								tabIndex[tostring(3)..IndexStringType..TabTask[taskStr]] = true
@@ -461,7 +461,7 @@ if input == "y" or input == "yes" then
 								tabIndex[tostring(7)..IndexStringType..TabTask[taskStr]] = true
 								tabIndex[tostring(8)..IndexStringType..TabTask[taskStr]] = true
 
-							elseif not TabTask[taskStr] then
+							elseif not TabTask[taskStr] and not string.lower(taskStr) == "spotter" then
 								table.insert(tabBug,taskStr )
 							end
 						end

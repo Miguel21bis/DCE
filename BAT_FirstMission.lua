@@ -319,10 +319,12 @@ repeat
 				end
 
 				-- display le tableau des choix d'avion et de task
+				local tabBug = {}
+
 				for nSide , unit_type in PairsByKeys(tabTaskAvailable) do
-					-- print() print(nSide..":")
-					for unitType , tabType in PairsByKeys(unit_type) do
-						-- print("BatFM unitType "..tostring(unitType))
+					print() print(nSide..":")
+					for unitType , TabType in PairsByKeys(unit_type) do
+
 						local IndexStringType = string.lower(string.char(ti))
 						if not playable_type[IndexStringType] then playable_type[IndexStringType] = {} end
 						playable_type[IndexStringType]["type"] = unitType
@@ -330,12 +332,11 @@ repeat
 
 						io.write(" (1 to 8): ("..IndexStringType.."): "..unitType..":")
 
-						for taskStr , nbool in PairsByKeys(tabType) do
-							-- print("BatFM taskStr "..tostring(taskStr))
-							-- print("BatFM TabTask[taskStr] "..tostring(TabTask[taskStr]))
-							if nbool == true then
+						for taskStr , nbool in PairsByKeys(TabType) do
+
+							if TabTask[taskStr] and nbool == true then
 								io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
-								local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
+								-- local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
 								tabIndex[tostring(1)..IndexStringType..TabTask[taskStr]] = true
 								tabIndex[tostring(2)..IndexStringType..TabTask[taskStr]] = true
 								tabIndex[tostring(3)..IndexStringType..TabTask[taskStr]] = true
@@ -345,12 +346,50 @@ repeat
 								tabIndex[tostring(7)..IndexStringType..TabTask[taskStr]] = true
 								tabIndex[tostring(8)..IndexStringType..TabTask[taskStr]] = true
 
+							elseif not TabTask[taskStr] and not string.lower(taskStr) == "spotter" then
+								table.insert(tabBug,taskStr )
 							end
 						end
 						io.write("\n")
 						ti = ti+1
 					end
 				end
+
+				-- -- display le tableau des choix d'avion et de task
+				-- for nSide , unit_type in PairsByKeys(tabTaskAvailable) do
+				-- 	-- print() print(nSide..":")
+				-- 	for unitType , tabType in PairsByKeys(unit_type) do
+				-- 		-- print("BatFM unitType "..tostring(unitType))
+				-- 		local IndexStringType = string.lower(string.char(ti))
+				-- 		if not playable_type[IndexStringType] then playable_type[IndexStringType] = {} end
+				-- 		playable_type[IndexStringType]["type"] = unitType
+				-- 		playable_type[IndexStringType]["side"] = nSide
+
+				-- 		io.write(" (1 to 8): ("..IndexStringType.."): "..unitType..":")
+
+				-- 		for taskStr , nbool in PairsByKeys(tabType) do
+				-- 			-- print("BatFM taskStr "..tostring(taskStr))
+				-- 			-- print("BatFM TabTask[taskStr] "..tostring(TabTask[taskStr]))
+				-- 			if nbool == true then
+				-- 				io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
+				-- 				-- local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
+				-- 				tabIndex[tostring(1)..IndexStringType..TabTask[taskStr]] = true
+				-- 				tabIndex[tostring(2)..IndexStringType..TabTask[taskStr]] = true
+				-- 				tabIndex[tostring(3)..IndexStringType..TabTask[taskStr]] = true
+				-- 				tabIndex[tostring(4)..IndexStringType..TabTask[taskStr]] = true
+				-- 				tabIndex[tostring(5)..IndexStringType..TabTask[taskStr]] = true
+				-- 				tabIndex[tostring(6)..IndexStringType..TabTask[taskStr]] = true
+				-- 				tabIndex[tostring(7)..IndexStringType..TabTask[taskStr]] = true
+				-- 				tabIndex[tostring(8)..IndexStringType..TabTask[taskStr]] = true
+
+				-- 			elseif not TabTask[taskStr] and not string.lower(taskStr) == "spotter" then
+				-- 				table.insert(tabBug,taskStr )
+				-- 			end
+				-- 		end
+				-- 		io.write("\n")
+				-- 		ti = ti+1
+				-- 	end
+				-- end
 
 				io.write( "\n")
 			--===================================================================================

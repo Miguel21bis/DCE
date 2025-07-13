@@ -41005,6 +41005,47 @@ db_all_loadouts = {
 			},
 		},
 		CSAR = {
+			["test 80s"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				attributes =  { },
+				code_loadout =  { "all" },
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 75,
+				vAttack = 85,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = {
+							CLSID = "{B919B0F4-7C25-455E-9A02-CEA51DB895E3}",
+						},
+						[2] = {
+							CLSID = "{PTB_450}",
+						},
+						[5] = {
+							CLSID = "{PTB_450}",
+						},
+						[6] = {
+							CLSID = "{B919B0F4-7C25-455E-9A02-CEA51DB895E3}",
+						},
+						[8] = {
+							CLSID = "KORD_12_7_MI24_R",
+						},
+					},
+					fuel = 1701,
+					flare = 192,
+					chaff = 0,
+					gun = 100,
+				},
+			},
 			["80s - CSAR 2xFT+4xATGM_9M114+Gunner"] = {
 				minscore = 0.3,
 				support = {

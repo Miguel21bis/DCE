@@ -115,7 +115,7 @@ local function responseTime(arg)
 end
 
 local function menuAccueil(unitID)
-	trigger.action.outTextForUnit( unitID, "To use the Spotter Artillery menu, you must place a marker on the F10 MAP, and enter a text beginning with "..tostring(user_markerPrefix) , 10)
+	trigger.action.outTextForUnit( unitID, "To use the Spotter Artillery menu, you must place a marker on the F10 MAP, and enter a text beginning with: \n "..tostring(user_markerPrefix) , 10)
 	trigger.action.outTextForUnit( unitID, " or enter the MGRS position directly.  ", 10)
 end
 
@@ -736,13 +736,18 @@ artyAction = function ( initiatorName )
 
 				local artyPoint = foundArtyPointInPoly(camp.boundary[spotterSide], _targetPosXZ )
 
-				nearestZone = math.sqrt(math.pow(artyPoint.x - _targetPosXZ.x, 2) + math.pow(artyPoint.y - _targetPosXZ.z, 2))
+				if artyPoint then
 
-				local distKm = math.floor(nearestZone / 1000)
+					nearestZone = math.sqrt(math.pow(artyPoint.x - _targetPosXZ.x, 2) + math.pow(artyPoint.y - _targetPosXZ.z, 2))
 
-				txtFromZone = " from the nearest "..tostring(spotterSide).." border , distance: "..tostring(math.floor(distKm).." Km ")
+					local distKm = math.floor(nearestZone / 1000)
 
-				-- env.info("CG_ArtySpotter: camp.boundary DD "..tostring(nearestZone).." txtFromZone: "..txtFromZone)
+					txtFromZone = " from the nearest "..tostring(spotterSide).." border , distance: "..tostring(math.floor(distKm).." Km ")
+					-- env.info("CG_ArtySpotter: camp.boundary DD "..tostring(nearestZone).." txtFromZone: "..txtFromZone)
+				else
+					env.info("CG_ArtySpotter: artyPoint = nil ERROR ?")
+				end
+				
 
 			end
 
@@ -804,7 +809,7 @@ artyAction = function ( initiatorName )
 
 			elseif not passZoneDistance then
 				--initiates the artilleryman's response with a time delay ~= 5s
-				timer.scheduleFunction(responseTime, {artyTasks[initiatorName].unitID, "Out of range of artillery support: "..tostring(math.floor(nearestZone))}, timer.getTime() + responseTimeVar)
+				timer.scheduleFunction(responseTime, {artyTasks[initiatorName].unitID, "Out of range of artillery support: "..tostring(math.floor(nearestZone)).." m"}, timer.getTime() + responseTimeVar)
 
 			else
 				--initiates the artilleryman's response with a time delay ~= 5s
@@ -919,34 +924,38 @@ local function isValidInitiator(initiator)
     if user_restrictByType == "helo" then
         if initiator:getDesc().category == Unit.Category.Helicopter then
             isValid = true
+			env.info("CG_ArtySpotter: isValidInitiator A: helo Unit.Category.Helicopter ")
         end
     end
 
-    -- Check name restriction
-    if user_restrictByUnitName ~= "" then
+    -- -- Check name restriction
+    -- -- if user_restrictByUnitName ~= "" then
+	-- if initiator.getPlayerName then
 
-        -- local name = initiator:getName():lower()
+    --     -- local name = initiator:getName():lower()
 
-		local name = initiator:getPlayerName()
+	-- 	local name = initiator:getPlayerName()
 
-        if name:find(user_restrictByUnitName:lower()) then
-			isValid = true
-        end
-    end
+    --     if name:find(user_restrictByUnitName:lower()) then
+	-- 		isValid = true
+	-- 		env.info("CG_ArtySpotter: isValidInitiator B: initiator:getPlayerName() ")
+    --     end
+    -- end
 
 
 
 	-- DCE environment
-	if camp.spotterAircraft then
+	if camp.spotterAircraft and initiator.getDesc then
 		local description = initiator:getDesc()
 		if description and description.typeName then
             if camp.spotterAircraft[description.typeName] then
 				isValid = true
+				env.info("CG_ArtySpotter: isValidInitiator B: camp.spotterAircraft "..tostring(description.typeName))
 			end
         end
 	end
 
-	 return isValid
+	return isValid
 end
 
 -- Function to check if the marker text has the required prefix and remove it
@@ -1012,11 +1021,10 @@ local function onPlayerAddMarker(event)
 
 				local _targetPosXZ = event.pos
 
-				if event.initiator then
+				if event.initiator and event.initiator.getPlayerName then
 
 					local initiatorName = event.initiator:getPlayerName()
-					local playerUnit = event.initiator
-					local _playerPosXZ = playerUnit:getPoint()
+					local _playerPosXZ = event.initiator:getPoint()
 
 
 					-- Store position**********************************************************
