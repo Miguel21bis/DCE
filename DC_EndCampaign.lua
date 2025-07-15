@@ -162,7 +162,7 @@ if EndCampaign or camp.endCampaign then												--if the campaign has ended
 	
 	for n = 1, #BriefingImagesR do
 		mission.maxDictId = mission.maxDictId + 1
-		mapResource["ResKey_ImageBriefing_" .. mission.maxDictId] = BriefingImagesB[n]     --define key in mapResource file
+		mapResource["ResKey_ImageBriefing_" .. mission.maxDictId] = BriefingImagesR[n]     --define key in mapResource file
 		table.insert(mission.pictureFileNameR, "ResKey_ImageBriefing_" .. mission.maxDictId)  --add picture to blue briefing
 	end
 

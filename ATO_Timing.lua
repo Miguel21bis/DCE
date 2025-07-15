@@ -763,16 +763,6 @@ for side, pack in pairs(ATO) do
 								--print(tempTxt)
 								debugTxt_AtoT = debugTxt_AtoT ..tempTxt.."\n"
 
-								-- _affiche(flight[f].route[w-1], "flight[f].route[w-1]")
-
-								-- _affiche(flight[f].route[w], "flight[f].route[w]")
-
-
-								-- local BriefingTmp = StringToTxt(debugTxt_AtoT)
-								-- local debugBriefingFile = io.open("Debug/debugTxt_AtoT_AtoTiming.lua", "w")										--open targetlist file
-								-- debugBriefingFile:write(BriefingTmp)																		--save new data
-								-- debugBriefingFile:close()
-
 							end
 						end
 					end

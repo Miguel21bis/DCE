@@ -2446,6 +2446,7 @@ if not (EndCampaign or camp.endCampaign) then
 		if side == "blue" then
 			for nb, filename in ipairs(file) do
 				table.insert(BriefingImagesB, filename)
+				-- print("DcBrief A table.insert(BriefingImagesB blue "..filename)
 			end
 		elseif side == "red" then
 			for nb, filename in ipairs(file) do
@@ -2456,14 +2457,15 @@ if not (EndCampaign or camp.endCampaign) then
 
 	 -- ajoute les images du target selectionné
 	if target_picture["blue"] then
-		for TP_n, target_picture in ipairs(target_picture.blue) do
-			local filename = target_picture
+		for TP_n, targetPicture in ipairs(target_picture.blue) do
+			local filename = targetPicture
 			table.insert(BriefingImagesB, filename)
+			-- print("DcBrief B table.insert(BriefingImagesB blue "..filename)
 		end
 	end
 	if target_picture["red"] then
-		for TP_n, target_picture in ipairs(target_picture.red) do
-			local filename = target_picture
+		for TP_n, targetPicture in ipairs(target_picture.red) do
+			local filename = targetPicture
 			table.insert(BriefingImagesR, filename)
 		end
 	end
@@ -2481,6 +2483,7 @@ if BriefingImagesB and camp.BriefingImagesB and not TaskRefused then
 		end
 		if not found then
 			table.insert(BriefingImagesB, camp.BriefingImagesB[iCamp])
+			-- print("DcBrief C if not found table.insert(BriefingImagesB blue "..camp.BriefingImagesB[iCamp])
 		end
 	end
 	camp.BriefingImagesB = nil
@@ -2502,31 +2505,58 @@ if BriefingImagesR and camp.BriefingImagesR and not TaskRefused then
 	camp.BriefingImagesR = nil
 end
 
+_affiche(mission.pictureFileNameB, "DcBrief FF0 mission.pictureFileNameB ")
+-- for n = 1, #BriefingImagesB do
+local frontlineN = 0
+for imageN, image in pairs(BriefingImagesB) do
+	local found_Frontline = false
+	if string.find(image, "Frontline") then
+		found_Frontline = true
+		frontlineN = frontlineN + 1
+	end
 
-for n = 1, #BriefingImagesB do
-	mission.maxDictId = mission.maxDictId + 1
-	mapResource["ResKey_ImageBriefing_" .. mission.maxDictId] = BriefingImagesB[n]     --define key in mapResource file
-	table.insert(mission.pictureFileNameB, "ResKey_ImageBriefing_" .. mission.maxDictId)  --add picture to blue briefing
+	if not found_Frontline or (found_Frontline and frontlineN == 1) then
+		mission.maxDictId = mission.maxDictId + 1
+		mapResource["ResKey_ImageBriefing_" .. mission.maxDictId] = image     --define key in mapResource file
+		table.insert(mission.pictureFileNameB, "ResKey_ImageBriefing_" .. mission.maxDictId)  --add picture to blue briefing
+		-- print("DcBrief FF1 table.insert(mission.pictureFileNameB  "..#mission.pictureFileNameB.." "..mission.pictureFileNameB[#mission.pictureFileNameB])
+		-- _affiche(mission.pictureFileNameB, "DcBrief FF2 mission.pictureFileNameB ")
+	end
 end
 
-for n = 1, #BriefingImagesR do
-	mission.maxDictId = mission.maxDictId + 1
-	mapResource["ResKey_ImageBriefing_" .. mission.maxDictId] = BriefingImagesB[n]     --define key in mapResource file
-	table.insert(mission.pictureFileNameR, "ResKey_ImageBriefing_" .. mission.maxDictId)  --add picture to blue briefing
+frontlineN = 0
+for imageN, image in pairs(BriefingImagesR) do
+	local found_Frontline = false
+	if string.find(image, "Frontline") then
+		found_Frontline = true
+		frontlineN = frontlineN + 1
+	end
+
+	if not found_Frontline or (found_Frontline and frontlineN == 1) then
+		mission.maxDictId = mission.maxDictId + 1
+		mapResource["ResKey_ImageBriefing_" .. mission.maxDictId] = image     --define key in mapResource file
+		table.insert(mission.pictureFileNameR, "ResKey_ImageBriefing_" .. mission.maxDictId)  --add picture to blue briefing
+	end
 end
 
+-- for n = 1, #BriefingImagesR do
+-- 	mission.maxDictId = mission.maxDictId + 1
+-- 	mapResource["ResKey_ImageBriefing_" .. mission.maxDictId] = BriefingImagesB[n]     --define key in mapResource file
+-- 	table.insert(mission.pictureFileNameR, "ResKey_ImageBriefing_" .. mission.maxDictId)  --add picture to blue briefing
+-- end
 
-local BriefingTmp = StringToTxt(dictionary.DictKey_descriptionRedTask_2)
-BriefingTmp = BriefingTmp.."\n\n"..StringToTxt(dictionary.DictKey_descriptionBlueTask_3)
+
+local briefingTmp = StringToTxt(dictionary.DictKey_descriptionRedTask_2)
+briefingTmp = briefingTmp.."\n\n"..StringToTxt(dictionary.DictKey_descriptionBlueTask_3)
 local debugBriefingFile = io.open("Debug/briefing.txt", "w") or error("Failed to open Debug/briefing.txt file")
-debugBriefingFile:write(BriefingTmp)																		--save new data
+debugBriefingFile:write(briefingTmp)																		--save new data
 debugBriefingFile:close()
 
 
 
-local BriefingTmp = StringToTxt(dictionary.DictKey_descriptionText_1)
+local briefingTmp = StringToTxt(dictionary.DictKey_descriptionText_1)
 local debugBriefingFile = io.open("Debug/briefingDescriptionText.txt", "w")	 or error("Failed to open Debug/briefingDescriptionText file")
-debugBriefingFile:write(BriefingTmp)																		--save new data
+debugBriefingFile:write(briefingTmp)																		--save new data
 debugBriefingFile:close()
 
 

@@ -72,10 +72,14 @@ if old_miz then
     old_miz:unzClose()
 end
 
+
+zipFile:unzLocateFile('mission')
+local misStr = zipFile:unzReadAllCurrentFile()
+local misStrFunc = loadstring(misStr)()
 --déjà appeler par LoadFileAndUpdate(), et ceci ecrase le mission["start_time"]
--- zipFile:unzLocateFile('mission')
--- local misStr = zipFile:unzReadAllCurrentFile()
--- local misStrFunc = loadstring(misStr)()
+--attention, pour que la mission ne démarre pas a l'heure de base_mission, il faut ça:
+mission["start_time"] = camp.time																--set mission start time
+
 
 zipFile:unzLocateFile('options')
 local optStr = zipFile:unzReadAllCurrentFile()
@@ -1421,6 +1425,12 @@ if Debug.debug or mission_ini.backupAllMissionFiles then
     end
 end
 
+	-- local camp_str = "mapResource = " .. TableSerialization(mapResource, 0)						--make a string
+	-- local campFile = io.open("Debug/mapResource_MainNM_B.lua", "w")  or error("Failed to open debug file")
+	-- campFile:write(camp_str)																		--save new data
+	-- campFile:close()
+
+	-- os.execute 'pause'
 
 -- if Debug.debug then
 -- 	local camp_str = "mission = " .. TableSerialization(mission, 0)						--make a string

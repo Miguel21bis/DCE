@@ -83,10 +83,12 @@ end
 
 local debugKT = false
 
-if not TaskRefused and not camp.waitingNextGen and not (EndCampaign or camp.endCampaign ) and not Firstmission_flag   then
-	BriefingImagesB = {}                                         --reset stockImage
-	BriefingImagesR = {}                                         --reset stockImage
-end
+-- fou le bordel, TODO, il faudrait vérifier si certaines images ont le droit d'être sauvegardée pour la prochaine mission
+
+-- if not TaskRefused and not camp.waitingNextGen and not (EndCampaign or camp.endCampaign ) and not Firstmission_flag then
+-- 	BriefingImagesB = {}                                         --reset stockImage
+-- 	BriefingImagesR = {}                                         --reset stockImage
+-- end
 ----- campaign flags -----
 if camp.flag == nil then
 	camp.flag = {}
@@ -535,9 +537,11 @@ Action = {}
 	function Action.AddImage(filename, side)
 		if side == "blue"  then
 			table.insert(BriefingImagesB, filename)									--add filename to briefing images table, will be added to mission file when this gets created
+			print("DcCT Action.AddImage blue "..filename)
 		elseif side == "red"  then
 			table.insert(BriefingImagesR, filename)
 		elseif side == "all" or side == "" or side == nil then
+			print("DcCT Action.AddImage all "..filename)
 			table.insert(BriefingImagesB, filename)
 			table.insert(BriefingImagesR, filename)
 		end

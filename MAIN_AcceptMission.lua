@@ -265,22 +265,23 @@ if Briefing_text and Briefing_text ~= "" then
 end
 
 
+-- fou le bordel, TODO, il faudrait vérifier si certaines images ont le droit d'être sauvegardée pour la prochaine mission
 
---si la generation de la mission suivante est repoussee, on sauvegarde le txt cr�e par les trigger txt precedent
-if BriefingImagesR ~= nil or (BriefingImagesR and #BriefingImagesR ~= 0) then
-	if camp["BriefingImagesR"] then
-		table.insert(camp["BriefingImagesR"], BriefingImagesR)
-	else
-		camp["BriefingImagesR"]	 = BriefingImagesR
-	end
-end
-if BriefingImagesB ~= nil or (BriefingImagesB and #BriefingImagesB ~= 0) then
-	if camp["BriefingImagesB"] then
-		table.insert(camp["BriefingImagesB"], BriefingImagesB)
-	else
-		camp["BriefingImagesB"]	 = BriefingImagesB
-	end
-end
+-- --si la generation de la mission suivante est repoussee, on sauvegarde le txt cr�e par les trigger txt precedent
+-- if BriefingImagesR ~= nil or (BriefingImagesR and #BriefingImagesR ~= 0) then
+-- 	if camp["BriefingImagesR"] then
+-- 		table.insert(camp["BriefingImagesR"], BriefingImagesR)
+-- 	else
+-- 		camp["BriefingImagesR"]	 = BriefingImagesR
+-- 	end
+-- end
+-- if BriefingImagesB ~= nil or (BriefingImagesB and #BriefingImagesB ~= 0) then
+-- 	if camp["BriefingImagesB"] then
+-- 		table.insert(camp["BriefingImagesB"], BriefingImagesB)
+-- 	else
+-- 		camp["BriefingImagesB"]	 = BriefingImagesB
+-- 	end
+-- end
 
 
 ----- convert tables back to strings for insertion into content files -----
