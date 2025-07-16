@@ -26,7 +26,6 @@ local user_quantity = 20					-- how many rounds will be fired in a fire for effe
 local user_spread = 50						-- impact radius of the rounds during fire for effect
 local user_spottingDistance = 15			-- max allowable distance from player to target to prevent cheating. In kilometers.
 local user_restrictByType = ""        		-- Restriction by type ("", "helo", etc.)
-local user_restrictByUnitName = "" 			-- Restriction by unit name ("", "spotter", etc.), not case sensitive	
 local user_markerPrefix = "fire mission"   	-- Prefix for marker text, for instance "#arty"
 local user_qty_Total_Shells = 45			-- total number of shells in stock
 local user_smokeOn = true					-- activate or deactivate the red smoke during “single round” firing, to aid artillery adjustment
@@ -37,11 +36,7 @@ local user_smokeOn = true					-- activate or deactivate the red smoke during “
 -- variable modified by environment DCE ****************************************************
 if camp.spotter then
 	user_quantity = camp.spotter.qtyBySalve
-	-- if camp.spotter.markerPrefix ~= nil then
-	-- 	user_markerPrefix = camp.spotter.markerPrefix
-	-- end
-	-- user_markerPrefix = camp.spotter.markerPrefix
-	user_markerPrefix = (camp.spotter.markerPrefix and camp.spotter.markerPrefix ~= "" and camp.spotter.markerPrefix) or "fire mission"
+	user_markerPrefix = (camp.spotter.markerPrefix and camp.spotter.markerPrefix ~= "" and camp.spotter.markerPrefix) or user_markerPrefix
 	user_qty_Total_Shells = camp.spotter.qtyTotalShells
 	user_spottingDistance = camp.spotter.spottingDistance
 	user_smokeOn = camp.spotter.smokeOn
@@ -557,7 +552,7 @@ local function foundArtyPointInPoly(polyA, targetPointXZ)
     -- addF10MapMarker("closest_seg_start", {x = closest_seg_start.x,y = 0, z = closest_seg_start.y})
     -- addF10MapMarker("closest_seg_end", {x = closest_seg_end.x,y = 0, z = closest_seg_end.y})
 
-    return closestPoint
+    return closestPoint, minDistance
 end
 
 
@@ -675,7 +670,7 @@ artyAction = function ( initiatorName )
 
 			local _targetPosXZ = artyTasks[initiatorName].targetPosXZ
 
-			local _dist = math.floor( getDist ( _targetPosXZ, _playerPosXZ ) / 10 ) / 100
+			local distPlayerTarget = math.floor( getDist ( _targetPosXZ, _playerPosXZ ) / 10 ) / 100
 
 			--increase altitude by 3 m to avoid inconsistencies
 			_playerPosXZ.y = _playerPosXZ.y + 3
@@ -699,61 +694,81 @@ artyAction = function ( initiatorName )
 			local nearestZone = 99999
 			local txtFromZone = ""
 
-			if 1 == 2 and #artyZones >= 1 then
-				for zoneN, zone in pairs(artyZones) do
-					if zone.radius and zone.radius > 1000 then
-						-- Calculer la distance entre O et B
-						local d = math.sqrt(math.pow(zone.x - _targetPosXZ.x, 2) + math.pow(zone.y - _targetPosXZ.z, 2))
+			--TODO attention, le script plus bas est désactivé, il faut le réactiver pour que les zones d'artillerie soient prises en compte
+			-- if 1 == 2 and #artyZones >= 1 then
+			-- 	for zoneN, zone in pairs(artyZones) do
+			-- 		if zone.radius and zone.radius > 1000 then
+			-- 			-- Calculer la distance entre O et B
+			-- 			local d = math.sqrt(math.pow(zone.x - _targetPosXZ.x, 2) + math.pow(zone.y - _targetPosXZ.z, 2))
 
-						-- Calculer les coordonnées de A sur la circonférence
-						local A = {
-							x = zone.x + zone.radius * (_targetPosXZ.x - zone.x) / d,
-							y = zone.y + zone.radius * (_targetPosXZ.z - zone.y) / d
-						}
+			-- 			-- Calculer les coordonnées de A sur la circonférence
+			-- 			local A = {
+			-- 				x = zone.x + zone.radius * (_targetPosXZ.x - zone.x) / d,
+			-- 				y = zone.y + zone.radius * (_targetPosXZ.z - zone.y) / d
+			-- 			}
 
-						-- Calculer la distance entre A et B
-						local distance_AB = math.sqrt((_targetPosXZ.x - A.x)^2 + (_targetPosXZ.z - A.y)^2)
+			-- 			-- Calculer la distance entre A et B
+			-- 			local distance_AB = math.sqrt((_targetPosXZ.x - A.x)^2 + (_targetPosXZ.z - A.y)^2)
 
-						if distance_AB < nearestZone then
-							nearestZone = distance_AB
-							local distKm = math.floor(nearestZone / 1000)
-							txtFromZone = " from FireBase "..tostring(zone.name).." , distance: "..tostring(math.floor(distKm).." Km ")
-							-- env.info("CG_ArtySpotter: artyZones D "..txtFromZone)
+			-- 			if distance_AB < nearestZone then
+			-- 				nearestZone = distance_AB
+			-- 				local distKm = math.floor(nearestZone / 1000)
+			-- 				txtFromZone = " from FireBase "..tostring(zone.name).." , distance: "..tostring(math.floor(distKm).." Km ")
+			-- 				-- env.info("CG_ArtySpotter: artyZones D "..txtFromZone)
 
-						end
-					else
+			-- 			end
+			-- 		else
 
-						local distance = math.sqrt(math.pow(zone.x - _targetPosXZ.x, 2) + math.pow(zone.y - _targetPosXZ.z, 2))
-						if distance < nearestZone then
-							nearestZone = distance
-							local distKm = math.floor(nearestZone / 1000)
-							txtFromZone = " from FireBase "..tostring(zone.name).." , distance: "..tostring(math.floor(distKm).." Km ")
-						end
-					end
-				end
+			-- 			local distance = math.sqrt(math.pow(zone.x - _targetPosXZ.x, 2) + math.pow(zone.y - _targetPosXZ.z, 2))
+			-- 			if distance < nearestZone then
+			-- 				nearestZone = distance
+			-- 				local distKm = math.floor(nearestZone / 1000)
+			-- 				txtFromZone = " from FireBase "..tostring(zone.name).." , distance: "..tostring(math.floor(distKm).." Km ")
+			-- 			end
+			-- 		end
+			-- 	end
 
-			elseif camp.boundary and camp.boundary[spotterSide] and camp.boundary[spotterSide] ~= nil then
+			-- elseif camp.boundary and camp.boundary[spotterSide] and camp.boundary[spotterSide] ~= nil then
 
-				local artyPoint = foundArtyPointInPoly(camp.boundary[spotterSide], _targetPosXZ )
+			if camp.boundary and camp.boundary[spotterSide] and camp.boundary[spotterSide] ~= nil then
 
-				if artyPoint then
-
-					nearestZone = math.sqrt(math.pow(artyPoint.x - _targetPosXZ.x, 2) + math.pow(artyPoint.y - _targetPosXZ.z, 2))
-
+				-- check si le target est dans son propre camp, si oui on balance
+				if CheckPointInPoly_XY_3({x=_targetPosXZ.x, y=_targetPosXZ.z}, camp.boundary[spotterSide]) then
+					
+					nearestZone = artyDistance/2
 					local distKm = math.floor(nearestZone / 1000)
 
-					txtFromZone = " from the nearest "..tostring(spotterSide).." border , distance: "..tostring(math.floor(distKm).." Km ")
-					-- env.info("CG_ArtySpotter: camp.boundary DD "..tostring(nearestZone).." txtFromZone: "..txtFromZone)
+					txtFromZone = " in your camp "..tostring(spotterSide).." , distance: "..tostring(math.floor(distKm).." Km ")
+					env.info("CG_ArtySpotter: in your side D1 "..tostring(nearestZone).." txtFromZone: "..txtFromZone)
+
 				else
-					env.info("CG_ArtySpotter: artyPoint = nil ERROR ?")
+					env.info("CG_ArtySpotter: camp.boundary D2 "..tostring(nearestZone).." txtFromZone: "..txtFromZone)
+
+					local artyPoint
+					artyPoint, nearestZone = foundArtyPointInPoly(camp.boundary[spotterSide], _targetPosXZ )
+
+					if artyPoint then
+
+						-- nearestZone = math.sqrt(math.pow(artyPoint.x - _targetPosXZ.x, 2) + math.pow(artyPoint.y - _targetPosXZ.z, 2))
+
+						local distKm = math.floor(nearestZone / 1000)
+
+						txtFromZone = " from the nearest "..tostring(spotterSide).." border , distance: "..tostring(math.floor(distKm).." Km ")
+						env.info("CG_ArtySpotter: camp.boundary EE "..tostring(nearestZone).." txtFromZone: "..txtFromZone)
+					else
+						env.info("CG_ArtySpotter: artyPoint = nil ERROR ?")
+					end
 				end
-				
 
 			end
 
 			local passZoneDistance = false
+			local distKm 
+			local distPlayerTarget_Km
 			if nearestZone < artyDistance then
 				passZoneDistance = true
+				distKm = math.floor(nearestZone / 1000)
+				distPlayerTarget_Km = math.floor(distPlayerTarget / 1000)
 			end
 
 			local targetPosString = convertPos2Coord ( _targetPosXZ, "string" )
@@ -764,7 +779,7 @@ artyAction = function ( initiatorName )
 				trigger.action.outTextForUnit( artyTasks[initiatorName].unitID, "Arty fire for effect requested on "..targetPosString, 10)
 			end
 
-			if  trigger.misc.getUserFlag( "artyEnabled" ) == 1 and _dist <= user_spottingDistance and user_qty_Total_Shells > 1 and lineOfSight and passZoneDistance then
+			if trigger.misc.getUserFlag( "artyEnabled" ) == 1 and distPlayerTarget <= user_spottingDistance and user_qty_Total_Shells > 1 and lineOfSight and passZoneDistance then
 
 				if _artyCall == 1 then
 					-- trigger.action.outTextForUnit( artyTasks[_initiatorName].unitID, "Arty single round requested on "..targetPosString, 10)
@@ -799,9 +814,9 @@ artyAction = function ( initiatorName )
 				--initiates the artilleryman's response with a time delay ~= 5s
 				timer.scheduleFunction(responseTime, {artyTasks[initiatorName].unitID, "Out of ammunition"}, timer.getTime() + responseTimeVar)
 
-			elseif _dist > user_spottingDistance then
+			elseif distPlayerTarget > user_spottingDistance then
 				--initiates the artilleryman's response with a time delay ~= 5s
-				timer.scheduleFunction(responseTime, {artyTasks[initiatorName].unitID, "Out of your range: "..tostring(_dist)}, timer.getTime() + responseTimeVar)
+				timer.scheduleFunction(responseTime, {artyTasks[initiatorName].unitID, "Out of your range: "..tostring(distPlayerTarget_Km).." Km"}, timer.getTime() + responseTimeVar)
 
 			elseif not lineOfSight then
 				--initiates the artilleryman's response with a time delay ~= 5s
@@ -809,7 +824,7 @@ artyAction = function ( initiatorName )
 
 			elseif not passZoneDistance then
 				--initiates the artilleryman's response with a time delay ~= 5s
-				timer.scheduleFunction(responseTime, {artyTasks[initiatorName].unitID, "Out of range of artillery support: "..tostring(math.floor(nearestZone)).." m"}, timer.getTime() + responseTimeVar)
+				timer.scheduleFunction(responseTime, {artyTasks[initiatorName].unitID, "Out of range of artillery support: "..tostring(math.floor(distKm)).." Km"}, timer.getTime() + responseTimeVar)
 
 			else
 				--initiates the artilleryman's response with a time delay ~= 5s
