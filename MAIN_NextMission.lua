@@ -1,11 +1,11 @@
 --To generate a new mission file. Unzips template mission, defines content of next missions and packs a new mission file
 --Initiated by Debrief_Master.lua, BAT_FirstMission.lua or BAT_RedoMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M83_c
+-- last modification: debug_m
 if not versionDCE then versionDCE = {} end
-versionDCE["MAIN_NextMission.lua"] = "1.36.216"
+versionDCE["MAIN_NextMission.lua"] = "1.36.217"
 ------------------------------------------------------------------------------------------------------- 
--- debug_l 					(l endCampaign)(ik error beacon file)(h mission.maxDictId)(g help campaignMaker)(f autolase)(e camp_ZoneSAR in skipmod)(d: oob_ground not in mission)(c: EndMission)
+-- debug_m 					(m zoneId)(l endCampaign)(ik error beacon file)(h mission.maxDictId)(g help campaignMaker)(f autolase)(e camp_ZoneSAR in skipmod)(d: oob_ground not in mission)(c: EndMission)
 -- Reglage_e				(e EPLRS_Capacity)(d CVN to CV)(c stop si < 2.7.0 (ver18))(a: Init/loadout selection)
 -- adjustment_g				(g keep original triggers( a_remove_scene_objects ))(e oob_scen ==0)(d currentKey)(c clean conf_mod)(b Firstmission_flag)(a: add Loadout tiers)
 -- cleanCode_h				(ag springCleaning)
@@ -132,12 +132,37 @@ mission.trigrules[trig_n] = {
 	["predicate"] = "triggerOnce",
 }
 
+List_zoneId = {}
+
+if mission.triggers.zones then
+	for zoneN, zone in pairs(mission.triggers.zones) do
+		if zone and zone.zoneId and not List_zoneId[zone.zoneId] then
+			List_zoneId[zone.zoneId] = true
+		end
+	end
+end
+
+-- _affiche(List_zoneId, "List_zoneId")
+-- os.execute('pause')
+
+--recherche un zoneId libre
+local function GetFreeZoneId()
+	local zoneId = 1
+	local maxZoneId = 1000
+	while List_zoneId[zoneId] do
+		zoneId = zoneId + 1
+		if zoneId > maxZoneId then
+			error("MainNM GetFreeZoneId: No free zoneId found after " .. maxZoneId .. " attempts")
+		end
+	end
+	List_zoneId[zoneId] = true
+	return zoneId
+end
+
+
 --attention, ne pas activer ici oob_scen, sinon cela ne prend pas en compte son update
 -- require("Active/oob_scen")
 
--- if not oob_scen and Firstmission_flag then
--- 	require("Active/oob_scen")
--- end
 for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed scenery objects
 
 	if scen.x and scen.z then														--destroyed scenery object has x and z coordinates
@@ -157,28 +182,16 @@ for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed 
             -- print("Destruction totale pour "..tostring(scen_name).." : rayon = "..radius.." m (masse TNT = "..scen.explosiveMass.." kg)")
         end
 
-		-- local addToMission = false
-
-		-- if scen.lifePourcent and not isForest then
-		-- 	if scen.lifePourcent <= MinPercentDestroyed then
-		-- 		addToMission = true
-		-- 		txDestruction = 100 - scen.lifePourcent -- taux de destruction = 100 - pourcentage de vie
-		-- 	else
-		-- 		oob_scen[scen_name] = nil
-		-- 	end
-		-- else
-		-- 	-- addToMission = true
-		-- end
-
 		if not isForest  then
-			local zones_n = #mission.triggers.zones	+ 1									--trigger zone number
+			-- local zones_n = #mission.triggers.zones	+ 1									--trigger zone number
+			local zoneId = GetFreeZoneId()
 
 			--add trigger zone
-			mission.triggers.zones[zones_n] = {
+			local dataZone = {
 				["x"] = scen.x,
 				["y"] = scen.z,
 				["radius"] = radius,
-				["zoneId"] = zones_n,
+				["zoneId"] = zoneId,
 				["color"] =
 				{
 					[1] = 1,
@@ -188,11 +201,13 @@ for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed 
 				},
 				["hidden"] = true,
 				-- ["name"] = "ScenKillZone_" .. (#mission.trigrules[trig_n].actions + 1).."_"..tostring(scen_name),
-				["name"] = "SceneryDestroyZone" .. #mission.trigrules[trig_n].actions + 1,
+				["name"] = "SceneryDestroyZone" .. zoneId,
 			}
 
+			table.insert(mission.triggers.zones, dataZone)
+
 			--add trigger
-			mission.trig.actions[trig_n] = mission.trig.actions[trig_n] ..  "a_scenery_destruction_zone(" .. zones_n .. ", ".. txDestruction..");"
+			mission.trig.actions[trig_n] = mission.trig.actions[trig_n] ..  "a_scenery_destruction_zone(" .. zoneId .. ", ".. txDestruction..");"
 
 			mission.trigrules[trig_n].actions[#mission.trigrules[trig_n].actions + 1] = {
 				["ai_task"] = {
@@ -201,7 +216,7 @@ for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed 
 				},
 				["predicate"] = "a_scenery_destruction_zone",
 				["destruction_level"] = txDestruction,
-				["zone"] = zones_n,
+				["zone"] = zoneId,
 			}
 		end
 	end
