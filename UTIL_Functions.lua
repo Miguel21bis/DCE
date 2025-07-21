@@ -4006,10 +4006,13 @@ function CompareTableNumeric(reference, working)
     }
 
     -- Parcourir les éléments de la table de référence pour détecter les ajouts
-    for refName, refData in ipairs(reference) do
+    for refN, refData in ipairs(reference) do
         local found = false
-        for workName, workData in ipairs(working) do
-            if refName == workName then
+		-- print("UtilF A refData.name: "..tostring(refData.name))
+        for workN, workData in ipairs(working) do
+			-- print("UtilF   BB refName: "..tostring(refData.name).." workName: "..tostring(workData.name))
+            if refData.name == workData.name then
+				-- print("UtilF       CCC ----------------->> FOUND ok")
                 found = true
                 break
             end
@@ -4017,6 +4020,7 @@ function CompareTableNumeric(reference, working)
         if not found then
             -- Si l'élément n'existe pas dans la table de travail, il a été ajouté
             table.insert(changes.added, refData)
+			-- print("UtilF          DDDD ----------------->> BAD ")
         end
     end
 
@@ -4486,6 +4490,17 @@ function UpdateFilesAfterTimeJump()
 
 end
 
+function ConvertAlphaToNumeric(tbl)
+    local numericTbl = {}
+    for k, v in pairs(tbl) do
+        if type(v) == "table" then
+            v.name = k -- copie la clé alphanumérique dans le champ 'name'
+            table.insert(numericTbl, v)
+        end
+    end
+    return numericTbl
+end
+
 function LoadFileAndUpdate(from)
 
     FromFile = "UTIL_Functions/LoadFileAndUpdate()" -- file name for debug
@@ -4571,6 +4586,10 @@ function LoadFileAndUpdate(from)
 	-- Charger les fichiers de référence et de travail
 	dofile("Init/camp_triggers_init.lua")
 	local camp_triggers_init = camp_triggers
+
+	if not IsSequentialTable(camp_triggers) then
+    	camp_triggers = ConvertAlphaToNumeric(camp_triggers)
+	end
 
 	dofile("Active/camp_triggers.lua")
 
