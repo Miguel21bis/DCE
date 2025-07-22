@@ -29,6 +29,8 @@ local pruneSam =				mission_ini.PruneScriptConf.ForcedPruneSam
 
 -- Liste des mots-clés à pruner
 local pruneKeywords = { "bag", "wall", "sand", "camouflage", "camouflage", "barrier", "container", "tent", "cargo", "soldier" , "vc_" }
+-- Liste des mots-clés à garder
+local keepKeywords = { "farp", "dallas", "paris" }
 
 -- work out which side has 'players'
 local function findPlayerSide()
@@ -166,9 +168,19 @@ local function waypointPairs(wps, f)
 end
 
 -- juste avant la fonction keepGroundUnit, tu déclares :
-local function isPruneKeyword(name)
+local function isPruneKeyword(lowCaseName)
     for _, kw in ipairs(pruneKeywords) do
-        if string.find(name, kw) then return true end
+        if string.find(lowCaseName, kw) then
+			--garde les mots clés pour les garder
+			for _, keepKw in ipairs(keepKeywords) do
+				if string.find(lowCaseName, keepKw) then
+					-- print("DC_P_T  Keep keyword: "..lowCaseName)
+					return false -- ne pas pruner si on trouve un mot clé de la liste des mots clés à garder
+				end
+			end
+			return true
+
+		end
     end
     return false
 end

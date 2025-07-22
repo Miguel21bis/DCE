@@ -267,56 +267,59 @@ for side_name, side in pairs(mission.coalition) do																--iterate thro
 	end
 end
 
-for side_name, side in pairs(oob_ground) do														--iterate through countries
-	for country_n, obCountry in pairs(side) do	
-		if obCountry.vehicle then																			--country has vehicles
-			-- for t = #threat, 1, -1 do
-			for o = #obCountry.vehicle.group, 1, -1 do														--iterate through vehicle groups
-				if  string.find(string.lower(obCountry.vehicle.group[o].name),"farp") then
-					local foundGroup = false
-					for country_n, country in pairs(mission.coalition[side_name].country) do															--iterate through countries
-						if country.vehicle then																			--country has vehicles
-							for g = 1, #country.vehicle.group do
-								if obCountry.vehicle.group[o].name == 	country.vehicle.group[g].name then
-									foundGroup = true
-								end
-							end
-						end
-					end
-					if not foundGroup then
-						print("DcUOOBG remove vehicle: no foundGroup: "..side_name.." "..obCountry.vehicle.group[o].name)
-						table.remove(oob_ground[side_name][country_n].vehicle.group, o)
-						-- table.insert(tabRemoveGroupe, o)
-						
-					end
-				end
-			end
-		end
 
-		if obCountry.static then																			--country has vehicles
-			for  o = #obCountry.static.group, 1, -1 do														--iterate through vehicle groups
-					if  string.find(string.lower(obCountry.static.group[o].name),"farp") then
-					local foundGroup = false
-					for country_n, country in pairs(mission.coalition[side_name].country) do															--iterate through countries
-						if country.static then																			--country has vehicles
-							for g = 1, #country.static.group do
-								if obCountry.static.group[o].name == 	country.static.group[g].name then
-									foundGroup = true
-								end
-							end
-						end
-					end
-					if not foundGroup then
-						print("DcUOOBG remove static: no foundGroup: "..side_name.." "..obCountry.static.group[o].name)
-						table.remove(oob_ground[side_name][country_n].static.group, o)
-						-- table.insert(tabRemoveGroupe, o)
+--TODO est ce vraiment utile? a quoi ça servait? de supprimer une FARP qui bouge sur BASE_Mission?
+
+-- for side_name, side in pairs(oob_ground) do														--iterate through countries
+-- 	for country_n, obCountry in pairs(side) do	
+-- 		if obCountry.vehicle then																			--country has vehicles
+-- 			-- for t = #threat, 1, -1 do
+-- 			for o = #obCountry.vehicle.group, 1, -1 do														--iterate through vehicle groups
+-- 				if  string.find(string.lower(obCountry.vehicle.group[o].name),"farp") then
+-- 					local foundGroup = false
+-- 					for countryN, country in pairs(mission.coalition[side_name].country) do															--iterate through countries
+-- 						if country.vehicle then																			--country has vehicles
+-- 							for g = 1, #country.vehicle.group do
+-- 								if obCountry.vehicle.group[o].name == country.vehicle.group[g].name then
+-- 									foundGroup = true
+-- 								end
+-- 							end
+-- 						end
+-- 					end
+-- 					if not foundGroup then
+-- 						print("DcUOOBG remove vehicle: no foundGroup: "..side_name.." "..obCountry.vehicle.group[o].name)
+-- 						table.remove(oob_ground[side_name][country_n].vehicle.group, o)
+-- 						-- table.insert(tabRemoveGroupe, o)
 						
-					end
-				end
-			end
-		end
-	end
-end
+-- 					end
+-- 				end
+-- 			end
+-- 		end
+
+-- 		if obCountry.static then
+-- 			for o = #obCountry.static.group, 1, -1 do
+-- 				if string.find(string.lower(obCountry.static.group[o].name),"farp") then
+-- 					local foundGroup = false
+-- 					for countryN, country in pairs(mission.coalition[side_name].country) do
+-- 						if country.static then
+-- 							for g = 1, #country.static.group do
+-- 								if obCountry.static.group[o].name == country.static.group[g].name then
+-- 									foundGroup = true
+-- 								end
+-- 							end
+-- 						end
+-- 					end
+-- 					if not foundGroup then
+-- 						print("DcUOOBG remove static: no foundGroup: "..side_name.." "..obCountry.static.group[o].name)
+-- 						table.remove(oob_ground[side_name][country_n].static.group, o)
+-- 						-- table.insert(tabRemoveGroupe, o)
+						
+-- 					end
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+-- end
 
 --check les doublons de name, groupId et unitId
 local GroupId = {}
