@@ -1485,7 +1485,12 @@ function LoopManagedRadioTransmission()
 						z = PosEjectedPilot.z,
 					}
 
-					trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', pilotVec3, 0, true, camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon, 1, 'radioBeacon_'..ejectedPilot.name)
+					local modulation = 0	--AM
+					if camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon < 90000000 then
+						modulation = 1	--FM
+					end
+
+					trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', pilotVec3, modulation, true, camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon, 0.1, 'radioBeacon_'..ejectedPilot.name)
 					ejectedPilot.radio_on = true
 
 					env.info( "DCE_SAR:LoopManagedRadioTransmission E frequency  "..tostring(camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon).." MGRS_Chute: "..tostring(ejectedPilot.MGRS_Chute).." |MGRS_Chute_10KM: "..tostring(ejectedPilot.MGRS_Chute_10KM).." "..tostring('radio_'..ejectedPilot.name))
@@ -2041,8 +2046,11 @@ function GetOutGDFM(arg)
 			unitId = playerId,
 		}
 
+		
+		local modulation = 0	--AM
+
 		env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection).." | "..tostring('GuardEjection'..unitName))
-		trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', player, 0, true, camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection, 1, 'GuardEjection'..unitName)
+		trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', player, modulation, true, camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection, 0.1, 'GuardEjection'..unitName)
 		env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection).." | "..tostring('GuardEjection'..unitName))
 
 		--position precise pour le fumigene
@@ -2177,12 +2185,6 @@ function GetOutGDFM(arg)
 					if damaged and damaged.unit or not damaged.unit:inAir() then
 
 						if not createWreckCrew[damaged.unitName] then
-
-							-- if damaged.unit:getPlayerName()	then
-							-- 	env.info( "DCE_getOut EventT :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[damaged.side].GuardEjection).." | "..tostring('GuardEjection'..damaged.unitName))
-							-- 	trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', damaged, 0, true, camp.EjectedPilotFrequency[damaged.side].GuardEjection, 1, 'GuardEjection'..damaged.unitName)
-							-- 	env.info( "DCE_getOut EventT :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[damaged.side].GuardEjection).." | "..tostring('GuardEjection'..damaged.unitName))
-							-- end
 
 							damaged.x = damaged.crashPoint.x
 							damaged.y = damaged.crashPoint.y

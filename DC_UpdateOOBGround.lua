@@ -524,7 +524,7 @@ for k1,v1 in pairs(mission.coalition) do															--side table(red/blue)
 									},
 								},
 							},
-							["groupId"] = GenerateIDGroup("DcUooBG dead "..v2.vehicle.group[n].units[m].name),
+							["groupId"] = GenerateIDGroup(),
 							["hidden"] = true,
 							["units"] = {
 								[1] = {

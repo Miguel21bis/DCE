@@ -1926,7 +1926,12 @@ local function activateRadioBeacon(arguments)
 
 			env.info( "AddCRF10:activateRadioBeacon  pilEjectPos.y "..tostring(pilEjectPos.y))
 
-			trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', ejectedPilot.position, 0, true, camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon, 1, 'radioBeacon_'..ejectedPilot.name)
+			local modulation = 0	--AM
+			if camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon < 90000000 then
+				modulation = 1	--FM
+			end
+
+			trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', ejectedPilot.position, modulation, true, camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon, 0.1, 'radioBeacon_'..ejectedPilot.name)
 
 			local freqShow = camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon / 1000000
 			trigger.action.outTextForGroup(gpGid, "activate RadioBeacon on : "..freqShow, 45 , true)

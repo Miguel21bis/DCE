@@ -721,8 +721,8 @@ local unitIdError = {}
 local minUnitId = 999999
 local maxUnitId = 0
 
-for side_name, side in pairs(mission.coalition) do																--iterate through sides
-	for country_n, country_ in pairs(side.country) do															--iterate through countries
+for side_name, side in pairs(mission.coalition) do
+	for country_n, country_ in pairs(side.country) do
 		for categorie, categorie_ in pairs(country_) do
 			if type(categorie_) == "table" and categorie_.group then
 				for _group, group in pairs(categorie_) do

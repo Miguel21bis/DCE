@@ -35,6 +35,14 @@ Assigned_freq = {}
 MinPercentDestroyed = 95		----variable pour destructions batiment de DCS en pourcentage
 RayonDamaged = 50				----variable pour destructions batiment de DCS en metres
 
+-- Initialisation des tables d'ID
+AllIdGroup = {}
+AllIdUnit = {}
+UnitByName = {}
+
+local idGroupCounter = 3000
+local idUnitCounter = 3000
+
 Brief = {
 	red = {},
 	blue = {},
@@ -835,39 +843,103 @@ end
 --function to return subsequent IDs
 -- Gestion propre des IDs pour groupes et unités
 
--- Initialisation des tables d'ID
-AllIdGroup = {}
-AllIdUnit = {}
-UnitByName = {}
 
-local idGroupCounter = 100000
-local idUnitCounter = 100000
 
 -- Génère un nouvel ID de groupe unique
-function GenerateIDGroup(name)
-    repeat
-        idGroupCounter = idGroupCounter + 1
-    until not AllIdGroup[idGroupCounter]
-    AllIdGroup[idGroupCounter] = true
-    return idGroupCounter
+function GenerateIDGroup()
+	local maxAttempts = 10000
+	local attempts = 0
+	repeat
+		idGroupCounter = idGroupCounter + 1
+		attempts = attempts + 1
+		if attempts > maxAttempts then
+			error("GenerateIDGroup: Too many attempts to find a unique group ID")
+		end
+	until not AllIdGroup[idGroupCounter]
+	AllIdGroup[idGroupCounter] = true
+	return idGroupCounter
 end
 
 -- Génère un nouvel ID d'unité unique
 function GenerateIDUnit(name)
-    repeat
-        idUnitCounter = idUnitCounter + 1
-    until not AllIdUnit[idUnitCounter]
-    AllIdUnit[idUnitCounter] = true
-    UnitByName[name] = idUnitCounter
-    return idUnitCounter
+	local maxAttempts = 10000
+	local attempts = 0
+	repeat
+		idUnitCounter = idUnitCounter + 1
+		attempts = attempts + 1
+		if attempts > maxAttempts then
+			error("GenerateIDUnit: Too many attempts to find a unique unit ID")
+		end
+	until not AllIdUnit[idUnitCounter]
+	AllIdUnit[idUnitCounter] = true
+	if name then
+		UnitByName[name] = idUnitCounter
+	end
+	return idUnitCounter
 end
 
 -- Fonction principale pour détecter et corriger les doublons
+function CheckAll_Id()
+
+	--pour le oob_ground
+    for coalName, coal in pairs(oob_ground or {}) do
+        for countryN, country in pairs(coal or {}) do
+            for category, groups in pairs(country or {}) do
+                if type(groups) == "table" and groups["group"] then
+                    for groupN, groupData in pairs(groups["group"] or {}) do
+                        -- Vérifie les doublons de groupId
+                        if AllIdGroup[groupData.groupId] then
+                        else
+                            AllIdGroup[groupData.groupId] = true
+                        end
+                        -- Vérifie les doublons de unitId
+                        for Nunit, unit in pairs(groupData.units or {}) do
+                            if AllIdUnit[unit.unitId] then
+                            else
+                                AllIdUnit[unit.unitId] = true
+                                UnitByName[unit.name] = unit.unitId
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+	--pour le mission
+	for side_name, side in pairs(mission.coalition) do
+		for country_n, country_ in pairs(side.country) do
+			for categorie, categorie_ in pairs(country_) do
+				if type(categorie_) == "table" and categorie_.group then
+					for groupN, groupData in pairs(categorie_.group) do
+						-- Vérifie les doublons de groupId
+                        if AllIdGroup[groupData.groupId] then
+                        else
+                            AllIdGroup[groupData.groupId] = true
+                        end
+                        -- Vérifie les doublons de unitId
+                        for Nunit, unit in pairs(groupData.units or {}) do
+                            if AllIdUnit[unit.unitId] then
+                            else
+                                AllIdUnit[unit.unitId] = true
+                                UnitByName[unit.name] = unit.unitId
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+end
+
+
+-- Fonction principale pour détecter et corriger les doublons
 function CheckAndFixAllIds()
-    -- Réinitialise les tables d'ID
-    AllIdGroup = {}
-    AllIdUnit = {}
-    UnitByName = {}
+    -- -- Réinitialise les tables d'ID
+    -- AllIdGroup = {}
+    -- AllIdUnit = {}
+    -- UnitByName = {}
 
     -- 1. Premier passage : collecte tous les IDs et détecte les doublons
     local groupIdError = {}
@@ -901,7 +973,7 @@ function CheckAndFixAllIds()
 
     -- 2. Correction des doublons de groupId
     for _, group in ipairs(groupIdError) do
-        group.groupId = GenerateIDGroup(group.name)
+        group.groupId = GenerateIDGroup()
         if Debug and Debug.debug then
             print("Nouveau groupId attribué : "..tostring(group.groupId).." pour "..tostring(group.name))
         end
@@ -909,161 +981,13 @@ function CheckAndFixAllIds()
 
     -- 3. Correction des doublons de unitId
     for _, unit in ipairs(unitIdError) do
-        unit.unitId = GenerateIDUnit(unit.name)
+        unit.unitId = GenerateIDUnit()
         if Debug and Debug.debug then
             print("Nouveau unitId attribué : "..tostring(unit.unitId).." pour "..tostring(unit.name))
         end
     end
 end
 
--- -- Appel de la fonction principale
--- CheckAndFixAllIds()
-
--- --recupere les Id deja utilise pour ne pas creer de doublon
--- function GetAllId()
-
--- 	AllIdGroupImport = false		--deprecate?
--- 	AllIdUnitImport = false		--deprecate?
-
--- 	local groupIdError = {}
--- 	local unitIdError = {}
-
--- 	--recupere les Id deja utilise pour ne pas creer de doublon
--- 	for coalName, coal in pairs(oob_ground) do
--- 		for countryN, country in pairs(coal) do
--- 			for category, groups in pairs(country) do
--- 				if type(groups) == "table" and groups["group"]  then
--- 					for groupN, group in pairs(groups["group"]) do
-
--- 						if not AllIdGroup[group.groupId] then
--- 							AllIdGroup[group.groupId] = true
--- 							AllIdGroupImport = true
--- 						else
--- 							table.insert(groupIdError,group.groupId )
--- 							-- print("UtilF F1 found groupIdError ID "..tostring(group.groupId).." name: "..tostring(group.name))
--- 						end
-
--- 						for Nunit, unit in pairs(group.units) do
-
--- 							if not AllIdUnit[unit.unitId] then
--- 								AllIdUnit[unit.unitId] = true
--- 								AllIdUnitImport = true
--- 							else
--- 								table.insert(unitIdError, unit.unitId )
--- 								-- print("UtilF F2 found unitIdError ID "..tostring(unit.unitId).." name: "..tostring(unit.name))
--- 							end
--- 						end
--- 					end
--- 				end
--- 			end
--- 		end
--- 	end
-
--- 	if unitIdError and #unitIdError > 0 then
--- 		for errorN, IdError in pairs(unitIdError) do
--- 			for coal_name,coal in pairs(oob_ground) do
--- 				for countryN, country in pairs(coal) do
--- 					for category, groups in pairs(country) do
--- 						if type(groups) == "table" and groups["group"]  then
--- 							for Ngroup, group in pairs(groups["group"]) do
--- 								for Nunit, unit in pairs(group.units) do
--- 									if IdError == unit.unitId then
--- 										unit.unitId = GenerateIDUnit(unit.name)
--- 										if Debug.debug then
--- 											print("UtilF PP found NEW ID| "..tostring(unit.unitId).." |unit.NAME:| "..tostring(unit.name))
--- 										end
--- 									end
--- 								end
--- 							end
--- 						end
--- 					end
--- 				end
--- 			end
--- 			-- os.execute 'pause'
--- 		end
--- 	end
-
--- 	if groupIdError and #groupIdError > 0 then
--- 		for errorN, IdError in pairs(groupIdError) do
--- 			for coal_name,coal in pairs(oob_ground) do
--- 				for countryN, country in pairs(coal) do
--- 					for category, groups in pairs(country) do
--- 						if type(groups) == "table" and groups["group"]  then
--- 							for Ngroup, group in pairs(groups["group"]) do
-
--- 								if IdError == group.groupId then
--- 									group.groupId = GenerateIDGroup(group.name)
--- 									if Debug.debug then
--- 										print("UtilF PP found NEW ID| "..tostring(group.groupId).." |group.NAME:| "..tostring(group.name))
--- 									end
--- 								end
-
--- 							end
--- 						end
--- 					end
--- 				end
--- 			end
--- 		end
--- 	end
-
--- end
-
-
-
--- local idGroupCounter = 100000
--- function GenerateIDGroup(name)
--- 	if not AllIdUnitImport or not AllIdGroupImport then
--- 		GetAllId()
--- 	end
-
--- 	local loop = 1
--- 	repeat
--- 		idGroupCounter = idGroupCounter + 1
--- 		loop = loop+1
--- 		-- if AllIdGroup[idGroupCounter] then
--- 		-- 	-- print("UtilF  GenerateIDGroup IDGroup déjà utilisé: "..tostring(idGroupCounter))
--- 		-- 	-- os.execute 'pause'
--- 		-- end
--- 	until not AllIdGroup[idGroupCounter] or loop > 5000
--- 	if loop > 5000 then
--- 		print("UtilF Bug GenerateIDGroup idGroupCounter "..tostring(idGroupCounter))
--- 		os.execute 'pause'
--- 	end
--- 	AllIdGroup[idGroupCounter] = true
-
--- 	-- print("UtilsF passe AA2 idGroupCounter "..idGroupCounter.." NAME: "..tostring(name))
--- 	return idGroupCounter
--- end
-
--- local idUnitCounter = 100000
--- function GenerateIDUnit(name)
-
--- 	if not AllIdUnitImport or not AllIdGroupImport then
--- 		GetAllId()
--- 	end
-
--- 	local loop = 1
--- 	repeat
--- 		idUnitCounter = idUnitCounter + 1
--- 		loop = loop+1
--- 	until not AllIdUnit[idUnitCounter] or loop > 5000
-
--- 	if loop > 5000 then
--- 		print("UtilF Bug GenerateIDUnit loop > 5000 "..tostring(idUnitCounter))
--- 		os.execute 'pause'
--- 	end
--- 	AllIdUnit[idUnitCounter] = true
--- 	UnitByName[name] = idUnitCounter
-
--- 	return idUnitCounter
--- end
-
--- id_counter = 100000
--- function GenerateID()
--- 	local id = id_counter
--- 	id_counter = id_counter + 1
--- 	return id
--- end
 
 function Disp_time(time)
 	local days = math.floor(time/86400)
@@ -4517,6 +4441,8 @@ function LoadFileAndUpdate(from)
 	NameTheatreLower =  string.lower(mission.theatre)
 	NameTheatre =  mission.theatre
 
+	CheckAll_Id()
+
 	zipFile:unzClose()
 
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
@@ -4809,6 +4735,7 @@ function LoadFileAndUpdate(from)
 
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+	CheckAll_Id()
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")

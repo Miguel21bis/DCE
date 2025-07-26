@@ -90,7 +90,8 @@ Data_configuration = {
 EjectedPilotFrequency = {
 	blue = {
 		GuardEjection = 243000000,			--frequency used for automatic triggering of the radio beacon during ejection (blue side usually 243)
-		radioBeacon = 121500000,			--think you need a compatible helicopter to listen and follow the frequency (preset Chanel 4 R-852)
+		-- radioBeacon = 121500000,			--think you need a compatible helicopter to listen and follow the frequency (preset Chanel 4 R-852)
+		radioBeacon = 43000000,			--pour vietnam et UH-1H, obligé de passer en Fm pour avoir du homing
 	},
 	red = {
 		GuardEjection = 114115000,			--think you need a compatible helicopter to listen and follow the frequency (preset Chanel 1 R-852)
@@ -98,7 +99,8 @@ EjectedPilotFrequency = {
 	},
 	neutral = {
 		GuardEjection = 243000000,			--think you need a compatible helicopter to listen and follow the frequency (blue side usually 243)
-		radioBeacon = 121500000,			--think you need a compatible helicopter to listen and follow the frequency (preset Chanel 4 R-852)
+		-- radioBeacon = 121500000,			--think you need a compatible helicopter to listen and follow the frequency (preset Chanel 4 R-852)
+		radioBeacon = 282800000,			--URC-11 (PRC-63)
 	},
 }
 
@@ -4111,8 +4113,50 @@ DataCountry = {
 
 }
 
+Data_warehouses = 
+{
+	["allowHotStart"] = false,
+	["unlimitedMunitions"] = true,
+	["methanol_mixture"] = 
+	{
+		["InitFuel"] = 100,
+	},
+	["OperatingLevel_Air"] = 10,
+	["diesel"] = 
+	{
+		["InitFuel"] = 100,
+	},
+	["speed"] = 16.666666,
+	["dynamicSpawn"] = false,
+	["unlimitedAircrafts"] = true,
+	["unlimitedFuel"] = true,
+	["size"] = 100,
+	["suppliers"] = 
+	{
+	},
+	["jet_fuel"] = 
+	{
+		["InitFuel"] = 100,
+	},
+	["coalition"] = "blue",
+	["dynamicCargo"] = false,
+	["OperatingLevel_Eqp"] = 10,
+	["gasoline"] = 
+	{
+		["InitFuel"] = 100,
+	},
+	["aircrafts"] = 
+	{
+	},
+	["weapons"] = 
+	{
+	},
+	["OperatingLevel_Fuel"] = 10,
+	["periodicity"] = 30,
+}
 
---rempli la table TaskByPlane avec les Tasks qui ne sont rempli que dans Data_divers
+
+	--rempli la table TaskByPlane avec les Tasks qui ne sont rempli que dans Data_divers
 for planeType, planeData in pairs(Data_divers) do
 	if planeData.Tasks then
 		for taskN, task in pairs(planeData.Tasks) do

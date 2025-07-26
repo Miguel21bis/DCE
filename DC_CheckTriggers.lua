@@ -1875,53 +1875,53 @@ Action = {}
 		--cherche la valeur UnitID la plus haute
 		local CurrentUnitId = 0
 		local CurrentGroupId = 0
-		for Oside_name, Oside in pairs(oob_ground) do																--iterate through sides
-			for Ocountry_n, Ocountry in pairs(Oside) do															--iterate through countries				
-				for Ocategory, Ogroup in pairs(Ocountry) do
-					if  type(Ogroup) == "table" then
-						for Ngroup, O_group in pairs(Ogroup) do
-							for g = 1, #O_group do
-								if O_group[g].groupId > CurrentGroupId then
-									CurrentGroupId = O_group[g].groupId
-								end
-								for u = 1, #O_group[g].units do											--iterate through units								
-									if O_group[g].units[u].unitId > CurrentUnitId then
-										CurrentUnitId = O_group[g].units[u].unitId
-									end
-								end
-							end
-						end
-					end
-				end
-			end
-		end
+		-- for Oside_name, Oside in pairs(oob_ground) do																--iterate through sides
+		-- 	for Ocountry_n, Ocountry in pairs(Oside) do															--iterate through countries				
+		-- 		for Ocategory, Ogroup in pairs(Ocountry) do
+		-- 			if  type(Ogroup) == "table" then
+		-- 				for Ngroup, O_group in pairs(Ogroup) do
+		-- 					for g = 1, #O_group do
+		-- 						if O_group[g].groupId > CurrentGroupId then
+		-- 							CurrentGroupId = O_group[g].groupId
+		-- 						end
+		-- 						for u = 1, #O_group[g].units do											--iterate through units								
+		-- 							if O_group[g].units[u].unitId > CurrentUnitId then
+		-- 								CurrentUnitId = O_group[g].units[u].unitId
+		-- 							end
+		-- 						end
+		-- 					end
+		-- 				end
+		-- 			end
+		-- 		end
+		-- 	end
+		-- end
 
-		-- print("DcCT AA CurrentGroupId: "..CurrentGroupId.." CurrentUnitId: "..CurrentUnitId)
+		-- -- print("DcCT AA CurrentGroupId: "..CurrentGroupId.." CurrentUnitId: "..CurrentUnitId)
 
-		for side_name, side in pairs(mission.coalition) do																--iterate through sides
-			for country_n, country_ in pairs(side.country) do															--iterate through countries
-				for categorie, categorie_ in pairs(country_) do
-					if type(categorie_) == "table" and categorie_.group then
-						for _group, group in pairs(categorie_) do
-							for groupN, group_ in pairs(group) do
-								if group_.groupId > CurrentUnitId then
-									CurrentUnitId = group_.groupId
-								end
-								for unitN, unit in ipairs(group_.units) do
-									if unit.unitId > CurrentUnitId then
-										CurrentUnitId = unit.unitId
-									end
-								end
-							end
-						end
-					end
-				end
-			end
-		end
-		-- print("DcCT BB CurrentGroupId: "..CurrentGroupId.." CurrentUnitId: "..CurrentUnitId)
+		-- for side_name, side in pairs(mission.coalition) do																--iterate through sides
+		-- 	for country_n, country_ in pairs(side.country) do															--iterate through countries
+		-- 		for categorie, categorie_ in pairs(country_) do
+		-- 			if type(categorie_) == "table" and categorie_.group then
+		-- 				for _group, group in pairs(categorie_) do
+		-- 					for groupN, group_ in pairs(group) do
+		-- 						if group_.groupId > CurrentUnitId then
+		-- 							CurrentUnitId = group_.groupId
+		-- 						end
+		-- 						for unitN, unit in ipairs(group_.units) do
+		-- 							if unit.unitId > CurrentUnitId then
+		-- 								CurrentUnitId = unit.unitId
+		-- 							end
+		-- 						end
+		-- 					end
+		-- 				end
+		-- 			end
+		-- 		end
+		-- 	end
+		-- end
+		-- -- print("DcCT BB CurrentGroupId: "..CurrentGroupId.." CurrentUnitId: "..CurrentUnitId)
 
-		-- local function FindUnit(Group_name, category)
-		local function FindUnit(groupName, sideName, countryId, category)
+		-- local function findGroup(Group_name, category)
+		local function findGroup(groupName, sideName, countryId, category)
 			for O_sideName, O_countries in pairs(oob_ground) do																--iterate through sides
 				if O_sideName == sideName  then
 					for O_country_n, O_country in pairs(O_countries) do															--iterate through countries
@@ -2040,34 +2040,43 @@ Action = {}
 			for countryN, country in pairs(countries) do
 				for category, class in pairs(country) do
 					if type(class) =="table" and class.group then
-						for g = 1, #class.group do
-							local groupname = class.group[g].name
+						for goupN, groupData in pairs(class.group) do
+							local groupname = groupData.name
 
 							--TODO attention, un nom identique existe peut etre dans les autres SIDE
-							local found = FindUnit(groupname, sideName, country.id, category)
-							class.group[g].name = groupname
+							local groupAlreadyExist = findGroup(groupname, sideName, country.id, category)
+							groupData.name = groupname
 
-							if found then
-								SetRouteXY(groupname, category, class.group[g].route )
+							if groupAlreadyExist then
+								SetRouteXY(groupname, category, groupData.route )
 							end
 
-							for u = 1, #class.group[g].units do
-								local unitname = class.group[g].units[u].name
-								class.group[g].units[u].name = unitname
-								if found then
-									movedXY(class.group[g].units[u], category )
+							for unitN, unit in ipairs(groupData.units) do
+								local unitname = unit.name
+								unit.name = unitname
+								if groupAlreadyExist then
+									movedXY(unit, category )
 								else
-									CurrentUnitId = CurrentUnitId + 1
-									class.group[g].units[u].unitId = CurrentUnitId
-									-- print("DcCT  vehicle CurrentUnitId: "..CurrentUnitId.." name: "..class.group[g].units[u].name)
+									unit.unitId = GenerateIDUnit()
+									-- print("DcCT  vehicle CurrentUnitId: "..CurrentUnitId.." name: "..unit.name)
+
+									--active le wareHouse de la FARP
+									if unit.category == "Heliports" then
+										if Data_warehouses then
+											warehouses[unit.unitId] = Data_warehouses
+											print("DcCT FARP detected, warehouse["..unit.unitId.."] activated "..unit.name)
+											os.execute 'pause'
+										end
+
+									end
 								end
 							end
 
-							-- print("DcCT B found? "..tostring(found))
+							-- print("DcCT B groupAlreadyExist? "..tostring(groupAlreadyExist))
 
-							if not found then
-								CurrentGroupId = CurrentGroupId + 1													--actualise un groupId unique, evite les plantages
-								class.group[g].groupId = CurrentGroupId
+							if not groupAlreadyExist then
+								groupData.groupId = GenerateIDGroup()
+
 								local newCountryN = countryNameToN[sideName][country.name]
 
 								if not countryNameToN[sideName][country.name] then
@@ -2100,75 +2109,13 @@ Action = {}
 
 								end
 
-								table.insert(oob_ground[sideName][newCountryN][category]["group"], class.group[g])
-								-- print("DcCT D category "..tostring(category).." g.name "..tostring(class.group[g].name))
+								table.insert(oob_ground[sideName][newCountryN][category]["group"], groupData)
+								-- print("DcCT D category "..tostring(category).." g.name "..tostring(groupData.name))
 							end
 						end
 					end
 				end
-				-- if country.ship then																			--country has ships
-				-- 	for g = 1, #country.ship.group do															--iterate through ship groups	
-				-- 		local groupname = country.ship.group[g].name								--find groupname in dictionary table			
-				-- 		local found = FindUnit(groupname, "ship")
-				-- 		country.ship.group[g].name = groupname												--give group the actual groupname instead of the pointer to the dictionary table						
-
-				-- 		if found then
-				-- 			SetRouteXY(groupname, "ship", country.ship.group[g].route )
-				-- 		end
-
-				-- 		for u = 1, #country.ship.group[g].units do											--iterate through units
-				-- 			local unitname = country.ship.group[g].units[u].name					--find unitname in dictionary table
-				-- 			country.ship.group[g].units[u].name = unitname									--give unit the actual unitname instead of the pointer to the dictionary table							
-				-- 			if found then
-				-- 				movedXY(country.ship.group[g].units[u], "ship" )
-				-- 			else
-				-- 				CurrentUnitId = CurrentUnitId + 1
-				-- 				country.ship.group[g].units[u].unitId = CurrentUnitId
-				-- 				-- print("DcCT  ship CurrentUnitId: "..CurrentUnitId.." name: "..country.vehicle.group[g].units[u].name)
-				-- 			end
-				-- 		end							
-
-				-- 		if not found then
-				-- 			CurrentGroupId = CurrentGroupId + 1													--actualise un groupId unique, evite les plantages
-				-- 			country.ship.group[g].groupId = CurrentGroupId
-				-- 			if not oob_ground[side_name][countryNameToN[country.name]]["ship"] then
-				-- 				oob_ground[side_name][countryNameToN[country.name]]["ship"] = {
-				-- 					["group"] = {},
-				-- 				}
-				-- 			end						
-				-- 			table.insert(oob_ground[side_name][countryNameToN[country.name]]["ship"]["group"], country.ship.group[g])							
-				-- 		end
-				-- 	end
-				-- end
-				-- if country.static then																			--country has static objects
-				-- 	for g = 1, #country.static.group do															--iterate through static groups	
-				-- 		local groupname = country.static.group[g].name											--find groupname in dictionary table			
-				-- 		local found = FindUnit(groupname, "static")
-
-				-- 		for u = 1, #country.static.group[g].units do											--iterate through units
-				-- 			-- local unitname = country.static.group[g].units[u].name								--find unitname in dictionary table
-				-- 			-- country.static.group[g].units[u].name = unitname									--give unit the actual unitname instead of the pointer to the dictionary table							
-				-- 			if found then
-				-- 				movedXY(country.static.group[g].units[u], "static" )
-				-- 			else
-				-- 				CurrentUnitId = CurrentUnitId + 1
-				-- 				country.static.group[g].units[u].unitId = CurrentUnitId
-				-- 				-- print("DcCT  static CurrentUnitId: "..CurrentUnitId.." name: "..country.vehicle.group[g].units[u].name)
-				-- 			end
-				-- 		end							
-
-				-- 		if not found then														
-				-- 			CurrentGroupId = CurrentGroupId + 1													--actualise un groupId unique, evite les plantages
-				-- 			country.static.group[g].groupId = CurrentGroupId						
-				-- 			if not oob_ground[side_name][countryNameToN[country.name]]["static"] then
-				-- 				oob_ground[side_name][countryNameToN[country.name]]["static"] = {
-				-- 					["group"] = {},
-				-- 				}
-				-- 			end	
-				-- 			table.insert(oob_ground[side_name][countryNameToN[country.name]]["static"]["group"],	country.static.group[g])												
-				-- 		end
-				-- 	end
-				-- end
+				
 			end
 		end
 	end
@@ -2178,7 +2125,7 @@ Action = {}
 
 		if debugKT then print("	--> function Action.TemplateDeactivate "..tostring( TabFile)) end
 
-		-- local function FindUnit(Group_name, category)
+		-- local function findGroup(Group_name, category)
 		-- 	for Oside_name, Oside in pairs(oob_ground) do																--iterate through sides
 		-- 		for Ocountry_n, Ocountry in pairs(Oside) do															--iterate through countries
 		-- 			if Ocountry[category] then																			--country has vehicles
@@ -2222,12 +2169,9 @@ Action = {}
 			for countryN, country in pairs(countries) do
 				for category, class in pairs(country) do
 					if type(class) == "table" and class.group then
-						for g = 1, #class.group do
-							-- local groupnName = class.group[g].name		
-							local tmpGroupName = class.group[g].name								--find groupname in dictionary table		
-
-							-- local idDecativate = 0
-							-- local groupDeactivate = {}
+						for groupN, groupData in ipairs(class.group) do
+							-- local groupnName = groupData.name		
+							local tmpGroupName = groupData.name								--find groupname in dictionary table		
 
 							for O_sideName, O_countries in pairs(oob_ground) do																--iterate through sides
 								for O_countryN, O_country in pairs(O_countries) do															--iterate through countries
@@ -2244,63 +2188,9 @@ Action = {}
 									end
 								end
 							end
-
-							-- if idDecativate ~= 0 then						
-							-- 	table.remove(groupDeactivate, idDecativate)
-							-- end		
 						end
 					end
-				end
-				-- if country.ship then																			--country has ships
-				-- 	for tg = 1, #country.ship.group do															--iterate through ship groups	
-				-- 		local tmpGroupName = country.ship.group[tg].name								--find groupname in dictionary table			
-
-				-- 		local idDecativate = 0
-				-- 		local groupDeactivate = {}
-				-- 		local category = "ship"
-				-- 		for Oside_name, Oside in pairs(oob_ground) do																--iterate through sides
-				-- 			for Ocountry_n, Ocountry in pairs(Oside) do															--iterate through countries
-				-- 				if Ocountry[category] then																			--country has vehicles
-				-- 					for og = 1, #Ocountry[category].group do
-				-- 						if Ocountry[category].group[og].name  == tmpGroupName then
-				-- 							idDecativate = og
-				-- 							groupDeactivate = Ocountry[category].group
-				-- 						end
-				-- 					end
-				-- 				end
-				-- 			end
-				-- 		end	
-
-				-- 		if idDecativate ~= 0 then					
-				-- 			table.remove(groupDeactivate, idDecativate)
-				-- 		end	
-				-- 	end
-				-- end
-				-- if country.static then																			--country has static objects
-				-- 	for tg = 1, #country.static.group do															--iterate through static groups	
-				-- 		local tmpGroupName = country.static.group[tg].name											--find groupname in dictionary table			
-
-				-- 		local idDecativate = 0
-				-- 		local groupDeactivate = {}
-				-- 		local category = "static"
-				-- 		for Oside_name, Oside in pairs(oob_ground) do																--iterate through sides
-				-- 			for Ocountry_n, Ocountry in pairs(Oside) do															--iterate through countries
-				-- 				if Ocountry[category] then																			--country has vehicles
-				-- 					for og = 1, #Ocountry[category].group do							
-				-- 						if Ocountry[category].group[og].name  == tmpGroupName then
-				-- 							idDecativate = og
-				-- 							groupDeactivate = Ocountry[category].group
-				-- 						end
-				-- 					end
-				-- 				end
-				-- 			end
-				-- 		end	
-
-				-- 		if idDecativate ~= 0 then						
-				-- 			table.remove(groupDeactivate, idDecativate)
-				-- 		end												
-				-- 	end
-				-- end
+				end			
 			end
 		end
 	end
