@@ -7028,14 +7028,11 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						--TODO regler les ETA negatif
 						-- print("AtoFP ETA négatif: "..tostring(waypoints[1]["ETA"]))
 						-- os.execute 'pause'
-
-
 					end
 				else
 
 					_affiche(group.route.points, "group.route.point.route")
 				end
-
 
 				debugTempFLIGHT = debugTempFLIGHT.."\n"..("\n")
 
@@ -7049,6 +7046,14 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 		end
 	end
 end
+
+--= = = = = = = =  = = = = = = = = = =  = = = = = = = = = =  ==  = = =
+---FIN-- create flight plans in mission file for all flights in ATO -----
+---END-- create flight plans in mission file for all flights in ATO -----
+---FIN-- create flight plans in mission file for all flights in ATO -----
+---END-- create flight plans in mission file for all flights in ATO -----
+--= = = = = = = =  = = = = = = = = = =  = = = = = = = = = =  ==  = = =
+
 
 
 function GeWpindex(groupIdCheck, wpLabel)
@@ -7074,8 +7079,6 @@ function GeWpindex(groupIdCheck, wpLabel)
 			end
 		end
 	end
-
-
 end
 
 
@@ -7107,6 +7110,28 @@ for side, pack in pairs(ATO) do
 
 										end
 									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
+
+-- ajoute le warehouse des FARP ajouté par trigger
+if camp.needWarehouse then
+	for _side, side in pairs(mission.coalition) do
+		for countryN, country in pairs(side.country) do
+			for category, groups in pairs(country) do
+				if category == "static" and type(groups) == "table" and groups["group"] then
+					for groupN, groupData in pairs(groups["group"]) do
+						for unitN, unit in pairs(groupData.units) do
+							if unit.category and unit.category == "Heliports" then
+								if not warehouses[unit.unitId] then
+									warehouses[unit.unitId] = Data_warehouses
 								end
 							end
 						end

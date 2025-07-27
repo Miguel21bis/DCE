@@ -547,18 +547,18 @@ end
 
 
 local verScriptsModPath = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_Changelog.lua"
-local TestPath = io.open(verScriptsModPath, "r")
-if  TestPath ~= nil then
-	io.close(TestPath)
+local testPath = io.open(verScriptsModPath, "r")
+if testPath ~= nil then
+	io.close(testPath)
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Changelog.lua")
 	camp.ScriptsMod = versionDCE["UTIL_Changelog.lua"]
 
 else
 	--OBSOLETE
-	local verScriptsModPath = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_Version.lua"
-	local TestPath = io.open(verScriptsModPath, "r")
-	if  TestPath ~= nil then
-		io.close(TestPath)
+	verScriptsModPath = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_Version.lua"
+	testPath = io.open(verScriptsModPath, "r")
+	if testPath ~= nil then
+		io.close(testPath)
 		dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Version.lua")
 		camp.ScriptsMod = version_ScriptsMod.ScriptsMod
 	end
