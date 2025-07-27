@@ -68,6 +68,9 @@ Players = {}					--table used to store player units
 AvgConsumptionKgPerKm = {}				--table used to store the available distance in km for each unitCat
 TypePedroByCV = {}         --table used to store the type of Pedro by CV
 
+SmokeColor_EjectedPilot = trigger.smokeColor.Orange
+SmokeColor_TargetDesignation = trigger.smokeColor.Blue
+
 coalitionId = {
 	["0"] = "neutral",
 	["1"] = "red",
@@ -3579,7 +3582,7 @@ local function loopAFAC_CAS()
 
 										if distance <= 10000 then
 
-											trigger.action.smoke(value.smokeTiming.targetPos, trigger.smokeColor.Blue)
+											trigger.action.smoke(value.smokeTiming.targetPos, SmokeColor_TargetDesignation)
 											-- env.info("DCE_loopAFAC_CAS K create smokeColor.Blue ")
 
 											AFAC_available[afacFlightName]["smokeTiming"] = {

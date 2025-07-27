@@ -423,7 +423,7 @@ local function shellZone(initiatorName)
 		-- Delay the shelling by 1 second for each shell	
 		timer.scheduleFunction(function()
 		  trigger.action.explosion(strikePos, tntEquivalent)  -- Create an explosion at the target position with a predefined power
-		  if _artyCall == 1 and user_smokeOn then trigger.action.smoke(strikePos, trigger.smokeColor.Red) end
+		  if _artyCall == 1 and user_smokeOn then trigger.action.smoke(strikePos, SmokeColor_TargetDesignation) end
 		end, {}, timer.getTime() + i)
 	end
 

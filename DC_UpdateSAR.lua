@@ -27,13 +27,13 @@ end
 -- 	pilotEjected = {
 -- 		[1] = {
 -- 			name = "ejected1",
--- 			smokeOK = false,
+-- 			smokeTiming = 0,
 -- 			embarked = false,
 -- 			embarkAndSafe = false,
 -- 		},
 -- 		[2] = {
 -- 			name = "ejected2",
--- 			smokeOK = false,
+-- 			smokeTiming = 0,
 -- 			embarked = false,
 -- 			embarkAndSafe = false,
 -- 		},
@@ -204,7 +204,7 @@ function AddSoldierAliasPilot(element)
                 }, -- end of [1]
             }, -- end of ["points"]
         }, -- end of ["route"]
-        ["groupId"] = GenerateIDGroup("Group_"..element.name),
+        ["groupId"] = GenerateIDGroup(),
         ["hidden"] = hidden,
         ["units"] =
         {
@@ -1132,13 +1132,13 @@ end
 -- 	pilotEjected = {
 -- 		[1] = {
 -- 			name = "ejected1",
--- 			smokeOK = false,
+-- 			smokeTiming = 0,
 -- 			embarked = false,
 -- 			embarkAndSafe = false,
 -- 		},
 -- 		[2] = {
 -- 			name = "ejected2",
--- 			smokeOK = false,
+-- 			smokeTiming = 0,
 -- 			embarked = false,
 -- 			embarkAndSafe = false,
 -- 		},
@@ -1202,7 +1202,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
                 if element.status == "EVAC_possible" and element.SurfaceType ~= 5  then
 
                     local AddPilot = element
-                    AddPilot.smokeOK = false
+                    AddPilot.smokeTiming = 0
                     AddPilot.embarked = false
                     AddPilot.embarkAndSafe = false
                     AddPilot.landingPossible = element.landingPossible
@@ -1216,7 +1216,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
                     --         name = element.name,
                     --         initiatorPilotName = element.initiatorPilotName,
                     --         side = element.side,
-                    --         smokeOK = false,
+                    --         smokeTiming = 0,
                     --         embarked = false,
                     --         embarkAndSafe = false,
                     --         MGRS_Chute = element.MGRS_Chute,

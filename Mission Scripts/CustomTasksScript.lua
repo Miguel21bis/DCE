@@ -1737,7 +1737,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 						if laserCode and laserCode ~= "nil" and laser == nil then
 							laser = Spot.createLaser(unitAFAC, nil, pos, laserCode)	--start laser spot
 						elseif laserCode == "nil" then
-							trigger.action.smoke(pos, trigger.smokeColor.Red)
+							trigger.action.smoke(pos, SmokeColor_TargetDesignation)
 							timerDesignate = timer.getTime()
 							env.info("DCE_AFAC () K create smokeColor.Red ")
 							trigger.action.outTextForGroup(AFAC_available[afacFlightName][gpGid],"DCE_AFAC () K nextUnit create smokeColor.Red ", 15, false)
@@ -1766,7 +1766,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 						if laserCode and laserCode ~= "nil" then
 							laser:setPoint(pos)
 						else
-							trigger.action.smoke(pos, trigger.smokeColor.Red)
+							trigger.action.smoke(pos, SmokeColor_TargetDesignation)
 							timerDesignate = timer.getTime()
 							env.info("DCE_AFAC () M create smokeColor.Red ")
 							if gpGid then
@@ -2053,7 +2053,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		env.info("DCE_AFAC () : J createLaser laserCode: "..tostring(laserCode))
 		laser = Spot.createLaser(unitAFAC, nil, targetPos, laserCode)	--start laser spot
 	else
-		trigger.action.smoke(targetPos, trigger.smokeColor.Red)
+		trigger.action.smoke(targetPos, SmokeColor_TargetDesignation)
 		env.info("DCE_AFAC () K create smokeColor.Red ")
 		-- if not AFAC_smokeTiming[afacFlightName] then AFAC_smokeTiming[afacFlightName] = {} end
 		-- AFAC_smokeTiming[afacFlightName] = {

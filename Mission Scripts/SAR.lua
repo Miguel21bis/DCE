@@ -49,13 +49,13 @@ local createWreckCrew = {}
 -- 	pilotEjected = {
 -- 		[1] = {
 -- 			name = "ejected1",
--- 			smokeOK = false,
+-- 			smokeTiming = 0,
 -- 			embarked = false,
 -- 			embarkAndSafe = false,
 -- 		},
 -- 		[2] = {
 -- 			name = "ejected2",
--- 			smokeOK = false,
+-- 			smokeTiming = 0,
 -- 			embarked = false,
 -- 			embarkAndSafe = false,
 -- 		},
@@ -907,7 +907,7 @@ function CheckImmediatSAR(ejectedPilot)
 		ejectedPilot.country = ejectedPilot.initiatorCountry
 
 		ejectedPilot.embarkAndSafe = false
-		ejectedPilot.smokeOK = false
+		ejectedPilot.smokeTiming = 0
 		ejectedPilot.embarked = false
 		ejectedPilot.landingPossible = false
 
@@ -1729,13 +1729,13 @@ function LoopSAR()
 	-- 	pilotEjected = {
 	-- 		[1] = {
 	-- 			name = "ejected1",
-	-- 			smokeOK = false,
+	-- 			smokeTiming = 0,
 	-- 			embarked = false,
 	-- 			embarkAndSafe = false,
 	-- 		},
 	-- 		[2] = {
 	-- 			name = "ejected2",
-	-- 			smokeOK = false,
+	-- 			smokeTiming = 0,
 	-- 			embarked = false,
 	-- 			embarkAndSafe = false,
 	-- 		},
@@ -1763,7 +1763,7 @@ function LoopSAR()
 									SAR_Coalition = tostring(unitSAR:getCoalition())
 									local _SAR_Player = unitSAR:getPlayerName()
 
-									if  unitSAR:isActive() and  string.lower(coalition_name) ==  coalitionId[SAR_Coalition] then
+									if unitSAR:isActive() and  string.lower(coalition_name) == coalitionId[SAR_Coalition] then
 										local Pos_SAR = unitSAR:getPoint()
 										local SAR_unitId = Unit.getID(unitSAR)
 										local SAR_Name = unitSAR:getName()
@@ -1779,7 +1779,11 @@ function LoopSAR()
 														local PosEjectedPilot = unitEjectPilot:getPoint()
 														local distance = math.sqrt(math.pow(Pos_SAR.x - PosEjectedPilot.x, 2) + math.pow(Pos_SAR.z - PosEjectedPilot.z, 2))
 
-														if distance <= 3000 and distance > 1000 and not ejectedPilot.smokeOK and _SARinAir then
+														if not ejectedPilot.smokeTiming then 
+															ejectedPilot.smokeTiming = timer.getTime()
+														end
+
+														if distance <= 3000 and distance > 1000 and _SARinAir and (timer.getTime() > ejectedPilot.smokeTiming + 300) then --and not ejectedPilot.smokeOK 
 															--active fumigene
 															local pilotVec3 = {
 																x = PosEjectedPilot.x,
@@ -1820,10 +1824,11 @@ function LoopSAR()
 															end
 
 															    -- Placer le fumigène
-    														trigger.action.smoke(smokePosition, trigger.smokeColor.Orange)
+    														trigger.action.smoke(smokePosition, SmokeColor_EjectedPilot)
+															ejectedPilot.smokeTiming = timer.getTime()	-- mettre à jour le temps du fumigène
 
-															-- Indiquer que le fumigène a été placé
-															ejectedPilot.smokeOK = true
+															-- -- Indiquer que le fumigène a été placé
+															-- ejectedPilot.smokeOK = true
 
 														elseif distance <= 1000 and distance > 450 then
 
@@ -2146,7 +2151,8 @@ function GetOutGDFM(arg)
 				end
 
 					-- Placer le fumigène
-				trigger.action.smoke(smokePosition, trigger.smokeColor.Orange)
+				trigger.action.smoke(smokePosition, SmokeColor_EjectedPilot)
+				-- ejectedPilot.smokeTiming = timer.getTime()	-- mettre à jour le temps du fumigène
 
 			end
 
@@ -2159,23 +2165,15 @@ function GetOutGDFM(arg)
 			}
 
 			table.insert(CustomLog, log_entry)
-
 			CheckImmediatSAR(infoPlayer)
-
 			env.info("DCE_getOut F test despawn ")
-
 			timer.scheduleFunction(despawn2, {infoPlayer.unit, "GetOutGDFM if pName" }, timer.getTime() + 30)
-
 			timer.scheduleFunction(spawnWreck, infoPlayer, timer.getTime() + 35)
-
 			createWreckCrew[infoPlayer.unitName] = true
-
 		end
-
 	else
 
 		for id_, key in pairs(GroundDamagedFlyingMachine) do
-
 			for occurenceN = #key, 1, -1 do
 				local damaged = key[occurenceN]
 
@@ -2226,7 +2224,7 @@ function GetOutGDFM(arg)
 
 							env.info("DCE_getOut G baseName "..tostring(baseName).." distanceBase "..tostring(distanceBase))
 
-							if distanceBase > 10000 and typeLand ~= land.SurfaceType.WATER and typeLand ~= land.SurfaceType.RUNWAY  then
+							if distanceBase > 15000 and typeLand ~= land.SurfaceType.WATER and typeLand ~= land.SurfaceType.RUNWAY  then
 
 								AddSoldierAliasPilot(damaged)
 								damaged.createdSoldier = true
@@ -2263,16 +2261,14 @@ function GetOutGDFM(arg)
 								end
 
 									-- Placer le fumigène
-								trigger.action.smoke(smokePosition, trigger.smokeColor.Orange)
+								trigger.action.smoke(smokePosition, SmokeColor_EjectedPilot)
 
 							end
 
 							CheckImmediatSAR(damaged)
 
 							timer.scheduleFunction(despawn2, {damaged.unit, "GetOutGDFM, else IA" }, timer.getTime() + 30)
-
 							timer.scheduleFunction(spawnWreck, damaged, timer.getTime() + 35)
-
 							createWreckCrew[damaged.unitName] = true
 
 							if damaged.initiator and damaged.initiator.id_ then
@@ -2291,13 +2287,9 @@ function GetOutGDFM(arg)
 									end
 								end
 							end
-
-
 						end
 					else
-
 						key[occurenceN] = nil
-
 					end
 				end
 			end

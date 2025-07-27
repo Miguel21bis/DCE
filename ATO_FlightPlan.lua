@@ -7122,7 +7122,7 @@ end
 
 
 -- ajoute le warehouse des FARP ajouté par trigger
-if camp.needWarehouse then
+-- if camp.needWarehouse then
 	for _side, side in pairs(mission.coalition) do
 		for countryN, country in pairs(side.country) do
 			for category, groups in pairs(country) do
@@ -7132,6 +7132,8 @@ if camp.needWarehouse then
 							if unit.category and unit.category == "Heliports" then
 								if not warehouses.warehouses[unit.unitId] then
 									warehouses.warehouses[unit.unitId] = Data_warehouses
+									print("AtoFP: add warehouse for FARP "..unit.unitId.." || "..unit.name)
+									os.execute 'pause'
 								end
 							end
 						end
@@ -7140,7 +7142,7 @@ if camp.needWarehouse then
 			end
 		end
 	end
-end
+-- end
 
 --ajoute les modules necessaire dans le fichier mission
 if ListRequiredModules then

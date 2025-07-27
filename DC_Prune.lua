@@ -28,7 +28,8 @@ local pruneStatic =				mission_ini.PruneScriptConf.PruneStatic
 local pruneSam =				mission_ini.PruneScriptConf.ForcedPruneSam
 
 -- Liste des mots-clés à pruner
-local pruneKeywords = { "bag", "wall", "sand", "camouflage", "camouflage", "barrier", "container", "tent", "cargo", "soldier" , "vc_" }
+-- local pruneKeywords = { "bag", "wall", "sand", "camouflage", "barrier", "container", "tent", "cargo", "soldier" , "vc_" }
+local pruneKeywords = { }
 -- Liste des mots-clés à garder
 local keepKeywords = { "farp", "dallas", "paris" }
 
