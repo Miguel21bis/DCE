@@ -7130,8 +7130,8 @@ if camp.needWarehouse then
 					for groupN, groupData in pairs(groups["group"]) do
 						for unitN, unit in pairs(groupData.units) do
 							if unit.category and unit.category == "Heliports" then
-								if not warehouses[unit.unitId] then
-									warehouses[unit.unitId] = Data_warehouses
+								if not warehouses.warehouses[unit.unitId] then
+									warehouses.warehouses[unit.unitId] = Data_warehouses
 								end
 							end
 						end

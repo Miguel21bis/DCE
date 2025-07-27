@@ -2061,16 +2061,16 @@ Action = {}
 									-- print("DcCT  vehicle CurrentUnitId: "..CurrentUnitId.." name: "..unit.name)
 
 									--active le wareHouse de la FARP
-									if unit.category == "Heliports" then
-										if Data_warehouses then
-                                        warehouses[unit.unitId] = Data_warehouses
-											camp.needWarehouse = camp.needWarehouse or {}
-											camp.needWarehouse[unit.unitId] = true
-											print("DcCT FARP detected, warehouse["..unit.unitId.."] activated "..unit.name)
-											os.execute 'pause'
-										end
+									-- if unit.category == "Heliports" then
+									-- 	if Data_warehouses then
+                                    --     	warehouses[unit.unitId] = Data_warehouses
+									-- 		camp.needWarehouse = camp.needWarehouse or {}
+									-- 		camp.needWarehouse[unit.unitId] = true
+									-- 		print("DcCT FARP detected, warehouse["..unit.unitId.."] activated "..unit.name)
+									-- 		os.execute 'pause'
+									-- 	end
 
-									end
+									-- end
 								end
 							end
 
