@@ -125,24 +125,12 @@ function AddSoldierAliasPilot(element)
                             ["tasks"] =
                             {
                                 [1] =
-                                {
-                                    ["number"] = 1,
-                                    ["auto"] = false,
-                                    ["id"] = "EmbarkToTransport",
-                                    ["enabled"] = true,
-                                    ["params"] =
-                                    {
-                                        ["y"] = tonumber(element.y2d),
-                                        ["x"] = tonumber(element.x2d),
-                                        ["zoneRadius"] = 2000,
-                                    }, -- end of ["params"]
-                                }, -- end of [1]
-								[2] =
 								{
 									["enabled"] = true,
 									["auto"] = false,
 									["id"] = "WrappedAction",
-									["number"] = 2,
+                                    ["name"] = "Tir defensif",
+									["number"] = 1,
 									["params"] =
 									{
 										["action"] =
@@ -156,47 +144,21 @@ function AddSoldierAliasPilot(element)
 										}, -- end of ["action"]
 									}, -- end of ["params"]
 								}, -- end of [2]
-                                -- [3] = 
-                                -- {
-                                --     ["enabled"] = true,
-                                --     ["auto"] = false,
-                                --     ["id"] = "WrappedAction",
-                                --     ["number"] = 3,
-                                --     ["params"] = 
-                                --     {
-                                --         ["action"] = 
-                                --         {
-                                --             ["id"] = "TransmitMessage",
-                                --             ["params"] = 
-                                --             {
-                                --                 ["loop"] = true,
-                                --                 ["subtitle"] = "DictKey_subtitle_50",
-                                --                 ["duration"] = 5,
-                                --                 ["file"] = "ResKey_advancedFile_51",
-                                --             }, -- end of ["params"]
-                                --         }, -- end of ["action"]
-                                --     }, -- end of ["params"]
-                                -- }, -- end of [3]
-                                -- [4] = 
-                                -- {
-                                --     ["enabled"] = true,
-                                --     ["auto"] = false,
-                                --     ["id"] = "WrappedAction",
-                                --     ["number"] = 4,
-                                --     ["params"] = 
-                                --     {
-                                --         ["action"] = 
-                                --         {
-                                --             ["id"] = "SetFrequency",
-                                --             ["params"] = 
-                                --             {
-                                --                 ["power"] = 1,
-                                --                 ["modulation"] = 0,
-                                --                 ["frequency"] = 121500000,
-                                --             }, -- end of ["params"]
-                                --         }, -- end of ["action"]
-                                --     }, -- end of ["params"]
-                                -- }, -- end of [4]
+                                [2] =
+                                {
+                                    ["number"] = 2,
+                                    ["auto"] = false,
+                                    ["id"] = "EmbarkToTransport",
+                                    ["enabled"] = true,
+                                    ["params"] =
+                                    {
+                                        ["y"] = tonumber(element.y2d),
+                                        ["x"] = tonumber(element.x2d),
+                                        ["zoneRadius"] = 2000,
+                                    }, -- end of ["params"]
+                                }, -- end of [2]
+
+                      
                             }, -- end of ["tasks"]
                         }, -- end of ["params"]
                     }, -- end of ["task"]

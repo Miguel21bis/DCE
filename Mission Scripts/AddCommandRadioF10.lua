@@ -1917,31 +1917,41 @@ local function activateRadioBeacon(arguments)
 
 	local gpGid = arguments[1]
 	local ejectedPilot = arguments[2]
-
 	local pilEjectObj = Unit.getByName(ejectedPilot.name)
 
-	if pilEjectObj and camp.EjectedPilotFrequency and camp.EjectedPilotFrequency[ejectedPilot.side] then
+	if camp.EjectedPilotFrequency and camp.EjectedPilotFrequency[ejectedPilot.side] then
 
-		env.info( "AddCRF10:activateRadioBeacon  pilEjectObj:isExist "..tostring(pilEjectObj:isExist()))
+		if pilEjectObj then
 
-		if not ejectedPilot.embarked  and pilEjectObj:isExist()  then
-			local pilEjectPos = pilEjectObj:getPoint()
+			env.info( "AddCRF10:activateRadioBeacon  pilEjectObj:isExist "..tostring(pilEjectObj:isExist()))
 
-			env.info( "AddCRF10:activateRadioBeacon  pilEjectPos.y "..tostring(pilEjectPos.y))
+			if not ejectedPilot.embarked  and pilEjectObj:isExist()  then
+				local pilEjectPos = pilEjectObj:getPoint()
 
-			local modulation = 0	--AM
-			if camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon < 90000000 then
-				modulation = 1	--FM
+				env.info( "AddCRF10:activateRadioBeacon  pilEjectPos.y "..tostring(pilEjectPos.y))
+
+				local modulation = 0	--AM
+				local modulationTxt = "AM"	--AM
+				if camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon < 90000000 then
+					modulation = 1	--FM
+					modulationTxt = "FM"
+				end
+
+				trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', ejectedPilot.position, modulation, true, camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon, 0.1, 'radioBeacon_'..ejectedPilot.name)
+
+				local freqShow = camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon / 1000000
+				trigger.action.outTextForGroup(gpGid, "activate RadioBeacon on : "..freqShow.." "..modulationTxt, 45 , true)
 			end
+		else
+			trigger.action.outTextForGroup(gpGid, "No response, the pilot may have been captured or killed. ", 15 , true)
 
-			trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', ejectedPilot.position, modulation, true, camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon, 0.1, 'radioBeacon_'..ejectedPilot.name)
-
-			local freqShow = camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon / 1000000
-			trigger.action.outTextForGroup(gpGid, "activate RadioBeacon on : "..freqShow, 45 , true)
+			env.info( "AddCRF10:activateRadioBeacon Error no response  ejectedPilot.name "..tostring(ejectedPilot.name))
+			
+			_affiche(pilEjectObj, "pilEjectObj ")
 		end
 	else
-		trigger.action.outTextForGroup(gpGid, "Error, no frequency  ", 15 , true)
-		env.info( "Error, no frequency  ")
+		env.info( "DCE_activateRadioBeacon frequency Error,  side  "..tostring(ejectedPilot.side).." or Frequency: "..tostring(camp.EjectedPilotFrequency[ejectedPilot.side]))
+
 	end
 end
 
@@ -1999,13 +2009,13 @@ local function sar_F10(arg)
 	end
 
 	if listEjectPil and #listEjectPil >=1 then
-		table.sort(listEjectPil, function(a,b) return a.distance > b.distance  end)
+		table.sort(listEjectPil, function(a,b) return a.distance < b.distance  end)
 
 		for n , ejectPil in ipairs(listEjectPil) do
 
 			local txt = "..."
 			if ejectPil.MGRS_Chute_10KM then
-				txt = ejectPil.distance.." Km. "..ejectPil.MGRS_Chute_10KM.." "..txt
+				txt = ejectPil.distance.." Km. "..ejectPil.MGRS_Chute_10KM.." |"
 			else
 				txt = ejectPil.distance.." Km. Activates radio beacon "..ejectPil.name
 			end
