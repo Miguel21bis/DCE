@@ -71,6 +71,8 @@ TypePedroByCV = {}         --table used to store the type of Pedro by CV
 SmokeColor_EjectedPilot = trigger.smokeColor.Orange
 SmokeColor_TargetDesignation = trigger.smokeColor.Blue
 
+RadioWatt = 0.5 -- Radio power in watts, used for radio beacon transmission
+
 coalitionId = {
 	["0"] = "neutral",
 	["1"] = "red",
@@ -1937,10 +1939,10 @@ local function activateRadioBeacon(arguments)
 					modulationTxt = "FM"
 				end
 
-				trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', ejectedPilot.position, modulation, true, camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon, 0.1, 'radioBeacon_'..ejectedPilot.name)
+				trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', ejectedPilot.position, modulation, true, camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon, RadioWatt, 'radioBeacon_'..ejectedPilot.name)
 
 				local freqShow = camp.EjectedPilotFrequency[ejectedPilot.side].radioBeacon / 1000000
-				trigger.action.outTextForGroup(gpGid, "activate RadioBeacon on : "..freqShow.." "..modulationTxt, 45 , true)
+				trigger.action.outTextForGroup(gpGid, "activate RadioBeacon on : "..freqShow.." MHz "..modulationTxt, 45 , true)
 			end
 		else
 			trigger.action.outTextForGroup(gpGid, "No response, the pilot may have been captured or killed. ", 15 , true)
@@ -1955,7 +1957,13 @@ local function activateRadioBeacon(arguments)
 	end
 end
 
+function StopRadioBeaconTransmission(PilotName)
 
+	trigger.action.stopRadioTransmission('radioBeacon_'..PilotName)
+
+	env.info( "DCE_RADIO StopRadioBeaconTransmission  "..tostring('radioBeacon_'..PilotName))
+
+end
 
 	--************* SAR ejectedPilot PART ****************************************
 local function sar_F10(arg)
@@ -2023,6 +2031,7 @@ local function sar_F10(arg)
 			-- missionCommands.addCommandForGroup(gpGid, txt, {"Activate beacon radios"}, activateRadioBeacon, {gpGid, ejectPil}  )
 
 			missionCommands.addCommandForGroup(gpGid, txt, ejctedPilRadioON, activateRadioBeacon, {gpGid, ejectPil}  )
+			missionCommands.addCommandForGroup(gpGid, "Radio Off: "..ejectPil.name, ejctedPilRadioOFF, StopRadioBeaconTransmission, ejectPil  )
 
 		end
 	end
