@@ -95,50 +95,74 @@ end
 
 -- modification M64_a		adds elements of a new base_mission
 -- ajoute dans oob_ground les nouveaux éléments d'un nouveau base_mission en cours de campagne
-for side_name, side in pairs(mission.coalition) do																--iterate through sides
-	for country_n, country in pairs(side.country) do															--iterate through countries
-		if country.vehicle then																			--country has vehicles
-			for g = 1, #country.vehicle.group do														--iterate through vehicle groups
-				local foundGroup = false
-				for obC_n, obCountry in pairs(oob_ground[side_name]) do															--iterate through countries
-					if obCountry.vehicle then																			--country has vehicles
-						for o = 1, #obCountry.vehicle.group do														--iterate through vehicle groups
-							-- print("DcUOOBG vehicle: foundGroup ?: "..side_name.." "..country.vehicle.group[g].name
-							-- 	.." ==? "..obCountry.vehicle.group[o].name)
+for missSideName, side in pairs(mission.coalition) do
+    for missCountryN, missCountry in pairs(side.country) do
+        for missCategory, missGroups in pairs(missCountry) do
+			print("DcUOOBG 01 missGroups " ..
+				tostring(missSideName) ..
+                tostring(missCountryN) .. tostring(missCategory) .. " missGroups " .. tostring(missGroups))
 
-							if obCountry.vehicle.group[o].name == country.vehicle.group[g].name then
-								foundGroup = true
+			if type(missGroups) == "table" and missGroups.group then
+                print("DcUOOBG 02  " )
+				
+				for missGroupN, missGroup in ipairs(missGroups.group) do
+					print("DcUOOBG 03 missGroupN " .. missGroupN)
+					local foundGroup = false
+					for obC_n, obCountry in pairs(oob_ground[missSideName]) do
+						if obCountry[missCategory] then
+							for oobGroupN, oobGroup in ipairs(obCountry[missCategory].group) do
+								
+								-- print("DcUOOBG A "..missCategory..": foundGroup ?: "..missSideName.." "..missGroup.name
+								-- 	.." ==? "..oobGroup.name)
 
-								--met à jour les GroupId qui peuvent changer, si le base_mission à été changé aussi
-								if obCountry.vehicle.group[o].groupId ~= country.vehicle.group[g].groupId then
-									obCountry.vehicle.group[o].groupId = country.vehicle.group[g].groupId
-									print("DcUOOBG vehicle: upgrad groupId: " ..obCountry.vehicle.group[o].groupId.." "..obCountry.vehicle.group[o].name)
-									-- os.execute 'pause'
-								end
+								if oobGroup.name == missGroup.name then
+									foundGroup = true
 
-								--regarde si les type ont changé, mais uniquement ceux qui ne sont pas dans targetlist
-								--car les elements Dead sont déjà enlevé et fou le bordel
-								local isTarget = false
-								for Tside, targets in pairs(targetlist) do
-									for targetN, target in pairs(targets) do
-										if target.name == obCountry.vehicle.group[o].name then
-											isTarget = true
-											break
+									--met à jour les GroupId qui peuvent changer, si le base_mission à été changé aussi
+									if oobGroup.groupId ~= missGroup.groupId then
+										oobGroup.groupId = missGroup.groupId
+										print("DcUOOBG --> B " ..
+										missCategory .. ": upgrad groupId: " .. oobGroup.groupId .. " " .. oobGroup.name)
+										-- os.execute 'pause'
+									end
+									
+									--met à jour les unitId qui peuvent changer, si le base_mission à été changé aussi
+									-- tres important pour lier les pistes (FARP, base, CV CVN ) aux warehouses
+									for oobUnitN, oobUnit in ipairs(oobGroup.units) do
+										if warehouses.warehouses[missGroup.units[oobUnitN].unitId] then
+											if oobUnit.unitId ~= missGroup.units[oobUnitN].unitId then
+												oobUnit.unitId = missGroup.units[oobUnitN].unitId
+
+												print("DcUOOBG -- -- > C " .. missCategory .. ":: new type2: " .. oobUnit.type)
+												-- os.execute 'pause'
+											end
 										end
 									end
-									if isTarget then break end
-								end
 
-								if not isTarget then
-									if #country.vehicle.group[g].units ~= #obCountry.vehicle.group[o].units then
-										obCountry.vehicle.group[o].units = country.vehicle.group[g].units
-									else
-										for nUnit, unit in ipairs(obCountry.vehicle.group[o].units) do
-											if unit.type ~= country.vehicle.group[g].units[nUnit].type then
-												oob_ground[side_name][obC_n].vehicle.group[o].units[nUnit] = country.vehicle.group[g].units[nUnit]
+									--regarde si les type ont changé, mais uniquement ceux qui ne sont pas dans targetlist
+									--car les elements Dead sont déjà enlevé et fou le bordel
+									local isTarget = false
+									for targetSide, targets in pairs(targetlist) do
+										for targetN, target in pairs(targets) do
+											if target.name == oobGroup.name then
+												isTarget = true
+												break
+											end
+										end
+										if isTarget then break end
+									end
 
-												print("DcUOOBG vehicle: new type2: "..oob_ground[side_name][obC_n].vehicle.group[o].units[nUnit].type)
-												-- os.execute 'pause'
+									if not isTarget then
+										if #missGroup.units ~= #oobGroup.units then
+											oobGroup.units = missGroup.units
+										else
+											for oobUnitN, oobUnit in ipairs(oobGroup.units) do
+												if oobUnit.type ~= missGroup.units[oobUnitN].type then
+													oobUnit = missGroup.units[oobUnitN]
+
+													print("DcUOOBG -- -- -- > D " .. missCategory .. ":: new type2: " .. oobUnit.type)
+													-- os.execute 'pause'
+												end
 											end
 										end
 									end
@@ -146,124 +170,127 @@ for side_name, side in pairs(mission.coalition) do																--iterate thro
 							end
 						end
 					end
-				end
 
-				if not foundGroup then
-					-- ["id"] = 80,
-					-- ["name"] = "CJTF Blue",
+					if not foundGroup then
+						-- ["id"] = 80,
+						-- ["name"] = "CJTF Blue",
 
-					if not oob_ground[side_name][country_n] then 
-						-- if #oob_ground[side_name] ~= country_n then
-						-- 	print("DcUOoBG futur bug, #country ne correspond pas avec le nouvel element ajouté")
-						-- 	print("#oob_ground[side_name] "..tostring(#oob_ground[side_name]).." country_n: "..country_n)
-						-- end
-						
-						oob_ground[side_name][country_n] = {
-							["id"] = country.id,
-							["name"] = tostring(country.name),
-							vehicle = {
-								group = {}
+						if not oob_ground[missSideName][missCountryN] then 
+							-- if #oob_ground[missSideName] ~= missCountryN then
+							-- 	print("DcUOoBG futur bug, #country ne correspond pas avec le nouvel element ajouté")
+							-- 	print("#oob_ground[missSideName] "..tostring(#oob_ground[missSideName]).." missCountryN: "..missCountryN)
+							-- end
+							
+							oob_ground[missSideName][missCountryN] = {
+								["id"] = missCountry.id,
+								["name"] = tostring(missCountry.name),
+								[missCategory] = {
+									group = {}
+								}
 							}
-						}
-					end
-
-					-- print("DcUOOBG vehicle: no foundGroup  "..tostring(side_name).." country_n "..tostring(country_n).." g "..tostring(g))
-
-					table.insert(oob_ground[side_name][country_n].vehicle.group, country.vehicle.group[g])
-					print("DcUOOBG vehicle: no foundGroup => table.insert: "..side_name.." "..country.vehicle.group[g].name)
-					-- os.execute 'pause'
-				end
-			end
-		end
-		if country.static then																			--country has static objects
-			for g = 1, #country.static.group do															--iterate through static groups
-				local foundGroup = false
-				for obC_n, obCountry in pairs(oob_ground[side_name]) do															--iterate through countries
-					if obCountry.static then																			--country has vehicles
-						for o = 1, #obCountry.static.group do														--iterate through vehicle groups
-							if obCountry.static.group[o].name == country.static.group[g].name then
-								foundGroup = true
-								-- --met à jour les GroupId qui peuvent changer, si le base_mission à été changé aussi
-								-- if obCountry.static.group[o].groupId ~= country.static.group[g].groupId then
-								-- 	obCountry.static.group[o].groupId = country.static.group[g].groupId
-								-- 	print("DcUOOBG static: upgrad groupId: " ..obCountry.static.group[o].groupId.." "..obCountry.static.group[o].name)
-								-- 	-- os.execute 'pause'
-								-- end
-
-								if obCountry.static.group[o].units[1].type ~= 	country.static.group[g].units[1].type then
-									print("DcUOOBG static: type changed: "..obCountry.static.group[o].units[1].type.." != "..country.static.group[g].units[1].type)
-									obCountry.static.group[o].units[1] = obCountry.static.group[o].units[1]
-									-- os.execute 'pause'
-								end
-							end
 						end
+
+						-- print("DcUOOBG vehicle: no foundGroup  "..tostring(missSideName).." missCountryN "..tostring(missCountryN).." g "..tostring(g))
+
+						table.insert(oob_ground[missSideName][missCountryN][missCategory].group, missGroup)
+						print("DcUOOBG vehicle: no foundGroup => table.insert: "..missSideName.." "..missGroup.name)
+						-- os.execute 'pause'
 					end
-				end
-				if not foundGroup and not string.find(country.static.group[g].name, "Dead") then
-					table.insert(oob_ground[side_name][country_n].static.group, country.static.group[g])
-					print("DcUOOBG static: no foundGroup => table.insert: "..side_name.." "..country.static.group[g].name)
-					-- os.execute 'pause'
 				end
 			end
 		end
-		if country.ship then																			--country has ships
-			for g = 1, #country.ship.group do														--iterate through ship groups
-				local foundGroup = false
-				for obC_n, obCountry in pairs(oob_ground[side_name]) do															--iterate through countries
-					if obCountry.ship then																			--country has ships
-						for o = 1, #obCountry.ship.group do														--iterate through ship groups
-							-- print("DcUOOBG ship: foundGroup ?: "..side_name.." "..country.ship.group[g].name
-							-- 	.." ==? "..obCountry.ship.group[o].name)
 
-							if obCountry.ship.group[o].name == country.ship.group[g].name then
-								foundGroup = true
+		os.execute('pause')
 
-								--met à jour les GroupId qui peuvent changer, si le base_mission à été changé aussi
-								if obCountry.ship.group[o].groupId ~= country.ship.group[g].groupId then
-									obCountry.ship.group[o].groupId = country.ship.group[g].groupId
-									print("DcUOOBG ship: upgrad groupId: " ..obCountry.ship.group[o].groupId.." "..obCountry.ship.group[o].name)
-									-- os.execute 'pause'
-								end
+		-- if country.static then																			--country has static objects
+		-- 	for g = 1, #country.static.group do															--iterate through static groups
+		-- 		local foundGroup = false
+		-- 		for obC_n, obCountry in pairs(oob_ground[missSideName]) do															--iterate through countries
+		-- 			if obCountry.static then																			--country has vehicles
+		-- 				for o = 1, #obCountry.static.group do														--iterate through vehicle groups
+		-- 					if obCountry.static.group[o].name == country.static.group[g].name then
+		-- 						foundGroup = true
+		-- 						-- --met à jour les GroupId qui peuvent changer, si le base_mission à été changé aussi
+		-- 						-- if obCountry.static.group[o].groupId ~= country.static.group[g].groupId then
+		-- 						-- 	obCountry.static.group[o].groupId = country.static.group[g].groupId
+		-- 						-- 	print("DcUOOBG static: upgrad groupId: " ..obCountry.static.group[o].groupId.." "..obCountry.static.group[o].name)
+		-- 						-- 	-- os.execute 'pause'
+		-- 						-- end
 
-								--regarde si les type ont changé, mais uniquement ceux qui ne sont pas dans targetlist
-								--car les elements Dead sont déjà enlevé et fou le bordel
-								local isTarget = false
-								for Tside, targets in pairs(targetlist) do
-									for targetN, target in pairs(targets) do
-										if target.name == obCountry.ship.group[o].name then
-											isTarget = true
-											break
-										end
-									end
-									if isTarget then break end
-								end
+		-- 						if obCountry.static.group[o].units[1].type ~= 	country.static.group[g].units[1].type then
+		-- 							print("DcUOOBG static: type changed: "..obCountry.static.group[o].units[1].type.." != "..country.static.group[g].units[1].type)
+		-- 							obCountry.static.group[o].units[1] = obCountry.static.group[o].units[1]
+		-- 							-- os.execute 'pause'
+		-- 						end
+		-- 					end
+		-- 				end
+		-- 			end
+		-- 		end
+		-- 		if not foundGroup and not string.find(country.static.group[g].name, "Dead") then
+		-- 			table.insert(oob_ground[missSideName][missCountryN].static.group, country.static.group[g])
+		-- 			print("DcUOOBG static: no foundGroup => table.insert: "..missSideName.." "..country.static.group[g].name)
+		-- 			-- os.execute 'pause'
+		-- 		end
+		-- 	end
+		-- end
+		-- if country.ship then																			--country has ships
+		-- 	for g = 1, #country.ship.group do														--iterate through ship groups
+		-- 		local foundGroup = false
+		-- 		for obC_n, obCountry in pairs(oob_ground[missSideName]) do															--iterate through countries
+		-- 			if obCountry.ship then																			--country has ships
+		-- 				for o = 1, #obCountry.ship.group do														--iterate through ship groups
+		-- 					-- print("DcUOOBG ship: foundGroup ?: "..missSideName.." "..country.ship.group[g].name
+		-- 					-- 	.." ==? "..obCountry.ship.group[o].name)
 
-								if not isTarget then
-									if #country.ship.group[g].units ~= #obCountry.ship.group[o].units then
-										obCountry.ship.group[o].units = country.ship.group[g].units
-									else
-										for nUnit, unit in ipairs(obCountry.ship.group[o].units) do
-											if unit.type ~= country.ship.group[g].units[nUnit].type then
-												oob_ground[side_name][obC_n].ship.group[o].units[nUnit] = country.ship.group[g].units[nUnit]
+		-- 					if obCountry.ship.group[o].name == country.ship.group[g].name then
+		-- 						foundGroup = true
 
-												print("DcUOOBG ship: new type2: "..oob_ground[side_name][obC_n].ship.group[o].units[nUnit].type)
-												-- os.execute 'pause'
-											end
-										end
-									end
-								end
-							end
-						end
-					end
-				end
+		-- 						--met à jour les GroupId qui peuvent changer, si le base_mission à été changé aussi
+		-- 						if obCountry.ship.group[o].groupId ~= country.ship.group[g].groupId then
+		-- 							obCountry.ship.group[o].groupId = country.ship.group[g].groupId
+		-- 							print("DcUOOBG ship: upgrad groupId: " ..obCountry.ship.group[o].groupId.." "..obCountry.ship.group[o].name)
+		-- 							-- os.execute 'pause'
+		-- 						end
 
-				if not foundGroup then
-					table.insert(oob_ground[side_name][country_n].ship.group, country.ship.group[g])
-					print("DcUOOBG ship: no foundGroup => table.insert: "..side_name.." "..country.ship.group[g].name)
-					-- os.execute 'pause'
-				end
-			end
-		end
+		-- 						--regarde si les type ont changé, mais uniquement ceux qui ne sont pas dans targetlist
+		-- 						--car les elements Dead sont déjà enlevé et fou le bordel
+		-- 						local isTarget = false
+		-- 						for Tside, targets in pairs(targetlist) do
+		-- 							for targetN, target in pairs(targets) do
+		-- 								if target.name == obCountry.ship.group[o].name then
+		-- 									isTarget = true
+		-- 									break
+		-- 								end
+		-- 							end
+		-- 							if isTarget then break end
+		-- 						end
+
+		-- 						if not isTarget then
+		-- 							if #country.ship.group[g].units ~= #obCountry.ship.group[o].units then
+		-- 								obCountry.ship.group[o].units = country.ship.group[g].units
+		-- 							else
+		-- 								for nUnit, unit in ipairs(obCountry.ship.group[o].units) do
+		-- 									if unit.type ~= country.ship.group[g].units[nUnit].type then
+		-- 										oob_ground[missSideName][obC_n].ship.group[o].units[nUnit] = country.ship.group[g].units[nUnit]
+
+		-- 										print("DcUOOBG ship: new type2: "..oob_ground[missSideName][obC_n].ship.group[o].units[nUnit].type)
+		-- 										-- os.execute 'pause'
+		-- 									end
+		-- 								end
+		-- 							end
+		-- 						end
+		-- 					end
+		-- 				end
+		-- 			end
+		-- 		end
+
+		-- 		if not foundGroup then
+		-- 			table.insert(oob_ground[missSideName][missCountryN].ship.group, country.ship.group[g])
+		-- 			print("DcUOOBG ship: no foundGroup => table.insert: "..missSideName.." "..country.ship.group[g].name)
+		-- 			-- os.execute 'pause'
+		-- 		end
+		-- 	end
+		-- end
 	end
 end
 
@@ -275,19 +302,19 @@ end
 -- 		if obCountry.vehicle then																			--country has vehicles
 -- 			-- for t = #threat, 1, -1 do
 -- 			for o = #obCountry.vehicle.group, 1, -1 do														--iterate through vehicle groups
--- 				if  string.find(string.lower(obCountry.vehicle.group[o].name),"farp") then
+-- 				if  string.find(string.lower(oobGroup.name),"farp") then
 -- 					local foundGroup = false
 -- 					for countryN, country in pairs(mission.coalition[side_name].country) do															--iterate through countries
 -- 						if country.vehicle then																			--country has vehicles
 -- 							for g = 1, #country.vehicle.group do
--- 								if obCountry.vehicle.group[o].name == country.vehicle.group[g].name then
+-- 								if oobGroup.name == country.vehicle.group[g].name then
 -- 									foundGroup = true
 -- 								end
 -- 							end
 -- 						end
 -- 					end
 -- 					if not foundGroup then
--- 						print("DcUOOBG remove vehicle: no foundGroup: "..side_name.." "..obCountry.vehicle.group[o].name)
+-- 						print("DcUOOBG remove vehicle: no foundGroup: "..side_name.." "..oobGroup.name)
 -- 						table.remove(oob_ground[side_name][country_n].vehicle.group, o)
 -- 						-- table.insert(tabRemoveGroupe, o)
 						

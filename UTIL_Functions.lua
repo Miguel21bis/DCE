@@ -4439,7 +4439,12 @@ function LoadFileAndUpdate(from)
 	local misStrFunc = loadstring(misStr)()
 
 	NameTheatreLower =  string.lower(mission.theatre)
-	NameTheatre =  mission.theatre
+    NameTheatre = mission.theatre
+	
+	--util pour connaitre les warehouses utilisé lors du script DC_UpdateOOBGround.lua
+	zipFile:unzLocateFile('warehouses')
+	local warStr = zipFile:unzReadAllCurrentFile()
+	local warStrFunc = loadstring(warStr)()
 
 	CheckAll_Id()
 

@@ -710,7 +710,11 @@ camp["groundthreats"] = groundthreats
 mission.currentKey = 1010000															--not clear how this works but is required for multiplyer clients to be available for selection on mission start
 
 --########   1   ##############
+--########   1   ##############
 --check les doublons de name, groupId et unitId
+--########   1   ##############
+--########   1   ##############
+
 local GroupId = {}
 local uniId = {}
 local name = {}
@@ -742,14 +746,16 @@ for side_name, side in pairs(mission.coalition) do
 							-- os.execute 'pause'
 						end
 
-						if not  GroupId[group_.groupId] then
+						
+						if not GroupId[group_.groupId] then
 							GroupId[group_.groupId] = group_.groupId
 						else
 							-- print("MainNM error, duplicate of |"..categorie.."| OLD GroupId |".. GroupId[group_.groupId].."|and|"..tostring(group_.name) )
 
-							table.insert(groupIdError,group_.name )
+							table.insert(groupIdError, group_.name )
 						end
 
+						--TODO ajouter ici une condition pour que les unitId des pistes (FARP et autres) ne soient pas changé
 						for unitN, unit in ipairs(group_.units) do
 
 							if unit.unitId > maxUnitId then
@@ -763,7 +769,7 @@ for side_name, side in pairs(mission.coalition) do
 								uniId[unit.unitId] = unit.unitId
 							else
 								-- print("MainNM error, duplicate of |"..tostring(categorie).."| OLD uniId |".. tostring(uniId[unit.unitId]) .."|and|"..tostring(unit.name))
-								table.insert(unitIdError,unit.name )
+								table.insert(unitIdError, unit.name )
 							end
 
 						end
@@ -1440,18 +1446,3 @@ if Debug.debug or mission_ini.backupAllMissionFiles then
     end
 end
 
-	-- local camp_str = "mapResource = " .. TableSerialization(mapResource, 0)						--make a string
-	-- local campFile = io.open("Debug/mapResource_MainNM_B.lua", "w")  or error("Failed to open debug file")
-	-- campFile:write(camp_str)																		--save new data
-	-- campFile:close()
-
-	-- os.execute 'pause'
-
--- if Debug.debug then
--- 	local camp_str = "mission = " .. TableSerialization(mission, 0)						--make a string
--- 	local campFile = io.open("Debug/mission_MainNM.lua", "w") or error("Failed to open debug file")
--- 	campFile:write(camp_str)															--save new data
--- 	campFile:close()
--- end
-
--- print("camp.time B  "..tostring(camp.time).." "..FormatTime(camp.time, "hh:mm"))
