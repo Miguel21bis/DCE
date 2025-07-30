@@ -2561,7 +2561,7 @@ if camp.endCampaign  then
 
 
 
-	os.execute 'pause'
+	-- os.execute 'pause'
 end
 
 -- local trigStr = "camp_triggers = " .. TableSerialization(camp_triggers, 0)

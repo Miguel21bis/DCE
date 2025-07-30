@@ -71,7 +71,7 @@ TypePedroByCV = {}         --table used to store the type of Pedro by CV
 SmokeColor_EjectedPilot = trigger.smokeColor.Orange
 SmokeColor_TargetDesignation = trigger.smokeColor.Blue
 
-RadioWatt = 0.5 -- Radio power in watts, used for radio beacon transmission
+RadioWatt = 1 -- Radio power in watts, used for radio beacon transmission
 
 coalitionId = {
 	["0"] = "neutral",
