@@ -320,8 +320,7 @@ for sideName, side in pairs(DCS_Side) do
 	for n=1, 2 do
 		local testFreqency = tonumber(CommonFreq[side]["UHF"][n])
 		if tonumber(CommonFreq[side]["UHF"][n]) == 243 or tonumber(CommonFreq[side]["UHF"][n]) == 121.5 then
-			print("ATTENTION GUARD Frequence Commune "..tostring(testFreqency))
-			os.execute 'pause'
+			print("ATTENTION GUARD Frequence Commune "..tostring(testFreqency)) os.execute 'pause'
 		end
 	end
 end
@@ -515,9 +514,7 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 						print()
 						print("********************ATTENTION******************")
 						print("***************Note for the Campaign Maker*****The nation of a previous aircraft misfiled in the table  conf_mod/campMod.WestCallsign or ATO_FlightPlan/country****************")
-						print("********************ATTENTION******************")
-						print()
-						os.execute 'pause'
+						print("********************ATTENTION******************") os.execute 'pause'
 					end
 
 					local ii = 1
@@ -529,9 +526,8 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 							print("AtoFp Error GetCal..callsign: "..tostring(category))
 							_affiche(Callsign_west , "Callsign_west")
 
-							_affiche(Callsign_west_counter, "Callsign_west_counter ")
-
-							os.execute 'pause'
+							_affiche(Callsign_west_counter, "Callsign_west_counter ") 
+							print("Error") os.execute 'pause'
 						end
 
 
@@ -583,8 +579,8 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 
 	if callsign == nil then
 		-- print("AtoFP ERROR callsign == nil , style: "..tostring(style).." country: "..tostring(country) .." WestCallsign: "..tostring(WestCallsign[country]) )
-		print("AtoFP ERROR callsign == nil , style: "..tostring(style).." country: "..tostring(country)  )
-		os.execute 'pause'
+		print("AtoFP ERROR callsign == nil , style: "..tostring(style).." country: "..tostring(country)  ) 
+		print("Error") os.execute 'pause'
 	end
 	return callsign
 end
@@ -728,8 +724,8 @@ local function Get_L16_Id()
 	STN_L16_Id[testId] = true
 
 	if i >= 900 then
-		print("AtoFP Get_L16_Id trop long "..i.." test "..testId)
-		os.execute 'pause'
+		print("AtoFP Get_L16_Id trop long "..i.." test "..testId) 
+		print("Error") os.execute 'pause'
 	end
 
 	return testId
@@ -754,8 +750,8 @@ local function Get_SADL_Id()
 
 
 	if i >= 300 then
-		print("AtoFP SADL_TN_Id trop long "..i.." test "..testId)
-		os.execute 'pause'
+		print("AtoFP SADL_TN_Id trop long "..i.." test "..testId) 
+		print("Error") os.execute 'pause'
 	end
 
 	return testId
@@ -780,8 +776,8 @@ local function get_IDM_Id()
 	until IDM_Id[testId] == nil or i >= 300
 
 	if i >= 300 then
-		print("AtoFP IDM_Id trop long "..i.." test "..testId)
-		os.execute 'pause'
+		print("AtoFP IDM_Id trop long "..i.." test "..testId) 
+		print("Error") os.execute 'pause'
 	end
 
 	return testId
@@ -796,8 +792,7 @@ for basename, base in pairs(db_airbases) do
 			Assigned_freq[tonumber(freq)] = basename
 		end
 	else
-		-- _affiche(base.ATC_frequency, "AA base.ATC_frequency")
-		-- os.execute 'pause'
+		-- _affiche(base.ATC_frequency, "AA base.ATC_frequency") 
 	end
 end
 
@@ -835,8 +830,6 @@ for basename, base in pairs(db_airbases) do															--iterate through airb
 	end
 end
 
--- _affiche(channel_tacan, "channel_tacan")
--- os.execute 'pause'
 
 local function GetTankerTACAN(tarnetName)
 
@@ -1463,8 +1456,8 @@ local function createBombingChapter(id_task ,flight ,waypoints, weaponType, atta
 			},
 		}
 	elseif id_task == ""  then
-		print("AtoFp no id_task from "..tostring(from))
-		os.execute 'pause'
+		print("AtoFp no id_task from "..tostring(from)) 
+		print("Error") os.execute 'pause'
 	end
 
 	return task_entry
@@ -2024,8 +2017,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 														id_task = idStrike_
 														GoupTaskTemp = task_
 
-														-- print("AtoFP Ship après le GoupTaskTemp après "..flight[f].type.." "..tostring(GoupTaskTemp).." id_task: "..tostring(id_task))
-														-- os.execute 'pause'
 														goodTask = true
 														breakloop = true
 														break
@@ -2036,19 +2027,13 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 														id_task = idStrike_
 														GoupTaskTemp = task_
 
-														-- print("AtoFP Runway après GoupTaskTemp après "..flight[f].type.." "..tostring(GoupTaskTemp).." id_task: "..tostring(id_task))
-														-- os.execute 'pause'
 														goodTask = true
 														breakloop = true
 														break
 													elseif not (task_ == "Runway Attack" or  task_ == "Antiship Strike" )then
-														-- print("AtoFP  GoupTaskTemp avant "..tostring(GoupTaskTemp))
-
 														id_task = idStrike_
 														GoupTaskTemp = task_
 
-														-- print("AtoFP  GoupTaskTemp après "..flight[f].type.." "..tostring(GoupTaskTemp).." id_task: "..tostring(id_task))
-														-- os.execute 'pause'
 														goodTask = true
 														breakloop = true
 														break
@@ -2077,9 +2062,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 									id_task = idStrike_
 
-									-- print("AtoFP #12 FOUND choix  |"..tostring(GoupTaskTemp).."| |"..tostring(id_task))
-									-- os.execute 'pause'
-
 									breakloop = true
 									break
 								end
@@ -2092,7 +2074,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 					if not breakloop then
 						-- print("AtoFP #14 choix  "..tostring(GoupTaskTemp).." id_task "..tostring(id_task).." typeCible "..tostring(typeCible))
-						-- os.execute 'pause'
 					end
 				end
 
@@ -2105,7 +2086,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					if GoupTaskTemp ~= "Runway Attack" then
 						print("(downgraded mode  : don t found task "..flight[f].task.." of the "..flight[f].type.. "in the oob_air_init.lua file")
 						print("typeCible "..typeCible.." || "..flight[f].type.." "..GoupTaskTemp.." "..tostring(flight[f].target.name))
-						-- os.execute 'pause'
 					end
 
 					if  TaskByPlane["Ground Attack"][flight[f].type]   then
@@ -2142,8 +2122,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				if not goodTask then
 					print("(Error AtoFp 11  : bad task: remove |"..flight[f].task.."| of the |"..flight[f].type.. "| in the oob_air_init.lua file")
-					print("typeCible "..typeCible.." || "..flight[f].type.." "..GoupTaskTemp.." "..tostring(flight[f].target.name))
-					os.execute 'pause'
+					print("typeCible "..typeCible.." || "..flight[f].type.." "..GoupTaskTemp.." "..tostring(flight[f].target.name)) 
+					print("Error") os.execute 'pause'
 				end
 
 
@@ -2430,8 +2410,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							print("AtoFP ATO_FP_Debug08 vi trop faible pour les escorteurs des strike trop lent 	")
 							print()
 
-							_affiche(flight[f], "flight[f]")
-							os.execute 'pause'
+							_affiche(flight[f], "flight[f]") 
+							print("Error") os.execute 'pause'
 						end
 
 					end
@@ -3545,7 +3525,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							local searchTime = flight[f].route[#flight[f].route].eta
 							if not flight[f].loadout.standoff then
 								print("no standoff in the loadout of the task ..Fighter Sweep.. of the type: "..tostring(flight[f].type))
-								os.execute "pause"
+								print("Error") os.execute 'pause'
 							end
 							local task_entry = {
 								["enabled"] = true,
@@ -3578,7 +3558,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 								if not flight[f].loadout.standoff then
 									print("no standoff in the loadout of the task ..Escort.. of the type: "..tostring(flight[f].type))
-									os.execute "pause"
+									print("Error") os.execute 'pause'
 								end
 
 								local searchTime = flight[f].route[#flight[f].route].eta
@@ -4338,8 +4318,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					if flight[f].task == "Anti-ship Strike" and wptTargetPass and  waypoints[w]["name"] ~= "Land"  then
 						waypoints[w].ETA_locked = false
 						waypoints[w].speed_locked = true
-						-- print("AtoFP ETA_locked false")
-						-- os.execute 'pause'
 					end
 
 				end	-- Fin de Route
@@ -4391,9 +4369,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					if flight[f].player or flight[f].client then
 						waypoints[1].ETA = 0
-						-- Display(waypoints[1])
-						-- Display(waypoints[2])
-						-- os.execute 'pause'
 					end
 
 					waypoints[1].ETA_locked = true
@@ -5080,8 +5055,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					if not FreqCapability2(testFreqency, type_withData, 1, info) then
 						print("AtoFP error frequency: "..type_withData.." "..testFreqency)
-						_affiche(frequency[type_withData].radio, "UtilF frequency[flightType].radio")
-						os.execute 'pause'
+						_affiche(frequency[type_withData].radio, "UtilF frequency[flightType].radio") 
+						print("Error") os.execute 'pause'
 					end
 				end
 
@@ -5100,16 +5075,16 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						if testFreqency < frequency[type_withData].onlyVariableFrequency.min
 						or testFreqency > frequency[type_withData].onlyVariableFrequency.max
 						then
-							print("AtoFp frequency BUG with "..tostring(type_withData).." frequency: "..tostring(testFreqency))
-							os.execute 'pause'
+							print("AtoFp frequency BUG with "..tostring(type_withData).." frequency: "..tostring(testFreqency)) 
+							print("Error") os.execute 'pause'
 						end
 					end
 				end
 
 
 				if tonumber(testFreqency) == 243 or tonumber(testFreqency) == 121.5 then
-					print("ATTENTION GUARD Frequence "..tostring(testFreqency))
-					os.execute 'pause'
+					print("ATTENTION GUARD Frequence "..tostring(testFreqency)) 
+					print("Error") os.execute 'pause'
 				end
 
 				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe waypoints[1][x] AA "..tostring(waypoints[1]["x"])) end
@@ -6131,9 +6106,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						-- SpawnOn( "air", waypoints, group, Pn, spawn_time + 300, BugFrom, flight, f)	
 
 						if not spawn_time or spawn_time == nil then
-							_affiche(group, "group No spawn_time")
-
-							os.execute 'pause'
+							_affiche(group, "group No spawn_time") 
+							print("Error") os.execute 'pause'
 
 						end
 
@@ -6641,8 +6615,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					if dataIdCountry == nil or dataIdCountry == "" then
 						print("******ATTENTION****** no found this contry "..tostring(flight[f].country).." into dataCoutrys")
-						print()
-						os.execute 'pause'
+						print("Error")  os.execute 'pause'
 					end
 
 					--cherche l idCoutry de plane demandé
@@ -6830,8 +6803,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						info01 = info01.." |+|ATTENTION VOL sans a_activate_group "
 					elseif a_activate2 > 1 then
 						info01 = info01.." |+|ATTENTION VOL (many times) "..a_activate2.." a_activate_group "
-						print("AtoFP "..group.name.." |+|ATTENTION VOL (many times) "..a_activate2.." a_activate_group ")
-						os.execute 'pause'
+						print("AtoFP "..group.name.." |+|ATTENTION VOL (many times) "..a_activate2.." a_activate_group ") 
+						print("Error") os.execute 'pause'
 					end
 				end
 
@@ -6851,8 +6824,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					else
 						info02 = info02.." |ATTENTION MANQUE Start "..group.groupId
-						print("AtoFp info02"..info02)
-						os.execute 'pause'
+						print("AtoFp info02"..info02) 
+						print("Error") os.execute 'pause'
 					end
 				end
 
@@ -7027,7 +7000,6 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					if group.route.points[1]["ETA"] < 0 then
 						--TODO regler les ETA negatif
 						-- print("AtoFP ETA négatif: "..tostring(waypoints[1]["ETA"]))
-						-- os.execute 'pause'
 					end
 				else
 
@@ -7132,8 +7104,7 @@ end
 							if unit.category and unit.category == "Heliports" then
 								if not warehouses.warehouses[unit.unitId] then
 									warehouses.warehouses[unit.unitId] = Data_warehouses
-									print("AtoFP: add warehouse for FARP "..unit.unitId.." || "..unit.name)
-									os.execute 'pause'
+									-- print("AtoFP: add warehouse for FARP "..unit.unitId.." || "..unit.name)
 								end
 							end
 						end
@@ -7354,9 +7325,8 @@ for CV, SixPack in pairs(testSixPack) do
 					print("        You MUST set the server to PAUSE")
 					print("          (to appear on the SIXPACK) ")
 					print()
-					print("********************ATTENTION******************")
-					print()
-					os.execute 'pause'
+					print("********************ATTENTION******************") 
+					print("ATTENTION")os.execute 'pause'
 
 
 				elseif  SingleWithDServer then	-- and not SingleWithDServerAiAirthen	
@@ -7369,8 +7339,7 @@ for CV, SixPack in pairs(testSixPack) do
 					print("(so that you don't appear on the Sixpack, you'd be annoying the AIs that will be driving before you) ")
 					print()
 					print("*****************************************ATTENTION***************************************************")
-					print()
-					os.execute 'pause'
+					print("ATTENTION") os.execute 'pause'
 				end
 			end
 
@@ -7791,8 +7760,8 @@ if testPosRunwayImpact then
 						-- print("AtoFP Nunits   "..tostring(#mission.coalition.blue.country[1].vehicle.group[Ngroup].units))
 					end
 				else
-					print("AtoFP bug runway "..baseName)
-					os.execute 'pause'
+					print("AtoFP bug runway "..baseName) 
+					print("Error") os.execute 'pause'
 				end
 			end
 		end
@@ -7812,8 +7781,8 @@ for _side, side in pairs(mission.coalition) do
 
 						if not point.ETA_locked and not point.speed_locked then
 							print("AtoFP bug ETA and Speed not lock in "..pointN.." "..group.name)
-							_affiche(point, "AtoFP point")
-							os.execute 'pause'
+							_affiche(point, "AtoFP point") 
+							print("Error") os.execute 'pause'
 						end
 					end
 				end
@@ -7893,6 +7862,4 @@ if Debug.debug then
 
 	-- _affiche(PointOfInterest, "Atofp PointOfInterest ")
 
-
-	-- os.execute('pause')
 end

@@ -77,7 +77,6 @@ require("Active/last_Mission")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
 
 -- print("DebriefStatsEvaluation Initialisation AcceptedMission? "..tostring(AcceptedMission))
--- os.execute 'pause'
 
 --reset air oob last mission stats
 for side_name,side in pairs(oob_air) do														--iterate through all sides
@@ -1302,7 +1301,6 @@ for scen_name, scen in pairs(scen_log) do													--iterate through destroye
 end
 
 -- print("DebriefSE AAA "..tostring(targetlist.blue[8].elements[2].name).." dead? "..tostring(targetlist.blue[8].elements[2].dead))
--- os.execute 'pause'
 
 -- runwayLife[Id] = {
 -- 	name = tostring(b:getName()),
@@ -1340,7 +1338,6 @@ if camp.runwayLife then
 								-- print("DebriefSE runway "..target.elements[i].name.." i: "..i)
 							end
 							-- print("DebriefSE aliveTemp "..aliveTemp.." nbRunwayPartDead: "..nbRunwayPartDead)
-							-- os.execute 'pause'
 						end
 
 

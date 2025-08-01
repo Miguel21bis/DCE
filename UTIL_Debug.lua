@@ -130,7 +130,6 @@ function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackTyp
 	-- 	-- print("DcB found target: "..target)
 	-- else
 	-- 	print("DcB NOT found target: "..tostring(target))
-	-- 	os.execute 'pause'
 	-- end
 
 	local foundTarget = false

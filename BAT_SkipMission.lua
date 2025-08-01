@@ -560,8 +560,7 @@ if input == "y" or input == "yes" then
 				-- print("ArgTools "..tostring(ArgTools))
 
 				if ArgTools ~= "KillTarget" then
-					dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Divers.lua")
-					os.execute 'pause'
+					dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Divers.lua") os.execute 'pause'
 				end
 
 				break

@@ -82,9 +82,7 @@ local function freqCapability(TestFreq, RadioPlane, Nradio, info)
 		print("***************Note for the Campaign Maker*****")
 		print("Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(TestFreq).." Info: "..tostring(info))
 		_affiche(RadioPlane, "RadioPlane")
-		print("********************ATTENTION******************")
-		print()
-		os.execute 'pause'
+		print("********************ATTENTION******************") os.execute 'pause'
 	end
 
 	if RadioPlane[Nradio] and RadioPlane[Nradio][waves] and (TestFreq > RadioPlane[Nradio][waves].min and TestFreq < RadioPlane[Nradio][waves].max)	 then
@@ -95,9 +93,6 @@ local function freqCapability(TestFreq, RadioPlane, Nradio, info)
 end
 
 local function hasAnEmergencyFreq(radioPlane)
-
-	-- _affiche(radioPlane, "DcBr_radioPlane ")
-	-- os.execute 'pause'
 
 	local emergencyFreq = 0
 	local emergencyPreset = 0
@@ -1213,8 +1208,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							if allowedBrief then  briefing[sideName] = briefing[sideName] .. s .. "\n\n" s="" end
 						else
 							print("\r\n ***ATTENTION***.")
-							print("You need to add the bulleyes parameters to your map, in the conf_mod, in the “movedBullseye” table.")
-							os.execute 'pause'
+							print("You need to add the bulleyes parameters to your map, in the conf_mod, in the “movedBullseye” table.") os.execute 'pause'
 						end
 					end
 

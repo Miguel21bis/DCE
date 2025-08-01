@@ -480,13 +480,11 @@ repeat
 
 			--killTarget doit etre lancé plus tard par MAIN_NextMission.lua
 			if ArgTools ~= "KillTarget" then
-				dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Divers.lua")
-				os.execute 'pause'
+				dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Divers.lua") os.execute 'pause'
 			end
 			break
 		elseif choix1 == "w3" then
-			dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_TestCercle.lua")
-			os.execute 'pause'																					--pause command window for user to read text
+			dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_TestCercle.lua") os.execute 'pause'																					--pause command window for user to read text
 			os.exit()
 		end
 	until tabIndex01[choix1]

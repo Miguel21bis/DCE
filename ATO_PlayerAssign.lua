@@ -337,13 +337,8 @@ if #playable > 0 then
 							end
 						end
 					end
-					
-
-					os.execute 'pause'
 				end
-
 			end
-
 		end
 	elseif #playable > 0 then
 		AllCoopPossible = true
@@ -383,8 +378,7 @@ if #playable > 0 and not AllCoopPossible then
 	end
 else
 	if debugAssign then
-		_affiche(Playability_criterium, "Playability_criterium AtoPA ")
-		os.execute 'pause'
+		_affiche(Playability_criterium, "Playability_criterium AtoPA ") os.execute 'pause'
 	end
 end
 

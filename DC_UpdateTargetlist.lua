@@ -248,7 +248,7 @@ local function TabFileTemplate()
 					print("after this ligne: ")
 					print()
 					print(tostring(trigger.action[n-1]))
-					os.execute 'pause'
+					print("********************ATTENTION******************") os.execute 'pause'
 				end
 			end
 		end
@@ -553,8 +553,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 
 		if not target.name then
 			print("DcUT no target.name , voici le target.titleName: "..tostring(target.titleName) )
-			_affiche(target, "DcUT TargetNoName")
-			os.execute 'pause'
+			_affiche(target, "DcUT TargetNoName") os.execute 'pause'
 		end
 
 		-- checkBug(target, "targetlist", "name")
@@ -588,9 +587,9 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 				else																		--only a single refoint
 					if not Refpoint[target.refpoint] then
 						print("DCE does not find the name of this reference (of targetlist) in the fields of baseMission.miz "..tostring(target.refpoint))
-						os.execute 'pause'
+						
 						_affiche(Refpoint, "Refpoint")
-						os.execute 'pause'
+						print("DCE info")  os.execute 'pause'
 					end
 
 					target.x = Refpoint[target.refpoint].x									--get x-coordinate
@@ -868,7 +867,6 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 
 						local txt = "DcUT no found xy "..target.titleName.." (normal message if it's a template activation)"
 						InsertBugList("DC_UT checkBug_xy :"..txt)
-						-- os.execute 'pause'
 					end
 				end
 
@@ -986,7 +984,6 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 			for e = 1, #target.elements do												--Iterate through elements of target
 				if not target.elements[e].x then
 					checkBug3(" Error_10: The x and y positions of this SAR position are missing:  '" .. target.titleName .. "!")
-					-- os.execute 'pause'
 				end
 				if target.elements[e].dead then											--if target element is dead		
 					target.alive = target.alive - 100 / #target.elements				--reduce target alive percentage	
@@ -1134,7 +1131,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 
 					if mission_ini.debug then
 						print(txtBug)
-						os.execute 'pause'
+						print("DCE debug")  os.execute 'pause'
 					end
 				end
 
@@ -1773,6 +1770,4 @@ if Debug.debug then
 	local campFile = io.open("Debug/oob_ground_DcUT.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
-
-	-- os.execute 'pause'
 end

@@ -1432,9 +1432,7 @@ function FreqCapability2(TestFreq, flightType, Nradio, info)
 		print("***************Note for the Campaign Maker*****")
 		print("Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(TestFreq).." Info: "..tostring(info))
 		_affiche(RadioPlane, "RadioPlane")
-		print("********************ATTENTION******************")
-		print()
-		os.execute 'pause'
+		print("********************ATTENTION******************") os.execute 'pause'
 	end
 
 	if RadioPlane[Nradio] and RadioPlane[Nradio][waves] and (TestFreq > RadioPlane[Nradio][waves].min and TestFreq < RadioPlane[Nradio][waves].max)	 then
@@ -1614,7 +1612,6 @@ function CreatePlageFrequency()																				--trouve une plage de frequen
 
 	camp.radioC = tempRadio
 	-- _affiche(camp.radioC, "UTIL_F camp.radio" )
-	-- os.execute 'pause'
 end
 
 
@@ -2200,9 +2197,7 @@ function GetFrequency(side, targetname, task, type, waves, overide)
 	print()
 	print("********************ATTENTION******************")
 	print("**** Note for the Campaign Maker: Impossible to assign a frequency to  "..tostring(type).."**********")
-	print("********************ATTENTION******************")
-	print()
-	os.execute 'pause'
+	print("********************ATTENTION******************") os.execute 'pause'
 end
 
 -- http://www.lua.org/pil/19.3.html
@@ -2232,7 +2227,6 @@ local function loadoutPylon(loadoutTable)
 
 						if emport.num and emport.num ~= chapterN then
 							-- print("UtilF incoherence pylon N and Num: "..tostring(plane).." "..tostring(task).." "..tostring(loadoutName).." "..tostring(chapterN))
-							-- os.execute 'pause'
 							newSort = true
 						end
 					end
@@ -2408,7 +2402,6 @@ local function buildsLoadout()
 
 	if Debug.debug then
 		print("UtilF camp.title |"..camp.title.."| campConfMod.code_loadout |"..campConfMod.code_loadout )
-	-- os.execute "pause"
 	end
 
 	if campMod.selectLoadout == "init" then
@@ -2512,8 +2505,6 @@ local function buildsLoadout()
 									print("********************ATTENTION******************")
 									print("***************Note for the Campaign Maker*****"..planeType.." ||| "..taskName.." ||| "..loadoutName.." ||| "..code.." not found in campaigns_code_loadout****************")
 									print("********************ATTENTION******************")
-									print()
-									-- os.execute 'pause'
 								end
 							else
 								-- print("UtilF camp.code_loadout "..camp.code_loadout.." found")						
@@ -2652,9 +2643,9 @@ function Check_TaskPossibleByPlane()
 						taskOA = "Transport"
 					end
 
-					if  type(valueOA) ~= "boolean" then
+					if type(valueOA) ~= "boolean" then
 						print("UtilF ATTENTION is not a boolean value for : "..tostring(squad.type).." "..tostring(taskOA))
-						os.execute 'pause'
+						print("ATTENTION ") os.execute 'pause'
 					end
 
 					if valueOA == true and TaskByPlane[taskOA] then
@@ -2671,19 +2662,19 @@ function Check_TaskPossibleByPlane()
 						--toutes les tasks sauf strike
 						if not foundTask and not addMultipleStrike and not tostring(taskOA) == "Fighter Sweep" then
 							print("(Error UutilF C01) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring(taskOA))
-							os.execute 'pause'
+							print("Error ") os.execute 'pause'
 						end
 
 					elseif valueOA == true and not TaskByPlane[taskOA] and not tostring(taskOA) == "Fighter Sweep" then
 						print("(Error UutilF C02) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring(taskOA))
-						os.execute 'pause'
+						print("Error ") os.execute 'pause'
 					end
 				end
 
 				--si aucune tasks strike n'a �t� trouv�
 				if not foundStrikeTask and  addMultipleStrike then
 					print("(Error UutilF C03) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring("Strike ( CAS or Ground Attack or Pinpoint Strike )"))
-					os.execute 'pause'
+					print("Error ") os.execute 'pause'
 				end
 				if not squad.inactive and not foundPlane   then
 					--TODO revoir ce pb, exemple avec campaign Hornet Over Carrier SC
@@ -2692,7 +2683,7 @@ function Check_TaskPossibleByPlane()
 					for taskOA, valueOA in  pairs(squad.tasks) do
 						print(tostring(taskOA).." : "..tostring(valueOA))
 					end
-					os.execute 'pause'
+					print("Error ") os.execute 'pause'
 				end
 			end
 		end
@@ -3694,7 +3685,6 @@ function AssignCallnameSquad()
 						if unit[r].name == initUnit[n].name and unit[r].callsign ~= initUnit[n].callsign then -- Si c'est le même squad
 							unit[r].callsign = initUnit[n].callsign
 							-- print("utilFct CORRECTION callsign "..unit[r].callsign)
-							-- os.execute 'pause'
 						end
 					end
 				end
@@ -3824,7 +3814,7 @@ function AssignCallnameSquad()
 						print(" This callsign is ignored for this mission. Change this callsign in /Init/oob_air_init.lua for this squadron ("..tostring(unit.name)..")")
 						print(" select a new callsign corresponding to the aircraft type as in this page. Or delete it, DCE will automatically assign the right one.")
 						print("https://wiki.hoggitworld.com/view/DCS_enum_callsigns")
-						os.execute 'pause'
+						print("Error ") os.execute 'pause'
 						unit.callsign = nil
 					end
 				end
@@ -4342,11 +4332,6 @@ function KillTarget(targetName, targetName2)
 			end
 		end
 	end
-
-	-- if not findTarget then																		--if target was not found in oob_ground
-	-- 	print("Error(UtilFct) Target "..tostring(targetName).." or "..tostring(targetName2).." not found in oob_ground")
-	-- 	os.execute 'pause'
-	-- end
 
 	for side_name, targets in pairs(targetlist) do											--iterate through targetlist
 		for targetN, target in pairs(targets) do										--iterate through targets

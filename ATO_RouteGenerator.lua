@@ -614,7 +614,6 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 				return false
 			else
 				-- print("AtoRG AAAA base_target_route ROUTE crée ****************")		
-				-- os.execute 'pause'
 			end
 
 		end
@@ -1944,8 +1943,7 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 
 	if #orig_route < 2 then
 		_affiche(orig_route, "orig_route")
-		_affiche(mainUnit, "mainUnit")
-		os.execute 'pause'
+		_affiche(mainUnit, "mainUnit") os.execute 'pause'
 	end
 	route[2].x = basePoint.x
 	route[2].y = basePoint.y

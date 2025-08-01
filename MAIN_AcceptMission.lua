@@ -226,7 +226,6 @@ ZoneSARFile:close()
 
 _affiche(camp.date, "camp.date")
 print("MAIN_AM BEFORE LoadFileAndUpdate()")
--- os.execute 'pause'
 
 --***********NEW function***************--
 --***********NEW function***************--
@@ -236,7 +235,6 @@ LoadFileAndUpdate("MAIN_AcceptMission "..debug.getinfo(1).currentline)
 
 _affiche(camp.date, "camp.date")
 print("MAIN_AM AFTER LoadFileAndUpdate()")
--- os.execute 'pause'
 
 
 -- if TypeAlias then

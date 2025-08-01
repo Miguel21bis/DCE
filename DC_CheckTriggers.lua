@@ -113,9 +113,6 @@ if type(camp.automaticReinforce) ~= "table" then
 	}
 end
 
--- _affiche(camp.automaticReinforce, "camp.automaticReinforce")
--- os.execute 'pause'
-
 local old_flag = Deepcopy(camp.flag)												--copy campaign flags, so that modifications of flags do not affect condition of subsequent campaign triggers in same mission
 
 
@@ -238,8 +235,7 @@ Return = {}
 				end
 			end
 		end
-		-- print("DcCT sideTest:A "..tostring(sideTest).." sum: "..tostring(sum).." nbMission "..tostring(camp.mission))
-		-- os.execute 'pause'
+
 		if sum == 0 and camp.mission <= 1 then
 			sum = 9999
 		end
@@ -286,8 +282,7 @@ Return = {}
 			end
 		end
 		if not foundTarget and Debug.debug  then
-			print("DcCT no found |"..tostring(targetName).."| in targetList, from campTriggers condition ")
-			os.execute 'pause'
+			print("DcCT no found |"..tostring(targetName).."| in targetList, from campTriggers condition ") os.execute 'pause'
 		end
 	end
 
@@ -569,9 +564,7 @@ Action = {}
 		print(" 	Action.CampaignEnd(arg)---> : "..tostring(Briefing_text))
 		print("********************ATTENTION******************")
 		print("*************** Attention, take into account that the campaign is over, press to see the rest..****************")
-		print("********************ATTENTION******************")
-		print()
-		os.execute 'pause'
+		print("********************ATTENTION******************") os.execute 'pause'
 	end
 
 	--set target active/inactive
@@ -591,8 +584,7 @@ Action = {}
 			end
 		end
 		if not targetFound then
-			print("DcCT not found "..targetName.." in targetlist file")
-			os.execute 'pause'
+			print("DcCT not found "..targetName.." in targetlist file") os.execute 'pause'
 		end
 	end
 
@@ -836,8 +828,7 @@ Action = {}
 		local function AirUnitBaseInternal(unitName, baseDestination)
 			if type(baseDestination) ~= "string" then
 				print("DcCT AirUnitBase ERROR unitName: "..tostring(unitName).." the destination database is a table")
-				_affiche(baseDestination, "DcCT baseDestination")
-				os.execute 'pause'
+				_affiche(baseDestination, "DcCT baseDestination") os.execute 'pause'
 			end
 
 			for side_name, air in pairs(oob_air) do
@@ -898,8 +889,7 @@ Action = {}
 		end
 
 		if typeAeronef == nil then
-			print("				DcCT the typeAeronef i not specified in this unit  oob_air : "..tostring(unitName))
-			os.execute 'pause'
+			print("				DcCT the typeAeronef i not specified in this unit  oob_air : "..tostring(unitName)) os.execute 'pause'
 		end
 
 		local function checkBaseCapacity(unitName, checkBase)
@@ -1579,7 +1569,6 @@ Action = {}
 								print("Dc_CT repair Runway "..target.name.." old value: "..oldVAlive.." new value "..target.alive )
 								print("Dc_CT repairRunwayPerDay "..repairRunwayPerDay)
 								print("Dc_CT RUNWAY repair: "..target.name.." new value: "..target.alive.." nbRunwayPartDead: "..nbRunwayPartDead )
-								-- os.execute 'pause'
 							end
 
 
@@ -2014,14 +2003,9 @@ Action = {}
 		for side_name, side in pairs(staticTemplate.coalition) do
 			for country_n, country in pairs(side.country) do
 				for category_n, category in pairs(country) do
-
 					if type(category) == "table" and category.group then
-
 						for group_n, group in pairs(category.group) do
-
 							group.taskSelected = true
-							-- print("DcST "..group.name.." group.taskSelected = true")
-							-- os.execute 'pause'
 						end
 					end
 				end
@@ -2067,7 +2051,6 @@ Action = {}
 									-- 		camp.needWarehouse = camp.needWarehouse or {}
 									-- 		camp.needWarehouse[unit.unitId] = true
 									-- 		print("DcCT FARP detected, warehouse["..unit.unitId.."] activated "..unit.name)
-									-- 		os.execute 'pause'
 									-- 	end
 
 									-- end
@@ -2237,11 +2220,7 @@ end
 if camp.Briefing_text and camp.Briefing_text ~= "" then
 	Briefing_text = camp.Briefing_text																--briefing text to be added this mission instance
 else
-
 	Briefing_text = ""
-
-	-- print("DcCT reset Briefing_text 2")
-	-- os.execute 'pause'
 end
 
 Briefing_text_playable = ""														--briefing text to be added only if this mission instance results in a playable mission
@@ -2558,10 +2537,6 @@ if camp.endCampaign  then
 		-- 	table.insert(BriefingImagesB, filename)
 		-- 	table.insert(BriefingImagesR, filename)
 		-- end	
-
-
-
-	-- os.execute 'pause'
 end
 
 -- local trigStr = "camp_triggers = " .. TableSerialization(camp_triggers, 0)

@@ -29,7 +29,6 @@ if EndCampaign or camp.endCampaign then												--if the campaign has ended
 	-- -- Afile:close()
 
 	-- -- print("DcEC pause debug fucking end mission ")
-	-- -- os.execute 'pause'
 
 	-- local misStrFunc = loadstring(misStr0)()
 

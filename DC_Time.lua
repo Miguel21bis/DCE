@@ -224,5 +224,3 @@ UpdateConfMod(nil, camp.date, "DC_Time " .. debug.getinfo(1).currentline)
 -- print("Test Time DC_Time  Y : " .. FormatTime(mission["start_time"], "hh:mm"))
 -- _affiche(mission["date"], "Test Time DC_Time Yb: mission[date] ")
 
--- os.execute 'pause'
-

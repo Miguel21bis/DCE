@@ -1115,7 +1115,6 @@ local function AddEWR(unit, side, freq, call)
 	else
 		-- print("AtoTE ATTENTION, not found "..tostring(unit.type).." in data ATO_ThreatEvaluation. Side: "..tostring(side).." freq: "..tostring(freq).." call: "..tostring(call)) 
 		return false
-			-- os.execute 'pause'
 	end
 
 
@@ -1382,7 +1381,6 @@ for side, unit in pairs(oob_air) do																--iterate through all sides
 						end
 					else
 						-- print("AtoTE Not loadout find for "..unit[n].type.." in UTIL_db_loaouts file OR code_loadout OR Init\db_loaouts "..tostring(task))
-						-- os.execute 'pause'
 					end
 				end
 			end

@@ -134,9 +134,7 @@ function Moonphase(day,month,year)
 		print("***************Note for the Campaign Maker*****")
 		print("***************Ajoute la MAP et des coordonées LatLong dans UTIL_DataMap pour utiliser les infos Moon ****************")
 		print("***************Add MAP and LatLong coordinates in UTIL_DataMap to use Moon info****************")
-		print("********************ATTENTION******************")
-		print()
-		os.execute 'pause'
+		print("********************ATTENTION******************") os.execute 'pause'
 
 	end
 

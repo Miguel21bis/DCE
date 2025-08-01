@@ -83,7 +83,7 @@ if testPath == nil then
 	- or these files have been deleted by a new mission generation.\
 	"
 	print(txt)
-	os.execute 'pause'
+	print("DCE debug") os.execute 'pause'
 	os.exit()
 end
 
@@ -780,7 +780,7 @@ if input == "y" or input == "yes" then
 
 
 		if Debug.debug and Debug.AfficheFlight then
-			os.execute 'pause'
+			print("DCE debug")  os.execute 'pause'
 		end
 
 	until 1 == 2																					--repeat until the next mission is ready (has a player flight)

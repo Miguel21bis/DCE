@@ -479,7 +479,7 @@ for side, pack in pairs(ATO) do
 							end
 						else
 							_affiche(flight[f], "flight[f] AtoTiming")
-							os.execute 'pause'
+							-- os.execute 'pause'
 						end
 
 						-- if pack[p].main[1].loadout.standoff and pack[p].main[1].loadout.standoff > 15000 and flight[f].route[w].id == "Egress" then		--if the package has a standoff from target bigger than 15 km, proceed from attack point directly to egress

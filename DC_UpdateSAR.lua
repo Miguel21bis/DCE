@@ -444,7 +444,6 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                 --     debugNoPow = true
                 --     print("Sauvez le Soldat Rayak_71_CEF")
                 --     element.status = "EVAC_possible"
-                --     os.execute 'pause'
                 -- else
                 --     debugNoPow = false
                 -- end
@@ -603,7 +602,6 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                         --         element.status = "POW"
                         --         if debugDcUS then 
                         --             print("DcUS CC RandomCapture POW if probaCapture > 50 "..element.status)
-                        --             os.execute 'pause'
                         --         end
                         --         -- DeleteSoldierAliasPilot(element)
 
@@ -722,8 +720,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
 							if randomMalChance > pourcent then
                                 element.status = "POW"
                                 if debugDcUS then
-                                    print("DcUS Jc POW [enemy][20000] >= 2 | randomMalChance  "..randomMalChance.." > pourcent? "..pourcent)
-                                    os.execute 'pause'
+                                    print("DcUS Jc POW [enemy][20000] >= 2 | randomMalChance  "..randomMalChance.." > pourcent? "..pourcent)  os.execute 'pause'
                                 end
 							elseif  not debugNoPow then
 								element.status = "EVAC_possible"
@@ -919,9 +916,6 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                             end
                         end
 
-                        -- print("DcUSAR fin ")
-                        -- os.execute 'pause'
-
                         -- int testX = 10191;
                         -- int testY = 5020;
                         local initElementX2D =  element.x2d
@@ -1022,7 +1016,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
                                 if nbRoster >= 1 then
                                     if not db_airbases[unit.base] or db_airbases[unit.base] == nil then
                                         print("ATTENTION this base does not exist in the database: "..unit.base.." this unit does not have the right base.: "..unit.name)
-                                        os.execute 'pause'
+                                        print("ATTENTION ") os.execute 'pause'
                                     end
 
                                     -- if unit.base and db_airbases[unit.base]  and not db_airbases[unit.base].x then
@@ -1073,7 +1067,6 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                     
                     if not result then
                         print("DcUS GG (rescued or POW) No pilot to delete")
-                        -- os.execute 'pause'
                     else
                     --    print("DcUS GG Deleted pilot: "..tostring(result))
                     end
@@ -1156,7 +1149,6 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
                 local result = DeleteSoldierAliasPilot(element)
                     if not result then
                         print("DcUS GG (maj) No pilot to delete "..tostring(element.name))
-                        -- os.execute 'pause'
                     else
                     --    print("DcUS GG Deleted pilot: "..tostring(result))
                     end

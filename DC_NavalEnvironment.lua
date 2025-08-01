@@ -93,35 +93,10 @@ function RandomPointInPoly(poly)
 		until found or i > 100000
 
 		if not found then
-			-- print()print("Before: ")
-			-- print("minx: "..tostring(minx))
-			-- print("maxx: "..tostring(maxx))
-			-- print("miny: "..tostring(miny))
-			-- print("maxy: "..tostring(maxy))
-			-- print()
-
-			-- minx =  minx*1.01
-			-- maxx =  maxx*0.99
-			-- miny =  miny*1.01
-			-- maxy =  maxy*0.99
-
-
 			minx =  minx*(5/100) + minx
 			maxx =  maxx*(5/100) + maxx
 			miny =  miny*(5/100) + miny
 			maxy =  maxy*(5/100) + maxy
-
-			-- print("After: ")
-			-- print("minx: "..tostring(minx))
-			-- print("maxx: "..tostring(maxx))
-			-- print("miny: "..tostring(miny))
-			-- print("maxy: "..tostring(maxy))
-
-			-- print("DcNE NOT found moins 1% "..n)
-			-- print()print()
-
-			-- os.execute 'pause'
-
 		end
 
 		n = n + 1
@@ -130,7 +105,6 @@ function RandomPointInPoly(poly)
 
 	if not found then
 
-		-- _affiche(poly, "DcNE bug 4 poly")
 		print("minx: "..tostring(minx))
 		print("maxx: "..tostring(maxx))
 		print("miny: "..tostring(miny))
@@ -138,9 +112,6 @@ function RandomPointInPoly(poly)
 
 		print("DcNE impossible found next random point")
 
-		-- os.execute 'pause'
-	-- else
-	-- 	print("DcNE found next random point")
 	end
 
 	return newpoint

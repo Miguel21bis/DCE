@@ -74,9 +74,7 @@ if mission_ini.slider_CampaignDuration and mission_ini.slider_CampaignDuration =
 	print()
 	print("********************ATTENTION******************")
 	print("*************** In the conf_mod file, for the option 'slider_CampaignDuration' we expect as value: 'false' or a value between 1 and 4.****************")
-	print("********************ATTENTION******************")
-	print()
-	os.execute 'pause'
+	print("********************ATTENTION******************") os.execute 'pause'
 end
 
 local airUnitReinforce = {}										--creation table qui reinforce qui, pour plus de souplesse d emploi
@@ -205,9 +203,7 @@ for name, trig in pairs(camp_triggers) do
 								-- print("********************ATTENTION******************")
 								-- print(" "..tostring(strMatch))
 								-- print("*************** slider_CampaignDuration: attention, the induced percentage exceeds 100%.****************")
-								-- print("********************ATTENTION******************")
-								-- print()
-								-- os.execute 'pause'								
+								-- print("********************ATTENTION******************") os.execute 'pause'								
 								-- two = 90								
 							-- elseif two <= 0 then							
 								-- two = 2							

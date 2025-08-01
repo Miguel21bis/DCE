@@ -45,7 +45,7 @@ for side,unit in pairs(oob_air) do										--iterate through all sides
 		if unit[n].player then											--find player unit			
 			if not db_airbases[unit[n].base] then
 				print("DcW: No "..unit[n].base.." (base) found for "..unit[n].name.." in db_airbase file")
-				os.execute 'pause'
+				print("DCE debug")  os.execute 'pause'
 			end
 			if db_airbases[unit[n].base].elevation then
 				fieldElevation = db_airbases[unit[n].base].elevation		--get field elevation of player base
@@ -1610,7 +1610,6 @@ elseif camp.weather.zone == "low front warm" then
 	-- if #presetCompatible == 0 then
 	-- 	presetCompatible = {1, 2, 3}
 	-- 	print("DcW PresetCompatible Error")
-	-- 	os.execute 'pause'
 	-- end
 
 	-- presetChoice = math.random(1, #presetCompatible)
@@ -2472,7 +2471,6 @@ camp.weather.brief = tostring(s)
 -- 	print()
 
 -- 	_affiche(mission.weather, "DcW mission.weather")
--- 	os.execute 'pause'
 -- end
 
 debugTxt = debugTxt .."DcW camp.weather.zoneTemp "..camp.weather.zone.."\n"
@@ -2504,7 +2502,7 @@ if debugWeather then
 
 	_affiche(mission.weather, "mission.weather: ")
 
-	os.execute 'pause'
+	print("DCE debug") os.execute 'pause'
 
 
 end

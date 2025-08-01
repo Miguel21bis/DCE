@@ -121,8 +121,7 @@ if Debug.debug and oob_air then
 					else
 						print("AtoG strange, no roster.ready on this unit ")
 						_affiche(unit, "unit")
-						if Debug.debug then
-							os.execute 'pause'
+						if Debug.debug then os.execute 'pause'
 						end
 					end
 
@@ -150,8 +149,7 @@ if Debug.debug and oob_air then
 					else
 						print("AtoG strange, squad.unavailable on this squad ")
 						_affiche(squad, "squad")
-						if Debug.debug then
-							os.execute 'pause'
+						if Debug.debug then os.execute 'pause'
 						end
 
 					end
@@ -254,7 +252,6 @@ for side, units in pairs(oob_air) do
 									else
 										-- print("AtoG error_A unit.type: |"..unit.type.."| not found in db_loadouts")
 										print("AtoG error_A: no task |"..tostring(task).."| in the loadout for this unit:? "..tostring(unit.type).."|")
-										-- os.execute 'pause'
 										error = error + 1
 									end
 								end
@@ -263,18 +260,15 @@ for side, units in pairs(oob_air) do
 
 								print("AtoG error_B: no task |"..tostring(task).."| in the loadout for this unit:? "..tostring(unit.type).."|")
 								error = error + 1
-								-- os.execute 'pause'
 							end
 
 						else
 							print("AtoG error_C: |"..unit.type.."| not found in db_loadouts. A problem with the campaigns_code_loadout code? |"..tostring(campConfMod.code_loadout).."|")
 							error = error + 1
-							-- os.execute 'pause'
 						end
 
 						if not foundTaskAndCountry then
 							print("AtoG error_D: |"..unit.type.."| |"..task.."| not found in db_loadouts for this country: |"..tostring(unit.country).."|")
-							-- os.execute 'pause'
 							error = error + 1
 						end
 					end
@@ -284,8 +278,7 @@ for side, units in pairs(oob_air) do
 	end
 end
 
-if error >= 1 and error < 5 then
-	os.execute 'pause'
+if error >= 1 and error < 5 then os.execute 'pause'
 end
 
 
@@ -296,8 +289,7 @@ if error >= 5 then
 		print()
 		print("================================================ATTENTION====================================================")
 		print("AtoG error: ".." With so many errors using the Central loadout, there may be a custom loadout in the /Init folder \n "
-		.."To do this, set the \"selectLoadout\" variable to \"init\" in the conf_mod")
-		os.execute 'pause'
+		.."To do this, set the \"selectLoadout\" variable to \"init\" in the conf_mod") os.execute 'pause'
 	end
 end
 
@@ -383,7 +375,6 @@ end
 if Debug.debug and Debug.Generator.affiche then
 	_affiche(Multi, "ATO_G_A Multi")
 	_affiche(multiPlaneSet, "ATO_G_B multiPlaneSet B")
-	-- os.execute 'pause'
 end
 
 if Debug.debug then
@@ -471,8 +462,7 @@ for side, units in pairs(oob_air) do
 			local overRideMP_A = false
 
 			if unit.inactive and unit.player then
-				print("AtoG attention, the player's squad is inactive. Activate it via DCE_Manager or directly in Init\\oob_air and Active\\oob_air ")
-				os.execute 'pause'
+				print("AtoG attention, the player's squad is inactive. Activate it via DCE_Manager or directly in Init\\oob_air and Active\\oob_air ") os.execute 'pause'
 			end
 
 			if not unit.inactive then
@@ -582,7 +572,6 @@ for side, units in pairs(oob_air) do
 							-- if AcftAvail[unit.name].unavailable[u] > ((CampTotalTimeS / 3600)*2)   then
 							if AcftAvail[unit.name].unavailable[u] > ((CampTotalTimeS / 3600))   then
 								AcftAvail[unit.name].unavailable[u] = 0
-								-- os.execute 'pause'
 							end
 
 							-- print("AtoGen AcftAvail ____***______ "..tostring(CampTotalTimeS / 3600).." >=? UnitUnavailable?? "..tostring(AcftAvail[unit.name].unavailable[u]))
@@ -1063,7 +1052,7 @@ for side, units in pairs(oob_air) do
 																							local toTarget = 9999999
 																							if not airbasePoint.x then print("AtoG No Airbase position "..tostring(unit.base)) os.execute 'pause' end
 																							if not target.x then
-																								-- print("AtoG No target position "..tostring(target_name)) os.execute 'pause' 
+																								-- print("AtoG No target position "..tostring(target_name))
 																							else
 																								toTarget = GetDistance(airbasePoint, target)												--direct distance to target
 																							end
@@ -1398,9 +1387,6 @@ for side, units in pairs(oob_air) do
 																										unit.tasksCoefPourcent[task] = tasksCoefPourcent
 
 																										-- print("AtoG tasksCoefPourcent "..tostring(tasksCoefPourcent))
-
-																										-- os.execute 'pause'
-
 																									end
 
 																									local randomCoef = math.random(1,100)
@@ -2202,8 +2188,6 @@ for sideName, draftT in pairs(Draft_sorties) do
 																			uniqueBonus = true
 
 																			-- print(tostring(draft.id).." "..draft.score)																			
-																			-- os.execute 'pause'
-
 																		end
 
 																	end
@@ -2623,7 +2607,7 @@ local function createATO_table(draftPriority)
 										-- 													if  support.number > AcftAvail[support.name].unassigned then 
 										-- 														support_available = false
 										-- 														-- print("AtoG passe support_available FALSE "..draft.target_name.." "..support.name.." "..support.number)
-										-- 														-- os.execute 'pause'
+
 
 										-- 														local tabRejected = {}
 										-- 														tabRejected["sujet"]  = draft.id.." type: "..support.type.." newTaskRequest  AVION SUPPORT INSUFFISANTsupport.number < unassigned "
@@ -2637,7 +2621,6 @@ local function createATO_table(draftPriority)
 										-- 										end
 										-- 									end	
 										-- 									-- print("AtoG passe newTaskRequest "..draft.target_name.." "..rTypeName .." rTaskEnCours: "..rTaskEnCours.." rNewTask: ".. rNewTask)
-										-- 									-- os.execute 'pause'
 
 										-- 								end
 										-- 							end
@@ -2886,7 +2869,6 @@ local function createATO_table(draftPriority)
 															-- testFile:write(test_str)															--save new data
 															-- testFile:close()
 
-															os.execute 'pause'
 														end
 
 
@@ -2998,7 +2980,6 @@ local function createATO_table(draftPriority)
 											-- 				table.insert(draft["rejected"], tabRejected)
 
 											-- 				-- print("tmpTxt "..tmpTxt)
-											-- 				-- os.execute 'pause'
 											-- 			end
 											-- 		end
 											-- 	end
@@ -3652,10 +3633,8 @@ end
 
 if #Draft_sorties.blue == 0 then
 	print("AtoG ERROR no route could be generated in blue camp? ")
-	-- os.execute 'pause'
 elseif #Draft_sorties.red == 0 then
 	print("AtoG ERROR no route could be generated in red camp? ")
-	-- os.execute 'pause'
 end
 
 --creation de la table multipack (systeme cassé a cause du decoupage draft_sortie en plusieurs morceau/priorité)
@@ -3834,7 +3813,6 @@ if Debug.debug then
 	-- 					print("AtoG strange, squad.unavailable on this squad ")
 	-- 					_affiche(squad, "squad")
 	-- 					if Debug.debug then
-	-- 						os.execute 'pause'
 	-- 					end
 
 	-- 				end
@@ -3864,8 +3842,7 @@ if Debug.debug then
 		end
 	end
 
-	if show then
-		os.execute 'pause'
+	if show then os.execute 'pause'
 	end
 
 end

@@ -102,7 +102,7 @@ zipFile:unzClose()
 
 if mission.version < 19 then --19ok 18bad
 	print("(MainNM) ATTENTION: BaseMission.miz is too old. (prior to DCS version 2.7.0) try to save it again with the mission editor. Or ask the creator of this campaign to provide an update.")
-	os.execute 'pause'
+	print("(MainNM) ATTENTION ") os.execute 'pause'
 	os.exit()
 end
 
@@ -142,8 +142,6 @@ if mission.triggers.zones then
 	end
 end
 
--- _affiche(List_zoneId, "List_zoneId")
--- os.execute('pause')
 
 --recherche un zoneId libre
 local function GetFreeZoneId()
@@ -743,7 +741,6 @@ for side_name, side in pairs(mission.coalition) do
 							name[group_.name] = group_.name
 						else
 							-- print("MainNM error, duplicate of |"..categorie.."| name |".. name[group_.name] .."|and|"..tostring(group_.name))
-							-- os.execute 'pause'
 						end
 
 						
@@ -959,16 +956,15 @@ for side_name, side in pairs(mission.coalition) do																--iterate thro
 							name[group_.name] = group_.name
 						else
 							print("MainNM error, duplicate of name |"..categorie.."| |".. name[group_.name] .."| and |"..tostring(group_.name))
-							os.execute 'pause'
+							print("DCE debug") os.execute 'pause'
 						end
 
 						if not  GroupId[group_.groupId] then
 							-- GroupId[group_.groupId] = group_.groupId
 							GroupId[group_.groupId] = group_.name
 						else
-							print("MainNM error, duplicate of GroupId |"..categorie.."| |".. GroupId[group_.groupId].."| and |"..tostring(group_.name)
-						)
-							os.execute 'pause'
+							print("MainNM error, duplicate of GroupId |"..categorie.."| |".. GroupId[group_.groupId].."| and |"..tostring(group_.name))
+							print("DCE debug") os.execute 'pause'
 						end
 
 						for unitN, unit in ipairs(group_.units) do
@@ -979,7 +975,7 @@ for side_name, side in pairs(mission.coalition) do																--iterate thro
 							else
 								if Debug.debug then
 									print("MainNM error debug, duplicate of unitId |"..tostring(categorie).."| Clone1: |"..unit.unitId.." |unitId| ".. tostring(uniId[unit.unitId]) .."| Clone2: |"..tostring(unit.name))
-									os.execute 'pause'
+									print("DCE debug") os.execute 'pause'
 								end
 							end
 						end
@@ -1085,8 +1081,6 @@ if ListRequiredModules then
 			end
 		end
 	end
-	-- _affiche(mission.requiredModules, "MainNM mission.requiredModules ")
-	-- os.execute 'pause'
 end
 
 
