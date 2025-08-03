@@ -1,14 +1,14 @@
 --To define Time on target for all packages and ETA for all aircraft waypoints
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  adjustment_i
+-- last modification:  Debug_l
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_Timing.lua"] = "1.7.69"
+versionDCE["ATO_Timing.lua"] = "1.7.70"
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_d				(d springCleaning)
 -- adjustment_i				(i subtract time for taxi)(h fuel consumption)(g add AFAC task)(f not standoff in cap)(d escort Transport)(c airstart for Fuel)(b attempts to "dilute" all packages throughout the duration of the mission)(a gives more time to set up the player flight (SP and MP))						
--- Debug_k					(k latest = nil)(j time between CAPs too long)(i client Transport)(h tot bug with same target_name)(g escort/transport)(f add offset role == Anti-ship Strike)(e retablit ate<0 jusqu'a wpt 1) (d: tot transport bug)(c: speed trop faible pour les escort : = flight[f].loadout.vCruise * (1 - 10/100)) (c: Spawn before Departure) (a: vCruise by default) 
+-- Debug_l					(l TOT main[2] etc)(k latest = nil)(j time between CAPs too long)(i client Transport)(h tot bug with same target_name)(g escort/transport)(f add offset role == Anti-ship Strike)(e retablit ate<0 jusqu'a wpt 1) (d: tot transport bug)(c: speed trop faible pour les escort : = flight[f].loadout.vCruise * (1 - 10/100)) (c: Spawn before Departure) (a: vCruise by default)
 -- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
 -- modification M17_b		Option F-14B
 -- modification M11A_bi		Multiplayer (bi: clientETA>0 au sol)(b(dh): clientETA<0 au sol)(w: force same package)
@@ -54,7 +54,7 @@ for side, pack in pairs(ATO) do
 			end
 		end
 
-		if  not tabPackStudied[n] then
+		if not tabPackStudied[n] then
 			table.insert(pack_n, n)																				--insert at the end of table
 			tabPackStudied[n] = true
 		end
@@ -129,7 +129,7 @@ for side, pack in pairs(ATO) do
 			end
 		else
 			-- local earliest = pack[p].main[1].tot_from + 2400 + mission_ini.startup_time_player		--600	
-			local earliest = pack[p].main[1].tot_from  + mission_ini.startup_time_player		--600												--earliest TOT is 10 minutes after tot_from to make sure it is at least 10 minutes after mission start
+			local earliest = pack[p].main[1].tot_from + mission_ini.startup_time_player		--600												--earliest TOT is 10 minutes after tot_from to make sure it is at least 10 minutes after mission start
 
 			if pack[p].main[1].task == "AWACS" or pack[p].main[1].task == "Refueling" then
 				earliest = pack[p].main[1].tot_from
@@ -614,7 +614,12 @@ for side, pack in pairs(ATO) do
 			end
 		end
 
-		TOTtable[side][pack[p].main[1].target_name] = TOTtable[side][pack[p].main[1].target_name] + player_start_shift	--adjust stored TOT of target for player shift
+		-- Ajuster le TOT pour toutes les occurences dans pack[p].main
+		for i = 1, #pack[p].main do
+			if pack[p].main[i].target_name and TOTtable[side][pack[p].main[i].target_name] then
+				TOTtable[side][pack[p].main[i].target_name] = TOTtable[side][pack[p].main[i].target_name] + player_start_shift
+			end
+		end
 
 
 		for role,flight in pairs(pack[p]) do
