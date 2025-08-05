@@ -517,20 +517,17 @@ for side, pack in pairs(ATO) do
 				if db_airbases[flight[f].base].startup then						--if there is a specific value defined for that airbase, use this instead
 					start_up_time = db_airbases[flight[f].base].startup
 				end
-				print("start_up_time A " .. start_up_time)
+				
                 if flight[f].player or flight[f].client then --for player flight
                     if mission_ini.startup_time_player then --if player value defined in camp -- modification M17.b Option F-14B, changement du temps avant start, possible � chaque mission plutot qu'au demarrage de la campagne
                         start_up_time = mission_ini.startup_time_player --use this value instead
-                        print("start_up_time B " .. start_up_time)
                         -- elseif camp.startup then										--if player value defined in camp
                         -- 	start_up_time = camp.startup							--time for player start-up
                     else
                         start_up_time = start_up_time +  300               --if player start-up is undefined, add 5 minutes as default
-                        print("start_up_time C " .. start_up_time)
-                    end
+                     end
                 end
-				print("start_up_time D " .. start_up_time)
-
+				
 				eta = tot + flight[f].eta_offset								--reset target WP ETA
 				tempTxt ="AtoT_eta tot "..tot.."  eta_offset "..flight[f].eta_offset.." eta "..eta
 				--print(tempTxt)
@@ -571,11 +568,7 @@ for side, pack in pairs(ATO) do
 
 						if (flight[f].player or flight[f].client) and w - 1 == 1 then				--for player flight and first waypoint
 							player_start_shift = 0 - eta											--time shift to start player at mission start
-							
-							print("start_up_time "..start_up_time.." eta "..eta.." player_start_shift "..player_start_shift)
-							print("AtoT player_start_shift "..player_start_shift.." eta "..eta.." w "..w.." flight[f].route[w].id "..flight[f].route[w].id)
-							
-							os.execute('pause')
+			
 
 							-- if eta < 0 then
 							-- 	print("AtoT [eta < 0 ]")
@@ -899,9 +892,3 @@ end
 -- campFile:write(camp_str)													
 -- campFile:close()
 
-
-
--- print("AtoT player_start_shift " .. player_start_shift)
-_affiche(TOT_TimeOccupation, "TOT_TimeOccupation ")
-_affiche(TOTtable, "TOTtable ")
-os.execute 'pause'
