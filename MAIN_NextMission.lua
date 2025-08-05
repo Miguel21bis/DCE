@@ -48,10 +48,11 @@ versionDCE["MAIN_NextMission.lua"] = "1.36.217"
 
 PlacePA = {}
 AltitudeCruise = 5400			--for plane without hcruise
-TaxiTime = 3000
+-- TaxiTime = 3000
 EPLRS_Capacity = {}
 
-if mission_ini.startup_time_player then mission_ini.startup_time_player = mission_ini.startup_time_player + TaxiTime end
+--heu, Taxitime n'est pas vraiment connu
+-- if mission_ini.startup_time_player then mission_ini.startup_time_player = mission_ini.startup_time_player + TaxiTime end
 
 --Check_TaskPossibleByPlane
 ----- unpack template mission file ----
