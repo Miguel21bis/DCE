@@ -213,21 +213,17 @@ function TableSerialization(t, i, params)
 
 	local crlf = ""
 	local tab1 = ""
-	for n = 1, i do																	--controls the indent for the current text line
+	for n = 1, i do
 		tab1 = tab1 .. "\t"
 	end
 
 	local text = "\n"..crlf..tab1.."{\n"..crlf
 
 	local tab = ""
-	for n = 1, i + 1 do																	--controls the indent for the current text line
+	for n = 1, i + 1 do
 		tab = tab .. "\t"
 	end
 
-	-- if params then
-	-- 	table.sort(t, function(a,b) return a[params] > b[params]  end)
-	-- end
-	local stop = false
 	for k,v in PairsByKeys(t) do
 		if type(k) == "string" then
 			k = string.gsub(k, "\n", "\\\n" )
@@ -259,13 +255,13 @@ function TableSerialization(t, i, params)
 		end
 	end
 	tab = ""
-	for n = 1, i do																		--indent for closing bracket is one less then previous text line
+	for n = 1, i do
 		tab = tab .. "\t"
 	end
 	if i == 0 then
-		text = text .. tab .. "}\n"		..crlf												--the last bracket should not be followed by an comma
+		text = text .. tab .. "}\n"		..crlf
 	else
-		text = text .. tab .. "},\n"	..crlf												--all brackets with indent higher than 0 are followed by a comma
+		text = text .. tab .. "},\n"	..crlf
 	end
 	return text
 end
