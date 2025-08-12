@@ -1,4 +1,30 @@
 
+
+local acceptedTargetTypes = {
+	['ULAK001']= "Warehouse",
+	['ULAK015'] = "Warehouse",
+	['ULAK058'] = "Warehouse",
+	['ULAK082'] = "Warehouse",
+	['UMOE16'] = "Warehouse",
+	['SMAC01_MILITARY_TRAINING_CENTRE_D'] = "Warehouse",
+	['WAREHOUSE_04'] = "Warehouse",
+	['ULAK066'] = "Warehouse",
+	['XLMV45'] = "Warehouse",
+	['XLMV56'] = "Warehouse",
+	['BODO216'] = "Warehouse",
+	['XLMV40'] = "Power Supply",
+	['ELECTRIC_TRANSFORMER_01'] = "Power Plant",
+	['SILO_03'] = "Fuel Storage",
+	['UMOE73'] = "Fuel Storage",
+	['ULAK062'] = "Fuel Storage",
+	['SILO_02'] = "Fuel Storage",
+	['UMOE31'] = "Fuel Storage",
+	['XLMV42'] = "Fuel Storage",
+	['UMOE36'] = "Fuel Storage",
+}
+
+
+
 function PairsByKeys (t, f)
     local a = {}
 	local initType
@@ -89,36 +115,38 @@ local function checkZone(searchZone,zoneName)
 		local objVec3 = obj:getPoint()
 		-- local objName = obj:getName()
 		local objType = obj:getTypeName()
-		
-		if not protoTargetList[zoneName] then
-			protoTargetList[zoneName] = {
-				inactive = true,
-				task = "Strike",
-				priority = 1,
-				picture = {},
-				attributes = {"Structure"},
-				firepower = {
-					min = 4,
-					max = 8,
-				},
-				elements = {
-					{
-						name = zoneName.." - "..tostring(objType).." - 1",
-						x = objVec3.x,
-						y = objVec3.y,
-						z = objVec3.z,
-					}
-				}
 
-			}
-		else
-			local element = {
-				name = zoneName.." - "..tostring(objType).." - "..#protoTargetList[zoneName].elements,
-				x = objVec3.x,
-				y = objVec3.y,
-				z = objVec3.z,
-			}
-			table.insert(protoTargetList[zoneName].elements, element)
+		if acceptedTargetTypes[objType] then
+			local typeNameDCE = acceptedTargetTypes[objType]
+		
+			if not protoTargetList[zoneName] then
+				protoTargetList[zoneName] = {
+					inactive = true,
+					task = "Strike",
+					priority = 1,
+					picture = {},
+					attributes = {"Structure"},
+					firepower = {
+						min = 4,
+						max = 8,
+					},
+					elements = {
+						{
+							name = tostring(typeNameDCE).." - 1",
+							x = math.floor(objVec3.x * 100 + 0.5) / 100,
+							y = math.floor(objVec3.z * 100 + 0.5) / 100,
+						}
+					}
+
+				}
+			else
+				local element = {
+					name = tostring(typeNameDCE).." - "..(#protoTargetList[zoneName].elements + 1),
+						x = math.floor(objVec3.x * 100 + 0.5) / 100,
+						y = math.floor(objVec3.z * 100 + 0.5) / 100,
+				}
+				table.insert(protoTargetList[zoneName].elements, element)
+			end
 		end
 	end
 

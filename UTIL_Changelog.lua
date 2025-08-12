@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.88.547"
+versionDCE["UTIL_Changelog.lua"] = "20.88.553"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.88.547"
+VersionDCE["UTIL_Changelog.txt"] = "20.88.553"
 --[[
 
 
@@ -9,20 +9,22 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.88.547:==
-bug assignation du joueur en multi
-suppression des alias de oob_air_init, transfert automatique vers \Init\various_table.lua
-WPT Before Landing
-anticollision au spawn air
-547	fixed		[campaign]	campaign peut etre update en cours, par modification des fichiers de Init
-546	fixed		[date]	bug 1970 again
-545	add			[date][time jump}	time jump possible with conf_mod (change date in conf_mod then make a SkipMission.BAT) 
-544	fixed		[inter]	player interceptors are "delayed
-543	fixed		[weather]	added latest weather presets + big bug on random weather
-542	fixed		[AI]	prohibits in-flight refuelling and straffing for AIs
-541	fixed		[scen]	map buildings are not destroyed when they should be
-540	fixed		[debrief][stats]	revision of MAP's building destruction detection and statistics code
-539	fixed		[debrief][stats]	ground unit destruction stats error
+==:20.88.553:==
+553 fixed		[timing]	bug 2nd strike TOT
+552 fixed		[spawn]	6-pack spawn bug
+551 fixed		[assign]	bug assigning player in multiplayer
+550 fixed		[alias]	removal of aliases from oob_air_init, automatic transfer to \Init\various_table.lua
+549 fixed		[WPT]	WPT before landing
+548 fixed		[spawn]	anti-collision at air spawn
+547 fixed		[campaign]	campaign can be updated during play by modifying Init files
+546 fixed		[date]	1970 bug again
+545 add			[date][time jump]	time jump possible with conf_mod (change date in conf_mod then run SkipMission.BAT)
+544 fixed		[inter]	player interceptors are "delayed"
+543 fixed		[weather]	added latest weather presets + major bug on random weather
+542 fixed		[AI]	prohibits in-flight refueling and strafing for AIs
+541 fixed		[scen]	map buildings are not destroyed when they should be
+540 fixed		[debrief][stats]	revision of map building destruction detection and statistics code
+539 fixed		[debrief][stats]	ground unit destruction stats error
 538 fixed		[refuel][M88]	CheckRefuelProgress (in progress)
 537	mod		[loadout][M87]	change of logic for the “day” variable: day will always be considered true (even if it's not in the loadout). 
 						However, if you want ONLY a night loadout, set this:

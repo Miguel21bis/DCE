@@ -229,7 +229,7 @@ for side, pack in pairs(ATO) do
 		debugTxt_AtoT = debugTxt_AtoT ..tempTxt.."\n"
 
 		tempTxt ="AtoT_eta vCruise "..tostring(vCruise).." \n vAttack "..tostring(vAttack)
-		print(tempTxt)
+		-- print(tempTxt)
 		debugTxt_AtoT = debugTxt_AtoT ..tempTxt.."\n"
 
 		local target_wp = 1																						--local variable to store the target waypoint number

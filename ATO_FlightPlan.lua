@@ -7250,7 +7250,7 @@ function AF_spawnOn(where, groupName)
 	end
 end
 
-_affiche(testSixPack, "testSixPack ")
+
 --nombre d'avion UNIQUEMENT sur le SIXPACK
 local sommePlane = {}
 for cv, sixPack in pairs(testSixPack) do
