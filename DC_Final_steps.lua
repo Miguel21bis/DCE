@@ -8,10 +8,10 @@ versionDCE["DC_Final_steps.lua"] = "1.1.1"
 
 -------------------------------------------------------------------------------------------------------
 
-    -- [5] = 
+    -- [4] = 
     -- {
     --     ["visible"] = true,
-    --     ["name"] = "Author",
+--     ["name"] = "Common",
     --     ["objects"] = 
     --     {
         -- [27] = 
@@ -23,30 +23,13 @@ versionDCE["DC_Final_steps.lua"] = "1.1.1"
         --         ["file"] = "P91000072.png",
         --         ["colorString"] = "0x000000ff",
         --         ["mapX"] = 63776.31,
-        --         ["layerName"] = "Author",
+        --         ["layerName"] = "Common",
         --         ["name"] = "Warehouse - 20",
         --         ["angle"] = 0,
 
-if not mission.drawings.layers[5].objects then
-    mission.drawings.layers[5].objects = {}
+if not mission.drawings.layers[4].objects then
+    mission.drawings.layers[4].objects = {}
 end
-
--- if mission.drawings.layers[1].mapY then
---     for PolyN = 1, #layer do
-
---         local tempAlti = {}
-
---         for pointN, point in ipairs(layer[PolyN].points) do
---             tempAlti[pointN] = {
---                 x = point.x + layer[PolyN].mapX,
---                 y = point.y + layer[PolyN].mapY,
---             }
-
---         end
---         table.insert(AltitudeFloorNew[alti], tempAlti)
---     end
--- end
-
 
 local targetsName = {}
 
@@ -62,13 +45,28 @@ elseif camp.player then
     end
 end
 
-local iconeType = {
-    ["warehouse"] = "P91000072.png",
-    -- ["airbase"] = "P91000073.png",
-    ["fuel_storage"] = "P91000207.png",
-    ["power_plant"] = "P91000036.png",
-    -- ["ship"] = "P91000076.png",
-    -- ["static"] = "P91000077.png",
+local dataType = {
+    ["warehouse"] = {
+        ["type"] = "icon",
+        ["data"] = "P91000072.png",
+    },
+    ["fuel_storage"] = {
+        ["type"] = "icon",
+        ["data"] = "P91000207.png",
+    },
+    ["power_plant"] = {
+        ["type"] = "txt",
+        ["data"] = "PP",
+    },
+    ["rail_bridge"] = {
+        ["type"] = "txt",
+        ["data"] = "RB",
+    },
+    ["road_bridge"] = {
+        ["type"] = "txt",
+        ["data"] = "B",
+    },
+    
 }
 -- Les couleurs dans DCS sont généralement définies au format hexadécimal ARGB (Alpha, Rouge, Vert, Bleu).
 -- Par exemple : "0xRRGGBBAA" où AA est l'opacité (FF = opaque).
@@ -87,28 +85,38 @@ local colorType = {
 
 local nb = 0
 for targetClientN, targetClientName in pairs(targetsName) do
-    print("targetClientName: " .. targetClientName)
+    -- print("targetClientName: " .. targetClientName)
 
     for targetSide, targets in pairs(targetlist) do
         for targetN, target in pairs(targets) do
-            print("target.name: " .. tostring(target.name))
+            -- print("target.name: " .. tostring(target.name))
 
             if target.name == targetClientName then
                 for elementN, element in pairs(target.elements) do
 
-                    local fileName
+                    local layerType
+                    local data
                     local colorDefine
                     local lowerName = string.lower(element.name)
+                    local tempObject = {}
 
+                    local typeMatched = nil
                     if string.find(lowerName, "warehouse") then
-                        fileName = iconeType["warehouse"]
+                        typeMatched = "warehouse"
                     elseif string.find(lowerName, "fuel") and string.find(lowerName, "storage") then
-                        fileName = iconeType["fuel_storage"]
+                        typeMatched = "fuel_storage"
                     elseif string.find(lowerName, "power") and string.find(lowerName, "plant") then
-                        fileName = iconeType["power_plant"]
+                        typeMatched = "power_plant"
+                    elseif string.find(lowerName, "rail") and string.find(lowerName, "bridge") then
+                        typeMatched = "rail_bridge"
+                    elseif string.find(lowerName, "road") and string.find(lowerName, "bridge") then
+                        typeMatched = "road_bridge"
                     else
-                        fileName = iconeType["warehouse"]
+                        typeMatched = "warehouse"
                     end
+
+                    data = dataType[typeMatched].data
+                    layerType = dataType[typeMatched].type
 
                     --definitions des couleurs
                     if element.dead then
@@ -117,22 +125,42 @@ for targetClientN, targetClientName in pairs(targetsName) do
                         colorDefine = colorType["red"]
                     end
 
-                    local tempObject = {
-                        ["visible"] = true,
-                        ["mapX"] = element.x,
-                        ["mapY"] = element.y,
-                        ["primitiveType"] = "Icon",
-                        ["scale"] = 1,
-                        ["file"] = fileName,
-                        ["colorString"] = colorDefine,
-                        ["layerName"] = "Author",
-                        ["name"] = "TestIconTarget_"..element.name,
-                        ["angle"] = 0,
-                    }
+                    if layerType == "icon" then
+                        tempObject = {
+                            ["visible"] = true,
+                            ["mapX"] = element.x,
+                            ["mapY"] = element.y,
+                            ["primitiveType"] = "Icon",
+                            ["scale"] = 1,
+                            ["text"] = tostring(data),
+                            ["name"] = tostring(element.name),
+                            ["colorString"] = tostring(colorDefine),
+                            ["layerName"] = "Common",
+                            ["angle"] = 0,
+                        }
 
-                    table.insert(mission.drawings.layers[5].objects, tempObject)
 
+                    elseif layerType == "txt" then
+                        tempObject =
+                        {
+                            ["visible"] = true,
+                            ["borderThickness"] = 0,
+                            ["fillColorString"] = "0xffffff00",     -- fond est transparent
+                            ["fontSize"] = 15,
+                            ["mapX"] = element.x,
+                            ["mapY"] = element.y,
+                            ["layerName"] = "Common",
+                            ["primitiveType"] = "TextBox",
+                            ["font"] = "DejaVuLGCSansCondensed.ttf",
+                            ["text"] = tostring(data),
+                            ["name"] = tostring(element.name),
+                            ["colorString"] = tostring(colorDefine),
+                            ["angle"] = 0,
+                        }
+                    end
+                    
                     nb = nb + 1
+                    table.insert(mission.drawings.layers[4].objects, tempObject)
                 end
             end
         end
