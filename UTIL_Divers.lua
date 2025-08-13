@@ -1493,6 +1493,218 @@ elseif ArgTools == "helpBalancePower" then
 	print("You can change oob_air_init.lua or db_loadout.lua file ")
 	print("And touch any key for restart the script without closing/opening a dos windows ")
 
+
+	--===================================================================================
+    --===================================================================================
+	
+elseif ArgTools == "missionWithIcone" then
+
+    --===================================================================================
+    --===================================================================================	
+	
+
+	print("Felicitation, missionWithIcone va commencer ^^: \n")
+
+
+	----- unpack template mission file ----
+	local minizip = require('minizip')
+
+	local zipFile = minizip.unzOpen("Init/base_mission.miz", 'rb')
+
+	zipFile:unzLocateFile('mission')
+	local misStr = zipFile:unzReadAllCurrentFile()
+	local misStrFunc_ = loadstring(misStr)()
+
+	zipFile:unzLocateFile('options')
+	local optStr = zipFile:unzReadAllCurrentFile()
+	local optStrFunc_ = loadstring(optStr)()
+
+	zipFile:unzLocateFile('warehouses')
+	local warStr = zipFile:unzReadAllCurrentFile()
+	local warStrFunc_ = loadstring(warStr)()
+
+	zipFile:unzLocateFile('l10n/DEFAULT/dictionary')
+	local dicStr = zipFile:unzReadAllCurrentFile()
+	local dicStrFunc_ = loadstring(dicStr)()
+
+	zipFile:unzLocateFile('l10n/DEFAULT/mapResource')
+	local resStr = zipFile:unzReadAllCurrentFile()
+	local resStrFunc_ = loadstring(resStr)()
+
+	zipFile:unzClose()
+
+	print("mission.version " .. mission.version)
+
+
+
+	mission.drawings = nil
+	mission["trig"] =
+	{
+		["actions"] =
+		{
+		}, -- end of ["actions"]
+		["events"] =
+		{
+		}, -- end of ["events"]
+		["custom"] =
+		{
+		}, -- end of ["custom"]
+		["func"] =
+		{
+		}, -- end of ["func"]
+		["flag"] =
+		{
+		}, -- end of ["flag"]
+		["conditions"] =
+		{
+		}, -- end of ["conditions"]
+		["customStartup"] =
+		{
+		}, -- end of ["customStartup"]
+		["funcStartup"] =
+		{
+		}, -- end of ["funcStartup"]
+	}
+
+	for side_, sideTab in pairs(mission.coalition) do
+		for countryN_, countryTab in pairs(sideTab.country) do
+			if countryTab.helicopter then countryTab.helicopter = nil end
+			-- if countryTab.ship then countryTab.ship = nil end
+			-- if countryTab.static then countryTab.static = nil end
+			-- if countryTab.vehicle then countryTab.vehicle = nil end
+			if countryTab.plane then countryTab.plane = {} end
+		end
+	end
+
+
+	mission["failures"] =
+	{
+	}
+
+	-- mission["triggers"] =
+	-- {
+	-- 	["zones"] =
+	-- 	{}
+	-- }
+
+
+	-- local trig_n =  #mission.trig.actions + 1
+	local trig_n = 1
+
+
+	local filename = "collectObjetMap.lua"
+	local rule = nil
+
+	rule = nil
+
+	local predicate1 = "triggerStart"
+	local predicate2 = 'a_do_script_file'
+
+	mission.maxDictId = mission.maxDictId + 1
+	mapResource["ResKey_Action_" .. mission.maxDictId] = filename
+	mission.trig.funcStartup[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
+	mission.trig.flag[trig_n] = true
+	mission.trig.conditions[trig_n] = "return(true)"
+
+	mission.trig.actions[trig_n] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_" .. mission.maxDictId .. "\"));"
+
+
+	mission.trigrules[trig_n] = {
+		['rules'] = { rule },
+		['eventlist'] = '',
+		['comment'] = 'Trigger ' .. trig_n,
+		['predicate'] = predicate1,
+		['actions'] = {
+			[1] = {
+				['file'] = 'ResKey_Action_' .. mission.maxDictId,
+				['predicate'] = predicate2,
+				-- ['ai_task'] = {
+				-- 	[1] = '',
+				-- 	[2] = '',
+				-- },
+			},
+		},
+	}
+
+	mission["forcedOptions"] =
+	{
+		["RBDAI"] = true,
+		["accidental_failures"] = false,
+		["birds"] = 0,
+		["civTraffic"] = "",
+		["cockpitStatusBarAllowed"] = false,
+		["cockpitVisualRM"] = true,
+		["externalViews"] = true,
+		["labels"] = 0,
+		["miniHUD"] = false,
+		["optionsView"] = "optview_all",
+		["permitCrash"] = true,
+		["userMarks"] = true,
+		["wakeTurbulence"] = false,
+	}
+
+
+	----- convert tables back to strings for insertion into content files -----
+	misStr = "mission = " .. TableSerialization(mission, 0)
+	optStr = "options = " .. TableSerialization(options, 0)
+	warStr = "warehouses = " .. TableSerialization(warehouses, 0)
+	dicStr = "dictionary = " .. TableSerialization(dictionary, 0)
+	-- resStr = "mapResource = " .. TableSerialization(mapResource, 0)
+
+	----- create temporary content files of new mission file -----
+	local misFile = io.open("misFile.lua", "w") or error("Failed to open debug file")
+	misFile:write(misStr)
+	misFile:close()
+
+	local optFile = io.open("optFile.lua", "w") or error("Failed to open debug file")
+	optFile:write(optStr)
+	optFile:close()
+
+	local warFile = io.open("warFile.lua", "w") or error("Failed to open debug file")
+	warFile:write(warStr)
+	warFile:close()
+
+	local dicFile = io.open("dicFile.lua", "w") or error("Failed to open debug file")
+	dicFile:write(dicStr)
+	dicFile:close()
+
+	local resFile = io.open("resFile.lua", "w") or error("Failed to open debug file")
+	resFile:write(resStr)
+	resFile:close()
+
+	local miz = minizip.zipCreate("Init/mission_collectObjetMap.miz")
+
+	miz:zipAddFile("mission", "misFile.lua")
+	miz:zipAddFile("options", "optFile.lua")
+	miz:zipAddFile("warehouses", "warFile.lua")
+	miz:zipAddFile("l10n/DEFAULT/dictionary", "dicFile.lua")
+    miz:zipAddFile("l10n/DEFAULT/mapResource", "resFile.lua")
+	miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "Active/camp_status.lua")
+
+	-- 3. Ajout au zip (à la fin de ton script)
+	miz:zipAddFile("l10n/DEFAULT/collectObjetMap.lua", "collectObjetMap.lua")
+
+	miz:zipClose()
+
+
+
+
+	----- remove temporary content files -----
+	os.remove("misFile.lua")
+	os.remove("optFile.lua")
+	os.remove("warFile.lua")
+	os.remove("dicFile.lua")
+	os.remove("resFile.lua")
+	os.remove("collectObjetMap.lua")
+
+	-- local miss_str = "mission = " .. TableSerialization(mission, 0)
+	-- local missFile = io.open("Init/mission_collectObjetMap.lua", "w") or error("Failed to open debug file")
+	-- missFile:write(miss_str)
+	-- missFile:close()
+
+	os.execute 'pause'
+    os.exit()
+	
 end
 
 

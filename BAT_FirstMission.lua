@@ -355,42 +355,6 @@ repeat
 					end
 				end
 
-				-- -- display le tableau des choix d'avion et de task
-				-- for nSide , unit_type in PairsByKeys(tabTaskAvailable) do
-				-- 	-- print() print(nSide..":")
-				-- 	for unitType , tabType in PairsByKeys(unit_type) do
-				-- 		-- print("BatFM unitType "..tostring(unitType))
-				-- 		local IndexStringType = string.lower(string.char(ti))
-				-- 		if not playable_type[IndexStringType] then playable_type[IndexStringType] = {} end
-				-- 		playable_type[IndexStringType]["type"] = unitType
-				-- 		playable_type[IndexStringType]["side"] = nSide
-
-				-- 		io.write(" (1 to 8): ("..IndexStringType.."): "..unitType..":")
-
-				-- 		for taskStr , nbool in PairsByKeys(tabType) do
-				-- 			-- print("BatFM taskStr "..tostring(taskStr))
-				-- 			-- print("BatFM TabTask[taskStr] "..tostring(TabTask[taskStr]))
-				-- 			if nbool == true then
-				-- 				io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
-				-- 				-- local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
-				-- 				tabIndex[tostring(1)..IndexStringType..TabTask[taskStr]] = true
-				-- 				tabIndex[tostring(2)..IndexStringType..TabTask[taskStr]] = true
-				-- 				tabIndex[tostring(3)..IndexStringType..TabTask[taskStr]] = true
-				-- 				tabIndex[tostring(4)..IndexStringType..TabTask[taskStr]] = true
-				-- 				tabIndex[tostring(5)..IndexStringType..TabTask[taskStr]] = true
-				-- 				tabIndex[tostring(6)..IndexStringType..TabTask[taskStr]] = true
-				-- 				tabIndex[tostring(7)..IndexStringType..TabTask[taskStr]] = true
-				-- 				tabIndex[tostring(8)..IndexStringType..TabTask[taskStr]] = true
-
-				-- 			elseif not TabTask[taskStr] and not string.lower(taskStr) == "spotter" then
-				-- 				table.insert(tabBug,taskStr )
-				-- 			end
-				-- 		end
-				-- 		io.write("\n")
-				-- 		ti = ti+1
-				-- 	end
-				-- end
-
 				io.write( "\n")
 			--===================================================================================
 				-- Ecran N°5 Selection Nombre d'avion Multiplayer
@@ -450,6 +414,7 @@ repeat
 				["b"] = true,
 				["c"] = true,
 				["d"] = true,
+				["e"] = true,
 			}
 			-- Ecran N°3 Selection nb of Flight
 			repeat
@@ -458,7 +423,9 @@ repeat
 				"A: DelGroup  \n"..
 				"B: fuelConsumption \n"..
 				"C: KillTarget \n"..
-				"D: help balance Power \n"
+				"D: help balance Power \n"..
+				"E: detect ObjetMap to create targetList \n" ..
+				"\n"
 				)
 
 				local choix2 = string.lower(io.stdin:read())
@@ -471,7 +438,9 @@ repeat
 					elseif choix2 == "c" then
 						ArgTools = "KillTarget"
 					elseif choix2 == "d" then
-						ArgTools = "helpBalancePower"
+                        ArgTools = "helpBalancePower"
+					elseif choix2 == "e" then
+						ArgTools = "missionWithIcone"
 					end
 				else
 					print("\nInvalid entry.\n")

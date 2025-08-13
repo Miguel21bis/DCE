@@ -1,13 +1,13 @@
 --To generate a new mission file. Unzips template mission, defines content of next missions and packs a new mission file
 --Initiated by Debrief_Master.lua, BAT_FirstMission.lua or BAT_RedoMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: debug_m
+-- last modification: adjustment_h
 if not versionDCE then versionDCE = {} end
-versionDCE["MAIN_NextMission.lua"] = "1.36.217"
+versionDCE["MAIN_NextMission.lua"] = "1.36.218"
 ------------------------------------------------------------------------------------------------------- 
 -- debug_m 					(m zoneId)(l endCampaign)(ik error beacon file)(h mission.maxDictId)(g help campaignMaker)(f autolase)(e camp_ZoneSAR in skipmod)(d: oob_ground not in mission)(c: EndMission)
 -- Reglage_e				(e EPLRS_Capacity)(d CVN to CV)(c stop si < 2.7.0 (ver18))(a: Init/loadout selection)
--- adjustment_g				(g keep original triggers( a_remove_scene_objects ))(e oob_scen ==0)(d currentKey)(c clean conf_mod)(b Firstmission_flag)(a: add Loadout tiers)
+-- adjustment_h				(h add DC_Final_steps.lua)(g keep original triggers( a_remove_scene_objects ))(e oob_scen ==0)(d currentKey)(c clean conf_mod)(b Firstmission_flag)(a: add Loadout tiers)
 -- cleanCode_h				(ag springCleaning)
 -- modification M83_c		Jammer checkMissileProximity (c all jammer in DataBase)(b B-52)
 -- modification M77_k		CG_ArtySpotter (k ListSpotterAircraft)(c camp.spotter)(b tempo)
@@ -686,7 +686,8 @@ dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Generator.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_PlayerAssign.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Timing.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_AddPropAircraft.lua")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_FlightPlan.lua")
+dofile("../../../ScriptsMod." .. VersionPackageICM .. "/ATO_FlightPlan.lua")
+dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Final_steps.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_StaticAircraft.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Prune.lua")
 dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Briefing.lua")
