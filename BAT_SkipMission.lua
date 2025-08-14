@@ -531,18 +531,28 @@ if input == "y" or input == "yes" then
 			-- 	UTIL_KillTarget = true
 			elseif choix1 == "o" then
 
+				local tabIndexTools = {
+					["a"] = true,
+					["b"] = true,
+					["c"] = true,
+					["d"] = true,
+					["e"] = true,
+				}
 				-- Ecran N°3 Selection nb of Flight
 				repeat
 					print("Tools menu: \n")
-					print("Select :\n"..
-					"A: DelGroup  \n"..
-					"B: fuelConsumption \n"..
-					"C: KillTarget \n"
+					print("Select :\n" ..
+						"A: DelGroup  \n" ..
+						"B: fuelConsumption \n" ..
+						"C: KillTarget \n" ..
+						"D: help balance Power \n" ..
+						"E: Icons on targetMission (PhotoMaton) \n" ..
+						"\n"
 					)
 
 					local choix2 = string.lower(io.stdin:read())
 
-					if (choix2 == "a" or choix2 == "b" or choix2 == "c") then
+					if tabIndexTools[choix2] then
 						if choix2 == "a" then
 							ArgTools = "DelGroup"
 						elseif choix2 == "b" then
@@ -551,13 +561,13 @@ if input == "y" or input == "yes" then
 							ArgTools = "KillTarget"
 						elseif choix2 == "d" then
 							ArgTools = "helpBalancePower"
+						elseif choix2 == "e" then
+							ArgTools = "missionWithIcone"
 						end
 					else
 						print("\nInvalid entry.\n")
 					end
-				until (choix2 == "a" or  choix2 == "b" or choix2 == "c")
-
-				-- print("ArgTools "..tostring(ArgTools))
+				until tabIndexTools[choix2]
 
 				if ArgTools ~= "KillTarget" then
 					dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Divers.lua") os.execute 'pause'

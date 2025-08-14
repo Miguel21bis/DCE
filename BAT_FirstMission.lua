@@ -424,7 +424,7 @@ repeat
 				"B: fuelConsumption \n"..
 				"C: KillTarget \n"..
 				"D: help balance Power \n"..
-				"E: detect ObjetMap to create targetList \n" ..
+				"E: Icons on targetMission (PhotoMaton) \n" ..
 				"\n"
 				)
 

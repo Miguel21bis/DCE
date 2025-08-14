@@ -1537,34 +1537,6 @@ elseif ArgTools == "missionWithIcone" then
 
 
 
-	mission.drawings = nil
-	mission["trig"] =
-	{
-		["actions"] =
-		{
-		}, -- end of ["actions"]
-		["events"] =
-		{
-		}, -- end of ["events"]
-		["custom"] =
-		{
-		}, -- end of ["custom"]
-		["func"] =
-		{
-		}, -- end of ["func"]
-		["flag"] =
-		{
-		}, -- end of ["flag"]
-		["conditions"] =
-		{
-		}, -- end of ["conditions"]
-		["customStartup"] =
-		{
-		}, -- end of ["customStartup"]
-		["funcStartup"] =
-		{
-		}, -- end of ["funcStartup"]
-	}
 
 	for side_, sideTab in pairs(mission.coalition) do
 		for countryN_, countryTab in pairs(sideTab.country) do
@@ -1579,69 +1551,67 @@ elseif ArgTools == "missionWithIcone" then
 
 	mission["failures"] =
 	{
-	}
-
-	-- mission["triggers"] =
-	-- {
-	-- 	["zones"] =
-	-- 	{}
-	-- }
+    }
+	
 
 
-	-- local trig_n =  #mission.trig.actions + 1
-	local trig_n = 1
 
+	--===================================================================================
+	-- Ecran N°2 Selection du Target	
+	print("choose targets")
 
-	local filename = "collectObjetMap.lua"
-	local rule = nil
+	local input
+	local tabIndex = {}
+    local targetListRequired = {}
+	local iTab = 1
+    local iPas = 1
+	
+    io.write("\n" .. iTab .. " " .. "\n")
+	
+	for side, targetSide in pairs(targetlist) do
 
-	rule = nil
+		-- print() print(side..":")
+		for key, target in ipairs(targetSide) do
+			if string.find(target.task, "Strike") or target.task == "Runway Attack" then
 
-	local predicate1 = "triggerStart"
-	local predicate2 = 'a_do_script_file'
+				io.write(side .. " " .. tostring(target.titleName) .. "\n")
+                if not tabIndex[iTab] then tabIndex[iTab] = {} end
+				table.insert(tabIndex[iTab], target.titleName)
+                iPas = iPas + 1
+				
+				if iPas >= 10 then
+					
+					iTab = iTab + 1
+					iPas = 1
+					io.write("\n" .. iTab .. " " .. "\n")
+				end
+			end
+		end
+	end
 
-	mission.maxDictId = mission.maxDictId + 1
-	mapResource["ResKey_Action_" .. mission.maxDictId] = filename
-	mission.trig.funcStartup[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
-	mission.trig.flag[trig_n] = true
-	mission.trig.conditions[trig_n] = "return(true)"
+	repeat
+		input = tonumber(io.stdin:read())
+		if (input == nil or input == "") then input = 999 end
 
-	mission.trig.actions[trig_n] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_" .. mission.maxDictId .. "\"));"
+		if tabIndex[input] then
+			targetListRequired = tabIndex[input]
+		else
+			print("\nInvalid entry.\n")
+		end
+	until  tabIndex[input]
 
+    io.write("\n")
 
-	mission.trigrules[trig_n] = {
-		['rules'] = { rule },
-		['eventlist'] = '',
-		['comment'] = 'Trigger ' .. trig_n,
-		['predicate'] = predicate1,
-		['actions'] = {
-			[1] = {
-				['file'] = 'ResKey_Action_' .. mission.maxDictId,
-				['predicate'] = predicate2,
-				-- ['ai_task'] = {
-				-- 	[1] = '',
-				-- 	[2] = '',
-				-- },
-			},
-		},
-	}
+	_affiche(targetListRequired, "targetListRequired")
+	
+    if not mission.drawings.layers[4].objects then
+        mission.drawings.layers[4].objects = {}
+    end
+	
+	-- os.execute 'pause'
 
-	mission["forcedOptions"] =
-	{
-		["RBDAI"] = true,
-		["accidental_failures"] = false,
-		["birds"] = 0,
-		["civTraffic"] = "",
-		["cockpitStatusBarAllowed"] = false,
-		["cockpitVisualRM"] = true,
-		["externalViews"] = true,
-		["labels"] = 0,
-		["miniHUD"] = false,
-		["optionsView"] = "optview_all",
-		["permitCrash"] = true,
-		["userMarks"] = true,
-		["wakeTurbulence"] = false,
-	}
+	dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Final_steps.lua")
+	mission.drawings.layers[4].objects = AddIconLayer(mission.drawings.layers[4].objects, targetListRequired)
 
 
 	----- convert tables back to strings for insertion into content files -----
@@ -1649,7 +1619,7 @@ elseif ArgTools == "missionWithIcone" then
 	optStr = "options = " .. TableSerialization(options, 0)
 	warStr = "warehouses = " .. TableSerialization(warehouses, 0)
 	dicStr = "dictionary = " .. TableSerialization(dictionary, 0)
-	-- resStr = "mapResource = " .. TableSerialization(mapResource, 0)
+	resStr = "mapResource = " .. TableSerialization(mapResource, 0)
 
 	----- create temporary content files of new mission file -----
 	local misFile = io.open("misFile.lua", "w") or error("Failed to open debug file")
@@ -1672,7 +1642,7 @@ elseif ArgTools == "missionWithIcone" then
 	resFile:write(resStr)
 	resFile:close()
 
-	local miz = minizip.zipCreate("Init/mission_collectObjetMap.miz")
+	local miz = minizip.zipCreate("Init/mission_IconTarget.miz")
 
 	miz:zipAddFile("mission", "misFile.lua")
 	miz:zipAddFile("options", "optFile.lua")
@@ -1681,13 +1651,7 @@ elseif ArgTools == "missionWithIcone" then
     miz:zipAddFile("l10n/DEFAULT/mapResource", "resFile.lua")
 	miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "Active/camp_status.lua")
 
-	-- 3. Ajout au zip (à la fin de ton script)
-	miz:zipAddFile("l10n/DEFAULT/collectObjetMap.lua", "collectObjetMap.lua")
-
 	miz:zipClose()
-
-
-
 
 	----- remove temporary content files -----
 	os.remove("misFile.lua")
@@ -1697,14 +1661,10 @@ elseif ArgTools == "missionWithIcone" then
 	os.remove("resFile.lua")
 	os.remove("collectObjetMap.lua")
 
-	-- local miss_str = "mission = " .. TableSerialization(mission, 0)
-	-- local missFile = io.open("Init/mission_collectObjetMap.lua", "w") or error("Failed to open debug file")
-	-- missFile:write(miss_str)
-	-- missFile:close()
 
 	os.execute 'pause'
     os.exit()
-	
+
 end
 
 

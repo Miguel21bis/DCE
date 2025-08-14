@@ -687,7 +687,30 @@ dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_PlayerAssign.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Timing.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_AddPropAircraft.lua")
 dofile("../../../ScriptsMod." .. VersionPackageICM .. "/ATO_FlightPlan.lua")
+
 dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Final_steps.lua")
+
+if not mission.drawings.layers[4].objects then
+	mission.drawings.layers[4].objects = {}
+end
+
+local targetListRequired = {}
+
+if camp.client then
+    for clientN, client in pairs(camp.client) do
+        if client.target then
+			table.insert(targetListRequired, client.target.name)
+        end
+    end
+elseif camp.player then
+    if camp.player.target then
+		table.insert(targetListRequired, camp.player.target.name)
+    end
+end
+
+mission.drawings.layers[4].objects = AddIconLayer(mission.drawings.layers[4].objects, targetListRequired)
+
+
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_StaticAircraft.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Prune.lua")
 dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Briefing.lua")
