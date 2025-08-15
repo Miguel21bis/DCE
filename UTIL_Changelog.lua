@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.88.553"
+versionDCE["UTIL_Changelog.lua"] = "20.90.558"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.88.553"
+VersionDCE["UTIL_Changelog.txt"] = "20.90.558"
 --[[
 
 
@@ -9,51 +9,53 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.88.553:==
-553 fixed		[timing]	bug 2nd strike TOT
-552 fixed		[spawn]	6-pack spawn bug
-551 fixed		[assign]	bug assigning player in multiplayer
-550 fixed		[alias]	removal of aliases from oob_air_init, automatic transfer to \Init\various_table.lua
-549 fixed		[WPT]	WPT before landing
-548 fixed		[spawn]	anti-collision at air spawn
-547 fixed		[campaign]	campaign can be updated during play by modifying Init files
-546 fixed		[date]	1970 bug again
-545 add			[date][time jump]	time jump possible with conf_mod (change date in conf_mod then run SkipMission.BAT)
-544 fixed		[inter]	player interceptors are "delayed"
-543 fixed		[weather]	added latest weather presets + major bug on random weather
-542 fixed		[AI]	prohibits in-flight refueling and strafing for AIs
-541 fixed		[scen]	map buildings are not destroyed when they should be
-540 fixed		[debrief][stats]	revision of map building destruction detection and statistics code
-539 fixed		[debrief][stats]	ground unit destruction stats error
-538 fixed		[refuel][M88]	CheckRefuelProgress (in progress)
-537	mod		[loadout][M87]	change of logic for the “day” variable: day will always be considered true (even if it's not in the loadout). 
-						However, if you want ONLY a night loadout, set this:
+==:20.90.558:==
+558 fixed    [PEDRO]    the second PEDRO helicopter is always an SH-60
+557 fixed    [spotter]  the spotter script does not work
+556 fixed    [FARP][CV] due to changes in base_mission and other things, FARP can lose their Warehouse link and can no longer refuel
+555 added    [FARP]     it is now possible for campaignMkers to add and move FARP with templates
+554 added    [target][M90] adds some of your target's icons on the F10 map
+553 fixed    [timing]   bug with 2nd strike TOT
+552 fixed    [spawn]    6-pack spawn bug
+551 fixed    [assign]   bug assigning player in multiplayer
+550 modified [alias]    removal of aliases from oob_air_init, automatic transfer to \Init\various_table.lua
+549 modified [WPT]      WPT before landing
+548 fixed    [spawn]    anti-collision at air spawn
+547 fixed    [date]     1970 bug again
+546 added    [date][time jump][M89] time jump possible with conf_mod (change date in conf_mod then run SkipMission.BAT)
+545 fixed    [inter]    player interceptors are "delayed"
+544 modified [weather]  added latest weather presets and major bug fix on random weather
+543 modified [AI]       prohibits in-flight refueling and strafing for AIs
+542 fixed    [scen]     map buildings are not destroyed when they should be
+541 fixed    [debrief][stats] revision of map building destruction detection and statistics code
+540 fixed    [debrief][stats] ground unit destruction stats error
+539 added    [refuel][M88] CheckRefuelProgress (in progress)
+538 added    [loadout][M87] changed logic for the “day” variable: day will always be considered true (even if it's not in the loadout).
+						However, if you want ONLY a night loadout, set:
 							night = true,
-						and 
+						and
 							day = false,
-536	mod		[date][M86]	new variables added to conf_mod (RepairOption, current_date, weather, etc.) 
-535	fixed	[generator][inter]		choosing interceptor causes mission generation to crash
-534	mod		[inter]		interceptors only take off if a type of aircraft to be intercepted is detected
-				in targetList: ["Kien An Airbase Alert"] = {
-					task = "Intercept",
-					targetPlane = {"B-52H", "A-6E", "VSN_F105D" },
-					...
-			
-533	 add	[file][M85]		keeps files already added to base_mission
----
-532	 add	[FPS][M84]		DCE Bubble by activating, deactivating vehicles and static
-531	 add	[Jammer][M83]		Jammer checkMissileProximity  M83
-530 add	[callSign]		assign a specific callSign (e.g. Tanker) to a target to have consistent callSigns according to the chosen pattern
+537 added    [date][M86] new variables added to conf_mod (RepairOption, current_date, weather, etc.)
+536 fixed    [generator][inter] choosing interceptor causes mission generation to crash
+535 modified [inter]    interceptors only take off if a type of aircraft to be intercepted is detected
+						in targetList: ["Kien An Airbase Alert"] = {
+							task = "Intercept",
+							targetPlane = {"B-52H", "A-6E", "VSN_F105D" },
+							...
+537 added    [file][M85] keeps files already added to base_mission
+534 added    [FPS][M84] DCE Bubble by activating, deactivating vehicles and static
+533 added    [Jammer][M83] Jammer checkMissileProximity  M83
+532 modified [callSign] assign a specific callSign (e.g. Tanker) to a target to have consistent callSigns according to the chosen pattern
 						add this to a target pattern/tanker in the targetList :
 						predeterminedCallsign =  {
 							groupNumber = 6,
 							name = "Shell",
 						},
-529 fixed	[radio]		tanker frequencies are not grouped by identical targets or patterns
-528 fixed	[generator]	take-off time does not match (again...)
-527 fixed	[debrief]	debriefing is blocked on a base.x position issue with damaged CVN/LHA
-526 add	[campaignMaker][M82]	Action.UnitResuscitateOrKill(unitName, liveOrKill, liveValue)
-525 fixed	[flight]	flight delayed
+531 fixed    [radio]    tanker frequencies are not grouped by identical targets or patterns
+530 fixed    [generator] take-off time does not match (again...)
+529 fixed    [debrief]  debriefing is blocked on a base.x position issue with damaged CVN/LHA
+528 added    [campaignMaker][M82] Action.UnitResuscitateOrKill(unitName, liveOrKill, liveValue)
+527 fixed    [flight]   flight delayed
 
 ==:20.81.524:==
 524 modified	[loadout]

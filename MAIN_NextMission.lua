@@ -1,14 +1,15 @@
 --To generate a new mission file. Unzips template mission, defines content of next missions and packs a new mission file
 --Initiated by Debrief_Master.lua, BAT_FirstMission.lua or BAT_RedoMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: adjustment_h
+-- last modification: M90_a
 if not versionDCE then versionDCE = {} end
-versionDCE["MAIN_NextMission.lua"] = "1.36.218"
+versionDCE["MAIN_NextMission.lua"] = "1.37.219"
 ------------------------------------------------------------------------------------------------------- 
 -- debug_m 					(m zoneId)(l endCampaign)(ik error beacon file)(h mission.maxDictId)(g help campaignMaker)(f autolase)(e camp_ZoneSAR in skipmod)(d: oob_ground not in mission)(c: EndMission)
 -- Reglage_e				(e EPLRS_Capacity)(d CVN to CV)(c stop si < 2.7.0 (ver18))(a: Init/loadout selection)
 -- adjustment_h				(h add DC_Final_steps.lua)(g keep original triggers( a_remove_scene_objects ))(e oob_scen ==0)(d currentKey)(c clean conf_mod)(b Firstmission_flag)(a: add Loadout tiers)
 -- cleanCode_h				(ag springCleaning)
+-- modification M90_a		missionWithIcone
 -- modification M83_c		Jammer checkMissileProximity (c all jammer in DataBase)(b B-52)
 -- modification M77_k		CG_ArtySpotter (k ListSpotterAircraft)(c camp.spotter)(b tempo)
 -- modification M71_b		PayloadRestricted  (b Action.RestrictedLoadout(file))
@@ -48,11 +49,7 @@ versionDCE["MAIN_NextMission.lua"] = "1.36.218"
 
 PlacePA = {}
 AltitudeCruise = 5400			--for plane without hcruise
--- TaxiTime = 3000
 EPLRS_Capacity = {}
-
---heu, Taxitime n'est pas vraiment connu
--- if mission_ini.startup_time_player then mission_ini.startup_time_player = mission_ini.startup_time_player + TaxiTime end
 
 --Check_TaskPossibleByPlane
 ----- unpack template mission file ----

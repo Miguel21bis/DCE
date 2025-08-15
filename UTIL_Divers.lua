@@ -3,13 +3,14 @@
 -- avec la commmande w2
 -- Supprime un Groupe entier en donnant son numero de groupe
 ------------------------------------------------------------------------------------------------------- 
--- Last Modification updateFunction_d
+-- Last Modification M90_a
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Divers.lua"] = "1.4.26"
+versionDCE["UTIL_Divers.lua"] = "1.5.27"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_a				(a springCleaning)
 -- adjustment_a				(a ajout dataMap)
 -- updateFunction_d			(d helpBalancePower())(c KillTarget())(b fuelConsumption())(a DelGroup())
+-- modification M90_a		missionWithIcone
 -- modification M38_n		Check and Help CampaignMaker (n: delete Ngroug)
 ------------------------------------------------------------------------------------------------------- 
 
@@ -534,9 +535,9 @@ elseif ArgTools == "fuelConsumption" then
 	for typePlane , loadouts in PairsByKeys(SelectedLoadout) do
 		for loadoutName , loadout in PairsByKeys(loadouts) do
 			-- io.write(i.." : ( "..type.." )("..loadoutName..")".."\n")
-			
+
 			print(typePlane.." ("..loadoutName..")")
-			
+
 
 			if not mission["coalition"]["red"]["country"][1]["plane"] then mission["coalition"]["red"]["country"][1]["plane"] = {} end
 			if not mission["coalition"]["red"]["country"][1]["plane"]["group"] then
@@ -558,7 +559,7 @@ elseif ArgTools == "fuelConsumption" then
 			else
 				print("loadout.hCruise: " ..loadout.hCruise)
 			end
-			
+
 			if not loadout.vCruise then
 				if Data_divers and Data_divers[typePlane] and Data_divers[typePlane].vCruise then
 					loadout.vCruise = Data_divers[typePlane].vCruise
@@ -579,12 +580,12 @@ elseif ArgTools == "fuelConsumption" then
 				end
 
 				for ai = 1, 10 do
-				
+
 					if nbGroup == 2 then
 						altTest = loadout.hCruise - 1640
 						if altTest < 100 then altTest = 100 end
 					end
-					
+
 					local init_x = mission.coalition.red.bullseye.x + (nbGroup * 500 )
 					local init_y = mission.coalition.red.bullseye.y + (nbGroup * 500 )
 
@@ -715,7 +716,7 @@ elseif ArgTools == "fuelConsumption" then
 					if nbGroup >= 2 then
 						viTest = viTest + 5
 					end
-					
+
 					-- if nbGroup > 2 then
 						-- altTest = altTest + 328.084
 					-- end
@@ -735,7 +736,7 @@ elseif ArgTools == "fuelConsumption" then
 			--****************************************************************************
 			print("**************")
 			--****************************************************************************
-			
+
 			altTest = 3280.84
 			-- viTest
 
@@ -1019,7 +1020,7 @@ elseif ArgTools == "KillTarget" then
 	print("Actuel Num de mission "..camp.mission)
 	print("Change number of mission or press \"Enter\".\n")				--ask for user confirmation
 
-	
+
 
 	local input, input2
 
@@ -1318,7 +1319,7 @@ elseif ArgTools == "helpBalancePower" then
 							local sum_fireP = 0
 							for l = 1, #unit_loadouts do
 								sum_fireP = sum_fireP +  unit_loadouts[l].firepower
-								
+
 								-- local break_loop = false
 								for m = 1, 6 do
 
@@ -1348,21 +1349,21 @@ elseif ArgTools == "helpBalancePower" then
 							--(sum_fireP  /#unit_loadouts) pour calculer la moyenne des firepowers
 							-- aditionne ici les plus hautes valeurs
 
-							if not balanceTS[task] then 
+							if not balanceTS[task] then
 								balanceTS[task] = {
-									["blue"] = 
+									["blue"] =
 									{
 										["numberblue"] = 0,
 										["sommeblue"] = 0,
 									},
-									["red"] = 
+									["red"] =
 									{
 										["numberred"] = 0,
 										["sommered"] = 0,
 									},
-								} 
+								}
 							end
-		
+
 							if task == "Escort" or task == "CAP" or task == "Intercept" then
 								somme = ((sum_fireP )  /#unit_loadouts)  * unit[n].number
 								balanceTS[task][side]["somme"..side] = balanceTS[task][side]["somme"..side] + somme
@@ -1496,12 +1497,12 @@ elseif ArgTools == "helpBalancePower" then
 
 	--===================================================================================
     --===================================================================================
-	
+
 elseif ArgTools == "missionWithIcone" then
 
     --===================================================================================
     --===================================================================================	
-	
+
 
 	print("Felicitation, missionWithIcone va commencer ^^: \n")
 
@@ -1552,7 +1553,7 @@ elseif ArgTools == "missionWithIcone" then
 	mission["failures"] =
 	{
     }
-	
+
 
 
 
@@ -1565,8 +1566,24 @@ elseif ArgTools == "missionWithIcone" then
     local targetListRequired = {}
 	local iTab = 1
     local iPas = 1
-	
+
     io.write("\n" .. iTab .. " " .. "\n")
+
+	--reorganise targetlist to have a sorted list of targets for each side
+    for side, targetSide in pairs(targetlist) do
+        -- Copier les cibles dans une table temporaire
+        local sortedTargets = {}
+        for i, target in ipairs(targetSide) do
+            table.insert(sortedTargets, target)
+        end
+        -- Trier par titleName (ordre alphabétique)
+        table.sort(sortedTargets, function(a, b)
+            return tostring(a.titleName):upper() < tostring(b.titleName):upper()
+        end)
+        -- Remplacer la table d'origine par la version triée
+        targetlist[side] = sortedTargets
+    end
+	
 	
 	for side, targetSide in pairs(targetlist) do
 
@@ -1578,9 +1595,9 @@ elseif ArgTools == "missionWithIcone" then
                 if not tabIndex[iTab] then tabIndex[iTab] = {} end
 				table.insert(tabIndex[iTab], target.titleName)
                 iPas = iPas + 1
-				
+
 				if iPas >= 10 then
-					
+
 					iTab = iTab + 1
 					iPas = 1
 					io.write("\n" .. iTab .. " " .. "\n")
@@ -1589,6 +1606,8 @@ elseif ArgTools == "missionWithIcone" then
 		end
 	end
 
+    print("Enter the number of the desired block")
+		
 	repeat
 		input = tonumber(io.stdin:read())
 		if (input == nil or input == "") then input = 999 end
@@ -1603,11 +1622,11 @@ elseif ArgTools == "missionWithIcone" then
     io.write("\n")
 
 	_affiche(targetListRequired, "targetListRequired")
-	
+
     if not mission.drawings.layers[4].objects then
         mission.drawings.layers[4].objects = {}
     end
-	
+
 	-- os.execute 'pause'
 
 	dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Final_steps.lua")
@@ -1661,6 +1680,7 @@ elseif ArgTools == "missionWithIcone" then
 	os.remove("resFile.lua")
 	os.remove("collectObjetMap.lua")
 
+	print("\nMission file generated and saved in this directory: Init/mission_IconTarget.miz.\n")
 
 	os.execute 'pause'
     os.exit()

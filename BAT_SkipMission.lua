@@ -3,11 +3,12 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification: M85_a
 if not versionDCE then versionDCE = {} end
-versionDCE["BAT_SkipMission.lua"] = "1.15.99"
+versionDCE["BAT_SkipMission.lua"] = "1.16.100"
 -------------------------------------------------------------------------------------------------------
 -- adjustment_o				(o tools)(n targetList numeric)(m BAT)(l Playable_m from Data_divers)(k BugList)(j PairsByKeys)(i global TabTask)(h Skipmission_flag)(g mise a niveau)(e: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form) 
 -- debug_d					(cd: EndMission)
 -- cleancode_d				(d springCleaning)
+-- modification M90_a		missionWithIcone
 -- modification M85_a		new variables added to conf_mod (RepairOption, current_date, weather, etc.)
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M61_a		SAR

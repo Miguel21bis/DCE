@@ -1,11 +1,12 @@
 -- adds the latest and various elements, postFlightPlan
 
 -------------------------------------------------------------------------------------------------------
--- Last Modification updateFunction_d
+-- Last Modification M38_n
 if not versionDCE then versionDCE = {} end
 versionDCE["DC_Final_steps.lua"] = "1.1.1"
 -------------------------------------------------------------------------------------------------------
-
+--
+-- modification M90_a		missionWithIcone
 -------------------------------------------------------------------------------------------------------
 
 --demandé par 2 fichiers, normalement via MAIN_NextMission et UTIL_DIvers outils
@@ -38,13 +39,29 @@ function AddIconLayer(layersObjects, targetListRequired)
             ["type"] = "icon",
             ["data"] = "P91000072.png",
         },
+        ["ammo_supply"] = {
+            ["type"] = "icon",
+            ["data"] = "P91000072.png",
+        },
+        ["logistic_center"] = {
+            ["type"] = "icon",
+            ["data"] = "P91000072.png",
+        },
         ["fuel_storage"] = {
+            ["type"] = "icon",
+            ["data"] = "P91000207.png",
+        },
+        ["fuel_tank"] = {
             ["type"] = "icon",
             ["data"] = "P91000207.png",
         },
         ["power_plant"] = {
             ["type"] = "txt",
             ["data"] = "PP",
+        },
+        ["power_supply"] = {
+            ["type"] = "txt",
+            ["data"] = "PS",
         },
         ["rail_bridge"] = {
             ["type"] = "txt",
@@ -54,8 +71,24 @@ function AddIconLayer(layersObjects, targetListRequired)
             ["type"] = "txt",
             ["data"] = "B",
         },
-        
+        ["control_tower"] = {
+            ["type"] = "txt",
+            ["data"] = "CT",
+        }, 
+        ["command_center"] = {
+            ["type"] = "txt",
+            ["data"] = "HQ",
+        },
+        ["airplane_shelter"] = {
+            ["type"] = "txt",
+            ["data"] = "AS",
+        },
+        ["default_target"] = {
+            ["type"] = "txt",
+            ["data"] = "T",
+        }
     }
+
     -- Les couleurs dans DCS sont généralement définies au format hexadécimal ARGB (Alpha, Rouge, Vert, Bleu).
     -- Par exemple : "0xRRGGBBAA" où AA est l'opacité (FF = opaque).
     -- Les couleurs standards utilisées dans les fichiers mission DCS sont souvent :
@@ -68,9 +101,6 @@ function AddIconLayer(layersObjects, targetListRequired)
         ["yellow"]= "0xffff00ff", -- Jaune, opaque
     }
 
-    -- _affiche(targetsName, "targetsName ")
-
-
     local nb = 0
     for targetClientN, targetClientName in pairs(targetListRequired) do
         for targetSide, targets in pairs(targetlist) do
@@ -78,26 +108,54 @@ function AddIconLayer(layersObjects, targetListRequired)
                 if target.name == targetClientName then
                     for elementN, element in pairs(target.elements) do
 
-                        local layerType
-                        local data
-                        local colorDefine
-                        local lowerName = string.lower(element.name)
-                        local tempObject = {}
+                        -- local layerType
+                        -- local data
+                        -- local colorDefine
+                        -- local lowerName = string.lower(element.name)
+                        -- local tempObject = {}
 
-                        local typeMatched = nil
-                        if string.find(lowerName, "warehouse") then
-                            typeMatched = "warehouse"
-                        elseif string.find(lowerName, "fuel") and string.find(lowerName, "storage") then
-                            typeMatched = "fuel_storage"
-                        elseif string.find(lowerName, "power") and string.find(lowerName, "plant") then
-                            typeMatched = "power_plant"
-                        elseif string.find(lowerName, "rail") and string.find(lowerName, "bridge") then
-                            typeMatched = "rail_bridge"
-                        elseif string.find(lowerName, "road") and string.find(lowerName, "bridge") then
-                            typeMatched = "road_bridge"
-                        -- else
+                        -- local typeMatched = nil
+                        -- if string.find(lowerName, "warehouse") then
                         --     typeMatched = "warehouse"
+                        -- elseif string.find(lowerName, "fuel") and string.find(lowerName, "storage") then
+                        --     typeMatched = "fuel_storage"
+                        -- elseif string.find(lowerName, "power") and string.find(lowerName, "plant") then
+                        --     typeMatched = "power_plant"
+                        -- elseif string.find(lowerName, "rail") and string.find(lowerName, "bridge") then
+                        --     typeMatched = "rail_bridge"
+                        -- elseif string.find(lowerName, "road") and string.find(lowerName, "bridge") then
+                        --     typeMatched = "road_bridge"
+                        -- else
+                        --     typeMatched = "default_target"
+                        -- end
+
+                        local function matchTypeFromName(name)
+                            local lowerName = string.lower(name)
+                            for key, val in pairs(dataType) do
+                                local allFound = true
+                                for sub in string.gmatch(key, "([^_]+)") do
+                                    if not string.find(lowerName, sub) then
+                                        allFound = false
+                                        break
+                                    end
+                                end
+                                if allFound then
+                                    return key, val
+                                end
+                            end
+                            return "default_target", dataType["default_target"]
                         end
+
+                        -- Utilisation dans ta boucle :
+                        local colorDefine
+                        local tempObject = {}
+                        local typeMatched, dataInfo = matchTypeFromName(element.name)
+                        local data = dataInfo.data
+                        local layerType = dataInfo.type
+
+                        print("Element Name: " .. element.name .. ", Matched Type: " .. typeMatched)
+                        _affiche(dataInfo, "dataInfo ")
+
 
                         if typeMatched then
                             data = dataType[typeMatched].data

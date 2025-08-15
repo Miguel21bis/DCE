@@ -1,12 +1,13 @@
 --To manually generate the first campaign mission and reset the campaign to initial status. For manual use by campaign designer only, not required for normal campaign play.
 --Initiated by FirstMission.bat
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M85_a
+-- last modification: M90_a
 if not versionDCE then versionDCE = {} end
-versionDCE["BAT_FirstMission.lua"] = "1.14.100"
+versionDCE["BAT_FirstMission.lua"] = "1.15.100"
 -------------------------------------------------------------------------------------------------------
 -- adjustment_p				(p tools)(o full targetList)(n targetList numeric)(m BAT)(l Playable_m from Data_divers)(k BugList)(j PairsByKeys)(i global TabTask)(h Firstmission_flag)(g mise a niveau)(d: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form)
 -- cleancode_d				(d springCleaning)
+-- modification M90_a		missionWithIcone
 -- modification M85_a		new variables added to conf_mod (RepairOption, current_date, weather, etc.)
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
 -- modification M61_c		SAR (c DEV creation fichier cercle commande: w3)
