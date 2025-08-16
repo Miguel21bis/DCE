@@ -1,14 +1,15 @@
 --Various DATA
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification: updateData_Bg
+-- last modification: M90_a
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Data.lua"] = "1.14.86"
+versionDCE["UTIL_Data.lua"] = "1.15.87"
 ------------------------------------------------------------------------------------------------------- 
 -- updateData_Bg			(g vwv_mig21mf)(f refuellingReceptacleType)(e Tu_22D)(Bd flyingAlone)(CH-47F H-6J)(a OH-58)(z F-4E-45MC)(UH-60L)(x hHover)(w reaper)(v Hercules)(u tabTask)(t add is_helicopter table)(s F1EE)(r F-16C_50)(q): Add helicos  (p): Add WOC80)(o: transfer the dataMap to another file)
 -- debug_c					(c OH-6A)(b requiredModulesSpecialName)(a add IsWesternCountry function)
 -- cleanCode_a				(a: repetition)
 -- adjustment_e				(e delete EPLRS_Capacity table)(d CVN to CV)(bombing on Group&Unit)(b: Syria nnTimeZone +3 & GudautaGPS )
+-- modification M90_a		missionWithIcone
 -- modification M68_a		add AFAC task
 -- modification M67_a		add 2.9 datalinks dataCartridge
 -- modification M66_a		add Runway Attack
@@ -4153,6 +4154,180 @@ Data_warehouses =
 	},
 	["OperatingLevel_Fuel"] = 10,
 	["periodicity"] = 30,
+}
+
+LayerObjectsLegend =
+{
+	[1] = 
+	{
+		["visible"] = true,
+		["mapY"] = -179624.46498808,
+		["primitiveType"] = "Icon",
+		["scale"] = 1,
+		["file"] = "P91000072.png",
+		["colorString"] = "0xff0000ff",
+		["mapX"] = -7378.308476086,
+		["layerName"] = "Common",
+		["name"] = "Icon-1",
+		["angle"] = 0,
+	}, -- end of [1]
+	[2] = 
+	{
+		["visible"] = true,
+		["borderThickness"] = 0,
+		["fillColorString"] = "0xffffff00",
+		["fontSize"] = 20,
+		["mapY"] = -178777.3700446,
+		["layerName"] = "Common",
+		["primitiveType"] = "TextBox",
+		["font"] = "DejaVuLGCSansCondensed.ttf",
+		["text"] = "warehouse - ammo supply - logistic center ",
+		["mapX"] = -7683.262655737,
+		["name"] = "Warehouse",
+		["colorString"] = "0xff0000ff",
+		["angle"] = 0,
+	}, -- end of [2]
+	[3] = 
+	{
+		["visible"] = true,
+		["mapY"] = -179658.34878582,
+		["primitiveType"] = "Icon",
+		["scale"] = 1,
+		["file"] = "P91000207.png",
+		["colorString"] = "0xff0000ff",
+		["mapX"] = -9072.4983630363,
+		["layerName"] = "Common",
+		["name"] = "Fuel-1",
+		["angle"] = 0,
+	}, -- end of [3]
+	[4] = 
+	{
+		["visible"] = true,
+		["borderThickness"] = 0,
+		["fillColorString"] = "0xffffff00",
+		["fontSize"] = 20,
+		["mapY"] = -178709.60244912,
+		["layerName"] = "Common",
+		["primitiveType"] = "TextBox",
+		["font"] = "DejaVuLGCSansCondensed.ttf",
+		["text"] = "fuel supply - fuel tank",
+		["mapX"] = -9479.1039359043,
+		["name"] = "Fuel",
+		["colorString"] = "0xff0000ff",
+		["angle"] = 0,
+	}, -- end of [4]
+	[5] = 
+	{
+		["visible"] = true,
+		["borderThickness"] = 0,
+		["fillColorString"] = "0xffffff00",
+		["fontSize"] = 20,
+		["mapY"] = -180047.98693401,
+		["layerName"] = "Common",
+		["primitiveType"] = "TextBox",
+		["font"] = "DejaVuLGCSansCondensed.ttf",
+		["text"] = "PP  Power Plant",
+		["mapX"] = -11077.190401296,
+		["name"] = "Power Plant",
+		["colorString"] = "0xff0000ff",
+		["angle"] = 0,
+	}, -- end of [5]
+	[6] = 
+	{
+		["visible"] = true,
+		["borderThickness"] = 0,
+		["fillColorString"] = "0xffffff00",
+		["fontSize"] = 20,
+		["mapY"] = -180047.98693401,
+		["layerName"] = "Common",
+		["primitiveType"] = "TextBox",
+		["font"] = "DejaVuLGCSansCondensed.ttf",
+		["text"] = "PS  Power Supply",
+		["mapX"] = -12382.682937089,
+		["name"] = "Power Supply",
+		["colorString"] = "0xff0000ff",
+		["angle"] = 0,
+	}, -- end of [6]
+	[7] = 
+	{
+		["visible"] = true,
+		["borderThickness"] = 0,
+		["fillColorString"] = "0xffffff00",
+		["fontSize"] = 20,
+		["mapY"] = -180047.98693401,
+		["layerName"] = "Common",
+		["primitiveType"] = "TextBox",
+		["font"] = "DejaVuLGCSansCondensed.ttf",
+		["text"] = "RB  Rail Bridge",
+		["mapX"] = -13490.37357352,
+		["name"] = "Rail Bridge",
+		["colorString"] = "0xff0000ff",
+		["angle"] = 0,
+	}, -- end of [7]
+	[8] = 
+	{
+		["visible"] = true,
+		["borderThickness"] = 0,
+		["fillColorString"] = "0xffffff00",
+		["fontSize"] = 20,
+		["mapY"] = -179810.62465478,
+		["layerName"] = "Common",
+		["primitiveType"] = "TextBox",
+		["font"] = "DejaVuLGCSansCondensed.ttf",
+		["text"] = "B   Road Bridge",
+		["mapX"] = -14558.503830078,
+		["name"] = "Road Bridge",
+		["colorString"] = "0xff0000ff",
+		["angle"] = 0,
+	}, -- end of [8]
+	[9] = 
+	{
+		["visible"] = true,
+		["borderThickness"] = 0,
+		["fillColorString"] = "0xffffff00",
+		["fontSize"] = 20,
+		["mapY"] = -180047.98693401,
+		["layerName"] = "Common",
+		["primitiveType"] = "TextBox",
+		["font"] = "DejaVuLGCSansCondensed.ttf",
+		["text"] = "CT  Control Tower",
+		["mapX"] = -15666.194466509,
+		["name"] = "Control Tower",
+		["colorString"] = "0xff0000ff",
+		["angle"] = 0,
+	}, -- end of [9]
+	[10] = 
+	{
+		["visible"] = true,
+		["borderThickness"] = 0,
+		["fillColorString"] = "0xffffff00",
+		["fontSize"] = 20,
+		["mapY"] = -180206.2284535,
+		["layerName"] = "Common",
+		["primitiveType"] = "TextBox",
+		["font"] = "DejaVuLGCSansCondensed.ttf",
+		["text"] = "HQ  Command Center Headquater",
+		["mapX"] = -17050.807762048,
+		["name"] = "Command Center",
+		["colorString"] = "0xff0000ff",
+		["angle"] = 0,
+	}, -- end of [10]
+	[11] = 
+	{
+		["visible"] = true,
+		["borderThickness"] = 0,
+		["fillColorString"] = "0xffffff00",
+		["fontSize"] = 20,
+		["mapY"] = -180087.54731388,
+		["layerName"] = "Common",
+		["primitiveType"] = "TextBox",
+		["font"] = "DejaVuLGCSansCondensed.ttf",
+		["text"] = "AS  Airplane Shelter",
+		["mapX"] = -18395.860677714,
+		["name"] = "Airplane Shelter",
+		["colorString"] = "0xff0000ff",
+		["angle"] = 0,
+	} -- end of [11]
 }
 
 

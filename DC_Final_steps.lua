@@ -101,6 +101,9 @@ function AddIconLayer(layersObjects, targetListRequired)
         ["yellow"]= "0xffff00ff", -- Jaune, opaque
     }
 
+    local x_Legend = 0
+    local y_Legend = 0
+                        
     local nb = 0
     for targetClientN, targetClientName in pairs(targetListRequired) do
         for targetSide, targets in pairs(targetlist) do
@@ -153,6 +156,7 @@ function AddIconLayer(layersObjects, targetListRequired)
                         local data = dataInfo.data
                         local layerType = dataInfo.type
 
+
                         print("Element Name: " .. element.name .. ", Matched Type: " .. typeMatched)
                         _affiche(dataInfo, "dataInfo ")
 
@@ -181,14 +185,12 @@ function AddIconLayer(layersObjects, targetListRequired)
                                     ["layerName"] = "Common",
                                     ["angle"] = 0,
                                 }
-
-
                             elseif layerType == "txt" then
                                 tempObject =
                                 {
                                     ["visible"] = true,
                                     ["borderThickness"] = 0,
-                                    ["fillColorString"] = "0xffffff00",     -- fond est transparent
+                                    ["fillColorString"] = "0xffffff00", -- fond est transparent
                                     ["fontSize"] = 15,
                                     ["mapX"] = element.x,
                                     ["mapY"] = element.y,
@@ -202,6 +204,22 @@ function AddIconLayer(layersObjects, targetListRequired)
                                 }
                             end
                             
+                            -- Trouver la position la plus à gauche (minX) et la plus en bas (minY) de tous les éléments du groupe
+                            -- On initialise minX et minY si ce n'est pas déjà fait
+                            if not x_Legend or element.x < x_Legend then
+                                x_Legend = element.x
+                            end
+                            if not y_Legend or element.y < y_Legend then
+                                y_Legend = element.y
+                            end
+                            -- -- On garde aussi la position la plus à droite (maxX) si besoin
+                            -- if not maxX or element.x > maxX then
+                            --     maxX = element.x
+                            -- end
+                            -- if not maxY or element.y > maxY then
+                            --     maxY = element.y
+                            -- end
+                            
                             nb = nb + 1
                             table.insert(mission.drawings.layers[4].objects, tempObject)
                         end
@@ -213,6 +231,26 @@ function AddIconLayer(layersObjects, targetListRequired)
 
     print("Number of targets added to the mission: " .. nb)
     -- os.execute 'pause'
+
+    y_Legend = y_Legend -500 -- Ajuster la position Y pour le texte
+
+    -- Décalage initial (pour placer la légende où tu veux)
+    local delta_x = 0
+    local delta_y = 0
+
+    if nb > 0 and LayerObjectsLegend then
+        for objectN, object in ipairs(LayerObjectsLegend) do
+            -- Calcule le décalage relatif à la position d'origine de chaque objet
+            local dx = (object.mapX or 0) - (LayerObjectsLegend[1].mapX or 0)
+            local dy = (object.mapY or 0) - (LayerObjectsLegend[1].mapY or 0)
+
+            -- Place l'objet à la nouvelle position
+            object.x = x_Legend + dx + delta_x
+            object.y = y_Legend + dy + delta_y
+
+            table.insert(mission.drawings.layers[4].objects, object)
+        end
+    end
 
     return layersObjects
 
