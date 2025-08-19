@@ -35,10 +35,6 @@ Assigned_freq = {}
 MinPercentDestroyed = 95		----variable pour destructions batiment de DCS en pourcentage
 RayonDamaged = 50				----variable pour destructions batiment de DCS en metres
 
--- Initialisation des tables d'ID
-AllIdGroup = {}
-AllIdUnit = {}
-UnitByName = {}
 
 local idGroupCounter = 3000
 local idUnitCounter = 3000
@@ -846,7 +842,7 @@ end
 
 
 -- Génère un nouvel ID de groupe unique
-function GenerateIDGroup()
+function GenerateIDGroup(groupName)
 	local maxAttempts = 10000
 	local attempts = 0
 	repeat
@@ -856,12 +852,12 @@ function GenerateIDGroup()
 			error("GenerateIDGroup: Too many attempts to find a unique group ID")
 		end
 	until not AllIdGroup[idGroupCounter]
-	AllIdGroup[idGroupCounter] = true
+	AllIdGroup[idGroupCounter] = groupName
 	return idGroupCounter
 end
 
 -- Génère un nouvel ID d'unité unique
-function GenerateIDUnit(name)
+function GenerateIDUnit(unitName)
 	local maxAttempts = 10000
 	local attempts = 0
 	repeat
@@ -871,15 +867,79 @@ function GenerateIDUnit(name)
 			error("GenerateIDUnit: Too many attempts to find a unique unit ID")
 		end
 	until not AllIdUnit[idUnitCounter]
-	AllIdUnit[idUnitCounter] = true
-	if name then
-		UnitByName[name] = idUnitCounter
+	AllIdUnit[idUnitCounter] = unitName
+	if unitName then
+		UnitByName[unitName] = idUnitCounter
 	end
 	return idUnitCounter
 end
 
 -- Fonction principale pour détecter et corriger les doublons
+--premiere passe pour les warehouses, CV, et FARP
+function FirstCheck_Id()
+
+	for warhouse_Id, warehouseData in pairs(warehouses.warehouses or {}) do
+		for side_name, side in pairs(mission.coalition) do
+			for country_n, country_ in pairs(side.country) do
+				for categorie, categorie_ in pairs(country_) do
+					if type(categorie_) == "table" and categorie_.group then
+						for groupN, groupData in pairs(categorie_.group) do
+
+							-- Vérifie les doublons de unitId
+							for unitN, unit in pairs(groupData.units or {}) do
+								if unit.unitId == warhouse_Id then
+									AllIdUnit[unit.unitId] = unit.name
+								end
+
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	-- _affiche(AllIdUnit, "warehouses ")
+
+end
+
+-- Fonction principale pour détecter et corriger les doublons
 function CheckAll_Id()
+
+	-- _affiche(AllIdUnit, "AllIdUnit_START ")
+	-- Cross-platform sleep for 6 seconds
+	-- if package.config:sub(1,1) == '\\' then
+	-- 	-- Windows
+	-- 	os.execute("ping -n 7 127.0.0.1 > NUL")
+	-- else
+	-- 	-- Unix/Linux/Mac
+	-- 	os.execute("sleep 6")
+	-- end
+	
+	--pour le mission
+	for side_name, side in pairs(mission.coalition) do
+		for country_n, country_ in pairs(side.country) do
+			for categorie, categorie_ in pairs(country_) do
+				if type(categorie_) == "table" and categorie_.group then
+					for groupN, groupData in pairs(categorie_.group) do
+						-- Vérifie les doublons de groupId
+                        if AllIdGroup[groupData.groupId] then
+                        else
+                            AllIdGroup[groupData.groupId] = groupData.name
+                        end
+                        -- Vérifie les doublons de unitId
+                        for Nunit, unit in pairs(groupData.units or {}) do
+                            if AllIdUnit[unit.unitId] then
+                            else
+                                AllIdUnit[unit.unitId] = unit.name
+                                UnitByName[unit.name] = unit.unitId
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
 
 	--pour le oob_ground
     for coalName, coal in pairs(oob_ground or {}) do
@@ -890,13 +950,13 @@ function CheckAll_Id()
                         -- Vérifie les doublons de groupId
                         if AllIdGroup[groupData.groupId] then
                         else
-                            AllIdGroup[groupData.groupId] = true
+                            AllIdGroup[groupData.groupId] = groupData.name
                         end
                         -- Vérifie les doublons de unitId
                         for Nunit, unit in pairs(groupData.units or {}) do
                             if AllIdUnit[unit.unitId] then
                             else
-                                AllIdUnit[unit.unitId] = true
+                                AllIdUnit[unit.unitId] = unit.name
                                 UnitByName[unit.name] = unit.unitId
                             end
                         end
@@ -906,30 +966,7 @@ function CheckAll_Id()
         end
     end
 
-	--pour le mission
-	for side_name, side in pairs(mission.coalition) do
-		for country_n, country_ in pairs(side.country) do
-			for categorie, categorie_ in pairs(country_) do
-				if type(categorie_) == "table" and categorie_.group then
-					for groupN, groupData in pairs(categorie_.group) do
-						-- Vérifie les doublons de groupId
-                        if AllIdGroup[groupData.groupId] then
-                        else
-                            AllIdGroup[groupData.groupId] = true
-                        end
-                        -- Vérifie les doublons de unitId
-                        for Nunit, unit in pairs(groupData.units or {}) do
-                            if AllIdUnit[unit.unitId] then
-                            else
-                                AllIdUnit[unit.unitId] = true
-                                UnitByName[unit.name] = unit.unitId
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
+-- _affiche(AllIdUnit, "AllIdUnit_FIN ")
 
 end
 
@@ -951,17 +988,17 @@ function CheckAndFixAllIds()
                 if type(groups) == "table" and groups["group"] then
                     for groupN, group in pairs(groups["group"] or {}) do
                         -- Vérifie les doublons de groupId
-                        if AllIdGroup[group.groupId] then
+                        if AllIdGroup[group.groupId] and AllIdGroup[group.groupId] ~= group.name then
                             table.insert(groupIdError, group)
                         else
-                            AllIdGroup[group.groupId] = true
+                            AllIdGroup[group.groupId] = group.name
                         end
                         -- Vérifie les doublons de unitId
                         for Nunit, unit in pairs(group.units or {}) do
-                            if AllIdUnit[unit.unitId] then
+                            if AllIdUnit[unit.unitId] and AllIdUnit[unit.unitId] ~= unit.name then
                                 table.insert(unitIdError, unit)
                             else
-                                AllIdUnit[unit.unitId] = true
+                                AllIdUnit[unit.unitId] = unit.name
                                 UnitByName[unit.name] = unit.unitId
                             end
                         end
@@ -973,7 +1010,7 @@ function CheckAndFixAllIds()
 
     -- 2. Correction des doublons de groupId
     for _, group in ipairs(groupIdError) do
-        group.groupId = GenerateIDGroup()
+        group.groupId = GenerateIDGroup(group.name)
         if Debug and Debug.debug then
             print("Nouveau groupId attribué : "..tostring(group.groupId).." pour "..tostring(group.name))
         end
@@ -981,7 +1018,7 @@ function CheckAndFixAllIds()
 
     -- 3. Correction des doublons de unitId
     for _, unit in ipairs(unitIdError) do
-        unit.unitId = GenerateIDUnit()
+        unit.unitId = GenerateIDUnit(unit.name)
         if Debug and Debug.debug then
             print("Nouveau unitId attribué : "..tostring(unit.unitId).." pour "..tostring(unit.name))
         end
@@ -4431,6 +4468,7 @@ function LoadFileAndUpdate(from)
 	local warStr = zipFile:unzReadAllCurrentFile()
 	local warStrFunc = loadstring(warStr)()
 
+	FirstCheck_Id()
 	CheckAll_Id()
 
 	zipFile:unzClose()

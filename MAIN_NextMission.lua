@@ -977,16 +977,16 @@ for side_name, side in pairs(mission.coalition) do																--iterate thro
 						if not  name[group_.name] then
 							name[group_.name] = group_.name
 						else
-							print("MainNM error, duplicate of name |"..categorie.."| |".. name[group_.name] .."| and |"..tostring(group_.name))
-							print("DCE debug") os.execute 'pause'
+							-- print("MainNM error, duplicate of name |"..categorie.."| |".. name[group_.name] .."| and |"..tostring(group_.name))
+							-- print("DCE debug") os.execute 'pause'
 						end
 
 						if not  GroupId[group_.groupId] then
 							-- GroupId[group_.groupId] = group_.groupId
 							GroupId[group_.groupId] = group_.name
 						else
-							print("MainNM error, duplicate of GroupId |"..categorie.."| |".. GroupId[group_.groupId].."| and |"..tostring(group_.name))
-							print("DCE debug") os.execute 'pause'
+							-- print("MainNM error, duplicate of GroupId |"..categorie.."| |".. GroupId[group_.groupId].."| and |"..tostring(group_.name))
+							-- print("DCE debug") os.execute 'pause'
 						end
 
 						for unitN, unit in ipairs(group_.units) do
@@ -996,8 +996,8 @@ for side_name, side in pairs(mission.coalition) do																--iterate thro
 								uniId[unit.unitId] = unit.name
 							else
 								if Debug.debug then
-									print("MainNM error debug, duplicate of unitId |"..tostring(categorie).."| Clone1: |"..unit.unitId.." |unitId| ".. tostring(uniId[unit.unitId]) .."| Clone2: |"..tostring(unit.name))
-									print("DCE debug") os.execute 'pause'
+									-- print("MainNM error debug, duplicate of unitId |"..tostring(categorie).."| Clone1: |"..unit.unitId.." |unitId| ".. tostring(uniId[unit.unitId]) .."| Clone2: |"..tostring(unit.name))
+									-- print("DCE debug") os.execute 'pause'
 								end
 							end
 						end

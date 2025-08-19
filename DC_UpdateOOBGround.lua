@@ -125,10 +125,23 @@ for missSideName, side in pairs(mission.coalition) do
 											if oobUnit.unitId ~= missGroup.units[oobUnitN].unitId then
 												oobUnit.unitId = missGroup.units[oobUnitN].unitId
 
-												-- print("DcUOOBG -- -- > C " .. missCategory .. ":: new type2: " .. oobUnit.type)
+												print("DcUOOBG miseAJour_ warehouses Id-- -- > C " .. missCategory .. " " .. oobUnit.type.." Id From missGroup.units "..missGroup.units[oobUnitN].unitId)
+												os.execute 'pause'
 											end
 										end
 									end
+
+									--met à jour les l'Id des CV et CVN de db_airbases si celui ci a changé
+									for missUnitN, missUnit in ipairs(missGroup.units) do
+										if missUnit.name == db_airbases[missUnit.name] and db_airbases[missUnit.name].airdromeId then
+											if db_airbases[missUnit.name].airdromeId ~= missUnit.unitId then
+												db_airbases[missUnit.name].airdromeId = missUnit.unitId
+												print("DcUOOBG miseAJour_Id-- -- > E  " .. missCategory .. ":: new airdromeId: " .. db_airbases[missUnit.name].airdromeId)
+												os.execute 'pause'
+											end
+										end
+									end
+
 
 									--regarde si les type ont changé, mais uniquement ceux qui ne sont pas dans targetlist
 									--car les elements Dead sont déjà enlevé et fou le bordel

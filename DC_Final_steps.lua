@@ -101,36 +101,15 @@ function AddIconLayer(layersObjects, targetListRequired)
         ["yellow"]= "0xffff00ff", -- Jaune, opaque
     }
 
-    local x_Legend = 0
-    local y_Legend = 0
+    local x_Legend = 999999999
+    local y_Legend = 999999999
                         
     local nb = 0
     for targetClientN, targetClientName in pairs(targetListRequired) do
         for targetSide, targets in pairs(targetlist) do
             for targetN, target in pairs(targets) do
-                if target.name == targetClientName then
+                 if target.name == targetClientName and target.elements then
                     for elementN, element in pairs(target.elements) do
-
-                        -- local layerType
-                        -- local data
-                        -- local colorDefine
-                        -- local lowerName = string.lower(element.name)
-                        -- local tempObject = {}
-
-                        -- local typeMatched = nil
-                        -- if string.find(lowerName, "warehouse") then
-                        --     typeMatched = "warehouse"
-                        -- elseif string.find(lowerName, "fuel") and string.find(lowerName, "storage") then
-                        --     typeMatched = "fuel_storage"
-                        -- elseif string.find(lowerName, "power") and string.find(lowerName, "plant") then
-                        --     typeMatched = "power_plant"
-                        -- elseif string.find(lowerName, "rail") and string.find(lowerName, "bridge") then
-                        --     typeMatched = "rail_bridge"
-                        -- elseif string.find(lowerName, "road") and string.find(lowerName, "bridge") then
-                        --     typeMatched = "road_bridge"
-                        -- else
-                        --     typeMatched = "default_target"
-                        -- end
 
                         local function matchTypeFromName(name)
                             local lowerName = string.lower(name)
@@ -212,13 +191,6 @@ function AddIconLayer(layersObjects, targetListRequired)
                             if not y_Legend or element.y < y_Legend then
                                 y_Legend = element.y
                             end
-                            -- -- On garde aussi la position la plus à droite (maxX) si besoin
-                            -- if not maxX or element.x > maxX then
-                            --     maxX = element.x
-                            -- end
-                            -- if not maxY or element.y > maxY then
-                            --     maxY = element.y
-                            -- end
                             
                             nb = nb + 1
                             table.insert(mission.drawings.layers[4].objects, tempObject)
@@ -229,28 +201,38 @@ function AddIconLayer(layersObjects, targetListRequired)
         end
     end
 
-    print("Number of targets added to the mission: " .. nb)
-    -- os.execute 'pause'
+    -- print("Number of targets added to the mission: " .. nb)
+    -- print("x_Legend: " .. x_Legend.." y_Legend: " .. y_Legend)
+    
 
-    y_Legend = y_Legend -500 -- Ajuster la position Y pour le texte
 
-    -- Décalage initial (pour placer la légende où tu veux)
-    local delta_x = 0
-    local delta_y = 0
+    x_Legend = x_Legend -500 -- Ajuster la position ordonné pour le texte
 
     if nb > 0 and LayerObjectsLegend then
-        for objectN, object in ipairs(LayerObjectsLegend) do
-            -- Calcule le décalage relatif à la position d'origine de chaque objet
-            local dx = (object.mapX or 0) - (LayerObjectsLegend[1].mapX or 0)
-            local dy = (object.mapY or 0) - (LayerObjectsLegend[1].mapY or 0)
+        -- Trouver le point d'ancrage de la légende (origine du template)
+        local legend_minX = math.huge
+        local legend_minY = math.huge
+        for _, object in ipairs(LayerObjectsLegend) do
+            if object.mapX and object.mapX < legend_minX then legend_minX = object.mapX end
+            if object.mapY and object.mapY < legend_minY then legend_minY = object.mapY end
+        end
 
-            -- Place l'objet à la nouvelle position
-            object.x = x_Legend + dx + delta_x
-            object.y = y_Legend + dy + delta_y
+        -- Décaler chaque objet de la légende pour l'aligner sur la cible
+        for _, object in ipairs(LayerObjectsLegend) do
+            local delta_x = (object.mapX or 0) - legend_minX
+            local delta_y = (object.mapY or 0) - legend_minY
+
+            object.mapX = x_Legend + delta_x
+            object.mapY = y_Legend + delta_y
+
+            -- print("object.mapX: "..object.mapX.." (x_Legend: "..x_Legend.." + delta_x: "..delta_x..")")
+            -- print("object.mapY: "..object.mapY.." (y_Legend: "..y_Legend.." + delta_y: "..delta_y..")")
 
             table.insert(mission.drawings.layers[4].objects, object)
         end
     end
+
+        -- os.execute 'pause'
 
     return layersObjects
 

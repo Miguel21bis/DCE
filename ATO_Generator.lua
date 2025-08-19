@@ -31,11 +31,45 @@ DebugRoute = false
 
 
 --to track what caused lack of playable sortie for the player
-Playability_criterium = {}
-function TrackPlayability(player_unit, criterium)																				--function that tracks whether a playability criterium has been met
-	if player_unit == true then																									--unit in question is playable by player
-		Playability_criterium[criterium] = true																					--set playability criterium to be met
-	end
+Playability_criterium = {
+    { key = "active_unit",           value = nil }, -- Player unit is not active
+    { key = "base",                  value = nil }, -- Player airbase is not operational
+    { key = "ready_aircraft",        value = nil }, -- Player unit has no ready aircraft
+    { key = "tot",                   value = nil }, -- Player aircraft type cannot operate at this time of day
+    { key = "target",                value = nil }, -- No eligible mission available for player
+    { key = "target_firepower",      value = nil }, -- Not enough ready aircraft for this mission
+    { key = "weather",               value = nil }, -- Player aircraft type cannot operate in this weather
+    { key = "target_range",          value = nil }, -- No eligible mission available for player
+
+	{ key = "escort_tot",            		      value = nil }, -- 
+    { key = "escort_target",         			   value = nil }, -- 
+	{ key = "escort_weather",                  		value = nil }, -- 
+    { key = "escort_target_range",             		value = nil }, -- 
+    { key = "escort_target_firepower",             value = nil }, -- 
+
+	{ key = "playerAssign_ATO",            		      value = nil }, -- 
+    { key = "playerAssign_intercept",         			   value = nil }, -- 
+	{ key = "playerAssign_intercept_hostile",                  		value = nil }, -- 
+    { key = "playerAssign_SAR",             		value = nil }, -- 
+    { key = "playerAssign_CAP",             value = nil }, -- 
+    { key = "playerAssign_CAP_hostile",             value = nil }, -- 
+
+}
+-- function TrackPlayability(player_unit, criterium)																				--function that tracks whether a playability criterium has been met
+-- 	if player_unit == true then																									--unit in question is playable by player
+-- 		Playability_criterium[criterium] = true																					--set playability criterium to be met
+-- 	end
+-- end
+function TrackPlayability(player_unit, criterium)
+    if player_unit == true then
+        for i, crit in ipairs(Playability_criterium) do
+            -- crit.key peut être "3_ready_aircraft" ou "ready_aircraft" selon ta déclaration
+            if crit.key == criterium or tostring(i).."_"..crit.key == criterium then
+                crit.value = true
+                break
+            end
+        end
+    end
 end
 
 --table to hold availability of aircraft
@@ -1950,7 +1984,7 @@ for sideName, draftT in pairs(Draft_sorties) do
 
 
 												if (unit_loadouts[l].day and draft.loadout.day) or (unit_loadouts[l].night and draft.loadout.night) then	--support can join package at either day or night
-													TrackPlayability(unit.player, "tot")															--track playabilty criterium has been met
+													TrackPlayability(unit.player, "escort_tot")															--track playabilty criterium has been met
 													--admet une vitesse (escort) 75% plus faible que la vitesse du Main
 													if unit_loadouts[l].vCruise < draft.loadout.vCruise then
 
@@ -1970,7 +2004,7 @@ for sideName, draftT in pairs(Draft_sorties) do
 													end
 
 													if unit_loadouts[l].vCruise >= draft.loadout.vCruise or overRideMP_B then										--support has a cruise speed equal or higher than main body
-														TrackPlayability(unit.player, "target")													--track playabilty criterium has been met
+														TrackPlayability(unit.player, "escort_target")													--track playabilty criterium has been met
 
 														local debuGenTxt1480 = "\n"..(tostring(draft.id).." AtoG II passe B_15e support_requirement passe: ")
 
@@ -2015,7 +2049,7 @@ for sideName, draftT in pairs(Draft_sorties) do
 														if weather_eligible or overRideMP_B then												--continue of this loadout is eligible for weather
 
 
-															TrackPlayability(unit.player, "weather")												--track playabilty criterium has been met								
+															TrackPlayability(unit.player, "escort_weather")												--track playabilty criterium has been met								
 															--get airbase position
 															local airbasePoint = {																	--get the x-y coordinates of the airbase where the unit is located
 																x = db_airbases[unit.base].x,
@@ -2033,7 +2067,7 @@ for sideName, draftT in pairs(Draft_sorties) do
 
 
 															if route.lenght <= unit_loadouts[l].range * 2 and (unit_loadouts[l].minrange == nil or route.lenght > unit_loadouts[l].minrange * 2) then		--escort route lenght is within range capability of loadout
-																TrackPlayability(unit.player, "target_range")									--track playabilty criterium has been met
+																TrackPlayability(unit.player, "escort_target_range")									--track playabilty criterium has been met
 
 																local debuGenTxt1545 = "\n"..(tostring(draft.id).." AtoG II passe B_17  ")
 
@@ -2209,7 +2243,7 @@ for sideName, draftT in pairs(Draft_sorties) do
 																	debugLog(draft.id.." AtoG II passe B_21c Id "..tostring(draft.id).." "..unit.type.." "..unit.name.." escort_num "..tostring(escort_num).." "..draft.target_name.." NbTotalSupport: "..draft.support[task]["NbTotalSupport"]  )
 																end
 
-																TrackPlayability(unit.player, "target_firepower")							--track playabilty criterium has been met
+																TrackPlayability(unit.player, "escort_target_firepower")							--track playabilty criterium has been met
 
 																local entryEscortNum
 

@@ -486,28 +486,55 @@ repeat
 			print("Mission Generation Error. No eligible player flight in 20 attempts. Try again.\n\n")
 			break
 		else																							--no player flight could be assigned, advance time and try again
-			if Playability_criterium.active_unit == nil then
-				print("Player unit is not active.\n\n")
-			elseif Playability_criterium.base == nil then
-				print("Player airbase is not operational.\n\n")
-			elseif Playability_criterium.ready_aircraft == nil then
-				print("Player unit has no ready aircraft.\n\n")
-			elseif Playability_criterium.tot == nil then
-				print("Player aircraft type cannot operate at this time of day.\n\n")
-			elseif Playability_criterium.target == nil then
-				print("No eligible mission available for player.\n\n")
-			elseif Playability_criterium.target_firepower == nil then
-				print("Not enough ready aircraft for this mission.\n\n")
-			elseif Playability_criterium.weather == nil then
-				print("Player aircraft type cannot operate in this weather.\n\n")
-			elseif Playability_criterium.target_range == nil then
-				print("No eligible mission available for player.\n\n")
-			-- elseif Playability_criterium.coop == nil then
-				-- print("Not enough ready aircraft for all clients.\n\n")
-			elseif Multi.NbGroup and not PlayerFlight then
+			-- if Playability_criterium["1_active_unit"] == false then
+			-- 	print("Player unit is not active.\n\n")
+			-- elseif Playability_criterium["2_base"] == false then
+			-- 	print("Player airbase is not operational.\n\n")
+			-- elseif Playability_criterium["3_ready_aircraft"] == false then
+			-- 	print("Player unit has no ready aircraft.\n\n")
+			-- elseif Playability_criterium["4_available_aircraft"] == false then
+			-- 	print("Player unit has no available aircraft.\n\n")
+			-- elseif Playability_criterium["5_tot"] == false then
+			-- 	print("Player aircraft type cannot operate at this time of day.\n\n")
+			-- elseif Playability_criterium["6_target"] == false then
+			-- 	print("No available target for player.\n\n")
+			-- elseif Playability_criterium["7_target_firepower"] == false then
+			-- 	print("Not enough firepower or ready aircraft for this mission.\n\n")
+			-- elseif Playability_criterium["8_weather"] == false then
+			-- 	print("Player aircraft type cannot operate in this weather.\n\n")
+			-- elseif Playability_criterium["9_target_range"] == false then
+			-- 	print("No eligible mission available for player.\n\n")
+			-- elseif Multi.NbGroup and not PlayerFlight then
+			-- 	print("Not enough ready aircraft for all clients..\n\n")
+			-- elseif Playability_criterium.intercept == false then
+			-- 	print("Ground alert intercept duty without launch.\n\n")
+			-- end
+
+			for _, crit in ipairs(Playability_criterium) do
+				if crit.key == "active_unit" and crit.value == nil then
+					print("Player unit is not active.\n\n")
+				elseif crit.key == "base" and crit.value == nil then
+					print("Player airbase is not operational.\n\n")
+				elseif crit.key == "ready_aircraft" and crit.value == nil then
+					print("Player unit has no ready aircraft.\n\n")
+				elseif crit.key == "tot" and crit.value == nil then
+					print("Player aircraft type cannot operate at this time of day.\n\n")
+				elseif crit.key == "target" and crit.value == nil then
+					print("No eligible mission available for player.\n\n")
+				elseif crit.key == "target_firepower" and crit.value == nil then
+					print("Not enough ready aircraft for this mission.\n\n")
+				elseif crit.key == "weather" and crit.value == nil then
+					print("Player aircraft type cannot operate in this weather.\n\n")
+				elseif crit.key == "target_range" and crit.value == nil then
+					print("No eligible mission available for player.\n\n")
+				elseif crit.key == "coop" and crit.value == nil then
+					print("Not enough ready aircraft for all clients.\n\n")
+				elseif crit.key == "intercept" and crit.value == nil then
+					print("Ground alert intercept duty without launch.\n\n")
+				end
+			end
+			if Multi.NbGroup and not PlayerFlight then
 				print("Not enough ready aircraft for all clients..\n\n")
-			elseif Playability_criterium.intercept == nil then
-				print("Ground alert intercept duty without launch.\n\n")
 			end
 		end
 

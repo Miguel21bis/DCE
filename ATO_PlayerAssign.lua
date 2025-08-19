@@ -17,7 +17,7 @@ versionDCE["ATO_PlayerAssign.lua"] = "1.9.74"
 ------------------------------------------------------------------------------------------------------- 
 
 -- local debugAssign = Debug.debug
-local debugAssign = false
+local debugAssign = true
 local allFlightName = {}
 
 if DebugAssignAll then
@@ -49,9 +49,10 @@ for side, pack in pairs(ATO) do															--iterate through sides in ATO
 					if debugAssign then print("AtoPS AA "..flight[f].name.." || "..flight[f].target_name) end
 					if flight[f].tot_from == 0 then										--flight is allowed to fly at mission start
 
-						TrackPlayability(flight[f].playable, "ATO")						--track playabilty criterium has been met
+						TrackPlayability(flight[f].playable, "playerAssign_ATO")						--track playabilty criterium has been met
 						if flight[f].task == "Intercept" then							--if the task is intercept, check if there is an enemy strike with target in range of player interceptor
 							if debugAssign then print("AtoPS     BB Intercept ") end
+							TrackPlayability(flight[f].playable, "playerAssign_intercept")
 
 							local enemy = "blue"
 							if side == "blue" then
@@ -77,7 +78,7 @@ for side, pack in pairs(ATO) do															--iterate through sides in ATO
 												allFlightName[unitname_] = true
 
 												if not tab_doublon[unitname_] then
-													TrackPlayability(flight[f].playable, "hostiles")			--track playabilty criterium has been met
+													TrackPlayability(flight[f].playable, "playerAssign_intercept_hostile")			--track playabilty criterium has been met
 
 													playable[#playable + 1] = {									--add flight to playable table
 														side = side,
@@ -117,7 +118,7 @@ for side, pack in pairs(ATO) do															--iterate through sides in ATO
 								tempNumFlight = tempNumFlight + 1
 							until not allFlightName[unitname_]
 							if not tab_doublon[unitname_] then
-								TrackPlayability(flight[f].playable, "hostiles")			--track playabilty criterium has been met
+								TrackPlayability(flight[f].playable, "playerAssign_SAR")			--track playabilty criterium has been met
 
 								playable[#playable + 1] = {									--add flight to playable table
 									side = side,
@@ -140,6 +141,7 @@ for side, pack in pairs(ATO) do															--iterate through sides in ATO
 
 						elseif flight[f].task == "CAP" then													--if the task is CAP, check if enemy aircraft will enter the CAP area when player is on station
 							if debugAssign then print("AtoPS     DD CAP ") end
+							TrackPlayability(flight[f].playable, "playerAssign_CAP")
 
 							if Multi.NbGroup >= 1 or ((f == 1 and (#flight - 1) * flight[f].loadout.tStation < flight[f].tot_to - flight[f].tot_from) or (f == 2 and (#flight - 1) * flight[f].loadout.tStation >= flight[f].tot_to - flight[f].tot_from)) then	--allow only the first or second flight (relief on station) in package to be playable
 								if debugAssign then print("AtoPS     DD1 CAP ") end
@@ -167,7 +169,7 @@ for side, pack in pairs(ATO) do															--iterate through sides in ATO
 													tempNumFlight = tempNumFlight + 1
 												until not allFlightName[unitname_]
 
-												TrackPlayability(flight[f].playable, "hostiles")			--track playabilty criterium has been met
+												TrackPlayability(flight[f].playable, "playerAssign_CAP_hostile")
 												playable[#playable + 1] = {									--add flight to playable table
 													side = side,
 													packN = p,
@@ -378,8 +380,10 @@ if #playable > 0 and not AllCoopPossible then
 		end
 	end
 else
+
 	if debugAssign then
-		_affiche(Playability_criterium, "Playability_criterium AtoPA ") os.execute 'pause'
+		_affiche(Playability_criterium, "Playability_criterium AtoPA ")
+		os.execute 'pause'
 	end
 end
 

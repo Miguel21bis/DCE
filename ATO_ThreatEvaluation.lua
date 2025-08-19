@@ -1169,6 +1169,8 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 					-- camp west, si utilisation des EWR, pour que les indicatifs soient bien pris en compte, l'enregistrement par DCS est comme ci dessus, il n'y a pas de SetCallsign
 					if group.route.points[1].task.params.tasks[t].params.callname then							--if group has a callsign set									
 						ewr_call = group.route.points[1].task.params.tasks[t].params.callname					--set callname modification M07f
+						-- print("AtoTE EWR A "..tostring(group.name).." callname: "..tostring(ewr_call))							--debug
+						
 						ewr_call = Callsign_west.JTAC_EWR[ewr_call]
 					end
 
@@ -1178,9 +1180,12 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 
 							if group.route.points[1].task.params.tasks[t].params.action.params.callsign then
 								ewr_call = group.route.points[1].task.params.tasks[t].params.action.params.callsign						--set callsign
-
+								-- print("AtoTE EWR B "..tostring(group.name).." callname: "..tostring(ewr_call))							--debug
+							
 							elseif group.route.points[1].task.params.tasks[t].params.action.params.callname then						-- callname is Callsign_west
 								ewr_call = group.route.points[1].task.params.tasks[t].params.action.params.callname						--set callname modification M07e
+								-- print("AtoTE EWR C "..tostring(group.name).." callname: "..tostring(ewr_call))							--debug
+								
 								ewr_call = Callsign_west.JTAC_EWR[ewr_call]
 							end
 						end

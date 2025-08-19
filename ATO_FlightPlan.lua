@@ -6841,6 +6841,14 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 				end
 
+				if flight[f].player or flight[f].client then
+					if group.route.points[1]["action"] == "Turning Point"then
+						info02 = info02.." |ATTENTION MANQUE Start "..group.groupId
+						print("AtoFp info02"..info02) 
+						print("Error") os.execute 'pause'
+					end
+				end
+
 				-- if waypoints[1].linkUnit then				
 				-- 	info04 = "linkUnit "..waypoints[1].linkUnit				
 				-- end
