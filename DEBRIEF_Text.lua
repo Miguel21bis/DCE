@@ -1,11 +1,11 @@
 --To create the Debriefing text for the mission
 --Initiated by DEBRIEF_Master.lua
 -------------------------------------------------------------------------------------------------------
--- last modification: cleancode_a adjustment_b debug_b
+-- last modification: debug_c
 if not versionDCE then versionDCE = {} end
 versionDCE["DEBRIEF_Text.lua"] = "1.4.5"
 ------------------------------------------------------------------------------------------------------- 
--- debug_b                  (b package stats)(a: neutral side) 
+-- debug_c                  (c alive_last)(b package stats)(a: neutral side) 
 -- cleancode_a				(a springCleaning)
 -- adjustment_b				(a priority numeric targetTable)
 -- modification M61_a		SAR
@@ -1049,7 +1049,7 @@ do
 					if target.alive and target.type ~= "Ejected Pilot" then															--if target has an alive value it is a scenery, vehicle or ship target and should be listed
 						table.insert(entries[1].values, target.titleName)
 						table.insert(entries[2].values, math.ceil(target.alive) .. "%")
-						if target.alive_last > 0 then
+						if target.alive_last and target.alive_last > 0 then
 							table.insert(entries[3].values, "(-" .. math.ceil(target.alive_last) .. "%)")
 						else
 							table.insert(entries[3].values, "")
