@@ -1,12 +1,12 @@
 --Various functions
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M85_a
+-- last modification: debug_l
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Functions.lua"] = "1.18.132"
+versionDCE["UTIL_Functions.lua"] = "1.18.133"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_g				(g springCleaning)					
 -- adjustment_o				(n loadout code)(m Disp_time)(l add AFAC task)(k FormatTime)(i add InsertBugList(txt))(h use IsWesternCountry)(fg: add Loadout tiers)(e todo)(d:CheckConfModMaster )(c: fire Playable_m from conf_mod)
--- debug_k					(k Package_freq-targetname)(j code_loadout bestMatch)(i planeType)(h Tha\'lah)(g string.gsub(v, "\"", "\\\"" ))(f new generateId)(d UH to HF) Angle et Bearing des statics sur PA
+-- debug_l					(l DC_NavalEnvironment)(k Package_freq-targetname)(j code_loadout bestMatch)(i planeType)(h Tha\'lah)(g string.gsub(v, "\"", "\\\"" ))(f new generateId)(d UH to HF) Angle et Bearing des statics sur PA
 -- modification M85_a		new variables added to conf_mod (RepairOption, current_date, weather, etc.)
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)
 -- modification M77_l		CG_ArtySpotter (kl ListSpotterAircraft)
@@ -4407,7 +4407,9 @@ function UpdateFilesAfterTimeJump()
 
 	require("Active/oob_ground")
 
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+    dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_UpdateTargetlist.lua")
+	dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Refpoints.lua")
+	dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_NavalEnvironment.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")

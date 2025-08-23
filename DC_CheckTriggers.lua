@@ -1784,9 +1784,8 @@ Action = {}
 								-- StartTime = StartTime
 							}
 
-							-- print("DcCT GroupName "..GroupName.." ShipGroupMovement")
+							-- print("DcCT START Action.ShipMission GroupName " .. GroupName .. " ShipGroupMovement")
 
-							-- ShipGroupMovement(GroupName, RandomWPtable, CruiseSpeed, PatrolSpeed, StartTime)	--exectue ship mission
 							ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, CampTotalTimeS)	--exectue ship mission
 						end
 					end
