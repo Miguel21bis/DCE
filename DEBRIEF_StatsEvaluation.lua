@@ -947,7 +947,7 @@ for e = 1, #events do
 										group.route.points[1].x = 2000000
 										group.route.points[1].y = 2000000
 									end
-									group.hidden = true												--hide dead static object
+									group.hidden = true	--TODO si le vehicle revit, il faudrait lui coller le hidden d'origine											--hide dead static object
 									unit.dead = true												--mark unit as dead in oob_ground (this is for the targetlist)
 									unit.dead_last = true											--mark unit as died in last mission
 									unit.CheckDay = camp.date.CampTotalTimeS                            -- ajoute la date de destruction		 Miguel21 modification M19 : Repair SAM	

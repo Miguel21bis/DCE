@@ -5173,7 +5173,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					--elseif flight[f].task == "Refueling" then									--flight is a tanker on player side
 						--group.hidden = false													--unhide group
 					--end
-				elseif camp.client and 	flight[f].IdClient and camp.client[flight[f].IdClient].side == side then							--player side										
+				elseif camp.client and flight[f].IdClient and camp.client[flight[f].IdClient].side == side then							--player side										
 					group.hidden = false														--unhide group
 				end
 
@@ -5190,17 +5190,17 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				if not Data_configuration.SC_SpawnOn[flight[f].type] then Data_configuration.SC_SpawnOn[flight[f].type] = "deck" end
 
-				local SpawnDeck = true
-				local SpawnAir = false
-				local SpawnCata = false
+				local spawnDeck = true
+				local spawnAir = false
+				local spawnCata = false
 
 				if baseIsCarrier and not ( flight[f].player or flight[f].client ) then
 					if Data_configuration.SC_SpawnOn[flight[f].type] == "catapult" then
-						SpawnDeck = false
-						SpawnCata = true
+						spawnDeck = false
+						spawnCata = true
 					elseif Data_configuration.SC_SpawnOn[flight[f].type] == "air" then
-						SpawnDeck = false
-						SpawnAir = true
+						spawnDeck = false
+						spawnAir = true
 					end
 				end
 
@@ -5301,7 +5301,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							-- = = = SixPack = = = = - = - = - = -- = - = - = - = - = - = - = - = - = - = -- = - =
 
 							--construit une table que l'on triera plus tard pour decider qui a le droit d etre sur le sixpack et ne pas gener les autres
-							if group['route']['points'][1].ETA <  (mission_ini.startup_time_player + 200) and waypoints[1]["action"] ~= "Turning Point" and not SpawnAir and not SpawnCata then
+							if group['route']['points'][1].ETA <  (mission_ini.startup_time_player + 200) and waypoints[1]["action"] ~= "Turning Point" and not spawnAir and not spawnCata then
 								-- and flight[f].type ~= "E-2C" and flight[f].type ~= "S-3B Tanker"
 
 								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe -- == SixPack == -- ") end
@@ -5357,7 +5357,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 								--les Planes qui genent le taxiing spawn selon conf_mod
-								if not SpawnDeck then
+								if not spawnDeck then
 									local BugFrom =  ""..debug.getinfo(1).currentline
 									SpawnOn(Data_configuration.SC_SpawnOn[flight[f].type], waypoints, group, Pn, spawn_time, BugFrom, flight, f, role)
 								end
@@ -5409,7 +5409,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							end
 
 							--les Planes qui genent le taxiing spawn selon conf_mod
-							if not SpawnDeck then
+							if not spawnDeck then
 								local BugFrom =  " if not SpawnDeck "..debug.getinfo(1).currentline
 								SpawnOn(Data_configuration.SC_SpawnOn[flight[f].type], waypoints, group, Pn, spawn_time, BugFrom, flight, f, role)
 							end
@@ -5442,7 +5442,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							if not FARP_MorePlace then
 								--les Planes qui genent le taxiing spawn selon conf_mod
-								if not SpawnDeck or baseIsFARP then
+								if not spawnDeck or baseIsFARP then
 									local BugFrom =  " not SpawnDeck "..debug.getinfo(1).currentline
 									SpawnOn(Data_configuration.SC_SpawnOn[flight[f].type], waypoints, group, Pn, spawn_time + 30, BugFrom, flight, f, role)
 									if flagInsertSixpack  then																			--si le vol postulait pour le sixpack, on le supprime de la table

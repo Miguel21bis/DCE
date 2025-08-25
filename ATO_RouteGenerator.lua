@@ -175,9 +175,9 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 		ewr = {},
 	}
 
-	--M28 les helicoptere peuvent voir toutes les d�fense, meme celles hidden
+	--M28 les helicoptere peuvent voir toutes les défense, meme celles hidden
 	-- local HiddenCheck = true																						-- l'avion vole haut et vite et ne voit pas les menaces
-	-- if helicopter then HiddenCheck = true end																		-- l'helicoptere vole bas et voit les menaces, meme cach�
+	-- if helicopter then HiddenCheck = true end																		-- l'helicoptere vole bas et voit les menaces, meme caché
 	threat_table.ground[profile.hCruise] = {}
 	threat_table.ground[profile.hAttack] = {}
 	for threat_n,threat in pairs(groundthreats[enemy]) do																--iterate through ground threats

@@ -399,7 +399,7 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 			print("\n\n Day or Night? : "..Daytime)														-- info day or not
 			print("\n\nAvailable tasks:")
 			for index = 1, #playable do
-				io.write(index.." - "..playable[index].base.." - "..playable[index].type.." "..playable[index].unitname )
+				io.write(index .. " - " .. ReplaceBaseName(playable[index].base) .. " - " .. ReplaceTypeName(playable[index].type) .. " " .. playable[index].unitname)
 				if playable[index].target_name ~= nil then  io.write(" - "..playable[index].target_name) end
 				io.write("\n")
 				tabIndex[index] = true
@@ -492,7 +492,7 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 					if Debug.Generator.affiche then
 						info = " "..playable[index].id.." "
 					end
-					io.write(Nindex..""..info.."(Nb: "..playable[index].number..") ".." -  Pack : "..playable[index].packN.." - "..playable[index].base.." - "..playable[index].type.." - "..playable[index].unitname )
+					io.write(Nindex..""..info.."(Nb: "..playable[index].number..") ".." -  Pack : "..playable[index].packN.." - "..ReplaceBaseName(playable[index].base).." - "..ReplaceTypeName(playable[index].type).." - "..playable[index].unitname )
 					if playable[index].target_name ~= nil then  io.write(" - "..playable[index].target_name) end
 					io.write("\n")
 

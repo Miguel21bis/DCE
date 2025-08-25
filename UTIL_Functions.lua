@@ -4343,6 +4343,7 @@ function KillTarget(targetName, targetName2)
 
 							if not unit.dead then											--unit is not yet dead (some static objects that are spawned in a destroyed state are logged dead at mission start, these must be excluded here)
 								group.dead = true												--mark group as dead in oob_ground (static objects can be set as group.dead and spawned in a destroyed state)
+								--TODO si le vehicle revit, il faudrait lui coller le hidden d'origine
 								group.hidden = true												--hide dead static object
 								unit.dead = true												--mark unit as dead in oob_ground (this is for the targetlist)
 								-- unit.dead_last = true
