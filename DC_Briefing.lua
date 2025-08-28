@@ -178,10 +178,15 @@ do
 
 	--air units****************************************************************************
 	for side_name, side in pairs(oob_air) do															--iterate through sides in oob_air
+		
 		if side_name == "blue" then
 			s = s .. "\nBlue Air Units:\n"															--side header
 		elseif side_name == "red" then
 			s = s .. "\nRed Air Units:\n"															--side header
+		elseif side_name == "neutral" then
+			-- Skip processing for "neutral" side, but continue with next iteration
+			break
+
 		end
 
 		 -- Crée une copie triée des unités
@@ -266,76 +271,6 @@ do
 			end
 			s = s .. string.format(formatStr, unpack(row))
 		end
-
-		-- --determine maximum string length for each entry
-		-- for e = 1, #entries do																		--iterate through entries
-		-- 	entries[e].str_length = string.len(entries[e].header)									--store string length of header for this entry
-		-- 	for n = 1, #entries[e].values do														--iterate through values of this entry
-		-- 		local l = string.len(tostring(entries[e].values[n]))								--get string length of value of this entry
-		-- 		if l > entries[e].str_length then													--if the string length is larger than the previous
-		-- 			entries[e].str_length = l														--make it the new length (find the largest)
-		-- 		end
-		-- 	end
-		-- end
-
-		-- --build the list header
-		-- for e = 1, #entries do																		--iterate through entries
-		-- 	s = s .. entries[e].header																--add header
-		-- 	if e < #entries then																	--if this is not the last header, add spaces to the next header	
-		-- 		local space = entries[e].str_length + 3 - string.len(entries[e].header)				--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
-		-- 		for m = 1, space * 1.5 do
-		-- 			s = s .. " "																	--add 1.5 spaces for every missing letter
-		-- 		end
-		-- 	end
-		-- end
-		-- s = s .. "\n"
-
-		-- --build the list		
-		-- for n = 1, #entries[1].values do															--iterate through number of values (number of units)
-		-- 	for e = 1, #entries do																	--iterate through entries
-		-- 		s = s .. entries[e].values[n]														--add value to list
-		-- 		if e < #entries then																--if this is not the last header, add spaces to the next header	
-		-- 			local space = entries[e].str_length + 3 - string.len(tostring(entries[e].values[n]))	--calculate number of spaces that need to be added for alignement (string length of largest entry of same type + 3 - length of current entry = number of spaces)
-		-- 			for m = 1, space * 1.5 do
-		-- 				s = s .. " "																--add 1.5 spaces for every missing letter
-		-- 			end
-		-- 		end
-		-- 	end
-		-- 	s = s .. "\n"																			--make a new line after each unit
-		-- end
-
-		-- --add oob description text (reinforcements and repairs)
-		-- if PlayerFlight and camp.player and camp.player.side == side_name then										--only do it for player side
-		-- 	if side_name == "blue" then
-		-- 		if Briefing_oob_text_blue ~= "" then
-		-- 			s = s .. "\n" .. Briefing_oob_text_blue .. "\n"
-		-- 		else
-		-- 			s = s .. "\n\n"
-		-- 		end
-		-- 	elseif side_name == "red" then
-		-- 		if Briefing_oob_text_red ~= "" then
-		-- 			s = s .. "\n" .. Briefing_oob_text_red .. "\n"
-		-- 		else
-		-- 			s = s .. "\n\n"
-		-- 		end
-		-- 	end
-		-- elseif PlayerFlight and camp.client and camp.client.side == side_name then										--only do it for player side
-		-- 	if side_name == "blue" then
-		-- 		if Briefing_oob_text_blue ~= "" then
-		-- 			s = s .. "\n" .. Briefing_oob_text_blue .. "\n"
-		-- 		else
-		-- 			s = s .. "\n\n"
-		-- 		end
-		-- 	elseif side_name == "red" then
-		-- 		if Briefing_oob_text_red ~= "" then
-		-- 			s = s .. "\n" .. Briefing_oob_text_red .. "\n"
-		-- 		else
-		-- 			s = s .. "\n\n"
-		-- 		end
-		-- 	end
-		-- else
-		-- 	s = s .. "\n\n"																		--make a new line after each side
-		-- end
 
 		s = s .. "\n\n"																		--make a new line after each side
 
@@ -2038,7 +1973,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								end
 							end
 							if value.flight == 1 then
-								for Nradio = 1, #radioP do
+								for radioN = 1, #radioP do
 									local postTxt = ""
 									if value.text then postTxt = value.text end
 									entry = {name = "", call = "", freq = "", radio = ""}
@@ -2046,16 +1981,16 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["call"] = call
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-									if freqCapability(freqA, radioP, Nradio, "") then
-										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] < radioP[Nradio].nbCanal then
-											if radioP[Nradio].startCanal == 0 then MC = -1 end
-											table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-											entry["radio"] = RadName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] + MC
+									if freqCapability(freqA, radioP, radioN, "") then
+										if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] < radioP[radioN].nbCanal then
+											if radioP[radioN].startCanal == 0 then MC = -1 end
+											table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
+											entry["radio"] = RadName[radioN].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] + MC
 											local entryCopy = Deepcopy(entry)
-											table.insert(entriesRadio[Nradio], entryCopy)
-										elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
+											table.insert(entriesRadio[radioN], entryCopy)
+										elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
 											local entryCopy = Deepcopy(entry)
-											table.insert(entriesRadio[Nradio], entryCopy)
+											table.insert(entriesRadio[radioN], entryCopy)
 										end
 									end
 								end

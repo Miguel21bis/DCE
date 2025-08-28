@@ -1760,10 +1760,10 @@ if Debug.debug then
 	_affiche(GroundTarget, " DcUT GroundTarget ")
 	_affiche(GroundZoneTarget, " DcUT GroundZoneTarget ")
 
-	local camp_str = "target = " .. TableSerialization(targetlist, 0)						--make a string
-	local campFile = io.open("Debug/targetlist_DcUT.lua", "w") or error("Failed to open debug file")
-	campFile:write(camp_str)															--save new data
-	campFile:close()
+	-- local camp_str = "target = " .. TableSerialization(targetlist, 0)						--make a string
+	-- local campFile = io.open("Debug/targetlist_DcUT.lua", "w") or error("Failed to open debug file")
+	-- campFile:write(camp_str)															--save new data
+	-- campFile:close()
 
 
 	local camp_str = "oob_ground = " .. TableSerialization(oob_ground, 0)						--make a string

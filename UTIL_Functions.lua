@@ -1049,11 +1049,11 @@ function FormatTime(t, form)
     local secondStr = string.format("%02d", second)
 
     if form == "dd:hh:mm" then
-        return dayStr .. "d " .. hourOnlyStr .. "h " .. minuteStr
+        return dayStr .. "d " .. hourOnlyStr .. "h" .. minuteStr
     elseif form == "hh:mm" then
-        return hourStr .. "h " .. minuteStr
+        return hourStr .. "h" .. minuteStr
     elseif form == "hh:mm:ss" then
-        return hourStr .. "h " .. minuteStr .. "mn " .. secondStr
+        return hourStr .. "h" .. minuteStr .. "mn " .. secondStr
     end
 end
 

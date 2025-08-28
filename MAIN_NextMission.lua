@@ -687,7 +687,7 @@ dofile("../../../ScriptsMod." .. VersionPackageICM .. "/ATO_FlightPlan.lua")
 
 dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Final_steps.lua")
 
-if not mission.drawings.layers[4].objects then
+if mission.drawings and not mission.drawings.layers[4].objects then
 	mission.drawings.layers[4].objects = {}
 end
 
@@ -705,7 +705,9 @@ elseif camp.player then
     end
 end
 
-mission.drawings.layers[4].objects = AddIconLayer(mission.drawings.layers[4].objects, targetListRequired)
+if mission.drawings then
+	mission.drawings.layers[4].objects = AddIconLayer(mission.drawings.layers[4].objects, targetListRequired)
+end
 
 
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_StaticAircraft.lua")

@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.90.558"
+versionDCE["UTIL_Changelog.lua"] = "20.90.559"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.90.558"
+VersionDCE["UTIL_Changelog.txt"] = "20.90.559"
 --[[
 
 
@@ -9,7 +9,8 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.90.558:==
+==:20.90.559:==
+559	fixed    [stats]	events[e].target bug in stat génération
 558 fixed    [PEDRO]    the second PEDRO helicopter is always an SH-60
 557 fixed    [spotter]  the spotter script does not work
 556 fixed    [FARP][CV] due to changes in base_mission and other things, FARP can lose their Warehouse link and can no longer refuel

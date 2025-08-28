@@ -136,8 +136,8 @@ function AddIconLayer(layersObjects, targetListRequired)
                         local layerType = dataInfo.type
 
 
-                        print("Element Name: " .. element.name .. ", Matched Type: " .. typeMatched)
-                        _affiche(dataInfo, "dataInfo ")
+                        -- print("Element Name: " .. element.name .. ", Matched Type: " .. typeMatched)
+                        -- _affiche(dataInfo, "dataInfo ")
 
 
                         if typeMatched then

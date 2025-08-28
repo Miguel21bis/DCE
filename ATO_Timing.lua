@@ -324,27 +324,35 @@ for side, pack in pairs(ATO) do
 
 					else	-- tous les autres tasks
 						
-						for w = 3, #flight[f].route - 1 do															--iterate through all waypoints that require lateral offset (taxi, departure and landing WP exluded)			
-							if flight[f].route[w].id ~= "Target" and flight[f].route[w].id ~= "WPT Before Landing" then --Target WP does not need lateral offset
-								local inbound_heading = GetHeading(pack[p].main[1].route[w - 1], pack[p].main[1].route[w])		--inbound heading to WP of lead flight
-								local outbound_heading = GetHeading(pack[p].main[1].route[w], pack[p].main[1].route[w + 1])		--outbound heading from WP of lead flight
-								local delta_heading = GetDeltaHeading(inbound_heading, outbound_heading)			--amount of heading change at WP
+						if #flight[f].route >= 4 then
+							for w = 3, #flight[f].route - 1 do															--iterate through all waypoints that require lateral offset (taxi, departure and landing WP exluded)			
+								if flight[f].route[w].id ~= "Target" and flight[f].route[w].id ~= "WPT Before Landing" then --Target WP does not need lateral offset
+									local inbound_heading = GetHeading(pack[p].main[1].route[w - 1], pack[p].main[1].route[w])		--inbound heading to WP of lead flight
+									local outbound_heading = GetHeading(pack[p].main[1].route[w], pack[p].main[1].route[w + 1])		--outbound heading from WP of lead flight
+									local delta_heading = GetDeltaHeading(inbound_heading, outbound_heading)			--amount of heading change at WP
 
-								if delta_heading < 66 and delta_heading > -66 then									--if heading change is small, flights stay at the present side of lead flight (check turn)
-									local alpha = inbound_heading + 90 + (delta_heading / 2)
-									local dist = offset / math.cos(math.rad(delta_heading / 2))
-									local offset_WP = GetOffsetPoint(flight[f].route[w], alpha, dist)
-									flight[f].route[w].x = offset_WP.x
-									flight[f].route[w].y = offset_WP.y
-								else																				--if heading change is big, flights switch side from lead flight (tactical turn and cross turn)
-									local alpha = outbound_heading - 90 + ((180 - delta_heading) / 2)
-									local dist = offset / math.cos(math.rad((180 - delta_heading) / 2))
-									local offset_WP = GetOffsetPoint(flight[f].route[w], alpha, dist)
-									flight[f].route[w].x = offset_WP.x
-									flight[f].route[w].y = offset_WP.y
-									offset = offset * -1															--switch side
+									if delta_heading < 66 and delta_heading > -66 then									--if heading change is small, flights stay at the present side of lead flight (check turn)
+										local alpha = inbound_heading + 90 + (delta_heading / 2)
+										local dist = offset / math.cos(math.rad(delta_heading / 2))
+										local offset_WP = GetOffsetPoint(flight[f].route[w], alpha, dist)
+										flight[f].route[w].x = offset_WP.x
+										flight[f].route[w].y = offset_WP.y
+									else																				--if heading change is big, flights switch side from lead flight (tactical turn and cross turn)
+										local alpha = outbound_heading - 90 + ((180 - delta_heading) / 2)
+										local dist = offset / math.cos(math.rad((180 - delta_heading) / 2))
+										local offset_WP = GetOffsetPoint(flight[f].route[w], alpha, dist)
+										flight[f].route[w].x = offset_WP.x
+										flight[f].route[w].y = offset_WP.y
+										offset = offset * -1															--switch side
+									end
 								end
 							end
+						else
+							print("AtoT Bug role :"..role.." f: "..f)
+							_affiche(flight[f], "ATO_Timing Bug with route length < 4 :")
+							print("(↑↑↑...) ATO_Timing Bug with route length < 4  (...↑↑↑)")
+							os.execute 'pause'
+							
 						end
 					end
 				end

@@ -64,41 +64,33 @@ TabLPark	= {}
 TargetList_InThisMission = {}			-- garde en mémoire les targets pour eviter de les pruner plus tard
 PointOfInterest = {}					-- liste des points d'interet
 TabDivert = {}							--liste des pistes de deroutement
-TACAN_byTarget = {}						--liste les TACAN pour un meme parttern , util pour les multiples tanker
 
 local debugStart = true					--NE PAS CHANGER, les infos restent seulement dans le fichier debugGenMission
 local debugTxt_AtoFP = ""
 local callSignFlight = {}
 local callSignFlightUnite = {}
-local PlayerTask = ""
+local playerTask = ""
 local tempBaseAirStart = {}
 local tempDeckPlace = {}
 local testDeckPlace = {}
 local altRole = 0
 local mn_StartParking = 5 				--[en minute] 5 mn de temps de presence sur parking
-local ParkSarAirBase = {}				--reprend la table db_airbases[basename].parkAlertSAR
+local parkSarAirBase = {}				--reprend la table db_airbases[basename].parkAlertSAR
 local is_helicopter
 local baseIsFARP
 local baseIsCarrier
 local allFlightName_AtoFP = {}
-
+local tacan_byTarget = {}				--liste les TACAN pour un meme parttern , util pour les multiples tanker
 local polkaOff = false					--evite la dance des aeronefs sur le parking (Inter et SAR compris)
--- local proximityAircraft = {}			--ajoute la position en spawn de départ, des tankers, pour tenter de les éloigner les uns des autres
+local proximityAircraft = {} 			-- Table des avions de ravitaillement déjà enregistrés
+local offsetDistance = 15000			-- Distance minimale entre tankers (15 km)
+local currentHeading = 0  				-- Angle initial-- On démarre vers le Nord
 
--- Table des avions de ravitaillement déjà enregistrés
-local proximityAircraft = {}
-
--- Distance minimale entre tankers (15 km)
-local OFFSET_DISTANCE = 15000
--- Angle initial
-local currentHeading = 0  -- On démarre vers le Nord
 
 if not camp.SAR then camp.SAR = {} end
 camp.SAR.helicopter = {}
 
-
 if Multi.NbGroup >= 1 then
-
 
 	mission_ini.PruneScript = true							-- reduce a mission by removing units (mod Tomsk M09) [MP: recommend: true]					PruneAggressiveness = 1.5,					-- How aggressive should the pruning be [0 to 2], larger numbers will remove more units, 0 = no pruning at all
 	mission_ini.PruneStatic = true							-- Should ALL parked (static) aircraft be pruned [MP: recommend: true]
@@ -162,7 +154,7 @@ if Data_divers and Data_divers[PlayerSquad.type] and Data_divers[PlayerSquad.typ
 end
 
 
-if  Multi.NbGroup <= 0 and mission.failures and Failures and Failures[type_withData_player] then
+if Multi.NbGroup <= 0 and mission.failures and Failures and Failures[type_withData_player] then
 	mission.failures = {}
 
 	-- ["A11_CLOCK_FAILURE"] = 
@@ -237,11 +229,12 @@ if mission_ini.failure then										-- not multiplayer --	if mission_ini.failur
 end
 
 ----- function to create callsigns for aircraft in ATO -----
-local Callsign_west_counter = {
-generic = math.random(1, #Callsign_west.generic ),
-AWACS = math.random(1, #Callsign_west.AWACS ),
-tanker = math.random(1, #Callsign_west.tanker),
-}
+local callSign_west_counter = {
+	generic = math.random(1, #Callsign_west.generic ),
+	AWACS = math.random(1, #Callsign_west.AWACS ),
+	tanker = math.random(1, #Callsign_west.tanker),
+	}
+
 local callsign_east_counter = 0
 
 
@@ -361,7 +354,7 @@ local function addAndSpaceTankers(groupName, startX, startY)
 
     -- Décale chaque nouveau tanker
     if count > 0 then
-        newPosition = GetOffsetPoint(newPosition, currentHeading, OFFSET_DISTANCE)
+        newPosition = GetOffsetPoint(newPosition, currentHeading, offsetDistance)
 
         -- On fait tourner le cap de 90°
         currentHeading = (currentHeading + 90) % 360
@@ -374,9 +367,9 @@ local function addAndSpaceTankers(groupName, startX, startY)
         local distance = math.sqrt(dx * dx + dy * dy)
 
         -- Si un tanker est trop proche, on ajuste en le repoussant
-        if distance < OFFSET_DISTANCE then
+        if distance < offsetDistance then
             -- print("⚠️ Ajustement de la position pour éviter un chevauchement")
-            newPosition = GetOffsetPoint(newPosition, currentHeading, OFFSET_DISTANCE)
+            newPosition = GetOffsetPoint(newPosition, currentHeading, offsetDistance)
         end
     end
 
@@ -389,7 +382,7 @@ local function addAndSpaceTankers(groupName, startX, startY)
 end
 
 
-local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
+local function getCallsign(country, flight_n, aircraft_n, task, flight_)
 	local style
 	local callsign_flight = 0
 
@@ -447,7 +440,7 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 			repeat
 				nb_unite = math.random(2, 9)
 				callsign_flight = callsign_flight + nb_unite
-				testCall = Callsign_west[category][Callsign_west_counter[category]]..callsign_flight
+				testCall = Callsign_west[category][callSign_west_counter[category]]..callsign_flight
 				testCallFlightUnite = testCall..1
 				ii = ii + 1
 			until ii > 100 or not callSignFlightUnite[testCallFlightUnite]
@@ -455,8 +448,8 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 			callSignFlight[testCall] = true
 			callSignFlightUnite[testCallFlightUnite] = true
 
-			callsign_nb = Callsign_west_counter[category]
-			_name = Callsign_west[category][Callsign_west_counter[category]] .. callsign_flight .. 1
+			callsign_nb = callSign_west_counter[category]
+			_name = Callsign_west[category][callSign_west_counter[category]] .. callsign_flight .. 1
 
 			callsign = {
 				[1] = callsign_nb,
@@ -502,9 +495,9 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 
 			else
 				if flight_n == 1 and aircraft_n == 1 then
-					Callsign_west_counter[category] = Callsign_west_counter[category] + 1
-					if Callsign_west_counter[category] > #Callsign_west[category] then
-						Callsign_west_counter[category] = 1
+					callSign_west_counter[category] = callSign_west_counter[category] + 1
+					if callSign_west_counter[category] > #Callsign_west[category] then
+						callSign_west_counter[category] = 1
 					end
 					callsign_flight = math.random(0, 8)
 				end
@@ -521,17 +514,17 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 					repeat
 						callsign_flight = math.random(1, 9)
 
-						if not Callsign_west[category] or not Callsign_west_counter[category] or not Callsign_west[category][Callsign_west_counter[category]] then
+						if not Callsign_west[category] or not callSign_west_counter[category] or not Callsign_west[category][callSign_west_counter[category]] then
 
 							print("AtoFp Error GetCal..callsign: "..tostring(category))
 							_affiche(Callsign_west , "Callsign_west")
 
-							_affiche(Callsign_west_counter, "Callsign_west_counter ") 
+							_affiche(callSign_west_counter, "Callsign_west_counter ") 
 							print("Error") os.execute 'pause'
 						end
 
 
-						testCall = Callsign_west[category][Callsign_west_counter[category]]..callsign_flight
+						testCall = Callsign_west[category][callSign_west_counter[category]]..callsign_flight
 						if not callSignFlight[testCall] then
 							callSignFlight[testCall] = true
 							foundCsf = true
@@ -544,14 +537,14 @@ local function GetCallsign(country, flight_n, aircraft_n, task, flight_)
 					if not foundCsf then
 						callsign_flight = math.random(1, 9)
 						-- testCall = flight_["callsign"]..callsign_flight
-						testCall = Callsign_west[category][Callsign_west_counter[category]]..callsign_flight
+						testCall = Callsign_west[category][callSign_west_counter[category]]..callsign_flight
 						callSignFlight[testCall] = true
 					end
 
 				end
 
-				callsign_nb = Callsign_west_counter[category]
-				_name = Callsign_west[category][Callsign_west_counter[category]] .. callsign_flight .. aircraft_n
+				callsign_nb = callSign_west_counter[category]
+				_name = Callsign_west[category][callSign_west_counter[category]] .. callsign_flight .. aircraft_n
 
 			end
 
@@ -831,12 +824,12 @@ for basename, base in pairs(db_airbases) do															--iterate through airb
 end
 
 
-local function GetTankerTACAN(tarnetName)
+local function getTankerTACAN(tarnetName)
 
 	local channel
 
-	if TACAN_byTarget[tarnetName] then
-		return TACAN_byTarget[tarnetName]
+	if tacan_byTarget[tarnetName] then
+		return tacan_byTarget[tarnetName]
 	end
 
 	repeat
@@ -845,7 +838,7 @@ local function GetTankerTACAN(tarnetName)
 	until channel_tacan[channel] == nil											--repeat until channel is found that is not in use yet
 
 	channel_tacan[channel] = tarnetName												--mark channel in use
-	TACAN_byTarget[tarnetName] = channel
+	tacan_byTarget[tarnetName] = channel
 
 	return channel																--return channel
 end
@@ -1539,9 +1532,9 @@ end
 for baseName, base in pairs(db_airbases) do
 	if base.parkAlertSAR and base.parkAlertSAR ~= nil then
 
-		ParkSarAirBase[baseName] = base.parkAlertSAR
+		parkSarAirBase[baseName] = base.parkAlertSAR
 
-		for parkN, park in pairs(ParkSarAirBase[baseName]) do
+		for parkN, park in pairs(parkSarAirBase[baseName]) do
 			park.occupied = false
 			park.reservedAR = false
 		end
@@ -1565,9 +1558,9 @@ for side, pack in pairs(ATO) do
 		for role, flight in pairs(pack[p]) do
 			for f = 1, #flight do
 				if flight[f].task == "SAR" then
-					if ParkSarAirBase[flight[f].base] then
+					if parkSarAirBase[flight[f].base] then
 						for n=1, flight[f].number do
-							for parkN, park in pairs(ParkSarAirBase[flight[f].base]) do
+							for parkN, park in pairs(parkSarAirBase[flight[f].base]) do
 								if not park.reservedAR or park.reservedAR == nil then
 									park.reservedAR = true
 									flight[f]["reservedAR"] = true
@@ -1633,9 +1626,10 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 			for f = 1, #flight do												--iterate through flights in roles
 
-				local FARP_MorePlace = false
-				local InfoFlight = ""
-				local TotFlightDist = 0
+				local farp_MorePlace = false
+				local infoFlight = ""
+				local totFlightDist = 0
+				local isHumain = flight[f].player or flight[f].client
 
 				--pour eviter le pb du flight 2 du main(strike) qui peut etre en comflit avec une escorte strike 		
 				local tempNumFlight = f
@@ -1655,8 +1649,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					type_withProp = Data_divers[flight[f].type].inherited_APA_From
 				end
 
-				if flight[f].player or flight[f].client	then
-					PlayerTask = flight[f].task
+				if isHumain	then
+					playerTask = flight[f].task
 				end
 
 				baseIsFARP = string.match(flight[f].base, "FARP") ~= nil
@@ -1669,7 +1663,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				if baseIsFARP then
 					if  db_airbases[flight[f].base].parkAlertSAR and #db_airbases[flight[f].base].parkAlertSAR >= 4  then
-						FARP_MorePlace = true
+						farp_MorePlace = true
 					end
 				end
 
@@ -1858,7 +1852,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							--combien de place libre reste t'il:
 							local freeParkSpace = 0
-							for baseN, park in pairs(ParkSarAirBase[flight[f].base]) do
+							for baseN, park in pairs(parkSarAirBase[flight[f].base]) do
 								if (not park.occupied or park.occupied == nil) and not park.reservedAR then
 									freeParkSpace = freeParkSpace + 1
 								end
@@ -1877,7 +1871,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 								for n = 1,  flight[f].number do
 
-									for baseN, park in pairs(ParkSarAirBase[flight[f].base]) do
+									for baseN, park in pairs(parkSarAirBase[flight[f].base]) do
 										if (not park.occupied or park.occupied == nil) and not park.reservedAR then
 											park.occupied = true
 											if not flight[f]["parkAlertSAR"] then flight[f]["parkAlertSAR"] = {} end
@@ -2417,7 +2411,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					-- ************* requetes des joueurs, assigner l'altitude des wpt landing et attack *************
-					if flight[f].player or flight[f].client then
+					if isHumain then
 						if waypoints[w]["briefing_name"] == "Target" or  waypoints[w]["briefing_name"] == "Attack" then
 							waypoints[w].alt = 0
 						elseif waypoints[w]["briefing_name"] == "Land" then
@@ -2488,7 +2482,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					-- ************* take off and landing *************
 					if (flight[f].route[w].id == "Taxi" and flight[f].route[w].eta >= 0) or (flight[f].route[w].id == "Intercept" or flight[f].route[w].id == "SAR")  then
-						if  ( not flight[f].player and not flight[f].client) and db_airbases[flight[f].base].AI_Spawn and string.upper(db_airbases[flight[f].base].AI_Spawn) ~= "PARKING" then
+						if not isHumain and db_airbases[flight[f].base].AI_Spawn and string.upper(db_airbases[flight[f].base].AI_Spawn) ~= "PARKING" then
 							if string.upper(db_airbases[flight[f].base].AI_Spawn) == "AIR" then
 								waypoints[w].type = "Turning Point"
 								waypoints[w].action = "Turning Point"
@@ -3093,7 +3087,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								end
 
 								if is_helicopter or AGAS_ready == false  then
-									if not (flight[f].player or flight[f].client) then
+									if not isHumain then
 										local task_entry = {																				--task is a command to run LUA code
 											["enabled"] = true,
 											["auto"] = false,
@@ -3118,7 +3112,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 								else
 
-									if not (flight[f].player or flight[f].client) then
+									if not isHumain then
 
 										local task_entry = {																				--task is a command to run LUA code
 											["enabled"] = true,
@@ -3142,11 +3136,11 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 									end
 								end
 
-								if flight[f].player or flight[f].client then
-									for n, target_element in ipairs(target_elements) do
+								if isHumain then
+									for n, _target_element in ipairs(target_elements) do
 										-- print("AtoFP target_element.name "..tostring(target_element.name))
 										local TaskFrom =  " TaskFrom "..debug.getinfo(1).currentline
-										local task_entry = createBombingChapter(id_task, flight[f],waypoints[w], weaponType, attackType, attackAlt, target_element, TaskFrom, typeCible)
+										local task_entry = createBombingChapter(id_task, flight[f],waypoints[w], weaponType, attackType, attackAlt, _target_element, TaskFrom, typeCible)
 										-- print("AtoFP "..tostring(target_element.name))
 										-- _affiche(task_entry, "task_entry B2")
 										table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
@@ -3179,7 +3173,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 									table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 								else
 
-									if not (flight[f].player or flight[f].client) then
+									if not isHumain then
 
 										local task_entry = {																				--task is a command to run LUA code
 											["enabled"] = true,
@@ -3213,7 +3207,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								--********************************* CarpetBombing *******************************************
 							elseif attackType == "Carpet" then
 
-								if not (flight[f].player or flight[f].client) then
+								if not isHumain then
 
 									local task_entry = {																				--task is a command to run LUA code
 										["enabled"] = true,
@@ -3243,7 +3237,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						--*********************************Runway Attack*******************************************
 						elseif flight[f].task == "Runway Attack" then
 
-							if not (flight[f].player or flight[f].client) then
+							if not isHumain then
 								local task_entry = {
 									["enabled"] = true,
 									["auto"] = false,
@@ -3309,7 +3303,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							else
 
-								if not (flight[f].player or flight[f].client) then
+								if not isHumain then
 
 									local task_entry = {																				--task is a command to run LUA code
 										["enabled"] = true,
@@ -3440,7 +3434,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 						--Custom_SAR
-						elseif flight[f].task == "CSAR" and not flight[f].player and not flight[f].client then
+						elseif flight[f].task == "CSAR" and not isHumain then
 
 							-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
 							local alt_cruise = (db_airbases[flight[f].base].elevation + flight[f].target.z + 100 ) / 2
@@ -3904,7 +3898,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						if flight[f].task == "Refueling" then
 							if flight[f].type == "KC-135" or flight[f].type == "KC130" or flight[f].type == "KC135BDA" or flight[f].type == "S-3B Tanker" or flight[f].type == "KC135MPRS" then	--only specific tanker types have air-air TACAN
 								if flight[1].tacan == nil then
-									flight[1].tacan = GetTankerTACAN(flight[f].target_name)															--get new channel for first flight in pack only, all other flights will use same channel
+									flight[1].tacan = getTankerTACAN(flight[f].target_name)															--get new channel for first flight in pack only, all other flights will use same channel
 								end
 
 								-- local unitIdTemp = GenerateIDUnit("AtoFP ".. "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight) .. "-1")
@@ -4192,7 +4186,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					--navigation information on waypoint name for player flight
-					if flight[f].player or flight[f].client then																				--flight is player flight
+					if isHumain then																				--flight is player flight
 						if waypoints[w - 1] then																			--previous waypoint exists
 							local distance = GetDistance(waypoints[w - 1], waypoints[w])									--distance between waypoints
 							local distanceStr = tostring(distance)
@@ -4219,12 +4213,12 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								if Data_divers and Data_divers[flight[f].type] and Data_divers[flight[f].type].instrumentUnits
 								and (Data_divers[flight[f].type].instrumentUnits == "metric" or Data_divers[flight[f].type].instrumentUnits =="russian") then
 									distance = math.ceil(distance / 1000)
-									TotFlightDist = TotFlightDist + tonumber(distance)
+									totFlightDist = totFlightDist + tonumber(distance)
 									distanceStr = tostring(distance) .. " KM"
 									suffixe = " KM"
 								else
 									distance = math.ceil(distance / 1000 * 0.539957)
-									TotFlightDist = TotFlightDist + tonumber(distance)
+									totFlightDist = totFlightDist + tonumber(distance)
 									distanceStr = distance .. " NM"
 									suffixe = " NM"
 								end
@@ -4296,7 +4290,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 											s = s .. " "
 										end
 										waypoints[w]["TotFlightTime"] = s..tempTimeStr
-										waypoints[w]["TotFlightDist"] = TotFlightDist .. suffixe
+										waypoints[w]["TotFlightDist"] = totFlightDist .. suffixe
 
 									end
 								end
@@ -4358,7 +4352,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					-- waypoints[1].ETA = spawn_time	--NE PAS METTRE ça, ça rend le decollage en retard
 
-					if flight[f].player or flight[f].client then
+					if isHumain then
 						waypoints[1].ETA = 0
 					end
 
@@ -4501,45 +4495,37 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						calcWish = SkillWish[side]
 					end
 
-					local mSkill = 2
+					local mSkill
+					local skill = ""
+
 					if n == 1 then
 						mSkill = ( math.random(calcWish-20, calcWish+18) / 25 ) + 1		-- 75-62 = 13 (13 + 5 = 18 )5 % de chance d'avoir excellent
 					else
 						mSkill = ( math.random(calcWish-50, calcWish+10) / 25) + 1
 					end
+					
+					mSkill = math.floor(mSkill)
 
-					if  (flight[f].player or flight[f].client) and n == 2 then
-						-- pour éviter à l'ailier de percuter le joueur, on lui donne un Hight ou Excellent
-						--75% de chance qu'il soit Hight
-						--25% de chance qu'il soit Excellent
-						randSkill = math.random(100)
-						if randSkill >= 75 then
-							mSkill = 4
-						else
-							mSkill = 3
-						end
-					end
-
-					if (flight[f].player or flight[f].client) and n == 2 then
+					if mSkill <= 1 then 
+						mSkill = 1
+					elseif mSkill >= 4 then 
 						mSkill = 4
 					end
 
-					mSkill = math.floor(mSkill)
 
-					if mSkill <= 1 then mSkill = 1
-					elseif mSkill >= 4 then mSkill = 4
-					end
-
-					local skill = ""
-					if mission_ini.randomizeSkills then
-						skill = skillTab[mSkill]
-					else
-						skill = flight[f].skill
-					end
-
+					if isHumain then
+						if n == 2 then
+							skill = skillTab[4]
+						end
 					--overide skill pour les AFAC qui ne sont pas des manches et prennent tous les risques
-					if flight[f].task == "AFAC" then
+					elseif flight[f].task == "AFAC" then
 						skill = skillTab[4]
+					else
+						if mission_ini.randomizeSkills then
+							skill = skillTab[mSkill]
+						else
+							skill = flight[f].skill
+						end
 					end
 
 
@@ -4578,7 +4564,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					{
 						["alt"] = waypoints[1].alt,
 						["heading"] = 0,
-						["callsign"] = GetCallsign(flight[f].country, f, n, flight[f].task, flight[f]),
+						["callsign"] = getCallsign(flight[f].country, f, n, flight[f].task, flight[f]),
 						["psi"] = 0,
 						["livery_id"] = flight[f].livery,
 						["type"] = flight[f].type,
@@ -4615,7 +4601,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					--ajout les restrictions au loadout s il y en a
-					if (flight[f].player or flight[f].client) then
+					if isHumain then
 						for typeAircraft, payloadProhibited in pairs(PayloadRestricted) do
 							if typeAircraft and payloadProhibited and flight[f].type == typeAircraft then
 								units[n].payload.restricted = payloadProhibited
@@ -4796,7 +4782,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					--remove gun ammunition from AI escorts to prevent them from strafing aircraft on the ground at hostile air bases
 					-- if (flight[f].task == "Escort" and not flight[f].player ) and (flight[f].task == "Escort" and not flight[f].client ) then	--if fligh is taskes as escort and is not player flight
-					if flight[f].task == "Anti-ship Strike" and not (flight[f].player or flight[f].client) then	--or Multi.NbGroup >= 1
+					if flight[f].task == "Anti-ship Strike" and not isHumain then	--or Multi.NbGroup >= 1
 						if units[n].payload.gun and units[n].payload.gun == 100 then								--if loadout has full gun ammo
 							units[n].payload.gun = 0																--remove all gun ammo
 						end
@@ -5194,7 +5180,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				local spawnAir = false
 				local spawnCata = false
 
-				if baseIsCarrier and not ( flight[f].player or flight[f].client ) then
+				if baseIsCarrier and not isHumain then
 					if Data_configuration.SC_SpawnOn[flight[f].type] == "catapult" then
 						spawnDeck = false
 						spawnCata = true
@@ -5247,7 +5233,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = -- = - = - = - = - = - = - = - = - = - = -- = - = - = - = - = - = - = - = - = - = -- = - = - = - = - = - = -
 				--Player & Client on SuperCarrier
 				-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = -- = - = - = - = - = - = - = - = - = - = -- = - = - = - = - = - = - = - = - = - = -- = - = - = - = - = - = -
-				if baseIsCarrier and  ( flight[f].player or flight[f].client ) and waypoints[1]["type"] ~= "Turning Point" then --??? LimitedParkTiming? vraiment pour le joueur?
+				if baseIsCarrier and isHumain and waypoints[1]["type"] ~= "Turning Point" then --??? LimitedParkTiming? vraiment pour le joueur?
 					
 					if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe 0A-a SinglePlayer ..NbPlanetDeck: "..NbPlanetDeck) end
 
@@ -5279,8 +5265,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				--LimitedParkTiming RAPPEL concerne: CV LHA FARP et Petite BASE, si le nombre de place est superieur à db_airbases.LimitedParkNb				
 				----- late groups spawn uncontrolled at mission start -----
-				-- if ((group['route']['points'][1].ETA > 0 and flight[f].task ~= "Intercept")  or LimitedParkTiming ) and  not flight[f].player and not flight[f].client
-				if (( flight[f].task ~= "Intercept"  and flight[f].task ~= "SAR") or LimitedParkTiming ) and not flight[f].player and not flight[f].client and waypoints[1]["type"] ~= "Turning Point"
+				if (( flight[f].task ~= "Intercept"  and flight[f].task ~= "SAR") or LimitedParkTiming ) and not isHumain and waypoints[1]["type"] ~= "Turning Point"
 					then	--group launches after mission start																	-- calcul le nombre de flight dans un Package, en comptant ceux des Roles				
 					if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe AA LimitedParkTiming "..tostring(LimitedParkTiming)) end
 
@@ -5440,7 +5425,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe GG Multi.NbGroup >= 1") end
 
 
-							if not FARP_MorePlace then
+							if not farp_MorePlace then
 								--les Planes qui genent le taxiing spawn selon conf_mod
 								if not spawnDeck or baseIsFARP then
 									local BugFrom =  " not SpawnDeck "..debug.getinfo(1).currentline
@@ -5515,16 +5500,16 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				if (flight[f].task == "CSAR" )  then
 
 					-- ParkSarAirBase
-					if ParkSarAirBase[flight[f].base] then
+					if parkSarAirBase[flight[f].base] then
 
 						local pkFound = false
 						local nLoop = 1
 						local nPk = 0
 						repeat
-							nPk = math.random(1, #ParkSarAirBase[flight[f].base])
+							nPk = math.random(1, #parkSarAirBase[flight[f].base])
 
-							if not ParkSarAirBase[flight[f].base][nPk].occupied or ParkSarAirBase[flight[f].base][nPk].occupied == false then
-								ParkSarAirBase[flight[f].base][nPk].occupied = true
+							if not parkSarAirBase[flight[f].base][nPk].occupied or parkSarAirBase[flight[f].base][nPk].occupied == false then
+								parkSarAirBase[flight[f].base][nPk].occupied = true
 								pkFound = true
 							end
 							nLoop = nLoop + 1
@@ -5537,14 +5522,14 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							waypoints[1].airdromeId = nil
 
-							group.units[1].x = ParkSarAirBase[flight[f].base][nPk].x
-							group.units[1].y = ParkSarAirBase[flight[f].base][nPk].y
+							group.units[1].x = parkSarAirBase[flight[f].base][nPk].x
+							group.units[1].y = parkSarAirBase[flight[f].base][nPk].y
 
-							group.x = ParkSarAirBase[flight[f].base][nPk].x
-							group.y = ParkSarAirBase[flight[f].base][nPk].y
+							group.x = parkSarAirBase[flight[f].base][nPk].x
+							group.y = parkSarAirBase[flight[f].base][nPk].y
 
-							waypoints[1].x = ParkSarAirBase[flight[f].base][nPk].x
-							waypoints[1].y = ParkSarAirBase[flight[f].base][nPk].y
+							waypoints[1].x = parkSarAirBase[flight[f].base][nPk].x
+							waypoints[1].y = parkSarAirBase[flight[f].base][nPk].y
 
 							if waypoints[1].linkUnit then
 								waypoints[1].linkUnit = nil
@@ -5576,13 +5561,13 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					camp.SAR.Flag = camp.SAR.Flag + 1								--go to next trigger flag number					
 
 					-- ParkSarAirBase
-					if ParkSarAirBase[flight[f].base] then
+					if parkSarAirBase[flight[f].base] then
 
 						local pkFound = false
 						local nPk = 0
 
 						--premier passage, on se positionne sur les places reservées, si elles existent
-						for parkN, park in pairs(ParkSarAirBase[flight[f].base]) do
+						for parkN, park in pairs(parkSarAirBase[flight[f].base]) do
 							if park.reservedAR and not park.occupied then
 								park.occupied = true
 								nPk = parkN
@@ -5594,10 +5579,10 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						if not pkFound  then
 							local nLoop = 1
 							repeat
-							nPk = math.random(1, #ParkSarAirBase[flight[f].base])
+							nPk = math.random(1, #parkSarAirBase[flight[f].base])
 
-								if not ParkSarAirBase[flight[f].base][nPk].occupied or ParkSarAirBase[flight[f].base][nPk].occupied == false then
-									ParkSarAirBase[flight[f].base][nPk].occupied = true
+								if not parkSarAirBase[flight[f].base][nPk].occupied or parkSarAirBase[flight[f].base][nPk].occupied == false then
+									parkSarAirBase[flight[f].base][nPk].occupied = true
 									pkFound = true
 								end
 								nLoop = nLoop + 1
@@ -5611,14 +5596,14 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							waypoints[1].airdromeId = nil
 
-							group.units[1].x = ParkSarAirBase[flight[f].base][nPk].x
-							group.units[1].y = ParkSarAirBase[flight[f].base][nPk].y
+							group.units[1].x = parkSarAirBase[flight[f].base][nPk].x
+							group.units[1].y = parkSarAirBase[flight[f].base][nPk].y
 
-							group.x = ParkSarAirBase[flight[f].base][nPk].x
-							group.y = ParkSarAirBase[flight[f].base][nPk].y
+							group.x = parkSarAirBase[flight[f].base][nPk].x
+							group.y = parkSarAirBase[flight[f].base][nPk].y
 
-							waypoints[1].x = ParkSarAirBase[flight[f].base][nPk].x
-							waypoints[1].y = ParkSarAirBase[flight[f].base][nPk].y
+							waypoints[1].x = parkSarAirBase[flight[f].base][nPk].x
+							waypoints[1].y = parkSarAirBase[flight[f].base][nPk].y
 
 							if waypoints[1].linkUnit then
 								waypoints[1].linkUnit = nil
@@ -5711,7 +5696,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						--if the group is on a carrier, it gets late activation instead of uncontrolled. An activate trigger is needed instead of AI task trigger.
 						-- Les SAR sur CV et parking limité spawn en vol
 
-						if (baseIsCarrier or LimitedParkTiming or db_airbases[flight[f].base].BaseAirStart) and not FARP_MorePlace  then
+						if (baseIsCarrier or LimitedParkTiming or db_airbases[flight[f].base].BaseAirStart) and not farp_MorePlace  then
 
 							local BugFrom =  " SAR sur CV et parking limité spawn en vol "..debug.getinfo(1).currentline
 							SpawnOn( "air", waypoints, group, Pn, 0, BugFrom, flight, f, role)
@@ -5756,7 +5741,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						}
 					end
 
-					if flight[f].player or flight[f].client then										-- M11 multiplayer, les joueurs sont ajouté dans la base ready pour ne pas attendre 
+					if isHumain then										-- M11 multiplayer, les joueurs sont ajouté dans la base ready pour ne pas attendre 
 						table.insert(camp.SAR.alertSAR[side].base[flight[f].base].ready, t)
 					else
 						table.insert(camp.SAR.alertSAR[side].base[flight[f].base].ready, t)
@@ -5766,7 +5751,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				----- provisions for interceptors/GCI/AWACS -----
 				if flight[f].task == "Intercept" then
 					GCI.Flag = GCI.Flag + 1															--go to next trigger flag number					
-					if not flight[f].player and not flight[f].client then	-- and LimitedParkTiming							-- M11 PVP ne copie pas de trigger retardé START pour les clients/joueurs	
+					if not isHumain then	-- and LimitedParkTiming							-- M11 PVP ne copie pas de trigger retardé START pour les clients/joueurs	
 
 						if polkaOff then
 							group['lateActivation'] = false
@@ -5882,7 +5867,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					-- Assign the plane to a table based on the assign_index
 					local base = GCI.Interceptor[side].base[flight[f].base]
 
-					if flight[f].player or flight[f].client then
+					if isHumain then
 						-- Always prioritize the `ready` table for player-controlled flights
 						table.insert(base.ready, t)
 						base.ready_n = base.ready_n + 1
@@ -5949,7 +5934,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						y=0,
 					}
 					local onCV = false
-					if Data_configuration.SC_SpawnOn["Pedro"] == "deck"  and PlayerTask ~= "Intercept"  then
+					if Data_configuration.SC_SpawnOn["Pedro"] == "deck"  and playerTask ~= "Intercept"  then
 						-- action = "From Parking Area"
 						-- type = "TakeOffParking"
 						action = "From Parking Area Hot"
@@ -5958,7 +5943,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						pos.x = PedroLinkCV.x
 						pos.y = PedroLinkCV.y
 						onCV = true
-					elseif  Data_configuration.SC_SpawnOn["Pedro"] == "catapult" and PlayerTask ~= "Intercept" then
+					elseif  Data_configuration.SC_SpawnOn["Pedro"] == "catapult" and playerTask ~= "Intercept" then
 						action = "From Runway"
 						type = "Turning TakeOff"
 						alt = 0
@@ -6093,7 +6078,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 				-- si multijoueur, les Flight AI commencent en vol + M11.j
-				if ((Multi.NbGroup >= 1 or SingleWithDServerAiAir) and not flight[f].player and not flight[f].client and baseIsCarrier and flight[f].task ~= "Intercept") then
+				if ((Multi.NbGroup >= 1 or SingleWithDServerAiAir) and not isHumain and baseIsCarrier and flight[f].task ~= "Intercept") then
 					if waypoints[1]["type"] ~= "Turning Point" then 					-- si le vol a deja ete deplace pour un commencement en vol, on ne recommence pas le d�calage lat�ral
 						local BugFrom =  " si multijoueur, les Flight AI commencent en vol "..debug.getinfo(1).currentline
 						-- SpawnOn( "air", waypoints, group, Pn, spawn_time + 300, BugFrom, flight, f)	
@@ -6167,7 +6152,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					-- end																		--make first aircraft in flight the player aircraft
 
 				-- modification M11.l : Multiplayer	
-				elseif (flight[f].client or flight[f].player) and not SingleWithDServer then
+				elseif isHumain and not SingleWithDServer then
 					local boucleNbPlaneClient
 					if flight[f].NbPlaneClient > 4 then
 						boucleNbPlaneClient = 4
@@ -6223,7 +6208,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				--M11.r ajoute une copie des avions multijoueur commançant en l'air // retab // recovery
 				local groupRTB = {}
-				if mission_ini.MP_PlaneRecovery and Multi.NbGroup >= 1 and (flight[f].client or flight[f].player) then
+				if mission_ini.MP_PlaneRecovery and Multi.NbGroup >= 1 and isHumain then
 
 					groupRTB = Deepcopy(group)
 					groupRTB.groupId = GenerateIDGroup()
@@ -6429,7 +6414,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				-- modification M33_e 	Custom Briefing (e: divert/CV possible)
 				-- place dans une table les bases proches des WPT
 				local TabBaseByWPT = {}
-				if flight[f].player or flight[f].client then
+				if isHumain then
 					for n = 1, #group.route.points   do
 						for baseName, airbase in pairs(db_airbases) do
 							if  (not airbase.inactive or airbase.inactive == false) and airbase["side"] == side and flight[f].base ~= baseName and not airbase.BaseAirStart and airbase.x then		--airbase.divert and					
@@ -6841,7 +6826,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 				end
 
-				if flight[f].player or flight[f].client then
+				if isHumain then
 					if group.route.points[1]["action"] == "Turning Point"then
 						info02 = info02.." |ATTENTION MANQUE Start "..group.groupId
 						print("AtoFp info02"..info02) 
@@ -6923,12 +6908,12 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 				if units[1].skill == "Player" or units[1].skill == "Client" then
-					InfoFlight = InfoFlight.."\n"..("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ")
-					InfoFlight = InfoFlight.."\n"..("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ")
+					infoFlight = infoFlight.."\n"..("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ")
+					infoFlight = infoFlight.."\n"..("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ")
 				end
 
 				if (units[1].skill == "Player" or units[1].skill == "Client") and group.route.points[1].ETA> 1 then
-					InfoFlight = InfoFlight.."\n\n\n".."ATTENTION Player/Client delayed start ETA1: "..group.route.points[1]["ETA"].."\n\n\n"
+					infoFlight = infoFlight.."\n\n\n".."ATTENTION Player/Client delayed start ETA1: "..group.route.points[1]["ETA"].."\n\n\n"
 				end
 
 				local groupInfo = ""
@@ -6957,7 +6942,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					-- .." |ETA1: "..group.route.points[1]["ETA"]
 				end
 
-				InfoFlight = InfoFlight.."\n"
+				infoFlight = infoFlight.."\n"
 					..""..flight[f].id
 					.." |Pack: "..p
 					.." |Nb "..flight[f].number
@@ -6975,7 +6960,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 
-				debugTempFLIGHT = InfoFlight.." "..groupInfo
+				debugTempFLIGHT = infoFlight.." "..groupInfo
 
 				-- for nn = 1 , #units do
 					-- debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("\n")						
@@ -6984,8 +6969,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				-- end
 
 				if units[1].skill == "Player" or units[1].skill == "Client" then
-					InfoFlight = InfoFlight.."\n"..("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ")
-					InfoFlight = InfoFlight.."\n"..("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ")
+					infoFlight = infoFlight.."\n"..("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ")
+					infoFlight = infoFlight.."\n"..("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ")
 				end
 				if units[1].skill == "Player" or units[1].skill == "Client" then
 					debugTempFLIGHT = debugTempFLIGHT.."\n"..("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ")
@@ -7013,7 +6998,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				debugTxt_AtoFP = debugTxt_AtoFP .. debugTempFLIGHT
 
 				if Multi.NbGroup >= 1 and not Debug.AfficheFlight then
-					print(InfoFlight)
+					print(infoFlight)
 				end
 			end
 		end
@@ -7678,7 +7663,7 @@ if testPosRunwayImpact then
 					end
 				end
 
-				local AddGroup = {
+				local addGroup = {
 					["visible"] = false,
 					["tasks"] =
 					{
@@ -7731,7 +7716,7 @@ if testPosRunwayImpact then
 
 				print("AtoFP Ngroup AVANT   "..tostring(#mission.coalition.blue.country[1].vehicle.group))
 
-				table.insert(mission.coalition.blue.country[1].vehicle.group, AddGroup)
+				table.insert(mission.coalition.blue.country[1].vehicle.group, addGroup)
 				local Ngroup = #mission.coalition.blue.country[1].vehicle.group
 
 				print("AtoFP Ngroup APRES   "..tostring(#mission.coalition.blue.country[1].vehicle.group))
