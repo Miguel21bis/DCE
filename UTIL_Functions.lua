@@ -657,7 +657,18 @@ end
 
 --function to return heading between two vector2 points
 -- return une valeur en degré par rapport au nord géographique (pas le cercle trigonometrique)
-function GetHeading(p1, p2)
+function GetHeading(p1, p2, debug)
+
+	if debug then
+		if not p1 or not p1.x or not p1.y then
+			_affiche(debug, "debug p1 GetHeading")
+		end
+		if not p2 or not p2.x or not p2.y then
+			_affiche(debug, "debug p2 GetHeading")
+		end
+	end
+
+
 	local deltax = p2.x - p1.x
 	local deltay = p2.y - p1.y
 	local result

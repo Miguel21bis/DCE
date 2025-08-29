@@ -1232,7 +1232,7 @@ end
 
 
 --modify_set_ai_task
-local function modify_set_ai_task(group, airSpawnTime, from)
+local function modify_set_ai_taskOLD(group, airSpawnTime, from)
 
 	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe 1B modify_set_ai_task "..tostring(from)) end
 

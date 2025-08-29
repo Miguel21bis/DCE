@@ -19,7 +19,7 @@ versionDCE["DC_UpdateTargetlist.lua"] = "1.11.51"
 -------------------------------------------------------------------------------------------------------
 
 if not targetlist.blue[1] then
-	TargetlistToNum()
+	TargetlistToNum(targetlist)
 end
 
 if not DC_UpdateTargetlist_counter then

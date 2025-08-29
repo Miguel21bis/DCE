@@ -250,8 +250,19 @@ do
 
 
 
--- print("DEBRIEF_t A1 camp.player.role "..tostring(camp.player.role))
--- print("DEBRIEF_t A2 camp.player.flight "..tostring(camp.player.flight))
+print("DEBRIEF_t A1 camp.player.role "..tostring(camp.player.role))
+print("DEBRIEF_t A2 camp.player.flight "..tostring(camp.player.flight))
+
+	-- if not camp.player and camp.client then --par defaut, compatible avec les anciens debrief
+
+	-- 	camp["player"] = {
+	-- 		["pack"] = camp.client[1].pack
+	-- 	}
+
+	-- 	camp.player.role = camp.client.role
+	-- 	camp.player.flight = camp.client.flight
+
+	-- end
 
 	local player_task = camp.player.pack[camp.player.role][camp.player.flight].task								--player task
 	local target_name = camp.player.pack[camp.player.role][camp.player.flight].target_name						--name of player package target

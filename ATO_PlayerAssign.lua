@@ -290,36 +290,6 @@ if #playable > 0 then
 		end
 	end
 	
-	-- for i=1, #playable do																									--check si un group à trouver son avion		
-	-- 	for k=1, MultiBIS.NbGroup do
-	-- 		if playable[i].type == MultiBIS.Group[k].PlaneType and not MultiBIS.Group[k].counted then
-
-	-- 			-- playability_Multi[k] = 0
-
-	-- 			if not MultiBIS.Group[k].NotAssigned then MultiBIS.Group[k].NotAssigned = Deepcopy(MultiBIS.Group[k].NbPlane) end
-
-	-- 			local nbPlaneFlight = playable[i].number
-
-	-- 			if playable[i].number >=  MultiBIS.Group[k].NotAssigned then
-	-- 				nbPlaneFlight = Deepcopy(MultiBIS.Group[k].NotAssigned)
-	-- 				MultiBIS.Group[k].NotAssigned = 0
-	-- 			else
-	-- 				MultiBIS.Group[k].NotAssigned = MultiBIS.Group[k].NotAssigned - playable[i].number
-	-- 			end
-
-	-- 			-- playability_Multi[k] = 1																				--propose ce choix au joueur						
-	-- 			local tabTemp = Deepcopy(MultiBIS.Group[k])
-	-- 			table.insert(creaClientFlight, tabTemp)
-	-- 			creaClientFlight[#creaClientFlight]["NbPlane"] = nbPlaneFlight							 				--TODO ce number pourrait reprendre l'historique						
-
-
-	-- 			if MultiBIS.Group[k].NotAssigned <= 0 then
-	-- 				MultiBIS.Group[k].counted = true
-	-- 				playable[i].counted = true
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
 
 	if MultiBIS.Group then
 		AllCoopPossible = true

@@ -222,7 +222,7 @@ local clientstatsDetail = {}
 
 
 --function to add new clients to clientstats
-local function AddClient(name)
+local function addClient(name)
 
 	local tabValues = {
 		kills_air = 0,
@@ -276,68 +276,39 @@ local function AddClient(name)
 			end
 		end
 	end
-
-	
 end
 
-
--- if camp.client then
--- 	-- local testN = 999
--- 	-- --recupere la plus petite valeur de pack, le strike est surement dedans
--- 	-- for _N, value in pairs(camp.MultiPlayer.pack_n) do
--- 		-- N_Pack = tonumber(_N)
--- 		-- if testN > N_Pack then
--- 			-- testN = N_Pack	
--- 		-- end
--- 	-- end	
--- 	-- local packN = testN	
--- 	-- camp.player = camp.client[packN]
-
-
--- 	local packN = 1
--- 	--recupere la valeur du pack qui est striker
--- 	for nClient, pack_ in pairs(camp.client) do
--- 		if string.find(pack_["pack"]["main"][1]["task"] , "Strike") then
--- 			packN = nClient
--- 			break
--- 		end
--- 	end
-
--- 	camp.player = camp.client[packN]
-
--- end
-
--- local camp_str = "DEBRIEF_States = " .. TableSerialization(camp.player, 0)						--make a string
--- local campFile = io.open("DebugDEBRIEF_States.lua", "w")										--open targetlist file
--- campFile:write(camp_str)																		--save new data
--- campFile:close()
-
-
 -- pack_n
-camp.player.pack = camp.player.package[camp.player.pack_n]
+if camp.player then
 
+	camp.player.pack = camp.player.package[camp.player.pack_n]
+
+elseif camp.client then --par defaut, compatible avec les anciens debrief
+
+	camp["player"] = {
+		["pack"] = camp.client[1].pack
+	}
+
+	camp.player.role = camp.client[1].role
+	camp.player.flight = camp.client[1].flight
+	camp.player.side = camp.client[1].side
+	camp.player.airbase = camp.client[1].airbase
+	camp.player.pack_n = camp.client[1].pack_n
+	camp.player.task = camp.client[1].task
+	camp.player.tgt_wp = camp.client[1].tgt_wp
+	camp.player.unitname = camp.client[1].unitname
+
+end
+
+	local camp_str = "camp.player = " .. TableSerialization(camp.player, 0)
+	local campFile = io.open("Debug/camp_player.lua", "w") or error("Failed to open debug file")
+	campFile:write(camp_str)
+	campFile:close()
 
 for roleName, role in pairs(camp.player.pack) do														--iterate through roles in player package
 	for flightN, flight in pairs(role) do																--iterate through flights
-		-- for n = 1, flight.number do
-
-		-- print("DebriefSE roleName "..tostring(roleName).." flightN: "..flightN)
-		-- print("flight: "..tostring(flight))
-
 		if type(flight) == "table" and flight.units then
-
 			for unitN, unit in pairs(flight.units) do
-
-				-- local unitname = "Pack " .. camp.player.pack_n .. " - " .. flight.name .. " - " .. flight.task .. " " .. flightN .. "-" .. n
-
-				-- print(" ............................              DebriefSE roleName "..tostring(roleName).." flightN "..flightN.." unit.name: "..unit.name)
-
-				-- if not flight.units or not flight.units[n] or not flight.units[n].name then
-				-- 	_affiche(flight, 'flight')
-				-- end
-
-				-- local unitname = unit.name
-
 				packstats[unit.name] = {
 					kills_air = 0,
 					kills_ground = 0,
@@ -346,19 +317,12 @@ for roleName, role in pairs(camp.player.pack) do														--iterate through 
 				}
 			end
 		end
-
 	end
 end
-
 
 -- end
 --function to check if a kill loss is attributed to the player package
 local function addPackstats(unitname, event, eventTable)
-
-	-- print("addPackstats unitname?: "..tostring(unitname).." event: "..tostring(event))
-	-- _affiche(eventTable, "eventTable")
-
-	-- if not unitname then return end
 
 	unitname = unitname:gsub("Recovery ", "")
 
@@ -387,7 +351,7 @@ for e = 1, #events do																					--iterate through all events
 	end
 
 	if events[e].initiatorPilotName and type(events[e].initiatorPilotName) == "string" and events[e].initiatorPilotName ~= "nil" then	--event is by a client
-		AddClient(events[e].initiatorPilotName)
+		addClient(events[e].initiatorPilotName)
 		client_control[events[e].initiator] = events[e].initiatorPilotName								--store which unit name (initiaror) is controllen by cliend (PilotName)
 	end
 end
