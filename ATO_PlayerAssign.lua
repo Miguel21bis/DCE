@@ -17,7 +17,7 @@ versionDCE["ATO_PlayerAssign.lua"] = "1.9.74"
 ------------------------------------------------------------------------------------------------------- 
 
 -- local debugAssign = Debug.debug
-local debugAssign = true
+local debugAssign = false
 local allFlightName = {}
 
 if DebugAssignAll then
