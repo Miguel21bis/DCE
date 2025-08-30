@@ -1,38 +1,37 @@
 
 
 local acceptedTargetTypes = {
- ['ULAK001']= "Warehouse",
-    ['ULAK004']= "Warehouse",
-    ['ULAK015'] = "Warehouse",
-    ['ULAK055'] = "Power Supply",
-    ['ULAK058'] = "Warehouse",
-    ['ULAK082'] = "Warehouse",
-    ['UMOE16'] = "Warehouse",
-    ['SMAC01_MILITARY_TRAINING_CENTRE_D'] = "Warehouse",
-    ['SMAC36_ANCILLARY_BUILDING_04'] = "Warehouse",
-    ['WAREHOUSE_04'] = "Warehouse",
-    ['ULAK066'] = "Warehouse",
-    ['XLMV45'] = "Warehouse",
-    ['XLMV56'] = "Warehouse",
-    ['BODO216'] = "Warehouse",
-    ['XLMV40'] = "Power Plant",
-    ['ELECTRIC_TRANSFORMER_01'] = "Power Supply",
-    ['SILO_03'] = "Fuel Storage",
-    ['UMOE73'] = "Fuel Storage",
-    ['ULAK062'] = "Fuel Storage",
-    ['SILO_02'] = "Fuel Storage",
-    ['UMOE31'] = "Fuel Storage",
-    ['XLMV42'] = "Fuel Storage",
-    ['UMOE36'] = "Fuel Storage",
-    ['CAR_BRIDGE_2LINE'] = "Road Bridge",
-    ['CAR_BRIDGE_4LINE'] = "Road Bridge",
-    ['WOODEN_BRIDGE_2LINE'] = "Road Bridge",
-    ['RW_BRIDGE_1LINE'] = "Rail Bridge",
-    ['RW_BRIDGE_2LINE'] = "Rail Bridge",
-    ['LOADING_CRANE_02'] = "Loading Crane",
-    ['LOADING_CRANE_03'] = "Loading Crane",
-    ['BOAT001'] = "Civil Ship", 
-
+	['ULAK001'] = "Warehouse",
+	['ULAK004'] = "Warehouse",
+	['ULAK015'] = "Warehouse",
+	['ULAK055'] = "Power Supply",
+	['ULAK058'] = "Warehouse",
+	['ULAK082'] = "Warehouse",
+	['UMOE16'] = "Warehouse",
+	['SMAC01_MILITARY_TRAINING_CENTRE_D'] = "Warehouse",
+	['SMAC36_ANCILLARY_BUILDING_04'] = "Warehouse",
+	['WAREHOUSE_04'] = "Warehouse",
+	['ULAK066'] = "Warehouse",
+	['XLMV45'] = "Warehouse",
+	['XLMV56'] = "Warehouse",
+	['BODO216'] = "Warehouse",
+	['XLMV40'] = "Power Plant",
+	['ELECTRIC_TRANSFORMER_01'] = "Power Supply",
+	['SILO_03'] = "Fuel Storage",
+	['UMOE73'] = "Fuel Storage",
+	['ULAK062'] = "Fuel Storage",
+	['SILO_02'] = "Fuel Storage",
+	['UMOE31'] = "Fuel Storage",
+	['XLMV42'] = "Fuel Storage",
+	['UMOE36'] = "Fuel Storage",
+	['CAR_BRIDGE_2LINE'] = "Road Bridge",
+	['CAR_BRIDGE_4LINE'] = "Road Bridge",
+	['WOODEN_BRIDGE_2LINE'] = "Road Bridge",
+	['RW_BRIDGE_1LINE'] = "Rail Bridge",
+	['RW_BRIDGE_2LINE'] = "Rail Bridge",
+	['LOADING_CRANE_02'] = "Loading Crane",
+	['LOADING_CRANE_03'] = "Loading Crane",
+	['BOAT001'] = "Civil Ship",
 }
 
 
@@ -120,44 +119,50 @@ end
 
 
 local protoTargetList = {}
+local tabByNameIdx = {}
 
 local function checkZone(searchZone,zoneName)
 
 	local function IfFound(obj)
 		local objVec3 = obj:getPoint()
-		-- local objName = obj:getName()
+		local objName = obj:getName()
 		local objType = obj:getTypeName()
 
 		if acceptedTargetTypes[objType] then
-			local typeNameDCE = zoneName.." "..acceptedTargetTypes[objType]
-		
-			if not protoTargetList[zoneName] then
-				protoTargetList[zoneName] = {
-					inactive = true,
-					task = "Strike",
-					priority = 1,
-					picture = {},
-					attributes = {"Structure"},
-					firepower = {
-						min = 4,
-						max = 8,
-					},
-					elements = {
-						{
-							name = tostring(typeNameDCE).." - 1",
+            local typeNameDCE = zoneName .. " " .. acceptedTargetTypes[objType]
+			
+            if not not tabByNameIdx[objName] then
+                tabByNameIdx[objName] = true
+				
+				if not protoTargetList[zoneName] then
+					
+					protoTargetList[zoneName] = {
+						inactive = true,
+						task = "Strike",
+						priority = 1,
+						picture = {},
+						attributes = {"Structure"},
+						firepower = {
+							min = 4,
+							max = 8,
+						},
+						elements = {
+							{
+								name = tostring(typeNameDCE).." - 1",
+								x = math.floor(objVec3.x * 100 + 0.5) / 100,
+								y = math.floor(objVec3.z * 100 + 0.5) / 100,
+							}
+						}
+
+					}
+				else
+					local element = {
+						name = tostring(typeNameDCE).." - "..(#protoTargetList[zoneName].elements + 1),
 							x = math.floor(objVec3.x * 100 + 0.5) / 100,
 							y = math.floor(objVec3.z * 100 + 0.5) / 100,
-						}
 					}
-
-				}
-			else
-				local element = {
-					name = tostring(typeNameDCE).." - "..(#protoTargetList[zoneName].elements + 1),
-						x = math.floor(objVec3.x * 100 + 0.5) / 100,
-						y = math.floor(objVec3.z * 100 + 0.5) / 100,
-				}
-				table.insert(protoTargetList[zoneName].elements, element)
+					table.insert(protoTargetList[zoneName].elements, element)
+				end
 			end
 		end
 	end

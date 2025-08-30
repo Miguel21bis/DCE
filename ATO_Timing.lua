@@ -328,10 +328,14 @@ for side, pack in pairs(ATO) do
 							for w = 3, #flight[f].route - 1 do															--iterate through all waypoints that require lateral offset (taxi, departure and landing WP exluded)			
 								if flight[f].route[w].id ~= "Target" and flight[f].route[w].id ~= "WPT Before Landing" then --Target WP does not need lateral offset
 									
-									local inbound_heading = GetHeading(pack[p].main[1].route[w - 1], pack[p].main[1].route[w], pack[p].main[1])		--inbound heading to WP of lead flight
-									local outbound_heading = GetHeading(pack[p].main[1].route[w], pack[p].main[1].route[w + 1], pack[p].main[1])		--outbound heading from WP of lead flight
-									local delta_heading = GetDeltaHeading(inbound_heading, outbound_heading)			--amount of heading change at WP
-
+									local inbound_heading, outbound_heading, delta_heading 
+									
+									if pack[p].main[1].route[w] and pack[p].main[1].route[w+1] and pack[p].main[1].route[w-1] then
+										inbound_heading = GetHeading(pack[p].main[1].route[w - 1], pack[p].main[1].route[w], pack[p].main[1])		--inbound heading to WP of lead flight
+										outbound_heading = GetHeading(pack[p].main[1].route[w], pack[p].main[1].route[w + 1], pack[p].main[1])		--outbound heading from WP of lead flight
+										delta_heading = GetDeltaHeading(inbound_heading, outbound_heading)			--amount of heading change at WP
+									end
+									
 									if delta_heading < 66 and delta_heading > -66 then									--if heading change is small, flights stay at the present side of lead flight (check turn)
 										local alpha = inbound_heading + 90 + (delta_heading / 2)
 										local dist = offset / math.cos(math.rad(delta_heading / 2))
