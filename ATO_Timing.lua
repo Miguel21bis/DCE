@@ -336,19 +336,21 @@ for side, pack in pairs(ATO) do
 										delta_heading = GetDeltaHeading(inbound_heading, outbound_heading)			--amount of heading change at WP
 									end
 									
-									if delta_heading < 66 and delta_heading > -66 then									--if heading change is small, flights stay at the present side of lead flight (check turn)
-										local alpha = inbound_heading + 90 + (delta_heading / 2)
-										local dist = offset / math.cos(math.rad(delta_heading / 2))
-										local offset_WP = GetOffsetPoint(flight[f].route[w], alpha, dist)
-										flight[f].route[w].x = offset_WP.x
-										flight[f].route[w].y = offset_WP.y
-									else																				--if heading change is big, flights switch side from lead flight (tactical turn and cross turn)
-										local alpha = outbound_heading - 90 + ((180 - delta_heading) / 2)
-										local dist = offset / math.cos(math.rad((180 - delta_heading) / 2))
-										local offset_WP = GetOffsetPoint(flight[f].route[w], alpha, dist)
-										flight[f].route[w].x = offset_WP.x
-										flight[f].route[w].y = offset_WP.y
-										offset = offset * -1															--switch side
+									if delta_heading then
+										if delta_heading < 66 and delta_heading > -66 then									--if heading change is small, flights stay at the present side of lead flight (check turn)
+											local alpha = inbound_heading + 90 + (delta_heading / 2)
+											local dist = offset / math.cos(math.rad(delta_heading / 2))
+											local offset_WP = GetOffsetPoint(flight[f].route[w], alpha, dist)
+											flight[f].route[w].x = offset_WP.x
+											flight[f].route[w].y = offset_WP.y
+										else																				--if heading change is big, flights switch side from lead flight (tactical turn and cross turn)
+											local alpha = outbound_heading - 90 + ((180 - delta_heading) / 2)
+											local dist = offset / math.cos(math.rad((180 - delta_heading) / 2))
+											local offset_WP = GetOffsetPoint(flight[f].route[w], alpha, dist)
+											flight[f].route[w].x = offset_WP.x
+											flight[f].route[w].y = offset_WP.y
+											offset = offset * -1															--switch side
+										end
 									end
 								end
 							end

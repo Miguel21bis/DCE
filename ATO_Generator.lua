@@ -3876,8 +3876,8 @@ if Debug.debug then
 		end
 	end
 
-	if show then os.execute 'pause'
-	end
+	-- if show then os.execute 'pause'
+	-- end
 
 end
 

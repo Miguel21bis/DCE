@@ -17,7 +17,7 @@ versionDCE["ATO_PlayerAssign.lua"] = "1.9.74"
 ------------------------------------------------------------------------------------------------------- 
 
 -- local debugAssign = Debug.debug
-local debugAssign = false
+local debugAssign = true
 local allFlightName = {}
 
 if DebugAssignAll then
@@ -150,7 +150,12 @@ for side, pack in pairs(ATO) do															--iterate through sides in ATO
 								if side == "blue" then
 									enemy = "red"
 								end
+
 								for enemy_pack_n, enemy_pack in pairs(ATO[enemy]) do						--iterate through enemy packages
+
+									if not enemy_pack.main[1].route then
+										_affiche(enemy_pack, "AtoPA enemy_pack: ")
+									end
 
 									local stoploop = false
 									for w = 1, #enemy_pack.main[1].route - 1 do								--iterate through waypoints of first enemy main flight
@@ -353,7 +358,7 @@ else
 
 	if debugAssign then
 		_affiche(Playability_criterium, "Playability_criterium AtoPA ")
-		os.execute 'pause'
+		-- os.execute 'pause'
 	end
 end
 

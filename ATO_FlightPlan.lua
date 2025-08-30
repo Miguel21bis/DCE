@@ -381,8 +381,190 @@ local function addAndSpaceTankers(groupName, startX, startY)
 	return newPosition.x, newPosition.y
 end
 
+local function getCallsignWest(category, flight_f, flight_n, aircraft_n)
+    -- Toute la logique actuelle pour l'ouest ici
+    -- Retourne la table callsign attendue par DCS pour l'ouest
+    
+	local callsign_flight = 0
+	local testCall = ""
+	local testCallFlightUnite = ""
+	local callsign_nb = 0
+	local _name = ""
+	local foundCsf = false
+	local task, callsign
 
-local function getCallsign(country, flight_n, aircraft_n, task, flight_)
+	if task == "AWACS" then
+		category = "AWACS"
+	elseif task == "Refueling" then
+		category = "tanker"
+	else
+		category = "generic"
+	end
+
+	if flight_f.target.predeterminedCallsign then
+
+		callsign_flight = flight_f.target.predeterminedCallsign.groupNumber
+
+		if callsign_flight <= 9 then
+			callsign_flight = callsign_flight * 10
+		end
+
+		local nb_unite
+
+		-- les tanker ne fonctionne pas avec Texaco 4.5
+		-- mais Texaco 45.1
+		--dans un group de 1, l'unité doit toujours etre à 1
+		local ii = 1
+		repeat
+			nb_unite = math.random(2, 9)
+			callsign_flight = callsign_flight + nb_unite
+			testCall = Callsign_west[category][callSign_west_counter[category]]..callsign_flight
+			testCallFlightUnite = testCall..1
+			ii = ii + 1
+		until ii > 100 or not callSignFlightUnite[testCallFlightUnite]
+
+		callSignFlight[testCall] = true
+		callSignFlightUnite[testCallFlightUnite] = true
+
+		callsign_nb = callSign_west_counter[category]
+		_name = Callsign_west[category][callSign_west_counter[category]] .. callsign_flight .. 1
+
+		callsign = {
+			[1] = callsign_nb,
+			[2] =  callsign_flight,
+			[3] =  1,
+			name = _name
+		}
+
+		return callsign
+
+
+	else
+
+		--M56_b
+		--si le callsign à déjà été défini par AssignCallnameSquad() ou oob_air_init
+		if flight_f and flight_f["callsign"] and flight_f["callsignId"]  then
+
+			if aircraft_n == 1 then
+
+				local ii = 1
+				repeat
+					callsign_flight = math.random(1, 9)
+					testCall = flight_f["callsign"]..callsign_flight
+					if not callSignFlight[testCall] then
+						callSignFlight[testCall] = true
+						flight_f["callsign_flight"] = callsign_flight
+						foundCsf = true
+						break
+					end
+					ii = ii + 1
+				until ii > 30 or foundCsf
+
+				--si le random non tuilé ne fonctionne pas, tant pis, on prend au pif
+				if not foundCsf then
+					callsign_flight = math.random(1, 9)
+					testCall = flight_f["callsign"]..callsign_flight
+					flight_f["callsign_flight"] = callsign_flight
+					callSignFlight[testCall] = true
+				end
+			end
+
+			callsign_flight = flight_f["callsign_flight"]
+			callsign_nb = flight_f["callsignId"]
+			_name = flight_f["callsign"] .. callsign_flight .. aircraft_n
+
+		else
+			if flight_n == 1 and aircraft_n == 1 then
+				callSign_west_counter[category] = callSign_west_counter[category] + 1
+				if callSign_west_counter[category] > #Callsign_west[category] then
+					callSign_west_counter[category] = 1
+				end
+				callsign_flight = math.random(0, 8)
+			end
+
+			if aircraft_n == 1 then
+				if not callsign_flight then
+					DebugFLIGHT = DebugFLIGHT .. "\nNote for the Campaign Maker: The nation of a previous aircraft misfiled in the table  conf_mod/campMod.WestCallsign or ATO_FlightPlan/country\n"
+					DebugFLIGHT = DebugFLIGHT .. "\n"..flight_f.name.. "\n"
+				end
+
+				local ii = 1
+				repeat
+					callsign_flight = math.random(1, 9)
+
+					if not Callsign_west[category] or not callSign_west_counter[category] or not Callsign_west[category][callSign_west_counter[category]] then						
+						DebugFLIGHT = DebugFLIGHT .. "\nAtoFp Error GetCal..callsign: "..tostring(category).." "..tostring(callSign_west_counter[category])"\n"						
+					end
+
+
+					testCall = Callsign_west[category][callSign_west_counter[category]]..callsign_flight
+					if not callSignFlight[testCall] then
+						callSignFlight[testCall] = true
+						foundCsf = true
+						break
+					end
+					ii = ii + 1
+				until ii > 100 or foundCsf
+
+				--si le random non tuilé ne fonctionne pas, tant pis, on prend au pif
+				if not foundCsf then
+					callsign_flight = math.random(1, 9)
+					testCall = Callsign_west[category][callSign_west_counter[category]]..callsign_flight
+					callSignFlight[testCall] = true
+				end
+
+			end
+
+			callsign_nb = callSign_west_counter[category]
+			_name = Callsign_west[category][callSign_west_counter[category]] .. callsign_flight .. aircraft_n
+
+		end
+
+		callsign = {
+			[1] = callsign_nb,
+			[2] =  callsign_flight,
+			[3] =  aircraft_n,
+			name = _name
+		}
+	end
+
+    return callsign
+end
+
+local function getCallsignEast(aircraft_n)
+    -- Toute la logique actuelle pour l'est ici
+    -- Retourne le nombre attendu par DCS pour l'est
+    
+		if aircraft_n == 1 then
+			callsign_east_counter = callsign_east_counter + 1
+		end
+		local callsign = 90 + callsign_east_counter * 10 + aircraft_n
+
+		-- callsign = {
+		-- 	[3] = hundreds,
+		-- 	[2] = tens,
+		-- 	[1] = ones,
+		-- 	name = ""
+		-- }
+
+    return callsign
+end
+
+local function getCallsign(country, flight_f, task, flight_n, aircraft_n )
+	--["callsign"] = getCallsign(flight[f].country, flight[f], flight[f].task, f, n),
+
+    local style = IsWesternCountry(country) and "west" or "east"
+    if style == "west" then
+        local category = "generic"
+        if task == "AWACS" then category = "AWACS"
+        elseif task == "Refueling" then category = "tanker" end
+        return getCallsignWest(category, flight_f, flight_n, aircraft_n)
+    else
+        return getCallsignEast(aircraft_n)
+    end
+end
+
+local function getCallsignOLD(country, flight_n, aircraft_n, task, flight_)
 	local style
 	local callsign_flight = 0
 
@@ -424,14 +606,6 @@ local function getCallsign(country, flight_n, aircraft_n, task, flight_)
 			end
 
 			local nb_unite
-
-			-- local ii = 1
-			-- repeat
-			-- 	nb_unite = math.random(2, 9)
-			-- 	testCall = Callsign_west[category][Callsign_west_counter[category]]..callsign_flight
-			-- 	testCallFlightUnite = testCall..nb_unite
-			-- 	ii = ii + 1
-			-- until ii > 100 or not callSignFlightUnite[testCallFlightUnite]
 
 			-- les tanker ne fonctionne pas avec Texaco 4.5
 			-- mais Texaco 45.1
@@ -4564,7 +4738,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					{
 						["alt"] = waypoints[1].alt,
 						["heading"] = 0,
-						["callsign"] = getCallsign(flight[f].country, f, n, flight[f].task, flight[f]),
+						["callsign"] = getCallsign(flight[f].country, flight[f], flight[f].task, f, n),
 						["psi"] = 0,
 						["livery_id"] = flight[f].livery,
 						["type"] = flight[f].type,
@@ -7278,7 +7452,7 @@ for cv, sixPack in pairs(testSixPack) do
 								if group.units[1].type == "S-3B Tanker" or group.units[1].type == "E-2C"  then						-- cet endroit est bloqué par DCS pour ces 2 avions
 									AF_spawnOn("catapult", group.name)
 									modify_activate_group_time(group, -1, debug.getinfo(1).currentline)								--supprime le triger activate (vraiment?)
-									modify_set_ai_task(group, -1, debug.getinfo(1).currentline) --supprime le triger start(vraiment?)
+									-- modify_set_ai_task(group, -1, debug.getinfo(1).currentline) --supprime le triger start(vraiment?)
 									group['tasks'] = {}
 									break
 								end
