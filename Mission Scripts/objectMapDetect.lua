@@ -1,4 +1,10 @@
-
+-- script for campaignMakers,
+-- file to add to a simple mission (using the mission editor), add circles with a future target name, and the elements will be added to a file in targetList format
+-------------------------------------------------------------------------------------------------------
+-- last modification:  
+if not versionDCE then versionDCE = {} end
+versionDCE["Mission Scripts/objectMapDetect.lua"] = "1.1.3"
+-------------------------------------------------------------------------------------------------------
 
 local acceptedTargetTypes = {
 	['ULAK001']= "Warehouse",
@@ -134,7 +140,7 @@ local function checkZone(searchZone,zoneName)
 		if acceptedTargetTypes[objType] then
             local typeNameDCE = zoneName .. " " .. acceptedTargetTypes[objType]
 			
-            if not not tabByNameIdx[objName] then
+            if not tabByNameIdx[objName] then
                 tabByNameIdx[objName] = true
 				
 				if not protoTargetList[zoneName] then
