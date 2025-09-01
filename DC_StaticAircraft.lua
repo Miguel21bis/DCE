@@ -206,7 +206,7 @@ for side,unit in pairs(oob_air) do												--Iterate through sides in oob_air
 						end
 					
 						-- local NbParkPossible  = db_airbases[unit[n].base].LimitedParkNb - nb
-						local NbParkPossible  = db_airbases[unit[n].base].LimitedParkNb - nb
+						local NbParkPossible = db_airbases[unit[n].base].LimitedParkNb - nb
 
 						if unassigned > NbParkPossible then
 							unassigned = NbParkPossible
