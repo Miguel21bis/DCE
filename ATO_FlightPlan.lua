@@ -1253,18 +1253,34 @@ function SpawnOn(spawn, waypoints, group, Pn, spawnTime, from, flight, f, role)
 		-- remet l'horaire d'origine sur activate
 		modify_activate_group_time(group, spawnTime, debug.getinfo(1).currentline)
 
-		--supprime les avions initialement prévu sur le pont, puisque maintenant, ils spawn en vol
-		local remove_n
-		if testDeckPlace and  testDeckPlace[flight[f].base] then
-			for n, deck in pairs(testDeckPlace[flight[f].base]) do
-				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP RemovetestDeckPlace n "..tostring(n).." "..tostring(deck["groupName"])) end
+		--supprime les avions initialement prévu sur le pont, puisque maintenant, ils spawnent en vol
+		-- local remove_n
+		-- if testDeckPlace and testDeckPlace[flight[f].base] then
+		-- 	for n, deck in pairs(testDeckPlace[flight[f].base]) do
+		-- 		if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP RemovetestDeckPlace n "..tostring(n).." "..tostring(deck["groupName"])) end
 
-				if deck["groupName"] == flight[f].name then
-					remove_n = n-1
-					break
+		-- 		if deck["groupName"] == flight[f].name then
+		-- 			remove_n = n-1
+		-- 			break
+		-- 		end
+		-- 	end
+		-- 	table.remove(testDeckPlace[flight[f].base], remove_n)
+		-- end
+
+
+		--supprime les avions initialement prévu sur le pont, puisque maintenant, ils spawnent en vol
+		if testDeckPlace and testDeckPlace[flight[f].base] then
+			local deckList = testDeckPlace[flight[f].base]
+			if deckList then
+				for i = #deckList, 1, -1 do
+					if deckList[i].groupName == flight[f].name then
+						if debugStart then
+							debugTxt_AtoFP = debugTxt_AtoFP .. "\n" .. ("AtoFP RemovetestDeckPlace i " .. tostring(i) .. " " .. tostring(deckList[i].groupName))
+						end
+						table.remove(deckList, i)
+					end
 				end
 			end
-			table.remove(testDeckPlace[flight[f].base], remove_n)
 		end
 
 
