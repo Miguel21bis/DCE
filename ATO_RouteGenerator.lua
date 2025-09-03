@@ -132,7 +132,7 @@ local function createPolyAltiHelico(unitHelico, hHover)
 
 end
 
-function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, multipackmax, unit, idDraftPackage)							--enemy: "blue" or "red"; time: "day" or "night" -- Miguel21 modification M06 : helicoptere playable (ajout variable helico)
+function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, multipackmax, unit, idDraftPackage, viaFARP)							--enemy: "blue" or "red"; time: "day" or "night" -- Miguel21 modification M06 : helicoptere playable (ajout variable helico)
 
 	local i_timmer01 = 0
 	local route = {}																									--table to store the route to be built
@@ -997,14 +997,27 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 		if  debugRoute and afterInter >= afterInterB + deltaT  then print() print("|Split: "..afterInter - afterInterB.." |") end
 		local afterInterB = os.clock()
 
+		if is_helicopter and viaFARP then
+			print("AtoRG viaFARP x "..tostring(viaFARP.x).." y "..tostring(viaFARP.y).." h "..tostring(viaFARP.h) )
+		end
 		-- --altitude plus basse pour helicopter -- Miguel21 modification M06 : helicoptere playable 
 		-- if is_helicopter then delta_h = 50 else delta_h = 1524 end
 
 		--build complete route if virtual air base, in the AIR ;), Spawn
 		-- Miguel21 modification M16.d : SpawnAir B1b & B-52 need BaseAirStart = true in db_aibase
 		if basePoint.BaseAirStart == true then
+			
 			table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Spawn", alt = profile.hCruise })
 			table.insert(route, {x = joinPoint.x, y = joinPoint.y, id = "Join", alt = profile.hCruise, hCruiseREF = profile.hCruiseREF})
+		
+		elseif is_helicopter and viaFARP then
+			--build complete route
+			table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Taxi", alt = basePoint.h})
+			table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Departure", alt = basePoint.h })		--+ delta_h
+			table.insert(route, {x = assemblyPoint.x, y = assemblyPoint.y, id = "Assemble", alt = profile.hCruise })
+			table.insert(route, {x = joinPoint.x, y = joinPoint.y, id = "Join", alt = profile.hCruise , hCruiseREF = profile.hCruiseREF})
+
+			table.insert(route, {x = viaFARP.x, y = viaFARP.y, id = "LandRefuel", alt = viaFARP.h })		--+ delta_h
 		else
 			--build complete route
 			table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Taxi", alt = basePoint.h})
@@ -1686,7 +1699,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 
 				for n = 1, #route - 1 do																				--iterate through all route segements
 					i_timmer01 = i_timmer01 +1
-
+--TODO alt est mal renseigné, je
 					if route[n + 1].alt <= alt then																		--if route segement is in threat altitude
 						local distance = GetTangentDistance(route[n], route[n + 1], threat[t])							--distance of route segment to threat
 						if distance < threat[t].range then																--if route segment is in range of threat						

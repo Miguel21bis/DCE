@@ -1,13 +1,14 @@
 --To create the Air Tasking Order
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  cleancode_d adjustment_Ab M11A_bk Debug_t
+-- last modification:  M90_a
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_Generator.lua"] = "1.20.134"
+versionDCE["ATO_Generator.lua"] = "1.21.135"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_d				(d springCleaning)
 -- adjustment_Ab			(b target priority (again))(low Red flight)(score & sort)(a country table)(z target priority)(y nb of Cap & Firepower)(v: depreciated variable capability)(u score & strikeOnlyWithEscorte)(minscore)(s tasks table)(op ne donne pas tout en CAP)(o info loadout)(N ne donne pas tout en CAP)(lM: MP) (ghi:donne une alti aléatoire) (f:altitude en fonction diff entre role)(e: random loadout temp)(cd:support équitable entre escadron)(b: TASK Coef)(a: escort mandatory or not)
 -- Debug_t					(t boost priority in MP)(s no Choice Plane MP with SEAD)(r priority again)(q sort C broken)(p multipack broken)(o #Draft_sorties)(n db_loadouts)(m strikeOnlyWithEscorte)(l AltitudeFloorNew)(k too tanker&Awacs)(jk number entre 0 et1)(i info2000)(h:reecriture loadout_eligible) (f:interdit l'escorte avion/helico)(de:correction targetName)(c: mauvaise insertion dans la base)(b: haut score)(a: Fin de campagne)
+-- modification M90_a		flight plan via a FARP to increase range
 -- modification M68_a		add AFAC task
 -- modification M61_a		SAR
 -- modification M56_b		AssignCallnameSquad (b: callsignId)
@@ -370,6 +371,25 @@ end
 
 local function debugLog(message)
     table.insert(debugLogs, message)
+end
+
+BaseFARP = {
+	blue = {},
+	red = {}
+}
+for baseName, base in pairs(db_airbases) do
+
+	if base.type and base.type == "FARP" or string.find(baseName, "FARP") then
+		--get airbase position
+		local farpData = {																				--get the x-y coordinates of the airbase where the unit is located
+			x = base.x,
+			y = base.y,
+			h = base.elevation,
+			BaseAirStart = base.BaseAirStart,
+			name = baseName,
+		}
+		table.insert(BaseFARP[base.side], farpData)
+	end
 end
 
 
@@ -1006,7 +1026,8 @@ for side, units in pairs(oob_air) do
 																					x = db_airbases[unit.base].x,
 																					y = db_airbases[unit.base].y,
 																					h = db_airbases[unit.base].elevation,
-																					BaseAirStart = db_airbases[unit.base].BaseAirStart
+																					BaseAirStart = db_airbases[unit.base].BaseAirStart,
+																					name = db_airbases[unit.base].base,
 																				}
 
 																				local multipack = 1
@@ -1036,6 +1057,9 @@ for side, units in pairs(oob_air) do
 																						debugLog(draftId.." AtoG passe A_16 "..tostring(variant).." "..tostring(Daytime).." Befor variant Condition "..target_name)
 																					end
 
+																					local viaFARP = nil
+
+																					--create draft sortie for this target, loadout and route variant
 																					while variant > 0 do
 																						draftId = draftId + 1
 
@@ -1089,28 +1113,52 @@ for side, units in pairs(oob_air) do
 																								-- print("AtoG No target position "..tostring(target_name))
 																							else
 																								toTarget = GetDistance(airbasePoint, target)												--direct distance to target
+																							
+																								if IsHelicopter[unit.type] and toTarget > unit_loadouts[l].range then
+																									for baseN, FARP in pairs(BaseFARP[side]) do
+																										local toFARP = GetDistance(airbasePoint, FARP)
+
+																										if toFARP < (unit_loadouts[l].range * 2) then
+
+																											local farpToTarget = GetDistance(FARP, target)
+
+																											if farpToTarget <= unit_loadouts[l].range and farpToTarget < toTarget then
+																												if IsHelicopter[unit.type] then print("passe E ") end
+
+																												toTarget = farpToTarget
+																												viaFARP = FARP
+																												-- print("AtoG A_24a Helicopter via FARP "..tostring(FARP.name).." toFARP: "..tostring(toFARP).." | farpToTarget: "..tostring(farpToTarget).." | "..tostring(unit.type).." "..tostring(unit.name).." to "..tostring(target_name))
+																												-- print("AtoG A_24b Helicopter via FARP toTarget "..tostring(toTarget).." <= ? unit_loadouts[l].range: "..tostring(unit_loadouts[l].range))
+																											end
+																										end
+																										
+																									end
+																									
+																							
+																								end
+																							
 																							end
 
 
 																							if isDebugModeA then
 																								debugLog(draftId.." AtoG A_25 "..tostring(toTarget).." || LoadoutUnitRange: "..tostring(unit_loadouts[l].range).." "..tostring(unit_loadouts[l].name)
 																								.."\n".."______________toTarget "..tostring(toTarget).." <=? "..tostring(unit_loadouts[l].range)
-																								.."\n".."______________minrange? "..tostring(unit_loadouts[l].minrange)
-																								.."\n".."______________toTarget * 1.5 "..tostring(toTarget * 1.5).." >minrange? "..tostring(unit_loadouts[l].minrange))
+																								)
 																							end
 
 																							tempDebug = "\n"..("AtoG A_26                    AtoG toTarget "..tostring(toTarget).." <=?? unit_loadouts[l].range: "..tostring(unit_loadouts[l].range) )
-																							if toTarget <= unit_loadouts[l].range and (unit_loadouts[l].minrange == nil or toTarget * 1.5 > unit_loadouts[l].minrange) then	--basic feasibility check of range before performance intensive route calculations are done
+																							
+																							if toTarget <= unit_loadouts[l].range then		--basic feasibility check of range before performance intensive route calculations are done
 																								tempDebug = tempDebug.."\n"..("                    AtoG variant" )
 																								if variant == 1 or variant == 4 then
 																									-- print("                    AtoG _1_4_route" )
 																									tempDebug = tempDebug.."\n"..("AtoG  A_27a day")
-																									route = GetRoute(airbasePoint, target, unit_loadouts[l], enemy, task, "day", r, multipack, unit, draftId)	or {}		--get the best route to this target at day-- modification M06 : helicopter playable(ajout variable helico pour generer une route )
+																									route = GetRoute(airbasePoint, target, unit_loadouts[l], enemy, task, "day", r, multipack, unit, draftId, viaFARP)	or {}		--get the best route to this target at day-- modification M06 : helicopter playable(ajout variable helico pour generer une route )
 																									-- print("                    AtoG      route_1_4_" )
 																								elseif variant == 2 or variant == 3 then
 																									-- print("                    AtoG _2_3_route" )
 																									tempDebug = tempDebug.."\n"..("AtoG  A_27b night")
-																									route = GetRoute(airbasePoint, target, unit_loadouts[l], enemy, task, "night", r, multipack, unit)	or {}	--get the best route to this target at night-- modification M06 : helicopter playable
+																									route = GetRoute(airbasePoint, target, unit_loadouts[l], enemy, task, "night", r, multipack, unit, viaFARP)	or {}	--get the best route to this target at night-- modification M06 : helicopter playable
 																									-- print("                    AtoG      route_2_3_" )
 																								end
 																							end
@@ -1126,13 +1174,11 @@ for side, units in pairs(oob_air) do
 																						if isDebugModeA then
 																							debugLog(tempDebug..draftId.."\n".."AtoG passe A_28d "
 																							.."\n".."______________route.lenght "..tostring(route.lenght).." <=? "..tostring(unit_loadouts[l].range * 2)
-																							.."\n".."______________minrange? "..tostring(unit_loadouts[l].minrange)
-																							.."\n".."______________route.lenght "..tostring(route.lenght).." >? "..tostring(unit_loadouts[l].minrange).." *2"
 																							.."\n".."______________altiPass? "..tostring(altiPass)
 																							.."\n".."______________altiPass? target.z "..tostring(target.z).." >? hHover "..tostring(unit_loadouts[l].hHover))
 																						end
 
-																						if route and route.lenght and route.lenght <= unit_loadouts[l].range * 2 and (unit_loadouts[l].minrange == nil or route.lenght > unit_loadouts[l].minrange * 2) and altiPass then		--if sortie route lenght is within range of aircraft-loadout
+																						if route and route.lenght and route.lenght <= unit_loadouts[l].range * 2  and altiPass then		--if sortie route lenght is within range of aircraft-loadout
 
 																							if isDebugModeA then
 																								debugLog(draftId.." AtoG passe A_29 After Range Condition | firepower.max: "..tostring(target.firepower.max).." / loadoutFirepower "..tostring(unit_loadouts[l].firepower))
@@ -2048,7 +2094,6 @@ for sideName, draftT in pairs(Draft_sorties) do
 
 														if weather_eligible or overRideMP_B then												--continue of this loadout is eligible for weather
 
-
 															TrackPlayability(unit.player, "escort_weather")												--track playabilty criterium has been met								
 															--get airbase position
 															local airbasePoint = {																	--get the x-y coordinates of the airbase where the unit is located
@@ -2061,12 +2106,11 @@ for sideName, draftT in pairs(Draft_sorties) do
 
 															if isDebugModeB then
 																debugLog(draft.id.." AtoG II passe B_16 weather_eligible route.lenght: "..tostring(route.lenght).. " <= "..tostring(unit_loadouts[l].range * 2)
-																.." (loadouts: )" ..tostring(unit_loadouts[l].range)..") loadoutName: "..tostring(unit_loadouts[l].name)
-																.."unit_loadouts[l].minrange: "..tostring(unit_loadouts[l].minrange))
+																.." (loadouts: )" ..tostring(unit_loadouts[l].range)..") loadoutName: "..tostring(unit_loadouts[l].name))
 															end
 
 
-															if route.lenght <= unit_loadouts[l].range * 2 and (unit_loadouts[l].minrange == nil or route.lenght > unit_loadouts[l].minrange * 2) then		--escort route lenght is within range capability of loadout
+															if route.lenght <= unit_loadouts[l].range * 2 then		--escort route lenght is within range capability of loadout
 																TrackPlayability(unit.player, "escort_target_range")									--track playabilty criterium has been met
 
 																local debuGenTxt1545 = "\n"..(tostring(draft.id).." AtoG II passe B_17  ")

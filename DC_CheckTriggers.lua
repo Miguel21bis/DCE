@@ -1863,51 +1863,7 @@ Action = {}
 		--cherche la valeur UnitID la plus haute
 		local CurrentUnitId = 0
 		local CurrentGroupId = 0
-		-- for Oside_name, Oside in pairs(oob_ground) do																--iterate through sides
-		-- 	for Ocountry_n, Ocountry in pairs(Oside) do															--iterate through countries				
-		-- 		for Ocategory, Ogroup in pairs(Ocountry) do
-		-- 			if  type(Ogroup) == "table" then
-		-- 				for Ngroup, O_group in pairs(Ogroup) do
-		-- 					for g = 1, #O_group do
-		-- 						if O_group[g].groupId > CurrentGroupId then
-		-- 							CurrentGroupId = O_group[g].groupId
-		-- 						end
-		-- 						for u = 1, #O_group[g].units do											--iterate through units								
-		-- 							if O_group[g].units[u].unitId > CurrentUnitId then
-		-- 								CurrentUnitId = O_group[g].units[u].unitId
-		-- 							end
-		-- 						end
-		-- 					end
-		-- 				end
-		-- 			end
-		-- 		end
-		-- 	end
-		-- end
-
-		-- -- print("DcCT AA CurrentGroupId: "..CurrentGroupId.." CurrentUnitId: "..CurrentUnitId)
-
-		-- for side_name, side in pairs(mission.coalition) do																--iterate through sides
-		-- 	for country_n, country_ in pairs(side.country) do															--iterate through countries
-		-- 		for categorie, categorie_ in pairs(country_) do
-		-- 			if type(categorie_) == "table" and categorie_.group then
-		-- 				for _group, group in pairs(categorie_) do
-		-- 					for groupN, group_ in pairs(group) do
-		-- 						if group_.groupId > CurrentUnitId then
-		-- 							CurrentUnitId = group_.groupId
-		-- 						end
-		-- 						for unitN, unit in ipairs(group_.units) do
-		-- 							if unit.unitId > CurrentUnitId then
-		-- 								CurrentUnitId = unit.unitId
-		-- 							end
-		-- 						end
-		-- 					end
-		-- 				end
-		-- 			end
-		-- 		end
-		-- 	end
-		-- end
-		-- -- print("DcCT BB CurrentGroupId: "..CurrentGroupId.." CurrentUnitId: "..CurrentUnitId)
-
+	
 		-- local function findGroup(Group_name, category)
 		local function findGroup(groupName, sideName, countryId, category)
 			for O_sideName, O_countries in pairs(oob_ground) do																--iterate through sides
@@ -2022,7 +1978,7 @@ Action = {}
 		for sideName, countries in pairs(tmp_ground) do
 			for countryN, country in pairs(countries) do
 				for category, class in pairs(country) do
-					if type(class) =="table" and class.group then
+					if type(class) == "table" and class.group then
 						for goupN, groupData in pairs(class.group) do
 							local groupname = groupData.name
 
@@ -2041,22 +1997,35 @@ Action = {}
 									movedXY(unit, category )
 								else
 									unit.unitId = GenerateIDUnit()
-									-- print("DcCT  vehicle CurrentUnitId: "..CurrentUnitId.." name: "..unit.name)
 
-									--active le wareHouse de la FARP
-									-- if unit.category == "Heliports" then
-									-- 	if Data_warehouses then
-                                    --     	warehouses[unit.unitId] = Data_warehouses
-									-- 		camp.needWarehouse = camp.needWarehouse or {}
-									-- 		camp.needWarehouse[unit.unitId] = true
-									-- 		print("DcCT FARP detected, warehouse["..unit.unitId.."] activated "..unit.name)
-									-- 	end
-
-									-- end
+									if unit.category == "Heliports" then
+										db_airbases[groupData.name] = {
+											["airdromeId"] = unit.unitId,
+											["side"] = sideName,
+											["LimitedParkNb"] = 4,
+											["x"] = unit.x,
+											-- ["TACAN"] = "40X",
+											["divert"] = false,
+											["inactive"] = false,
+											["elevation"] = groupData.route.points[1].alt,
+											-- ["code"] = 
+											-- {
+											-- 	["ICAO"] = "LOND",
+											-- },
+											["baseAlive"] = 100,
+											["runwayAlive"] = 100,
+											["ATC_frequency"] = 
+											{
+												[1] = unit.heliport_frequency,
+											},
+											["y"] = unit.y,
+											["name"] = groupData.name,
+											
+										}
+									end
+									
 								end
 							end
-
-							-- print("DcCT B groupAlreadyExist? "..tostring(groupAlreadyExist))
 
 							if not groupAlreadyExist then
 								groupData.groupId = GenerateIDGroup()

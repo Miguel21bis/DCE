@@ -521,7 +521,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 			-- for targetN, target in ipairs(targets) do
 				if targets[i].elements then
 					for elementN, element in ipairs(targets[i].elements) do
-						if element.status and (element.status == 'rescued' or element.status == "POW") then
+						if element.status and (element.status == 'rescued' or element.status == "POW" or element.status == "error") then
 							-- _affiche(element, "element PW or Rescued DcUT ")
 
 							table.remove(targets[i].elements, elementN)

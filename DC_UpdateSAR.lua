@@ -431,13 +431,18 @@ end
 
 local timeActualCampaignSecond = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month}
 
-if camp_ZoneSAR and camp_ZoneSAR ~= nil   then--and flag_MainAcceptMission
+if camp_ZoneSAR and camp_ZoneSAR ~= nil then
     for sideName, sideSAR in pairs(camp_ZoneSAR) do
         for ZoneName, zone in pairs(sideSAR) do
 
             for Nelement, element in ipairs(zone) do
                 if element.status ~= "rescued" and element.embarked then
                     element.status = "rescued"
+                end
+                
+                local lowerName = string.lower(element.name)
+                if string.find(lowerName, "pedro") and  string.find(lowerName, "damaged")  then
+                    element.status = "error"
                 end
 
                 -- if element.initiatorPilotName and element.initiatorPilotName == "Rayak_71_CEF" then
@@ -1061,7 +1066,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
     for sideName, sideSAR in pairs(camp_ZoneSAR) do
         for ZoneName, zone in pairs(sideSAR) do
             for Nelement, element in ipairs(zone) do
-                if element.status == "rescued" or element.status == "POW" then
+                if element.status == "rescued" or element.status == "POW" or element.status == "error" then
                     
                     local result = DeleteSoldierAliasPilot(element)
                     
