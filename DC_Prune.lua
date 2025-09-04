@@ -208,17 +208,17 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 
 	-- puis dans keepGroundUnit :
 	elseif isPruneKeyword(lowCaseName) then
-		if string.find(lowCaseName, "vc_") then
+		-- if string.find(lowCaseName, "vc_") then
 
-			-- Exception : ne prune pas si c'est VC_Khe-Sanh
-			if string.find(unit.name, "VC_Khe%-Sanh") then
-				-- print("DC_P_T9 ---K----> Keep VC: "..unit.name)
-				return true -- keep
-			end
+		-- 	-- Exception : ne prune pas si c'est VC_Khe-Sanh
+		-- 	if string.find(unit.name, "VC_Khe%-Sanh") then
+		-- 		-- print("DC_P_T9 ---K----> Keep VC: "..unit.name)
+		-- 		return true -- keep
+		-- 	end
 
-			-- print("DC_P_T2 -P----P--> Prune vc_: "..lowCaseName)
-			return false -- Prune
-		end
+		-- 	-- print("DC_P_T2 -P----P--> Prune vc_: "..lowCaseName)
+		-- 	return false -- Prune
+		-- end
 
 		-- Vérifie la proximité d'un PointOfInterest
 		for nPOI, POI in pairs(PointOfInterest) do
@@ -241,7 +241,7 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 		-- print("DC_P_ keep scud")
 		return true -- keep scud
 	elseif  string.find(string.lower(unit.name),"_pilot_") then
-		-- print("DC_P_ keep scud")
+		print("DC_P_ keep _pilot_")
 		return true -- keep ejected _pilot_
 	elseif  ( string.find(string.lower(unit.name),"ewr") or string.find(string.lower(unit.name),"fps") or string.find(string.lower(unit.name),"FuMG") or string.find(string.lower(unit.name),"FuSe") )   then
 		-- print("DC_P_ keep EWR")

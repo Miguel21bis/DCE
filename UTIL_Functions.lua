@@ -36,9 +36,6 @@ MinPercentDestroyed = 95		----variable pour destructions batiment de DCS en pour
 RayonDamaged = 50				----variable pour destructions batiment de DCS en metres
 
 
-local idGroupCounter = 3000
-local idUnitCounter = 3000
-
 Brief = {
 	red = {},
 	blue = {},
@@ -92,6 +89,11 @@ Package_freq = {															--table to store frequencies assigned to packages
 		["HF"] = {},
 	},
 }
+
+
+
+local idGroupCounter = 3000
+local idUnitCounter = 3000
 
 
 --function to return txt whith carriage return
