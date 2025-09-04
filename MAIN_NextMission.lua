@@ -695,12 +695,12 @@ local targetListRequired = {}
 
 if camp.client then
     for clientN, client in pairs(camp.client) do
-        if client.target and client.target.attributes and client.target.attributes["attributes"][1] and client.target.attributes["attributes"][1] == "Structure" then
+        if client.target and client.target.attributes and client.target.attributes[1] and client.target.attributes[1] == "Structure" then
 			table.insert(targetListRequired, client.target.name)
         end
     end
 elseif camp.player then
-    if camp.player.target and camp.player.target.attributes and camp.player.target.attributes["attributes"][1] and camp.player.target.attributes["attributes"][1] == "Structure" then
+    if camp.player.target and camp.player.target.attributes and camp.player.target.attributes[1] and camp.player.target.attributes[1] == "Structure" then
 		table.insert(targetListRequired, camp.player.target.name)
     end
 end
