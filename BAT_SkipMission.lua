@@ -320,12 +320,19 @@ if input == "y" or input == "yes" then
 						local Ckey = 0
 
 						for key, target in ipairs(targetlist[side]) do
-							if target.inactive ~= true and target.ATO
-							and target.task == "CSAR" and target.type == "Ejected Pilot"
+							if target.inactive ~= true and target.ATO and target.task == "CSAR" and target.type == "Ejected Pilot"
 							then
 								Ckey = key
-								io.write(Ckey.." "..side.." "..tostring(target.titleName).."  "..tostring(target.alive).."%  X"..tostring(target.priority).."\n")
+								io.write(Ckey.." "..side.." "..tostring(target.titleName).."\n")
 								tabIndex[Ckey] = target
+								
+								for ejectPilotN, ejectPilot in ipairs(target.elements) do
+									if ejectPilot.status == "EVAC_possible" then
+										local txtSup = ""
+										if ejectPilot.inTheEnemyCamp then txtSup = "in the enemy camp" end
+										io.write("          - - - - >"..tostring(ejectPilot.MGRS_Chute_10KM).." : "..tostring(ejectPilot.name).." "..txtSup.."\n")
+									end
+								end
 							end
 						end
 

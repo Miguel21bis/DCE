@@ -221,15 +221,17 @@ function AddSoldierAliasPilot(element)
     end
 end
 
-function DeleteSoldierAliasPilot(element)
+function DeleteSoldierAliasPilot(ejectedPilot)
     local found = false
+    local foundTarget = false
+
     for coal_name, coal in pairs(oob_ground) do
         for country_n, country in ipairs(coal) do
-            if string.lower(country.name) == string.lower(element.country) then
+            if string.lower(country.name) == string.lower(ejectedPilot.country) then
                if country.vehicle then
-                    local found = false
+
                     for group_n, group in ipairs(country.vehicle.group) do
-                        if group.units[1].name == element.name then
+                        if group.units[1].name == ejectedPilot.name then
                             table.remove(country.vehicle.group, group_n)
                             found = true
                             break
@@ -241,7 +243,31 @@ function DeleteSoldierAliasPilot(element)
         end
         if found then break end
     end
-    return
+
+    for side, targets in pairs(targetlist)	 do
+        for i = #targets, 1, -1 do
+            if targets[i].elements then
+                for elementN, element in ipairs(targets[i].elements) do
+                    if element.name == ejectedPilot.name then
+
+                        table.remove(targets[i].elements, elementN)
+                        foundTarget = true
+                        --supprime la zone SAR s'il n'y a plus d'élément dedans
+                        if targets[i].elements == nil or #targets[i].elements == 0 then
+                            table.remove(targets, i)
+                        end
+
+                        break
+                    end
+                end
+            end
+            if foundTarget then break end
+        end
+        if foundTarget then break end
+    end
+
+
+    return found, foundTarget
 end
 
 if not camp_ZoneSAR or camp_ZoneSAR == nil or not camp_ZoneSAR.blue or camp_ZoneSAR.blue == nil  then
@@ -1045,9 +1071,9 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
             for Nelement, element in ipairs(zone) do
                 if element.status == "rescued" or element.status == "POW" or element.status == "error" then
                     
-                    local result = DeleteSoldierAliasPilot(element)
+                    local result, resultTarget = DeleteSoldierAliasPilot(element)
                     
-                    if not result then
+                    if not result and not resultTarget then
                         print("DcUS GG (rescued or POW) No pilot to delete")
                     else
                     --    print("DcUS GG Deleted pilot: "..tostring(result))
