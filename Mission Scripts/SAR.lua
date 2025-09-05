@@ -879,23 +879,18 @@ function CheckImmediatSAR(ejectedPilot)
 
 		local t = timer.getTime()
 
+		ejectedPilot.type = "ejectedPilot"
+
 		ejectedPilot.x2d = ejectedPilot.x
 		ejectedPilot.y2d = ejectedPilot.z
 		ejectedPilot.z2d = land.getHeight({x = ejectedPilot.x, y = ejectedPilot.z})
-		-- ejectedPilot.name = "Mis"..camp.mission.."_M"..camp.date.month.."_D"..camp.date.day.."_H"..camp.date.hour.."_Mn"..camp.date.minute.."_Pilot_"..ejectedPilot.initiator.."_Nb"..tostring(ejectedPilot.SumejectedPilotDay)
 
-		-- if ejectedPilot.initiatorPilotName then
-		-- 	ejectedPilot.name = "Mis"..camp.mission.."_Pilot_"..ejectedPilot.initiatorPilotName.."_Nb"..tostring(ejectedPilot.SumejectedPilotDay)
-		-- else
-		-- 	ejectedPilot.name = "Mis"..camp.mission.."_Pilot_"..ejectedPilot.initiator.."_Nb"..tostring(ejectedPilot.SumejectedPilotDay)
-		-- end
-
-		-- ejectedPilot.name = ejectedPilot.name:gsub('[%p%c%s]', '_')
-
-		ejectedPilot.year = camp.date.year
-		ejectedPilot.month = camp.date.month
-		ejectedPilot.day = camp.date.day
-		ejectedPilot.hour = camp.date.hour
+        ejectedPilot.date = {
+			hour = camp.date.hour,
+			month = camp.date.month,
+            day = camp.date.day,
+			year = camp.date.year
+		}
 
 
 		ejectedPilot.nameId = ejectedPilot.initiatorMissionID
@@ -911,7 +906,12 @@ function CheckImmediatSAR(ejectedPilot)
 		ejectedPilot.embarked = false
 		ejectedPilot.landingPossible = false
 
-		ejectedPilot.initChoicePOW = false
+        ejectedPilot.dataPOW = {
+            initChoicePOW = false,
+			ejectNbDay = 0,
+			POW_nextDayCheck = 2,
+			PowDayMax = math.random(3, 15),
+		}
 
 		ejectedPilot.radio_start = 0
 

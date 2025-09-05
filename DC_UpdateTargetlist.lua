@@ -341,102 +341,35 @@ if Debug.checkTargetName and (Firstmission_flag or Skipmission_flag) then
 	tabTemplates = TabFileTemplate()
 end
 
--- box = {
-	-- ["min_x"] = 9999999,
-	-- ["min_y"] = 9999999,
-	-- ["max_x"] = -9999999,
-	-- ["max_y"] = -9999999,
--- }
--- box = {	--caucasus
-	-- ["min_x"] = -488954,
-	-- ["min_y"] = 199450,
-	-- ["max_x"] = 62058,
-	-- ["max_y"] = 942610,
--- }
-
--- local box = {	--gulf
--- 	["min_x"] = -289090,
--- 	["min_y"] = -840909,
--- 	["max_x"] = 790909,
--- 	["max_y"] = 377272,
--- }
-
--- for coal_name,coal in pairs(oob_ground) do										--go through sides(red/blue)	
--- 	for country_n,country in ipairs(coal) do									--go through countries
--- 		if country.vehicle then													--country has vehicles
--- 			for group_n,group in ipairs(country.vehicle.group) do				--go through groups
--- 				if group.x < box.min_x then
--- 					box.min_x = group.x
--- 				end
--- 				if group.x  > box.max_x then
--- 					box.max_x = group.x
--- 				end
--- 				if group.y <box. min_y then
--- 					box.min_y = group.y
--- 				end
--- 				if group.y  > box.max_y then
--- 					box.max_y = group.y
--- 				end
--- 			end
--- 		end
-
--- 		if country.ship then													--country has ships
--- 			for group_n,group in ipairs(country.ship.group) do					--go through groups
--- 				if group.x < box.min_x then
--- 					box.min_x = group.x
--- 				end
--- 				if group.x  > box.max_x then
--- 					box.max_x = group.x
--- 				end
--- 				if group.y <box. min_y then
--- 					box.min_y = group.y
--- 				end
--- 				if group.y  > box.max_y then
--- 					box.max_y = group.y
--- 				end
--- 			end
--- 		end
--- 	end
--- end
-
--- for base_name,base in pairs(db_airbases) do
-
--- 	if base.x and base.x ~= 9999999999 then
--- 		if base.x < box.min_x then
--- 			box.min_x = base.x
--- 		end
--- 		if base.x  > box.max_x then
--- 			box.max_x = base.x
--- 		end
--- 	end
--- 	if base.y and base.y ~= 9999999999 then
--- 		if base.y <box. min_y then
--- 			box.min_y = base.y
--- 		end
--- 		if base.y  > box.max_y then
--- 			box.max_y = base.y
--- 		end
--- 	end
--- end
-
 
 if camp_ZoneSAR and camp_ZoneSAR ~= nil then
-	for SideTL, targets in pairs(targetlist)	 do
-		if camp_ZoneSAR[SideTL] then
-			for zoneName, elementC in pairs(camp_ZoneSAR[SideTL]) do
+	for sideTL, targets in pairs(targetlist)	 do
+		if camp_ZoneSAR[sideTL] then
+			for zoneName, pilots in pairs(camp_ZoneSAR[sideTL]) do
 
-				local AltiReference = 999999
-				local referenceX = elementC[1].x2d
-				local referenceY = elementC[1].y2d
+				if not pilots[1] then
+					print("DcUT Error_04 : No pilot in this SAR zone: "..tostring(zoneName).." for side "..tostring(sideTL) )
+					os.execute 'pause'
+					break
+				end
 
-				for i = 1, #elementC do
+
+				local altiReference = 999999
+				local referenceX = pilots[1].x2d
+				local referenceY = pilots[1].y2d
+
+				for i = 1, #pilots do
+
+					--met à jour la nouvelle structure des ejectedPilot
+					PatchEjectedPilotStructure(pilots[i])
+
 
 					local ePriority = 0
-					if elementC[i].inTheEnemyCamp then
+					if pilots[i].inTheEnemyCamp then
 						ePriority = 5		--	10
-					elseif elementC[i].inTheEnemyCamp == false then
+					elseif pilots[i].inTheEnemyCamp == false then
 						ePriority = 7		--	100
-					elseif elementC[i].inTheEnemyCamp == nil then
+					elseif pilots[i].inTheEnemyCamp == nil then
 						ePriority = 6		--	50
 					end
 
@@ -447,32 +380,32 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 							if target.elements then
 
 								for elementN, element in pairs(target.elements) do
-									if elementC[i].name == element.name then
-										element.status = elementC[i].status
-										element.x = elementC[i].x2d
-										element.y = elementC[i].y2d
-										element.z = elementC[i].z2d
+									if pilots[i].name == element.name then
+										element.status = pilots[i].status
+										element.x = pilots[i].x2d
+										element.y = pilots[i].y2d
+										element.z = pilots[i].z2d
 										foundElement = true
 									end
 								end
 							end
 
 							if not foundElement then
-								table.insert(target.elements, elementC[i] )
+								table.insert(target.elements, pilots[i] )
 							end
 
 							foundZoneName = true
-							target.selectedUnitSAR = elementC[1].selectedUnitSAR
+							target.selectedUnitSAR = pilots[1].selectedUnitSAR
 							break
 						end
 					end
 
 					if not foundZoneName then
-						local newElement = elementC[i]
+						local newElement = pilots[i]
 						newElement.type = "Ejected Pilot"
-						newElement.x = elementC[i].x2d
-						newElement.y = elementC[i].y2d
-						newElement.z = elementC[i].z2d
+						newElement.x = pilots[i].x2d
+						newElement.y = pilots[i].y2d
+						newElement.z = pilots[i].z2d
 
 						local newTarget = {
 							task = "CSAR",
@@ -487,7 +420,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 							elements = {
 								[1] = newElement,
 							},
-							selectedUnitSAR = elementC[1].selectedUnitSAR
+							selectedUnitSAR = pilots[1].selectedUnitSAR
 						}
 
 						table.insert(targets,newTarget )
@@ -495,10 +428,10 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 					end
 
 					--repere le EjectedPilot ayant l'alti le plus bas
-					if elementC[i].z2d < AltiReference and (elementC[i].status == "EVAC_possible" or elementC[i].status == "MIA" ) then
-						AltiReference = elementC[i].z2d
-						referenceX = elementC[i].x2d
-						referenceY = elementC[i].y2d
+					if pilots[i].z2d < altiReference and (pilots[i].status == "EVAC_possible" or pilots[i].status == "MIA" ) then
+						altiReference = pilots[i].z2d
+						referenceX = pilots[i].x2d
+						referenceY = pilots[i].y2d
 					end
 				end
 
@@ -506,7 +439,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 					if target.titleName == zoneName then
 						target.x = referenceX
 						target.y = referenceY
-						target.z = AltiReference
+						target.z = altiReference
 					end
 				end
 			end
@@ -518,11 +451,9 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 		local findDeprecated = false
 		for side, targets in pairs(targetlist)	 do
 			for i = #targets, 1, -1 do
-			-- for targetN, target in ipairs(targets) do
 				if targets[i].elements then
 					for elementN, element in ipairs(targets[i].elements) do
 						if element.status and (element.status == 'rescued' or element.status == "POW" or element.status == "error") then
-							-- _affiche(element, "element PW or Rescued DcUT ")
 
 							table.remove(targets[i].elements, elementN)
 							findDeprecated = true
@@ -541,6 +472,42 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
 	until findDeprecated == false
 
+	--supprime les pilots de targetlist s'ils n'existent pas dans camp_ZoneSAR
+	for side, targets in pairs(targetlist)	 do
+		for i = #targets, 1, -1 do
+			if targets[i].elements then
+				for elementN, element in ipairs(targets[i].elements) do
+					if element and type(element) == 'table' and (element["SumEjectedPilotDay"] or element.type == "ejectedPilot") then
+
+						local foundPilot = false
+						for zoneName, zones in pairs(camp_ZoneSAR[side]) do
+							for pilotN, pilot in ipairs(zones) do
+								if pilot.name == element.name then
+									foundPilot = true
+									break
+								end
+							end
+							if foundPilot then break end
+						end
+
+						if not foundPilot then
+
+							print("DcUT A no found Pilot, delete him in targetList "..tostring(element.name) )
+
+							table.remove(targets[i].elements, elementN)
+
+							--supprime la zone SAR s'il n'y a plus d'élément dedans
+							if targets[i].elements == nil or #targets[i].elements == 0 then
+								print("DcUT B no found Pilot, delete the zone in targetList "..tostring(targets[i].name) )
+								table.remove(targets, i)
+							end
+						end
+
+					end
+				end
+			end
+		end
+	end
 end
 
 for side_name, targets in pairs(targetlist) do													--Iterate through all side

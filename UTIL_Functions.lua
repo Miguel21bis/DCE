@@ -4836,6 +4836,43 @@ function SecondsBetween(date1,date2)
     return deltaTimeSeconds
 end
 
+function PatchEjectedPilotStructure(pilot)
+
+	if not pilot.type then
+		pilot.type = "ejectedPilot"
+	end
+
+	if not pilot.date then
+		pilot.date = {
+			day = pilot.day,
+			month = pilot.month,
+			year = pilot.year,
+			hours = pilot.hours,
+		}
+		pilot.day = nil
+		pilot.month = nil
+		pilot.year = nil
+		pilot.hours = nil
+	end
+
+
+	if not pilot.dataPOW then
+		pilot.dataPOW = {
+			initChoicePOW = pilot.initChoicePOW or false,
+			ejectNbDay = pilot.ejectNbDay or 0,
+			POW_nextDayCheck = pilot.POW_nextDayCheck or 2,
+			PowDayMax = pilot.PowDayMax or math.random(3, 15),
+		}
+		pilot.initChoicePOW = nil
+		pilot.ejectNbDay = nil
+		pilot.POW_nextDayCheck = nil
+		pilot.PowDayMax = nil
+	end
+
+	return pilot
+
+end
+
 
 
 

@@ -313,7 +313,7 @@ for sideName, side in pairs(DCS_Side) do
 	for n=1, 2 do
 		local testFreqency = tonumber(CommonFreq[side]["UHF"][n])
 		if tonumber(CommonFreq[side]["UHF"][n]) == 243 or tonumber(CommonFreq[side]["UHF"][n]) == 121.5 then
-			print("ATTENTION GUARD Frequence Commune "..tostring(testFreqency)) os.execute 'pause'
+			DebugFLIGHT = DebugFLIGHT .. " ATTENTION GUARD Frequence Commune "..tostring(testFreqency)
 		end
 	end
 end
@@ -564,194 +564,6 @@ local function getCallsign(country, flight_f, task, flight_n, aircraft_n )
     end
 end
 
-local function getCallsignOLD(country, flight_n, aircraft_n, task, flight_)
-	local style
-	local callsign_flight = 0
-
-	local testCall = ""
-	local testCallFlightUnite = ""
-
-	local callsign_nb = 0
-	local _name = ""
-	local foundCsf = false
-
-	local westernCountry = IsWesternCountry(country)
-
-	-- if  WestCallsign[country] == "west" then
-	if westernCountry then
-		style = "west"
-	else
-		style = "east"
-	end
-
-	local callsign
-	if style == "west" then
-
-		local category
-
-		if task == "AWACS" then
-			category = "AWACS"
-		elseif task == "Refueling" then
-			category = "tanker"
-		else
-			category = "generic"
-		end
-
-		if flight_.target.predeterminedCallsign then
-
-			callsign_flight = flight_.target.predeterminedCallsign.groupNumber
-
-			if callsign_flight <= 9 then
-				callsign_flight = callsign_flight * 10
-			end
-
-			local nb_unite
-
-			-- les tanker ne fonctionne pas avec Texaco 4.5
-			-- mais Texaco 45.1
-			--dans un group de 1, l'unité doit toujours etre à 1
-			local ii = 1
-			repeat
-				nb_unite = math.random(2, 9)
-				callsign_flight = callsign_flight + nb_unite
-				testCall = Callsign_west[category][callSign_west_counter[category]]..callsign_flight
-				testCallFlightUnite = testCall..1
-				ii = ii + 1
-			until ii > 100 or not callSignFlightUnite[testCallFlightUnite]
-
-			callSignFlight[testCall] = true
-			callSignFlightUnite[testCallFlightUnite] = true
-
-			callsign_nb = callSign_west_counter[category]
-			_name = Callsign_west[category][callSign_west_counter[category]] .. callsign_flight .. 1
-
-			callsign = {
-				[1] = callsign_nb,
-				[2] =  callsign_flight,
-				[3] =  1,
-				name = _name
-			}
-
-			return callsign
-		else
-
-			--M56_b
-			--si le callsign à déjà été défini par AssignCallnameSquad() ou oob_air_init
-			if flight_ and flight_["callsign"] and flight_["callsignId"]  then
-
-				if aircraft_n == 1 then
-
-					local ii = 1
-					repeat
-						callsign_flight = math.random(1, 9)
-						testCall = flight_["callsign"]..callsign_flight
-						if not callSignFlight[testCall] then
-							callSignFlight[testCall] = true
-							flight_["callsign_flight"] = callsign_flight
-							foundCsf = true
-							break
-						end
-						ii = ii + 1
-					until ii > 30 or foundCsf
-					--si le random non tuilé ne fonctionne pas, tant pis, on prend au pif
-					if not foundCsf then
-						callsign_flight = math.random(1, 9)
-						testCall = flight_["callsign"]..callsign_flight
-						flight_["callsign_flight"] = callsign_flight
-						callSignFlight[testCall] = true
-					end
-
-				end
-
-				callsign_flight = flight_["callsign_flight"]
-				callsign_nb = flight_["callsignId"]
-				_name = flight_["callsign"] .. callsign_flight .. aircraft_n
-
-			else
-				if flight_n == 1 and aircraft_n == 1 then
-					callSign_west_counter[category] = callSign_west_counter[category] + 1
-					if callSign_west_counter[category] > #Callsign_west[category] then
-						callSign_west_counter[category] = 1
-					end
-					callsign_flight = math.random(0, 8)
-				end
-
-				if aircraft_n == 1 then
-					if not callsign_flight then
-						print()
-						print("********************ATTENTION******************")
-						print("***************Note for the Campaign Maker*****The nation of a previous aircraft misfiled in the table  conf_mod/campMod.WestCallsign or ATO_FlightPlan/country****************")
-						print("********************ATTENTION******************") os.execute 'pause'
-					end
-
-					local ii = 1
-					repeat
-						callsign_flight = math.random(1, 9)
-
-						if not Callsign_west[category] or not callSign_west_counter[category] or not Callsign_west[category][callSign_west_counter[category]] then
-
-							print("AtoFp Error GetCal..callsign: "..tostring(category))
-							_affiche(Callsign_west , "Callsign_west")
-
-							_affiche(callSign_west_counter, "Callsign_west_counter ") 
-							print("Error") os.execute 'pause'
-						end
-
-
-						testCall = Callsign_west[category][callSign_west_counter[category]]..callsign_flight
-						if not callSignFlight[testCall] then
-							callSignFlight[testCall] = true
-							foundCsf = true
-							break
-						end
-						ii = ii + 1
-					until ii > 100 or foundCsf
-
-					--si le random non tuilé ne fonctionne pas, tant pis, on prend au pif
-					if not foundCsf then
-						callsign_flight = math.random(1, 9)
-						-- testCall = flight_["callsign"]..callsign_flight
-						testCall = Callsign_west[category][callSign_west_counter[category]]..callsign_flight
-						callSignFlight[testCall] = true
-					end
-
-				end
-
-				callsign_nb = callSign_west_counter[category]
-				_name = Callsign_west[category][callSign_west_counter[category]] .. callsign_flight .. aircraft_n
-
-			end
-
-			callsign = {
-				[1] = callsign_nb,
-				[2] =  callsign_flight,
-				[3] =  aircraft_n,
-				name = _name
-			}
-		end
-
-	else
-		if aircraft_n == 1 then
-			callsign_east_counter = callsign_east_counter + 1
-		end
-		callsign = 90 + callsign_east_counter * 10 + aircraft_n
-
-		-- callsign = {
-		-- 	[3] = hundreds,
-		-- 	[2] = tens,
-		-- 	[1] = ones,
-		-- 	name = ""
-		-- }
-	end
-
-	if callsign == nil then
-		-- print("AtoFP ERROR callsign == nil , style: "..tostring(style).." country: "..tostring(country) .." WestCallsign: "..tostring(WestCallsign[country]) )
-		print("AtoFP ERROR callsign == nil , style: "..tostring(style).." country: "..tostring(country)  ) 
-		print("Error") os.execute 'pause'
-	end
-	return callsign
-end
-
 
 ---- function to get sidenumbers -----
 local sidenumbers = {}
@@ -890,9 +702,8 @@ local function Get_L16_Id()
 
 	STN_L16_Id[testId] = true
 
-	if i >= 900 then
-		print("AtoFP Get_L16_Id trop long "..i.." test "..testId) 
-		print("Error") os.execute 'pause'
+	if i >= 400 then
+		DebugFLIGHT = DebugFLIGHT .. "\n".." AtoFP Get_L16_Id trop long "..i.." test "..testId
 	end
 
 	return testId
@@ -916,9 +727,8 @@ local function Get_SADL_Id()
 	until SADL_TN_Id[testId] == nil or i >= 300
 
 
-	if i >= 300 then
-		print("AtoFP SADL_TN_Id trop long "..i.." test "..testId) 
-		print("Error") os.execute 'pause'
+	if i >= 200 then
+		DebugFLIGHT = DebugFLIGHT .. "\n".." AtoFP Get_SADL_Id trop long "..i.." test "..testId
 	end
 
 	return testId
@@ -942,9 +752,8 @@ local function get_IDM_Id()
 
 	until IDM_Id[testId] == nil or i >= 300
 
-	if i >= 300 then
-		print("AtoFP IDM_Id trop long "..i.." test "..testId) 
-		print("Error") os.execute 'pause'
+	if i >= 200 then
+		DebugFLIGHT = DebugFLIGHT .. "\n".."AtoFP IDM_Id trop long "..i.." test "..testId
 	end
 
 	return testId
@@ -1104,15 +913,14 @@ local function modify_activate_group_time(group, airSpawnTime, from)
 	-- group['uncontrolled'] = true
 	-- group['lateActivation'] = true --incompatible avec l'activation sur sixpack
 
-	for trig_n = 1, #mission.trigrules  do
-		if  mission.trigrules[trig_n] and mission.trigrules[trig_n].actions and mission.trigrules[trig_n].actions[1] then
+	for trig_n = 1, #mission.trigrules do
+		if mission.trigrules[trig_n] and mission.trigrules[trig_n].actions and mission.trigrules[trig_n].actions[1] then
 			if mission.trigrules[trig_n].actions[1].group and mission.trigrules[trig_n].actions[1].group == group.groupId then
 
 				if airSpawnTime == -1 then
 					airSpawnTime = 0
 				end
 
-				-- if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe 1Bb seconds (before) "..tostring(mission.trigrules[trig_n].rules[1].seconds)) end
 				mission.trigrules[trig_n].rules[1].seconds = airSpawnTime
 				-- if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe 1Bc seconds (after) "..tostring(mission.trigrules[trig_n].rules[1].seconds)) end
 
@@ -1127,7 +935,7 @@ end
 
 -- modification M37.l SuperCarrier (l: ajout alt et speed aux unites)(i: option deck air catapult)
 --Spawn OnDeck, OnCatapult or OnAir
-function SpawnOn(spawn, waypoints, group, Pn, spawnTime, from, flight, f, role)
+local function spawnOn(spawn, waypoints, group, Pn, spawnTime, from, flight, f, role)
 	spawn = string.lower(spawn)
 
 	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe A SpawnOn() "..spawn) end
@@ -1639,8 +1447,7 @@ local function createBombingChapter(id_task ,flight ,waypoints, weaponType, atta
 			},
 		}
 	elseif id_task == ""  then
-		print("AtoFp no id_task from "..tostring(from)) 
-		print("Error") os.execute 'pause'
+		DebugFLIGHT = DebugFLIGHT .. "\n"..("AtoFp no id_task from "..tostring(from))
 	end
 
 	return task_entry
@@ -2310,9 +2117,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 				if not goodTask then
-					print("(Error AtoFp 11  : bad task: remove |"..flight[f].task.."| of the |"..flight[f].type.. "| in the oob_air_init.lua file")
-					print("typeCible "..typeCible.." || "..flight[f].type.." "..GoupTaskTemp.." "..tostring(flight[f].target.name)) 
-					print("Error") os.execute 'pause'
+					DebugFLIGHT = DebugFLIGHT .. "\n".."(Error AtoFp 11  : bad task: remove |"..flight[f].task.."| of the |"..flight[f].type.. "| in the oob_air_init.lua file"
+					DebugFLIGHT = DebugFLIGHT .. "\n"..("typeCible "..typeCible.." || "..flight[f].type.." "..GoupTaskTemp.." "..tostring(flight[f].target.name))
 				end
 
 
@@ -2585,18 +2391,20 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					-- *************  ATO_FP_Debug08 vi trop faible pour les escorteurs des strike trop lent 					
-					if 	w>1 and flight[f].loadout.vCruise and waypoints[w]["speed"] < flight[f].loadout.vCruise / 4 * 3 then
-						if Debug.debug then
-							print("AtoFP vi trop faible w: "..w.." waypoints[w][speed]: "..waypoints[w]["speed"].." vCruise3/4 "..tostring(flight[f].loadout.vCruise / 4 * 3))
-							print("  flight[f].loadout.vCruise ".. flight[f].loadout.vCruise)
+					if w>1 and flight[f].loadout.vCruise and waypoints[w]["speed"] < flight[f].loadout.vCruise / 4 * 3 then
+						-- if Debug.debug then
+							-- print("AtoFP vi trop faible w: "..w.." waypoints[w][speed]: "..waypoints[w]["speed"].." vCruise3/4 "..tostring(flight[f].loadout.vCruise / 4 * 3))
+							-- print("  flight[f].loadout.vCruise ".. flight[f].loadout.vCruise)
 
-							_affiche(waypoints, "waypoints")
-							print("AtoFP ATO_FP_Debug08 vi trop faible pour les escorteurs des strike trop lent 	")
-							print()
+							-- _affiche(waypoints, "waypoints")
+							-- print("AtoFP ATO_FP_Debug08 vi trop faible pour les escorteurs des strike trop lent 	")
+							-- print()
 
-							_affiche(flight[f], "flight[f]") 
-							print("Error") os.execute 'pause'
-						end
+							-- _affiche(flight[f], "flight[f]") 
+							-- print("Error") os.execute 'pause'
+
+							DebugFLIGHT = DebugFLIGHT .. "\n".."(Error AtoFp 12  : vi trop faible pour les escorteurs des strike trop lent 	"
+						-- end
 
 					end
 
@@ -3704,8 +3512,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						if flight[f].route[w].id == "Spawn" or flight[f].route[w].id == "Departure" then
 							local searchTime = flight[f].route[#flight[f].route].eta
 							if not flight[f].loadout.standoff then
-								print("no standoff in the loadout of the task ..Fighter Sweep.. of the type: "..tostring(flight[f].type))
-								print("Error") os.execute 'pause'
+								DebugFLIGHT = DebugFLIGHT .. "\n".."no standoff in the loadout of the task ..Fighter Sweep.. of the type: "..tostring(flight[f].type)
 							end
 							local task_entry = {
 								["enabled"] = true,
@@ -3737,8 +3544,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								end
 
 								if not flight[f].loadout.standoff then
-									print("no standoff in the loadout of the task ..Escort.. of the type: "..tostring(flight[f].type))
-									print("Error") os.execute 'pause'
+									DebugFLIGHT = DebugFLIGHT .. "\n".."no standoff in the loadout of the task ..Escort.. of the type: "..tostring(flight[f].type)
 								end
 
 								local searchTime = flight[f].route[#flight[f].route].eta
@@ -5226,9 +5032,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					if not FreqCapability2(testFreqency, type_withData, 1, info) then
-						print("AtoFP error frequency: "..type_withData.." "..testFreqency)
-						_affiche(frequency[type_withData].radio, "UtilF frequency[flightType].radio") 
-						print("Error") os.execute 'pause'
+						DebugFLIGHT = DebugFLIGHT .. "\n"..("AtoFP error frequency: "..type_withData.." "..testFreqency)
 					end
 				end
 
@@ -5247,16 +5051,14 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						if testFreqency < frequency[type_withData].onlyVariableFrequency.min
 						or testFreqency > frequency[type_withData].onlyVariableFrequency.max
 						then
-							print("AtoFp frequency BUG with "..tostring(type_withData).." frequency: "..tostring(testFreqency)) 
-							print("Error") os.execute 'pause'
+							DebugFLIGHT = DebugFLIGHT .. "\n"..("AtoFP error frequency: "..type_withData.." "..testFreqency)
 						end
 					end
 				end
 
 
 				if tonumber(testFreqency) == 243 or tonumber(testFreqency) == 121.5 then
-					print("ATTENTION GUARD Frequence "..tostring(testFreqency)) 
-					print("Error") os.execute 'pause'
+					DebugFLIGHT = DebugFLIGHT .. "\n"..("AtoFP error frequency GUARD: "..type_withData.." "..testFreqency)
 				end
 
 				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe waypoints[1][x] AA "..tostring(waypoints[1]["x"])) end
@@ -5505,7 +5307,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 								if counter == 20 or placeTiming < 0 then
 									local BugFrom =  " timingDeckCata "..debug.getinfo(1).currentline
-									SpawnOn( "air", waypoints, group, Pn, spawn_time + 30, BugFrom, flight, f, role)
+									spawnOn( "air", waypoints, group, Pn, spawn_time + 30, BugFrom, flight, f, role)
 								else
 									timingDeckCata[side][flight[f].base][placeTiming] = group.name
 									spawn_time = placeTiming
@@ -5539,7 +5341,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								--les Planes qui genent le taxiing spawn selon conf_mod
 								if not spawnDeck then
 									local BugFrom =  ""..debug.getinfo(1).currentline
-									SpawnOn(Data_configuration.SC_SpawnOn[flight[f].type], waypoints, group, Pn, spawn_time, BugFrom, flight, f, role)
+									spawnOn(Data_configuration.SC_SpawnOn[flight[f].type], waypoints, group, Pn, spawn_time, BugFrom, flight, f, role)
 								end
 
 								-- -- les helico sur le FARP du joueur spawn en l'air
@@ -5560,7 +5362,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 									-- group['uncontrolled'] = true		VOL decale			: lateActivation + a_activate_group																--Seulement sur CV, lateActivation and uncontrolled requis
 
 									local BugFrom =  " NbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb "..debug.getinfo(1).currentline
-									SpawnOn( "air", waypoints, group, Pn, spawn_time + 30, BugFrom, flight, f, role)
+									spawnOn( "air", waypoints, group, Pn, spawn_time + 30, BugFrom, flight, f, role)
 
 								elseif flagInsertSixpack  and NbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb  then										-- on ne dépasse pas le nb max de spawn sur le CV 
 									if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe FFb  NbPlanetDeck >= LimitedParkNb") end
@@ -5569,7 +5371,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 									-- group['uncontrolled'] = true			VOL decale			: lateActivation + a_activate_group															--Seulement sur CV, lateActivation and uncontrolled requis
 
 									local BugFrom =  " NbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb "..debug.getinfo(1).currentline
-									SpawnOn( "air", waypoints, group, Pn, spawn_time + 30, BugFrom, flight, f, role)
+									spawnOn( "air", waypoints, group, Pn, spawn_time + 30, BugFrom, flight, f, role)
 
 									--si le vol postulait pour le sixpack, on le supprime de la table
 									table.remove(testSixPack[flight[f].base])
@@ -5591,14 +5393,14 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							--les Planes qui genent le taxiing spawn selon conf_mod
 							if not spawnDeck then
 								local BugFrom =  " if not SpawnDeck "..debug.getinfo(1).currentline
-								SpawnOn(Data_configuration.SC_SpawnOn[flight[f].type], waypoints, group, Pn, spawn_time, BugFrom, flight, f, role)
+								spawnOn(Data_configuration.SC_SpawnOn[flight[f].type], waypoints, group, Pn, spawn_time, BugFrom, flight, f, role)
 							end
 
 							if limitedParkTiming or db_airbases[flight[f].base].BaseAirStart then
 								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe LLLa limitedParkTiming OR BaseAirStart ") end
 								local BugFrom =  " limitedParkTiming or BaseAirStart "..debug.getinfo(1).currentline
 
-								SpawnOn( "air", waypoints, group, Pn, spawn_time + 30, BugFrom, flight, f, role)
+								spawnOn( "air", waypoints, group, Pn, spawn_time + 30, BugFrom, flight, f, role)
 								if flagInsertSixpack  then																			--si le vol postulait pour le sixpack, on le supprime de la table
 									table.remove(testSixPack[flight[f].base])
 									flagInsertSixpack  = false
@@ -5624,7 +5426,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								--les Planes qui genent le taxiing spawn selon conf_mod
 								if not spawnDeck or baseIsFARP then
 									local BugFrom =  " not SpawnDeck "..debug.getinfo(1).currentline
-									SpawnOn(Data_configuration.SC_SpawnOn[flight[f].type], waypoints, group, Pn, spawn_time + 30, BugFrom, flight, f, role)
+									spawnOn(Data_configuration.SC_SpawnOn[flight[f].type], waypoints, group, Pn, spawn_time + 30, BugFrom, flight, f, role)
 									if flagInsertSixpack  then																			--si le vol postulait pour le sixpack, on le supprime de la table
 										table.remove(testSixPack[flight[f].base])
 										flagInsertSixpack  = false
@@ -5676,7 +5478,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							group['uncontrolled'] = false
 							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe LLLb limitedParkTiming OR BaseAirStart ") end
 							local BugFrom =  " limitedParkTiming or BaseAirStart "..debug.getinfo(1).currentline
-							SpawnOn( "air", waypoints, group, Pn, spawn_time + 30, BugFrom, flight, f, role)
+							spawnOn( "air", waypoints, group, Pn, spawn_time + 30, BugFrom, flight, f, role)
 
 						elseif group.route.points[1].action ~= "Turning Point" then
 
@@ -5894,7 +5696,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						if (baseIsCarrier or limitedParkTiming or db_airbases[flight[f].base].BaseAirStart) and not farp_MorePlace  then
 
 							local BugFrom =  " SAR sur CV et parking limité spawn en vol "..debug.getinfo(1).currentline
-							SpawnOn( "air", waypoints, group, Pn, 0, BugFrom, flight, f, role)
+							spawnOn( "air", waypoints, group, Pn, 0, BugFrom, flight, f, role)
 
 							group['lateActivation'] = true											--make group late activation "en vol"
 							group['uncontrolled'] = false
@@ -6013,7 +5815,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						if baseIsCarrier or limitedParkTiming or db_airbases[flight[f].base].BaseAirStart then
 
 							local BugFrom =  " IA intercept "..debug.getinfo(1).currentline
-							SpawnOn( "air", waypoints, group, Pn, 0, BugFrom, flight, f, role)
+							spawnOn( "air", waypoints, group, Pn, 0, BugFrom, flight, f, role)
 
 							group['lateActivation'] = true											--make group late activation "en vol"
 							group['uncontrolled'] = false
@@ -6279,12 +6081,10 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						-- SpawnOn( "air", waypoints, group, Pn, spawn_time + 300, BugFrom, flight, f)	
 
 						if not spawn_time or spawn_time == nil then
-							_affiche(group, "group No spawn_time") 
-							print("Error") os.execute 'pause'
-
+							DebugFLIGHT = DebugFLIGHT .. "\n".."Error group No spawn_time "..group.name
 						end
 
-						SpawnOn( "air", waypoints, group, Pn, spawn_time, BugFrom, flight, f, role)
+						spawnOn( "air", waypoints, group, Pn, spawn_time, BugFrom, flight, f, role)
 						modify_activate_group_time(group, spawn_time - 1, debug.getinfo(1).currentline)
 					end
 
@@ -6787,8 +6587,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					if dataIdCountry == nil or dataIdCountry == "" then
-						print("******ATTENTION****** no found this contry "..tostring(flight[f].country).." into dataCoutrys")
-						print("Error")  os.execute 'pause'
+						DebugFLIGHT = DebugFLIGHT .. "\n".."Error no found this contry "..tostring(flight[f].country).." into dataCoutrys"
 					end
 
 					--cherche l idCoutry de plane demandé
@@ -6976,8 +6775,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						info01 = info01.." |+|ATTENTION VOL sans a_activate_group "
 					elseif a_activate2 > 1 then
 						info01 = info01.." |+|ATTENTION VOL (many times) "..a_activate2.." a_activate_group "
-						print("AtoFP "..group.name.." |+|ATTENTION VOL (many times) "..a_activate2.." a_activate_group ") 
-						print("Error") os.execute 'pause'
+
+						DebugFLIGHT = DebugFLIGHT .. "\n".."Error VOL (many times) "..a_activate2.." a_activate_group "
 					end
 				end
 
@@ -6997,8 +6796,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					else
 						info02 = info02.." |ATTENTION MANQUE Start "..group.groupId
-						print("AtoFp info02"..info02) 
-						print("Error") os.execute 'pause'
+
+						DebugFLIGHT = DebugFLIGHT .. "\n".."AtoFp info02"..info02
 					end
 				end
 
@@ -7024,8 +6823,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				if isHumain then
 					if group.route.points[1]["action"] == "Turning Point"then
 						info02 = info02.." |ATTENTION MANQUE Start "..group.groupId
-						print("AtoFp info02"..info02) 
-						print("Error") os.execute 'pause'
+
+						DebugFLIGHT = DebugFLIGHT .. "\n".."Error info02"..info02
 					end
 				end
 
@@ -7944,8 +7743,7 @@ if testPosRunwayImpact then
 						-- print("AtoFP Nunits   "..tostring(#mission.coalition.blue.country[1].vehicle.group[Ngroup].units))
 					end
 				else
-					print("AtoFP bug runway "..baseName) 
-					print("Error") os.execute 'pause'
+					DebugFLIGHT = DebugFLIGHT .. "\n"..("AtoFP bug runway "..baseName)
 				end
 			end
 		end
@@ -7964,9 +7762,8 @@ for _side, side in pairs(mission.coalition) do
 					for pointN, point in pairs(group.route.points) do
 
 						if not point.ETA_locked and not point.speed_locked then
-							print("AtoFP bug ETA and Speed not lock in "..pointN.." "..group.name)
-							_affiche(point, "AtoFP point") 
-							print("Error") os.execute 'pause'
+
+							DebugFLIGHT = DebugFLIGHT .. "\n"..("AtoFP bug ETA and Speed not lock in "..pointN.." "..group.name)
 						end
 					end
 				end
