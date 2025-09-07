@@ -15,9 +15,9 @@ versionDCE["ATO_ThreatEvaluation.lua"] = "1.7.56"
 ------------------------------------------------------------------------------------------------------- 
 
 -- modification M34.f custom FrequenceRadio
-CreatePlageFrequency()																--trouve une plage de frequence commune si c'est possible
+-- CreatePlageFrequency()																--trouve une plage de frequence commune si c'est possible
 
-CreatePlageFrequencyB()
+-- CreatePlageFrequencyB()
 
 local reduceCercle = 100
 
@@ -29,33 +29,54 @@ groundthreats = {
 	}
 }
 
--- local Callsign_west = {
--- 		JTAC_EWR = {
--- 			[1] = "Axeman",
--- 			[2] = "Darknight",
--- 			[3] = "Warrior",
--- 			[4] = "Pointer",
--- 			[5] = "Eyeball",
--- 			[6] = "Moonbeam",
--- 			[7] = "Whiplash",
--- 			[8] = "Finger",
--- 			[9] = "Pinpoint",
--- 			[10] = "Ferret",
--- 			[11] = "Shaba",
--- 			[12] = "Playboy",
--- 			[13] = "Hammer",
--- 			[14] = "Jaguar",
--- 			[15] = "Deathstar",
--- 			[16] = "Anvil",
--- 			[17] = "Firefly",
--- 			[18] = "Mantis",
--- 			[19] = "Badger",
--- 			}
--- 	}
+--pb callSign EWR:
+-- façon WEST:
+	-- [2] = 
+	-- {
+	-- 	["number"] = 2,
+	-- 	["auto"] = false,
+	-- 	["id"] = "WrappedAction",
+	-- 	["enabled"] = true,
+	-- 	["params"] = 
+	-- 	{
+	-- 		["action"] = 
+	-- 		{
+	-- 			["id"] = "SetCallsign",
+	-- 			["params"] = 
+	-- 			{
+	-- 				["number"] = 1,
+	-- 				["callnameFlag"] = true,
+	-- 				["callname"] = 19,
+	-- 			}, -- end of ["params"]
+	-- 		}, -- end of ["action"]
+	-- 	}, -- end of ["params"]
+	-- }, -- end of [2]
+
+	-- façon EST:
+		-- [3] = 
+		-- {
+		-- 	["number"] = 3,
+		-- 	["auto"] = false,
+		-- 	["id"] = "WrappedAction",
+		-- 	["enabled"] = true,
+		-- 	["params"] = 
+		-- 	{
+		-- 		["action"] = 
+		-- 		{
+		-- 			["id"] = "SetCallsign",
+		-- 			["params"] = 
+		-- 			{
+		-- 				["callsign"] = 503,
+		-- 				["callnameFlag"] = false,
+		-- 			}, -- end of ["params"]
+		-- 		}, -- end of ["action"]
+		-- 	}, -- end of ["params"]
+		-- }, -- end of [3]
+
 
 --function to check if a unit is a threat, assign threat values and add to threats table
 
-local function AddThreat(unit, side, hide)											--unput is side and unit-table from oob_ground	-- modification M28.b : helicoptere see all SAM (on ajoute Hide)							
+local function addThreat(unit, side, hide)											--unput is side and unit-table from oob_ground	-- modification M28.b : helicoptere see all SAM (on ajoute Hide)							
 
 	local threatentry = {}
 
@@ -939,7 +960,7 @@ end -- fin local function AddThreat(unit, side, hide)
 
 
 --table to store ewr
-ewr = {
+EWR_DB = {
 	blue = {																		--blue EWR
 	},
 	red = {																			--red EWR
@@ -967,7 +988,7 @@ GCI = {
 }
 
 --function to add EWR units to EWR table
-local function AddEWR(unit, side, freq, call)
+local function addEWR(unit, side, ewrData)
 	-- print("AtoTE passe 00 function AddEWR type "..tostring(unit.type).." side: "..tostring(side).." freq: "..tostring(freq).." call: "..tostring(call)) 
 	local insertEWR = false
 	local insertGCi = false
@@ -980,8 +1001,8 @@ local function AddEWR(unit, side, freq, call)
 			x = unit.x,
 			y = unit.y,
 			range = 330000,
-			frequency = freq,
-			callsign = call,
+			frequency = ewrData.frequencyMHz,
+			callsign = (ewrData.WEST_callnameString and ewrData.WEST_number) and (ewrData.WEST_callnameString .. "." .. tostring(ewrData.WEST_number)) or (ewrData.EST_callsign or ""),
 			elevation = 39,
 			min_alt = 0,
 			max_alt = 30000,
@@ -997,8 +1018,8 @@ local function AddEWR(unit, side, freq, call)
 			x = unit.x,
 			y = unit.y,
 			range = 340000,
-			frequency = freq,
-			callsign = call,
+			frequency = ewrData.frequencyMHz,
+			callsign = (ewrData.WEST_callnameString and ewrData.WEST_number) and (ewrData.WEST_callnameString .. "." .. tostring(ewrData.WEST_number)) or (ewrData.EST_callsign or ""),
 			elevation = 39,
 			min_alt = 50,
 			max_alt = 30000,
@@ -1014,8 +1035,8 @@ local function AddEWR(unit, side, freq, call)
 			x = unit.x,
 			y = unit.y,
 			range = 461000,
-			frequency = freq,
-			callsign = call,
+			frequency = ewrData.frequencyMHz,
+			callsign = (ewrData.WEST_callnameString and ewrData.WEST_number) and (ewrData.WEST_callnameString .. "." .. tostring(ewrData.WEST_number)) or (ewrData.EST_callsign or ""),
 			elevation = 39,
 			min_alt = 50,
 			max_alt = 30000,
@@ -1031,8 +1052,8 @@ local function AddEWR(unit, side, freq, call)
 			x = unit.x,
 			y = unit.y,
 			range = 461000,
-			frequency = freq,
-			callsign = call,
+			frequency = ewrData.frequencyMHz,
+			callsign = (ewrData.WEST_callnameString and ewrData.WEST_number) and (ewrData.WEST_callnameString .. "." .. tostring(ewrData.WEST_number)) or (ewrData.EST_callsign or ""),
 			elevation = 39,
 			min_alt = 50,
 			max_alt = 30000,
@@ -1048,8 +1069,8 @@ local function AddEWR(unit, side, freq, call)
 			x = unit.x,
 			y = unit.y,
 			range = 160000,
-			frequency = freq,
-			callsign = call,
+			frequency = ewrData.frequencyMHz,
+			callsign = (ewrData.WEST_callnameString and ewrData.WEST_number) and (ewrData.WEST_callnameString .. "." .. tostring(ewrData.WEST_number)) or (ewrData.EST_callsign or ""),
 			elevation = 6,
 			min_alt = 0,
 			max_alt = 30000,
@@ -1065,8 +1086,8 @@ local function AddEWR(unit, side, freq, call)
 			x = unit.x,
 			y = unit.y,
 			range = 35000,
-			frequency = freq,
-			callsign = call,
+			frequency = ewrData.frequencyMHz,
+			callsign = (ewrData.WEST_callnameString and ewrData.WEST_number) and (ewrData.WEST_callnameString .. "." .. tostring(ewrData.WEST_number)) or (ewrData.EST_callsign or ""),
 			elevation = 4,
 			min_alt = 0,
 			max_alt = 20000,
@@ -1119,9 +1140,11 @@ local function AddEWR(unit, side, freq, call)
 
 
 	if insertEWR then
-		if entry.callsign ~= nil and entry.callsign ~= nil then
-			table.insert(ewr[side], entry)
-			ewr[side][#ewr[side]][call] = true
+		if entry.callsign then
+			table.insert(EWR_DB[side], entry)
+
+			--TODO a quoi ça sert?
+			-- EWR_DB[side][#EWR_DB[side]][call] = true
 		else
 			return false
 		end
@@ -1141,8 +1164,15 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 		if country.vehicle then												--If country has vehicles
 			for group_n, group in pairs(country.vehicle.group) do			--Iterate through all groups				
 				local ewr_task = false							--group has EWR task
-				local ewr_freq = nil							--group has a communications frequency
-				local ewr_call = nil							--group has a communications callsign
+				-- local ewr_freq = nil							--group has a communications frequency
+				local ewr_call = {
+					EST_callsign = nil ,
+					frequencyHz = nil,
+					frequencyMHz = nil,
+					WEST_callnameId = nil ,
+					WEST_callnameString = nil ,
+					WEST_number = nil ,
+				}							--group has a communications callsign
 				local tempFreq = nil
 
 				--check la presences d'une task EWR en ne parsant QUE le wpt 1
@@ -1168,40 +1198,43 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 				for t = 1, #group.route.points[1].task.params.tasks do
 					-- camp west, si utilisation des EWR, pour que les indicatifs soient bien pris en compte, l'enregistrement par DCS est comme ci dessus, il n'y a pas de SetCallsign
 					if group.route.points[1].task.params.tasks[t].params.callname then							--if group has a callsign set									
-						ewr_call = group.route.points[1].task.params.tasks[t].params.callname					--set callname modification M07f
+						ewr_call["WEST_callnameId"] = group.route.points[1].task.params.tasks[t].params.callname					--set callname modification M07f
+						ewr_call["WEST_number"] = group.route.points[1].task.params.tasks[t].params.number
 						-- print("AtoTE EWR A "..tostring(group.name).." callname: "..tostring(ewr_call))							--debug
 						
-						ewr_call = Callsign_west.JTAC_EWR[ewr_call]
+						ewr_call["WEST_callnameString"] = Callsign_west.JTAC_EWR[ewr_call.WEST_callnameId]
 					end
 
 					if group.route.points[1].task.params.tasks[t].params.action and ewr_task then
 						if group.route.points[1].task.params.tasks[t].params.action.id == "SetCallsign" then							--if group has a callsign set
-							-- ewr_call = group.route.points[1].task.params.tasks[t].params.action.params.callsign						--set callsign
-
-							if group.route.points[1].task.params.tasks[t].params.action.params.callsign then
-								ewr_call = group.route.points[1].task.params.tasks[t].params.action.params.callsign						--set callsign
-								-- print("AtoTE EWR B "..tostring(group.name).." callname: "..tostring(ewr_call))							--debug
 							
-							elseif group.route.points[1].task.params.tasks[t].params.action.params.callname then						-- callname is Callsign_west
-								ewr_call = group.route.points[1].task.params.tasks[t].params.action.params.callname						--set callname modification M07e
-								-- print("AtoTE EWR C "..tostring(group.name).." callname: "..tostring(ewr_call))							--debug
+						--EST side
+							if group.route.points[1].task.params.tasks[t].params.action.params.callsign then
+								ewr_call["EST_callsign"] = group.route.points[1].task.params.tasks[t].params.action.params.callsign						--set callsign
 								
-								ewr_call = Callsign_west.JTAC_EWR[ewr_call]
+							--WEST side
+							elseif group.route.points[1].task.params.tasks[t].params.action.params.callname then						-- callname is Callsign_west
+								ewr_call["WEST_callnameId"] = group.route.points[1].task.params.tasks[t].params.action.params.callname
+								ewr_call["WEST_number"] = group.route.points[1].task.params.tasks[t].params.action.params.number						--set callname modification M07e
+
+								ewr_call["WEST_callnameString"] = Callsign_west.JTAC_EWR[ewr_call.WEST_callnameId]
 							end
 						end
 
+						--changement obligatoire de la frequence (pourquoi?)
 						if group.route.points[1].task.params.tasks[t].params.action.id == "SetFrequency" then							--if group has a frequency set										
-							ewr_freq = GetFrequency(sidename, group.name, "EWR")
-							tempFreq = group.route.points[1].task.params.tasks[t].params.action.params.frequency
+							--TODO a jouter ici une option pour forcer une freq, ou une plage de freq
+							-- ewr_call.frequencyMHz = GetFrequency(sidename, group.name, "EWR")
+							ewr_call["frequencyHz"] = group.route.points[1].task.params.tasks[t].params.action.params.frequency
+							ewr_call["frequencyMHz"] = ewr_call.frequencyHz / 1000000		--convert to MHz
+							Assigned_freq[ewr_call.frequencyMHz] = true
 
-							for Mgroup_n, Mgroup in pairs(mission.coalition[sidename].country[country_n].vehicle.group) do				-- M34.b, verifie si le Num du group OOB, correspond au Num du groupe mission
-								if group.groupId == Mgroup.groupId then
-									Mgroup.route.points[1].task.params.tasks[t].params.action.params.frequency = ewr_freq * 1000000 	-- met à jour la table mission qui est déjà en mémoire
+							-- for missGroupN, missGroup in pairs(mission.coalition[sidename].country[country_n].vehicle.group) do				-- M34.b, verifie si le Num du group OOB, correspond au Num du groupe mission
+							-- 	if group.groupId == missGroup.groupId then
+							-- 		missGroup.route.points[1].task.params.tasks[t].params.action.params.frequency = ewr_call.frequencyMHz * 1000000 	-- met à jour la table mission qui est déjà en mémoire
 
-									ewr_freq = tostring(ewr_freq)
-
-								end
-							end
+							-- 	end
+							-- end
 						end
 					end
 				end
@@ -1215,7 +1248,7 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 
 						-- print("AtoTE group.name "..group.name.." group.hidden: "..tostring(group.hidden))
 						-- print(" - - - AtoTE unit.name "..unit.name.." group.hidden: "..tostring(group.hidden))
-						AddThreat(unit, sidename, group.hidden)
+						addThreat(unit, sidename, group.hidden)
 
 						if not ewrFreqDejaTraite[sidename]then ewrFreqDejaTraite[sidename]= {} end
 						if not ewrFreqDejaTraite[sidename][group.groupId] then
@@ -1223,7 +1256,7 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 							--tente d'ajouter cette unité dans la table EWR du script GCI inGame
 							--si elle est reconnue EWR, elle sera ajoutée
 
-							testAdd = AddEWR(unit, sidename, ewr_freq, ewr_call)	--Add to EWR table
+							testAdd = addEWR(unit, sidename, ewr_call)	--Add to EWR table
 							if testAdd ~= false then
 								ewrFreqDejaTraite[sidename][group.groupId] = true
 								-- tempFreq = ewr_freq * 1000000
@@ -1247,8 +1280,8 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 				if group.hidden == false then								--group is not hidden
 					for unit_n, unit in pairs(group.units) do				--Iterate through all units
 						if not unit.dead then							--If unit is not dead
-							AddThreat(unit, sidename)						--Evaluate unit as threat and add to groundthreats table
-							AddEWR(unit, sidename)							--Evaluate unit as EWR and add to EWR table
+							addThreat(unit, sidename)						--Evaluate unit as threat and add to groundthreats table
+							addEWR(unit, sidename)							--Evaluate unit as EWR and add to EWR table
 						end
 					end
 				end
@@ -1427,7 +1460,7 @@ for side, targets in pairs(targetlist) do																--iterate through all s
 				max_alt = 40000,
 			}
 
-			table.insert(ewr[side], entry)
+			table.insert(EWR_DB[side], entry)
 
 		elseif  target.task == "CAP" and target.inactive ~= false then											--if loadout is CAP
 			if CAPthreatsSort[side] and CAPthreatsSort[side][1] then
@@ -1586,8 +1619,8 @@ if Debug.debug then
 	campFile:write(camp_str)															--save new data
 	campFile:close()
 
-	camp_str = "ewr_AtoTE = " .. TableSerialization(ewr, 0)						--make a string
-	campFile = io.open("Debug/threat_EWR_AtoTE.lua", "w") or error("Failed to open debug file")
+	camp_str = "EWR_DB = " .. TableSerialization(EWR_DB, 0)						--make a string
+	campFile = io.open("Debug/EWR_DB_AtoTE.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
 

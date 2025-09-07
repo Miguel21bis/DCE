@@ -1495,7 +1495,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					end
 
 					--make EWR_freq table				
-					local tempEWR = ewr[tempPlayer.side]
+					local tempEWR = EWR_DB[tempPlayer.side]
 
 					-- modification M34.g change freq EWR + custom FrequenceRadio (g: utilise les indicatifs WEST pour EWR)
 					local comparePossible = true

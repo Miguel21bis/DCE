@@ -603,21 +603,21 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 						local distance = 100000000																				--distance from WP w to point where EWR coverage is entered
 						local heading = GetHeading(pack.main[1].route[w], pack.main[1].route[w + 1])							--heading between WP w and WP w+1
 
-						for e = 1, #ewr[playable[r].side] do																	--iterate through all ewr/awacs
+						for e = 1, #EWR_DB[playable[r].side] do																	--iterate through all ewr/awacs
 
-							local radar_route_distance = GetTangentDistance(pack.main[1].route[w], pack.main[1].route[w + 1], ewr[playable[r].side][e])		--get closest distance from radar to route between WP w and WP w+1
-							if radar_route_distance < ewr[playable[r].side][e].range then										--if route passes radar range circle
+							local radar_route_distance = GetTangentDistance(pack.main[1].route[w], pack.main[1].route[w + 1], EWR_DB[playable[r].side][e])		--get closest distance from radar to route between WP w and WP w+1
+							if radar_route_distance < EWR_DB[playable[r].side][e].range then										--if route passes radar range circle
 								if debugAssign then	print("AtoPA           --E3   ") end
 
-								local p1_ewr_heading = GetHeading(pack.main[1].route[w], ewr[playable[r].side][e])				--heading from p1 to radar
+								local p1_ewr_heading = GetHeading(pack.main[1].route[w], EWR_DB[playable[r].side][e])				--heading from p1 to radar
 								local alpha = math.abs(heading - p1_ewr_heading)												--angle beteen route and p1-ewr
 								if alpha > 180 then
 									alpha = math.abs(alpha - 360)
 								end
-								local p1_ewr = GetDistance(pack.main[1].route[w], ewr[playable[r].side][e])						--distance between p1 and ewr
+								local p1_ewr = GetDistance(pack.main[1].route[w], EWR_DB[playable[r].side][e])						--distance between p1 and ewr
 								local p1_p90ewr = math.cos(math.rad(alpha)) * p1_ewr											--distance between p1 and point on route perpendicular to ewr
 								local p90ewr_ewr = p1_ewr * math.sin(math.rad(alpha))											--distance between ewr and point on route perpendicular to ewr
-								local p90t_pC = math.sqrt(math.pow(ewr[playable[r].side][e].range, 2) - math.pow(p90ewr_ewr, 2))	--distance between point on route perpendiculat to ewr and point on route intersecting ewr circle
+								local p90t_pC = math.sqrt(math.pow(EWR_DB[playable[r].side][e].range, 2) - math.pow(p90ewr_ewr, 2))	--distance between point on route perpendiculat to ewr and point on route intersecting ewr circle
 								local p1_pC = p1_p90ewr - p90t_pC																--distance from p1 to point on route intersecting ewr circle
 
 								local p1_base = GetDistance(pack.main[1].route[w], ATO[playable[r].side][playable[r].packN][playable[r].role][playable[r].flight].route[1])	--distance between p1 and interceptor base
@@ -646,12 +646,12 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 								if camp.player then
 									if p1_pC <= 0 then
 										distance = 0
-										camp.player.EWR_freq = ewr[playable[r].side][e].frequency
-										camp.player.EWR_call = ewr[playable[r].side][e].callsign
+										camp.player.EWR_freq = EWR_DB[playable[r].side][e].frequency
+										camp.player.EWR_call = EWR_DB[playable[r].side][e].callsign
 									elseif p1_pC < distance then
 										distance = p1_pC
-										camp.player.EWR_freq = ewr[playable[r].side][e].frequency
-										camp.player.EWR_call = ewr[playable[r].side][e].callsign
+										camp.player.EWR_freq = EWR_DB[playable[r].side][e].frequency
+										camp.player.EWR_call = EWR_DB[playable[r].side][e].callsign
 									end
 									if distance < p1_pB then
 										distance = p1_pB
@@ -661,12 +661,12 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 								elseif camp.client then
 									if p1_pC <= 0 then
 										distance = 0
-										camp.player.EWR_freq = ewr[playable[r].side][e].frequency
-										camp.player.EWR_call = ewr[playable[r].side][e].callsign
+										camp.player.EWR_freq = EWR_DB[playable[r].side][e].frequency
+										camp.player.EWR_call = EWR_DB[playable[r].side][e].callsign
 									elseif p1_pC < distance then
 										distance = p1_pC
-										camp.player.EWR_freq = ewr[playable[r].side][e].frequency
-										camp.player.EWR_call = ewr[playable[r].side][e].callsign
+										camp.player.EWR_freq = EWR_DB[playable[r].side][e].frequency
+										camp.player.EWR_call = EWR_DB[playable[r].side][e].callsign
 									end
 									if distance < p1_pB then
 										distance = p1_pB

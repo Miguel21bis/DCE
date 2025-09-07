@@ -514,7 +514,7 @@ camp.debug = Debug.debug
 camp.debugInGamePopup = Debug.debugInGamePopup
 camp.theatre = NameTheatreLower
 camp.EjectedPilotFrequency = EjectedPilotFrequency
-camp.EWR_frequency = ewr
+camp.EWR_frequency = EWR_DB
 
 camp.spotter = mission_ini.spotter
 camp.spotterAircraft = ListSpotterAircraft()

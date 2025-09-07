@@ -24,7 +24,7 @@ if Debug.debug then
 
 	local ground_str = "groundthreats = " .. TableSerialization(groundthreats, 0)
 	local air_str = "Fighterthreats = " .. TableSerialization(Fighterthreats, 0)
-	local ewr_str = "ewr = " .. TableSerialization(ewr, 0)
+	local ewr_str = "ewr = " .. TableSerialization(EWR_DB, 0)
 	local threatFile = io.open("Debug/threat_UtilDebug.lua", "w") or error("Failed to open debug file")
 	threatFile:write(ground_str .. "\n\n" .. air_str .. "\n\n" .. ewr_str)
 	threatFile:close()
@@ -45,7 +45,7 @@ if Debug.debug then
 	file_File:write(file_str)																	--save new data
 	file_File:close()
 
-	local file_str = "EWR = " .. TableSerialization(ewr, 0)			--make a string
+	local file_str = "EWR = " .. TableSerialization(EWR_DB, 0)			--make a string
 	local file_File = io.open("Debug/EWR_UtilDebug.lua", "w") or error("Failed to open debug EWR_UtilDebug file")
 	file_File:write(file_str)																	--save new data
 	file_File:close()

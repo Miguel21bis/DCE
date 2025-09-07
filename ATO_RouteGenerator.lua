@@ -222,7 +222,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 
 	threat_table.ewr[profile.hCruise] = {}
 	threat_table.ewr[profile.hAttack] = {}
-	for threat_n,threat in pairs(ewr[enemy]) do																			--iterate through ewr threats
+	for threat_n,threat in pairs(EWR_DB[enemy]) do																			--iterate through ewr threats
 		local cruisethreatentry = {
 			class = threat.class,
 			x = threat.x,
