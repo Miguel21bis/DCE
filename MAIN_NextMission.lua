@@ -662,6 +662,11 @@ if MissionInstance >= 2 then
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Weather.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
+	
+	CreatePlageFrequency_A()-- TODO a confirmer qu'il est encore utile cree une table de radio en fonction du canal puis de la wave
+	CreatePlageFrequency_B()	--cree une table de radio en fonction des wave
+	-- CreatePlageFrequency_C()	--cree une table de radio en fonction des wave
+
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")

@@ -214,7 +214,11 @@ if Debug.debug then
 			if db_airbases[base.name] then
 				foundN = foundN + 1
 
-				if db_airbases[base.name].x == base.point.x  then
+				if not base.pointVec3 then
+					_affiche(base "base")
+				end
+
+				if db_airbases[base.name].x == base.pointVec3.x  then
 					foundX = foundX + 1
 				else
 					-- print("DebriefMaster : "..tostring(base.name).." foundX incorrect DCE "..tostring(db_airbases[base.name].x).." DCS "..tostring(base.point.x))
