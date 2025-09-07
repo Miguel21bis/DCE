@@ -22,7 +22,7 @@ versionDCE["Mission Scripts/CustomTasksScript.lua"] = "1.9.43"
 local varFpsLeak = false
 local varFpsLeak_B = false
 local selectedTransport = 0			--util pour embarked
-local AttackCounter	= {}	
+local attackCounter	= {}	
 local falseCycleCount = {}												--table to count how many flights have already attacked and distribute subsequent attacks accordingly
 
 --TODO encore utile?
@@ -83,12 +83,12 @@ function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackTyp
 			idTypeStrike  = "Bombing"
 		end
 
-		if AttackCounter[TargetName] then								--counter with number of flights that have already attacked this target
-			AttackCounter[TargetName] = AttackCounter[TargetName] + 1	--increase counter by one
+		if attackCounter[TargetName] then								--counter with number of flights that have already attacked this target
+			attackCounter[TargetName] = attackCounter[TargetName] + 1	--increase counter by one
 		else															--no flight has attacked this target yet
-			AttackCounter[TargetName] = 1								--set to one
+			attackCounter[TargetName] = 1								--set to one
 		end
-		local AttackN = AttackCounter[TargetName]
+		local AttackN = attackCounter[TargetName]
 
 		local target = TargetGroup:getUnits()							--get target units
 
@@ -279,20 +279,20 @@ end
 
 ----- attack multiple static objects -----
 --allows each wingman of a flight to attack its own individual target simultaneously, then proceed to Egress point to join up (flight would not climb during egress if wingmen would joing leader imediately after attack)
-function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackType, attackAlt, id_task)
+function CustomStaticAttack(flightName, targetList, expend, weaponType, attackType, attackAlt, id_task)
 	if varFpsLeak then return end
-	env.info("DCE_CustomStaticAttack | start| "..tostring(FlightName))
+	env.info("DCE_CustomStaticAttack | start| "..tostring(flightName))
 
 	local function execute(arg)
 		local cntrl = arg[1]
-		local ComboTask = arg[2]
+		local comboTask = arg[2]
 		local n = arg[3]
 		local current_time = timer.getTime()
 
 		if camp.debug then
 			--export custom mission log
-			local logStr = "ComboTask = " .. TableSerialization(ComboTask, 0)
-			local FlightNameClean = FlightName:gsub('[%p%c%s]', '_')
+			local logStr = "ComboTask = " .. TableSerialization(comboTask, 0)
+			local FlightNameClean = flightName:gsub('[%p%c%s]', '_')
 			local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..n.."_".. "CustomStaticAttack_"..tostring(current_time)..".lua", "w")
 			if logFile then
 				logFile:write(logStr)
@@ -302,7 +302,7 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 			end
 		end
 
-		cntrl:pushTask(ComboTask)									--push task to front of task list	
+		cntrl:pushTask(comboTask)									--push task to front of task list	
 
 		env.info("DCE_CustomStaticAttack | fin")
 	end
@@ -314,12 +314,12 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 		idTypeStrike  = "Bombing"
 	end
 
-	if AttackCounter[TargetList[1]] then									--counter with number of flights that have already attacked this target
-		AttackCounter[TargetList[1]] = AttackCounter[TargetList[1]] + 1		--increase counter by one
+	if attackCounter[targetList[1]] then									--counter with number of flights that have already attacked this target
+		attackCounter[targetList[1]] = attackCounter[targetList[1]] + 1		--increase counter by one
 	else																	--no flight has attacked this target yet
-		AttackCounter[TargetList[1]] = 1									--set to one
+		attackCounter[targetList[1]] = 1									--set to one
 	end
-	local AttackN = AttackCounter[TargetList[1]]
+	local AttackN = attackCounter[targetList[1]]
 
 	env.info("DCE_CustomStaticAttack : AttackN "..tostring(AttackN))
 
@@ -327,7 +327,7 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 		attackType = nil
 	end
 
-	local flight = Group.getByName(FlightName)						--get group of attacking flight
+	local flight = Group.getByName(flightName)						--get group of attacking flight
 	local wingman = flight:getUnits()								--get list of units from attacking flights
 
 	local EgressWP
@@ -337,7 +337,7 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 			if country.plane then
 				for group_n,group in pairs(country.plane.group) do
 					-- if FlightName == env.getValueDictByKey(group.name) then								--find group in env.mission
-					if FlightName == group.name then
+					if flightName == group.name then
 						for w = 1, #group.route.points do												--iterate through all group waypoints
 							-- if string.find(env.getValueDictByKey(group.route.points[w].name), "Egress") then		--find egress waypoint
 							if string.find(group.route.points[w].name, "Egress") then
@@ -355,7 +355,7 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 			if country.helicopter then
 				for group_n,group in pairs(country.helicopter.group) do
 					-- if FlightName == env.getValueDictByKey(group.name) then								--find group in env.mission
-					if FlightName == group.name then
+					if flightName == group.name then
 						for w = 1, #group.route.points do												--iterate through all group waypoints
 							-- if string.find(env.getValueDictByKey(group.route.points[w].name), "Egress") then		--find egress waypoint
 							if string.find(group.route.points[w].name, "Egress") then
@@ -395,35 +395,35 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 			},
 		}
 
-		for t = 1, #TargetList do									--iterate thourgh targets
+		for t = 1, #targetList do									--iterate thourgh targets
 
 			--each wingman gets one attack task for each target	
-			local num = t + math.ceil((n - 1) * (#TargetList / #wingman))	--distribute target numbers across flight
+			local num = t + math.ceil((n - 1) * (#targetList / #wingman))	--distribute target numbers across flight
 			num = num + AttackN - 1											--increase target number to adjust for previous attacks
-			while num > #TargetList do
-				num = num - #TargetList
+			while num > #targetList do
+				num = num - #targetList
 			end
 
-			local StaticName = TargetList[num]
-			local StaticTemp = false
+			local staticName = targetList[num]
+			local staticTemp = false
 
-			env.info("DCE_CustomStaticAttack :StaticName AA |"..tostring(StaticName).."|")
+			env.info("DCE_CustomStaticAttack :StaticName AA |"..tostring(staticName).."|")
 
-			if  StaticObject.getByName(StaticName) then
-				StaticTemp = StaticObject.getByName(StaticName)
-				env.info("DCE_CustomStaticAttack found BB |"..tostring(StaticName).."|")
+			if  StaticObject.getByName(staticName) then
+				staticTemp = StaticObject.getByName(staticName)
+				env.info("DCE_CustomStaticAttack found BB |"..tostring(staticName).."|")
 			else
-				StaticName = StaticName.."-1"
-				StaticTemp = StaticObject.getByName(StaticName)
-				if StaticTemp then
-					env.info("DCE_CustomStaticAttack found CC-1 |"..tostring(StaticName).."|")
+				staticName = staticName.."-1"
+				staticTemp = StaticObject.getByName(staticName)
+				if staticTemp then
+					env.info("DCE_CustomStaticAttack found CC-1 |"..tostring(staticName).."|")
 				end
 			end
 
-			if StaticTemp then							--make sure that static object still exists
+			if staticTemp then							--make sure that static object still exists
 
 				-- local targetID = StaticObject.getByName(TargetList[num]):getID()	--get static object ID
-				local targetID = StaticTemp:getID()	--get static object ID
+				local targetID = staticTemp:getID()	--get static object ID
 
 				local task_entry = {									--define attack task
 					["enabled"] = true,
@@ -431,8 +431,8 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 					["id"] = idTypeStrike,
 					["number"] = #ComboTask.params.tasks + 1,
 					["params"] = {
-						["x"] = StaticTemp:getPoint().x,
-						["y"] = StaticTemp:getPoint().z,
+						["x"] = staticTemp:getPoint().x,
+						["y"] = staticTemp:getPoint().z,
 						["expend"] = expend,
 						["weaponType"] = tonumber(weaponType),
 						["groupAttack"] = false,
@@ -470,7 +470,7 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 				-- 	-- ["duration"] = tonumber(var_duration),
 				-- }
 
-				env.info("DCE_CustomStaticAttack: CustomStaticAttack DD |"..tostring(FlightName).."| |"..tostring(task_entry["id"]))
+				env.info("DCE_CustomStaticAttack: CustomStaticAttack DD |"..tostring(flightName).."| |"..tostring(task_entry["id"]))
 
 				table.insert(ComboTask.params.tasks, task_entry)
 
@@ -544,12 +544,12 @@ function CustomMixClassAttack(flightName, targetList, expend, weaponType, attack
 	-- 	idTypeStrike  = "AttackUnit"  --TODO a confirmer que cela fonctionne sur un static	
 	-- end
 
-	if AttackCounter[targetList[1]] then									--counter with number of flights that have already attacked this target
-		AttackCounter[targetList[1]] = AttackCounter[targetList[1]] + 1		--increase counter by one
+	if attackCounter[targetList[1]] then									--counter with number of flights that have already attacked this target
+		attackCounter[targetList[1]] = attackCounter[targetList[1]] + 1		--increase counter by one
 	else																	--no flight has attacked this target yet
-		AttackCounter[targetList[1]] = 1									--set to one
+		attackCounter[targetList[1]] = 1									--set to one
 	end
-	local AttackN = AttackCounter[targetList[1]]
+	local AttackN = attackCounter[targetList[1]]
 
 	-- env.info("DCE_CustomMixClassAttack : AttackN "..tostring(AttackN))
 
@@ -791,12 +791,12 @@ function CustomMapObjectAttack(FlightName, TargetList, expend, weaponType, attac
 	-- 	idTypeStrike  = "Bombing"											--  M54_a
 	-- end
 
-	if AttackCounter[TargetList[1].x .. TargetList[1].y] then															--counter with number of flights that have already attacked this target
-		AttackCounter[TargetList[1].x .. TargetList[1].y] = AttackCounter[TargetList[1].x .. TargetList[1].y] + 1		--increase counter by one
+	if attackCounter[TargetList[1].x .. TargetList[1].y] then															--counter with number of flights that have already attacked this target
+		attackCounter[TargetList[1].x .. TargetList[1].y] = attackCounter[TargetList[1].x .. TargetList[1].y] + 1		--increase counter by one
 	else																												--no flight has attacked this target yet
-		AttackCounter[TargetList[1].x .. TargetList[1].y] = 1															--set to one
+		attackCounter[TargetList[1].x .. TargetList[1].y] = 1															--set to one
 	end
-	local AttackN = AttackCounter[TargetList[1].x .. TargetList[1].y]
+	local AttackN = attackCounter[TargetList[1].x .. TargetList[1].y]
 
 	if attackType ~= "Dive" then
 		attackType = nil
@@ -944,12 +944,12 @@ end
 --allows each wingman of a flight to attack its own target aircraft on ground simultaneously, then proceed to Egress point to join up (flight would not climb during egress if wingmen would joing leader imediately after attack)
 function CustomAirbaseAttack(FlightName, TargetPos, expend, weaponType, attackType, attackAlt)
 	if varFpsLeak then return end
-	if AttackCounter[TargetPos.x .. TargetPos.y] then													--counter with number of flights that have already attacked this target
-		AttackCounter[TargetPos.x .. TargetPos.y] = AttackCounter[TargetPos.x .. TargetPos.y] + 1		--increase counter by one
+	if attackCounter[TargetPos.x .. TargetPos.y] then													--counter with number of flights that have already attacked this target
+		attackCounter[TargetPos.x .. TargetPos.y] = attackCounter[TargetPos.x .. TargetPos.y] + 1		--increase counter by one
 	else																								--no flight has attacked this target yet
-		AttackCounter[TargetPos.x .. TargetPos.y] = 1													--set to one
+		attackCounter[TargetPos.x .. TargetPos.y] = 1													--set to one
 	end
-	local AttackN = AttackCounter[TargetPos.x .. TargetPos.y]
+	local AttackN = attackCounter[TargetPos.x .. TargetPos.y]
 
 	if attackType ~= "Dive" then
 		attackType = nil
@@ -1017,8 +1017,8 @@ function CustomAirbaseAttack(FlightName, TargetPos, expend, weaponType, attackTy
 				if u:inAir() == false then													--aircraft is on ground
 					local uV = u:getVelocity()												--get aircraft speed
 					if (desc.category == 0 and uV.x == 0 and uV.y == 0 and uV.z == 0) or desc.category == 1 then	--aircraft is stationary/parked	(doesn't work for helicopters because for helos getVelocity returns IAS not absolute speed)	
-						local uP = u:getPoint()												--get aircraft point
-						table.insert(TargetList, {x = uP.x, y = uP.z})						--insert x-y coordinates into targetlist
+						local uPvec3 = u:getPoint()												--get aircraft point
+						table.insert(TargetList, {x = uPvec3.x, y = uPvec3.z})						--insert x-y coordinates into targetlist
 					end
 				end
 			end
@@ -1173,9 +1173,9 @@ function CustomFlareAttack(FlightName, tgt_x, tgt_y, grp_name, expend, weaponTyp
 	if tgt_x == "n/a" and tgt_y == "n/a" then						--if the coordinates are n/a, then the target is a vehicle/ship group
 		local tgt_grp = Group.getByName(grp_name)					--get target group
 		local tgt_units = tgt_grp:getUnits()						--get target units 
-		local tgt_p = tgt_units[1]:getPoint()						--get group leader point
-		tgt_x = tgt_p.x
-		tgt_y = tgt_p.z
+		local tgt_p_vec3 = tgt_units[1]:getPoint()						--get group leader point
+		tgt_x = tgt_p_vec3.x
+		tgt_y = tgt_p_vec3.z
 	end
 
 	local flight = Group.getByName(FlightName)						--get group of attacking flight
@@ -1314,8 +1314,8 @@ function CustomLaserDesignation(FlightName, target, class, laserCode)
 					local wingman = flight:getUnits()						--get list of units from designating flights
 
 					if wingman[1] and units[1] then							--if target group has a leader unit left
-						local pos = units[1]:getPoint()						--get target position
-						laser = Spot.createLaser(wingman[1], nil, pos, laserCode)	--start laser spot
+						local posVec3 = units[1]:getPoint()						--get target position
+						laser = Spot.createLaser(wingman[1], nil, posVec3, laserCode)	--start laser spot
 					end
 				end
 
@@ -1346,8 +1346,8 @@ function CustomLaserDesignation(FlightName, target, class, laserCode)
 				local wingman = flight:getUnits()						--get list of units from designating flights
 
 				if wingman[1] and static then							--if flight leader and static object are alive
-					local pos = static:getPoint()						--get target position
-					laser = Spot.createLaser(wingman[1], nil, pos, laserCode)	--start laser spot
+					local posVec3 = static:getPoint()						--get target position
+					laser = Spot.createLaser(wingman[1], nil, posVec3, laserCode)	--start laser spot
 				end
 
 				if laser and laser ~= nil then											--if there is a new laser spot
@@ -1458,9 +1458,9 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 		env.info("DCE_CustomDesignationAFAC() AAc : else AFAC_available = nil "..tostring(afacFlightName))
 	end
 
-	local afacPos = unitAFAC:getPoint()
-	local afacAlt = afacPos.y
-	local terrainAlt = land.getHeight({x = afacPos.x, y = afacPos.z})
+	local afacPosVec3 = unitAFAC:getPoint()
+	local afacAlt = afacPosVec3.y
+	local terrainAlt = land.getHeight({x = afacPosVec3.x, y = afacPosVec3.z})
 	local distVisibility = distanceVisibilite(afacAlt, terrainAlt)
 	-- env.info("DCE_CustomDesignationAFAC() BB : afacFlightName "..tostring(afacFlightName).." afacAlt: "..tostring(afacAlt).." terrainAlt: "..tostring(terrainAlt).." distVisibility: "..tostring(distVisibility))
 
@@ -1481,20 +1481,20 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 				local description = grndUnit:getDesc()
 
 				local life = description.life
-				local unitPos = grndUnit:getPoint()
-				local gpGid = Group.getID(gp)
+				local unitPosVec3 = grndUnit:getPoint()
+				-- local gpGid = Group.getID(gp)
 				local UnitId = Unit.getID(grndUnit)
-				local unitCallsign = grndUnit:getCallsign()
+				-- local unitCallsign = grndUnit:getCallsign()
 				local unitTypeName = grndUnit:getTypeName()
 
-				local distance = math.floor(math.sqrt(math.pow(unitPos.x - refX, 2) + math.pow(unitPos.z - refY, 2)))
+				local distance = math.floor(math.sqrt(math.pow(unitPosVec3.x - refX, 2) + math.pow(unitPosVec3.z - refY, 2)))
 
 				if distance < distVisibility then
 
 					local item = {
 						unitGround = grndUnit,
 						unitTypeName = unitTypeName,
-						unitPos = unitPos,
+						unitPos = unitPosVec3,
 						desc = description,
 						distance = distance,
 						life = life,
@@ -1547,23 +1547,23 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 			-- 2025-03-17 17:46:19.198 INFO    SCRIPTING (Main): CTS_description life: 2
 
 			local life = desc.life
-			local unitPos = static:getPoint()
+			local unitPosVec3 = static:getPoint()
 			local UnitId = static:getID()
 			local unitTypeName = static:getTypeName()
 
-			local distance = math.floor(math.sqrt(math.pow(unitPos.x - refX, 2) + math.pow(unitPos.z - refY, 2)))
+			local distance = math.floor(math.sqrt(math.pow(unitPosVec3.x - refX, 2) + math.pow(unitPosVec3.z - refY, 2)))
 
 			-- if category ~= "Fortifications" and distance < 50000 then
 			if distance < distVisibility and not string.find(string.lower(desc.typeName) , "sandbag") then
 
-				local lineOfSight = land.isVisible(afacPos, unitPos)
+				local lineOfSight = land.isVisible(afacPosVec3, unitPosVec3)
 
 				if lineOfSight then
 					local item = {
 						unitGround = static,
 						unitTypeName = unitTypeName,
 						name = stName,
-						unitPos = unitPos,
+						unitPos = unitPosVec3,
 						desc = desc,
 						distance = distance,
 						life = life,
@@ -1617,8 +1617,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 				gpGid = AFAC_available[afacFlightName]["gpGid"]
 			end
 			--detecte si l'AFAC rentre:
-			-- local afacPos = unitAFAC:getPoint()
-			local distAFAC_Pattern = math.floor(math.sqrt(math.pow(afacPos.x - refX, 2) + math.pow(afacPos.z - refY, 2)))
+			local distAFAC_Pattern = math.floor(math.sqrt(math.pow(afacPosVec3.x - refX, 2) + math.pow(afacPosVec3.z - refY, 2)))
 
 			-- env.info("DCE_AFAC () :GG2 distAFAC_Pattern "..tostring(distAFAC_Pattern))
 			-- trigger.action.outText("AFAC : passe GG2 distance: "..tostring(distAFAC_Pattern), 15)
@@ -1844,14 +1843,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 		end
 	end
 
-
-
-	--detecte si l'AFAC rentre:
-	-- local afacPos = unitAFAC:getPoint()
-	-- local distAFAC_Pattern = math.floor(math.sqrt(math.pow(afacPos.x - refX, 2) + math.pow(afacPos.z - refY, 2)))
-
 	timer.scheduleFunction(designationCycle, nil, timer.getTime() + 15)	--start designation cylce
-
 
 	env.info("DCE_CustomDesignationAFAC : FIN "..tostring(afacFlightName))
 	trigger.action.outText("AFAC : FIN "..tostring(afacFlightName), 15)
@@ -1908,10 +1900,10 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		return
 	end
 
-	local afacPos = unitAFAC:getPoint()
-	local afacAlt = afacPos.y
+	local afacPosVec3 = unitAFAC:getPoint()
+	local afacAlt = afacPosVec3.y
 
-	local terrainAlt = land.getHeight({x = afacPos.x, y = afacPos.z})
+	local terrainAlt = land.getHeight({x = afacPosVec3.x, y = afacPosVec3.z})
 
 	local distVisibility = distanceVisibilite(afacAlt, terrainAlt)
 	-- env.info("DCE_CustomDesignationAFAC() BB : afacFlightName "..tostring(afacFlightName).." afacAlt: "..tostring(afacAlt).." terrainAlt: "..tostring(terrainAlt).." distVisibility: "..tostring(distVisibility))
@@ -1935,13 +1927,13 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 				local description = grndUnit:getDesc()
 
 				local life = description.life
-				local unitPos = grndUnit:getPoint()
-				local gpGid = Group.getID(gp)
+				local unitPosVec3 = grndUnit:getPoint()
+				-- local gpGid = Group.getID(gp)
 				local UnitId = Unit.getID(grndUnit)
-				local unitCallsign = grndUnit:getCallsign()
+				-- local unitCallsign = grndUnit:getCallsign()
 				local unitTypeName = grndUnit:getTypeName()
 
-				local distance = math.floor(math.sqrt(math.pow(unitPos.x - refX, 2) + math.pow(unitPos.z - refY, 2)))
+				local distance = math.floor(math.sqrt(math.pow(unitPosVec3.x - refX, 2) + math.pow(unitPosVec3.z - refY, 2)))
 				-- env.info("DCE_AFAC () :DD_2a  "..distance)
 
 				if distance < distVisibility then
@@ -1951,7 +1943,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 					local item = {
 						unitGround = grndUnit,
 						unitTypeName = unitTypeName,
-						unitPos = unitPos,
+						unitPos = unitPosVec3,
 						desc = description,
 						distance = distance,
 						life = life,
@@ -1982,15 +1974,15 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 			local desc = static:getDesc()
 
 			local life = desc.life
-			local unitPos = static:getPoint()
+			local unitPosVec3 = static:getPoint()
 			local UnitId = static:getID()
 			local unitTypeName = static:getTypeName()
 
-			local distance = math.floor(math.sqrt(math.pow(unitPos.x - refX, 2) + math.pow(unitPos.z - refY, 2)))
+			local distance = math.floor(math.sqrt(math.pow(unitPosVec3.x - refX, 2) + math.pow(unitPosVec3.z - refY, 2)))
 
 			if distance < distVisibility and not string.find(string.lower(desc.typeName) , "sandbag") then
 
-				local lineOfSight = land.isVisible(afacPos, unitPos)
+				local lineOfSight = land.isVisible(afacPosVec3, unitPosVec3)
 
 				if lineOfSight then
 					-- env.info("DCE_AFAC () :EEb  "..tostring(unitTypeName).." desc.typeName: "..tostring(desc.typeName))
@@ -1999,7 +1991,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 						unitGround = static,
 						unitTypeName = unitTypeName,
 						name = stName,
-						unitPos = unitPos,
+						unitPosVec3 = unitPosVec3,
 						desc = desc,
 						distance = distance,
 						life = life,
@@ -2132,11 +2124,11 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	local new_way = {
 		[1] = {
-			['y'] = afacPos.z,
-			['x'] = afacPos.x,
+			['y'] = afacPosVec3.z,
+			['x'] = afacPosVec3.x,
 			['speed'] = descAfac.speedMax * 2/3,
 			['action'] = 'Turning Point',
-			['alt'] = afacPos.y,
+			['alt'] = afacPosVec3.y,
 
 			['type'] = 'Turning Point',
 			['alt_type'] = 'BARO',
@@ -2210,7 +2202,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 			},
 		},
 		[2] = {
-			['alt'] = afacPos.y,
+			['alt'] = afacPosVec3.y,
 			['type'] = 'Turning Point',
 			['action'] = 'Turning Point',
 			['alt_type'] = 'BARO',
@@ -2277,7 +2269,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 									["id"] = "Orbit",
 									["params"] =
 									{
-										["altitude"] = afacPos.y,
+										["altitude"] = afacPosVec3.y,
 										["pattern"] = "Anchored",
 										["hotLegDir"] = 2.6354471705114,
 										["speed"] = descAfac.speedMax * 2/3,
@@ -2319,7 +2311,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 			['ETA'] = current_time + 60,
 		},
 		[3] = {
-			['alt'] = afacPos.y,
+			['alt'] = afacPosVec3.y,
 			['type'] = 'Turning Point',
 			['action'] = 'Turning Point',
 			['alt_type'] = 'BARO',
@@ -2577,7 +2569,7 @@ function CustomSearchThenEngageTEST(flightName, radius, targetType, searchTime)
 					local desc = element:getDesc()
 					local cat = desc and desc.category or nil
 					local cntrl = flight:getController()
-					local pos = element:getPoint()
+					local posVec3 = element:getPoint()
 
 					local task_entry = {
 						id = 'ControlledTask',
@@ -2589,8 +2581,8 @@ function CustomSearchThenEngageTEST(flightName, radius, targetType, searchTime)
 								number = 1,
 								params = {
 									targetTypes = { targetType },
-									x = pos.x,
-									y = pos.z,
+									x = posVec3.x,
+									y = posVec3.z,
 									value = targetType .. ";",
 									priority = 0,
 									zoneRadius = radius,
@@ -2727,7 +2719,7 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 			if elementInAir and cat and element and element:getPlayerName() == nil  then	--and not RTB
 
 				local cntrl = flight:getController()						--get controller of group
-				local pos = element:getPoint()								--get position
+				local posVec3 = element:getPoint()								--get position
 				local task_entry = {}
 
 				if cat == Unit.Category.AIRPLANE then  --0 Airplane
@@ -2741,8 +2733,8 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 								number = 1,
 								params = {
 									targetTypes = { targetType },
-									x = pos.x,
-									y = pos.z,
+									x = posVec3.x,
+									y = posVec3.z,
 									value = targetType .. ";",
 									priority = 0,
 									zoneRadius = radius,
@@ -2768,8 +2760,8 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 								number = 1,
 								params = {
 									targetTypes = { "Helicopters" },
-									x = pos.x,
-									y = pos.z,
+									x = posVec3.x,
+									y = posVec3.z,
 									value = targetType .. ";",
 									priority = 0,
 									zoneRadius = 15000,
@@ -2859,7 +2851,7 @@ function OrbitPosition(FlightName, Alt, Speed, UntilTime)
 
 			local leader = flight:getUnit(1)								--get first unit in group
 			local cntrl = flight:getController()							--get controller of group
-			local pos = leader:getPoint()									--get position
+			local posVec3 = leader:getPoint()									--get position
 
 			local task_entry = {
 				["enabled"] = true,
@@ -2876,7 +2868,7 @@ function OrbitPosition(FlightName, Alt, Speed, UntilTime)
 							["altitude"] = Alt,
 							["pattern"] = "Circle",
 							["speed"] = Speed,
-							["point"] = { x = pos.x, y = pos.z},
+							["point"] = { x = posVec3.x, y = posVec3.z},
 						},
 					},
 					["stopCondition"] =
@@ -2943,30 +2935,30 @@ function Custom_RTB_2_Base(grpname, BaseName, speed, alt)
 			-- env.info( "Custom_RTB_2_Base, PASSE if flight and Base ")
 			-- trigger.action.outText( "Custom_RTB_2_Base, PASSE if flight and Base ", 30)
 
-			local posFlight = leader:getPoint()									--get position
+			local posFlightVec3 = leader:getPoint()									--get position
 			local pt_start = {
-				x2d = posFlight.x,
-				y2d = posFlight.z,
-				z2d = posFlight.y,
+				x = posFlightVec3.x,
+				y = posFlightVec3.z,
+				z = posFlightVec3.y,
 			}
 
-			local posBase = base:getPoint()										--get position	
+			local posBaseVec3 = base:getPoint()										--get position	
 			local uId = base:getID()
 			local pt_landing = {
-				x2d = posBase.x,
-				y2d = posBase.z,
-				z2d = posBase.y,
+				x = posBaseVec3.x,
+				y = posBaseVec3.z,
+				z = posBaseVec3.y,
 				Id = uId,
 			}
 
 			local current_time = timer.getTime()
-			local distance01 = math.sqrt(math.pow(pt_start.x2d - pt_landing.x2d, 2) + math.pow(pt_start.y2d - pt_landing.y2d, 2))
+			local distance01 = math.sqrt(math.pow(pt_start.x - pt_landing.x, 2) + math.pow(pt_start.y - pt_landing.y, 2))
 
 			local route = {}
 			route = {
 					[1] =
 					{
-						["alt"] = tonumber(pt_start.z2d + 100),
+						["alt"] = tonumber(pt_start.z + 100),
 						["action"] = "Turning Point",
 						["type"] = "Turning Point",
 						["alt_type"] = "BARO",
@@ -2983,15 +2975,15 @@ function Custom_RTB_2_Base(grpname, BaseName, speed, alt)
 						}, -- end of ["task"]
 						["ETA"] = current_time + 1 ,
 						["ETA_locked"] = true,
-						["y"] = pt_start.y2d,
-						["x"] = pt_start.x2d,
+						["y"] = pt_start.y,
+						["x"] = pt_start.x,
 						["name"] = "",
 						["formation_template"] = "",
 						["speed_locked"] = true,
 					}, -- end of [1]  
 				[2] =
 				{
-					["alt"] = tonumber((pt_start.z2d + pt_landing.z2d + 100) / 2),
+					["alt"] = tonumber((pt_start.z + pt_landing.z + 100) / 2),
 					["action"] = "Landing",
 					["alt_type"] = "BARO",
 					["speed"] = speed,
@@ -3008,8 +3000,8 @@ function Custom_RTB_2_Base(grpname, BaseName, speed, alt)
 					["type"] = "Land",
 					["ETA"] = (distance01 / speed) + current_time,
 					["ETA_locked"] = false,
-					["y"] = pt_landing.y2d,
-					["x"] = pt_landing.x2d,
+					["y"] = pt_landing.y,
+					["x"] = pt_landing.x,
 					["name"] = "",
 					["formation_template"] = "",
 					["speed_locked"] = true,
@@ -3094,39 +3086,39 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 		end
 
 		if leader and base  then
-			local posFlight = leader:getPoint()
+			local posFlightVec3 = leader:getPoint()
 			local pt_start = {
-				x2d = posFlight.x,
-				y2d = posFlight.z,
-				z2d = posFlight.y,
+				x = posFlightVec3.x,
+				y = posFlightVec3.z,
+				z = posFlightVec3.y,
 			}
 			local pt_dest = {
-				x2d = 0,
-				y2d = 0,
-				z2d = 0,
+				x = 0,
+				y = 0,
+				z = 0,
 				Id = 0,
 			}
 			local FuelPercent = Unit.getFuel(leader)
 
-			local posBase = base:getPoint()
+			local posBaseVec3 = base:getPoint()
 			local uId = base:getID()
 
 			local pt_landing = {
-				x2d = posBase.x,
-				y2d = posBase.z,
-				z2d = posBase.y,
+				x = posBaseVec3.x,
+				y = posBaseVec3.z,
+				z = posBaseVec3.y,
 				Id = uId,
 			}
 
 			local current_time = timer.getTime()
-			local distanceLanding = math.sqrt(math.pow(pt_start.x2d - pt_landing.x2d, 2) + math.pow(pt_start.y2d - pt_landing.y2d, 2))
+			local distanceLanding = math.sqrt(math.pow(pt_start.x - pt_landing.x, 2) + math.pow(pt_start.y - pt_landing.y, 2))
 
 			-- _affiche(zoneSAR, "Custom_AddWptSAR E zoneSAR")
 
 			local selectedDistance = 999999
 			local nb_survivor = 0
 
-			for MGRS_Chute, zone in pairs(zoneSAR) do
+			for MGRS_Chute, zone in pairs(ZoneSAR) do
 				for N_Pilot, uPilot in ipairs(zone) do
 					-- env.info( "Custom_AddWptSAR F  "..tostring(uPilot.name).."|"..tostring(mgrsChute).."|"..tostring(uPilot.status))
 
@@ -3134,7 +3126,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 						if uPilot.name and uPilot.embarked ~= true  and (uPilot.status ==  "MIA" or uPilot.status ==  "EVAC_possible" )  then
 							-- env.info( "Custom_AddWptSAR G "..tostring(uPilot.name).."|"..tostring(mgrsChute).."|"..tostring(uPilot.status))
 
-							local distance = math.sqrt(math.pow(pt_start.x2d - uPilot.x2d, 2) + math.pow(pt_start.y2d - uPilot.y2d, 2))
+							local distance = math.sqrt(math.pow(pt_start.x - uPilot.x, 2) + math.pow(pt_start.y - uPilot.y, 2))
 							if distance < selectedDistance then
 								selectedDistance = distance
 								pt_dest = uPilot
@@ -3147,7 +3139,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 			end
 
 			-- env.info( "Custom_AddWptSAR nb_survivor  "..tostring(nb_survivor).." FuelPercent: "..tostring(FuelPercent))
-			-- env.info( "Custom_AddWptSAR pt_start.c2d  "..tostring(pt_start.x2d).." pt_start.y2d: "..tostring(pt_start.y2d))
+			-- env.info( "Custom_AddWptSAR pt_start.c2d  "..tostring(pt_start.x).." pt_start.y: "..tostring(pt_start.y))
 
 			local newRoute = {}
 			if nb_survivor >= 1 and FuelPercent >= 0.5 and selectedDistance < 30001 then
@@ -3157,11 +3149,11 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 
 				-- env.info( "Custom_AddWptSAR J, TENTE nouveau WPT distance "..selectedDistance)
 
-				local distance01 = math.sqrt(math.pow(pt_start.x2d - pt_dest.x2d, 2) + math.pow(pt_start.y2d - pt_dest.y2d, 2))
+				local distance01 = math.sqrt(math.pow(pt_start.x - pt_dest.x, 2) + math.pow(pt_start.y - pt_dest.y, 2))
 
 				-- local distance = math.sqrt(math.pow(copyRoute[n].x - copyRoute[n+1].x, 2) + math.pow(copyRoute[n].y - copyRoute[n+1].y, 2))
-				local heading = GetHeading({x=pt_dest.x2d, y=pt_dest.y2d} , {x=pt_landing.x2d, y=pt_landing.y2d} )
-				local pt_inter = GetOffsetPoint({x=pt_dest.x2d, y=pt_dest.y2d}, heading , 1000 )
+				local heading = GetHeading({x=pt_dest.x, y=pt_dest.y} , {x=pt_landing.x, y=pt_landing.y} )
+				local pt_inter = GetOffsetPoint({x=pt_dest.x, y=pt_dest.y}, heading , 1000 )
 				-- env.info( "Custom_AddWptSAR K, pt_inter.x "..tostring(pt_inter.x))
 
 				pt_inter.alti = land.getHeight({x =pt_inter.x, y = pt_inter.y})
@@ -3170,7 +3162,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 				newRoute = {
 					[1] =
 						{
-							["alt"] = tonumber(pt_start.z2d + 100),
+							["alt"] = tonumber(pt_start.z + 100),
 							["action"] = "Turning Point",
 							["type"] = "Turning Point",
 							["alt_type"] = "BARO",
@@ -3206,14 +3198,14 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 							}, -- end of ["task"]
 							["ETA"] = current_time ,
 							["ETA_locked"] = true,
-							["y"] = pt_start.y2d,
-							["x"] = pt_start.x2d,
+							["y"] = pt_start.y,
+							["x"] = pt_start.x,
 							["formation_template"] = "",
 							["speed_locked"] = true,
 						}, -- end of [1]  
 					[2] =
 					{
-						["alt"] = tonumber(pt_dest.z2d + 100),
+						["alt"] = tonumber(pt_dest.z + 100),
 						["action"] = "Turning Point",
 						["alt_type"] = "BARO",
 						["speed"] = tonumber(speed),
@@ -3230,15 +3222,15 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 						["type"] = "Turning Point",
 						["ETA"] = current_time + 1 ,
 						["ETA_locked"] = false,
-						["y"] = pt_dest.y2d,
-						["x"] = pt_dest.x2d,
+						["y"] = pt_dest.y,
+						["x"] = pt_dest.x,
 						["name"] = "",
 						["formation_template"] = "",
 						["speed_locked"] = true,
 					},
 					[3] =
 					{
-						["alt"] = tonumber(pt_dest.z2d + 100),
+						["alt"] = tonumber(pt_dest.z + 100),
 						["action"] = "Turning Point",
 						["alt_type"] = "BARO",
 						["speed"] = tonumber(speed),
@@ -3263,8 +3255,8 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 												["id"] = "Script",
 												["params"] =
 												{
-																-- Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, speed, alt)
-													["command"] = "Custom_SAR('" .. grpname .. "', '" .. BaseName .. "', '" .. pt_landing.x2d .. "', '" .. pt_landing.y2d .. "', '" .. mgrsChute .. "', '" .. speed .. "', '" .. alt ..  "')",
+																-- Custom_SAR(grpname, BaseName, BaseNameX, BaseNameY, mgrsChute, speed, alt)
+													["command"] = "Custom_SAR('" .. grpname .. "', '" .. BaseName .. "', '" .. pt_landing.x .. "', '" .. pt_landing.y .. "', '" .. mgrsChute .. "', '" .. speed .. "', '" .. alt ..  "')",
 												}, -- end of ["params"]
 											}, -- end of ["action"]
 										}, -- end of ["params"]
@@ -3275,8 +3267,8 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 						["type"] = "Turning Point",
 						["ETA"] = (distance01 / speed) + current_time ,
 						["ETA_locked"] = false,
-						["y"] = pt_dest.y2d,
-						["x"] = pt_dest.x2d,
+						["y"] = pt_dest.y,
+						["x"] = pt_dest.x,
 						["name"] = "",
 						["formation_template"] = "",
 						["speed_locked"] = true,
@@ -3326,7 +3318,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 					},
 					[5] =
 					{
-						["alt"] = tonumber((pt_dest.z2d + pt_landing.z2d + 100) / 2),
+						["alt"] = tonumber((pt_dest.z + pt_landing.z + 100) / 2),
 						["action"] = "Landing",
 						["alt_type"] = "BARO",
 						["speed"] = tonumber(speed),
@@ -3343,8 +3335,8 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 						["type"] = "Land",
 						["ETA"] = (distanceLanding / speed) + current_time,
 						["ETA_locked"] = false,
-						["y"] = pt_landing.y2d,
-						["x"] = pt_landing.x2d,
+						["y"] = pt_landing.y,
+						["x"] = pt_landing.x,
 						["name"] = "",
 						["formation_template"] = "",
 						["speed_locked"] = true,
@@ -3457,9 +3449,9 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 						} -- end of ["task"]
 
 						--pour calculer l'altitude max du relief entre position actuel et wpt suivant
-						copyRoute[1].x = pt_start.x2d
-						copyRoute[1].y = pt_start.y2d
-						copyRoute[1]["alt"] = tonumber(pt_start.z2d + 100)
+						copyRoute[1].x = pt_start.x
+						copyRoute[1].y = pt_start.y
+						copyRoute[1]["alt"] = tonumber(pt_start.z + 100)
 
 						newRoute = copyRoute
 					else
@@ -3471,7 +3463,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 					newRoute = {
 						[1] =
 							{
-								["alt"] = tonumber(pt_start.z2d + 100),
+								["alt"] = tonumber(pt_start.z + 100),
 								["action"] = "Turning Point",
 								["type"] = "Turning Point",
 								["alt_type"] = "BARO",
@@ -3507,14 +3499,14 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 								}, -- end of ["task"]
 								["ETA"] = current_time + 1 ,
 								["ETA_locked"] = true,
-								["y"] = pt_start.y2d,
-								["x"] = pt_start.x2d,
+								["y"] = pt_start.y,
+								["x"] = pt_start.x,
 								["formation_template"] = "",
 								["speed_locked"] = true,
 							}, -- end of [1]  
 						[2] =
 						{
-							["alt"] = tonumber((pt_dest.z2d + pt_landing.z2d + 100) / 2),
+							["alt"] = tonumber((pt_dest.z + pt_landing.z + 100) / 2),
 							["action"] = "Landing",
 							["alt_type"] = "BARO",
 							["speed"] = tonumber(speed),
@@ -3531,8 +3523,8 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 							["type"] = "Land",
 							["ETA"] = (distanceLanding / speed) + current_time,
 							["ETA_locked"] = false,
-							["y"] = pt_landing.y2d,
-							["x"] = pt_landing.x2d,
+							["y"] = pt_landing.y,
+							["x"] = pt_landing.x,
 							["name"] = "",
 							["formation_template"] = "",
 							["speed_locked"] = true,
@@ -3589,7 +3581,7 @@ end	--Custom_AddWptSAR
 ----------------------------------------------------------------------------------------------------
 
 --Makes a personalized approach depending on the presence of a landing point or a soldier or the sea 
-function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, speed, alt)
+function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, alt)
 	if varFpsLeak_B then return end
 	local current_time = timer.getTime()
 	-- env.info( "Custom_SAR A0 current_time: "..tostring(current_time).." grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(mgrsChute))
@@ -3601,56 +3593,56 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 
 		local flight = Group.getByName(grpname)								--get Group
 		local leader = flight:getUnit(1)									--get first unit in group
-		local Base = Unit.getByName(BaseName)								--get unit
+		local base = Unit.getByName(baseName)								--get unit
 		local grpSide = tostring(flight:getCoalition())
 		local gpGid = Group.getID(flight)
 
-		local posFlight = leader:getPoint()									--get position
+		local posFlightVec3 = leader:getPoint()									--get position
 		local currentPos = {
-			x2d = posFlight.x,
-			y2d = posFlight.z,
-			z2d = posFlight.y,
+			x = posFlightVec3.x,
+			y = posFlightVec3.z,
+			z = posFlightVec3.y,
 		}
 
-		local SarSpeed = speed /2 *3
+		local uSAR_Speed = speed /2 *3
 		local pt_dest = {
-			x2d = 0,
-			y2d = 0,
-			z2d = 0,
+			x = 0,
+			y = 0,
+			z = 0,
 			Id = 0,
 			SoldierGroupID = 0,
 			landingPossible = false,
 			uPilotName = "",
 		}
 
-		local posBase
+		local posBaseVec3
 		local uId
-		local BaseNameZ2d = land.getHeight({x = BaseNameX2d, y = BaseNameY2d})
+		local baseNameZ = land.getHeight({x = baseNameX, y = baseNameY})
 		local pt_landing = {
-			x2d = BaseNameX2d,
-			y2d = BaseNameY2d,
-			z2d = BaseNameZ2d,
+			x = baseNameX,
+			y = baseNameY,
+			z = baseNameZ,
 		}
 
 		--TODO CV est aussi une base, il faut donc lui coller l'alti, ici aussi
 
-		if Base then
-			posBase = Base:getPoint()
-			uId = Base:getID()
+		if base then
+			posBaseVec3 = base:getPoint()
+			uId = base:getID()
 
-			pt_landing.x2d = posBase.x
-			pt_landing.y2d = posBase.z
+			pt_landing.x = posBaseVec3.x
+			pt_landing.y = posBaseVec3.z
 			pt_landing.Id = uId
 
 		end
 
 		--TODO ajouter la distinction par camp (???)
-		local PosEjectPilot
+		local posEjectPilotVec3
 
 		local selected_distance = 9999999
 		local selectedEjection = {}
 
-		for MGRS_Chute, zone in pairs(zoneSAR) do
+		for MGRS_Chute, zone in pairs(ZoneSAR) do
 			-- env.info( "Custom_SAR C grpSide: " ..tostring(grpSide).."| MGRS_Chute: "..tostring(MGRS_Chute).." "..current_time)
 
 			for N_Pilot, uPilot in ipairs(zone) do
@@ -3663,7 +3655,7 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 					local wrongSide = false
 					local ENI_Side = DCS_ENI_Side[uPilot.side]
 					if camp.boundary and camp.boundary[ENI_Side] and camp.boundary[ENI_Side] ~= nil then
-						wrongSide =  CheckPointInPoly_XY_2({x=uPilot.x2d,y=uPilot.y2d} , camp.boundary[ENI_Side])
+						wrongSide =  CheckPointInPoly_XY_2({x=uPilot.x,y=uPilot.y} , camp.boundary[ENI_Side])
 						-- env.info( "Custom_SAR DD3?  boundary wrongSide ? __"..tostring(wrongSide))
 						if wrongSide  then
 							authorisesRescue = false
@@ -3673,7 +3665,7 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 					if authorisesRescue and uPilot.name and uPilot.name ~= nil and not uPilot.embarked then
 
 						local unitPilot = Unit.getByName(uPilot.name)
-						local temp_x2d, temp_y2d, temp_z2d = 0, 0, 0
+						local temp_x, temp_y, temp_z = 0, 0, 0
 						local distance = 0
 						local temp_SoldierGroupID = 0
 						local temp_landingPossible = uPilot.landingPossible
@@ -3684,20 +3676,20 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 						if uPilot.SurfaceType == 3 then												--dans l'eau: pas de soldat
 							-- env.info( "Custom_SAR F")
 
-							temp_x2d, temp_y2d, temp_z2d = uPilot.x2d, uPilot.y2d, uPilot.z2d
+							temp_x, temp_y, temp_z = uPilot.x, uPilot.y, uPilot.z
 							temp_SoldierGroupID = 0
 						elseif unitPilot and unitPilot ~= nil then
 							-- env.info( "Custom_SAR G")
 
-							PosEjectPilot = unitPilot:getPoint()
-							temp_x2d, temp_y2d, temp_z2d = PosEjectPilot.x, PosEjectPilot.z, PosEjectPilot.y
+							posEjectPilotVec3 = unitPilot:getPoint()
+							temp_x, temp_y, temp_z = posEjectPilotVec3.x, posEjectPilotVec3.z, posEjectPilotVec3.y
 							temp_SoldierGroupID = unitPilot:getGroup():getID()
 							-- temp_landingPossible = unitPilot.landingPossible
 
 						end
 
-						-- distance = math.sqrt(math.pow(currentPos.x2d - PosEjectPilot.x, 2) + math.pow(currentPos.y2d - PosEjectPilot.z, 2))
-						distance = math.sqrt(math.pow(currentPos.x2d - temp_x2d, 2) + math.pow(currentPos.y2d - temp_y2d, 2))
+						-- distance = math.sqrt(math.pow(currentPos.x - PosEjectPilot.x, 2) + math.pow(currentPos.y - PosEjectPilot.z, 2))
+						distance = math.sqrt(math.pow(currentPos.x - temp_x, 2) + math.pow(currentPos.y - temp_y, 2))
 						-- env.info( "Custom_SAR H1 distance: "..tostring(distance))
 
 						if distance <= 15000 and distance < selected_distance  then
@@ -3705,9 +3697,9 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 
 							selected_distance = distance
 
-							pt_dest.x2d = temp_x2d
-							pt_dest.y2d = temp_y2d
-							pt_dest.z2d = temp_z2d
+							pt_dest.x = temp_x
+							pt_dest.y = temp_y
+							pt_dest.z = temp_z
 							pt_dest.landingPossible = temp_landingPossible
 
 							selectedEjection = uPilot
@@ -3727,16 +3719,16 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 		end
 
 		-- si pas de présence de soldat, simulant le piloteEjecté: on sort (cas des ejected en mer, par exemple)
-		if pt_dest.x2d == 0 then
+		if pt_dest.x == 0 then
 			-- env.info( "Custom_SAR Ib RETURN ************* ")
 			return
 		end
 
-		local distanceLanding = math.sqrt(math.pow(currentPos.x2d - pt_landing.x2d, 2) + math.pow(currentPos.y2d - pt_landing.y2d, 2))
-		local headingRTB = GetHeading({x=pt_dest.x2d, y=pt_dest.y2d} , {x=pt_landing.x2d, y=pt_landing.y2d} )
+		local distanceLanding = math.sqrt(math.pow(currentPos.x - pt_landing.x, 2) + math.pow(currentPos.y - pt_landing.y, 2))
+		local headingRTB = GetHeading({x=pt_dest.x, y=pt_dest.y} , {x=pt_landing.x, y=pt_landing.y} )
 		-- local distanceRTB = distanceLanding/2
 		local distanceRTB = 1500
-		local pointRTB = GetOffsetPoint({x=pt_dest.x2d, y=pt_dest.y2d}, headingRTB, distanceRTB)
+		local pointRTB = GetOffsetPoint({x=pt_dest.x, y=pt_dest.y}, headingRTB, distanceRTB)
 		local pointRTBz = land.getHeight({x =pointRTB.x, y = pointRTB.y})
 		local pt50m
 		local selectedTransport = 1
@@ -3749,7 +3741,7 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 		elseif pt_dest.landingPossible then
 
 			--on tente la position  50m plus loin que l'ejectedPilot pour ne par lui tomber dessus
-			pt50m = GetOffsetPoint({x=pt_dest.x2d, y=pt_dest.y2d}, 0, 50 )
+			pt50m = GetOffsetPoint({x=pt_dest.x, y=pt_dest.y}, 0, 50 )
 
 			-- env.info( "Custom_SAR Y NEW pt_dest LANDING "..tostring(pt50m.x).." "..tostring(pt50m.y))
 
@@ -3789,11 +3781,11 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 		local route = {
 			[1] =
 				{
-					["alt"] = currentPos.z2d,
+					["alt"] = currentPos.z,
 					["action"] = "Turning Point",
 					["type"] = "Turning Point",
 					["alt_type"] = "BARO",
-					["speed"] = tonumber(SarSpeed),
+					["speed"] = tonumber(uSAR_Speed),
 					["task"] =
 					{
 						["id"] = "ComboTask",
@@ -3806,18 +3798,18 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 					}, -- end of ["task"]
 					["ETA"] = current_time ,
 					["ETA_locked"] = true,
-					["y"] = currentPos.y2d,
-					["x"] = currentPos.x2d,
+					["y"] = currentPos.y,
+					["x"] = currentPos.x,
 					["name"] = "",
 					["formation_template"] = "",
 					["speed_locked"] = true,
 				}, -- end of [1]  
 			[2] =
 			{
-				["alt"] = pt_dest.z2d + 150 ,
+				["alt"] = pt_dest.z + 150 ,
 				["action"] = "Turning Point",
 				["alt_type"] = "BARO",
-				["speed"] = tonumber(SarSpeed),
+				["speed"] = tonumber(uSAR_Speed),
 				["task"] =
 				{
 					["id"] = "ComboTask",
@@ -3829,20 +3821,20 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 					}, -- end of ["params"]
 				}, -- end of ["task"]
 				["type"] = "Turning Point",
-				["ETA"] =  (selected_distance / SarSpeed) + current_time ,
+				["ETA"] =  (selected_distance / uSAR_Speed) + current_time ,
 				["ETA_locked"] = false,
-				["y"] = pt_dest.y2d,
-				["x"] = pt_dest.x2d,
+				["y"] = pt_dest.y,
+				["x"] = pt_dest.x,
 				["name"] = "",
 				["formation_template"] = "",
 				["speed_locked"] = true,
 			},
 			[3] =
 			{
-				["alt"] = pt_dest.z2d + 150,
+				["alt"] = pt_dest.z + 150,
 				["action"] = "Turning Point",
 				["alt_type"] = "BARO",
-				["speed"] = tonumber(SarSpeed),
+				["speed"] = tonumber(uSAR_Speed),
 				["task"] =
 				{
 					["id"] = "ComboTask",
@@ -3854,10 +3846,10 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 					}, -- end of ["params"]
 				}, -- end of ["task"]
 				["type"] = "Turning Point",
-				["ETA"] =  (selected_distance / SarSpeed) + current_time + 2 ,
+				["ETA"] =  (selected_distance / uSAR_Speed) + current_time + 2 ,
 				["ETA_locked"] = false,
-				["y"] = pt_dest.y2d,
-				["x"] = pt_dest.x2d,
+				["y"] = pt_dest.y,
+				["x"] = pt_dest.x,
 				["name"] = "",
 				["formation_template"] = "",
 				["speed_locked"] = true,
@@ -3867,7 +3859,7 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 				["alt"] = pointRTBz + 150 ,
 				["action"] = "Turning Point",
 				["alt_type"] = "BARO",
-				["speed"] = tonumber(SarSpeed),
+				["speed"] = tonumber(uSAR_Speed),
 				["task"] =
 				{
 					["id"] = "ComboTask",
@@ -3907,7 +3899,7 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 			},
 			[5] =
 			{
-				["alt"] = tonumber(pt_landing.z2d + 100),
+				["alt"] = tonumber(pt_landing.z + 100),
 				["action"] = "Landing",
 				["alt_type"] = "BARO",
 				["speed"] = tonumber(speed),
@@ -3924,8 +3916,8 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 				["type"] = "Land",
 				["ETA"] = (distanceLanding / speed) + current_time,
 				["ETA_locked"] = false,
-				["y"] = tonumber(pt_landing.y2d),
-				["x"] = tonumber(pt_landing.x2d),
+				["y"] = tonumber(pt_landing.y),
+				["x"] = tonumber(pt_landing.x),
 				["name"] = "",
 				["formation_template"] = "",
 				["speed_locked"] = true,
@@ -3960,7 +3952,7 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 										["speedEdited"] = true,
 										["pattern"] = "Circle",
 										["speed"] = 0,		--["speed"] = 0.27777777777778,
-										["altitude"] = pt_dest.z2d + 80,
+										["altitude"] = pt_dest.z + 80,
 										["altitudeEdited"] = true,
 									}, -- end of ["params"]
 								}, -- end of ["task"]
@@ -3983,7 +3975,7 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 									["id"] = "Script",
 									["params"] =
 									{
-										["command"] = "Custom_AddWptSAR('" .. grpname .. "', '" .. BaseName .. "', '" .. mgrsChute .. "', '" .. speed .. "', '" .. alt ..  "')",
+										["command"] = "Custom_AddWptSAR('" .. grpname .. "', '" .. baseName .. "', '" .. mgrsChute .. "', '" .. speed .. "', '" .. alt ..  "')",
 									}, -- end of ["params"]
 								}, -- end of ["action"]
 							}, -- end of ["params"]
@@ -4086,7 +4078,7 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 									["id"] = "Script",
 									["params"] =
 									{
-										["command"] = "Custom_AddWptSAR('" .. grpname .. "', '" .. BaseName .. "', '" .. mgrsChute .. "', '" .. speed .. "', '" .. alt .. "')",
+										["command"] = "Custom_AddWptSAR('" .. grpname .. "', '" .. baseName .. "', '" .. mgrsChute .. "', '" .. speed .. "', '" .. alt .. "')",
 									}, -- end of ["params"]
 								}, -- end of ["action"]
 							}, -- end of ["params"]
@@ -4189,7 +4181,7 @@ function Custom_SAR(grpname, BaseName, BaseNameX2d, BaseNameY2d, mgrsChute, spee
 									["id"] = "Script",
 									["params"] =
 									{
-										["command"] = "Custom_AddWptSAR('" .. grpname .. "', '" .. BaseName .. "', '" .. mgrsChute ..  "', '" .. speed ..  "', '" .. alt ..  "')",
+										["command"] = "Custom_AddWptSAR('" .. grpname .. "', '" .. baseName .. "', '" .. mgrsChute ..  "', '" .. speed ..  "', '" .. alt ..  "')",
 									}, -- end of ["params"]
 								}, -- end of ["action"]
 							}, -- end of ["params"]
@@ -4298,20 +4290,11 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 		end
 
 		local ctr = selectedMember:getGroup():getController()
-		local actualPosition = selectedMember:getPoint()
+		local actualPositionVec3 = selectedMember:getPoint()
 		local actualPositionXY = {
-			x = actualPosition.x,
-			y = actualPosition.z,
+			x = actualPositionVec3.x,
+			y = actualPositionVec3.z,
 		}
-
-		-- local leader = flight:getUnit(1)		
-		-- local ctr = leader:getGroup():getController()
-		-- local current_time = timer.getTime()
-		-- local actualPosition = leader:getPoint()
-		-- local actualPositionXY = {
-		-- 	x = actualPosition.x,
-		-- 	y = actualPosition.z,
-		-- }
 
 		local addAlti = 150
 		local str_selectedMember = selectedMember:getTypeName()
@@ -4379,7 +4362,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 			else
 				for Npoint, point in ipairs(copyRoute)  do
 
-					local distance = math.sqrt(math.pow(point.x - actualPosition.x, 2) + math.pow(point.y - actualPosition.z, 2))
+					local distance = math.sqrt(math.pow(point.x - actualPositionVec3.x, 2) + math.pow(point.y - actualPositionVec3.z, 2))
 					if distance < 1000 then
 						if point.task and point.task.params and point.task.params.tasks then
 							for Ntask , taskFinal in ipairs(point.task.params.tasks)  do

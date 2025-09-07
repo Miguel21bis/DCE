@@ -3454,7 +3454,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 										["id"] = "Script",
 										["params"] =
 										{
-														-- Custom_SAR(grpname, airdrome, airdromeX2d, airdromeY2d, mgrsChute, speed, alt)
+														-- Custom_SAR(grpname, airdrome, airdromeX, airdromeY, mgrsChute, speed, alt)
 											["command"] = "Custom_SAR('" .. groupName .. "', '" .. flight[f].base .. "', '" .. db_airbases[flight[f].base].x .. "', '" .. db_airbases[flight[f].base].y .. "', '" .. flight[f].target_name .. "', '" .. flight[f].loadout.vCruise .. "', '" .. alt_cruise ..  "')",
 										},
 									},
@@ -4423,7 +4423,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 						if waypoints[n]["briefing_name"] == "IP" or waypoints[n]["briefing_name"] == "Attack"  then   -- or waypoints[n]["briefing_name"] == "Egress"
 
-							local altEjected  = flight[f].target.elements[1].z2d + 100
+							local altEjected  = flight[f].target.elements[1].z + 100
 
 							waypoints[n]["alt"] = altEjected
 
@@ -7674,7 +7674,7 @@ if testPosRunwayImpact then
 						{
 							[1] =
 							{
-								-- ["alt"] = tonumber(target.z2d),
+								-- ["alt"] = tonumber(target.z),
 								["type"] = "Turning Point",
 								ETA = 0,
 								["name"] = tostring(baseName).."_runway_"..runwayN,

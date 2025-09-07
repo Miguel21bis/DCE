@@ -58,7 +58,7 @@ clientFile:close()
 
 -- local oob_scen_old = loadfile("Active/oob_scen.lua")()										--load oob_scen file
 for scen_name, scen in PairsByKeys(scen_log) do												--iterate through destroyed scenery objects
-	if scen.x and scen.z then																--destroyed scenery object has x and z coordinates
+	if scen.x and scen.y then																--destroyed scenery object has x and z coordinates
 
 		local isForest = false
 		if scen.sceneryTypeName and string.find(scen.sceneryTypeName, "FOREST")  then

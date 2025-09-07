@@ -161,7 +161,7 @@ end
 
 for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed scenery objects
 
-	if scen.x and scen.z then														--destroyed scenery object has x and z coordinates
+	if scen.x and scen.y then														--destroyed scenery object has x and z coordinates
 
 		local isForest = false
 		if scen.sceneryTypeName and string.find(scen.sceneryTypeName, "FOREST")  then
@@ -185,7 +185,7 @@ for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed 
 			--add trigger zone
 			local dataZone = {
 				["x"] = scen.x,
-				["y"] = scen.z,
+				["y"] = scen.y,
 				["radius"] = radius,
 				["zoneId"] = zoneId,
 				["color"] =

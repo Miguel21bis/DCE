@@ -72,13 +72,13 @@ versionDCE["Mission Scripts/AirGroundAttackScript.lua"] = "1.2.3"
 ---------------------------------------------------------------------------------------------------------------------------------
 
 
-local AttackCounter	= {}																		--table to count how many flights have already attacked the same target and distribute target sub-elements for subsequent attacks accordingly
+local attackCounter	= {}																		--table to count how many flights have already attacked the same target and distribute target sub-elements for subsequent attacks accordingly
 
-function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, OffsetAngle, ClimbAngle, PopAlt, AttackDist, Reattack, Debug)
-	local wingman = Group.getByName(FlightName):getUnits()
+function AirGroundAttackTask(flightName, target, weaponType, expendQty, dive, offsetAngle, climbAngle, popAlt, attackDist, reattack, debug)
+	local wingman = Group.getByName(flightName):getUnits()
 	
 	--get flight route of group for egress and resume route after attack
-	local function GetPlaneGroupRoute(groupname)
+	local function getPlaneGroupRoute(groupname)
 		for coalition_name,coal in pairs(env.mission.coalition) do
 			for country_n,country in pairs(coal.country) do
 				if country.plane then
@@ -91,7 +91,7 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 			end
 		end
 	end
-	local route	= GetPlaneGroupRoute(FlightName)												--get the route of the flight from env.mission
+	local route	= getPlaneGroupRoute(flightName)												--get the route of the flight from env.mission
 	local AttackWpN																				--number of attack waypoint in route
 	local EgressWpN																				--number of egress waypoint in route
 	for w = 1, #route do																		--iterate through waypoints of group
@@ -118,62 +118,71 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 	
 	
 	----- build target list based on target type -----
-	local TargetList = {}																		--list of all target sub-elements
-	local TargetType																			--store the type of target
-	local AttackN
+	local targetList = {}																		--list of all target sub-elements
+	local targetType																			--store the type of target
+	local attackN
 	
 	--vehicle/ship
-	if type(Target) == "string" then															--target is vehicle/ship (group name)
-		TargetType = "unit"
-		local TargetGroup = Group.getByName(Target):getUnits()									--get target group
-		if TargetGroup then																		--target group exists
-			for n = 1, #TargetGroup do															--iterate through units in target group
-				local TgtPoint = TargetGroup[n]:getPoint()										--get point of target unit
-				TgtPoint.y = TgtPoint.z															--turn vec3 coordinate into vec2 coordinate
-				table.insert(TargetList, TgtPoint)												--insert target unit coordinates into Target List
+	if type(target) == "string" then															--target is vehicle/ship (group name)
+		targetType = "unit"
+		local targetGroup = Group.getByName(target):getUnits()									--get target group
+		if targetGroup then																		--target group exists
+			for n = 1, #targetGroup do															--iterate through units in target group
+				local targetVec3 = targetGroup[n]:getPoint()										--get point of target unit
+				targetVec3.y = targetVec3.z															--turn vec3 coordinate into vec2 coordinate
+                local targetPos = {
+					x = targetVec3.x,
+                    y = targetVec3.z,
+					z = targetVec3.y,
+				 }										--turn vec3 coordinate into vec2 coordinate
+				table.insert(targetList, targetPos) --insert target unit coordinates into Target List
 			end
 		end
-		if AttackCounter[Target] then															--counter with number of flights that have already attacked this target
-			AttackCounter[Target] = AttackCounter[Target] + 1									--increase counter by one
+		if attackCounter[target] then															--counter with number of flights that have already attacked this target
+			attackCounter[target] = attackCounter[target] + 1									--increase counter by one
 		else																					--no flight has attacked this target yet
-			AttackCounter[Target] = 1															--set to one
+			attackCounter[target] = 1															--set to one
 		end
-		AttackN = AttackCounter[Target]
+		attackN = attackCounter[target]
 		
 	--static object
-	elseif type(Target) == "table" and Target[1] and type(Target[1]) == "string" then			--target is static object (array of static object names)
-		TargetType = "static"
-		for n = #Target, 1, -1 do																--iterate through static objects in target array backwards (to allow element removal)
-			local obj = StaticObject.getByName(Target[n])										--get static object
+	elseif type(target) == "table" and target[1] and type(target[1]) == "string" then			--target is static object (array of static object names)
+		targetType = "static"
+		for n = #target, 1, -1 do																--iterate through static objects in target array backwards (to allow element removal)
+			local obj = StaticObject.getByName(target[n])										--get static object
 			if obj then																			--static object exists
-				local TgtPoint = obj:getPoint()													--get point of static object
-				TgtPoint.y = TgtPoint.z															--turn vec3 coordinate into vec2 coordinate
-				table.insert(TargetList, 1, TgtPoint)											--insert static object coordinates into first position of Target List (this alows same order in Target List as in Target array)
+				local targetVec3 = obj:getPoint()													--get point of static object
+				local targetPos = {
+					x = targetVec3.x,
+					y = targetVec3.z,
+					z = targetVec3.y,
+				}                           --turn vec3 coordinate into vec2 coordinate
+				table.insert(targetList, 1, targetPos) --insert static object coordinates into first position of Target List (this alows same order in Target List as in Target array)
 			else																				--static object does not exist
-				table.remove(Target, n)															--remove name from target array
+				table.remove(target, n)															--remove name from target array
 			end
 		end
-		if AttackCounter[Target[1]] then														--counter with number of flights that have already attacked this target
-			AttackCounter[Target[1]] = AttackCounter[Target[1]] + 1								--increase counter by one
+		if attackCounter[target[1]] then														--counter with number of flights that have already attacked this target
+			attackCounter[target[1]] = attackCounter[target[1]] + 1								--increase counter by one
 		else																					--no flight has attacked this target yet
-			AttackCounter[Target[1]] = 1														--set to one
+			attackCounter[target[1]] = 1														--set to one
 		end
-		AttackN = AttackCounter[Target[1]]
+		attackN = attackCounter[target[1]]
 		
 	--scenery object
-	elseif type(Target) == "table" and Target[1] and Target[1].x and Target[1].y then			--target is scenery object (array of coordinates)
-		TargetType = "scenery"
-		TargetList = Target																		--Target List is this array
-		if AttackCounter[Target[1].x .. Target[1].y] then										--counter with number of flights that have already attacked this target
-			AttackCounter[Target[1].x .. Target[1].y] = AttackCounter[Target[1].x .. Target[1].y] + 1	--increase counter by one
+	elseif type(target) == "table" and target[1] and target[1].x and target[1].y then			--target is scenery object (array of coordinates)
+		targetType = "scenery"
+		targetList = target																		--Target List is this array
+		if attackCounter[target[1].x .. target[1].y] then										--counter with number of flights that have already attacked this target
+			attackCounter[target[1].x .. target[1].y] = attackCounter[target[1].x .. target[1].y] + 1	--increase counter by one
 		else																					--no flight has attacked this target yet
-			AttackCounter[Target[1].x .. Target[1].y] = 1										--set to one
+			attackCounter[target[1].x .. target[1].y] = 1										--set to one
 		end
-		AttackN = AttackCounter[Target[1].x .. Target[1].y]
+		attackN = attackCounter[target[1].x .. target[1].y]
 		
 	--airbase
-	elseif type(Target) == "table" and Target.x and Target.y then								--target is airbase (single coordinate; search for parked aircraft to attack)
-		TargetType = "airbase"
+	elseif type(target) == "table" and target.x and target.y then								--target is airbase (single coordinate; search for parked aircraft to attack)
+		targetType = "airbase"
 		local function Found(u)																	--for each found unit, determine if it is a parked aircraft and insert coordinates into target list
 			if u:getCoalition() ~= wingman[1]:getCoalition() then								--unit is hostile
 				local desc = u:getDesc()														--get unit description
@@ -181,8 +190,8 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 					if u:inAir() == false then													--aircraft is on ground
 						local uV = u:getVelocity()												--get aircraft speed
 						if (desc.category == 0 and uV.x == 0 and uV.y == 0 and uV.z == 0) or desc.category == 1 then	--aircraft is stationary/parked	(doesn't work for helicopters because for helos getVelocity returns IAS not absolute speed)	
-							local uP = u:getPoint()												--get aircraft point
-							table.insert(TargetList, {x = uP.x, y = uP.z})						--insert x-y coordinates into targetlist
+							local uVec3 = u:getPoint()												--get aircraft point
+							table.insert(targetList, {x = uVec3.x, y = uVec3.z})						--insert x-y coordinates into targetlist
 						end
 					end
 				end
@@ -194,58 +203,58 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 			id = world.VolumeType.SPHERE,
 			params = {
 				point = {
-					x = Target.x,
-					y = land.getHeight({Target.x, Target.y}),
-					z = Target.y,
+					x = target.x,
+					y = land.getHeight({target.x, target.y}),
+					z = target.y,
 				},
 				radius = 5000
 			}
 		}
 		world.searchObjects(Object.Category.UNIT, SearchArea, Found)							--search for parked aircraft
 		
-		if AttackCounter[Target.x .. Target.y] then												--counter with number of flights that have already attacked this target
-			AttackCounter[Target.x .. Target.y] = AttackCounter[Target.x .. Target.y] + 1		--increase counter by one
+		if attackCounter[target.x .. target.y] then												--counter with number of flights that have already attacked this target
+			attackCounter[target.x .. target.y] = attackCounter[target.x .. target.y] + 1		--increase counter by one
 		else																					--no flight has attacked this target yet
-			AttackCounter[Target.x .. Target.y] = 1												--set to one
+			attackCounter[target.x .. target.y] = 1												--set to one
 		end
-		AttackN = AttackCounter[Target.x .. Target.y]
+		attackN = attackCounter[target.x .. target.y]
 	end
 	
 	
 	----- weapon types -----																	--weapon types can either be given as numbers (DCS codes), strings as convenient helpers (are converted to actual numbers below) or arrays of numbers (if multiple weapon types shall be used)
-	if WeaponType == nil or WeaponType == "Auto" then
-		WeaponType = 1073741822																	--DCS code for auto
-	elseif WeaponType == "Cannon" then
-		WeaponType = 805306368																	--DCS code for cannon
-	elseif WeaponType == "Rockets" then
-		WeaponType = 30720																		--DCS code for unguided rockets		
-	elseif WeaponType == "Bombs" then
-		WeaponType = 2032																		--DCS code for unguided bombs
-	elseif WeaponType == "Guided bombs" then
-		WeaponType = 14																			--DCS code for guided bombs
-	elseif WeaponType == "ASM" then
-		WeaponType = 4161536																	--DCS code for guided missiles
+	if weaponType == nil or weaponType == "Auto" then
+		weaponType = 1073741822																	--DCS code for auto
+	elseif weaponType == "Cannon" then
+		weaponType = 805306368																	--DCS code for cannon
+	elseif weaponType == "Rockets" then
+		weaponType = 30720																		--DCS code for unguided rockets		
+	elseif weaponType == "Bombs" then
+		weaponType = 2032																		--DCS code for unguided bombs
+	elseif weaponType == "Guided bombs" then
+		weaponType = 14																			--DCS code for guided bombs
+	elseif weaponType == "ASM" then
+		weaponType = 4161536																	--DCS code for guided missiles
 	end
 			
-	if type(WeaponType) == "number" then														--there is only a single weapon type
-		WeaponType = {WeaponType}																--turn weapon type into an array
+	if type(weaponType) == "number" then														--there is only a single weapon type
+		weaponType = {weaponType}																--turn weapon type into an array
 	end
 	
 	
 	----- egress direction -----
 	local EgressAngle																			--angle between attack axis and egress direction (positive to the right, negative to the left)
 	local EgressVec2 = {																		--vector from target to egress waypoint
-		x = route[EgressWpN].x - TargetList[1].x,												--use first element of target list so that egress vector is the same for all wingmen
-		y = route[EgressWpN].y - TargetList[1].y,
+		x = route[EgressWpN].x - targetList[1].x,												--use first element of target list so that egress vector is the same for all wingmen
+		y = route[EgressWpN].y - targetList[1].y,
 	}
 	local d_Tgt_Egress = math.sqrt(math.pow(EgressVec2.x, 2) + math.pow(EgressVec2.y, 2))		--distance from target to egress waypoint
 	EgressVec2.x = EgressVec2.x / d_Tgt_Egress													--normalize vector
 	EgressVec2.y = EgressVec2.y / d_Tgt_Egress													--normalize vector
 	
-	if PopAlt and PopAlt > 0 then																--if attack profile includes a pop-up, get ingress-egress direction to make egress turn
+	if popAlt and popAlt > 0 then																--if attack profile includes a pop-up, get ingress-egress direction to make egress turn
 		local IngressVec2 = {																	--vector from attack waypoint to target
-			x = TargetList[1].x - route[AttackWpN].x,											--use first element of target list so that ingress vector is the same for all wingmen
-			y = TargetList[1].y - route[AttackWpN].y,
+			x = targetList[1].x - route[AttackWpN].x,											--use first element of target list so that ingress vector is the same for all wingmen
+			y = targetList[1].y - route[AttackWpN].y,
 		}
 		EgressAngle = math.deg(math.atan2(EgressVec2.y, EgressVec2.x) - math.atan2(IngressVec2.y, IngressVec2.x))
 		if EgressAngle < -180 then
@@ -257,12 +266,12 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 	
 	
 	----- assign target to wingman -----
-	if #TargetList > 0 then																		--there is at least one target in target list
+	if #targetList > 0 then																		--there is at least one target in target list
 		for w = 1, #wingman do																	--iterate through wingmen
-			local TgtN = 1 + math.ceil((w - 1) * (#TargetList / #wingman))						--distribute target numbers across flight
-			TgtN = TgtN + AttackN - 1															--increase target number to adjust for previous attacks
-			while TgtN > #TargetList do
-				TgtN = TgtN - #TargetList
+			local TgtN = 1 + math.ceil((w - 1) * (#targetList / #wingman))						--distribute target numbers across flight
+			TgtN = TgtN + attackN - 1															--increase target number to adjust for previous attacks
+			while TgtN > #targetList do
+				TgtN = TgtN - #targetList
 			end
 			
 			----- calculate the geometry of the pop-up maneuver -----
@@ -275,12 +284,12 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 			local ClimbEndPoint																	--end of the pop-up climb (only needed for offset turn)
 			local OffsetSide = 0																--side of the offset turn (only needed for offset turn)
 			local RollInAngle																	--angle to turn into the target at the top of the pop-up (only needed for offset turn)
-			local TgtElev = land.getHeight(TargetList[TgtN])									--target ground elevation
+			local TgtElev = land.getHeight(targetList[TgtN])									--target ground elevation
 				
-			if PopAlt and PopAlt > 0 then														--attack profile has a pop-up element
+			if popAlt and popAlt > 0 then														--attack profile has a pop-up element
 			
-				if OffsetAngle == nil then														--attack profile has no offset
-					OffsetAngle = 0																--set angle zero to enable pop-up calculations
+				if offsetAngle == nil then														--attack profile has no offset
+					offsetAngle = 0																--set angle zero to enable pop-up calculations
 				end
 				
 				--AoA is required later because climb angle needs to be corrected for AoA (climb task is based on pitch)
@@ -296,23 +305,23 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 				end
 				
 				--create time on target interval for wingmen
-				if OffsetAngle > 0 then																	--attack profile as an offset turn element
+				if offsetAngle > 0 then																	--attack profile as an offset turn element
 					if w > 1 then																		--for any wingman
-						OffsetAngle = OffsetAngle + 3													--increase offset angle by 3° from previous aircraft
-						ClimbAngle = ClimbAngle - 3														--decrease climb angle by 3° from previous aircraft (min climb angle is hard limited to 15° later)
-						if WeaponType[1] ~= 4161536 then												--for weapons other than guided missiles increase pop-altitude (guided missiles have standoff and are less sensitive for TOT deconfliction)
-							PopAlt = PopAlt + 166														--increase pop-up altitude by 166m (500 ft) from previous aircraft
+						offsetAngle = offsetAngle + 3													--increase offset angle by 3° from previous aircraft
+						climbAngle = climbAngle - 3														--decrease climb angle by 3° from previous aircraft (min climb angle is hard limited to 15° later)
+						if weaponType[1] ~= 4161536 then												--for weapons other than guided missiles increase pop-altitude (guided missiles have standoff and are less sensitive for TOT deconfliction)
+							popAlt = popAlt + 166														--increase pop-up altitude by 166m (500 ft) from previous aircraft
 						end
 					end
 				end
 				
 				--dive
-				local AttackDist = AttackDist															--make a local copy of attack distance
+				local AttackDist = attackDist															--make a local copy of attack distance
 				if AttackDist == nil then																--if no specific attack distance is forced, then the shortest possible is calculated based on weapon type
-					if WeaponType[1] == 30720 then														--when attacking with rockets
+					if weaponType[1] == 30720 then														--when attacking with rockets
 						AttackDist = 6000																--generic value that seems to work well for most rocket types
 					else																				--when attacking with anything else (primary measure shall be bombing)
-						AttackDist = 5900 + 1827 * math.log((PopAlt - 1000) / 500 + 1)					--formula tries to match empirical data for minimum dive bomb attack distance based on altitude at 1000 kph (formula not perfect but close enough)
+						AttackDist = 5900 + 1827 * math.log((popAlt - 1000) / 500 + 1)					--formula tries to match empirical data for minimum dive bomb attack distance based on altitude at 1000 kph (formula not perfect but close enough)
 						AttackDist = AttackDist * math.pow(1.04, (AttackSpeed * 3.6 - 1000) / 100)		--correct attack distance for speed (baseline at 1000 kph, distance increases by 4% for each additional 100 kph)
 						if AttackDist < 5000 then														--make sure it is at least 5000m
 							AttackDist = 5000
@@ -321,19 +330,20 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 				end
 				
 				--offset side
-				if OffsetAngle > 0 then																	--attack profile as an offset turn element
+				if offsetAngle > 0 then																	--attack profile as an offset turn element
 					if EgressAngle >= 45 and EgressAngle <= 135 then									--egress to the right
 						OffsetSide = 0																	--0 == left side
 					elseif EgressAngle <= -45 and EgressAngle >= -135 then								--egress to the left
 						OffsetSide = 1																	--1 == right side
 					else																				--egress forward or back
-						local function ReturnSide(ac1, ac2)												--function to return on which side ac2 is in relation to ac1's nose
+						local function returnSide(ac1, ac2)												--function to return on which side ac2 is in relation to ac1's nose
 							local ac1pos = ac1:getPosition()											--get position of aircraft 1
-							local Vec3Ac1Ac2 = {														--vector from aircraft 1 to aircraft 2
-								x = ac2:getPoint().x - ac1pos.p.x,
-								z = ac2:getPoint().z - ac1pos.p.z
+							local ac2Vec3 = ac2:getPoint()												--get point of aircraft 2
+							local vec3Ac1Ac2 = {														--vector from aircraft 1 to aircraft 2
+								x = ac2Vec3.x - ac1pos.p.x,
+								z = ac2Vec3.z - ac1pos.p.z	--TODO la j'ai un doute
 							}
-							local angle = math.deg(math.atan2(Vec3Ac1Ac2.z, Vec3Ac1Ac2.x) - math.atan2(ac1pos.x.z, ac1pos.x.x))	--angle between aircraft 1's nose and vector to aircraft 2
+							local angle = math.deg(math.atan2(vec3Ac1Ac2.z, vec3Ac1Ac2.x) - math.atan2(ac1pos.x.z, ac1pos.x.x))	--angle between aircraft 1's nose and vector to aircraft 2
 							if angle < -180 then
 								angle = angle + 360
 							elseif angle > 180 then
@@ -354,35 +364,35 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 							end
 						elseif #wingman == 2 then														--two ship flight
 							if w == 1 then
-								OffsetSide = ReturnSide(wingman[2], wingman[w])
+								OffsetSide = returnSide(wingman[2], wingman[w])
 							elseif w == 2 then
-								OffsetSide = ReturnSide(wingman[1], wingman[w])
+								OffsetSide = returnSide(wingman[1], wingman[w])
 							end
 						elseif #wingman == 3 then														--three ship flight
 							if w == 1 then
-								OffsetSide = ReturnSide(wingman[3], wingman[w])
+								OffsetSide = returnSide(wingman[3], wingman[w])
 							elseif w == 2 then
-								OffsetSide = ReturnSide(wingman[3], wingman[w])
+								OffsetSide = returnSide(wingman[3], wingman[w])
 							elseif w == 3 then
-								OffsetSide = ReturnSide(wingman[1], wingman[w])
+								OffsetSide = returnSide(wingman[1], wingman[w])
 							end
 						elseif #wingman == 4 then														--four ship flight
 							if w == 1 then
-								OffsetSide = ReturnSide(wingman[4], wingman[w])
+								OffsetSide = returnSide(wingman[4], wingman[w])
 							elseif w == 2 then
-								OffsetSide = ReturnSide(wingman[4], wingman[w])
+								OffsetSide = returnSide(wingman[4], wingman[w])
 							elseif w == 3 then
-								OffsetSide = ReturnSide(wingman[1], wingman[w])
+								OffsetSide = returnSide(wingman[1], wingman[w])
 							elseif w == 4 then
-								OffsetSide = ReturnSide(wingman[1], wingman[w])
+								OffsetSide = returnSide(wingman[1], wingman[w])
 							end
 						end
 					end
 				end
 				
 				--offset turn
-				local d_OffsetTurnStart_OffsetTurnEnd = math.sin(math.rad(OffsetAngle / 2)) * TurnRadius * 2													--distance from offset turn start to offset turn end point
-				local d_OffsetTurnStart_OffsetTurnCorner = (d_OffsetTurnStart_OffsetTurnEnd / 2) / math.sin(math.rad((180 - OffsetAngle) / 2))					--distance from offset turn start to the offset turn corner (the turn cuts this corner)
+				local d_OffsetTurnStart_OffsetTurnEnd = math.sin(math.rad(offsetAngle / 2)) * TurnRadius * 2													--distance from offset turn start to offset turn end point
+				local d_OffsetTurnStart_OffsetTurnCorner = (d_OffsetTurnStart_OffsetTurnEnd / 2) / math.sin(math.rad((180 - offsetAngle) / 2))					--distance from offset turn start to the offset turn corner (the turn cuts this corner)
 				d_OffsetTurnStart_OffsetTurnCorner = d_OffsetTurnStart_OffsetTurnCorner + 2 * AttackSpeed														--add two seconds worth of distance covered during rolling in/out of the turn
 				
 				--climb altitude initial assumtion
@@ -390,7 +400,7 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 				if route[AttackWpN].alt_type == "RADIO" then												--if the waypoint alt is AGL
 					ClimbStartMSL = land.getHeight(route[AttackWpN]) + route[AttackWpN].alt					--ground elevation plus alt AGL
 				end
-				local DeltaClimbH = TgtElev + PopAlt - ClimbStartMSL										--height to climb to reach pop-up altitute above target (initial assumption altitude at pop-up point is the same as at attack waypoint)
+				local DeltaClimbH = TgtElev + popAlt - ClimbStartMSL										--height to climb to reach pop-up altitute above target (initial assumption altitude at pop-up point is the same as at attack waypoint)
 				
 				--attack geometry calculation loop
 				for n = 1, 10 do																			--attack geometry calculation loop (mulitple rounds to update for elevation differences between pop-up point and target, but stop after 10 rounds)
@@ -402,21 +412,21 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 					end
 					
 					--climb ground distance
-					if ClimbAngle < 15 then																	--minimum climb angle for aerobatics task is 15°
-						ClimbAngle = 15
+					if climbAngle < 15 then																	--minimum climb angle for aerobatics task is 15°
+						climbAngle = 15
 					end
 					local ClimbTurnG = 1.5																	--pull into climb at 2.5G means 1.5G goes into generating the turn radius
 					local ClimbTurnRadius = math.pow(AttackSpeed, 2) / (ClimbTurnG * 9.81)					--calculate turn radius based on G pulled
-					local ClimbTurnGroundDist = math.sin(math.rad(ClimbAngle)) * ClimbTurnRadius			--ground distance covered when pulling up into the climb
+					local ClimbTurnGroundDist = math.sin(math.rad(climbAngle)) * ClimbTurnRadius			--ground distance covered when pulling up into the climb
 					local ClimbTurnAlt = ClimbTurnRadius - math.sqrt(math.pow(ClimbTurnRadius, 2) - math.pow(ClimbTurnGroundDist, 2))	--altitude change when pulling into the climb
-					ClimbGroundDist = (DeltaClimbH - 2 * ClimbTurnAlt)  / math.tan(math.rad(ClimbAngle))	--ground distance covered during straight part of the climb
+					ClimbGroundDist = (DeltaClimbH - 2 * ClimbTurnAlt)  / math.tan(math.rad(climbAngle))	--ground distance covered during straight part of the climb
 					ClimbGroundDist = ClimbGroundDist + ClimbTurnGroundDist * 2								--add ground distance covered during the pull up/down
 					
 					--confusing as hell without the drawing
 					local d_OffsetTurnCorner_ClimbEnd = ClimbGroundDist + d_OffsetTurnStart_OffsetTurnCorner														--distance from offset turn corner to climb end point
 					local d_OffsetTurnCorner_RollInTurnPivot = math.sqrt(math.pow(d_OffsetTurnCorner_ClimbEnd, 2) + math.pow(TurnRadius, 2))						--distance from offset turn corner to roll-in turn pivot point
 					local a_OffsetTurnCorner_ClimbEnd_OffsetTurnCorner_RollInTurnPivot = math.deg(math.atan(TurnRadius / d_OffsetTurnCorner_ClimbEnd))				--angle between line "offset turn corner to climb end" and line "offset turn corner to roll-in turn pivot"
-					local a_OffsetTurnCorner_RollInTurnPivot_OffsetTurnCorner_Target = OffsetAngle - a_OffsetTurnCorner_ClimbEnd_OffsetTurnCorner_RollInTurnPivot	--angle between line "offset turn corner to roll-in turn pivot" and line "offset turn corner to target"
+					local a_OffsetTurnCorner_RollInTurnPivot_OffsetTurnCorner_Target = offsetAngle - a_OffsetTurnCorner_ClimbEnd_OffsetTurnCorner_RollInTurnPivot	--angle between line "offset turn corner to roll-in turn pivot" and line "offset turn corner to target"
 					local d_Target_RollInTurnPivot = math.sqrt(math.pow(AttackDist, 2) + math.pow(TurnRadius, 2))													--distance from target to roll-in turn pivot point
 					local a_Target_OffsetTurnCorner_Target_RollInTurnPivot = math.deg(math.asin(d_OffsetTurnCorner_RollInTurnPivot / (d_Target_RollInTurnPivot / math.sin(math.rad(a_OffsetTurnCorner_RollInTurnPivot_OffsetTurnCorner_Target)))))		--angle between line "target to offset turn corner" and line "target to roll-in turn pivot"
 					local a_Target_RollInTurnPivot_Target_RollInTurnEnd = math.deg(math.asin(TurnRadius / d_Target_RollInTurnPivot))								--angle between line "target to roll-in turn pivot" and line "target to roll-in turn end"
@@ -424,15 +434,16 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 					local d_Target_OffsetTurnCorner = d_Target_RollInTurnPivot / math.sin(math.rad(a_OffsetTurnCorner_RollInTurnPivot_OffsetTurnCorner_Target)) * math.sin(math.rad(a_RollInTurnPivot_OffsetTurnCorner_RollInTurnPivot_Target))			--distance form target to offset turn corner
 					
 					--roll-in turn
-					RollInAngle = OffsetAngle + a_Target_OffsetTurnCorner_Target_RollInTurnPivot + a_Target_RollInTurnPivot_Target_RollInTurnEnd					--angle to turn into the target at the top of the pop-up
+					RollInAngle = offsetAngle + a_Target_OffsetTurnCorner_Target_RollInTurnPivot + a_Target_RollInTurnPivot_Target_RollInTurnEnd					--angle to turn into the target at the top of the pop-up
 					
 					--point to start pop-up maneuver
-					local VectorTgtToAc = {																	--vector from target to aircraft
-						x = wingman[w]:getPoint().x - TargetList[TgtN].x,
-						y = wingman[w]:getPoint().z - TargetList[TgtN].y,
+					local wingmanVec3 = wingman[w]:getPoint()													--get point of aircraft
+					local vectorTgtToAc = {																	--vector from target to aircraft
+						x = wingmanVec3.x - targetList[TgtN].x,
+						y = wingmanVec3.z - targetList[TgtN].y,
 					}
-					TgtToAcDist = math.sqrt(math.pow(VectorTgtToAc.x, 2) + math.pow(VectorTgtToAc.y, 2))	--lenght of vector (distance from target to aircraft)
-					if OffsetAngle > 0 then																	--attack profile has an offset turn element
+					TgtToAcDist = math.sqrt(math.pow(vectorTgtToAc.x, 2) + math.pow(vectorTgtToAc.y, 2))	--lenght of vector (distance from target to aircraft)
+					if offsetAngle > 0 then																	--attack profile has an offset turn element
 						PopDist = d_Target_OffsetTurnCorner + d_OffsetTurnStart_OffsetTurnCorner			--distance from target to Pop-Up point (start of the offset turn)
 						PopDist = PopDist + 100																--add 100m for reaction delay to initiate the turn
 					elseif AttackDist and AttackDist + ClimbGroundDist < TgtToAcDist then 					--attack profile is directly towards target, attack distance is defined pop-up point will be ahead of aircraft
@@ -441,36 +452,36 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 						PopDist = TgtToAcDist																--pop-up directly from where the aircraft is now
 					end
 					PopPoint = {																			--define the position for the start of the offset pop-up maneuver
-						x = TargetList[TgtN].x + VectorTgtToAc.x / TgtToAcDist * PopDist,
-						y = TargetList[TgtN].y + VectorTgtToAc.y / TgtToAcDist * PopDist,
+						x = targetList[TgtN].x + vectorTgtToAc.x / TgtToAcDist * PopDist,
+						y = targetList[TgtN].y + vectorTgtToAc.y / TgtToAcDist * PopDist,
 					}
 					local VecAcTgtNorm = {
-						x = VectorTgtToAc.x / TgtToAcDist * -1,
-						y = VectorTgtToAc.y / TgtToAcDist * -1,
+						x = vectorTgtToAc.x / TgtToAcDist * -1,
+						y = vectorTgtToAc.y / TgtToAcDist * -1,
 					}
 					ClimbEndPoint = {																		--calculate the position of the end of the pop-up climb going from pop-up point forward
-						x = PopPoint.x + VecAcTgtNorm.x * d_OffsetTurnStart_OffsetTurnCorner + (VecAcTgtNorm.x * math.cos(math.rad(OffsetAngle * (OffsetSide * 2 - 1))) - VecAcTgtNorm.y * math.sin(math.rad(OffsetAngle * (OffsetSide * 2 - 1)))) * (d_OffsetTurnStart_OffsetTurnCorner + ClimbGroundDist),
-						y = PopPoint.y + VecAcTgtNorm.y * d_OffsetTurnStart_OffsetTurnCorner + (VecAcTgtNorm.x * math.sin(math.rad(OffsetAngle * (OffsetSide * 2 - 1))) + VecAcTgtNorm.y * math.cos(math.rad(OffsetAngle * (OffsetSide * 2 - 1)))) * (d_OffsetTurnStart_OffsetTurnCorner + ClimbGroundDist),
+						x = PopPoint.x + VecAcTgtNorm.x * d_OffsetTurnStart_OffsetTurnCorner + (VecAcTgtNorm.x * math.cos(math.rad(offsetAngle * (OffsetSide * 2 - 1))) - VecAcTgtNorm.y * math.sin(math.rad(offsetAngle * (OffsetSide * 2 - 1)))) * (d_OffsetTurnStart_OffsetTurnCorner + ClimbGroundDist),
+						y = PopPoint.y + VecAcTgtNorm.y * d_OffsetTurnStart_OffsetTurnCorner + (VecAcTgtNorm.x * math.sin(math.rad(offsetAngle * (OffsetSide * 2 - 1))) + VecAcTgtNorm.y * math.cos(math.rad(offsetAngle * (OffsetSide * 2 - 1)))) * (d_OffsetTurnStart_OffsetTurnCorner + ClimbGroundDist),
 					}
 					
 					--check if ground elevation of the pop-up point works for this attack geometry
 					if route[AttackWpN].alt_type == "RADIO" then											--aircraft approaches the pop-up point at AGL alt
-						if land.getHeight(PopPoint) + route[AttackWpN].alt + DeltaClimbH - PopAlt < TgtElev + 30 and land.getHeight(PopPoint) + route[AttackWpN].alt + DeltaClimbH - PopAlt > TgtElev - 30 then	--current assumtion about height to climb leads to within 30m of target elevation
+						if land.getHeight(PopPoint) + route[AttackWpN].alt + DeltaClimbH - popAlt < TgtElev + 30 and land.getHeight(PopPoint) + route[AttackWpN].alt + DeltaClimbH - popAlt > TgtElev - 30 then	--current assumtion about height to climb leads to within 30m of target elevation
 							break																			--all ok, stop attack geometry calculation loop
 						else																				--current assumtion about height to climb does not lead to within 100m of target elevation
-							DeltaClimbH = TgtElev + PopAlt - route[AttackWpN].alt - land.getHeight(PopPoint)	--calculate new height to climb and continue attack geometry calculation loop
+							DeltaClimbH = TgtElev + popAlt - route[AttackWpN].alt - land.getHeight(PopPoint)	--calculate new height to climb and continue attack geometry calculation loop
 						end
 					else																					--aircraft approaches the pop-up point at MSL alt
 						if route[AttackWpN].alt >= land.getHeight(PopPoint) + 30 then						--aircraft will be at pop-up point at least 30m above ground level
 							break																			--all ok, stop attack geometry calculation loop
 						else																				--aircraft will be too low at pop-up point
-							DeltaClimbH = TgtElev + PopAlt - land.getHeight(PopPoint) + 30					--calculate new height to climb and continue attack geometry calculation loop
+							DeltaClimbH = TgtElev + popAlt - land.getHeight(PopPoint) + 30					--calculate new height to climb and continue attack geometry calculation loop
 						end
 					end
 				end
 				
 				--abort offset-pop up attack if not sufficient distance from target
-				if OffsetAngle > 0 and PopDist > TgtToAcDist then											--there is not sufficient distance from target to perfom the offset pop-up maneuver
+				if offsetAngle > 0 and PopDist > TgtToAcDist then											--there is not sufficient distance from target to perfom the offset pop-up maneuver
 					if w == 1 then																			--for flight leader
 						Abort[w] = true																		--abort attack and go to egress
 					else																					--for wingmen
@@ -523,7 +534,7 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 			}
 			
 			if Abort[w] == nil then																			--attack should not be aborted
-				if PopAlt and PopAlt > 0 then																--attack profile has a pop-up element
+				if popAlt and popAlt > 0 then																--attack profile has a pop-up element
 					local FlyToPopTask = {																	--fly to pop-up point
 						id = 'Mission',
 						params = {
@@ -545,7 +556,7 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 					}
 					table.insert(ComboTask.params.tasks, FlyToPopTask)
 					
-					if OffsetAngle > 0 then																	--attack profile has an offset element
+					if offsetAngle > 0 then																	--attack profile has an offset element
 						local OffsetTurnTask = {															--aerobatics task for offset turn
 							["id"] = "ControlledTask",
 							["params"] = {
@@ -588,7 +599,7 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 													},
 													["SECTOR"] = {
 														["order"] = 8,
-														["value"] = OffsetAngle,							--angle to turn
+														["value"] = offsetAngle,							--angle to turn
 													},
 													["SIDE"] = {
 														["order"] = 9,
@@ -683,14 +694,14 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 										},
 										["Angle"] = {
 											["order"] = 6,
-											["value"] = ClimbAngle + AoA,									--climb angle needs to be corrected with AoA (the value set here is the pitch value, not the flight path)
+											["value"] = climbAngle + AoA,									--climb angle needs to be corrected with AoA (the value set here is the pitch value, not the flight path)
 											["min_v"] = 15,
 											["max_v"] = 90,
 											["step"] = 5,
 										},
 										["FinalAltitude"] = {
 											["order"] = 7,
-											["value"] = TgtElev + PopAlt,									--alt to climb to
+											["value"] = TgtElev + popAlt,									--alt to climb to
 										},
 									},
 								},
@@ -699,7 +710,7 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 					}
 					table.insert(ComboTask.params.tasks, ClimbTask)
 					
-					if OffsetAngle > 0 then																	--attack profile has an offset element
+					if offsetAngle > 0 then																	--attack profile has an offset element
 						local RollInTurnTask = {															--aerobatics task for roll-in turn
 							["id"] = "ControlledTask",
 							["params"] = {
@@ -754,7 +765,7 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 									},
 								},
 								["stopCondition"] = {
-									["condition"] = 'if MatchHeading("' .. wingman[w]:getName() .. '", {x = ' .. TargetList[TgtN].x .. ', y = ' .. TargetList[TgtN].y .. '}) then return true end',		--AI will always overshoot turns, therefore the task must be stopped prematurely via stop condition when the desired heading is reached
+									["condition"] = 'if MatchHeading("' .. wingman[w]:getName() .. '", {x = ' .. targetList[TgtN].x .. ', y = ' .. targetList[TgtN].y .. '}) then return true end',		--AI will always overshoot turns, therefore the task must be stopped prematurely via stop condition when the desired heading is reached
 								},
 							},
 						}
@@ -819,20 +830,20 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 				end
 				
 				--attack task
-				for n = 1, #WeaponType do																			--make an attack task variant for each wapon type
-					for t = 1, #TargetList do															
-						if t == 1 or Reattack then																	--make an attack task variant for the first target or for each target element if re-attack is enabled
+				for n = 1, #weaponType do																			--make an attack task variant for each wapon type
+					for t = 1, #targetList do															
+						if t == 1 or reattack then																	--make an attack task variant for the first target or for each target element if re-attack is enabled
 							local TgtNum = TgtN + t - 1																--make a modifier if target number (each target elements gets its own attack task, starting with TgtN)
-							if TgtNum > #TargetList then
-								TgtNum = TgtNum - #TargetList
+							if TgtNum > #targetList then
+								TgtNum = TgtNum - #targetList
 							end
 							
 							local AttackTask = {																	--define generic attack task (to be completed below based on target type)
 								["params"] = {
 									["groupAttack"] = true,
 									["attackQty"] = 1,
-									["expend"] = ExpendQty,
-									["weaponType"] = WeaponType[n],
+									["expend"] = expendQty,
+									["weaponType"] = weaponType[n],
 									["altitudeEnabled"] = false,
 									["altitude"] = route[AttackWpN].alt,
 									["directionEnabled"] = false,
@@ -840,52 +851,52 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 								},
 							}
 							
-							if Dive then																			--if argument dive is true
+							if dive then																			--if argument dive is true
 								AttackTask.params.attackType = "Dive"												--set attack type to dive
 							end
 							
-							if TargetType == "unit" then															--target is a unit
-								if ExpendQty == "Auto" then															--expend quantity Auto
+							if targetType == "unit" then															--target is a unit
+								if expendQty == "Auto" then															--expend quantity Auto
 									AttackTask.id = "AttackUnit"													--attack unit
-									AttackTask.params.unitId = Group.getByName(Target):getUnits()[TgtNum]:getID()	--get unit id
-								elseif Group.getByName(Target):getUnits()[TgtNum]:getVelocity().x ~= 0 or Group.getByName(Target):getUnits()[TgtNum]:getVelocity().z ~= 0 then		--target is moving
+									AttackTask.params.unitId = Group.getByName(target):getUnits()[TgtNum]:getID()	--get unit id
+								elseif Group.getByName(target):getUnits()[TgtNum]:getVelocity().x ~= 0 or Group.getByName(target):getUnits()[TgtNum]:getVelocity().z ~= 0 then		--target is moving
 									AttackTask.id = "AttackUnit"													--attack unit
-									AttackTask.params.unitId = Group.getByName(Target):getUnits()[TgtNum]:getID()	--get unit id
-								elseif WeaponType[n] == 2032 or WeaponType[n] == 30720 then							--weapon type is unguided bomb or rocket
+									AttackTask.params.unitId = Group.getByName(target):getUnits()[TgtNum]:getID()	--get unit id
+								elseif weaponType[n] == 2032 or weaponType[n] == 30720 then							--weapon type is unguided bomb or rocket
 									AttackTask.id = "Bombing"														--attack coordinates (bombing task is better because it centers salvo on target instead of first round on target)
-									AttackTask.params.x = TargetList[TgtNum].x
-									AttackTask.params.y = TargetList[TgtNum].y
+									AttackTask.params.x = targetList[TgtNum].x
+									AttackTask.params.y = targetList[TgtNum].y
 								else																				--for the remaining weapon types (guided or cannon)
 									AttackTask.id = "AttackUnit"													--attack unit
-									AttackTask.params.unitId = Group.getByName(Target):getUnits()[TgtNum]:getID()	--get unit id
+									AttackTask.params.unitId = Group.getByName(target):getUnits()[TgtNum]:getID()	--get unit id
 								end
 		
-							elseif TargetType == "static" then														--target is a static unit
-								if ExpendQty == "Auto" then															--expend quantity Auto
+							elseif targetType == "static" then														--target is a static unit
+								if expendQty == "Auto" then															--expend quantity Auto
 									AttackTask.id = "AttackUnit"													--attack unit
-									AttackTask.params.unitId = StaticObject.getByName(Target[TgtNum]):getID()		--get unit id
-								elseif WeaponType[n] == 2032 or WeaponType[n] == 30720 then							--weapon type is unguided bomb or rocket
+									AttackTask.params.unitId = StaticObject.getByName(target[TgtNum]):getID()		--get unit id
+								elseif weaponType[n] == 2032 or weaponType[n] == 30720 then							--weapon type is unguided bomb or rocket
 									AttackTask.id = "Bombing"														--attack coordinates (bombing task is better because it centers salvo on target instead of first round on target)
-									AttackTask.params.x = TargetList[TgtNum].x
-									AttackTask.params.y = TargetList[TgtNum].y
+									AttackTask.params.x = targetList[TgtNum].x
+									AttackTask.params.y = targetList[TgtNum].y
 								else																				--for the remaining weapon types (guided or cannon)
 									AttackTask.id = "AttackUnit"													--attack unit
-									AttackTask.params.unitId = StaticObject.getByName(Target[TgtNum]):getID()		--get unit id
+									AttackTask.params.unitId = StaticObject.getByName(target[TgtNum]):getID()		--get unit id
 								end
 								
 							else																					--scenery and airbase target
 								AttackTask.id = "Bombing"															--attack coordinates
-								AttackTask.params.x = TargetList[TgtNum].x
-								AttackTask.params.y = TargetList[TgtNum].y
+								AttackTask.params.x = targetList[TgtNum].x
+								AttackTask.params.y = targetList[TgtNum].y
 							end
 							
-							if AttackTask.id == "AttackUnit" and Reattack then										--for unit targets, allow for re-attacks on undestroyed targets
+							if AttackTask.id == "AttackUnit" and reattack then										--for unit targets, allow for re-attacks on undestroyed targets
 								AttackTask.params.attackQtyLimit = false
 							else																					--for all fixed expend quantities, do not allow re-attacks on undestroyed targets
 								AttackTask.params.attackQtyLimit = true
 							end
 							
-							if PopAlt == nil or PopAlt == 0 or Dive ~= true then									--if no pop-up altitude is set or no dive
+							if popAlt == nil or popAlt == 0 or dive ~= true then									--if no pop-up altitude is set or no dive
 								AttackTask.params.altitudeEnabled = true											--enable attack altitude setting (altitude of attack waypoint)
 							end
 							
@@ -895,18 +906,18 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 				end
 			
 				--post-weapon release maneuvers
-				if PopAlt and PopAlt > 0 and Reattack ~= true then													--only do post-release maneuvering for pop-up attacks and if re-attack is turned off (unknown attack direction from subsequent attacks)
+				if popAlt and popAlt > 0 and reattack ~= true then													--only do post-release maneuvering for pop-up attacks and if re-attack is turned off (unknown attack direction from subsequent attacks)
 					
 					--egress turn
 					local EgressSide
 					local EgressTurnAngle
-					if OffsetAngle > 0 then																			--attack profile has an offset element
+					if offsetAngle > 0 then																			--attack profile has an offset element
 						if (EgressAngle < 0 and OffsetSide == 0) or (EgressAngle > 0 and OffsetSide == 1) then		--offset is on the side of the egress
-							EgressTurnAngle = math.abs(math.abs(EgressAngle) + (180 - OffsetAngle - (180 - RollInAngle)))	--angle between attack run and egress
+							EgressTurnAngle = math.abs(math.abs(EgressAngle) + (180 - offsetAngle - (180 - RollInAngle)))	--angle between attack run and egress
 							EgressSide = OffsetSide
 						else																						--offset is on the opposing side of the egress
-							EgressTurnAngle = math.abs(math.abs(EgressAngle) - (180 - OffsetAngle - (180 - RollInAngle)))	--angle between attack run and egress
-							if math.abs(EgressAngle) > (180 - OffsetAngle - (180 - RollInAngle)) then
+							EgressTurnAngle = math.abs(math.abs(EgressAngle) - (180 - offsetAngle - (180 - RollInAngle)))	--angle between attack run and egress
+							if math.abs(EgressAngle) > (180 - offsetAngle - (180 - RollInAngle)) then
 								EgressSide = OffsetSide * -1 + 1
 							else
 								EgressSide = OffsetSide
@@ -1065,14 +1076,14 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 						["action"] = {
 							["id"] = "Script",
 							["params"] = {
-								["command"] = 'local wingman = Group.getByName("' .. FlightName .. '"):getUnits() for n = 2, #wingman do wingman[n]:getController():resetTask() end',
+								["command"] = 'local wingman = Group.getByName("' .. flightName .. '"):getUnits() for n = 2, #wingman do wingman[n]:getController():resetTask() end',
 							},
 						},
 					},
 				}
 				table.insert(ResumeRouteTask.params.route.points[1].task.params.tasks, WingmanRejoinTask)			--insert wingman rejoin task into first waypoint of resume route (egress waypoint)
 				
-				EgressTaskTable[FlightName] = ResumeRouteTask														--store the resume route task (will be used by function SetEgressTask() when the aircraft has completed the attack)
+				EgressTaskTable[flightName] = ResumeRouteTask														--store the resume route task (will be used by function SetEgressTask() when the aircraft has completed the attack)
 			end
 			
 			--SetEgressTask
@@ -1095,7 +1106,7 @@ function AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, Of
 				local current_time = timer.getTime()
 
 				local logStr = "ComboTask = " .. TableSerialization(ComboTask, 0)
-				local FlightNameClean = FlightName:gsub('[%p%c%s]', '_')
+				local FlightNameClean = flightName:gsub('[%p%c%s]', '_')
 				local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..w.."_".. "AirGroundAttackTask".."_"..tostring(current_time)..".lua", "w")
 				-- logFile:write(logStr)
 				-- logFile:close()
@@ -1121,49 +1132,56 @@ end
 
 
 --function to return true when an aircraft points in target direction
-function MatchHeading(AcName, Tgt)
-	local Ac = Unit.getByName(AcName)																--get aircraft
-	if Ac then																						--aircraft exists
-		local AcPos = Ac:getPosition()
-		local AcHeadingVec2 = {																		--aircraft heading as a normalized 2d vector
-			x = AcPos.x.x,																			--x component of aircraft nose
-			y = AcPos.x.z ,																			--y component of aircraft nose
+local function matchHeading(acName, tgt)
+	local ac = Unit.getByName(acName)																--get aircraft
+	if ac then																						--aircraft exists
+		local acPos = ac:getPosition()
+		local acHeadingVec2 = {																		--aircraft heading as a normalized 2d vector
+			x = acPos.x.x,																			--x component of aircraft nose
+			y = acPos.x.z ,																			--y component of aircraft nose
 		}
-		local AcVel = Ac:getVelocity()
-		local AcVelVec2 = {																			--aircraft velocity vector as a normalized 2d vector
-			x = AcVel.x,																			--x component of aircraft flight path
-			y = AcVel.z,																			--y component of aircraft flight path
+		local acVel = ac:getVelocity()
+		local acVelVec2 = {																			--aircraft velocity vector as a normalized 2d vector
+			x = acVel.x,																			--x component of aircraft flight path
+			y = acVel.z,																			--y component of aircraft flight path
 		}
 																					
-		local TgtHeadingVec2																		--target heading as normalized 2d vector
-		if type(Tgt) == "number" then																--the target is a specific heading
-			TgtHeadingVec2 = {
-				x = math.cos(math.rad(Tgt)),														--x component of target heading
-				y = math.sin(math.rad(Tgt)),														--y component of target heading
+		local tgtHeadingVec2																		--target heading as normalized 2d vector
+		if type(tgt) == "number" then																--the target is a specific heading
+			tgtHeadingVec2 = {
+				x = math.cos(math.rad(tgt)),														--x component of target heading
+				y = math.sin(math.rad(tgt)),														--y component of target heading
 			}
 		else																						--the target heading is based on the heading towards a specific unit or point
-			local TgtPos																			--target position
-			if type(Tgt) == "string" then															--the target is a string, then it is the name of a target unit
-				if Unit.getByName(Tgt) then															--target exists
-					TgtPos = Unit.getByName(Tgt):getPoint()											--get target position
+			local tgtVec3																			--target position
+			local tgtLoc
+			if type(tgt) == "string" then															--the target is a string, then it is the name of a target unit
+				if Unit.getByName(tgt) then															--target exists
+					tgtVec3 = Unit.getByName(tgt):getPoint()											--get target position
 				else																				--target does not exist
 					return false																	--do not continue
 				end
-			elseif type(Tgt) == "table"	then														--target is given as coordinates
-				TgtPos = Tgt
-				TgtPos.z = TgtPos.y																	--convert target position from 2d to 3d (so it has the same format as when the position is taken from a unit)
+			elseif type(tgt) == "table"	then														--target is given as coordinates
+				tgtVec3 = tgt
+				-- tgtVec3.z = tgtVec3.y																	--convert target position from 2d to 3d (so it has the same format as when the position is taken from a unit)
+                tgtLoc = {
+					x = tgtVec3.x,
+					y = tgtVec3.z,
+					z = tgtVec3.y,
+				}
 			else																					--no valid target is given
 				return false																		--do not continue
 			end
 			
-			TgtHeadingVec2 = {																								
-				x = TgtPos.x - AcPos.p.x,															--x component of vector to target
-				y = TgtPos.z - AcPos.p.z,															--y component of vector to target
+			--TODO la aussi, bug sur
+			tgtHeadingVec2 = {																								
+				x = tgtLoc.x - acPos.p.x, --x component of vector to target
+				y = tgtLoc.z - acPos.p.z, --y component of vector to target
 			}
 		end
 		
 		--to roll out at the target heading, turning needs to be stopped when aircraft velocity vector comes within margin of target heading
-		local margin = math.deg(math.atan2(AcHeadingVec2.y, AcHeadingVec2.x) - math.atan2(AcVelVec2.y, AcVelVec2.x))			--angle between velocity vector and aircraft nose
+		local margin = math.deg(math.atan2(acHeadingVec2.y, acHeadingVec2.x) - math.atan2(acVelVec2.y, acVelVec2.x))			--angle between velocity vector and aircraft nose
 		if margin < -180 then
 			margin = margin + 360
 		elseif margin > 180 then
@@ -1171,7 +1189,7 @@ function MatchHeading(AcName, Tgt)
 		end
 		margin = margin / 2
 			
-		local deltaHeading = math.deg(math.atan2(AcVelVec2.y, AcVelVec2.x) - math.atan2(TgtHeadingVec2.y, TgtHeadingVec2.x))	--difference between aircraft velocity vector and target heading
+		local deltaHeading = math.deg(math.atan2(acVelVec2.y, acVelVec2.x) - math.atan2(tgtHeadingVec2.y, tgtHeadingVec2.x))	--difference between aircraft velocity vector and target heading
 		if deltaHeading < -180 then
 			deltaHeading = deltaHeading + 360
 		elseif deltaHeading > 180 then
@@ -1188,31 +1206,31 @@ end
 
 --function to send aircraft to their egress waypoints (executed only after egress turn is completed to generate descend waypoint based on current aircraft postion)
 EgressTaskTable = {}																				--table to store egress task that are generated inside AirGroundAttackTask() (global table because it needs to be accessed by waypoint action)
-function SetEgressTask(AcName)																		--global because it needs to be accessed by waypoint action
-	local Ac = Unit.getByName(AcName)																--get aircraft
-	if Ac then																						--aircraft exists
-		local EgressTask = EgressTaskTable[AcName]													--shortcut to the egress task that is prepared and stored in the EgressTaskTable
+function SetEgressTask(acName)																		--global because it needs to be accessed by waypoint action
+	local ac = Unit.getByName(acName)																--get aircraft
+	if ac then																						--aircraft exists
+		local EgressTask = EgressTaskTable[acName]													--shortcut to the egress task that is prepared and stored in the EgressTaskTable
 	
-		local AcPoint = Ac:getPoint()																--get aircraft point
-		local AcEgressVec2 = {																		--make a vector between aircraft and egress wayoint
-			x = EgressTask.params.route.points[1].x - AcPoint.x,
-			y = EgressTask.params.route.points[1].y - AcPoint.z,
+		local acVec3 = ac:getPoint()																--get aircraft point
+		local acEgressVec2 = {																		--make a vector between aircraft and egress wayoint
+			x = EgressTask.params.route.points[1].x - acVec3.x,
+			y = EgressTask.params.route.points[1].y - acVec3.z,
 		}
-		local AcEgressDist = math.sqrt(math.pow(AcEgressVec2.x, 2) + math.pow(AcEgressVec2.y, 2))	--distance between aircraft and egress waypoint
+		local acEgressDist = math.sqrt(math.pow(acEgressVec2.x, 2) + math.pow(acEgressVec2.y, 2))	--distance between aircraft and egress waypoint
 		
-		local DeltaAlt																				--altitude to descend
+		local deltaAlt																				--altitude to descend
 		if EgressTask.params.route.points[1].alt_type == "RADIO" then								--egress waypoint alt is AGL
-			DeltaAlt = AcPoint.y - land.getHeight({x = AcPoint.x, y = AcPoint.z}) + EgressTask.params.route.points[1].alt	--altitude difference to AGL alt above current ground ground elevation
+			deltaAlt = acVec3.y - land.getHeight({x = acVec3.x, y = acVec3.z}) + EgressTask.params.route.points[1].alt	--altitude difference to AGL alt above current ground ground elevation
 		else																						--egress waypoint alt is MSL
-			DeltaAlt = AcPoint.y - EgressTask.params.route.points[1].alt							--altitude difference to MSL waypoint alt
+			deltaAlt = acVec3.y - EgressTask.params.route.points[1].alt							--altitude difference to MSL waypoint alt
 		end
 		
-		local DescendDist = DeltaAlt / math.tan(math.rad(15))										--distance required to descend to egress alt at 15° descend angle
+		local descendDist = deltaAlt / math.tan(math.rad(15))										--distance required to descend to egress alt at 15° descend angle
 		
-		if DescendDist > 0 and DescendDist < AcEgressDist then										--if distance to descend is positive (no climb) and shorter than the distance to egress waypoint, insert a descend waypoint
+		if descendDist > 0 and descendDist < acEgressDist then										--if distance to descend is positive (no climb) and shorter than the distance to egress waypoint, insert a descend waypoint
 			local DescendWP = {																		--define the descend waypoint
-				["x"] = AcPoint.x + AcEgressVec2.x / AcEgressDist * DescendDist,
-				["y"] = AcPoint.z + AcEgressVec2.y / AcEgressDist * DescendDist,
+				["x"] = acVec3.x + acEgressVec2.x / acEgressDist * descendDist,
+				["y"] = acVec3.z + acEgressVec2.y / acEgressDist * descendDist,
 				["type"] = "Turning Point",
 				["action"] = "Fly Over Point",
 				["alt"] = EgressTask.params.route.points[1].alt,
@@ -1225,12 +1243,12 @@ function SetEgressTask(AcName)																		--global because it needs to be 
 		--trigger.action.markToAll(1, "Descend WP", {x = EgressTask.params.route.points[1].x, y = 0, z = EgressTask.params.route.points[1].y})
 		--trigger.action.markToAll(2, "Egress WP", {x = EgressTask.params.route.points[2].x, y = 0, z = EgressTask.params.route.points[2].y})
 		
-		if Ac == Ac:getGroup():getUnit(1)then														--aircraft is the group leader
-			Ac:getGroup():getController():setTask(EgressTask)										--the task has to be set on the group level
-			Ac:getGroup():getController():setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2)			--evade fire
+		if ac == ac:getGroup():getUnit(1)then														--aircraft is the group leader
+			ac:getGroup():getController():setTask(EgressTask)										--the task has to be set on the group level
+			ac:getGroup():getController():setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2)			--evade fire
 		else																						--aircraft is a group wingman
-			Ac:getController():setTask(EgressTask)													--set on a unit level
-			Ac:getController():setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2)					--tasked units do not inherit the options of their parent group, so reaction to threat has to be set to evade fire (otherwise they may abort the attack against defended targets)
+			ac:getController():setTask(EgressTask)													--set on a unit level
+			ac:getController():setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2)					--tasked units do not inherit the options of their parent group, so reaction to threat has to be set to evade fire (otherwise they may abort the attack against defended targets)
 		end
 
 		if camp.debug then
@@ -1239,7 +1257,7 @@ function SetEgressTask(AcName)																		--global because it needs to be 
 			local current_time = timer.getTime()
 
 			local logStr = "EgressTask = " .. TableSerialization(EgressTask, 0)
-			local FlightNameClean = AcName:gsub('[%p%c%s]', '_')
+			local FlightNameClean = acName:gsub('[%p%c%s]', '_')
 			local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_".. "AirGroundAttackTask_EgressTask".."_"..tostring(current_time)..".lua", "w")
 			-- logFile:write(logStr)
 			-- logFile:close()

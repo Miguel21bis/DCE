@@ -201,7 +201,7 @@ local function GCI_Cycle()
 								-- env.info("DCE_Gci A_E "..tostring(target_name))	
 								track_update[target_name] = true								--the target track for this group is updated
 								local target_number = targetGpObject:getUnits()	--get target group size
-								local target_point = targets[t].object:getPoint()				--get target point
+								local target_pointVec3 = targets[t].object:getPoint()				--get target point
 								local target_typeName = targetGpObject:getUnit(1):getTypeName()
 								-- env.info("DCE_Gci A_G "..tostring(target_typeName))
 								ErrorMsg = "EWR target detection: " .. ewr_name	.. "; Target: " .. target_name 	--Error message in case follow on code fails
@@ -214,14 +214,14 @@ local function GCI_Cycle()
 									end
 									target_tracks[ewr_side][target_name].number = #target_number
 									target_tracks[ewr_side][target_name].time = current_time
-									target_tracks[ewr_side][target_name].point = target_point
+									target_tracks[ewr_side][target_name].pointVec3 = target_pointVec3
 									target_tracks[ewr_side][target_name].category = targetDesc.category
 									-- target_tracks[ewr_side][target_name].target_Type = targetDesc.typeName
 								else															--new track
 									target_tracks[ewr_side][target_name] = {
 										number = #target_number,								--number of aircraft in traget group
 										time = current_time,									--time of current detection
-										point = target_point,									--position of this target group
+										pointVec3 = target_pointVec3, --position of this target group
 										typeName = target_typeName,
 										history = 0,											--number of detections in sequence
 										assigned = 0,											--number of interceptors assigned to this target group
@@ -259,9 +259,9 @@ local function GCI_Cycle()
 				if camp.boundary and camp.boundary[track_side] and camp.boundary[track_side] ~= nil then
 					-- env.info("DCE_Gci B_4 ")
 
-					ourSideOfBorder =  CheckPointInPoly_XY_3({x=target.point.x,y=target.point.z}, camp.boundary[track_side])
+					ourSideOfBorder =  CheckPointInPoly_XY_3({x=target.pointVec3.x,y=target.pointVec3.z}, camp.boundary[track_side])
 
-					enemySideOfBorder =  CheckPointInPoly_XY_3({x=target.point.x,y=target.point.z}, camp.boundary[DCS_ENI_Side[track_side]])
+					enemySideOfBorder =  CheckPointInPoly_XY_3({x=target.pointVec3.x,y=target.pointVec3.z}, camp.boundary[DCS_ENI_Side[track_side]])
 
 					-- if enemySideOfBorder then
 					-- 	--pour info
@@ -335,10 +335,8 @@ local function GCI_Cycle()
 								if flight.time + 900 < current_time then								--interceptor flight has moved to ready status (from ready15) longer than 15 minutes ago and is ready for action (time is -900 for flight starting ready at mission start).
 									ErrorMsg = "Assign interceptors; Target: " .. target_name .. "; Interceptor: " .. flight.name						--Error message in case follow on code fails
 									
-									-- env.info("DCE_Gci C4 "..tostring(target.point.x).." "..tostring(target.point.z).." "..tostring(flight.x).." "..tostring(flight.y))
-
 									-- if current_time >= flight.tot_from and current_time <= flight.tot_to then											--flight can operate at current time							
-										local distance = math.sqrt(math.pow(target.point.x - flight.x, 2) + math.pow(target.point.z - flight.y, 2))		--distance between interceptor airbase and target
+										local distance = math.sqrt(math.pow(target.pointVec3.x - flight.x, 2) + math.pow(target.pointVec3.z - flight.y, 2))		--distance between interceptor airbase and target
 										-- env.info("DCE_Gci C5 distance: "..tostring(distance).." <?range: "..tostring(flight.range))
 										
 										if distance < flight.range then									--target is in interception range
@@ -402,23 +400,19 @@ local function GCI_Cycle()
 									end
 									
 									local idInfo = groupObj:getID()
-									local _side = groupObj:getCoalition()
-
-									-- local idInfo = Group.getByName(selected_flight):getID()
-									-- local _side = Group.getByName(selected_flight):getCoalition()
 
 									-- on replace les vecteurs dans un repere x/y/z/
 									local newTarget = {}
 									newTarget.point = {}
-									newTarget.point.x = target.point.x
-									newTarget.point.y = target.point.z
-									newTarget.point.z = target.point.y
+									newTarget.point.x = target.pointVec3.x
+									newTarget.point.y = target.pointVec3.z
+									newTarget.point.z = target.pointVec3.y
 
-									target.altitude = math.floor(target.point.y / 1000) * 1000
+									target.altitude = math.floor(target.pointVec3.y / 1000) * 1000
 									target.distance_Km = math.floor(selected_distance / 10000) * 10
 									target.distance = selected_distance
 									local testBearing = math.floor(GetHeadingIM(flight, newTarget.point))
-									target.bearing = math.floor(GetHeading({x=flight.x, y=flight.y}, {x=target.point.x, y=target.point.z} ))
+									target.bearing = math.floor(GetHeading({x=flight.x, y=flight.y}, {x=target.pointVec3.x, y=target.pointVec3.z} ))
 
 
 
@@ -432,8 +426,6 @@ local function GCI_Cycle()
 
 									--***********************************************************************************
 									--***********************************************************************************
-									-- local heading1 = GetHeading(FlightSAR, {x=pt_dest.x2d, y=pt_dest.y2d})
-
 									-- env.info( "DCE_Gci D8 distance: "..tostring(target.distance).." altitude: "..target.altitude)
 									local distance2 = target.distance/3
 									local weaponType = 1069547520					--automatique

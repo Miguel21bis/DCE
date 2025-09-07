@@ -52,13 +52,9 @@ local bdaTimestamps = {}
 local BDA_WINDOW = 0.4      -- fenêtre de temps en secondes
 local BDA_THRESHOLD = 15    -- nombre d'événements BDA tolérés dans cette fenêtre
 
-
-
 for eventName, eventId in pairs(world.event) do
 	table.insert(Info_event_B, eventId, eventName)
 end
-
-
 
 if camp.debug then
 	local logStr = "Info_event_B = " .. TableSerialization(Info_event_B, 0)
@@ -70,8 +66,6 @@ if camp.debug then
 		env.info("DCE_EventT Info_event_B: Failed to open log file for writing.")
 	end
 end
-
-
 
 env.info("DCET_testingConstante: Unit.Category.AIRPLANE "..tostring(Unit.Category.AIRPLANE))
 env.info("DCET_testingConstante: Unit.Category.HELICOPTER "..tostring(Unit.Category.HELICOPTER))
@@ -86,7 +80,7 @@ local despawn = {}
 local eventHandlerDCE = {}
 local refuelProgressTimerId = nil
 -- EventHandler robuste pour détecter uniquement les bombes larguées
-local bombTracker = {}
+local bombTracker = {}	--TODO pourquoi non utilisé?
 local trackedBombs = {}
 
 local function WarningText()
@@ -126,41 +120,42 @@ local function health1s(arg)
 	-- 	SCENERY 5
 	-- 	Cargo   6
 
-	local health1sCategory = Object.getCategory(healthTemp.objSujet)
-	-- env.info( "DCE_EventT (health1s) targetCategory| "..tostring(health1sCategory))
+	if healthTemp then
+		local health1sCategory = Object.getCategory(healthTemp.objSujet)
+		-- env.info( "DCE_EventT (health1s) targetCategory| "..tostring(health1sCategory))
 
-	if health1sCategory ~= 0 then
-		if health1sCategory and ( health1sCategory == 1 or health1sCategory == 3 or health1sCategory == 4)  then
-			--Function also works with Unit, Static Object, Airbase
-			local tempName = healthTemp.objSujet:getName()
-			-- env.info( "DCE_EventT (health1s) |getName| "..tostring(tempName))
+		if health1sCategory ~= 0 then
+			if health1sCategory and ( health1sCategory == 1 or health1sCategory == 3 or health1sCategory == 4)  then
+				--Function also works with Unit, Static Object, Airbase
+				local tempName = healthTemp.objSujet:getName()
+				-- env.info( "DCE_EventT (health1s) |getName| "..tostring(tempName))
 
-			if health1sCategory == 3 then
-				local staticHealth1sCategory = event.target:getDesc().category
-				-- env.info( "DCE_EventT (health1s) |staticHealth1sCategory| "..tostring(staticHealth1sCategory))
+				if health1sCategory == 3 then
+					local staticHealth1sCategory = event.target:getDesc().category
+					-- env.info( "DCE_EventT (health1s) |staticHealth1sCategory| "..tostring(staticHealth1sCategory))
+				end
 			end
+
+			local lifeActual1s = healthTemp.objSujet:getLife()		--651: Unit doesn't exist
+			local lifePourcent = (lifeActual1s/healthTemp.health0) * 100
+			-- local initDesc = healthTemp.objSujet:getDesc()	--tooHeavy
+
+			local health1s_entry = {
+				PilotName = healthTemp.PilotName,
+				lifeActual1s = lifeActual1s,
+				health0 = healthTemp.health0,
+				lifePourcent = lifePourcent,
+				event = healthTemp.typeEvent,
+				-- description = initDesc,	--tooHeavy
+			}
+
+			table.insert(CustomLog, health1s_entry)
 		end
-
-		local lifeActual1s = healthTemp.objSujet:getLife()		--651: Unit doesn't exist
-		local lifePourcent = (lifeActual1s/healthTemp.health0) * 100
-		-- local initDesc = healthTemp.objSujet:getDesc()	--tooHeavy
-
-		local health1s_entry = {
-			PilotName = healthTemp.PilotName,
-			lifeActual1s = lifeActual1s,
-			health0 = healthTemp.health0,
-			lifePourcent = lifePourcent,
-			event = healthTemp.typeEvent,
-			-- description = initDesc,	--tooHeavy
-		}
-
-		table.insert(CustomLog, health1s_entry)
 	end
 end
 
 --1s apres le hit, la valeur est plus proche de la réalité
 local function schedulHit(hitTemp)
-
 
 	scenLog[hitTemp.scenaryName] = {							--add scenery object to table
 		lifePourcent = 0,
@@ -219,8 +214,8 @@ local function destructionScenaryInZone(point, radius, launcherName)
 		return
 	end
 
-	local function IfFound(obj)
-		local objName = obj:getName()
+	local function if_found(obj)
+		local objName = obj.getName and obj:getName() or "unknown"
 		local objType = obj:getTypeName()
 		local objVec3 = obj:getPoint()
 		
@@ -243,9 +238,7 @@ local function destructionScenaryInZone(point, radius, launcherName)
 				time = timer.getTime(),
 				-- valid = true,
 			}
-			
 		end
-
 	end
 
 	local searchArea = {
@@ -259,7 +252,7 @@ local function destructionScenaryInZone(point, radius, launcherName)
 			radius = radius
 		}
 	}
-	world.searchObjects(Object.Category.SCENERY, searchArea, IfFound)
+	world.searchObjects(Object.Category.SCENERY, searchArea, if_found)
 end
 
 local function processhit1sQueue()
@@ -279,7 +272,6 @@ local function processhit1sQueue()
     end
 end
 
-
 -- Calcule le prochain intervalle de suivi selon l'altitude
 local function getTrackingInterval(alt)
     if alt > 5000 then return 3.0 end     -- Haute altitude
@@ -290,7 +282,7 @@ end
 local function trackBomb(bomb, desc, initiator)
     -- Génère un ID unique même si bomb:getID() n'existe plus
     local id = (bomb and bomb.getID and bomb:getID()) or GenerateIdAleatoire()
-    local lastPos = nil
+    local lastPosVec3 = nil
     local weaponName = desc and (desc.displayName or (bomb and bomb.getTypeName and bomb:getTypeName()) or "unknown") or "unknown"
     local explosiveMass = desc and desc.warhead and desc.warhead.explosiveMass or 0
     -- local warheadMass = desc and desc.warhead and desc.warhead.mass or 0
@@ -300,16 +292,16 @@ local function trackBomb(bomb, desc, initiator)
 
     local function checkBomb()
         if not bomb or not (bomb.isExist and bomb:isExist()) then
-            if lastPos and lastPos.x and lastPos.y and lastPos.z then
+            if lastPosVec3 and lastPosVec3.x and lastPosVec3.y and lastPosVec3.z then
                 -- debugBomb(string.format(" Bombe %s tombée à %.1f / %.1f / %.1f", weaponName, lastPos.x, lastPos.y, lastPos.z))
                 scenLog["BOMB_"..id] = {
                     event = "BOMB_IMPACT",
                     weaponName = weaponName,
                     explosiveMass = explosiveMass,
                     -- warheadMass = warheadMass,
-                    x = lastPos.x,
-                    y = lastPos.y,
-                    z = lastPos.z,
+                    x = lastPosVec3.x,
+                    y = lastPosVec3.y,
+                    z = lastPosVec3.z,
                     initiator = launcherName,
                     time = timer.getTime(),
                     valid = true,
@@ -325,7 +317,7 @@ local function trackBomb(bomb, desc, initiator)
 				-- Ajoute la détection de destruction de bâtiments dans la zone de souffle avec un timer pour diluer les requêtes
 				local delay = 120
 				local function scheduleDestructionScenery(repeatCount)
-					destructionScenaryInZone(lastPos, correctedRadius, launcherName)
+					destructionScenaryInZone(lastPosVec3, correctedRadius, launcherName)
 					if repeatCount > 1 then
 						timer.scheduleFunction(function()
 							scheduleDestructionScenery(repeatCount - 1)
@@ -354,14 +346,14 @@ local function trackBomb(bomb, desc, initiator)
             return
         end
 
-        local success, pos = pcall(function() return bomb:getPoint() end)
-        if success and pos and pos.x and pos.y and pos.z then
-            lastPos = pos
+        local success, posVec3 = pcall(function() return bomb:getPoint() end)
+        if success and posVec3 and posVec3.x and posVec3.y and posVec3.z then
+            lastPosVec3 = posVec3
         else
             -- debugBomb("Erreur sur getPoint(), bombe probablement supprimée trop tôt.")
         end
 
-        local alt = lastPos and lastPos.y or 0
+        local alt = lastPosVec3 and lastPosVec3.y or 0
         local nextCheck = getTrackingInterval(alt)
         timer.scheduleFunction(checkBomb, {}, timer.getTime() + nextCheck)
     end
@@ -627,8 +619,8 @@ function eventHandlerDCE:onEvent(event)
 						env.info("[BDA-FLOOD C]BDA flood détecté tgtName : " .. tgtName ..  "  sera upprimé")
 
 						local isPlayer = tgt.getPlayerName and tgt:getPlayerName()
-						if not isPlayer and tgt.getName then
-							isPlayer = Players[tgt:getName()]
+						if not isPlayer and tgtName then
+							isPlayer = Players[tgtName]
 						end
 
 						if tgt and tgt.isExist and not isPlayer then
@@ -648,8 +640,8 @@ function eventHandlerDCE:onEvent(event)
 						env.info("[BDA-FLOOD C]BDA flood détecté initName: " .. initName .. " supprimé")
 
 						local isPlayer = init.getPlayerName and init:getPlayerName()
-						if not isPlayer and init.getName then
-							isPlayer = Players[init:getName()]
+						if not isPlayer and initName then
+							isPlayer = Players[initName]
 						end
 
 						if init and init.isExist and not isPlayer then
@@ -731,13 +723,20 @@ function eventHandlerDCE:onEvent(event)
 
 		--recupere le SIDE une fois pour toute:
 		local initiatorSideName
-		local targetSideName
+		local initiatorName
+        local targetSideName
+        local initiatorVec3
+		local initiatorId
 
 		local initiatorObjCategory
 		local targetObjCategory
 
 		if event.initiator then
 			initiatorObjCategory = Object.getCategory(event.initiator)
+            initiatorName = event.initiator.getName and event.initiator:getName() or "unknown"
+            initiatorVec3 = event.initiator.getPoint and event.initiator:getPoint()
+			initiatorId = event.initiator.getID and event.initiator:getID() or "unknown"
+
 			--DCE_EventsTracker initiator Category 0 _: nil
 			-- if camp.debug then env.info("DCE_EventsTracker initiator Category: "..tostring(initiatorObjCategory)) end
 			if Object_Category[initiatorObjCategory] then
@@ -776,7 +775,7 @@ function eventHandlerDCE:onEvent(event)
 				-- end
 
 				if event.target.getCoalition then
-					local targetCoalition = event.target:getCoalition()		--ERROR 769: Unit doesn't exist
+					local targetCoalition = event.target:getCoalition() --779: Unit doesn't exist
 					targetSideName = coalitionIdNumeric[tonumber(targetCoalition)]
 				end
 
@@ -786,28 +785,25 @@ function eventHandlerDCE:onEvent(event)
 
 		if log_entry.type == "eject"  then
 			if event.initiator then
-				local ptEvent = event.initiator:getPoint()
+				-- local ptEventVec3 = event.initiator:getPoint()
 				local pilotEjection = {}
 				local side
-				if ptEvent and ptEvent.x then
+				if initiatorVec3 and initiatorVec3.x then
 
 					pilotEjection = {
-						x = ptEvent.x,
-						y = land.getHeight({x = ptEvent.x, y = ptEvent.z}),
-						z = ptEvent.z,
+						vec3x = initiatorVec3.x,
+						vec3y = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z }),
+						vec3z = initiatorVec3.z,
 						unit = event.initiator,
 					}
 
-					-- local initDesc = event.initiator:getDesc()																									--debug ET01	
-					-- if initDesc.displayName then
-					-- 	pilotEjection.initiator = event.initiator:getName()
-					-- 	log_entry.initiator = event.initiator:getName()
+					-- if event.initiator.getName then
+					-- 	local name = event.initiator:getName()
+					-- 	pilotEjection.initiator, log_entry.initiator = name, name
 					-- end
-					if event.initiator.getName then
-						local name = event.initiator:getName()
-						pilotEjection.initiator, log_entry.initiator = name, name
+					if initiatorName then
+						pilotEjection.initiator, log_entry.initiator = initiatorName, initiatorName
 					end
-
 
 					if initiatorObjCategory == Object.Category.UNIT  then										--initiator is a unit debug_ET01.h
 						-- pilotEjection.initiatorPilotName = event.initiator:getPlayerName()
@@ -822,7 +818,7 @@ function eventHandlerDCE:onEvent(event)
 					end
 
 					if initiatorObjCategory ~= Object.Category.SCENERY and event.initiator.getID then				--initator is not a scenery object debug_ET01.h
-						pilotEjection.initiatorMissionID = event.initiator:getID()																					--store ID
+						pilotEjection.initiatorMissionID = initiatorId                 --store ID
 						pilotEjection.initiatorSIDE = event.initiator:getCoalition()
 						side = coalitionIdNumeric[tonumber(pilotEjection.initiatorSIDE)]
 
@@ -840,28 +836,20 @@ function eventHandlerDCE:onEvent(event)
 					-- local point = {
 					-- 	x = pilotEjection.x,
 					-- 	y = pilotEjection.z,
-					-- }
-					pilotEjection.SurfaceType = land.getSurfaceType({x = pilotEjection.x, y = pilotEjection.z})
-
+                    -- }
+					
+					pilotEjection.SurfaceType = land.getSurfaceType({ x = pilotEjection.vec3x, y = pilotEjection.vec3z })
 					pilotEjection.grid = coord.LLtoMGRS(coord.LOtoLL(pilotEjection.unit:getPosition().p))
 
-					local CloseRoad = {}
+					local closeRoad = {}
 					-- Roadtype can be 'railroads' or 'roads'
-					local x, y = land.getClosestPointOnRoads('roads',pilotEjection.x, pilotEjection.z)
-					CloseRoad.x = x
-					CloseRoad.y = y
-					pilotEjection.CloseRoad = CloseRoad
+					local x, y = land.getClosestPointOnRoads('roads', pilotEjection.vec3x, pilotEjection.vec3z)
+					closeRoad.x = x
+					closeRoad.y = y
+					pilotEjection.closeRoad = closeRoad
 					table.insert(tabEjection, pilotEjection)
 
-					-- _affiche(pilotEjection, " pilotEjection |log_entry.type == eject")
-
-					-- local PilotVec3 = {
-						-- x = ptEvent.x,
-						-- y = land.getHeight({x = ptEvent.x, y = ptEvent.z}),
-						-- z = ptEvent.z,
-					-- }
-
-					if event.initiator and event.initiator.getPlayerName	then
+                    if event.initiator and event.initiator.getPlayerName	then
 						env.info( "DCE_EJECT EventT :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..pilotEjection.initiator))
 
 						trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', pilotEjection, 0, true, camp.EjectedPilotFrequency[side].GuardEjection, 0.1, 'GuardEjection'..pilotEjection.initiator)
@@ -877,8 +865,6 @@ function eventHandlerDCE:onEvent(event)
 
 					table.insert(EjectionSeatFrequency, ejectionSeatTemp)
 
-					-- table.insert(CustomLog, log_entry)
-
 				end
 				if initiatorSideName then
 					log_entry.initiatorSideName = initiatorSideName
@@ -892,20 +878,20 @@ function eventHandlerDCE:onEvent(event)
 			env.info( "DCE_EventT  PASSE A pilot seat separation, id: "..tostring(event.id).."_type_"..tostring(log_entry.type))
 
 			if event.initiator then
-				local ptEvent = event.initiator:getPoint()
-				if ptEvent and ptEvent.x then
+				-- local ptEventVec3 = event.initiator:getPoint()
+				if initiatorVec3 and initiatorVec3.x then
 
-					--active fumigene
-					local PilotVec3 = {
-						x = ptEvent.x,
-						y = land.getHeight({x = ptEvent.x, y = ptEvent.z}),
-						z = ptEvent.z,
+					--pour fumigene
+					local pilotVec3 = {
+						x = initiatorVec3.x,
+						y = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z }),
+						z = initiatorVec3.z,
 					}
 					
-					log_entry.initiatorMissionID = event.initiator:getID()
-					log_entry.x = ptEvent.x
-					log_entry.y = ptEvent.y
-					log_entry.z = ptEvent.z
+					log_entry.initiatorMissionID = initiatorId
+					log_entry.x = initiatorVec3.x
+					log_entry.y = initiatorVec3.z
+					log_entry.z = initiatorVec3.y
 
 					--TODO revoir ça, normalement l'id du parachut devrait etre celui de plane, quid d'un biplace?
 					--attention l'id disparait si le parachute tombe dans l'eau
@@ -913,7 +899,7 @@ function eventHandlerDCE:onEvent(event)
 					local selectedEjection = {}
 					for n=1, #tabEjection do
 						if tabEjection[n] and tabEjection[n] ~= nil then
-							local distance = math.sqrt(math.pow(PilotVec3.x - tabEjection[n].x, 2) + math.pow(PilotVec3.z - tabEjection[n].z, 2))
+							local distance = math.sqrt(math.pow(pilotVec3.x - tabEjection[n].vec3x, 2) + math.pow(pilotVec3.z - tabEjection[n].vec3z, 2))
 							if distance < selected_distance and (not tabEjection[n].SumEjectedPilotDay) then
 								selected_distance = distance
 								selectedEjection = tabEjection[n]
@@ -921,24 +907,20 @@ function eventHandlerDCE:onEvent(event)
 						end
 					end
 
-					local infoPilot = {}
 					if selected_distance <= 4000 then
 						log_entry.initiatorPilotName = selectedEjection.initiatorPilotName
 						log_entry.initiator = selectedEjection.initiator
 
-						selectedEjection.x = ptEvent.x
-						selectedEjection.y = ptEvent.y
-						selectedEjection.z = ptEvent.z
-						selectedEjection.x2d = PilotVec3.x
-						selectedEjection.y2d = PilotVec3.z
-						selectedEjection.z2d = PilotVec3.y
+						selectedEjection.vec3x = initiatorVec3.x
+						selectedEjection.vec3y = initiatorVec3.y
+						selectedEjection.vec3z = initiatorVec3.z
+						selectedEjection.x = pilotVec3.x
+						selectedEjection.y = pilotVec3.z
+						selectedEjection.z = pilotVec3.y
 						if selectedEjection.unit:isExist()  then
 							selectedEjection.grid = coord.LLtoMGRS(coord.LOtoLL(selectedEjection.unit:getPosition().p))
 						end
 					end
-
-					-- _affiche(selectedEjection, " selectedEjection |pilot seat separation")
-
 				end
 				if initiatorSideName then
 					log_entry.initiatorSideName = initiatorSideName
@@ -955,91 +937,87 @@ function eventHandlerDCE:onEvent(event)
 			env.info( "DCE_EvenT: pilotLand_A id: "..tostring(event.id).."_type_"..tostring(log_entry.type))
 
 			if event.initiator then
-				
-				local ptEvent = event.initiator:getPoint()
-
-				if ptEvent  and  ptEvent.x then
+				-- local ptEventVec3 = event.initiator:getPoint()
+				if initiatorVec3 and initiatorVec3.x then
 					--active fumigene
-					local PilotVec3 = {
-						x = ptEvent.x,
-						y = land.getHeight({x = ptEvent.x, y = ptEvent.z}),
-						z = ptEvent.z,
+					local pilotVec3 = {
+						x = initiatorVec3.x,
+						y = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z }),
+						z = initiatorVec3.z,
 					}
 					
 					--inscrit position et name dans le log
-					log_entry.initiatorMissionID = event.initiator:getID()
-					log_entry.x = ptEvent.x
-					log_entry.y = ptEvent.y
-					log_entry.z = ptEvent.z
+					log_entry.initiatorMissionID = initiatorId
+					log_entry.x = initiatorVec3.x
+					log_entry.y = initiatorVec3.z
+					log_entry.z = initiatorVec3.y
 
 					-- _affiche(tabEjection, " tabEjection |pilot land AAA")
 
 					local selected_distance = 9999999
-					local selectedEjection = {}
+					local selPilotEject = {}
 					local ejectN = 0
 					for n=1, #tabEjection do
 						if tabEjection[n] and tabEjection[n] ~= nil then
-							local distance = math.sqrt(math.pow(PilotVec3.x - tabEjection[n].x, 2) + math.pow(PilotVec3.z - tabEjection[n].z, 2))
+							local distance = math.sqrt(math.pow(pilotVec3.x - tabEjection[n].x, 2) + math.pow(pilotVec3.z - tabEjection[n].z, 2))
 
 							if distance < selected_distance and (not tabEjection[n].createdSoldier) then
 								selected_distance = distance
 								ejectN = n
 							end
-
 						end
 					end
 
 					if selected_distance <= 8000 and ejectN ~= 0 then
-
-						selectedEjection = tabEjection[ejectN]
-
-						log_entry.initiatorPilotName = selectedEjection.initiatorPilotName
-						log_entry.initiator = selectedEjection.initiator
+						selPilotEject = tabEjection[ejectN]
+						log_entry.initiatorPilotName = selPilotEject.initiatorPilotName
+						log_entry.initiator = selPilotEject.initiator
 
 						--on change la position, car le vent peut pousser le parachute de la mere vers la terre
-						selectedEjection.x = PilotVec3.x
-						selectedEjection.y = PilotVec3.y
-						selectedEjection.z = PilotVec3.z
 
-						selectedEjection.x2d = PilotVec3.x
-						selectedEjection.y2d = PilotVec3.z
-						selectedEjection.z2d = PilotVec3.y
-
-						selectedEjection.SurfaceType = land.getSurfaceType({x = selectedEjection.x, y = selectedEjection.z})
+						selPilotEject["pos"] = {
+							vec3x = pilotVec3.x,
+							vec3y = pilotVec3.y,
+							vec3z = pilotVec3.z,
+							x = pilotVec3.x,
+							y = pilotVec3.z,
+                            z = pilotVec3.y,
+							surfaceType = land.getSurfaceType({x = selPilotEject.x, y = selPilotEject.z})
+							
+						}
 
 						SumSoldierAliasPilot = SumSoldierAliasPilot + 1
-						selectedEjection.SumEjectedPilotDay  = SumSoldierAliasPilot
 
-						if selectedEjection.initiatorPilotName then
-							selectedEjection.name = "Mis"..camp.mission.."_Pilot_"..selectedEjection.initiatorPilotName.."_Nb"..tostring(selectedEjection.SumEjectedPilotDay)
+						if selPilotEject.initiatorPilotName then
+							selPilotEject.name = "Mis" ..
+							camp.mission ..
+							"_Pilot_" .. selPilotEject.initiatorPilotName .. "_Nb" .. tostring(SumSoldierAliasPilot)
 						else
-							selectedEjection.name = "Mis"..camp.mission.."_Pilot_"..selectedEjection.initiator.."_Nb"..tostring(selectedEjection.SumEjectedPilotDay)
+							selPilotEject.name = "Mis"..camp.mission.."_Pilot_"..selPilotEject.initiator.."_Nb"..tostring(SumSoldierAliasPilot)
 						end
 
-						selectedEjection.name = CleanName(selectedEjection.name)
-
-						-- _affiche(selectedEjection, " selectedEjection |pilot land")
-
-						CheckImmediatSAR(selectedEjection)
-
-						env.info( "DCE_EvenT: pilotLand_B createdSoldier? SurfaceType? "..tostring(selectedEjection.SurfaceType))
-						-- trigger.action.outText("EvenT:  createdSoldier? SurfaceType? "..tostring(selectedEjection.SurfaceType), 30)
-
-
-						local distanceBase, baseName = ProxyBase(selectedEjection)
-
+						selPilotEject.name = CleanName(selPilotEject.name)
+						CheckImmediatSAR(selPilotEject)
+						local distanceBase, baseName = ProxyBase(selPilotEject)
 						if distanceBase then
 							distanceBase = math.floor(distanceBase)
 						else
 							distanceBase = 0
 						end
-
 						env.info("DCE_EvenT: pilotLand_C G baseName "..tostring(baseName).." distanceBase "..tostring(distanceBase))
 
+						if distanceBase > 6000 and selPilotEject.SurfaceType ~= land.SurfaceType.WATER and selPilotEject.SurfaceType ~= land.SurfaceType.RUNWAY  then
+							AddSoldierAliasPilot(selPilotEject)
+                            selPilotEject.createdSoldier = true
 
-						if distanceBase > 6000 and selectedEjection.SurfaceType ~= land.SurfaceType.WATER and selectedEjection.SurfaceType ~= land.SurfaceType.RUNWAY  then
-							AddSoldierAliasPilot(selectedEjection)
-							selectedEjection.createdSoldier = true
+                            --ajoute l'ejectedPilot dans la liste SAR, pour etre recupéré par le module SAR
+                            selPilotEject = Add_MGRS_Chute(selPilotEject)
+							if selPilotEject.MGRS_Chute then
+								if ZoneSAR[selPilotEject.MGRS_Chute] == nil then
+									ZoneSAR[selPilotEject.MGRS_Chute] = {}
+								end
+								table.insert(ZoneSAR[selPilotEject.MGRS_Chute], selPilotEject)
+							end
 						end
 					end
 				end
@@ -1055,13 +1033,13 @@ function eventHandlerDCE:onEvent(event)
 		elseif log_entry.type == "pilot dead"  then
 
 			if event.initiator then
-				local ptEvent = event.initiator:getPoint()
-				if ptEvent  and  ptEvent.x then
-					--active fumigene
+				-- local ptEventVec3 = event.initiator:getPoint()
+				if initiatorVec3 and initiatorVec3.x then
+					--TODO les reste n'est pas utilisé, pourquoi?
 					local PilotVec3 = {
-						x = ptEvent.x,
-						y = land.getHeight({x = ptEvent.x, y = ptEvent.z}),
-						z = ptEvent.z,
+						x = initiatorVec3.x,
+						y = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z }),
+						z = initiatorVec3.z,
 					}
 				end
 			end
@@ -1082,17 +1060,19 @@ function eventHandlerDCE:onEvent(event)
 
 				if event.place then
 
-					local s =""
-					s = s.."| Object.getCategory "..initiatorObjCategory
-					s = s.."| "..event.initiator:getName()
-					-- s = s.." "..event.place:getCategory()
-					s = s.."| Airbase.getCategory "..Airbase.getCategory(event.place)
-					s = s.."| "..event.place:getName()
-					s = s.."| "..event.initiator:getID()
-					s = s.."| "..event.initiator:getTypeName()
+					-- local s =""
+					-- s = s.."| Object.getCategory "..initiatorObjCategory
+					-- -- s = s.."| "..event.initiator:getName()
+					-- s = s .. "| " .. event.initiator and event.initiator:getName() or "unknown"
+					-- -- s = s.." "..event.place:getCategory()
+					-- s = s.."| Airbase.getCategory "..Airbase.getCategory(event.place)
+					-- -- s = s.."| "..event.place:getName()
+					-- s = s .. "| " .. event.place and event.place:getName() or "unknown"
+					-- s = s.."| "..event.initiator:getID()
+					-- s = s.."| "..event.initiator:getTypeName()
 
 
-					log_entry.place = event.place:getName()
+					log_entry.place = event.place and event.place:getName() or "unknown"
 					log_entry.placeTypeName = tostring(event.place:getTypeName())
 					local baseCoalition = Airbase.getCoalition(event.place)
 					log_entry.objCategory = initiatorObjCategory
@@ -1111,11 +1091,11 @@ function eventHandlerDCE:onEvent(event)
 						if env.mission.theatre ~= "Kola" then
 							if placeDesc.category == Airbase.Category.SHIP then 											-- category ship
 								
-								--relance un Pedro si c'est un Pedro qui se pose
-								if string.find(event.initiator:getName(), "Pedro") then
+                                --relance un Pedro si c'est un Pedro qui se pose
+								if initiatorName and string.find(initiatorName, "Pedro") then
 
 									--["name"] = "Unit_Pedro_CVN-71 Theodore Roosevelt_1",
-									local cvName = event.initiator:getName()
+									local cvName = initiatorName
 									
 									cvName = cvName:gsub( "Unit_Pedro_", "")
 									cvName, _ = cvName:match("([^,]+)_([^,]+)")
@@ -1137,8 +1117,6 @@ function eventHandlerDCE:onEvent(event)
 																callsign = _group.units[1].callsign,
 															}
 															break
-
-															
 														end
 													end
 												end
@@ -1147,7 +1125,6 @@ function eventHandlerDCE:onEvent(event)
 									end
 								
 									NeedPedro(cvName, TypePedroByCV[cvName])
-
 								end
 
 								if initDesc.category == Unit.Category.HELICOPTER then
@@ -1166,7 +1143,7 @@ function eventHandlerDCE:onEvent(event)
 
 					
 					if initDesc.displayName then
-						log_entry.initiator = event.initiator:getName()																							--store initiator name
+						log_entry.initiator = initiatorName --store initiator name
 						log_entry.type_name = event.initiator:getTypeName()
 
 						log_entry.placeTypeName = CleanName(log_entry.placeTypeName)
@@ -1180,15 +1157,17 @@ function eventHandlerDCE:onEvent(event)
 						log_entry.initiatorPilotName = log_entry.initiatorPilotName:gsub("['\"]", '')
 					end
 
-					if initiatorObjCategory ~= Object.Category.SCENERY and event.initiator.getID then				--initator is not a scenery object debug_ET01.h
-						log_entry.initiatorMissionID = event.initiator:getID()																					--store ID
-					end
+                    -- if initiatorObjCategory ~= Object.Category.SCENERY and event.initiator.getID then --initator is not a scenery object debug_ET01.h
+                    --     log_entry.initiatorMissionID = event.initiator:getID()         --store ID
+                    -- end
+                    
+					log_entry.initiatorMissionID = initiatorId --store ID
 
-					local initPoint = event.initiator:getPoint()
-					if initPoint and initPoint.x then
-						log_entry.x = initPoint.x
-						log_entry.y = initPoint.y
-						log_entry.z = initPoint.z
+					-- local initPointVec3 = event.initiator:getPoint()
+					if initiatorVec3 and initiatorVec3.x then
+						log_entry.x = initiatorVec3.x
+						log_entry.y = initiatorVec3.z
+						log_entry.z = initiatorVec3.y
 					end
 
 					local life = event.initiator:getLife()																	--get current life of unit
@@ -1215,7 +1194,7 @@ function eventHandlerDCE:onEvent(event)
 
 				local initDesc = event.initiator:getDesc()
 				if event.initiator.getName then
-					log_entry.initiator = event.initiator:getName()
+					log_entry.initiator = initiatorName
 				end
 				
 				if initiatorObjCategory == Object.Category.UNIT then										--initiator is a unit debug_ET01.h
@@ -1252,23 +1231,15 @@ function eventHandlerDCE:onEvent(event)
 
 				--util uniquement pour les AFAC?
 				if log_entry.type == "unit lost" and initiatorObjCategory and (initiatorObjCategory == Object.Category.STATIC or initiatorObjCategory == Object.Category.UNIT) then
-					local victimMissionID = event.initiator:getID()
-					-- env.info( "DCE_EventT  unitLost_A  victimMissionID: "..tostring(victimMissionID) )
-
-					if victimMissionID and AFAC_targetStatus[victimMissionID] then
-						-- env.info( "DCE_EventT  unitLost_B  victimMissionID: "..tostring(victimMissionID) )
-
-						trigger.action.setUserFlag("targetDestroyed_Flag_"..victimMissionID, 1)
-						AFAC_targetStatus[victimMissionID] = nil
+					-- local victimMissionID = event.initiator:getID()
+					if initiatorId and AFAC_targetStatus[initiatorId] then
+						trigger.action.setUserFlag("targetDestroyed_Flag_" .. initiatorId, 1)
+						AFAC_targetStatus[initiatorId] = nil
 					end
 				end
 
-				-- if initDesc.category and (initDesc.category ~= 0) and initiatorObjCategory ~= Object.Category.SCENERY and not initDesc.missileCategory  then				--initator is not a scenery object debug_ET01.h
-				-- 	log_entry.initiatorMissionID = event.initiator:getID()
-				-- end
-
 				if event.initiator.getID then
-					log_entry.initiatorMissionID = event.initiator:getID()																					--store IDs
+					log_entry.initiatorMissionID = initiatorId --store IDs
 				end
 
 				if initiatorSideName then
@@ -1279,7 +1250,6 @@ function eventHandlerDCE:onEvent(event)
 				end
 
 			end
-
 
 
 			if event.target then																														--event has a target
@@ -1341,13 +1311,13 @@ function eventHandlerDCE:onEvent(event)
 
 							timer.scheduleFunction(health1s, {healthTemp, event}, timer.getTime() + 1)
 
-							local pos = event.target:getPoint()
-							if pos and pos.x then
-								log_entry.x = pos.x
-								log_entry.y = pos.y
-								log_entry.z = pos.z
+							local posVec3 = event.target:getPoint()
+							if posVec3 and posVec3.x then
+								log_entry.x = posVec3.x
+								log_entry.y = posVec3.z
+								log_entry.z = posVec3.y
 
-								local agl = pos.y - land.getHeight({x=pos.x, y = pos.z})
+								local agl = posVec3.y - land.getHeight({x=posVec3.x, y = posVec3.z})
 								log_entry.agl = agl
 							end
 						end
@@ -1399,8 +1369,7 @@ function eventHandlerDCE:onEvent(event)
 				end
 			end
 
-			camp.runwayLife = runwayLife
-
+			camp.RunwayLife = RunwayLife
 
 			env.setErrorMessageBoxEnabled(true)																					-- debug_ET02	n'affiche pas les messages d'error sauf � la fin de mission
 
@@ -1438,7 +1407,6 @@ function eventHandlerDCE:onEvent(event)
 			end
 
 
-
 			if camp.debugTraceability then
 				camp.debugTraceability = {}
 			end
@@ -1457,7 +1425,7 @@ function eventHandlerDCE:onEvent(event)
 			end
 
 			--export zoneSAR file
-			local SAR_Str = "zoneSAR = " .. TableSerialization(zoneSAR, 0)
+			local SAR_Str = "zoneSAR = " .. TableSerialization(ZoneSAR, 0)
 			local SAR_File = io.open(PathDCE .. "zoneSAR.lua", "w")
 			if SAR_File then
 				SAR_File:write(SAR_Str)
@@ -1465,7 +1433,6 @@ function eventHandlerDCE:onEvent(event)
 			else
 				env.info("DCE_zoneSAR: Failed to open log file for writing.")
 			end
-
 
 
 			--export eventIdTotal
@@ -1478,8 +1445,6 @@ function eventHandlerDCE:onEvent(event)
 				else
 					env.info("DCE_eventIdTotal: Failed to open log file for writing.")
 				end
-
-
 
 				local fileStr = "EWR_optionPlayer = " .. TableSerialization(EWR_optionPlayer, 0)
 				local fileFile = io.open(PathDCE.."Debug\\" .. "EWR_optionPlayer.lua", "w")
@@ -1496,104 +1461,21 @@ function eventHandlerDCE:onEvent(event)
 			--Launch external LUA environment to evaluate debrief.log, update campaign status files and generate the next campaign mission
 			os.execute('start "Debriefing" cmd  /k "set \"DCSDIR=%cd%\" &  ' .. PathDD .. ' & cd ' .. PathDCE .. ' & call \"%DCSDIR%\\bin\\luae.exe\" ..\\..\\..\\ScriptsMod.'..camp.VersionPackageICM..'\\DEBRIEF_Master.lua"')
 
-		--collect destroyed scenery objects
-		-- elseif event.id == world.event.S_EVENT_HIT then
-		-- 	if event.target and event.initiator then
-		-- 		if initiatorObjCategory == 5 and event.target.getDesc then								--if target is a scenery object
-		-- 			local descr = event.target:getDesc()
-		-- 			if descr.life and descr.life > 9 then							--only store destroyed scenery that had an initial health bigger than 20
-		-- 				local lifeHit = event.target:getLife()
-		-- 				-- local live0 = event.target:getLife0()	--ne fonctionne pas avec scenery object
-		-- 				local health0 = descr.life
-		-- 				local hightLife = health0
-		-- 				if lifeHit > hightLife and lifeHit > health0 then
-		-- 					hightLife = lifeHit
-		-- 				end
-		-- 				local lifePourcent = (lifeHit/hightLife) * 100
-
-		-- 				local initPoint = event.target:getPoint()				--get point of hit scenery object
-
-		-- 				local scenaryName = event.target:getName()
-
-		-- 				local wep = event.weapon
-		-- 				local descWep = wep:getDesc()
-		-- 				-- if descWep and camp.debug then
-		-- 				-- 	_affiche(descWep, "DCE_EventsTracker hit descWep ")
-		-- 				-- end
-
-		-- 				local explosiveMass = 0
-		-- 				if descWep and descWep.warhead and descWep.warhead.explosiveMass then
-		-- 					explosiveMass = descWep.warhead.explosiveMass
-		-- 				end
-
-		-- 				local weaponName = "inc"
-		-- 				if descWep and descWep.displayName then
-		-- 					weaponName = descWep.displayName
-		-- 				end
-
-		-- 				local sceneryTypeName = "inc"
-		-- 				if descr and descr.typeName then
-		-- 					sceneryTypeName = descr.typeName
-		-- 				end
-
-		-- 				local hitTemp = {
-		-- 					scenaryName = scenaryName,
-		-- 					sceneryTypeName = sceneryTypeName,
-		-- 					objScen = event.target,
-		-- 					hightLife = hightLife,
-		-- 					health0 = descr.life,									--store initial health of scenery object
-		-- 					lasthit = event.initiator:getName(),					--store who hit the scenery object
-		-- 					lifeHit = lifeHit,
-		-- 					lifePourcent = lifePourcent,
-		-- 					x = initPoint.x,
-		-- 					y = initPoint.y,
-		-- 					z = initPoint.z,
-		-- 					-- description = descr,
-		-- 					event = "S_EVENT_HIT",
-		-- 					initiatorSideName = initiatorSideName,
-		-- 					targetSideName = targetSideName,
-		-- 					explosiveMass = explosiveMass,
-		-- 					weaponName = weaponName,
-		-- 					time = log_entry.t,
-		-- 					log_equiv = log_entry,
-		-- 				}
-
-		-- 				if descr and camp.debug then
-		-- 					hitTemp.description = descr
-		-- 				end
-
-		-- 				-- timer.scheduleFunction(addHit1s, hitTemp, timer.getTime() + 1)
-
-		-- 				-- Ajoute à la file d'attente au lieu d'appeler directement
-		--       			table.insert(hit1sQueue, hitTemp)
-		-- 				if not hit1sQueueTimerId then
-		-- 					hit1sQueueTimerId = timer.scheduleFunction(processhit1sQueue, nil, timer.getTime() + 0.1)
-		-- 				end
-
-		-- 			end
-		-- 		end
-		-- 	end
 		elseif event.id == world.event.S_EVENT_HIT then
 			if event.target and event.initiator then
 				if targetObjCategory == Object.Category.SCENERY and event.target.getDesc then
 
 					local lifePourcent = 0
-
-					local initPoint = event.target:getPoint()
-
+					local initPointVec3 = event.target:getPoint()
 					local scenaryName = event.target:getName()
-
-					-- local wep = event.weapon
-					-- local descWep = wep:getDesc()
-					
 
 					local hitTemp = {
 						scenaryName = scenaryName,
-						lasthit = event.initiator:getName(),
+						lasthit = initiatorName,
 						lifePourcent = lifePourcent,
-						x = initPoint.x,
-						y = initPoint.y,
-						z = initPoint.z,
+						x = initPointVec3.x,
+						y = initPointVec3.y,
+						z = initPointVec3.z,
 						event = "S_EVENT_HIT",
 						
 					}
@@ -1608,13 +1490,13 @@ function eventHandlerDCE:onEvent(event)
 		elseif event.id == world.event.S_EVENT_DEAD then
 			if event.initiator then
 				if initiatorObjCategory == 5 then							--if initiator is a scenery object
-					local scenaryName = event.initiator:getName()
+					local scenaryName = initiatorName
 
 					if scenLog[scenaryName] then
-						local initPoint = event.initiator:getPoint()				--get point of dead scenery object
-						scenLog[scenaryName].x = initPoint.x
-						scenLog[scenaryName].y = initPoint.y
-						scenLog[scenaryName].z = initPoint.z
+						-- local initPointVec3 = event.initiator:getPoint()				--get point of dead scenery object
+						scenLog[scenaryName].x = initiatorVec3.x
+						scenLog[scenaryName].y = initiatorVec3.z
+						scenLog[scenaryName].z = initiatorVec3.y
 						scenLog[scenaryName].event = "S_EVENT_DEAD"
 						local initDesc = event.initiator:getDesc()																									--debug ET01	
 						if initDesc then
@@ -1627,13 +1509,13 @@ function eventHandlerDCE:onEvent(event)
 			if event.initiator then
 				if initiatorObjCategory == 5 then							--if initiator is a scenery object
 
-					local scenaryName = event.initiator:getName()
+					local scenaryName = initiatorName
 
 					if scenLog[scenaryName] then
-						local initPoint = event.initiator:getPoint()				--get point of dead scenery object
-						scenLog[scenaryName].x = initPoint.x
-						scenLog[scenaryName].y = initPoint.y
-						scenLog[scenaryName].z = initPoint.z
+						-- local initPointVec3 = event.initiator:getPoint()				--get point of dead scenery object
+						scenLog[scenaryName].x = initiatorVec3.x
+						scenLog[scenaryName].y = initiatorVec3.z
+						scenLog[scenaryName].z = initiatorVec3.y
 
 						scenLog[scenaryName].event = "S_EVENT_UNIT_LOST"
 
@@ -1647,13 +1529,13 @@ function eventHandlerDCE:onEvent(event)
 		elseif event.id == world.event.S_EVENT_KILL then
 			if event.initiator then
 				if initiatorObjCategory == 5 then							--if initiator is a scenery object
-					local scenaryName = event.initiator:getName()
+					local scenaryName = initiatorName
 
 					if scenLog[scenaryName] then
-						local initPoint = event.initiator:getPoint()				--get point of dead scenery object
-						scenLog[scenaryName].x = initPoint.x
-						scenLog[scenaryName].y = initPoint.y
-						scenLog[scenaryName].z = initPoint.z
+						-- local initPointVec3 = event.initiator:getPoint()				--get point of dead scenery object
+						scenLog[scenaryName].x = initiatorVec3.x
+						scenLog[scenaryName].y = initiatorVec3.z
+						scenLog[scenaryName].z = initiatorVec3.y
 
 						scenLog[scenaryName].event = "S_EVENT_KILL"
 
@@ -1670,24 +1552,13 @@ function eventHandlerDCE:onEvent(event)
 			local uid ,uName ,fuelMassMax, playerName
 
 			if event.initiator then
-				-- env.info("DCE_EventT_Refuel: START_B ")
-
 				local desc = event.initiator:getDesc()
-				-- _affiche(desc, "START_B2 desc: ")
-
-				-- if desc then
-				-- 	env.info("DCE_EventT_Refuel: START_B3 attributes? "..tostring( desc.attributes)
-				-- 	.." Tankers? "..tostring( desc.attributes.Tankers)
-				-- 	.." Refuelable? "..tostring( desc.attributes.Refuelable)
-				-- 	)
-				-- end
-
 				-- Détection si c'est un tanker
 				if desc and desc.attributes and desc.attributes.Tankers then
 					env.info("DCE_EventT_Refuel: START_C initiator est un TANKER, recherche du receveur...")
 
 					local tanker = event.initiator
-					local tankerPos = tanker:getPoint()
+					local tankerPosVec3 = tanker:getPoint()
 					local minDist = 99999
 					local closestUnit = nil
 
@@ -1701,9 +1572,9 @@ function eventHandlerDCE:onEvent(event)
 						for i = 1, group:getSize() do
 							local unit = group:getUnit(i)
 							if unit and unit:isExist() and unit ~= tanker then
-								local pos = unit:getPoint()
-								local dx = pos.x - tankerPos.x
-								local dz = pos.z - tankerPos.z
+								local posVec3 = unit:getPoint()
+								local dx = posVec3.x - tankerPosVec3.x
+								local dz = posVec3.z - tankerPosVec3.z
 								local dist = math.sqrt(dx*dx + dz*dz)
 								-- On ne prend que l’unité la plus proche à moins de 200m et en vol
 								if dist < 200 and unit:inAir() then
@@ -1747,11 +1618,11 @@ function eventHandlerDCE:onEvent(event)
 					end
 				else
 					-- Sinon, comportement normal (initiator = receveur)
-					uid = event.initiator:getID()
-					uName = event.initiator:getName()
+					uid = initiatorId
+					uName = initiatorName
 					fuelMassMax = desc and desc.fuelMassMax or 0
-						if not refuelStartByUnit[uid] then
-							refuelStartByUnit[uid] = {
+					if not refuelStartByUnit[uid] then
+						refuelStartByUnit[uid] = {
 							uName = uName,
 							fuel_init_pourcent = event.initiator:getFuel(),
 							fuelMassMax = fuelMassMax,
@@ -1787,10 +1658,8 @@ function eventHandlerDCE:onEvent(event)
 		elseif event.id == world.event.S_EVENT_REFUELING_STOP then
 			-- env.info("DCE_EventT_Refuel STOP_A S_EVENT_REFUELING_STOP")
 
-			
-
 			if event.initiator and event.initiator.getID and event.initiator.getFuel and event.initiator.isExist and event.initiator:isExist() then
-				local tanker_uid = event.initiator:getID()
+				local tanker_uid = initiatorId
 				local plane_obj
 				local uid
 
@@ -1806,8 +1675,7 @@ function eventHandlerDCE:onEvent(event)
 					uid = tanker_uid
 					-- env.info("DCE_EventT_Refuel STOP_B2 tankerToPlane not found: c est donc LR_Plane " .. tostring(uid))
 				end
-
-				
+			
 				if refuelStartByUnit[uid] and refuelStartByUnit[uid].fuel_init_pourcent then
 
 					local fuelBefore = refuelStartByUnit[uid].fuel_init_pourcent
@@ -1868,12 +1736,6 @@ function eventHandlerDCE:onEvent(event)
 
 			SatusGroupAircraft[flightName]["takeoff"] = true
 
-			-- if camp.debug then
-			-- 	env.info( "DCE_Event S_EVENT_TAKEOFF "..flightName)
-			-- 	_affiche(SatusGroupAircraft, "DCE_Event S_EVENT_TAKEOFF SatusGroupAircraft")
-			-- end
-			
-
 		elseif event.id == world.event.S_EVENT_LAND then
 			
 			local flightName = "inc_"..timer.getTime()
@@ -1894,11 +1756,6 @@ function eventHandlerDCE:onEvent(event)
 			end
 
 			SatusGroupAircraft[flightName]["landing"] = true
-
-			-- if camp.debug then
-			-- 	env.info( "DCE_Event S_EVENT_LAND "..flightName)
-			-- 	_affiche(SatusGroupAircraft, "DCE_Event S_EVENT_LAND SatusGroupAircraft")
-			-- end
 
 		end
 	end
@@ -1939,10 +1796,10 @@ if camp.ShipHealth then																						--table with ship health exists
 					local h = u:getLife()																	--get current health of unit
 					local h0 = camp.ShipHealth0[name]														--get maximum health of unit
 					local health_current = math.floor(h / h0 * 100)											--store health percentage of ship
-					local point = u:getPoint()																--get position of ship
+					local pointVec3 = u:getPoint()																--get position of ship
 					local power = h0 / 100																	--explosive power is relatve to ship strenght
 					--trigger.action.outText(counter .. " / Name: " .. name .. " / Power: " ..power .. " / Health: " .. health_current, 1)	--DEBUG
-					trigger.action.explosion(point, power)													--apply explosion
+					trigger.action.explosion(pointVec3, power)													--apply explosion
 					counter = counter + 1																	--counter to prevent runaway repeat
 				until health_current < health_stored + 5 or counter > 100										--repeat until ship health reaches dieserd level or for a maximum of 100 times
 			end
@@ -1977,11 +1834,11 @@ local function CheckRtbAirbase()
 								for n=1  , #group.units do
 									local unitAero = groupAero:getUnit(n)
 									if unitAero and unitAero ~= nil and unitAero:isActive() and unitAero:inAir() then
-										local unitAeroPoint = unitAero:getPoint()
+										local unitAeroPointVec3 = unitAero:getPoint()
 										local unitAeroFuel = unitAero:getFuel()
-										local alti = unitAeroPoint.y - base.elevation
+										local alti = unitAeroPointVec3.y - base.elevation
 										if alti <= 1000 and unitAeroFuel <= 0.75 then
-											local distance = math.floor(math.sqrt(math.pow(base.x - unitAeroPoint.x, 2) + math.pow(base.y - unitAeroPoint.z, 2)))
+											local distance = math.floor(math.sqrt(math.pow(base.x - unitAeroPointVec3.x, 2) + math.pow(base.y - unitAeroPointVec3.z, 2)))
 
 											
 											if distance <= 20000 then

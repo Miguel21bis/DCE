@@ -4836,24 +4836,71 @@ function SecondsBetween(date1,date2)
     return deltaTimeSeconds
 end
 
-function PatchEjectedPilotStructure(pilot)
+function PatchEjectedPilotStructure(pilot, from)
 
 	if not pilot.type then
 		pilot.type = "ejectedPilot"
 	end
+
+	print("utilF pilot.x2d "..tostring(pilot.x2d).." pilot.y2d "..tostring(pilot.y2d).." pilot.z2d "..tostring(pilot.z2d).." pilot.name "..tostring(pilot.name) )
 
 	if not pilot.date then
 		pilot.date = {
 			day = pilot.day,
 			month = pilot.month,
 			year = pilot.year,
-			hours = pilot.hours,
+			hour = pilot.hour,
 		}
 		pilot.day = nil
 		pilot.month = nil
 		pilot.year = nil
-		pilot.hours = nil
+		pilot.hour = nil
 	end
+
+	if not pilot.pos then
+		if pilot.vec3x then
+			pilot.pos = {
+				vec3x = pilot.vec3x,
+				vec3y = pilot.vec3y,
+				vec3z = pilot.vec3z,
+				x = pilot.vec3x,
+				y = pilot.vec3z,
+				z = pilot.vec3y,
+				surfaceType = pilot.SurfaceType,
+			}
+		elseif pilot.x2d then
+			pilot.pos = {
+				vec3x = pilot.x2d,
+				vec3y = pilot.z2d,
+				vec3z = pilot.y2d,
+				x = pilot.x2d,
+				y = pilot.y2d,
+				z = pilot.z2d,
+				surfaceType = pilot.SurfaceType,
+			}
+		else
+			print("Error PatchEjectedPilotStructure no pos for pilot "..tostring(pilot.name) )
+		end
+		pilot.x = nil
+		pilot.y = nil
+		pilot.z = nil
+		pilot.x2d = nil
+		pilot.y2d = nil
+		pilot.z2d = nil
+		pilot.SurfaceType = nil	
+	end
+
+	if from == "targetlist" and not pilot.x then
+		-- dans targetlist on a pas le side
+		pilot.x = pilot.pos.x
+		pilot.y = pilot.pos.y
+		pilot.z = pilot.pos.z
+	end
+
+	-- if not pilot.sumEjectedPilotDay then
+	-- 	pilot.sumEjectedPilotDay = pilot.SumEjectedPilotDay
+		pilot.SumEjectedPilotDay = nil
+	-- end
 
 
 	if not pilot.dataPOW then

@@ -78,7 +78,7 @@ local function checkBug2(txt)
 end
 
 local function checkBug3(txt)
-	if Debug.checkTargetName  and DC_UpdateTargetlist_counter > 1 then
+	if Debug.checkTargetName and DC_UpdateTargetlist_counter > 1 then
 		-- table.insert(BugList, "DC_UT checkBug3 "..txt)
 		InsertBugList("DC_UT checkBug3 :"..txt)
 	end
@@ -342,6 +342,25 @@ if Debug.checkTargetName and (Firstmission_flag or Skipmission_flag) then
 end
 
 
+--met a jour la structure des ejectedPilot dans le targetlist
+for side, targets in pairs(targetlist)	 do
+	for i = #targets, 1, -1 do
+		if targets[i].elements then
+			for elementN, element in ipairs(targets[i].elements) do
+				if element and type(element) == 'table' and (element["SumEjectedPilotDay"] or element["sumEjectedPilotDay"] or element.type == "ejectedPilot") then
+
+					--met à jour la nouvelle structure des ejectedPilot
+					element = PatchEjectedPilotStructure(element, "targetlist")
+
+
+				end
+			end
+		end
+	end
+end
+
+
+
 if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 	for sideTL, targets in pairs(targetlist)	 do
 		if camp_ZoneSAR[sideTL] then
@@ -355,14 +374,10 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
 
 				local altiReference = 999999
-				local referenceX = pilots[1].x2d
-				local referenceY = pilots[1].y2d
+				local referenceX = pilots[1].x or pilots[1].pos.x
+				local referenceY = pilots[1].y or pilots[1].pos.y
 
 				for i = 1, #pilots do
-
-					--met à jour la nouvelle structure des ejectedPilot
-					PatchEjectedPilotStructure(pilots[i])
-
 
 					local ePriority = 0
 					if pilots[i].inTheEnemyCamp then
@@ -382,9 +397,9 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 								for elementN, element in pairs(target.elements) do
 									if pilots[i].name == element.name then
 										element.status = pilots[i].status
-										element.x = pilots[i].x2d
-										element.y = pilots[i].y2d
-										element.z = pilots[i].z2d
+										element.x = pilots[i].pos.x
+										element.y = pilots[i].pos.y
+										element.z = pilots[i].pos.z
 										foundElement = true
 									end
 								end
@@ -403,9 +418,9 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 					if not foundZoneName then
 						local newElement = pilots[i]
 						newElement.type = "Ejected Pilot"
-						newElement.x = pilots[i].x2d
-						newElement.y = pilots[i].y2d
-						newElement.z = pilots[i].z2d
+						newElement.x = pilots[i].pos.x
+						newElement.y = pilots[i].pos.y
+						newElement.z = pilots[i].pos.z
 
 						local newTarget = {
 							task = "CSAR",
@@ -428,10 +443,10 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 					end
 
 					--repere le EjectedPilot ayant l'alti le plus bas
-					if pilots[i].z2d < altiReference and (pilots[i].status == "EVAC_possible" or pilots[i].status == "MIA" ) then
-						altiReference = pilots[i].z2d
-						referenceX = pilots[i].x2d
-						referenceY = pilots[i].y2d
+					if pilots[i].pos.z < altiReference and (pilots[i].status == "EVAC_possible" or pilots[i].status == "MIA" ) then
+						altiReference = pilots[i].pos.z
+						referenceX = pilots[i].pos.x
+						referenceY = pilots[i].pos.y
 					end
 				end
 
@@ -950,7 +965,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 			target.alive_last = 0														--Introduce percentage of elements that died in last mission (for Debriefing)
 			for e = 1, #target.elements do												--Iterate through elements of target
 				if not target.elements[e].x then
-					checkBug3(" Error_10: The x and y positions of this SAR position are missing:  '" .. target.titleName .. "!")
+					checkBug3(" Error_10: The x and y positions of this CSAR position are missing:  '" .. target.titleName .. "!")
 				end
 				if target.elements[e].dead then											--if target element is dead		
 					target.alive = target.alive - 100 / #target.elements				--reduce target alive percentage	
@@ -1649,7 +1664,7 @@ for name, scen in pairs(oob_scen) do
         table.insert(impacts, {
             name = name,
             x = scen.x,
-            z = scen.z ,
+            y = scen.y ,
             radius = radius,
             isFused = string.find(name, "BOMB_FUSED") and true or false
         })
@@ -1666,7 +1681,7 @@ for i = 1, #impacts do
     for j = 1, #impacts do
         local B = impacts[j]
         if i ~= j and B.radius < A.radius and not toRemove[B.name] then
-            local dist = GetDistance({x=A.x, y=A.z}, {x=B.x, y=B.z})
+            local dist = GetDistance({x=A.x, y=A.y}, {x=B.x, y=B.y})
             if dist <= A.radius then
                 toRemove[B.name] = true
             end
@@ -1693,7 +1708,7 @@ for targetSide, targets in pairs(targetlist) do
 
 					oob_scen[element.name] = {
 						x = element.x,
-						z = element.y,
+						y = element.y,
 						lifePourcent = 0,
 						scenaryName = element.name,
 						sceneryTypeName = element.name,
@@ -1703,7 +1718,7 @@ for targetSide, targets in pairs(targetlist) do
 
 					for oob_scenN, scen in pairs(oob_scen) do
 						if scen.x and scen.y then
-							local dist = GetDistance({x=element.x, y=element.y}, {x=scen.x, y=scen.z})
+							local dist = GetDistance({x=element.x, y=element.y}, {x=scen.x, y=scen.y})
 							if dist < 50 then
 								
 								-- print("DC_UpdateScen_B5 (-) delete PROXY scen "..tostring(scen.sceneryTypeName))

@@ -59,8 +59,8 @@ local artyZones = {}
 
 local tableOfClient = {
 	MARKER_FOUND = false,
-	playerPosXZ = { x = 0, y = 0, z = 0 },
-	targetPosXZ = { x = 0, y = 0, z = 0 },
+	playerVec3 = { x = 0, y = 0, z = 0 },
+	targetVec3 = { x = 0, y = 0, z = 0 },
 	unitID = "",
 	groupID = "",
 	initiator = "",
@@ -261,10 +261,10 @@ local function addMenuItems(groupId, initiatorName)
 		--*************************************
 
 
-	local TimeSearchEngage = timer.getTime()
+	local timeSearchEngage = timer.getTime()
 	local logStr = "artyTask = " .. TableSerialization(artyTask, 0)
-	local FlightNameClean = "artyTask"
-	local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_artyTask.lua", "w")
+	local flightNameClean = "artyTask"
+	local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_"..timeSearchEngage.."_".. "_artyTask.lua", "w")
 	if logFile then
 		logFile:write(logStr)
 		logFile:close()
@@ -301,10 +301,10 @@ local function removeMenuItems(initiatorName)
 			missionCommands.removeItemForGroup(artyTask.groupID, artyTask.ArtyMenu)
 		end
 
-		local TimeSearchEngage = timer.getTime()
+		local timeSearchEngage = timer.getTime()
 		local logStr = "artyTasks = " .. TableSerialization(artyTasks, 0)
-		local FlightNameClean = "artyTasks"
-		local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..TimeSearchEngage.."_".. "_removeMenuItems.lua", "w")
+		local flightNameClean = "artyTasks"
+		local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_"..timeSearchEngage.."_".. "_removeMenuItems.lua", "w")
 		if logFile then
 			logFile:write(logStr)
 			logFile:close()
@@ -373,7 +373,7 @@ end
 local function shellZone(initiatorName)
 
 	local _artyCall = artyTasks[initiatorName].artyCall
-	local _shellPos = artyTasks[initiatorName].targetPosXZ
+	local _shellPos = artyTasks[initiatorName].targetVec3
 
 	env.info("CG_ArtySpotter: AA shellZone  initiatorName: "..tostring(initiatorName))
 	-- trigger.action.outTextForUnit( artyTasks[initiatorName].unitID, "Arty Task Created - fire incoming "..quantity.." rounds", 10)
@@ -525,7 +525,7 @@ local function closest_point_on_segment(seg_start, seg_end, point)
 end
 
 -- Fonction pour trouver le point sur le polygone le plus proche du point cible
-local function foundArtyPointInPoly(polyA, targetPointXZ)
+local function foundArtyPointInPoly(polyA, targetVec3)
     -- Initialiser la distance minimale avec un grand nombre
     local minDistance = math.huge
     local closestPoint = nil
@@ -537,8 +537,8 @@ local function foundArtyPointInPoly(polyA, targetPointXZ)
         local seg_start = polyA[i]
         local seg_end = polyA[i + 1]
 
-        local pointA = closest_point_on_segment(seg_start, seg_end, {x = targetPointXZ.x, y = targetPointXZ.z})
-        local distance_AB = math.sqrt((pointA.x - targetPointXZ.x)^2 + (pointA.y - targetPointXZ.z)^2)
+        local pointA = closest_point_on_segment(seg_start, seg_end, {x = targetVec3.x, y = targetVec3.z})
+        local distance_AB = math.sqrt((pointA.x - targetVec3.x)^2 + (pointA.y - targetVec3.z)^2)
 
         if distance_AB < minDistance then
             minDistance = distance_AB
@@ -650,8 +650,8 @@ artyAction = function ( initiatorName )
 		artyTasks[initiatorName].adjustDirection = 0
 		artyTasks[initiatorName].adjustDistance = 0
 
-		artyTasks[initiatorName].targetPosXZ.x = artyTasks[initiatorName].targetPosXZ.x + adjustX
-		artyTasks[initiatorName].targetPosXZ.z = artyTasks[initiatorName].targetPosXZ.z + adjustZ
+		artyTasks[initiatorName].targetVec3.x = artyTasks[initiatorName].targetVec3.x + adjustX
+		artyTasks[initiatorName].targetVec3.z = artyTasks[initiatorName].targetVec3.z + adjustZ
 
 	end
 
@@ -664,19 +664,19 @@ artyAction = function ( initiatorName )
 
 			--updates the player's position, if he has moved after the marker was created
 			local playerUnit = artyTasks[initiatorName].initiator
-			local _playerPosXZ = playerUnit:getPoint()
-			artyTasks[initiatorName].playerPosXZ = _playerPosXZ
+			local playerVec3 = playerUnit:getPoint()
+			artyTasks[initiatorName].playerVec3 = playerVec3
 
 
-			local _targetPosXZ = artyTasks[initiatorName].targetPosXZ
+			local targetVec3 = artyTasks[initiatorName].targetVec3
 
-			local distPlayerTarget = math.floor( getDist ( _targetPosXZ, _playerPosXZ ) / 10 ) / 100
+			local distPlayerTarget = math.floor( getDist ( targetVec3, playerVec3 ) / 10 ) / 100
 
 			--increase altitude by 3 m to avoid inconsistencies
-			_playerPosXZ.y = _playerPosXZ.y + 3
-			_targetPosXZ.y = _targetPosXZ.y + 3
+			playerVec3.y = playerVec3.y + 3
+			targetVec3.y = targetVec3.y + 3
 
-			local lineOfSight = land.isVisible(_playerPosXZ, _targetPosXZ)
+			local lineOfSight = land.isVisible(playerVec3, targetVec3)
 			local spotterSide =   "neutral"
 			local sideNum = artyTasks[initiatorName].initiator:getCoalition()
 
@@ -699,16 +699,16 @@ artyAction = function ( initiatorName )
 			-- 	for zoneN, zone in pairs(artyZones) do
 			-- 		if zone.radius and zone.radius > 1000 then
 			-- 			-- Calculer la distance entre O et B
-			-- 			local d = math.sqrt(math.pow(zone.x - _targetPosXZ.x, 2) + math.pow(zone.y - _targetPosXZ.z, 2))
+			-- 			local d = math.sqrt(math.pow(zone.x - _targetVec3.x, 2) + math.pow(zone.y - _targetVec3.z, 2))
 
 			-- 			-- Calculer les coordonnées de A sur la circonférence
 			-- 			local A = {
-			-- 				x = zone.x + zone.radius * (_targetPosXZ.x - zone.x) / d,
-			-- 				y = zone.y + zone.radius * (_targetPosXZ.z - zone.y) / d
+			-- 				x = zone.x + zone.radius * (_targetVec3.x - zone.x) / d,
+			-- 				y = zone.y + zone.radius * (_targetVec3.z - zone.y) / d
 			-- 			}
 
 			-- 			-- Calculer la distance entre A et B
-			-- 			local distance_AB = math.sqrt((_targetPosXZ.x - A.x)^2 + (_targetPosXZ.z - A.y)^2)
+			-- 			local distance_AB = math.sqrt((_targetVec3.x - A.x)^2 + (_targetVec3.z - A.y)^2)
 
 			-- 			if distance_AB < nearestZone then
 			-- 				nearestZone = distance_AB
@@ -719,7 +719,7 @@ artyAction = function ( initiatorName )
 			-- 			end
 			-- 		else
 
-			-- 			local distance = math.sqrt(math.pow(zone.x - _targetPosXZ.x, 2) + math.pow(zone.y - _targetPosXZ.z, 2))
+			-- 			local distance = math.sqrt(math.pow(zone.x - _targetVec3.x, 2) + math.pow(zone.y - _targetVec3.z, 2))
 			-- 			if distance < nearestZone then
 			-- 				nearestZone = distance
 			-- 				local distKm = math.floor(nearestZone / 1000)
@@ -733,7 +733,7 @@ artyAction = function ( initiatorName )
 			if camp.boundary and camp.boundary[spotterSide] and camp.boundary[spotterSide] ~= nil then
 
 				-- check si le target est dans son propre camp, si oui on balance
-				if CheckPointInPoly_XY_3({x=_targetPosXZ.x, y=_targetPosXZ.z}, camp.boundary[spotterSide]) then
+				if CheckPointInPoly_XY_3({x=targetVec3.x, y=targetVec3.z}, camp.boundary[spotterSide]) then
 					
 					nearestZone = artyDistance/2
 					local distKm = math.floor(nearestZone / 1000)
@@ -745,11 +745,11 @@ artyAction = function ( initiatorName )
 					env.info("CG_ArtySpotter: camp.boundary D2 "..tostring(nearestZone).." txtFromZone: "..txtFromZone)
 
 					local artyPoint
-					artyPoint, nearestZone = foundArtyPointInPoly(camp.boundary[spotterSide], _targetPosXZ )
+					artyPoint, nearestZone = foundArtyPointInPoly(camp.boundary[spotterSide], targetVec3 )
 
 					if artyPoint then
 
-						-- nearestZone = math.sqrt(math.pow(artyPoint.x - _targetPosXZ.x, 2) + math.pow(artyPoint.y - _targetPosXZ.z, 2))
+						-- nearestZone = math.sqrt(math.pow(artyPoint.x - _targetVec3.x, 2) + math.pow(artyPoint.y - _targetVec3.z, 2))
 
 						local distKm = math.floor(nearestZone / 1000)
 
@@ -771,7 +771,7 @@ artyAction = function ( initiatorName )
 				distPlayerTarget_Km = math.floor(distPlayerTarget / 1000)
 			end
 
-			local targetPosString = convertPos2Coord ( _targetPosXZ, "string" )
+			local targetPosString = convertPos2Coord ( targetVec3, "string" )
 
 			if _artyCall == 1 then
 				trigger.action.outTextForUnit( artyTasks[initiatorName].unitID, "Arty single round requested on "..targetPosString, 10)
@@ -1034,12 +1034,12 @@ local function onPlayerAddMarker(event)
 
             if hasPrefix then
 
-				local _targetPosXZ = event.pos
+				local _targetVec3 = event.pos
 
 				if event.initiator and event.initiator.getPlayerName then
 
 					local initiatorName = event.initiator:getPlayerName()
-					local _playerPosXZ = event.initiator:getPoint()
+					local playerVec3 = event.initiator:getPoint()
 
 
 					-- Store position**********************************************************
@@ -1051,8 +1051,8 @@ local function onPlayerAddMarker(event)
 					trigger.action.outTextForUnit( event.initiator:getID(), "Marker added", 5)
 					env.info("CG_ArtySpotter: MARK_ADDED 5 Marker added")
 
-					artyTasks[initiatorName].playerPosXZ = _playerPosXZ
-					artyTasks[initiatorName].targetPosXZ = _targetPosXZ
+					artyTasks[initiatorName].playerVec3 = playerVec3
+					artyTasks[initiatorName].targetVec3 = _targetVec3
 					artyTasks[initiatorName].unitID = event.initiator:getID()
 					artyTasks[initiatorName].initiator = event.initiator
 					artyTasks[initiatorName].MARKER_FOUND = true
@@ -1114,8 +1114,8 @@ local function onPlayerAddMarker(event)
 
 						if markText ~= "" then
 
-							local playerPosXZ = playerUnit:getPoint()
-							local lat, lon = coord.LOtoLL(playerPosXZ)
+							local playerVec3 = playerUnit:getPoint()
+							local lat, lon = coord.LOtoLL(playerVec3)
 							local playerPosition = { Lat = lat, Lon = lon }
 							local validMGRS = processMGRS(markText, playerPosition, initiatorName)
 
@@ -1133,8 +1133,8 @@ local function onPlayerAddMarker(event)
 								local targetPoint = MGRStoVec3(tmpMGRS)
 								targetPoint.y = land.getHeight({ x = targetPoint.x, y = targetPoint.z })
 
-								artyTasks[initiatorName].targetPosXZ = targetPoint
-								artyTasks[initiatorName].playerPosXZ = playerPosXZ
+								artyTasks[initiatorName].targetVec3 = targetPoint
+								artyTasks[initiatorName].playerVec3 = playerVec3
 
 							else
 								trigger.action.outTextForUnit( artyTasks[initiatorName].unitID, "Invalid MGRS coordinate entered.", 10)
@@ -1142,7 +1142,7 @@ local function onPlayerAddMarker(event)
 
 						else
 
-							artyTasks[initiatorName].targetPosXZ.y = land.getHeight({ x = artyTasks[initiatorName].targetPosXZ.x, y = artyTasks[initiatorName].targetPosXZ.z })
+							artyTasks[initiatorName].targetVec3.y = land.getHeight({ x = artyTasks[initiatorName].targetVec3.x, y = artyTasks[initiatorName].targetVec3.z })
 
 						end
 

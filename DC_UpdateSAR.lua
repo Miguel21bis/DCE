@@ -56,7 +56,7 @@ local function checkPointInPoly2(point, poly)
 	end
 end
 
-local function addSoldierAliasPilot(element)
+local function addSoldierAliasPilot(soldier)
     -- print("DcUS GG passe AddPilotSoldier ")
     -- [element] = {
     --     ['nameId'] = '100085',
@@ -76,12 +76,12 @@ local function addSoldierAliasPilot(element)
     --     hidden = false
     -- end
     local CircleName =""
-    if element.circle and element.circle.id then
-        CircleName =  "circle "..tostring(element.circle.id).."_x_"..tostring(element.circle.x).."_y_"..tostring(element.circle.y)
+    if soldier.circle and soldier.circle.id then
+        CircleName =  "circle "..tostring(soldier.circle.id).."_x_"..tostring(soldier.circle.x).."_y_"..tostring(soldier.circle.y)
     end
 
 
-    local AddGroup = {
+    local addGroup = {
         ["visible"] = false,
         ["tasks"] =
         {
@@ -98,14 +98,14 @@ local function addSoldierAliasPilot(element)
             {
                 [1] =
                 {
-                    ["alt"] = tonumber(element.z2d),
+                    ["alt"] = tonumber(soldier.pos.z),
                     ["type"] = "Turning Point",
                     ["ETA"] = 0,
                     ["name"] = tostring(CircleName),
                     ["alt_type"] = "BARO",
                     ["formation_template"] = "",
-                    ["y"] = tonumber(element.y2d),
-                    ["x"] = tonumber(element.x2d),
+                    ["y"] = tonumber(soldier.pos.y),
+                    ["x"] = tonumber(soldier.pos.x),
                     ["ETA_locked"] = true,
                     ["speed"] = 0,
                     ["action"] = "Off Road",
@@ -144,8 +144,8 @@ local function addSoldierAliasPilot(element)
                                     ["enabled"] = true,
                                     ["params"] =
                                     {
-                                        ["y"] = tonumber(element.y2d),
-                                        ["x"] = tonumber(element.x2d),
+                                        ["y"] = tonumber(soldier.pos.y),
+                                        ["x"] = tonumber(soldier.pos.x),
                                         ["zoneRadius"] = 2000,
                                     }, -- end of ["params"]
                                 }, -- end of [2]
@@ -165,20 +165,20 @@ local function addSoldierAliasPilot(element)
             [1] =
             {
                 ["type"] = "Soldier M4",
-                ["unitId"] = GenerateIDUnit(element.name),
+                ["unitId"] = GenerateIDUnit(soldier.name),
                 ["livery_id"] = "winter",
                 ["skill"] = "Average",
-                ["y"] = tonumber(element.y2d),
-                ["x"] = tonumber(element.x2d),
-                ["name"] = element.name,
+                ["y"] = tonumber(soldier.pos.y),
+                ["x"] = tonumber(soldier.pos.x),
+                ["name"] = soldier.name,
                 ["heading"] = 0,
                 ["playerCanDrive"] = false,
                 ["coldAtStart"] = false,
             }, -- end of [1]
         }, -- end of ["units"]
-        ["y"] = tonumber(element.y2d),
-        ["x"] = tonumber(element.x2d),
-        ["name"] = "Group_"..element.name,
+        ["y"] = tonumber(soldier.pos.y),
+        ["x"] = tonumber(soldier.pos.x),
+        ["name"] = "Group_"..soldier.name,
         ["start_time"] = 0,
     }
 
@@ -190,21 +190,21 @@ local function addSoldierAliasPilot(element)
 
     for coal_name, coal in pairs(oob_ground) do
         for country_n, country in ipairs(coal) do
-            if string.lower(country.name) == string.lower(element.country) then
+            if string.lower(country.name) == string.lower(soldier.country) then
                if country.vehicle then
                     local found = false
                     for group_n, group in ipairs(country.vehicle.group) do
-                        if group.units[1].name == element.name then
+                        if group.units[1].name == soldier.name then
                             found = true
                         end
                     end
                     if not found then
-                        table.insert(country.vehicle.group, AddGroup)
+                        table.insert(country.vehicle.group, addGroup)
                      end
                 else
                     country.vehicle = {
                             ["group"] = {
-                                [1] = AddGroup
+                                [1] = addGroup
                             }
                         }
                 end
@@ -314,7 +314,7 @@ if zoneSAR and zoneSAR ~= nil then
 
                 if type(pilot) == "table" then
                 
-                    PatchEjectedPilotStructure(pilot)
+                    pilot = PatchEjectedPilotStructure(pilot, "updateSAR")
 
                     if pilot.side == "" then
                         pilot.side = "neutrals"
@@ -492,12 +492,12 @@ local timeActualCampaignSecond = os.time{day=camp.date.day, year=aliasYear, mont
 
 if camp_ZoneSAR and camp_ZoneSAR ~= nil then
     for sideName, sideSAR in pairs(camp_ZoneSAR) do
-        for ZoneName, zone in pairs(sideSAR) do
+        for zoneName, zone in pairs(sideSAR) do
 
             for pilotN, pilot in ipairs(zone) do
 
                 --met à jour la nouvelle structure des ejectedPilot
-                PatchEjectedPilotStructure(pilot)
+                pilot = PatchEjectedPilotStructure(pilot, "updateSAR")
 
                 if pilot.status ~= "rescued" and pilot.embarked then
                     pilot.status = "rescued"
@@ -512,7 +512,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                 for baseName, base in pairs(db_airbases) do
                     if base.side == pilot.side then
 
-                        local distance = math.sqrt(math.pow(pilot.x2d - base.x, 2) + math.pow(pilot.y2d - base.y, 2))
+                        local distance = math.sqrt(math.pow(pilot.pos.x - base.x, 2) + math.pow(pilot.pos.y - base.y, 2))
                         if distance < 5000 then
                             print("DcUS SAR pilot on BASE  "..tostring(pilot.name).." set to error")
                             pilot.status = "error"
@@ -525,7 +525,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                 if pilot.side == "red" and campConfMod.code_loadout == "NAM" then
                     
                     local enemy = DCS_ENI_Side[sideName]
-                    pilot.inTheEnemyCamp =  checkPointInPoly2({x=pilot.x2d,y=pilot.y2d}, boundary[enemy])
+                    pilot.inTheEnemyCamp =  checkPointInPoly2({x=pilot.pos.x,y=pilot.pos.y}, boundary[enemy])
 
                     if not pilot.inTheEnemyCamp and pilot.date.year and pilot.date.month and pilot.date.day then
                         local timeEjectSecond = os.time{day=pilot.date.day, year=pilot.date.year, month=pilot.date.month}
@@ -572,7 +572,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                                 if country.static then
                                     for group_n, group in pairs(country.static.group) do
 
-                                        local distance = math.sqrt(math.pow(pilot.x2d - group.x, 2) + math.pow(pilot.y2d - group.y, 2))
+                                        local distance = math.sqrt(math.pow(pilot.pos.x - group.x, 2) + math.pow(pilot.pos.y - group.y, 2))
                                         if not nbAMI_ENI[side][refD] then
                                             nbAMI_ENI[side][refD] = 0
                                         end
@@ -584,7 +584,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                                 if country.vehicle then
                                     for group_n, group in pairs(country.vehicle.group) do
                                         if not string.find(group.name, "_Pilot_") then
-                                            local distance = math.sqrt(math.pow(pilot.x2d - group.x, 2) + math.pow(pilot.y2d - group.y, 2))
+                                            local distance = math.sqrt(math.pow(pilot.pos.x - group.x, 2) + math.pow(pilot.pos.y - group.y, 2))
 
                                             if not nbAMI_ENI[side][refD] then
                                                 nbAMI_ENI[side][refD] = 0
@@ -656,7 +656,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
                     --cherche s'il est ejecté chez l'ENI
                     if not pilot.dataPOW.initChoicePOW or pilot.dataPOW.initChoicePOW == nil then
-                        pilot.inTheEnemyCamp =  checkPointInPoly2({x=pilot.x2d,y=pilot.y2d}, boundary[enemy])
+                        pilot.inTheEnemyCamp =  checkPointInPoly2({x=pilot.pos.x,y=pilot.pos.y}, boundary[enemy])
                         pilot.dataPOW.initChoicePOW = true
                         pilot.dataPOW.PowDayMax = math.random(3, 15)
 
@@ -856,24 +856,24 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                             --mission axe x: vertical vers le haut      (ordonne)
                             --mission axe y: horizontal vers la droite  (abscissse)
 
-                            -- local mission2d_x = (ref_DCS_metre_ordonne * circle.pixel_y) / ref_pixel_ordonne     --pas assez precis
-                            local mission2d_x = 58538.7 - (47.2304 * circle.pixel_y )
+                            -- local mission_x = (ref_DCS_metre_ordonne * circle.pixel_y) / ref_pixel_ordonne     --pas assez precis
+                            local mission_x = 58538.7 - (47.2304 * circle.pixel_y )
                                                 --  58538.7−47.2304x
 
 
-                            -- local mission2d_y = (ref_DCS_metre_abscissse * circle.pixel_x) / ref_pixel_abscissse    --pas assez precis                 
-                            -- local mission2d_y = (564387 * circle.x2d) / offsett_pix_x
-                            local mission2d_y = (47.2287 * circle.pixel_x) + 70914
+                            -- local mission_y = (ref_DCS_metre_abscissse * circle.pixel_x) / ref_pixel_abscissse    --pas assez precis                 
+                            -- local mission_y = (564387 * circle.pos.x) / offsett_pix_x
+                            local mission_y = (47.2287 * circle.pixel_x) + 70914
                                                 -- 47.2287x+70914
 
-                            local testX = math.abs(pilot.x2d - mission2d_x)
-                            local testY =  math.abs(pilot.y2d - mission2d_y)
-                            -- print("DcUSAR passe A element x: "..tostring(element.x2d).." Y: "..tostring(element.y2d).." ||mission X: "..tostring(mission2d_x).." Y: "..tostring(mission2d_y).." ||Delat "..tostring(testX).." Y: "..tostring(testY))
+                            local testX = math.abs(pilot.pos.x - mission_x)
+                            local testY =  math.abs(pilot.pos.y - mission_y)
+                            -- print("DcUSAR passe A element x: "..tostring(element.pos.x).." Y: "..tostring(element.pos.y).." ||mission X: "..tostring(mission_x).." Y: "..tostring(mission_y).." ||Delat "..tostring(testX).." Y: "..tostring(testY))
 
-                            if math.abs(pilot.x2d - mission2d_x) <= 2000 and math.abs(pilot.y2d - mission2d_y) <= 2000 then
-                                -- print("DcUSAR passe B x: "..tostring(mission2d_x).." Y: "..tostring(mission2d_y))
+                            if math.abs(pilot.pos.x - mission_x) <= 2000 and math.abs(pilot.pos.y - mission_y) <= 2000 then
+                                -- print("DcUSAR passe B x: "..tostring(mission_x).." Y: "..tostring(mission_y))
 
-                                local result = math.pow ((pilot.x2d - mission2d_x), 2) + math.pow((pilot.y2d - mission2d_y), 2) <= math.pow((circle.radius * 47.2287), 2)
+                                local result = math.pow ((pilot.pos.x - mission_x), 2) + math.pow((pilot.pos.y - mission_y), 2) <= math.pow((circle.radius * 47.2287), 2)
                                 if result then
 
                                     --le soldierEjectedPilot est déjà dans une zone SAR possible
@@ -893,8 +893,8 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
                         -- int testX = 10191;
                         -- int testY = 5020;
-                        local initElementX2D =  pilot.x2d
-                        local initElementY2D =  pilot.y2d
+                        local initElementX2D =  pilot.pos.x
+                        local initElementY2D =  pilot.pos.y
 
                         local distanceSAR = 9999999
                         local distanceSelected = 9999999
@@ -913,15 +913,15 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                                 -- local newZone_metre_y = (ref_DCS_metre_abscissse * circle.pixel_x) / ref_pixel_abscissse      --pas assez precis
                                 local newZone_metre_y = (47.2287 * circle.pixel_x) + 70914
 
-                                -- if math.abs(element.x2d - newZone_metre_x) <= 2000 and math.abs(element.y2d - newZone_metre_y) <= 2000 then 
+                                -- if math.abs(element.pos.x - newZone_metre_x) <= 2000 and math.abs(element.pos.y - newZone_metre_y) <= 2000 then 
 
-                                if math.abs(pilot.x2d - newZone_metre_x) <= 20000 and math.abs(pilot.y2d - newZone_metre_y) <= 20000 then
+                                if math.abs(pilot.pos.x - newZone_metre_x) <= 20000 and math.abs(pilot.pos.y - newZone_metre_y) <= 20000 then
 
                                     --distance de la nouvelle zone degagé depuis la zone de chute
-                                    local distChuteNewZone = math.sqrt(math.pow(pilot.x2d - newZone_metre_x, 2) + math.pow(pilot.y2d - newZone_metre_y, 2))
+                                    local distChuteNewZone = math.sqrt(math.pow(pilot.pos.x - newZone_metre_x, 2) + math.pow(pilot.pos.y - newZone_metre_y, 2))
 
-                                                -- local result = Math.Pow((element.x2d - circle.x2d), 2) + Math.Pow((element.y2d - circle.y2d), 2) <= Math.Pow((circle.radius * 47.2287), 2)
-                                                -- local distance = math.sqrt(math.pow(element.x2d - newZone_metre_x, 2) + math.pow(element.y2d - newZone_metre_y, 2))
+                                                -- local result = Math.Pow((element.pos.x - circle.pos.x), 2) + Math.Pow((element.pos.y - circle.pos.y), 2) <= Math.Pow((circle.radius * 47.2287), 2)
+                                                -- local distance = math.sqrt(math.pow(element.pos.x - newZone_metre_x, 2) + math.pow(element.pos.y - newZone_metre_y, 2))
 
                                     if distChuteNewZone < distanceSelected then
 
@@ -935,8 +935,8 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                                             xy_Selected.x = circle.pixel_x
                                             xy_Selected.y = circle.pixel_y
 
-                                            pilot.x2d = newZone_metre_x + (pilotN * 100)
-                                            pilot.y2d = newZone_metre_y + (pilotN * 100)
+                                            pilot.pos.x = newZone_metre_x + (pilotN * 100)
+                                            pilot.pos.y = newZone_metre_y + (pilotN * 100)
                                             pilot["circle"] = {
                                                 id = nCircle,
                                                 x = circle.pixel_x,
@@ -950,7 +950,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
                         if distanceSelected < 9999999 then
                             pilot.landingPossible = true
-                            pilot.inTheEnemyCamp =  checkPointInPoly2({x=pilot.x2d,y=pilot.y2d}, boundary[enemy])
+                            pilot.inTheEnemyCamp =  checkPointInPoly2({x=pilot.pos.x,y=pilot.pos.y}, boundary[enemy])
                         end
                     else
                         pilot.landingPossible = false
@@ -981,7 +981,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                                     -- end
 
                                     if unit.base and db_airbases[unit.base] and db_airbases[unit.base].x then
-                                        local distance = math.sqrt(math.pow(pilot.x2d -  db_airbases[unit.base].x, 2) + math.pow(pilot.y2d -  db_airbases[unit.base].y, 2))
+                                        local distance = math.sqrt(math.pow(pilot.pos.x -  db_airbases[unit.base].x, 2) + math.pow(pilot.pos.y -  db_airbases[unit.base].y, 2))
                                         if distance <= selectedDistance then
                                             selectedDistance = distance
                                             selectedUnitName = unit.name
@@ -1090,7 +1090,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
         for ZoneName, zone in pairs(sideSAR) do
             for pilotN, pilot in ipairs(zone) do
 
-				-- land.SurfaceType 
+				-- land.pos.surfaceType 
 				-- LAND             1
 				-- SHALLOW_WATER    2
 				-- WATER            3 
@@ -1105,18 +1105,18 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
                     --    print("DcUS GG Deleted pilot: "..tostring(result))
                     end
 
-                if pilot.status == "EVAC_possible" and pilot.SurfaceType ~= 5  then
+                if pilot.status == "EVAC_possible" and pilot.pos.surfaceType ~= 5  then
 
-                    local AddPilot = pilot
-                    AddPilot.smokeTiming = 0
-                    AddPilot.embarked = false
-                    AddPilot.embarkAndSafe = false
-                    AddPilot.landingPossible = pilot.landingPossible
-                    AddPilot.inTheEnemyCamp = pilot.inTheEnemyCamp
-                    AddPilot.radio_on  = false
-                    AddPilot.radio_start = 0
+                    local addPilot = pilot
+                    addPilot.smokeTiming = 0
+                    addPilot.embarked = false
+                    addPilot.embarkAndSafe = false
+                    addPilot.landingPossible = pilot.landingPossible
+                    addPilot.inTheEnemyCamp = pilot.inTheEnemyCamp
+                    addPilot.radio_on  = false
+                    addPilot.radio_start = 0
                     if pilot.MGRS_Chute_10KM then
-                        AddPilot.MGRS_Chute_10KM = pilot.MGRS_Chute_10KM
+                        addPilot.MGRS_Chute_10KM = pilot.MGRS_Chute_10KM
                     end
                     -- local AddPilot = {
                     --         name = element.name,
@@ -1127,10 +1127,10 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
                     --         embarkAndSafe = false,
                     --         MGRS_Chute = element.MGRS_Chute,
                     --     }
-                    table.insert(camp.SAR.pilotEjected, AddPilot)
+                    table.insert(camp.SAR.pilotEjected, addPilot)
 
                     --ne spawn pas dans l'eau (pas encore)
-                    if pilot.SurfaceType ~= 3 then
+                    if pilot.pos.surfaceType ~= 3 then
                         addSoldierAliasPilot(pilot)
                     end
                 end

@@ -53,33 +53,33 @@ timer.scheduleFunction(ChangeValue, nil, timer.getTime() + 28)							--pendant l
 local FlightOpsOngoing = {}
 
 --function to turn ship group into wind
-function TurnIntoWind(GroupName, pos, heading)
+function TurnIntoWind(groupName, carrierVec3, heading)
 	-- local Vmax = 10																			--standard maxiumum speed value of carrier: 30 kts		Vmax = 15.4333
 	-- local windDeck = 9																			--standard desired wind over deck value: 27 kts		windDeck = 13.89
 	local duration = 0
 
-	if type(GroupName) == "table" then
+	if type(groupName) == "table" then
 		-- _affiche(GroupName, "GroupName")
-		duration = GroupName[4]
-		GroupName = GroupName[1]
+		duration = groupName[4]
+		groupName = groupName[1]
 		heading = nil
-		local groupCarrier = Group.getByName(GroupName)
+		local groupCarrier = Group.getByName(groupName)
 		local carrier = groupCarrier:getUnit(1)
-		pos = carrier:getPoint()
+		carrierVec3 = carrier:getPoint()
 
 	end
 
-	local groupCarrier = Group.getByName(GroupName)
+	local groupCarrier = Group.getByName(groupName)
 	local carrier = groupCarrier:getUnit(1)
 	local carrierName = carrier:getName()													--get carrier name
-	local Desc = carrier:getDesc()
+	local desc = carrier:getDesc()
 	local txt = ""
 
 	if heading == nil or not heading then
 		heading = radToDeg(GetHeadingByPos(carrier))
 	end
 
-	local typeName = Group.getByName(GroupName):getUnit(1):getTypeName()
+	local typeName = Group.getByName(groupName):getUnit(1):getTypeName()
 	if typeName == "LHA_Tarawa" then																--here it is possible to define individual values for specific carrier types
 		Vmax = 12.3467																				--Tarawa max speed 24 kts 
 		windDeck = 10.2889																			--Tarawa wind over deck 20 kts (?)
@@ -88,15 +88,15 @@ function TurnIntoWind(GroupName, pos, heading)
 		windDeck = 99																				--Kuznetsov should get as much wind over deck as possible
 	end
 
-	pos.y = 10																						--set altitute to 10m above sea level to measure wind
-	local wind = atmosphere.getWind(pos)															--measure wind at this position
+	carrierVec3.y = 10																						--set altitute to 10m above sea level to measure wind
+	local wind = atmosphere.getWind(carrierVec3)															--measure wind at this position
 	local windV = math.sqrt(math.pow(wind.x, 2) + math.pow(wind.z, 2))								--calculate wind speed in m/s
 	local speed = windDeck - windV																	--movement speed into wind to get the required wind over deck
 
 	local moveVec																					--normalized movement vector to create straight wind over deck
 	if windV < 0.5 then																				--if there is almost no wind, keep moving in current direction
 		txt = "It is not necessary to turn, the wind is less than 0.5 m/s."
-		local carrierVec = Group.getByName(GroupName):getUnit(1):getPosition()						--get carrier movement vector
+		local carrierVec = Group.getByName(groupName):getUnit(1):getPosition()						--get carrier movement vector
 		moveVec = {
 			x =	carrierVec.x.x,
 			y = 0,
@@ -124,7 +124,7 @@ function TurnIntoWind(GroupName, pos, heading)
 
 	-- Miguel21 modification M36.d	(d: add timer) MenuRadio request manual TurnIntoWind
 	if duration then
-		timer.scheduleFunction(ResumeRoute, {GroupName, nil, carrierName}, timer.getTime() + (duration*60))	--schedule resume carrier on route
+		timer.scheduleFunction(ResumeRoute, {groupName, nil, carrierName}, timer.getTime() + (duration*60))	--schedule resume carrier on route
 		-- env.info( "TurnIntoWind ResumeRoute? duration: "..tostring(duration))
 	end
 	--search original group route
@@ -134,7 +134,7 @@ function TurnIntoWind(GroupName, pos, heading)
 			if country.ship then
 				for group_n,group in ipairs(country.ship.group) do
 					-- if GroupName == env.getValueDictByKey(group.name) then
-					if GroupName == group.name then							--M45
+					if groupName == group.name then							--M45
 						_route = Deepcopy(group.route.points)										--make a copy of the route
 					end
 				end
@@ -143,13 +143,13 @@ function TurnIntoWind(GroupName, pos, heading)
 	end
 
 	--update first _route point to current position
-	_route[1].x = pos.x
-	_route[1].y = pos.z
+	_route[1].x = carrierVec3.x
+	_route[1].y = carrierVec3.z
 
 	--define new group _route, create a waypoint to turn into wind
 	if _route[2] then																				--if there is a waypoint 2, modify it
-		_route[2].x = pos.x + moveVec.x * 200000														--point 200 km away
-		_route[2].y = pos.z + moveVec.z * 200000														--point 200 km away
+		_route[2].x = carrierVec3.x + moveVec.x * 200000														--point 200 km away
+		_route[2].y = carrierVec3.z + moveVec.z * 200000														--point 200 km away
 		_route[2].speed = speed
 		for n = 3, #_route do																		--clear any additional waypoints
 			_route[n] = nil
@@ -161,8 +161,8 @@ function TurnIntoWind(GroupName, pos, heading)
 			['ETA'] = 0,
 			['alt_type'] = 'BARO',
 			['formation_template'] = '',
-			['y'] = pos.z + moveVec.z * 200000,
-			['x'] = pos.x + moveVec.x * 200000,
+			['y'] = carrierVec3.z + moveVec.z * 200000,
+			['x'] = carrierVec3.x + moveVec.x * 200000,
 			['name'] = '',
 			['ETA_locked'] = false,
 			['speed'] = speed,
@@ -203,7 +203,7 @@ function TurnIntoWind(GroupName, pos, heading)
 			['x'] = intercalWP.x,
 			['name'] = '',
 			['ETA_locked'] = false,
-			['speed'] = Desc.speedMax - 1,
+			['speed'] = desc.speedMax - 1,
 			['action'] = 'Turning Point',
 			['task'] = {
 				['id'] = 'ComboTask',
@@ -228,7 +228,7 @@ function TurnIntoWind(GroupName, pos, heading)
 		}
 	}
 
-	local ctr = Group.getByName(GroupName):getController()
+	local ctr = Group.getByName(groupName):getController()
 	Controller.setTask(ctr, Mission)
 end
 
@@ -236,17 +236,16 @@ end
 function ResumeRoute(arg)
 	env.info( "TurnIntoWind ResumeRoute? passe00: ")
 	if FlightOpsOngoing[arg[3]] ~= true then
-		local GroupName = arg[1]
+		local groupName = arg[1]
 		-- local pos = arg[2]
 		-- GroupName = GroupName[1]
 		-- env.info( "TurnIntoWind ResumeRoute? passe01: ")
-		local heading = nil
+		-- local heading = nil
 
-		local groupCarrier = Group.getByName(GroupName)
+		local groupCarrier = Group.getByName(groupName)
 		local carrier = groupCarrier:getUnit(1)
-		local Desc = carrier:getDesc()
+		local desc = carrier:getDesc()
 		local heading = GetHeadingByPos(carrier)
-		local pos = carrier:getPoint()
 
 		heading = radToDeg(heading)
 		-- env.info( "ResumeRoute radToDegheading : "..tostring(heading) )
@@ -258,7 +257,7 @@ function ResumeRoute(arg)
 				if country.ship then
 					for group_n,group in ipairs(country.ship.group) do
 						-- if GroupName == env.getValueDictByKey(group.name) then
-						if GroupName == group.name then
+						if groupName == group.name then
 							_route = Deepcopy(group.route.points)										--make a copy of the route
 						end
 					end
@@ -313,7 +312,7 @@ function ResumeRoute(arg)
 				['x'] = intercalWP.x,
 				['name'] = '',
 				['ETA_locked'] = false,
-				['speed'] = Desc.speedMax - 1,
+				['speed'] = desc.speedMax - 1,
 				['action'] = 'Turning Point',
 				['task'] = {
 					['id'] = 'ComboTask',
@@ -337,7 +336,7 @@ function ResumeRoute(arg)
 			}
 		}
 		_affiche(_route, "APRESintercalRoute _route")
-		local ctr = Group.getByName(GroupName):getController()
+		local ctr = Group.getByName(groupName):getController()
 		Controller.setTask(ctr, Mission)
 		env.info("CWS Controller.setTask ResumeRoute")
 	end
@@ -363,16 +362,16 @@ function CarrierIntoWind(GroupName)
 	world.addEventHandler(CollectEngineStatus)														--start collection of aircraft startup/shutdown status to detect start/end of flight ops
 
 	--reccuring function to check if there are aircraft to launch or recover
-	local function CheckFlightOps()
+	local function checkFlightOps()
 
 		local group = Group.getByName(GroupName)													--get carrier group
 		if group then																				--group exists
 			local carrier = group:getUnit(1)														--get group leader (assumed to be the carrier)
 			local carrierName = carrier:getName()													--get carrier name
-			local carrierPos = carrier:getPoint()													--get position of carrier
+			local carrierVec3 = carrier:getPoint()													--get position of carrier
 			local carrierHeading = GetHeadingByPos(carrier)
 			local carrierCoal = carrier:getCoalition()												--get coalition of carrier
-			local FlightOps = false
+			local flightOps = false
 
 			--search for aircraft around carrier
 			local function Found(u)
@@ -380,17 +379,17 @@ function CarrierIntoWind(GroupName)
 				if coal == carrierCoal then															--unit has same coalition as carrier
 					local desc = u:getDesc()														--get unit description
 					if desc.category == 0 then														--unit is an aircraft (no helicopters)
-						local acPos = u:getPoint()													--get position of aircraft
+						local aircraftVec3 = u:getPoint()													--get position of aircraft
 						if u:inAir() then															--unit is in air
-							if acPos.y < 1600 then													--aircraft is below 6000ft
-								FlightOps = true													--there are flight ops
+							if aircraftVec3.y < 1600 then													--aircraft is below 6000ft
+								flightOps = true													--there are flight ops
 								return false														--stop search for more aircraft
 							end
 						else																		--aircraft is on the ground
-							local dist = math.sqrt(math.pow(acPos.x - carrierPos.x, 2) + math.pow(acPos.z - carrierPos.z, 2))	--distance between aircraft and carrier
+							local dist = math.sqrt(math.pow(aircraftVec3.x - carrierVec3.x, 2) + math.pow(aircraftVec3.z - carrierVec3.z, 2))	--distance between aircraft and carrier
 							if dist < 250 then														--aircraft is on the carrier
 								if EngineOn[u:getName()] then										--aicraft has engine running
-									FlightOps = true												--there are flight ops
+									flightOps = true												--there are flight ops
 									return false													--stop search for more aircraft
 								end
 							end
@@ -403,17 +402,17 @@ function CarrierIntoWind(GroupName)
 			local SearchArea = {
 				id = world.VolumeType.SPHERE,
 				params = {
-					point = carrierPos,
+					point = carrierVec3,
 					radius = 20000
 				}
 			}
 			world.searchObjects(Object.Category.UNIT, SearchArea, Found)
 
-			if FlightOps then																		--there are flight ops
+			if flightOps then																		--there are flight ops
 				if FlightOpsOngoing[carrierName] ~= true then										--carrier is not currently conducting flight ops
 					-- trigger.action.outText("Turn Into Wind", 5)
 					-- env.info("CWS Turn Into Wind Vmax: "..Vmax)
-					TurnIntoWind(GroupName, carrierPos, carrierHeading)												--turn carrier into wind
+					TurnIntoWind(GroupName, carrierVec3, carrierHeading)												--turn carrier into wind
 					FlightOpsOngoing[carrierName] = true											--store carrier flight ops status
 				else
 					-- trigger.action.outText("Flight Ops Ongoing", 5)
@@ -423,7 +422,7 @@ function CarrierIntoWind(GroupName)
 				if FlightOpsOngoing[carrierName] == true then										--carrier is currently conduction flight ops
 					-- trigger.action.outText("Resume Route", 5)
 					-- env.info("CWS Resume Route ")
-					timer.scheduleFunction(ResumeRoute, {GroupName, carrierPos, carrierName}, timer.getTime() + 150)	--schedule resume carrier on route
+					timer.scheduleFunction(ResumeRoute, {GroupName, carrierVec3, carrierName}, timer.getTime() + 150)	--schedule resume carrier on route
 					FlightOpsOngoing[carrierName] = nil												--store carrier flight ops status
 				else
 					-- trigger.action.outText("No Flight Ops", 5)
@@ -436,7 +435,7 @@ function CarrierIntoWind(GroupName)
 	end
 
 	if camp.SC_CarrierIntoWind == "auto" then
-		timer.scheduleFunction(CheckFlightOps, nil, timer.getTime() + 30)								--schedule function
+		timer.scheduleFunction(checkFlightOps, nil, timer.getTime() + 30)								--schedule function
 		-- timer.scheduleFunction(CheckFlightOps, nil, timer.getTime() + 2)								--schedule function
 	end
 

@@ -33,10 +33,10 @@ end
 local function missileDisappearTimer(missile)
 
 	if missile and missile:isExist() then
-		local posMissile = missile:getPoint()
+		local missileVec3 = missile:getPoint()
 		missile:destroy()
 
-		timer.scheduleFunction(makeExplosion, posMissile, timer.getTime() + 0.3)
+		timer.scheduleFunction(makeExplosion, missileVec3, timer.getTime() + 0.3)
 
 		-- env.info("ARM_Jammer C Missile disparait proche du Jammer !")
 		-- trigger.action.outText("Missile détruit proche du Jammer", 20)
@@ -60,17 +60,17 @@ local function checkMissileProximity()
         if not missile or not missile:isExist() or not missile.getPoint then
             table.remove(activeMissiles, i)
         else
-            local posMissile = missile:getPoint()
+            local missileVec3 = missile:getPoint()
 
 			for _, jammer in ipairs(jammers) do
 
 				if jammer.unit and jammer.unit:isExist() then  -- Protection contre les unités invalides
 
-					local posJammer = jammer.unit:getPoint()
+					local jammerVec3 = jammer.unit:getPoint()
 
-					local dx = posMissile.x - posJammer.x
-					local dy = posMissile.y - posJammer.y
-					local dz = posMissile.z - posJammer.z
+					local dx = missileVec3.x - jammerVec3.x
+					local dy = missileVec3.y - jammerVec3.y
+					local dz = missileVec3.z - jammerVec3.z
 					local distance = math.sqrt(dx * dx + dy * dy + dz * dz)
 
 					-- env.info("ARM_Jammer B1 Missile jammer.range: "..tostring(jammer.range).."|efficiency:"..tostring(jammer.efficiency))

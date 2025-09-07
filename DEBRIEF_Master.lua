@@ -209,8 +209,8 @@ end
 if Debug.debug then
 	local foundN = 0
 	local foundX = 0
-	if camp.runwayLife then
-		for baseN, base in pairs(camp.runwayLife) do
+	if camp.RunwayLife then
+		for baseN, base in pairs(camp.RunwayLife) do
 			if db_airbases[base.name] then
 				foundN = foundN + 1
 

@@ -29,9 +29,9 @@ local function injecteRoutePedro(arg)
 	local distance01 = math.sqrt(math.pow(pt_start.x - pt_dest.x, 2) + math.pow(pt_start.y - pt_dest.y, 2))
 
 	local nbWaypointCV
-	local CVUnit = Unit.getByName(pt_start.CV_Name)
-	local CVGroup = CVUnit:getGroup()
-	local CVId = CVGroup:getID()
+	local uCVUnit = Unit.getByName(pt_start.CV_Name)
+	local gCVGroup = uCVUnit:getGroup()
+	local gCVId = gCVGroup:getID()
 
 	for coalition_name,coal in pairs(env.mission.coalition) do
 		for country_n,country in ipairs(coal.country) do
@@ -73,7 +73,7 @@ local function injecteRoutePedro(arg)
 								["params"] =
 								{
 									["lastWptIndexFlagChangedManually"] = true,
-									["groupId"] = tonumber(CVId),
+									["groupId"] = tonumber(gCVId),
 									["lastWptIndex"] = tonumber(nbWaypointCV),
 									["lastWptIndexFlag"] = true,
 									["pos"] =
@@ -119,7 +119,7 @@ local function injecteRoutePedro(arg)
 								["params"] =
 								{
 									["lastWptIndexFlagChangedManually"] = true,
-									["groupId"] = tonumber(CVId),
+									["groupId"] = tonumber(gCVId),
 									["lastWptIndex"] = tonumber(nbWaypointCV),
 									["lastWptIndexFlag"] = true,
 									["pos"] =
@@ -177,7 +177,7 @@ end
 
 local function createPedro(arg)
 
-    local CV_Name = arg[1]
+    local uCV_Name = arg[1]
 	local parameters = arg[2]
 
 	-- TypePedroByCV[cvName] = {
@@ -189,43 +189,41 @@ local function createPedro(arg)
 	-- }
 
 	--TODO ajouter ici une condition de distance pour ne pas annoncer le spawn à tout le monde, mais seulement aux joueurs proches du CV
-	env.info( "Attention, Pedro's helicopter will spawning on the CV "..tostring(CV_Name))
-	trigger.action.outText("Attention, Pedro's helicopter will spawning on the CV "..tostring(CV_Name), 30)
+	env.info( "Attention, Pedro's helicopter will spawning on the CV "..tostring(uCV_Name))
+	trigger.action.outText("Attention, Pedro's helicopter will spawning on the CV "..tostring(uCV_Name), 30)
 
-	if not ListPedro[CV_Name] then ListPedro[CV_Name] = {CV_Name} end
-	table.insert(ListPedro[CV_Name], #ListPedro[CV_Name])
+	if not ListPedro[uCV_Name] then ListPedro[uCV_Name] = {uCV_Name} end
+	table.insert(ListPedro[uCV_Name], #ListPedro[uCV_Name])
 
 	-- local BaseUnit = Unit.getByName(pt_start.name)
-	local UnitCV = Unit.getByName(CV_Name)
-	local TtempPoint = UnitCV:getPoint()
-	local satartx = TtempPoint.x
-	local satarty = TtempPoint.z
+	local unitCV = Unit.getByName(uCV_Name)
+	local uCV_tempPointVec3 = unitCV:getPoint()
+	local satartx = uCV_tempPointVec3.x
+	local satarty = uCV_tempPointVec3.z
 	local pt_start = {
 		x = satartx,
 		y = satarty,
-		PedroName = "Pedro_"..CV_Name.."_"..tostring(#ListPedro[CV_Name]),
-		CV_Name = CV_Name,
+		PedroName = "Pedro_"..uCV_Name.."_"..tostring(#ListPedro[uCV_Name]),
+		CV_Name = uCV_Name,
 	}
 
 	local current_time = timer.getTime() +1
-	local speed = 46.25		-- v = m/s
-	-- local distance01 = math.sqrt(math.pow(pt_start.x - pt_dest.x, 2) + math.pow(pt_start.y - pt_dest.y, 2))
-	local nbFlight = math.random(2,10)
-	-- local FlightName = "Pedro_"..pt_start.name.."_"..tostring(nbFlight)
+	-- local speed = 46.25		-- v = m/s
+	-- local nbFlight = math.random(2,10)
 
 	--from  mist.getHeading
-	local u = Unit.getByName(CV_Name)
+	local u = Unit.getByName(uCV_Name)
 	local unitpos = u:getPosition()
 	local headingCV
 	if unitpos then
-		local Heading = math.atan2(unitpos.x.z, unitpos.x.x)
+		local heading = math.atan2(unitpos.x.z, unitpos.x.x)
 
 		-- Heading = Heading + mist.getNorthCorrection(unitpos.p)
 
-		if Heading < 0 then
-			Heading = Heading + 2*math.pi
+		if heading < 0 then
+			heading = heading + 2*math.pi
 		end
-		headingCV = Heading
+		headingCV = heading
 	end
 
 	local pt_dest = GetOffsetPoint(pt_start, headingCV, 300)
@@ -302,9 +300,9 @@ local function createPedro(arg)
 
 end
 
-function NeedPedro(CV_Name, parameters)
-	if CV_Name  then
-		timer.scheduleFunction(createPedro, { CV_Name, parameters }, timer.getTime() + 30)
+function NeedPedro(uCV_Name, parameters)
+	if uCV_Name  then
+		timer.scheduleFunction(createPedro, { uCV_Name, parameters }, timer.getTime() + 30)
 	end
 end
 

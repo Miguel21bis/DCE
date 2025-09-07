@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.91.560"
+versionDCE["UTIL_Changelog.lua"] = "20.91.561"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.91.560"
+VersionDCE["UTIL_Changelog.txt"] = "20.91.561"
 --[[
 
 
@@ -9,7 +9,8 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.91.560:==
+==:20.91.561:==
+561 fixed    [SAR]    pilots ejected during a mission do not appear in the F10 menu
 560 added	[M91]    flight plan via a FARP to increase range (test)
 559	fixed    [stats]	events[e].target bug in stat génération
 558 fixed    [PEDRO]    the second PEDRO helicopter is always an SH-60

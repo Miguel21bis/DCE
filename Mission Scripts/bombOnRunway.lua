@@ -18,7 +18,7 @@ versionDCE["Mission Scripts\bombOnRunway.lua"] = "1.4.10"
 env.info("DCE_bombOnRunway START LOADING bombOnRunway.lua "..tostring(versionDCE["Mission Scripts/bombOnRunway.lua"]))
 
 
-runwayLife = {} 						-- nome das bases incluso FARP
+RunwayLife = {} 						-- nome das bases incluso FARP
 local baseAerea = world.getAirbases()	 -- todas as bases incluso FARP
 WorksiteVehicles = {}
 
@@ -35,20 +35,20 @@ for a, b in pairs(baseAerea) do
 		
 		local Id = b:getID()
 		local baseLife0 = b:getLife()
-		local point = b:getPoint()
+		local pointVec3 = b:getPoint()
 
-		runwayLife[Id] = {
+		RunwayLife[Id] = {
 			name = tostring(b:getName()),
 			baseObject = b,
 			life0 = baseLife0,
 			life = 3600,
-			point = point,
+			pointVec3 = pointVec3,
 		}
 
 	end	
 end
 
-function cleanWorksiteVehicles()
+local function cleanWorksiteVehicles()
 	for i, worker in ipairs(WorksiteVehicles) do
 		
 		local element = StaticObject.getByName(worker)
@@ -60,7 +60,7 @@ function cleanWorksiteVehicles()
 end
 
 
-function addWorksiteVehicles(arg)
+local function addWorksiteVehicles(arg)
 
 	local pos = arg[1] 
 	local runwayName = arg[2] 
@@ -135,12 +135,12 @@ function addWorksiteVehicles(arg)
 end
 
 local function CheckAllBase()
-	for Id, base in pairs(runwayLife) do 
+	for Id, base in pairs(RunwayLife) do 
 			local baseLife = base.baseObject:getLife()
-			runwayLife[Id].life = baseLife
+			RunwayLife[Id].life = baseLife
 
 			if baseLife < 3600 then
-				env.info("bombOnRunway runwayLife "..tostring(base.name).." lifeHealth: "..tostring(baseLife))
+				env.info("bombOnRunway RunwayLife "..tostring(base.name).." lifeHealth: "..tostring(baseLife))
 			end
 	end
 	return timer.getTime() + 60

@@ -1144,7 +1144,7 @@ for scen_name, scen in pairs(scen_log) do													--iterate through destroye
 		passeOK = false
 	end
 
-	if scen.x and scen.z and passeOK then
+	if scen.x and scen.y and passeOK then
 
 		for side_name, targets in pairs(targetlist) do											--iterate through targetlist
 			for targetN, target in pairs(targets) do										--iterate through targets				
@@ -1163,7 +1163,7 @@ for scen_name, scen in pairs(scen_log) do													--iterate through destroye
 					for element_n, element in pairs(target.elements) do						--iterate through target elements
 						if element.x then
 
-							local distance = math.floor(math.sqrt((scen.x - element.x)^2 + (scen.z - element.y)^2))					--calculate distance between dead scenery and target element						
+							local distance = math.floor(math.sqrt((scen.x - element.x)^2 + (scen.y - element.y)^2))					--calculate distance between dead scenery and target element						
 							local correctedRadius = RayonDamaged
 							if  scen.event == "BOMB_IMPACT_ZONE" or element.class == "static" then
 								correctedRadius = 15 -- 15 m
@@ -1270,16 +1270,16 @@ end
 
 -- print("DebriefSE AAA "..tostring(targetlist.blue[8].elements[2].name).." dead? "..tostring(targetlist.blue[8].elements[2].dead))
 
--- runwayLife[Id] = {
+-- RunwayLife[Id] = {
 -- 	name = tostring(b:getName()),
 -- 	baseObject = b,
 -- 	life0 = baseLife0,
 -- 	life = 3600,
--- 	point = point,
+-- 	pointVec3 = pointVec3,
 -- }
 --evaluate destroyed runway objects
-if camp.runwayLife then
-	for id, runway in pairs(camp.runwayLife) do													--iterate through destroyed scenery objects
+if camp.RunwayLife then
+	for id, runway in pairs(camp.RunwayLife) do													--iterate through destroyed scenery objects
 
 		if runway.life < 3600 and runway.name then
 			for side_name, targets in pairs(targetlist) do											--iterate through targetlist

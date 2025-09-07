@@ -169,14 +169,14 @@ for nCircle, circle in ipairs(circleSAR) do
     --mission axe x: vertical vers le haut      (ordonne)
     --mission axe y: horizontal vers la droite  (abscissse)
 
-    -- local mission2d_x = (ref_DCS_metre_ordonne * circle.pixel_y) / ref_pixel_ordonne     --pas assez precis
-    local mission2d_x = 58538.7 - (47.2304 * circle.pixel_y )
+    -- local mission_x = (ref_DCS_metre_ordonne * circle.pixel_y) / ref_pixel_ordonne     --pas assez precis
+    local mission_x = 58538.7 - (47.2304 * circle.pixel_y )
                         --  58538.7−47.2304x
     
 
-    -- local mission2d_y = (ref_DCS_metre_abscissse * circle.pixel_x) / ref_pixel_abscissse    --pas assez precis                 
-    -- local mission2d_y = (564387 * circle.x2d) / offsett_pix_x
-    local mission2d_y = (47.2287 * circle.pixel_x) + 70914
+    -- local mission_y = (ref_DCS_metre_abscissse * circle.pixel_x) / ref_pixel_abscissse    --pas assez precis                 
+    -- local mission_y = (564387 * circle.x) / offsett_pix_x
+    local mission_y = (47.2287 * circle.pixel_x) + 70914
                         -- 47.2287x+70914
 
     local tempZone = 
@@ -194,8 +194,8 @@ for nCircle, circle in ipairs(circleSAR) do
         -- {
         -- },
         ["hidden"] = false,
-        ["y"] = mission2d_y,
-        ["x"] = mission2d_x,
+        ["y"] = mission_y,
+        ["x"] = mission_x,
         ["name"] = tostring(nCircle),
     }
 
