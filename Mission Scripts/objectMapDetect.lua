@@ -3,14 +3,13 @@
 -------------------------------------------------------------------------------------------------------
 -- last modification:  
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/objectMapDetect.lua"] = "1.1.3"
+versionDCE["Mission Scripts/objectMapDetect.lua"] = "1.1.4"
 -------------------------------------------------------------------------------------------------------
 
 local acceptedTargetTypes = {
 	['ULAK001'] = "Warehouse",
 	['ULAK004'] = "Warehouse",
 	['ULAK015'] = "Warehouse",
-	['ULAK055'] = "Power Supply",
 	['ULAK058'] = "Warehouse",
 	['ULAK082'] = "Warehouse",
 	['UMOE16'] = "Warehouse",
@@ -18,11 +17,24 @@ local acceptedTargetTypes = {
 	['SMAC36_ANCILLARY_BUILDING_04'] = "Warehouse",
 	['WAREHOUSE_04'] = "Warehouse",
 	['ULAK066'] = "Warehouse",
+	['ENNA32'] = "Warehouse",
+	['XLMV01'] = "Warehouse",
+	['XLMV04'] = "Warehouse",
+	['XLMV08'] = "Warehouse",
+	['XLMV43'] = "Warehouse",
 	['XLMV45'] = "Warehouse",
 	['XLMV56'] = "Warehouse",
 	['BODO216'] = "Warehouse",
+	['ESPA16'] = "Warehouse",
+	['UMOE64'] = "Warehouse",
+	['ULAK006'] = "Warehouse",
 	['XLMV40'] = "Power Plant",
+	['WAREHOUSE_02'] = "Power Plant",
 	['ELECTRIC_TRANSFORMER_01'] = "Power Supply",
+	['UMOE46'] = "Power Supply",
+	['ULAK055'] = "Power Supply",
+	['ULAK105'] = "Power Supply",
+	['ULAK107'] = "Power Supply",
 	['UMOE73'] = "Fuel Storage",
 	['ULAK062'] = "Fuel Storage",
 	['SILO_01'] = "Fuel Storage",
@@ -31,18 +43,17 @@ local acceptedTargetTypes = {
 	['UMOE31'] = "Fuel Storage",
 	['XLMV42'] = "Fuel Storage",
 	['UMOE36'] = "Fuel Storage",
-	['CAR_BRIDGE_2LINE'] = "Road Bridge",
-	['CAR_BRIDGE_4LINE'] = "Road Bridge",
-	['WOODEN_BRIDGE_2LINE'] = "Road Bridge",
-	['RW_BRIDGE_1LINE'] = "Rail Bridge",
-	['RW_BRIDGE_2LINE'] = "Rail Bridge",
-	['CRANE_01'] = "Loading Crane",
-	['LOADING_CRANE_01'] = "Loading Crane",
-	['LOADING_CRANE_02'] = "Loading Crane",
-	['LOADING_CRANE_03'] = "Loading Crane",
-	['BOAT001'] = "Civil Ship",
-	['BOAT003'] = "Civil Ship",
-	['BOAT010'] = "Civil Ship",
+	['UMOE10'] = "Logistic Center",
+	['UOLE13'] = "Logistic Center",
+	['XLMV06'] = "Logistic Center",
+	['ORBX_HAS_03'] = "Ammo Supply",
+	['SMS201'] = "Ammo Supply",
+	['XLMW47'] = "Control Tower",
+	['KDP'] = "Control Tower",
+	['ULAK068'] = "Command Center",
+	['ULAK077'] = "Communication Center",
+	['ORBX_HAS_04'] = "Airplane Shelter",
+	['ESPA14'] = "Airplane Shelter",
 }
 
 
