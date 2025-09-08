@@ -4320,8 +4320,11 @@ function UpdateFilesAfterTimeJump()
 	zipFile:unzClose()
 
 	CampTotalTimeS = SecondsBetween(camp.dateInit, camp.date)
-	camp.date.CampTotalTimeS = CampTotalTimeS
 
+	print("UTIL_function The campaign will start on this date: " .. tostring(camp.dateInit.day) .. "." .. tostring(camp.dateInit.month) .. "." .. tostring(camp.dateInit.year) .. ".\n")
+	print("UTIL_function The current date of the campaign is: " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
+
+	camp.date.CampTotalTimeS = CampTotalTimeS
 
 	require("Active/oob_ground")
 

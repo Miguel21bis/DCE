@@ -689,7 +689,6 @@ dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_PlayerAssign.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Timing.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_AddPropAircraft.lua")
 dofile("../../../ScriptsMod." .. VersionPackageICM .. "/ATO_FlightPlan.lua")
-
 dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Final_steps.lua")
 
 if mission.drawings and not mission.drawings.layers[4].objects then
@@ -1112,48 +1111,52 @@ if ListRequiredModules then
 	end
 end
 
+-- if not camp.date.CampTotalTimeS then
+-- 	camp.date.CampTotalTimeS = CampTotalTimeS
+-- end
+CampTotalTimeS = SecondsBetween(camp.dateInit, camp.date)
+camp.date.CampTotalTimeS = CampTotalTimeS
 
------ convert tables back to strings for insertion into content files -----
-local misStr = "mission = " .. TableSerialization(mission, 0)
-local optStr = "options = " .. TableSerialization(options, 0)
-local warStr = "warehouses = " .. TableSerialization(warehouses, 0)
-local dicStr = "dictionary = " .. TableSerialization(dictionary, 0)
-local resStr = "mapResource = " .. TableSerialization(mapResource, 0)
-local gciStr = "GCI = " .. TableSerialization(GCI, 0)
-local cmpStr = "camp = " .. TableSerialization(camp, 0)
+-- met à jour la date de camp dans conf_mod.lua
+UpdateConfMod(nil, camp.date, "MAIN_NextMission "..debug.getinfo(1).currentline)
 
 ----- create temporary content files of new mission file -----
+local misStr = "mission = " .. TableSerialization(mission, 0)
 local misFile = io.open("misFile.lua", "w") or error("Failed to open debug file")											--mission
 misFile:write(misStr)
 misFile:close()
 
+local optStr = "options = " .. TableSerialization(options, 0)
 local optFile = io.open("optFile.lua", "w") or error("Failed to open debug file")											--options
 optFile:write(optStr)
 optFile:close()
 
+local warStr = "warehouses = " .. TableSerialization(warehouses, 0)
 local warFile = io.open("warFile.lua", "w") or error("Failed to open debug file")											--warehouses
 warFile:write(warStr)
 warFile:close()
 
+local dicStr = "dictionary = " .. TableSerialization(dictionary, 0)
 local dicFile = io.open("dicFile.lua", "w") or error("Failed to open debug file")											--dictionary
 dicFile:write(dicStr)
 dicFile:close()
 
+local resStr = "mapResource = " .. TableSerialization(mapResource, 0)
 local resFile = io.open("resFile.lua", "w")	 or error("Failed to open debug file")										--mapResource
 resFile:write(resStr)
 resFile:close()
 
+local gciStr = "GCI = " .. TableSerialization(GCI, 0)
 local gciFile = io.open("GCIdata.lua", "w") or error("Failed to open debug file")											--GCI data file (EWR radars, AWACS, interceptors)
 gciFile:write(gciStr)
 gciFile:close()
 
+local cmpStr = "camp = " .. TableSerialization(camp, 0)
 local cmpFile = io.open("Active/camp_status.lua", "w") or error("Failed to open debug file")								--campaign status file
 cmpFile:write(cmpStr)
 cmpFile:close()
 
 
--- met à jour la date de camp dans conf_mod.lua
-UpdateConfMod(nil, camp.date, "MAIN_NextMission "..debug.getinfo(1).currentline)
 
 ----- create new mission file and add content files -----
 
@@ -1216,11 +1219,11 @@ for filename, content in pairs(existing_files) do
                 -- Supprimer le fichier temporaire
                 os.remove(temp_filename)
             else
-                print("⚠️ Impossible d'écrire le fichier temporaire : " .. temp_filename)
+                print("Impossible d'écrire le fichier temporaire : " .. temp_filename)
             end
         end
     else
-        print("⚠️ Contenu vide ou nil pour le fichier : " .. filename)
+        print("Contenu vide ou nil pour le fichier : " .. filename)
     end
 end
 
@@ -1468,4 +1471,3 @@ if Debug.debug or mission_ini.backupAllMissionFiles then
          os.execute('xcopy "' .. activeFolder .. '" "' .. folderName .. '\\Active" /E /I /Y /Q')
     end
 end
-
