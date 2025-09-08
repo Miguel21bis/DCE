@@ -5009,12 +5009,12 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				--certain plane ne peuvent pas dépasser les valeurs de la radio 1 pour la frequence générale (exemple M-2000)
 				local info = ""
-				if frequency[type_withData] and frequency[type_withData].radio.frequencyMustBeRadio1 then
+				if Frequency[type_withData] and Frequency[type_withData].radio.frequencyMustBeRadio1 then
 					if not FreqCapability2(testFreqency, type_withData, 1, info) then
 
 						local foundFreq = false
-						if frequency[type_withData].radio then
-							for range, value in pairs(frequency[type_withData].radio) do
+						if Frequency[type_withData].radio then
+							for range, value in pairs(Frequency[type_withData].radio) do
 								local i=0
 								repeat
 									testFreqency = GetFrequency(side, groupName, flight[f].task, type_withData, range)
@@ -5036,20 +5036,20 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 				end
 
-				if frequency[type_withData] and frequency[type_withData]["onlyVariableFrequency"] then
+				if Frequency[type_withData] and Frequency[type_withData]["onlyVariableFrequency"] then
 
-					if testFreqency >= frequency[type_withData].onlyVariableFrequency.min
-					and testFreqency <= frequency[type_withData].onlyVariableFrequency.max
+					if testFreqency >= Frequency[type_withData].onlyVariableFrequency.min
+					and testFreqency <= Frequency[type_withData].onlyVariableFrequency.max
 					then
 						-- print("AtoFp frequency Passe C Frequence "..tostring(testFreqency))
 					else
 
-						local wave = FoundWave(frequency[type_withData].onlyVariableFrequency)
+						local wave = FoundWave(Frequency[type_withData].onlyVariableFrequency)
 
 						testFreqency = GetFrequency(side, flight[f].target_name, flight[f].task, type_withData, wave)
 
-						if testFreqency < frequency[type_withData].onlyVariableFrequency.min
-						or testFreqency > frequency[type_withData].onlyVariableFrequency.max
+						if testFreqency < Frequency[type_withData].onlyVariableFrequency.min
+						or testFreqency > Frequency[type_withData].onlyVariableFrequency.max
 						then
 							DebugFLIGHT = DebugFLIGHT .. "\n"..("AtoFP error frequency: "..type_withData.." "..testFreqency)
 						end

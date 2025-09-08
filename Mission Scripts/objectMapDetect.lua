@@ -54,6 +54,19 @@ local acceptedTargetTypes = {
 	['ULAK077'] = "Communication Center",
 	['ORBX_HAS_04'] = "Airplane Shelter",
 	['ESPA14'] = "Airplane Shelter",
+	['CAR_BRIDGE_2LINE'] = "Road Bridge",
+    ['CAR_BRIDGE_4LINE'] = "Road Bridge",
+    ['WOODEN_BRIDGE_2LINE'] = "Road Bridge",
+    ['RW_BRIDGE_1LINE'] = "Rail Bridge",
+    ['RW_BRIDGE_2LINE'] = "Rail Bridge",
+    ['CRANE_01'] = "Loading Crane",
+    ['LOADING_CRANE_01'] = "Loading Crane",
+    ['LOADING_CRANE_02'] = "Loading Crane",
+    ['LOADING_CRANE_03'] = "Loading Crane",
+    ['BOAT001'] = "Civil Ship",
+    ['BOAT003'] = "Civil Ship",
+    ['BOAT010'] = "Civil Ship", 
+
 }
 
 

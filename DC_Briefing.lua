@@ -1364,9 +1364,9 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 					for u = 1, #tempPlayer.group["units"] do
 						for n = 1, #RadioA[sideName] do																		--do it for all the radios
-							if 	frequency[inheritedType] then
-								for ir=1, #frequency[inheritedType].radio do
-									if frequency[inheritedType].radio[ir].nbCanal > 0 then
+							if 	Frequency[inheritedType] then
+								for ir=1, #Frequency[inheritedType].radio do
+									if Frequency[inheritedType].radio[ir].nbCanal > 0 then
 										if not tempPlayer.group["units"][u]["Radio"] then tempPlayer.group["units"][u]["Radio"] = {} end
 
 										tempPlayer.group["units"][u]["Radio"][ir] = {
@@ -1527,7 +1527,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					local _radio = {}
 					local radioP = {}
 
-					if not frequency[inheritedType] then
+					if not Frequency[inheritedType] then
 						radioP[1] = {
 							VHF = {
 								min = 118,
@@ -1536,8 +1536,8 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							nbCanal = 0,
 						}
 					else
-						for i=1, #frequency[inheritedType].radio do
-							radioP[i] = frequency[inheritedType].radio[i]
+						for i=1, #Frequency[inheritedType].radio do
+							radioP[i] = Frequency[inheritedType].radio[i]
 						end
 					end
 

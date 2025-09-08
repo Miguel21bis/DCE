@@ -1,11 +1,11 @@
 --cree pour controler les plages des frequences
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  updateData_j
+-- last modification:  updateData_k
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_DataRadio.lua"] = "1.4.47"
+versionDCE["UTIL_DataRadio.lua"] = "1.4.48"
 ------------------------------------------------------------------------------------------------------- 
--- updateData_j				(CH-47F)(i: VSN_F100 + 105)(h F-4E-45MC)(g add Hercules)(h F-15ESE)(f add MB-339A)(e: add F1-EE)(d add 3xSa342)(c: L39+Su25)(b: add AH-64D_BLK_II)(a: add Mi24)
+-- updateData_k				k(Frequency)(CH-47F)(i: VSN_F100 + 105)(h F-4E-45MC)(g add Hercules)(h F-15ESE)(f add MB-339A)(e: add F1-EE)(d add 3xSa342)(c: L39+Su25)(b: add AH-64D_BLK_II)(a: add Mi24)
 -- Debug_f					(f: bug list Freq)(e correction F16)(d: fix Mi24 VHF/UHF)(c onlyVariableFrequency = true, for SA342)(b radio 2 UHF)(a Bf109, Spitfire)
 -- modification M34_Bl		custom FrequenceRadio (l new file name)  (i: FreqCapability2)(f more Divert, more Coalition)(Bc Bug Mirage 2000)(Ba A-4E-C bug)(v delete Radio3 AV8)(t: radioname)(p LVHF)(i: 3 frequency bands)
 -- modification M20_b		Pannes aléatoires (Failures) en SingleMission et ForcedOption (external view etc..) (b failure adapted to each aircraft type)
@@ -50,7 +50,7 @@ on divisera la gamme comme ceci:
 ]]--
 
 
-frequency = {
+Frequency = {
 
 	["A-4E-C"] = {							--A-4C
 		radio = {						--range of radio frequencies of player aircraft
