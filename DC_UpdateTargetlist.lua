@@ -1137,20 +1137,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 				local txt = " Error_12: this base |"..target.db_airbaseName.."| linked to this objective  (targetlist_ini.lua)|"..target.titleName.."| was not found in the file (db_airbase.lua) "..tostring(debugTxt) 
 				checkBug3(txt) 
 			
-				InsertBugList(txt)
-
-				-- os.remove("Debug/BugList.lua")
-
-				-- if BugList and type(BugList) == "table" and #BugList >= 1 then
-				-- 	local table_Str = "BugList = " .. TableSerialization(BugList, 0)
-				-- 	local bugFile = io.open("Debug/BugList.lua", "w") or error("Failed to open debug file")
-				-- 	bugFile:write(table_Str)
-				-- 	bugFile:close()
-				-- end
-
-				-- os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')
-				
-				-- os.execute 'pause'
+				-- InsertBugList(txt)
 			end
 
 		end

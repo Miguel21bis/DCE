@@ -1223,18 +1223,19 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 
 						--changement obligatoire de la frequence (pourquoi?)
 						if group.route.points[1].task.params.tasks[t].params.action.id == "SetFrequency" then							--if group has a frequency set										
-							--TODO a jouter ici une option pour forcer une freq, ou une plage de freq
-							-- ewr_call.frequencyMHz = GetFrequency(sidename, group.name, "EWR")
-							ewr_call["frequencyHz"] = group.route.points[1].task.params.tasks[t].params.action.params.frequency
-							ewr_call["frequencyMHz"] = ewr_call.frequencyHz / 1000000		--convert to MHz
-							Assigned_freq[ewr_call.frequencyMHz] = true
+							
+							if camp and camp.ewrFreqAdaptable then
+								ewr_call.frequencyMHz = GetFrequency(sidename, group.name, "EWR")
+								ewr_call.frequencyHz = ewr_call.frequencyMHz * 1000000		--convert to Hz
+							else
+								ewr_call["frequencyHz"] = group.route.points[1].task.params.tasks[t].params.action.params.frequency
+								ewr_call["frequencyMHz"] = ewr_call.frequencyHz / 1000000		--convert to MHz
+							end
 
-							-- for missGroupN, missGroup in pairs(mission.coalition[sidename].country[country_n].vehicle.group) do				-- M34.b, verifie si le Num du group OOB, correspond au Num du groupe mission
-							-- 	if group.groupId == missGroup.groupId then
-							-- 		missGroup.route.points[1].task.params.tasks[t].params.action.params.frequency = ewr_call.frequencyMHz * 1000000 	-- met à jour la table mission qui est déjà en mémoire
+							if Assigned_freq and ewr_call.frequencyMHz then
+								Assigned_freq[ewr_call.frequencyMHz] = true
+							end
 
-							-- 	end
-							-- end
 						end
 					end
 				end
