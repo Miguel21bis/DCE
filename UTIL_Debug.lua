@@ -57,12 +57,12 @@ if Debug.debug then
 
 
 	--recherche Debug/BugList.lua
-	local testFile = "Debug/BugList.lua"
-	local TestPath = io.open(testFile, "r")										--cette maniere de chercer la presence d un fichier evite un plantage
-	if TestPath ~= nil and MissionInstance == 1 then														--check si le fichier existe 
-		io.close(TestPath)
+	local fileName = "Debug/BugList.lua"
+	local testPath = io.open(fileName, "r")										--cette maniere de chercer la presence d un fichier evite un plantage
+	if testPath ~= nil and MissionInstance == 1 then														--check si le fichier existe 
+		io.close(testPath)
 		os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')			--open the BugList file with notepad
-	end	
+	end
 
 end
 

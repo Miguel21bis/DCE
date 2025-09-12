@@ -641,6 +641,8 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 			end
 		end
 
+		local debugTxt = ""
+
 		if target.task == "Strike" then
 			if target.class == nil or  target.class == "vehicle" or  target.class == "static"  then														--For scenery object targets
 				
@@ -981,23 +983,31 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 			--creation des parties de Runway à bombarder, crée à partir des info runway.hdg et runway.length x et y
 			-- la mise a jour du target runway se fait dans le fichier DEBRIEF_StatsEvaluation.lua
 			-- en fonction du runway.life qui doit etre de 3600 point lorsqu'il est intacte.
+			
+			debugTxt = debugTxt.." 0 "..target.db_airbaseName
+
 			if db_airbases[target.db_airbaseName] then									--if the target airbase has an entry in db_airbases table
 
 				target.foundOobGround = true
+				
 
 				target.x = db_airbases[target.db_airbaseName].x						--add x coordinate of target
 				target.y = db_airbases[target.db_airbaseName].y						--add y coordinate of target
 
 				if db_airbases[target.db_airbaseName].runways and db_airbases[target.db_airbaseName].runways[1] and db_airbases[target.db_airbaseName].runways[1].hdg then
 					--pour le cas particulier des runway non detecté à l'impacte bombe, il faut s appuyer sur target.element.dead et non oob_ground dead
-					if  target.elements == nil   then
-
+					debugTxt = debugTxt.." A "
+					if target.elements == nil   then
+						debugTxt = debugTxt.." Ab "
 						target.alive = 100
 						-- target.alive_last = 0
 						for iRunway, runway in ipairs(db_airbases[target.db_airbaseName].runways) do
+							debugTxt = debugTxt.." Ac "
 							if runway.x and runway.x ~= 0 then
+								debugTxt = debugTxt.." Ad "
 								--pour la map caucasus
 								if camp.theatre and (string.lower(camp.theatre)  == "caucasus" or string.lower(camp.theatre)  == "persiangulf") then
+									debugTxt = debugTxt.." Ae "
 									local hdg = runway.hdg
 									if not runway.true_hdg or runway.true_hdg == nil then
 										hdg = runway.hdg + camp.variation
@@ -1025,6 +1035,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 
 								-- elseif camp.theatre and string.lower(camp.theatre) == "syria" then 
 								else
+									debugTxt = debugTxt.." Ad2 "
 									--pour la map Syria
 									local hdg = runway.hdg
 									if not runway.true_hdg or runway.true_hdg == nil then
@@ -1065,14 +1076,14 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 							end
 						end
 					else --si les element runway exite
-
+						debugTxt = debugTxt.." B "
 						for elementN, element in pairs(target.elements) do
 							element.mainObjective = true
 						end
 
 						if target.alive and target.alive < 50 then
 							target.ATO = false										--remove target to ATO
-
+							debugTxt = debugTxt.." Ba "
 							--rempli la table camp qui sera utilisé pour détruire artificiellement la piste pendant le jeux
 							if not camp.runwayCratere then camp.runwayCratere = {} end
 							if not camp.runwayCratere[target.titleName] then
@@ -1122,7 +1133,25 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 				end
 			end
 
-			if not target.foundOobGround then checkBug3(" Error_12: this base |"..target.db_airbaseName.."| linked to this objective  (targetlist_ini.lua)|"..target.titleName.."| was not found in the file (db_airbase.lua)") end
+			if not target.foundOobGround then 
+				local txt = " Error_12: this base |"..target.db_airbaseName.."| linked to this objective  (targetlist_ini.lua)|"..target.titleName.."| was not found in the file (db_airbase.lua) "..tostring(debugTxt) 
+				checkBug3(txt) 
+			
+				InsertBugList(txt)
+
+				-- os.remove("Debug/BugList.lua")
+
+				-- if BugList and type(BugList) == "table" and #BugList >= 1 then
+				-- 	local table_Str = "BugList = " .. TableSerialization(BugList, 0)
+				-- 	local bugFile = io.open("Debug/BugList.lua", "w") or error("Failed to open debug file")
+				-- 	bugFile:write(table_Str)
+				-- 	bugFile:close()
+				-- end
+
+				-- os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')
+				
+				-- os.execute 'pause'
+			end
 
 		end
 

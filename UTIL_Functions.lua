@@ -4504,23 +4504,25 @@ function LoadFileAndUpdate(from)
 
 	dofile("Active/db_airbases.lua")
 
+	-- Comparer les deux tables
+	changes = CompareTableAlphaNumeric(db_airbases_init, db_airbases)
 
 	-- Afficher les résultats
 	for _, added in ipairs(changes.added) do
 		print("\nAdded db_airbases Name:", added.name)
 	end
-	for _, removed in ipairs(changes.removed) do
-		print("\nRemoved db_airbases: Name:", removed.name)
-	end
+	-- for _, removed in ipairs(changes.removed) do
+	-- 	print("\nRemoved db_airbases: Name:", removed.name)
+	-- end
 
 	-- Ajouter les éléments manquants dans db_airbases
 	for _, added in ipairs(changes.added) do
 		db_airbases[added.name] = added.data
 	end
-	-- Supprimer les éléments retirés de db_airbases
-	for _, removed in ipairs(changes.removed) do
-		db_airbases[removed.name] = nil
-	end
+	-- -- Supprimer les éléments retirés de db_airbases
+	-- for _, removed in ipairs(changes.removed) do
+	-- 	db_airbases[removed.name] = nil
+	-- end
 
 
 	--********************************* oob_air ******************************************************
