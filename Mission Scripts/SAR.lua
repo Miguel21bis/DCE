@@ -134,15 +134,15 @@ function AddSoldierAliasPilot(element)
 	env.info( "DCE_SAR_AddSoldierAliasPilot name:  "..tostring(element.name).." countryId: "..tostring(element.countryId))
 
 	local hidden = true
-	-- if camp.debug then
-	-- 	hidden = false
-	-- end
+	if camp.debug then
+		hidden = false
+	end
 
 	if element.getOutHelicopter then
 		hidden = false
 	end
 
-	local AddGroup = {
+	local addGroup = {
 		["visible"] = false,
 		["tasks"] =
 		{
@@ -165,8 +165,8 @@ function AddSoldierAliasPilot(element)
 					["ETA"] = 0,
 					["alt_type"] = "BARO",
 					["formation_template"] = "",
-					["y"] = tonumber(element.y),
-					["x"] = tonumber(element.x),
+					["y"] = tonumber(element.pos.y),
+					["x"] = tonumber(element.pos.x),
 					["ETA_locked"] = true,
 					["speed"] = 1,
 					["action"] = "Off Road",
@@ -185,8 +185,8 @@ function AddSoldierAliasPilot(element)
 									["enabled"] = true,
 									["params"] =
 									{
-										["y"] = tonumber(element.y + 5),
-										["x"] = tonumber(element.x + 5),
+										["y"] = tonumber(element.pos.y + 5),
+										["x"] = tonumber(element.pos.x + 5),
 										["zoneRadius"] = 2000,
 									}, -- end of ["params"]
 								}, -- end of [1]
@@ -222,8 +222,8 @@ function AddSoldierAliasPilot(element)
 					["ETA"] = 5,
 					["alt_type"] = "BARO",
 					["formation_template"] = "",
-					["y"] = tonumber(element.y + 5),
-					["x"] = tonumber(element.x + 5),
+					["y"] = tonumber(element.pos.y + 5),
+					["x"] = tonumber(element.pos.x + 5),
 					["ETA_locked"] = false,
 					["speed"] = 1,
 					["action"] = "Off Road",
@@ -242,8 +242,8 @@ function AddSoldierAliasPilot(element)
 									["enabled"] = true,
 									["params"] =
 									{
-										["y"] = tonumber(element.y + 5),
-										["x"] = tonumber(element.x + 5),
+										["y"] = tonumber(element.pos.y + 5),
+										["x"] = tonumber(element.pos.x + 5),
 										["zoneRadius"] = 2000,
 									}, -- end of ["params"]
 								}, -- end of [1]
@@ -283,24 +283,24 @@ function AddSoldierAliasPilot(element)
 				-- ["unitId"] = GenerateID(),
 				["livery_id"] = "winter",
 				["skill"] = "Average",
-				["y"] = tonumber(element.y) + 2,
-				["x"] = tonumber(element.x) + 2,
+				["y"] = tonumber(element.pos.y) + 2,
+				["x"] = tonumber(element.pos.x) + 2,
 				["name"] = element.name,
 				["heading"] = 0,
 				["playerCanDrive"] = false,
 			}, -- end of [1]
 		}, -- end of ["units"]
-		["y"] = tonumber(element.y) + 2,
-		["x"] = tonumber(element.x) + 2,
+		["y"] = tonumber(element.pos.y) + 2,
+		["x"] = tonumber(element.pos.x) + 2,
 		["name"] = "Group_"..tostring(element.name),
 		["start_time"] = 0,
 	}
 
-	coalition.addGroup(element.countryId, Group.Category.GROUND, AddGroup)
+	coalition.addGroup(element.countryId, Group.Category.GROUND, addGroup)
 
 	if camp.debug then
 		local TimeSearchEngage = timer.getTime() + 5
-		local logStr = "AddGroup = " .. TableSerialization(AddGroup, 0)
+		local logStr = "AddGroup = " .. TableSerialization(addGroup, 0)
 		local ElementNameClean = element.name:gsub('[%p%c%s]', '_')
 		local logFile = io.open(PathDCE.."Debug\\"..ElementNameClean.."_"..TimeSearchEngage.."_".. "_AddSoldierAliasPilot.lua", "w")
 		if logFile then
@@ -539,7 +539,7 @@ local function startSAR(arg)
 	}
 	local current_time = timer.getTime()
 	local speed = flightSAR.vAttack
-	local distance01 = math.sqrt(math.pow(flightSAR.x - ejectPilot.pos.x, 2) + math.pow(flightSAR.y - ejectPilot.pos.y, 2))
+	local distance01 = math.sqrt(math.pow(flightSAR.x - ejectPilot.x, 2) + math.pow(flightSAR.y - ejectPilot.y, 2))
 
 	local alt_cruise = flightSAR.hCruise
 
@@ -555,7 +555,7 @@ local function startSAR(arg)
 	end
 
 
-	local heading1 = GetHeading(flightSAR, {x=ejectPilot.pos.x, y=ejectPilot.pos.y})
+	local heading1 = GetHeading(flightSAR, {x=ejectPilot.x, y=ejectPilot.y})
 	local distanceAfterPt2 = distance01/2
 
 	local point2 = GetOffsetPoint(flightSAR, heading1, distanceAfterPt2)
@@ -564,7 +564,7 @@ local function startSAR(arg)
 	env.info( "DCE_SAR startSAR point_2z "..tostring(point2_z).." heading1: "..tostring(heading1))
 	-- trigger.action.outText("SAR startSAR point_2z "..tostring(point_2z).." heading1: "..tostring(heading1), 30)
 
-	local altiTarget = ejectPilot.pos.z + 100
+	local altiTarget = ejectPilot.z + 100
 	if altiTarget < alt_cruise then
 		altiTarget = alt_cruise
 	end
@@ -665,8 +665,8 @@ local function startSAR(arg)
 			["type"] = "Turning Point",
 			["ETA"] = tonumber((distance01 / flightSAR.vCruise) + current_time + 500) ,
 			["ETA_locked"] = false,
-			["y"] = ejectPilot.pos.y,
-			["x"] = ejectPilot.pos.x,
+			["y"] = ejectPilot.y,
+			["x"] = ejectPilot.x,
 			["name"] = "",
 			["formation_template"] = "",
 			["speed_locked"] = true,
@@ -710,8 +710,8 @@ local function startSAR(arg)
 			["type"] = "Turning Point",
 			["ETA"] = tonumber((distance01 / flightSAR.vCruise) + current_time + 500) ,
 			["ETA_locked"] = false,
-			["y"] = ejectPilot.pos.y,
-			["x"] = ejectPilot.pos.x,
+			["y"] = ejectPilot.y,
+			["x"] = ejectPilot.x,
 			["name"] = "",
 			["formation_template"] = "",
 			["speed_locked"] = true,
@@ -734,8 +734,8 @@ local function startSAR(arg)
 			["type"] = "Turning Point",
 			["ETA"] = tonumber(((distance01 + distanceAfterPt2) / flightSAR.vCruise) + current_time + 1000) ,
 			["ETA_locked"] = false,
-			["y"] = ejectPilot.pos.y,
-			["x"] = ejectPilot.pos.x,
+			["y"] = ejectPilot.y,
+			["x"] = ejectPilot.x,
 			["name"] = "",
 			["formation_template"] = "",
 			["speed_locked"] = true,
@@ -818,7 +818,7 @@ function CheckImmediatSAR(pilot)
 		end
 	end
 
-	if pilot and pilot.x  then
+	if pilot and pilot.pos.x then
 
         -- local grid = coord.LLtoMGRS(coord.LOtoLL(ejectedPilot))
 
@@ -848,9 +848,9 @@ function CheckImmediatSAR(pilot)
 		local t = timer.getTime()
 
 		pilot.type = "ejectedPilot"
-		pilot.x = pilot.x
-		pilot.y = pilot.z
-		pilot.z = land.getHeight({x = pilot.x, y = pilot.z})
+		-- pilot.x = pilot.x
+		-- pilot.y = pilot.z
+		-- pilot.z = land.getHeight({x = pilot.x, y = pilot.z})
 
         pilot.date = {
 			hour = camp.date.hour,
@@ -886,7 +886,7 @@ function CheckImmediatSAR(pilot)
 		local wrongSide = false
 		local ENI_Side = DCS_ENI_Side[pilot.side]
 		if camp.boundary and camp.boundary[ENI_Side] and camp.boundary[ENI_Side] ~= nil then
-			wrongSide =  CheckPointInPoly_XY_2({x=pilot.x,y=pilot.y} , camp.boundary[ENI_Side])
+			wrongSide =  CheckPointInPoly_XY_2({x=pilot.pos.x,y=pilot.pos.y} , camp.boundary[ENI_Side])
 			env.info( "DCE_CheckImmediatSAR C ?  boundary wrongSide ? __"..tostring(wrongSide))
 			if wrongSide  then
 				env.info( "DCE_CheckImmediatSAR? D boundary rightSideOfBorder __FALSE__ Return ")
@@ -908,10 +908,10 @@ function CheckImmediatSAR(pilot)
 
 				-- env.info( "CheckImmediatSAR? Passe 2  mission2d_x: "..tostring(mission2d_x).." |mission2d_y: "..tostring(mission2d_y))
 
-				if math.abs(pilot.x - mission2d_x) <= 50000 and math.abs(pilot.y - mission2d_y) <= 50000 then
+				if math.abs(pilot.pos.x - mission2d_x) <= 50000 and math.abs(pilot.pos.y - mission2d_y) <= 50000 then
 					env.info( "DCE_CheckImmediatSAR? Passe 3 <= 50000  ")
 
-					local result = math.pow ((pilot.x - mission2d_x), 2) + math.pow((pilot.y - mission2d_y), 2) <= math.pow((circle.radius * 47.229042083728), 2)
+					local result = math.pow ((pilot.pos.x - mission2d_x), 2) + math.pow((pilot.pos.y - mission2d_y), 2) <= math.pow((circle.radius * 47.229042083728), 2)
 					env.info( "DCE_CheckImmediatSAR? Passe 4 result?  "..tostring(result))
 
 					local debugA = type(result)
@@ -926,7 +926,7 @@ function CheckImmediatSAR(pilot)
 
 						local rightSideOfBorder
 						if camp.boundary and camp.boundary[pilot.side] and camp.boundary[pilot.side] ~= nil then
-							rightSideOfBorder =  CheckPointInPoly_XY_2({x=pilot.x,y=pilot.y}, camp.boundary[pilot.side])
+							rightSideOfBorder =  CheckPointInPoly_XY_2({x=pilot.pos.x,y=pilot.pos.y}, camp.boundary[pilot.side])
 
 						end
 
@@ -958,7 +958,7 @@ function CheckImmediatSAR(pilot)
 
 			local units = gp:getUnits()
 			local _unit = units[1]
-			local gpName = Group.getName(gp)
+			-- local gpName = Group.getName(gp)
 			local uName = Unit.getName(_unit)
 
 			if string.find(uName,"CV") or string.find(uName,"LHA")  then
@@ -985,7 +985,7 @@ function CheckImmediatSAR(pilot)
 				local description = _unit:getDesc()
 
 				if _unit:isActive() then
-					local distance = math.sqrt(math.pow(baseHelico.x - pilot.x, 2) + math.pow(baseHelico.y - pilot.y, 2))
+					local distance = math.sqrt(math.pow(baseHelico.x - pilot.pos.x, 2) + math.pow(baseHelico.y - pilot.pos.y, 2))
 					if distance < selected_distance then
 						selected_distance = distance
 						selectedPoint = baseHelico
@@ -1001,7 +1001,7 @@ function CheckImmediatSAR(pilot)
 			--6000 -> 30 s
 			--m 	-> x s
 			local tempReact = (selected_distance * 30) / 6000
-			timer.scheduleFunction(PedroSAR, {selectedPoint, pilot}, timer.getTime() + tempReact)
+			timer.scheduleFunction(PedroSAR, {selectedPoint, pilot.pos}, timer.getTime() + tempReact)
 
 		-- elseif zoneSAR[ejectedPilot.MGRS_Chute] == nil or ( zoneSAR[ejectedPilot.MGRS_Chute] and zoneSAR[ejectedPilot.MGRS_Chute].groupSAR and  zoneSAR[ejectedPilot.MGRS_Chute].groupSAR == "" ) then
 		elseif ZoneSAR[pilot.MGRS_Chute].groupSAR == "" or ZoneSAR[pilot.MGRS_Chute].groupSAR == nil or ZoneSAR[pilot.MGRS_Chute].groupSAR == false then
@@ -1013,17 +1013,17 @@ function CheckImmediatSAR(pilot)
 				env.info( "DCE_CheckImmediatSAR? FFb  base_name "..tostring(base_name))
 				for flight_n, flight in ipairs(base.ready) do
 
-					local distance = math.sqrt(math.pow(flight.x - pilot.x, 2) + math.pow(flight.y - pilot.y, 2))
+					local distance = math.sqrt(math.pow(flight.x - pilot.pos.x, 2) + math.pow(flight.y - pilot.pos.y, 2))
 
 					if distance >= flight.range  then
 						env.info( "DCE_CheckImmediatSAR? trop loin : "..tostring(distance).." > flight.range: "..tostring(flight.range))
 					end
 
-					if pilot.z >= flight.hHover then
-						env.info( "DCE_CheckImmediatSAR? trop haut : "..tostring(pilot.z).." > flight.hHover: "..tostring(flight.hHover))
+					if pilot.pos.z >= flight.hHover then
+						env.info( "DCE_CheckImmediatSAR? trop haut : "..tostring(pilot.pos.z).." > flight.hHover: "..tostring(flight.hHover))
 					end
 
-					if distance < flight.range and pilot.z < flight.hHover then
+					if distance < flight.range and pilot.pos.z < flight.hHover then
 						eligible_flights[flight.name] = distance
 						env.info( "DCE_CheckImmediatSAR? FFc eligible_flights?   "..tostring(flight.name).."|distance: "..tostring(distance))
 					end
@@ -1060,7 +1060,7 @@ function CheckImmediatSAR(pilot)
 
 							env.info( "DCE_CheckImmediatSAR? YY launch SAR Alert   ")
 
-							timer.scheduleFunction(startSAR, {flight, pilot}, timer.getTime() + 30)
+							timer.scheduleFunction(startSAR, {flight, pilot.pos}, timer.getTime() + 30)
 
 							if not ZoneSAR[pilot.MGRS_Chute].groupSAR or ZoneSAR[pilot.MGRS_Chute].groupSAR == nil then
 								ZoneSAR[pilot.MGRS_Chute].groupSAR = "Group_"..flight.name

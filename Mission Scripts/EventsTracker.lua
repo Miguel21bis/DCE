@@ -232,8 +232,8 @@ local function destructionScenaryInZone(point, radius, launcherName)
 				-- weaponName = weaponName,
 				-- explosiveMass = explosiveMass,
 				x = objVec3.x,
-				y = objVec3.y,
-				z = objVec3.z,
+				y = objVec3.z,
+				z = objVec3.y,
 				initiator = launcherName,
 				time = timer.getTime(),
 				-- valid = true,
@@ -300,8 +300,8 @@ local function trackBomb(bomb, desc, initiator)
                     explosiveMass = explosiveMass,
                     -- warheadMass = warheadMass,
                     x = lastPosVec3.x,
-                    y = lastPosVec3.y,
-                    z = lastPosVec3.z,
+                    y = lastPosVec3.z,
+                    z = lastPosVec3.y,
                     initiator = launcherName,
                     time = timer.getTime(),
                     valid = true,
@@ -784,29 +784,27 @@ function eventHandlerDCE:onEvent(event)
 
 
 		if log_entry.type == "eject"  then
+			env.info( "DCE_EventT_eject PASSE A, id: "..tostring(event.id).." event.initiator "..tostring(event.initiator))
 			if event.initiator then
-				-- local ptEventVec3 = event.initiator:getPoint()
 				local pilotEjection = {}
 				local side
 				if initiatorVec3 and initiatorVec3.x then
-
+					local altiLand = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z })
 					pilotEjection = {
 						vec3x = initiatorVec3.x,
-						vec3y = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z }),
+						vec3y = altiLand,
 						vec3z = initiatorVec3.z,
 						unit = event.initiator,
+						x = initiatorVec3.x,
+                        y = initiatorVec3.z,
+						z = altiLand,
 					}
 
-					-- if event.initiator.getName then
-					-- 	local name = event.initiator:getName()
-					-- 	pilotEjection.initiator, log_entry.initiator = name, name
-					-- end
 					if initiatorName then
 						pilotEjection.initiator, log_entry.initiator = initiatorName, initiatorName
 					end
 
-					if initiatorObjCategory == Object.Category.UNIT  then										--initiator is a unit debug_ET01.h
-						-- pilotEjection.initiatorPilotName = event.initiator:getPlayerName()
+					if initiatorObjCategory == Object.Category.UNIT then
 						if event.initiator.getPlayerName then
 							pilotEjection.initiatorPilotName = event.initiator:getPlayerName()
 							if pilotEjection.initiatorPilotName then
@@ -847,14 +845,17 @@ function eventHandlerDCE:onEvent(event)
 					closeRoad.x = x
 					closeRoad.y = y
 					pilotEjection.closeRoad = closeRoad
+
+					-- _affiche(pilotEjection, " pilotEjection |DCE_EventT_eject G")
+
 					table.insert(tabEjection, pilotEjection)
 
-                    if event.initiator and event.initiator.getPlayerName	then
-						env.info( "DCE_EJECT EventT :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..pilotEjection.initiator))
+                    if event.initiator and event.initiator.getPlayerName then
+						env.info( "DCE_EventT_eject H :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..pilotEjection.initiator))
 
 						trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', pilotEjection, 0, true, camp.EjectedPilotFrequency[side].GuardEjection, 0.1, 'GuardEjection'..pilotEjection.initiator)
 
-						env.info( "DCE_EJECT EventT :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..pilotEjection.initiator))
+						env.info( "DCE_EventT_eject I :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..pilotEjection.initiator))
 					end
 
 					local ejectionSeatTemp = {
@@ -875,10 +876,9 @@ function eventHandlerDCE:onEvent(event)
 			end
 
 		elseif log_entry.type == "pilot seat separation"  then
-			env.info( "DCE_EventT  PASSE A pilot seat separation, id: "..tostring(event.id).."_type_"..tostring(log_entry.type))
+			env.info( "DCE_EventT_seat A , id: "..tostring(event.id).."_type_"..tostring(log_entry.type))
 
 			if event.initiator then
-				-- local ptEventVec3 = event.initiator:getPoint()
 				if initiatorVec3 and initiatorVec3.x then
 
 					--pour fumigene
@@ -895,17 +895,22 @@ function eventHandlerDCE:onEvent(event)
 
 					--TODO revoir ça, normalement l'id du parachut devrait etre celui de plane, quid d'un biplace?
 					--attention l'id disparait si le parachute tombe dans l'eau
+
 					local selected_distance = 9999999
 					local selectedEjection = {}
+
 					for n=1, #tabEjection do
-						if tabEjection[n] and tabEjection[n] ~= nil then
+						if tabEjection[n] and tabEjection[n] ~= nil then						
 							local distance = math.sqrt(math.pow(pilotVec3.x - tabEjection[n].vec3x, 2) + math.pow(pilotVec3.z - tabEjection[n].vec3z, 2))
 							if distance < selected_distance and (not tabEjection[n].SumEjectedPilotDay) then
+								env.info( "DCE_EventT_seat F , selected_distance: "..tostring(selected_distance))
 								selected_distance = distance
 								selectedEjection = tabEjection[n]
 							end
 						end
 					end
+
+					env.info( "DCE_EventT_seat G , selected_distance: "..tostring(selected_distance))
 
 					if selected_distance <= 4000 then
 						log_entry.initiatorPilotName = selectedEjection.initiatorPilotName
@@ -929,15 +934,14 @@ function eventHandlerDCE:onEvent(event)
 					log_entry.targetSideName = targetSideName
 				end
 			else
-				env.info( "DCE_EventT  PASSE M pilot seat separation, id: "..tostring(event.id).."_type_"..tostring(log_entry.type))
+				-- env.info( "DCE_EventT_seat, J ")
 				-- _affiche(event, "BUG pilot seat separation event ")
 			end
 
 		elseif  log_entry.type == "pilot land"  then
-			env.info( "DCE_EvenT: pilotLand_A id: "..tostring(event.id).."_type_"..tostring(log_entry.type))
+			env.info( "DCE_EventT_pilot_land A id: "..tostring(event.id))
 
 			if event.initiator then
-				-- local ptEventVec3 = event.initiator:getPoint()
 				if initiatorVec3 and initiatorVec3.x then
 					--active fumigene
 					local pilotVec3 = {
@@ -952,23 +956,46 @@ function eventHandlerDCE:onEvent(event)
 					log_entry.y = initiatorVec3.z
 					log_entry.z = initiatorVec3.y
 
-					-- _affiche(tabEjection, " tabEjection |pilot land AAA")
-
 					local selected_distance = 9999999
 					local selPilotEject = {}
 					local ejectN = 0
-					for n=1, #tabEjection do
-						if tabEjection[n] and tabEjection[n] ~= nil then
-							local distance = math.sqrt(math.pow(pilotVec3.x - tabEjection[n].x, 2) + math.pow(pilotVec3.z - tabEjection[n].z, 2))
+					for n = 1, #tabEjection do
+						if tabEjection[n] and tabEjection[n].x then
+                            if not pilotVec3.x then
+                                env.info("DCE_EvenT: pilotLand_I pb pilotVec3.x nil")
+								_affiche(pilotVec3, "pilotVec3 ")
+                            end
 
-							if distance < selected_distance and (not tabEjection[n].createdSoldier) then
-								selected_distance = distance
-								ejectN = n
+                            if pilotVec3.x and tabEjection[n].x then
+                                local distance = math.sqrt(math.pow(pilotVec3.x - tabEjection[n].x, 2) + math.pow(pilotVec3.z - tabEjection[n].vec3z, 2))
+                                if distance < selected_distance and (not tabEjection[n].createdSoldier) then
+                                    selected_distance = distance
+                                    ejectN = n
+                                end
+                            end
+                        else
+
+							env.info("DCE_EventT_pilot_land J pb tabEjection[n].x nil, n: " .. n .. " total tabEjection " .. #tabEjection)
+							_affiche(tabEjection[n], "tabEjection[n] ")
+							
+							local locTime = timer.getTime()
+							local logStr = "tabEjection = " .. TableSerialization(tabEjection, 0)
+							local logFile = io.open( PathDCE .. "Debug\\tabEjection" .. "_" .. locTime .. "_" .. "tabEjection.lua",
+								"w")
+							if logFile then
+								logFile:write(logStr)
+								logFile:close()
+							else
+								env.info("DCE_EventT_pilot_land K: Failed to open log file for writing.")
 							end
+							
 						end
 					end
 
+					env.info( "DCE_EventT_pilot_land L selected_distance: "..tostring(selected_distance))
+
 					if selected_distance <= 8000 and ejectN ~= 0 then
+
 						selPilotEject = tabEjection[ejectN]
 						log_entry.initiatorPilotName = selPilotEject.initiatorPilotName
 						log_entry.initiator = selPilotEject.initiator
@@ -997,7 +1024,7 @@ function eventHandlerDCE:onEvent(event)
 						end
 
 						selPilotEject.name = CleanName(selPilotEject.name)
-						CheckImmediatSAR(selPilotEject)
+						
 						local distanceBase, baseName = ProxyBase(selPilotEject)
 						if distanceBase then
 							distanceBase = math.floor(distanceBase)
@@ -1019,6 +1046,9 @@ function eventHandlerDCE:onEvent(event)
 								table.insert(ZoneSAR[selPilotEject.MGRS_Chute], selPilotEject)
 							end
 						end
+
+						CheckImmediatSAR(selPilotEject)
+
 					end
 				end
 
@@ -1474,8 +1504,8 @@ function eventHandlerDCE:onEvent(event)
 						lasthit = initiatorName,
 						lifePourcent = lifePourcent,
 						x = initPointVec3.x,
-						y = initPointVec3.y,
-						z = initPointVec3.z,
+						y = initPointVec3.z,
+						z = initPointVec3.y,
 						event = "S_EVENT_HIT",
 						
 					}
