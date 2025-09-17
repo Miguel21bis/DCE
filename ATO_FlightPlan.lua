@@ -381,7 +381,7 @@ local function addAndSpaceTankers(groupName, startX, startY)
 	return newPosition.x, newPosition.y
 end
 
-local function getCallsignWest(category, flight_f, flight_n, aircraft_n)
+local function getCallsignWest(category, task, flight_f, flight_n, aircraft_n)
     -- Toute la logique actuelle pour l'ouest ici
     -- Retourne la table callsign attendue par DCS pour l'ouest
     
@@ -391,7 +391,7 @@ local function getCallsignWest(category, flight_f, flight_n, aircraft_n)
 	local callsign_nb = 0
 	local _name = ""
 	local foundCsf = false
-	local task, callsign
+	local callsign
 
 	if task == "AWACS" then
 		category = "AWACS"
@@ -436,7 +436,7 @@ local function getCallsignWest(category, flight_f, flight_n, aircraft_n)
 			name = _name
 		}
 
-		return callsign
+		-- return callsign
 
 
 	else
@@ -528,6 +528,8 @@ local function getCallsignWest(category, flight_f, flight_n, aircraft_n)
 		}
 	end
 
+	-- print("AtoFP flight_f.name "..tostring(flight_f.name))
+	-- _affiche(callsign, "callsign")
     return callsign
 end
 
@@ -558,7 +560,7 @@ local function getCallsign(country, flight_f, task, flight_n, aircraft_n )
         local category = "generic"
         if task == "AWACS" then category = "AWACS"
         elseif task == "Refueling" then category = "tanker" end
-        return getCallsignWest(category, flight_f, flight_n, aircraft_n)
+        return getCallsignWest(category, task, flight_f, flight_n, aircraft_n)
     else
         return getCallsignEast(aircraft_n)
     end
