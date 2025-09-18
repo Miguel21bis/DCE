@@ -14,7 +14,7 @@ versionDCE["MAIN_AcceptMission.lua"] = "1.10.65"
 -- modification M56_a		AssignCallnameSquad
 -- modification M51_a		Moonphase
 -- modification M49_a		big central db_loadout
--- modification M48_g		Accept result mission (d: garde en memoire le txt camp["Briefing_text"]) (g: addImage trigger)(af: debug)
+-- modification M48_g		Accept result mission (d: garde en memoire le txt camp.pendingBriefing) (g: addImage trigger)(af: debug)
 -- modification M34_Bl		custom FrequenceRadio (l new file name)
 -- -------------------------------------------------------------------------------------------------------
 
@@ -141,10 +141,10 @@ mission.currentKey = 1010000															--not clear how this works but is req
 
 if Briefing_text and Briefing_text ~= "" then
 
-	if camp["Briefing_text"] then
-		camp["Briefing_text"] = camp["Briefing_text"] .. Briefing_text
+	if camp.pendingBriefing then
+		camp.pendingBriefing = camp.pendingBriefing .. Briefing_text
 	else
-		camp["Briefing_text"] = Briefing_text
+		camp.pendingBriefing = Briefing_text
 	end
 
 end

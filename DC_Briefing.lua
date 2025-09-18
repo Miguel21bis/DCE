@@ -15,7 +15,7 @@ versionDCE["DC_Briefing.lua"] = "1.24.157"
 -- modification M58_b		flight plan, heading, Dist, ETE (b bug, no view)
 -- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
 -- modification M51_d  		Moonphase (d: NVG info)
--- modification M48_g		Accept result mission (d: garde en memoire le txt camp["Briefing_text"]) (g: addImage trigger)(f: debug)
+-- modification M48_g		Accept result mission (d: garde en memoire le txt camp.Briefing_text) (g: addImage trigger)(f: debug)
 -- modification M47_d  		Keeps the history of the campaign files (d: Briefing part)
 -- modification M41_b 		Sratchpad written in the Sratchpad file, if this modul is installed
 -- modification M38_k 		Check and Help CampaignMaker (k: frequence)
@@ -368,13 +368,12 @@ do
 		s = s .. "\n\n"																			--make a new line after each side
 	end
 
-
-	if camp["Briefing_text"] and not TaskRefused then
-		local briefTemp = camp["Briefing_text"]
-		mission.descriptionText =  briefTemp
-	else
-		mission.descriptionText = "\n"
+	if camp.pendingBriefing then
+		Briefing_text = camp.pendingBriefing .. Briefing_text																--briefing text to be added this mission instance
+		camp.pendingBriefing = nil																		--reset pending briefing text
 	end
+
+	mission.descriptionText = Briefing_text
 
 	mission.descriptionText = mission.descriptionText .. "\n" .. s
 

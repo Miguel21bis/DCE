@@ -31,6 +31,8 @@ Playable_m = {}
 SinglePlayer = false
 VersionPackageICM = os.getenv('VersionPackageICM')														-- modification M35.b version ScriptsMod
 TimeJump = false
+Briefing_text = ""
+
 
 local function acceptMission()
 	local m = ""
@@ -83,6 +85,11 @@ if not camp.dateInit then
 		year = campInit.date.year,
 		month = campInit.date.month,
 	}
+end
+
+if camp.pendingBriefing then
+	Briefing_text = camp.pendingBriefing .. Briefing_text																--briefing text to be added this mission instance
+	camp.pendingBriefing = nil																		--reset pending briefing text
 end
 
 if mission_ini.current_date and mission_ini.current_date.year then

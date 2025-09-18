@@ -364,13 +364,13 @@ end
 -- of 0 to 2*pi.
 function GetHeadingByPos(unit)
 	local unitpos = unit:getPosition()
-	local Heading = 0
+	local heading = 0
 	if unitpos then
-		local Heading = math.atan2(unitpos.x.z, unitpos.x.x)
-		if Heading < 0 then
-			Heading = Heading + 2*math.pi	-- put heading in range of 0 to 2*pi
+		heading = math.atan2(unitpos.x.z, unitpos.x.x)
+		if heading < 0 then
+			heading = heading + 2*math.pi	-- put heading in range of 0 to 2*pi
 		end
-		return Heading
+		return heading
 	else
 		return nil
 	end
@@ -1310,8 +1310,8 @@ local function airRetreat()
 										RetreatTimeGp[gpGid].rTime = current_time + 300
 
 										local carrierDistance = 99999999
-										local xRetreat = 0
-										local yRetreat = 0
+										local retreat_x = 0
+										local retreat_y = 0
 										for coalition_name,coal in pairs(env.mission.coalition) do
 											if coalition_name == "blue" then
 												for country_n,country in ipairs(coal.country) do
@@ -1325,8 +1325,8 @@ local function airRetreat()
 																	local carrierVec3 = carrier:getPoint()
 																	local carrierTestDist = math.sqrt(math.pow(carrierVec3.x - awacsVec3.x, 2) + math.pow(carrierVec3.z - awacsVec3.z, 2))
 																	if carrierTestDist < carrierDistance then
-																		xRetreat = carrierVec3.x
-																		yRetreat = carrierVec3.z
+																		retreat_x = carrierVec3.x
+																		retreat_y = carrierVec3.z
 																		carrierDistance =  carrierTestDist
 																	end
 																end
@@ -1340,17 +1340,17 @@ local function airRetreat()
 
 										for _coalition, coalition in pairs(env.mission.coalition) do
 											if _coalition  == "blue" then
-												for Ncountry, _country in pairs(coalition.country) do
+												for countryN, _country in pairs(coalition.country) do
 													if _country.plane then
-														for Ngroup, _group in pairs(_country.plane.group) do
+														for groupN, _group in pairs(_country.plane.group) do
 															if _group.groupId == gpGid then
 
 																-- si aucun CVN n'a été trouvé, on prend comme position de retraite l'ID "land"
-																if xRetreat == 0 then
+																if retreat_x == 0 then
 																	for key, value in ipairs(_group.route.points) do				-- recherche de la position safe du PA et une alti						
 																		if value.type == 'Land' then
-																			xRetreat = value.x
-																			yRetreat = value.y
+																			retreat_x = value.x
+																			retreat_y = value.y
 																		end
 																	end
 																end
@@ -1445,8 +1445,8 @@ local function airRetreat()
 																table.insert(retreatRoute, 1, firstWPT)
 
 																--modifie les coordonées du premier wpt initial
-																retreatRoute[2].x = xRetreat
-																retreatRoute[2].y = yRetreat
+																retreatRoute[2].x = retreat_x
+																retreatRoute[2].y = retreat_y
 																retreatRoute[2].alt = awacsVec3.y
 																retreatRoute[2].speed_locked = true
 																retreatRoute[2].ETA_locked = false
@@ -1805,9 +1805,9 @@ end
 
 LLtool = {}
 
-LLtool.LLstrings = function(pos) -- pos is a Vec3
+LLtool.LLstrings = function(posVec3) -- pos is a Vec3
 
-	local LLposN, LLposE = coord.LOtoLL(pos)
+	local LLposN, LLposE = coord.LOtoLL(posVec3)
 	local LLposfixN, LLposdegN = math.modf(LLposN)
 	LLposdegN = LLposdegN * 60
 	local LLposdegN2, LLposdegN3 = math.modf(LLposdegN)
@@ -2346,15 +2346,15 @@ function ReFueling(playerGroup)
 
 	local heading  = GetHeading(tanker.point, player.point)		--return heading between two vector2 points
 	local dist = tanker.distance / 2
-	local interception_pos = GetOffsetPoint(tanker.point, heading, dist)		--function to return a new point offset from an initial point
-	local interception_alt = player.point.z
+	local interceptPos = GetOffsetPoint(tanker.point, heading, dist)		--function to return a new point offset from an initial point
+	local interceptAlt = player.point.z
 	local pattern_alt = player.point.z
 	local pattern_speed = player.speed
 
-	if interception_alt < 1000 and dist > 50000 then
-		interception_alt = 3000
-	elseif interception_alt > 6100  then										-- alti max:6100
-		interception_alt = 6100
+	if interceptAlt < 1000 and dist > 50000 then
+		interceptAlt = 3000
+	elseif interceptAlt > 6100  then										-- alti max:6100
+		interceptAlt = 6100
 		pattern_alt = 6100
 	end
 
@@ -2366,15 +2366,15 @@ function ReFueling(playerGroup)
 
 	local infoSpeed = math.floor(pattern_speed / 0.51444444444)					-- m/s to Kts
 	local infoAlti = math.floor((pattern_alt * 3.2808398950131 )/100)*100		-- m to ft	
-	local intercept_pos = {
-					x = interception_pos.x,
+	local interceptPosVec3 = {
+					x = interceptPos.x,
 					y = pattern_alt,
-					z = interception_pos.y
+					z = interceptPos.y
 					}
 
-	local intercept_LL =  coord.LOtoLL(intercept_pos)
+	local intercept_LL =  coord.LOtoLL(interceptPosVec3)
 
-	LLposNstring, LLposEstring = LLtool.LLstrings(intercept_pos)
+	LLposNstring, LLposEstring = LLtool.LLstrings(interceptPosVec3)
 	trigger.action.outText(tanker.callsign.." "..tanker.gpName.." Rdv: "..'N ' .. LLposNstring .. '   E ' .. LLposEstring.." Alt: "..infoAlti.." Speed "..infoSpeed, 20)
 
 		local Mission = {														--define mission for interceptor group
@@ -2383,13 +2383,13 @@ function ReFueling(playerGroup)
 				route = {
 					["points"] = {
 						[1] = {
-							["alt"] = interception_alt,
+							["alt"] = interceptAlt,
 							["type"] = "Turning Point",
 							["action"] = "Turning Point",
 							["alt_type"] = "BARO",
 							["formation_template"] = "",
-							["y"] = interception_pos.y ,
-							["x"] = interception_pos.x ,
+							["y"] = interceptPos.y ,
+							["x"] = interceptPos.x ,
 							["speed"] = 200,
 							["ETA_locked"] = false,
 							["task"] = {
@@ -3187,20 +3187,20 @@ local function EWR_magic()
 
 								if camp.unitSystem and camp.unitSystem == "metric" then
 									displayDistance = math.ceil(target.distance / 4000) * 4000 -- En mètres, arrondi à 4 km près
-									displayAltitude = math.ceil(target.point.y / 1000) * 1000 -- Altitude en mètres, arrondi à 1000m
+									displayAltitude = math.ceil(target.pointVec3.y / 1000) * 1000 -- Altitude en mètres, arrondi à 1000m
 									displayDistUnit = "m"
 									displayAltUnit = "m"
 								else
 									displayDistance = roundTo2NmUp(target.distance / 1852) -- En miles nautiques, arrondi à 2 Nm près
-									displayAltitude = math.floor((target.point.y * 3.281) / 1000) * 1000 -- Altitude en pieds	
+									displayAltitude = math.floor((target.pointVec3.y * 3.281) / 1000) * 1000 -- Altitude en pieds	
 									displayDistUnit = "NM"
 									displayAltUnit = "ft"
 								end
 
 
 								-- Calcul du bearing
-								local dx = target.point.x - playerVec3.x
-								local dz = target.point.z - playerVec3.z
+								local dx = target.pointVec3.x - playerVec3.x
+								local dz = target.pointVec3.z - playerVec3.z
 								local angleRad = math.atan2(dz, dx) -- Angle en radians
 								local bearing = math.deg(angleRad) -- Conversion en degrés
 								if bearing < 0 then
@@ -3253,8 +3253,8 @@ local function EWR_magic()
 											distanceKm = distanceKm,
 											speak = speak,
 											qte = target.qte,
-											target_point = target.point,
-											playerPoint = playerVec3,
+											target_pointVec3 = target.pointVec3,
+											playerPointVec3 = playerVec3,
 											bearing = bearing,
 										}
 

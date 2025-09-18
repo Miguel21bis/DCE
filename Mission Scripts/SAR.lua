@@ -539,7 +539,7 @@ local function startSAR(arg)
 	}
 	local current_time = timer.getTime()
 	local speed = flightSAR.vAttack
-	local distance01 = math.sqrt(math.pow(flightSAR.x - ejectPilot.x, 2) + math.pow(flightSAR.y - ejectPilot.y, 2))
+	local distance01 = math.sqrt(math.pow(flightSAR.x - ejectPilot.pos.x, 2) + math.pow(flightSAR.y - ejectPilot.pos.y, 2))
 
 	local alt_cruise = flightSAR.hCruise
 
@@ -555,7 +555,7 @@ local function startSAR(arg)
 	end
 
 
-	local heading1 = GetHeading(flightSAR, {x=ejectPilot.x, y=ejectPilot.y})
+	local heading1 = GetHeading(flightSAR, { x = ejectPilot.pos.x, y = ejectPilot.pos.y })
 	local distanceAfterPt2 = distance01/2
 
 	local point2 = GetOffsetPoint(flightSAR, heading1, distanceAfterPt2)
@@ -564,7 +564,7 @@ local function startSAR(arg)
 	env.info( "DCE_SAR startSAR point_2z "..tostring(point2_z).." heading1: "..tostring(heading1))
 	-- trigger.action.outText("SAR startSAR point_2z "..tostring(point_2z).." heading1: "..tostring(heading1), 30)
 
-	local altiTarget = ejectPilot.z + 100
+	local altiTarget = ejectPilot.pos.z + 100
 	if altiTarget < alt_cruise then
 		altiTarget = alt_cruise
 	end
@@ -665,8 +665,8 @@ local function startSAR(arg)
 			["type"] = "Turning Point",
 			["ETA"] = tonumber((distance01 / flightSAR.vCruise) + current_time + 500) ,
 			["ETA_locked"] = false,
-			["y"] = ejectPilot.y,
-			["x"] = ejectPilot.x,
+			["y"] = ejectPilot.pos.y,
+			["x"] = ejectPilot.pos.x,
 			["name"] = "",
 			["formation_template"] = "",
 			["speed_locked"] = true,
@@ -710,8 +710,8 @@ local function startSAR(arg)
 			["type"] = "Turning Point",
 			["ETA"] = tonumber((distance01 / flightSAR.vCruise) + current_time + 500) ,
 			["ETA_locked"] = false,
-			["y"] = ejectPilot.y,
-			["x"] = ejectPilot.x,
+			["y"] = ejectPilot.pos.y,
+			["x"] = ejectPilot.pos.x,
 			["name"] = "",
 			["formation_template"] = "",
 			["speed_locked"] = true,
@@ -734,8 +734,8 @@ local function startSAR(arg)
 			["type"] = "Turning Point",
 			["ETA"] = tonumber(((distance01 + distanceAfterPt2) / flightSAR.vCruise) + current_time + 1000) ,
 			["ETA_locked"] = false,
-			["y"] = ejectPilot.y,
-			["x"] = ejectPilot.x,
+			["y"] = ejectPilot.pos.y,
+			["x"] = ejectPilot.pos.x,
 			["name"] = "",
 			["formation_template"] = "",
 			["speed_locked"] = true,
@@ -1060,7 +1060,7 @@ function CheckImmediatSAR(pilot)
 
 							env.info( "DCE_CheckImmediatSAR? YY launch SAR Alert   ")
 
-							timer.scheduleFunction(startSAR, {flight, pilot.pos}, timer.getTime() + 30)
+							timer.scheduleFunction(startSAR, {flight, pilot}, timer.getTime() + 30)
 
 							if not ZoneSAR[pilot.MGRS_Chute].groupSAR or ZoneSAR[pilot.MGRS_Chute].groupSAR == nil then
 								ZoneSAR[pilot.MGRS_Chute].groupSAR = "Group_"..flight.name

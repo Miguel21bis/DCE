@@ -27,6 +27,8 @@ Firstmission_flag = true
 Playable_m = {}
 SinglePlayer = false
 MissionInstance = 0
+Briefing_text = ""
+
 
 Multi =
 {

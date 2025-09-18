@@ -63,7 +63,6 @@ Brief = {
 	red = {},
 	blue = {},
 }
-Briefing_text = ""
 
 -- par défaut, on assigne une valeur superieur au camp du joueur, qu'il soit rouge ou bleu.
 SkillWish = {

@@ -33,6 +33,7 @@ TimeAlreadyAdded = false
 Briefing_status = ""																		--text string to be added to next briefing (status reports are amended for each mission generation attempt until mission is succesfully generated)
 Briefing_oob_text_red = ""																	--text string to be added to next briefing (red repair and reinforcements)
 Briefing_oob_text_blue = ""																	--text string to be added to next briefing (blue repair and reinforcements)
+Briefing_text = ""
 
 local function AcceptMission()
 	local m = ""

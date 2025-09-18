@@ -497,29 +497,30 @@ Action = {}
 	end
 
 	--add briefing text
-	function Action.Text(arg, clear)
+	function Action.Text(text, clear)
 		--n'ajoute pas le texte s'il existe deja
 
 		if debugKT then
 			print("DcCT PBriefing_text "..type(Briefing_text))
-			print("DcCT arg "..type(arg))
+			print("DcCT arg "..type(text))
 
 			_affiche(Briefing_text, "Briefing_text DcCT")
-			_affiche(arg, "arg")
+			_affiche(text, "text")
 		end
 
-		if string.find(Briefing_text, arg) then
-			-- print("DcCT PASSE B ")
+		--pour ne pas reecrire la meme chose
+		if string.find(Briefing_text, text) then
+			print("DcCT PASSE B ")
 			return
 		end
 
 		if clear then
 			-- Briefing_status = ""												--clear briefing text from previous mission instances
-			Briefing_text = Briefing_text .. arg .. " \n \n"					--add trigger text to briefing text of this mission instance with double new line
-			-- print("DcCT PASSE C "..Briefing_text)
+			Briefing_text = Briefing_text .. text .. " \n \n"					--add trigger text to briefing text of this mission instance with double new line
+			print("DcCT PASSE C "..Briefing_text)
 		else
-			Briefing_text = Briefing_text .. arg .. " \n \n"					--add trigger text to briefing text of this mission instance with double new line
-			-- print("DcCT PASSE D "..Briefing_text)
+			Briefing_text = Briefing_text .. text .. " \n \n"					--add trigger text to briefing text of this mission instance with double new line
+			print("DcCT PASSE D "..Briefing_text)
 		end
 	end
 
@@ -2185,11 +2186,10 @@ if not BriefingImagesR then
 BriefingImagesR = { }                             --global table to hold information about briefing images to be added to miz mission file
 end
 
-if camp.Briefing_text and camp.Briefing_text ~= "" then
-	Briefing_text = camp.Briefing_text																--briefing text to be added this mission instance
-else
-	Briefing_text = ""
-end
+-- if camp.pendingBriefing then
+-- 	Briefing_text = camp.Briefing_text .. Briefing_text																--briefing text to be added this mission instance
+-- 	camp.Briefing_text = nil																		--reset pending briefing text
+-- end
 
 Briefing_text_playable = ""														--briefing text to be added only if this mission instance results in a playable mission
 
