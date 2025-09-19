@@ -97,11 +97,11 @@ table.sort(oobAirSide, function(a, b) return a.type:upper() < b.type:upper() end
 -- end	
 
 Playable_m = {}
-for planeType, value in pairs(Data_divers) do	
-	if value.playable then
+for planeType, plane in pairs(Data_divers) do
+	if plane.playable then
 		Playable_m[planeType] = true
 	end
-end	
+end
 
 
 local nType = 1

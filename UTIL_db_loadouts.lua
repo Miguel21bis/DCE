@@ -4,7 +4,7 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.192"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.193"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
@@ -38299,6 +38299,766 @@ db_all_loadouts = {
 				},
 			},
 		},
+	},
+	["MiG-29 Fulcrum"] = {
+		CAP = {
+			["AA CAP - 90s - R-27R*2 R-60M*4 - FT"] = {
+				attributes =  { },
+				code_loadout =  { "Crisis", "PG" },
+				night = true,
+				adverseWeather = true,
+				range = 504000,
+				firepower = 1,
+				vCruise = 213,
+				vAttack = 213,
+				hCruise = 7011,
+				hAttack = 7011,
+				standoff = 27000,
+				tStation = 2700,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = {
+					["CLSID"] = "{PTB_1500_MIG29A}",
+					["num"] = 4,
+				},
+				[2] = {
+					["CLSID"] = "{9B25D316-0434-4954-868F-D51DB1A38DF0}",
+					["num"] = 5,
+				},
+				[3] = {
+					["CLSID"] = "{9B25D316-0434-4954-868F-D51DB1A38DF0}",
+					["num"] = 3,
+				},
+				[4] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 7,
+				},
+				[5] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 1,
+				},
+				[6] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 6,
+				},
+				[7] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 2,
+				},
+					},
+					fuel = "3376",
+					flare = 30,
+					chaff = 30,
+					gun = 100,
+				},
+			},
+			["CAP AA - 2000s - R-27ER*2 R-73*4 - FT"] = {
+				attributes =  { },
+				code_loadout =  { "TF", "Caucasus", "WOB" },
+				night = true,
+				adverseWeather = true,
+				range = 400000,
+				firepower = 1.5,
+				vCruise = 213,
+				vAttack = 213,
+				hCruise = 7011,
+				hAttack = 7011,
+				tStation = 1800,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = {
+					["CLSID"] = "{PTB_1500_MIG29A}",
+					["num"] = 4,
+				},
+				[2] = {
+					["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+					["num"] = 5,
+				},
+				[3] = {
+					["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+					["num"] = 3,
+				},
+				[4] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 7,
+				},
+				[5] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 1,
+				},
+				[6] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 6,
+				},
+				[7] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 2,
+				},
+					},
+					fuel = "3380",
+					flare = 30,
+					chaff = 30,
+					gun = 100,
+				},
+			},
+		},
+		["Fighter Sweep"] = {
+			["AA sweep - 90s - R-27R*2 R-60M*4 - FT"] = {
+				attributes =  { },
+				code_loadout =  { "Crisis", "PG" },
+				night = true,
+				adverseWeather = true,
+				firepower = 1.5,
+				range = 504000,
+				vCruise = 213,
+				vAttack = 213,
+				hCruise = 7011,
+				hAttack = 7011,
+				standoff = 27000,
+				LDSD = true,
+				sortie_rate = 10,
+				stores = {
+					pylons = {
+						[1] = {
+					["CLSID"] = "{PTB_1500_MIG29A}",
+					["num"] = 4,
+				},
+				[2] = {
+					["CLSID"] = "{9B25D316-0434-4954-868F-D51DB1A38DF0}",
+					["num"] = 5,
+				},
+				[3] = {
+					["CLSID"] = "{9B25D316-0434-4954-868F-D51DB1A38DF0}",
+					["num"] = 3,
+				},
+				[4] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 7,
+				},
+				[5] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 1,
+				},
+				[6] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 6,
+				},
+				[7] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 2,
+				},
+					},
+					fuel = "3380",
+					flare = 30,
+					chaff = 30,
+					gun = 100,
+				},
+			},
+			["Fighter Sweep AA - 2000s - R-27ER*2 R-73*4 - FT"] = {
+				attributes =  { },
+				code_loadout =  { "TF", "Caucasus", "WOB" },
+				night = true,
+				adverseWeather = true,
+				range = 600000,
+				firepower = 1.5,
+				vCruise = 260.83333333333,
+				vAttack = 315.83333333333,
+				hCruise = 7011,
+				hAttack = 7011,
+				standoff = 60000,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = {
+					["CLSID"] = "{PTB_1500_MIG29A}",
+					["num"] = 4,
+				},
+				[2] = {
+					["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+					["num"] = 5,
+				},
+				[3] = {
+					["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+					["num"] = 3,
+				},
+				[4] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 7,
+				},
+				[5] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 1,
+				},
+				[6] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 6,
+				},
+				[7] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 2,
+				},
+					},
+					fuel = "3380",
+					flare = 30,
+					chaff = 30,
+					gun = 100,
+				},
+			},
+		},
+		Escort = {
+			["Escort  AA - 2000s - R-27ER*2 R-73*4 - FT"] = {
+				attributes =  { },
+				code_loadout =  { "TF", "Caucasus", "WOB" },
+				night = true,
+				adverseWeather = true,
+				range = 700000,
+				firepower = 1.5,
+				vCruise = 260.83333333333,
+				standoff = 50000,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = {
+					["CLSID"] = "{PTB_1500_MIG29A}",
+					["num"] = 4,
+				},
+				[2] = {
+					["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+					["num"] = 5,
+				},
+				[3] = {
+					["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+					["num"] = 3,
+				},
+				[4] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 7,
+				},
+				[5] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 1,
+				},
+				[6] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 6,
+				},
+				[7] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 2,
+				},
+					},
+					fuel = "3380",
+					flare = 30,
+					chaff = 30,
+					gun = 100,
+				},
+			},
+			["AA Escort - 90s - R-27R*2 R-60M*4 - FT"] = {
+				attributes =  { },
+				code_loadout =  { "Crisis", "PG" },
+				night = true,
+				adverseWeather = true,
+				range = 504000,
+				firepower = 1,
+				vCruise = 213,
+				standoff = 27000,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = {
+					["CLSID"] = "{PTB_1500_MIG29A}",
+					["num"] = 4,
+				},
+				[2] = {
+					["CLSID"] = "{9B25D316-0434-4954-868F-D51DB1A38DF0}",
+					["num"] = 5,
+				},
+				[3] = {
+					["CLSID"] = "{9B25D316-0434-4954-868F-D51DB1A38DF0}",
+					["num"] = 3,
+				},
+				[4] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 7,
+				},
+				[5] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 1,
+				},
+				[6] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 6,
+				},
+				[7] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 2,
+				},
+					},
+					fuel = "3380",
+					flare = 30,
+					chaff = 30,
+					gun = 100,
+				},
+			},
+		},
+		Intercept = {
+			["AA Intercept - 90s - R-27R*2 R-60M*4 - FT"] = {
+				attributes =  { },
+				code_loadout =  { "Crisis", "PG" },
+				night = true,
+				adverseWeather = true,
+				range = 250000,
+				firepower = 1,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = {
+					["CLSID"] = "{PTB_1500_MIG29A}",
+					["num"] = 4,
+				},
+				[2] = {
+					["CLSID"] = "{9B25D316-0434-4954-868F-D51DB1A38DF0}",
+					["num"] = 5,
+				},
+				[3] = {
+					["CLSID"] = "{9B25D316-0434-4954-868F-D51DB1A38DF0}",
+					["num"] = 3,
+				},
+				[4] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 7,
+				},
+				[5] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 1,
+				},
+				[6] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 6,
+				},
+				[7] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 2,
+				},
+					},
+					fuel = "3380",
+					flare = 30,
+					chaff = 30,
+					gun = 100,
+				},
+			},
+			["Intercept AA - 2000s - R-27ER*2 R-73*4 - FT"] = {
+				attributes =  { },
+				code_loadout =  { "TF", "Caucasus", "WOB" },
+				night = true,
+				adverseWeather = true,
+				range = 200000,
+				firepower = 1,
+				LDSD = true,
+				sortie_rate = 10,
+				stores = {
+					pylons = {
+						[1] = {
+					["CLSID"] = "{PTB_1500_MIG29A}",
+					["num"] = 4,
+				},
+				[2] = {
+					["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+					["num"] = 5,
+				},
+				[3] = {
+					["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+					["num"] = 3,
+				},
+				[4] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 7,
+				},
+				[5] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 1,
+				},
+				[6] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 6,
+				},
+				[7] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 2,
+				},
+					},
+					fuel = "3380",
+					flare = 30,
+					chaff = 30,
+					gun = 100,
+				},
+			},
+		},
+		Strike = {
+		["AG - 2000s - FAB-500*4 - R-73*2 - FT"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+				},
+				attributes =  { "Structure", "soft", "Parked Aircraft" },
+				code_loadout =  { "TF", "Caucasus", "WOB" },
+				weaponType = "Bombs",
+				expend = "All",
+				range = 200000,
+				firepower = 1,
+				vCruise = 245,
+				vAttack = 277.5,
+				hCruise = 5486.4,
+				hAttack = 4572,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 7,
+				},
+				[2] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 1,
+				},
+				[3] = {
+					["CLSID"] = "{PTB_1500_MIG29A}",
+					["num"] = 4,
+				},
+				[4] = {
+					["CLSID"] = "{37DCC01E-9E02-432F-B61D-10C166CA2798}",
+					["num"] = 5,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_AVUE_NOSE"] = 4.5,
+						["00_prfx_function_delay_ctrl_AVUE_NOSE"] = 0,
+						["NFP_PRESID"] = "MDRN_B_USSR_FABMedium",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = 1,
+						["NFP_fuze_type_tail"] = "EMPTY_TAIL",
+						["safety_delay"] = 11.35,
+					},
+				},
+				[5] = {
+					["CLSID"] = "{37DCC01E-9E02-432F-B61D-10C166CA2798}",
+					["num"] = 3,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_AVUE_NOSE"] = 4.5,
+						["00_prfx_function_delay_ctrl_AVUE_NOSE"] = 0,
+						["NFP_PRESID"] = "MDRN_B_USSR_FABMedium",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = 1,
+						["NFP_fuze_type_tail"] = "EMPTY_TAIL",
+						["safety_delay"] = 11.35,
+					},
+				},
+				[6] = {
+					["CLSID"] = "{37DCC01E-9E02-432F-B61D-10C166CA2798}",
+					["num"] = 6,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_AVUE_NOSE"] = 4.5,
+						["00_prfx_function_delay_ctrl_AVUE_NOSE"] = 0,
+						["NFP_PRESID"] = "MDRN_B_USSR_FABMedium",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = 1,
+						["NFP_fuze_type_tail"] = "EMPTY_TAIL",
+						["safety_delay"] = 11.35,
+					},
+				},
+				[7] = {
+					["CLSID"] = "{37DCC01E-9E02-432F-B61D-10C166CA2798}",
+					["num"] = 2,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_AVUE_NOSE"] = 4.5,
+						["00_prfx_function_delay_ctrl_AVUE_NOSE"] = 0,
+						["NFP_PRESID"] = "MDRN_B_USSR_FABMedium",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = 1,
+						["NFP_fuze_type_tail"] = "EMPTY_TAIL",
+						["safety_delay"] = 11.35,
+					},
+				},
+					},
+					fuel = 3380,
+					flare = 30,
+					chaff = 30,
+					gun = 100,
+				},
+			},
+			["AG - 90s - FAB-500*4 - R-60M*2 - FT"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+				},
+				attributes =  { "Structure", "soft", "Parked Aircraft" },
+				code_loadout =  { "Crisis", "PG" },
+				weaponType = "Bombs",
+				expend = "All",
+				range = 200000,
+				firepower = 1,
+				vCruise = 245,
+				vAttack = 277.5,
+				hCruise = 5486.4,
+				hAttack = 4572,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 7,
+				},
+				[2] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 1,
+				},
+				[3] = {
+					["CLSID"] = "{PTB_1500_MIG29A}",
+					["num"] = 4,
+				},
+				[4] = {
+					["CLSID"] = "{37DCC01E-9E02-432F-B61D-10C166CA2798}",
+					["num"] = 5,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_AVUE_NOSE"] = 4.5,
+						["00_prfx_function_delay_ctrl_AVUE_NOSE"] = 0,
+						["NFP_PRESID"] = "MDRN_B_USSR_FABMedium",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = 1,
+						["NFP_fuze_type_tail"] = "EMPTY_TAIL",
+						["safety_delay"] = 11.35,
+					},
+				},
+				[5] = {
+					["CLSID"] = "{37DCC01E-9E02-432F-B61D-10C166CA2798}",
+					["num"] = 3,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_AVUE_NOSE"] = 4.5,
+						["00_prfx_function_delay_ctrl_AVUE_NOSE"] = 0,
+						["NFP_PRESID"] = "MDRN_B_USSR_FABMedium",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = 1,
+						["NFP_fuze_type_tail"] = "EMPTY_TAIL",
+						["safety_delay"] = 11.35,
+					},
+				},
+				[6] = {
+					["CLSID"] = "{37DCC01E-9E02-432F-B61D-10C166CA2798}",
+					["num"] = 6,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_AVUE_NOSE"] = 4.5,
+						["00_prfx_function_delay_ctrl_AVUE_NOSE"] = 0,
+						["NFP_PRESID"] = "MDRN_B_USSR_FABMedium",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = 1,
+						["NFP_fuze_type_tail"] = "EMPTY_TAIL",
+						["safety_delay"] = 11.35,
+					},
+				},
+				[7] = {
+					["CLSID"] = "{37DCC01E-9E02-432F-B61D-10C166CA2798}",
+					["num"] = 2,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_AVUE_NOSE"] = 4.5,
+						["00_prfx_function_delay_ctrl_AVUE_NOSE"] = 0,
+						["NFP_PRESID"] = "MDRN_B_USSR_FABMedium",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type_nose"] = 1,
+						["NFP_fuze_type_tail"] = "EMPTY_TAIL",
+						["safety_delay"] = 11.35,
+					},
+				},
+					},
+					fuel = 3380,
+					flare = 30,
+					chaff = 30,
+					gun = 100,
+				},
+			},
+			["AG Low - 2000s - BeTAB-500 HD*4 - R-73*2 - FT"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+				},
+				attributes =  { "Structure", "soft", "Parked Aircraft" },
+				code_loadout =  { "TF", "Caucasus", "WOB" },
+				weaponType = "Bombs",
+				expend = "All",
+				range = 200000,
+				firepower = 1,
+				night = true,
+				adverseWeather = true,
+				vCruise = 245,
+				vAttack = 277.5,
+				hCruise = 9100,
+				hAttack = 200,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 7,
+				},
+				[2] = {
+					["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+					["num"] = 1,
+				},
+				[3] = {
+					["CLSID"] = "{PTB_1500_MIG29A}",
+					["num"] = 4,
+				},
+				[4] = {
+					["CLSID"] = "{BD289E34-DF84-4C5E-9220-4B14C346E79D}",
+					["num"] = 5,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_USSR_BetABShP",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type"] = 1,
+						["arm_delay_ctrl_AVU589"] = 4.5,
+						["function_delay_ctrl_AVU589"] = 26,
+						["safety_delay"] = 11.35,
+					},
+				},
+				[5] = {
+					["CLSID"] = "{BD289E34-DF84-4C5E-9220-4B14C346E79D}",
+					["num"] = 3,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_USSR_BetABShP",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type"] = 1,
+						["arm_delay_ctrl_AVU589"] = 4.5,
+						["function_delay_ctrl_AVU589"] = 26,
+					},
+				},
+				[6] = {
+					["CLSID"] = "{BD289E34-DF84-4C5E-9220-4B14C346E79D}",
+					["num"] = 6,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_USSR_BetABShP",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type"] = 1,
+						["arm_delay_ctrl_AVU589"] = 4.5,
+						["function_delay_ctrl_AVU589"] = 26,
+						["safety_delay"] = 11.35,
+					},
+				},
+				[7] = {
+					["CLSID"] = "{BD289E34-DF84-4C5E-9220-4B14C346E79D}",
+					["num"] = 2,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_USSR_BetABShP",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type"] = 1,
+						["arm_delay_ctrl_AVU589"] = 4.5,
+						["function_delay_ctrl_AVU589"] = 26,
+						["safety_delay"] = 11.35,
+					},
+				},
+					},
+					fuel = 3380,
+					flare = 30,
+					chaff = 30,
+					gun = 100,
+				},
+			},
+			["AG Low - 90s - BeTAB-500 HD*4 - R-60M*2 - FT"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+				},
+				attributes =  { "Structure", "soft", "Parked Aircraft" },
+				code_loadout =  { "Crisis", "PG" },
+				weaponType = "Bombs",
+				expend = "All",
+				range = 200000,
+				night = true,
+				adverseWeather = true,
+				firepower = 1,
+				vCruise = 245,
+				vAttack = 277.5,
+				hCruise = 9100,
+				hAttack = 200,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 7,
+				},
+				[2] = {
+					["CLSID"] = "{682A481F-0CB5-4693-A382-D00DD4A156D7}",
+					["num"] = 1,
+				},
+				[3] = {
+					["CLSID"] = "{PTB_1500_MIG29A}",
+					["num"] = 4,
+				},
+				[4] = {
+					["CLSID"] = "{BD289E34-DF84-4C5E-9220-4B14C346E79D}",
+					["num"] = 5,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_USSR_BetABShP",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type"] = 1,
+						["arm_delay_ctrl_AVU589"] = 4.5,
+						["function_delay_ctrl_AVU589"] = 26,
+					},
+				},
+				[5] = {
+					["CLSID"] = "{BD289E34-DF84-4C5E-9220-4B14C346E79D}",
+					["num"] = 3,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_USSR_BetABShP",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type"] = 1,
+						["arm_delay_ctrl_AVU589"] = 4.5,
+						["function_delay_ctrl_AVU589"] = 26,
+					},
+				},
+				[6] = {
+					["CLSID"] = "{BD289E34-DF84-4C5E-9220-4B14C346E79D}",
+					["num"] = 6,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_USSR_BetABShP",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type"] = 1,
+						["arm_delay_ctrl_AVU589"] = 4.5,
+						["function_delay_ctrl_AVU589"] = 26,
+					},
+				},
+				[7] = {
+					["CLSID"] = "{BD289E34-DF84-4C5E-9220-4B14C346E79D}",
+					["num"] = 2,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_USSR_BetABShP",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type"] = 1,
+						["arm_delay_ctrl_AVU589"] = 4.5,
+						["function_delay_ctrl_AVU589"] = 26,
+					},
+				},
+					},
+					fuel = 3380,
+					flare = 30,
+					chaff = 30,
+					gun = 100,
+				},
+			},
+		},	
 	},
 	["CH-47D"] = {
 		CSAR = {

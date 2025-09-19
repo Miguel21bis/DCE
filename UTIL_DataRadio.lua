@@ -889,7 +889,7 @@ Frequency = {
 		},	
 	},
 	["MiG-21Bis"] = {
-		radio = {						--range of radio frequencies of player aircraft
+		radio = {
 			[1] = {						--radio 1  RSIU 5V 
 				VHF = {
 					min = 118,				--minimum radio frequency in mHz   RS-832 0 to 19 preset channels only
@@ -907,8 +907,32 @@ Frequency = {
 			},
 		},
 	},
+	["MiG-29 Fulcrum"] = {
+		radio = {
+			[1] = {
+				VHF = {
+					min = 100,
+					max = 149.975,
+				},
+				UHF = {
+					min = 220,
+					max = 399.975,
+				},
+				nbCanal = 20,
+				name = "VHF/UHF R-862"
+			},
+			[2] = {
+				HF = {
+					min = 0.150,
+					max = 1.2995,
+				},
+				nbCanal = 8,
+				name = "ARK-19",
+			},
+		},
+	},
 	["MiG-29A"] = {
-		radio = {						--range of radio frequencies of player aircraft
+		radio = {
 			[1] = {
 				VHF = {
 					min = 100,

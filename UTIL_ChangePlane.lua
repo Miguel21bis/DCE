@@ -1,11 +1,11 @@
 --gives the player the possibility to change planes during the campaign.
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleanCode_b
+-- last modification: cleanCode_c
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_ChangePlane.lua"] = "1.5.8"
+versionDCE["UTIL_ChangePlane.lua"] = "1.5.9"
 -------------------------------------------------------------------------------------------------------
 
--- cleanCode_b				(b springCleaning)
+-- cleanCode_c				(b springCleaning)
 -- adjustment_a
 -- debug_a					(a recipient == nil)
 -- modification M63_a		compatible Datacard Generator or CombatFlite
@@ -60,20 +60,17 @@ table.sort(oobAirSide, function(a, b) return a.type:upper() < b.type:upper() end
 
 local nType = 1
 local tabSquad = {}
--- for nSide , oob_airSide in pairs(oob_air) do														--pour afficher l'exemple de selection du premier avion pr�sent�
-	-- if nSide == playerSide then
-		-- for i,v in ipairs(animals) do print(v.name) end
-		for m , unit in ipairs(oobAirSide) do
-			if Playable_m[unit.type] and unit.inactive ~= true  then
-				table.insert(tabSquad,nType, unit.name)
 
-				io.write("\n"..nType .." | "..unit.type .." | "..unit.name.." | "..unit.country)
+for unitN , unit in ipairs(oobAirSide) do
+	if Playable_m[unit.type] and unit.inactive ~= true  then
+		table.insert(tabSquad,nType, unit.name)
 
-				nType = nType + 1
-			end
-		end
-	-- end
--- end
+		io.write("\n"..nType .." | "..unit.type .." | "..unit.name.." | "..unit.country)
+
+		nType = nType + 1
+	end
+end
+
 io.write( "\n")
 --===================================================================================
 -- Ecran N�1 Selection Nombre d'avion Multiplayer
@@ -249,7 +246,7 @@ airFile:close()
 
 LoadFileAndUpdate("UTIL_ChangePlane "..debug.getinfo(1).currentline)
 
-local Reinforce = {}
+local reinforce = {}
 --recherche l'escadron de ravitaillement, s'il existe
 --['action'] = 'Action.AirUnitReinforce("R/3.IAP", "3.IAP", 12)',
 for name, trig in pairs(camp_triggers) do
@@ -274,7 +271,7 @@ for name, trig in pairs(camp_triggers) do
 				recipient = donor
 			end
 
-			if recipient ~= nil and not Reinforce[recipient]  then Reinforce[recipient] = donor end
+			if recipient ~= nil and not reinforce[recipient]  then reinforce[recipient] = donor end
 		end
 	end
 end
@@ -292,7 +289,7 @@ for name, trig in pairs(camp_triggers) do
 
 					local s = trig.condition
 					local stringEgal = ""
-					local TrigChanged = false
+					local trigChanged = false
 
 					local one, nValue = s:match("([^,]+)<([^,]+)")
 
@@ -314,16 +311,16 @@ for name, trig in pairs(camp_triggers) do
 					if string.find(one, "AirUnitReady") or string.find(one, "AirUnitAlive")  then
 						--['condition'] = 'Return.AirUnitAlive("VFA-106") + Return.AirUnitReady("R/VFA-106") < 5',
 
-						TrigChanged = true
+						trigChanged = true
 						one = one:gsub(oldSquadName, newSquadName)
 
-						if Reinforce[newSquadName] then
+						if reinforce[newSquadName] then
 							--condition = 'Return.AirUnitAlive("VFA-106") + Return.AirUnitReady("R/VFA-106") < 5',								
-							one = one .. " + Return.AirUnitReady(\""..Reinforce[newSquadName].."\")"							
+							one = one .. " + Return.AirUnitReady(\""..reinforce[newSquadName].."\")"							
 						end
 					end
 
-					if TrigChanged  then
+					if trigChanged  then
 						trig.condition = ""
 						local stringAnd = ""
 						local tempConcat = one.."<"..stringEgal .."".. tostring(nValue).." "

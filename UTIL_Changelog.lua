@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.91.563"
+versionDCE["UTIL_Changelog.lua"] = "20.91.564"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.91.563"
+VersionDCE["UTIL_Changelog.txt"] = "20.91.564"
 --[[
 
 
@@ -9,7 +9,8 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.91.563:==
+==:20.91.564:==
+564 added	[plane] MiG-29 Fulcrum
 563 added	[EWR][frequencies]    Some CampaignMakers specifically want to keep the same EWR frequencies, while others do not.
 						Therefore, this variable should be added to the camp_init.lua files:
 						ewrFreqAdaptable = true,		--Defines whether the EWR frequency can be adjusted based on the aircraft's radio capability

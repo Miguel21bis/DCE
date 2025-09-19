@@ -285,7 +285,7 @@ Data_AddPropAircraft = {
 		["NS430allow"] = true,
     },	
 
-	["MiG-19P"] = {							--Mig-19P
+	["MiG-19P"] = {
 		["MissileToneVolume"] = 5,
 		["ADF_Selected_Frequency"] = 1,
 		["MountSIRENA"] = false,
@@ -293,7 +293,13 @@ Data_AddPropAircraft = {
 		["ADF_FAR_Frequency"] = 625,
 		["NAV_Initial_Hdg"] = 0,	-- fast/slow alignment, information will be adapted according to the player's choice in conf_mod (alignment_Mode)				
 	},
-
+	["MiG-29 Fulcrum"] = {
+		["IMU alignment type"] = 1,	--{id = 0, dispName = _("Fast")}, {id = 1, dispName = _("Normal")},
+		["HelmetMountedDevice"] = 1,
+		["SPOMode"] = 1,
+		["NS430allow"] = false,
+		["Realistic INS"] = 1,	--{id = 0, dispName = _("No alignment and fixtaking needed") {id = 1, dispName = _("Fully realistic")
+	},
 	["Mi-24P"] = {							--Mi-24P Hind
 		["LeftEngineResource"] = 90,
 		["RightEngineResource"] = 90,

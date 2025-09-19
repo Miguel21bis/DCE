@@ -70,7 +70,7 @@ Transport = "Transport"
 
 
 
-function aircraft_task(taskName)
+local function aircraft_task(taskName)
 
 	return taskName
 end
@@ -1939,9 +1939,35 @@ Data_divers = {
 	},
 	["MiG-27K"] = {
 		instrumentUnits = "russian",
-		EPLRS_Capacity = false,		
+		EPLRS_Capacity = false,
 		vCruise = 190,
 		hCruise = 6358,
+	},
+	["MiG-29 Fulcrum"] = {
+		instrumentUnits = "russian",
+		EPLRS_Capacity = false,
+		playable = true,
+		alignment_PropAircraft = {
+			fast = {
+				["IMU alignment type"] = 0,
+			},
+			slow = {
+				["IMU alignment type"] = 1,
+			},
+		},
+		Tasks = {
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(AFAC),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(RunwayAttack),
+			aircraft_task(AntishipStrike),
+		},
+		vCruise = 240, --m/s--a peaufiner
+		hCruise = 9000,	-- m--a peaufiner
 	},
 	["MiG-29A"] = {
 		instrumentUnits = "russian",
@@ -3685,6 +3711,59 @@ Failures = {
 		'KPP_FAILURE_PARTIAL',--('Kpp'), -- 11
 
 		'LANDING_LIGHTS_FAILURE',--('Landing lights failure'), -- 12, 03. Dec 2014
+	},
+
+	["MiG-29 Fulcrum"] =
+	{
+		"NOSE_CENTER",
+		"NOSE_LEFT_SIDE",
+		"NOSE_RIGHT_SIDE",
+		"COCKPIT",
+		"CABIN_LEFT_SIDE",
+		"CABIN_RIGHT_SIDE",
+		"FRONT_GEAR_BOX",
+		"FUSELAGE_LEFT_SIDE",
+		"FUSELAGE_RIGHT_SIDE",
+		"ENGINE_L",
+		"ENGINE_R",
+		"MTG_L_BOTTOM",
+		"MTG_R_BOTTOM",
+		"LEFT_GEAR_BOX",
+		"RIGHT_GEAR_BOX",
+		"MTG_L",
+		"MTG_R",
+		"AIR_BRAKE_L",
+		"AIR_BRAKE_R",
+		"WING_L_PART_OUT",
+		"WING_R_PART_OUT",
+		"WING_L_OUT",
+		"WING_R_OUT",
+		"AILERON_L",
+		"AILERON_R",
+		"WING_L_CENTER",
+		"WING_R_CENTER",
+		"WING_L_PART_IN",
+		"WING_R_PART_IN",
+		"WING_L_IN",
+		"WING_R_IN",
+		"FLAP_L_IN",
+		"FLAP_R_IN",
+		"FIN_L_TOP",
+		"FIN_R_TOP",
+		"FIN_L_BOTTOM",
+		"FIN_R_BOTTOM",
+		"ELEVATOR_L_IN",
+		"ELEVATOR_R_IN",
+		"RUDDER_L",
+		"RUDDER_R",
+		"TAIL",
+		"TAIL_BOTTOM",
+		"NOSE_BOTTOM",
+		"FUSELAGE_BOTTOM",
+		"WHEEL_F",
+		"WHEEL_L",
+		"WHEEL_R",
+		"CREW_1",
 	},
 
 	["JF-17"] = {
