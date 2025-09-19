@@ -775,8 +775,19 @@ function eventHandlerDCE:onEvent(event)
 				-- end
 
 				if event.target.getCoalition then
-					local targetCoalition = event.target:getCoalition() --779: Unit doesn't exist
-					targetSideName = coalitionIdNumeric[tonumber(targetCoalition)]
+					if event.target.isExist and event.target:isExist() then
+						local targetCoalition = event.target:getCoalition() --779: Unit doesn't exist
+						targetSideName = coalitionIdNumeric[tonumber(targetCoalition)]
+
+					else -- pour éviter --779: Unit doesn't exist
+					
+						env.info("DCE_EventsTracker target Unit doesn't exist: Category: " .. tostring(targetObjCategory))
+						if event.target.getDesc then
+							local targetDesc = event.target:getDesc()
+							_affiche(targetDesc, "DCE_EventsTracker targetDesc ")
+						end
+					end
+
 				end
 
 			end
@@ -792,13 +803,25 @@ function eventHandlerDCE:onEvent(event)
 					local altiLand = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z })
 					pilotEjection = {
 						vec3x = initiatorVec3.x,
-						vec3y = altiLand,
+						vec3y = initiatorVec3.y,
 						vec3z = initiatorVec3.z,
 						unit = event.initiator,
 						x = initiatorVec3.x,
                         y = initiatorVec3.z,
-						z = altiLand,
+						z = initiatorVec3.y,
+						altiLand = altiLand,
 					}
+
+					--permet le spawn du soldat meme si le joueur ... s'ejecte d'un helico au sol
+					if pilotEjection.z - pilotEjection.altiLand <= 5 then
+						if event.initiator.getPlayerName and event.initiator.getGroup then
+							local playerName = event.initiator:getPlayerName()
+							local groupObj = event.initiator:getGroup()
+							if playerName and groupObj then
+                           		getOut({ groupObj, playerName })
+							end
+						end
+					end
 
 					if initiatorName then
 						pilotEjection.initiator, log_entry.initiator = initiatorName, initiatorName
@@ -938,7 +961,7 @@ function eventHandlerDCE:onEvent(event)
 				-- _affiche(event, "BUG pilot seat separation event ")
 			end
 
-		elseif  log_entry.type == "pilot land"  then
+		elseif log_entry.type == "pilot land"  then
 			env.info( "DCE_EventT_pilot_land A id: "..tostring(event.id))
 
 			if event.initiator then

@@ -73,6 +73,8 @@ SmokeColor_TargetDesignation = trigger.smokeColor.Blue
 
 RadioWatt = 1 -- Radio power in watts, used for radio beacon transmission
 
+AnnonceOneOunce = {}
+
 coalitionId = {
 	["0"] = "neutral",
 	["1"] = "red",
@@ -706,11 +708,15 @@ end
 -- interdit aux CAP et Intercepteur d'entrer dans une zone SAM connu
 local function avoidArea()
 
-	-- env.info("ACRF10_avoidArea A0 camp.groundthreats.? "..tostring(camp.groundthreats))
-
 	local debug_avoidArea = false
 
-	if not camp.groundthreats then return end
+    if not camp.groundthreats then
+		if not AnnonceOneOunce["avoidArea"] then
+			env.info("ACRF10_avoidArea ERROR RETURN no camp.groundthreats")
+			AnnonceOneOunce["avoidArea"] = true
+		end
+        return
+	end
 
 	local current_time = timer.getTime()
 
@@ -727,44 +733,12 @@ local function avoidArea()
 			if (flightPlanTimer[gpGid] and nowTime < flightPlanTimer[gpGid] + 30) then
 				passTimer = false
 				-- env.info("ACRF10_avoidArea A "..tostring(gpName).." "..tostring(passTimer))
-				-- _affiche(flightPlanTimer, "ACRF10_avoidArea flightPlanTimer")
 			end
 
 			if (string.find(gpName,"CAP") or string.find(gpName,"Intercept")) and passTimer then
-
 				local wingman = gp:getUnits()
-
-				for wingmanN, _unit in ipairs(wingman) do
-
-					if _unit and _unit:isActive() and _unit:inAir() then
-						local currentPointVec3 = _unit:getPoint()
-						local currentPointXY = {
-							x = currentPointVec3.x,
-							y = currentPointVec3.z,
-							z = currentPointVec3.y,
-						}
-
-						local unitName = _unit:getName()
-						local callSign = _unit:getCallsign()
-
-						local description = _unit:getDesc()
-
-						local speedMax = 300
-						local speedCruise = 300
-						local Hcruise = 7600
-						if description then
-							if description.speedMax then
-								speedMax = description.speedMax
-							end
-							if description.speedMax0 then
-								speedCruise = description.speedMax0 / 2
-							end
-							if description.Hmax then
-								Hcruise = description.Hmax / 3
-							end
-						end
-
-						-- local ctr = _unit:getGroup():getController()
+				for wingmanN, unitObj in ipairs(wingman) do
+					if unitObj and unitObj:isActive() and unitObj:inAir() then
 
 						local ctr
 						if wingmanN == 1 then												--for leader
@@ -774,23 +748,48 @@ local function avoidArea()
 							ctr:setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2) 	--set to evade fire again, as controller for individual unit does not take over options from parent group
 						end
 
-						local ENI_side = DCS_ENI_Side[coalitionIdNumeric[sideNum]]
+						local eni_side = DCS_ENI_Side[coalitionIdNumeric[sideNum]]
 
-						for threatN, threat in pairs(camp.groundthreats[ENI_side]) do
-
+						for threatN, threat in pairs(camp.groundthreats[eni_side]) do
 							if threat and threat.class and threat.class == "SAM"  then
 
+								local currentPointVec3 = unitObj:getPoint()
+								local currentPointXY = {
+									x = currentPointVec3.x,
+									y = currentPointVec3.z,
+									z = currentPointVec3.y,
+										}
+						
 								local distance = math.sqrt(math.pow(threat.x - currentPointXY.x, 2) + math.pow(threat.y - currentPointXY.y, 2))
 
 								-- if debug_avoidArea or (distance and distance <= threat.range) then
 								if debug_avoidArea or (distance and distance <= ((2 / 3) * threat.range)) then
 
-
+									--ajoute ici les variables vraiment utile
+									local unitName = unitObj:getName()
+									local callSign = unitObj:getCallsign()
+									local description = unitObj:getDesc()
+									local speedMax = 300
+									local speedCruise = 300
+                                    local altiCruise = 7600
+									
+                                    if description then
+                                        if description.speedMax then
+                                            speedMax = description.speedMax
+                                        end
+                                        if description.speedMax0 then
+                                            speedCruise = description.speedMax0 / 2
+                                        end
+                                        if description.Hmax then
+                                            altiCruise = description.Hmax / 3
+                                        end
+                                    end
+									
 									env.info( "ACRF10_avoidArea I4_______  ")
 
 									local foundGroup = false
 									local breaktab = false
-									local CAP_group = {
+									local cap_group = {
 										name = "",
 										from = 0,
 										to = 0,
@@ -809,25 +808,23 @@ local function avoidArea()
 										sation2 = {},
 									}
 
-									for _coalition, coalition in pairs(env.mission.coalition) do
-										env.info( "ACRF10_avoidArea J________  _coalition? "..tostring(_coalition).." coalitionIdNumeric[sideNum]? "..tostring(coalitionIdNumeric[sideNum]).." sideNum? "..tostring(sideNum))
+									for coalitionName, coalition in pairs(env.mission.coalition) do
+										env.info( "ACRF10_avoidArea J________  _coalition? "..tostring(coalitionName).." coalitionIdNumeric[sideNum]? "..tostring(coalitionIdNumeric[sideNum]).." sideNum? "..tostring(sideNum))
 
-										if _coalition == coalitionIdNumeric[sideNum] then
-											for Ncountry, _country in pairs(coalition.country) do
-												if _country.plane then
-													for Ngroup, _group in pairs(_country.plane.group) do
-														if _group.groupId and _group.groupId == gpGid then
+										if coalitionName == coalitionIdNumeric[sideNum] then
+											for countryN, countryData in pairs(coalition.country) do
+												if countryData.plane then
+													for groupN, groupData in pairs(countryData.plane.group) do
+														if groupData.groupId and groupData.groupId == gpGid then
 
-															CAP_group.name = _group.name
+															cap_group.name = groupData.name
 															foundGroup = true
 
-															-- env.info( "ACRF10_avoidArea M        found Froup "..tostring(unitName))
-
 															--Station
-															for pointN, value in ipairs(_group.route.points) do
+															for pointN, value in ipairs(groupData.route.points) do
 																if value.name == 'Station' then
-																	CAP_group.to = pointN
-																	CAP_group.from = pointN - 1
+																	cap_group.to = pointN
+																	cap_group.from = pointN - 1
 																	if value.task then
 
 
@@ -837,16 +834,17 @@ local function avoidArea()
 
 																				if valueTasks.params.task.id == "EngageTargetsInZone" then
 
-																					CAP_group.sation1 = _group.route.points[pointN]
-																					CAP_group.sation2 = _group.route.points[pointN+1]
+																					--TODO prevoir une table globale pour ne par re itérer la mission entiere.
+																					cap_group.sation1 = groupData.route.points[pointN]
+																					cap_group.sation2 = groupData.route.points[pointN+1]
 
 																					-- CAP_group.orbitCAP.x = valueTasks.params.task.params.x
 																					-- CAP_group.orbitCAP.y = valueTasks.params.task.params.y
 
 
 																				elseif valueTasks.params.task.id == "Orbit" then
-																					CAP_group.orbitCAP.altitude = valueTasks.params.task.params.altitude
-																					CAP_group.orbitCAP.speed = valueTasks.params.task.params.speed
+																					cap_group.orbitCAP.altitude = valueTasks.params.task.params.altitude
+																					cap_group.orbitCAP.speed = valueTasks.params.task.params.speed
 																				end
 																			end
 																		end
@@ -857,9 +855,9 @@ local function avoidArea()
 
 															--BaseXY
 
-															CAP_group.base = {
-																x = _group.route.points[#_group.route.points].x,
-																y = _group.route.points[#_group.route.points].y,
+															cap_group.base = {
+																x = groupData.route.points[#groupData.route.points].x,
+																y = groupData.route.points[#groupData.route.points].y,
 															}
 
 															breaktab = true
@@ -873,12 +871,12 @@ local function avoidArea()
 										if breaktab then break end
 									end
 
-									if CAP_group.to ~= 0 then
+									if cap_group.to ~= 0 then
 										local switchtask = {
 												id = "SwitchWaypoint",
 													params = {
-														goToWaypointIndex = CAP_group.to,
-														fromWaypointIndex = CAP_group.from
+														goToWaypointIndex = cap_group.to,
+														fromWaypointIndex = cap_group.from
 												}
 											}
 
@@ -887,21 +885,21 @@ local function avoidArea()
 									end
 
 									local pointOfCoverage = chooseBestHotspot(currentPointXY, coalitionIdNumeric[sideNum])
-									local altCircle = Hcruise + (math.random(1,10) * 10)
+									local altCircle = altiCruise + (math.random(1,10) * 10)
 									local timeCircle = current_time
 
-									if CAP_group.orbitCAP.altitude ~= 0 then
-										Hcruise = CAP_group.orbitCAP.altitude
-									elseif Hcruise < currentPointXY.z then
-										Hcruise = currentPointXY.z
+									if cap_group.orbitCAP.altitude ~= 0 then
+										altiCruise = cap_group.orbitCAP.altitude
+									elseif altiCruise < currentPointXY.z then
+										altiCruise = currentPointXY.z
 									end
 
-									if CAP_group.orbitCAP.speed ~= 0 then
-										speedCruise = CAP_group.orbitCAP.speed
+									if cap_group.orbitCAP.speed ~= 0 then
+										speedCruise = cap_group.orbitCAP.speed
 									end
 
-									if CAP_group.orbitCAP.altitude ~= 0 then
-										altCircle = CAP_group.orbitCAP.altitude
+									if cap_group.orbitCAP.altitude ~= 0 then
+										altCircle = cap_group.orbitCAP.altitude
 										timeCircle = timeCircle + 150
 
 									else
@@ -930,7 +928,7 @@ local function avoidArea()
 															speed = speedMax,
 															speed_locked = true,
 															ETA_locked = false,
-															alt = Hcruise,
+															alt = altiCruise,
 															action = "Turning Point",
 															type = "Turning Point",
 															name = "Found pointOfCoverage"
@@ -939,7 +937,7 @@ local function avoidArea()
 															x = oppositePoint_x,
 															y = oppositePoint_y,
 															speed = speedCruise,
-															alt = Hcruise,
+															alt = altiCruise,
 															speed_locked = true,
 															ETA_locked = false,
 															action = "Turning Point",
@@ -950,7 +948,7 @@ local function avoidArea()
 															x = pointOfCoverage.x ,
 															y = pointOfCoverage.y ,
 															speed = speedCruise,
-															alt = Hcruise,
+															alt = altiCruise,
 															speed_locked = true,
 															ETA_locked = false,
 															action = "Turning Point",
@@ -1070,8 +1068,8 @@ local function avoidArea()
 														},
 
 														{
-															x = CAP_group.base.x,
-															y = CAP_group.base.y,
+															x = cap_group.base.x,
+															y = cap_group.base.y,
 															speed = speedCruise,
 															action = "Landing",
 															type = "Land"
@@ -1082,21 +1080,21 @@ local function avoidArea()
 										}
 
 										-- env.info( "ACRF10_avoidArea K2_______ #CAP_group.sation1: "..tostring(#CAP_group.sation1))
-										if CAP_group.sation1 ~= nil and CAP_group.sation2 ~= nil and CAP_group.orbitCAP.altitude ~= 0 then
+										if cap_group.sation1 ~= nil and cap_group.sation2 ~= nil and cap_group.orbitCAP.altitude ~= 0 then
 
 											local numPoints = #flightPlan.params.route.points
 											local indexForStation1 = numPoints
 											local indexForStation2 = numPoints +1 -- Station2 viendra après Station1
 
 											-- Insérer station1 et station2 à des indices fixes
-											table.insert(flightPlan.params.route.points, indexForStation1, CAP_group.sation1)
-											table.insert(flightPlan.params.route.points, indexForStation2, CAP_group.sation2)
+											table.insert(flightPlan.params.route.points, indexForStation1, cap_group.sation1)
+											table.insert(flightPlan.params.route.points, indexForStation2, cap_group.sation2)
 
 										end
 
 									else --if NOT pointOfCoverage then
 
-										local position = _unit:getPosition()
+										local position = unitObj:getPosition()
 										-- local heading = math.atan2(position.x.z, position.x.x) -- Calcul du cap en radians
 
 										env.info( "ACRF10_avoidArea L_______ currentPointXY.y: "..tostring(currentPointXY.y).." threat.y "..tostring(threat.y))
@@ -1113,7 +1111,7 @@ local function avoidArea()
 															y = currentPointXY.y,
 															speed = speedMax,
 															speed_locked = true,
-															alt = Hcruise,
+															alt = altiCruise,
 															ETA_locked = false,
 															action = "Turning Point",
 															type = "Turning Point",
@@ -1123,7 +1121,7 @@ local function avoidArea()
 															x = oppositePoint_x,
 															y = oppositePoint_y,
 															speed = speedCruise,
-															alt = Hcruise,
+															alt = altiCruise,
 															speed_locked = true,
 															ETA_locked = false,
 															action = "Turning Point",
@@ -1131,10 +1129,10 @@ local function avoidArea()
 														},
 														--point à mi chemin entre le point 2 et 4
 														{
-															x = (oppositePoint_x + CAP_group.base.x ) / 2,
-															y = (oppositePoint_y + CAP_group.base.y ) / 2,
+															x = (oppositePoint_x + cap_group.base.x ) / 2,
+															y = (oppositePoint_y + cap_group.base.y ) / 2,
 															speed = speedCruise,
-															alt = Hcruise,
+															alt = altiCruise,
 															speed_locked = true,
 															ETA_locked = false,
 															action = "Turning Point",
@@ -1142,8 +1140,8 @@ local function avoidArea()
 															-- cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, false)
 														},
 														{
-															x = CAP_group.base.x,
-															y = CAP_group.base.y,
+															x = cap_group.base.x,
+															y = cap_group.base.y,
 															speed = speedCruise,
 															action = "Landing",
 															type = "Land"
@@ -1166,7 +1164,7 @@ local function avoidArea()
 										ctr:setOption(AI.Option.Air.id.PROHIBIT_AA, true) -- Désactiver l'engagement A/A
 										ctr:setTask(flightPlan)
 										flightPlanTimer[gpGid] = nowTime
-										_affiche(flightPlanTimer, "ACRF10_avoidArea Z2 flightPlanTimer")
+										-- _affiche(flightPlanTimer, "ACRF10_avoidArea Z2 flightPlanTimer")
 									end
 
 									if camp.debug then
@@ -2658,10 +2656,10 @@ end
 function getOut(arg)
 	env.info( "DCE_getOut A function getOut(gid) ")
 
-	local groupObj = arg[1]
-	local pName = arg[2]
+	local arg_groupObj = arg[1]
+	local arg_playerName = arg[2]
 
-	local wingman = groupObj:getUnits()
+	local wingman = arg_groupObj:getUnits()
 	local playerName
 	local playerObj
 	local playerId
@@ -2669,14 +2667,14 @@ function getOut(arg)
 	for w = 1, #wingman do
 		playerName = wingman[w]:getPlayerName()
 
-		if playerName == pName then
+		if playerName == arg_playerName then
 			playerObj = wingman[w]
 			playerId = Unit.getID(playerObj)
 
 			env.info( "DCE_getOut B Attempted emergency evacuation of the aircraft ")
 			trigger.action.outTextForUnit(playerId, "Attempted emergency evacuation of the aircraft ", 15)
 
-			GetOutGDFM({pName, playerObj, playerId})
+			GetOutGDFM({playerName, playerObj, playerId})
 		end
 	end
 end
@@ -2729,16 +2727,16 @@ local function getLL_TargetPosition()
 
 end
 
-local function addFuncs(gid, groupObject, playerName)
+local function addFuncs(arg_Gid, arg_GroupObj, argPlayerName)
 
-	env.info("DCE_addFuncs PASSE   _A gid "..tostring(gid).." Group "..tostring(Group))
+	env.info("DCE_addFuncs PASSE   _A gid "..tostring(arg_Gid).." Group "..tostring(Group))
 
-	if gid and Group then
+	if arg_Gid and Group then
 
 		env.info("DCE_addFuncs PASSE   _B  ")
 
-		if not EWR_optionPlayer[playerName] then
-			EWR_optionPlayer[playerName] = {
+		if not EWR_optionPlayer[argPlayerName] then
+			EWR_optionPlayer[argPlayerName] = {
 				EWR_on = false,
 			}
 		end
@@ -2765,28 +2763,28 @@ local function addFuncs(gid, groupObject, playerName)
 
 		-- supprime les anciens items de la commande F10**************************************
 
-		missionCommands.removeItemForGroup(gid, {"Fuel Check"})
-		missionCommands.removeItemForGroup(gid, {"Urgent request"})
-		missionCommands.removeItemForGroup(gid, {"BullsEye_LongLat"})
-		missionCommands.removeItemForGroup(gid, {"EWR"})
-		missionCommands.removeItemForGroup(gid, {"Get out of the cockpit"})
-		missionCommands.removeItemForGroup(gid, {"CarrierIntoWind"})
+		missionCommands.removeItemForGroup(arg_Gid, {"Fuel Check"})
+		missionCommands.removeItemForGroup(arg_Gid, {"Urgent request"})
+		missionCommands.removeItemForGroup(arg_Gid, {"BullsEye_LongLat"})
+		missionCommands.removeItemForGroup(arg_Gid, {"EWR"})
+		missionCommands.removeItemForGroup(arg_Gid, {"Get out of the cockpit"})
+		missionCommands.removeItemForGroup(arg_Gid, {"CarrierIntoWind"})
 
 
 
 		-- ajoute les nouvelles commandes F10 **************************************
-		missionCommands.addCommandForGroup(gid, "Fuel Check", nil, FuelCheck, {gid = gid, groupObject = groupObject })
+		missionCommands.addCommandForGroup(arg_Gid, "Fuel Check", nil, FuelCheck, {gid = arg_Gid, groupObject = arg_GroupObj })
 
-		local subR_A = missionCommands.addSubMenuForGroup(gid, "Urgent request", nil)
+		local subR_A = missionCommands.addSubMenuForGroup(arg_Gid, "Urgent request", nil)
 
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Urgent_Refueling", subR_A, ReFueling, groupObject )
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Urgent_RequestCAP", subR_A, RequestCAP, groupObject)
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Package_All_RTB", subR_A, RtbPack, groupObject)
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Package_Strike_RTB", subR_A, RtbStrikePack, groupObject)
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Package_SEAD_RTB", subR_A, RtbSEADPack, groupObject)
+		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, "Urgent_Refueling", subR_A, ReFueling, arg_GroupObj )
+		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, "Urgent_RequestCAP", subR_A, RequestCAP, arg_GroupObj)
+		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, "Package_All_RTB", subR_A, RtbPack, arg_GroupObj)
+		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, "Package_Strike_RTB", subR_A, RtbStrikePack, arg_GroupObj)
+		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, "Package_SEAD_RTB", subR_A, RtbSEADPack, arg_GroupObj)
 
 
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "BullsEye_LongLat", nil, BullsEye, groupObject)
+		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, "BullsEye_LongLat", nil, BullsEye, arg_GroupObj)
 
 
 		-- local subR = missionCommands.addSubMenu('Root SubMenu')
@@ -2794,31 +2792,31 @@ local function addFuncs(gid, groupObject, playerName)
 		-- local subN2 = missionCommands.addSubMenu('we must go deeper', subN1)
 		-- local subN3 = missionCommands.addSubMenu('Go take a UX class', subN2)
 
-		local subR_B1 = missionCommands.addSubMenuForGroup(gid, "EWR", nil)
-		local subR_B2 = missionCommands.addSubMenuForGroup(gid, "EWR ON", subR_B1)
-		local subR_B3 = missionCommands.addSubMenuForGroup(gid, "EWR OFF", subR_B1)
+		local subR_B1 = missionCommands.addSubMenuForGroup(arg_Gid, "EWR", nil)
+		local subR_B2 = missionCommands.addSubMenuForGroup(arg_Gid, "EWR ON", subR_B1)
+		local subR_B3 = missionCommands.addSubMenuForGroup(arg_Gid, "EWR OFF", subR_B1)
 
-		for pName, value in pairs(EWR_optionPlayer) do
-			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, tostring(pName) .." EWR ON", subR_B2, EWR_ON, pName )
+		for playerName, value in pairs(EWR_optionPlayer) do
+			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, tostring(playerName) .." EWR ON", subR_B2, EWR_ON, playerName )
 		end
 
-		for pName, value in pairs(EWR_optionPlayer) do
-			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, tostring(pName) .." EWR OFF", subR_B3, EWR_OFF, pName )
+		for playerName, value in pairs(EWR_optionPlayer) do
+			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, tostring(playerName) .." EWR OFF", subR_B3, EWR_OFF, playerName )
 		end
 
 
 		-- radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Get out of the cockpit", subR_A, getOut, gid)
-		local subR_C1 = missionCommands.addSubMenuForGroup(gid, "Get out of the cockpit", subR_A)
-		for pName, value in pairs(EWR_optionPlayer) do
-			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, tostring(pName) .." Get out", subR_C1, getOut, {groupObject ,pName} )
+		local subR_C1 = missionCommands.addSubMenuForGroup(arg_Gid, "Get out of the cockpit", subR_A)
+		for playerName, value in pairs(EWR_optionPlayer) do
+			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, tostring(playerName) .." Get out", subR_C1, getOut, {arg_GroupObj ,playerName} )
 		end
 
 
 		env.info("DCE_addFuncs PASSE   _C  ")
 
 		if camp.SC_CarrierIntoWind == "man" then
-			missionCommands.removeItemForGroup(gid, {"CarrierIntoWind"})
-			local subR = missionCommands.addSubMenuForGroup(gid, "CarrierIntoWind", nil)
+			missionCommands.removeItemForGroup(arg_Gid, {"CarrierIntoWind"})
+			local subR = missionCommands.addSubMenuForGroup(arg_Gid, "CarrierIntoWind", nil)
 			for coalition_name,coal in pairs(env.mission.coalition) do
 				for country_n,country in ipairs(coal.country) do
 					if country.ship then
@@ -2829,9 +2827,9 @@ local function addFuncs(gid, groupObject, playerName)
 								local Desc = carrier:getDesc()
 								if Desc.attributes.AircraftCarrier or Desc.attributes["Aircraft Carriers"] then
 									local groupName = group.name
-									radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, group.name.." Into Wind 30mn", subR, TurnIntoWind, {groupName, nil, nil, 30} )	-- modification M36.d	(d: add timer) MenuRadio request manual TurnIntoWind
-									radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, group.name.." Into Wind 60mn", subR, TurnIntoWind, {groupName, nil, nil, 60} )
-									radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, group.name.." Resume Route", subR, ResumeRoute, {groupName, nil} )
+									radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, group.name.." Into Wind 30mn", subR, TurnIntoWind, {groupName, nil, nil, 30} )	-- modification M36.d	(d: add timer) MenuRadio request manual TurnIntoWind
+									radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, group.name.." Into Wind 60mn", subR, TurnIntoWind, {groupName, nil, nil, 60} )
+									radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, group.name.." Resume Route", subR, ResumeRoute, {groupName, nil} )
 								end
 							end
 						end
@@ -2841,7 +2839,7 @@ local function addFuncs(gid, groupObject, playerName)
 		end
 
 		-- sar_F10(Group)
-		timer.scheduleFunction(menuF10_SAR, {gid, groupObject}, timer.getTime() + 2)
+		timer.scheduleFunction(menuF10_SAR, {arg_Gid, arg_GroupObj}, timer.getTime() + 2)
 
 		-- -- AFAC_F10(Group)
 		-- timer.scheduleFunction(AFAC_F10, groupObject, timer.getTime() + 2)

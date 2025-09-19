@@ -1945,162 +1945,163 @@ end
 function GetOutGDFM(arg)
 	-- env.info( "DCE_getOut A scheduleFunction GetOutGDFM ")
 
-	local pName
-	local player
-	local playerId
+	local arg_playerName
+	local arg_playerObj
+	local arg_playerId
 
 	if arg and arg[1] then
-		pName = arg[1]
-		player = arg[2]
-		playerId = arg[3]
+		arg_playerName = arg[1]
+		arg_playerObj = arg[2]
+		arg_playerId = arg[3]
 	end
 
-	if pName then
+	if arg_playerName then
 
-		local unitName = player:getName()
-		local playerPointVec3 = player:getPoint()				--get target point
+		if arg_playerObj.getName and arg_playerObj.getPoint and arg_playerObj.getCountry and arg_playerObj.getCoalition
+			and arg_playerObj.getTypeName and arg_playerObj.getID then
 
-		local countryId = player:getCountry()
-		local initiatorSIDE = player:getCoalition()
-		local side = coalitionIdNumeric[tonumber(initiatorSIDE)]
+			local unitName = arg_playerObj:getName()
+			local playerPointVec3 = arg_playerObj:getPoint()				--get target point
+
+			local countryId = arg_playerObj:getCountry()
+			local initiatorSIDE = arg_playerObj:getCoalition()
+			local side = coalitionIdNumeric[tonumber(initiatorSIDE)]
 
 
-		local infoPlayer = {
-			initiatorPilotName = pName,
-			unit = player,
-			unitName = unitName,
-			aircraftType = player:getTypeName(),
-			Coalition = player:getCoalition(),
-			initiatorMissionID = player:getID(),
-			initiatorSIDE = player:getCoalition(),
-			countryId = countryId,
-			initiatorCountry = string.lower(country.name[countryId]),
-			side = side,
-			x = playerPointVec3.x,
-			y = playerPointVec3.z,
-			z = playerPointVec3.y,
-			unitId = playerId,
-		}
-
+			local infoPlayer = {
+				initiatorPilotName = arg_playerName,
+				unit = arg_playerObj,
+				unitName = unitName,
+				aircraftType = arg_playerObj:getTypeName(),
+				Coalition = initiatorSIDE,
+				initiatorMissionID = arg_playerObj:getID(),
+				initiatorSIDE = initiatorSIDE,
+				countryId = countryId,
+				initiatorCountry = string.lower(country.name[countryId]),
+				side = side,
+				x = playerPointVec3.x,
+				y = playerPointVec3.z,
+				z = playerPointVec3.y,
+				unitId = arg_playerId,
+			}
 		
-		local modulation = 0	--AM
+			local modulation = 0	--AM
 
-		env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection).." | "..tostring('GuardEjection'..unitName))
-		trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', player, modulation, true, camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection, 0.1, 'GuardEjection'..unitName)
-		env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection).." | "..tostring('GuardEjection'..unitName))
+			env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection).." | "..tostring('GuardEjection'..unitName))
+			trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', arg_playerObj, modulation, true, camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection, 0.1, 'GuardEjection'..unitName)
+			env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection).." | "..tostring('GuardEjection'..unitName))
 
-		--position precise pour le fumigene
-		local pilotVec3 = {
-			x = playerPointVec3.x,
-			y = land.getHeight({x = playerPointVec3.x, y = playerPointVec3.z}),
-			z = playerPointVec3.z,
-		}
-
-		--position futur de l ejectedPilot
-		infoPlayer.x = pilotVec3.x + 150
-		infoPlayer.y = pilotVec3.z + 150
-		infoPlayer.z = pilotVec3.y
-
-
-		local life = player:getLife()
-		local init_life = player:getLife0()
-		local lifePourcent = 100
-		local isPlayer = true
-		if init_life then
-			lifePourcent = life/init_life*100
-			infoPlayer.rate = lifePourcent
-		end
-
-
-		local current_time = timer.getTime()
-		if camp.debug then
-			local logStr = "GetOutPlayer = " .. TableSerialization(GroundDamagedFlyingMachine, 0)
-			local grpnameClean = pName:gsub('[%p%c%s]', '_')
-			local logFile = io.open(PathDCE.."Debug\\"..infoPlayer.unitId.."_"..grpnameClean.."_".. "DamagedFM_"..current_time..".lua", "w")
-			if logFile then
-				logFile:write(logStr)
-				logFile:close()
-			else
-				env.info("DCE_GetOutPlayer: Failed to open log file for writing.")
-			end
-		end
-
-		--si l'helico ne vole pas
-		if pilotVec3.y <= 100 then
-
-			SumSoldierAliasPilot = SumSoldierAliasPilot + 1
-			infoPlayer.getOutHelicopter  = true
-
-			if infoPlayer.initiatorPilotName then
-				infoPlayer.name = "Mis" ..
-				camp.mission ..
-				"_Pilot_" .. infoPlayer.initiatorPilotName .. "_Nb" .. tostring(SumSoldierAliasPilot) .. "_Damaged"
-			end
-
-			-- infoPlayer.name = infoPlayer.name:gsub('[%p%c%s]', '_')
-			infoPlayer.name = CleanName(infoPlayer.name)
-
-			local typeLand = land.getSurfaceType({x =infoPlayer.x, y = infoPlayer.y})
-
-			env.info("DCE_getOut infoPlayer E test typeLand "..tostring(typeLand))
-
-			if typeLand ~= 3 and typeLand ~= 5  then
-
-				AddSoldierAliasPilot(infoPlayer)
-				infoPlayer.createdSoldier = true
-
-				-- Obtenir le vecteur du vent à la position du pilote
-				local windVec3 = atmosphere.getWind(pilotVec3)
-
-				-- Calculer la norme du vent dans le plan horizontal
-				local windMagnitude = math.sqrt(windVec3.x^2 + windVec3.z^2)
-
-				-- Position de décalage pour le fumigène
-				local smokeOffsetDistance = 30
-				local smokePosition
-
-				if windMagnitude > 0 then
-					-- Normaliser la direction opposée au vent
-					local windDirectionOpposite = {
-						x = -windVec3.x / windMagnitude,
-						z = -windVec3.z / windMagnitude,
-					}
-
-					-- Calculer la position du fumigène
-					smokePosition = {
-						x = pilotVec3.x + windDirectionOpposite.x * smokeOffsetDistance,
-						y = pilotVec3.y,
-						z = pilotVec3.z + windDirectionOpposite.z * smokeOffsetDistance,
-					}
-				else
-					-- Si le vent est nul, placer le fumigène 10 mètres au nord du pilote
-					smokePosition = {
-						x = pilotVec3.x,
-						y = pilotVec3.y,
-						z = pilotVec3.z + smokeOffsetDistance,
-					}
-				end
-
-					-- Placer le fumigène
-				trigger.action.smoke(smokePosition, SmokeColor_EjectedPilot)
-				-- ejectedPilot.smokeTiming = timer.getTime()	-- mettre à jour le temps du fumigène
-
-			end
-
-
-			local log_entry = {
-				type = "eject",
-				initiator = unitName,
-				initiatorPilotName = pName,
-				t = timer.getTime(),
+			--position precise pour le fumigene
+			local pilotVec3 = {
+				x = playerPointVec3.x,
+				y = land.getHeight({x = playerPointVec3.x, y = playerPointVec3.z}),
+				z = playerPointVec3.z,
 			}
 
-			table.insert(CustomLog, log_entry)
-			CheckImmediatSAR(infoPlayer)
-			env.info("DCE_getOut F test despawn ")
-			timer.scheduleFunction(despawn2, {infoPlayer.unit, "GetOutGDFM if pName" }, timer.getTime() + 30)
-			timer.scheduleFunction(spawnWreck, infoPlayer, timer.getTime() + 35)
-			createWreckCrew[infoPlayer.unitName] = true
+			--position futur de l ejectedPilot
+			infoPlayer.x = pilotVec3.x + 150
+			infoPlayer.y = pilotVec3.z + 150
+			infoPlayer.z = pilotVec3.y
+
+			local life = arg_playerObj:getLife()
+			local init_life = arg_playerObj:getLife0()
+			local lifePourcent = 100
+			local isPlayer = true
+			if init_life then
+				lifePourcent = life/init_life*100
+				infoPlayer.rate = lifePourcent
+			end
+
+			local current_time = timer.getTime()
+			if camp.debug then
+				local logStr = "GetOutPlayer = " .. TableSerialization(GroundDamagedFlyingMachine, 0)
+				local grpnameClean = arg_playerName:gsub('[%p%c%s]', '_')
+				local logFile = io.open(PathDCE.."Debug\\"..infoPlayer.unitId.."_"..grpnameClean.."_".. "DamagedFM_"..current_time..".lua", "w")
+				if logFile then
+					logFile:write(logStr)
+					logFile:close()
+				else
+					env.info("DCE_GetOutPlayer: Failed to open log file for writing.")
+				end
+			end
+
+			--si l'helico ne vole pas
+			if pilotVec3.y <= 100 then
+
+				SumSoldierAliasPilot = SumSoldierAliasPilot + 1
+				infoPlayer.getOutHelicopter  = true
+
+				if infoPlayer.initiatorPilotName then
+					infoPlayer.name = "Mis" ..
+					camp.mission ..
+					"_Pilot_" .. infoPlayer.initiatorPilotName .. "_Nb" .. tostring(SumSoldierAliasPilot) .. "_Damaged"
+				end
+
+				-- infoPlayer.name = infoPlayer.name:gsub('[%p%c%s]', '_')
+				infoPlayer.name = CleanName(infoPlayer.name)
+
+				local typeLand = land.getSurfaceType({x =infoPlayer.x, y = infoPlayer.y})
+
+				env.info("DCE_getOut infoPlayer E test typeLand "..tostring(typeLand))
+
+				if typeLand ~= 3 and typeLand ~= 5  then
+
+					AddSoldierAliasPilot(infoPlayer)
+					infoPlayer.createdSoldier = true
+
+					-- Obtenir le vecteur du vent à la position du pilote
+					local windVec3 = atmosphere.getWind(pilotVec3)
+
+					-- Calculer la norme du vent dans le plan horizontal
+					local windMagnitude = math.sqrt(windVec3.x^2 + windVec3.z^2)
+
+					-- Position de décalage pour le fumigène
+					local smokeOffsetDistance = 30
+					local smokePosition
+
+					if windMagnitude > 0 then
+						-- Normaliser la direction opposée au vent
+						local windDirectionOpposite = {
+							x = -windVec3.x / windMagnitude,
+							z = -windVec3.z / windMagnitude,
+						}
+
+						-- Calculer la position du fumigène
+						smokePosition = {
+							x = pilotVec3.x + windDirectionOpposite.x * smokeOffsetDistance,
+							y = pilotVec3.y,
+							z = pilotVec3.z + windDirectionOpposite.z * smokeOffsetDistance,
+						}
+					else
+						-- Si le vent est nul, placer le fumigène 10 mètres au nord du pilote
+						smokePosition = {
+							x = pilotVec3.x,
+							y = pilotVec3.y,
+							z = pilotVec3.z + smokeOffsetDistance,
+						}
+					end
+
+						-- Placer le fumigène
+					trigger.action.smoke(smokePosition, SmokeColor_EjectedPilot)
+					-- ejectedPilot.smokeTiming = timer.getTime()	-- mettre à jour le temps du fumigène
+
+				end
+
+
+				local log_entry = {
+					type = "eject",
+					initiator = unitName,
+					initiatorPilotName = arg_playerName,
+					t = timer.getTime(),
+				}
+
+				table.insert(CustomLog, log_entry)
+				CheckImmediatSAR(infoPlayer)
+				env.info("DCE_getOut F test despawn ")
+				timer.scheduleFunction(despawn2, {infoPlayer.unit, "GetOutGDFM if pName" }, timer.getTime() + 30)
+				timer.scheduleFunction(spawnWreck, infoPlayer, timer.getTime() + 35)
+				createWreckCrew[infoPlayer.unitName] = true
+			end
 		end
 	else
 
@@ -2108,7 +2109,7 @@ function GetOutGDFM(arg)
 			for occurenceN = #key, 1, -1 do
 				local damaged = key[occurenceN]
 
-				if not pName and not damaged.isPlayer then
+				if not arg_playerName and not damaged.isPlayer then
 
 					-- if damaged.unit and damaged.unit:isExist() and damaged.unit:isActive() and not damaged.unit:inAir() then
 					if damaged and damaged.unit or not damaged.unit:inAir() then
@@ -2229,7 +2230,7 @@ function GetOutGDFM(arg)
 			end
 		end
 
-		if not pName then
+		if not arg_playerName then
 			return timer.getTime() + 5
 		end
 	end
