@@ -279,8 +279,8 @@ function ProxyBase(selectedEjection)
     local baseName = nil
     for Id, base in pairs(RunwayLife) do
         if base.pointVec3 and base.pointVec3.x and base.pointVec3.z then
-			local dx = base.pointVec3.x - selectedEjection.vec3x
-			local dz = base.pointVec3.z - selectedEjection.vec3z
+			local dx = base.pointVec3.x - selectedEjection.pos.vec3x
+			local dz = base.pointVec3.z - selectedEjection.pos.vec3z
             local tempDistance = math.sqrt(dx * dx + dz * dz)
             if not distanceBase or tempDistance < distanceBase then
                 distanceBase = tempDistance
@@ -3445,7 +3445,7 @@ function EventHandler2:onEvent(event)
 									SurfaceType = typeLand,
 									aircraftType = event.initiator:getTypeName(),
 									lifePourcent = lifePourcent,
-									crashPoint = crashVec3,
+									crashPointVec3 = crashVec3,
 									unit = event.initiator,
 									gpGid = gpGid,
 									idLabel= idLabel,

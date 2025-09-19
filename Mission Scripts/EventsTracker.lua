@@ -782,10 +782,10 @@ function eventHandlerDCE:onEvent(event)
 					else -- pour éviter --779: Unit doesn't exist
 					
 						env.info("DCE_EventsTracker target Unit doesn't exist: Category: " .. tostring(targetObjCategory))
-						if event.target.getDesc then
-							local targetDesc = event.target:getDesc()
-							_affiche(targetDesc, "DCE_EventsTracker targetDesc ")
-						end
+						-- if event.target.getDesc then
+						-- 	local targetDesc = event.target:getDesc()
+						-- 	_affiche(targetDesc, "DCE_EventsTracker targetDesc ")
+						-- end
 					end
 
 				end
@@ -802,26 +802,19 @@ function eventHandlerDCE:onEvent(event)
 				if initiatorVec3 and initiatorVec3.x then
 					local altiLand = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z })
 					pilotEjection = {
-						vec3x = initiatorVec3.x,
-						vec3y = initiatorVec3.y,
-						vec3z = initiatorVec3.z,
-						unit = event.initiator,
-						x = initiatorVec3.x,
-                        y = initiatorVec3.z,
-						z = initiatorVec3.y,
-						altiLand = altiLand,
+						pos = {
+							vec3x = initiatorVec3.x,
+							vec3y = initiatorVec3.y,
+							vec3z = initiatorVec3.z,
+							unit = event.initiator,
+							x = initiatorVec3.x,
+							y = initiatorVec3.z,
+							z = initiatorVec3.y,
+							altiLand = altiLand,
+						},
 					}
 
-					--permet le spawn du soldat meme si le joueur ... s'ejecte d'un helico au sol
-					if pilotEjection.z - pilotEjection.altiLand <= 5 then
-						if event.initiator.getPlayerName and event.initiator.getGroup then
-							local playerName = event.initiator:getPlayerName()
-							local groupObj = event.initiator:getGroup()
-							if playerName and groupObj then
-                           		getOut({ groupObj, playerName })
-							end
-						end
-					end
+				
 
 					if initiatorName then
 						pilotEjection.initiator, log_entry.initiator = initiatorName, initiatorName
@@ -859,12 +852,13 @@ function eventHandlerDCE:onEvent(event)
 					-- 	y = pilotEjection.z,
                     -- }
 					
-					pilotEjection.SurfaceType = land.getSurfaceType({ x = pilotEjection.vec3x, y = pilotEjection.vec3z })
-					pilotEjection.grid = coord.LLtoMGRS(coord.LOtoLL(pilotEjection.unit:getPosition().p))
+					pilotEjection.SurfaceType = land.getSurfaceType({ x = pilotEjection.pos.vec3x, y = pilotEjection.pos.vec3z })
+					-- pilotEjection.grid = coord.LLtoMGRS(coord.LOtoLL(pilotEjection.unit:getPosition().p))
+					pilotEjection.grid = coord.LLtoMGRS(coord.LOtoLL({x=pilotEjection.pos.vec3x, y=pilotEjection.pos.vec3y, z=pilotEjection.pos.vec3z} ))
 
 					local closeRoad = {}
 					-- Roadtype can be 'railroads' or 'roads'
-					local x, y = land.getClosestPointOnRoads('roads', pilotEjection.vec3x, pilotEjection.vec3z)
+					local x, y = land.getClosestPointOnRoads('roads', pilotEjection.pos.vec3x, pilotEjection.pos.vec3z)
 					closeRoad.x = x
 					closeRoad.y = y
 					pilotEjection.closeRoad = closeRoad
@@ -889,6 +883,61 @@ function eventHandlerDCE:onEvent(event)
 
 					table.insert(EjectionSeatFrequency, ejectionSeatTemp)
 
+
+					--****************************************************************************
+					--permet le spawn du soldat meme si le joueur ... s'ejecte d'un helico au sol
+					if pilotEjection.pos.z - pilotEjection.pos.altiLand <= 5 then
+						if event.initiator.getPlayerName and event.initiator.getGroup then
+							local playerName = event.initiator:getPlayerName()
+							local groupObj = event.initiator:getGroup()
+
+							if playerName and groupObj then
+
+								SumSoldierAliasPilot = SumSoldierAliasPilot + 1
+
+								if pilotEjection.initiatorPilotName then
+									pilotEjection.name = "Mis" ..
+									camp.mission ..
+									"_Pilot_" .. pilotEjection.initiatorPilotName .. "_Nb" .. tostring(SumSoldierAliasPilot)
+								else
+									pilotEjection.name = "Mis"..camp.mission.."_Pilot_"..pilotEjection.initiator.."_Nb"..tostring(SumSoldierAliasPilot)
+								end
+
+								pilotEjection.name = CleanName(pilotEjection.name)
+								
+								local distanceBase, baseName = ProxyBase(pilotEjection)
+								if distanceBase then
+									distanceBase = math.floor(distanceBase)
+								else
+									distanceBase = 0
+								end
+								env.info("DCE_EvenT: pilotLand_C G baseName "..tostring(baseName).." distanceBase "..tostring(distanceBase))
+
+								-- if distanceBase > 6000 and pilotEjection.SurfaceType ~= land.SurfaceType.WATER and pilotEjection.SurfaceType ~= land.SurfaceType.RUNWAY  then
+								if pilotEjection.SurfaceType ~= land.SurfaceType.WATER and pilotEjection.SurfaceType ~= land.SurfaceType.RUNWAY  then
+									AddSoldierAliasPilot(pilotEjection)
+									pilotEjection.createdSoldier = true
+
+									--ajoute l'ejectedPilot dans la liste SAR, pour etre recupéré par le module SAR
+									pilotEjection = Add_MGRS_Chute(pilotEjection)
+									if pilotEjection.MGRS_Chute then
+										if ZoneSAR[pilotEjection.MGRS_Chute] == nil then
+											ZoneSAR[pilotEjection.MGRS_Chute] = {}
+										end
+										table.insert(ZoneSAR[pilotEjection.MGRS_Chute], pilotEjection)
+									end
+								end
+
+								CheckImmediatSAR(pilotEjection)
+
+								
+                           		getOut({ groupObj, playerName })
+							end
+						end
+					end
+
+
+
 				end
 				if initiatorSideName then
 					log_entry.initiatorSideName = initiatorSideName
@@ -905,11 +954,11 @@ function eventHandlerDCE:onEvent(event)
 				if initiatorVec3 and initiatorVec3.x then
 
 					--pour fumigene
-					local pilotVec3 = {
-						x = initiatorVec3.x,
-						y = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z }),
-						z = initiatorVec3.z,
-					}
+					-- local pilotVec3 = {
+					-- 	x = initiatorVec3.x,
+					-- 	y = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z }),
+					-- 	z = initiatorVec3.z,
+					-- }
 					
 					log_entry.initiatorMissionID = initiatorId
 					log_entry.x = initiatorVec3.x
@@ -924,7 +973,7 @@ function eventHandlerDCE:onEvent(event)
 
 					for n=1, #tabEjection do
 						if tabEjection[n] and tabEjection[n] ~= nil then						
-							local distance = math.sqrt(math.pow(pilotVec3.x - tabEjection[n].vec3x, 2) + math.pow(pilotVec3.z - tabEjection[n].vec3z, 2))
+							local distance = math.sqrt(math.pow(initiatorVec3.x - tabEjection[n].pos.vec3x, 2) + math.pow(initiatorVec3.z - tabEjection[n].pos.vec3z, 2))
 							if distance < selected_distance and (not tabEjection[n].SumEjectedPilotDay) then
 								env.info( "DCE_EventT_seat F , selected_distance: "..tostring(selected_distance))
 								selected_distance = distance
@@ -939,12 +988,14 @@ function eventHandlerDCE:onEvent(event)
 						log_entry.initiatorPilotName = selectedEjection.initiatorPilotName
 						log_entry.initiator = selectedEjection.initiator
 
-						selectedEjection.vec3x = initiatorVec3.x
-						selectedEjection.vec3y = initiatorVec3.y
-						selectedEjection.vec3z = initiatorVec3.z
-						selectedEjection.x = pilotVec3.x
-						selectedEjection.y = pilotVec3.z
-						selectedEjection.z = pilotVec3.y
+						selectedEjection.pos.vec3x = initiatorVec3.x
+						selectedEjection.pos.vec3y = initiatorVec3.y
+						selectedEjection.pos.vec3z = initiatorVec3.z
+						selectedEjection.pos.x = initiatorVec3.x
+						selectedEjection.pos.y = initiatorVec3.z
+						selectedEjection.pos.z = initiatorVec3.y
+						selectedEjection.pos.altiLand = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z })
+
 						if selectedEjection.unit:isExist()  then
 							selectedEjection.grid = coord.LLtoMGRS(coord.LOtoLL(selectedEjection.unit:getPosition().p))
 						end
@@ -967,11 +1018,12 @@ function eventHandlerDCE:onEvent(event)
 			if event.initiator then
 				if initiatorVec3 and initiatorVec3.x then
 					--active fumigene
-					local pilotVec3 = {
-						x = initiatorVec3.x,
-						y = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z }),
-						z = initiatorVec3.z,
-					}
+					-- local pilotVec3 = {
+					-- 	x = initiatorVec3.x,
+					-- 	-- y = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z }),
+					-- 	y = initiatorVec3.y,
+					-- 	z = initiatorVec3.z,
+					-- }
 					
 					--inscrit position et name dans le log
 					log_entry.initiatorMissionID = initiatorId
@@ -984,13 +1036,13 @@ function eventHandlerDCE:onEvent(event)
 					local ejectN = 0
 					for n = 1, #tabEjection do
 						if tabEjection[n] and tabEjection[n].x then
-                            if not pilotVec3.x then
-                                env.info("DCE_EvenT: pilotLand_I pb pilotVec3.x nil")
-								_affiche(pilotVec3, "pilotVec3 ")
+                            if not initiatorVec3.x then
+                                env.info("DCE_EvenT: pilotLand_I pb initiatorVec3.x nil")
+								_affiche(initiatorVec3, "initiatorVec3 ")
                             end
 
-                            if pilotVec3.x and tabEjection[n].x then
-                                local distance = math.sqrt(math.pow(pilotVec3.x - tabEjection[n].x, 2) + math.pow(pilotVec3.z - tabEjection[n].vec3z, 2))
+                            if initiatorVec3.x and tabEjection[n].x then
+                                local distance = math.sqrt(math.pow(initiatorVec3.x - tabEjection[n].x, 2) + math.pow(initiatorVec3.z - tabEjection[n].vec3z, 2))
                                 if distance < selected_distance and (not tabEjection[n].createdSoldier) then
                                     selected_distance = distance
                                     ejectN = n
@@ -1025,15 +1077,17 @@ function eventHandlerDCE:onEvent(event)
 
 						--on change la position, car le vent peut pousser le parachute de la mere vers la terre
 
-						selPilotEject["pos"] = {
-							vec3x = pilotVec3.x,
-							vec3y = pilotVec3.y,
-							vec3z = pilotVec3.z,
-							x = pilotVec3.x,
-							y = pilotVec3.z,
-                            z = pilotVec3.y,
-							surfaceType = land.getSurfaceType({x = selPilotEject.x, y = selPilotEject.z})
-							
+						selPilotEject = {
+							pos = {
+								vec3x = initiatorVec3.x,
+								vec3y = initiatorVec3.y,
+								vec3z = initiatorVec3.z,
+								x = initiatorVec3.x,
+								y = initiatorVec3.z,
+								z = initiatorVec3.y,
+								altiLand = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z }),
+								surfaceType = land.getSurfaceType({x = selPilotEject.x, y = selPilotEject.z})
+							}
 						}
 
 						SumSoldierAliasPilot = SumSoldierAliasPilot + 1

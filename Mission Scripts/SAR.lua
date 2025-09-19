@@ -1979,9 +1979,15 @@ function GetOutGDFM(arg)
 				countryId = countryId,
 				initiatorCountry = string.lower(country.name[countryId]),
 				side = side,
-				x = playerPointVec3.x,
-				y = playerPointVec3.z,
-				z = playerPointVec3.y,
+				pos = {
+					Vec3x = playerPointVec3.x,
+					Vec3y = playerPointVec3.z,
+					Vec3z = playerPointVec3.y,
+					x= playerPointVec3.x,
+					y= playerPointVec3.z,
+					z= playerPointVec3.y,
+					altiLand = land.getHeight({ x = playerPointVec3.x, y = playerPointVec3.z }),
+				},
 				unitId = arg_playerId,
 			}
 		
@@ -1991,22 +1997,21 @@ function GetOutGDFM(arg)
 			trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', arg_playerObj, modulation, true, camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection, 0.1, 'GuardEjection'..unitName)
 			env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[infoPlayer.side].GuardEjection).." | "..tostring('GuardEjection'..unitName))
 
-			--position precise pour le fumigene
-			local pilotVec3 = {
-				x = playerPointVec3.x,
-				y = land.getHeight({x = playerPointVec3.x, y = playerPointVec3.z}),
-				z = playerPointVec3.z,
-			}
+			-- --position precise pour le fumigene
+			-- local pilotVec3 = {
+			-- 	x = playerPointVec3.x,
+			-- 	y = land.getHeight({x = playerPointVec3.x, y = playerPointVec3.z}),
+			-- 	z = playerPointVec3.z,
+			-- }
 
 			--position futur de l ejectedPilot
-			infoPlayer.x = pilotVec3.x + 150
-			infoPlayer.y = pilotVec3.z + 150
-			infoPlayer.z = pilotVec3.y
+			infoPlayer.pos.x = infoPlayer.pos.x + 150
+			infoPlayer.pos.y = infoPlayer.pos.y + 150
 
 			local life = arg_playerObj:getLife()
 			local init_life = arg_playerObj:getLife0()
 			local lifePourcent = 100
-			local isPlayer = true
+			-- local isPlayer = true
 			if init_life then
 				lifePourcent = life/init_life*100
 				infoPlayer.rate = lifePourcent
@@ -2026,7 +2031,7 @@ function GetOutGDFM(arg)
 			end
 
 			--si l'helico ne vole pas
-			if pilotVec3.y <= 100 then
+			if infoPlayer.pos.z <= 100 then
 
 				SumSoldierAliasPilot = SumSoldierAliasPilot + 1
 				infoPlayer.getOutHelicopter  = true
@@ -2050,14 +2055,14 @@ function GetOutGDFM(arg)
 					infoPlayer.createdSoldier = true
 
 					-- Obtenir le vecteur du vent à la position du pilote
-					local windVec3 = atmosphere.getWind(pilotVec3)
+					local windVec3 = atmosphere.getWind({x=infoPlayer.pos.Vec3x,y=infoPlayer.pos.Vec3y,z=infoPlayer.pos.Vec3z})
 
 					-- Calculer la norme du vent dans le plan horizontal
 					local windMagnitude = math.sqrt(windVec3.x^2 + windVec3.z^2)
 
 					-- Position de décalage pour le fumigène
 					local smokeOffsetDistance = 30
-					local smokePosition
+					local smokePosVec3
 
 					if windMagnitude > 0 then
 						-- Normaliser la direction opposée au vent
@@ -2067,22 +2072,22 @@ function GetOutGDFM(arg)
 						}
 
 						-- Calculer la position du fumigène
-						smokePosition = {
-							x = pilotVec3.x + windDirectionOpposite.x * smokeOffsetDistance,
-							y = pilotVec3.y,
-							z = pilotVec3.z + windDirectionOpposite.z * smokeOffsetDistance,
+						smokePosVec3 = {
+							x = infoPlayer.pos.Vec3x + windDirectionOpposite.x * smokeOffsetDistance,
+							y = infoPlayer.pos.Vec3y,
+							z = infoPlayer.pos.Vec3z + windDirectionOpposite.z * smokeOffsetDistance,
 						}
 					else
 						-- Si le vent est nul, placer le fumigène 10 mètres au nord du pilote
-						smokePosition = {
-							x = pilotVec3.x,
-							y = pilotVec3.y,
-							z = pilotVec3.z + smokeOffsetDistance,
+						smokePosVec3 = {
+							x = infoPlayer.pos.Vec3x,
+							y = infoPlayer.pos.Vec3y,
+							z = infoPlayer.pos.Vec3z + smokeOffsetDistance,
 						}
 					end
 
 						-- Placer le fumigène
-					trigger.action.smoke(smokePosition, SmokeColor_EjectedPilot)
+					trigger.action.smoke(smokePosVec3, SmokeColor_EjectedPilot)
 					-- ejectedPilot.smokeTiming = timer.getTime()	-- mettre à jour le temps du fumigène
 
 				end
@@ -2116,20 +2121,24 @@ function GetOutGDFM(arg)
 
 						if not createWreckCrew[damaged.unitName] then
 
-							damaged.x = damaged.crashPoint.x
-							damaged.y = damaged.crashPoint.y
-							damaged.z = damaged.crashPoint.z
-
-							--position precise pour le fumigene
-							local pilotVec3 = {
-								x = damaged.crashPoint.x,
-								y = land.getHeight({x = damaged.crashPoint.x, y = damaged.crashPoint.z}),
-								z = damaged.crashPoint.z,
+							damaged.pos = {
+								Vec3x = damaged.crashPointVec3.x,
+								Vec3y = damaged.crashPointVec3.y,
+								Vec3z = damaged.crashPointVec3.z,
+								x = damaged.crashPointVec3.x,
+								y = damaged.crashPointVec3.z,
+								z = damaged.crashPointVec3.y,
 							}
 
-							damaged.x = pilotVec3.x + 50
-							damaged.y = pilotVec3.z + 50
-							damaged.z = pilotVec3.y
+							-- --position precise pour le fumigene
+							-- local pilotVec3 = {
+							-- 	x = damaged.crashPointVec3.x,
+							-- 	y = land.getHeight({x = damaged.crashPointVec3.x, y = damaged.crashPointVec3.z}),
+							-- 	z = damaged.crashPointVec3.z,
+							-- }
+
+							damaged.pos.x = damaged.pos.x + 50
+							damaged.pos.y = damaged.pos.y + 50
 
 							SumSoldierAliasPilot = SumSoldierAliasPilot + 1
 							damaged.getOutHelicopter  = true
@@ -2164,14 +2173,14 @@ function GetOutGDFM(arg)
 								AddSoldierAliasPilot(damaged)
 								damaged.createdSoldier = true
 								-- Obtenir le vecteur du vent à la position du pilote
-								local windVec3 = atmosphere.getWind(pilotVec3)
+								local windVec3 = atmosphere.getWind({x=damaged.pos.Vec3x,y=damaged.pos.Vec3y,z=damaged.pos.Vec3z})
 
 								-- Calculer la norme du vent dans le plan horizontal
 								local windMagnitude = math.sqrt(windVec3.x^2 + windVec3.z^2)
 
 								-- Position de décalage pour le fumigène
 								local smokeOffsetDistance = 30
-								local smokePosition
+								local smokePosVec3
 
 								if windMagnitude > 0 then
 									-- Normaliser la direction opposée au vent
@@ -2181,22 +2190,22 @@ function GetOutGDFM(arg)
 									}
 
 									-- Calculer la position du fumigène
-									smokePosition = {
-										x = pilotVec3.x + windDirectionOpposite.x * smokeOffsetDistance,
-										y = pilotVec3.y,
-										z = pilotVec3.z + windDirectionOpposite.z * smokeOffsetDistance,
+									smokePosVec3 = {
+										x = damaged.pos.Vec3x + windDirectionOpposite.x * smokeOffsetDistance,
+										y = damaged.pos.Vec3y,
+										z = damaged.pos.Vec3z + windDirectionOpposite.z * smokeOffsetDistance,
 									}
 								else
 									-- Si le vent est nul, placer le fumigène 10 mètres au nord du pilote
-									smokePosition = {
-										x = pilotVec3.x,
-										y = pilotVec3.y,
-										z = pilotVec3.z + smokeOffsetDistance,
+									smokePosVec3 = {
+										x = damaged.pos.Vec3x,
+										y = damaged.pos.Vec3y,
+										z = damaged.pos.Vec3z + smokeOffsetDistance,
 									}
 								end
 
 									-- Placer le fumigène
-								trigger.action.smoke(smokePosition, SmokeColor_EjectedPilot)
+								trigger.action.smoke(smokePosVec3, SmokeColor_EjectedPilot)
 
 							end
 
