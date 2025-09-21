@@ -1555,6 +1555,14 @@ local function detectsEjectedPilotEmbarkation(arg_uSAR, arg_ejPil_tab)
 		return
 	end
 
+	--si c'est un joueur, on s'assure qu'il occupe bien l'helico SAR
+	if uSAR_Player and PlayerInOutAircraft[uSAR_Player] then
+		timer.scheduleFunction(walk, nil, timer.getTime() + 1)
+    else
+		env.info( "DCE_SAR:_SAR_Player no embarkation GG RETURN no player in SAR : "..tostring(uSAR_Player))
+		return
+	end
+
 	if arg_uSAR.isExist and arg_uSAR:isExist() and arg_uSAR.isActive and arg_uSAR:isActive() then
 		timer.scheduleFunction(walk, nil, timer.getTime() + 1)
 	else
@@ -1603,7 +1611,6 @@ local function guideTreuilSAR(arg_uSAR, arg_EjPilPosVec3, arg_EjPil_tab)
 		-- end
 		-- local bearing = math.ceil(math.deg(bearing_rad))
 
-
 		local bearing_vector = {
 			x = arg_EjPilPosVec3.x - pos_SAR_vec3.x,
 			y = arg_EjPilPosVec3.y - pos_SAR_vec3.y,
@@ -1614,9 +1621,7 @@ local function guideTreuilSAR(arg_uSAR, arg_EjPilPosVec3, arg_EjPil_tab)
 				bearing_rad = bearing_rad + (2 * math.pi)
 		end
 		local bearing = math.ceil(math.deg(bearing_rad))
-
 		local high = math.ceil(uSAR_h - ejectedPilot_h)
-		-- local high = SAR_h - ejectedPilot_h 
 		trigger.action.outTextForUnit( uSAR_unitId , "Helitacking Distance: "..tostring(distance).." (need <10m) High: "..tostring(high).." (need <45m) Bearing: "..tostring(bearing) , 2 , true)
 
 		if distance <= 10 and high <=45 then
@@ -1628,7 +1633,7 @@ local function guideTreuilSAR(arg_uSAR, arg_EjPilPosVec3, arg_EjPil_tab)
 			trigger.action.outTextForUnit( uSAR_unitId , "Speed: "..tostring(speed) .." ( need < 0.2)" , 2 , false)
 
 			if speed <= 0.2 then
-				local embarkation = false	--il n'est pas embaqué au sol, mais helitreuillé
+				local embarkation = false	--il n'est pas embarqué au sol, mais helitreuillé
 				DespawnSoldierAliasPilot({arg_EjPil_tab.name, embarkation, uSAR_Player, uSAR_Name})
 				-- EjectedPilotOnBoard[SAR_Name] = EjectedPilotOnBoard[SAR_Name] or {}
 				-- table.insert(EjectedPilotOnBoard[SAR_Name],ejectedPilot.name)
@@ -1690,7 +1695,7 @@ function LoopSAR()
 	for coalName, coal in pairs(env.mission.coalition) do
 		for countryN, country in ipairs(coal.country) do
 			if country.helicopter then
-				for group_n, group in ipairs(country.helicopter.group) do
+				for groupN, group in ipairs(country.helicopter.group) do
 					local gpSAR = Group.getByName(group.name)
 
 					if gpSAR then
@@ -1962,7 +1967,6 @@ function GetOutGDFM(arg)
 
 			local unitName = arg_playerObj:getName()
 			local playerPointVec3 = arg_playerObj:getPoint()				--get target point
-
 			local countryId = arg_playerObj:getCountry()
 			local initiatorSIDE = arg_playerObj:getCoalition()
 			local side = coalitionIdNumeric[tonumber(initiatorSIDE)]
@@ -2115,12 +2119,8 @@ function GetOutGDFM(arg)
 				local damaged = key[occurenceN]
 
 				if not arg_playerName and not damaged.isPlayer then
-
-					-- if damaged.unit and damaged.unit:isExist() and damaged.unit:isActive() and not damaged.unit:inAir() then
 					if damaged and damaged.unit or not damaged.unit:inAir() then
-
 						if not createWreckCrew[damaged.unitName] then
-
 							damaged.pos = {
 								Vec3x = damaged.crashPointVec3.x,
 								Vec3y = damaged.crashPointVec3.y,
@@ -2130,16 +2130,8 @@ function GetOutGDFM(arg)
 								z = damaged.crashPointVec3.y,
 							}
 
-							-- --position precise pour le fumigene
-							-- local pilotVec3 = {
-							-- 	x = damaged.crashPointVec3.x,
-							-- 	y = land.getHeight({x = damaged.crashPointVec3.x, y = damaged.crashPointVec3.z}),
-							-- 	z = damaged.crashPointVec3.z,
-							-- }
-
 							damaged.pos.x = damaged.pos.x + 50
 							damaged.pos.y = damaged.pos.y + 50
-
 							SumSoldierAliasPilot = SumSoldierAliasPilot + 1
 							damaged.getOutHelicopter  = true
 
@@ -2158,7 +2150,6 @@ function GetOutGDFM(arg)
 							damaged.name = CleanName(damaged.name)
 
 							local typeLand = land.getSurfaceType({x =damaged.x, y = damaged.y})
-
 							local distanceBase, baseName = ProxyBase(damaged)
 							if distanceBase then
 								distanceBase = math.floor(distanceBase)

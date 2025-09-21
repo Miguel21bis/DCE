@@ -1,11 +1,11 @@
 --Various DATA
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M90_a
+-- last modification: M90_a updateData_Bh
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Data.lua"] = "1.15.87"
+versionDCE["UTIL_Data.lua"] = "1.15.88"
 ------------------------------------------------------------------------------------------------------- 
--- updateData_Bg			(g vwv_mig21mf)(f refuellingReceptacleType)(e Tu_22D)(Bd flyingAlone)(CH-47F H-6J)(a OH-58)(z F-4E-45MC)(UH-60L)(x hHover)(w reaper)(v Hercules)(u tabTask)(t add is_helicopter table)(s F1EE)(r F-16C_50)(q): Add helicos  (p): Add WOC80)(o: transfer the dataMap to another file)
+-- updateData_Bh			(h Fulcrum)(g vwv_mig21mf)(f refuellingReceptacleType)(e Tu_22D)(Bd flyingAlone)(CH-47F H-6J)(a OH-58)(z F-4E-45MC)(UH-60L)(x hHover)(w reaper)(v Hercules)(u tabTask)(t add is_helicopter table)(s F1EE)(r F-16C_50)(q): Add helicos  (p): Add WOC80)(o: transfer the dataMap to another file)
 -- debug_c					(c OH-6A)(b requiredModulesSpecialName)(a add IsWesternCountry function)
 -- cleanCode_a				(a: repetition)
 -- adjustment_e				(e delete EPLRS_Capacity table)(d CVN to CV)(bombing on Group&Unit)(b: Syria nnTimeZone +3 & GudautaGPS )

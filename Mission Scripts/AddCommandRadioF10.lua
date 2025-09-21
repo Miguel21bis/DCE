@@ -67,6 +67,7 @@ SatusGroupAircraft = {}				--table used to store the status of aircraft groups
 Players = {}					--table used to store player units
 AvgConsumptionKgPerKm = {}				--table used to store the available distance in km for each unitCat
 TypePedroByCV = {}         --table used to store the type of Pedro by CV
+PlayerInOutAircraft = {}         --table used to store the type of Pedro by CV
 
 SmokeColor_EjectedPilot = trigger.smokeColor.Orange
 SmokeColor_TargetDesignation = trigger.smokeColor.Blue
@@ -826,7 +827,6 @@ local function avoidArea()
 																	cap_group.to = pointN
 																	cap_group.from = pointN - 1
 																	if value.task then
-
 
 																		if value.task.params and value.task.params.tasks then
 
@@ -3318,6 +3318,32 @@ end
 --////////////////////////////////////////////////////////////////////////////////////////////
 --test EWR (fin)
 
+
+function MonitorPlayerAircraftActivity(arg)
+
+    local arg_inOut = arg[1]
+	local arg_playerName = arg[2]
+	local arg_aircraftName = arg[3]
+	local arg_category = arg[4]
+	
+	if arg_inOut == "in" then
+		env.info("DCE_MonitorPlayerAircraftActivity IN: "..tostring(arg_playerName).." in "..tostring(arg_aircraftName) )
+		PlayerInOutAircraft[arg_playerName] = {
+			inOut = arg_inOut,
+			aircraftName = arg_aircraftName,
+			category = arg_category,
+		}
+	elseif arg_inOut == "out" then
+		env.info("DCE_MonitorPlayerAircraftActivity OUT: "..tostring(arg_playerName).." out of "..tostring(arg_aircraftName) )
+		if PlayerInOutAircraft[arg_playerName] then
+			PlayerInOutAircraft[arg_playerName] = nil
+		end
+    else
+		env.info("DCE_MonitorPlayerAircraftActivity ERROR: arg_inOut unknown " .. tostring(arg_playerName) .. " arg_inOut: " .. tostring(arg_inOut) .. " aircraft: " .. tostring(arg_aircraftName))
+	end
+
+end
+
 local eventsSurvey2 = {
 	[world.event.S_EVENT_BIRTH] = true,--
 	[world.event.S_EVENT_PLAYER_LEAVE_UNIT] = true,--
@@ -3354,6 +3380,12 @@ function EventHandler2:onEvent(event)
 
 					if gpGid and groupObject and playerName then
 						addFuncs(gpGid, groupObject, playerName)
+
+						local desc = event.initiator:getDesc()
+                        if desc.category == Unit.Category.HELICOPTER then
+							local aircraftName = event.initiator:getName()
+							timer.scheduleFunction(MonitorPlayerAircraftActivity, {"in", playerName, aircraftName, desc.category}, timer.getTime() + 1)
+						end
 					end
 				end
 			end
@@ -3367,8 +3399,6 @@ function EventHandler2:onEvent(event)
 					Players[uName] = name
 				end
 			end
-
-
 
 		elseif not event.place then
 			if event.subPlace then
@@ -3482,6 +3512,15 @@ function EventHandler2:onEvent(event)
 			end
 		elseif event.id == world.event.S_EVENT_DEAD or event.id == world.event.S_EVENT_PILOT_DEAD or event.id == world.event.S_EVENT_KILL then
 
+            local playerName = event.initiator:getPlayerName()
+			if playerName then
+				local desc = event.initiator:getDesc()
+				if desc.category == Unit.Category.HELICOPTER then
+					local aircraftName = event.initiator:getName()
+					timer.scheduleFunction(MonitorPlayerAircraftActivity, {"out", playerName, aircraftName, desc.category}, timer.getTime() + 1)
+				end
+			end
+
 			--TODO controler si c'est utile
 			if event.initiator and event.initiator.id_ then
 				for n, damageds in pairs(GroundDamagedFlyingMachine) do
@@ -3502,8 +3541,6 @@ function EventHandler2:onEvent(event)
 					end
 				end
 			end
-
-
 		end
 	end
 end

@@ -1,11 +1,11 @@
 --we place here the specific properties of flyable aircraft, such as, for example, rapid alignment.
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  updateData_r
+-- last modification:  updateData_s
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_AddPropAircraft.lua"] = "1.5.29"
+versionDCE["UTIL_AddPropAircraft.lua"] = "1.5.30"
 -------------------------------------------------------------------------------------------------------
 -- debug_b					(b F16 L16 & Radar Apach)(a F16 AddPropAircraft) 
--- updateData_r				(q CH-47F)(p OH58D)(o OH-6A)(n F-4E-45MC)(m LoadWater)(l Ka-50_3) (k Mirage-F1EE)(j Gazelle + UH-1)(i: Mirage-F1CE)(h: Apache)(g: M-2000C)
+-- updateData_s				(s Fulcrum)(q CH-47F)(p OH58D)(o OH-6A)(n F-4E-45MC)(m LoadWater)(l Ka-50_3) (k Mirage-F1EE)(j Gazelle + UH-1)(i: Mirage-F1CE)(h: Apache)(g: M-2000C)
 -- cleanCode				(en attente d utilisation)
 -- adjustment_a				(a following the desynchro problem when loading missions, especially when using MP:  INSAlignmentStored = false)
 -- modification M67_a		add 2.9 datalinks dataCartridge

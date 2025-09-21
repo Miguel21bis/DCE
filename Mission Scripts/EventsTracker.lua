@@ -737,15 +737,7 @@ function eventHandlerDCE:onEvent(event)
             initiatorVec3 = event.initiator.getPoint and event.initiator:getPoint()
 			initiatorId = event.initiator.getID and event.initiator:getID() or "unknown"
 
-			--DCE_EventsTracker initiator Category 0 _: nil
-			-- if camp.debug then env.info("DCE_EventsTracker initiator Category: "..tostring(initiatorObjCategory)) end
 			if Object_Category[initiatorObjCategory] then
-				-- if camp.debug then env.info("DCE_EventsTracker initiator Object_Category :  _:_ "..tostring(Object_Category[initiatorObjCategory])) end
-
-				-- if initiatorObjCategory ~= Object.Category.SCENERY then
-				-- 	local initiatorCoalition = event.initiator:getCoalition()
-				-- 	initiatorSideName = coalitionIdNumeric[tonumber(initiatorCoalition)]
-				-- end
 				if event.initiator.getCoalition then
 					local initiatorCoalition = event.initiator:getCoalition()
 					initiatorSideName = coalitionIdNumeric[tonumber(initiatorCoalition)]
@@ -753,49 +745,33 @@ function eventHandlerDCE:onEvent(event)
 			end
 		end
 
-		if event.target then
-			targetObjCategory = Object.getCategory(event.target)
+        if event.target then
+            targetObjCategory = Object.getCategory(event.target)
 
-			-- if camp.debug then  env.info("DCE_EventsTracker target Category: "..tostring(targetObjCategory)) end
+           if Object_Category[targetObjCategory] then
+                 if event.target.getCoalition then
+                    if event.target.isExist and event.target:isExist() then
+                        local targetCoalition = event.target:getCoalition() --779: Unit doesn't exist
+                        targetSideName = coalitionIdNumeric[tonumber(targetCoalition)]
+                    else -- pour éviter --779: Unit doesn't exist
+                        env.info("DCE_EventsTracker target Unit doesn't exist: Category: " .. tostring(targetObjCategory))
+                        -- if event.target.getDesc then
+                        -- 	local targetDesc = event.target:getDesc()
+                        -- 	_affiche(targetDesc, "DCE_EventsTracker targetDesc ")
+                        -- end
+                    end
+                end
+            end
+        end
+		
+		-- if log_entry.type == "birth"  then
+		-- 	env.info( "DCE_EventT_birth A, id: "..tostring(event.id).." event.initiator "..tostring(event.initiator))
 
-			if Object_Category[targetObjCategory] then
-				-- local targetDesc = event.target:getDesc()
-				
-				-- local targetObjCategory2 = targetDesc.category
-				-- if camp.debug then  env.info("DCE_EventsTracker target targetObjCategory2: "..tostring(targetObjCategory2)) end
 
-				-- if camp.debug then  env.info("DCE_EventsTracker target Object_Category :  _:_ "..tostring(Object_Category[targetObjCategory])) end
-				
-				-- static:getDesc().category
-				-- if targetObjCategory ~= Object.Category.SCENERY then
-				-- 	if event.target:isExist() then
-				-- 		local targetCoalition = event.target:getCoalition()
-				-- 		targetSideName = coalitionIdNumeric[tonumber(targetCoalition)]
-				-- 	end
-				-- end
-
-				if event.target.getCoalition then
-					if event.target.isExist and event.target:isExist() then
-						local targetCoalition = event.target:getCoalition() --779: Unit doesn't exist
-						targetSideName = coalitionIdNumeric[tonumber(targetCoalition)]
-
-					else -- pour éviter --779: Unit doesn't exist
-					
-						env.info("DCE_EventsTracker target Unit doesn't exist: Category: " .. tostring(targetObjCategory))
-						-- if event.target.getDesc then
-						-- 	local targetDesc = event.target:getDesc()
-						-- 	_affiche(targetDesc, "DCE_EventsTracker targetDesc ")
-						-- end
-					end
-
-				end
-
-			end
-		end
-
+		-- end
 
 		if log_entry.type == "eject"  then
-			env.info( "DCE_EventT_eject PASSE A, id: "..tostring(event.id).." event.initiator "..tostring(event.initiator))
+			env.info( "DCE_EventT_eject A, id: "..tostring(event.id).." event.initiator "..tostring(event.initiator))
 			if event.initiator then
 				local pilotEjection = {}
 				local side
@@ -814,7 +790,14 @@ function eventHandlerDCE:onEvent(event)
 						},
 					}
 
-				
+					local playerName = event.initiator:getPlayerName()
+					if playerName then
+						local desc = event.initiator:getDesc()
+						if desc.category == Unit.Category.HELICOPTER then
+							local aircraftName = event.initiator:getName()
+							timer.scheduleFunction(MonitorPlayerAircraftActivity, {"out", playerName, aircraftName, desc.category}, timer.getTime() + 1)
+						end
+					end
 
 					if initiatorName then
 						pilotEjection.initiator, log_entry.initiator = initiatorName, initiatorName
@@ -888,7 +871,7 @@ function eventHandlerDCE:onEvent(event)
 					--permet le spawn du soldat meme si le joueur ... s'ejecte d'un helico au sol
 					if pilotEjection.pos.z - pilotEjection.pos.altiLand <= 5 then
 						if event.initiator.getPlayerName and event.initiator.getGroup then
-							local playerName = event.initiator:getPlayerName()
+							-- local playerName = event.initiator:getPlayerName()
 							local groupObj = event.initiator:getGroup()
 
 							if playerName and groupObj then
