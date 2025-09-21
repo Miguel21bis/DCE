@@ -739,8 +739,8 @@ function eventHandlerDCE:onEvent(event)
 
 			if Object_Category[initiatorObjCategory] then
 				if event.initiator.getCoalition then
-					local initiatorCoalition = event.initiator:getCoalition()
-					initiatorSideName = coalitionIdNumeric[tonumber(initiatorCoalition)]
+					local coalitionId = event.initiator:getCoalition()
+					initiatorSideName = CoalitionIdToName[tonumber(coalitionId)]
 				end
 			end
 		end
@@ -751,8 +751,8 @@ function eventHandlerDCE:onEvent(event)
            if Object_Category[targetObjCategory] then
                  if event.target.getCoalition then
                     if event.target.isExist and event.target:isExist() then
-                        local targetCoalition = event.target:getCoalition() --779: Unit doesn't exist
-                        targetSideName = coalitionIdNumeric[tonumber(targetCoalition)]
+                        local targetCoalId = event.target:getCoalition() --779: Unit doesn't exist
+                        targetSideName = CoalitionIdToName[tonumber(targetCoalId)]
                     else -- pour éviter --779: Unit doesn't exist
                         env.info("DCE_EventsTracker target Unit doesn't exist: Category: " .. tostring(targetObjCategory))
                         -- if event.target.getDesc then
@@ -774,7 +774,7 @@ function eventHandlerDCE:onEvent(event)
 			env.info( "DCE_EventT_eject A, id: "..tostring(event.id).." event.initiator "..tostring(event.initiator))
 			if event.initiator then
 				local pilotEjection = {}
-				local side
+				local sideName
 				if initiatorVec3 and initiatorVec3.x then
 					local altiLand = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z })
 					pilotEjection = {
@@ -805,23 +805,23 @@ function eventHandlerDCE:onEvent(event)
 
 					if initiatorObjCategory == Object.Category.UNIT then
 						if event.initiator.getPlayerName then
-							pilotEjection.initiatorPilotName = event.initiator:getPlayerName()
-							if pilotEjection.initiatorPilotName then
-								pilotEjection.initiatorPilotName = CleanName(pilotEjection.initiatorPilotName)
-								log_entry.initiatorPilotName = pilotEjection.initiatorPilotName
+							pilotEjection.pilotName = event.initiator:getPlayerName()
+							if pilotEjection.pilotName then
+								pilotEjection.pilotName = CleanName(pilotEjection.pilotName)
+								log_entry.pilotName = pilotEjection.pilotName
 							end
 						end
-						pilotEjection.Coalition = event.initiator:getCoalition()
+						pilotEjection.coalitionId = event.initiator:getCoalition()
 					end
 
 					if initiatorObjCategory ~= Object.Category.SCENERY and event.initiator.getID then				--initator is not a scenery object debug_ET01.h
 						pilotEjection.initiatorMissionID = initiatorId                 --store ID
-						pilotEjection.initiatorSIDE = event.initiator:getCoalition()
-						side = coalitionIdNumeric[tonumber(pilotEjection.initiatorSIDE)]
+						pilotEjection.coalitionId = event.initiator:getCoalition()
+						sideName = CoalitionIdToName[tonumber(pilotEjection.coalitionId)]
 
 						local countryId = event.initiator:getCountry()
 						pilotEjection.countryId = countryId
-						pilotEjection.initiatorCountry = string.lower(country.name[countryId])
+						pilotEjection.countryName = string.lower(country.name[countryId])
 					end
 
 					-- land.SurfaceType 
@@ -851,11 +851,11 @@ function eventHandlerDCE:onEvent(event)
 					table.insert(tabEjection, pilotEjection)
 
                     if event.initiator and event.initiator.getPlayerName then
-						env.info( "DCE_EventT_eject H :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..pilotEjection.initiator))
+						env.info( "DCE_EventT_eject H :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[sideName].GuardEjection).." | "..tostring('GuardEjection'..pilotEjection.initiator))
 
-						trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', pilotEjection, 0, true, camp.EjectedPilotFrequency[side].GuardEjection, 0.1, 'GuardEjection'..pilotEjection.initiator)
+						trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', pilotEjection, 0, true, camp.EjectedPilotFrequency[sideName].GuardEjection, 0.1, 'GuardEjection'..pilotEjection.initiator)
 
-						env.info( "DCE_EventT_eject I :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[side].GuardEjection).." | "..tostring('GuardEjection'..pilotEjection.initiator))
+						env.info( "DCE_EventT_eject I :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[sideName].GuardEjection).." | "..tostring('GuardEjection'..pilotEjection.initiator))
 					end
 
 					local ejectionSeatTemp = {
@@ -878,10 +878,10 @@ function eventHandlerDCE:onEvent(event)
 
 								SumSoldierAliasPilot = SumSoldierAliasPilot + 1
 
-								if pilotEjection.initiatorPilotName then
+								if pilotEjection.pilotName then
 									pilotEjection.name = "Mis" ..
 									camp.mission ..
-									"_Pilot_" .. pilotEjection.initiatorPilotName .. "_Nb" .. tostring(SumSoldierAliasPilot)
+									"_Pilot_" .. pilotEjection.pilotName .. "_Nb" .. tostring(SumSoldierAliasPilot)
 								else
 									pilotEjection.name = "Mis"..camp.mission.."_Pilot_"..pilotEjection.initiator.."_Nb"..tostring(SumSoldierAliasPilot)
 								end
@@ -968,7 +968,7 @@ function eventHandlerDCE:onEvent(event)
 					env.info( "DCE_EventT_seat G , selected_distance: "..tostring(selected_distance))
 
 					if selected_distance <= 4000 then
-						log_entry.initiatorPilotName = selectedEjection.initiatorPilotName
+						log_entry.pilotName = selectedEjection.pilotName
 						log_entry.initiator = selectedEjection.initiator
 
 						selectedEjection.pos.vec3x = initiatorVec3.x
@@ -1021,7 +1021,7 @@ function eventHandlerDCE:onEvent(event)
 						if tabEjection[n] and tabEjection[n].x then
                             if not initiatorVec3.x then
                                 env.info("DCE_EvenT: pilotLand_I pb initiatorVec3.x nil")
-								_affiche(initiatorVec3, "initiatorVec3 ")
+								-- _affiche(initiatorVec3, "initiatorVec3 ")
                             end
 
                             if initiatorVec3.x and tabEjection[n].x then
@@ -1034,7 +1034,7 @@ function eventHandlerDCE:onEvent(event)
                         else
 
 							env.info("DCE_EventT_pilot_land J pb tabEjection[n].x nil, n: " .. n .. " total tabEjection " .. #tabEjection)
-							_affiche(tabEjection[n], "tabEjection[n] ")
+							-- _affiche(tabEjection[n], "tabEjection[n] ")
 							
 							local locTime = timer.getTime()
 							local logStr = "tabEjection = " .. TableSerialization(tabEjection, 0)
@@ -1055,7 +1055,7 @@ function eventHandlerDCE:onEvent(event)
 					if selected_distance <= 8000 and ejectN ~= 0 then
 
 						selPilotEject = tabEjection[ejectN]
-						log_entry.initiatorPilotName = selPilotEject.initiatorPilotName
+						log_entry.pilotName = selPilotEject.pilotName
 						log_entry.initiator = selPilotEject.initiator
 
 						--on change la position, car le vent peut pousser le parachute de la mere vers la terre
@@ -1075,10 +1075,10 @@ function eventHandlerDCE:onEvent(event)
 
 						SumSoldierAliasPilot = SumSoldierAliasPilot + 1
 
-						if selPilotEject.initiatorPilotName then
+						if selPilotEject.pilotName then
 							selPilotEject.name = "Mis" ..
 							camp.mission ..
-							"_Pilot_" .. selPilotEject.initiatorPilotName .. "_Nb" .. tostring(SumSoldierAliasPilot)
+							"_Pilot_" .. selPilotEject.pilotName .. "_Nb" .. tostring(SumSoldierAliasPilot)
 						else
 							selPilotEject.name = "Mis"..camp.mission.."_Pilot_"..selPilotEject.initiator.."_Nb"..tostring(SumSoldierAliasPilot)
 						end
@@ -1164,7 +1164,7 @@ function eventHandlerDCE:onEvent(event)
 
 					log_entry.place = event.place and event.place:getName() or "unknown"
 					log_entry.placeTypeName = tostring(event.place:getTypeName())
-					local baseCoalition = Airbase.getCoalition(event.place)
+					-- local baseCoalitionId = Airbase.getCoalition(event.place)
 					log_entry.objCategory = initiatorObjCategory
 
 					local initDesc = event.initiator:getDesc()
@@ -1237,14 +1237,14 @@ function eventHandlerDCE:onEvent(event)
 						log_entry.type_name = event.initiator:getTypeName()
 
 						log_entry.placeTypeName = CleanName(log_entry.placeTypeName)
-						log_entry.placeCoalition = Airbase.getCoalition(event.place)
+						log_entry.placeCoalitionId = Airbase.getCoalition(event.place)
 						log_entry.place = CleanName(log_entry.place)
 
 					end
 
 					if initiatorObjCategory == Object.Category.UNIT and playerName then			--initiator is a unit debug_ET01.h
-						log_entry.initiatorPilotName = playerName
-						log_entry.initiatorPilotName = log_entry.initiatorPilotName:gsub("['\"]", '')
+						log_entry.pilotName = playerName
+						log_entry.pilotName = log_entry.pilotName:gsub("['\"]", '')
 					end
 
                     -- if initiatorObjCategory ~= Object.Category.SCENERY and event.initiator.getID then --initator is not a scenery object debug_ET01.h
@@ -1290,10 +1290,10 @@ function eventHandlerDCE:onEvent(event)
 				if initiatorObjCategory == Object.Category.UNIT then										--initiator is a unit debug_ET01.h
 
 					local unitCat = initDesc.category
-					log_entry.initiatorPilotName = event.initiator:getPlayerName()
+					log_entry.pilotName = event.initiator:getPlayerName()
 
-					if log_entry.initiatorPilotName then
-						log_entry.initiatorPilotName = CleanName(log_entry.initiatorPilotName)
+					if log_entry.pilotName then
+						log_entry.pilotName = CleanName(log_entry.pilotName)
 					end
 
 					if log_entry.type == "unit lost" and camp.SAR and camp.SAR.pilotEjected then
@@ -1653,8 +1653,8 @@ function eventHandlerDCE:onEvent(event)
 					local closestUnit = nil
 
 					-- Récupère la coalition du tanker
-					local tankerCoalition = tanker:getCoalition()
-					local coalitionSide = tankerCoalition == coalition.side.BLUE and coalition.side.BLUE or coalition.side.RED
+					local tankerCoalitionId = tanker:getCoalition()
+					local coalitionSide = tankerCoalitionId == coalition.side.BLUE and coalition.side.BLUE or coalition.side.RED
 
 					-- Parcours uniquement les groupes aériens de la coalition du tanker
 					local groups = coalition.getGroups(coalitionSide, Group.Category.AIRPLANE)

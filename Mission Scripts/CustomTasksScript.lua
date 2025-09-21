@@ -1443,7 +1443,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 	local smokeDuration = 300
 
 	local flightGroup = Group.getByName(afacFlightName)
-	local coalitionForce = flightGroup:getCoalition()
+	local coalitionId = flightGroup:getCoalition()
 	local unitsAFAC = flightGroup:getUnits()
 	local unitAFAC = unitsAFAC[1]
 
@@ -1465,7 +1465,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 	-- env.info("DCE_CustomDesignationAFAC() BB : afacFlightName "..tostring(afacFlightName).." afacAlt: "..tostring(afacAlt).." terrainAlt: "..tostring(terrainAlt).." distVisibility: "..tostring(distVisibility))
 
 	--recupere les dynamique ****
-	local groundGroups = coalition.getGroups(coalitionIdNumericENI[coalitionForce], Group.Category.GROUND)
+	local groundGroups = coalition.getGroups(CoalitionIdToENI_Id[coalitionId], Group.Category.GROUND)
 	local unitGroundSelected_A = {}
 	local unitGroundSelected_B = {}
 
@@ -1513,7 +1513,7 @@ function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
 
 
 	--recupere les static ****
-	local statics = coalition.getStaticObjects(coalitionIdNumericENI[coalitionForce])
+	local statics = coalition.getStaticObjects(CoalitionIdToENI_Id[coalitionId])
 	-- _affiche(statics, "DCE_AFAC () statics ")
 
 	for _, static in pairs(statics) do
@@ -1880,17 +1880,17 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	local laser														--variable to hold the laser spot
 	local flightGroup = Group.getByName(afacFlightName)
-	local coalitionForce = flightGroup:getCoalition()
+	local coalitionId = flightGroup:getCoalition()
 	local unitsAFAC = flightGroup:getUnits()
 	local unitAFAC = unitsAFAC[1]
 
 	if unitAFAC and unitAFAC:isExist() then
 
-		local sideNum = unitAFAC:getCoalition()
+		local coalitionId = unitAFAC:getCoalition()
 		
 		AFAC_available[afacFlightName] = {
 				["unitAFAC"] = unitAFAC,
-				["sideNum"] = sideNum,
+				["sideNum"] = coalitionId,
 				-- ["gpGid"] = 0,
 			}
 			-- env.info("DCE_CustomDesignationAFAC() AAb : unitAFAC:isExist "..tostring(afacFlightName))
@@ -1911,7 +1911,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	--****--****--****--**** ********--****--****--**** ********--****--****--**** ********--****--****--**** ****
 	--**** recupere les dynamique ****
 	--****--****--****--**** ********--****--****--**** ********--****--****--**** ********--****--****--**** ****
-	local groundGroups = coalition.getGroups(coalitionIdNumericENI[coalitionForce], Group.Category.GROUND)
+	local groundGroups = coalition.getGroups(CoalitionIdToENI_Id[coalitionId], Group.Category.GROUND)
 	local unitGroundSelected_A = {}
 	local unitGroundSelected_B = {}
 
@@ -1963,7 +1963,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	--****--****--****--**** ********--****--****--**** ********--****--****--**** ********--****--****--**** ****
 	--**** recupere les static ****
 	--****--****--****--**** ********--****--****--**** ********--****--****--**** ********--****--****--**** ****
-	local statics = coalition.getStaticObjects(coalitionIdNumericENI[coalitionForce])
+	local statics = coalition.getStaticObjects(CoalitionIdToENI_Id[coalitionId])
 	for _, static in pairs(statics) do
 		local stName = Object.getName(static)
 
@@ -2057,7 +2057,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		AFAC_available[afacFlightName]["smokeTiming"] = {
 			time = timer.getTime(),
 			targetPos = targetPos,
-			sideNum = coalitionForce,
+			sideNum = coalitionId,
 		}
 
 	end
@@ -3063,7 +3063,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 		-- env.info( "current_time: "..tostring(current_time).." Custom_AddWptSAR B, grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(speed).."|"..tostring(alt))
 
 		local flight = Group.getByName(grpname)
-		local grpSide = tostring(flight:getCoalition())						--obligé pour le string, car 0 est impossible en numerotation de table	
+		local coalitionId = tostring(flight:getCoalition())						--obligé pour le string, car 0 est impossible en numerotation de table	
 		local leader = flight:getUnit(1)
 		local base = Unit.getByName(BaseName)								--trouve le CV si c'en est un
 		local  gpGid = Group.getID(flight)
@@ -3122,7 +3122,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 				for N_Pilot, uPilot in ipairs(zone) do
 					-- env.info( "Custom_AddWptSAR F  "..tostring(uPilot.name).."|"..tostring(mgrsChute).."|"..tostring(uPilot.status))
 
-					if  string.lower(uPilot.side) ==  coalitionId[grpSide]  then
+					if  string.lower(uPilot.side) ==  coalitionId[coalitionId]  then
 						if uPilot.name and uPilot.embarked ~= true  and (uPilot.status ==  "MIA" or uPilot.status ==  "EVAC_possible" )  then
 							-- env.info( "Custom_AddWptSAR G "..tostring(uPilot.name).."|"..tostring(mgrsChute).."|"..tostring(uPilot.status))
 
@@ -3594,7 +3594,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 		local flight = Group.getByName(grpname)								--get Group
 		local leader = flight:getUnit(1)									--get first unit in group
 		local base = Unit.getByName(baseName)								--get unit
-		local grpSide = tostring(flight:getCoalition())
+		local grpCoalitionId = tostring(flight:getCoalition())
 		local gpGid = Group.getID(flight)
 
 		local posFlightVec3 = leader:getPoint()									--get position
@@ -3648,7 +3648,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 			for N_Pilot, uPilot in ipairs(zone) do
 				-- env.info( "Custom_SAR D1 uPilot.side: "..tostring(uPilot.side).."| coalitionId[grpSide]: "..tostring(coalitionId[grpSide]))
 
-				if  string.lower(uPilot.side) ==  coalitionId[grpSide]  then
+				if  string.lower(uPilot.side) ==  CoalitionIdAlphaToName[grpCoalitionId]  then
 					-- env.info( "Custom_SAR DD2 uPilot.name: "..tostring(uPilot.name).."| uPilot.embarked: "..tostring(uPilot.embarked))
 
 					local authorisesRescue = true

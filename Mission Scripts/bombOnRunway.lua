@@ -181,14 +181,14 @@ local function makeRunwayCratere(arg)
 					}
 
 					
-					local sideId = Airbase.getByName(base.db_airbaseName):getCoalition()
+					local coalitionId = Airbase.getByName(base.db_airbaseName):getCoalition()
 
 					-- 80: CJTF_BLUE
 					-- 81: CJTF_RED
 					local countryId =country.id.BELGIUM
-					if coalitionIdNumeric[sideId] == "blue" then
+					if CoalitionIdToName[coalitionId] == "blue" then
 						countryId = country.id.CJTF_BLUE
-					elseif coalitionIdNumeric[sideId] == "red" then
+					elseif CoalitionIdToName[coalitionId] == "red" then
 						countryId = country.id.CJTF_RED
 					end
 

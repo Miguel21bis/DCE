@@ -688,7 +688,7 @@ for e = 1, #events do
 			if statutObject[initiator]["unit lost"] then
 				clientstats[client_control[initiator]].dead = clientstats[client_control[initiator]].dead - 1	--store death for client
 				clientstats[client_control[initiator]].score_last.dead =  clientstats[client_control[initiator]].score_last.dead - 1						--store dead pilot for client
-				clientstats[client_control[initiator]].score_last.Time_Dead = nil
+				clientstats[client_control[initiator]].score_last.Time_Dead = 0
 				statutObject[initiator]["pilot dead"] =  false
 				statutObject[initiator]["unit lost"] =  false
 			end

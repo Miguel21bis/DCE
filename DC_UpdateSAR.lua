@@ -32,6 +32,55 @@ versionDCE["DC_UpdateSAR.lua"] = "1.4.19"
 -- 	}
 -- }
 
+--temporaire, transforme les variables renommé:
+-- Supprime de oob_ground ET de camp_ZoneSAR les ejectedPilot capturés ou sauvés
+if camp_ZoneSAR and camp_ZoneSAR ~= nil then
+    for _, sideSAR in pairs(camp_ZoneSAR) do
+        for _, zone in pairs(sideSAR) do
+
+            for _, pilot in ipairs(zone) do
+
+                if pilot.initiatorSIDE then pilot.initiatorSIDE = nil end
+                if pilot.side then
+                    pilot.sideName = pilot.side
+                    pilot.side = nil
+                end
+                if pilot.Coalition then
+                    pilot.coalitionId = pilot.Coalition
+                    pilot.Coalition = nil
+                end
+                if pilot.country then
+                    pilot.countryName = pilot.country
+                    pilot.country = nil
+                end
+
+                if pilot.x then
+                    pilot["pos"] = {
+                        x = pilot.x,
+                        y = pilot.y,
+                        z = pilot.z,
+                        Vec3x = pilot.x,
+                        Vec3y = pilot.z,
+                        Vec3z = pilot.y,
+                    }
+                    pilot.x = nil
+                    pilot.y = nil
+                    pilot.z = nil
+
+                end
+
+                if pilot.x2d then pilot.x2d = nil end
+                if pilot.y2d then pilot.y2d = nil end
+                if pilot.z2d then pilot.z2d = nil end
+                if pilot.initiatorMissionID then pilot.initiatorMissionID = nil end
+                if pilot.initiatorCountry then pilot.initiatorCountry = nil end
+
+
+            end
+        end
+    end
+end
+
 local function checkPointInPoly2(point, poly)
 
     local crossings = 0
@@ -190,7 +239,7 @@ local function addSoldierAliasPilot(soldier)
 
     for coal_name, coal in pairs(oob_ground) do
         for country_n, country in ipairs(coal) do
-            if string.lower(country.name) == string.lower(soldier.country) then
+            if string.lower(country.name) == string.lower(soldier.countryName) then
                if country.vehicle then
                     local found = false
                     for group_n, group in ipairs(country.vehicle.group) do
@@ -219,7 +268,7 @@ local function deleteSoldierAliasPilot(ejectedPilot)
 
     for coal_name, coal in pairs(oob_ground) do
         for country_n, country in ipairs(coal) do
-            if string.lower(country.name) == string.lower(ejectedPilot.country) then
+            if string.lower(country.name) == string.lower(ejectedPilot.countryName) then
                if country.vehicle then
 
                     for group_n, group in ipairs(country.vehicle.group) do
@@ -278,7 +327,7 @@ local function deleteAliasPilotInOobGround(ejectedPilot)
 
     for coal_name, coal in pairs(oob_ground) do
         for country_n, country in ipairs(coal) do
-            if string.lower(country.name) == string.lower(ejectedPilot.country) then
+            if string.lower(country.name) == string.lower(ejectedPilot.countryName) then
                if country.vehicle then
 
                     for group_n, group in ipairs(country.vehicle.group) do
@@ -308,7 +357,7 @@ end
 
 --ajoute les ejectedPilot du fichier temp zoneSAR au fichier camp_ZoneSAR
 if zoneSAR and zoneSAR ~= nil then
-    for sideN, sideName in pairs(DCS_Side) do
+    for sideN, dcs_sideName in pairs(DCS_Side) do
         for zoneName, pilots in pairs(zoneSAR) do
             for pilotN, pilot in pairs(pilots) do
 
@@ -316,25 +365,25 @@ if zoneSAR and zoneSAR ~= nil then
                 
                     pilot = PatchEjectedPilotStructure(pilot, "updateSAR")
 
-                    if pilot.side == "" then
-                        pilot.side = "neutrals"
+                    if pilot.sideName == "" then
+                        pilot.sideName = "neutrals"
                     end
-                    if pilot.side == sideName then
-                        if not camp_ZoneSAR[sideName][zoneName] then
-                            camp_ZoneSAR[sideName][zoneName] = {
+                    if pilot.sideName == dcs_sideName then
+                        if not camp_ZoneSAR[dcs_sideName][zoneName] then
+                            camp_ZoneSAR[dcs_sideName][zoneName] = {
                                 [1] = pilot
                             }
                         else
                             local foundElement = false
-                            for n=1, #camp_ZoneSAR[sideName][zoneName] do
-                                if pilot.name == camp_ZoneSAR[sideName][zoneName][n].name then
+                            for n=1, #camp_ZoneSAR[dcs_sideName][zoneName] do
+                                if pilot.name == camp_ZoneSAR[dcs_sideName][zoneName][n].name then
 
                                     foundElement = true
                                     break
                                 end
                             end
                             if not foundElement then
-                                table.insert(camp_ZoneSAR[sideName][zoneName], pilot )
+                                table.insert(camp_ZoneSAR[dcs_sideName][zoneName], pilot )
                             end
                         end
                     end
@@ -346,22 +395,22 @@ end
 
 --TODO quel est l'interet de cette partie? afficher seulement si un joueur est secouru?
 if zoneSAR and zoneSAR ~= nil then
-    for Nside, sideName in pairs(DCS_Side)	 do
+    for Nside, dcs_sideName in pairs(DCS_Side)	 do
         for zoneName, pilot in pairs(zoneSAR) do
             for i = 1, #pilot do
-               if  pilot[i].side == "" then
-                    pilot[i].side = "neutrals"
+               if pilot[i].sideName == "" then
+                    pilot[i].sideName = "neutrals"
                 end
-                if pilot[i].side == sideName then
-                    if not camp_ZoneSAR[sideName][zoneName] then
-                        camp_ZoneSAR[sideName][zoneName] = {
+                if pilot[i].sideName == dcs_sideName then
+                    if not camp_ZoneSAR[dcs_sideName][zoneName] then
+                        camp_ZoneSAR[dcs_sideName][zoneName] = {
                             [1] = pilot[i]
                         }
                     else
-                         for n=1, #camp_ZoneSAR[sideName][zoneName] do
-                            if pilot[i].name == camp_ZoneSAR[sideName][zoneName][n].name then
-                                 if pilot[i].embarked == true  and  camp_ZoneSAR[sideName][zoneName][n].status ~= "rescued" then
-                                     camp_ZoneSAR[sideName][zoneName][n].status = "rescued"
+                         for n=1, #camp_ZoneSAR[dcs_sideName][zoneName] do
+                            if pilot[i].name == camp_ZoneSAR[dcs_sideName][zoneName][n].name then
+                                 if pilot[i].embarked == true  and  camp_ZoneSAR[dcs_sideName][zoneName][n].status ~= "rescued" then
+                                     camp_ZoneSAR[dcs_sideName][zoneName][n].status = "rescued"
 
                                     if pilot[i].initiatorPilotName then
                                         print("DcUS rescued "..tostring(zoneName).." "..tostring(pilot[i].initiatorPilotName))
@@ -491,7 +540,7 @@ end
 local timeActualCampaignSecond = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month}
 
 if camp_ZoneSAR and camp_ZoneSAR ~= nil then
-    for sideName, sideSAR in pairs(camp_ZoneSAR) do
+    for ZoneSideName, sideSAR in pairs(camp_ZoneSAR) do
         for zoneName, zone in pairs(sideSAR) do
 
             for pilotN, pilot in ipairs(zone) do
@@ -510,7 +559,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                 end
 
                 for baseName, base in pairs(db_airbases) do
-                    if base.side == pilot.side then
+                    if base.side == pilot.sideName then
 
                         local distance = math.sqrt(math.pow(pilot.pos.x - base.x, 2) + math.pow(pilot.pos.y - base.y, 2))
                         if distance < 5000 then
@@ -522,9 +571,9 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                 end
 
                 --*************************************************************
-                if pilot.side == "red" and campConfMod.code_loadout == "NAM" then
+                if pilot.sideName == "red" and campConfMod.code_loadout == "NAM" then
                     
-                    local enemy = DCS_ENI_Side[sideName]
+                    local enemy = DCS_ENI_Side[ZoneSideName]
                     pilot.inTheEnemyCamp =  checkPointInPoly2({x=pilot.pos.x,y=pilot.pos.y}, boundary[enemy])
 
                     if not pilot.inTheEnemyCamp and pilot.date.year and pilot.date.month and pilot.date.day then
@@ -538,7 +587,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                 end
 
 
-                if (pilot.status == "MIA" or pilot.status == "EVAC_possible" ) and pilot.side == sideName and sideName ~= "neutrals" then
+                if (pilot.status == "MIA" or pilot.status == "EVAC_possible" ) and pilot.sideName == ZoneSideName and ZoneSideName ~= "neutrals" then
                   
 					local redDistance ={500, 3000, 20000, 200000}
                     -- local nbAMI_ENI = {
@@ -567,17 +616,17 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                     --defini si le pilot est capturé ou récupérable
                      --recherche le nombre d'AMI ENI proche
                     for distanceN, refD in ipairs(redDistance) do
-                        for side, oob in pairs(oob_ground) do
-                            for country_n, country in pairs(oob_ground[side]) do
+                        for sideName, oob in pairs(oob_ground) do
+                            for country_n, country in pairs(oob_ground[sideName]) do
                                 if country.static then
                                     for group_n, group in pairs(country.static.group) do
 
                                         local distance = math.sqrt(math.pow(pilot.pos.x - group.x, 2) + math.pow(pilot.pos.y - group.y, 2))
-                                        if not nbAMI_ENI[side][refD] then
-                                            nbAMI_ENI[side][refD] = 0
+                                        if not nbAMI_ENI[sideName][refD] then
+                                            nbAMI_ENI[sideName][refD] = 0
                                         end
                                         if distance <= refD then
-                                            nbAMI_ENI[side][refD] = nbAMI_ENI[side][refD] + #group.units
+                                            nbAMI_ENI[sideName][refD] = nbAMI_ENI[sideName][refD] + #group.units
                                         end
                                     end
                                 end
@@ -586,11 +635,11 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                                         if not string.find(group.name, "_Pilot_") then
                                             local distance = math.sqrt(math.pow(pilot.pos.x - group.x, 2) + math.pow(pilot.pos.y - group.y, 2))
 
-                                            if not nbAMI_ENI[side][refD] then
-                                                nbAMI_ENI[side][refD] = 0
+                                            if not nbAMI_ENI[sideName][refD] then
+                                                nbAMI_ENI[sideName][refD] = 0
                                             end
                                             if distance <= refD then
-                                                nbAMI_ENI[side][refD] = nbAMI_ENI[side][refD] + #group.units
+                                                nbAMI_ENI[sideName][refD] = nbAMI_ENI[sideName][refD] + #group.units
                                             end
                                         end
                                     end
@@ -617,7 +666,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                     -- }
 
                     local enemy																													--determine enemy side (opposite of unit side)
-                    if sideName == "blue" then
+                    if ZoneSideName == "blue" then
                         enemy = "red"
                     else
                         enemy = "blue"
@@ -681,16 +730,16 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                         --ne regarde qu'une fois par jour, ou tous les 2 jours ou...
                         pilot.dataPOW.POW_nextDayCheck = pilot.dataPOW.ejectNbDay + 2
 
-                        if nbAMI_ENI[sideName][500] >= 2  then
+                        if nbAMI_ENI[ZoneSideName][500] >= 2  then
 							pilot.status = "EVAC_possible"
-						elseif  nbAMI_ENI[sideName][500] == 0 and  nbAMI_ENI[enemy][500] >= 2  then
+						elseif  nbAMI_ENI[ZoneSideName][500] == 0 and  nbAMI_ENI[enemy][500] >= 2  then
 							pilot.status = "POW"
-						elseif nbAMI_ENI[sideName][3000] >= 2  and nbAMI_ENI[enemy][3000] < 2 then
+						elseif nbAMI_ENI[ZoneSideName][3000] >= 2  and nbAMI_ENI[enemy][3000] < 2 then
 							pilot.status = "EVAC_possible"
-						elseif nbAMI_ENI[sideName][3000] < 2  and nbAMI_ENI[enemy][3000] >= 2 then
+						elseif nbAMI_ENI[ZoneSideName][3000] < 2  and nbAMI_ENI[enemy][3000] >= 2 then
 							pilot.status = "POW"
-						elseif nbAMI_ENI[sideName][3000] >= 2  and nbAMI_ENI[enemy][3000] >= 2  then
-							local pourcent = (nbAMI_ENI[sideName][3000] / ( nbAMI_ENI[sideName][3000] + nbAMI_ENI[enemy][3000]))*100
+						elseif nbAMI_ENI[ZoneSideName][3000] >= 2  and nbAMI_ENI[enemy][3000] >= 2  then
+							local pourcent = (nbAMI_ENI[ZoneSideName][3000] / ( nbAMI_ENI[ZoneSideName][3000] + nbAMI_ENI[enemy][3000]))*100
 							local coef = (pilot.dataPOW.ejectNbDay*(-1) + 5) -- plus le nb de jour augmente, plus les chances d etre capturé augmente
                             if coef < 1 then coef = 1 end
                             local randomMalChance = math.random(1, 100) / coef
@@ -700,15 +749,15 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 							else
 								pilot.status = "EVAC_possible"
                             end
-						elseif nbAMI_ENI[sideName][20000] >= 2 and nbAMI_ENI[enemy][20000] < 2 then
+						elseif nbAMI_ENI[ZoneSideName][20000] >= 2 and nbAMI_ENI[enemy][20000] < 2 then
 							pilot.status = "EVAC_possible"
-						elseif nbAMI_ENI[sideName][20000] < 2 and nbAMI_ENI[enemy][20000] >= 2 then
+						elseif nbAMI_ENI[ZoneSideName][20000] < 2 and nbAMI_ENI[enemy][20000] >= 2 then
 
                             pilot.status = "EVAC_possible"
 
-						elseif nbAMI_ENI[sideName][20000] >= 2 and nbAMI_ENI[enemy][20000] >= 2  then
+						elseif nbAMI_ENI[ZoneSideName][20000] >= 2 and nbAMI_ENI[enemy][20000] >= 2  then
 
-							local pourcent = (nbAMI_ENI[sideName][20000] / ( nbAMI_ENI[sideName][20000] + nbAMI_ENI[enemy][20000]))*100
+							local pourcent = (nbAMI_ENI[ZoneSideName][20000] / ( nbAMI_ENI[ZoneSideName][20000] + nbAMI_ENI[enemy][20000]))*100
                             local coef = (pilot.dataPOW.ejectNbDay*(-1) + 5) -- plus le nb de jour augmente, plus les chances d etre capturé augmente
                             if coef < 1 then coef = 1 end
                             local randomMalChance = math.random(1, 100)/coef
@@ -719,11 +768,11 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 								pilot.status = "EVAC_possible"
                             end
 
-						elseif nbAMI_ENI[sideName][200000] >= 2 and nbAMI_ENI[enemy][200000] < 2 then
+						elseif nbAMI_ENI[ZoneSideName][200000] >= 2 and nbAMI_ENI[enemy][200000] < 2 then
 							pilot.status = "EVAC_possible"
-						elseif nbAMI_ENI[sideName][200000] < 2 and nbAMI_ENI[enemy][200000] >= 2 then
+						elseif nbAMI_ENI[ZoneSideName][200000] < 2 and nbAMI_ENI[enemy][200000] >= 2 then
 							pilot.status = "EVAC_possible"
-						elseif nbAMI_ENI[sideName][200000] >= 2 and nbAMI_ENI[enemy][200000] >= 2  then
+						elseif nbAMI_ENI[ZoneSideName][200000] >= 2 and nbAMI_ENI[enemy][200000] >= 2  then
 							pilot.status = "EVAC_possible"
                         else
                             pilot.status = "EVAC_possible"
@@ -961,9 +1010,9 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                 --selectionne la base la plus proche pour leur porter secours
                 local selectedDistance = 9999999
                 local selectedUnitName = ""
-                for side_name,side in pairs(oob_air) do
-                    if side_name == pilot.side then
-                        for n, unit in pairs(side) do
+                for oob_sidename, sideTab in pairs(oob_air) do
+                    if oob_sidename == pilot.sideName then
+                        for n, unit in pairs(sideTab) do
                             if unit.tasks.SAR  and not unit.inactive  then
                                 local unitReserve = 0
                                 if unit.roster and unit.roster.reserve then
@@ -1004,8 +1053,8 @@ end
 
 -- Supprime de oob_ground ET de camp_ZoneSAR les ejectedPilot capturés ou sauvés
 if camp_ZoneSAR then
-    for sideName, sideSAR in pairs(camp_ZoneSAR) do
-        for zoneName, zone in pairs(sideSAR) do
+    for zone_sideName, sideTab in pairs(camp_ZoneSAR) do
+        for zoneName, zone in pairs(sideTab) do
             -- Parcours à l'envers pour supprimer sans bug d'index
             for pilotN = #zone, 1, -1 do
                 local pilot = zone[pilotN]
@@ -1020,7 +1069,7 @@ if camp_ZoneSAR then
                     -- Supprimer la zone si elle est vide
                     if not next(zone) then
                         print("DcUS GH Supprimer la zone si elle est vide zoneName "..tostring(zoneName))
-                        sideSAR[zoneName] = nil
+                        sideTab[zoneName] = nil
                     end
 
                 end
@@ -1086,8 +1135,8 @@ camp.SAR.pilotEjected = {}
 --creation table de la liste des pilote ejecté à utiliser dans le game DC_StaticAircraft
 --UTIL pour calculer en temps réel la distance séparant ces pilotes des helico pour déclencher le fumigene
 if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
-    for sideName, sideSAR in pairs(camp_ZoneSAR) do
-        for ZoneName, zone in pairs(sideSAR) do
+    for zone_sideName, sideTab in pairs(camp_ZoneSAR) do
+        for zoneName, zone in pairs(sideTab) do
             for pilotN, pilot in ipairs(zone) do
 
 				-- land.pos.surfaceType 

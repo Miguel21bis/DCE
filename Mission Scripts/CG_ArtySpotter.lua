@@ -678,12 +678,12 @@ artyAction = function ( initiatorName )
 
 			local lineOfSight = land.isVisible(playerVec3, targetVec3)
 			local spotterSide =   "neutral"
-			local sideNum = artyTasks[initiatorName].initiator:getCoalition()
+			local coalitionId = artyTasks[initiatorName].initiator:getCoalition()
 
-			if sideNum then
-				if sideNum == coalition.side.RED then
+			if coalitionId then
+				if coalitionId == coalition.side.RED then
 					spotterSide =  "red"
-				elseif sideNum == coalition.side.BLUE then
+				elseif coalitionId == coalition.side.BLUE then
 					spotterSide =   "blue"
 				else
 					spotterSide =   "neutral"

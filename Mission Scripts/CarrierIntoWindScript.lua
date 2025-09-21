@@ -370,13 +370,13 @@ function CarrierIntoWind(GroupName)
 			local carrierName = carrier:getName()													--get carrier name
 			local carrierVec3 = carrier:getPoint()													--get position of carrier
 			local carrierHeading = GetHeadingByPos(carrier)
-			local carrierCoal = carrier:getCoalition()												--get coalition of carrier
+			local carrierCoalId = carrier:getCoalition()												--get coalition of carrier
 			local flightOps = false
 
 			--search for aircraft around carrier
 			local function Found(u)
-				local coal = u:getCoalition()														--get coalition of units
-				if coal == carrierCoal then															--unit has same coalition as carrier
+				local coalId = u:getCoalition()														--get coalition of units
+				if coalId == carrierCoalId then															--unit has same coalition as carrier
 					local desc = u:getDesc()														--get unit description
 					if desc.category == 0 then														--unit is an aircraft (no helicopters)
 						local aircraftVec3 = u:getPoint()													--get position of aircraft
