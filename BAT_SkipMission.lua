@@ -282,7 +282,7 @@ if input == "y" or input == "yes" then
 					local function selectMissionType()
 						print("\n--- Select Mission Type ---")
 						print("1. Standard targets (Strike's, Runway Attack)")
-						print("2. Rescue mission (CSAR)")
+						print("2. Rescue mission (SAR/CSAR)")
 						print("3. Back to coalition selection")
 
 						local choice
@@ -324,20 +324,22 @@ if input == "y" or input == "yes" then
 					local function showCSARTargets(targetlist, side)
 						print("\n--- Select the pilot to be rescued, who has fallen into the "..DCS_ENI_Side[side].." side  ---")
 						local tabIndex = {}
-						local Ckey = 0
+						-- local Ckey = 0
 
 						for key, target in ipairs(targetlist[side]) do
-							if target.inactive ~= true and target.ATO and target.task == "CSAR" and target.type == "Ejected Pilot"
+							if target.inactive ~= true and target.ATO and (target.task == "CSAR" or target.task == "SAR")
 							then
-								Ckey = key
-								io.write(Ckey.." "..side.." "..tostring(target.titleName).."\n")
-								tabIndex[Ckey] = target
+								-- Ckey = key
+								io.write(key.." "..side.." "..tostring(target.titleName).."\n")
+								tabIndex[key] = target
 								
-								for ejectPilotN, ejectPilot in ipairs(target.elements) do
-									if ejectPilot.status == "EVAC_possible" then
-										local txtSup = ""
-										if ejectPilot.inTheEnemyCamp then txtSup = "in the enemy camp" end
-										io.write("          - - - - >"..tostring(ejectPilot.MGRS_Chute_10KM).." : "..tostring(ejectPilot.name).." "..txtSup.."\n")
+								if target.task == "CSAR" and target.elements then
+									for ejectPilotN, ejectPilot in ipairs(target.elements) do
+										if ejectPilot.status == "EVAC_possible" then
+											local txtSup = ""
+											if ejectPilot.inTheEnemyCamp then txtSup = "in the enemy camp" end
+											io.write("          - - - - >"..tostring(ejectPilot.MGRS_Chute_10KM).." : "..tostring(ejectPilot.name).." "..txtSup.."\n")
+										end
 									end
 								end
 							end

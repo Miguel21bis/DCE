@@ -1664,10 +1664,10 @@ if Debug.Generator.affiche then
 
 	-- debuGenTxt = debuGenTxt.."\n"..("BLUE PART A")
 
-	local _str = "Draft_sortiesA = " .. TableSerialization(Draft_sorties, 0)						--make a string
-	local _file = io.open("Debug/Draft_sortiesA.lua", "w")  or error("Failed to open debug file")
-	_file:write(_str)																		--save new data
-	_file:close()
+	-- local _str = "Draft_sortiesA = " .. TableSerialization(Draft_sorties, 0)						--make a string
+	-- local _file = io.open("Debug/Draft_sortiesA.lua", "w")  or error("Failed to open debug file")
+	-- _file:write(_str)																		--save new data
+	-- _file:close()
 
 	for sideName, drafts in pairs(Draft_sorties) do
 		local di = 1
