@@ -155,8 +155,11 @@ end
 
 CampTotalTimeS = SecondsBetween(camp.dateInit, camp.date)
 
-print("DcTime The campaign will start on this date: " .. tostring(camp.dateInit.day) .. "." .. tostring(camp.dateInit.month) .. "." .. tostring(camp.dateInit.year) .. ".\n")
-print("DcTime The current date of the campaign is: " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
+if Debug.debug then
+	print("DcTime The campaign will start on this date: " .. tostring(camp.dateInit.day) .. "." .. tostring(camp.dateInit.month) .. "." .. tostring(camp.dateInit.year) .. ".\n")
+	print("DcTime The current date of the campaign is: " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
+
+end
 
 
 camp.date.CampTotalTimeS = CampTotalTimeS

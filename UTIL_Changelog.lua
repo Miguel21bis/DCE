@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.91.564"
+versionDCE["UTIL_Changelog.lua"] = "20.91.565"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.91.564"
+VersionDCE["UTIL_Changelog.txt"] = "20.91.565"
 --[[
 
 
@@ -9,7 +9,8 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.91.564:==
+==:20.91.565:==
+565 fixed	[radio][choice] Sometimes there are no radio channels assigned to the player aircraft. We have also changed the aircraft selection. Please note that a wingman player position is possible.
 564 added	[plane] MiG-29 Fulcrum
 563 added	[EWR][frequencies]    Some CampaignMakers specifically want to keep the same EWR frequencies, while others do not.
 						Therefore, this variable should be added to the camp_init.lua files:

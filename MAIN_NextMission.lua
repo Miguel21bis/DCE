@@ -323,14 +323,14 @@ end
 
 
 ----- prepare triggers to run files in mission with tempo-----
-function AddFileTriggerTempo(filename, time, predicat0, ActionPredicate0)
+function AddFileTriggerTempo(arg_filename, arg_time, arg_predicat0, arg_actionPredicate0)
 
 	mission.maxDictId = mission.maxDictId +1
-	local Table_trigrulesAction = {}
+	local table_trigrulesAction = {}
 	local trig_n =  #mission.trig.actions + 1										--next available trigger number
 	local s = ""
 
-	for key, value in ipairs(ActionPredicate0) do
+	for key, value in ipairs(arg_actionPredicate0) do
 		local  trigrulesAction = {}
 
 		if value.Predicate == "a_do_script_file" then
@@ -354,12 +354,12 @@ function AddFileTriggerTempo(filename, time, predicat0, ActionPredicate0)
 			s = s.."a_do_script(\\\"ctld.JTACAutoLase(\\\'"..value.NameJTAC.."\\\', 1688, true,\\\"all\\\",1));"
 		end
 
-		table.insert(Table_trigrulesAction, trigrulesAction)
+		table.insert(table_trigrulesAction, trigrulesAction)
 	end
 
 
-	if filename and filename ~= "" then
-		mapResource["ResKey_Action_" .. mission.maxDictId] = filename
+	if arg_filename and arg_filename ~= "" then
+		mapResource["ResKey_Action_" .. mission.maxDictId] = arg_filename
 		--							[1] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_6\"));",
 		mission.trig.actions[trig_n] = "a_do_script_file(getValueResourceByKey('ResKey_Action_"..mission.maxDictId.."')); mission.trig.func[" .. trig_n .. "]=nil;"
 	else
@@ -370,21 +370,21 @@ function AddFileTriggerTempo(filename, time, predicat0, ActionPredicate0)
 
 	mission.trig.func[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
 	mission.trig.flag[trig_n] = true
-	mission.trig.conditions[trig_n] = "return(c_time_after(" .. time .. ") )"
+	mission.trig.conditions[trig_n] = "return(c_time_after(" .. arg_time .. ") )"
 
 	mission.trigrules[trig_n] = {
 		['rules'] = {
 			[1] = {
-				["seconds"] = time,
+				["seconds"] = arg_time,
 				["predicate"] = "c_time_after",
 			},
 		},
 		['eventlist'] = '',
 		['comment'] = 'Trigger ' .. trig_n,
-		['predicate'] = predicat0,
+		['predicate'] = arg_predicat0,
 
 	}
-	mission.trigrules[trig_n]['actions'] = Table_trigrulesAction
+	mission.trigrules[trig_n]['actions'] = table_trigrulesAction
 
 	-- table.insert(mission.trigrules[trig_n]['actions'], trigrulesAction)
 end
@@ -426,12 +426,12 @@ local function makePayloadRestricted()
 
 			-- La mission extraite est maintenant stockée dans env.mission
 			if env.mission then
-				for _side, side in pairs(env.mission.coalition) do
-					for countryN, country in pairs(side.country) do
-						for category, groups in pairs(country) do
+				for _, side in pairs(env.mission.coalition) do
+					for _, country in pairs(side.country) do
+						for _, groups in pairs(country) do
 							if type(groups) == "table" and groups["group"] then
-								for Ngroup, group in pairs(groups["group"]) do
-									for Nunit, unit in pairs(group.units) do
+								for _, group in pairs(groups["group"]) do
+									for _, unit in pairs(group.units) do
 										if unit.payload and unit.payload.restricted then
 											PayloadRestricted[unit.type] = unit.payload.restricted
 										end
@@ -484,7 +484,7 @@ end
 -- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
 
-if 	not mission_ini  or mission_ini == nil  then
+if not mission_ini  or mission_ini == nil  then
 	dofile("Init/conf_mod.lua")
 end
 
@@ -606,8 +606,8 @@ end
 
 --si ADD_data existe, on le precharge pour l'ajouter au DATA centram
 local addDataFile02 = "../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua"
-local TestPathADD_addData = io.open(addDataFile02, "r")										--cette maniere de chercher la presence d un fichier evite un plantage
-if TestPathADD_addData ~= nil  then														--check si le fichier existe dans ScriptsMod
+local testPathADD_addData = io.open(addDataFile02, "r")										--cette maniere de chercher la presence d un fichier evite un plantage
+if testPathADD_addData ~= nil  then														--check si le fichier existe dans ScriptsMod
 	dofile("../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua")
 
 	if add_EPLRS_Capacity then
@@ -729,7 +729,6 @@ if BugList and type(BugList) == "table" and #BugList >= 1 then
 end
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Debug.lua")
 
-
 camp["groundthreats"] = groundthreats
 
 
@@ -741,7 +740,7 @@ mission.currentKey = 1010000															--not clear how this works but is req
 --########   1   ##############
 --########   1   ##############
 
-local GroupId = {}
+local groupId = {}
 local uniId = {}
 local name = {}
 local groupIdError = {}
@@ -751,12 +750,12 @@ local unitIdError = {}
 local minUnitId = 999999
 local maxUnitId = 0
 
-for side_name, side in pairs(mission.coalition) do
-	for country_n, country_ in pairs(side.country) do
-		for categorie, categorie_ in pairs(country_) do
+for _, side in pairs(mission.coalition) do
+	for _, country_ in pairs(side.country) do
+		for _, categorie_ in pairs(country_) do
 			if type(categorie_) == "table" and categorie_.group then
-				for _group, group in pairs(categorie_) do
-					for groupN, group_ in pairs(group) do
+				for _, group in pairs(categorie_) do
+					for _, group_ in pairs(group) do
 
 						if group_.groupId > maxGroupId then
 							maxGroupId = group_.groupId
@@ -772,8 +771,8 @@ for side_name, side in pairs(mission.coalition) do
 						end
 
 						
-						if not GroupId[group_.groupId] then
-							GroupId[group_.groupId] = group_.groupId
+						if not groupId[group_.groupId] then
+							groupId[group_.groupId] = group_.groupId
 						else
 							-- print("MainNM error, duplicate of |"..categorie.."| OLD GroupId |".. GroupId[group_.groupId].."|and|"..tostring(group_.name) )
 
@@ -781,7 +780,7 @@ for side_name, side in pairs(mission.coalition) do
 						end
 
 						--TODO ajouter ici une condition pour que les unitId des pistes (FARP et autres) ne soient pas changé
-						for unitN, unit in ipairs(group_.units) do
+						for _, unit in ipairs(group_.units) do
 
 							if unit.unitId > maxUnitId then
 								maxUnitId = unit.unitId
@@ -806,7 +805,7 @@ for side_name, side in pairs(mission.coalition) do
 end
 print()
 --renumerote automatiquement le groupId en doublon
-for nError , refName in pairs(groupIdError) do
+for _ , refName in pairs(groupIdError) do
 
 	local nTentative = 0
 	local found = false
@@ -814,7 +813,7 @@ for nError , refName in pairs(groupIdError) do
 	if minGroupId > 1 then
 		repeat
 			testId = math.random(1,minGroupId)
-			if not GroupId[testId] then
+			if not groupId[testId] then
 				found = true
 			end
 			nTentative = nTentative + 1
@@ -824,7 +823,7 @@ for nError , refName in pairs(groupIdError) do
 	if not found then
 		repeat
 			testId = math.random(minGroupId,maxGroupId)
-			if not GroupId[testId] then
+			if not groupId[testId] then
 				found = true
 			end
 			nTentative = nTentative + 1
@@ -843,12 +842,12 @@ for nError , refName in pairs(groupIdError) do
 	end
 
 	--change l'Id dans la mission
-	for side_name, side in pairs(mission.coalition) do																--iterate through sides
-		for country_n, country_ in pairs(side.country) do															--iterate through countries
-			for categorie, categorie_ in pairs(country_) do
+	for _, side in pairs(mission.coalition) do																--iterate through sides
+		for _, country_ in pairs(side.country) do															--iterate through countries
+			for _, categorie_ in pairs(country_) do
 				if type(categorie_) == "table" and categorie_.group then
-					for _group, group in pairs(categorie_) do
-						for groupN, group_ in pairs(group) do
+					for _, group in pairs(categorie_) do
+						for _, group_ in pairs(group) do
 							if group_.name == refName then
 								-- print("MainNM MISSION update NEW GroupId |"..testId.."| GroupName |".. group_.name)
 								group_.groupId = testId
@@ -882,7 +881,7 @@ end
 print()
 
 --renumerote automatiquement le uniId en doublon
-for nErrorB , refNameB in pairs(unitIdError) do
+for _ , refNameB in pairs(unitIdError) do
 
 	local nTentative = 0
 	local found = false
@@ -918,14 +917,14 @@ for nErrorB , refNameB in pairs(unitIdError) do
 		minUnitId = testId
 	end
 
-	for side_nameB, sideB in pairs(mission.coalition) do																--iterate through sides
-		for NcountryB, countryB in pairs(sideB.country) do															--iterate through countries
-			for NcategorieB, categorieB in pairs(countryB) do
+	for _, sideB in pairs(mission.coalition) do																--iterate through sides
+		for _, countryB in pairs(sideB.country) do															--iterate through countries
+			for _, categorieB in pairs(countryB) do
 				if type(categorieB) == "table" and categorieB.group then
-					for _groupB, groupsB in pairs(categorieB) do
-						for groupNB, groupB in pairs(groupsB) do
+					for _, groupsB in pairs(categorieB) do
+						for _, groupB in pairs(groupsB) do
 
-							for unitNB, unitB in ipairs(groupB.units) do
+							for _, unitB in ipairs(groupB.units) do
 								if unitB.name == refNameB then
 									-- print("MainNM update MISSION NEW uniId |"..testId.."| groupName |".. groupB.name.."| unitName |".. unitB.name)
 									unitB.unitId = testId
@@ -963,22 +962,16 @@ end
 
 --########   2   ##############
 --check les doublons de name, groupId et unitId
-local GroupId = {}
-local uniId = {}
-local name = {}
-local groupIdError = {}
-local minGroupId = 999999
-local maxGroupId = 0
-local unitIdError = {}
-local minUnitId = 999999
-local maxUnitId = 0
+groupId = {}
+uniId = {}
+name = {}
 
-for side_name, side in pairs(mission.coalition) do																--iterate through sides
-	for country_n, country_ in pairs(side.country) do															--iterate through countries
-		for categorie, categorie_ in pairs(country_) do
+for _, side in pairs(mission.coalition) do																--iterate through sides
+	for _, country_ in pairs(side.country) do															--iterate through countries
+		for _, categorie_ in pairs(country_) do
 			if type(categorie_) == "table" and categorie_.group then
-				for _group, group in pairs(categorie_) do
-					for groupN, group_ in pairs(group) do
+				for _, group in pairs(categorie_) do
+					for _, group_ in pairs(group) do
 
 						if not  name[group_.name] then
 							name[group_.name] = group_.name
@@ -987,9 +980,9 @@ for side_name, side in pairs(mission.coalition) do																--iterate thro
 							-- print("DCE debug") os.execute 'pause'
 						end
 
-						if not  GroupId[group_.groupId] then
+						if not  groupId[group_.groupId] then
 							-- GroupId[group_.groupId] = group_.groupId
-							GroupId[group_.groupId] = group_.name
+							groupId[group_.groupId] = group_.name
 						else
 							-- print("MainNM error, duplicate of GroupId |"..categorie.."| |".. GroupId[group_.groupId].."| and |"..tostring(group_.name))
 							-- print("DCE debug") os.execute 'pause'
@@ -1017,12 +1010,12 @@ end
 --supprime les informations de DCE dans le fichier mission
 
 if Debug.allUnhide then
-	for side_name, side in pairs(mission.coalition) do																--iterate through sides
-		for country_n, country_ in pairs(side.country) do															--iterate through countries
-			for categorie, categorie_ in pairs(country_) do
+	for _, side in pairs(mission.coalition) do																--iterate through sides
+		for _, country_ in pairs(side.country) do															--iterate through countries
+			for _, categorie_ in pairs(country_) do
 				if type(categorie_) == "table" and categorie_.group then
-					for _group, groups in pairs(categorie_) do
-						for groupN, group in pairs(groups) do
+					for _, groups in pairs(categorie_) do
+						for _, group in pairs(groups) do
 
 							if group.hidden then
 								group.hidden = false
@@ -1038,15 +1031,15 @@ end
 
 --met à jour ce lien dans le fichier mission
 --FARP-Paphos-Beacon etc example
-for side_name, side in pairs(mission.coalition) do
-	for country_n, country in pairs(side.country) do
+for _, side in pairs(mission.coalition) do
+	for _, country in pairs(side.country) do
 		if type(country) == "table" then
-			for typeChapter, chapter in pairs(country) do
+			for _, chapter in pairs(country) do
 				if type(chapter) == "table" then
-					for groupN, group in ipairs(chapter.group) do
+					for _, group in ipairs(chapter.group) do
 						if group.route.points[1]  and group.route.points[1].task then
 							if group.route.points[1].task.params.tasks then
-								for taskN, task in ipairs(group.route.points[1].task.params.tasks) do
+								for _, task in ipairs(group.route.points[1].task.params.tasks) do
 									if task.params and task.params.action and task.params.action.id and task.params.action.id == "TransmitMessage" then
 
 										if oldMapResource[task.params.action.params.file] == "beacon.ogg" then
@@ -1093,7 +1086,7 @@ end
 
 if ListRequiredModules then
 	local infoShow = false
-	for nameN, module in pairs(ListRequiredModules) do
+	for _, module in pairs(ListRequiredModules) do
 
 		if module and module ~= nil then
 

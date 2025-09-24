@@ -79,7 +79,6 @@ local parkSarAirBase = {}				--reprend la table db_airbases[basename].parkAlertS
 local is_helicopter
 local baseIsFARP
 local baseIsCarrier
-local allFlightName_AtoFP = {}
 local tacan_byTarget = {}				--liste les TACAN pour un meme parttern , util pour les multiples tanker
 local polkaOff = false					--evite la dance des aeronefs sur le parking (Inter et SAR compris)
 local proximityAircraft = {} 			-- Table des avions de ravitaillement déjà enregistrés
@@ -658,6 +657,7 @@ end
 ---- function to get datalink Id -----
 local pack_L16_unitId = {}		--permet de retrouver tous les unitId participant à un package
 local STN_L16_Id = {}
+
 local function Get_L16_Id()
 	local i = 0
 	local preTest = "002"
@@ -673,7 +673,7 @@ local function Get_L16_Id()
 	until STN_L16_Id[testId] == nil 	or i >= 300
 
 	if i >= 300 then
-		local preTest = "003"
+		preTest = "003"
 		repeat
 			i=i+1
 			-- local digit1 = math.random(0,7)
@@ -688,7 +688,7 @@ local function Get_L16_Id()
 	end
 
 	if i >= 600 then
-		local preTest = "00"
+		preTest = "00"
 		repeat
 			i=i+1
 			-- local digit1 = math.random(0,7)
@@ -1630,13 +1630,15 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				local totFlightDist = 0
 				local isHumain = flight[f].player or flight[f].client
 
-				--pour eviter le pb du flight 2 du main(strike) qui peut etre en comflit avec une escorte strike 		
-				local tempNumFlight = f
-				local groupName = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. tempNumFlight
-				repeat
-					groupName = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. tempNumFlight
-					tempNumFlight = tempNumFlight + 1
-				until not allFlightName_AtoFP[groupName]
+				-- --pour eviter le pb du flight 2 du main(strike) qui peut etre en conflit avec une escorte strike 		
+				-- local tempNumFlight = f
+				-- local groupName = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. tempNumFlight
+				-- repeat
+				-- 	groupName = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. tempNumFlight
+				-- 	tempNumFlight = tempNumFlight + 1
+				-- until not allFlightName_AtoFP[groupName]
+
+				local groupName = flight[f].groupName
 
 				-- inheritedFrom 
 				local type_withData = flight[f].type
@@ -2104,7 +2106,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 										GoupTaskTemp = GoupTaskTemp_
 										id_task = "Bombing"
-										for id_task_ , value in pairs(StrikeDegradedMode[GoupTaskTemp]) do
+										for id_task_ , value2 in pairs(StrikeDegradedMode[GoupTaskTemp]) do
 											id_task = id_task_
 											goodTask = true
 
@@ -3086,9 +3088,9 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 									table.remove(target_e, 1)																	--delete first element
 								end
 
-								local tgtlist = ""																					--list of of names of all target elements
+								local tgtlist2 = ""																					--list of of names of all target elements
 								for n,e in ipairs(target_e) do
-									tgtlist = tgtlist .. "{'" .. flight[f].target.elements[e].name .. "','" .. tostring(flight[f].target.elements[e].class) .. "','" .. tostring(flight[f].target.elements[e].x) .. "','" .. tostring(flight[f].target.elements[e].y) .. "'}, "
+									tgtlist2 = tgtlist2 .. "{'" .. flight[f].target.elements[e].name .. "','" .. tostring(flight[f].target.elements[e].class) .. "','" .. tostring(flight[f].target.elements[e].x) .. "','" .. tostring(flight[f].target.elements[e].y) .. "'}, "
 								end
 
 								if is_helicopter or AGAS_ready == false  then
@@ -3105,7 +3107,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 													["id"] = "Script",
 													["params"] =
 													{
-														["command"] = "CustomMixClassAttack('" .. groupName .. "', {" .. tgtlist .. "}, '" .. expendQty .. "', '" .. weaponType .. "', '" .. attackType .. "', '" .. attackAlt .. "', '" .. GoupTaskTemp ..  "')",	--this is a custom written task to allow all aircraft in flight to attack multiple static objects simultenously
+														["command"] = "CustomMixClassAttack('" .. groupName .. "', {" .. tgtlist2 .. "}, '" .. expendQty .. "', '" .. weaponType .. "', '" .. attackType .. "', '" .. attackAlt .. "', '" .. GoupTaskTemp ..  "')",	--this is a custom written task to allow all aircraft in flight to attack multiple static objects simultenously
 													},
 
 												},
@@ -3132,7 +3134,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 													["params"] =
 													{
 																	--AirGroundAttackTask(FlightName,				 Target,						 WeaponType,string			 expendQty,string		 dive,			 OffsetAngle, 			ClimbAngle, 		PopAlt, 		AttackDist, 			Reattack,			 Debug)
-														["command"] = "AirGroundAttackTask('" .. groupName .. "', {" .. tgtlist .. "}, '" .. weaponType_ .. "', '"  .. expendQty .. "', " .. tostring(dive) .. ", " .. tostring(OffsetAngle) .. ", " .. tostring(ClimbAngle) ..", " .. tostring(PopAlt) ..", " .. tostring(AttackDist) ..", " .. tostring(Reattack) .. ", " .. tostring(DebugTask) ..  ")",
+														["command"] = "AirGroundAttackTask('" .. groupName .. "', {" .. tgtlist2 .. "}, '" .. weaponType_ .. "', '"  .. expendQty .. "', " .. tostring(dive) .. ", " .. tostring(OffsetAngle) .. ", " .. tostring(ClimbAngle) ..", " .. tostring(PopAlt) ..", " .. tostring(AttackDist) ..", " .. tostring(Reattack) .. ", " .. tostring(DebugTask) ..  ")",
 													},
 												},
 											},
@@ -3289,7 +3291,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
 								-- + ATO_FP_Debug03 Antiship strike
-								local task_entry = {
+								task_entry = {
 									["enabled"] = true,
 									["auto"] = false,
 									["id"] = "AttackGroup",
@@ -3361,8 +3363,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
 							local expend = flight[f].loadout.expend
-							local attackType = flight[f].loadout.attackType or "nil"
-							local attackAlt = flight[f].loadout.attackAlt or flight[f].loadout.hAttack
+							-- local attackType = flight[f].loadout.attackType or "nil"
+							-- attackAlt = flight[f].loadout.attackAlt or flight[f].loadout.hAttack
 							local tgtx = "n/a"																					--target coordinate n/a, custom attach script will determine latest target position at time of attack during the misssion
 							local tgty = "n/a"																					--target coordinate n/a, custom attach script will determine latest target position at time of attack during the misssion
 							if flight[f].target.class ~= "vehicle" then															--if target is not a vehicle or ship, then known target coordinates are used
@@ -3370,7 +3372,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								tgty = flight[f].target.y																		--use known target coordinates
 							end
 
-							local task_entry = {																				--task is a command to run LUA code
+							task_entry = {																				--task is a command to run LUA code
 								["enabled"] = true,
 								["auto"] = false,
 								["id"] = "WrappedAction",
@@ -3847,7 +3849,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 							local altitude = AltitudeCruise * 2/3
-							local speed = pack[p].main[1].loadout.vCruise
+							speed = pack[p].main[1].loadout.vCruise
 
 							if flight[f].loadout.vCruise then
 								speed = flight[f].loadout.vCruise
@@ -4002,7 +4004,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					-- ************* SEAD switch from IP to egress
 					if flight[f].route[w].id == "IP" and flight[f].task == "SEAD" then
-						local speed = pack[p].main[1].loadout.vCruise
+						speed = pack[p].main[1].loadout.vCruise
 						if flight[f].loadout.vCruise and flight[f].loadout.vCruise < speed then
 							speed = flight[f].loadout.vCruise / 3 * 2
 						end
@@ -4050,7 +4052,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					--orbit on egress
 					if flight[f].route[w].id == "Egress" and flight[f].task == "Escort" then
-						local speed = pack[p].main[1].loadout.vCruise
+						speed = pack[p].main[1].loadout.vCruise
 						if flight[f].loadout.vCruise and flight[f].loadout.vCruise < speed then
 							speed = flight[f].loadout.vCruise / 3 * 2
 						end
@@ -4287,8 +4289,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 										tempTimeStr = FormatTime( tempTime, "hh:mm")
 										-- tempTime =  math.floor((tempTime / 60) + 0.5)	.. " mn"
 
-										local space = 6 - string.len(tostring(tempTimeStr))
-										local s = ""
+										space = 6 - string.len(tostring(tempTimeStr))
+										s = ""
 										for n = 1, space  do
 											s = s .. " "
 										end
@@ -5893,25 +5895,25 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 				if flight[f].task == "SAR" and (pedroOK[flight[f].base] == nil and db_airbases[flight[f].base].unitname) then
 
 					--recherche le nombre de wpt du CV pour que le pedro le suive
-					local PedroLinkCV = {}
+					local pedroLinkCV = {}
 					local breakFlag = false
-					for coalition_name, coal in pairs(mission.coalition) do
-						for country_n, country in pairs(coal.country) do
+					for _, coal in pairs(mission.coalition) do
+						for _, country in pairs(coal.country) do
 							if country.ship then
-								for group_n, group in pairs(country.ship.group) do
-									for w = 1, #group.units do
-										if group.units[w].name and group.units[w].name == db_airbases[flight[f].base].unitname then
+								for _, mGroup in pairs(country.ship.group) do
+									for w = 1, #mGroup.units do
+										if mGroup.units[w].name and mGroup.units[w].name == db_airbases[flight[f].base].unitname then
 
-											PedroLinkCV = {
-												Gname = group.name,
-												Uname = group.units[w].name ,
-												id_group = group.groupId,
-												id_unit = group.units[w].unitId,
-												x = group.units[w].x,
-												y = group.units[w].y,
-												startTime = group.start_time,
-												nbWPT = #group.route.points,
-												frequency = group.units[w].frequency/1000000,
+											pedroLinkCV = {
+												Gname = mGroup.name,
+												Uname = mGroup.units[w].name ,
+												id_group = mGroup.groupId,
+												id_unit = mGroup.units[w].unitId,
+												x = mGroup.units[w].x,
+												y = mGroup.units[w].y,
+												startTime = mGroup.start_time,
+												nbWPT = #mGroup.route.points,
+												frequency = mGroup.units[w].frequency/1000000,
 											}
 											breakFlag = true
 											break
@@ -5939,34 +5941,34 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 						action = "From Parking Area Hot"
 						type = "TakeOffParkingHot"
 						alt = 0
-						pos.x = PedroLinkCV.x
-						pos.y = PedroLinkCV.y
+						pos.x = pedroLinkCV.x
+						pos.y = pedroLinkCV.y
 						onCV = true
 					elseif  Data_configuration.SC_SpawnOn["Pedro"] == "catapult" and playerTask ~= "Intercept" then
 						action = "From Runway"
 						type = "Turning TakeOff"
 						alt = 0
-						pos.x = PedroLinkCV.x
-						pos.y = PedroLinkCV.y
+						pos.x = pedroLinkCV.x
+						pos.y = pedroLinkCV.y
 						onCV = true
 					else
 						action = "Turning Point"
 						type = "Turning Point"
 						alt = 60
-						pos.x = PedroLinkCV.x + 100
-						pos.y = PedroLinkCV.y + 100
+						pos.x = pedroLinkCV.x + 100
+						pos.y = pedroLinkCV.y + 100
 					end
 
 					group.units[1].alt = alt
 					group.units[1].speed = 41.7
 					group.units[1].x = pos.x
 					group.units[1].y = pos.y
-					group.units[1].name = "Unit_Pedro_"..PedroLinkCV.Uname.."_1"
+					group.units[1].name = "Unit_Pedro_"..pedroLinkCV.Uname.."_1"
 
 					group.x = pos.x
 					group.y = pos.y
-					group.name = "Group_Pedro_"..PedroLinkCV.Uname.."_1"
-					group.frequency = PedroLinkCV.frequency
+					group.name = "Group_Pedro_"..pedroLinkCV.Uname.."_1"
+					group.frequency = pedroLinkCV.frequency
 					group.start_time = 0
 
 					spawn_time = 0
@@ -5996,8 +5998,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 										["params"] =
 										{
 											["lastWptIndexFlagChangedManually"] = true,
-											["groupId"] =   PedroLinkCV.id_group,
-											["lastWptIndex"] = PedroLinkCV.nbWPT,
+											["groupId"] =   pedroLinkCV.id_group,
+											["lastWptIndex"] = pedroLinkCV.nbWPT,
 											["lastWptIndexFlag"] = true,
 											["pos"] =
 											{
@@ -6010,7 +6012,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 								}, -- end of ["tasks"]
 							}, -- end of ["params"]
 						}, -- end of ["task"]
-						ETA = PedroLinkCV.startTime,
+						ETA = pedroLinkCV.startTime,
 						ETA_locked = true,
 						["y"] =  pos.y,
 						["x"] =  pos.x,
@@ -6019,8 +6021,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 					}
 
 					if onCV then
-						waypoints[1].linkUnit = PedroLinkCV.id_unit
-						waypoints[1].helipadId = PedroLinkCV.id_unit
+						waypoints[1].linkUnit = pedroLinkCV.id_unit
+						waypoints[1].helipadId = pedroLinkCV.id_unit
 					end
 
 
@@ -6047,8 +6049,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 										["params"] =
 										{
 											["lastWptIndexFlagChangedManually"] = true,
-											["groupId"] = PedroLinkCV.id_group,
-											["lastWptIndex"] = PedroLinkCV.nbWPT,
+											["groupId"] = pedroLinkCV.id_group,
+											["lastWptIndex"] = pedroLinkCV.nbWPT,
 											["lastWptIndexFlag"] = true,
 											["pos"] =
 											{
@@ -6062,7 +6064,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 							}, -- end of ["params"]
 						}, -- end of ["task"]
 						["type"] = "Turning Point",
-						ETA = PedroLinkCV.startTime + 60,
+						ETA = pedroLinkCV.startTime + 60,
 						ETA_locked = false,
 						["y"] = pos.y + 300,
 						["x"] = pos.x + 300,
@@ -6140,13 +6142,8 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 				if SinglePlayer and flight[f].player and not SingleWithDServer then									--if this is the player flight
-				-- Eagle_01 Modification E02.a												--Make Flight Lead an AI
-					-- if flight[f].type == 'I-16' or flight[f].type == 'A-4E-C' then			--Compensate for Unit without a radio so AI in flight will automatically attack targets
-						-- units[1]["skill"] = "Excellent"
-						-- units[2]["skill"] = "Client"
-					-- else
-						units[1]["skill"] = "Player"										--make first aircraft in flight the player aircraft
-					-- end																		--make first aircraft in flight the player aircraft
+					local unitPlayer = flight[f].unitPlayer or 1
+					units[unitPlayer]["skill"] = "Player"										--make first aircraft in flight the player aircraft
 
 				-- modification M11.l : Multiplayer	
 				elseif isHumain and not SingleWithDServer then
@@ -6286,7 +6283,7 @@ for side, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					--determine une nouvelle altitude pour ne pas prendre une montagne
 					-- modification M11A.t  Multiplayer (t: AltitudeFloor)
-					local nameTheatre =  string.lower(mission.theatre)
+					-- nameTheatre =  string.lower(mission.theatre)
 					local altFloor = -1
 
 					if AltitudeFloorNew  then
@@ -7491,11 +7488,6 @@ if camp.player then
 		camp.player.package[camp.player.pack_n] = Deepcopy(ATO[camp.player.side][camp.player.pack_n])
 	end
 
-	local camp_str = "camp.player = " .. TableSerialization(camp.player, 0)						--make a string
-	local campFile = io.open("Debug/CAMP_player_AA.lua", "w")	 or error("Failed to open debug file")
-	campFile:write(camp_str)																		--save new data
-	campFile:close()
-
 	--for multi-package strikes, add flights from other packages with the same target to player package to enrich the briefiing
 	for p = 1, #ATO[camp.player.side] do										--iterate through packages in player side	
 		for role,flight in pairs(ATO[camp.player.side][p]) do					--iterate through roles in package (main, SEAD, escort)		
@@ -7822,19 +7814,19 @@ end
 
 
 if Debug.debug then
-	local camp_str = "ATO_AtoFP = " .. TableSerialization(ATO, 0)						--make a string
-	local campFile = io.open("Debug/ATO_AtoFP.lua", "w")  or error("Failed to open debug file")
+	camp_str = "ATO_AtoFP = " .. TableSerialization(ATO, 0)						--make a string
+	campFile = io.open("Debug/ATO_AtoFP.lua", "w")  or error("Failed to open debug file")
 	campFile:write(camp_str)																		--save new data
 	campFile:close()
 
 	if camp.client then
-		local camp_str = "client = " .. TableSerialization(camp.client, 0)						--make a string
-		local campFile = io.open("Debug/camp_client_AtoFP.lua", "w")  or error("Failed to open debug file")
+		camp_str = "client = " .. TableSerialization(camp.client, 0)						--make a string
+		campFile = io.open("Debug/camp_client_AtoFP.lua", "w")  or error("Failed to open debug file")
 		campFile:write(camp_str)																		--save new data
 		campFile:close()
 	elseif camp.player then
-		local camp_str = "player = " .. TableSerialization(camp.player, 0)						--make a string
-		local campFile = io.open("Debug/camp_player_AtoFP.lua", "w")  or error("Failed to open debug file")
+		camp_str = "player = " .. TableSerialization(camp.player, 0)						--make a string
+		campFile = io.open("Debug/camp_player_AtoFP.lua", "w")  or error("Failed to open debug file")
 		campFile:write(camp_str)																		--save new data
 		campFile:close()
 	end

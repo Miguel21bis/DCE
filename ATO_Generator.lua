@@ -1730,7 +1730,7 @@ for sideName, draftT in pairs(Draft_sorties) do
 		end
 
 		--rearange aléatoirement les unites pour que ne soit pas toujours les memes
-		local shuffled = {}
+		shuffled = {}
 		for i, v in ipairs(oob_air["blue"]) do
 			local pos = math.random(1, #shuffled+1)
 			table.insert(shuffled, pos, v)
@@ -3064,7 +3064,7 @@ local function createATO_table(draftPriority)
 											-- end
 
 
-											for _p,_support in pairs(draft.support) do																							--iterate through support in draft sortie
+											for _,_support in pairs(draft.support) do																							--iterate through support in draft sortie
 												tmpTxt = tmpTxt .."_B1_"
 												if support_available and type(_support) == "table" then
 													tmpTxt = tmpTxt .."_B2_"
@@ -3098,16 +3098,18 @@ local function createATO_table(draftPriority)
 										end
 
 										--si c'est un task d'une demande MP, on chunte la restrition plus loin
-										local MPOverride_C  = false
+										local override_MP_C  = false
 										if multiPlaneSet[side] and multiPlaneSet[side][draft.type] and multiPlaneSet[side][draft.type][draft.task]
 											-- and support.number < AcftAvail[support.name].unassigned
 										then
-											MPOverride_C = true
+											override_MP_C = true
 
 											if isDebugModeC then
 												debugLog(draft.id.." AtoG passe C_02a "..draft.type.." "..draft.task )
 											end
 										end
+										-- print("AtoG SAR/CSAR passe : AtoG passe C_02a type: "..draft.type.." ,task: "..draft.task.." ,override_MP_C: "..tostring(override_MP_C))
+														
 
 
 										if isDebugModeC then
@@ -3120,7 +3122,7 @@ local function createATO_table(draftPriority)
 										-- modification M11.u : Multiplayer	(u: reserve avion Escorte)
 										-- interdit aux possible avion d'escorte de tout donner dans CAP ou Intercept
 
-										if not MPOverride_C and (draft.task == "CAP" or draft.task == "Intercept" )   then
+										if not override_MP_C and (draft.task == "CAP" or draft.task == "Intercept" )   then
 
 											for n_squad, squad in pairs(oob_air[side]) do
 												if squad.type == draft.type and squad.name == draft.name and ((squad.tasks["Escort"] and squad.tasks["Escort"] == true)
@@ -3209,7 +3211,7 @@ local function createATO_table(draftPriority)
 										-- end
 
 										if isDebugModeC then
-											debugLog(draft.id.." AtoG passe C_04  support_available "..tostring(support_available).." MPOverride_C: "..tostring(MPOverride_C))
+											debugLog(draft.id.." AtoG passe C_04  support_available "..tostring(support_available).." MPOverride_C: "..tostring(override_MP_C))
 										end
 
 										--add new package to ATO
@@ -3240,46 +3242,46 @@ local function createATO_table(draftPriority)
 											--********************************************************************************************
 
 											--add flights of 1, 2 or 4 aircraft to package
-											local function AddFlight(assign, role, entry)
+											local function addFlight(arg_Assign, arg_Role, arg_Entry)
 
 												local assigned
-												while assign > 0 do																		--loop as long as there are aircraft to assign
+												while arg_Assign > 0 do																		--loop as long as there are aircraft to assign
 
 													local debugA = ""
 													local debugE = ""
 
-													if entry.flights then																--for multiple flights with station time (CAP, AWACS, Tanker etc.)
+													if arg_Entry.flights then																--for multiple flights with station time (CAP, AWACS, Tanker etc.)
 														local flightsize = math.ceil(draft.target.firepower.max / draft.loadout.firepower)	--how many aircraft should be in each flight
-														debugA = "assign: "..assign.." >=? flightsize: "..flightsize
-														if assign >= flightsize then													--if there are more aircraft left to assign than the size of one flight
+														debugA = "assign: "..arg_Assign.." >=? flightsize: "..flightsize
+														if arg_Assign >= flightsize then													--if there are more aircraft left to assign than the size of one flight
 															assigned = flightsize														--assign one full flight
 															debugA = debugA .." ||if assign >= flightsize: assigned: "..assigned
 														else																			--if there are less aircraft left to assign than size of one flight
-															assigned = assign
+															assigned = arg_Assign
 															debugA = debugA .." ||else assigned: "..assigned												--assign whatever is left
 														end
 
-														if entry.task == "CAP" then
+														if arg_Entry.task == "CAP" then
 															if assigned < 2 then
 																assigned = 2
 															end
 														end
 
-														entry.flights = entry.flights - 1												--one less flight to assign
+														arg_Entry.flights = arg_Entry.flights - 1												--one less flight to assign
 
-														debugA = debugA .." ||result entry.flights: "..entry.flights
+														debugA = debugA .." ||result entry.flights: "..arg_Entry.flights
 
-													elseif  entry.task == "Escort Jammer" or entry.task == "Flare Illumination" or entry.task == "Laser Illumination" then		--for tasks with single aircraft
+													elseif arg_Entry.task == "Escort Jammer" or arg_Entry.task == "Flare Illumination" or arg_Entry.task == "Laser Illumination" then		--for tasks with single aircraft
 														assigned = 1																	--assign one aircraft per flight	
-													elseif entry.task == "Transport" then
-														if multiPlaneSet and multiPlaneSet[side] and multiPlaneSet[side][draft.type]  and multiPlaneSet[side][draft.type][entry.task] then
-															assigned = assign
+													elseif arg_Entry.task == "Transport" then
+														if multiPlaneSet and multiPlaneSet[side] and multiPlaneSet[side][draft.type]  and multiPlaneSet[side][draft.type][arg_Entry.task] then
+															assigned = arg_Assign
 														else
 															assigned = 1
 														end
 
-													elseif entry.task == "Intercept" then
-														if assign >= 4 then																--if more than 2 aircraft are to be assigned
+													elseif arg_Entry.task == "Intercept" then
+														if arg_Assign >= 4 then																--if more than 2 aircraft are to be assigned
 															assigned = 4																--assign flight of 2 aircaft
 														-- if assign >= 2 then																--if more than 2 aircraft are to be assigned
 														-- 	assigned = 2
@@ -3288,30 +3290,31 @@ local function createATO_table(draftPriority)
 														end
 													-- elseif (entry.type == "S-3B" or entry.type == "F-117A" or entry.type == "B-1B" or entry.type == "B-52H" or entry.type == "Tu-22M3" or entry.type == "Tu-95MS" or entry.type == "Tu-142" or entry.type == "Tu-160" or entry.type == "MiG-25RBT")
 													-- and entry.task ~= "Runway Attack" then	--for bombers	
-													elseif (Data_divers[entry.type] and Data_divers[entry.type].flyingAlone) and entry.task ~= "Runway Attack" then	--for bombers
+													elseif (Data_divers[arg_Entry.type] and Data_divers[arg_Entry.type].flyingAlone) and arg_Entry.task ~= "Runway Attack" then	--for bombers
 														assigned = 1																	--assigne one aircraft per flight
-													elseif entry.task == "Reconnaissance" then											--for recon
-														if assign == 1 then																--if there is one aircraft left to assign
+													elseif arg_Entry.task == "Reconnaissance" then											--for recon
+														if arg_Assign == 1 then																--if there is one aircraft left to assign
 															assigned = 1																--assigne one aircraft per flight
-														elseif assign >= 4 then															--if more than 4 aircraft are to be assigned
+														elseif arg_Assign >= 4 then															--if more than 4 aircraft are to be assigned
 															assigned = 4																--assign flight of 4 aircaft
-														elseif assign == 3 then															--if more than 3 aircraft are to be assigned
+														elseif arg_Assign == 3 then															--if more than 3 aircraft are to be assigned
 															assigned = 3																--assign flight of 3 aircaft
 														else
 															assigned = 2																--else assign flight of 2 aicraft
 														end
-													elseif (entry.task == "SAR" or entry.task == "CSAR") and not MPOverride_C then											--for recon
+													elseif (arg_Entry.task == "SAR" or arg_Entry.task == "CSAR") and not override_MP_C then											--for recon
+														-- print("AtoG SAR/CSAR assigned 1, override_MP_C: "..tostring(override_MP_C).." , "..arg_Entry.target_name)
 														assigned = 1
 													else																			--for everything else
-														debugE = "else BEFORE assigned: if assigned and assign == 1? "..assign
+														debugE = "else BEFORE assigned: if assigned and assign == 1? "..arg_Assign
 
-														if assigned and assign == 1 then												--if there is one aircraft left to assign and there was already a previous flight assigned, stop assigning (do not add leftover single-ships)
+														if assigned and arg_Assign == 1 then												--if there is one aircraft left to assign and there was already a previous flight assigned, stop assigning (do not add leftover single-ships)
 															break
-														elseif assign >= 4 then															--if more than 4 aircraft are to be assigned
+														elseif arg_Assign >= 4 then															--if more than 4 aircraft are to be assigned
 															assigned = 4																--assign flight of 4 aircaft
 															debugE = debugE .." || elseif assign >= 4 then"
 															else
-															assigned = assign															--else assign flight size of what is left
+															assigned = arg_Assign															--else assign flight size of what is left
 														end
 														debugE = debugE .. " || elseAFTER assigned: "..assigned
 													end
@@ -3327,45 +3330,45 @@ local function createATO_table(draftPriority)
 													end
 
 													local flight = {																	--build ATO flight entry
-														name = entry.name,
-														playable = entry.playable,
-														type = entry.type,
-														modification = entry.modification,
-														callsign = entry.callsign,
-														callsignId = entry.callsignId,
-														helicopter = entry.helicopter,
+														name = arg_Entry.name,
+														playable = arg_Entry.playable,
+														type = arg_Entry.type,
+														modification = arg_Entry.modification,
+														callsign = arg_Entry.callsign,
+														callsignId = arg_Entry.callsignId,
+														helicopter = arg_Entry.helicopter,
 														number = assigned,																--number of aircraft in flight
-														country = entry.country,
-														livery = entry.livery,
-														sidenumber = entry.sidenumber,
-														liveryModex = entry.liveryModex,
-														base = entry.base,
-														airdromeId = entry.airdromeId,
-														parking_id = entry.parking_id,
-														skill = entry.skill,
-														task = entry.task,
-														loadout = entry.loadout,
+														country = arg_Entry.country,
+														livery = arg_Entry.livery,
+														sidenumber = arg_Entry.sidenumber,
+														liveryModex = arg_Entry.liveryModex,
+														base = arg_Entry.base,
+														airdromeId = arg_Entry.airdromeId,
+														parking_id = arg_Entry.parking_id,
+														skill = arg_Entry.skill,
+														task = arg_Entry.task,
+														loadout = arg_Entry.loadout,
 														route = {},																		--route is a table and connot be copied as a whole
-														target = Deepcopy(entry.target),
-														target_name = entry.target_name,
-														firepower = assigned * entry.loadout.firepower,
-														tot_from = entry.tot_from,
-														tot_to = entry.tot_to,
-														id = entry.id,
+														target = Deepcopy(arg_Entry.target),
+														target_name = arg_Entry.target_name,
+														firepower = assigned * arg_Entry.loadout.firepower,
+														tot_from = arg_Entry.tot_from,
+														tot_to = arg_Entry.tot_to,
+														id = arg_Entry.id,
 														score= draft.score,
 														threatsGround = draft.threatsGround,
 														threatsAir = draft.threatsAir,
 													}
-													for r = 1, #entry.route do															--make copy of route table
+													for r = 1, #arg_Entry.route do															--make copy of route table
 														flight.route[r] = {}
-														for k,v in pairs(entry.route[r]) do
+														for k,v in pairs(arg_Entry.route[r]) do
 															flight.route[r][k] = v
 														end
 													end
 
 
 													if isDebugModeC then
-														debugLog(draft.id.." AtoG passe C_05a number "..assigned.." "..entry.task)
+														debugLog(draft.id.." AtoG passe C_05a number "..assigned.." "..arg_Entry.task)
 													end
 
 
@@ -3383,7 +3386,7 @@ local function createATO_table(draftPriority)
 			--######################################################################################################################################
 			--#############"" insert/create ATO table ##############################################################################################
 
-													table.insert(ATO[side][pack_n][role], flight)										--add flight to package role (main, SEAD or escort)											
+													table.insert(ATO[side][pack_n][arg_Role], flight)										--add flight to package role (main, SEAD or escort)											
 
 
 													-- for prioriyN, testTargets in pairs(targetNamePrio[side]) do
@@ -3438,12 +3441,12 @@ local function createATO_table(draftPriority)
 													-- 	end
 													-- end
 
-													AcftAvail[entry.name].assigned = AcftAvail[entry.name].assigned + assigned
-													AcftAvail[entry.name].unassigned = AcftAvail[entry.name].unassigned - assigned		--remove assigned aircraft from total number of available aircraft for this unit
-													assign = assign - assigned															--continue loop until are aircraft are assigned
+													AcftAvail[arg_Entry.name].assigned = AcftAvail[arg_Entry.name].assigned + assigned
+													AcftAvail[arg_Entry.name].unassigned = AcftAvail[arg_Entry.name].unassigned - assigned		--remove assigned aircraft from total number of available aircraft for this unit
+													arg_Assign = arg_Assign - assigned															--continue loop until are aircraft are assigned
 
 													if isDebugModeC then
-														debugLog(draft.id.." AtoG passe C_05b   assign "..assign.." type: "..entry.type.." unassigned: "..AcftAvail[entry.name].unassigned)
+														debugLog(draft.id.." AtoG passe C_05b   assign "..arg_Assign.." type: "..arg_Entry.type.." unassigned: "..AcftAvail[arg_Entry.name].unassigned)
 													end
 
 												end
@@ -3454,7 +3457,7 @@ local function createATO_table(draftPriority)
 											end
 
 											--********************************************************************************************
-											AddFlight(draft.number, "main", draft)												--add main body flights to package
+											addFlight(draft.number, "main", draft)												--add main body flights to package
 											--********************************************************************************************
 
 											for support_name, supportPart in pairs(draft.support) do										--iterate through all package support
@@ -3477,7 +3480,7 @@ local function createATO_table(draftPriority)
 															end
 
 															--********************************************************************************************
-															AddFlight(number, support_name, support)										--add support flights to package
+															addFlight(number, support_name, support)										--add support flights to package
 															--********************************************************************************************
 
 														else
@@ -3619,7 +3622,7 @@ end
 -- _affiche(Draft_sorties.blue[1], "Draft_sorties.blue[1]")
 -- _affiche(Draft_sorties.red[1], "Draft_sorties.red[1]")
 
-local function showAtoSort(newDraftByPriority, tablePrio)
+local function showAtoSort(arg_newDraftByPriority, arg_tablePrio)
 
 	local showSquad
 	local showTarget
@@ -3634,7 +3637,7 @@ local function showAtoSort(newDraftByPriority, tablePrio)
 
 	-- local showSquad = "111.Filo"
 
-	for side, sorties in pairs(newDraftByPriority) do
+	for side, sorties in pairs(arg_newDraftByPriority) do
 		local di = 1
 		debugLog(side.." PART C ")
 
@@ -3655,7 +3658,7 @@ local function showAtoSort(newDraftByPriority, tablePrio)
 
 			if di < Debug.Generator.nb or draft.name == showSquad or nameOK  then
 				debugLog("")
-				debugLog("/n"..	side.." tablePrio: "..tablePrio.." C N° " .. draft_n..
+				debugLog("/n"..	side.." tablePrio: "..arg_tablePrio.." C N° " .. draft_n..
 						-- " /support/ " ..tostring(draft.support)..
 						" /Id" ..tostring(draft.id)..
 						" /Prioriry/ " ..tostring(draft.priorityIni)..
@@ -3805,22 +3808,32 @@ for sidePrio, tableauPrio in pairs(targetListPrio) do
 	end
 end
 
+local allFlightName_AtoG = {}
+--assign le nom des packages
+for _, packages in pairs(ATO) do
+	for packN, pack in pairs(packages) do
+		for _, flights in pairs(pack) do
+			for flightN, flight in pairs(flights) do
+				if type(flight) == "table" and flight.name then
+				
+					--pour eviter le pb du flight 2 du main(strike) qui peut etre en conflit avec une escorte strike 		
+					local tempNumFlight = flightN
+					flight.groupName = "Pack " .. packN .. " - " .. flight.name .. " - " .. flight.task .. " " .. tempNumFlight
+					repeat
+						flight.groupName = "Pack " .. packN .. " - " .. flight.name .. " - " .. flight.task .. " " .. tempNumFlight
+						tempNumFlight = tempNumFlight + 1
+					until not allFlightName_AtoG[flight.groupName]
 
---calcul le nb d'avion en tout
--- local nbAfterPlaneActifTotal = {
--- 	blue = {
--- 		ready = 0,
--- 		reserve = 0
--- 	},
--- 	red = {
--- 		ready = 0,
--- 		reserve = 0
--- 	},
--- }
--- for side, packages in pairs(ATO) do								
--- 	for packN, pack in pairs(packages) do
--- 		for task, flights in pairs(pack) do
--- 			for task, flights in pairs(pack) do
+					-- print("AtoG assign flight G: groupName: " .. tostring(flight.groupName))
+
+				else
+					-- _affiche(flight, "AtoG H flight:: ")
+				end
+
+			end
+		end
+	end
+end
 
 
 
@@ -3867,7 +3880,7 @@ if Debug.debug then
 	end
 
 	resultPourcent =  checkNbPlane.red.thisMission.used / checkNbPlane.red.beforMission.ready * 100
-	local resultPourcent2 =  checkNbPlane.red.thisMission.used / (checkNbPlane.red.beforMission.ready - checkNbPlane.red.beforMission.alreadyInFlight) * 100
+	resultPourcent2 =  checkNbPlane.red.thisMission.used / (checkNbPlane.red.beforMission.ready - checkNbPlane.red.beforMission.alreadyInFlight) * 100
 	print("AtoG caution 2, not enough RED aircraft used compared to available aircraft. Maybe a bug? "..resultPourcent2.." %")
 
 	if resultPourcent < 75 then
@@ -3936,8 +3949,8 @@ if Debug.debug and Debug.Generator.affiche and string.find(Debug.Generator.chapt
 		campFile:close()
 	end
 
-	local camp_str = "camp = " .. TableSerialization(camp, 0)
-	local campFile = io.open("Debug/CAMP_Ato_Generator.lua", "w")
+	camp_str = "camp = " .. TableSerialization(camp, 0)
+	campFile = io.open("Debug/CAMP_Ato_Generator.lua", "w")
 	if campFile then
 		campFile:write(camp_str)
 		campFile:close()
@@ -3958,7 +3971,7 @@ end
 
 
 -- modification M49.c big central db_loadout (c: loadout statistics)
-local found = false
+-- local found = false
 for side, pack in pairs(ATO) do
 	for p = 1, #pack do
 		for role,flight in pairs(pack[p]) do

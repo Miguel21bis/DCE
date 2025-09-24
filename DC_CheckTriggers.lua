@@ -533,11 +533,11 @@ Action = {}
 	function Action.AddImage(filename, side)
 		if side == "blue"  then
 			table.insert(BriefingImagesB, filename)									--add filename to briefing images table, will be added to mission file when this gets created
-			print("DcCT Action.AddImage blue "..filename)
+			-- print("DcCT Action.AddImage blue "..filename)
 		elseif side == "red"  then
 			table.insert(BriefingImagesR, filename)
 		elseif side == "all" or side == "" or side == nil then
-			print("DcCT Action.AddImage all "..filename)
+			-- print("DcCT Action.AddImage all "..filename)
 			table.insert(BriefingImagesB, filename)
 			table.insert(BriefingImagesR, filename)
 		end
@@ -826,18 +826,18 @@ Action = {}
 
 	function Action.AirUnitBase(unitName, tab_baseName)
 
-		local function AirUnitBaseInternal(unitName, baseDestination)
-			if type(baseDestination) ~= "string" then
-				print("DcCT AirUnitBase ERROR unitName: "..tostring(unitName).." the destination database is a table")
-				_affiche(baseDestination, "DcCT baseDestination") os.execute 'pause'
+		local function AirUnitBaseInternal(arg2_unitName, arg2_baseDestination)
+			if type(arg2_baseDestination) ~= "string" then
+				print("DcCT AirUnitBase ERROR unitName: "..tostring(arg2_unitName).." the destination database is a table")
+				_affiche(arg2_baseDestination, "DcCT baseDestination") os.execute 'pause'
 			end
 
 			for side_name, air in pairs(oob_air) do
 				for unit_n, unit in pairs(air) do
-					if unit.name == unitName and unit.base ~= baseDestination then
-						unit.base = baseDestination										--set new airbase for unit
+					if unit.name == arg2_unitName and unit.base ~= arg2_baseDestination then
+						unit.base = arg2_baseDestination										--set new airbase for unit
 						-- ActivateBaseAndAssociatedTargets(baseDestination, true)
-						Action.Text(unitName.."  moveToAnotherBase."..baseDestination)
+						Action.Text(arg2_unitName.."  moveToAnotherBase."..arg2_baseDestination)
 					end
 				end
 			end
@@ -893,20 +893,20 @@ Action = {}
 			print("				DcCT the typeAeronef i not specified in this unit  oob_air : "..tostring(unitName)) os.execute 'pause'
 		end
 
-		local function checkBaseCapacity(unitName, checkBase)
+		local function checkBaseCapacity(arg2_UnitName, arg2_CheckBase)
 
-			if sideUnite == db_airbases[checkBase].side then
+			if sideUnite == db_airbases[arg2_CheckBase].side then
 
-				if not db_airbases[checkBase].baseAlive then
-					Return.BaseAlive(checkBase)
+				if not db_airbases[arg2_CheckBase].baseAlive then
+					Return.BaseAlive(arg2_CheckBase)
 				end
 
-				if not db_airbases[checkBase].runwayAlive then
-					db_airbases[checkBase].runwayAlive = 100
+				if not db_airbases[arg2_CheckBase].runwayAlive then
+					db_airbases[arg2_CheckBase].runwayAlive = 100
 				end
 
 				if IsHelicopter[typeAeronef] then
-					if db_airbases[checkBase].baseAlive >= 20  then  --and db_airbases[checkBase].runwayAlive > 20
+					if db_airbases[arg2_CheckBase].baseAlive >= 20  then  --and db_airbases[checkBase].runwayAlive > 20
 						if debugKT then print(" 		-> moveToAnotherBaseOrDeactivate IsHelicopter baseAlive > 20 runwayAlive > 20 ") end
 						return true
 					else
@@ -914,7 +914,7 @@ Action = {}
 					end
 
 				else
-					if db_airbases[checkBase].baseAlive >= 20 and db_airbases[checkBase].runwayAlive >= 50 then
+					if db_airbases[arg2_CheckBase].baseAlive >= 20 and db_airbases[arg2_CheckBase].runwayAlive >= 50 then
 						if debugKT then print(" 		-> moveToAnotherBaseOrDeactivate PLANE baseAlive > 20 runwayAlive > 50 ") end
 						return true
 					else

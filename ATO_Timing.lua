@@ -94,7 +94,6 @@ for side, pack in pairs(ATO) do
 		if pack[p].main[1].tot then																				--package already has a tot (target package for player intercept)
 			tot = pack[p].main[1].tot																			--set package tot
 			TOTtable[side][pack[p].main[1].target_name] = tot															--store TOT for target
-			print("AtoT Aa  tot   "..tostring(tot) )
 		elseif TOTtable[side][pack[p].main[1].target_name] then														--target already has a TOT assigned from another package
 			if pack[p].main[1].loadout.standoff == nil or pack[p].main[1].loadout.standoff <= 15000 then		--if package overflies the target, add 15 seconds tot interval between multi-packages
 				TOTtable[side][pack[p].main[1].target_name] = TOTtable[side][pack[p].main[1].target_name] + 15
