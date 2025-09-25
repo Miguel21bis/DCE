@@ -1330,9 +1330,9 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					--tanker TACAN
 					local tanker_TACAN = {}
 					if refuelable then
-						for pack_n,pack in pairs(ATO[tempPlayer.side]) do																		--iterate through packages in player side
-							for role_name, roles in pairs(pack) do																				--iterate through roles in package
-								for n, role in pairs(roles) do
+						for _,pack in pairs(ATO[tempPlayer.side]) do																		--iterate through packages in player side
+							for _, roles in pairs(pack) do																				--iterate through roles in package
+								for _, role in pairs(roles) do
 									if role and role.task == "Refueling" then																	--if first flight is tanker
 										if role.tacan then																						--tanker has a tacan channel
 											s = s .. "Tanker " .. role.callsign .. ", TACAN " .. role.tacan .. "Y "..tostring(role.target.text).."\n"					--add TACAN informaion									
@@ -1508,6 +1508,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					--reprend sous une forme plus simple les butées des radios
 					-- local _radio = {}
 					local radioP = {}
+					local u = 1
 
 					if not Frequency[inheritedType] then
 						radioP[1] = {
@@ -1601,7 +1602,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 						if freqCapability(freqA, radioP, radioN, "") then
-							for u = 1, #tempPlayer.group["units"] do
+							-- for u = 1, #tempPlayer.group["units"] do
 								if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 									if radioP[radioN].startCanal == 0 then MC = -1 end
 									-- if RadioA[sideName][Nradio]  then
@@ -1615,7 +1616,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								else
 									-- print("Package B ERROR ")
 								end
-							end
+							-- end
 						end
 					end
 
@@ -1647,7 +1648,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 						if freqCapability(freqA, radioP, radioN, "") then
-							for u = 1, #tempPlayer.group["units"] do
+							-- for u = 1, #tempPlayer.group["units"] do
 								if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 									if radioP[radioN].startCanal == 0 then MC = -1 end
 									-- if RadioA[sideName][Nradio]  then
@@ -1659,7 +1660,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									local entryCopy = Deepcopy(entry)
 									table.insert(entriesRadio[radioN], entryCopy)
 								end
-							end
+							-- end
 						end
 					end
 
@@ -1671,7 +1672,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						local lib = ""
 
 						if freqA > 0 then
-							for Nradio = 1, #radioP do
+							for radioN = 1, #radioP do
 								entry = {name = "", call = "", freq = "",radio = ""}
 								entry["name"] = "Emergency :"
 								entry["call"] = call
@@ -1679,11 +1680,11 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 								local numPreset
 
-								if freqCapability(freqA, radioP, Nradio, "") then
-									for u = 1, #tempPlayer.group["units"] do
-										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] < radioP[Nradio].nbCanal then
-											if radioP[Nradio] and radioP[Nradio].nbCanal > 0 then
-												if radioP[Nradio].startCanal == 0 then MC = -1 end
+								if freqCapability(freqA, radioP, radioN, "") then
+									-- for u = 1, #tempPlayer.group["units"] do
+										if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] < radioP[radioN].nbCanal then
+											if radioP[radioN] and radioP[radioN].nbCanal > 0 then
+												if radioP[radioN].startCanal == 0 then MC = -1 end
 
 												--ça ne marche pas, on perd trop de temps dessus ..
 												-- if emergencyPreset then
@@ -1693,21 +1694,21 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 												-- 	local entryCopy = Deepcopy(entry)
 												-- 	table.insert(entriesRadio[Nradio], emergencyPreset, entryCopy)
 												-- else
-													table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-													numPreset = #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] + MC
-													entry["radio"] = radioName[Nradio].." / Channel " .. numPreset
+													table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
+													numPreset = #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] + MC
+													entry["radio"] = radioName[radioN].." / Channel " .. numPreset
 													local entryCopy = Deepcopy(entry)
-													table.insert(entriesRadio[Nradio], entryCopy)
+													table.insert(entriesRadio[radioN], entryCopy)
 												-- end
 
 
 
-											elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
+											elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
 												local entryCopy = Deepcopy(entry)
-												table.insert(entriesRadio[Nradio], emergencyPreset, entryCopy)
+												table.insert(entriesRadio[radioN], emergencyPreset, entryCopy)
 											end
 										end
-									end
+									-- end
 								end
 							end
 						end
@@ -1730,7 +1731,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 									if freqCapability(freqA, radioP, radioN, "") then
-										for u = 1, #tempPlayer.group["units"] do
+										-- for u = 1, #tempPlayer.group["units"] do
 											if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 												if radioP[radioN] and radioP[radioN].nbCanal > 0 then
 													if radioP[radioN].startCanal == 0 then MC = -1 end
@@ -1744,7 +1745,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 													table.insert(entriesRadio[radioN], entryCopy)
 												end
 											end
-										end
+										-- end
 									end
 
 								end
@@ -1767,7 +1768,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 									if freqCapability(freqA, radioP, radioN, "") then
-										for u = 1, #tempPlayer.group["units"] do
+										-- for u = 1, #tempPlayer.group["units"] do
 											if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 												if radioP[radioN].startCanal == 0 then MC = -1 end
 												table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
@@ -1778,7 +1779,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 												local entryCopy = Deepcopy(entry)
 												table.insert(entriesRadio[radioN], entryCopy)
 											end
-										end
+										-- end
 									end
 								end
 							end
@@ -1800,7 +1801,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["freq"] = string.format("%02.3f", freqA).. " MHz"
 
 									if freqCapability(freqA, radioP, radioN, "") then
-										for u = 1, #tempPlayer.group["units"] do
+										-- for u = 1, #tempPlayer.group["units"] do
 											if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 												if radioP[radioN].startCanal == 0 then MC = -1 end
 												table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
@@ -1811,7 +1812,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 												local entryCopy = Deepcopy(entry)
 												table.insert(entriesRadio[radioN], entryCopy)
 											end
-										end
+										-- end
 									end
 								end
 							end
@@ -1833,7 +1834,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["freq"] = string.format("%02.3f", freqA).. " MHz"
 
 									if freqCapability(freqA, radioP, radioN, "") then
-										for u = 1, #tempPlayer.group["units"] do
+										-- for u = 1, #tempPlayer.group["units"] do
 											if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 												if radioP[radioN].startCanal == 0 then MC = -1 end
 												table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
@@ -1844,7 +1845,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 												local entryCopy = Deepcopy(entry)
 												table.insert(entriesRadio[radioN], entryCopy)
 											end
-										end
+										-- end
 									end
 								end
 							end
@@ -1873,7 +1874,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 								if freqCapability(freqA, radioP, radioN, "") then
-									for u = 1, #tempPlayer.group["units"] do
+									-- for u = 1, #tempPlayer.group["units"] do
 										if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 											if radioP[radioN].startCanal == 0 then MC = -1 end
 											table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
@@ -1884,7 +1885,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 											local entryCopy = Deepcopy(entry)
 											table.insert(entriesRadio[radioN], entryCopy)
 										end
-									end
+									-- end
 								end
 							end
 						end
@@ -1912,7 +1913,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 								if freqCapability(freqA, radioP, radioN, "") then
-									for u = 1, #tempPlayer.group["units"] do
+									-- for u = 1, #tempPlayer.group["units"] do
 										if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 											if radioP[radioN].startCanal == 0 then MC = -1 end
 											table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
@@ -1923,7 +1924,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 											local entryCopy = Deepcopy(entry)
 											table.insert(entriesRadio[radioN], entryCopy)
 										end
-									end
+									-- end
 								end
 							end
 						end
@@ -1941,7 +1942,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 								if freqCapability(freqA, radioP, radioN, "") then
-									for u = 1, #tempPlayer.group["units"] do
+									-- for u = 1, #tempPlayer.group["units"] do
 										if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 											if radioP[radioN].startCanal == 0 then MC = -1 end
 											table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
@@ -1952,7 +1953,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 											local entryCopy = Deepcopy(entry)
 											table.insert(entriesRadio[radioN], entryCopy)
 										end
-									end
+									-- end
 								end
 							end
 						end
@@ -1985,7 +1986,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 									if freqCapability(freqA, radioP, radioN, "") then
-										for u = 1, #tempPlayer.group["units"] do
+										-- for u = 1, #tempPlayer.group["units"] do
 											if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] < radioP[radioN].nbCanal then
 												if radioP[radioN].startCanal == 0 then MC = -1 end
 												table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
@@ -1996,7 +1997,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 												local entryCopy = Deepcopy(entry)
 												table.insert(entriesRadio[radioN], entryCopy)
 											end
-										end
+										-- end
 									end
 								end
 							end
@@ -2015,7 +2016,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 							if freqCapability(freqA, radioP, Nradio, "") then
-								for u = 1, #tempPlayer.group["units"] do
+								-- for u = 1, #tempPlayer.group["units"] do
 									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 										if radioP[Nradio].startCanal == 0 then MC = -1 end
 										-- if RadioA[sideName][Nradio]  then
@@ -2027,7 +2028,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 										local entryCopy = Deepcopy(entry)
 										table.insert(entriesRadio[Nradio], entryCopy)
 									end
-								end
+								-- end
 							end
 						end
 					end
@@ -2044,7 +2045,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 								if freqCapability(freqA, radioP, Nradio, "") then
-									for u = 1, #tempPlayer.group["units"] do
+									-- for u = 1, #tempPlayer.group["units"] do
 										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 											if radioP[Nradio].startCanal == 0 then MC = -1 end
 											-- if RadioA[sideName][Nradio]  then
@@ -2056,7 +2057,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 											local entryCopy = Deepcopy(entry)
 											table.insert(entriesRadio[Nradio], entryCopy)
 										end
-									end
+									-- end
 								end
 							end
 						end
@@ -2092,7 +2093,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 									if freqCapability(freqA, radioP, radioN, "ATC "..tostring(baseName)) then
-										for u = 1, #tempPlayer.group["units"] do
+										-- for u = 1, #tempPlayer.group["units"] do
 											if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 												if radioP[radioN].startCanal == 0 then MC = -1 end
 												table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
@@ -2100,7 +2101,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 												local entryCopy = Deepcopy(entry)
 												table.insert(entriesRadio[radioN], entryCopy)
 											end
-										end
+										-- end
 									end
 								end
 							end
@@ -2119,7 +2120,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 								if freqCapability(freqA, radioP, Nradio, "") then
-									for u = 1, #tempPlayer.group["units"] do
+									-- for u = 1, #tempPlayer.group["units"] do
 										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 											if radioP[Nradio].startCanal == 0 then MC = -1 end
 											-- if RadioA[sideName][Nradio]  then
@@ -2131,7 +2132,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 											local entryCopy = Deepcopy(entry)
 											table.insert(entriesRadio[Nradio], entryCopy)
 										end
-									end
+									-- end
 								end
 							end
 						end
@@ -2271,66 +2272,8 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 
 					--Meteo
-					--Debug_c camp.date.day
 					s = "Meteo:\n"																				--overview of Weather
-					-- local remain = math.ceil((camp.weather.zoneEnd - ((camp.date.day - 1) * 86400 + camp.time)) / 3600)		--hours until end of weather zone					
-					-- local duration = math.ceil((camp.weather.zoneEnd - camp.weather.zoneStart) / 3600)					--duration of the weather zone in hours
-					-- local passed = 100 / duration * remain																--percentage of zone passage
-
-					-- if camp.weather.zone == "high" then
-					-- 	if mission.weather["enable_fog"] == false then
-					-- 		s = s .. "Good flying weather due to influence of a high pressure system in theater of operations"
-					-- 		if remain < 6 then
-					-- 			s = s .. ". Change of general weather situation imminent. "
-					-- 		elseif remain < 25 then
-					-- 			s = s .. ", expected to remain in effect for next " .. remain .. " hours. "
-					-- 		elseif remain < 48 then
-					-- 			s = s .. ", expected to remain dominant for another day. "
-					-- 		else
-					-- 			s = s .. ", expected to remain dominant for next " .. math.floor(remain / 24) .. " days. "
-					-- 		end
-					-- 	else
-					-- 		s = s .. "Ground fog conditions. "
-					-- 	end
-
-					-- elseif camp.weather.zone == "low front cold" then
-					-- 	s = s .. "Low pressure system dominating theater of operations. Currently poor flying weather due to passage of cold front. Weather improvement expected within next " .. remain .. " hours. "
-
-					-- elseif camp.weather.zone == "low front warm" then
-					-- 	s = s .. "Low pressure system dominating theater of operations. "
-					-- 	if passed < 50 then
-					-- 		s = s .. "Currently increasingly poor flying weather due to the passage of warm front. Expected to clear up after " .. remain .. " hours. "
-					-- 	else
-					-- 		s = s .. "Weather expected to deteriorate within next " .. remain .. " hours due to approach of warm front. "
-					-- 	end
-
-					-- elseif camp.weather.zone == "low sector cold" then
-					-- 	s = s .. "Low pressure system dominating theater of operations. Currently fair flying weather in cold sector"
-					-- 	if remain < 6 then
-					-- 		s = s .. ". Change of general weather situation imminent. "
-					-- 	elseif remain < 25 then
-					-- 		s = s .. ", expected to remain in effect for next " .. remain .. " hours. "
-					-- 	elseif remain < 48 then
-					-- 		s = s .. ", expected to remain stable for another day. "
-					-- 	else
-					-- 		s = s .. ", expected to remain stable for next " .. math.floor(remain / 24) .. " days. "
-					-- 	end
-
-					-- elseif camp.weather.zone == "low sector warm" then
-					-- 	s = s .. "Low pressure system dominating theater of operations. Currently fair flying weather in warm sector"
-					-- 	if remain < 6 then
-					-- 		s = s .. ". Change of general weather situation imminent. "
-					-- 	elseif remain < 25 then
-					-- 		s = s .. ", expected to remain in effect for next " .. remain .. " hours. "
-					-- 	elseif remain < 48 then
-					-- 		s = s .. ", expected to remain stable for another day. "
-					-- 	else
-					-- 		s = s .. ", expected to remain stable for next " .. math.floor(remain / 24) .. " days. "
-					-- 	end
-
-					-- end
-
-
+				
 					s = s ..camp.weather.brief
 
 					local lMetar = TabMetar[tempPlayer.airbase][unitsUse]
@@ -2349,18 +2292,18 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					end
 
 					-- modification M41.b 	Sratchpad written in the Sratchpad file, if this modul is installed
-					local ScratchpadPath = "../../../../../../Config/ScratchpadConfig.lua"
+					local scratchpadPath = "../../../../../../Config/ScratchpadConfig.lua"
 					-- local ScratchpadPath = "../../../../../../Config/ScratchpadConfig.lua"
-					local TestPath = io.open(ScratchpadPath, "r")
+					local testPath = io.open(scratchpadPath, "r")
 
 					-- modification M41 	Scratchpad written in the Sratchpad file, if this modul is installed
 					-- if mission_ini.WrittenOnScratchpadMod and TestPath ~= nil then 
-					if TestPath ~= nil then
-						io.close(TestPath)
+					if testPath ~= nil then
+						io.close(testPath)
 						local ScratBriefTXT = StringToTxtBrief(briefing[sideName])
 						config = {}
-						dofile(ScratchpadPath)
-						local ScratFil = io.open(ScratchpadPath, "w") or error("Failed to open Scratchpad file")
+						dofile(scratchpadPath)
+						local ScratFil = io.open(scratchpadPath, "w") or error("Failed to open Scratchpad file")
 						config.content = ScratBriefTXT
 						local ScratConfig = "config = " .. TableSerialization(config, 0)
 						ScratFil:write(ScratConfig)

@@ -202,44 +202,44 @@ if Multi.Group then
 end
 
 --fait une copie de Multi pour eviter de perdre le nombre d'avion
-local MultiBIS = Deepcopy(Multi)
+local multiBIS = Deepcopy(Multi)
 local creaClientFlight = {}																									--crée une table pour dérouler plus tard les flight selectionnable
 local sum
 
 if debugAssign then
-	_affiche(MultiBIS, "MultiBIS AtoPA ")
+	_affiche(multiBIS, "MultiBIS AtoPA ")
 	_affiche(playable, "playable AtoPA ")
 end
 
 -- Vérifie si on a bien des avions jouables et des groupes définis
-if #playable == 0 or not MultiBIS.NbGroup then
+if #playable == 0 or not multiBIS.NbGroup then
     return
 end
 
 -- Parcours des slots jouables
 for _, slot in ipairs(playable) do
     if not slot.counted then
-        for _, group in ipairs(MultiBIS.Group or {}) do
-            if slot.type == group.PlaneType and not group.counted then
+        for _, requestGroup in ipairs(multiBIS.Group or {}) do
+            if slot.type == requestGroup.PlaneType and not requestGroup.counted then
                 
                 -- Initialise le quota restant si nécessaire
-                if group.NotAssigned == nil then
-                    group.NotAssigned = group.NbPlane
+                if requestGroup.NotAssigned == nil then
+                    requestGroup.NotAssigned = requestGroup.NbPlane
                 end
 
                 -- Calcule combien d'avions peuvent être affectés
-                local nbPlaneToAssign = math.min(slot.number, group.NotAssigned)
-                group.NotAssigned = group.NotAssigned - nbPlaneToAssign
+                local nbPlaneToAssign = math.min(slot.number, requestGroup.NotAssigned)
+                requestGroup.NotAssigned = requestGroup.NotAssigned - nbPlaneToAssign
 
                 -- Cherche une entrée existante dans creaClientFlight
                 local entryFound = false
                 for _, entry in ipairs(creaClientFlight) do
-                    if entry.PlaneType == group.PlaneType
-                        and entry.task == group.task
-                        and entry.side == group.side then
+                    if entry.PlaneType == requestGroup.PlaneType
+                        and entry.task == requestGroup.task
+                        and entry.side == requestGroup.side then
                         
                         entry.NbPlane    = entry.NbPlane + nbPlaneToAssign
-                        entry.NotAssigned = group.NotAssigned
+                        entry.NotAssigned = requestGroup.NotAssigned
                         entryFound = true
                         break
                     end
@@ -247,14 +247,14 @@ for _, slot in ipairs(playable) do
 
                 -- Si aucune entrée existante, on en crée une
                 if not entryFound then
-                    local tabTemp = Deepcopy(group)
+                    local tabTemp = Deepcopy(requestGroup)
                     tabTemp.NbPlane = nbPlaneToAssign
                     table.insert(creaClientFlight, tabTemp)
                 end
 
                 -- Marque comme traité si quota atteint
-                if group.NotAssigned <= 0 then
-                    group.counted = true
+                if requestGroup.NotAssigned <= 0 then
+                    requestGroup.counted = true
                     slot.counted  = true
                 end
             end
@@ -307,20 +307,20 @@ end
 -- 	end
 -- end
 
-if #playable > 0 and MultiBIS.NbGroup then
-	if MultiBIS.Group then
+if #playable > 0 and multiBIS.NbGroup then
+	if multiBIS.Group then
 		AllCoopPossible = true
-		for k=1, #MultiBIS.Group do
-			if MultiBIS.Group[k].counted and MultiBIS.Group[k].NotAssigned then
+		for k=1, #multiBIS.Group do
+			if multiBIS.Group[k].counted and multiBIS.Group[k].NotAssigned then
 			else
 				AllCoopPossible = false
 				if Debug.debug then
-					print("AtoPA   no flight possible or not NotAssigned:  "..tostring(MultiBIS.Group[k].NotAssigned).." for this aircraft: "..tostring(MultiBIS.Group[k].PlaneType))
-					_affiche(MultiBIS,"MultiBIS")
+					print("AtoPA   no flight possible or not NotAssigned:  "..tostring(multiBIS.Group[k].NotAssigned).." for this aircraft: "..tostring(multiBIS.Group[k].PlaneType))
+					_affiche(multiBIS,"MultiBIS")
 
 					for sideName, units in pairs(oob_air) do
 						for unitN, unit in pairs(units) do
-							if unit.type == MultiBIS.Group[k].PlaneType and not unit.inactive then
+							if unit.type == multiBIS.Group[k].PlaneType and not unit.inactive then
 								
 								_affiche(AcftAvail[unit.name], "Aircraft_availability[unit.name]")
 

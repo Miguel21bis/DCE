@@ -3972,14 +3972,14 @@ end
 
 -- modification M49.c big central db_loadout (c: loadout statistics)
 -- local found = false
-for side, pack in pairs(ATO) do
+for _, pack in pairs(ATO) do
 	for p = 1, #pack do
-		for role,flight in pairs(pack[p]) do
+		for _,flight in pairs(pack[p]) do
 			for f = 1, #flight do
 				local found = false
 				for plane, planeTab  in pairs(Loadouts_archive) do
 					if plane == flight[f].type then
-						for taskName, loadout  in pairs(planeTab) do
+						for _, loadout  in pairs(planeTab) do
 							for loadoutName, value  in pairs(loadout) do
 								if loadoutName  == flight[f].loadout.name then
 									if not value["occurence"] or value["occurence"] == nil or value["occurence"] == " " then value["occurence"] = 0 end

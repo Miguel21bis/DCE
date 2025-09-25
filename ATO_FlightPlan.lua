@@ -7791,14 +7791,14 @@ end
 
 --supprime les ["num"] = 1, des loadouts
 --qui sont devenu inutile
-for _side, side in pairs(mission.coalition) do
-	for countryN, country in pairs(side.country) do
-		for category, groups in pairs(country) do
+for _, side in pairs(mission.coalition) do
+	for _, country in pairs(side.country) do
+		for _, groups in pairs(country) do
 			if type(groups) == "table" and groups["group"]  then
-				for Ngroup, group in pairs(groups["group"]) do
-					for Nunit, unit in pairs(group.units) do
+				for _, group in pairs(groups["group"]) do
+					for _, unit in pairs(group.units) do
 						if unit.payload and unit.payload.pylons   then
-							for pylonN, pylon in pairs(unit.payload.pylons) do
+							for _, pylon in pairs(unit.payload.pylons) do
 								if pylon and pylon.num then
 									pylon.num = nil
 								end
