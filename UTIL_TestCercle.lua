@@ -205,11 +205,11 @@ end
 
 
 	----- convert tables back to strings for insertion into content files -----
-	local misStr = "mission = " .. TableSerialization(mission, 0)
-	local optStr = "options = " .. TableSerialization(options, 0)
-	local warStr = "warehouses = " .. TableSerialization(warehouses, 0)
-	local dicStr = "dictionary = " .. TableSerialization(dictionary, 0)
-	local resStr = "mapResource = " .. TableSerialization(mapResource, 0)
+	misStr = "mission = " .. TableSerialization(mission, 0)
+	optStr = "options = " .. TableSerialization(options, 0)
+	warStr = "warehouses = " .. TableSerialization(warehouses, 0)
+	dicStr = "dictionary = " .. TableSerialization(dictionary, 0)
+	resStr = "mapResource = " .. TableSerialization(mapResource, 0)
 	local cmpStr = "camp = " .. TableSerialization(camp, 0)
 
 	----- create temporary content files of new mission file -----

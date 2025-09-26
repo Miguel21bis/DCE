@@ -1,14 +1,14 @@
 --To generate a new mission file. Unzips template mission, defines content of next missions and packs a new mission file
 --Initiated by Debrief_Master.lua, BAT_FirstMission.lua or BAT_RedoMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M90_a
+-- last modification: M90_a cleanCode_i
 if not versionDCE then versionDCE = {} end
-versionDCE["MAIN_NextMission.lua"] = "1.37.219"
+versionDCE["MAIN_NextMission.lua"] = "1.37.220"
 ------------------------------------------------------------------------------------------------------- 
 -- debug_m 					(m zoneId)(l endCampaign)(ik error beacon file)(h mission.maxDictId)(g help campaignMaker)(f autolase)(e camp_ZoneSAR in skipmod)(d: oob_ground not in mission)(c: EndMission)
 -- Reglage_e				(e EPLRS_Capacity)(d CVN to CV)(c stop si < 2.7.0 (ver18))(a: Init/loadout selection)
 -- adjustment_h				(h add DC_Final_steps.lua)(g keep original triggers( a_remove_scene_objects ))(e oob_scen ==0)(d currentKey)(c clean conf_mod)(b Firstmission_flag)(a: add Loadout tiers)
--- cleanCode_h				(ag springCleaning)
+-- cleanCode_i				(ag springCleaning)
 -- modification M90_a		missionWithIcone
 -- modification M83_c		Jammer checkMissileProximity (c all jammer in DataBase)(b B-52)
 -- modification M77_k		CG_ArtySpotter (k ListSpotterAircraft)(c camp.spotter)(b tempo)
@@ -104,16 +104,16 @@ if mission.version < 19 then --19ok 18bad
 	os.exit()
 end
 
-local trig_n = #mission.trigrules + 1
+local scenaryTrigN = #mission.trigrules + 1
 
 ---- add trigger to destory scenery objects -----
-mission.trig.flag[trig_n] = true
+mission.trig.flag[scenaryTrigN] = true
 -- mission.trig.conditions[trig_n] = "return(true)"
-mission.trig.conditions[trig_n] = "return(c_time_after(300) )"
-mission.trig.actions[trig_n] = ""
+mission.trig.conditions[scenaryTrigN] = "return(c_time_after(300) )"
+mission.trig.actions[scenaryTrigN] = ""
 -- mission.trig.funcStartup[trig_n] = "if mission.trig.conditions["..trig_n.."]() then mission.trig.actions["..trig_n.."]() end"
-mission.trig.func[trig_n] = "if mission.trig.conditions["..trig_n.."]() then mission.trig.actions["..trig_n.."]() end"
-mission.trigrules[trig_n] = {
+mission.trig.func[scenaryTrigN] = "if mission.trig.conditions["..scenaryTrigN.."]() then mission.trig.actions["..scenaryTrigN.."]() end"
+mission.trigrules[scenaryTrigN] = {
 	-- ["rules"] = {},
 	["rules"] =
 		{
@@ -160,7 +160,6 @@ end
 -- require("Active/oob_scen")
 
 for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed scenery objects
-
 	if scen.x and scen.y then														--destroyed scenery object has x and z coordinates
 
 		local isForest = false
@@ -203,9 +202,9 @@ for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed 
 			table.insert(mission.triggers.zones, dataZone)
 
 			--add trigger
-			mission.trig.actions[trig_n] = mission.trig.actions[trig_n] ..  "a_scenery_destruction_zone(" .. zoneId .. ", ".. txDestruction..");"
+			mission.trig.actions[scenaryTrigN] = mission.trig.actions[scenaryTrigN] ..  "a_scenery_destruction_zone(" .. zoneId .. ", ".. txDestruction..");"
 
-			mission.trigrules[trig_n].actions[#mission.trigrules[trig_n].actions + 1] = {
+			mission.trigrules[scenaryTrigN].actions[#mission.trigrules[scenaryTrigN].actions + 1] = {
 				["ai_task"] = {
 					[1] = "",
 					[2] = "",
@@ -225,7 +224,7 @@ mapResource =
 
 ----- prepare triggers to run files in mission -----
 -- local trig_n = 1
-local function AddFileTrigger(filename, cond0, predicate1, predicate2)
+local function addFileTrigger(filename, cond0, predicate1, predicate2)
 
 	--attention, les sons sont à telecharger de cette maniere
 	--	[4] = "a_out_sound_c(21, getValueResourceByKey(\"ResKey_Action_2\"), 0);a_out_sound_c(8, getValueResourceByKey(\"ResKey_Action_3\"), 0);",
@@ -287,7 +286,8 @@ local function AddFileTrigger(filename, cond0, predicate1, predicate2)
 	local idCountry = 2
 
 	mission.maxDictId = mission.maxDictId + 1
-	trig_n = trig_n + 1
+	-- trig_n = trig_n + 1
+	local trig_n =  #mission.trigrules + 1										--next available trigger number
 	mapResource["ResKey_Action_" .. mission.maxDictId] = filename
 	mission.trig.funcStartup[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
 	mission.trig.flag[trig_n] = true
@@ -327,7 +327,8 @@ function AddFileTriggerTempo(arg_filename, arg_time, arg_predicat0, arg_actionPr
 
 	mission.maxDictId = mission.maxDictId +1
 	local table_trigrulesAction = {}
-	local trig_n =  #mission.trig.actions + 1										--next available trigger number
+	-- local trig_n =  #mission.trig.actions + 1										--next available trigger number
+	local trig_n =  #mission.trigrules + 1										--next available trigger number
 	local s = ""
 
 	for key, value in ipairs(arg_actionPredicate0) do
@@ -448,23 +449,23 @@ local function makePayloadRestricted()
 end
 
 
-AddFileTrigger("camp_status.lua")
-AddFileTrigger("AddCommandRadioF10.lua")
-AddFileTrigger("EventsTracker.lua")
-AddFileTrigger("Fuel_Check.lua")													-- Norman99 Modification	M57
-AddFileTrigger("ATC_ShutUp_GENERIC.lua")											-- Psyko Modification		M59
-AddFileTrigger("GCIdata.lua")
-AddFileTrigger("GCIscript.lua")
-AddFileTrigger("ARM_Defence_Script.lua")
-AddFileTrigger("CustomTasksScript.lua")
-AddFileTrigger("CarrierIntoWindScript.lua")
-AddFileTrigger("Pedro.lua")
-AddFileTrigger("SAR.lua")
-AddFileTrigger("Cercle_City.lua")
-AddFileTrigger("AirGroundAttackScript.lua")
-AddFileTrigger("bombOnRunway.lua")
-AddFileTrigger("beacon.ogg", nil, nil, "a_out_sound_c")
-AddFileTrigger("beaconsilent.ogg", nil, nil, "a_out_sound_c")
+addFileTrigger("camp_status.lua")
+addFileTrigger("AddCommandRadioF10.lua")
+addFileTrigger("EventsTracker.lua")
+addFileTrigger("Fuel_Check.lua")													-- Norman99 Modification	M57
+addFileTrigger("ATC_ShutUp_GENERIC.lua")											-- Psyko Modification		M59
+addFileTrigger("GCIdata.lua")
+addFileTrigger("GCIscript.lua")
+addFileTrigger("ARM_Defence_Script.lua")
+addFileTrigger("CustomTasksScript.lua")
+addFileTrigger("CarrierIntoWindScript.lua")
+addFileTrigger("Pedro.lua")
+addFileTrigger("SAR.lua")
+addFileTrigger("Cercle_City.lua")
+addFileTrigger("AirGroundAttackScript.lua")
+addFileTrigger("bombOnRunway.lua")
+addFileTrigger("beacon.ogg", nil, nil, "a_out_sound_c")
+addFileTrigger("beaconsilent.ogg", nil, nil, "a_out_sound_c")
 -- AddFileTrigger("CG_ArtySpotter.lua")												--https://www.digitalcombatsimulator.com/fr/files/3339128/
 
 AddFileTriggerTempo("CG_ArtySpotter.lua", 2, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})
@@ -1114,27 +1115,27 @@ camp.date.CampTotalTimeS = CampTotalTimeS
 UpdateConfMod(nil, camp.date, "MAIN_NextMission "..debug.getinfo(1).currentline)
 
 ----- create temporary content files of new mission file -----
-local misStr = "mission = " .. TableSerialization(mission, 0)
+misStr = "mission = " .. TableSerialization(mission, 0)
 local misFile = io.open("misFile.lua", "w") or error("Failed to open debug file")											--mission
 misFile:write(misStr)
 misFile:close()
 
-local optStr = "options = " .. TableSerialization(options, 0)
+optStr = "options = " .. TableSerialization(options, 0)
 local optFile = io.open("optFile.lua", "w") or error("Failed to open debug file")											--options
 optFile:write(optStr)
 optFile:close()
 
-local warStr = "warehouses = " .. TableSerialization(warehouses, 0)
+warStr = "warehouses = " .. TableSerialization(warehouses, 0)
 local warFile = io.open("warFile.lua", "w") or error("Failed to open debug file")											--warehouses
 warFile:write(warStr)
 warFile:close()
 
-local dicStr = "dictionary = " .. TableSerialization(dictionary, 0)
+dicStr = "dictionary = " .. TableSerialization(dictionary, 0)
 local dicFile = io.open("dicFile.lua", "w") or error("Failed to open debug file")											--dictionary
 dicFile:write(dicStr)
 dicFile:close()
 
-local resStr = "mapResource = " .. TableSerialization(mapResource, 0)
+resStr = "mapResource = " .. TableSerialization(mapResource, 0)
 local resFile = io.open("resFile.lua", "w")	 or error("Failed to open debug file")										--mapResource
 resFile:write(resStr)
 resFile:close()
@@ -1411,7 +1412,7 @@ if not (EndCampaign or camp.endCampaign) then
 end
 --M40_k
 local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
-local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
+trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
 trigFile:write(airbases_Str)
 trigFile:close()
 

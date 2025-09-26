@@ -95,7 +95,7 @@ local SARExport
 
 --zoneSAR = {
 local zoneSARFile = "zoneSAR.lua"
-local testPath = io.open(zoneSARFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
+testPath = io.open(zoneSARFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
 if testPath ~= nil then																					--check si le fichier existe dans ScriptsMod
 	io.close(testPath)
 	SARExport = loadfile("zoneSAR.lua")()														--zoneSAR
@@ -131,8 +131,8 @@ end
 require("Active/clientstats")																	--load clientstats
 
 --camp_ZoneSAR = {
-local zoneSARFile = "Active/camp_ZoneSAR.lua"
-local testPath = io.open(zoneSARFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
+zoneSARFile = "Active/camp_ZoneSAR.lua"
+testPath = io.open(zoneSARFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
 if testPath ~= nil then																					--check si le fichier existe dans ScriptsMod
 	io.close(testPath)
 	require("Active/camp_ZoneSAR")																--zoneSAR
@@ -334,7 +334,7 @@ end
 
 print("\nGenerate next campaign mission? y(es)/n(o):\n")						--ask for user confirmation
 
-local input
+-- input
 local playable_type = {}
 local choix1
 
@@ -509,7 +509,7 @@ if input == "y" or input == "yes" then
 					end
 
 					-- Sélection de la cible spécifique
-					local input
+					-- input
 					repeat
 						io.write("\nEnter target number: ")
 						input = tonumber(io.stdin:read())
@@ -567,7 +567,7 @@ if input == "y" or input == "yes" then
 					if not Multi.Group then Multi.Group= {} end
 					if not Multi.Group[i] then Multi.Group[i]= {} end
 
-					local playable_type = {}
+					playable_type = {}
 					local seen = {}
 					local tasks = {}
 				local ti = 65 																						--char(65) == a

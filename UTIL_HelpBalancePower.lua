@@ -76,15 +76,15 @@ for side,unit in pairs(oob_air) do																								--iterate through all 
 							-- sum_capY = sum_capY +  unit_loadouts[l].capability
 							
 							local break_loop = false
-							for n = 1, 6 do
+							for n2 = 1, 6 do
 								
 								if not tabMaxSum[side] then tabMaxSum[side] = {} end
-								if not tabMaxSum[side][n] then tabMaxSum[side][n] = {}  tabMaxSum[side][n]["sum"] = 0 end
+								if not tabMaxSum[side][n2] then tabMaxSum[side][n2] = {}  tabMaxSum[side][n2]["sum"] = 0 end
 								
-								if ((sum_fireP * sum_capY)  /#unit_loadouts) > tabMaxSum[side][n]["sum"] then								
+								if ((sum_fireP * sum_capY)  /#unit_loadouts) > tabMaxSum[side][n2]["sum"] then								
 
-									tabMaxSum[side][n] = nil
-									tabMaxSum[side][n] = {
+									tabMaxSum[side][n2] = nil
+									tabMaxSum[side][n2] = {
 										["sum"] = (sum_fireP * sum_capY)  /#unit_loadouts,
 										["plane"] = plane,
 										["task"] = task,

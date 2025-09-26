@@ -1,11 +1,11 @@
 --To update the targetlist (target position, alive precentage)
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: debug_f
+-- last modification: cleancode_e
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_UpdateTargetlist.lua"] = "1.11.51"
+versionDCE["DC_UpdateTargetlist.lua"] = "1.11.52"
 ------------------------------------------------------------------------------------------------------- 
--- cleancode_d				(d springCleaning)
+-- cleancode_e				(d springCleaning)
 -- adjustment_a				(a GroundTarget.percent = 100 & Error_05 )
 -- debug_f					(f ne detruisait les derniers element dans oob_groud)(e updateAlive)(d updateAlive)(bc InsertBugList)(a -nan(ind))
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (camp.targetPos)
@@ -215,14 +215,14 @@ end
  -- }
 
 
-local function TabFileTemplate()
-	local ArrayFileTemplate = {}
+local function tabFileTemplate()
+	local arrayFileTemplate = {}
 	if camp_triggers == nil then
-		local ArrayFileTemplate
-		return ArrayFileTemplate
+		-- local arrayFileTemplate
+		return arrayFileTemplate
 	end
 
-	local ArrayFileTemplate = {}
+	arrayFileTemplate = {}
 	local camp_triggersTemPlaTe =  camp_triggers
 
 	for nTrigger, trigger in pairs(camp_triggersTemPlaTe) do
@@ -237,7 +237,7 @@ local function TabFileTemplate()
 						local res2 = string.match(str2, '%b""')
 						res2 = string.gsub(res2, '"', "")
 
-						table.insert(ArrayFileTemplate, res2)
+						table.insert(arrayFileTemplate, res2)
 					end
 				else
 					print()
@@ -253,7 +253,7 @@ local function TabFileTemplate()
 			end
 		end
 	end
-	return ArrayFileTemplate
+	return arrayFileTemplate
 end
 
 
@@ -338,7 +338,7 @@ end
 checkRequiredModules()
 
 if Debug.checkTargetName and (Firstmission_flag or Skipmission_flag) then
-	tabTemplates = TabFileTemplate()
+	tabTemplates = tabFileTemplate()
 end
 
 
@@ -1308,7 +1308,7 @@ if LL_KnownPositionsFileExit then
 					for i, element in pairs(target.elements) do
 						if element.x and element ~= 0 then
 
-							local xKey = math.abs(math.floor(element.x))
+							xKey = math.abs(math.floor(element.x))
 							if LL_KnownPositions[xKey]  then
 								local testX = math.floor(element.x)
 								local testY = math.floor(element.y)
@@ -1381,9 +1381,9 @@ for sideName, countries in pairs(oob_ground) do
 								if unit.x and unit.y then
 									local addItemSub = false
 
-									local floor_x = math.floor(unit.x)
-									local floor_y = math.floor(unit.y)
-									local xKey = math.abs(floor_x)
+									floor_x = math.floor(unit.x)
+									floor_y = math.floor(unit.y)
+									xKey = math.abs(floor_x)
 
 									if not targetPosTemp[xKey] then
 										targetPosTemp[xKey] = {}
@@ -1455,9 +1455,9 @@ if targetlist then
 						if element.x and element.x ~= 0 and element.y and element.y ~= 0 then
 							local addItemSub = false
 
-							local floor_x = math.floor(element.x)
-							local floor_y = math.floor(element.y)
-							local xKey = math.abs(floor_x)
+							floor_x = math.floor(element.x)
+							floor_y = math.floor(element.y)
+							xKey = math.abs(floor_x)
 
 							if not targetPosTemp[xKey] then
 								targetPosTemp[xKey] = {}
@@ -1491,7 +1491,7 @@ if targetlist then
 end
 
 --*********************************************************************************
-tabTemplates = TabFileTemplate()
+tabTemplates = tabFileTemplate()
 
 if tabTemplates ~= nil then
 	for i = 1 , #tabTemplates do
@@ -1537,9 +1537,9 @@ if tabTemplates ~= nil then
 											if unit.x and unit.y then
 												local addItemSub = false
 
-												local floor_x = math.floor(unit.x)
-												local floor_y = math.floor(unit.y)
-												local xKey = math.abs(floor_x)
+												floor_x = math.floor(unit.x)
+												floor_y = math.floor(unit.y)
+												xKey = math.abs(floor_x)
 
 												if not targetPosTemp[xKey] then
 													targetPosTemp[xKey] = {}

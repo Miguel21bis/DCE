@@ -2,12 +2,12 @@
 --Script attached to mission and executed via trigger
 --Functions accessed via LUA Run Script on waypoint
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  M68_b
+-- last modification:  M68_b cleanCode_d
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/CustomTasksScript.lua"] = "1.9.43"
+versionDCE["Mission Scripts/CustomTasksScript.lua"] = "1.9.44"
 ------------------------------------------------------------------------------------------------------- 
 -- Reglage_n				(n force RTB)(m stopcondition)(l escorte)(k CVN to CV)(j altitudeEnabled true)(h GetHeading)(global path)(f rejoin debug)(e more scheduleFunction) (d landingImpossible denivelé)(c: limit =  1 ?)(b: orbit infini) all ["groupAttack"] = false,
--- cleanCode_c				(c GetCategory)(b springCleaning)
+-- cleanCode_d				(c GetCategory)(b springCleaning)
 -- Debug_h					(fgh: CAS AttackUnit)(e: static id -1)(d: Checking) creates custom files to observe (c: Helicopter)(b: strike bombing)(a: strike ASM B52)
 
 -- modification M74_a		mix static, vehicle and map elements in a Target.
@@ -39,9 +39,9 @@ local baseFullName =
 
 ----- attack group -----
 --allows each wingman of a flight to attack its own target in a vahicle/ship group simultaneously, then proceed to Egress point to join up (flight would not climb during egress if wingmen would joing leader imediately after attack)
-function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackType, attackAlt, id_task)
+function CustomGroupAttack(arg_FlightName, arg_TargetName, arg_Expend, arg_WeaponType, arg_AttackType, arg_AttackAlt, arg_Id_task)
 	if varFpsLeak then return end
-	env.info("DCE_CustomGroupAttack start| "..tostring(FlightName))
+	env.info("DCE_CustomGroupAttack start| "..tostring(arg_FlightName))
 
 	-- Weapon.Category
 	-- SHELL     0
@@ -50,16 +50,16 @@ function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackTyp
 	-- BOMB      3
 
 	local function execute(arg)
-		local cntrl = arg[1]
-		local ComboTask = arg[2]
-		local n = arg[3]
+		local arg2_Cntrl = arg[1]
+		local arg2_ComboTask = arg[2]
+		local arg2_n = arg[3]
 		local current_time = timer.getTime()
 
 		if camp.debug then
 			--export custom mission log
-			local logStr = "ComboTask = " .. TableSerialization(ComboTask, 0)
-			local FlightNameClean = FlightName:gsub('[%p%c%s]', '_')
-			local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..n.."_".. "CustomGroupAttack".."_"..tostring(current_time)..".lua", "w")
+			local logStr = "ComboTask = " .. TableSerialization(arg2_ComboTask, 0)
+			local flightNameClean = arg_FlightName:gsub('[%p%c%s]', '_')
+			local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_"..arg2_n.."_".. "CustomGroupAttack".."_"..tostring(current_time)..".lua", "w")
 			if logFile then
 				logFile:write(logStr)
 				logFile:close()
@@ -68,49 +68,49 @@ function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackTyp
 			end
 		end
 
-		cntrl:pushTask(ComboTask)									--push task to front of task list	
+		arg2_Cntrl:pushTask(arg2_ComboTask)									--push task to front of task list	
 
 		env.info("DCE_CustomGroupAttack | fin")
 	end
 
-	local TargetGroup = Group.getByName(TargetName)						--get target group
-	if TargetGroup then													--target group exists
+	local targetGroup = Group.getByName(arg_TargetName)						--get target group
+	if targetGroup then													--target group exists
 		local idTypeStrike = "Bombing"
 		-- if (weaponType == 4161536 or weaponType == 14) and id_task == "CAS" then	-- Guided bombs or ASM M54_a
-		if id_task == "CAS" or id_task == "Pinpoint Strike" then												--  M54_a		
+		if arg_Id_task == "CAS" or arg_Id_task == "Pinpoint Strike" then												--  M54_a		
 			idTypeStrike  = "AttackUnit"
 		else
 			idTypeStrike  = "Bombing"
 		end
 
-		if attackCounter[TargetName] then								--counter with number of flights that have already attacked this target
-			attackCounter[TargetName] = attackCounter[TargetName] + 1	--increase counter by one
+		if attackCounter[arg_TargetName] then								--counter with number of flights that have already attacked this target
+			attackCounter[arg_TargetName] = attackCounter[arg_TargetName] + 1	--increase counter by one
 		else															--no flight has attacked this target yet
-			attackCounter[TargetName] = 1								--set to one
+			attackCounter[arg_TargetName] = 1								--set to one
 		end
-		local AttackN = attackCounter[TargetName]
+		local attackN = attackCounter[arg_TargetName]
 
-		local target = TargetGroup:getUnits()							--get target units
+		local target = targetGroup:getUnits()							--get target units
 
-		if attackType ~= "Dive" then
-			attackType = nil
+		if arg_AttackType ~= "Dive" then
+			arg_AttackType = nil
 		end
 
-		local flight = Group.getByName(FlightName)						--get group of attacking flight
+		local flight = Group.getByName(arg_FlightName)						--get group of attacking flight
 		local wingman = flight:getUnits()								--get list of units from attacking flights
 
-		local EgressWP
+		local egressWP
 		for coalition_name,coal in pairs(env.mission.coalition) do
 			local stop = false
 			for country_n,country in pairs(coal.country) do
 				if country.plane then
 					for group_n,group in pairs(country.plane.group) do
 						-- if FlightName == env.getValueDictByKey(group.name) then								--find group in env.mission
-						if FlightName == group.name then
+						if arg_FlightName == group.name then
 							for w = 1, #group.route.points do												--iterate through all group waypoints
 								-- if string.find(env.getValueDictByKey(group.route.points[w].name), "Egress") then		--find egress waypoint
 								if string.find(group.route.points[w].name, "Egress") then
-									EgressWP = group.route.points[w]										--store Egress waypoint
+									egressWP = group.route.points[w]										--store Egress waypoint
 									stop = true
 									break
 								end
@@ -124,11 +124,11 @@ function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackTyp
 				if country.helicopter then
 					for group_n,group in pairs(country.helicopter.group) do
 						-- if FlightName == env.getValueDictByKey(group.name) then								--find group in env.mission
-						if FlightName == group.name then
+						if arg_FlightName == group.name then
 							for w = 1, #group.route.points do												--iterate through all group waypoints
 								-- if string.find(env.getValueDictByKey(group.route.points[w].name), "Egress") then		--find egress waypoint
 								if string.find(group.route.points[w].name, "Egress") then
-									EgressWP = group.route.points[w]										--store Egress waypoint
+									egressWP = group.route.points[w]										--store Egress waypoint
 									stop = true
 									break
 								end
@@ -184,7 +184,7 @@ function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackTyp
 
 				--each wingman gets one attack task for each target
 				local num = t + math.ceil((n - 1) * (#target / #wingman))	--distribute target numbers across flight
-				num = num + AttackN - 1										--increase target number to adjust for previous attacks
+				num = num + attackN - 1										--increase target number to adjust for previous attacks
 				while num > #target do
 					num = num - #target
 				end
@@ -199,26 +199,26 @@ function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackTyp
 					["params"] = {
 						["x"] = target[num]:getPoint().x,
 						["y"] = target[num]:getPoint().z,
-						["expend"] = expend,
-						["weaponType"] = tonumber(weaponType),
+						["expend"] = arg_Expend,
+						["weaponType"] = tonumber(arg_WeaponType),
 						["groupAttack"] = false,
-						["attackType"] = attackType,
+						["attackType"] = arg_AttackType,
 						["attackQtyLimit"] = false,
 						["attackQty"] = 1,
 						-- ["altitudeEdited"] = true,
 						["altitudeEnabled"] = true,
-						["altitude"] = tonumber(attackAlt),
+						["altitude"] = tonumber(arg_AttackAlt),
 						["directionEnabled"] = false,
 						["direction"] = 0,
 					},
 				}
 
-				if attackAlt and tonumber(attackAlt) > 0 then
+				if arg_AttackAlt and tonumber(arg_AttackAlt) > 0 then
 					task_entry.altitudeEnabled = true
 				end
 
 				--auto expend
-				if ((expend == "Auto" or target[num]:getDesc().category == 3) and idTypeStrike == "AttackUnit") or idTypeStrike == "AttackUnit"  then		--if auto expend or target unit is a ship
+				if ((arg_Expend == "Auto" or target[num]:getDesc().category == 3) and idTypeStrike == "AttackUnit") or idTypeStrike == "AttackUnit"  then		--if auto expend or target unit is a ship
 					local existId = tonumber(target[num]:getID())
 					env.info("DCE_CustomGroupAttack existId? |"..tostring(existId))
 					if existId   then
@@ -232,17 +232,17 @@ function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackTyp
 					end
 				end
 
-				if expend == "All" and t > 1 and weaponType ~= "ASM" then
+				if arg_Expend == "All" and t > 1 and arg_WeaponType ~= "ASM" then
 					env.info("DCE_CustomGroupAttack: passe G3 ")
 					break
 				end
 
-				env.info("DCE_CustomGroupAttack |"..tostring(FlightName).."| |"..tostring(task_entry["id"]))
+				env.info("DCE_CustomGroupAttack |"..tostring(arg_FlightName).."| |"..tostring(task_entry["id"]))
 
 				table.insert(ComboTask.params.tasks, task_entry)
 			end
 
-			if n > 1 and EgressWP.x then												--for all wingmen
+			if n > 1 and egressWP.x then												--for all wingmen
 				local MissionTask = {									--mission task to store go-to Egress waypoint task for wingmen (wingmen need to fly to Egress individually, otherwise out-of-formation flight will not climb during egress)
 					id = 'Mission',
 					params = {
@@ -251,7 +251,7 @@ function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackTyp
 						}
 					}
 				}
-				table.insert(MissionTask.params.route.points, EgressWP)	--add egress waypoint into MissionTask
+				table.insert(MissionTask.params.route.points, egressWP)	--add egress waypoint into MissionTask
 				MissionTask.params.route.points[1].x = MissionTask.params.route.points[1].x + math.random(-500, 500)	--add some randomness to egress waypoint location to prevent all aircraft in flight converging on same point
 				MissionTask.params.route.points[1].y = MissionTask.params.route.points[1].y + math.random(-500, 500)
 				MissionTask.params.route.points[1].alt = MissionTask.params.route.points[1].alt + math.random(-100, 100)
@@ -1886,7 +1886,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	if unitAFAC and unitAFAC:isExist() then
 
-		local coalitionId = unitAFAC:getCoalition()
+		coalitionId = unitAFAC:getCoalition()
 		
 		AFAC_available[afacFlightName] = {
 				["unitAFAC"] = unitAFAC,
@@ -3059,7 +3059,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 	env.info( "current_time: "..tostring(current_time).." Custom_AddWptSAR A, grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(speed).."|"..tostring(alt))
 
 	local function execute()
-		local current_time = timer.getTime()
+		-- local current_time = timer.getTime()
 		-- env.info( "current_time: "..tostring(current_time).." Custom_AddWptSAR B, grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(speed).."|"..tostring(alt))
 
 		local flight = Group.getByName(grpname)
@@ -3110,7 +3110,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 				Id = uId,
 			}
 
-			local current_time = timer.getTime()
+			current_time = timer.getTime()
 			local distanceLanding = math.sqrt(math.pow(pt_start.x - pt_landing.x, 2) + math.pow(pt_start.y - pt_landing.y, 2))
 
 			-- _affiche(zoneSAR, "Custom_AddWptSAR E zoneSAR")
@@ -3731,7 +3731,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 		local pointRTB = GetOffsetPoint({x=pt_dest.x, y=pt_dest.y}, headingRTB, distanceRTB)
 		local pointRTBz = land.getHeight({x =pointRTB.x, y = pointRTB.y})
 		local pt50m
-		local selectedTransport = 1
+		selectedTransport = 1
 
 		--test tous les cas: landing or not
 		if pt_dest.SoldierGroupID == 0 or pt_dest.theatreCercle == false then
@@ -4255,24 +4255,24 @@ end	--Custom_SAR
 ----------------------------------------------------------------------------------------------------
 
 --adapte l'altitude aux chaines montagneuse
-function Custom_Altitude(grpname, wptAlti, wptTag)
+function Custom_Altitude(arg_grpName, arg_wptAlti, arg_wptTag)
 	if varFpsLeak_B then return end
 
-	if wptTag then
-		wptTag = tonumber(wptTag)
+	if arg_wptTag then
+		arg_wptTag = tonumber(arg_wptTag)
 	else
-		wptTag = 0
+		arg_wptTag = 0
 	end
-	if not wptAlti or wptAlti == nil then
-		wptAlti = 1
-		env.info( "Custom_Altitude, A wptAlti  |"..tostring(grpname).." |wptAlti: "..tostring(wptAlti))
+	if not arg_wptAlti or arg_wptAlti == nil then
+		arg_wptAlti = 1
+		env.info( "Custom_Altitude, A wptAlti  |"..tostring(arg_grpName).." |wptAlti: "..tostring(arg_wptAlti))
 	end
 	local current_time = timer.getTime()
-	env.info( "current_time: "..tostring(current_time).." Custom_Altitude, B wptAlti  |"..tostring(grpname).." |wptAlti: "..tostring(wptAlti))
+	env.info( "current_time: "..tostring(current_time).." Custom_Altitude, B wptAlti  |"..tostring(arg_grpName).." |wptAlti: "..tostring(arg_wptAlti))
 
 	local function execute()
 		current_time = timer.getTime()
-		local flight = Group.getByName(grpname)
+		local flight = Group.getByName(arg_grpName)
 
 		-- local selectedMember = flight:getUnits(1)
 		local selectedMember
@@ -4310,7 +4310,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 
 		if ctr then
 
-			local  gpGid = Group.getID(flight)
+			local gpGid = Group.getID(flight)
 			local foundAeronef = false
 			local copyRoute = {}
 
@@ -4341,9 +4341,9 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 			end
 
 			--enleve le script Custom_Altitude pour eviter de le reinjecter et d avoir une boucle
-			if wptTag and wptTag ~= nil then
+			if arg_wptTag and arg_wptTag ~= nil then
 				for Npoint, point in ipairs(copyRoute)  do
-					if tonumber(Npoint) == tonumber( wptTag) then
+					if tonumber(Npoint) == tonumber( arg_wptTag) then
 						copyRoute[tonumber(Npoint)].name = "deleteBeforHere"
 						if point.task and point.task.params and point.task.params.tasks then
 							for Ntask , taskFinal in ipairs(point.task.params.tasks)  do
@@ -4380,9 +4380,9 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 				end
 			end
 
-			if wptTag and wptTag > 0 then
+			if arg_wptTag and arg_wptTag > 0 then
 				for i = #copyRoute, 1, -1 do
-					if i <= wptTag then
+					if i <= arg_wptTag then
 						table.remove(copyRoute, i)
 					end
 				end
@@ -4430,10 +4430,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 
 				local origineN = #copyRoute2
 				local distInterWpt = 0
-				local sondagePt
-				local sondageAlti
-				local selectedPoint
-				local headingAlt
+				local sondagePt, sondageAlti, selectedPoint, headingAlt
 				local interDistance = 2500	--7500m ou 2500 m
 				local oldAltiMax = 0
 				local oldHeadingAlt = 0
@@ -4441,7 +4438,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 				selectedPoint = {x=copyRoute[n].x, y=copyRoute[n].y}
 				oldAltiMax = land.getHeight({x =selectedPoint.x, y = selectedPoint.y})
 
-				for interval = 1, distance  , interDistance do
+				for interval = 1, distance, interDistance do
 
 					if interval == 1 then
 						-- selectedPoint = {x=copyRoute[n].x, y=copyRoute[n].y}
@@ -4451,9 +4448,9 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 						heading = GetHeading({x=selectedPoint.x, y=selectedPoint.y} , {x=copyRoute[n+1].x, y=copyRoute[n+1].y} )
 					end
 
-					local AddHeadingMin = -5
-					local AddHeadingMax = 5
-					local AddDistance = 1000
+					local addHeadingMin = -5
+					local addHeadingMax = 5
+					local addDistance = 1000
 					local altiMin0 = 999999
 					local altiMax0 = 0
 					local diffHeading = 10
@@ -4461,11 +4458,11 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 
 					--regarde la topographie devant l helico
 					--si c est montagneux, on augmente le nb de wpt, sinon on ne fait rien ou presque
-					for AddHeading = -90 , 90 do
+					for addHeading = -90 , 90 do
 						for interval0 = 0, 1500 , 150 do
-							local headingAlt0 = heading + AddHeading
+							local headingAlt0 = heading + addHeading
 							local sondagePt0 = GetOffsetPoint(selectedPoint, headingAlt0 , interval0 )
-							local sondageAlti = land.getHeight({x =sondagePt0.x, y = sondagePt0.y})
+							sondageAlti = land.getHeight({x =sondagePt0.x, y = sondagePt0.y})
 
 							if altiMin0 >= sondageAlti then
 								altiMin0 = sondageAlti
@@ -4479,14 +4476,14 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 					local diffAlti0 = altiMax0 - altiMin0
 
 					if diffAlti0 >= 450 and  diffAlti0 < 950 then
-						AddHeadingMin = -25
-						AddHeadingMax = 25
-						AddDistance = 1100
+						addHeadingMin = -25
+						addHeadingMax = 25
+						addDistance = 1100
 						diffHeading = 1
 					elseif  diffAlti0 >= 950 then
-						AddHeadingMin = -50
-						AddHeadingMax = 50
-						AddDistance = 400
+						addHeadingMin = -50
+						addHeadingMax = 50
+						addDistance = 400
 						diffHeading = 5
 					end
 
@@ -4495,43 +4492,43 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 					--cumul les alti pour trouver la plus petite sur les differents chemin calculé
 					-- calcul pour la prochaine tranche de 5000m
 					-- for AddHeading = -30 , 30 do
-					for AddHeading = AddHeadingMin , AddHeadingMax do
-						for interval0 = AddDistance, interDistance , AddDistance do
-							headingAlt = heading + AddHeading
+					for addHeading = addHeadingMin , addHeadingMax do
+						for interval0 = addDistance, interDistance , addDistance do
+							headingAlt = heading + addHeading
 							sondagePt = GetOffsetPoint(selectedPoint, headingAlt , interval0 )
 							sondageAlti = land.getHeight({x =sondagePt.x, y = sondagePt.y})
 
-							if not sumAlti[tostring(AddHeading)] then
-								sumAlti[tostring(AddHeading)] = {}
+							if not sumAlti[tostring(addHeading)] then
+								sumAlti[tostring(addHeading)] = {}
 							end
-							if not sumAlti[tostring(AddHeading)]["sum"]  then sumAlti[tostring(AddHeading)]["sum"]  = 0 end
-							if not sumAlti[tostring(AddHeading)]["altiMax"]  then sumAlti[tostring(AddHeading)]["altiMax"]  = 0 end
-							if not sumAlti[tostring(AddHeading)]["distance"]  then sumAlti[tostring(AddHeading)]["distance"]  = 0 end
+							if not sumAlti[tostring(addHeading)]["sum"]  then sumAlti[tostring(addHeading)]["sum"]  = 0 end
+							if not sumAlti[tostring(addHeading)]["altiMax"]  then sumAlti[tostring(addHeading)]["altiMax"]  = 0 end
+							if not sumAlti[tostring(addHeading)]["distance"]  then sumAlti[tostring(addHeading)]["distance"]  = 0 end
 
 
-							sumAlti[tostring(AddHeading)]["sum"] = sumAlti[tostring(AddHeading)]["sum"]  + sondageAlti
-							sumAlti[tostring(AddHeading)]["distance"]  = interval0
+							sumAlti[tostring(addHeading)]["sum"] = sumAlti[tostring(addHeading)]["sum"]  + sondageAlti
+							sumAlti[tostring(addHeading)]["distance"]  = interval0
 
-							if sumAlti[tostring(AddHeading)]["altiMax"] < sondageAlti then
-								sumAlti[tostring(AddHeading)]["altiMax"] = sondageAlti
+							if sumAlti[tostring(addHeading)]["altiMax"] < sondageAlti then
+								sumAlti[tostring(addHeading)]["altiMax"] = sondageAlti
 							end
 						end
 
 						--regarde l'alti max sur une tres longue distance, pour ne pas s orienter vers une trop grande montagne
 						for interval0 = 600 , 10000 , 500 do
-							headingAlt = heading + AddHeading
+							headingAlt = heading + addHeading
 							sondagePt = GetOffsetPoint(selectedPoint, headingAlt , interval0 )
 							sondageAlti = land.getHeight({x =sondagePt.x, y = sondagePt.y})
 
-							if not sumAlti[tostring(AddHeading)] then
-								sumAlti[tostring(AddHeading)] = {}
+							if not sumAlti[tostring(addHeading)] then
+								sumAlti[tostring(addHeading)] = {}
 							end
-							if not sumAlti[tostring(AddHeading)]["altiMaxLong"]  then sumAlti[tostring(AddHeading)]["altiMaxLong"]  = 0 end
+							if not sumAlti[tostring(addHeading)]["altiMaxLong"]  then sumAlti[tostring(addHeading)]["altiMaxLong"]  = 0 end
 
-							if sumAlti[tostring(AddHeading)]["altiMaxLong"] < sondageAlti then
-								sumAlti[tostring(AddHeading)]["altiMaxLong"] = sondageAlti
+							if sumAlti[tostring(addHeading)]["altiMaxLong"] < sondageAlti then
+								sumAlti[tostring(addHeading)]["altiMaxLong"] = sondageAlti
 
-								if sumAlti[tostring(AddHeading)]["altiMaxLong"] < 3500 then
+								if sumAlti[tostring(addHeading)]["altiMaxLong"] < 3500 then
 									-- env.info( "CustomTS Pf BBB_b sondageAlti: "..tostring(AddHeading).." altiMaxLong: "..tostring(sondageAlti).."")
 								end
 							end
@@ -4546,8 +4543,8 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 
 					--regarde si au moins un cap est inferieur à l altiMaxLong
 					local foundLowAltiMaxLong = false
-					for NaddHdg, value in pairs(sumAlti) do
-						if  sumAlti[tostring(NaddHdg)].altiMaxLong < 2500 then
+					for addHdg_N, value in pairs(sumAlti) do
+						if  sumAlti[tostring(addHdg_N)].altiMaxLong < 2500 then
 							foundLowAltiMaxLong = true
 							break
 						end
@@ -4580,9 +4577,9 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 					local selectedPointNew = GetOffsetPoint(selectedPoint, headingAlt , sumAlti[tostring(selectHdg)].distance )
 					selectedPoint = selectedPointNew
 
-					local PrintAltiMaxLong =  0
+					local printAltiMaxLong =  0
 					if sumAlti[tostring(selectHdg)] and sumAlti[tostring(selectHdg)].altiMaxLong then
-						PrintAltiMaxLong =  math.floor(sumAlti[tostring(selectHdg)].altiMaxLong)
+						printAltiMaxLong =  math.floor(sumAlti[tostring(selectHdg)].altiMaxLong)
 					end
 
 					local alt_type = "BARO"
@@ -4596,8 +4593,8 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 						oldHeadingAlt =  headingAlt
 						distInterWpt = 0
 						local alti = altiMax + addAlti
-						if PrintAltiMaxLong >= 3500 then
-							alti = PrintAltiMaxLong + addAlti
+						if printAltiMaxLong >= 3500 then
+							alti = printAltiMaxLong + addAlti
 						end
 						local interWpt = {
 
@@ -4681,7 +4678,7 @@ function Custom_Altitude(grpname, wptAlti, wptTag)
 
 			if camp.debug then
 				local logStr = "Mission = " .. TableSerialization(Mission, 0)
-				local grpnameClean = grpname:gsub('[%p%c%s]', '_')
+				local grpnameClean = arg_grpName:gsub('[%p%c%s]', '_')
 				local logFile = io.open(PathDCE.."Debug\\"..grpnameClean.."_".. "Custom_Altitude_"..current_time..".lua", "w")
 				if logFile then
 					logFile:write(logStr)

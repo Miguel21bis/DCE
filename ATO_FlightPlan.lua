@@ -120,7 +120,7 @@ end
 -- }, -- end of ["requiredModules"]
 
 if mission.requiredModules then
-	for nameN, module in pairs(mission.requiredModules) do
+	for nameN, _ in pairs(mission.requiredModules) do
 		local entry = {
 			["name"] = tostring(nameN),
 			["origine"] = {
@@ -7546,19 +7546,6 @@ local debugGenMFile = io.open("Debug/debugGenMission.txt", "w") or error("Failed
 debugGenMFile:write(debugTxt_AtoFP)
 debugGenMFile:close()
 
-
--- local camp_str = "mission_AtoFP = " .. TableSerialization(mission, 0)						
--- local campFile = io.open("Debug/mission_AtoFP.lua", "w")								
--- campFile:write(camp_str)															
--- campFile:close()
-
--- local camp_str = "target = " .. TableSerialization(targetList_InThisMission, 0)						
--- local campFile = io.open("Debug/targetList_InThisMission_AtoFP.lua", "w")								
--- campFile:write(camp_str)															
--- campFile:close()
-
-
-
 local camp_str = "TabLPark = " .. TableSerialization(TabLPark, 0)
 local campFile = io.open("Debug/TabLPark_AtoFP.lua", "w") or error("Failed to open debug file")
 campFile:write(camp_str)
@@ -7770,19 +7757,14 @@ end
 local positionCentrale = {}
 for _side, side in pairs(mission.coalition) do
 	for countryN, country in pairs(side.country) do
-
 		for category, groups in pairs(country) do
-
 			if (category == "vehicule" or category == "static"  ) and type(groups) == "table" and groups["group"]  then
 				for Ngroup, group in pairs(groups["group"]) do
-
 					if string.find(group.name, "ASTI") then
 						positionCentrale.x = group.x
 						positionCentrale.y = group.y
 						positionCentrale.name = group.name
 					end
-
-
 				end
 			end
 		end

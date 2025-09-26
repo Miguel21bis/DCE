@@ -1,11 +1,11 @@
 ---@diagnostic disable: param-type-mismatch, lowercase-global
 
 ------------------------------------------------------------------------------------------------------- 
--- Last modification cleanCode_a
+-- Last modification cleanCode_b
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_SunMoonRise.lua"] = "1.3.5"
+versionDCE["UTIL_SunMoonRise.lua"] = "1.3.6"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_a
+-- cleanCode_b
 -- -- adjustment
 -- miguel21 modification M53_b			automatic update of the conf_mod file (b conf_mod reconfiguration)
 -- miguel21 modification M51_b      (b: Moonphase) (a: Moonphase)
@@ -575,7 +575,7 @@ function calcMoonRiseSet(lat, lon, jDateMoon, moonTimeOffset)
   --
   -- calculate moonrise and moonset times
   --
-  local i, j, k
+  -- local i, j, k
   local zone = moonTimeOffset / 60
   local ph
   jd = jDateMoon - 2451545                                   -- Julian day relative to Jan 1.5, 2000

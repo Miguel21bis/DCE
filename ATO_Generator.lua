@@ -4046,7 +4046,7 @@ if Debug.Generator and Debug.debug then
 	_file:close()
 
 	local _str = "debugLogs = " .. TableSerializationAG_triggers(debugLogs, 0)
-	_file = io.open("Debug/AtoGenerator_Debug_B.lua", "w") or error("Échec d'ouverture du fichier AtoGenerator_Debug_B")
+	local _file = io.open("Debug/AtoGenerator_Debug_B.lua", "w") or error("Échec d'ouverture du fichier AtoGenerator_Debug_B")
 	_file:write(_str)
 	_file:close()
 

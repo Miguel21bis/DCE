@@ -516,7 +516,7 @@ for side, pack in pairs(ATO) do
 				-- if flight[f].task == "Nothing" or flight[f].task == "Transport" then
 
 				if target_wp >= 2 and target_wp + 1 >= #flight[f].route then
-					local speed = vCruise										--everything else is at cruise speed
+					speed = vCruise										--everything else is at cruise speed
 					local leg = GetDistance(flight[f].route[#flight[f].route - 1], flight[f].route[#flight[f].route])	--measure lenght of the next route leg
 					eta = eta + leg / speed									--calculate ETA at next waypoint
 					flight[f].route[#flight[f].route].eta = eta				--set ETA at waypoint
@@ -884,8 +884,8 @@ if Debug.debug then
 		table.insert(TOT_TimeOccupation, timingQuarOccupation)
 	end
 
-	local camp_str = "TOT_TimeOccupation = " .. TableSerialization(TOT_TimeOccupation, 0)
-	local campFile = io.open("Debug/TOT_TimeOccupation_AtoT.lua", "w") or error("Failed to open debug file")
+	camp_str = "TOT_TimeOccupation = " .. TableSerialization(TOT_TimeOccupation, 0)
+	campFile = io.open("Debug/TOT_TimeOccupation_AtoT.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)
 	campFile:close()
 

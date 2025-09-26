@@ -3,11 +3,11 @@
 -- avec la commmande w2
 -- Supprime un Groupe entier en donnant son numero de groupe
 ------------------------------------------------------------------------------------------------------- 
--- Last Modification M90_a
+-- Last Modification M90_a cleancode_b
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Divers.lua"] = "1.5.27"
+versionDCE["UTIL_Divers.lua"] = "1.5.28"
 ------------------------------------------------------------------------------------------------------- 
--- cleancode_a				(a springCleaning)
+-- cleancode_b				(a springCleaning)
 -- adjustment_a				(a ajout dataMap)
 -- updateFunction_d			(d helpBalancePower())(c KillTarget())(b fuelConsumption())(a DelGroup())
 -- modification M90_a		missionWithIcone
@@ -688,7 +688,7 @@ elseif ArgTools == "fuelConsumption" then
 					}
 
 
-					local groupEntries =
+					groupEntries =
 					{
 						-- ['frequency'] = frequencyIni +1,
 						['taskSelected'] = true,
@@ -845,7 +845,7 @@ elseif ArgTools == "fuelConsumption" then
 					}
 
 
-					local groupEntries =
+					groupEntries =
 					{
 						-- ['frequency'] = frequencyIni +1,
 						['taskSelected'] = true,
@@ -947,11 +947,11 @@ elseif ArgTools == "fuelConsumption" then
 
 
 	----- convert tables back to strings for insertion into content files -----
-	local misStr = "mission = " .. TableSerialization(mission, 0)
-	local optStr = "options = " .. TableSerialization(options, 0)
-	local warStr = "warehouses = " .. TableSerialization(warehouses, 0)
-	local dicStr = "dictionary = " .. TableSerialization(dictionary, 0)
-	local resStr = "mapResource = " .. TableSerialization(mapResource, 0)
+	misStr = "mission = " .. TableSerialization(mission, 0)
+	optStr = "options = " .. TableSerialization(options, 0)
+	warStr = "warehouses = " .. TableSerialization(warehouses, 0)
+	dicStr = "dictionary = " .. TableSerialization(dictionary, 0)
+	resStr = "mapResource = " .. TableSerialization(mapResource, 0)
 	-- local gciStr = "GCI = " .. TableSerialization(GCI, 0)
 
 	----- create temporary content files of new mission file -----
@@ -1033,7 +1033,7 @@ elseif ArgTools == "KillTarget" then
 	repeat
 		local tableTargetlist = {}
 		local i = 1
-		local tableTargetlist = {
+		tableTargetlist = {
 				["blue"] = {},
 				["red"] = {},
 				}
@@ -1164,7 +1164,7 @@ elseif ArgTools == "KillTarget" then
 
 				print(" enter the percentage value of BLUE ground groups to be deactivated (targetlist.red)")
 				inputString = string.lower(io.stdin:read())
-				local pourcentDesactive = tonumber(inputString)
+				pourcentDesactive = tonumber(inputString)
 				active = false
 				activeInactiveTarget(nil, active, pourcentDesactive, "red")
 
@@ -1179,7 +1179,7 @@ elseif ArgTools == "KillTarget" then
 
 				print(" enter the percentage value of RED ground groups to be deactivated")
 				inputString = string.lower(io.stdin:read())
-				local pourcentDesactive = tonumber(inputString)
+				pourcentDesactive = tonumber(inputString)
 				active = false
 				checkGroundFirst(  pourcentDesactive, "red", active)
 
@@ -1226,7 +1226,7 @@ elseif ArgTools == "KillTarget" then
 
 				input = tonumber(inputString)
 
-				local active
+				-- local active
 
 				active = string.sub (inputString, -1)
 

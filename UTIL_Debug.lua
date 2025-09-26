@@ -1,11 +1,11 @@
 --Various debug file exports
 --Initiated by MAIN_NextMission.lua (unless disabled there)
 -------------------------------------------------------------------------------------------------------
--- last modification: cleancode_b
+-- last modification: cleancode_c
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Debug.lua"] = "1.3.10"
+versionDCE["UTIL_Debug.lua"] = "1.3.11"
 ------------------------------------------------------------------------------------------------------- 
--- cleancode_b		(b springCleaning)
+-- cleancode_c		(b springCleaning)
 -- adjustment_g		(f targetName)(e Package_freq)(ac affiche le nombre d element dans la mission)
 ------------------------------------------------------------------------------------------------------- 
 
@@ -45,8 +45,8 @@ if Debug.debug then
 	file_File:write(file_str)																	--save new data
 	file_File:close()
 
-	local file_str = "EWR = " .. TableSerialization(EWR_DB, 0)			--make a string
-	local file_File = io.open("Debug/EWR_UtilDebug.lua", "w") or error("Failed to open debug EWR_UtilDebug file")
+	file_str = "EWR = " .. TableSerialization(EWR_DB, 0)			--make a string
+	file_File = io.open("Debug/EWR_UtilDebug.lua", "w") or error("Failed to open debug EWR_UtilDebug file")
 	file_File:write(file_str)																	--save new data
 	file_File:close()
 

@@ -183,13 +183,13 @@ local testFile = io.open(pathCampaign.."/Debug/DCEM_Function_tabSquad.lua", "w")
 testFile:write(test_str)															--save new data
 testFile:close()
 
-local test_str = "taskByPlane = " .. TableSerialization(taskByPlane, 0)						--make a string
-local testFile = io.open(pathCampaign.."/Debug/DCEM_Function_taskByPlane.lua", "w") or error("Failed to open debug file")
+test_str = "taskByPlane = " .. TableSerialization(taskByPlane, 0)						--make a string
+testFile = io.open(pathCampaign.."/Debug/DCEM_Function_taskByPlane.lua", "w") or error("Failed to open debug file")
 testFile:write(test_str)															--save new data
 testFile:close()
 
-local test_str = "Playable_m = " .. TableSerialization(Playable_m, 0)						--make a string
-local testFile = io.open(pathCampaign.."/Debug/DCEM_Function_Playable_m.lua", "w") or error("Failed to open debug file")
+test_str = "Playable_m = " .. TableSerialization(Playable_m, 0)						--make a string
+testFile = io.open(pathCampaign.."/Debug/DCEM_Function_Playable_m.lua", "w") or error("Failed to open debug file")
 testFile:write(test_str)															--save new data
 testFile:close()
 

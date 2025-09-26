@@ -2,11 +2,11 @@
 --Returns route points, route lenght and route threat level (unavoided threats)
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  cleancode_a
+-- last modification:  cleancode_b
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_RouteGenerator.lua"] = "1.8.48"
+versionDCE["ATO_RouteGenerator.lua"] = "1.8.49"
 ------------------------------------------------------------------------------------------------------- 
--- cleancode_a				(d springCleaning)
+-- cleancode_b				(d springCleaning)
 -- adjustment_n				(n create assemblyPoint)(m add AFAC task)(l alti heli)k alti station on target)(j does not fly over the target)(i escort Transport)(h alti escorte helicoptere)(fg add axis patern)(e unit.helicopter)(d escort too low) (c: climb refueling)(a:alti diff en fonction du role dans le meme package)
 -- Debug_e					(e SEAD SAm)(d route[m + 1])(c:supprime trop de waypoint lors de l'escorte)(b:quand les EWR sont d�truit: on active les CAP, si les CAP on besoin d'EWR c'est nul)(a:target ligne 473 Reconnaissance)
 -- modification M66_a		add Runway Attack
@@ -154,8 +154,6 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 		end
 	end
 
-	local before = os.clock()
-
 	--function to return radar horizon
 	local function RadarHorizon(h1, h2)
 		local r = 8500000																										--radius of earth (actual value 6371000 currected for refraction of radio waves)
@@ -251,14 +249,10 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 		end
 	end
 
-	local after = os.clock()
-	if debugRoute and after >= before + deltaT  then print() print("|Part 1: "..before.."-"..after.." |") end
-
 
 	--function to check if a line between two points runs through a threat. Returns a table of threats
 	local function ThreatOnLeg(point1, point2, leg_alt)
 		local tbl = {}																									--local table to collect threats on route leg
-		local before = os.clock()
 		local tempB = 0
 
 		--check ground threats
@@ -320,8 +314,6 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 				end
 			end
 		end
-		local after = os.clock()
-		if debugRoute and after >= before + deltaT  then print() print("|ThreatOnLeg: "..before.."-"..after.." |#Fighterthreats "..tempB) end
 
 		return tbl
 	end
@@ -339,7 +331,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 		local berfor = os.clock()
 		local afterInterB = os.clock()
 
-		local function FindPathLeg(point1, point2, pointEnd, distance, route, instance, leg_alt)									--find a route between point1 and point2		
+		local function FindPathLeg(point1, point2, pointEnd, distance, arg_route, instance, leg_alt)									--find a route between point1 and point2		
 
 
 
@@ -388,7 +380,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			--also try a low variant
 			if instance == 1 and leg_alt > profile.hAttack and not tooHighReliefB  then	--and not tooHighReliefB																	--in first instance also make a low level route if attack alt is lower than cruise alt
 				-- table.insert(FindPathLegTable, {point1, point2, pointEnd, distance + 1, route, instance - 1, profile.hAttack})		--try leg again low (do not increase instance), increase distance slighly to introduce a bias against going low compared to the identical route high
-					FindPathLegTable[#FindPathLegTable+1] = {point1, point2, pointEnd, distance + 1, route, instance - 1, profile.hAttack}
+					FindPathLegTable[#FindPathLegTable+1] = {point1, point2, pointEnd, distance + 1, arg_route, instance - 1, profile.hAttack}
 			end
 
 			--abort unneeded pathfing after a valid route has been found
@@ -414,7 +406,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 
 			if not tooHighReliefB then
 				-- table.insert(NavRoutes, {navpoints = route, dist = distance + distance_remain, threats = threatsum})					--save route variant directly to end from current route branch
-				NavRoutes[#NavRoutes+1] = {navpoints = route, dist = distance + distance_remain, threats = threatsum}
+				NavRoutes[#NavRoutes+1] = {navpoints = arg_route, dist = distance + distance_remain, threats = threatsum}
 			end
 
 			if threatsum == 0 and not tooHighReliefB then																									--there are no threats to end (also no unavoidable threats)
@@ -440,9 +432,9 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 				elseif not tooHighReliefB then																												--if point2 is not the end
 					distance = distance + GetDistance(point1, point2)																--complete route distance of this variant up to point2
 					-- table.insert(route, point2)																						--add point2 to route
-					route[#route+1] =  point2
+					arg_route[#arg_route+1] =  point2
 					-- table.insert(FindPathLegTable, {point2, pointEnd, pointEnd, distance, route, instance, leg_alt})				--continue find route from point2 to end
-					FindPathLegTable[#FindPathLegTable+1] = {point2, pointEnd, pointEnd, distance, route, instance, leg_alt}
+					FindPathLegTable[#FindPathLegTable+1] = {point2, pointEnd, pointEnd, distance, arg_route, instance, leg_alt}
 				end
 
 			elseif #threat > 0 and not tooHighReliefB then																													--if there is a threat on leg			
@@ -478,7 +470,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 						if #threat_leg == 0 then																					--if there is no threat between point 1 and alternate point2
 							local distance_alt = distance + GetDistance(point1, point2alt)											--complete route distance of this variant up to point2alt
 							local route_alt = {}																					--make a local copy of the route up to now
-							for k, v in pairs(route) do
+							for k, v in pairs(arg_route) do
 								route_alt[k] = {
 									x = v.x,
 									y = v.y,
@@ -490,14 +482,10 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 							FindPathLegTable[#FindPathLegTable+1] = {point2alt, pointEnd, pointEnd, distance_alt, route_alt, instance, leg_alt}
 						else																										--if there is a threat between point1 and point2alt
 							-- table.insert(FindPathLegTable, {point1, point2alt, pointEnd, distance, route, instance, leg_alt})		--find new route to point2alt
-							FindPathLegTable[#FindPathLegTable+1] = {point1, point2alt, pointEnd, distance, route, instance, leg_alt}
+							FindPathLegTable[#FindPathLegTable+1] = {point1, point2alt, pointEnd, distance, arg_route, instance, leg_alt}
 						end
 					end
 				end
-
-				local afterInter = os.clock()
-				if debugRoute and  afterInter >= afterInterB + deltaT  then print() print("|FindPathLeg B not tooHighReliefB: "..afterInter - afterInterB.." |") end
-				local afterInterB = os.clock()
 
 			elseif tooHighReliefB == true and freeRouteX then
 				--find left/right side alternates around threat
@@ -541,7 +529,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 
 
 							-- table.insert(FindPathLegTable, {point1, point2alt, pointEnd, distance, route, instance, leg_alt})		--find new route to point2alt
-							FindPathLegTable[#FindPathLegTable+1] = {point1, point2alt, pointEnd, distance, route, instance, leg_alt}
+							FindPathLegTable[#FindPathLegTable+1] = {point1, point2alt, pointEnd, distance, arg_route, instance, leg_alt}
 
 						end
 
@@ -603,7 +591,6 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 
 	----- find a route depending on task -----
 	if task == "Strike" or task == "Anti-ship Strike" or task == "Reconnaissance" or task == "CSAR" or task == "Runway Attack" then
-		local before = os.clock()
 		--set Initial Point IP
 		local initialPoint = {}																				--initial point
 
@@ -697,8 +684,8 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 							local tooHighReliefD = false
 							if is_helicopter then
 								for Npoly, poly in ipairs(AltiHelicoMap) do
-									for n = 1 , #poly - 1 do
-										local freeRoute = findIntersect(target, draft_IP, poly[n], poly[n+1])
+									for n2 = 1 , #poly - 1 do
+										local freeRoute = findIntersect(target, draft_IP, poly[n2], poly[n2+1])
 										if freeRoute then
 											tooHighReliefD = true
 											-- print("AtoRG Baa freeRoute BREAK "..tostring(freeRoute))
@@ -740,8 +727,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 
 		local afterInter = os.clock()
 		local afterInterB = os.clock()
-		if  debugRoute and afterInter >= before + deltaT  then print() print("|Strike IPb: "..afterInter - before.." |") end
-
+		
 		--set attack point
 		local target_ip_heading = GetHeading(target, initialPoint)
 		local attackPoint = GetOffsetPoint(target, target_ip_heading, standoff)						--attack point is standoff range from target on straight IP-target line
@@ -813,12 +799,6 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 					end
 				end
 
-				local afterInter = os.clock()
-				if  debugRoute and afterInter >= afterInterAb + deltaT  then print() print("|Strike Egress: "..afterInter - afterInterAb.." |") end
-				local afterInterBb = os.clock()
-
-
-
 			elseif task == "Reconnaissance"  then																	--for recon missions
 				local afterInterAb = os.clock()
 				egress_heading = GetHeading(initialPoint, target)
@@ -851,9 +831,6 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 						end
 					end
 				end
-
-			local afterInter = os.clock()
-			if  debugRoute and afterInter >= afterInterAb + deltaT  then print() print("|Reconnaissance: "..afterInter - afterInterAb.." |") end
 
 			elseif  task == "CSAR" then																	--for recon missions
 				local afterInterAb = os.clock()
@@ -888,9 +865,6 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 						end
 					end
 				end
-				local afterInter = os.clock()
-				if  debugRoute and afterInter >= afterInterAb + deltaT  then print() print("|CSAR: "..afterInter - afterInterAb.." |") end
-
 			end
 
 			if egressPoint.x == nil then																			--if egress is not yet set, find the best from egress table
@@ -911,24 +885,9 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			end
 		end
 
-		local afterInter = os.clock()
-		if  debugRoute and afterInter >= afterInterB + deltaT  then print() print("|Egress b: "..afterInter - afterInterB.." |") end
-		local afterInterB = os.clock()
-
 		--set outbound and inbound routes
 		local outbound_navRoute = FindPath(basePoint, initialPoint)														--find the safest route between basePoint and initialPoint
-
-
-		local afterInter = os.clock()
-		if  debugRoute and afterInter >= afterInterB + deltaT  then print() print("|outbound_navRoute: "..afterInter - afterInterB.." |") end
-		local afterInterB = os.clock()
-
 		local inbound_navRoute = FindPath(basePoint, egressPoint)														--find the safest route between egressPoint and basePoint
-
-
-		local afterInter = os.clock()
-		if  debugRoute and afterInter >= afterInterB + deltaT  then print() print("|inbound_navRoute: "..afterInter - afterInterB.." |") end
-		local afterInterB = os.clock()
 
 		if task == "CSAR" and is_helicopter   then
 			if outbound_navRoute.routeImpossible  then
@@ -959,10 +918,6 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			joinPoint = GetOffsetPoint(basePoint, heading, distance)													--define join point
 		end
 
-		local afterInter = os.clock()
-		if  debugRoute and afterInter >= afterInterB + deltaT  then print() print("|Join: "..afterInter - afterInterB.." |") end
-		local afterInterB = os.clock()
-
 		--set split point
 		local splitPoint = {}																							--point where package splits to land on individual airbases		
 		do
@@ -992,10 +947,6 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			if GetDistance(basePoint, joinPoint) < distance then distance = GetDistance(basePoint, joinPoint) -1000 end
 			assemblyPoint = GetOffsetPoint(basePoint, heading, distance)
 		end
-
-		local afterInter = os.clock()
-		if  debugRoute and afterInter >= afterInterB + deltaT  then print() print("|Split: "..afterInter - afterInterB.." |") end
-		local afterInterB = os.clock()
 
 		if is_helicopter and viaFARP then
 			print("AtoRG viaFARP x "..tostring(viaFARP.x).." y "..tostring(viaFARP.y).." h "..tostring(viaFARP.h) )
@@ -1173,10 +1124,6 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 				end
 			end
 
-			local afterInter = os.clock()
-			if  debugRoute and afterInter >= afterInterB + deltaT  then print() print("|Descent: "..afterInter - afterInterB.." |") end
-			local afterInterB = os.clock()
-
 			--climb point
 			for n = #route - 1, 4, -1 do																				--iterate through route backkwards between split and join point
 				if route[n].alt == profile.hCruise then
@@ -1299,10 +1246,6 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 				end
 			end
 
-			local afterInter = os.clock()
-			if  debugRoute and afterInter >= afterInterB + deltaT  then print() print("|Climb: "..afterInter - afterInterB.." |") end
-			local afterInterB = os.clock()
-
 		elseif profile.hCruise < profile.hAttack then																	--if cruise is lower than attack altitude, a descend and a climb point must be inserted
 			for n = 3, #route - 2 do																					--iterate through route between join and split point
 				if route[n].alt < route[n + 1].alt then																	--climb route leg
@@ -1334,8 +1277,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			end
 		end
 		local after = os.clock()
-		if  debugRoute and after >= before + deltaT  then print() print("|task == Strike: "..before.."-"..after.." |") end
-
+		
 	elseif task == "Fighter Sweep" then
 
 		--set outbound and inbound routes
@@ -1689,7 +1631,6 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 	--evaluate threat level of complete route
 	do
 		route.threats = {}																								--table to store threats for route
-		before = os.clock()
 		-- print() print("|Fighterthreats: "..before.." |")
 		--ground threats
 		route.threats.ground = {}																						--table to store ground threats for route
@@ -1733,10 +1674,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			end
 
 		end
-		after = os.clock()
-		if  debugRoute and after >= before + deltaT  then print() print("|threat_table.ground: "..before.."-"..after.." |") end
 
-		before = os.clock()
 		-- print() print("|Fighterthreats: "..before.." |")
 		--air threats
 		route.threats.air = {}																										--table to store air threats for route
@@ -1813,9 +1751,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 				end
 			end
 		end
-		after = os.clock()
-		if  debugRoute and after >= before + deltaT  then print() print("|Fighterthreats: "..before.."-"..after.." |") end
-
+		
 		--combine route threats
 		route.threats.SEAD_offset = 0																								--counter for SEAD sorties required to offset ground threats
 		route.threats.ground_total = 0.5																							--cummulative route ground threat level (0.5 = no threat)
@@ -1853,7 +1789,6 @@ end
 
 function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainUnit)																					--get the escort route given the escort start point and an existing package route
 
-	local before = os.clock()
 	--make a local copy of the route table forwarded as function argument (otherwise the original route gets adjusted
 	-- local MainUnitHelicopter = mainUnit.helicopter
 	local route = Deepcopy(orig_route)
@@ -2166,11 +2101,6 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 	if DebugRoute then
 		print("AtoRG passe CC route.lenght "..tostring(route.lenght))
 	end
-
-	-- if i_timmer01 >= 10  then io.write("|") i_timmer01 = 0 end
-
-	local after = os.clock()
-	if debugRoute and after >= before + deltaT  then print() print("|EscorteRoute: "..before.."-"..after.." |") end
-
+	
 	return route
 end

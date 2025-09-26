@@ -7,13 +7,13 @@
 -- How close any flight passes to the unit when that flight is flying along the waypoints.
 -- Whether that unit is close to any 'Target' or 'Attack' waypoint
 -------------------------------------------------------------------------------------------------------
--- last modification: cleancode_b
+-- last modification: cleancode_c
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_Prune.lua"] = "1.7.25"
+versionDCE["DC_Prune.lua"] = "1.7.26"
 -------------------------------------------------------------------------------------------------------
 -- Reglage_g		(g targetList_InThisMission)(f debug file)(g add 9A33)(f ZSU_57_2)(e dont prune target mission)(d unit FARP)(c: scud)(b: add FPS-117 & FUG & FUSE) (a: ajust PruneScriptConf)
 -- debug_g			(g function entry)(f: keept EWR)(e: prune category tag)(d: Static Plane Bug + Heli)(c: Package avion supprimé)(b: FARP)(a: helicopter)
--- cleancode_b		(a springCleaning)
+-- cleancode_c		(a springCleaning)
 -- M23_a			Désactive USN Mod
 -- M21_a			Ajout Convoy (interdit à Prune de les Pruner..)
 -- Z02_a			DontPrunSAM et prend en compte la position des intercepteur qui n'ont qu'un seul waypoint
@@ -283,11 +283,11 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 
 				-- if this is a 'target' waypoint then record that distance as well
 				if wp1.name == 'Target' or wp1.name == 'Attack' then
-					local dist = GetDistance(wp1, unit)
+					dist = GetDistance(wp1, unit)
 					closestTarget = math.min(closestTarget, dist)
 				end
 				if wp2.name == 'Target' or wp2.name == 'Attack' then
-					local dist = GetDistance(wp2, unit)
+					dist = GetDistance(wp2, unit)
 					closestTarget = math.min(closestTarget, dist)
 				end
 
@@ -306,7 +306,7 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 											if allGroundGroupId[targetGroupId] then
 		-- print("DC_P_P Keep cibles identifiées par idgroup seront Gardées "..targetGroupId.." Unit "..unit.name)	
 												cibleTrouve[targetGroupId] = allGroundGroupId[targetGroupId].name
-												local dist = GetDistance(allGroundGroupId[targetGroupId], unit)
+												dist = GetDistance(allGroundGroupId[targetGroupId], unit)
 												closestTarget = math.min(closestTarget, dist)
 											end
 										end

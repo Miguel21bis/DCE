@@ -2,11 +2,11 @@
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleanCode_e debug_e
+-- last modification: cleanCode_f
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_Weather.lua"] = "1.6.24"
+versionDCE["DC_Weather.lua"] = "1.6.25"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_e				(e springCleaning)					
+-- cleanCode_f				(e springCleaning)					
 -- adjustment_h				(h baseChoice)(f \\\n to \n)(e debug info)(d preset = nil)(c adds METAR to dynamic cloud presets, where possible) (b CampTotalTimeS)(a: high 2 days max)
 -- debug_e					(e: cloud/METAR altitudes above 10000ft were not displayed)(d very bad weather during a cold sector)%chance pHigh pLow 
 -- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
@@ -245,8 +245,8 @@ if camp.weather.zone == nil then
     camp.weather.zoneNextTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)
 
     -- Calcul du ratio de beau temps
-    local pHigh = camp.weather.pHigh or 50
-    local pLow = camp.weather.pLow or 50
+    pHigh = camp.weather.pHigh or 50
+    pLow = camp.weather.pLow or 50
     local total = pHigh + pLow
     local probaHigh = pHigh / total
 
@@ -333,8 +333,8 @@ if elapsed_time > camp.weather.zoneEnd then										--active weather zone has e
 	-- end
 	if not InitalW then  -- évite de passer 2 fois le random lors de la première mission
 
-		local pHigh = pHigh or 50
-		local pLow = pLow or 50
+		pHigh = pHigh or 50
+		pLow = pLow or 50
 		local total = pHigh + pLow
 		local probaHigh = pHigh / total
 
@@ -1314,7 +1314,7 @@ if camp.weather.zone == "high_OLD" then
 	end
 
 	local presetMiss = ""
-	local baseChoice = 5000							--TODO quelle base est appliquée par l editeur de mission en cas d extreme beau
+	baseChoice = 5000							--TODO quelle base est appliquée par l editeur de mission en cas d extreme beau
 	presetChoice = math.random(Rmini, Rmaxi)
 
 	if presetChoice ~= 0 then

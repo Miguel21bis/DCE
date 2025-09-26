@@ -370,7 +370,7 @@ if input == "y" or input == "yes" then
 						end
 
 						-- Sélection de la cible spécifique
-						local input
+						
 						repeat
 							io.write("\nEnter target number: ")
 							input = tonumber(io.stdin:read())

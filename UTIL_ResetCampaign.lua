@@ -120,7 +120,7 @@ trigFile:write(trigStr)
 trigFile:close()
 
 local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
-local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
+trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
 trigFile:write(airbases_Str)
 trigFile:close()
 
@@ -218,8 +218,8 @@ do
 
 
 	--save oob_ground status file
-	local ground_str = "oob_ground = " .. TableSerialization(oob_ground, 0)								--make a string
-	local groundFile = io.open("Active/oob_ground.lua", "w") or error("Failed to open debug file")
+	ground_str = "oob_ground = " .. TableSerialization(oob_ground, 0)								--make a string
+	groundFile = io.open("Active/oob_ground.lua", "w") or error("Failed to open debug file")
 	groundFile:write(ground_str)																		--write initial data
 	groundFile:close()
 end
