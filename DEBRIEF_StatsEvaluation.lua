@@ -5,7 +5,7 @@
 if not versionDCE then versionDCE = {} end
 versionDCE["DEBRIEF_StatsEvaluation.lua"] = "1.8.68"
 ------------------------------------------------------------------------------------------------------- 
--- debug_m						(m events[e].target or "nil")(l package stats)(k task inc)(j element.x)(i inconnu events[e].initiator)(g mission+1) hit name)(h take debrief camp_status)(g some kills are not counted)(f debrief bug)(e initiatorPilotName)(c:equipage compte 2X)(b transport)(a: nom cible peut ressembler à nom AirUnit)
+-- debug_m						(m events[e].target or "nil")(l package stats)(k task inc)(j element.x)(i inconnu events[e].initiator)(g mission+1) hit name)(h take debrief camp_status)(g some kills are not counted)(f debrief bug)(e pilotName)(c:equipage compte 2X)(b transport)(a: nom cible peut ressembler à nom AirUnit)
 -- cleancode_h					(h springCleaning)
 -- adjustment_i					(i Debug/statsClientDetails) (g soldat inconnu)(f reveals the SAM that have already fired)
 -- modification M66_a			bombOnRunway
@@ -344,7 +344,6 @@ for e = 1, #events do																					--iterate through all events
 	if events[e].initiatorPilotName then
 		-- print("DebriefSE e: "..tostring(e).." initiatorPilotName: "..tostring( events[e].initiatorPilotName).." initiator: "..tostring(events[e].initiator))
 	end
-	-- _affiche(events[e], "prepare client stats events[e]")
 
 	if events[e].initiator and string.find(events[e].initiator, "parachut") then
 		events[e].initiator = tostring(events[e].initiatorPilotName)
@@ -353,6 +352,21 @@ for e = 1, #events do																					--iterate through all events
 	if events[e].initiatorPilotName and type(events[e].initiatorPilotName) == "string" and events[e].initiatorPilotName ~= "nil" then	--event is by a client
 		addClient(events[e].initiatorPilotName)
 		client_control[events[e].initiator] = events[e].initiatorPilotName								--store which unit name (initiaror) is controllen by cliend (PilotName)
+	end
+end
+
+for e = 1, #events do																					--iterate through all events
+	if events[e].pilotName then
+		-- print("DebriefSE e: "..tostring(e).." pilotName: "..tostring( events[e].pilotName).." initiator: "..tostring(events[e].initiator))
+	end
+
+	if events[e].initiator and string.find(events[e].initiator, "parachut") then
+		events[e].initiator = tostring(events[e].pilotName)
+	end
+
+	if events[e].pilotName and type(events[e].pilotName) == "string" and events[e].pilotName ~= "nil" then	--event is by a client
+		addClient(events[e].pilotName)
+		client_control[events[e].initiator] = events[e].pilotName								--store which unit name (initiaror) is controllen by cliend (PilotName)
 	end
 end
 
@@ -981,6 +995,24 @@ else
 	print("DebriefSE ne trouve pas la table/fichier camp_ZoneSAR ")
 end
 
+if camp_ZoneSAR then
+	for side, zones in pairs(camp_ZoneSAR) do
+		for zoneName, zone in pairs(zones) do
+			for pilotN, ejectedPilot in ipairs(zone) do
+				--client stats for POW
+				if clientstats[ejectedPilot.pilotName] and ejectedPilot.status == "POW" then														--if take off is by a client
+					if clientstats[ejectedPilot.pilotName].score_last.POW == 0 then			--client has no take off logged yet for this mission
+						clientstats[ejectedPilot.pilotName].POW = clientstats[ejectedPilot.pilotName].POW + 1	--increase flown mission number
+						clientstats[ejectedPilot.pilotName].score_last.POW = 1					--store mission for client
+					end
+				end
+			end
+		end
+	end
+else
+	print("DebriefSE ne trouve pas la table/fichier camp_ZoneSAR ")
+end
+
 --log damaged aircraft in oob_air
 for hit_unit,hitter in pairs(hit_table) do													--iterate through all remaining entries in the hit_table (all destroyed aircraft are removed meanwhile, damaged remain)
 	for side_name,side in pairs(oob_air) do													--iterate through all sides
@@ -1439,8 +1471,8 @@ if Debug.debug and camp.newTaskRequest then
 	trigFile:write(_Str)
 	trigFile:close()
 
-	local _Str = "newTaskPerTarget = " .. TableSerialization(camp.newTaskPerTarget, 0)
-	local trigFile = io.open("Debug/newTaskPerTarget.lua", "w") or error("Failed to open debug file")
+	_Str = "newTaskPerTarget = " .. TableSerialization(camp.newTaskPerTarget, 0)
+	trigFile = io.open("Debug/newTaskPerTarget.lua", "w") or error("Failed to open debug file")
 	trigFile:write(_Str)
 	trigFile:close()
 end
@@ -1508,8 +1540,8 @@ trigFile:write(_Str)
 trigFile:close()
 
 if Debug.debug then
-	local camp_str = "clientstats = " .. TableSerialization(clientstats, 0)						--make a string
-	local campFile = io.open("Debug/DEBRIEF_clientstats.lua", "w") or error("Failed to open debug file")
+	camp_str = "clientstats = " .. TableSerialization(clientstats, 0)						--make a string
+	campFile = io.open("Debug/DEBRIEF_clientstats.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
 end

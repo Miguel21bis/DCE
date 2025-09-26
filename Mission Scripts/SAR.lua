@@ -104,7 +104,7 @@ function DespawnSoldierAliasPilot(arg)
 				log_entry.t = timer.getTime()
 				log_entry.targetPilotName = ejectedPilot.pilotName
 				log_entry.target = ejectedPilot.name
-				log_entry.initiatorPilotName = uSAR_Player
+				log_entry.pilotName = uSAR_Player
 				log_entry.initiator = uSAR_Name
 
 				table.insert(CustomLog, log_entry)
@@ -2156,7 +2156,7 @@ function GetOutGDFM(arg)
 				local log_entry = {
 					type = "eject",
 					initiator = name,
-					initiatorPilotName = arg_playerName,
+					pilotName = arg_playerName,
 					t = timer.getTime(),
 				}
 
