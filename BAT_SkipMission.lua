@@ -31,6 +31,8 @@ Playable_m = {}
 SinglePlayer = false
 VersionPackageICM = os.getenv('VersionPackageICM')														-- modification M35.b version ScriptsMod
 TimeJump = false
+TimeJump_RosterUpdated = false
+CheckTriggersOnce = false
 Briefing_text = ""
 
 

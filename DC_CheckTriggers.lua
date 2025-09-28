@@ -26,6 +26,10 @@ versionDCE["DC_CheckTriggers.lua"] = "1.16.95"
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
 
+if Debug.debug then
+	print("START DC_CheckTriggers.lua "..versionDCE["DC_CheckTriggers.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
+
 
 
 --List of Return functions to build conditions:
@@ -77,18 +81,8 @@ versionDCE["DC_CheckTriggers.lua"] = "1.16.95"
 --Important notes:
 --for condition and action strings: outside with single quotes '', inside with double quotes ""!
 
-if Debug.debug then
-	print("START DC_CheckTriggers.lua "..versionDCE["DC_CheckTriggers.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
-end
-
 local debugKT = false
 
--- fou le bordel, TODO, il faudrait vérifier si certaines images ont le droit d'être sauvegardée pour la prochaine mission
-
--- if not TaskRefused and not camp.waitingNextGen and not (EndCampaign or camp.endCampaign ) and not Firstmission_flag then
--- 	BriefingImagesB = {}                                         --reset stockImage
--- 	BriefingImagesR = {}                                         --reset stockImage
--- end
 ----- campaign flags -----
 if camp.flag == nil then
 	camp.flag = {}
@@ -114,7 +108,6 @@ if type(camp.automaticReinforce) ~= "table" then
 end
 
 local old_flag = Deepcopy(camp.flag)												--copy campaign flags, so that modifications of flags do not affect condition of subsequent campaign triggers in same mission
-
 
 ----- functions to return campaign information to build trigger conditions -----
 Return = {}
@@ -2300,12 +2293,26 @@ for side_name, side in pairs(oob_air) do
                 if unit.roster.reserve and unit.roster.reserve > 0 then
                     Action.AirUnitReinforce(unit.name, "")
                     if debugKT then print("DcCT automaticReinforce "..tostring(unit.name)) end
-                    -- print("DcCT automaticReinforce "..tostring(unit.name))
+                    print("DcCT automaticReinforce "..tostring(unit.name))
                 end
             end
             camp.automaticReinforce[side_name] = camp.automaticReinforce[side_name] + interval
         end
     end
+end
+
+-- reajuste le roster pour ne pas repartir  a donf suite à un TimeJump ou saut temporel
+if TimeJump and not TimeJump_RosterUpdated then
+	for sideName, oob in pairs(oob_air) do
+		for unitN, unit in pairs(oob) do
+			if unit.roster.ready and unit.roster.reserve then
+				local part = math.floor(unit.roster.ready / 2)
+				unit.roster.ready = unit.roster.ready - part
+				unit.roster.reserve = unit.roster.reserve + part
+			end
+		end
+	end
+	TimeJump_RosterUpdated = true
 end
 
 
@@ -2506,6 +2513,10 @@ if camp.endCampaign  then
 		-- 	table.insert(BriefingImagesR, filename)
 		-- end	
 end
+
+--pour que certaines fonctions ne s'active qu'une fois
+CheckTriggersOnce = true
+
 
 -- local trigStr = "camp_triggers = " .. TableSerialization(camp_triggers, 0)
 -- local trigFile = io.open("Debug/camp_triggers.lua", "w")

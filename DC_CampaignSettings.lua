@@ -102,7 +102,7 @@ for name, trig in pairs(camp_triggers) do
 				local tempConcat = ""
 				for strMatch in (s..delimiter):gmatch("(.-)"..delimiter) do
 					-- print("DcCS strMatch  "..tostring(strMatch))
-					local TrigChanged = false
+					local trigChanged = false
 					if mission_ini.slider_CampaignDuration and type(mission_ini.slider_CampaignDuration == "number") then
 
 						local stringEgal = ""
@@ -122,44 +122,7 @@ for name, trig in pairs(camp_triggers) do
 						-- Return.AirUnitReady("23 TFS")
 						local oneNb = 0
 						local oneDelimiter = "+"
-						--[[
-						if string.find(one, oneDelimiter) then 														
-							for oneMatch in (one..oneDelimiter):gmatch("(.-)"..oneDelimiter) do								
-								if string.find(oneMatch, "AirUnitReady") or string.find(oneMatch, "AirUnitAlive") then						
-									local nameOne 
-									nameOne, nameTwo = oneMatch:match("([^,]+)\"([^,]+)")
-									nameOne, name3 = nameOne:match("([^,]+)\"([^,]+)")
-									
-									for side_name,side in pairs(oob_air) do									--iterate through sides in oob_air
-										for unit_n,unit in pairs(side) do									--iterate through units in side
-											if unit.name == name3 then										--unit found
-												oneNb = oneNb + unit.number											--return number of total aircraft											
-												-- if unit.reserve then
-													-- oneNb = oneNb + unit.reserve
-												-- end
-											end
-										end
-									end								
-									-- -- --recherche le nombre prévu de renfort
-									-- -- GetName = {}
-									-- -- function GetName.AirUnitReinforce(sourceName, destName, destNumber)
-										-- -- oneNb = oneNb + destNumber																	
-									-- -- end
-									-- -- --recherche dans les triggers 
-									-- -- --AirUnitReinforce
-									-- -- for RFname, trigger in pairs(camp_triggers) do
-										-- -- --action = 'Action.AirUnitReinforce("R/335 TFS", "335 TFS", 6)',
-										-- -- if trigger.action and type(trigger.action) ~= "table" and string.find(trigger.action, "Action.AirUnitReinforce") and string.find(trigger.action, name3) then
-											-- -- triggerCopy = Deepcopy(trigger)
-											-- -- triggerCopy.action = triggerCopy.action:gsub( "Action", "GetName")																																	
-											-- -- local f = loadstring(triggerCopy.action)()											
-										-- -- end
-									-- -- end									
-								end
-							end
-							-- print("DcCS oneNb  "..tostring(oneNb))
-						end
-						]]--
+					
 
 						if two and string.find(two, "=") then
 							stringEgal = "="
@@ -213,7 +176,7 @@ for name, trig in pairs(camp_triggers) do
 							-- end
 						end
 
-						if TrigChanged  then
+						if trigChanged  then
 							trig.condition = ""
 							tempConcat = one.." <"..stringEgal .." ".. tostring(two).." "
 
@@ -247,7 +210,7 @@ end
 --recherche le nombre prevu de renfort
 --recherche dans les triggers 
 --AirUnitReinforce
-for RFname, trigger in pairs(camp_triggers) do
+for _, trigger in pairs(camp_triggers) do
 	--action = 'Action.AirUnitReinforce("R/335 TFS", "335 TFS", 6)',
 	if trigger.action and type(trigger.action) ~= "table" and type(trigger.action) == "string" and string.find(trigger.action, "Action.AirUnitReinforce")  then
 
@@ -444,16 +407,8 @@ for side,unit in pairs(oob_air) do
 end
 
 
--- for n=1, #oob_air.red do
--- 	if oob_air.red[n].name == "790.IAP" then
--- 		print("K2 roster.ready: "..tostring(oob_air.red[n].roster.ready))
--- 	end
--- end
-
--- _affiche(airUnitReinforce, "airUnitReinforce")
-
 if mission_ini.slider_PercentPlane and type(mission_ini.slider_PercentPlane == "number") then
-	local NbTotalAeronefInit, NbTotalAeronefAfter = 0, 0
+	local nbTotalAeronefInit, nbTotalAeronefAfter = 0, 0
 	local view_oob_air = Deepcopy(oob_air)
 	for side,unit in pairs(oob_air) do
 		for n = 1, #unit do
@@ -463,16 +418,11 @@ if mission_ini.slider_PercentPlane and type(mission_ini.slider_PercentPlane == "
 				if not unit[n].InitNumber then
 					unit[n].InitNumber = unit[n].number
 				end
-				NbTotalAeronefInit = NbTotalAeronefInit + unit[n].InitNumber
+				nbTotalAeronefInit = nbTotalAeronefInit + unit[n].InitNumber
 
 				local coef = mission_ini.slider_PercentPlane / 100
 
 				if not unit[n].player then
-
-					-- if unit[n].name == "EC 1-12" then
-					-- 	print("K3 roster.ready: "..tostring(unit[n].roster.ready))
-					-- 	_affiche(unit[n].roster, "AA unit[n].roster")
-					-- end
 
 					local transfert = 0
 					if airUnitReinforce[unit[n].name] then
@@ -480,7 +430,6 @@ if mission_ini.slider_PercentPlane and type(mission_ini.slider_PercentPlane == "
 							for m = 1, #Vunit do
 								if Vunit[m].name == airUnitReinforce[unit[n].name] then
 									transfert = Vunit[m].roster.trans
-									-- print("DcCS found name "..unit[n].name.." transfert: "..transfert)
 								end
 							end
 
@@ -490,8 +439,6 @@ if mission_ini.slider_PercentPlane and type(mission_ini.slider_PercentPlane == "
 
 					end
 
-					-- print("DcCampaignSetting "..unit[n].name.." transfert: "..transfert)
-
 					--change la valeur ready:
 					unit[n].roster.ready =  math.ceil( unit[n].InitNumber * coef) - (unit[n].roster.lost * coef)  - (unit[n].roster.damaged * coef) + (transfert * coef)
 					-- unit[n].roster.ready =  math.ceil( unit[n].InitNumber * coef) - (unit[n].roster.lost)  - (unit[n].roster.damaged ) + (transfert )					
@@ -500,14 +447,8 @@ if mission_ini.slider_PercentPlane and type(mission_ini.slider_PercentPlane == "
 					end
 					--change la valeur number, qui sert de reference pour le recompletement
 					unit[n].number =  math.ceil( unit[n].InitNumber * coef)
-					NbTotalAeronefAfter = NbTotalAeronefAfter + unit[n].number
+					nbTotalAeronefAfter = nbTotalAeronefAfter + unit[n].number
 
-					-- print("DcCampaignSetting "..unit[n].name.." InitNumber: "..unit[n].InitNumber.." number: "..unit[n].number)
-
-					-- if unit[n].name == "EC 1-12" then
-					-- 	print("K4 roster.ready: "..tostring(unit[n].roster.ready))
-					-- 	_affiche(unit[n].roster, "BB unit[n].roster")
-					-- end
 				end
 			end
 		end

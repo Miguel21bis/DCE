@@ -876,24 +876,45 @@ for side, units in pairs(oob_air) do
 																end
 
 
-																--check target/loadout attributes
-																local loadout_eligible = true																					--boolean if loadout matches any target attributes (default true, because target might have no attributes)
-																if target.attributes and target.attributes[1] and target.attributes[1] ~= "" then																					--target has attributes
-																	loadout_eligible = false
-																	for target_attribute_number, target_attribute in ipairs(target.attributes) do								--Iterate through target attributes																
-																		for loadout_attribute_number, loadout_attribute in ipairs(unit_loadouts[l].attributes) do				--Iterate through loadout attributes												
+																-- --check target/loadout attributes
+																-- local loadout_eligible = true																					--boolean if loadout matches any target attributes (default true, because target might have no attributes)
+																-- if target.attributes and target.attributes[1] and target.attributes[1] ~= "" then																					--target has attributes
+																-- 	loadout_eligible = false
+																-- 	for target_attribute_number, target_attribute in ipairs(target.attributes) do								--Iterate through target attributes																
+																-- 		for loadout_attribute_number, loadout_attribute in ipairs(unit_loadouts[l].attributes) do				--Iterate through loadout attributes												
 
-																			if isDebugModeA then
-																				debugLog(draftId.."  AtoG passe A_10b Befor loadout_eligible: target_attribute?: "..tostring(target_attribute).."  || loadout_attribute: "..tostring(loadout_attribute).." || "..target_name.." || "..tostring(unit_loadouts[l].name) )
-																			end
+																-- 			if isDebugModeA then
+																-- 				debugLog(draftId.."  AtoG passe A_10b Befor loadout_eligible: target_attribute?: "..tostring(target_attribute).."  || loadout_attribute: "..tostring(loadout_attribute).." || "..target_name.." || "..tostring(unit_loadouts[l].name) )
+																-- 			end
 
-																			if target_attribute == loadout_attribute then														--if match is found													
-																				loadout_eligible = true																			--set variable true
-																				break																							--break the loadout attributes iteration
-																			end
-																		end
-																	end
-																end
+																-- 			if target_attribute == loadout_attribute then														--if match is found													
+																-- 				loadout_eligible = true																			--set variable true
+																-- 				break																							--break the loadout attributes iteration
+																-- 			end
+																-- 		end
+																-- 	end
+																-- end+
+
+																-- ...existing code...
+                                                                --check target/loadout attributes
+                                                                local loadout_eligible = true
+                                                                if target.attributes and target.attributes[1] and target.attributes[1] ~= "" then
+                                                                    -- Il faut que TOUS les attributs du target soient présents dans le loadout
+                                                                    for _, target_attribute in ipairs(target.attributes) do
+                                                                        local found = false
+                                                                        for _, loadout_attribute in ipairs(unit_loadouts[l].attributes or {}) do
+                                                                            if target_attribute == loadout_attribute then
+                                                                                found = true
+                                                                                break
+                                                                            end
+                                                                        end
+                                                                        if not found then
+                                                                            loadout_eligible = false
+                                                                            break -- Un attribut manquant suffit à rendre le loadout inéligible
+                                                                        end
+                                                                    end
+                                                                end
+-- ...existing code...
 
 
 																if target.attributes and target.attributes[1] and target.attributes[1] ~= "" then
@@ -4046,7 +4067,7 @@ if Debug.Generator and Debug.debug then
 	_file:close()
 
 	local _str = "debugLogs = " .. TableSerializationAG_triggers(debugLogs, 0)
-	local _file = io.open("Debug/AtoGenerator_Debug_B.lua", "w") or error("Échec d'ouverture du fichier AtoGenerator_Debug_B")
+	_file = io.open("Debug/AtoGenerator_Debug_B.lua", "w") or error("Échec d'ouverture du fichier AtoGenerator_Debug_B")
 	_file:write(_str)
 	_file:close()
 
