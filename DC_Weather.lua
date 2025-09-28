@@ -14,12 +14,13 @@ versionDCE["DC_Weather.lua"] = "1.6.25"
 -- modification M45_e		compatible with 2.7.0s  (e: debug cleaning)(d: less clounds in the PG)(c: debugWeather)
 ------------------------------------------------------------------------------------------------------- 
 
-
+if Debug.debug then
+	print("START DC_Weather.lua "..versionDCE["DC_Weather.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
 local debugWeather = false
 
-
-
 TabMetar = {}
+MoonTxt = ""
 
 local debugTxt = ""
 local presetChoice = 0
@@ -28,9 +29,7 @@ local showOneNight = false
 local baseChoice
 local foundSinglePlayer = {}
 local fieldElevation = 0												--elevation of players airfield used for minimum cloud base
-
-local elapsed_time = CampTotalTimeS										--elapsed time since campaign start in seconds
-
+local elapsed_Time = CampTotalTimeS										--elapsed time since campaign start in seconds
 local pHigh = mission_ini.weather.High or 50					--default pressure high value
 local pLow = mission_ini.weather.Low or 50					--default pressure pLow value
 
@@ -80,16 +79,10 @@ end
 camp.weather.pHigh = pHigh
 camp.weather.pLow = pLow
 
-local InitalW = false
+local initalW = false
 
 local probaPhight = (pHigh / (pHigh + pLow)) * 100					--chance of next weather zone being a high pressure system
 local probaPlow = (pLow / (pHigh + pLow)) * 100
-
--- if debugWeather then 
--- 	print("DcW camp.weather.zone: "..tostring( camp.weather.zone)) 
--- 	print("DcW probaPhight weather : "..tostring(probaPhight))
--- 	print("DcW probaPlow weather : "..tostring(probaPlow))
--- end	
 
 debugTxt = debugTxt .."DcW A1 probaPhight weather : "..tostring(probaPhight).."\n"
 debugTxt = debugTxt .."DcW A2 probaPlow weather : "..tostring(probaPlow).."\n"
@@ -118,8 +111,8 @@ end
 	-- },
 
 -- si le temps passé est supérieur à 3 fois ce qui etait convenu, on recommence à 0
-if elapsed_time and camp.weather.zoneEnd and elapsed_time > camp.weather.zoneEnd then
-	local deltaTime = elapsed_time - camp.weather.zoneEnd
+if elapsed_Time and camp.weather.zoneEnd and elapsed_Time > camp.weather.zoneEnd then
+	local deltaTime = elapsed_Time - camp.weather.zoneEnd
 	if debugWeather then print("DcW A10 deltaTime: "..tostring(deltaTime)) end
 
 	if camp.missionHistory and camp.missionHistory[camp.mission-1] then
@@ -132,111 +125,6 @@ if elapsed_time and camp.weather.zoneEnd and elapsed_time > camp.weather.zoneEnd
 		end
 	end
 end
-
--- --Initial weather 2
--- if camp.weather.zone == nil then										--no weather exists yet
-
--- 	debugTxt = debugTxt .."DcW B1 Initial weather 2 ".."\n"
-
--- 	camp.weather.zoneTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)				--Set temperature of weather zone (+/- 5°C of reference tempereature)
--- 	camp.weather.zoneNextTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)			--Set temperature of next weather zone (+/- 5°C of reference tempereature)
-
--- 	local randChance = math.random(1, 100)
-
--- 	debugTxt = debugTxt .."DcW B2 camp.weather.zoneTemp: "..tostring(camp.weather.zoneTemp).."\n"
--- 	debugTxt = debugTxt .."DcW B3 camp.weather.zoneNextTemp: "..tostring(camp.weather.zoneNextTemp).."\n"
--- 	debugTxt = debugTxt .."DcW B4 Initial weather: "..tostring(randChance).. "<=? "..tostring(probaPhight).."\n"
-
--- 	if randChance <= probaPhight then								--High pressure system
--- 		-- if debugWeather then print("DcW YES camp.weather.zoneNext = high" ) end
--- 		debugTxt = debugTxt .."DcW B5 YES camp.weather.zoneNext = high".."\n"
-
--- 		camp.weather.zoneNext = "high"									--set next weather zone
-
--- 	else
-
--- 		-- if debugWeather then print("DcW probaPlow weather : "..tostring(probaPlow)) end
--- 		debugTxt = debugTxt .."DcW C1 probaPlow weather : "..tostring(probaPlow).."\n"
-
--- 		local limitA = 0
--- 		local limitB = 0
--- 		local limitC = 5
-
--- 		--ceci à pour but de mettre un mauvais temps en fonction du random
--- 		--plus le random est fort, plus le mauvais temps est probable
--- 		if  probaPlow <= 25  then--faible proba TRES mauvais temps, donc fort proba SIMPLE mauvais temps
--- 			-- rando = math.random(0,100)
--- 			limitA = 95
--- 			limitB = 100
--- 			limitC = 100
-
--- 		elseif  probaPlow <= 50  then
--- 			-- rando = math.random(0,100)
--- 			limitA = 25
--- 			limitB = 50
--- 			limitC = 75
-
--- 		elseif  probaPlow <= 62  then
--- 			-- rando = math.random(0,100)
--- 			limitA = 17
--- 			limitB = 34
--- 			limitC = 52
-
--- 		elseif  probaPlow <= 75  then
--- 			-- rando = math.random(0,100)
--- 			limitA = 9
--- 			limitB = 18
--- 			limitC = 29
-
--- 		else
--- 			-- rando = math.random(0,100)
--- 			limitA = 0
--- 			limitB = 0
--- 			limitC = 5
--- 		end
-
--- 		local rando = math.random(0,100)
-
--- 		-- if debugWeather then print("DcW random (rando) weather : "..tostring(rando)) end
--- 		debugTxt = debugTxt .."DcW C2 random (rando) weather : "..tostring(rando).."\n"
-
--- 		-- if debugWeather then print("DcW  choice: "
--- 		-- 	.. "<=A "..tostring(limitA)
--- 		-- 	.. "<=B "..tostring(limitB)
--- 		-- 	.. "<=C "..tostring(limitC)
-
--- 		-- ) end
--- 		debugTxt = debugTxt .."DcW  choice: ".."\n"
--- 		debugTxt = debugTxt .."<=A "..tostring(limitA).."\n"
--- 		debugTxt = debugTxt .."<=B "..tostring(limitB).."\n"
--- 		debugTxt = debugTxt .."<=C "..tostring(limitC).."\n"
-
-
--- 		if  rando < limitA  then--rando <= ((probaPlow / 4)*1)
-
--- 			camp.weather.zoneNext = "low sector warm"					--next zone is a warm sector
--- 			debugTxt = debugTxt .."DcW probaPlow weather rando: "..tostring(rando).. "<=? limitA "..tostring(limitA).."\n"
-
--- 		elseif rando < limitB then
-
--- 			camp.weather.zoneNext = "low front warm"					--Next zone is a warm front
--- 			debugTxt = debugTxt .."DcW probaPlow weather rando: "..tostring(rando).. "<=?limitB "..tostring(limitB).."\n"
--- 		elseif rando < limitC then
-
--- 			camp.weather.zoneNext = "low sector cold"					--next zone is a cold sector
--- 			debugTxt = debugTxt .."DcW probaPlow weather rando: "..tostring(rando).. "<=? limitC "..tostring(limitC).."\n"
-
--- 		else  --rando <= probaPlow  then
-
--- 			--TODo pb ici, à 60 % de chance d avoir du mauvais temps, on ne devrait pas avoir l'ultra mauvais temps
--- 			camp.weather.zoneNext = "low front cold"					--Next zone is a cold front
--- 			debugTxt = debugTxt .."DcW probaPlow weather rando: "..tostring(rando).. "<=?Else D ".."\n"
--- 		end
--- 	end
-
--- 	camp.weather.zoneEnd = -1											--Current (non-existing) zone end negative to trigger weather change
--- 	InitalW = true
--- end
 
 -- --Initial weather 2
 if camp.weather.zone == nil then
@@ -273,7 +161,7 @@ debugTxt = debugTxt .."DcW D3 camp.weather.zoneNext: " ..camp.weather.zoneNext..
 
 
 --Weather change
-if elapsed_time > camp.weather.zoneEnd then										--active weather zone has ended
+if elapsed_Time > camp.weather.zoneEnd then										--active weather zone has ended
 
 	debugTxt = debugTxt .."DcW E0 Weather change ".."\n"
 
@@ -281,24 +169,24 @@ if elapsed_time > camp.weather.zoneEnd then										--active weather zone has e
 	camp.weather.zone = camp.weather.zoneNext									--make next weather zone the active weather zone
 	camp.weather.zoneStart = camp.weather.zoneEnd								--time active weather zone has started
 	if camp.weather.zone == "high" then
-		camp.weather.zoneEnd = elapsed_time + math.random(86400, 172800 )		--432000(5j)	--set duration of current weather zone (between 1 and 2 days for High system)
+		camp.weather.zoneEnd = elapsed_Time + math.random(86400, 172800 )		--432000(5j)	--set duration of current weather zone (between 1 and 2 days for High system)
 		camp.weather.zoneTemp = camp.weather.zoneNextTemp						--make next weather zone temperature the current temperature
 	elseif camp.weather.zone == "low front cold" then
-		camp.weather.zoneEnd = elapsed_time + math.random(14400, 28800)			--set duration of current weather zone (between 4 and 8 hours for cold front)
+		camp.weather.zoneEnd = elapsed_Time + math.random(14400, 28800)			--set duration of current weather zone (between 4 and 8 hours for cold front)
 	elseif camp.weather.zone == "low front warm" then
-		camp.weather.zoneEnd = elapsed_time + math.random(43200, 86400)			--set duration of current weather zone (between 12 and 24 hours for warm front)
+		camp.weather.zoneEnd = elapsed_Time + math.random(43200, 86400)			--set duration of current weather zone (between 12 and 24 hours for warm front)
 	elseif camp.weather.zone == "low sector cold" then
-		camp.weather.zoneEnd = elapsed_time + math.random(21600, 172800)		--set duration of current weather zone (between 6 and 48 hours for cold sector)
+		camp.weather.zoneEnd = elapsed_Time + math.random(21600, 172800)		--set duration of current weather zone (between 6 and 48 hours for cold sector)
 		camp.weather.zoneTemp = camp.weather.zoneNextTemp						--make next weather zone temperature the current temperature
 	elseif camp.weather.zone == "low sector warm" then
-		camp.weather.zoneEnd = elapsed_time + math.random(21600, 172800)		--set duration of current weather zone (between 6 and 48 hours for warm sector)
+		camp.weather.zoneEnd = elapsed_Time + math.random(21600, 172800)		--set duration of current weather zone (between 6 and 48 hours for warm sector)
 		camp.weather.zoneTemp = camp.weather.zoneNextTemp						--make next weather zone temperature the current temperature
 	end
 
 	if mission_ini.weather.weatherChangeRate then
-		camp.weather.zoneEnd = camp.weather.zoneEnd - elapsed_time
+		camp.weather.zoneEnd = camp.weather.zoneEnd - elapsed_Time
 		camp.weather.zoneEnd = camp.weather.zoneEnd * mission_ini.weather.weatherChangeRate
-		camp.weather.zoneEnd = camp.weather.zoneEnd + elapsed_time
+		camp.weather.zoneEnd = camp.weather.zoneEnd + elapsed_Time
 	end
 
 
@@ -306,32 +194,7 @@ if elapsed_time > camp.weather.zoneEnd then										--active weather zone has e
 	--Next zone
 	camp.weather.zoneNextTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)			--Set temperature of next weather zone (+/- 5°C of reference tempereature)
 
-	-- if not InitalW then 																		-- evite de passer 2 fois le random lors de la premiere mission
-
-	-- 	-- local chance = 100 / (pHigh + pLow) * pHigh					--chance of next weather zone being a high pressure system
-	-- 	probaPhight = (pHigh / (pHigh + pLow)) * 100					--chance of next weather zone being a high pressure system
-	-- 	local randChance = math.random(1, 100)
-	-- 		-- if debugWeather then print("Next zone: "..tostring(randChance).. "<=? "..tostring(probaPhight)) end	
-	-- 		debugTxt = debugTxt .."Next zone: "..tostring(randChance).. "<=? "..tostring(probaPhight).."\n"
-	-- 	if randChance <= probaPhight   then								--High pressure system
-	-- 		camp.weather.zoneNext = "high"									--set next weather zone		
-	-- 	else																--Low pressure system
-	-- 		if camp.weather.zone == "low front cold" then					--active zone is a cold front
-	-- 			camp.weather.zoneNext = "low sector cold"					--next zone is a cold sector
-	-- 		elseif camp.weather.zone == "low front warm" then				--active zone is a warm front
-	-- 			camp.weather.zoneNext = "low sector warm"					--next zone is a warm sector
-	-- 		else															--active zone is a sector (warm or cold), next zone is a front (warm or cold)
-	-- 			if camp.weather.zoneTemp > camp.weather.zoneNextTemp then	--Next zone is colder
-	-- 				camp.weather.zoneNext = "low front cold"				--Next zone is a cold front
-	-- 			elseif camp.weather.zoneTemp < camp.weather.zoneNextTemp then	--Next zone is warmer
-	-- 				camp.weather.zoneNext = "low front warm"				--Next zone is a warm front
-	-- 			else														--Next zone has same tempreature
-	-- 				camp.weather.zoneNext = camp.weather.zone				--Next zone remains the same (warm or cold sectior)
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
-	if not InitalW then  -- évite de passer 2 fois le random lors de la première mission
+	if not initalW then  -- évite de passer 2 fois le random lors de la première mission
 
 		pHigh = pHigh or 50
 		pLow = pLow or 50
@@ -1301,21 +1164,21 @@ local lowSectorColdPresets = {14, 17, 21, 22, 24, 34}
 --Set current weather
 ----- HIGH -----
 if camp.weather.zone == "high_OLD" then
-
+		local r_mini, r_maxi
 	if camp.weather.zoneTemp >= 30 then				--si T° sup= à 30: aucun nuage, on se passe du nouveau systeme de nuage de DCS
-		Rmini = 0
-		Rmaxi = 0
+		r_mini = 0
+		r_maxi = 0
 	elseif camp.weather.zoneTemp >= 25 then				--si T° sup= à 25: proba entre ancien systeme (pas de nuage) et les 2 premiers nuages du nouveau systeme DCS
-		Rmini = 0
-		Rmaxi = 2
+		r_mini = 0
+		r_maxi = 2
 	else											--sinon, proba entre les 4 premiers nuages du nouveau systeme DCS
-		Rmini = 1
-		Rmaxi = 4
+		r_mini = 1
+		r_maxi = 4
 	end
 
 	local presetMiss = ""
 	baseChoice = 5000							--TODO quelle base est appliquée par l editeur de mission en cas d extreme beau
-	presetChoice = math.random(Rmini, Rmaxi)
+	presetChoice = math.random(r_mini, r_maxi)
 
 	if presetChoice ~= 0 then
 		baseChoice =  math.random(preset[presetChoice].altiMin, preset[presetChoice].altiMax)
@@ -1489,7 +1352,7 @@ elseif camp.weather.zone == "high" then
 ----- COLD FRONT -----
 elseif camp.weather.zone == "low front cold" then
 
-	local front_remaining = (camp.weather.zoneEnd - elapsed_time) / 3600					--hours until end of cold front
+	local front_remaining = (camp.weather.zoneEnd - elapsed_Time) / 3600					--hours until end of cold front
 	local front_duration = (camp.weather.zoneEnd - camp.weather.zoneStart) / 3600			--duration of the front in hours
 	local strength = 10 - front_remaining * 10 / front_duration								--strength of the front on a scale of 0-10
 
@@ -1581,7 +1444,7 @@ elseif camp.weather.zone == "low front cold" then
 ------ WARM FRONT -----
 elseif camp.weather.zone == "low front warm" then
 
-	local front_remaining = (camp.weather.zoneEnd - elapsed_time) / 3600					--hours until end of warm front
+	local front_remaining = (camp.weather.zoneEnd - elapsed_Time) / 3600					--hours until end of warm front
 	local front_duration = (camp.weather.zoneEnd - camp.weather.zoneStart) / 3600			--duration of the front in hours
 	local strength = 10 - front_remaining * 10 / front_duration								--strength of the front on a scale of 0-10
 
@@ -1593,27 +1456,6 @@ elseif camp.weather.zone == "low front warm" then
 		dens = 10
 	end
 
-	-- local conversionDens = math.ceil((0.77777777777778 * dens) + 0.22222222222222)
-	-- local presetCompatible = {}
-	-- local maxloop = 1
-	-- local tolerance = 0
-	-- repeat
-	-- 	for n=1, #preset do
-	-- 		if math.ceil(preset[n].cover/10) <= conversionDens + tolerance and math.ceil(preset[n].cover/10) >= conversionDens - tolerance then
-	-- 			table.insert(presetCompatible, n )
-	-- 		end
-	-- 		maxloop = maxloop +1
-	-- 	end
-	-- 	tolerance = tolerance + 1
-	-- until #presetCompatible >= 1 or maxloop > 200
-
-	-- if #presetCompatible == 0 then
-	-- 	presetCompatible = {1, 2, 3}
-	-- 	print("DcW PresetCompatible Error")
-	-- end
-
-	-- presetChoice = math.random(1, #presetCompatible)
-	-- presetChoice = presetCompatible[presetChoice]
 
 	-- Pour choisir aléatoirement parmi une liste précise de valeurs, place-les dans un tableau puis utilise math.random sur l'index :
 	presetChoice = lowFrontWarmPresets[math.random(1, #lowFrontWarmPresets)]
@@ -2389,20 +2231,17 @@ for placeName, place in pairs(db_airbases) do
 			end
 		end
 
-
-		MoonTxt = ""
 		if not showOneNight and string.find(Daytime, "night") then
 			MoonTxt = Moonphase(camp.date.day, camp.date.month, camp.date.year)
 			showOneNight = true
-			-- print(MoonTxt)
 		end
 
-	end   -- end of unite
-end   --end db_airbase
+	end
+end 
 
 
 local s = ""
-local remain = math.ceil((camp.weather.zoneEnd - elapsed_time) / 3600)		--hours until end of weather zone					
+local remain = math.ceil((camp.weather.zoneEnd - elapsed_Time) / 3600)		--hours until end of weather zone					
 local duration = math.ceil((camp.weather.zoneEnd - camp.weather.zoneStart) / 3600)					--duration of the weather zone in hours
 local passed = 100 / duration * remain																--percentage of zone passage
 
@@ -2461,17 +2300,6 @@ end
 
 camp.weather.brief = tostring(s)
 
--- if debugWeather then
--- 	print()
--- 	print("---")
--- 	print("DcW camp.weather.zoneTemp "..camp.weather.zone)
--- 	print("DcW camp.weather.zoneNextTemp "..camp.weather.zoneNext)
-
--- 	print("---")
--- 	print()
-
--- 	_affiche(mission.weather, "DcW mission.weather")
--- end
 
 debugTxt = debugTxt .."DcW camp.weather.zoneTemp "..camp.weather.zone.."\n"
 debugTxt = debugTxt .."DcW camp.weather.zoneNextTemp "..camp.weather.zoneNext.."\n"
@@ -2492,7 +2320,7 @@ if debugWeather then
 	print(debugTxt)
 	print("FIN debugTxt: ")
 	print()
-	print("elapsed_time: "..elapsed_time)
+	print("elapsed_time: "..elapsed_Time)
 	print("camp.weather.zoneEnd "..camp.weather.zoneEnd)
 	print("remain "..remain)
 	print()

@@ -3092,16 +3092,16 @@ local function EWR_magic()
 	end
 
 
-	local function calculateAspect(myPos, enemy)
+	local function calculateAspect(arg_myPosVec3, arg_Enemy)
 		local aspect = "UNKNOWN"
 
-		local enemyPos = enemy.position
+		local enemyPos = arg_Enemy.position
 		local forward = enemyPos.x -- Forward vector (direction de l'ennemi)
-		local targetPos = enemy.point -- Position de l'ennemi
+		local targetPosVec3 = arg_Enemy.pointVec3 -- Position de l'ennemi
 
 		-- Calcul du vecteur relatif de l'ennemi à moi
-		local dx = myPos.x - targetPos.x
-		local dz = myPos.z - targetPos.z
+		local dx = arg_myPosVec3.x - targetPosVec3.x
+		local dz = arg_myPosVec3.z - targetPosVec3.z
 		local relative = {x = dx, z = dz}
 
 		-- Produit scalaire pour l'angle
@@ -3594,13 +3594,12 @@ local function loopAFAC_CAS()
 				local wingman = gp:getUnits()
 				for wingmanN, unit in ipairs(wingman) do
 					-- env.info("DCE_loopAFAC_CAS F  sideNum: "..tostring(sideNum))
-					for afacFlightName, value in pairs(AFAC_available) do
+					for afacFlightName, afacData in pairs(AFAC_available) do
 						-- env.info("DCE_loopAFAC_CAS G value.sideNum: "..tostring(value.sideNum).." "..tostring(afacFlightName))
-						if sideNum == value.sideNum then
-							-- env.info("DCE_loopAFAC_CAS H timer: "..timer.getTime().." >smokeTiming.time? "..tostring(value.smokeTiming.time))
+						if sideNum == afacData.sideNum then
+							-- env.info("DCE_loopAFAC_CAS H timer: "..timer.getTime().." >smokeData.time? "..tostring(value.smokeData.time))
 
-
-							if timer.getTime() > (value.smokeTiming.time + 300) then
+							if timer.getTime() > (afacData.smokeData.time + 300) then
 								-- env.info("DCE_loopAFAC_CAS I "..tostring(afacFlightName))
 								local flightGroup = Group.getByName(afacFlightName)
 								if flightGroup then
@@ -3613,19 +3612,18 @@ local function loopAFAC_CAS()
 									if unitAFAC and unitAFAC:isExist() then
 										local afacVec3 = unitAFAC:getPoint()
 										local unitVec3 = unit:getPoint()
-
 										local distance = math.sqrt((afacVec3.x - unitVec3.x)^2 + (afacVec3.z - unitVec3.z)^2)
 
 										-- env.info("DCE_loopAFAC_CAS J "..tostring(distance))
 
 										if distance <= 10000 then
 
-											trigger.action.smoke(value.smokeTiming.targetPos, SmokeColor_TargetDesignation)
+											trigger.action.smoke(afacData.smokeData.targetPosVec3, SmokeColor_TargetDesignation)
 											-- env.info("DCE_loopAFAC_CAS K create smokeColor.Blue ")
 
-											AFAC_available[afacFlightName]["smokeTiming"] = {
+											AFAC_available[afacFlightName]["smokeData"] = {
 												time = timer.getTime(),
-												targetPos = value.smokeTiming.targetPos,
+												targetPosVec3 = afacData.smokeData.targetPosVec3,
 												sideNum = sideNum,
 											}
 

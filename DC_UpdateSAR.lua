@@ -11,6 +11,10 @@ versionDCE["DC_UpdateSAR.lua"] = "1.4.19"
 -- modification M61_d		SAR	 (d theatre)
 -------------------------------------------------------------------------------------------------------
 
+if Debug.debug then
+	print("START DC_UpdateSAR.lua "..versionDCE["DC_UpdateSAR.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
+
 -- camp.SAR = {
 -- 	helicopter = {
 -- 		[1] = "machprout",
@@ -531,16 +535,18 @@ camp.boundary = boundary
 --selectionne la base la plus proche pour leur porter secours
 --defini si le pilot est capturé ou récupérable
 
--- Remplace une année inférieure à 1970 par 1970 pour éviter les problèmes avec os.time
-local aliasYear = camp.date.year
-if aliasYear and aliasYear < 1970 then
-    aliasYear = 1970
-end
+-- -- Remplace une année inférieure à 1970 par 1970 pour éviter les problèmes avec os.time
+-- local aliasYear = camp.date.year
+-- if aliasYear and aliasYear < 1970 then
+--     aliasYear = 1970
+-- end
 
-local timeActualCampaignSecond = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month}
+-- local timeActualCampaignSecond = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month}
+
+local timeActualCampaignSecond = SecondsBetween(camp.dateInit, camp.date)
 
 if camp_ZoneSAR and camp_ZoneSAR ~= nil then
-    for ZoneSideName, sideSAR in pairs(camp_ZoneSAR) do
+    for zoneSideName, sideSAR in pairs(camp_ZoneSAR) do
         for zoneName, zone in pairs(sideSAR) do
 
             for pilotN, pilot in ipairs(zone) do
@@ -573,7 +579,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                 --*************************************************************
                 if pilot.sideName == "red" and campConfMod.code_loadout == "NAM" then
                     
-                    local enemy = DCS_ENI_Side[ZoneSideName]
+                    local enemy = DCS_ENI_Side[zoneSideName]
                     pilot.inTheEnemyCamp =  checkPointInPoly2({x=pilot.pos.x,y=pilot.pos.y}, boundary[enemy])
 
                     if not pilot.inTheEnemyCamp and pilot.date.year and pilot.date.month and pilot.date.day then
@@ -587,7 +593,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                 end
 
 
-                if (pilot.status == "MIA" or pilot.status == "EVAC_possible" ) and pilot.sideName == ZoneSideName and ZoneSideName ~= "neutrals" then
+                if (pilot.status == "MIA" or pilot.status == "EVAC_possible" ) and pilot.sideName == zoneSideName and zoneSideName ~= "neutrals" then
                   
 					local redDistance ={500, 3000, 20000, 200000}
                     -- local nbAMI_ENI = {
@@ -666,35 +672,38 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                     -- }
 
                     local enemy																													--determine enemy side (opposite of unit side)
-                    if ZoneSideName == "blue" then
+                    if zoneSideName == "blue" then
                         enemy = "red"
                     else
                         enemy = "blue"
                     end
 
-                    local aliasInitYear = camp.dateInit.year
-                    if aliasInitYear < 1970 then
-                        aliasInitYear = 1970
-                    end
+                    -- local aliasInitYear = camp.dateInit.year
+                    -- if aliasInitYear < 1970 then
+                    --     aliasInitYear = 1970
+                    -- end
                 
-                    local aliasYear = camp.date.year
-                    if aliasYear < 1970 then
-                        aliasYear = 1970
-                    end
+                    -- local aliasYear = camp.date.year
+                    -- if aliasYear < 1970 then
+                    --     aliasYear = 1970
+                    -- end
 
                     --ajoute et met à jour le nb de jour depuis son ejection
                     if not pilot.dataPOW.ejectNbDay then
                         if pilot.date.year and pilot.date.month and pilot.date.day then
-                            local timeEjectSecond = os.time{day=pilot.date.day, year=aliasYear, month=pilot.date.month}
-                            local daysfrom = os.difftime(timeActualCampaignSecond, timeEjectSecond) / (24 * 60 * 60) -- seconds in a day 
+                            -- local timeEjectSecond = os.time{day=pilot.date.day, year=aliasYear, month=pilot.date.month}
+                            -- local daysfrom = os.difftime(timeActualCampaignSecond, timeEjectSecond) / (24 * 60 * 60) -- seconds in a day 
+                            
+                            local daysfrom = SecondsBetween(camp.dateInit, pilot.date) / (24 * 60 * 60)
                             pilot.dataPOW.ejectNbDay = daysfrom
                         else
                             pilot.dataPOW.ejectNbDay = 0
                         end
                     else
                         if pilot.date.year and pilot.date.month and pilot.date.day then
-                            local timeEjectSecond = os.time{day=pilot.date.day, year=aliasYear, month=pilot.date.month}
-                            local daysfrom = os.difftime(timeActualCampaignSecond, timeEjectSecond) / (24 * 60 * 60) -- seconds in a day 
+                            -- local timeEjectSecond = os.time{day=pilot.date.day, year=aliasYear, month=pilot.date.month}
+                            -- local daysfrom = os.difftime(timeActualCampaignSecond, timeEjectSecond) / (24 * 60 * 60) -- seconds in a day 
+                            local daysfrom = SecondsBetween(camp.dateInit, pilot.date) / (24 * 60 * 60)
                             pilot.dataPOW.ejectNbDay = tonumber(daysfrom)
                         end
                     end
@@ -730,16 +739,16 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                         --ne regarde qu'une fois par jour, ou tous les 2 jours ou...
                         pilot.dataPOW.POW_nextDayCheck = pilot.dataPOW.ejectNbDay + 2
 
-                        if nbAMI_ENI[ZoneSideName][500] >= 2  then
+                        if nbAMI_ENI[zoneSideName][500] >= 2  then
 							pilot.status = "EVAC_possible"
-						elseif  nbAMI_ENI[ZoneSideName][500] == 0 and  nbAMI_ENI[enemy][500] >= 2  then
+						elseif  nbAMI_ENI[zoneSideName][500] == 0 and  nbAMI_ENI[enemy][500] >= 2  then
 							pilot.status = "POW"
-						elseif nbAMI_ENI[ZoneSideName][3000] >= 2  and nbAMI_ENI[enemy][3000] < 2 then
+						elseif nbAMI_ENI[zoneSideName][3000] >= 2  and nbAMI_ENI[enemy][3000] < 2 then
 							pilot.status = "EVAC_possible"
-						elseif nbAMI_ENI[ZoneSideName][3000] < 2  and nbAMI_ENI[enemy][3000] >= 2 then
+						elseif nbAMI_ENI[zoneSideName][3000] < 2  and nbAMI_ENI[enemy][3000] >= 2 then
 							pilot.status = "POW"
-						elseif nbAMI_ENI[ZoneSideName][3000] >= 2  and nbAMI_ENI[enemy][3000] >= 2  then
-							local pourcent = (nbAMI_ENI[ZoneSideName][3000] / ( nbAMI_ENI[ZoneSideName][3000] + nbAMI_ENI[enemy][3000]))*100
+						elseif nbAMI_ENI[zoneSideName][3000] >= 2  and nbAMI_ENI[enemy][3000] >= 2  then
+							local pourcent = (nbAMI_ENI[zoneSideName][3000] / ( nbAMI_ENI[zoneSideName][3000] + nbAMI_ENI[enemy][3000]))*100
 							local coef = (pilot.dataPOW.ejectNbDay*(-1) + 5) -- plus le nb de jour augmente, plus les chances d etre capturé augmente
                             if coef < 1 then coef = 1 end
                             local randomMalChance = math.random(1, 100) / coef
@@ -749,15 +758,15 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 							else
 								pilot.status = "EVAC_possible"
                             end
-						elseif nbAMI_ENI[ZoneSideName][20000] >= 2 and nbAMI_ENI[enemy][20000] < 2 then
+						elseif nbAMI_ENI[zoneSideName][20000] >= 2 and nbAMI_ENI[enemy][20000] < 2 then
 							pilot.status = "EVAC_possible"
-						elseif nbAMI_ENI[ZoneSideName][20000] < 2 and nbAMI_ENI[enemy][20000] >= 2 then
+						elseif nbAMI_ENI[zoneSideName][20000] < 2 and nbAMI_ENI[enemy][20000] >= 2 then
 
                             pilot.status = "EVAC_possible"
 
-						elseif nbAMI_ENI[ZoneSideName][20000] >= 2 and nbAMI_ENI[enemy][20000] >= 2  then
+						elseif nbAMI_ENI[zoneSideName][20000] >= 2 and nbAMI_ENI[enemy][20000] >= 2  then
 
-							local pourcent = (nbAMI_ENI[ZoneSideName][20000] / ( nbAMI_ENI[ZoneSideName][20000] + nbAMI_ENI[enemy][20000]))*100
+							local pourcent = (nbAMI_ENI[zoneSideName][20000] / ( nbAMI_ENI[zoneSideName][20000] + nbAMI_ENI[enemy][20000]))*100
                             local coef = (pilot.dataPOW.ejectNbDay*(-1) + 5) -- plus le nb de jour augmente, plus les chances d etre capturé augmente
                             if coef < 1 then coef = 1 end
                             local randomMalChance = math.random(1, 100)/coef
@@ -768,11 +777,11 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 								pilot.status = "EVAC_possible"
                             end
 
-						elseif nbAMI_ENI[ZoneSideName][200000] >= 2 and nbAMI_ENI[enemy][200000] < 2 then
+						elseif nbAMI_ENI[zoneSideName][200000] >= 2 and nbAMI_ENI[enemy][200000] < 2 then
 							pilot.status = "EVAC_possible"
-						elseif nbAMI_ENI[ZoneSideName][200000] < 2 and nbAMI_ENI[enemy][200000] >= 2 then
+						elseif nbAMI_ENI[zoneSideName][200000] < 2 and nbAMI_ENI[enemy][200000] >= 2 then
 							pilot.status = "EVAC_possible"
-						elseif nbAMI_ENI[ZoneSideName][200000] >= 2 and nbAMI_ENI[enemy][200000] >= 2  then
+						elseif nbAMI_ENI[zoneSideName][200000] >= 2 and nbAMI_ENI[enemy][200000] >= 2  then
 							pilot.status = "EVAC_possible"
                         else
                             pilot.status = "EVAC_possible"

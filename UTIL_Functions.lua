@@ -2793,9 +2793,12 @@ function UpdateConfMod(setWeather, setDate, from)
 	-- 	refTemp = 18,				--average day max temperature
 	-- }
 
-	-- if Debug.debug then
-	-- 	print("UpdateConfMod() from "..tostring(from))
-	-- end
+	if Debug.debug then
+
+		print("UpdateConfMod() from "..tostring(from))
+		_affiche(setWeather, "setWeather: ")
+		_affiche(setDate, "setDate: ")
+	end
 
 	local weather_override
 	local date_override
@@ -3679,6 +3682,16 @@ function InsertBugList(txt)
 end
 
 
+function ExtractDateFromCondition(condition)
+	local day = condition:match("camp%.date%.day%s*[<>=]+%s*(%d+)")
+	local month = condition:match("camp%.date%.month%s*[<>=]+%s*(%d+)")
+	local year = condition:match("camp%.date%.year%s*[<>=]+%s*(%d+)")
+	if day and month and year then
+		return { day = tonumber(day), month = tonumber(month), year = tonumber(year) }
+	end
+	return nil
+end
+
 	--sort() trie la table alpha en fonction du priority
 function TargetlistToNum(tableWorking)
 	local targetlistTempB = {}
@@ -3752,7 +3765,7 @@ function CompareTargetLists(reference, working)
     return changes
 end
 
-function CompareTableNumeric(reference, working)
+function CompareTableNumericTrigger(reference, working)
     local changes = {
         added = {},    -- Éléments ajoutés
         removed = {},  -- Éléments supprimés
@@ -3771,26 +3784,37 @@ function CompareTableNumeric(reference, working)
             end
         end
         if not found then
+			print("CompareTrigger refData.name: "..tostring(refData.name))
+			print("CompareTrigger refData.condition: "..tostring(refData.condition))
+
+			local dateCible = ExtractDateFromCondition(refData.condition)
+			if dateCible then
+				print("CompareTrigger Date extraite : " .. dateCible.day .. "/" .. dateCible.month .. "/" .. dateCible.year)
+				refData.active = false
+			else
+				print("CompareTrigger Impossible d'extraire la date")
+			end
+
             -- Si l'élément n'existe pas dans la table de travail, il a été ajouté
             table.insert(changes.added, refData)
 			-- print("UtilF          DDDD ----------------->> BAD ")
         end
     end
 
-    -- Parcourir les éléments de la table de travail pour détecter les suppressions
-    for workName, workData in ipairs(working) do
-        local found = false
-        for refName, refData in ipairs(reference) do
-            if workName == refName then
-                found = true
-                break
-            end
-        end
-        if not found then
-            -- Si l'élément n'existe pas dans la table de référence, il a été supprimé
-            table.insert(changes.removed, workData)
-        end
-    end
+    -- -- Parcourir les éléments de la table de travail pour détecter les suppressions
+    -- for workName, workData in ipairs(working) do
+    --     local found = false
+    --     for refName, refData in ipairs(reference) do
+    --         if workName == refName then
+    --             found = true
+    --             break
+    --         end
+    --     end
+    --     if not found then
+    --         -- Si l'élément n'existe pas dans la table de référence, il a été supprimé
+    --         table.insert(changes.removed, workData)
+    --     end
+    -- end
 
     return changes
 end
@@ -4356,7 +4380,7 @@ function LoadFileAndUpdate(from)
 	dofile("Active/camp_triggers.lua")
 
 	-- Comparer les deux tables
-	changes = CompareTableNumeric(camp_triggers_init, camp_triggers)
+	changes = CompareTableNumericTrigger(camp_triggers_init, camp_triggers)
 
 	-- Afficher les résultats
 	for _, added in ipairs(changes.added) do

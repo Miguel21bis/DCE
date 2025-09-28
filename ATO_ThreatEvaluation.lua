@@ -14,10 +14,9 @@ versionDCE["ATO_ThreatEvaluation.lua"] = "1.7.56"
 -- modification M07_g		EWR toujours affiché dans le briefing + 07g ajout des SAM et Boat dans la chaine de detection
 ------------------------------------------------------------------------------------------------------- 
 
--- modification M34.f custom FrequenceRadio
--- CreatePlageFrequency()																--trouve une plage de frequence commune si c'est possible
-
--- CreatePlageFrequencyB()
+if Debug.debug then
+	print("START ATO_ThreatEvaluation.lua "..versionDCE["ATO_ThreatEvaluation.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
 
 local reduceCercle = 100
 

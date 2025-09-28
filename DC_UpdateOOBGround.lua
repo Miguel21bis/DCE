@@ -10,7 +10,9 @@ versionDCE["DC_UpdateOOBGround.lua"] = "1.4.12"
 -- modification M64_c		adds elements of a new base_mission (c ship)(b: update Type & groupId)
 -- modification M33_f		frequence des FARP selon db_airbase
 ------------------------------------------------------------------------------------------------------- 
-
+if Debug.debug then
+	print("START DC_UpdateOOBGround.lua "..versionDCE["DC_UpdateOOBGround.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
 
 for coal_name,coal in pairs(oob_ground) do												--go through sides(red/blue)	
 	for country_n,country in ipairs(coal) do											--go through countries

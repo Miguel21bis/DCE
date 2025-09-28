@@ -8,7 +8,9 @@ versionDCE["DC_Final_steps.lua"] = "1.1.1"
 --
 -- modification M90_a		missionWithIcone
 -------------------------------------------------------------------------------------------------------
-
+if Debug.debug then
+	print("START DC_Final_steps.lua "..versionDCE["DC_Final_steps.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
 --demandé par 2 fichiers, normalement via MAIN_NextMission et UTIL_DIvers outils
 function AddIconLayer(layersObjects, targetListRequired)
 

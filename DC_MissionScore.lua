@@ -8,6 +8,9 @@ if not versionDCE then versionDCE = {} end
 versionDCE["DC_MissionScore.lua"] = "1.1.3"
 ------------------------------------------------------------------------------------------------------- 
 
+if Debug.debug then
+	print("START DC_MissionScore.lua "..versionDCE["DC_MissionScore.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
 -- cleancode_a				(a springCleaning)
 
 --define the mission score

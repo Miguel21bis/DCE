@@ -19,7 +19,9 @@ versionDCE["DC_Prune.lua"] = "1.7.26"
 -- Z02_a			DontPrunSAM et prend en compte la position des intercepteur qui n'ont qu'un seul waypoint
 -- M16_d			SpawnAir, & insert pos far target
 -------------------------------------------------------------------------------------------------------
-
+if Debug.debug then
+	print("START DC_Prune.lua "..versionDCE["DC_Prune.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
 local cibleTrouve = {}
 
 local pruneScript =				mission_ini.PruneScriptConf.PruneScript

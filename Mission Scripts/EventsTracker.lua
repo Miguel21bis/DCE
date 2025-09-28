@@ -777,12 +777,13 @@ function eventHandlerDCE:onEvent(event)
 				local sideName
 				if initiatorVec3 and initiatorVec3.x then
 					local altiLand = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z })
-					pilotEjection = {
+                    pilotEjection = {
+						unit = event.initiator,
+						unitObj = event.initiator,
 						pos = {
 							vec3x = initiatorVec3.x,
 							vec3y = initiatorVec3.y,
 							vec3z = initiatorVec3.z,
-							unit = event.initiator,
 							x = initiatorVec3.x,
 							y = initiatorVec3.z,
 							z = initiatorVec3.y,
@@ -979,7 +980,7 @@ function eventHandlerDCE:onEvent(event)
 						selectedEjection.pos.z = initiatorVec3.y
 						selectedEjection.pos.altiLand = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z })
 
-						if selectedEjection.unit:isExist()  then
+						if selectedEjection.unitObj.isExist and selectedEjection.unitObj:isExist() then
 							selectedEjection.grid = coord.LLtoMGRS(coord.LOtoLL(selectedEjection.unit:getPosition().p))
 						end
 					end
@@ -1536,8 +1537,8 @@ function eventHandlerDCE:onEvent(event)
 					env.info("DCE_eventIdTotal: Failed to open log file for writing.")
 				end
 
-				local fileStr = "EWR_optionPlayer = " .. TableSerialization(EWR_optionPlayer, 0)
-				local fileFile = io.open(PathDCE.."Debug\\" .. "EWR_optionPlayer.lua", "w")
+				fileStr = "EWR_optionPlayer = " .. TableSerialization(EWR_optionPlayer, 0)
+				fileFile = io.open(PathDCE.."Debug\\" .. "EWR_optionPlayer.lua", "w")
 				if fileFile then
 					fileFile:write(fileStr)
 					fileFile:close()

@@ -8,7 +8,9 @@ versionDCE["DC_EndCampaign.lua"] = "1.2.8"
 -- debug_g 			(g bug end campaign)(f mission.maxDictId)(d: EndMission not remove static (FARPS))(c: oldImage)(ab: EndMission)
 -- cleancode_c		(c springCleaning)
 -- -------------------------------------------------------------------------------------------------------
-
+if Debug.debug then
+	print("START DC_EndCampaign.lua "..versionDCE["DC_EndCampaign.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
 
 if EndCampaign or camp.endCampaign then												--if the campaign has ended
 	PlayerFlight = true											--set true to stop mission generation loop in DEBRIEF_Master.lua

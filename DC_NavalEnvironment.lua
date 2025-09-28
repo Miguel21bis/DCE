@@ -16,7 +16,9 @@ versionDCE["DC_NavalEnvironment.lua"] = "1.12.35"
 -- modification M33_e		Custom Briefing (e: CV Manual Freq)
 -- modification M11_a		Multiplayer
 ------------------------------------------------------------------------------------------------------- 
-
+if Debug.debug then
+	print("START DC_NavalEnvironment.lua "..versionDCE["DC_NavalEnvironment.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
 -- local poly = {}
 
 

@@ -9,7 +9,9 @@ versionDCE["DC_StaticAircraft.lua"] = "1.3.11"
 -- cleancode_a				(a springCleaning)
 -- modification M43_d		assignation des numeros de parking du type C08 (d: bug static, solution : NbPlaneTot)
 ------------------------------------------------------------------------------------------------------- 
-
+if Debug.debug then
+	print("START DC_StaticAircraft.lua "..versionDCE["DC_StaticAircraft.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
 
 --Count all aircraft assigned in ATO
 local count = {}

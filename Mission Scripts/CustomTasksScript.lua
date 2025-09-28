@@ -1854,11 +1854,11 @@ end
 -----************** CustomDesignationAFAC ************-----
 -----************** CustomDesignationAFAC ************-----
 ------************** CustomDesignationAFAC ************-----
-function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
+function CustomDesignationAFAC(arg_AFAC_F_Name, arg_refX, arg_refY, arg_LaserCode)
 	if varFpsLeak then return end
 
-	if LastInjecAFAC[afacFlightName] and LastInjecAFAC[afacFlightName] < timer.getTime() + 30 then
-		env.info("DCE_CustomDesignationAFAC() DCE_ERROR AFAC 00 BUG RETURN : "..tostring(afacFlightName).." LastInjecAFAC: "..tostring(LastInjecAFAC[afacFlightName]))
+	if LastInjecAFAC[arg_AFAC_F_Name] and LastInjecAFAC[arg_AFAC_F_Name] < timer.getTime() + 30 then
+		env.info("DCE_CustomDesignationAFAC() DCE_ERROR AFAC 00 BUG RETURN : "..tostring(arg_AFAC_F_Name).." LastInjecAFAC: "..tostring(LastInjecAFAC[arg_AFAC_F_Name]))
 		return
 	end
 
@@ -1875,11 +1875,11 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	end
 
 
-	env.info("DCE_CustomDesignationAFAC() AA : START "..tostring(afacFlightName))
+	env.info("DCE_CustomDesignationAFAC() AA : START "..tostring(arg_AFAC_F_Name))
 	-- trigger.action.outText("AFAC : START "..tostring(afacFlightName), 15)
 
 	local laser														--variable to hold the laser spot
-	local flightGroup = Group.getByName(afacFlightName)
+	local flightGroup = Group.getByName(arg_AFAC_F_Name)
 	local coalitionId = flightGroup:getCoalition()
 	local unitsAFAC = flightGroup:getUnits()
 	local unitAFAC = unitsAFAC[1]
@@ -1888,23 +1888,21 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 		coalitionId = unitAFAC:getCoalition()
 		
-		AFAC_available[afacFlightName] = {
+		AFAC_available[arg_AFAC_F_Name] = {
 				["unitAFAC"] = unitAFAC,
 				["sideNum"] = coalitionId,
 				-- ["gpGid"] = 0,
 			}
 			-- env.info("DCE_CustomDesignationAFAC() AAb : unitAFAC:isExist "..tostring(afacFlightName))
 	else
-		AFAC_available[afacFlightName] = nil
-		env.info("DCE_CustomDesignationAFAC() AAc : else "..tostring(afacFlightName))
+		AFAC_available[arg_AFAC_F_Name] = nil
+		env.info("DCE_CustomDesignationAFAC() AAc : else "..tostring(arg_AFAC_F_Name))
 		return
 	end
 
 	local afacPosVec3 = unitAFAC:getPoint()
 	local afacAlt = afacPosVec3.y
-
 	local terrainAlt = land.getHeight({x = afacPosVec3.x, y = afacPosVec3.z})
-
 	local distVisibility = distanceVisibilite(afacAlt, terrainAlt)
 	-- env.info("DCE_CustomDesignationAFAC() BB : afacFlightName "..tostring(afacFlightName).." afacAlt: "..tostring(afacAlt).." terrainAlt: "..tostring(terrainAlt).." distVisibility: "..tostring(distVisibility))
 
@@ -1922,20 +1920,15 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		for n=1, #groundUnits do
 
 			local grndUnit = groundUnits[n]
-			if  grndUnit:isActive()  then
+			if grndUnit:isActive()  then
 
 				local description = grndUnit:getDesc()
-
 				local life = description.life
 				local unitPosVec3 = grndUnit:getPoint()
-				-- local gpGid = Group.getID(gp)
 				local UnitId = Unit.getID(grndUnit)
-				-- local unitCallsign = grndUnit:getCallsign()
 				local unitTypeName = grndUnit:getTypeName()
-
-				local distance = math.floor(math.sqrt(math.pow(unitPosVec3.x - refX, 2) + math.pow(unitPosVec3.z - refY, 2)))
-				-- env.info("DCE_AFAC () :DD_2a  "..distance)
-
+				local distance = math.floor(math.sqrt(math.pow(unitPosVec3.x - arg_refX, 2) + math.pow(unitPosVec3.z - arg_refY, 2)))
+				
 				if distance < distVisibility then
 
 					-- env.info("DCE_AFAC () :EEa  "..tostring(unitTypeName))
@@ -1964,9 +1957,9 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	--**** recupere les static ****
 	--****--****--****--**** ********--****--****--**** ********--****--****--**** ********--****--****--**** ****
 	local statics = coalition.getStaticObjects(CoalitionIdToENI_Id[coalitionId])
-	for _, static in pairs(statics) do
+    for _, static in pairs(statics) do
+		
 		local stName = Object.getName(static)
-
 		local stLife = static:getLife()
 
 		if stLife > 0 then
@@ -1978,7 +1971,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 			local UnitId = static:getID()
 			local unitTypeName = static:getTypeName()
 
-			local distance = math.floor(math.sqrt(math.pow(unitPosVec3.x - refX, 2) + math.pow(unitPosVec3.z - refY, 2)))
+			local distance = math.floor(math.sqrt(math.pow(unitPosVec3.x - arg_refX, 2) + math.pow(unitPosVec3.z - arg_refY, 2)))
 
 			if distance < distVisibility and not string.find(string.lower(desc.typeName) , "sandbag") then
 
@@ -2035,40 +2028,34 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	AFAC_targetStatus[target.UnitId] = target
 
 	local gpGid
-	if AFAC_available[afacFlightName] and AFAC_available[afacFlightName]["gpGid"] then
-		gpGid = AFAC_available[afacFlightName]["gpGid"]
+	if AFAC_available[arg_AFAC_F_Name] and AFAC_available[arg_AFAC_F_Name]["gpGid"] then
+		gpGid = AFAC_available[arg_AFAC_F_Name]["gpGid"]
 	end
 
-	local targetPos = target.unitPos
+	local targetPosVec3 = target.unitPosVec3
 
-	if laserCode and laserCode ~= "nil" and laser == nil then
-		env.info("DCE_AFAC () : J createLaser laserCode: "..tostring(laserCode))
-		laser = Spot.createLaser(unitAFAC, nil, targetPos, laserCode)	--start laser spot
+	if arg_LaserCode and arg_LaserCode ~= "nil" and laser == nil then
+		env.info("DCE_AFAC () : J createLaser laserCode: "..tostring(arg_LaserCode))
+		laser = Spot.createLaser(unitAFAC, nil, targetPosVec3, arg_LaserCode)	--start laser spot
 	else
-		trigger.action.smoke(targetPos, SmokeColor_TargetDesignation)
+		trigger.action.smoke(targetPosVec3, SmokeColor_TargetDesignation)
 		env.info("DCE_AFAC () K create smokeColor.Red ")
-		-- if not AFAC_smokeTiming[afacFlightName] then AFAC_smokeTiming[afacFlightName] = {} end
-		-- AFAC_smokeTiming[afacFlightName] = {
-		-- 	time = timer.getTime(),
-		-- 	targetPos = targetPos,
-		-- 	sideNum = coalitionForce,
-		-- }
 
-		AFAC_available[afacFlightName]["smokeTiming"] = {
+		AFAC_available[arg_AFAC_F_Name]["smokeData"] = {
 			time = timer.getTime(),
-			targetPos = targetPos,
+			targetPosVec3 = targetPosVec3,
 			sideNum = coalitionId,
 		}
 
 	end
 
-	local LLposNstring, LLposEstring = LLtool.LLstrings(targetPos)
+	local LLposNstring, LLposEstring = LLtool.LLstrings(targetPosVec3)
 	local LLpos = ' N ' .. LLposNstring .. '   E ' .. LLposEstring
 	target["LLpos"] = LLpos
 
 	if gpGid then
-		if laserCode and laserCode ~= "nil"  then
-			trigger.action.outTextForGroup(gpGid,"AFAC createLaser laserCode: "..tostring(laserCode), 30, false)
+		if arg_LaserCode and arg_LaserCode ~= "nil"  then
+			trigger.action.outTextForGroup(gpGid,"AFAC createLaser laserCode: "..tostring(arg_LaserCode), 30, false)
 		end
 
 		if target.LLpos then
@@ -2090,7 +2077,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 		for Ncountry, _country in pairs(coalition.country) do
 			if _country.plane then
 				for Ngroup, _group in pairs(_country.plane.group) do
-					if _group.name and _group.name == afacFlightName then
+					if _group.name and _group.name == arg_AFAC_F_Name then
 						--copie de l'ancienne route
 						modFPlan = Deepcopy(_group.route.points)
 						foundAfacRoute = true
@@ -2207,8 +2194,8 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 			['action'] = 'Turning Point',
 			['alt_type'] = 'BARO',
 			['speed_locked'] = true,
-			['y'] = targetPos.z ,
-			['x'] = targetPos.x ,
+			['y'] = targetPosVec3.z ,
+			['x'] = targetPosVec3.x ,
 			['formation_template'] = '',
 			['speed'] = descAfac.speedMax * 2/3,
 			['ETA_locked'] = false,
@@ -2316,8 +2303,8 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 			['action'] = 'Turning Point',
 			['alt_type'] = 'BARO',
 			['speed_locked'] = true,
-			['y'] = tonumber(refY) ,
-			['x'] = tonumber(refX) ,
+			['y'] = tonumber(arg_refY) ,
+			['x'] = tonumber(arg_refX) ,
 			['formation_template'] = '',
 			['speed'] = descAfac.speedMax * 2/3,
 			['ETA_locked'] = false,
@@ -2387,7 +2374,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 									["params"] =
 									{
 										--afacFlightName, refX, refY
-										["command"] = "CustomDesignationAFAC('" .. afacFlightName .. "', '" .. refX .. "', '" .. refY .. "',  'nil')",
+										["command"] = "CustomDesignationAFAC('" .. arg_AFAC_F_Name .. "', '" .. arg_refX .. "', '" .. arg_refY .. "',  'nil')",
 									},
 								},
 							},
@@ -2467,17 +2454,17 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 				{x = newRoute[i-1].x, y = newRoute[i-1].y }
 			)
 
-			local ETA_minimum
+			local eta_Minimum
 			if deltaDist and descAfac.speedMax then
-				ETA_minimum = deltaDist / (descAfac.speedMax * 2/3)
+				eta_Minimum = deltaDist / (descAfac.speedMax * 2/3)
 			else
 				-- Sortir uniquement de la boucle, mais pas de la fonction
 				env.info("DCE_AFAC () passe O6 ERROR BREAK ")
 				break
 			end
 
-			if ETA_minimum and deltaTime < ETA_minimum then
-				newRoute[i]["ETA"] = newRoute[i-1]["ETA"] + ETA_minimum + 300
+			if eta_Minimum and deltaTime < eta_Minimum then
+				newRoute[i]["ETA"] = newRoute[i-1]["ETA"] + eta_Minimum + 300
 			end
 
 			-- if i >= 4 then
@@ -2518,7 +2505,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 
 	if camp.debug then
 		local logStr = "afac = " .. TableSerialization(newMission, 0)
-		local flightNameClean = afacFlightName:gsub('[%p%c%s]', '_')
+		local flightNameClean = arg_AFAC_F_Name:gsub('[%p%c%s]', '_')
 		local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_AFAC_"..current_time..".lua", "w")
 		if logFile then
 			logFile:write(logStr)
@@ -2531,7 +2518,7 @@ function CustomDesignationAFAC(afacFlightName, refX, refY, laserCode)
 	ctr:resetTask() 			-- Efface les tâches existantes
 	ctr:setTask(newMission)
 
-	LastInjecAFAC[afacFlightName] = timer.getTime() 	--update last injection time
+	LastInjecAFAC[arg_AFAC_F_Name] = timer.getTime() 	--update last injection time
 
 	env.info("DCE_AFAC Z nouvelle mission injectee")
 

@@ -18,6 +18,10 @@ versionDCE["DC_UpdateTargetlist.lua"] = "1.11.52"
 -- modification M19_e		Repair GROUND
 -------------------------------------------------------------------------------------------------------
 
+if Debug.debug then
+	print("START DC_UpdateTargetlist.lua "..versionDCE["DC_UpdateTargetlist.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
+
 if not targetlist.blue[1] then
 	TargetlistToNum(targetlist)
 end

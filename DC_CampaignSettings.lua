@@ -57,6 +57,9 @@ versionDCE["DC_CampaignSettings.lua"] = "1.4.19"
 -- modification M53_b	automatic update of the conf_mod file (b conf_mod reconfiguration)
 -- modification M52_f	campaign player's choices  (f bug transfert)(e bug sourceName01) (d: corrige automatic bug CVN & debug CVN)(c: debug)(b: difficulté de campagne)(a: durée de la campagne)
 ------------------------------------------------------------------------------------------------------- 
+if Debug.debug then
+	print("START DC_CampaignSettings.lua "..versionDCE["DC_CampaignSettings.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
 
 --[[
 PARTIE slider_CampaignDuration ***************************************************************************

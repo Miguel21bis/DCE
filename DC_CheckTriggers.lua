@@ -78,7 +78,7 @@ versionDCE["DC_CheckTriggers.lua"] = "1.16.95"
 --for condition and action strings: outside with single quotes '', inside with double quotes ""!
 
 if Debug.debug then
-	print("START DC_CheckTriggers.lua "..versionDCE["DC_CheckTriggers.lua"])
+	print("START DC_CheckTriggers.lua "..versionDCE["DC_CheckTriggers.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
 
 local debugKT = false

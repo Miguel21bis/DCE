@@ -32,6 +32,9 @@ versionDCE["DC_Briefing.lua"] = "1.24.158"
 -- modification M04_h		ajout d'une troisieme radio (g: helicopter recovery radio)(g: recovery radio)(f: set up radio channels for wing players )
 ------------------------------------------------------------------------------------------------------- 
 
+if Debug.debug then
+	print("START DC_Briefing.lua "..versionDCE["DC_Briefing.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
 
 local nbPasse = 0
 local target_picture = {}

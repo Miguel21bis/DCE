@@ -15,26 +15,25 @@ versionDCE["DC_Time.lua"] = "1.6.18"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
-	print("START DC_Time.lua "..versionDCE["DC_Time.lua"])
+	print("START DC_Time.lua "..versionDCE["DC_Time.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
+
 
 --Global variable:
 Daytime	= ""																					--variable what Daytime the is covered in the duration of the mission
 
 --local variable:
-local actualTime
-local referenceTime
 local idle_time = 0
 local overnightTime = 0
 
--- print("DcIme 0a Current date : " ..FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year )
+print("DcIme 0a Current date : " ..FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year )
 
 --campaign day counter
 if camp.day == nil then
 	camp.day = 1
 end
 
--- print("DcIme 0b TimeJump:? ".. tostring(TimeJump).." Mission.MissionInstance: "..camp.mission..".".. tostring(MissionInstance))
+print("DcIme 0b TimeJump:? ".. tostring(TimeJump).." Mission.MissionInstance: "..camp.mission..".".. tostring(MissionInstance))
 
 if TimeJump and (MissionInstance and MissionInstance <= 1) then
 	camp.time = 0
@@ -138,7 +137,7 @@ while camp.time >= 86400 do																		--repeat as long as time 24 hours o
 	camp.day = camp.day + 1																		--counter for campaign days
 end
 
--- print("DcIme E "..FormatTime(idle_time, "dd:hh:mm") .. " passed. Next mission scheduled at: " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
+print("DcIme E "..FormatTime(idle_time, "dd:hh:mm") .. " passed. Next mission scheduled at: " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
 
 
 if not camp.dateInit then
