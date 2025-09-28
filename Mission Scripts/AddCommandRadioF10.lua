@@ -1579,16 +1579,16 @@ local function bingo(arg_gpGid, arg_groupMission)
 											local firstWPTPos = {x=firstWPT.x, y=firstWPT.y}
 											local unitVec3 = unit:getPoint()
 											distanceToBase_Km = GetDistance(firstWPTPos, {x=unitVec3.x, y=unitVec3.z})/1000
-											env.info( "DCE_Bingo D1  distanceToBase: "..tostring(distanceToBase_Km).." groupName: "..tostring(_group.name).." groupMission.id_: "..tostring(arg_groupMission.id_) )
+											-- env.info( "DCE_Bingo D1  distanceToBase: "..tostring(distanceToBase_Km).." groupName: "..tostring(_group.name).." groupMission.id_: "..tostring(arg_groupMission.id_) )
 
 											--if it's CV or CVN:
 											if  _group.route.points[1]["linkUnit"] then
 												local carrierPosVec3 = GetCarrierPosition(_group.route.points[1]["linkUnit"])
 												if carrierPosVec3 then
-													env.info( "DCE_Bingo D1+ carrierPos.x: "..tostring(carrierPosVec3.x).." carrierPos.y: "..tostring(carrierPosVec3.y).." carrierPos.z: "..tostring(carrierPosVec3.z))
+													-- env.info( "DCE_Bingo D1+ carrierPos.x: "..tostring(carrierPosVec3.x).." carrierPos.y: "..tostring(carrierPosVec3.y).." carrierPos.z: "..tostring(carrierPosVec3.z))
 													firstWPTPos = {x=carrierPosVec3.x, y=carrierPosVec3.z}
 													distanceToBase_Km = GetDistance(firstWPTPos, {x=unitVec3.x, y=unitVec3.z})/1000
-													env.info( "DCE_Bingo D1+  distanceToBase: "..tostring(distanceToBase_Km).." groupName: "..tostring(_group.name).." groupMission.id_: "..tostring(arg_groupMission.id_) )
+													-- env.info( "DCE_Bingo D1+  distanceToBase: "..tostring(distanceToBase_Km).." groupName: "..tostring(_group.name).." groupMission.id_: "..tostring(arg_groupMission.id_) )
 												end
 
 											end
@@ -1599,16 +1599,16 @@ local function bingo(arg_gpGid, arg_groupMission)
 											local firstWPTPos = {x=lastWPT.x, y=lastWPT.y}
 											local unitVec3 = unit:getPoint()
 											distanceToBase_Km = GetDistance(firstWPTPos, {x=unitVec3.x, y=unitVec3.z})/1000
-											env.info( "DCE_Bingo D2  distanceToBase: "..tostring(distanceToBase_Km).." groupName: "..tostring(_group.name).." groupMission.id_: "..tostring(arg_groupMission.id_) )
+											-- env.info( "DCE_Bingo D2  distanceToBase: "..tostring(distanceToBase_Km).." groupName: "..tostring(_group.name).." groupMission.id_: "..tostring(arg_groupMission.id_) )
 
 												--if it's CV or CVN:
 											if  _group.route.points[1]["linkUnit"] then
 												local carrierPosVec3 = GetCarrierPosition(_group.route.points[1]["linkUnit"])
 												if carrierPosVec3 then
-													env.info( "DCE_Bingo D1+ carrierPos.x: "..tostring(carrierPosVec3.x).." carrierPos.y: "..tostring(carrierPosVec3.y).." carrierPos.z: "..tostring(carrierPosVec3.z))
+													-- env.info( "DCE_Bingo D1+ carrierPos.x: "..tostring(carrierPosVec3.x).." carrierPos.y: "..tostring(carrierPosVec3.y).." carrierPos.z: "..tostring(carrierPosVec3.z))
 													firstWPTPos = {x=carrierPosVec3.x, y=carrierPosVec3.z}
 													distanceToBase_Km = GetDistance(firstWPTPos, {x=unitVec3.x, y=unitVec3.z})/1000
-													env.info( "DCE_Bingo D1+  distanceToBase: "..tostring(distanceToBase_Km).." groupName: "..tostring(_group.name).." groupMission.id_: "..tostring(arg_groupMission.id_) )
+													-- env.info( "DCE_Bingo D1+  distanceToBase: "..tostring(distanceToBase_Km).." groupName: "..tostring(_group.name).." groupMission.id_: "..tostring(arg_groupMission.id_) )
 												end
 
 											end
@@ -1640,11 +1640,11 @@ local function bingo(arg_gpGid, arg_groupMission)
 
 								local availableDistanceKm = fuelMass / AvgConsumptionKgPerKm[unitId]
 								
-								env.info("DCE_Bingo D3b availableDistanceKm: " ..
-									tostring(availableDistanceKm) .. " <? distanceToBase_Km+200: " .. tostring(distanceToBase_Km+200))
+								-- env.info("DCE_Bingo D3b availableDistanceKm: " ..
+								-- 	tostring(availableDistanceKm) .. " <? distanceToBase_Km+200: " .. tostring(distanceToBase_Km+200))
 								
 								if availableDistanceKm < (distanceToBase_Km + 200) then
-									env.info("DCE_Bingo D4 toRTB=true  distancePossibleKm: "..tostring(availableDistanceKm).." < distanceToBase: "..tostring(distanceToBase_Km))
+									-- env.info("DCE_Bingo D4 toRTB=true  distancePossibleKm: "..tostring(availableDistanceKm).." < distanceToBase: "..tostring(distanceToBase_Km))
 									toRTB = true
 								end
 							end
@@ -1681,7 +1681,7 @@ local function bingo(arg_gpGid, arg_groupMission)
 
 						report = report.." RTB_ON_BINGO & PROHIBIT_AB "
 
-						env.info( "DCE_Bingo CC MM     report "..tostring(arg_groupMission.id_).." "..tostring(unitName).." "..callSign.." report "..tostring(report) )
+						-- env.info( "DCE_Bingo CC MM     report "..tostring(arg_groupMission.id_).." "..tostring(unitName).." "..callSign.." report "..tostring(report) )
 
 						-- local description = unit:getDesc()
 						-- _affiche(description, "description function bingo()")
@@ -1710,18 +1710,18 @@ local function bingo(arg_gpGid, arg_groupMission)
 												if wpt.name == 'IP' then
 													existIP = wptN
 													closestPoint = 99999999
-													env.info( "DCE_Bingo D1  passIP existIP: "..tostring(existIP))
+													-- env.info( "DCE_Bingo D1  passIP existIP: "..tostring(existIP))
 												end
 												--on essai de passer le point IP et le target
 												if existIP > 0 and wptN < existIP + 2 then
 													closestPoint = 99999999
-													env.info( "DCE_Bingo D2 N1 existIP: "..tostring(existIP).." wptN : "..tostring(wptN).." < "..tostring(existIP+2))
+													-- env.info( "DCE_Bingo D2 N1 existIP: "..tostring(existIP).." wptN : "..tostring(wptN).." < "..tostring(existIP+2))
 												end
 												local distance  = GetDistance({x=unitVec3.x, y=unitVec3.z}, {x=wpt.x, y=wpt.y})
 												if distance < closestPoint then
 													closestPoint = distance
 													wptN_closest = wptN
-													env.info( "DCE_Bingo D1 N2 wptN_closest: "..tostring(wptN_closest).." closestPoint: "..tostring(closestPoint))
+													-- env.info( "DCE_Bingo D1 N2 wptN_closest: "..tostring(wptN_closest).." closestPoint: "..tostring(closestPoint))
 												end
 											end
 

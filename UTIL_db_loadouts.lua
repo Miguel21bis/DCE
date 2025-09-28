@@ -4,11 +4,14 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.193"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.194"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
+-- V194 - MiG-29 for TF80s
+-- V193 - MiG-29 Fulcrum loadout first version
+-- V192 - Armement des MIG-21 (Ajout version 4 missiles ) - Modif de l'armement des A-4 (toujours 2 Fuel Tanks)
 -- V191 KC-135 v = 185
 -- V190 A-4E fuel = 2467
 -- V189 - Crusader Escort
@@ -38304,7 +38307,7 @@ db_all_loadouts = {
 		CAP = {
 			["AA CAP - 90s - R-27R*2 R-60M*4 - FT"] = {
 				attributes =  { },
-				code_loadout =  { "Crisis", "PG" },
+				code_loadout =  { "Crisis", "PG", "TF80s" },
 				night = true,
 				adverseWeather = true,
 				range = 504000,
@@ -38409,7 +38412,7 @@ db_all_loadouts = {
 		["Fighter Sweep"] = {
 			["AA sweep - 90s - R-27R*2 R-60M*4 - FT"] = {
 				attributes =  { },
-				code_loadout =  { "Crisis", "PG" },
+				code_loadout =  { "Crisis", "PG", "TF80s"  },
 				night = true,
 				adverseWeather = true,
 				firepower = 1.5,
@@ -38561,7 +38564,7 @@ db_all_loadouts = {
 			},
 			["AA Escort - 90s - R-27R*2 R-60M*4 - FT"] = {
 				attributes =  { },
-				code_loadout =  { "Crisis", "PG" },
+				code_loadout =  { "Crisis", "PG", "TF80s"  },
 				night = true,
 				adverseWeather = true,
 				range = 504000,
@@ -38611,7 +38614,7 @@ db_all_loadouts = {
 		Intercept = {
 			["AA Intercept - 90s - R-27R*2 R-60M*4 - FT"] = {
 				attributes =  { },
-				code_loadout =  { "Crisis", "PG" },
+				code_loadout =  { "Crisis", "PG", "TF80s"  },
 				night = true,
 				adverseWeather = true,
 				range = 250000,
@@ -38801,7 +38804,7 @@ db_all_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { "Structure", "soft", "Parked Aircraft" },
-				code_loadout =  { "Crisis", "PG" },
+				code_loadout =  { "Crisis", "PG", "TF80s"  },
 				weaponType = "Bombs",
 				expend = "All",
 				range = 200000,
@@ -38980,7 +38983,7 @@ db_all_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { "Structure", "soft", "Parked Aircraft" },
-				code_loadout =  { "Crisis", "PG" },
+				code_loadout =  { "Crisis", "PG", "TF80s"  },
 				weaponType = "Bombs",
 				expend = "All",
 				range = 200000,
