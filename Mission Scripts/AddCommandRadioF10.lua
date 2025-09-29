@@ -3591,45 +3591,34 @@ local function loopAFAC_CAS()
 		for _, gp in pairs(groups) do
 			local gpName = Group.getName(gp)
 			if string.find(gpName,"Strike") then
-				local wingman = gp:getUnits()
-				for wingmanN, unit in ipairs(wingman) do
-					-- env.info("DCE_loopAFAC_CAS F  sideNum: "..tostring(sideNum))
+				local strikers = gp:getUnits()
+				for wingmanN, unitStriker in ipairs(strikers) do
 					for afacFlightName, afacData in pairs(AFAC_available) do
-						-- env.info("DCE_loopAFAC_CAS G value.sideNum: "..tostring(value.sideNum).." "..tostring(afacFlightName))
 						if sideNum == afacData.sideNum then
-							-- env.info("DCE_loopAFAC_CAS H timer: "..timer.getTime().." >smokeData.time? "..tostring(value.smokeData.time))
-
-							if timer.getTime() > (afacData.smokeData.time + 300) then
-								-- env.info("DCE_loopAFAC_CAS I "..tostring(afacFlightName))
-								local flightGroup = Group.getByName(afacFlightName)
-								if flightGroup then
-									-- env.info("DCE_loopAFAC_CAS Ib break "..tostring(afacFlightName))
-
-									-- local coalitionForceId = flightGroup:getCoalition()
-									local unitsAFAC = flightGroup:getUnits()
+							if afacData.smokeData and timer.getTime() > (afacData.smokeData.time + 300) then
+								local afacGroupObj = Group.getByName(afacFlightName)
+								if afacGroupObj then
+									local unitsAFAC = afacGroupObj:getUnits()
 									local unitAFAC = unitsAFAC[1]
 
 									if unitAFAC and unitAFAC:isExist() then
 										local afacVec3 = unitAFAC:getPoint()
-										local unitVec3 = unit:getPoint()
-										local distance = math.sqrt((afacVec3.x - unitVec3.x)^2 + (afacVec3.z - unitVec3.z)^2)
-
-										-- env.info("DCE_loopAFAC_CAS J "..tostring(distance))
+										local unitStrikerVec3 = unitStriker:getPoint()
+										local distance = math.sqrt((afacVec3.x - unitStrikerVec3.x)^2 + (afacVec3.z - unitStrikerVec3.z)^2)
 
 										if distance <= 10000 then
-
 											trigger.action.smoke(afacData.smokeData.targetPosVec3, SmokeColor_TargetDesignation)
-											-- env.info("DCE_loopAFAC_CAS K create smokeColor.Blue ")
-
 											AFAC_available[afacFlightName]["smokeData"] = {
 												time = timer.getTime(),
 												targetPosVec3 = afacData.smokeData.targetPosVec3,
 												sideNum = sideNum,
 											}
-
 										end
 									end
 								end
+
+                            else
+								
 							end
 						end
 					end
