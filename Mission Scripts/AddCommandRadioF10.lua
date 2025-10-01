@@ -285,7 +285,7 @@ function ProxyBase(selectedEjection)
     local distanceBase = nil
     local baseName = nil
     for Id, base in pairs(RunwayLife) do
-        if base.pointVec3 and base.pointVec3.x and base.pointVec3.z then
+		if base.pointVec3 and base.pointVec3.x and base.pointVec3.z and selectedEjection.pos then
 			local dx = base.pointVec3.x - selectedEjection.pos.vec3x
 			local dz = base.pointVec3.z - selectedEjection.pos.vec3z
             local tempDistance = math.sqrt(dx * dx + dz * dz)
@@ -293,6 +293,9 @@ function ProxyBase(selectedEjection)
                 distanceBase = tempDistance
                 baseName = base.name
             end
+        else
+			env.info("DCE_EvenT: pilotLand_C G baseName "..tostring(baseName).." distanceBase "..tostring(distanceBase))
+
         end
     end
     return distanceBase, baseName
@@ -719,7 +722,7 @@ local function avoidArea()
 
     if not camp.groundthreats then
 		if not AnnonceOneOunce["avoidArea"] then
-			env.info("ACRF10_avoidArea ERROR RETURN no camp.groundthreats")
+			env.info("ACRF10_avoidArea DCE_ERROR RETURN no camp.groundthreats")
 			AnnonceOneOunce["avoidArea"] = true
 		end
         return

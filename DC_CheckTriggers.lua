@@ -2293,7 +2293,6 @@ for side_name, side in pairs(oob_air) do
                 if unit.roster.reserve and unit.roster.reserve > 0 then
                     Action.AirUnitReinforce(unit.name, "")
                     if debugKT then print("DcCT automaticReinforce "..tostring(unit.name)) end
-                    print("DcCT automaticReinforce "..tostring(unit.name))
                 end
             end
             camp.automaticReinforce[side_name] = camp.automaticReinforce[side_name] + interval

@@ -1144,7 +1144,7 @@ for side, units in pairs(oob_air) do
 																											local farpToTarget = GetDistance(FARP, target)
 
 																											if farpToTarget <= unit_loadouts[l].range and farpToTarget < toTarget then
-																												if IsHelicopter[unit.type] then print("passe E ") end
+																												-- if IsHelicopter[unit.type] then print("passe E ") end
 
 																												toTarget = farpToTarget
 																												viaFARP = FARP

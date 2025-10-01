@@ -164,12 +164,12 @@ end
 
 --Order of Battle
 do
-	local s = ""
+	-- local s = ""
 
-	s =  FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ":\n\n"		--add date and time header
+	local s =  FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ":\n\n"		--add date and time header
 
 	if AirLiftObjectif and next(AirLiftObjectif) ~= nil then
-		s = "AirLift:\n\n"
+		s = s .. "AirLift:\n\n"
 		for place, airTxt in pairs(AirLiftObjectif) do
 			s = s ..airTxt.. "\n"
 		end
@@ -180,21 +180,18 @@ do
 	s = s.."Order of Battle:\n\n"																--make lists of the air order of battle for all sides
 
 	--air units****************************************************************************
-	for side_name, side in pairs(oob_air) do															--iterate through sides in oob_air
-		
-		if side_name == "blue" then
-			s = s .. "\nBlue Air Units:\n"															--side header
-		elseif side_name == "red" then
-			s = s .. "\nRed Air Units:\n"															--side header
-		elseif side_name == "neutral" then
-			-- Skip processing for "neutral" side, but continue with next iteration
-			break
+	for sideName, oobTbl in pairs(oob_air) do															--iterate through sides in oob_air
 
+		if sideName == "blue" then
+			s = s .. "\nBlue Air Units:\n"															--side header
+		elseif sideName == "red" then
+			s = s .. "\nRed Air Units:\n"															--side header
+		elseif sideName == "neutral" then
 		end
 
 		 -- Crée une copie triée des unités
 		local sorted_units = {}
-		for _, unit in pairs(side) do
+		for _, unit in pairs(oobTbl) do
 			table.insert(sorted_units, unit)
 		end
 		table.sort(sorted_units, function(a, b)
@@ -230,7 +227,7 @@ do
 		}
 
 		--add list values
-		for unit_n,unit in ipairs(sorted_units) do															--iterate through units
+		for _, unit in ipairs(sorted_units) do															--iterate through units
 			if unit.inactive ~= true then															--unit is active
 				table.insert(entries[1].values, unit.name)											--unit name
 				table.insert(entries[2].values, ReplaceTypeName(unit.type))							--unit type
@@ -282,10 +279,9 @@ do
 	--FIN air units****************************************************************************
 
 
-
 	--ground targets
-	for side_name, targetSide in pairs(targetlist) do														--iterate through sides in targetlist
-		if side_name == "blue" then																	--owner of the target is the opposite of targetlist side
+	for sideName, targetTbl in pairs(targetlist) do														--iterate through sides in targetlist
+		if sideName == "blue" then																	--owner of the target is the opposite of targetlist side
 			s = s .. "Red Ground Assets:\n"														--side header
 		else
 			s = s .. "Blue Ground Assets:\n"														--side header
@@ -312,7 +308,7 @@ do
 			},
 		}
 
-		for targetN, target in ipairs(targetSide) do															--iterate through sort table
+		for targetN, target in ipairs(targetTbl) do															--iterate through sort table
 			if target.inactive ~= true then														--target is active
 				if target.alive and target.type ~= "Ejected Pilot" then																--target is a ground target
 					if target.hidden == nil or target.hidden == false then						--target is not hidden

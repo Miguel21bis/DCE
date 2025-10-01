@@ -65,7 +65,7 @@ TargetList_InThisMission = {}			-- garde en mémoire les targets pour eviter de 
 PointOfInterest = {}					-- liste des points d'interet
 TabDivert = {}							--liste des pistes de deroutement
 
-local debugStart = true					--NE PAS CHANGER, les infos restent seulement dans le fichier debugGenMission
+local debugStart = true					--NE PAS CHANGER, les infos restent seulement dans le fichier FlightPlan_Generator_Debug
 local debugTxt_AtoFP = ""
 local callSignFlight = {}
 local callSignFlightUnite = {}
@@ -915,30 +915,35 @@ local function fct_movedBullseye(arg_Side, arg_NameTheatre)
 end
 
 --modify_activate_group_time
-local function modify_activate_group_time(group, airSpawnTime, from)
+local function modify_Activate_GroupTime(arg_Group, arg_AirSpawnTime, from)
 
-	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe 1B modify_activate_group_time "..tostring(airSpawnTime).." from: "..tostring(from)) end
+	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_modify_Activate_GroupTime() passe A "..tostring(arg_AirSpawnTime).." from: "..tostring(from)) end
 
 	-- group['uncontrolled'] = true
 	-- group['lateActivation'] = true --incompatible avec l'activation sur sixpack
 
+	local found = false
 	for trig_n = 1, #mission.trigrules do
 		if mission.trigrules[trig_n] and mission.trigrules[trig_n].actions and mission.trigrules[trig_n].actions[1] then
-			if mission.trigrules[trig_n].actions[1].group and mission.trigrules[trig_n].actions[1].group == group.groupId then
+			if mission.trigrules[trig_n].actions[1].group and mission.trigrules[trig_n].actions[1].group == arg_Group.groupId then
 
-				if airSpawnTime == -1 then
-					airSpawnTime = 0
+				if arg_AirSpawnTime == -1 then
+					arg_AirSpawnTime = 0
 				end
 
-				mission.trigrules[trig_n].rules[1].seconds = airSpawnTime
+				mission.trigrules[trig_n].rules[1].seconds = arg_AirSpawnTime
 				-- if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe 1Bc seconds (after) "..tostring(mission.trigrules[trig_n].rules[1].seconds)) end
 
 				-- conditions[44] = 'return(c_time_after(2233.512158504) )',
-				mission.trig.conditions[trig_n] = "return(c_time_after(" .. airSpawnTime .. ") )"
-				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe 1Cc modify_activate_group_time find groupId "..group.groupId.." trig_n: "..tostring(trig_n)) end
-
+				mission.trig.conditions[trig_n] = "return(c_time_after(" .. arg_AirSpawnTime .. ") )"
+				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_modify_Activate_GroupTime() B find groupId "..arg_Group.groupId.." trig_n: "..tostring(trig_n)) end
+				found = true
 			end
 		end
+	end
+
+	if not found then
+		DebugFLIGHT = DebugFLIGHT .. "\n".." AtoFP_modify_Activate_GroupTime() C ERROR: NO TRIGGER FOUND groupId "..tostring(arg_Group.groupId).." from: "..tostring(from)
 	end
 end
 
@@ -947,7 +952,7 @@ end
 local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTime, arg_From, arg_Flight, arg_f, arg_Role)
 	arg_Spawn = string.lower(arg_Spawn)
 
-	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe A SpawnOn() "..arg_Spawn) end
+	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_spawnOn() A SpawnOn() "..arg_Spawn.." from: "..tostring(arg_From).." Missionfunc: "..tostring(Missionfunc)) end
 
 	-- ATO_FP_Debug_k
 	local alt_Role = 0
@@ -958,8 +963,7 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 	end
 
 	if arg_Spawn == "air" then
-		if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP spawnOair AIR from: "..tostring(arg_From)) end
-		if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP spawnOair AIR from: "..tostring(arg_From)) end
+		if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_spawnOn() B AIR ") end
 
 		if arg_Waypoints[1]["alt"] <= 500 and not is_helicopter then arg_Waypoints[1]["alt"] = 500 end
 
@@ -1021,6 +1025,8 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 		end
 
 		if arg_SpawnTime and arg_SpawnTime > 1 and Missionfunc then	--not group["TrigActivate"] and
+			if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_spawnOn() C0  ") end
+		
 			-- group["TrigActivate"] = true ATTENTION semble bloquer les orbite indefiniment
 			arg_Group['lateActivation'] = true											--make group late activation "en vol"
 			arg_Group['uncontrolled'] = false
@@ -1033,15 +1039,17 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 						if trigrule.actions[1]["predicate"] == "a_activate_group" then
 
 							activateGroupExist = true
+							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_spawnOn() C1 activateGroupExist ") end
 						end
 					end
 				end
 			end
 
 			if not activateGroupExist then
+				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_spawnOn() C2 activateGroupExist ") end
 
 				local trig_n = #mission.trig.actions + 1
-				Missionfunc = Missionfunc + 1 																	--M11.o
+				Missionfunc = Missionfunc + 1
 				mission.trig.func[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
 				mission.trig.flag[trig_n] = true
 				mission.trig.conditions[trig_n] = "return(c_time_after(" .. arg_SpawnTime .. ") )"
@@ -1063,12 +1071,12 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 						},
 					}
 				}
-				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP SpawnOn passe activate 01") end
+
 			end
 		end
 
 		-- remet l'horaire d'origine sur activate
-		modify_activate_group_time(arg_Group, arg_SpawnTime, debug.getinfo(1).currentline)
+		modify_Activate_GroupTime(arg_Group, arg_SpawnTime, debug.getinfo(1).currentline)
 
 		--supprime les avions initialement prévu sur le pont, puisque maintenant, ils spawnent en vol
 		if testDeckPlace and testDeckPlace[arg_Flight[arg_f].base] then
@@ -1088,7 +1096,7 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 
 	elseif arg_Spawn == "catapult" then
 
-		if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP spawnOair CATAPULT from: "..tostring(arg_From)) end
+		if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_spawnOn() CATAPULT D ") end
 
 		arg_Waypoints[1].action = "From Runway"
 		arg_Waypoints[1].type = "TakeOff"
@@ -1100,9 +1108,9 @@ end
 
 
 --activate_group_withFlag
-local function activate_group_withFlag(group, flag, from)
+local function activate_Group_WithFlag(group, flag, from)
 
-	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe 1H activate_group_withFlag "..tostring(flag).." from: "..tostring(from)) end
+	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_activate_Group_WithFlag() passe A  "..tostring(flag).." from: "..tostring(from)) end
 
 	group['uncontrolled'] = false
 	group['lateActivation'] = true
@@ -1168,9 +1176,9 @@ local function activate_group_time_after(group, AirSpawnTime, from)
 end
 
 --start_set_ai_task
-local function start_set_ai_task(group, aiStart_spawn_time, from)
+local function start_Set_Ai_Task(arg_group, arg_aiStart_Time, from)
 
-	group['uncontrolled'] = true
+	arg_group['uncontrolled'] = true
 
 	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP tasks_Start start_set_ai_task "..tostring(from)) end
 
@@ -1179,12 +1187,12 @@ local function start_set_ai_task(group, aiStart_spawn_time, from)
 	Missionfunc = Missionfunc + 1
 	mission.trig.func[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
 	mission.trig.flag[trig_n] = true
-	mission.trig.conditions[trig_n] = "return(c_time_after(" .. aiStart_spawn_time .. ") )"
-	mission.trig.actions[trig_n] = "a_set_ai_task(" .. group.groupId .. ", 1); mission.trig.func[" .. trig_n .. "]=nil;"
+	mission.trig.conditions[trig_n] = "return(c_time_after(" .. arg_aiStart_Time .. ") )"
+	mission.trig.actions[trig_n] = "a_set_ai_task(" .. arg_group.groupId .. ", 1); mission.trig.func[" .. trig_n .. "]=nil;"
 	mission.trigrules[trig_n] = {
 		['rules'] = {
 			[1] = {
-				["seconds"] = aiStart_spawn_time,
+				["seconds"] = arg_aiStart_Time,
 				["predicate"] = "c_time_after",
 				["zone"] = "",
 			},
@@ -1196,17 +1204,17 @@ local function start_set_ai_task(group, aiStart_spawn_time, from)
 			[1] = {
 				["predicate"] = "a_set_ai_task",
 				["set_ai_task"] = {
-					[1] = group.groupId,
+					[1] = arg_group.groupId,
 					[2] = 1,
 				}
 			},
 		},
 	}
 	--triggered action to start uncontrolled group
-	group['tasks'] = {
+	arg_group['tasks'] = {
 		[1] = {
 			["number"] = 1,
-			["name"] = group.name,
+			["name"] = arg_group.name,
 			["id"] = "WrappedAction",
 			["auto"] = false,
 			["enabled"] = true,
@@ -2178,6 +2186,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					if flight[f].route[w].id == "Taxi" or flight[f].route[w].id == "Spawn" or flight[f].route[w].id == "SAR"then
 						-- spawn_time = flight[f].route[w].eta --spawn_time_bug
 						departure_time = flight[f].route[w].eta
+						debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP Taxi or Spawn and SAR or set departure_time " .. tostring(departure_time) )
+
 					elseif flight[f].route[w].id == "Departure" then
 						departure_time = flight[f].route[w].eta
 					end
@@ -2189,19 +2199,20 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 					-- ************* alter departure alt (spawn and orbit) to prevent collisions of multiple packages *************
-					if flight[f].route[w].id == "Departure" and flight[f].route[w - 1] and flight[f].route[w].id == "Spawn" then							--for departure waypoints that come after spwn waypoints
+					if flight[f].route[w].id == "Departure" and flight[f].route[w - 1] then	--and flight[f].route[w].id == "Spawn"							--for departure waypoints that come after spwn waypoints
 						waypoints[w].alt = waypoints[w - 1]["alt"]																						--use same altitude as departure as for spawn
-					elseif  w < #flight[f].route then
+					
+					elseif w < #flight[f].route then
 
 						if flight[f].route[w + 1] == nil then
 							print("AtoFp #flight[f].route "..#flight[f].route.." w: "..w.." type: "..flight[f].type.." task: "..flight[f].task)
 							_affiche(flight[f].route, "Atofp ")
 						end
 
-						if flight[f].route[w].id == "Departure"
-						or (flight[f].route[w].id == "Spawn"
-						and flight[f].route[w + 1].id == "Departure")
-						then		--for departure waypoint or spawn before departure waypoint
+						if flight[f].route[w].id == "Departure" or (flight[f].route[w].id == "Spawn" and flight[f].route[w + 1].id == "Departure") then		--for departure waypoint or spawn before departure waypoint
+						
+							debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP Departure or (Spawn and Departure ) set Altitude " )
+	
 							local alt = 609.6														--initial departure alt to try: 2'000 ft
 							if is_helicopter  then 											-- M6.1 sauf helicopter
 								alt = 50
@@ -2897,7 +2908,6 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					-- de façon dégradé, l'on ne prend que la position de la cible dans son ensemble
 					if tgtlist == nil and flight[f].task == "Runway Attack" then
 						tgtlist =  '{ x = ' .. tostring(flight[f].target.x) .. ', y = ' .. tostring(flight[f].target.y) .. '}, '
-						-- table.insert(BugList, "no known runway element for the target "..tostring(flight[f].target_name))
 						InsertBugList("no known runway element for the target "..tostring(flight[f].target_name))
 					end
 
@@ -3370,8 +3380,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					-- ************* Escort and Fighter Sweep Custom Search and Engage Task CustomSearchThenEngage *************
 					elseif flight[f].task == "Fighter Sweep" then
-						-- if flight[f].route[w].id == "Join" or (flight[f].route[w].id == "Spawn" and (flight[f].route[w + 1].id ~= "Join" and flight[f].route[w + 1].id ~= "Departure")) then
-
+						
 						if flight[f].route[w].id == "Spawn" or flight[f].route[w].id == "Departure" then
 							local searchTime = flight[f].route[#flight[f].route].eta
 							if not flight[f].loadout.standoff then
@@ -3398,8 +3407,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					elseif flight[f].task == "Escort" then
 						if flight[f].route[w + 1] ~= nil then
-							-- if flight[f].route[w].id == "Join" or (flight[f].route[w].id == "Spawn" and (flight[f].route[w + 1].id ~= "Join" and flight[f].route[w + 1].id ~= "Departure")) then
-
+							
 							if flight[f].route[w].id == "Spawn" or flight[f].route[w].id == "Departure" then
 								local target = "Battle airplanes"
 								if  is_helicopter then															-- modif M06 : helicoptere playable
@@ -4977,8 +4985,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					if not camp.SAR.helicopter then camp.SAR.helicopter = {} end
 					table.insert(camp.SAR.helicopter, group.name )
 				end
+						
+				if waypoints[1]["briefing_name"] == "Spawn" and db_airbases[flight[f].base].BaseAirStart and waypoints[1].ETA > 5 then
+					group["start_time"] = waypoints[1].ETA 
+				end
 
-				-- ATO_FP_Debug01 
 				-- decale les apparitions en vol pour eviter les collisions en vol
 				if waypoints[1].type == "Turning Point" and waypoints[1]["briefing_name"] == "Spawn" and not flight[f].task == "AFAC"  then
 					-- for	n = 1 , #group.units do
@@ -5169,8 +5180,10 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								until not timingDeckCata[sideName][flight[f].base][placeTiming]  or counter == 20	or placeTiming < 0
 
 								if counter == 20 or placeTiming < 0 then
-									local BugFrom =  " timingDeckCata "..debug.getinfo(1).currentline
-									spawnOn( "air", waypoints, group, pn, spawn_time + 30, BugFrom, flight, f, role)
+									local infoFrom =  " timingDeckCata "..debug.getinfo(1).currentline
+									-- spawnOn( "air", waypoints, group, pn, spawn_time, infoFrom, flight, f, role)
+									spawnOn( "air", waypoints, group, pn, waypoints[1]["ETA"], infoFrom, flight, f, role)
+									
 								else
 									timingDeckCata[sideName][flight[f].base][placeTiming] = group.name
 									spawn_time = placeTiming
@@ -5197,7 +5210,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							end
 
 
-							if camp.player  and camp.player.side == sideName and camp.player.pack_n == p and camp.player.airbase == flight[f].base and flight[f].task ~= "AWACS" and flight[f].task ~= "Refueling" then					--for flights in player's package and package does not cover a station and flight[f].task ~= "CAP"
+							if camp.player and camp.player.side == sideName and camp.player.pack_n == p and camp.player.airbase == flight[f].base and flight[f].task ~= "AWACS" and flight[f].task ~= "Refueling" then					--for flights in player's package and package does not cover a station and flight[f].task ~= "CAP"
 								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe DD camp.player.pack_n") end
 
 
@@ -5224,17 +5237,18 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									group['lateActivation'] = true																		--make group late activation  -- SOL decale 			 : lateActivation + a_activate_group
 									-- group['uncontrolled'] = true		VOL decale			: lateActivation + a_activate_group																--Seulement sur CV, lateActivation and uncontrolled requis
 
-									local BugFrom =  " NbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb "..debug.getinfo(1).currentline
-									spawnOn( "air", waypoints, group, pn, spawn_time + 30, BugFrom, flight, f, role)
+									local infoFrom =  " NbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb "..debug.getinfo(1).currentline
+									-- spawnOn( "air", waypoints, group, pn, spawn_time + 30, infoFrom, flight, f, role)
+									spawnOn( "air", waypoints, group, pn, waypoints[1]["ETA"], infoFrom, flight, f, role)
 
-								elseif flagInsertSixpack  and nbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb  then										-- on ne dépasse pas le nb max de spawn sur le CV 
+								elseif flagInsertSixpack and nbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb  then										-- on ne dépasse pas le nb max de spawn sur le CV 
 									if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe FFb  NbPlanetDeck >= LimitedParkNb") end
 
 									group['lateActivation'] = true																		--make group late activation  -- SOL decale 			 : lateActivation + a_activate_group
 									-- group['uncontrolled'] = true			VOL decale			: lateActivation + a_activate_group															--Seulement sur CV, lateActivation and uncontrolled requis
 
-									local BugFrom =  " NbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb "..debug.getinfo(1).currentline
-									spawnOn( "air", waypoints, group, pn, spawn_time + 30, BugFrom, flight, f, role)
+									local infoFrom =  " NbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb "..debug.getinfo(1).currentline
+									spawnOn( "air", waypoints, group, pn, waypoints[1]["ETA"], infoFrom, flight, f, role)
 
 									--si le vol postulait pour le sixpack, on le supprime de la table
 									table.remove(testSixPack[flight[f].base])
@@ -5261,9 +5275,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							if limitedParkTiming or db_airbases[flight[f].base].BaseAirStart then
 								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe LLLa limitedParkTiming OR BaseAirStart ") end
-								local BugFrom =  " limitedParkTiming or BaseAirStart "..debug.getinfo(1).currentline
+								local infoFrom =  " limitedParkTiming or BaseAirStart "..debug.getinfo(1).currentline
 
-								spawnOn( "air", waypoints, group, pn, spawn_time + 30, BugFrom, flight, f, role)
+								spawnOn( "air", waypoints, group, pn, waypoints[1]["ETA"], infoFrom, flight, f, role)
 								if flagInsertSixpack  then																			--si le vol postulait pour le sixpack, on le supprime de la table
 									table.remove(testSixPack[flight[f].base])
 									flagInsertSixpack  = false
@@ -5278,7 +5292,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							--au final, Start+Activate si le flight ne spawn pas en vol
 							if waypoints[1]["action"] ~= "Turning Point" then
 								activate_group_time_after(group, activate_time, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
-								start_set_ai_task(group, spawn_time, debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
+								start_Set_Ai_Task(group, spawn_time, debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
 							end
 
 						elseif   (Multi.NbGroup >= 1 and not camp.MultiPlayer.pack_n[p]) or SingleWithDServerAiAir  then	--en multiplayer: aucun décalage sur le pont, puisque tous les IA commencent en vol								
@@ -5306,7 +5320,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									group['lateActivation'] = true										--make group late activation 
 									group['uncontrolled'] = true										--Seulement sur CV, lateActivation and uncontrolled requis
 									activate_group_time_after(group, activate_time, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
-									start_set_ai_task(group, spawn_time, debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
+									start_Set_Ai_Task(group, spawn_time, debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
 								end
 							end
 						end
@@ -5340,8 +5354,10 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							group['lateActivation'] = true
 							group['uncontrolled'] = false
 							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe LLLb limitedParkTiming OR BaseAirStart ") end
-							local BugFrom =  " limitedParkTiming or BaseAirStart "..debug.getinfo(1).currentline
-							spawnOn( "air", waypoints, group, pn, spawn_time + 30, BugFrom, flight, f, role)
+							local infoFrom =  " limitedParkTiming or BaseAirStart "..debug.getinfo(1).currentline
+							-- spawnOn( "air", waypoints, group, pn, spawn_time + 30, BugFrom, flight, f, role)
+							spawnOn( "air", waypoints, group, pn, waypoints[1]["ETA"], infoFrom, flight, f, role)
+							
 
 						elseif group.route.points[1].action ~= "Turning Point" then
 
@@ -5349,7 +5365,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							group['uncontrolled'] = true
 							group['start_time'] = spawn_time - 15		--evite le BUG actuel de la Polka sur parking
 
-							start_set_ai_task(group, spawn_time, debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
+							start_Set_Ai_Task(group, spawn_time, debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
 						end
 					end
 
@@ -5493,7 +5509,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							group['lateActivation'] = false
 							group['uncontrolled'] = false
-							activate_group_withFlag(group, camp.SAR.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
+							activate_Group_WithFlag(group, camp.SAR.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
 
 						else
 
@@ -5558,8 +5574,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						if (baseIsCarrier or limitedParkTiming or db_airbases[flight[f].base].BaseAirStart) and not farp_MorePlace  then
 
-							local BugFrom =  " SAR sur CV et parking limité spawn en vol "..debug.getinfo(1).currentline
-							spawnOn( "air", waypoints, group, pn, 0, BugFrom, flight, f, role)
+							local infoFrom =  " SAR sur CV et parking limité spawn en vol "..debug.getinfo(1).currentline
+							spawnOn( "air", waypoints, group, pn, 0, infoFrom, flight, f, role)
 
 							group['lateActivation'] = true											--make group late activation "en vol"
 							group['uncontrolled'] = false
@@ -5616,7 +5632,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						if polkaOff then
 							group['lateActivation'] = false
 							group['uncontrolled'] = false
-							activate_group_withFlag(group, GCI.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
+							activate_Group_WithFlag(group, GCI.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
 
 						else
 							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP tasks_Start "..tostring(debug.getinfo(1).currentline)) end
@@ -5677,8 +5693,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						-- Les inter sur CV et parking limité spawn en vol
 						if baseIsCarrier or limitedParkTiming or db_airbases[flight[f].base].BaseAirStart then
 
-							local BugFrom =  " IA intercept "..debug.getinfo(1).currentline
-							spawnOn( "air", waypoints, group, pn, 0, BugFrom, flight, f, role)
+							local infoFrom =  " IA intercept "..debug.getinfo(1).currentline
+							spawnOn( "air", waypoints, group, pn, 0, infoFrom, flight, f, role)
 
 							group['lateActivation'] = true											--make group late activation "en vol"
 							group['uncontrolled'] = false
@@ -5940,15 +5956,17 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				-- si multijoueur, les Flight AI commencent en vol + M11.j
 				if ((Multi.NbGroup >= 1 or SingleWithDServerAiAir) and not isHumain and baseIsCarrier and flight[f].task ~= "Intercept") then
 					if waypoints[1]["type"] ~= "Turning Point" then 					-- si le vol a deja ete deplace pour un commencement en vol, on ne recommence pas le d�calage lat�ral
-						local BugFrom =  " si multijoueur, les Flight AI commencent en vol "..debug.getinfo(1).currentline
+						local infoFrom =  " si multijoueur, les Flight AI commencent en vol "..debug.getinfo(1).currentline
 						-- SpawnOn( "air", waypoints, group, Pn, spawn_time + 300, BugFrom, flight, f)	
 
 						if not spawn_time or spawn_time == nil then
 							DebugFLIGHT = DebugFLIGHT .. "\n".."Error group No spawn_time "..group.name
 						end
 
-						spawnOn( "air", waypoints, group, pn, spawn_time, BugFrom, flight, f, role)
-						modify_activate_group_time(group, spawn_time - 1, debug.getinfo(1).currentline)
+						-- spawnOn( "air", waypoints, group, pn, spawn_time, BugFrom, flight, f, role)
+						spawnOn( "air", waypoints, group, pn, waypoints[1]["ETA"], infoFrom, flight, f, role)
+						
+						modify_Activate_GroupTime(group, spawn_time - 1, debug.getinfo(1).currentline)
 					end
 
 
@@ -6541,10 +6559,22 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 
-	--***************************--DEBUG INFO
-					--***************************--DEBUG INFO
-	--***************************--DEBUG INFO
 
+	--***************************--DEBUG INFO***************************
+					--***************************--DEBUG INFO***************************
+	--***************************--DEBUG INFO***************************
+	--***************************--DEBUG INFO***************************
+					--***************************--DEBUG INFO***************************
+	--***************************--DEBUG INFO***************************
+	--***************************--DEBUG INFO***************************
+					--***************************--DEBUG INFO***************************
+	--***************************--DEBUG INFO***************************
+
+
+
+
+
+				local tagATTENTION = false
 				local debugTempFLIGHT = ""
 				local start_time = -1
 
@@ -6602,40 +6632,56 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				if nbactivate > 1 then
 					info06 = info06.." |+|ATTENTION plusieurs ACTIVATE "
+					tagATTENTION = true
 				end
 
 				if group.tasks and group.tasks[1] and group.tasks[1].params.action.id == "Start" then
 					if not group.uncontrolled then
 						info01 = "ATTENTION MANQUE uncontrolled "..group.groupId
+						tagATTENTION = true
 					end
 					-- if waypoints[1].action == "Turning Point" then
 					-- 	info01 = info01.." |+|ATTENTION Start en VOL "
 					-- end
 					if group.route.points[1].action == "Turning Point" then
 						info01 = info01.." |+|ATTENTION Start en VOL "
+						tagATTENTION = true
 					end
 
 
 				end
 
-				-- if spawn_time and waypoints[1].action == "Turning Point" and spawn_time > 10 then	
-				if spawn_time and group.route.points[1].action == "Turning Point" and spawn_time > 10 then
-					for n , trigrule in pairs(mission.trigrules) do
-						if type(trigrule) == "table" then
-							if trigrule.actions and trigrule.actions[1] and trigrule.actions[1].group == group.groupId then
-								if trigrule.actions[1]["predicate"] == "a_activate_group" then
-									a_activate2 = a_activate2 + 1
-								end
-							end
-						end
-					end
-					if a_activate2 == 0 then
-						info01 = info01.." |+|ATTENTION VOL sans a_activate_group "
-					elseif a_activate2 > 1 then
-						info01 = info01.." |+|ATTENTION VOL (many times) "..a_activate2.." a_activate_group "
 
-						DebugFLIGHT = DebugFLIGHT .. "\n".."Error VOL (many times) "..a_activate2.." a_activate_group "
-					end
+				--chais pas, faut voir, car un spawn plus tard peux etre fait sans a_activate_group
+				-- if spawn_time and group.route.points[1].action == "Turning Point" and spawn_time > 10 then
+				-- 	for n , trigrule in pairs(mission.trigrules) do
+				-- 		if type(trigrule) == "table" then
+				-- 			if trigrule.actions and trigrule.actions[1] and trigrule.actions[1].group == group.groupId then
+				-- 				if trigrule.actions[1]["predicate"] == "a_activate_group" then
+				-- 					a_activate2 = a_activate2 + 1
+				-- 				end
+				-- 			end
+				-- 		end
+				-- 	end
+				-- 	if a_activate2 == 0 then
+				-- 		info01 = info01.." |+|ATTENTION VOL sans a_activate_group "
+				-- 		tagATTENTION = true
+				-- 	elseif a_activate2 > 1 then
+				-- 		info01 = info01.." |+|ATTENTION VOL (many times) "..a_activate2.." a_activate_group "
+				-- 		tagATTENTION = true
+
+				-- 		DebugFLIGHT = DebugFLIGHT .. "\n".."Error VOL (many times) "..a_activate2.." a_activate_group "
+				-- 	end
+				-- end
+
+				-- .." |start_time: ".. math.floor(start_time)
+				-- .." |ETA1: "..group.route.points[1]["ETA"]
+	
+				local a_activate3 = 0
+				if group.route.points[1].action == "Turning Point" and (math.abs(group.route.points[1]["ETA"] - group.start_time) > 5) then
+
+					info01 = info01.." |+|ATTENTION ETA "..tostring(group.route.points[1]["ETA"]).." ~= start_time "..tostring(math.floor(start_time))
+					tagATTENTION = true
 				end
 
 
@@ -6651,9 +6697,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							end
 						else
 							info02 = info02.." |ATTENTION MANQUE a_set_ai_task: aucun demarrage possible "..group.groupId
+							tagATTENTION = true
 						end
 					else
 						info02 = info02.." |ATTENTION MANQUE Start "..group.groupId
+						tagATTENTION = true
 
 						DebugFLIGHT = DebugFLIGHT .. "\n".."AtoFp info02"..info02
 					end
@@ -6667,6 +6715,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								info03 = "SOL/VOL decale_A"
 							else
 								info03 = "ATTENTION SECONDES a_activate_group "..group.groupId .." |activateSecondes ~= "..activateSecondes .." |ETA: "..start_time
+								tagATTENTION = true
 							end
 						elseif c_flag then
 							info03 = "VOL FLAG decale _B"
@@ -6675,12 +6724,14 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					else
 						info03 = "ATTENTION MANQUE a_activate_group "..group.groupId
+						tagATTENTION = true
 					end
 				end
 
 				if isHumain then
 					if group.route.points[1]["action"] == "Turning Point"then
 						info02 = info02.." |ATTENTION MANQUE Start "..group.groupId
+						tagATTENTION = true
 
 						DebugFLIGHT = DebugFLIGHT .. "\n".."Error info02"..info02
 					end
@@ -6735,12 +6786,14 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					info06 = info06.."frequency "..group.frequency
 				else
 					info06 = info06.."ATTENTION NO frequency "
+					tagATTENTION = true
 				end
 
 				if group.task then
 					info06 = info06.."task "..group.task
 				else
 					info06 = info06.."ATTENTION NO task "
+					tagATTENTION = true
 				end
 
 				if flight[f].loadout.name then
@@ -6766,6 +6819,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				if (units[1].skill == "Player" or units[1].skill == "Client") and group.route.points[1].ETA> 1 then
 					infoFlight = infoFlight.."\n\n\n".."ATTENTION Player/Client delayed start ETA1: "..group.route.points[1]["ETA"].."\n\n\n"
+					tagATTENTION = true
 				end
 
 				local groupInfo = ""
@@ -6831,6 +6885,10 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				if Debug.AfficheFlight  then
 					print(debugTempFLIGHT)
+				end
+
+				if Debug.debug and tagATTENTION then
+					InsertBugList(debugTempFLIGHT)
 				end
 
 				-- if waypoints[1].ETA< 0 then
@@ -7129,7 +7187,7 @@ for cv, sixPack in pairs(testSixPack) do
 							if group.name == sixpackWiner then
 								if group.units[1].type == "S-3B Tanker" or group.units[1].type == "E-2C"  then						-- cet endroit est bloqué par DCS pour ces 2 avions
 									AF_spawnOn("catapult", group.name)
-									modify_activate_group_time(group, -1, debug.getinfo(1).currentline)								--supprime le triger activate (vraiment?)
+									modify_Activate_GroupTime(group, -1, debug.getinfo(1).currentline)								--supprime le triger activate (vraiment?)
 									-- modify_set_ai_task(group, -1, debug.getinfo(1).currentline) --supprime le triger start(vraiment?)
 									group['tasks'] = {}
 									break
@@ -7137,7 +7195,7 @@ for cv, sixPack in pairs(testSixPack) do
 								if not placeOnSixPack_OK then
 									group['route']['points'][1].ETA = 0
 									group['start_time'] = 0
-									modify_activate_group_time(group, -1, debug.getinfo(1).currentline) --supprime le triger activate(vraiment?)
+									modify_Activate_GroupTime(group, -1, debug.getinfo(1).currentline) --supprime le triger activate(vraiment?)
 									if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFp SixPack Find "..group.name) end
 									breakloop = true
 									placeOnSixPack_OK = true
@@ -7149,7 +7207,7 @@ for cv, sixPack in pairs(testSixPack) do
 							if group.name == sixpackWiner then
 								group['route']['points'][1].ETA = 0
 								group['start_time'] = 0
-								modify_activate_group_time(group, -1, debug.getinfo(1).currentline)								--supprime le triger activate
+								modify_Activate_GroupTime(group, -1, debug.getinfo(1).currentline)								--supprime le triger activate
 								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFp SixPack Find "..group.name) end
 								breakloop = true
 							end
@@ -7232,7 +7290,7 @@ for CV, deck in pairs(testDeckPlace) do
 										if group.name ==  DeckWiner then
 											group['uncontrolled'] = true
 											group['lateActivation'] = true
-											modify_activate_group_time(group, 2, debug.getinfo(1).currentline)
+											modify_Activate_GroupTime(group, 2, debug.getinfo(1).currentline)
 											sommePlane[CV] = sommePlane[CV] + tonumber(deck[n]["number"])
 											deck[n]["OnDeck"] = true
 											if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFp DeckWiner Find "..group.name.." +number: "..deck[n]["number"]) end
@@ -7243,7 +7301,7 @@ for CV, deck in pairs(testDeckPlace) do
 										if group.name ==  DeckWiner then
 											group['uncontrolled'] = true
 											group['lateActivation'] = true
-											modify_activate_group_time(group, 2, debug.getinfo(1).currentline)
+											modify_Activate_GroupTime(group, 2, debug.getinfo(1).currentline)
 											sommePlane[CV] = sommePlane[CV] + tonumber(deck[n]["number"])
 											deck[n]["OnDeck"] = true
 											if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFp DeckWiner Find "..group.name.." +number: "..deck[n]["number"]) end
@@ -7401,7 +7459,7 @@ end
 camp.BaseAirStart = tempBaseAirStart
 
 -- local debugTxt_AtoFP = debugTxt_AtoFP
-local debugGenMFile = io.open("Debug/debugGenMission.txt", "w") or error("Failed to open debug file")
+local debugGenMFile = io.open("Debug/FlightPlan_Generator_Debug.txt", "w") or error("Failed to open debug file")
 debugGenMFile:write(debugTxt_AtoFP)
 debugGenMFile:close()
 

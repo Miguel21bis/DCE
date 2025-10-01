@@ -1030,25 +1030,29 @@ function CheckImmediatSAR(ejPilot)
 			
 			--find all flights in range to Ejected Pilot and hover ceiling
 			local eligible_flights = {}
-			for baseName, base in pairs(camp.SAR.alertSAR[ejPilot.sideName].base) do
-				env.info( "DCE_CheckImmediatSAR? FFb  base_name "..tostring(baseName))
-				for flightN, flightSAR in ipairs(base.ready) do
+			if ejPilot.sideName then
+				for baseName, base in pairs(camp.SAR.alertSAR[ejPilot.sideName].base) do
+					env.info( "DCE_CheckImmediatSAR? FFb  base_name "..tostring(baseName))
+					for flightN, flightSAR in ipairs(base.ready) do
 
-					local distance = math.sqrt(math.pow(flightSAR.x - ejPilot.pos.x, 2) + math.pow(flightSAR.y - ejPilot.pos.y, 2))
+						local distance = math.sqrt(math.pow(flightSAR.x - ejPilot.pos.x, 2) + math.pow(flightSAR.y - ejPilot.pos.y, 2))
 
-					if distance >= flightSAR.range  then
-						env.info( "DCE_CheckImmediatSAR? trop loin : "..tostring(distance).." > flight.range: "..tostring(flightSAR.range))
-					end
+						if distance >= flightSAR.range  then
+							env.info( "DCE_CheckImmediatSAR? trop loin : "..tostring(distance).." > flight.range: "..tostring(flightSAR.range))
+						end
 
-					if ejPilot.pos.z >= flightSAR.hHover then
-						env.info( "DCE_CheckImmediatSAR? trop haut : "..tostring(ejPilot.pos.z).." > flight.hHover: "..tostring(flightSAR.hHover))
-					end
+						if ejPilot.pos.z >= flightSAR.hHover then
+							env.info( "DCE_CheckImmediatSAR? trop haut : "..tostring(ejPilot.pos.z).." > flight.hHover: "..tostring(flightSAR.hHover))
+						end
 
-					if distance < flightSAR.range and ejPilot.pos.z < flightSAR.hHover then
-						eligible_flights[flightSAR.name] = distance
-						env.info( "DCE_CheckImmediatSAR? FFc eligible_flights?   "..tostring(flightSAR.name).."|distance: "..tostring(distance))
+						if distance < flightSAR.range and ejPilot.pos.z < flightSAR.hHover then
+							eligible_flights[flightSAR.name] = distance
+							env.info( "DCE_CheckImmediatSAR? FFc eligible_flights?   "..tostring(flightSAR.name).."|distance: "..tostring(distance))
+						end
 					end
 				end
+			else
+				env.info( "DCE_CheckImmediatSAR? DCE_ERROR  no ejPilot.sideName "..tostring(ejPilot.sideName))
 			end
 
 			env.info( "DCE_CheckImmediatSAR? interB   ")
@@ -1454,8 +1458,8 @@ function LoopManagedRadioTransmission()
 						z = ejPilPosVec3.z,
 					}
 
-					env.info( "LoopManagedRadioTransmission D "..tostring(ejPil.sideName))
-					_affiche(ejPil, "LoopManagedRadioT ejPil")
+					-- env.info( "LoopManagedRadioTransmission D "..tostring(ejPil.sideName))
+					-- _affiche(ejPil, "LoopManagedRadioT ejPil")
 
 					local modulation = 0	--AM
 					if camp.EjectedPilotFrequency[ejPil.sideName].radioBeacon < 90000000 then

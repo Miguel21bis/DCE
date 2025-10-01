@@ -27,7 +27,7 @@ env.info("DCE_EventT START LOADING EventsTracker.lua "..tostring(versionDCE["Mis
 
 env.info("DCE_EventT env.mission.theatre?: "..tostring(env.mission.theatre ))
 
-_affiche(world.event, "DCE_EventT world.event ")
+_affiche(world.event, "DCE_EventT world.event: ")
 
 Info_event_C = {}
 
@@ -790,6 +790,7 @@ function eventHandlerDCE:onEvent(event)
 							altiLand = altiLand,
 						},
 					}
+					-- _affiche(pilotEjection, "A eject pilotEjection: ")
 
 					local playerName = event.initiator:getPlayerName()
 					if playerName then
@@ -818,7 +819,8 @@ function eventHandlerDCE:onEvent(event)
 					if initiatorObjCategory ~= Object.Category.SCENERY and event.initiator.getID then				--initator is not a scenery object debug_ET01.h
 						pilotEjection.initiatorMissionID = initiatorId                 --store ID
 						pilotEjection.coalitionId = event.initiator:getCoalition()
-						sideName = CoalitionIdToName[tonumber(pilotEjection.coalitionId)]
+						pilotEjection.sideName = CoalitionIdToName[tonumber(pilotEjection.coalitionId)]
+						sideName = pilotEjection.sideName
 
 						local countryId = event.initiator:getCountry()
 						pilotEjection.countryId = countryId
@@ -846,8 +848,6 @@ function eventHandlerDCE:onEvent(event)
 					closeRoad.x = x
 					closeRoad.y = y
 					pilotEjection.closeRoad = closeRoad
-
-					-- _affiche(pilotEjection, " pilotEjection |DCE_EventT_eject G")
 
 					table.insert(tabEjection, pilotEjection)
 
@@ -972,17 +972,31 @@ function eventHandlerDCE:onEvent(event)
 						log_entry.pilotName = selectedEjection.pilotName
 						log_entry.initiator = selectedEjection.initiator
 
-						selectedEjection.pos.vec3x = initiatorVec3.x
-						selectedEjection.pos.vec3y = initiatorVec3.y
-						selectedEjection.pos.vec3z = initiatorVec3.z
-						selectedEjection.pos.x = initiatorVec3.x
-						selectedEjection.pos.y = initiatorVec3.z
-						selectedEjection.pos.z = initiatorVec3.y
-						selectedEjection.pos.altiLand = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z })
+						--selectedEjection.pos.vec3x = initiatorVec3.x
+						--selectedEjection.pos.vec3y = initiatorVec3.y
+						--selectedEjection.pos.vec3z = initiatorVec3.z
+						--selectedEjection.pos.x = initiatorVec3.x
+						--selectedEjection.pos.y = initiatorVec3.z
+						--selectedEjection.pos.z = initiatorVec3.y
+						--selectedEjection.pos.altiLand = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z })
+
+						selectedEjection["pos"] = {
+
+							vec3x = initiatorVec3.x,
+							vec3y = initiatorVec3.y,
+							vec3z = initiatorVec3.z,
+							x = initiatorVec3.x,
+							y = initiatorVec3.z,
+							z = initiatorVec3.y,
+							altiLand = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z }),
+						}
 
 						if selectedEjection.unitObj.isExist and selectedEjection.unitObj:isExist() then
 							selectedEjection.grid = coord.LLtoMGRS(coord.LOtoLL(selectedEjection.unit:getPosition().p))
 						end
+
+						-- _affiche(selectedEjection, "B pilot seat selectedEjection: ")
+
 					end
 				end
 				if initiatorSideName then
@@ -1019,14 +1033,13 @@ function eventHandlerDCE:onEvent(event)
 					local selPilotEject = {}
 					local ejectN = 0
 					for n = 1, #tabEjection do
-						if tabEjection[n] and tabEjection[n].x then
+						if tabEjection[n] and tabEjection[n]["pos"] and tabEjection[n]["pos"].x and tabEjection[n]["pos"].vec3z then
                             if not initiatorVec3.x then
                                 env.info("DCE_EvenT: pilotLand_I pb initiatorVec3.x nil")
-								-- _affiche(initiatorVec3, "initiatorVec3 ")
                             end
 
-                            if initiatorVec3.x and tabEjection[n].x then
-                                local distance = math.sqrt(math.pow(initiatorVec3.x - tabEjection[n].x, 2) + math.pow(initiatorVec3.z - tabEjection[n].vec3z, 2))
+							if initiatorVec3.x then
+                                local distance = math.sqrt(math.pow(initiatorVec3.x - tabEjection[n]["pos"].vec3x, 2) + math.pow(initiatorVec3.z - tabEjection[n]["pos"].vec3z, 2))
                                 if distance < selected_distance and (not tabEjection[n].createdSoldier) then
                                     selected_distance = distance
                                     ejectN = n
@@ -1034,13 +1047,12 @@ function eventHandlerDCE:onEvent(event)
                             end
                         else
 
-							env.info("DCE_EventT_pilot_land J pb tabEjection[n].x nil, n: " .. n .. " total tabEjection " .. #tabEjection)
-							-- _affiche(tabEjection[n], "tabEjection[n] ")
+							env.info("DCE_EventT_pilot_land DCE_ERROR pb tabEjection[n][pos].x nil, n: " .. n .. " total tabEjection " .. #tabEjection)
+							_affiche(tabEjection[n], "C tabEjection[n] ")
 							
 							local locTime = timer.getTime()
 							local logStr = "tabEjection = " .. TableSerialization(tabEjection, 0)
-							local logFile = io.open( PathDCE .. "Debug\\tabEjection" .. "_" .. locTime .. "_" .. "tabEjection.lua",
-								"w")
+							local logFile = io.open( PathDCE .. "Debug\\tabEjection" .. "_" .. locTime .. "_" .. "tabEjection.lua", "w")
 							if logFile then
 								logFile:write(logStr)
 								logFile:close()
@@ -1061,18 +1073,19 @@ function eventHandlerDCE:onEvent(event)
 
 						--on change la position, car le vent peut pousser le parachute de la mere vers la terre
 
-						selPilotEject = {
-							pos = {
-								vec3x = initiatorVec3.x,
-								vec3y = initiatorVec3.y,
-								vec3z = initiatorVec3.z,
-								x = initiatorVec3.x,
-								y = initiatorVec3.z,
-								z = initiatorVec3.y,
-								altiLand = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z }),
-								surfaceType = land.getSurfaceType({x = selPilotEject.x, y = selPilotEject.z})
-							}
+						selPilotEject["pos"] = {
+							vec3x = initiatorVec3.x,
+							vec3y = initiatorVec3.y,
+							vec3z = initiatorVec3.z,
+							x = initiatorVec3.x,
+							y = initiatorVec3.z,
+							z = initiatorVec3.y,
+							altiLand = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z }),
+							surfaceType = land.getSurfaceType({x = selPilotEject.x, y = selPilotEject.z})
+							
 						}
+
+						-- _affiche(selPilotEject, "D selPilotEject ")
 
 						SumSoldierAliasPilot = SumSoldierAliasPilot + 1
 
@@ -1094,7 +1107,7 @@ function eventHandlerDCE:onEvent(event)
 						end
 						env.info("DCE_EvenT: pilotLand_C G baseName "..tostring(baseName).." distanceBase "..tostring(distanceBase))
 
-						if distanceBase > 6000 and selPilotEject.SurfaceType ~= land.SurfaceType.WATER and selPilotEject.SurfaceType ~= land.SurfaceType.RUNWAY  then
+						--if distanceBase > 6000 and selPilotEject.SurfaceType ~= land.SurfaceType.WATER and selPilotEject.SurfaceType ~= land.SurfaceType.RUNWAY  then
 							AddSoldierAliasPilot(selPilotEject)
                             selPilotEject.createdSoldier = true
 
@@ -1106,7 +1119,7 @@ function eventHandlerDCE:onEvent(event)
 								end
 								table.insert(ZoneSAR[selPilotEject.MGRS_Chute], selPilotEject)
 							end
-						end
+						--end
 
 						CheckImmediatSAR(selPilotEject)
 
