@@ -3051,7 +3051,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 				for N_Pilot, uPilot in ipairs(zone) do
 					-- env.info( "Custom_AddWptSAR F  "..tostring(uPilot.name).."|"..tostring(mgrsChute).."|"..tostring(uPilot.status))
 
-					if  string.lower(uPilot.side) ==  coalitionId[coalitionId]  then
+					if  string.lower(uPilot.sideName) ==  coalitionId[coalitionId]  then
 						if uPilot.name and uPilot.embarked ~= true  and (uPilot.status ==  "MIA" or uPilot.status ==  "EVAC_possible" )  then
 							-- env.info( "Custom_AddWptSAR G "..tostring(uPilot.name).."|"..tostring(mgrsChute).."|"..tostring(uPilot.status))
 
@@ -3577,12 +3577,12 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 			for N_Pilot, uPilot in ipairs(zone) do
 				-- env.info( "Custom_SAR D1 uPilot.side: "..tostring(uPilot.side).."| coalitionId[grpSide]: "..tostring(coalitionId[grpSide]))
 
-				if  string.lower(uPilot.side) ==  CoalitionIdAlphaToName[grpCoalitionId]  then
+				if  string.lower(uPilot.sideName) ==  CoalitionIdAlphaToName[grpCoalitionId]  then
 					-- env.info( "Custom_SAR DD2 uPilot.name: "..tostring(uPilot.name).."| uPilot.embarked: "..tostring(uPilot.embarked))
 
 					local authorisesRescue = true
 					local wrongSide = false
-					local ENI_Side = DCS_ENI_Side[uPilot.side]
+					local ENI_Side = DCS_ENI_Side[uPilot.sideName]
 					if camp.boundary and camp.boundary[ENI_Side] and camp.boundary[ENI_Side] ~= nil then
 						wrongSide =  CheckPointInPoly_XY_2({x=uPilot.x,y=uPilot.y} , camp.boundary[ENI_Side])
 						-- env.info( "Custom_SAR DD3?  boundary wrongSide ? __"..tostring(wrongSide))
