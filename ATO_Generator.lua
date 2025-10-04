@@ -2059,10 +2059,10 @@ for sideName, draftT in pairs(Draft_sorties) do
 															debugLog(draft.id.." AtoG II passe B_15c unit_loadouts[l].vCruise : "..tostring(unit_loadouts[l].vCruise).." < "..tostring(draft.loadout.vCruise).. " | %: "..tostring(unit_loadouts[l].vCruise / draft.loadout.vCruise))
 														end
 
-
-														if (unit_loadouts[l].vCruise / draft.loadout.vCruise) * 100 >= 75 then
-															draft.loadout.vCruise = unit_loadouts[l].vCruise
-														end
+														--ATTENTION, ce code descend trop bas la vitesse des bombers
+														-- if (unit_loadouts[l].vCruise / draft.loadout.vCruise) * 100 >= 75 then
+														-- 	draft.loadout.vCruise = unit_loadouts[l].vCruise
+														-- end
 													end
 
 
