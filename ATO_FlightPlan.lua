@@ -6697,7 +6697,6 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				--recherche des incoherences de vitesse et/ou de timing:
 				for wtpN, wptData in ipairs(group.route.points) do
-					print("AtoFP orbit? A1 wtpN "..wtpN)
 					if wtpN > wptRefN then
 						local preWptData = group.route.points[wtpN - 1]
 						local distance = GetDistance(preWptData, wptData)
@@ -6707,16 +6706,10 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						local preOrbit = false
 						local debutParams = ""
 						if preWptData.task and preWptData.task.params and preWptData.task.params.tasks then
-							-- print("AtoFP orbit? A2 ")
-							for taskN, taskData in pairs(preWptData.task.params.tasks) do
-						
-
-								if taskData.params and taskData.params.action and taskData.params.action.params and taskData.params.action.params.command then
-									
-									debutParams = taskData.params.action.params.command
-									
+							for taskN, taskData in pairs(preWptData.task.params.tasks) do				
+								if taskData.params and taskData.params.action and taskData.params.action.params and taskData.params.action.params.command then								
+									debutParams = taskData.params.action.params.command								
 									if string.find(taskData.params.action.params.command, "OrbitPosition") then
-										
 										preOrbit = true
 										break
 									end
@@ -6741,6 +6734,47 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								tagATTENTION = true
 							end
 						end
+					end
+				end
+
+				--recherche des incoherences de vitesse et/ou de timing:
+				local wptLanding = #group.route.points
+				for wtpN, wptData in ipairs(group.route.points) do
+					if wtpN < wptLanding - 1 then
+						local postWptData = group.route.points[wtpN + 1]
+						local distance = GetDistance(wptData, postWptData)
+						local calPostETA = distance / (wptData.speed or 1) + wptData.ETA
+
+						--cherche si un cercle est demandé:
+						local isOrbit = false
+						local debutParams = ""
+						if wptData.task and wptData.task.params and wptData.task.params.tasks then
+							for taskN, taskData in pairs(wptData.task.params.tasks) do				
+								if taskData.params and taskData.params.action and taskData.params.action.params and taskData.params.action.params.command then								
+									debutParams = taskData.params.action.params.command								
+									if string.find(taskData.params.action.params.command, "OrbitPosition") then
+										isOrbit = true
+										break
+									end
+								end
+							end
+						end
+
+						
+
+						if postWptData.ETA then
+							-- local pct = math.abs(calPostETA - postWptData.ETA) / math.abs(postWptData.ETA)
+							-- if pct > 0.10 and not isOrbit and wptData["briefing_name"] ~= "Station"  then
+							if calPostETA ~= postWptData.ETA and not isOrbit and wptData["briefing_name"] ~= "Station"  then
+								-- info06 = info06.." |ATTENTION bad ETA wpt| "..wtpN.." |distance:| "..distance.." |calPostETA:| "..calPostETA.." |>| "..postWptData.ETA.." ("..string.format("%.1f%%", pct*100)..")"
+								info06 = info06.." |ATTENTION bad ETA wpt| "..wtpN.." |distance:| "..distance.." |calPostETA:| "..calPostETA.." |>| "..postWptData.ETA
+								tagATTENTION = true
+							end
+						else
+							info06 = info06.." |ATTENTION pas de postWptData.ETA| "..wtpN..")"
+							tagATTENTION = true
+						end
+	
 					end
 				end
 
