@@ -6693,9 +6693,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					wptRefN = 3
 				end
 
-				print("AtoFP orbit? A0 "..group.name)
-
-				--recherche des incoherences de vitesse et/ou de timing:
+				--recherche des incoherences de VITESSE #1:
 				for wtpN, wptData in ipairs(group.route.points) do
 					if wtpN > wptRefN then
 						local preWptData = group.route.points[wtpN - 1]
@@ -6737,7 +6735,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 				end
 
-				--recherche des incoherences de vitesse et/ou de timing:
+				--recherche des incoherences de TIMING ETA: #2
 				local wptLanding = #group.route.points
 				for wtpN, wptData in ipairs(group.route.points) do
 					if wtpN < wptLanding - 1 then
@@ -6765,7 +6763,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						if postWptData.ETA then
 							-- local pct = math.abs(calPostETA - postWptData.ETA) / math.abs(postWptData.ETA)
 							-- if pct > 0.10 and not isOrbit and wptData["briefing_name"] ~= "Station"  then
-							if calPostETA ~= postWptData.ETA and not isOrbit and wptData["briefing_name"] ~= "Station"  then
+							if (math.abs(calPostETA - postWptData.ETA) > 10) and not isOrbit and wptData["briefing_name"] ~= "Station"  then
 								-- info06 = info06.." |ATTENTION bad ETA wpt| "..wtpN.." |distance:| "..distance.." |calPostETA:| "..calPostETA.." |>| "..postWptData.ETA.." ("..string.format("%.1f%%", pct*100)..")"
 								info06 = info06.." |ATTENTION bad ETA wpt| "..wtpN.." |distance:| "..distance.." |calPostETA:| "..calPostETA.." |>| "..postWptData.ETA
 								tagATTENTION = true
