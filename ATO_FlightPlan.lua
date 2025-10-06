@@ -768,7 +768,7 @@ local function get_IDM_Id()
 	return testId
 end
 
---liste tous les Fréquence déjà existantes pour ne pas creer de doublon
+--liste toutes les Fréquences déjà existantes pour ne pas creer de doublon
 for basename, base in pairs(db_airbases) do
 	if base.ATC_frequency and base.ATC_frequency ~= "" and type(base.ATC_frequency)~= "table" then
 		Assigned_freq[tonumber(base.ATC_frequency)] = basename
@@ -964,6 +964,8 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 
 		if arg_Waypoints[1]["alt"] <= 500 and not is_helicopter then arg_Waypoints[1]["alt"] = 500 end
 
+		--TODO changer ici ETA pour etaSpawn
+
 		local altBase = arg_Waypoints[1]["alt"]
 		if db_airbases[arg_Flight[arg_f].base].elevation then
 			altBase = db_airbases[arg_Flight[arg_f].base].elevation
@@ -979,7 +981,8 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 		arg_Waypoints[1].type = "Turning Point"
 		arg_Waypoints[1]["alt"] = altBase + (arg_Pn * altStep) + (alt_Role * 33)
 		arg_Waypoints[1]["speed"] = speed
-		-- waypoints[1].ETA = spawnTime
+		-- arg_Waypoints[1].ETA = spawnTime
+		arg_Waypoints[1].ETA = arg_SpawnTime
 
 		arg_Group.start_time = arg_SpawnTime
 
@@ -1583,6 +1586,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 				end
 
+				--requiredModules
 				if Data_divers[flight[f].type] and Data_divers[flight[f].type].requiredModules then
 
 					local nameOfModule = flight[f].type
@@ -1603,24 +1607,21 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					if ListRequiredModules[nameOfModule] then
-
 						local alreadyInside = false
 						for n, from in pairs(ListRequiredModules[nameOfModule].origine) do
-
 							if from == "Data_divers: "..nameOfModule then
 								alreadyInside = true
 								break
 							end
 						end
-
 						if not alreadyInside then
 							table.insert(ListRequiredModules[nameOfModule].origine, "Data_divers: "..nameOfModule )
 						end
-
 					else
 						ListRequiredModules[nameOfModule] = entry
 					end
 				end
+
 
 				-- modification M18.c despawn/destroy Plane on BaseAirStart
 				if db_airbases[flight[f].base].BaseAirStart then
@@ -2025,11 +2026,16 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 
+
+
+				------========================-----========================--
 				---========================-----========================--
 				----- define waypoints -----
                 ------========================-----========================--
 				---
-				local spawn_time = flight[f].route[1].eta --spawn_time_bug											--local variable to store spawn time
+				--- ------========================-----========================--
+				--- 
+				local spawn_time = flight[f].route[1].eta 
 				local departure_time											--local variable to store departure time
 				local waypoints = {}											--define waypoints of flight
 				local wptTargetPass = false										--detecte le passage du wpt Target
@@ -2060,7 +2066,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						["briefing_name"] = flight[f].route[w].id,				--not needed for actual mission creation, but added for navigation overview in briefing
 						["alt"] = atlTemp,
 						["type"] = "Turning Point",
-						action = "Turning Point",
+						["action"] =  "Turning Point",
 						["alt_type"] = "BARO",
 						["formation_template"] = "",
 						-- ["properties"] = 
@@ -2071,11 +2077,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						-- 	["vangle"] = 0,
 						-- 	["steer"] = 2,
 						-- },
-						ETA = flight[f].route[w].eta,
+						["ETA"] = flight[f].route[w].eta,
 						["y"] = flight[f].route[w].y,
 						["x"] = flight[f].route[w].x,
 						["speed"] = speed,
-						ETA_locked = true,
+						["ETA_locked"] =  true,
 						["task"] =
 						{
 							["id"] = "ComboTask",
@@ -2084,7 +2090,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								["tasks"] = {}
 							},
 						},
-						speed_locked = false,
+						["speed_locked"] =  false,
+						["etaSpawn"] =  flight[f].route[w].etaSpawn,
 					}
 
 					if waypoints[w].name == "Target" then
@@ -2101,7 +2108,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							-- ["briefing_name"] = flight[f].route[w].id,				--not needed for actual mission creation, but added for navigation overview in briefing
 							["alt"] = flight[f].route[w].alt,
 							type = "Turning Point",
-							action = "Turning Point",
+							["action"] =  "Turning Point",
 							["alt_type"] = "BARO",
 							["formation_template"] = "",
 							-- ["properties"] = 
@@ -2112,11 +2119,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							-- 	["vangle"] = 0,
 							-- 	["steer"] = 2,
 							-- },
-							ETA = flight[f].route[w].eta,
+							["ETA"] = flight[f].route[w].eta,
 							["y"] = flight[f].route[w].y,
 							["x"] = flight[f].route[w].x,
 							["speed"] = speed,
-							ETA_locked = false,
+							["ETA_locked"] =  false,
 							["task"] =
 							{
 								["id"] = "ComboTask",
@@ -2125,7 +2132,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									["tasks"] = {}
 								},
 							},
-							speed_locked = true,
+							["speed_locked"] =  true,
 						}
 					end
 
@@ -2525,12 +2532,12 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									['briefing_name'] = 'Stacking',
 									['action'] = 'Turning Point',
 									['alt_type'] = 'BARO',
-									speed_locked = false,
+									["speed_locked"] =  false,
 									['ETA'] = ETA_orbit,
 									['y'] = pointOrbit.y,
 									['formation_template'] = '',
 									['name'] = 'Stacking',
-									ETA_locked = true,
+									["ETA_locked"] =  true,
 									['speed'] = waypoints[w-1]["speed"],
 									['x'] = pointOrbit.x,
 									['task'] = {
@@ -4220,6 +4227,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					waypoints[2].action = waypoints[1]["action"]
 					waypoints[2].type = waypoints[1]["type"]
 					waypoints[2].ETA = waypoints[1].ETA
+					waypoints[2].etaSpawn = waypoints[1].etaSpawn
 
 					table.remove(waypoints, 1)
 
@@ -5176,7 +5184,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 								if counter == 20 or placeTiming < 0 then
 									local infoFrom =  " timingDeckCata "..debug.getinfo(1).currentline
-									-- spawnOn( "air", waypoints, group, pn, spawn_time, infoFrom, flight, f, role)
+									-- = SixPack =
 									spawnOn( "air", waypoints, group, pn, waypoints[1]["ETA"], infoFrom, flight, f, role)
 									
 								else
@@ -5212,6 +5220,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								--les Planes qui genent le taxiing spawn selon conf_mod
 								if not spawnDeck then
 									local BugFrom =  ""..debug.getinfo(1).currentline
+									-- = SixPack =
 									spawnOn(Data_configuration.SC_SpawnOn[flight[f].type], waypoints, group, pn, spawn_time, BugFrom, flight, f, role)
 								end
 
@@ -5233,7 +5242,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									-- group['uncontrolled'] = true		VOL decale			: lateActivation + a_activate_group																--Seulement sur CV, lateActivation and uncontrolled requis
 
 									local infoFrom =  " NbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb "..debug.getinfo(1).currentline
-									-- spawnOn( "air", waypoints, group, pn, spawn_time + 30, infoFrom, flight, f, role)
+									-- = SixPack =
 									spawnOn( "air", waypoints, group, pn, waypoints[1]["ETA"], infoFrom, flight, f, role)
 
 								elseif flagInsertSixpack and nbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb  then										-- on ne dépasse pas le nb max de spawn sur le CV 
@@ -5242,6 +5251,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									group['lateActivation'] = true																		--make group late activation  -- SOL decale 			 : lateActivation + a_activate_group
 									-- group['uncontrolled'] = true			VOL decale			: lateActivation + a_activate_group															--Seulement sur CV, lateActivation and uncontrolled requis
 
+									--= SixPack =
 									local infoFrom =  " NbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb "..debug.getinfo(1).currentline
 									spawnOn( "air", waypoints, group, pn, waypoints[1]["ETA"], infoFrom, flight, f, role)
 
@@ -5264,6 +5274,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							--les Planes qui genent le taxiing spawn selon conf_mod
 							if not spawnDeck then
+								--= SixPack =
 								local BugFrom =  " if not SpawnDeck "..debug.getinfo(1).currentline
 								spawnOn(Data_configuration.SC_SpawnOn[flight[f].type], waypoints, group, pn, spawn_time, BugFrom, flight, f, role)
 							end
@@ -5272,6 +5283,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe LLLa limitedParkTiming OR BaseAirStart ") end
 								local infoFrom =  " limitedParkTiming or BaseAirStart "..debug.getinfo(1).currentline
 
+								--= SixPack =
 								spawnOn( "air", waypoints, group, pn, waypoints[1]["ETA"], infoFrom, flight, f, role)
 								if flagInsertSixpack  then																			--si le vol postulait pour le sixpack, on le supprime de la table
 									table.remove(testSixPack[flight[f].base])
@@ -5290,13 +5302,14 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								start_Set_Ai_Task(group, spawn_time, debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
 							end
 
-						elseif   (Multi.NbGroup >= 1 and not camp.MultiPlayer.pack_n[p]) or SingleWithDServerAiAir  then	--en multiplayer: aucun décalage sur le pont, puisque tous les IA commencent en vol								
+						elseif (Multi.NbGroup >= 1 and not camp.MultiPlayer.pack_n[p]) or SingleWithDServerAiAir  then	--en multiplayer: aucun décalage sur le pont, puisque tous les IA commencent en vol								
 							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe GG Multi.NbGroup >= 1") end
 
 
 							if not farp_MorePlace then
 								--les Planes qui genent le taxiing spawn selon conf_mod
 								if not spawnDeck or baseIsFARP then
+									--= SixPack =
 									local BugFrom =  " not SpawnDeck "..debug.getinfo(1).currentline
 									spawnOn(Data_configuration.SC_SpawnOn[flight[f].type], waypoints, group, pn, spawn_time + 30, BugFrom, flight, f, role)
 									if flagInsertSixpack  then																			--si le vol postulait pour le sixpack, on le supprime de la table
@@ -5350,8 +5363,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							group['uncontrolled'] = false
 							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe LLLb limitedParkTiming OR BaseAirStart ") end
 							local infoFrom =  " limitedParkTiming or BaseAirStart "..debug.getinfo(1).currentline
-							-- spawnOn( "air", waypoints, group, pn, spawn_time + 30, BugFrom, flight, f, role)
-							spawnOn( "air", waypoints, group, pn, waypoints[1]["ETA"], infoFrom, flight, f, role)
+							-- --SUR PISTE DUR---
+							-- spawnOn( "air", waypoints, group, pn, waypoints[1]["ETA"], infoFrom, flight, f, role)
+							local airSpawnTIme = waypoints[1]["etaSpawn"] or waypoints[1]["ETA"]
+							
+							spawnOn( "air", waypoints, group, pn, airSpawnTIme, infoFrom, flight, f, role)
 							
 
 						elseif group.route.points[1].action ~= "Turning Point" then
@@ -5808,21 +5824,21 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					if Data_configuration.SC_SpawnOn["Pedro"] == "deck"  and playerTask ~= "Intercept"  then
 						-- action = "From Parking Area"
 						-- type = "TakeOffParking"
-						action = "From Parking Area Hot"
+						action =  "From Parking Area Hot"
 						type = "TakeOffParkingHot"
 						alt = 0
 						pos.x = pedroLinkCV.x
 						pos.y = pedroLinkCV.y
 						onCV = true
 					elseif  Data_configuration.SC_SpawnOn["Pedro"] == "catapult" and playerTask ~= "Intercept" then
-						action = "From Runway"
+						action =  "From Runway"
 						type = "Turning TakeOff"
 						alt = 0
 						pos.x = pedroLinkCV.x
 						pos.y = pedroLinkCV.y
 						onCV = true
 					else
-						action = "Turning Point"
+						action =  "Turning Point"
 						type = "Turning Point"
 						alt = 60
 						pos.x = pedroLinkCV.x + 100
@@ -5882,12 +5898,12 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								}, -- end of ["tasks"]
 							}, -- end of ["params"]
 						}, -- end of ["task"]
-						ETA = pedroLinkCV.startTime,
-						ETA_locked = true,
+						["ETA"] = pedroLinkCV.startTime,
+						["ETA_locked"] =  true,
 						["y"] =  pos.y,
 						["x"] =  pos.x,
 						["formation_template"] = "",
-						speed_locked = true,
+						["speed_locked"] =  true,
 					}
 
 					if onCV then
@@ -5934,12 +5950,12 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							}, -- end of ["params"]
 						}, -- end of ["task"]
 						["type"] = "Turning Point",
-						ETA = pedroLinkCV.startTime + 60,
-						ETA_locked = false,
+						["ETA"] = pedroLinkCV.startTime + 60,
+						["ETA_locked"] =  false,
 						["y"] = pos.y + 300,
 						["x"] = pos.x + 300,
 						["formation_template"] = "",
-						speed_locked = true,
+						["speed_locked"] =  true,
 					}
 
 					pedroOK[flight[f].base] = true
@@ -5957,7 +5973,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							DebugFLIGHT = DebugFLIGHT .. "\n".."Error group No spawn_time "..group.name
 						end
 
-						spawnOn( "air", waypoints, group, pn, waypoints[1]["ETA"], infoFrom, flight, f, role)
+						-- spawnOn( "air", waypoints, group, pn, waypoints[1]["ETA"], infoFrom, flight, f, role)
+						local airSpawnTIme = waypoints[1]["etaSpawn"] or waypoints[1]["ETA"]
+						spawnOn( "air", waypoints, group, pn, airSpawnTIme, infoFrom, flight, f, role)
 						modify_Activate_GroupTime(group, spawn_time - 1, debug.getinfo(1).currentline)
 					end
 
@@ -6346,12 +6364,12 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						['briefing_name'] = 'interWpt',
 						['action'] = 'Turning Point',
 						['alt_type'] = 'BARO',
-						speed_locked = false,
+						["speed_locked"] =  false,
 						['ETA'] = tonumber(newEta),
 						['y'] = newPoint.y,
 						['formation_template'] = '',
 						['name'] = 'Stacking',
-						ETA_locked = true,
+						["ETA_locked"] =  true,
 						['speed'] = wpt2.speed,
 						['x'] = newPoint.x,
 						['task'] = {
@@ -6605,20 +6623,20 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 				if nbactivate and nbactivate > 1 then
-					info06 = info06.." |+|ATTENTION plusieurs ACTIVATE "
+					info06 = info06.."\n".." |+|ATTENTION plusieurs ACTIVATE ".."\n"
 					tagATTENTION = true
 				end
 
 				if group.tasks and group.tasks[1] and group.tasks[1].params.action.id == "Start" then
 					if not group.uncontrolled then
-						info01 = "ATTENTION MANQUE uncontrolled "..group.groupId
+						info01 = "\n".."ATTENTION MANQUE uncontrolled "..group.groupId.."\n"
 						tagATTENTION = true
 					end
 					-- if waypoints[1].action == "Turning Point" then
 					-- 	info01 = info01.." |+|ATTENTION Start en VOL "
 					-- end
 					if group.route.points[1].action == "Turning Point" then
-						info01 = info01.." |+|ATTENTION Start en VOL "
+						info01 = info01.."\n".." |+|ATTENTION Start en VOL ".."\n"
 						tagATTENTION = true
 					end
 
@@ -6627,7 +6645,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				if group.route.points[1].action == "Turning Point" and (math.abs(group.route.points[1]["ETA"] - group.start_time) > 5) then
 
-					info01 = info01.." |+|ATTENTION ETA "..tostring(group.route.points[1]["ETA"]).." ~= start_time "..tostring(math.floor(debug_StartTime))
+					info01 = info01.."\n".." |+|ATTENTION ETA[1] "..tostring(group.route.points[1]["ETA"]).." ~= start_time "..tostring(math.floor(debug_StartTime)).."\n"
 					tagATTENTION = true
 				end
 
@@ -6643,11 +6661,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								_affiche(testtrigrule, "testtrigrule")
 							end
 						else
-							info02 = info02.." |ATTENTION MANQUE a_set_ai_task: aucun demarrage possible "..group.groupId
+							info02 = info02.."\n".." |ATTENTION MANQUE a_set_ai_task: aucun demarrage possible "..group.groupId.."\n"
 							tagATTENTION = true
 						end
 					else
-						info02 = info02.." |ATTENTION MANQUE Start "..group.groupId
+						info02 = info02.."\n".." |ATTENTION MANQUE Start "..group.groupId.."\n"
 						tagATTENTION = true
 
 						DebugFLIGHT = DebugFLIGHT .. "\n".."AtoFp info02"..info02
@@ -6660,12 +6678,12 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						if c_time and activateGroupSecondes then
 							--si c'est sur CV, on peux faire apparaitre (a_activate_group) le plane, avant le démarrage (a_set_ai_task)
 							if (debug_StartTime < activateGroupSecondes) and group.route.points[1]["action"] ~= "Turning Point"  then
-								info03 = "ATTENTION SECONDES a_activate_group  |activateGrpSecondes "..activateGroupSecondes .."  ~= |start_time: "..debug_StartTime
+								info03 = "\n".."ATTENTION SECONDES a_activate_group  |activateGrpSecondes "..activateGroupSecondes .."  ~= |start_time: "..debug_StartTime.."\n"
 								tagATTENTION = true
 
 							elseif (group.route.points[1]["ETA"] < activateGroupSecondes) then
 		
-								info03 = "ATTENTION SECONDES a_activate_group  |activateGrpSecondes"..activateGroupSecondes .."  ~= |ETA: "..tostring(group.route.points[1]["ETA"])
+								info03 = "\n".."ATTENTION SECONDES a_activate_group  |activateGrpSecondes"..activateGroupSecondes .."  ~= |ETA: "..tostring(group.route.points[1]["ETA"]).."\n"
 								tagATTENTION = true
 							else
 								info03 = "SOL/VOL decale _A"
@@ -6673,7 +6691,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						elseif c_flag then
 							info03 = "VOL FLAG decale _B"
 						else
-							info03 = "ATTENTION bug a_activate_group, no c_time, no c_flag "..group.groupId
+							info03 = "\n".."ATTENTION bug a_activate_group, no c_time, no c_flag "..group.groupId.."\n"
 							tagATTENTION = true
 						end
 					else
@@ -6721,14 +6739,14 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						if wptData.speed and wptData.speed > 0 then
 							local pct = math.abs(speedCalc - wptData.speed) / math.abs(wptData.speed)
 							if pct > 0.10 and not preOrbit and wptData["briefing_name"] ~= "Station"  then
-								info06 = info06.." |ATTENTION acceleration wpt| "..wtpN.." |distance:| "..distance.." |speedCalc:| "..speedCalc.." |>| "..wptData.speed.." ("..string.format("%.1f%%", pct*100)..")"
+								info06 = info06.."\n".." |ATTENTION acceleration wpt| "..wtpN.." |distance:| "..distance.." |speedCalc:| "..speedCalc.." |>| "..wptData.speed.." ("..string.format("%.1f%%", pct*100)..")".."\n"
 								-- info06 = info06.." preOrbit?: "..tostring(preOrbit).." |debutParams?: "..tostring(debutParams)
 								tagATTENTION = true
 							end
 						else
 							-- fallback: when expected speed is zero or missing, keep absolute threshold
 							if math.abs(speedCalc - (wptData.speed or 0)) > 30 then
-								info06 = info06.." |ATTENTION speed is zero or missing wpt"..wtpN.." "..speedCalc.." > "..tostring(wptData.speed)
+								info06 = info06.."\n".." |ATTENTION speed is zero or missing wpt"..wtpN.." "..speedCalc.." > "..tostring(wptData.speed).."\n"
 								tagATTENTION = true
 							end
 						end
@@ -6749,8 +6767,22 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						if wptData.task and wptData.task.params and wptData.task.params.tasks then
 							for taskN, taskData in pairs(wptData.task.params.tasks) do				
 								if taskData.params and taskData.params.action and taskData.params.action.params and taskData.params.action.params.command then								
-									debutParams = taskData.params.action.params.command								
-									if string.find(taskData.params.action.params.command, "OrbitPosition") then
+									debutParams = taskData.params.action.params.command
+									if string.find(debutParams, "OrbitPosition") then
+										isOrbit = true
+										break
+									elseif string.find(debutParams, "Custom_Altitude") then
+										isOrbit = true
+										break
+									end
+								end
+							end
+						end
+
+						if wptData.task and wptData.task.params and wptData.task.params.tasks then
+							for taskN, taskData in pairs(wptData.task.params.tasks) do				
+								if taskData.params and taskData.params.task and taskData.params.task.params and taskData.params.task.params.pattern then								
+									if taskData.params.task.params.pattern == "Circle" then
 										isOrbit = true
 										break
 									end
@@ -6763,13 +6795,13 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						if postWptData.ETA then
 							-- local pct = math.abs(calPostETA - postWptData.ETA) / math.abs(postWptData.ETA)
 							-- if pct > 0.10 and not isOrbit and wptData["briefing_name"] ~= "Station"  then
-							if (math.abs(calPostETA - postWptData.ETA) > 10) and not isOrbit and wptData["briefing_name"] ~= "Station"  then
+							if (math.abs(calPostETA - postWptData.ETA) > 50) and not isOrbit and wptData["briefing_name"] ~= "Station"  then
 								-- info06 = info06.." |ATTENTION bad ETA wpt| "..wtpN.." |distance:| "..distance.." |calPostETA:| "..calPostETA.." |>| "..postWptData.ETA.." ("..string.format("%.1f%%", pct*100)..")"
-								info06 = info06.." |ATTENTION bad ETA wpt| "..wtpN.." |distance:| "..distance.." |calPostETA:| "..calPostETA.." |>| "..postWptData.ETA
+								info06 = info06.."\n".." |ATTENTION bad ETA wpt| "..wtpN.." |distance:| "..distance.." |calPostETA:| "..calPostETA.." |>| "..postWptData.ETA.."\n"
 								tagATTENTION = true
 							end
 						else
-							info06 = info06.." |ATTENTION pas de postWptData.ETA| "..wtpN..")"
+							info06 = info06.."\n".." |ATTENTION pas de postWptData.ETA| "..wtpN..")".."\n"
 							tagATTENTION = true
 						end
 	
@@ -6779,7 +6811,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				if isHumain then
 					if group.route.points[1]["action"] == "Turning Point"then
-						info02 = info02.." |ATTENTION MANQUE Start "..group.groupId
+						info02 = info02.."\n".." |ATTENTION MANQUE Start "..group.groupId.."\n"
 						tagATTENTION = true
 
 						DebugFLIGHT = DebugFLIGHT .. "\n".."Error info02"..info02
@@ -6834,14 +6866,14 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				if group.frequency then
 					info06 = info06.."frequency "..group.frequency
 				else
-					info06 = info06.."ATTENTION NO frequency "
+					info06 = info06.."\n".."ATTENTION NO frequency ".."\n"
 					tagATTENTION = true
 				end
 
 				if group.task then
 					info06 = info06.."task "..group.task
 				else
-					info06 = info06.."ATTENTION NO task "
+					info06 = info06.."\n".."ATTENTION NO task ".."\n"
 					tagATTENTION = true
 				end
 
@@ -7171,7 +7203,7 @@ function AF_spawnOn(where, groupName)
 		local actionType = 'TakeOff'
 
 	if where == "catapult" then
-		action = 'From Runway'
+		action =  'From Runway'
 		actionType = 'TakeOff'
 	end
 
@@ -7623,13 +7655,13 @@ if testPosRunwayImpact then
 							{
 								-- ["alt"] = tonumber(target.z),
 								["type"] = "Turning Point",
-								ETA = 0,
+								["ETA"] = 0,
 								["name"] = tostring(baseName).."_runway_"..runwayN,
 								["alt_type"] = "BARO",
 								["formation_template"] = "",
 								["y"] = tonumber(runway.y),
 								["x"] = tonumber(runway.x),
-								ETA_locked = true,
+								["ETA_locked"] =  true,
 								["speed"] = 0,
 								["action"] = "Off Road",
 								["task"] =
@@ -7642,7 +7674,7 @@ if testPosRunwayImpact then
 										},
 									}, -- end of ["params"]
 								}, -- end of ["task"]
-								speed_locked = true,
+								["speed_locked"] =  true,
 							}, -- end of [1]
 						}, -- end of ["points"]
 					}, -- end of ["route"]

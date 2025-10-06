@@ -2,12 +2,12 @@
 --Returns route points, route lenght and route threat level (unavoided threats)
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  cleancode_b
+-- last modification:  adjustment_m
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_RouteGenerator.lua"] = "1.8.49"
+versionDCE["ATO_RouteGenerator.lua"] = "1.8.50"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_b				(d springCleaning)
--- adjustment_n				(n create assemblyPoint)(m add AFAC task)(l alti heli)k alti station on target)(j does not fly over the target)(i escort Transport)(h alti escorte helicoptere)(fg add axis patern)(e unit.helicopter)(d escort too low) (c: climb refueling)(a:alti diff en fonction du role dans le meme package)
+-- adjustment_m				(m add assemblyPoint on escort())(n create assemblyPoint)(m add AFAC task)(l alti heli)k alti station on target)(j does not fly over the target)(i escort Transport)(h alti escorte helicoptere)(fg add axis patern)(e unit.helicopter)(d escort too low) (c: climb refueling)(a:alti diff en fonction du role dans le meme package)
 -- Debug_e					(e SEAD SAm)(d route[m + 1])(c:supprime trop de waypoint lors de l'escorte)(b:quand les EWR sont d�truit: on active les CAP, si les CAP on besoin d'EWR c'est nul)(a:target ligne 473 Reconnaissance)
 -- modification M66_a		add Runway Attack
 -- modification M61_a		SAR
@@ -1790,24 +1790,44 @@ end
 function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainUnit)																					--get the escort route given the escort start point and an existing package route
 
 	--make a local copy of the route table forwarded as function argument (otherwise the original route gets adjusted
-	-- local MainUnitHelicopter = mainUnit.helicopter
 	local route = Deepcopy(orig_route)
-	local TagPause = false
 
-	-- Miguel21 modification M16.c // ne recopie pas le Spawn des B1b et B-52 en apparation sur une base virtuel en alti
+	-- ne recopie pas le Spawn des B1b et B-52 en apparation sur une base virtuel en alti
 	if route[1].id == "Spawn" then
 		route[1].id = "Taxi"
-		route[2].id = "Departure"
+	end
+
+	route[1].id = "Taxi"
+	route[1].x = basePoint.x																									--modify route to start at escort start point
+	route[1].y = basePoint.y
+	route[1].alt = basePoint.h
+
+	-- chercher un waypoint "Departure" existant
+	local departurIndex = nil
+	for i, w in ipairs(route) do
+		if w.id == "Departure" then
+			departurIndex = i
+			break
+		end
+	end
+
+	if not departurIndex then
+		local tempDeparture = {
+			id = "Departure",
+			x = basePoint.x,
+			y = basePoint.y,
+			alt = basePoint.h,
+		}
+		table.insert(route, 2, tempDeparture)
+	else
+		route[2].x = basePoint.x
+		route[2].y = basePoint.y
+		route[2].alt = basePoint.h
 	end
 
 	-- change l'altitude des differents role, sinon, Strike Escorte et SEAD sont � la meme alti, pas bien
 	local randomAlti = math.random(4500, 7600)
 	if IsHelicopter[unitEscort.type]  then
-		-- if not loadouts.hCruise then
-		-- 	_affiche(unitEscort, "unitEscort AtoRG")
-		-- 	_affiche(loadouts, "loadouts AtoRG")
-		-- end
-
 		if loadouts.hCruise then
 			randomAlti = math.random(loadouts.hCruise*2/3, loadouts.hCruise)
 		else
@@ -1819,41 +1839,15 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 	--******************* w route ************************
 	for w = 1, #route do
 
-		-- local higher = 0
-
-		-- if task == "SEAD" then
-		-- 	higher = 304
-		-- elseif task == "Escort" then
-		-- 	higher = 608
-		-- end
-
 		if not IsHelicopter[unitEscort.type]  then
-			-- -- on ne l'applique pas � un groupe volant sous les radars
-			-- if route[w].alt > 1000 then
-			-- 	route[w].alt = route[w].alt + higher
-			-- end
-
-
-			-- if loadouts.hAttack and loadouts.hCruise then
-			-- 	-- ne pas avoir d'avion haute altitude en escorte TBA
-			-- 	if route[w].id ~= "Departure" and route[w].id ~= "Taxi" and route[w].id ~= "Land" and route[w].alt < loadouts.hAttack and route[w].alt < loadouts.hCruise then
-			-- 		route[w].alt = loadouts.hCruise + higher
-			-- 	end
-			-- end
-
 			if loadouts.hAttack then
-
 				-- ne pas avoir d'avion haute altitude en escorte TBA
 				if route[w].id == "IP" or route[w].id == "Attack" or route[w].id == "Target" or route[w].id == "Egress" then
 					route[w].alt = loadouts.hAttack
 				end
-
 			else
 				route[w].alt = randomAlti
 			end
-
-
-
 		else
 			route[w].alt = randomAlti
 		end
@@ -1885,25 +1879,6 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 		end
 	end
 
-	route[1].x = basePoint.x																									--modify route to start at escort start point
-	route[1].y = basePoint.y
-	route[1].alt = basePoint.h
-
-	if #orig_route < 2 then
-		_affiche(orig_route, "orig_route")
-		_affiche(mainUnit, "mainUnit") os.execute 'pause'
-	end
-	route[2].x = basePoint.x
-	route[2].y = basePoint.y
-	route[2].alt = basePoint.h
-
-	if route[3].id == "Assemble" then
-		route[3].x = basePoint.x
-		route[3].y = basePoint.y
-		route[3].alt = basePoint.h
-	end
-
-
 	if not IsHelicopter[unitEscort.type] then
 		local heading = 0
 		for n, wpt in ipairs(route) do
@@ -1913,20 +1888,32 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 			end
 		end
 
-		local assemblyPoint = GetOffsetPoint(basePoint, heading, 16000)
-
-		local altitude = AltitudeCruise *2/3
+		local assemblyPoint = GetOffsetPoint(basePoint, heading, assemblePointDistance)
+		local altitude = AltitudeCruise * 2 / 3
 
 		if Data_divers[unitEscort.type] and Data_divers[unitEscort.type].hCruise then
-			altitude = Data_divers[unitEscort.type].hCruise *2/3
+			altitude = Data_divers[unitEscort.type].hCruise * 2 / 3
 		end
 
-
-		if route[3].id == "Assemble" then
-			route[3].x = assemblyPoint.x
-			route[3].y = assemblyPoint.y
-			route[3].alt = altitude
+		-- chercher un waypoint "Assemble" existant
+		local assembleIndex = nil
+		for i, w in ipairs(route) do
+			if w.id == "Assemble" then
+				assembleIndex = i
+				break
+			end
 		end
+
+		if assembleIndex then
+			-- -- mettre à jour l'existant
+			-- route[assembleIndex].x = assemblyPoint.x
+			-- route[assembleIndex].y = assemblyPoint.y
+			-- route[assembleIndex].alt = altitude
+		else
+			-- insérer en position 3 sans remplacer
+			table.insert(route, 3, { x = assemblyPoint.x, y = assemblyPoint.y, id = "Assemble", alt = altitude })
+		end
+
 	end
 
 
@@ -2077,16 +2064,11 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 				{ x = newPoint.x, y = newPoint.y, id = "WPT Before Landind", alt = route[#route - 1].alt })
             end
         else
-            -- print("AtoRG: unitEscort.task: " ..
-            -- tostring(unitEscort.task) .. " target_name: " .. tostring(unitEscort.target_name))
-            -- print("AtoRG: GetDistance: " .. GetDistance(basePoint, route[#route - 1]))
             if GetDistance(basePoint, route[#route - 1]) > 30000 then
                 heading = GetHeading(basePoint, route[#route - 1])
                 newPoint = GetOffsetPoint(basePoint, heading, 30000)
 				table.insert(route, #route,
 				{ x = newPoint.x, y = newPoint.y, id = "WPT Before Landing", alt = route[#route - 1].alt })
-                -- print("AtoRG: WPT Before Landing added at " .. newPoint.x .. ", " .. newPoint.y)
-                -- os.execute 'pause'
             end
         end
 	end

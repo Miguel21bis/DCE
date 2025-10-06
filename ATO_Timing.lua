@@ -631,15 +631,11 @@ for sideName, packs in pairs(ATO) do
 						end
 
 						local leg = GetDistance(flight[f].route[w], flight[f].route[w - 1])
-						eta = eta - leg / speed
-						etaSpawn = etaSpawn - leg / speed
+						eta = eta - (leg / speed)
+						etaSpawn = etaSpawn - (leg / speed)
 
 						flight[f].route[w-1]["debug"] = (flight[f].route[w-1]["debug"] or "")..
 							debug_TgtToLand.."\nAtoT_TgtToLand eta J "..eta.." leg "..leg
-
-						-- Sauvegarde systématique des deux valeurs
-						flight[f].route[w-1].eta = eta
-						flight[f].route[w-1].etaSpawn = etaSpawn
 
 						-- Cas du premier WP
 						if w - 1 == 1 then
@@ -647,15 +643,19 @@ for sideName, packs in pairs(ATO) do
 							eta = eta - startUp_time
 							flight[f].route[w - 1].eta = eta
 
-						elseif w - 1 == 2 then
-							-- WP 2, form-up/taxi
-							eta = eta - startUp_time
-							flight[f].route[w - 1].eta = eta
+						-- elseif w - 1 == 2 then
+						-- 	-- WP 2, form-up/taxi
+						-- 	eta = eta - startUp_time
+						-- 	flight[f].route[w - 1].eta = eta
 						end
+
+						-- Sauvegarde systématique des deux valeurs
+						flight[f].route[w-1].eta = eta
+						flight[f].route[w-1].etaSpawn = etaSpawn
 
 						flight[f].route[w-1]["debug"] = (flight[f].route[w-1]["debug"] or "")..
 							"\nAtoT_TgtToLand eta K "..eta.." WPT: "..w..
-							"\nAtoT_TgtToLand etaSpawn K "..etaSpawn.." WPT: "..w
+							"\nAtoT_TgtToLand etaSpawn L "..etaSpawn.." WPT: "..w
 
 						flight[f].route[w].speed = speed
 
@@ -750,10 +750,10 @@ for sideName, packs in pairs(ATO) do
 						if flight[f].route[w].etaSpawn then
 							flight[f].route[w].etaSpawn = flight[f].route[w].etaSpawn + player_start_shift
 						end
-						
+
 						flight[f].route[w]["debug"] = (flight[f].route[w]["debug"] or "")..
 							"\nAtoT_eta player_start_shift "..player_start_shift.." WPT: "..w..
-							"\nAtoT_eta new eta "..flight[f].route[w].eta
+							"\nAtoT_eta suite_start_shift new eta "..flight[f].route[w].eta
 					end
 				end
 
@@ -828,7 +828,7 @@ for sideName, packs in pairs(ATO) do
 
 							flight[f].route[w]["debug"] = (flight[f].route[w]["debug"] or "")..
 							"\nAtoT_eta id == Spawn , WPT: "..w..
-							"\nAtoT_eta new eta "..flight[f].route[w].eta
+							"\nAtoT_eta suite_Spawn, new eta "..flight[f].route[w].eta
 						end
 					end
 				end

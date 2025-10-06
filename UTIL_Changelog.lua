@@ -10,6 +10,7 @@ known issues:
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
 ==:20.91.565:==
+566 fixed	[timing] 
 565 fixed	[radio][choice] Sometimes there are no radio channels assigned to the player aircraft. We have also changed the aircraft selection. Please note that a wingman player position is possible.
 564 added	[plane] MiG-29 Fulcrum
 563 added	[EWR][frequencies]    Some CampaignMakers specifically want to keep the same EWR frequencies, while others do not.
