@@ -35,7 +35,7 @@ UnitByName = {}						-- table de tous les unitId généré, utile pour placer le
 Assigned_freq = {}
 MinPercentDestroyed = 95		----variable pour destructions batiment de DCS en pourcentage
 RayonDamaged = 50				----variable pour destructions batiment de DCS en metres
-
+RosterJumpTempPercent = 0.25			-- suite à un saut temporel, enleve une partie des presents pour éviter un effectif neuf comme un démarrage de DCE
 
 RadioA = {
 	["blue"] = {
@@ -4230,8 +4230,8 @@ function UpdateFilesAfterTimeJump()
 
 	CampTotalTimeS = SecondsBetween(camp.dateInit, camp.date)
 
-	print("UTIL_function The campaign will start on this date: " .. tostring(camp.dateInit.day) .. "." .. tostring(camp.dateInit.month) .. "." .. tostring(camp.dateInit.year) .. ".\n")
-	print("UTIL_function The current date of the campaign is: " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
+	print("UTIL_function_UpdateFilesAfterTimeJump() The campaign will start on this date: " .. tostring(camp.dateInit.day) .. "." .. tostring(camp.dateInit.month) .. "." .. tostring(camp.dateInit.year) .. ".\n")
+	print("UTIL_function_UpdateFilesAfterTimeJump() The current date of the campaign is: " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
 
 	camp.date.CampTotalTimeS = CampTotalTimeS
 
@@ -4540,7 +4540,7 @@ function LoadFileAndUpdate(from)
 	end
 
 	--si le joueur fait un saut temporel (via date dans conf_mod) on met a jour les fichiers de la campagne
-	if not Firstmission_flag then
+	if not Firstmission_flag and TimeJump then
 		UpdateFilesAfterTimeJump()
 	end
 

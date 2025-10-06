@@ -478,8 +478,10 @@ for sideName, packs in pairs(ATO) do
 							camp.client[flight[f].IdClient].tgt_wp = w								--store the target wp for the player
 						end
 
-						flight[f].route[w]["debug"] = "\n AtoT_TargetWPT  eta "..eta
-						.."\n AtoT_TargetWPT  w "..w
+						flight[f].route[w]["debug"] = (flight[f].route[w]["debug"] or "")..
+							"\n AtoT_TargetWPT  eta "..eta..
+							"\n AtoT_TargetWPT w "..w..
+							"\n AtoT_TargetWPT eta_offset: "..flight[f].eta_offset
 
 						break
 					end
@@ -499,8 +501,9 @@ for sideName, packs in pairs(ATO) do
 						camp.client[flight[f].IdClient].tgt_wp = target_wp - 1								--store the target wp for the player
 					end
 
-					flight[f].route[target_wp]["debug"] = "\n AtoT_TargetWPT ferry flight eta "..eta
-					.."\n AtoT_TargetWPT  target_wp "..target_wp
+					flight[f].route[target_wp]["debug"] = (flight[f].route[target_wp]["debug"] or "")..
+						"\n AtoT_TargetWPT ferry flight eta "..eta..
+						"\n AtoT_TargetWPT  target_wp "..target_wp
 
 				end
 
@@ -553,9 +556,10 @@ for sideName, packs in pairs(ATO) do
 						-- end
 						flight[f].route[w].eta = eta							--set ETA at waypoint
 						flight[f].route[w].speed = speed						--set NEWSPEED
-						flight[f].route[w]["debug"] = "\n AtoT_TargetToLanding  eta "..eta
-						.."\n AtoT_TargetToLanding  w "..w
-						.."\n AtoT_TargetToLanding  leg "..leg
+						flight[f].route[w]["debug"] = (flight[f].route[w]["debug"] or "") ..
+							"\nAtoT_TargetToLanding eta " .. eta ..
+							"\nAtoT_TargetToLanding w " .. w ..
+							"\nAtoT_TargetToLanding leg " .. leg
 
 					end
 				end
@@ -575,8 +579,9 @@ for sideName, packs in pairs(ATO) do
 						flight[f].route[wptLandind].eta = eta				--set ETA at waypoint
 						flight[f].route[wptLandind].speed = speed						--set NEWSPEED
 
-						flight[f].route[wptLandind]["debug"] = "\nAtoT_wptAfterTargetTxt  |speed: "..speed
-						.."\nAtoT_wptAfterTargetTxt  |leg: "..leg.." |eta: "..eta
+						flight[f].route[wptLandind]["debug"] = (flight[f].route[wptLandind]["debug"] or "") ..
+							"\nAtoT_wptAfterTargetTxt  |speed: "..speed..
+							"\nAtoT_wptAfterTargetTxt  |leg: "..leg.." |eta: "..eta
 
 					end
 				end
@@ -596,150 +601,127 @@ for sideName, packs in pairs(ATO) do
                 --      end
                 -- end
 
-				eta = tot + flight[f].eta_offset								--reset target WP ETA
-				local etaSpawn = tot + flight[f].eta_offset
+
+
 
 				--***********************************////////////////////////////////////////////////////////////////////////////
 				-- iterate through flight waypoints from target backwards
 				-- Itérer les waypoints du vol en partant de target vers l’arrière 
+				--***********************************////////////////////////////////////////////////////////////////////////////
+				eta = tot + flight[f].eta_offset								--reset target WP ETA
+				local etaSpawn = tot + flight[f].eta_offset
+
 				for w = target_wp, 2, -1 do
 					if flight[f].route[w] then
-						speed = main_vCruise
-						local debug_TgtToLand = "\nAtoT_eta speed_F "..speed
+						speed = flight[f].loadout.vCruise or main_vCruise
+						local debug_TgtToLand = "\nAtoT_TgtToLand speed_F "..speed
 
 						if w == target_wp then
-
-						-- if flight[f].route[w].id == "Attack" or flight[f].route[w].id == "Target" then	--WP is target point or attack point
-							speed = main_vAttack											--ingress to target is at attack seed
-							debug_TgtToLand = debug_TgtToLand.."\nAtoT_eta speed_G "..speed
-						-- elseif (flight[f].route[w].id == "Join") then		-- and not flight[f].helicopter			--WP is join point --M06.c and not flight[f].helicopter
-						-- 	-- speed = vCruise * (1 - 10/100)									--speed to Join Point is 3/4 of cruise speed to allow for the climb
-						-- 	target_wpTxt = target_wpTxt.."\nAtoT_eta speed_H "..speed
-						-- end
-						elseif (flight[f].route[w].id == "Assemble") then		-- and not flight[f].helicopter			--WP is join point --M06.c and not flight[f].helicopter
-							-- Vitesse réduite à 90 % de vCruise pour faciliter la montée vers le point de Assemble
-							speed = main_vCruise * (1 - 10/100)
-							debug_TgtToLand = debug_TgtToLand.."\nAtoT_eta speed_H "..speed
+							speed = flight[f].loadout.vAttack or main_vAttack
+							debug_TgtToLand = debug_TgtToLand.."\nAtoT_TgtToLand speed_G "..speed
+						elseif flight[f].route[w].id == "Assemble" then
+							speed = (flight[f].loadout.vCruise or main_vCruise) * 0.9
+							debug_TgtToLand = debug_TgtToLand.."\nAtoT_TgtToLand speed_H "..speed
 						end
 
-						-- Assure une vitesse minimale de 90 % de la vitesse de croisière
-						if speed < flight[f].loadout.vCruise * (1 - 10/100) then
-							speed = flight[f].loadout.vCruise * (1 - 10/100)
-							debug_TgtToLand = debug_TgtToLand.."\nAtoT_eta speed_I "..speed
+						local minCruise = (flight[f].loadout.vCruise or main_vCruise) * 0.9
+						if speed < minCruise then
+							speed = minCruise
+							debug_TgtToLand = debug_TgtToLand.."\nAtoT_TgtToLand speed_I "..speed
 						end
 
-						local leg = GetDistance(flight[f].route[w], flight[f].route[w - 1])	--measure lenght of the previous route leg
+						local leg = GetDistance(flight[f].route[w], flight[f].route[w - 1])
+						eta = eta - leg / speed
+						etaSpawn = etaSpawn - leg / speed
 
-						eta = eta - leg / speed										--calcualte ETA at previous waypoint
-						etaSpawn = etaSpawn - leg / speed										--calcualte ETA at previous waypoint
-						
-						flight[f].route[w-1]["debug"] = debug_TgtToLand.."\nAtoT_eta eta J "..eta.." leg "..leg
-						
-						-- --enregistre le premier calcul ETA pour le remettre si on spawn en vol
-						-- flight[f].route[w - 1]["eta1calc"] = eta							--set real ETA at previous waypoint
+						flight[f].route[w-1]["debug"] = (flight[f].route[w-1]["debug"] or "")..
+							debug_TgtToLand.."\nAtoT_TgtToLand eta J "..eta.." leg "..leg
 
-						--si l eta passe negatif et que le flight spawn en vol, on recollera eta1calc
-						if w - 1 == 1 then											--WP is first WP
-							eta = eta - startUp_time								--subtract time for start up
-							flight[f].route[w - 1].etaSpawn = etaSpawn
+						-- Sauvegarde systématique des deux valeurs
+						flight[f].route[w-1].eta = eta
+						flight[f].route[w-1].etaSpawn = etaSpawn
+
+						-- Cas du premier WP
+						if w - 1 == 1 then
+							-- Spawn au sol, on ajoute le temps de startup/taxi
+							eta = eta - startUp_time
+							flight[f].route[w - 1].eta = eta
+
+						elseif w - 1 == 2 then
+							-- WP 2, form-up/taxi
+							eta = eta - startUp_time
+							flight[f].route[w - 1].eta = eta
 						end
-						if w - 1 == 2 then											--WP is 2 WP
-							-- eta = eta - 300								--subtract time for taxi
-							eta = eta - startUp_time								--subtract time for form-up
-							flight[f].route[w - 1].etaSpawn = etaSpawn
-						end
 
-						flight[f].route[w-1]["debug"] = flight[f].route[w-1]["debug"].."\nAtoT_eta eta K "..eta.." WPT: "..w
+						flight[f].route[w-1]["debug"] = (flight[f].route[w-1]["debug"] or "")..
+							"\nAtoT_TgtToLand eta K "..eta.." WPT: "..w..
+							"\nAtoT_TgtToLand etaSpawn K "..etaSpawn.." WPT: "..w
 
-						flight[f].route[w - 1].eta = eta							--set ETA at previous waypoint
-						flight[f].route[w].speed = speed							--set NEWSPEED
-						
-						if (flight[f].player or flight[f].client) and w - 1 == 1 then				--for player flight and first waypoint
-							player_start_shift = 0 - eta											--time shift to start player at mission start
+						flight[f].route[w].speed = speed
+
+						if (flight[f].player or flight[f].client) and w - 1 == 1 then
+							player_start_shift = 0 - eta
 						end
 					end
 				end
 
-				-- -- iterate through flight waypoints from target backwards
-				-- for w = target_wp, 2, -1 do
-				-- 	if flight[f].route[w] then
-				-- 		speed = vCruise
-				-- 		tempTxt = tempTxt.."\nAtoT_eta speed_F "..speed
 
-				-- 		if flight[f].route[w].id == "Attack" or flight[f].route[w].id == "Target" then
-				-- 			-- WP is target point or attack point
-				-- 			speed = vAttack
-				-- 			tempTxt = tempTxt.."\nAtoT_eta speed_G "..speed
+		-- 		--***********************************////////////////////////////////////////////////////////////////////////////
+		-- 		-- iterate through flight waypoints from target backwards
+		-- 		-- Itérer les waypoints du vol en partant de target vers l’arrière 
+		-- 		for w = target_wp, 2, -1 do
+		-- 			if flight[f].route[w] then
+		-- 				speed = main_vCruise
+		-- 				local debug_TgtToLand = "\nAtoT_eta speed_F "..speed
 
-				-- 		elseif (flight[f].route[w].id == "Assemble") then
-				-- 			-- vitesse réduite à 90 % de vCruise pour Assemble
-				-- 			speed = vCruise * 0.9
-				-- 			tempTxt = tempTxt.."\nAtoT_eta speed_H "..speed
+		-- 				if w == target_wp then
 
-				-- 			--  ajout : Orbit 5 minutes à Assemble
-				-- 			eta = eta - 300
-				-- 			tempTxt = tempTxt.."\nAtoT_eta ORBIT 5min at Assemble (WP"..w..")"
-				-- 		end
+		-- 					speed = main_vAttack											--ingress to target is at attack seed
+		-- 					debug_TgtToLand = debug_TgtToLand.."\nAtoT_eta speed_G "..speed
+		-- 				elseif (flight[f].route[w].id == "Assemble") then		-- and not flight[f].helicopter			--WP is join point --M06.c and not flight[f].helicopter
+		-- 					-- Vitesse réduite à 90 % de vCruise pour faciliter la montée vers le point de Assemble
+		-- 					speed = main_vCruise * (1 - 10/100)
+		-- 					debug_TgtToLand = debug_TgtToLand.."\nAtoT_eta speed_H "..speed
+		-- 				end
 
-				-- 		-- Assure une vitesse minimale de 90 % de la vitesse de croisière
-				-- 		if speed < flight[f].loadout.vCruise * 0.9 then
-				-- 			speed = flight[f].loadout.vCruise * 0.9
-				-- 		end
+		-- 				-- Assure une vitesse minimale de 90 % de la vitesse de croisière
+		-- 				if speed < flight[f].loadout.vCruise * (1 - 10/100) then
+		-- 					speed = flight[f].loadout.vCruise * (1 - 10/100)
+		-- 					debug_TgtToLand = debug_TgtToLand.."\nAtoT_eta speed_I "..speed
+		-- 				end
 
-				-- 		-- longueur du segment
-				-- 		local leg = GetDistance(flight[f].route[w], flight[f].route[w - 1])
+		-- 				local leg = GetDistance(flight[f].route[w], flight[f].route[w - 1])	--measure lenght of the previous route leg
 
-				-- 		-- recule l'ETA en fonction du vol
-				-- 		eta = eta - leg / speed
+		-- 				eta = eta - leg / speed										--calcualte ETA at previous waypoint
+		-- 				etaSpawn = etaSpawn - leg / speed										--calcualte ETA at previous waypoint
+						
+		-- 				flight[f].route[w-1]["debug"] = debug_TgtToLand.."\nAtoT_eta eta J "..eta.." leg "..leg
+						
+		-- 				--si l eta passe negatif et que le flight spawn en vol, on recollera eta1calc
+		-- 				if w - 1 == 1 then											--WP is first WP
+		-- 					eta = eta - startUp_time								--subtract time for start up
+		-- 					flight[f].route[w - 1].etaSpawn = etaSpawn
+		-- 				end
+		-- 				if w - 1 == 2 then											--WP is 2 WP
+		-- 					-- eta = eta - 300								--subtract time for taxi
+		-- 					eta = eta - startUp_time								--subtract time for form-up
+		-- 					flight[f].route[w - 1].etaSpawn = etaSpawn
+		-- 				end
 
-				-- 		-- Startup et taxi corrections
-				-- 		if w - 1 == 1 then
-				-- 			eta = eta - start_up_time    -- temps mise en route
-				-- 		end
-				-- 		if w - 1 == 2 then
-				-- 			eta = eta - 300              -- temps taxi
-				-- 		end
+		-- 				flight[f].route[w-1]["debug"] = flight[f].route[w-1]["debug"].."\nAtoT_eta eta K "..eta.." WPT: "..w
 
-				-- 		-- Stockage
-				-- 		flight[f].route[w].speed = speed        -- vitesse pour rejoindre w
-				-- 		flight[f].route[w].eta   = eta          -- heure d'arrivée à w
+		-- 				flight[f].route[w - 1].eta = eta							--set ETA at previous waypoint
+		-- 				flight[f].route[w].speed = speed							--set NEWSPEED
+						
+		-- 				if (flight[f].player or flight[f].client) and w - 1 == 1 then				--for player flight and first waypoint
+		-- 					player_start_shift = 0 - eta											--time shift to start player at mission start
+		-- 				end
+		-- 			end
+		-- 		end
 
-				-- 		-- Ajustement pour le joueur
-				-- 		if (flight[f].player or flight[f].client) and w - 1 == 1 then
-				-- 			player_start_shift = 0 - eta
-				-- 		end
-				-- 	end
-				-- end
-
-
-				-- --set WP ETAs for transport tasks
-				-- if flight[f].task == "Transport" then					
-				-- 	--Debug_d
-				-- 	local firstRandom 
-				-- 	if (flight[f].tot_from + 600) >= flight[f].tot_to then
-				-- 		firstRandom = flight[f].tot_to - 600
-				-- 	else
-				-- 		firstRandom = flight[f].tot_from + 600
-				-- 	end
-
-				-- 	eta = math.random(firstRandom, flight[f].tot_to)	--make destination ETA for each transport flight in package random
-
-				-- 	flight[f].route[#flight[f].route].eta = eta					--set ETA at destination waypoint
-				-- 	for w = #flight[f].route, 2, -1 do							--iterate through flight waypoints from destination backwards
-				-- 		local leg = GetDistance(flight[f].route[w], flight[f].route[w - 1])	--measure lenght of the previous route leg
-				-- 		eta = eta - leg / vCruise								--calcualte ETA at previous waypoint
-				-- 		if w - 1 == 1 then										--WP is first WP
-				-- 			eta = eta - start_up_time							--subtract time for start up
-				-- 		end
-
-				-- 		flight[f].route[w - 1].eta = eta						--set ETA at previous waypoint
-
-				-- 		if flight[f].player == true and w - 1 == 1 then			--for player flight and first waypoint
-				-- 			player_start_shift = 0 - eta						--time shift to start player at mission start
-				-- 		end
-				-- 	end
-				-- end
+				
 			end
+
 		end
 
 		-- Ajuster le TOT pour toutes les occurences dans pack[p].main
@@ -765,6 +747,13 @@ for sideName, packs in pairs(ATO) do
 						flight[f].route[w].eta = 1																		--adjust WP eta to mission start
 					else
 						flight[f].route[w].eta = flight[f].route[w].eta + player_start_shift							--adjust WP eta by time difference for player to start at mission start
+						if flight[f].route[w].etaSpawn then
+							flight[f].route[w].etaSpawn = flight[f].route[w].etaSpawn + player_start_shift
+						end
+						
+						flight[f].route[w]["debug"] = (flight[f].route[w]["debug"] or "")..
+							"\nAtoT_eta player_start_shift "..player_start_shift.." WPT: "..w..
+							"\nAtoT_eta new eta "..flight[f].route[w].eta
 					end
 				end
 
@@ -836,6 +825,10 @@ for sideName, packs in pairs(ATO) do
 					for w = 1, #flight[f].route do
 						if flight[f].route[w].etaSpawn then
 							flight[f].route[w].eta = flight[f].route[w].etaSpawn
+
+							flight[f].route[w]["debug"] = (flight[f].route[w]["debug"] or "")..
+							"\nAtoT_eta id == Spawn , WPT: "..w..
+							"\nAtoT_eta new eta "..flight[f].route[w].eta
 						end
 					end
 				end

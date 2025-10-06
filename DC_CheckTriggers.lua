@@ -2302,12 +2302,22 @@ end
 
 -- reajuste le roster pour ne pas repartir  a donf suite à un TimeJump ou saut temporel
 if TimeJump and not TimeJump_RosterUpdated then
+	-- régler ce pourcentage à 0.25 pour 25%, 0.30 pour 30%, etc.
+	local rosterCalculPercent = 0.25
+
+	-- accepte aussi une valeur en pourcentage (ex: 25) et la convertit en fraction
+	if RosterJumpTempPercent > 1 and RosterJumpTempPercent <= 100 then
+		rosterCalculPercent = RosterJumpTempPercent / 100
+	end
+
 	for sideName, oob in pairs(oob_air) do
 		for unitN, unit in pairs(oob) do
 			if unit.roster.ready and unit.roster.reserve then
-				local part = math.floor(unit.roster.ready / 2)
-				unit.roster.ready = unit.roster.ready - part
-				unit.roster.reserve = unit.roster.reserve + part
+				if unit.roster.ready >= unit.number then
+					local part = math.floor(unit.roster.ready * rosterCalculPercent)
+					unit.roster.ready = unit.roster.ready - part
+					unit.roster.reserve = unit.roster.reserve + part
+				end
 			end
 		end
 	end

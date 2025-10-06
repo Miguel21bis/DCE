@@ -20,6 +20,23 @@ versionDCE["DC_UpdateTargetlist.lua"] = "1.11.52"
 
 if Debug.debug then
 	print("START DC_UpdateTargetlist.lua "..versionDCE["DC_UpdateTargetlist.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+
+	local function stripSource(src)
+		if not src then return "?" end
+		if string.sub(src,1,1) == "@" then return string.sub(src,2) end
+		return src
+	end
+
+	-- affiche une dizaine de niveaux d'appel (2 = l'appelant direct)
+	for i = 2, 10 do
+		local info = debug.getinfo(i, "Sln")
+		if not info then break end
+		print(string.format("caller level %d -> %s:%d  func=%s  what=%s",
+			i, stripSource(info.source), info.currentline or 0, info.name or "-", info.what or "-"))
+	end
+
+	-- affichage complet de la trace (utile pour voir toute la pile)
+	print("Full traceback:\n" .. debug.traceback("", 2))
 end
 
 if not targetlist.blue[1] then
