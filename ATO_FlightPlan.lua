@@ -3752,6 +3752,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							waypoints[w].alt = altitude
 
+							local timeOrbit = waypoints[w]["ETA"]+120
+							if flight[f].route[w + 1] and flight[f].route[w + 1].eta and flight[f].route[w + 1].eta > timeOrbit then
+								timeOrbit = flight[f].route[w + 1].eta
+							end
+
 							task_entry =
 							{
 								["enabled"] = true,
@@ -3765,7 +3770,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 										["id"] = "Script",
 										["params"] =
 										{
-											["command"] = "OrbitPosition('" .. groupName .. "', " .. altitude .. ", " .. speed .. ", " .. tostring(waypoints[w]["ETA"]+120) .. ")",
+											["command"] = "OrbitPosition('" .. groupName .. "', " .. altitude .. ", " .. speed .. ", " .. tostring(timeOrbit) .. ")",
 										},
 									},
 								},
@@ -6729,54 +6734,54 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				-- Elle utilise la vitesse définie dans le waypoint N+1 comme consigne pour ce segment de vol.
 				-- Idem pour l’altitude : l’IA cherchera à être à l’altitude du waypoint N+1 lorsqu’elle l’atteint.
 
-				local wptRefN = 3
-				if group.route.points[1]["action"] == "Turning Point" then
-					wptRefN = 2
-				else
-					wptRefN = 3
-				end
+				-- local wptRefN = 3
+				-- if group.route.points[1]["action"] == "Turning Point" then
+				-- 	wptRefN = 2
+				-- else
+				-- 	wptRefN = 3
+				-- end
 
-				--recherche des incoherences de VITESSE #1:
-				for wtpN, wptData in ipairs(group.route.points) do
-					if wtpN > wptRefN then
-						local preWptData = group.route.points[wtpN - 1]
-						local distance = GetDistance(preWptData, wptData)
-						local speedCalc = math.floor((distance / (wptData.ETA - preWptData.ETA)))
+				-- --recherche des incoherences de VITESSE #1:
+				-- for wtpN, wptData in ipairs(group.route.points) do
+				-- 	if wtpN > wptRefN then
+				-- 		local preWptData = group.route.points[wtpN - 1]
+				-- 		local distance = GetDistance(preWptData, wptData)
+				-- 		local speedCalc = math.floor((distance / (wptData.ETA - preWptData.ETA)))
 
-						--cherche si un cercle est demandé:
-						local preOrbit = false
-						local debutParams = ""
-						if preWptData.task and preWptData.task.params and preWptData.task.params.tasks then
-							for taskN, taskData in pairs(preWptData.task.params.tasks) do				
-								if taskData.params and taskData.params.action and taskData.params.action.params and taskData.params.action.params.command then								
-									debutParams = taskData.params.action.params.command								
-									if string.find(taskData.params.action.params.command, "OrbitPosition") then
-										preOrbit = true
-										break
-									end
-								end
-							end
-						end
+				-- 		--cherche si un cercle est demandé:
+				-- 		local preOrbit = false
+				-- 		local debutParams = ""
+				-- 		if preWptData.task and preWptData.task.params and preWptData.task.params.tasks then
+				-- 			for taskN, taskData in pairs(preWptData.task.params.tasks) do				
+				-- 				if taskData.params and taskData.params.action and taskData.params.action.params and taskData.params.action.params.command then								
+				-- 					debutParams = taskData.params.action.params.command								
+				-- 					if string.find(taskData.params.action.params.command, "OrbitPosition") then
+				-- 						preOrbit = true
+				-- 						break
+				-- 					end
+				-- 				end
+				-- 			end
+				-- 		end
 
 						
 
-						-- compare relative diff (%) and only warn if > 10%
-						if wptData.speed and wptData.speed > 0 then
-							local pct = math.abs(speedCalc - wptData.speed) / math.abs(wptData.speed)
-							if pct > 0.10 and not preOrbit and wptData["briefing_name"] ~= "Station"  then
-								info06 = info06.."\n".." |+T11|ATTENTION acceleration wpt| "..wtpN.." |distance:| "..distance.." |speedCalc:| "..speedCalc.." |>| "..wptData.speed.." ("..string.format("%.1f%%", pct*100)..")".."\n"
-								-- info06 = info06.." preOrbit?: "..tostring(preOrbit).." |debutParams?: "..tostring(debutParams)
-								tagATTENTION = true
-							end
-						else
-							-- fallback: when expected speed is zero or missing, keep absolute threshold
-							if math.abs(speedCalc - (wptData.speed or 0)) > 30 then
-								info06 = info06.."\n".." |+T12|ATTENTION speed is zero or missing wpt"..wtpN.." "..speedCalc.." > "..tostring(wptData.speed).."\n"
-								tagATTENTION = true
-							end
-						end
-					end
-				end
+				-- 		-- compare relative diff (%) and only warn if > 10%
+				-- 		if wptData.speed and wptData.speed > 0 then
+				-- 			local pct = math.abs(speedCalc - wptData.speed) / math.abs(wptData.speed)
+				-- 			if pct > 0.10 and not preOrbit and wptData["briefing_name"] ~= "Station"  then
+				-- 				info06 = info06.."\n".." |+T11|ATTENTION acceleration wpt| "..wtpN.." |distance:| "..distance.." |speedCalc:| "..speedCalc.." |>| "..wptData.speed.." ("..string.format("%.1f%%", pct*100)..")".."\n"
+				-- 				-- info06 = info06.." preOrbit?: "..tostring(preOrbit).." |debutParams?: "..tostring(debutParams)
+				-- 				tagATTENTION = true
+				-- 			end
+				-- 		else
+				-- 			-- fallback: when expected speed is zero or missing, keep absolute threshold
+				-- 			if math.abs(speedCalc - (wptData.speed or 0)) > 30 then
+				-- 				info06 = info06.."\n".." |+T12|ATTENTION speed is zero or missing wpt"..wtpN.." "..speedCalc.." > "..tostring(wptData.speed).."\n"
+				-- 				tagATTENTION = true
+				-- 			end
+				-- 		end
+				-- 	end
+				-- end
 
 				
 				-- Chaque waypoint contient sa propre alt, alt_type, speed, et speed_locked.
@@ -6800,17 +6805,17 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 
 						--cherche si un cercle est demandé:
-						local isOrbit = false
+						local diversParamsTiming = false
 						local debutParams = ""
 						if wptData.task and wptData.task.params and wptData.task.params.tasks then
-							for taskN, taskData in pairs(wptData.task.params.tasks) do				
+							for taskN, taskData in pairs(wptData.task.params.tasks) do
 								if taskData.params and taskData.params.action and taskData.params.action.params and taskData.params.action.params.command then								
 									debutParams = taskData.params.action.params.command
 									if string.find(debutParams, "OrbitPosition") then
-										isOrbit = true
+										diversParamsTiming = true
 										break
 									elseif string.find(debutParams, "Custom_Altitude") then
-										isOrbit = true
+										diversParamsTiming = true
 										break
 									end
 								end
@@ -6818,20 +6823,23 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 
 						if wptData.task and wptData.task.params and wptData.task.params.tasks then
-							for taskN, taskData in pairs(wptData.task.params.tasks) do			
+							for taskN, taskData in pairs(wptData.task.params.tasks) do		
 								if taskData.params and taskData.params.task and taskData.params.task.params and taskData.params.task.params.pattern then								
 									if taskData.params.task.params.pattern == "Circle" then
-										isOrbit = true
+										diversParamsTiming = true
 										break
 									end
 								end
 							end
 						end
 
+						if wptData["briefing_name"] == "Station" or postWptData["briefing_name"] == "Station" then
+							diversParamsTiming = true
+						end
 						
 
 						if postWptData.ETA then
-							if (math.abs(calPostETA - postWptData.ETA) > 50) and not isOrbit and wptData["briefing_name"] ~= "Station"  then
+							if (math.abs(calPostETA - postWptData.ETA) > 50) and not diversParamsTiming and not isHumain  then
 								info06 = info06.."\n".." |+T13|ATTENTION bad ETA wpt| "..wtpN.." |distance:| "..distance.." |calPostETA:| "..calPostETA.." |>| "..postWptData.ETA.." |infoCompl: "..infoCompl.."\n"
 								tagATTENTION = true
 							end
@@ -7418,10 +7426,10 @@ for CV, deck in pairs(testDeckPlace) do
 					testSomme = testSomme + deck[n]["number"]
 					if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFp testSomme "..testSomme) end
 					if testSomme <= LimitedDeckNb and not deck[n]["OnDeck"] then
-						for _side,side in pairs(mission.coalition) do
-							for _country,country in pairs(side.country) do
+						for _, side in pairs(mission.coalition) do
+							for _, country in pairs(side.country) do
 								if country.plane then
-									for Ngroup,group in pairs(country.plane.group) do
+									for _, group in pairs(country.plane.group) do
 										if group.name ==  DeckWiner then
 											group['uncontrolled'] = true
 											group['lateActivation'] = true
@@ -7432,7 +7440,7 @@ for CV, deck in pairs(testDeckPlace) do
 										end
 									end
 								elseif country.helicopter  then
-									for Ngroup,group in pairs(country.helicopter.group) do
+									for _, group in pairs(country.helicopter.group) do
 										if group.name ==  DeckWiner then
 											group['uncontrolled'] = true
 											group['lateActivation'] = true

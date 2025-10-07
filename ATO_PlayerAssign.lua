@@ -192,7 +192,7 @@ end
 
 local groupNChoice
 local choice
-local unitNChoice
+local unitNChoice = 1
 TaskRefused = false
 
 if Multi.Group then
@@ -385,26 +385,37 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 		repeat
 			print("\n\n Day or Night? : "..Daytime)														-- info day or not
 			print("\n\nAvailable tasks:")
+			
 			local indexTotal
-			for index = 1, #playable do
-				for unitN = 1, playable[index].number do
-					indexTotal = index .. unitN
-					-- io.write(index .. " - " .. ReplaceBaseName(playable[index].base) .. " - " .. ReplaceTypeName(playable[index].type) .. " " .. playable[index].unitname)
-					io.write(indexTotal .. " : " .. ReplaceBaseName(playable[index].base) .. " | " .. ReplaceTypeName(playable[index].type) .. " | " .. playable[index].groupName.." - "..unitN)
-					
-					if unitN == 1 then  
-						io.write(" (Leader) ") 
-					else 
-						io.write("          ")
+			
+			if WingmenPlayer then
+				for index = 1, #playable do
+					for unitN = 1, playable[index].number do
+						indexTotal = index .. unitN
+						io.write(indexTotal .. " : " .. ReplaceBaseName(playable[index].base) .. " | " .. ReplaceTypeName(playable[index].type) .. " | " .. playable[index].groupName.." - "..unitN)
+						
+						if unitN == 1 then  
+							io.write(" (Leader) ") 
+						else
+							io.write("          ")
+						end
 
+						if playable[index].target_name ~= nil then  io.write(" | "..playable[index].target_name) end
+
+						io.write("\n")
+						tabIndex[indexTotal] = true
 					end
-
+				end
+			else
+				for index = 1, #playable do
+					io.write(index .. " - " .. ReplaceBaseName(playable[index].base) .. " - " .. ReplaceTypeName(playable[index].type) .. " " .. playable[index].groupName)
 					if playable[index].target_name ~= nil then  io.write(" | "..playable[index].target_name) end
-
 					io.write("\n")
-					tabIndex[indexTotal] = true
+					tabIndex[tostring(index)] = true
 				end
 			end
+
+
 			print("r - random task")
 			print("s - skip mission")
 			tabIndex["s"] = true
@@ -420,8 +431,12 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 			choice = io.stdin:read()
 
 			if choice ~= "" and string.byte(choice) <= 57 then				-- adjustment A01 : robust form 									-- si inférieur à 57 ASCII, c'est inférieur au chiffre 9, donc c'est un chiffre
-				groupNChoice = math.floor(choice / 10)	-- dizaine
-				unitNChoice = choice % 10				-- unité
+				if WingmenPlayer then
+					groupNChoice = math.floor(choice / 10)	-- dizaine
+					unitNChoice = choice % 10				-- unité
+				else
+					groupNChoice = tonumber(choice)
+				end
 			end
 
 			local stringChoice = tostring(choice)
@@ -439,6 +454,8 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 				groupNChoice = math.random(1, #playable)
 			end
 		end
+
+		print("groupNChoice: "..tostring(groupNChoice).." unitNChoice: "..tostring(unitNChoice))
 
 		ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].player = true		--mark ATO entry as player flight
 		ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].unitPlayer = unitNChoice

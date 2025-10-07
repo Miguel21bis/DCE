@@ -611,10 +611,10 @@ for sideName, packs in pairs(ATO) do
 							-- Spawn au sol, on ajoute le temps de startup/taxi
 							eta = eta - startUp_time
 							flight[f].route[w - 1].eta = eta
-							flight[f].route[w - 1].baseStartup = db_airbases[flight[f].base].startup
+							flight[f].route[w - 1].baseStartup = db_airbases[flight[f].base].startup or startUp_time
 
 						elseif w - 1 == 2 then
-							flight[f].route[w - 1].baseStartup = db_airbases[flight[f].base].startup
+							flight[f].route[w - 1].baseStartup = db_airbases[flight[f].base].startup or startUp_time
 						-- 	-- WP 2, form-up/taxi
 						-- 	eta = eta - startUp_time
 						-- 	flight[f].route[w - 1].eta = eta

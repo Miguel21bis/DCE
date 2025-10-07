@@ -36,6 +36,8 @@ Assigned_freq = {}
 MinPercentDestroyed = 95		----variable pour destructions batiment de DCS en pourcentage
 RayonDamaged = 50				----variable pour destructions batiment de DCS en metres
 RosterJumpTempPercent = 0.25			-- suite à un saut temporel, enleve une partie des presents pour éviter un effectif neuf comme un démarrage de DCE
+WingmenPlayer = false			-- si true, les wingmen playable sont proposé aux joueurs
+-- WeatherParams = {}				-- contient les parametres météo de la mission
 
 RadioA = {
 	["blue"] = {

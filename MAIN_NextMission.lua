@@ -470,7 +470,6 @@ addFileTrigger("beaconsilent.ogg", nil, nil, "a_out_sound_c")
 
 AddFileTriggerTempo("CG_ArtySpotter.lua", 2, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})
 
-
 if mission_ini.load_mist then
 	AddFileTriggerTempo("mist.lua", 2, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})	-- modification M60 CTLD
 end
@@ -504,6 +503,8 @@ for planeType, plane in pairs(Data_divers) do
 	end
 end
 
+--weather
+mission.weather = WeatherParams
 
 camp.SC_FullPlaneOnDeck = mission_ini.SC_FullPlaneOnDeck								-- modification M37.d SuperCarrier
 camp.CV_Vmax = Data_configuration.CV_Vmax												-- modification M37.d SuperCarrier
@@ -516,10 +517,8 @@ camp.debugInGamePopup = Debug.debugInGamePopup
 camp.theatre = NameTheatreLower
 camp.EjectedPilotFrequency = EjectedPilotFrequency
 camp.EWR_frequency = EWR_DB
-
 camp.spotter = mission_ini.spotter
 camp.spotterAircraft = ListSpotterAircraft()
-
 camp.jammerOnBoard = jammerOnBoard
 camp.unitSystem = mission_ini.unitSystem
 camp.MinPercentDestroyed = MinPercentDestroyed

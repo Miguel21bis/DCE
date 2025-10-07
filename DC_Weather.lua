@@ -2,13 +2,13 @@
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleanCode_f
+-- last modification: debug_f
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_Weather.lua"] = "1.6.25"
+versionDCE["DC_Weather.lua"] = "1.6.26"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_f				(e springCleaning)					
 -- adjustment_h				(h baseChoice)(f \\\n to \n)(e debug info)(d preset = nil)(c adds METAR to dynamic cloud presets, where possible) (b CampTotalTimeS)(a: high 2 days max)
--- debug_e					(e: cloud/METAR altitudes above 10000ft were not displayed)(d very bad weather during a cold sector)%chance pHigh pLow 
+-- debug_f					(f WeatherParams)(e: cloud/METAR altitudes above 10000ft were not displayed)(d very bad weather during a cold sector)%chance pHigh pLow 
 -- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
 -- modification M51_c		Moonphase
 -- modification M45_e		compatible with 2.7.0s  (e: debug cleaning)(d: less clounds in the PG)(c: debugWeather)
@@ -2313,6 +2313,8 @@ if not camp["debugTraceability"]["weather"] then
 end
 
 camp["debugTraceability"]["weather"] = debugTxt
+
+WeatherParams = Deepcopy(mission.weather)
 
 if debugWeather then
 	print()
