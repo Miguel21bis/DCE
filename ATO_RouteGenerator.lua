@@ -20,7 +20,8 @@ versionDCE["ATO_RouteGenerator.lua"] = "1.8.50"
 local debugRoute = false
 
 local deltaT = 0.15		-- deltaT = 0.25
-local assemblePointDistance = 20000
+local assemblePlanePtDist = 20000
+local assembleHeliPtDist = 2000
 
 
 --https://love2d.org/forums/viewtopic.php?t=88719
@@ -941,19 +942,25 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 
 		--set assemble point
 		local assemblyPoint = {}
+		-- do
+		-- 	local heading = GetHeading(basePoint, joinPoint)
+		-- 	local distance = assembleHeliPtDist
+		-- 	if GetDistance(basePoint, joinPoint) < distance then distance = GetDistance(basePoint, joinPoint) -1000 end
+		-- 	assemblyPoint = GetOffsetPoint(basePoint, heading, distance)
+		-- end
 		do
+			local offsetDist = assemblePlanePtDist
+			if is_helicopter and viaFARP then offsetDist = assembleHeliPtDist end
 			local heading = GetHeading(basePoint, joinPoint)
-			local distance = assemblePointDistance
-			if GetDistance(basePoint, joinPoint) < distance then distance = GetDistance(basePoint, joinPoint) -1000 end
-			assemblyPoint = GetOffsetPoint(basePoint, heading, distance)
+			if GetDistance(basePoint, joinPoint) < offsetDist then offsetDist = offsetDist*2/3 end
+			assemblyPoint = GetOffsetPoint(basePoint, heading, offsetDist)
 		end
+		
 
-		if is_helicopter and viaFARP then
-			print("AtoRG viaFARP x "..tostring(viaFARP.x).." y "..tostring(viaFARP.y).." h "..tostring(viaFARP.h) )
-		end
-		-- --altitude plus basse pour helicopter -- Miguel21 modification M06 : helicoptere playable 
-		-- if is_helicopter then delta_h = 50 else delta_h = 1524 end
-
+		-- if is_helicopter and viaFARP then
+		-- 	print("AtoRG viaFARP x "..tostring(viaFARP.x).." y "..tostring(viaFARP.y).." h "..tostring(viaFARP.h) )
+		-- end
+--
 		--build complete route if virtual air base, in the AIR ;), Spawn
 		-- Miguel21 modification M16.d : SpawnAir B1b & B-52 need BaseAirStart = true in db_aibase
 		if basePoint.BaseAirStart == true then
@@ -1337,11 +1344,19 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 		end
 		--set assemble point
 		local assemblyPoint = {}
+		-- do
+		-- 	local heading = GetHeading(basePoint, joinPoint)
+		-- 	local distance = assembleHeliPtDist
+		-- 	if GetDistance(basePoint, joinPoint) < distance then distance = GetDistance(basePoint, joinPoint) -1000 end
+		-- 	assemblyPoint = GetOffsetPoint(basePoint, heading, distance)
+		-- end
+
 		do
+			local offsetDist = assemblePlanePtDist
+			if is_helicopter and viaFARP then offsetDist = assembleHeliPtDist end
 			local heading = GetHeading(basePoint, joinPoint)
-			local distance = assemblePointDistance
-			if GetDistance(basePoint, joinPoint) < distance then distance = GetDistance(basePoint, joinPoint) -1000 end
-			assemblyPoint = GetOffsetPoint(basePoint, heading, distance)
+			if GetDistance(basePoint, joinPoint) < offsetDist then offsetDist = offsetDist*2/3 end
+			assemblyPoint = GetOffsetPoint(basePoint, heading, offsetDist)
 		end
 
 		--build complete route
@@ -1460,11 +1475,18 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 
 		--set assemble point
 		local assemblyPoint = {}
+		-- do
+		-- 	local heading = GetHeading(basePoint, joinPoint)
+		-- 	local distance = assembleHeliPtDist
+		-- 	if GetDistance(basePoint, joinPoint) < distance then distance = GetDistance(basePoint, joinPoint) -1000 end
+		-- 	assemblyPoint = GetOffsetPoint(basePoint, heading, distance)
+		-- end
 		do
+			local offsetDist = assemblePlanePtDist
+			if is_helicopter and viaFARP then offsetDist = assembleHeliPtDist end
 			local heading = GetHeading(basePoint, joinPoint)
-			local distance = assemblePointDistance
-			if GetDistance(basePoint, joinPoint) < distance then distance = GetDistance(basePoint, joinPoint) -1000 end
-			assemblyPoint = GetOffsetPoint(basePoint, heading, distance)
+			if GetDistance(basePoint, joinPoint) < offsetDist then offsetDist = offsetDist*2/3 end
+			assemblyPoint = GetOffsetPoint(basePoint, heading, offsetDist)
 		end
 
 		--build complete route
@@ -1601,11 +1623,18 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 
 		--set assemble point
 		local assemblyPoint = {}
+		-- do
+		-- 	local heading = GetHeading(basePoint, joinPoint)
+		-- 	local distance = assembleHeliPtDist
+		-- 	if GetDistance(basePoint, joinPoint) < distance then distance = GetDistance(basePoint, joinPoint) -1000 end
+		-- 	assemblyPoint = GetOffsetPoint(basePoint, heading, distance)
+		-- end
 		do
+			local offsetDist = assemblePlanePtDist
+			if is_helicopter and viaFARP then offsetDist = assembleHeliPtDist end
 			local heading = GetHeading(basePoint, joinPoint)
-			local distance = assemblePointDistance
-			if GetDistance(basePoint, joinPoint) < distance then distance = GetDistance(basePoint, joinPoint) -1000 end
-			assemblyPoint = GetOffsetPoint(basePoint, heading, distance)
+			if GetDistance(basePoint, joinPoint) < offsetDist then offsetDist = offsetDist*2/3 end
+			assemblyPoint = GetOffsetPoint(basePoint, heading, offsetDist)
 		end
 
 		table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Taxi", alt = basePoint.h})
@@ -1888,7 +1917,15 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 			end
 		end
 
-		local assemblyPoint = GetOffsetPoint(basePoint, heading, assemblePointDistance)
+		local assemblyPoint = GetOffsetPoint(basePoint, heading, assemblePlanePtDist)
+		-- do
+		-- 	local offsetDist = assemblePlanePtDist
+		-- 	if is_helicopter and viaFARP then offsetDist = assembleHeliPtDist end
+		-- 	local heading = GetHeading(basePoint, joinPoint)
+		-- 	if GetDistance(basePoint, joinPoint) < offsetDist then offsetDist = offsetDist*2/3 end
+		-- 	assemblyPoint = GetOffsetPoint(basePoint, heading, offsetDist)
+		-- end
+
 		local altitude = AltitudeCruise * 2 / 3
 
 		if Data_divers[unitEscort.type] and Data_divers[unitEscort.type].hCruise then
@@ -1905,10 +1942,10 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 		end
 
 		if assembleIndex then
-			-- -- mettre à jour l'existant
-			-- route[assembleIndex].x = assemblyPoint.x
-			-- route[assembleIndex].y = assemblyPoint.y
-			-- route[assembleIndex].alt = altitude
+			-- mettre à jour l'existant
+			route[assembleIndex].x = assemblyPoint.x
+			route[assembleIndex].y = assemblyPoint.y
+			route[assembleIndex].alt = altitude
 		else
 			-- insérer en position 3 sans remplacer
 			table.insert(route, 3, { x = assemblyPoint.x, y = assemblyPoint.y, id = "Assemble", alt = altitude })

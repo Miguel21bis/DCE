@@ -1536,6 +1536,7 @@ end
 ----- create flight plans in mission file for all flights in ATO -----
 ----- create flight plans in mission file for all flights in ATO -----
 ----- create flight plans in mission file for all flights in ATO -----
+-- chapitre ATO
 --= = = = = = = =  = = = = = = = = = =  = = = = = = = = = =  ==  = = = 
 
 
@@ -2034,6 +2035,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
                 ------========================-----========================--
 				---
 				--- ------========================-----========================--
+				--- -- chapitre waypoints
 				--- 
 				local spawn_time = flight[f].route[1].eta 
 				local departure_time											--local variable to store departure time
@@ -2092,6 +2094,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						},
 						["speed_locked"] =  false,
 						["etaSpawn"] =  flight[f].route[w].etaSpawn,
+						["baseStartup"] =  flight[f].route[w].baseStartup,
 					}
 
 					if waypoints[w].name == "Target" then
@@ -6350,57 +6353,57 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 				--ajoute un wpt supplementaire, num2 , proche du 1 (1500m), pour ajouter en toute securite Custom_Altitude
-				if is_helicopter and not flight[f].client and not flight[f].player and  #group.route.points >= 3  then
-					local wpt1 = group.route.points[1]
-					local wpt2 = group.route.points[2]
-					local Heading  = GetHeading(wpt1, wpt2)
-					local newPoint = GetOffsetPoint(wpt1, Heading, 2000)
-					local newEta = (1500 / wpt2.speed) + wpt1.ETA
-					-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
+				-- if is_helicopter and not flight[f].client and not flight[f].player and  #group.route.points >= 3  then
+				-- 	local wpt1 = group.route.points[1]
+				-- 	local wpt2 = group.route.points[2]
+				-- 	local Heading  = GetHeading(wpt1, wpt2)
+				-- 	local newPoint = GetOffsetPoint(wpt1, Heading, 2000)
+				-- 	local newEta = (1500 / wpt2.speed) + wpt1.ETA
+				-- 	-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
 
-					--ajoute un waypoint intermediaire avec une orbit
-					local neWpt = {
-						['alt'] = wpt2.alt,
-						['briefing_name'] = 'interWpt',
-						['action'] = 'Turning Point',
-						['alt_type'] = 'BARO',
-						["speed_locked"] =  false,
-						['ETA'] = tonumber(newEta),
-						['y'] = newPoint.y,
-						['formation_template'] = '',
-						['name'] = 'Stacking',
-						["ETA_locked"] =  true,
-						['speed'] = wpt2.speed,
-						['x'] = newPoint.x,
-						['task'] = {
-							['id'] = 'ComboTask',
-							['params'] = {
-								['tasks'] = {
-									[1] = {
-										["enabled"] = true,
-										["auto"] = false,
-										["id"] = "WrappedAction",
-										["number"] =  1,
-										["params"] =
-										{
-											["action"] =
-											{
-												["id"] = "Script",
-												["params"] =
-												{
-													["command"] = "Custom_Altitude('" .. groupName .. "',  '  nil  ', '" .. 2 .. "')",
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-						['type'] = 'Turning Point',
+				-- 	--ajoute un waypoint intermediaire avec une orbit
+				-- 	local neWpt = {
+				-- 		['alt'] = wpt2.alt,
+				-- 		['briefing_name'] = 'interWpt',
+				-- 		['action'] = 'Turning Point',
+				-- 		['alt_type'] = 'BARO',
+				-- 		["speed_locked"] =  false,
+				-- 		['ETA'] = tonumber(newEta),
+				-- 		['y'] = newPoint.y,
+				-- 		['formation_template'] = '',
+				-- 		['name'] = 'Stacking',
+				-- 		["ETA_locked"] =  true,
+				-- 		['speed'] = wpt2.speed,
+				-- 		['x'] = newPoint.x,
+				-- 		['task'] = {
+				-- 			['id'] = 'ComboTask',
+				-- 			['params'] = {
+				-- 				['tasks'] = {
+				-- 					[1] = {
+				-- 						["enabled"] = true,
+				-- 						["auto"] = false,
+				-- 						["id"] = "WrappedAction",
+				-- 						["number"] =  1,
+				-- 						["params"] =
+				-- 						{
+				-- 							["action"] =
+				-- 							{
+				-- 								["id"] = "Script",
+				-- 								["params"] =
+				-- 								{
+				-- 									["command"] = "Custom_Altitude('" .. groupName .. "',  '  nil  ', '" .. 2 .. "')",
+				-- 								},
+				-- 							},
+				-- 						},
+				-- 					},
+				-- 				},
+				-- 			},
+				-- 		},
+				-- 		['type'] = 'Turning Point',
 
-					}
-					table.insert(group.route.points, 2, neWpt )
-				end
+				-- 	}
+				-- 	table.insert(group.route.points, 2, neWpt )
+				-- end
 
 
 				--ajoute ici les Custom_Altitude car les num de wpt ne change plus
@@ -6409,7 +6412,27 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						if group.route.points[n].briefing_name == "Egress" then
 
-							-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
+							local task_entry = {
+								["enabled"] = true,
+								["auto"] = false,
+								["id"] = "WrappedAction",
+								["number"] = #group.route.points[n]["task"]["params"]["tasks"] + 1,
+								["params"] =
+								{
+									["action"] =
+									{
+										["id"] = "Script",
+										["params"] =
+										{
+											["command"] = "Custom_Altitude('" .. groupName .. "',  '  nil  ', '" .. n .. "')",
+										},
+									},
+								},
+							}
+							table.insert(group.route.points[n]["task"]["params"]["tasks"], task_entry)
+
+						elseif group.route.points[n].briefing_name == "Assemble" then
+
 							local task_entry = {
 								["enabled"] = true,
 								["auto"] = false,
@@ -6430,6 +6453,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							table.insert(group.route.points[n]["task"]["params"]["tasks"], task_entry)
 
 						end
+
+						
 					end
 				end
 
@@ -6623,20 +6648,20 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 				if nbactivate and nbactivate > 1 then
-					info06 = info06.."\n".." |+|ATTENTION plusieurs ACTIVATE ".."\n"
+					info06 = info06.."\n".." |+T1|ATTENTION plusieurs ACTIVATE ".."\n"
 					tagATTENTION = true
 				end
 
 				if group.tasks and group.tasks[1] and group.tasks[1].params.action.id == "Start" then
 					if not group.uncontrolled then
-						info01 = "\n".."ATTENTION MANQUE uncontrolled "..group.groupId.."\n"
+						info01 = "\n".." |+T2|ATTENTION MANQUE uncontrolled "..group.groupId.."\n"
 						tagATTENTION = true
 					end
 					-- if waypoints[1].action == "Turning Point" then
 					-- 	info01 = info01.." |+|ATTENTION Start en VOL "
 					-- end
 					if group.route.points[1].action == "Turning Point" then
-						info01 = info01.."\n".." |+|ATTENTION Start en VOL ".."\n"
+						info01 = info01.."\n".." |+T3|ATTENTION Start en VOL ".."\n"
 						tagATTENTION = true
 					end
 
@@ -6645,7 +6670,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				if group.route.points[1].action == "Turning Point" and (math.abs(group.route.points[1]["ETA"] - group.start_time) > 5) then
 
-					info01 = info01.."\n".." |+|ATTENTION ETA[1] "..tostring(group.route.points[1]["ETA"]).." ~= start_time "..tostring(math.floor(debug_StartTime)).."\n"
+					info01 = info01.."\n".."  |+T4|ATTENTION ETA[1] "..tostring(group.route.points[1]["ETA"]).." ~= start_time "..tostring(math.floor(debug_StartTime)).."\n"
 					tagATTENTION = true
 				end
 
@@ -6661,11 +6686,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								_affiche(testtrigrule, "testtrigrule")
 							end
 						else
-							info02 = info02.."\n".." |ATTENTION MANQUE a_set_ai_task: aucun demarrage possible "..group.groupId.."\n"
+							info02 = info02.."\n".."  |+T5|ATTENTION MANQUE a_set_ai_task: aucun demarrage possible "..group.groupId.."\n"
 							tagATTENTION = true
 						end
 					else
-						info02 = info02.."\n".." |ATTENTION MANQUE Start "..group.groupId.."\n"
+						info02 = info02.."\n".."  |+T6|ATTENTION MANQUE Start "..group.groupId.."\n"
 						tagATTENTION = true
 
 						DebugFLIGHT = DebugFLIGHT .. "\n".."AtoFp info02"..info02
@@ -6678,12 +6703,12 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						if c_time and activateGroupSecondes then
 							--si c'est sur CV, on peux faire apparaitre (a_activate_group) le plane, avant le démarrage (a_set_ai_task)
 							if (debug_StartTime < activateGroupSecondes) and group.route.points[1]["action"] ~= "Turning Point"  then
-								info03 = "\n".."ATTENTION SECONDES a_activate_group  |activateGrpSecondes "..activateGroupSecondes .."  ~= |start_time: "..debug_StartTime.."\n"
+								info03 = "\n".." |+T7|ATTENTION SECONDES a_activate_group  |activateGrpSecondes "..activateGroupSecondes .."  ~= |start_time: "..debug_StartTime.."\n"
 								tagATTENTION = true
 
 							elseif (group.route.points[1]["ETA"] < activateGroupSecondes) then
 		
-								info03 = "\n".."ATTENTION SECONDES a_activate_group  |activateGrpSecondes"..activateGroupSecondes .."  ~= |ETA: "..tostring(group.route.points[1]["ETA"]).."\n"
+								info03 = "\n".." |+T8|ATTENTION SECONDES a_activate_group  |activateGrpSecondes"..activateGroupSecondes .."  ~= |ETA: "..tostring(group.route.points[1]["ETA"]).."\n"
 								tagATTENTION = true
 							else
 								info03 = "SOL/VOL decale _A"
@@ -6691,11 +6716,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						elseif c_flag then
 							info03 = "VOL FLAG decale _B"
 						else
-							info03 = "\n".."ATTENTION bug a_activate_group, no c_time, no c_flag "..group.groupId.."\n"
+							info03 = "\n".." |+T9|ATTENTION bug a_activate_group, no c_time, no c_flag "..group.groupId.."\n"
 							tagATTENTION = true
 						end
 					else
-						info03 = "ATTENTION MANQUE a_activate_group "..group.groupId
+						info03 = " |+T10|ATTENTION MANQUE a_activate_group "..group.groupId
 						tagATTENTION = true
 					end
 				end
@@ -6739,19 +6764,26 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						if wptData.speed and wptData.speed > 0 then
 							local pct = math.abs(speedCalc - wptData.speed) / math.abs(wptData.speed)
 							if pct > 0.10 and not preOrbit and wptData["briefing_name"] ~= "Station"  then
-								info06 = info06.."\n".." |ATTENTION acceleration wpt| "..wtpN.." |distance:| "..distance.." |speedCalc:| "..speedCalc.." |>| "..wptData.speed.." ("..string.format("%.1f%%", pct*100)..")".."\n"
+								info06 = info06.."\n".." |+T11|ATTENTION acceleration wpt| "..wtpN.." |distance:| "..distance.." |speedCalc:| "..speedCalc.." |>| "..wptData.speed.." ("..string.format("%.1f%%", pct*100)..")".."\n"
 								-- info06 = info06.." preOrbit?: "..tostring(preOrbit).." |debutParams?: "..tostring(debutParams)
 								tagATTENTION = true
 							end
 						else
 							-- fallback: when expected speed is zero or missing, keep absolute threshold
 							if math.abs(speedCalc - (wptData.speed or 0)) > 30 then
-								info06 = info06.."\n".." |ATTENTION speed is zero or missing wpt"..wtpN.." "..speedCalc.." > "..tostring(wptData.speed).."\n"
+								info06 = info06.."\n".." |+T12|ATTENTION speed is zero or missing wpt"..wtpN.." "..speedCalc.." > "..tostring(wptData.speed).."\n"
 								tagATTENTION = true
 							end
 						end
 					end
 				end
+
+				
+				-- Chaque waypoint contient sa propre alt, alt_type, speed, et speed_locked.
+				-- Quand l’IA se déplace d’un waypoint N vers un waypoint N+1 :
+				-- Elle utilise la vitesse définie dans le waypoint N+1 comme consigne pour ce segment de vol.
+				-- Idem pour l’altitude : l’IA cherchera à être à l’altitude du waypoint N+1 lorsqu’elle l’atteint.
+
 
 				--recherche des incoherences de TIMING ETA: #2
 				local wptLanding = #group.route.points
@@ -6759,7 +6791,13 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					if wtpN < wptLanding - 1 then
 						local postWptData = group.route.points[wtpN + 1]
 						local distance = GetDistance(wptData, postWptData)
-						local calPostETA = distance / (wptData.speed or 1) + wptData.ETA
+						local calPostETA = distance / (postWptData.speed or 1) + wptData.ETA
+						local infoCompl = ""
+
+						if wtpN == 1 and wptData.action ~= "Turning Point" and wptData.baseStartup then
+							calPostETA = distance / (postWptData.speed or 1) + (wptData.ETA + wptData.baseStartup)
+							infoCompl = " (incl. baseStartup "..tostring(wptData.baseStartup)..")"
+						end
 
 						--cherche si un cercle est demandé:
 						local isOrbit = false
@@ -6780,7 +6818,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 
 						if wptData.task and wptData.task.params and wptData.task.params.tasks then
-							for taskN, taskData in pairs(wptData.task.params.tasks) do				
+							for taskN, taskData in pairs(wptData.task.params.tasks) do			
 								if taskData.params and taskData.params.task and taskData.params.task.params and taskData.params.task.params.pattern then								
 									if taskData.params.task.params.pattern == "Circle" then
 										isOrbit = true
@@ -6793,15 +6831,12 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						
 
 						if postWptData.ETA then
-							-- local pct = math.abs(calPostETA - postWptData.ETA) / math.abs(postWptData.ETA)
-							-- if pct > 0.10 and not isOrbit and wptData["briefing_name"] ~= "Station"  then
 							if (math.abs(calPostETA - postWptData.ETA) > 50) and not isOrbit and wptData["briefing_name"] ~= "Station"  then
-								-- info06 = info06.." |ATTENTION bad ETA wpt| "..wtpN.." |distance:| "..distance.." |calPostETA:| "..calPostETA.." |>| "..postWptData.ETA.." ("..string.format("%.1f%%", pct*100)..")"
-								info06 = info06.."\n".." |ATTENTION bad ETA wpt| "..wtpN.." |distance:| "..distance.." |calPostETA:| "..calPostETA.." |>| "..postWptData.ETA.."\n"
+								info06 = info06.."\n".." |+T13|ATTENTION bad ETA wpt| "..wtpN.." |distance:| "..distance.." |calPostETA:| "..calPostETA.." |>| "..postWptData.ETA.." |infoCompl: "..infoCompl.."\n"
 								tagATTENTION = true
 							end
 						else
-							info06 = info06.."\n".." |ATTENTION pas de postWptData.ETA| "..wtpN..")".."\n"
+							info06 = info06.."\n".." |+T14|ATTENTION pas de postWptData.ETA| "..wtpN..")".."\n"
 							tagATTENTION = true
 						end
 	
@@ -6811,7 +6846,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				if isHumain then
 					if group.route.points[1]["action"] == "Turning Point"then
-						info02 = info02.."\n".." |ATTENTION MANQUE Start "..group.groupId.."\n"
+						info02 = info02.."\n".." |+T15|ATTENTION MANQUE Start "..group.groupId.."\n"
 						tagATTENTION = true
 
 						DebugFLIGHT = DebugFLIGHT .. "\n".."Error info02"..info02
@@ -6866,14 +6901,14 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				if group.frequency then
 					info06 = info06.."frequency "..group.frequency
 				else
-					info06 = info06.."\n".."ATTENTION NO frequency ".."\n"
+					info06 = info06.."\n".." |+T16|ATTENTION NO frequency ".."\n"
 					tagATTENTION = true
 				end
 
 				if group.task then
 					info06 = info06.."task "..group.task
 				else
-					info06 = info06.."\n".."ATTENTION NO task ".."\n"
+					info06 = info06.."\n".." |+T17|ATTENTION NO task ".."\n"
 					tagATTENTION = true
 				end
 
@@ -6899,7 +6934,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 				if (units[1].skill == "Player" or units[1].skill == "Client") and group.route.points[1].ETA> 1 then
-					infoFlight = infoFlight.."\n\n\n".."ATTENTION Player/Client delayed start ETA1: "..group.route.points[1]["ETA"].."\n\n\n"
+					infoFlight = infoFlight.."\n\n\n".." |+T18|ATTENTION Player/Client delayed start ETA1: "..group.route.points[1]["ETA"].."\n\n\n"
 					tagATTENTION = true
 				end
 
@@ -6994,6 +7029,25 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 			end
 		end
 	end
+end
+
+
+if mission.weather["clouds"] then
+
+	
+
+	if not mission.weather["clouds"]["preset"] then
+		local infoWeather01 = " |+IW1|ATTENTION NO weather preset "
+		if Debug.debug then
+			InsertBugList(infoWeather01)
+		end
+	else
+		local infoWeather02 = " |+IW2|weather preset: "..mission.weather["clouds"]["preset"]
+		if Debug.debug then
+			InsertBugList(infoWeather02)
+		end
+	end
+
 end
 
 --= = = = = = = =  = = = = = = = = = =  = = = = = = = = = =  ==  = = =
