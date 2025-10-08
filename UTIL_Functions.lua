@@ -682,7 +682,7 @@ end
 
 --function to return heading between two vector2 points
 -- return une valeur en degré par rapport au nord géographique (pas le cercle trigonometrique)
-function GetHeading(p1, p2, debug)
+function GetHeadingDegre(p1, p2, debug)
 
 	if debug then
 		if not p1 or not p1.x or not p1.y then
@@ -802,16 +802,16 @@ end
 
 --function to return closest distance of point p3 to the line p1 to p2
 function GetTangentDistance(p1, p2, p3)
-	local p1_p2_heading = GetHeading(p1, p2)
-	local p1_p3_heading = GetHeading(p1, p3)
+	local p1_p2_heading = GetHeadingDegre(p1, p2)
+	local p1_p3_heading = GetHeadingDegre(p1, p3)
 	local alpha = math.abs(p1_p2_heading - p1_p3_heading)
 	if alpha > 180 then
 		alpha = math.abs(alpha - 360)
 	end
 	local p1_p3_distance = GetDistance(p1, p3)
 
-	local p2_p1_heading = GetHeading(p2, p1)
-	local p2_p3_heading = GetHeading(p2, p3)
+	local p2_p1_heading = GetHeadingDegre(p2, p1)
+	local p2_p3_heading = GetHeadingDegre(p2, p3)
 
 	local beta = math.abs(p2_p1_heading - p2_p3_heading)
 	if beta > 180 then
@@ -846,8 +846,8 @@ function GetTangentLenght(p1, p2, pc, r)
 	elseif p1_pc < r and p2_pc < r then													--p1 and p2 are in circle
 		return p1_p2																	--return distance from p1 to p2
 	elseif p1_pc < r then																--only p1 is in circle
-		local p1_p2_heading = GetHeading(p1, p2)										--heading from p1 to p2
-		local p1_pc_heading = GetHeading(p1, pc)										--heading from p1 to pc
+		local p1_p2_heading = GetHeadingDegre(p1, p2)										--heading from p1 to p2
+		local p1_pc_heading = GetHeadingDegre(p1, pc)										--heading from p1 to pc
 		local alpha = math.abs(p1_p2_heading - p1_pc_heading)							--angle in deg		
 		local a = r
 		local b = p1_pc
@@ -856,8 +856,8 @@ function GetTangentLenght(p1, p2, pc, r)
 		local c = a * math.sin(math.rad(gamma)) / math.sin(math.rad(alpha))
 		return math.abs(c)
 	elseif p2_pc < r then																--only p2 is in circle
-		local p2_p1_heading = GetHeading(p2, p1)										--heading from p2 to p1
-		local p2_pc_heading = GetHeading(p2, pc)										--heading from p2 to pc
+		local p2_p1_heading = GetHeadingDegre(p2, p1)										--heading from p2 to p1
+		local p2_pc_heading = GetHeadingDegre(p2, pc)										--heading from p2 to pc
 		local alpha = math.abs(p2_p1_heading - p2_pc_heading)							--angle in deg		
 		local a = r
 		local b = p2_pc

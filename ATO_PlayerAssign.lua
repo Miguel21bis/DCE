@@ -642,14 +642,14 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 
 						local detected = false
 						local distance = 100000000																				--distance from WP w to point where EWR coverage is entered
-						local heading = GetHeading(pack.main[1].route[w], pack.main[1].route[w + 1])							--heading between WP w and WP w+1
+						local heading = GetHeadingDegre(pack.main[1].route[w], pack.main[1].route[w + 1])							--heading between WP w and WP w+1
 
 						for e = 1, #EWR_DB[playable[groupNChoice].side] do																	--iterate through all ewr/awacs
 
 							local radar_route_distance = GetTangentDistance(pack.main[1].route[w], pack.main[1].route[w + 1], EWR_DB[playable[groupNChoice].side][e])		--get closest distance from radar to route between WP w and WP w+1
 							if radar_route_distance < EWR_DB[playable[groupNChoice].side][e].range then										--if route passes radar range circle
 								
-								local p1_ewr_heading = GetHeading(pack.main[1].route[w], EWR_DB[playable[groupNChoice].side][e])				--heading from p1 to radar
+								local p1_ewr_heading = GetHeadingDegre(pack.main[1].route[w], EWR_DB[playable[groupNChoice].side][e])				--heading from p1 to radar
 								local alpha = math.abs(heading - p1_ewr_heading)												--angle beteen route and p1-ewr
 								if alpha > 180 then
 									alpha = math.abs(alpha - 360)

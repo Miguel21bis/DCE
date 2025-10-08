@@ -4,11 +4,12 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.194"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.195"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
+-- V195 - A-5 Vigilante speed
 -- V194 - MiG-29 for TF80s
 -- V193 - MiG-29 Fulcrum loadout first version
 -- V192 - Armement des MIG-21 (Ajout version 4 missiles ) - Modif de l'armement des A-4 (toujours 2 Fuel Tanks)
@@ -7573,15 +7574,15 @@ db_all_loadouts = {
 				attributes =  { "recon high" },
 				code_loadout =  { "NAM" },
 				night = false,
-								adverseWeather = false,
+				adverseWeather = false,
 				range = 900000,
 				firepower = 10,
-				vCruise = 154,
-				vAttack = 352,
+				vCruise = 305,
+				vAttack = 443,
 				hCruise = 9144,
-				hAttack = 12192,
+				hAttack = 15000,
 				tStation = 2000,
-				sortie_rate = 6,
+				sortie_rate = 3,
 				stores = {
 					pylons = {
 					},
@@ -7603,12 +7604,12 @@ db_all_loadouts = {
 				adverseWeather = true,
 				range = 900000,
 				firepower = 10,
-				vCruise = 205.55555555556,
-				vAttack = 352.52777777778,
+				vCruise = 290,
+				vAttack = 305,
 				hCruise = 300,
 				hAttack = 300,
 				tStation = 2000,
-				sortie_rate = 6,
+				sortie_rate = 3,
 				stores = {
 					pylons = {
 					},

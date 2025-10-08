@@ -379,7 +379,7 @@ BaseFARP = {
 }
 for baseName, base in pairs(db_airbases) do
 
-	if base.type and base.type == "FARP" or string.find(baseName, "FARP") then
+	if (base.type and base.type == "FARP") or (type(baseName) == "string" and string.find(baseName, "FARP")) then
 		--get airbase position
 		local farpData = {																				--get the x-y coordinates of the airbase where the unit is located
 			x = base.x,
@@ -388,7 +388,17 @@ for baseName, base in pairs(db_airbases) do
 			BaseAirStart = base.BaseAirStart,
 			name = baseName,
 		}
-		table.insert(BaseFARP[base.side], farpData)
+		-- ensure BaseFARP[side] exists before inserting (avoid nil when base.side missing or unexpected)
+		if base and base.side then
+			if not BaseFARP[base.side] then BaseFARP[base.side] = {} end
+			table.insert(BaseFARP[base.side], farpData)
+		else
+			-- fallback: keep problematic FARPs to a neutral bucket so code doesn't error out
+			if not BaseFARP["neutral"] then BaseFARP["neutral"] = {} end
+			table.insert(BaseFARP["neutral"], farpData)
+			-- optional debug:
+			-- print("AtoG warning: FARP '" .. tostring(baseName) .. "' has no 'side' field; stored under BaseFARP['neutral']")
+		end
 	end
 end
 

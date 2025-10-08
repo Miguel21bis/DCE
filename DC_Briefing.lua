@@ -724,7 +724,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 						if tempPlayer.tgt_pack then	 --ATO[tempPlayer.tgt_side][tempPlayer.tgt_pack]
 
-							local tgt_heading = GetHeading(tempPlayer.waypoints[1], ATO[tempPlayer.tgt_side][tempPlayer.tgt_pack].main[1].route[1])
+							local tgt_heading = GetHeadingDegre(tempPlayer.waypoints[1], ATO[tempPlayer.tgt_side][tempPlayer.tgt_pack].main[1].route[1])
 							local tgt_distance = GetDistance(tempPlayer.waypoints[1], ATO[tempPlayer.tgt_side][tempPlayer.tgt_pack].main[1].route[1])
 							local tgt_n = 0
 							for role, flightInter in pairs (ATO[tempPlayer.tgt_side][tempPlayer.tgt_pack]) do

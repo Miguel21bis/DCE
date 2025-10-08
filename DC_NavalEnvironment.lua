@@ -335,7 +335,7 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 								else
 									local TimePassed = CurrentTime - route[n].time								--time since passed last waypoint
 									local DistancePassed = TimePassed * route[n].speed							--distance covered since passed last waypoint
-									local heading = GetHeading(route[n], route[n + 1])							--heading from last to next waypoint
+									local heading = GetHeadingDegre(route[n], route[n + 1])							--heading from last to next waypoint
 									route[n].x = route[n].x + math.cos(math.rad(heading)) * DistancePassed		--update last waypoint to position at current time
 									route[n].y = route[n].y + math.sin(math.rad(heading)) * DistancePassed		--update last waypoint to position at current time
 								end
@@ -405,8 +405,8 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 							routeModif[1] = route[1]
 							for n = 2, #route-1 do
 								local waypoint = {}
-								local h1 = GetHeading(route[n-1], route[n] )
-								local h2 = GetHeading(route[n], route[n+1] )
+								local h1 = GetHeadingDegre(route[n-1], route[n] )
+								local h2 = GetHeadingDegre(route[n], route[n+1] )
 								local angle = GetDeltaHeading(h1, h2)
 								local bearing = 0
 
@@ -465,15 +465,15 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 						local delta_heading = 0												--change of heading between initial leader heading as per base_mission and actual heading at start of route
 						local PaHeading = 0
 						if route[2] then													--if there is more than one waypoint
-							delta_heading = GetHeading(route[1], route[2]) - math.deg(group.units[1].heading)		--difference between heading as per base_mission and actual heading at start of route
-							PaHeading = math.rad(GetHeading(route[1], route[2]))
+							delta_heading = GetHeadingDegre(route[1], route[2]) - math.deg(group.units[1].heading)		--difference between heading as per base_mission and actual heading at start of route
+							PaHeading = math.rad(GetHeadingDegre(route[1], route[2]))
 
 						end
 						local dx = 0
 						local dy = 0
 
 						for u = 2, #group.units do											--go through all units in group after the leader
-							local bearing_from_leader = GetHeading(group.units[1], group.units[u])		--unit bearing from leader
+							local bearing_from_leader = GetHeadingDegre(group.units[1], group.units[u])		--unit bearing from leader
 							bearing_from_leader = bearing_from_leader + delta_heading					--update bearing from leader by change of group heading
 							local distance_from_leader = GetDistance(group.units[1], group.units[u])	--unit distance from leader
 							dx = math.cos(math.rad(bearing_from_leader)) * distance_from_leader	--x component from leader
@@ -491,7 +491,7 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 							for u = 1, #group.units do										--go through all units in group
 								for static_n, static in ipairs(country.static.group) do		--go through static groups								
 									if static.route.points[1].linkUnit and static.route.points[1].linkUnit == group.units[u].unitId then	--static unit is linked to ship
-										local bearing_from_leader = GetHeading(group.units[1], static)				--static bearing from leader
+										local bearing_from_leader = GetHeadingDegre(group.units[1], static)				--static bearing from leader
 
 										bearing_from_leader = bearing_from_leader + delta_heading					--update bearing from leader by change of group heading
 										local distance_from_leader = GetDistance(group.units[1], static)			--unit distance from leader

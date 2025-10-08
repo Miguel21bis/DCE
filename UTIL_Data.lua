@@ -1227,6 +1227,8 @@ Data_divers = {
 		requiredModules = true,						--itsModule
 		EPLRS_Capacity = false,
 		playable = true,
+		vCruise = 200,	--TODO a confirmer
+		hCruise = 4500,
 	},
 
 	["VSN_F105D"] = 	{				--Mod
@@ -1245,8 +1247,10 @@ Data_divers = {
 		  --aircraft_task(AFAC),
 			aircraft_task(RunwayAttack),
 			aircraft_task(AntishipStrike),
-	  },	
+	  },
 		playable = true,
+		vCruise = 205.5,	--TODO a confirmer
+		hCruise = 5315.2,
 	},
 
 	["VSN_F105G"] = 	{				--Mod
@@ -1265,14 +1269,16 @@ Data_divers = {
 		  --aircraft_task(AFAC),
 			aircraft_task(RunwayAttack),
 			aircraft_task(AntishipStrike),
-	  },	
+	  },
 		playable = true,
 		jammer = {
 			type = "AN/ALQ-71",
 			efficiency = 90,
 			range = 4000,
 			power = 90,
-		}
+		},
+		vCruise = 205.5,	--TODO a confirmer
+		hCruise = 5315.2,
 	},
 
 	["Bronco-OV-10A"] = 	{				--Mod
@@ -1310,7 +1316,9 @@ Data_divers = {
 			type = "AN/ALQ-100",
 			efficiency = 86,
 			range = 2000,
-		}
+		},
+		vCruise = 154,
+		hCruise = 9144,
 	},
 
 	["vwv_crusader"] = 	{				--Mod
@@ -1326,6 +1334,8 @@ Data_divers = {
 			maxFrequency = 156.000,
 			modulation = MODULATION_AM
 		},
+		vCruise = 245,		--TODO a confirmer
+		hCruise = 5486.4,
 	},
 	["vwv_o-1"] = 	{			                 	--Mod
 		instrumentUnits = "imperial",
@@ -1753,11 +1763,15 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
+		vCruise = 55,	--TODO a verifier
+		hCruise = 50,
 	},
 	["SH-3D"] = {--mod
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		requiredModules = true,						--itsModule
+		vCruise = 40,	--TODO a verifier
+		hCruise = 500,
 	},
 	["vwv_sh2f"] = {--mod
 		instrumentUnits = "imperial",
@@ -1777,9 +1791,13 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
+		vCruise = 75,	--TODO a verifier
+		hCruise = 500,
 	},
 	["SH-60B"] = {
 		instrumentUnits = "imperial",
+		vCruise = 65,
+		hCruise = 500,
 	},
 	["UH-60L"] = {
 		instrumentUnits = "imperial",
@@ -1843,6 +1861,8 @@ Data_divers = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
+		vCruise = 200,	--TODO a verifier
+		hCruise = 800,
 	},
 
 	["vwv_mig17f"] = 	{			                 	--Mod
@@ -1894,6 +1914,8 @@ Data_divers = {
 			aircraft_task(CAS),
 			aircraft_task(AntishipStrike),
 		},
+		vCruise = 200,	--TODO a verifier
+		hCruise = 4000,
 	},
 
 	["vwv_mig21mf"] = 	{			                 	--Mod
@@ -1986,6 +2008,8 @@ Data_divers = {
 	["MiG-31"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
+		vCruise = 220,
+		hCruise = 10500,
 	},
 	["Su-17M4"] = {
 		instrumentUnits = "russian",
@@ -2015,6 +2039,12 @@ Data_divers = {
 		vCruise = 185,
 		hCruise = 5000,
 	},
+	["Su-27"] = {
+		instrumentUnits = "russian",
+		EPLRS_Capacity = false,
+		vCruise = 213.222,--TODO a confirmer
+		hCruise = 8500,
+	},
 	["Su-30"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
@@ -2035,6 +2065,8 @@ Data_divers = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
+		vCruise = 63,
+		hCruise = 50,
 	},
 	["Mi-24V"] = {
 		instrumentUnits = "russian",
@@ -2092,7 +2124,9 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		flyingAlone = true,
-		refuellingType = "drogue"
+		refuellingType = "drogue",
+		vCruise = 180,
+		hCruise = 1828.8,
 	},
 	["KC135MPRS"] = {
 		instrumentUnits = "imperial",
@@ -2124,6 +2158,8 @@ Data_divers = {
 	["Su-24MR"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
+		vCruise = 250,
+		hCruise = 10096,
 	},
 
 	["Tu-22M3"] = {

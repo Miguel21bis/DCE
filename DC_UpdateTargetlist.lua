@@ -1320,7 +1320,7 @@ if LL_KnownPositionsFileExit then
 						end
 					end
 					if distMin ~= 9999999 then
-						local azimut = GetHeading(target, pointNearest)
+						local azimut = GetHeadingDegre(target, pointNearest)
 						target.lat, target.lon = NewPosLatLon(pointNearest.lat, pointNearest.lon, distMin, azimut)
 					end
 				end

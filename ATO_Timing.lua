@@ -5,6 +5,12 @@
 if not versionDCE then versionDCE = {} end
 versionDCE["ATO_Timing.lua"] = "1.7.70"
 ------------------------------------------------------------------------------------------------------- 
+---
+			-- Chaque waypoint contient sa propre alt, alt_type, speed, et speed_locked.
+			-- Quand l’IA se déplace d’un waypoint N vers un waypoint N+1 :
+			-- Elle utilise la vitesse définie dans le waypoint N+1 comme consigne pour ce segment de vol.
+			-- Idem pour l’altitude : l’IA cherchera à être à l’altitude du waypoint N+1 lorsqu’elle l’atteint.
+
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_d				(d springCleaning)
 -- adjustment_i				(i subtract time for taxi)(h fuel consumption)(g add AFAC task)(f not standoff in cap)(d escort Transport)(c airstart for Fuel)(b attempts to "dilute" all packages throughout the duration of the mission)(a gives more time to set up the player flight (SP and MP))						
@@ -287,8 +293,8 @@ for sideName, packs in pairs(ATO) do
 					if packs[p].main[1].task == "Transport" or packs[p].main[1].task == "Nothing" then
                         for w = 3, #flight[f].route - 1 do                              --iterate through all waypoints that require lateral offset (taxi, departure and landing WP exluded)			
                             if flight[f].route[w].id ~= "Target" then                   --Target WP does not need lateral offset
-                                local inbound_heading = GetHeading(flight[f].route[w - 1], flight[f].route[w]) --inbound heading to WP of lead flight
-                                local outbound_heading = GetHeading(flight[f].route[w], flight[f].route[w + 1]) --outbound heading from WP of lead flight
+                                local inbound_heading = GetHeadingDegre(flight[f].route[w - 1], flight[f].route[w]) --inbound heading to WP of lead flight
+                                local outbound_heading = GetHeadingDegre(flight[f].route[w], flight[f].route[w + 1]) --outbound heading from WP of lead flight
                                 local delta_heading = GetDeltaHeading(inbound_heading, outbound_heading) --amount of heading change at WP
 
                                 if delta_heading < 66 and delta_heading > -66 then      --if heading change is small, flights stay at the present side of lead flight (check turn)
@@ -317,8 +323,8 @@ for sideName, packs in pairs(ATO) do
 									local inbound_heading, outbound_heading, delta_heading
 
 									if packs[p].main[1].route[w] and packs[p].main[1].route[w+1] and packs[p].main[1].route[w-1] then
-										inbound_heading = GetHeading(packs[p].main[1].route[w - 1], packs[p].main[1].route[w], packs[p].main[1])		--inbound heading to WP of lead flight
-										outbound_heading = GetHeading(packs[p].main[1].route[w], packs[p].main[1].route[w + 1], packs[p].main[1])		--outbound heading from WP of lead flight
+										inbound_heading = GetHeadingDegre(packs[p].main[1].route[w - 1], packs[p].main[1].route[w], packs[p].main[1])		--inbound heading to WP of lead flight
+										outbound_heading = GetHeadingDegre(packs[p].main[1].route[w], packs[p].main[1].route[w + 1], packs[p].main[1])		--outbound heading from WP of lead flight
 										delta_heading = GetDeltaHeading(inbound_heading, outbound_heading)			--amount of heading change at WP
 									end
 
@@ -383,7 +389,7 @@ for sideName, packs in pairs(ATO) do
 				if flight[f].loadout.vAttack then main_vAttack = flight[f].loadout.vAttack end
 
 				--flight TOT for packages continously covering a station
-				if  flight[f].task == "AWACS" or flight[f].task == "Refueling" or flight[f].task == "AFAC" then		--flight is part of a package that continously covers a station
+				if flight[f].task == "AWACS" or flight[f].task == "Refueling" or flight[f].task == "AFAC" then		--flight is part of a package that continously covers a station
 					local available_station_coverage = #flight * flight[f].loadout.tStation							--total time that station can be covered
 					local required_station_coverage = flight[f].tot_to - flight[f].tot_from	+ flight[f].loadout.tStation	--total time that station must be covered
 					local station_uncovered = required_station_coverage - available_station_coverage				--total time that station is uncovered
@@ -497,6 +503,7 @@ for sideName, packs in pairs(ATO) do
 				--***********************************////////////////////////////////////////////////////////////////////////////
 
 				local speed
+				local safeWpt = false
 				for w = target_wp + 1, #flight[f].route  do						--iterate through flight waypoints from target foward
 					speed = main_vCruise												-- ATO_T_Debug01 vCruise by default 
 
@@ -521,21 +528,24 @@ for sideName, packs in pairs(ATO) do
 							speed = main_vCruise										--everything else is at cruise speed
 						end
 
+						if flight[f].task == "Reconnaissance" and flight[f].route[w].id == "Split" then
+							safeWpt = true										--reconnaissance is at attack speed in hostile territory
+						end
+						if flight[f].task == "Reconnaissance" and not safeWpt then
+							speed = main_vAttack										--reconnaissance is at attack speed in hostile territory
+						elseif flight[f].task == "Reconnaissance" and safeWpt then
+							speed = main_vCruise										--reconnaissance is at cruise speed in safe territory
+						end
+
 						if flight[f].loadout.vCruise then
 							if speed < flight[f].loadout.vCruise then
 								speed = flight[f].loadout.vCruise
 							end
 						end
 
-						-- if pack[p].main[1].loadout.standoff and pack[p].main[1].loadout.standoff > 15000 and flight[f].route[w].id == "Egress" then		--if the package has a standoff from target bigger than 15 km, proceed from attack point directly to egress
-						-- 	local tgt_ap_dist = GetDistance(flight[f].route[target_wp], flight[f].route[target_wp - 1])		--distance from target to attack point
-						-- 	local ap_eta = eta - tgt_ap_dist / speed			--eta at attack point
-						-- 	local ap_egress_dist = GetDistance(flight[f].route[target_wp - 1], flight[f].route[target_wp + 1])	--distance from attack point to egress point
-						-- 	eta = ap_eta + ap_egress_dist / speed				--calculate ETA at egress
-						-- else
-							local leg = GetDistance(flight[f].route[w - 1], flight[f].route[w])	--measure lenght of the next route leg
-							eta = eta + leg / speed								--calculate ETA at next waypoint
-						-- end
+						local leg = GetDistance(flight[f].route[w - 1], flight[f].route[w])	--measure lenght of the next route leg
+						eta = eta + leg / speed								--calculate ETA at next waypoint
+
 						flight[f].route[w].eta = eta							--set ETA at waypoint
 						flight[f].route[w].speed = speed						--set NEWSPEED
 						flight[f].route[w]["debug"] = (flight[f].route[w]["debug"] or "") ..
@@ -577,6 +587,7 @@ for sideName, packs in pairs(ATO) do
 				eta = tot + flight[f].eta_offset								--reset target WP ETA
 				local etaSpawn = tot + flight[f].eta_offset
 
+				local safeWptBefore = false
 				for w = target_wp, 2, -1 do
 					if flight[f].route[w] then
 						speed = flight[f].loadout.vCruise or main_vCruise
@@ -597,6 +608,15 @@ for sideName, packs in pairs(ATO) do
 						if speed < minCruise then
 							speed = minCruise
 							debug_TgtToLand = debug_TgtToLand.."\nAtoT_TgtToLand speed_I "..speed
+						end
+
+						if flight[f].task == "Reconnaissance" and flight[f].route[w].id == "Join" then
+							safeWptBefore = true										--reconnaissance is at attack speed in hostile territory
+						end
+						if flight[f].task == "Reconnaissance" and not safeWptBefore then
+							speed = main_vAttack										--reconnaissance is at attack speed in hostile territory
+						elseif flight[f].task == "Reconnaissance" and safeWptBefore then
+							speed = main_vCruise										--reconnaissance is at cruise speed in safe territory
 						end
 
 						local leg = GetDistance(flight[f].route[w], flight[f].route[w - 1])
@@ -695,7 +715,7 @@ for sideName, packs in pairs(ATO) do
 						deltaETA = flight[f].route[1].eta
 
 						--find flight position at mission start and make it a WP
-						local h = GetHeading(flight[f].route[w + 1], flight[f].route[w])		--heading from last WP with positive ETA
+						local h = GetHeadingDegre(flight[f].route[w + 1], flight[f].route[w])		--heading from last WP with positive ETA
 						local speed
 						if flight[f].route[w].id == "IP" then
 							speed = main_vAttack
@@ -709,22 +729,23 @@ for sideName, packs in pairs(ATO) do
 							-- print("AtoRG result: "..tostring(speed).." ==? ".. flight[f].loadout.vCruise * (1 - 10/100) )
 						end
 
+						--TODO, revoir cette partie, y'a souvent erreur d'ETA ici
 						local dist = flight[f].route[w + 1].eta * speed							--distance covered from mission start to first positive ETA
 						if dist > GetDistance(flight[f].route[w], flight[f].route[w + 1]) then	--if distance is ahead of WP (caused by extra minutes at take off WP), keep spawn point over take off point but adjust id and alt for air spawn
 
+							flight[f].route[w].name = "Create Spawn Wp in AtoTiming "..flight[f].route[w].id.." "..tostring(debug.getinfo(1).currentline)
 							flight[f].route[w].id = "Spawn"
-							flight[f].route[w].name = "Create Spawn Wp in AtoTiming "..tostring(debug.getinfo(1).currentline)
 							flight[f].route[w].alt = flight[f].route[w + 1].alt
 							flight[f].route[w].eta = 0											--ETA of WP is at mission start
 							flight[f].route[w].speed = speed									--set NEWSPEED
 						
 						else																	--else move the spawn point to new location
 							flight[f].route[w] = {
+								name = "Create Spawn Wp in AtoTiming "..flight[f].route[w].id.." "..tostring(debug.getinfo(1).currentline),
 								x = flight[f].route[w + 1].x + math.cos(math.rad(h)) * dist,
 								y = flight[f].route[w + 1].y + math.sin(math.rad(h)) * dist,
 								eta = 0,														--ETA of WP is at mission start
 								id = "Spawn",													--WP is spawn point
-								name = "Create Spawn Wp in AtoTiming "..tostring(debug.getinfo(1).currentline),
 								alt = flight[f].route[w + 1].alt,
 								speed = speed,													--set NEWSPEED
 							}
