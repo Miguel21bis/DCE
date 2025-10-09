@@ -3397,7 +3397,8 @@ function ModifiCampInit()
 		"refTemp",
 		"weatherChangeRate",
 		"time",
-		"variation"
+		"variation",
+		"ewrFreqAdaptable",
 	}
 
 	local monfichier = io.open("Init/camp_init.lua", "r") or error("Failed to open debug file")

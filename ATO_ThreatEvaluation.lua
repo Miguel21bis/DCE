@@ -1220,12 +1220,14 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 							end
 						end
 
-						--changement obligatoire de la frequence (pourquoi?)
+						--changement obligatoire de la frequence 
+						--pour que les frequences puissent etre compatible avec la radio du joueur
 						if group.route.points[1].task.params.tasks[t].params.action.id == "SetFrequency" then							--if group has a frequency set										
 							
 							if camp and camp.ewrFreqAdaptable then
-								ewr_call.frequencyMHz = GetFrequency(sidename, group.name, "EWR")
-								ewr_call.frequencyHz = ewr_call.frequencyMHz * 1000000		--convert to Hz
+								ewr_call["frequencyMHz"] = GetFrequency(sidename, group.name, "EWR")
+								ewr_call["frequencyHz"] = ewr_call.frequencyMHz * 1000000		--convert to Hz
+								group.route.points[1].task.params.tasks[t].params.action.params.frequency = ewr_call["frequencyHz"]
 							else
 								ewr_call["frequencyHz"] = group.route.points[1].task.params.tasks[t].params.action.params.frequency
 								ewr_call["frequencyMHz"] = ewr_call.frequencyHz / 1000000		--convert to MHz
@@ -1242,15 +1244,14 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 
 				--parse toutes les unités car le/les radars ne sont pas forcement en position 1
 				local testAdd = false
-				local EwrAdd = false
-				for unit_n, unit in pairs(group.units) do				--Iterate through all units			
+				for _, unit in pairs(group.units) do				--Iterate through all units			
 					if not unit.dead then
 
 						-- print("AtoTE group.name "..group.name.." group.hidden: "..tostring(group.hidden))
 						-- print(" - - - AtoTE unit.name "..unit.name.." group.hidden: "..tostring(group.hidden))
 						addThreat(unit, sidename, group.hidden)
 
-						if not ewrFreqDejaTraite[sidename]then ewrFreqDejaTraite[sidename]= {} end
+						if not ewrFreqDejaTraite[sidename] then ewrFreqDejaTraite[sidename]= {} end
 						if not ewrFreqDejaTraite[sidename][group.groupId] then
 
 							--tente d'ajouter cette unité dans la table EWR du script GCI inGame
@@ -1427,7 +1428,7 @@ for side, unit in pairs(oob_air) do																--iterate through all sides
 end
 
 
-local CAPthreatsSort = {
+local cap_threatsSort = {
 	blue = {},
 	red = {},
 }
@@ -1435,13 +1436,13 @@ local CAPthreatsSort = {
 for side, threats in pairs(CAPthreats) do
 	for key, value in ipairs(threats) do
 		if value.class == "CAP" then
-			table.insert(CAPthreatsSort[side], value)
+			table.insert(cap_threatsSort[side], value)
 		end
 
 	end
 end
-table.sort(CAPthreatsSort["blue"], function(a,b) return a.level > b.level  end)
-table.sort(CAPthreatsSort["red"], function(a,b) return a.level > b.level  end)
+table.sort(cap_threatsSort["blue"], function(a,b) return a.level > b.level  end)
+table.sort(cap_threatsSort["red"], function(a,b) return a.level > b.level  end)
 
 --find AWACS, CAP and interceptors in aircraft units and populate ewr/Fighterthreats table
 for side, targets in pairs(targetlist) do																--iterate through all sides
@@ -1463,16 +1464,16 @@ for side, targets in pairs(targetlist) do																--iterate through all s
 			table.insert(EWR_DB[side], entry)
 
 		elseif  target.task == "CAP" and target.inactive ~= false then											--if loadout is CAP
-			if CAPthreatsSort[side] and CAPthreatsSort[side][1] then
+			if cap_threatsSort[side] and cap_threatsSort[side][1] then
 				local entry = {													--define Fighterthreats table entry
 					name = tostring(target.titleName),										--unit name
 					class = "CAP",												--class
 					info  = "AddCAP by target position",
 					x = target.x,
 					y = target.y,
-					level =  CAPthreatsSort[side][1].level,
+					level =  cap_threatsSort[side][1].level,
 					range = target.radius,										--Fighter action radius
-					LDSD = CAPthreatsSort[side][1].LDSD,										--Look Down/Shoot Down
+					LDSD = cap_threatsSort[side][1].LDSD,										--Look Down/Shoot Down
 				}
 
 				table.insert(Fighterthreats[side], entry)
@@ -1572,8 +1573,8 @@ if sumCercleSAM >= reduceCercle then
 	local copyThreats = Deepcopy(groundthreats)
 	for sideThreat, threats in pairs(groundthreats) do
 		for n=#threats-1, 2, -1 do
-			for copyThreats_n, 	copyThreat in pairs(copyThreats[sideThreat]) do
-				if  threats[n]  and threats[n].x and threats[n].range < 10000  then
+			for copyThreats_n, copyThreat in pairs(copyThreats[sideThreat]) do
+				if  threats[n] and threats[n].x and threats[n].range < 10000  then
 					local allIn = true
 					for r=0, 360, 90 do
 						local testPoint = GetOffsetPoint(threats[n], r, threats[n].range)

@@ -1304,6 +1304,8 @@ Data_divers = {
 			maxFrequency = 156.000,
 			modulation = MODULATION_AM
 		},
+		vCruise = 154,	-- TODO a confirmer
+		hCruise = 3315,
 	},
 
 	["vwv_ra-5"] = 	{				--Mod
@@ -1350,6 +1352,8 @@ Data_divers = {
 			maxFrequency = 156.000,
 			modulation = MODULATION_AM
 		},
+		vCruise = 80,	-- TODO a confirmer
+		hCruise = 3315.2,
 	},
 
 	["A-10A"] = 	{
