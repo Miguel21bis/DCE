@@ -528,7 +528,7 @@ for sideName, packs in pairs(ATO) do
 							speed = main_vCruise										--everything else is at cruise speed
 						end
 
-						if flight[f].task == "Reconnaissance" and flight[f].route[w].id == "Split" then
+						if flight[f].task == "Reconnaissance" and flight[f].route[w].id == "Border Out" then
 							safeWpt = true										--reconnaissance is at attack speed in hostile territory
 						end
 						if flight[f].task == "Reconnaissance" and not safeWpt then
@@ -610,7 +610,7 @@ for sideName, packs in pairs(ATO) do
 							debug_TgtToLand = debug_TgtToLand.."\nAtoT_TgtToLand speed_I "..speed
 						end
 
-						if flight[f].task == "Reconnaissance" and flight[f].route[w].id == "Join" then
+						if flight[f].task == "Reconnaissance" and flight[f].route[w].id == "Border In" then
 							safeWptBefore = true										--reconnaissance is at attack speed in hostile territory
 						end
 						if flight[f].task == "Reconnaissance" and not safeWptBefore then
@@ -699,57 +699,77 @@ for sideName, packs in pairs(ATO) do
 				
 				for w = target_wp - 1, 1, -1 do													--iterate through waypoints backwards
 
-					if flight[f] then
-						if flight[f].route[w] then
-						else
-							print("Bug with flight[f].route[w] w: "..w)
-							_affiche(flight, "flightAtoT ")
-						end
-
-					else
-						print("Bug with flight[f] f: "..f)
-						_affiche(flight, "flightAtoT ")
-					end
-
 					if flight[f].route[w].eta < 0 and not (flight[f].client or flight[f].player) then		--ETA before mission start
 						deltaETA = flight[f].route[1].eta
 
 						--find flight position at mission start and make it a WP
-						local h = GetHeadingDegre(flight[f].route[w + 1], flight[f].route[w])		--heading from last WP with positive ETA
-						local speed
-						if flight[f].route[w].id == "IP" then
-							speed = main_vAttack
-						else
-							speed = main_vCruise
-						end
+						local heading = GetHeadingDegre(flight[f].route[w + 1], flight[f].route[w])		--heading from last WP with positive ETA
 
-						if speed < flight[f].loadout.vCruise * (1 - 10/100) then
-							-- print("AtoRG passe speed < flight[f]..vCruise "..tostring(speed).." < ".. flight[f].loadout.vCruise * (1 - 10/100) )
-							speed = flight[f].loadout.vCruise * (1 - 10/100)
-							-- print("AtoRG result: "..tostring(speed).." ==? ".. flight[f].loadout.vCruise * (1 - 10/100) )
-						end
+						----review
 
 						--TODO, revoir cette partie, y'a souvent erreur d'ETA ici
-						local dist = flight[f].route[w + 1].eta * speed							--distance covered from mission start to first positive ETA
+						local dist = flight[f].route[w + 1].eta * flight[f].route[w + 1].speed							--distance covered from mission start to first positive ETA
 						if dist > GetDistance(flight[f].route[w], flight[f].route[w + 1]) then	--if distance is ahead of WP (caused by extra minutes at take off WP), keep spawn point over take off point but adjust id and alt for air spawn
 
 							flight[f].route[w].name = "Create Spawn Wp in AtoTiming "..flight[f].route[w].id.." "..tostring(debug.getinfo(1).currentline)
 							flight[f].route[w].id = "Spawn"
 							flight[f].route[w].alt = flight[f].route[w + 1].alt
 							flight[f].route[w].eta = 0											--ETA of WP is at mission start
-							flight[f].route[w].speed = speed									--set NEWSPEED
+							-- flight[f].route[w].speed = speed									--set NEWSPEED
 						
 						else																	--else move the spawn point to new location
+							
+							local offset_WP = GetOffsetPoint(flight[f].route[w + 1], heading, dist)
+
+							-- x = flight[f].route[w + 1].x + math.cos(math.rad(h)) * dist,
+							-- y = flight[f].route[w + 1].y + math.sin(math.rad(h)) * dist,
+
 							flight[f].route[w] = {
 								name = "Create Spawn Wp in AtoTiming "..flight[f].route[w].id.." "..tostring(debug.getinfo(1).currentline),
-								x = flight[f].route[w + 1].x + math.cos(math.rad(h)) * dist,
-								y = flight[f].route[w + 1].y + math.sin(math.rad(h)) * dist,
+								x = offset_WP.x,
+								y = offset_WP.y,
 								eta = 0,														--ETA of WP is at mission start
 								id = "Spawn",													--WP is spawn point
 								alt = flight[f].route[w + 1].alt,
-								speed = speed,													--set NEWSPEED
+								speed = flight[f].route[w + 1].speed,													--set NEWSPEED
 							}
 						end
+						
+						
+						
+						
+						-- local speed
+						-- if flight[f].route[w].id == "IP" then
+						-- 	speed = main_vAttack
+						-- else
+						-- 	speed = main_vCruise
+						-- end
+
+						-- if speed < flight[f].loadout.vCruise * (1 - 10/100) then
+						-- 	speed = flight[f].loadout.vCruise * (1 - 10/100)
+						-- end
+
+						-- --TODO, revoir cette partie, y'a souvent erreur d'ETA ici
+						-- local dist = flight[f].route[w + 1].eta * speed							--distance covered from mission start to first positive ETA
+						-- if dist > GetDistance(flight[f].route[w], flight[f].route[w + 1]) then	--if distance is ahead of WP (caused by extra minutes at take off WP), keep spawn point over take off point but adjust id and alt for air spawn
+
+						-- 	flight[f].route[w].name = "Create Spawn Wp in AtoTiming "..flight[f].route[w].id.." "..tostring(debug.getinfo(1).currentline)
+						-- 	flight[f].route[w].id = "Spawn"
+						-- 	flight[f].route[w].alt = flight[f].route[w + 1].alt
+						-- 	flight[f].route[w].eta = 0											--ETA of WP is at mission start
+						-- 	flight[f].route[w].speed = speed									--set NEWSPEED
+						
+						-- else																	--else move the spawn point to new location
+						-- 	flight[f].route[w] = {
+						-- 		name = "Create Spawn Wp in AtoTiming "..flight[f].route[w].id.." "..tostring(debug.getinfo(1).currentline),
+						-- 		x = flight[f].route[w + 1].x + math.cos(math.rad(h)) * dist,
+						-- 		y = flight[f].route[w + 1].y + math.sin(math.rad(h)) * dist,
+						-- 		eta = 0,														--ETA of WP is at mission start
+						-- 		id = "Spawn",													--WP is spawn point
+						-- 		alt = flight[f].route[w + 1].alt,
+						-- 		speed = speed,													--set NEWSPEED
+						-- 	}
+						-- end
 
 						airstart = w															--store the number of the spawn WP (WPs ahead will be removed)
 						break

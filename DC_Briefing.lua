@@ -1420,7 +1420,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 											local time = ""
 											local occurence = 0
 
-											for w , wpt in ipairs(role[fr].route) do
+											for _ , wpt in ipairs(role[fr].route) do
 												if wpt.id == "Station" and occurence == 0 then
 													time = FormatTime(camp.time + wpt.eta, "hh:mm")
 													occurence = occurence + 1
@@ -1925,18 +1925,21 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 					--***************************************************************************
 					--tanker_freq			
-					-- Display(tanker_freq, "DcB tanker_freq")
-					local copy_tanker_freq = Deepcopy(frq_Tanker)
+					local tanker_freq_2 = Deepcopy(frq_Tanker)
 					if refuelable then
-						for vN, value in pairs(frq_Tanker) do
+						
+						for _, value in pairs(frq_Tanker) do
 							local callINI = value.callsign
 							freqA = tonumber(value.freq) or 0
 							local call = ""
-
-							for copy_vN, copyValue in pairs(copy_tanker_freq) do
-								if tonumber(copyValue.freq) == freqA  then
-									-- call = call .. ""..copyValue.callsign.." ("..copyValue.time..")"
-									call = call .. " - "..copyValue.callsign
+							local n_txt = ""
+							local occurenceN = 0
+							
+							for tankerN, value2 in pairs(tanker_freq_2) do
+								if occurenceN >= 1 then n_txt = " - " else n_txt = "" end
+								if tonumber(value2.freq) == freqA  then
+									call = call .. n_txt..value2.callsign
+									occurenceN = occurenceN + 1
 								end
 							end
 							if value.flight == 1 then
@@ -1970,12 +1973,10 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					local copy_AFAC_freq = Deepcopy(freq_AFAC)
 					for vN, value in pairs(freq_AFAC) do
 						freqA = tonumber(value.freq) or 0
-						-- local call = string.sub(value.callsign, 1, -3)
 						local call = ""
 
 						for copy_vN, copyValue in pairs(copy_AFAC_freq) do
 							if tonumber(copyValue.freq) == freqA  then
-								-- call = call .. ""..copyValue.callsign.." ("..copyValue.time..")"
 								call = call .. " "..copyValue.callsign
 							end
 						end
@@ -2014,19 +2015,16 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 							if freqCapability(freqA, radioP, Nradio, "") then
-								-- for u = 1, #tempPlayer.group["units"] do
-									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
-										if radioP[Nradio].startCanal == 0 then MC = -1 end
-										-- if RadioA[sideName][Nradio]  then
-										table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-										entry["radio"] = radioName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
-										local entryCopy = Deepcopy(entry)
-										table.insert(entriesRadio[Nradio], entryCopy)
-									elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
-										local entryCopy = Deepcopy(entry)
-										table.insert(entriesRadio[Nradio], entryCopy)
-									end
-								-- end
+								if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+									if radioP[Nradio].startCanal == 0 then MC = -1 end
+									table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+									entry["radio"] = radioName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+									local entryCopy = Deepcopy(entry)
+									table.insert(entriesRadio[Nradio], entryCopy)
+								elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
+									local entryCopy = Deepcopy(entry)
+									table.insert(entriesRadio[Nradio], entryCopy)
+								end
 							end
 						end
 					end
@@ -2043,19 +2041,16 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 								if freqCapability(freqA, radioP, Nradio, "") then
-									-- for u = 1, #tempPlayer.group["units"] do
-										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
-											if radioP[Nradio].startCanal == 0 then MC = -1 end
-											-- if RadioA[sideName][Nradio]  then
-											table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-											entry["radio"] = radioName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
-											local entryCopy = Deepcopy(entry)
-											table.insert(entriesRadio[Nradio], entryCopy)
-										elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
-											local entryCopy = Deepcopy(entry)
-											table.insert(entriesRadio[Nradio], entryCopy)
-										end
-									-- end
+									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+										if radioP[Nradio].startCanal == 0 then MC = -1 end
+										table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+										entry["radio"] = radioName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+										local entryCopy = Deepcopy(entry)
+										table.insert(entriesRadio[Nradio], entryCopy)
+									elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
+										local entryCopy = Deepcopy(entry)
+										table.insert(entriesRadio[Nradio], entryCopy)
+									end
 								end
 							end
 						end
@@ -2091,15 +2086,13 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 									if freqCapability(freqA, radioP, radioN, "ATC "..tostring(baseName)) then
-										-- for u = 1, #tempPlayer.group["units"] do
-											if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
-												if radioP[radioN].startCanal == 0 then MC = -1 end
-												table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
-												entry["radio"] = radioName[radioN].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][radioN]["channels"]	 + MC
-												local entryCopy = Deepcopy(entry)
-												table.insert(entriesRadio[radioN], entryCopy)
-											end
-										-- end
+										if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
+											if radioP[radioN].startCanal == 0 then MC = -1 end
+											table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
+											entry["radio"] = radioName[radioN].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][radioN]["channels"]	 + MC
+											local entryCopy = Deepcopy(entry)
+											table.insert(entriesRadio[radioN], entryCopy)
+										end
 									end
 								end
 							end
@@ -2118,19 +2111,16 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 								if freqCapability(freqA, radioP, Nradio, "") then
-									-- for u = 1, #tempPlayer.group["units"] do
-										if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
-											if radioP[Nradio].startCanal == 0 then MC = -1 end
-											-- if RadioA[sideName][Nradio]  then
-											table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-											entry["radio"] = radioName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
-											local entryCopy = Deepcopy(entry)
-											table.insert(entriesRadio[Nradio], entryCopy)
-										elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
-											local entryCopy = Deepcopy(entry)
-											table.insert(entriesRadio[Nradio], entryCopy)
-										end
-									-- end
+									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
+										if radioP[Nradio].startCanal == 0 then MC = -1 end
+										table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
+										entry["radio"] = radioName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
+										local entryCopy = Deepcopy(entry)
+										table.insert(entriesRadio[Nradio], entryCopy)
+									elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
+										local entryCopy = Deepcopy(entry)
+										table.insert(entriesRadio[Nradio], entryCopy)
+									end
 								end
 							end
 						end

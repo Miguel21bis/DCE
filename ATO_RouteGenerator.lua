@@ -18,8 +18,6 @@ versionDCE["ATO_RouteGenerator.lua"] = "1.8.50"
 
 
 local debugRoute = false
-
-local deltaT = 0.15		-- deltaT = 0.25
 local assemblePlanePtDist = 20000
 local assembleHeliPtDist = 2000
 
@@ -73,6 +71,35 @@ local function findIntersect(l1p1, l1p2, l2p1, l2p2)
     end
 
     return x, y
+end
+
+
+-- Détecte si le segment [A, B] croise la frontière ennemie (polygone ou liste de polygones)
+function CheckENY_BorderCrossPoint(A, B, enemyBoundary)
+    -- enemyBoundary peut être un polygone (table de points) ou une liste de polygones
+    local function checkPoly(poly)
+        for i = 1, #poly do
+            local p1 = poly[i]
+            local p2 = poly[i % #poly + 1] -- boucle sur le dernier segment
+            local x, y = findIntersect(A, B, p1, p2)
+            if x and y then
+                return {x = x, y = y}
+            end
+        end
+        return nil
+    end
+
+    -- Si c'est une liste de polygones
+    if type(enemyBoundary[1]) == "table" and enemyBoundary[1].x == nil then
+        for _, poly in ipairs(enemyBoundary) do
+            local cross = checkPoly(poly)
+            if cross then return cross end
+        end
+    else
+        -- Un seul polygone
+        return checkPoly(enemyBoundary)
+    end
+    return nil
 end
 
 
@@ -133,12 +160,12 @@ local function createPolyAltiHelico(unitHelico, hHover)
 
 end
 
-function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, multipackmax, unit, idDraftPackage, viaFARP)							--enemy: "blue" or "red"; time: "day" or "night" -- Miguel21 modification M06 : helicoptere playable (ajout variable helico)
+function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, multipackmax, unit, viaFARP)							--enemy: "blue" or "red"; time: "day" or "night" -- Miguel21 modification M06 : helicoptere playable (ajout variable helico)
 
-	local i_timmer01 = 0
 	local route = {}																									--table to store the route to be built
 	local route_axis = GetHeadingDegre(target, basePoint)																--axis base-target
 	local standoff																										--standoff distance of attack WP from target
+	local enemySide_name = DCS_ENI_Side[sideName]																												--determine enemy side (opposite of unit side)
 
 	local is_helicopter = false
 	if IsHelicopter[unit.type]  then
@@ -156,7 +183,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 	end
 
 	--function to return radar horizon
-	local function RadarHorizon(h1, h2)
+	local function radarHorizon(h1, h2)
 		local r = 8500000																										--radius of earth (actual value 6371000 currected for refraction of radio waves)
 		local d1 = math.sqrt(math.pow(r + h1, 2) - math.pow(r, 2))															--distance from radar height to earth tangent point
 		local d2 = math.sqrt(math.pow(r + h2, 2) - math.pow(r, 2))															--distance from target altitude to earth tangent point
@@ -179,7 +206,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 	-- if helicopter then HiddenCheck = true end																		-- l'helicoptere vole bas et voit les menaces, meme caché
 	threat_table.ground[profile.hCruise] = {}
 	threat_table.ground[profile.hAttack] = {}
-	for threat_n,threat in pairs(groundthreats[enemy]) do																--iterate through ground threats
+	for threat_n,threat in pairs(groundthreats[enemySide_name]) do																--iterate through ground threats
 		if (time == "day" or threat.night == true) and (not threat.hidden or is_helicopter)  then							--and threat.hidden == HiddenCheck										--during day or threat is night capable to be counted as threat
 			local threatentry = {
 				class = threat.class,
@@ -190,7 +217,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 				type = threat.type,
 			}
 			if threat.min_alt <= profile.hCruise and threat.max_alt >= profile.hCruise then								--threat covers cruise alt
-				local maxrange = RadarHorizon(threat.elevation, profile.hCruise + 100)									--get the maximal range due to radar horizon (profile alt +100 m for safety)
+				local maxrange = radarHorizon(threat.elevation, profile.hCruise + 100)									--get the maximal range due to radar horizon (profile alt +100 m for safety)
 				if maxrange < threat.range then																			--maximal range due to radar horizon is smaller than threat range
 					threatentry.range = maxrange																		--use maximal range due to radar horizon
 				end
@@ -204,7 +231,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			if profile.hCruise ~= profile.hAttack then																	--attack alt is different than cruise alt
 				if threat.min_alt <= profile.hAttack and threat.max_alt >= profile.hAttack then							--threat covers attack alt		
 					threatentry.range = threat.range
-					local maxrange = RadarHorizon(threat.elevation, profile.hAttack + 100)								--get the maximal range due to radar horizon (profile alt +100 m for safety)
+					local maxrange = radarHorizon(threat.elevation, profile.hAttack + 100)								--get the maximal range due to radar horizon (profile alt +100 m for safety)
 					if maxrange < threat.range then																		--maximal range due to radar horizon is smaller than threat range
 						threatentry.range = maxrange																	--use maximal range due to radar horizon
 					end
@@ -221,7 +248,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 
 	threat_table.ewr[profile.hCruise] = {}
 	threat_table.ewr[profile.hAttack] = {}
-	for threat_n,threat in pairs(EWR_DB[enemy]) do																			--iterate through ewr threats
+	for threat_n,threat in pairs(EWR_DB[enemySide_name]) do																			--iterate through ewr threats
 		local cruisethreatentry = {
 			class = threat.class,
 			x = threat.x,
@@ -229,7 +256,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			range = threat.range,
 		}
 		if threat.min_alt <= profile.hCruise and threat.max_alt >= profile.hCruise then									--threat covers cruise alt
-			local maxrange = RadarHorizon(threat.elevation, profile.hCruise + 100)										--get the maximal range due to radar horizon (profile alt +100 m for safety)
+			local maxrange = radarHorizon(threat.elevation, profile.hCruise + 100)										--get the maximal range due to radar horizon (profile alt +100 m for safety)
 			if maxrange < threat.range then																				--maximal range due to radar horizon is smaller than threat range
 				cruisethreatentry.range = maxrange																			--use maximal range due to radar horizon
 			end
@@ -242,7 +269,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			range = threat.range,
 		}
 		if threat.min_alt <= profile.hAttack and threat.max_alt >= profile.hAttack then									--threat covers attack alt		
-			local maxrange = RadarHorizon(threat.elevation, profile.hAttack + 100)										--get the maximal range due to radar horizon (profile alt +100 m for safety)
+			local maxrange = radarHorizon(threat.elevation, profile.hAttack + 100)										--get the maximal range due to radar horizon (profile alt +100 m for safety)
 			if maxrange < threat.range then																				--maximal range due to radar horizon is smaller than threat range
 				attackthreatentry.range = maxrange																		--use maximal range due to radar horizon
 			end
@@ -252,9 +279,8 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 
 
 	--function to check if a line between two points runs through a threat. Returns a table of threats
-	local function ThreatOnLeg(point1, point2, leg_alt)
+	local function threatOnLeg(point1, point2, leg_alt)
 		local tbl = {}																									--local table to collect threats on route leg
-		local tempB = 0
 
 		--check ground threats
 		for t = 1, #threat_table.ground[leg_alt] do																		--iterate through all ground threats
@@ -276,31 +302,31 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 						approachfactor = 0
 					}
 
-					tempB = #Fighterthreats[enemy]
-					for t = 1, #Fighterthreats[enemy] do																	--iterate through all fighter threats
+					tempB = #Fighterthreats[enemySide_name]
+					for t = 1, #Fighterthreats[enemySide_name] do																	--iterate through all fighter threats
 						local ewr_required																					--boolean whether ewr is required for the fighter to be a threat
-						if Fighterthreats[enemy][t].class == "CAP" then														--if the fighter is CAP
+						if Fighterthreats[enemySide_name][t].class == "CAP" then														--if the fighter is CAP
 							if leg_alt >= 3000 then																			--if route leg is at high altitude
 								ewr_required = false																		--CAP does not need ewr to be a threat
 							else																							--if route leg is at low altitude
-								if Fighterthreats[enemy][t].LDSD then														--if fighter is look down/shoot down capable
+								if Fighterthreats[enemySide_name][t].LDSD then														--if fighter is look down/shoot down capable
 									ewr_required = false																	--CAP does not need ewr to be a threat
 								else																						--if fighter is not look down/shoot down capable
 									ewr_required = true																		--CAP needs ewr to be a threat
 								end
 							end
-						elseif Fighterthreats[enemy][t].class == "Intercept" then											--if the fighter is an interceptor
+						elseif Fighterthreats[enemySide_name][t].class == "Intercept" then											--if the fighter is an interceptor
 							ewr_required = true																				--ewr is required for fighter to be a threat (needs early warning to take off)
 						end
 
 						if ewr_required == true then																		--EWR stations that can command fighters that require ewr guidance are counted as threats (AWACS and fighter areas are ignored, since these are too large areas to avoid anyway)
-							if GetDistance(threat_table.ewr[leg_alt][e], Fighterthreats[enemy][t]) < threat_table.ewr[leg_alt][e].range + Fighterthreats[enemy][t].range then	--if Fighterthreats and ewr are overlapping
-								if GetTangentDistance(point1, point2, Fighterthreats[enemy][t]) < Fighterthreats[enemy][t].range then								--if route leg is in range of fighterthreat
+							if GetDistance(threat_table.ewr[leg_alt][e], Fighterthreats[enemySide_name][t]) < threat_table.ewr[leg_alt][e].range + Fighterthreats[enemySide_name][t].range then	--if Fighterthreats and ewr are overlapping
+								if GetTangentDistance(point1, point2, Fighterthreats[enemySide_name][t]) < Fighterthreats[enemySide_name][t].range then								--if route leg is in range of fighterthreat
 									if GetTangentDistance(point1, point2, threat_table.ewr[leg_alt][e]) < threat_table.ewr[leg_alt][e].range then					--if route leg is in range of ewr
 										local approachfactor = 1 - GetTangentDistance(point1, point2, threat_table.ewr[leg_alt][e]) / threat_table.ewr[leg_alt][e].range		--factor how close route passes to threat (1 = on top)
 										if approachfactor > entry.approachfactor then										--approach factor is higher than current entry for this ewr
 											entry = threat_table.ewr[leg_alt][e]											--make this ewr the entry
-											entry.level = Fighterthreats[enemy][t].level									--capability level of fighter becomes new threat level of EWR station
+											entry.level = Fighterthreats[enemySide_name][t].level									--capability level of fighter becomes new threat level of EWR station
 											entry.approachfactor = approachfactor											--factor how close route passes to threat (1 = on top)
 										end
 									end
@@ -321,23 +347,14 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 
 
 	--function to define a set of nav points to make a route between two points that evades threats
-	local function FindPath(from, to)
+	local function findPath(from, to)
 
-		i_timmer01 = i_timmer01 +1
-		local FindPathLegTable = {}																									--table to store the the FindPathLeg functions for execution
-		local NavRoutes = {}																										--table to temporary store all possible nav routes
+		local findPathLegTable = {}																									--table to store the the FindPathLeg functions for execution
+		local navRoutes = {}																										--table to temporary store all possible nav routes
 		local direct_distance = GetDistance(from, to)																				--distance of direct path between start and end of route
 		local no_threat_route = {}																									--to collect route branches that found a no threat route in order to cancel other arms of that branch
 
-		local berfor = os.clock()
-		local afterInterB = os.clock()
-
 		local function FindPathLeg(point1, point2, pointEnd, distance, arg_route, instance, leg_alt)									--find a route between point1 and point2		
-
-
-
-			local afterInter = os.clock()
-			if debugRoute and  afterInter >= berfor + 0.10  then print() print("|FindPath D: "..afterInter - berfor.." |") end
 
 			instance = instance + 1																									--increase instance of the function
 
@@ -381,7 +398,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			--also try a low variant
 			if instance == 1 and leg_alt > profile.hAttack and not tooHighReliefB  then	--and not tooHighReliefB																	--in first instance also make a low level route if attack alt is lower than cruise alt
 				-- table.insert(FindPathLegTable, {point1, point2, pointEnd, distance + 1, route, instance - 1, profile.hAttack})		--try leg again low (do not increase instance), increase distance slighly to introduce a bias against going low compared to the identical route high
-					FindPathLegTable[#FindPathLegTable+1] = {point1, point2, pointEnd, distance + 1, arg_route, instance - 1, profile.hAttack}
+					findPathLegTable[#findPathLegTable+1] = {point1, point2, pointEnd, distance + 1, arg_route, instance - 1, profile.hAttack}
 			end
 
 			--abort unneeded pathfing after a valid route has been found
@@ -390,7 +407,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			end
 
 			local distance_remain = GetDistance(point1, pointEnd)																	--remaining distance to end
-			local threat = ThreatOnLeg(point1, point2, leg_alt)																		--get the threat between point1 and point2
+			local threat = threatOnLeg(point1, point2, leg_alt)																		--get the threat between point1 and point2
 
 			--save the current route variant directly to end before trying to refine it further
 			local threatsum = 0																										--sum of threats from current point1 to end
@@ -399,7 +416,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 					threatsum = threatsum + threat[t].approachfactor																--sum the factors of each threat (1 = on top, 0 = tangential)
 				end
 			else
-				local threat2 = ThreatOnLeg(point1, pointEnd, leg_alt)																--get the threat between point1 and pointEnd
+				local threat2 = threatOnLeg(point1, pointEnd, leg_alt)																--get the threat between point1 and pointEnd
 				for t = 1, #threat2 do
 					threatsum = threatsum + threat2[t].approachfactor																--sum the factors of each threat (1 = on top, 0 = tangential)
 				end
@@ -407,7 +424,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 
 			if not tooHighReliefB then
 				-- table.insert(NavRoutes, {navpoints = route, dist = distance + distance_remain, threats = threatsum})					--save route variant directly to end from current route branch
-				NavRoutes[#NavRoutes+1] = {navpoints = arg_route, dist = distance + distance_remain, threats = threatsum}
+				navRoutes[#navRoutes+1] = {navpoints = arg_route, dist = distance + distance_remain, threats = threatsum}
 			end
 
 			if threatsum == 0 and not tooHighReliefB then																									--there are no threats to end (also no unavoidable threats)
@@ -435,7 +452,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 					-- table.insert(route, point2)																						--add point2 to route
 					arg_route[#arg_route+1] =  point2
 					-- table.insert(FindPathLegTable, {point2, pointEnd, pointEnd, distance, route, instance, leg_alt})				--continue find route from point2 to end
-					FindPathLegTable[#FindPathLegTable+1] = {point2, pointEnd, pointEnd, distance, arg_route, instance, leg_alt}
+					findPathLegTable[#findPathLegTable+1] = {point2, pointEnd, pointEnd, distance, arg_route, instance, leg_alt}
 				end
 
 			elseif #threat > 0 and not tooHighReliefB then																													--if there is a threat on leg			
@@ -458,7 +475,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 						end
 					end
 
-					local threat_leg = ThreatOnLeg(point1, point2alt, leg_alt)													--get threat between point1 and alternate point2
+					local threat_leg = threatOnLeg(point1, point2alt, leg_alt)													--get threat between point1 and alternate point2
 
 					--ignore threats that point1 is already in
 					for t = #threat_leg, 1, -1 do																				--iterate through threats from back to front
@@ -480,10 +497,10 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 							-- table.insert(route_alt, point2alt)																		--add point2alt to this route variant
 							route_alt[#route_alt+1] =  point2alt
 							-- table.insert(FindPathLegTable, {point2alt, pointEnd, pointEnd, distance_alt, route_alt, instance, leg_alt})	--continue route from point2alt
-							FindPathLegTable[#FindPathLegTable+1] = {point2alt, pointEnd, pointEnd, distance_alt, route_alt, instance, leg_alt}
+							findPathLegTable[#findPathLegTable+1] = {point2alt, pointEnd, pointEnd, distance_alt, route_alt, instance, leg_alt}
 						else																										--if there is a threat between point1 and point2alt
 							-- table.insert(FindPathLegTable, {point1, point2alt, pointEnd, distance, route, instance, leg_alt})		--find new route to point2alt
-							FindPathLegTable[#FindPathLegTable+1] = {point1, point2alt, pointEnd, distance, arg_route, instance, leg_alt}
+							findPathLegTable[#findPathLegTable+1] = {point1, point2alt, pointEnd, distance, arg_route, instance, leg_alt}
 						end
 					end
 				end
@@ -530,7 +547,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 
 
 							-- table.insert(FindPathLegTable, {point1, point2alt, pointEnd, distance, route, instance, leg_alt})		--find new route to point2alt
-							FindPathLegTable[#FindPathLegTable+1] = {point1, point2alt, pointEnd, distance, arg_route, instance, leg_alt}
+							findPathLegTable[#findPathLegTable+1] = {point1, point2alt, pointEnd, distance, arg_route, instance, leg_alt}
 
 						end
 
@@ -538,7 +555,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 				end
 			end
 
-			if is_helicopter and  #FindPathLegTable == 1 then
+			if is_helicopter and  #findPathLegTable == 1 then
 				local test = {																						--local table to store the currently selected optimal route
 				routeImpossible = true,
 				}
@@ -548,10 +565,10 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 
 		end		--function FindPathLeg()
 
-		table.insert(FindPathLegTable, {from, to, to, 0, {}, 0, profile.hCruise})									--insert first instance of FindPathLeg to find a route between start and end point. arguments: start, end, final end (same), initial route distance 0, initial route empty {}, initial instance of the function 0, cruise alt
+		table.insert(findPathLegTable, {from, to, to, 0, {}, 0, profile.hCruise})									--insert first instance of FindPathLeg to find a route between start and end point. arguments: start, end, final end (same), initial route distance 0, initial route empty {}, initial instance of the function 0, cruise alt
 
-		for num,arg in ipairs(FindPathLegTable) do																	--go through table of FindPathLegt functions and execute them. Each FindPathLegt functions can add more instances of same function for execution at end of table
-			i_timmer01 = i_timmer01 +1
+		for num,arg in ipairs(findPathLegTable) do																	--go through table of FindPathLegt functions and execute them. Each FindPathLegt functions can add more instances of same function for execution at end of table
+			
 			if is_helicopter then
 				--  print("AtoRG BOUCLE FOR C "..tostring(num))
 			end
@@ -572,15 +589,15 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			dist = GetDistance(from, to)
 		}
 
-		if #NavRoutes == 0 then
+		if #navRoutes == 0 then
 			return temp_route
 		else
-			for n = 1, #NavRoutes do																				--Go through all stored routes
+			for n = 1, #navRoutes do																				--Go through all stored routes
 				if n == 1 then
-					temp_route = NavRoutes[n]																		--make first route the temp route
+					temp_route = navRoutes[n]																		--make first route the temp route
 				else
-					if NavRoutes[n].threats < temp_route.threats or (NavRoutes[n].threats == temp_route.threats and NavRoutes[n].dist < temp_route.dist) then	--if next route has either less threats or the same threats and shorter distance, make this the current temp route
-						temp_route = NavRoutes[n]
+					if navRoutes[n].threats < temp_route.threats or (navRoutes[n].threats == temp_route.threats and navRoutes[n].dist < temp_route.dist) then	--if next route has either less threats or the same threats and shorter distance, make this the current temp route
+						temp_route = navRoutes[n]
 					end
 				end
 			end
@@ -592,10 +609,12 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 
 	----- find a route depending on task -----
 	if task == "Strike" or task == "Anti-ship Strike" or task == "Reconnaissance" or task == "CSAR" or task == "Runway Attack" then
+		
+		--///////////////////==========================================================
 		--set Initial Point IP
+		--///////////////////==========================================================		
 		local initialPoint = {}																				--initial point
-
-		local base_target_route = FindPath(basePoint, target)											--find the safest route between basePoint and target
+		local base_target_route = findPath(basePoint, target)											--find the safest route between basePoint and target
 
 		if task == "CSAR" and is_helicopter   then
 			if base_target_route.routeImpossible  then
@@ -628,50 +647,47 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 		end
 
 		do
-			local IP_distance = standoff + profile.vAttack * 60												--distance target-IP is standoff range from profile + 60 seconds run in at attack speed
+			local ip_distance = standoff + profile.vAttack * 60												--distance target-IP is standoff range from profile + 60 seconds run in at attack speed
 			if profile.ingress then																			--ingress distance is defined in loadout
-				IP_distance = standoff + profile.ingress
+				ip_distance = standoff + profile.ingress
 			end
 			local IP_table = {}																				--table to store all possible IPs
 
-			local MaxAttackOffset = 90
+			local maxAttackOffset = 90
 			if profile.MaxAttackOffset then
-				MaxAttackOffset = profile.MaxAttackOffset
+				maxAttackOffset = profile.MaxAttackOffset
 			end
 
-			local heading_min = ideal_axis - MaxAttackOffset												--lowest heading from target to IP
-			local heading_max = ideal_axis + MaxAttackOffset												--highest heading from target to IP
+			local heading_min = ideal_axis - maxAttackOffset												--lowest heading from target to IP
+			local heading_max = ideal_axis + maxAttackOffset												--highest heading from target to IP
 			if multipackmax > 1 then																		--if this is part of a multi package attack
-				ideal_axis = heading_min + (multipackn - 1) / (multipackmax - 1) * (MaxAttackOffset * 2)	--distribute ideal axis evenly across maximal left/right offset depending on package number
+				ideal_axis = heading_min + (multipackn - 1) / (multipackmax - 1) * (maxAttackOffset * 2)	--distribute ideal axis evenly across maximal left/right offset depending on package number
 			end
-
-			local afterInterAa = os.clock()
 
 			for n = 0, 180, 5 do	--5		--10																--find IP by evaluating threat level for IPs between heading min and heading max in 5� steps
 				if initialPoint.x then																		--break loop if an IP is set																
 					break
 				else
 					for m = 1, -1, -2 do																		--try left and right option for each offset from ideal axis (*1, *-1)
-						local IP_heading = ideal_axis + (n * m)													--current IP heading to consider
-						if (IP_heading >= heading_min and IP_heading <= heading_max) or task == "CSAR" then							--IP heading must be within min and max offsets
-							local draft_IP = GetOffsetPoint(target, IP_heading, IP_distance)				--draft IP for current offset
+						local ip_heading = ideal_axis + (n * m)													--current IP heading to consider
+						if (ip_heading >= heading_min and ip_heading <= heading_max) or task == "CSAR" then							--IP heading must be within min and max offsets
+							local draft_IP = GetOffsetPoint(target, ip_heading, ip_distance)				--draft IP for current offset
 							local draft_attackPoint = target
 							if standoff > 15000 then															--if standoff range is more than 15'000m, assume target will not be overflown.
-								draft_attackPoint = GetOffsetPoint(target, IP_heading, standoff)			--draft attack point
+								draft_attackPoint = GetOffsetPoint(target, ip_heading, standoff)			--draft attack point
 							end
-							local threat = ThreatOnLeg(draft_IP, draft_attackPoint, profile.hAttack)			--all threats between draft IP and draft attack point
+							local threat = threatOnLeg(draft_IP, draft_attackPoint, profile.hAttack)			--all threats between draft IP and draft attack point
 
 							if  debugRoute then io.write(" "..#threat.." ") end
 
 							local total_threat_level = 0														--cumulated threat level for this leg
-							local EWRpenality = false
+							local awr_penality = false
 							for t = 1, #threat do																--iterate through all threats on this option				
-								i_timmer01 = i_timmer01 +1
-
+								
 								if threat[t].class == "EWR" then												--threat is an EWR
-									if EWRpenality == false then												--threat is the first EWR encountered
+									if awr_penality == false then												--threat is the first EWR encountered
 										total_threat_level = total_threat_level + 0.1							--add a small threat level once if there are any EWR encountered betwen draft IP and draft attack point (this means there will be a small bias for IPs that are not under any EWR, but multiple EWR will not affect IP direction).
-										EWRpenality = true														--mark that the threat penality for one EWR has been marked 
+										awr_penality = true														--mark that the threat penality for one EWR has been marked 
 									end
 								else
 									local closest_approach = GetTangentDistance(draft_IP, draft_attackPoint, threat[t])	--closest approach distance to threat
@@ -709,11 +725,6 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 				end
 			end
 
-			local afterInter = os.clock()
-			if  debugRoute and afterInter >= afterInterAa + deltaT  then print() print("|Strike IPa: "..afterInter - afterInterAa.." |") end
-			local afterInterBa = os.clock()
-
-
 			if initialPoint.x == nil then																	--if IP is not yet set, find the best from IP table
 				local current_threat = 1000000
 				for n = 1, #IP_table do																		--iterate through all draft IPs to find to one with the lowest threat level
@@ -726,14 +737,15 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			end
 		end
 
-		local afterInter = os.clock()
-		local afterInterB = os.clock()
-		
+		--///////////////////==========================================================
 		--set attack point
+		--///////////////////==========================================================
 		local target_ip_heading = GetHeadingDegre(target, initialPoint)
 		local attackPoint = GetOffsetPoint(target, target_ip_heading, standoff)						--attack point is standoff range from target on straight IP-target line
 
+		--///////////////////==========================================================		
 		--set egress point
+		--///////////////////==========================================================		
 		local egressPoint = {}																				--egress point
 		do
 			local egress_point_start																		--point from where egress is initiated (target or attack point depending on standoff profile)
@@ -742,11 +754,11 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			if profile.egress then																			--egress distance is defined in loadout
 				egress_distance = standoff + profile.egress
 			end
+
 			local egress_heading
 
 			if task == "Strike" or task == "Anti-ship Strike" or task == "Runway Attack" then
-				local afterInterAb = os.clock()
-
+				
 				if standoff <= 15000 then																		--if standoff range is 15'000m or less, assume target will be overflown. Optimal egress should be 90� offset from ingress in direction of RTB
 					egress_point_start = target															--egress starts from target
 
@@ -769,17 +781,16 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 						break
 					else
 						for m = 1, -1, -2 do																	--try left and right option for each offset from egress heading (*1, *-1)
-							i_timmer01 = i_timmer01 +1
 							if GetDeltaHeading(egress_heading + n * m, target_ip_heading) >= 15 or GetDeltaHeading(egress_heading + n * m, target_ip_heading) <= -15 then	--valid egresses must be at least 15� offset from ingress
 								local draft_egress = GetOffsetPoint(egress_point_start, egress_heading + n * m, egress_distance)	--draft egress for current offset
-								local threat = ThreatOnLeg(egress_point_start, draft_egress, profile.hAttack)		--all threats between attack point and draft egress point
+								local threat = threatOnLeg(egress_point_start, draft_egress, profile.hAttack)		--all threats between attack point and draft egress point
 								local total_threat_level = 0														--cumulated threat level for this leg
-								local EWRpenality = false
+								local ewr_penality = false
 								for t = 1, #threat do																--iterate through all threats on this option				
 									if threat[t].class == "EWR" then												--threat is an EWR
-										if EWRpenality == false then												--threat is the first EWR encountered
+										if ewr_penality == false then												--threat is the first EWR encountered
 											total_threat_level = total_threat_level + 0.1							--add a small threat level once if there are any EWR encountered betwen attack point and draft egress point (this means there will be a small bias for IPs that are not under any EWR, but multiple EWR will not affect IP direction).
-											EWRpenality = true														--mark that the threat penality for one EWR has been marked 
+											ewr_penality = true														--mark that the threat penality for one EWR has been marked 
 										end
 									else
 										local closest_approach = GetTangentDistance(egress_point_start, draft_egress, threat[t])	--closest approach distance to threat
@@ -801,7 +812,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 				end
 
 			elseif task == "Reconnaissance"  then																	--for recon missions
-				local afterInterAb = os.clock()
+
 				egress_heading = GetHeadingDegre(initialPoint, target)
 				for n = 0, 30, 5 do																					--find egress point by evaluating threat level for egress between egress heading and +/- 30� offset in 5� steps
 					if egressPoint.x then																			--break loop if an egress point is set																
@@ -809,14 +820,14 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 					else
 						for m = 1, -1, -2 do																		--try left and right option for each offset from egress heading (*1, *-1)
 							local draft_egress = GetOffsetPoint(target, egress_heading + n * m, egress_distance)	--draft egress for current offset
-							local threat = ThreatOnLeg(target, draft_egress, profile.hAttack)					--all threats between target point and draft egress point
+							local threat = threatOnLeg(target, draft_egress, profile.hAttack)					--all threats between target point and draft egress point
 							local total_threat_level = 0															--cumulated threat level for this leg
-							local EWRpenality = false
+							local ewr_penality = false
 							for t = 1, #threat do																--iterate through all threats on this option				
 								if threat[t].class == "EWR" then												--threat is an EWR
-									if EWRpenality == false then												--threat is the first EWR encountered
+									if ewr_penality == false then												--threat is the first EWR encountered
 										total_threat_level = total_threat_level + 0.1							--add a small threat level once if there are any EWR encountered betwen attack point and draft egress point (this means there will be a small bias for IPs that are not under any EWR, but multiple EWR will not affect IP direction).
-										EWRpenality = true														--mark that the threat penality for one EWR has been marked 
+										ewr_penality = true														--mark that the threat penality for one EWR has been marked 
 									end
 								else
 									local threat_level = GetTangentLenght(target, draft_egress, threat[t], threat[t].range) / (threat[t].range * 2) * threat[t].level		--threat level for this indiviudal threat (path lenght in threat circle compared to threat diameter)
@@ -834,7 +845,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 				end
 
 			elseif  task == "CSAR" then																	--for recon missions
-				local afterInterAb = os.clock()
+
 				egress_distance = 0
 				egress_heading = GetHeadingDegre(initialPoint, target)
 				for n = 0, 30, 5 do																					--find egress point by evaluating threat level for egress between egress heading and +/- 30� offset in 5� steps
@@ -843,14 +854,14 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 					else
 						for m = 1, -1, -2 do																		--try left and right option for each offset from egress heading (*1, *-1)
 							local draft_egress = GetOffsetPoint(target, egress_heading + n * m, egress_distance)	--draft egress for current offset
-							local threat = ThreatOnLeg(target, draft_egress, profile.hAttack)					--all threats between target point and draft egress point
+							local threat = threatOnLeg(target, draft_egress, profile.hAttack)					--all threats between target point and draft egress point
 							local total_threat_level = 0															--cumulated threat level for this leg
-							local EWRpenality = false
+							local ewr_penality = false
 							for t = 1, #threat do																--iterate through all threats on this option				
 								if threat[t].class == "EWR" then												--threat is an EWR
-									if EWRpenality == false then												--threat is the first EWR encountered
+									if ewr_penality == false then												--threat is the first EWR encountered
 										total_threat_level = total_threat_level + 0.1							--add a small threat level once if there are any EWR encountered betwen attack point and draft egress point (this means there will be a small bias for IPs that are not under any EWR, but multiple EWR will not affect IP direction).
-										EWRpenality = true														--mark that the threat penality for one EWR has been marked 
+										ewr_penality = true														--mark that the threat penality for one EWR has been marked 
 									end
 								else
 									local threat_level = GetTangentLenght(target, draft_egress, threat[t], threat[t].range) / (threat[t].range * 2) * threat[t].level		--threat level for this indiviudal threat (path lenght in threat circle compared to threat diameter)
@@ -887,10 +898,10 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 		end
 
 		--set outbound and inbound routes
-		local outbound_navRoute = FindPath(basePoint, initialPoint)														--find the safest route between basePoint and initialPoint
-		local inbound_navRoute = FindPath(basePoint, egressPoint)														--find the safest route between egressPoint and basePoint
+		local outbound_navRoute = findPath(basePoint, initialPoint)														--find the safest route between basePoint and initialPoint
+		local inbound_navRoute = findPath(basePoint, egressPoint)														--find the safest route between egressPoint and basePoint
 
-		if task == "CSAR" and is_helicopter   then
+		if task == "CSAR" and is_helicopter then
 			if outbound_navRoute.routeImpossible  then
 				return false
 			else
@@ -898,7 +909,9 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			end
 		end
 
+		--///////////////////==========================================================		
 		--set form-up point
+		--///////////////////==========================================================		
 		local joinPoint = {}																							--point where package joins on common flight route
 		do
 			local point																									--join point is between basePoint and this local point
@@ -919,7 +932,9 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			joinPoint = GetOffsetPoint(basePoint, heading, distance)													--define join point
 		end
 
+		--///////////////////==========================================================		
 		--set split point
+		--///////////////////==========================================================		
 		local splitPoint = {}																							--point where package splits to land on individual airbases		
 		do
 			local point																									--split point is between basePoint and this local point
@@ -940,7 +955,9 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			splitPoint = GetOffsetPoint(basePoint, heading, distance)													--define split point
 		end
 
+		--///////////////////==========================================================		
 		--set assemble point
+		--///////////////////==========================================================		
 		local assemblyPoint = {}
 		-- do
 		-- 	local heading = GetHeading(basePoint, joinPoint)
@@ -1004,10 +1021,11 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 		table.insert(route, {x = splitPoint.x, y = splitPoint.y, id = "Split", alt = profile.hCruise})
 		table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Land", alt = profile.hCruise})
 
-
+		--///////////////////==========================================================
 		--set descend and climb points in route
 		if profile.hCruise > profile.hAttack then																		--if cruise is higher than attack altitude, a descend and a climb point must be inserted
 
+		--///////////////////==========================================================		
 			--descend point
 			for n = 3, #route - 2 do																					--iterate through route between join and split point
 				if route[n].alt == profile.hCruise then
@@ -1015,25 +1033,25 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 					--get high and low threats on route segement
 					local threat = {}																					--threats on leg at high alt default to 0 as an earlier change in altitude is of no advantage
 					if profile.hAttack < 1000 then																		--if attack alt is at low altitude, collect actual threats to determine descend point on route
-						threat = ThreatOnLeg(route[n], route[n + 1], profile.hCruise)									--collect threats on leg at high alt
+						threat = threatOnLeg(route[n], route[n + 1], profile.hCruise)									--collect threats on leg at high alt
 					end
 
 					--reduce threat range of EWR to areas of fighter threat
 					for t = 1, #threat do																				--iterate through threats
 						if threat[t].class == "EWR" then																--threat is an EWR
 							local newEWRrange = 0																		--reduce EWR range to point where route enters the first fighter threat
-							for f = 1, #Fighterthreats[enemy] do														--iterate through fighter threats to find the first fighter threat that route enters into
-								if GetTangentDistance(route[n], route[n + 1], Fighterthreats[enemy][f]) < Fighterthreats[enemy][f].range then	--route passes though fighter threat circle
+							for f = 1, #Fighterthreats[enemySide_name] do														--iterate through fighter threats to find the first fighter threat that route enters into
+								if GetTangentDistance(route[n], route[n + 1], Fighterthreats[enemySide_name][f]) < Fighterthreats[enemySide_name][f].range then	--route passes though fighter threat circle
 									--find point where route enters fighter circle					
 									local heading1 = GetHeadingDegre(route[n], route[n + 1])									--route heading
-									local heading2 = GetHeadingDegre(route[n], Fighterthreats[enemy][f])						--heading to center of threat circle
+									local heading2 = GetHeadingDegre(route[n], Fighterthreats[enemySide_name][f])						--heading to center of threat circle
 									local alpha = math.abs(heading1 - heading2)											--angle beteen both headings
 									if alpha > 180 then
 										alpha = math.abs(alpha - 360)
 									end
 									alpha = math.rad(alpha)
-									local a = Fighterthreats[enemy][f].range											--radius of threat circle
-									local b = GetDistance(route[n], Fighterthreats[enemy][f])							--distance to center of threat circle
+									local a = Fighterthreats[enemySide_name][f].range											--radius of threat circle
+									local b = GetDistance(route[n], Fighterthreats[enemySide_name][f])							--distance to center of threat circle
 									local beta = math.asin(b / (a / math.sin(alpha)))									--sinus sentence
 									beta = math.pi - beta																--since sinus sentence results in two possible angles for beta and only the second is valid, use the second
 									local gamma = math.pi - alpha - beta
@@ -1044,7 +1062,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 										newEWRrange = EWR_p
 									end
 
-									local heading_p_t = GetHeadingDegre(p, Fighterthreats[enemy][f])							--heading from intersection point to fighter threat
+									local heading_p_t = GetHeadingDegre(p, Fighterthreats[enemySide_name][f])							--heading from intersection point to fighter threat
 									local heading_p_EWR = GetHeadingDegre(p, threat[t])										--heading from intersection point to EWR
 									local angle = math.abs(heading_p_t - heading_p_EWR)									--angle beteen both headings
 									if angle > 180 then
@@ -1131,6 +1149,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 				end
 			end
 
+		--///////////////////==========================================================			
 			--climb point
 			for n = #route - 1, 4, -1 do																				--iterate through route backkwards between split and join point
 				if route[n].alt == profile.hCruise then
@@ -1138,25 +1157,25 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 					--get high and low threats on route segement
 					local threat = {}																					--threats on leg at high alt default to 0 as an earlier change in altitude is of no advantage
 					if profile.hAttack < 1000 then																		--if attack alt is at low altitude, collect actual threats to determine climb point on route
-						threat = ThreatOnLeg(route[n], route[n - 1], profile.hCruise)									--collect threats on leg at high alt
+						threat = threatOnLeg(route[n], route[n - 1], profile.hCruise)									--collect threats on leg at high alt
 					end
 
 					--reduce threat range of EWR to areas of fighter threat
 					for t = 1, #threat do																				--iterate through threats
 						if threat[t].class == "EWR" then																--threat is an EWR
 							local newEWRrange = 0																		--reduce EWR range to point where route enters the first fighter threat
-							for f = 1, #Fighterthreats[enemy] do														--iterate through fighter threats to find the first fighter threat that route enters into
-								if GetTangentDistance(route[n], route[n - 1], Fighterthreats[enemy][f]) < Fighterthreats[enemy][f].range then	--route passes though fighter threat circle
+							for f = 1, #Fighterthreats[enemySide_name] do														--iterate through fighter threats to find the first fighter threat that route enters into
+								if GetTangentDistance(route[n], route[n - 1], Fighterthreats[enemySide_name][f]) < Fighterthreats[enemySide_name][f].range then	--route passes though fighter threat circle
 									--find point where route enters fighter circle					
 									local heading1 = GetHeadingDegre(route[n], route[n - 1])									--route heading
-									local heading2 = GetHeadingDegre(route[n], Fighterthreats[enemy][f])						--heading to center of threat circle
+									local heading2 = GetHeadingDegre(route[n], Fighterthreats[enemySide_name][f])						--heading to center of threat circle
 									local alpha = math.abs(heading1 - heading2)											--angle beteen both headings
 									if alpha > 180 then
 										alpha = math.abs(alpha - 360)
 									end
 									alpha = math.rad(alpha)
-									local a = Fighterthreats[enemy][f].range											--radius of threat circle
-									local b = GetDistance(route[n], Fighterthreats[enemy][f])							--distance to center of threat circle
+									local a = Fighterthreats[enemySide_name][f].range											--radius of threat circle
+									local b = GetDistance(route[n], Fighterthreats[enemySide_name][f])							--distance to center of threat circle
 									local beta = math.asin(b / (a / math.sin(alpha)))									--sinus sentence
 									beta = math.pi - beta																--since sinus sentence results in two possible angles for beta and only the second is valid, use the second
 									local gamma = math.pi - alpha - beta
@@ -1167,7 +1186,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 										newEWRrange = EWR_p
 									end
 
-									local heading_p_t = GetHeadingDegre(p, Fighterthreats[enemy][f])							--heading from intersection point to fighter threat
+									local heading_p_t = GetHeadingDegre(p, Fighterthreats[enemySide_name][f])							--heading from intersection point to fighter threat
 									local heading_p_EWR = GetHeadingDegre(p, threat[t])										--heading from intersection point to EWR
 									local angle = math.abs(heading_p_t - heading_p_EWR)									--angle beteen both headings
 									if angle > 180 then
@@ -1283,7 +1302,6 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 				end
 			end
 		end
-		local after = os.clock()
 		
 	elseif task == "Fighter Sweep" then
 
@@ -1296,8 +1314,8 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 			sweepEnd = target																						--sweep ends at target point
 		end
 
-		local outbound_navRoute = FindPath(basePoint, sweepStart)														--find the safest outbound route
-		local inbound_navRoute = FindPath(basePoint, sweepEnd)															--find the safest inbound route
+		local outbound_navRoute = findPath(basePoint, sweepStart)														--find the safest outbound route
+		local inbound_navRoute = findPath(basePoint, sweepEnd)															--find the safest inbound route
 
 
 		--set form-up point
@@ -1426,8 +1444,8 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 
 
 		--set outbound and inbound routes
-		local outbound_navRoute = FindPath(basePoint, orbitStart)														--find the safest outbound route
-		local inbound_navRoute = FindPath(basePoint, orbitEnd)															--find the safest inbound route
+		local outbound_navRoute = findPath(basePoint, orbitStart)														--find the safest outbound route
+		local inbound_navRoute = findPath(basePoint, orbitEnd)															--find the safest inbound route
 
 
 		--set form-up point
@@ -1577,7 +1595,7 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 	elseif task == "Transport" or task == "Nothing" then
 
 		--set outbound and inbound routes
-		local outbound_navRoute = FindPath(basePoint, target)														--find the safest outbound route
+		local outbound_navRoute = findPath(basePoint, target)														--find the safest outbound route
 
 		--set form-up point
 		local joinPoint = {}																							--point where package joins on common flight route
@@ -1646,6 +1664,62 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 	end
 
 
+	if task == "Reconnaissance" then
+		-- ajout des WPT in et out, entrée et sortie de la zone ENI
+		if camp.boundary and camp.boundary[enemySide_name] and camp.boundary[enemySide_name] ~= nil then
+
+			local new_route = {}
+
+			for n = 1, #route - 1 do
+				-- copier le waypoint courant (copie superficielle pour éviter de référencer la même table)
+				local wp = route[n]
+				local wp_copy = {}
+				for k, v in pairs(wp) do wp_copy[k] = v end
+				new_route[#new_route + 1] = wp_copy
+
+				-- test de crossing entre route[n] et route[n+1]
+				local ourBoundary = camp.boundary[sideName]
+				local ourSideOfBorder_A = false
+				local ourSideOfBorder_B = false
+				if ourBoundary then
+					ourSideOfBorder_A = CheckPointInPolygon(route[n], ourBoundary)
+					ourSideOfBorder_B = CheckPointInPolygon(route[n + 1], ourBoundary)
+				end
+
+				local enemyBorderCrossPoint = CheckENY_BorderCrossPoint(route[n], route[n + 1], camp.boundary[enemySide_name])
+
+				if enemyBorderCrossPoint then
+					local newPoint = {
+						x = enemyBorderCrossPoint.x,
+						y = enemyBorderCrossPoint.y,
+						alt = route[n + 1].alt,
+					}
+
+					if ourSideOfBorder_A == true and ourSideOfBorder_B == false then
+						newPoint.id = "Border In"
+					elseif ourSideOfBorder_A == false and ourSideOfBorder_B == true then
+						newPoint.id = "Border Out"
+					else
+						newPoint.id = "Border"
+					end
+
+					new_route[#new_route + 1] = newPoint
+				end
+			end
+
+			-- ajouter le dernier waypoint (copie aussi)
+			if route[#route] then
+				local last = {}
+				for k, v in pairs(route[#route]) do last[k] = v end
+				new_route[#new_route + 1] = last
+			end
+
+			-- remplacer la table route par la nouvelle table
+			route = new_route
+		end
+	end
+
+
 	--measure lenght of complete route
 	local route_lenght = 0
 	for n = 1, #route - 1 do
@@ -1660,15 +1734,12 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 	--evaluate threat level of complete route
 	do
 		route.threats = {}																								--table to store threats for route
-		-- print() print("|Fighterthreats: "..before.." |")
+
 		--ground threats
 		route.threats.ground = {}																						--table to store ground threats for route
 		for alt,threat in pairs(threat_table.ground) do																	--iterate through all ground threat altitudes
 			for t = 1, #threat do																						--iterate through all ground threats within altitude band
-				-- io.write(" #threat "..#threat.." ")
-
 				for n = 1, #route - 1 do																				--iterate through all route segements
-					i_timmer01 = i_timmer01 +1
 --TODO alt est mal renseigné, je
 					if route[n + 1].alt <= alt then																		--if route segement is in threat altitude
 						local distance = GetTangentDistance(route[n], route[n + 1], threat[t])							--distance of route segment to threat
@@ -1693,24 +1764,18 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 									route[n].SEAD_radius = threat[t].range												--store the range of the threat that route segment penetrates
 								end
 							end
-
 						end
-
-						-- io.write("| "..before.."-"..after.." |")
 					end
-					-- if i_timmer01 >= 10  then io.write("!") i_timmer01 = 0 end
 				end
 			end
-
 		end
 
-		-- print() print("|Fighterthreats: "..before.." |")
 		--air threats
 		route.threats.air = {}																										--table to store air threats for route
-		for t = 1, #Fighterthreats[enemy] do																						--iterate through all fighter threats
-			if Fighterthreats[enemy][t].class == "CAP" or Fighterthreats[enemy][t].class == "Intercept" then
+		for t = 1, #Fighterthreats[enemySide_name] do																						--iterate through all fighter threats
+			if Fighterthreats[enemySide_name][t].class == "CAP" or Fighterthreats[enemySide_name][t].class == "Intercept" then
 				for n = 1, #route - 1 do																							--iterate through all route segements
-					i_timmer01 = i_timmer01 +1
+
 					local route_leg_alt
 					local route_leg_band
 					if route[n].alt >= 3000 and route[n + 1].alt >= 3000 then
@@ -1721,37 +1786,36 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 						route_leg_band = "low"
 					end
 
-					if GetTangentDistance(route[n], route[n + 1], Fighterthreats[enemy][t]) < Fighterthreats[enemy][t].range then	--if route segment is in range of fighter threat
+					if GetTangentDistance(route[n], route[n + 1], Fighterthreats[enemySide_name][t]) < Fighterthreats[enemySide_name][t].range then	--if route segment is in range of fighter threat
 						local ewr_required																							--boolean whether ewr is required for the fighter to be a threat
-						if Fighterthreats[enemy][t].class == "CAP" then																--if the fighter is CAP
+						if Fighterthreats[enemySide_name][t].class == "CAP" then																--if the fighter is CAP
 							if route_leg_band == "high" then																		--if route leg is at high altitude
 								ewr_required = false																				--CAP does not need ewr to be a threat
 							else																									--if route leg is at low altitude
-								if Fighterthreats[enemy][t].LDSD then																--if fighter is look down/shoot down capable
+								if Fighterthreats[enemySide_name][t].LDSD then																--if fighter is look down/shoot down capable
 									ewr_required = false																			--CAP does not need ewr to be a threat
 								else																								--if fighter is not look down/shoot down capable
 									-- ATO_RG_Debug02		quand les EWR sont d�truit: on active les CAP, si les CAP on besoin d'EWR c'est nul
 									-- ewr_required = true																				--CAP needs ewr to be a threat
 								end
 							end
-						elseif Fighterthreats[enemy][t].class == "Intercept" then													--if the fighter is an interceptor
+						elseif Fighterthreats[enemySide_name][t].class == "Intercept" then													--if the fighter is an interceptor
 							ewr_required = true																						--ewr is required for fighter to be a threat (needs early warning to take off)
 						end
 
 						if ewr_required == true then																				--fighter needs ewr/awacs station to be a threat
 							local break_loop = false
 							for e = 1, #threat_table.ewr[route_leg_alt] do															--iterate through all ewr/awacs
-								i_timmer01 = i_timmer01 +1
-								if GetDistance(threat_table.ewr[route_leg_alt][e], Fighterthreats[enemy][t]) < threat_table.ewr[route_leg_alt][e].range + Fighterthreats[enemy][t].range then	--fighter operation area and ewr coverage are overlapping
-									if GetTangentDistance(route[n], route[n + 1], Fighterthreats[enemy][t]) < Fighterthreats[enemy][t].range then				--if route leg is in range of fighter
+								if GetDistance(threat_table.ewr[route_leg_alt][e], Fighterthreats[enemySide_name][t]) < threat_table.ewr[route_leg_alt][e].range + Fighterthreats[enemySide_name][t].range then	--fighter operation area and ewr coverage are overlapping
+									if GetTangentDistance(route[n], route[n + 1], Fighterthreats[enemySide_name][t]) < Fighterthreats[enemySide_name][t].range then				--if route leg is in range of fighter
 										if GetTangentDistance(route[n], route[n + 1], threat_table.ewr[route_leg_alt][e]) < threat_table.ewr[route_leg_alt][e].range then	--if route leg is in range of ewr/awacs
-											if route.threats.air[Fighterthreats[enemy][t].name] then															--if this fighter unit already has a threat entry for this route
-												if route.threats.air[Fighterthreats[enemy][t].name].level < Fighterthreats[enemy][t].level then					--if the existing threat entry is lower than the new one
-													route.threats.air[Fighterthreats[enemy][t].name].level = Fighterthreats[enemy][t].level						--overwrite threat entry with new one
+											if route.threats.air[Fighterthreats[enemySide_name][t].name] then															--if this fighter unit already has a threat entry for this route
+												if route.threats.air[Fighterthreats[enemySide_name][t].name].level < Fighterthreats[enemySide_name][t].level then					--if the existing threat entry is lower than the new one
+													route.threats.air[Fighterthreats[enemySide_name][t].name].level = Fighterthreats[enemySide_name][t].level						--overwrite threat entry with new one
 												end
 											else																					--if this fighter unit has no threat entry for this route yet
-												route.threats.air[Fighterthreats[enemy][t].name] = {								--make new threat entry for this fighter unit
-													level = Fighterthreats[enemy][t].level,
+												route.threats.air[Fighterthreats[enemySide_name][t].name] = {								--make new threat entry for this fighter unit
+													level = Fighterthreats[enemySide_name][t].level,
 												}
 											end
 											break_loop = true																		--two breaks would be required to break ewr loop and route loop
@@ -1764,19 +1828,18 @@ function GetRoute(basePoint, target, profile, enemy, task, time, multipackn, mul
 								break																								--break route segemnt loop and go to next threat
 							end
 						else																										--no ewr is needed for fighter to be a threat
-							if route.threats.air[Fighterthreats[enemy][t].name] then												--if this fighter unit already has a threat entry for this route
-								if route.threats.air[Fighterthreats[enemy][t].name].level < Fighterthreats[enemy][t].level then		--if the existing threat entry is lower than the new one
-									route.threats.air[Fighterthreats[enemy][t].name].level = Fighterthreats[enemy][t].level			--overwrite threat entry with new one
+							if route.threats.air[Fighterthreats[enemySide_name][t].name] then												--if this fighter unit already has a threat entry for this route
+								if route.threats.air[Fighterthreats[enemySide_name][t].name].level < Fighterthreats[enemySide_name][t].level then		--if the existing threat entry is lower than the new one
+									route.threats.air[Fighterthreats[enemySide_name][t].name].level = Fighterthreats[enemySide_name][t].level			--overwrite threat entry with new one
 								end
 							else																									--if this fighter unit has no threat entry for this route yet
-								route.threats.air[Fighterthreats[enemy][t].name] = {												--make new threat entry for this fighter unit
-									level = Fighterthreats[enemy][t].level,
+								route.threats.air[Fighterthreats[enemySide_name][t].name] = {												--make new threat entry for this fighter unit
+									level = Fighterthreats[enemySide_name][t].level,
 								}
 							end
 							break																									--break route segemnt loop and go to next threat
 						end
 					end
-					-- if i_timmer01 >= 10  then io.write("*a") i_timmer01 = 0 end
 				end
 			end
 		end

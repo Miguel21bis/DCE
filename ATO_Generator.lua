@@ -503,14 +503,14 @@ table.sort(targetlist["red"], function(a,b) return a.priority > b.priority  end)
 
 
 --creat draft sorties
-for side, units in pairs(oob_air) do
+for sideName, units in pairs(oob_air) do
 	--determine enemy side
-	local enemy																													--determine enemy side (opposite of unit side)
-	if side == "blue" then
-		enemy = "red"
-	else
-		enemy = "blue"
-	end
+	-- local enemySide_name																													--determine enemy side (opposite of unit side)
+	-- if sideName == "blue" then
+	-- 	enemySide_name = "red"
+	-- else
+	-- 	enemySide_name = "blue"
+	-- end
 	local draftId = 1
 	if Debug.Generator.affiche then
 		debugLog(draftId.." AtoG passe A_0 chapter: "..Debug.Generator.chapter.." SpySquad:  "..Debug.Generator.SpySquad.." SpyTask: "..Debug.Generator.SpyTask)
@@ -552,9 +552,9 @@ for side, units in pairs(oob_air) do
 
 
 					local overRideReady = false
-					if multiPlaneSet and  multiPlaneSet[side] and  multiPlaneSet[side][unit.type] then
-						if unit.roster.ready < multiPlaneSet[side][unit.type].InitNbPlane then
-							unit.roster.ready = multiPlaneSet[side][unit.type].InitNbPlane + 1
+					if multiPlaneSet and  multiPlaneSet[sideName] and  multiPlaneSet[sideName][unit.type] then
+						if unit.roster.ready < multiPlaneSet[sideName][unit.type].InitNbPlane then
+							unit.roster.ready = multiPlaneSet[sideName][unit.type].InitNbPlane + 1
 							if isDebugModeA then
 								debugLog(draftId.." AtoG 1_A multiPlaneSetPass  ")
 							end
@@ -609,7 +609,7 @@ for side, units in pairs(oob_air) do
 							serviceability = unit.serviceability																	--use it instead
 						end
 
-						if multiPlaneSet and multiPlaneSet[side] and multiPlaneSet[side][unit.type]   then
+						if multiPlaneSet and multiPlaneSet[sideName] and multiPlaneSet[sideName][unit.type]   then
 							aircraft_serviceable = unit.roster.ready
 						else
 							for s = 1, unit.roster.ready do																				--iterate through ready aircraft
@@ -739,7 +739,7 @@ for side, units in pairs(oob_air) do
 												--ajoute une task obligatoire en fonction du learning des missions précédentes
 												if camp.newTaskRequest then
 													for rSide, rSides in pairs(camp.newTaskRequest) do
-														if rSide == side then
+														if rSide == sideName then
 															for rTypeName, rTypes in pairs(rSides) do
 																if rTypeName == unit.type then
 																	for rTaskEnCours, rNewTasks in pairs(rTypes) do
@@ -849,7 +849,7 @@ for side, units in pairs(oob_air) do
 											local i_timmer01 = 0
 											for target_side_name, target_side in pairs(targetlist) do											--iterate through sides in targetlist				
 												i_timmer01 = i_timmer01 +1
-												if side == target_side_name then																--if the target is hostile
+												if sideName == target_side_name then																--if the target is hostile
 													local totalTarget = 0
 													for target_name, target in pairs(target_side) do
 														totalTarget = totalTarget + 1
@@ -1146,7 +1146,7 @@ for side, units in pairs(oob_air) do
 																								toTarget = GetDistance(airbasePoint, target)												--direct distance to target
 																							
 																								if IsHelicopter[unit.type] and toTarget > unit_loadouts[l].range then
-																									for baseN, FARP in pairs(BaseFARP[side]) do
+																									for baseN, FARP in pairs(BaseFARP[sideName]) do
 																										local toFARP = GetDistance(airbasePoint, FARP)
 
 																										if toFARP < (unit_loadouts[l].range * 2) then
@@ -1162,12 +1162,8 @@ for side, units in pairs(oob_air) do
 																												-- print("AtoG A_24b Helicopter via FARP toTarget "..tostring(toTarget).." <= ? unit_loadouts[l].range: "..tostring(unit_loadouts[l].range))
 																											end
 																										end
-																										
 																									end
-																									
-																							
 																								end
-																							
 																							end
 
 
@@ -1182,15 +1178,11 @@ for side, units in pairs(oob_air) do
 																							if toTarget <= unit_loadouts[l].range then		--basic feasibility check of range before performance intensive route calculations are done
 																								tempDebug = tempDebug.."\n"..("                    AtoG variant" )
 																								if variant == 1 or variant == 4 then
-																									-- print("                    AtoG _1_4_route" )
 																									tempDebug = tempDebug.."\n"..("AtoG  A_27a day")
-																									route = GetRoute(airbasePoint, target, unit_loadouts[l], enemy, task, "day", r, multipack, unit, draftId, viaFARP)	or {}		--get the best route to this target at day-- modification M06 : helicopter playable(ajout variable helico pour generer une route )
-																									-- print("                    AtoG      route_1_4_" )
+																									route = GetRoute(airbasePoint, target, unit_loadouts[l], sideName, task, "day", r, multipack, unit, viaFARP)	or {}--draftId,		--get the best route to this target at day-- modification M06 : helicopter playable(ajout variable helico pour generer une route )
 																								elseif variant == 2 or variant == 3 then
-																									-- print("                    AtoG _2_3_route" )
 																									tempDebug = tempDebug.."\n"..("AtoG  A_27b night")
-																									route = GetRoute(airbasePoint, target, unit_loadouts[l], enemy, task, "night", r, multipack, unit, viaFARP)	or {}	--get the best route to this target at night-- modification M06 : helicopter playable
-																									-- print("                    AtoG      route_2_3_" )
+																									route = GetRoute(airbasePoint, target, unit_loadouts[l], sideName, task, "night", r, multipack, unit, viaFARP)	or {}	--get the best route to this target at night-- modification M06 : helicopter playable
 																								end
 																							end
 
@@ -1229,12 +1221,12 @@ for side, units in pairs(oob_air) do
 																							local aircraft_requested = firepowerRequest / unit_loadouts[l].firepower
 
 																							if task == "Transport" then
-																								if multiPlaneSet and multiPlaneSet[side] and multiPlaneSet[side][unit.type]  and multiPlaneSet[side][unit.type][task]
+																								if multiPlaneSet and multiPlaneSet[sideName] and multiPlaneSet[sideName][unit.type]  and multiPlaneSet[sideName][unit.type][task]
 																								and task_bool
-																								and aircraft_requested < multiPlaneSet[side][unit.type][task].NbPlane
+																								and aircraft_requested < multiPlaneSet[sideName][unit.type][task].NbPlane
 																								and task == "Transport"
 																								then
-																									aircraft_requested =  multiPlaneSet[side][unit.type][task].NbPlane
+																									aircraft_requested =  multiPlaneSet[sideName][unit.type][task].NbPlane
 																									if aircraft_requested > 4 then aircraft_requested = 4 end
 																								end
 																							elseif task == "Strike" and aircraft_requested < 2 and aircraft_requested < 2  then
@@ -1294,18 +1286,18 @@ for side, units in pairs(oob_air) do
 
 																								debugMulti = debugMulti.."\n"..("AtoG passe A_AAb "..tostring(task).." "..unit.type.." aircraft_assign:"..tostring(aircraft_assign))
 
-																								if multiPlaneSet[side] and multiPlaneSet[side][unit.type]  and multiPlaneSet[side][unit.type][task] and task_bool then
-																									if Multi.Target and Multi.Target[side] then
-																										debugMulti = debugMulti.."\n"..("AtoG passe A_AAe Multi.Target[side] "..tostring(Multi.Target[side]) .. " ==? target_name? " .. tostring(target_name))
-																										if Multi.Target[side] == target_name  then
-																											debugMulti = debugMulti.."\n"..("AtoG passe A_AAf Multi.Target[side] "..tostring(Multi.Target[side]) .. " ==? target_name? " .. tostring(target_name).." "..unit.type.." "..tostring(task))
+																								if multiPlaneSet[sideName] and multiPlaneSet[sideName][unit.type]  and multiPlaneSet[sideName][unit.type][task] and task_bool then
+																									if Multi.Target and Multi.Target[sideName] then
+																										debugMulti = debugMulti.."\n"..("AtoG passe A_AAe Multi.Target[side] "..tostring(Multi.Target[sideName]) .. " ==? target_name? " .. tostring(target_name))
+																										if Multi.Target[sideName] == target_name  then
+																											debugMulti = debugMulti.."\n"..("AtoG passe A_AAf Multi.Target[side] "..tostring(Multi.Target[sideName]) .. " ==? target_name? " .. tostring(target_name).." "..unit.type.." "..tostring(task))
 																											overRideMP_A = true
 																										end
 																									else
 																										debugMulti = debugMulti.."\n"..("AtoG passe A_AAg  " .. " ==? target_name? " .. tostring(target_name).." "..unit.type.." "..tostring(task))
 
 																										Multi.Target = {}
-																										Multi.Target[side] = target_name
+																										Multi.Target[sideName] = target_name
 																										overRideMP_A = true
 																									end
 
@@ -1315,8 +1307,8 @@ for side, units in pairs(oob_air) do
 																									end
 
 																									--M11.z
-																									if overRideMP_A and aircraft_assign < multiPlaneSet[side][unit.type][task].NbPlane then
-																										aircraft_assign = multiPlaneSet[side][unit.type][task].NbPlane
+																									if overRideMP_A and aircraft_assign < multiPlaneSet[sideName][unit.type][task].NbPlane then
+																										aircraft_assign = multiPlaneSet[sideName][unit.type][task].NbPlane
 																										debugMulti = debugMulti.."\n"..("AtoG passe A_AAh "..unit.type.." aircraft_assign: "..tostring(aircraft_assign))
 																									end
 																									clientPlayer = true
@@ -1338,11 +1330,11 @@ for side, units in pairs(oob_air) do
 
 																							--build sortie entry
 																							repeat																							--for tasks with station repeat to make entries for lesser amount of aircraft, repeat once for everything else
-																								local idTemp = "id"..#Draft_sorties[side]+1
+																								local idTemp = "id"..#Draft_sorties[sideName]+1
 
 																								if isDebugModeA then
 																									debugLog(draftId.." AtoG passe A_30a "..idTemp.." clientPlayer: "..tostring(clientPlayer) .. " overRideMP_A: "
-																									.. tostring(overRideMP_A).." idTemp: "..tostring(idTemp).." aircraft_assign: "..tostring(aircraft_assign).." |Nb Draft "..tostring(#Draft_sorties[side]))
+																									.. tostring(overRideMP_A).." idTemp: "..tostring(idTemp).." aircraft_assign: "..tostring(aircraft_assign).." |Nb Draft "..tostring(#Draft_sorties[sideName]))
 																								end
 
 																								local draftSortiesEntry = {
@@ -1384,7 +1376,7 @@ for side, units in pairs(oob_air) do
 																									multipack = multipack,
 																									threatsGround = route.threats.ground_total,
 																									threatsAir = route.threats.air_total,
-																									id = "DraftId"..draftId.."_id"..#Draft_sorties[side]+1,
+																									id = "DraftId"..draftId.."_id"..#Draft_sorties[sideName]+1,
 																									rejected = {},
 																									mainOverRideMP = overRideMP_A,
 																									remainingFirepower = remainingFirepower,
@@ -1546,7 +1538,7 @@ for side, units in pairs(oob_air) do
 
 																								-- modification M11.q multiplayer
 
-																								if multiPlaneSet[side] and  multiPlaneSet[side][unit.type] and  multiPlaneSet[side][unit.type][task] and task_bool and  multiPlaneSet[side][unit.type][task].NbPlane > 0 then
+																								if multiPlaneSet[sideName] and  multiPlaneSet[sideName][unit.type] and  multiPlaneSet[sideName][unit.type][task] and task_bool and  multiPlaneSet[sideName][unit.type][task].NbPlane > 0 then
 																									draftSortiesEntry.score = draftSortiesEntry.score + 1000
 																									draftSortiesEntry.scoreAdd =  draftSortiesEntry.scoreAdd + 1000
 																									if overRideMP_A then
@@ -1610,10 +1602,10 @@ for side, units in pairs(oob_air) do
 																								--/*/*/****/**/*/*/*/***/**/*/*/**/*/*/**/*/*/***/*/*/*/*/****/**/*/*/*/***/**/*/*/**/*/*/**/*/*/***/*/*
 																								-- INSERT IN Draft_sorties
 																								--/*/*/****/**/*/*/*/***/**/*/*/**/*/*/**/*/*/***/*/*/*/*/****/**/*/*/*/***/**/*/*/**/*/*/**/*/*/***/*/*
-																								if not Draft_sorties[side] then
-																									Draft_sorties[side] = {}
+																								if not Draft_sorties[sideName] then
+																									Draft_sorties[sideName] = {}
 																								end
-																								Draft_sorties[side][#Draft_sorties[side] + 1] = draftSortiesEntry
+																								Draft_sorties[sideName][#Draft_sorties[sideName] + 1] = draftSortiesEntry
 
 																								--/*/*/****/**/*/*/*/***/**/*/*/**/*/*/**/*/*/***/*/*/*/*/****/**/*/*/*/***/**/*/*/**/*/*/**/*/*/***/*/*
 																								-- INSERT IN Draft_sorties
@@ -1630,7 +1622,7 @@ for side, units in pairs(oob_air) do
 																								end
 
 																								if isDebugModeA then
-																									debugLog(draftId .." AtoG passe A_30_INIT : "..idTemp.." aircraft_assign "..aircraft_assign.." |Nb de draft: "..#Draft_sorties[side])
+																									debugLog(draftId .." AtoG passe A_30_INIT : "..idTemp.." aircraft_assign "..aircraft_assign.." |Nb de draft: "..#Draft_sorties[sideName])
 																								end
 
 																							until aircraft_assign <= 0																		--stop making more draft sorties
