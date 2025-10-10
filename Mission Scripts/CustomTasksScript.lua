@@ -3513,13 +3513,8 @@ end	--Custom_AddWptSAR
 function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, alt)
 	if varFpsLeak_B then return end
 	local current_time = timer.getTime()
-	-- env.info( "Custom_SAR A0 current_time: "..tostring(current_time).." grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(mgrsChute))
-
 	local function execute()
 		current_time = timer.getTime()
-		-- env.info( "Custom_SAR B1, current_time: "..tostring(current_time))
-		-- env.info( "Custom_SAR BB2, grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(mgrsChute).."|"..tostring(current_time))
-
 		local flight = Group.getByName(grpname)								--get Group
 		local leader = flight:getUnit(1)									--get first unit in group
 		local base = Unit.getByName(baseName)								--get unit
@@ -3572,20 +3567,13 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 		local selectedEjection = {}
 
 		for MGRS_Chute, zone in pairs(ZoneSAR) do
-			-- env.info( "Custom_SAR C grpSide: " ..tostring(grpSide).."| MGRS_Chute: "..tostring(MGRS_Chute).." "..current_time)
-
 			for N_Pilot, uPilot in ipairs(zone) do
-				-- env.info( "Custom_SAR D1 uPilot.side: "..tostring(uPilot.side).."| coalitionId[grpSide]: "..tostring(coalitionId[grpSide]))
-
 				if  string.lower(uPilot.sideName) ==  CoalitionIdAlphaToName[grpCoalitionId]  then
-					-- env.info( "Custom_SAR DD2 uPilot.name: "..tostring(uPilot.name).."| uPilot.embarked: "..tostring(uPilot.embarked))
-
 					local authorisesRescue = true
 					local wrongSide = false
 					local ENI_Side = DCS_ENI_Side[uPilot.sideName]
 					if camp.boundary and camp.boundary[ENI_Side] and camp.boundary[ENI_Side] ~= nil then
-						wrongSide =  CheckPointInPoly_XY_2({x=uPilot.x,y=uPilot.y} , camp.boundary[ENI_Side])
-						-- env.info( "Custom_SAR DD3?  boundary wrongSide ? __"..tostring(wrongSide))
+						wrongSide =  CheckPointInPoly_XY_2({x=uPilot.pos.x,y=uPilot.pos.y} , camp.boundary[ENI_Side])
 						if wrongSide  then
 							authorisesRescue = false
 						end
@@ -3599,17 +3587,10 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 						local temp_SoldierGroupID = 0
 						local temp_landingPossible = uPilot.landingPossible
 
-
-						-- env.info( "Custom_SAR E "..tostring(unitPilot).." |SurfaceType: "..tostring(uPilot.SurfaceType).." "..tostring(uPilot.name))
-
-						if uPilot.SurfaceType == 3 then												--dans l'eau: pas de soldat
-							-- env.info( "Custom_SAR F")
-
-							temp_x, temp_y, temp_z = uPilot.x, uPilot.y, uPilot.z
+						if uPilot.pos.surfaceType == 3 then												--dans l'eau: pas de soldat
+							temp_x, temp_y, temp_z = uPilot.pos.x, uPilot.pos.y, uPilot.pos.z
 							temp_SoldierGroupID = 0
 						elseif unitPilot and unitPilot ~= nil then
-							-- env.info( "Custom_SAR G")
-
 							posEjectPilotVec3 = unitPilot:getPoint()
 							temp_x, temp_y, temp_z = posEjectPilotVec3.x, posEjectPilotVec3.z, posEjectPilotVec3.y
 							temp_SoldierGroupID = unitPilot:getGroup():getID()
@@ -3617,13 +3598,9 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 
 						end
 
-						-- distance = math.sqrt(math.pow(currentPos.x - PosEjectPilot.x, 2) + math.pow(currentPos.y - PosEjectPilot.z, 2))
 						distance = math.sqrt(math.pow(currentPos.x - temp_x, 2) + math.pow(currentPos.y - temp_y, 2))
-						-- env.info( "Custom_SAR H1 distance: "..tostring(distance))
-
+						
 						if distance <= 15000 and distance < selected_distance  then
-							-- env.info( "Custom_SAR HH2 ")
-
 							selected_distance = distance
 
 							pt_dest.x = temp_x
@@ -3632,8 +3609,6 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 							pt_dest.landingPossible = temp_landingPossible
 
 							selectedEjection = uPilot
-
-							-- env.info( "Custom_SAR HHH3 landingPossible: "..tostring(pt_dest.landingPossible))
 
 							pt_dest.SoldierGroupID = temp_SoldierGroupID
 							pt_dest.uPilotName = uPilot.name
