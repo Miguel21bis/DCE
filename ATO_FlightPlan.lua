@@ -2360,13 +2360,13 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					-- ************* OrbitPosition  *************
-					if (waypoints[w]["name"] == "IP" ) and flight[f].task == "Escort" then --or waypoints[w]["name"] == "Egress"
+					if (waypoints[w]["name"] == "IP" ) and flight[f].task == "Escort" then
 
-						-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
 						local task_entry = {
 							["enabled"] = true,
 							["auto"] = false,
 							["id"] = "WrappedAction",
+							["name"] = "orbit with Escort (name == IP)",
 							["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 							["params"] =
 							{
@@ -2499,6 +2499,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								["enabled"] = true,
 								["auto"] = false,
 								["id"] = "WrappedAction",
+								["name"] = "orbit with BaseAirStart (name == Land)",
 								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 								["params"] =
 								{
@@ -2569,6 +2570,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 													["enabled"] = true,
 													["auto"] = false,
 													["id"] = "WrappedAction",
+													["name"] = "orbit with BaseCarrier (name == Land)",
 													["number"] =  1,
 													["params"] =
 													{
@@ -3783,8 +3785,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							waypoints[w].alt = altitude
 
-							local timeOrbit = waypoints[w]["ETA"]+120
-							if flight[f].route[w + 1] and flight[f].route[w + 1].eta and flight[f].route[w + 1].eta > timeOrbit then
+							local timeOrbit = waypoints[w]["ETA"]
+
+							if flight[f].route[w + 1] and flight[f].route[w + 1].eta and timeOrbit > flight[f].route[w + 1].eta then
 								timeOrbit = flight[f].route[w + 1].eta
 							end
 
@@ -3793,6 +3796,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								["enabled"] = true,
 								["auto"] = false,
 								["id"] = "WrappedAction",
+								["name"] = "orbit (name == Assemble)",
 								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 								["params"] =
 								{

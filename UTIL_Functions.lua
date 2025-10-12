@@ -4748,6 +4748,23 @@ end
 
 
 
+-- Safe helper: debug may be overridden in some environments, avoid calling nil
+
+function SafeGetLine()
+
+    if type(debug) == "table" and type(debug.getinfo) == "function" then
+
+        local info = debug.getinfo(2)
+
+        return info and info.currentline or 0
+
+    end
+
+    return 0
+
+end
+
+
 
 
 

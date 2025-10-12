@@ -2825,7 +2825,8 @@ local function createATO_table(draftPriority)
 																	local tabRejected = {}
 																	tabRejected["sujet"]  = draft.id.." "..supportTask.." newTaskPerTarget  AVION TOTAL SUPPORT INSUFFISANT NbTotPlanePerTask <= 0 "
 																	tabRejected["cause"] = { [1] = NbTotPlanePerTask, [2] = "newTaskPerTarget", }
-																	tabRejected["ligne"]  = debug.getinfo(1).currentline
+																	-- tabRejected["ligne"]  = debug.getinfo(1).currentline
+																	tabRejected["ligne"]  = SafeGetLine()
 																	table.insert(draft["rejected"], tabRejected)
 																end
 
@@ -2873,12 +2874,12 @@ local function createATO_table(draftPriority)
 										--TODO bizarre, il s agit du nb d avion du main, pas du support
 										-- if not draft.mainOverRideMP then
 											for unitname,_ in pairs(need) do
-												if need[unitname] > avail[unitname] then																						--more aircraft are needed from this unit across all package tasks than are available
+													if need[unitname] > avail[unitname] then																						--more aircraft are needed from this unit across all package tasks than are available
 													support_available = false																									--not enough support available
 													local tabRejected = {}
 													tabRejected["sujet"]  = draft.id.." type: "..draft.type.." AVION SUPPORT?Main? INSUFFISANT()support_available if need[unitname] > avail[unitname]"
 													tabRejected["cause"] = { tostring(need[unitname]), tostring(avail[unitname]) }
-													tabRejected["ligne"]  = debug.getinfo(1).currentline
+													tabRejected["ligne"]  = SafeGetLine()
 													table.insert(draft["rejected"], tabRejected)
 												end
 											end
@@ -2991,7 +2992,8 @@ local function createATO_table(draftPriority)
 															local tabRejected = {}
 															tabRejected["sujet"]  = support.id.." type: "..support.type.." we don't accept a single aircraft as escort "..supportName
 															tabRejected["cause"] = { "support.number: ",support.number, "unassigned:" , tostring(dispoTmp[support.name].unassigned), " available: ", tostring(dispoTmp[support.name].aircraft_available), "supportName: ", tostring(supportName), " task: ", tostring(draft.task)  }
-															tabRejected["ligne"]  = debug.getinfo(1).currentline
+															-- tabRejected["ligne"]  = debug.getinfo(1).currentline
+															tabRejected["ligne"]  = SafeGetLine()
 															table.insert(draft["rejected"], tabRejected)
 														else
 															dispoTmp[support.name].unassigned = dispoTmp[support.name].unassigned - support.number
@@ -3033,7 +3035,8 @@ local function createATO_table(draftPriority)
 																local tabRejected = {}
 																tabRejected["sujet"]  = support.id.." type: "..support.type.." (strikeOnlyWithEscorte) support_available if support.number > AcftAvail[support.name].unassigned "..supportName
 																tabRejected["cause"] = { [1] =  support.number, [2] = AcftAvail[support.name].unassigned, }
-																tabRejected["ligne"]  = debug.getinfo(1).currentline
+																-- tabRejected["ligne"]  = debug.getinfo(1).currentline
+																tabRejected["ligne"]  = SafeGetLine()
 																table.insert(draft["rejected"], tabRejected)
 
 															end
@@ -3106,7 +3109,8 @@ local function createATO_table(draftPriority)
 																local tabRejected = {}
 																tabRejected["sujet"]  = draft.id.." type: "..support.type.." (strikeOnlyWithEscorte) AVION SUPPORT INSUFFISANT()support_available if AcftAvail[support.name].unassigned <=0"
 																tabRejected["cause"] = { [1] = AcftAvail[support.name].unassigned, [2] = "", }
-																tabRejected["ligne"]  = debug.getinfo(1).currentline
+																-- tabRejected["ligne"]  = debug.getinfo(1).currentline
+																tabRejected["ligne"]  = SafeGetLine()
 																table.insert(draft["rejected"], tabRejected)
 															end
 														end
@@ -3190,7 +3194,8 @@ local function createATO_table(draftPriority)
 														local tabRejected = {}
 														tabRejected["sujet"]  = draft.id.." NE DONNE PAS TOUT en CAP ou Intercept ()support_available if AcftAvail[draft.name].unassigned - draft.number <= AcftAvail[draft.name].serviceable/3"
 														tabRejected["cause"] = { " unassigned - draft.number: ", tostring(AcftAvail[draft.name].unassigned - draft.number), "serviceable/ denom_NeDonnePasTOUT: ", tostring(AcftAvail[draft.name].serviceable/ denom_NeDonnePasTOUT) }
-														tabRejected["ligne"]  = debug.getinfo(1).currentline
+														-- tabRejected["ligne"]  = debug.getinfo(1).currentline
+														tabRejected["ligne"]  = SafeGetLine()
 														table.insert(draft["rejected"], tabRejected)
 
 													end
@@ -3548,7 +3553,8 @@ local function createATO_table(draftPriority)
 													local tabRejected = {}
 													tabRejected["sujet"]  = draft.id.." IN AddFlight type(supportPart) == table"
 													tabRejected["cause"] = { "support_available: ", tostring(support_available) }
-													tabRejected["ligne"]  = debug.getinfo(1).currentline
+													-- tabRejected["ligne"]  = debug.getinfo(1).currentline
+													tabRejected["ligne"]  = SafeGetLine()
 													table.insert(draft["rejected"], tabRejected)
 												end
 											end
@@ -3589,14 +3595,16 @@ local function createATO_table(draftPriority)
 											local tabRejected = {}
 											tabRejected["sujet"]  = draft.id.." SUPPORT IMPOSSIBLE()if support_available"
 											tabRejected["cause"] = { "support_available: ", tostring(support_available) }
-											tabRejected["ligne"]  = debug.getinfo(1).currentline
+											-- tabRejected["ligne"]  = debug.getinfo(1).currentline
+											tabRejected["ligne"]  = SafeGetLine()
 											table.insert(draft["rejected"], tabRejected)
 										end
 									else
 										local tabRejected = {}
 										tabRejected["sujet"]  = draft.id.." AVIONS INSUFFISANT()if draft.number <= available and limitMP then {draft.number, limitMP}"
 										tabRejected["cause"] = {"draft.number: ", tostring(draft.number), "limitMP: ", tostring(limitMP)}
-										tabRejected["ligne"]  = debug.getinfo(1).currentline
+										-- tabRejected["ligne"]  = debug.getinfo(1).currentline
+										tabRejected["ligne"]  = SafeGetLine()
 										table.insert(draft["rejected"], tabRejected)
 									end
 								else
@@ -3604,35 +3612,40 @@ local function createATO_table(draftPriority)
 									local tabRejected = {}
 									tabRejected["sujet"]  = draft.id.." FIREPOWER du PACKAGE INSUFFISANT()if  available * draft.loadout.firepower >= (draft.target.firepower.packmin - 1) * draft.target.firepower.max"
 									tabRejected["cause"] = { [1] = tostring(available * draft.loadout.firepower), [2]  = tostring((draft.target.firepower.packmin - 1) * draft.target.firepower.max), }
-									tabRejected["ligne"]  = debug.getinfo(1).currentline
+									-- tabRejected["ligne"]  = debug.getinfo(1).currentline
+									tabRejected["ligne"]  = SafeGetLine()
 									table.insert(draft["rejected"], tabRejected)
 								end
 							else
 								local tabRejected = {}
 								tabRejected["sujet"]  = draft.id.." "..tostring(draft.type).." AVION DISPONIBLE INSUFFISANT "..tostring(draft.name).." available: "..tostring(available).." draft.loadout.firepower: "..tostring(draft.loadout.firepower.." firepowerMin: "..tostring(draft.target.firepower.min))
 								tabRejected["cause"] = { [1] = tostring(available * draft.loadout.firepower), [2]  = tostring(draft.target.firepower.min), }
-								tabRejected["ligne"]  = debug.getinfo(1).currentline
+								-- tabRejected["ligne"]  = debug.getinfo(1).currentline
+								tabRejected["ligne"]  = SafeGetLine()
 								table.insert(draft["rejected"], tabRejected)
 							end
 						else
 							local tabRejected = {}
 							tabRejected["sujet"]  = draft.id.." FIREPOWER INSUFFISANT (a augmenter dans loadout)if draft.target.firepower.max > 0 and draft.target.firepower.max >= draft.target.firepower.min"
 							tabRejected["cause"] = { [1] = tostring(draft.target.firepower.max), [2]  = tostring(draft.target.firepower.max), }
-							tabRejected["ligne"]  = debug.getinfo(1).currentline
+							-- tabRejected["ligne"]  = debug.getinfo(1).currentline
+							tabRejected["ligne"]  = SafeGetLine()
 							table.insert(draft["rejected"], tabRejected)
 						end
 					else
 						local tabRejected = {}
 						tabRejected["sujet"]  = draft.id.." MultiPACKAGE A 0 (?)if draft.multipack == nil or draft.multipack > 0 || target_name: "..tostring(draft.target_name).." || multipack: " ..tostring(draft.multipack)
 						tabRejected["cause"] = { [1] = tostring(draft.multipack), [2]  = tostring(draft.multipack), }
-						tabRejected["ligne"]  = debug.getinfo(1).currentline
+						-- tabRejected["ligne"]  = debug.getinfo(1).currentline
+						tabRejected["ligne"]  = SafeGetLine()
 						table.insert(draft["rejected"], tabRejected)
 					end
 				else
 					local tabRejected = {}
 					tabRejected["sujet"]  = draft.id.." MENACE TROP IMPORTANTE (descendre minscore ou diminuer Menace AA AS) draft.loadout.minscore <= draft.score"
 					tabRejected["cause"] = { [1] = tostring(draft.loadout.minscore), [2]  = tostring(draft.score), }
-					tabRejected["ligne"]  = debug.getinfo(1).currentline
+					-- tabRejected["ligne"]  = debug.getinfo(1).currentline
+					tabRejected["ligne"]  = SafeGetLine()
 					table.insert(draft["rejected"], tabRejected)
 				end
 			end
