@@ -575,6 +575,7 @@ local function startSAR(arg)
 	pointData = {
 		{
 			["alt"] = arg_flightSAR.airdromeElevation + 30,
+			["name"] = "startSAR()",
 			["action"] = "Turning Point",
 			["type"] = "Turning Point",
 			["alt_type"] = "BARO",
@@ -607,7 +608,6 @@ local function startSAR(arg)
 			["ETA_locked"] = true,
 			["y"] = point1.y,
 			["x"] = point1.x,
-			["name"] = "",
 			["formation_template"] = "",
 			["speed_locked"] = true,
 		}, -- end of [1] 

@@ -2988,9 +2988,6 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 	env.info( "current_time: "..tostring(current_time).." Custom_AddWptSAR A, grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(speed).."|"..tostring(alt))
 
 	local function execute()
-		-- local current_time = timer.getTime()
-		-- env.info( "current_time: "..tostring(current_time).." Custom_AddWptSAR B, grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(speed).."|"..tostring(alt))
-
 		local flight = Group.getByName(grpname)
 		local coalitionId = tostring(flight:getCoalition())						--obligé pour le string, car 0 est impossible en numerotation de table	
 		local leader = flight:getUnit(1)
@@ -3004,14 +3001,8 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 				if  baseFullName[BaseName] then
 					BaseName = baseFullName[BaseName]
 					base = Airbase.getByName(BaseName)
-					-- env.info( "Custom_AddWptSAR B2, BaseName |"..tostring(BaseName).."| base |"..tostring(base))
-				else
-					-- env.info( "Custom_AddWptSAR B3, BaseName |"..tostring(BaseName).."| base |"..tostring(base))
 				end
 			end
-
-			-- env.info( "Custom_AddWptSAR C, BaseName |"..tostring(BaseName).."| base |"..tostring(base))
-			-- _affiche(base, "Custom_AddWptSAR D base")
 		end
 
 		if leader and base  then
@@ -3027,7 +3018,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 				z = 0,
 				Id = 0,
 			}
-			local FuelPercent = Unit.getFuel(leader)
+			local fuelPercent = Unit.getFuel(leader)
 
 			local posBaseVec3 = base:getPoint()
 			local uId = base:getID()
@@ -3041,52 +3032,32 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 
 			current_time = timer.getTime()
 			local distanceLanding = math.sqrt(math.pow(pt_start.x - pt_landing.x, 2) + math.pow(pt_start.y - pt_landing.y, 2))
-
-			-- _affiche(zoneSAR, "Custom_AddWptSAR E zoneSAR")
-
 			local selectedDistance = 999999
 			local nb_survivor = 0
 
 			for MGRS_Chute, zone in pairs(ZoneSAR) do
 				for N_Pilot, uPilot in ipairs(zone) do
-					-- env.info( "Custom_AddWptSAR F  "..tostring(uPilot.name).."|"..tostring(mgrsChute).."|"..tostring(uPilot.status))
-
 					if  string.lower(uPilot.sideName) ==  coalitionId[coalitionId]  then
 						if uPilot.name and uPilot.embarked ~= true  and (uPilot.status ==  "MIA" or uPilot.status ==  "EVAC_possible" )  then
-							-- env.info( "Custom_AddWptSAR G "..tostring(uPilot.name).."|"..tostring(mgrsChute).."|"..tostring(uPilot.status))
-
 							local distance = math.sqrt(math.pow(pt_start.x - uPilot.x, 2) + math.pow(pt_start.y - uPilot.y, 2))
 							if distance < selectedDistance then
 								selectedDistance = distance
 								pt_dest = uPilot
 								nb_survivor = nb_survivor + 1
-								-- env.info( "Custom_AddWptSAR H no_rescue  "..tostring(nb_survivor))
 							end
 						end
 					end
 				end
 			end
 
-			-- env.info( "Custom_AddWptSAR nb_survivor  "..tostring(nb_survivor).." FuelPercent: "..tostring(FuelPercent))
-			-- env.info( "Custom_AddWptSAR pt_start.c2d  "..tostring(pt_start.x).." pt_start.y: "..tostring(pt_start.y))
-
 			local newRoute = {}
-			if nb_survivor >= 1 and FuelPercent >= 0.5 and selectedDistance < 30001 then
-				if selectedDistance > 30000 then
-					-- env.info( "Custom_AddWptSAR I, CompteRenduEtonnement distance trop longue, la recuperation devrait etre verticale "..selectedDistance)
-				end
-
-				-- env.info( "Custom_AddWptSAR J, TENTE nouveau WPT distance "..selectedDistance)
+			if nb_survivor >= 1 and fuelPercent >= 0.5 and selectedDistance < 30001 then
 
 				local distance01 = math.sqrt(math.pow(pt_start.x - pt_dest.x, 2) + math.pow(pt_start.y - pt_dest.y, 2))
-
-				-- local distance = math.sqrt(math.pow(copyRoute[n].x - copyRoute[n+1].x, 2) + math.pow(copyRoute[n].y - copyRoute[n+1].y, 2))
 				local heading = GetHeading({x=pt_dest.x, y=pt_dest.y} , {x=pt_landing.x, y=pt_landing.y} )
 				local pt_inter = GetOffsetPoint({x=pt_dest.x, y=pt_dest.y}, heading , 1000 )
-				-- env.info( "Custom_AddWptSAR K, pt_inter.x "..tostring(pt_inter.x))
 
 				pt_inter.alti = land.getHeight({x =pt_inter.x, y = pt_inter.y})
-
 
 				newRoute = {
 					[1] =
@@ -3278,18 +3249,11 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 
 				--reprise de la route originale pour rentrer, en supprimant la partie INGRESS
 				if string.find(grpname, "CSAR") then
-					-- local  gpGid = Group.getID(flight)
 					local copyRoute = {}
 					local foundAeronef = false
 
-					-- env.info( "Custom_AddWptSAR CSAR M  "..tostring(gpGid) )
-
 					for tblGrpId, value in pairs(LastInjectFlightPlan) do
-						-- env.info( "Custom_AddWptSAR CSAR N  tblGrpId "..tostring(tblGrpId) )
-
 						if tblGrpId == gpGid then
-							-- env.info( "Custom_AddWptSAR CSAR O  foundAeronef " )
-
 							copyRoute = Deepcopy(value.params.route.points)
 							foundAeronef = true
 							break
@@ -3327,7 +3291,6 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 					--https://stackoverflow.com/questions/12394841/safely-remove-items-from-an-array-table-while-iterating
 					-- nouvelle façon de supprimer des elements d'une table, sans le tps ultra long de table.remove
 					if foundAeronef and attackPoint > 0 then
-						-- env.info( "Custom_AddWptSAR CSAR P  foundAeronef and attackPoint > 0 " )
 						local n=#copyRoute
 						for i=1,n do
 							if i < attackPoint-1 then
@@ -3480,18 +3443,12 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 				if logFile then
 					logFile:write(logStr)
 					logFile:close()
-				else
-					env.info("DCE_Custom_AddWptSAR: Failed to open log file for writing.")
 				end
 			end
 
 			LastInjectFlightPlan[gpGid] = Mission
-			env.info( "Custom_AddWptSAR Y  LastInjectFlightPlan setTask Debut " )
-
 			local ctr = flight:getController()
 			Controller.setTask(ctr, Mission)
-
-			env.info( "Custom_AddWptSAR Z  setTask Fin " )
 
 			--ajoute le plan de vol dans db, pour utiliser plus tard si necessaire, car DCS ne garde pas en env.mission les plan de vol ajouté à l'arrache
 
@@ -3528,7 +3485,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 			z = posFlightVec3.y,
 		}
 
-		local uSAR_Speed = speed /2 *3
+		-- local uSAR_Speed = speed /2 *3
 		local pt_dest = {
 			x = 0,
 			y = 0,
@@ -3571,9 +3528,9 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 				if  string.lower(uPilot.sideName) ==  CoalitionIdAlphaToName[grpCoalitionId]  then
 					local authorisesRescue = true
 					local wrongSide = false
-					local ENI_Side = DCS_ENI_Side[uPilot.sideName]
-					if camp.boundary and camp.boundary[ENI_Side] and camp.boundary[ENI_Side] ~= nil then
-						wrongSide =  CheckPointInPoly_XY_2({x=uPilot.pos.x,y=uPilot.pos.y} , camp.boundary[ENI_Side])
+					local eny_Side = DCS_ENI_Side[uPilot.sideName]
+					if camp.boundary and camp.boundary[eny_Side] and camp.boundary[eny_Side] ~= nil then
+						wrongSide =  CheckPointInPoly_XY_2({x=uPilot.pos.x,y=uPilot.pos.y} , camp.boundary[eny_Side])
 						if wrongSide  then
 							authorisesRescue = false
 						end
@@ -3618,10 +3575,6 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 			end
 		end
 
-		if selectedEjection.name then
-			-- env.info( "Custom_SAR Ia selectedEjection.name: "..tostring(selectedEjection.name))
-		end
-
 		-- si pas de présence de soldat, simulant le piloteEjecté: on sort (cas des ejected en mer, par exemple)
 		if pt_dest.x == 0 then
 			-- env.info( "Custom_SAR Ib RETURN ************* ")
@@ -3647,8 +3600,6 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 			--on tente la position  50m plus loin que l'ejectedPilot pour ne par lui tomber dessus
 			pt50m = GetOffsetPoint({x=pt_dest.x, y=pt_dest.y}, 0, 50 )
 
-			-- env.info( "Custom_SAR Y NEW pt_dest LANDING "..tostring(pt50m.x).." "..tostring(pt50m.y))
-
 			local certitudeLand  = true     --on est sur que le terrain n'est pas en partie, de l'eau
 			local altiMax = 0
 			local altiMin = 999999
@@ -3669,8 +3620,6 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 			end
 			local testDeniv = altiMax - altiMin
 
-			-- env.info( "Custom_SAR W test altiMin altiMax "..tostring(altiMax).." "..tostring(altiMin).." |testDeniv: "..tonumber(testDeniv))
-
 			if testDeniv < 5 and certitudeLand then
 				-- si le denivelé est faible, on se pose
 				pt_dest.landingPossible = true
@@ -3689,7 +3638,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 					["action"] = "Turning Point",
 					["type"] = "Turning Point",
 					["alt_type"] = "BARO",
-					["speed"] = tonumber(uSAR_Speed),
+					["speed"] = tonumber(speed),
 					["task"] =
 					{
 						["id"] = "ComboTask",
@@ -3704,7 +3653,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 					["ETA_locked"] = true,
 					["y"] = currentPos.y,
 					["x"] = currentPos.x,
-					["name"] = "",
+					["name"] = "Custom_SAR() A",
 					["formation_template"] = "",
 					["speed_locked"] = true,
 				}, -- end of [1]  
@@ -3713,7 +3662,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 				["alt"] = pt_dest.z + 150 ,
 				["action"] = "Turning Point",
 				["alt_type"] = "BARO",
-				["speed"] = tonumber(uSAR_Speed),
+				["speed"] = tonumber(speed),
 				["task"] =
 				{
 					["id"] = "ComboTask",
@@ -3725,7 +3674,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 					}, -- end of ["params"]
 				}, -- end of ["task"]
 				["type"] = "Turning Point",
-				["ETA"] =  (selected_distance / uSAR_Speed) + current_time ,
+				["ETA"] =  (selected_distance / speed) + current_time ,
 				["ETA_locked"] = false,
 				["y"] = pt_dest.y,
 				["x"] = pt_dest.x,
@@ -3738,7 +3687,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 				["alt"] = pt_dest.z + 150,
 				["action"] = "Turning Point",
 				["alt_type"] = "BARO",
-				["speed"] = tonumber(uSAR_Speed),
+				["speed"] = tonumber(speed),
 				["task"] =
 				{
 					["id"] = "ComboTask",
@@ -3750,7 +3699,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 					}, -- end of ["params"]
 				}, -- end of ["task"]
 				["type"] = "Turning Point",
-				["ETA"] =  (selected_distance / uSAR_Speed) + current_time + 2 ,
+				["ETA"] =  (selected_distance / speed) + current_time + 2 ,
 				["ETA_locked"] = false,
 				["y"] = pt_dest.y,
 				["x"] = pt_dest.x,
@@ -3763,7 +3712,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 				["alt"] = pointRTBz + 150 ,
 				["action"] = "Turning Point",
 				["alt_type"] = "BARO",
-				["speed"] = tonumber(uSAR_Speed),
+				["speed"] = tonumber(speed),
 				["task"] =
 				{
 					["id"] = "ComboTask",
@@ -3836,6 +3785,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 			route[3]["task"] =
 			{
 				["id"] = "ComboTask",
+				["name"] = "Custom_SAR() B",
 				["params"] =
 				{
 					["tasks"] =
@@ -3919,6 +3869,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 			route[3]["task"] =
 			{
 				["id"] = "ComboTask",
+				["name"] = "Custom_SAR() C",
 				["params"] =
 				{
 					["tasks"] =
@@ -4019,6 +3970,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 			route[3]["task"] =
 			{
 				["id"] = "ComboTask",
+				["name"] = "Custom_SAR() D",
 				["params"] =
 				{
 					["tasks"] =
@@ -4104,6 +4056,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 					["params"] =
 					{
 						["speedEdited"] = true,
+						["name"] = "Custom_SAR() E",
 						["pattern"] = "Circle",
 						["speed"] = 0,		--["speed"] = 0.27777777777778,
 						["altitude"] = 10,

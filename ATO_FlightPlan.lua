@@ -2118,9 +2118,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					if w == 1 and (flight[f].task == "Intercept" or flight[f].task == "SAR") then
-						speed = 300
+						-- speed = 300
+						speed = flight[f].loadout.vAttack or Data_divers[flight[f].type].vAttack or 300
+
 						if flight[f].task == "SAR" then
-							speed = 30
+							speed = flight[f].loadout.vCruise or Data_divers[flight[f].type].vCruise or 50
 						end
 						waypoints[2] = {
 							-- ["name"] = flight[f].route[w].id,
