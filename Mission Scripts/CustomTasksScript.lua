@@ -2575,10 +2575,12 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 		searchTime = timer.getTime() + 1800
 	end
 
-	local function ApplyEngageTargetsInZoneTask()							--engage targets in zone task needs to be applied continously to update zone position to group position
+	local function applyEngageTargetsInZoneTask()							--engage targets in zone task needs to be applied continously to update zone position to group position
+		
 		local elementInAir = false
 		local elementExist = false
 		local flight = Group.getByName(flightName)							--get group
+		
 		if flight then														--group still exists
 			-- env.info( "DCE_CustomSearchThenEngage B0 "..flightName)
 
@@ -2648,7 +2650,7 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 			if elementInAir and cat and element and element:getPlayerName() == nil  then	--and not RTB
 
 				local cntrl = flight:getController()						--get controller of group
-				local posVec3 = element:getPoint()								--get position
+				local posVec3 = element:getPoint()							--get position
 				local task_entry = {}
 
 				if cat == Unit.Category.AIRPLANE then  --0 Airplane
@@ -2744,9 +2746,119 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 	end
 
 	-- env.info( "DCE_CustomSearchThenEngage R scheduleFunction")
-	timer.scheduleFunction(ApplyEngageTargetsInZoneTask, nil, (nextTenth/10))			--schedule function
+	timer.scheduleFunction(applyEngageTargetsInZoneTask, nil, (nextTenth/10))			--schedule function
 
 end --FIN CustomSearchThenEngage
+
+
+function Custom_Intercept(argTargetName, argInterName, argFriendSide, argSpeed, argPosX, argPosY)
+	if varFpsLeak then return end
+
+	env.info( "DCE_Custom_Intercept A start func() "..tostring(argTargetName).."| arg_PosX |"..tostring(argPosX).."| arg_PosY |"..tostring(argPosY))
+
+	argPosX = tonumber(argPosX)
+    argPosY = tonumber(argPosY)
+    argSpeed = tonumber(argSpeed)
+	local interObj = Group.getByName(argInterName)
+	local selected_distance = 99999999
+    local enyCoalName = coalition.side.RED
+
+	env.info( "DCE_Custom_Intercept B")
+	
+	if argFriendSide == "blue" then
+		argFriendSide = coalition.side.BLUE
+	end
+
+    local groups = coalition.getGroups(enyCoalName)
+    local selected_group = nil
+	local selected_PtVec3 = nil
+	env.info( "DCE_Custom_Intercept C")
+    for i, groupObj in pairs(groups) do
+		local gpPointVec3 = groupObj:getPoint()
+		local tempDistance = math.sqrt(math.pow(gpPointVec3.x - argPosX, 2) + math.pow(gpPointVec3.z - argPosY, 2))
+        if tempDistance < selected_distance then
+			selected_distance = tempDistance
+			selected_group = groupObj
+			selected_PtVec3 = gpPointVec3
+		end
+	end
+	env.info( "DCE_Custom_Intercept D")
+    if selected_group and selected_PtVec3 then
+
+		local target_id = selected_group:getID()
+		
+        local weaponType = 1069547520 --automatique
+		
+		env.info( "DCE_Custom_Intercept E")
+
+		local mission = { --define mission for interceptor group
+		id = 'Mission',
+			params = {
+				route = {
+					["points"] = {
+						[1] =
+						{
+							["alt"] = selected_PtVec3.y,
+							["type"] = "Turning Point",
+							["action"] = "Turning Point",
+							["alt_type"] = "BARO",
+							["formation_template"] = "",
+							["y"] = selected_PtVec3.z,
+							["x"] = selected_PtVec3.x,
+							["speed"] = argSpeed,
+							["ETA_locked"] = false,
+							["task"] = {
+								["id"] = "ComboTask",
+								["params"] = {
+									["tasks"] = {
+
+										[1] = {
+											["enabled"] = true,
+											["number"] = 1,
+											["auto"] = false,
+											["id"] = "EngageGroup",
+											["params"] = {
+												["visible"] = false,
+												["groupId"] = target_id,
+												["priority"] = 1,
+												["weaponType"] = weaponType,
+											},
+										},
+
+									},
+								},
+								["speed_locked"] = true,
+							},
+						},
+					},
+				}
+			}
+		}
+
+		env.info( "DCE_Custom_Intercept F")
+
+		local ctr = interObj:getController()
+        Controller.setTask(ctr, mission)
+		
+		if camp.debug then
+			--export custom mission log
+			local current_time = timer.getTime()
+			local logStr = "ComboTask = " .. TableSerialization(mission, 0)
+			local flightNameClean = interObj:gsub('[%p%c%s]', '_')
+			local logFile = io.open(
+			PathDCE .. "Debug\\" .. flightNameClean .. "_" .. "INTERCEPTOR" .. "_" .. tostring(current_time) .. ".lua", "w")
+			if logFile then
+				logFile:write(logStr)
+				logFile:close()
+			else
+				env.info("DCE_INTERCEPTOR: Failed to open log file for writing.")
+			end
+		end
+
+			
+	end
+
+end
 
 
 ----------------------------------------------------------------------------------------------------
@@ -2758,13 +2870,13 @@ end --FIN CustomSearchThenEngage
 ----------------------------------------------------------------------------------------------------
 
 --lets flight orbit at the current position the task was applied (regardless of waypoints)
-function OrbitPosition(FlightName, Alt, Speed, UntilTime)
+function OrbitPosition(arg_FlightName, arg_Alt, arg_Speed, arg_UntilTime)
 	if varFpsLeak then return end
-	local flight = Group.getByName(FlightName)							--get group
+	local flight = Group.getByName(arg_FlightName)							--get group
 	local current_time0 = timer.getTime()
 	env.info(
-		"DCE_Orbit A, grpname |"..tostring(FlightName).."|Alt|"..tostring(Alt).."|Speed|"
-		..tostring(Speed).."|UntilTime|"..tostring(UntilTime).."|current_time0|"..tostring(current_time0)
+		"DCE_Orbit A, grpname |"..tostring(arg_FlightName).."|Alt|"..tostring(arg_Alt).."|Speed|"
+		..tostring(arg_Speed).."|UntilTime|"..tostring(arg_UntilTime).."|current_time0|"..tostring(current_time0)
 	)
 
 	local function execute()
@@ -2772,9 +2884,8 @@ function OrbitPosition(FlightName, Alt, Speed, UntilTime)
 
 		if flight then														--group still exists
 
-
 			local current_time = timer.getTime()
-			env.info( "DCE_Orbit C "..tostring(FlightName)..tostring(current_time))
+			env.info( "DCE_Orbit C "..tostring(arg_FlightName).." "..tostring(current_time))
 
 			-- local var_duration = tonumber(UntilTime) - current_time
 
@@ -2794,15 +2905,15 @@ function OrbitPosition(FlightName, Alt, Speed, UntilTime)
 						["id"] = "Orbit",
 						["params"] =
 						{
-							["altitude"] = Alt,
+							["altitude"] = arg_Alt,
 							["pattern"] = "Circle",
-							["speed"] = Speed,
+							["speed"] = arg_Speed,
 							["point"] = { x = posVec3.x, y = posVec3.z},
 						},
 					},
 					["stopCondition"] =
 					{
-						["time"] = tonumber(UntilTime),
+						["time"] = tonumber(arg_UntilTime),
 						-- ["duration"] = tonumber(var_duration),
 					}
 				}
@@ -2811,8 +2922,8 @@ function OrbitPosition(FlightName, Alt, Speed, UntilTime)
 
 			if camp.debug then
 				local logStr = "OrbitPosition = " .. TableSerialization(task_entry, 0)
-				local FlightNameClean = FlightName:gsub('[%p%c%s]', '_')
-				local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_".. "OrbitPosition_"..current_time..".lua", "w")
+				local flightNameClean = arg_FlightName:gsub('[%p%c%s]', '_')
+				local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_".. "OrbitPosition_"..current_time..".lua", "w")
 				if logFile then
 					logFile:write(logStr)
 					logFile:close()

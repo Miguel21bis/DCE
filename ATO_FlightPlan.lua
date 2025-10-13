@@ -2099,7 +2099,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						["y"] = flight[f].route[w].y,
 						["x"] = flight[f].route[w].x,
 						["speed"] = speed,
-						["ETA_locked"] =  true,
+						["ETA_locked"] = true,
 						["task"] =
 						{
 							["id"] = "ComboTask",
@@ -2144,7 +2144,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							["y"] = flight[f].route[w].y,
 							["x"] = flight[f].route[w].x,
 							["speed"] = speed,
-							["ETA_locked"] =  false,
+							["ETA_locked"] = false,
 							["task"] =
 							{
 								["id"] = "ComboTask",
@@ -2284,11 +2284,13 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					-- ************* set attack speed for attack, target and egress waypoints *************
 					if waypoints[w]["name"] == "Attack" or waypoints[w]["name"] == "Target" or waypoints[w]["name"] == "Egress" then
-						waypoints[w].ETA_locked = false
-						waypoints[w].speed_locked = true
+						waypoints[w]["ETA_locked"] = false
+						waypoints[w]["speed_locked"] = true
+						waypoints[w]["debug"] = (waypoints[w]["debug"] or "") .." ETA_locked A False "
 					elseif waypoints[w]["name"] == "Join"  then
-						waypoints[w].ETA_locked = true
-						waypoints[w].speed_locked = false
+						waypoints[w]["ETA_locked"] = true
+						waypoints[w]["speed_locked"] = false
+						waypoints[w]["debug"] = (waypoints[w]["debug"] or "") .." ETA_locked B True "
 
 						local task_entry =
 						{
@@ -2313,16 +2315,18 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
 					elseif waypoints[w]["name"] == "Assemble"  then
-						waypoints[w].ETA_locked = false
-						waypoints[w].speed_locked = true
+						waypoints[w]["ETA_locked"] = false
+						waypoints[w]["speed_locked"] = true
+						waypoints[w]["debug"] = (waypoints[w]["debug"] or "") .." ETA_locked C False "
 					elseif waypoints[w]["name"] == "Departure"  then
 						-- waypoints[w]["speed"] = pack[p].main[1].loadout.vCruise / 4 * 3					--set NEWSPEED
 					end
 
 					-- ************* sets the speed_locked values for the CAP only (it can arrive late ^^) *************
 					if flight[f].task == "CAP" and waypoints[w]["name"] ~= "Land" and waypoints[w]["name"] ~= "Departure" and waypoints[w]["name"] ~= "Taxi" then
-						waypoints[w].ETA_locked = false
-						waypoints[w].speed_locked = true
+						waypoints[w]["ETA_locked"] = false
+						waypoints[w]["speed_locked"] = true
+						waypoints[w]["debug"] = (waypoints[w]["debug"] or "") .." ETA_locked D False "
 					end
 
 					-- *************  ATO_FP_Debug08 vi trop faible pour les escorteurs des strike trop lent 					
@@ -2361,52 +2365,53 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 
-					-- ************* OrbitPosition  *************
-					if (waypoints[w]["name"] == "IP" ) and flight[f].task == "Escort" then
+					--ATTENTION, OrbitPosition() fonctionne en PUCH de task, et donc les Escort revienne en arriere
+					-- -- ************* OrbitPosition  *************
+					-- if (waypoints[w]["name"] == "IP" ) and flight[f].task == "Escort" then
 
-						local task_entry = {
-							["enabled"] = true,
-							["auto"] = false,
-							["id"] = "WrappedAction",
-							["name"] = "orbit with Escort (name == IP)",
-							["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-							["params"] =
-							{
-								["action"] =
-								{
-									["id"] = "Script",
-									["params"] =
-									{
-										["command"] = "OrbitPosition('" .. groupName .. "', " .. waypoints[w]["alt"] .. ", " .. flight[f].loadout.vCruise  / 4 * 3 .. ", " .. (waypoints[w].ETA + 300) .. ")",
-									},
-								},
-							},
-						}
-						table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+					-- 	local task_entry = {
+					-- 		["enabled"] = true,
+					-- 		["auto"] = false,
+					-- 		["id"] = "WrappedAction",
+					-- 		["name"] = "orbit with Escort (name == IP)",
+					-- 		["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+					-- 		["params"] =
+					-- 		{
+					-- 			["action"] =
+					-- 			{
+					-- 				["id"] = "Script",
+					-- 				["params"] =
+					-- 				{
+					-- 					["command"] = "OrbitPosition('" .. groupName .. "', " .. waypoints[w]["alt"] .. ", " .. flight[f].loadout.vCruise  / 4 * 3 .. ", " .. (waypoints[w].ETA + 300) .. ")",
+					-- 				},
+					-- 			},
+					-- 		},
+					-- 	}
+					-- 	table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
-					end
+					-- end
 
 					-- ************* player flight WP ETA *************
 					if flight[f].player then
 						if waypoints[w]["name"] == "Target" or waypoints[w]["name"] == "Station" then
-							waypoints[w].ETA_locked = true
-							waypoints[w].speed_locked = false
+							waypoints[w]["ETA_locked"] = true
+							waypoints[w]["speed_locked"] = false
 						elseif waypoints[w]["name"] == "Join" then															--ETA of join should be unlocked (so it is no target point for Viggen), but speed needs to be reduced to allow time for start up and take off
-							waypoints[w].ETA_locked = false
-							waypoints[w].speed_locked = true
-							--set NEWSPEED
-							-- waypoints[w]["speed"] = GetDistance(waypoints[w - 1], waypoints[w]) / (waypoints[w].ETA - waypoints[w-1]["ETA"])		--exact speed to rach join at required ETA
+							waypoints[w]["ETA_locked"] = false
+							waypoints[w]["speed_locked"] = true
 						else
-							waypoints[w].ETA_locked = false
-							waypoints[w].speed_locked = true
+							waypoints[w]["ETA_locked"] = false
+							waypoints[w]["speed_locked"] = true
 						end
+						waypoints[w]["debug"] = (waypoints[w]["debug"] or "") .." ETA_locked E "
 					end
 
 					-- modification M06.b bug helico reste statique s'il demarre en horaire décalé
 					-- M06.e
 					if is_helicopter and flight[f].route[w].id ~= "Departure" then	 --and flight[f].task == "Transport"	
-						waypoints[w].ETA_locked = false
-						waypoints[w].speed_locked = true
+						waypoints[w]["ETA_locked"] = false
+						waypoints[w]["speed_locked"] = true
+						waypoints[w]["debug"] = (waypoints[w]["debug"] or "") .." ETA_locked F False "
 					end
 
 					-- ************* altitudes below 1000m are AGL instead of MSL *************
@@ -2491,8 +2496,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							waypoints[w].action = "Turning Point"
 							-- waypoints[w]["speed"] = flight[f].loadout.vCruise / 3 * 2			--set NEWSPEED
 							waypoints[w].alt = 500 + db_airbases[flight[f].base].elevation
-							waypoints[w].ETA_locked = false
-							waypoints[w].speed_locked = true
+							waypoints[w]["ETA_locked"] = false
+							waypoints[w]["speed_locked"] = true
+							waypoints[w]["debug"] = (waypoints[w]["debug"] or "") .." ETA_locked G False "
 
 							local stopTime = waypoints[w].ETA + 7200
 
@@ -2520,9 +2526,10 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						else
 							waypoints[w].type = "Land"
 							waypoints[w].action = "Landing"
-							-- waypoints[w].ETA_locked = true		--ceci n'est pas une bonne idée, le DCS bloque
-							waypoints[w].ETA_locked = false
-                            waypoints[w].speed_locked = true
+							-- waypoints[w]["ETA_locked"] = true		--ceci n'est pas une bonne idée, le DCS bloque
+							waypoints[w]["ETA_locked"] = false
+                            waypoints[w]["speed_locked"] = true
+							waypoints[w]["debug"] = (waypoints[w]["debug"] or "") .." ETA_locked H False "
 
 							if baseIsCarrier then
 								waypoints[w].linkUnit = flight[f].airdromeId
@@ -2561,7 +2568,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									['y'] = pointOrbit.y,
 									['formation_template'] = '',
 									['name'] = 'Stacking',
-									["ETA_locked"] =  true,
+									["ETA_locked"] = true,
 									['speed'] = waypoints[w-1]["speed"],
 									['x'] = pointOrbit.x,
 									['task'] = {
@@ -3733,10 +3740,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 
-					-- ************* orbit on departure *************
+					-- ************* orbit on departure/Assemble *************
 					if flight[f].route[w].id == "Assemble" then
 						if flight[f].number > 1 or (#flight > 1 and flight[f].loadout.tStation == nil) or flight[f].target.firepower.packmax then		--orbit on departure only for flights larger than 1-ship, flights that are part of a package (but no on-station tasks) or multi-packages
-
 
 							local task_entry =
 							{
@@ -3793,26 +3799,62 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								timeOrbit = flight[f].route[w + 1].eta
 							end
 
-							task_entry =
-							{
+
+
+							--orbit **--
+
+							speed = pack[p].main[1].loadout.vCruise
+							if flight[f].loadout.vCruise and flight[f].loadout.vCruise < speed then
+								speed = flight[f].loadout.vCruise / 3 * 2
+							end
+
+							task_entry = {
 								["enabled"] = true,
 								["auto"] = false,
-								["id"] = "WrappedAction",
-								["name"] = "orbit (name == Assemble)",
+								["id"] = "ControlledTask",
+								["name"] = "orbit (id == Assemble)",
 								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 								["params"] =
 								{
-									["action"] =
+									["task"] =
 									{
-										["id"] = "Script",
+										["id"] = "Orbit",
 										["params"] =
 										{
-											["command"] = "OrbitPosition('" .. groupName .. "', " .. altitude .. ", " .. speed .. ", " .. tostring(timeOrbit) .. ")",
+											["altitude"] = waypoints[w]["alt"],
+											["pattern"] = "Circle",
+											["speed"] = speed,
 										},
 									},
-								},
+									["stopCondition"] =
+									{
+										["time"] = timeOrbit
+									}
+								}
 							}
 							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+
+
+							-- task_entry =
+							-- {
+							-- 	["enabled"] = true,
+							-- 	["auto"] = false,
+							-- 	["id"] = "WrappedAction",
+							-- 	["name"] = "orbit (name == Assemble)",
+							-- 	["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+							-- 	["params"] =
+							-- 	{
+							-- 		["action"] =
+							-- 		{
+							-- 			["id"] = "Script",
+							-- 			["params"] =
+							-- 			{
+							-- 				["command"] = "OrbitPosition('" .. groupName .. "', " .. altitude .. ", " .. speed .. ", " .. tostring(timeOrbit) .. ")",
+							-- 			},
+							-- 		},
+							-- 	},
+							-- }
+							-- table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
 						end
 					end
@@ -3968,7 +4010,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry2)
 					end
 
-					--TODO ajouter un circle pour les escorte de Transport
+					-- TODO ajouter un circle pour les escorte de Transport
 
 					--orbit on egress
 					if flight[f].route[w].id == "Egress" and flight[f].task == "Escort" then
@@ -3979,7 +4021,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						local timeOrbit = 400
 
 						if IsHelicopter[pack[p]["main"][1].type] then
-							timeOrbit = 700
+							timeOrbit = 600
 						end
 						local task_entry = {
 							["enabled"] = true,
@@ -4009,7 +4051,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					-- ************* rejoin flight on egress *************
 					if (flight[f].task == "Strike" or flight[f].task == "Anti-ship Strike" ) and flight[f].route[w].id == "Egress" then
-						-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
+						
 						local task_entry = {																				--task is a command to run LUA code
 							["enabled"] = true,
 							["auto"] = false,
@@ -4225,9 +4267,10 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 					-- print("AtoFp "..flight[f].task.." _________ wptTargetPass: "..tostring(wptTargetPass).." wptName "..tostring(waypoints[w]["name"]) )
-					if flight[f].task == "Anti-ship Strike" and wptTargetPass and  waypoints[w]["name"] ~= "Land"  then
-						waypoints[w].ETA_locked = false
-						waypoints[w].speed_locked = true
+					if flight[f].task == "Anti-ship Strike" and wptTargetPass and waypoints[w]["name"] ~= "Land"  then
+						waypoints[w]["ETA_locked"] = false
+						waypoints[w]["speed_locked"] = true
+						waypoints[w]["debug"] = (waypoints[w]["debug"] or "") .." ETA_locked J False "
 					end
 
 				end	-- Fin de Route
@@ -4241,8 +4284,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 				-- ************* lock ETA and speed of first waypoint *************
-				waypoints[1].ETA_locked = true
-				waypoints[1].speed_locked = true
+				waypoints[1]["ETA_locked"] = true
+				waypoints[1]["speed_locked"] = true
 				if waypoints[1]["speed"] == nil then
 					waypoints[1]["speed"] = 1
 				end
@@ -4282,8 +4325,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						waypoints[1]["ETA"] = 0
 					end
 
-					waypoints[1].ETA_locked = true
-					waypoints[1].speed_locked = true
+					waypoints[1]["ETA_locked"] = true
+					waypoints[1]["speed_locked"] = true
 
 					if waypoints[1]["speed"] == nil then
 						waypoints[1]["speed"] = 1
@@ -4334,6 +4377,33 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 				end
+
+
+				
+				-- ************* evite que les escortes passent PC pour rattraper le retard au retour de mission *************
+				local wptEtaOff = 9999
+				for w = 1, #waypoints do
+					if waypoints[w].briefing_name then
+						if waypoints[w].briefing_name == "IP" then
+							wptEtaOff = w+1
+						elseif waypoints[w].briefing_name == "Egress" then
+							wptEtaOff = w
+						end
+					end
+
+					if w >= wptEtaOff then
+						waypoints[w]["ETA_locked"] = false
+						waypoints[w]["speed_locked"] = true
+						waypoints[w]["debug"] = (waypoints[w]["debug"] or "") .. "ETA_Locked_OFF wptEtaOff: "..tostring(wptEtaOff)
+					end
+
+				end
+
+
+
+				-- ************* Fin de bidouillage ETA *************
+				-- ************* Fin de bidouillage ETA *************
+				-- ************* Fin de bidouillage ETA *************
 
 
 
@@ -5957,7 +6027,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							}, -- end of ["params"]
 						}, -- end of ["task"]
 						["ETA"] = pedroLinkCV.startTime,
-						["ETA_locked"] =  true,
+						["ETA_locked"] = true,
 						["y"] =  pos.y,
 						["x"] =  pos.x,
 						["formation_template"] = "",
@@ -6009,7 +6079,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						}, -- end of ["task"]
 						["type"] = "Turning Point",
 						["ETA"] = pedroLinkCV.startTime + 60,
-						["ETA_locked"] =  false,
+						["ETA_locked"] = false,
 						["y"] = pos.y + 300,
 						["x"] = pos.x + 300,
 						["formation_template"] = "",
@@ -6166,8 +6236,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						groupRTB.route.points[1]['action'] = 'Turning Point'
 						groupRTB.route.points[1]['type'] = 'Turning Point'
 
-						groupRTB.route.points[1].ETA_locked = true
-						groupRTB.route.points[1].speed_locked = true
+						groupRTB.route.points[1]["ETA_locked"] = true
+						groupRTB.route.points[1]["speed_locked"] = true
 
 						if flight[f].loadout.vAttack then
 							groupRTB.route.points[1]['speed'] = flight[f].loadout.vAttack
@@ -6188,7 +6258,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 																	},
 																},
 															}
-						groupRTB.route.points[2].ETA_locked = false
+						groupRTB.route.points[2]["ETA_locked"] = false
 
 					elseif groupRTB.route.points[2] and  groupRTB.route.points[3] then
 						-- groupRTB.route.points[1] = groupRTB.route.points[2]
@@ -6200,8 +6270,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						groupRTB.route.points[1] = groupRTB.route.points[3]
 
-						groupRTB.route.points[1].speed_locked = true
-						groupRTB.route.points[1].ETA_locked = true
+						groupRTB.route.points[1]["speed_locked"] = true
+						groupRTB.route.points[1]["ETA_locked"] = true
 						groupRTB.route.points[1]['ETA'] = 1
 						-- groupRTB.route.points[1]['x'] = groupRTB.route.points[1]['x'] + 5000
 						-- groupRTB.route.points[1]['y'] = groupRTB.route.points[1]['y'] + 5000
@@ -6220,8 +6290,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						groupRTB.route.points[2].x = tempWPT['x']
 						groupRTB.route.points[2].y = tempWPT['y']
 						groupRTB.route.points[1]['ETA'] = 10
-						groupRTB.route.points[2].speed_locked = false
-						groupRTB.route.points[2].ETA_locked = true
+						groupRTB.route.points[2]["speed_locked"] = false
+						groupRTB.route.points[2]["ETA_locked"] = true
 					end
 
 					groupRTB.name = "Recovery "..groupRTB.name
@@ -7775,7 +7845,7 @@ if testPosRunwayImpact then
 								["formation_template"] = "",
 								["y"] = tonumber(runway.y),
 								["x"] = tonumber(runway.x),
-								["ETA_locked"] =  true,
+								["ETA_locked"] = true,
 								["speed"] = 0,
 								["action"] = "Off Road",
 								["task"] =

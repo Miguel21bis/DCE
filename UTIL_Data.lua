@@ -1762,6 +1762,8 @@ Data_divers = {
 	["AH-1W"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
+		vCruise = 75,	--TODO a verifier
+		hCruise = 50,
 	},
 	["UH-1H"] = {
 		instrumentUnits = "imperial",
@@ -2075,6 +2077,8 @@ Data_divers = {
 	["Mi-24V"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
+		vCruise = 75,	--TODO a verifier
+		hCruise = 50,
 	},
 	["Mi-24P"] = {
 		instrumentUnits = "russian",

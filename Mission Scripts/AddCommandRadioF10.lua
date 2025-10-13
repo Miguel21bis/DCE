@@ -2326,7 +2326,7 @@ function ReFueling(playerGroup)
 
 	for i, gp in pairs(groups) do
 		local gpName = Group.getName(gp)
-		if   string.find(gpName,"Refueling") then
+		if string.find(gpName,"Refueling") then
 			local units = gp:getUnits()
 			local _unit = units[1]
 			local fuel = _unit:getFuel()

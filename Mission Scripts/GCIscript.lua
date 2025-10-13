@@ -106,7 +106,7 @@ function GetHeadingIM(p1, p2)
 end
 
 
-local ErrorMsg = ""																				--variable to store script status in case of error
+local errorMsg = ""																				--variable to store script status in case of error
 
 --target tracks
 local target_tracks = {
@@ -117,10 +117,10 @@ local target_tracks = {
 local function GCI_Cycle()
 	local current_time = timer.getTime()
 	--remove old targets from target_tracks
-	ErrorMsg = "Remove old tracks."																--Error message in case follow on code fails
+	errorMsg = "Remove old tracks."																--Error message in case follow on code fails
 	for track_side, side in pairs(target_tracks) do												--iterate through sides in target tracks table
 		for target_name, target in pairs(side) do												--iterate through targets
-			ErrorMsg = "Remove old tracks: " .. target_name .. " no time stamp."				--Error message in case follow on code fails
+			errorMsg = "Remove old tracks: " .. target_name .. " no time stamp."				--Error message in case follow on code fails
 			if target.time + 300 < current_time then											--if target was not detected for more than 5 minutes
 				target.assigned = 0
 				target.number = 0																--make target void
@@ -129,7 +129,7 @@ local function GCI_Cycle()
 	end
 
 	--update assigned interceptors table
-	ErrorMsg = "Update interceptor table."														--Error message in case follow on code fails
+	errorMsg = "Update interceptor table."														--Error message in case follow on code fails
 	for side_name, side in pairs(GCI.Interceptor) do											--iterate through sides in Interceptor table	
 		for base_name, base in pairs(side.base) do													--iterate through bases in Interceptor table
 			--move ready 15 flights to ready
@@ -148,7 +148,7 @@ local function GCI_Cycle()
 		end
 
 		for flight_name, flight in pairs(side.assigned) do										--iterate through assigned interceptors
-			ErrorMsg = "Update interceptor table: "	.. 	flight_name								--Error message in case follow on code fails
+			errorMsg = "Update interceptor table: "	.. 	flight_name								--Error message in case follow on code fails
 			local group = Group.getByName(flight_name)											--get group of flight
 			if group then
 				local units = group:getUnits()													--get alive units array of group
@@ -166,10 +166,10 @@ local function GCI_Cycle()
 	end
 
 	--EWR target detection
-	ErrorMsg = "EWR target detection."																--Error message in case follow on code fails
+	errorMsg = "EWR target detection."																--Error message in case follow on code fails
 	for ewr_side, ewr_table in pairs(GCI.EWR) do													--iterate through sides in EWR table
 		for ewr_name, bool in pairs(ewr_table) do													--iterate through EWR radars	
-			ErrorMsg = "EWR target detection: "	.. ewr_name											--Error message in case follow on code fails
+			errorMsg = "EWR target detection: "	.. ewr_name											--Error message in case follow on code fails
 			local unit = Unit.getByName(ewr_name)													--get EWR unit
 			if unit then																			--if unit exists
 				local ctr = unit:getGroup():getController()											--get unit controller
@@ -179,32 +179,23 @@ local function GCI_Cycle()
 					--le radar peut aussi detecter les missiles, il faut donc prouver que c'est une unité avant toute chose
 					if targets[t].object and Object.getCategory(targets[t].object) == Object.Category.UNIT then
 						
-						local objCat = Object.getCategory(targets[t].object)
-						
+						local objCat = Object.getCategory(targets[t].object)						
 						local targetDesc = targets[t].object:getDesc()
 						local txtA = ""
-
 						local targetCat = targetDesc.category
-						-- env.info("DCE_Gci A_C targetCat "..tostring(targetCat))
-
-						-- _affiche(targetDesc, "DCE_Gci A_C2 targetDesc ")
-
 						local isExist = targets[t].object:isExist()
 						local inAir = targets[t].object:inAir()
 
 						if isExist and inAir and targetCat and (targetCat == Unit.Category.AIRPLANE or targetCat == Unit.Category.HELICOPTER) then
 							local targetGpObject = targets[t].object:getGroup()
 							local target_name = targetGpObject:getName()			--get target group name
-							-- env.info("DCE_Gci A_D² ")
-
+							
 							if track_update[target_name] == nil then							--the target track for this group has not yet been updated
-								-- env.info("DCE_Gci A_E "..tostring(target_name))	
 								track_update[target_name] = true								--the target track for this group is updated
 								local target_number = targetGpObject:getUnits()	--get target group size
 								local target_pointVec3 = targets[t].object:getPoint()				--get target point
 								local target_typeName = targetGpObject:getUnit(1):getTypeName()
-								-- env.info("DCE_Gci A_G "..tostring(target_typeName))
-								ErrorMsg = "EWR target detection: " .. ewr_name	.. "; Target: " .. target_name 	--Error message in case follow on code fails
+								errorMsg = "EWR target detection: " .. ewr_name	.. "; Target: " .. target_name 	--Error message in case follow on code fails
 
 								if target_tracks[ewr_side][target_name] then					--existing track
 									if target_tracks[ewr_side][target_name].time > current_time - 30 then	--last detection was within 30 seconds
@@ -239,45 +230,27 @@ local function GCI_Cycle()
 	end
 
 	--assign interceptors to targets
-	ErrorMsg = "Assign interceptors."																--Error message in case follow on code fails
-	for track_side, side in pairs(target_tracks) do													--iterate throug sides in target_tracks table
-		-- env.info("DCE_Gci B_1 track_side: "..track_side)
-
-		for target_name, target in pairs(side) do													--iterate through targets
-			-- env.info("DCE_Gci B_2 "..tostring(target_name))
-			ErrorMsg = "Assign interceptors; Target: " .. target_name								--Error message in case follow on code fails
+	errorMsg = "Assign interceptors."																--Error message in case follow on code fails
+	for friendSideName, targetData in pairs(target_tracks) do													--iterate throug sides in target_tracks table
+		for target_name, target in pairs(targetData) do													--iterate through targets
+			errorMsg = "Assign interceptors; Target: " .. target_name								--Error message in case follow on code fails
 			
 			if target.history > 0 then																--target was detected at least two times in sequence
-				-- env.info("DCE_Gci B_3 ")
-
 				--ne declenche les intercepteur que si les ENI franchissent la frontiere
 				-- ou si le target est entre chez nous et chez eux (zone tampon ou eau international)
 				local ourSideOfBorder = false
 				local enemySideOfBorder = false
 				local authorizedInter = false
 
-				if camp.boundary and camp.boundary[track_side] and camp.boundary[track_side] ~= nil then
-					-- env.info("DCE_Gci B_4 ")
-
-					ourSideOfBorder =  CheckPointInPoly_XY_3({x=target.pointVec3.x,y=target.pointVec3.z}, camp.boundary[track_side])
-
-					enemySideOfBorder =  CheckPointInPoly_XY_3({x=target.pointVec3.x,y=target.pointVec3.z}, camp.boundary[DCS_ENI_Side[track_side]])
-
-					-- if enemySideOfBorder then
-					-- 	--pour info
-					-- 	env.info("DCE_Gci B_5 enemySideOfBorder "..tostring(enemySideOfBorder))
-					-- end
+				if camp.boundary and camp.boundary[friendSideName] and camp.boundary[friendSideName] ~= nil then
+					
+					ourSideOfBorder =  CheckPointInPoly_XY_3({x=target.pointVec3.x,y=target.pointVec3.z}, camp.boundary[friendSideName])
+					enemySideOfBorder =  CheckPointInPoly_XY_3({x=target.pointVec3.x,y=target.pointVec3.z}, camp.boundary[DCS_ENI_Side[friendSideName]])
 
 					if ourSideOfBorder then
-
 						authorizedInter = true
-						-- env.info("DCE_Gci B_6 ourSideOfBorder "..tostring(ourSideOfBorder))
-
 					elseif not ourSideOfBorder and not enemySideOfBorder then
-
 						authorizedInter = true
-						-- env.info("DCE_Gci B_7 zone tampon authorizedInter "..tostring(authorizedInter))
-
 					else
 						-- --check si le target est sur la mere
 						-- local surfaceType = land.getSurfaceType({x = target.point.x, y = target.point.z})
@@ -307,14 +280,11 @@ local function GCI_Cycle()
 					authorizedInter = true
 				end
 
-				-- env.info("DCE_Gci B_8 authorizedInter: "..tostring(authorizedInter).." | target.assigned<? "..tostring(target.assigned).." target.number"..tostring(target.number))
-
 				if authorizedInter and target.assigned < target.number then												--if target has less interceptors assigned than it has aircraft in group
-					-- env.info("DCE_Gci C0 ")	
 					--find all flights in range to intercept target
 					local eligible_flights = {}														--table of flights eligible for interception of this target
 					local goodTargetType = true
-					for base_name, base in pairs(GCI.Interceptor[track_side].base) do				--iterate through bases in GCI table
+					for base_name, base in pairs(GCI.Interceptor[friendSideName].base) do				--iterate through bases in GCI table
 						if base.targetPlane then 
 							goodTargetType = false
 							for tPlaneN, tPlane in pairs(base.targetPlane) do
@@ -325,23 +295,14 @@ local function GCI_Cycle()
 							end
 						end
 					
-						-- env.info("DCE_Gci C1 goodTargetType: "..tostring(goodTargetType))
-
 						if goodTargetType then
-							-- env.info("DCE_Gci C2 base_name: "..tostring(base_name))
 							for flight_n, flight in pairs(base.ready) do								--iterate through ready interceptor flights
-								-- env.info("DCE_Gci C3")
-
 								if flight.time + 900 < current_time then								--interceptor flight has moved to ready status (from ready15) longer than 15 minutes ago and is ready for action (time is -900 for flight starting ready at mission start).
-									ErrorMsg = "Assign interceptors; Target: " .. target_name .. "; Interceptor: " .. flight.name						--Error message in case follow on code fails
+									errorMsg = "Assign interceptors; Target: " .. target_name .. "; Interceptor: " .. flight.name						--Error message in case follow on code fails
 									
 									-- if current_time >= flight.tot_from and current_time <= flight.tot_to then											--flight can operate at current time							
 										local distance = math.sqrt(math.pow(target.pointVec3.x - flight.x, 2) + math.pow(target.pointVec3.z - flight.y, 2))		--distance between interceptor airbase and target
-										-- env.info("DCE_Gci C5 distance: "..tostring(distance).." <?range: "..tostring(flight.range))
-										
 										if distance < flight.range then									--target is in interception range
-											-- env.info("DCE_Gci C6")
-											
 											eligible_flights[flight.name] = distance					--store flight name and interception distance in table
 										end
 									-- end
@@ -353,112 +314,96 @@ local function GCI_Cycle()
 					end
 
 					--select the flight closest to target for interception
-					local selected_flight															--currently selected flight for interception
+					local selectInterName															--currently selected flight for interception
 					local selected_distance = 9999999												--interception distance of currently selected flight
 					for flight_name, distance in pairs(eligible_flights) do							--iterate through eligible flights
 						if distance < selected_distance then										--if distance of current flight is lower than of currently selected flight
-							selected_flight = flight_name											--select this flight instead
+							selectInterName = flight_name											--select this flight instead
 							selected_distance = distance											--make this the new distance
 						end
 					end
 
-					-- env.info("DCE_Gci N selected_flight: "..tostring(selected_flight))
-
 					--assign selected flight to target
-					ErrorMsg = "Assign interceptors; Target: " .. target_name .. "; Select Flight."					--Error message in case follow on code fails
+					errorMsg = "Assign interceptors; Target: " .. target_name .. "; Select Flight."					--Error message in case follow on code fails
 					local launchedInterceptorOK = false
 
-					if selected_flight then
-						-- env.info("DCE_Gci D1 target_name: "..tostring(target_name))
-
-						for base_name, base in pairs(GCI.Interceptor[track_side].base) do				--iterate through bases in GCI table
-							-- env.info("DCE_Gci D2 base_name: "..tostring(base_name))
-						
+					if selectInterName then
+						for base_name, base in pairs(GCI.Interceptor[friendSideName].base) do				--iterate through bases in GCI table
 							for flight_n, flight in pairs(base.ready) do								--iterate through ready interceptor flights						
-								-- env.info("DCE_Gci D3 flight_n: "..tostring(flight_n))
-								
-								if flight.name == selected_flight then									--find selected interceptor flight in ready table
-									-- env.info("DCE_Gci D4 flight.name: "..tostring(flight.name))
-									
+								if flight.name == selectInterName then									--find selected interceptor flight in ready table
 									trigger.action.setUserFlag(flight.flag, true)						--set flag true to launch interceptor
-									-- trigger.action.outText(selected_flight .. " 01 launched to intercept " .. target_name, 15)	--FOR DEBUG
-									
-									local groupObj = Group.getByName(selected_flight)
+									local groupObj = Group.getByName(selectInterName)
 
 									if groupObj then
 										local isExist = groupObj:isExist()
-										-- local inAir = targets[t].object:inAir()
 										if not isExist then 
 											-- env.info("DCE_Gci D5 group doesnt exist, break "..tostring(selected_flight))
 											break
 
-										end
-									else
-
-										-- env.info("DCE_Gci D6 groupObj doesnt exist, break "..tostring(selected_flight))
-										break
+										end								
 									end
 									
-									local idInfo = groupObj:getID()
+									-- local idInfo = groupObj:getID()
 
-									-- on replace les vecteurs dans un repere x/y/z/
-									local newTarget = {}
-									newTarget.point = {}
-									newTarget.point.x = target.pointVec3.x
-									newTarget.point.y = target.pointVec3.z
-									newTarget.point.z = target.pointVec3.y
+									-- -- on replace les vecteurs dans un repere x/y/z/
+									-- local newTarget = {}
+									-- newTarget.point = {}
+									-- newTarget.point.x = target.pointVec3.x
+									-- newTarget.point.y = target.pointVec3.z
+									-- newTarget.point.z = target.pointVec3.y
 
-									target.altitude = math.floor(target.pointVec3.y / 1000) * 1000
-									target.distance_Km = math.floor(selected_distance / 10000) * 10
-									target.distance = selected_distance
-									local testBearing = math.floor(GetHeadingIM(flight, newTarget.point))
-									target.bearing = math.floor(GetHeading({x=flight.x, y=flight.y}, {x=target.pointVec3.x, y=target.pointVec3.z} ))
+									-- target.altitude = math.floor(target.pointVec3.y / 1000) * 1000
+									-- target.distance_Km = math.floor(selected_distance / 10000) * 10
+									-- target.distance = selected_distance
+									-- local testBearing = math.floor(GetHeadingIM(flight, newTarget.point))
+									-- target.bearing = math.floor(GetHeading({x=flight.x, y=flight.y}, {x=target.pointVec3.x, y=target.pointVec3.z} ))
 
 
 
-									env.info("DCE_Gci "..selected_flight .. " launched to intercept: " .. target.number .." | "..target.typeName.." |Bearing: "..target.bearing.. " |testBearing: "..testBearing.." |Angel: "..target.altitude.." |Distance: "..target.distance_Km.." Km")
+									-- env.info("DCE_Gci "..selected_flight .. " launched to intercept: " .. target.number .." | "..target.typeName.." |Bearing: "..target.bearing.. " |testBearing: "..testBearing.." |Angel: "..target.altitude.." |Distance: "..target.distance_Km.." Km")
 
-									trigger.action.outTextForGroup(idInfo, selected_flight .. " launched to intercept: " .. target.number .." "..target.typeName.." Bearing: "..target.bearing.." Angel: "..target.altitude.." Distance: "..target.distance_Km.." Km", 60 , true)
+									-- trigger.action.outTextForGroup(idInfo, selected_flight .. " launched to intercept: " .. target.number .." "..target.typeName.." Bearing: "..target.bearing.." Angel: "..target.altitude.." Distance: "..target.distance_Km.." Km", 60 , true)
 
-									-- trigger.action.outSoundForCoalition(_side, "l10n/DEFAULT/alarme.wav" )
-
-									trigger.action.outSoundForGroup(idInfo, "l10n/DEFAULT/alarme.wav" )
+									-- trigger.action.outSoundForGroup(idInfo, "l10n/DEFAULT/alarme.wav" )
 
 									--***********************************************************************************
 									--***********************************************************************************
-									-- env.info( "DCE_Gci D8 distance: "..tostring(target.distance).." altitude: "..target.altitude)
-									local distance2 = target.distance/3
-									local weaponType = 1069547520					--automatique
-									local point_1 = GetOffsetPoint(flight, target.bearing, distance2/2)
+									
+									-- local distance2 = target.distance/3
+									-- local weaponType = 1069547520					--automatique
+									-- local point_1 = GetOffsetPoint(flight, target.bearing, distance2/2)
 
-									if target.category == 0 then             --avion
-										distance2 = (target.distance/3)*2
-										-- env.info( "DCE_Gci D9 avion "..tostring(distance2))
-										weaponType = 1069547520					--automatique
-									elseif  target.category == 1 then             --helico
-										distance2 = target.distance/3
-										-- env.info( "DCE_Gci D10 helico "..tostring(distance2))
-										weaponType = 4194304						--Short Range Missile (Fox2)
-									end
+									-- if target.category == 0 then             --avion
+									-- 	distance2 = (target.distance/3)*2
+									-- 	-- env.info( "DCE_Gci D9 avion "..tostring(distance2))
+									-- 	weaponType = 1069547520					--automatique
+									-- elseif  target.category == 1 then             --helico
+									-- 	distance2 = target.distance/3
+									-- 	-- env.info( "DCE_Gci D10 helico "..tostring(distance2))
+									-- 	weaponType = 4194304						--Short Range Missile (Fox2)
+									-- end
 
-									local point_2 = GetOffsetPoint(flight, target.bearing, distance2)
+									-- local point_2 = GetOffsetPoint(flight, target.bearing, distance2)
 
-									local distance3 = (target.distance/3)*2
-									local point_3 = GetOffsetPoint(flight, target.bearing, distance3)
-									point_3.x = point_3.x + 1000
-									point_3.y = point_3.y + 1000
-									local distAfterPt3 = math.sqrt(math.pow(point_2.x - point_3.x, 2) + math.pow(point_2.y - point_3.y, 2))
-									local distRTB = math.sqrt(math.pow(point_3.x - flight.x, 2) + math.pow(point_3.y - flight.y, 2))
+									-- local distance3 = (target.distance/3)*2
+									-- local point_3 = GetOffsetPoint(flight, target.bearing, distance3)
+									-- point_3.x = point_3.x + 1000
+									-- point_3.y = point_3.y + 1000
+									-- local distAfterPt3 = math.sqrt(math.pow(point_2.x - point_3.x, 2) + math.pow(point_2.y - point_3.y, 2))
+									-- local distRTB = math.sqrt(math.pow(point_3.x - flight.x, 2) + math.pow(point_3.y - flight.y, 2))
 									local speed = 250      --mur du son 350 Atl0 293 Atl10000m
 
 									--assign mission task to interceptor flight
-									ErrorMsg = "Assign interceptors; Target: " .. target_name .. "; Selected Flight: " .. selected_flight				--Error message in case follow on code fails
+									errorMsg = "Assign interceptors; Target: " .. target_name .. "; Selected Flight: " .. selectInterName				--Error message in case follow on code fails
 									
-									local function AssignMission()												--function to set interception mission (to be executed with 2 seconds delay, in order for the group to activate first)
+									local bearingWing = 90
+									local point_0 = GetOffsetPoint(flight, bearingWing, 1500)
+									
+									local function assignMission()												--function to set interception mission (to be executed with 2 seconds delay, in order for the group to activate first)
 
-										local ctr = Group.getByName(selected_flight):getController()			--get controller of interceptor group
+										local ctr = Group.getByName(selectInterName):getController()			--get controller of interceptor group
 
-										local flightAir = Group.getByName(selected_flight)
+										local flightAir = Group.getByName(selectInterName)
 										local leader = flightAir:getUnit(1)
 										local descIntercept = leader:getDesc()
 										--mig23 speedMax0 388 m.s
@@ -466,15 +411,14 @@ local function GCI_Cycle()
 
 										if descIntercept and descIntercept.speedMax0 then
 											speed = descIntercept.speedMax0 * 0.8
-
 										end
 
 
 										if camp.debug and descIntercept then
 											--export custom mission log
 											local logStr = "descIntercept = " .. TableSerialization(descIntercept, 0)
-											local FlightNameClean = selected_flight:gsub('[%p%c%s]', '_')
-											local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_".. "DESCRIPT_INTER".."_"..tostring(current_time)..".lua", "w")
+											local flightNameClean = selectInterName:gsub('[%p%c%s]', '_')
+											local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_".. "DESCRIPT_INTER".."_"..tostring(current_time)..".lua", "w")
 											if logFile then
 												logFile:write(logStr)
 												logFile:close()
@@ -483,119 +427,165 @@ local function GCI_Cycle()
 											end
 										end
 
-										-- env.info( " A intercept target_name : "..tostring(target_name) )
-										local GrpObjt =  Group.getByName(target_name)
+										-- local grpObjt =  Group.getByName(target_name)
 
-										if not GrpObjt or GrpObjt == nil then
-											return
-										end
+										-- if not grpObjt or grpObjt == nil then
+										-- 	return
+										-- end
 
-										-- env.info( "DCE_Gci E2 intercept GrpObjt : "..tostring(GrpObjt) )
-										local target_id = GrpObjt:getID()
-										-- env.info( "DCE_Gci E3 intercept target_id: "..tostring(target_id) )
-
-										target_id = Group.getByName(target_name):getID()					--get target group ID --TODO BUG 287: attempt to index a nil value stack traceback:
-										local Mission = {														--define mission for interceptor group
+										-- local target_id = grpObjt:getID()
+										
+										-- target_id = Group.getByName(target_name):getID()					--get target group ID --TODO BUG 287: attempt to index a nil value stack traceback:
+										
+										local planDeVol = {														--define mission for interceptor group
 											id = 'Mission',
 											params = {
 												route = {
-													["points"] = {
-														[1] = {
-															["alt"] = 2000,
-															["type"] = "Turning Point",
+                                                    ["points"] = {
+														
+														{
+															["alt"] = 500,
 															["action"] = "Turning Point",
-															["alt_type"] = "BARO",
-															["formation_template"] = "",
-															["ETA"] = tonumber((distance2 / speed) + current_time) ,
-															["y"] = point_1.y,
-															["x"] = point_1.x,
-															["speed"] = tonumber(speed),
-															["ETA_locked"] = false,
-															["task"] = {
-																["id"] = "ComboTask",
-																["params"] = {
-																	["tasks"] = {
-
-																		[1] = {
-																			["enabled"] = true,
-																			["number"] = 1,
-																			["auto"] = false,
-																			["id"] = "EngageGroup",
-																			["params"] = {
-																				["visible"] = false,
-																				["groupId"] = target_id,
-																				["priority"] = 1,
-																				["weaponType"] = weaponType,
-																			},
-																		},
-
-																	},
-																},
-															},
-															["speed_locked"] = true,
-														},
-														[2] = {
-															["alt"] = target.altitude + 500,
 															["type"] = "Turning Point",
-															["action"] = "Turning Point",
 															["alt_type"] = "BARO",
-															["formation_template"] = "",
-															["ETA"] = tonumber((distance2 / speed) + current_time) ,
-															["y"] = point_2.y,
-															["x"] = point_2.x,
+															["name"] = "intercept new wpt 1",
 															["speed"] = tonumber(speed),
-															["ETA_locked"] = false,
-															["task"] = {
+															["task"] =
+															{
 																["id"] = "ComboTask",
-																["params"] = {
-																	["tasks"] = {
-
-																		[1] = {
+																["params"] =
+																{
+																	["tasks"] =
+																	{
+																		[1] =
+																		{
 																			["enabled"] = true,
+																			["auto"] = false,
+																			["id"] = "WrappedAction",
 																			["number"] = 1,
-																			["auto"] = false,
-																			["id"] = "EngageGroup",
-																			["params"] = {
-																				["visible"] = false,
-																				["groupId"] = target_id,
-																				["priority"] = 1,
-																				["weaponType"] = weaponType,
-																			},
-																		},
-																		[2] = {
-																			["number"] = 2,
-																			["auto"] = false,
-																			["id"] = "ControlledTask",
-																			["enabled"] = true,
-																			["params"] = {
-																				["task"] = {
-																					["id"] = "Orbit",
-																					["params"] = {
-																						["altitude"] = target.altitude + 500,
-																						["pattern"] = "Circle",
-																						["speed"] = 200,
+																			["params"] =
+																			{
+																				["action"] =
+																				{
+																					["id"] = "Script",
+																					["params"] =
+																					{
+																						["command"] = "Custom_Intercept('" .. target_name .. "', '" ..selectInterName.. "', '" ..friendSideName.. "', '" ..speed.. "', '" ..point_0.x.. "', '" ..point_0.y.. "')",
 																					},
 																				},
-																				["stopCondition"] = {
-																					["time"] = current_time + 1200,
-																				}
-																			}
-																		},
-
-																	},
-																},
-															},
+																			},
+																		}, -- end of [2]	
+																	}, -- end of ["tasks"]
+																}, -- end of ["params"]
+															}, -- end of ["task"]
+															["ETA"] = current_time ,
+															["ETA_locked"] = true,
+															["y"] = point_0.y,
+															["x"] = point_0.x,
+															["formation_template"] = "",
 															["speed_locked"] = true,
-														},
-														[3] = {
+														}, -- end of [1]  
+
+
+														-- {
+														-- 	["alt"] = 2000,
+														-- 	["type"] = "Turning Point",
+														-- 	["action"] = "Turning Point",
+														-- 	["alt_type"] = "BARO",
+														-- 	["formation_template"] = "",
+														-- 	["ETA"] = tonumber((distance2 / speed) + current_time) ,
+														-- 	["y"] = point_1.y,
+														-- 	["x"] = point_1.x,
+														-- 	["speed"] = tonumber(speed),
+														-- 	["ETA_locked"] = false,
+														-- 	["task"] = {
+														-- 		["id"] = "ComboTask",
+														-- 		["params"] = {
+														-- 			["tasks"] = {
+
+														-- 				[1] = {
+														-- 					["enabled"] = true,
+														-- 					["number"] = 1,
+														-- 					["auto"] = false,
+														-- 					["id"] = "EngageGroup",
+														-- 					["params"] = {
+														-- 						["visible"] = false,
+														-- 						["groupId"] = target_id,
+														-- 						["priority"] = 1,
+														-- 						["weaponType"] = weaponType,
+														-- 					},
+														-- 				},
+
+														-- 			},
+														-- 		},
+														-- 	},
+														-- 	["speed_locked"] = true,
+														-- },
+														-- {
+														-- 	["alt"] = target.altitude + 500,
+														-- 	["type"] = "Turning Point",
+														-- 	["action"] = "Turning Point",
+														-- 	["alt_type"] = "BARO",
+														-- 	["formation_template"] = "",
+														-- 	["ETA"] = tonumber((distance2 / speed) + current_time) ,
+														-- 	["y"] = point_2.y,
+														-- 	["x"] = point_2.x,
+														-- 	["speed"] = tonumber(speed),
+														-- 	["ETA_locked"] = false,
+														-- 	["task"] = {
+														-- 		["id"] = "ComboTask",
+														-- 		["params"] = {
+														-- 			["tasks"] = {
+
+														-- 				[1] = {
+														-- 					["enabled"] = true,
+														-- 					["number"] = 1,
+														-- 					["auto"] = false,
+														-- 					["id"] = "EngageGroup",
+														-- 					["params"] = {
+														-- 						["visible"] = false,
+														-- 						["groupId"] = target_id,
+														-- 						["priority"] = 1,
+														-- 						["weaponType"] = weaponType,
+														-- 					},
+														-- 				},
+														-- 				-- [2] = {
+														-- 				-- 	["number"] = 2,
+														-- 				-- 	["auto"] = false,
+														-- 				-- 	["id"] = "ControlledTask",
+														-- 				-- 	["enabled"] = true,
+														-- 				-- 	["params"] = {
+														-- 				-- 		["task"] = {
+														-- 				-- 			["id"] = "Orbit",
+														-- 				-- 			["params"] = {
+														-- 				-- 				["altitude"] = target.altitude + 500,
+														-- 				-- 				["pattern"] = "Circle",
+														-- 				-- 				["speed"] = 200,
+														-- 				-- 			},
+														-- 				-- 		},
+														-- 				-- 		["stopCondition"] = {
+														-- 				-- 			["time"] = current_time + 1200,
+														-- 				-- 		}
+														-- 				-- 	}
+														-- 				-- },
+
+														-- 			},
+														-- 		},
+														-- 	},
+														-- 	["speed_locked"] = true,
+														-- },
+														{
 															["alt"] = 4000,
 															["type"] = "Turning Point",
 															["action"] = "Turning Point",
 															["alt_type"] = "BARO",
 															["formation_template"] = "",
-															["ETA"] = tonumber((distAfterPt3 / speed) + current_time),
-															["y"] = point_3.y,
-															["x"] = point_3.x,
+															-- ["ETA"] = tonumber((distAfterPt3 / speed) + current_time),
+															["ETA"] = 3000,
+															-- ["y"] = point_3.y,
+															-- ["x"] = point_3.x,
+															["y"] = flight.y,
+															["x"] = flight.x,
 															["speed"] = tonumber(speed),
 															["ETA_locked"] = false,
 															["task"] = {
@@ -645,14 +635,15 @@ local function GCI_Cycle()
 															},
 															["speed_locked"] = true,
 														},
-														[4] = {
+														{
 															["alt"] = 2000,
 															["type"] = "Land",
 															["action"] = "Landing",
 															["airdromeId"] = flight.airdromeId,
 															["alt_type"] = "BARO",
 															["formation_template"] = "",
-															["ETA"] = tonumber((distRTB / speed) + current_time),
+                                                            -- ["ETA"] = tonumber((distRTB / speed) + current_time),
+															["ETA"] = 3600,
 															["y"] = flight.y,
 															["x"] = flight.x,
 															["speed"] = tonumber(speed),
@@ -670,12 +661,12 @@ local function GCI_Cycle()
 												}
 											}
 										}
-										Controller.setTask(ctr, Mission)																			--activate task with mission for interceptor group
+										Controller.setTask(ctr, planDeVol)																			--activate task with mission for interceptor group
 
 										if camp.debug then
 											--export custom mission log
-											local logStr = "ComboTask = " .. TableSerialization(Mission, 0)
-											local FlightNameClean = selected_flight:gsub('[%p%c%s]', '_')
+											local logStr = "ComboTask = " .. TableSerialization(planDeVol, 0)
+											local FlightNameClean = selectInterName:gsub('[%p%c%s]', '_')
 											local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_".. "INTERCEPTOR".."_"..tostring(current_time)..".lua", "w")
 											if logFile then
 												logFile:write(logStr)
@@ -687,16 +678,16 @@ local function GCI_Cycle()
 
 									end
 
-									timer.scheduleFunction(AssignMission, nil, timer.getTime() + 2)													--set intercept mission with 2 seconds delay
+									timer.scheduleFunction(assignMission, nil, timer.getTime() + 2)													--set intercept mission with 2 seconds delay
 
-									ErrorMsg = "Assign interceptors; Target: " .. target_name .. "; Selected Flight: " .. selected_flight .. "; Update GCI Table."				--Error message in case follow on code fails
+									errorMsg = "Assign interceptors; Target: " .. target_name .. "; Selected Flight: " .. selectInterName .. "; Update GCI Table."				--Error message in case follow on code fails
 
 									launchedInterceptorOK = true
 
-									GCI.Interceptor[track_side].assigned[selected_flight] = GCI.Interceptor[track_side].base[base_name].ready[flight_n]	--move flight from ready to assigned status
-									table.remove(GCI.Interceptor[track_side].base[base_name].ready, flight_n)											--move flight from ready to assigned status
-									GCI.Interceptor[track_side].assigned[selected_flight].target = target_name										--store target name
-									target.assigned = target.assigned + GCI.Interceptor[track_side].assigned[selected_flight].number				--mark target as assigned for interception
+									GCI.Interceptor[friendSideName].assigned[selectInterName] = GCI.Interceptor[friendSideName].base[base_name].ready[flight_n]	--move flight from ready to assigned status
+									table.remove(GCI.Interceptor[friendSideName].base[base_name].ready, flight_n)											--move flight from ready to assigned status
+									GCI.Interceptor[friendSideName].assigned[selectInterName].target = target_name										--store target name
+									target.assigned = target.assigned + GCI.Interceptor[friendSideName].assigned[selectInterName].number				--mark target as assigned for interception
 
 									if camp.debug then
 										--export custom mission log
@@ -735,8 +726,8 @@ timer.scheduleFunction(GCI_Cycle, nil, timer.getTime() + 1)										--start GCI
 --Control function to report when GCI_Cylce() stopped working
 local function ControlFunction()
 	if ControlTime + 30 < timer.getTime() then													--if ControlTime was not updated since 30 seconds
-		trigger.action.outText("GCI_Cycle() Error: " .. ErrorMsg, 60)							--print error
-		env.info("DCE_GCI_Cycle() Error: " .. ErrorMsg)
+		trigger.action.outText("GCI_Cycle() Error: " .. errorMsg, 60)							--print error
+		env.info("DCE_GCI_Cycle() Error: " .. errorMsg)
 	else
 		return timer.getTime() + 15
 	end
