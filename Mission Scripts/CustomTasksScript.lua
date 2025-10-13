@@ -2760,7 +2760,7 @@ function Custom_Intercept(argTargetName, argInterName, argFriendSide, argSpeed, 
     argPosY = tonumber(argPosY)
     argSpeed = tonumber(argSpeed)
 	local interObj = Group.getByName(argInterName)
-	local selected_distance = 99999999
+	local selected_distance = 999999999
     local enyCoalName = coalition.side.RED
 
 	env.info( "DCE_Custom_Intercept B")
@@ -2771,22 +2771,48 @@ function Custom_Intercept(argTargetName, argInterName, argFriendSide, argSpeed, 
 
     local groups = coalition.getGroups(enyCoalName)
     local selected_group = nil
-	local selected_PtVec3 = nil
-	env.info( "DCE_Custom_Intercept C")
+    local selected_PtVec3 = nil
+	
+    env.info("DCE_Custom_Intercept C1")
+	
     for i, groupObj in pairs(groups) do
-		local gpPointVec3 = groupObj:getPoint()
-		local tempDistance = math.sqrt(math.pow(gpPointVec3.x - argPosX, 2) + math.pow(gpPointVec3.z - argPosY, 2))
-        if tempDistance < selected_distance then
-			selected_distance = tempDistance
-			selected_group = groupObj
-			selected_PtVec3 = gpPointVec3
+		
+		local unitObj = groupObj:getUnit(1)
+
+		-- env.info("DCE_Custom_Intercept C2 "..i .." groupObj "..tostring(groupObj).." unitObj "..tostring(unitObj))
+		
+		--and unitObj.isActive and unitObj:isActive() and unitObj.isExist and unitObj:isExist()
+		if unitObj and unitObj.inAir and unitObj:inAir() then
+			
+			local uPointVec3 = unitObj:getPoint()
+			-- env.info("DCE_Custom_Intercept C3 inAir uPointVec3.x: "..tostring(uPointVec3.x).." uPointVec3.z "..tostring(uPointVec3.z))
+			-- env.info("DCE_Custom_Intercept C4 math.abs(uPointVec3.x - argPosX): "..tostring(math.abs(uPointVec3.x - argPosX)))
+			-- env.info("DCE_Custom_Intercept C5 math.abs(uPointVec3.z - argPosY): "..tostring(math.abs(uPointVec3.z - argPosY)))
+			
+            if math.abs(uPointVec3.x - argPosX) < 125000 and math.abs(uPointVec3.z - argPosY) < 125000 then
+                -- Calcul précis seulement pour les avions proches
+
+                local tempDistance = math.sqrt(math.pow(uPointVec3.x - argPosX, 2) + math.pow(uPointVec3.z - argPosY, 2))
+
+				env.info("DCE_Custom_Intercept C6 tempDistance before: " .. tostring(tempDistance).." <? selected_distance "..tostring(selected_distance))
+				
+                if tempDistance < selected_distance then
+					env.info("DCE_Custom_Intercept C7  " )
+                    selected_distance = tempDistance
+                    selected_group = groupObj
+                    selected_PtVec3 = uPointVec3
+                end
+            end
+
 		end
-	end
-	env.info( "DCE_Custom_Intercept D")
+
+    end
+	
+	env.info("DCE_Custom_Intercept D selected_group: "..tostring(selected_group).." selected_PtVec3: "..tostring(selected_PtVec3))
+	
     if selected_group and selected_PtVec3 then
 
-		local target_id = selected_group:getID()
-		
+		local targetGpId = selected_group:getID()
         local weaponType = 1069547520 --automatique
 		
 		env.info( "DCE_Custom_Intercept E")
@@ -2819,7 +2845,7 @@ function Custom_Intercept(argTargetName, argInterName, argFriendSide, argSpeed, 
 											["id"] = "EngageGroup",
 											["params"] = {
 												["visible"] = false,
-												["groupId"] = target_id,
+												["groupId"] = targetGpId,
 												["priority"] = 1,
 												["weaponType"] = weaponType,
 											},
@@ -2838,15 +2864,37 @@ function Custom_Intercept(argTargetName, argInterName, argFriendSide, argSpeed, 
 		env.info( "DCE_Custom_Intercept F")
 
 		local ctr = interObj:getController()
-        Controller.setTask(ctr, mission)
+        -- Controller.setTask(ctr, mission)	-- ecrase la mission precedente
+
+		-- Stop toute action en cours
+		ctr:setCommand({ id = 'StopRoute', params = { value = true } })
+
+		-- Supprime la tâche active si bloquante
+		ctr:popTask()
+
+		-- Prépare et injecte l’interception
+
+		local interceptTask = {
+			id = 'EngageGroup',
+			["params"] = {
+				["visible"] = false,
+				["groupId"] = targetGpId,
+				["priority"] = 1,
+				["weaponType"] = weaponType,
+			},
+		}
+		ctr:pushTask(interceptTask)
+
+		env.info("DCE_Custom_Intercept G")
+
 		
 		if camp.debug then
 			--export custom mission log
 			local current_time = timer.getTime()
-			local logStr = "ComboTask = " .. TableSerialization(mission, 0)
-			local flightNameClean = interObj:gsub('[%p%c%s]', '_')
+			local logStr = "params = " .. TableSerialization(interceptTask, 0)
+			local flightNameClean = argInterName:gsub('[%p%c%s]', '_')
 			local logFile = io.open(
-			PathDCE .. "Debug\\" .. flightNameClean .. "_" .. "INTERCEPTOR" .. "_" .. tostring(current_time) .. ".lua", "w")
+			PathDCE .. "Debug\\" .. flightNameClean .. "_" .. "Custom_Intercept" .. "_" .. tostring(current_time) .. ".lua", "w")
 			if logFile then
 				logFile:write(logStr)
 				logFile:close()

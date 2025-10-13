@@ -414,18 +414,18 @@ local function GCI_Cycle()
 										end
 
 
-										if camp.debug and descIntercept then
-											--export custom mission log
-											local logStr = "descIntercept = " .. TableSerialization(descIntercept, 0)
-											local flightNameClean = selectInterName:gsub('[%p%c%s]', '_')
-											local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_".. "DESCRIPT_INTER".."_"..tostring(current_time)..".lua", "w")
-											if logFile then
-												logFile:write(logStr)
-												logFile:close()
-											else
-												env.info("DCE_Gci E1 DCE_DESCRIPT_INTER: Failed to open log file for writing.")
-											end
-										end
+										-- if camp.debug and descIntercept then
+										-- 	--export custom mission log
+										-- 	local logStr = "descIntercept = " .. TableSerialization(descIntercept, 0)
+										-- 	local flightNameClean = selectInterName:gsub('[%p%c%s]', '_')
+										-- 	local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_".. "DESCRIPT_INTER".."_"..tostring(current_time)..".lua", "w")
+										-- 	if logFile then
+										-- 		logFile:write(logStr)
+										-- 		logFile:close()
+										-- 	else
+										-- 		env.info("DCE_Gci E1 DCE_DESCRIPT_INTER: Failed to open log file for writing.")
+										-- 	end
+										-- end
 
 										-- local grpObjt =  Group.getByName(target_name)
 

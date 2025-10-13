@@ -6944,8 +6944,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							end
 						end
 
-						if wptData.task and wptData.task.params and wptData.task.params.tasks then
-							for taskN, taskData in pairs(wptData.task.params.tasks) do		
+						if postWptData.task and postWptData.task.params and postWptData.task.params.tasks then
+							for taskN, taskData in pairs(postWptData.task.params.tasks) do		
 								if taskData.params and taskData.params.task and taskData.params.task.params and taskData.params.task.params.pattern then								
 									if taskData.params.task.params.pattern == "Circle" then
 										diversParamsTiming = true
