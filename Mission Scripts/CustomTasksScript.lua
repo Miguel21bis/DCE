@@ -2751,7 +2751,7 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 end --FIN CustomSearchThenEngage
 
 
-function Custom_Intercept(argTargetName, argInterName, argFriendSide, argSpeed, argPosX, argPosY)
+function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, argPosX, argPosY)
 	if varFpsLeak then return end
 
 	env.info( "DCE_Custom_Intercept A start func() "..tostring(argTargetName).."| arg_PosX |"..tostring(argPosX).."| arg_PosY |"..tostring(argPosY))
@@ -2779,17 +2779,17 @@ function Custom_Intercept(argTargetName, argInterName, argFriendSide, argSpeed, 
 		
 		local unitObj = groupObj:getUnit(1)
 
-		-- env.info("DCE_Custom_Intercept C2 "..i .." groupObj "..tostring(groupObj).." unitObj "..tostring(unitObj))
+		env.info("DCE_Custom_Intercept C2 i "..i .." groupObj "..tostring(groupObj).." unitObj "..tostring(unitObj))
 		
 		--and unitObj.isActive and unitObj:isActive() and unitObj.isExist and unitObj:isExist()
 		if unitObj and unitObj.inAir and unitObj:inAir() then
 			
 			local uPointVec3 = unitObj:getPoint()
-			-- env.info("DCE_Custom_Intercept C3 inAir uPointVec3.x: "..tostring(uPointVec3.x).." uPointVec3.z "..tostring(uPointVec3.z))
-			-- env.info("DCE_Custom_Intercept C4 math.abs(uPointVec3.x - argPosX): "..tostring(math.abs(uPointVec3.x - argPosX)))
-			-- env.info("DCE_Custom_Intercept C5 math.abs(uPointVec3.z - argPosY): "..tostring(math.abs(uPointVec3.z - argPosY)))
+			env.info("DCE_Custom_Intercept C3 inAir uPointVec3.x: "..tostring(uPointVec3.x).." uPointVec3.z "..tostring(uPointVec3.z))
+			env.info("DCE_Custom_Intercept C4 math.abs(uPointVec3.x - argPosX): "..tostring(math.abs(uPointVec3.x - argPosX)))
+			env.info("DCE_Custom_Intercept C5 math.abs(uPointVec3.z - argPosY): "..tostring(math.abs(uPointVec3.z - argPosY)))
 			
-            if math.abs(uPointVec3.x - argPosX) < 125000 and math.abs(uPointVec3.z - argPosY) < 125000 then
+            if math.abs(uPointVec3.x - argPosX) < 150000 and math.abs(uPointVec3.z - argPosY) < 150000 then
                 -- Calcul précis seulement pour les avions proches
 
                 local tempDistance = math.sqrt(math.pow(uPointVec3.x - argPosX, 2) + math.pow(uPointVec3.z - argPosY, 2))

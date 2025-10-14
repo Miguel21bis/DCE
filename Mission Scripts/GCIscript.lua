@@ -391,7 +391,8 @@ local function GCI_Cycle()
 									-- point_3.y = point_3.y + 1000
 									-- local distAfterPt3 = math.sqrt(math.pow(point_2.x - point_3.x, 2) + math.pow(point_2.y - point_3.y, 2))
 									-- local distRTB = math.sqrt(math.pow(point_3.x - flight.x, 2) + math.pow(point_3.y - flight.y, 2))
-									local speed = 250      --mur du son 350 Atl0 293 Atl10000m
+									-- local speed = 250      --mur du son 350 Atl0 293 Atl10000m
+									local speed = 340 --mach 0.95 au sol
 
 									--assign mission task to interceptor flight
 									errorMsg = "Assign interceptors; Target: " .. target_name .. "; Selected Flight: " .. selectInterName				--Error message in case follow on code fails
@@ -410,7 +411,8 @@ local function GCI_Cycle()
 										--["speedMax"] = 693.25,
 
 										if descIntercept and descIntercept.speedMax0 then
-											speed = descIntercept.speedMax0 * 0.8
+											-- speed = descIntercept.speedMax0 * 0.8
+											speed = descIntercept.speedMax0
 										end
 
 
@@ -456,13 +458,14 @@ local function GCI_Cycle()
 																["params"] =
 																{
 																	["tasks"] =
-																	{
+                                                                    {
 																		[1] =
 																		{
-																			["enabled"] = true,
+																			["number"] = 1,
 																			["auto"] = false,
 																			["id"] = "WrappedAction",
-																			["number"] = 1,
+																			["name"] = "partie script",
+																			["enabled"] = true,
 																			["params"] =
 																			{
 																				["action"] =
@@ -470,14 +473,53 @@ local function GCI_Cycle()
 																					["id"] = "Script",
 																					["params"] =
 																					{
-																						["command"] = "Custom_Intercept('" .. target_name .. "', '" ..selectInterName.. "', '" ..friendSideName.. "', '" ..speed.. "', '" ..point_0.x.. "', '" ..point_0.y.. "')",
+																						["command"] =
+																						"env.info(\"interceptPlanDeVol W1 A \")",
 																					},
 																				},
 																			},
-																		}, -- end of [2]	
-																	}, -- end of ["tasks"]
-																}, -- end of ["params"]
-															}, -- end of ["task"]
+																		},
+																		[2] =
+																		{
+																			["enabled"] = true,
+																			["auto"] = false,
+																			["id"] = "WrappedAction",
+																			["number"] = 2,
+																			["params"] =
+																			{
+																				["action"] =
+																				{
+																					["id"] = "Script",
+																					["params"] =
+																					{
+																						["command"] = "CustomIntercept('" .. target_name .. "', '" ..selectInterName.. "', '" ..friendSideName.. "', '" ..speed.. "', '" ..point_0.x.. "', '" ..point_0.y.. "')",
+																					},
+																				},
+																			},
+																		},
+																		[3] =
+																		{
+																			["number"] = 3,
+																			["auto"] = false,
+																			["id"] = "WrappedAction",
+																			["name"] = "partie script",
+																			["enabled"] = true,
+																			["params"] =
+																			{
+																				["action"] =
+																				{
+																					["id"] = "Script",
+																					["params"] =
+																					{
+																						["command"] =
+																						"env.info(\"interceptPlanDeVol W2 C \")",
+																					},
+																				},
+																			},
+																		},
+																	},
+																},
+															},
 															["ETA"] = current_time ,
 															["ETA_locked"] = true,
 															["y"] = point_0.y,
@@ -591,13 +633,32 @@ local function GCI_Cycle()
 															["task"] = {
 																["id"] = "ComboTask",
 																["params"] = {
-																	["tasks"] = {
+                                                                    ["tasks"] = {
 																		[1] =
+																		{
+																			["number"] = 1,
+																			["auto"] = false,
+																			["id"] = "WrappedAction",
+																			["name"] = "partie script",
+																			["enabled"] = true,
+																			["params"] =
+																			{
+																				["action"] =
+																				{
+																					["id"] = "Script",
+																					["params"] =
+																					{
+																						["command"] = "env.info(\"interceptPlanDeVol W2 D \")",
+																					},
+																				},
+																			},
+																		},
+																		[2] =
 																		{
 																			["enabled"] = true,
 																			["key"] = "CAP",
 																			["id"] = "EngageTargets",
-																			["number"] = 1,
+																			["number"] = 2,
 																			["auto"] = true,
 																			["params"] =
 																			{
@@ -611,8 +672,8 @@ local function GCI_Cycle()
                                                                				["maxDist"] = 40000,
 																		}, -- end of [1]
 
-																		[2] = {
-																			["number"] = 2,
+																		[3] = {
+																			["number"] = 3,
 																			["auto"] = false,
 																			["id"] = "ControlledTask",
 																			["enabled"] = true,
