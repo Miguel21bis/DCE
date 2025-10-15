@@ -2562,7 +2562,7 @@ end
 
 ----- search then engage task -----
 --allows to engage targets within a set distance from own group. CAUTION: Once this function is running, it group can no longer receive waypoint actions (DCS treats engage task set via script as never completed)!
-function CustomSearchThenEngageOLD1(flightName, radius, targetType, searchTime)
+function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 -- "CustomSearchThenEngage(\'Pack 7 - 923rd-1 FR - Fighter Sweep 1\', 20000, \'Air\',2864.5791359112)"
 	if varFpsLeak then return end
 
@@ -2571,9 +2571,9 @@ function CustomSearchThenEngageOLD1(flightName, radius, targetType, searchTime)
 	if not radius or radius == nil or radius <= 30000 then
 		radius = 30000
 	end
-	if not searchTime or searchTime == nil then
-		searchTime = timer.getTime() + 1800
-	end
+	-- if not searchTime or searchTime == nil then
+	-- 	searchTime = timer.getTime() + 1800
+	-- end
 
 	local function applyEngageTargetsInZoneTask()							--engage targets in zone task needs to be applied continously to update zone position to group position
 		
@@ -2647,6 +2647,8 @@ function CustomSearchThenEngageOLD1(flightName, radius, targetType, searchTime)
 				
 			end
 
+			--TODO detecter le passage de tous les wpt, puis la proximité de la base, pour enfin forcer l'atterrissage
+
 			if elementInAir and cat and element and element:getPlayerName() == nil  then	--and not RTB
 
 				local cntrl = flight:getController()						--get controller of group
@@ -2672,7 +2674,7 @@ function CustomSearchThenEngageOLD1(flightName, radius, targetType, searchTime)
 								}
 							},
 							stopCondition = {
-								duration = 59,
+								duration = 50,
 							}
 						}
 					}
@@ -2699,7 +2701,7 @@ function CustomSearchThenEngageOLD1(flightName, radius, targetType, searchTime)
 								}
 							},
 							stopCondition = {
-								duration = 59,
+								duration = 50,
 							}
 						}
 					}
@@ -2730,27 +2732,27 @@ function CustomSearchThenEngageOLD1(flightName, radius, targetType, searchTime)
 		end
 
 		-- env.info( "DCE_CustomSearchThenEngage P timer 120")
-		return timer.getTime() + 120
+		-- return timer.getTime() + 120
 	end
 
-	local nextTenth = (math.ceil(timer.getTime()) + 0.1 ) * 10
-	if ScheduleTenth[nextTenth] then
-		local i = 1
-		repeat
-			nextTenth = nextTenth + 1
-			i = i + 1
-		until not ScheduleTenth[nextTenth] or i > 1000
-		ScheduleTenth[nextTenth] = true
-	else
-		ScheduleTenth[nextTenth] = true
-	end
+	-- local nextTenth = (math.ceil(timer.getTime()) + 0.1 ) * 10
+	-- if ScheduleTenth[nextTenth] then
+	-- 	local i = 1
+	-- 	repeat
+	-- 		nextTenth = nextTenth + 1
+	-- 		i = i + 1
+	-- 	until not ScheduleTenth[nextTenth] or i > 1000
+	-- 	ScheduleTenth[nextTenth] = true
+	-- else
+	-- 	ScheduleTenth[nextTenth] = true
+	-- end
 
 	-- env.info( "DCE_CustomSearchThenEngage R scheduleFunction")
-	timer.scheduleFunction(applyEngageTargetsInZoneTask, nil, (nextTenth/10))			--schedule function
+	timer.scheduleFunction(applyEngageTargetsInZoneTask, nil, timer.getTime() + 1)			--schedule function
 
 end --FIN CustomSearchThenEngage
 
-function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
+function CustomSearchThenEngageFutur1(flightName, radius, targetType, searchTime)
 	radius = radius or 30000
 	-- searchTime = searchTime or timer.getTime() + 1800
 
@@ -2795,6 +2797,19 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 		local cntrl = flight:getController()
 		cntrl:setOption(AI.Option.Air.id.PROHIBIT_AG, true)
 		cntrl:setTask(task) -- remplace pushTask()
+
+		if camp.debug then
+			local current_time = timer.getTime() + 5
+			local logStr = "task_entry = " .. TableSerialization(task, 0)
+			local flightNameClean = flightName:gsub('[%p%c%s]', '_')
+			local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_"..current_time.."_".. "_CustomSearchThenEngage.lua", "w")
+			if logFile then
+				logFile:write(logStr)
+				logFile:close()
+			else
+				env.info("DCE_CustomSearchThenEngage : Failed to open log file for writing.")
+			end
+		end
 
 		return t + 60
 	end
@@ -2893,12 +2908,25 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 											["enabled"] = true,
 											["number"] = 1,
 											["auto"] = false,
-											["id"] = "EngageGroup",
+											-- ["id"] = "EngageGroup", -- en route
+											["id"] = "AttackGroup",	-- main task
+											
 											["params"] = {
-												["visible"] = false,
-												["groupId"] = targetGpId,
-												["priority"] = 1,
-												["weaponType"] = weaponType,
+												-- ["visible"] = false,
+												-- ["groupId"] = targetGpId,
+												-- ["priority"] = 1,
+												-- ["weaponType"] = weaponType,
+
+												["altitudeEnabled"] = true,
+												["groupId"] = 1,
+												["attackQtyLimit"] = false,
+												["attackQty"] = 1,
+												["expend"] = "Auto",
+												["altitude"] = selected_PtVec3.y,
+												["directionEnabled"] = false,
+												["groupAttack"] = false,
+												["weaponType"] = 9659482112,
+												["direction"] = 0,
 											},
 										},
 
