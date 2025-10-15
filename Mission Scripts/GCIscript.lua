@@ -648,7 +648,7 @@ local function GCI_Cycle()
 																					["id"] = "Script",
 																					["params"] =
 																					{
-																						["command"] = "env.info(\"interceptPlanDeVol W2 D \")",
+																						["command"] = "env.info(\"interceptPlanDeVol W3 D \")",
 																					},
 																				},
 																			},

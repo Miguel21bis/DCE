@@ -591,23 +591,23 @@ for sideName, packs in pairs(ATO) do
 				for w = target_wp, 2, -1 do
 					if flight[f].route[w] then
 						speed = flight[f].loadout.vCruise or main_vCruise
-						local debug_TgtToLand = "\nAtoT_TgtToLand speed_F "..speed
+						local debug_TgtToLand = "\nAtoT_TgtTakeOff speed_F "..speed
 
 						if w == target_wp then
 							speed = flight[f].loadout.vAttack or main_vAttack
-							debug_TgtToLand = debug_TgtToLand.."\nAtoT_TgtToLand speed_G1 target_wp "..speed
+							debug_TgtToLand = debug_TgtToLand.."\nAtoT_TgtTakeOff speed_G1 target_wp "..speed
 						elseif flight[f].route[w].id == "Attack" then
 							speed = flight[f].loadout.vAttack or main_vAttack
-							debug_TgtToLand = debug_TgtToLand.."\nAtoT_TgtToLand speed_G2 Attack "..speed
+							debug_TgtToLand = debug_TgtToLand.."\nAtoT_TgtTakeOff speed_G2 Attack "..speed
 						elseif flight[f].route[w].id == "Assemble" then
 							speed = (flight[f].loadout.vCruise or main_vCruise) * 0.9
-							debug_TgtToLand = debug_TgtToLand.."\nAtoT_TgtToLand speed_H "..speed
+							debug_TgtToLand = debug_TgtToLand.."\nAtoT_TgtTakeOff speed_H "..speed
 						end
 
 						local minCruise = (flight[f].loadout.vCruise or main_vCruise) * 0.9
 						if speed < minCruise then
 							speed = minCruise
-							debug_TgtToLand = debug_TgtToLand.."\nAtoT_TgtToLand speed_I "..speed
+							debug_TgtToLand = debug_TgtToLand.."\nAtoT_TgtTakeOff speed_I "..speed
 						end
 
 						if flight[f].task == "Reconnaissance" and flight[f].route[w].id == "Border In" then
@@ -624,7 +624,7 @@ for sideName, packs in pairs(ATO) do
 						etaSpawn = etaSpawn - (leg / speed)
 
 						flight[f].route[w-1]["debug"] = (flight[f].route[w-1]["debug"] or "")..
-							debug_TgtToLand.."\nAtoT_TgtToLand eta J "..eta.." leg "..leg
+							debug_TgtToLand.."\nAtoT_TgtTakeOff eta J "..eta.." leg "..leg
 
 						-- Cas du premier WP
 						if w - 1 == 1 then
@@ -645,8 +645,8 @@ for sideName, packs in pairs(ATO) do
 						flight[f].route[w-1].etaSpawn = etaSpawn
 
 						flight[f].route[w-1]["debug"] = (flight[f].route[w-1]["debug"] or "")..
-							"\nAtoT_TgtToLand eta K "..eta.." WPT: "..w..
-							"\nAtoT_TgtToLand etaSpawn L "..etaSpawn.." WPT: "..w
+							"\nAtoT_TgtTakeOff eta K "..eta.." WPT: "..w..
+							"\nAtoT_TgtTakeOff etaSpawn L "..etaSpawn.." WPT: "..w
 
 						flight[f].route[w].speed = speed
 

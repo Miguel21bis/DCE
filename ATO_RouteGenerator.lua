@@ -738,9 +738,10 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 
 							if total_threat_level == 0 and not tooHighReliefD then														--if there is no threat, make this the IP and stop evaluation
 								initialPoint = draft_IP
+								initialPoint["ip_distance"] = ip_distance
 								break
 							elseif not tooHighReliefD then																				--if there are threats
-								table.insert(IP_table, {point = draft_IP, threat = total_threat_level})			--store current draft IP in IP table
+								table.insert(IP_table, {point = draft_IP, ip_distance = ip_distance, threat = total_threat_level})			--store current draft IP in IP table
 							end
 						end
 					end
@@ -753,6 +754,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 					local roundedThreat = math.floor(IP_table[n].threat * 10000000000) / 10000000000		--round threat value to remove rounding errors
 					if roundedThreat < current_threat then													--if this draft IP has a lower threat level than the IP currently set
 						initialPoint = IP_table[n].point													--make it the new IP
+						initialPoint["ip_distance"] = IP_table[n].ip_distance
 						current_threat = roundedThreat														--this is the threat level of the currently set IP					
 					end
 				end
@@ -1027,7 +1029,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			table.insert(route, {x = outbound_navRoute.navpoints[n].x, y = outbound_navRoute.navpoints[n].y, id = "Nav", alt = profile.hCruise, debug = "Nav_A"})
 		end
 
-		table.insert(route, {x = initialPoint.x, y = initialPoint.y, id = "IP", alt = profile.hAttack})
+		table.insert(route, {x = initialPoint.x, y = initialPoint.y, id = "IP", alt = profile.hAttack, debug = "ip_distance: "..initialPoint.ip_distance})
 		table.insert(route, {x = attackPoint.x, y = attackPoint.y, id = "Attack", alt = profile.hAttack})
 
 		if standoff <= 15000 then																						--if standoff is less than 15 km, then assume target is overflown. For higher standoff, target is only inserted after route lenght and threats are calculated-
@@ -2154,39 +2156,39 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 		route[#route].x = basePoint.x																								--modify route to end at escort land point
 		route[#route].y = basePoint.y
 
-        if GetDistance(basePoint, route[jointWP]) == split_distance then
-            route[#route - 1].x = route[jointWP].x
-            route[#route - 1].y = route[jointWP].y
-            for n = #route - 2, jointWP, -1 do
-                table.remove(route, n)
-            end
-        elseif GetDistance(basePoint, route[jointWP - 1]) == split_distance then
-            route[#route - 1].x = route[jointWP - 1].x
-            route[#route - 1].y = route[jointWP - 1].y
-            for n = #route - 2, jointWP - 1, -1 do
-                table.remove(route, n)
-            end
-        else --if a point between last Nav and Split Point is closest to escort land point
-            local split_heading
-            local heading1 = GetHeadingDegre(route[jointWP], route[jointWP - 1])
-            local heading2 = GetHeadingDegre(route[jointWP], basePoint)
-            if heading1 - heading2 > 180 then
-                heading1 = heading1 - 360
-            elseif heading2 - heading1 > 180 then
-                heading2 = heading2 - 360
-            end
-            if heading1 <= heading2 then
-                split_heading = heading1 - 90
-            else
-                split_heading = heading1 + 90
-            end
-            local mod_splitPoint = GetOffsetPoint(basePoint, split_heading, split_distance) --modify the Split Point to be between last Nav and old Split Point
-            route[#route - 1].x = mod_splitPoint.x
-            route[#route - 1].y = mod_splitPoint.y
-            for n = #route - 2, jointWP, -1 do
-                table.remove(route, n)
-            end
-        end
+        -- if GetDistance(basePoint, route[jointWP]) == split_distance then
+        --     route[#route - 1].x = route[jointWP].x
+        --     route[#route - 1].y = route[jointWP].y
+        --     for n = #route - 2, jointWP, -1 do
+        --         table.remove(route, n)
+        --     end
+        -- elseif GetDistance(basePoint, route[jointWP - 1]) == split_distance then
+        --     route[#route - 1].x = route[jointWP - 1].x
+        --     route[#route - 1].y = route[jointWP - 1].y
+        --     for n = #route - 2, jointWP - 1, -1 do
+        --         table.remove(route, n)
+        --     end
+        -- else --if a point between last Nav and Split Point is closest to escort land point
+        --     local split_heading
+        --     local heading1 = GetHeadingDegre(route[jointWP], route[jointWP - 1])
+        --     local heading2 = GetHeadingDegre(route[jointWP], basePoint)
+        --     if heading1 - heading2 > 180 then
+        --         heading1 = heading1 - 360
+        --     elseif heading2 - heading1 > 180 then
+        --         heading2 = heading2 - 360
+        --     end
+        --     if heading1 <= heading2 then
+        --         split_heading = heading1 - 90
+        --     else
+        --         split_heading = heading1 + 90
+        --     end
+        --     local mod_splitPoint = GetOffsetPoint(basePoint, split_heading, split_distance) --modify the Split Point to be between last Nav and old Split Point
+        --     route[#route - 1].x = mod_splitPoint.x
+        --     route[#route - 1].y = mod_splitPoint.y
+        --     for n = #route - 2, jointWP, -1 do
+        --         table.remove(route, n)
+        --     end
+        -- end
 
 		--ajoute un WPT descent, proche de la base si necessaire, cela permet aux escortes (notamment) de se poser correctement.
 		local newPoint = {}

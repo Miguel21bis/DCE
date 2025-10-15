@@ -2562,7 +2562,7 @@ end
 
 ----- search then engage task -----
 --allows to engage targets within a set distance from own group. CAUTION: Once this function is running, it group can no longer receive waypoint actions (DCS treats engage task set via script as never completed)!
-function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
+function CustomSearchThenEngageOLD1(flightName, radius, targetType, searchTime)
 -- "CustomSearchThenEngage(\'Pack 7 - 923rd-1 FR - Fighter Sweep 1\', 20000, \'Air\',2864.5791359112)"
 	if varFpsLeak then return end
 
@@ -2724,13 +2724,13 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 				-- end
 
 				-- env.info( "DCE_CustomSearchThenEngage O timer 60")
-				return timer.getTime() + 60									--repeat function every 60 seconds
+				return timer.getTime() + 60
 
 			end
 		end
 
 		-- env.info( "DCE_CustomSearchThenEngage P timer 120")
-		return timer.getTime() + 120									--repeat function every 60 seconds
+		return timer.getTime() + 120
 	end
 
 	local nextTenth = (math.ceil(timer.getTime()) + 0.1 ) * 10
@@ -2750,6 +2750,57 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 
 end --FIN CustomSearchThenEngage
 
+function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
+	radius = radius or 30000
+	-- searchTime = searchTime or timer.getTime() + 1800
+
+	local function loopEngage(_, t)
+		local flight = Group.getByName(flightName)
+		if not flight or not flight:isExist() then return end
+
+
+		local element = flight:getUnit(1)
+        if not element or not element:isExist() or not element:inAir() then
+            return t + 60
+        end
+		
+		local rtb = false
+		local gpGid = ""
+		local callSign = ""
+		if element and element:getPlayerName() == nil and not rtb then
+			gpGid = Group.getID(flight)
+			callSign = Unit.getCallsign(element)
+			if BingoPlaneTab[gpGid] and BingoPlaneTab[gpGid][callSign] then
+				return
+			end
+		end
+
+		local posVec3 = element:getPoint()
+		local task = {
+			id = 'ControlledTask',
+			params = {
+				task = {
+					id = "EngageTargetsInZone",
+					params = {
+						targetTypes = { targetType },
+						x = posVec3.x,
+						y = posVec3.z,
+						zoneRadius = radius,
+					}
+				},
+				stopCondition = { duration = 59 }
+			}
+		}
+
+		local cntrl = flight:getController()
+		cntrl:setOption(AI.Option.Air.id.PROHIBIT_AG, true)
+		cntrl:setTask(task) -- remplace pushTask()
+
+		return t + 60
+	end
+
+	timer.scheduleFunction(loopEngage, nil, timer.getTime() + 1)
+end
 
 function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, argPosX, argPosY)
 	if varFpsLeak then return end
