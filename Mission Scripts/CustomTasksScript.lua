@@ -2582,8 +2582,6 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 		local flight = Group.getByName(flightName)							--get group
 		
 		if flight then														--group still exists
-			-- env.info( "DCE_CustomSearchThenEngage B0 "..flightName)
-
 			local element = flight:getUnit(1)								--get first unit in group
 
 			if SatusGroupAircraft[flightName] and (SatusGroupAircraft[flightName]["takeoff"] and not SatusGroupAircraft[flightName]["landing"]) then
@@ -2602,21 +2600,16 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 
 			if element and element:isExist() and element:isActive()  then--and element:inAir()
 				elementExist = true
-				-- env.info( "DCE_CustomSearchThenEngage B1b getUnit(1) elementInAir = true ")
 			else
 				local wingman = flight:getUnits()								--get list of units from attacking flights
 				for n = 2, #wingman do
 					element = flight:getUnit(n)
 
-					-- env.info( "DCE_CustomSearchThenEngage B2 element "..tostring(element).." element:isExist() "..tostring(element and element:isExist()).." element:isActive() "..tostring(element and element:isActive()).." element:inAir() "..tostring(element and element:inAir()))
-
 					if element and element:isExist() and element:isActive()  then--and element:inAir()
 						elementExist = true
-						-- env.info( "DCE_CustomSearchThenEngage B2b else n puis break n: "..n)
 						break
 					end
 				end
-				-- env.info( "DCE_CustomSearchThenEngage B98 fin else ")
 			end
 
 			if not elementExist then
@@ -2638,13 +2631,8 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 				cat = desc.category
 
 				if BingoPlaneTab[gpGid] and BingoPlaneTab[gpGid][callSign] then
-					-- _affiche(BingoPlaneTab, "DCE_CustomSearchThenEngage C BingoPlaneTab")
-					-- env.info( "DCE_CustomSearchThenEngage C2 RETURN RTB true "..flightName)
 					return
 				end
-
-				-- env.info( "DCE_CustomSearchThenEngage D1 gpGid "..tostring(gpGid).." callSign "..tostring(callSign).." RTB "..tostring(RTB).." elementInAir "..tostring(elementInAir))
-				
 			end
 
 			--TODO detecter le passage de tous les wpt, puis la proximité de la base, pour enfin forcer l'atterrissage

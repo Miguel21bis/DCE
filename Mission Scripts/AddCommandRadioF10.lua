@@ -37,6 +37,11 @@ local useBubble_DisableEnable_Group = false
 -- Distance seuil pour activation/désactivation (en mètres)
 local ACTIVATION_DISTANCE = 45000
 local SPAWN_DELAY = 0.06  -- Délai entre chaque création (en secondes)
+-- CONFIG ------------------------------------------------
+local FORCING_DISTANCE = 15000       -- distance en mètres pour déclencher (15 km)
+local CHECK_INTERVAL = 15            -- intervalle de vérification en secondes
+-- local FORCE_ON_COMBAT = false        -- si false : n'applique pas setTask() si le groupe est en combat
+-- END CONFIG --------------------------------------------
 
 
 -- Liste des unités à exclure
@@ -274,10 +279,21 @@ function TableSerialization(t, i, params)
 end
 
 --function to return distance between two vector2 points
-function GetDistance(p1, p2)
-	local deltax = p2.x - p1.x
-	local deltay = p2.y - p1.y
-	return math.sqrt(math.pow(deltax, 2) + math.pow(deltay, 2))
+-- function GetDistance(p1, p2)
+function GetDistance(a, b)
+	-- local deltax = p2.x - p1.x
+	-- local deltay = p2.y - p1.y
+	-- return math.sqrt(math.pow(deltax, 2) + math.pow(deltay, 2))
+	local dx = a.x - b.x
+	local dy = a.y - b.y
+	return math.sqrt(dx * dx + dy * dy)
+end
+
+-- Helper : calcule distance 2D entre deux points {x,y} et {x,y}
+local function distance2D(a, b)
+	local dx = a.x - b.x
+	local dy = a.y - b.y
+	return math.sqrt(dx * dx + dy * dy)
 end
 
 --proxyBase
@@ -2743,10 +2759,169 @@ local function getLL_TargetPosition()
 	else
 		env.info("DCE_LL_KnownPositions: Failed to open log file for writing.")
 	end
-
-
-
 end
+
+-- Force la mission d'atterrissage (remplace la mission du groupe)
+-- landingWp : table du waypoint d'atterrissage sauvegardée dans SatusGroupAircraft[flightName]["waypoints"]
+local function forceLandingTowardsWaypoint(group, landingWp)
+    if not group or not group:isExist() or not landingWp then return false end
+
+    local leader = group:getUnit(1)
+    if not leader or not leader:isExist() then return false end
+
+    local curPos = leader:getPoint()
+
+    -- Construire une mission simple : WP courant (Turning Point) -> WP atterrissage (Land)
+    local mission = {
+        id = 'Mission',
+        params = {
+            route = {
+                points = {
+                    [1] = {
+                        action = "Turning Point",
+                        type = "Turning Point",
+                        x = curPos.x,
+                        y = curPos.z,
+                        alt = leader:getAltitude() or 500,
+                        alt_type = "BARO",
+						speed = landingWp.speed or 230,
+                        ETA_locked = false,
+                        task = { id = "ComboTask", params = { tasks = {} } },
+                    },
+                    [2] = nil -- on remplira ci-dessous selon landingWp
+                }
+            }
+        }
+    }
+
+    -- Si landingWp contient un linkUnit (base/ship), on le réutilise pour avoir un "vrai" landing
+    local landPoint = {
+        action = "Landing",
+        type = "Land",
+        alt = landingWp.alt or 0,
+        alt_type = landingWp.alt_type or "RADIO",
+        speed = landingWp.speed or 230,
+        x = landingWp.x,
+        y = landingWp.y,
+        ETA_locked = false,
+        task = { id = "ComboTask", params = { tasks = {} } },
+    }
+
+    if landingWp.linkUnit then
+        landPoint.linkUnit = landingWp.linkUnit
+    end
+    if landingWp.helipadId then
+        landPoint.helipadId = landingWp.helipadId
+    end
+
+    mission.params.route.points[2] = landPoint
+
+    -- Appliquer en remplaçant la mission : Controller.setTask
+    local ctrl = group:getController()
+    if ctrl then
+        -- On utilise pcall pour éviter crash si API différente
+        local ok, err = pcall(function()
+            Controller.setTask(ctrl, mission)
+        end)
+        if not ok then
+            env.info("DCE_forceLandingTowardsWaypoint: Controller.setTask failed: " .. tostring(err))
+            return false
+        end
+        env.info("DCE_forceLandingTowardsWaypoint: mission d'atterrissage appliquée pour " .. tostring(group:getName()))
+        return true
+    end
+
+    return false
+end
+
+
+
+-- Fonction principale : vérifier un groupe et forcer l'atterrissage si conditions remplies
+local function checkAndForceLandingForGroup(flightName)
+    if not flightName then return end
+    local stat = SatusGroupAircraft[flightName]
+    if not stat then return end
+
+    -- si déjà forcé auparavant, rien à faire
+    if stat["forcedLanding"] then
+        return
+    end
+
+    local group = Group.getByName(flightName)
+    if not group or not group:isExist() then return end
+
+    -- si aucune route stockée -> rien
+    local wps = stat["waypoints"]
+    local landingIdx = stat["landingWpt"] or (#wps)
+    if not wps or #wps == 0 or landingIdx < 1 or landingIdx > #wps then
+        return
+    end
+
+    -- Vérifier si le vol a déjà passé le waypoint just before landing (landingWpt - 1)
+    local thresholdWp = landingIdx - 1
+    if thresholdWp < 1 then
+        -- il n'y a pas de WP précédent : on peut traiter différemment ou ignorer
+        thresholdWp = 1
+    end
+
+    -- On considère "passé" si currentWP > thresholdWp OR si le WP threshold a le flag passed
+    local curIdx = stat["currentWP"] or 1
+    local passedThreshold = false
+    if stat["waypoints"][thresholdWp] and stat["waypoints"][thresholdWp]["passed"] then
+        passedThreshold = true
+    elseif curIdx and curIdx > thresholdWp then
+        passedThreshold = true
+    end
+
+    if not passedThreshold then
+        return
+    end
+
+    -- calcul distance au waypoint d'atterrissage
+    local leader = group:getUnit(1)
+    if not leader or not leader:isExist() then return end
+    local pos = leader:getPoint()
+    local landingWp = stat["waypoints"][landingIdx]
+    if not landingWp or not landingWp.x or not landingWp.y then return end
+
+    local landingPos = { x = landingWp.x, y = landingWp.y }
+    local curPos = { x = pos.x, y = pos.z }  -- attention à l'axe y/z
+
+    local dist = distance2D(curPos, landingPos)
+
+    if dist <= FORCING_DISTANCE then
+        -- détection combat (optionnel)
+        -- local inCombat = groupIsInCombat(group)
+        -- if inCombat and FORCE_ON_COMBAT == false then
+        --     env.info(string.format("checkAndForceLandingForGroup: %s is in combat — skip forcing (dist=%.0f)", flightName, dist))
+        --     return
+        -- end
+
+        -- forcer l'atterrissage et marquer
+        local ok = forceLandingTowardsWaypoint(group, landingWp)
+        if ok then
+            SatusGroupAircraft[flightName]["forcedLanding"] = true
+            env.info(string.format("checkAndForceLandingForGroup: forced landing for %s (dist=%.0f)", flightName, dist))
+        end
+    end
+end
+
+-- Wrapper scheduler pour surveiller tous les groupes enregistrés
+local function monitorAllGroups(_, t)
+    -- parcours des groupes connus
+    for flightName, _ in pairs(SatusGroupAircraft) do
+        -- ne pas bloquer si table malformée
+        if flightName and SatusGroupAircraft[flightName] then
+            pcall(checkAndForceLandingForGroup, flightName)
+        end
+    end
+    return t + CHECK_INTERVAL
+end
+
+-- Démarrer le scheduler (une fois dans ton init ou event birth)
+timer.scheduleFunction(monitorAllGroups, nil, timer.getTime() + 1)
+
+
 
 local function addFuncs(arg_Gid, arg_GroupObj, argPlayerName)
 
@@ -3399,13 +3574,43 @@ function EventHandler2:onEvent(event)
 				if groupObject and groupObject.getID then
 					local gpGid = groupObject:getID()
 
-					if gpGid and groupObject and playerName then
-						addFuncs(gpGid, groupObject, playerName)
+                    if gpGid and groupObject then
+						local flightName = event.initiator:getName()
+						if playerName then
+							addFuncs(gpGid, groupObject, playerName)
 
-						local desc = event.initiator:getDesc()
-                        if desc.category == Unit.Category.HELICOPTER then
-							local aircraftName = event.initiator:getName()
-							timer.scheduleFunction(MonitorPlayerAircraftActivity, {"in", playerName, aircraftName, desc.category}, timer.getTime() + 1)
+							local desc = event.initiator:getDesc()
+							if desc.category == Unit.Category.HELICOPTER then
+								
+								timer.scheduleFunction(MonitorPlayerAircraftActivity,
+									{ "in", playerName, flightName, desc.category }, timer.getTime() + 1)
+							end
+						else
+                            if not SatusGroupAircraft[flightName] then
+                                SatusGroupAircraft[flightName] = {
+                                    ["spawn"] = false,
+                                    ["takeoff"] = false,
+                                    ["landing"] = false,
+									["landingWpt"] = 999,
+									["task"] = "",
+                                    ["waypoints"] = {}, -- suivi des waypoints
+                                    ["currentWP"] = 1,  -- index du waypoint à atteindre
+                                }
+                            end
+							
+							local group = Group.getByName(flightName)
+							local passEscorte = false
+							if string.find(string.lower(flightName), "escorte") then passEscorte = true end
+							if group and passEscorte then
+                                local route = group:getTaskRoute()
+                                if route and #route > 0 then
+                                    SatusGroupAircraft[flightName]["waypoints"] = route
+                                    SatusGroupAircraft[flightName]["currentWP"] = 1
+									SatusGroupAircraft[flightName]["landingWpt"] = #route
+									SatusGroupAircraft[flightName]["task"] = "escorte"
+                                end
+                            end
+							
 						end
 					end
 				end
@@ -3652,6 +3857,35 @@ local function loopAFAC()
 	return timer.getTime() + 61
 end
 
+
+function MonitorWaypointProgress(flightName)
+    local flight = Group.getByName(flightName)
+    local stat = SatusGroupAircraft[flightName]
+    if not flight or not stat or stat["landing"] then return end
+
+    local unit = flight:getUnit(1)
+    if not unit or not unit:isExist() then return end
+
+    local pos = unit:getPoint()
+    local wpIndex = stat["currentWP"]
+    local wpList = stat["waypoints"]
+    if not wpList or not wpList[wpIndex] then return end
+
+    local wp = wpList[wpIndex]
+    local dx = pos.x - wp.x
+    local dz = pos.z - wp.y -- attention : "y" de la route est coordonnée horizontale Z !
+    local dist = math.sqrt(dx * dx + dz * dz)
+
+    if dist < 2000 then -- distance de validation (2 km par exemple)
+        stat["waypoints"][wpIndex]["passed"] = true
+        stat["currentWP"] = wpIndex + 1
+        env.info(string.format("[WP TRACK] %s a passé le WP %d à %.0f m", flightName, wpIndex, dist))
+    end
+
+    if wpIndex <= #wpList then
+		timer.scheduleFunction(MonitorWaypointProgress, flightName, timer.getTime() + 10)
+    end
+end
 
 --uniquement pour le Bingo?
 local function loopPilot()

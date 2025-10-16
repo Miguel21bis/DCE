@@ -957,7 +957,8 @@ function eventHandlerDCE:onEvent(event)
 
 					for n=1, #tabEjection do
 						if tabEjection[n] and tabEjection[n] ~= nil then						
-							local distance = math.sqrt(math.pow(initiatorVec3.x - tabEjection[n].pos.vec3x, 2) + math.pow(initiatorVec3.z - tabEjection[n].pos.vec3z, 2))
+							-- local distance = math.sqrt(math.pow(initiatorVec3.x - tabEjection[n].pos.vec3x, 2) + math.pow(initiatorVec3.z - tabEjection[n].pos.vec3z, 2))
+							local distance = GetDistance({ x = initiatorVec3.x, y = initiatorVec3.z }, { x = tabEjection[n].pos.vec3x, y = tabEjection[n].pos.vec3z })
 							if distance < selected_distance and (not tabEjection[n].SumEjectedPilotDay) then
 								env.info( "DCE_EventT_seat F , selected_distance: "..tostring(selected_distance))
 								selected_distance = distance
@@ -1039,7 +1040,8 @@ function eventHandlerDCE:onEvent(event)
                             end
 
 							if initiatorVec3.x then
-                                local distance = math.sqrt(math.pow(initiatorVec3.x - tabEjection[n]["pos"].vec3x, 2) + math.pow(initiatorVec3.z - tabEjection[n]["pos"].vec3z, 2))
+                                -- local distance = math.sqrt(math.pow(initiatorVec3.x - tabEjection[n]["pos"].vec3x, 2) + math.pow(initiatorVec3.z - tabEjection[n]["pos"].vec3z, 2))
+								local distance = GetDistance({ x = initiatorVec3.x, y = initiatorVec3.z }, { x = tabEjection[n].pos.vec3x, y = tabEjection[n].pos.vec3z })
                                 if distance < selected_distance and (not tabEjection[n].createdSoldier) then
                                     selected_distance = distance
                                     ejectN = n
@@ -1830,11 +1832,13 @@ function eventHandlerDCE:onEvent(event)
 				end
 			end
 			
-			if not SatusGroupAircraft[flightName] then 
+			if not SatusGroupAircraft[flightName] then
 				SatusGroupAircraft[flightName] = {
 					["spawn"] = false,
 					["takeoff"] = false,
 					["landing"] = false,
+					["waypoints"] = {}, -- suivi des waypoints
+					["currentWP"] = 1, -- index du waypoint à atteindre
 				}
 			end
 
@@ -1942,8 +1946,9 @@ local function CheckRtbAirbase()
 										local unitAeroFuel = unitAero:getFuel()
 										local alti = unitAeroPointVec3.y - base.elevation
 										if alti <= 1000 and unitAeroFuel <= 0.75 then
-											local distance = math.floor(math.sqrt(math.pow(base.x - unitAeroPointVec3.x, 2) + math.pow(base.y - unitAeroPointVec3.z, 2)))
-
+											
+											-- local distance = math.floor(math.sqrt(math.pow(base.x - unitAeroPointVec3.x, 2) + math.pow(base.y - unitAeroPointVec3.z, 2)))
+											local distance = math.floor(GetDistance(base, { x = unitAeroPointVec3.x, y = unitAeroPointVec3.z }))
 											
 											if distance <= 20000 then
 

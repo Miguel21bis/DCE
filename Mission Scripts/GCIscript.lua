@@ -301,7 +301,8 @@ local function GCI_Cycle()
 									errorMsg = "Assign interceptors; Target: " .. target_name .. "; Interceptor: " .. flight.name						--Error message in case follow on code fails
 									
 									-- if current_time >= flight.tot_from and current_time <= flight.tot_to then											--flight can operate at current time							
-										local distance = math.sqrt(math.pow(target.pointVec3.x - flight.x, 2) + math.pow(target.pointVec3.z - flight.y, 2))		--distance between interceptor airbase and target
+										-- local distance = math.sqrt(math.pow(target.pointVec3.x - flight.x, 2) + math.pow(target.pointVec3.z - flight.y, 2))		--distance between interceptor airbase and target
+										local distance = GetDistance(flight, { x = target.pointVec3.x, y = target.pointVec3.z })
 										if distance < flight.range then									--target is in interception range
 											eligible_flights[flight.name] = distance					--store flight name and interception distance in table
 										end
