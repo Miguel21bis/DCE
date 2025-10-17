@@ -2740,70 +2740,75 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 
 end --FIN CustomSearchThenEngage
 
+
+
 function CustomSearchThenEngageFutur1(flightName, radius, targetType, searchTime)
-	radius = radius or 30000
-	-- searchTime = searchTime or timer.getTime() + 1800
+    radius = radius or 30000
+    -- searchTime = searchTime or timer.getTime() + 1800
 
-	local function loopEngage(_, t)
-		local flight = Group.getByName(flightName)
-		if not flight or not flight:isExist() then return end
+    local function loopEngage(_, t)
+        local flight = Group.getByName(flightName)
+        if not flight or not flight:isExist() then return end
 
 
-		local element = flight:getUnit(1)
+        local element = flight:getUnit(1)
         if not element or not element:isExist() or not element:inAir() then
             return t + 60
         end
-		
-		local rtb = false
-		local gpGid = ""
-		local callSign = ""
-		if element and element:getPlayerName() == nil and not rtb then
-			gpGid = Group.getID(flight)
-			callSign = Unit.getCallsign(element)
-			if BingoPlaneTab[gpGid] and BingoPlaneTab[gpGid][callSign] then
-				return
-			end
-		end
 
-		local posVec3 = element:getPoint()
-		local task = {
-			id = 'ControlledTask',
-			params = {
-				task = {
-					id = "EngageTargetsInZone",
-					params = {
-						targetTypes = { targetType },
-						x = posVec3.x,
-						y = posVec3.z,
-						zoneRadius = radius,
-					}
-				},
-				stopCondition = { duration = 59 }
-			}
-		}
+        local rtb = false
+        local gpGid = ""
+        local callSign = ""
+        if element and element:getPlayerName() == nil and not rtb then
+            gpGid = Group.getID(flight)
+            callSign = Unit.getCallsign(element)
+            if BingoPlaneTab[gpGid] and BingoPlaneTab[gpGid][callSign] then
+                return
+            end
+        end
 
-		local cntrl = flight:getController()
-		cntrl:setOption(AI.Option.Air.id.PROHIBIT_AG, true)
-		cntrl:setTask(task) -- remplace pushTask()
+        local posVec3 = element:getPoint()
+        local task = {
+            id = 'ControlledTask',
+            params = {
+                task = {
+                    id = "EngageTargetsInZone",
+                    params = {
+                        targetTypes = { targetType },
+                        x = posVec3.x,
+                        y = posVec3.z,
+                        zoneRadius = radius,
+                    }
+                },
+                stopCondition = { duration = 59 }
+            }
+        }
 
-		if camp.debug then
-			local current_time = timer.getTime() + 5
-			local logStr = "task_entry = " .. TableSerialization(task, 0)
-			local flightNameClean = flightName:gsub('[%p%c%s]', '_')
-			local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_"..current_time.."_".. "_CustomSearchThenEngage.lua", "w")
-			if logFile then
-				logFile:write(logStr)
-				logFile:close()
-			else
-				env.info("DCE_CustomSearchThenEngage : Failed to open log file for writing.")
-			end
-		end
+        local cntrl = flight:getController()
+        cntrl:setOption(AI.Option.Air.id.PROHIBIT_AG, true)
+        cntrl:setTask(task) -- remplace pushTask()
 
-		return t + 60
-	end
+        if camp.debug then
+            local current_time = timer.getTime() + 5
+            local logStr = "task_entry = " .. TableSerialization(task, 0)
+            local flightNameClean = flightName:gsub('[%p%c%s]', '_')
+            local logFile = io.open(
+            PathDCE .. "Debug\\" .. flightNameClean .. "_" .. current_time .. "_" .. "_CustomSearchThenEngage.lua", "w")
+            if logFile then
+                logFile:write(logStr)
+                logFile:close()
+            else
+                env.info("DCE_CustomSearchThenEngage : Failed to open log file for writing.")
+            end
+        end
 
-	timer.scheduleFunction(loopEngage, nil, timer.getTime() + 1)
+        return t + 60
+    end
+
+    timer.scheduleFunction(loopEngage, nil, timer.getTime() + 1)
 end
+
+
 
 function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, argPosX, argPosY)
 	if varFpsLeak then return end
@@ -2885,7 +2890,8 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 							["formation_template"] = "",
 							["y"] = selected_PtVec3.z,
 							["x"] = selected_PtVec3.x,
-							["speed"] = argSpeed,
+                            ["speed"] = argSpeed,
+							["speed_locked"] = true,
 							["ETA_locked"] = false,
 							["task"] = {
 								["id"] = "ComboTask",
@@ -2920,7 +2926,6 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 
 									},
 								},
-								["speed_locked"] = true,
 							},
 						},
 					},
@@ -2977,8 +2982,113 @@ end
 
 
 ----------------------------------------------------------------------------------------------------
------ Follow task -----
+----- ForceToLand -----
 ----------------------------------------------------------------------------------------------------
+function Custom_ForceToLand(argFlightName, argSpeed, argAltLanding, argLandingX, argLandingY, argLinkUnit)
+    if varFpsLeak then return end
+
+	argLandingX = tonumber(argLandingX)
+	argLandingY = tonumber(argLandingY)
+    argSpeed = tonumber(argSpeed)
+	argAltLanding = tonumber(argAltLanding)
+
+	env.info( "DCE_Custom_ForceToLand A1 argFlightName |"..tostring(argFlightName).."| argLandingX |"..tostring(argLandingX).."| argLandingY |"..tostring(argLandingY).."| argLinkUnit |"..tostring(argLinkUnit))
+
+	env.info("DCE_Custom_ForceToLand A start func() " .. tostring(argFlightName) )
+
+	local group = Group.getByName(argFlightName)
+	if group and group:isExist() then
+		local leader = group:getUnit(1)
+		if leader and leader:isExist() then
+			local leaderPosVec3 = leader:getPoint()
+
+			local landingPos = { x = argLandingX, y = argLandingY }
+			local curPos = { x = leaderPosVec3.x, y = leaderPosVec3.z } -- attention à l'axe y/z
+			local dist = GetDistance(curPos, landingPos)
+
+			-- forcer l'atterrissage et marquer
+
+			SatusGroupAircraft[argFlightName]["forcedLanding"] = true
+			env.info(string.format("checkAndForceLandingForGroup: forced landing for %s (dist=%.0f)", argFlightName, dist))
+
+			-- Construire une mission simple : WP courant (Turning Point) -> WP atterrissage (Land)
+			local newRoute = {
+				id = 'Mission',
+				params = {
+					route = {
+						points = {
+							[1] = {
+								action = "Turning Point",
+								type = "Turning Point",
+								x = curPos.x,
+								y = curPos.y,
+								alt = leaderPosVec3.y or 500,
+								alt_type = "BARO",
+								speed = argSpeed or 230,
+								ETA_locked = false,
+								task = { id = "ComboTask", params = { tasks = {} } },
+							},
+							[2] = nil -- on remplira ci-dessous selon landingWp
+						}
+					}
+				}
+			}
+
+			-- Si landingWp contient un linkUnit (base/ship), on le réutilise pour avoir un "vrai" landing
+			local landPoint = {
+				action = "Landing",
+				type = "Land",
+				alt = argAltLanding or 0,
+				alt_type = "RADIO",
+				speed = argSpeed or 230,
+				x = landingPos.x,
+				y = landingPos.y,
+				ETA_locked = false,
+				task = { id = "ComboTask", params = { tasks = {} } },
+			}
+
+			if argLinkUnit then
+				landPoint.linkUnit = argLinkUnit
+				landPoint.helipadId = argLinkUnit
+			end
+
+			newRoute.params.route.points[2] = landPoint
+
+			-- Appliquer en remplaçant la mission : Controller.setTask
+			local ctrl = group:getController()
+			if ctrl then
+				-- On utilise pcall pour éviter crash si API différente
+				local ok, err = pcall(function()
+					Controller.setTask(ctrl, newRoute)
+				end)
+				if not ok then
+					env.info("DCE_Custom_ForceToLand: Controller.setTask failed: " .. tostring(err))
+					return false
+				end
+				env.info("DCE_Custom_ForceToLand: mission d'atterrissage appliquée pour " .. tostring(group:getName()))
+				return true
+			end
+
+
+				
+			if camp.debug then
+				--export custom mission log
+				local current_time = timer.getTime()
+				local logStr = "newRoute = " .. TableSerialization(newRoute, 0)
+				local flightNameClean = argFlightName:gsub('[%p%c%s]', '_')
+				local logFile = io.open(
+				PathDCE .. "Debug\\" .. flightNameClean .. "_" .. "Custom_ForceToLand" .. "_" .. tostring(current_time) .. ".lua", "w")
+				if logFile then
+					logFile:write(logStr)
+					logFile:close()
+				else
+					env.info("DCE_Custom_ForceToLand: Failed to open log file for writing.")
+				end
+			end
+		end
+	end	
+end
+
 
 ----------------------------------------------------------------------------------------------------
 ----- orbit position task -----

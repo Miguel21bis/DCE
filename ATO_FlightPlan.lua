@@ -981,8 +981,8 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 			speed = arg_Waypoints[1]["speed"]
 		end 
 
-		arg_Waypoints[1].action = "Turning Point"
-		arg_Waypoints[1].type = "Turning Point"
+		arg_Waypoints[1]["action"] = "Turning Point"
+		arg_Waypoints[1]["type"] = "Turning Point"
 		arg_Waypoints[1]["alt"] = altBase + (arg_Pn * altStep) + (alt_Role * 33)
 		arg_Waypoints[1]["speed"] = speed
 		-- arg_Waypoints[1]["ETA"] = spawnTime
@@ -1104,8 +1104,8 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 
 		if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_spawnOn() CATAPULT D ") end
 
-		arg_Waypoints[1].action = "From Runway"
-		arg_Waypoints[1].type = "TakeOff"
+		arg_Waypoints[1]["action"] = "From Runway"
+		arg_Waypoints[1]["type"] = "TakeOff"
 		arg_Waypoints[1]["alt"] = 0
 		arg_Group.uncontrolled = false											-- sur cata, les F14 IA bloquent
 	end
@@ -2119,11 +2119,13 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					if w == 1 and (flight[f].task == "Intercept" or flight[f].task == "SAR") then
 						-- speed = 300
-						speed = flight[f].loadout.vAttack or Data_divers[flight[f].type].vAttack or 300
-
+						speed = flight[f].loadout.vAttack or Data_divers[flight[f].type].vAttack or 340
 						if flight[f].task == "SAR" then
 							speed = flight[f].loadout.vCruise or Data_divers[flight[f].type].vCruise or 50
 						end
+
+						waypoints[1]["speed"] = speed
+						
 						waypoints[2] = {
 							-- ["name"] = flight[f].route[w].id,
 							-- ["briefing_name"] = flight[f].route[w].id,				--not needed for actual mission creation, but added for navigation overview in briefing
@@ -2158,7 +2160,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					-- modification M17.e
-					if flight[f].type == "F-14B" and ( flight[f].player or  flight[f].client) then		-- and TargetPointF14 --or Multi.NbGroup >= 1 
+					if flight[f]["type"] == "F-14B" and ( flight[f].player or  flight[f].client) then		-- and TargetPointF14 --or Multi.NbGroup >= 1 
 						if  flight[f].route[w].id == "Target" or flight[f].route[w].id == "Attack" and not flagPoints["ST"] then
 
 							local tempNTP = {
@@ -2349,7 +2351,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					-- ************* attack waypoint is a fly over point *************
 					if waypoints[w]["name"] == "Attack" then
-						waypoints[w].action = "Fly Over Point"
+						waypoints[w]["action"] = "Fly Over Point"
 					end
 
 					-- ************* requetes des joueurs, assigner l'altitude des wpt landing et attack *************
@@ -2427,20 +2429,20 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					if (flight[f].route[w].id == "Taxi" and flight[f].route[w].eta >= 0) or (flight[f].route[w].id == "Intercept" or flight[f].route[w].id == "SAR")  then
 						if not isHumain and db_airbases[flight[f].base].AI_Spawn and string.upper(db_airbases[flight[f].base].AI_Spawn) ~= "PARKING" then
 							if string.upper(db_airbases[flight[f].base].AI_Spawn) == "AIR" then
-								waypoints[w].type = "Turning Point"
-								waypoints[w].action = "Turning Point"
+								waypoints[w]["type"] = "Turning Point"
+								waypoints[w]["action"] = "Turning Point"
 								flight[f].route[w].id = "Spawn"
 								flight[f].route[w].eta = flight[f].route[w].eta - 300
 								-- spawn_time = flight[f].route[w].eta --spawn_time_bug							
 							elseif string.upper(db_airbases[flight[f].base].AI_Spawn) == "RUNWAY" then
-								waypoints[w].type = "Turning TakeOff"
-								waypoints[w].action = "From Runway"
+								waypoints[w]["type"] = "Turning TakeOff"
+								waypoints[w]["action"] = "From Runway"
 								flight[f].route[w].eta = flight[f].route[w].eta - 200
 								-- spawn_time = flight[f].route[w].eta --spawn_time_bug										
 							end
 						else
-							waypoints[w].type = "TakeOffParking"
-							waypoints[w].action = "From Parking Area"
+							waypoints[w]["type"] = "TakeOffParking"
+							waypoints[w]["action"] = "From Parking Area"
 							if baseIsCarrier or (flight[f].airdromeId and flight[f].airdromeId >= 100 and not flight[f]["parkAlertSAR"]) then									--airbase is a carrier
 								waypoints[w].linkUnit = flight[f].airdromeId
 								waypoints[w].helipadId = flight[f].airdromeId
@@ -2453,18 +2455,18 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 								if mission_ini.parking_hotstart then
 									if  type(mission_ini.parking_hotstart) == "boolean"  then
-										waypoints[w].action = "From Parking Area Hot"
-										waypoints[w].type = "TakeOffParkingHot"
+										waypoints[w]["action"] = "From Parking Area Hot"
+										waypoints[w]["type"] = "TakeOffParkingHot"
 										-- print("AtoFP passe boolean TakeOffParkingHot")
 									elseif  type(mission_ini.parking_hotstart) == "number" and mission_ini.parking_hotstart == 0  then
-										waypoints[w].action = "From Parking Area"
-										waypoints[w].type = "TakeOffParking"
+										waypoints[w]["action"] = "From Parking Area"
+										waypoints[w]["type"] = "TakeOffParking"
 									elseif  type(mission_ini.parking_hotstart) == "number" and mission_ini.parking_hotstart == 1  then
-										waypoints[w].action = "From Parking Area Hot"
-										waypoints[w].type = "TakeOffParkingHot"
+										waypoints[w]["action"] = "From Parking Area Hot"
+										waypoints[w]["type"] = "TakeOffParkingHot"
 									elseif  type(mission_ini.parking_hotstart) == "number" and mission_ini.parking_hotstart == 2  then
-										waypoints[w].action = "From Runway"
-										waypoints[w].type = "TakeOff"
+										waypoints[w]["action"] = "From Runway"
+										waypoints[w]["type"] = "TakeOff"
 									end
 								end
 
@@ -2472,17 +2474,17 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							elseif (flight[f].player == true or flight[f].client == true) and (flight[f].task == "Intercept" or flight[f].task == "SAR") then													--if flight[f].player == true and camp.hotstart then
 								if  mission_ini.intercept_hotstart then
 									if  type(mission_ini.intercept_hotstart) == "boolean"  then														--if flight[f].player == true and camp.hotstart then
-										waypoints[w].action = "From Parking Area Hot"
-										waypoints[w].type = "TakeOffParkingHot"
+										waypoints[w]["action"] = "From Parking Area Hot"
+										waypoints[w]["type"] = "TakeOffParkingHot"
 									elseif  type(mission_ini.intercept_hotstart) == "number" and mission_ini.intercept_hotstart == 0  then			--if flight[f].player == true and camp.hotstart then
-										waypoints[w].action = "From Parking Area"
-										waypoints[w].type = "TakeOffParking"
+										waypoints[w]["action"] = "From Parking Area"
+										waypoints[w]["type"] = "TakeOffParking"
 									elseif  type(mission_ini.intercept_hotstart) == "number" and mission_ini.intercept_hotstart == 1  then			--if flight[f].player == true and camp.hotstart then
-										waypoints[w].action = "From Parking Area Hot"
-										waypoints[w].type = "TakeOffParkingHot"
+										waypoints[w]["action"] = "From Parking Area Hot"
+										waypoints[w]["type"] = "TakeOffParkingHot"
 									elseif  type(mission_ini.intercept_hotstart) == "number" and mission_ini.intercept_hotstart == 2  then			--if flight[f].player == true and camp.hotstart then
-										waypoints[w].action = "From Runway"
-										waypoints[w].type = "TakeOff"
+										waypoints[w]["action"] = "From Runway"
+										waypoints[w]["type"] = "TakeOff"
 									end
 								end
 							end
@@ -2492,8 +2494,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						if (db_airbases[flight[f].base].BaseAirStart and not (flight[f].task == "Nothing" or flight[f].task == "Transport")) or
 							( (flight[f].task == "Nothing" or flight[f].task == "Transport") and db_airbases[flight[f].target.destination].BaseAirStart ) then
 
-							waypoints[w].type = "Turning Point"
-							waypoints[w].action = "Turning Point"
+							waypoints[w]["type"] = "Turning Point"
+							waypoints[w]["action"] = "Turning Point"
 							-- waypoints[w]["speed"] = flight[f].loadout.vCruise / 3 * 2			--set NEWSPEED
 							waypoints[w].alt = 500 + db_airbases[flight[f].base].elevation
 							waypoints[w]["ETA_locked"] = false
@@ -2524,8 +2526,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
 						else
-							waypoints[w].type = "Land"
-							waypoints[w].action = "Landing"
+							waypoints[w]["type"] = "Land"
+							waypoints[w]["action"] = "Landing"
 							-- waypoints[w]["ETA_locked"] = true		--ceci n'est pas une bonne idée, le DCS bloque
 							waypoints[w]["ETA_locked"] = false
                             waypoints[w]["speed_locked"] = true
@@ -3459,7 +3461,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 						end
 					elseif flight[f].task == "Escort" then
-						if flight[f].route[w + 1] ~= nil then
+						-- if flight[f].route[w + 1] ~= nil then
 							
 							if flight[f].route[w].id == "Spawn" or flight[f].route[w].id == "Departure" then
 								local target = "Battle airplanes"
@@ -3492,7 +3494,31 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								}
 								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 							end
-						end
+
+							if flight[f].route[w].id == "Land" then
+								
+								local task_entry = {
+									["enabled"] = true,
+									["auto"] = false,
+									["id"] = "WrappedAction",
+									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+									["params"] =
+									{
+										["action"] =
+										{
+											["id"] = "Script",
+											["params"] =
+											{
+												--Custom_ForceToLand(argFlightName, 						argSpeed, 								argAltLanding, 									argLandingX, argLandingY, argLinkUnit)
+												["command"] = "Custom_ForceToLand('" .. groupName .. "', '" .. tostring(flight[f].route[w].speed) .. "', '" .. tostring(flight[f].route[w].alt)
+												..  "', '" .. tostring(flight[f].route[w].x) .. "',  '" .. tostring(flight[f].route[w].y) .. "', '" .. tostring(waypoints[w].linkUnit)  .. "')",
+											},
+										},
+									},
+								}
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+							end
+						-- end
 					elseif flight[f].task == "AFAC" then
 						if w == 1 and flight[f].route[w] ~= nil then
 
@@ -3863,7 +3889,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					--w == 1 : suite au bug des tacan qui ne s'active plus en cours du plan de vol, sauf sur le wpt 0
 					if (flight[f].route[w].id == "Station" and flight[f].route[w + 1].id == "Station") or w == 1 then
 						if flight[f].task == "Refueling" then
-							if flight[f].type == "KC-135" or flight[f].type == "KC130" or flight[f].type == "KC135BDA" or flight[f].type == "S-3B Tanker" or flight[f].type == "KC135MPRS" then	--only specific tanker types have air-air TACAN
+							if flight[f]["type"] == "KC-135" or flight[f]["type"] == "KC130" or flight[f]["type"] == "KC135BDA" or flight[f]["type"] == "S-3B Tanker" or flight[f]["type"] == "KC135MPRS" then	--only specific tanker types have air-air TACAN
 								if flight[1].tacan == nil then
 									flight[1].tacan = getTankerTACAN(flight[f].target_name)															--get new channel for first flight in pack only, all other flights will use same channel
 								end
@@ -3909,7 +3935,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					--A-A TACAN for tankers, deactivate beacon after 2 wpt on orbit WP
 					if w > 2 and (flight[f].route[w-1].id == "Station" and flight[f].route[w - 2].id == "Station") then
 						if flight[f].task == "Refueling" then
-							if flight[f].type == "KC-135" or flight[f].type == "KC135MPRS"  or flight[f].type == "KC130" or flight[f].type == "KC135BDA" or flight[f].type == "S-3B Tanker" then	--only specific tanker types have air-air TACAN			
+							if flight[f]["type"] == "KC-135" or flight[f]["type"] == "KC135MPRS"  or flight[f]["type"] == "KC130" or flight[f]["type"] == "KC135BDA" or flight[f]["type"] == "S-3B Tanker" then	--only specific tanker types have air-air TACAN			
 								local task_entry = {
 									["enabled"] = true,
 									["auto"] = false,
@@ -4232,7 +4258,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 								--TODO, revoir ces ce code, pas sur que name garde Target ou autre...essais avec NavTP, a voir comment l'integrer inGame
 								-- modification M17
-								if flight[f].type == "F-14B" and navTargetPoints[1] then
+								if flight[f]["type"] == "F-14B" and navTargetPoints[1] then
 									if waypoints[w].name == "Target" or waypoints[w].name == "Attack" then  waypoints[w].NavTP = "ST" end
 									if waypoints[w].name == "Station"  then  waypoints[w].NavTP = "DP" end
 								end
@@ -4410,9 +4436,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				if flight[f].task == "CSAR" then
 					--ajuste l'altitude des helico en zone montagneuse, ils ont beaucoup de mal en alti radar
 					for n = 1, #waypoints do
-						if waypoints[n].type == "Land" then
-							waypoints[n].action = "LandingReFuAr"
-							waypoints[n].type = "LandingReFuAr"
+						if waypoints[n]["type"] == "Land" then
+							waypoints[n]["action"] = "LandingReFuAr"
+							waypoints[n]["type"] = "LandingReFuAr"
 						end
 						if waypoints[n]["briefing_name"] == "Join" or waypoints[n]["briefing_name"] == "Nav" or waypoints[n]["briefing_name"] == "Split"  then
 							waypoints[n]["alt"] = waypoints[n]["alt"] + db_airbases[flight[f].base].elevation
@@ -4552,7 +4578,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					local define_x = waypoints[1]["x"]
 					local define_y = waypoints[1]["y"]
 
-					if not (is_helicopter and waypoints[1].action == "From Ground Area" and baseIsFARP ) then --n >= 2 and
+					if not (is_helicopter and waypoints[1]["action"] == "From Ground Area" and baseIsFARP ) then --n >= 2 and
 						define_x = waypoints[1]["x"] + ((n - 1) * 15) +  ((f-1) * 15) + ((p - 1) * 15) -- ATO_FP_Debug01	--ANTI-COLLISION B
 						define_y = waypoints[1]["y"] + ((n - 1) * 15) +  ((f-1) * 15) + ((p - 1) * 15) --ATO_FP_Debug01 	--ANTI-COLLISION B
 					end
@@ -4600,7 +4626,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					--ajout les restrictions au loadout s il y en a
 					if isHumain then
 						for typeAircraft, payloadProhibited in pairs(PayloadRestricted) do
-							if typeAircraft and payloadProhibited and flight[f].type == typeAircraft then
+							if typeAircraft and payloadProhibited and flight[f]["type"] == typeAircraft then
 								units[n].payload.restricted = payloadProhibited
 							end
 						end
@@ -4618,8 +4644,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							if n==1 then
 								--groups.xy se fera plus loin, dans le code, avec waypoints[1].xy comme ref
-								waypoints[1].action = "From Ground Area"
-								waypoints[1].type = "TakeOffGround"
+								waypoints[1]["action"] = "From Ground Area"
+								waypoints[1]["type"] = "TakeOffGround"
 								waypoints[1].airdromeId = nil
 								waypoints[1].x = flight[f]["parkAlertSAR"][n].x
 								waypoints[1].y = flight[f]["parkAlertSAR"][n].y
@@ -4631,8 +4657,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							end
 
 							--on le fait reposer au meme endroit:
-							waypoints[#waypoints].action = "Landing"
-							waypoints[#waypoints].type = "Land"
+							waypoints[#waypoints]["action"] = "Landing"
+							waypoints[#waypoints]["type"] = "Land"
 							waypoints[#waypoints].x = flight[f]["parkAlertSAR"][n].x
 							waypoints[#waypoints].y = flight[f]["parkAlertSAR"][n].y
 
@@ -4643,8 +4669,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							if n==1 then
 								--groups.xy se fera plus loin, dans le code, avec waypoints[1].xy comme ref
-								waypoints[1].action = "From Ground Area"
-								waypoints[1].type = "TakeOffGround"
+								waypoints[1]["action"] = "From Ground Area"
+								waypoints[1]["type"] = "TakeOffGround"
 								waypoints[1].airdromeId = nil
 								waypoints[1].x = flight[f]["parkAlertSAR"][n].x
 								waypoints[1].y = flight[f]["parkAlertSAR"][n].y
@@ -4656,8 +4682,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							end
 
 							--on le fait reposer au meme endroit:
-							waypoints[#waypoints].action = "Landing"
-							waypoints[#waypoints].type = "Land"
+							waypoints[#waypoints]["action"] = "Landing"
+							waypoints[#waypoints]["type"] = "Land"
 							waypoints[#waypoints].x = flight[f]["parkAlertSAR"][n].x
 							waypoints[#waypoints].y = flight[f]["parkAlertSAR"][n].y
 
@@ -4666,7 +4692,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 					-- n assigne pas de parking aux IA qui spawn in air
-					if waypoints[1].action == "From Parking Area" and not limitedParkTiming and not db_airbases[flight[f].base].BaseAirStart then
+					if waypoints[1]["action"] == "From Parking Area" and not limitedParkTiming and not db_airbases[flight[f].base].BaseAirStart then
 						if not flight[f]["parkAlertSAR"] and flight[f].parking_id then
 
 							local parkParameters = GetParkingId( flight[f].parking_id, flight[f].base)
@@ -4693,8 +4719,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						elseif flight[f]["parkAlertSAR"] and flight[f]["parkAlertSAR"][n] then
 							if n==1 then
 								--groups.xy se fera plus loin, dans le code, avec waypoints[1].xy comme ref
-								waypoints[1].action = "From Ground Area"
-								waypoints[1].type = "TakeOffGround"
+								waypoints[1]["action"] = "From Ground Area"
+								waypoints[1]["type"] = "TakeOffGround"
 								waypoints[1].airdromeId = nil
 								waypoints[1].x = flight[f]["parkAlertSAR"][n].x
 								waypoints[1].y = flight[f]["parkAlertSAR"][n].y
@@ -4706,8 +4732,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							end
 
 							--on le fait reposer au meme endroit:
-							waypoints[#waypoints].action = "Landing"
-							waypoints[#waypoints].type = "Land"
+							waypoints[#waypoints]["action"] = "Landing"
+							waypoints[#waypoints]["type"] = "Land"
 							waypoints[#waypoints].x = flight[f]["parkAlertSAR"][n].x
 							waypoints[#waypoints].y = flight[f]["parkAlertSAR"][n].y
 						end
@@ -4858,7 +4884,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							--pour les receveir uniquement						
 							if isReceiver then
 								--pour assigner le lead
-								if typeDatalink == "SADL" or (flight[f].type == "F-16C_50" ) then
+								if typeDatalink == "SADL" or (flight[f]["type"] == "F-16C_50" ) then
 									if  n == 1 then
 										units[n].datalinks[typeDatalink].settings.flightLead = true
 									else
@@ -4875,7 +4901,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 												table.remove(copyRecordId, r)
 											end
 										end
-										if flight[f].type == "F-16C_50" then
+										if flight[f]["type"] == "F-16C_50" then
 											units[n].datalinks[typeDatalink].network.teamMembers[m].TDOA = true
 
 										end
@@ -4884,7 +4910,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 										if #copyRecordId >= 1 then
 											units[n].datalinks[typeDatalink].network.teamMembers[m] = {missionUnitId = copyRecordId[1]}
 											table.remove(copyRecordId, 1)
-											if flight[f].type == "F-16C_50" then
+											if flight[f]["type"] == "F-16C_50" then
 												units[n].datalinks[typeDatalink].network.teamMembers[m].TDOA = true
 
 											end
@@ -4903,7 +4929,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 												table.remove(copyRecordId, r)
 											end
 										end
-										if flight[f].type == "F-16C_50" then
+										if flight[f]["type"] == "F-16C_50" then
 											member["TDOA"] = true
 
 										end
@@ -4912,7 +4938,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 										if #copyRecordId >= 1 then
 											member.missionUnitId = copyRecordId[1]
 											table.remove(copyRecordId, 1)
-											if flight[f].type == "F-16C_50" then
+											if flight[f]["type"] == "F-16C_50" then
 												member["TDOA"] = true
 
 											end
@@ -5114,7 +5140,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 				-- decale les apparitions en vol pour eviter les collisions en vol
-				if waypoints[1].type == "Turning Point" and waypoints[1]["briefing_name"] == "Spawn" and not flight[f].task == "AFAC"  then
+				if waypoints[1]["type"] == "Turning Point" and waypoints[1]["briefing_name"] == "Spawn" and not flight[f].task == "AFAC"  then
 					local spacing = 330 -- Mets ici la distance minimale souhaitée (en mètres)
 					for n = 1, #group.units do
 						group.units[n].x = ((p-1) * spacing/1.2) + ((f-1) * spacing) + group.units[n].x + (spacing * n) 	--ANTI-COLLISION C
@@ -5129,7 +5155,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 				-- modif M17
-				if flight[f].type == "F-14B" and navTargetPoints[1] then
+				if flight[f]["type"] == "F-14B" and navTargetPoints[1] then
 					 group["NavTargetPoints"]= navTargetPoints
 				end
 
@@ -5532,8 +5558,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						if pkFound then
 
-							waypoints[1].action = "From Ground Area"
-							waypoints[1].type = "TakeOffGround"
+							waypoints[1]["action"] = "From Ground Area"
+							waypoints[1]["type"] = "TakeOffGround"
 
 							waypoints[1].airdromeId = nil
 
@@ -5606,8 +5632,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						if pkFound then
 
-							waypoints[1].action = "From Ground Area"
-							waypoints[1].type = "TakeOffGround"
+							waypoints[1]["action"] = "From Ground Area"
+							waypoints[1]["type"] = "TakeOffGround"
 
 							waypoints[1].airdromeId = nil
 
@@ -5636,9 +5662,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					--ajuste l'altitude des helico en zone montagneuse, ils ont beaucoup de mal en alti radar
 					for n = 1, #waypoints do
-						if waypoints[n].type == "Land" then
-							waypoints[n].action = "LandingReFuAr"
-							waypoints[n].type = "LandingReFuAr"
+						if waypoints[n]["type"] == "Land" then
+							waypoints[n]["action"] = "LandingReFuAr"
+							waypoints[n]["type"] = "LandingReFuAr"
 						end
 					end
 
@@ -6110,7 +6136,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 
-				elseif (flight[f].type == 'F-14B' or flight[f].type == 'FA-18C_hornet') and flight[f].client
+				elseif (flight[f]["type"] == 'F-14B' or flight[f]["type"] == 'FA-18C_hornet') and flight[f].client
 					and baseIsCarrier and flight[f].task ~= "Intercept" then
 
 					if not waypoints[1]['linkUnit'] then waypoints[1]['linkUnit'] = waypoints[#waypoints]['linkUnit'] end
@@ -6176,8 +6202,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					--ne change pas le type de decollage d'une position SAR (from ground)
 					if waypoints[1]["type"] ~= "TakeOffGround" then
-						waypoints[1].type = "TakeOffParking"
-						waypoints[1].action = "From Parking Area"							--TODO pourquoi je l'avais enlevé déjà????
+						waypoints[1]["type"] = "TakeOffParking"
+						waypoints[1]["action"] = "From Parking Area"							--TODO pourquoi je l'avais enlevé déjà????
 					end
 
 					if db_airbases[flight[f].base].elevation then
@@ -6429,7 +6455,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							if  (not airbase.inactive or airbase.inactive == false) and airbase["side"] == sideName and flight[f].base ~= baseName and not airbase.BaseAirStart and airbase.x then		--airbase.divert and					
 								local distance = GetDistance(group.route.points[n], airbase )
 
-								if flight[f].type == "AV8BNA" or baseIsCarrier then
+								if flight[f]["type"] == "AV8BNA" or baseIsCarrier then
 
 										if distance < 300000 then
 											local temp = {
@@ -6784,10 +6810,10 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						info01 = "\n".."|+T2|ATTENTION MANQUE uncontrolled "..group.groupId.."\n"
 						tagATTENTION = true
 					end
-					-- if waypoints[1].action == "Turning Point" then
+					-- if waypoints[1]["action"] == "Turning Point" then
 					-- 	info01 = info01.."|+|ATTENTION Start en VOL "
 					-- end
-					if group.route.points[1].action == "Turning Point" then
+					if group.route.points[1]["action"] == "Turning Point" then
 						info01 = info01.."\n".."|+T3|ATTENTION Start en VOL ".."\n"
 						tagATTENTION = true
 					end
@@ -6795,7 +6821,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				end
 
-				if group.route.points[1].action == "Turning Point" and (math.abs(group.route.points[1]["ETA"] - group.start_time) > 5) then
+				if group.route.points[1]["action"] == "Turning Point" and (math.abs(group.route.points[1]["ETA"] - group.start_time) > 5) then
 
 					info01 = info01.."\n".."  |+T4|ATTENTION ETA[1] "..tostring(group.route.points[1]["ETA"]).." ~= start_time "..tostring(math.floor(debug_StartTime)).."\n"
 					tagATTENTION = true
@@ -7450,7 +7476,7 @@ for cv, sixPack in pairs(testSixPack) do
 					if country.plane then
 						for Ngroup,group in pairs(country.plane.group) do
 							if group.name == sixpackWiner then
-								if group.units[1].type == "S-3B Tanker" or group.units[1].type == "E-2C"  then						-- cet endroit est bloqué par DCS pour ces 2 avions
+								if group.units[1]["type"] == "S-3B Tanker" or group.units[1]["type"] == "E-2C"  then						-- cet endroit est bloqué par DCS pour ces 2 avions
 									AF_spawnOn("catapult", group.name)
 									modify_Activate_GroupTime(group, -1, debug.getinfo(1).currentline)								--supprime le triger activate (vraiment?)
 									-- modify_set_ai_task(group, -1, debug.getinfo(1).currentline) --supprime le triger start(vraiment?)

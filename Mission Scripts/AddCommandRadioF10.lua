@@ -2761,6 +2761,8 @@ local function getLL_TargetPosition()
 	end
 end
 
+
+--[[ 
 -- Force la mission d'atterrissage (remplace la mission du groupe)
 -- landingWp : table du waypoint d'atterrissage sauvegardée dans SatusGroupAircraft[flightName]["waypoints"]
 local function forceLandingTowardsWaypoint(group, landingWp)
@@ -2919,7 +2921,7 @@ local function monitorAllGroups(_, t)
 end
 
 -- Démarrer le scheduler (une fois dans ton init ou event birth)
-timer.scheduleFunction(monitorAllGroups, nil, timer.getTime() + 1)
+timer.scheduleFunction(monitorAllGroups, nil, timer.getTime() + 1) ]]
 
 
 
@@ -3858,34 +3860,34 @@ local function loopAFAC()
 end
 
 
-function MonitorWaypointProgress(flightName)
-    local flight = Group.getByName(flightName)
-    local stat = SatusGroupAircraft[flightName]
-    if not flight or not stat or stat["landing"] then return end
+-- function MonitorWaypointProgress(flightName)
+--     local flight = Group.getByName(flightName)
+--     local stat = SatusGroupAircraft[flightName]
+--     if not flight or not stat or stat["landing"] then return end
 
-    local unit = flight:getUnit(1)
-    if not unit or not unit:isExist() then return end
+--     local unit = flight:getUnit(1)
+--     if not unit or not unit:isExist() then return end
 
-    local pos = unit:getPoint()
-    local wpIndex = stat["currentWP"]
-    local wpList = stat["waypoints"]
-    if not wpList or not wpList[wpIndex] then return end
+--     local pos = unit:getPoint()
+--     local wpIndex = stat["currentWP"]
+--     local wpList = stat["waypoints"]
+--     if not wpList or not wpList[wpIndex] then return end
 
-    local wp = wpList[wpIndex]
-    local dx = pos.x - wp.x
-    local dz = pos.z - wp.y -- attention : "y" de la route est coordonnée horizontale Z !
-    local dist = math.sqrt(dx * dx + dz * dz)
+--     local wp = wpList[wpIndex]
+--     local dx = pos.x - wp.x
+--     local dz = pos.z - wp.y -- attention : "y" de la route est coordonnée horizontale Z !
+--     local dist = math.sqrt(dx * dx + dz * dz)
 
-    if dist < 2000 then -- distance de validation (2 km par exemple)
-        stat["waypoints"][wpIndex]["passed"] = true
-        stat["currentWP"] = wpIndex + 1
-        env.info(string.format("[WP TRACK] %s a passé le WP %d à %.0f m", flightName, wpIndex, dist))
-    end
+--     if dist < 2000 then -- distance de validation (2 km par exemple)
+--         stat["waypoints"][wpIndex]["passed"] = true
+--         stat["currentWP"] = wpIndex + 1
+--         env.info(string.format("[WP TRACK] %s a passé le WP %d à %.0f m", flightName, wpIndex, dist))
+--     end
 
-    if wpIndex <= #wpList then
-		timer.scheduleFunction(MonitorWaypointProgress, flightName, timer.getTime() + 10)
-    end
-end
+--     if wpIndex <= #wpList then
+-- 		timer.scheduleFunction(MonitorWaypointProgress, flightName, timer.getTime() + 10)
+--     end
+-- end
 
 --uniquement pour le Bingo?
 local function loopPilot()
