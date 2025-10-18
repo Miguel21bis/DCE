@@ -3495,8 +3495,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 							end
 
-							if flight[f].route[w].id == "Land" then
-								
+							if flight[f].route[w].id == "WPT Before Landing" then
 								local task_entry = {
 									["enabled"] = true,
 									["auto"] = false,
@@ -3504,14 +3503,82 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 									["params"] =
 									{
-										["action"] =
-										{
+										["action"] = {
 											["id"] = "Script",
-											["params"] =
-											{
-												--Custom_ForceToLand(argFlightName, 						argSpeed, 								argAltLanding, 									argLandingX, argLandingY, argLinkUnit)
-												["command"] = "Custom_ForceToLand('" .. groupName .. "', '" .. tostring(flight[f].route[w].speed) .. "', '" .. tostring(flight[f].route[w].alt)
-												..  "', '" .. tostring(flight[f].route[w].x) .. "',  '" .. tostring(flight[f].route[w].y) .. "', '" .. tostring(waypoints[w].linkUnit)  .. "')",
+											["params"] = {
+												["command"] = "env.info(\"DCE_WPT Before Landing #WPT-1 \")",
+											},
+										},
+									},
+								}
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+
+
+								task_entry = {
+									["enabled"] = true,
+									["auto"] = false,
+									["id"] = "WrappedAction",
+									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+									["params"] =
+									{
+										["action"] = {
+											["id"] = "Script",
+											["params"] = {
+												["command"] = string.format(
+													"Custom_ForceToLand('%s', %s, %s, %s, %s, %s)",
+													groupName,
+													tostring(flight[f].route[w].speed or 0),
+													tostring(flight[f].route[w].alt or 0),
+													tostring(flight[f].route[w].x or 0),
+													tostring(flight[f].route[w].y or 0),
+													tostring(waypoints[w].linkUnit or "nil")
+												),
+											},
+										},
+									},
+								}
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+							end
+
+
+							if flight[f].route[w].id == "Land" then
+								local task_entry = {
+									["enabled"] = true,
+									["auto"] = false,
+									["id"] = "WrappedAction",
+									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+									["params"] =
+									{
+										["action"] = {
+											["id"] = "Script",
+											["params"] = {
+												["command"] = "env.info(\"DCE_WPT_Land #WPT \")",
+											},
+										},
+									},
+								}
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+
+
+								task_entry = {
+									["enabled"] = true,
+									["auto"] = false,
+									["id"] = "WrappedAction",
+									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+									["params"] =
+									{
+										["action"] = {
+											["id"] = "Script",
+											["params"] = {
+												["command"] = string.format(
+													"Custom_ForceToLand('%s', %s, %s, %s, %s, %s)",
+													groupName,
+													tostring(flight[f].route[w].speed or 0),
+													tostring(flight[f].route[w].alt or 0),
+													tostring(flight[f].route[w].x or 0),
+													tostring(flight[f].route[w].y or 0),
+													tostring(waypoints[w].linkUnit or "nil")
+												),
 											},
 										},
 									},
@@ -3543,7 +3610,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						end
 					elseif flight[f].task == "CAP" then
-						if flight[f].route[w].id ~= "Station"  then --and flight[f].route[w].id ~= "Departure" and flight[f].route[w].id ~= "Land"
+						if flight[f].route[w].id ~= "Station" and flight[f].route[w].id ~= "Land" then --and flight[f].route[w].id ~= "Departure" 
 							local task_entry = {
 								["enabled"] = true,
 								["auto"] = false,
@@ -6572,14 +6639,17 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								["number"] = #group.route.points[n]["task"]["params"]["tasks"] + 1,
 								["params"] =
 								{
-									["action"] =
-									{
+									["action"] = {
 										["id"] = "Script",
-										["params"] =
-										{
-											["command"] = "Custom_Altitude('" .. groupName .. "',  '  nil  ', '" .. n .. "')",
+										["params"] = {
+											["command"] = string.format(
+												"Custom_Altitude('%s', nil, %s)",
+												groupName,
+												tostring(n or 0)
+											),
 										},
 									},
+
 								},
 							}
 							table.insert(group.route.points[n]["task"]["params"]["tasks"], task_entry)
@@ -6593,14 +6663,17 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								["number"] = #group.route.points[n]["task"]["params"]["tasks"] + 1,
 								["params"] =
 								{
-									["action"] =
-									{
+									["action"] = {
 										["id"] = "Script",
-										["params"] =
-										{
-											["command"] = "Custom_Altitude('" .. groupName .. "',  '  nil  ', '" .. n .. "')",
+										["params"] = {
+											["command"] = string.format(
+												"Custom_Altitude('%s', nil, %s)",
+												groupName,
+												tostring(n or 0)
+											),
 										},
 									},
+
 								},
 							}
 							table.insert(group.route.points[n]["task"]["params"]["tasks"], task_entry)

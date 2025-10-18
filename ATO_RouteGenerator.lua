@@ -2156,39 +2156,40 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 		route[#route].x = basePoint.x																								--modify route to end at escort land point
 		route[#route].y = basePoint.y
 
-        -- if GetDistance(basePoint, route[jointWP]) == split_distance then
-        --     route[#route - 1].x = route[jointWP].x
-        --     route[#route - 1].y = route[jointWP].y
-        --     for n = #route - 2, jointWP, -1 do
-        --         table.remove(route, n)
-        --     end
-        -- elseif GetDistance(basePoint, route[jointWP - 1]) == split_distance then
-        --     route[#route - 1].x = route[jointWP - 1].x
-        --     route[#route - 1].y = route[jointWP - 1].y
-        --     for n = #route - 2, jointWP - 1, -1 do
-        --         table.remove(route, n)
-        --     end
-        -- else --if a point between last Nav and Split Point is closest to escort land point
-        --     local split_heading
-        --     local heading1 = GetHeadingDegre(route[jointWP], route[jointWP - 1])
-        --     local heading2 = GetHeadingDegre(route[jointWP], basePoint)
-        --     if heading1 - heading2 > 180 then
-        --         heading1 = heading1 - 360
-        --     elseif heading2 - heading1 > 180 then
-        --         heading2 = heading2 - 360
-        --     end
-        --     if heading1 <= heading2 then
-        --         split_heading = heading1 - 90
-        --     else
-        --         split_heading = heading1 + 90
-        --     end
-        --     local mod_splitPoint = GetOffsetPoint(basePoint, split_heading, split_distance) --modify the Split Point to be between last Nav and old Split Point
-        --     route[#route - 1].x = mod_splitPoint.x
-        --     route[#route - 1].y = mod_splitPoint.y
-        --     for n = #route - 2, jointWP, -1 do
-        --         table.remove(route, n)
-        --     end
-        -- end
+		--INFO ne pas supprimer, cela evite aux ESCORT de suivre les bombers jusqu'a leur base
+        if GetDistance(basePoint, route[jointWP]) == split_distance then
+            route[#route - 1].x = route[jointWP].x
+            route[#route - 1].y = route[jointWP].y
+            for n = #route - 2, jointWP, -1 do
+                table.remove(route, n)
+            end
+        elseif GetDistance(basePoint, route[jointWP - 1]) == split_distance then
+            route[#route - 1].x = route[jointWP - 1].x
+            route[#route - 1].y = route[jointWP - 1].y
+            for n = #route - 2, jointWP - 1, -1 do
+                table.remove(route, n)
+            end
+        else --if a point between last Nav and Split Point is closest to escort land point
+            local split_heading
+            local heading1 = GetHeadingDegre(route[jointWP], route[jointWP - 1])
+            local heading2 = GetHeadingDegre(route[jointWP], basePoint)
+            if heading1 - heading2 > 180 then
+                heading1 = heading1 - 360
+            elseif heading2 - heading1 > 180 then
+                heading2 = heading2 - 360
+            end
+            if heading1 <= heading2 then
+                split_heading = heading1 - 90
+            else
+                split_heading = heading1 + 90
+            end
+            local mod_splitPoint = GetOffsetPoint(basePoint, split_heading, split_distance) --modify the Split Point to be between last Nav and old Split Point
+            route[#route - 1].x = mod_splitPoint.x
+            route[#route - 1].y = mod_splitPoint.y
+            for n = #route - 2, jointWP, -1 do
+                table.remove(route, n)
+            end
+        end
 
 		--ajoute un WPT descent, proche de la base si necessaire, cela permet aux escortes (notamment) de se poser correctement.
 		local newPoint = {}
@@ -2197,16 +2198,14 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
             if GetDistance(basePoint, route[#route - 1]) > 5000 then
                 heading = GetHeadingDegre(basePoint, route[#route - 1])
                 newPoint = GetOffsetPoint(basePoint, heading, 10000)
-				table.insert(route, #route,
-				{ x = newPoint.x, y = newPoint.y, id = "WPT Before Landind", alt = route[#route - 1].alt })
+				table.insert(route, #route, { x = newPoint.x, y = newPoint.y, id = "WPT Before Landind", alt = route[#route - 1].alt })
             end
         else
-            if GetDistance(basePoint, route[#route - 1]) > 30000 then
+            -- if GetDistance(basePoint, route[#route - 1]) > 20000 then
                 heading = GetHeadingDegre(basePoint, route[#route - 1])
                 newPoint = GetOffsetPoint(basePoint, heading, 30000)
-				table.insert(route, #route,
-				{ x = newPoint.x, y = newPoint.y, id = "WPT Before Landing", alt = route[#route - 1].alt })
-            end
+				table.insert(route, #route, { x = newPoint.x, y = newPoint.y, id = "WPT Before Landing", alt = route[#route - 1].alt })
+            -- end
         end
 	end
 

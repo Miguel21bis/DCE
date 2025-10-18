@@ -2575,167 +2575,147 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 	-- 	searchTime = timer.getTime() + 1800
 	-- end
 
-	local function applyEngageTargetsInZoneTask()							--engage targets in zone task needs to be applied continously to update zone position to group position
-		
-		local elementInAir = false
-		local elementExist = false
-		local flight = Group.getByName(flightName)							--get group
-		
-		if flight then														--group still exists
-			local element = flight:getUnit(1)								--get first unit in group
+    local function applyEngageTargetsInZoneTask() --engage targets in zone task needs to be applied continously to update zone position to group position
+        local elementInAir = false
+        local elementExist = false
+        local flight = Group.getByName(flightName) --get group
 
-			if SatusGroupAircraft[flightName] and (SatusGroupAircraft[flightName]["takeoff"] and not SatusGroupAircraft[flightName]["landing"]) then
-				elementInAir = true
-			end
+        if flight then                       --group still exists
+            local element = flight:getUnit(1) --get first unit in group
 
-			if element and element.inAir and element:inAir() then
-				elementInAir = true
-			end
+            if SatusGroupAircraft[flightName] and (SatusGroupAircraft[flightName]["takeoff"] and not SatusGroupAircraft[flightName]["landing"]) then
+                elementInAir = true
+            end
 
-			if SatusGroupAircraft[flightName] and SatusGroupAircraft[flightName]["landing"] then
-				elementInAir = false
-				env.info( "DCE_CustomSearchThenEngage B1_99 RETURN landing")
-				return
-			end
+            if element and element.inAir and element:inAir() then
+                elementInAir = true
+            end
 
-			if element and element:isExist() and element:isActive()  then--and element:inAir()
-				elementExist = true
-			else
-				local wingman = flight:getUnits()								--get list of units from attacking flights
-				for n = 2, #wingman do
-					element = flight:getUnit(n)
+            if SatusGroupAircraft[flightName] and SatusGroupAircraft[flightName]["landing"] then
+                elementInAir = false
+                env.info("DCE_CustomSearchThenEngage B1_99 RETURN landing")
+                return
+            end
 
-					if element and element:isExist() and element:isActive()  then--and element:inAir()
-						elementExist = true
-						break
-					end
-				end
-			end
+            if element and element:isExist() and element:isActive() then --and element:inAir()
+                elementExist = true
+            else
+                local wingman = flight:getUnits() --get list of units from attacking flights
+                for n = 2, #wingman do
+                    element = flight:getUnit(n)
 
-			if not elementExist then
-				env.info( "DCE_CustomSearchThenEngage B99 RETURN not elementExist")
-				return
-			end
+                    if element and element:isExist() and element:isActive() then --and element:inAir()
+                        elementExist = true
+                        break
+                    end
+                end
+            end
 
-			local RTB = false
-			local gpGid = ""
-			local callSign = ""
-			local cat
-			if element and element:getPlayerName() == nil and not RTB then
-				gpGid = Group.getID(flight)
-				callSign = Unit.getCallsign(element)
-				-- cat = Group.getCategory(flight)	--ne fonctionne plus (ne pas prendre getCategory pour les unit)
+            if not elementExist then
+                env.info("DCE_CustomSearchThenEngage B99 RETURN not elementExist")
+                return
+            end
 
-				--detecte si l'helico se pose proche d'une FARP BASE
-				local desc = element:getDesc()
-				cat = desc.category
+            local RTB = false
+            local gpGid = ""
+            local callSign = ""
+            local cat
+            if element and element:getPlayerName() == nil and not RTB then
+                gpGid = Group.getID(flight)
+                callSign = Unit.getCallsign(element)
+                -- cat = Group.getCategory(flight)	--ne fonctionne plus (ne pas prendre getCategory pour les unit)
 
-				if BingoPlaneTab[gpGid] and BingoPlaneTab[gpGid][callSign] then
-					return
-				end
-			end
+                --detecte si l'helico se pose proche d'une FARP BASE
+                local desc = element:getDesc()
+                cat = desc.category
 
-			--TODO detecter le passage de tous les wpt, puis la proximité de la base, pour enfin forcer l'atterrissage
+                if BingoPlaneTab[gpGid] and BingoPlaneTab[gpGid][callSign] then
+                    return
+                end
+            end
 
-			if elementInAir and cat and element and element:getPlayerName() == nil  then	--and not RTB
+            --TODO detecter le passage de tous les wpt, puis la proximité de la base, pour enfin forcer l'atterrissage
 
-				local cntrl = flight:getController()						--get controller of group
-				local posVec3 = element:getPoint()							--get position
-				local task_entry = {}
+            if elementInAir and cat and element and element:getPlayerName() == nil then --and not RTB
+                local cntrl = flight:getController()                            --get controller of group
+                local posVec3 = element:getPoint()                              --get position
+                local task_entry = {}
 
-				if cat == Unit.Category.AIRPLANE then  --0 Airplane
-					task_entry = {										--define engage task		
-						id = 'ControlledTask',
-						params = {
-							task = {
-								enabled = true,
-								auto = false,
-								id = "EngageTargetsInZone",
-								number = 1,
-								params = {
-									targetTypes = { targetType },
-									x = posVec3.x,
-									y = posVec3.z,
-									value = targetType .. ";",
-									priority = 0,
-									zoneRadius = radius,
-								}
-							},
-							stopCondition = {
-								duration = 50,
-							}
-						}
-					}
-
-									
-				cntrl:setOption(AI.Option.Air.id.PROHIBIT_AG, true)
-				
-				elseif cat == Unit.Category.HELICOPTER then  -- 1 helo
-					task_entry = {
-						id = 'ControlledTask',
-						params = {
-							task = {
-								enabled = true,
-								auto = false,
-								id = "EngageTargetsInZone",
-								number = 1,
-								params = {
-									targetTypes = { "Helicopters" },
-									x = posVec3.x,
-									y = posVec3.z,
-									value = targetType .. ";",
-									priority = 0,
-									zoneRadius = 15000,
-								}
-							},
-							stopCondition = {
-								duration = 50,
-							}
-						}
-					}
-				end
-
-				cntrl:pushTask(task_entry)		--ERROR 2785: Task id missed
+                if cat == Unit.Category.AIRPLANE then --0 Airplane
+                    task_entry = {        --define engage task		
+                        id = 'ControlledTask',
+                        params = {
+                            task = {
+                                enabled = true,
+                                auto = false,
+                                id = "EngageTargetsInZone",
+                                number = 1,
+                                params = {
+                                    targetTypes = { targetType },
+                                    x = posVec3.x,
+                                    y = posVec3.z,
+                                    value = targetType .. ";",
+                                    priority = 0,
+                                    zoneRadius = radius,
+                                }
+                            },
+                            stopCondition = {
+                                duration = 50,
+                            }
+                        }
+                    }
 
 
-				-- if camp.debug then
-				-- 	local current_time = timer.getTime() + 5
-				-- 	local logStr = "task_entry = " .. TableSerialization(task_entry, 0)
-				-- 	local flightNameClean = flightName:gsub('[%p%c%s]', '_')
-				-- 	local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_"..current_time.."_".. "_CustomSearchThenEngage.lua", "w")
-				-- 	if logFile then
-				-- 		logFile:write(logStr)
-				-- 		logFile:close()
-				-- 	else
-				-- 		env.info("DCE_CustomSearchThenEngage : Failed to open log file for writing.")
-				-- 	end
+                    cntrl:setOption(AI.Option.Air.id.PROHIBIT_AG, true)
+                elseif cat == Unit.Category.HELICOPTER then -- 1 helo
+                    task_entry = {
+                        id = 'ControlledTask',
+                        params = {
+                            task = {
+                                enabled = true,
+                                auto = false,
+                                id = "EngageTargetsInZone",
+                                number = 1,
+                                params = {
+                                    targetTypes = { "Helicopters" },
+                                    x = posVec3.x,
+                                    y = posVec3.z,
+                                    value = targetType .. ";",
+                                    priority = 0,
+                                    zoneRadius = 15000,
+                                }
+                            },
+                            stopCondition = {
+                                duration = 50,
+                            }
+                        }
+                    }
+                end
 
-				-- 	env.info( "DCE_CustomSearchThenEngage M : "..tostring(flightName).."| targetType |"..tostring(targetType).."| Radius |"..tostring(radius).." |ACTUALtime| "..timer.getTime())
-				-- end
+                cntrl:pushTask(task_entry) --ERROR 2785: Task id missed
 
-				-- env.info( "DCE_CustomSearchThenEngage O timer 60")
-				return timer.getTime() + 60
 
-			end
-		end
+                -- if camp.debug then
+                -- 	local current_time = timer.getTime() + 5
+                -- 	local logStr = "task_entry = " .. TableSerialization(task_entry, 0)
+                -- 	local flightNameClean = flightName:gsub('[%p%c%s]', '_')
+                -- 	local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_"..current_time.."_".. "_CustomSearchThenEngage.lua", "w")
+                -- 	if logFile then
+                -- 		logFile:write(logStr)
+                -- 		logFile:close()
+                -- 	else
+                -- 		env.info("DCE_CustomSearchThenEngage : Failed to open log file for writing.")
+                -- 	end
 
-		-- env.info( "DCE_CustomSearchThenEngage P timer 120")
-		-- return timer.getTime() + 120
-	end
+                -- 	env.info( "DCE_CustomSearchThenEngage M : "..tostring(flightName).."| targetType |"..tostring(targetType).."| Radius |"..tostring(radius).." |ACTUALtime| "..timer.getTime())
+                -- end
 
-	-- local nextTenth = (math.ceil(timer.getTime()) + 0.1 ) * 10
-	-- if ScheduleTenth[nextTenth] then
-	-- 	local i = 1
-	-- 	repeat
-	-- 		nextTenth = nextTenth + 1
-	-- 		i = i + 1
-	-- 	until not ScheduleTenth[nextTenth] or i > 1000
-	-- 	ScheduleTenth[nextTenth] = true
-	-- else
-	-- 	ScheduleTenth[nextTenth] = true
-	-- end
-
-	-- env.info( "DCE_CustomSearchThenEngage R scheduleFunction")
+                -- env.info( "DCE_CustomSearchThenEngage O timer 60")
+                return timer.getTime() + 60
+            end
+        end
+    end
+	
 	timer.scheduleFunction(applyEngageTargetsInZoneTask, nil, timer.getTime() + 1)			--schedule function
 
 end --FIN CustomSearchThenEngage
@@ -2990,7 +2970,8 @@ function Custom_ForceToLand(argFlightName, argSpeed, argAltLanding, argLandingX,
 	argLandingX = tonumber(argLandingX)
 	argLandingY = tonumber(argLandingY)
     argSpeed = tonumber(argSpeed)
-	argAltLanding = tonumber(argAltLanding)
+    argAltLanding = tonumber(argAltLanding)
+	if argLinkUnit == "nil" then argLinkUnit = nil end
 
 	env.info( "DCE_Custom_ForceToLand A1 argFlightName |"..tostring(argFlightName).."| argLandingX |"..tostring(argLandingX).."| argLandingY |"..tostring(argLandingY).."| argLinkUnit |"..tostring(argLinkUnit))
 

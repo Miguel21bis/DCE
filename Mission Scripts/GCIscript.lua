@@ -403,18 +403,26 @@ local function GCI_Cycle()
 									
 									local function assignMission()												--function to set interception mission (to be executed with 2 seconds delay, in order for the group to activate first)
 
-										local ctr = Group.getByName(selectInterName):getController()			--get controller of interceptor group
-
-										local flightAir = Group.getByName(selectInterName)
-										local leader = flightAir:getUnit(1)
-										local descIntercept = leader:getDesc()
+										-- local ctr = Group.getByName(selectInterName):getController()			--get controller of interceptor group
+										local ctr = groupObj:getController()			--get controller of interceptor group
+										-- local flightAir = Group.getByName(selectInterName)
+										local leaderObj = groupObj:getUnit(1)
+										local descIntercept = leaderObj:getDesc()
 										--mig23 speedMax0 388 m.s
-										--["speedMax"] = 693.25,
+                                        --["speedMax"] = 693.25,
+										env.info("DCE_Gci A speed: "..tostring(speed).." "..tostring(selectInterName))
 
 										if descIntercept and descIntercept.speedMax0 then
-											-- speed = descIntercept.speedMax0 * 0.8
-											speed = descIntercept.speedMax0
+											env.info("DCE_Gci B speedMax0: "..tostring(descIntercept.speedMax0))
 										end
+
+										if descIntercept and descIntercept.speedMax0 and descIntercept.speedMax0 > speed then
+											-- speed = descIntercept.speedMax0 * 0.8
+                                            speed = descIntercept.speedMax0
+											env.info("DCE_Gci C speed: " .. tostring(speed))
+										end
+
+										env.info("DCE_Gci D speed: " .. tostring(speed))
 
 
 										-- if camp.debug and descIntercept then
