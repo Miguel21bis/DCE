@@ -453,7 +453,6 @@ local function GCI_Cycle()
 											params = {
 												route = {
                                                     ["points"] = {
-														
 														{
 															["alt"] = 500,
 															["action"] = "Turning Point",
@@ -482,8 +481,9 @@ local function GCI_Cycle()
 																					["id"] = "Script",
 																					["params"] =
 																					{
-																						["command"] =
-																						"env.info(\"interceptPlanDeVol W1 A \")",
+																						-- ["command"] =
+                                                                                        -- "env.info('interceptPlanDeVol W1 A '..tostring(selectInterName) )",
+																						["command"] = "env.info('interceptPlanDeVol W1 A " .. tostring(selectInterName) .. "')",
 																					},
 																				},
 																			},
@@ -494,18 +494,24 @@ local function GCI_Cycle()
 																			["auto"] = false,
 																			["id"] = "WrappedAction",
 																			["number"] = 2,
-																			["params"] =
-																			{
-																				["action"] =
-																				{
+																			["params"] = {
+																				["action"] = {
 																					["id"] = "Script",
-																					["params"] =
-																					{
-																						["command"] = "CustomIntercept('" .. target_name .. "', '" ..selectInterName.. "', '" ..friendSideName.. "', '" ..speed.. "', '" ..point_0.x.. "', '" ..point_0.y.. "')",
+																					["params"] = {
+																						["command"] = string.format(
+																							"CustomIntercept('%s', '%s', '%s', %s, %s, %s)",
+																							target_name,
+																							selectInterName,
+																							friendSideName,
+																							tostring(speed or 0),
+																							tostring(point_0.x or 0),
+																							tostring(point_0.y or 0)
+																						),
 																					},
 																				},
 																			},
 																		},
+
 																		[3] =
 																		{
 																			["number"] = 3,
@@ -520,8 +526,9 @@ local function GCI_Cycle()
 																					["id"] = "Script",
 																					["params"] =
 																					{
-																						["command"] =
-																						"env.info(\"interceptPlanDeVol W2 C \")",
+																						-- ["command"] =
+                                                                                        -- "env.info('interceptPlanDeVol W2 C '..tostring(selectInterName))",
+																						["command"] = "env.info('interceptPlanDeVol W2 C " .. tostring(selectInterName) .. "')",
 																					},
 																				},
 																			},
@@ -626,15 +633,12 @@ local function GCI_Cycle()
 														-- 	["speed_locked"] = true,
 														-- },
 														{
-															["alt"] = 4000,
+															["alt"] = 6000,
 															["type"] = "Turning Point",
 															["action"] = "Turning Point",
 															["alt_type"] = "BARO",
 															["formation_template"] = "",
-															-- ["ETA"] = tonumber((distAfterPt3 / speed) + current_time),
 															["ETA"] = 3000,
-															-- ["y"] = point_3.y,
-															-- ["x"] = point_3.x,
 															["y"] = flight.y,
 															["x"] = flight.x,
 															["speed"] = tonumber(speed),
@@ -657,7 +661,9 @@ local function GCI_Cycle()
 																					["id"] = "Script",
 																					["params"] =
 																					{
-																						["command"] = "env.info(\"interceptPlanDeVol W3 D \")",
+																						-- ["command"] = "env.info('interceptPlanDeVol W3 D '" .. tostring(selectInterName) .. ")",
+																						["command"] = "env.info('interceptPlanDeVol W3 D " .. tostring(selectInterName) .. "')",
+
 																					},
 																				},
 																			},
@@ -690,13 +696,13 @@ local function GCI_Cycle()
 																				["task"] = {
 																					["id"] = "Orbit",
 																					["params"] = {
-																						["altitude"] = 4000,
+																						["altitude"] = 6000,
 																						["pattern"] = "Circle",
 																						["speed"] = 200,
 																					},
 																				},
 																				["stopCondition"] = {
-																					["time"] = current_time + 1200,
+																					["time"] = current_time + 3000,
 																				}
 																			}
 																		},
@@ -712,8 +718,7 @@ local function GCI_Cycle()
 															["airdromeId"] = flight.airdromeId,
 															["alt_type"] = "BARO",
 															["formation_template"] = "",
-                                                            -- ["ETA"] = tonumber((distRTB / speed) + current_time),
-															["ETA"] = 3600,
+                                                            ["ETA"] = 3600,
 															["y"] = flight.y,
 															["x"] = flight.x,
 															["speed"] = tonumber(speed),

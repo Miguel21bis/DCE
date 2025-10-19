@@ -44,35 +44,34 @@ local CHECK_INTERVAL = 15            -- intervalle de vérification en secondes
 -- END CONFIG --------------------------------------------
 
 
--- Liste des unités à exclure
-local excludedUnitTypes = {
-	["FPS-117"] = true,
-	["55G6 EWR"] = true,
-	["1L13 EWR"] = true,
-	["FPS-117 Dome"] = true,
-	["TACAN_beacon"] = true,
-}
 
-LastInjectFlightPlan = {}					--garde les derniers plan de vol injecté
-BingoPlaneTab = {}
-GroundDamagedFlyingMachine = {}
+
+
 AFAC_available = {}				--liste les AFAC en position
-AFAC_targetStatus = {}					--table used by AFACs to monitor the status of targets and move on to the next ones
+AFAC_targetStatus = {}    --table used by AFACs to monitor the status of targets and move on to the next ones
+
+LastInjectAFAC = {}    --garde les derniers plan de vol injecté
+LastInjectFlightPlan = {} --garde les derniers plan de vol injecté
+
 ScheduleTenth = {}					--table used to schedule the tenth of a second
 AgendaSeconde = {}
 
 EWR_optionPlayer = {}
+
+ZoneSAR = {} --table enumérant les helico SAR pour eviter d'en envoyer plusieurs aux memes endroits
 EjectionSeatFrequency = {}
-SumSoldierAliasPilot = 0
-CustomLog = {}
-ZoneSAR = {}								--table enumérant les helico SAR pour eviter d'en envoyer plusieurs aux memes endroits
 EjectedPilotOnBoard = {}
-LastInjecAFAC = {}					--garde les derniers plan de vol injecté
-SatusGroupAircraft = {}				--table used to store the status of aircraft groups
+GroundDamagedFlyingMachine = {}
+SumSoldierAliasPilot = 0
+
+CustomLog = {}
+
+SatusGroupAircraft = {}			--table used to store the status of aircraft groups
 Players = {}					--table used to store player units
-AvgConsumptionKgPerKm = {}				--table used to store the available distance in km for each unitCat
-TypePedroByCV = {}         --table used to store the type of Pedro by CV
-PlayerInOutAircraft = {}         --table used to store the type of Pedro by CV
+BingoPlaneTab = {}
+AvgConsumptionKgPerKm = {}		--table used to store the available distance in km for each unitCat
+TypePedroByCV = {}         		--table used to store the type of Pedro by CV
+PlayerInOutAircraft = {}        --table used to store the type of Pedro by CV
 
 SmokeColor_EjectedPilot = trigger.smokeColor.Orange
 SmokeColor_TargetDesignation = trigger.smokeColor.Blue
@@ -154,6 +153,14 @@ local radioCommands = {}
 local flightPlanTimer = {}
 local tabJockerPlane = {}
 local var_TPN_alreadyAdded = false
+-- Liste des unités à exclure
+local excludedUnitTypes = {
+	["FPS-117"] = true,
+	["55G6 EWR"] = true,
+	["1L13 EWR"] = true,
+	["FPS-117 Dome"] = true,
+	["TACAN_beacon"] = true,
+}
 
 
 -----*********check path**************---------

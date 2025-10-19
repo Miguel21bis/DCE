@@ -22,7 +22,7 @@ versionDCE["Mission Scripts/CustomTasksScript.lua"] = "1.9.44"
 local varFpsLeak = false
 local varFpsLeak_B = false
 local selectedTransport = 0			--util pour embarked
-local attackCounter	= {}	
+local attackCounter	= {}
 local falseCycleCount = {}												--table to count how many flights have already attacked and distribute subsequent attacks accordingly
 
 --TODO encore utile?
@@ -669,7 +669,7 @@ function CustomMixClassAttack(flightName, targetList, expend, weaponType, attack
 				idTypeStrike  = "Bombing"
 
 				-- env.info("DCE_CustomMixClassAttack MapObject found BB2 |"..tostring(targetName).."|")
-				
+
 			elseif  targetClass == "nil" then
 				targetTempPos ={
 					x = targetX,
@@ -679,7 +679,7 @@ function CustomMixClassAttack(flightName, targetList, expend, weaponType, attack
 				idTypeStrike  = "Bombing"
 
 				-- env.info("DCE_CustomMixClassAttack MapObject found BB22 |"..tostring(targetName).."|")
-				
+
 			else --if targetClass == "vehicle" then
 				targetTemp = Unit.getByName(targetName)
 				if targetTemp then
@@ -1856,11 +1856,11 @@ end
 ------************** CustomDesignationAFAC ************-----
 function CustomDesignationAFAC(arg_AFAC_F_Name, arg_refX, arg_refY, arg_LaserCode)
 	if varFpsLeak then return end
-	
+
     env.info("DCE_CustomDesignationAFAC() AA : START " .. tostring(arg_AFAC_F_Name))
-	
-	if LastInjecAFAC[arg_AFAC_F_Name] and LastInjecAFAC[arg_AFAC_F_Name] < timer.getTime() + 30 then
-		env.info("DCE_CustomDesignationAFAC() DCE_ERROR AFAC 00 BUG RETURN : "..tostring(arg_AFAC_F_Name).." LastInjecAFAC: "..tostring(LastInjecAFAC[arg_AFAC_F_Name]))
+
+	if LastInjectAFAC[arg_AFAC_F_Name] and LastInjectAFAC[arg_AFAC_F_Name] < timer.getTime() + 30 then
+		env.info("DCE_CustomDesignationAFAC() DCE_ERROR AFAC 00 BUG RETURN : "..tostring(arg_AFAC_F_Name).." LastInjecAFAC: "..tostring(LastInjectAFAC[arg_AFAC_F_Name]))
 		return
 	end
 
@@ -1885,7 +1885,7 @@ function CustomDesignationAFAC(arg_AFAC_F_Name, arg_refX, arg_refY, arg_LaserCod
 	if unitAFAC and unitAFAC:isExist() then
 
 		coalitionId = unitAFAC:getCoalition()
-		
+
 		AFAC_available[arg_AFAC_F_Name] = {
 				["unitAFAC"] = unitAFAC,
 				["sideNum"] = coalitionId,
@@ -1921,7 +1921,7 @@ function CustomDesignationAFAC(arg_AFAC_F_Name, arg_refX, arg_refY, arg_LaserCod
 				local UnitId = Unit.getID(grndUnit)
 				local unitTypeName = grndUnit:getTypeName()
 				local distance = math.floor(math.sqrt(math.pow(unitPosVec3.x - arg_refX, 2) + math.pow(unitPosVec3.z - arg_refY, 2)))
-				
+
 				if distance < distVisibility then
 
 					local item = {
@@ -1948,7 +1948,7 @@ function CustomDesignationAFAC(arg_AFAC_F_Name, arg_refX, arg_refY, arg_LaserCod
 	--**** recupere les static ****
 	--****--****--****--**** ********--****--****--**** ********--****--****--**** ********--****--****--**** ****
     local statics = coalition.getStaticObjects(CoalitionIdToENI_Id[coalitionId])
-	
+
     for _, static in pairs(statics) do
 		local stName = Object.getName(static)
 		local stLife = static:getLife()
@@ -1967,7 +1967,7 @@ function CustomDesignationAFAC(arg_AFAC_F_Name, arg_refX, arg_refY, arg_LaserCod
 				local lineOfSight = land.isVisible(afacPosVec3, unitPosVec3)
 
 				if lineOfSight then
-					
+
 					local item = {
 						unitGround = static,
 						unitTypeName = unitTypeName,
@@ -1994,7 +1994,7 @@ function CustomDesignationAFAC(arg_AFAC_F_Name, arg_refX, arg_refY, arg_LaserCod
     for i = 1, 60 do
         table.insert(unitGroundSelected_B, unitGroundSelected_A[i])
     end
-	
+
 	unitGroundSelected_A = nil
 
 	--**** choisi THE target ^^ ****
@@ -2050,7 +2050,7 @@ function CustomDesignationAFAC(arg_AFAC_F_Name, arg_refX, arg_refY, arg_LaserCod
 	local descAfac = unitAFAC:getDesc()
 	local modFPlan = {}
     local foundAfacRoute
-	
+
 	for _, coalition in pairs(env.mission.coalition) do
 		for _, _country in pairs(coalition.country) do
 			if _country.plane then
@@ -2315,7 +2315,7 @@ function CustomDesignationAFAC(arg_AFAC_F_Name, arg_refX, arg_refY, arg_LaserCod
 						}, -- end of [1]
 
 
-						
+
 
 						[2] =
 						{
@@ -2460,7 +2460,7 @@ function CustomDesignationAFAC(arg_AFAC_F_Name, arg_refX, arg_refY, arg_LaserCod
 	ctr:resetTask() 			-- Efface les tâches existantes
 	ctr:setTask(newMission)
 
-	LastInjecAFAC[arg_AFAC_F_Name] = timer.getTime() 	--update last injection time
+	LastInjectAFAC[arg_AFAC_F_Name] = timer.getTime() 	--update last injection time
 
 	env.info("DCE_AFAC Z nouvelle mission injectee")
 
@@ -2593,7 +2593,7 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
 
             if SatusGroupAircraft[flightName] and SatusGroupAircraft[flightName]["landing"] then
                 elementInAir = false
-                env.info("DCE_CustomSearchThenEngage B1_99 RETURN landing")
+                env.info("DCE_CustomSearchThenEngage B1_99 RETURN landing "..tostring(flightName))
                 return
             end
 
@@ -2616,11 +2616,11 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
                 return
             end
 
-            local RTB = false
+            local rtb = false
             local gpGid = ""
             local callSign = ""
             local cat
-            if element and element:getPlayerName() == nil and not RTB then
+            if element and element:getPlayerName() == nil and not rtb then
                 gpGid = Group.getID(flight)
                 callSign = Unit.getCallsign(element)
                 -- cat = Group.getCategory(flight)	--ne fonctionne plus (ne pas prendre getCategory pour les unit)
@@ -2715,7 +2715,7 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
             end
         end
     end
-	
+
 	timer.scheduleFunction(applyEngageTargetsInZoneTask, nil, timer.getTime() + 1)			--schedule function
 
 end --FIN CustomSearchThenEngage
@@ -2793,136 +2793,167 @@ end
 function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, argPosX, argPosY)
 	if varFpsLeak then return end
 
-	env.info( "DCE_Custom_Intercept A start func() "..tostring(argTargetName).."| arg_PosX |"..tostring(argPosX).."| arg_PosY |"..tostring(argPosY))
+	env.info( "DCE_Custom_Intercept A start func() "..tostring(argTargetName).."| argFriendSide |"..tostring(argFriendSide).."| arg_PosX |"..tostring(argPosX).."| arg_PosY |"..tostring(argPosY))
 
-	argPosX = tonumber(argPosX)
-    argPosY = tonumber(argPosY)
-    argSpeed = tonumber(argSpeed)
+	-- argPosX = tonumber(argPosX)
+    -- argPosY = tonumber(argPosY)
+    -- argSpeed = tonumber(argSpeed)
 	local interObj = Group.getByName(argInterName)
 	local selected_distance = 999999999
     local enyCoalName = coalition.side.RED
 
 	env.info( "DCE_Custom_Intercept B")
-	
-	if argFriendSide == "blue" then
-		argFriendSide = coalition.side.BLUE
+
+	if argFriendSide == "red" then
+		enyCoalName = coalition.side.BLUE
 	end
 
-    local groups = coalition.getGroups(enyCoalName)
-    local selected_group = nil
-    local selected_PtVec3 = nil
-	
-    env.info("DCE_Custom_Intercept C1")
-	
-    for i, groupObj in pairs(groups) do
-		
-		local unitObj = groupObj:getUnit(1)
+    local enyGroups = coalition.getGroups(enyCoalName)
+    local selEnyGroup = nil
+    local selEnyPtVec3 = nil
+	local selEnyName = nil
 
-		env.info("DCE_Custom_Intercept C2 i "..i .." groupObj "..tostring(groupObj).." unitObj "..tostring(unitObj))
-		
+    env.info("DCE_Custom_Intercept C1")
+
+    for i, enyGroupObj in pairs(enyGroups) do
+
+		local enyUnitObj = enyGroupObj:getUnit(1)
+
+		env.info("DCE_Custom_Intercept C2 i "..i .." groupObj "..tostring(enyGroupObj).." unitObj "..tostring(enyUnitObj))
+
+		local enyUnitInAir_A = false
+		local enyUnitInAir_B = false
+		if enyUnitObj and enyUnitObj:isExist() then
+			local ok, result = pcall(function() return enyUnitObj:inAir() end)
+			if ok and result then
+				-- L’unité est en vol
+				enyUnitInAir_A = true
+				env.info("DCE_Custom_Intercept C3 enyUnitInAir_A")
+			end
+		end
+
+		if enyUnitObj and enyUnitObj.inAir and enyUnitObj:inAir() then
+			enyUnitInAir_B = true
+			env.info("DCE_Custom_Intercept C4 enyUnitInAir_B")
+		end
+
+
 		--and unitObj.isActive and unitObj:isActive() and unitObj.isExist and unitObj:isExist()
-		if unitObj and unitObj.inAir and unitObj:inAir() then
-			
-			local uPointVec3 = unitObj:getPoint()
-			env.info("DCE_Custom_Intercept C3 inAir uPointVec3.x: "..tostring(uPointVec3.x).." uPointVec3.z "..tostring(uPointVec3.z))
-			env.info("DCE_Custom_Intercept C4 math.abs(uPointVec3.x - argPosX): "..tostring(math.abs(uPointVec3.x - argPosX)))
-			env.info("DCE_Custom_Intercept C5 math.abs(uPointVec3.z - argPosY): "..tostring(math.abs(uPointVec3.z - argPosY)))
-			
+		if enyUnitInAir_A or enyUnitInAir_B then
+
+			local uPointVec3 = enyUnitObj:getPoint()
+			local enyName = enyUnitObj:getName()
+
+			env.info("DCE_Custom_Intercept D1 inAir uPointVec3.x: "..tostring(uPointVec3.x).." uPointVec3.z "..tostring(uPointVec3.z).." : "..tostring(enyName))
+			env.info("DCE_Custom_Intercept D2 math.abs(uPointVec3.x - argPosX): "..tostring(math.abs(uPointVec3.x - argPosX)))
+			env.info("DCE_Custom_Intercept D3 math.abs(uPointVec3.z - argPosY): "..tostring(math.abs(uPointVec3.z - argPosY)))
+
             if math.abs(uPointVec3.x - argPosX) < 150000 and math.abs(uPointVec3.z - argPosY) < 150000 then
                 -- Calcul précis seulement pour les avions proches
 
                 local tempDistance = math.sqrt(math.pow(uPointVec3.x - argPosX, 2) + math.pow(uPointVec3.z - argPosY, 2))
 
-				env.info("DCE_Custom_Intercept C6 tempDistance before: " .. tostring(tempDistance).." <? selected_distance "..tostring(selected_distance))
-				
+				env.info("DCE_Custom_Intercept D4 tempDistance before: " .. tostring(tempDistance).." <? selected_distance "..tostring(selected_distance))
+
                 if tempDistance < selected_distance then
-					env.info("DCE_Custom_Intercept C7  " )
+					env.info("DCE_Custom_Intercept D5  " )
                     selected_distance = tempDistance
-                    selected_group = groupObj
-                    selected_PtVec3 = uPointVec3
+                    selEnyGroup = enyGroupObj
+                    selEnyPtVec3 = uPointVec3
+					selEnyName = enyName
                 end
             end
 
 		end
 
     end
-	
-	env.info("DCE_Custom_Intercept D selected_group: "..tostring(selected_group).." selected_PtVec3: "..tostring(selected_PtVec3))
-	
-    if selected_group and selected_PtVec3 then
 
-		local targetGpId = selected_group:getID()
+	env.info("DCE_Custom_Intercept E selected_group: "..tostring(selEnyGroup).." selected_PtVec3: "..tostring(selEnyPtVec3))
+
+    if selEnyGroup and selEnyPtVec3 then
+
+		local targetGpId = selEnyGroup:getID()
         local weaponType = 1069547520 --automatique
-		
-		env.info( "DCE_Custom_Intercept E")
 
-		local mission = { --define mission for interceptor group
-		id = 'Mission',
-			params = {
-				route = {
-					["points"] = {
-						[1] =
-						{
-							["alt"] = selected_PtVec3.y,
-							["type"] = "Turning Point",
-							["action"] = "Turning Point",
-							["alt_type"] = "BARO",
-							["formation_template"] = "",
-							["y"] = selected_PtVec3.z,
-							["x"] = selected_PtVec3.x,
-                            ["speed"] = argSpeed,
-							["speed_locked"] = true,
-							["ETA_locked"] = false,
-							["task"] = {
-								["id"] = "ComboTask",
-								["params"] = {
-									["tasks"] = {
+		env.info( "DCE_Custom_Intercept M")
 
-										[1] = {
-											["enabled"] = true,
-											["number"] = 1,
-											["auto"] = false,
-											-- ["id"] = "EngageGroup", -- en route
-											["id"] = "AttackGroup",	-- main task
-											
-											["params"] = {
-												-- ["visible"] = false,
-												-- ["groupId"] = targetGpId,
-												-- ["priority"] = 1,
-												-- ["weaponType"] = weaponType,
+		-- local mission = { --define mission for interceptor group
+		-- id = 'Mission',
+		-- 	params = {
+		-- 		route = {
+		-- 			["points"] = {
+		-- 				[1] =
+		-- 				{
+		-- 					["alt"] = selEnyPtVec3.y,
+		-- 					["type"] = "Turning Point",
+		-- 					["action"] = "Turning Point",
+		-- 					["alt_type"] = "BARO",
+		-- 					["formation_template"] = "",
+		-- 					["y"] = selEnyPtVec3.z,
+		-- 					["x"] = selEnyPtVec3.x,
+        --                     ["speed"] = argSpeed,
+		-- 					["speed_locked"] = true,
+		-- 					["ETA_locked"] = false,
+		-- 					["task"] = {
+		-- 						["id"] = "ComboTask",
+		-- 						["params"] = {
+		-- 							["tasks"] = {
 
-												["altitudeEnabled"] = true,
-												["groupId"] = 1,
-												["attackQtyLimit"] = false,
-												["attackQty"] = 1,
-												["expend"] = "Auto",
-												["altitude"] = selected_PtVec3.y,
-												["directionEnabled"] = false,
-												["groupAttack"] = false,
-												["weaponType"] = 9659482112,
-												["direction"] = 0,
-											},
-										},
+		-- 								[1] = {
+		-- 									["enabled"] = true,
+		-- 									["number"] = 1,
+		-- 									["auto"] = false,
+		-- 									-- ["id"] = "EngageGroup", -- en route
+		-- 									["id"] = "AttackGroup",	-- main task
 
-									},
-								},
-							},
-						},
-					},
-				}
-			}
-		}
+		-- 									["params"] = {
+		-- 										-- ["visible"] = false,
+		-- 										-- ["groupId"] = targetGpId,
+		-- 										-- ["priority"] = 1,
+		-- 										-- ["weaponType"] = weaponType,
 
-		env.info( "DCE_Custom_Intercept F")
+		-- 										["altitudeEnabled"] = true,
+		-- 										["groupId"] = 1,
+		-- 										["attackQtyLimit"] = false,
+		-- 										["attackQty"] = 1,
+		-- 										["expend"] = "Auto",
+		-- 										["altitude"] = selEnyPtVec3.y,
+		-- 										["directionEnabled"] = false,
+		-- 										["groupAttack"] = false,
+		-- 										["weaponType"] = 9659482112,
+		-- 										["direction"] = 0,
+		-- 									},
+		-- 								},
+
+		-- 							},
+		-- 						},
+		-- 					},
+		-- 				},
+		-- 			},
+		-- 		}
+		-- 	}
+		-- }
+
+		env.info( "DCE_Custom_Intercept N")
+
+		--INFO: ne pas faire la suite car semble ecraser la route
+		-- local ctr = interObj:getController()
+        -- -- Controller.setTask(ctr, mission)	-- ecrase la mission precedente
+
+		-- -- Stop toute action en cours
+		-- ctr:setCommand({ id = 'StopRoute', params = { value = true } })
+
+		-- -- Supprime la tâche active si bloquante
+		-- ctr:popTask()
 
 		local ctr = interObj:getController()
-        -- Controller.setTask(ctr, mission)	-- ecrase la mission precedente
 
-		-- Stop toute action en cours
-		ctr:setCommand({ id = 'StopRoute', params = { value = true } })
+		-- NE PAS faire StopRoute ni popTask
+		-- ctr:setCommand({ id = 'StopRoute', params = { value = true } })
+		-- ctr:popTask()
 
-		-- Supprime la tâche active si bloquante
-		ctr:popTask()
+		-- Si tu veux être propre :
+		ctr:resetTask()
 
 		-- Prépare et injecte l’interception
 
@@ -2937,9 +2968,9 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 		}
 		ctr:pushTask(interceptTask)
 
-		env.info("DCE_Custom_Intercept G")
+		env.info("DCE_Custom_Intercept O " .. tostring(argInterName) .." INITargInterName : "..argInterName.. " intercepting selEnyName " .. tostring(selEnyName))
 
-		
+
 		if camp.debug then
 			--export custom mission log
 			local current_time = timer.getTime()
@@ -2955,7 +2986,7 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 			end
 		end
 
-			
+
 	end
 
 end
@@ -2986,6 +3017,10 @@ function Custom_ForceToLand(argFlightName, argSpeed, argAltLanding, argLandingX,
 			local landingPos = { x = argLandingX, y = argLandingY }
 			local curPos = { x = leaderPosVec3.x, y = leaderPosVec3.z } -- attention à l'axe y/z
 			local dist = GetDistance(curPos, landingPos)
+
+			local oldRoute = SatusGroupAircraft[argFlightName]["waypoints"]
+            local initLinkUnit = #oldRoute > 0 and oldRoute[#oldRoute].linkUnit or nil
+			local varLinkUnit = argLinkUnit or initLinkUnit
 
 			-- forcer l'atterrissage et marquer
 
@@ -3028,9 +3063,9 @@ function Custom_ForceToLand(argFlightName, argSpeed, argAltLanding, argLandingX,
 				task = { id = "ComboTask", params = { tasks = {} } },
 			}
 
-			if argLinkUnit then
-				landPoint.linkUnit = argLinkUnit
-				landPoint.helipadId = argLinkUnit
+			if varLinkUnit then
+				landPoint.linkUnit = varLinkUnit
+				landPoint.helipadId = varLinkUnit
 			end
 
 			newRoute.params.route.points[2] = landPoint
@@ -3051,7 +3086,7 @@ function Custom_ForceToLand(argFlightName, argSpeed, argAltLanding, argLandingX,
 			end
 
 
-				
+
 			if camp.debug then
 				--export custom mission log
 				local current_time = timer.getTime()
@@ -3067,7 +3102,7 @@ function Custom_ForceToLand(argFlightName, argSpeed, argAltLanding, argLandingX,
 				end
 			end
 		end
-	end	
+	end
 end
 
 
@@ -3873,7 +3908,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 						end
 
 						distance = math.sqrt(math.pow(currentPos.x - temp_x, 2) + math.pow(currentPos.y - temp_y, 2))
-						
+
 						if distance <= 15000 and distance < selected_distance  then
 							selected_distance = distance
 
@@ -4451,7 +4486,7 @@ function Custom_Altitude(arg_grpName, arg_wptAlti, arg_wptTag)
 		-- local selectedMember = flight:getUnits(1)
 		local selectedMember
 		local wingman = flight:getUnits()
-		
+
 		for memberN, _unit in ipairs(wingman) do
 			if _unit and _unit:isExist() and _unit:isActive()  and _unit:inAir() then
 				selectedMember = _unit
