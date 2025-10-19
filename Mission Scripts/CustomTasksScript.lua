@@ -703,8 +703,8 @@ function CustomMixClassAttack(flightName, targetList, expend, weaponType, attack
 					["enabled"] = true,
 					["auto"] = false,
 					["id"] = idTypeStrike,
-					["name"] = "task: "..tostring(id_task).." class: "..tostring(targetClass),
 					["number"] = #comboTask.params.tasks + 1,
+					["name"] = "task: "..tostring(id_task).." class: "..tostring(targetClass),
 					["params"] = {
 						["x"] = targetTempPos.x,
 						["y"] = targetTempPos.y,
@@ -723,7 +723,7 @@ function CustomMixClassAttack(flightName, targetList, expend, weaponType, attack
 				}
 
 				--auto expend
-				if  idTypeStrike == "AttackUnit" then
+				if idTypeStrike == "AttackUnit" then
 					task_entry["id"] = "AttackUnit"
 					task_entry.params["unitId"] = tonumber(targetID)
 					task_entry.params["attackQtyLimit"] = false
@@ -731,7 +731,13 @@ function CustomMixClassAttack(flightName, targetList, expend, weaponType, attack
 					task_entry.params["y"] = nil
 				end
 
-				-- env.info("DCE_CustomMixClassAttack: DD2 |"..tostring(FlightName).."| |"..tostring(task_entry["id"]))
+				-- ["stopCondition"] = 
+				-- {
+				-- 	["time"] = tonumber(UntilTime),
+				-- 	-- ["duration"] = tonumber(var_duration),
+				-- }
+
+				-- env.info("DCE_CustomMixClassAttack: CustomStaticAttack DD |"..tostring(flightName).."| |"..tostring(task_entry["id"]))
 
 				table.insert(comboTask.params.tasks, task_entry)
 
@@ -2788,16 +2794,97 @@ function CustomSearchThenEngageFutur1(flightName, radius, targetType, searchTime
     timer.scheduleFunction(loopEngage, nil, timer.getTime() + 1)
 end
 
+-- Durée entre deux réévaluations (en secondes)
+local REEVAL_INTERVAL = 15
 
+-- Table de suivi pour éviter de lancer plusieurs boucles sur le même intercepteur
+local interceptorsActive = {}
 
 function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, argPosX, argPosY)
+    if varFpsLeak then return end
+
+    env.info("DCE_Custom_Intercept start for " .. tostring(argInterName))
+
+    local interObj = Group.getByName(argInterName)
+    if not interObj or not interObj:isExist() then
+        env.info("DCE_Custom_Intercept: group not found or dead")
+        interceptorsActive[argInterName] = nil
+        return
+    end
+
+    local friendCoalition = (argFriendSide == "red") and coalition.side.RED or coalition.side.BLUE
+    local enemyCoalition = (friendCoalition == coalition.side.RED) and coalition.side.BLUE or coalition.side.RED
+    local enemyGroups = coalition.getGroups(enemyCoalition)
+    if not enemyGroups then return end
+
+    local bestTarget, bestDistance = nil, 999999999
+
+    local interUnit = interObj:getUnit(1)
+    if not interUnit or not interUnit:isExist() then
+        interceptorsActive[argInterName] = nil
+        return
+    end
+    local interPos = interUnit:getPoint()
+
+    -- Recherche de la cible la plus proche (et en vol)
+    for _, group in pairs(enemyGroups) do
+        local unit = group:getUnit(1)
+        if unit and unit:isExist() and unit:inAir() then
+            local p = unit:getPoint()
+            local dx, dz = p.x - interPos.x, p.z - interPos.z
+            local dist = dx * dx + dz * dz -- distance², plus rapide
+            if dist < bestDistance then
+                bestTarget = group
+                bestDistance = dist
+            end
+        end
+    end
+
+    if bestTarget then
+        local ctr = interObj:getController()
+        if ctr then
+            local targetGpId = bestTarget:getID()
+            local weaponType = 1069547520 -- automatique
+
+            local interceptTask = {
+                id = 'EngageGroup',
+                params = {
+                    visible = false,
+                    groupId = targetGpId,
+                    priority = 1,
+                    weaponType = weaponType,
+                },
+            }
+
+            ctr:resetTask()
+            ctr:pushTask(interceptTask)
+
+            env.info("DCE_Custom_Intercept: " .. argInterName .. " engaging " .. bestTarget:getName())
+        end
+    else
+        env.info("DCE_Custom_Intercept: no air target found for " .. argInterName)
+    end
+
+    -- Si ce groupe n’a pas déjà sa boucle d’évaluation
+    if not interceptorsActive[argInterName] then
+        interceptorsActive[argInterName] = true
+
+        -- Planifie la prochaine réévaluation automatique
+        timer.scheduleFunction(function()
+            interceptorsActive[argInterName] = nil
+            if interObj and interObj:isExist() then
+                CustomIntercept(nil, argInterName, argFriendSide, argSpeed, argPosX, argPosY)
+            end
+        end, {}, timer.getTime() + REEVAL_INTERVAL)
+    end
+end
+
+
+function CustomInterceptVersionA(argTargetName, argInterName, argFriendSide, argSpeed, argPosX, argPosY)
 	if varFpsLeak then return end
 
 	env.info( "DCE_Custom_Intercept A start func() "..tostring(argTargetName).."| argFriendSide |"..tostring(argFriendSide).."| arg_PosX |"..tostring(argPosX).."| arg_PosY |"..tostring(argPosY))
 
-	-- argPosX = tonumber(argPosX)
-    -- argPosY = tonumber(argPosY)
-    -- argSpeed = tonumber(argSpeed)
 	local interObj = Group.getByName(argInterName)
 	local selected_distance = 999999999
     local enyCoalName = coalition.side.RED
@@ -2875,7 +2962,7 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 		local targetGpId = selEnyGroup:getID()
         local weaponType = 1069547520 --automatique
 
-		env.info( "DCE_Custom_Intercept M")
+		env.info( "DCE_Custom_Intercept M²")
 
 		-- local mission = { --define mission for interceptor group
 		-- id = 'Mission',
@@ -2934,7 +3021,7 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 		-- 	}
 		-- }
 
-		env.info( "DCE_Custom_Intercept N")
+		env.info( "DCE_Custom_Intercept N²")
 
 		--INFO: ne pas faire la suite car semble ecraser la route
 		-- local ctr = interObj:getController()
@@ -2946,11 +3033,12 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 		-- -- Supprime la tâche active si bloquante
 		-- ctr:popTask()
 
-		local ctr = interObj:getController()
-
 		-- NE PAS faire StopRoute ni popTask
 		-- ctr:setCommand({ id = 'StopRoute', params = { value = true } })
 		-- ctr:popTask()
+
+
+		local ctr = interObj:getController()
 
 		-- Si tu veux être propre :
 		ctr:resetTask()
@@ -2968,7 +3056,7 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 		}
 		ctr:pushTask(interceptTask)
 
-		env.info("DCE_Custom_Intercept O " .. tostring(argInterName) .." INITargInterName : "..argInterName.. " intercepting selEnyName " .. tostring(selEnyName))
+		env.info("DCE_Custom_Intercept O² " .. tostring(argInterName) .." INITargInterName : "..argInterName.. " intercepting selEnyName " .. tostring(selEnyName))
 
 
 		if camp.debug then
@@ -2998,107 +3086,122 @@ end
 function Custom_ForceToLand(argFlightName, argSpeed, argAltLanding, argLandingX, argLandingY, argLinkUnit)
     if varFpsLeak then return end
 
-	argLandingX = tonumber(argLandingX)
-	argLandingY = tonumber(argLandingY)
-    argSpeed = tonumber(argSpeed)
-    argAltLanding = tonumber(argAltLanding)
-	if argLinkUnit == "nil" then argLinkUnit = nil end
+	-- argLandingX = tonumber(argLandingX)
+	-- argLandingY = tonumber(argLandingY)
+    -- argSpeed = tonumber(argSpeed)
+    -- argAltLanding = tonumber(argAltLanding)
+	-- if argLinkUnit == "nil" then argLinkUnit = nil end
 
 	env.info( "DCE_Custom_ForceToLand A1 argFlightName |"..tostring(argFlightName).."| argLandingX |"..tostring(argLandingX).."| argLandingY |"..tostring(argLandingY).."| argLinkUnit |"..tostring(argLinkUnit))
 
 	env.info("DCE_Custom_ForceToLand A start func() " .. tostring(argFlightName) )
 
-	local group = Group.getByName(argFlightName)
-	if group and group:isExist() then
-		local leader = group:getUnit(1)
-		if leader and leader:isExist() then
-			local leaderPosVec3 = leader:getPoint()
+	local groupObj = Group.getByName(argFlightName)
+	if groupObj and groupObj:isExist() then
+		-- local leaderObj = groupObj:getUnit(1)
 
-			local landingPos = { x = argLandingX, y = argLandingY }
-			local curPos = { x = leaderPosVec3.x, y = leaderPosVec3.z } -- attention à l'axe y/z
-			local dist = GetDistance(curPos, landingPos)
+		local units = groupObj:getUnits()
+		for _, unitObj in ipairs(units) do
+			-- if unit and unit:isExist() and unit:isActive() and unit:inAir() then
 
-			local oldRoute = SatusGroupAircraft[argFlightName]["waypoints"]
-            local initLinkUnit = #oldRoute > 0 and oldRoute[#oldRoute].linkUnit or nil
-			local varLinkUnit = argLinkUnit or initLinkUnit
+			if unitObj and unitObj:isExist() then
+				local leaderPosVec3 = unitObj:getPoint()
 
-			-- forcer l'atterrissage et marquer
+				local landingPos = { x = argLandingX, y = argLandingY }
+				local curPos = { x = leaderPosVec3.x, y = leaderPosVec3.z }
 
-			SatusGroupAircraft[argFlightName]["forcedLanding"] = true
-			env.info(string.format("checkAndForceLandingForGroup: forced landing for %s (dist=%.0f)", argFlightName, dist))
+				if landingPos.x and curPos.y then
 
-			-- Construire une mission simple : WP courant (Turning Point) -> WP atterrissage (Land)
-			local newRoute = {
-				id = 'Mission',
-				params = {
-					route = {
-						points = {
-							[1] = {
-								action = "Turning Point",
-								type = "Turning Point",
-								x = curPos.x,
-								y = curPos.y,
-								alt = leaderPosVec3.y or 500,
-								alt_type = "BARO",
-								speed = argSpeed or 230,
-								ETA_locked = false,
-								task = { id = "ComboTask", params = { tasks = {} } },
-							},
-							[2] = nil -- on remplira ci-dessous selon landingWp
+					local dist = GetDistance(curPos, landingPos)
+
+					local oldRoute = SatusGroupAircraft[argFlightName]["waypoints"]
+					local initLinkUnit = #oldRoute > 0 and oldRoute[#oldRoute].linkUnit or nil
+					local varLinkUnit = argLinkUnit or initLinkUnit
+
+					-- forcer l'atterrissage et marquer
+
+					SatusGroupAircraft[argFlightName]["forcedLanding"] = true
+					env.info(string.format("checkAndForceLandingForGroup: forced landing for %s (dist=%.0f)", argFlightName, dist))
+
+					-- Construire une mission simple : WP courant (Turning Point) -> WP atterrissage (Land)
+					local newRoute = {
+						id = 'Mission',
+						params = {
+							route = {
+								points = {
+									[1] = {
+										action = "Turning Point",
+										type = "Turning Point",
+										x = curPos.x,
+										y = curPos.y,
+										alt = leaderPosVec3.y or 500,
+										alt_type = "BARO",
+										speed = argSpeed or 230,
+										ETA_locked = false,
+										task = { id = "ComboTask", params = { tasks = {} } },
+									},
+									[2] = nil -- on remplira ci-dessous selon landingWp
+								}
+							}
 						}
 					}
-				}
-			}
 
-			-- Si landingWp contient un linkUnit (base/ship), on le réutilise pour avoir un "vrai" landing
-			local landPoint = {
-				action = "Landing",
-				type = "Land",
-				alt = argAltLanding or 0,
-				alt_type = "RADIO",
-				speed = argSpeed or 230,
-				x = landingPos.x,
-				y = landingPos.y,
-				ETA_locked = false,
-				task = { id = "ComboTask", params = { tasks = {} } },
-			}
+					-- Si landingWp contient un linkUnit (base/ship), on le réutilise pour avoir un "vrai" landing
+					local landPoint = {
+						action = "Landing",
+						type = "Land",
+						alt = argAltLanding or 0,
+						alt_type = "RADIO",
+						speed = argSpeed or 230,
+						x = landingPos.x,
+						y = landingPos.y,
+						ETA_locked = false,
+						task = { id = "ComboTask", params = { tasks = {} } },
+					}
 
-			if varLinkUnit then
-				landPoint.linkUnit = varLinkUnit
-				landPoint.helipadId = varLinkUnit
-			end
+					if varLinkUnit then
+						landPoint.linkUnit = varLinkUnit
+						landPoint.helipadId = varLinkUnit
+					end
 
-			newRoute.params.route.points[2] = landPoint
+					newRoute.params.route.points[2] = landPoint
 
-			-- Appliquer en remplaçant la mission : Controller.setTask
-			local ctrl = group:getController()
-			if ctrl then
-				-- On utilise pcall pour éviter crash si API différente
-				local ok, err = pcall(function()
-					Controller.setTask(ctrl, newRoute)
-				end)
-				if not ok then
-					env.info("DCE_Custom_ForceToLand: Controller.setTask failed: " .. tostring(err))
-					return false
-				end
-				env.info("DCE_Custom_ForceToLand: mission d'atterrissage appliquée pour " .. tostring(group:getName()))
-				return true
-			end
+					-- Appliquer en remplaçant la mission : Controller.setTask
+					local ctrl = groupObj:getController()
+					if ctrl then
+						-- On utilise pcall pour éviter crash si API différente
+						local ok, err = pcall(function()
+							Controller.setTask(ctrl, newRoute)
+						end)
+						if not ok then
+							env.info("DCE_Custom_ForceToLand: Controller.setTask failed: " .. tostring(err))
+							return false
+						end
+						env.info("DCE_Custom_ForceToLand: mission d'atterrissage appliquée pour " .. tostring(groupObj:getName()))
+						return true
+					end
 
 
 
-			if camp.debug then
-				--export custom mission log
-				local current_time = timer.getTime()
-				local logStr = "newRoute = " .. TableSerialization(newRoute, 0)
-				local flightNameClean = argFlightName:gsub('[%p%c%s]', '_')
-				local logFile = io.open(
-				PathDCE .. "Debug\\" .. flightNameClean .. "_" .. "Custom_ForceToLand" .. "_" .. tostring(current_time) .. ".lua", "w")
-				if logFile then
-					logFile:write(logStr)
-					logFile:close()
+					if camp.debug then
+						--export custom mission log
+						local current_time = timer.getTime()
+						local logStr = "newRoute = " .. TableSerialization(newRoute, 0)
+						local flightNameClean = argFlightName:gsub('[%p%c%s]', '_')
+						local logFile = io.open(
+						PathDCE .. "Debug\\" .. flightNameClean .. "_" .. "Custom_ForceToLand" .. "_" .. tostring(current_time) .. ".lua", "w")
+						if logFile then
+							logFile:write(logStr)
+							logFile:close()
+						else
+							env.info("DCE_Custom_ForceToLand: Failed to open log file for writing.")
+						end
+					end
+					break
 				else
-					env.info("DCE_Custom_ForceToLand: Failed to open log file for writing.")
+					env.info("DCE_Custom_ForceToLand Z ERROR missing landingPos or curPos")
+					_affiche(landingPos, "DCE_Custom_ForceToLand C landingPos")
+					_affiche(curPos, "DCE_Custom_ForceToLand D curPos")
 				end
 			end
 		end

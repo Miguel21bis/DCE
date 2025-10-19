@@ -3842,7 +3842,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								["enabled"] = true,
 								["auto"] = false,
 								["id"] = "WrappedAction",
-								["name"] = "interdit la pc (id == Assemble)",
+								["name"] = "interdit la PC after burner (id == Assemble)",
 								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 								["params"] =
 								{

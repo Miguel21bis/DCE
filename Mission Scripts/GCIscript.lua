@@ -330,9 +330,9 @@ local function GCI_Cycle()
 
 					if selectInterName then
 						for base_name, base in pairs(GCI.Interceptor[friendSideName].base) do				--iterate through bases in GCI table
-							for flight_n, flight in pairs(base.ready) do								--iterate through ready interceptor flights						
-								if flight.name == selectInterName then									--find selected interceptor flight in ready table
-									trigger.action.setUserFlag(flight.flag, true)						--set flag true to launch interceptor
+							for flight_n, flightInter in pairs(base.ready) do								--iterate through ready interceptor flights						
+								if flightInter.name == selectInterName then									--find selected interceptor flight in ready table
+									trigger.action.setUserFlag(flightInter.flag, true)						--set flag true to launch interceptor
 									local groupObj = Group.getByName(selectInterName)
 
 									if groupObj then
@@ -357,7 +357,7 @@ local function GCI_Cycle()
 									-- target.distance_Km = math.floor(selected_distance / 10000) * 10
 									-- target.distance = selected_distance
 									-- local testBearing = math.floor(GetHeadingIM(flight, newTarget.point))
-									-- target.bearing = math.floor(GetHeading({x=flight.x, y=flight.y}, {x=target.pointVec3.x, y=target.pointVec3.z} ))
+									target.bearing = math.floor(GetHeading({x=flightInter.x, y=flightInter.y}, {x=target.pointVec3.x, y=target.pointVec3.z} ))
 
 
 
@@ -399,8 +399,10 @@ local function GCI_Cycle()
 									errorMsg = "Assign interceptors; Target: " .. target_name .. "; Selected Flight: " .. selectInterName				--Error message in case follow on code fails
 									
 									local bearingWing = 90
-									local point_0 = GetOffsetPoint(flight, bearingWing, 1500)
+									local point_0 = GetOffsetPoint(flightInter, bearingWing, 1500)
 									
+
+
 									local function assignMission()												--function to set interception mission (to be executed with 2 seconds delay, in order for the group to activate first)
 
 										-- local ctr = Group.getByName(selectInterName):getController()			--get controller of interceptor group
@@ -448,6 +450,9 @@ local function GCI_Cycle()
 										
 										-- target_id = Group.getByName(target_name):getID()					--get target group ID --TODO BUG 287: attempt to index a nil value stack traceback:
 										
+
+										local pointB = GetOffsetPoint(flightInter, target.bearing, 3000)
+
 										local planDeVol = {														--define mission for interceptor group
 											id = 'Mission',
 											params = {
@@ -490,6 +495,75 @@ local function GCI_Cycle()
 																		},
 																		[2] =
 																		{
+																			["number"] = 2,
+																			["enabled"] = true,
+																			["auto"] = false,
+																			["id"] = "WrappedAction",
+																			["name"] = "force la PC after burner (inerception)",
+																			["params"] =
+																			{
+																				["action"] =
+																				{
+																					["id"] = "Option",
+																					["params"] =
+																					{
+																						["value"] = false,
+																						["name"] = 16,
+																					},
+																				},
+																			},
+																		},
+																	},
+																},
+															},
+															["ETA"] = current_time ,
+															["ETA_locked"] = true,
+															["y"] = point_0.y,
+															["x"] = point_0.x,
+															["formation_template"] = "",
+															["speed_locked"] = true,
+														}, -- end of [1]  
+
+														{
+															["alt"] = 1000,
+															["type"] = "Turning Point",
+															["action"] = "Turning Point",
+															["alt_type"] = "BARO",
+															["formation_template"] = "",
+															["ETA"] = tonumber((3000 / speed) + current_time) ,
+															["y"] = pointB.y,
+															["x"] = pointB.x,
+															["speed"] = tonumber(speed),
+															["speed_locked"] = true,
+															["ETA_locked"] = false,
+															["task"] = {
+																["id"] = "ComboTask",
+																["params"] = {
+																	["tasks"] = {
+																		[1] =
+																		{
+																			["number"] = 1,
+																			["auto"] = false,
+																			["id"] = "WrappedAction",
+																			["name"] = "partie script",
+																			["enabled"] = true,
+																			["params"] =
+																			{
+																				["action"] =
+																				{
+																					["id"] = "Script",
+																					["params"] =
+																					{
+																						-- ["command"] =
+                                                                                        -- "env.info('interceptPlanDeVol W2 C '..tostring(selectInterName))",
+																						["command"] = "env.info('interceptPlanDeVol W2 A " .. tostring(selectInterName) .. "')",
+																					},
+																				},
+																			},
+																		},
+
+																		[2] =
+																		{
 																			["enabled"] = true,
 																			["auto"] = false,
 																			["id"] = "WrappedAction",
@@ -511,7 +585,6 @@ local function GCI_Cycle()
 																				},
 																			},
 																		},
-
 																		[3] =
 																		{
 																			["number"] = 3,
@@ -533,18 +606,12 @@ local function GCI_Cycle()
 																				},
 																			},
 																		},
+
 																	},
 																},
 															},
-															["ETA"] = current_time ,
-															["ETA_locked"] = true,
-															["y"] = point_0.y,
-															["x"] = point_0.x,
-															["formation_template"] = "",
-															["speed_locked"] = true,
-														}, -- end of [1]  
-
-
+														},
+														
 														-- {
 														-- 	["alt"] = 2000,
 														-- 	["type"] = "Turning Point",
@@ -633,14 +700,14 @@ local function GCI_Cycle()
 														-- 	["speed_locked"] = true,
 														-- },
 														{
-															["alt"] = 6000,
+															["alt"] = 1000,
 															["type"] = "Turning Point",
 															["action"] = "Turning Point",
 															["alt_type"] = "BARO",
 															["formation_template"] = "",
-															["ETA"] = 3000,
-															["y"] = flight.y,
-															["x"] = flight.x,
+															["ETA"] = current_time + 3000,
+															["y"] = flightInter.y,
+															["x"] = flightInter.x,
 															["speed"] = tonumber(speed),
 															["ETA_locked"] = false,
 															["task"] = {
@@ -715,12 +782,12 @@ local function GCI_Cycle()
 															["alt"] = 2000,
 															["type"] = "Land",
 															["action"] = "Landing",
-															["airdromeId"] = flight.airdromeId,
+															["airdromeId"] = flightInter.airdromeId,
 															["alt_type"] = "BARO",
 															["formation_template"] = "",
-                                                            ["ETA"] = 3600,
-															["y"] = flight.y,
-															["x"] = flight.x,
+                                                            ["ETA"] = current_time + 3600,
+															["y"] = flightInter.y,
+															["x"] = flightInter.x,
 															["speed"] = tonumber(speed),
 															["ETA_locked"] = false,
 															["task"] = {
