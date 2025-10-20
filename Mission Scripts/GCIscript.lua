@@ -108,17 +108,17 @@ end
 
 local errorMsg = ""																				--variable to store script status in case of error
 
---target tracks
-local target_tracks = {
-	["blue"] = {},
-	["red"] = {}
-}
+-- --target tracks
+-- Target_tracks = {
+-- 	["blue"] = {},
+-- 	["red"] = {}
+-- }
 
 local function GCI_Cycle()
 	local current_time = timer.getTime()
 	--remove old targets from target_tracks
 	errorMsg = "Remove old tracks."																--Error message in case follow on code fails
-	for track_side, side in pairs(target_tracks) do												--iterate through sides in target tracks table
+	for track_side, side in pairs(Target_tracks) do												--iterate through sides in target tracks table
 		for target_name, target in pairs(side) do												--iterate through targets
 			errorMsg = "Remove old tracks: " .. target_name .. " no time stamp."				--Error message in case follow on code fails
 			if target.time + 300 < current_time then											--if target was not detected for more than 5 minutes
@@ -153,14 +153,14 @@ local function GCI_Cycle()
 			if group then
 				local units = group:getUnits()													--get alive units array of group
 				local difference = #units - flight.number										--number of of interceptors that died since last cylce										
-				target_tracks[side_name][flight.target].assigned = target_tracks[side_name][flight.target].assigned + difference	--remove dead interceptors from assigned number of target track
+				Target_tracks[side_name][flight.target].assigned = Target_tracks[side_name][flight.target].assigned + difference	--remove dead interceptors from assigned number of target track
 				flight.number = #units															--store new number of interceptors
 			else																				--group doesnt exist
-				target_tracks[side_name][flight.target].assigned = target_tracks[side_name][flight.target].assigned - flight.number	--remove dead interceptors from assigned number of target track
+				Target_tracks[side_name][flight.target].assigned = Target_tracks[side_name][flight.target].assigned - flight.number	--remove dead interceptors from assigned number of target track
 				side.assigned[flight_name] = nil												--remove flight from Interceptors table
 			end
-			if target_tracks[side_name][flight.target].assigned < 0 then						--make sure that assigned number of target track is not negative (lost track resets number to 0 and dead interceptor can further subtract form that)
-				target_tracks[side_name][flight.target].assigned = 0
+			if Target_tracks[side_name][flight.target].assigned < 0 then						--make sure that assigned number of target track is not negative (lost track resets number to 0 and dead interceptor can further subtract form that)
+				Target_tracks[side_name][flight.target].assigned = 0
 			end
 		end
 	end
@@ -197,19 +197,19 @@ local function GCI_Cycle()
 								local target_typeName = targetGpObject:getUnit(1):getTypeName()
 								errorMsg = "EWR target detection: " .. ewr_name	.. "; Target: " .. target_name 	--Error message in case follow on code fails
 
-								if target_tracks[ewr_side][target_name] then					--existing track
-									if target_tracks[ewr_side][target_name].time > current_time - 30 then	--last detection was within 30 seconds
-										target_tracks[ewr_side][target_name].history = target_tracks[ewr_side][target_name].history + 1		--increase detection history by one
+								if Target_tracks[ewr_side][target_name] then					--existing track
+									if Target_tracks[ewr_side][target_name].time > current_time - 30 then	--last detection was within 30 seconds
+										Target_tracks[ewr_side][target_name].history = Target_tracks[ewr_side][target_name].history + 1		--increase detection history by one
 									else																	--last detection is older than 30 seconds
-										target_tracks[ewr_side][target_name].history = 0					--reset detection history to 0
+										Target_tracks[ewr_side][target_name].history = 0					--reset detection history to 0
 									end
-									target_tracks[ewr_side][target_name].number = #target_number
-									target_tracks[ewr_side][target_name].time = current_time
-									target_tracks[ewr_side][target_name].pointVec3 = target_pointVec3
-									target_tracks[ewr_side][target_name].category = targetDesc.category
+									Target_tracks[ewr_side][target_name].number = #target_number
+									Target_tracks[ewr_side][target_name].time = current_time
+									Target_tracks[ewr_side][target_name].pointVec3 = target_pointVec3
+									Target_tracks[ewr_side][target_name].category = targetDesc.category
 									-- target_tracks[ewr_side][target_name].target_Type = targetDesc.typeName
 								else															--new track
-									target_tracks[ewr_side][target_name] = {
+									Target_tracks[ewr_side][target_name] = {
 										number = #target_number,								--number of aircraft in traget group
 										time = current_time,									--time of current detection
 										pointVec3 = target_pointVec3, --position of this target group
@@ -231,7 +231,7 @@ local function GCI_Cycle()
 
 	--assign interceptors to targets
 	errorMsg = "Assign interceptors."																--Error message in case follow on code fails
-	for friendSideName, targetData in pairs(target_tracks) do													--iterate throug sides in target_tracks table
+	for friendSideName, targetData in pairs(Target_tracks) do													--iterate throug sides in target_tracks table
 		for target_name, target in pairs(targetData) do													--iterate through targets
 			errorMsg = "Assign interceptors; Target: " .. target_name								--Error message in case follow on code fails
 			

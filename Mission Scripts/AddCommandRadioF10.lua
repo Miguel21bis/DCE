@@ -80,6 +80,12 @@ RadioWatt = 1 -- Radio power in watts, used for radio beacon transmission
 
 AnnonceOneOunce = {}
 
+--target tracks
+Target_tracks = {
+	["blue"] = {},
+	["red"] = {}
+}
+
 CoalitionIdAlphaToName = {
 	["0"] = "neutral",
 	["1"] = "red",
@@ -3570,6 +3576,7 @@ function EventHandler2:onEvent(event)
 	if eventsSurvey2[event.id] then
 
 		local idLabel = "inc"
+		local current_time = timer.getTime()
 
 		if event and event.id and Info_event and Info_event[tonumber(event.id)] then
 			idLabel = tostring(Info_event[tonumber(event.id)])
@@ -3592,7 +3599,7 @@ function EventHandler2:onEvent(event)
 							if desc.category == Unit.Category.HELICOPTER then
 								
 								timer.scheduleFunction(MonitorPlayerAircraftActivity,
-									{ "in", playerName, flightName, desc.category }, timer.getTime() + 1)
+									{ "in", playerName, flightName, desc.category }, current_time + 1)
 							end
 						else
                             if not SatusGroupAircraft[flightName] then
@@ -3609,7 +3616,7 @@ function EventHandler2:onEvent(event)
 							
 							local group = Group.getByName(flightName)
 							local passEscorte = false
-							if string.find(string.lower(flightName), "escorte") then passEscorte = true end
+							if string.find(string.lower(flightName), "escort") then passEscorte = true end
 							if group and passEscorte then
                                 local route = group:getTaskRoute()
                                 if route and #route > 0 then
@@ -3617,6 +3624,21 @@ function EventHandler2:onEvent(event)
                                     SatusGroupAircraft[flightName]["currentWP"] = 1
 									SatusGroupAircraft[flightName]["landingWpt"] = #route
 									SatusGroupAircraft[flightName]["task"] = "escorte"
+
+									if camp.debug then
+										--export custom mission log
+										local logStr = "SatusGroupAircraft = " .. TableSerialization(SatusGroupAircraft, 0)
+										local logFile = io.open( PathDCE .. "Debug\\" .. "SatusGroupAircraft" .. "_" .. tostring(current_time) ..
+										".lua", "w")
+										if logFile then
+											logFile:write(logStr)
+											logFile:close()
+										else
+											env.info("DCE_INTERCEPTOR: Failed to open log file for writing.")
+										end
+									end
+
+
                                 end
                             end
 							
@@ -3721,7 +3743,6 @@ function EventHandler2:onEvent(event)
 								if not GroundDamagedFlyingMachine[event.initiator.id_] then GroundDamagedFlyingMachine[event.initiator.id_] = {} end
 								table.insert(GroundDamagedFlyingMachine[event.initiator.id_], eventData)
 
-								local current_time = timer.getTime()
 								if camp.debug then
 									local logStr = "DamagedFM = " .. TableSerialization(GroundDamagedFlyingMachine, 0)
 									local grpnameClean = name:gsub('[%p%c%s]', '_')
@@ -3746,7 +3767,7 @@ function EventHandler2:onEvent(event)
 				local desc = event.initiator:getDesc()
 				if desc.category == Unit.Category.HELICOPTER then
 					local aircraftName = event.initiator:getName()
-					timer.scheduleFunction(MonitorPlayerAircraftActivity, {"out", playerName, aircraftName, desc.category}, timer.getTime() + 1)
+					timer.scheduleFunction(MonitorPlayerAircraftActivity, {"out", playerName, aircraftName, desc.category}, current_time + 1)
 				end
 			end
 

@@ -2794,13 +2794,127 @@ function CustomSearchThenEngageFutur1(flightName, radius, targetType, searchTime
     timer.scheduleFunction(loopEngage, nil, timer.getTime() + 1)
 end
 
--- Durée entre deux réévaluations (en secondes)
+local MAX_INTERCEPT_RANGE = 75000 -- mètres
 local REEVAL_INTERVAL = 15
-
--- Table de suivi pour éviter de lancer plusieurs boucles sur le même intercepteur
 local interceptorsActive = {}
+local groupTargetMemory = {}
 
 function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, argPosX, argPosY)
+	if varFpsLeak then return end
+
+	local interObj = Group.getByName(argInterName)
+	if not interObj or not interObj:isExist() then
+		interceptorsActive[argInterName] = nil
+		groupTargetMemory[argInterName] = nil
+		return
+	end
+
+	local friendCoalition = (argFriendSide == "red") and coalition.side.RED or coalition.side.BLUE
+	local enemyCoalition = (friendCoalition == coalition.side.RED) and coalition.side.BLUE or coalition.side.RED
+	local enemyGroups = coalition.getGroups(enemyCoalition)
+	if not enemyGroups then return end
+
+	local interUnit = interObj:getUnit(1)
+	if not interUnit or not interUnit:isExist() then
+		interceptorsActive[argInterName] = nil
+		return
+	end
+
+	local interPos = interUnit:getPoint()
+	local bestTarget, bestDistance = nil, 999999999
+
+	-- Vérifie si une cible est déjà mémorisée
+	local lastTarget = groupTargetMemory[argInterName]
+	if lastTarget and lastTarget:isExist() then
+		-- Vérifie la distance actuelle pour savoir si le combat est en cours
+		local tgtPos = lastTarget:getUnit(1):getPoint()
+		local dx, dz = tgtPos.x - interPos.x, tgtPos.z - interPos.z
+		local dist = math.sqrt(dx * dx + dz * dz)
+		if dist < 10000 then
+			env.info(argInterName .. " still fighting " .. lastTarget:getName() .. " (" .. math.floor(dist) .. "m)")
+			bestTarget = lastTarget
+		end
+	end
+
+	-- Si pas de combat actif, on peut changer de cible
+	if not bestTarget then
+		for _, group in pairs(enemyGroups) do
+			local unit = group:getUnit(1)
+			if unit and unit:isExist() and unit:inAir() then
+				local p = unit:getPoint()
+				local dx, dz = p.x - interPos.x, p.z - interPos.z
+				local dist = dx * dx + dz * dz                    -- distance² rapide
+				if dist < bestDistance and dist < (MAX_INTERCEPT_RANGE * MAX_INTERCEPT_RANGE) then
+					bestTarget = group
+					bestDistance = dist
+				end
+			end
+		end
+	end
+
+	-- Nouvelle cible trouvée ?
+	if bestTarget then
+		local ctr = interObj:getController()
+
+		local newTargetName = bestTarget:getName()
+		if newTargetName ~= argTargetName then
+			env.info("DCE_Custom_Intercept Target_tracks A")
+			if Target_tracks[argFriendSide][argTargetName] then
+				Target_tracks[argFriendSide][argTargetName].assigned = 0
+				Target_tracks[argFriendSide][argTargetName].number = 0
+				env.info("DCE_Custom_Intercept Target_tracks B")
+			end
+		else
+			env.info("DCE_Custom_Intercept Target_tracks C")
+			if not Target_tracks[argFriendSide] then Target_tracks[argFriendSide] = {} end
+			if not Target_tracks[argFriendSide][newTargetName] then Target_tracks[argFriendSide][newTargetName] = {} end
+
+			Target_tracks[argFriendSide][newTargetName].assigned = 2
+			Target_tracks[argFriendSide][newTargetName].number = 2
+		end
+
+
+		if ctr then
+			local targetGpId = bestTarget:getID()
+			local weaponType = 1069547520 -- automatique
+
+			local interceptTask = {
+				id = 'EngageGroup',
+				params = {
+					visible = false,
+					groupId = targetGpId,
+					priority = 1,
+					weaponType = weaponType,
+				},
+			}
+
+			ctr:resetTask()
+			ctr:pushTask(interceptTask)
+
+			groupTargetMemory[argInterName] = bestTarget
+			-- env.info(argInterName .. " engaging " .. bestTarget:getName())
+			env.info("DCE_Custom_Intercept: " .. argInterName .. " engaging " .. tostring(newTargetName))
+		end
+	end
+
+	-- Réévaluation périodique
+	if not interceptorsActive[argInterName] then
+		interceptorsActive[argInterName] = true
+		timer.scheduleFunction(function()
+			interceptorsActive[argInterName] = nil
+			if interObj and interObj:isExist() then
+				CustomIntercept(nil, argInterName, argFriendSide, argSpeed, argPosX, argPosY)
+			end
+		end, {}, timer.getTime() + REEVAL_INTERVAL)
+	end
+end
+-- -- Durée entre deux réévaluations (en secondes)
+-- local REEVAL_INTERVAL = 15
+
+-- -- Table de suivi pour éviter de lancer plusieurs boucles sur le même intercepteur
+-- local interceptorsActive = {}
+
+function CustomInterceptVersionB(argTargetName, argInterName, argFriendSide, argSpeed, argPosX, argPosY)
     if varFpsLeak then return end
 
     env.info("DCE_Custom_Intercept start for " .. tostring(argInterName))
@@ -2824,16 +2938,16 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
         interceptorsActive[argInterName] = nil
         return
     end
-    local interPos = interUnit:getPoint()
+    local interPosVec3 = interUnit:getPoint()
 
     -- Recherche de la cible la plus proche (et en vol)
     for _, group in pairs(enemyGroups) do
         local unit = group:getUnit(1)
         if unit and unit:isExist() and unit:inAir() then
-            local p = unit:getPoint()
-            local dx, dz = p.x - interPos.x, p.z - interPos.z
+            local pVec3 = unit:getPoint()
+            local dx, dz = pVec3.x - interPosVec3.x, pVec3.z - interPosVec3.z
             local dist = dx * dx + dz * dz -- distance², plus rapide
-            if dist < bestDistance then
+			if dist < 100000 and dist < bestDistance then
                 bestTarget = group
                 bestDistance = dist
             end
@@ -2841,6 +2955,27 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
     end
 
     if bestTarget then
+
+        local newTargetName = bestTarget:getName()
+		if newTargetName ~= argTargetName then
+			env.info("DCE_Custom_Intercept Target_tracks A")
+			if Target_tracks[argFriendSide][argTargetName] then
+				Target_tracks[argFriendSide][argTargetName].assigned = 0
+				Target_tracks[argFriendSide][argTargetName].number = 0
+				env.info("DCE_Custom_Intercept Target_tracks B")
+			end
+        else
+			env.info("DCE_Custom_Intercept Target_tracks C")
+            if not Target_tracks[argFriendSide] then Target_tracks[argFriendSide] = {} end
+            if not Target_tracks[argFriendSide][newTargetName] then Target_tracks[argFriendSide][newTargetName] = {} end
+			
+			Target_tracks[argFriendSide][newTargetName].assigned = 2
+            Target_tracks[argFriendSide][newTargetName].number = 2
+			
+		end
+
+		
+		
         local ctr = interObj:getController()
         if ctr then
             local targetGpId = bestTarget:getID()
@@ -3086,15 +3221,9 @@ end
 function Custom_ForceToLand(argFlightName, argSpeed, argAltLanding, argLandingX, argLandingY, argLinkUnit)
     if varFpsLeak then return end
 
-	-- argLandingX = tonumber(argLandingX)
-	-- argLandingY = tonumber(argLandingY)
-    -- argSpeed = tonumber(argSpeed)
-    -- argAltLanding = tonumber(argAltLanding)
-	-- if argLinkUnit == "nil" then argLinkUnit = nil end
+	env.info( "DCE_Custom_ForceToLand A0 argFlightName |"..tostring(argFlightName).."| argLandingX |"..tostring(argLandingX).."| argLandingY |"..tostring(argLandingY).."| argLinkUnit |"..tostring(argLinkUnit))
 
-	env.info( "DCE_Custom_ForceToLand A1 argFlightName |"..tostring(argFlightName).."| argLandingX |"..tostring(argLandingX).."| argLandingY |"..tostring(argLandingY).."| argLinkUnit |"..tostring(argLinkUnit))
-
-	env.info("DCE_Custom_ForceToLand A start func() " .. tostring(argFlightName) )
+	env.info("DCE_Custom_ForceToLand A1 start func() " .. tostring(argFlightName) )
 
 	local groupObj = Group.getByName(argFlightName)
 	if groupObj and groupObj:isExist() then
@@ -3109,19 +3238,26 @@ function Custom_ForceToLand(argFlightName, argSpeed, argAltLanding, argLandingX,
 
 				local landingPos = { x = argLandingX, y = argLandingY }
 				local curPos = { x = leaderPosVec3.x, y = leaderPosVec3.z }
+				local initLinkUnit = nil
 
 				if landingPos.x and curPos.y then
 
 					local dist = GetDistance(curPos, landingPos)
 
-					local oldRoute = SatusGroupAircraft[argFlightName]["waypoints"]
-					local initLinkUnit = #oldRoute > 0 and oldRoute[#oldRoute].linkUnit or nil
+					if SatusGroupAircraft and SatusGroupAircraft[argFlightName] then
+						local oldRoute = SatusGroupAircraft[argFlightName]["waypoints"]
+                        initLinkUnit = #oldRoute > 0 and oldRoute[#oldRoute].linkUnit or nil
+                    else
+						env.info(string.format("DCE_Custom_ForceToLand B BUG NO SatusGroupAircraft with " ..
+						tostring(argFlightName)))
+					end
 					local varLinkUnit = argLinkUnit or initLinkUnit
 
 					-- forcer l'atterrissage et marquer
 
 					SatusGroupAircraft[argFlightName]["forcedLanding"] = true
-					env.info(string.format("checkAndForceLandingForGroup: forced landing for %s (dist=%.0f)", argFlightName, dist))
+					env.info(string.format("DCE_Custom_ForceToLand C forced landing for %s (dist=%.0f)", argFlightName,
+					dist))
 
 					-- Construire une mission simple : WP courant (Turning Point) -> WP atterrissage (Land)
 					local newRoute = {
@@ -3174,10 +3310,10 @@ function Custom_ForceToLand(argFlightName, argSpeed, argAltLanding, argLandingX,
 							Controller.setTask(ctrl, newRoute)
 						end)
 						if not ok then
-							env.info("DCE_Custom_ForceToLand: Controller.setTask failed: " .. tostring(err))
+							env.info("DCE_Custom_ForceToLand D Controller.setTask failed: " .. tostring(err))
 							return false
 						end
-						env.info("DCE_Custom_ForceToLand: mission d'atterrissage appliquée pour " .. tostring(groupObj:getName()))
+						env.info("DCE_Custom_ForceToLand E  mission d'atterrissage appliquée pour " .. tostring(groupObj:getName()))
 						return true
 					end
 
@@ -3194,7 +3330,7 @@ function Custom_ForceToLand(argFlightName, argSpeed, argAltLanding, argLandingX,
 							logFile:write(logStr)
 							logFile:close()
 						else
-							env.info("DCE_Custom_ForceToLand: Failed to open log file for writing.")
+							env.info("DCE_Custom_ForceToLand F Failed to open log file for writing.")
 						end
 					end
 					break
