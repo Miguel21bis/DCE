@@ -1838,7 +1838,7 @@ function eventHandlerDCE:onEvent(event)
 					["takeoff"] = false,
 					["landing"] = false,
 					["waypoints"] = {}, -- suivi des waypoints
-					["currentWP"] = 1, -- index du waypoint à atteindre
+					-- ["currentWP"] = 1, -- index du waypoint à atteindre
 				}
 			end
 

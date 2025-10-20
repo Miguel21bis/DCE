@@ -3247,6 +3247,7 @@ function Custom_ForceToLand(argFlightName, argSpeed, argAltLanding, argLandingX,
 					if SatusGroupAircraft and SatusGroupAircraft[argFlightName] then
 						local oldRoute = SatusGroupAircraft[argFlightName]["waypoints"]
                         initLinkUnit = #oldRoute > 0 and oldRoute[#oldRoute].linkUnit or nil
+						SatusGroupAircraft[argFlightName]["forcedLanding"] = true
                     else
 						env.info(string.format("DCE_Custom_ForceToLand B BUG NO SatusGroupAircraft with " ..
 						tostring(argFlightName)))
@@ -3255,7 +3256,6 @@ function Custom_ForceToLand(argFlightName, argSpeed, argAltLanding, argLandingX,
 
 					-- forcer l'atterrissage et marquer
 
-					SatusGroupAircraft[argFlightName]["forcedLanding"] = true
 					env.info(string.format("DCE_Custom_ForceToLand C forced landing for %s (dist=%.0f)", argFlightName,
 					dist))
 
