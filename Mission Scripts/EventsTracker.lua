@@ -1823,17 +1823,17 @@ function eventHandlerDCE:onEvent(event)
 			end
 		elseif event.id == world.event.S_EVENT_TAKEOFF then
 			
-			local flightName = "inc_"..timer.getTime()
+			local groupName = "inc_"..timer.getTime()
 			if event.initiator and event.initiator.getGroup then
 				local group = event.initiator:getGroup()
 				if group and group.getName then
-					flightName = group:getName()
+					groupName = group:getName()
 					-- flightName est maintenant le nom du groupe d'avion
 				end
 			end
 			
-			if not SatusGroupAircraft[flightName] then
-				SatusGroupAircraft[flightName] = {
+			if not SatusGroupAircraft[groupName] then
+				SatusGroupAircraft[groupName] = {
 					["spawn"] = false,
 					["takeoff"] = false,
 					["landing"] = false,
@@ -1842,28 +1842,28 @@ function eventHandlerDCE:onEvent(event)
 				}
 			end
 
-			SatusGroupAircraft[flightName]["takeoff"] = true
+			SatusGroupAircraft[groupName]["takeoff"] = true
 
 		elseif event.id == world.event.S_EVENT_LAND then
 			
-			local flightName = "inc_"..timer.getTime()
+			local groupName = "inc_"..timer.getTime()
 			if event.initiator and event.initiator.getGroup then
 				local group = event.initiator:getGroup()
 				if group and group.getName then
-					flightName = group:getName()
+					groupName = group:getName()
 					-- flightName est maintenant le nom du groupe d'avion
 				end
 			end
 			
-			if not SatusGroupAircraft[flightName] then 
-				SatusGroupAircraft[flightName] = {
+			if not SatusGroupAircraft[groupName] then 
+				SatusGroupAircraft[groupName] = {
 					["spawn"] = false, 
 					["takeoff"] = false, 
 					["landing"] = false,
 				}
 			end
 
-			SatusGroupAircraft[flightName]["landing"] = true
+			SatusGroupAircraft[groupName]["landing"] = true
 
 		end
 	end

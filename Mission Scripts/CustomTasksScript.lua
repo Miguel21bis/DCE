@@ -2568,11 +2568,11 @@ end
 
 ----- search then engage task -----
 --allows to engage targets within a set distance from own group. CAUTION: Once this function is running, it group can no longer receive waypoint actions (DCS treats engage task set via script as never completed)!
-function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
+function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
 -- "CustomSearchThenEngage(\'Pack 7 - 923rd-1 FR - Fighter Sweep 1\', 20000, \'Air\',2864.5791359112)"
 	if varFpsLeak then return end
 
-	env.info( "DCE_CustomSearchThenEngage A start func() "..tostring(flightName).."| radius |"..tostring(radius).."| targetType |"..tostring(targetType).."| searchTime |"..tostring(searchTime))
+	env.info( "DCE_CustomSearchThenEngage A start func() "..tostring(groupName).."| radius |"..tostring(radius).."| targetType |"..tostring(targetType).."| searchTime |"..tostring(searchTime))
 
 	if not radius or radius == nil or radius <= 30000 then
 		radius = 30000
@@ -2584,12 +2584,12 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
     local function applyEngageTargetsInZoneTask() --engage targets in zone task needs to be applied continously to update zone position to group position
         local elementInAir = false
         local elementExist = false
-        local flight = Group.getByName(flightName) --get group
+        local flight = Group.getByName(groupName) --get group
 
         if flight then                       --group still exists
             local element = flight:getUnit(1) --get first unit in group
 
-            if SatusGroupAircraft[flightName] and (SatusGroupAircraft[flightName]["takeoff"] and not SatusGroupAircraft[flightName]["landing"]) then
+            if SatusGroupAircraft[groupName] and (SatusGroupAircraft[groupName]["takeoff"] and not SatusGroupAircraft[groupName]["landing"]) then
                 elementInAir = true
             end
 
@@ -2597,9 +2597,9 @@ function CustomSearchThenEngage(flightName, radius, targetType, searchTime)
                 elementInAir = true
             end
 
-            if SatusGroupAircraft[flightName] and SatusGroupAircraft[flightName]["landing"] then
+            if SatusGroupAircraft[groupName] and SatusGroupAircraft[groupName]["landing"] then
                 elementInAir = false
-                env.info("DCE_CustomSearchThenEngage B1_99 RETURN landing "..tostring(flightName))
+                env.info("DCE_CustomSearchThenEngage B1_99 RETURN landing "..tostring(groupName))
                 return
             end
 
@@ -3218,14 +3218,14 @@ end
 ----------------------------------------------------------------------------------------------------
 ----- ForceToLand -----
 ----------------------------------------------------------------------------------------------------
-function Custom_ForceToLand(argFlightName, argSpeed, argAltLanding, argLandingX, argLandingY, argLinkUnit)
+function Custom_ForceToLand(argGroupName, argSpeed, argAltLanding, argLandingX, argLandingY, argLinkUnit)
     if varFpsLeak then return end
 
-	env.info( "DCE_Custom_ForceToLand A0 argFlightName |"..tostring(argFlightName).."| argLandingX |"..tostring(argLandingX).."| argLandingY |"..tostring(argLandingY).."| argLinkUnit |"..tostring(argLinkUnit))
+	env.info( "DCE_Custom_ForceToLand A0 argFlightName |"..tostring(argGroupName).."| argLandingX |"..tostring(argLandingX).."| argLandingY |"..tostring(argLandingY).."| argLinkUnit |"..tostring(argLinkUnit))
 
-	env.info("DCE_Custom_ForceToLand A1 start func() " .. tostring(argFlightName) )
+	env.info("DCE_Custom_ForceToLand A1 start func() " .. tostring(argGroupName) )
 
-	local groupObj = Group.getByName(argFlightName)
+	local groupObj = Group.getByName(argGroupName)
 	if groupObj and groupObj:isExist() then
 		-- local leaderObj = groupObj:getUnit(1)
 
@@ -3244,19 +3244,19 @@ function Custom_ForceToLand(argFlightName, argSpeed, argAltLanding, argLandingX,
 
 					local dist = GetDistance(curPos, landingPos)
 
-					if SatusGroupAircraft and SatusGroupAircraft[argFlightName] then
-						local oldRoute = SatusGroupAircraft[argFlightName]["waypoints"]
+					if SatusGroupAircraft and SatusGroupAircraft[argGroupName] then
+						local oldRoute = SatusGroupAircraft[argGroupName]["waypoints"]
                         initLinkUnit = #oldRoute > 0 and oldRoute[#oldRoute].linkUnit or nil
-						SatusGroupAircraft[argFlightName]["forcedLanding"] = true
+						SatusGroupAircraft[argGroupName]["forcedLanding"] = true
                     else
 						env.info(string.format("DCE_Custom_ForceToLand B BUG NO SatusGroupAircraft with " ..
-						tostring(argFlightName)))
+						tostring(argGroupName)))
 					end
 					local varLinkUnit = argLinkUnit or initLinkUnit
 
 					-- forcer l'atterrissage et marquer
 
-					env.info(string.format("DCE_Custom_ForceToLand C forced landing for %s (dist=%.0f)", argFlightName,
+					env.info(string.format("DCE_Custom_ForceToLand C forced landing for %s (dist=%.0f)", argGroupName,
 					dist))
 
 					-- Construire une mission simple : WP courant (Turning Point) -> WP atterrissage (Land)
@@ -3323,7 +3323,7 @@ function Custom_ForceToLand(argFlightName, argSpeed, argAltLanding, argLandingX,
 						--export custom mission log
 						local current_time = timer.getTime()
 						local logStr = "newRoute = " .. TableSerialization(newRoute, 0)
-						local flightNameClean = argFlightName:gsub('[%p%c%s]', '_')
+						local flightNameClean = argGroupName:gsub('[%p%c%s]', '_')
 						local logFile = io.open(
 						PathDCE .. "Debug\\" .. flightNameClean .. "_" .. "Custom_ForceToLand" .. "_" .. tostring(current_time) .. ".lua", "w")
 						if logFile then

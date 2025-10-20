@@ -590,7 +590,7 @@ function DCE_GetRoute(groupName, sideName)
             if country.plane and country.plane.group then
                 for _, group in pairs(country.plane.group) do
                     if group.name == groupName then
-                        env.info("Waypoints : " .. tostring(#group.route.points))
+                        env.info("DCE_GetRoute Waypoints : " .. tostring(#group.route.points))
                         return group.route.points
                     end
                 end
@@ -3602,46 +3602,42 @@ function EventHandler2:onEvent(event)
 		end
 
 		if event.id == world.event.S_EVENT_BIRTH then
-			env.info("DCE_EventHandler2 A S_EVENT_BIRTH.")
+			-- env.info("DCE_EventHandler2 A S_EVENT_BIRTH.")
 
 			if event.initiator and Object.getCategory(event.initiator) ~= Object.Category.STATIC and event.initiator.getPlayerName and event.initiator.getGroup then
 				local playerName = event.initiator:getPlayerName()
 				local groupObject = event.initiator:getGroup()
 
-				env.info("DCE_EventHandler2 B playerName." .. tostring(playerName))
+				-- env.info("DCE_EventHandler2 B playerName." .. tostring(playerName))
 
 				if groupObject and groupObject.getID then
 
                     local gpGid = groupObject:getID()
 					local flightName = event.initiator:getName()
+					local groupName = groupObject:getName()
 					
 					if playerName then
 						
-						env.info("DCE_EventHandler2 C0." .. tostring(playerName))
+						-- env.info("DCE_EventHandler2 C0." .. tostring(playerName))
 
 						if gpGid and groupObject then
-							-- local flightName = event.initiator:getName()
-							-- if playerName then
 							addFuncs(gpGid, groupObject, playerName)
 
 							local desc = event.initiator:getDesc()
 							if desc.category == Unit.Category.HELICOPTER then
-								timer.scheduleFunction(MonitorPlayerAircraftActivity,
-									{ "in", playerName, flightName, desc.category }, current_time + 1)
+								timer.scheduleFunction(MonitorPlayerAircraftActivity, { "in", playerName, flightName, desc.category }, current_time + 1)
 							end
-							-- end
 						end
-						
 					else
 						
-						env.info("DCE_EventHandler2 D0 gpGid." .. tostring(gpGid))
+						-- env.info("DCE_EventHandler2 D0 gpGid." .. tostring(gpGid))
 
 						if gpGid and groupObject then
 							
-							env.info("DCE_EventHandler2 D1 flightName." .. tostring(flightName))
+							-- env.info("DCE_EventHandler2 D1 flightName." .. tostring(flightName))
 							
-							if not SatusGroupAircraft[flightName] then
-								SatusGroupAircraft[flightName] = {
+							if not SatusGroupAircraft[groupName] then
+								SatusGroupAircraft[groupName] = {
 									["spawn"] = false,
 									["takeoff"] = false,
 									["landing"] = false,
@@ -3652,58 +3648,40 @@ function EventHandler2:onEvent(event)
 
 							local passEscort = false
 							
-							if string.find(string.lower(flightName), "escort") then passEscort = true end
+							if string.find(string.lower(groupName), "escort") then passEscort = true end
 
-							env.info("DCE_EventHandler2 D2 group: "..tostring(groupObject).." passEscort " .. tostring(passEscort))
+							-- env.info("DCE_EventHandler2 D2 groupObject: "..tostring(groupObject).." passEscort " .. tostring(passEscort))
 							
 							if groupObject and passEscort then
 
 								-- local route = DCE_GetRoute(flightName, sideName)
-								local route = DCE_GetRoute(flightName)
+								local route = DCE_GetRoute(groupName)
 
+								-- if route then
 
-								if camp.debug then
-									--export custom mission log
-									local logStr = "route = " ..
-										TableSerialization(route, 0)
-									local logFile = io.open(
-										PathDCE ..
-										"Debug\\" .. "route" ..tostring(flightName).. "_" .. tostring(current_time) ..
-										".lua", "w")
-									if logFile then
-										logFile:write(logStr)
-										logFile:close()
-									else
-										env.info("DCE_INTERCEPTOR: Failed to open log file for writing.")
-									end
-								end
-
-
-								-- local route = groupObject:getTaskRoute()
-								env.info("DCE_EventHandler2 D3 #route." .. tostring(#route))
+								-- 	-- local route = groupObject:getTaskRoute()
+								-- 	env.info("DCE_EventHandler2 D3 #route." .. tostring(#route))
+								-- end
+								
 
 								if route and #route > 0 then
 
-									env.info("DCE_EventHandler2 D4 flightName." .. tostring(flightName))
+									-- env.info("DCE_EventHandler2 D4 flightName." .. tostring(groupName))
 									
-									SatusGroupAircraft[flightName]["waypoints"] = route
-									SatusGroupAircraft[flightName]["task"] = "escorte"
+									SatusGroupAircraft[groupName]["waypoints"] = route
+									SatusGroupAircraft[groupName]["task"] = "escort"
 
-									if camp.debug then
-										--export custom mission log
-										local logStr = "SatusGroupAircraft = " ..
-											TableSerialization(SatusGroupAircraft, 0)
-										local logFile = io.open(
-											PathDCE ..
-											"Debug\\" .. "SatusGroupAircraft" .. "_" .. tostring(current_time) ..
-											".lua", "w")
-										if logFile then
-											logFile:write(logStr)
-											logFile:close()
-										else
-											env.info("DCE_INTERCEPTOR: Failed to open log file for writing.")
-										end
-									end
+									-- if camp.debug then
+									-- 	--export custom mission log
+									-- 	local logStr = "SatusGroupAircraft = " .. TableSerialization(SatusGroupAircraft, 0)
+									-- 	local logFile = io.open( PathDCE .. "Debug\\" .. "SatusGroupAircraft" .. "_" .. tostring(current_time) .. ".lua", "w")
+									-- 	if logFile then
+									-- 		logFile:write(logStr)
+									-- 		logFile:close()
+									-- 	else
+									-- 		env.info("DCE_INTERCEPTOR: Failed to open log file for writing.")
+									-- 	end
+									-- end
 								end
 							end
 						end
