@@ -4,12 +4,13 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.196"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.197"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
--- V198 - F-4E Fuel tanks 
+-- V197 - AI restricted loadouts
+-- V196 - F-4E Fuel tanks 
 -- V195 - A-5 Vigilante speed
 -- V194 - MiG-29 for TF80s
 -- V193 - MiG-29 Fulcrum loadout first version
@@ -8821,7 +8822,7 @@ db_all_loadouts = {
 				weaponType = "Bombs",
 				expend = "All",
 				attackType = "Dive",
-								range = 500000,
+				range = 500000,
 				firepower = 1,
 				vCruise = 245,
 				vAttack = 277.5,
@@ -9018,289 +9019,363 @@ db_all_loadouts = {
 					chaff = 120,
 					gun = 100,
 				},
-			},			
-			-- ["NAM AG - GBU - AIM-9Jx4 - AIM-7E-2x3 - FT - TP - GBU-12x6"] = {
-				-- minscore = 0.3,
-				-- support = {
-					-- Escort = true,
-					-- SEAD = true,
-				-- },
-				-- country = {
-					-- [1] = "USA",
-				-- },
-				-- attributes =  { "Bridge", "soft", "Parked Aircraft", "SAM" },
-				-- code_loadout =  { "NAM" },
-				-- weaponType = "Guided bombs",
-				-- expend = "Auto",
-				-- 				-- range = 250000,
-				-- firepower = 1,
-				-- vCruise = 245,
-				-- vAttack = 277.5,
-				-- hCruise = 5486.4,
-				-- hAttack = 5487,
-				-- LDSD = true,
-				-- sortie_rate = 6,
-				-- stores = {
-					-- pylons = {
-				-- [1] = {
-					-- ["CLSID"] = "{AIM-9J}",
-					-- ["num"] = 12,
-				-- },
-				-- [2] = {
-					-- ["CLSID"] = "{AIM-9J}",
-					-- ["num"] = 10,
-				-- },
-				-- [3] = {
-					-- ["CLSID"] = "{F4_SARGENT_TANK_600_GAL}",
-					-- ["num"] = 7,
-				-- },
-				-- [4] = {
-					-- ["CLSID"] = "{AIM-9J}",
-					-- ["num"] = 4,
-				-- },
-				-- [5] = {
-					-- ["CLSID"] = "{AIM-9J}",
-					-- ["num"] = 2,
-				-- },
-				-- [6] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
-					-- ["num"] = 9,
-				-- },
-				-- [7] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
-					-- ["num"] = 8,
-				-- },
-				-- [8] = {
-					-- ["CLSID"] = "{HB_PAVE_SPIKE_ON_ADAPTER_IN_AERO7}",
-					-- ["num"] = 6,
-				-- },
-				-- [9] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
-					-- ["num"] = 5,
-				-- },
-				-- [10] = {
-					-- ["CLSID"] = "{DB769D48-67D7-42ED-A2BE-108D566C8B1E}",
-					-- ["num"] = 13,
-					-- ["settings"] = {
-						-- ["NFP_VIS_DrawArgNo_57"] = 0,
-						-- ["NFP_fuze_type_tail"] = "M905",
-						-- ["arm_delay_ctrl_M905"] = 4,
-						-- ["function_delay_ctrl_M905"] = 0,
-						-- ["laser_code"] = 1688,
-					-- },
-				-- },
-				-- [11] = {
-					-- ["CLSID"] = "{DB769D48-67D7-42ED-A2BE-108D566C8B1E}",
-					-- ["num"] = 1,
-					-- ["settings"] = {
-						-- ["NFP_VIS_DrawArgNo_57"] = 0,
-						-- ["NFP_fuze_type_tail"] = "M905",
-						-- ["arm_delay_ctrl_M905"] = 4,
-						-- ["function_delay_ctrl_M905"] = 0,
-						-- ["laser_code"] = 1688,
-					-- },
-				-- },
-				-- [12] = {
-					-- ["CLSID"] = "{HB_F4E_GBU-12_2x_SWA}",
-					-- ["num"] = 11,
-					-- ["settings"] = {
-						-- ["NFP_VIS_DrawArgNo_57"] = 0,
-						-- ["NFP_fuze_type_tail"] = "M905",
-						-- ["arm_delay_ctrl_M905"] = 4,
-						-- ["function_delay_ctrl_M905"] = 0,
-						-- ["laser_code"] = 1688,
-					-- },
-				-- },
-				-- [13] = {
-					-- ["CLSID"] = "{HB_F4E_GBU-12_2x_SWA}",
-					-- ["num"] = 3,
-					-- ["settings"] = {
-						-- ["NFP_VIS_DrawArgNo_57"] = 0,
-						-- ["NFP_fuze_type_tail"] = "M905",
-						-- ["arm_delay_ctrl_M905"] = 4,
-						-- ["function_delay_ctrl_M905"] = 0,
-						-- ["laser_code"] = 1688,
-					-- },
-				-- },
-					-- },
-					-- fuel = 5510.5,
-					-- flare = 30,
-					-- chaff = 120,
-					-- gun = 100,
-				-- },
-			-- },
-			-- ["NAM AG - GBU - AIM-9Jx4 - AIM-7E-2x3 - FT - TP - GBU-10x2"] = {
-				-- minscore = 0.3,
-				-- support = {
-					-- Escort = true,
-					-- SEAD = true,
-				-- },
-				-- country = {
-					-- [1] = "USA",
-				-- },
-				-- attributes =  { "Bridge", "soft", "Parked Aircraft", "SAM" },
-				-- code_loadout =  { "NAM" },
-				-- weaponType = "Guided bombs",
-				-- expend = "Auto",
-				-- 				-- range = 250000,
-				-- firepower = 1,
-				-- vCruise = 245,
-				-- vAttack = 277.5,
-				-- hCruise = 5486.4,
-				-- hAttack = 5487,
-				-- LDSD = true,
-				-- sortie_rate = 6,
-				-- stores = {
-					-- pylons = {
-				-- [1] = {
-					-- ["CLSID"] = "{AIM-9J}",
-					-- ["num"] = 12,
-				-- },
-				-- [2] = {
-					-- ["CLSID"] = "{AIM-9J}",
-					-- ["num"] = 10,
-				-- },
-				-- [3] = {
-					-- ["CLSID"] = "{F4_SARGENT_TANK_600_GAL}",
-					-- ["num"] = 7,
-				-- },
-				-- [4] = {
-					-- ["CLSID"] = "{AIM-9J}",
-					-- ["num"] = 4,
-				-- },
-				-- [5] = {
-					-- ["CLSID"] = "{AIM-9J}",
-					-- ["num"] = 2,
-				-- },
-				-- [6] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
-					-- ["num"] = 9,
-				-- },
-				-- [7] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
-					-- ["num"] = 8,
-				-- },
-				-- [8] = {
-					-- ["CLSID"] = "{HB_PAVE_SPIKE_ON_ADAPTER_IN_AERO7}",
-					-- ["num"] = 6,
-				-- },
-				-- [9] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
-					-- ["num"] = 5,
-				-- },
-				-- [10] = {
-					-- ["CLSID"] = "{51F9AAE5-964F-4D21-83FB-502E3BFE5F8A}",
-					-- ["num"] = 13,
-					-- ["settings"] = {
-						-- ["NFP_VIS_DrawArgNo_57"] = 0,
-						-- ["NFP_fuze_type_tail"] = "M905",
-						-- ["arm_delay_ctrl_M905"] = 4,
-						-- ["function_delay_ctrl_M905"] = 0,
-						-- ["laser_code"] = 1688,
-					-- },
-				-- },
-				-- [11] = {
-					-- ["CLSID"] = "{51F9AAE5-964F-4D21-83FB-502E3BFE5F8A}",
-					-- ["num"] = 1,
-					-- ["settings"] = {
-						-- ["NFP_VIS_DrawArgNo_57"] = 0,
-						-- ["NFP_fuze_type_tail"] = "M905",
-						-- ["arm_delay_ctrl_M905"] = 4,
-						-- ["function_delay_ctrl_M905"] = 0,
-						-- ["laser_code"] = 1688,
-					-- },
-				-- },
-					-- },
-					-- fuel = 5510.5,
-					-- flare = 30,
-					-- chaff = 120,
-					-- gun = 100,
-				-- },
-			-- },
-			-- ["NAM AG - AIM-7E-2x4 - FT - AGM-62x4"] = {
-				-- minscore = 0.3,
-				-- support = {
-					-- Escort = true,
-					-- SEAD = true,
-				-- },
-				-- country = {
-					-- [1] = "USA",
-				-- },
-				-- attributes =  { "Bridge", "Structure" },
-				-- code_loadout =  { "NAM" },
-				-- weaponType = "ASM",
-				-- expend = "Auto",
-				-- attackType = "Dive",
-				-- 				-- range = 600000,
-				-- firepower = 1,
-				-- vCruise = 250,
-				-- vAttack = 300,
-				-- hCruise = 5486.4,
-				-- hAttack = 4572,
-				-- standoff = 5000,
-				-- LDSD = true,
-				-- sortie_rate = 6,
-				-- stores = {
-					-- pylons = {
-				-- [1] = {
-					-- ["CLSID"] = "<CLEAN>",
-					-- ["num"] = 12,
-				-- },
-				-- [2] = {
-					-- ["CLSID"] = "<CLEAN>",
-					-- ["num"] = 10,
-				-- },
-				-- [3] = {
-					-- ["CLSID"] = "{F4_SARGENT_TANK_600_GAL}",
-					-- ["num"] = 7,
-				-- },
-				-- [4] = {
-					-- ["CLSID"] = "<CLEAN>",
-					-- ["num"] = 4,
-				-- },
-				-- [5] = {
-					-- ["CLSID"] = "<CLEAN>",
-					-- ["num"] = 2,
-				-- },
-				-- [6] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
-					-- ["num"] = 9,
-				-- },
-				-- [7] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
-					-- ["num"] = 8,
-				-- },
-				-- [8] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
-					-- ["num"] = 6,
-				-- },
-				-- [9] = {
-					-- ["CLSID"] = "{HB_F4E_AIM-7E-2}",
-					-- ["num"] = 5,
-				-- },
-				-- [10] = {
-					-- ["CLSID"] = "{AGM_62_I}",
-					-- ["num"] = 13,
-				-- },
-				-- [11] = {
-					-- ["CLSID"] = "{AGM_62_I}",
-					-- ["num"] = 1,
-				-- },
-				-- [12] = {
-					-- ["CLSID"] = "{AGM_62_I}",
-					-- ["num"] = 11,
-				-- },
-				-- [13] = {
-					-- ["CLSID"] = "{AGM_62_I}",
-					-- ["num"] = 3,
-				-- },
-					-- },
-					-- fuel = 5510.5,
-					-- flare = 30,
-					-- chaff = 120,
-					-- gun = 100,
-				-- },
-			-- },
+			},
+			["NAM - AG Hobos - AIM-7E-2*3 - AIM-9J*3 - FT - CMPod - ECM Pod - GBU-8*2"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+				},
+				country = {
+					[1] = "USA",
+				},
+				attributes =  { "Bridge", "Structure" },
+				restrictedCondition = "restricted_loadoutnam3",      --restricted_loadoutnam3
+				code_loadout =  { "NAM" },
+				weaponType = "ASM",
+				expend = "Auto",
+				attackType = "Dive",
+				range = 500000,
+				firepower = 1,
+				vCruise = 250,
+				vAttack = 300,
+				hCruise = 5486.4,
+				hAttack = 4572,
+				standoff = 5000,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
+				},
+				[2] = {
+					["CLSID"] = "{GBU_8_B}",
+					["num"] = 13,
+				},
+				[3] = {
+					["CLSID"] = "{GBU_8_B}",
+					["num"] = 1,
+				},
+				[4] = {
+					["CLSID"] = "{F4_SARGENT_TANK_600_GAL}",
+					["num"] = 7,
+				},
+				[5] = {
+					["CLSID"] = "{AIM-9J}",
+					["num"] = 12,
+				},
+				[6] = {
+					["CLSID"] = "{AIM-9J}",
+					["num"] = 10,
+				},
+				[7] = {
+					["CLSID"] = "{AIM-9J}",
+					["num"] = 4,
+				},
+				[8] = {
+					["CLSID"] = "{AIM-9J}",
+					["num"] = 2,
+				},
+				[9] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 9,
+				},
+				[10] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 8,
+				},
+				[11] = {
+					["CLSID"] = "{HB_ALQ-131_ON_ADAPTER_IN_AERO7}",
+					["num"] = 6,
+				},
+				[12] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 5,
+				},
+					},
+					fuel = 5510.5,
+					flare = 30,
+					chaff = 120,
+					gun = 100,
+				},
+			},
+			["NAM - AG Smart - AIM-7E-2*3 - FT*3 - CMPod - ECM Pod - Walleye I*2"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+				},
+				country = {
+					[1] = "USA",
+				},
+				attributes =  { "Bridge", "Structure" },
+				restrictedCondition = "restricted_loadoutnam4",      --restricted_loadoutnam3
+				code_loadout =  { "NAM" },
+				weaponType = "ASM",
+				expend = "Auto",
+				attackType = "Dive",
+				range = 600000,
+				firepower = 1,
+				vCruise = 250,
+				vAttack = 300,
+				hCruise = 5486.4,
+				hAttack = 4572,
+				standoff = 5000,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
+				},
+				[2] = {
+					["CLSID"] = "{F4_SARGENT_TANK_370_GAL_R}",
+					["num"] = 13,
+				},
+				[3] = {
+					["CLSID"] = "{F4_SARGENT_TANK_370_GAL}",
+					["num"] = 1,
+				},
+				[4] = {
+					["CLSID"] = "{F4_SARGENT_TANK_600_GAL}",
+					["num"] = 7,
+				},
+				[5] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 12,
+				},
+				[6] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 10,
+				},
+				[7] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 4,
+				},
+				[8] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 2,
+				},
+				[9] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 9,
+				},
+				[10] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 8,
+				},
+				[11] = {
+					["CLSID"] = "{HB_ALQ-131_ON_ADAPTER_IN_AERO7}",
+					["num"] = 6,
+				},
+				[12] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 5,
+				},
+				[13] = {
+					["CLSID"] = "{AGM_62_I}",
+					["num"] = 11,
+				},
+				[14] = {
+					["CLSID"] = "{AGM_62_I}",
+					["num"] = 3,
+				},
+					},
+					fuel = 5510.5,
+					flare = 30,
+					chaff = 120,
+					gun = 100,
+				},
+			},
+			["NAM - AG LG - AIM-7E-2*3 - AIM-9J*4 - FT - CMPod - Laser Pod - GBU-10*2"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+				},
+				country = {
+					[1] = "USA",
+				},
+				attributes =  { "Bridge", "Structure", "Parked Aircraft", "SAM" },
+				restrictedCondition = "restricted_loadoutnam4",      --restricted_loadoutnam4
+				code_loadout =  { "NAM" },
+				weaponType = "Guided bombs",
+				expend = "Auto",
+				range = 250000,
+				firepower = 1,
+				vCruise = 245,
+				vAttack = 277.5,
+				hCruise = 5486.4,
+				hAttack = 5487,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
+				},
+				[2] = {
+					["CLSID"] = "{51F9AAE5-964F-4D21-83FB-502E3BFE5F8A}",
+					["num"] = 13,
+					["settings"] = {
+						["01_prfx_arm_delay_ctrl_FMU139CB_LD"] = 4,
+						["01_prfx_function_delay_ctrl_FMU139CB_LD"] = 0,
+						["NFP_PRESID"] = "Paveway_II",
+						["NFP_PRESVER"] = 2,
+						["NFP_VIS_DrawArgNo_57"] = 0,
+						["NFP_fuze_type_tail"] = "FMU139CB_LD",
+						["laser_code"] = 1688,
+					},
+				},
+				[3] = {
+					["CLSID"] = "{51F9AAE5-964F-4D21-83FB-502E3BFE5F8A}",
+					["num"] = 1,
+					["settings"] = {
+						["01_prfx_arm_delay_ctrl_FMU139CB_LD"] = 4,
+						["01_prfx_function_delay_ctrl_FMU139CB_LD"] = 0,
+						["NFP_PRESID"] = "Paveway_II",
+						["NFP_PRESVER"] = 2,
+						["NFP_VIS_DrawArgNo_57"] = 0,
+						["NFP_fuze_type_tail"] = "FMU139CB_LD",
+						["laser_code"] = 1688,
+					},
+				},
+				[4] = {
+					["CLSID"] = "{F4_SARGENT_TANK_600_GAL}",
+					["num"] = 7,
+				},
+				[5] = {
+					["CLSID"] = "{AIM-9J}",
+					["num"] = 12,
+				},
+				[6] = {
+					["CLSID"] = "{AIM-9J}",
+					["num"] = 10,
+				},
+				[7] = {
+					["CLSID"] = "{AIM-9J}",
+					["num"] = 4,
+				},
+				[8] = {
+					["CLSID"] = "{AIM-9J}",
+					["num"] = 2,
+				},
+				[9] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 9,
+				},
+				[10] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 8,
+				},
+				[11] = {
+					["CLSID"] = "{HB_PAVE_SPIKE_FAST_ON_ADAPTER_IN_AERO7}",
+					["num"] = 6,
+				},
+				[12] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 5,
+				},
+					},
+					fuel = 5510.5,
+					flare = 30,
+					chaff = 120,
+					gun = 100,
+				},
+			},
+			["NAM - AG Walleye II - AIM-7E-2*3 - FT*3 - CMPod - ECM Pod - AGM-62*2"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+				},
+				country = {
+					[1] = "USA",
+				},
+				attributes =  { "Bridge", "Structure" },
+				restrictedCondition = "restricted_loadoutnam4",      --restricted_loadoutnam4
+				code_loadout =  { "NAM" },
+				weaponType = "ASM",
+				expend = "Auto",
+				attackType = "Dive",
+				range = 600000,
+				firepower = 1,
+				vCruise = 250,
+				vAttack = 300,
+				hCruise = 5486.4,
+				hAttack = 4572,
+				standoff = 5000,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
+				},
+				[2] = {
+					["CLSID"] = "{F4_SARGENT_TANK_370_GAL_R}",
+					["num"] = 13,
+				},
+				[3] = {
+					["CLSID"] = "{F4_SARGENT_TANK_370_GAL}",
+					["num"] = 1,
+				},
+				[4] = {
+					["CLSID"] = "{F4_SARGENT_TANK_600_GAL}",
+					["num"] = 7,
+				},
+				[5] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 12,
+				},
+				[6] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 10,
+				},
+				[7] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 4,
+				},
+				[8] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 2,
+				},
+				[9] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 9,
+				},
+				[10] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 8,
+				},
+				[11] = {
+					["CLSID"] = "{HB_ALQ-131_ON_ADAPTER_IN_AERO7}",
+					["num"] = 6,
+				},
+				[12] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 5,
+				},
+				[13] = {
+					["CLSID"] = "{C40A1E3A-DD05-40D9-85A4-217729E37FAE}",
+					["num"] = 11,
+				},
+				[14] = {
+					["CLSID"] = "{C40A1E3A-DD05-40D9-85A4-217729E37FAE}",
+					["num"] = 3,
+				},
+					},
+					fuel = 5510.5,
+					flare = 30,
+					chaff = 120,
+					gun = 100,
+				},
+			},
 		},
 		["Anti-ship Strike"] = {
 			["NAM AG - AIM-9Jx4 - AIM-7E-2x4 - FT - Mk-82LDx16"] = {

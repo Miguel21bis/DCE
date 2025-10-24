@@ -1,8 +1,8 @@
 --Various functions
 ------------------------------------------------------------------------------------------------------- 
--- last modification: debug_l
+-- last modification: M71_c
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Functions.lua"] = "1.18.133"
+versionDCE["UTIL_Functions.lua"] = "1.19.136"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_g				(g springCleaning)					
 -- adjustment_o				(n loadout code)(m Disp_time)(l add AFAC task)(k FormatTime)(i add InsertBugList(txt))(h use IsWesternCountry)(fg: add Loadout tiers)(e todo)(d:CheckConfModMaster )(c: fire Playable_m from conf_mod)
@@ -10,6 +10,7 @@ versionDCE["UTIL_Functions.lua"] = "1.18.133"
 -- modification M85_a		new variables added to conf_mod (RepairOption, current_date, weather, etc.)
 -- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)
 -- modification M77_l		CG_ArtySpotter (kl ListSpotterAircraft)
+-- modification M71_c		PayloadRestricted (c:AuthorizedLoadout )(b Action.RestrictedLoadout(file))
 -- modification M63_a		compatible Datacard Generator or CombatFlite
 -- modification M61_a		SAR
 -- modification M56_a		AssignCallnameSquad
@@ -26,6 +27,11 @@ versionDCE["UTIL_Functions.lua"] = "1.18.133"
 -- petit code pour remettre les stock init comme au debut
 local adjust_DCE_GC22 = true				-- variable pour ajuster les GC22, si false, ne pas ajuster
 
+--variable camp global
+if not camp.AuthorizedLoadout then
+	camp.AuthorizedLoadout = {}
+end
+
 --variable global
 NameTheatreLower = ""
 NameTheatre  = ""
@@ -37,7 +43,7 @@ MinPercentDestroyed = 95		----variable pour destructions batiment de DCS en pour
 RayonDamaged = 50				----variable pour destructions batiment de DCS en metres
 RosterJumpTempPercent = 0.25			-- suite à un saut temporel, enleve une partie des presents pour éviter un effectif neuf comme un démarrage de DCE
 WingmenPlayer = false			-- si true, les wingmen playable sont proposé aux joueurs
--- WeatherParams = {}				-- contient les parametres météo de la mission
+LoadoutsList = {}				-- construit la table loadout en fonction du loadout général et de la campagne
 
 RadioA = {
 	["blue"] = {
@@ -51,15 +57,8 @@ RadioB = {
 	["red"] = {
 	},
 }
--- RadioC = {
--- 	["blue"] = {
--- 	},
--- 	["red"] = {
--- 	},
--- }
+
 RadioWavePlayer = nil
-
-
 
 Brief = {
 	red = {},
@@ -95,8 +94,6 @@ Attribut2Target = {
 	["bridge"] = "bridge",
 }
 
-
-
 Package_freq = {															--table to store frequencies assigned to packages
 	["blue"] = {
 		["UHF"] = {},
@@ -113,7 +110,6 @@ Package_freq = {															--table to store frequencies assigned to packages
 		["HF"] = {},
 	},
 }
-
 
 
 local idGroupCounter = 3000
@@ -2104,7 +2100,7 @@ end
 
 -- modification M49.a big central db_loadout
 
-local function buildsLoadout()
+function BuildLoadout()
 	local addLoadoutsTag = false
 	-- campaigns_code_loadout = { 
 		-- ["Cyprus"] =		"Cyprus Incident",
@@ -2246,38 +2242,96 @@ local function buildsLoadout()
 	end
 
 	if campMod.selectLoadout == "init" then
-		-- require("Init/db_loadouts")
-	else
-		-- modification M49.a big central db_loadout
-		--construit la table loadout en fonction du loadout général et de la campagne
-		db_loadouts = {}
+		require("Init/db_loadouts")
+		db_all_loadouts = db_loadouts
+	end
 
-		for plane, planeTab  in pairs(db_all_loadouts) do
-			for taskName, loadout  in pairs(planeTab) do
-				for loadoutName, value  in pairs(loadout) do
-					if value.code_loadout and value.code_loadout ~= "" then
-						for code_loadout_number, code in pairs(value.code_loadout) do
-							if string.lower(campConfMod.code_loadout) == string.lower(code) or string.lower(code) == "all" then
-								if not db_loadouts[plane] then
-									db_loadouts[plane] = {}
-								end
-								if not db_loadouts[plane][taskName] then db_loadouts[plane][taskName] = {} end
-								if not db_loadouts[plane][taskName][loadoutName] then db_loadouts[plane][taskName][loadoutName] = {} end
-								db_loadouts[plane][taskName][loadoutName] = value
-							end
-						end
-					elseif  value.code_loadout == "" or not value.code_loadout  or not value.code_loadout == nil  then
-						if not db_loadouts[plane] then
-							db_loadouts[plane] = {}
-						end
-						if not db_loadouts[plane][taskName] then db_loadouts[plane][taskName] = {} end
-						if not db_loadouts[plane][taskName][loadoutName] then db_loadouts[plane][taskName][loadoutName] = {} end
-						db_loadouts[plane][taskName][loadoutName] = value
+	-- helper: vérifie si le loadout est autorisé par restrictedCondition
+	local function allowed_by_restriction(loadData)
+		-- print("allowed_by_restriction() A0 ")
+		if not loadData.restrictedCondition then
+			-- print("allowed_by_restriction() A1 return true ")
+			return true
+		end
+		if type(loadData.restrictedCondition) == "string" then
+			-- print("allowed_by_restriction() B ")
+			-- _affiche(camp.AuthorizedLoadout, "camp.restrictedCondition: ")
+
+			for _, campAuth in pairs(camp.AuthorizedLoadout) do
+				-- print("allowed_by_restriction() B2 "..tostring(loadData.restrictedCondition).." ==?campAuth: "..tostring(campAuth) )
+				if string.lower(tostring(loadData.restrictedCondition)) == string.lower(tostring(campAuth)) then
+					-- print("allowed_by_restriction() B3 return true ")
+					return true
+				end
+			end
+			-- print("allowed_by_restriction() B4 return false ")
+			return false
+		end
+		if not camp.AuthorizedLoadout then
+			-- print("allowed_by_restriction() C1 return true ")
+			return true
+		end
+		for _, conditionName in pairs(loadData.restrictedCondition) do
+			-- print("allowed_by_restriction() D1 ")
+			for _, campAuth in pairs(camp.AuthorizedLoadout) do
+				-- print("allowed_by_restriction() D2 ")
+				if string.lower(tostring(conditionName)) == string.lower(tostring(campAuth)) then
+					-- print("allowed_by_restriction() D3 returns true ")
+					return true
+				end
+			end
+		end
+		-- print("allowed_by_restriction() Z return false ")
+		return false
+	end
+
+	-- helper: vérifie si le code_loadout correspond à la configuration de la campagne
+	local function codes_match(value, campaign_code)
+		if not value.code_loadout or value.code_loadout == "" then
+			return true
+		end
+		-- accepter une chaîne ou une table
+		if type(value.code_loadout) == "string" then
+			return string.lower(value.code_loadout) == string.lower(campaign_code) or string.lower(value.code_loadout) == "all"
+		end
+		if type(value.code_loadout) == "table" then
+			for _, code in pairs(value.code_loadout) do
+				if string.lower(tostring(code)) == string.lower(campaign_code) or string.lower(tostring(code)) == "all" then
+					return true
+				end
+			end
+		end
+		return false
+	end
+
+	local function add_loadout(plane, taskName, loadoutName, value)
+		LoadoutsList[plane] = LoadoutsList[plane] or {}
+		LoadoutsList[plane][taskName] = LoadoutsList[plane][taskName] or {}
+		LoadoutsList[plane][taskName][loadoutName] = value
+	end
+
+	for plane, planeTab in pairs(db_all_loadouts) do
+		for taskName, loadout in pairs(planeTab) do
+			for loadoutName, loadData in pairs(loadout) do
+				if codes_match(loadData, campConfMod.code_loadout) then
+					-- if loadData.restrictedCondition then
+					-- 	print("buildsLoadout() MAIN_A restrictedCondition "..plane.." "..taskName.." |loadoutName>:| "..loadoutName)
+					-- 	_affiche(loadData.restrictedCondition, "restrictedCondition: ")
+					-- end
+					if allowed_by_restriction(loadData) then
+						-- print("buildsLoadout() MAIN_B add_loadout")
+						add_loadout(plane, taskName, loadoutName, loadData)
+						-- print("buildsLoadout() MAIN_B2")
 					end
+					-- if loadData.restrictedCondition then
+					-- 	print("buildsLoadout() MAIN_C check")
+					-- 	os.execute 'pause'
+					-- end
 				end
 			end
 		end
 	end
+
 
 
 	-- if TestPathADD_loadouts ~= nil and add_loadouts  then																	--check si le fichier existe dans ScriptsMod
@@ -2332,7 +2386,7 @@ local function buildsLoadout()
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_db_loadouts.lua")
 
 	if campaigns_code_loadout and not addLoadoutsTag then
-		for planeType, plane  in pairs(db_loadouts) do
+		for planeType, plane  in pairs(LoadoutsList) do
 			for taskName, loadouts in pairs(plane) do
 				for loadoutName, loadout  in pairs(loadouts) do
 					-- print("UtilF "..plane.." "..taskName.." "..loadoutName)
@@ -2358,12 +2412,12 @@ local function buildsLoadout()
 	end
 
 
-	db_loadouts = loadoutPylon(db_loadouts)
+	LoadoutsList = loadoutPylon(LoadoutsList)
 
 	-- copy_all_loadouts = makeStrutureLoadout(copy_all_loadouts)
 
 	if Debug.debug then
-		local test_loadouts = Deepcopy(db_loadouts)
+		local test_loadouts = Deepcopy(LoadoutsList)
 		test_loadouts = makeStrutureLoadout(test_loadouts)
 
 		local test_str = "db_loadouts = " .. TableSerializationLoadout(test_loadouts, 0, 0)						--make a string	
@@ -2384,12 +2438,10 @@ local function buildsLoadout()
 			testFile:close()
 		end
 	end
-
-	-- db_all_loadouts = copy_all_loadouts
-
 end
 
-buildsLoadout()
+
+-- buildsLoadout()
 
 
 -- modification M54		revoir CustomTaskScript et TaskBombing
@@ -2445,8 +2497,8 @@ function Check_TaskPossibleByPlane()
 		for squad_n, squad in  pairs(squadTbl) do
 
 			local foundPlane = false
-			-- print("UtilF side "..side.." "..squad_n.." "..tostring(squad.name))
-			if squad.tasks and type(squad.tasks) == "table" then --not squad.inactive and 
+
+			if squad.tasks and type(squad.tasks) == "table" then
 
 				-- StrikeCombi
 				local addMultipleStrike = false
@@ -3787,15 +3839,45 @@ function CompareTableNumericTrigger(reference, working)
             end
         end
         if not found then
-			print("CompareTrigger refData.name: "..tostring(refData.name))
-			print("CompareTrigger refData.condition: "..tostring(refData.condition))
+			-- print("CompareTrigger refData.name: "..tostring(refData.name))
+			-- print("CompareTrigger refData.condition: "..tostring(refData.condition))
 
 			local dateCible = ExtractDateFromCondition(refData.condition)
 			if dateCible then
-				print("CompareTrigger Date extraite : " .. dateCible.day .. "/" .. dateCible.month .. "/" .. dateCible.year)
-				refData.active = false
+				-- print("CompareTrigger Date extraite : " .. dateCible.day .. "/" .. dateCible.month .. "/" .. dateCible.year)
+				-- Désactive si la date de la campagne est au moins 1 jour strictement après la date cible
+				-- Utilise Julian Day Number (JDN) pour être indépendant de os.time et compatible avant 1970
+				local function date_to_jdn(d)
+					if not d then return nil end
+					local y = tonumber(d.year)
+					local m = tonumber(d.month)
+					local day = tonumber(d.day)
+					if not (y and m and day) then return nil end
+					if m <= 2 then
+						y = y - 1
+						m = m + 12
+					end
+					local A = math.floor(y / 100)
+					local B = 2 - A + math.floor(A / 4)
+					local jd = math.floor(365.25 * (y + 4716)) + math.floor(30.6001 * (m + 1)) + day + B - 1524
+					return jd
+				end
+
+				local camp_jd = date_to_jdn(camp.date)
+				local cible_jd = date_to_jdn(dateCible)
+				if camp_jd and cible_jd then
+					local day_diff = camp_jd - cible_jd
+					if day_diff >= 1 then
+						refData.active = false
+						-- print("CompareTrigger refData.active FALSE (camp >= cible +1 jour)")
+						-- _affiche(camp.date, "camp.date: ")
+						-- os.execute 'pause'
+					end
+				else
+					-- print("CompareTrigger erreur lors de la conversion des dates (JDN)")
+				end
 			else
-				print("CompareTrigger Impossible d'extraire la date")
+				-- print("CompareTrigger Impossible d'extraire la date")
 			end
 
             -- Si l'élément n'existe pas dans la table de travail, il a été ajouté
@@ -4395,6 +4477,7 @@ function LoadFileAndUpdate(from)
 
 	-- Ajouter les éléments manquants dans camp_triggers
 	for _, added in ipairs(changes.added) do
+		_affiche(added, "triggersAdded: ")
 		table.insert(camp_triggers, added)
 	end
 	-- Supprimer les éléments retirés de camp_triggers

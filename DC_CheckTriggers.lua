@@ -2,16 +2,16 @@
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleanCode_g M33_n
+-- last modification: M71_c
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_CheckTriggers.lua"] = "1.16.95"
+versionDCE["DC_CheckTriggers.lua"] = "1.16.96"
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_g				(g springCleaning)
 -- adjustment_m				(m add new country if template need)(L win totalAirUnitAliveBySide)(k \\" to \")(j moveToAnotherBaseOrDeactivate name & attributes)(i add moveToAnotherBaseOrDeactivate)(h taskSelected)(g airReinforceDelay)(f add targetIsActive)(e check found activate target)(d totalAirUnitAliveBySide)(c add automaticReinforce) (a boat CampTotalTimeS)
 -- debug_g					(fg -nan(ind) Return.BaseAlive)(e link of briefing)(d: ensures that DCE chooses between several ship patrol areas)(a: n'ajoute pas le texte s'il existe d�j�)
 -- modification M73_d		automatic squad transfer based on available/unavailable runways/bases (c disabledByDCE)
--- modification M71_b		PayloadRestricted (b Action.RestrictedLoadout(file))
+-- modification M71_c		PayloadRestricted (c:AuthorizedLoadout )(b Action.RestrictedLoadout(file))
 -- modification M70_a		GroundZoneTarget (adds the possibility of counting unit completeness by zone) 
 -- modification M66_d		bombOnRunway and ActivateBaseAndItsUnits (d <0 non réparable)
 -- modification M53_cd		simplification of the "Reserves" variable (cd: debug)(b: add reserve in AirUnitAlive)
@@ -76,7 +76,8 @@ end
 --Action.ShipMission(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTime)				-- assign and run a movement mission to a ship group (See the DC_CheckTriggers.lua file for more explanation)
 --Action.TemplateActive(TabFile)															-- Template Active GroundGroup moving front (single file : active template) (if tab file: random activation)
 --Action.SetWeather( "weather = { pHigh = 78, etc... }" )									-- modifies conf_mod weather parameters during the campaign
-
+--Action.RestrictedLoadout(file)															-- (ADD) only for players, prohibits certain items, targets the file name loadouts/restricted_loadoutnamX.miz
+--Action.AuthorizedLoadout(authName)														-- (ADD) Essentially for AIs, allows you to add certain loadouts containing the variable: restrictedCondition = “restricted_loadoutnamX”,
 
 --Important notes:
 --for condition and action strings: outside with single quotes '', inside with double quotes ""!
@@ -1843,9 +1844,16 @@ Action = {}
 			dataFile:close()
 
 		end
-
 	end
 
+
+	function Action.AuthorizedLoadout(authName)
+
+		if not camp.AuthorizedLoadout then
+			camp.AuthorizedLoadout = {}
+		end
+		table.insert(camp.AuthorizedLoadout, authName)
+	end
 
 	--Miguel21 modification M40
 	--TemplateActive
@@ -2187,13 +2195,13 @@ end
 Briefing_text_playable = ""														--briefing text to be added only if this mission instance results in a playable mission
 
 --go through campaign triggers
-for trigger_name,trigger in pairs(camp_triggers) do								--iterate through triggers
+for triggerName, trigger in pairs(camp_triggers) do								--iterate through triggers
 
-	if debugKT then print("DcCT passe 00 trigger_name: "..tostring(trigger_name)) end
+	if debugKT then print("DcCT 00 trigger_name: "..tostring(triggerName).." trigger.name: "..tostring(trigger.name)) end
 
 		if trigger.active then														--trigger is active
 
-			if debugKT then print("DcCT passe 01 if trigger.active: trigger.condition: "..tostring(trigger.condition)) end
+			if debugKT then print("DcCT 01 if trigger.active: trigger.condition: "..tostring(trigger.condition)) end
 
 			local conditionStr = trigger.condition
 			-- Remplace campMod.RepairMinimumDestroyed par une valeur numérique (exemple : 20)
@@ -2203,7 +2211,7 @@ for trigger_name,trigger in pairs(camp_triggers) do								--iterate through tri
 			local condition = loadstring("if " .. conditionStr .." then return true end")	--make a function from the string condition
 			if type(condition) == "function" and condition() then														--if the trigger condition is true
 
-			if debugKT then print(" -> :DcCT passe 02 passe  condition()trigger_name: "..tostring(trigger_name)) end
+			if debugKT then print(" -> :DcCT 02 passe  condition()trigger_name: "..tostring(trigger.name)) end
 
 				if type(trigger.action) == "table" then								--multiple actions
 					for i,action in ipairs(trigger.action) do
@@ -2216,6 +2224,7 @@ for trigger_name,trigger in pairs(camp_triggers) do								--iterate through tri
 				end
 				if trigger.once then												--trigger should only fire once
 					trigger.active = false											--set trigger inactive
+					if debugKT then print(" -> :DcCT 03 passe  trigger.active = false: "..tostring(trigger.name)) end
 				end
 
 			end

@@ -11,10 +11,6 @@ versionDCE["UTIL_Debug.lua"] = "1.3.11"
 
 
 if Debug.debug then
-	--local sorties_str = "Draft_sorties = " .. TableSerialization(Draft_sorties, 0)		--this can take up to 30 seconds for parge missions, only activate if really needed
-	--local sortiesFile = io.open("Debug/ATO_Draft_sorties.lua", "w")
-	--sortiesFile:write(sorties_str)
-	--sortiesFile:close()
 
 	local ato_str = "ATO = " .. TableSerialization(ATO, 0)
 	local atoFile = io.open("Debug/ATO_UtilDebug.lua", "w") or error("Failed to open debug ATO_UtilDebug file")

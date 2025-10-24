@@ -1309,9 +1309,9 @@ for side, unit in pairs(oob_air) do																--iterate through all sides
 		if unit[n].inactive ~= true and unit[n].roster.ready > 0 and db_airbases[unit[n].base] and db_airbases[unit[n].base].inactive ~= true and db_airbases[unit[n].base].x and db_airbases[unit[n].base].y then		--if unit is active and has ready aircraft and its airbase is active
 			for task, task_bool in pairs(unit[n].tasks) do										--iterate through all tasks of unit			
 				if task_bool then
-					if db_loadouts[unit[n].type] then
-						if db_loadouts[unit[n].type][task] then							--task is true and db_loadouts has such tasks
-							for loadout_name, loadout in pairs(db_loadouts[unit[n].type][task]) do		--iterate through all loadout.descriptions for a given aircraft type
+					if LoadoutsList[unit[n].type] then
+						if LoadoutsList[unit[n].type][task] then							--task is true and db_loadouts has such tasks
+							for loadout_name, loadout in pairs(LoadoutsList[unit[n].type][task]) do		--iterate through all loadout.descriptions for a given aircraft type
 								
 								if loadout.day == nil then
 									loadout.day = true

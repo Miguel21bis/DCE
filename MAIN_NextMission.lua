@@ -576,25 +576,25 @@ else
 end
 
 
--- Vérification et création du fichier de loadout
-local loadoutFile01 = "../../../Missions/Campaigns/" .. camp.title .. "/Active/Loadouts_archive.lua"
+-- -- Vérification et création du fichier de loadout
+-- local loadoutFile01 = "../../../Missions/Campaigns/" .. camp.title .. "/Active/Loadouts_archive.lua"
 
-if not FileExists(loadoutFile01) or Firstmission_flag then
-    -- Sérialisation des données
-    local loadout_str = "Loadouts_archive = " .. TableSerialization(db_loadouts, 0)
+-- -- if not FileExists(loadoutFile01) or Firstmission_flag then
+--     -- Sérialisation des données
+--     local loadout_str = "Loadouts_archive = " .. TableSerialization(LoadoutsList, 0)
 
-    -- Essayez d'écrire dans le fichier
-    local success, err = pcall(function()
-        WriteToFile(loadoutFile01, loadout_str)
-    end)
+--     -- Essayez d'écrire dans le fichier
+--     local success, err = pcall(function()
+--         WriteToFile(loadoutFile01, loadout_str)
+--     end)
 
-    if not success then
-        print("Erreur lors de l'écriture dans le fichier : " .. tostring(err))
-        os.exit(1) -- Quitte le script proprement en cas d'erreur
-    else
-        -- print("Fichier créé avec succès : " .. loadoutFile01)
-    end
-end
+--     if not success then
+--         print("Erreur lors de l'écriture dans le fichier : " .. tostring(err))
+--         os.exit(1) -- Quitte le script proprement en cas d'erreur
+--     else
+--         -- print("Fichier créé avec succès : " .. loadoutFile01)
+--     end
+-- -- end
 
 
 
@@ -1401,13 +1401,20 @@ missFile:write(miss_str)															--save new data
 missFile:close()
 
 
-if not (EndCampaign or camp.endCampaign) then
-	local loadout_str = "Loadouts_archive = " .. TableSerialization(Loadouts_archive, 0)	--make a string
-	local loadoutFile = io.open("Active/Loadouts_archive.lua", "w") or error("Failed to open debug file")
-	loadoutFile:write(loadout_str)																--save new data
-	loadoutFile:close()
-end
---M40_k
+-- if not (EndCampaign or camp.endCampaign) then
+-- 	local loadout_str = "Loadouts_archive = " .. TableSerialization(Loadouts_archive, 0)	--make a string
+-- 	local loadoutFile = io.open("Active/Loadouts_archive.lua", "w") or error("Failed to open debug file")
+-- 	loadoutFile:write(loadout_str)																--save new data
+-- 	loadoutFile:close()
+-- end
+
+
+local loadout_str = "Loadouts_archive = " .. TableSerialization(LoadoutsList, 0)	--make a string
+local loadoutFile = io.open("Active/Loadouts_archive.lua", "w") or error("Failed to open debug file")
+loadoutFile:write(loadout_str)																--save new data
+loadoutFile:close()
+
+
 local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
 trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
 trigFile:write(airbases_Str)

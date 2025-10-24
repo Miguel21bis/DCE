@@ -2568,7 +2568,7 @@ end
 
 ----- search then engage task -----
 --allows to engage targets within a set distance from own group. CAUTION: Once this function is running, it group can no longer receive waypoint actions (DCS treats engage task set via script as never completed)!
-function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
+function CustomSearchThenEngageOLD_A(groupName, radius, targetType, searchTime)
 -- "CustomSearchThenEngage(\'Pack 7 - 923rd-1 FR - Fighter Sweep 1\', 20000, \'Air\',2864.5791359112)"
 	if varFpsLeak then return end
 
@@ -2726,6 +2726,172 @@ function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
 
 end --FIN CustomSearchThenEngage
 
+function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
+	-- simple, friendly version with a small cache to avoid calling getDesc()/getPlayerName() every loop
+	if varFpsLeak then return end
+	local MIN_SEARCH_RADIUS = 30000
+	local HELICOPTER_ZONE_RADIUS = 15000
+	local ENGAGE_DURATION = 50
+	local RECHECK_INTERVAL = 60
+	local CACHE_TTL = 60 -- seconds: don't re-call heavy APIs more often than this
+
+	radius = tonumber(radius) or MIN_SEARCH_RADIUS
+	if radius < MIN_SEARCH_RADIUS then radius = MIN_SEARCH_RADIUS end
+
+	if CustomSearchThenEngageActive == nil then CustomSearchThenEngageActive = {} end
+	if CustomSearchThenEngageActive[groupName] then
+		env.info("DCE_CustomSearchThenEngage: already active for " .. tostring(groupName))
+		return
+	end
+	CustomSearchThenEngageActive[groupName] = true
+
+	-- per-unit cache kept by the closure
+	local unitCache = {} -- unitId -> { playerName, desc, lastUpdate }
+
+	local function refreshUnitCache(u)
+		-- safe checks
+		if not u or type(u.isExist) ~= 'function' then return nil end
+		local okExist, exist = pcall(function() return u:isExist() end)
+		if not okExist or not exist then return nil end
+
+		local id = u:getID()
+		if not id then return nil end
+
+		local now = timer.getTime()
+		local c = unitCache[id]
+		if not c then
+			-- initialize cache entry with separate static/dynamic parts
+			c = { static = nil, dynamic = nil, lastDynamic = 0 }
+		end
+
+		-- static info (desc) is read only once — it rarely changes
+		if not c.static then
+			local okd, desc = pcall(function() return u:getDesc() end)
+			if okd then c.static = desc else c.static = nil end
+		end
+
+		-- playerName is considered effectively static for our use-case: read it once and cache
+		if not c.dynamic then
+			local okp, pname = pcall(function() return u:getPlayerName() end)
+			if okp then c.dynamic = { playerName = pname } else c.dynamic = { playerName = nil } end
+			c.lastDynamic = now
+		end
+
+		unitCache[id] = c
+		-- return a flat structure compatible with existing code
+		return { playerName = c.dynamic and c.dynamic.playerName, desc = c.static, lastUpdate = now }
+	end
+
+	-- small helper: find first alive unit in group
+	local function findFirstActiveUnit(flight)
+		if not flight then return nil end
+		local units = flight:getUnits()
+		for _, uu in ipairs(units) do
+			if uu and uu:isExist() and uu:isActive() then return uu end
+		end
+		return nil
+	end
+
+	local function buildTask(isHelo, x, y, rad)
+		local zone = isHelo and HELICOPTER_ZONE_RADIUS or rad
+		return {
+			id = 'ControlledTask',
+			params = {
+				task = {
+					enabled = true,
+					auto = false,
+					id = 'EngageTargetsInZone',
+					number = 1,
+					params = {
+						targetTypes = { targetType },
+						x = x,
+						y = y,
+						priority = 0,
+						zoneRadius = zone,
+					}
+				},
+				stopCondition = { duration = ENGAGE_DURATION }
+			}
+		}
+	end
+
+	-- loop called by timer
+	local function loop(_, t)
+		local next_time = nil
+		local flight = Group.getByName(groupName)
+
+		if flight and type(flight.isExist) == 'function' and flight:isExist() then
+			-- find first active unit (call isExist/isActive only once per unit)
+			local units = flight:getUnits()
+			local element = nil
+			for _, uu in ipairs(units) do
+				if uu then
+					local okExist, exist = pcall(function() return uu:isExist() end)
+					if okExist and exist then
+						local okActive, active = pcall(function() return uu:isActive() end)
+						if okActive and active then
+							element = uu
+							break
+						end
+					end
+				end
+			end
+
+			if element then
+				-- if group is landing stop the loop
+				if SatusGroupAircraft and SatusGroupAircraft[groupName] and SatusGroupAircraft[groupName]["landing"] then
+					env.info("DCE_CustomSearchThenEngage RETURN landing " .. tostring(groupName))
+					CustomSearchThenEngageActive[groupName] = nil
+					next_time = nil
+				else
+					-- check airborne once
+					local okAir, inAir = pcall(function() return element:inAir() end)
+					if okAir and inAir then
+						-- refresh cached infos (playerName, desc) but cache limits calls
+						local cached = refreshUnitCache(element)
+						if not (cached and cached.playerName) then
+							local cntrl = flight:getController()
+							if cntrl then
+								local pos = element:getPoint()
+								local cat = cached and cached.desc and cached.desc.category or nil
+								local isHelo = (cat == Unit.Category.HELICOPTER)
+								local task = buildTask(isHelo, pos.x, pos.z, radius)
+
+								cntrl:setOption(AI.Option.Air.id.PROHIBIT_AG, true)
+								local okPush, errPush = pcall(function() cntrl:pushTask(task) end)
+								if not okPush then
+									env.info("DCE_CustomSearchThenEngage: pushTask failed: " .. tostring(errPush))
+								end
+
+								next_time = t + RECHECK_INTERVAL
+							else
+								next_time = t + RECHECK_INTERVAL
+							end
+						else
+							-- player onboard, recheck later
+							next_time = t + RECHECK_INTERVAL
+						end
+					else
+						-- not in air, recheck later
+						next_time = t + RECHECK_INTERVAL
+					end
+				end
+			else
+				-- no active element found, recheck later
+				next_time = t + RECHECK_INTERVAL
+			end
+		else
+			-- flight gone -> cleanup
+			CustomSearchThenEngageActive[groupName] = nil
+			next_time = nil
+		end
+
+		return next_time
+	end
+
+	timer.scheduleFunction(loop, nil, timer.getTime() + 1)
+end
+
 
 
 function CustomSearchThenEngageFutur1(flightName, radius, targetType, searchTime)
@@ -2794,12 +2960,185 @@ function CustomSearchThenEngageFutur1(flightName, radius, targetType, searchTime
     timer.scheduleFunction(loopEngage, nil, timer.getTime() + 1)
 end
 
-local MAX_INTERCEPT_RANGE = 75000 -- mètres
+local MAX_INTERCEPT_RANGE = 100000 -- mètres
 local REEVAL_INTERVAL = 15
 local interceptorsActive = {}
 local groupTargetMemory = {}
+-- local callSign = Unit.getCallsign(interUnitObj)
+-- local gpGid = Group.getID(interGroupObj)
+
+-- if BingoPlaneTab[gpGid] and BingoPlaneTab[gpGid][callSign] then
+-- 	return
+-- end
 
 function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, argPosX, argPosY)
+	if varFpsLeak then return end
+
+	local interGroupObj = Group.getByName(argInterName)
+	if not interGroupObj or not interGroupObj:isExist() then
+		interceptorsActive[argInterName] = nil
+		groupTargetMemory[argInterName] = nil
+		return
+	end
+
+	local interUnitObj = interGroupObj:getUnit(1)
+	if not interUnitObj or not interUnitObj:isExist() then
+		interceptorsActive[argInterName] = nil
+		groupTargetMemory[argInterName] = nil
+		return
+	end
+
+	-- Si l'avion est posé, inutile de continuer
+	if not interUnitObj:inAir() then
+		env.info("DCE_Custom_Intercept: " .. argInterName .. " has landed — stopping logic.")
+		interceptorsActive[argInterName] = nil
+		groupTargetMemory[argInterName] = nil
+		return
+	end
+
+	local friendCoalition = (argFriendSide == "red") and coalition.side.RED or coalition.side.BLUE
+	local enemyCoalition = (friendCoalition == coalition.side.RED) and coalition.side.BLUE or coalition.side.RED
+	local enemyGroups = coalition.getGroups(enemyCoalition)
+	if not enemyGroups then return end
+
+	local interPos = interUnitObj:getPoint()
+	local bestTarget, bestScore = nil, math.huge
+
+	local lastTarget = groupTargetMemory[argInterName]
+	if lastTarget and lastTarget:isExist() then
+		local tgtPos = lastTarget:getUnit(1):getPoint()
+		local dx, dz = tgtPos.x - interPos.x, tgtPos.z - interPos.z
+		local dist = math.sqrt(dx * dx + dz * dz)
+		if dist < 10000 then
+			bestTarget = lastTarget
+			env.info(argInterName .. " still engaging " .. lastTarget:getName() .. " (" .. math.floor(dist) .. "m)")
+		end
+	end
+
+	if not bestTarget then
+		for _, group in pairs(enemyGroups) do
+			local unit = group:getUnit(1)
+			if unit and unit:isExist() and unit:inAir() then
+				local p = unit:getPoint()
+				local v = unit:getVelocity()
+				local dx, dz = p.x - interPos.x, p.z - interPos.z
+				local dist2 = dx * dx + dz * dz
+				if dist2 < (MAX_INTERCEPT_RANGE * MAX_INTERCEPT_RANGE) then
+					local dist = math.sqrt(dist2)
+					local dot = dx * v.x + dz * v.z
+					local approaching = dot < 0
+					local score = approaching and dist * 0.6 or dist
+					if score < bestScore then
+						bestTarget, bestScore = group, score
+					end
+				end
+			end
+		end
+	end
+
+	local ctr = interGroupObj:getController()
+	if bestTarget then
+		local sameTarget = (groupTargetMemory[argInterName] == bestTarget)
+		local newTargetName = bestTarget:getName()
+
+		if not sameTarget then
+			env.info("DCE_Custom_Intercept: " .. argInterName .. " switching to new target " .. newTargetName)
+			ctr:resetTask()
+
+			timer.scheduleFunction(function()
+				if interGroupObj and interGroupObj:isExist() then
+					local targetGpId = bestTarget:getID()
+					local weaponType = 1069547520
+					local interceptTask = {
+						id = 'EngageGroup',
+						params = {
+							visible = false,
+							groupId = targetGpId,
+							priority = 1,
+							weaponType = weaponType,
+						},
+					}
+					local ctr2 = interGroupObj:getController()
+					if ctr2 then
+						ctr2:pushTask(interceptTask)
+						env.info("DCE_Custom_Intercept: " .. argInterName .. " engaging " .. tostring(newTargetName))
+						if camp.debug then
+							local current_time = timer.getTime()
+							local logStr = "params = " .. TableSerialization(interceptTask, 0)
+							local flightNameClean = argInterName:gsub('[%p%c%s]', '_')
+							local logFile = io.open(
+								PathDCE .. "Debug\\" .. flightNameClean ..
+								"_" .. "Custom_Intercept" .. "_" .. tostring(current_time) .. ".lua", "w")
+							if logFile then
+								logFile:write(logStr)
+								logFile:close()
+							end
+						end
+					end
+				end
+			end, {}, timer.getTime() + 1.5)
+			groupTargetMemory[argInterName] = bestTarget
+		else
+			env.info("DCE_Custom_Intercept: " .. argInterName .. " already targeting " .. newTargetName)
+		end
+	else
+		-- Aucune cible disponible : mise en orbite
+		env.info("DCE_Custom_Intercept: " .. argInterName .. " no target, entering orbit.")
+		ctr:resetTask()
+		-- local orbitTask = {
+		-- 	id = 'Orbit',
+		-- 	params = {
+		-- 		pattern = 'Circle',
+		-- 		speed = argSpeed or 250,
+		-- 		altitude = 6000,
+		-- 	}
+		-- }
+
+		local orbitCapTask = {
+			id = 'ComboTask',
+			params = {
+				tasks = {
+					[1] = {
+						id = 'EngageTargets',
+						auto = true,
+						enabled = true,
+						params = {
+							targetTypes = { "Air" },
+							priority = 0,
+							maxDist = 40000,       -- rayon d'engagement
+							maxDistEnabled = true,
+						},
+					},
+					[2] = {
+						id = 'Orbit',
+						enabled = true,
+						auto = false,
+						params = {
+							pattern = 'Circle',
+							speed = argSpeed or 250,
+							altitude = 6000,
+						},
+					},
+				},
+			},
+		}
+		ctr:pushTask(orbitCapTask)
+
+	end
+
+	-- Réévaluation périodique
+	if not interceptorsActive[argInterName] then
+		interceptorsActive[argInterName] = true
+		timer.scheduleFunction(function()
+			interceptorsActive[argInterName] = nil
+			if interGroupObj and interGroupObj:isExist() then
+				CustomIntercept(nil, argInterName, argFriendSide, argSpeed, argPosX, argPosY)
+			end
+		end, {}, timer.getTime() + REEVAL_INTERVAL)
+	end
+end
+
+function CustomInterceptVersionC(argTargetName, argInterName, argFriendSide, argSpeed, argPosX, argPosY)
 	if varFpsLeak then return end
 
 	local interObj = Group.getByName(argInterName)

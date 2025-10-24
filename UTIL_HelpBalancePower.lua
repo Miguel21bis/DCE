@@ -60,13 +60,13 @@ for side,unit in pairs(oob_air) do																								--iterate through all 
 					local temp_draft_sorties = {}														--temporary table to hold additional draft sorties with escorts assigned
 					--get possible loadouts
 					local unit_loadouts = {}														--table to hold all loadouts for this aircraft type and task
-					for loadout_name, ltable in pairs(db_loadouts[unit[n].type][task]) do			--iterate through all loadouts for the aircraft type and task
+					for loadout_name, ltable in pairs(LoadoutsList[unit[n].type][task]) do			--iterate through all loadouts for the aircraft type and task
 						ltable.name = loadout_name
 						unit_loadouts[#unit_loadouts+1] = ltable
 					end
 
 					-- ajoute dans une table les informations aux plus hautes valeurs
-					if unit[n].number > 0 and db_loadouts[unit[n].type][task]  then																				--has ready aircraft
+					if unit[n].number > 0 and LoadoutsList[unit[n].type][task]  then																				--has ready aircraft
 								
 						local somme = 0
 						local sum_fireP = 0

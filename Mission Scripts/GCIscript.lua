@@ -405,9 +405,12 @@ local function GCI_Cycle()
 
 									local function assignMission()												--function to set interception mission (to be executed with 2 seconds delay, in order for the group to activate first)
 
-										-- local ctr = Group.getByName(selectInterName):getController()			--get controller of interceptor group
+										if groupObj and groupObj:isExist() then
+                                        else
+											return
+										end
+
 										local ctr = groupObj:getController()			--get controller of interceptor group
-										-- local flightAir = Group.getByName(selectInterName)
 										local leaderObj = groupObj:getUnit(1)
 										local descIntercept = leaderObj:getDesc()
 										--mig23 speedMax0 388 m.s

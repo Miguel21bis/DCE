@@ -233,9 +233,15 @@ local totalPlanePerTask = {
 	neutral = {},
 }
 
-require("Active/Loadouts_archive")
+
+
+--////////////////////////////////////////////////////////
+BuildLoadout()
+--////////////////////////////////////////////////////////
+
+--check le Loadout pour voir s'il y a des erreurs
+-- require("Active/Loadouts_archive")
 local error = 0
--- oob_air = oob_air or {} -- Assurez que c'est une table, même après un reset
 for side, units in pairs(oob_air) do
 -- db_loadouts = {
 	-- ["AV8BNA"] = {
@@ -249,11 +255,11 @@ for side, units in pairs(oob_air) do
 
 						local foundTaskAndCountry = false
 
-						if db_loadouts[unit.type] and db_loadouts[unit.type] ~= nil then
+						if LoadoutsList[unit.type] and LoadoutsList[unit.type] ~= nil then
 
-							if db_loadouts[unit.type][task] and db_loadouts[unit.type][task] ~= nil then
+							if LoadoutsList[unit.type][task] and LoadoutsList[unit.type][task] ~= nil then
 
-								for loadout_name, ltable in pairs(db_loadouts[unit.type][task]) do
+								for loadout_name, ltable in pairs(LoadoutsList[unit.type][task]) do
 									if ltable and type(ltable) == "table" then
 
 										local countryEligible = false
@@ -328,24 +334,6 @@ if error >= 5 then
 	end
 end
 
-local function mysort(s)
-    -- convert hash to array
-    local t = {}
-    for k, v in pairs(s) do
-        table.insert(t, v)
-    end
-
-    -- sort
-    table.sort(t, function(a, b)
-        if a.players ~= b.players then
-            return a.priorityIni > b.priorityIni
-        end
-
-        return a.score > b.score
-    end)
-    return t
-end
-
 local function table_move(src, start, stop, dest, tbl)
     tbl = tbl or src
     local offset = dest - start
@@ -373,10 +361,12 @@ local function debugLog(message)
     table.insert(debugLogs, message)
 end
 
-BaseFARP = {
+local baseFARP = {
 	blue = {},
 	red = {}
 }
+
+
 for baseName, base in pairs(db_airbases) do
 
 	if (base.type and base.type == "FARP") or (type(baseName) == "string" and string.find(baseName, "FARP")) then
@@ -390,14 +380,12 @@ for baseName, base in pairs(db_airbases) do
 		}
 		-- ensure BaseFARP[side] exists before inserting (avoid nil when base.side missing or unexpected)
 		if base and base.side then
-			if not BaseFARP[base.side] then BaseFARP[base.side] = {} end
-			table.insert(BaseFARP[base.side], farpData)
+			if not baseFARP[base.side] then baseFARP[base.side] = {} end
+			table.insert(baseFARP[base.side], farpData)
 		else
 			-- fallback: keep problematic FARPs to a neutral bucket so code doesn't error out
-			if not BaseFARP["neutral"] then BaseFARP["neutral"] = {} end
-			table.insert(BaseFARP["neutral"], farpData)
-			-- optional debug:
-			-- print("AtoG warning: FARP '" .. tostring(baseName) .. "' has no 'side' field; stored under BaseFARP['neutral']")
+			if not baseFARP["neutral"] then baseFARP["neutral"] = {} end
+			table.insert(baseFARP["neutral"], farpData)
 		end
 	end
 end
@@ -411,7 +399,7 @@ local status_counter_ATO = 0
 
 
 --table to store draft sorties (all valid unit/task/loadout/target combinations)
-Draft_sorties = {
+local draftSorties = {
 	blue = {},
 	red = {}
 }
@@ -504,13 +492,7 @@ table.sort(targetlist["red"], function(a,b) return a.priority > b.priority  end)
 
 --creat draft sorties
 for sideName, units in pairs(oob_air) do
-	--determine enemy side
-	-- local enemySide_name																													--determine enemy side (opposite of unit side)
-	-- if sideName == "blue" then
-	-- 	enemySide_name = "red"
-	-- else
-	-- 	enemySide_name = "blue"
-	-- end
+
 	local draftId = 1
 	if Debug.Generator.affiche then
 		debugLog(draftId.." AtoG passe A_0 chapter: "..Debug.Generator.chapter.." SpySquad:  "..Debug.Generator.SpySquad.." SpyTask: "..Debug.Generator.SpyTask)
@@ -633,12 +615,10 @@ for sideName, units in pairs(oob_air) do
 
 							if DebugAssignAll then print("AtoGen AcftAvail  "..unit.type.." || "..unit.name) end
 
-							-- if AcftAvail[unit.name].unavailable[u] > ((CampTotalTimeS / 3600)*2)   then
 							if AcftAvail[unit.name].unavailable[u] > ((CampTotalTimeS / 3600))   then
 								AcftAvail[unit.name].unavailable[u] = 0
 							end
 
-							-- print("AtoGen AcftAvail ____***______ "..tostring(CampTotalTimeS / 3600).." >=? UnitUnavailable?? "..tostring(AcftAvail[unit.name].unavailable[u]))
 							if (CampTotalTimeS / 3600) >= AcftAvail[unit.name].unavailable[u] then
 								table.remove(AcftAvail[unit.name].unavailable, u)								--remove this entry
 								if DebugAssignAll then  print("AtoGen AcftAvail     ____***______ REMOVE ") end
@@ -654,8 +634,6 @@ for sideName, units in pairs(oob_air) do
 						AcftAvail[unit.name].available = aircraft_available											--store available aircraft in availability table
 						AcftAvail[unit.name].assigned = 0
 						AcftAvail[unit.name].unassigned = aircraft_available										--store unassigned aircraft in availability table
-
-						-- _affiche(AcftAvail[unit.name], "AcftAvail "..unit.name..": ")
 
 						if aircraft_available > 0 then																				--unit has available aircraft
 							if isDebugModeA then
@@ -678,9 +656,9 @@ for sideName, units in pairs(oob_air) do
 									--get possible loadouts
 									local unit_loadouts = {}																					--table to hold all loadouts for this aircraft type and task
 
-									if db_loadouts[unit.type] and db_loadouts[unit.type][task] then																		--db_loadouts table has loadouts for this task
+									if LoadoutsList[unit.type] and LoadoutsList[unit.type][task] then																		--db_loadouts table has loadouts for this task
 
-										for loadout_name, ltable in pairs(db_loadouts[unit.type][task]) do									--iterate through all loadouts for the aircraft type and task
+										for loadout_name, ltable in pairs(LoadoutsList[unit.type][task]) do									--iterate through all loadouts for the aircraft type and task
 
 											local countryEligible = false
 											if ltable.country == nil  then
@@ -1146,7 +1124,7 @@ for sideName, units in pairs(oob_air) do
 																								toTarget = GetDistance(airbasePoint, target)												--direct distance to target
 																							
 																								if IsHelicopter[unit.type] and toTarget > unit_loadouts[l].range then
-																									for baseN, FARP in pairs(BaseFARP[sideName]) do
+																									for baseN, FARP in pairs(baseFARP[sideName]) do
 																										local toFARP = GetDistance(airbasePoint, FARP)
 
 																										if toFARP < (unit_loadouts[l].range * 2) then
@@ -1330,11 +1308,11 @@ for sideName, units in pairs(oob_air) do
 
 																							--build sortie entry
 																							repeat																							--for tasks with station repeat to make entries for lesser amount of aircraft, repeat once for everything else
-																								local idTemp = "id"..#Draft_sorties[sideName]+1
+																								local idTemp = "id"..#draftSorties[sideName]+1
 
 																								if isDebugModeA then
 																									debugLog(draftId.." AtoG passe A_30a "..idTemp.." clientPlayer: "..tostring(clientPlayer) .. " overRideMP_A: "
-																									.. tostring(overRideMP_A).." idTemp: "..tostring(idTemp).." aircraft_assign: "..tostring(aircraft_assign).." |Nb Draft "..tostring(#Draft_sorties[sideName]))
+																									.. tostring(overRideMP_A).." idTemp: "..tostring(idTemp).." aircraft_assign: "..tostring(aircraft_assign).." |Nb Draft "..tostring(#draftSorties[sideName]))
 																								end
 
 																								local draftSortiesEntry = {
@@ -1376,7 +1354,7 @@ for sideName, units in pairs(oob_air) do
 																									multipack = multipack,
 																									threatsGround = route.threats.ground_total,
 																									threatsAir = route.threats.air_total,
-																									id = "DraftId"..draftId.."_id"..#Draft_sorties[sideName]+1,
+																									id = "DraftId"..draftId.."_id"..#draftSorties[sideName]+1,
 																									rejected = {},
 																									mainOverRideMP = overRideMP_A,
 																									remainingFirepower = remainingFirepower,
@@ -1602,10 +1580,10 @@ for sideName, units in pairs(oob_air) do
 																								--/*/*/****/**/*/*/*/***/**/*/*/**/*/*/**/*/*/***/*/*/*/*/****/**/*/*/*/***/**/*/*/**/*/*/**/*/*/***/*/*
 																								-- INSERT IN Draft_sorties
 																								--/*/*/****/**/*/*/*/***/**/*/*/**/*/*/**/*/*/***/*/*/*/*/****/**/*/*/*/***/**/*/*/**/*/*/**/*/*/***/*/*
-																								if not Draft_sorties[sideName] then
-																									Draft_sorties[sideName] = {}
+																								if not draftSorties[sideName] then
+																									draftSorties[sideName] = {}
 																								end
-																								Draft_sorties[sideName][#Draft_sorties[sideName] + 1] = draftSortiesEntry
+																								draftSorties[sideName][#draftSorties[sideName] + 1] = draftSortiesEntry
 
 																								--/*/*/****/**/*/*/*/***/**/*/*/**/*/*/**/*/*/***/*/*/*/*/****/**/*/*/*/***/**/*/*/**/*/*/**/*/*/***/*/*
 																								-- INSERT IN Draft_sorties
@@ -1622,7 +1600,7 @@ for sideName, units in pairs(oob_air) do
 																								end
 
 																								if isDebugModeA then
-																									debugLog(draftId .." AtoG passe A_30_INIT : "..idTemp.." aircraft_assign "..aircraft_assign.." |Nb de draft: "..#Draft_sorties[sideName])
+																									debugLog(draftId .." AtoG passe A_30_INIT : "..idTemp.." aircraft_assign "..aircraft_assign.." |Nb de draft: "..#draftSorties[sideName])
 																								end
 
 																							until aircraft_assign <= 0																		--stop making more draft sorties
@@ -1673,7 +1651,7 @@ oob_air["red"] = shuffled
 
 
 -- Tri final par `targetPriority` (ascendant), puis par `score` (descendant)
-for side, sorties in pairs(Draft_sorties) do
+for side, sorties in pairs(draftSorties) do
     table.sort(sorties, function(a, b)
         if a.targetPriority ~= b.targetPriority then
             return a.targetPriority > b.targetPriority -- Plus petite priorité d'abord
@@ -1692,7 +1670,7 @@ if Debug.Generator.affiche then
 	-- _file:write(_str)																		--save new data
 	-- _file:close()
 
-	for sideName, drafts in pairs(Draft_sorties) do
+	for sideName, drafts in pairs(draftSorties) do
 		local di = 1
 		debugLog(string.upper(sideName).." PART A")
 
@@ -1731,7 +1709,7 @@ local i_timmer02 = 0
 local uniqueBonus = false
 
 --inversion des 2 boucles draft_sortie en premier, oob_air ensuite, pour homogeniser les chances de sortie de tous les escadrons support
-for sideName, draftT in pairs(Draft_sorties) do
+for sideName, draftT in pairs(draftSorties) do
 	-- for draft_n, draft in ipairs(Draft_sorties[sideName]) do													--iterate through all draft sorties beginning with the highest scored
 	for draft_n, draft in ipairs(draftT) do
 
@@ -1889,7 +1867,7 @@ for sideName, draftT in pairs(Draft_sorties) do
 								--get possible loadouts
 								local unit_loadouts = {}														--table to hold all loadouts for this aircraft type and task
 
-								for loadout_name, ltable in pairs(db_loadouts[unit.type][task]) do			--iterate through all loadouts for the aircraft type and task
+								for loadout_name, ltable in pairs(LoadoutsList[unit.type][task]) do			--iterate through all loadouts for the aircraft type and task
 									ltable.name = loadout_name
 									if ltable.standoff == nil then ltable.standoff = 0 end
 
@@ -2519,7 +2497,7 @@ end
 
 
 -- Tri final par `targetPriority` (ascendant), puis par `score` (descendant)
-for side, sorties in pairs(Draft_sorties) do
+for side, sorties in pairs(draftSorties) do
     table.sort(sorties, function(a, b)
         if a.targetPriority ~= b.targetPriority then
             return a.targetPriority > b.targetPriority -- Plus grande priorité d'abord
@@ -2532,7 +2510,7 @@ if Debug.Generator.affiche then
 
 	debugLog("ATO Assigning Escorts (" .. status_counter_escorts.. ")")
 
-	for sideName, drafts in pairs(Draft_sorties) do
+	for sideName, drafts in pairs(draftSorties) do
 		-- debuGenTxt = debuGenTxt.."\n\n\n"..( string.upper(sideName).." PART B")
 		debugLog(string.upper(sideName).." PART B")
 
@@ -3748,15 +3726,15 @@ local function showAtoSort(arg_newDraftByPriority, arg_tablePrio)
 	end
 end
 
-if #Draft_sorties.blue == 0 then
+if #draftSorties.blue == 0 then
 	print("AtoG ERROR no route could be generated in blue camp? ")
-elseif #Draft_sorties.red == 0 then
+elseif #draftSorties.red == 0 then
 	print("AtoG ERROR no route could be generated in red camp? ")
 end
 
 --creation de la table multipack (systeme cassé a cause du decoupage draft_sortie en plusieurs morceau/priorité)
 multipackByTargetName = {}
-for side, drafts in pairs(Draft_sorties) do
+for side, drafts in pairs(draftSorties) do
 	for draftN, draft in ipairs(drafts)do
 		if not multipackByTargetName[draft.target_name] then  multipackByTargetName[draft.target_name] = 0 end
 
@@ -3821,7 +3799,7 @@ table.sort(targetListPrio["red"], function(a,b) return a > b  end)
 
 for sidePrio, tableauPrio in pairs(targetListPrio) do
 	for tableN, tablePrio in pairs(tableauPrio) do
-		for draftN, draft in pairs(Draft_sorties[sidePrio]) do
+		for draftN, draft in pairs(draftSorties[sidePrio]) do
 			if draft.priorityIni == tablePrio then
 				table.insert(newDraftByPriority[sidePrio], draft)
 			end
@@ -3993,88 +3971,88 @@ if Debug.debug and Debug.Generator.affiche and string.find(Debug.Generator.chapt
 	end
 end
 
---place la clef occurence à tous les loadouts
-Loadouts_archive = Loadouts_archive or {}
-for plane, planeTab  in pairs(Loadouts_archive) do
-	for taskName, loadout  in pairs(planeTab) do
-		for loadoutName, value  in pairs(loadout) do
-			if type(value) == "table" then
-				if not value["occurence"] then value["occurence"] = 0 end
-			end
-		end
-	end
-end
+-- --place la clef occurence à tous les loadouts
+-- Loadouts_archive = Loadouts_archive or {}
+-- for plane, planeTab  in pairs(Loadouts_archive) do
+-- 	for taskName, loadout  in pairs(planeTab) do
+-- 		for loadoutName, value  in pairs(loadout) do
+-- 			if type(value) == "table" then
+-- 				if not value["occurence"] then value["occurence"] = 0 end
+-- 			end
+-- 		end
+-- 	end
+-- end
 
 
--- modification M49.c big central db_loadout (c: loadout statistics)
--- local found = false
-for _, pack in pairs(ATO) do
-	for p = 1, #pack do
-		for _,flight in pairs(pack[p]) do
-			for f = 1, #flight do
-				local found = false
-				for plane, planeTab  in pairs(Loadouts_archive) do
-					if plane == flight[f].type then
-						for _, loadout  in pairs(planeTab) do
-							for loadoutName, value  in pairs(loadout) do
-								if loadoutName  == flight[f].loadout.name then
-									if not value["occurence"] or value["occurence"] == nil or value["occurence"] == " " then value["occurence"] = 0 end
-									value["occurence"] = value["occurence"] + 1
-									found = true
-									break
-								end
-								if found then break end
-							end
-							if found then break end
-						end
-						if found then break end
-					end
-					if found then break end
-				end
-			end
-		end
-	end
-end
+-- -- modification M49.c big central db_loadout (c: loadout statistics)
+-- -- local found = false
+-- for _, pack in pairs(ATO) do
+-- 	for p = 1, #pack do
+-- 		for _,flight in pairs(pack[p]) do
+-- 			for f = 1, #flight do
+-- 				local found = false
+-- 				for plane, planeTab  in pairs(Loadouts_archive) do
+-- 					if plane == flight[f].type then
+-- 						for _, loadout  in pairs(planeTab) do
+-- 							for loadoutName, value  in pairs(loadout) do
+-- 								if loadoutName  == flight[f].loadout.name then
+-- 									if not value["occurence"] or value["occurence"] == nil or value["occurence"] == " " then value["occurence"] = 0 end
+-- 									value["occurence"] = value["occurence"] + 1
+-- 									found = true
+-- 									break
+-- 								end
+-- 								if found then break end
+-- 							end
+-- 							if found then break end
+-- 						end
+-- 						if found then break end
+-- 					end
+-- 					if found then break end
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+-- end
 
 
-local s = ""
---place la clef occurence à tous les loadouts
-for plane, planeTab  in pairs(Loadouts_archive) do
-	for taskName, loadout  in pairs(planeTab) do
-		for loadoutName, value  in pairs(loadout) do
-			if type(value) == "table" then
-				s = s.."\n"
-				s = s..plane
-				for i=1, 15 - string.len(plane) do
-					s = s.." "
-				end
+-- local s = ""
+-- --place la clef occurence à tous les loadouts
+-- for plane, planeTab  in pairs(Loadouts_archive) do
+-- 	for taskName, loadout  in pairs(planeTab) do
+-- 		for loadoutName, value  in pairs(loadout) do
+-- 			if type(value) == "table" then
+-- 				s = s.."\n"
+-- 				s = s..plane
+-- 				for i=1, 15 - string.len(plane) do
+-- 					s = s.." "
+-- 				end
 
-				s = s..taskName
-				for i=1, 20 - string.len(taskName) do
-					s = s.." "
-				end
+-- 				s = s..taskName
+-- 				for i=1, 20 - string.len(taskName) do
+-- 					s = s.." "
+-- 				end
 
-				if value.occurence == 0 then
-					value.occurence = " "
-				end
-				s = s..value.occurence
-				for i=1, 5 - string.len(value.occurence) do
-					s = s.." "
-				end
+-- 				if value.occurence == 0 then
+-- 					value.occurence = " "
+-- 				end
+-- 				s = s..value.occurence
+-- 				for i=1, 5 - string.len(value.occurence) do
+-- 					s = s.." "
+-- 				end
 
-				local minsCore = ""
-				if value.minscore then minsCore = value.minscore end
+-- 				local minsCore = ""
+-- 				if value.minscore then minsCore = value.minscore end
 
-				s = s..minsCore
-				for i=1, 5 - string.len(minsCore) do
-					s = s.." "
-				end
+-- 				s = s..minsCore
+-- 				for i=1, 5 - string.len(minsCore) do
+-- 					s = s.." "
+-- 				end
 
-				s = s..loadoutName
-			end
-		end
-	end
-end
+-- 				s = s..loadoutName
+-- 			end
+-- 		end
+-- 	end
+-- end
 
 if Debug.Generator and Debug.debug then
 	local _file = io.open("Debug/AtoGenerator_Debug.txt", "w") or error("Failed to open debug file")
@@ -4096,10 +4074,10 @@ if Debug.debug then
 end
 
 --*****************ne pas effacer commenter**********************	
-local loadoutSTR = StringToTxt(s)
-local dloadoutFile = io.open("Active/loadout_stats.lua", "w") or error("Failed to open debug file")
-dloadoutFile:write(loadoutSTR)
-dloadoutFile:close()
+-- local loadoutSTR = StringToTxt(s)
+-- local dloadoutFile = io.open("Active/loadout_stats.lua", "w") or error("Failed to open debug file")
+-- dloadoutFile:write(loadoutSTR)
+-- dloadoutFile:close()
 --***************ne pas effacer commenter	**************************
 
 

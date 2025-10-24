@@ -387,7 +387,7 @@ elseif ArgTools == "fuelConsumption" then
 					if not typeTaskLoadouts[side][squad.type] then typeTaskLoadouts[side][squad.type] = {} end
 					if not typeTaskLoadouts[side][squad.type][task] then typeTaskLoadouts[side][squad.type][task] = {} end
 
-					for loadoutName, loadout in pairs(db_loadouts[squad.type][task]) do
+					for loadoutName, loadout in pairs(LoadoutsList[squad.type][task]) do
 						typeTaskLoadouts[side][squad.type][task][loadoutName] = loadout
 					end
 
@@ -1307,13 +1307,13 @@ elseif ArgTools == "helpBalancePower" then
 						local temp_Draft_sorties = {}														--temporary table to hold additional draft sorties with escorts assigned
 						--get possible loadouts
 						local unit_loadouts = {}														--table to hold all loadouts for this aircraft type and task
-						for loadout_name, ltable in pairs(db_loadouts[unit[n].type][task]) do			--iterate through all loadouts for the aircraft type and task
+						for loadout_name, ltable in pairs(LoadoutsList[unit[n].type][task]) do			--iterate through all loadouts for the aircraft type and task
 							ltable.name = loadout_name
 							unit_loadouts[#unit_loadouts+1] = ltable
 						end
 
 						-- ajoute dans une table les informations aux plus hautes valeurs
-						if unit[n].number > 0 and db_loadouts[unit[n].type][task]  then																				--has ready aircraft
+						if unit[n].number > 0 and LoadoutsList[unit[n].type][task]  then																				--has ready aircraft
 
 							local somme = 0
 							local sum_fireP = 0
