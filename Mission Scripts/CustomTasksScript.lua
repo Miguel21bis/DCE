@@ -3083,46 +3083,54 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 		end
 	else
 		-- Aucune cible disponible : mise en orbite
-		env.info("DCE_Custom_Intercept: " .. argInterName .. " no target, entering orbit.")
-		ctr:resetTask()
-		-- local orbitTask = {
-		-- 	id = 'Orbit',
-		-- 	params = {
-		-- 		pattern = 'Circle',
-		-- 		speed = argSpeed or 250,
-		-- 		altitude = 6000,
-		-- 	}
-		-- }
-
-		local orbitCapTask = {
-			id = 'ComboTask',
+		local capMission = {
+			id = 'Mission',
 			params = {
-				tasks = {
-					[1] = {
-						id = 'EngageTargets',
-						auto = true,
-						enabled = true,
-						params = {
-							targetTypes = { "Air" },
-							priority = 0,
-							maxDist = 40000,       -- rayon d'engagement
-							maxDistEnabled = true,
-						},
-					},
-					[2] = {
-						id = 'Orbit',
-						enabled = true,
-						auto = false,
-						params = {
-							pattern = 'Circle',
+				route = {
+					points = {
+						[1] = {
+							type = "Turning Point",
+							action = "Turning Point",
+							x = interPos.x + 1000,
+							y = interPos.z + 1000,
+							alt = 6000,
 							speed = argSpeed or 250,
-							altitude = 6000,
+							task = {
+								id = "ComboTask",
+								params = {
+									tasks = {
+										[1] = {
+											id = 'EngageTargets',
+											auto = true,
+											enabled = true,
+											params = {
+												targetTypes = { "Air" },
+												priority = 0,
+												maxDist = 80000,
+												maxDistEnabled = true,
+											},
+										},
+										[2] = {
+											id = 'Orbit',
+											enabled = true,
+											auto = false,
+											params = {
+												pattern = 'Circle',
+												speed = argSpeed or 250,
+												altitude = 6000,
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 				},
 			},
 		}
-		ctr:pushTask(orbitCapTask)
+
+		ctr:setTask(capMission)
+		env.info("DCE_Custom_Intercept: " .. argInterName .. " now in CAP mission.")
 
 	end
 

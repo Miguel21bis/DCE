@@ -2272,9 +2272,9 @@ function BuildLoadout()
 			return true
 		end
 		for _, conditionName in pairs(loadData.restrictedCondition) do
-			-- print("allowed_by_restriction() D1 ")
+			-- print("allowed_by_restriction() D1 "..tostring(conditionName))
 			for _, campAuth in pairs(camp.AuthorizedLoadout) do
-				-- print("allowed_by_restriction() D2 ")
+				-- print("allowed_by_restriction() D2 "..tostring(campAuth))
 				if string.lower(tostring(conditionName)) == string.lower(tostring(campAuth)) then
 					-- print("allowed_by_restriction() D3 returns true ")
 					return true

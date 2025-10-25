@@ -4,11 +4,12 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.197"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.198"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
+-- V198 - F-4E GBU - AGM - Mk20 
 -- V197 - AI restricted loadouts
 -- V196 - F-4E Fuel tanks 
 -- V195 - A-5 Vigilante speed
@@ -7750,180 +7751,180 @@ db_all_loadouts = {
 			},
 		},
 		Strike = {
-			-- ["Crisis - AG - LR - TPod - GBU-10x2 -  AIM-7Mx3 - FTx3 - DP"] = {
-				-- minscore = 0.3,
-				-- support = {
-					-- Escort = true,
-					-- SEAD = true,
-				-- },
-				-- country = {
-					-- [1] = "Turkey",
-				-- },
-				-- attributes =  { "Bridge", "Structure" },
-				-- code_loadout =  { "Crisis", "PG", "Cyprus" },
-				-- weaponType = "Guided bombs",
-				-- expend = "Auto",
-				-- 				-- range = 500000,
-				-- firepower = 1,
-				-- vCruise = 245,
-				-- vAttack = 277.5,
-				-- hCruise = 5486.4,
-				-- hAttack = 5487,
-				-- LDSD = true,
-				-- sortie_rate = 6,
-				-- stores = {
-					-- pylons = {
-						-- [1] = {
-							-- CLSID = "{F4_SARGENT_TANK_370_GAL}",
-						-- },
-						-- [2] = {
-							-- CLSID = "{AIM-9M}",
-						-- },
-						-- [3] = {
-							-- CLSID = "{51F9AAE5-964F-4D21-83FB-502E3BFE5F8A}",
-							-- settings = {
-								-- ["NFP_VIS_DrawArgNo_57"] = 0,
-								-- laser_code = 1688,
-								-- NFP_fuze_type_tail = "M905",
-								-- ["function_delay_ctrl_M905"] = 0,
-								-- ["arm_delay_ctrl_M905"] = 4,
-							-- },
-						-- },
-						-- [4] = {
-							-- CLSID = "{AIM-9M}",
-						-- },
-						-- [5] = {
-							-- CLSID = "{HB_F4E_AIM-7M}",
-						-- },
-						-- [6] = {
-							-- CLSID = "{HB_PAVE_SPIKE_ON_ADAPTER_IN_AERO7}",
-						-- },
-						-- [7] = {
-							-- CLSID = "{F4_SARGENT_TANK_600_GAL}",
-						-- },
-						-- [8] = {
-							-- CLSID = "{HB_F4E_AIM-7M}",
-						-- },
-						-- [9] = {
-							-- CLSID = "{HB_F4E_AIM-7M}",
-						-- },
-						-- [10] = {
-							-- CLSID = "{AIM-9M}",
-						-- },
-						-- [11] = {
-							-- CLSID = "{51F9AAE5-964F-4D21-83FB-502E3BFE5F8A}",
-							-- settings = {
-								-- ["NFP_VIS_DrawArgNo_57"] = 0,
-								-- laser_code = 1688,
-								-- NFP_fuze_type_tail = "M905",
-								-- ["function_delay_ctrl_M905"] = 0,
-								-- ["arm_delay_ctrl_M905"] = 4,
-							-- },
-						-- },
-						-- [12] = {
-							-- CLSID = "{AIM-9M}",
-						-- },
-						-- [13] = {
-							-- CLSID = "{F4_SARGENT_TANK_370_GAL_R}",
-						-- },
-						-- [14] = {
-							-- CLSID = "{HB_ALE_40_30_60}",
-						-- },
-					-- },
-					-- fuel = 5510.5,
-					-- flare = 30,
-					-- chaff = 120,
-					-- gun = 100,
-				-- },
-			-- },
-			-- ["Crisis Strike AG - LR - ECM - AGM-65Bx6 - AIM-7Mx3 - FTx3 - DP"] = {
-				-- minscore = 0.3,
-				-- support = {
-					-- Escort = true,
-					-- SEAD = true,
-				-- },
-				-- country = {
-					-- [1] = "Turkey",
-				-- },
-				-- attributes =  { "SAM", "soft", "frontline" },
-				-- code_loadout =  { "Crisis", "PG", "HWITC", "Cyprus", "WOC80" },
-				-- weaponType = "ASM",
-				-- expend = "Auto",
-				-- attackType = "Dive",
-				-- 				-- range = 600000,
-				-- firepower = 1,
-				-- vCruise = 250,
-				-- vAttack = 300,
-				-- hCruise = 5486.4,
-				-- hAttack = 4572,
-				-- standoff = 15000,
-				-- LDSD = true,
-				-- sortie_rate = 6,
-				-- stores = {
-					-- pylons = {
-						-- [1] = {
-							-- CLSID = "{F4_SARGENT_TANK_370_GAL}",
-						-- },
-						-- [2] = {
-							-- CLSID = "<CLEAN>",
-						-- },
-						-- [3] = {
-							-- CLSID = "{HB_F4EAGM-65B_LAU88_3x_Left}",
-						-- },
-						-- [4] = {
-							-- CLSID = "<CLEAN>",
-						-- },
-						-- [5] = {
-							-- CLSID = "{HB_F4E_AIM-7M}",
-						-- },
-						-- [6] = {
-							-- CLSID = "{HB_ALQ-131_ON_ADAPTER_IN_AERO7}",
-						-- },
-						-- [7] = {
-							-- CLSID = "{F4_SARGENT_TANK_600_GAL}",
-						-- },
-						-- [8] = {
-							-- CLSID = "{HB_F4E_AIM-7M}",
-						-- },
-						-- [9] = {
-							-- CLSID = "{HB_F4E_AIM-7M}",
-						-- },
-						-- [10] = {
-							-- CLSID = "<CLEAN>",
-							-- settings = {
-								-- ["NFP_VIS_DrawArgNo_57"] = 0,
-								-- laser_code = 1688,
-								-- NFP_fuze_type_tail = "M905",
-								-- ["function_delay_ctrl_M905"] = 0,
-								-- ["arm_delay_ctrl_M905"] = 4,
-							-- },
-						-- },
-						-- [11] = {
-							-- CLSID = "{HB_F4EAGM-65B_LAU88_3x_Right}",
-						-- },
-						-- [12] = {
-							-- CLSID = "<CLEAN>",
-							-- settings = {
-								-- ["NFP_VIS_DrawArgNo_57"] = 0,
-								-- laser_code = 1688,
-								-- NFP_fuze_type_tail = "M905",
-								-- ["function_delay_ctrl_M905"] = 0,
-								-- ["arm_delay_ctrl_M905"] = 4,
-							-- },
-						-- },
-						-- [13] = {
-							-- CLSID = "{F4_SARGENT_TANK_370_GAL_R}",
-						-- },
-						-- [14] = {
-							-- CLSID = "{HB_ALE_40_30_60}",
-						-- },
-					-- },
-					-- fuel = 5510.5,
-					-- flare = 30,
-					-- chaff = 120,
-					-- gun = 100,
-				-- },
-			-- },
+			["Crisis - AG - LR - TPod - GBU-10x2 -  AIM-7Mx3 - FTx3 - DP"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+				},
+				country = {
+					[1] = "Turkey",
+				},
+				attributes =  { "Bridge", "Structure" },
+				code_loadout =  { "Crisis", "PG", "Cyprus" },
+				weaponType = "Guided bombs",
+				expend = "Auto",
+				range = 500000,
+				firepower = 1,
+				vCruise = 245,
+				vAttack = 277.5,
+				hCruise = 5486.4,
+				hAttack = 5487,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = {
+							CLSID = "{F4_SARGENT_TANK_370_GAL}",
+						},
+						[2] = {
+							CLSID = "{AIM-9M}",
+						},
+						[3] = {
+							CLSID = "{51F9AAE5-964F-4D21-83FB-502E3BFE5F8A}",
+							settings = {
+								["NFP_VIS_DrawArgNo_57"] = 0,
+								laser_code = 1688,
+								NFP_fuze_type_tail = "M905",
+								["function_delay_ctrl_M905"] = 0,
+								["arm_delay_ctrl_M905"] = 4,
+							},
+						},
+						[4] = {
+							CLSID = "{AIM-9M}",
+						},
+						[5] = {
+							CLSID = "{HB_F4E_AIM-7M}",
+						},
+						[6] = {
+							CLSID = "{HB_PAVE_SPIKE_ON_ADAPTER_IN_AERO7}",
+						},
+						[7] = {
+							CLSID = "{F4_SARGENT_TANK_600_GAL}",
+						},
+						[8] = {
+							CLSID = "{HB_F4E_AIM-7M}",
+						},
+						[9] = {
+							CLSID = "{HB_F4E_AIM-7M}",
+						},
+						[10] = {
+							CLSID = "{AIM-9M}",
+						},
+						[11] = {
+							CLSID = "{51F9AAE5-964F-4D21-83FB-502E3BFE5F8A}",
+							settings = {
+								["NFP_VIS_DrawArgNo_57"] = 0,
+								laser_code = 1688,
+								NFP_fuze_type_tail = "M905",
+								["function_delay_ctrl_M905"] = 0,
+								["arm_delay_ctrl_M905"] = 4,
+							},
+						},
+						[12] = {
+							CLSID = "{AIM-9M}",
+						},
+						[13] = {
+							CLSID = "{F4_SARGENT_TANK_370_GAL_R}",
+						},
+						[14] = {
+							CLSID = "{HB_ALE_40_30_60}",
+						},
+					},
+					fuel = 5510.5,
+					flare = 30,
+					chaff = 120,
+					gun = 100,
+				},
+			},
+			["Crisis Strike AG - LR - ECM - AGM-65Bx6 - AIM-7Mx3 - FTx3 - DP"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+				},
+				country = {
+					[1] = "Turkey",
+				},
+				attributes =  { "SAM", "soft", "frontline" },
+				code_loadout =  { "Crisis", "PG", "HWITC", "Cyprus", "WOC80" },
+				weaponType = "ASM",
+				expend = "Auto",
+				attackType = "Dive",
+				range = 600000,
+				firepower = 1,
+				vCruise = 250,
+				vAttack = 300,
+				hCruise = 5486.4,
+				hAttack = 4572,
+				standoff = 15000,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = {
+							CLSID = "{F4_SARGENT_TANK_370_GAL}",
+						},
+						[2] = {
+							CLSID = "<CLEAN>",
+						},
+						[3] = {
+							CLSID = "{HB_F4EAGM-65B_LAU88_3x_Left}",
+						},
+						[4] = {
+							CLSID = "<CLEAN>",
+						},
+						[5] = {
+							CLSID = "{HB_F4E_AIM-7M}",
+						},
+						[6] = {
+							CLSID = "{HB_ALQ-131_ON_ADAPTER_IN_AERO7}",
+						},
+						[7] = {
+							CLSID = "{F4_SARGENT_TANK_600_GAL}",
+						},
+						[8] = {
+							CLSID = "{HB_F4E_AIM-7M}",
+						},
+						[9] = {
+							CLSID = "{HB_F4E_AIM-7M}",
+						},
+						[10] = {
+							CLSID = "<CLEAN>",
+							settings = {
+								["NFP_VIS_DrawArgNo_57"] = 0,
+								laser_code = 1688,
+								NFP_fuze_type_tail = "M905",
+								["function_delay_ctrl_M905"] = 0,
+								["arm_delay_ctrl_M905"] = 4,
+							},
+						},
+						[11] = {
+							CLSID = "{HB_F4EAGM-65B_LAU88_3x_Right}",
+						},
+						[12] = {
+							CLSID = "<CLEAN>",
+							settings = {
+								["NFP_VIS_DrawArgNo_57"] = 0,
+								laser_code = 1688,
+								NFP_fuze_type_tail = "M905",
+								["function_delay_ctrl_M905"] = 0,
+								["arm_delay_ctrl_M905"] = 4,
+							},
+						},
+						[13] = {
+							CLSID = "{F4_SARGENT_TANK_370_GAL_R}",
+						},
+						[14] = {
+							CLSID = "{HB_ALE_40_30_60}",
+						},
+					},
+					fuel = 5510.5,
+					flare = 30,
+					chaff = 120,
+					gun = 100,
+				},
+			},
 			["Crisis AG - LR - ECM - Mk-82LDx10 - AIM-9Mx4- AIM-7Mx3 - FTx2 - DP"] = {
 				minscore = 0.3,
 				support = {
@@ -8701,7 +8702,7 @@ db_all_loadouts = {
 				weaponType = "Bombs",
 				expend = "All",
 				attackType = "Dive",
-								range = 500000,
+				range = 500000,
 				firepower = 1,
 				vCruise = 245,
 				vAttack = 277.5,
@@ -8914,7 +8915,7 @@ db_all_loadouts = {
 				expend = "All",
 				night = true,
 				adverseWeather = true,
-				range = 200000,
+				range = 500000,
 				firepower = 1,
 				vCruise = 245,
 				vAttack = 277.5,
@@ -9020,6 +9021,116 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
+			["NAM - AG Mk-20 Rockeye - AIM-7E-2*3 - AIM-9J*4 - FT*2 - CMPod - ECM - Mk20*10"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+					["Escort Jammer"] = true,
+				},
+				country = {
+					[1] = "USA",
+				},
+				attributes =  { "soft", "Parked Aircraft", "SAM" },
+				restrictedCondition = "restricted_loadoutnam3",      --restricted_loadoutnam3
+				code_loadout =  { "NAM" },
+				weaponType = "Bombs",
+				expend = "All",
+				attackType = "Dive",
+				range = 500000,
+				firepower = 1,
+				vCruise = 245,
+				vAttack = 277.5,
+				hCruise = 5486.4,
+				hAttack = 4572,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
+				},
+				[2] = {
+					["CLSID"] = "{F4_SARGENT_TANK_370_GAL_R}",
+					["num"] = 13,
+				},
+				[3] = {
+					["CLSID"] = "{F4_SARGENT_TANK_370_GAL}",
+					["num"] = 1,
+				},
+				[4] = {
+					["CLSID"] = "{HB_F4E_ROCKEYE_6x}",
+					["num"] = 7,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_CC_A_Mk20",
+						["NFP_PRESVER"] = 2,
+						["NFP_fuze_type_nose"] = "Mk339Mod1",
+						["function_delay_ctrl_00_Mk339Mod1"] = 1.2,
+						["function_delay_ctrl_01_Mk339Mod1"] = 4,
+					},
+				},
+				[5] = {
+					["CLSID"] = "{AIM-9J}",
+					["num"] = 12,
+				},
+				[6] = {
+					["CLSID"] = "{AIM-9J}",
+					["num"] = 10,
+				},
+				[7] = {
+					["CLSID"] = "{AIM-9J}",
+					["num"] = 4,
+				},
+				[8] = {
+					["CLSID"] = "{AIM-9J}",
+					["num"] = 2,
+				},
+				[9] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 9,
+				},
+				[10] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 8,
+				},
+				[11] = {
+					["CLSID"] = "{HB_ALQ-131_ON_ADAPTER_IN_AERO7}",
+					["num"] = 6,
+				},
+				[12] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 5,
+				},
+				[13] = {
+					["CLSID"] = "{HB_F4E_ROCKEYE_2x_SWA}",
+					["num"] = 11,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_CC_A_Mk20",
+						["NFP_PRESVER"] = 2,
+						["NFP_fuze_type_nose"] = "Mk339Mod1",
+						["function_delay_ctrl_00_Mk339Mod1"] = 1.2,
+						["function_delay_ctrl_01_Mk339Mod1"] = 4,
+					},
+				},
+				[14] = {
+					["CLSID"] = "{HB_F4E_ROCKEYE_2x_SWA}",
+					["num"] = 3,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_CC_A_Mk20",
+						["NFP_PRESVER"] = 2,
+						["NFP_fuze_type_nose"] = "Mk339Mod1",
+						["function_delay_ctrl_00_Mk339Mod1"] = 1.2,
+						["function_delay_ctrl_01_Mk339Mod1"] = 4,
+					},
+				},
+					},
+					fuel = 5510.5,
+					flare = 30,
+					chaff = 120,
+					gun = 100,
+				},
+			},
 			["NAM - AG Hobos - AIM-7E-2*3 - AIM-9J*3 - FT - CMPod - ECM Pod - GBU-8*2"] = {
 				minscore = 0.3,
 				support = {
@@ -9035,7 +9146,7 @@ db_all_loadouts = {
 				weaponType = "ASM",
 				expend = "Auto",
 				attackType = "Dive",
-				range = 500000,
+				range = 400000,
 				firepower = 1,
 				vCruise = 250,
 				vAttack = 300,
@@ -9204,7 +9315,7 @@ db_all_loadouts = {
 				code_loadout =  { "NAM" },
 				weaponType = "Guided bombs",
 				expend = "Auto",
-				range = 250000,
+				range = 400000,
 				firepower = 1,
 				vCruise = 245,
 				vAttack = 277.5,
@@ -9367,6 +9478,184 @@ db_all_loadouts = {
 				},
 				[14] = {
 					["CLSID"] = "{C40A1E3A-DD05-40D9-85A4-217729E37FAE}",
+					["num"] = 3,
+				},
+					},
+					fuel = 5510.5,
+					flare = 30,
+					chaff = 120,
+					gun = 100,
+				},
+			},
+			["NAM - AG LG - AIM-7E-2*3 - AIM-9J*4 - FT*3 - CMPod - ECM Pod - AGM-65A*2"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+				},
+				country = {
+					[1] = "USA",
+				},
+				attributes =  { "SAM", "soft"},
+				restrictedCondition = "restricted_loadoutnam4",      --restricted_loadoutnam4
+				code_loadout =  { "NAM" },
+				weaponType = "ASM",
+				expend = "Auto",
+				attackType = "Dive",
+				range = 600000,
+				firepower = 1,
+				vCruise = 250,
+				vAttack = 300,
+				hCruise = 5486.4,
+				hAttack = 4572,
+				standoff = 15000,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
+				},
+				[2] = {
+					["CLSID"] = "{F4_SARGENT_TANK_370_GAL_R}",
+					["num"] = 13,
+				},
+				[3] = {
+					["CLSID"] = "{F4_SARGENT_TANK_370_GAL}",
+					["num"] = 1,
+				},
+				[4] = {
+					["CLSID"] = "{F4_SARGENT_TANK_600_GAL}",
+					["num"] = 7,
+				},
+				[5] = {
+					["CLSID"] = "{AIM-9J}",
+					["num"] = 12,
+				},
+				[6] = {
+					["CLSID"] = "{AIM-9J}",
+					["num"] = 10,
+				},
+				[7] = {
+					["CLSID"] = "{AIM-9J}",
+					["num"] = 4,
+				},
+				[8] = {
+					["CLSID"] = "{AIM-9J}",
+					["num"] = 2,
+				},
+				[9] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 9,
+				},
+				[10] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 8,
+				},
+				[11] = {
+					["CLSID"] = "{HB_ALQ-131_ON_ADAPTER_IN_AERO7}",
+					["num"] = 6,
+				},
+				[12] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 5,
+				},
+				[13] = {
+					["CLSID"] = "{HB_F4E_AGM-65A_LAU117_SWA}",
+					["num"] = 11,
+				},
+				[14] = {
+					["CLSID"] = "{HB_F4E_AGM-65A_LAU117_SWA}",
+					["num"] = 3,
+				},
+					},
+					fuel = 5510.5,
+					flare = 30,
+					chaff = 120,
+					gun = 100,
+				},
+			},
+			["NAM - AG LG - AIM-7E-2*3 - FT*3 - CMPod - ECM Pod - AGM-65A*6"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+				},
+				country = {
+					[1] = "USA",
+				},
+				attributes =  { "SAM", "soft"},
+				restrictedCondition = "restricted_loadoutnam4",      --restricted_loadoutnam4
+				code_loadout =  { "NAM" },
+				weaponType = "ASM",
+				expend = "Auto",
+				attackType = "Dive",
+				range = 600000,
+				firepower = 1,
+				vCruise = 250,
+				vAttack = 300,
+				hCruise = 5486.4,
+				hAttack = 4572,
+				standoff = 15000,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{HB_ALE_40_30_60}",
+					["num"] = 14,
+				},
+				[2] = {
+					["CLSID"] = "{F4_SARGENT_TANK_370_GAL_R}",
+					["num"] = 13,
+				},
+				[3] = {
+					["CLSID"] = "{F4_SARGENT_TANK_370_GAL}",
+					["num"] = 1,
+				},
+				[4] = {
+					["CLSID"] = "{F4_SARGENT_TANK_600_GAL}",
+					["num"] = 7,
+				},
+				[5] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 12,
+				},
+				[6] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 10,
+				},
+				[7] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 4,
+				},
+				[8] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 2,
+				},
+				[9] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 9,
+				},
+				[10] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 8,
+				},
+				[11] = {
+					["CLSID"] = "{HB_ALQ-131_ON_ADAPTER_IN_AERO7}",
+					["num"] = 6,
+				},
+				[12] = {
+					["CLSID"] = "{HB_F4E_AIM-7E-2}",
+					["num"] = 5,
+				},
+				[13] = {
+					["CLSID"] = "{HB_F4EAGM-65A_LAU88_3x_Right}",
+					["num"] = 11,
+				},
+				[14] = {
+					["CLSID"] = "{HB_F4EAGM-65A_LAU88_3x_Left}",
 					["num"] = 3,
 				},
 					},
@@ -24142,6 +24431,7 @@ db_all_loadouts = {
 					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM" },
+				restrictedCondition = "restricted_loadoutnam3",      --restricted_loadoutnam3
 				country = {
 					[1] = "USA",
 				},
@@ -24259,70 +24549,70 @@ db_all_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM - AG - AIM-9Jx2 - FTx2 - Mk-77x2 Napalm"] = {
-				minscore = 0.3,
-				support = {
-					SEAD = true,
-					Escort = true,
-					["Escort Jammer"] = true,
-				},
-				attributes =  { "soft", "Parked Aircraft", "SAM" },
-				country = {
-					[1] = "USA",
-				},
-				code_loadout =  { "NAM" },
-				weaponType = "Bombs",
-				expend = "All",
-				night = true,
-				adverseWeather = true,
-				range = 1600000,
-				firepower = 1,
-				vCruise = 200,
-				vAttack = 350,
-				hCruise = 4500,
-				hAttack = 200,
-				sortie_rate = 6,
-				stores = {
-					pylons = {
-					[1] = {
-					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
-					["num"] = 5,
-					},
-					[2] = {
-					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
-					["num"] = 1,
-					},
-					[3] = {
-					["CLSID"] = "{Mk-77 mod 1_TER_2_C}",
-					["num"] = 3,
-					["settings"] = {
-						["NFP_PRESID"] = "MDRN_B_A_GPLD",
-						["NFP_PRESVER"] = 1,
-						["NFP_VIS_DrawArgNo_57"] = 0,
-						["NFP_fuze_type_nose"] = "M904E4",
-						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 4,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
-					},
-					},
-					[4] = {
-					["CLSID"] = "{DFT-300gal_LR}",
-					["num"] = 4,
-					},
-					[5] = {
-					["CLSID"] = "{DFT-300gal_LR}",
-					["num"] = 2,
-					},
-					},
-					fuel = 2467.5454273299,
-					flare = 30,
-					ammo_type = 1,
-					chaff = 30,
-					gun = 100,
-				},
-			},
+			-- ["NAM - AG - AIM-9Jx2 - FTx2 - Mk-77x2 Napalm"] = {
+				-- minscore = 0.3,
+				-- support = {
+					-- SEAD = true,
+					-- Escort = true,
+					-- ["Escort Jammer"] = true,
+				-- },
+				-- attributes =  { "soft", "Parked Aircraft", "SAM" },
+				-- country = {
+					-- [1] = "USA",
+				-- },
+				-- code_loadout =  { "NAM" },
+				-- weaponType = "Bombs",
+				-- expend = "All",
+				-- night = true,
+				-- adverseWeather = true,
+				-- range = 1600000,
+				-- firepower = 1,
+				-- vCruise = 200,
+				-- vAttack = 350,
+				-- hCruise = 4500,
+				-- hAttack = 200,
+				-- sortie_rate = 6,
+				-- stores = {
+					-- pylons = {
+					-- [1] = {
+					-- ["CLSID"] = "{AIM-9J-ON-ADAPTER}",
+					-- ["num"] = 5,
+					-- },
+					-- [2] = {
+					-- ["CLSID"] = "{AIM-9J-ON-ADAPTER}",
+					-- ["num"] = 1,
+					-- },
+					-- [3] = {
+					-- ["CLSID"] = "{Mk-77 mod 1_TER_2_C}",
+					-- ["num"] = 3,
+					-- ["settings"] = {
+						-- ["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						-- ["NFP_PRESVER"] = 1,
+						-- ["NFP_VIS_DrawArgNo_57"] = 0,
+						-- ["NFP_fuze_type_nose"] = "M904E4",
+						-- ["NFP_fuze_type_tail"] = "M905",
+						-- ["arm_delay_ctrl_M904E4"] = 4,
+						-- ["arm_delay_ctrl_M905"] = 4,
+						-- ["function_delay_ctrl_M904E4"] = 0,
+						-- ["function_delay_ctrl_M905"] = 0,
+					-- },
+					-- },
+					-- [4] = {
+					-- ["CLSID"] = "{DFT-300gal_LR}",
+					-- ["num"] = 4,
+					-- },
+					-- [5] = {
+					-- ["CLSID"] = "{DFT-300gal_LR}",
+					-- ["num"] = 2,
+					-- },
+					-- },
+					-- fuel = 2467.5454273299,
+					-- flare = 30,
+					-- ammo_type = 1,
+					-- chaff = 30,
+					-- gun = 100,
+				-- },
+			-- },
 			["NAM - AG - AIM-9Jx2 - FTx2 - Mk-83LDx3"] = {
 				minscore = 0.3,
 				support = {

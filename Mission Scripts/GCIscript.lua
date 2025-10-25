@@ -489,8 +489,6 @@ local function GCI_Cycle()
 																					["id"] = "Script",
 																					["params"] =
 																					{
-																						-- ["command"] =
-                                                                                        -- "env.info('interceptPlanDeVol W1 A '..tostring(selectInterName) )",
 																						["command"] = "env.info('interceptPlanDeVol W1 A " .. tostring(selectInterName) .. "')",
 																					},
 																				},
@@ -557,8 +555,6 @@ local function GCI_Cycle()
 																					["id"] = "Script",
 																					["params"] =
 																					{
-																						-- ["command"] =
-                                                                                        -- "env.info('interceptPlanDeVol W2 C '..tostring(selectInterName))",
 																						["command"] = "env.info('interceptPlanDeVol W2 A " .. tostring(selectInterName) .. "')",
 																					},
 																				},
@@ -602,8 +598,6 @@ local function GCI_Cycle()
 																					["id"] = "Script",
 																					["params"] =
 																					{
-																						-- ["command"] =
-                                                                                        -- "env.info('interceptPlanDeVol W2 C '..tostring(selectInterName))",
 																						["command"] = "env.info('interceptPlanDeVol W2 C " .. tostring(selectInterName) .. "')",
 																					},
 																				},
@@ -731,7 +725,6 @@ local function GCI_Cycle()
 																					["id"] = "Script",
 																					["params"] =
 																					{
-																						-- ["command"] = "env.info('interceptPlanDeVol W3 D '" .. tostring(selectInterName) .. ")",
 																						["command"] = "env.info('interceptPlanDeVol W3 D " .. tostring(selectInterName) .. "')",
 
 																					},

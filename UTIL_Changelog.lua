@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.91.565"
+versionDCE["UTIL_Changelog.lua"] = "20.91.568"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.91.565"
+VersionDCE["UTIL_Changelog.txt"] = "20.91.568"
 --[[
 
 
@@ -9,8 +9,11 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.91.565:==
-566 fixed	[timing] 
+==:20.91.568:==
+568 WIP		[WPT][timing]	Reviewing the “flight plan” code revealed a lot of bugs on my part and negative side effects (zombie planes, premature landings, too many task injections, routes, etc.). I'm reviewing it again.
+567 fixed	[trigger][loadout]	Addition of the trigger action.AuthorizedLoadout(authName) associated with the variable in loadouts: restrictedCondition.
+									This allows certain loadouts to be activated depending on the progress of the campaign
+566 fixed	[timing] Some plane fly too slowly to stay on schedule: in-depth review of the code: flight plan, waypoint, time, speed
 565 fixed	[radio][choice] Sometimes there are no radio channels assigned to the player aircraft. We have also changed the aircraft selection. Please note that a wingman player position is possible.
 564 added	[plane] MiG-29 Fulcrum
 563 added	[EWR][frequencies]    Some CampaignMakers specifically want to keep the same EWR frequencies, while others do not.
