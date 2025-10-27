@@ -1,11 +1,11 @@
 --Various DATA
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M90_a updateData_Bh
+-- last modification: M90_a updateData_Bi
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Data.lua"] = "1.15.88"
+versionDCE["UTIL_Data.lua"] = "1.15.89"
 ------------------------------------------------------------------------------------------------------- 
--- updateData_Bh			(h Fulcrum)(g vwv_mig21mf)(f refuellingReceptacleType)(e Tu_22D)(Bd flyingAlone)(CH-47F H-6J)(a OH-58)(z F-4E-45MC)(UH-60L)(x hHover)(w reaper)(v Hercules)(u tabTask)(t add is_helicopter table)(s F1EE)(r F-16C_50)(q): Add helicos  (p): Add WOC80)(o: transfer the dataMap to another file)
+-- updateData_Bi			(i VSN_F4)(h Fulcrum)(g vwv_mig21mf)(f refuellingReceptacleType)(e Tu_22D)(Bd flyingAlone)(CH-47F H-6J)(a OH-58)(z F-4E-45MC)(UH-60L)(x hHover)(w reaper)(v Hercules)(u tabTask)(t add is_helicopter table)(s F1EE)(r F-16C_50)(q): Add helicos  (p): Add WOC80)(o: transfer the dataMap to another file)
 -- debug_c					(c OH-6A)(b requiredModulesSpecialName)(a add IsWesternCountry function)
 -- cleanCode_a				(a: repetition)
 -- adjustment_e				(e delete EPLRS_Capacity table)(d CVN to CV)(bombing on Group&Unit)(b: Syria nnTimeZone +3 & GudautaGPS )
@@ -140,25 +140,18 @@ TaskByPlane = {
 		["AV8BNA"] = true,
 		["A-4E-C"] = true,				--Mod
 		["A-6E"] = true,				--Mod
-		["EA_6B"] = true,				--Mod
 		["A-10C"] = true,
 		["A-10A"] = true,
 		["A-10C_2"] = true,
 		["Bronco-OV-10A"] = true,		--Mod
 		["vwv_a1_skyraider"] = true,	--Mod
 		["vwv_o-1"] = true,         	--Mod
-		["VSN_F100"] = true,			--Mod
-		["VSN_F105D"] = true,			--Mod
-		["VSN_F105G"] = true,			--Mod
 
 		["F-86F Sabre"] = true,
 		["F-4E"] = true,
-		-- ["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
 		["vwv_ra-5"] = true,		--Mod
-		-- ["F-14A-135-GR"] = true,
-		-- ["F-14B"] = true,
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
@@ -205,7 +198,6 @@ TaskByPlane = {
 		["MiG-19P"] = true,
 		["MiG-21Bis"] = true,
 		["vwv_mig21mf"] = true,			--Mod
---		["vwv_mig21pfm"] = true,			--Mod
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-27K"] = true,
@@ -254,7 +246,6 @@ TaskByPlane = {
 
 
 	["AFAC"] = {
-		-- ["F-4E-45MC"] = true,
 		["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
@@ -343,9 +334,6 @@ TaskByPlane = {
 		["A-10A"] = true,
 		["Bronco-OV-10A"] = true,		--Mod
 		["vwv_a1_skyraider"] = true,	--Mod
-		["VSN_F100"] = true,			--Mod
-		["VSN_F105D"] = true,			--Mod
-		["VSN_F105G"] = true,			--Mod
 
 		["AJS37"] = true,
 		["AV8BNA"] = true,
@@ -365,10 +353,7 @@ TaskByPlane = {
 		["F-86F Sabre"] = true,
 
 		["F-4E"] = true,
-		-- ["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
-		-- ["F-14B"] = true,
-		-- ["F-14A-135-GR"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
 		["F-16C_50"] = true,
@@ -452,15 +437,11 @@ TaskByPlane = {
 		["F-86F Sabre"] = true,
 
 		["F-4E"] = true,
-		-- ["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
-		-- ["F-14A-135-GR"] = true,
-		-- ["F-14B"] = true,
 		["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
 		["FA-18C_hornet"] = true,
-		["MB-339A"] = true,
-		--["Mirage-F1CE"] = true,		--not yet				 
+		["MB-339A"] = true,			 
 		["MirageF1CT"] = true,			--Mod
 
 		["AH-1W"] = true,
@@ -526,7 +507,6 @@ TaskByPlane = {
 
 		["A-4E-C"] = true,				--Mod
 		["A-6E"] = true,				--Mod
-		["EA_6B"] = true,				--Mod
 		["Bronco-OV-10A"] = true,		--Mod
 		["vwv_a1_skyraider"] = true,	--Mod
 		["A-10C"] = true,
@@ -534,9 +514,6 @@ TaskByPlane = {
 		["A-10A"] = true,
 		["AJS37"] = true,
 		["AV8BNA"] = true,
-		["VSN_F100"] = true,			--Mod
-		["VSN_F105D"] = true,			--Mod
-		["VSN_F105G"] = true,			--Mod
 
 		["B-1B"] = true,
 		["B-52H"] = true,
@@ -547,10 +524,7 @@ TaskByPlane = {
 		["F-86F Sabre"] = true,
 
 		["F-4E"] = true,
-		-- ["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
-		-- ["F-14A-135-GR"] = true,
-		-- ["F-14B"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
 		["F-16C_50"] = true,
@@ -642,8 +616,6 @@ TaskByPlane = {
 		["H-6J"] = true,
 		["tu_22D"] = true,					--Mod
 
-		-- ["F-14A-135-GR"] = true,
-		-- ["F-14B"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
 		["F-16C_50"] = true,
@@ -686,8 +658,6 @@ TaskByPlane = {
 		["P-51D"] = true,
 		["P-51D-30-NA"] = true,
 
-		-- ["C-47"] = true,				--C47 en escorte? mais ils sont fou chez ED :p
-
 		["Bf-109K-4"] = true,
 		["FW-190A8"] = true,
 		["FW-190D9"] = true,
@@ -700,11 +670,8 @@ TaskByPlane = {
 
 		["F-86F Sabre"] = true,
 		["F-4E"] = true,
-		-- ["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
-		-- ["F-14A-135-GR"] = true,
-		-- ["F-14B"] = true,
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
@@ -732,7 +699,6 @@ TaskByPlane = {
 		["MiG-19P"] = true,
 		["MiG-21Bis"] = true,
 		["vwv_mig21mf"] = true,			--Mod
---		["vwv_mig21pfm"] = true,			--Mod
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-29A"] = true,
@@ -762,10 +728,7 @@ TaskByPlane = {
 		["tu_22D"] = true,				--Mod
 
 		["F-4E"] = true,
-		-- ["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
-		-- ["F-14A-135-GR"] = true,
-		-- ["F-14B"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
 		["F-16C_50"] = true,
@@ -811,11 +774,8 @@ TaskByPlane = {
 
 		["AV8BNA"] = true,
 		["F-4E"] = true,
-		-- ["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
-		-- ["F-14A-135-GR"] = true,
-		-- ["F-14B"] = true,
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
@@ -833,7 +793,6 @@ TaskByPlane = {
 		["MiG-19P"] = true,
 		["MiG-21Bis"] = true,
 		["vwv_mig21mf"] = true,			--Mod
---		["vwv_mig21pfm"] = true,			--Mod
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-29A"] = true,
@@ -871,11 +830,8 @@ TaskByPlane = {
 		["F-86F Sabre"] = true,
 
 		["F-4E"] = true,
-		-- ["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
-		-- ["F-14A-135-GR"] = true,
-		-- ["F-14B"] = true,
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
@@ -897,7 +853,6 @@ TaskByPlane = {
 		["MiG-19P"] = true,
 		["MiG-21Bis"] = true,
 		["vwv_mig21mf"] = true,			--Mod
---		["vwv_mig21pfm"] = true,			--Mod
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-29A"] = true,
@@ -934,11 +889,8 @@ TaskByPlane = {
 
 		["AV8BNA"] = true,
 		["F-4E"] = true,
-		-- ["F-4E-45MC"] = true,
 		["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
-		-- ["F-14A-135-GR"] = true,
-		-- ["F-14B"] = true,
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
@@ -957,7 +909,6 @@ TaskByPlane = {
 		["MiG-19P"] = true,
 		["MiG-21Bis"] = true,
 		["vwv_mig21mf"] = true,			--Mod
---		["vwv_mig21pfm"] = true,			--Mod
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-29A"] = true,
@@ -981,7 +932,6 @@ TaskByPlane = {
 		["A-4E-C"] = true,				--Mod
 		["AJS37"] = true,
 		["F-4E"] = true,
-		-- ["F-4E-45MC"] = true,
 		["vwv_crusader"] = true,		--Mod
 		["vwv_ra-5"] = true,		--Mod
 		["F-15E"] = true,
@@ -1026,15 +976,10 @@ TaskByPlane = {
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
 
-		["A-4E-C"] = true,				--Mod	
-		--["A-6E"] = true,				--no weapon				 
-		["EA_6B"] = true,				--Mod
-		["VSN_F100"] = true,			--Mod
-		["VSN_F105G"] = true,			--Mod
+		["A-4E-C"] = true,				--Mod				 
 
 		["AV8BNA"] = true,
 		["F-4E"] = true,
-		-- ["F-4E-45MC"] = true,
 		["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
 		["FA-18C_hornet"] = true,
@@ -1219,7 +1164,11 @@ Data_divers = {
 			type = "AN/ALQ-99",
 			efficiency = 95,
 			range = 10000,
-		}
+		},
+		Tasks = {
+			aircraft_task(GroundAttack),
+			aircraft_task(SEAD),
+		},
 	},
 
 	["VSN_F100"] = 	{				--Mod
@@ -1229,6 +1178,11 @@ Data_divers = {
 		playable = true,
 		vCruise = 200,	--TODO a confirmer
 		hCruise = 4500,
+		Tasks = {
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(SEAD),
+		},
 	},
 
 	["VSN_F105D"] = 	{				--Mod
@@ -1266,7 +1220,6 @@ Data_divers = {
 			aircraft_task(Reconnaissance),
 			aircraft_task(GroundAttack),
 			aircraft_task(CAS),
-		  --aircraft_task(AFAC),
 			aircraft_task(RunwayAttack),
 			aircraft_task(AntishipStrike),
 	  },
@@ -1412,6 +1365,50 @@ Data_divers = {
 		vCruise = 215,
 		hCruise = 9000,
 	},
+	["VSN_F4B"] = 	{
+		instrumentUnits = "imperial",
+		requiredModules = true,						--itsModule
+		requiredModulesSpecialName = "VSN_F4",	--if the aircraft type name does not match the requested module name
+		playable = true,
+		vCruise = 215,
+		hCruise = 9000,
+		Tasks = {
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(Reconnaissance),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(AFAC),
+			aircraft_task(RunwayAttack),
+			aircraft_task(PinpointStrike), --NEU
+	--  	aircraft_task(AntishipStrike),
+		},	
+	},
+	["VSN_F4C"] = 	{
+		instrumentUnits = "imperial",
+		requiredModules = true,						--itsModule
+		requiredModulesSpecialName = "VSN_F4",	--if the aircraft type name does not match the requested module name
+		playable = true,
+		vCruise = 215,
+		hCruise = 9000,
+		Tasks = {
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(Reconnaissance),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(AFAC),
+			aircraft_task(RunwayAttack),
+			aircraft_task(SEAD), --NEU
+			aircraft_task(PinpointStrike), --NEU
+	--  	aircraft_task(AntishipStrike),
+		},	
+	},
+
 	["F-4E-45MC"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,

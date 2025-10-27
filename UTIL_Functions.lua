@@ -2101,6 +2101,10 @@ end
 -- modification M49.a big central db_loadout
 
 function BuildLoadout()
+	
+	if not camp.AuthorizedLoadout then
+		camp.AuthorizedLoadout = {}
+	end
 	local addLoadoutsTag = false
 	-- campaigns_code_loadout = { 
 		-- ["Cyprus"] =		"Cyprus Incident",
@@ -2176,7 +2180,7 @@ function BuildLoadout()
 
 
 	-- cherche le code a appliquer au loadout, pour charger le bon..loadout ^^
-	if (not ( campConfMod and  campConfMod.code_loadout) and campaigns_code_loadout )then
+	if (not ( campConfMod and campConfMod.code_loadout) and campaigns_code_loadout )then
 		local bestMatch = nil
 		local bestMatchCount = 0
 		campConfMod = {}
@@ -2187,42 +2191,30 @@ function BuildLoadout()
 				-- Plusieurs mots-clés à vérifier
 				local matchCount = 0
 				for _, prefix in ipairs(prefix_s) do
-					-- print("choiceLoadout B1 _: "..tostring(_).." prefix: "..tostring(prefix))
-
 					if string.find(string.lower(camp.title), string.lower(prefix)) then
 						matchCount = matchCount + 1
-						-- print("choiceLoadout B2 matchCount: "..tostring(matchCount).." prefix: "..tostring(prefix))
-
 					end
 				end
 				-- Mise à jour du meilleur match
 				if matchCount > bestMatchCount then
 					bestMatch = codeName
 					bestMatchCount = matchCount
-					-- print("choiceLoadout C bestMatchCount: "..tostring(bestMatchCount).." bestMatch: "..tostring(bestMatch))
 				end
 			else
 				-- Un seul mot-clé à vérifier
 				if string.find(string.lower(camp.title), string.lower(prefix_s)) then
-					-- print("choiceLoadout D1 title: "..tostring(camp.title).." prefix_s: "..tostring(prefix_s))
-
-
 					local number_of_words = word_count(prefix_s)
 					if number_of_words > bestMatchCount then
 						bestMatch = codeName
 						bestMatchCount = 1
-						-- print("choiceLoadout D2 bestMatchCount: "..tostring(bestMatchCount).." bestMatch: "..tostring(bestMatch))
-
 					elseif prefix_s == camp.title then
 						bestMatch = codeName
 						bestMatchCount = 100
-						-- print("choiceLoadout D3 bestMatchCount: "..tostring(bestMatchCount).." bestMatch: "..tostring(bestMatch))
 					end
 
 					if bestMatchCount < 1 then -- Priorité pour les correspondances plus spécifiques
 						bestMatch = codeName
 						bestMatchCount = 1
-						-- print("choiceLoadout D4 bestMatchCount: "..tostring(bestMatchCount).." bestMatch: "..tostring(bestMatch))
 					end
 				end
 			end
@@ -2248,40 +2240,27 @@ function BuildLoadout()
 
 	-- helper: vérifie si le loadout est autorisé par restrictedCondition
 	local function allowed_by_restriction(loadData)
-		-- print("allowed_by_restriction() A0 ")
 		if not loadData.restrictedCondition then
-			-- print("allowed_by_restriction() A1 return true ")
 			return true
 		end
 		if type(loadData.restrictedCondition) == "string" then
-			-- print("allowed_by_restriction() B ")
-			-- _affiche(camp.AuthorizedLoadout, "camp.restrictedCondition: ")
-
 			for _, campAuth in pairs(camp.AuthorizedLoadout) do
-				-- print("allowed_by_restriction() B2 "..tostring(loadData.restrictedCondition).." ==?campAuth: "..tostring(campAuth) )
 				if string.lower(tostring(loadData.restrictedCondition)) == string.lower(tostring(campAuth)) then
-					-- print("allowed_by_restriction() B3 return true ")
 					return true
 				end
 			end
-			-- print("allowed_by_restriction() B4 return false ")
 			return false
 		end
 		if not camp.AuthorizedLoadout then
-			-- print("allowed_by_restriction() C1 return true ")
 			return true
 		end
 		for _, conditionName in pairs(loadData.restrictedCondition) do
-			-- print("allowed_by_restriction() D1 "..tostring(conditionName))
 			for _, campAuth in pairs(camp.AuthorizedLoadout) do
-				-- print("allowed_by_restriction() D2 "..tostring(campAuth))
 				if string.lower(tostring(conditionName)) == string.lower(tostring(campAuth)) then
-					-- print("allowed_by_restriction() D3 returns true ")
 					return true
 				end
 			end
 		end
-		-- print("allowed_by_restriction() Z return false ")
 		return false
 	end
 
@@ -2304,6 +2283,18 @@ function BuildLoadout()
 		return false
 	end
 
+	-- helper: vérifie si 
+	local function plane_match(planeLoadout)
+		for sideName, squads in pairs(oob_air) do
+			for squadN, squad in pairs(squads) do
+				if string.lower(squad.type) == string.lower(planeLoadout) then
+					return true
+				end
+			end
+		end
+		return false
+	end
+
 	local function add_loadout(plane, taskName, loadoutName, value)
 		LoadoutsList[plane] = LoadoutsList[plane] or {}
 		LoadoutsList[plane][taskName] = LoadoutsList[plane][taskName] or {}
@@ -2311,22 +2302,14 @@ function BuildLoadout()
 	end
 
 	for plane, planeTab in pairs(db_all_loadouts) do
-		for taskName, loadout in pairs(planeTab) do
-			for loadoutName, loadData in pairs(loadout) do
-				if codes_match(loadData, campConfMod.code_loadout) then
-					-- if loadData.restrictedCondition then
-					-- 	print("buildsLoadout() MAIN_A restrictedCondition "..plane.." "..taskName.." |loadoutName>:| "..loadoutName)
-					-- 	_affiche(loadData.restrictedCondition, "restrictedCondition: ")
-					-- end
-					if allowed_by_restriction(loadData) then
-						-- print("buildsLoadout() MAIN_B add_loadout")
-						add_loadout(plane, taskName, loadoutName, loadData)
-						-- print("buildsLoadout() MAIN_B2")
+		if plane_match(plane) then
+			for taskName, loadout in pairs(planeTab) do
+				for loadoutName, loadData in pairs(loadout) do
+					if codes_match(loadData, campConfMod.code_loadout) then
+						if allowed_by_restriction(loadData) then
+							add_loadout(plane, taskName, loadoutName, loadData)
+						end
 					end
-					-- if loadData.restrictedCondition then
-					-- 	print("buildsLoadout() MAIN_C check")
-					-- 	os.execute 'pause'
-					-- end
 				end
 			end
 		end

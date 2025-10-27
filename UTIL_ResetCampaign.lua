@@ -30,12 +30,8 @@ require("Init/camp_init")
 if not ChangePlane then
 	require("Init/oob_air_init")
 	require("Init/camp_triggers_init")
-else
-	-- require("Active/oob_air")
-	-- require("Active/camp_triggers")	
 end
 require("Init/db_airbases")
--- require("Init/targetlist_init") déjà appelé par BAT_FirstMission
 
 --retrocompatibilie location UTIL_DataRadio file
 --recherche en priorite le fichier UTIL_DataRadio dans le dossier ScriptsMod puis dans le dossier campagne
@@ -109,11 +105,6 @@ local clientFile = io.open("Active/clientstats.lua", "w") or error("Failed to op
 clientFile:write(client_str)																		--write initial file
 clientFile:close()
 
--- require("Init/camp_triggers_init")																	--open campaign trigger file
--- local trigStr = "camp_triggers = " .. TableSerializationAG(camp_triggers, 0)							--write
--- local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to open debug file")
--- trigFile:write(trigStr)
--- trigFile:close()
 local trigStr = "camp_triggers = " .. TableSerializationAG_triggers(camp_triggers, 0)							--write
 local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to open debug file")
 trigFile:write(trigStr)
@@ -123,11 +114,6 @@ local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
 trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
 trigFile:write(airbases_Str)
 trigFile:close()
-
--- local scen_str = "oob_scen = {}"
--- local scenFile = io.open("Active/oob_scen.lua", "w") or error("Failed to open debug file")
--- scenFile:write(scen_str)																			--write initial file
--- scenFile:close()
 
 local ZoneSAR_str = "camp_ZoneSAR = {}"																--make a string
 local ZoneSARFile = io.open("Active/camp_ZoneSAR.lua", "w") or error("Failed to open debug file")
@@ -148,13 +134,7 @@ end
 
 --create new oob_ground (requires extraction of data of init mission)
 do
-	-- if minizip == nil then
 
-	-- else
-	-- 	-- print("Impossible de charger minizip.dll.")
-	-- 	minizip = require('minizip')
-
-	-- end
 	--unpack template mission file
 	local minizip = require('minizip')
 	local zipFile = minizip.unzOpen("Init/base_mission.miz", 'rb')

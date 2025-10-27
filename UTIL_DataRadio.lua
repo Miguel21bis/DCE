@@ -1,11 +1,11 @@
 --cree pour controler les plages des frequences
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  updateData_l
+-- last modification:  updateData_m
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_DataRadio.lua"] = "1.4.49"
+versionDCE["UTIL_DataRadio.lua"] = "1.4.50"
 ------------------------------------------------------------------------------------------------------- 
--- updateData_l				(l: Fulcrum)k(Frequency)(CH-47F)(i: VSN_F100 + 105)(h F-4E-45MC)(g add Hercules)(h F-15ESE)(f add MB-339A)(e: add F1-EE)(d add 3xSa342)(c: L39+Su25)(b: add AH-64D_BLK_II)(a: add Mi24)
+-- updateData_m				(m VSN_F4)(l: Fulcrum)k(Frequency)(CH-47F)(i: VSN_F100 + 105)(h F-4E-45MC)(g add Hercules)(h F-15ESE)(f add MB-339A)(e: add F1-EE)(d add 3xSa342)(c: L39+Su25)(b: add AH-64D_BLK_II)(a: add Mi24)
 -- Debug_f					(f: bug list Freq)(e correction F16)(d: fix Mi24 VHF/UHF)(c onlyVariableFrequency = true, for SA342)(b radio 2 UHF)(a Bf109, Spitfire)
 -- modification M34_Bl		custom FrequenceRadio (l new file name)  (i: FreqCapability2)(f more Divert, more Coalition)(Bc Bug Mirage 2000)(Ba A-4E-C bug)(v delete Radio3 AV8)(t: radioname)(p LVHF)(i: 3 frequency bands)
 -- modification M20_b		Pannes aléatoires (Failures) en SingleMission et ForcedOption (external view etc..) (b failure adapted to each aircraft type)
@@ -223,21 +223,50 @@ Frequency = {
 			},
 		},
 	},
-	["F-4E-45MC"] = {
-		radio = {						--range of radio frequencies of player aircraft
-			[1] = {						--radio 1
+	["VSN_F4B"] = {
+		radio = {
+			[1] = {
 				UHF = {
-					min = 225,				--minimum radio frequency in mHz    UHF AN/ARC-164 COMM channels
-					max = 399,				--maxium  radio frequency in mHz
+					min = 225,
+					max = 399,
 				},
 				nbCanal = 18,
 				manual = true,
 				name = "UHF COMM",
+				type = "AN/ASQ-19",
 			},
-			[2] = {						--radio 2
+		},
+	},
+	["VSN_F4C"] = {
+		radio = {
+			[1] = {
 				UHF = {
-					min = 265,				--minimum radio frequency in mHz   MIN 108 MAX 399
-					max = 284.9,				--maxium  radio frequency in mHz
+					min = 225,
+					max = 399,
+				},
+				nbCanal = 18,
+				manual = true,
+				name = "UHF COMM",
+				type = "AN/ASQ-19",
+			},
+		},
+	},
+	["F-4E-45MC"] = {
+		radio = {
+			[1] = {
+				UHF = {
+					min = 225,
+					max = 399,
+				},
+				nbCanal = 18,
+				manual = true,
+				name = "UHF COMM",
+				type = "AN/ARC-164",
+			},
+			[2] = {
+				UHF = {
+					min = 265,
+					max = 284.9,
 				},
 				nbCanal = 20,
 				manual = false,
