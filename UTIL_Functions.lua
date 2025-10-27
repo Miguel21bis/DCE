@@ -2180,10 +2180,11 @@ function BuildLoadout()
 
 
 	-- cherche le code a appliquer au loadout, pour charger le bon..loadout ^^
-	if (not ( campConfMod and campConfMod.code_loadout) and campaigns_code_loadout )then
+	-- if (not ( campConfMod and campConfMod.code_loadout) and campaigns_code_loadout )then
+	if (campaigns_code_loadout )then
 		local bestMatch = nil
 		local bestMatchCount = 0
-		campConfMod = {}
+		-- campConfMod = {}
 
 		-- Parcourir la table des codes
 		for codeName, prefix_s in pairs(campaigns_code_loadout) do
@@ -2220,17 +2221,18 @@ function BuildLoadout()
 			end
 		end
 
-		campConfMod.code_loadout = bestMatch
+		-- campConfMod.code_loadout = bestMatch
+		camp.code_loadout = bestMatch
 	end
 
-	if not campConfMod or not campConfMod.code_loadout or campConfMod.code_loadout == nil then
-		campConfMod = {
-			code_loadout = "all",
-		}
-	end
+	-- if not campConfMod or not campConfMod.code_loadout or campConfMod.code_loadout == nil then
+	-- 	campConfMod = {
+	-- 		code_loadout = "all",
+	-- 	}
+	-- end
 
 	if Debug.debug then
-		print("UtilF camp.title |"..camp.title.."| campConfMod.code_loadout |"..campConfMod.code_loadout )
+		print("UtilF camp.title |"..camp.title.."| campConfMod.code_loadout |"..camp.code_loadout )
 	end
 
 	if campMod.selectLoadout == "init" then
@@ -2305,7 +2307,7 @@ function BuildLoadout()
 		if plane_match(plane) then
 			for taskName, loadout in pairs(planeTab) do
 				for loadoutName, loadData in pairs(loadout) do
-					if codes_match(loadData, campConfMod.code_loadout) then
+					if codes_match(loadData, camp.code_loadout) then
 						if allowed_by_restriction(loadData) then
 							add_loadout(plane, taskName, loadoutName, loadData)
 						end

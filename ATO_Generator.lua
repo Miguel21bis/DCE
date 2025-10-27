@@ -304,7 +304,7 @@ for side, units in pairs(oob_air) do
 							end
 
 						else
-							print("AtoG error_C: |"..unit.type.."| not found in db_loadouts. A problem with the campaigns_code_loadout code? |"..tostring(campConfMod.code_loadout).."|")
+							print("AtoG error_C: |"..unit.type.."| not found in db_loadouts. A problem with the campaigns_code_loadout code? |"..tostring(camp.code_loadout).."|")
 							error = error + 1
 						end
 

@@ -577,7 +577,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                 end
 
                 --*************************************************************
-                if pilot.sideName == "red" and campConfMod.code_loadout == "NAM" then
+                if pilot.sideName == "red" and camp.code_loadout == "NAM" then
                     
                     local enemy = DCS_ENI_Side[zoneSideName]
                     pilot.inTheEnemyCamp =  checkPointInPoly2({x=pilot.pos.x,y=pilot.pos.y}, boundary[enemy])
