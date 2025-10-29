@@ -66,6 +66,15 @@ else
 			end
 		end	
 	end	
+
+	-- add keys from campL that are not in camp
+	for kk,vv in pairs(campL) do
+		if not camp[kk] then
+			camp[kk] = vv
+		end
+	end
+
+	
 	camp.mission = camp.mission + 1
 
 

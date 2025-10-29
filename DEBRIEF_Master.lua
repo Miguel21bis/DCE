@@ -107,6 +107,13 @@ for k,v in pairs(camp) do
 	end	
 end	
 
+-- add keys from campL that are not in camp
+for kk,vv in pairs(campL) do
+	if not camp[kk] then
+		camp[kk] = vv
+	end
+end
+
 --zoneSAR = {
 local zoneSARFile = "zoneSAR.lua"
 testPath = io.open(zoneSARFile, "r")																--cette maniere de chercher la presence d un fichier evite un plantage
