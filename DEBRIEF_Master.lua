@@ -90,12 +90,26 @@ end
 
 local logExport = loadfile("MissionEventsLog.lua")()											--mission events log
 local scenExport = loadfile("scen_destroyed.lua")()												--destroyed scenery objects
-local campExport = loadfile("camp_status.lua")()												--camp_status
+local campExport = loadfile("camp_status.lua")()
+Mission_LL_Positions = nil
+local ll_PositionsExport = loadfile("Mission_LL_Positions.lua")()
 local SARExport
+
+--camp full type A
+dofile("Active/camp_status.lua")
+
+--merge camp full and camp light
+for k,v in pairs(camp) do
+	for kk,vv in pairs(campL) do
+		if k == kk then
+			v = vv
+		end
+	end	
+end	
 
 --zoneSAR = {
 local zoneSARFile = "zoneSAR.lua"
-testPath = io.open(zoneSARFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
+testPath = io.open(zoneSARFile, "r")																--cette maniere de chercher la presence d un fichier evite un plantage
 if testPath ~= nil then																					--check si le fichier existe dans ScriptsMod
 	io.close(testPath)
 	SARExport = loadfile("zoneSAR.lua")()														--zoneSAR
@@ -277,6 +291,7 @@ if Debug.debug or mission_ini.backupAllMissionFiles then
 		"scen_destroyed.lua",
 		"camp_status.lua",
 		"zoneSAR.lua",
+		"Mission_LL_Positions.lua",
 	}
 
 	-- Créer le répertoire "mission_0n" s'il n'existe pas
@@ -324,6 +339,7 @@ else
 		os.remove("scen_destroyed.lua")		--DISABLE FOR DEBUG
 		os.remove("camp_status.lua")		--DISABLE FOR DEBUG
 		os.remove("zoneSAR.lua")			--DISABLE FOR DEBUG
+		os.remove("Mission_LL_Positions.lua")			--DISABLE FOR DEBUG
 	end
 	os.exit()
 
@@ -848,6 +864,7 @@ if not Debug.debug then
 	os.remove("scen_destroyed.lua")		--DISABLE FOR DEBUG
 	os.remove("camp_status.lua")		--DISABLE FOR DEBUG
 	os.remove("zoneSAR.lua")			--DISABLE FOR DEBUG
+	os.remove("Mission_LL_Positions.lua")			--DISABLE FOR DEBUG
 end
 
 os.exit()

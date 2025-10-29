@@ -160,7 +160,7 @@ Debug_check = {
 	},
 	checkTargetName = false,					-- (true/false)	[default: false]	checks whether the target exists in oob_ground or in a template
 	checkTargetName2Space = false,				-- (true/false)	[default: false]	FirsMission Alert if target names contain 2 consecutive spaces	
-	-- makeCampaign = false,						-- (true/false)	[default: false]	allows campaignMaker to create a file mapping xy positions to LL (Init\LL_KnownPositionsTable.lua) this file is created automatically during the first 60 seconds of a DCE mission in DCS
+	-- makeCampaign = false,						-- (true/false)	[default: false]	allows campaignMaker to create a file mapping xy positions to LL (Init\LL_Positions.lua) this file is created automatically during the first 60 seconds of a DCE mission in DCS
 }
 
 

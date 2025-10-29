@@ -275,11 +275,11 @@ function ARM_Shot_EventHandler:onEvent(event)
 
 								-- env.info("ARM_Jammer B typeName: "..tostring(typeName))
 
-								if camp.jammerOnBoard and camp.jammerOnBoard[typeName] then
+								if campL.jammerOnBoard and campL.jammerOnBoard[typeName] then
 									local entry = {
 										unit = unit,
-										range = camp.jammerOnBoard[typeName].range,
-										efficiency = camp.jammerOnBoard[typeName].efficiency,
+										range = campL.jammerOnBoard[typeName].range,
+										efficiency = campL.jammerOnBoard[typeName].efficiency,
 									}
 									table.insert(jammers, entry)
 									-- env.info("ARM_Jammer C table.insert(jammers ")

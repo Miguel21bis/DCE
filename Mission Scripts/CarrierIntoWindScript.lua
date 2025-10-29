@@ -25,8 +25,8 @@ Vmax = 10																				--valeur limité pour spawner les F14 sans explosio
 windDeck = 9																			--valeur limité pour spawner les F14 sans explosion
 
 function ChangeValue()
-	Vmax = camp.CV_Vmax																--standard maxiumum speed value of carrier: 30 kts
-	windDeck = camp.CV_windDeck														--standard desired wind over deck value: 27 kts
+	Vmax = campL.CV_Vmax																--standard maxiumum speed value of carrier: 30 kts
+	windDeck = campL.CV_windDeck														--standard desired wind over deck value: 27 kts
 end
 
 
@@ -434,7 +434,7 @@ function CarrierIntoWind(GroupName)
 		end
 	end
 
-	if camp.SC_CarrierIntoWind == "auto" then
+	if campL.SC_CarrierIntoWind == "auto" then
 		timer.scheduleFunction(checkFlightOps, nil, timer.getTime() + 30)								--schedule function
 		-- timer.scheduleFunction(CheckFlightOps, nil, timer.getTime() + 2)								--schedule function
 	end

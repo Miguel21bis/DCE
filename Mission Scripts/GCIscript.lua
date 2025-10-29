@@ -242,10 +242,10 @@ local function GCI_Cycle()
 				local enemySideOfBorder = false
 				local authorizedInter = false
 
-				if camp.boundary and camp.boundary[friendSideName] and camp.boundary[friendSideName] ~= nil then
+				if campL.boundary and campL.boundary[friendSideName] and campL.boundary[friendSideName] ~= nil then
 					
-					ourSideOfBorder =  CheckPointInPoly_XY_3({x=target.pointVec3.x,y=target.pointVec3.z}, camp.boundary[friendSideName])
-					enemySideOfBorder =  CheckPointInPoly_XY_3({x=target.pointVec3.x,y=target.pointVec3.z}, camp.boundary[DCS_ENI_Side[friendSideName]])
+					ourSideOfBorder =  CheckPointInPoly_XY_3({x=target.pointVec3.x,y=target.pointVec3.z}, campL.boundary[friendSideName])
+					enemySideOfBorder =  CheckPointInPoly_XY_3({x=target.pointVec3.x,y=target.pointVec3.z}, campL.boundary[DCS_ENI_Side[friendSideName]])
 
 					if ourSideOfBorder then
 						authorizedInter = true
@@ -801,7 +801,7 @@ local function GCI_Cycle()
 										}
 										Controller.setTask(ctr, planDeVol)																			--activate task with mission for interceptor group
 
-										if camp.debug then
+										if campL.debug then
 											--export custom mission log
 											local logStr = "ComboTask = " .. TableSerialization(planDeVol, 0)
 											local FlightNameClean = selectInterName:gsub('[%p%c%s]', '_')
@@ -827,7 +827,7 @@ local function GCI_Cycle()
 									GCI.Interceptor[friendSideName].assigned[selectInterName].target = target_name										--store target name
 									target.assigned = target.assigned + GCI.Interceptor[friendSideName].assigned[selectInterName].number				--mark target as assigned for interception
 
-									if camp.debug then
+									if campL.debug then
 										--export custom mission log
 										local logStr = "GCI = " .. TableSerialization(GCI, 0)
 										local logFile = io.open(PathDCE.."Debug\\GCI".."_".. "TABLE".."_"..tostring(current_time)..".lua", "w")

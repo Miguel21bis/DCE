@@ -8,7 +8,7 @@ versionDCE["UTIL_Functions.lua"] = "1.19.136"
 -- adjustment_o				(n loadout code)(m Disp_time)(l add AFAC task)(k FormatTime)(i add InsertBugList(txt))(h use IsWesternCountry)(fg: add Loadout tiers)(e todo)(d:CheckConfModMaster )(c: fire Playable_m from conf_mod)
 -- debug_l					(l DC_NavalEnvironment)(k Package_freq-targetname)(j code_loadout bestMatch)(i planeType)(h Tha\'lah)(g string.gsub(v, "\"", "\\\"" ))(f new generateId)(d UH to HF) Angle et Bearing des statics sur PA
 -- modification M85_a		new variables added to conf_mod (RepairOption, current_date, weather, etc.)
--- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)
+-- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_Positions)
 -- modification M77_l		CG_ArtySpotter (kl ListSpotterAircraft)
 -- modification M71_c		PayloadRestricted (c:AuthorizedLoadout )(b Action.RestrictedLoadout(file))
 -- modification M63_a		compatible Datacard Generator or CombatFlite
@@ -769,11 +769,11 @@ end
 --function to return distance between two vector2 points
 function GetDistance(p1, p2)
 
-	if not p1.x then
+	if not p1.x or not p1.y then
 		_affiche(p1, "p1")
 	end
 
-	if not p2.x then
+	if not p2.x or not p2.y then
 		_affiche(p2, "p2")
 	end
 

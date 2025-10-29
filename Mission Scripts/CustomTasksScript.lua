@@ -55,7 +55,7 @@ function CustomGroupAttack(arg_FlightName, arg_TargetName, arg_Expend, arg_Weapo
 		local arg2_n = arg[3]
 		local current_time = timer.getTime()
 
-		if camp.debug then
+		if campL.debug then
 			--export custom mission log
 			local logStr = "ComboTask = " .. TableSerialization(arg2_ComboTask, 0)
 			local flightNameClean = arg_FlightName:gsub('[%p%c%s]', '_')
@@ -289,7 +289,7 @@ function CustomStaticAttack(flightName, targetList, expend, weaponType, attackTy
 		local n = arg[3]
 		local current_time = timer.getTime()
 
-		if camp.debug then
+		if campL.debug then
 			--export custom mission log
 			local logStr = "ComboTask = " .. TableSerialization(comboTask, 0)
 			local FlightNameClean = flightName:gsub('[%p%c%s]', '_')
@@ -521,7 +521,7 @@ function CustomMixClassAttack(flightName, targetList, expend, weaponType, attack
 		local n = arg[3]
 		local current_time = timer.getTime()
 
-		if camp.debug then
+		if campL.debug then
 			--export custom mission log
 			local logStr = "ComboTask = " .. TableSerialization(comboTask, 0)
 			local flightNameClean = flightName:gsub('[%p%c%s]', '_')
@@ -774,7 +774,7 @@ function CustomMapObjectAttack(FlightName, TargetList, expend, weaponType, attac
 		local n = arg[3]
 		local current_time = timer.getTime()
 
-		if camp.debug then
+		if campL.debug then
 			--export custom mission log
 			local logStr = "ComboTask = " .. TableSerialization(ComboTask, 0)
 			local FlightNameClean = FlightName:gsub('[%p%c%s]', '_')
@@ -1108,7 +1108,7 @@ function CustomAirbaseAttack(FlightName, TargetPos, expend, weaponType, attackTy
 				table.insert(ComboTask.params.tasks, MissionTask)		--add mission task fly to Egress waypoint individually, where the task will end and the wingmen will join their leader
 			end
 
-			if camp.debug then
+			if campL.debug then
 				local logStr = "ComboTask = " .. TableSerialization(ComboTask, 0)
 				local FlightNameClean = FlightName:gsub('[%p%c%s]', '_')
 				local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_"..n.."_".. "CustomAirbaseAttack.lua", "w")
@@ -1139,7 +1139,7 @@ function CustomRejoin(FlightName)
 	local function execute(cntrl)
 		cntrl:resetTask()												--reset task (wingman will rejoin with leader)
 
-		if camp.debug then
+		if campL.debug then
 
 			env.info("DCE_CustomRejoin | execute | cntrl:resetTask()| "..tostring(cntrl).." actualtime: "..tostring(timer.getTime()))
 			_affiche(cntrl, "DCE_CustomRejoin cntrl")
@@ -2451,7 +2451,7 @@ function CustomDesignationAFAC(arg_AFAC_F_Name, arg_refX, arg_refY, arg_LaserCod
 			}
 		}
 
-	if camp.debug then
+	if campL.debug then
 		local logStr = "afac = " .. TableSerialization(newMission, 0)
 		local flightNameClean = arg_AFAC_F_Name:gsub('[%p%c%s]', '_')
 		local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_AFAC_"..current_time..".lua", "w")
@@ -2940,7 +2940,7 @@ function CustomSearchThenEngageFutur1(flightName, radius, targetType, searchTime
         cntrl:setOption(AI.Option.Air.id.PROHIBIT_AG, true)
         cntrl:setTask(task) -- remplace pushTask()
 
-        if camp.debug then
+        if campL.debug then
             local current_time = timer.getTime() + 5
             local logStr = "task_entry = " .. TableSerialization(task, 0)
             local flightNameClean = flightName:gsub('[%p%c%s]', '_')
@@ -3062,7 +3062,7 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 					if ctr2 then
 						ctr2:pushTask(interceptTask)
 						env.info("DCE_Custom_Intercept: " .. argInterName .. " engaging " .. tostring(newTargetName))
-						if camp.debug then
+						if campL.debug then
 							local current_time = timer.getTime()
 							local logStr = "params = " .. TableSerialization(interceptTask, 0)
 							local flightNameClean = argInterName:gsub('[%p%c%s]', '_')
@@ -3326,7 +3326,7 @@ function CustomInterceptVersionA(argTargetName, argInterName, argFriendSide, arg
 		env.info("DCE_Custom_Intercept O² " .. tostring(argInterName) .." INITargInterName : "..argInterName.. " intercepting selEnyName " .. tostring(selEnyName))
 
 
-		if camp.debug then
+		if campL.debug then
 			--export custom mission log
 			local current_time = timer.getTime()
 			local logStr = "params = " .. TableSerialization(interceptTask, 0)
@@ -3451,7 +3451,7 @@ function Custom_ForceToLand(argGroupName, argSpeed, argAltLanding, argLandingX, 
 
 
 
-					if camp.debug then
+					if campL.debug then
 						--export custom mission log
 						local current_time = timer.getTime()
 						local logStr = "newRoute = " .. TableSerialization(newRoute, 0)
@@ -3532,7 +3532,7 @@ function OrbitPosition(arg_FlightName, arg_Alt, arg_Speed, arg_UntilTime)
 			}
 			cntrl:pushTask(task_entry)										--set task for group
 
-			if camp.debug then
+			if campL.debug then
 				local logStr = "OrbitPosition = " .. TableSerialization(task_entry, 0)
 				local flightNameClean = arg_FlightName:gsub('[%p%c%s]', '_')
 				local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_".. "OrbitPosition_"..current_time..".lua", "w")
@@ -3671,7 +3671,7 @@ function Custom_RTB_2_Base(grpname, BaseName, speed, alt)
 				}
 			}
 
-			if camp.debug then
+			if campL.debug then
 				local logStr = "Custom_RTB_2_Base = " .. TableSerialization(Mission, 0)
 				local grpnameClean = grpname:gsub('[%p%c%s]', '_')
 				local logFile = io.open(PathDCE.."Debug\\"..grpnameClean.."_".. "Custom_RTB_2_Base.lua", "w")
@@ -4159,7 +4159,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 				}
 			}
 
-			if camp.debug then
+			if campL.debug then
 				local logStr = "Custom_AddWptSAR = " .. TableSerialization(Mission, 0)
 				local grpnameClean = grpname:gsub('[%p%c%s]', '_')
 				local logFile = io.open(PathDCE.."Debug\\"..grpnameClean.."_Custom_AddWptSAR_"..current_time..".lua", "w")
@@ -4252,8 +4252,8 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 					local authorisesRescue = true
 					local wrongSide = false
 					local eny_Side = DCS_ENI_Side[uPilot.sideName]
-					if camp.boundary and camp.boundary[eny_Side] and camp.boundary[eny_Side] ~= nil then
-						wrongSide =  CheckPointInPoly_XY_2({x=uPilot.pos.x,y=uPilot.pos.y} , camp.boundary[eny_Side])
+					if campL.boundary and campL.boundary[eny_Side] and campL.boundary[eny_Side] ~= nil then
+						wrongSide =  CheckPointInPoly_XY_2({x=uPilot.pos.x,y=uPilot.pos.y} , campL.boundary[eny_Side])
 						if wrongSide  then
 							authorisesRescue = false
 						end
@@ -4803,7 +4803,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 			}
 		}
 
-		if camp.debug then
+		if campL.debug then
 			local logStr = "Custom_SAR = " .. TableSerialization(mission, 0)
 			local grpnameClean = grpname:gsub('[%p%c%s]', '_')
 			local logFile = io.open(PathDCE.."Debug\\"..grpnameClean.."_".. "Custom_SAR_"..current_time..".lua", "w")
@@ -5256,7 +5256,7 @@ function Custom_Altitude(arg_grpName, arg_wptAlti, arg_wptTag)
 					}
 				}
 
-			if camp.debug then
+			if campL.debug then
 				local logStr = "Mission = " .. TableSerialization(Mission, 0)
 				local grpnameClean = arg_grpName:gsub('[%p%c%s]', '_')
 				local logFile = io.open(PathDCE.."Debug\\"..grpnameClean.."_".. "Custom_Altitude_"..current_time..".lua", "w")

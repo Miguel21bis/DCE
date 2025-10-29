@@ -63,7 +63,7 @@ local createWreckCrew = {}
 -- }
 
 --ajoute la table (camp.SAR.pilotEjected) dans SAR  pour n'avoir qu'une seule table
-for pilotN, ejectedPilot in ipairs(camp.SAR.pilotEjected) do
+for pilotN, ejectedPilot in ipairs(campL.SAR.pilotEjected) do
 	if ejectedPilot and ejectedPilot.MGRS_Chute   then
 		if ZoneSAR[ejectedPilot.MGRS_Chute] == nil then
 			ZoneSAR[ejectedPilot.MGRS_Chute] = {}
@@ -134,7 +134,7 @@ function AddSoldierAliasPilot(element)
 	env.info( "DCE_SAR_AddSoldierAliasPilot name:  "..tostring(element.name).." countryId: "..tostring(element.countryId))
 
 	local hidden = true
-	if camp.debug then
+	if campL.debug then
 		hidden = false
 	end
 
@@ -298,7 +298,7 @@ function AddSoldierAliasPilot(element)
 
 	coalition.addGroup(element.countryId, Group.Category.GROUND, addGroup)
 
-	if camp.debug then
+	if campL.debug then
 		local TimeSearchEngage = timer.getTime() + 5
 		local logStr = "AddGroup = " .. TableSerialization(addGroup, 0)
 		local ElementNameClean = element.name:gsub('[%p%c%s]', '_')
@@ -333,7 +333,7 @@ function AddSoldierAliasManhunt(ejectedPilot)
 		env.info( "DCE_SAR_AddSoldierAliasManhunt B ejectedPilotName:  "..tostring(ejectedPilotName).." randomIdCountry: "..tostring(randomIdCountry).." n: "..tostring(n))
 
 		local hidden = true
-		if camp.debug then
+		if campL.debug then
 			hidden = false
 		end
 		local randomPos = math.random(-15, 15)
@@ -504,8 +504,8 @@ function AddSoldierAliasManhunt(ejectedPilot)
 			env.info( "DCE_SAR_AddSoldierAliasManhunt F1")
 
 			local rightSideOfBorder
-			if camp.boundary and camp.boundary[manhuntSide] and camp.boundary[manhuntSide] ~= nil then
-				rightSideOfBorder =  CheckPointInPoly_XY_2(pointSelected, camp.boundary[manhuntSide])
+			if campL.boundary and campL.boundary[manhuntSide] and campL.boundary[manhuntSide] ~= nil then
+				rightSideOfBorder =  CheckPointInPoly_XY_2(pointSelected, campL.boundary[manhuntSide])
 				env.info( "DCE_SAR_AddSoldierAliasManhunt?  F2 boundary rightSideOfBorder __"..tostring(rightSideOfBorder).."__ ejectedPilot.side: "..tostring(manhuntSide))
 				if rightSideOfBorder  then
 					env.info( "DCE_SAR_AddSoldierAliasManhunt? G rightSideOfBorder  ")
@@ -792,7 +792,7 @@ local function startSAR(arg)
 		local ctr = groupSAR_Obj:getController()
 		Controller.setTask(ctr, Mission)
 
-		if camp.debug then
+		if campL.debug then
 			local logStr = "Start_SAR = " .. TableSerialization(Mission, 0)
 			local flightNameClean = arg_flightSAR.name:gsub('[%p%c%s]', '_')
 			local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_".. "Start_SAR"..current_time..".lua", "w")
@@ -867,10 +867,10 @@ function CheckImmediatSAR(ejPilot)
 		-- pilot.z = land.getHeight({x = pilot.x, y = pilot.z})
 
         ejPilot.date = {
-			hour = camp.date.hour,
-			month = camp.date.month,
-            day = camp.date.day,
-			year = camp.date.year
+			hour = campL.date.hour,
+			month = campL.date.month,
+            day = campL.date.day,
+			year = campL.date.year
 		}
 
 
@@ -899,8 +899,8 @@ function CheckImmediatSAR(ejPilot)
 
 		local wrongSide = false
 		local ENI_Side = DCS_ENI_Side[ejPilot.sideName]
-		if camp.boundary and camp.boundary[ENI_Side] and camp.boundary[ENI_Side] ~= nil then
-			wrongSide =  CheckPointInPoly_XY_2({x=ejPilot.pos.x,y=ejPilot.pos.y} , camp.boundary[ENI_Side])
+		if campL.boundary and campL.boundary[ENI_Side] and campL.boundary[ENI_Side] ~= nil then
+			wrongSide =  CheckPointInPoly_XY_2({x=ejPilot.pos.x,y=ejPilot.pos.y} , campL.boundary[ENI_Side])
 			env.info( "DCE_CheckImmediatSAR C ?  boundary wrongSide ? __"..tostring(wrongSide))
 			if wrongSide  then
 				env.info( "DCE_CheckImmediatSAR? D boundary rightSideOfBorder __FALSE__ Return ")
@@ -939,8 +939,8 @@ function CheckImmediatSAR(ejPilot)
 						-- rightSideOfBorder =  CheckPointInPoly_XY_2(pointSelected, camp.boundary[manhuntSide])
 
 						local rightSideOfBorder
-						if camp.boundary and camp.boundary[ejPilot.sideName] and camp.boundary[ejPilot.sideName] ~= nil then
-							rightSideOfBorder =  CheckPointInPoly_XY_2({x=ejPilot.pos.x,y=ejPilot.pos.y}, camp.boundary[ejPilot.sideName])
+						if campL.boundary and campL.boundary[ejPilot.sideName] and campL.boundary[ejPilot.sideName] ~= nil then
+							rightSideOfBorder =  CheckPointInPoly_XY_2({x=ejPilot.pos.x,y=ejPilot.pos.y}, campL.boundary[ejPilot.sideName])
 
 						end
 
@@ -1031,7 +1031,7 @@ function CheckImmediatSAR(ejPilot)
 			--find all flights in range to Ejected Pilot and hover ceiling
 			local eligible_flights = {}
 			if ejPilot.sideName then
-				for baseName, base in pairs(camp.SAR.alertSAR[ejPilot.sideName].base) do
+				for baseName, base in pairs(campL.SAR.alertSAR[ejPilot.sideName].base) do
 					env.info( "DCE_CheckImmediatSAR? FFb  base_name "..tostring(baseName))
 					for flightN, flightSAR in ipairs(base.ready) do
 
@@ -1075,7 +1075,7 @@ function CheckImmediatSAR(ejPilot)
 			--assign selected flight to rescue
 			if selected_flight then
 				env.info( "DCE_CheckImmediatSAR? II   ")
-				for base_name, base in pairs(camp.SAR.alertSAR[ejPilot.sideName].base) do
+				for base_name, base in pairs(campL.SAR.alertSAR[ejPilot.sideName].base) do
 					for flight_n, flightSAR in pairs(base.ready) do
 						if flightSAR.name == selected_flight then
 							env.info( "CheckImmediatSAR? JJ    selected_flight: "..tostring(selected_flight))
@@ -1091,8 +1091,8 @@ function CheckImmediatSAR(ejPilot)
 								ZoneSAR[ejPilot.MGRS_Chute].groupSAR = "Group_"..flightSAR.name
 							end
 
-							table.insert(camp.SAR.alertSAR[ejPilot.sideName].assigned, flightSAR )
-							table.remove( camp.SAR.alertSAR[ejPilot.sideName].base[base_name].ready, flight_n)											--move flight from ready to assigned status
+							table.insert(campL.SAR.alertSAR[ejPilot.sideName].assigned, flightSAR )
+							table.remove( campL.SAR.alertSAR[ejPilot.sideName].base[base_name].ready, flight_n)											--move flight from ready to assigned status
 						end
 					end
 				end
@@ -1407,8 +1407,8 @@ local function checkAddingManhunt()
 					env.info( "DCE_SAR:checkAddingManhunt PASSE BBB ")
 
 					local rightSideOfBorder
-					if camp.boundary and camp.boundary[ejPil.sideName] and camp.boundary[ejPil.sideName] ~= nil then
-						rightSideOfBorder =  CheckPointInPoly_XY_2({x=ejPil.x,y=ejPil.y}, camp.boundary[ejPil.sideName])
+					if campL.boundary and campL.boundary[ejPil.sideName] and campL.boundary[ejPil.sideName] ~= nil then
+						rightSideOfBorder = CheckPointInPoly_XY_2(ejPil.pos, campL.boundary[ejPil.sideName])
 						env.info( "DCE_checkAddingManhunt?  CCC boundary rightSideOfBorder __"..tostring(rightSideOfBorder).."__ ejectedPilot.sideName: "..tostring(ejPil.sideName))
 						
                         if rightSideOfBorder == nil or rightSideOfBorder == false then
@@ -1462,14 +1462,14 @@ function LoopManagedRadioTransmission()
 					-- _affiche(ejPil, "LoopManagedRadioT ejPil")
 
 					local modulation = 0	--AM
-					if camp.EjectedPilotFrequency[ejPil.sideName].radioBeacon < 90000000 then
+					if campL.EjectedPilotFrequency[ejPil.sideName].radioBeacon < 90000000 then
 						modulation = 1	--FM
 					end
 
-					trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', pilotVec3, modulation, true, camp.EjectedPilotFrequency[ejPil.sideName].radioBeacon, 0.1, 'radioBeacon_'..ejPil.name)
+					trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', pilotVec3, modulation, true, campL.EjectedPilotFrequency[ejPil.sideName].radioBeacon, 0.1, 'radioBeacon_'..ejPil.name)
 					ejPil.radio_on = true
 
-					env.info( "DCE_SAR:LoopManagedRadioTransmission E frequency  "..tostring(camp.EjectedPilotFrequency[ejPil.sideName].radioBeacon).." MGRS_Chute: "..tostring(ejPil.MGRS_Chute).." |MGRS_Chute_10KM: "..tostring(ejPil.MGRS_Chute_10KM).." "..tostring('radio_'..ejPil.name))
+					env.info( "DCE_SAR:LoopManagedRadioTransmission E frequency  "..tostring(campL.EjectedPilotFrequency[ejPil.sideName].radioBeacon).." MGRS_Chute: "..tostring(ejPil.MGRS_Chute).." |MGRS_Chute_10KM: "..tostring(ejPil.MGRS_Chute_10KM).." "..tostring('radio_'..ejPil.name))
 
 				end
 			end
@@ -1970,7 +1970,7 @@ local function spawnWreck(element)
 
 	createWreck[wreckName] = true
 
-	if camp.debug then
+	if campL.debug then
 		local TimeNow = timer.getTime() + 5
 		local logStr = "AddstaticObjWreck = " .. TableSerialization(staticObj, 0)
 		local ElementNameClean = element.name:gsub('[%p%c%s]', '_')
@@ -2035,9 +2035,9 @@ function GetOutGDFM(arg)
 		
 			local modulation = 0	--AM
 
-			env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[infoPlayer.sideName].GuardEjection).." | "..tostring('GuardEjection'..name))
-			trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', arg_playerObj, modulation, true, camp.EjectedPilotFrequency[infoPlayer.sideName].GuardEjection, 0.1, 'GuardEjection'..name)
-			env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[infoPlayer.sideName].GuardEjection).." | "..tostring('GuardEjection'..name))
+			env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency A  "..tostring(campL.EjectedPilotFrequency[infoPlayer.sideName].GuardEjection).." | "..tostring('GuardEjection'..name))
+			trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', arg_playerObj, modulation, true, campL.EjectedPilotFrequency[infoPlayer.sideName].GuardEjection, 0.1, 'GuardEjection'..name)
+			env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency B  "..tostring(campL.EjectedPilotFrequency[infoPlayer.sideName].GuardEjection).." | "..tostring('GuardEjection'..name))
 
 			-- --position precise pour le fumigene
 			-- local pilotVec3 = {
@@ -2060,7 +2060,7 @@ function GetOutGDFM(arg)
 			end
 
 			local current_time = timer.getTime()
-			if camp.debug then
+			if campL.debug then
 				local logStr = "GetOutPlayer = " .. TableSerialization(GroundDamagedFlyingMachine, 0)
 				local grpnameClean = arg_playerName:gsub('[%p%c%s]', '_')
 				local logFile = io.open(PathDCE.."Debug\\"..infoPlayer.unitId.."_"..grpnameClean.."_".. "DamagedFM_"..current_time..".lua", "w")
@@ -2089,7 +2089,7 @@ function GetOutGDFM(arg)
 
 				if infoPlayer.pilotName then
 					infoPlayer.name = "Mis" ..
-					camp.mission ..
+					campL.mission ..
 					"_Pilot_" .. infoPlayer.pilotName .. "_Nb" .. tostring(SumSoldierAliasPilot) .. "_Damaged"
 				end
 
@@ -2202,12 +2202,12 @@ function GetOutGDFM(arg)
 
 							if damaged.pilotName then
 								damaged.name = "Mis" ..
-								camp.mission ..
+								campL.mission ..
 								"_Pilot_" ..
 								damaged.pilotName .. "_Nb" .. tostring(SumSoldierAliasPilot) .. "_Damaged"
 							else
 								damaged.name = "Mis" ..
-								camp.mission ..
+								campL.mission ..
 								"_Pilot_" .. damaged.name .. "_Nb" .. tostring(SumSoldierAliasPilot) .. "_Damaged"
 							end
 
@@ -2302,7 +2302,7 @@ function GetOutGDFM(arg)
 end
 
 
-if camp.SAR and camp.SAR.helicopter then
+if campL.SAR and campL.SAR.helicopter then
 	timer.scheduleFunction(LoopSAR, nil, timer.getTime() + 5)
 	timer.scheduleFunction(LoopManagedRadioTransmission, nil, timer.getTime() + 60)
 end

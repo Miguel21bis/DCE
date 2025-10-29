@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.91.568"
+versionDCE["UTIL_Changelog.lua"] = "20.91.569"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.91.568"
+VersionDCE["UTIL_Changelog.txt"] = "20.91.569"
 --[[
 
 
@@ -9,7 +9,8 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.91.568:==
+==:20.91.569:==
+569	fixed	[.miz]	reducing the weight of missions by trimming certain files that are too large and/or unnecessary
 568 WIP		[WPT][timing]	Reviewing the “flight plan” code revealed a lot of bugs on my part and negative side effects (zombie planes, premature landings, too many task injections, routes, etc.). I'm reviewing it again.
 567 fixed	[trigger][loadout]	Addition of the trigger action.AuthorizedLoadout(authName) associated with the variable in loadouts: restrictedCondition.
 									This allows certain loadouts to be activated depending on the progress of the campaign

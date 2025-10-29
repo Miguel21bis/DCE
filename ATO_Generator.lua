@@ -1663,13 +1663,6 @@ end
 
 if Debug.Generator.affiche then
 
-	-- debuGenTxt = debuGenTxt.."\n"..("BLUE PART A")
-
-	-- local _str = "Draft_sortiesA = " .. TableSerialization(Draft_sorties, 0)						--make a string
-	-- local _file = io.open("Debug/Draft_sortiesA.lua", "w")  or error("Failed to open debug file")
-	-- _file:write(_str)																		--save new data
-	-- _file:close()
-
 	for sideName, drafts in pairs(draftSorties) do
 		local di = 1
 		debugLog(string.upper(sideName).." PART A")
@@ -1700,6 +1693,16 @@ if Debug.Generator.affiche then
 			end
 		end
 	end
+
+end
+
+if Debug.Generator and Debug.debug then
+    local _str = "debugLogs = " .. TableSerializationAG_triggers(debugLogs, 0)
+	local _file = io.open("Debug/AtoGenerator_Debug_A_Logs.lua", "w") or error("Échec d'ouverture du fichier AtoGenerator_Debug_Logs")
+	_file:write(_str)
+	_file:close()
+    debugLogs = {}        -- on supprime la référence
+    collectgarbage("collect") -- on force la libération
 
 end
 
@@ -2022,11 +2025,9 @@ for sideName, draftT in pairs(draftSorties) do
 											end
 
 											if support_requirement or MP_Game then																	--go ahead with this support task
-												if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "B")
-												and (Debug.Generator.SpySquad and (Debug.Generator.SpySquad == unit.name or Debug.Generator.SpySquad == draft.name)  and  (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
-												or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
-												then
-													debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II passe B_15b support_requirement passe: ")
+												if isDebugModeB then
+													-- debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II passe B_15b support_requirement passe: ")
+													debugLog(tostring(draft.id).." AtoG II passe B_15b support_requirement passe: ")
 												end
 
 
@@ -2090,7 +2091,9 @@ for sideName, draftT in pairs(draftSorties) do
 														and (Debug.Generator.SpySquad and (Debug.Generator.SpySquad == unit.name or Debug.Generator.SpySquad == draft.name)  and  (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
 														or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
 														then
-															debuGenTxt = debuGenTxt..debuGenTxt1480.."\n"..(tostring(draft.id).." AtoG II passe B_15e support_requirement passe: weather_eligible "..tostring(weather_eligible).." overRideMP_B "..tostring(overRideMP_B))
+															-- debuGenTxt = debuGenTxt..debuGenTxt1480.."\n"..(tostring(draft.id).." AtoG II passe B_15e support_requirement passe: weather_eligible "..tostring(weather_eligible).." overRideMP_B "..tostring(overRideMP_B))
+															debugLog(debuGenTxt1480.."\n"..(tostring(draft.id).." AtoG II passe B_15e support_requirement passe: weather_eligible "..tostring(weather_eligible).." overRideMP_B "..tostring(overRideMP_B)))
+															
 														end
 
 														if weather_eligible or overRideMP_B then												--continue of this loadout is eligible for weather
@@ -2313,7 +2316,8 @@ for sideName, draftT in pairs(draftSorties) do
 																	and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name  and  (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
 																	or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
 																	then
-																		debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II passe B_21c Add In draft.support ")
+																		-- debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II passe B_21c Add In draft.support ")
+																		debugLog(tostring(draft.id).." AtoG II passe B_21c Add In draft.support ")
 																	end
 
 																	if not draft.support[task][unit.type] then
@@ -2457,10 +2461,8 @@ for sideName, draftT in pairs(draftSorties) do
 
 																--status report
 																status_counter_escorts = status_counter_escorts + 1
-																--debuGenTxt = debuGenTxt.."\n"..("ATO Assigning Escorts (" .. status_counter_escorts .. ")")	--DEBUG
-
+																
 																wi = wi + 1
-
 
 																if isDebugModeB then
 																	debugLog(draft.id.." AtoG II passe B_22 escort_num "..tostring(escort_num).." "..unit.type.." target_name: "..tostring(draft.target_name)  )
@@ -2489,11 +2491,6 @@ for sideName, draftT in pairs(draftSorties) do
 	end
 end
 
--- debuGenTxt = debuGenTxt.."\n\n"..("ATO Assigning Escorts (" .. status_counter_escorts .. ")")
-
--- if isDebugModeB then
--- 	debugLog(draft.id.." AtoG II passe B_22 escort_num "..tostring(escort_num).." "..unit.type.." target_name: "..tostring(draft.target_name)  )
--- end
 
 
 -- Tri final par `targetPriority` (ascendant), puis par `score` (descendant)
@@ -2566,6 +2563,19 @@ if Debug.Generator.affiche then
 
 
 	-- debuGenTxt = debuGenTxt.."\n"
+
+	
+end
+
+if Debug.Generator and Debug.debug then
+
+	local _str = "debugLogs = " .. TableSerializationAG_triggers(debugLogs, 0)
+	local _file = io.open("Debug/AtoGenerator_Debug_B_Logs.lua", "w") or error("Échec d'ouverture du fichier AtoGenerator_Debug_Logs")
+	_file:write(_str)
+	_file:close()
+    debugLogs = {}        -- on supprime la référence
+    collectgarbage("collect") -- on force la libération
+
 end
 
 --table to store the final ATO
@@ -2943,12 +2953,6 @@ local function createATO_table(draftPriority)
 															if isDebugModeC then
 																debugLog(draft.id.." AtoG bugA1 supportTask|"..supportTask.."|supportName:|"..tostring(supportName).."|"..tostring(support.name).." no unassigned "..tostring(support.number))
 															end
-
-															-- local test_str = "draft = " .. TableSerialization(draft, 0)						--make a string
-															-- local testFile = io.open("Debug/draft_support__AtoG.lua", "w")								--open targetlist file
-															-- testFile:write(test_str)															--save new data
-															-- testFile:close()
-
 														end
 
 
@@ -2992,14 +2996,15 @@ local function createATO_table(draftPriority)
 											end
 
 											local tmpTxt = ""
-											for _p,_support in pairs(draft.support) do																							--iterate through support in draft sortie
-												tmpTxt = tmpTxt .."_A_ "
+											--draft.support[task][unit.type] = {
+											for supportTask,_support in pairs(draft.support) do																							--iterate through support in draft sortie
+												tmpTxt = tmpTxt .."_A_ supportTask: "..tostring(supportTask)
 
 												if support_available and type(_support) == "table" then
 													tmpTxt = tmpTxt .." _B_ "
 
-													for supportName, support in pairs(_support) do																							--iterate through support in draft sortie
-														tmpTxt = tmpTxt .." _C_supportName: "..tostring(supportName)
+													for supportUnitType, support in pairs(_support) do																							--iterate through support in draft sortie
+														tmpTxt = tmpTxt .." _C_supportName: "..tostring(supportUnitType)
 
 														if 	type(support) == "table" then
 															tmpTxt = tmpTxt .." _D_support.number: "..tostring(support.number).." >? "..AcftAvail[support.name].unassigned
@@ -3011,7 +3016,7 @@ local function createATO_table(draftPriority)
 																support_available = false																									--not enough support available
 
 																local tabRejected = {}
-																tabRejected["sujet"]  = support.id.." type: "..support.type.." (strikeOnlyWithEscorte) support_available if support.number > AcftAvail[support.name].unassigned "..supportName
+																tabRejected["sujet"]  = support.id.." type: "..support.type.." (strikeOnlyWithEscorte) support_available if support.number > AcftAvail[support.name].unassigned "..supportUnitType
 																tabRejected["cause"] = { [1] =  support.number, [2] = AcftAvail[support.name].unassigned, }
 																-- tabRejected["ligne"]  = debug.getinfo(1).currentline
 																tabRejected["ligne"]  = SafeGetLine()
@@ -3025,47 +3030,54 @@ local function createATO_table(draftPriority)
 
 											tmpTxt = tmpTxt .. "\n".."Passe 20 "..tostring(draft.type).." "..tostring(draft.target_name).."\n"
 
-											--NON, ce qui suit est faux, il ne faut pas se limiter à ce que demande le loadout, mais ce limiter en fonction des menaces (thread)
+
+											
+											--NON, ce qui suit est faux, il ne faut pas se limiter à ce que demande le loadout, mais ce limiter en fonction des menaces (threat)
+											
+											--[[ debut du strikeOnlyWithEscorte pur]]--
 											--si escorte obligatoire(pévu dans le loadout main) et qu'il n'y en a pas de prévu, on shunt
-											-- if support_available and draft.loadout.support then																									--main body loadout support requirements
+											if support_available and draft.loadout.support then																									--main body loadout support requirements
 
-											-- 	for loadoutNeedTask, loadoutNeedTaskValue in pairs(draft.loadout.support) do																		--iterate through support requirements of loadout
-											-- 		tmpTxt = tmpTxt .. "Passe 2B |||"..tostring(draft.loadout.name).."|||"..tostring(loadoutNeedTask).."||| Value: |||"..tostring(loadoutNeedTaskValue).."|||\n"
+												for loadoutNeedTask, loadoutNeedTaskValue in pairs(draft.loadout.support) do																		--iterate through support requirements of loadout
+													tmpTxt = tmpTxt .. "Passe 2B |||"..tostring(draft.loadout.name).."|||"..tostring(loadoutNeedTask).."||| Value: |||"..tostring(loadoutNeedTaskValue).."|||\n"
 
-											-- 		if draft.loadout.support[loadoutNeedTask]   then
-											-- 			tmpTxt = tmpTxt .. "Passe 2C ".."\n"
+													if draft.loadout.support[loadoutNeedTask]   then
+														tmpTxt = tmpTxt .. "Passe 2C ".."\n"
 
-											-- 			local foundOnePlane = false
-											-- 			for planeSupport, support in pairs(draft.support[loadoutNeedTask]) do
-											-- 				tmpTxt = tmpTxt .. "Passe 2D "..tostring(planeSupport).."\n"
+														local foundOnePlane = false
+														for planeSupport, support in pairs(draft.support[loadoutNeedTask]) do
+															tmpTxt = tmpTxt .. "Passe 2D "..tostring(planeSupport).."\n"
 
-											-- 				if type(support) == "table" then
-											-- 					tmpTxt = tmpTxt .. "Passe 2E ".."\n"
+															if type(support) == "table" then
+																tmpTxt = tmpTxt .. "Passe 2E ".."\n"
 
-											-- 					if support.name  then
-											-- 						tmpTxt = tmpTxt .. "Passe 2H "..tostring(support.name).."\n"
+																if support.name  then
+																	tmpTxt = tmpTxt .. "Passe 2H "..tostring(support.name).."\n"
 
-											-- 						foundOnePlane = true
-											-- 					end
-											-- 				end
-											-- 			end
+																	foundOnePlane = true
+																end
+															end
+														end
 
-											-- 			if not foundOnePlane then
-											-- 				tmpTxt = tmpTxt .. "Passe 2J EJECT".."\n"
+														if not foundOnePlane then
+															tmpTxt = tmpTxt .. "Passe 2J EJECT".."\n"
 
-											-- 				support_available = false																							--necessary support is not available
+															support_available = false																							--necessary support is not available
 
-											-- 				local tabRejected = {}
-											-- 				tabRejected["sujet"]  = draft.id.." type: ".." aucun SUPPORT "..tostring(loadoutNeedTask)
-											-- 				tabRejected["cause"] = { [1] =  draft.support["support"], [2] = "", }
-											-- 				tabRejected["ligne"]  = debug.getinfo(1).currentline
-											-- 				table.insert(draft["rejected"], tabRejected)
+															local tabRejected = {}
+															tabRejected["sujet"]  = draft.id.." type: ".." aucun SUPPORT "..tostring(loadoutNeedTask)
+															tabRejected["cause"] = { [1] =  draft.support["support"], [2] = "", }
+															tabRejected["ligne"]  = debug.getinfo(1).currentline
+															table.insert(draft["rejected"], tabRejected)
 
-											-- 				-- print("tmpTxt "..tmpTxt)
-											-- 			end
-											-- 		end
-											-- 	end
-											-- end
+															-- print("tmpTxt "..tmpTxt)
+														end
+													end
+												end
+											end
+
+											--
+											--[[ fin du strikeOnlyWithEscorte pur]]--
 
 
 											for _,_support in pairs(draft.support) do																							--iterate through support in draft sortie
@@ -3866,6 +3878,8 @@ end
 
 local show = true
 
+print("AtoG outMemory check Z1")
+
 if Debug.debug then
 
 	for side, packages in pairs(ATO) do
@@ -3937,7 +3951,7 @@ if Debug.debug then
 
 					if pourcent <= 25 then
 						print("AtoG caution, low available unassigned aircraft. Maybe a bug? "..unit.type.." : "..pourcent.." %: "..unit.name)
-						_affiche(campSquad, "squad ")
+						_affiche(campSquad, "_affiche squad : ")
 						print()
 					end
 				else
@@ -3952,7 +3966,7 @@ if Debug.debug then
 
 end
 
-
+print("AtoG outMemory check Z2")
 
 if Debug.debug and Debug.Generator.affiche and string.find(Debug.Generator.chapter, "C") then
 
@@ -3963,6 +3977,8 @@ if Debug.debug and Debug.Generator.affiche and string.find(Debug.Generator.chapt
 		campFile:close()
 	end
 
+	print("AtoG outMemory check Z3")
+
 	camp_str = "camp = " .. TableSerialization(camp, 0)
 	campFile = io.open("Debug/CAMP_Ato_Generator.lua", "w")
 	if campFile then
@@ -3970,6 +3986,8 @@ if Debug.debug and Debug.Generator.affiche and string.find(Debug.Generator.chapt
 		campFile:close()
 	end
 end
+
+print("AtoG outMemory check Z4")
 
 -- --place la clef occurence à tous les loadouts
 -- Loadouts_archive = Loadouts_archive or {}
@@ -4055,16 +4073,27 @@ end
 -- end
 
 if Debug.Generator and Debug.debug then
-	local _file = io.open("Debug/AtoGenerator_Debug.txt", "w") or error("Failed to open debug file")
-	_file:write(debuGenTxt)
-	_file:close()
+
+	print("AtoG outMemory check Z5")
+
+	-- local _file = io.open("Debug/AtoGenerator_Debug_C.txt", "w") or error("Failed to open debug file")
+	-- _file:write(debuGenTxt)
+	-- _file:close()
+	-- debuGenTxt = ""        -- on supprime la référence
+    -- collectgarbage("collect") -- on force la libération
+
+	print("AtoG outMemory check Z6")
 
 	local _str = "debugLogs = " .. TableSerializationAG_triggers(debugLogs, 0)
-	_file = io.open("Debug/AtoGenerator_Debug_B.lua", "w") or error("Échec d'ouverture du fichier AtoGenerator_Debug_B")
+	local _file = io.open("Debug/AtoGenerator_Debug_C_Logs.lua", "w") or error("Échec d'ouverture du fichier AtoGenerator_Debug_Logs")
 	_file:write(_str)
 	_file:close()
+    debugLogs = nil        -- on supprime la référence
+    collectgarbage("collect") -- on force la libération
 
 end
+
+print("AtoG outMemory check Z7")
 
 if Debug.debug then
 	local camp_str = "ATO_ATO_PA = " .. TableSerialization(ATO, 0)
@@ -4072,6 +4101,8 @@ if Debug.debug then
 	campFile:write(camp_str)
 	campFile:close()
 end
+
+print("AtoG outMemory check Z8")
 
 --*****************ne pas effacer commenter**********************	
 -- local loadoutSTR = StringToTxt(s)

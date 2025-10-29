@@ -1104,6 +1104,67 @@ if ListRequiredModules then
 	end
 end
 
+
+--création d'un camp pour camp_status InGame nettement plus leger
+local campL = {
+
+	debug = Debug.debug,
+	debugInGamePopup = Debug.debugInGamePopup,
+	debugTraceability = Debug.debugTraceability,                           --??? utile
+	path = camp.path,
+	title = camp.title,
+	mission = camp.mission,
+	ScriptsMod = camp.ScriptsMod,
+	version = camp.version,
+	VersionPackageICM = camp.VersionPackageICM,
+	Briefing_text = camp.Briefing_text,                           --??? utile
+
+	date = camp.date,
+	--weather
+	weather = WeatherParams,
+
+	SC_FullPlaneOnDeck = mission_ini.SC_FullPlaneOnDeck,								-- modification M37.d SuperCarrier
+	CV_Vmax = Data_configuration.CV_Vmax,												-- modification M37.d SuperCarrier
+	CV_windDeck = Data_configuration.CV_windDeck,										-- modification M37.d SuperCarrier
+	CV_despawnAfterLanding = Data_configuration.CV_despawnAfterLanding,				-- modification M18.e despawn (e: option confMod)
+	SC_CarrierIntoWind = string.lower(mission_ini.SC_CarrierIntoWind),					-- modification M36.d	MenuRadio request manual TurnIntoWind
+
+	theatre = NameTheatreLower,
+	EjectedPilotFrequency = EjectedPilotFrequency,
+	EWR_frequency = EWR_DB,
+	spotter = mission_ini.spotter,
+	spotterAircraft = ListSpotterAircraft(),
+	jammerOnBoard = jammerOnBoard,
+	unitSystem = mission_ini.unitSystem,
+	MinPercentDestroyed = MinPercentDestroyed,
+	groundthreats = groundthreats,
+	-- player = camp.player,
+	-- camp.player.side
+	-- camp.player.pack_n
+	playerSide = (camp.player and camp.player.side) or "blue",
+	playerPackN = (camp.player and camp.player.pack_n) or 1,
+	targetPos = camp.targetPos,
+	TableTransportPilotNames = camp.TableTransportPilotNames,
+	silenceATC = camp.silenceATC,
+	runwayCrateres = camp.runwayCraters,
+	MissionFilename = camp.MissionFilename,
+	boundary = camp.boundary,
+	SAR = camp.SAR,
+	ShipDamagedLast = camp.ShipDamagedLast,
+	ShipHealth = camp.ShipHealth,
+	ShipHealth0 = camp.ShipHealth0,
+	BaseAirStart = camp.BaseAirStart,
+
+
+
+
+
+	-- if not camp.missionHistory then camp.missionHistory = {} end
+	-- camp.missionHistory[camp.mission] = camp.date
+}
+
+
+
 -- if not camp.date.CampTotalTimeS then
 -- 	camp.date.CampTotalTimeS = CampTotalTimeS
 -- end
@@ -1148,6 +1209,11 @@ local cmpStr = "camp = " .. TableSerialization(camp, 0)
 local cmpFile = io.open("Active/camp_status.lua", "w") or error("Failed to open debug file")								--campaign status file
 cmpFile:write(cmpStr)
 cmpFile:close()
+
+local cmpL_Str = "campL = " .. TableSerialization(campL, 0)
+local cmpL_File = io.open("campL.lua", "w") or error("Failed to open debug file")								--campaign status file
+cmpL_File:write(cmpL_Str)
+cmpL_File:close()
 
 
 
@@ -1237,7 +1303,8 @@ miz:zipAddFile("l10n/DEFAULT/AddCommandRadioF10.lua", "../../../ScriptsMod."..Ve
 miz:zipAddFile("l10n/DEFAULT/Fuel_Check.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Fuel_Check.lua")								-- Norman99 modification M57_a
 miz:zipAddFile("l10n/DEFAULT/ATC_ShutUp_GENERIC.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ATC_ShutUp_GENERIC.lua")				-- Psyko modification M59_a
 miz:zipAddFile("l10n/DEFAULT/Pedro.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Pedro.lua")										-- Pedro TEST
-miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "Active/camp_status.lua")
+-- miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "Active/camp_status.lua")
+miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "campL.lua")
 miz:zipAddFile("l10n/DEFAULT/FlightPlan_Generator_Debug.txt", "Debug/FlightPlan_Generator_Debug.txt")
 miz:zipAddFile("l10n/DEFAULT/debugFlight.txt", "Debug/debugFlight.txt")
 miz:zipAddFile("l10n/DEFAULT/SAR.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/SAR.lua")
@@ -1351,6 +1418,7 @@ os.remove("warFile.lua")
 os.remove("dicFile.lua")
 os.remove("resFile.lua")
 os.remove("GCIdata.lua")
+os.remove("campL.lua")
 
 if not Debug.debug then
 	--delete mission temporary files

@@ -10,7 +10,7 @@ versionDCE["DC_Briefing.lua"] = "1.24.158"
 -- debug_k					(k choix cahotique, entrainant un bug radio)(j tempPlayer.package)(i package stats)(h nbPasse)(g mission h)(f mission.maxDictId)(e intercept navigation) (d: affiche info MP)(c: camp.date.day)  (b: Mi8 & Mi24)(a: add Mig21 Channel 00)
 
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
--- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)
+-- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_Positions)
 -- modification M61_a		SAR
 -- modification M58_b		flight plan, heading, Dist, ETE (b bug, no view)
 -- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)

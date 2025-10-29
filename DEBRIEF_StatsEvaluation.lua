@@ -52,8 +52,23 @@ else
 
 	camp = nil
 
+	--camp full type A
+	dofile("Active/camp_status.lua")
+
+	--camp light type B
 	local campExport = loadfile("camp_status.lua")()												--camp_status
+	
+	--merge camp full and camp light
+	for k,v in pairs(camp) do
+		for kk,vv in pairs(campL) do
+			if k == kk then
+				v = vv
+			end
+		end	
+	end	
 	camp.mission = camp.mission + 1
+
+
 
 	camp_ZoneSAR = nil
 
@@ -1528,6 +1543,84 @@ if camp.newTaskRequest then
 					end
 				end
 			end
+		end
+	end
+end
+
+-- Merge Mission_LL_Positions into LL_Positions (Active/LL_Positions.lua)
+LL_Positions = nil
+local posFile = "Active/LL_Positions.lua"
+local testPath = io.open(posFile, "r")
+if testPath ~= nil then
+	io.close(testPath)
+	-- load existing positions file (expected to set LL_Positions)
+	dofile(posFile)
+	LL_Positions = LL_Positions or {}
+
+	-- If there's mission provided positions, merge them in
+	if Mission_LL_Positions and type(Mission_LL_Positions) == "table" then
+		for m_key, m_positions in pairs(Mission_LL_Positions) do
+			-- ensure target key exists
+			if not LL_Positions[m_key] or type(LL_Positions[m_key]) ~= "table" then
+				LL_Positions[m_key] = {}
+			end
+
+			-- merge each position
+			if type(m_positions) == "table" then
+				for _, m_pos in ipairs(m_positions) do
+					local merged = false
+					-- try to detect duplicates by (x,y) or (lat,lon)
+					for i, pos in ipairs(LL_Positions[m_key]) do
+						if pos and m_pos then
+							if pos.x and m_pos.x and pos.y and m_pos.y then
+								if pos.x == m_pos.x and pos.y == m_pos.y then
+									-- overwrite existing entry with mission one
+									LL_Positions[m_key][i] = m_pos
+									merged = true
+									break
+								end
+							elseif pos.lat and m_pos.lat and pos.lon and m_pos.lon then
+								if pos.lat == m_pos.lat and pos.lon == m_pos.lon then
+									LL_Positions[m_key][i] = m_pos
+									merged = true
+									break
+								end
+							end
+						end
+					end
+					if not merged then
+						table.insert(LL_Positions[m_key], m_pos)
+					end
+				end
+			else
+				-- not a table (fallback), just assign
+				LL_Positions[m_key] = m_positions
+			end
+		end
+	end
+
+else
+	-- no existing file -> use mission positions or empty table
+	LL_Positions = Mission_LL_Positions or {}
+end
+
+-- Persist merged LL_Positions back to Active/LL_Positions.lua
+local ok, err = pcall(function()
+	local f, ferr = io.open(posFile, "w")
+	if not f then
+		error("Failed to open " .. tostring(posFile) .. " for write: " .. tostring(ferr))
+	end
+	local str = "LL_Positions = " .. TableSerialization(LL_Positions, 0)
+	f:write(str)
+	f:close()
+end)
+if not ok then
+	-- on failure, log error but don't crash
+	if Debug and Debug.debug then
+		local errFile = io.open("Debug/LL_Positions_write_error.txt", "w")
+		if errFile then
+			errFile:write(tostring(err))
+			errFile:close()
 		end
 	end
 end

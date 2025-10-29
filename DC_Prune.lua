@@ -210,17 +210,20 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 
 	-- puis dans keepGroundUnit :
 	elseif isPruneKeyword(lowCaseName) then
-		-- if string.find(lowCaseName, "vc_") then
 
-		-- 	-- Exception : ne prune pas si c'est VC_Khe-Sanh
-		-- 	if string.find(unit.name, "VC_Khe%-Sanh") then
-		-- 		-- print("DC_P_T9 ---K----> Keep VC: "..unit.name)
-		-- 		return true -- keep
-		-- 	end
+		--[[particularité NAM GC22]]
+		if string.find(lowCaseName, "vc_") then
 
-		-- 	-- print("DC_P_T2 -P----P--> Prune vc_: "..lowCaseName)
-		-- 	return false -- Prune
-		-- end
+			-- Exception : ne prune pas si c'est VC_Khe-Sanh
+			if string.find(unit.name, "VC_Khe%-Sanh") then
+				-- print("DC_P_T9 ---K----> Keep VC: "..unit.name)
+				return true -- keep
+			end
+
+			-- print("DC_P_T2 -P----P--> Prune vc_: "..lowCaseName)
+			return false -- Prune
+		end
+		--[[particularité NAM GC22]]
 
 		-- Vérifie la proximité d'un PointOfInterest
 		for nPOI, POI in pairs(PointOfInterest) do

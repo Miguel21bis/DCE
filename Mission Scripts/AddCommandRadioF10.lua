@@ -25,7 +25,7 @@ versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "1.14.52"
 -- modification M29_i		Added MenuRadio F10  (i:escorte to RTB(@bonfor))(h:strike or SEAD only packages to RTB(@bonfor))(g:movePlane) (f: CallTankRefuel camp rouge et bleu)
 ------------------------------------------------------------------------------------------------------- 
 
-if not camp.debugInGamePopup then
+if not campL.debugInGamePopup then
 	env.setErrorMessageBoxEnabled(false)
 end
 
@@ -170,18 +170,18 @@ local excludedUnitTypes = {
 
 
 -----*********check path**************---------
-env.info( "DCE_Bat_Path  "..tostring(camp.path) )
+env.info( "DCE_Bat_Path  "..tostring(campL.path) )
 
 PathDD = "c:"
 --prepare campaign path
-PathDCE = string.gsub(camp.path, "/", "\\")																		--replace slashes in campaign path with double-backslashes
-if  string.sub (camp.path, 2, 2) ~= ":" then																	--si le chemin est differen de C:\Users ou D:\Users
+PathDCE = string.gsub(campL.path, "/", "\\")																		--replace slashes in campaign path with double-backslashes
+if  string.sub (campL.path, 2, 2) ~= ":" then																	--si le chemin est differen de C:\Users ou D:\Users
 	PathDCE = os.getenv('USERPROFILE') .. "\\" .. PathDCE														--get path of windows userprofile and add to campaign path	
 else
-	PathDD = string.sub (camp.path, 1, 2)
+	PathDD = string.sub (campL.path, 1, 2)
 end
 
-PathDCE = PathDCE .."Mods\\tech\\DCE\\Missions\\Campaigns\\"..camp.title.."\\"
+PathDCE = PathDCE .."Mods\\tech\\DCE\\Missions\\Campaigns\\"..campL.title.."\\"
 env.info( "DCE_PathDCE "..tostring(PathDCE) )
 env.info( "DCE_PathDD "..tostring(PathDD) )
 -----*********check PathDCE**************---------
@@ -514,7 +514,7 @@ local function localGetPlayerObj()
 end
 
 local function setErrorMessageBoxShedul()
-	if not camp.debugInGamePopup then
+	if not campL.debugInGamePopup then
 		env.setErrorMessageBoxEnabled(false)
 	end
 end
@@ -698,11 +698,11 @@ local function calculateDistance(x1, y1, x2, y2)
 end
 
 local function hotSpotSAM()
-    if not camp.groundthreats then return end
+    if not campL.groundthreats then return end
 
     local clusterThreshold = 100000 -- Distance max pour regrouper les SAMs
 
-    for sideName, antiAirCover in pairs(camp.groundthreats) do
+    for sideName, antiAirCover in pairs(campL.groundthreats) do
         local clusters = {}
 
         -- Parcourir chaque SAM
@@ -768,7 +768,7 @@ local function avoidArea()
 
 	local debug_avoidArea = false
 
-    if not camp.groundthreats then
+    if not campL.groundthreats then
 		if not AnnonceOneOunce["avoidArea"] then
 			env.info("ACRF10_avoidArea DCE_ERROR RETURN no camp.groundthreats")
 			AnnonceOneOunce["avoidArea"] = true
@@ -808,7 +808,7 @@ local function avoidArea()
 
 						local eni_side_name = DCS_ENI_Side[CoalitionIdToName[sideNum]]
 
-						for threatN, threat in pairs(camp.groundthreats[eni_side_name]) do
+						for threatN, threat in pairs(campL.groundthreats[eni_side_name]) do
 							if threat and threat.class and threat.class == "SAM"  then
 
 								local currentPointVec3 = unitObj:getPoint()
@@ -1224,7 +1224,7 @@ local function avoidArea()
 										-- _affiche(flightPlanTimer, "ACRF10_avoidArea Z2 flightPlanTimer")
 									end
 
-									if camp.debug then
+									if campL.debug then
 										local timeSearchEngage = timer.getTime() + 5
 										local logStr = "flightPlan = " .. TableSerialization(flightPlan, 0)
 										local flightNameClean = unitName:gsub('[%p%c%s]', '_')
@@ -2000,7 +2000,7 @@ local function activateRadioBeacon(arguments)
 	local arg_ejPilot = arguments[2]
 	local pilEjectObj = Unit.getByName(arg_ejPilot.name)
 
-	if camp.EjectedPilotFrequency and camp.EjectedPilotFrequency[arg_ejPilot.sideName] then
+	if campL.EjectedPilotFrequency and campL.EjectedPilotFrequency[arg_ejPilot.sideName] then
 
 		if pilEjectObj then
 
@@ -2010,16 +2010,16 @@ local function activateRadioBeacon(arguments)
 
 				local modulation = 0	--AM
 				local modulationTxt = "AM"	--AM
-				if camp.EjectedPilotFrequency[arg_ejPilot.sideName].radioBeacon < 90000000 then
+				if campL.EjectedPilotFrequency[arg_ejPilot.sideName].radioBeacon < 90000000 then
 					modulation = 1	--FM
 					modulationTxt = "FM"
 				end
 
 				trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', arg_ejPilot.posVec3, modulation, true,
-					camp.EjectedPilotFrequency[arg_ejPilot.sideName].radioBeacon, RadioWatt,
+					campL.EjectedPilotFrequency[arg_ejPilot.sideName].radioBeacon, RadioWatt,
 					'radioBeacon_' .. arg_ejPilot.name)
 
-				local freqShow = camp.EjectedPilotFrequency[arg_ejPilot.sideName].radioBeacon / 1000000
+				local freqShow = campL.EjectedPilotFrequency[arg_ejPilot.sideName].radioBeacon / 1000000
 				trigger.action.outTextForGroup(arg_gpGid, "activate RadioBeacon on : "..freqShow.." MHz "..modulationTxt, 45 , true)
 			end
 		else
@@ -2030,7 +2030,7 @@ local function activateRadioBeacon(arguments)
 			_affiche(pilEjectObj, "pilEjectObj ")
 		end
 	else
-		env.info( "DCE_activateRadioBeacon frequency Error,  side  "..tostring(arg_ejPilot.sideName).." or Frequency: "..tostring(camp.EjectedPilotFrequency[arg_ejPilot.sideName]))
+		env.info( "DCE_activateRadioBeacon frequency Error,  side  "..tostring(arg_ejPilot.sideName).." or Frequency: "..tostring(campL.EjectedPilotFrequency[arg_ejPilot.sideName]))
 
 	end
 end
@@ -2182,11 +2182,11 @@ end
 function RtbPack(playerGroup)
 
 	for _coalition, coalition in pairs(env.mission.coalition) do
-		if _coalition == camp.player.side then
+		if _coalition == campL.playerSide then
 			for Ncountry, _country in pairs(coalition.country) do
 				if _country.plane then
 					for Ngroup, _group in pairs(_country.plane.group) do
-						if string.find(_group.name,"Pack "..camp.player.pack_n) then
+						if string.find(_group.name,"Pack "..campL.playerPackN) then
 
 							local rtbGroup = {
 									name = "",
@@ -2239,11 +2239,11 @@ end
 function RtbStrikePack(playerGroup)
 
 	for _coalition, coalition in pairs(env.mission.coalition) do
-		if _coalition == camp.player.side then
+		if _coalition == campL.playerSide then
 			for Ncountry, _country in pairs(coalition.country) do
 				if _country.plane then
 					for Ngroup, _group in pairs(_country.plane.group) do
-						if string.find(_group.name,"Pack "..camp.player.pack_n) then
+						if string.find(_group.name,"Pack "..campL.playerPackN) then
 
 							local rtbGroup = {
 									name = "",
@@ -2281,11 +2281,11 @@ end
 function RtbSEADPack(playerGroup)
 
 	for _coalition, coalition in pairs(env.mission.coalition) do
-		if _coalition == camp.player.side then
+		if _coalition == campL.playerSide then
 			for Ncountry, _country in pairs(coalition.country) do
 				if _country.plane then
 					for Ngroup, _group in pairs(_country.plane.group) do
-						if string.find(_group.name,"Pack "..camp.player.pack_n) then
+						if string.find(_group.name,"Pack "..campL.playerPackN) then
 
 							local rtbGroup = {
 									name = "",
@@ -2763,9 +2763,9 @@ local function getLL_TargetPosition()
 	-- 		["y"] = 665544,
 	-- 	},
 
-	if camp.targetPos then
+	if campL.targetPos then
 		-- trigger.action.outText("DCE_getLL_TargetPosition START ", 15)
-		for key_x, searchPos_s in pairs(camp.targetPos) do
+		for key_x, searchPos_s in pairs(campL.targetPos) do
 			for posN, searchPos in pairs(searchPos_s) do
 				if searchPos.x and searchPos.y then
 					local posXZ = {
@@ -2783,14 +2783,19 @@ local function getLL_TargetPosition()
 		end
 	end
 
-	local logStr = "LL_KnownPositions = " .. TableSerialization(camp.targetPos, 0)
-	local logFile = io.open(PathDCE.."Init\\".."LL_KnownPositionsTable.lua", "w")
-	if logFile then
-		logFile:write(logStr)
-		logFile:close()
-	else
-		env.info("DCE_LL_KnownPositions: Failed to open log file for writing.")
-	end
+	--export custom mission log
+	local logStr = "Mission_LL_Positions = " .. TableSerialization(campL.targetPos, 0)
+	local logFile = io.open(PathDCE .. "Mission_LL_Positions.lua", "w")
+    if logFile then
+        logFile:write(logStr)
+        logFile:close()
+    else
+		env.info("DCE_Mission_LL_Positions: Failed to open log file for writing.")
+    end
+
+    campL.targetPos = nil
+	collectgarbage("step", 200) -- on force la libération
+	
 end
 
 
@@ -3044,7 +3049,7 @@ local function addFuncs(arg_Gid, arg_GroupObj, argPlayerName)
 
 		env.info("DCE_addFuncs PASSE   _C  ")
 
-		if camp.SC_CarrierIntoWind == "man" then
+		if campL.SC_CarrierIntoWind == "man" then
 			missionCommands.removeItemForGroup(arg_Gid, {"CarrierIntoWind"})
 			local subR = missionCommands.addSubMenuForGroup(arg_Gid, "CarrierIntoWind", nil)
 			for coalition_name,coal in pairs(env.mission.coalition) do
@@ -3082,7 +3087,7 @@ local function addFuncs(arg_Gid, arg_GroupObj, argPlayerName)
 		 -- commandDB['speed'] = missionCommands.addCommandForGroup(gid,"Testing", nil, Test, Group)
 		 -- commandDB['RTB'] = missionCommands.addCommandForGroup(gid,"Package_RTB", nil, RtbPack, Group)
 
-		 if camp.debug then
+		 if campL.debug then
 			local timeSearchEngage = timer.getTime()
 			local logStr = "radioCommands = " .. TableSerialization(radioCommands, 0)
 			local flightNameClean = "radioCommands"
@@ -3413,7 +3418,7 @@ local function EWR_magic()
 								local distanceKm = math.floor(target.distance / 1000) -- En kilomètres
 								local displayDistance, displayAltitude, displayDistUnit, displayAltUnit
 
-								if camp.unitSystem and camp.unitSystem == "metric" then
+								if campL.unitSystem and campL.unitSystem == "metric" then
 									displayDistance = math.ceil(target.distance / 4000) * 4000 -- En mètres, arrondi à 4 km près
 									displayAltitude = math.ceil(target.pointVec3.y / 1000) * 1000 -- Altitude en mètres, arrondi à 1000m
 									displayDistUnit = "m"
@@ -3839,7 +3844,7 @@ function EventHandler2:onEvent(event)
 								if not GroundDamagedFlyingMachine[event.initiator.id_] then GroundDamagedFlyingMachine[event.initiator.id_] = {} end
 								table.insert(GroundDamagedFlyingMachine[event.initiator.id_], eventData)
 
-								if camp.debug then
+								if campL.debug then
 									local logStr = "DamagedFM = " .. TableSerialization(GroundDamagedFlyingMachine, 0)
 									local grpnameClean = name:gsub('[%p%c%s]', '_')
 									local logFile = io.open(PathDCE.."Debug\\"..event.initiator.id_.."_"..grpnameClean.."_".. "DamagedFM_"..current_time..".lua", "w")
@@ -4034,9 +4039,9 @@ local function loopPilot()
 		end
 	end
 
-	if camp.TableTransportPilotNames and ctld and ctld.alreadyInitialized and not var_TPN_alreadyAdded then
-		for n=1, #camp.TableTransportPilotNames do
-			ctld.transportPilotNames[#ctld.transportPilotNames +1 ] = camp.TableTransportPilotNames[n]
+	if campL.TableTransportPilotNames and ctld and ctld.alreadyInitialized and not var_TPN_alreadyAdded then
+		for n=1, #campL.TableTransportPilotNames do
+			ctld.transportPilotNames[#ctld.transportPilotNames +1 ] = campL.TableTransportPilotNames[n]
 		end
 		env.info( "AdCR10 add  ctld.transportPilotNames ")
 		var_TPN_alreadyAdded = true
@@ -4050,7 +4055,7 @@ end
 --creation de la table de couverture anti aérienne AMI
 hotSpotSAM()
 
-if camp.debug then
+if campL.debug then
 	local logStr = "hotSpotAirDefense = " .. TableSerialization(hotSpotAirDefense, 0)
 	local logFile = io.open(PathDCE.."Debug\\".."hotSpotAirDefense.lua", "w")
 	if logFile then

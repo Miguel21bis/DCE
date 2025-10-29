@@ -34,12 +34,12 @@ local user_smokeOn = true					-- activate or deactivate the red smoke during “
 
 
 -- variable modified by environment DCE ****************************************************
-if camp.spotter then
-	user_quantity = camp.spotter.qtyBySalve
-	user_markerPrefix = (camp.spotter.markerPrefix and camp.spotter.markerPrefix ~= "" and camp.spotter.markerPrefix) or user_markerPrefix
-	user_qty_Total_Shells = camp.spotter.qtyTotalShells
-	user_spottingDistance = camp.spotter.spottingDistance
-	user_smokeOn = camp.spotter.smokeOn
+if campL.spotter then
+	user_quantity = campL.spotter.qtyBySalve
+	user_markerPrefix = (campL.spotter.markerPrefix and campL.spotter.markerPrefix ~= "" and campL.spotter.markerPrefix) or user_markerPrefix
+	user_qty_Total_Shells = campL.spotter.qtyTotalShells
+	user_spottingDistance = campL.spotter.spottingDistance
+	user_smokeOn = campL.spotter.smokeOn
 end
 
 
@@ -730,10 +730,10 @@ artyAction = function ( initiatorName )
 
 			-- elseif camp.boundary and camp.boundary[spotterSide] and camp.boundary[spotterSide] ~= nil then
 
-			if camp.boundary and camp.boundary[spotterSide] and camp.boundary[spotterSide] ~= nil then
+			if campL.boundary and campL.boundary[spotterSide] and campL.boundary[spotterSide] ~= nil then
 
 				-- check si le target est dans son propre camp, si oui on balance
-				if CheckPointInPoly_XY_3({x=targetVec3.x, y=targetVec3.z}, camp.boundary[spotterSide]) then
+				if CheckPointInPoly_XY_3({x=targetVec3.x, y=targetVec3.z}, campL.boundary[spotterSide]) then
 					
 					nearestZone = artyDistance/2
 					local distKm = math.floor(nearestZone / 1000)
@@ -745,7 +745,7 @@ artyAction = function ( initiatorName )
 					env.info("CG_ArtySpotter: camp.boundary D2 "..tostring(nearestZone).." txtFromZone: "..txtFromZone)
 
 					local artyPoint
-					artyPoint, nearestZone = foundArtyPointInPoly(camp.boundary[spotterSide], targetVec3 )
+					artyPoint, nearestZone = foundArtyPointInPoly(campL.boundary[spotterSide], targetVec3 )
 
 					if artyPoint then
 
@@ -960,10 +960,10 @@ local function isValidInitiator(initiator)
 
 
 	-- DCE environment
-	if camp.spotterAircraft and initiator.getDesc then
+	if campL.spotterAircraft and initiator.getDesc then
 		local description = initiator:getDesc()
 		if description and description.typeName then
-            if camp.spotterAircraft[description.typeName] then
+            if campL.spotterAircraft[description.typeName] then
 				isValid = true
 				env.info("CG_ArtySpotter: isValidInitiator B: camp.spotterAircraft "..tostring(description.typeName))
 			end

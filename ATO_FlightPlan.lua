@@ -15,7 +15,7 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.290"
 -- cleancode_n				(n springCleaning)
 -- debug_Ab					(b Seasick intercept)(a flight delayed)(z package stats)(y polka on parking)(x frequency SA342)(w no recalculates all speeds)
 
--- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)
+-- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_Positions)
 -- modification M74_a		mix static, vehicle and map elements in a Target.
 -- modification M71_a		PayloadRestricted
 -- modification M68_a		add AFAC task
@@ -895,13 +895,13 @@ local function fct_movedBullseye(arg_Side, arg_NameTheatre)
 		Brief[arg_Side].bullseye.x = tempBullseye.x
 		Brief[arg_Side].bullseye.y = tempBullseye.y
 
-		if LL_KnownPositionsFileExit then
+		if LL_PositionsFileExit then
 
 			local xKey = math.abs(math.floor(tempBullseye.x))
-			if LL_KnownPositions[xKey]  then
+			if LL_Positions[xKey]  then
 				local testX = math.floor(Brief[arg_Side].bullseye.x)
 				local testY = math.floor(Brief[arg_Side].bullseye.y)
-				for n, llPos in pairs(LL_KnownPositions[xKey] ) do
+				for n, llPos in pairs(LL_Positions[xKey] ) do
 					if testX == llPos.x and testY == llPos.y then
 						Brief[arg_Side].bullseye.lat = llPos.lat
 						Brief[arg_Side].bullseye.lon = llPos.lon

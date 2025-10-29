@@ -153,8 +153,8 @@ local function makeRunwayCratere(arg)
 	--enleve préalablement les véhicules de chantier
 	 cleanWorksiteVehicles()
 
-	if camp.runwayCratere and type(camp.runwayCratere) == "table" then
-		for baseName, base in pairs(camp.runwayCratere) do
+	if campL.runwayCratere and type(campL.runwayCratere) == "table" then
+		for baseName, base in pairs(campL.runwayCratere) do
 			-- env.info("bombOnRunway baseName "..baseName)
 
 			--melange l'ordre des elements de runway pour que ce ne soit pas toujours les memes de cassé

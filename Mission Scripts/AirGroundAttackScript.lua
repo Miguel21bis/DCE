@@ -407,7 +407,7 @@ function AirGroundAttackTask(flightName, target, weaponType, expendQty, dive, of
 					-- if Debug then
 					-- 	trigger.action.outText(wingman[w]:getName() .. " Geometry Calculation Loop " .. n, 99)
 					-- end
-					if camp.debug then
+					if campL.debug then
 						env.info("debug AirGroundAttackTask ".. wingman[w]:getName() .. " Geometry Calculation Loop " .. n)
 					end
 					
@@ -493,13 +493,13 @@ function AirGroundAttackTask(flightName, target, weaponType, expendQty, dive, of
 					end
 					-- trigger.action.outText(wingman[w]:getName() .. " too close to target to perform Offset Pop-Up Attack. Abort attack and egress.", 10)
 				
-					if camp.debug then
+					if campL.debug then
 						env.info("debug AirGroundAttackTask "..wingman[w]:getName() .. " too close to target to perform Offset Pop-Up Attack. Abort attack and egress.")
 					end
 
 				end
 
-				if camp.debug then
+				if campL.debug then
 					trigger.action.markToAll(w * 10 + 1, wingman[w]:getName() .. "\nStart Offset Turn", {x = PopPoint.x, y = 0, z = PopPoint.y})
 					trigger.action.markToAll(w * 10 + 2, wingman[w]:getName() .. "\nEnd Climb", {x = ClimbEndPoint.x, y = 0, z = ClimbEndPoint.y})
 					
@@ -1100,7 +1100,7 @@ function AirGroundAttackTask(flightName, target, weaponType, expendQty, dive, of
 			}
 			table.insert(ComboTask.params.tasks, SetEgressTask)
 			
-			if camp.debug then
+			if campL.debug then
 				--export custom mission log
 
 				local current_time = timer.getTime()
@@ -1251,7 +1251,7 @@ function SetEgressTask(acName)																		--global because it needs to be 
 			ac:getController():setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2)					--tasked units do not inherit the options of their parent group, so reaction to threat has to be set to evade fire (otherwise they may abort the attack against defended targets)
 		end
 
-		if camp.debug then
+		if campL.debug then
 			--export custom mission log
 
 			local current_time = timer.getTime()

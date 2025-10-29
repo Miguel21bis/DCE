@@ -8,7 +8,7 @@ versionDCE["UTIL_Functions.lua"] = "1.17.128"
 -- adjustment_o				(n loadout code)(m Disp_time)(l add AFAC task)(k FormatTime)(i add InsertBugList(txt))(h use IsWesternCountry)(fg: add Loadout tiers)(e todo)(d:CheckConfModMaster )(c: fire Playable_m from conf_mod)
 -- debug_i					(i planeType)(h Tha\'lah)(g string.gsub(v, "\"", "\\\"" ))(f new generateId)(d UH to HF) Angle et Bearing des statics sur PA
 -- modification M80_a		use various tables, such as base name or aircraft type aliases
--- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_KnownPositionsTable)
+-- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_Positions)
 -- modification M77_l		CG_ArtySpotter (kl ListSpotterAircraft)
 -- modification M63_a		compatible Datacard Generator or CombatFlite
 -- modification M61_a		SAR

@@ -154,7 +154,7 @@ local function injecteRoutePedro(arg)
 		}
 	}
 
-	if camp.debug then
+	if campL.debug then
 		local logStr = "injectPedro = " .. TableSerialization(Mission, 0)
 		local FlightNameClean = pt_start.PedroName:gsub('[%p%c%s]', '_')
 		local logFile = io.open(PathDCE.."Debug\\"..FlightNameClean.."_".. "injecteRoutePedro.lua", "w")
@@ -280,7 +280,7 @@ local function createPedro(arg)
 		["frequency"] = 243,
 	} -- end of [1]
 
-	if camp.debug then
+	if campL.debug then
 		local logStr = "Mission = " .. TableSerialization(groupData, 0)
 		local grpnameClean = pt_start.PedroName:gsub('[%p%c%s]', '_')
 		local logFile = io.open(PathDCE .. "Debug\\" .. grpnameClean .. "_create_Pedro_" .. current_time .. ".lua", "w")

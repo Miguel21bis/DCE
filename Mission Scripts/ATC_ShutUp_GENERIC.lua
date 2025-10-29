@@ -26,7 +26,7 @@ EventClientSpawn = {}
 	
 function EventClientSpawn:onEvent(event)
 
-    if event.id == world.event.S_EVENT_BIRTH and camp.silenceATC then	--client spawning in a unit
+    if event.id == world.event.S_EVENT_BIRTH and campL.silenceATC then	--client spawning in a unit
         -- trigger.action.outText("**New Unit detected**", 5, 0)		-- debug text
 		env.info("**New Unit detected**")
 		

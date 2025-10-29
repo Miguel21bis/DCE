@@ -56,7 +56,7 @@ for eventName, eventId in pairs(world.event) do
 	table.insert(Info_event_B, eventId, eventName)
 end
 
-if camp.debug then
+if campL.debug then
 	local logStr = "Info_event_B = " .. TableSerialization(Info_event_B, 0)
 	local logFile = io.open(PathDCE.."Debug\\Info_event_B.lua", "w")
 	if logFile then
@@ -202,7 +202,7 @@ local function addHit1s(hitTemp)
 		explosiveMass = hitTemp.explosiveMass,
 		weaponName = hitTemp.weaponName,
 	}
-	if hitTemp.description and camp.debug then
+	if hitTemp.description and campL.debug then
 		scenLog[hitTemp.scenaryName]["description"] = hitTemp.description	--tooHeavy
 	end
 end
@@ -559,7 +559,7 @@ Info_event = {
 
 function eventHandlerDCE:onEvent(event)
 
-	if camp.debug then
+	if campL.debug then
 		if event and event.id then
 			if Info_event then
 				if Info_event[tonumber(event.id)] then
@@ -575,7 +575,7 @@ function eventHandlerDCE:onEvent(event)
 	-- on ne traite et surtout on n'enregistre pas les events interressant pour la DCE, sinon surchage CPU
 	if eventsSurvey[event.id] then
 
-		if camp.debug then
+		if campL.debug then
 			env.info("DCE_EventsTracker event.id "..tostring(event.id).." "..tostring(Info_event[event.id]))
 		end
 
@@ -714,7 +714,7 @@ function eventHandlerDCE:onEvent(event)
 			log_entry.type = "player leave unit"
 		end
 		
-		if camp.debug then
+		if campL.debug then
 			env.info("DCE_EventsTracker log_entry.type: "..tostring(log_entry.type).." | "..tostring(log_entry.infoEvent))
 		end
 
@@ -852,11 +852,11 @@ function eventHandlerDCE:onEvent(event)
 					table.insert(tabEjection, pilotEjection)
 
                     if event.initiator and event.initiator.getPlayerName then
-						env.info( "DCE_EventT_eject H :radioTransmission frequency A  "..tostring(camp.EjectedPilotFrequency[sideName].GuardEjection).." | "..tostring('GuardEjection'..pilotEjection.initiator))
+						env.info( "DCE_EventT_eject H :radioTransmission frequency A  "..tostring(campL.EjectedPilotFrequency[sideName].GuardEjection).." | "..tostring('GuardEjection'..pilotEjection.initiator))
 
-						trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', pilotEjection, 0, true, camp.EjectedPilotFrequency[sideName].GuardEjection, 0.1, 'GuardEjection'..pilotEjection.initiator)
+						trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', pilotEjection, 0, true, campL.EjectedPilotFrequency[sideName].GuardEjection, 0.1, 'GuardEjection'..pilotEjection.initiator)
 
-						env.info( "DCE_EventT_eject I :radioTransmission frequency B  "..tostring(camp.EjectedPilotFrequency[sideName].GuardEjection).." | "..tostring('GuardEjection'..pilotEjection.initiator))
+						env.info( "DCE_EventT_eject I :radioTransmission frequency B  "..tostring(campL.EjectedPilotFrequency[sideName].GuardEjection).." | "..tostring('GuardEjection'..pilotEjection.initiator))
 					end
 
 					local ejectionSeatTemp = {
@@ -881,10 +881,10 @@ function eventHandlerDCE:onEvent(event)
 
 								if pilotEjection.pilotName then
 									pilotEjection.name = "Mis" ..
-									camp.mission ..
+									campL.mission ..
 									"_Pilot_" .. pilotEjection.pilotName .. "_Nb" .. tostring(SumSoldierAliasPilot)
 								else
-									pilotEjection.name = "Mis"..camp.mission.."_Pilot_"..pilotEjection.initiator.."_Nb"..tostring(SumSoldierAliasPilot)
+									pilotEjection.name = "Mis"..campL.mission.."_Pilot_"..pilotEjection.initiator.."_Nb"..tostring(SumSoldierAliasPilot)
 								end
 
 								pilotEjection.name = CleanName(pilotEjection.name)
@@ -1093,10 +1093,10 @@ function eventHandlerDCE:onEvent(event)
 
 						if selPilotEject.pilotName then
 							selPilotEject.name = "Mis" ..
-							camp.mission ..
+							campL.mission ..
 							"_Pilot_" .. selPilotEject.pilotName .. "_Nb" .. tostring(SumSoldierAliasPilot)
 						else
-							selPilotEject.name = "Mis"..camp.mission.."_Pilot_"..selPilotEject.initiator.."_Nb"..tostring(SumSoldierAliasPilot)
+							selPilotEject.name = "Mis"..campL.mission.."_Pilot_"..selPilotEject.initiator.."_Nb"..tostring(SumSoldierAliasPilot)
 						end
 
 						selPilotEject.name = CleanName(selPilotEject.name)
@@ -1312,7 +1312,7 @@ function eventHandlerDCE:onEvent(event)
 						log_entry.pilotName = CleanName(log_entry.pilotName)
 					end
 
-					if log_entry.type == "unit lost" and camp.SAR and camp.SAR.pilotEjected then
+					if log_entry.type == "unit lost" and campL.SAR and campL.SAR.pilotEjected then
 						if unitCat and (unitCat == Unit.Category.HELICOPTER) then
 							if log_entry.initiator and EjectedPilotOnBoard[log_entry.initiator] then
 								-- Itérer en boucle inversée pour supprimer des éléments dans une table indexée numériquement
@@ -1320,7 +1320,7 @@ function eventHandlerDCE:onEvent(event)
 									local ejectedPilot_OB_name = EjectedPilotOnBoard[log_entry.initiator][i]
 
 									-- Parcourir les pilotes éjectés dans la campagne
-									for pilotN, ejectedPilot_camp in pairs(camp.SAR.pilotEjected) do
+									for pilotN, ejectedPilot_camp in pairs(campL.SAR.pilotEjected) do
 										if ejectedPilot_camp.name == ejectedPilot_OB_name then
 											-- Marquer le pilote dans la campagne comme "mort"
 											ejectedPilot_camp.status = "dead"
@@ -1442,11 +1442,11 @@ function eventHandlerDCE:onEvent(event)
 		if event.id == world.event.S_EVENT_MISSION_END then
 
 			--collect health of ships
-			if camp.ShipHealth == nil then																						--table to store ship damage does not exist yet
-				camp.ShipHealth = {}																							--create table to store ship damage
+			if campL.ShipHealth == nil then																						--table to store ship damage does not exist yet
+				campL.ShipHealth = {}																							--create table to store ship damage
 			end
 
-			camp.ShipDamagedLast = {}																							--table to collect ship names that took new additional damage during this mission
+			campL.ShipDamagedLast = {}																							--table to collect ship names that took new additional damage during this mission
 			for coalition_name,coal in pairs(env.mission.coalition) do															--iterate through coalitions in mission
 				for country_n,country in pairs(coal.country) do																	--iterate through countries in coalitions
 					if country.ship then																						--country has ships
@@ -1455,19 +1455,19 @@ function eventHandlerDCE:onEvent(event)
 								local u = Unit.getByName(unit.name)																--get unit
 								if u then																						--unit exists
 									local health = u:getLife()																	--get current health of unit
-									local health0 = camp.ShipHealth0[unit.name]													--get maximum health of unit
+									local health0 = campL.ShipHealth0[unit.name]													--get maximum health of unit
 									local newhealth = math.floor(health / health0 * 100)										--health percentage of ship
 
-									if camp.ShipHealth[unit.name] then
-										if newhealth < camp.ShipHealth[unit.name] - 5 then										--new health is lower than previous health
-											camp.ShipDamagedLast[unit.name] = true												--mark that ship has taken new damage during this mission
+									if campL.ShipHealth[unit.name] then
+										if newhealth < campL.ShipHealth[unit.name] - 5 then										--new health is lower than previous health
+											campL.ShipDamagedLast[unit.name] = true												--mark that ship has taken new damage during this mission
 										end
 									else
 										if newhealth < 100 then
-											camp.ShipDamagedLast[unit.name] = true												--mark that ship has taken new damage during this mission
+											campL.ShipDamagedLast[unit.name] = true												--mark that ship has taken new damage during this mission
 										end
 									end
-									camp.ShipHealth[unit.name] = newhealth														--store new health of ship
+									campL.ShipHealth[unit.name] = newhealth														--store new health of ship
 								end
 							end
 						end
@@ -1475,19 +1475,19 @@ function eventHandlerDCE:onEvent(event)
 				end
 			end
 
-			camp.RunwayLife = RunwayLife
+			campL.RunwayLife = RunwayLife
 
 			env.setErrorMessageBoxEnabled(true)																					-- debug_ET02	n'affiche pas les messages d'error sauf � la fin de mission
 
 			-- modification M35.d (d: info log) version ScriptsMod
-			if camp.VersionPackageICM then
-				env.info( "DCE_VersionPackageICM  "..tostring(camp.VersionPackageICM) )
+			if campL.VersionPackageICM then
+				env.info( "DCE_VersionPackageICM  "..tostring(campL.VersionPackageICM) )
 			end
-			if camp.MissionFilename then
-				env.info( "DCE_MissionFilename  "..tostring(camp.MissionFilename) )
+			if campL.MissionFilename then
+				env.info( "DCE_MissionFilename  "..tostring(campL.MissionFilename) )
 			end
-			if camp.version then
-				env.info( "DCE_versionCampaign  "..tostring(camp.version) )
+			if campL.version then
+				env.info( "DCE_versionCampaign  "..tostring(campL.version) )
 			end
 
 
@@ -1513,15 +1513,15 @@ function eventHandlerDCE:onEvent(event)
 			end
 
 
-			if camp.debugTraceability then
-				camp.debugTraceability = {}
+			if campL.debugTraceability then
+				campL.debugTraceability = {}
 			end
-			if camp.Briefing_text then
-				camp.Briefing_text = ""
+			if campL.Briefing_text then
+				campL.Briefing_text = ""
 			end
 
 			--export camp stats file
-			local campStr = "camp = " .. TableSerialization(camp, 0)
+			local campStr = "campL = " .. TableSerialization(campL, 0)
 			local campFile = io.open(PathDCE .. "camp_status.lua", "w")
 			if campFile then
 				campFile:write(campStr)
@@ -1542,7 +1542,7 @@ function eventHandlerDCE:onEvent(event)
 
 
 			--export eventIdTotal
-			if camp.debug then
+			if campL.debug then
 				local fileStr = "scen_log = " .. TableSerialization(eventIdTotal, 0)
 				local fileFile = io.open(PathDCE.."Debug\\" .. "eventIdTotal.lua", "w")
 				if fileFile then
@@ -1565,7 +1565,7 @@ function eventHandlerDCE:onEvent(event)
 			-- os.execute('start "EventPath" cmd  /k "c: & cd '..path..' & call \Init\\path.bat && pause"')
 
 			--Launch external LUA environment to evaluate debrief.log, update campaign status files and generate the next campaign mission
-			os.execute('start "Debriefing" cmd  /k "set \"DCSDIR=%cd%\" &  ' .. PathDD .. ' & cd ' .. PathDCE .. ' & call \"%DCSDIR%\\bin\\luae.exe\" ..\\..\\..\\ScriptsMod.'..camp.VersionPackageICM..'\\DEBRIEF_Master.lua"')
+			os.execute('start "Debriefing" cmd  /k "set \"DCSDIR=%cd%\" &  ' .. PathDD .. ' & cd ' .. PathDCE .. ' & call \"%DCSDIR%\\bin\\luae.exe\" ..\\..\\..\\ScriptsMod.'..campL.VersionPackageICM..'\\DEBRIEF_Master.lua"')
 
 		elseif event.id == world.event.S_EVENT_HIT then
 			if event.target and event.initiator then
@@ -1874,8 +1874,8 @@ world.addEventHandler(eventHandlerDCE)
 
 
 --collect initial health of ships
-if camp.ShipHealth0 == nil then																						--table does not exist yet
-	camp.ShipHealth0 = {}																							--create table
+if campL.ShipHealth0 == nil then																						--table does not exist yet
+	campL.ShipHealth0 = {}																							--create table
 end
 for coalition_name,coal in pairs(env.mission.coalition) do															--iterate through coalitions in mission
 	for country_n,country in pairs(coal.country) do																	--iterate through countries in coalitions
@@ -1885,7 +1885,7 @@ for coalition_name,coal in pairs(env.mission.coalition) do															--itera
 					local u = Unit.getByName(unit.name)																--get unit
 					if u then																						--unit exists
 						local health = u:getLife()																	--get current health of unit
-						camp.ShipHealth0[unit.name] = health														--store initial ship health
+						campL.ShipHealth0[unit.name] = health														--store initial ship health
 					end
 				end
 			end
@@ -1894,15 +1894,15 @@ for coalition_name,coal in pairs(env.mission.coalition) do															--itera
 end
 
 --apply ship damage
-if camp.ShipHealth then																						--table with ship health exists
-	for name,health_stored in pairs(camp.ShipHealth) do														--iterate through ships in table
-		if health_stored < 66 and camp.ShipHealth0[name] > 10 then											--health is less than 100% and ship has more than 10 health points (do not do for exteremly small boats)
+if campL.ShipHealth then																						--table with ship health exists
+	for name,health_stored in pairs(campL.ShipHealth) do														--iterate through ships in table
+		if health_stored < 66 and campL.ShipHealth0[name] > 10 then											--health is less than 100% and ship has more than 10 health points (do not do for exteremly small boats)
 			local u = Unit.getByName(name)																	--get unit
 			if u then																						--unit exists
 				local counter = 1
 				repeat
 					local h = u:getLife()																	--get current health of unit
-					local h0 = camp.ShipHealth0[name]														--get maximum health of unit
+					local h0 = campL.ShipHealth0[name]														--get maximum health of unit
 					local health_current = math.floor(h / h0 * 100)											--store health percentage of ship
 					local pointVec3 = u:getPoint()																--get position of ship
 					local power = h0 / 100																	--explosive power is relatve to ship strenght
@@ -1930,8 +1930,8 @@ local function CheckRtbAirbase()
 		-- },
 	-- }
 
-	if camp.BaseAirStart then
-		for base_name, base in pairs(camp.BaseAirStart) do
+	if campL.BaseAirStart then
+		for base_name, base in pairs(campL.BaseAirStart) do
 			if not base.side and base.coalition then base.side = base.coalition end
 			if env.mission.coalition[base.side] then
 				for country_n, country in pairs(env.mission.coalition[base.side].country) do

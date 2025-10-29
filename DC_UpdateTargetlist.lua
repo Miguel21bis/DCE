@@ -546,6 +546,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 	end
 end
 
+
 for side_name, targets in pairs(targetlist) do													--Iterate through all side
 	for targetN, target in pairs(targets) do												--Iterat through all targets
 		local maxRange = 0
@@ -1274,29 +1275,41 @@ end
 
 
 --********************************************************************************************************
---Update targetList avec le fichier LL_KnownPositionsTable.lua
---adds GPS lat positions with the LL_KnownPositionsTable file, if it exists
+--Update targetList avec le fichier LL_Positions.lua
+--adds GPS lat positions with the LL_Positions file, if it exists
 --********************************************************************************************************
 
-LL_KnownPositionsFileExit = false
-local posFile = "Init/LL_KnownPositionsTable.lua"
-local TestPath = io.open(posFile, "r")
-if  TestPath ~= nil then
-	LL_KnownPositionsFileExit = true
-	io.close(TestPath)
+-- LL_KnownPositionsFileExit = false
+-- local posFile = "Init/LL_Positions.lua"
+-- local testPath = io.open(posFile, "r")
+-- if  testPath ~= nil then
+-- 	LL_KnownPositionsFileExit = true
+-- 	io.close(testPath)
+-- 	dofile(posFile) --LL_KnownPositions = {}
+-- end
+
+
+LL_Positions = nil
+LL_PositionsFileExit = false
+local posFile = "Active/LL_Positions.lua"
+local testPath = io.open(posFile, "r")
+if testPath ~= nil then
+	LL_PositionsFileExit = true
+	io.close(testPath)
 	dofile(posFile) --LL_KnownPositions = {}
 end
 
-if LL_KnownPositionsFileExit then
+
+if LL_PositionsFileExit then
 	for campName, targets in pairs(targetlist) do
 		for targetName, target in pairs(targets) do
 			local foundTarget = false
 			if target.x and target.x ~= 0 then
 				local xKey = math.abs(math.floor(target.x))
-				if LL_KnownPositions[xKey]  then
+				if LL_Positions[xKey]  then
 					local testX = math.floor(target.x)
 					local testY = math.floor(target.y)
-					for n, llPos in pairs(LL_KnownPositions[xKey] ) do
+					for n, llPos in pairs(LL_Positions[xKey] ) do
 						if testX == llPos.x and testY == llPos.y then
 							target.lat = llPos.lat
 							target.lon = llPos.lon
@@ -1310,9 +1323,9 @@ if LL_KnownPositionsFileExit then
 				if not foundTarget then
 					local distMin = 9999999
 					local pointNearest = {}
-					for nPos, llPositions in pairs(LL_KnownPositions ) do
+					for nPos, llPositions in pairs(LL_Positions ) do
 						for n, llPos in pairs(llPositions ) do
-							local dist = GetDistance(llPos,target)
+							local dist = GetDistance(llPos, target)
 							if dist < distMin then
 								distMin = dist
 								pointNearest = llPos
@@ -1330,10 +1343,10 @@ if LL_KnownPositionsFileExit then
 						if element.x and element ~= 0 then
 
 							xKey = math.abs(math.floor(element.x))
-							if LL_KnownPositions[xKey]  then
+							if LL_Positions[xKey]  then
 								local testX = math.floor(element.x)
 								local testY = math.floor(element.y)
-								for n, llPos in pairs(LL_KnownPositions[xKey] ) do
+								for n, llPos in pairs(LL_Positions[xKey] ) do
 									if testX == llPos.x and testY == llPos.y then
 										element.lat = llPos.lat
 										element.lon = llPos.lon
@@ -1376,56 +1389,63 @@ for sideName, countries in pairs(oob_ground) do
 							local floor_y = math.floor(group.y)
 							local xKey = math.abs(floor_x)
 
-							if not targetPosTemp[xKey] then
-								targetPosTemp[xKey] = {}
-								addItem = true
-							else
-								for n, pos in pairs(targetPosTemp[xKey]) do
-									if floor_x == pos.x and floor_y == pos.y then
-										break
-									end
-								end
-							end
-
-							if addItem == true then
-								local posTemp = {
-									x = floor_x,
-									y = floor_y,
-									-- from = "Ground_Groups",
-								}
-								table.insert(targetPosTemp[xKey], posTemp)
-								-- print("DcUT #targetPosTemp:oob_ground "..qte.." "..typeName)
-								qte = qte + 1
-							end
-
-							for unitN, unit in pairs(group.units) do
-								if unit.x and unit.y then
-									local addItemSub = false
-
-									floor_x = math.floor(unit.x)
-									floor_y = math.floor(unit.y)
-									xKey = math.abs(floor_x)
-
-									if not targetPosTemp[xKey] then
-										targetPosTemp[xKey] = {}
-										addItemSub = true
-									else
-										for n, pos in pairs(targetPosTemp[xKey]) do
-											if floor_x == pos.x and floor_y == pos.y then
-												break
-											end
+							if LL_Positions and not LL_Positions[xKey] then
+								
+								if not targetPosTemp[xKey] then
+									targetPosTemp[xKey] = {}
+									addItem = true
+								else
+									for n, pos in pairs(targetPosTemp[xKey]) do
+										if floor_x == pos.x and floor_y == pos.y then
+											break
 										end
 									end
+								end
 
-									if addItemSub == true then
-										local posTemp = {
-											x = floor_x,
-											y = floor_y,
-											-- from = "Ground_Groups",
-										}
-										table.insert(targetPosTemp[xKey], posTemp)
-										-- print("DcUT #targetPosTemp:oob_ground "..qte.." ")
-										qte = qte + 1
+								if addItem == true then
+									local posTemp = {
+										x = floor_x,
+										y = floor_y,
+										-- from = "Ground_Groups",
+									}
+									table.insert(targetPosTemp[xKey], posTemp)
+									-- _affiche(posTemp, "posTemp: ")
+									-- print("DcUT #targetPosTemp:oob_ground "..qte.." "..typeName)
+									qte = qte + 1
+								end
+
+								for unitN, unit in pairs(group.units) do
+									if unit.x and unit.y then
+										local addItemSub = false
+
+										floor_x = math.floor(unit.x)
+										floor_y = math.floor(unit.y)
+										xKey = math.abs(floor_x)
+
+										if LL_Positions and not LL_Positions[xKey] then
+										
+											if not targetPosTemp[xKey] then
+												targetPosTemp[xKey] = {}
+												addItemSub = true
+											else
+												for n, pos in pairs(targetPosTemp[xKey]) do
+													if floor_x == pos.x and floor_y == pos.y then
+														break
+													end
+												end
+											end
+
+											if addItemSub == true then
+												local posTemp = {
+													x = floor_x,
+													y = floor_y,
+													-- from = "Ground_Groups",
+												}
+												table.insert(targetPosTemp[xKey], posTemp)
+												-- print("DcUT #targetPosTemp:oob_ground "..qte.." ")
+												qte = qte + 1
+											end
+										end
 									end
 								end
 							end
@@ -1436,6 +1456,8 @@ for sideName, countries in pairs(oob_ground) do
 		end
 	end
 end
+local qteOob = qte
+-- print("DcUT #targetPosTemp:oob_ground "..qteOob.." ")
 
 
 --***************************************************************************
@@ -1451,7 +1473,9 @@ if targetlist then
 				local floor_y = math.floor(target.y)
 				local xKey = math.abs(floor_x)
 
-				if not targetPosTemp[xKey] then
+				if LL_Positions and LL_Positions[xKey] then
+					addItem = false
+				elseif not targetPosTemp[xKey] then
 					targetPosTemp[xKey] = {}
 					addItem = true
 				else
@@ -1480,7 +1504,9 @@ if targetlist then
 							floor_y = math.floor(element.y)
 							xKey = math.abs(floor_x)
 
-							if not targetPosTemp[xKey] then
+							if LL_Positions and LL_Positions[xKey] then
+								addItemSub = false
+							elseif not targetPosTemp[xKey] then
 								targetPosTemp[xKey] = {}
 								addItemSub = true
 							else
@@ -1511,6 +1537,9 @@ if targetlist then
 	end
 end
 
+local qteTargetList = qte - qteOob
+-- print("DcUT #targetPosTemp:targetlist "..qteTargetList.." ")
+
 --*********************************************************************************
 tabTemplates = tabFileTemplate()
 
@@ -1534,7 +1563,9 @@ if tabTemplates ~= nil then
 										local floor_y = math.floor(group.y)
 										local xKey = math.abs(floor_x)
 
-										if not targetPosTemp[xKey] then
+										if LL_Positions and LL_Positions[xKey] then
+											addItem = false
+										elseif not targetPosTemp[xKey] then
 											targetPosTemp[xKey] = {}
 											addItem = true
 										else
@@ -1562,7 +1593,9 @@ if tabTemplates ~= nil then
 												floor_y = math.floor(unit.y)
 												xKey = math.abs(floor_x)
 
-												if not targetPosTemp[xKey] then
+												if LL_Positions and LL_Positions[xKey] then
+													addItemSub = false
+												elseif not targetPosTemp[xKey] then
 													targetPosTemp[xKey] = {}
 													addItemSub = true
 												else
@@ -1596,6 +1629,8 @@ if tabTemplates ~= nil then
 	end
 end
 
+local qteTemplate = qte - qteOob - qteTargetList
+-- print("DcUT #targetPosTemp:template "..qteTemplate.." ")
 
 --*********************************************************************************
 
@@ -1607,7 +1642,9 @@ for baseName, base in pairs(db_airbases) do
 		local floor_y = math.floor(base.y)
 		local xKey = math.abs(floor_x)
 
-		if not targetPosTemp[xKey] then
+		if LL_Positions and LL_Positions[xKey] then
+			addItem = false
+		elseif not targetPosTemp[xKey] then
 			targetPosTemp[xKey] = {}
 			addItem = true
 		else
@@ -1631,6 +1668,9 @@ for baseName, base in pairs(db_airbases) do
 	end
 end
 
+local qteBase = qte - qteOob - qteTargetList - qteTemplate
+-- print("DcUT #targetPosTemp:db_airbases "..qteBase.." ")
+
 --*********************************************************************************
 -- cherche les points 
 if mission and mission.triggers and mission.triggers.zones then
@@ -1642,7 +1682,9 @@ if mission and mission.triggers and mission.triggers.zones then
 			local floor_y = math.floor(zone.y)
 			local xKey = math.abs(floor_x)
 
-			if not targetPosTemp[xKey] then
+			if LL_Positions and LL_Positions[xKey] then
+				addItem = false
+			elseif not targetPosTemp[xKey] then
 				targetPosTemp[xKey] = {}
 				addItem = true
 			else
@@ -1667,7 +1709,12 @@ if mission and mission.triggers and mission.triggers.zones then
 	end
 end
 
+local qteZone = qte - qteOob - qteTargetList - qteTemplate - qteBase
+-- print("DcUT #targetPosTemp:zone "..qteZone.." ")
+
 --*********************************************************************************
+-- print("DcUT #targetPosTemp:TOTAL "..qte.."")
+-- os.execute 'pause'
 camp.targetPos = targetPosTemp
 --*********************************************************************************
 
