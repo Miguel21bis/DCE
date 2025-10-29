@@ -657,6 +657,11 @@ if MissionInstance >= 2 then
 		print("MissionInstance "..MissionInstance)
 		print("LOAD DC_Time from "..tostring("MAIN_NextMission "..debug.getinfo(1).currentline))
 	end
+	
+	--////////////////////////////////////////////////////////
+	BuildLoadout()
+	--////////////////////////////////////////////////////////
+
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Time.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_MoonPhase.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Weather.lua")

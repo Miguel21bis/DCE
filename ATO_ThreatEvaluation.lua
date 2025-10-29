@@ -1304,9 +1304,18 @@ CAPthreats = {
 
 
 --find AWACS, CAP and interceptors in aircraft units and populate ewr/Fighterthreats table
-for side, unit in pairs(oob_air) do																--iterate through all sides
+for sideName, unit in pairs(oob_air) do																--iterate through all sides
 	for n = 1, #unit do																			--iterate through all units
-		if unit[n].inactive ~= true and unit[n].roster.ready > 0 and db_airbases[unit[n].base] and db_airbases[unit[n].base].inactive ~= true and db_airbases[unit[n].base].x and db_airbases[unit[n].base].y then		--if unit is active and has ready aircraft and its airbase is active
+		local pass = true
+		print("AtoTE B n: "..n.." "..unit[n].type)
+		if unit[n].inactive then
+			-- print("AtoTE Ce echec ")
+			-- _affiche(unit[n], "unit[n]: ")
+			-- os.execute 'pause'
+			pass = false
+		end
+
+		if pass and unit[n].roster.ready > 0 and db_airbases[unit[n].base] and db_airbases[unit[n].base].inactive ~= true and db_airbases[unit[n].base].x and db_airbases[unit[n].base].y then		--if unit is active and has ready aircraft and its airbase is active
 			for task, task_bool in pairs(unit[n].tasks) do										--iterate through all tasks of unit			
 				if task_bool then
 					if LoadoutsList[unit[n].type] then
@@ -1362,7 +1371,7 @@ for side, unit in pairs(oob_air) do																--iterate through all sides
 												LDSD = loadout.LDSD,										--Look Down/Shoot Down
 											}
 
-											table.insert(Fighterthreats[side], entry)
+											table.insert(Fighterthreats[sideName], entry)
 											-- print("AtoTE J table.insert Escort")
 
 										elseif task == "Fighter Sweep" then											--if loadout is CAP
@@ -1378,7 +1387,7 @@ for side, unit in pairs(oob_air) do																--iterate through all sides
 												LDSD = loadout.LDSD,										--Look Down/Shoot Down
 											}
 
-											table.insert(Fighterthreats[side], entry)
+											table.insert(Fighterthreats[sideName], entry)
 											-- print("AtoTE J table.insert Fighter Sweep")
 
 										elseif task == "CAP" then											--if loadout is CAP
@@ -1394,8 +1403,8 @@ for side, unit in pairs(oob_air) do																--iterate through all sides
 												LDSD = loadout.LDSD,										--Look Down/Shoot Down
 											}
 
-											table.insert(CAPthreats[side], entry)
-											table.insert(Fighterthreats[side], entry)
+											table.insert(CAPthreats[sideName], entry)
+											table.insert(Fighterthreats[sideName], entry)
 											-- print("AtoTE J table.insert CAP")
 
 										elseif task == "Intercept" then										--if loadout is Intercept
@@ -1410,9 +1419,9 @@ for side, unit in pairs(oob_air) do																--iterate through all sides
 												range = loadout.range,										--Fighter action radius
 											}
 
-											table.insert(Fighterthreats[side], entry)
+											table.insert(Fighterthreats[sideName], entry)
 											-- print("AtoTE J table.insert Intercept")
-
+											
 										end
 									end
 								end
@@ -1420,6 +1429,7 @@ for side, unit in pairs(oob_air) do																--iterate through all sides
 						end
 					else
 						-- print("AtoTE Not loadout find for "..unit[n].type.." in UTIL_db_loaouts file OR code_loadout OR Init\db_loaouts "..tostring(task))
+						
 					end
 				end
 			end
@@ -1624,6 +1634,15 @@ if Debug.debug then
 	campFile = io.open("Debug/EWR_DB_AtoTE.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
+
+	if #Fighterthreats["blue"] == 0 then
+		print("AtoTE pas de menace air BLue? ^^")
+		os.execute 'pause'
+	end
+	if #Fighterthreats["red"] == 0 then
+		print("AtoTE pas de menace air red? ^^")
+		os.execute 'pause'
+	end
 
 end
 

@@ -2426,7 +2426,6 @@ function BuildLoadout()
 end
 
 
--- buildsLoadout()
 
 
 -- modification M54		revoir CustomTaskScript et TaskBombing
@@ -4659,6 +4658,13 @@ function LoadFileAndUpdate(from)
     if Debug.debug then
         print("LOAD LoadFileAndUpdate() from " .. tostring(from))
     end
+
+	
+	--////////////////////////////////////////////////////////
+	BuildLoadout()
+	--////////////////////////////////////////////////////////
+
+
 	
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Time.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_MoonPhase.lua")

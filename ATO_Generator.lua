@@ -235,10 +235,6 @@ local totalPlanePerTask = {
 
 
 
---////////////////////////////////////////////////////////
-BuildLoadout()
---////////////////////////////////////////////////////////
-
 --check le Loadout pour voir s'il y a des erreurs
 -- require("Active/Loadouts_archive")
 local error = 0
@@ -2021,12 +2017,11 @@ for sideName, draftT in pairs(draftSorties) do
 
 
 											if isDebugModeB then
-												debugLog(draft.id.." AtoG II passe B_15 threats.SEAD_offset?: "..tostring(draft.route.threats.SEAD_offset).." support_requirement?: "..tostring(support_requirement).." "..unit.type.." MP_Game: "..tostring(MP_Game))
+												debugLog(draft.id.." AtoG II passe B_15 threats.SEAD_offset?: "..tostring(draft.route.threats.SEAD_offset).." threats.air_total?: "..tostring(draft.route.threats.air_total).." "..unit.type.." MP_Game: "..tostring(MP_Game))
 											end
 
 											if support_requirement or MP_Game then																	--go ahead with this support task
 												if isDebugModeB then
-													-- debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II passe B_15b support_requirement passe: ")
 													debugLog(tostring(draft.id).." AtoG II passe B_15b support_requirement passe: ")
 												end
 
@@ -2808,7 +2803,7 @@ local function createATO_table(draftPriority)
 																if taskRequireInSide and NbTotPlanePerTask < 2 and not draft.overRideMP_B then
 																	support_available = false
 
-																	tempInfo = tempInfo .."\nAtoG NbTotPlanePerTask REJETE CC "
+																	tempInfo = tempInfo .."\nAtoG NbTotPlanePerTask REJETE DD "
 
 																	local tabRejected = {}
 																	tabRejected["sujet"]  = draft.id.." "..supportTask.." newTaskPerTarget  AVION TOTAL SUPPORT INSUFFISANT NbTotPlanePerTask <= 0 "
@@ -2817,13 +2812,6 @@ local function createATO_table(draftPriority)
 																	tabRejected["ligne"]  = SafeGetLine()
 																	table.insert(draft["rejected"], tabRejected)
 																end
-
-																-- if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "C")
-																-- and ( Debug.Generator.SpySquad and Debug.Generator.SpySquad == draft.name
-																-- or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
-																-- then
-																-- 	debuGenTxt = debuGenTxt.."\n"..tempInfo
-																-- end
 
 															end
 
@@ -2873,66 +2861,67 @@ local function createATO_table(draftPriority)
 											end
 										-- end
 
+										--[[ debut du strikeOnlyWithEscorte pur]]--
+
 										-- ATO_G_adjustment01 escort mandatory or not
 										-- regarde uniquement pour les bombardiers necessitant une escorte
 
-										-- if campMod.strikeOnlyWithEscorte and not draft.loadout.self_escort then
-										-- 	if (db_loadouts[draft.type]["Anti-ship Strike"] or db_loadouts[draft.type]["Strike"])  then	
-										-- 		local break_loop = false
-										-- 		for n_squad, squad in pairs(oob_air[side]) do
+										if campMod.strikeOnlyWithEscorte and not draft.loadout.self_escort then
+											if (db_loadouts[draft.type]["Anti-ship Strike"] or db_loadouts[draft.type]["Strike"])  then	
+												local break_loop = false
+												for n_squad, squad in pairs(oob_air[side]) do
 
-										-- 			if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "C") 
-										-- 			and ( Debug.Generator.SpySquad and Debug.Generator.SpySquad == draft.name 
-										-- 			or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
-										-- 			then
-										-- 				debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG III passe SWE _01 "..draft.type.." "..squad.type ) 
-										-- 			end
+													if isDebugModeC then
+														debugLog(draft.id.." ".." AtoG III passe SWE _01 "..draft.type.." "..squad.type)
+													end
 
-										-- 			if draft.mainOverRideMP or ((squad.tasks["Anti-ship Strike"]  or squad.tasks["Strike"] ) and squad.type == draft.type) then
-										-- 				local needSupport = {}																														--collect the total number of aircraft needed from each unit to complete the package																							--number of main body aircraft 
-										-- 				local availSupport = {}																													--collect the maximal number of available aircraft from this unit (biggest number of all tasks)
+													if draft.mainOverRideMP or ((squad.tasks["Anti-ship Strike"]  or squad.tasks["Strike"] ) and squad.type == draft.type) then
+														local needSupport = {}																														--collect the total number of aircraft needed from each unit to complete the package																							--number of main body aircraft 
+														local availSupport = {}																													--collect the maximal number of available aircraft from this unit (biggest number of all tasks)
 
-										-- 				if not needSupport[draft.name] then needSupport[draft.name] = 0 end
-										-- 				if not availSupport[draft.name] then availSupport[draft.name] = 0 end
-										-- 				needSupport[draft.name] =  Deepcopy(draft.number)	
+														if not needSupport[draft.name] then needSupport[draft.name] = 0 end
+														if not availSupport[draft.name] then availSupport[draft.name] = 0 end
+														needSupport[draft.name] =  Deepcopy(draft.number)	
 
-										-- 				--TODO comment ça marche? ça a l'air inutile....
-										-- 				availSupport[draft.name] =  AcftAvail[draft.name].unassigned
+														--TODO comment ça marche? ça a l'air inutile....
+														availSupport[draft.name] =  AcftAvail[draft.name].unassigned
 
-										-- 				for _p,_support in pairs(draft.support) do																							--iterate through support in draft sortie	
-										-- 					if 	type(_support) == "table" then	
-										-- 						for _a,support in pairs(_support) do											
-										-- 							if 	type(support) == "table" then
+														for _p,_support in pairs(draft.support) do																							--iterate through support in draft sortie	
+															if 	type(_support) == "table" then	
+																for _a,support in pairs(_support) do											
+																	if 	type(support) == "table" then
 
-										-- 								if not needSupport[support.name] then needSupport[support.name] = 0 end																															
-										-- 								if not availSupport[support.name] then availSupport[support.name] = 0 end																
+																		if not needSupport[support.name] then needSupport[support.name] = 0 end																															
+																		if not availSupport[support.name] then availSupport[support.name] = 0 end																
 
-										-- 								needSupport[support.name] =  needSupport[support.name] + support.number																	--add number of support aircraft from same unit
-										-- 								availSupport[support.name] =  AcftAvail[support.name].unassigned														
+																		needSupport[support.name] =  needSupport[support.name] + support.number																	--add number of support aircraft from same unit
+																		availSupport[support.name] =  AcftAvail[support.name].unassigned														
 
-										-- 							end
-										-- 						end
-										-- 					end
-										-- 				end		
+																	end
+																end
+															end
+														end		
 
-										-- 				--TODO encore utile ça?												
-										-- 				for Sname,_ in pairs(needSupport) do 
-										-- 					-- print("AtoG NeedName"..Sname.." |Need| "..needSupport[Sname].." |dispo| "..availSupport[Sname])
-										-- 					if needSupport[Sname] - (needSupport[Sname] * 0.25)  > availSupport[Sname] then	
-										-- 					----more aircraft are needed from this unit across all package tasks than are available
-										-- 						-- print("AtoG tabRejected: Necessaire: "..needSupport[Sname].." >  Dispo "..availSupport[Sname])
-										-- 						support_available = false																									--not enough support available
-										-- 							local tabRejected = {}
-										-- 							tabRejected["sujet"]  = draft.id.." BOMBARDIER NECESSITANT ESCORTE()support_available if needSupport[Sname] - (needSupport[Sname] * 0.15) > availSupport[Sname]"
-										-- 							tabRejected["cause"] = { [1] =  needSupport[Sname] - (needSupport[Sname] * 0.25), [2] = availSupport[Sname], }
-										-- 							tabRejected["ligne"]  = debug.getinfo(1).currentline														
-										-- 							table.insert(draft["rejected"], tabRejected)
-										-- 					end
-										-- 				end
-										-- 			end
-										-- 		end
-										-- 	end	
-										-- end
+														--TODO encore utile ça?												
+														for Sname,_ in pairs(needSupport) do 
+															-- print("AtoG NeedName"..Sname.." |Need| "..needSupport[Sname].." |dispo| "..availSupport[Sname])
+															if needSupport[Sname] - (needSupport[Sname] * 0.25)  > availSupport[Sname] then	
+															----more aircraft are needed from this unit across all package tasks than are available
+																-- print("AtoG tabRejected: Necessaire: "..needSupport[Sname].." >  Dispo "..availSupport[Sname])
+																support_available = false																									--not enough support available
+																	local tabRejected = {}
+																	tabRejected["sujet"]  = draft.id.." BOMBARDIER NECESSITANT ESCORTE()support_available if needSupport[Sname] - (needSupport[Sname] * 0.15) > availSupport[Sname]"
+																	tabRejected["cause"] = { [1] =  needSupport[Sname] - (needSupport[Sname] * 0.25), [2] = availSupport[Sname], }
+																	tabRejected["ligne"]  = debug.getinfo(1).currentline														
+																	table.insert(draft["rejected"], tabRejected)
+															end
+														end
+													end
+												end
+											end	
+										end
+
+										--[[ debut du strikeOnlyWithEscorte pur]]--
 
 
 										-- s il n y a qu un avion d escorte, on bache la mission
