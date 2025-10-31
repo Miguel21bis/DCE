@@ -437,6 +437,13 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 				else
 					groupNChoice = tonumber(choice)
 				end
+			elseif type(choice) == "string" then
+				if string.lower(choice) == "s" then
+					TaskRefused = true
+					groupNChoice = math.random(1, #playable)
+				elseif string.lower(choice) == "r" then
+					groupNChoice = math.random(1, #playable)
+				end
 			end
 
 			local stringChoice = tostring(choice)
@@ -446,48 +453,47 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 
 		until tabIndex[stringChoice]
 
-		if type(groupNChoice) == "string" then
-			if string.lower(groupNChoice) == "r" then
-				groupNChoice = math.random(1, #playable)
-			elseif string.lower(groupNChoice) == "s" then
-				TaskRefused = true
-				groupNChoice = math.random(1, #playable)
-			end
-		end
+		-- if type(groupNChoice) == "string" then
+		-- 	if string.lower(groupNChoice) == "r" then
+		-- 		groupNChoice = math.random(1, #playable)
+		-- 	elseif string.lower(groupNChoice) == "s" then
+		-- 		--TODO pas sur que cela fonctionne
+		-- 		TaskRefused = true
+		-- 		groupNChoice = math.random(1, #playable)
+		-- 	end
+		-- end
 
 		print("groupNChoice: "..tostring(groupNChoice).." unitNChoice: "..tostring(unitNChoice))
 
-		ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].player = true		--mark ATO entry as player flight
-		ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].unitPlayer = unitNChoice
+		if not TaskRefused then
+			
+			ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].player = true		--mark ATO entry as player flight
+			ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].unitPlayer = unitNChoice
 
-		camp.player = {
-			side = playable[groupNChoice].side,
-			pack_n = playable[groupNChoice].packN,
-			role = playable[groupNChoice].role,
-			flight = playable[groupNChoice].flight,
-			-- unitname = playable[r].unitname,
-			groupName = playable[groupNChoice].groupName,
-			target = ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].target,
-			tgt_side = playable[groupNChoice].target_side,
-			tgt_pack = playable[groupNChoice].target_pack,
-			tgt_wp = 1,
-			airbase = playable[groupNChoice].base,
-			squadName = playable[groupNChoice].squadName,
-			task = playable[groupNChoice].task,
-			type = playable[groupNChoice].type,
-		}
-
+			camp.player = {
+				side = playable[groupNChoice].side,
+				pack_n = playable[groupNChoice].packN,
+				role = playable[groupNChoice].role,
+				flight = playable[groupNChoice].flight,
+				-- unitname = playable[r].unitname,
+				groupName = playable[groupNChoice].groupName,
+				target = ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].target,
+				tgt_side = playable[groupNChoice].target_side,
+				tgt_pack = playable[groupNChoice].target_pack,
+				tgt_wp = 1,
+				airbase = playable[groupNChoice].base,
+				squadName = playable[groupNChoice].squadName,
+				task = playable[groupNChoice].task,
+				type = playable[groupNChoice].type,
+			}
+		end
 		------------------
 	elseif AllCoopPossible then	--si le multiplayerF1 est demandé
 
-		print(" -------------------------------------------------------> Note: Your plane Flight wishes: ")
-		-- for k=1,  Multi.NbGroup do
-			-- print(" -------------------------------------------------------> "..Multi.Group[k].NbPlane.." "..Multi.Group[k].PlaneType.." ("..Multi.Group[k].side..") "..Multi.Group[k].task)
+		-- print(" -------------------------------------------------------> Note: Your plane Flight wishes: ")
+		-- for k=1,  #creaClientFlight do
+		-- 	print(" -------------------------------------------------------> "..creaClientFlight[k].NbPlane.." "..creaClientFlight[k].PlaneType.." ("..creaClientFlight[k].side..") "..creaClientFlight[k].task)
 		-- end
-
-		for k=1,  #creaClientFlight do
-			print(" -------------------------------------------------------> "..creaClientFlight[k].NbPlane.." "..creaClientFlight[k].PlaneType.." ("..creaClientFlight[k].side..") "..creaClientFlight[k].task)
-		end
 
 
 		MpIdInterceptor = 1
@@ -497,98 +503,97 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 		local tabSelect = {}																		--table pour afficher * devant chaque selection
 		local badEntry = false
 		for k=1, #creaClientFlight do																	-- si le multiplayer est demande
-			local tabIndex = {}																		--table pour afficher uniquement les choix possibles
-
+			
+			local resteAPrendre = creaClientFlight[k].NbPlane
+				
 			repeat
-				for index = 1, #playable do
+				local tabIndex = {}																		--table pour afficher uniquement les choix possibles
 
-					local Nindex = " "
-					if tabSelect[index] then
-						Nindex = "*"
-					elseif creaClientFlight[k].PlaneType == playable[index].type then
-						Nindex = tostring(index)
-						tabIndex[index] = true
+				repeat
+					
+					print(" -------------------------------------------------------> Note: Your plane Flight wishes: ")
+					-- for k=1,  #creaClientFlight do
+						print(" -------------------------------------------------------> "..creaClientFlight[k].NbPlane.." "..creaClientFlight[k].PlaneType.." ("..creaClientFlight[k].side..") "..creaClientFlight[k].task)
+					-- end
+
+					
+					for index = 1, #playable do
+
+						local indexN = " "
+						if tabSelect[index] then
+							indexN = "*"
+						elseif creaClientFlight[k].PlaneType == playable[index].type then
+							indexN = tostring(index)
+							tabIndex[index] = true
+						else
+							indexN = " "
+						end
+						local info = ""
+						if Debug.Generator.affiche then
+							info = " "..playable[index].id.." "
+						end
+						io.write(indexN..""..info.."(Nb: "..playable[index].number..") ".." -  Pack : "..playable[index].packN.." - "..ReplaceBaseName(playable[index].base).." - "..ReplaceTypeName(playable[index].type).." - "..playable[index].groupName )
+						if playable[index].target_name ~= nil then  io.write(" - "..playable[index].target_name) end
+						io.write("\n")
+
+					end
+
+					print("s - skip mission")
+					tabIndex["s"] = true
+					tabIndex["S"] = true
+					if badEntry then print("\n\\WARNING, your previous choice was wrong. Do it again: ") end
+					print("Please select your flight (1-"..(#playable).."): ")
+
+					groupNChoice = io.stdin:read()
+
+					if groupNChoice ~= "" and string.byte(groupNChoice) <= 57 then				-- adjustment A01 : robust form 
+						groupNChoice = tonumber(groupNChoice)										-- si inférieur à 57 ASCII, c'est inférieur au chiffre 9, donc c'est un chiffre
+					elseif type(groupNChoice) == "string" then
+						if string.lower(groupNChoice) == "s" then
+							TaskRefused = true
+							groupNChoice = math.random(1, #playable)
+						-- elseif string.lower(groupNChoice) == "r" then
+						-- 	groupNChoice = math.random(1, #playable)
+						end
+					end
+
+					if not tabIndex[groupNChoice] then
+						print("\nInvalid entry.\n")
+						badEntry = true
 					else
-						Nindex = " "
+						tabSelect[groupNChoice] = true
+						badEntry = false
 					end
-					local info = ""
-					if Debug.Generator.affiche then
-						info = " "..playable[index].id.." "
-					end
-					io.write(Nindex..""..info.."(Nb: "..playable[index].number..") ".." -  Pack : "..playable[index].packN.." - "..ReplaceBaseName(playable[index].base).." - "..ReplaceTypeName(playable[index].type).." - "..playable[index].groupName )
-					if playable[index].target_name ~= nil then  io.write(" - "..playable[index].target_name) end
-					io.write("\n")
 
-				end
-
-				print("s - skip mission")
-				tabIndex["s"] = true
-				tabIndex["S"] = true
-				if badEntry then print("\n\\WARNING, your previous choice was wrong. Do it again: ") end
-				print("Please select your flight (1-"..(#playable).."): ")
-
-				groupNChoice = io.stdin:read()
-
-				if groupNChoice ~= "" and string.byte(groupNChoice) <= 57 then				-- adjustment A01 : robust form 
-					groupNChoice = tonumber(groupNChoice)										-- si inférieur à 57 ASCII, c'est inférieur au chiffre 9, donc c'est un chiffre
-				end
-
-				if not tabIndex[groupNChoice] then
-					print("\nInvalid entry.\n")
-					badEntry = true
-				else
-					tabSelect[groupNChoice] = true
-					badEntry = false
-				end
-
-			until tabIndex[groupNChoice]
-
-			if playable[groupNChoice] then print("Selected: "..playable[groupNChoice].groupName) end
-
-			if type(groupNChoice) == "string" then
-				if string.lower(groupNChoice) == "r" then
-					groupNChoice = math.random(1, #playable)
-				elseif string.lower(groupNChoice) == "s" then
-					TaskRefused = true
-					groupNChoice = math.random(1, #playable)
-					break
-				end
-			end
-
-			if not TaskRefused then
-
-				-- ajoute ce systeme pour avoir le briefing de tous
-				if not camp.client then camp.client = {} end
-
-				local tabClient = {
-					side = playable[groupNChoice].side,
-					pack_n = playable[groupNChoice].packN,
-					role = playable[groupNChoice].role,
-					flight = playable[groupNChoice].flight,
-					-- unitname = playable[r].unitname,
-					groupName = playable[groupNChoice].groupName,
-					target = ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].target,
-					tgt_side = playable[groupNChoice].target_side,
-					tgt_pack = playable[groupNChoice].target_pack,
-					tgt_wp = 1,
-					airbase = playable[groupNChoice].base,
-					squadName = playable[groupNChoice].squadName,
-					task = playable[groupNChoice].task,
-					type = playable[groupNChoice].type,
-				}
-
-				table.insert(camp.client, tabClient)
+				until tabIndex[groupNChoice]
 
 
-				-- garde ce systeme pour ne faire un debriefing que sur un group, normalement celui du main
-				local foundGoodMain
-				if not foundGoodMain then
-					camp.player = {
+
+				if playable[groupNChoice] then print("Selected: "..playable[groupNChoice].groupName) end
+
+				-- if type(groupNChoice) == "string" then
+				-- 	if string.lower(groupNChoice) == "r" then
+				-- 		groupNChoice = math.random(1, #playable)
+				-- 	elseif string.lower(groupNChoice) == "s" then
+				-- 		--TODO par sur que cela fonctionne
+				-- 		TaskRefused = true
+				-- 		groupNChoice = math.random(1, #playable)
+				-- 		break
+				-- 	end
+				-- end
+
+				if not TaskRefused then
+
+					resteAPrendre = resteAPrendre - playable[groupNChoice].number
+
+					-- ajoute ce systeme pour avoir le briefing de tous
+					if not camp.client then camp.client = {} end
+
+					local tabClient = {
 						side = playable[groupNChoice].side,
 						pack_n = playable[groupNChoice].packN,
 						role = playable[groupNChoice].role,
 						flight = playable[groupNChoice].flight,
-						-- unitname = playable[r].unitname,
 						groupName = playable[groupNChoice].groupName,
 						target = ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].target,
 						tgt_side = playable[groupNChoice].target_side,
@@ -600,17 +605,40 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 						type = playable[groupNChoice].type,
 					}
 
-					if playable[groupNChoice].role == "main" then foundGoodMain = true end
+					table.insert(camp.client, tabClient)
+
+
+					-- garde ce systeme pour ne faire un debriefing que sur un group, normalement celui du main
+					local foundGoodMain
+					if not foundGoodMain then
+						camp.player = {
+							side = playable[groupNChoice].side,
+							pack_n = playable[groupNChoice].packN,
+							role = playable[groupNChoice].role,
+							flight = playable[groupNChoice].flight,
+							groupName = playable[groupNChoice].groupName,
+							target = ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].target,
+							tgt_side = playable[groupNChoice].target_side,
+							tgt_pack = playable[groupNChoice].target_pack,
+							tgt_wp = 1,
+							airbase = playable[groupNChoice].base,
+							squadName = playable[groupNChoice].squadName,
+							task = playable[groupNChoice].task,
+							type = playable[groupNChoice].type,
+						}
+
+						if playable[groupNChoice].role == "main" then foundGoodMain = true end
+					end
+
+
+					ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].client = true
+					ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].IdClient = #camp.client
+					-- ATO[playable[r].side][playable[r].packN][playable[r].role][playable[r].flight].NbPlaneClient = creaClientFlight[#camp.client].NbPlane
+					ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].NbPlaneClient = creaClientFlight[k].NbPlane
+
+					camp.MultiPlayer.pack_n[playable[groupNChoice].packN] = true
 				end
-
-
-				ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].client = true
-				ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].IdClient = #camp.client
-				-- ATO[playable[r].side][playable[r].packN][playable[r].role][playable[r].flight].NbPlaneClient = creaClientFlight[#camp.client].NbPlane
-				ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].NbPlaneClient = creaClientFlight[k].NbPlane
-
-				camp.MultiPlayer.pack_n[playable[groupNChoice].packN] = true
-			end
+			until resteAPrendre <= 0 or TaskRefused
 		end
 	end
 

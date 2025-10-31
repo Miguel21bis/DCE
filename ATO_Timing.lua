@@ -773,8 +773,8 @@ for sideName, packs in pairs(ATO) do
 
 						airstart = w															--store the number of the spawn WP (WPs ahead will be removed)
 						break
-					elseif flight[f].route[w].eta < 0 and (flight[f].client or flight[f].player) then
-						InsertBugList("AtoT ALERT player SPAWNING ETA <0 "..tostring(flight[f].route[w].eta))
+					-- elseif flight[f].route[w].eta < 0 and (flight[f].client or flight[f].player) then
+					-- 	InsertBugList("AtoT ALERT player SPAWNING ETA <0 "..tostring(flight[f].route[w].eta))
 					end
 				end
 

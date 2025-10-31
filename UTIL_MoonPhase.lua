@@ -175,43 +175,43 @@ function Moonphase(day,month,year)
 
 	local timeToTarget = camp.time + 3600
 	local infoMoonSet = ""
-	local NiveauDeNuit = 0
+	local niveauDeNuit = 0
 
 	if sSunrise and sSunset then
 
 		if timeToTarget < sSunrise or timeToTarget > sSunset then				--il fait nuit		
 			if timeToTarget < sMoonrise and timeToTarget > sMoonset then		--pas de lune
-				NiveauDeNuit = 4
+				niveauDeNuit = 4
 				infoMoonSet = " (but the moon is set) "
 			elseif lumi >= 50 then
-				NiveauDeNuit = 1
+				niveauDeNuit = 1
 			elseif lumi >= 25 then
-				NiveauDeNuit = 2
+				niveauDeNuit = 2
 			elseif lumi >= 5 then
-				NiveauDeNuit = 3
+				niveauDeNuit = 3
 			end
 		end
 	end
 
-	local NVG_info =  "Sunrise   "..tostring(bSunrise) .. "\\n"..
+	local nvg_info =  "Sunrise   "..tostring(bSunrise) .. "\\n"..
 				"Sunset    "..tostring(bSunset).. "\\n"..
 				"Moonrise  "..tostring(bMoonrise).. "\\n"..
 				"Moonset   "..tostring(bMoonset).. "\\n"..
-				"NVG Info => Night Level: "..tostring(NiveauDeNuit).." (max 5)  "..moonText.." ( "..lumi.."% full moon)"..tostring(infoMoonSet)
+				"NVG Info => Night Level: "..tostring(niveauDeNuit).." (max 5)  "..moonText.." ( "..lumi.."% full moon)"..tostring(infoMoonSet)
 
 	if bSunrise == "----" or bSunset == "----" then
-		NVG_info = "The sun doesn't set, you're probably beyond the Arctic Circle."
-		print(NVG_info)
+		nvg_info = "The sun doesn't set, you're probably beyond the Arctic Circle."
+		print(nvg_info)
 	else
 
 		print("Sunrise   "..tostring(bSunrise))
 		print("Sunset    "..tostring(bSunset))
 		print("Moonrise  "..tostring(bMoonrise))
 		print("Moonset   "..tostring(bMoonset))
-		print("NVG Info => Night Level: "..tostring(NiveauDeNuit).." (max 5)  "..moonText.." ( "..lumi.."% full moon)"..tostring(infoMoonSet))
+		print("NVG Info => Night Level: "..tostring(niveauDeNuit).." (max 5)  "..moonText.." ( "..lumi.."% full moon)"..tostring(infoMoonSet))
 
 	end
 
-	return NVG_info
+	return nvg_info
 
 end

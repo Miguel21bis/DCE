@@ -50,7 +50,7 @@ local playerSide = findPlayerSide()
 
 -- M16 : SpawnAir, & insert pos far target 
 -- array de tous les groups vehicle pour rechercher ceux qui seront des targets designés afin de les protéger de Prune
-local function GroundGroupId()
+local function groundGroupId()
 	local allGroundGroupId = {}
 	for side, ncountry in pairs(oob_ground ) do
 		for nc, country in pairs(ncountry ) do
@@ -220,7 +220,7 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 				return true -- keep
 			end
 
-			-- print("DC_P_T2 -P----P--> Prune vc_: "..lowCaseName)
+			print("DC_P_T2 -P----P--> Prune vc_: "..lowCaseName)
 			return false -- Prune
 		end
 		--[[particularité NAM GC22]]
@@ -455,7 +455,7 @@ end
 
 local function prune()
 
-	local allGroundGroupId = GroundGroupId()
+	local allGroundGroupId = groundGroupId()
 	-- get the waypoints for all air units in the mission.
 	local allWaypoints = getAllWaypoints()
 

@@ -1955,8 +1955,13 @@ local function AFAC_Com_OFF(arg)
 end
 
 function AFAC_F10(playerGroup)
-	--1677: Group doesn't exist
-	local gpGid = playerGroup:getID()		--ERROR 1748: Group doesn't exist
+
+	local gpGid
+	if playerGroup and playerGroup:isExist() then
+		gpGid = playerGroup:getID()
+	else
+		return -- Exit the function if group doesn't exist
+	end
 
 	missionCommands.removeItemForGroup(gpGid, {"AFAC"})
 
@@ -3978,7 +3983,7 @@ local function loopAFAC()
 	local playerObj = localGetPlayerObj()
 	if playerObj then
 		groupObject = playerObj:getGroup()
-		gpGid = playerObj:getGroup():getID()
+		-- gpGid = playerObj:getGroup():getID()
 	end
 
 	if gpGid and groupObject then
