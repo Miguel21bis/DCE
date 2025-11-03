@@ -108,7 +108,7 @@ EjectedPilotFrequency = {
 
 TaskByPlane = {
 	["Nothing"] = {
-		["MosquitoFBMkVI"] = true,
+		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
 
@@ -246,7 +246,7 @@ TaskByPlane = {
 
 
 	["AFAC"] = {
-		["MosquitoFBMkVI"] = true,
+		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
 
@@ -308,7 +308,7 @@ TaskByPlane = {
 
 	},
 	["CAS"] = {
-		["MosquitoFBMkVI"] = true,
+		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
 
@@ -403,7 +403,7 @@ TaskByPlane = {
 	},
 
 	["Antiship Strike"] = {
-		["MosquitoFBMkVI"] = true,
+		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
 
@@ -482,7 +482,7 @@ TaskByPlane = {
 	},
 
 	["Ground Attack"] = {
-		["MosquitoFBMkVI"] = true,
+		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
 
@@ -580,7 +580,7 @@ TaskByPlane = {
 	},
 
 	["Runway Attack"] = {
-		["MosquitoFBMkVI"] = true,
+		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
 
@@ -648,7 +648,7 @@ TaskByPlane = {
 	},
 
 	["Escort"] = {
-		["MosquitoFBMkVI"] = true,
+		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
 
@@ -753,7 +753,7 @@ TaskByPlane = {
 	},
 
 	["Intercept"] = {
-		["MosquitoFBMkVI"] = true,
+		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
 
@@ -805,7 +805,7 @@ TaskByPlane = {
 	},
 
 	["CAP"] = {
-		["MosquitoFBMkVI"] = true,
+		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
 
@@ -865,7 +865,7 @@ TaskByPlane = {
 	},
 
 	["Fighter Sweep"] = {
-		["MosquitoFBMkVI"] = true,
+		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
 
@@ -1058,6 +1058,17 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
+		Tasks = {
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(Escort),
+			aircraft_task(CAP),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(AFAC),
+			aircraft_task(RunwayAttack),
+			aircraft_task(AntishipStrike),
+		},
 	},
 	["SpitfireLFMkIX"] = 	{
 		instrumentUnits = "imperial",
@@ -1266,7 +1277,7 @@ Data_divers = {
 		requiredModules = true,						--itsModule
 		EPLRS_Capacity = false,
 		laserDesignator = false,
-		moduleName = "tetet_ra5",
+		moduleName = "tetet_ra5",					--self_ID 
 		jammer = {
 			type = "AN/ALQ-100",
 			efficiency = 86,
@@ -1346,6 +1357,24 @@ Data_divers = {
 		hCruise = 7600,
 		refuellingReceptacleType = "probe"
 	},
+
+	["A-37B"] = 	{							--name, next to DisplayName
+		instrumentUnits = "imperial",
+		moduleName = "h60_a37_dragonfly",		--self_ID 
+		Tasks = {
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(AFAC),
+			aircraft_task(RunwayAttack),
+			aircraft_task(AntishipStrike),
+		},
+		playable = false,
+		vCruise = 125,						--V_opt
+		hCruise = 6000,
+	},
+	
 
 	["MQ-9 Reaper"] = 	{
 		instrumentUnits = "imperial",

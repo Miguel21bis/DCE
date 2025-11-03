@@ -8052,27 +8052,27 @@ for _side, side in pairs(mission.coalition) do
 	end
 end
 
---supprime les ["num"] = 1, des loadouts
---qui sont devenu inutile
-for _, side in pairs(mission.coalition) do
-	for _, country in pairs(side.country) do
-		for _, groups in pairs(country) do
-			if type(groups) == "table" and groups["group"]  then
-				for _, group in pairs(groups["group"]) do
-					for _, unit in pairs(group.units) do
-						if unit.payload and unit.payload.pylons   then
-							for _, pylon in pairs(unit.payload.pylons) do
-								if pylon and pylon.num then
-									pylon.num = nil
-								end
-							end
-						end
-					end
-				end
-			end
-		end
-	end
-end
+-- --supprime les ["num"] = 1, des loadouts
+-- --qui sont devenu inutile
+-- for _, side in pairs(mission.coalition) do
+-- 	for _, country in pairs(side.country) do
+-- 		for _, groups in pairs(country) do
+-- 			if type(groups) == "table" and groups["group"]  then
+-- 				for _, group in pairs(groups["group"]) do
+-- 					for _, unit in pairs(group.units) do
+-- 						if unit.payload and unit.payload.pylons   then
+-- 							for _, pylon in pairs(unit.payload.pylons) do
+-- 								if pylon and pylon.num then
+-- 									pylon.num = nil
+-- 								end
+-- 							end
+-- 						end
+-- 					end
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+-- end
 
 
 

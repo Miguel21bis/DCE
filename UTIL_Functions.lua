@@ -2053,40 +2053,44 @@ end
 -- 	return iter
 -- end
 
+--renommer les clefs des pylones est une mauvaise idée
+--elles sont défini par le module, il ne faut plus y toucher
 local function loadoutPylon(loadoutTable)
 	for plane, loadoutByTask in pairs(loadoutTable) do
 		for task, ltable in pairs(loadoutByTask) do
 			for loadoutName, loadout in pairs(ltable) do
-				local newSortPylons = {}
-				local newSort = false
-				if loadout.stores and loadout.stores.pylons then
-					for chapterN, emport in pairs(loadout.stores.pylons) do
+				
 
-						if emport.num and emport.num ~= chapterN then
-							-- print("UtilF incoherence pylon N and Num: "..tostring(plane).." "..tostring(task).." "..tostring(loadoutName).." "..tostring(chapterN))
-							newSort = true
-						end
-					end
+				-- local newSortPylons = {}
+				-- local newSort = false
+				-- if loadout.stores and loadout.stores.pylons then
+				-- for chapterN, emport in pairs(loadout.stores.pylons) do
 
-					if newSort then
-						for chapterN, emport in pairs(loadout.stores.pylons) do
-							newSortPylons[emport.num] =
-							{
-								["CLSID"] =	emport.CLSID,
-							}
-							newSort = true
-						end
-					else
-						for chapterN, emport in pairs(loadout.stores.pylons) do
-							emport.num = nil
+				-- 		if emport.num and emport.num ~= chapterN then
+				-- 			-- print("UtilF incoherence pylon N and Num: "..tostring(plane).." "..tostring(task).." "..tostring(loadoutName).." "..tostring(chapterN))
+				-- 			newSort = true
+				-- 		end
+				-- 	end
 
-						end
-					end
-				end
+				-- 	if newSort then
+				-- 		for chapterN, emport in pairs(loadout.stores.pylons) do
+				-- 			newSortPylons[emport.num] =
+				-- 			{
+				-- 				["CLSID"] =	emport.CLSID,
+				-- 			}
+				-- 			newSort = true
+				-- 		end
+				-- 	else
+				-- 		for chapterN, emport in pairs(loadout.stores.pylons) do
+				-- 			emport.num = nil
 
-				if newSort then
-					loadout.stores.pylons = newSortPylons
-				end
+				-- 		end
+				-- 	end
+				-- end
+
+				-- if newSort then
+				-- 	loadout.stores.pylons = newSortPylons
+				-- end
 
 				--deletes deprecated variables
 				if loadout.capability then
