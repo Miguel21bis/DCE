@@ -139,12 +139,25 @@ local function RadarOff(arg)																				--Function to shut down radar of
 	end
 end
 
+
+SAM_AMM = {
+	["Patriot str"] = true,
+	["S-300PS 40B6M tr"] = true,
+}
+
+OLD_SAM_Radar = {
+    ["SNR_75V"] = true,
+	["snr s-125 tr"] = true,
+}
+
+local timingRadarOff = {5,15 }
+
 ARM_Shot_EventHandler = {}																					--Event handler to look for launched ARM
 function ARM_Shot_EventHandler:onEvent(event)
 	if event.id == world.event.S_EVENT_SHOT then
 		local wep = event.weapon																			--Get the weapon of the launch event
 		local tgt = wep:getTarget()																			--Get the target of the weapon
-
+		local addTime = 0
 		if not wep or not wep.getDesc then return end
 
 		-- if event.initiator and Object.getCategory(event.initiator) == Object.Category.UNIT  then										--initiator is a unit debug_ET01.h
@@ -204,10 +217,7 @@ function ARM_Shot_EventHandler:onEvent(event)
 
 						-- _affiche(descRadarSam, "descRadarSam ArmDefence")
 
-						SAM_AMM = {
-							["Patriot str"] = true,
-							["S-300PS 40B6M tr"] = true,
-						}
+
 
 						if math.random(1,10) > 1 then																--90% chance that ARM launch is detected by target
 							local probaTurnOff = 75
@@ -219,7 +229,12 @@ function ARM_Shot_EventHandler:onEvent(event)
 							if math.random(1,100) <= probaTurnOff then
 								-- trigger.action.outText("RadarOff", 3)	--DEBUG
 								env.info("DCE_ARM_RadarOff")
-								timer.scheduleFunction(RadarOff, {tgt, wep}, timer.getTime() + math.random(5, 15))		--Target reacts within 5 to 15 seconds after ARM launch with shutting down its radar
+								
+                                if OLD_SAM_Radar[descRadarSam.typeName] then
+									addTime = 60
+								end
+								
+								timer.scheduleFunction(RadarOff, {tgt, wep}, timer.getTime() + math.random(timingRadarOff[1], timingRadarOff[2]) + addTime)		--Target reacts within 5 to 15 seconds after ARM launch with shutting down its radar
 							end
 
 						end

@@ -8,6 +8,29 @@ versionDCE["DC_Final_steps.lua"] = "1.1.1"
 --
 -- modification M90_a		missionWithIcone
 -------------------------------------------------------------------------------------------------------
+---
+---["type"] = "KS-19",
+---["type"] = "S-60_Type59_Artillery",
+---["skill"] = "High",Average
+
+--set quelques unitées AAA en moyen
+for _, side in pairs(mission.coalition) do
+	for _, country in pairs(side.country) do
+		for _, groups in pairs(country) do
+			if type(groups) == "table" and groups["group"]  then
+				for _, group in pairs(groups["group"]) do
+					for _, unit in pairs(group.units) do
+						if unit.type and (unit.type ==  "KS-19" or unit.type ==  "S-60_Type59_Artillery" ) then
+							unit.skill = "Average"
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
+---
 if Debug.debug then
 	print("START DC_Final_steps.lua "..versionDCE["DC_Final_steps.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
