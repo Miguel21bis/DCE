@@ -2053,44 +2053,45 @@ end
 -- 	return iter
 -- end
 
---renommer les clefs des pylones est une mauvaise idée
---elles sont défini par le module, il ne faut plus y toucher
+--renommer les clefs, c'est obligatoire
+-- les tables loadouts sauvegardé par le campaignMaker dans aved Games\DCS\MissionEditor\UnitPayloads
+-- sont inutilisable dans le fichier mission, tel quel
 local function loadoutPylon(loadoutTable)
 	for plane, loadoutByTask in pairs(loadoutTable) do
 		for task, ltable in pairs(loadoutByTask) do
 			for loadoutName, loadout in pairs(ltable) do
 				
 
-				-- local newSortPylons = {}
-				-- local newSort = false
-				-- if loadout.stores and loadout.stores.pylons then
-				-- for chapterN, emport in pairs(loadout.stores.pylons) do
+				local newSortPylons = {}
+				local newSort = false
+				if loadout.stores and loadout.stores.pylons then
+				for chapterN, emport in pairs(loadout.stores.pylons) do
 
-				-- 		if emport.num and emport.num ~= chapterN then
-				-- 			-- print("UtilF incoherence pylon N and Num: "..tostring(plane).." "..tostring(task).." "..tostring(loadoutName).." "..tostring(chapterN))
-				-- 			newSort = true
-				-- 		end
-				-- 	end
+						if emport.num and emport.num ~= chapterN then
+							-- print("UtilF incoherence pylon N and Num: "..tostring(plane).." "..tostring(task).." "..tostring(loadoutName).." "..tostring(chapterN))
+							newSort = true
+						end
+					end
 
-				-- 	if newSort then
-				-- 		for chapterN, emport in pairs(loadout.stores.pylons) do
-				-- 			newSortPylons[emport.num] =
-				-- 			{
-				-- 				["CLSID"] =	emport.CLSID,
-				-- 			}
-				-- 			newSort = true
-				-- 		end
-				-- 	else
-				-- 		for chapterN, emport in pairs(loadout.stores.pylons) do
-				-- 			emport.num = nil
+					if newSort then
+						for chapterN, emport in pairs(loadout.stores.pylons) do
+							newSortPylons[emport.num] =
+							{
+								["CLSID"] =	emport.CLSID,
+							}
+							newSort = true
+						end
+					else
+						for chapterN, emport in pairs(loadout.stores.pylons) do
+							emport.num = nil
 
-				-- 		end
-				-- 	end
-				-- end
+						end
+					end
+				end
 
-				-- if newSort then
-				-- 	loadout.stores.pylons = newSortPylons
-				-- end
+				if newSort then
+					loadout.stores.pylons = newSortPylons
+				end
 
 				--deletes deprecated variables
 				if loadout.capability then

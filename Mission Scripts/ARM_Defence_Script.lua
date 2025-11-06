@@ -215,7 +215,7 @@ function ARM_Shot_EventHandler:onEvent(event)
 
 						local descRadarSam = tgt:getDesc()
 
-						-- _affiche(descRadarSam, "descRadarSam ArmDefence")
+						_affiche(descRadarSam, "descRadarSam ArmDefence")
 
 
 
@@ -232,6 +232,7 @@ function ARM_Shot_EventHandler:onEvent(event)
 								
                                 if OLD_SAM_Radar[descRadarSam.typeName] then
 									addTime = 60
+									env.info("DCE_ARM_Defence OLD_SAM_Radar detected addTime: " .. tostring(addTime))
 								end
 								
 								timer.scheduleFunction(RadarOff, {tgt, wep}, timer.getTime() + math.random(timingRadarOff[1], timingRadarOff[2]) + addTime)		--Target reacts within 5 to 15 seconds after ARM launch with shutting down its radar
