@@ -28,14 +28,29 @@ local showOne = false
 local showOneNight = false
 local baseChoice
 local foundSinglePlayer = {}
-local fieldElevation = 0												--elevation of players airfield used for minimum cloud base
-local elapsed_Time = CampTotalTimeS										--elapsed time since campaign start in seconds
-local pHigh = mission_ini.weather.High or 50					--default pressure high value
-local pLow = mission_ini.weather.Low or 50					--default pressure pLow value
+local fieldElevation = 0											--elevation of players airfield used for minimum cloud base
+local elapsed_Time = CampTotalTimeS								--elapsed time since campaign start in seconds
+
+-- Définit pHigh / pLow et signale via InsertBugList si la variable attendue est manquante
+local pHigh, pLow
+if mission_ini and mission_ini.weather and mission_ini.weather.pHigh ~= nil then
+	pHigh = mission_ini.weather.pHigh
+else
+	pHigh = 50										--default pressure high value
+	-- Enregistre le fait que la variable pHigh est manquante (appel demandé)
+	if InsertBugList then InsertBugList("pHigh weather, absent from conf_mod") end
+end
+if mission_ini and mission_ini.weather and mission_ini.weather.pLow ~= nil then
+	pLow = mission_ini.weather.pLow
+else
+	pLow = 50										--default pressure pLow value
+	-- Enregistre le fait que la variable pLow est manquante (appel demandé)
+	if InsertBugList then InsertBugList("pLow weather, absent from conf_mod") end
+end
 
 if Firstmission_flag and camp.weather then
 	pHigh = camp.weather.pHigh or 50					--default pressure high value
-	pLow = camp.weather.pLow or 50					--default pressure pLow value
+	pLow = camp.weather.pLow or 50						--default pressure pLow value
 end
 
 
@@ -128,36 +143,37 @@ end
 
 -- --Initial weather 2
 if camp.weather.zone == nil then
+	debugTxt = debugTxt .."DcW D0a camp.weather.zone == nil ".."\n"
     -- Températures de zone
     camp.weather.zoneTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)
     camp.weather.zoneNextTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)
 
-    -- Calcul du ratio de beau temps
-    pHigh = camp.weather.pHigh or 50
-    pLow = camp.weather.pLow or 50
-    local total = pHigh + pLow
-    local probaHigh = pHigh / total
+	local r = math.random(1, 100)
 
-    -- Tirage aléatoire
-    local r = math.random()
-    if r < probaHigh * 0.7 then
-        -- Très beau temps (plus rare)
-        camp.weather.zoneNext = "high"
-    elseif r < probaHigh then
-        -- Beau temps mais couvert
-        camp.weather.zoneNext = "low sector warm"
-    else
-        -- Mauvais temps, réparti équitablement
-        local mauvais = { "low front cold", "low front warm", "low sector cold" }
-        camp.weather.zoneNext = mauvais[math.random(1, #mauvais)]
-    end
+	debugTxt = debugTxt ..
+		string.format("DcW D01 r=%d | probaPhight=%.1f | ", r, probaPhight) ..
+		"logique : plus r est grand → meilleur temps\n"
+
+	if r > (100 - probaPhight * 0.7) then
+		camp.weather.zoneNext = "high"
+		debugTxt = debugTxt .. "DcW AAA => Très beau temps (high)\n"
+	elseif r > (100 - probaPhight) then
+		camp.weather.zoneNext = "low sector warm"
+		debugTxt = debugTxt .. "DcW BBB => Beau temps mais un peu couvert (low sector warm)\n"
+	else
+		local mauvais = { "low front cold", "low front warm", "low sector cold" }
+		camp.weather.zoneNext = mauvais[math.random(1, #mauvais)]
+		debugTxt = debugTxt .. "DcW CCC => Mauvais temps (" .. camp.weather.zoneNext .. ")\n"
+	end
+
 
     camp.weather.zoneEnd = -1
+
 end
 
 debugTxt = debugTxt .."DcW D1 camp.weather.zoneTemp: " ..tostring(camp.weather.zoneTemp).."\n"
 debugTxt = debugTxt .."DcW D2 camp.weather.zone: " ..tostring(camp.weather.zone).."\n"
-debugTxt = debugTxt .."DcW D3 camp.weather.zoneNext: " ..camp.weather.zoneNext.."\n"
+debugTxt = debugTxt .."DcW D3 camp.weather.zoneNext (va devenir zone actuelle ): " ..camp.weather.zoneNext.."\n"
 
 
 --Weather change
@@ -196,36 +212,43 @@ if elapsed_Time > camp.weather.zoneEnd then										--active weather zone has e
 
 	if not initalW then  -- évite de passer 2 fois le random lors de la première mission
 
-		pHigh = pHigh or 50
-		pLow = pLow or 50
-		local total = pHigh + pLow
-		local probaHigh = pHigh / total
+			-- Tirage unique entre 1 et 100 pour coller aux pourcentages (probaPhight en %)
+			local r = math.random(1, 100)
+			debugTxt = debugTxt .."Next zone random: "..tostring(r).." probaPhight:"..tostring(probaPhight).."\n"
 
-		local r = math.random()
-		debugTxt = debugTxt .."Next zone random: "..tostring(r).." < "..tostring(probaHigh).."\n"
+			-- On veut que : r > ref => beau temps. On calcule ref comme la portion "mauvais" = 100 - probaPhight
+			local ph = math.floor(probaPhight + 0.5)
+			if ph < 0 then ph = 0 end
+			if ph > 100 then ph = 100 end
+			local ref = 100 - ph
 
-		if r < probaHigh * 0.7 then
-			camp.weather.zoneNext = "high"
-		elseif r < probaHigh then
-			camp.weather.zoneNext = "low sector warm"
-		else
-			-- On choisit le type de mauvais temps en fonction de la tendance thermique
-			if camp.weather.zoneTemp > camp.weather.zoneNextTemp then
-				camp.weather.zoneNext = "low front cold"
-			elseif camp.weather.zoneTemp < camp.weather.zoneNextTemp then
-				camp.weather.zoneNext = "low front warm"
-			else
-				-- Si la température ne change pas, on reste dans le même secteur
-				if camp.weather.zone == "low front cold" then
-					camp.weather.zoneNext = "low sector cold"
-				elseif camp.weather.zone == "low front warm" then
-					camp.weather.zoneNext = "low sector warm"
+			if r > ref then
+				-- c'est du beau temps ; on répartit high / low sector warm à partir de la position de r
+				local pos = r - ref -- va de 1 à ph
+				local highCut = math.floor(ph * 0.7 + 0.5) -- 70% du beau temps = "high"
+				if pos <= highCut then
+					camp.weather.zoneNext = "high"
 				else
-					-- Par défaut, on reste sur la même zone
-					camp.weather.zoneNext = camp.weather.zone
+					camp.weather.zoneNext = "low sector warm"
+				end
+			else
+				-- mauvais temps : on choisit le type en fonction de la tendance thermique
+				if camp.weather.zoneTemp > camp.weather.zoneNextTemp then
+					camp.weather.zoneNext = "low front cold"
+				elseif camp.weather.zoneTemp < camp.weather.zoneNextTemp then
+					camp.weather.zoneNext = "low front warm"
+				else
+					-- Si la température ne change pas, on reste dans le même secteur
+					if camp.weather.zone == "low front cold" then
+						camp.weather.zoneNext = "low sector cold"
+					elseif camp.weather.zone == "low front warm" then
+						camp.weather.zoneNext = "low sector warm"
+					else
+						-- Par défaut, on reste sur la même zone
+						camp.weather.zoneNext = camp.weather.zone
+					end
 				end
 			end
-		end
 	end
 
 end
@@ -1141,8 +1164,8 @@ local preset = {
 }
 
 -- Beau temps
-local highPresets = {3, 4, 5, 6, 10, 31}
-local lowSectorWarmPresets = {1, 2, 7, 8, 9, 11, 12, 13, 18, 19, 23}
+local highPresets = {3, 4, 5, 6, 10}
+local lowSectorWarmPresets = {1, 2, 7, 8, 9, 11, 12, 13, 18, 19, 23, 31}
 -- Mauvais temps
 local lowFrontColdPresets = {28, 29, 30, 32}
 local lowFrontWarmPresets = {15, 16, 20, 25, 26, 27, 33}
