@@ -2279,23 +2279,36 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						mission.descriptionRedTask = briefing[sideName]
 					end
 
-					-- modification M41.b 	Sratchpad written in the Sratchpad file, if this modul is installed
+					-- Sratchpad written in the Sratchpad file, if this modul is installed
 					local scratchpadPath = "../../../../../../Config/ScratchpadConfig.lua"
-					-- local ScratchpadPath = "../../../../../../Config/ScratchpadConfig.lua"
 					local testPath = io.open(scratchpadPath, "r")
 
-					-- modification M41 	Scratchpad written in the Sratchpad file, if this modul is installed
-					-- if mission_ini.WrittenOnScratchpadMod and TestPath ~= nil then 
+					-- Scratchpad written in the Sratchpad file, if this modul is installed
 					if testPath ~= nil then
 						io.close(testPath)
-						local ScratBriefTXT = StringToTxtBrief(briefing[sideName])
+						local scratBriefTXT = StringToTxtBrief(briefing[sideName])
 						config = {}
 						dofile(scratchpadPath)
-						local ScratFil = io.open(scratchpadPath, "w") or error("Failed to open Scratchpad file")
-						config.content = ScratBriefTXT
-						local ScratConfig = "config = " .. TableSerialization(config, 0)
-						ScratFil:write(ScratConfig)
-						ScratFil:close()
+						local scratFil = io.open(scratchpadPath, "w") or error("Failed to open Scratchpad file")
+						config.content = scratBriefTXT
+						local scratConfig = "config = " .. TableSerialization(config, 0)
+						scratFil:write(scratConfig)
+						scratFil:close()
+					-- elseif Debug.debug then
+					-- 	local scratBriefTXT = StringToTxtBrief(briefing[sideName])
+					-- 	local debugFile = io.open("Debug/scratchpad_TXT_Briefing.txt", "w")  or error("Failed to open debug file")
+					-- 	debugFile:write(scratBriefTXT)																		--save new data
+					-- 	debugFile:close()
+
+					-- 	config = {
+					-- 		content = scratBriefTXT
+					-- 	}
+						
+					-- 	local scratConfig = "config = " .. TableSerialization(config, 0)
+					-- 	debugFile = io.open("Debug/scratchpad_Config_DC_Briefing.lua", "w")  or error("Failed to open debug file")
+					-- 	debugFile:write(scratConfig)																		--save new data
+					-- 	debugFile:close()
+
 					end
 				end
 			end

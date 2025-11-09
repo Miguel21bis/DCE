@@ -9,11 +9,12 @@ https://easydomoticz.com/forum/viewtopic.php?f=17&t=8789
 --]]
 
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  cleanCode_c
+-- last modification:  cledebug_aanCode_c
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_MoonPhase.lua"] = "1.3.8"
+versionDCE["UTIL_MoonPhase.lua"] = "1.4.9"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_c			(c springCleaning)
+-- debug_a				(a too many //)
 -- adjustment_a			(a add english info)
 -- modification M51_d  (d: actic circle)(c: NVG info)(b: Moonphase) (a: Moonphase)
 ------------------------------------------------------------------------------------------------------- 
@@ -193,10 +194,10 @@ function Moonphase(day,month,year)
 		end
 	end
 
-	local nvg_info =  "Sunrise   "..tostring(bSunrise) .. "\\n"..
-				"Sunset    "..tostring(bSunset).. "\\n"..
-				"Moonrise  "..tostring(bMoonrise).. "\\n"..
-				"Moonset   "..tostring(bMoonset).. "\\n"..
+	local nvg_info =  "Sunrise   "..tostring(bSunrise) .. "\n"..
+				"Sunset    "..tostring(bSunset).. "\n"..
+				"Moonrise  "..tostring(bMoonrise).. "\n"..
+				"Moonset   "..tostring(bMoonset).. "\n"..
 				"NVG Info => Night Level: "..tostring(niveauDeNuit).." (max 5)  "..moonText.." ( "..lumi.."% full moon)"..tostring(infoMoonSet)
 
 	if bSunrise == "----" or bSunset == "----" then
