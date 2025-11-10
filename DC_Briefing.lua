@@ -2390,7 +2390,7 @@ if BriefingImagesR and camp.BriefingImagesR and not TaskRefused then
 	camp.BriefingImagesR = nil
 end
 
-_affiche(mission.pictureFileNameB, "DcBrief FF0 mission.pictureFileNameB ")
+-- _affiche(mission.pictureFileNameB, "DcBrief FF0 mission.pictureFileNameB ")
 -- for n = 1, #BriefingImagesB do
 local frontlineN = 0
 for imageN, image in pairs(BriefingImagesB) do

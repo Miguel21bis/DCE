@@ -3843,10 +3843,9 @@ end
 
 local show = true
 
-print("AtoG outMemory check Z1")
 
 if Debug.debug then
-
+	print("AtoG outMemory check Z1")
 	for side, packages in pairs(ATO) do
 		for packN, pack in pairs(packages) do
 			for role, flights in pairs(pack) do
@@ -3931,10 +3930,8 @@ if Debug.debug then
 
 end
 
-print("AtoG outMemory check Z2")
-
 if Debug.debug and Debug.Generator.affiche and string.find(Debug.Generator.chapter, "C") then
-
+	print("AtoG outMemory check Z2")
 	local camp_str = "ATO = " .. TableSerialization(ATO, 0)
 	local campFile = io.open("Debug/ATO_AtoGenerator.lua", "w")
 	if campFile then
@@ -3950,9 +3947,8 @@ if Debug.debug and Debug.Generator.affiche and string.find(Debug.Generator.chapt
 		campFile:write(camp_str)
 		campFile:close()
 	end
+	print("AtoG outMemory check Z4")
 end
-
-print("AtoG outMemory check Z4")
 
 -- --place la clef occurence à tous les loadouts
 -- Loadouts_archive = Loadouts_archive or {}
@@ -4056,9 +4052,11 @@ if Debug.Generator and Debug.debug then
     debugLogs = nil        -- on supprime la référence
     collectgarbage("collect") -- on force la libération
 
+	print("AtoG outMemory check Z7")
+
 end
 
-print("AtoG outMemory check Z7")
+
 
 if Debug.debug then
 	local camp_str = "ATO_ATO_PA = " .. TableSerialization(ATO, 0)
@@ -4067,7 +4065,6 @@ if Debug.debug then
 	campFile:close()
 end
 
-print("AtoG outMemory check Z8")
 
 --*****************ne pas effacer commenter**********************	
 -- local loadoutSTR = StringToTxt(s)

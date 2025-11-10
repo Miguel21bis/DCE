@@ -1307,7 +1307,7 @@ CAPthreats = {
 for sideName, unit in pairs(oob_air) do																--iterate through all sides
 	for n = 1, #unit do																			--iterate through all units
 		local pass = true
-		print("AtoTE B n: "..n.." "..unit[n].type)
+
 		if unit[n].inactive then
 			-- print("AtoTE Ce echec ")
 			-- _affiche(unit[n], "unit[n]: ")

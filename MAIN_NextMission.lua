@@ -49,7 +49,6 @@ versionDCE["MAIN_NextMission.lua"] = "1.37.220"
 
 PlacePA = {}
 AltitudeCruise = 5400			--for plane without hcruise
-EPLRS_Capacity = {}
 
 --Check_TaskPossibleByPlane
 ----- unpack template mission file ----

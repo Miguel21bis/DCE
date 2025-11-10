@@ -171,12 +171,7 @@ TaskByPlane = {
 		["Mirage-F1CE"] = true,
 		["Mirage-F1EE"] = true,
 		["MirageF1CT"] = true,			--Mod
-		["M-2000C"] = true,
 
-		["SA342M"] = true,
-		["SA342Mistral"] = true,
-		["SA342Minigun"] = true,
-		["SA342L"] = true,
 		["AH-1W"] = true,
 		["UH-1H"] = true,
 		["vwv_sh2f"] = true,			--Mod
@@ -213,7 +208,6 @@ TaskByPlane = {
 		["Ka-27"] = true,
 		["Mi-8MT"] = true,
 		["Mi-24V"] = true,
-		["Mi-24P"] = true,
 		["Mi-28N"] = true,
 		["Ka-50"] = true,
 		["Ka-50_3"] = true,
@@ -292,15 +286,9 @@ TaskByPlane = {
 		["Mi-8MT"] = true,
 		["Ka-50"] = true,
 		["Ka-50_3"] = true,
-		["Mi-24P"] = true,
 		["Mi-28N"] = true,
 
 		["AH-64A"] = true,
-
-		["SA342M"] = true,
-		["SA342Mistral"] = true,
-		["SA342Minigun"] = true,
-		["SA342L"] = true,
 
 		["OH58D"] = true,
 		["OH-6A"] = true,			--Mod
@@ -359,13 +347,9 @@ TaskByPlane = {
 		["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
 		["FA-18C_hornet"] = true,
-		["M-2000C"] = true,
 
 		["AH-1W"] = true,
 		["UH-1H"] = true,
-		["SA342M"] = true,
-		["SA342Minigun"] = true,
-		["SA342L"] = true,
 		["AH-64D_BLK_II"] = true,
 		["OH58D"] = true,
 		["OH-6A"] = true,			--Mod
@@ -394,7 +378,6 @@ TaskByPlane = {
 
 		["Mi-8MT"] = true,
 		["Mi-24V"] = true,
-		["Mi-24P"] = true,
 		["Mi-28N"] = true,
 		["Ka-50"] = true,
 		["Ka-50_3"] = true,
@@ -535,13 +518,9 @@ TaskByPlane = {
 		["Mirage-F1CE"] = true,
 		["Mirage-F1EE"] = true,
 		["MirageF1CT"] = true,			--Mod
-		["M-2000C"] = true,
 
 		["AH-1W"] = true,
 		["UH-1H"] = true,
-		["SA342M"] = true,
-		["SA342Minigun"] = true,
-		["SA342L"] = true,
 		["AH-64D_BLK_II"] = true,
 		["AH-64A"] = true,
 		["OH58D"] = true,
@@ -570,7 +549,6 @@ TaskByPlane = {
 
 		["Mi-8MT"] = true,
 		["Mi-24V"] = true,
-		["Mi-24P"] = true,
 		["Mi-28N"] = true,
 		["Ka-50"] = true,
 		["Ka-50_3"] = true,
@@ -627,7 +605,6 @@ TaskByPlane = {
 		["Mirage-F1CE"] = true,
 		["Mirage-F1EE"] = true,
 		["MirageF1CT"] = true,			--Mod
-		["M-2000C"] = true,
 
 
 		["JF-17"] = true,
@@ -682,13 +659,8 @@ TaskByPlane = {
 		["MirageF1"] = true,			--Mod
 		["Mirage-F1CE"] = true,
 		["Mirage-F1EE"] = true,
-		["M-2000C"] = true,
 
 		["AH-1W"] = true,
-		["SA342M"] = true,
-		["SA342Mistral"] = true,
-		["SA342Minigun"] = true,
-		["SA342L"] = true,
 		["AH-64D_BLK_II"] = true,
 		["OH58D"] = true,
 
@@ -708,7 +680,6 @@ TaskByPlane = {
 		["Su-27"] = true,
 		["Su-30"] = true,
 
-		["Mi-24P"] = true,
 		["Mi-28N"] = true,
 		["Ka-50"] = true,
 		["Ka-50_3"] = true,
@@ -739,7 +710,6 @@ TaskByPlane = {
 		["Mirage-F1CE"] = true,
 		["Mirage-F1EE"] = true,
 		["MirageF1CT"] = true,			--Mod
-		["M-2000C"] = true,
 
 		["JF-17"] = true,
 		["MiG-27K"] = true,
@@ -785,7 +755,6 @@ TaskByPlane = {
 		["MirageF1"] = true,			--Mod
 		["Mirage-F1CE"] = true,
 		["Mirage-F1EE"] = true,
-		["M-2000C"] = true,
 
 		["JF-17"] = true,
 		["MiG-15bis"] = true,
@@ -842,7 +811,6 @@ TaskByPlane = {
 		["MirageF1"] = true,			--Mod
 		["Mirage-F1CE"] = true,
 		["Mirage-F1EE"] = true,
-		["M-2000C"] = true,
 
 		["Yak-52"] = true,
 		["JF-17"] = true,
@@ -901,7 +869,6 @@ TaskByPlane = {
 		["MirageF1"] = true,			--Mod
 		["Mirage-F1CE"] = true,
 		["Mirage-F1EE"] = true,
-		["M-2000C"] = true,
 
 		["JF-17"] = true,
 		["MiG-15bis"] = true,
@@ -939,10 +906,6 @@ TaskByPlane = {
 		["F-16C bl.52d"] = true,
 		["FA-18C_hornet"] = true,
 
-		["SA342M"] = true,
-		["SA342Mistral"] = true,
-		["SA342Minigun"] = true,
-		["SA342L"] = true,
 		["OH58D"] = true,
 		["OH-6A"] = true,			--Mod
 
@@ -1023,7 +986,6 @@ TaskByPlane = {
 		["Ka-27"] = true,
 		["Mi-8MT"] = true,
 		["Mi-24V"] = true,
-		["Mi-24P"] = true,
 		["Mi-26"] = true,
 
 
@@ -1033,7 +995,7 @@ TaskByPlane = {
 
 -- Data_divers = {}
 --instrumentUnits = "imperial" or  metric or russian (metric and QNH in mmHg)
--- inheritedFrom = "F-14",	--copy radio frequency, failues ...
+-- inheritedFrom = "F-14",	--copy radio frequency, failures ...
 -- inherited_APA_From = "F-14",	--copy AddPropAircraft
 --requiredModules = true,						--itsModule
 -- requiredModulesSpecialName = "VSN_F105",	--if the aircraft type name does not match the requested module name
@@ -1351,7 +1313,7 @@ Data_divers = {
 			isDonnor = true,
 			isReceiver = true,
 		},
-		inheritedFrom = "A-10C",	--copy radio frequency, failues ...
+		inheritedFrom = "A-10C",	--copy radio frequency, failures ...
 		playable = true,
 		vCruise = 154,
 		hCruise = 7600,
@@ -1515,7 +1477,7 @@ Data_divers = {
 	["F-14B"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-		inheritedFrom = "F-14",	--copy radio frequency, failues ...
+		inheritedFrom = "F-14",	--copy radio frequency, failures ...
 		inherited_APA_From = "F-14",	--copy AddPropAircraft
 		playable = true,
 		alignment_PropAircraft = {
@@ -1696,22 +1658,16 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		-- 		3 types : Mirage-F1CE, Mirage-F1EE, Mirage-F1BE 
 		-- Le futur devrait être le F-1M ... le plus moderne mais pas pour tout de suite je pense ...
+		playable = true,
 		vCruise = 250,
 		hCruise = 7548,
 	},
 	["Mirage-F1CE"] = {
-		instrumentUnits = "imperial",
-		EPLRS_Capacity = false,
-		inheritedFrom = "Mirage-F1",	--copy radio frequency, failues ...
-		playable = true,
-		vCruise = 250,
-		hCruise = 7548,
+		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
 		refuellingReceptacleType = "drogue"
 	},
 	["Mirage-F1EE"] = {
-		instrumentUnits = "imperial",
-		EPLRS_Capacity = false,
-		inheritedFrom = "Mirage-F1",	--copy radio frequency, failues ...
+		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
 		alignment_PropAircraft = {
 			fast = {
 				["INSStartMode"] = 1,
@@ -1720,19 +1676,11 @@ Data_divers = {
 				["INSStartMode"] = 0,
 			}
 		},
-		playable = true,
-		vCruise = 250,
-		hCruise = 7548,
 		refuellingReceptacleType = "drogue"
 		
 	},
 	["Mirage-F1BE"] = {
-		instrumentUnits = "imperial",
-		EPLRS_Capacity = false,
-		inheritedFrom = "Mirage-F1",	--copy radio frequency, failues ...
-		playable = true,
-		vCruise = 250,
-		hCruise = 7548,
+		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
 		refuellingReceptacleType = "drogue"
 	},
 
@@ -1752,38 +1700,69 @@ Data_divers = {
 				["InitHotDrift"] = 0,
 			}
 		},
-		refuellingReceptacleType = "drogue"
+		Tasks = {
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(RunwayAttack),
+			aircraft_task(PinpointStrike),
+	  	},
+		refuellingReceptacleType = "drogue",
+		vCruise = 250,
+		hCruise = 8000,
 	},
 
 	["SA342"] = {
 		instrumentUnits = "metric",
 		EPLRS_Capacity = false,
+		Tasks = {
+			aircraft_task(Escort),
+			aircraft_task(AFAC),
+			aircraft_task(Reconnaissance),
+			aircraft_task(GroundAttack),
+	  	},
+		playable = true,
+		hCruise = 150,   -- m (vol très basse altitude typique)
+		vCruise = 65,    -- m/s (≈ 235 km/h, croisière normale)
 	},
 	["SA342M"] = {
-		instrumentUnits = "metric",
-		EPLRS_Capacity = false,
-		inheritedFrom = "SA342",	--copy radio frequency, failues ...
+		-- instrumentUnits = "metric",
+		-- EPLRS_Capacity = false,
+		inheritedFrom = "SA342",	--copy radio frequency, failures ...
 		inherited_APA_From = "SA342",	--copy AddPropAircraft
-		playable = true,
+		-- playable = true,
+		Tasks = {
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+	  	},
 	},
 	["SA342Mistral"] = {
-		instrumentUnits = "metric",
-		EPLRS_Capacity = false,
-		inheritedFrom = "SA342",	--copy radio frequency, failues ...
+		-- instrumentUnits = "metric",
+		-- EPLRS_Capacity = false,
+		inheritedFrom = "SA342",	--copy radio frequency, failures ...
 		inherited_APA_From = "SA342",	--copy AddPropAircraft
-		playable = true,
+		-- playable = true,
 	},
 	["SA342L"] = {
-		instrumentUnits = "metric",
-		EPLRS_Capacity = false,
-		inheritedFrom = "SA342",	--copy radio frequency, failues ...
+		-- instrumentUnits = "metric",
+		-- EPLRS_Capacity = false,
+		inheritedFrom = "SA342",	--copy radio frequency, failures ...
 		inherited_APA_From = "SA342",	--copy AddPropAircraft
-		playable = true,
+		-- playable = true,
+		Tasks = {
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+	  	},
 	},
 	["SA342Minigun"] = {
-		instrumentUnits = "metric",
 		inheritedFrom = "SA342",
-		EPLRS_Capacity = false,
+		Tasks = {
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+	  	},
 	},
 	["AH-1W"] = {
 		instrumentUnits = "imperial",
@@ -1879,13 +1858,13 @@ Data_divers = {
 	["L-39C"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-		inheritedFrom = "L-39",	--copy radio frequency, failues ...
+		inheritedFrom = "L-39",	--copy radio frequency, failures ...
 		playable = true,
 	},
 	["L-39ZA"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-		inheritedFrom = "L-39",	--copy radio frequency, failues ...
+		inheritedFrom = "L-39",	--copy radio frequency, failures ...
 		playable = true,
 	},
 
@@ -2066,7 +2045,7 @@ Data_divers = {
 	["Su-25T"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-		inheritedFrom = "Su-25",	--copy radio frequency, failues ...
+		inheritedFrom = "Su-25",	--copy radio frequency, failures ...
 		playable = true,
 		vCruise = 185,
 		hCruise = 5000,
@@ -2103,13 +2082,22 @@ Data_divers = {
 	["Mi-24V"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-		vCruise = 75,	--TODO a verifier
-		hCruise = 50,
+		hCruise = 150,    -- m  (vol basse altitude typique)
+		vCruise = 75,     -- m/s  (≈ 270 km/h)
 	},
 	["Mi-24P"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
+		Tasks = {
+			aircraft_task(Escort),
+			aircraft_task(AFAC),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(Transport),
+		},
+		hCruise = 150,    -- m  (vol basse altitude typique)
+		vCruise = 75,     -- m/s  (≈ 270 km/h)
 	},
 	["Mi-28N"] = {
 		instrumentUnits = "russian",
@@ -4479,8 +4467,95 @@ LayerObjectsLegend =
 	}, -- end of [11]
 }
 
+-- Détecte si une table est une liste simple (1..n)
+local function isSequence(t)
+    if type(t) ~= "table" then return false end
+    local count = 0
+    for k in pairs(t) do
+        if type(k) ~= "number" or k <= 0 or k ~= math.floor(k) then
+            return false
+        end
+        count = count + 1
+    end
+    for i = 1, count do
+        if t[i] == nil then return false end
+    end
+    return true
+end
 
-	--rempli la table TaskByPlane avec les Tasks qui ne sont rempli que dans Data_divers
+-- Supprime les doublons d'une liste (par comparaison simple)
+local function removeDuplicates(t)
+    if not isSequence(t) then return end
+    local seen = {}
+    local unique = {}
+    for _, v in ipairs(t) do
+        if not seen[v] then
+            table.insert(unique, v)
+            seen[v] = true
+        end
+    end
+    -- remplace le contenu original
+    for k in pairs(t) do t[k] = nil end
+    for i, v in ipairs(unique) do t[i] = v end
+end
+
+-- Fusionne récursivement src dans dest
+-- opts.overwrite = true : les scalaires de src remplacent ceux de dest
+local function mergeSimple(dest, src, opts)
+    if type(dest) ~= "table" or type(src) ~= "table" then return end
+    opts = opts or {}
+
+    -- Si les deux tables sont des listes (ex: Tasks), on concatène puis on déduplique
+    if isSequence(dest) and isSequence(src) then
+        for _, v in ipairs(src) do
+            table.insert(dest, Deepcopy(v))
+        end
+        removeDuplicates(dest)
+        return
+    end
+
+    -- Sinon, on fusionne clé par clé
+    for k, v in pairs(src) do
+        local d = dest[k]
+        if d == nil then
+            -- Clé absente : copie directe
+            if type(v) == "table" then
+                dest[k] = Deepcopy(v)
+            else
+                dest[k] = v
+            end
+        else
+            -- Clé déjà existante
+            if type(d) == "table" and type(v) == "table" then
+                mergeSimple(d, v, opts)
+                if isSequence(d) then removeDuplicates(d) end
+            else
+                if opts.overwrite then
+                    dest[k] = v
+                end
+            end
+        end
+    end
+end
+
+-- Data_divers contient les définitions (parent et enfant)
+for planeType, planeData in pairs(Data_divers) do
+    if planeData.inheritedFrom then
+        local parent = Data_divers[planeData.inheritedFrom]
+        if type(parent) == "table" then
+            -- 1) on part d'une copie du parent (table propre)
+            local merged = Deepcopy(parent)
+            -- 2) on fusionne les champs de l'enfant dans la copie
+            -- overwrite = true : si l'enfant définit un champ scalaire, il remplace le parent
+            mergeSimple(merged, planeData, { overwrite = true })
+            -- 3) on stocke le résultat dans l'enfant
+            Data_divers[planeType] = merged
+        end
+    end
+end
+
+
+--rempli la table TaskByPlane avec les Tasks qui ne sont rempli que dans Data_divers
 for planeType, planeData in pairs(Data_divers) do
 	if planeData.Tasks then
 		for taskN, task in pairs(planeData.Tasks) do

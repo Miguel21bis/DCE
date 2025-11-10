@@ -44,6 +44,7 @@ RayonDamaged = 50				----variable pour destructions batiment de DCS en metres
 RosterJumpTempPercent = 0.25			-- suite à un saut temporel, enleve une partie des presents pour éviter un effectif neuf comme un démarrage de DCE
 WingmenPlayer = false			-- si true, les wingmen playable sont proposé aux joueurs
 LoadoutsList = {}				-- construit la table loadout en fonction du loadout général et de la campagne
+EPLRS_Capacity = {}
 
 RadioA = {
 	["blue"] = {
@@ -2276,6 +2277,9 @@ function BuildLoadout()
 		if not value.code_loadout or value.code_loadout == "" then
 			return true
 		end
+		if not campaign_code or campaign_code == "" then
+			return true
+		end
 		-- accepter une chaîne ou une table
 		if type(value.code_loadout) == "string" then
 			return string.lower(value.code_loadout) == string.lower(campaign_code) or string.lower(value.code_loadout) == "all"
@@ -2447,8 +2451,8 @@ function Check_TaskPossibleByPlane()
 
 	--si ADD_data existe, on le precharge pour l'ajouter au DATA centram
 	local addDataFile02 = "../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua"
-	local TestPathADD_addData = io.open(addDataFile02, "r")										--cette maniere de chercher la presence d un fichier evite un plantage
-	if TestPathADD_addData ~= nil  then														--check si le fichier existe dans ScriptsMod
+	local testPathADD_addData = io.open(addDataFile02, "r")										--cette maniere de chercher la presence d un fichier evite un plantage
+	if testPathADD_addData ~= nil  then														--check si le fichier existe dans ScriptsMod
 		dofile("../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua")
 
 		if add_EPLRS_Capacity then
