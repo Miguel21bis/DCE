@@ -1377,7 +1377,7 @@ function _afficheTXT(_table, titre, prof)
 end -- function affiche
 
 
-function FreqCapability2(TestFreq, flightType, Nradio, info)
+function FreqCapability2(testFreq, flightType, radioN, info)
 	local waves  = ""
 
 	if not Frequency[flightType] then
@@ -1386,48 +1386,45 @@ function FreqCapability2(TestFreq, flightType, Nradio, info)
 	end
 	local RadioPlane = Frequency[flightType].radio
 
-	if type(TestFreq) == "table" then
+	if type(testFreq) == "table" then
 		return false
-	elseif type(TestFreq) == "string" then
-		TestFreq = tonumber(TestFreq)
-		if type(TestFreq) ~= "number" then
+	elseif type(testFreq) == "string" then
+		testFreq = tonumber(testFreq)
+		if type(testFreq) ~= "number" then
 			return false
 		end
 	end
-	if not RadioPlane[Nradio] or RadioPlane[Nradio] == nil then
+	if not RadioPlane[radioN] or RadioPlane[radioN] == nil then
 		return false
 	end
 	-- modification M34.n (n: bestCapability)
-	for wave, freqRange in pairs(RadioPlane[Nradio]) do
+	for wave, freqRange in pairs(RadioPlane[radioN]) do
 		-- if string.lower(wave)  ~= "nbcanal"  then
 		if type(freqRange)  == "table"  then
-			if tonumber(TestFreq) < freqRange.max and  tonumber(TestFreq) > freqRange.min then
-				if RadioPlane[Nradio] and RadioPlane[Nradio][wave] and (TestFreq > RadioPlane[Nradio][wave].min and TestFreq < RadioPlane[Nradio][wave].max)	 then
+			if tonumber(testFreq) < freqRange.max and  tonumber(testFreq) > freqRange.min then
+				if RadioPlane[radioN] and RadioPlane[radioN][wave] and (testFreq > RadioPlane[radioN][wave].min and testFreq < RadioPlane[radioN][wave].max)	 then
 					return true
 				end
 			end
 		end
 	end
 
-	if TestFreq >= 225 then
+	if testFreq >= 225 then
 		waves = "UHF"
-	elseif TestFreq >= 100 and TestFreq < 225 then
+	elseif testFreq >= 100 and testFreq < 225 then
 		waves = "VHF"
-	elseif TestFreq >= 20 and TestFreq < 100 then
+	elseif testFreq >= 20 and testFreq < 100 then
 		waves = "LVHF"
-		if RadioPlane[Nradio] and not RadioPlane[Nradio][waves] then waves = "LVHF" end
-	elseif TestFreq >= 1 and TestFreq < 20 then
+		if RadioPlane[radioN] and not RadioPlane[radioN][waves] then waves = "LVHF" end
+	elseif testFreq >= 1 and testFreq < 20 then
 		waves = "HF"
 	else
-		print()
-		print("********************ATTENTION******************")
-		print("***************Note for the Campaign Maker*****")
-		print("Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(TestFreq).." Info: "..tostring(info))
-		_affiche(RadioPlane, "RadioPlane")
-		print("********************ATTENTION******************") os.execute 'pause'
+		-- print("Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(testFreq).." Info: "..tostring(info))
+		local bugTxt = "Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(testFreq).." Info: "..tostring(info)
+		InsertBugList("Note for the Campaign Maker"..bugTxt)
 	end
 
-	if RadioPlane[Nradio] and RadioPlane[Nradio][waves] and (TestFreq > RadioPlane[Nradio][waves].min and TestFreq < RadioPlane[Nradio][waves].max)	 then
+	if RadioPlane[radioN] and RadioPlane[radioN][waves] and (testFreq > RadioPlane[radioN][waves].min and testFreq < RadioPlane[radioN][waves].max)	 then
 		return true
 	else
 		return false
@@ -2032,10 +2029,6 @@ function GetFrequency(arg_Side, arg_TargetName, arg_Task, arg_Type, arg_Waves, a
 		end
 	end
 
-	print()
-	print("********************ATTENTION******************")
-	print("**** Note for the Campaign Maker: Impossible to assign a frequency to  "..tostring(arg_Type).."**********")
-	print("********************ATTENTION******************") os.execute 'pause'
 end
 
 -- http://www.lua.org/pil/19.3.html
@@ -2238,7 +2231,7 @@ function BuildLoadout()
 	-- end
 
 	if Debug.debug then
-		print("UtilF camp.title |"..camp.title.."| campConfMod.code_loadout |"..camp.code_loadout )
+		print("UtilF camp.title |"..camp.title.."| campConfMod.code_loadout |"..tostring(camp.code_loadout) )
 	end
 
 	if campMod.selectLoadout == "init" then
@@ -2390,10 +2383,8 @@ function BuildLoadout()
 
 								if  string.lower(code) ~= "all"  then
 
-									print()
-									print("********************ATTENTION******************")
-									print("***************Note for the Campaign Maker*****"..planeType.." ||| "..taskName.." ||| "..loadoutName.." ||| "..code.." not found in campaigns_code_loadout****************")
-									print("********************ATTENTION******************")
+									local bugTxt = ""..planeType.." ||| "..taskName.." ||| "..loadoutName.." ||| "..code.." not found in campaigns_code_loadout****************"
+									InsertBugList("Note for the Campaign Maker"..bugTxt)
 								end
 							else
 								-- print("UtilF camp.code_loadout "..camp.code_loadout.." found")						
@@ -3971,7 +3962,9 @@ function ListSpotterAircraft()
 	local isAfacAircraft = {}
 	for side, oob_side in pairs(oob_air) do
 		for n, sqd in pairs(oob_side) do
-			if sqd.tasks  then
+			if sqd.tasks and type(sqd.tasks) == "table" then
+				-- print("UtilFct sqd.name : "..tostring(sqd.name).." sqd.type: "..tostring(sqd.type))
+				-- _affiche(sqd.tasks, "UtilFct sqd.tasks: ")
 				for taskName, value in pairs(sqd.tasks) do
 					if string.lower(taskName) == "spotter" and value == true then
 						isAfacAircraft[sqd.type] = true

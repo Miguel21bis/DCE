@@ -246,34 +246,69 @@ local function tabFileTemplate()
 	arrayFileTemplate = {}
 	local camp_triggersTemPlaTe =  camp_triggers
 
+	-- for nTrigger, trigger in pairs(camp_triggersTemPlaTe) do
+	-- 	if type(trigger.action) == "table" then
+	-- 		for n = 1, #trigger.action do
+	-- 			-- [1] = 'Action.TemplateActive("North Cyprus Force 2 T1.stm")',
+
+	-- 			if trigger.action[n] then
+	-- 				if string.find(trigger.action[n], ".stm") then
+
+	-- 					local str2 = trigger.action[n]
+	-- 					local res2 = string.match(str2, '%b""')
+	-- 					res2 = string.gsub(res2, '"', "")
+
+	-- 					table.insert(arrayFileTemplate, res2)
+	-- 				end
+	-- 			else
+	-- 				print()
+	-- 				print("********************ATTENTION******************")
+	-- 				print("***************Note for the Campaign Maker***** the key: "..n.." is missing in the file camp_triggers_init.lua ****************")
+	-- 				print("********************ATTENTION******************")
+	-- 				print()
+	-- 				print("after this ligne: ")
+	-- 				print()
+	-- 				print(tostring(trigger.action[n-1]))
+	-- 				print("********************ATTENTION******************") os.execute 'pause'
+	-- 			end
+	-- 		end
+	-- 	end
+	-- end
+	
 	for nTrigger, trigger in pairs(camp_triggersTemPlaTe) do
 		if type(trigger.action) == "table" then
+			-- Étape 1 : collecter et trier les clés numériques
+			local sortedKeys = {}
+			for k in pairs(trigger.action) do
+				if type(k) == "number" then
+					table.insert(sortedKeys, k)
+				end
+			end
+			table.sort(sortedKeys)
+
+			-- Étape 2 : créer une nouvelle table ordonnée sans "trous"
+			local orderedActions = {}
+			for _, k in ipairs(sortedKeys) do
+				table.insert(orderedActions, trigger.action[k])
+			end
+
+			-- Étape 3 : remplacer la table d'origine par la version nettoyée
+			trigger.action = orderedActions
+
+			-- Étape 4 : ton traitement habituel
 			for n = 1, #trigger.action do
-				-- [1] = 'Action.TemplateActive("North Cyprus Force 2 T1.stm")',
+				local actionStr = trigger.action[n]
 
-				if trigger.action[n] then
-					if string.find(trigger.action[n], ".stm") then
-
-						local str2 = trigger.action[n]
-						local res2 = string.match(str2, '%b""')
-						res2 = string.gsub(res2, '"', "")
-
-						table.insert(arrayFileTemplate, res2)
-					end
-				else
-					print()
-					print("********************ATTENTION******************")
-					print("***************Note for the Campaign Maker***** the key: "..n.." is missing in the file camp_triggers_init.lua ****************")
-					print("********************ATTENTION******************")
-					print()
-					print("after this ligne: ")
-					print()
-					print(tostring(trigger.action[n-1]))
-					print("********************ATTENTION******************") os.execute 'pause'
+				if actionStr and string.find(actionStr, "%.stm") then
+					local res2 = string.match(actionStr, '%b""')
+					res2 = string.gsub(res2 or "", '"', "")
+					table.insert(arrayFileTemplate, res2)
 				end
 			end
 		end
 	end
+
+
 	return arrayFileTemplate
 end
 

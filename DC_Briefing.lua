@@ -80,12 +80,11 @@ local function freqCapability(arg_TestFreq, arg_RadioPlane, arg_Nradio, arg_info
 	elseif arg_TestFreq >= 1 and arg_TestFreq < 20 then
 		waves = "HF"
 	else
-		print()
-		print("********************ATTENTION******************")
-		print("***************Note for the Campaign Maker*****")
-		print("Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(arg_TestFreq).." Info: "..tostring(arg_info))
-		_affiche(arg_RadioPlane, "RadioPlane")
-		print("********************ATTENTION******************") os.execute 'pause'
+		local bugTxt = "Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(arg_TestFreq).." Info: "..tostring(arg_info)
+		-- _affiche(arg_RadioPlane, "RadioPlane")
+		
+		InsertBugList("Note for the Campaign Maker"..bugTxt)
+
 	end
 
 	if arg_RadioPlane[arg_Nradio] and arg_RadioPlane[arg_Nradio][waves] and (arg_TestFreq > arg_RadioPlane[arg_Nradio][waves].min and arg_TestFreq < arg_RadioPlane[arg_Nradio][waves].max)	 then

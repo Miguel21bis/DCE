@@ -97,7 +97,7 @@ if not camp.automaticReinforce then
 	}
 end
 
-if type(camp.automaticReinforce) ~= "table" then
+if type(camp.automaticReinforce) ~= "table" and type(camp.automaticReinforce) == "number" then
 
 	local tempValue = Deepcopy(camp.automaticReinforce)
 
@@ -105,6 +105,12 @@ if type(camp.automaticReinforce) ~= "table" then
 		blue = tempValue,
 		red = tempValue,
 		neutral = tempValue,
+	}
+else
+	camp.automaticReinforce = {
+		blue = 0,
+		red = 0,
+		neutral = 0,
 	}
 end
 
@@ -2293,10 +2299,10 @@ for triggerName, trigger in pairs(camp_triggers) do								--iterate through tri
 
 --Compatible avec les sauts temporels
 for side_name, side in pairs(oob_air) do
-    -- print("DcCT side_name "..tostring(side_name))
-
+    
     if side_name ~= "neutral" then
         local interval = campMod.RepairOption[side_name]["airUnit"][3] * 3600
+		
         while CampTotalTimeS >= camp.automaticReinforce[side_name] + interval do
             for unit_n, unit in pairs(side) do
                 if unit.roster.reserve and unit.roster.reserve > 0 then

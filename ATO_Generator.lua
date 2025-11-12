@@ -353,9 +353,31 @@ local dec = 2
 end
 
 
-local function debugLog(message)
-    table.insert(debugLogs, message)
+-- local function debugLog(message)
+--     table.insert(debugLogs, message)
+-- end
+
+-- local debugLogs = {}
+local logFilePath = "Debug/AtoGenerator_debugLogs.txt"
+local logBufferSize = 1000  -- Nombre de lignes avant écriture disque
+
+local function flushDebugLogs()
+    local file = io.open(logFilePath, "a")
+    if file then
+        file:write(table.concat(debugLogs, "\n"))
+        file:write("\n")
+        file:close()
+    end
+    debugLogs = {}  -- vider le buffer
 end
+
+local function debugLog(message)
+    table.insert(debugLogs,  message)
+    if #debugLogs >= logBufferSize then
+        flushDebugLogs()
+    end
+end
+
 
 local baseFARP = {
 	blue = {},
@@ -1692,15 +1714,15 @@ if Debug.Generator.affiche then
 
 end
 
-if Debug.Generator and Debug.debug then
-    local _str = "debugLogs = " .. TableSerializationAG_triggers(debugLogs, 0)
-	local _file = io.open("Debug/AtoGenerator_Debug_A_Logs.lua", "w") or error("Échec d'ouverture du fichier AtoGenerator_Debug_Logs")
-	_file:write(_str)
-	_file:close()
-    debugLogs = {}        -- on supprime la référence
-    collectgarbage("collect") -- on force la libération
+-- if Debug.Generator and Debug.debug then
+--     local _str = "debugLogs = " .. TableSerializationAG_triggers(debugLogs, 0)
+-- 	local _file = io.open("Debug/AtoGenerator_Debug_A_Logs.lua", "w") or error("Échec d'ouverture du fichier AtoGenerator_Debug_Logs")
+-- 	_file:write(_str)
+-- 	_file:close()
+--     debugLogs = {}        -- on supprime la référence
+--     collectgarbage("collect") -- on force la libération
 
-end
+-- end
 
 --create additional draft sorties with support flights assigned
 local wk = 1
@@ -2535,16 +2557,16 @@ if Debug.Generator.affiche then
 	
 end
 
-if Debug.Generator and Debug.debug then
+-- if Debug.Generator and Debug.debug then
 
-	local _str = "debugLogs = " .. TableSerializationAG_triggers(debugLogs, 0)
-	local _file = io.open("Debug/AtoGenerator_Debug_B_Logs.lua", "w") or error("Échec d'ouverture du fichier AtoGenerator_Debug_Logs")
-	_file:write(_str)
-	_file:close()
-    debugLogs = {}        -- on supprime la référence
-    collectgarbage("collect") -- on force la libération
+-- 	local _str = "debugLogs = " .. TableSerializationAG_triggers(debugLogs, 0)
+-- 	local _file = io.open("Debug/AtoGenerator_Debug_B_Logs.lua", "w") or error("Échec d'ouverture du fichier AtoGenerator_Debug_Logs")
+-- 	_file:write(_str)
+-- 	_file:close()
+--     debugLogs = {}        -- on supprime la référence
+--     collectgarbage("collect") -- on force la libération
 
-end
+-- end
 
 --table to store the final ATO
 ATO = {
@@ -4043,14 +4065,7 @@ if Debug.Generator and Debug.debug then
 	-- debuGenTxt = ""        -- on supprime la référence
     -- collectgarbage("collect") -- on force la libération
 
-	print("AtoG outMemory check Z6")
-
-	local _str = "debugLogs = " .. TableSerializationAG_triggers(debugLogs, 0)
-	local _file = io.open("Debug/AtoGenerator_Debug_C_Logs.lua", "w") or error("Échec d'ouverture du fichier AtoGenerator_Debug_Logs")
-	_file:write(_str)
-	_file:close()
-    debugLogs = nil        -- on supprime la référence
-    collectgarbage("collect") -- on force la libération
+	flushDebugLogs()
 
 	print("AtoG outMemory check Z7")
 

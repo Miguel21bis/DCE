@@ -176,13 +176,9 @@ TaskByPlane = {
 		["UH-1H"] = true,
 		["vwv_sh2f"] = true,			--Mod
 		["vwv_hh2d"] = true,			--Mod
-		["CH-47D"] = true,
-		["CH-47Fbl1"] = true,
 		["AH-64D_BLK_II"] = true,
 		["AH-64A"] = true,
 		["OH-6A"] = true,				--Mod
-		["OH58D"] = true,
-
 
 		["JF-17"] = true,
 		["L-39C"] = true,
@@ -225,8 +221,6 @@ TaskByPlane = {
 
 		["MiG-25RBT"] = true,
 		["Su-24MR"] = true,
-		["Tu-142"] = true,
-
 
 		["C-130"] = true,
 		["Hercules"] = true,		--Mod
@@ -290,9 +284,7 @@ TaskByPlane = {
 
 		["AH-64A"] = true,
 
-		["OH58D"] = true,
 		["OH-6A"] = true,			--Mod
-
 
 	},
 	["CAS"] = {
@@ -351,7 +343,6 @@ TaskByPlane = {
 		["AH-1W"] = true,
 		["UH-1H"] = true,
 		["AH-64D_BLK_II"] = true,
-		["OH58D"] = true,
 		["OH-6A"] = true,			--Mod
 
 		["JF-17"] = true,
@@ -386,7 +377,6 @@ TaskByPlane = {
 	},
 
 	["Antiship Strike"] = {
-		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
 
@@ -449,10 +439,7 @@ TaskByPlane = {
 		["Su-27"] = true,
 		["Su-30"] = true,
 
-		["Tu-22M3"] = true,
-		["Tu-142"] = true,
 		["tu_22D"] = true,				--Mod
-
 
 		["Mi-8MT"] = true,
 		["Mi-24V"] = true,
@@ -465,7 +452,6 @@ TaskByPlane = {
 	},
 
 	["Ground Attack"] = {
-		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
 
@@ -523,7 +509,6 @@ TaskByPlane = {
 		["UH-1H"] = true,
 		["AH-64D_BLK_II"] = true,
 		["AH-64A"] = true,
-		["OH58D"] = true,
 		["OH-6A"] = true,			--Mod
 
 		["JF-17"] = true,
@@ -545,7 +530,6 @@ TaskByPlane = {
 		["Su-27"] = true,
 		["Su-30"] = true,
 		["Su-34"] = true,
-		["Tu-22M3"] = true,
 
 		["Mi-8MT"] = true,
 		["Mi-24V"] = true,
@@ -618,7 +602,6 @@ TaskByPlane = {
 		["Su-30"] = true,
 		["Su-34"] = true,
 		["MiG-29A"] = true,
-		["Tu-22M3"] = true,
 		["MiG-27K"] = true,
 
 
@@ -662,7 +645,6 @@ TaskByPlane = {
 
 		["AH-1W"] = true,
 		["AH-64D_BLK_II"] = true,
-		["OH58D"] = true,
 
 		["Yak-52"] = true,
 		["JF-17"] = true,
@@ -906,14 +888,12 @@ TaskByPlane = {
 		["F-16C bl.52d"] = true,
 		["FA-18C_hornet"] = true,
 
-		["OH58D"] = true,
 		["OH-6A"] = true,			--Mod
 
 		["JF-17"] = true,
 		["MiG-21Bis"] = true,
 		["MiG-25RBT"] = true,
 		["Su-24MR"] = true,
-		["Tu-142"] = true,
 		["tu_22D"] = true,				--Mod
 	},
 
@@ -968,14 +948,11 @@ TaskByPlane = {
 		["UH-1H"] = true,
 		["vwv_sh2f"] = true,			--Mod
 		["vwv_hh2d"] = true,			--Mod
-		["CH-47D"] = true,
-		["CH-47Fbl1"] = true,
 		["CH-53E"] = true,
 		["UH-60A"] = true,
 		["UH-60L"] = true,			--Mod
 		["SH-3D"] = true,			--Mod
 		["SH-60B"] = true,
-		["OH58D"] = true,
 		["OH-6A"] = true,			--Mod
 
 
@@ -1797,13 +1774,21 @@ Data_divers = {
 	["CH-47D"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
+		Tasks = {
+			aircraft_task(Transport),
+		},
+		hCruise = 200,
+		vCruise = 75, -- (m/s, ≈ 270 km/h)
 	},
 	["CH-47Fbl1"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
-		vCruise = 75,	--TODO a verifier
-		hCruise = 500,
+		Tasks = {
+			aircraft_task(Transport),
+		},
+		hCruise = 200,
+		vCruise = 75, -- (m/s, ≈ 270 km/h)
 	},
 	["SH-60B"] = {
 		instrumentUnits = "imperial",
@@ -1818,6 +1803,16 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
+		Tasks = {
+			aircraft_task(AFAC),
+			aircraft_task(Escort),
+			aircraft_task(Reconnaissance),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(Transport),
+		},
+		hCruise = 150,
+		vCruise = 65, -- (m/s, ≈ 235 km/h)
 	},
 	["OH-6A"] = {
 		instrumentUnits = "imperial",
@@ -2189,24 +2184,52 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		flyingAlone = true,
 		heavyBomber = true,
+		Tasks = {
+			aircraft_task(GroundAttack),
+			aircraft_task(RunwayAttack),
+			aircraft_task(AntishipStrike),
+		},
+		hCruise = 10000,   -- m
+		vCruise = 260,     -- m/s (≈ 935 km/h, Mach 0.84 à 10 km)
+
 	},
 	["Tu-95MS"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		flyingAlone = true,
 		heavyBomber = true,
+		Tasks = {
+			aircraft_task(GroundAttack), --TODO a verifier
+			aircraft_task(RunwayAttack),
+			aircraft_task(AntishipStrike),
+		},
+		hCruise = 9000,
+		vCruise = 220, -- (m/s)
 	},
 	["Tu-142"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		flyingAlone = true,
 		heavyBomber = true,
+		Tasks = {
+			aircraft_task(Reconnaissance),
+			aircraft_task(AntishipStrike),
+		},
+		hCruise = 10000,   -- m
+		vCruise = 260,     -- m/s --TODO a confirmer
 	},
 	["Tu-160"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		flyingAlone = true,
 		heavyBomber = true,
+		Tasks = {
+			aircraft_task(GroundAttack),
+			aircraft_task(RunwayAttack),
+			aircraft_task(AntishipStrike),
+		},
+		hCruise = 10000,   -- m
+		vCruise = 260,     -- m/s 
 	},
 
 

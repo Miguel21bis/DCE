@@ -2069,9 +2069,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						else
 							speed = pack[p].main[1].loadout.vCruise
-							if Debug.debug then
+							-- if Debug.debug then
 								InsertBugList("this flight have not a speed Data_divers.vCruise: "..flight[f].name.." |type: "..flight[f].type)
-							end
+							-- end
 						end
 						
 					else
@@ -7232,7 +7232,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					print(debugTempFLIGHT)
 				end
 
-				if Debug.debug and tagATTENTION then
+				if tagATTENTION then
 					InsertBugList(debugTempFLIGHT)
 				end
 
@@ -7267,9 +7267,9 @@ if mission.weather["clouds"] then
 
 	if not mission.weather["clouds"]["preset"] then
 		local infoWeather01 = "|+IW1|ATTENTION NO weather preset "
-		if Debug.debug then
+		-- if Debug.debug then
 			InsertBugList(infoWeather01)
-		end
+		-- end
 	-- else
 	-- 	local infoWeather02 = "|+IW2|weather preset: "..mission.weather["clouds"]["preset"]
 	-- 	if Debug.debug then
@@ -7615,14 +7615,14 @@ if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.. _afficheTXT(testDeckPlace, 
 
 -- nombre d'avion sur le pont total
 -- limite le nombre d'avion sur le pont (permet de faire apparaitre les avions tardif, s'il y a de la place)
-for CV, deck in pairs(testDeckPlace) do
+for cv, deck in pairs(testDeckPlace) do
 
 	if #deck > 0 then
 
 		table.sort(deck, function(a,b) return a.time < b.time  end)
 		if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.. _afficheTXT(deck, "testDeckPlace deck") end
 
-		if testSixPack[CV] and #testSixPack[CV] > 0 then
+		if testSixPack[cv] and #testSixPack[cv] > 0 then
 
 			--cherche une place dispo sur le deck pour les avions tardif
 			local counter = 0
@@ -7655,7 +7655,7 @@ for CV, deck in pairs(testDeckPlace) do
 											group['uncontrolled'] = true
 											group['lateActivation'] = true
 											modify_Activate_GroupTime(group, 2, debug.getinfo(1).currentline)
-											sommePlane[CV] = sommePlane[CV] + tonumber(deck[n]["number"])
+											sommePlane[cv] = sommePlane[cv] + tonumber(deck[n]["number"])
 											deck[n]["OnDeck"] = true
 											if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFp DeckWiner Find "..group.name.." +number: "..deck[n]["number"]) end
 										end
@@ -7666,7 +7666,7 @@ for CV, deck in pairs(testDeckPlace) do
 											group['uncontrolled'] = true
 											group['lateActivation'] = true
 											modify_Activate_GroupTime(group, 2, debug.getinfo(1).currentline)
-											sommePlane[CV] = sommePlane[CV] + tonumber(deck[n]["number"])
+											sommePlane[cv] = sommePlane[cv] + tonumber(deck[n]["number"])
 											deck[n]["OnDeck"] = true
 											if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFp DeckWiner Find "..group.name.." +number: "..deck[n]["number"]) end
 										end
@@ -7676,7 +7676,7 @@ for CV, deck in pairs(testDeckPlace) do
 						end
 					end
 
-				until sommePlane[CV] >= LimitedDeckNb or counter >= 2
+				until sommePlane[cv] >= LimitedDeckNb or counter >= 2
 			end
 		end
 	end

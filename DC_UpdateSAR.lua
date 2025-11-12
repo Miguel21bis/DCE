@@ -471,7 +471,8 @@ if  tableDrawings and tableDrawings.layers then
 end
 
 if not foundBoundary and Debug.debug then
-    print(" * * * DcUsar there are no valid borders in this campaign * * * ")
+    local bugTxt = " * * * DcUsar there are no valid borders in this campaign * * * "
+    InsertBugList("Note for the Campaign Maker"..bugTxt)
 end
 
 camp.boundary = boundary
