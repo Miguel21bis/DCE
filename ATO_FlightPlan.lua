@@ -4621,11 +4621,34 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					--gerer le kero au Spawn
 					local fuelTemp = flight[f].loadout.stores.fuel
+
 					if (flight[f].task == "Refueling" or flight[f].task == "AWACS")
 						and waypoints[1].briefing_name and  waypoints[1].briefing_name == "Spawn"
 						and flight[f].route[1].airstart
 					then
 						fuelTemp = fuelTemp * 0.75
+					end
+
+					if flight[f].type == "A-4E-C" then
+						local foundLongRunway = false
+						if flight[f].base == "Rovaniemi" then
+							fuelTemp = fuelTemp * 0.65
+						elseif db_airbases[flight[f].base].runways then
+							for wayN, runwayData in pairs(db_airbases[flight[f].base].runways) do
+								if runwayData.length then
+									if runwayData.length > 2700 then
+										foundLongRunway = true
+										break
+									end
+								else
+									--si la longueur n'est pas renseignée, on suppose que c'est bon
+									foundLongRunway = true
+								end
+							end
+							if not foundLongRunway then
+								fuelTemp = fuelTemp * 0.65
+							end
+						end
 					end
 
 					--generation du name
