@@ -4,7 +4,7 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_db_loadouts.lua"] = "1.3.199"
+versionDCE["UTIL_db_loadouts.lua"] = "1.3.200"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
@@ -23995,43 +23995,43 @@ db_all_loadouts = {
 				stores = {
 					pylons = {
 						[1] = {
-						["CLSID"] = "{C_A4E_AGM-45B_LAU34}",
-						["num"] = 5,
-						["settings"] = {
+					["CLSID"] = "{C_A4E_AGM-45B_LAU34}",
+					["num"] = 5,
+					["settings"] = {
 						["EAS_bypass_ctrl"] = 1,
 						["NFP_PRESID"] = "AGM_45",
 						["NFP_PRESVER"] = 1,
-						["NFP_rfgu_type"] = 1,
-						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
-						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
+						["NFP_rfgu_type"] = 5,
+						["rf_lower_limit_ctrl_Mk25"] = 4000000000,
+						["rf_upper_limit_ctrl_Mk25"] = 6000000000,
 						["smoke_marker"] = 0,
-						},
-						},
-						[2] = {
-						["CLSID"] = "{C_A4E_AGM-45B_LAU34}",
-						["num"] = 1,
-						["settings"] = {
+					},
+				},
+				[2] = {
+					["CLSID"] = "{C_A4E_AGM-45B_LAU34}",
+					["num"] = 1,
+					["settings"] = {
 						["EAS_bypass_ctrl"] = 1,
 						["NFP_PRESID"] = "AGM_45",
 						["NFP_PRESVER"] = 1,
-						["NFP_rfgu_type"] = 1,
-						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
-						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
+						["NFP_rfgu_type"] = 5,
+						["rf_lower_limit_ctrl_Mk25"] = 4000000000,
+						["rf_upper_limit_ctrl_Mk25"] = 6000000000,
 						["smoke_marker"] = 0,
-						},
-						},
-						[3] = {
-						["CLSID"] = "{DFT-150gal}",
-						["num"] = 3,
-						},
-						[4] = {
-						["CLSID"] = "{DFT-150gal}",
-						["num"] = 4,
-						},
-						[5] = {
-						["CLSID"] = "{DFT-150gal}",
-						["num"] = 2,
-						},
+					},
+				},
+				[3] = {
+					["CLSID"] = "{DFT-150gal}",
+					["num"] = 3,
+				},
+				[4] = {
+					["CLSID"] = "{DFT-150gal}",
+					["num"] = 4,
+				},
+				[5] = {
+					["CLSID"] = "{DFT-150gal}",
+					["num"] = 2,
+				},
 					},
 					fuel = 2467.5454273299,
 					flare = 30,
@@ -24427,34 +24427,34 @@ db_all_loadouts = {
 					[1] = {
 					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 5,
-					},
-					[2] = {
+				},
+				[2] = {
 					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 1,
-					},
-					[3] = {
+				},
+				[3] = {
 					["CLSID"] = "{Mk-82_MER_6_C}",
 					["num"] = 3,
 					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
 						["NFP_PRESID"] = "MDRN_B_A_GPLD",
-						["NFP_PRESVER"] = 1,
+						["NFP_PRESVER"] = 2,
 						["NFP_VIS_DrawArgNo_57"] = 0,
 						["NFP_fuze_type_nose"] = "M904E4",
 						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 4,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
 					},
-					},
-					[4] = {
+				},
+				[4] = {
 					["CLSID"] = "{DFT-300gal_LR}",
 					["num"] = 4,
-					},
-					[5] = {
+				},
+				[5] = {
 					["CLSID"] = "{DFT-300gal_LR}",
 					["num"] = 2,
-					},
+				},
 					},
 					fuel = 2467.5454273299,
 					flare = 30,
@@ -24492,31 +24492,30 @@ db_all_loadouts = {
 					[1] = {
 					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 5,
-					},
-					[2] = {
+				},
+				[2] = {
 					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 1,
-					},
-					[3] = {
+				},
+				[3] = {
 					["CLSID"] = "{Mk-20_TER_3_C}",
 					["num"] = 3,
 					["settings"] = {
 						["NFP_PRESID"] = "MDRN_CC_A_Mk20",
-						["NFP_PRESVER"] = 1,
+						["NFP_PRESVER"] = 2,
 						["NFP_fuze_type_nose"] = "Mk339Mod1",
-						["arm_delay_ctrl_Mk339Mod1"] = 1.1,
 						["function_delay_ctrl_00_Mk339Mod1"] = 1.2,
 						["function_delay_ctrl_01_Mk339Mod1"] = 4,
 					},
-					},
-					[4] = {
+				},
+				[4] = {
 					["CLSID"] = "{DFT-300gal_LR}",
 					["num"] = 4,
-					},
-					[5] = {
+				},
+				[5] = {
 					["CLSID"] = "{DFT-300gal_LR}",
 					["num"] = 2,
-					},
+				},
 					},
 					fuel = 2467.5454273299,
 					flare = 30,
@@ -24553,34 +24552,34 @@ db_all_loadouts = {
 					[1] = {
 					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 5,
-					},
-					[2] = {
+				},
+				[2] = {
 					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 1,
-					},
-					[3] = {
+				},
+				[3] = {
 					["CLSID"] = "{Mk-82 Snakeye_MER_6_C}",
 					["num"] = 3,
 					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
 						["NFP_PRESID"] = "MDRN_B_A_GPLD",
-						["NFP_PRESVER"] = 1,
+						["NFP_PRESVER"] = 2,
 						["NFP_VIS_DrawArgNo_57"] = 0,
 						["NFP_fuze_type_nose"] = "M904E4",
 						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 4,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
 					},
-					},
-					[4] = {
+				},
+				[4] = {
 					["CLSID"] = "{DFT-300gal_LR}",
 					["num"] = 4,
-					},
-					[5] = {
+				},
+				[5] = {
 					["CLSID"] = "{DFT-300gal_LR}",
 					["num"] = 2,
-					},
+				},
 					},
 					fuel = 2467.5454273299,
 					flare = 30,
@@ -24681,34 +24680,34 @@ db_all_loadouts = {
 					[1] = {
 					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 5,
-					},
-					[2] = {
+				},
+				[2] = {
 					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 1,
-					},
-					[3] = {
+				},
+				[3] = {
 					["CLSID"] = "{Mk-83_TER_3_C}",
 					["num"] = 3,
 					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
 						["NFP_PRESID"] = "MDRN_B_A_GPLD",
-						["NFP_PRESVER"] = 1,
+						["NFP_PRESVER"] = 2,
 						["NFP_VIS_DrawArgNo_57"] = 0,
 						["NFP_fuze_type_nose"] = "M904E4",
 						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 4,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
 					},
-					},
-					[4] = {
+				},
+				[4] = {
 					["CLSID"] = "{DFT-300gal_LR}",
 					["num"] = 4,
-					},
-					[5] = {
+				},
+				[5] = {
 					["CLSID"] = "{DFT-300gal_LR}",
 					["num"] = 2,
-					},
+				},
 					},
 					fuel = 2467.5454273299,
 					flare = 30,
@@ -24745,34 +24744,34 @@ db_all_loadouts = {
 					[1] = {
 					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 5,
-					},
-					[2] = {
+				},
+				[2] = {
 					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 1,
-					},
-					[3] = {
+				},
+				[3] = {
 					["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
 					["num"] = 3,
 					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
 						["NFP_PRESID"] = "MDRN_B_A_GPLD",
-						["NFP_PRESVER"] = 1,
+						["NFP_PRESVER"] = 2,
 						["NFP_VIS_DrawArgNo_57"] = 0,
 						["NFP_fuze_type_nose"] = "M904E4",
 						["NFP_fuze_type_tail"] = "M905",
-						["arm_delay_ctrl_M904E4"] = 4,
-						["arm_delay_ctrl_M905"] = 4,
-						["function_delay_ctrl_M904E4"] = 0,
-						["function_delay_ctrl_M905"] = 0,
 					},
-					},
-					[4] = {
+				},
+				[4] = {
 					["CLSID"] = "{DFT-300gal_LR}",
 					["num"] = 4,
-					},
-					[5] = {
+				},
+				[5] = {
 					["CLSID"] = "{DFT-300gal_LR}",
 					["num"] = 2,
-					},
+				},
 					},
 					fuel = 2467.5454273299,
 					flare = 30,
@@ -24809,23 +24808,23 @@ db_all_loadouts = {
 					[1] = {
 					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 5,
-					},
-					[2] = {
+				},
+				[2] = {
 					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 1,
-					},
-					[3] = {
+				},
+				[3] = {
 					["CLSID"] = "{LAU-10 ZUNI_TER_3_C}",
 					["num"] = 3,
-					},
-					[4] = {
+				},
+				[4] = {
 					["CLSID"] = "{DFT-300gal_LR}",
 					["num"] = 4,
-					},
-					[5] = {
-					["CLSID"] = "{DFT-300gal_LR}",
+				},
+				[5] = {
+					["CLSID"] = "{DFT-150gal}",
 					["num"] = 2,
-					},
+				},
 					},
 					fuel = 2467.5454273299,
 					flare = 30,
@@ -24862,23 +24861,23 @@ db_all_loadouts = {
 					[1] = {
 					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 5,
-					},
-					[2] = {
+				},
+				[2] = {
 					["CLSID"] = "{AIM-9J-ON-ADAPTER}",
 					["num"] = 1,
-					},
-					[3] = {
+				},
+				[3] = {
 					["CLSID"] = "{LAU-3 FFAR Mk1 HE_TER_3_C}",
 					["num"] = 3,
-					},
-					[4] = {
+				},
+				[4] = {
 					["CLSID"] = "{DFT-300gal_LR}",
 					["num"] = 4,
-					},
-					[5] = {
+				},
+				[5] = {
 					["CLSID"] = "{DFT-300gal_LR}",
 					["num"] = 2,
-					},
+				},
 					},
 					fuel = 2467.5454273299,
 					flare = 30,
