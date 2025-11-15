@@ -220,7 +220,7 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 				return true -- keep
 			end
 
-			print("DC_P_T2 -P----P--> Prune vc_: "..lowCaseName)
+			-- print("DC_P_T2 -P----P--> Prune vc_: "..lowCaseName)
 			return false -- Prune
 		end
 		--[[particularité NAM GC22]]

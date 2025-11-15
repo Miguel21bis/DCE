@@ -105,6 +105,25 @@ EjectedPilotFrequency = {
 	},
 }
 
+-- function en local, sinon en global ça pollue ça fait planter DCE_Manager
+local function deepcopyLocal(orig, copies)
+    copies = copies or {}  -- Table pour suivre les références déjà copiées
+
+    if type(orig) ~= 'table' then return orig end  -- Copie simple des types de base
+
+    if copies[orig] then return copies[orig] end  -- Si déjà copié, éviter boucle infinie
+
+    local copy = {}
+    copies[orig] = copy  -- Stocker la copie pour éviter de repasser sur la même table
+
+    for orig_key, orig_value in pairs(orig) do
+        copy[deepcopyLocal(orig_key, copies)] = deepcopyLocal(orig_value, copies)
+    end
+
+    setmetatable(copy, deepcopyLocal(getmetatable(orig), copies))
+    return copy
+end
+
 
 TaskByPlane = {
 	["Nothing"] = {
@@ -4531,7 +4550,7 @@ local function mergeSimple(dest, src, opts)
     -- Si les deux tables sont des listes (ex: Tasks), on concatène puis on déduplique
     if isSequence(dest) and isSequence(src) then
         for _, v in ipairs(src) do
-            table.insert(dest, Deepcopy(v))
+            table.insert(dest, deepcopyLocal(v))
         end
         removeDuplicates(dest)
         return
@@ -4543,7 +4562,7 @@ local function mergeSimple(dest, src, opts)
         if d == nil then
             -- Clé absente : copie directe
             if type(v) == "table" then
-                dest[k] = Deepcopy(v)
+                dest[k] = deepcopyLocal(v)
             else
                 dest[k] = v
             end
@@ -4567,7 +4586,7 @@ for planeType, planeData in pairs(Data_divers) do
         local parent = Data_divers[planeData.inheritedFrom]
         if type(parent) == "table" then
             -- 1) on part d'une copie du parent (table propre)
-            local merged = Deepcopy(parent)
+            local merged = deepcopyLocal(parent)
             -- 2) on fusionne les champs de l'enfant dans la copie
             -- overwrite = true : si l'enfant définit un champ scalaire, il remplace le parent
             mergeSimple(merged, planeData, { overwrite = true })

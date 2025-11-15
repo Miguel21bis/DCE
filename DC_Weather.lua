@@ -17,241 +17,24 @@ versionDCE["DC_Weather.lua"] = "1.6.26"
 if Debug.debug then
 	print("START DC_Weather.lua "..versionDCE["DC_Weather.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
-local debugWeather = false
 
-TabMetar = {}
-MoonTxt = ""
+-- weather = {
+--     trend         = 70,   -- (0–100) : 0 = dépression forte / pluie, 100 = anticyclone stable / ciel clair
+--     refTemp       = 28,   -- (°C) température moyenne diurne (point d’équilibre)
+--     instability   = 40,   -- (0–100) : fréquence et amplitude des changements météo
+--     windActivity  = 35,   -- (0–100) : intensité générale du vent
+-- }
 
-local debugTxt = ""
-local presetChoice = 0
-local showOne = false
-local showOneNight = false
-local baseChoice
-local foundSinglePlayer = {}
-local fieldElevation = 0											--elevation of players airfield used for minimum cloud base
-local elapsed_Time = CampTotalTimeS								--elapsed time since campaign start in seconds
-
--- Définit pHigh / pLow et signale via InsertBugList si la variable attendue est manquante
-local pHigh, pLow
-if mission_ini and mission_ini.weather and mission_ini.weather.pHigh ~= nil then
-	pHigh = mission_ini.weather.pHigh
-else
-	pHigh = 50										--default pressure high value
-	-- Enregistre le fait que la variable pHigh est manquante (appel demandé)
-	if InsertBugList then InsertBugList("pHigh weather, absent from conf_mod") end
-end
-if mission_ini and mission_ini.weather and mission_ini.weather.pLow ~= nil then
-	pLow = mission_ini.weather.pLow
-else
-	pLow = 50										--default pressure pLow value
-	-- Enregistre le fait que la variable pLow est manquante (appel demandé)
-	if InsertBugList then InsertBugList("pLow weather, absent from conf_mod") end
-end
-
-if Firstmission_flag and camp.weather then
-	pHigh = camp.weather.pHigh or 50					--default pressure high value
-	pLow = camp.weather.pLow or 50						--default pressure pLow value
-end
-
-
-for side,unit in pairs(oob_air) do										--iterate through all sides
-	for n = 1, #unit do													--iterate through all units
-		if unit[n].player then											--find player unit			
-			if not db_airbases[unit[n].base] then
-				print("DcW: No "..unit[n].base.." (base) found for "..unit[n].name.." in db_airbase file")
-				print("DCE debug")  os.execute 'pause'
-			end
-			if db_airbases[unit[n].base].elevation then
-				fieldElevation = db_airbases[unit[n].base].elevation		--get field elevation of player base
-			end
-			if fieldElevation == nil then
-				fieldElevation = 0
-			end
-
-			foundSinglePlayer = {
-				place = unit[n].base,
-				type = unit[n].type,
-				fieldElevation = fieldElevation
-			}
-
-			break
-
-		end
-	end
-end
-
-
-if camp and camp.weather and camp.weather.zoneEnd then
-	debugTxt = debugTxt .." A0 camp.weather.zoneEnd "..tostring(camp.weather.zoneEnd).."\n"
-end
--- if debugWeather then print("time              "..tostring((camp.date.day - 1) * 86400 + camp.time)) end
-debugTxt = debugTxt .."time              "..tostring((camp.date.day - 1) * 86400 + camp.time).."\n"
-
-mission.weather["atmosphere_type"] = 0									--set simple weather model
-if camp.weather == nil then
-	camp.weather = {}
-end
-camp.weather.pHigh = pHigh
-camp.weather.pLow = pLow
-
-local initalW = false
-
-local probaPhight = (pHigh / (pHigh + pLow)) * 100					--chance of next weather zone being a high pressure system
-local probaPlow = (pLow / (pHigh + pLow)) * 100
-
-debugTxt = debugTxt .."DcW A1 probaPhight weather : "..tostring(probaPhight).."\n"
-debugTxt = debugTxt .."DcW A2 probaPlow weather : "..tostring(probaPlow).."\n"
-
---Initial weather
-if camp.weather == nil then
-	camp.weather = {}
-end
-
--- efface l'historique de la météo si on a un saut de temps
-if TimeJump then
-	camp.weather.zone = nil
-end
-
-	-- ["missionHistory"] = 
-	-- {
-	-- 	[4] = 
-	-- 	{
-	-- 		["CampTotalTimeS"] = 832800,
-	-- 		["month"] = 7,
-	-- 		["year"] = 1965,
-	-- 		["minute"] = 20,
-	-- 		["hour"] = 15,
-	-- 		["day"] = 20,
-	-- 	},
-	-- },
-
--- si le temps passé est supérieur à 3 fois ce qui etait convenu, on recommence à 0
-if elapsed_Time and camp.weather.zoneEnd and elapsed_Time > camp.weather.zoneEnd then
-	local deltaTime = elapsed_Time - camp.weather.zoneEnd
-	if debugWeather then print("DcW A10 deltaTime: "..tostring(deltaTime)) end
-
-	if camp.missionHistory and camp.missionHistory[camp.mission-1] then
-		local deltaNexTime = camp.weather.zoneEnd - camp.missionHistory[camp.mission-1]["CampTotalTimeS"]
-		if debugWeather then print("DcW A12 deltaNexTime "..tostring(deltaNexTime).."deltaNexTime *3 "..tostring(deltaNexTime *3)) end
-
-		if deltaTime > (deltaNexTime *3 ) then
-			if debugWeather then print("DcW A13 deltaTime *3: "..tostring(deltaNexTime *3)) end
-			camp.weather.zone = nil
-		end
-	end
-end
-
--- --Initial weather 2
-if camp.weather.zone == nil then
-	debugTxt = debugTxt .."DcW D0a camp.weather.zone == nil ".."\n"
-    -- Températures de zone
-    camp.weather.zoneTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)
-    camp.weather.zoneNextTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)
-
-	local r = math.random(1, 100)
-
-	debugTxt = debugTxt ..
-		string.format("DcW D01 r=%d | probaPhight=%.1f | ", r, probaPhight) ..
-		"logique : plus r est grand → meilleur temps\n"
-
-	if r > (100 - probaPhight * 0.7) then
-		camp.weather.zoneNext = "high"
-		debugTxt = debugTxt .. "DcW AAA => Très beau temps (high)\n"
-	elseif r > (100 - probaPhight) then
-		camp.weather.zoneNext = "low sector warm"
-		debugTxt = debugTxt .. "DcW BBB => Beau temps mais un peu couvert (low sector warm)\n"
-	else
-		local mauvais = { "low front cold", "low front warm", "low sector cold" }
-		camp.weather.zoneNext = mauvais[math.random(1, #mauvais)]
-		debugTxt = debugTxt .. "DcW CCC => Mauvais temps (" .. camp.weather.zoneNext .. ")\n"
-	end
-
-
-    camp.weather.zoneEnd = -1
-
-end
-
-debugTxt = debugTxt .."DcW D1 camp.weather.zoneTemp: " ..tostring(camp.weather.zoneTemp).."\n"
-debugTxt = debugTxt .."DcW D2 camp.weather.zone: " ..tostring(camp.weather.zone).."\n"
-debugTxt = debugTxt .."DcW D3 camp.weather.zoneNext (va devenir zone actuelle ): " ..camp.weather.zoneNext.."\n"
-
-
---Weather change
-if elapsed_Time > camp.weather.zoneEnd then										--active weather zone has ended
-
-	debugTxt = debugTxt .."DcW E0 Weather change ".."\n"
-
-	--Active zone
-	camp.weather.zone = camp.weather.zoneNext									--make next weather zone the active weather zone
-	camp.weather.zoneStart = camp.weather.zoneEnd								--time active weather zone has started
-	if camp.weather.zone == "high" then
-		camp.weather.zoneEnd = elapsed_Time + math.random(86400, 172800 )		--432000(5j)	--set duration of current weather zone (between 1 and 2 days for High system)
-		camp.weather.zoneTemp = camp.weather.zoneNextTemp						--make next weather zone temperature the current temperature
-	elseif camp.weather.zone == "low front cold" then
-		camp.weather.zoneEnd = elapsed_Time + math.random(14400, 28800)			--set duration of current weather zone (between 4 and 8 hours for cold front)
-	elseif camp.weather.zone == "low front warm" then
-		camp.weather.zoneEnd = elapsed_Time + math.random(43200, 86400)			--set duration of current weather zone (between 12 and 24 hours for warm front)
-	elseif camp.weather.zone == "low sector cold" then
-		camp.weather.zoneEnd = elapsed_Time + math.random(21600, 172800)		--set duration of current weather zone (between 6 and 48 hours for cold sector)
-		camp.weather.zoneTemp = camp.weather.zoneNextTemp						--make next weather zone temperature the current temperature
-	elseif camp.weather.zone == "low sector warm" then
-		camp.weather.zoneEnd = elapsed_Time + math.random(21600, 172800)		--set duration of current weather zone (between 6 and 48 hours for warm sector)
-		camp.weather.zoneTemp = camp.weather.zoneNextTemp						--make next weather zone temperature the current temperature
-	end
-
-	if mission_ini.weather.weatherChangeRate then
-		camp.weather.zoneEnd = camp.weather.zoneEnd - elapsed_Time
-		camp.weather.zoneEnd = camp.weather.zoneEnd * mission_ini.weather.weatherChangeRate
-		camp.weather.zoneEnd = camp.weather.zoneEnd + elapsed_Time
-	end
+-- mission_ini.weather = {
+--     trend = 35,        -- dépression faible → nuages, pluie possible
+--     refTemp = 32,      -- température moyenne
+--     instability = 60,  -- météo changeante
+--     windActivity = 8,  -- 8 m/s au sol (~28 km/h)
+-- }
 
 
 
-	--Next zone
-	camp.weather.zoneNextTemp = math.random(mission_ini.weather.refTemp - 5, mission_ini.weather.refTemp + 5)			--Set temperature of next weather zone (+/- 5°C of reference tempereature)
 
-	if not initalW then  -- évite de passer 2 fois le random lors de la première mission
-
-			-- Tirage unique entre 1 et 100 pour coller aux pourcentages (probaPhight en %)
-			local r = math.random(1, 100)
-			debugTxt = debugTxt .."Next zone random: "..tostring(r).." probaPhight:"..tostring(probaPhight).."\n"
-
-			-- On veut que : r > ref => beau temps. On calcule ref comme la portion "mauvais" = 100 - probaPhight
-			local ph = math.floor(probaPhight + 0.5)
-			if ph < 0 then ph = 0 end
-			if ph > 100 then ph = 100 end
-			local ref = 100 - ph
-
-			if r > ref then
-				-- c'est du beau temps ; on répartit high / low sector warm à partir de la position de r
-				local pos = r - ref -- va de 1 à ph
-				local highCut = math.floor(ph * 0.7 + 0.5) -- 70% du beau temps = "high"
-				if pos <= highCut then
-					camp.weather.zoneNext = "high"
-				else
-					camp.weather.zoneNext = "low sector warm"
-				end
-			else
-				-- mauvais temps : on choisit le type en fonction de la tendance thermique
-				if camp.weather.zoneTemp > camp.weather.zoneNextTemp then
-					camp.weather.zoneNext = "low front cold"
-				elseif camp.weather.zoneTemp < camp.weather.zoneNextTemp then
-					camp.weather.zoneNext = "low front warm"
-				else
-					-- Si la température ne change pas, on reste dans le même secteur
-					if camp.weather.zone == "low front cold" then
-						camp.weather.zoneNext = "low sector cold"
-					elseif camp.weather.zone == "low front warm" then
-						camp.weather.zoneNext = "low sector warm"
-					else
-						-- Par défaut, on reste sur la même zone
-						camp.weather.zoneNext = camp.weather.zone
-					end
-				end
-			end
-	end
-
-end
 
 -- if debugWeather then
 -- 	print("calcul new weather:")
@@ -1163,613 +946,515 @@ local preset = {
 	},
 }
 
--- Beau temps
-local highPresets = {3, 4, 5, 6, 10}
-local lowSectorWarmPresets = {1, 2, 7, 8, 9, 11, 12, 13, 18, 19, 23, 31}
--- Mauvais temps
-local lowFrontColdPresets = {28, 29, 30, 32}
-local lowFrontWarmPresets = {15, 16, 20, 25, 26, 27, 33}
-local lowSectorColdPresets = {14, 17, 21, 22, 24, 34}
-
-
--- -- pour map desertique:
--- -- Beau temps
--- local highPresets = {1, 2, 3, 4, 5, 6, 10, 31}
--- local lowSectorWarmPresets = {7, 8, 9, 11, 12, 13, 18, 19, 23}
-
--- -- Mauvais temps
--- local lowFrontColdPresets = {28, 29, 30, 32}
--- local lowFrontWarmPresets = {25, 26, 27, 33}
--- local lowSectorColdPresets = {17, 21, 22, 24, 34}
-
-
-
---Set current weather
------ HIGH -----
-if camp.weather.zone == "high_OLD" then
-		local r_mini, r_maxi
-	if camp.weather.zoneTemp >= 30 then				--si T° sup= à 30: aucun nuage, on se passe du nouveau systeme de nuage de DCS
-		r_mini = 0
-		r_maxi = 0
-	elseif camp.weather.zoneTemp >= 25 then				--si T° sup= à 25: proba entre ancien systeme (pas de nuage) et les 2 premiers nuages du nouveau systeme DCS
-		r_mini = 0
-		r_maxi = 2
-	else											--sinon, proba entre les 4 premiers nuages du nouveau systeme DCS
-		r_mini = 1
-		r_maxi = 4
-	end
-
-	local presetMiss = ""
-	baseChoice = 5000							--TODO quelle base est appliquée par l editeur de mission en cas d extreme beau
-	presetChoice = math.random(r_mini, r_maxi)
-
-	if presetChoice ~= 0 then
-		baseChoice =  math.random(preset[presetChoice].altiMin, preset[presetChoice].altiMax)
-		presetMiss = preset[presetChoice].name
-	end
-
-	--clouds
-	mission.weather["clouds"] = {
-		["thickness"] = 0,
-		["density"] = 0,
-		["base"] = baseChoice,
-		["iprecptns"] = 0,
-		["preset"] = presetMiss,
-	}
-
-	--wind
-	-- local windDir = 180
-	local windDir = math.random(0, 359)
-	local windSpeed = math.random(0, 5)
-	mission.weather["wind"] = {
-		["at8000"] =
-		{
-			["speed"] = windSpeed * 2.5,
-			["dir"] = windDir,
-		},
-		["at2000"] =
-		{
-			["speed"] = windSpeed * 0.8,
-			["dir"] = windDir,
-		},
-		["atGround"] =
-		{
-			["speed"] = windSpeed,
-			["dir"] = windDir,
-		},
-	}
-
-	--turbulence
-
-
-	-- mission.weather["turbulence"] = {
-	-- 	["at8000"] = math.random(0, windSpeed*2),--10
-	-- 	["at2000"] = math.random(0, windSpeed*2),--10
-	-- 	["atGround"] = math.random(0, windSpeed*2),--10
-	-- }
-
-	local coef = 1
-	local ponderation = math.random(1, 100)
-	if ponderation <= 50 then
-		coef = 1
-	elseif ponderation <= 100 then
-		coef = 2
-	end
-			-- mission.weather["turbulence"] = {
-			-- 	["atGround"] = math.random(0, mission.weather.wind.atGround.speed * coef),--10
-			-- 	["at2000"] = math.random(0,  mission.weather.wind.at2000.speed * coef),--10
-			-- 	["at8000"] = math.random(0,  mission.weather.wind.at8000.speed * coef),--10
-			-- }
-	-- if max_atGroung <= 0 then max_atGroung = 1 end
-	mission.weather["groundTurbulence"] = math.random(0, mission.weather.wind.atGround.speed * coef) --10
-	-- print("DcW ponderation High "..ponderation.." coef "..coef.." max_atGroung: "..max_atGroung.." groundTurbulence: "..mission.weather["groundTurbulence"])
-	-- mission.weather["groundTurbulence"] = math.random(0, 10)--10
-
-	--temperature
-	mission.weather["season"]["temperature"] = camp.weather.zoneTemp
-	-- if debugWeather then print("DcW B temperature: "..mission.weather["season"]["temperature"]) end
-	debugTxt = debugTxt .."DcW B temperature: "..mission.weather["season"]["temperature"].."\n"
-	--pressure
-	-- 720- -790 mm Hg
-	mission.weather["qnh"] = math.random(760, 780)
-
-
-	-- HIGH → Anticyclone (hautes pressions, beau temps)
-
-	-- LOW FRONT COLD → Front froid (temps instable, souvent pluie et baisse brutale température)
-
-	-- LOW FRONT WARM → Front chaud (temps nuageux, pluie légère possible, amélioration progressive)
-
-	-- LOW SECTOR COLD → Secteur froid (air froid entre deux fronts, souvent instable)
-
-	-- LOW SECTOR WARM → Secteur chaud (air chaud entre deux fronts, souvent stable mais couvert)
-
-
------ HIGH -----
-elseif camp.weather.zone == "high" then
-
-	-- local front_remaining = (camp.weather.zoneEnd - elapsed_time) / 3600					--hours until end of cold front
-	-- local front_duration = (camp.weather.zoneEnd - camp.weather.zoneStart) / 3600			--duration of the front in hours
-	-- local strength = 10 - front_remaining * 10 / front_duration								--strength of the front on a scale of 0-10
-
-	--clouds
-	presetChoice = highPresets[math.random(1, #highPresets)]
-
-	if fieldElevation >= preset[presetChoice].altiMin and fieldElevation <= preset[presetChoice].altiMax then
-		baseChoice =  math.random(fieldElevation, preset[presetChoice].altiMax)
-	else
-		baseChoice =  math.random(preset[presetChoice].altiMin, preset[presetChoice].altiMax)
-	end
-
-	mission.weather["clouds"] = {
-		["thickness"] = math.random(4000, 8000),
-		["density"] = math.random(1, 5),
-		-- ["base"] = fieldElevation + math.random(100, 500),
-		["base"] = baseChoice,
-		["iprecptns"] = 0,
-		["preset"] = preset[presetChoice].name,
-	}
-
-	--wind
-	-- local windDir = 180
-	local windDir = math.random(0, 359)
-	local windSpeed = math.random(1, 5)
-	mission.weather["wind"] = {
-		["at8000"] =
-		{
-			["speed"] = windSpeed * 2.5,
-			["dir"] = windDir,
-		},
-		["at2000"] =
-		{
-			["speed"] = windSpeed * 0.8,
-			["dir"] = windDir,
-		},
-		["atGround"] =
-		{
-			["speed"] = windSpeed,
-			["dir"] = windDir,
-		},
-	}
-
-	--turbulence
-	local coef = 1
-	local ponderation = math.random(1, 100)
-	if ponderation <= 8 then
-		coef = 1
-	elseif ponderation < 16 then
-		coef = 2
-	elseif ponderation < 24 then
-		coef = 3
-	elseif ponderation < 32 then
-		coef = 4
-	elseif ponderation < 40 then
-		coef = 5
-	elseif ponderation < 48 then
-		coef = 6
-	elseif ponderation < 56 then
-		coef = 7
-	elseif ponderation < 64 then
-		coef = 8
-	elseif ponderation < 72 then
-		coef = 9
-	elseif ponderation < 80 then
-		coef = 10
-	elseif ponderation < 88 then
-		coef = 11
-	elseif ponderation <= 100 then
-		coef = 12
-	end
-	local max_atGroung = (mission.weather.wind.atGround.speed * coef > 10 and mission.weather.wind.atGround.speed * coef or 11)
-	if max_atGroung <= 10 then max_atGroung = 11 end
-	if max_atGroung > 60 then max_atGroung = 60 end
-	mission.weather["groundTurbulence"] = math.random(10, max_atGroung)--60
-
-	debugTxt = debugTxt .."DcW ponderation LFC "..ponderation.." coef "..coef.." max_atGroung: "..max_atGroung.." groundTurbulence: "..mission.weather["groundTurbulence"].."\n"
-
-	mission.weather["season"]["temperature"] = camp.weather.zoneTemp
-
-	--pressure
-	mission.weather["qnh"] = math.random(760, 780)
-
------ COLD FRONT -----
-elseif camp.weather.zone == "low front cold" then
-
-	local front_remaining = (camp.weather.zoneEnd - elapsed_Time) / 3600					--hours until end of cold front
-	local front_duration = (camp.weather.zoneEnd - camp.weather.zoneStart) / 3600			--duration of the front in hours
-	local strength = 10 - front_remaining * 10 / front_duration								--strength of the front on a scale of 0-10
-
-	--clouds
-	-- Pour choisir aléatoirement parmi une liste précise de valeurs, place-les dans un tableau puis utilise math.random sur l'index :
-	presetChoice = lowFrontColdPresets[math.random(1, #lowFrontColdPresets)]
-
-	if fieldElevation >= preset[presetChoice].altiMin and fieldElevation <= preset[presetChoice].altiMax then
-		baseChoice =  math.random(fieldElevation, preset[presetChoice].altiMax)
-	else
-		baseChoice =  math.random(preset[presetChoice].altiMin, preset[presetChoice].altiMax)
-	end
-
-	mission.weather["clouds"] = {
-		["thickness"] = math.random(4000, 8000),
-		["density"] = math.random(9, 10),
-		-- ["base"] = fieldElevation + math.random(100, 500),
-		["base"] = baseChoice,
-		["iprecptns"] = math.random(1, 2),
-		["preset"] = preset[presetChoice].name,
-	}
-
-	--wind
-	-- local windDir = 180
-	local windDir = math.random(0, 359)
-	local windSpeed = math.random(3, 5)
-	mission.weather["wind"] = {
-		["at8000"] =
-		{
-			["speed"] = windSpeed * 2.5,
-			["dir"] = windDir,
-		},
-		["at2000"] =
-		{
-			["speed"] = windSpeed * 0.8,
-			["dir"] = windDir,
-		},
-		["atGround"] =
-		{
-			["speed"] = windSpeed,
-			["dir"] = windDir,
-		},
-	}
-
-	--turbulence
-	local coef = 1
-	local ponderation = math.random(1, 100)
-	if ponderation <= 8 then
-		coef = 1
-	elseif ponderation < 16 then
-		coef = 2
-	elseif ponderation < 24 then
-		coef = 3
-	elseif ponderation < 32 then
-		coef = 4
-	elseif ponderation < 40 then
-		coef = 5
-	elseif ponderation < 48 then
-		coef = 6
-	elseif ponderation < 56 then
-		coef = 7
-	elseif ponderation < 64 then
-		coef = 8
-	elseif ponderation < 72 then
-		coef = 9
-	elseif ponderation < 80 then
-		coef = 10
-	elseif ponderation < 88 then
-		coef = 11
-	elseif ponderation <= 100 then
-		coef = 12
-	end
-	local max_atGroung = (mission.weather.wind.atGround.speed * coef > 10 and mission.weather.wind.atGround.speed * coef or 11)
-	if max_atGroung <= 10 then max_atGroung = 11 end
-	if max_atGroung > 60 then max_atGroung = 60 end
-	mission.weather["groundTurbulence"] = math.random(10, max_atGroung)--60
-	-- if debugWeather then
-	-- 	print("DcW ponderation LFC "..ponderation.." coef "..coef.." max_atGroung: "..max_atGroung.." groundTurbulence: "..mission.weather["groundTurbulence"])
-	-- end
-	debugTxt = debugTxt .."DcW ponderation LFC "..ponderation.." coef "..coef.." max_atGroung: "..max_atGroung.." groundTurbulence: "..mission.weather["groundTurbulence"].."\n"
-			-- mission.weather["groundTurbulence"] = math.random(10, 60)--60
-	--temperature
-	mission.weather["season"]["temperature"] = math.ceil(camp.weather.zoneTemp + strength * (camp.weather.zoneNextTemp - camp.weather.zoneTemp) / 10)
-
-	--pressure
-	mission.weather["qnh"] = math.random(740, 760)
-
-
------- WARM FRONT -----
-elseif camp.weather.zone == "low front warm" then
-
-	local front_remaining = (camp.weather.zoneEnd - elapsed_Time) / 3600					--hours until end of warm front
-	local front_duration = (camp.weather.zoneEnd - camp.weather.zoneStart) / 3600			--duration of the front in hours
-	local strength = 10 - front_remaining * 10 / front_duration								--strength of the front on a scale of 0-10
-
-	--clouds
-	strength = math.random(math.floor(strength - (strength * probaPhight/100)), math.ceil(strength))
-
-	local dens = math.ceil(strength * 1.5)
-	if dens > 10 then
-		dens = 10
-	end
-
-
-	-- Pour choisir aléatoirement parmi une liste précise de valeurs, place-les dans un tableau puis utilise math.random sur l'index :
-	presetChoice = lowFrontWarmPresets[math.random(1, #lowFrontWarmPresets)]
-
-	-- baseChoice =  math.random(preset[presetChoice].altiMin, preset[presetChoice].altiMax)
-	if fieldElevation >= preset[presetChoice].altiMin and fieldElevation <= preset[presetChoice].altiMax then
-		baseChoice =  math.random(fieldElevation, preset[presetChoice].altiMax)
-	else
-		baseChoice =  math.random(preset[presetChoice].altiMin, preset[presetChoice].altiMax)
-	end
-
-	mission.weather["clouds"] = {
-		["thickness"] = math.ceil(strength * 200),
-		["density"] = dens,
-		-- ["base"] = fieldElevation + 100 + math.ceil(8000 - strength * 800),
-		["base"] = baseChoice,
-		["preset"] = preset[presetChoice].name,
-	}
-
-	--il ne pleut que dans les preset 28/29/30
-	if presetChoice >= 28 and presetChoice <= 30 then
-		mission.weather["clouds"]["iprecptns"] = math.floor(strength * 0.2)
-	else
-		mission.weather["clouds"]["iprecptns"] = 0
-	end
-
-
-	--wind
-	-- local windDir = 180
-	local windDir = math.random(0, 359)
-	local windSpeed = math.random(2, 5)
-	mission.weather["wind"] = {
-		["at8000"] =
-		{
-			["speed"] = windSpeed * 2.5,
-			["dir"] = windDir,
-		},
-		["at2000"] =
-		{
-			["speed"] = windSpeed * 0.8,
-			["dir"] = windDir,
-		},
-		["atGround"] =
-		{
-			["speed"] = windSpeed,
-			["dir"] = windDir,
-		},
-	}
-
-	--turbulence
-	local coef = 1
-	local ponderation = math.random(1, 100)
-	if ponderation <= 50 then
-		coef = 1
-	elseif ponderation <= 60 then
-		coef = 2
-	elseif ponderation <= 70 then
-		coef = 3
-	elseif ponderation <= 80 then
-		coef = 4
-	elseif ponderation <= 90 then
-		coef = 5
-	elseif ponderation <= 100 then
-		coef = 6
-	end
-	local max_atGroung = (mission.weather.wind.atGround.speed * coef > 5 and mission.weather.wind.atGround.speed * coef or 5)
-		-- local max_at2000 = (mission.weather.wind.at2000.speed * coef > 5 and mission.weather.wind.at2000.speed * coef or 5)
-		-- local max_at8000 = (mission.weather.wind.at8000.speed * coef > 5 and mission.weather.wind.at8000.speed * coef or 5)
-
-		-- mission.weather["turbulence"] = {
-		-- 	["atGround"] = math.random(5, max_atGroung),--30
-		-- 	["at2000"] = math.random(5,  max_at2000),--30
-		-- 	["at8000"] = math.random(5,  max_at8000),--30
-		-- }
-
-	if max_atGroung <= 10 then max_atGroung = 11 end
-	mission.weather["groundTurbulence"] = math.random(10, max_atGroung)--30
-	-- print("DcW ponderation LFW "..ponderation.." coef "..coef.." max_atGroung: "..max_atGroung.." groundTurbulence: "..mission.weather["groundTurbulence"])
-	-- mission.weather["groundTurbulence"] = math.random(10, 30)--30
-
-	--temperature
-	mission.weather["season"]["temperature"] = math.ceil(camp.weather.zoneTemp + strength * (camp.weather.zoneNextTemp - camp.weather.zoneTemp) / 10)
-
-	--pressure
-	mission.weather["qnh"] = math.random(740, 760)
-
-
------ COLD SECTOR ------
-elseif camp.weather.zone == "low sector cold" then
-
-	--clouds
-	-- Pour choisir aléatoirement parmi une liste précise de valeurs, place-les dans un tableau puis utilise math.random sur l'index :
-	presetChoice = lowSectorColdPresets[math.random(1, #lowSectorColdPresets)]
-
-	presetChoice = 1
-	baseChoice =  math.random(preset[presetChoice].altiMin, preset[presetChoice].altiMax)
-
-	mission.weather["clouds"] = {
-		["thickness"] = math.random(100, 1000),
-		["density"] = math.random(0, 1),
-		-- ["base"] = math.random(4000, 6000),
-		["base"] = baseChoice,
-
-		["iprecptns"] = 0,
-		["preset"] = preset[presetChoice].name,
-	}
-
-	--wind
-	-- local windDir = 180
-	local windDir = math.random(0, 359)
-	local windSpeed = math.random(1, 5)
-	mission.weather["wind"] = {
-		["at8000"] =
-		{
-			["speed"] = windSpeed * 2.5,
-			["dir"] = windDir,
-		},
-		["at2000"] =
-		{
-			["speed"] = windSpeed * 0.8,
-			["dir"] = windDir,
-		},
-		["atGround"] =
-		{
-			["speed"] = windSpeed,
-			["dir"] = windDir,
-		},
-	}
-
-	--turbulence
-	local coef = 1
-	local ponderation = math.random(1, 100)
-	if ponderation <= 50 then
-		coef = 1
-	elseif ponderation <= 60 then
-		coef = 2
-	elseif ponderation <= 70 then
-		coef = 3
-	elseif ponderation <= 80 then
-		coef = 4
-	elseif ponderation <= 90 then
-		coef = 5
-	elseif ponderation <= 100 then
-		coef = 6
-	end
-	local max_atGroung = (mission.weather.wind.atGround.speed * coef > 5 and mission.weather.wind.atGround.speed * coef or 5)
-			-- local max_at2000 = (mission.weather.wind.at2000.speed * coef > 5 and mission.weather.wind.at2000.speed * coef or 5)
-			-- local max_at8000 = (mission.weather.wind.at8000.speed * coef > 5 and mission.weather.wind.at8000.speed * coef or 5)
-
-			-- mission.weather["turbulence"] = {
-			-- 	["atGround"] = math.random(5, max_atGroung),--30
-			-- 	["at2000"] = math.random(5,  max_at2000),--30
-			-- 	["at8000"] = math.random(5,  max_at8000),--30
-			-- }
-	if max_atGroung <= 10 then max_atGroung = 11 end
-	mission.weather["groundTurbulence"] = math.random(10, max_atGroung)--30
-	-- print("DcW ponderation LSC "..ponderation.." coef "..coef.." max_atGroung: "..max_atGroung.." groundTurbulence: "..mission.weather["groundTurbulence"])
-	-- mission.weather["groundTurbulence"] = math.random(10, 30)--30
-
-	--temperature
-	mission.weather["season"]["temperature"] = camp.weather.zoneTemp
-
-	--pressure
-	mission.weather["qnh"] = math.random(740, 760)
-
-
------ WARM SECTOR -----
-elseif camp.weather.zone == "low sector warm" then
-
-	--clouds
-	-- Pour choisir aléatoirement parmi une liste précise de valeurs, place-les dans un tableau puis utilise math.random sur l'index :
-	presetChoice = lowSectorWarmPresets[math.random(1, #lowSectorWarmPresets)]
-
-	baseChoice =  math.random(preset[presetChoice].altiMin, preset[presetChoice].altiMax)
-
-	mission.weather["clouds"] = {
-		["thickness"] = math.random(100, 1000),
-		["density"] = math.random(1, 4),
-		-- ["base"] = math.random(4000, 6000),
-		["base"] = baseChoice,
-		["iprecptns"] = 0,
-		["preset"] = preset[presetChoice].name,
-	}
-
-	--wind
-	-- local windDir = 180
-	local windDir = math.random(0, 359)
-	local windSpeed = math.random(1, 5)
-	mission.weather["wind"] = {
-		["at8000"] =
-		{
-			["speed"] = windSpeed * 2.5,
-			["dir"] = windDir,
-		},
-		["at2000"] =
-		{
-			["speed"] = windSpeed * 0.8,
-			["dir"] = windDir,
-		},
-		["atGround"] =
-		{
-			["speed"] = windSpeed,
-			["dir"] = windDir,
-		},
-	}
-
-	--turbulence
-	local coef = 1
-	local ponderation = math.random(1, 100)
-
-	if ponderation <= 50 then
-		coef = 1
-	elseif ponderation <= 60 then
-		coef = 2
-	elseif ponderation <= 70 then
-		coef = 3
-	elseif ponderation <= 80 then
-		coef = 4
-	elseif ponderation <= 90 then
-		coef = 5
-	elseif ponderation <= 100 then
-		coef = 6
-	end
-
-	local max_atGroung = (mission.weather.wind.atGround.speed * coef > 5 and mission.weather.wind.atGround.speed * coef or 6)
-			-- local max_at2000 = (mission.weather.wind.at2000.speed * coef > 5 and mission.weather.wind.at2000.speed * coef or 6)
-			-- local max_at8000 = (mission.weather.wind.at8000.speed * coef > 5 and mission.weather.wind.at8000.speed * coef or 6)
-
-			-- mission.weather["turbulence"] = {
-			-- 	["atGround"] = math.random(5, max_atGroung),--30
-			-- 	["at2000"] = math.random(5,  max_at2000),--30
-			-- 	["at8000"] = math.random(5,  max_at8000),--30
-			-- }
-
-	if max_atGroung <= 10 then max_atGroung = 11 end
-	mission.weather["groundTurbulence"] = math.random(10, max_atGroung)--30
-	-- mission.weather["groundTurbulence"] = math.random(10, 30)--30
-	-- print("DcW ponderation LSW "..ponderation.." coef "..coef.." max_atGroung: "..max_atGroung.." groundTurbulence: "..mission.weather["groundTurbulence"])
-
-
-	--temperature
-	mission.weather["season"]["temperature"] = camp.weather.zoneTemp
-
-	--pressure
-	mission.weather["qnh"] = math.random(740, 760)
-
-
+------------------------------------------------------------
+-- DCS CampaignMaker Realistic Weather Generator v0.3
+-- Basé sur les familles de presets réels
+------------------------------------------------------------
+
+--------------------------------------------------------------
+-- 0. VARIABLES 
+--------------------------------------------------------------
+
+-- METAR = ""
+TabMetar = {}
+local foundSinglePlayer = {}
+
+local presetChoice
+local elapsed_Time = CampTotalTimeS								--elapsed time since campaign start in seconds
+local debugTxt = ""
+local debugWeather = true
+local debugChoice
+local showOne = false
+local showOneNight = true
+
+print("elapsed_Time = "..tostring(elapsed_Time))
+--------------------------------------------------------------
+-- 1. Catégories de presets DCS
+--------------------------------------------------------------
+
+local highPresets        = {1, 2, 3, 4}
+local warmSectorPresets  = {5, 6, 7, 8, 9, 10}
+local coldSectorPresets  = {11, 12, 13, 14, 15, 16, 17, 18}
+local warmFrontPresets   = {19, 20, 21, 22, 23, 24, 25, 26, 27}
+local coldFrontPresets   = {28, 29, 30, 32}
+local lightRainPresets   = {31, 33, 34}
+local heavyRainPresets   = {28, 29, 30}
+
+
+
+--------------------------------------------------------------
+-- 2. UTILITAIRES
+--------------------------------------------------------------
+
+local function pickRandom(t)
+    return t[math.random(1, #t)]
+end
+
+-- Random gaussien simplifié
+local function gaussianRandom(mean, stdDev)
+    -- math.random() produit un nombre uniformément distribué entre 0 et 1.
+    -- Pour obtenir une distribution gaussienne, on applique la transformation de Box-Muller.
+
+    local u1 = math.random()
+    local u2 = math.random()
+
+    -- Transformation : on convertit deux tirages uniformes
+    -- en un tirage gaussien centré sur 0, variance 1
+    local z0 = math.sqrt(-2 * math.log(u1)) * math.cos(2 * math.pi * u2)
+
+    -- Puis on applique moyenne et écart-type
+    return mean + z0 * stdDev
 end
 
 
---Time of day temperature modification, min at 5 o'clock, max at 17 o'clock, deltaT 1 °C per hour
-local hour = math.floor(camp.time / 3600)								--convert time to hours rounded down
-if hour <= 5 then														--before 5 o'clock in the morning
-	mission.weather["season"]["temperature"] = mission.weather["season"]["temperature"] - 7 - hour
-elseif hour <= 17 then													--between 5 and 17 o'clock
-	mission.weather["season"]["temperature"] = mission.weather["season"]["temperature"] - 17 + hour
-else																	--after 17 o'clock
-	mission.weather["season"]["temperature"] = mission.weather["season"]["temperature"] + 17 - hour
+-- renvoie une valeur centrée autour de "center"
+-- amplitude = +/- plage du random
+local function weightedRandom(center, amplitude)
+    -- random 0..1
+    local r = math.random()
+    -- courbe douce (r^2 favorise les valeurs proches du centre)
+    local factor = r * r
+    local offset = (math.random(0,1) == 0 and -1 or 1) * factor * amplitude
+    return center + offset
+end
+
+local function generateFog(category, windSpeed)
+
+    -- Jamais de brouillard si trop de vent
+    if windSpeed > 2 then
+        return false, {visibility = 0, thickness = 0}
+    end
+
+    -- Catégories qui peuvent naturellement donner du brouillard
+    local fogPossible = {
+        lightRain = true,
+        heavyRain = true,
+        warmFront = true,
+        coldFront = true,
+    }
+
+    if not fogPossible[category] then
+        return false, {visibility = 0, thickness = 0}
+    end
+
+    -- Probabilité rare : 5 %
+    if math.random() > 0.05 then
+        return false, {visibility = 0, thickness = 0}
+    end
+
+    -- Brouillard généré
+    local visibility = math.random(250, 1200)
+    local thickness  = math.random(100, 300)
+
+    return true, {
+        visibility = visibility,
+        thickness  = thickness
+    }
 end
 
 
---Fog
-if mission.weather["wind"]["atGround"]["speed"] < 2 then															--Fog is possible at speeds below 2 m/s
-	if mission.weather["season"]["temperature"] < 12 and mission.weather["season"]["temperature"] > -2 then			--Fog is possoble at temperatures between -2 and 12 °C
-		if math.random(1, 2) == 1 then																				--20% chance of fog
-			mission.weather["enable_fog"] = true
-			mission.weather["fog"] = {
-				["thickness"] = math.random(0, 1000),
-				["visibility"] = math.random(0,10000),
-			}
+--------------------------------------------------------------
+-- 3. CHOISIR UN PRESET EN FONCTION DE LA METEO SIMULÉE
+--------------------------------------------------------------
 
-			--pas de turbulence lors d'un brouillard ....
-			-- mission.weather["turbulence"] = {
-			-- 	["atGround"] = 0,
-			-- 	["at2000"] = mission.weather.turbulence.at2000 / 4,
-			-- 	["at8000"] = mission.weather.turbulence.at2000 / 2,
-			-- }
-			mission.weather["groundTurbulence"] = 0
-		end
-	end
+-- Débogage : dernière valeur utilisée pour déterminer la catégorie météo
+local lastWeatherRoll = 0
+
+local function chooseWeatherPreset(trend)
+    -- On génère un tirage gaussien autour de "trend"
+    -- Spread (écart type) fixe, car "instability" ne doit plus être pris en compte
+    local spread = 12
+
+    -- On conserve la valeur pour débug
+    lastWeatherRoll = gaussianRandom(trend, spread)
+
+    -- Sélection de la météo
+    if lastWeatherRoll >= 85 then
+        return pickRandom(highPresets), "high", lastWeatherRoll
+
+    elseif lastWeatherRoll >= 65 then
+        return pickRandom(warmSectorPresets), "warmSector", lastWeatherRoll
+
+    elseif lastWeatherRoll >= 45 then
+        return pickRandom(coldSectorPresets), "coldSector", lastWeatherRoll
+
+    elseif lastWeatherRoll >= 30 then
+        return pickRandom(warmFrontPresets), "warmFront", lastWeatherRoll
+
+    elseif lastWeatherRoll >= 15 then
+        return pickRandom(lightRainPresets), "lightRain", lastWeatherRoll
+
+    elseif lastWeatherRoll >= 8 then
+        return pickRandom(coldFrontPresets), "coldFront", lastWeatherRoll
+
+    else
+        return pickRandom(heavyRainPresets), "heavyRain", lastWeatherRoll
+    end
 end
 
---halo
-mission.weather["halo"] =
-{
-	["preset"] = "auto",
-}
 
-if mission.weather.clouds.preset == "" then
-	mission.weather.clouds.preset = nil
+--------------------------------------------------------------
+-- 4. GENERATION DU VENT DCS
+--------------------------------------------------------------
+
+local function generateWindDirection(category, winDirection)
+    
+    -- Catégories où le vent peut venir de n'importe où
+    local badWeather = {
+        heavyRain = true,
+        coldFront = true
+    }
+
+    -- Si météo mauvaise → direction chaotique
+    if badWeather[category] then
+        return math.random(0, 359)
+    end
+
+    -- Sinon direction pondérée autour du vent dominant
+    local dir = weightedRandom(winDirection, 35)   -- +/- 35° autour
+    dir = dir % 360
+    if dir < 0 then dir = dir + 360 end
+    return math.floor(dir)
 end
+
+-- local function generateWind(windActivity, winDir, category)
+
+
+-- 	local function randomWind(base, category)
+
+-- 		-- Influence de la météo : facteur multiplicatif
+-- 		local meteoFactor = 1.0
+
+-- 		if category == "high"        then meteoFactor = 0.9 end   -- beau temps → vent un peu réduit
+-- 		if category == "warmSector"  then meteoFactor = 1.0 end
+-- 		if category == "coldSector"  then meteoFactor = 1.1 end
+-- 		if category == "warmFront"   then meteoFactor = 1.3 end
+-- 		if category == "lightRain"   then meteoFactor = 1.2 end
+-- 		if category == "coldFront"   then meteoFactor = 1.5 end
+-- 		if category == "heavyRain"   then meteoFactor = 1.6 end
+
+-- 		print("category "..tostring(category).." meteoFactor "..tostring(meteoFactor))
+
+-- 		-- base élargie selon météo
+-- 		base = base * meteoFactor
+
+-- 		-- Random pondéré
+-- 		local r = math.random()
+
+-- 		if r < 0.70 then
+-- 			-- 70% du temps : vent faible ou proche de la consigne
+-- 			return math.random() * (base * 2)
+
+-- 		elseif r < 0.90 then
+-- 			-- 20% : vent modéré
+-- 			return base * 2 + math.random() * (base * 2)
+
+-- 		else
+-- 			-- 10% : vent fort (rare, mais cohérent avec météo)
+-- 			return base * 4 + math.random() * (base * 4)
+-- 		end
+-- 	end
+
+
+
+--     ----------------------------------------------------------
+--     -- 2. Direction pondérée autour du winDir (inchangé)
+--     ----------------------------------------------------------
+--     local function driftDir(center, amplitude)
+--         local r = math.random()
+--         local offset = ((math.random() < 0.5) and -1 or 1) * (r * r) * amplitude
+--         local d = (center + offset) % 360
+--         if d < 0 then d = d + 360 end
+--         return math.floor(d)
+--     end
+
+
+--     ----------------------------------------------------------
+--     -- 3. Construction des trois niveaux de vent
+--     ----------------------------------------------------------
+--     return {
+--         atGround = {
+--             speed = randomWind(windActivity, category),
+--             dir   = driftDir(winDir, 20)
+--         },
+--         at2000 = {
+--             speed = randomWind(windActivity * 0.9, category),
+--             dir   = driftDir(winDir, 12)
+--         },
+--         at8000 = {
+--             speed = randomWind(windActivity * 0.8, category),
+--             dir   = driftDir(winDir, 7)
+--         }
+--     }
+-- end
+
+local function generateWind(windActivity, winDir, category)
+
+    category = category or "unknown"   --  évite nil et aide au debug
+
+	print("category A = "..tostring(category))
+
+    local function randomWind(base)
+
+        local meteoFactor = 1.0
+
+        if category == "high"        then meteoFactor = 0.9 end
+        if category == "warmSector"  then meteoFactor = 1.0 end
+        if category == "coldSector"  then meteoFactor = 1.1 end
+        if category == "warmFront"   then meteoFactor = 1.3 end
+        if category == "lightRain"   then meteoFactor = 1.2 end
+        if category == "coldFront"   then meteoFactor = 1.5 end
+        if category == "heavyRain"   then meteoFactor = 1.6 end
+
+        print("category B = "..tostring(category).. " | meteoFactor = "..tostring(meteoFactor))
+
+        base = base * meteoFactor
+
+        local r = math.random()
+
+        if r < 0.70 then
+            return math.random() * (base * 2)
+
+        elseif r < 0.90 then
+            return base * 2 + math.random() * (base * 2)
+
+        else
+            return base * 4 + math.random() * (base * 4)
+        end
+    end
+
+
+    local function driftDir(center, amplitude)
+        local r = math.random()
+        local offset = ((math.random() < 0.5) and -1 or 1) * (r * r) * amplitude
+        local d = (center + offset) % 360
+        if d < 0 then d = d + 360 end
+        return math.floor(d)
+    end
+
+
+    return {
+        atGround = {
+            speed = randomWind(windActivity),
+            dir   = driftDir(winDir, 20)
+        },
+        at2000 = {
+            speed = randomWind(windActivity * 0.9),
+            dir   = driftDir(winDir, 12)
+        },
+        at8000 = {
+            speed = randomWind(windActivity * 0.8),
+            dir   = driftDir(winDir, 7)
+        }
+    }
+end
+
+
+--------------------------------------------------------------
+-- 5. GENERATION DES NUAGES
+--------------------------------------------------------------
+
+-- data doit contenir data[presetID].altiMin et altiMax
+-- Exemple : data[32].altiMin = 1260 ; data[32].altiMax = 2520
+
+local function clamp(val, min, max)
+    if val < min then return min end
+    if val > max then return max end
+    return val
+end
+
+
+
+local function generateClouds(presetID, category)
+
+	local data = preset[presetID]
+    -- Sécurités
+    local presetData = data[presetID]
+    if not presetData then
+        -- fallback propre
+        presetData = { altiMin = 500, altiMax = 5000 }
+    end
+
+    local altiMin = presetData.altiMin
+    local altiMax = presetData.altiMax
+
+    -----------------------------------------------------
+    -- 1) Base estimée selon la catégorie (comme tu le voulais)
+    -----------------------------------------------------
+    local base = 3500 -- valeur par défaut ciel haut
+
+    if category == "coldSector" then base = 2200 end
+    if category == "warmFront"  then base = 1800 end
+    if category == "lightRain"  then base = 1500 end
+    if category == "heavyRain"  then base =  900 end
+    if category == "coldFront"  then base =  700 end
+
+    -----------------------------------------------------
+    -- 2) Clamp final : la base doit respecter altiMin / altiMax
+    -----------------------------------------------------
+    base = clamp(base, altiMin, altiMax)
+
+    -----------------------------------------------------
+    -- 3) Construction de la table clouds compatible DCS
+    -----------------------------------------------------
+    return {
+        preset    = "Preset" .. tostring(presetID),
+        base      = base,
+        density   = 0,       -- requis par DCS mais ignoré
+        thickness = 200,     -- requis mais non utilisé
+        iprecptns = 0        -- ignoré depuis la 2.9 mais obligatoire
+    }
+end
+
+
+
+
+--------------------------------------------------------------
+-- 6. GENERATION DE LA TEMPÉRATURE
+--------------------------------------------------------------
+
+local function generateTemperature(baseTemp, category)
+
+    -- Influence météo très légère
+    local meteoBias = 0
+
+    if category == "high" then meteoBias =  1 end        -- beau temps : un poil plus chaud
+    if category == "warmSector" then meteoBias =  2 end  -- air chaud
+    if category == "coldSector" then meteoBias = -2 end  -- air froid
+    if category == "warmFront"  then meteoBias =  1 end
+    if category == "coldFront"  then meteoBias = -2 end
+    if category == "lightRain"  then meteoBias = -1 end
+    if category == "heavyRain"  then meteoBias = -2 end  -- logique météo
+
+    -- Température cible finale avant random
+    local target = baseTemp + meteoBias
+
+    -- Random pondéré léger autour de cette cible (±2°C)
+    local temp = weightedRandom(target, 5)
+
+    return math.floor(temp)
+end
+
+
+
+--------------------------------------------------------------
+-- 7. GENERATION DU QNH
+--------------------------------------------------------------
+
+local function generateQNH(category)
+
+    -- Valeur centrale selon météo
+    local center = 770   -- valeur par défaut
+
+    if category == "high" then center = 777 end            -- anticyclone
+    if category == "warmSector" then center = 773 end
+    if category == "coldSector" then center = 767 end
+    if category == "warmFront" then center = 765 end
+    if category == "coldFront" then center = 762 end       -- dépression
+    if category == "lightRain" then center = 768 end
+    if category == "heavyRain" then center = 761 end       -- très bas
+
+    -- Random pondéré autour du centre, amplitude ±4
+    local qnh = weightedRandom(center, 4)
+
+    -- Clamp strict
+    if qnh < 760 then qnh = 760 end
+    if qnh > 780 then qnh = 780 end
+
+    return math.floor(qnh)
+end
+
+
+--------------------------------------------------------------
+-- 8. GENERATION GLOBAL DCS WEATHER
+--------------------------------------------------------------
+
+local function generateDCSweather()
+	local trend = mission_ini.weather.trend
+	local refTemp = mission_ini.weather.refTemp
+	local instability = mission_ini.weather.instability
+	local windActivity = mission_ini.weather.windActivity
+	local winDirection = mission_ini.weather.winDirection
+
+
+    local presetID, category, loc_debugChoice = chooseWeatherPreset(trend)
+
+	print("generateDCSweather() category "..category)
+	
+	local windDir = generateWindDirection(category, winDirection)
+    local wind = generateWind(windActivity, windDir, category)
+
+    local clouds = generateClouds(presetID, category)
+    local temperature = generateTemperature(refTemp, category)
+    local qnh = generateQNH(trend)
+
+	local fogEnabled, fogData = generateFog(category, wind.atGround.speed)
+
+    -- Fog (rare, seulement si très mauvaise météo)
+    local fog = {
+        thickness = fogEnabled and fogData.thickness or 0,
+        visibility = fogEnabled and fogData.visibility or 0,
+    }
+
+    -- Visibilité globale
+    local vis = 80000
+    if category == "lightRain" then vis = 40000 end
+    if category == "heavyRain" then vis = 15000 end
+    if category == "coldFront" then vis = 10000 end
+
+	camp.weather.zone = category
+	presetChoice = presetID
+	debugChoice = loc_debugChoice
+
+
+    return {
+        wind = wind,
+
+        enable_fog = fogEnabled,
+
+        season = {
+            temperature = temperature
+        },
+
+        qnh = qnh,
+
+        cyclones = {},
+
+        dust_density = 0,
+        enable_dust = false,
+
+        clouds = clouds,
+
+        atmosphere_type = 0,
+        groundTurbulence = math.floor(windActivity),
+
+        halo = { preset = "auto" },
+
+        type_weather = 0,
+
+        modifiedTime = false,
+
+        name = "Generated Weather: "..category,
+
+        fog = fog,
+
+        visibility = {
+            distance = vis
+        }
+    }
+end
+
+local weather = generateDCSweather( )
+
+mission["weather"] = weather
+
+_affiche(weather, "weather: ")
+
+os.execute 'pause'
+
+--###################################################################
+----- debut old weather -----
+--###################################################################
 
 --time and date
 camp.date.hour = math.floor(camp.time / 3600)
@@ -1779,7 +1464,25 @@ camp.date.minute =  math.floor((camp.time / 3600 - camp.date.hour) * 60)
 --###################################################################
 ----- Build METAR -----
 --###################################################################
-
+local breakTag
+for side, units in pairs(oob_air) do
+	if units and units ~= nil then
+		for n, unit in pairs(units) do
+			if unit.player then
+				foundSinglePlayer = {
+					place = unit.base,
+					type = unit.type,
+					-- fieldElevation = fieldElevation
+				}
+				breakTag = true
+				break
+			end
+		end
+		if breakTag then
+			break
+		end
+	end
+end
 
 local tab_unite = {
 	[1] = "imperial",
@@ -1791,7 +1494,7 @@ local tab_unite = {
 for placeName, place in pairs(db_airbases) do
 	for i, units in ipairs(tab_unite) do
 
-		local METAR = "METAR "
+		local metar = "METAR "
 
 		-- code = {
 		-- 	ICAO = "LTAG",
@@ -1806,13 +1509,13 @@ for placeName, place in pairs(db_airbases) do
 		else
 			name = placeName
 		end
-		METAR = METAR .. name .. " "
+		metar = metar .. name .. " "
 
 		--time and date
 		if camp.date.day < 10 then
-			METAR = METAR .. "0" .. camp.date.day
+			metar = metar .. "0" .. camp.date.day
 		else
-			METAR = METAR .. camp.date.day
+			metar = metar .. camp.date.day
 		end
 
 		--le metar est pris en compte avant le briefing, donc environ 1 à 2h avant
@@ -1829,9 +1532,9 @@ for placeName, place in pairs(db_airbases) do
 
 		local hours = math.floor((timePrepa) / 3600)
 		if hours < 10 then
-			METAR = METAR .. "0" .. hours
+			metar = metar .. "0" .. hours
 		else
-			METAR = METAR .. hours
+			metar = metar .. hours
 		end
 
 		local minute = (timePrepa / 3600 - hours) * 60
@@ -1842,7 +1545,7 @@ for placeName, place in pairs(db_airbases) do
 		else
 			minuteStr = tostring(minute)
 		end
-		METAR = METAR .. minuteStr .. " "
+		metar = metar .. minuteStr .. " "
 
 		--wind
 		local direction = mission.weather["wind"]["atGround"]["dir"] - 180
@@ -1882,15 +1585,15 @@ for placeName, place in pairs(db_airbases) do
 
 		if units == "imperial" then
 			if mission.weather["wind"]["atGround"]["speed"] == 0 then
-				METAR = METAR .. "00000KT "
+				metar = metar .. "00000KT "
 			else
-				METAR = METAR .. directionStr .. speed .. gust .. "KT "
+				metar = metar .. directionStr .. speed .. gust .. "KT "
 			end
 		else
 			if mission.weather["wind"]["atGround"]["speed"] == 0 then
-				METAR = METAR .. "00000MPS "
+				metar = metar .. "00000MPS "
 			else
-				METAR = METAR .. directionStr
+				metar = metar .. directionStr
 
 				.. speed .. gust .. "MPS "
 			end
@@ -1910,7 +1613,7 @@ for placeName, place in pairs(db_airbases) do
 			else
 				visStr = tostring(vis)
 			end
-			METAR = METAR .. visStr .. " "
+			metar = metar .. visStr .. " "
 		else
 			-- if mission.weather["clouds"]["iprecptns"] == 1 then
 			-- 	METAR = METAR .. "9999 "
@@ -1924,20 +1627,20 @@ for placeName, place in pairs(db_airbases) do
 
 		--fog
 		if mission.weather["enable_fog"] == true then
-			METAR = METAR .. "FG "
+			metar = metar .. "FG "
 		end
 
 		--precipitation
 		if mission.weather["clouds"]["iprecptns"] == 1 then
 			if mission.weather["season"]["temperature"] <= 0 then
-				METAR = METAR .. "SN "
+				metar = metar .. "SN "
 			else
-				METAR = METAR .. "RA "
+				metar = metar .. "RA "
 			end
 		elseif mission.weather["clouds"]["iprecptns"] == 2 then
-			METAR = METAR .. "TS "
+			metar = metar .. "TS "
 		elseif not mission.weather["enable_fog"] then
-			METAR = METAR .. "NSW "
+			metar = metar .. "NSW "
 		end
 
 
@@ -1999,7 +1702,7 @@ for placeName, place in pairs(db_airbases) do
 				end
 
 
-				METAR = METAR .. metarLayer..baseCloud
+				metar = metar .. metarLayer..baseCloud
 
 			end
 		end
@@ -2030,9 +1733,9 @@ for placeName, place in pairs(db_airbases) do
 			tempT = "0"..tempT_num
 		end
 		if mission.weather.season.temperature < 0 then
-			METAR = METAR .. " M" .. tempT
+			metar = metar .. " M" .. tempT
 		else
-			METAR = METAR .. " " .. tempT
+			metar = metar .. " " .. tempT
 		end
 
 		-- dewPoint = airTemp - ((cloudAltitude/1000) * 2.5) 
@@ -2045,9 +1748,9 @@ for placeName, place in pairs(db_airbases) do
 			tempDewPointStr = tostring(tempDewPoint)
 		end
 		if dewPoint < 0 then
-			METAR = METAR .. "/M" .. tempDewPointStr
+			metar = metar .. "/M" .. tempDewPointStr
 		else
-			METAR = METAR .. "/" .. tempDewPointStr
+			metar = metar .. "/" .. tempDewPointStr
 		end
 
 		--*******************************************************************************
@@ -2121,7 +1824,7 @@ for placeName, place in pairs(db_airbases) do
 				-- no turbulence layer in DCS, but groundTurbulence, maybe 2000ft ^^
 			turbulenceInfo = turbulenceInfo .. "2"
 
-			METAR = METAR ..turbulenceInfo
+			metar = metar ..turbulenceInfo
 
 		--QNH
 		--le QNH de DCS est en mm d Hg, il faut le transformer pour etre en HPa
@@ -2133,15 +1836,15 @@ for placeName, place in pairs(db_airbases) do
 			qnhStr = tostring(qnh)
 			qnhStr = qnhStr:sub(1, 2)..qnhStr:sub(4, 5)
 
-			METAR = METAR .. " A" .. qnhStr
+			metar = metar .. " A" .. qnhStr
 		elseif units == "metric" then
 
 			local qnh = math.floor(mission.weather["qnh"] / 760 * 1013.25)
-			METAR = METAR .. " Q" .. qnh
+			metar = metar .. " Q" .. qnh
 
 		else
 			local qnh = math.floor(mission.weather["qnh"] )
-			METAR = METAR .. " QNH" .. qnh
+			metar = metar .. " QNH" .. qnh
 		end
 
 
@@ -2211,15 +1914,15 @@ for placeName, place in pairs(db_airbases) do
 			-- print("DcW vis "..vis.." > level.visu_m? "..level.visu_m.." level.color? "..level.color)
 			if baseIni >= level.alti_m and vis >= level.visu_m  then
 				-- print("DcW passe color ")
-				METAR = METAR .. " " .. level.color
+				metar = metar .. " " .. level.color
 				break
 			end
 		end
 
-		METAR = METAR .. "="
+		metar = metar .. "="
 
 		if not TabMetar[placeName] then TabMetar[placeName] = {} end
-		TabMetar[placeName][units] = METAR
+		TabMetar[placeName][units] = metar
 
 		-- if debugWeather then
 		-- 	print("DcW units "..TabMetar[placeName][units])
@@ -2228,12 +1931,6 @@ for placeName, place in pairs(db_airbases) do
 		-- 	end
 		-- end
 
-		-- foundSinglePlayer = {
-		-- 	place = unit[n].base,
-		-- 	type = unit[n].type,
-		-- 	fieldElevation = fieldElevation
-		-- }
-
 		if not showOne then
 			if foundSinglePlayer and foundSinglePlayer.type and foundSinglePlayer.place then
 
@@ -2241,7 +1938,7 @@ for placeName, place in pairs(db_airbases) do
 				and Data_divers and Data_divers[foundSinglePlayer.type]
 				and Data_divers[foundSinglePlayer.type].instrumentUnits
 				then
-					if  TabMetar[foundSinglePlayer.place][Data_divers[foundSinglePlayer.type].instrumentUnits] then
+					if TabMetar[foundSinglePlayer.place][Data_divers[foundSinglePlayer.type].instrumentUnits] then
 						print("Metar: ".. tostring(TabMetar[foundSinglePlayer.place][Data_divers[foundSinglePlayer.type].instrumentUnits]))
 						showOne = true
 					else
@@ -2264,9 +1961,15 @@ end
 
 
 local s = ""
-local remain = math.ceil((camp.weather.zoneEnd - elapsed_Time) / 3600)		--hours until end of weather zone					
-local duration = math.ceil((camp.weather.zoneEnd - camp.weather.zoneStart) / 3600)					--duration of the weather zone in hours
-local passed = 100 / duration * remain																--percentage of zone passage
+local remain = 1
+local duration = 1
+local passed = 1
+
+if camp.weather and camp.weather.zoneEnd then
+	remain = math.ceil((camp.weather.zoneEnd - elapsed_Time) / 3600)		--hours until end of weather zone					
+	duration = math.ceil((camp.weather.zoneEnd - camp.weather.zoneStart) / 3600)					--duration of the weather zone in hours
+	passed = 100 / duration * remain																--percentage of zone passage
+end
 
 if camp.weather.zone == "high" then
 	if mission.weather["enable_fog"] == false then
@@ -2319,13 +2022,16 @@ elseif camp.weather.zone == "low sector warm" then
 		s = s .. ", expected to remain stable for next " .. math.floor(remain / 24) .. " days. "
 	end
 
+else
+	s = s .. "Weather data unavailable. "
+
 end
 
 camp.weather.brief = tostring(s)
 
 
 debugTxt = debugTxt .."DcW camp.weather.zoneTemp "..camp.weather.zone.."\n"
-debugTxt = debugTxt .."DcW camp.weather.zoneNextTemp "..camp.weather.zoneNext.."\n"
+-- debugTxt = debugTxt .."DcW camp.weather.zoneNextTemp "..camp.weather.zoneNext.."\n"
 
 if not camp["debugTraceability"] then
 	camp["debugTraceability"] = {}
@@ -2341,12 +2047,13 @@ WeatherParams = Deepcopy(mission.weather)
 
 if debugWeather then
 	print()
+	print("debugChoice: "..debugChoice)
 	print("START debugTxt: ")
 	print(debugTxt)
 	print("FIN debugTxt: ")
 	print()
 	print("elapsed_time: "..elapsed_Time)
-	print("camp.weather.zoneEnd "..camp.weather.zoneEnd)
+	-- print("camp.weather.zoneEnd "..camp.weather.zoneEnd)
 	print("remain "..remain)
 	print()
 	_affiche(camp.date, "camp.date FINAL: ")

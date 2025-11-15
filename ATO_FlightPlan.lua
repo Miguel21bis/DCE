@@ -1271,7 +1271,7 @@ local function createBombingChapter(arg_idTask, arg_Flight, arg_Wpt, arg_WeaponT
 					if country.vehicle then
 						for group_n, group in pairs(country.vehicle.group) do				--iterate through groups in country.static.group table
 							for unit_n, unit in pairs(group.units) do									--Iterate through elements of target						
-								print("AtoFP passe ZC_b group.name "..tostring(group.name).." || "..tostring(arg_Flight.target.name))
+								-- print("AtoFP passe ZC_b group.name "..tostring(group.name).." || "..tostring(arg_Flight.target.name))
 
 								-- if group.name == unit.name then
 								if unit.name == arg_Flight.target_name or unit.name == arg_Element.name then

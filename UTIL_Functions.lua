@@ -1892,7 +1892,7 @@ function GetFrequency(arg_Side, arg_TargetName, arg_Task, arg_Type, arg_Waves, a
 		elseif arg2_Wave == "HF" then
 
 			if Frequency[arg2_Type] and Frequency[arg2_Type]["radio"] then
-				print("UtilF		  typeB "..tostring(arg2_Type).." sideB "..tostring(arg2_Side).." waveB "..tostring(arg2_Wave))
+				-- print("UtilF		  typeB "..tostring(arg2_Type).." sideB "..tostring(arg2_Side).." waveB "..tostring(arg2_Wave))
 				repeat
 					freq = math.random(RadioB[arg2_Side][arg2_Wave].min * 10, RadioB[arg2_Side][arg2_Wave].max * 10)		--find random frequency in mHz
 				until Assigned_freq[freq] == nil and freq ~= 4125 and freq ~= 5680										--repeat until a frequency is found that is not yet in use
@@ -3428,10 +3428,12 @@ function ModifiCampInit()
 		"year",
 		"month",
 		"weather",
-		"pHigh",
-		"pLow",
+		"trend",
+		"variance",
 		"refTemp",
-		"weatherChangeRate",
+		"instability",
+		"windActivity",
+		"winDirection",
 		"time",
 		"variation",
 		"ewrFreqAdaptable",
@@ -4301,8 +4303,8 @@ function UpdateFilesAfterTimeJump()
 
 	CampTotalTimeS = SecondsBetween(camp.dateInit, camp.date)
 
-	print("UTIL_function_UpdateFilesAfterTimeJump() The campaign will start on this date: " .. tostring(camp.dateInit.day) .. "." .. tostring(camp.dateInit.month) .. "." .. tostring(camp.dateInit.year) .. ".\n")
-	print("UTIL_function_UpdateFilesAfterTimeJump() The current date of the campaign is: " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
+	-- print("UTIL_function_UpdateFilesAfterTimeJump() The campaign will start on this date: " .. tostring(camp.dateInit.day) .. "." .. tostring(camp.dateInit.month) .. "." .. tostring(camp.dateInit.year) .. ".\n")
+	-- print("UTIL_function_UpdateFilesAfterTimeJump() The current date of the campaign is: " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
 
 	camp.date.CampTotalTimeS = CampTotalTimeS
 

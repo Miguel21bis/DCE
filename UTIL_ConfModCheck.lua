@@ -66,11 +66,14 @@ mission_ini_check = {
 	
 	--***weather options***
 	weather = {
-		pHigh = 50,								--(1 to 100 [%])			[default: 50]		probability of high pressure weather system
-		pLow = 50,								--(1 to 100 [%])			[default: 50]		probability of low pressure weather system
-		refTemp = 20,							--(1 to 100 [T°])			[default: 20]		average day max temperature
-		weatherChangeRate = 1,					--(0.25 to 2)				[default:  1]		coefficient changing the speed at which the weather changes, example,  coef 1: changes every 48 hours on average, coef 0.25, changes every every 12h
+		trend        = 50,    -- (0–100) Main weather tendency. 0  = strong low pressure: storms, fronts, heavy clouds. 100 = strong high pressure: clear skies, stable weather
+		variance     = 30,    -- (0–100) How much the weather is allowed to deviate from the trend. Low  = very stable, predictable weather. High = wide variations, unpredictable weather, mixed conditions
+		refTemp      = 25,    -- (°C) Reference daytime temperature. Weather categories will adjust slightly around this value.
+		instability  = 40,    -- (0–100h) How fast the weather evolves over time. Controls how often and how strongly the weather changes. between missions or during long campaigns (in hours).
+		windActivity = 2.5,   -- (m/s) Average wind intensity at ground level. Higher values produce stronger and more turbulent winds.
+		winDirection = 158,   -- (0–359°) Dominant wind direction in degrees. Weather generation will create realistic variations around this value.
 	},
+
 
 	--***current date during this campaign***
 	current_date = {
@@ -99,6 +102,11 @@ mission_ini_check = {
 	silenceATC = "auto",						-- ("auto"/false/true)		[default: "auto"]	auto: silence only MP silences the ATC | useful for many multiplayer flights where the ATC talks and blocks repeatedly (except CV)
 	load_CTLD = false,							-- (true/false)				[default: false]	loads the CTLD script
 	load_mist = false,							-- (true/false)				[default: false]	loads the mist script
+
+	--***aircraft mod option***
+	--***F-4E option***
+	persistentAircraft = true,					-- (true/false/string(021))	[default: true]		true: damaged with skin and tailNumber, string: damaged whith key (ex: "021"), false: no persistent aircraft
+
 
 }
 

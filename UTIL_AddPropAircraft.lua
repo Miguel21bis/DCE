@@ -92,6 +92,15 @@ Data_AddPropAircraft = {
 		["LaserCodeDigit3"] = 8,
 		["LaserCodeDigit4"] = 8,
 		["IsNvgAllowed"] = true,
+
+
+		["PersistentAircraftKey"] = "",
+		["IsEfbAllowed"] = true,
+		["IsModifiedJesterAllowed"] = true,
+		-- ["UseReferenceAircraft"] = 0,
+		["CombatTreeSpoofable"] = 0, --0 (none),1(historical),2(all)
+
+		
 	},
 	["F-5E-3"] = {							--Tiger
 		["LAU68ROF"] = 0,
