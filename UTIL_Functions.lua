@@ -4651,6 +4651,48 @@ function LoadFileAndUpdate(from)
 		try_dofile(radioFile2)
 	end
 
+	local persistPath = "../../../Missions/Campaigns/"..camp.title.."/Init/persistenceMP.lua"
+	try_dofile(persistPath)
+
+	--reorganise la table PersistenceMP en fonction de la Task et rank
+	if PersistenceMP then
+		PersistenceMP_byTask = {}
+		for pilotName, pilotData in pairs(PersistenceMP) do
+			local task = pilotData.task or "Unknown"
+			local rank = pilotData.rank or "Unknown"
+			if pilotData.active then
+				if not PersistenceMP_byTask[task] then
+					PersistenceMP_byTask[task] = {}
+				end
+				if not PersistenceMP_byTask[task][rank] then
+					PersistenceMP_byTask[task][rank] = {}
+				end
+				pilotData.name = pilotName
+				PersistenceMP_byTask[task][rank] = pilotData
+			end
+
+		end
+		-- s'assure que la renumerotation ne comporte pas de trou
+		for task, ranks in pairs(PersistenceMP_byTask) do
+			local newRanks = {}
+			local rankIndex = 1
+			for rank, pilotData in pairs(ranks) do
+				newRanks[rankIndex] = pilotData
+				rankIndex = rankIndex + 1
+			end
+			PersistenceMP_byTask[task] = newRanks
+		end
+
+
+		-- local str = "PersistenceMP_byTask = " .. TableSerialization(PersistenceMP_byTask, 0)						--make a string
+		-- local fileObj = io.open("Debug/PersistenceMP_byTask.lua", "w")  or error("Failed to open debug file")
+		-- fileObj:write(str)																		--save new data
+		-- fileObj:close()
+
+		-- os.execute 'pause'
+
+	end
+
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CampaignSettings.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Refpoints.lua")
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_MissionScore.lua")

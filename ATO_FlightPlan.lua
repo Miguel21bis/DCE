@@ -585,13 +585,31 @@ function GetSidenumber(flight, nUnit)				--not local, also used in DC_StaticAirc
 	local lower = flight.sidenumber and flight.sidenumber[1] or nil
 	local upper = flight.sidenumber and flight.sidenumber[2] or nil
 	local player = flight.player
+	local client = flight.client
 	local type = flight.type
 	
 	local s 																		--new sidenumber
 	local counter = 0
 
-	if player and mission_ini.persistentAircraft and mission_ini.persistentAircraft ~= "" then
-		return mission_ini.persistentAircraft
+	if type == "F-4E-45MC" and mission_ini.persistentAircraft and mission_ini.persistentAircraft ~= "" then
+		-- print("GetSidenumber C persistentAircraft "..tostring(mission_ini.persistentAircraft))
+		if player then
+			-- print("GetSidenumber D player true")
+			if nUnit == 1 then
+				local persistentAircraft = true
+				return mission_ini.persistentAircraft, persistentAircraft
+			end
+		elseif client and PersistenceMP_byTask and PersistenceMP_byTask[flight.task] then
+			-- print("GetSidenumber E PersistenceMP_byTask for flight.task "..tostring(flight.task))
+			for clientName, clientData in pairs(PersistenceMP_byTask[flight.task]) do
+				-- print("GetSidenumber F clientName "..tostring(clientName).." assigned "..tostring(clientData.assigned).." sidenumber "..tostring(clientData.tailNum))
+				if not clientData.assigned and clientData.tailNum then
+					clientData.assigned = true
+					local persistentAircraft = true
+					return tostring(clientData.tailNum), persistentAircraft
+				end
+			end
+		end
 	end
 
 	if not lower or upper then
@@ -4849,7 +4867,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					end
 					
-					units[n]["onboard_num"] = GetSidenumber(flight[f], n)	--get new sidenumber
+					local assignedPersistentPlane = nil
+					units[n]["onboard_num"], assignedPersistentPlane = GetSidenumber(flight[f], n)	--get new sidenumber
 
 					-- if flight[f].sidenumber and flight[f].sidenumber[1] and flight[f].sidenumber[2] then		--squadron has sidenumbers defined
 					-- 	units[n]["onboard_num"] = GetSidenumber(flight[f].name, flight[f].sidenumber[1], flight[f].sidenumber[2],n , flight[f].player, flight[f].type)	--get new sidenumber
@@ -4890,13 +4909,17 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								end
 							end
 							-- print("AtoFp AddPropAircraft for ".." type "..flight[f].type.." flight[f].player "..tostring(flight[f].player).." mission_ini.persistentAircraft "..tostring(mission_ini.persistentAircraft) )
-							if flight[f].type == "F-4E-45MC" and flight[f].player and mission_ini.persistentAircraft and mission_ini.persistentAircraft ~= "" then
-								-- print("AtoFp AddPropAircraft PASSE A SinglePlayer: "..tostring(SinglePlayer))
-								if SinglePlayer and flight[f].player and not SingleWithDServer and n == 1 then
-									units[n]["AddPropAircraft"]["PersistentAircraftKey"] = mission_ini.persistentAircraft
-									units[n]["AddPropAircraft"]["UseReferenceAircraft"] = 2
-									-- print("AtoFp AddPropAircraft PASSE B ")
-								end
+							-- if flight[f].type == "F-4E-45MC" and flight[f].player and mission_ini.persistentAircraft and mission_ini.persistentAircraft ~= "" then
+							-- 	-- print("AtoFp AddPropAircraft PASSE A SinglePlayer: "..tostring(SinglePlayer))
+							-- 	if SinglePlayer and flight[f].player and not SingleWithDServer and n == 1 then
+							-- 		units[n]["AddPropAircraft"]["PersistentAircraftKey"] = mission_ini.persistentAircraft
+							-- 		units[n]["AddPropAircraft"]["UseReferenceAircraft"] = 2
+							-- 		-- print("AtoFp AddPropAircraft PASSE B ")
+							-- 	end
+							-- end
+							if assignedPersistentPlane then
+								units[n]["AddPropAircraft"]["PersistentAircraftKey"] = units[n]["onboard_num"]
+								units[n]["AddPropAircraft"]["UseReferenceAircraft"] = 2
 							end
 						else
 							units[n]["AddPropAircraft"] =
@@ -6559,6 +6582,12 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								unit["AddPropAircraft"]["TN_IDM_LB"] =  get_IDM_Id()
 								if not pack_IDM_unitId[p] then pack_IDM_unitId[p] = {} end
 								table.insert(pack_IDM_unitId[p], unit.unitId)
+							end
+
+							--desactive les num precis des avions persistants
+							if unit["AddPropAircraft"]["PersistentAircraftKey"] and unit["AddPropAircraft"]["PersistentAircraftKey"]  ~= "" then
+								unit["AddPropAircraft"]["PersistentAircraftKey"] = ""
+								unit["AddPropAircraft"]["UseReferenceAircraft"] = 0
 							end
 						end
 					end
