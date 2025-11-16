@@ -962,7 +962,7 @@ local foundSinglePlayer = {}
 local presetChoice
 local elapsed_Time = CampTotalTimeS								--elapsed time since campaign start in seconds
 local debugTxt = ""
-local debugWeather = true
+local debugWeather = false
 local debugChoice
 local showOne = false
 local showOneNight = true
@@ -1448,9 +1448,9 @@ local weather = generateDCSweather( )
 
 mission["weather"] = weather
 
-_affiche(weather, "weather: ")
+-- _affiche(weather, "weather: ")
 
-os.execute 'pause'
+-- os.execute 'pause'
 
 --###################################################################
 ----- debut old weather -----

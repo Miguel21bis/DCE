@@ -578,14 +578,33 @@ end
 ---- function to get sidenumbers -----
 local sidenumbers = {}
 
-function GetSidenumber(squadron, lower, upper, nUnit, player, type)				--not local, also used in DC_StaticAircraft
+-- function GetSidenumber(squadron, lower, upper, nUnit, player, type)				--not local, also used in DC_StaticAircraft
+function GetSidenumber(flight, nUnit)				--not local, also used in DC_StaticAircraft
+	
+	local squadron = flight.name
+	local lower = flight.sidenumber and flight.sidenumber[1] or nil
+	local upper = flight.sidenumber and flight.sidenumber[2] or nil
+	local player = flight.player
+	local type = flight.type
+	
+	local s 																		--new sidenumber
+	local counter = 0
+
+	if player and mission_ini.persistentAircraft and mission_ini.persistentAircraft ~= "" then
+		return mission_ini.persistentAircraft
+	end
+
+	if not lower or upper then
+		s = math.random(1, 99)										--us a random number
+		s = string.format("%03d", s)
+		return tostring(s)
+	end
 	if sidenumbers[squadron] == nil then										--sidenumber squadron entry does not exist
 		sidenumbers[squadron] = {}												--create sidenumber squadron entry
 	end
 	local upperNum = tonumber(upper)
 	local lowerNum = tonumber(lower)
-	local s 																		--new sidenumber
-	local counter = 0
+
 
 	--cherche si le joueur fait partie de cet escadron
 	local reservedDigit = 0
@@ -4829,14 +4848,16 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 
 					end
+					
+					units[n]["onboard_num"] = GetSidenumber(flight[f], n)	--get new sidenumber
 
-					if flight[f].sidenumber and flight[f].sidenumber[1] and flight[f].sidenumber[2] then		--squadron has sidenumbers defined
-						units[n]["onboard_num"] = GetSidenumber(flight[f].name, flight[f].sidenumber[1], flight[f].sidenumber[2],n , flight[f].player, flight[f].type)	--get new sidenumber
-					else																						--squadron has no sidenumbers defined
-						-- units[n]["onboard_num"] = "0" .. math.random(1, 99)										--us a random number
-						units[n]["onboard_num"] = math.random(1, 99)										--us a random number
-						units[n]["onboard_num"] = string.format("%03d", units[n]["onboard_num"])
-					end
+					-- if flight[f].sidenumber and flight[f].sidenumber[1] and flight[f].sidenumber[2] then		--squadron has sidenumbers defined
+					-- 	units[n]["onboard_num"] = GetSidenumber(flight[f].name, flight[f].sidenumber[1], flight[f].sidenumber[2],n , flight[f].player, flight[f].type)	--get new sidenumber
+					-- else																						--squadron has no sidenumbers defined
+					-- 	-- units[n]["onboard_num"] = "0" .. math.random(1, 99)										--us a random number
+					-- 	units[n]["onboard_num"] = math.random(1, 99)										--us a random number
+					-- 	units[n]["onboard_num"] = string.format("%03d", units[n]["onboard_num"])
+					-- end
 
 					--multiple skins for aircraft
 					if flight[f].liveryModex then
@@ -4866,6 +4887,15 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								--règle la/les valeurs des variables de vitesse d'alignement dans la table AddPropAircraft 
 								for key, value in pairs(Data_divers[flight[f].type].alignment_PropAircraft[mission_ini.alignment_Mode]) do
 									units[n]["AddPropAircraft"][key] = value
+								end
+							end
+							-- print("AtoFp AddPropAircraft for ".." type "..flight[f].type.." flight[f].player "..tostring(flight[f].player).." mission_ini.persistentAircraft "..tostring(mission_ini.persistentAircraft) )
+							if flight[f].type == "F-4E-45MC" and flight[f].player and mission_ini.persistentAircraft and mission_ini.persistentAircraft ~= "" then
+								-- print("AtoFp AddPropAircraft PASSE A SinglePlayer: "..tostring(SinglePlayer))
+								if SinglePlayer and flight[f].player and not SingleWithDServer and n == 1 then
+									units[n]["AddPropAircraft"]["PersistentAircraftKey"] = mission_ini.persistentAircraft
+									units[n]["AddPropAircraft"]["UseReferenceAircraft"] = 2
+									-- print("AtoFp AddPropAircraft PASSE B ")
 								end
 							end
 						else

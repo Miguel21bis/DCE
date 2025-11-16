@@ -105,7 +105,7 @@ mission_ini_check = {
 
 	--***aircraft mod option***
 	--***F-4E option***
-	persistentAircraft = true,					-- (true/false/string(021))	[default: true]		true: damaged with skin and tailNumber, string: damaged whith key (ex: "021"), false: no persistent aircraft
+	persistentAircraft = "",					-- (number(exemple: "021"))	[default: ""]		number: damaged whith key (ex: "021"), false: no persistent aircraft
 
 
 }
