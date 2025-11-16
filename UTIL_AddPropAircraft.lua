@@ -76,13 +76,11 @@ Data_AddPropAircraft = {
 		["TacanBand"] = 0,
 		["TacanChannel"] = 0,
 		["VORILSFrequencyMHZ"] = 108,
-		["Quality"] = 100,
 		["ChaffDoubleDispense"] = false,
 		["INSAlignmentStored"] = false,
 		["KY28Key"] = 1,
 		["VORILSFrequencyDecimalMHZ"] = 0,
-		["UseReferenceAircraft"] = false,
-		["Wear"] = 0,
+
 		["IffMode2Digit1"] = 0,
 		["IffMode2Digit2"] = 0,
 		["IffMode2Digit3"] = 0,
@@ -94,11 +92,14 @@ Data_AddPropAircraft = {
 		["IsNvgAllowed"] = true,
 
 
+		["UseReferenceAircraft"] = 2,		--0 random/default? (Quality & Wear variable is used); 1 reference aircraft (the Best); 2 persistent (Enables the aircraft persistence system, Quality & Wear disabled)
 		["PersistentAircraftKey"] = "",
+		["Quality"] = 85,					--aircraft condition 
+		["Wear"] = 15,						--Aircraft Wear and Tear
+
 		["IsEfbAllowed"] = true,
 		["IsModifiedJesterAllowed"] = true,
-		-- ["UseReferenceAircraft"] = 0,
-		["CombatTreeSpoofable"] = 0, --0 (none),1(historical),2(all)
+		["CombatTreeSpoofable"] = 2, --0 (none),1(historical),2(all)
 
 		
 	},
