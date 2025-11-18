@@ -523,7 +523,7 @@ for sideName, units in pairs(oob_air) do
 	if units then
 
 		for unitN, unit in pairs(units) do
-			local overRideMP_A = false
+			local overideMP_A = false
 
 			if unit.inactive and unit.player then
 				print("AtoG attention, the player's squad is inactive. Activate it via DCE_Manager or directly in Init\\oob_air and Active\\oob_air ") os.execute 'pause'
@@ -552,7 +552,7 @@ for sideName, units in pairs(oob_air) do
 
 
 					local overRideReady = false
-					if multiPlaneSet and  multiPlaneSet[sideName] and  multiPlaneSet[sideName][unit.type] then
+					if multiPlaneSet and multiPlaneSet[sideName] and  multiPlaneSet[sideName][unit.type] then
 						if unit.roster.ready < multiPlaneSet[sideName][unit.type].InitNbPlane then
 							unit.roster.ready = multiPlaneSet[sideName][unit.type].InitNbPlane + 1
 							if isDebugModeA then
@@ -966,7 +966,7 @@ for sideName, units in pairs(oob_air) do
 																		TrackPlayability(unit.player, "target")																							--track playabilty criterium has been met
 
 																		if isDebugModeA then
-																			debugLog(draftId.." AtoG passe A_11 overRideMP_A? "..tostring(overRideMP_A).." Befor firepower Condition".." || "..target_name
+																			debugLog(draftId.." AtoG passe A_11 overRideMP_A? "..tostring(overideMP_A).." Befor firepower Condition".." || "..target_name
 																			.." "..unit.type
 																			.." firepower.min? "..target.firepower.min
 																			.." <= aircraft_available: ".. aircraft_available
@@ -974,7 +974,7 @@ for sideName, units in pairs(oob_air) do
 																			)
 																		end
 
-																		if target.firepower.min <= aircraft_available * unit_loadouts[l].firepower or overRideMP_A then				--enough aircraft are available to satisfy minimum firepower requirement of target	
+																		if target.firepower.min <= aircraft_available * unit_loadouts[l].firepower or overideMP_A then				--enough aircraft are available to satisfy minimum firepower requirement of target	
 
 																			if isDebugModeA then
 																				debugLog(draftId.." AtoG passe A_12  Befor weather Condition || overRideReady: "..tostring(overRideReady).." || "..target_name)
@@ -1274,7 +1274,7 @@ for sideName, units in pairs(oob_air) do
 																							if remainingFirepower < 0 then remainingFirepower = 0 end
 
 																							local debugMulti = ""
-																							overRideMP_A = false
+																							overideMP_A = false
 
 
 																							-- modification M11.o multiplayer
@@ -1287,14 +1287,14 @@ for sideName, units in pairs(oob_air) do
 																										debugMulti = debugMulti.."\n"..("AtoG passe A_AAe Multi.Target[side] "..tostring(Multi.Target[sideName]) .. " ==? target_name? " .. tostring(target_name))
 																										if Multi.Target[sideName] == target_name  then
 																											debugMulti = debugMulti.."\n"..("AtoG passe A_AAf Multi.Target[side] "..tostring(Multi.Target[sideName]) .. " ==? target_name? " .. tostring(target_name).." "..unit.type.." "..tostring(task))
-																											overRideMP_A = true
+																											overideMP_A = true
 																										end
 																									else
 																										debugMulti = debugMulti.."\n"..("AtoG passe A_AAg  " .. " ==? target_name? " .. tostring(target_name).." "..unit.type.." "..tostring(task))
 
 																										Multi.Target = {}
 																										Multi.Target[sideName] = target_name
-																										overRideMP_A = true
+																										overideMP_A = true
 																									end
 
 																									--TODO a regarder si c'etait utile
@@ -1303,7 +1303,7 @@ for sideName, units in pairs(oob_air) do
 																									end
 
 																									--M11.z
-																									if overRideMP_A and aircraft_assign < multiPlaneSet[sideName][unit.type][task].NbPlane then
+																									if overideMP_A and aircraft_assign < multiPlaneSet[sideName][unit.type][task].NbPlane then
 																										aircraft_assign = multiPlaneSet[sideName][unit.type][task].NbPlane
 																										debugMulti = debugMulti.."\n"..("AtoG passe A_AAh "..unit.type.." aircraft_assign: "..tostring(aircraft_assign))
 																									end
@@ -1330,7 +1330,7 @@ for sideName, units in pairs(oob_air) do
 
 																								if isDebugModeA then
 																									debugLog(draftId.." AtoG passe A_30a "..idTemp.." clientPlayer: "..tostring(clientPlayer) .. " overRideMP_A: "
-																									.. tostring(overRideMP_A).." idTemp: "..tostring(idTemp).." aircraft_assign: "..tostring(aircraft_assign).." |Nb Draft "..tostring(#draftSorties[sideName]))
+																									.. tostring(overideMP_A).." idTemp: "..tostring(idTemp).." aircraft_assign: "..tostring(aircraft_assign).." |Nb Draft "..tostring(#draftSorties[sideName]))
 																								end
 
 																								local draftSortiesEntry = {
@@ -1374,7 +1374,7 @@ for sideName, units in pairs(oob_air) do
 																									threatsAir = route.threats.air_total,
 																									id = "DraftId"..draftId.."_id"..#draftSorties[sideName]+1,
 																									rejected = {},
-																									mainOverRideMP = overRideMP_A,
+																									main_overideMP = overideMP_A,
 																									remainingFirepower = remainingFirepower,
 																									multiPlaneSet_B  = multiPlaneSet,
 
@@ -1440,7 +1440,6 @@ for sideName, units in pairs(oob_air) do
 																									end
 
 																									if not  unit.tasksCoefPourcent or buildCoef then
-
 
 																										local minValue = 999999
 																										local maxValue = -999999
@@ -1537,7 +1536,7 @@ for sideName, units in pairs(oob_air) do
 																								if multiPlaneSet[sideName] and  multiPlaneSet[sideName][unit.type] and  multiPlaneSet[sideName][unit.type][task] and task_bool and  multiPlaneSet[sideName][unit.type][task].NbPlane > 0 then
 																									draftSortiesEntry.score = draftSortiesEntry.score + 1000
 																									draftSortiesEntry.scoreAdd =  draftSortiesEntry.scoreAdd + 1000
-																									if overRideMP_A then
+																									if overideMP_A then
 
 																										-- draftSortiesEntry.score = draftSortiesEntry.score * 2 +1000
 																										-- draftSortiesEntry.scoreCoef =  draftSortiesEntry.scoreCoef * 2
@@ -1611,7 +1610,7 @@ for sideName, units in pairs(oob_air) do
 
 																								if task == "AWACS" or task == "Refueling" or task == "AFAC"  then--task == "CAP" or
 																									aircraft_assign = aircraft_assign - 1													--make additional draft sortie for lesser amount of aircraft
-																								elseif overRideMP_A then
+																								elseif overideMP_A then
 																									aircraft_assign = aircraft_assign - 4
 																								else
 																									aircraft_assign = 0																		--do not make additional draft sorties
@@ -1699,7 +1698,7 @@ if Debug.Generator.affiche then
 						" /Task/ "..draft.task..
 						" /Target/ "..draft.target_name..
 						" /Sead_Of/ "..tostring(draft.route.threats.SEAD_offset)..
-						" /mainOverRideMP/ " ..tostring(draft.mainOverRideMP)..
+						" /main_overideMP/ " ..tostring(draft.main_overideMP)..
 						" /remainingFirepower/ " ..draft.remainingFirepower..
 						" /multipack/ " ..draft.multipack
 
@@ -1829,24 +1828,24 @@ for sideName, draftT in pairs(draftSorties) do
 		local remain_air_total = draft.route.threats.air_total
 
 		for side, units in pairs(oob_air) do
-			local NbTotalSupport = {}
+			-- local NbTotalSupport = {}
 
 			if units and units ~= nil then
 				for unitN, unit in pairs(units) do
 
-					local overRideMP_B = false
+					local overideMP_B = false
 
-					if draft.mainOverRideMP or (multiPlaneSet[side] and multiPlaneSet[side][unit.type]) then
-						overRideMP_B = true
-					else
-						overRideMP_B = false
-					end
+					-- if draft.main_overideMP or (multiPlaneSet[side] and multiPlaneSet[side][unit.type]) then
+					-- 	overideMP_B = true
+					-- else
+					-- 	overideMP_B = false
+					-- end
 
 					-- if side == sideName and unit.inactive ~= true and db_airbases[unit.base] and db_airbases[unit.base].inactive ~= true and ( overRideMP_B or (AcftAvail[unit.name] and AcftAvail[unit.name].available > 0))  and db_airbases[unit.base].x  then	--if unit is active, its base is active and has available aircraft -- ATO_G_debug01 Fin de campagne					
 					if side == sideName and unit.inactive ~= true and db_airbases[unit.base] and db_airbases[unit.base].inactive ~= true and (  (AcftAvail[unit.name] and AcftAvail[unit.name].available > 0))  and db_airbases[unit.base].x  then	--if unit is active, its base is active and has available aircraft -- ATO_G_debug01 Fin de campagne					
 
 						if isDebugModeB then
-							debugLog(draft.id.." AtoG II pass B_02_a draft.: "..draft.type.." OOBunit: "..unit.type.." overRideMP_B?: "..tostring(overRideMP_B) .." "..tostring(draft.score))
+							debugLog(draft.id.." AtoG II pass B_02_a draft.: "..draft.type.." OOBunit: "..unit.type.." overRideMP_B?: "..tostring(overideMP_B) .." "..tostring(draft.score))
 						end
 
 						for task, task_bool in pairs(unit.tasks) do											--iterate through all tasks of unit
@@ -1856,22 +1855,22 @@ for sideName, draftT in pairs(draftSorties) do
 								debugLog(draft.id.." AtoG II pass B_03 task.: "..tostring(task).." task_bool: "..tostring(task_bool) .." |score: "..tostring(draft.score))
 							end
 
-							if overRideMP_B or( multiPlaneSet[side] and multiPlaneSet[side][unit.type] and multiPlaneSet[side][unit.type][task] and task_bool) then
+							if overideMP_B or( multiPlaneSet[side] and multiPlaneSet[side][unit.type] and multiPlaneSet[side][unit.type][task] and task_bool) then
 
-								overRideMP_B = true
+								overideMP_B = true
 
 								if not Multi.Target and draft.task ~= "SAR" and draft.task ~= "CAP" then
 									Multi.Target = {}
 									Multi.Target[side] = draft.target_name
-									overRideMP_B = true
+									overideMP_B = true
 
 									if isDebugModeB then
-										debugLog(draft.id.." AtoG II pass B_04 draft.: "..draft.type.." OOBunit: "..unit.type.." overRideMP_B?: "..tostring(overRideMP_B) .." |score: "..tostring(draft.score))
+										debugLog(draft.id.." AtoG II pass B_04 draft.: "..draft.type.." OOBunit: "..unit.type.." overRideMP_B?: "..tostring(overideMP_B) .." |score: "..tostring(draft.score))
 									end
 								end
 
 							else
-								overRideMP_B = false
+								overideMP_B = false
 							end
 
 							local temp_Draft_sorties = {}														--temporary table to hold additional draft sorties with escorts assigned
@@ -1955,7 +1954,7 @@ for sideName, draftT in pairs(draftSorties) do
 									end
 
 									if isDebugModeB then
-										debugLog(draft.id.." AtoG II pass B_06 tot_from: "..tot_from.." tot_to: "..tot_to.." overRideMP_B: "..tostring(overRideMP_B) .." |score: "..tostring(draft.score))
+										debugLog(draft.id.." AtoG II pass B_06 tot_from: "..tot_from.." tot_to: "..tot_to.." overRideMP_B: "..tostring(overideMP_B) .." |score: "..tostring(draft.score))
 									end
 
 									--**cet overRideMP_B donne trop d'avion
@@ -1967,9 +1966,9 @@ for sideName, draftT in pairs(draftSorties) do
 										-- if not draft.support[task]["escort_max"] then draft.support[task]["escort_max"] = campMod.Setting_Generation.limit_escort end
 										if not draft.support[task]["escort_max"] then draft.support[task]["escort_max"] = 999 end
 
-										local MP_Game = false
+										local overideMP_B_targetName = false
 										--TODO virer MP_Game des que possible, doublon/triplon etc...
-										MP_Game = overRideMP_B
+										overideMP_B_targetName = Deepcopy(overideMP_B)
 										
 										if multiPlaneSet then
 											if multiPlaneSet[side] and multiPlaneSet[side][unit.type] and multiPlaneSet[side][unit.type][task] then
@@ -1981,7 +1980,7 @@ for sideName, draftT in pairs(draftSorties) do
 												if Multi.Target and Multi.Target[side] and Multi.Target[side] == draft.target_name then
 
 													if draft.task ~= "SAR" then
-														MP_Game = true
+														overideMP_B_targetName = true
 													end
 
 
@@ -2041,10 +2040,10 @@ for sideName, draftT in pairs(draftSorties) do
 
 
 											if isDebugModeB then
-												debugLog(draft.id.." AtoG II pass B_15 threats.SEAD_offset?: "..tostring(draft.route.threats.SEAD_offset).." threats.air_total?: "..tostring(draft.route.threats.air_total).." "..unit.type.." MP_Game: "..tostring(MP_Game) .." |score: "..tostring(draft.score))
+												debugLog(draft.id.." AtoG II pass B_15 threats.SEAD_offset?: "..tostring(draft.route.threats.SEAD_offset).." threats.air_total?: "..tostring(draft.route.threats.air_total).." "..unit.type.." MP_Game: "..tostring(overideMP_B_targetName) .." |score: "..tostring(draft.score))
 											end
 
-											if support_requirement or MP_Game then																	--go ahead with this support task
+											if support_requirement or overideMP_B_targetName then																	--go ahead with this support task
 												if isDebugModeB then
 													debugLog(tostring(draft.id).." AtoG II pass B_15b support_requirement passe: " .." |score: "..tostring(draft.score))
 												end
@@ -2070,7 +2069,7 @@ for sideName, draftT in pairs(draftSorties) do
 														debugLog(draft.id.." AtoG II pass B_15d support_requirement passe: " .." |score: "..tostring(draft.score))
 													end
 
-													if unit_loadouts[l].vCruise >= draft.loadout.vCruise or overRideMP_B then										--support has a cruise speed equal or higher than main body
+													if unit_loadouts[l].vCruise >= draft.loadout.vCruise or overideMP_B_targetName then										--support has a cruise speed equal or higher than main body
 														TrackPlayability(unit.player, "escort_target")													--track playabilty criterium has been met
 
 														local debuGenTxt1480 = "\n"..(tostring(draft.id).." AtoG II pass B_15e support_requirement passe: " .." |score: "..tostring(draft.score))
@@ -2111,11 +2110,11 @@ for sideName, draftT in pairs(draftSorties) do
 														or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
 														then
 															-- debuGenTxt = debuGenTxt..debuGenTxt1480.."\n"..(tostring(draft.id).." AtoG II pass B_15e support_requirement passe: weather_eligible "..tostring(weather_eligible).." overRideMP_B "..tostring(overRideMP_B))
-															debugLog(debuGenTxt1480.."\n"..(tostring(draft.id).." AtoG II pass B_15e support_requirement passe: weather_eligible "..tostring(weather_eligible).." overRideMP_B "..tostring(overRideMP_B)) .." |score: "..tostring(draft.score))
+															debugLog(debuGenTxt1480.."\n"..(tostring(draft.id).." AtoG II pass B_15e support_requirement passe: weather_eligible "..tostring(weather_eligible).." overRideMP_B "..tostring(overideMP_B)) .." |score: "..tostring(draft.score))
 															
 														end
 
-														if weather_eligible or overRideMP_B then												--continue of this loadout is eligible for weather
+														if weather_eligible or overideMP_B_targetName then												--continue of this loadout is eligible for weather
 
 															TrackPlayability(unit.player, "escort_weather")												--track playabilty criterium has been met								
 															--get airbase position
@@ -2201,7 +2200,7 @@ for sideName, draftT in pairs(draftSorties) do
 																	escort_num = 1																	--flare illumination by single aircraft
 																elseif task == "Laser Illumination" then
 																	escort_num = 1																	--laser illumination by single aircraft
-																elseif task == "Strike" and not overRideMP_B then
+																elseif task == "Strike" and not overideMP_B_targetName then
 																	-- escort_num = 4
 																	escort_num = draft.remainingFirepower / unit_loadouts[l].firepower
 																elseif task == "Strike"  then
@@ -2369,7 +2368,7 @@ for sideName, draftT in pairs(draftSorties) do
 																		tot_from = draft.tot_from,
 																		tot_to = draft.tot_to,
 																		rejected = {},
-																		overRideMP_B = overRideMP_B,
+																		overideMP_B_targetName = overideMP_B_targetName,
 																		priorityIni = draft.priorityIni,
 																		support_requirement = support_requirement,
 																	}
@@ -2428,7 +2427,7 @@ for sideName, draftT in pairs(draftSorties) do
 																	testScore = draft.score * draft.scoreCoef
 																	testScore = draft.score + draft.scoreAdd
 
-																	if overRideMP_B then
+																	if overideMP_B_targetName then
 																		if testScore > draft.score then
 																			draft.score = testScore
 																		end
@@ -2521,7 +2520,7 @@ if Debug.Generator.affiche then
 						" /Task/ "..draft.task..
 						" /Target/ "..draft.target_name..
 						" /Sead_Of/ "..tostring(draft.route.threats.SEAD_offset)..
-						" /mainOverRideMP/ " ..tostring(draft.mainOverRideMP)..
+						" /main_overideMP/ " ..tostring(draft.main_overideMP)..
 						" /loadout/ "..tostring(draft.loadout.loadout_name)
 						)
 
@@ -2540,7 +2539,7 @@ if Debug.Generator.affiche then
 									" /Task/ "..task.task..
 									" /NbTotSupt/ " ..tostring(task.NbTotalSupport)..
 									" /Target/ "..task.target_name..
-									" /overRideMP_B/ "..tostring(task.overRideMP_B)..
+									" /overideMP_B_targetName/ "..tostring(task.overideMP_B_targetName)..
 									" /loadout/ "..tostring(task.loadout.loadout_name)
 									)
 						end
@@ -2616,14 +2615,14 @@ local function createATO_table(draftPriority)
 										debugLog(draft.id.." AtoG passe C_00_b  ".." "..draft.type
 											.." available: "..tostring(available)
 											.." < NbPlane? ".. tostring(multiPlaneSet[side][draft.type][draft.task].NbPlane)
-											.." mainOverRideMP?: "..tostring(draft.mainOverRideMP)
-											.." overRideMP_B?: "..tostring(draft.overRideMP_B))
+											.." main_overideMP?: "..tostring(draft.main_overideMP)
+											.." overideMP_B_targetName?: "..tostring(draft.overideMP_B_targetName))
 									end
 
-									if (draft.flights == nil or draft.number <= available or draft.mainOverRideMP) and limitMP then											--for targets with station time (multiple flights), continue only if sufficient aircraft are availabe. Additional lower scored sorties with less airctaft required will come later 
+									if (draft.flights == nil or draft.number <= available or draft.main_overideMP) and limitMP then											--for targets with station time (multiple flights), continue only if sufficient aircraft are availabe. Additional lower scored sorties with less airctaft required will come later 
 
 										--adjust the number of requested aircraft to the number of available aircraft
-										if draft.number > available and not draft.mainOverRideMP then
+										if draft.number > available and not draft.main_overideMP then
 
 											draft.number = available
 
@@ -2746,7 +2745,7 @@ local function createATO_table(draftPriority)
 
 													for taskLearning, value in pairs(targetTask.tasks) do
 
-														local NbTotPlanePerTask = 0
+														local nbTotPlanePerTask = 0
 
 														for supportTask, supportPart in pairs(draft.support) do
 
@@ -2771,8 +2770,8 @@ local function createATO_table(draftPriority)
 
 																		if type(support) == "table" and draft_availability[support.name] then
 
-																			if support.overRideMP_B then
-																				NbTotPlanePerTask = 9999
+																			if support.overideMP_B_targetName then
+																				nbTotPlanePerTask = 9999
 																			else
 
 																				--enleve le nombre de plane du main si le meme type de plane est compté pour le support
@@ -2787,22 +2786,22 @@ local function createATO_table(draftPriority)
 																				tempInfo = tempInfo .."\n AtoG NbTotPlanePerTask BB "..supportTask.." ".._plane.." "..support.name.." Need "..support.number.." Dispo: "..draft_availability[support.name].unassigned
 
 																				if draft_availability[support.name].unassigned >= 0 then
-																					NbTotPlanePerTask = NbTotPlanePerTask + support.number
+																					nbTotPlanePerTask = nbTotPlanePerTask + support.number
 
-																					tempInfo = tempInfo .."\nAtoG NbTotPlanePerTask CC "..supportTask.." NbTotPlanePerTask: "..NbTotPlanePerTask
+																					tempInfo = tempInfo .."\nAtoG NbTotPlanePerTask CC "..supportTask.." NbTotPlanePerTask: "..nbTotPlanePerTask
 																				end
 																			end
 																		end
 																	end
 																end
-																if taskRequireInSide and NbTotPlanePerTask < 2 and not draft.overRideMP_B then
+																if taskRequireInSide and nbTotPlanePerTask < 2 and not draft.overideMP_B_targetName then
 																	support_available = false
 
 																	tempInfo = tempInfo .."\nAtoG NbTotPlanePerTask REJETE DD "
 
 																	local tabRejected = {}
 																	tabRejected["sujet"]  = draft.id.." "..supportTask.." newTaskPerTarget  AVION TOTAL SUPPORT INSUFFISANT NbTotPlanePerTask <= 0 "
-																	tabRejected["cause"] = { [1] = NbTotPlanePerTask, [2] = "newTaskPerTarget", }
+																	tabRejected["cause"] = { [1] = nbTotPlanePerTask, [2] = "newTaskPerTarget", }
 																	-- tabRejected["ligne"]  = debug.getinfo(1).currentline
 																	tabRejected["ligne"]  = SafeGetLine()
 																	table.insert(draft["rejected"], tabRejected)
@@ -2814,7 +2813,7 @@ local function createATO_table(draftPriority)
 															-- 	if type(supportPart) == "table" then	
 															-- 		for _plane, support in pairs(supportPart) do
 
-															-- 			if type(support) == "table" and not support.overRideMP_B then
+															-- 			if type(support) == "table" and not support.overideMP_B_targetName then
 
 															-- 				draft_availability[support.name].unassigned = draft_availability[support.name].unassigned - support.number
 
@@ -2843,7 +2842,7 @@ local function createATO_table(draftPriority)
 										end
 
 										--TODO bizarre, il s agit du nb d avion du main, pas du support
-										-- if not draft.mainOverRideMP then
+										-- if not draft.main_overideMP then
 											for unitname,_ in pairs(need) do
 													if need[unitname] > avail[unitname] then																						--more aircraft are needed from this unit across all package tasks than are available
 													support_available = false																									--not enough support available
@@ -2870,7 +2869,7 @@ local function createATO_table(draftPriority)
 														debugLog(draft.id.." ".." AtoG III passe SWE _01 "..draft.type.." "..squad.type)
 													end
 
-													if draft.mainOverRideMP or ((squad.tasks["Anti-ship Strike"]  or squad.tasks["Strike"] ) and squad.type == draft.type) then
+													if draft.main_overideMP or ((squad.tasks["Anti-ship Strike"]  or squad.tasks["Strike"] ) and squad.type == draft.type) then
 														local needSupport = {}																														--collect the total number of aircraft needed from each unit to complete the package																							--number of main body aircraft 
 														local availSupport = {}																													--collect the maximal number of available aircraft from this unit (biggest number of all tasks)
 
@@ -2970,7 +2969,7 @@ local function createATO_table(draftPriority)
 											end
 										end
 
-										if support_available and not draft.mainOverRideMP and mission_ini.strikeOnlyWithEscorte then
+										if support_available and not draft.main_overideMP and mission_ini.strikeOnlyWithEscorte then
 
 											local tracing = false
 											local txtTracing = ""
@@ -3100,15 +3099,15 @@ local function createATO_table(draftPriority)
 
 										--si c'est un task d'une demande MP, on chunte la restrition plus loin
 										local override_MP_C  = false
-										if multiPlaneSet[side] and multiPlaneSet[side][draft.type] and multiPlaneSet[side][draft.type][draft.task]
-											-- and support.number < AcftAvail[support.name].unassigned
-										then
-											override_MP_C = true
+										-- if multiPlaneSet[side] and multiPlaneSet[side][draft.type] and multiPlaneSet[side][draft.type][draft.task]
+										-- 	-- and support.number < AcftAvail[support.name].unassigned
+										-- then
+										-- 	override_MP_C = true
 
-											if isDebugModeC then
-												debugLog(draft.id.." AtoG passe C_02a "..draft.type.." "..draft.task )
-											end
-										end
+										-- 	if isDebugModeC then
+										-- 		debugLog(draft.id.." AtoG passe C_02a "..draft.type.." "..draft.task )
+										-- 	end
+										-- end
 										-- print("AtoG SAR/CSAR passe : AtoG passe C_02a type: "..draft.type.." ,task: "..draft.task.." ,override_MP_C: "..tostring(override_MP_C))
 														
 
@@ -3475,7 +3474,7 @@ local function createATO_table(draftPriority)
 																number = support.number
 															end
 
-															if support.overRideMP_B and multiPlaneSet[side] and multiPlaneSet[side][support.type] and multiPlaneSet[side][support.type][support.task] and multiPlaneSet[side][support.type][support.task].NbPlane then
+															if support.overideMP_B and multiPlaneSet[side] and multiPlaneSet[side][support.type] and multiPlaneSet[side][support.type][support.task] and multiPlaneSet[side][support.type][support.task].NbPlane then
 																-- number = support.number
 																number = multiPlaneSet[side][support.type][support.task].NbPlane
 															end
@@ -3491,7 +3490,7 @@ local function createATO_table(draftPriority)
 														else
 															-- if type(support) ~= "table" then
 															-- 	txt0 = "support != table "
-															-- 		.." OveRide?: "..tostring(draft.mainOverRideMP)
+															-- 		.." OveRide?: "..tostring(draft.main_overideMP)
 															-- 		.." type: "..tostring(draft.type)
 															-- 		.." key: "..tostring(_plane)
 															-- 		.." supportPart(_plane): "..tostring(supportPart[_plane]) 
@@ -3511,7 +3510,7 @@ local function createATO_table(draftPriority)
 
 
 															-- txt0 = draft.id.." IN AddFlight: type(support) ~= table or support_name "
-															-- 	.." OveRide?: "..tostring(draft.mainOverRideMP)
+															-- 	.." OveRide?: "..tostring(draft.main_overideMP)
 															-- 	.." "..tostring(draft.type) 
 															-- 	.." support_name: "..tostring(support_name)
 															-- 	-- .."\n".. TableSerialization(draft.loadout, 0)  
