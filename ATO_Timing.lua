@@ -867,56 +867,158 @@ end
 
 
 
-for side, pack in pairs(ATO) do
-	for p = 1, #pack do
-		for role, flight in pairs(pack[p]) do
-			for f = 1, #flight do
-				-- print()
-				for u = 1, flight[f].number do
+-- for side, pack in pairs(ATO) do
+-- 	for p = 1, #pack do
+-- 		for role, flight in pairs(pack[p]) do
+-- 			for f = 1, #flight do
+-- 				-- print()
+-- 				for u = 1, flight[f].number do
 
-					if not flight[f] or not flight[f].route[1] or not flight[f].route[1].eta then
-						_affiche(flight, "flight[f].route[1].eta")
-					end
+-- 					if not flight[f] or not flight[f].route[1] or not flight[f].route[1].eta then
+-- 						_affiche(flight, "flight[f].route[1].eta")
+-- 					end
 
-					local operating_hours = 86400
-					local time_to_next_mission = operating_hours / flight[f].loadout.sortie_rate	--time duration until aircraft can do the next mission based on its sortie rate
+-- 					local operating_hours = 86400
+-- 					local time_to_next_mission = operating_hours / flight[f].loadout.sortie_rate	--time duration until aircraft can do the next mission based on its sortie rate
 
-					-- if entry.loadout.tStation and #ATO[side][pack_n][role] == 1 then			--for a flight that has a station time and for the first flight in package
-					-- 	time_to_next_mission = time_to_next_mission - entry.loadout.tStation	--remove station time from time to next mission, because flight could airstart current mission at close to end of its station time
-					-- end
+-- 					-- if entry.loadout.tStation and #ATO[side][pack_n][role] == 1 then			--for a flight that has a station time and for the first flight in package
+-- 					-- 	time_to_next_mission = time_to_next_mission - entry.loadout.tStation	--remove station time from time to next mission, because flight could airstart current mission at close to end of its station time
+-- 					-- end
 
-					local flightStartTime_hour = (CampTotalTimeS / 3600) + (flight[f].route[1].eta / 3600)
-					local flightEndTime_hour = (CampTotalTimeS / 3600) + (flight[f].route[#flight[f].route].eta / 3600)
+-- 					local flightStartTime_hour = (CampTotalTimeS / 3600) + (flight[f].route[1].eta / 3600)
+-- 					local flightEndTime_hour = (CampTotalTimeS / 3600) + (flight[f].route[#flight[f].route].eta / 3600)
 
-					--temps calculé par sortie_rate:
-					local nextRate = flightStartTime_hour + time_to_next_mission
+-- 					--temps calculé par sortie_rate:
+-- 					local nextRate = flightStartTime_hour + time_to_next_mission
 
-					-- --temps de remise en oeuvre:
-					-- local remiseEnOeuvre = math.random(1800, 14400)/3600
-					-- local downtime_hour = flightEndTime_hour + remiseEnOeuvre
+-- 					-- --temps de remise en oeuvre:
+-- 					-- local remiseEnOeuvre = math.random(1800, 14400)/3600
+-- 					-- local downtime_hour = flightEndTime_hour + remiseEnOeuvre
 
-					--temps de remise en oeuvre:
+-- 					--temps de remise en oeuvre:
 
-					local downtime_hour = flightEndTime_hour
-					if downtime_hour < nextRate then
-						downtime_hour = nextRate
-					end
+-- 					local downtime_hour = flightEndTime_hour
+-- 					if downtime_hour < nextRate then
+-- 						downtime_hour = nextRate
+-- 					end
 
-					if (flight[f].task == "Refueling" or flight[f].task == "AWACS") then
-						if downtime_hour < ((CampTotalTimeS  + mission_ini.idle_time_min)/ 3600 ) then
-							table.insert(AcftAvail[flight[f].name].unavailable, downtime_hour)
-						else
-							-- print("AtoT AcftAvail _______Refueling__AWACS____*******_______________ dont insert OVERTIME "..flight[f].name.." downtime_hour "..downtime_hour.."******************")
-						end
-					else
-						table.insert(AcftAvail[flight[f].name].unavailable, downtime_hour)						--insert unavailable time into unavailable table of this unit
+-- 					if (flight[f].task == "Refueling" or flight[f].task == "AWACS") then
+-- 						if downtime_hour < ((CampTotalTimeS  + mission_ini.idle_time_min)/ 3600 ) then
+-- 							table.insert(AcftAvail[flight[f].name].unavailable, downtime_hour)
+-- 						else
+-- 							-- print("AtoT AcftAvail _______Refueling__AWACS____*******_______________ dont insert OVERTIME "..flight[f].name.." downtime_hour "..downtime_hour.."******************")
+-- 						end
+-- 					else
+-- 						table.insert(AcftAvail[flight[f].name].unavailable, downtime_hour)						--insert unavailable time into unavailable table of this unit
 					
+-- 					end
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+-- end
+
+for side, pack in pairs(ATO) do
+    for p = 1, #pack do
+        local subPack = pack[p]
+
+        for role, flight in pairs(subPack) do
+            for f = 1, #flight do
+
+                local fl = flight[f]
+
+                ----------------------------------------------------------------
+                -- BLOC DE PROTECTION : si un élément manque, on saute ce flight
+                ----------------------------------------------------------------
+                repeat
+                    if not fl then break end
+                    if not fl.route or not fl.route[1] or not fl.route[#fl.route] then break end
+                    if not fl.route[1].eta or not fl.route[#fl.route].eta then break end
+                    if not fl.loadout or not fl.loadout.sortie_rate then break end
+                    if not fl.name then break end
+                    if not fl.number then break end
+
+                    ----------------------------------------------------------------
+                    -- CALCULS : ici tous les champs sont garantis non-nil
+                    ----------------------------------------------------------------
+
+                    -- local operating_hours = 86400   -- en secondes
+
+                    -- -- temps avant disponibilité, en secondes
+                    -- local time_to_next_mission_s = operating_hours / fl.loadout.sortie_rate
+
+                    -- -- conversion secondes → heures
+                    -- local time_to_next_mission_h = time_to_next_mission_s / 3600
+					-- print("AtoT type: "..tostring(fl.type).." name: "..tostring(fl.name).." sortie_rate: "..tostring(fl.loadout.sortie_rate).." time_to_next_mission_h: "..tostring(time_to_next_mission_h))
+
+                    -- -- heures absolues : CampTotalTimeS est en secondes
+                    -- local flightStartTime_hour = (CampTotalTimeS / 3600) + (fl.route[1].eta / 3600)
+                    -- local flightEndTime_hour   = (CampTotalTimeS / 3600) + (fl.route[#fl.route].eta / 3600)
+
+                    -- -- contrainte sortie_rate
+                    -- local nextRate = flightStartTime_hour + time_to_next_mission_h
+
+                    -- ------------------------------------------------------------
+                    -- -- Calcul downtime (remise en œuvre)
+                    -- ------------------------------------------------------------
+                    -- local downtime_hour = flightEndTime_hour
+                    -- if downtime_hour < nextRate then
+                    --     downtime_hour = nextRate
+                    -- end
+
+					local downtime_hour
+
+					if #fl.route <= 3 then
+						--si vol de type Inter ou SAR, pas de plan de vol complet, on prend donc en compte que le sortie_rate
+						local operating_hours = 86400   -- en secondes
+						local time_to_next_mission_h = operating_hours / fl.loadout.sortie_rate / 3600
+						local flightStartTime_hour = (CampTotalTimeS / 3600) + (fl.route[1].eta / 3600)
+						downtime_hour = flightStartTime_hour + time_to_next_mission_h
+					else
+						-- 1) durée du vol en secondes
+						local flight_duration_s = fl.route[#fl.route].eta - fl.route[1].eta
+						if flight_duration_s < 0 then flight_duration_s = 0 end
+
+						-- 2) durée allouée par sortie (selon sortie_rate)
+						local sortie_time_s = 86400 / fl.loadout.sortie_rate
+
+						-- 3) temps de remise en œuvre = temps alloué - vol réel
+						local turnaround_time_s = sortie_time_s - flight_duration_s
+						if turnaround_time_s < 0 then turnaround_time_s = 0 end
+						print("AtoT type: "..tostring(fl.type).." name: "..tostring(fl.name).." sortie_rate: "..tostring(fl.loadout.sortie_rate).." turnaround_time_s_h: "..tostring(turnaround_time_s/3600))
+
+						-- 4) temps de fin du vol en heures
+						local flightEndTime_hour = (CampTotalTimeS / 3600) + (fl.route[#fl.route].eta / 3600)
+
+						-- 5) downtime = fin du vol + remise en œuvre
+						downtime_hour = flightEndTime_hour + (turnaround_time_s / 3600)
 					end
-				end
-			end
-		end
-	end
+
+                    ------------------------------------------------------------
+                    -- Enregistrement de l'indisponibilité
+                    ------------------------------------------------------------
+
+                    for u = 1, fl.number do
+
+						print("AtoT type: "..tostring(fl.type).." name: "..tostring(fl.name).." sortie_rate: "..tostring(fl.loadout.sortie_rate).." time_to_next_mission_h: "..tostring(downtime_hour))
+
+                        if fl.task == "Refueling" or fl.task == "AWACS" then
+                            local limit = (CampTotalTimeS + mission_ini.idle_time_min) / 3600
+                            if downtime_hour < limit then
+                                table.insert(AcftAvail[fl.name].unavailable, downtime_hour)
+                            end
+                        else
+                            table.insert(AcftAvail[fl.name].unavailable, downtime_hour)
+                        end
+                    end
+
+                until true  -- fin du simulateur de "continue"
+            end
+        end
+    end
 end
+
+
 
 -- --complete unit unavailable table with zero entries for unassigned aircraft
 -- for side,unit in pairs(oob_air) do																					--iterate through all sides

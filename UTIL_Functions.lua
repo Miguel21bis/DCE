@@ -4684,10 +4684,10 @@ function LoadFileAndUpdate(from)
 		end
 
 
-		-- local str = "PersistenceMP_byTask = " .. TableSerialization(PersistenceMP_byTask, 0)						--make a string
-		-- local fileObj = io.open("Debug/PersistenceMP_byTask.lua", "w")  or error("Failed to open debug file")
-		-- fileObj:write(str)																		--save new data
-		-- fileObj:close()
+		local str = "PersistenceMP_byTask = " .. TableSerialization(PersistenceMP_byTask, 0)						--make a string
+		local fileObj = io.open("Debug/PersistenceMP_byTask.lua", "w")  or error("Failed to open debug file")
+		fileObj:write(str)																		--save new data
+		fileObj:close()
 
 		-- os.execute 'pause'
 

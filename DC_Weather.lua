@@ -1117,113 +1117,52 @@ local function generateWindDirection(category, winDirection)
     return math.floor(dir)
 end
 
--- local function generateWind(windActivity, winDir, category)
-
-
--- 	local function randomWind(base, category)
-
--- 		-- Influence de la météo : facteur multiplicatif
--- 		local meteoFactor = 1.0
-
--- 		if category == "high"        then meteoFactor = 0.9 end   -- beau temps → vent un peu réduit
--- 		if category == "warmSector"  then meteoFactor = 1.0 end
--- 		if category == "coldSector"  then meteoFactor = 1.1 end
--- 		if category == "warmFront"   then meteoFactor = 1.3 end
--- 		if category == "lightRain"   then meteoFactor = 1.2 end
--- 		if category == "coldFront"   then meteoFactor = 1.5 end
--- 		if category == "heavyRain"   then meteoFactor = 1.6 end
-
--- 		print("category "..tostring(category).." meteoFactor "..tostring(meteoFactor))
-
--- 		-- base élargie selon météo
--- 		base = base * meteoFactor
-
--- 		-- Random pondéré
--- 		local r = math.random()
-
--- 		if r < 0.70 then
--- 			-- 70% du temps : vent faible ou proche de la consigne
--- 			return math.random() * (base * 2)
-
--- 		elseif r < 0.90 then
--- 			-- 20% : vent modéré
--- 			return base * 2 + math.random() * (base * 2)
-
--- 		else
--- 			-- 10% : vent fort (rare, mais cohérent avec météo)
--- 			return base * 4 + math.random() * (base * 4)
--- 		end
--- 	end
-
-
-
---     ----------------------------------------------------------
---     -- 2. Direction pondérée autour du winDir (inchangé)
---     ----------------------------------------------------------
---     local function driftDir(center, amplitude)
---         local r = math.random()
---         local offset = ((math.random() < 0.5) and -1 or 1) * (r * r) * amplitude
---         local d = (center + offset) % 360
---         if d < 0 then d = d + 360 end
---         return math.floor(d)
---     end
-
-
---     ----------------------------------------------------------
---     -- 3. Construction des trois niveaux de vent
---     ----------------------------------------------------------
---     return {
---         atGround = {
---             speed = randomWind(windActivity, category),
---             dir   = driftDir(winDir, 20)
---         },
---         at2000 = {
---             speed = randomWind(windActivity * 0.9, category),
---             dir   = driftDir(winDir, 12)
---         },
---         at8000 = {
---             speed = randomWind(windActivity * 0.8, category),
---             dir   = driftDir(winDir, 7)
---         }
---     }
--- end
-
 local function generateWind(windActivity, winDir, category)
 
-    category = category or "unknown"   --  évite nil et aide au debug
+    category = category or "unknown"
 
-	print("category A = "..tostring(category))
+    ----------------------------------------------------------
+    -- 1. Meteo → Facteur multiplicateur limité
+    ----------------------------------------------------------
+    local function getMeteoFactor(cat)
+        if cat == "high"        then return 0.9 end
+        if cat == "warmSector"  then return 1.0 end
+        if cat == "coldSector"  then return 1.1 end
+        if cat == "warmFront"   then return 1.2 end
+        if cat == "lightRain"   then return 1.1 end
+        if cat == "coldFront"   then return 1.3 end
+        if cat == "heavyRain"   then return 1.4 end
+        return 1.0
+    end
 
-    local function randomWind(base)
+    local meteoFactor = getMeteoFactor(category)
+    print("Wind category = "..tostring(category).." | meteoFactor = "..meteoFactor)
 
-        local meteoFactor = 1.0
 
-        if category == "high"        then meteoFactor = 0.9 end
-        if category == "warmSector"  then meteoFactor = 1.0 end
-        if category == "coldSector"  then meteoFactor = 1.1 end
-        if category == "warmFront"   then meteoFactor = 1.3 end
-        if category == "lightRain"   then meteoFactor = 1.2 end
-        if category == "coldFront"   then meteoFactor = 1.5 end
-        if category == "heavyRain"   then meteoFactor = 1.6 end
+    ----------------------------------------------------------
+    -- 2. Tire un vent maîtrisé avec maxima stricts
+    ----------------------------------------------------------
+    local function randomWind(base, maxLimit)
 
-        print("category B = "..tostring(category).. " | meteoFactor = "..tostring(meteoFactor))
+        -- influence météo
+        local v = base * meteoFactor
 
-        base = base * meteoFactor
+        -- variation légère ±20%
+        local delta = (math.random() * 0.4) - 0.2      -- -0.2 à +0.2
+        v = v + (v * delta)
 
-        local r = math.random()
+        -- clamp to limits
+        if v > maxLimit then v = maxLimit end
+        if v < 0 then v = 0 end
 
-        if r < 0.70 then
-            return math.random() * (base * 2)
-
-        elseif r < 0.90 then
-            return base * 2 + math.random() * (base * 2)
-
-        else
-            return base * 4 + math.random() * (base * 4)
-        end
+        -- no decimals
+        return math.floor(v)
     end
 
 
+    ----------------------------------------------------------
+    -- 3. Direction (pas modifiée)
+    ----------------------------------------------------------
     local function driftDir(center, amplitude)
         local r = math.random()
         local offset = ((math.random() < 0.5) and -1 or 1) * (r * r) * amplitude
@@ -1233,22 +1172,28 @@ local function generateWind(windActivity, winDir, category)
     end
 
 
+    ----------------------------------------------------------
+    -- 4. Construction du vent (sol → 2000 → 8000)
+    ----------------------------------------------------------
+    local groundWind = randomWind(windActivity, 2)     -- MAX sol = 2 m/s
+    local wind2000   = randomWind(groundWind * 1.5, 6) -- MAX altitude = 6 m/s
+    local wind8000   = randomWind(groundWind * 2.0, 6)
+
     return {
         atGround = {
-            speed = randomWind(windActivity),
+            speed = groundWind,
             dir   = driftDir(winDir, 20)
         },
         at2000 = {
-            speed = randomWind(windActivity * 0.9),
+            speed = wind2000,
             dir   = driftDir(winDir, 12)
         },
         at8000 = {
-            speed = randomWind(windActivity * 0.8),
+            speed = wind8000,
             dir   = driftDir(winDir, 7)
         }
     }
 end
-
 
 --------------------------------------------------------------
 -- 5. GENERATION DES NUAGES
@@ -1426,7 +1371,8 @@ local function generateDCSweather()
         clouds = clouds,
 
         atmosphere_type = 0,
-        groundTurbulence = math.floor(windActivity),
+        -- groundTurbulence = math.floor(windActivity),
+		groundTurbulence = 0,
 
         halo = { preset = "auto" },
 
@@ -1564,12 +1510,17 @@ for placeName, place in pairs(db_airbases) do
 		else
 			directionStr = tostring(direction)
 		end
-		local speed = mission.weather["wind"]["atGround"]["speed"]
+
+
+		local speedString = tostring(mission.weather["wind"]["atGround"]["speed"] or "0")
+		local speedNum = tonumber(speedString) or 0
 		if units == "imperial" then
-			speed = math.ceil(speed * 1.94384)
+			speedNum = math.ceil(speedNum * 1.94384)
 		end
-		if speed < 10 then
-			speed = "0" .. speed
+		if speedNum < 10 then
+			speedString = "0" .. tostring(speedNum)
+		else
+			speedString = tostring(speedNum)
 		end
 		-- 33014G26KT
 
@@ -1587,7 +1538,7 @@ for placeName, place in pairs(db_airbases) do
 			if mission.weather["wind"]["atGround"]["speed"] == 0 then
 				metar = metar .. "00000KT "
 			else
-				metar = metar .. directionStr .. speed .. gust .. "KT "
+				metar = metar .. directionStr .. speedString .. gust .. "KT "
 			end
 		else
 			if mission.weather["wind"]["atGround"]["speed"] == 0 then
@@ -1595,7 +1546,7 @@ for placeName, place in pairs(db_airbases) do
 			else
 				metar = metar .. directionStr
 
-				.. speed .. gust .. "MPS "
+				.. speedString .. gust .. "MPS "
 			end
 		end
 

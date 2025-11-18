@@ -345,7 +345,7 @@ end
 if #playable > 0 and not AllCoopPossible then
 
 	for i=1, #playable do
-		local Number = playable[i].number
+		local playableNb = playable[i].number
 
 		if camp.Aircraft_availability[playable[i].squadName] then
 			local testIme = 0
@@ -357,11 +357,11 @@ if #playable > 0 and not AllCoopPossible then
 			end
 
 			for k  , _unavailable in pairs(camp.Aircraft_availability[playable[i].squadName].unavailable) do
-				if _unavailable == testIme and Number > 0 then
+				if _unavailable == testIme and playableNb > 0 then
 					camp.Aircraft_availability[playable[i].squadName].unavailable[k] = 0
 					camp.Aircraft_availability[playable[i].squadName].assigned = camp.Aircraft_availability[playable[i].squadName].assigned - 1
 					camp.Aircraft_availability[playable[i].squadName].unassigned = camp.Aircraft_availability[playable[i].squadName].unassigned + 1
-					Number = Number - 1
+					playableNb = playableNb - 1
 				end
 			end
 		end
