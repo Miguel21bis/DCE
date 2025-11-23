@@ -92,14 +92,14 @@ Data_AddPropAircraft = {
 		["IsNvgAllowed"] = true,
 
 
-		["UseReferenceAircraft"] = 2,		--0 random/default? (Quality & Wear variable is used); 1 reference aircraft (the Best); 2 persistent (Enables the aircraft persistence system, Quality & Wear disabled)
+		["UseReferenceAircraft"] = 0,		--0 random/default? (Quality & Wear variable is used); 1 reference aircraft (the Best); 2 persistent (Enables the aircraft persistence system, Quality & Wear disabled)
 		["PersistentAircraftKey"] = "",
 		["Quality"] = 85,					--aircraft condition 
 		["Wear"] = 15,						--Aircraft Wear and Tear
 
 		["IsEfbAllowed"] = true,
 		["IsModifiedJesterAllowed"] = true,
-		["CombatTreeSpoofable"] = 2, --0 (none),1(historical),2(all)
+		["CombatTreeSpoofable"] = 0, --0 (full),1(historical),2(none)
 
 		
 	},

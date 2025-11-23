@@ -4651,6 +4651,7 @@ function LoadFileAndUpdate(from)
 		try_dofile(radioFile2)
 	end
 
+	--utilise ici le fichier Init/persistenceMP.lua s'il existe, pour facilité l'attribution des num tail/avion
 	local persistPath = "../../../Missions/Campaigns/"..camp.title.."/Init/persistenceMP.lua"
 	try_dofile(persistPath)
 
@@ -4683,12 +4684,12 @@ function LoadFileAndUpdate(from)
 			PersistenceMP_byTask[task] = newRanks
 		end
 
-
-		local str = "PersistenceMP_byTask = " .. TableSerialization(PersistenceMP_byTask, 0)						--make a string
-		local fileObj = io.open("Debug/PersistenceMP_byTask.lua", "w")  or error("Failed to open debug file")
-		fileObj:write(str)																		--save new data
-		fileObj:close()
-
+		-- if Debug and Debug.debug then
+		-- 	local str = "PersistenceMP_byTask = " .. TableSerialization(PersistenceMP_byTask, 0)						--make a string
+		-- 	local fileObj = io.open("Debug/PersistenceMP_byTask.lua", "w")  or error("Failed to open debug file")
+		-- 	fileObj:write(str)																		--save new data
+		-- 	fileObj:close()
+		-- end
 		-- os.execute 'pause'
 
 	end

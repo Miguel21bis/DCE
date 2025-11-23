@@ -1309,15 +1309,22 @@ miz:zipAddFile("l10n/DEFAULT/ATC_ShutUp_GENERIC.lua", "../../../ScriptsMod."..Ve
 miz:zipAddFile("l10n/DEFAULT/Pedro.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Pedro.lua")										-- Pedro TEST
 -- miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "Active/camp_status.lua")
 miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "campL.lua")
-miz:zipAddFile("l10n/DEFAULT/FlightPlan_Generator_Debug.txt", "Debug/FlightPlan_Generator_Debug.txt")
-miz:zipAddFile("l10n/DEFAULT/debugFlight.txt", "Debug/debugFlight.txt")
+-- miz:zipAddFile("l10n/DEFAULT/FlightPlan_Generator_Debug.txt", "Debug/FlightPlan_Generator_Debug.txt")
+-- miz:zipAddFile("l10n/DEFAULT/debugFlight.txt", "Debug/debugFlight.txt")
 miz:zipAddFile("l10n/DEFAULT/SAR.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/SAR.lua")
-miz:zipAddFile("l10n/DEFAULT/Cercle_City.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Cercle_City.lua")
+
+if camp.theatre  == "Caucasus" then
+	miz:zipAddFile("l10n/DEFAULT/Cercle_City.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Cercle_City.lua")
+end
+
 miz:zipAddFile("l10n/DEFAULT/bombOnRunway.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/bombOnRunway.lua")
 miz:zipAddFile("l10n/DEFAULT/CG_ArtySpotter.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CG_ArtySpotter.lua")
 
 
-miz:zipAddFile("l10n/DEFAULT/beacon.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/beacon.ogg")											-- modification M60 CTLD
+if not existing_files["l10n/DEFAULT/beacon.ogg"] then
+	miz:zipAddFile("l10n/DEFAULT/beacon.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/beacon.ogg")	
+end
+
 miz:zipAddFile("l10n/DEFAULT/beaconsilent.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/beaconsilent.ogg")
 miz:zipAddFile("l10n/DEFAULT/ejectionRadioBeacon.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ejectionRadioBeacon.ogg")
 
@@ -1406,9 +1413,9 @@ end
 
 
 
-
-miz:zipAddFile("l10n/DEFAULT/alarme.wav" , "Sounds/alarme.wav")
-
+if HumainInterceptor then
+	miz:zipAddFile("l10n/DEFAULT/alarme.wav" , "Sounds/alarme.wav")
+end
 
 miz:zipClose()
 

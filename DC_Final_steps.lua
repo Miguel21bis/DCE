@@ -30,6 +30,35 @@ for _, side in pairs(mission.coalition) do
 	end
 end
 
+--supprime les élements dead
+local toRemove = {}
+for _, side in pairs(mission.coalition) do
+    for _, country in pairs(side.country) do
+        for category, groups in pairs(country) do
+            -- Vérifier si la catégorie est "static" (string)
+            if category == "static" and type(groups) == "table" and groups["group"] then
+                for groupNb, group in pairs(groups["group"]) do
+                    for _, unit in pairs(group.units) do
+                        if unit.skill == true then
+                            unit.skill = nil 
+                        end
+                    end
+                    if group.dead == true then
+                        table.insert(toRemove, groupNb)
+                    end
+                end
+                
+                -- Supprimer en ordre inverse
+                for i = #toRemove, 1, -1 do
+                    table.remove(groups["group"], toRemove[i])
+                end
+                toRemove = {} -- Réinitialiser pour la prochaine catégorie
+            end
+        end
+    end
+end
+
+
 ---
 if Debug.debug then
 	print("START DC_Final_steps.lua "..versionDCE["DC_Final_steps.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")

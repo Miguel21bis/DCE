@@ -64,6 +64,7 @@ TabLPark	= {}
 TargetList_InThisMission = {}			-- garde en mémoire les targets pour eviter de les pruner plus tard
 PointOfInterest = {}					-- liste des points d'interet
 TabDivert = {}							--liste des pistes de deroutement
+HumainInterceptor = false
 
 local debugStart = true					--NE PAS CHANGER, les infos restent seulement dans le fichier FlightPlan_Generator_Debug
 local debugTxt_AtoFP = ""
@@ -591,22 +592,31 @@ function GetSidenumber(flight, nUnit)				--not local, also used in DC_StaticAirc
 	local s 																		--new sidenumber
 	local counter = 0
 
-	if type == "F-4E-45MC" and mission_ini.persistentAircraft and mission_ini.persistentAircraft ~= "" then
-		-- print("GetSidenumber C persistentAircraft "..tostring(mission_ini.persistentAircraft))
+	-- if type == "F-4E-45MC" then
+	-- 	print("player "..tostring(player).." client "..tostring(client).." flight.task "..tostring(flight.task))
+	-- 	print("mission_ini.persistentAircraftTailNb "..tostring(mission_ini.persistentACFT_TailNb))
+	-- 	print("mission_ini.persistentAircraftKey "..tostring(mission_ini.persistentACFT_FileNameCache))
+	-- 	-- os.execute 'pause'
+	-- end
+	if type == "F-4E-45MC" and mission_ini.persistentACFT_TailNb and mission_ini.persistentACFT_TailNb ~= "" then
+		-- print("persistent passe A")
 		if player then
-			-- print("GetSidenumber D player true")
+			-- print("persistent passe A2")
 			if nUnit == 1 then
-				local persistentAircraft = true
-				return mission_ini.persistentAircraft, persistentAircraft
+				-- print("persistent passe A3 ok")
+				-- os.execute 'pause'
+				return mission_ini.persistentACFT_TailNb, mission_ini.persistentACFT_FileNameCache, true
 			end
+		--utilise ici le fichier Init/persistenceMP.lua s'il existe, pour facilité l'attribution des num tail/avion
 		elseif client and PersistenceMP_byTask and PersistenceMP_byTask[flight.task] then
-			-- print("GetSidenumber E PersistenceMP_byTask for flight.task "..tostring(flight.task))
+			-- print("persistent passe B")
 			for clientName, clientData in pairs(PersistenceMP_byTask[flight.task]) do
-				-- print("GetSidenumber F clientName "..tostring(clientName).." assigned "..tostring(clientData.assigned).." sidenumber "..tostring(clientData.tailNum))
+				-- print("persistent passe B2")
 				if not clientData.assigned and clientData.tailNum then
+					-- print("persistent passe B3 OK")
+					-- os.execute 'pause'
 					clientData.assigned = true
-					local persistentAircraft = true
-					return tostring(clientData.tailNum), persistentAircraft
+					return tostring(clientData.tailNum), mission_ini.persistentACFT_FileNameCache, true
 				end
 			end
 		end
@@ -1073,6 +1083,33 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 			arg_Group['uncontrolled'] = false
 			arg_Group['tasks'] = {}														--supprime le tasks start
 
+			--si le tasks START est supprimé, il faut aussi le supprimer des trigrules &Co
+			local found_trigN
+			for trig_n = 1, #mission.trigrules do
+				if mission.trigrules[trig_n] and mission.trigrules[trig_n].actions and mission.trigrules[trig_n].actions[1] then
+					if mission.trigrules[trig_n].actions[1].set_ai_task and mission.trigrules[trig_n].actions[1].set_ai_task[1] and mission.trigrules[trig_n].actions[1].set_ai_task[1] == arg_Group.groupId then
+						if mission.trigrules[trig_n].actions[1]["predicate"] == "a_set_ai_task" then
+
+							found_trigN = trig_n
+							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_spawnOn() C0b supprime start_Set_Ai_Task groupId "..arg_Group.groupId.." trig_n: "..tostring(trig_n)) end
+							break
+
+							
+						end
+					end
+				end
+			end
+
+			-- supprime le trigrule start_Set_Ai_Task
+			if found_trigN then
+				table.remove(mission.trigrules, found_trigN)
+				table.remove(mission.trig.flag, found_trigN)
+				table.remove(mission.trig.conditions, found_trigN)
+				table.remove(mission.trig.actions, found_trigN)
+				table.remove(mission.trig.func, found_trigN)
+
+			end
+
 			local activateGroupExist = false
 			for n , trigrule in pairs(mission.trigrules) do
 				if type(trigrule) == "table" then
@@ -1219,7 +1256,7 @@ local function activate_group_time_after(group, AirSpawnTime, from)
 end
 
 --start_set_ai_task
-local function start_Set_Ai_Task(arg_group, arg_aiStart_Time, from)
+local function start_Set_Ai_Task(arg_group, aiStart_Time, flag, from)
 
 	arg_group['uncontrolled'] = true
 
@@ -1230,18 +1267,22 @@ local function start_Set_Ai_Task(arg_group, arg_aiStart_Time, from)
 	Missionfunc = Missionfunc + 1
 	mission.trig.func[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
 	mission.trig.flag[trig_n] = true
-	mission.trig.conditions[trig_n] = "return(c_time_after(" .. arg_aiStart_Time .. ") )"
+	if aiStart_Time then
+		mission.trig.conditions[trig_n] = "return(c_time_after(" .. aiStart_Time .. ") )"
+	elseif flag then
+		mission.trig.conditions[trig_n] = "return(c_flag_is_true(" .. GCI.Flag .. ") )"
+	end
 	mission.trig.actions[trig_n] = "a_set_ai_task(" .. arg_group.groupId .. ", 1); mission.trig.func[" .. trig_n .. "]=nil;"
 	mission.trigrules[trig_n] = {
-		['rules'] = {
-			[1] = {
-				["seconds"] = arg_aiStart_Time,
-				["predicate"] = "c_time_after",
-				["zone"] = "",
-			},
-		},
+		-- ['rules'] = {
+		-- 	[1] = {
+		-- 		["seconds"] = aiStart_Time,
+		-- 		["predicate"] = "c_time_after",
+		-- 		["zone"] = "",
+		-- 	},
+		-- },
 		['eventlist'] = '',
-		['comment'] = 'Trigger ' .. trig_n,
+		['comment'] = 'Trigger_' .. arg_group.name,
 		['predicate'] = 'triggerOnce',
 		['actions'] = {
 			[1] = {
@@ -1253,6 +1294,23 @@ local function start_Set_Ai_Task(arg_group, arg_aiStart_Time, from)
 			},
 		},
 	}
+	if aiStart_Time then 
+		mission.trigrules[trig_n]['rules'] = {
+			[1] = {
+				["seconds"] = aiStart_Time,
+				["predicate"] = "c_time_after",
+				["zone"] = "",
+			}
+		}
+	elseif flag then
+		mission.trigrules[trig_n]['rules'] = {
+			[1] = {
+				["flag"] = GCI.Flag,
+				["predicate"] = "c_flag_is_true",
+				["zone"] = "",
+			}
+		}
+	end
 	--triggered action to start uncontrolled group
 	arg_group['tasks'] = {
 		[1] = {
@@ -2326,7 +2384,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						waypoints[w]["ETA_locked"] = false
 						waypoints[w]["speed_locked"] = true
 						waypoints[w]["debug"] = (waypoints[w]["debug"] or "") .." ETA_locked A False "
-					elseif waypoints[w]["name"] == "Join"  then
+					elseif waypoints[w]["name"] == "Join" and not is_helicopter then
 						waypoints[w]["ETA_locked"] = true
 						waypoints[w]["speed_locked"] = false
 						waypoints[w]["debug"] = (waypoints[w]["debug"] or "") .." ETA_locked B True "
@@ -3006,27 +3064,29 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					-- ************* SEAD switch from IP to egress *************
 					if flight[f].route[w].id == "IP" then
 
-						--largage d'urgence
-						local task_entry = {
-							["enabled"] = true,
-							["auto"] = false,
-							["id"] = "WrappedAction",
-							["name"] = "emergency jettison : FALSE (id == IP)",
-							["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-							["params"] =
-							{
-								["action"] =
+						if not is_helicopter then
+							--largage d'urgence
+							local task_entry = {
+								["enabled"] = true,
+								["auto"] = false,
+								["id"] = "WrappedAction",
+								["name"] = "emergency jettison : FALSE (id == IP)",
+								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+								["params"] =
 								{
-									["id"] = "Option",
-									["params"] =
+									["action"] =
 									{
-										["value"] = false,			--false interdit le largage d'urgence
-										["name"] = 15,
+										["id"] = "Option",
+										["params"] =
+										{
+											["value"] = false,			--false interdit le largage d'urgence
+											["name"] = 15,
+										},
 									},
 								},
-							},
-						}
-						table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+							}
+							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+						end
 
 					elseif  flight[f].route[w].id == "Attack" then
 
@@ -3874,28 +3934,29 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					if flight[f].route[w].id == "Assemble" then
 						if flight[f].number > 1 or (#flight > 1 and flight[f].loadout.tStation == nil) or flight[f].target.firepower.packmax then		--orbit on departure only for flights larger than 1-ship, flights that are part of a package (but no on-station tasks) or multi-packages
 
-							local task_entry =
-							{
-								["enabled"] = true,
-								["auto"] = false,
-								["id"] = "WrappedAction",
-								["name"] = "interdit la PC after burner (id == Assemble)",
-								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-								["params"] =
+							if not is_helicopter then
+								local task_entry =
 								{
-									["action"] =
+									["enabled"] = true,
+									["auto"] = false,
+									["id"] = "WrappedAction",
+									["name"] = "interdit la PC after burner (id == Assemble)",
+									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+									["params"] =
 									{
-										["id"] = "Option",
-										["params"] =
+										["action"] =
 										{
-											["value"] = true,
-											["name"] = 16,
+											["id"] = "Option",
+											["params"] =
+											{
+												["value"] = true,
+												["name"] = 16,
+											},
 										},
 									},
-								},
-							}
-							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-
+								}
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+							end
 
 							local altitude = AltitudeCruise * 2/3
 							speed = pack[p].main[1].loadout.vCruise
@@ -4867,16 +4928,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					end
 					
-					local assignedPersistentPlane = nil
-					units[n]["onboard_num"], assignedPersistentPlane = GetSidenumber(flight[f], n)	--get new sidenumber
-
-					-- if flight[f].sidenumber and flight[f].sidenumber[1] and flight[f].sidenumber[2] then		--squadron has sidenumbers defined
-					-- 	units[n]["onboard_num"] = GetSidenumber(flight[f].name, flight[f].sidenumber[1], flight[f].sidenumber[2],n , flight[f].player, flight[f].type)	--get new sidenumber
-					-- else																						--squadron has no sidenumbers defined
-					-- 	-- units[n]["onboard_num"] = "0" .. math.random(1, 99)										--us a random number
-					-- 	units[n]["onboard_num"] = math.random(1, 99)										--us a random number
-					-- 	units[n]["onboard_num"] = string.format("%03d", units[n]["onboard_num"])
-					-- end
+					local pers_ACFT_bool = nil
+					local pers_ACFT_prefixFileName = nil
+					units[n]["onboard_num"], pers_ACFT_prefixFileName, pers_ACFT_bool = GetSidenumber(flight[f], n)	--get new sidenumber
 
 					--multiple skins for aircraft
 					if flight[f].liveryModex then
@@ -4901,26 +4955,35 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							--ajoute AddPropAircraft aux types joueur/client
 							units[n]["AddPropAircraft"] = Deepcopy(Data_AddPropAircraft[type_withProp])
 
-							if Data_divers[flight[f].type] and Data_divers[flight[f].type].alignment_PropAircraft and Data_divers[flight[f].type].alignment_PropAircraft[mission_ini.alignment_Mode] then
+							if isHumain then
+								if Data_divers[type_withProp] and Data_divers[type_withProp].alignment_PropAircraft and Data_divers[flight[f].type].alignment_PropAircraft[mission_ini.alignment_Mode] then
 
-								--règle la/les valeurs des variables de vitesse d'alignement dans la table AddPropAircraft 
-								for key, value in pairs(Data_divers[flight[f].type].alignment_PropAircraft[mission_ini.alignment_Mode]) do
-									units[n]["AddPropAircraft"][key] = value
+									--règle la/les valeurs des variables de vitesse d'alignement dans la table AddPropAircraft 
+									for key, value in pairs(Data_divers[type_withProp].alignment_PropAircraft[mission_ini.alignment_Mode]) do
+										units[n]["AddPropAircraft"][key] = value
+									end
+
+								end
+
+								if pers_ACFT_bool then
+									units[n]["AddPropAircraft"]["PersistentAircraftKey"] = pers_ACFT_prefixFileName.."_"..units[n]["onboard_num"]
+									units[n]["AddPropAircraft"]["UseReferenceAircraft"] = 2
+								end
+								-- if units[n]["CombatTreeSpoofable"] then
+
+								-- end
+								
+							else
+								if pers_ACFT_bool then
+									units[n]["AddPropAircraft"]["PersistentAircraftKey"] = ""
+									units[n]["AddPropAircraft"]["UseReferenceAircraft"] = 0 --0 random/default? (Quality & Wear variable is used)
+								end
+								if units[n]["CombatTreeSpoofable"] then
+									units[n]["CombatTreeSpoofable"] = 2	-- AI use default CombatTree
 								end
 							end
-							-- print("AtoFp AddPropAircraft for ".." type "..flight[f].type.." flight[f].player "..tostring(flight[f].player).." mission_ini.persistentAircraft "..tostring(mission_ini.persistentAircraft) )
-							-- if flight[f].type == "F-4E-45MC" and flight[f].player and mission_ini.persistentAircraft and mission_ini.persistentAircraft ~= "" then
-							-- 	-- print("AtoFp AddPropAircraft PASSE A SinglePlayer: "..tostring(SinglePlayer))
-							-- 	if SinglePlayer and flight[f].player and not SingleWithDServer and n == 1 then
-							-- 		units[n]["AddPropAircraft"]["PersistentAircraftKey"] = mission_ini.persistentAircraft
-							-- 		units[n]["AddPropAircraft"]["UseReferenceAircraft"] = 2
-							-- 		-- print("AtoFp AddPropAircraft PASSE B ")
-							-- 	end
-							-- end
-							if assignedPersistentPlane then
-								units[n]["AddPropAircraft"]["PersistentAircraftKey"] = units[n]["onboard_num"]
-								units[n]["AddPropAircraft"]["UseReferenceAircraft"] = 2
-							end
+
+
 						else
 							units[n]["AddPropAircraft"] =
 							{
@@ -5565,8 +5628,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							--les Planes qui genent le taxiing spawn selon conf_mod
 							if not spawnDeck then
 								--= SixPack =
-								local BugFrom =  " if not SpawnDeck "..debug.getinfo(1).currentline
-								spawnOn(Data_configuration.SC_SpawnOn[flight[f].type], waypoints, group, pn, spawn_time, BugFrom, flight, f, role)
+								local bugFrom =  " if not SpawnDeck "..debug.getinfo(1).currentline
+								spawnOn(Data_configuration.SC_SpawnOn[flight[f].type], waypoints, group, pn, spawn_time, bugFrom, flight, f, role)
 							end
 
 							if limitedParkTiming or db_airbases[flight[f].base].BaseAirStart then
@@ -5594,7 +5657,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							--au final, Start+Activate si le flight ne spawn pas en vol
 							if waypoints[1]["action"] ~= "Turning Point" then
 								activate_group_time_after(group, activate_time, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
-								start_Set_Ai_Task(group, spawn_time, debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
+								start_Set_Ai_Task(group, spawn_time, nil, debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
+								
+								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP arg_group['uncontrolled']: "..tostring(group['uncontrolled'])) end
 							end
 
 						elseif (Multi.NbGroup >= 1 and not camp.MultiPlayer.pack_n[p]) or SingleWithDServerAiAir  then	--en multiplayer: aucun décalage sur le pont, puisque tous les IA commencent en vol								
@@ -5621,9 +5686,10 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								--au final, Start+Activate si le flight ne spawn pas en vol
 								if waypoints[1]["action"] ~= "Turning Point" then
 									group['lateActivation'] = true										--make group late activation 
-									group['uncontrolled'] = true										--Seulement sur CV, lateActivation and uncontrolled requis
+									-- group['uncontrolled'] = true		--sera fait dans start_Set_Ai_Task								--Seulement sur CV, lateActivation and uncontrolled requis
 									activate_group_time_after(group, activate_time, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
-									start_Set_Ai_Task(group, spawn_time, debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
+									start_Set_Ai_Task(group, spawn_time, nil,  debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
+									if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP arg_group['uncontrolled']: "..tostring(group['uncontrolled'])) end
 								end
 							end
 						end
@@ -5658,9 +5724,6 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							group['uncontrolled'] = false
 							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe LLLb limitedParkTiming OR BaseAirStart ") end
 							local infoFrom =  " limitedParkTiming or BaseAirStart "..debug.getinfo(1).currentline
-							-- --SUR PISTE DUR---
-							-- spawnOn( "air", waypoints, group, pn, waypoints[1]["ETA"], infoFrom, flight, f, role)
-
 							local airSpawnTIme = waypoints[1]["etaSpawn"] or waypoints[1]["ETA"]						
 							spawnOn( "air", waypoints, group, pn, airSpawnTIme, infoFrom, flight, f, role)
 							--TODO vérifier si c'est utile:
@@ -5670,10 +5733,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						elseif group.route.points[1].action ~= "Turning Point" then
 
 							group['lateActivation'] = false
-							group['uncontrolled'] = true
+							-- group['uncontrolled'] = true	--sera faut dabs start_Set_Ai_Task()
 							group['start_time'] = spawn_time - 15		--evite le BUG actuel de la Polka sur parking
 
-							start_Set_Ai_Task(group, spawn_time, debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
+							start_Set_Ai_Task(group, spawn_time, nil,  debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
+							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP arg_group['uncontrolled']: "..tostring(group['uncontrolled'])) end
 						end
 					end
 
@@ -5945,56 +6009,59 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						else
 							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP tasks_Start "..tostring(debug.getinfo(1).currentline)) end
 
-
 							group['uncontrolled'] = true											--make interceptor groups uncontrolled at mission start
 							group['lateActivation'] = false
 
-							--triggered action to start uncontrolled group
-							group['tasks'] = {
-								[1] = {
-									["number"] = 1,
-									["name"] = group.name,
-									["id"] = "WrappedAction",
-									["auto"] = false,
-									["enabled"] = true,
-									["params"] = {
-										["action"] = {
-											["id"] = "Start",
-											["params"] = {},
-										},
-									},
-								},
-							}
+							start_Set_Ai_Task(group, nil, GCI.Flag, debug.getinfo(1).currentline)
 
-							--mission trigger to initiate triggered action
-							-- local trig_n = Missionfunc + #mission.trig.funcStartup + 1										--next available trigger number
-							trig_n =  #mission.trig.actions + 1
-							Missionfunc = Missionfunc + 1 																	--M11.o
-							mission.trig.func[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
-							mission.trig.flag[trig_n] = true
-							mission.trig.conditions[trig_n] = "return(c_flag_is_true(" .. GCI.Flag .. ") )"
-							mission.trig.actions[trig_n] = "a_set_ai_task(" .. group.groupId .. ", 1); mission.trig.func[" .. trig_n .. "]=nil;"
-							mission.trigrules[trig_n] = {
-								['rules'] = {
-									[1] = {
-										["flag"] = GCI.Flag,
-										["predicate"] = "c_flag_is_true",
-										["zone"] = "",
-									},
-								},
-								['eventlist'] = '',
-								['comment'] = 'Trigger ' .. trig_n,
-								['predicate'] = 'triggerOnce',
-								['actions'] = {
-									[1] = {
-										["predicate"] = "a_set_ai_task",
-										["set_ai_task"] = {
-											[1] = group.groupId,
-											[2] = 1,
-										}
-									},
-								},
-							}
+						-- 	--triggered action to start uncontrolled group
+						-- 	group['tasks'] = {
+						-- 		[1] = {
+						-- 			["number"] = 1,
+						-- 			["name"] = group.name,
+						-- 			["id"] = "WrappedAction",
+						-- 			["auto"] = false,
+						-- 			["enabled"] = true,
+						-- 			["params"] = {
+						-- 				["action"] = {
+						-- 					["id"] = "Start",
+						-- 					["params"] = {},
+						-- 				},
+						-- 			},
+						-- 		},
+						-- 	}
+
+						-- 	--mission trigger to initiate triggered action
+						-- 	-- local trig_n = Missionfunc + #mission.trig.funcStartup + 1										--next available trigger number
+						-- 	trig_n =  #mission.trig.actions + 1
+						-- 	Missionfunc = Missionfunc + 1 																	--M11.o
+						-- 	mission.trig.func[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
+						-- 	mission.trig.flag[trig_n] = true
+						-- 	mission.trig.conditions[trig_n] = "return(c_flag_is_true(" .. GCI.Flag .. ") )"
+						-- 	mission.trig.actions[trig_n] = "a_set_ai_task(" .. group.groupId .. ", 1); mission.trig.func[" .. trig_n .. "]=nil;"
+						-- 	mission.trigrules[trig_n] = {
+						-- 		['rules'] = {
+						-- 			[1] = {
+						-- 				["flag"] = GCI.Flag,
+						-- 				["predicate"] = "c_flag_is_true",
+						-- 				["zone"] = "",
+						-- 			},
+						-- 		},
+						-- 		['eventlist'] = '',
+						-- 		['comment'] = 'Trigger ' .. trig_n,
+						-- 		['predicate'] = 'triggerOnce',
+						-- 		['actions'] = {
+						-- 			[1] = {
+						-- 				["predicate"] = "a_set_ai_task",
+						-- 				["set_ai_task"] = {
+						-- 					[1] = group.groupId,
+						-- 					[2] = 1,
+						-- 				}
+						-- 			},
+						-- 		},
+						-- 	}
+
+
 						end
 
 						--if the group is on a carrier, it gets late activation instead of uncontrolled. An activate trigger is needed instead of AI task trigger.
@@ -6055,6 +6122,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						-- Always prioritize the `ready` table for player-controlled flights
 						table.insert(base.ready, t)
 						base.ready_n = base.ready_n + 1
+						HumainInterceptor = true
 					else
 						-- Insert into the appropriate table based on the current assign_index
 						if base.assign_index == 1 then
@@ -6275,6 +6343,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						local airSpawnTIme = waypoints[1]["etaSpawn"] or waypoints[1]["ETA"]
 						spawnOn( "air", waypoints, group, pn, airSpawnTIme, infoFrom, flight, f, role)
 						-- modify_Activate_GroupTime(group, spawn_time - 1, debug.getinfo(1).currentline)
+						--TODO supprimer le start_Set_Ai_Task START
 						modify_Activate_GroupTime(group, airSpawnTIme - 1, debug.getinfo(1).currentline)
 					end
 
@@ -6920,6 +6989,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				local nbactivate = 0
 				local activateGroupSecondes = nil
 				local tagATTENTION, a_activate, a_set_ai_task, c_time, c_flag = false, false, false, false, false
+				local task_START = false
 				local testtrigrule = {}
 
 				for n , trigrule in pairs(mission.trigrules) do
@@ -6955,12 +7025,16 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 				end
 
+				if group.tasks and group.tasks[1] and group.tasks[1].params.action.id == "Start" then
+					task_START = true
+				end
+
 				if nbactivate and nbactivate > 1 then
 					info06 = info06.."\n".."|+T1|ATTENTION plusieurs ACTIVATE ".."\n"
 					tagATTENTION = true
 				end
 
-				if group.tasks and group.tasks[1] and group.tasks[1].params.action.id == "Start" then
+				if task_START then
 					if not group.uncontrolled then
 						info01 = "\n".."|+T2|ATTENTION MANQUE uncontrolled "..group.groupId.."\n"
 						tagATTENTION = true
@@ -6982,9 +7056,17 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					tagATTENTION = true
 				end
 
+				if a_set_ai_task and not group.uncontrolled then
+					info02 = info02.."\n".."  |+T5|SOL/VOL decale mais pas de uncontrolled "..group.groupId.."\n"
+					tagATTENTION = true
+				end
+				if a_set_ai_task and not task_START then
+					info02 = info02.."\n".."  |+T5|SOL/VOL decale mais pas de Task START "..group.groupId.."\n"
+					tagATTENTION = true
+				end
 
 				if group.uncontrolled then
-					if group.tasks and group.tasks[1] and group.tasks[1].params.action.id == "Start" then
+					if task_START then
 						if a_set_ai_task then
 							if c_time then
 								info02 = "SOL/VOL decale_A "..tostring(activateGroupSecondes)

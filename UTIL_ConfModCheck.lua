@@ -105,8 +105,8 @@ mission_ini_check = {
 
 	--***aircraft mod option***
 	--***F-4E option***
-	persistentAircraft = "",					-- (number(exemple: "021"))	[default: ""]		number: damaged whith key (ex: "021"), false: no persistent aircraft
-
+	persistentACFT_FileNameCache = "",			-- ("text"(exemple: "NAM_Campaign"))[default: ""]		text: filename of the damaged aircraft, in Heatblur folder cache
+	persistentACFT_TailNb   = "",				-- ("text"(exemple: "021"))[default: ""]		text: damaged whith tail number (ex: "FT-021"), 
 
 }
 
