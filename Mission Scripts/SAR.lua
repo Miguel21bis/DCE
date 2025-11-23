@@ -911,7 +911,7 @@ function CheckImmediatSAR(ejPilot)
 		--si ejectedPilot sur une VILLE on ne lance pas de SAR ni de CSAR
 		local NameTheatre =  string.lower(env.mission.theatre)
 		env.info( "DCE_CheckImmediatSAR? NameTheatre "..tostring(NameTheatre))
-		if circleCity[NameTheatre] then
+		if circleCity and circleCity[NameTheatre] then
 			env.info( "DCE_CheckImmediatSAR? Passe 1 NameTheatre  ")
 
 			for nCircle, circle in ipairs(circleCity[NameTheatre]) do

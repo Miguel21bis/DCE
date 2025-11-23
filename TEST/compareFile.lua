@@ -59,6 +59,7 @@ local ignoredKeys = {
     DCE_targetName = true,
     dead = true,
     CheckDay = true,
+    etaSpawn = true,
 
     Radio = true,
     x = true,
@@ -243,8 +244,8 @@ end
 
 -- Exemple d'utilisation
 local function main()
-    local file1 = "mission_A.lua" -- Chemin vers le premier fichier Lua
-    local file2 = "mission_B.lua" -- Chemin vers le deuxième fichier Lua
+    local file1 = "mission_A" -- Chemin vers le premier fichier Lua
+    local file2 = "mission_B" -- Chemin vers le deuxième fichier Lua
 
     local table1 = loadLuaFile(file1)
     local table2 = loadLuaFile(file2)
