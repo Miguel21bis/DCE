@@ -30,6 +30,136 @@ for _, side in pairs(mission.coalition) do
 	end
 end
 
+
+-- supprime les task EWR orphelines (sans unité EWR)
+for _, side in pairs(mission.coalition) do
+    for _, country in pairs(side.country) do
+        for _, groups in pairs(country) do
+            if type(groups) == "table" and groups["group"] then
+                for _, group in pairs(groups["group"]) do
+
+                    local found_EWR_task = false
+                    local found_EWR_unit = false
+
+                    -- 1) Chercher la présence d'une task EWR
+                    if group.route and group.route.points then
+                        for _, point in pairs(group.route.points) do
+                            if point.task and point.task.params and point.task.params.tasks then
+                                for _, task in pairs(point.task.params.tasks) do
+                                    if task.id == "EWR" then
+                                        found_EWR_task = true
+                                        break
+                                    end
+                                end
+                            end
+                        end
+                    end
+
+                    -- 2) Chercher une unité EWR dans le groupe
+                    if found_EWR_task then
+                        for _, unit in pairs(group.units) do
+                            if IsEWR[unit.type] then
+                                found_EWR_unit = true
+                                break
+                            end
+                        end
+                    end
+
+                    -- 3) Supprimer les tasks EWR si aucune unité EWR, puis renuméroter
+                    if found_EWR_task and not found_EWR_unit then
+                        for _, point in pairs(group.route.points) do
+                            if point.task and point.task.params and point.task.params.tasks then
+
+                                local tasks = point.task.params.tasks
+
+                                ----------------------------------------------------------------------
+                                -- A) Suppression des tasks EWR (robuste)
+                                ----------------------------------------------------------------------
+                                for i = #tasks, 1, -1 do
+                                    if tasks[i].id == "EWR" then
+                                        table.remove(tasks, i)
+                                    end
+                                end
+
+                                ----------------------------------------------------------------------
+                                -- B) RENUMÉROTATION OBLIGATOIRE : tasks[n].number = n
+                                ----------------------------------------------------------------------
+                                for newIndex = 1, #tasks do
+                                    local t = tasks[newIndex]
+                                    if t.number ~= newIndex then
+                                        t.number = newIndex
+                                    end
+                                end
+
+                            end
+                        end
+                    end
+
+                end
+            end
+        end
+    end
+end
+
+
+
+-- --si le parsing trouve ["id"] = "EWR" mais pas d'unité presente dans IsEWR, alors on supprime proprement la tasks[n] ["id"] = "EWR"
+-- for _, side in pairs(mission.coalition) do
+--     for _, country in pairs(side.country) do
+--         for _, groups in pairs(country) do
+--             if type(groups) == "table" and groups["group"]  then
+--                 for _, group in pairs(groups["group"]) do
+--                     local found_EWR_task,found_EWR_unit, mustDel_EWR_task = false, false, false
+--                     if group.route and group.route.points then
+--                         for pointIndex, point in pairs(group.route.points) do
+--                             if point.task and point.task.params and point.task.params.tasks then
+--                                 local toRemoveTasks = {}
+--                                 for taskIndex, task in pairs(point.task.params.tasks) do
+--                                     if task.id == "EWR" then
+--                                         found_EWR_task = true
+--                                     end
+--                                 end
+--                             end
+--                         end
+--                     end
+
+--                     if found_EWR_task then
+--                         for _, unit in pairs(group.units) do
+--                             if IsEWR[unit.type] then
+--                                 found_EWR_unit = true
+--                             end
+--                         end
+--                         if not found_EWR_unit then
+--                             mustDel_EWR_task = true
+--                         end
+--                     end
+
+--                     if mustDel_EWR_task then
+--                         for pointIndex, point in pairs(group.route.points) do
+--                             if point.task and point.task.params and point.task.params.tasks then
+--                                 local toRemoveTasks
+--                                 for taskIndex, task in pairs(point.task.params.tasks) do
+--                                     if task.id == "EWR" then
+
+--                                         toRemoveTasks = taskIndex
+
+--                                     end
+--                                 end
+--                                 -- Supprimer en ordre inverse pour éviter les problèmes d'indexation
+--                                 for i = #point.task.params.tasks, 1, -1 do
+--                                     if i == toRemoveTasks then
+--                                         table.remove(point.task.params.tasks, i)
+--                                     end
+--                                 end
+--                             end
+--                         end
+--                     end
+--                 end
+--             end
+--         end
+--     end
+-- end
+
 --supprime les élements dead
 local toRemove = {}
 for _, side in pairs(mission.coalition) do

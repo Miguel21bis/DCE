@@ -4509,6 +4509,17 @@ LayerObjectsLegend =
 	}, -- end of [11]
 }
 
+IsEWR = {
+	["FPS-117"] = true,
+	["FPS-117 Dome"] = true,
+	["P-18"] = true,
+	["PRV-13"] = true,
+	["P-18T"] = true,
+	["55G6 EWR"] = true,
+	["1L13 EWR"] = true,
+}
+
+
 -- Détecte si une table est une liste simple (1..n)
 local function isSequence(t)
     if type(t) ~= "table" then return false end

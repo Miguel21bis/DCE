@@ -2097,6 +2097,95 @@ local function loadoutPylon(loadoutTable)
 	return loadoutTable
 end
 
+
+-- local lfs = require("lfs")
+
+-- local function mergeTablesB(target, source)
+--     for k, v in pairs(source) do
+--         target[k] = v
+--     end
+-- end
+
+-- function LoadAllLoadouts(folder)
+--     local final = {}
+
+--     for file in lfs.dir(folder) do
+--         -- on ignore "." et ".."
+--         if file ~= "." and file ~= ".." then
+            
+--             -- on ne prend que les .lua
+--             if file:match("%.lua$") then
+--                 local fullpath = folder .. "/" .. file
+
+--                 -- exécution du fichier
+--                 dofile(fullpath)
+
+--                 -- chaque fichier définit la variable db_loadouts
+--                 if db_loadouts then
+--                     mergeTablesB(final, db_loadouts)
+--                     db_loadouts = nil -- IMPORTANT
+--                 end
+--             end
+--         end
+--     end
+
+--     return final
+-- end
+
+-- -- Charge toute la base
+-- db_loadouts = LoadAllLoadouts("db_loadout")
+
+
+-- récupère le chemin du script actuel (UTIL_Functions.lua)
+local currentScript = debug.getinfo(1).source:sub(2)
+local baseDir = currentScript:match("(.*/)") or "./"
+
+local function mergeTablesB(target, source)
+    for k, v in pairs(source) do
+        target[k] = v
+    end
+end
+
+function LoadAllLoadouts(subFolder)
+    local final = {}
+
+    -- chemin absolu du dossier db_loadouts
+    local folder = baseDir .. subFolder
+
+    -- commande DIR en mode bare (/b)
+    local cmd = 'dir "' .. folder .. '" /b'
+
+    local p = io.popen(cmd)
+    if not p then
+        env.info("DCE ERROR: impossible d’ouvrir le dossier : " .. folder)
+        return final
+    end
+
+    for file in p:lines() do
+        if file:match("%.lua$") then
+            local fullpath = folder .. "/" .. file
+
+            local ok, err = pcall(function()
+                dofile(fullpath)
+            end)
+
+            if not ok then
+                env.info("DCE ERROR: erreur lors du chargement de " .. fullpath .. " : " .. err)
+            else
+                if db_loadouts then
+                    mergeTablesB(final, db_loadouts)
+                    db_loadouts = nil
+                end
+            end
+        end
+    end
+
+    p:close()
+    return final
+end
+
+
+
 -- modification M49.a big central db_loadout
 
 function BuildLoadout()
@@ -2124,7 +2213,8 @@ function BuildLoadout()
 		require("Init/db_loadouts")
 	else
 		-- charge le loadout central en premier pour avoir la table de code_loadout
-		dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_db_loadouts.lua")
+		-- Charge toute la base
+		db_loadouts = LoadAllLoadouts("db_loadouts")
 	end
 
 	-- Fonction pour compter les mots dans une chaîne
@@ -2136,46 +2226,6 @@ function BuildLoadout()
 		return count
 	end
 
-
-	-- --si ADD_loadouts existe, on le precharge pour prendre en compte son/ses codes code_loadout que l'on ajoutera au central
-	-- local loadoutFile02 = "../../../Missions/Campaigns/"..camp.title.."/Init/ADD_loadouts.lua"
-	-- local TestPathADD_loadouts = io.open(loadoutFile02, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
-	-- if TestPathADD_loadouts ~= nil  then																	--check si le fichier existe dans ScriptsMod
-	-- 	dofile("../../../Missions/Campaigns/"..camp.title.."/Init/ADD_loadouts.lua")	
-	-- 	addLoadoutsTag = true
-
-	-- 	if add_campaigns_code_loadout then
-	-- 		campaigns_code_loadout = add_campaigns_code_loadout
-	-- 	end
-	-- end
-
-
-	-- -- cherche le code a appliquer au loadout, pour charger le bon..loadout ^^
-	-- if (not ( campConfMod and  campConfMod.code_loadout) and campaigns_code_loadout )then 
-	-- 	campConfMod = {}
-	-- 	local maxOcc = 0
-	-- 	for codeName , name in pairs(campaigns_code_loadout) do			
-	-- 		local j = 0
-	-- 		if type(name) == "table" then
-	-- 			for i=1, #name do
-	-- 				print("UtilF title "..camp.title.." string.find "..name[i])
-	-- 				if  camp.title == name[i] or  string.find(string.lower(camp.title) , string.lower(name[i])) then
-	-- 					j = j +1 
-	-- 					print("UtilF   PasseB "..j.." #name "..#name.." >?maxOcc ".. maxOcc)
-	-- 					if j == #name and #name > maxOcc then						-- il a trouv� toutes les occurences du nom
-	-- 						print("UtilF     PasseC ")
-	-- 						campConfMod.code_loadout = codeName
-	-- 						maxOcc = #name											--assigne le nomCode seulement � celui qui a le plus d'occurence
-	-- 					end
-	-- 				end
-	-- 			end
-	-- 		else
-	-- 			if  string.find(string.lower(camp.title) , string.lower(name)) then
-	-- 				campConfMod.code_loadout = codeName
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
 
 
 	-- cherche le code a appliquer au loadout, pour charger le bon..loadout ^^
@@ -2224,19 +2274,9 @@ function BuildLoadout()
 		camp.code_loadout = bestMatch
 	end
 
-	-- if not campConfMod or not campConfMod.code_loadout or campConfMod.code_loadout == nil then
-	-- 	campConfMod = {
-	-- 		code_loadout = "all",
-	-- 	}
-	-- end
 
 	if Debug.debug then
 		print("UtilF camp.title |"..camp.title.."| campConfMod.code_loadout |"..tostring(camp.code_loadout) )
-	end
-
-	if campMod.selectLoadout == "init" then
-		require("Init/db_loadouts")
-		db_all_loadouts = db_loadouts
 	end
 
 	-- helper: vérifie si le loadout est autorisé par restrictedCondition
@@ -2305,7 +2345,7 @@ function BuildLoadout()
 		LoadoutsList[plane][taskName][loadoutName] = value
 	end
 
-	for plane, planeTab in pairs(db_all_loadouts) do
+	for plane, planeTab in pairs(db_loadouts) do
 		if plane_match(plane) then
 			for taskName, loadout in pairs(planeTab) do
 				for loadoutName, loadData in pairs(loadout) do
@@ -2319,58 +2359,6 @@ function BuildLoadout()
 		end
 	end
 
-
-
-	-- if TestPathADD_loadouts ~= nil and add_loadouts  then																	--check si le fichier existe dans ScriptsMod
-	-- 	for plane, planeTab  in pairs(add_loadouts) do		
-	-- 		for taskName, loadout  in pairs(planeTab) do					
-	-- 			for loadoutName, value  in pairs(loadout) do
-	-- 				if value.code_loadout and value.code_loadout ~= "" then 								
-	-- 					for code_loadout_number, code in pairs(value.code_loadout) do																																
-	-- 						if string.lower(campConfMod.code_loadout) == string.lower(code) or string.lower(code) == "all" then
-	-- 							if not db_loadouts[plane] then							
-	-- 								db_loadouts[plane] = {}
-	-- 							end 
-	-- 							if not db_loadouts[plane][taskName] then db_loadouts[plane][taskName] = {} end 
-	-- 							if not db_loadouts[plane][taskName][loadoutName] then db_loadouts[plane][taskName][loadoutName] = {} end 
-
-	-- 							local n = 0
-	-- 							local insertionAutorise = false
-	-- 							local insertionOK  = false
-	-- 							repeat
-
-	-- 								if not db_loadouts[plane][taskName][loadoutName] then
-	-- 									db_loadouts[plane][taskName][loadoutName] = value
-	-- 									insertionOK = true
-	-- 								end
-
-	-- 								if not insertionOK and  db_loadouts[plane][taskName][loadoutName..tostring(n)] then
-	-- 									n = tonumber(n) + 1
-	-- 								else
-	-- 									insertionAutorise = true
-	-- 								end
-
-	-- 								if insertionAutorise then
-	-- 									db_loadouts[plane][taskName][loadoutName..tostring(n)] = value
-	-- 									insertionOK = true
-	-- 								end
-
-	-- 								if tonumber(n) > 50 then
-	-- 									print("MainNM MEGA BUG ADD_loadout")
-	-- 								end
-	-- 							until insertionOK or tonumber(n) > 50
-
-
-	-- 						end						
-	-- 					end
-	-- 				end
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
-
-	--routine de verification des code campagne
-	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_db_loadouts.lua")
 
 	if campaigns_code_loadout and not addLoadoutsTag then
 		for planeType, plane  in pairs(LoadoutsList) do
@@ -2410,9 +2398,9 @@ function BuildLoadout()
 		testFile:write(test_str)															--save new data
 		testFile:close()
 
-		if db_all_loadouts then
+		if db_loadouts then
 
-			local copy_all_loadouts = Deepcopy(db_all_loadouts)
+			local copy_all_loadouts = Deepcopy(db_loadouts)
 			copy_all_loadouts = loadoutPylon(copy_all_loadouts)
 
 			copy_all_loadouts = makeStrutureLoadout(copy_all_loadouts)

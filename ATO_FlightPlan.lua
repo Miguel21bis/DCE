@@ -4956,6 +4956,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							units[n]["AddPropAircraft"] = Deepcopy(Data_AddPropAircraft[type_withProp])
 
 							if isHumain then
+								-- print("passe C10 isHumain")
 								if Data_divers[type_withProp] and Data_divers[type_withProp].alignment_PropAircraft and Data_divers[flight[f].type].alignment_PropAircraft[mission_ini.alignment_Mode] then
 
 									--règle la/les valeurs des variables de vitesse d'alignement dans la table AddPropAircraft 
@@ -4965,13 +4966,13 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 								end
 
+								-- print("passe C11 pers_ACFT_bool "..tostring(pers_ACFT_bool).." pers_ACFT_prefixFileName "..tostring(pers_ACFT_prefixFileName).." units[n][\"onboard_num\"] "..tostring(units[n]["onboard_num"]) )
 								if pers_ACFT_bool then
 									units[n]["AddPropAircraft"]["PersistentAircraftKey"] = pers_ACFT_prefixFileName.."_"..units[n]["onboard_num"]
 									units[n]["AddPropAircraft"]["UseReferenceAircraft"] = 2
 								end
-								-- if units[n]["CombatTreeSpoofable"] then
 
-								-- end
+								-- os.execute 'pause'
 								
 							else
 								if pers_ACFT_bool then
