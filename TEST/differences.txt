@@ -1,111 +1,23 @@
 return {
     {
-        type = "removed",
-        path = "/coalition/red/country/3/static",
-        key = "static",
-        value = {
-	["group"] = {
-	},
-},
-    },
-    {
-        type = "removed",
-        path = "/coalition/red/country/1/vehicle/group/10/route/points/1/task/params/tasks/3",
-        key = "3",
-        value = {
-	["auto"] = false,
-	["enabled"] = true,
-	["params"] = {
-		["action"] = {
-			["id"] = SetFrequency,
-			["params"] = {...},
-		},
-	},
-	["number"] = 3,
-	["id"] = WrappedAction,
-},
+        type = "added",
+        path = "/requiredModules/tetet_ec121",
+        key = "tetet_ec121",
+        value = tetet_ec121,
     },
     {
         type = "changed",
-        path = "/coalition/red/country/1/vehicle/group/10/route/points/1/task/params/tasks/1/auto",
-        key = "auto",
-        oldValue = true,
-        newValue = false,
-    },
-    {
-        type = "added",
-        path = "/coalition/red/country/1/vehicle/group/10/route/points/1/task/params/tasks/1/params/action",
-        key = "action",
-        value = {
-	["id"] = SetCallsign,
-	["params"] = {
-		["callname"] = 16,
-		["number"] = 1,
-		["callnameFlag"] = true,
-	},
-},
+        path = "/currentKey",
+        key = "currentKey",
+        oldValue = 1010000,
+        newValue = 1021651,
     },
     {
         type = "changed",
-        path = "/coalition/red/country/1/vehicle/group/10/route/points/1/task/params/tasks/1/id",
-        key = "id",
-        oldValue = EWR,
-        newValue = WrappedAction,
-    },
-    {
-        type = "changed",
-        path = "/coalition/red/country/1/vehicle/group/10/route/points/1/task/params/tasks/2/params/action/id",
-        key = "id",
-        oldValue = SetCallsign,
-        newValue = SetFrequency,
-    },
-    {
-        type = "removed",
-        path = "/coalition/red/country/1/vehicle/group/10/route/points/1/task/params/tasks/2/params/action/params/callname",
-        key = "callname",
-        value = 16,
-    },
-    {
-        type = "removed",
-        path = "/coalition/red/country/1/vehicle/group/10/route/points/1/task/params/tasks/2/params/action/params/number",
-        key = "number",
-        value = 1,
-    },
-    {
-        type = "removed",
-        path = "/coalition/red/country/1/vehicle/group/10/route/points/1/task/params/tasks/2/params/action/params/callnameFlag",
-        key = "callnameFlag",
-        value = true,
-    },
-    {
-        type = "added",
-        path = "/coalition/red/country/1/vehicle/group/10/route/points/1/task/params/tasks/2/params/action/params/modulation",
-        key = "modulation",
-        value = 0,
-    },
-    {
-        type = "added",
-        path = "/coalition/red/country/1/vehicle/group/10/route/points/1/task/params/tasks/2/params/action/params/frequency",
-        key = "frequency",
-        value = 262200000,
-    },
-    {
-        type = "added",
-        path = "/coalition/red/country/1/vehicle/group/10/route/points/1/task/params/tasks/2/params/action/params/power",
-        key = "power",
-        value = 10,
-    },
-    {
-        type = "added",
-        path = "/coalition/blue/country/1/vehicle/group/13/taskSelected",
-        key = "taskSelected",
-        value = true,
-    },
-    {
-        type = "added",
-        path = "/coalition/blue/country/1/vehicle/group/14/taskSelected",
-        key = "taskSelected",
-        value = true,
+        path = "/result/total",
+        key = "total",
+        oldValue = 0,
+        newValue = 1,
     },
     {
         type = "removed",
@@ -752,6 +664,39 @@ return {
     {
         type = "removed",
         path = "/coalition/blue/country/1/static/group/772/taskSelected",
+        key = "taskSelected",
+        value = true,
+    },
+    {
+        type = "changed",
+        path = "/coalition/blue/country/1/helicopter/group/8/task",
+        key = "task",
+        oldValue = Transport,
+        newValue = CAS,
+    },
+    {
+        type = "changed",
+        path = "/coalition/blue/country/1/helicopter/group/8/units/1/alt_type",
+        key = "alt_type",
+        oldValue = RADIO,
+        newValue = BARO,
+    },
+    {
+        type = "changed",
+        path = "/coalition/blue/country/1/helicopter/group/9/task",
+        key = "task",
+        oldValue = Transport,
+        newValue = CAS,
+    },
+    {
+        type = "added",
+        path = "/coalition/blue/country/1/vehicle/group/13/taskSelected",
+        key = "taskSelected",
+        value = true,
+    },
+    {
+        type = "added",
+        path = "/coalition/blue/country/1/vehicle/group/14/taskSelected",
         key = "taskSelected",
         value = true,
     },
@@ -1464,17 +1409,12 @@ return {
         value = true,
     },
     {
-        type = "changed",
-        path = "/currentKey",
-        key = "currentKey",
-        oldValue = 1010000,
-        newValue = 1022033,
-    },
-    {
-        type = "changed",
-        path = "/result/total",
-        key = "total",
-        oldValue = 0,
-        newValue = 1,
+        type = "removed",
+        path = "/coalition/red/country/3/static",
+        key = "static",
+        value = {
+	["group"] = {
+	},
+},
     },
 }

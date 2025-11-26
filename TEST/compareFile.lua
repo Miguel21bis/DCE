@@ -81,7 +81,6 @@ local ignoredKeys = {
     failures = true,
 
     -- taskSelected = true,
-    -- etaSpawn = true,
     baseStartup = true,
     name = true,
 
