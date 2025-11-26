@@ -238,6 +238,7 @@ local totalPlanePerTask = {
 --check le Loadout pour voir s'il y a des erreurs
 -- require("Active/Loadouts_archive")
 local error = 0
+local debugTempFLIGHT
 for side, units in pairs(oob_air) do
 -- db_loadouts = {
 	-- ["AV8BNA"] = {
@@ -295,17 +296,20 @@ for side, units in pairs(oob_air) do
 
 							elseif task ~= "Spotter" then
 
-								print("AtoG error_B: no task |"..tostring(task).."| in the loadout for this unit:? "..tostring(unit.type).."|")
+								debugTempFLIGHT = "AtoG error_B: no task |"..tostring(task).."| in the loadout for this unit:? "..tostring(unit.type).."|"
+								InsertBugList(debugTempFLIGHT)
 								error = error + 1
 							end
 
 						else
-							print("AtoG error_C: |"..unit.type.."| not found in db_loadouts. A problem with the campaigns_code_loadout code? |"..tostring(camp.code_loadout).."|")
+							debugTempFLIGHT = "AtoG error_C: |"..unit.type.."| not found in db_loadouts. A problem with the campaigns_code_loadout code? |"..tostring(camp.code_loadout).."|"
+							InsertBugList(debugTempFLIGHT)
 							error = error + 1
 						end
 
 						if not foundTaskAndCountry then
-							print("AtoG error_D: |"..unit.type.."| |"..task.."| not found in db_loadouts for this country: |"..tostring(unit.country).."|")
+							debugTempFLIGHT = "AtoG error_D: |"..unit.type.."| |"..task.."| not found in db_loadouts for this country: |"..tostring(unit.country).."|"
+							InsertBugList(debugTempFLIGHT)
 							error = error + 1
 						end
 					end
@@ -315,20 +319,41 @@ for side, units in pairs(oob_air) do
 	end
 end
 
-if error >= 1 and error < 5 then os.execute 'pause'
-end
+if error >= 1 then 
 
+	debugTempFLIGHT = "AtoG error: ".." With so many errors using the Central loadout, there may be a custom loadout in the /Init folder \n "
+	.."To do this, set the \"selectLoadout\" variable to \"init\" in the conf_mod"
 
-if error >= 5 then
-	if string.lower(campMod.selectLoadout) == "init" then
+	InsertBugList(debugTempFLIGHT)
 
-	else
-		print()
-		print("================================================ATTENTION====================================================")
-		print("AtoG error: ".." With so many errors using the Central loadout, there may be a custom loadout in the /Init folder \n "
-		.."To do this, set the \"selectLoadout\" variable to \"init\" in the conf_mod") os.execute 'pause'
+	local loadout_str = "Loadouts_archive = " .. TableSerialization(LoadoutsList, 0)	--make a string
+	local loadoutFile = io.open("Active/Loadouts_archive.lua", "w") or error("Failed to open debug file")
+	loadoutFile:write(loadout_str)																--save new data
+	loadoutFile:close()
+
+	if BugList and type(BugList) == "table" and #BugList >= 1 then
+		local table_Str = "BugList = " .. TableSerialization(BugList, 0)
+		local bugFile = io.open("Debug/BugList.lua", "w") or error("Failed to open debug file")
+		bugFile:write(table_Str)
+		bugFile:close()
 	end
+
+	os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')			--open the BugList file with notepad
+
+	os.execute 'pause'
 end
+
+
+-- if error >= 5 then
+-- 	if string.lower(campMod.selectLoadout) == "init" then
+
+-- 	else
+
+
+-- 		os.execute 'pause'
+		
+-- 	end
+-- end
 
 local function table_move(src, start, stop, dest, tbl)
     tbl = tbl or src

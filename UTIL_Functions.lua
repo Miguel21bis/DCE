@@ -46,6 +46,7 @@ WingmenPlayer = false			-- si true, les wingmen playable sont proposé aux joueu
 LoadoutsList = {}				-- construit la table loadout en fonction du loadout général et de la campagne
 EPLRS_Capacity = {}
 
+
 RadioA = {
 	["blue"] = {
 	},
@@ -441,6 +442,12 @@ function TableSerializationAG_triggers(t, i)
         text = text .. tab .. "},\n" -- Toutes les autres accolades sont suivies d'une virgule
     end
     return text
+end
+
+--function type DCS, ne pas changer la casse
+function aircraft_task(taskName)
+
+	return taskName
 end
 
 local loadoutStructures = {
@@ -2098,7 +2105,20 @@ local function loadoutPylon(loadoutTable)
 end
 
 
--- local lfs = require("lfs")
+-- récupère le chemin du script actuel (UTIL_Functions.lua)
+local currentScript = debug.getinfo(1).source:sub(2)
+local baseDir = currentScript:match("(.*/)") or "./"
+
+local function mergeTablesDeep(target, source)
+    for k, v in pairs(source) do
+        if type(v) == "table" then
+            target[k] = target[k] or {}
+            mergeTablesDeep(target[k], v)
+        else
+            target[k] = v
+        end
+    end
+end
 
 -- local function mergeTablesB(target, source)
 --     for k, v in pairs(source) do
@@ -2106,76 +2126,45 @@ end
 --     end
 -- end
 
--- function LoadAllLoadouts(folder)
---     local final = {}
-
---     for file in lfs.dir(folder) do
---         -- on ignore "." et ".."
---         if file ~= "." and file ~= ".." then
-            
---             -- on ne prend que les .lua
---             if file:match("%.lua$") then
---                 local fullpath = folder .. "/" .. file
-
---                 -- exécution du fichier
---                 dofile(fullpath)
-
---                 -- chaque fichier définit la variable db_loadouts
---                 if db_loadouts then
---                     mergeTablesB(final, db_loadouts)
---                     db_loadouts = nil -- IMPORTANT
---                 end
---             end
---         end
---     end
-
---     return final
--- end
-
--- -- Charge toute la base
--- db_loadouts = LoadAllLoadouts("db_loadout")
-
-
--- récupère le chemin du script actuel (UTIL_Functions.lua)
-local currentScript = debug.getinfo(1).source:sub(2)
-local baseDir = currentScript:match("(.*/)") or "./"
-
-local function mergeTablesB(target, source)
-    for k, v in pairs(source) do
-        target[k] = v
-    end
-end
-
 function LoadAllLoadouts(subFolder)
+
+    -- 1) ON PART DE LA TABLE ORIGINALE (celle de DCE)
     local final = {}
+    if db_loadouts and type(db_loadouts) == "table" then
+        final = Deepcopy(db_loadouts)
+    else
+        print("DCE WARNING : aucun db_loadouts initial trouvé !")
+    end
 
-    -- chemin absolu du dossier db_loadouts
     local folder = baseDir .. subFolder
-
-    -- commande DIR en mode bare (/b)
     local cmd = 'dir "' .. folder .. '" /b'
 
     local p = io.popen(cmd)
     if not p then
-        env.info("DCE ERROR: impossible d’ouvrir le dossier : " .. folder)
+        print("DCE ERROR : impossible d’ouvrir le dossier : " .. folder)
         return final
     end
 
     for file in p:lines() do
         if file:match("%.lua$") then
+            
             local fullpath = folder .. "/" .. file
+            print("DCE : loading loadout -> " .. fullpath)
+
+            db_loadouts = nil  -- IMPORTANT : on purifie avant le dofile
 
             local ok, err = pcall(function()
                 dofile(fullpath)
             end)
 
             if not ok then
-                env.info("DCE ERROR: erreur lors du chargement de " .. fullpath .. " : " .. err)
-            else
-                if db_loadouts then
-                    mergeTablesB(final, db_loadouts)
-                    db_loadouts = nil
-                end
+                print("DCE ERROR : erreur dans " .. fullpath .. " : " .. err)
+            
+            elseif db_loadouts then
+                -- MERGE ici : final = final + db_loadouts
+                mergeTablesDeep(final, db_loadouts)
+
+                db_loadouts = nil  -- nettoyage
             end
         end
     end
@@ -2184,6 +2173,144 @@ function LoadAllLoadouts(subFolder)
     return final
 end
 
+
+
+-- function LoadAllLoadouts(subFolder)
+--     local final = {}
+
+--     -- chemin absolu du dossier db_loadouts
+--     local folder = baseDir .. subFolder
+
+--     -- commande DIR en mode bare (/b)
+--     local cmd = 'dir "' .. folder .. '" /b'
+
+--     local p = io.popen(cmd)
+--     if not p then
+--         print("DCE ERROR: impossible d’ouvrir le dossier : " .. folder)
+--         return final
+--     end
+
+--     for file in p:lines() do
+--         if file:match("%.lua$") then
+--             local fullpath = folder .. "/" .. file
+
+-- 			--TODO ici, ça ecrase l'initial
+--             local ok, err = pcall(function()
+--                 dofile(fullpath)
+--             end)
+
+--             if not ok then
+--                 print("DCE ERROR: erreur lors du chargement de " .. fullpath .. " : " .. err)
+--             else
+--                 if db_loadouts then
+--                     mergeTablesB(final, db_loadouts)
+
+-- 					local loadout_str = "Loadouts_archive = " .. TableSerialization(db_loadouts, 0)	--make a string
+-- 					local loadoutFile = io.open("Active/Loadouts_archive"..N_var..".lua", "w") or error("Failed to open debug file")
+-- 					loadoutFile:write(loadout_str)																--save new data
+-- 					loadoutFile:close()
+
+-- 					N_var = N_var +1
+
+--                     db_loadouts = nil
+--                 end
+--             end
+--         end
+--     end
+
+--     p:close()
+--     return final
+-- end
+
+
+
+-- Merge deep "amateur averti" : préserve tables existantes et fusionne récursivement
+-- local function mergeTablesDeep(target, source)
+--     for k, v in pairs(source) do
+--         if type(v) == "table" then
+--             if type(target[k]) ~= "table" then
+--                 -- si target n'est pas table, on remplace
+--                 target[k] = {}
+--             end
+--             mergeTablesDeep(target[k], v)
+--         else
+--             target[k] = v
+--         end
+--     end
+-- end
+
+-- Charge les mods d'un dossier, exécute chaque fichier dans un env isolé
+-- relativeFolder = "../../../Missions/Campaigns/"..camp.title.."/Mods" par exemple
+-- ACCEPT_NEW_TABLES = true --toutes les tables créées par le mod seront ajoutées à _G
+function LoadModData(relativeFolder, ACCEPT_NEW_TABLES)
+    ACCEPT_NEW_TABLES = not not ACCEPT_NEW_TABLES    -- bool
+    local fullFolder = "../../../Missions/Campaigns/"..camp.title.."/"..relativeFolder
+    print("DCE : Scanning Mods folder : " .. tostring(fullFolder))
+
+    local cmd = 'dir "' .. fullFolder .. '" /b'
+    local p = io.popen(cmd)
+    if not p then
+        print("DCE ERROR : impossible de lire le dossier Mods : " .. fullFolder)
+        return
+    end
+
+    for file in p:lines() do
+        if file:match("%.lua$") then
+            local fullpath = fullFolder .. "/" .. file
+            print("DCE : Chargement MOD -> " .. fullpath)
+
+            -- load the chunk (file) without executing it globally
+            local chunk, loadErr = loadfile(fullpath)
+            if not chunk then
+                print("DCE ERROR : loadfile failed for " .. fullpath .. " : " .. tostring(loadErr))
+            else
+                -- create an isolated env that falls back to _G for reads (so mod can call DCE functions)
+                local env = {}
+                setmetatable(env, { __index = _G })
+
+                -- set this env as the chunk's environment (Lua 5.1)
+                setfenv(chunk, env)
+
+                -- execute the chunk safely
+                local ok, execErr = pcall(chunk)
+                if not ok then
+                    print("DCE ERROR : execution failed for " .. fullpath .. " : " .. tostring(execErr))
+                else
+                    -- enumerate what the mod defined in env
+                    for k, v in pairs(env) do
+                        -- skip metamethods and inherited keys (if index produced inherited, pairs won't show them)
+                        if type(k) == "string" then
+                            -- only consider tables defined by the mod (ignore functions, numbers...)
+                            if type(v) == "table" then
+                                print("DCE : Table détectée dans MOD '" .. file .. "' : " .. tostring(k))
+
+                                -- si DCE (global) a déjà une table du même nom -> merge dedans
+                                if type(_G[k]) == "table" then
+                                    print("DCE : Fusion dans DCE -> " .. tostring(k))
+                                    mergeTablesDeep(_G[k], v)
+                                else
+                                    -- table nouvelle, décider selon ACCEPT_NEW_TABLES
+                                    if ACCEPT_NEW_TABLES then
+                                        print("DCE : Ajout d'une nouvelle table globale -> " .. tostring(k))
+                                        _G[k] = v
+                                    else
+                                        print("DCE : Table nouvelle ignorée (pour l'instant) -> " .. tostring(k))
+                                    end
+                                end
+                            else
+                                -- si le mod définit des scalaires ou fonctions globaux qu'on souhaite conserver ou logger
+                                -- par défaut on ignore pour éviter de polluer _G
+                                -- Si tu veux autoriser certaines clés non-table, tu peux les whitelist ici.
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    p:close()
+end
 
 
 -- modification M49.a big central db_loadout
@@ -2418,6 +2545,8 @@ end
 
 -- modification M54		revoir CustomTaskScript et TaskBombing
 -- check si tous les avions pr�vu dans oob_air ont leur task d�clar� possible dans la table TaskByPlane
+local error = 0
+local debugTempFLIGHT
 function Check_TaskPossibleByPlane()
 
 	-- StrikeCombi = {
@@ -2463,8 +2592,6 @@ function Check_TaskPossibleByPlane()
 	end
 
 	local checkOobAir = Deepcopy(oob_air)
-
-
 	for side, squadTbl in  pairs(checkOobAir) do
 		for squad_n, squad in  pairs(squadTbl) do
 
@@ -2509,8 +2636,8 @@ function Check_TaskPossibleByPlane()
 					end
 
 					if type(valueOA) ~= "boolean" then
-						print("UtilF ATTENTION is not a boolean value for : "..tostring(squad.type).." "..tostring(taskOA))
-						print("ATTENTION ") os.execute 'pause'
+						debugTempFLIGHT = "UtilF ATTENTION is not a boolean value for : "..tostring(squad.type).." "..tostring(taskOA)
+						error = error + 1
 					end
 
 					if valueOA == true and TaskByPlane[taskOA] then
@@ -2526,35 +2653,52 @@ function Check_TaskPossibleByPlane()
 
 						--toutes les tasks sauf strike
 						if not foundTask and not addMultipleStrike and not tostring(taskOA) == "Fighter Sweep" then
-							print("(Error UutilF C01) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring(taskOA))
-							print("Error ") os.execute 'pause'
+							debugTempFLIGHT = "(Error UutilF C01) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring(taskOA)
+							error = error + 1
 						end
 
 					elseif valueOA == true and not TaskByPlane[taskOA] and not tostring(taskOA) == "Fighter Sweep" then
-						print("(Error UutilF C02) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring(taskOA))
-						print("Error ") os.execute 'pause'
+						debugTempFLIGHT = "(Error UutilF C02) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring(taskOA)
+						error = error + 1
 					end
 				end
 
 				--si aucune tasks strike n'a �t� trouv�
 				if not foundStrikeTask and  addMultipleStrike then
-					print("(Error UutilF C03) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring("Strike ( CAS or Ground Attack or Pinpoint Strike )"))
-					print("Error ") os.execute 'pause'
+					debugTempFLIGHT = "(Error UutilF C03) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring("Strike ( CAS or Ground Attack or Pinpoint Strike )")
+					-- print("Error ") 
+					InsertBugList(debugTempFLIGHT)
+					error = error + 1
 				end
 				if not squad.inactive and not foundPlane   then
 					--TODO revoir ce pb, exemple avec campaign Hornet Over Carrier SC
-					print("(Error UutilF C04)||"..tostring(squad.type).."||"..tostring(squad.name).."||  impossible to find a task/aircraft match with all files concerned ".." (oob_air_init or  UTIL_Data.lua or bad Task or bad boolean task)")
+					debugTempFLIGHT = "(Error UutilF C04)||"..tostring(squad.type).."||"..tostring(squad.name).."||  impossible to find a task/aircraft match with all files concerned ".." (oob_air_init or  UTIL_Data.lua or bad Task or bad boolean task)"
+					InsertBugList(debugTempFLIGHT)
 
 					for taskOA, valueOA in  pairs(squad.tasks) do
-						print(tostring(taskOA).." : "..tostring(valueOA))
+						debugTempFLIGHT = tostring(taskOA).." : "..tostring(valueOA)
+						InsertBugList(debugTempFLIGHT)
 					end
-					print("Error ") os.execute 'pause'
+					error = error + 1
 				end
 			end
 		end
 	end
 end
 
+if error >= 1 then 
+
+	if BugList and type(BugList) == "table" and #BugList >= 1 then
+		local table_Str = "BugList = " .. TableSerialization(BugList, 0)
+		local bugFile = io.open("Debug/BugList.lua", "w") or error("Failed to open debug file")
+		bugFile:write(table_Str)
+		bugFile:close()
+	end
+
+	os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')			--open the BugList file with notepad
+	
+	os.execute 'pause'
+end
 
 --M43 assignation des numeros de parking du type C08 
 ParkOccupied = {}
@@ -2711,101 +2855,6 @@ function CheckPointInPolygon(point, polygon, show)
         j = i;
     end
     return oddNodes
-end
-
-
-
-
-
-function CheckConfModMaster_OLD()
-
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua")
-	local confModCheck = {
-		mission_ini = mission_ini_check,
-		mission_forcedOptions = mission_forcedOptions_check,
-		-- campaign_ini = campaign_ini_check,
-		Debug = Debug_check,
-		campMod = campMod_check,
-
-	}
-
-	local confModLocal = {
-		mission_ini = mission_ini,
-		mission_forcedOptions = mission_forcedOptions,
-		-- campaign_ini = campaign_ini,
-		Debug = Debug,
-		campMod = campMod,
-
-	}
-
-	local function checkChanged()
-
-		local found = true
-		for var1, value1 in pairs(confModCheck) do
-			if type(value1) ~= "table" then
-				if confModLocal[var1] == nil then found = false   return false end
-
-			elseif type(value1) == "table" then
-				for var2, value2 in pairs(value1) do
-					if type(value2) ~= "table" then
-						if confModLocal[var1][var2] == nil then found = false   return false end
-
-					elseif type(value2) == "table" then
-						for var3, value3 in pairs(value2) do
-							if type(value3) ~= "table" then
-								if  confModLocal[var1] == nil or  confModLocal[var1][var2] == nil or  confModLocal[var1][var2][var3] == nil then found = false   return false end
-
-							end
-						end
-					end
-				end
-			end
-		end
-
-		--on change de sens, on regarde s'il y a des infos en trop en local
-		for var1, value1 in pairs(confModLocal) do
-			-- print("UtilF var1 |"..var1  )
-
-			if type(value1) ~= "table" then
-				if confModCheck[var1] == nil then found = false print("UtilF B not found var1 |"..var1  )  return false end
-			elseif type(value1) == "table" then
-				for var2, value2 in pairs(value1) do
-					if type(value2) ~= "table" then
-						if confModCheck[var1] == nil or confModCheck[var1][var2] == nil  then
-							found = false
-							-- print("UtilF B not found var2 |"..var1.." "..var2  ) 
-							return false
-						end
-
-					elseif type(value2) == "table" then
-						for var3, value3 in pairs(value2) do
-							if type(value3) ~= "table" then
-								-- print("UtilF var1 |"..var1.." var2 "..var2.." var3 "..var3  )
-								if confModCheck[var1] == nil or confModCheck[var1][var2] == nil or confModCheck[var1][var2][var3] == nil  then
-									-- print("UtilF B not found var3 |"..var3  )
-									found = false return false
-								end
-
-							end
-						end
-					end
-				end
-			end
-		end
-
-		return true
-
-	end
-
-
-	local integrity = checkChanged()
-
-
-	if integrity == false then
-		return 1
-	else
-		return 0
-	end
 end
 
 
@@ -3588,7 +3637,7 @@ function AssignCallnameSquad()
 						local assigneOk = false
 
 						--s'il existe une table avec des CallName sp�cifique � un type d'avion
-						if  SpecificCallnames[unit.type] and SpecificCallnames[unit.type][unit.country]  then
+						if SpecificCallnames[unit.type] and SpecificCallnames[unit.type][unit.country]  then
 
 							--recherch l'index le plus haut de la table SpecificCallnames
 							local Imax = 0
@@ -3916,26 +3965,6 @@ function CompareTableAlphaNumeric(reference, working)
 
     return changes
 end
-
--- -- Fonction utilitaire pour comparer deux tables
--- function CompareTables(t1, t2)
---     if t1 == t2 then return true end
---     if type(t1) ~= "table" or type(t2) ~= "table" then return false end
-
---     for k, v in pairs(t1) do
---         if type(v) == "table" then
---             if not CompareTables(v, t2[k]) then return false end
---         else
---             if v ~= t2[k] then return false end
---         end
---     end
-
---     for k, v in pairs(t2) do
---         if t1[k] == nil then return false end
---     end
-
---     return true
--- end
 
 
 function ListSpotterAircraft()
@@ -4687,8 +4716,9 @@ function LoadFileAndUpdate(from)
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_MissionScore.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_AddPropAircraft.lua")
 
-	Check_TaskPossibleByPlane()
+	-- Check_TaskPossibleByPlane()
 
     if Debug.debug then
         print("LOAD LoadFileAndUpdate() from " .. tostring(from))
@@ -4696,9 +4726,14 @@ function LoadFileAndUpdate(from)
 
 	
 	--////////////////////////////////////////////////////////
+	LoadModData("Mods", true)
 	BuildLoadout()
 	--////////////////////////////////////////////////////////
 
+	InheritedFromProcessing()
+	DataCompilation_TaskByPlane()
+
+	Check_TaskPossibleByPlane()
 
 	
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Time.lua")

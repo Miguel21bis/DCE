@@ -691,7 +691,8 @@ dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_RouteGenerator.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Generator.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_PlayerAssign.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Timing.lua")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_AddPropAircraft.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_AddPropAircraft.lua")
+
 dofile("../../../ScriptsMod." .. VersionPackageICM .. "/ATO_FlightPlan.lua")
 dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Final_steps.lua")
 

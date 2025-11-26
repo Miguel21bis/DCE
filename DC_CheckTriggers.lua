@@ -76,7 +76,7 @@ end
 --Action.ShipMission(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTime)				-- assign and run a movement mission to a ship group (See the DC_CheckTriggers.lua file for more explanation)
 --Action.TemplateActive(TabFile)															-- Template Active GroundGroup moving front (single file : active template) (if tab file: random activation)
 --Action.SetWeather( "weather = { pHigh = 78, etc... }" )									-- modifies conf_mod weather parameters during the campaign
---Action.RestrictedLoadout(file)															-- (ADD) only for players, prohibits certain items, targets the file name loadouts/restricted_loadoutnamX.miz
+--Action.RestrictedLoadout(file)															-- (ADD) only for players, prohibits certain items, targets the file name Restricted_loadouts/restricted_loadoutnamX.miz
 --Action.AuthorizedLoadout(authName)														-- (ADD) Essentially for AIs, allows you to add certain loadouts containing the variable: restrictedCondition = “restricted_loadoutnamX”,
 
 --Important notes:
@@ -1810,10 +1810,15 @@ Action = {}
 
 		-- local missionFromBaseMission = mission  -- Sauvegarde la mission principale
 
-		local PayloadRestricted = {}
+		local payloadRestricted = {}
 
-		local restrictedPath = "Loadouts/" .. file
+		local restrictedPath = "Restricted_loadouts/" .. file
 		local testPath = io.open(restrictedPath, "r")
+
+		if testPath ~= nil then
+			restrictedPath = "Loadouts/" .. file
+			testPath = io.open(restrictedPath, "r")
+		end
 
 		if testPath ~= nil then
 			io.close(testPath)
@@ -1840,7 +1845,7 @@ Action = {}
 								for Ngroup, group in pairs(groups["group"]) do
 									for Nunit, unit in pairs(group.units) do
 										if unit.payload and unit.payload.restricted then
-											PayloadRestricted[unit.type] = unit.payload.restricted
+											payloadRestricted[unit.type] = unit.payload.restricted
 										end
 									end
 								end
@@ -1854,7 +1859,7 @@ Action = {}
 			-- mission = missionFromBaseMission  <-- Plus besoin !
 
 			-- Sérialisation des restrictions et sauvegarde dans un fichier
-			local data_str = "PayloadRestricted = " .. TableSerialization(PayloadRestricted, 0)
+			local data_str = "PayloadRestricted = " .. TableSerialization(payloadRestricted, 0)
 			local dataFile = io.open("Active/PayloadRestricted.lua", "w") or error("Failed to open debug file")
 			dataFile:write(data_str)
 			dataFile:close()

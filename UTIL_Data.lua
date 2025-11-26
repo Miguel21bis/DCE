@@ -68,13 +68,6 @@ SEAD = "SEAD"
 Transport = "Transport"
 
 
-
-
-local function aircraft_task(taskName)
-
-	return taskName
-end
-
 Data_configuration = {
 	CV_Vmax = 15.4,								--10-- (default : 15.4333( m/s):30kts), can have bp with F14, go down to 10 m/s
 	CV_windDeck = 13.8,							--9-- (default : 13.89( m/s):27kts), can have bp with F14, go down to 9 m/s
@@ -4592,30 +4585,36 @@ local function mergeSimple(dest, src, opts)
 end
 
 -- Data_divers contient les définitions (parent et enfant)
-for planeType, planeData in pairs(Data_divers) do
-    if planeData.inheritedFrom then
-        local parent = Data_divers[planeData.inheritedFrom]
-        if type(parent) == "table" then
-            -- 1) on part d'une copie du parent (table propre)
-            local merged = deepcopyLocal(parent)
-            -- 2) on fusionne les champs de l'enfant dans la copie
-            -- overwrite = true : si l'enfant définit un champ scalaire, il remplace le parent
-            mergeSimple(merged, planeData, { overwrite = true })
-            -- 3) on stocke le résultat dans l'enfant
-            Data_divers[planeType] = merged
-        end
-    end
+function InheritedFromProcessing()
+	for planeType, planeData in pairs(Data_divers) do
+		if planeData.inheritedFrom then
+			local parent = Data_divers[planeData.inheritedFrom]
+			if type(parent) == "table" then
+				-- 1) on part d'une copie du parent (table propre)
+				local merged = deepcopyLocal(parent)
+				-- 2) on fusionne les champs de l'enfant dans la copie
+				-- overwrite = true : si l'enfant définit un champ scalaire, il remplace le parent
+				mergeSimple(merged, planeData, { overwrite = true })
+				-- 3) on stocke le résultat dans l'enfant
+				Data_divers[planeType] = merged
+			end
+		end
+	end
 end
 
 
 --rempli la table TaskByPlane avec les Tasks qui ne sont rempli que dans Data_divers
-for planeType, planeData in pairs(Data_divers) do
-	if planeData.Tasks then
-		for taskN, task in pairs(planeData.Tasks) do
-			if not TaskByPlane[task][planeType] then
-				TaskByPlane[task][planeType] = true
+function DataCompilation_TaskByPlane()
+	for planeType, planeData in pairs(Data_divers) do
+		if planeData.Tasks then
+			for taskN, task in pairs(planeData.Tasks) do
+				if not TaskByPlane[task][planeType] then
+					TaskByPlane[task][planeType] = true
+				end
 			end
-		end
 
+		end
 	end
 end
+-- InheritedFromProcessing()
+-- DataCompilation_TaskByPlane()
