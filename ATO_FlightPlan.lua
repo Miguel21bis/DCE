@@ -5292,6 +5292,10 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe waypoints[1][x] AA "..tostring(waypoints[1]["x"])) end
 
+				local goupTask = flight[f].task
+				if flight[f].type == "SH-3D" and flight[f].task == "Transport" then
+					goupTask = "CAS"
+				end
 
 				local group =
 				{
@@ -5312,7 +5316,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					['x'] = waypoints[1]["x"],
 					['y'] = waypoints[1]["y"],
 					['start_time'] = start_time or 1,
-					['task'] = flight[f].task,
+					['task'] = goupTask,
 					['uncontrolled'] = false,
 					['DCE_targetName'] = flight[f].target_name,
 

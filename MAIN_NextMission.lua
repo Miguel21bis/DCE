@@ -157,7 +157,7 @@ end
 
 --attention, ne pas activer ici oob_scen, sinon cela ne prend pas en compte son update
 -- require("Active/oob_scen")
-
+local addTriggersZOne
 for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed scenery objects
 	if scen.x and scen.y then														--destroyed scenery object has x and z coordinates
 
@@ -176,8 +176,8 @@ for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed 
             -- print("Destruction totale pour "..tostring(scen_name).." : rayon = "..radius.." m (masse TNT = "..scen.explosiveMass.." kg)")
         end
 
-		if not isForest  then
-			-- local zones_n = #mission.triggers.zones	+ 1									--trigger zone number
+		if not isForest then
+			addTriggersZOne = true
 			local zoneId = GetFreeZoneId()
 
 			--add trigger zone
@@ -211,11 +211,16 @@ for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed 
 				["predicate"] = "a_scenery_destruction_zone",
 				["destruction_level"] = txDestruction,
 				["zone"] = zoneId,
+				["type"] = 0,
 			}
 		end
 	end
+	
 end
 
+if addTriggersZOne then
+	mission.trig.actions[scenaryTrigN] = mission.trig.actions[scenaryTrigN]  ..' mission.trig.func[' .. scenaryTrigN .. ']=nil;'
+end
 -----------------------------------------------------------------------
 mapResource =
 {
@@ -293,7 +298,7 @@ local function addFileTrigger(filename, cond0, predicate1, predicate2)
 	mission.trig.conditions[trig_n] = cond																			--"return(true)"
 	--						[1] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_6\"));",
 	if predicate2 == "a_out_sound_c" then
-		mission.trig.actions[trig_n] = "a_out_sound_c("..idCountry..", getValueResourceByKey(\"ResKey_Action_" .. mission.maxDictId .. "\"), 0);"
+		mission.trig.actions[trig_n] = "a_out_sound_c("..", getValueResourceByKey(\"ResKey_Action_" .. mission.maxDictId .. "\"), 0);"
 	else
 		mission.trig.actions[trig_n] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_" .. mission.maxDictId .. "\"));"
 	end
@@ -737,7 +742,7 @@ dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Debug.lua")
 camp["groundthreats"] = groundthreats
 
 
-mission.currentKey = 1010000															--not clear how this works but is required for multiplyer clients to be available for selection on mission start
+mission.currentKey = 1500000															--not clear how this works but is required for multiplyer clients to be available for selection on mission start
 
 --########   1   ##############
 --########   1   ##############

@@ -49,18 +49,20 @@ local MAX_DEPTH = 3  -- Modifier cette valeur pour changer la profondeur (2 pour
 
 -- Liste des clés à ignorer
 local ignoredKeys = {
-    briefing_name = true,
-    hCruiseREF = true,
-    DCE_payloadtName = true,
-    psi = true,
+    -- briefing_name = true,
+    -- hCruiseREF = true,
+    -- DCE_payloadtName = true,
     dead_last = true,
-    TotFlightTime = true,
-    TotFlightDist = true,
-    DCE_targetName = true,
-    dead = true,
-    CheckDay = true,
-    etaSpawn = true,
+    -- TotFlightTime = true,
+    -- TotFlightDist = true,
+    -- DCE_targetName = true,
+    -- dead = true,
+    -- CheckDay = true,
+    -- etaSpawn = true,
+    -- baseStartup = true,
+    -- debug = true,
 
+    psi = true,
     Radio = true,
     x = true,
     y = true,
@@ -71,7 +73,7 @@ local ignoredKeys = {
     alt = true,
     ETA = true,
     start_time = true,
-    debug = true,
+
 
 
     triggers = true,
@@ -81,7 +83,6 @@ local ignoredKeys = {
     failures = true,
 
     -- taskSelected = true,
-    baseStartup = true,
     name = true,
 
 }
