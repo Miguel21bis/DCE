@@ -1860,10 +1860,19 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					for vN, value in pairs(frew_AWACS) do
 						freqA = tonumber(value.freq) or 0
 						local call = ""
+						local n_txt = ""
+						local occurenceN = 0
 
-						for copy_vN, copyValue in pairs(copy_AWACS_freq) do
-							if tonumber(copyValue.freq) == freqA  then
-								call = call .. ""..copyValue.callsign.." ("..copyValue.time..")"
+						-- for copy_vN, copyValue in pairs(copy_AWACS_freq) do
+						-- 	if tonumber(copyValue.freq) == freqA  then
+						-- 		call = call .. ""..copyValue.callsign.." ("..copyValue.time..")"
+						-- 	end
+						-- end
+						for _, value2 in pairs(copy_AWACS_freq) do
+							if occurenceN >= 1 then n_txt = " - " else n_txt = "" end
+							if tonumber(value2.freq) == freqA  then
+								call = call .. n_txt..value2.callsign
+								occurenceN = occurenceN + 1
 							end
 						end
 
@@ -1905,10 +1914,10 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
 								if freqCapability(freqA, radioP, radioN, "") then
-									if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
+									if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] < radioP[radioN].nbCanal then
 										if radioP[radioN].startCanal == 0 then MC = -1 end
 										table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
-										entry["radio"] = radioName[radioN].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][radioN]["channels"]	 + MC
+										entry["radio"] = radioName[radioN].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][radioN]["channels"]	+ MC
 										local entryCopy = Deepcopy(entry)
 										table.insert(entriesRadio[radioN], entryCopy)
 									elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then

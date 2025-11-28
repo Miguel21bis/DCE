@@ -1702,8 +1702,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					}
 
 					-- local typeNameRequire = flight[f].type
-					if Data_divers[flight[f].type].requiredModulesSpecialName then
-						nameOfModule = Data_divers[flight[f].type].requiredModulesSpecialName
+					if Data_divers[flight[f].type].moduleName then
+						nameOfModule = Data_divers[flight[f].type].moduleName
 					end
 
 					if ListRequiredModules[nameOfModule] then

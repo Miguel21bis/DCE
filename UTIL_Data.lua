@@ -1,12 +1,12 @@
 --Various DATA
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M90_a updateData_Bi
+-- last modification: M90_a updateData_Bj
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Data.lua"] = "1.15.89"
+versionDCE["UTIL_Data.lua"] = "1.15.90"
 ------------------------------------------------------------------------------------------------------- 
--- updateData_Bi			(i VSN_F4)(h Fulcrum)(g vwv_mig21mf)(f refuellingReceptacleType)(e Tu_22D)(Bd flyingAlone)(CH-47F H-6J)(a OH-58)(z F-4E-45MC)(UH-60L)(x hHover)(w reaper)(v Hercules)(u tabTask)(t add is_helicopter table)(s F1EE)(r F-16C_50)(q): Add helicos  (p): Add WOC80)(o: transfer the dataMap to another file)
--- debug_c					(c OH-6A)(b requiredModulesSpecialName)(a add IsWesternCountry function)
+-- updateData_Bj			(j ec-121 etc...)(i VSN_F4)(h Fulcrum)(g vwv_mig21mf)(f refuellingReceptacleType)(e Tu_22D)(Bd flyingAlone)(CH-47F H-6J)(a OH-58)(z F-4E-45MC)(UH-60L)(x hHover)(w reaper)(v Hercules)(u tabTask)(t add is_helicopter table)(s F1EE)(r F-16C_50)(q): Add helicos  (p): Add WOC80)(o: transfer the dataMap to another file)
+-- debug_c					(c OH-6A)(b moduleName)(a add IsWesternCountry function)
 -- cleanCode_a				(a: repetition)
 -- adjustment_e				(e delete EPLRS_Capacity table)(d CVN to CV)(bombing on Group&Unit)(b: Syria nnTimeZone +3 & GudautaGPS )
 -- modification M90_a		missionWithIcone
@@ -119,131 +119,6 @@ end
 
 
 TaskByPlane = {
-	["Nothing"] = {
-		-- ["MosquitoFBMkVI"] = true,
-		["SpitfireLFMkIX"] = true,
-		["SpitfireLFMkIXCW"] = true,
-
-		["P-47D-30bl1"] = true,
-		["P-47D-30"] = true,
-		["P-47D-40"] = true,
-		["P-51D"] = true,
-		["P-51D-30-NA"] = true,
-		["TF-51D"] = true,
-
-		["A-20G"] = true,
-		["B-17G"] = true,
-		["C-47"] = true,
-
-
-		["Bf-109K-4"] = true,
-		["FW-190A8"] = true,
-		["FW-190D9"] = true,
-		["Ju-88A4"] = true,
-
-		["I-16"] = true,
-		["Yak-52"] = true,
-
-		["MQ-9 Reaper"] = true,
-
-		["Tornado GR4"] = true,
-		["Tornado IDS"] = true,
-
-		["AV8BNA"] = true,
-		["A-4E-C"] = true,				--Mod
-		["A-6E"] = true,				--Mod
-		["A-10C"] = true,
-		["A-10A"] = true,
-		["A-10C_2"] = true,
-		["Bronco-OV-10A"] = true,		--Mod
-		["vwv_a1_skyraider"] = true,	--Mod
-		["vwv_o-1"] = true,         	--Mod
-
-		["F-86F Sabre"] = true,
-		["F-4E"] = true,
-		["F-5E-3"] = true,
-		["vwv_crusader"] = true,		--Mod
-		["vwv_ra-5"] = true,		--Mod
-		["F-15C"] = true,
-		["F-15E"] = true,
-		["F-15ESE"] = true,
-		["F-16C_50"] = true,
-		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
-
-		["F-117A"] = true,
-		["B-1B"] = true,
-		["B-52H"] = true,
-
-		["H-6J"] = true,
-
-		["AJS37"] = true,
-		["MB-339A"] = true,
-		["MirageF1"] = true,			--Mod
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
-		["MirageF1CT"] = true,			--Mod
-
-		["AH-1W"] = true,
-		["UH-1H"] = true,
-		["vwv_sh2f"] = true,			--Mod
-		["vwv_hh2d"] = true,			--Mod
-		["AH-64D_BLK_II"] = true,
-		["AH-64A"] = true,
-		["OH-6A"] = true,				--Mod
-
-		["JF-17"] = true,
-		["L-39C"] = true,
-		["L-39ZA"] = true,
-
-		["MiG-15bis"] = true,
-		["vwv_mig17f"] = true,			--Mod
-		["MiG-19P"] = true,
-		["MiG-21Bis"] = true,
-		["vwv_mig21mf"] = true,			--Mod
-		["MiG-23MLD"] = true,
-		["MiG-25PD"] = true,
-		["MiG-27K"] = true,
-		["MiG-29A"] = true,
-		["MiG-29S"] = true,
-		["MiG-31"] = true,
-
-		["Su-24M"] = true,
-		["Su-27"] = true,
-		["Su-30"] = true,
-		["Su-34"] = true,
-
-		["Ka-27"] = true,
-		["Mi-8MT"] = true,
-		["Mi-24V"] = true,
-		["Mi-28N"] = true,
-		["Ka-50"] = true,
-		["Ka-50_3"] = true,
-
-
-		["E-3A"] = true,
-		["E-2C"] = true,
-		["A-50"] = true,
-
-		["S-3B Tanker"] = true,
-		["KC135MPRS"] = true,
-		["KC-135"] = true,
-		["KC130"] = true,
-		["IL-78M"] = true,
-
-		["MiG-25RBT"] = true,
-		["Su-24MR"] = true,
-
-		["C-130"] = true,
-		["Hercules"] = true,		--Mod
-		["C-17A"] = true,
-		["An-30M"] = true,
-		["An-26B"] = true,
-		["IL-76MD"] = true,
-		["tu_22D"] = true,
-
-	},
-
 
 	["AFAC"] = {
 		-- ["MosquitoFBMkVI"] = true,
@@ -352,8 +227,6 @@ TaskByPlane = {
 		["F-16C bl.52d"] = true,
 		["FA-18C_hornet"] = true,
 
-		["AH-1W"] = true,
-		["UH-1H"] = true,
 		["AH-64D_BLK_II"] = true,
 		["OH-6A"] = true,			--Mod
 
@@ -429,7 +302,6 @@ TaskByPlane = {
 		["MB-339A"] = true,			 
 		["MirageF1CT"] = true,			--Mod
 
-		["AH-1W"] = true,
 		["AH-64D_BLK_II"] = true,
 		["AH-64A"] = true,
 		["SH-3D"] = true,				--Mod
@@ -517,8 +389,6 @@ TaskByPlane = {
 		["Mirage-F1EE"] = true,
 		["MirageF1CT"] = true,			--Mod
 
-		["AH-1W"] = true,
-		["UH-1H"] = true,
 		["AH-64D_BLK_II"] = true,
 		["AH-64A"] = true,
 		["OH-6A"] = true,			--Mod
@@ -655,7 +525,6 @@ TaskByPlane = {
 		["Mirage-F1CE"] = true,
 		["Mirage-F1EE"] = true,
 
-		["AH-1W"] = true,
 		["AH-64D_BLK_II"] = true,
 
 		["Yak-52"] = true,
@@ -957,7 +826,6 @@ TaskByPlane = {
 		["Hercules"] = true,		--Mod
 		["C-17A"] = true,
 
-		["UH-1H"] = true,
 		["vwv_sh2f"] = true,			--Mod
 		["vwv_hh2d"] = true,			--Mod
 		["CH-53E"] = true,
@@ -987,7 +855,7 @@ TaskByPlane = {
 -- inheritedFrom = "F-14",	--copy radio frequency, failures ...
 -- inherited_APA_From = "F-14",	--copy AddPropAircraft
 --requiredModules = true,						--itsModule
--- requiredModulesSpecialName = "VSN_F105",	--if the aircraft type name does not match the requested module name
+-- moduleName = "VSN_F105",	--if the aircraft type name does not match the requested module name
 --flyingAlone = false
 	-- alignment_PropAircraft = {
 	-- 	fast = {
@@ -1082,6 +950,18 @@ Data_divers = {
 		instrumentUnits = "russian",
 	},
 
+	["vwv_ec-121"] = 	{							--name, next to DisplayName
+		instrumentUnits = "imperial",
+		moduleName = "tetet_ec121",		--self_ID 
+		Tasks = {
+			aircraft_task(AWACS),
+		},
+		requiredModules = true,						--itsModule
+		playable = false,
+		hCruise = 7000,	--(≈ 20 000–25 000 ft)
+		vCruise = 110,	--–120 m/s
+	},
+
 
 	["Tornado GR4"] = 	{
 		instrumentUnits = "imperial",
@@ -1150,7 +1030,7 @@ Data_divers = {
 	["VSN_F105D"] = 	{				--Mod
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
-		requiredModulesSpecialName = "VSN_F105",	--if the aircraft type name does not match the requested module name
+		moduleName = "VSN_F105",	--if the aircraft type name does not match the requested module name
 		EPLRS_Capacity = false,
 		Tasks = {
 			aircraft_task(CAP),
@@ -1172,7 +1052,7 @@ Data_divers = {
 	["VSN_F105G"] = 	{				--Mod
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
-		requiredModulesSpecialName = "VSN_F105",	--if the aircraft type name does not match the requested module name
+		moduleName = "VSN_F105",	--if the aircraft type name does not match the requested module name
 		EPLRS_Capacity = false,
 		Tasks = {
 			aircraft_task(CAP),
@@ -1309,7 +1189,7 @@ Data_divers = {
 		refuellingReceptacleType = "probe"
 	},
 
-	["A-37B"] = 	{							--name, next to DisplayName
+	["a_37_dragonfly"] = 	{							--name, next to DisplayName
 		instrumentUnits = "imperial",
 		moduleName = "h60_a37_dragonfly",		--self_ID 
 		Tasks = {
@@ -1339,6 +1219,35 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		playable = true,
 	},
+	["vwv_rf101b"] = 	{
+		instrumentUnits = "imperial",
+		requiredModules = true,						--itsModule
+		moduleName = "tetet_rf101b",	--if the aircraft type name does not match the requested module name
+		vCruise = 215,
+		hCruise = 9000,
+		Tasks = {
+			aircraft_task(Reconnaissance),
+		},
+	},
+	["VSN_F104C"] = 	{
+		instrumentUnits = "imperial",
+		requiredModules = true,						--itsModule
+		moduleName = "VSN_F104C",	--if the aircraft type name does not match the requested module name
+		playable = true,
+		vCruise = 215,
+		hCruise = 9000,
+		Tasks = {
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(Reconnaissance),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(RunwayAttack),
+			aircraft_task(AntishipStrike),
+		},
+	},
 	["F-4E"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -1348,7 +1257,7 @@ Data_divers = {
 	["VSN_F4B"] = 	{
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
-		requiredModulesSpecialName = "VSN_F4",	--if the aircraft type name does not match the requested module name
+		moduleName = "VSN_F4",	--if the aircraft type name does not match the requested module name
 		playable = true,
 		vCruise = 215,
 		hCruise = 9000,
@@ -1364,12 +1273,12 @@ Data_divers = {
 			aircraft_task(RunwayAttack),
 			aircraft_task(PinpointStrike), --NEU
 	--  	aircraft_task(AntishipStrike),
-		},	
+		},
 	},
 	["VSN_F4C"] = 	{
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
-		requiredModulesSpecialName = "VSN_F4",	--if the aircraft type name does not match the requested module name
+		moduleName = "VSN_F4",	--if the aircraft type name does not match the requested module name
 		playable = true,
 		vCruise = 215,
 		hCruise = 9000,
@@ -1753,19 +1662,46 @@ Data_divers = {
 			aircraft_task(CAS),
 	  	},
 	},
-	["AH-1W"] = {
-		instrumentUnits = "imperial",
-		EPLRS_Capacity = false,
-		vCruise = 75,	--TODO a verifier
-		hCruise = 50,
-	},
 	["UH-1H"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
+		Tasks = {
+			aircraft_task(CAS),
+			aircraft_task(GroundAttack),
+			aircraft_task(Transport),
+	  	},
 		playable = true,
 		vCruise = 55,	--TODO a verifier
 		hCruise = 50,
 	},
+	["AH-1G"] = {
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		requiredModules = true,
+		moduleName = "AH-1G",
+		Tasks = {
+			aircraft_task(CAS),
+			aircraft_task(GroundAttack),
+			aircraft_task(Escort),
+			aircraft_task(AFAC),
+			aircraft_task(AntishipStrike)
+		},
+		vCruise = 55,	--TODO a verifier
+		hCruise = 50,
+	},
+	["AH-1W"] = {
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		Tasks = {
+			aircraft_task(CAS),
+			aircraft_task(Escort),
+			aircraft_task(AntishipStrike),
+			aircraft_task(GroundAttack),
+	  	},
+		vCruise = 55,	--TODO a verifier
+		hCruise = 50,
+	},
+
 	["SH-3D"] = {--mod
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -2315,6 +2251,7 @@ IsHelicopter = {
 	["SA342Minigun"] = {},
 
 	["UH-1H"] = {},
+	["AH-1G"] = {},
 	["AH-1W"] = {},
 
 	["vwv_sh2f"] = {},                            --mod
