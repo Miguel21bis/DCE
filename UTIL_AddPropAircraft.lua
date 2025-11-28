@@ -65,6 +65,27 @@ Data_AddPropAircraft = {
 		["VoiceCallsignLabel"] = "OD",
 		["VoiceCallsignNumber"] = "61",
 	},
+
+
+	["C-130J-30"] = 
+	{
+		["cargo_8"] = "",
+		["cargo_7"] = "",
+		["cargo_1"] = "",
+		["cargo_10"] = "",
+		["save_custom_data"] = true,
+		["ramp_down"] = false,
+		["cargo_9"] = "",
+		["cargo_4"] = "",
+		["cargo_6"] = "",
+		["cargo_3"] = "",
+		["cargo_5"] = "",
+		["NetCrewControlPriority"] = 0,
+		["cargo_2"] = "",
+		["allow_air_load"] = false,
+		["pre_flight_complete"] = false,
+	}, 
+
 	["KC-135"] = 
 	{
 		["STN_L16"] = "00233",

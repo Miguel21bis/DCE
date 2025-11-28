@@ -1214,6 +1214,73 @@ Data_divers = {
 		laserDesignator = true,
 	},
 
+	["B-1B"] = 	{
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		datalinks = {
+			type = "Link16",
+			isDonnor = true,
+		},
+		flyingAlone = true,
+		vCruise = 250,
+		hCruise = 9150,
+		heavyBomber = true,
+	},
+	["B-52H"] = 	{
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		datalinks = {
+			type = "Link16",
+			isDonnor = true,
+		},
+		-- flyingAlone = true,
+		vCruise = 250,
+		hCruise = 12000,
+		heavyBomber = true,
+		jammer = {
+			type = "AN/ALT-22",
+			efficiency = 86,
+			range = 2000,
+		}
+	},
+
+	["F-117A"] = 	{
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		flyingAlone = true,
+		vCruise = 260,
+		hCruise = 12500,
+	},
+
+	["C-130"] = {
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		vCruise = 140,
+		hCruise = 7620,
+	},
+	["C-130J-30"] = {
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		Tasks = {
+			aircraft_task(Transport),
+			aircraft_task(GroundAttack),
+			aircraft_task(Refueling),
+		},
+		vCruise = 140,
+		hCruise = 7620,
+	},
+	["Hercules"] = {			--Mod
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		requiredModules = true,						--itsModule
+		playable = true,
+	},
+	["C-17A"] = {
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+	},
+
+
 	["F-86F Sabre"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -1483,42 +1550,6 @@ Data_divers = {
 		refuellingReceptacleType = "drogue"
 	},
 
-	["F-117A"] = 	{
-		instrumentUnits = "imperial",
-		EPLRS_Capacity = false,
-		flyingAlone = true,
-		vCruise = 260,
-		hCruise = 12500,
-	},
-	["B-1B"] = 	{
-		instrumentUnits = "imperial",
-		EPLRS_Capacity = false,
-		datalinks = {
-			type = "Link16",
-			isDonnor = true,
-		},
-		flyingAlone = true,
-		vCruise = 250,
-		hCruise = 9150,
-		heavyBomber = true,
-	},
-	["B-52H"] = 	{
-		instrumentUnits = "imperial",
-		EPLRS_Capacity = false,
-		datalinks = {
-			type = "Link16",
-			isDonnor = true,
-		},
-		-- flyingAlone = true,
-		vCruise = 250,
-		hCruise = 12000,
-		heavyBomber = true,
-		jammer = {
-			type = "AN/ALT-22",
-			efficiency = 86,
-			range = 2000,
-		}
-	},
 	["H-6J"] = 	{
 		instrumentUnits = "metric",
 		EPLRS_Capacity = false,
@@ -1701,23 +1732,57 @@ Data_divers = {
 		vCruise = 55,	--TODO a verifier
 		hCruise = 50,
 	},
-
+	
+	["vwv_uh2a"] = {--mod
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		requiredModules = true,						--itsModule
+		moduleName = "jjj_uh2a",
+		vCruise = 40,	--TODO a verifier
+		hCruise = 500,
+	},
+	["vwv_uh2b"] = {--mod
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		requiredModules = true,						--itsModule
+		moduleName = "jjj_uh2b",
+		vCruise = 40,	--TODO a verifier
+		hCruise = 500,
+	},
+	["vwv_uh2c"] = {--mod
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		requiredModules = true,						--itsModule
+		moduleName = "jjj_uh2c",
+		vCruise = 40,	--TODO a verifier
+		hCruise = 500,
+	},
 	["SH-3D"] = {--mod
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		requiredModules = true,						--itsModule
+		moduleName = "SH-3D",
 		vCruise = 40,	--TODO a verifier
 		hCruise = 500,
 	},
 	["vwv_sh2f"] = {--mod
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
+		moduleName = "vwv_sh2f",
 		requiredModules = true,						--itsModule
 	},
-	["vwv_hh2d"] = {--mod
+	["vwv_ch46d"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-		requiredModules = true,						--itsModule
+		requiredModules = true,
+		moduleName = "tetet_ch46d",
+		Tasks = {
+			aircraft_task(Transport),
+			aircraft_task(Reconnaissance),
+			-- aircraft_task(Airborne),
+		},
+		hCruise = 200,
+		vCruise = 75, -- (m/s, ≈ 270 km/h)
 	},
 	["CH-47D"] = {
 		instrumentUnits = "imperial",
@@ -2180,23 +2245,6 @@ Data_divers = {
 		vCruise = 260,     -- m/s 
 	},
 
-
-	["C-130"] = {
-		instrumentUnits = "imperial",
-		EPLRS_Capacity = false,
-		vCruise = 140,
-		hCruise = 7620,
-	},
-	["Hercules"] = {			--Mod
-		instrumentUnits = "imperial",
-		EPLRS_Capacity = false,
-		requiredModules = true,						--itsModule
-		playable = true,
-	},
-	["C-17A"] = {
-		instrumentUnits = "imperial",
-		EPLRS_Capacity = false,
-	},
 	["An-30M"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,

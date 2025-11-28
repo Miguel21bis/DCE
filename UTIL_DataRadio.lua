@@ -848,6 +848,61 @@ Frequency = {
 			},
 		},
 	},
+	["C-130J-30"] = {
+		-- HumanRadio                               = {
+		-- 	frequency      = 305.0,
+		-- 	editable       = true,
+		-- 	minFrequency   = 1.000,
+		-- 	maxFrequency   = 399.975,
+		-- 	rangeFrequency = {
+		-- 		{ min = 30.0,   max = 87.975,  modulation = MODULATION_FM },
+		-- 		{ min = 156.0,  max = 173.975, modulation = MODULATION_FM },
+		-- 		{ min = 225.0,  max = 399.975, modulation = MODULATION_AM },
+		-- 		{ min = 108.0,  max = 200.975, modulation = MODULATION_AM },
+		-- 	},
+		-- 	modulation     = MODULATION_AM,
+		-- },
+		-- panelRadio                               = {
+		-- 	[1] = {
+		-- 		name = _("UHF-1/2"),
+		-- 		range = {
+		-- 			{ min = 225.0, max = 399.975, modulation = MODULATION_AM }
+		-- 		},
+		-- 		channels = { 30 }
+
+		-- 	},
+		-- 	[2] = {
+		-- 		name = _("VHF-1/2"),
+		-- 		range = {
+		-- 			{ min = 30.0, max = 200.975, modulation = MODULATION_AM }
+		-- 		},
+		-- 		channels = { 10 }
+		-- 	},
+		-- },
+
+		radio = {						--range of radio frequencies of player aircraft
+			[1] = {						--radio 1
+				UHF = {
+					min = 225,				--minimum radio frequency in mHz
+					max = 399.975,				--maxium  radio frequency in mHz
+				},
+				nbCanal = 20,
+				name = "UHF-1/2",
+			},
+			[2] = {						--radio 2
+				LVHF = {
+					min = 30,				--minimum radio frequency in mHz
+					max = 87.975,				--maxium  radio frequency in mHz
+				},
+				VHF = {
+					min = 108,				--minimum radio frequency in mHz
+					max = 200.975,				--maxium  radio frequency in mHz
+				},
+				nbCanal = 10,
+				name = "VHF-1/2",
+			},
+		},
+	},
 	["Hercules"] = {
 		-- prefFreqPackage = {
 		-- 	nRadio = 2,
@@ -879,7 +934,7 @@ Frequency = {
 				name = "VHF Radio",
 			},
 		},
-	},	
+	},
 	["L-39"] = {--Common aircraft definitions L-39C & L-39ZA
 		radio = {
 			[1] = {
