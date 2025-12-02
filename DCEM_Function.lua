@@ -9,12 +9,16 @@ versionDCE["DCEM_Function.lua"] = "1.2.5"
 -- cleancode_a			(a springCleaning)
 -------------------------------------------------------------------------------------------------------
 
--- local pathScriptsMod = "C:/Users/Miguel/Saved Games/DCS_Installer/Mods/tech/DCE/ScriptsMod.NG"
--- local pathCampaign = "C:/Users/Miguel/Saved Games/DCS_Installer/Mods/tech/DCE/Missions/Campaigns/Crisis in PG-Blue-GC22"
+--function type DCS, ne pas changer la casse
+function aircraft_task(taskName)
 
--- C:\Users\Miguel\Saved Games\DCS_Installer\Mods\tech\DCE\Missions\Campaigns\Crisis in PG-Blue-GC22
--- C:/Users/Miguel/Saved Games/DCS_Installer/Mods/tech/DCE/Missions/Crisis in PG-Blue-GC22
+	return taskName
+end
 
+pathScriptsMod = pathScriptsMod or  "C:/Users/miguel/Saved Games/DCS/Mods/tech/DCE/ScriptsMod.NG"
+pathCampaign = pathCampaign or  "C:/Users/miguel/Saved Games/DCS/Mods/tech/DCE/Missions/Campaigns/Hot War in The Cold - Fishbed"
+
+print("debug pathCampaign "..tostring(pathCampaign))
 dofile(pathScriptsMod.."/UTIL_Data.lua")
 dofile(pathCampaign.."/Init/oob_air_init.lua")
 
@@ -65,6 +69,111 @@ local function TableSerialization(t, i)
 end
 
 
+-- récupère le chemin du script actuel (UTIL_Functions.lua)
+local currentScript = debug.getinfo(1).source:sub(2)
+local baseDir = currentScript:match("(.*/)") or "./"
+
+local function mergeTablesDeep(target, source)
+    for k, v in pairs(source) do
+        if type(v) == "table" then
+            target[k] = target[k] or {}
+            mergeTablesDeep(target[k], v)
+        else
+            target[k] = v
+        end
+    end
+end
+
+
+-- Charge les mods d'un dossier, exécute chaque fichier dans un env isolé
+-- relativeFolder = "../../../Missions/Campaigns/"..camp.title.."/Mods" par exemple
+-- ACCEPT_NEW_TABLES = true --toutes les tables créées par le mod seront ajoutées à _G
+function LoadModData(relativeFolder, ACCEPT_NEW_TABLES)
+    ACCEPT_NEW_TABLES = not not ACCEPT_NEW_TABLES    -- bool
+    local fullFolder = pathCampaign.."/"..relativeFolder
+    -- print("DCE : A  Scanning Mods folder : " .. tostring(fullFolder))
+
+    local cmd = 'dir "' .. fullFolder .. '" /b'
+	-- print("DCE : B  cmd : " .. tostring(cmd))
+    local p = io.popen(cmd)
+	-- print("DCE : C  p : " .. tostring(p))
+    if not p then
+        print("DCE ERROR : impossible de lire le dossier Mods : " .. fullFolder)
+        return
+    end
+
+	-- print("DCE : D  p : " .. tostring(p))
+
+    for file in p:lines() do
+        if file:match("%.lua$") then
+            local fullpath = fullFolder .. "/" .. file
+            -- print("DCE : Chargement MOD -> " .. fullpath)
+
+            -- load the chunk (file) without executing it globally
+            local chunk, loadErr = loadfile(fullpath)
+            if not chunk then
+                print("DCE ERROR : loadfile failed for " .. fullpath .. " : " .. tostring(loadErr))
+            else
+                -- create an isolated env that falls back to _G for reads (so mod can call DCE functions)
+                local env = {}
+                setmetatable(env, { __index = _G })
+
+                -- set this env as the chunk's environment (Lua 5.1)
+				chunk, loadErr = loadfile(fullpath, "t", env)
+				-- if not chunk then
+				-- 	print("DCE ERROR : loadfile failed : " .. tostring(loadErr))
+				-- else
+					local ok, execErr = pcall(chunk)
+				-- end
+
+                if not ok then
+                    print("DCE ERROR : execution failed for " .. fullpath .. " : " .. tostring(execErr))
+                else
+                    -- enumerate what the mod defined in env
+                    for k, v in pairs(env) do
+                        -- skip metamethods and inherited keys (if index produced inherited, pairs won't show them)
+                        if type(k) == "string" then
+                            -- only consider tables defined by the mod (ignore functions, numbers...)
+                            if type(v) == "table" then
+                                print("DCE : Table détectée dans MOD '" .. file .. "' : " .. tostring(k))
+
+                                -- si DCE (global) a déjà une table du même nom -> merge dedans
+                                if type(_G[k]) == "table" then
+                                    print("DCE : Fusion dans DCE -> " .. tostring(k))
+                                    mergeTablesDeep(_G[k], v)
+                                else
+                                    -- table nouvelle, décider selon ACCEPT_NEW_TABLES
+                                    if ACCEPT_NEW_TABLES then
+                                        print("DCE : Ajout d'une nouvelle table globale -> " .. tostring(k))
+                                        _G[k] = v
+                                    else
+                                        print("DCE : Table nouvelle ignorée (pour l'instant) -> " .. tostring(k))
+                                    end
+                                end
+                            else
+                                -- si le mod définit des scalaires ou fonctions globaux qu'on souhaite conserver ou logger
+                                -- par défaut on ignore pour éviter de polluer _G
+                                -- Si tu veux autoriser certaines clés non-table, tu peux les whitelist ici.
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    p:close()
+end
+
+LoadModData("Mods", true)
+
+-- if Data_divers["a_37_dragonfly"] then
+-- 	print(" a_37_dragonfly FOUND !!!! ")
+-- else
+-- 	print(" a_37_dragonfly BUUUUG !!!! ")
+-- end
+
+-- os.execute 'pause'
 --******************************************************************--
 --******************************************************************--
 --********* Function qui return les Task possible par type d'avion
@@ -192,6 +301,14 @@ test_str = "Playable_m = " .. TableSerialization(Playable_m, 0)						--make a st
 testFile = io.open(pathCampaign.."/Debug/DCEM_Function_Playable_m.lua", "w") or error("Failed to open debug file")
 testFile:write(test_str)															--save new data
 testFile:close()
+
+
+test_str = "Data_divers = " .. TableSerialization(Data_divers, 0)						--make a string
+testFile = io.open(pathCampaign.."/Debug/DCEM_Function_Data_divers.lua", "w") or error("Failed to open debug file")
+testFile:write(test_str)															--save new data
+testFile:close()
+
+
 
 --******************************************************************--
 --******************************************************************--
