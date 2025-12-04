@@ -3549,7 +3549,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 										["id"] = "Script",
 										["params"] =
 										{
-											["command"] = "CustomSearchThenEngage(" .. groupName .. ", " .. tostring(flight[f].loadout.standoff) .. ", 'Air'," .. searchTime .. ")",
+											-- ["command"] = "CustomSearchThenEngage(" .. groupName .. ", " .. tostring(flight[f].loadout.standoff) .. ", Air," .. searchTime .. ")",
+											["command"] = "CustomSearchThenEngage('" .. groupName .. "', "  .. tostring(flight[f].loadout.standoff) .. ", 'Air',"   .. searchTime .. ")",
 										},
 									},
 								},
@@ -3583,7 +3584,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 											["id"] = "Script",
 											["params"] =
 											{
-												["command"] = "CustomSearchThenEngage(" .. groupName .. ", " .. tostring(flight[f].loadout.standoff) .. ", 'Air'," .. searchTime .. ")",
+												-- ["command"] = "CustomSearchThenEngage(" .. groupName .. ", " .. tostring(flight[f].loadout.standoff) .. ", Air," .. searchTime .. ")",
+												["command"] = "CustomSearchThenEngage('" .. groupName .. "', "  .. tostring(flight[f].loadout.standoff) .. ", 'Air',"   .. searchTime .. ")",
 											},
 										},
 									},

@@ -287,7 +287,7 @@ function TableSerialization(t, i, options)
             elseif type(v) == "string" then
                 v = string.gsub(v, "\n", "\\\n")
                 v = string.gsub(v, "\"", "\\\"")
-                v = string.gsub(v, "'", "\\\'")
+                -- v = string.gsub(v, "'", "\\\'")
                 text = text .. tab .. '"' .. v .. '",\n'
             elseif type(v) == "number" or type(v) == "boolean" then
                 text = text .. tab .. tostring(v) .. ",\n"
@@ -301,7 +301,7 @@ function TableSerialization(t, i, options)
             if type(k) == "string" then
                 k = string.gsub(k, "\n", "\\\n")
                 k = string.gsub(k, "\"", "\\\"")
-                k = string.gsub(k, "'", "\\\'")
+                -- k = string.gsub(k, "'", "\\\'")
                 text = text .. tab .. '["' .. k .. '"] = '
             else
                 text = text .. tab .. "[" .. k .. "] = "
@@ -312,7 +312,7 @@ function TableSerialization(t, i, options)
             elseif type(v) == "string" then
                 v = string.gsub(v, "\n", "\\\n")
                 v = string.gsub(v, "\"", "\\\"")
-                v = string.gsub(v, "'", "\\\'")
+                -- v = string.gsub(v, "'", "\\\'")
                 text = text .. '"' .. v .. '",\n'
             elseif type(v) == "number" or type(v) == "boolean" then
                 text = text .. tostring(v) .. ",\n"

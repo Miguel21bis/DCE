@@ -1350,7 +1350,7 @@ function PedroSAR(arg)
 								["id"] = "Script",
 								["params"] =
 								{
-									["command"] = "Custom_RTB_2_Base(" .. groupName .. ",  " .. arg_pt_start.name .. ",  " .. speed .. ",  " .. alt ..  ","
+									["command"] = 'Custom_RTB_2_Base("' .. groupName .. '",  "' .. arg_pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
 								},
 							},
 						},
