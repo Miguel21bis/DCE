@@ -158,8 +158,9 @@ end
 --attention, ne pas activer ici oob_scen, sinon cela ne prend pas en compte son update
 -- require("Active/oob_scen")
 local addTriggersZOne
+local destN = 0
 for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed scenery objects
-	if scen.x and scen.y then														--destroyed scenery object has x and z coordinates
+	if destN <= 5 and scen.x and scen.y then														--destroyed scenery object has x and z coordinates
 
 		local isForest = false
 		if scen.sceneryTypeName and string.find(scen.sceneryTypeName, "FOREST")  then
@@ -213,6 +214,8 @@ for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed 
 				["zone"] = zoneId,
 				["type"] = 0,
 			}
+
+			destN = destN + 1
 		end
 	end
 	

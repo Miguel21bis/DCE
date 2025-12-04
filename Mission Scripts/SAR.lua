@@ -596,7 +596,7 @@ local function startSAR(arg)
 								-- ['action'] = {
 									-- ['id'] = 'Script',
 									-- ['params'] = {
-										-- ["command"] = 'Custom_Altitude("' .. FlightSAR.name .. '")',
+										-- ["command"] = "Custom_Altitude(" .. FlightSAR.name .. ")",
 									-- },
 								-- },
 							-- },
@@ -632,7 +632,7 @@ local function startSAR(arg)
 								['action'] = {
 									['id'] = 'Script',
 									['params'] = {
-										["command"] = "Custom_Altitude('" .. arg_flightSAR.name .. "',  '  nil  ', '" .."2".. "')",
+										["command"] = "Custom_Altitude(" .. arg_flightSAR.name .. ",   nil , " .."2".. ")",
 									},
 								},
 							},
@@ -701,7 +701,7 @@ local function startSAR(arg)
 									["params"] =
 									{
 													-- Custom_SAR(grpname, airdrome, airdromeX2d, airdromeY2d, mgrsChute, speed, alt)
-										["command"] = 'Custom_SAR("' .. arg_flightSAR.name .. '",  "' .. arg_flightSAR.airdromeName .. '",  "' .. arg_flightSAR.x .. '",  "' .. arg_flightSAR.y .. '",  "' .. arg_ejPil.MGRS_Chute .. '",   "' .. arg_flightSAR.vCruise .. '",  "' .. alt_cruise ..  '")',
+										["command"] = "Custom_SAR(" .. arg_flightSAR.name .. ",  " .. arg_flightSAR.airdromeName .. ",  " .. arg_flightSAR.x .. ",  " .. arg_flightSAR.y .. ",  " .. arg_ejPil.MGRS_Chute .. ",   " .. arg_flightSAR.vCruise .. ",  " .. alt_cruise ..  ")",
 									}, -- end of ["params"]
 								}, -- end of ["action"]
 							}, -- end of ["params"]
@@ -1175,7 +1175,7 @@ function PedroSAR(arg)
 									['action'] = {
 										['id'] = 'Script',
 										['params'] = {
-											["command"] = "Custom_Altitude('" .. groupName .. "',  '  nil  ', '" .."1".. "')",
+											["command"] = "Custom_Altitude(" .. groupName .. ",    nil  , " .."1".. ")",
 										},
 									},
 								},
@@ -1310,7 +1310,7 @@ function PedroSAR(arg)
 								["id"] = "Script",
 								["params"] =
 								{
-									["command"] = 'Custom_RTB_2_Base("' .. groupName .. '",  "' .. arg_pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
+									["command"] = "Custom_RTB_2_Base(" .. groupName .. ",  " .. arg_pt_start.name .. ",  " .. speed .. ",  " .. alt ..  ")",
 								},
 							},
 						},
@@ -1350,7 +1350,7 @@ function PedroSAR(arg)
 								["id"] = "Script",
 								["params"] =
 								{
-									["command"] = 'Custom_RTB_2_Base("' .. groupName .. '",  "' .. arg_pt_start.name .. '",  "' .. speed .. '",  "' .. alt ..  '")',
+									["command"] = "Custom_RTB_2_Base(" .. groupName .. ",  " .. arg_pt_start.name .. ",  " .. speed .. ",  " .. alt ..  ","
 								},
 							},
 						},

@@ -141,6 +141,7 @@ Return = {}
 
 	--return mission number
 	function Return.Mission()
+		print("DC_CT Return.Mission() ---> : "..tostring(camp.mission))
 		return camp.mission
 	end
 
@@ -1806,16 +1807,11 @@ Action = {}
 	end
 
 	function Action.RestrictedLoadout(file)
-		-- restricted_loadout.miz
-
-		-- local missionFromBaseMission = mission  -- Sauvegarde la mission principale
-
 		local payloadRestricted = {}
-
 		local restrictedPath = "Restricted_loadouts/" .. file
 		local testPath = io.open(restrictedPath, "r")
 
-		if testPath ~= nil then
+		if testPath == nil then
 			restrictedPath = "Loadouts/" .. file
 			testPath = io.open(restrictedPath, "r")
 		end

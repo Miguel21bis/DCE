@@ -3612,13 +3612,21 @@ function EventHandler2:onEvent(event)
 		end
 
 		if event.id == world.event.S_EVENT_BIRTH then
-			-- env.info("DCE_EventHandler2 A S_EVENT_BIRTH.")
+			env.info("DCE_EventHandler2 A S_EVENT_BIRTH.")
 
+			if event.initiator then
+				local test_getCategory = Object.getCategory(event.initiator)
+				env.info("DCE_EventHandler2 A2 test_getCategory: "..tostring(test_getCategory).." Object.Category.STATIC: "..tostring(Object.Category.STATIC))
+				env.info("DCE_EventHandler2 A3 event.initiator.getPlayerName: "..tostring(event.initiator.getPlayerName).." event.initiator.getGroup: "..tostring(event.initiator.getGroupC))
+				env.info("DCE_EventHandler2 A4 event.initiator:getPlayerName(): "..tostring(event.initiator:getPlayerName()).." event.initiator:getGroup(): "..tostring(event.initiator:getGroup()))
+				
+			end
+		
 			if event.initiator and Object.getCategory(event.initiator) ~= Object.Category.STATIC and event.initiator.getPlayerName and event.initiator.getGroup then
 				local playerName = event.initiator:getPlayerName()
 				local groupObject = event.initiator:getGroup()
 
-				-- env.info("DCE_EventHandler2 B playerName." .. tostring(playerName))
+				env.info("DCE_EventHandler2 B playerName." .. tostring(playerName))
 
 				if groupObject and groupObject.getID then
 
@@ -3628,12 +3636,13 @@ function EventHandler2:onEvent(event)
 					
 					if playerName then
 						
-						-- env.info("DCE_EventHandler2 C0." .. tostring(playerName))
+						env.info("DCE_EventHandler2 C0. playerName " .. tostring(playerName) .. " gpGid." .. tostring(gpGid) .. " groupObject." .. tostring(groupObject))
 
 						if gpGid and groupObject then
 							addFuncs(gpGid, groupObject, playerName)
 
-							local desc = event.initiator:getDesc()
+                            local desc = event.initiator:getDesc()
+							env.info("DCE_EventHandler2 C1. desc" .. tostring(desc))
 							if desc.category == Unit.Category.HELICOPTER then
 								timer.scheduleFunction(MonitorPlayerAircraftActivity, { "in", playerName, flightName, desc.category }, current_time + 1)
 							end

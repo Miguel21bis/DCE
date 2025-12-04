@@ -1189,22 +1189,22 @@ Data_divers = {
 		refuellingReceptacleType = "probe"
 	},
 
-	["a_37_dragonfly"] = 	{							--name, next to DisplayName
-		instrumentUnits = "imperial",
-		moduleName = "h60_a37_dragonfly",		--self_ID 
-		Tasks = {
-			aircraft_task(FighterSweep),
-			aircraft_task(Intercept),
-			aircraft_task(GroundAttack),
-			aircraft_task(CAS),
-			aircraft_task(AFAC),
-			aircraft_task(RunwayAttack),
-			aircraft_task(AntishipStrike),
-		},
-		playable = false,
-		vCruise = 125,						--V_opt
-		hCruise = 6000,
-	},
+	-- ["a_37_dragonfly"] = 	{							--name, next to DisplayName
+	-- 	instrumentUnits = "imperial",
+	-- 	moduleName = "h60_a37_dragonfly",		--self_ID 
+	-- 	Tasks = {
+	-- 		aircraft_task(FighterSweep),
+	-- 		aircraft_task(Intercept),
+	-- 		aircraft_task(GroundAttack),
+	-- 		aircraft_task(CAS),
+	-- 		aircraft_task(AFAC),
+	-- 		aircraft_task(RunwayAttack),
+	-- 		aircraft_task(AntishipStrike),
+	-- 	},
+	-- 	playable = false,
+	-- 	vCruise = 125,						--V_opt
+	-- 	hCruise = 6000,
+	-- },
 	
 
 	["MQ-9 Reaper"] = 	{
@@ -1738,6 +1738,10 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		requiredModules = true,						--itsModule
 		moduleName = "jjj_uh2a",
+		Tasks = {
+			aircraft_task(Transport),
+			aircraft_task(Reconnaissance),
+		},
 		vCruise = 40,	--TODO a verifier
 		hCruise = 500,
 	},
@@ -1746,6 +1750,10 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		requiredModules = true,						--itsModule
 		moduleName = "jjj_uh2b",
+		Tasks = {
+			aircraft_task(Transport),
+			aircraft_task(Reconnaissance),
+		},
 		vCruise = 40,	--TODO a verifier
 		hCruise = 500,
 	},
@@ -1754,6 +1762,10 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		requiredModules = true,						--itsModule
 		moduleName = "jjj_uh2c",
+		Tasks = {
+			aircraft_task(Transport),
+			aircraft_task(Reconnaissance),
+		},
 		vCruise = 40,	--TODO a verifier
 		hCruise = 500,
 	},
@@ -2302,6 +2314,9 @@ IsHelicopter = {
 	["AH-1G"] = {},
 	["AH-1W"] = {},
 
+	["vwv_uh2a"] = {},                            --mod
+	["vwv_uh2b"] = {},                            --mod
+	["vwv_uh2c"] = {},                            --mod
 	["vwv_sh2f"] = {},                            --mod
 	["vwv_hh2d"] = {},                            --mod
 

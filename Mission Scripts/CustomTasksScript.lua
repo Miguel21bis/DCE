@@ -2356,7 +2356,7 @@ function CustomDesignationAFAC(arg_AFAC_F_Name, arg_refX, arg_refY, arg_LaserCod
 									["params"] =
 									{
 										--afacFlightName, refX, refY
-										["command"] = "CustomDesignationAFAC('" .. arg_AFAC_F_Name .. "', '" .. arg_refX .. "', '" .. arg_refY .. "',  'nil')",
+										["command"] = "CustomDesignationAFAC(" .. arg_AFAC_F_Name .. ", " .. arg_refX .. ", " .. arg_refY .. ",  nil)",
 									},
 								},
 							},
@@ -3811,7 +3811,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 													["id"] = "Script",
 													["params"] =
 													{
-														["command"] = "Custom_Altitude('" .. grpname .. "',  '  nil  ', '" .."1".. "')",
+														["command"] = "Custom_Altitude(" .. grpname .. ",    nil  , 1 )",
 													},
 												},
 											},
@@ -3879,7 +3879,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 												["params"] =
 												{
 																-- Custom_SAR(grpname, BaseName, BaseNameX, BaseNameY, mgrsChute, speed, alt)
-													["command"] = "Custom_SAR('" .. grpname .. "', '" .. BaseName .. "', '" .. pt_landing.x .. "', '" .. pt_landing.y .. "', '" .. mgrsChute .. "', '" .. speed .. "', '" .. alt ..  "')",
+													["command"] = "Custom_SAR(" .. grpname .. ", '" .. BaseName .. ", " .. pt_landing.x .. ", " .. pt_landing.y .. ", " .. mgrsChute .. ", " .. speed .. ", " .. alt ..  ")",
 												}, -- end of ["params"]
 											}, -- end of ["action"]
 										}, -- end of ["params"]
@@ -3922,7 +3922,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 												["id"] = "Script",
 												["params"] =
 												{
-													["command"] = "Custom_Altitude('" .. grpname .. "',  '  nil  ', '" .."4".. "')",
+													["command"] = "Custom_Altitude(" .. grpname .. ",    nil  , 4 )",
 												},
 											},
 										},
@@ -4054,7 +4054,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 												["id"] = "Script",
 												["params"] =
 												{
-													["command"] = "Custom_Altitude('" .. grpname .. "',  '  nil  ', '" .."1".. "')",
+													["command"] = "Custom_Altitude(" .. grpname .. ",   nil  , 1)",
 												},
 											},
 										},
@@ -4104,7 +4104,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 														["id"] = "Script",
 														["params"] =
 														{
-															["command"] = "Custom_Altitude('" .. grpname .. "',  '  nil  ', '" .."1".. "')",
+														["command"] = "Custom_Altitude(" .. grpname .. ",   nil  , 1)",
 														},
 													},
 												},
@@ -4456,7 +4456,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 										["id"] = "Script",
 										["params"] =
 										{
-											["command"] = "Custom_Altitude('" .. grpname .. "', '  nil  ', '" .."4".. "')",
+											["command"] = "Custom_Altitude(" .. grpname .. ",   nil  , 1)",
 										},
 									},
 								},
@@ -4552,7 +4552,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 									["id"] = "Script",
 									["params"] =
 									{
-										["command"] = "Custom_AddWptSAR('" .. grpname .. "', '" .. baseName .. "', '" .. mgrsChute .. "', '" .. speed .. "', '" .. alt ..  "')",
+										["command"] = "Custom_AddWptSAR(" .. grpname .. ", '" .. baseName .. ", " .. mgrsChute .. ", " .. speed .. ", " .. alt ..  ")",
 									}, -- end of ["params"]
 								}, -- end of ["action"]
 							}, -- end of ["params"]
@@ -4570,7 +4570,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 						-- 			["id"] = "Script",
 						-- 			["params"] = 
 						-- 			{
-						-- 				["command"] = "Custom_Altitude('" .. grpname .. "',  '  nil  ', '" .."3".. "')",
+						-- 				["command"] = "Custom_Altitude(" .. grpname .. ",   nil  , 3)",
 						-- 			},
 						-- 		},
 						-- 	},
@@ -4637,7 +4637,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 									["id"] = "Script",
 									["params"] =
 									{
-										["command"] = "DespawnSoldierAliasPilot('"..pt_dest.uPilotName.."')",
+										["command"] = "DespawnSoldierAliasPilot("..pt_dest.uPilotName..")",
 									},
 								},
 							},
@@ -4656,7 +4656,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 									["id"] = "Script",
 									["params"] =
 									{
-										["command"] = "Custom_AddWptSAR('" .. grpname .. "', '" .. baseName .. "', '" .. mgrsChute .. "', '" .. speed .. "', '" .. alt .. "')",
+										["command"] = "Custom_AddWptSAR(" .. grpname .. ", " .. baseName .. ", " .. mgrsChute .. ", " .. speed .. ", " .. alt .. ")",
 									}, -- end of ["params"]
 								}, -- end of ["action"]
 							}, -- end of ["params"]
@@ -4674,7 +4674,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 						-- 			["id"] = "Script",
 						-- 			["params"] = 
 						-- 			{
-						-- 				["command"] = "Custom_Altitude('" .. grpname .. "',  '  nil  ', '" .."3".. "')",
+						-- 				["command"] = "Custom_Altitude(" .. grpname .. ",   nil  , 3)",
 						-- 			},
 						-- 		},
 						-- 	},
@@ -4741,7 +4741,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 									["id"] = "Script",
 									["params"] =
 									{
-										["command"] = "DespawnSoldierAliasPilot('"..pt_dest.uPilotName.."')",
+										["command"] = "DespawnSoldierAliasPilot("..pt_dest.uPilotName..")",
 									},
 								},
 							},
@@ -4760,7 +4760,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 									["id"] = "Script",
 									["params"] =
 									{
-										["command"] = "Custom_AddWptSAR('" .. grpname .. "', '" .. baseName .. "', '" .. mgrsChute ..  "', '" .. speed ..  "', '" .. alt ..  "')",
+										["command"] = "Custom_AddWptSAR(" .. grpname .. ", " .. baseName .. ", " .. mgrsChute ..  ", " .. speed ..  ", " .. alt ..  ")",
 									}, -- end of ["params"]
 								}, -- end of ["action"]
 							}, -- end of ["params"]
@@ -5181,7 +5181,6 @@ function Custom_Altitude(arg_grpName, arg_wptAlti, arg_wptTag)
 							['speed_locked'] = true,
 							['type'] = 'Turning Point',
 							['action'] = 'Fly Over Point',
-							-- ['alt_type'] = '"'..tostring(alt_type)..'"',
 							['alt_type'] = tostring(alt_type),
 							['ETA'] = (interval / copyRoute[n].speed) + copyRoute[n].ETA ,
 							['y'] = selectedPoint.y,

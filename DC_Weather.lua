@@ -33,13 +33,6 @@ end
 -- }
 
 
-
-
-
--- if debugWeather then
--- 	print("calcul new weather:")
--- 	_affiche(camp.weather, "camp.weather DcW ")
--- end
 -- debugTxt = debugTxt .."".."\n"
 
 
@@ -966,6 +959,17 @@ local debugWeather = false
 local debugChoice
 local showOne = false
 local showOneNight = true
+
+if not camp.weather then
+	camp.weather = {
+		refTemp = mission_ini.weather.refTemp
+	}
+end
+
+if debugWeather then
+	print("calcul new weather:")
+	_affiche(camp.weather, "camp.weather DcW ")
+end
 
 print("elapsed_Time = "..tostring(elapsed_Time))
 --------------------------------------------------------------
