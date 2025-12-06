@@ -155,6 +155,15 @@ local function compareTables(t1, t2, path)
 
     -- Vérifier les clés dans t1 (éléments manquants dans t2 ou différents)
     for k, v1 in pairs(t1) do
+        if k == "command" then
+            print("found command")
+            if type(v1) == "string" then
+                local v22 = t2[k]
+                print("command T1 is a string: " .. v1)
+                print("command T2 is a string: " .. v22)
+            end
+            os.execute 'pause'
+        end
         if shouldIgnoreKey(k) then
             -- Ignorer cette clé
         else
@@ -170,8 +179,26 @@ local function compareTables(t1, t2, path)
                 for _, diff in ipairs(subDiff) do
                     table.insert(differences, diff)
                 end
+            elseif type(v1) == "string" and type(v2) == "string" then
+                -- comparaison stricte caractère par caractère
+                if v1 ~= v2 then
+                    table.insert(differences, {
+                        type = "changed",
+                        path = currentPath,
+                        oldValue = v1,
+                        newValue = v2,
+                        key = k
+                    })
+                end
             elseif v1 ~= v2 then
-                table.insert(differences, { type = "changed", path = currentPath, oldValue = v1, newValue = v2, key = k })
+                -- comparaison classique pour les nombres, booléens etc.
+                table.insert(differences, {
+                    type = "changed",
+                    path = currentPath,
+                    oldValue = v1,
+                    newValue = v2,
+                    key = k
+                })
             end
         end
     end

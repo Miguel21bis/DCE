@@ -2462,31 +2462,6 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 
-					--ATTENTION, OrbitPosition() fonctionne en PUCH de task, et donc les Escort revienne en arriere
-					-- -- ************* OrbitPosition  *************
-					-- if (waypoints[w]["name"] == "IP" ) and flight[f].task == "Escort" then
-
-					-- 	local task_entry = {
-					-- 		["enabled"] = true,
-					-- 		["auto"] = false,
-					-- 		["id"] = "WrappedAction",
-					-- 		["name"] = "orbit with Escort (name == IP)",
-					-- 		["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-					-- 		["params"] =
-					-- 		{
-					-- 			["action"] =
-					-- 			{
-					-- 				["id"] = "Script",
-					-- 				["params"] =
-					-- 				{
-					-- 					["command"] = "OrbitPosition(" .. groupName .. ", " .. waypoints[w]["alt"] .. ", " .. flight[f].loadout.vCruise  / 4 * 3 .. ", " .. (waypoints[w].ETA + 300) .. ")",
-					-- 				},
-					-- 			},
-					-- 		},
-					-- 	}
-					-- 	table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-
-					-- end
 
 					-- ************* player flight WP ETA *************
 					if flight[f].player then
@@ -2613,7 +2588,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 										["id"] = "Script",
 										["params"] =
 										{
-											["command"] = "OrbitPosition(" .. groupName .. ", " .. waypoints[w]["alt"] .. ", " .. waypoints[w]["speed"] .. ", " .. stopTime .. ")",
+											["command"] = "OrbitPosition('" .. groupName .. "', " .. waypoints[w]["alt"] .. ", " .. waypoints[w]["speed"] .. ", " .. stopTime .. ")",
 										},
 									},
 								},
@@ -2685,7 +2660,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 															["id"] = "Script",
 															["params"] =
 															{
-																["command"] = "OrbitPosition(" .. groupName .. ", " .. alt_orbit .. ", " .. waypoints[w-1]["speed"] .. ", " .. tostring(waypoints[w-1]["ETA"]+120) .. ")",
+																["command"] = "OrbitPosition('" .. groupName .. "', " .. alt_orbit .. ", " .. waypoints[w-1]["speed"] .. ", " .. tostring(waypoints[w-1]["ETA"]+120) .. ")",
 															},
 														},
 													},
@@ -3130,7 +3105,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 													["id"] = "Script",
 													["params"] =
 													{
-														["command"] = "CustomMixClassAttack(" .. groupName .. ", {" .. tgtlist2 .. "}, '" .. expendQty .. "', '" .. weaponType .. "', '" .. attackType .. "', '" .. attackAlt .. "', '" .. goupTaskTemp ..  "')",	--this is a custom written task to allow all aircraft in flight to attack multiple static objects simultenously
+														["command"] = "CustomMixClassAttack('" .. groupName .. "', {" .. tgtlist2 .. "}, '" .. expendQty .. "', '" .. weaponType .. "', '" .. attackType .. "', '" .. attackAlt .. "', '" .. goupTaskTemp ..  "')",	--this is a custom written task to allow all aircraft in flight to attack multiple static objects simultenously
 													},
 
 												},
@@ -3155,7 +3130,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 													["params"] =
 													{
 																	--AirGroundAttackTask(FlightName,				 Target,						 WeaponType,string			 expendQty,string		 dive,			 OffsetAngle, 			ClimbAngle, 		PopAlt, 		AttackDist, 			Reattack,			 Debug)
-														["command"] = "AirGroundAttackTask(" .. groupName .. ", {" .. tgtlist2 .. "}, '" .. weaponType_ .. "', '"  .. expendQty .. "', " .. tostring(dive) .. ", " .. tostring(OffsetAngle) .. ", " .. tostring(ClimbAngle) ..", " .. tostring(PopAlt) ..", " .. tostring(AttackDist) ..", " .. tostring(Reattack) .. ", " .. tostring(DebugTask) ..  ")",
+														["command"] = "AirGroundAttackTask('" .. groupName .. "', {" .. tgtlist2 .. "}, '" .. weaponType_ .. "', '"  .. expendQty .. "', " .. tostring(dive) .. ", " .. tostring(OffsetAngle) .. ", " .. tostring(ClimbAngle) ..", " .. tostring(PopAlt) ..", " .. tostring(AttackDist) ..", " .. tostring(Reattack) .. ", " .. tostring(DebugTask) ..  ")",
 													},
 												},
 											},
@@ -3193,7 +3168,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 												["id"] = "Script",
 												["params"] =
 												{
-													["command"] = "CustomAirbaseAttack(" .. groupName .. ", {x = " .. flight[f].target.x .. ", y = " .. flight[f].target.y .. "}, '" .. expendQty .. "', '" .. weaponType .. "', '" .. attackType .. "', " .. attackAlt .. ")",
+													["command"] = "CustomAirbaseAttack('" .. groupName .. "', {x = " .. flight[f].target.x .. ", y = " .. flight[f].target.y .. "}, '" .. expendQty .. "', '" .. weaponType .. "', '" .. attackType .. "', " .. attackAlt .. ")",
 												},
 											},
 										},
@@ -3216,7 +3191,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 													["params"] =
 													{
 																	--AirGroundAttackTask(FlightName,				 Target,															 WeaponType,string			 expendQty,string		 dive,			 OffsetAngle, 			ClimbAngle, 		PopAlt, 		AttackDist, 			Reattack,			 Debug)
-														["command"] = "AirGroundAttackTask(" .. groupName .. ", {x = " .. flight[f].target.x .. ", y = " .. flight[f].target.y .. "}, '" .. weaponType_ .. "', '"  .. expendQty .. "', " .. tostring(dive) .. ", " .. tostring(OffsetAngle) .. ", " .. tostring(ClimbAngle) ..", " .. tostring(PopAlt) ..", " .. tostring(AttackDist) ..", " .. tostring(Reattack) .. ", " .. tostring(DebugTask) ..  ")",
+														["command"] = "AirGroundAttackTask('" .. groupName .. "', {x = " .. flight[f].target.x .. ", y = " .. flight[f].target.y .. "}, '" .. weaponType_ .. "', '"  .. expendQty .. "', " .. tostring(dive) .. ", " .. tostring(OffsetAngle) .. ", " .. tostring(ClimbAngle) ..", " .. tostring(PopAlt) ..", " .. tostring(AttackDist) ..", " .. tostring(Reattack) .. ", " .. tostring(DebugTask) ..  ")",
 													},
 												},
 											},
@@ -3278,7 +3253,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 											["id"] = "Script",
 											["params"] =
 											{
-												["command"] = "CustomMapObjectAttack(" .. groupName .. ", {" .. tgtlist .. "}, '" .. expendQty .. "', '" .. weaponType .. "', '" .. attackType .. "', '" .. attackAlt .. "', '" .. goupTaskTemp ..  "')",
+												["command"] = "CustomMapObjectAttack('" .. groupName .. "', {" .. tgtlist .. "}, '" .. expendQty .. "', '" .. weaponType .. "', '" .. attackType .. "', '" .. attackAlt .. "', '" .. goupTaskTemp ..  "')",
 											},
 
 										},
@@ -3345,7 +3320,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 												["params"] =
 												{
 																--AirGroundAttackTask(FlightName,				 Target,						 WeaponType,string			 expendQty,string		 dive,			 OffsetAngle, 			ClimbAngle, 		PopAlt, 		AttackDist, 			Reattack,			 Debug)
-													["command"] = "AirGroundAttackTask(" .. groupName .. ", '" .. flight[f].target.name .. "', '" .. weaponType_ .. "', '"  .. expendQty .. "', " .. tostring(dive) .. ", " .. tostring(OffsetAngle) .. ", " .. tostring(ClimbAngle) ..", " .. tostring(PopAlt) ..", " .. tostring(AttackDist) ..", " .. tostring(Reattack) .. ", " .. tostring(DebugTask) ..  ")",
+													["command"] = "AirGroundAttackTask('" .. groupName .. "', '" .. flight[f].target.name .. "', '" .. weaponType_ .. "', '"  .. expendQty .. "', " .. tostring(dive) .. ", " .. tostring(OffsetAngle) .. ", " .. tostring(ClimbAngle) ..", " .. tostring(PopAlt) ..", " .. tostring(AttackDist) ..", " .. tostring(Reattack) .. ", " .. tostring(DebugTask) ..  ")",
 												},
 											},
 										},
@@ -3404,7 +3379,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 										["id"] = "Script",
 										["params"] =
 										{
-											["command"] = "CustomFlareAttack(" .. groupName .. ", '" .. tgtx .. "', '" .. tgty .. "', '" .. flight[f].target.name .. "', '" .. expend .. "', '" .. weaponType .. "', '" .. attackType .. "', '" .. attackAlt .. ")",	--this is a custom written task to allow coordinates bombing of target poistion at time of attack
+											["command"] = "CustomFlareAttack('" .. groupName .. "', '" .. tgtx .. "', '" .. tgty .. "', '" .. flight[f].target.name .. "', '" .. expend .. "', '" .. weaponType .. "', '" .. attackType .. "', '" .. attackAlt .. ")",	--this is a custom written task to allow coordinates bombing of target poistion at time of attack
 										},
 									},
 								},
@@ -3452,7 +3427,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 										["id"] = "Script",
 										["params"] =
 										{
-											["command"] = "CustomLaserDesignation(" .. groupName .. ", '" .. tgt .. "', '" .. class .. "', '" .. flight[f].target.LaserCode .. "')",	--this is a custom written task to allow coordinates bombing of target poistion at time of attack
+											["command"] = "CustomLaserDesignation('" .. groupName .. "', '" .. tgt .. "', '" .. class .. "', '" .. flight[f].target.LaserCode .. "')",	--this is a custom written task to allow coordinates bombing of target poistion at time of attack
 										},
 									},
 								},
@@ -3479,7 +3454,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 										["params"] =
 										{
 														-- Custom_SAR(grpname, airdrome, airdromeX, airdromeY, mgrsChute, speed, alt)
-											["command"] = "Custom_SAR(" .. groupName .. ", '" .. flight[f].base .. "', '" .. db_airbases[flight[f].base].x .. "', '" .. db_airbases[flight[f].base].y .. "', '" .. flight[f].target_name .. "', '" .. flight[f].loadout.vCruise .. "', '" .. alt_cruise ..  "')",
+											["command"] = "Custom_SAR('" .. groupName .. "', '" .. flight[f].base .. "', '" .. db_airbases[flight[f].base].x .. "', '" .. db_airbases[flight[f].base].y .. "', '" .. flight[f].target_name .. "', '" .. flight[f].loadout.vCruise .. "', '" .. alt_cruise ..  "')",
 										},
 									},
 								},
@@ -3549,7 +3524,6 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 										["id"] = "Script",
 										["params"] =
 										{
-											-- ["command"] = "CustomSearchThenEngage(" .. groupName .. ", " .. tostring(flight[f].loadout.standoff) .. ", Air," .. searchTime .. ")",
 											["command"] = "CustomSearchThenEngage('" .. groupName .. "', "  .. tostring(flight[f].loadout.standoff) .. ", 'Air',"   .. searchTime .. ")",
 										},
 									},
@@ -3584,7 +3558,6 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 											["id"] = "Script",
 											["params"] =
 											{
-												-- ["command"] = "CustomSearchThenEngage(" .. groupName .. ", " .. tostring(flight[f].loadout.standoff) .. ", Air," .. searchTime .. ")",
 												["command"] = "CustomSearchThenEngage('" .. groupName .. "', "  .. tostring(flight[f].loadout.standoff) .. ", 'Air',"   .. searchTime .. ")",
 											},
 										},
@@ -3604,7 +3577,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 										["action"] = {
 											["id"] = "Script",
 											["params"] = {
-												["command"] = "env.info(\"DCE_WPT Before Landing #WPT-1 \")",
+												["command"] = "env.info(\'DCE_WPT Before Landing #WPT-1 \')",
 											},
 										},
 									},
@@ -3650,7 +3623,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 										["action"] = {
 											["id"] = "Script",
 											["params"] = {
-												["command"] = "env.info(\"DCE_WPT_Land #WPT \")",
+												["command"] = "env.info(\'DCE_WPT_Land #WPT \')",
 											},
 										},
 									},
@@ -3920,8 +3893,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 										["id"] = "Script",
 										["params"] =
 										{
-											["command"] = "CustomDesignationAFAC(" .. groupName .. ", '" .. flight[f].target.x .. "', '" .. flight[f].target.y .. "',  '" .. tostring(flight[f].target.LaserCode) .. "')",
-											-- ["command"] = "CustomLaserDesignation(" .. grpname .. ", '" .. tgt .. "', '" .. class .. "', '" .. flight[f].target.LaserCode .. "')",	--this is a custom written task to allow coordinates bombing of target poistion at time of attack
+											["command"] = "CustomDesignationAFAC('" .. groupName .. "', '" .. flight[f].target.x .. "', '" .. flight[f].target.y .. "',  '" .. tostring(flight[f].target.LaserCode) .. "')",
 										},
 									},
 								},
@@ -4025,28 +3997,6 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								}
 							}
 							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-
-
-							-- task_entry =
-							-- {
-							-- 	["enabled"] = true,
-							-- 	["auto"] = false,
-							-- 	["id"] = "WrappedAction",
-							-- 	["name"] = "orbit (name == Assemble)",
-							-- 	["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-							-- 	["params"] =
-							-- 	{
-							-- 		["action"] =
-							-- 		{
-							-- 			["id"] = "Script",
-							-- 			["params"] =
-							-- 			{
-							-- 				["command"] = "OrbitPosition(" .. groupName .. ", " .. altitude .. ", " .. speed .. ", " .. tostring(timeOrbit) .. ")",
-							-- 			},
-							-- 		},
-							-- 	},
-							-- }
-							-- table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
 						end
 					end
@@ -4256,7 +4206,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									["id"] = "Script",
 									["params"] =
 									{
-										["command"] = "CustomRejoin(" .. groupName .. ")",
+										["command"] = "CustomRejoin('" .. groupName .. "')",
 									},
 								},
 							},
@@ -4967,13 +4917,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 								end
 
-								-- print("passe C11 pers_ACFT_bool "..tostring(pers_ACFT_bool).." pers_ACFT_prefixFileName "..tostring(pers_ACFT_prefixFileName).." units[n][\"onboard_num\"] "..tostring(units[n]["onboard_num"]) )
 								if pers_ACFT_bool then
 									units[n]["AddPropAircraft"]["PersistentAircraftKey"] = pers_ACFT_prefixFileName.."_"..units[n]["onboard_num"]
 									units[n]["AddPropAircraft"]["UseReferenceAircraft"] = 2
 								end
 
-								-- os.execute 'pause'
 								
 							else
 								if pers_ACFT_bool then
@@ -6728,59 +6676,6 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						-- end
 					end
 				end
-
-				--ajoute un wpt supplementaire, num2 , proche du 1 (1500m), pour ajouter en toute securite Custom_Altitude
-				-- if is_helicopter and not flight[f].client and not flight[f].player and  #group.route.points >= 3  then
-				-- 	local wpt1 = group.route.points[1]
-				-- 	local wpt2 = group.route.points[2]
-				-- 	local Heading  = GetHeading(wpt1, wpt2)
-				-- 	local newPoint = GetOffsetPoint(wpt1, Heading, 2000)
-				-- 	local newEta = (1500 / wpt2.speed) + wpt1.ETA
-				-- 	-- local grpname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight)
-
-				-- 	--ajoute un waypoint intermediaire avec une orbit
-				-- 	local neWpt = {
-				-- 		['alt'] = wpt2.alt,
-				-- 		['briefing_name'] = 'interWpt',
-				-- 		['action'] = 'Turning Point',
-				-- 		['alt_type'] = 'BARO',
-				-- 		["speed_locked"] =  false,
-				-- 		['ETA'] = tonumber(newEta),
-				-- 		['y'] = newPoint.y,
-				-- 		['formation_template'] = '',
-				-- 		['name'] = 'Stacking',
-				-- 		["ETA_locked"] =  true,
-				-- 		['speed'] = wpt2.speed,
-				-- 		['x'] = newPoint.x,
-				-- 		['task'] = {
-				-- 			['id'] = 'ComboTask',
-				-- 			['params'] = {
-				-- 				['tasks'] = {
-				-- 					[1] = {
-				-- 						["enabled"] = true,
-				-- 						["auto"] = false,
-				-- 						["id"] = "WrappedAction",
-				-- 						["number"] =  1,
-				-- 						["params"] =
-				-- 						{
-				-- 							["action"] =
-				-- 							{
-				-- 								["id"] = "Script",
-				-- 								["params"] =
-				-- 								{
-				-- 									["command"] = "Custom_Altitude(" .. groupName .. ",  '  nil  ', '" .. 2 .. "')",
-				-- 								},
-				-- 							},
-				-- 						},
-				-- 					},
-				-- 				},
-				-- 			},
-				-- 		},
-				-- 		['type'] = 'Turning Point',
-
-				-- 	}
-				-- 	table.insert(group.route.points, 2, neWpt )
-				-- end
 
 
 				--ajoute ici les Custom_Altitude car les num de wpt ne change plus

@@ -15,6 +15,10 @@ versionDCE["DEBRIEF_StatsEvaluation.lua"] = "1.8.68"
 -- modification M11A_be			Multiplayer	(be camp.client)(y: force same package)
 ------------------------------------------------------------------------------------------------------- 
 
+if Debug.debug then
+	print("START DEBRIEF_StatsEvaluation.lua "..versionDCE["DEBRIEF_StatsEvaluation.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
+
 --Global variable
 packstats = {}	--track stats for player package
 
@@ -36,6 +40,7 @@ else
 
 	oob_ground = nil
 	dofile("Active/oob_ground.lua")
+	
 
 	--clean All Id 
 	AllIdGroupImport = false
@@ -76,8 +81,6 @@ else
 
 	
 	camp.mission = camp.mission + 1
-
-
 
 	camp_ZoneSAR = nil
 

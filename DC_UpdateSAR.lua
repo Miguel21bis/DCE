@@ -350,7 +350,8 @@ local function deleteAliasPilotInOobGround(ejectedPilot)
     return found
 end
 
-if not camp_ZoneSAR or camp_ZoneSAR == nil or not camp_ZoneSAR.blue or camp_ZoneSAR.blue == nil  then
+-- if not camp_ZoneSAR or camp_ZoneSAR == nil or not camp_ZoneSAR.blue or camp_ZoneSAR.blue == nil  then
+if not camp_ZoneSAR then
 
     camp_ZoneSAR = {
         ["blue"] = {},
@@ -359,35 +360,46 @@ if not camp_ZoneSAR or camp_ZoneSAR == nil or not camp_ZoneSAR.blue or camp_Zone
     }
 end
 
---ajoute les ejectedPilot du fichier temp zoneSAR au fichier camp_ZoneSAR
-if zoneSAR and zoneSAR ~= nil then
-    for sideN, dcs_sideName in pairs(DCS_Side) do
-        for zoneName, pilots in pairs(zoneSAR) do
-            for pilotN, pilot in pairs(pilots) do
+if not zoneSAR then
+    print("DcuSAR zoneSAR NIL ")
+    os.execute 'pause'
+end
 
+--ajoute les ejectedPilot du fichier temp zoneSAR au fichier camp_ZoneSAR
+if zoneSAR then
+    for sideN, dcs_sideName in pairs(DCS_Side) do
+        print("AddEjectedPilot A")
+        for zoneName, pilots in pairs(zoneSAR) do
+            print("AddEjectedPilot B")
+            for pilotN, pilot in pairs(pilots) do
+                print("AddEjectedPilot C")
                 if type(pilot) == "table" then
-                
+                    print("AddEjectedPilot D")
                     pilot = PatchEjectedPilotStructure(pilot, "updateSAR")
 
                     if pilot.sideName == "" then
                         pilot.sideName = "neutrals"
                     end
                     if pilot.sideName == dcs_sideName then
+                        print("AddEjectedPilot E")
                         if not camp_ZoneSAR[dcs_sideName][zoneName] then
                             camp_ZoneSAR[dcs_sideName][zoneName] = {
                                 [1] = pilot
                             }
+                            print("AddEjectedPilot F")
                         else
+                            print("AddEjectedPilot G  "..pilot.name)
                             local foundElement = false
                             for n=1, #camp_ZoneSAR[dcs_sideName][zoneName] do
                                 if pilot.name == camp_ZoneSAR[dcs_sideName][zoneName][n].name then
-
+                                    print("AddEjectedPilot G2 table.insert "..pilot.name)
                                     foundElement = true
                                     break
                                 end
                             end
                             if not foundElement then
                                 table.insert(camp_ZoneSAR[dcs_sideName][zoneName], pilot )
+                                print("AddEjectedPilot G3 table.insert "..pilot.name)
                             end
                         end
                     end
@@ -536,14 +548,6 @@ camp.boundary = boundary
 --selectionne la base la plus proche pour leur porter secours
 --defini si le pilot est capturé ou récupérable
 
--- -- Remplace une année inférieure à 1970 par 1970 pour éviter les problèmes avec os.time
--- local aliasYear = camp.date.year
--- if aliasYear and aliasYear < 1970 then
---     aliasYear = 1970
--- end
-
--- local timeActualCampaignSecond = os.time{day=camp.date.day, year=aliasYear, month=camp.date.month}
-
 local timeActualCampaignSecond = SecondsBetween(camp.dateInit, camp.date)
 
 if camp_ZoneSAR and camp_ZoneSAR ~= nil then
@@ -554,6 +558,12 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
                 --met à jour la nouvelle structure des ejectedPilot
                 pilot = PatchEjectedPilotStructure(pilot, "updateSAR")
+                local mia_Since
+
+                if pilot.date then
+
+                    mia_Since = SecondsBetween( camp.date, pilot.date) / (24 * 60 * 60)
+                end
 
                 if pilot.status ~= "rescued" and pilot.embarked then
                     pilot.status = "rescued"
@@ -584,18 +594,17 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                     pilot.inTheEnemyCamp =  checkPointInPoly2({x=pilot.pos.x,y=pilot.pos.y}, boundary[enemy])
 
                     if not pilot.inTheEnemyCamp and pilot.date.year and pilot.date.month and pilot.date.day then
-                        local timeEjectSecond = os.time{day=pilot.date.day, year=pilot.date.year, month=pilot.date.month}
-                        local daysfrom = os.difftime(timeActualCampaignSecond, timeEjectSecond) / (24 * 60 * 60) -- seconds in a day
-                        if daysfrom > 2 then
+                        if mia_Since > 2 then
                             pilot.status = "rescued"
                         end
                     end
 
                 end
 
+                print("DcUS update Status A "..tostring(pilot.name).." pilot.sideName "..tostring(pilot.sideName).." zoneSideName: "..zoneSideName)
 
                 if (pilot.status == "MIA" or pilot.status == "EVAC_possible" ) and pilot.sideName == zoneSideName and zoneSideName ~= "neutrals" then
-                  
+                    print("DcUS update Status B ")
 					local redDistance ={500, 3000, 20000, 200000}
                     -- local nbAMI_ENI = {
                     --     neutrals = {},
@@ -691,22 +700,14 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
                     --ajoute et met à jour le nb de jour depuis son ejection
                     if not pilot.dataPOW.ejectNbDay then
-                        if pilot.date.year and pilot.date.month and pilot.date.day then
-                            -- local timeEjectSecond = os.time{day=pilot.date.day, year=aliasYear, month=pilot.date.month}
-                            -- local daysfrom = os.difftime(timeActualCampaignSecond, timeEjectSecond) / (24 * 60 * 60) -- seconds in a day 
-                            
-                            local daysfrom = SecondsBetween(camp.dateInit, pilot.date) / (24 * 60 * 60)
-                            pilot.dataPOW.ejectNbDay = daysfrom
-                        else
-                            pilot.dataPOW.ejectNbDay = 0
-                        end
+                        pilot.dataPOW.ejectNbDay = mia_Since
                     else
-                        if pilot.date.year and pilot.date.month and pilot.date.day then
-                            -- local timeEjectSecond = os.time{day=pilot.date.day, year=aliasYear, month=pilot.date.month}
-                            -- local daysfrom = os.difftime(timeActualCampaignSecond, timeEjectSecond) / (24 * 60 * 60) -- seconds in a day 
-                            local daysfrom = SecondsBetween(camp.dateInit, pilot.date) / (24 * 60 * 60)
-                            pilot.dataPOW.ejectNbDay = tonumber(daysfrom)
-                        end
+                
+                        -- mia_Since = SecondsBetween( camp.date, pilot.date) / (24 * 60 * 60)
+                        pilot.dataPOW.ejectNbDay = tonumber(mia_Since)
+
+                        print("daysfrom "..mia_Since)
+
                     end
 
                     if not pilot.dataPOW.POW_nextDayCheck then
@@ -722,16 +723,16 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                     elseif pilot.dataPOW.initChoicePOW and pilot.inTheEnemyCamp then
 
                         if pilot.dataPOW.PowDayMax and pilot.date.year and pilot.date.month and pilot.date.day then
-                            local timeEjectSecond = os.time{day=pilot.date.day, year=pilot.date.year, month=pilot.date.month}
-                            local daysfrom = os.difftime(timeActualCampaignSecond, timeEjectSecond) / (24 * 60 * 60) -- seconds in a day
-
-                            if daysfrom > pilot.dataPOW.PowDayMax then
+                            if mia_Since > pilot.dataPOW.PowDayMax then
                                 pilot.status = "POW"
+                                print("DcUS update Status A10 "..tostring(pilot.name).." set to POW after max days "..tostring(pilot.dataPOW.PowDayMax))
                             end
                         end
 
 
                     end
+
+                     print("DcUS update Status B2 "..tostring(pilot.inTheEnemyCamp).." pilot.dataPOW.ejectNbDay "..tostring(pilot.dataPOW.ejectNbDay).." pilot.dataPOW.POW_nextDayCheck "..tostring(pilot.dataPOW.POW_nextDayCheck) )
 
                     --////////////////////////////************************////////////////////
                     if pilot.status ~= "POW" and pilot.inTheEnemyCamp and (pilot.dataPOW.ejectNbDay < pilot.dataPOW.POW_nextDayCheck) then
@@ -744,10 +745,12 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 							pilot.status = "EVAC_possible"
 						elseif  nbAMI_ENI[zoneSideName][500] == 0 and  nbAMI_ENI[enemy][500] >= 2  then
 							pilot.status = "POW"
+                            print("DcUS update Status D "..tostring(pilot.name).." set to POW 500m ENI")
 						elseif nbAMI_ENI[zoneSideName][3000] >= 2  and nbAMI_ENI[enemy][3000] < 2 then
 							pilot.status = "EVAC_possible"
 						elseif nbAMI_ENI[zoneSideName][3000] < 2  and nbAMI_ENI[enemy][3000] >= 2 then
 							pilot.status = "POW"
+                            print("DcUS update Status E "..tostring(pilot.name).." set to POW 3000m ENI")
 						elseif nbAMI_ENI[zoneSideName][3000] >= 2  and nbAMI_ENI[enemy][3000] >= 2  then
 							local pourcent = (nbAMI_ENI[zoneSideName][3000] / ( nbAMI_ENI[zoneSideName][3000] + nbAMI_ENI[enemy][3000]))*100
 							local coef = (pilot.dataPOW.ejectNbDay*(-1) + 5) -- plus le nb de jour augmente, plus les chances d etre capturé augmente
@@ -756,6 +759,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
 							if randomMalChance > pourcent then
 								pilot.status = "POW"
+                                print("DcUS update Status F "..tostring(pilot.name).." set to POW 3000m both sides")
 							else
 								pilot.status = "EVAC_possible"
                             end
@@ -774,6 +778,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                            
 							if randomMalChance > pourcent then
                                 pilot.status = "POW"
+                                print("DcUS update Status G "..tostring(pilot.name).." set to POW 20000m both sides")
 							else
 								pilot.status = "EVAC_possible"
                             end
@@ -789,6 +794,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 						end
 
                     elseif pilot.status == "POW" then
+                        print("DcUS update Status H "..tostring(pilot.name).." remains POW")
 
 
                     elseif not pilot.inTheEnemyCamp then
@@ -1016,6 +1022,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                         pilot.theatreCercle = false
                     end
 
+                     print("DcUS update Status Z ")
                end
                 --selectionne la base la plus proche pour leur porter secours
                 local selectedDistance = 9999999
@@ -1071,7 +1078,7 @@ if camp_ZoneSAR then
                 if pilot.status == "rescued" or pilot.status == "POW" or pilot.status == "error" then
                     local result, resultTarget = deleteSoldierAliasPilot(pilot)
                     if not result and not resultTarget then
-                        print("DcUS GG (rescued or POW) Unable to delete this pilot "..tostring(pilot.name))
+                        print("DcUS GG (rescued or POW) Unable to delete this pilot "..pilot.status.." // "..tostring(pilot.name))
                     end
                     -- Suppression du pilote dans camp_ZoneSAR
                     table.remove(zone, pilotN)
@@ -1159,10 +1166,12 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
                 -- supprime d'abord le soldat existant, pour actualiser sa position et son status
                 local result = deleteAliasPilotInOobGround(pilot)
                     if not result then
-                        print("DcUS GG (maj) aliasPilot cannot be found and deleted in oob_ground "..tostring(pilot.name))
+                        -- print("DcUS GG (maj) aliasPilot cannot be found and deleted in oob_ground "..tostring(pilot.name))
                     else
                     --    print("DcUS GG Deleted pilot: "..tostring(result))
                     end
+
+                print("DcUS G1 (maj) pilot.status "..pilot.status.." // "..tostring(pilot.name))
 
                 if pilot.status == "EVAC_possible" and pilot.pos.surfaceType ~= 5  then
 
@@ -1186,6 +1195,9 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
                     --         embarkAndSafe = false,
                     --         MGRS_Chute = element.MGRS_Chute,
                     --     }
+
+                     print("DcUS G2 table.insert camp.SAR.pilotEjected "..tostring(pilot.name))
+
                     table.insert(camp.SAR.pilotEjected, addPilot)
 
                     --ne spawn pas dans l'eau (pas encore)

@@ -4756,52 +4756,38 @@ function LoadFileAndUpdate(from)
 
 end
 
--- Calcule le nombre de jours entre deux dates (YYYY, MM, DD)
-function SecondsBetween(date1,date2)
-
-
-	local y1 = date1.year
-	local m1 = date1.month
-	local d1 = date1.day
-
-	local y2 = date2.year
-	local m2 = date2.month
-	local d2 = date2.day
+-- Convertit une date en "nombre absolu de jours" depuis 1/1/0001
+local function dateToAbsoluteDays(y, m, d)
+    local monthDays = {31,28,31,30,31,30,31,31,30,31,30,31}
 
     local function isLeap(year)
         return (year % 4 == 0 and year % 100 ~= 0) or (year % 400 == 0)
     end
-    local monthDays = {31,28,31,30,31,30,31,31,30,31,30,31}
-    local function daysInYear(y)
-        return isLeap(y) and 366 or 365
-    end
-    local function daysSinceYearStart(y, m, d)
-        local days = d
-        for i=1,m-1 do
-            days = days + monthDays[i]
-            if i == 2 and isLeap(y) then days = days + 1 end
+
+    local days = d
+
+    -- Ajouter les jours des mois précédents
+    for i = 1, m - 1 do
+        days = days + monthDays[i]
+        if i == 2 and isLeap(y) then
+            days = days + 1
         end
-        return days
     end
 
-    -- Si la date 2 est avant la date 1, inverse
-    if y2 < y1 or (y2 == y1 and m2 < m1) or (y2 == y1 and m2 == m1 and d2 < d1) then
-        y1, m1, d1, y2, m2, d2 = y2, m2, d2, y1, m1, d1
+    -- Ajouter les jours des années précédentes
+    for year = 1, y - 1 do
+        days = days + (isLeap(year) and 366 or 365)
     end
 
-    local days = 0
-    -- Ajoute les jours restants de la première année
-    days = days + (daysInYear(y1) - daysSinceYearStart(y1, m1, d1) + 1)
-    -- Ajoute les jours des années intermédiaires
-    for y = y1+1, y2-1 do
-        days = days + daysInYear(y)
-    end
-    -- Ajoute les jours écoulés dans la dernière année
-    days = days + daysSinceYearStart(y2, m2, d2) - 1
+    return days
+end
 
-	local deltaTimeSeconds = days * 24 * 3600
+function SecondsBetween(date1, date2)
+    local abs1 = dateToAbsoluteDays(date1.year, date1.month, date1.day)
+    local abs2 = dateToAbsoluteDays(date2.year, date2.month, date2.day)
 
-    return deltaTimeSeconds
+    local deltaDays = math.abs(abs2 - abs1)
+    return deltaDays * 24 * 3600
 end
 
 function PatchEjectedPilotStructure(pilot, from)

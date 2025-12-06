@@ -1,6 +1,13 @@
 return {
     {
         type = "changed",
+        path = "/result/total",
+        key = "total",
+        oldValue = 0,
+        newValue = 1,
+    },
+    {
+        type = "changed",
         path = "/currentKey",
         key = "currentKey",
         oldValue = 1500000,
@@ -50,12 +57,5 @@ return {
         path = "/requiredModules/tetet_ec121",
         key = "tetet_ec121",
         value = tetet_ec121,
-    },
-    {
-        type = "changed",
-        path = "/result/total",
-        key = "total",
-        oldValue = 0,
-        newValue = 1,
     },
 }

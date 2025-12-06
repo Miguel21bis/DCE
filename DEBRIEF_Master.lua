@@ -160,8 +160,6 @@ if testPath ~= nil then																					--check si le fichier existe dans Sc
 end
 
 
--- dofile("Init/conf_mod.lua")
-
 --ne pas supprimer, utile pour le fichier statsevaluation
 dofile("Active/db_airbases.lua")
 dofile("Active/targetlist.lua")
