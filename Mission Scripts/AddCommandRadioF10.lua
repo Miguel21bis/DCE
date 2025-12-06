@@ -2009,9 +2009,9 @@ local function activateRadioBeacon(arguments)
 
 		if pilEjectObj then
 
-			env.info( "AddCRF10:activateRadioBeacon  pilEjectObj:isExist "..tostring(pilEjectObj:isExist()))
+			env.info( "DCE_activateRadioBeacon  pilEjectObj:isExist "..tostring(pilEjectObj:isExist()))
 
-			if not arg_ejPilot.embarked  and pilEjectObj:isExist() then
+			if not arg_ejPilot.embarked and pilEjectObj:isExist() then
 
 				local modulation = 0	--AM
 				local modulationTxt = "AM"	--AM
@@ -2026,14 +2026,28 @@ local function activateRadioBeacon(arguments)
 
 				local freqShow = campL.EjectedPilotFrequency[arg_ejPilot.sideName].radioBeacon / 1000000
 				trigger.action.outTextForGroup(arg_gpGid, "activate RadioBeacon on : "..freqShow.." MHz "..modulationTxt, 45 , true)
+
+				--set a ON la radio du l'ejectedPilot
+				for MGRS_Chute, zone in pairs(ZoneSAR) do
+					for pilotN, ejPilot in ipairs(zone) do
+						local ejPilotObj = Unit.getByName(ejPilot.name)
+						if ejPilot.sideName == arg_ejPilot then
+							ejPilot.radioBeaconOn = freqShow
+							env.info( "DCE_activateRadioBeacon set radioBeaconOn true for ejPilot.name "..tostring(ejPilot.name))	
+						end
+					end
+				end
+
+
 			end
 		else
 			trigger.action.outTextForGroup(arg_gpGid, "No response, the pilot may have been captured or killed. ", 15 , true)
 
-			env.info( "AddCRF10:activateRadioBeacon Error no response  ejectedPilot.name "..tostring(arg_ejPilot.name))
+			env.info( "DCE_activateRadioBeacon Error no response  ejectedPilot.name "..tostring(arg_ejPilot.name))
 			
 			_affiche(pilEjectObj, "pilEjectObj ")
 		end
+
 	else
 		env.info( "DCE_activateRadioBeacon frequency Error,  side  "..tostring(arg_ejPilot.sideName).." or Frequency: "..tostring(campL.EjectedPilotFrequency[arg_ejPilot.sideName]))
 
@@ -2045,6 +2059,17 @@ function StopRadioBeaconTransmission(ejPilotName)
 	trigger.action.stopRadioTransmission('radioBeacon_'..ejPilotName)
 
 	env.info( "DCE_RADIO StopRadioBeaconTransmission  "..tostring('radioBeacon_'..ejPilotName))
+
+	--set a OFF la radio du l'ejectedPilot
+	for MGRS_Chute, zone in pairs(ZoneSAR) do
+		for pilotN, ejPilot in ipairs(zone) do
+			local ejPilotObj = Unit.getByName(ejPilot.name)
+			if ejPilot.sideName == ejPilotName then
+				ejPilot.radioBeaconOn = nil
+				env.info( "DCE_activateRadioBeacon set radioBeacon OFF for ejPilot.name "..tostring(ejPilot.name))	
+			end
+		end
+	end
 
 end
 
@@ -2108,12 +2133,18 @@ local function menuF10_SAR(arg)
 				for n , ejectPil in ipairs(listEjectPil) do
 					local txt = "..."
 					if ejectPil.MGRS_Chute_10KM then
-						txt = ejectPil.distance.." Km. "..ejectPil.MGRS_Chute_10KM.." |"
+						txt = ejectPil.distance.." Km. "..ejectPil.MGRS_Chute_10KM.." |"..ejectPil.name
 					else
 						txt = ejectPil.distance.." Km. Activates radio beacon "..ejectPil.name
 					end
-					missionCommands.addCommandForGroup(arg_gpGid, txt, ejctedPilRadioON, activateRadioBeacon, {arg_gpGid, ejectPil}  )
-					missionCommands.addCommandForGroup(arg_gpGid, "Radio Off: "..ejectPil.name, ejctedPilRadioOFF, StopRadioBeaconTransmission, ejectPil.name  )
+
+					if ejectPil.radioBeaconOn then
+						missionCommands.addCommandForGroup(arg_gpGid, ejectPil.radioBeaconOn.." Radio Off: "..ejectPil.name, ejctedPilRadioOFF, StopRadioBeaconTransmission, ejectPil.name  )
+					else
+						missionCommands.addCommandForGroup(arg_gpGid, txt, ejctedPilRadioON, activateRadioBeacon, {arg_gpGid, ejectPil}  )
+					end
+					
+					
 				end
 			end
 		end
