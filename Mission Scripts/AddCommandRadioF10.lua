@@ -467,34 +467,90 @@ function CheckPointInPoly_XY_3(point, poly)
     return inside
 end
 
+-- MGRS Rescue Zones (simplified)
+--
+-- Each MGRS square is divided into four rescue zones:
+--
+--        North
+--      [3] | [4]
+--      -----------
+--      [1] | [2]
+--        South
+--
+-- Zone 1 = South-West
+-- Zone 2 = South-East
+-- Zone 3 = North-West
+-- Zone 4 = North-East
+--
+-- When a downed pilot reports "Zone 3", go to the north-west quarter
+-- of the specified MGRS grid (e.g. 35W NR).
 function Add_MGRS_Chute(pilot)
+	local grid    = coord.LLtoMGRS(coord.LOtoLL(pilot))
 
-	local grid = coord.LLtoMGRS(coord.LOtoLL(pilot))
+	-- Extract first digit of Easting & Northing (10 km subdivision)
+	local E       = tonumber(string.sub(grid.Easting, 1, 1))
+	local N       = tonumber(string.sub(grid.Northing, 1, 1))
 
-    --Avec 2 lettres (A et B) on passe de zone de 10km à des zone de 50km (la limite supérieur serait de 100km)
-    --A B
-	--A B
-	local subdiv_E_Num = tonumber(string.sub(grid.Easting, 1, 1))
-	local subdiv_E_Alpha
-	if subdiv_E_Num < 5 then
-		subdiv_E_Alpha = "A"
+	-- Determine direction
+	local isEast  = (E >= 5)
+	local isNorth = (N >= 5)
+
+	-- New zone numbering (requested layout):
+	--        North
+	--      3 | 4
+	--      ------
+	--      1 | 2
+	--        South
+	local zoneNumber
+
+	if not isEast and not isNorth then
+		zoneNumber = 1 -- South-West
+	elseif isEast and not isNorth then
+		zoneNumber = 2 -- South-East
+	elseif not isEast and isNorth then
+		zoneNumber = 3 -- North-West
 	else
-		subdiv_E_Alpha = "B"
+		zoneNumber = 4 -- North-East
 	end
 
-	local subdiv_N_Num = tonumber(string.sub(grid.Northing, 1, 1))
-	local subdiv_N_Alpha
-	if subdiv_N_Num < 5 then
-		subdiv_N_Alpha = "A"
-	else
-		subdiv_N_Alpha = "B"
-	end
+	-- Construct final strings
+	pilot.MGRS_Chute = grid.UTMZone .. "_" ..
+		grid.MGRSDigraph .. "_Zone_" .. zoneNumber
 
-	pilot.MGRS_Chute = grid.UTMZone .. "_" .. grid.MGRSDigraph .. "_" .. subdiv_E_Alpha .. "_" .. subdiv_N_Alpha
-	pilot.MGRS_Chute_10KM = grid.UTMZone .. "_" .. grid.MGRSDigraph .. "_" .. subdiv_E_Num .. "_" .. subdiv_N_Num
+	pilot.MGRS_Chute_10KM = grid.UTMZone .. "_" ..
+		grid.MGRSDigraph .. "_" .. E .. "_" .. N
 
 	return pilot
 end
+
+-- function Add_MGRS_Chute(pilot)
+
+-- 	local grid = coord.LLtoMGRS(coord.LOtoLL(pilot))
+
+--     --Avec 2 lettres (A et B) on passe de zone de 10km à des zone de 50km (la limite supérieur serait de 100km)
+--     --A B
+-- 	--A B
+-- 	local subdiv_E_Num = tonumber(string.sub(grid.Easting, 1, 1))
+-- 	local subdiv_E_Alpha
+-- 	if subdiv_E_Num < 5 then
+-- 		subdiv_E_Alpha = "A"
+-- 	else
+-- 		subdiv_E_Alpha = "B"
+-- 	end
+
+-- 	local subdiv_N_Num = tonumber(string.sub(grid.Northing, 1, 1))
+-- 	local subdiv_N_Alpha
+-- 	if subdiv_N_Num < 5 then
+-- 		subdiv_N_Alpha = "A"
+-- 	else
+-- 		subdiv_N_Alpha = "B"
+-- 	end
+
+-- 	pilot.MGRS_Chute = grid.UTMZone .. "_" .. grid.MGRSDigraph .. "_" .. subdiv_E_Alpha .. "_" .. subdiv_N_Alpha
+-- 	pilot.MGRS_Chute_10KM = grid.UTMZone .. "_" .. grid.MGRSDigraph .. "_" .. subdiv_E_Num .. "_" .. subdiv_N_Num
+
+-- 	return pilot
+-- end
 
 
 local function localGetPlayerObj()

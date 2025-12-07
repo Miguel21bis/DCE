@@ -571,7 +571,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                 
                 local lowerName = string.lower(pilot.name)
                 if string.find(lowerName, "pedro") and string.find(lowerName, "damaged") then
-                    print("DcUS SAR pilot with damaged  "..tostring(pilot.name).." set to error")
+                    -- print("DcUS SAR pilot with damaged  "..tostring(pilot.name).." set to error")
                     pilot.status = "error"
                 end
 
@@ -580,7 +580,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
                         local distance = math.sqrt(math.pow(pilot.pos.x - base.x, 2) + math.pow(pilot.pos.y - base.y, 2))
                         if distance < 5000 then
-                            print("DcUS SAR pilot on BASE  "..tostring(pilot.name).." set to error")
+                            -- print("DcUS SAR pilot on BASE  "..tostring(pilot.name).." set to error")
                             pilot.status = "error"
                         end
 
@@ -601,10 +601,10 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
                 end
 
-                print("DcUS update Status A "..tostring(pilot.name).." pilot.sideName "..tostring(pilot.sideName).." zoneSideName: "..zoneSideName)
+                -- print("DcUS update Status A "..tostring(pilot.name).." pilot.sideName "..tostring(pilot.sideName).." zoneSideName: "..zoneSideName)
 
                 if (pilot.status == "MIA" or pilot.status == "EVAC_possible" ) and pilot.sideName == zoneSideName and zoneSideName ~= "neutrals" then
-                    print("DcUS update Status B ")
+                    -- print("DcUS update Status B ")
 					local redDistance ={500, 3000, 20000, 200000}
                     -- local nbAMI_ENI = {
                     --     neutrals = {},
@@ -706,7 +706,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                         -- mia_Since = SecondsBetween( camp.date, pilot.date) / (24 * 60 * 60)
                         pilot.dataPOW.ejectNbDay = tonumber(mia_Since)
 
-                        print("daysfrom "..mia_Since)
+                        -- print("daysfrom "..mia_Since)
 
                     end
 
@@ -725,14 +725,14 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                         if pilot.dataPOW.PowDayMax and pilot.date.year and pilot.date.month and pilot.date.day then
                             if mia_Since > pilot.dataPOW.PowDayMax then
                                 pilot.status = "POW"
-                                print("DcUS update Status A10 "..tostring(pilot.name).." set to POW after max days "..tostring(pilot.dataPOW.PowDayMax))
+                                -- print("DcUS update Status A10 "..tostring(pilot.name).." set to POW after max days "..tostring(pilot.dataPOW.PowDayMax))
                             end
                         end
 
 
                     end
 
-                     print("DcUS update Status B2 "..tostring(pilot.inTheEnemyCamp).." pilot.dataPOW.ejectNbDay "..tostring(pilot.dataPOW.ejectNbDay).." pilot.dataPOW.POW_nextDayCheck "..tostring(pilot.dataPOW.POW_nextDayCheck) )
+                    --  print("DcUS update Status B2 "..tostring(pilot.inTheEnemyCamp).." pilot.dataPOW.ejectNbDay "..tostring(pilot.dataPOW.ejectNbDay).." pilot.dataPOW.POW_nextDayCheck "..tostring(pilot.dataPOW.POW_nextDayCheck) )
 
                     --////////////////////////////************************////////////////////
                     if pilot.status ~= "POW" and pilot.inTheEnemyCamp and (pilot.dataPOW.ejectNbDay < pilot.dataPOW.POW_nextDayCheck) then
@@ -745,12 +745,12 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 							pilot.status = "EVAC_possible"
 						elseif  nbAMI_ENI[zoneSideName][500] == 0 and  nbAMI_ENI[enemy][500] >= 2  then
 							pilot.status = "POW"
-                            print("DcUS update Status D "..tostring(pilot.name).." set to POW 500m ENI")
+                            -- print("DcUS update Status D "..tostring(pilot.name).." set to POW 500m ENI")
 						elseif nbAMI_ENI[zoneSideName][3000] >= 2  and nbAMI_ENI[enemy][3000] < 2 then
 							pilot.status = "EVAC_possible"
 						elseif nbAMI_ENI[zoneSideName][3000] < 2  and nbAMI_ENI[enemy][3000] >= 2 then
 							pilot.status = "POW"
-                            print("DcUS update Status E "..tostring(pilot.name).." set to POW 3000m ENI")
+                            -- print("DcUS update Status E "..tostring(pilot.name).." set to POW 3000m ENI")
 						elseif nbAMI_ENI[zoneSideName][3000] >= 2  and nbAMI_ENI[enemy][3000] >= 2  then
 							local pourcent = (nbAMI_ENI[zoneSideName][3000] / ( nbAMI_ENI[zoneSideName][3000] + nbAMI_ENI[enemy][3000]))*100
 							local coef = (pilot.dataPOW.ejectNbDay*(-1) + 5) -- plus le nb de jour augmente, plus les chances d etre capturé augmente
@@ -759,7 +759,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
 							if randomMalChance > pourcent then
 								pilot.status = "POW"
-                                print("DcUS update Status F "..tostring(pilot.name).." set to POW 3000m both sides")
+                                -- print("DcUS update Status F "..tostring(pilot.name).." set to POW 3000m both sides")
 							else
 								pilot.status = "EVAC_possible"
                             end
@@ -778,7 +778,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                            
 							if randomMalChance > pourcent then
                                 pilot.status = "POW"
-                                print("DcUS update Status G "..tostring(pilot.name).." set to POW 20000m both sides")
+                                -- print("DcUS update Status G "..tostring(pilot.name).." set to POW 20000m both sides")
 							else
 								pilot.status = "EVAC_possible"
                             end
@@ -794,7 +794,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 						end
 
                     elseif pilot.status == "POW" then
-                        print("DcUS update Status H "..tostring(pilot.name).." remains POW")
+                        -- print("DcUS update Status H "..tostring(pilot.name).." remains POW")
 
 
                     elseif not pilot.inTheEnemyCamp then
