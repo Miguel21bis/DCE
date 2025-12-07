@@ -155,6 +155,8 @@ Unit_Category = {
 --   ROAD             4
 --   RUNWAY           5
 
+local addFuncs
+
 local radioCommands = {}
 local flightPlanTimer = {}
 local tabJockerPlane = {}
@@ -2002,38 +2004,47 @@ end
 local function activateRadioBeacon(arguments)
 
 	local arg_gpGid = arguments[1]
-	local arg_ejPilot = arguments[2]
-	local pilEjectObj = Unit.getByName(arg_ejPilot.name)
+	local arg_ejPilTab = arguments[2]
+	local pilEjectObj = Unit.getByName(arg_ejPilTab.name)
 
-	if campL.EjectedPilotFrequency and campL.EjectedPilotFrequency[arg_ejPilot.sideName] then
+	if campL.EjectedPilotFrequency and campL.EjectedPilotFrequency[arg_ejPilTab.sideName] then
 
 		if pilEjectObj then
 
 			env.info( "DCE_activateRadioBeacon  pilEjectObj:isExist "..tostring(pilEjectObj:isExist()))
 
-			if not arg_ejPilot.embarked and pilEjectObj:isExist() then
+			if not arg_ejPilTab.embarked and pilEjectObj:isExist() then
 
-				local modulation = 0	--AM
+				local modulation = 0	--AM/FM
 				local modulationTxt = "AM"	--AM
-				if campL.EjectedPilotFrequency[arg_ejPilot.sideName].radioBeacon < 90000000 then
+				if campL.EjectedPilotFrequency[arg_ejPilTab.sideName].radioBeacon < 90000000 then
 					modulation = 1	--FM
 					modulationTxt = "FM"
 				end
 
-				trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', arg_ejPilot.posVec3, modulation, true,
-					campL.EjectedPilotFrequency[arg_ejPilot.sideName].radioBeacon, RadioWatt,
-					'radioBeacon_' .. arg_ejPilot.name)
+				env.info("DCE_TransRadio modulation: "..tostring(modulation))
+				env.info("DCE_TransRadio Ejected pilot position: "..tostring(arg_ejPilTab.posVec3.x)..", "..tostring(arg_ejPilTab.posVec3.y)..", "..tostring(arg_ejPilTab.posVec3.z))
+				env.info("DCE_TransRadio radioBeacon: "..tostring(campL.EjectedPilotFrequency[arg_ejPilTab.sideName].radioBeacon))
+				env.info("DCE_TransRadio RadioWatt: "..tostring(RadioWatt))
+				env.info("DCE_TransRadio 'radioBeacon_' .. arg_ejPilTab.name: "..tostring('radioBeacon_' .. arg_ejPilTab.name))
 
-				local freqShow = campL.EjectedPilotFrequency[arg_ejPilot.sideName].radioBeacon / 1000000
+
+
+				trigger.action.radioTransmission('l10n/DEFAULT/beaconEjectPilot.ogg', arg_ejPilTab.posVec3, modulation, true,
+					campL.EjectedPilotFrequency[arg_ejPilTab.sideName].radioBeacon, RadioWatt,
+					'radioBeacon_' .. arg_ejPilTab.name)
+
+				local freqShow = campL.EjectedPilotFrequency[arg_ejPilTab.sideName].radioBeacon / 1000000
 				trigger.action.outTextForGroup(arg_gpGid, "activate RadioBeacon on : "..freqShow.." MHz "..modulationTxt, 45 , true)
 
 				--set a ON la radio du l'ejectedPilot
 				for MGRS_Chute, zone in pairs(ZoneSAR) do
 					for pilotN, ejPilot in ipairs(zone) do
 						local ejPilotObj = Unit.getByName(ejPilot.name)
-						if ejPilot.sideName == arg_ejPilot then
+						if ejPilot.name == arg_ejPilTab.name then
 							ejPilot.radioBeaconOn = freqShow
-							env.info( "DCE_activateRadioBeacon set radioBeaconOn true for ejPilot.name "..tostring(ejPilot.name))	
+							env.info( "DCE_activateRadioBeacon set radioBeaconOn true for ejPilot.name "..tostring(ejPilot.name))
+							addFuncs()
 						end
 					end
 				end
@@ -2043,13 +2054,13 @@ local function activateRadioBeacon(arguments)
 		else
 			trigger.action.outTextForGroup(arg_gpGid, "No response, the pilot may have been captured or killed. ", 15 , true)
 
-			env.info( "DCE_activateRadioBeacon Error no response  ejectedPilot.name "..tostring(arg_ejPilot.name))
+			env.info( "DCE_activateRadioBeacon Error no response  ejectedPilot.name "..tostring(arg_ejPilTab.name))
 			
 			_affiche(pilEjectObj, "pilEjectObj ")
 		end
 
 	else
-		env.info( "DCE_activateRadioBeacon frequency Error,  side  "..tostring(arg_ejPilot.sideName).." or Frequency: "..tostring(campL.EjectedPilotFrequency[arg_ejPilot.sideName]))
+		env.info( "DCE_activateRadioBeacon frequency Error,  side  "..tostring(arg_ejPilTab.sideName).." or Frequency: "..tostring(campL.EjectedPilotFrequency[arg_ejPilTab.sideName]))
 
 	end
 end
@@ -2102,11 +2113,14 @@ local function menuF10_SAR(arg)
 			missionCommands.removeItemForGroup(arg_gpGid, {"SAR"})
 			missionCommands.removeItemForGroup(arg_gpGid, {"Activate beacon radios", "SAR"})
 			missionCommands.removeItemForGroup(arg_gpGid, {"Turns off beacon radios", "SAR"})
+			missionCommands.removeItemForGroup(arg_gpGid, {"Radio transmitting", "SAR"})
 
 			missionCommands.addSubMenuForGroup(arg_gpGid, "SAR")
 
 			local ejctedPilRadioON = missionCommands.addSubMenuForGroup(arg_gpGid, "Activate beacon radios", {"SAR"})
 			local ejctedPilRadioOFF = missionCommands.addSubMenuForGroup(arg_gpGid, "Turns off beacon radios", {"SAR"})
+			
+			
 
 			for MGRS_Chute, zone in pairs(ZoneSAR) do
 				for pilotN, ejPilot in ipairs(zone) do
@@ -2128,6 +2142,8 @@ local function menuF10_SAR(arg)
 				end
 			end
 
+			env.info("DCE_menuF10_SAR C nb EjectedPilot "..tostring(#listEjectPil))
+
 			if listEjectPil and #listEjectPil >= 1 then
 				table.sort(listEjectPil, function(a,b) return a.distance < b.distance  end)
 				for n , ejectPil in ipairs(listEjectPil) do
@@ -2139,8 +2155,11 @@ local function menuF10_SAR(arg)
 					end
 
 					if ejectPil.radioBeaconOn then
-						missionCommands.addCommandForGroup(arg_gpGid, ejectPil.radioBeaconOn.." Radio Off: "..ejectPil.name, ejctedPilRadioOFF, StopRadioBeaconTransmission, ejectPil.name  )
+						env.info("DCE_menuF10_SAR D ejectPil.radioBeaconOn "..tostring(ejectPil.radioBeaconOn).." for ejectPil.name "..tostring(ejectPil.name))
+						missionCommands.addCommandForGroup(arg_gpGid, ejectPil.radioBeaconOn.." Turn the Radio Off: "..ejectPil.name, ejctedPilRadioOFF, StopRadioBeaconTransmission, ejectPil.name  )
+						missionCommands.addSubMenuForGroup(arg_gpGid, ejectPil.radioBeaconOn.." Radio On: "..ejectPil.name, {"SAR"})
 					else
+						env.info("DCE_menuF10_SAR E ejectPil.radioBeaconOff for ejectPil.name "..tostring(ejectPil.name))
 						missionCommands.addCommandForGroup(arg_gpGid, txt, ejctedPilRadioON, activateRadioBeacon, {arg_gpGid, ejectPil}  )
 					end
 					
@@ -2998,13 +3017,28 @@ timer.scheduleFunction(monitorAllGroups, nil, timer.getTime() + 1) ]]
 
 
 
-local function addFuncs(arg_Gid, arg_GroupObj, argPlayerName)
+function addFuncs(arg_Gid, arg_GroupObj, argPlayerName)
 
-	env.info("DCE_addFuncs PASSE   _A gid "..tostring(arg_Gid).." Group "..tostring(arg_GroupObj))
+	env.info("DCE_addFuncs _A gid "..tostring(arg_Gid).." Group "..tostring(arg_GroupObj))
+
+	--si aucun argument, on s'appui sur la liste des joueurs fait maison
+	if not arg_Gid or not arg_GroupObj then
+		env.info("DCE_addFuncs _A2 with No arg ")
+		
+
+		for playerName, playerData in pairs(PlayerInOutAircraft) do
+			env.info("DCE_addFuncs  _A4 gid "..tostring(playerData.gid).." Group "..tostring(playerData.groupObject))
+			if playerData.gid and playerData.groupObject then
+				env.info("DCE_addFuncs  _A5 gid "..tostring(playerData.gid).." Group "..tostring(playerData.groupObject))
+				addFuncs(playerData.gid, playerData.groupObject, playerName)
+			end
+		end
+
+	end
 
 	if arg_Gid and arg_GroupObj then
 
-		env.info("DCE_addFuncs PASSE   _B  ")
+		env.info("DCE_addFuncs  _B  ")
 
 		if not EWR_optionPlayer[argPlayerName] then
 			EWR_optionPlayer[argPlayerName] = {
@@ -3596,21 +3630,33 @@ function MonitorPlayerAircraftActivity(arg)
 	local arg_playerName = arg[2]
 	local arg_aircraftName = arg[3]
 	local arg_category = arg[4]
+	local groupObject = arg[5]
+
+	env.info("DCE_MonitorPlayerAircraftActivity A "..arg_inOut.." // "..tostring(arg_aircraftName))
+
+	env.info("DCE_MonitorPlayerAircraftActivity B1 "..tostring(groupObject))
+	local gid
+	if groupObject then
+		gid = groupObject:getID()
+	end
+	env.info("DCE_MonitorPlayerAircraftActivity B2 "..tostring(gid))
 	
 	if arg_inOut == "in" then
-		env.info("DCE_MonitorPlayerAircraftActivity IN: "..tostring(arg_playerName).." in "..tostring(arg_aircraftName) )
+		env.info("DCE_MonitorPlayerAircraftActivity C IN: "..tostring(arg_playerName).." in "..tostring(arg_aircraftName) )
 		PlayerInOutAircraft[arg_playerName] = {
 			inOut = arg_inOut,
 			aircraftName = arg_aircraftName,
 			category = arg_category,
+			groupObject = groupObject,
+			gid = gid,
 		}
 	elseif arg_inOut == "out" then
-		env.info("DCE_MonitorPlayerAircraftActivity OUT: "..tostring(arg_playerName).." out of "..tostring(arg_aircraftName) )
+		env.info("DCE_MonitorPlayerAircraftActivity D OUT: "..tostring(arg_playerName).." out of "..tostring(arg_aircraftName) )
 		if PlayerInOutAircraft[arg_playerName] then
 			PlayerInOutAircraft[arg_playerName] = nil
 		end
     else
-		env.info("DCE_MonitorPlayerAircraftActivity ERROR: arg_inOut unknown " .. tostring(arg_playerName) .. " arg_inOut: " .. tostring(arg_inOut) .. " aircraft: " .. tostring(arg_aircraftName))
+		env.info("DCE_MonitorPlayerAircraftActivity E ERROR: arg_inOut unknown " .. tostring(arg_playerName) .. " arg_inOut: " .. tostring(arg_inOut) .. " aircraft: " .. tostring(arg_aircraftName))
 	end
 
 end
@@ -3675,7 +3721,7 @@ function EventHandler2:onEvent(event)
                             local desc = event.initiator:getDesc()
 							env.info("DCE_EventHandler2 C1. desc" .. tostring(desc))
 							if desc.category == Unit.Category.HELICOPTER then
-								timer.scheduleFunction(MonitorPlayerAircraftActivity, { "in", playerName, flightName, desc.category }, current_time + 1)
+								timer.scheduleFunction(MonitorPlayerAircraftActivity, { "in", playerName, flightName, desc.category, groupObject }, current_time + 1)
 							end
 						end
 					else

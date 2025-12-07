@@ -1466,7 +1466,7 @@ function LoopManagedRadioTransmission()
 						modulation = 1	--FM
 					end
 
-					trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', pilotVec3, modulation, true, campL.EjectedPilotFrequency[ejPil.sideName].radioBeacon, 0.1, 'radioBeacon_'..ejPil.name)
+					trigger.action.radioTransmission('l10n/DEFAULT/beaconEjectPilot.ogg', pilotVec3, modulation, true, campL.EjectedPilotFrequency[ejPil.sideName].radioBeacon, 0.1, 'radioBeacon_'..ejPil.name)
 					ejPil.radio_on = true
 
 					env.info( "DCE_SAR:LoopManagedRadioTransmission E frequency  "..tostring(campL.EjectedPilotFrequency[ejPil.sideName].radioBeacon).." MGRS_Chute: "..tostring(ejPil.MGRS_Chute).." |MGRS_Chute_10KM: "..tostring(ejPil.MGRS_Chute_10KM).." "..tostring('radio_'..ejPil.name))
