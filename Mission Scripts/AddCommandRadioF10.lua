@@ -155,7 +155,9 @@ Unit_Category = {
 --   ROAD             4
 --   RUNWAY           5
 
-local addFuncs
+menuF10_SAR()
+
+-- addFuncs()
 
 local radioCommands = {}
 local flightPlanTimer = {}
@@ -2100,7 +2102,11 @@ local function activateRadioBeacon(arguments)
 						if ejPilot.name == arg_ejPilTab.name then
 							ejPilot.radioBeaconOn = freqShow
 							env.info( "DCE_activateRadioBeacon set radioBeaconOn true for ejPilot.name "..tostring(ejPilot.name))
-							addFuncs()
+                            -- addFuncs()
+							
+							-- sar_F10(Group)
+                            timer.scheduleFunction(menuF10_SAR, nil, timer.getTime() + 1)
+							
 						end
 					end
 				end
@@ -2146,22 +2152,44 @@ local function menuF10_SAR(arg)
 
 	env.info("DCE_menuF10_SAR A timer.getTime() "..tostring(timer.getTime()))
 
+
+	--si aucun argument, on s'appui sur la liste des joueurs fait maison
+    if not arg then
+        env.info("DCE_amenuF10_SAR _B2 with No arg ")
+
+        for playerName, playerData in pairs(PlayerInOutAircraft) do
+            env.info("DCE_menuF10_SAR  _B4 gid " ..
+            tostring(playerData.gid) .. " Group " .. tostring(playerData.groupObject))
+            if playerData.gid and playerData.groupObject then
+                env.info("DCE_menuF10_SAR  _B5 gid " ..
+                tostring(playerData.gid) .. " Group " .. tostring(playerData.groupObject))
+                menuF10_SAR({ playerData.gid, playerData.groupObject })
+            end
+        end
+    end
+	
 	local arg_gpGid = arg[1]
 	local arg_playerGroup = arg[2]
 
+	env.info("DCE_menuF10_SAR C arg_gpGid " .. tostring(arg_gpGid) .. " arg_playerGroup: " .. tostring(arg_playerGroup))
+
 	if arg_playerGroup and arg_playerGroup:isExist() then
 	else
-		env.info("DCE_menuF10_SAR B playerGroup not exist")
+		env.info("DCE_menuF10_SAR D playerGroup not exist")
 		return
 	end
 
-	local playerUnits = arg_playerGroup:getUnits()
-	local playerUnit = playerUnits[1]
+	-- local playerUnits = arg_playerGroup:getUnits()
+	-- local playerUnit = playerUnits[1]
 
-	if playerUnit then
+	local playerUnits = arg_playerGroup:getUnits()
+
+    for _, playerUnit in ipairs(playerUnits) do
+		env.info("DCE_amenuF10_SAR E1")
 		local uSAR_Player = playerUnit:getPlayerName()
 
 		if uSAR_Player and PlayerInOutAircraft[uSAR_Player] then
+			env.info("DCE_amenuF10_SAR E2")
 			local playerVec3 = playerUnit:getPoint()
 			local playerCoalId = playerUnit:getCoalition()
 			local listEjectPil = {}
@@ -2198,7 +2226,7 @@ local function menuF10_SAR(arg)
 				end
 			end
 
-			env.info("DCE_menuF10_SAR C nb EjectedPilot "..tostring(#listEjectPil))
+			env.info("DCE_menuF10_SAR M nb EjectedPilot "..tostring(#listEjectPil))
 
 			if listEjectPil and #listEjectPil >= 1 then
 				table.sort(listEjectPil, function(a,b) return a.distance < b.distance  end)
@@ -2211,11 +2239,11 @@ local function menuF10_SAR(arg)
 					end
 
 					if ejectPil.radioBeaconOn then
-						env.info("DCE_menuF10_SAR D ejectPil.radioBeaconOn "..tostring(ejectPil.radioBeaconOn).." for ejectPil.name "..tostring(ejectPil.name))
+						env.info("DCE_menuF10_SAR N ejectPil.radioBeaconOn "..tostring(ejectPil.radioBeaconOn).." for ejectPil.name "..tostring(ejectPil.name))
 						missionCommands.addCommandForGroup(arg_gpGid, ejectPil.radioBeaconOn.." Turn the Radio Off: "..ejectPil.name, ejctedPilRadioOFF, StopRadioBeaconTransmission, ejectPil.name  )
 						missionCommands.addSubMenuForGroup(arg_gpGid, ejectPil.radioBeaconOn.." Radio On: "..ejectPil.name, {"SAR"})
 					else
-						env.info("DCE_menuF10_SAR E ejectPil.radioBeaconOff for ejectPil.name "..tostring(ejectPil.name))
+						env.info("DCE_menuF10_SAR O ejectPil.radioBeaconOff for ejectPil.name "..tostring(ejectPil.name))
 						missionCommands.addCommandForGroup(arg_gpGid, txt, ejctedPilRadioON, activateRadioBeacon, {arg_gpGid, ejectPil}  )
 					end
 					
