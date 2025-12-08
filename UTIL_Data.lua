@@ -157,8 +157,6 @@ TaskByPlane = {
 		["Yak-52"] = true,
 		["JF-17"] = true,
 		["L-39ZA"] = true,
-		["MiG-15bis"] = true,
-		["vwv_mig17f"] = true,			--Mod
 		["Su-24M"] = true,
 
 		["Mirage-F1CE"] = true,
@@ -233,10 +231,6 @@ TaskByPlane = {
 		["JF-17"] = true,
 		["L-39C"] = true,
 		["L-39ZA"] = true,
-		["MiG-15bis"] = true,
-		["vwv_mig17f"] = true,			--Mod
-		["MiG-19P"] = true,
-		["MiG-21Bis"] = true,
 		["MiG-23MLD"] = true,
 		["MiG-27K"] = true,
 		["MiG-29A"] = true,
@@ -309,8 +303,6 @@ TaskByPlane = {
 		["JF-17"] = true,
 		["L-39C"] = true,
 		["L-39ZA"] = true,
-		["vwv_mig17f"] = true,			--Mod
-		["MiG-19P"] = true,
 		["MiG-27K"] = true,
 		["MiG-29A"] = true,
 		["Su-17M4"] = true,
@@ -396,10 +388,6 @@ TaskByPlane = {
 		["JF-17"] = true,
 		["L-39C"] = true,
 		["L-39ZA"] = true,
-		["MiG-15bis"] = true,
-		["vwv_mig17f"] = true,			--Mod
-		["MiG-19P"] = true,
-		["MiG-21Bis"] = true,
 		["MiG-23MLD"] = true,
 		["MiG-25RBT"] = true,
 		["MiG-27K"] = true,
@@ -529,11 +517,6 @@ TaskByPlane = {
 
 		["Yak-52"] = true,
 		["JF-17"] = true,
-		["MiG-15bis"] = true,
-		["vwv_mig17f"] = true,			--Mod
-		["MiG-19P"] = true,
-		["MiG-21Bis"] = true,
-		["vwv_mig21mf"] = true,			--Mod
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-29A"] = true,
@@ -620,11 +603,6 @@ TaskByPlane = {
 		["Mirage-F1EE"] = true,
 
 		["JF-17"] = true,
-		["MiG-15bis"] = true,
-		["vwv_mig17f"] = true,			--Mod
-		["MiG-19P"] = true,
-		["MiG-21Bis"] = true,
-		["vwv_mig21mf"] = true,			--Mod
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-29A"] = true,
@@ -679,11 +657,6 @@ TaskByPlane = {
 		["JF-17"] = true,
 		["L-39C"] = true,
 		["L-39ZA"] = true,
-		["MiG-15bis"] = true,
-		["vwv_mig17f"] = true,			--Mod
-		["MiG-19P"] = true,
-		["MiG-21Bis"] = true,
-		["vwv_mig21mf"] = true,			--Mod
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-29A"] = true,
@@ -734,11 +707,7 @@ TaskByPlane = {
 		["Mirage-F1EE"] = true,
 
 		["JF-17"] = true,
-		["MiG-15bis"] = true,
 		["vwv_mig17f"] = true,			--Mod
-		["MiG-19P"] = true,
-		["MiG-21Bis"] = true,
-		["vwv_mig21mf"] = true,			--Mod
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-29A"] = true,
@@ -772,7 +741,6 @@ TaskByPlane = {
 		["OH-6A"] = true,			--Mod
 
 		["JF-17"] = true,
-		["MiG-21Bis"] = true,
 		["MiG-25RBT"] = true,
 		["Su-24MR"] = true,
 		["tu_22D"] = true,				--Mod
@@ -1892,8 +1860,17 @@ Data_divers = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
-		vCruise = 200,	--TODO a verifier
-		hCruise = 800,
+		Tasks = {
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(AFAC),
+		},
+		vCruise = 180,   -- m/s 648km/h M ≈ 0.59
+		hCruise = 8500,  -- m
 	},
 
 	["vwv_mig17f"] = 	{			                 	--Mod
@@ -1908,6 +1885,18 @@ Data_divers = {
 			maxFrequency = 156.000,
 			modulation = MODULATION_AM,
 		},
+		Tasks = {
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(AntishipStrike),
+			aircraft_task(AFAC),
+		},
+		vCruise = 200,   -- m/s 720km/h M ≈ 0.66
+		hCruise = 9000,  -- m
 	},
 
 	["MiG-19P"] = {
@@ -1922,6 +1911,17 @@ Data_divers = {
 				["NAV_Initial_Hdg"] = 0,
 			}
 		},
+		Tasks = {
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(AntishipStrike),
+		},
+		vCruise = 220,   -- m/s (≈ 792 km/h)Mach ≈ 0.72
+		hCruise = 9000,  -- m (≈ 9 000 m)
 	},
 	
 	["vwv_mig21pfm"] = 	{			                 	--Mod
@@ -1945,8 +1945,8 @@ Data_divers = {
 			aircraft_task(CAS),
 			aircraft_task(AntishipStrike),
 		},
-		vCruise = 200,	--TODO a verifier
-		hCruise = 4000,
+		vCruise = 220,   -- m/s
+		hCruise = 11000, -- m
 	},
 
 	["vwv_mig21mf"] = 	{			                 	--Mod
@@ -1961,6 +1961,14 @@ Data_divers = {
 			maxFrequency = 156.000,
 			modulation = MODULATION_AM,
 		},
+		Tasks = {
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+		},
+		vCruise = 240,   -- m/s (≈ 864 km/h)Mach ≈ 0.81
+		hCruise = 11000, -- m (≈ 11 000 m)
 	},
 
 	["MiG-21Bis"] = {
@@ -1969,6 +1977,15 @@ Data_divers = {
 		playable = true,
 		vCruise = 225,
 		hCruise = 7548,
+		Tasks = {
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(Reconnaissance),
+		},
 	},
 	["MiG-23MLD"] = {
 		instrumentUnits = "russian",

@@ -368,39 +368,30 @@ end
 --ajoute les ejectedPilot du fichier temp zoneSAR au fichier camp_ZoneSAR
 if zoneSAR then
     for sideN, dcs_sideName in pairs(DCS_Side) do
-        print("AddEjectedPilot A")
-        for zoneName, pilots in pairs(zoneSAR) do
-            print("AddEjectedPilot B")
+       for zoneName, pilots in pairs(zoneSAR) do
             for pilotN, pilot in pairs(pilots) do
-                print("AddEjectedPilot C")
-                if type(pilot) == "table" then
-                    print("AddEjectedPilot D")
+                 if type(pilot) == "table" then
                     pilot = PatchEjectedPilotStructure(pilot, "updateSAR")
 
                     if pilot.sideName == "" then
                         pilot.sideName = "neutrals"
                     end
                     if pilot.sideName == dcs_sideName then
-                        print("AddEjectedPilot E")
                         if not camp_ZoneSAR[dcs_sideName][zoneName] then
                             camp_ZoneSAR[dcs_sideName][zoneName] = {
                                 [1] = pilot
                             }
-                            print("AddEjectedPilot F")
                         else
-                            print("AddEjectedPilot G  "..pilot.name)
                             local foundElement = false
                             for n=1, #camp_ZoneSAR[dcs_sideName][zoneName] do
                                 if pilot.name == camp_ZoneSAR[dcs_sideName][zoneName][n].name then
-                                    print("AddEjectedPilot G2 table.insert "..pilot.name)
-                                    foundElement = true
+                                   foundElement = true
                                     break
                                 end
                             end
                             if not foundElement then
                                 table.insert(camp_ZoneSAR[dcs_sideName][zoneName], pilot )
-                                print("AddEjectedPilot G3 table.insert "..pilot.name)
-                            end
+                           end
                         end
                     end
                 end
@@ -1171,7 +1162,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
                     --    print("DcUS GG Deleted pilot: "..tostring(result))
                     end
 
-                print("DcUS G1 (maj) pilot.status "..pilot.status.." // "..tostring(pilot.name))
+                -- print("DcUS G1 (maj) pilot.status "..pilot.status.." // "..tostring(pilot.name))
 
                 if pilot.status == "EVAC_possible" and pilot.pos.surfaceType ~= 5  then
 
@@ -1196,7 +1187,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
                     --         MGRS_Chute = element.MGRS_Chute,
                     --     }
 
-                     print("DcUS G2 table.insert camp.SAR.pilotEjected "..tostring(pilot.name))
+                    --  print("DcUS G2 table.insert camp.SAR.pilotEjected "..tostring(pilot.name))
 
                     table.insert(camp.SAR.pilotEjected, addPilot)
 
