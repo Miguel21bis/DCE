@@ -78,6 +78,8 @@ SmokeColor_TargetDesignation = trigger.smokeColor.Blue
 
 RadioWatt = 1 -- Radio power in watts, used for radio beacon transmission
 
+SAR_fct = {}	--table des fonction SAR, evite tous les pbs de monter une function avant l'autre
+
 AnnonceOneOunce = {}
 
 --target tracks
@@ -155,7 +157,7 @@ Unit_Category = {
 --   ROAD             4
 --   RUNWAY           5
 
-menuF10_SAR()
+-- local function menuF10_SAR(...) end
 
 -- addFuncs()
 
@@ -2059,7 +2061,10 @@ function AFAC_F10(playerGroup)
 
 end
 
-local function activateRadioBeacon(arguments)
+--SAR_function
+function SAR_fct.activateRadioBeacon(arguments)
+
+	--attention, surement conflit avec function LoopManagedRadioTransmission()
 
 	local arg_gpGid = arguments[1]
 	local arg_ejPilTab = arguments[2]
@@ -2088,7 +2093,7 @@ local function activateRadioBeacon(arguments)
 
 
 
-				trigger.action.radioTransmission('l10n/DEFAULT/beaconEjectPilot.ogg', arg_ejPilTab.posVec3, modulation, true,
+				trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', arg_ejPilTab.posVec3, modulation, true,
 					campL.EjectedPilotFrequency[arg_ejPilTab.sideName].radioBeacon, RadioWatt,
 					'radioBeacon_' .. arg_ejPilTab.name)
 
@@ -2100,12 +2105,10 @@ local function activateRadioBeacon(arguments)
 					for pilotN, ejPilot in ipairs(zone) do
 						local ejPilotObj = Unit.getByName(ejPilot.name)
 						if ejPilot.name == arg_ejPilTab.name then
-							ejPilot.radioBeaconOn = freqShow
-							env.info( "DCE_activateRadioBeacon set radioBeaconOn true for ejPilot.name "..tostring(ejPilot.name))
-                            -- addFuncs()
-							
-							-- sar_F10(Group)
-                            timer.scheduleFunction(menuF10_SAR, nil, timer.getTime() + 1)
+							ejPilot.radioFreq = freqShow
+							ejPilot.radio_on = true
+							env.info( "DCE_activateRadioBeacon set radioFreq true for ejPilot.name "..tostring(ejPilot.name))
+                            timer.scheduleFunction(SAR_fct.menuF10_SAR, nil, timer.getTime() + 1)
 							
 						end
 					end
@@ -2127,7 +2130,7 @@ local function activateRadioBeacon(arguments)
 	end
 end
 
-function StopRadioBeaconTransmission(ejPilotName)
+function SAR_fct.StopRadioBeaconTransmission(ejPilotName)
 
 	trigger.action.stopRadioTransmission('radioBeacon_'..ejPilotName)
 
@@ -2138,7 +2141,7 @@ function StopRadioBeaconTransmission(ejPilotName)
 		for pilotN, ejPilot in ipairs(zone) do
 			local ejPilotObj = Unit.getByName(ejPilot.name)
 			if ejPilot.sideName == ejPilotName then
-				ejPilot.radioBeaconOn = nil
+				ejPilot.radio_on = nil
 				env.info( "DCE_activateRadioBeacon set radioBeacon OFF for ejPilot.name "..tostring(ejPilot.name))	
 			end
 		end
@@ -2148,30 +2151,37 @@ end
 
 	--************* SAR ejectedPilot PART ****************************************
 	--on refait régulierement le menu SAR pour actualiser la liste des pilotes ejectés, et le proposer aux menu des joueurs
-local function menuF10_SAR(arg)
+function SAR_fct.menuF10_SAR(arg)
 
 	env.info("DCE_menuF10_SAR A timer.getTime() "..tostring(timer.getTime()))
 
+	
+
+
+	env.info("DCE_menuF10_SAR C0 arg " .. tostring(arg) )
 
 	--si aucun argument, on s'appui sur la liste des joueurs fait maison
-    if not arg then
-        env.info("DCE_amenuF10_SAR _B2 with No arg ")
+    if not arg or arg == nil then
+        env.info("DCE_menuF10_SAR _B2 with No arg ")
 
         for playerName, playerData in pairs(PlayerInOutAircraft) do
-            env.info("DCE_menuF10_SAR  _B4 gid " ..
-            tostring(playerData.gid) .. " Group " .. tostring(playerData.groupObject))
+            env.info("DCE_menuF10_SAR  _B4 gid " ..  tostring(playerData.gid) .. " Group " .. tostring(playerData.groupObject))
             if playerData.gid and playerData.groupObject then
-                env.info("DCE_menuF10_SAR  _B5 gid " ..
-                tostring(playerData.gid) .. " Group " .. tostring(playerData.groupObject))
-                menuF10_SAR({ playerData.gid, playerData.groupObject })
+                env.info("DCE_menuF10_SAR  _B5 gid " .. tostring(playerData.gid) .. " Group " .. tostring(playerData.groupObject))
+                SAR_fct.menuF10_SAR({ playerData.gid, playerData.groupObject })
             end
         end
     end
-	
+
+	if not arg or arg == nil then
+		env.info("DCE_menuF10_SAR _B1 Exit no arg ")
+		return
+	end
+
 	local arg_gpGid = arg[1]
 	local arg_playerGroup = arg[2]
 
-	env.info("DCE_menuF10_SAR C arg_gpGid " .. tostring(arg_gpGid) .. " arg_playerGroup: " .. tostring(arg_playerGroup))
+	env.info("DCE_menuF10_SAR C1 arg_gpGid " .. tostring(arg_gpGid) .. " arg_playerGroup: " .. tostring(arg_playerGroup))
 
 	if arg_playerGroup and arg_playerGroup:isExist() then
 	else
@@ -2185,11 +2195,11 @@ local function menuF10_SAR(arg)
 	local playerUnits = arg_playerGroup:getUnits()
 
     for _, playerUnit in ipairs(playerUnits) do
-		env.info("DCE_amenuF10_SAR E1")
+		env.info("DCE_menuF10_SAR E1")
 		local uSAR_Player = playerUnit:getPlayerName()
 
 		if uSAR_Player and PlayerInOutAircraft[uSAR_Player] then
-			env.info("DCE_amenuF10_SAR E2")
+			env.info("DCE_menuF10_SAR E2 uSAR_Player "..tostring(uSAR_Player))
 			local playerVec3 = playerUnit:getPoint()
 			local playerCoalId = playerUnit:getCoalition()
 			local listEjectPil = {}
@@ -2220,6 +2230,9 @@ local function menuF10_SAR(arg)
 							posVec3 = ejPilotVec3,
 							MGRS_Chute_10KM = ejPilot.MGRS_Chute_10KM,
 							sideName = ejPilot.sideName,
+							radio_on= ejPilot.radio_on,
+							radioFreq= ejPilot.radioFreq,
+
 						}
 						table.insert(listEjectPil, tabTemp)
 					end
@@ -2238,13 +2251,13 @@ local function menuF10_SAR(arg)
 						txt = ejectPil.distance.." Km. Activates radio beacon "..ejectPil.name
 					end
 
-					if ejectPil.radioBeaconOn then
-						env.info("DCE_menuF10_SAR N ejectPil.radioBeaconOn "..tostring(ejectPil.radioBeaconOn).." for ejectPil.name "..tostring(ejectPil.name))
-						missionCommands.addCommandForGroup(arg_gpGid, ejectPil.radioBeaconOn.." Turn the Radio Off: "..ejectPil.name, ejctedPilRadioOFF, StopRadioBeaconTransmission, ejectPil.name  )
-						missionCommands.addSubMenuForGroup(arg_gpGid, ejectPil.radioBeaconOn.." Radio On: "..ejectPil.name, {"SAR"})
+					if ejectPil.radio_on and ejectPil.radioFreq then
+						env.info("DCE_menuF10_SAR N ejectPil.radioFreq "..tostring(ejectPil.radioFreq).." for ejectPil.name "..tostring(ejectPil.name))
+						missionCommands.addCommandForGroup(arg_gpGid, ejectPil.radioFreq.." Turn the Radio Off: "..ejectPil.name, ejctedPilRadioOFF, SAR_fct.StopRadioBeaconTransmission, ejectPil.name  )
+						missionCommands.addSubMenuForGroup(arg_gpGid, ejectPil.radioFreq.." Radio On: "..ejectPil.name, {"SAR"})
 					else
 						env.info("DCE_menuF10_SAR O ejectPil.radioBeaconOff for ejectPil.name "..tostring(ejectPil.name))
-						missionCommands.addCommandForGroup(arg_gpGid, txt, ejctedPilRadioON, activateRadioBeacon, {arg_gpGid, ejectPil}  )
+						missionCommands.addCommandForGroup(arg_gpGid, txt, ejctedPilRadioON, SAR_fct.activateRadioBeacon, {arg_gpGid, ejectPil}  )
 					end
 					
 					
@@ -2255,7 +2268,7 @@ local function menuF10_SAR(arg)
 	
 
 	--TODO, A REMETTRE, enlever, modifier, bref a voir
-	return timer.getTime() + 30
+	-- return timer.getTime() + 30
 end
 
 
@@ -3103,7 +3116,7 @@ timer.scheduleFunction(monitorAllGroups, nil, timer.getTime() + 1) ]]
 
 function addFuncs(arg_Gid, arg_GroupObj, argPlayerName)
 
-	env.info("DCE_addFuncs _A gid "..tostring(arg_Gid).." Group "..tostring(arg_GroupObj))
+	env.info("DCE_addFuncs _A gid "..tostring(arg_Gid).." Group "..tostring(arg_GroupObj).." argPlayerName: "..tostring(argPlayerName))
 
 	--si aucun argument, on s'appui sur la liste des joueurs fait maison
 	if not arg_Gid or not arg_GroupObj then
@@ -3113,7 +3126,7 @@ function addFuncs(arg_Gid, arg_GroupObj, argPlayerName)
 		for playerName, playerData in pairs(PlayerInOutAircraft) do
 			env.info("DCE_addFuncs  _A4 gid "..tostring(playerData.gid).." Group "..tostring(playerData.groupObject))
 			if playerData.gid and playerData.groupObject then
-				env.info("DCE_addFuncs  _A5 gid "..tostring(playerData.gid).." Group "..tostring(playerData.groupObject))
+				env.info("DCE_addFuncs  _A5  MAKE addFuncs() gid "..tostring(playerData.gid).." Group "..tostring(playerData.groupObject))
 				addFuncs(playerData.gid, playerData.groupObject, playerName)
 			end
 		end
@@ -3228,7 +3241,7 @@ function addFuncs(arg_Gid, arg_GroupObj, argPlayerName)
 		end
 
 		-- sar_F10(Group)
-		timer.scheduleFunction(menuF10_SAR, {arg_Gid, arg_GroupObj}, timer.getTime() + 2)
+		timer.scheduleFunction(SAR_fct.menuF10_SAR, {arg_Gid, arg_GroupObj}, timer.getTime() + 5)
 
 		-- -- AFAC_F10(Group)
 		-- timer.scheduleFunction(AFAC_F10, groupObject, timer.getTime() + 2)
@@ -3773,21 +3786,21 @@ function EventHandler2:onEvent(event)
 		end
 
 		if event.id == world.event.S_EVENT_BIRTH then
-			env.info("DCE_EventHandler2 A S_EVENT_BIRTH.")
+			-- env.info("DCE_EventHandler2 A S_EVENT_BIRTH.")
 
-			if event.initiator then
-				local test_getCategory = Object.getCategory(event.initiator)
-				env.info("DCE_EventHandler2 A2 test_getCategory: "..tostring(test_getCategory).." Object.Category.STATIC: "..tostring(Object.Category.STATIC))
-				env.info("DCE_EventHandler2 A3 event.initiator.getPlayerName: "..tostring(event.initiator.getPlayerName).." event.initiator.getGroup: "..tostring(event.initiator.getGroupC))
-				env.info("DCE_EventHandler2 A4 event.initiator:getPlayerName(): "..tostring(event.initiator:getPlayerName()).." event.initiator:getGroup(): "..tostring(event.initiator:getGroup()))
+			-- if event.initiator then
+			-- 	local test_getCategory = Object.getCategory(event.initiator)
+			-- 	env.info("DCE_EventHandler2 A2 test_getCategory: "..tostring(test_getCategory).." Object.Category.STATIC: "..tostring(Object.Category.STATIC))
+			-- 	env.info("DCE_EventHandler2 A3 event.initiator.getPlayerName: "..tostring(event.initiator.getPlayerName).." event.initiator.getGroup: "..tostring(event.initiator.getGroupC))
+			-- 	env.info("DCE_EventHandler2 A4 event.initiator:getPlayerName(): "..tostring(event.initiator:getPlayerName()).." event.initiator:getGroup(): "..tostring(event.initiator:getGroup()))
 				
-			end
+			-- end
 		
 			if event.initiator and Object.getCategory(event.initiator) ~= Object.Category.STATIC and event.initiator.getPlayerName and event.initiator.getGroup then
 				local playerName = event.initiator:getPlayerName()
 				local groupObject = event.initiator:getGroup()
 
-				env.info("DCE_EventHandler2 B playerName." .. tostring(playerName))
+				-- env.info("DCE_EventHandler2 B playerName." .. tostring(playerName))
 
 				if groupObject and groupObject.getID then
 
@@ -3800,21 +3813,18 @@ function EventHandler2:onEvent(event)
 						env.info("DCE_EventHandler2 C0. playerName " .. tostring(playerName) .. " gpGid." .. tostring(gpGid) .. " groupObject." .. tostring(groupObject))
 
 						if gpGid and groupObject then
+							env.info("DCE_EventHandler2 C1 playerName S_EVENT_BIRTH. MAKE addFuncs() ")
 							addFuncs(gpGid, groupObject, playerName)
 
                             local desc = event.initiator:getDesc()
-							env.info("DCE_EventHandler2 C1. desc" .. tostring(desc))
+							env.info("DCE_EventHandler2 C2. desc" .. tostring(desc))
 							if desc.category == Unit.Category.HELICOPTER then
 								timer.scheduleFunction(MonitorPlayerAircraftActivity, { "in", playerName, flightName, desc.category, groupObject }, current_time + 1)
 							end
 						end
 					else
 						
-						-- env.info("DCE_EventHandler2 D0 gpGid." .. tostring(gpGid))
-
 						if gpGid and groupObject then
-							
-							-- env.info("DCE_EventHandler2 D1 flightName." .. tostring(flightName))
 							
 							if not SatusGroupAircraft[groupName] then
 								SatusGroupAircraft[groupName] = {
@@ -3830,38 +3840,16 @@ function EventHandler2:onEvent(event)
 							
 							if string.find(string.lower(groupName), "escort") then passEscort = true end
 
-							-- env.info("DCE_EventHandler2 D2 groupObject: "..tostring(groupObject).." passEscort " .. tostring(passEscort))
-							
 							if groupObject and passEscort then
 
 								-- local route = DCE_GetRoute(flightName, sideName)
 								local route = DCE_GetRoute(groupName)
 
-								-- if route then
-
-								-- 	-- local route = groupObject:getTaskRoute()
-								-- 	env.info("DCE_EventHandler2 D3 #route." .. tostring(#route))
-								-- end
-								
-
 								if route and #route > 0 then
 
-									-- env.info("DCE_EventHandler2 D4 flightName." .. tostring(groupName))
-									
 									SatusGroupAircraft[groupName]["waypoints"] = route
 									SatusGroupAircraft[groupName]["task"] = "escort"
 
-									-- if camp.debug then
-									-- 	--export custom mission log
-									-- 	local logStr = "SatusGroupAircraft = " .. TableSerialization(SatusGroupAircraft, 0)
-									-- 	local logFile = io.open( PathDCE .. "Debug\\" .. "SatusGroupAircraft" .. "_" .. tostring(current_time) .. ".lua", "w")
-									-- 	if logFile then
-									-- 		logFile:write(logStr)
-									-- 		logFile:close()
-									-- 	else
-									-- 		env.info("DCE_INTERCEPTOR: Failed to open log file for writing.")
-									-- 	end
-									-- end
 								end
 							end
 						end
@@ -3870,65 +3858,13 @@ function EventHandler2:onEvent(event)
 			end
 
 
-			-- if event.initiator and Object.getCategory(event.initiator) ~= Object.Category.STATIC and event.initiator.getGroup then
-			-- 	local groupObject = event.initiator:getGroup()
-
-			-- 	if groupObject and groupObject.getID then
-			-- 		local gpGid = groupObject:getID()
-
-			-- 		if gpGid and groupObject then
-			-- 			local flightName = event.initiator:getName()
-		
-			-- 			if not SatusGroupAircraft[flightName] then
-			-- 				SatusGroupAircraft[flightName] = {
-			-- 					["spawn"] = false,
-			-- 					["takeoff"] = false,
-			-- 					["landing"] = false,
-			-- 					["landingWpt"] = 999,
-			-- 					["task"] = "",
-			-- 					["waypoints"] = {}, -- suivi des waypoints
-			-- 					["currentWP"] = 1,  -- index du waypoint à atteindre
-			-- 				}
-			-- 			end
-
-			-- 			local group = Group.getByName(flightName)
-			-- 			local passEscort = false
-			-- 			if string.find(string.lower(flightName), "escort") then passEscort = true end
-			-- 			if group and passEscort then
-			-- 				local route = group:getTaskRoute()
-			-- 				if route and #route > 0 then
-			-- 					SatusGroupAircraft[flightName]["waypoints"] = route
-			-- 					SatusGroupAircraft[flightName]["currentWP"] = 1
-			-- 					SatusGroupAircraft[flightName]["landingWpt"] = #route
-			-- 					SatusGroupAircraft[flightName]["task"] = "escorte"
-
-			-- 					if camp.debug then
-			-- 						--export custom mission log
-			-- 						local logStr = "SatusGroupAircraft = " ..
-			-- 						TableSerialization(SatusGroupAircraft, 0)
-			-- 						local logFile = io.open(
-			-- 							PathDCE ..
-			-- 							"Debug\\" .. "SatusGroupAircraft" .. "_" .. tostring(current_time) ..
-			-- 							".lua", "w")
-			-- 						if logFile then
-			-- 							logFile:write(logStr)
-			-- 							logFile:close()
-			-- 						else
-			-- 							env.info("DCE_INTERCEPTOR: Failed to open log file for writing.")
-			-- 						end
-			-- 					end
-			-- 				end
-			-- 			end
-			-- 		end
-			-- 	end
-			-- end
-
+			
 			if event.initiator then
 				local unit = event.initiator
 				if unit and unit.getPlayerName and unit:getPlayerName() then
 					local name = unit:getPlayerName()
 					local uName = unit:getName()
-					env.info("DCE_EventHandler2 Joueur détecté: " .. name .. " (unité: " .. uName .. ")")
+					env.info("DCE_EventHandler2 D Joueur détecté: " .. name .. " (unité: " .. uName .. ")")
 					Players[uName] = name
 				end
 			end
@@ -3941,7 +3877,8 @@ function EventHandler2:onEvent(event)
 
 					if groupObject and groupObject.getID then
 						local gpGid = groupObject:getID()		--1300: attempt to index a nil value
-						if gpGid and groupObject then
+						if gpGid and groupObject and playerName then
+							env.info("DCE_EventHandler2 E playerName event.subPlace MAKE addFuncs()")
 							addFuncs(gpGid, groupObject, playerName)
 						end
 					end
@@ -3959,12 +3896,12 @@ function EventHandler2:onEvent(event)
 							y = land.getHeight({x = eventVec3.x, y = eventVec3.z}),
 							z = eventVec3.z,
 						}
-						env.info( "DCE_GroundDamagedFlyingMachine B1 wreckVec3 alti "..tostring(wreckVec3.y))
+						env.info( "DCE_GroundDamagedFlyingMachine F1 wreckVec3 alti "..tostring(wreckVec3.y))
 					end
 
 					if wreckVec3.y <= 100 then
 
-						env.info( "DCE_GroundDamagedFlyingMachine B getPlayerName detected ? ")
+						env.info( "DCE_GroundDamagedFlyingMachine G getPlayerName detected ? ")
 
 						local name = event.initiator:getName()
 						local life = event.initiator:getLife()
@@ -3975,13 +3912,13 @@ function EventHandler2:onEvent(event)
 							lifePourcent = life/init_life*100
 						end
 
-						env.info( "DCE_GroundDamagedFlyingMachine C2 init_life "..tostring(init_life).." life: "..tostring(life))
-						env.info( "DCE_GroundDamagedFlyingMachine C3 event.initiator.id_ "..tostring(event.initiator.id_))
+						env.info( "DCE_GroundDamagedFlyingMachine H2 init_life "..tostring(init_life).." life: "..tostring(life))
+						env.info( "DCE_GroundDamagedFlyingMachine H3 event.initiator.id_ "..tostring(event.initiator.id_))
 
 
 
 						if lifePourcent < 100 and lifePourcent >= 1 then
-							env.info( "DCE_GroundDamagedFlyingMachine D detected ? event.initiator.id_ "..tostring(event.initiator.id_))
+							env.info( "DCE_GroundDamagedFlyingMachine I detected ? event.initiator.id_ "..tostring(event.initiator.id_))
 
 							local crashVec3 = event.initiator:getPoint()
 							local typeLand = land.getSurfaceType({x =crashVec3.x, y = crashVec3.z})
@@ -4085,7 +4022,9 @@ local function timerPlayerMenu(arg)
 			gpGid = playerObj:getGroup():getID()
 		end
 
-		if gpGid and Group then
+		if gpGid and Group and playerName then
+			 
+			env.info("DCE_timerPlayerMenu: MAKE addFuncs().")
 			addFuncs(gpGid, groupObject, playerName)
 		end
 	end
