@@ -351,7 +351,7 @@ local function deleteAliasPilotInOobGround(ejectedPilot)
 end
 
 -- if not camp_ZoneSAR or camp_ZoneSAR == nil or not camp_ZoneSAR.blue or camp_ZoneSAR.blue == nil  then
-if not camp_ZoneSAR then
+if not camp_ZoneSAR or not camp_ZoneSAR.blue then
 
     camp_ZoneSAR = {
         ["blue"] = {},
