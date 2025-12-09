@@ -3,8 +3,10 @@
 -------------------------------------------------------------------------------------------------------
 
 if not versionDCE then versionDCE = {} end
-versionDCE["loadouts_data/db_loadouts_Heli.lua"] = "1.1.1"
+versionDCE["loadouts_data/db_loadouts_Heli.lua"] = "1.1.3"
 
+-- 1.1.3 - SH-3D missions adjustement
+-- 1.1.2 - OH58D NAM version
 -- 1.1.1 - Beginning of the versions of this loadouts file dedicated to the F4.
 
 
@@ -3112,32 +3114,6 @@ db_loadouts = {
 				},
 			},
 		},
-		Transport = {
-			Default = {
-				support = {
-					Escort = true,
-					SEAD = false,
-				},
-				attributes =  { },
-				code_loadout =  { "All" },
-				adverseWeather = true,
-				range = 500000,
-				firepower = 1,
-				vCruise = 40,
-				vAttack = 40,
-				hCruise = 500,
-				hAttack = 500,
-				sortie_rate = 6,
-				stores = {
-					pylons = {
-					},
-					fuel = 1157,
-					flare = 30,
-					chaff = 30,
-					gun = 100,
-				},
-			},
-		},
 	},
 	["Mi-26"] = {
 		CSAR = {
@@ -3326,7 +3302,7 @@ db_loadouts = {
 					SEAD = false,
 				},
 				attributes =  { "soft", "SAM" },
-				code_loadout =  { "All" },
+				code_loadout =  { "Caucasus" },
 				expend = "Auto",
 				adverseWeather = true,
 				range = 100000,
@@ -3359,7 +3335,7 @@ db_loadouts = {
 					SEAD = false,
 				},
 				attributes =  { "soft", "SAM" },
-				code_loadout =  { "All" },
+				code_loadout =  { "Caucasus" },
 				expend = "Auto",
 				adverseWeather = true,
 				range = 100000,
@@ -3392,7 +3368,7 @@ db_loadouts = {
 					SEAD = false,
 				},
 				attributes =  { "soft", "SAM" },
-				code_loadout =  { "All" },
+				code_loadout =  { "Caucasus" },
 				expend = "Auto",
 				adverseWeather = true,
 				range = 100000,
@@ -3887,6 +3863,63 @@ db_loadouts = {
 	},
 	["OH58D"] = {
 		Strike = {
+			["NAM Strike Rockets Gun"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				country = {
+					[1] = "USA",
+				},
+				attributes =  { "soft" },
+				code_loadout =  { "NAM" },
+				expend = "Auto",
+				night = true,
+				adverseWeather = true,
+				range = 200000,
+				firepower = 1,
+				vCruise = 55,
+				vAttack = 60,
+				hCruise = 50,
+				hAttack = 50,
+				standoff = 1000,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = 
+				{
+				["CLSID"] = "OH58D_M3P_L300",
+				}, -- end of [1]
+				[2] = {
+					["CLSID"] = "OH58D_Green_Smoke_Grenade",
+				},
+				[3] = {
+					["CLSID"] = "OH58D_Red_Smoke_Grenade",
+				},
+				[4] = {
+					["CLSID"] = "OH58D_Blue_Smoke_Grenade",
+				},
+				[5] = 
+				{
+				["CLSID"] = "{M260_M151}",
+				}, -- end of [5]
+					},
+					fuel = 333.69,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+				["AddPropAircraft"] = 
+				{
+				["MMS removal"] = true,
+				["Remove doors"] = true,
+				["Rapid Deployment Gear"] = false,
+				["ALQ144"] = false,
+				["PDU"] = false,
+				["tacNet"] = 1,
+				}, -- end of ["AddPropAircraft"]
+			},
 			["AG - AGM-114Kx2 - GP500"] = {
 				minscore = 0.3,
 				support = {
@@ -3897,7 +3930,7 @@ db_loadouts = {
 					[1] = "USA",
 				},
 				attributes =  { "soft" },
-				code_loadout =  { "All" },
+				code_loadout =  { "Caucasus", "Crisis" },
 				expend = "Auto",
 				night = true,
 				adverseWeather = true,
@@ -3948,7 +3981,7 @@ db_loadouts = {
 					[1] = "USA",
 				},
 				attributes =  { "soft" },
-				code_loadout =  { "All" },
+				code_loadout =  { "Caucasus", "Crisis" },
 				expend = "Auto",
 				night = true,
 				adverseWeather = true,
@@ -3999,7 +4032,7 @@ db_loadouts = {
 					[1] = "USA",
 				},
 				attributes =  { "soft" },
-				code_loadout =  { "All" },
+				code_loadout =  { "Caucasus", "Crisis" },
 				expend = "Auto",
 				night = true,
 				adverseWeather = true,
@@ -4050,7 +4083,7 @@ db_loadouts = {
 					[1] = "USA",
 				},
 				attributes =  { "soft" },
-				code_loadout =  { "All" },
+				code_loadout =  { "Caucasus", "Crisis" },
 				expend = "Auto",
 				night = true,
 				adverseWeather = true,
@@ -4098,7 +4131,7 @@ db_loadouts = {
 					[1] = "USA",
 				},
 				attributes =  { },
-				code_loadout =  { "All" },
+				code_loadout =  { "Caucasus", "Crisis" },
 				night = true,
 				adverseWeather = true,
 				range = 200000,
@@ -4137,6 +4170,63 @@ db_loadouts = {
 			},
 		},
 		CSAR = {
+			["NAM CSAR"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				country = {
+					[1] = "USA",
+				},
+				attributes =  { "soft" },
+				code_loadout =  { "NAM" },
+				expend = "Auto",
+				night = true,
+				adverseWeather = true,
+				range = 200000,
+				firepower = 1,
+				vCruise = 55,
+				vAttack = 60,
+				hCruise = 50,
+				hAttack = 50,
+				standoff = 1000,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = 
+				{
+				["CLSID"] = "OH58D_M3P_L300",
+				}, -- end of [1]
+				[2] = {
+					["CLSID"] = "OH58D_Green_Smoke_Grenade",
+				},
+				[3] = {
+					["CLSID"] = "OH58D_Red_Smoke_Grenade",
+				},
+				[4] = {
+					["CLSID"] = "OH58D_Blue_Smoke_Grenade",
+				},
+				[5] = 
+				{
+				["CLSID"] = "{M260_M151}",
+				}, -- end of [5]
+					},
+					fuel = 333.69,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+				["AddPropAircraft"] = 
+				{
+				["MMS removal"] = true,
+				["Remove doors"] = true,
+				["Rapid Deployment Gear"] = false,
+				["ALQ144"] = false,
+				["PDU"] = false,
+				["tacNet"] = 1,
+				}, -- end of ["AddPropAircraft"]
+			},
 			["CSAR - APKWSx7 - GP500"] = {
 				minscore = 0.3,
 				support = {
@@ -4147,7 +4237,7 @@ db_loadouts = {
 					[1] = "USA",
 				},
 				attributes =  { },
-				code_loadout =  { "All" },
+				code_loadout =  { "Caucasus", "Crisis" },
 				night = true,
 				adverseWeather = true,
 				range = 200000,
@@ -4189,6 +4279,63 @@ db_loadouts = {
 			},
 		},
 		SAR = {
+			["NAM SAR"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				country = {
+					[1] = "USA",
+				},
+				attributes =  { "soft" },
+				code_loadout =  { "NAM" },
+				expend = "Auto",
+				night = true,
+				adverseWeather = true,
+				range = 200000,
+				firepower = 1,
+				vCruise = 55,
+				vAttack = 60,
+				hCruise = 50,
+				hAttack = 50,
+				standoff = 1000,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = 
+				{
+				["CLSID"] = "OH58D_M3P_L300",
+				}, -- end of [1]
+				[2] = {
+					["CLSID"] = "OH58D_Green_Smoke_Grenade",
+				},
+				[3] = {
+					["CLSID"] = "OH58D_Red_Smoke_Grenade",
+				},
+				[4] = {
+					["CLSID"] = "OH58D_Blue_Smoke_Grenade",
+				},
+				[5] = 
+				{
+				["CLSID"] = "{M260_M151}",
+				}, -- end of [5]
+					},
+					fuel = 333.69,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+				["AddPropAircraft"] = 
+				{
+				["MMS removal"] = true,
+				["Remove doors"] = true,
+				["Rapid Deployment Gear"] = false,
+				["ALQ144"] = false,
+				["PDU"] = false,
+				["tacNet"] = 1,
+				}, -- end of ["AddPropAircraft"]
+			},
 			["SAR - APKWSx7 - GP500"] = {
 				minscore = 0.3,
 				support = {
@@ -4197,7 +4344,7 @@ db_loadouts = {
 					[1] = "USA",
 				},
 				attributes =  { },
-				code_loadout =  { "All" },
+				code_loadout =  { "Caucasus", "Crisis" },
 				night = true,
 				adverseWeather = true,
 				range = 200000,
@@ -4239,6 +4386,58 @@ db_loadouts = {
 			},
 		},
 		Transport = {
+			["NAM transport"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				country = {
+					[1] = "USA",
+				},
+				attributes =  { "soft" },
+				code_loadout =  { "NAM" },
+				expend = "Auto",
+				night = true,
+				adverseWeather = true,
+				range = 200000,
+				firepower = 1,
+				vCruise = 55,
+				vAttack = 60,
+				hCruise = 50,
+				hAttack = 50,
+				sortie_rate = 6,
+				stores = {
+					pylons = {				
+				[2] = {
+					["CLSID"] = "OH58D_Green_Smoke_Grenade",
+				},
+				[3] = {
+					["CLSID"] = "OH58D_Red_Smoke_Grenade",
+				},
+				[4] = {
+					["CLSID"] = "OH58D_Blue_Smoke_Grenade",
+				},
+				[5] = 
+				{
+				["CLSID"] = "{M260_M151}",
+				}, -- end of [5]
+					},
+					fuel = 333.69,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+				["AddPropAircraft"] = 
+				{
+				["MMS removal"] = true,
+				["Remove doors"] = true,
+				["Rapid Deployment Gear"] = false,
+				["ALQ144"] = false,
+				["PDU"] = false,
+				["tacNet"] = 1,
+				}, -- end of ["AddPropAircraft"]
+			},
 			["Transport - APKWSx7 - GP500"] = {
 				support = {
 					Escort = true,
@@ -4248,7 +4447,7 @@ db_loadouts = {
 					[1] = "USA",
 				},
 				attributes =  { },
-				code_loadout =  { "All" },
+				code_loadout =  { "Caucasus", "Crisis" },
 				adverseWeather = true,
 				range = 500000,
 				firepower = 1,
