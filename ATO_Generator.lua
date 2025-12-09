@@ -577,15 +577,15 @@ for sideName, units in pairs(oob_air) do
 
 
 					local overRideReady = false
-					if multiPlaneSet and multiPlaneSet[sideName] and  multiPlaneSet[sideName][unit.type] then
-						if unit.roster.ready < multiPlaneSet[sideName][unit.type].InitNbPlane then
-							unit.roster.ready = multiPlaneSet[sideName][unit.type].InitNbPlane + 1
-							if isDebugModeA then
-								debugLog(draftId.." AtoG 1_A multiPlaneSetPass  ")
-							end
-						end
-						overRideReady = true
-					end
+					-- if multiPlaneSet and multiPlaneSet[sideName] and  multiPlaneSet[sideName][unit.type] then
+					-- 	if unit.roster.ready < multiPlaneSet[sideName][unit.type].InitNbPlane then
+					-- 		unit.roster.ready = multiPlaneSet[sideName][unit.type].InitNbPlane + 1
+					-- 		if isDebugModeA then
+					-- 			debugLog(draftId.." AtoG 1_A multiPlaneSetPass  ")
+					-- 		end
+					-- 	end
+					-- 	overRideReady = true
+					-- end
 
 					if Multi.NbGroup == 0 then
 						clientPlayer = unit.player
@@ -888,7 +888,7 @@ for sideName, units in pairs(oob_air) do
 																or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == target.titleName ))
 
 															if isDebugModeA then
-																debugLog(draftId.."  AtoG passe A_07c :"..unit.type.." "..target.titleName.." Befor task Condition: "..target.task .." ==? task? "..task.." || "..target_name)
+																debugLog(draftId.." AtoG passe A_07c :"..unit.type.." "..target.titleName.." Befor task Condition: "..target.task .." ==? task? "..task.." || "..target_name)
 															end
 
 															if target.task == task then															--if target is valid for aircaft-loadout															
@@ -1058,8 +1058,12 @@ for sideName, units in pairs(oob_air) do
 																					proxiCSAR = false
 
 																					if isDebugModeA then
-																						debugLog(draftId.." AtoG passe A_13b ".." proxiCSAR "..tostring(proxiCSAR).." ".. unit.name.." selectedUnitSAR: "..target.selectedUnitSAR)
+																						debugLog(draftId.." AtoG passe A_13__B ".." proxiCSAR "..tostring(proxiCSAR).." ".. unit.name.." selectedUnitSAR: "..target.selectedUnitSAR.." target.name: "..tostring(target.name))
 																					end
+																				end
+																			else
+																				if isDebugModeA then
+																					debugLog(draftId.." AtoG passe A_13__C ".." proxiCSAR "..tostring(proxiCSAR).." ".. unit.name.." selectedUnitSAR: "..target.selectedUnitSAR.." target.name: "..tostring(target.name))
 																				end
 																			end
 
@@ -1260,8 +1264,8 @@ for sideName, units in pairs(oob_air) do
 																							.."\n".."______________altiPass? target.z "..tostring(target.z).." >? hHover "..tostring(unit_loadouts[l].hHover))
 																						end
 
-																						if route and route.lenght and route.lenght <= unit_loadouts[l].range * 2 and altiPass then		--if sortie route lenght is within range of aircraft-loadout
-
+																						--if sortie route lenght is within range of aircraft-loadout
+																						if route and route.lenght and route.lenght <= unit_loadouts[l].range * 2 and altiPass then
 																							if isDebugModeA then
 																								debugLog(draftId.." AtoG passe A_29 After Range Condition | firepower.max: "..tostring(target.firepower.max).." / loadoutFirepower "..tostring(unit_loadouts[l].firepower))
 																							end
@@ -1332,7 +1336,7 @@ for sideName, units in pairs(oob_air) do
 																							-- modification M11.o multiplayer
 																							if overideMP_A then
 
-																								debugMulti = debugMulti.."\n"..("AtoG passe B "..tostring(task).." "..unit.type.." aircraft_assign:"..tostring(aircraft_assign))
+																								debugMulti = debugMulti.."\n"..("AtoG_overideMP_A passe B "..tostring(task).." "..unit.type.." aircraft_assign:"..tostring(aircraft_assign))
 
 																								--TODO a regarder si c'etait utile
 																								if aircraft_assign > 4 and ( task == "CAP" ) then --or task == "Intercept"
@@ -1342,60 +1346,17 @@ for sideName, units in pairs(oob_air) do
 																								--M11.z
 																								if aircraft_assign < multiPlaneSet[sideName][unit.type][task].NbPlane then
 																									aircraft_assign = multiPlaneSet[sideName][unit.type][task].NbPlane
-																									debugMulti = debugMulti.."\n"..("AtoG passe C "..unit.type.." aircraft_assign: "..tostring(aircraft_assign))
+																									debugMulti = debugMulti.."\n"..("AtoG_overideMP_A passe C "..unit.type.." aircraft_assign: "..tostring(aircraft_assign))
 																								end
 																								
 																								
 																							end
 
-																							debugMulti = debugMulti.."\n"..("AtoG passe D "..unit.type.." aircraft_assign: "..tostring(aircraft_assign))
+																							debugMulti = debugMulti.."\n"..("AtoG_overideMP_A passe D "..unit.type.." aircraft_assign: "..tostring(aircraft_assign))
 
 																							if isDebugModeA then
 																								debugLog(draftId.." "..debugMulti)
 																							end
-
-																							-- local debugMulti = ""
-																							-- overideMP_A = false
-
-
-																							-- -- modification M11.o multiplayer
-																							-- if multiPlaneSet then
-
-																							-- 	debugMulti = debugMulti.."\n"..("AtoG passe A_AAb "..tostring(task).." "..unit.type.." aircraft_assign:"..tostring(aircraft_assign))
-
-																							-- 	if multiPlaneSet[sideName] and multiPlaneSet[sideName][unit.type] and multiPlaneSet[sideName][unit.type][task] and task_bool then
-																							-- 		if Multi.Target and Multi.Target[sideName] then
-																							-- 			debugMulti = debugMulti.."\n"..("AtoG passe A_AAe Multi.Target[side] "..tostring(Multi.Target[sideName]) .. " ==? target_name? " .. tostring(target_name))
-																							-- 			if Multi.Target[sideName] == target_name  then
-																							-- 				debugMulti = debugMulti.."\n"..("AtoG passe A_AAf Multi.Target[side] "..tostring(Multi.Target[sideName]) .. " ==? target_name? " .. tostring(target_name).." "..unit.type.." "..tostring(task))
-																							-- 				overideMP_A = true
-																							-- 			end
-																							-- 		else
-																							-- 			debugMulti = debugMulti.."\n"..("AtoG passe A_AAg  " .. " ==? target_name? " .. tostring(target_name).." "..unit.type.." "..tostring(task))
-
-																							-- 			Multi.Target = {}
-																							-- 			Multi.Target[sideName] = target_name
-																							-- 			overideMP_A = true
-																							-- 		end
-
-																							-- 		--TODO a regarder si c'etait utile
-																							-- 		if aircraft_assign > 4 and ( task == "CAP" ) then --or task == "Intercept"
-																							-- 			aircraft_assign = 4
-																							-- 		end
-
-																							-- 		--M11.z
-																							-- 		if overideMP_A and aircraft_assign < multiPlaneSet[sideName][unit.type][task].NbPlane then
-																							-- 			aircraft_assign = multiPlaneSet[sideName][unit.type][task].NbPlane
-																							-- 			debugMulti = debugMulti.."\n"..("AtoG passe A_AAh "..unit.type.." aircraft_assign: "..tostring(aircraft_assign))
-																							-- 		end
-																							-- 		clientPlayer = true
-																							-- 	end
-																							-- end
-
-																							-- if isDebugModeA then
-																							-- 	debugLog(draftId.." "..debugMulti)
-																							-- end
-
 
 																							--self escort
 																							if unit_loadouts[l].self_escort then															--if the loadout is capable of self-escort

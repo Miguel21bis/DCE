@@ -1013,15 +1013,17 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                         pilot.theatreCercle = false
                     end
 
-                     print("DcUS update Status Z ")
-               end
+                    --  print("DcUS update Status Z ")
+                end
+
+
                 --selectionne la base la plus proche pour leur porter secours
                 local selectedDistance = 9999999
                 local selectedUnitName = ""
                 for oob_sidename, sideTab in pairs(oob_air) do
                     if oob_sidename == pilot.sideName then
                         for n, unit in pairs(sideTab) do
-                            if unit.tasks.SAR  and not unit.inactive  then
+                            if (unit.tasks.SAR or unit.tasks.CSAR) and not unit.inactive then
                                 local unitReserve = 0
                                 if unit.roster and unit.roster.reserve then
                                     unitReserve = unit.roster.reserve
@@ -1032,10 +1034,6 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                                         print("ATTENTION this base does not exist in the database: "..unit.base.." this unit does not have the right base.: "..unit.name)
                                         print("ATTENTION ") os.execute 'pause'
                                     end
-
-                                    -- if unit.base and db_airbases[unit.base]  and not db_airbases[unit.base].x then
-                                    --     print("DcUSAR not base.x on "..unit.base)
-                                    -- end
 
                                     if unit.base and db_airbases[unit.base] and db_airbases[unit.base].x then
                                         local distance = math.sqrt(math.pow(pilot.pos.x -  db_airbases[unit.base].x, 2) + math.pow(pilot.pos.y -  db_airbases[unit.base].y, 2))
