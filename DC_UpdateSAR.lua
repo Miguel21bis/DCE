@@ -360,10 +360,10 @@ if not camp_ZoneSAR or not camp_ZoneSAR.blue then
     }
 end
 
-if not zoneSAR then
-    print("DcuSAR zoneSAR NIL ")
-    os.execute 'pause'
-end
+-- if not zoneSAR then
+--     print("DcuSAR zoneSAR NIL ")
+--     os.execute 'pause'
+-- end
 
 --ajoute les ejectedPilot du fichier temp zoneSAR au fichier camp_ZoneSAR
 if zoneSAR then
@@ -475,7 +475,7 @@ end
 
 if not foundBoundary and Debug.debug then
     local bugTxt = " * * * DcUsar there are no valid borders in this campaign * * * "
-    InsertBugList("Note for the Campaign Maker"..bugTxt)
+    AddLog("Note for the Campaign Maker"..bugTxt)
 end
 
 camp.boundary = boundary

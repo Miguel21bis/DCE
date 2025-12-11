@@ -141,7 +141,6 @@ Return = {}
 
 	--return mission number
 	function Return.Mission()
-		print("DC_CT Return.Mission() ---> : "..tostring(camp.mission))
 		return camp.mission
 	end
 
@@ -848,7 +847,7 @@ Action = {}
 					if unit.name == arg2_unitName and unit.base ~= arg2_baseDestination then
 						unit.base = arg2_baseDestination										--set new airbase for unit
 						-- ActivateBaseAndAssociatedTargets(baseDestination, true)
-						Action.Text(arg2_unitName.."  moveToAnotherBase."..arg2_baseDestination)
+						Action.Text(arg2_unitName.."  move to anotherBase."..ReplaceBaseName(arg2_baseDestination))
 					end
 				end
 			end
@@ -940,16 +939,12 @@ Action = {}
 		-- local placeToBeFound = false
 		if type(tab_baseName) == "string" then
 			if checkBaseCapacity(unitName, tab_baseName) then
-				-- moveAllOrOneUnit(unitName, tab_baseName )
 				Action.AirUnitBase(unitName, tab_baseName)
-				-- Action.Text(unitName.."  moveToAnotherBase."..tab_baseName)
 				transfertOk = true
 			end
 		elseif type(tab_baseName) == "table" and #tab_baseName == 1 then
 			if checkBaseCapacity(unitName, tab_baseName[1]) then
-				-- moveAllOrOneUnit(unitName, tab_baseName[1] 
 				Action.AirUnitBase(unitName, tab_baseName[1])
-				-- Action.Text(unitName.."  moveToAnotherBase."..tab_baseName[1])
 				transfertOk = true
 			end
 		elseif type(tab_baseName) == "table" and #tab_baseName > 1 then
@@ -957,10 +952,8 @@ Action = {}
 			for n, baseName in ipairs(tab_baseName) do
 				if debugKT then print(" 		-> moveToAnotherBaseOrDeactivate table test baseName "..baseName) end
 				if checkBaseCapacity(unitName, baseName) then
-					-- moveAllOrOneUnit(unitName, baseName )
 					Action.AirUnitBase(unitName, baseName)
 					if debugKT then print(" 		-> moveToAnotherBaseOrDeactivate table OK baseName "..baseName) end
-					-- Action.Text(unitName.."  moveToAnotherBase."..baseName)
 					transfertOk = true
 					break
 				end
@@ -2427,20 +2420,14 @@ for baseName, base in pairs(db_airbases) do
 			if debugKT then print(baseName.." 	airbase < 20 || airbase is destroyed and will not be able to support air units anymore. ") end
 
 			Action.ActivateBaseAndItsUnits(baseName, false )
-			Action.Text(baseName.." airbase is destroyed and will not be able to support air units anymore.")
+			Action.Text(ReplaceBaseName(baseName).." airbase is destroyed and will not be able to support air units anymore.")
 
 		elseif base.runwayAlive then
 			--runway gravement endommagé, irréparable
-			-- if base.runwayAlive < campMod.RepairBaseMinimumDestroyed then
 			if base.runwayAlive < runwayDeathPoint then
 				if debugKT then print(baseName.." .runwayAlive < 20 || runway is completely destroyed and the base is not able to support planes  anymore.") end
 
 				Action.ActivateBaseAndItsUnits(baseName, true )
-
-				-- if base.runwayTxt == nil or base.runwayTxt ~= "<"..campMod.RepairBaseMinimumDestroyed then
-				-- 	base.runwayTxt = "<"..campMod.RepairBaseMinimumDestroyed
-				-- 	Action.Text(baseName.." runway is completely destroyed and the base is not able to support planes anymore.")
-				-- end
 
 				if base.runwayTxt == nil or base.runwayTxt ~= "<"..runwayDeathPoint then
 					base.runwayTxt = "<"..runwayDeathPoint
@@ -2448,7 +2435,6 @@ for baseName, base in pairs(db_airbases) do
 				end
 
 				--runway endommagé mais base encore active (les avions ne peuvent plus décoller, les helico si)
-			-- elseif  base.runwayAlive < 50 then
 			elseif  base.runwayAlive < runwayOk then
 				if debugKT then print(baseName.." .runwayAlive < 50 || runway is badly damaged and it will require major repairs before it can be used again.") end
 
@@ -2465,7 +2451,6 @@ for baseName, base in pairs(db_airbases) do
 
 				Action.ActivateBaseAndItsUnits(baseName, true )
 
-				-- if  base.runwayTxt == "<50" or base.runwayTxt == "<"..campMod.RepairBaseMinimumDestroyed then
 				if  base.runwayTxt == "<50" or base.runwayTxt == "<"..runwayDeathPoint then
 					base.runwayTxt = ">=50"
 					Action.Text(baseName.." runway is repaired and can be used again.")

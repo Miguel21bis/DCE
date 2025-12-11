@@ -1428,7 +1428,7 @@ function FreqCapability2(testFreq, flightType, radioN, info)
 	else
 		-- print("Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(testFreq).." Info: "..tostring(info))
 		local bugTxt = "Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(testFreq).." Info: "..tostring(info)
-		InsertBugList("Note for the Campaign Maker"..bugTxt)
+		AddLog("Note for the Campaign Maker"..bugTxt)
 	end
 
 	if RadioPlane[radioN] and RadioPlane[radioN][waves] and (testFreq > RadioPlane[radioN][waves].min and testFreq < RadioPlane[radioN][waves].max)	 then
@@ -2038,21 +2038,6 @@ function GetFrequency(arg_Side, arg_TargetName, arg_Task, arg_Type, arg_Waves, a
 
 end
 
--- http://www.lua.org/pil/19.3.html
--- Trier un tableau A[b] en le classant par A, et non b... pas simple .. ^^
--- function PairsByKeys (t, f)
--- 	local a = {}
--- 	for n in pairs(t) do table.insert(a, n) end
--- 		table.sort(a, f)
--- 		local i = 0      -- iterator variable
--- 		local iter = function ()   -- iterator function
--- 		i = i + 1
--- 		if a[i] == nil then return nil
--- 		else return a[i], t[a[i]]
--- 		end
--- 	end
--- 	return iter
--- end
 
 --renommer les clefs, c'est obligatoire
 -- les tables loadouts sauvegardé par le campaignMaker dans aved Games\DCS\MissionEditor\UnitPayloads
@@ -2061,26 +2046,35 @@ local function loadoutPylon(loadoutTable)
 	for plane, loadoutByTask in pairs(loadoutTable) do
 		for task, ltable in pairs(loadoutByTask) do
 			for loadoutName, loadout in pairs(ltable) do
-				
 
 				local newSortPylons = {}
 				local newSort = false
 				if loadout.stores and loadout.stores.pylons then
-				for chapterN, emport in pairs(loadout.stores.pylons) do
 
+					for chapterN, emport in pairs(loadout.stores.pylons) do
 						if emport.num and emport.num ~= chapterN then
-							-- print("UtilF incoherence pylon N and Num: "..tostring(plane).." "..tostring(task).." "..tostring(loadoutName).." "..tostring(chapterN))
+								-- print("UtilF incoherence pylon N and Num: "..tostring(plane).." "..tostring(task).." "..tostring(loadoutName).." "..tostring(chapterN))
 							newSort = true
 						end
 					end
 
 					if newSort then
 						for chapterN, emport in pairs(loadout.stores.pylons) do
-							newSortPylons[emport.num] =
-							{
-								["CLSID"] =	emport.CLSID,
-							}
-							newSort = true
+							
+							if not emport.num then
+								AddLog("UtilF bug with plane "..plane.." loadoutName: "..loadoutName)
+							else
+								newSortPylons[emport.num] =
+								{
+									["CLSID"] =	emport.CLSID,
+								}
+								if emport.settings then
+									newSortPylons[emport.num]["settings"] = emport.settings
+								end
+								newSort = true
+							end
+							
+
 						end
 					else
 						for chapterN, emport in pairs(loadout.stores.pylons) do
@@ -2105,10 +2099,6 @@ local function loadoutPylon(loadoutTable)
 end
 
 
--- récupère le chemin du script actuel (UTIL_Functions.lua)
-local currentScript = debug.getinfo(1).source:sub(2)
-local baseDir = currentScript:match("(.*/)") or "./"
-
 local function mergeTablesDeep(target, source)
     for k, v in pairs(source) do
         if type(v) == "table" then
@@ -2120,13 +2110,11 @@ local function mergeTablesDeep(target, source)
     end
 end
 
--- local function mergeTablesB(target, source)
---     for k, v in pairs(source) do
---         target[k] = v
---     end
--- end
-
 function LoadAllLoadouts(subFolder)
+
+	-- récupère le chemin du script actuel (UTIL_Functions.lua)
+	local currentScript = debug.getinfo(1).source:sub(2)
+	local baseDir = currentScript:match("(.*/)") or "./"
 
     -- 1) ON PART DE LA TABLE ORIGINALE (celle de DCE)
     local final = {}
@@ -2174,70 +2162,6 @@ function LoadAllLoadouts(subFolder)
 end
 
 
-
--- function LoadAllLoadouts(subFolder)
---     local final = {}
-
---     -- chemin absolu du dossier db_loadouts
---     local folder = baseDir .. subFolder
-
---     -- commande DIR en mode bare (/b)
---     local cmd = 'dir "' .. folder .. '" /b'
-
---     local p = io.popen(cmd)
---     if not p then
---         print("DCE ERROR: impossible d’ouvrir le dossier : " .. folder)
---         return final
---     end
-
---     for file in p:lines() do
---         if file:match("%.lua$") then
---             local fullpath = folder .. "/" .. file
-
--- 			--TODO ici, ça ecrase l'initial
---             local ok, err = pcall(function()
---                 dofile(fullpath)
---             end)
-
---             if not ok then
---                 print("DCE ERROR: erreur lors du chargement de " .. fullpath .. " : " .. err)
---             else
---                 if db_loadouts then
---                     mergeTablesB(final, db_loadouts)
-
--- 					local loadout_str = "Loadouts_archive = " .. TableSerialization(db_loadouts, 0)	--make a string
--- 					local loadoutFile = io.open("Active/Loadouts_archive"..N_var..".lua", "w") or error("Failed to open debug file")
--- 					loadoutFile:write(loadout_str)																--save new data
--- 					loadoutFile:close()
-
--- 					N_var = N_var +1
-
---                     db_loadouts = nil
---                 end
---             end
---         end
---     end
-
---     p:close()
---     return final
--- end
-
-
-
--- Merge deep "amateur averti" : préserve tables existantes et fusionne récursivement
--- local function mergeTablesDeep(target, source)
---     for k, v in pairs(source) do
---         if type(v) == "table" then
---             if type(target[k]) ~= "table" then
---                 -- si target n'est pas table, on remplace
---                 target[k] = {}
---             end
---             mergeTablesDeep(target[k], v)
---         else
---             target[k] = v
---         end
---     end
--- end
 
 -- Charge les mods d'un dossier, exécute chaque fichier dans un env isolé
 -- relativeFolder = "../../../Missions/Campaigns/"..camp.title.."/Mods" par exemple
@@ -2456,6 +2380,7 @@ function BuildLoadout()
 
 	-- helper: vérifie si 
 	local function plane_match(planeLoadout)
+		
 		for sideName, squads in pairs(oob_air) do
 			for squadN, squad in pairs(squads) do
 				if string.lower(squad.type) == string.lower(planeLoadout) then
@@ -2499,7 +2424,7 @@ function BuildLoadout()
 								if  string.lower(code) ~= "all"  then
 
 									local bugTxt = ""..planeType.." ||| "..taskName.." ||| "..loadoutName.." ||| "..code.." not found in campaigns_code_loadout****************"
-									InsertBugList("Note for the Campaign Maker"..bugTxt)
+									AddLog("Note for the Campaign Maker"..bugTxt)
 								end
 							else
 								-- print("UtilF camp.code_loadout "..camp.code_loadout.." found")						
@@ -2525,18 +2450,18 @@ function BuildLoadout()
 		testFile:write(test_str)															--save new data
 		testFile:close()
 
-		if db_loadouts then
+		-- if db_loadouts then
 
-			local copy_all_loadouts = Deepcopy(db_loadouts)
-			copy_all_loadouts = loadoutPylon(copy_all_loadouts)
+		-- 	local copy_all_loadouts = Deepcopy(db_loadouts)
+		-- 	copy_all_loadouts = loadoutPylon(copy_all_loadouts)
 
-			copy_all_loadouts = makeStrutureLoadout(copy_all_loadouts)
+		-- 	copy_all_loadouts = makeStrutureLoadout(copy_all_loadouts)
 
-			test_str = "db_all_loadouts = " .. TableSerializationLoadout(copy_all_loadouts, 0, 0)						--make a string	
-			testFile = io.open("Debug/loadouts_global_clean.lua", "w") or error("Failed to open debug file")
-			testFile:write(test_str)															--save new data
-			testFile:close()
-		end
+		-- 	test_str = "db_all_loadouts = " .. TableSerializationLoadout(copy_all_loadouts, 0, 0)						--make a string	
+		-- 	testFile = io.open("Debug/loadouts_global_clean.lua", "w") or error("Failed to open debug file")
+		-- 	testFile:write(test_str)															--save new data
+		-- 	testFile:close()
+		-- end
 	end
 end
 
@@ -2667,17 +2592,17 @@ function Check_TaskPossibleByPlane()
 				if not foundStrikeTask and  addMultipleStrike then
 					debugTempFLIGHT = "(Error UutilF C03) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring("Strike ( CAS or Ground Attack or Pinpoint Strike )")
 					-- print("Error ") 
-					InsertBugList(debugTempFLIGHT)
+					AddLog(debugTempFLIGHT)
 					error = error + 1
 				end
 				if not squad.inactive and not foundPlane   then
 					--TODO revoir ce pb, exemple avec campaign Hornet Over Carrier SC
 					debugTempFLIGHT = "(Error UutilF C04)||"..tostring(squad.type).."||"..tostring(squad.name).."||  impossible to find a task/aircraft match with all files concerned ".." (oob_air_init or  UTIL_Data.lua or bad Task or bad boolean task)"
-					InsertBugList(debugTempFLIGHT)
+					AddLog(debugTempFLIGHT)
 
 					for taskOA, valueOA in  pairs(squad.tasks) do
 						debugTempFLIGHT = tostring(taskOA).." : "..tostring(valueOA)
-						InsertBugList(debugTempFLIGHT)
+						AddLog(debugTempFLIGHT)
 					end
 					error = error + 1
 				end
@@ -3743,7 +3668,7 @@ function AssignCallnameSquad()
 	end
 end
 
-function InsertBugList(txt)
+function AddLog(txt)
 	if not BugList then BugList = {} end
 
 	if #BugList >=1 then

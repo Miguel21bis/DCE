@@ -297,19 +297,19 @@ for side, units in pairs(oob_air) do
 							elseif task ~= "Spotter" then
 
 								debugTempFLIGHT = "AtoG error_B: no task |"..tostring(task).."| in the loadout for this unit:? "..tostring(unit.type).."|"
-								InsertBugList(debugTempFLIGHT)
+								AddLog(debugTempFLIGHT)
 								error = error + 1
 							end
 
 						else
 							debugTempFLIGHT = "AtoG error_C: |"..unit.type.."| not found in db_loadouts. A problem with the campaigns_code_loadout code? |"..tostring(camp.code_loadout).."|"
-							InsertBugList(debugTempFLIGHT)
+							AddLog(debugTempFLIGHT)
 							error = error + 1
 						end
 
 						if not foundTaskAndCountry then
 							debugTempFLIGHT = "AtoG error_D: |"..unit.type.."| |"..task.."| not found in db_loadouts for this country: |"..tostring(unit.country).."|"
-							InsertBugList(debugTempFLIGHT)
+							AddLog(debugTempFLIGHT)
 							error = error + 1
 						end
 					end
@@ -324,7 +324,7 @@ if error >= 1 then
 	debugTempFLIGHT = "AtoG error: ".." With so many errors using the Central loadout, there may be a custom loadout in the /Init folder \n "
 	.."To do this, set the \"selectLoadout\" variable to \"init\" in the conf_mod"
 
-	InsertBugList(debugTempFLIGHT)
+	AddLog(debugTempFLIGHT)
 
 	local loadout_str = "Loadouts_archive = " .. TableSerialization(LoadoutsList, 0)	--make a string
 	local loadoutFile = io.open("Active/Loadouts_archive.lua", "w") or error("Failed to open debug file")

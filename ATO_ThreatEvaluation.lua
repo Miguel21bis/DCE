@@ -1263,7 +1263,7 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 								-- tempFreq = ewr_freq * 1000000
 								EwrAdd = true
 							elseif ewrFreqDejaTraite[sidename][group.groupId] then
-								InsertBugList("no callsign planned for this EWR name "..tostring(unit.name).." type "..tostring(unit.type))
+								AddLog("no callsign planned for this EWR name "..tostring(unit.name).." type "..tostring(unit.type))
 							end
 
 						else

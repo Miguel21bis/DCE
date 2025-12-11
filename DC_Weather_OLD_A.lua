@@ -38,14 +38,14 @@ if mission_ini and mission_ini.weather and mission_ini.weather.pHigh ~= nil then
 else
 	pHigh = 50										--default pressure high value
 	-- Enregistre le fait que la variable pHigh est manquante (appel demandé)
-	if InsertBugList then InsertBugList("pHigh weather, absent from conf_mod") end
+	if AddLog then AddLog("pHigh weather, absent from conf_mod") end
 end
 if mission_ini and mission_ini.weather and mission_ini.weather.pLow ~= nil then
 	pLow = mission_ini.weather.pLow
 else
 	pLow = 50										--default pressure pLow value
 	-- Enregistre le fait que la variable pLow est manquante (appel demandé)
-	if InsertBugList then InsertBugList("pLow weather, absent from conf_mod") end
+	if AddLog then AddLog("pLow weather, absent from conf_mod") end
 end
 
 if Firstmission_flag and camp.weather then

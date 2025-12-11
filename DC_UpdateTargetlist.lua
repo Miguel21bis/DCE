@@ -101,7 +101,7 @@ end
 local function checkBug3(txt)
 	if Debug.checkTargetName and DC_UpdateTargetlist_counter > 1 then
 		-- table.insert(BugList, "DC_UT checkBug3 "..txt)
-		InsertBugList("DC_UT checkBug3 :"..txt)
+		AddLog("DC_UT checkBug3 :"..txt)
 	end
 end
 
@@ -907,7 +907,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 					else
 
 						local txt = "DcUT no found xy "..target.titleName.." (normal message if it's a template activation)"
-						InsertBugList("DC_UT checkBug_xy :"..txt)
+						AddLog("DC_UT checkBug_xy :"..txt)
 					end
 				end
 
@@ -1177,7 +1177,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 					local txtBug = "DcUT The information runway hdg and lenght and position runway.x, runway.y are missing in the file db_airbases.lua to create the portions to attack.\n"
 					txtBug = txtBug .."DcUT Bug related to the targetlist_init.lua file in the target: : "..target.titleName.."\n"
 
-					InsertBugList(txtBug)
+					AddLog(txtBug)
 
 					if mission_ini.debug then
 						print(txtBug)

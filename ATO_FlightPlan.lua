@@ -2165,7 +2165,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						else
 							speed = pack[p].main[1].loadout.vCruise
 							-- if Debug.debug then
-								InsertBugList("this flight have not a speed Data_divers.vCruise: "..flight[f].name.." |type: "..flight[f].type)
+								AddLog("this flight have not a speed Data_divers.vCruise: "..flight[f].name.." |type: "..flight[f].type)
 							-- end
 						end
 						
@@ -3033,7 +3033,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					-- de façon dégradé, l'on ne prend que la position de la cible dans son ensemble
 					if tgtlist == nil and flight[f].task == "Runway Attack" then
 						tgtlist =  '{ x = ' .. tostring(flight[f].target.x) .. ', y = ' .. tostring(flight[f].target.y) .. '}, '
-						InsertBugList("no known runway element for the target "..tostring(flight[f].target_name))
+						AddLog("no known runway element for the target "..tostring(flight[f].target_name))
 					end
 
 					-- ************* SEAD switch from IP to egress *************
@@ -7016,58 +7016,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 				end
 
-				-- Quand l’IA se déplace d’un waypoint N vers un waypoint N+1 :
-				-- Elle utilise la vitesse définie dans le waypoint N+1 comme consigne pour ce segment de vol.
-				-- Idem pour l’altitude : l’IA cherchera à être à l’altitude du waypoint N+1 lorsqu’elle l’atteint.
-
-				-- local wptRefN = 3
-				-- if group.route.points[1]["action"] == "Turning Point" then
-				-- 	wptRefN = 2
-				-- else
-				-- 	wptRefN = 3
-				-- end
-
-				-- --recherche des incoherences de VITESSE #1:
-				-- for wtpN, wptData in ipairs(group.route.points) do
-				-- 	if wtpN > wptRefN then
-				-- 		local preWptData = group.route.points[wtpN - 1]
-				-- 		local distance = GetDistance(preWptData, wptData)
-				-- 		local speedCalc = math.floor((distance / (wptData.ETA - preWptData.ETA)))
-
-				-- 		--cherche si un cercle est demandé:
-				-- 		local preOrbit = false
-				-- 		local debutParams = ""
-				-- 		if preWptData.task and preWptData.task.params and preWptData.task.params.tasks then
-				-- 			for taskN, taskData in pairs(preWptData.task.params.tasks) do				
-				-- 				if taskData.params and taskData.params.action and taskData.params.action.params and taskData.params.action.params.command then								
-				-- 					debutParams = taskData.params.action.params.command								
-				-- 					if string.find(taskData.params.action.params.command, "OrbitPosition") then
-				-- 						preOrbit = true
-				-- 						break
-				-- 					end
-				-- 				end
-				-- 			end
-				-- 		end
-
-						
-
-				-- 		-- compare relative diff (%) and only warn if > 10%
-				-- 		if wptData.speed and wptData.speed > 0 then
-				-- 			local pct = math.abs(speedCalc - wptData.speed) / math.abs(wptData.speed)
-				-- 			if pct > 0.10 and not preOrbit and wptData["briefing_name"] ~= "Station"  then
-				-- 				info06 = info06.."\n".."|+T11|ATTENTION acceleration wpt| "..wtpN.." |distance:| "..distance.." |speedCalc:| "..speedCalc.." |>| "..wptData.speed.." ("..string.format("%.1f%%", pct*100)..")".."\n"
-				-- 				-- info06 = info06.." preOrbit?: "..tostring(preOrbit).." |debutParams?: "..tostring(debutParams)
-				-- 				tagATTENTION = true
-				-- 			end
-				-- 		else
-				-- 			-- fallback: when expected speed is zero or missing, keep absolute threshold
-				-- 			if math.abs(speedCalc - (wptData.speed or 0)) > 30 then
-				-- 				info06 = info06.."\n".."|+T12|ATTENTION speed is zero or missing wpt"..wtpN.." "..speedCalc.." > "..tostring(wptData.speed).."\n"
-				-- 				tagATTENTION = true
-				-- 			end
-				-- 		end
-				-- 	end
-				-- end
+				
 
 				
 				-- Chaque waypoint contient sa propre alt, alt_type, speed, et speed_locked.
@@ -7298,7 +7247,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 				if tagATTENTION then
-					InsertBugList(debugTempFLIGHT)
+					AddLog(debugTempFLIGHT)
 				end
 
 				-- if waypoints[1].ETA< 0 then
@@ -7333,7 +7282,7 @@ if mission.weather["clouds"] then
 	if not mission.weather["clouds"]["preset"] then
 		local infoWeather01 = "|+IW1|ATTENTION NO weather preset "
 		-- if Debug.debug then
-			InsertBugList(infoWeather01)
+			AddLog(infoWeather01)
 		-- end
 	-- else
 	-- 	local infoWeather02 = "|+IW2|weather preset: "..mission.weather["clouds"]["preset"]

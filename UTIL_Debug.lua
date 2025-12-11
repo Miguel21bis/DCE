@@ -166,7 +166,7 @@ function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackTyp
 		if not foundTarget then
 			local txtBug = "UtilD NOT found CustomGroupAttack target: "..tostring(target)
 			-- table.insert(BugList, txtBug)
-			InsertBugList(txtBug)
+			AddLog(txtBug)
 		end
 
 end
@@ -213,7 +213,7 @@ function CustomStaticAttack(FlightName, TargetList, expend, weaponType, attackTy
 			if not foundTarget then
 				local txtBug = "UutilD NOT found CustomStaticAttack target: "..tostring(target)
 				-- table.insert(BugList, txtBug)
-				InsertBugList(txtBug)
+				AddLog(txtBug)
 			end
 
 		end

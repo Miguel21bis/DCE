@@ -83,7 +83,7 @@ local function freqCapability(arg_TestFreq, arg_RadioPlane, arg_Nradio, arg_info
 		local bugTxt = "Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(arg_TestFreq).." Info: "..tostring(arg_info)
 		-- _affiche(arg_RadioPlane, "RadioPlane")
 		
-		InsertBugList("Note for the Campaign Maker"..bugTxt)
+		AddLog("Note for the Campaign Maker"..bugTxt)
 
 	end
 
