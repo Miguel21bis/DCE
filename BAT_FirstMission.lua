@@ -91,8 +91,6 @@ else
 end
 
 dofile("Init/db_airbases.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 dofile("Init/targetlist_init.lua")--ne pas supprimé, util pour inscrire targetlist dans Active
 if not targetlist.blue[1] then

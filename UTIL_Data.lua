@@ -25,6 +25,9 @@ versionDCE["UTIL_Data.lua"] = "1.15.90"
 -- if flight[f].type == "E-2C" or flight[f].type == "E-3A" or flight[f].type == "F-15C" or flight[f].type == "F-15E" or flight[f].type == "F-16C bl.52d" 
 --or flight[f].type == "FA-18C_hornet" or flight[f].type == "F/A-18C" or flight[f].type = "A-10C_2", then
 
+if Debug.debug then
+	print("START UTIL_Data.lua "..versionDCE["UTIL_Data.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
 
 -- EPLRS_Capacity = {
 -- 	["E-2C"] = true,

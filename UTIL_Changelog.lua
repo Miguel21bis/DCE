@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.91.571"
+versionDCE["UTIL_Changelog.lua"] = "20.92.572"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.91.571"
+VersionDCE["UTIL_Changelog.txt"] = "20.92.572"
 --[[
 
 
@@ -9,7 +9,14 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-==:20.91.571:==
+==:20.92.572:==
+572 add		[M92]	add new attributesCond in targetList for best squad selection
+			attributesCond = {
+				op = "AND",
+				{ op = "AND", playerSquad = true, category = "helico" },
+				{ op = "OR", planeType = { "OH-6A", "OH58D", "UH-1H" } },
+				{ op = "OR", squadName = { "160th SOAR Det 1", "US Army 1-6 A" } },
+			},
 571 add		[F4][Persistent]	add new optional persistent aircraft system for F-4E-45MC
 570 modfied	[weather]	new script and logic for weather generation
 569	fixed	[.miz]	reducing the weight of missions by trimming certain files that are too large and/or unnecessary

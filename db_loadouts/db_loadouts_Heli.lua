@@ -3450,7 +3450,7 @@ db_loadouts = {
 					SEAD = false,
 				},
 				attributes =  { "frontline" },
-				code_loadout =  { "Crisis", "Caucasus", "WOC80" },
+				code_loadout =  { "Crisis", "Caucasus", "WOC80"},
 				expend = "Auto",
 				night = true,
 				adverseWeather = true,

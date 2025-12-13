@@ -585,29 +585,6 @@ else
 	camp["MissionFilename"] =  camp.title.."_ongoing.miz"
 end
 
-
--- -- Vérification et création du fichier de loadout
--- local loadoutFile01 = "../../../Missions/Campaigns/" .. camp.title .. "/Active/Loadouts_archive.lua"
-
--- -- if not FileExists(loadoutFile01) or Firstmission_flag then
---     -- Sérialisation des données
---     local loadout_str = "Loadouts_archive = " .. TableSerialization(LoadoutsList, 0)
-
---     -- Essayez d'écrire dans le fichier
---     local success, err = pcall(function()
---         WriteToFile(loadoutFile01, loadout_str)
---     end)
-
---     if not success then
---         print("Erreur lors de l'écriture dans le fichier : " .. tostring(err))
---         os.exit(1) -- Quitte le script proprement en cas d'erreur
---     else
---         -- print("Fichier créé avec succès : " .. loadoutFile01)
---     end
--- -- end
-
-
-
 for planeType, value in PairsByKeys(Data_divers) do
 	if value.EPLRS_Capacity then
 		EPLRS_Capacity[planeType] = true
@@ -667,11 +644,6 @@ if MissionInstance >= 2 then
 		print("MissionInstance "..MissionInstance)
 		print("LOAD DC_Time from "..tostring("MAIN_NextMission "..debug.getinfo(1).currentline))
 	end
-	
-	-- --////////////////////////////////////////////////////////
-	-- LoadModData("Mods", true)
-	-- BuildLoadout()
-	-- --////////////////////////////////////////////////////////
 
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Time.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_MoonPhase.lua")
@@ -703,10 +675,8 @@ dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_RouteGenerator.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Generator.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_PlayerAssign.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Timing.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_AddPropAircraft.lua")
 
 dofile("../../../ScriptsMod." .. VersionPackageICM .. "/ATO_FlightPlan.lua")
-dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Final_steps.lua")
 
 if mission.drawings and not mission.drawings.layers[4].objects then
 	mission.drawings.layers[4].objects = {}
@@ -734,6 +704,7 @@ end
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_StaticAircraft.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Prune.lua")
 dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Briefing.lua")
+dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Final_steps.lua")
 
 -- Supprime le fichier sans vérifier s'il existe
 os.remove("Debug/BugList.lua")

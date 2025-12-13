@@ -1150,7 +1150,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							},
 							[3] = {
 								lookup = "alt",
-								header = "Altitute",
+								header = "Altitude",
 								str_length = 8,
 							},
 							[4] = {

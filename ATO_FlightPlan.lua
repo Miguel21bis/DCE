@@ -58,6 +58,9 @@ versionDCE["ATO_FlightPlan.lua"] = "1.58.290"
 -- modification M01_b		Ajout datalink (b: UTIL_Data file)
 ------------------------------------------------------------------------------------------------------- 	
 
+if Debug.debug then
+	print("START ATO_FlightPlan.lua "..versionDCE["ATO_FlightPlan.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
 
 DebugFLIGHT = ""
 TabLPark	= {}	
@@ -7227,12 +7230,6 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				debugTempFLIGHT = infoFlight.." "..groupInfo
 
-				-- for nn = 1 , #units do
-					-- debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("\n")						
-					-- debugTxt_AtoFP = debugTxt_AtoFP.."\n"..(" / ".. units[nn].onboard_num )
-					-- debugTxt_AtoFP = debugTxt_AtoFP.."\n"..(" / ".. units[nn].livery_id )
-				-- end
-
 				if units[1].skill == "Player" or units[1].skill == "Client" then
 					infoFlight = infoFlight.."\n"..("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ")
 					infoFlight = infoFlight.."\n"..("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ")
@@ -7276,8 +7273,6 @@ end
 
 
 if mission.weather["clouds"] then
-
-	
 
 	if not mission.weather["clouds"]["preset"] then
 		local infoWeather01 = "|+IW1|ATTENTION NO weather preset "

@@ -16,6 +16,10 @@ versionDCE["ATO_PlayerAssign.lua"] = "1.9.75"
 -- modification M11A_bf		Multiplayer (f: interceptor)(bd wingmen)(wxy: force same package)
 ------------------------------------------------------------------------------------------------------- 
 
+if Debug.debug then
+	print("START ATO_PlayerAssign.lua "..versionDCE["ATO_PlayerAssign.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
+
 -- local debugAssign = Debug.debug
 local debugAssign = false
 
