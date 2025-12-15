@@ -2594,11 +2594,12 @@ function Check_TaskPossibleByPlane()
 				end
 
 				--si aucune tasks strike n'a �t� trouv�
-				if not foundStrikeTask and  addMultipleStrike then
+				if not foundStrikeTask and addMultipleStrike then
 					debugTempFLIGHT = "(Error UutilF C03) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring("Strike ( CAS or Ground Attack or Pinpoint Strike )")
-					-- print("Error ") 
+					print(debugTempFLIGHT ) 
 					AddLog(debugTempFLIGHT)
 					error = error + 1
+					os.execute 'pause'
 				end
 				if not squad.inactive and not foundPlane   then
 					--TODO revoir ce pb, exemple avec campaign Hornet Over Carrier SC
@@ -4660,8 +4661,21 @@ function LoadFileAndUpdate(from)
 	--////////////////////////////////////////////////////////
 
 	InheritedFromProcessing()
+	DataCompilation_DataDiscovery()
 	DataCompilation_TaskByPlane()
 
+	if Debug.debug then
+		local camp_str = "Data_divers = " .. TableSerialization(Data_divers, 0)
+		local campFile = io.open("Debug/Data_divers.lua", "w") or error("Échec d'ouverture du fichier Data_divers")
+		campFile:write(camp_str)
+		campFile:close()
+	
+		camp_str = "Failures = " .. TableSerialization(Failures, 0)
+		campFile = io.open("Debug/Failures.lua", "w") or error("Échec d'ouverture du fichier Failures")
+		campFile:write(camp_str)
+		campFile:close()
+	end
+	
 	Check_TaskPossibleByPlane()
 
 	

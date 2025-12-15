@@ -984,58 +984,61 @@ Data_divers = {
 		},
 	},
 
-	["VSN_F100"] = 	{				--Mod
+	["VSN_F100"] = 	{				--type in mission.miz
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
+		moduleName = "VSN_F100",		--self_ID  require module name
+		folderModName = "VSN_F100",
 		EPLRS_Capacity = false,
 		playable = true,
 		vCruise = 200,	--TODO a confirmer
 		hCruise = 4500,
-		Tasks = {
-			aircraft_task(GroundAttack),
-			aircraft_task(CAS),
-			aircraft_task(SEAD),
-		},
+		-- Tasks = {
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(CAS),
+		-- 	aircraft_task(SEAD),
+		-- },
 	},
 
-	["VSN_F105D"] = 	{				--Mod
+	["VSN_F105D"] = 	{				-- type in mission.miz
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
-		moduleName = "VSN_F105",	--if the aircraft type name does not match the requested module name
+		moduleName = "VSN_F105",	--self_ID  require module name
+		folderModName = "VSN_F105",
 		EPLRS_Capacity = false,
-		Tasks = {
-			aircraft_task(CAP),
-			aircraft_task(Escort),
-			aircraft_task(FighterSweep),
-			aircraft_task(Intercept),
-			aircraft_task(Reconnaissance),
-			aircraft_task(GroundAttack),
-			aircraft_task(CAS),
-		  --aircraft_task(AFAC),
-			aircraft_task(RunwayAttack),
-			aircraft_task(AntishipStrike),
-	  },
+	-- 	Tasks = {
+	-- 		aircraft_task(CAP),
+	-- 		aircraft_task(Escort),
+	-- 		aircraft_task(FighterSweep),
+	-- 		aircraft_task(Intercept),
+	-- 		aircraft_task(Reconnaissance),
+	-- 		aircraft_task(GroundAttack),
+	-- 		aircraft_task(CAS),
+	-- 		aircraft_task(RunwayAttack),
+	-- 		aircraft_task(AntishipStrike),
+	--   },
 		playable = true,
 		vCruise = 205.5,	--TODO a confirmer
 		hCruise = 5315.2,
 	},
 
-	["VSN_F105G"] = 	{				--Mod
+	["VSN_F105G"] = 	{				--type in mission.miz
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
-		moduleName = "VSN_F105",	--if the aircraft type name does not match the requested module name
+		moduleName = "VSN_F105",	--self_ID  require module name
+		folderModName = "VSN_F105",
 		EPLRS_Capacity = false,
-		Tasks = {
-			aircraft_task(CAP),
-			aircraft_task(Escort),
-			aircraft_task(FighterSweep),
-			aircraft_task(Intercept),
-			aircraft_task(Reconnaissance),
-			aircraft_task(GroundAttack),
-			aircraft_task(CAS),
-			aircraft_task(RunwayAttack),
-			aircraft_task(AntishipStrike),
-	  },
+	-- 	Tasks = {
+	-- 		aircraft_task(CAP),
+	-- 		aircraft_task(Escort),
+	-- 		aircraft_task(FighterSweep),
+	-- 		aircraft_task(Intercept),
+	-- 		aircraft_task(Reconnaissance),
+	-- 		aircraft_task(GroundAttack),
+	-- 		aircraft_task(CAS),
+	-- 		aircraft_task(RunwayAttack),
+	-- 		aircraft_task(AntishipStrike),
+	--   },
 		playable = true,
 		jammer = {
 			type = "AN/ALQ-71",
@@ -1160,22 +1163,23 @@ Data_divers = {
 		refuellingReceptacleType = "probe"
 	},
 
-	-- ["a_37_dragonfly"] = 	{							--name, next to DisplayName
-	-- 	instrumentUnits = "imperial",
-	-- 	moduleName = "h60_a37_dragonfly",		--self_ID 
-	-- 	Tasks = {
-	-- 		aircraft_task(FighterSweep),
-	-- 		aircraft_task(Intercept),
-	-- 		aircraft_task(GroundAttack),
-	-- 		aircraft_task(CAS),
-	-- 		aircraft_task(AFAC),
-	-- 		aircraft_task(RunwayAttack),
-	-- 		aircraft_task(AntishipStrike),
-	-- 	},
-	-- 	playable = false,
-	-- 	vCruise = 125,						--V_opt
-	-- 	hCruise = 6000,
-	-- },
+	["a_37_dragonfly"] = 	{							--name, next to DisplayName
+		instrumentUnits = "imperial",
+		moduleName = "h60_a37_dragonfly",		--self_ID 
+		folderModName = "[VWV] A-37",
+		-- Tasks = {
+		-- 	aircraft_task(FighterSweep),
+		-- 	aircraft_task(Intercept),
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(CAS),
+		-- 	aircraft_task(AFAC),
+		-- 	aircraft_task(RunwayAttack),
+		-- 	aircraft_task(AntishipStrike),
+		-- },
+		playable = false,
+		vCruise = 125,						--V_opt
+		hCruise = 6000,
+	},
 	
 
 	["MQ-9 Reaper"] = 	{
@@ -1339,6 +1343,7 @@ Data_divers = {
 	["F-4E-45MC"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
+		folderModName = "F-4E",
 		playable = true,
 		alignment_PropAircraft = {
 			fast = {
@@ -1348,20 +1353,20 @@ Data_divers = {
 				["INSAlignmentStored"] = false,
 			},
 		},
-		Tasks = {
-			aircraft_task(CAP),
-			aircraft_task(Escort),
-			aircraft_task(FighterSweep),
-			aircraft_task(Intercept),
-			aircraft_task(GroundAttack),
-			aircraft_task(RunwayAttack),
-			aircraft_task(PinpointStrike),
-			aircraft_task(CAS),
-			aircraft_task(AFAC),
-			aircraft_task(SEAD),
-			aircraft_task(AntishipStrike),
-			aircraft_task(Reconnaissance),
-		},
+		-- Tasks = {
+		-- 	aircraft_task(CAP),
+		-- 	aircraft_task(Escort),
+		-- 	aircraft_task(FighterSweep),
+		-- 	aircraft_task(Intercept),
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(RunwayAttack),
+		-- 	aircraft_task(PinpointStrike),
+		-- 	aircraft_task(CAS),
+		-- 	aircraft_task(AFAC),
+		-- 	aircraft_task(SEAD),
+		-- 	aircraft_task(AntishipStrike),
+		-- 	aircraft_task(Reconnaissance),
+		-- },
 		vCruise = 215,--a peaufiner
 		hCruise = 9000,--a peaufiner
 		refuellingReceptacleType = "probe"
@@ -1707,36 +1712,41 @@ Data_divers = {
 	["vwv_uh2a"] = {--mod
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-		requiredModules = true,						--itsModule
-		moduleName = "jjj_uh2a",
-		Tasks = {
-			aircraft_task(Transport),
-			aircraft_task(Reconnaissance),
-		},
+		-- requiredModules = true,						--itsModule
+		moduleName = "jjj_uh2a",		--self_ID  require module name
+		folderModName = "[VWV] UH-2A",
+		-- Tasks = {
+		-- 	aircraft_task(Transport),
+		-- 	aircraft_task(Reconnaissance),
+		-- },
 		vCruise = 40,	--TODO a verifier
 		hCruise = 500,
 	},
 	["vwv_uh2b"] = {--mod
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-		requiredModules = true,						--itsModule
-		moduleName = "jjj_uh2b",
-		Tasks = {
-			aircraft_task(Transport),
-			aircraft_task(Reconnaissance),
-		},
+		-- requiredModules = true,						--itsModule
+		moduleName = "jjj_uh2b",		--self_ID  require module name
+		folderModName = "[VWV] UH-2B",
+		-- Tasks = {
+		-- 	aircraft_task(Transport),
+		-- 	aircraft_task(Reconnaissance),
+		-- },
 		vCruise = 40,	--TODO a verifier
 		hCruise = 500,
 	},
 	["vwv_uh2c"] = {--mod
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-		requiredModules = true,						--itsModule
+		-- requiredModules = true,						--itsModule
 		moduleName = "jjj_uh2c",
-		Tasks = {
-			aircraft_task(Transport),
-			aircraft_task(Reconnaissance),
-		},
+		coreMod = false,
+		savedGameMod = true,
+		folderModName = "[VWV] UH-2C",
+		-- Tasks = {
+		-- 	aircraft_task(Transport),
+		-- 	aircraft_task(Reconnaissance),
+		-- },
 		vCruise = 40,	--TODO a verifier
 		hCruise = 500,
 	},
@@ -1862,16 +1872,17 @@ Data_divers = {
 	["MiG-15bis"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
+		folderModName = "MiG-15bis",
 		playable = true,
-		Tasks = {
-			aircraft_task(CAP),
-			aircraft_task(Escort),
-			aircraft_task(FighterSweep),
-			aircraft_task(Intercept),
-			aircraft_task(GroundAttack),
-			aircraft_task(CAS),
-			aircraft_task(AFAC),
-		},
+		-- Tasks = {
+		-- 	aircraft_task(CAP),
+		-- 	aircraft_task(Escort),
+		-- 	aircraft_task(FighterSweep),
+		-- 	aircraft_task(Intercept),
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(CAS),
+		-- 	aircraft_task(AFAC),
+		-- },
 		vCruise = 180,   -- m/s 648km/h M ≈ 0.59
 		hCruise = 8500,  -- m
 	},
@@ -1905,6 +1916,7 @@ Data_divers = {
 	["MiG-19P"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
+		folderModName = "MiG-19P",
 		playable = true,
 		alignment_PropAircraft = {
 			fast = {
@@ -1914,15 +1926,15 @@ Data_divers = {
 				["NAV_Initial_Hdg"] = 0,
 			}
 		},
-		Tasks = {
-			aircraft_task(CAP),
-			aircraft_task(Escort),
-			aircraft_task(FighterSweep),
-			aircraft_task(Intercept),
-			aircraft_task(GroundAttack),
-			aircraft_task(CAS),
-			aircraft_task(AntishipStrike),
-		},
+		-- Tasks = {
+		-- 	aircraft_task(CAP),
+		-- 	aircraft_task(Escort),
+		-- 	aircraft_task(FighterSweep),
+		-- 	aircraft_task(Intercept),
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(CAS),
+		-- 	aircraft_task(AntishipStrike),
+		-- },
 		vCruise = 220,   -- m/s (≈ 792 km/h)Mach ≈ 0.72
 		hCruise = 9000,  -- m (≈ 9 000 m)
 	},
@@ -3350,123 +3362,123 @@ Failures = {
 
 	},
 
-	["F-4E-45-MC"] =
-	{
-		[1] = "/F-4E-45-MC/Pilot Cockpit/Pilot Left Console/Intercom Panel:Full Damage",
-		[2] = "/F-4E-45-MC/Air Data Computer/Static Pressure Compensator/On-Off logic Calculator:SPC Failed",
-		[3] = "/F-4E-45-MC/IFF Interrogator System:IFF Interrogator Damage",
-		[4] = "/F-4E-45-MC/Angle Of Attack Indicator WSO/Servo:AoA Indicator Failure",
-		[5] = "/F-4E-45-MC/Pilot Cockpit/Pilot Front Panel/VOR ILS/WSO ARN-127 Aural Tone Generator:VOR ILS Aural Tone Generator Malfunction",
-		[6] = "/F-4E-45-MC/Airborne Video Tape Recorder (AVTR):AVTR Damage",
-		[7] = "/F-4E-45-MC/Right Engine/Fire Detection:Engine Fire",
-		[8] = "/F-4E-45-MC/WSO Cockpit/WSO Front Panel/ECM System Right:ECM Broken",
-		[9] = "/F-4E-45-MC/EO TGT Designator System/Range Indicator:Damage",
-		[10] = "/F-4E-45-MC/Left Engine/Gas Generator:Compressor Stall",
-		[11] = "/F-4E-45-MC/Exterior Lights/Formation Lights Left Damage:HitDamage",
-		[12] = "/F-4E-45-MC/Right Engine/Nozzle Controller:Failure",
-		[13] = "/F-4E-45-MC/WSO Cockpit/WSO Left Console/Intercom Panel:Full Damage",
-		[14] = "/F-4E-45-MC/Weapons/Nosegun:Gun Damage",
-		[15] = "/F-4E-45-MC/Pilot Servoed Altimeter/Altitude Meter/Output Calculator:Pressure Set Rollers Stuck",
-		[16] = "/F-4E-45-MC/Bearing Distance Heading Indicator/BDHI Meter:BDHI Stuck",
-		[17] = "/F-4E-45-MC/Pilot Cockpit/Pilot Left Console/Intercom Panel:Backup Amplifier Failure",
-		[18] = "/F-4E-45-MC/Exterior Lights/Fuselage Lights Bottom Damage:HitDamage",
-		[19] = "/F-4E-45-MC/ASN-63/Mode Logic:Failed",
-		[20] = "/F-4E-45-MC/EO TGT Designator System/Pave Spike/Camera Damage:HitDamage",
-		[21] = "/F-4E-45-MC/Right Engine/Spool Dynamics:Seizure",
-		[22] = "/F-4E-45-MC/Ground Speed Indicator:Ground Speed Indicator Stuck",
-		[23] = "/F-4E-45-MC/Pilot Vertical Velocity Indicator/Vertical Velocity Meter/Vertical Speed From Pressure Calculator:Vertical Velocity Indicator Pressure Leak Clogged",
-		[24] = "/F-4E-45-MC/WSO Servoed Altimeter/Altitude Meter/Output Calculator:Pressure Set Rollers Stuck",
-		[25] = "/F-4E-45-MC/UHF Radio:Lower Antenna Damaged",
-		[26] = "/F-4E-45-MC/Pilot Cockpit/Pilot Left Console/Intercom Panel:Microphone Failure",
-		[27] = "/F-4E-45-MC/WSO Cockpit/WSO Left Console/Intercom Panel:Microphone Failure",
-		[28] = "/F-4E-45-MC/TACAN Info:Transmitter Damage",
-		[29] = "/F-4E-45-MC/UHF Radio/UHF Radio:UHF ARC 164 Radio Failed",
-		[30] = "/F-4E-45-MC/WSO Servoed Altimeter/Three Position Switch:Broken",
-		[31] = "/F-4E-45-MC/Exterior Lights/Wing Pos Light Left Damage:HitDamage",
-		[32] = "/F-4E-45-MC/Hud:HUD Damage",
-		[33] = "/F-4E-45-MC/Exterior Lights/Formation Lights Right Damage:HitDamage",
-		[34] = "/F-4E-45-MC/Exterior Lights/Wing Pos Light Right Damage:HitDamage",
-		[35] = "/F-4E-45-MC/WSO Cockpit/WSO Front Panel/ECM System Left:ECM Broken",
-		[36] = "/F-4E-45-MC/WSO Servoed Altimeter/Reference Pressure Knob:Broken",
-		[37] = "/F-4E-45-MC/WSO Cockpit/WSO Left Console/Intercom Panel:Internal Failure",
-		[38] = "/F-4E-45-MC/WSO Vertical Velocity Indicator/Vertical Velocity Meter/Vertical Speed From Pressure Calculator:Vertical Velocity Indicator Calibrated Leak Clogged",
-		[39] = "/F-4E-45-MC/TACAN Info:Total Damage",
-		[40] = "/F-4E-45-MC/Pilot Servoed Altimeter/Three Position Switch:Broken",
-		[41] = "/F-4E-45-MC/WSO Servoed Altimeter/Altitude Meter/Output Calculator:Needle Stuck",
-		[42] = "/F-4E-45-MC/WSO Cockpit/WSO Right Console/Interior Lights:Interior Light Damage",
-		[43] = "/F-4E-45-MC/Landing Gear/Right Main Landing Gear/Side Brace Actuator/Actuator:Mechanical Failure",
-		[44] = "/F-4E-45-MC/Right Engine/Gas Generator:Compressor Stall",
-		[45] = "/F-4E-45-MC/Right Engine/Engine Oil System:Oil Leak",
-		[46] = "/F-4E-45-MC/EO TGT Designator System/Laser Coder Control:Damage",
-		[47] = "/F-4E-45-MC/Pilot Cockpit/Pilot Front Panel/VOR ILS/VOR ARN-127 Positioning Aid:VOR Receiver Malfunction",
-		[48] = "/F-4E-45-MC/Exterior Lights/Anti-Coll Lights Damage:HitDamage",
-		[49] = "/F-4E-45-MC/Pilot Servoed Altimeter/Reference Pressure Knob:Broken",
-		[50] = "/F-4E-45-MC/WSO Vertical Velocity Indicator/Vertical Velocity Meter/Vertical Speed From Pressure Calculator:Vertical Velocity Indicator Pressure Leak Clogged",
-		[51] = "/F-4E-45-MC/Pilot Mach And Airspeed Indicator:Mach And Airspeed Stuck",
-		[52] = "/F-4E-45-MC/Left Engine/Engine Oil System:Oil Leak",
-		[53] = "/F-4E-45-MC/Pilot Vertical Velocity Indicator/Vertical Velocity Meter/Vertical Speed From Pressure Calculator:Vertical Velocity Indicator Calibrated Leak Clogged",
-		[54] = "/F-4E-45-MC/Navigation Computer/Test Cap Off Light:NAV Comp Test Cap failed",
-		[55] = "/F-4E-45-MC/Pilot True Airspeed Indicator:True Airspeed Indicator Stuck",
-		[56] = "/F-4E-45-MC/WSO Vertical Velocity Indicator/Vertical Velocity Meter:Vertical Velocity Indicator Stuck",
-		[57] = "/F-4E-45-MC/WSO Servoed Altimeter/Altitude Meter/Operation Mode Logic:Electric Servo Failed",
-		[58] = "/F-4E-45-MC/Exterior Lights/Landing Light Damage:HitDamage",
-		[59] = "/F-4E-45-MC/Angle Of Attack Indicator Pilot/Servo:AoA Indicator Failure",
-		[60] = "/F-4E-45-MC/Landing Gear/Nose Landing Gear/Drag Brace Actuator/Actuator:Mechanical Failure",
-		[61] = "/F-4E-45-MC/Exterior Lights/Tail Pos Light Damage:HitDamage",
-		[62] = "/F-4E-45-MC/WSO Cockpit/WSO Left Console/Intercom Panel:Normal Amplifier Failure",
-		[63] = "/F-4E-45-MC/UHF Remote Indicator Pilot:Frequency Channel Indicator Damage",
-		[64] = "/F-4E-45-MC/WSO Accelerometer:G-Meter Stuck",
-		[65] = "/F-4E-45-MC/Pilot Cockpit/Pilot Front Panel/VOR ILS:VOR ILS Malfunction",
-		[66] = "/F-4E-45-MC/Pilot Cockpit/Pilot Front Panel/VOR ILS/Pilot ARN-127 Aural Tone Generator:VOR ILS Aural Tone Generator Malfunction",
-		[67] = "/F-4E-45-MC/Attitude Indicator (Rear Cockpit)/Meter:Attitude Indicator Stuck",
-		[68] = "/F-4E-45-MC/WSO Mach And Airspeed Indicator:Mach And Airspeed Stuck",
-		[69] = "/F-4E-45-MC/Pilot Servoed Altimeter/Altitude Meter/Operation Mode Logic:Electric Servo Failed",
-		[70] = "/F-4E-45-MC/TACAN Info:WSO Module Damage",
-		[71] = "/F-4E-45-MC/Air Data Computer:Total Failure",
-		[72] = "/F-4E-45-MC/Air Data Computer/Altitude Encoder:Altitude Encoder Failed",
-		[73] = "/F-4E-45-MC/Left Engine/Fire Detection:Engine Fire",
-		[74] = "/F-4E-45-MC/Aural Tone System:Aural Tone Damage",
-		[75] = "/F-4E-45-MC/WSO Cockpit/WSO Left Console/Radio Panel/Panel Logic:Panel failed",
-		[76] = "/F-4E-45-MC/Exterior Lights/Refueling Light Damage:HitDamage",
-		[77] = "/F-4E-45-MC/UHF Radio:Upper Antenna Damaged",
-		[78] = "/F-4E-45-MC/WSO Cockpit/WSO Left Console/Intercom Panel:Backup Amplifier Failure",
-		[79] = "/F-4E-45-MC/WSO Servoed Altimeter/Altitude Meter/Output Calculator:Altitude Rollers Stuck",
-		[80] = "/F-4E-45-MC/Exterior Lights/Fuselage Light Top Damage:HitDamage",
-		[81] = "/F-4E-45-MC/Pilot Cockpit/Pilot Left Console/Intercom Panel:Normal Amplifier Failure",
-		[82] = "/F-4E-45-MC/IFF Transponder:Failure",
-		[83] = "/F-4E-45-MC/Pilot Cockpit/Pilot Left Console/Intercom Panel:Internal Failure",
-		[84] = "/F-4E-45-MC/EO TGT Designator System/Azimuth Elevation Indicator:Damage",
-		[85] = "/F-4E-45-MC/Pilot Cockpit/Pilot Right Console/Interior Lights:Interior Light Damage",
-		[86] = "/F-4E-45-MC/EO TGT Designator System/Pave Spike/Cooling Damage:HitDamage",
-		[87] = "/F-4E-45-MC/WSO Servoed Altimeter:Altimeter Stuck",
-		[88] = "/F-4E-45-MC/Pilot Servoed Altimeter/Altitude Meter/Output Calculator:Altitude Rollers Stuck",
-		[89] = "/F-4E-45-MC/KY-28:Failure",
-		[90] = "/F-4E-45-MC/Exterior Lights/Taxi Light Damage:HitDamage",
-		[91] = "/F-4E-45-MC/Pilot Servoed Altimeter:Altimeter Stuck",
-		[92] = "/F-4E-45-MC/Pilot Cockpit/Pilot Right Console/Radio Panel/Panel Logic:Panel failed",
-		[93] = "/F-4E-45-MC/Left Engine/Nozzle Controller:Failure",
-		[94] = "/F-4E-45-MC/Navigation Computer:Nav Comp Damaged",
-		[95] = "/F-4E-45-MC/EO TGT Designator System/Target Designator Set Control:Damage",
-		[96] = "/F-4E-45-MC/WSO True Airspeed Indicator:True Airspeed Indicator Stuck",
-		[97] = "/F-4E-45-MC/Left Engine/Spool Dynamics:Seizure",
-		[98] = "/F-4E-45-MC/UHF Remote Indicator WSO:Frequency Channel Indicator Damage",
-		[99] = "/F-4E-45-MC/Aural Tone System:Stall Vibrator Damage",
-		[100] = "/F-4E-45-MC/Pilot Servoed Altimeter/Altitude Meter/Output Calculator:Needle Stuck",
-		[101] = "/F-4E-45-MC/Horizontal Situation Indicator/HSI Meter:HSI Stuck",
-		[102] = "/F-4E-45-MC/TACAN Info:Pilot Module Damage",
-		[103] = "/F-4E-45-MC/Pilot Seat:Seat Motor Overheated",
-		[104] = "/F-4E-45-MC/Pilot Cockpit/Pilot Front Panel/VOR ILS/ILS ARN-127 Landing Aid:ILS Antenna Malfunction",
-		[105] = "/F-4E-45-MC/Pilot Main ADI:Failed",
-		[106] = "/F-4E-45-MC/Pilot Accelerometer:G-Meter Stuck",
-		[107] = "/F-4E-45-MC/UHF Radio/ADF:ADF Damaged",
-		[108] = "/F-4E-45-MC/Exterior Lights/Joinup Light Left Damage:HitDamage",
-		[109] = "/F-4E-45-MC/TACAN Info:Receiver Damage",
-		[110] = "/F-4E-45-MC/Landing Gear/Left Main Landing Gear/Side Brace Actuator/Actuator:Mechanical Failure",
-		[111] = "/F-4E-45-MC/Exterior Lights/Joinup Light Right Damage:HitDamage",
-		[112] = "/F-4E-45-MC/WSO Seat:Seat Motor Overheated",
-		[113] = "/F-4E-45-MC/Pilot Vertical Velocity Indicator/Vertical Velocity Meter:Vertical Velocity Indicator Stuck",
-		[114] = "/F-4E-45-MC/EO TGT Designator System/Pave Spike:System Damage",
-	},
+	-- ["F-4E-45-MC"] =
+	-- {
+	-- 	[1] = "/F-4E-45-MC/Pilot Cockpit/Pilot Left Console/Intercom Panel:Full Damage",
+	-- 	[2] = "/F-4E-45-MC/Air Data Computer/Static Pressure Compensator/On-Off logic Calculator:SPC Failed",
+	-- 	[3] = "/F-4E-45-MC/IFF Interrogator System:IFF Interrogator Damage",
+	-- 	[4] = "/F-4E-45-MC/Angle Of Attack Indicator WSO/Servo:AoA Indicator Failure",
+	-- 	[5] = "/F-4E-45-MC/Pilot Cockpit/Pilot Front Panel/VOR ILS/WSO ARN-127 Aural Tone Generator:VOR ILS Aural Tone Generator Malfunction",
+	-- 	[6] = "/F-4E-45-MC/Airborne Video Tape Recorder (AVTR):AVTR Damage",
+	-- 	[7] = "/F-4E-45-MC/Right Engine/Fire Detection:Engine Fire",
+	-- 	[8] = "/F-4E-45-MC/WSO Cockpit/WSO Front Panel/ECM System Right:ECM Broken",
+	-- 	[9] = "/F-4E-45-MC/EO TGT Designator System/Range Indicator:Damage",
+	-- 	[10] = "/F-4E-45-MC/Left Engine/Gas Generator:Compressor Stall",
+	-- 	[11] = "/F-4E-45-MC/Exterior Lights/Formation Lights Left Damage:HitDamage",
+	-- 	[12] = "/F-4E-45-MC/Right Engine/Nozzle Controller:Failure",
+	-- 	[13] = "/F-4E-45-MC/WSO Cockpit/WSO Left Console/Intercom Panel:Full Damage",
+	-- 	[14] = "/F-4E-45-MC/Weapons/Nosegun:Gun Damage",
+	-- 	[15] = "/F-4E-45-MC/Pilot Servoed Altimeter/Altitude Meter/Output Calculator:Pressure Set Rollers Stuck",
+	-- 	[16] = "/F-4E-45-MC/Bearing Distance Heading Indicator/BDHI Meter:BDHI Stuck",
+	-- 	[17] = "/F-4E-45-MC/Pilot Cockpit/Pilot Left Console/Intercom Panel:Backup Amplifier Failure",
+	-- 	[18] = "/F-4E-45-MC/Exterior Lights/Fuselage Lights Bottom Damage:HitDamage",
+	-- 	[19] = "/F-4E-45-MC/ASN-63/Mode Logic:Failed",
+	-- 	[20] = "/F-4E-45-MC/EO TGT Designator System/Pave Spike/Camera Damage:HitDamage",
+	-- 	[21] = "/F-4E-45-MC/Right Engine/Spool Dynamics:Seizure",
+	-- 	[22] = "/F-4E-45-MC/Ground Speed Indicator:Ground Speed Indicator Stuck",
+	-- 	[23] = "/F-4E-45-MC/Pilot Vertical Velocity Indicator/Vertical Velocity Meter/Vertical Speed From Pressure Calculator:Vertical Velocity Indicator Pressure Leak Clogged",
+	-- 	[24] = "/F-4E-45-MC/WSO Servoed Altimeter/Altitude Meter/Output Calculator:Pressure Set Rollers Stuck",
+	-- 	[25] = "/F-4E-45-MC/UHF Radio:Lower Antenna Damaged",
+	-- 	[26] = "/F-4E-45-MC/Pilot Cockpit/Pilot Left Console/Intercom Panel:Microphone Failure",
+	-- 	[27] = "/F-4E-45-MC/WSO Cockpit/WSO Left Console/Intercom Panel:Microphone Failure",
+	-- 	[28] = "/F-4E-45-MC/TACAN Info:Transmitter Damage",
+	-- 	[29] = "/F-4E-45-MC/UHF Radio/UHF Radio:UHF ARC 164 Radio Failed",
+	-- 	[30] = "/F-4E-45-MC/WSO Servoed Altimeter/Three Position Switch:Broken",
+	-- 	[31] = "/F-4E-45-MC/Exterior Lights/Wing Pos Light Left Damage:HitDamage",
+	-- 	[32] = "/F-4E-45-MC/Hud:HUD Damage",
+	-- 	[33] = "/F-4E-45-MC/Exterior Lights/Formation Lights Right Damage:HitDamage",
+	-- 	[34] = "/F-4E-45-MC/Exterior Lights/Wing Pos Light Right Damage:HitDamage",
+	-- 	[35] = "/F-4E-45-MC/WSO Cockpit/WSO Front Panel/ECM System Left:ECM Broken",
+	-- 	[36] = "/F-4E-45-MC/WSO Servoed Altimeter/Reference Pressure Knob:Broken",
+	-- 	[37] = "/F-4E-45-MC/WSO Cockpit/WSO Left Console/Intercom Panel:Internal Failure",
+	-- 	[38] = "/F-4E-45-MC/WSO Vertical Velocity Indicator/Vertical Velocity Meter/Vertical Speed From Pressure Calculator:Vertical Velocity Indicator Calibrated Leak Clogged",
+	-- 	[39] = "/F-4E-45-MC/TACAN Info:Total Damage",
+	-- 	[40] = "/F-4E-45-MC/Pilot Servoed Altimeter/Three Position Switch:Broken",
+	-- 	[41] = "/F-4E-45-MC/WSO Servoed Altimeter/Altitude Meter/Output Calculator:Needle Stuck",
+	-- 	[42] = "/F-4E-45-MC/WSO Cockpit/WSO Right Console/Interior Lights:Interior Light Damage",
+	-- 	[43] = "/F-4E-45-MC/Landing Gear/Right Main Landing Gear/Side Brace Actuator/Actuator:Mechanical Failure",
+	-- 	[44] = "/F-4E-45-MC/Right Engine/Gas Generator:Compressor Stall",
+	-- 	[45] = "/F-4E-45-MC/Right Engine/Engine Oil System:Oil Leak",
+	-- 	[46] = "/F-4E-45-MC/EO TGT Designator System/Laser Coder Control:Damage",
+	-- 	[47] = "/F-4E-45-MC/Pilot Cockpit/Pilot Front Panel/VOR ILS/VOR ARN-127 Positioning Aid:VOR Receiver Malfunction",
+	-- 	[48] = "/F-4E-45-MC/Exterior Lights/Anti-Coll Lights Damage:HitDamage",
+	-- 	[49] = "/F-4E-45-MC/Pilot Servoed Altimeter/Reference Pressure Knob:Broken",
+	-- 	[50] = "/F-4E-45-MC/WSO Vertical Velocity Indicator/Vertical Velocity Meter/Vertical Speed From Pressure Calculator:Vertical Velocity Indicator Pressure Leak Clogged",
+	-- 	[51] = "/F-4E-45-MC/Pilot Mach And Airspeed Indicator:Mach And Airspeed Stuck",
+	-- 	[52] = "/F-4E-45-MC/Left Engine/Engine Oil System:Oil Leak",
+	-- 	[53] = "/F-4E-45-MC/Pilot Vertical Velocity Indicator/Vertical Velocity Meter/Vertical Speed From Pressure Calculator:Vertical Velocity Indicator Calibrated Leak Clogged",
+	-- 	[54] = "/F-4E-45-MC/Navigation Computer/Test Cap Off Light:NAV Comp Test Cap failed",
+	-- 	[55] = "/F-4E-45-MC/Pilot True Airspeed Indicator:True Airspeed Indicator Stuck",
+	-- 	[56] = "/F-4E-45-MC/WSO Vertical Velocity Indicator/Vertical Velocity Meter:Vertical Velocity Indicator Stuck",
+	-- 	[57] = "/F-4E-45-MC/WSO Servoed Altimeter/Altitude Meter/Operation Mode Logic:Electric Servo Failed",
+	-- 	[58] = "/F-4E-45-MC/Exterior Lights/Landing Light Damage:HitDamage",
+	-- 	[59] = "/F-4E-45-MC/Angle Of Attack Indicator Pilot/Servo:AoA Indicator Failure",
+	-- 	[60] = "/F-4E-45-MC/Landing Gear/Nose Landing Gear/Drag Brace Actuator/Actuator:Mechanical Failure",
+	-- 	[61] = "/F-4E-45-MC/Exterior Lights/Tail Pos Light Damage:HitDamage",
+	-- 	[62] = "/F-4E-45-MC/WSO Cockpit/WSO Left Console/Intercom Panel:Normal Amplifier Failure",
+	-- 	[63] = "/F-4E-45-MC/UHF Remote Indicator Pilot:Frequency Channel Indicator Damage",
+	-- 	[64] = "/F-4E-45-MC/WSO Accelerometer:G-Meter Stuck",
+	-- 	[65] = "/F-4E-45-MC/Pilot Cockpit/Pilot Front Panel/VOR ILS:VOR ILS Malfunction",
+	-- 	[66] = "/F-4E-45-MC/Pilot Cockpit/Pilot Front Panel/VOR ILS/Pilot ARN-127 Aural Tone Generator:VOR ILS Aural Tone Generator Malfunction",
+	-- 	[67] = "/F-4E-45-MC/Attitude Indicator (Rear Cockpit)/Meter:Attitude Indicator Stuck",
+	-- 	[68] = "/F-4E-45-MC/WSO Mach And Airspeed Indicator:Mach And Airspeed Stuck",
+	-- 	[69] = "/F-4E-45-MC/Pilot Servoed Altimeter/Altitude Meter/Operation Mode Logic:Electric Servo Failed",
+	-- 	[70] = "/F-4E-45-MC/TACAN Info:WSO Module Damage",
+	-- 	[71] = "/F-4E-45-MC/Air Data Computer:Total Failure",
+	-- 	[72] = "/F-4E-45-MC/Air Data Computer/Altitude Encoder:Altitude Encoder Failed",
+	-- 	[73] = "/F-4E-45-MC/Left Engine/Fire Detection:Engine Fire",
+	-- 	[74] = "/F-4E-45-MC/Aural Tone System:Aural Tone Damage",
+	-- 	[75] = "/F-4E-45-MC/WSO Cockpit/WSO Left Console/Radio Panel/Panel Logic:Panel failed",
+	-- 	[76] = "/F-4E-45-MC/Exterior Lights/Refueling Light Damage:HitDamage",
+	-- 	[77] = "/F-4E-45-MC/UHF Radio:Upper Antenna Damaged",
+	-- 	[78] = "/F-4E-45-MC/WSO Cockpit/WSO Left Console/Intercom Panel:Backup Amplifier Failure",
+	-- 	[79] = "/F-4E-45-MC/WSO Servoed Altimeter/Altitude Meter/Output Calculator:Altitude Rollers Stuck",
+	-- 	[80] = "/F-4E-45-MC/Exterior Lights/Fuselage Light Top Damage:HitDamage",
+	-- 	[81] = "/F-4E-45-MC/Pilot Cockpit/Pilot Left Console/Intercom Panel:Normal Amplifier Failure",
+	-- 	[82] = "/F-4E-45-MC/IFF Transponder:Failure",
+	-- 	[83] = "/F-4E-45-MC/Pilot Cockpit/Pilot Left Console/Intercom Panel:Internal Failure",
+	-- 	[84] = "/F-4E-45-MC/EO TGT Designator System/Azimuth Elevation Indicator:Damage",
+	-- 	[85] = "/F-4E-45-MC/Pilot Cockpit/Pilot Right Console/Interior Lights:Interior Light Damage",
+	-- 	[86] = "/F-4E-45-MC/EO TGT Designator System/Pave Spike/Cooling Damage:HitDamage",
+	-- 	[87] = "/F-4E-45-MC/WSO Servoed Altimeter:Altimeter Stuck",
+	-- 	[88] = "/F-4E-45-MC/Pilot Servoed Altimeter/Altitude Meter/Output Calculator:Altitude Rollers Stuck",
+	-- 	[89] = "/F-4E-45-MC/KY-28:Failure",
+	-- 	[90] = "/F-4E-45-MC/Exterior Lights/Taxi Light Damage:HitDamage",
+	-- 	[91] = "/F-4E-45-MC/Pilot Servoed Altimeter:Altimeter Stuck",
+	-- 	[92] = "/F-4E-45-MC/Pilot Cockpit/Pilot Right Console/Radio Panel/Panel Logic:Panel failed",
+	-- 	[93] = "/F-4E-45-MC/Left Engine/Nozzle Controller:Failure",
+	-- 	[94] = "/F-4E-45-MC/Navigation Computer:Nav Comp Damaged",
+	-- 	[95] = "/F-4E-45-MC/EO TGT Designator System/Target Designator Set Control:Damage",
+	-- 	[96] = "/F-4E-45-MC/WSO True Airspeed Indicator:True Airspeed Indicator Stuck",
+	-- 	[97] = "/F-4E-45-MC/Left Engine/Spool Dynamics:Seizure",
+	-- 	[98] = "/F-4E-45-MC/UHF Remote Indicator WSO:Frequency Channel Indicator Damage",
+	-- 	[99] = "/F-4E-45-MC/Aural Tone System:Stall Vibrator Damage",
+	-- 	[100] = "/F-4E-45-MC/Pilot Servoed Altimeter/Altitude Meter/Output Calculator:Needle Stuck",
+	-- 	[101] = "/F-4E-45-MC/Horizontal Situation Indicator/HSI Meter:HSI Stuck",
+	-- 	[102] = "/F-4E-45-MC/TACAN Info:Pilot Module Damage",
+	-- 	[103] = "/F-4E-45-MC/Pilot Seat:Seat Motor Overheated",
+	-- 	[104] = "/F-4E-45-MC/Pilot Cockpit/Pilot Front Panel/VOR ILS/ILS ARN-127 Landing Aid:ILS Antenna Malfunction",
+	-- 	[105] = "/F-4E-45-MC/Pilot Main ADI:Failed",
+	-- 	[106] = "/F-4E-45-MC/Pilot Accelerometer:G-Meter Stuck",
+	-- 	[107] = "/F-4E-45-MC/UHF Radio/ADF:ADF Damaged",
+	-- 	[108] = "/F-4E-45-MC/Exterior Lights/Joinup Light Left Damage:HitDamage",
+	-- 	[109] = "/F-4E-45-MC/TACAN Info:Receiver Damage",
+	-- 	[110] = "/F-4E-45-MC/Landing Gear/Left Main Landing Gear/Side Brace Actuator/Actuator:Mechanical Failure",
+	-- 	[111] = "/F-4E-45-MC/Exterior Lights/Joinup Light Right Damage:HitDamage",
+	-- 	[112] = "/F-4E-45-MC/WSO Seat:Seat Motor Overheated",
+	-- 	[113] = "/F-4E-45-MC/Pilot Vertical Velocity Indicator/Vertical Velocity Meter:Vertical Velocity Indicator Stuck",
+	-- 	[114] = "/F-4E-45-MC/EO TGT Designator System/Pave Spike:System Damage",
+	-- },
 
 	["F-14"] =
 	{
@@ -4623,11 +4635,490 @@ function InheritedFromProcessing()
 end
 
 
+
+local function extractFailures(aircraft)
+    if type(aircraft.Failures) ~= "table" then
+        return nil
+    end
+
+    local out = {}
+    local idx = 1
+
+    for _, failure in ipairs(aircraft.Failures) do
+        if type(failure) == "table" and type(failure.id) == "string" then
+            out[idx] = failure.id
+            idx = idx + 1
+        end
+    end
+
+    if idx == 1 then
+        return nil
+    end
+
+    return out
+end
+
+-- --rempli le reste des variables en allant chercher elle meme dans le bon repertoire mod
+-- --si la table possede dataDiscovery = true
+-- --exemple, si dans planeData, il y a moduleName = "h60_a37_dragonfly",		--self_ID 
+-- -- le chemin : C:\Users\miguel\Saved Games\DCS\Mods\aircraft\h60_a37_dragonfly
+-- --donc camp.path..\DCS\Mods\aircraft\h60_a37_dragonfly
+
+function DataCompilation_DataDiscovery()
+
+    local camp_path = os.getenv('pathSavedGames')
+    local dcs_path  = os.getenv('pathDCS')
+
+    for planeName, planeData in pairs(Data_divers) do
+        if planeData.folderModName then
+
+            -- local pathfileName = planeData.pathfileName
+            local tableName    = planeData.tableName
+			local folderModName = planeData.folderModName
+
+            if type(folderModName) == "string" then
+
+                -- local fullPath
+                local modRoot
+
+				-- Construire le chemin CoreMods
+				local fullPath = dcs_path .. "CoreMods/aircraft/" .. folderModName .. "/entry.lua"
+
+				-- Vérifier si le fichier existe
+				local f0 = io.open(fullPath, "r")
+				if f0 then
+					modRoot  = dcs_path .. "CoreMods/aircraft/" .. folderModName
+					f0:close()
+				else
+					-- Si non trouvé, basculer vers Mods
+					fullPath = camp_path .. "Mods/aircraft/" .. folderModName .. "/entry.lua"
+					modRoot  = camp_path .. "Mods/aircraft/" .. folderModName
+				end
+
+                print("DataDiscovery_B entry.lua : "..fullPath)
+
+                local collected = {}
+
+                -- ENVIRONNEMENT SANDBOX
+
+				   local base_env = {
+					-- Lua standard (OBLIGATOIRE)
+					pairs      = pairs,
+					ipairs     = ipairs,
+					next       = next,
+					tonumber   = tonumber,
+					tostring   = tostring,
+					type       = type,
+					unpack     = unpack,
+					select     = select,
+
+					math       = math,
+					string     = string,
+					table      = table,
+
+					-- sécurité
+					assert     = assert,
+					error      = error,
+					pcall      = pcall,
+
+					-- logs
+					print      = print,
+				}
+
+				
+				local env = {}
+
+				for k,v in pairs(base_env) do
+					env[k] = v
+				end
+
+				env.db_path = dcs_path .. "Scripts/Database"
+				env._ = function(s) return s end
+
+				env.ViewSettings = {}
+				env.weapons_loadouts = {}
+				env.weapons_loadouts_QF4 = {}
+
+				env.weapons = setmetatable({}, {
+					__index = function(t, k)
+						local w = { name = k }
+						rawset(t, k, w)
+						return w
+					end
+				})
+
+				env.warheads = setmetatable({}, {
+					__index = function(t, k)
+						local w = { name = k }
+						rawset(t, k, w)
+						return w
+					end
+				})
+
+
+				env.Transport        = "Transport"
+				env.Reconnaissance   = "Reconnaissance"
+				env.Refueling 		= "Refueling"
+				env.AWACS 			= "AWACS"
+
+				env.AFAC              = "AFAC"
+				env.CAP              = "CAP"
+				env.CAS              = "CAS"
+				env.GroundAttack     = "Ground Attack"
+				env.RunwayAttack     = "Runway Attack"
+				env.Intercept        = "Intercept"
+				env.AntishipStrike    = "Antiship Strike"
+				env.PinpointStrike	 = "Pinpoint Strike"
+				env.Escort           = "Escort"
+				env.FighterSweep     = "Fighter Sweep"
+				env.SEAD             = "SEAD"
+				env.Training         = "Training"
+
+				env.aircraft_task = function(task)
+					return task
+				end
+
+				env.add_aircraft = function(def)
+					table.insert(collected, def)
+				end
+
+				env.dofile = function(path)
+					local f = loadfile(path)
+					if not f then
+						print("  [IGNORED dofile] "..tostring(path))
+						return nil
+					end
+					setfenv(f, env)
+					local ok, res = pcall(f)
+					if not ok then
+						print("  [DOFILE ERROR] "..tostring(res))
+						return nil
+					end
+					return res
+				end
+
+				env.current_mod_path = modRoot
+
+                -- variables DCS communes
+                env.current_mod_path = modRoot
+                env.__DCS_VERSION__  = "OFFLINE"
+                env.__DEBUG__        = false
+
+				setmetatable(env, {
+					__index = function(_, k)
+						-- print("[STUB]", k)
+						return function() end
+					end
+				})
+
+                -- chargement entry.lua
+                local chunk = loadfile(fullPath)
+                if chunk then
+                    setfenv(chunk, env)
+                    local ok, err = pcall(chunk)
+                    if not ok then
+                        print("  [ENTRY ERROR] "..tostring(err))
+						-- os.execute 'pause'
+                    end
+                else
+                    print("  [MISSING entry.lua]")
+					os.execute 'pause'
+                end
+
+                -- 👉 collected contient TOUS les avions du module
+                for _, aircraft in ipairs(collected) do
+
+					local dst = Data_divers[planeName]
+
+					if aircraft.Tasks then
+						dst.Tasks = aircraft.Tasks
+						_affiche(aircraft.Tasks, "  -> Tasks found ")
+					end
+
+					if aircraft.Damage then
+						dst.Damage = aircraft.Damage
+					end
+
+					-- FAILURES
+					local failures = extractFailures(aircraft)
+					if failures then
+						Failures[planeName] = failures
+					end
+
+                    -- extraction plus tard
+                    print("  -> aircraft captured")
+					-- os.execute 'pause'
+                end
+            end
+        end
+    end
+end
+
+
+
+local IGNORED_KEYS = {
+	lights_data = true,
+	shape_table_data = true,
+	Pylons = true,
+	Weapons = true,
+	Countries = true,
+	Sensors = true,
+	Failures = true,
+}
+
+function DataCompilation_DataDiscoveryOLD()
+
+	local camp_path = os.getenv('pathSavedGames')
+	local dcs_path = os.getenv('pathDCS')
+
+	for planeName, planeData in pairs(Data_divers) do
+		if planeData.pathfileName then
+
+			-- local folderName = planeData.moduleName
+			local pathfileName   = planeData.pathfileName
+			local tableName  = planeData.tableName
+
+			print("DataDiscovery_A pathfileName : "..pathfileName)
+
+			if type(pathfileName) == "string"  then
+
+				local fullPath 
+
+				if planeData.coreMod then
+					fullPath = dcs_path.. "CoreMods/aircraft/" .. pathfileName 
+				elseif planeData.savedGameMod then
+					fullPath = camp_path.. "Mods/aircraft/" .. pathfileName 
+				end
+
+				print("DataDiscovery_B fullPath : "..fullPath)
+
+
+				local function sandbox_dofile(path)
+					-- normalisation
+					if type(path) ~= "string" then
+						return nil
+					end
+
+					-- fichiers qu'on refuse catégoriquement
+					if path:find("Views.lua")
+					or path:find("Cockpit")
+					or path:find("FM")
+					or path:find("Sounds")
+					then
+						return nil
+					end
+
+					-- tentative de chargement
+					local f = loadfile(path)
+					if not f then
+						return nil
+					end
+
+					setfenv(f, env)
+
+					local ok, result = pcall(f)
+					if not ok then
+						return nil
+					end
+
+					return result
+				end
+	
+
+				-- local capturedAircraft = nil
+
+				-- -- sandbox
+				-- local env = {
+
+				-- 	-- DCS stubs
+				-- 	mount_vfs_model_path     = function() end,
+				-- 	mount_vfs_texture_path   = function() end,
+				-- 	mount_vfs_liveries_path  = function() end,
+				-- 	declare_loadout          = function() end,
+				-- 	pylon                   = function() end,
+				-- 	gun_mount               = function() end,
+				-- 	declare_weapon           = function() end,
+				-- 	makeAirplaneCanopyGeometry = function() end,
+				-- 	nr30 				 = function() end,
+				-- 	verbose_to_dmg_properties  = function() end,
+				-- 	gatling_effect	  = function() end,
+				-- 	fire_effect           = function() end,
+				-- 	add_aircraft             = function() end,
+				-- 	-- add_aircraft = function(t)
+				-- 	-- 	if type(t) == "table" then
+				-- 	-- 		capturedAircraft = t
+				-- 	-- 	end
+				-- 	-- end,
+				-- 	-- dofile                   = function() end,
+				-- 	dofile = sandbox_dofile,
+				-- 	_                        = function(s) return s end,
+
+				-- 	-- aircraft tasks
+				-- 	aircraft_task = function(task) return task end,
+
+
+
+				-- 	AFAC = "AFAC",
+				-- 	CAS = "CAS",
+				-- 	AntishipStrike = "Antiship Strike",
+				-- 	GroundAttack = "Ground Attack",
+				-- 	RunwayAttack = "Runway Attack",
+				-- 	Escort = "Escort",
+				-- 	PinpointStrike = "Pinpoint Strike",
+				-- 	Intercept = "Intercept",
+				-- 	CAP = "CAP",
+				-- 	FighterSweep = "Fighter Sweep",
+				-- 	Reconnaissance = "Reconnaissance",
+				-- 	Refueling = "Refueling",
+				-- 	AWACS = "AWACS",
+				-- 	SEAD = "SEAD",
+				-- 	Transport = "Transport",
+
+				-- 	-- constantes bidon
+				-- 	CAT_FUEL_TANKS = 0,
+				-- 	wsType_Air = 0,
+				-- 	wsType_Free_Fall = 0,
+				-- 	wsType_FuelTank = 0,
+				-- 	WSTYPE_PLACEHOLDER = 0,
+
+				-- 	-- current_mod_path = basePath,
+
+				-- 	-- Lua standard
+				-- 	pairs = pairs,
+				-- 	ipairs = ipairs,
+				-- 	type = type,
+				-- 	table = table,
+				-- 	math = math,
+				-- 	string = string,
+				-- 	tonumber = tonumber,
+				-- 	tostring = tostring,
+				-- }
+
+				local capturedAircraft = nil
+
+				local function dummy_function(...)
+					return nil
+				end
+
+				local function dummy_table()
+					return {}
+				end
+
+
+				local env = {
+
+					-- indispensables DCS
+					current_mod_path = "",
+
+					aircraft_task = function(task)
+						return task
+					end,
+
+					_ = function(s) return s end,
+
+					dofile = sandbox_dofile,
+
+					-- Lua safe
+					pairs = pairs,
+					ipairs = ipairs,
+					type = type,
+					table = table,
+					math = math,
+					string = string,
+					tonumber = tonumber,
+					tostring = tostring,
+				}
+
+
+				-- métatable universelle
+				setmetatable(env, {
+					__index = function(t, k)
+
+						-- constantes numériques DCS
+						if k:match("^CAT_")
+						or k:match("^wsType")
+						or k:match("^WOLA")
+						then
+							local v = 0
+							rawset(t, k, v)
+							return v
+						end
+
+						-- tout le reste = fonction neutre
+						rawset(t, k, dummy_function)
+						return dummy_function
+					end
+				})
+
+
+
+
+
+				local chunk, err = loadfile(fullPath)
+				if not chunk then
+					print("DataDiscovery_D loadfile error : "..err)
+					-- return
+				end
+
+				setfenv(chunk, env)
+
+				local ok, result = pcall(chunk)
+				if not ok then
+					print("DataDiscovery_E exec error : "..result)
+					-- return
+				end
+
+				local aircraftData = nil
+
+				-- CAS 1 : dofile() direct → return {}
+				if type(result) == "table" then
+					aircraftData = result
+				end
+
+				-- CAS 2 : add_aircraft intercepté
+				if not aircraftData and type(capturedAircraft) == "table" then
+					aircraftData = capturedAircraft
+				end
+
+				-- CAS 3 : table globale classique
+				if not aircraftData and type(env[tableName]) == "table" then
+					aircraftData = env[tableName]
+				end
+
+
+				if not aircraftData then
+					print("DataDiscovery_H aucune table aircraft valide dans "..pathfileName)
+					os.execute("pause")
+				else
+					aircraftData = deepcopyLocal(aircraftData)
+
+					for k,_ in pairs(IGNORED_KEYS) do
+						aircraftData[k] = nil
+					end
+
+					local dst = Data_divers[planeName]
+
+					if aircraftData.Tasks then
+						dst.Tasks = aircraftData.Tasks
+					end
+
+					if aircraftData.Damage then
+						dst.Damage = aircraftData.Damage
+					end
+				end
+
+			end
+		end
+	end
+end
+
+
 --rempli la table TaskByPlane avec les Tasks qui ne sont rempli que dans Data_divers
 function DataCompilation_TaskByPlane()
 	for planeType, planeData in pairs(Data_divers) do
 		if planeData.Tasks then
 			for taskN, task in pairs(planeData.Tasks) do
+				-- print("DataCompilation_TaskByPlane: planeType "..planeType.." task "..task)
 				if not TaskByPlane[task][planeType] then
 					TaskByPlane[task][planeType] = true
 				end
@@ -4636,5 +5127,3 @@ function DataCompilation_TaskByPlane()
 		end
 	end
 end
--- InheritedFromProcessing()
--- DataCompilation_TaskByPlane()

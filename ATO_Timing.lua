@@ -20,6 +20,10 @@ versionDCE["ATO_Timing.lua"] = "1.7.70"
 -- modification M11A_bi		Multiplayer (bi: clientETA>0 au sol)(b(dh): clientETA<0 au sol)(w: force same package)
 -- modification M06_e		helicoptere playable
 
+if Debug.debug then
+	print("START ATO_Timing.lua "..versionDCE["ATO_Timing.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
+
 -- local Correction_startup_time_player = 0
 local tempTxt = ""
 local debugTxt_AtoT = ""
@@ -735,46 +739,10 @@ for sideName, packs in pairs(ATO) do
 							}
 						end
 						
-						
-						
-						
-						-- local speed
-						-- if flight[f].route[w].id == "IP" then
-						-- 	speed = main_vAttack
-						-- else
-						-- 	speed = main_vCruise
-						-- end
-
-						-- if speed < flight[f].loadout.vCruise * (1 - 10/100) then
-						-- 	speed = flight[f].loadout.vCruise * (1 - 10/100)
-						-- end
-
-						-- --TODO, revoir cette partie, y'a souvent erreur d'ETA ici
-						-- local dist = flight[f].route[w + 1].eta * speed							--distance covered from mission start to first positive ETA
-						-- if dist > GetDistance(flight[f].route[w], flight[f].route[w + 1]) then	--if distance is ahead of WP (caused by extra minutes at take off WP), keep spawn point over take off point but adjust id and alt for air spawn
-
-						-- 	flight[f].route[w].name = "Create Spawn Wp in AtoTiming "..flight[f].route[w].id.." "..tostring(debug.getinfo(1).currentline)
-						-- 	flight[f].route[w].id = "Spawn"
-						-- 	flight[f].route[w].alt = flight[f].route[w + 1].alt
-						-- 	flight[f].route[w].eta = 0											--ETA of WP is at mission start
-						-- 	flight[f].route[w].speed = speed									--set NEWSPEED
-						
-						-- else																	--else move the spawn point to new location
-						-- 	flight[f].route[w] = {
-						-- 		name = "Create Spawn Wp in AtoTiming "..flight[f].route[w].id.." "..tostring(debug.getinfo(1).currentline),
-						-- 		x = flight[f].route[w + 1].x + math.cos(math.rad(h)) * dist,
-						-- 		y = flight[f].route[w + 1].y + math.sin(math.rad(h)) * dist,
-						-- 		eta = 0,														--ETA of WP is at mission start
-						-- 		id = "Spawn",													--WP is spawn point
-						-- 		alt = flight[f].route[w + 1].alt,
-						-- 		speed = speed,													--set NEWSPEED
-						-- 	}
-						-- end
 
 						airstart = w															--store the number of the spawn WP (WPs ahead will be removed)
 						break
-					-- elseif flight[f].route[w].eta < 0 and (flight[f].client or flight[f].player) then
-					-- 	InsertBugList("AtoT ALERT player SPAWNING ETA <0 "..tostring(flight[f].route[w].eta))
+
 					end
 				end
 
@@ -985,7 +953,7 @@ for side, pack in pairs(ATO) do
 						-- 3) temps de remise en œuvre = temps alloué - vol réel
 						local turnaround_time_s = sortie_time_s - flight_duration_s
 						if turnaround_time_s < 0 then turnaround_time_s = 0 end
-						print("AtoT type: "..tostring(fl.type).." name: "..tostring(fl.name).." sortie_rate: "..tostring(fl.loadout.sortie_rate).." turnaround_time_s_h: "..tostring(turnaround_time_s/3600))
+						-- print("AtoT type: "..tostring(fl.type).." name: "..tostring(fl.name).." sortie_rate: "..tostring(fl.loadout.sortie_rate).." turnaround_time_s_h: "..tostring(turnaround_time_s/3600))
 
 						-- 4) temps de fin du vol en heures
 						local flightEndTime_hour = (CampTotalTimeS / 3600) + (fl.route[#fl.route].eta / 3600)

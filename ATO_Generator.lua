@@ -4117,19 +4117,7 @@ end
 -- end
 
 if Debug.Generator and Debug.debug then
-
-	print("AtoG outMemory check Z5")
-
-	-- local _file = io.open("Debug/AtoGenerator_Debug_C.txt", "w") or error("Failed to open debug file")
-	-- _file:write(debuGenTxt)
-	-- _file:close()
-	-- debuGenTxt = ""        -- on supprime la référence
-    -- collectgarbage("collect") -- on force la libération
-
 	flushDebugLogs()
-
-	print("AtoG outMemory check Z7")
-
 end
 
 
