@@ -1000,7 +1000,7 @@ Frequency = {
 			[1] = {						--radio 1  RSIU 5V 
 				VHF = {
 					min = 118,				--minimum radio frequency in mHz   RS-832 0 to 19 preset channels only
-					max = 224.995,				--maxium  radio frequency in mHz
+					max = 140,				--maxium  radio frequency in mHz
 				},
 				UHF = {
 					min = 225,				--minimum radio frequency in mHz  

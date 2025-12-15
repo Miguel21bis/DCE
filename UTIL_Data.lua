@@ -1236,11 +1236,12 @@ Data_divers = {
 	["C-130J-30"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-		Tasks = {
-			aircraft_task(Transport),
-			aircraft_task(GroundAttack),
-			aircraft_task(Refueling),
-		},
+		folderModName = "C130J",
+		-- Tasks = {
+		-- 	aircraft_task(Transport),
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(Refueling),
+		-- },
 		vCruise = 140,
 		hCruise = 7620,
 	},
@@ -1740,7 +1741,7 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		-- requiredModules = true,						--itsModule
 		moduleName = "jjj_uh2c",
-		coreMod = false,
+		-- coreMod = false,
 		savedGameMod = true,
 		folderModName = "[VWV] UH-2C",
 		-- Tasks = {
@@ -1790,9 +1791,10 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
-		Tasks = {
-			aircraft_task(Transport),
-		},
+		folderModName = "CH-47F",
+		-- Tasks = {
+		-- 	aircraft_task(Transport),
+		-- },
 		hCruise = 200,
 		vCruise = 75, -- (m/s, ≈ 270 km/h)
 	},
@@ -4684,13 +4686,16 @@ function DataCompilation_DataDiscovery()
 				-- Construire le chemin CoreMods
 				local fullPath = dcs_path .. "CoreMods/aircraft/" .. folderModName .. "/entry.lua"
 
-				-- Vérifier si le fichier existe
+				-- Vérifier si le fichier existe dans le premier chemin (CoreMods)
+				local f0 = io.open(fullPath, "r")
+
+				-- Vérifier si le fichier existe dans le premier chemin (par exemple, CoreMods/aircraft/)
 				local f0 = io.open(fullPath, "r")
 				if f0 then
 					modRoot  = dcs_path .. "CoreMods/aircraft/" .. folderModName
 					f0:close()
 				else
-					-- Si non trouvé, basculer vers Mods
+					-- Si non trouvé, basculer vers Mods (Saved Games)
 					fullPath = camp_path .. "Mods/aircraft/" .. folderModName .. "/entry.lua"
 					modRoot  = camp_path .. "Mods/aircraft/" .. folderModName
 				end
@@ -4773,6 +4778,11 @@ function DataCompilation_DataDiscovery()
 				env.FighterSweep     = "Fighter Sweep"
 				env.SEAD             = "SEAD"
 				env.Training         = "Training"
+				-- env.Airborne         = "Airborne"
+				env.Airborne         = "Transport"
+				env.MODULATION_AM	= "AM"
+				env.MODULATION_FM	= "FM"
+				env.MODULATION_AM_AND_FM = "AM AND FM"
 
 				env.aircraft_task = function(task)
 					return task
@@ -4835,9 +4845,22 @@ function DataCompilation_DataDiscovery()
 						_affiche(aircraft.Tasks, "  -> Tasks found ")
 					end
 
-					if aircraft.Damage then
-						dst.Damage = aircraft.Damage
+					-- if aircraft.Damage then
+					-- 	dst.Damage = aircraft.Damage
+					-- end
+					if aircraft.HumanRadio then
+						dst.HumanRadio = aircraft.HumanRadio
+						-- _affiche(aircraft.HumanRadio, "  -> HumanRadio found ")
+						-- os.execute 'pause'
 					end
+					if aircraft.panelRadio then
+						dst.panelRadio = aircraft.panelRadio
+						-- _affiche(aircraft.panelRadio, "  -> panelRadio found ")
+						-- os.execute 'pause'
+					end
+					
+
+					
 
 					-- FAILURES
 					local failures = extractFailures(aircraft)
@@ -5118,7 +5141,7 @@ function DataCompilation_TaskByPlane()
 	for planeType, planeData in pairs(Data_divers) do
 		if planeData.Tasks then
 			for taskN, task in pairs(planeData.Tasks) do
-				-- print("DataCompilation_TaskByPlane: planeType "..planeType.." task "..task)
+				print("DataCompilation_TaskByPlane: planeType "..planeType.." task "..tostring(task))
 				if not TaskByPlane[task][planeType] then
 					TaskByPlane[task][planeType] = true
 				end
