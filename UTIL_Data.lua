@@ -29,26 +29,6 @@ if Debug.debug then
 	print("START UTIL_Data.lua "..versionDCE["UTIL_Data.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
 
--- EPLRS_Capacity = {
--- 	["E-2C"] = true,
--- 	["E-3A"] = true,
--- 	["F-15C"] = true,
--- 	["F-15E"] = true,
--- 	["F-15ESE"] = true,
--- 	["F-16C bl.52d"] = true,
--- 	["F-16C_50"] = true,
--- 	["FA-18C_hornet"] = true,
--- 	["F/A-18C"] = true,
--- 	["A-10C"] = true,
--- 	["A-10C_2"] = true,
-
--- 	["MQ-9 Reaper"] = true,	
-
--- 	["AH-64D_BLK_II"] = true,
-
--- 	["JF-17"] = true,
--- }
-
 -- À la louche je pencherais plutôt pour : 
 -- 75% à 10000m pour l’EA-6B
 -- 50% à 4000m pour le F-105G
@@ -153,7 +133,7 @@ TaskByPlane = {
 		["vwv_a1_skyraider"] = true,	--Mod
 		["vwv_o-1"] = true,         	--Mod
 
-		["F-16C_50"] = true,
+		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
 
 
@@ -162,8 +142,8 @@ TaskByPlane = {
 		["L-39ZA"] = true,
 		["Su-24M"] = true,
 
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
+		-- ["Mirage-F1CE"] = true,
+		-- ["Mirage-F1EE"] = true,
 
 		["Mi-8MT"] = true,
 		["Ka-50"] = true,
@@ -207,9 +187,9 @@ TaskByPlane = {
 		["AV8BNA"] = true,
 		["MB-339A"] = true,
 		["MirageF1"] = true,			--Mod
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
-		["MirageF1CT"] = true,			--Mod
+		-- ["Mirage-F1CE"] = true,
+		-- ["Mirage-F1EE"] = true,
+		-- ["MirageF1CT"] = true,			--Mod
 
 
 		["B-1B"] = true,
@@ -224,9 +204,9 @@ TaskByPlane = {
 		["F-5E-3"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
-		["F-16C_50"] = true,
+		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
+		-- ["FA-18C_hornet"] = true,
 
 		["AH-64D_BLK_II"] = true,
 		["OH-6A"] = true,			--Mod
@@ -293,11 +273,11 @@ TaskByPlane = {
 
 		["F-4E"] = true,
 		["F-5E-3"] = true,
-		["F-16C_50"] = true,
+		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
+		-- ["FA-18C_hornet"] = true,
 		["MB-339A"] = true,			 
-		["MirageF1CT"] = true,			--Mod
+		-- ["MirageF1CT"] = true,			--Mod
 
 		["AH-64D_BLK_II"] = true,
 		["AH-64A"] = true,
@@ -375,14 +355,14 @@ TaskByPlane = {
 		["F-5E-3"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
-		["F-16C_50"] = true,
+		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
+		-- ["FA-18C_hornet"] = true,
 		["MB-339A"] = true,
 		["MirageF1"] = true,			--Mod
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
-		["MirageF1CT"] = true,			--Mod
+		-- ["Mirage-F1CE"] = true,
+		-- ["Mirage-F1EE"] = true,
+		-- ["MirageF1CT"] = true,			--Mod
 
 		["AH-64D_BLK_II"] = true,
 		["AH-64A"] = true,
@@ -453,15 +433,15 @@ TaskByPlane = {
 
 		["F-15E"] = true,
 		["F-15ESE"] = true,
-		["F-16C_50"] = true,
+		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
+		-- ["FA-18C_hornet"] = true,
 
 		["MB-339A"] = true,
 		["MirageF1"] = true,			--Mod
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
-		["MirageF1CT"] = true,			--Mod
+		-- ["Mirage-F1CE"] = true,
+		-- ["Mirage-F1EE"] = true,
+		-- ["MirageF1CT"] = true,			--Mod
 
 
 		["JF-17"] = true,
@@ -508,13 +488,13 @@ TaskByPlane = {
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
-		["F-16C_50"] = true,
+		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
+		-- ["FA-18C_hornet"] = true,
 
 		["MirageF1"] = true,			--Mod
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
+		-- ["Mirage-F1CE"] = true,
+		-- ["Mirage-F1EE"] = true,
 
 		["AH-64D_BLK_II"] = true,
 
@@ -551,14 +531,14 @@ TaskByPlane = {
 		["F-5E-3"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
-		["F-16C_50"] = true,
+		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
+		-- ["FA-18C_hornet"] = true,
 		["F-117A"] = true,
 
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
-		["MirageF1CT"] = true,			--Mod
+		-- ["Mirage-F1CE"] = true,
+		-- ["Mirage-F1EE"] = true,
+		-- ["MirageF1CT"] = true,			--Mod
 
 		["JF-17"] = true,
 		["MiG-27K"] = true,
@@ -598,12 +578,12 @@ TaskByPlane = {
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
-		["F-16C_50"] = true,
+		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
+		-- ["FA-18C_hornet"] = true,
 		["MirageF1"] = true,			--Mod
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
+		-- ["Mirage-F1CE"] = true,
+		-- ["Mirage-F1EE"] = true,
 
 		["JF-17"] = true,
 		["MiG-23MLD"] = true,
@@ -648,13 +628,13 @@ TaskByPlane = {
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
-		["F-16C_50"] = true,
+		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
+		-- ["FA-18C_hornet"] = true,
 
 		["MirageF1"] = true,			--Mod
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
+		-- ["Mirage-F1CE"] = true,
+		-- ["Mirage-F1EE"] = true,
 
 		["Yak-52"] = true,
 		["JF-17"] = true,
@@ -701,13 +681,13 @@ TaskByPlane = {
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
-		["F-16C_50"] = true,
+		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
+		-- ["FA-18C_hornet"] = true,
 
 		["MirageF1"] = true,			--Mod
-		["Mirage-F1CE"] = true,
-		["Mirage-F1EE"] = true,
+		-- ["Mirage-F1CE"] = true,
+		-- ["Mirage-F1EE"] = true,
 
 		["JF-17"] = true,
 		["vwv_mig17f"] = true,			--Mod
@@ -737,9 +717,9 @@ TaskByPlane = {
 		["vwv_crusader"] = true,		--Mod
 		["vwv_ra-5"] = true,		--Mod
 		["F-15E"] = true,
-		["F-16C_50"] = true,
+		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
+		-- ["FA-18C_hornet"] = true,
 
 		["OH-6A"] = true,			--Mod
 
@@ -775,9 +755,9 @@ TaskByPlane = {
 
 		["AV8BNA"] = true,
 		["F-4E"] = true,
-		["F-16C_50"] = true,
+		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		["FA-18C_hornet"] = true,
+		-- ["FA-18C_hornet"] = true,
 
 		["JF-17"] = true,
 
@@ -1388,6 +1368,8 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		inheritedFrom = "F-14",	--copy radio frequency, failures ...
 		inherited_APA_From = "F-14",	--copy AddPropAircraft
+		folderModName = "F14",
+		fileModName = "F-14B.lua",		--exactement les meme fichiers que le F-14B
 		playable = true,
 		alignment_PropAircraft = {
 			fast = {
@@ -1397,20 +1379,20 @@ Data_divers = {
 				["INSAlignmentStored"] = false,
 			},
 		},
-		Tasks = {
-			aircraft_task(CAP),
-			aircraft_task(Escort),
-			aircraft_task(FighterSweep),
-			aircraft_task(Intercept),
-			aircraft_task(Reconnaissance),
-			aircraft_task(GroundAttack),
-			aircraft_task(CAS),
-		  	aircraft_task(AFAC),
-			aircraft_task(RunwayAttack),
-			aircraft_task(PinpointStrike),
-			aircraft_task(AntishipStrike),
-			aircraft_task(SEAD),
-	  	},
+		-- Tasks = {
+		-- 	aircraft_task(CAP),
+		-- 	aircraft_task(Escort),
+		-- 	aircraft_task(FighterSweep),
+		-- 	aircraft_task(Intercept),
+		-- 	aircraft_task(Reconnaissance),
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(CAS),
+		--   	aircraft_task(AFAC),
+		-- 	aircraft_task(RunwayAttack),
+		-- 	aircraft_task(PinpointStrike),
+		-- 	aircraft_task(AntishipStrike),
+		-- 	aircraft_task(SEAD),
+	  	-- },
 
 		vCruise = 230,
 		hCruise = 9140,
@@ -1421,6 +1403,8 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		inheritedFrom = "F-14",	--copy radio frequency, failures ...
 		inherited_APA_From = "F-14",	--copy AddPropAircraft
+		folderModName = "F14",
+		fileModName = "F-14B.lua",
 		playable = true,
 		alignment_PropAircraft = {
 			fast = {
@@ -1430,20 +1414,20 @@ Data_divers = {
 				["INSAlignmentStored"] = false,
 			},
 		},
-		Tasks = {
-			aircraft_task(CAP),
-			aircraft_task(Escort),
-			aircraft_task(FighterSweep),
-			aircraft_task(Intercept),
-			aircraft_task(Reconnaissance),
-			aircraft_task(GroundAttack),
-			aircraft_task(CAS),
-		  	aircraft_task(AFAC),
-			aircraft_task(RunwayAttack),
-			aircraft_task(PinpointStrike),
-			aircraft_task(AntishipStrike),
-			aircraft_task(SEAD),
-	  	},
+		-- Tasks = {
+		-- 	aircraft_task(CAP),
+		-- 	aircraft_task(Escort),
+		-- 	aircraft_task(FighterSweep),
+		-- 	aircraft_task(Intercept),
+		-- 	aircraft_task(Reconnaissance),
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(CAS),
+		--   	aircraft_task(AFAC),
+		-- 	aircraft_task(RunwayAttack),
+		-- 	aircraft_task(PinpointStrike),
+		-- 	aircraft_task(AntishipStrike),
+		-- 	aircraft_task(SEAD),
+	  	-- },
 		vCruise = 230,
 		hCruise = 9140,
 		refuellingReceptacleType = "drogue"
@@ -1478,6 +1462,7 @@ Data_divers = {
 	},
 	["F-16C_50"] = 	{
 		instrumentUnits = "imperial",
+		folderModName = "F-16C",
 		EPLRS_Capacity = true,
 		datalinks = {
 			type = "Link16",
@@ -1513,6 +1498,7 @@ Data_divers = {
 	["FA-18C_hornet"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = true,
+		folderModName = "FA-18C",
 		datalinks = {
 			type = "Link16",
 			hasTeamMembers = 4,
@@ -1553,27 +1539,35 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		requiredModules = true,						--itsModule
 	},
-	["MirageF1CT"] = {--mod
-		instrumentUnits = "imperial",
-		EPLRS_Capacity = false,
-		requiredModules = true,						--itsModule
-	},
+	-- ["MirageF1CT"] = {--mod
+	-- 	instrumentUnits = "imperial",
+	-- 	folderModName = "Mirage-F1",
+	-- 	inheritedModFrom = {"Mirage-F1","Mirage-F1C"},
+	-- 	EPLRS_Capacity = false,
+	-- 	requiredModules = true,						--itsModule
+	-- },
 
-	["Mirage-F1"] = {--Common aircraft definitions
-		instrumentUnits = "imperial",
-		EPLRS_Capacity = false,
-		-- 		3 types : Mirage-F1CE, Mirage-F1EE, Mirage-F1BE 
-		-- Le futur devrait être le F-1M ... le plus moderne mais pas pour tout de suite je pense ...
-		playable = true,
-		vCruise = 250,
-		hCruise = 7548,
-	},
-	["Mirage-F1CE"] = {
-		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
-		refuellingReceptacleType = "drogue"
-	},
+	-- ["Mirage-F1"] = {--Common aircraft definitions
+	-- 	instrumentUnits = "imperial",
+	-- 	EPLRS_Capacity = false,
+	-- 	-- folderModName = "Mirage-F1",
+	-- 	-- 		3 types : Mirage-F1CE, Mirage-F1EE, Mirage-F1BE 
+	-- 	-- Le futur devrait être le F-1M ... le plus moderne mais pas pour tout de suite je pense ...
+	-- 	playable = true,
+	-- 	vCruise = 250,
+	-- 	hCruise = 7548,
+	-- },
+	-- ["Mirage-F1CE"] = {
+	-- 	inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
+	-- 	folderModName = "Mirage-F1",
+	-- 	inheritedModFrom = {"Mirage-F1","Mirage-F1C"},
+	-- 	refuellingReceptacleType = "drogue",
+	-- 	fileModName = "Mirage-F1CE",
+	-- },
 	["Mirage-F1EE"] = {
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
+		folderModName = "Mirage-F1",
+		inheritedModFrom = {"Mirage-F1","Mirage-F1C"},
 		alignment_PropAircraft = {
 			fast = {
 				["INSStartMode"] = 1,
@@ -1587,12 +1581,15 @@ Data_divers = {
 	},
 	["Mirage-F1BE"] = {
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
+		folderModName = "Mirage-F1",
+		inheritedModFrom = {"Mirage-F1B","Mirage-F1BE"},
 		refuellingReceptacleType = "drogue"
 	},
 
 	["M-2000C"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
+		folderModName = "M-2000C",
 		playable = true,
 		alignment_PropAircraft = {
 			fast = {
@@ -1606,16 +1603,16 @@ Data_divers = {
 				["InitHotDrift"] = 0,
 			}
 		},
-		Tasks = {
-			aircraft_task(CAP),
-			aircraft_task(Escort),
-			aircraft_task(FighterSweep),
-			aircraft_task(Intercept),
-			aircraft_task(GroundAttack),
-			aircraft_task(CAS),
-			aircraft_task(RunwayAttack),
-			aircraft_task(PinpointStrike),
-	  	},
+		-- Tasks = {
+		-- 	aircraft_task(CAP),
+		-- 	aircraft_task(Escort),
+		-- 	aircraft_task(FighterSweep),
+		-- 	aircraft_task(Intercept),
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(CAS),
+		-- 	aircraft_task(RunwayAttack),
+		-- 	aircraft_task(PinpointStrike),
+	  	-- },
 		refuellingReceptacleType = "drogue",
 		vCruise = 250,
 		hCruise = 8000,
@@ -3236,133 +3233,133 @@ Failures = {
 
 		-- radio devices
 	},
-	["M-2000C"] = {
-		'HYD_PUMP_1_FAIL_100',
-		'HYD_PUMP_2_FAIL_100',
-		'HYD_PUMP_3_FAIL_100',
-		'OIL_SYSTEM_FAIL_050',
-		'OIL_SYSTEM_FAIL_100',
-		'BATT_FAIL',
-		'TRN_FAIL',
-		'TRN_FAIL_AUX',
-		'ENG_ALT_1_FAIL',
-		'ENG_ALT_2_FAIL',
-		'HYD_ALT_1_FAIL',
-		'HYD_ALT_2_FAIL',
-		'INS_PART_FAIL',
-		'INS_GYROS_FAIL',
-		'INS_TOTAL_FAIL',
-		'RWR_FAILURE_SENSOR_TAIL',
-		'RWR_FAILURE_SENSOR_LEFT',
-		'RWR_FAILURE_SENSOR_RIGHT',
-		'RWR_FAILURE_TOTAL',
-		'IFF_FAILURE_MAIN',
-	},
-	["Mirage-F1"] =
-	{
-		"battery_fail",
-		"alt1_fail",
-		"alt2_fail",
-		"tr1_fail",
-		"tr2_fail",
-		"triphase_inv_fail",
-		"miss_bus_fail",
+	-- ["M-2000C"] = {
+	-- 	'HYD_PUMP_1_FAIL_100',
+	-- 	'HYD_PUMP_2_FAIL_100',
+	-- 	'HYD_PUMP_3_FAIL_100',
+	-- 	'OIL_SYSTEM_FAIL_050',
+	-- 	'OIL_SYSTEM_FAIL_100',
+	-- 	'BATT_FAIL',
+	-- 	'TRN_FAIL',
+	-- 	'TRN_FAIL_AUX',
+	-- 	'ENG_ALT_1_FAIL',
+	-- 	'ENG_ALT_2_FAIL',
+	-- 	'HYD_ALT_1_FAIL',
+	-- 	'HYD_ALT_2_FAIL',
+	-- 	'INS_PART_FAIL',
+	-- 	'INS_GYROS_FAIL',
+	-- 	'INS_TOTAL_FAIL',
+	-- 	'RWR_FAILURE_SENSOR_TAIL',
+	-- 	'RWR_FAILURE_SENSOR_LEFT',
+	-- 	'RWR_FAILURE_SENSOR_RIGHT',
+	-- 	'RWR_FAILURE_TOTAL',
+	-- 	'IFF_FAILURE_MAIN',
+	-- },
+	-- ["Mirage-F1"] =
+	-- {
+	-- 	"battery_fail",
+	-- 	"alt1_fail",
+	-- 	"alt2_fail",
+	-- 	"tr1_fail",
+	-- 	"tr2_fail",
+	-- 	"triphase_inv_fail",
+	-- 	"miss_bus_fail",
 
-		"left_fuel_pump_fail",
-		"right_fuel_pump_fail",
-		"detotalizer_fail",
-		"fuel_gauges_fail",
-		"fuel_intercom_fail",
-		"left_wing_transfer_fail",
-		"right_wing_transfer_fail",
-		"front_central_transfer_fail",
-		"left_front_transfer_fail",
-		"right_front_transfer_fail",
-		"left_rear_transfer_fail",
-		"right_rear_transfer_fail",
-		"external_tanks_transfer_fail",
-		"left_wing_leaks",
-		"right_wing_leaks",
-		"front_central_leaks",
-		"left_front_leaks",
-		"right_front_leaks",
-		"left_rear_leaks",
-		"right_rear_leaks",
-		"left_feeder_leaks",
-		"right_feeder_leaks",
-		"fuel_accu_leaks",
+	-- 	"left_fuel_pump_fail",
+	-- 	"right_fuel_pump_fail",
+	-- 	"detotalizer_fail",
+	-- 	"fuel_gauges_fail",
+	-- 	"fuel_intercom_fail",
+	-- 	"left_wing_transfer_fail",
+	-- 	"right_wing_transfer_fail",
+	-- 	"front_central_transfer_fail",
+	-- 	"left_front_transfer_fail",
+	-- 	"right_front_transfer_fail",
+	-- 	"left_rear_transfer_fail",
+	-- 	"right_rear_transfer_fail",
+	-- 	"external_tanks_transfer_fail",
+	-- 	"left_wing_leaks",
+	-- 	"right_wing_leaks",
+	-- 	"front_central_leaks",
+	-- 	"left_front_leaks",
+	-- 	"right_front_leaks",
+	-- 	"left_rear_leaks",
+	-- 	"right_rear_leaks",
+	-- 	"left_feeder_leaks",
+	-- 	"right_feeder_leaks",
+	-- 	"fuel_accu_leaks",
 
-		"left_airbrake_fail",
-		"right_airbrake_fail",
-		"gear_lever_fail",
-		"gear_down_lock_fail",
-		"gear_nose_stuck",
-		"gear_left_stuck",
-		"gear_right_stuck",
-		"brakes_fail",
-		"chute_fail",
-		"electropump_fail",
-		"hydr1_leaks",
-		"hydr1_reserv_leaks",
-		"hydr1_pump_fail",
-		"hydr2_leaks",
-		"hydr2_reserv_leaks",
-		"hydr2_pump_fail",
-		"hydr_serv_leaks",
-		"flap_left_stuck",
-		"flap_right_stuck",
-		"flaps_stuck",
-		"slat_inner_left_stuck",
-		"slat_inner_right_stuck",
-		"slat_outer_left_stuck",
-		"slat_outer_right_stuck",
-		"slats_stuck",
+	-- 	"left_airbrake_fail",
+	-- 	"right_airbrake_fail",
+	-- 	"gear_lever_fail",
+	-- 	"gear_down_lock_fail",
+	-- 	"gear_nose_stuck",
+	-- 	"gear_left_stuck",
+	-- 	"gear_right_stuck",
+	-- 	"brakes_fail",
+	-- 	"chute_fail",
+	-- 	"electropump_fail",
+	-- 	"hydr1_leaks",
+	-- 	"hydr1_reserv_leaks",
+	-- 	"hydr1_pump_fail",
+	-- 	"hydr2_leaks",
+	-- 	"hydr2_reserv_leaks",
+	-- 	"hydr2_pump_fail",
+	-- 	"hydr_serv_leaks",
+	-- 	"flap_left_stuck",
+	-- 	"flap_right_stuck",
+	-- 	"flaps_stuck",
+	-- 	"slat_inner_left_stuck",
+	-- 	"slat_inner_right_stuck",
+	-- 	"slat_outer_left_stuck",
+	-- 	"slat_outer_right_stuck",
+	-- 	"slats_stuck",
 
-		"pitot_heat_fail",
-		"altitude_chain_fail",
-		"mach_chain_fail",
-		"incidometer_fail",
-		"incidometer_blockage_fail",
-		"anemo_central_fail",
+	-- 	"pitot_heat_fail",
+	-- 	"altitude_chain_fail",
+	-- 	"mach_chain_fail",
+	-- 	"incidometer_fail",
+	-- 	"incidometer_blockage_fail",
+	-- 	"anemo_central_fail",
 
-		"trim_pitch_fail",
-		"trim_roll_fail",
-		"trim_yaw_fail",
-		"trim_elect_supply",
-		"yaw_damper_fail",
-		"pilot_aids_1_fail",
-		"pilot_aids_2_fail",
-		"pitch_chain_fail",
-		"ap_global_fail",
+	-- 	"trim_pitch_fail",
+	-- 	"trim_roll_fail",
+	-- 	"trim_yaw_fail",
+	-- 	"trim_elect_supply",
+	-- 	"yaw_damper_fail",
+	-- 	"pilot_aids_1_fail",
+	-- 	"pilot_aids_2_fail",
+	-- 	"pitch_chain_fail",
+	-- 	"ap_global_fail",
 
-		"broken_guards",
-		"oil_fail",
-		"nosecone_stuck",
-		"nosecone_stuck_forward",
-		"nosecone_stuck_backward",
-		"start_fail",
-		"ignition_fail",
-		"total_comp_stall",
-		"partial_comp_stall",
-		"overspeed_fail",
-		"discharge_valves_fail",
-		"engine_fire",
-		"AB_fire",
-		"compressor_damage",
-		"engine_flameout",
-		"cabin_temp_fail",
-		"equip_temp_fail",
-		"oxygen_regulator_fail",
+	-- 	"broken_guards",
+	-- 	"oil_fail",
+	-- 	"nosecone_stuck",
+	-- 	"nosecone_stuck_forward",
+	-- 	"nosecone_stuck_backward",
+	-- 	"start_fail",
+	-- 	"ignition_fail",
+	-- 	"total_comp_stall",
+	-- 	"partial_comp_stall",
+	-- 	"overspeed_fail",
+	-- 	"discharge_valves_fail",
+	-- 	"engine_fire",
+	-- 	"AB_fire",
+	-- 	"compressor_damage",
+	-- 	"engine_flameout",
+	-- 	"cabin_temp_fail",
+	-- 	"equip_temp_fail",
+	-- 	"oxygen_regulator_fail",
 
-		"gyros_general_BSM_fail",
-		"gyros_main_att_fail",
-		"gyros_main_fail",
-		"gyros_emergency_fail",
-		"gyros_att_indicator",
-		"gyros_temp_drift",
-		"BARAX_fail",
+	-- 	"gyros_general_BSM_fail",
+	-- 	"gyros_main_att_fail",
+	-- 	"gyros_main_fail",
+	-- 	"gyros_emergency_fail",
+	-- 	"gyros_att_indicator",
+	-- 	"gyros_temp_drift",
+	-- 	"BARAX_fail",
 
-	},
+	-- },
 
 	-- ["F-4E-45-MC"] =
 	-- {
@@ -3482,200 +3479,200 @@ Failures = {
 	-- 	[114] = "/F-4E-45-MC/EO TGT Designator System/Pave Spike:System Damage",
 	-- },
 
-	["F-14"] =
-	{
-        'RADAR_FAILURE_TOTAL', --('Radar: Total') -- 0
-        'DDD_FAILURE_TOTAL', --('DDD: Total')
-        -- ENGINE
-        'L_ENG_FIRE', --('Left Engine: Fire')
-        'R_ENG_FIRE', --('Right Engine: Fire')
-        'L_ENG_SEIZED', --('Left Engine: Main Spool Seizure')
-        'R_ENG_SEIZED', --('Right Engine: Main Spool Seizure')
-        'L_ENG_TURBINE_FAILURE', --('Left Engine: Turbine Failed')
-        'R_ENG_TURBINE_FAILURE', --('Right Engine: Turbine Failed')
-        'L_ENG_OIL_LEAK_SLOW', --('Left Engine: Slow Oil Leak (1 hr)')
-        'R_ENG_OIL_LEAK_SLOW', --('Right Engine: Slow Oil Leak (1 hr)')
-        'L_ENG_OIL_LEAK_MODERATE', --('Left Engine: Moderate Oil Leak (30 min)')
-        'R_ENG_OIL_LEAK_MODERATE', --('Right Engine: Moderate Oil Leak (30 min)')
-        'L_ENG_OIL_LEAK_SEVERE', --('Left Engine: Severe Oil Leak (2 min)')
-        'R_ENG_OIL_LEAK_SEVERE', --('Right Engine: Severe Oil Leak (2 min)')
-        'L_ENG_COMPRESSOR_STALL', --('Left Engine: Compressor Stall')
-        'R_ENG_COMPRESSOR_STALL', --('Right Engine: Compressor Stall')
-        'L_ENG_POP_STALL', --('Left Engine: Pop Stall')
-        'R_ENG_POP_STALL', --('Right Engine: Pop Stall')
-		--      'L_ENG_SUPERSONIC_INLET_BUZZ', --('Left Engine: Supersonic Inlet Buzz')
-		--      'R_ENG_SUPERSONIC_INLET_BUZZ', --('Right Engine: Supersonic Inlet Buzz')
-        'L_ENG_HPT_OVERSPEED', --('Left Engine: Turbine Overspeed')
-        'R_ENG_HPT_OVERSPEED', --('Right Engine: Turbine Overspeed')
-        'L_ENG_AFTC_PRI_FAILED', --('Left Engine: AFTC Failure')
-        'R_ENG_AFTC_PRI_FAILED', --('Right Engine: AFTC Failure')
-        'L_ENG_AICS_RAMP_FAIL_OPEN', --('Left Engine: AICS Ramp Fail Open')
-        'R_ENG_AICS_RAMP_FAIL_OPEN', --('Right Engine: AICS Ramp Fail Open')
-        'L_ENG_AICS_RAMP_FAIL_CLOSED', --('Left Engine: AICS Ramp Fail Closed')
-        'R_ENG_AICS_RAMP_FAIL_CLOSED', --('Right Engine: AICS Ramp Fail Closed')
-        'L_ENG_AICS_RAMP_FAIL_IN_POS', --('Left Engine: AICS Ramp Fail In Position')
-        'R_ENG_AICS_RAMP_FAIL_IN_POS', --('Right Engine: AICS Ramp Fail In Position')
-        'L_ENG_NOZZLE_FAILURE', --('Left Engine: Exhaust Nozzle Failure')
-        'R_ENG_NOZZLE_FAILURE', --('Right Engine: Exhaust Nozzle Failure')
-        -- CADC
-        'CADC_FAILURE_TOTAL', --('CADC: Total')
-        'CADC_PRESSURE_SENSOR', --('CADC: Pressure sensor')
-        'CADC_WING_SWEEP_COMMAND_CHANNEL_1', --('CADC: Wing Sweep Channel 1')
-        'CADC_WING_SWEEP_COMMAND_CHANNEL_2', --('CADC: Wing Sweep Channel 2')
-        'CADC_MANEUVER_FLAP_COMMAND', --('CADC: Maneuver Flap Command')
-        'CADC_RUDDER_AUTHORITY_COMMAND', --('CADC: Rudder Authority Command')
-        'CADC_STABILIZER_AUTHORITY_COMMAND', --('CADC: Stabilizer Authority Command')
-        'CADC_ANGLE_OF_ATTACK_SIGNAL', --('CADC: Angle Of Attack Signal')
-        'CADC_TOTAL_TEMPERATURE_SIGNAL', --('CADC: Temperature Signal')
-        'CADC_WING_SWEEP_INDICATOR', --('CADC: Wing Sweep Indicator')
-        'CADC_CSDC_CONNECTION', --('CADC: Digital output to CSDC')
-        -- NAV
-        'INS_FAILURE_TOTAL', --('INS: Total')
-        'INS_FAILURE_NAV_COMPUTER', --('INS: Nav Computer')
-        'IMU_FAILURE_TOTAL', --('IMU: Total')
-        'IMU_FAILURE_QUANTIZER', --('IMU: Quantizer')
-        'AHRS_FAILURE_TOTAL', --('AHRS: Total')
-        'AHRS_FAILURE_GYRO', --('AHRS: Gyro Platform')
-        'AHRS_FAILURE_MAD', --('AHRS: Magnetic Azimuth Detector')
-        -- RWR AN/ALR-67
-        'RWR_FAILURE_TOTAL', --('RWR: Total')
-        'RWR_FAILURE_CONTROL_BOX', --('RWR: Control Box')
-        'RWR_FAILURE_COMPUTER', --('RWR: Computer')
-        'RWR_FAILURE_LOW_BAND', --('RWR: Low Band Receiver/Antenna')
-        'RWR_FAILURE_QUAD45', --('RWR: 45 Quad Receiver/Antenna')
-        'RWR_FAILURE_QUAD135', --('RWR: 135 Quad Receiver/Antenna')
-        'RWR_FAILURE_QUAD225', --('RWR: 225 Quad Receiver/Antenna')
-        'RWR_FAILURE_QUAD315', --('RWR: 315 Quad Receiver/Antenna')
-        'RWR_FAILURE_MBE', --('RWR: MBE BUS')
-        'RWR_FAILURE_BLANKER', --('RWR: Interference Blanker')
-        'RWR_FAILURE_DISPLAY_PILOT', --('RWR: Display Pilot')
-        'RWR_FAILURE_DISPLAY_RIO', --('RWR: Display RIO')
-        -- COUNTERMEASURES AN/ALE-39
-        'CMS_FAILURE_PROGRAMMER', --('Countermeasures: Programmer')
-        'CMS_FAILURE_LEFT_DISPENSER', --('Countermeasures: Left Dispenser')
-        'CMS_FAILURE_RIGHT_DISPENSER', --('Countermeasures: Right Dispenser')
-        -- UHF AN/ARC-159
-        'UHF_ARC_159_FAILURE_TOTAL', --('UHF AN/ARC-159: Total')
-        'UHF_ARC_159_FAILURE_DISPLAY', --('UHF AN/ARC-159: Display')
-        'UHF_ARC_159_FAILURE_REMOTE_DISPLAY', --('UHF AN/ARC-159: Remote Display Pilot')
-        'UHF_ARC_159_FAILURE_REMOTE_DISPLAY_RIO', --('UHF AN/ARC-159: Remote Display RIO')
-        'UHF_ARC_159_FAILURE_INTERNAL_MODULE', --('UHF AN/ARC-159: Internal Module')
-        'UHF_ARC_159_FAILURE_TRANSCEIVER', --('UHF AN/ARC-159: Transceiver')
-        'UHF_ARC_159_FAILURE_ANTENNA', --('UHF AN/ARC-159: Antenna')
-        -- VHF/UHF AN/ARC-182
-        'VHF_ARC_182_FAILURE_TOTAL', --('VHF/UHF AN/ARC-182: Total')
-        'VHF_ARC_182_FAILURE_DISPLAY', --('VHF/UHF AN/ARC-182: Display')
-        'VHF_ARC_182_FAILURE_REMOTE_DISPLAY', --('VHF/UHF AN/ARC-182: Remote Display')
-        'VHF_ARC_182_FAILURE_INTERNAL_MODULE', --('VHF/UHF AN/ARC-182: Internal Module')
-        'VHF_ARC_182_FAILURE_TRANSCEIVER', --('VHF/UHF AN/ARC-182: Transceiver')
-        'VHF_ARC_182_FAILURE_ANTENNA', --('VHF/UHF AN/ARC-182: Antenna')
-        -- ICS
-        'ICS_FAILURE_AMPLIFIER_PILOT_NORM', --('ICS: Amplifier Pilot')
-        'ICS_FAILURE_AMPLIFIER_PILOT_BU', --('ICS: Amplifier Pilot Backup')
-        'ICS_FAILURE_AMPLIFIER_RIO_NORM', --('ICS: Amplifier RIO')
-        'ICS_FAILURE_AMPLIFIER_RIO_BU', --('ICS: Amplifier RIO Backup')
-        -- TACAN
-        'TACAN_FAILURE_TOTAL', --('TACAN: Total')
-        'TACAN_FAILURE_TRANSMITTER', --('TACAN: Transmitter')
-        'TACAN_FAILURE_RECEIVER', --('TACAN: Receiver')
-        -- ILS
-        'ILS_FAILURE_TOTAL', --('ILS: Total')
-        'ILS_FAILURE_DECODER', --('ILS: Decoder')
-        'ILS_FAILURE_ANTENNA', --('ILS: Antenna')
-        -- HUD
-        'HUD_FAILURE_TOTAL', --('HUD: Total')
-        -- VDI
-        'VDI_FAILURE_TOTAL', --('VDI: Total')
-        -- RIO TID bowl
-        'TID_FAILURE_TOTAL', --('TID: Total')
+	-- ["F-14"] =
+	-- {
+    --     'RADAR_FAILURE_TOTAL', --('Radar: Total') -- 0
+    --     'DDD_FAILURE_TOTAL', --('DDD: Total')
+    --     -- ENGINE
+    --     'L_ENG_FIRE', --('Left Engine: Fire')
+    --     'R_ENG_FIRE', --('Right Engine: Fire')
+    --     'L_ENG_SEIZED', --('Left Engine: Main Spool Seizure')
+    --     'R_ENG_SEIZED', --('Right Engine: Main Spool Seizure')
+    --     'L_ENG_TURBINE_FAILURE', --('Left Engine: Turbine Failed')
+    --     'R_ENG_TURBINE_FAILURE', --('Right Engine: Turbine Failed')
+    --     'L_ENG_OIL_LEAK_SLOW', --('Left Engine: Slow Oil Leak (1 hr)')
+    --     'R_ENG_OIL_LEAK_SLOW', --('Right Engine: Slow Oil Leak (1 hr)')
+    --     'L_ENG_OIL_LEAK_MODERATE', --('Left Engine: Moderate Oil Leak (30 min)')
+    --     'R_ENG_OIL_LEAK_MODERATE', --('Right Engine: Moderate Oil Leak (30 min)')
+    --     'L_ENG_OIL_LEAK_SEVERE', --('Left Engine: Severe Oil Leak (2 min)')
+    --     'R_ENG_OIL_LEAK_SEVERE', --('Right Engine: Severe Oil Leak (2 min)')
+    --     'L_ENG_COMPRESSOR_STALL', --('Left Engine: Compressor Stall')
+    --     'R_ENG_COMPRESSOR_STALL', --('Right Engine: Compressor Stall')
+    --     'L_ENG_POP_STALL', --('Left Engine: Pop Stall')
+    --     'R_ENG_POP_STALL', --('Right Engine: Pop Stall')
+	-- 	--      'L_ENG_SUPERSONIC_INLET_BUZZ', --('Left Engine: Supersonic Inlet Buzz')
+	-- 	--      'R_ENG_SUPERSONIC_INLET_BUZZ', --('Right Engine: Supersonic Inlet Buzz')
+    --     'L_ENG_HPT_OVERSPEED', --('Left Engine: Turbine Overspeed')
+    --     'R_ENG_HPT_OVERSPEED', --('Right Engine: Turbine Overspeed')
+    --     'L_ENG_AFTC_PRI_FAILED', --('Left Engine: AFTC Failure')
+    --     'R_ENG_AFTC_PRI_FAILED', --('Right Engine: AFTC Failure')
+    --     'L_ENG_AICS_RAMP_FAIL_OPEN', --('Left Engine: AICS Ramp Fail Open')
+    --     'R_ENG_AICS_RAMP_FAIL_OPEN', --('Right Engine: AICS Ramp Fail Open')
+    --     'L_ENG_AICS_RAMP_FAIL_CLOSED', --('Left Engine: AICS Ramp Fail Closed')
+    --     'R_ENG_AICS_RAMP_FAIL_CLOSED', --('Right Engine: AICS Ramp Fail Closed')
+    --     'L_ENG_AICS_RAMP_FAIL_IN_POS', --('Left Engine: AICS Ramp Fail In Position')
+    --     'R_ENG_AICS_RAMP_FAIL_IN_POS', --('Right Engine: AICS Ramp Fail In Position')
+    --     'L_ENG_NOZZLE_FAILURE', --('Left Engine: Exhaust Nozzle Failure')
+    --     'R_ENG_NOZZLE_FAILURE', --('Right Engine: Exhaust Nozzle Failure')
+    --     -- CADC
+    --     'CADC_FAILURE_TOTAL', --('CADC: Total')
+    --     'CADC_PRESSURE_SENSOR', --('CADC: Pressure sensor')
+    --     'CADC_WING_SWEEP_COMMAND_CHANNEL_1', --('CADC: Wing Sweep Channel 1')
+    --     'CADC_WING_SWEEP_COMMAND_CHANNEL_2', --('CADC: Wing Sweep Channel 2')
+    --     'CADC_MANEUVER_FLAP_COMMAND', --('CADC: Maneuver Flap Command')
+    --     'CADC_RUDDER_AUTHORITY_COMMAND', --('CADC: Rudder Authority Command')
+    --     'CADC_STABILIZER_AUTHORITY_COMMAND', --('CADC: Stabilizer Authority Command')
+    --     'CADC_ANGLE_OF_ATTACK_SIGNAL', --('CADC: Angle Of Attack Signal')
+    --     'CADC_TOTAL_TEMPERATURE_SIGNAL', --('CADC: Temperature Signal')
+    --     'CADC_WING_SWEEP_INDICATOR', --('CADC: Wing Sweep Indicator')
+    --     'CADC_CSDC_CONNECTION', --('CADC: Digital output to CSDC')
+    --     -- NAV
+    --     'INS_FAILURE_TOTAL', --('INS: Total')
+    --     'INS_FAILURE_NAV_COMPUTER', --('INS: Nav Computer')
+    --     'IMU_FAILURE_TOTAL', --('IMU: Total')
+    --     'IMU_FAILURE_QUANTIZER', --('IMU: Quantizer')
+    --     'AHRS_FAILURE_TOTAL', --('AHRS: Total')
+    --     'AHRS_FAILURE_GYRO', --('AHRS: Gyro Platform')
+    --     'AHRS_FAILURE_MAD', --('AHRS: Magnetic Azimuth Detector')
+    --     -- RWR AN/ALR-67
+    --     'RWR_FAILURE_TOTAL', --('RWR: Total')
+    --     'RWR_FAILURE_CONTROL_BOX', --('RWR: Control Box')
+    --     'RWR_FAILURE_COMPUTER', --('RWR: Computer')
+    --     'RWR_FAILURE_LOW_BAND', --('RWR: Low Band Receiver/Antenna')
+    --     'RWR_FAILURE_QUAD45', --('RWR: 45 Quad Receiver/Antenna')
+    --     'RWR_FAILURE_QUAD135', --('RWR: 135 Quad Receiver/Antenna')
+    --     'RWR_FAILURE_QUAD225', --('RWR: 225 Quad Receiver/Antenna')
+    --     'RWR_FAILURE_QUAD315', --('RWR: 315 Quad Receiver/Antenna')
+    --     'RWR_FAILURE_MBE', --('RWR: MBE BUS')
+    --     'RWR_FAILURE_BLANKER', --('RWR: Interference Blanker')
+    --     'RWR_FAILURE_DISPLAY_PILOT', --('RWR: Display Pilot')
+    --     'RWR_FAILURE_DISPLAY_RIO', --('RWR: Display RIO')
+    --     -- COUNTERMEASURES AN/ALE-39
+    --     'CMS_FAILURE_PROGRAMMER', --('Countermeasures: Programmer')
+    --     'CMS_FAILURE_LEFT_DISPENSER', --('Countermeasures: Left Dispenser')
+    --     'CMS_FAILURE_RIGHT_DISPENSER', --('Countermeasures: Right Dispenser')
+    --     -- UHF AN/ARC-159
+    --     'UHF_ARC_159_FAILURE_TOTAL', --('UHF AN/ARC-159: Total')
+    --     'UHF_ARC_159_FAILURE_DISPLAY', --('UHF AN/ARC-159: Display')
+    --     'UHF_ARC_159_FAILURE_REMOTE_DISPLAY', --('UHF AN/ARC-159: Remote Display Pilot')
+    --     'UHF_ARC_159_FAILURE_REMOTE_DISPLAY_RIO', --('UHF AN/ARC-159: Remote Display RIO')
+    --     'UHF_ARC_159_FAILURE_INTERNAL_MODULE', --('UHF AN/ARC-159: Internal Module')
+    --     'UHF_ARC_159_FAILURE_TRANSCEIVER', --('UHF AN/ARC-159: Transceiver')
+    --     'UHF_ARC_159_FAILURE_ANTENNA', --('UHF AN/ARC-159: Antenna')
+    --     -- VHF/UHF AN/ARC-182
+    --     'VHF_ARC_182_FAILURE_TOTAL', --('VHF/UHF AN/ARC-182: Total')
+    --     'VHF_ARC_182_FAILURE_DISPLAY', --('VHF/UHF AN/ARC-182: Display')
+    --     'VHF_ARC_182_FAILURE_REMOTE_DISPLAY', --('VHF/UHF AN/ARC-182: Remote Display')
+    --     'VHF_ARC_182_FAILURE_INTERNAL_MODULE', --('VHF/UHF AN/ARC-182: Internal Module')
+    --     'VHF_ARC_182_FAILURE_TRANSCEIVER', --('VHF/UHF AN/ARC-182: Transceiver')
+    --     'VHF_ARC_182_FAILURE_ANTENNA', --('VHF/UHF AN/ARC-182: Antenna')
+    --     -- ICS
+    --     'ICS_FAILURE_AMPLIFIER_PILOT_NORM', --('ICS: Amplifier Pilot')
+    --     'ICS_FAILURE_AMPLIFIER_PILOT_BU', --('ICS: Amplifier Pilot Backup')
+    --     'ICS_FAILURE_AMPLIFIER_RIO_NORM', --('ICS: Amplifier RIO')
+    --     'ICS_FAILURE_AMPLIFIER_RIO_BU', --('ICS: Amplifier RIO Backup')
+    --     -- TACAN
+    --     'TACAN_FAILURE_TOTAL', --('TACAN: Total')
+    --     'TACAN_FAILURE_TRANSMITTER', --('TACAN: Transmitter')
+    --     'TACAN_FAILURE_RECEIVER', --('TACAN: Receiver')
+    --     -- ILS
+    --     'ILS_FAILURE_TOTAL', --('ILS: Total')
+    --     'ILS_FAILURE_DECODER', --('ILS: Decoder')
+    --     'ILS_FAILURE_ANTENNA', --('ILS: Antenna')
+    --     -- HUD
+    --     'HUD_FAILURE_TOTAL', --('HUD: Total')
+    --     -- VDI
+    --     'VDI_FAILURE_TOTAL', --('VDI: Total')
+    --     -- RIO TID bowl
+    --     'TID_FAILURE_TOTAL', --('TID: Total')
 
-        -- Wings
-        'W_S_L', --('Wings: Left Sweep Failure')
-        'W_S_R', --('Wings: Right Sweep Failure')
+    --     -- Wings
+    --     'W_S_L', --('Wings: Left Sweep Failure')
+    --     'W_S_R', --('Wings: Right Sweep Failure')
 
-        -- Engines
+    --     -- Engines
 
 
-        -- Hydraulics
-        'HYD_Combined', --('Hydraulics: Left Engine Pump')
-        'HYD_Flight', --('Hydraulics: Right Engine Pump')
-        'HYD_Transf', --('Hydraulics: Transfer Pump-Motor')
-       --'HYD_CombLeak', --('Hydraulics: Combined System Leak')
-       --'HYD_FlightLeak', --('Hydraulics: Flight System Leak')
-       --'HYD_SpoilLeak', --('Hydraulics: Spoiler System Leak')
-       --'HYD_FBackLeak', --('Hydraulics: Flight Backup System Leak')
+    --     -- Hydraulics
+    --     'HYD_Combined', --('Hydraulics: Left Engine Pump')
+    --     'HYD_Flight', --('Hydraulics: Right Engine Pump')
+    --     'HYD_Transf', --('Hydraulics: Transfer Pump-Motor')
+    --    --'HYD_CombLeak', --('Hydraulics: Combined System Leak')
+    --    --'HYD_FlightLeak', --('Hydraulics: Flight System Leak')
+    --    --'HYD_SpoilLeak', --('Hydraulics: Spoiler System Leak')
+    --    --'HYD_FBackLeak', --('Hydraulics: Flight Backup System Leak')
 
-       -- Jester
-       'JESTER', --('Jester: Incapacitated')
+    --    -- Jester
+    --    'JESTER', --('Jester: Incapacitated')
 
-       -- Emergency Gear Handle
-       'EMERGENCY_GEAR_LEVER_PULLED', --('Emergency Gear Handle: Pulled'),    enable = false, hh = 0, mm = 0, mmint = 1, prob = 100},
+    --    -- Emergency Gear Handle
+    --    'EMERGENCY_GEAR_LEVER_PULLED', --('Emergency Gear Handle: Pulled'),    enable = false, hh = 0, mm = 0, mmint = 1, prob = 100},
 
-    },
+    -- },
 	["F-15ESE"] = {
 		--'AAQ13_FLIR_SENSOR_FAIL',	--('AN/AAQ13 FLIR sensor fail'),
 		'AAQ13_TF_RADAR_SENSOR_FAIL',--('AN/AAQ13 TF radar fail'),
 		'CARA_RADALT_FAIL',		--('CARA Radar Altimeter fail')
 	},
-	["FA-18C_hornet"] =
-	{
-		-- electric system
-		'Failure_Elec_UtilityBattery', --('Utility Battery FAILURE'), 								
-		'Failure_Elec_EmergencyBattery', --('Emergency Battery FAILURE'), 							
-		'Failure_Elec_LeftGenerator', --('Left Generator FAILURE'),								
-		'Failure_Elec_RightGenerator', --('Right Generator FAILURE'), 								
-		'Failure_Elec_LeftTransformerRectifier', --('Left Transformer-Rectifier FAILURE'), 					
-		'Failure_Elec_RightTransformerRectifier', --('Right Transformer-Rectifier FAILURE'), 					
-		-- hydraulic system
-		'Failure_Hyd_HYD1A_Leak',	 --('HYD 1A LEAKAGE'),										
-		'Failure_Hyd_HYD1B_Leak',	 --('HYD 1B LEAKAGE'), 										
-		'Failure_Hyd_HYD2A_Leak',	 --('HYD 2A LEAKAGE'), 										
-		'Failure_Hyd_HYD2B_Leak',	 --('HYD 2B LEAKAGE'), 										
-		'Failure_Hyd_IsolatedHYD2BSystem_Leak', --('Isolated HYD 2B System LEAKAGE'), 						
-		-- power plant
-		'Failure_PP_EngL_Main_FFCS',	 --('Left Engine: Main Fuel Flow Control System FAILURE'),	
-		'Failure_PP_EngR_Main_FFCS',	 --('Right Engine: Main Fuel Flow Control System FAILURE'),	
-		'Failure_PP_EngL_AB_FFCS',	 --('Left Engine: AB Fuel Flow Control System FAILURE'),		
-		'Failure_PP_EngR_AB_FFCS',	 --('Right Engine: AB Fuel Flow Control System FAILURE'),		
-		'Failure_PP_EngL_Nozzle_CS',	 --('Left Engine: Nozzle Control System FAILURE'),			
-		'Failure_PP_EngR_Nozzle_CS',	 --('Right Engine: Nozzle Control System FAILURE'),			
-		'Failure_PP_EngL_OilLeak',	 --('Left Engine: Oil LEAKAGE'),								
-		'Failure_PP_EngR_OilLeak',	 --('Right Engine: Oil LEAKAGE'),								
-		'Failure_PP_LeftPTS',		 --('Left PTS FAILURE'),										
-		'Failure_PP_RightPTS',		 --('Right PTS FAILURE'),										
-		'Failure_PP_LeftAMAD_OilLeak', --('Left AMAD Oil LEAKAGE'),									
-		'Failure_PP_RightAMAD_OilLeak', --('Right AMAD Oil LEAKAGE'),								
-		-- fuel system
-		'Failure_Fuel_LeftBoostPump', --('Left Boost Pump FAILURE'),								
-		'Failure_Fuel_RightBoostPump', --('Right Boost Pump FAILURE'),								
-		'Failure_Fuel_Tank1Transfer', --('Tank 1 Transfer FAILURE'),								
-		'Failure_Fuel_Tank4Transfer', --('Tank 4 Transfer FAILURE'),								
-		'Failure_Fuel_ExtTankTransferL', --('External Left Wing Tank Transfer FAILURE'),				
-		'Failure_Fuel_ExtTankTransferR', --('External Right Wing Tank Transfer FAILURE'),				
-		'Failure_Fuel_ExtTankTransferC', --('External Centerline Tank Transfer FAILURE'),				
-		'Failure_Fuel_QuantityGaging', --('Fuel Quantity Gaging System FAILURE'),					
-		-- gear system
-		'Failure_Gear_WOW',			 --('WOW System FAILURE'),									
-		'Failure_Gear_NWS',			 --('NWS FAILURE'),											
-		-- ECS
-		'Failure_ECS_Valve',			 --('ECS Valve FAILURE'),										
-		'Failure_ECS_OBOGS',			 --('OBOGS FAILURE'),											
-		-- control system
-		'Failure_Ctrl_LEF',			 --('LEF FAILURE'),											
-		'Failure_Ctrl_Aileron',		 --('Aileron FAILURE'),										
-		'Failure_Ctrl_FCS_Ch1',		 --('FCS Channel 1 FAILURE'),									
-		'Failure_Ctrl_FCS_Ch2',		 --('FCS Channel 2 FAILURE'),									
-		'Failure_Ctrl_FCS_Ch3',		 --('FCS Channel 3 FAILURE'),									
-		'Failure_Ctrl_FCS_Ch4',		 --('FCS Channel 4 FAILURE'),									
-		-- computers
-		'Failure_Comp_ADC',			 --('ADC FAILURE'),											
-		'Failure_Comp_MC1',			 --('MC 1 FAILURE'),											
-		'Failure_Comp_MC2',			 --('MC 2 FAILURE'),											
-		--'Failure_Comp_CSC_Mux',		 --('CSC MUX FAILURE'),										
-		-- sensors
-		'Failure_Sens_LeftPitotHeater', --('Left PITOT Heater FAILURE'),								
-		'Failure_Sens_RightPitotHeater', --('Right PITOT Heater FAILURE'),							
-	},
+	-- ["FA-18C_hornet"] =
+	-- {
+	-- 	-- electric system
+	-- 	'Failure_Elec_UtilityBattery', --('Utility Battery FAILURE'), 								
+	-- 	'Failure_Elec_EmergencyBattery', --('Emergency Battery FAILURE'), 							
+	-- 	'Failure_Elec_LeftGenerator', --('Left Generator FAILURE'),								
+	-- 	'Failure_Elec_RightGenerator', --('Right Generator FAILURE'), 								
+	-- 	'Failure_Elec_LeftTransformerRectifier', --('Left Transformer-Rectifier FAILURE'), 					
+	-- 	'Failure_Elec_RightTransformerRectifier', --('Right Transformer-Rectifier FAILURE'), 					
+	-- 	-- hydraulic system
+	-- 	'Failure_Hyd_HYD1A_Leak',	 --('HYD 1A LEAKAGE'),										
+	-- 	'Failure_Hyd_HYD1B_Leak',	 --('HYD 1B LEAKAGE'), 										
+	-- 	'Failure_Hyd_HYD2A_Leak',	 --('HYD 2A LEAKAGE'), 										
+	-- 	'Failure_Hyd_HYD2B_Leak',	 --('HYD 2B LEAKAGE'), 										
+	-- 	'Failure_Hyd_IsolatedHYD2BSystem_Leak', --('Isolated HYD 2B System LEAKAGE'), 						
+	-- 	-- power plant
+	-- 	'Failure_PP_EngL_Main_FFCS',	 --('Left Engine: Main Fuel Flow Control System FAILURE'),	
+	-- 	'Failure_PP_EngR_Main_FFCS',	 --('Right Engine: Main Fuel Flow Control System FAILURE'),	
+	-- 	'Failure_PP_EngL_AB_FFCS',	 --('Left Engine: AB Fuel Flow Control System FAILURE'),		
+	-- 	'Failure_PP_EngR_AB_FFCS',	 --('Right Engine: AB Fuel Flow Control System FAILURE'),		
+	-- 	'Failure_PP_EngL_Nozzle_CS',	 --('Left Engine: Nozzle Control System FAILURE'),			
+	-- 	'Failure_PP_EngR_Nozzle_CS',	 --('Right Engine: Nozzle Control System FAILURE'),			
+	-- 	'Failure_PP_EngL_OilLeak',	 --('Left Engine: Oil LEAKAGE'),								
+	-- 	'Failure_PP_EngR_OilLeak',	 --('Right Engine: Oil LEAKAGE'),								
+	-- 	'Failure_PP_LeftPTS',		 --('Left PTS FAILURE'),										
+	-- 	'Failure_PP_RightPTS',		 --('Right PTS FAILURE'),										
+	-- 	'Failure_PP_LeftAMAD_OilLeak', --('Left AMAD Oil LEAKAGE'),									
+	-- 	'Failure_PP_RightAMAD_OilLeak', --('Right AMAD Oil LEAKAGE'),								
+	-- 	-- fuel system
+	-- 	'Failure_Fuel_LeftBoostPump', --('Left Boost Pump FAILURE'),								
+	-- 	'Failure_Fuel_RightBoostPump', --('Right Boost Pump FAILURE'),								
+	-- 	'Failure_Fuel_Tank1Transfer', --('Tank 1 Transfer FAILURE'),								
+	-- 	'Failure_Fuel_Tank4Transfer', --('Tank 4 Transfer FAILURE'),								
+	-- 	'Failure_Fuel_ExtTankTransferL', --('External Left Wing Tank Transfer FAILURE'),				
+	-- 	'Failure_Fuel_ExtTankTransferR', --('External Right Wing Tank Transfer FAILURE'),				
+	-- 	'Failure_Fuel_ExtTankTransferC', --('External Centerline Tank Transfer FAILURE'),				
+	-- 	'Failure_Fuel_QuantityGaging', --('Fuel Quantity Gaging System FAILURE'),					
+	-- 	-- gear system
+	-- 	'Failure_Gear_WOW',			 --('WOW System FAILURE'),									
+	-- 	'Failure_Gear_NWS',			 --('NWS FAILURE'),											
+	-- 	-- ECS
+	-- 	'Failure_ECS_Valve',			 --('ECS Valve FAILURE'),										
+	-- 	'Failure_ECS_OBOGS',			 --('OBOGS FAILURE'),											
+	-- 	-- control system
+	-- 	'Failure_Ctrl_LEF',			 --('LEF FAILURE'),											
+	-- 	'Failure_Ctrl_Aileron',		 --('Aileron FAILURE'),										
+	-- 	'Failure_Ctrl_FCS_Ch1',		 --('FCS Channel 1 FAILURE'),									
+	-- 	'Failure_Ctrl_FCS_Ch2',		 --('FCS Channel 2 FAILURE'),									
+	-- 	'Failure_Ctrl_FCS_Ch3',		 --('FCS Channel 3 FAILURE'),									
+	-- 	'Failure_Ctrl_FCS_Ch4',		 --('FCS Channel 4 FAILURE'),									
+	-- 	-- computers
+	-- 	'Failure_Comp_ADC',			 --('ADC FAILURE'),											
+	-- 	'Failure_Comp_MC1',			 --('MC 1 FAILURE'),											
+	-- 	'Failure_Comp_MC2',			 --('MC 2 FAILURE'),											
+	-- 	--'Failure_Comp_CSC_Mux',		 --('CSC MUX FAILURE'),										
+	-- 	-- sensors
+	-- 	'Failure_Sens_LeftPitotHeater', --('Left PITOT Heater FAILURE'),								
+	-- 	'Failure_Sens_RightPitotHeater', --('Right PITOT Heater FAILURE'),							
+	-- },
 	["F-86F"] = {
 		-- electric system
 		'es_damage_Generator',	--('Generator FAILURE'), 		
@@ -4636,7 +4633,7 @@ function InheritedFromProcessing()
 	end
 end
 
-
+--/////////////////////////////////////////////////////////////////////
 
 local function extractFailures(aircraft)
     if type(aircraft.Failures) ~= "table" then
@@ -4659,6 +4656,43 @@ local function extractFailures(aircraft)
 
     return out
 end
+
+local function shouldLoadFile(path, name)
+    -- normalisation
+    local filename = path:match("([^/\\]+)$")
+	print("shouldLoadFile filename: |"..filename.."|==? |"..name.."|")
+
+    -- fichier avion principal
+    if name and filename == name then
+		print("shouldLoadFile A true: "..filename)
+        return true
+	else
+		 -- autres variantes avion → refuser
+		print("shouldLoadFile B false: "..filename)
+    	return false
+    end
+
+    -- -- autres variantes avion → refuser
+    -- if filename:match("^F%-14") and filename:match("%.lua$") then
+	-- 	print("shouldLoadFile B false: "..filename)
+    --     return false
+    -- end
+
+    -- -- fichiers communs
+    -- if filename == "Weapons.lua" then
+	-- 	print("shouldLoadFile C true: "..filename)
+    --     return true
+    -- end
+
+    -- if filename:match("Equipment") then
+	-- 	print("shouldLoadFile D true: "..filename)
+    --     return true
+    -- end
+
+    -- par défaut : autoriser
+    return true
+end
+
 
 -- --rempli le reste des variables en allant chercher elle meme dans le bon repertoire mod
 -- --si la table possede dataDiscovery = true
@@ -4686,9 +4720,6 @@ function DataCompilation_DataDiscovery()
 				-- Construire le chemin CoreMods
 				local fullPath = dcs_path .. "CoreMods/aircraft/" .. folderModName .. "/entry.lua"
 
-				-- Vérifier si le fichier existe dans le premier chemin (CoreMods)
-				local f0 = io.open(fullPath, "r")
-
 				-- Vérifier si le fichier existe dans le premier chemin (par exemple, CoreMods/aircraft/)
 				local f0 = io.open(fullPath, "r")
 				if f0 then
@@ -4706,7 +4737,7 @@ function DataCompilation_DataDiscovery()
 
                 -- ENVIRONNEMENT SANDBOX
 
-				   local base_env = {
+				local base_env = {
 					-- Lua standard (OBLIGATOIRE)
 					pairs      = pairs,
 					ipairs     = ipairs,
@@ -4788,31 +4819,64 @@ function DataCompilation_DataDiscovery()
 					return task
 				end
 
+				--CODE INI
+				-- env.add_aircraft = function(def)
+				-- 	table.insert(collected, def)
+				-- end			
+
+				--ATTENTION, le code suivant fait perdre collected pour le reste du script:
 				env.add_aircraft = function(def)
-					table.insert(collected, def)
+					if def.Name then
+						collected[def.Name] = def
+					end
 				end
 
+				--CODE INITIAL
+				-- env.dofile = function(path)
+				-- 	local f = loadfile(path)
+				-- 	if not f then
+				-- 		print("  [IGNORED dofile] "..tostring(path))
+				-- 		return nil
+				-- 	end
+				-- 	setfenv(f, env)
+				-- 	local ok, res = pcall(f)
+				-- 	if not ok then
+				-- 		print("  [DOFILE ERROR] "..tostring(res))
+				-- 		return nil
+				-- 	end
+				-- 	return res
+				-- end
+
 				env.dofile = function(path)
-					local f = loadfile(path)
-					if not f then
-						print("  [IGNORED dofile] "..tostring(path))
+
+					if not shouldLoadFile(path, planeName..".lua") then
+						print("  [SKIPPED dofile] "..path)
 						return nil
 					end
+
+					local f = loadfile(path)
+					if not f then
+						print("  [IGNORED dofile] "..path)
+						return nil
+					end
+
 					setfenv(f, env)
 					local ok, res = pcall(f)
 					if not ok then
 						print("  [DOFILE ERROR] "..tostring(res))
 						return nil
 					end
+
 					return res
 				end
 
+
 				env.current_mod_path = modRoot
 
-                -- variables DCS communes
-                env.current_mod_path = modRoot
-                env.__DCS_VERSION__  = "OFFLINE"
-                env.__DEBUG__        = false
+				-- variables DCS communes
+				env.current_mod_path = modRoot
+				env.__DCS_VERSION__  = "OFFLINE"
+				env.__DEBUG__        = false
 
 				setmetatable(env, {
 					__index = function(_, k)
@@ -4821,62 +4885,151 @@ function DataCompilation_DataDiscovery()
 					end
 				})
 
-                -- chargement entry.lua
-                local chunk = loadfile(fullPath)
-                if chunk then
-                    setfenv(chunk, env)
-                    local ok, err = pcall(chunk)
-                    if not ok then
-                        print("  [ENTRY ERROR] "..tostring(err))
+				-- chargement entry.lua
+				local chunk = loadfile(fullPath)
+				if chunk then
+					setfenv(chunk, env)
+					local ok, err = pcall(chunk)
+					if not ok then
+						print("  [ENTRY ERROR] "..tostring(err))
 						-- os.execute 'pause'
-                    end
-                else
-                    print("  [MISSING entry.lua]")
+					end
+				else
+					print("  [MISSING entry.lua]")
 					os.execute 'pause'
-                end
+				end
 
-                -- 👉 collected contient TOUS les avions du module
-                for _, aircraft in ipairs(collected) do
+				-- 👉 collected contient TOUS les avions du module
+
+				---------------------------------------------------------
+				-- ASSEMBLAGE DES AVIONS AVEC HERITAGE
+				-- (à placer APRÈS le chargement de entry.lua)
+				---------------------------------------------------------
+
+				local function deepMerge(dst, src)
+					for k, v in pairs(src) do
+						if type(v) == "table" and type(dst[k]) == "table" then
+							deepMerge(dst[k], v)
+						else
+							dst[k] = v
+						end
+					end
+				end
+
+				local function buildAircraft(arg_planeName, visited)
+					visited = visited or {}
+					if visited[arg_planeName] then return {} end
+					visited[arg_planeName] = true
+
+					local result = {}
+
+					-- héritage déclaré côté Data_divers
+					local meta = Data_divers[arg_planeName]
+					if meta and meta.inheritedModFrom then
+						for _, parent in ipairs(meta.inheritedModFrom) do
+							print("  -> aircraft inherited from:", parent)
+							local parentData = buildAircraft(parent, visited)
+							deepMerge(result, parentData)
+						end
+					end
+
+					-- définition locale (celle du module)
+					local planeDef = collected[arg_planeName]
+					if planeDef then
+						deepMerge(result, planeDef)
+					end
+
+					return result
+				end
+
+
+				---------------------------------------------------------
+				-- APPLICATION AUX DONNÉES FINALES
+				---------------------------------------------------------
+
+				-- for planeName2, planeData2 in pairs(Data_divers) do
+				-- 	if collected[planeName2] then
+				-- 		Data_divers[planeName2] = buildAircraft(planeName2)
+				-- 		print("  -> aircraft assembled: ", planeName2)
+				-- 	end
+				-- end
+
+				local aircraft_final = buildAircraft(planeName)
+
+				if not next(aircraft_final) then
+					print("  -> aircraft NOT found or empty:", planeName)
+				else
+					print("  -> aircraft assembled:", planeName)
 
 					local dst = Data_divers[planeName]
 
-					if aircraft.Tasks then
-						dst.Tasks = aircraft.Tasks
-						_affiche(aircraft.Tasks, "  -> Tasks found ")
+					-- TASKS
+					if aircraft_final.Tasks then
+						dst.Tasks = aircraft_final.Tasks
+						_affiche(aircraft_final.Tasks, "  -> Tasks found ")
 					end
 
-					-- if aircraft.Damage then
-					-- 	dst.Damage = aircraft.Damage
-					-- end
-					if aircraft.HumanRadio then
-						dst.HumanRadio = aircraft.HumanRadio
-						-- _affiche(aircraft.HumanRadio, "  -> HumanRadio found ")
-						-- os.execute 'pause'
+					-- RADIOS
+					if aircraft_final.HumanRadio then
+						dst.HumanRadio = aircraft_final.HumanRadio
 					end
-					if aircraft.panelRadio then
-						dst.panelRadio = aircraft.panelRadio
-						-- _affiche(aircraft.panelRadio, "  -> panelRadio found ")
-						-- os.execute 'pause'
-					end
-					
 
-					
+					if aircraft_final.panelRadio then
+						dst.panelRadio = aircraft_final.panelRadio
+					end
 
 					-- FAILURES
-					local failures = extractFailures(aircraft)
+					local failures = extractFailures(aircraft_final)
 					if failures then
 						Failures[planeName] = failures
 					end
+				end
 
-                    -- extraction plus tard
-                    print("  -> aircraft captured")
-					-- os.execute 'pause'
-                end
+
+
+				-- for _, aircraft in ipairs(collected) do
+
+				-- 	local dst = Data_divers[planeName]
+
+				-- 	if aircraft.Tasks then
+				-- 		dst.Tasks = aircraft.Tasks
+				-- 		_affiche(aircraft.Tasks, "  -> Tasks found ")
+				-- 	end
+
+				-- 	-- if aircraft.Damage then
+				-- 	-- 	dst.Damage = aircraft.Damage
+				-- 	-- end
+				-- 	if aircraft.HumanRadio then
+				-- 		dst.HumanRadio = aircraft.HumanRadio
+				-- 		-- _affiche(aircraft.HumanRadio, "  -> HumanRadio found ")
+				-- 		-- os.execute 'pause'
+				-- 	end
+				-- 	if aircraft.panelRadio then
+				-- 		dst.panelRadio = aircraft.panelRadio
+				-- 		-- _affiche(aircraft.panelRadio, "  -> panelRadio found ")
+				-- 		-- os.execute 'pause'
+				-- 	end
+					
+
+					
+
+				-- 	-- FAILURES
+				-- 	local failures = extractFailures(aircraft)
+				-- 	if failures then
+				-- 		Failures[planeName] = failures
+				-- 	end
+
+				-- 	-- extraction plus tard
+				-- 	print("  -> aircraft captured")
+				-- 	-- os.execute 'pause'
+				-- end
+
+
+
             end
         end
     end
 end
-
 
 
 local IGNORED_KEYS = {
