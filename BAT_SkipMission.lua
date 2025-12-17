@@ -310,7 +310,7 @@ if input == "y" or input == "yes" then
 
 						for key, target in ipairs(targetlist[side]) do
 							if target.inactive ~= true and target.ATO
-							and (string.find(target.task, "Strike") or target.task == "Runway Attack")
+							and (string.find(target.task, "Strike") or target.task == "Runway Attack" or target.task == "CAP" or target.task == "Fighter Sweep" or target.task == "Transport")
 							and target.type ~= "Ejected Pilot"
 							then
 								Ckey = key

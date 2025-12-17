@@ -1231,6 +1231,7 @@ Data_divers = {
 	},
 	["C-130J-30"] = {
 		instrumentUnits = "imperial",
+		playable = true,
 		EPLRS_Capacity = false,
 		Tasks = {
 			aircraft_task(Transport),
