@@ -3004,14 +3004,31 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 	local interPos = interUnitObj:getPoint()
 	local bestTarget, bestScore = nil, math.huge
 
+	-- local lastTarget = groupTargetMemory[argInterName]
+	-- if lastTarget and lastTarget:isExist() then
+	-- 	local tgtPos = lastTarget:getUnit(1):getPoint()		--3009: attempt to index a nil value
+	-- 	local dx, dz = tgtPos.x - interPos.x, tgtPos.z - interPos.z
+	-- 	local dist = math.sqrt(dx * dx + dz * dz)
+	-- 	if dist < 10000 then
+	-- 		bestTarget = lastTarget
+	-- 		env.info(argInterName .. " still engaging " .. lastTarget:getName() .. " (" .. math.floor(dist) .. "m)")
+	-- 	end
+	-- end
+
 	local lastTarget = groupTargetMemory[argInterName]
 	if lastTarget and lastTarget:isExist() then
-		local tgtPos = lastTarget:getUnit(1):getPoint()
-		local dx, dz = tgtPos.x - interPos.x, tgtPos.z - interPos.z
-		local dist = math.sqrt(dx * dx + dz * dz)
-		if dist < 10000 then
-			bestTarget = lastTarget
-			env.info(argInterName .. " still engaging " .. lastTarget:getName() .. " (" .. math.floor(dist) .. "m)")
+		local tgtUnit = lastTarget:getUnit(1)
+		if tgtUnit and tgtUnit:isExist() and tgtUnit:inAir() then
+			local tgtPos = tgtUnit:getPoint()
+			local dx, dz = tgtPos.x - interPos.x, tgtPos.z - interPos.z
+			local dist = math.sqrt(dx * dx + dz * dz)
+			if dist < 10000 then
+				bestTarget = lastTarget
+				env.info("DCE_Custom_Intercept: " ..argInterName .. " still engaging " .. lastTarget:getName() .. " (" .. math.floor(dist) .. "m)")
+			end
+		else
+			-- cible morte ou invalide → purge mémoire
+			groupTargetMemory[argInterName] = nil
 		end
 	end
 

@@ -415,7 +415,7 @@ local function CheckRefuelProgress()
 						plane["fuel"] = plane["fuel"] + 1000
 						plane["fuel_palier"] = plane["fuel_palier"] + 1000
 						env.info("DCE_EventT_Refuel PROGRESS_F palier atteint ------------------===============>>>>>>>>>>: "..tostring(plane["fuel_palier"]))
-						trigger.action.outTextForUnit(uid, string.format("%d lbs ajouté", plane["fuel_palier"]), 5)
+						trigger.action.outTextForUnit(uid, string.format("%d lbs ajouté", plane["fuel_palier"]), 30)
 					end
 				end
 			end
@@ -1804,7 +1804,7 @@ function eventHandlerDCE:onEvent(event)
 						local playerName = plane_obj.getPlayerName and plane_obj:getPlayerName() or nil
 						
 						if playerName then
-							trigger.action.outTextForUnit(uid, string.format("Total: %.0f lbs, fuel transferred: %.0f lbs", fuelTotalLbs, fuelTransferredLbs), 20)
+							trigger.action.outTextForUnit(uid, string.format("Total: %.0f lbs, fuel transferred: %.0f lbs", fuelTotalLbs, fuelTransferredLbs), 30)
 
 							env.info("DCE_EventT_Refuel outTextForUnit Stop for unit -----------------==================> " .. string.format("(outText_All) Total: %.0f lbs, fuel transferred: %.0f lbs", fuelTotalLbs, fuelTransferredLbs))
 						end
