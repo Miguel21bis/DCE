@@ -141,7 +141,6 @@ TaskByPlane = {
 		["L-39ZA"] = true,
 		["Su-24M"] = true,
 
-		["Mi-8MT"] = true,
 		["Ka-50"] = true,
 		["Ka-50_3"] = true,
 		["Mi-28N"] = true,
@@ -193,7 +192,7 @@ TaskByPlane = {
 		["F-86F Sabre"] = true,
 
 		["F-4E"] = true,
-		["F-5E-3"] = true,
+		-- ["F-5E-3"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
 		["F-16C bl.52d"] = true,
@@ -217,7 +216,6 @@ TaskByPlane = {
 		["Su-30"] = true,
 		["Su-34"] = true,
 
-		["Mi-8MT"] = true,
 		["Mi-24V"] = true,
 		["Mi-28N"] = true,
 		["Ka-50"] = true,
@@ -259,7 +257,7 @@ TaskByPlane = {
 		["F-86F Sabre"] = true,
 
 		["F-4E"] = true,
-		["F-5E-3"] = true,
+		-- ["F-5E-3"] = true,
 		["F-16C bl.52d"] = true,
 		["MB-339A"] = true,			 
 		
@@ -284,7 +282,6 @@ TaskByPlane = {
 
 		["tu_22D"] = true,				--Mod
 
-		["Mi-8MT"] = true,
 		["Mi-24V"] = true,
 		["Mi-24P"] = true,
 		["Mi-28N"] = true,
@@ -336,7 +333,7 @@ TaskByPlane = {
 		["F-86F Sabre"] = true,
 
 		["F-4E"] = true,
-		["F-5E-3"] = true,
+		-- ["F-5E-3"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
 		["F-16C bl.52d"] = true,
@@ -363,7 +360,6 @@ TaskByPlane = {
 		["Su-30"] = true,
 		["Su-34"] = true,
 
-		["Mi-8MT"] = true,
 		["Mi-24V"] = true,
 		["Mi-28N"] = true,
 		["Ka-50"] = true,
@@ -453,7 +449,7 @@ TaskByPlane = {
 
 		["F-86F Sabre"] = true,
 		["F-4E"] = true,
-		["F-5E-3"] = true,
+		-- ["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
 		["F-15C"] = true,
 		["F-15E"] = true,
@@ -494,7 +490,7 @@ TaskByPlane = {
 		["tu_22D"] = true,				--Mod
 
 		["F-4E"] = true,
-		["F-5E-3"] = true,
+		-- ["F-5E-3"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
 		["F-16C bl.52d"] = true,
@@ -532,7 +528,7 @@ TaskByPlane = {
 
 		["AV8BNA"] = true,
 		["F-4E"] = true,
-		["F-5E-3"] = true,
+		-- ["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
 		["F-15C"] = true,
 		["F-15E"] = true,
@@ -579,7 +575,7 @@ TaskByPlane = {
 		["F-86F Sabre"] = true,
 
 		["F-4E"] = true,
-		["F-5E-3"] = true,
+		-- ["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
 		["F-15C"] = true,
 		["F-15E"] = true,
@@ -627,7 +623,7 @@ TaskByPlane = {
 
 		["AV8BNA"] = true,
 		["F-4E"] = true,
-		["F-5E-3"] = true,
+		-- ["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
 		["F-15C"] = true,
 		["F-15E"] = true,
@@ -735,7 +731,6 @@ TaskByPlane = {
 		["IL-76MD"] = true,
 
 		["Ka-27"] = true,
-		["Mi-8MT"] = true,
 		["Mi-24V"] = true,
 		["Mi-26"] = true,
 
@@ -1052,6 +1047,7 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
+		folderModName = "A-10",
 		vCruise = 154,
 		hCruise = 7600,
 		refuellingReceptacleType = "probe"
@@ -1060,11 +1056,13 @@ Data_divers = {
 	["A-10C"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = true,
+		folderModName = "A-10",
+		playable = true,
 		datalinks = {
 			type = "SADL",
 			isDonnor = true,
 		},
-		playable = true,
+
 		vCruise = 154,
 		hCruise = 7600,
 		refuellingReceptacleType = "probe"
@@ -1072,6 +1070,7 @@ Data_divers = {
 	["A-10C_2"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = true,
+		folderModName = "A-10",
 		datalinks = {
 			type = "SADL",
 			hasTeamMembers = 4,
@@ -1303,8 +1302,7 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
-		-- folderModName = "F-5E", -- marche pas sur ce mod
-		-- fileModName = "F-5E-3.lua", -- marche pas sur ce mod
+		folderModName = "F-5E", -- marche pas sur ce mod
 		vCruise = 230,
 		hCruise = 5112,
 	},
@@ -1447,7 +1445,7 @@ Data_divers = {
 	["FA-18C_hornet"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = true,
-		-- folderModName = "FA-18C",
+		folderModName = "FA-18C",
 		datalinks = {
 			type = "Link16",
 			hasTeamMembers = 4,
@@ -1455,21 +1453,20 @@ Data_divers = {
 			isDonnor = true,
 			isReceiver = true,
 		},
-		--difficile à récupérer dans le data FA-18A
-		Tasks = {
-			aircraft_task(CAP),
-			aircraft_task(Escort),
-			aircraft_task(FighterSweep),
-			aircraft_task(Intercept),
-			aircraft_task(PinpointStrike),
-			aircraft_task(CAS),
-			aircraft_task(GroundAttack),
-			aircraft_task(RunwayAttack),
-			aircraft_task(SEAD),
-			aircraft_task(AFAC),
-			aircraft_task(AntishipStrike),
-			aircraft_task(Reconnaissance),
-		},-- end of Tasks
+		-- Tasks = {
+		-- 	aircraft_task(CAP),
+		-- 	aircraft_task(Escort),
+		-- 	aircraft_task(FighterSweep),
+		-- 	aircraft_task(Intercept),
+		-- 	aircraft_task(PinpointStrike),
+		-- 	aircraft_task(CAS),
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(RunwayAttack),
+		-- 	aircraft_task(SEAD),
+		-- 	aircraft_task(AFAC),
+		-- 	aircraft_task(AntishipStrike),
+		-- 	aircraft_task(Reconnaissance),
+		-- },-- end of Tasks
 		dataCartridge = true,
 		playable = true,
 		vCruise = 230,
@@ -1827,6 +1824,7 @@ Data_divers = {
 	},
 	["L-39C"] = {
 		instrumentUnits = "russian",
+		folderModName = "L-39C",
 		EPLRS_Capacity = false,
 		inheritedFrom = "L-39",	--copy radio frequency, failures ...
 		playable = true,
@@ -1836,6 +1834,7 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		inheritedFrom = "L-39",	--copy radio frequency, failures ...
 		playable = true,
+		folderModName = "L-39",
 	},
 
 	["MiG-15bis"] = {
@@ -1962,17 +1961,18 @@ Data_divers = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
+		folderModName = "MiG-21bis",
 		vCruise = 225,
 		hCruise = 7548,
-		Tasks = {
-			aircraft_task(CAP),
-			aircraft_task(Escort),
-			aircraft_task(FighterSweep),
-			aircraft_task(Intercept),
-			aircraft_task(GroundAttack),
-			aircraft_task(CAS),
-			aircraft_task(Reconnaissance),
-		},
+		-- Tasks = {
+		-- 	aircraft_task(CAP),
+		-- 	aircraft_task(Escort),
+		-- 	aircraft_task(FighterSweep),
+		-- 	aircraft_task(Intercept),
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(CAS),
+		-- 	aircraft_task(Reconnaissance),
+		-- },
 	},
 	["MiG-23MLD"] = {
 		instrumentUnits = "russian",
@@ -2100,6 +2100,13 @@ Data_divers = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
+		Tasks = {
+			aircraft_task(AFAC),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(Transport),
+			aircraft_task(AntishipStrike),
+		},
 		vCruise = 63,
 		hCruise = 50,
 	},
@@ -2113,13 +2120,14 @@ Data_divers = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
-		Tasks = {
-			aircraft_task(Escort),
-			aircraft_task(AFAC),
-			aircraft_task(GroundAttack),
-			aircraft_task(CAS),
-			aircraft_task(Transport),
-		},
+		folderModName = "Mi-24P",
+		-- Tasks = {
+		-- 	aircraft_task(Escort),
+		-- 	aircraft_task(AFAC),
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(CAS),
+		-- 	aircraft_task(Transport),
+		-- },
 		hCruise = 150,    -- m  (vol basse altitude typique)
 		vCruise = 75,     -- m/s  (≈ 270 km/h)
 	},
@@ -3168,44 +3176,44 @@ Failures = {
 		"radioalt_fail",--("Radio altimeter signal fail"), 		
 		"sight_lamps_fail",--("Gunsight lamps failure"),   
 	},
-	["F-5E-3"] = {
-		-- electric system
-		'esf_LeftGenerator',	--('Electricity: Left Generator'),				
-		'esf_RightGenerator',--('Electricity: Right Generator'),				
-		'esf_LeftRectifier',	--('Electricity: Left Rectifier'),				
-		'esf_RightRectifier',--('Electricity: Right Rectifier'),				
-		'esf_StaticInverter',--('Electricity: Static Inverter'),				
-		-- fuel system
-		'fsf_AutoBalance',	--('Fuel System: Fuel Autobalance'),				
-		'fsf_LeftBoostPump',	--('Fuel System: Left Fuel Boost Pump'),			
-		'fsf_RightBoostPump',--('Fuel System: Right Fuel Boost Pump'),		
-		'fsf_CrossfeedValve',--('Fuel System: Crossfeed Valve'),				
-		-- hydraulic system
-		'hsf_UtilityHydraulic',--('Hydraulic: Utility Hydraulic System'),		
-		'hsf_ControlHydraulic',--('Hydraulic: Flight Control Hydraulic System'),
-		-- control system
-		'csf_PitchDamper',	--('Control: Pitch Damper'),						
-		'csf_YawDamper',		--('Control: Yaw Damper'),						
-		'csf_PitchTrim',		--('Control: Pitch Trim'),						
-		'csf_AutoFlap',		--('Control: Auto Flap System'),					
-		-- sensors system
-		'sensf_CADC',		--('Sensors: Central Air Data Computer'),		
-		'sensf_PITOT_DAMAGE',--('Sensors: Pitot-static System Leakage'),		
-		-- power plant
-		'ppf_LeftGearbox',	--('Power Plant: Left Gearbox'),					
-		'ppf_RightGearbox',	--('Power Plant: Right Gearbox'),				
-		'ppf_FireLeft',		--('Power Plant: Fire Left Engine'),				
-		'ppf_FireRight',		--('Power Plant: Fire Right Engine'),			
-		'ppf_LeftNozzleControl',--('Power Plant: Left Nozzle Control System'),	
-		'ppf_RightNozzleControl',--('Power Plant: Right Nozzle Control System'),	
-		'ppf_LeftOil',		--('Power Plant: Left Oil System'),				
-		'ppf_RightOil',		--('Power Plant: Right Oil System'),				
-		-- oxygen system
-		'oxy_FAILURE_TOTAL',	--('Oxygen System: Total Failure'),				
-		-- weapon system
+	-- ["F-5E-3"] = {
+	-- 	-- electric system
+	-- 	'esf_LeftGenerator',	--('Electricity: Left Generator'),				
+	-- 	'esf_RightGenerator',--('Electricity: Right Generator'),				
+	-- 	'esf_LeftRectifier',	--('Electricity: Left Rectifier'),				
+	-- 	'esf_RightRectifier',--('Electricity: Right Rectifier'),				
+	-- 	'esf_StaticInverter',--('Electricity: Static Inverter'),				
+	-- 	-- fuel system
+	-- 	'fsf_AutoBalance',	--('Fuel System: Fuel Autobalance'),				
+	-- 	'fsf_LeftBoostPump',	--('Fuel System: Left Fuel Boost Pump'),			
+	-- 	'fsf_RightBoostPump',--('Fuel System: Right Fuel Boost Pump'),		
+	-- 	'fsf_CrossfeedValve',--('Fuel System: Crossfeed Valve'),				
+	-- 	-- hydraulic system
+	-- 	'hsf_UtilityHydraulic',--('Hydraulic: Utility Hydraulic System'),		
+	-- 	'hsf_ControlHydraulic',--('Hydraulic: Flight Control Hydraulic System'),
+	-- 	-- control system
+	-- 	'csf_PitchDamper',	--('Control: Pitch Damper'),						
+	-- 	'csf_YawDamper',		--('Control: Yaw Damper'),						
+	-- 	'csf_PitchTrim',		--('Control: Pitch Trim'),						
+	-- 	'csf_AutoFlap',		--('Control: Auto Flap System'),					
+	-- 	-- sensors system
+	-- 	'sensf_CADC',		--('Sensors: Central Air Data Computer'),		
+	-- 	'sensf_PITOT_DAMAGE',--('Sensors: Pitot-static System Leakage'),		
+	-- 	-- power plant
+	-- 	'ppf_LeftGearbox',	--('Power Plant: Left Gearbox'),					
+	-- 	'ppf_RightGearbox',	--('Power Plant: Right Gearbox'),				
+	-- 	'ppf_FireLeft',		--('Power Plant: Fire Left Engine'),				
+	-- 	'ppf_FireRight',		--('Power Plant: Fire Right Engine'),			
+	-- 	'ppf_LeftNozzleControl',--('Power Plant: Left Nozzle Control System'),	
+	-- 	'ppf_RightNozzleControl',--('Power Plant: Right Nozzle Control System'),	
+	-- 	'ppf_LeftOil',		--('Power Plant: Left Oil System'),				
+	-- 	'ppf_RightOil',		--('Power Plant: Right Oil System'),				
+	-- 	-- oxygen system
+	-- 	'oxy_FAILURE_TOTAL',	--('Oxygen System: Total Failure'),				
+	-- 	-- weapon system
 
-		-- radio devices
-	},
+	-- 	-- radio devices
+	-- },
 	-- ["M-2000C"] = {
 	-- 	'HYD_PUMP_1_FAIL_100',
 	-- 	'HYD_PUMP_2_FAIL_100',

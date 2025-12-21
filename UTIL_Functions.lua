@@ -1697,8 +1697,87 @@ function FindBestCommonRange(ranges)
 	return best
 end
 
-
 function SimplifyRadioRanges(moduleData)
+
+	if type(moduleData) ~= "table" then
+		return {}
+	end
+
+	local collected = {}
+
+	local function addRange(min, max)
+		if type(min) == "number" and type(max) == "number" and max > min then
+			table.insert(collected, { min = min, max = max })
+		end
+	end
+
+	------------------------------------------------
+	-- 1) HUMAN RADIO (PRIORITÉ AUX SOUS-RANGES)
+	------------------------------------------------
+	local hr = moduleData.HumanRadio
+	if type(hr) == "table" then
+
+		-- 🔴 CAS LIMITATIF : rangeFrequency EXISTE
+		if type(hr.rangeFrequency) == "table" and hr.rangeFrequency[1] then
+			for _,r in ipairs(hr.rangeFrequency) do
+				addRange(r.min, r.max)
+			end
+
+		-- 🟢 CAS SIMPLE : pas de sous-ranges
+		elseif hr.minFrequency and hr.maxFrequency then
+			addRange(hr.minFrequency, hr.maxFrequency)
+		end
+	end
+
+	------------------------------------------------
+	-- 2) PANEL RADIO (idem, uniquement ranges réelles)
+	------------------------------------------------
+	local pr = moduleData.panelRadio
+	if type(pr) == "table" then
+		for _,radio in pairs(pr) do
+			if type(radio.range) == "table" then
+				for _,r in ipairs(radio.range) do
+					addRange(r.min, r.max)
+				end
+			end
+		end
+	end
+
+	------------------------------------------------
+	-- 3) Aucun range → module ignoré
+	------------------------------------------------
+	if #collected == 0 then
+		return {}
+	end
+
+	------------------------------------------------
+	-- 4) TRI + FUSION (tolérance micro-gap)
+	------------------------------------------------
+	table.sort(collected, function(a,b)
+		return a.min < b.min
+	end)
+
+	local EPSILON = 0.01
+	local simplified = {}
+	local current = collected[1]
+
+	for i = 2, #collected do
+		local r = collected[i]
+		if r.min <= current.max + EPSILON then
+			current.max = math.max(current.max, r.max)
+		else
+			table.insert(simplified, current)
+			current = r
+		end
+	end
+
+	table.insert(simplified, current)
+
+	return simplified
+end
+
+
+function SimplifyRadioRangesOLD(moduleData)
 
 	if type(moduleData) ~= "table" then
 		return {}
@@ -1837,40 +1916,77 @@ function DCE_FindRadioCommonWaves()
 		red  = {},
 	}
 
-	camp_str = "Db_Frequency = " .. TableSerialization(Db_Frequency, 0)						--make a string
-	campFile = io.open("Debug/Radio_Db_Frequency_FRC.lua", "w")	 or error("Failed to open debug file")
-	campFile:write(camp_str)																		--save new data
-	campFile:close()
-
 	for side,modules in pairs(AircraftCampaignBySide) do
 
-		for waveName,wave in pairs(RADIO_WAVES) do
+		for waveName, wave in pairs(RADIO_WAVES) do
 
-			local collected = {}
+		local common = nil
+		local validModuleCount = 0
 
 			for moduleName,_ in pairs(modules) do
-				print("DCE_FindRadioCommonWaves A checking module "..moduleName.." for side "..side.." wave "..waveName)
+				-- print("DCE_FindRadioCommonWaves A checking module "..moduleName.." for side "..side.." wave "..waveName)
+
 				local moduleData = Db_Frequency[moduleName]
-				_affiche(moduleData, "A1 moduleData "..moduleName..": ")
 				if moduleData then
-					print("DCE_FindRadioCommonWaves B checking module "..moduleName.." for side "..side.." wave "..waveName)
 					local ranges = SimplifyRadioRanges(moduleData)
-					_affiche(ranges, "B2 module "..moduleName.." ranges: ")
+					local inWave = {}
+					-- _affiche(ranges, "ranges: ")
+
 					for _,r in ipairs(ranges) do
-						local inter = intersectRange(r, wave)
-						_affiche(inter, "inter for module "..moduleName..": ")
+						local inter = Intersect(r, wave)
+						-- _affiche(inter, "inter: ")
 						if inter then
-							table.insert(collected, inter)
+							table.insert(inWave, inter)
 						end
 					end
+
+					-- ce module participe à la wave
+					if inWave[1] then
+						validModuleCount = validModuleCount + 1
+						-- print("DCE_FindRadioCommonWaves B module "..moduleName.." contributes to side "..side.." wave "..waveName)
+						if not common then
+							common = Deepcopy(inWave)
+						else
+							local newCommon = {}
+
+							for _,c in ipairs(common) do
+								-- _affiche(c, "c: ")
+								for _,m in ipairs(inWave) do
+									-- _affiche(m, "m: ")
+									local inter2 = Intersect(c, m)
+									-- _affiche(inter2, "Ainter2: ")
+									if inter2 then
+										-- _affiche(inter2, "Binter2: ")
+										table.insert(newCommon, inter2)
+									end
+								end
+							end
+
+							-- intersection impossible
+							if not newCommon[1] then
+								common = nil
+								break
+							end
+
+							common = newCommon
+						end
+						-- _affiche(common, "common : ")
+					end
+				else
+					if Data_divers[moduleName] and Data_divers[moduleName].playable then
+						print("DCE_FindRadioCommonWaves D no Data_divers for module "..moduleName)
+						os.execute("pause")
+					end
+
 				end
 			end
 
-			local best = FindBestCommonRange(collected)
-			if best then
-				result[side][waveName] = best
+			-- décision finale
+			if common and validModuleCount >= 1 then
+				result[side][waveName] = FindBestCommonRange(common)
 			end
 		end
+
 	end
 
 	return result
@@ -1897,15 +2013,16 @@ function DCE_FindCommonRadioRanges()
 			end
 		end
 	end
-	
+
 	--initie les waves de frequences
 	RadioWaveCommon = DCE_FindRadioCommonWaves()
+
 		local camp_str = "RadioWaveCommon = " .. TableSerialization(RadioWaveCommon, 0)						--make a string
 		local campFile = io.open("Debug/Radio_RadioWaveCommon_.lua", "w")	 or error("Failed to open debug file")
 		campFile:write(camp_str)																		--save new data
 		campFile:close()
 
-		os.execute("pause")
+		-- os.execute("pause")
 
 
 
@@ -1922,7 +2039,7 @@ function DCE_FindCommonRadioRanges()
 	end
 
 	if not currentPlayerAircraftType then
-		print("DCE_FindRadioCommonRG ERROR: no player aircraft found")
+		-- print("DCE_FindRadioCommonRG ERROR: no player aircraft found")
 		return { red = {}, blue = {} }
 	end
 
@@ -1938,10 +2055,10 @@ function DCE_FindCommonRadioRanges()
 		campFile:write(camp_str)																		--save new data
 		campFile:close()
 
-		_affiche(playerRanges, "playerRanges: ")
+		-- _affiche(playerRanges, "playerRanges: ")
 
 	if not playerRanges or not playerRanges[1] then
-		print("DCE_FindRadioCommonRG WARNING: player has no radio data")
+		-- print("DCE_FindRadioCommonRG WARNING: player has no radio data")
 		return { red = {}, blue = {} }
 	end
 
@@ -1956,7 +2073,7 @@ function DCE_FindCommonRadioRanges()
 	end
 
 	if not playerSide then
-		print("DCE_FindRadioCommonRG ERROR: player side not found")
+		-- print("DCE_FindRadioCommonRG ERROR: player side not found")
 		return { red = {}, blue = {} }
 	end
 
@@ -1980,7 +2097,7 @@ function DCE_FindCommonRadioRanges()
 			-- same side only
 			if AircraftCampaignBySide[playerSide] and AircraftCampaignBySide[playerSide][moduleName] then
 
-				print("DCE_FindRadioCommonRG checking module "..moduleName.." for side "..playerSide)
+				-- print("DCE_FindRadioCommonRG checking module "..moduleName.." for side "..playerSide)
 				local moduleRanges = SimplifyRadioRanges(moduleData)
 					 camp_str = "moduleRanges = " .. TableSerialization(moduleRanges, 0)						--make a string
 					 campFile = io.open("Debug/RadioRangeModule_"..moduleName..".lua", "w")	 or error("Failed to open debug file")
@@ -2006,10 +2123,10 @@ function DCE_FindCommonRadioRanges()
 					if newCommon[1] then
 						commonRanges[playerSide] = newCommon
 					else
-						print("DCE_FindRadioCommonRG: no compatible ranges with "..moduleName..", ignored")
+						-- print("DCE_FindRadioCommonRG: no compatible ranges with "..moduleName..", ignored")
 					end
 				else
-					print("DCE_FindRadioCommonRG: module "..moduleName.." has no radio data, ignored")
+					-- print("DCE_FindRadioCommonRG: module "..moduleName.." has no radio data, ignored")
 				end
 			end
 		end
@@ -5118,24 +5235,12 @@ function LoadFileAndUpdate(from)
 	--supprime des mega grosse table DATA les info supperflue
 	CleanDataDivers()
 
-	
-		camp_str = "Db_Frequency = " .. TableSerialization(Db_Frequency, 0)						--make a string
-		campFile = io.open("Debug/Radio_Db_Frequency_A.lua", "w")	 or error("Failed to open debug file")
-		campFile:write(camp_str)																		--save new data
-		campFile:close()
-
 	--/////////////////////////////////////////////////////////////////////
 	--/////////////////////////////////////////////////////////////////////
 
 	InheritedFromProcessing()
 	DataCompilation_DataDiscoveryA2()
 	DataCompilation_TaskByPlane()
-
-
-		camp_str = "Db_Frequency = " .. TableSerialization(Db_Frequency, 0)						--make a string
-		campFile = io.open("Debug/Radio_Db_Frequency_B.lua", "w")	 or error("Failed to open debug file")
-		campFile:write(camp_str)																		--save new data
-		campFile:close()
 
 	if Debug.debug then
 		local camp_str = "Data_divers = " .. TableSerialization(Data_divers, 0)
@@ -5177,12 +5282,6 @@ function LoadFileAndUpdate(from)
 	local file_File = io.open("Debug/Radio_CommonRanges.lua", "w") or error("Failed to open debug EWR_UtilDebug file")
 	file_File:write(file_str)																	--save new data
 	file_File:close()
-
-	
-		camp_str = "Db_Frequency = " .. TableSerialization(Db_Frequency, 0)						--make a string
-		campFile = io.open("Debug/Radio_Db_Frequency_C.lua", "w")	 or error("Failed to open debug file")
-		campFile:write(camp_str)																		--save new data
-		campFile:close()
 
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
@@ -5577,7 +5676,8 @@ end
 function CreateAircraftListInCampaign()
 	for sideName, squads in pairs(oob_air) do
 		for squadN, squad in pairs(squads) do
-			if not squad.inactive then
+			--ne pas tenir compte des escadrilles inactives, car si activation en cours, ça bug
+			-- if not squad.inactive then
 				if not AircraftInCampaign[squad.type] then
 					AircraftInCampaign[squad.type] = true
 					AircraftCampaignBySide[sideName][squad.type] = true
@@ -5595,7 +5695,7 @@ function CreateAircraftListInCampaign()
 					if squad.client then
 						AircraftInCampaign[squad.type] = "client"
 					end
-			end
+			-- end
 		end
 	end
 end
@@ -5611,7 +5711,6 @@ function CleanDataDivers()
 	for planeType, _ in pairs(Db_Frequency) do
 		if not AircraftInCampaign[planeType] then
 			Db_Frequency[planeType] = nil
-			print("CleanDataDivers() remove Db_Frequency for "..tostring(planeType) )
 		end
 	end
 
