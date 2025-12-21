@@ -125,7 +125,7 @@ TaskByPlane = {
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
 
-		["A-4E-C"] = true,				--Mod
+		-- ["A-4E-C"] = true,				--Mod
 		["A-10C"] = true,
 		["A-10C_2"] = true,
 		["A-10A"] = true,
@@ -133,7 +133,6 @@ TaskByPlane = {
 		["vwv_a1_skyraider"] = true,	--Mod
 		["vwv_o-1"] = true,         	--Mod
 
-		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
 
 
@@ -141,9 +140,6 @@ TaskByPlane = {
 		["JF-17"] = true,
 		["L-39ZA"] = true,
 		["Su-24M"] = true,
-
-		-- ["Mirage-F1CE"] = true,
-		-- ["Mirage-F1EE"] = true,
 
 		["Mi-8MT"] = true,
 		["Ka-50"] = true,
@@ -175,7 +171,7 @@ TaskByPlane = {
 
 		["I-16"] = true,
 
-		["A-4E-C"] = true,			--Mod
+		-- ["A-4E-C"] = true,			--Mod
 		["A-6E"] = true,			--Mod
 		["A-10C"] = true,
 		["A-10C_2"] = true,
@@ -183,14 +179,10 @@ TaskByPlane = {
 		["Bronco-OV-10A"] = true,		--Mod
 		["vwv_a1_skyraider"] = true,	--Mod
 
-		["AJS37"] = true,
+		-- ["AJS37"] = true,
 		["AV8BNA"] = true,
 		["MB-339A"] = true,
 		["MirageF1"] = true,			--Mod
-		-- ["Mirage-F1CE"] = true,
-		-- ["Mirage-F1EE"] = true,
-		-- ["MirageF1CT"] = true,			--Mod
-
 
 		["B-1B"] = true,
 		["B-52H"] = true,
@@ -204,10 +196,8 @@ TaskByPlane = {
 		["F-5E-3"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
-		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		-- ["FA-18C_hornet"] = true,
-
+	
 		["AH-64D_BLK_II"] = true,
 		["OH-6A"] = true,			--Mod
 
@@ -227,14 +217,11 @@ TaskByPlane = {
 		["Su-30"] = true,
 		["Su-34"] = true,
 
-
-
 		["Mi-8MT"] = true,
 		["Mi-24V"] = true,
 		["Mi-28N"] = true,
 		["Ka-50"] = true,
 		["Ka-50_3"] = true,
-
 
 	},
 
@@ -258,12 +245,12 @@ TaskByPlane = {
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
 
-		["A-4E-C"] = true,				--Mod
+		-- ["A-4E-C"] = true,				--Mod
 		["A-10C"] = true,
 		["A-10C_2"] = true,
 		["A-10A"] = true,
 		["vwv_a1_skyraider"] = true,	--Mod
-		["AJS37"] = true,
+		-- ["AJS37"] = true,
 		["AV8BNA"] = true,
 		["B-52H"] = true,
 
@@ -273,12 +260,9 @@ TaskByPlane = {
 
 		["F-4E"] = true,
 		["F-5E-3"] = true,
-		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		-- ["FA-18C_hornet"] = true,
 		["MB-339A"] = true,			 
-		-- ["MirageF1CT"] = true,			--Mod
-
+		
 		["AH-64D_BLK_II"] = true,
 		["AH-64A"] = true,
 		["SH-3D"] = true,				--Mod
@@ -333,14 +317,14 @@ TaskByPlane = {
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
 
-		["A-4E-C"] = true,				--Mod
+		-- ["A-4E-C"] = true,				--Mod
 		["A-6E"] = true,				--Mod
 		["Bronco-OV-10A"] = true,		--Mod
 		["vwv_a1_skyraider"] = true,	--Mod
 		["A-10C"] = true,
 		["A-10C_2"] = true,
 		["A-10A"] = true,
-		["AJS37"] = true,
+		-- ["AJS37"] = true,
 		["AV8BNA"] = true,
 
 		["B-1B"] = true,
@@ -355,14 +339,9 @@ TaskByPlane = {
 		["F-5E-3"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
-		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		-- ["FA-18C_hornet"] = true,
 		["MB-339A"] = true,
 		["MirageF1"] = true,			--Mod
-		-- ["Mirage-F1CE"] = true,
-		-- ["Mirage-F1EE"] = true,
-		-- ["MirageF1CT"] = true,			--Mod
 
 		["AH-64D_BLK_II"] = true,
 		["AH-64A"] = true,
@@ -395,7 +374,6 @@ TaskByPlane = {
 	},
 
 	["Runway Attack"] = {
-		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
 
@@ -416,13 +394,13 @@ TaskByPlane = {
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
 
-		["A-4E-C"] = true,					--Mod
+		-- ["A-4E-C"] = true,					--Mod
 		["A-6E"] = true,					--Mod
 		["A-10C"] = true,
 		["A-10C_2"] = true,
 		["A-10A"] = true,
 		["vwv_a1_skyraider"] = true,		--Mod
-		["AJS37"] = true,
+		-- ["AJS37"] = true,
 		["AV8BNA"] = true,
 
 		["B-1B"] = true,
@@ -433,16 +411,9 @@ TaskByPlane = {
 
 		["F-15E"] = true,
 		["F-15ESE"] = true,
-		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		-- ["FA-18C_hornet"] = true,
-
 		["MB-339A"] = true,
 		["MirageF1"] = true,			--Mod
-		-- ["Mirage-F1CE"] = true,
-		-- ["Mirage-F1EE"] = true,
-		-- ["MirageF1CT"] = true,			--Mod
-
 
 		["JF-17"] = true,
 		["L-39C"] = true,
@@ -461,7 +432,6 @@ TaskByPlane = {
 	},
 
 	["Escort"] = {
-		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
 
@@ -478,7 +448,7 @@ TaskByPlane = {
 		["I-16"] = true,
 
 
-		["A-4E-C"] = true,				--Mod
+		-- ["A-4E-C"] = true,				--Mod
 		["AV8BNA"] = true,
 
 		["F-86F Sabre"] = true,
@@ -488,13 +458,9 @@ TaskByPlane = {
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
-		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		-- ["FA-18C_hornet"] = true,
 
 		["MirageF1"] = true,			--Mod
-		-- ["Mirage-F1CE"] = true,
-		-- ["Mirage-F1EE"] = true,
 
 		["AH-64D_BLK_II"] = true,
 
@@ -515,7 +481,7 @@ TaskByPlane = {
 	},
 
 	["Pinpoint Strike"] = {
-		["AJS37"] = true,
+		-- ["AJS37"] = true,
 		["AV8BNA"] = true,
 
 		["Tornado GR4"] = true,
@@ -531,14 +497,8 @@ TaskByPlane = {
 		["F-5E-3"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
-		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		-- ["FA-18C_hornet"] = true,
 		["F-117A"] = true,
-
-		-- ["Mirage-F1CE"] = true,
-		-- ["Mirage-F1EE"] = true,
-		-- ["MirageF1CT"] = true,			--Mod
 
 		["JF-17"] = true,
 		["MiG-27K"] = true,
@@ -552,7 +512,6 @@ TaskByPlane = {
 	},
 
 	["Intercept"] = {
-		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
 
@@ -567,7 +526,7 @@ TaskByPlane = {
 		["I-16"] = true,
 
 
-		["AJS37"] = true,
+		-- ["AJS37"] = true,
 
 		["F-86F Sabre"] = true,
 
@@ -578,12 +537,10 @@ TaskByPlane = {
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
-		-- ["F-16C_50"] = true,
+
 		["F-16C bl.52d"] = true,
-		-- ["FA-18C_hornet"] = true,
+
 		["MirageF1"] = true,			--Mod
-		-- ["Mirage-F1CE"] = true,
-		-- ["Mirage-F1EE"] = true,
 
 		["JF-17"] = true,
 		["MiG-23MLD"] = true,
@@ -598,7 +555,6 @@ TaskByPlane = {
 	},
 
 	["CAP"] = {
-		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
 
@@ -616,8 +572,8 @@ TaskByPlane = {
 		["I-16"] = true,
 
 
-		["AJS37"] = true,
-		["A-4E-C"] = true,				--Mod
+		-- ["AJS37"] = true,
+		-- ["A-4E-C"] = true,				--Mod
 		["AV8BNA"] = true,
 
 		["F-86F Sabre"] = true,
@@ -628,13 +584,9 @@ TaskByPlane = {
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
-		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		-- ["FA-18C_hornet"] = true,
-
+		
 		["MirageF1"] = true,			--Mod
-		-- ["Mirage-F1CE"] = true,
-		-- ["Mirage-F1EE"] = true,
 
 		["Yak-52"] = true,
 		["JF-17"] = true,
@@ -652,7 +604,6 @@ TaskByPlane = {
 	},
 
 	["Fighter Sweep"] = {
-		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
 
@@ -670,7 +621,7 @@ TaskByPlane = {
 		["I-16"] = true,
 
 
-		["AJS37"] = true,
+		-- ["AJS37"] = true,
 
 		["F-86F Sabre"] = true,
 
@@ -681,13 +632,9 @@ TaskByPlane = {
 		["F-15C"] = true,
 		["F-15E"] = true,
 		["F-15ESE"] = true,
-		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		-- ["FA-18C_hornet"] = true,
-
+		
 		["MirageF1"] = true,			--Mod
-		-- ["Mirage-F1CE"] = true,
-		-- ["Mirage-F1EE"] = true,
 
 		["JF-17"] = true,
 		["vwv_mig17f"] = true,			--Mod
@@ -711,16 +658,14 @@ TaskByPlane = {
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
 
-		["A-4E-C"] = true,				--Mod
-		["AJS37"] = true,
+		-- ["A-4E-C"] = true,				--Mod
+		-- ["AJS37"] = true,
 		["F-4E"] = true,
 		["vwv_crusader"] = true,		--Mod
 		["vwv_ra-5"] = true,		--Mod
 		["F-15E"] = true,
-		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		-- ["FA-18C_hornet"] = true,
-
+		
 		["OH-6A"] = true,			--Mod
 
 		["JF-17"] = true,
@@ -731,7 +676,7 @@ TaskByPlane = {
 
 
 	["Refueling"] = {
-		["A-4E-C"] = true,				--Mod
+		-- ["A-4E-C"] = true,				--Mod
 		["S-3B Tanker"] = true,
 		["KC135MPRS"] = true,
 		["KC-135"] = true,
@@ -746,19 +691,17 @@ TaskByPlane = {
 	},
 
 	["SEAD"] = {
-		["AJS37"] = true,
+		-- ["AJS37"] = true,
 
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
 
-		["A-4E-C"] = true,				--Mod				 
+		-- ["A-4E-C"] = true,				--Mod				 
 
 		["AV8BNA"] = true,
 		["F-4E"] = true,
-		-- ["F-16C_50"] = true,
 		["F-16C bl.52d"] = true,
-		-- ["FA-18C_hornet"] = true,
-
+		
 		["JF-17"] = true,
 
 		["Su-17M4"] = true,
@@ -904,9 +847,11 @@ Data_divers = {
 	["vwv_ec-121"] = 	{							--name, next to DisplayName
 		instrumentUnits = "imperial",
 		moduleName = "tetet_ec121",		--self_ID 
-		Tasks = {
-			aircraft_task(AWACS),
-		},
+		folderModName = "[VWV] EC-121",
+
+		-- Tasks = {
+		-- 	aircraft_task(AWACS),
+		-- },
 		requiredModules = true,						--itsModule
 		playable = false,
 		hCruise = 7000,	--(≈ 20 000–25 000 ft)
@@ -933,9 +878,10 @@ Data_divers = {
 	},
 	["A-4E-C"] = 	{--mod
 		instrumentUnits = "imperial",
-		EPLRS_Capacity = false,
 		requiredModules = true,						--itsModule
 		playable = true,
+		moduleName = "A-4E-C",		--self_ID 
+		folderModName = "A-4E-C",
 		vCruise = 221,
 		hCruise = 10630,--TODO a confirmer
 		refuellingReceptacleType = "drogue"
@@ -969,7 +915,6 @@ Data_divers = {
 		requiredModules = true,						--itsModule
 		moduleName = "VSN_F100",		--self_ID  require module name
 		folderModName = "VSN_F100",
-		EPLRS_Capacity = false,
 		playable = true,
 		vCruise = 200,	--TODO a confirmer
 		hCruise = 4500,
@@ -1043,16 +988,15 @@ Data_divers = {
 	["vwv_a1_skyraider"] = 	{				--Mod
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
-		EPLRS_Capacity = false,
-		laserDesignator = false,
 		moduleName = "tetet_a-1_skyraider",
-		radio = {
-			frequency = 127.5,  -- Radio Freq
-			editable = true,
-			minFrequency = 100.000,
-			maxFrequency = 156.000,
-			modulation = MODULATION_AM
-		},
+		folderModName = "[VWV] A-1",
+		-- radio = {
+		-- 	frequency = 127.5,  -- Radio Freq
+		-- 	editable = true,
+		-- 	minFrequency = 100.000,
+		-- 	maxFrequency = 156.000,
+		-- 	modulation = MODULATION_AM
+		-- },
 		vCruise = 154,	-- TODO a confirmer
 		hCruise = 3315,
 	},
@@ -1060,9 +1004,8 @@ Data_divers = {
 	["vwv_ra-5"] = 	{				--Mod
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
-		EPLRS_Capacity = false,
-		laserDesignator = false,
 		moduleName = "tetet_ra5",					--self_ID 
+		folderModName = "[VWV] A-5",
 		jammer = {
 			type = "AN/ALQ-100",
 			efficiency = 86,
@@ -1075,32 +1018,32 @@ Data_divers = {
 	["vwv_crusader"] = 	{				--Mod
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
-		EPLRS_Capacity = false,
 		moduleName = "tetet_crusader",
+		folderModName = "[VWV] F-8",
 		-- playable = true,
-		radio = {
-			frequency = 127.5,  -- Radio Freq
-			editable = true,
-			minFrequency = 100.000,
-			maxFrequency = 156.000,
-			modulation = MODULATION_AM
-		},
+		-- radio = {
+		-- 	frequency = 127.5,  -- Radio Freq
+		-- 	editable = true,
+		-- 	minFrequency = 100.000,
+		-- 	maxFrequency = 156.000,
+		-- 	modulation = MODULATION_AM
+		-- },
 		vCruise = 245,		--TODO a confirmer
 		hCruise = 5486.4,
 	},
 	["vwv_o-1"] = 	{			                 	--Mod
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
-		EPLRS_Capacity = false,
 		moduleName = "tetet_O1",
-		radio =
-		{
-			frequency = 127.5,  -- Radio Freq
-			editable = true,
-			minFrequency = 100.000,
-			maxFrequency = 156.000,
-			modulation = MODULATION_AM
-		},
+		folderModName = "[VWV] O-1",
+		-- radio =
+		-- {
+		-- 	frequency = 127.5,  -- Radio Freq
+		-- 	editable = true,
+		-- 	minFrequency = 100.000,
+		-- 	maxFrequency = 156.000,
+		-- 	modulation = MODULATION_AM
+		-- },
 		vCruise = 80,	-- TODO a confirmer
 		hCruise = 3315.2,
 	},
@@ -1246,6 +1189,7 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
 		moduleName = "tetet_rf101b",	--if the aircraft type name does not match the requested module name
+		folderModName = "[VWV] RF-101B",
 		vCruise = 215,
 		hCruise = 9000,
 		Tasks = {
@@ -1256,20 +1200,21 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
 		moduleName = "VSN_F104C",	--if the aircraft type name does not match the requested module name
+		folderModName = "VSN_F104C",
 		playable = true,
 		vCruise = 215,
 		hCruise = 9000,
-		Tasks = {
-			aircraft_task(CAP),
-			aircraft_task(Escort),
-			aircraft_task(FighterSweep),
-			aircraft_task(Intercept),
-			aircraft_task(Reconnaissance),
-			aircraft_task(GroundAttack),
-			aircraft_task(CAS),
-			aircraft_task(RunwayAttack),
-			aircraft_task(AntishipStrike),
-		},
+		-- Tasks = {
+		-- 	aircraft_task(CAP),
+		-- 	aircraft_task(Escort),
+		-- 	aircraft_task(FighterSweep),
+		-- 	aircraft_task(Intercept),
+		-- 	aircraft_task(Reconnaissance),
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(CAS),
+		-- 	aircraft_task(RunwayAttack),
+		-- 	aircraft_task(AntishipStrike),
+		-- },
 	},
 	["F-4E"] = 	{
 		instrumentUnits = "imperial",
@@ -1281,44 +1226,46 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
 		moduleName = "VSN_F4",	--if the aircraft type name does not match the requested module name
+		folderModName = "VSN_F4",
 		playable = true,
 		vCruise = 215,
 		hCruise = 9000,
-		Tasks = {
-			aircraft_task(CAP),
-			aircraft_task(Escort),
-			aircraft_task(FighterSweep),
-			aircraft_task(Intercept),
-			aircraft_task(Reconnaissance),
-			aircraft_task(GroundAttack),
-			aircraft_task(CAS),
-			aircraft_task(AFAC),
-			aircraft_task(RunwayAttack),
-			aircraft_task(PinpointStrike), --NEU
-	--  	aircraft_task(AntishipStrike),
-		},
+	-- 	Tasks = {
+	-- 		aircraft_task(CAP),
+	-- 		aircraft_task(Escort),
+	-- 		aircraft_task(FighterSweep),
+	-- 		aircraft_task(Intercept),
+	-- 		aircraft_task(Reconnaissance),
+	-- 		aircraft_task(GroundAttack),
+	-- 		aircraft_task(CAS),
+	-- 		aircraft_task(AFAC),
+	-- 		aircraft_task(RunwayAttack),
+	-- 		aircraft_task(PinpointStrike), --NEU
+	-- --  	aircraft_task(AntishipStrike),
+	-- 	},
 	},
 	["VSN_F4C"] = 	{
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
 		moduleName = "VSN_F4",	--if the aircraft type name does not match the requested module name
+		folderModName = "VSN_F4",
 		playable = true,
 		vCruise = 215,
 		hCruise = 9000,
-		Tasks = {
-			aircraft_task(CAP),
-			aircraft_task(Escort),
-			aircraft_task(FighterSweep),
-			aircraft_task(Intercept),
-			aircraft_task(Reconnaissance),
-			aircraft_task(GroundAttack),
-			aircraft_task(CAS),
-			aircraft_task(AFAC),
-			aircraft_task(RunwayAttack),
-			aircraft_task(SEAD), --NEU
-			aircraft_task(PinpointStrike), --NEU
-	--  	aircraft_task(AntishipStrike),
-		},	
+	-- 	Tasks = {
+	-- 		aircraft_task(CAP),
+	-- 		aircraft_task(Escort),
+	-- 		aircraft_task(FighterSweep),
+	-- 		aircraft_task(Intercept),
+	-- 		aircraft_task(Reconnaissance),
+	-- 		aircraft_task(GroundAttack),
+	-- 		aircraft_task(CAS),
+	-- 		aircraft_task(AFAC),
+	-- 		aircraft_task(RunwayAttack),
+	-- 		aircraft_task(SEAD), --NEU
+	-- 		aircraft_task(PinpointStrike), --NEU
+	-- --  	aircraft_task(AntishipStrike),
+	-- 	},	
 	},
 
 	["F-4E-45MC"] = 	{
@@ -1356,6 +1303,8 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
+		-- folderModName = "F-5E", -- marche pas sur ce mod
+		-- fileModName = "F-5E-3.lua", -- marche pas sur ce mod
 		vCruise = 230,
 		hCruise = 5112,
 	},
@@ -1498,7 +1447,7 @@ Data_divers = {
 	["FA-18C_hornet"] = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = true,
-		folderModName = "FA-18C",
+		-- folderModName = "FA-18C",
 		datalinks = {
 			type = "Link16",
 			hasTeamMembers = 4,
@@ -1506,6 +1455,21 @@ Data_divers = {
 			isDonnor = true,
 			isReceiver = true,
 		},
+		--difficile à récupérer dans le data FA-18A
+		Tasks = {
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(PinpointStrike),
+			aircraft_task(CAS),
+			aircraft_task(GroundAttack),
+			aircraft_task(RunwayAttack),
+			aircraft_task(SEAD),
+			aircraft_task(AFAC),
+			aircraft_task(AntishipStrike),
+			aircraft_task(Reconnaissance),
+		},-- end of Tasks
 		dataCartridge = true,
 		playable = true,
 		vCruise = 230,
@@ -1526,6 +1490,7 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
+		folderModName = "AJS37",
 		vCruise = 200,
 		hCruise = 100,
 	},
@@ -1557,17 +1522,16 @@ Data_divers = {
 	-- 	vCruise = 250,
 	-- 	hCruise = 7548,
 	-- },
-	-- ["Mirage-F1CE"] = {
-	-- 	inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
-	-- 	folderModName = "Mirage-F1",
-	-- 	inheritedModFrom = {"Mirage-F1","Mirage-F1C"},
-	-- 	refuellingReceptacleType = "drogue",
-	-- 	fileModName = "Mirage-F1CE",
-	-- },
+	["Mirage-F1CE"] = {
+		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
+		folderModName = "Mirage-F1",
+		inheritedModFrom = "Mirage-F1C",
+		refuellingReceptacleType = "drogue",
+	},
 	["Mirage-F1EE"] = {
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
 		folderModName = "Mirage-F1",
-		inheritedModFrom = {"Mirage-F1","Mirage-F1C"},
+		inheritedModFrom = "Mirage-F1C",
 		alignment_PropAircraft = {
 			fast = {
 				["INSStartMode"] = 1,
@@ -1582,7 +1546,8 @@ Data_divers = {
 	["Mirage-F1BE"] = {
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
 		folderModName = "Mirage-F1",
-		inheritedModFrom = {"Mirage-F1B","Mirage-F1BE"},
+		inheritedModFrom = "Mirage-F1B",
+		-- inheritedModFrom = {"Mirage-F1B","Mirage-F1BE"},
 		refuellingReceptacleType = "drogue"
 	},
 
@@ -1684,13 +1649,14 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		requiredModules = true,
 		moduleName = "AH-1G",
-		Tasks = {
-			aircraft_task(CAS),
-			aircraft_task(GroundAttack),
-			aircraft_task(Escort),
-			aircraft_task(AFAC),
-			aircraft_task(AntishipStrike)
-		},
+		folderModName = "AH-1G",
+		-- Tasks = {
+		-- 	aircraft_task(CAS),
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(Escort),
+		-- 	aircraft_task(AFAC),
+		-- 	aircraft_task(AntishipStrike)
+		-- },
 		vCruise = 55,	--TODO a verifier
 		hCruise = 50,
 	},
@@ -1710,7 +1676,7 @@ Data_divers = {
 	["vwv_uh2a"] = {--mod
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-		-- requiredModules = true,						--itsModule
+		requiredModules = true,						--itsModule
 		moduleName = "jjj_uh2a",		--self_ID  require module name
 		folderModName = "[VWV] UH-2A",
 		-- Tasks = {
@@ -1723,7 +1689,7 @@ Data_divers = {
 	["vwv_uh2b"] = {--mod
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-		-- requiredModules = true,						--itsModule
+		requiredModules = true,						--itsModule
 		moduleName = "jjj_uh2b",		--self_ID  require module name
 		folderModName = "[VWV] UH-2B",
 		-- Tasks = {
@@ -1736,11 +1702,10 @@ Data_divers = {
 	["vwv_uh2c"] = {--mod
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-		-- requiredModules = true,						--itsModule
+		requiredModules = true,						--itsModule
 		moduleName = "jjj_uh2c",
-		-- coreMod = false,
-		savedGameMod = true,
 		folderModName = "[VWV] UH-2C",
+		savedGameMod = true,
 		-- Tasks = {
 		-- 	aircraft_task(Transport),
 		-- 	aircraft_task(Reconnaissance),
@@ -1750,28 +1715,28 @@ Data_divers = {
 	},
 	["SH-3D"] = {--mod
 		instrumentUnits = "imperial",
-		EPLRS_Capacity = false,
 		requiredModules = true,						--itsModule
 		moduleName = "SH-3D",
+		folderModName = "SH-3D",
 		vCruise = 40,	--TODO a verifier
 		hCruise = 500,
 	},
 	["vwv_sh2f"] = {--mod
 		instrumentUnits = "imperial",
-		EPLRS_Capacity = false,
 		moduleName = "vwv_sh2f",
+		folderModName = "[VWV] SH-2F",
 		requiredModules = true,						--itsModule
 	},
 	["vwv_ch46d"] = {
 		instrumentUnits = "imperial",
-		EPLRS_Capacity = false,
 		requiredModules = true,
 		moduleName = "tetet_ch46d",
-		Tasks = {
-			aircraft_task(Transport),
-			aircraft_task(Reconnaissance),
-			-- aircraft_task(Airborne),
-		},
+		folderModName = "[VWV] CH-46D",
+		-- Tasks = {
+		-- 	aircraft_task(Transport),
+		-- 	aircraft_task(Reconnaissance),
+		-- 	-- aircraft_task(Airborne),
+		-- },
 		hCruise = 200,
 		vCruise = 75, -- (m/s, ≈ 270 km/h)
 	},
@@ -1808,14 +1773,15 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
-		Tasks = {
-			aircraft_task(AFAC),
-			aircraft_task(Escort),
-			aircraft_task(Reconnaissance),
-			aircraft_task(GroundAttack),
-			aircraft_task(CAS),
-			aircraft_task(Transport),
-		},
+		folderModName = "OH-58D",
+		-- Tasks = {
+		-- 	aircraft_task(AFAC),
+		-- 	aircraft_task(Escort),
+		-- 	aircraft_task(Reconnaissance),
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(CAS),
+		-- 	aircraft_task(Transport),
+		-- },
 		hCruise = 150,
 		vCruise = 65, -- (m/s, ≈ 235 km/h)
 	},
@@ -1848,6 +1814,10 @@ Data_divers = {
 
 	["JF-17"] = {
 		instrumentUnits = "imperial",
+		playable = true,
+		folderModName = "ChinaAssetPack",
+		add_aircraftFileName = "Entries/Aircrafts.lua",
+
 		EPLRS_Capacity = true,
 	},
 
@@ -1891,23 +1861,24 @@ Data_divers = {
 		requiredModules = true,						--itsModule
 		EPLRS_Capacity = false,
 		moduleName = "tetet_mig17f",
-		radio = {
-			frequency = 127.5, -- Radio Freq
-			editable = true,
-			minFrequency = 100.000,
-			maxFrequency = 156.000,
-			modulation = MODULATION_AM,
-		},
-		Tasks = {
-			aircraft_task(CAP),
-			aircraft_task(Escort),
-			aircraft_task(FighterSweep),
-			aircraft_task(Intercept),
-			aircraft_task(GroundAttack),
-			aircraft_task(CAS),
-			aircraft_task(AntishipStrike),
-			aircraft_task(AFAC),
-		},
+		folderModName = "[VWV] MiG-17",
+		-- radio = {
+		-- 	frequency = 127.5, -- Radio Freq
+		-- 	editable = true,
+		-- 	minFrequency = 100.000,
+		-- 	maxFrequency = 156.000,
+		-- 	modulation = MODULATION_AM,
+		-- },
+		-- Tasks = {
+		-- 	aircraft_task(CAP),
+		-- 	aircraft_task(Escort),
+		-- 	aircraft_task(FighterSweep),
+		-- 	aircraft_task(Intercept),
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(CAS),
+		-- 	aircraft_task(AntishipStrike),
+		-- 	aircraft_task(AFAC),
+		-- },
 		vCruise = 200,   -- m/s 720km/h M ≈ 0.66
 		hCruise = 9000,  -- m
 	},
@@ -1943,22 +1914,23 @@ Data_divers = {
 		requiredModules = true,						--itsModule
 		EPLRS_Capacity = false,
 		moduleName = "tetet_mig21pfm",
-		radio = {
-			frequency = 127.5, -- Radio Freq
-			editable = true,
-			minFrequency = 100.000,
-			maxFrequency = 156.000,
-			modulation = MODULATION_AM,
-		},
-		Tasks = {
-			aircraft_task(CAP),
-			aircraft_task(Escort),
-			aircraft_task(FighterSweep),
-			aircraft_task(Intercept),
-			aircraft_task(GroundAttack),
-			aircraft_task(CAS),
-			aircraft_task(AntishipStrike),
-		},
+		folderModName = "vwv_MiG-21PFM",
+		-- radio = {
+		-- 	frequency = 127.5, -- Radio Freq
+		-- 	editable = true,
+		-- 	minFrequency = 100.000,
+		-- 	maxFrequency = 156.000,
+		-- 	modulation = MODULATION_AM,
+		-- },
+		-- Tasks = {
+		-- 	aircraft_task(CAP),
+		-- 	aircraft_task(Escort),
+		-- 	aircraft_task(FighterSweep),
+		-- 	aircraft_task(Intercept),
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(CAS),
+		-- 	aircraft_task(AntishipStrike),
+		-- },
 		vCruise = 220,   -- m/s
 		hCruise = 11000, -- m
 	},
@@ -1968,19 +1940,20 @@ Data_divers = {
 		requiredModules = true,						--itsModule
 		EPLRS_Capacity = false,
 		moduleName = "tetet_mig21mf",
-		radio = {
-			frequency = 127.5, -- Radio Freq
-			editable = true,
-			minFrequency = 100.000,
-			maxFrequency = 156.000,
-			modulation = MODULATION_AM,
-		},
-		Tasks = {
-			aircraft_task(CAP),
-			aircraft_task(Escort),
-			aircraft_task(FighterSweep),
-			aircraft_task(Intercept),
-		},
+		folderModName = "[VWV] MiG-21MF",
+		-- radio = {
+		-- 	frequency = 127.5, -- Radio Freq
+		-- 	editable = true,
+		-- 	minFrequency = 100.000,
+		-- 	maxFrequency = 156.000,
+		-- 	modulation = MODULATION_AM,
+		-- },
+		-- Tasks = {
+		-- 	aircraft_task(CAP),
+		-- 	aircraft_task(Escort),
+		-- 	aircraft_task(FighterSweep),
+		-- 	aircraft_task(Intercept),
+		-- },
 		vCruise = 240,   -- m/s (≈ 864 km/h)Mach ≈ 0.81
 		hCruise = 11000, -- m (≈ 11 000 m)
 	},
@@ -2995,86 +2968,86 @@ Failures = {
 		'CDU_FAILURE_TOTAL',	  					--('CDU'),		
 		'EGI_FAILURE_TOTAL',	  					--('EGI'),		
     },
-	["AJS37"] = {
-		'ADI_UNIT',--('Flight attitude and direction unit'),
-		'CK_UNIT',--('Centralkalkylator 37'),
-		'DATACARTRIDGE',--('Data cartridge'),
-		'RPMSENSOR',--('RPM sensor'),
-		'EGTSENSOR',--('EGT sensor'),
-		'EPRSENSOR',--('EPR sensor'),
-		'TVDISPLAY',--('EP13 Maverick sight display'),
-		'HUDDISPLAY',--('EP08 Head Up Display'),
-		'MAINPITOT',--('Main pitot'),
-		'AOASENSOR',--('Angle of attack sensor'),
-		'ACCSENSOR',--('Accelerometer unit'),
-		'FDU',--('Flight Data Unit'),
-		'BCKPITOT',--('Backup pitot'),
-		'BCKGYRO',--('Backup gyro'),
-		'TEMPSENSOR',--('Temperature sensor'),
-		'HAW',--('High Alpha Warning'),
-		'FR22RADIO',--('FR22 Radio unit'),
-		'FR22ANTENNA',--('FR22 Radio antenna'),
-		'FR24RADIO',--('FR24 Radio unit'),
-		'FR24ANTENNA',--('FR24 Radio antenna'),
-		'RADARALTUNIT',--('Radar altimeter unit'),
-		'RADARALTANT',--('Radar altimeter antenna'),
-		'RADARASS',--('Radar PS-37 assembly'),
-		'RADARDISPL',--('Central Indikator display'),
-		'TAPEREC',--('Tape recorder'),
-		'RB05ANT',--('Rb05 antenna unit'),
-		'RWRANTLEFT',--('RWR antenna left wing'),
-		'RWRANTRIGHT',--('RWR antenna right wing'),
-		'RWRANTREAR',--('RWR antenna rear'),
-		'RWRUNIT',--('RWR control unit'),
-		'JAMMER',--('U22 or U22/A Jammer'),
-		'CMDISP',--('KB countermeasure dispenser'),
-		'AUTOPILOT',--('SA-06 Autopilot unit'),
-		'ELEVONOUTERLEFT',--('Elevon control surface outer left'),
-		'ELEVONINNERLEFT',--('Elevon control surface inner left'),
-		'ELEVONINNERRIGHT',--('Elevon control surface inner right'),
-		'ELEVONOUTERRIGHT',--('Elevon control surface outer right'),
-		'ELEVONSERVOUTERLEFT',--('Elevon servo outer left'),
-		'ELEVONSERVINNERLEFT',--('Elevon servo inner left'),
-		'ELEVONSERVINNERRIGHT',--('Elevon servo inner right'),
-		'ELEVONSERVOUTERRIGHT',--('Elevon servo outer right'),
-		'RUDDER',--('Rudder control surface'),
-		'RUDDERSERV',--('Rudder servo'),
-		'CANARDFLAPLEFT',--('Canard flap surface left'),
-		'CANARDFLAPRIGHT',--('Canard flap surface right'),
-		'CANARDSERVOLEFT',--('Canard flap servo left'),
-		'CANARDSERVORIGHT',--('Canard flap servo right'),
-		'AIRBRAKE',--('Airbrake surfaces'),
-		'AIRBRAKESERVO',--('Airbrake servo'),
-		'HYDR1PUMP',--('Hydraulic pump System 1'),
-		'HYDR1ACC',--('Hydraulic accumulator System 1'),
-		'HYDR2PUMP',--('Hydraulic pump System 2'),
-		'HYDR2ACC',--('Hydraulic accumulator System 2'),
-		'HYDRRESERVPUMP',--('Hydraulic pump backup'),
-		'OXYGEN',--('Oxygen bottle'),
-		'MAINPOWER',--('Main electrical junction & relays'),
-		'MAINGENERATOR',--('Main generator'),
-		'BACKUPGENERATOR',--('Backup generator (RAT)'),
-		'BATTERY',--('Main battery'),
-		'IFF',--('IFF'),
-		'TILS',--('TILS'),
-		'DOPPLER_UNIT',--('Doppler unit'),
-		'COMPRESSOR',--('Engine fan and compressor stage'),
-		'BURNER',--('Engine burner stage'),
-		'TURBINE',--('Engine turbine stage'),
-		'GTS',--('Engine starter (GTS)'),
-		'AFK',--('Auto-thrust (AFK)'),
-		'REVERSER',--('Thrust reverser'),
-		'FUELTANK2',--('Fuel tank 2'),
-		'FUELTANK3L',--('Fuel tank 3V'),
-		'FUELTANK3R',--('Fuel tank 3H'),
-		'FUELTANK1',--('Fuel tank 1'),
-		'FUELTANK4L',--('Fuel tank 4V'),
-		'FUELTANK5L',--('Fuel tank 5V'),
-		'FUELTANK4R',--('Fuel tank 4H'),
-		'FUELTANK5R',--('Fuel tank 5H'),
-		'LANDINGGEARL',--('Left landing gear'),
-		'LANDINGGEARR',--('Right landing gear'),
-	},
+	-- ["AJS37"] = {
+	-- 	'ADI_UNIT',--('Flight attitude and direction unit'),
+	-- 	'CK_UNIT',--('Centralkalkylator 37'),
+	-- 	'DATACARTRIDGE',--('Data cartridge'),
+	-- 	'RPMSENSOR',--('RPM sensor'),
+	-- 	'EGTSENSOR',--('EGT sensor'),
+	-- 	'EPRSENSOR',--('EPR sensor'),
+	-- 	'TVDISPLAY',--('EP13 Maverick sight display'),
+	-- 	'HUDDISPLAY',--('EP08 Head Up Display'),
+	-- 	'MAINPITOT',--('Main pitot'),
+	-- 	'AOASENSOR',--('Angle of attack sensor'),
+	-- 	'ACCSENSOR',--('Accelerometer unit'),
+	-- 	'FDU',--('Flight Data Unit'),
+	-- 	'BCKPITOT',--('Backup pitot'),
+	-- 	'BCKGYRO',--('Backup gyro'),
+	-- 	'TEMPSENSOR',--('Temperature sensor'),
+	-- 	'HAW',--('High Alpha Warning'),
+	-- 	'FR22RADIO',--('FR22 Radio unit'),
+	-- 	'FR22ANTENNA',--('FR22 Radio antenna'),
+	-- 	'FR24RADIO',--('FR24 Radio unit'),
+	-- 	'FR24ANTENNA',--('FR24 Radio antenna'),
+	-- 	'RADARALTUNIT',--('Radar altimeter unit'),
+	-- 	'RADARALTANT',--('Radar altimeter antenna'),
+	-- 	'RADARASS',--('Radar PS-37 assembly'),
+	-- 	'RADARDISPL',--('Central Indikator display'),
+	-- 	'TAPEREC',--('Tape recorder'),
+	-- 	'RB05ANT',--('Rb05 antenna unit'),
+	-- 	'RWRANTLEFT',--('RWR antenna left wing'),
+	-- 	'RWRANTRIGHT',--('RWR antenna right wing'),
+	-- 	'RWRANTREAR',--('RWR antenna rear'),
+	-- 	'RWRUNIT',--('RWR control unit'),
+	-- 	'JAMMER',--('U22 or U22/A Jammer'),
+	-- 	'CMDISP',--('KB countermeasure dispenser'),
+	-- 	'AUTOPILOT',--('SA-06 Autopilot unit'),
+	-- 	'ELEVONOUTERLEFT',--('Elevon control surface outer left'),
+	-- 	'ELEVONINNERLEFT',--('Elevon control surface inner left'),
+	-- 	'ELEVONINNERRIGHT',--('Elevon control surface inner right'),
+	-- 	'ELEVONOUTERRIGHT',--('Elevon control surface outer right'),
+	-- 	'ELEVONSERVOUTERLEFT',--('Elevon servo outer left'),
+	-- 	'ELEVONSERVINNERLEFT',--('Elevon servo inner left'),
+	-- 	'ELEVONSERVINNERRIGHT',--('Elevon servo inner right'),
+	-- 	'ELEVONSERVOUTERRIGHT',--('Elevon servo outer right'),
+	-- 	'RUDDER',--('Rudder control surface'),
+	-- 	'RUDDERSERV',--('Rudder servo'),
+	-- 	'CANARDFLAPLEFT',--('Canard flap surface left'),
+	-- 	'CANARDFLAPRIGHT',--('Canard flap surface right'),
+	-- 	'CANARDSERVOLEFT',--('Canard flap servo left'),
+	-- 	'CANARDSERVORIGHT',--('Canard flap servo right'),
+	-- 	'AIRBRAKE',--('Airbrake surfaces'),
+	-- 	'AIRBRAKESERVO',--('Airbrake servo'),
+	-- 	'HYDR1PUMP',--('Hydraulic pump System 1'),
+	-- 	'HYDR1ACC',--('Hydraulic accumulator System 1'),
+	-- 	'HYDR2PUMP',--('Hydraulic pump System 2'),
+	-- 	'HYDR2ACC',--('Hydraulic accumulator System 2'),
+	-- 	'HYDRRESERVPUMP',--('Hydraulic pump backup'),
+	-- 	'OXYGEN',--('Oxygen bottle'),
+	-- 	'MAINPOWER',--('Main electrical junction & relays'),
+	-- 	'MAINGENERATOR',--('Main generator'),
+	-- 	'BACKUPGENERATOR',--('Backup generator (RAT)'),
+	-- 	'BATTERY',--('Main battery'),
+	-- 	'IFF',--('IFF'),
+	-- 	'TILS',--('TILS'),
+	-- 	'DOPPLER_UNIT',--('Doppler unit'),
+	-- 	'COMPRESSOR',--('Engine fan and compressor stage'),
+	-- 	'BURNER',--('Engine burner stage'),
+	-- 	'TURBINE',--('Engine turbine stage'),
+	-- 	'GTS',--('Engine starter (GTS)'),
+	-- 	'AFK',--('Auto-thrust (AFK)'),
+	-- 	'REVERSER',--('Thrust reverser'),
+	-- 	'FUELTANK2',--('Fuel tank 2'),
+	-- 	'FUELTANK3L',--('Fuel tank 3V'),
+	-- 	'FUELTANK3R',--('Fuel tank 3H'),
+	-- 	'FUELTANK1',--('Fuel tank 1'),
+	-- 	'FUELTANK4L',--('Fuel tank 4V'),
+	-- 	'FUELTANK5L',--('Fuel tank 5V'),
+	-- 	'FUELTANK4R',--('Fuel tank 4H'),
+	-- 	'FUELTANK5R',--('Fuel tank 5H'),
+	-- 	'LANDINGGEARL',--('Left landing gear'),
+	-- 	'LANDINGGEARR',--('Right landing gear'),
+	-- },
 	["AV8BNA"] = {
 		-- FWD Avionics Bay
 		'DMT_FAILURE_TOTAL',	--('DMT Camera Failure'),			
@@ -4544,6 +4517,12 @@ IsEWR = {
 }
 
 
+
+
+--/////////////////////////////////////////////////////////////////////
+--/////////////////////////////////////////////////////////////////////
+
+
 -- Détecte si une table est une liste simple (1..n)
 local function isSequence(t)
     if type(t) ~= "table" then return false end
@@ -4634,9 +4613,16 @@ function InheritedFromProcessing()
 end
 
 --/////////////////////////////////////////////////////////////////////
+--/////////////////////////////////////////////////////////////////////
 
-local function extractFailures(aircraft)
+
+--/////////////////////////////////////////////////////////////////////
+-- extractFailuresA2 simple+
+--/////////////////////////////////////////////////////////////////////
+
+local function extractFailuresA2(aircraft)
     if type(aircraft.Failures) ~= "table" then
+		print("extractFailuresA2: no Failures table")
         return nil
     end
 
@@ -4650,47 +4636,33 @@ local function extractFailures(aircraft)
         end
     end
 
+	-- print("extractFailuresA2: found "..(idx-1).." failures")
+
     if idx == 1 then
+		-- print("extractFailuresA2: no failures extracted")
         return nil
     end
 
     return out
 end
 
-local function shouldLoadFile(path, name)
-    -- normalisation
-    local filename = path:match("([^/\\]+)$")
-	print("shouldLoadFile filename: |"..filename.."|==? |"..name.."|")
 
-    -- fichier avion principal
-    if name and filename == name then
-		print("shouldLoadFile A true: "..filename)
-        return true
-	else
-		 -- autres variantes avion → refuser
-		print("shouldLoadFile B false: "..filename)
-    	return false
-    end
+local function make_stub()
+    local t = {}
 
-    -- -- autres variantes avion → refuser
-    -- if filename:match("^F%-14") and filename:match("%.lua$") then
-	-- 	print("shouldLoadFile B false: "..filename)
-    --     return false
-    -- end
+    local mt = {
+        __index = function(self, k)
+            local v = make_stub()
+            rawset(self, k, v)
+            return v
+        end,
 
-    -- -- fichiers communs
-    -- if filename == "Weapons.lua" then
-	-- 	print("shouldLoadFile C true: "..filename)
-    --     return true
-    -- end
+        __call = function(...)
+            return make_stub()
+        end
+    }
 
-    -- if filename:match("Equipment") then
-	-- 	print("shouldLoadFile D true: "..filename)
-    --     return true
-    -- end
-
-    -- par défaut : autoriser
-    return true
+    return setmetatable(t, mt)
 end
 
 
@@ -4700,17 +4672,17 @@ end
 -- -- le chemin : C:\Users\miguel\Saved Games\DCS\Mods\aircraft\h60_a37_dragonfly
 -- --donc camp.path..\DCS\Mods\aircraft\h60_a37_dragonfly
 
-function DataCompilation_DataDiscovery()
+function DataCompilation_DataDiscoveryA2()
 
     local camp_path = os.getenv('pathSavedGames')
     local dcs_path  = os.getenv('pathDCS')
 
-    for planeName, planeData in pairs(Data_divers) do
-        if planeData.folderModName then
+    for planeType, planeData in pairs(Data_divers) do
+        if AircraftInCampaign[planeType] and planeData.folderModName then
 
-            -- local pathfileName = planeData.pathfileName
-            local tableName    = planeData.tableName
-			local folderModName = planeData.folderModName
+			print("DataDiscoveryA2 for aircraft: "..planeType)
+
+           local folderModName = planeData.folderModName
 
             if type(folderModName) == "string" then
 
@@ -4719,6 +4691,295 @@ function DataCompilation_DataDiscovery()
 
 				-- Construire le chemin CoreMods
 				local fullPath = dcs_path .. "CoreMods/aircraft/" .. folderModName .. "/entry.lua"
+
+				if planeData.add_aircraftFileName then
+					fullPath = dcs_path .. "CoreMods/aircraft/" .. folderModName .. "/"..planeData.add_aircraftFileName	
+				end
+
+				-- Vérifier si le fichier existe dans le premier chemin (par exemple, CoreMods/aircraft/)
+				local f0 = io.open(fullPath, "r")
+				if f0 then
+					modRoot  = dcs_path .. "CoreMods/aircraft/" .. folderModName
+					f0:close()
+				else
+					-- Si non trouvé, basculer vers Mods (Saved Games)
+					fullPath = camp_path .. "Mods/aircraft/" .. folderModName .. "/entry.lua"
+					modRoot  = camp_path .. "Mods/aircraft/" .. folderModName
+				end
+
+                print("DataDiscovery_B entry.lua : "..fullPath)
+
+                local env = {}
+
+				-- Lua standard
+				env.pairs    = pairs
+				env.ipairs   = ipairs
+				env.next     = next
+				env.tonumber = tonumber
+				env.tostring = tostring
+				env.type     = type
+				env.unpack   = unpack
+				env.select   = select
+
+				env.math   = math
+				env.string = string
+				env.table  = table
+
+				env.assert = assert
+				env.error  = error
+				env.pcall  = pcall
+				env.print  = print
+
+				env.Transport        = "Transport"
+				env.Reconnaissance   = "Reconnaissance"
+				env.Refueling 		= "Refueling"
+				env.AWACS 			= "AWACS"
+
+				env.AFAC              = "AFAC"
+				env.CAP              = "CAP"
+				env.CAS              = "CAS"
+				env.GroundAttack     = "Ground Attack"
+				env.RunwayAttack     = "Runway Attack"
+				env.Intercept        = "Intercept"
+				env.AntishipStrike    = "Antiship Strike"
+				env.PinpointStrike	 = "Pinpoint Strike"
+				env.Escort           = "Escort"
+				env.FighterSweep     = "Fighter Sweep"
+				env.SEAD             = "SEAD"
+				env.Training         = "Training"
+				-- env.Airborne         = "Airborne"
+				env.Airborne         = "Transport"
+				env.MODULATION_AM	= "AM"
+				env.MODULATION_FM	= "FM"
+				env.MODULATION_AM_AND_FM = "AM AND FM"
+
+				-- DCS helpers connus
+				env._ = function(s) return s end
+				env.current_mod_path = modRoot
+				env.__DCS_VERSION__  = "OFFLINE"
+				env.__DEBUG__        = false
+
+				--code original
+				env.db_path = dcs_path .. "Scripts/Database"
+				env.aircraft_task = function(task)
+					return task
+				end
+
+				-- add_aircraft DOIT rester réel
+				local collected = {}
+				env.add_aircraft = function(def)
+					if type(def) ~= "table" then
+						print("  [add_aircraft IGNORED] invalid def:", type(def))
+						return
+					end
+					table.insert(collected, def)
+				end
+
+				-- dofile sandboxé
+				env.dofile = function(path)
+					local f = loadfile(path)
+					if not f then
+						print("  [IGNORED dofile] "..tostring(path))
+						return nil
+					end
+					setfenv(f, env)
+					local ok, res = pcall(f)
+					if not ok then
+						print("  [DOFILE ERROR] "..tostring(res))
+						return nil
+					end
+					return res
+				end
+
+				-- 🔥 fallback universel
+				setmetatable(env, {
+					__index = function(t, k)
+						local v = make_stub()
+						rawset(t, k, v)
+						return v
+					end
+				})
+
+
+
+				-- for k,v in pairs(base_env) do
+				-- 	env[k] = v
+				-- end
+
+				-- env.db_path = dcs_path .. "Scripts/Database"
+				-- env._ = function(s) return s end
+
+				-- env.ViewSettings = {}
+				-- env.weapons_loadouts = {}
+				-- env.weapons_loadouts_QF4 = {}
+
+				-- env.weapons = setmetatable({}, {
+				-- 	__index = function(t, k)
+				-- 		local w = { name = k }
+				-- 		rawset(t, k, w)
+				-- 		return w
+				-- 	end
+				-- })
+
+				-- env.warheads = setmetatable({}, {
+				-- 	__index = function(t, k)
+				-- 		local w = { name = k }
+				-- 		rawset(t, k, w)
+				-- 		return w
+				-- 	end
+				-- })
+
+				-- env.add_aircraft = function(def)
+				-- if type(def) ~= "table" then
+				-- 	print("  [add_aircraft IGNORED] invalid def:", type(def))
+				-- 	return
+				-- end
+				-- table.insert(collected, def)
+			-- end
+
+
+
+				-- -- CODE INITIAL
+				-- env.dofile = function(path)
+				-- 	local f = loadfile(path)
+				-- 	if not f then
+				-- 		print("  [IGNORED dofile] "..tostring(path))
+				-- 		return nil
+				-- 	end
+
+				-- 	setfenv(f, env)
+				-- 	local ok, res = pcall(f)
+				-- 	if not ok then
+				-- 		print("  [DOFILE ERROR] "..tostring(res))
+				-- 		return nil
+				-- 	end
+				-- 	return res
+				-- end
+
+				
+
+				-- env.current_mod_path = modRoot
+
+				-- -- variables DCS communes
+				-- env.current_mod_path = modRoot
+				-- env.__DCS_VERSION__  = "OFFLINE"
+				-- env.__DEBUG__        = false
+
+				-- setmetatable(env, {
+				-- 	__index = function(t, k)
+				-- 		local v = {}
+				-- 		-- rawset(t, k, v)
+				-- 		return v
+				-- 	end
+				-- })
+
+				-- chargement entry.lua
+				local chunk = loadfile(fullPath)
+				if chunk then
+					setfenv(chunk, env)
+					local ok, err = pcall(chunk)
+					if not ok then
+						print("  [ENTRY ERROR] "..tostring(err))
+						-- os.execute 'pause'
+					end
+				else
+					print("  [MISSING entry.lua]")
+					os.execute 'pause'
+				end
+
+				local function isWantedAircraft(aircraft, wanted)
+					local name = aircraft.Name or aircraft.self_ID
+
+					print("  -> isWantedAircraft A2 name "..tostring(name).." wanted: "..tostring(wanted))
+
+					if not name or not wanted then
+						return false
+					end
+
+					return wanted == name
+				end
+
+
+				--  collected contient TOUS les avions du module
+				for _, aircraft in ipairs(collected) do
+
+					local dst = Data_divers[planeType]
+					local wanted = dst.inheritedModFrom or planeType
+
+					print("  -> collected A planeName "..tostring(planeType).." aircraft.Name: "..tostring(aircraft.Name).." wanted: "..tostring(wanted))
+
+					if wanted then
+						-- 🔴 FILTRE COMPATIBLE LUA 5.1
+						if isWantedAircraft(aircraft, wanted) then
+
+							if aircraft.Tasks then
+								dst.Tasks = aircraft.Tasks
+								_affiche(aircraft.Tasks, "  -> A2 Tasks found ")
+								-- os.execute 'pause'
+							end
+
+							if aircraft.HumanRadio then
+								dst.HumanRadio = aircraft.HumanRadio
+								-- _affiche(aircraft.HumanRadio, "  -> HumanRadio found ")
+								-- os.execute 'pause'
+							end
+							if aircraft.panelRadio then
+								dst.panelRadio = aircraft.panelRadio
+								-- _affiche(aircraft.panelRadio, "  -> panelRadio found ")
+								-- os.execute 'pause'
+							end
+							
+							-- FAILURES
+							local failures = extractFailuresA2(aircraft)
+							if failures then
+								Failures[planeType] = failures
+								dst.Failures = failures
+							end
+
+							-- extraction plus tard
+							print("  -> A2 aircraft captured "..planeType)
+							-- os.execute 'pause'
+
+							local file_str = "dst = " .. TableSerialization(dst, 0)			--make a string
+							local file_File = io.open("Debug/Data_Divers_GetMods"..planeType..".lua", "w") or error("Failed to open debug EWR_UtilDebug file")
+							file_File:write(file_str)																	--save new data
+							file_File:close()
+
+						end
+					else
+						print("  -> collected A planeName "..tostring(planeType).." wanted: "..tostring(wanted))
+						os.execute 'pause'
+					end
+				end
+
+            end
+        end
+    end
+end
+
+function DataCompilation_DataDiscovery_OLDA2()
+
+    local camp_path = os.getenv('pathSavedGames')
+    local dcs_path  = os.getenv('pathDCS')
+
+    for planeType, planeData in pairs(Data_divers) do
+        if AircraftInCampaign[planeType] and planeData.folderModName then
+
+			print("DataDiscoveryA2 for aircraft: "..planeType)
+
+           local folderModName = planeData.folderModName
+
+            if type(folderModName) == "string" then
+
+                -- local fullPath
+                local modRoot
+
+				-- Construire le chemin CoreMods
+				local fullPath = dcs_path .. "CoreMods/aircraft/" .. folderModName .. "/entry.lua"
+
+				if planeData.add_aircraftFileName then
+					fullPath = dcs_path .. "CoreMods/aircraft/" .. folderModName .. "/"..planeData.add_aircraftFileName	
+				end
 
 				-- Vérifier si le fichier existe dans le premier chemin (par exemple, CoreMods/aircraft/)
 				local f0 = io.open(fullPath, "r")
@@ -4761,7 +5022,6 @@ function DataCompilation_DataDiscovery()
 					print      = print,
 				}
 
-				
 				local env = {}
 
 				for k,v in pairs(base_env) do
@@ -4821,42 +5081,25 @@ function DataCompilation_DataDiscovery()
 
 				--CODE INI
 				-- env.add_aircraft = function(def)
+				-- 	print("  [add_aircraft] ")
 				-- 	table.insert(collected, def)
-				-- end			
-
-				--ATTENTION, le code suivant fait perdre collected pour le reste du script:
-				env.add_aircraft = function(def)
-					if def.Name then
-						collected[def.Name] = def
-					end
-				end
-
-				--CODE INITIAL
-				-- env.dofile = function(path)
-				-- 	local f = loadfile(path)
-				-- 	if not f then
-				-- 		print("  [IGNORED dofile] "..tostring(path))
-				-- 		return nil
-				-- 	end
-				-- 	setfenv(f, env)
-				-- 	local ok, res = pcall(f)
-				-- 	if not ok then
-				-- 		print("  [DOFILE ERROR] "..tostring(res))
-				-- 		return nil
-				-- 	end
-				-- 	return res
 				-- end
 
+				env.add_aircraft = function(def)
+				if type(def) ~= "table" then
+					print("  [add_aircraft IGNORED] invalid def:", type(def))
+					return
+				end
+				table.insert(collected, def)
+			end
+
+
+
+				-- CODE INITIAL
 				env.dofile = function(path)
-
-					if not shouldLoadFile(path, planeName..".lua") then
-						print("  [SKIPPED dofile] "..path)
-						return nil
-					end
-
 					local f = loadfile(path)
 					if not f then
-						print("  [IGNORED dofile] "..path)
+						print("  [IGNORED dofile] "..tostring(path))
 						return nil
 					end
 
@@ -4866,10 +5109,31 @@ function DataCompilation_DataDiscovery()
 						print("  [DOFILE ERROR] "..tostring(res))
 						return nil
 					end
-
 					return res
 				end
 
+				--INI 0A a supprimer
+				--///////////////////////////////////////////
+				-- ==== PLUGIN SYSTEM ====
+				env.declare_plugin = function(...) 
+					-- on ignore volontairement
+				end
+
+				env.plugin_done = function(...)
+				end
+
+				-- ==== VFS ====
+				env.mount_vfs_model_path = function(...) end
+				env.mount_vfs_liveries_path = function(...) end
+				env.mount_vfs_texture_path = function(...) end
+				env.mount_vfs_sound_path   = function(...) end
+
+				-- ==== misc ED ====
+				env.make_view_settings = function(...) return {} end
+				env.make_flyable = function(...) end
+				env.set_manual_path = function(...) end
+				--INI 0A a supprimer
+				--///////////////////////////////////////////
 
 				env.current_mod_path = modRoot
 
@@ -4878,10 +5142,19 @@ function DataCompilation_DataDiscovery()
 				env.__DCS_VERSION__  = "OFFLINE"
 				env.__DEBUG__        = false
 
+				--INI0A
+				-- setmetatable(env, {
+				-- 	__index = function(_, k)
+				-- 		-- print("[STUB]", k)
+				-- 		return function() end
+				-- 	end
+				-- })
+
 				setmetatable(env, {
-					__index = function(_, k)
-						-- print("[STUB]", k)
-						return function() end
+					__index = function(t, k)
+						local v = {}
+						-- rawset(t, k, v)
+						return v
 					end
 				})
 
@@ -4899,395 +5172,75 @@ function DataCompilation_DataDiscovery()
 					os.execute 'pause'
 				end
 
-				-- 👉 collected contient TOUS les avions du module
+				local function isWantedAircraft(aircraft, wanted)
+					local name = aircraft.Name or aircraft.self_ID
 
-				---------------------------------------------------------
-				-- ASSEMBLAGE DES AVIONS AVEC HERITAGE
-				-- (à placer APRÈS le chargement de entry.lua)
-				---------------------------------------------------------
+					print("  -> isWantedAircraft A2 name "..tostring(name).." wanted: "..tostring(wanted))
 
-				local function deepMerge(dst, src)
-					for k, v in pairs(src) do
-						if type(v) == "table" and type(dst[k]) == "table" then
-							deepMerge(dst[k], v)
-						else
-							dst[k] = v
+					if not name or not wanted then
+						return false
+					end
+
+					return wanted == name
+				end
+
+
+				--  collected contient TOUS les avions du module
+				for _, aircraft in ipairs(collected) do
+
+					local dst = Data_divers[planeType]
+					local wanted = dst.inheritedModFrom or planeType
+
+					print("  -> collected A planeName "..tostring(planeType).." aircraft.Name: "..tostring(aircraft.Name).." wanted: "..tostring(wanted))
+
+					if wanted then
+						-- 🔴 FILTRE COMPATIBLE LUA 5.1
+						if isWantedAircraft(aircraft, wanted) then
+
+							if aircraft.Tasks then
+								dst.Tasks = aircraft.Tasks
+								_affiche(aircraft.Tasks, "  -> A2 Tasks found ")
+								-- os.execute 'pause'
+							end
+
+							if aircraft.HumanRadio then
+								dst.HumanRadio = aircraft.HumanRadio
+								-- _affiche(aircraft.HumanRadio, "  -> HumanRadio found ")
+								-- os.execute 'pause'
+							end
+							if aircraft.panelRadio then
+								dst.panelRadio = aircraft.panelRadio
+								-- _affiche(aircraft.panelRadio, "  -> panelRadio found ")
+								-- os.execute 'pause'
+							end
+							
+							-- FAILURES
+							local failures = extractFailuresA2(aircraft)
+							if failures then
+								Failures[planeType] = failures
+								dst.Failures = failures
+							end
+
+							-- extraction plus tard
+							print("  -> A2 aircraft captured "..planeType)
+							-- os.execute 'pause'
+
+							local file_str = "dst = " .. TableSerialization(dst, 0)			--make a string
+							local file_File = io.open("Debug/Data_Divers_GetMods"..planeType..".lua", "w") or error("Failed to open debug EWR_UtilDebug file")
+							file_File:write(file_str)																	--save new data
+							file_File:close()
+
 						end
+					else
+						print("  -> collected A planeName "..tostring(planeType).." wanted: "..tostring(wanted))
+						os.execute 'pause'
 					end
 				end
-
-				local function buildAircraft(arg_planeName, visited)
-					visited = visited or {}
-					if visited[arg_planeName] then return {} end
-					visited[arg_planeName] = true
-
-					local result = {}
-
-					-- héritage déclaré côté Data_divers
-					local meta = Data_divers[arg_planeName]
-					if meta and meta.inheritedModFrom then
-						for _, parent in ipairs(meta.inheritedModFrom) do
-							print("  -> aircraft inherited from:", parent)
-							local parentData = buildAircraft(parent, visited)
-							deepMerge(result, parentData)
-						end
-					end
-
-					-- définition locale (celle du module)
-					local planeDef = collected[arg_planeName]
-					if planeDef then
-						deepMerge(result, planeDef)
-					end
-
-					return result
-				end
-
-
-				---------------------------------------------------------
-				-- APPLICATION AUX DONNÉES FINALES
-				---------------------------------------------------------
-
-				-- for planeName2, planeData2 in pairs(Data_divers) do
-				-- 	if collected[planeName2] then
-				-- 		Data_divers[planeName2] = buildAircraft(planeName2)
-				-- 		print("  -> aircraft assembled: ", planeName2)
-				-- 	end
-				-- end
-
-				local aircraft_final = buildAircraft(planeName)
-
-				if not next(aircraft_final) then
-					print("  -> aircraft NOT found or empty:", planeName)
-				else
-					print("  -> aircraft assembled:", planeName)
-
-					local dst = Data_divers[planeName]
-
-					-- TASKS
-					if aircraft_final.Tasks then
-						dst.Tasks = aircraft_final.Tasks
-						_affiche(aircraft_final.Tasks, "  -> Tasks found ")
-					end
-
-					-- RADIOS
-					if aircraft_final.HumanRadio then
-						dst.HumanRadio = aircraft_final.HumanRadio
-					end
-
-					if aircraft_final.panelRadio then
-						dst.panelRadio = aircraft_final.panelRadio
-					end
-
-					-- FAILURES
-					local failures = extractFailures(aircraft_final)
-					if failures then
-						Failures[planeName] = failures
-					end
-				end
-
-
-
-				-- for _, aircraft in ipairs(collected) do
-
-				-- 	local dst = Data_divers[planeName]
-
-				-- 	if aircraft.Tasks then
-				-- 		dst.Tasks = aircraft.Tasks
-				-- 		_affiche(aircraft.Tasks, "  -> Tasks found ")
-				-- 	end
-
-				-- 	-- if aircraft.Damage then
-				-- 	-- 	dst.Damage = aircraft.Damage
-				-- 	-- end
-				-- 	if aircraft.HumanRadio then
-				-- 		dst.HumanRadio = aircraft.HumanRadio
-				-- 		-- _affiche(aircraft.HumanRadio, "  -> HumanRadio found ")
-				-- 		-- os.execute 'pause'
-				-- 	end
-				-- 	if aircraft.panelRadio then
-				-- 		dst.panelRadio = aircraft.panelRadio
-				-- 		-- _affiche(aircraft.panelRadio, "  -> panelRadio found ")
-				-- 		-- os.execute 'pause'
-				-- 	end
-					
-
-					
-
-				-- 	-- FAILURES
-				-- 	local failures = extractFailures(aircraft)
-				-- 	if failures then
-				-- 		Failures[planeName] = failures
-				-- 	end
-
-				-- 	-- extraction plus tard
-				-- 	print("  -> aircraft captured")
-				-- 	-- os.execute 'pause'
-				-- end
-
-
 
             end
         end
     end
 end
-
-
-local IGNORED_KEYS = {
-	lights_data = true,
-	shape_table_data = true,
-	Pylons = true,
-	Weapons = true,
-	Countries = true,
-	Sensors = true,
-	Failures = true,
-}
-
-function DataCompilation_DataDiscoveryOLD()
-
-	local camp_path = os.getenv('pathSavedGames')
-	local dcs_path = os.getenv('pathDCS')
-
-	for planeName, planeData in pairs(Data_divers) do
-		if planeData.pathfileName then
-
-			-- local folderName = planeData.moduleName
-			local pathfileName   = planeData.pathfileName
-			local tableName  = planeData.tableName
-
-			print("DataDiscovery_A pathfileName : "..pathfileName)
-
-			if type(pathfileName) == "string"  then
-
-				local fullPath 
-
-				if planeData.coreMod then
-					fullPath = dcs_path.. "CoreMods/aircraft/" .. pathfileName 
-				elseif planeData.savedGameMod then
-					fullPath = camp_path.. "Mods/aircraft/" .. pathfileName 
-				end
-
-				print("DataDiscovery_B fullPath : "..fullPath)
-
-
-				local function sandbox_dofile(path)
-					-- normalisation
-					if type(path) ~= "string" then
-						return nil
-					end
-
-					-- fichiers qu'on refuse catégoriquement
-					if path:find("Views.lua")
-					or path:find("Cockpit")
-					or path:find("FM")
-					or path:find("Sounds")
-					then
-						return nil
-					end
-
-					-- tentative de chargement
-					local f = loadfile(path)
-					if not f then
-						return nil
-					end
-
-					setfenv(f, env)
-
-					local ok, result = pcall(f)
-					if not ok then
-						return nil
-					end
-
-					return result
-				end
-	
-
-				-- local capturedAircraft = nil
-
-				-- -- sandbox
-				-- local env = {
-
-				-- 	-- DCS stubs
-				-- 	mount_vfs_model_path     = function() end,
-				-- 	mount_vfs_texture_path   = function() end,
-				-- 	mount_vfs_liveries_path  = function() end,
-				-- 	declare_loadout          = function() end,
-				-- 	pylon                   = function() end,
-				-- 	gun_mount               = function() end,
-				-- 	declare_weapon           = function() end,
-				-- 	makeAirplaneCanopyGeometry = function() end,
-				-- 	nr30 				 = function() end,
-				-- 	verbose_to_dmg_properties  = function() end,
-				-- 	gatling_effect	  = function() end,
-				-- 	fire_effect           = function() end,
-				-- 	add_aircraft             = function() end,
-				-- 	-- add_aircraft = function(t)
-				-- 	-- 	if type(t) == "table" then
-				-- 	-- 		capturedAircraft = t
-				-- 	-- 	end
-				-- 	-- end,
-				-- 	-- dofile                   = function() end,
-				-- 	dofile = sandbox_dofile,
-				-- 	_                        = function(s) return s end,
-
-				-- 	-- aircraft tasks
-				-- 	aircraft_task = function(task) return task end,
-
-
-
-				-- 	AFAC = "AFAC",
-				-- 	CAS = "CAS",
-				-- 	AntishipStrike = "Antiship Strike",
-				-- 	GroundAttack = "Ground Attack",
-				-- 	RunwayAttack = "Runway Attack",
-				-- 	Escort = "Escort",
-				-- 	PinpointStrike = "Pinpoint Strike",
-				-- 	Intercept = "Intercept",
-				-- 	CAP = "CAP",
-				-- 	FighterSweep = "Fighter Sweep",
-				-- 	Reconnaissance = "Reconnaissance",
-				-- 	Refueling = "Refueling",
-				-- 	AWACS = "AWACS",
-				-- 	SEAD = "SEAD",
-				-- 	Transport = "Transport",
-
-				-- 	-- constantes bidon
-				-- 	CAT_FUEL_TANKS = 0,
-				-- 	wsType_Air = 0,
-				-- 	wsType_Free_Fall = 0,
-				-- 	wsType_FuelTank = 0,
-				-- 	WSTYPE_PLACEHOLDER = 0,
-
-				-- 	-- current_mod_path = basePath,
-
-				-- 	-- Lua standard
-				-- 	pairs = pairs,
-				-- 	ipairs = ipairs,
-				-- 	type = type,
-				-- 	table = table,
-				-- 	math = math,
-				-- 	string = string,
-				-- 	tonumber = tonumber,
-				-- 	tostring = tostring,
-				-- }
-
-				local capturedAircraft = nil
-
-				local function dummy_function(...)
-					return nil
-				end
-
-				local function dummy_table()
-					return {}
-				end
-
-
-				local env = {
-
-					-- indispensables DCS
-					current_mod_path = "",
-
-					aircraft_task = function(task)
-						return task
-					end,
-
-					_ = function(s) return s end,
-
-					dofile = sandbox_dofile,
-
-					-- Lua safe
-					pairs = pairs,
-					ipairs = ipairs,
-					type = type,
-					table = table,
-					math = math,
-					string = string,
-					tonumber = tonumber,
-					tostring = tostring,
-				}
-
-
-				-- métatable universelle
-				setmetatable(env, {
-					__index = function(t, k)
-
-						-- constantes numériques DCS
-						if k:match("^CAT_")
-						or k:match("^wsType")
-						or k:match("^WOLA")
-						then
-							local v = 0
-							rawset(t, k, v)
-							return v
-						end
-
-						-- tout le reste = fonction neutre
-						rawset(t, k, dummy_function)
-						return dummy_function
-					end
-				})
-
-
-
-
-
-				local chunk, err = loadfile(fullPath)
-				if not chunk then
-					print("DataDiscovery_D loadfile error : "..err)
-					-- return
-				end
-
-				setfenv(chunk, env)
-
-				local ok, result = pcall(chunk)
-				if not ok then
-					print("DataDiscovery_E exec error : "..result)
-					-- return
-				end
-
-				local aircraftData = nil
-
-				-- CAS 1 : dofile() direct → return {}
-				if type(result) == "table" then
-					aircraftData = result
-				end
-
-				-- CAS 2 : add_aircraft intercepté
-				if not aircraftData and type(capturedAircraft) == "table" then
-					aircraftData = capturedAircraft
-				end
-
-				-- CAS 3 : table globale classique
-				if not aircraftData and type(env[tableName]) == "table" then
-					aircraftData = env[tableName]
-				end
-
-
-				if not aircraftData then
-					print("DataDiscovery_H aucune table aircraft valide dans "..pathfileName)
-					os.execute("pause")
-				else
-					aircraftData = deepcopyLocal(aircraftData)
-
-					for k,_ in pairs(IGNORED_KEYS) do
-						aircraftData[k] = nil
-					end
-
-					local dst = Data_divers[planeName]
-
-					if aircraftData.Tasks then
-						dst.Tasks = aircraftData.Tasks
-					end
-
-					if aircraftData.Damage then
-						dst.Damage = aircraftData.Damage
-					end
-				end
-
-			end
-		end
-	end
-end
-
 
 --rempli la table TaskByPlane avec les Tasks qui ne sont rempli que dans Data_divers
 function DataCompilation_TaskByPlane()
@@ -5297,6 +5250,13 @@ function DataCompilation_TaskByPlane()
 				print("DataCompilation_TaskByPlane: planeType "..planeType.." task "..tostring(task))
 				if not TaskByPlane[task][planeType] then
 					TaskByPlane[task][planeType] = true
+				end
+			end
+		else
+			planeData.Tasks = {}
+			for task, dataTask in pairs(TaskByPlane) do
+				if dataTask[planeType] then
+					table.insert(planeData.Tasks, task)
 				end
 			end
 

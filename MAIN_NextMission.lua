@@ -487,13 +487,6 @@ if mission_ini.load_CTLD then
 	AddFileTriggerTempo("CTLD.lua", 4, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})	-- modification M60 CTLD
 end
 
-
------ run scripts to create content of next mission -----
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
-
-
 if not mission_ini  or mission_ini == nil  then
 	dofile("Init/conf_mod.lua")
 end
@@ -622,20 +615,6 @@ AssignCallnameSquad()
 
 -- Appel de la fonction principale
 CheckAndFixAllIds()
-
-
-
---****************************************************************************************
---transferé dans UTIL_Fonctions LoadFileAndUpdate()
---****************************************************************************************
-
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CampaignSettings.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Refpoints.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_MissionScore.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
-
--- Check_TaskPossibleByPlane()
 
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_MissionScore.lua")
 
