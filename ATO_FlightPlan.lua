@@ -310,17 +310,19 @@ CommonFreq = {
 --DCS_Side = {"blue", "red", "neutrals"}
 --commun frequence M34_
 for sideName, side in pairs(DCS_Side) do
-	CommonFreq[side]["UHF"][1] = GetFrequency(side, nil, "coalition", nil, "UHF")
-	CommonFreq[side]["UHF"][2] = GetFrequency(side, nil, "coalition", nil, "UHF")
+	CommonFreq[side]["UHF"][1] = GetFrequencyNG(side, nil, "coalition", nil, "UHF")
+	CommonFreq[side]["UHF"][2] = GetFrequencyNG(side, nil, "coalition", nil, "UHF")
 
-	CommonFreq[side]["VHF"][1] = GetFrequency(side, nil, "coalition", nil, "VHF")
-	CommonFreq[side]["VHF"][2] = GetFrequency(side, nil, "coalition", nil, "VHF")
+	CommonFreq[side]["VHF"][1] = GetFrequencyNG(side, nil, "coalition", nil, "VHF")
+	CommonFreq[side]["VHF"][2] = GetFrequencyNG(side, nil, "coalition", nil, "VHF")
 
-	CommonFreq[side]["HF"][1] = GetFrequency(side, nil, "coalition", nil, "HF")
-	CommonFreq[side]["HF"][2] = GetFrequency(side, nil, "coalition", nil, "HF")
+	CommonFreq[side]["HF"][1] = GetFrequencyNG(side, nil, "coalition", nil, "HF")
+	CommonFreq[side]["HF"][2] = GetFrequencyNG(side, nil, "coalition", nil, "HF")
+	CommonFreq[side]["LVHF"][1] = GetFrequencyNG(side, nil, "coalition", nil, "LVHF")
+	CommonFreq[side]["LVHF"][2] = GetFrequencyNG(side, nil, "coalition", nil, "LVHF")
 
-	CommonFreq[side]["LVHF"][1] = GetFrequency(side, nil, "coalition", nil, "LVHF")
-	CommonFreq[side]["LVHF"][2] = GetFrequency(side, nil, "coalition", nil, "LVHF")
+	_affiche(CommonFreq[side], "ATOFP CommonFreq "..side)
+	-- os.execute 'pause'
 
 	for n=1, 2 do
 		local testFreqency = tonumber(CommonFreq[side]["UHF"][n])
@@ -8088,6 +8090,13 @@ end
 if Debug.debug then
 	camp_str = "ATO_AtoFP = " .. TableSerialization(ATO, 0)						--make a string
 	campFile = io.open("Debug/ATO_AtoFP.lua", "w")  or error("Failed to open debug file")
+	campFile:write(camp_str)																		--save new data
+	campFile:close()
+
+	
+
+	camp_str = "CommonFreq = " .. TableSerialization(CommonFreq, 0)						--make a string
+	campFile = io.open("Debug/Radio_CommonFreq_FlightPlan.lua", "w")  or error("Failed to open debug file")
 	campFile:write(camp_str)																		--save new data
 	campFile:close()
 

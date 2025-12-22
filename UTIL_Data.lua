@@ -147,8 +147,6 @@ TaskByPlane = {
 
 		["AH-64A"] = true,
 
-		["OH-6A"] = true,			--Mod
-
 	},
 	["CAS"] = {
 		-- ["MosquitoFBMkVI"] = true,
@@ -198,7 +196,6 @@ TaskByPlane = {
 		["F-16C bl.52d"] = true,
 	
 		["AH-64D_BLK_II"] = true,
-		["OH-6A"] = true,			--Mod
 
 		["JF-17"] = true,
 		["L-39C"] = true,
@@ -342,7 +339,6 @@ TaskByPlane = {
 
 		["AH-64D_BLK_II"] = true,
 		["AH-64A"] = true,
-		["OH-6A"] = true,			--Mod
 
 		["JF-17"] = true,
 		["L-39C"] = true,
@@ -661,8 +657,6 @@ TaskByPlane = {
 		["vwv_ra-5"] = true,		--Mod
 		["F-15E"] = true,
 		["F-16C bl.52d"] = true,
-		
-		["OH-6A"] = true,			--Mod
 
 		["JF-17"] = true,
 		["MiG-25RBT"] = true,
@@ -723,8 +717,6 @@ TaskByPlane = {
 		["UH-60L"] = true,			--Mod
 		["SH-3D"] = true,			--Mod
 		["SH-60B"] = true,
-		["OH-6A"] = true,			--Mod
-
 
 		["An-26B"] = true,
 		["An-30M"] = true,
@@ -867,6 +859,7 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
+		folderModName = "AV8BNA",
 		vCruise = 230,
 		hCruise = 4500,
 		refuellingReceptacleType = "drogue"
@@ -880,6 +873,15 @@ Data_divers = {
 		vCruise = 221,
 		hCruise = 10630,--TODO a confirmer
 		refuellingReceptacleType = "drogue"
+	},
+	["A6E"] = 	{				--Mod ED
+		instrumentUnits = "imperial",
+		requiredModules = true,						--itsModule
+		moduleName = "A6E",
+		folderModName = "A-6E",
+		EPLRS_Capacity = false,
+		vCruise = 216,
+		hCruise = 10670,
 	},
 	["A-6E"] = 	{				--Mod
 		instrumentUnits = "imperial",
@@ -1785,10 +1787,12 @@ Data_divers = {
 	["OH-6A"] = {
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
-		Tasks = {                     -- defined in db_units_planes.lua
-		aircraft_task(Transport), --31
-		aircraft_task(Reconnaissance),
-	},
+		folderModName = "OH-6A",
+		addTasks = {                     -- defined in db_units_planes.lua
+			-- aircraft_task(Transport), --31
+			-- aircraft_task(Reconnaissance),
+			aircraft_task(CAS),
+		},
 		playable = true,
 	},
 	["AH-64D_BLK_II"] = {
@@ -1824,7 +1828,7 @@ Data_divers = {
 	},
 	["L-39C"] = {
 		instrumentUnits = "russian",
-		folderModName = "L-39C",
+		folderModName = "L-39",
 		EPLRS_Capacity = false,
 		inheritedFrom = "L-39",	--copy radio frequency, failures ...
 		playable = true,
@@ -2887,20 +2891,20 @@ TabTask = {
 }
 
 Failures = {
-	["A-4E-C"] = {
-        'asc',        --('ASC'),        
-        'autopilot',--('AUTOPILOT'),
-        'hydro',     --('HYDRO'),    
-        'l_engine', --('L-ENGINE'),    
-        'r_engine', --('R-ENGINE'),    
-        'radar',     --('RADAR'),    
-        'eos',         --('EOS'),        
-        'helmet',     --('HELMET'),    
-        'rws',         --('RWS'),        
-        'ecm',      --('ECM'),        
-        'hud',         --('HUD'),        
-        'mfd',         --('MFD'),        
-    },
+	-- ["A-4E-C"] = {
+    --     'asc',        --('ASC'),        
+    --     'autopilot',--('AUTOPILOT'),
+    --     'hydro',     --('HYDRO'),    
+    --     'l_engine', --('L-ENGINE'),    
+    --     'r_engine', --('R-ENGINE'),    
+    --     'radar',     --('RADAR'),    
+    --     'eos',         --('EOS'),        
+    --     'helmet',     --('HELMET'),    
+    --     'rws',         --('RWS'),        
+    --     'ecm',      --('ECM'),        
+    --     'hud',         --('HUD'),        
+    --     'mfd',         --('MFD'),        
+    -- },
 	["A-10A"] = {
 		'asc',--('ASC'),
 		'autopilot',--('AUTOPILOT'),
@@ -3056,35 +3060,35 @@ Failures = {
 	-- 	'LANDINGGEARL',--('Left landing gear'),
 	-- 	'LANDINGGEARR',--('Right landing gear'),
 	-- },
-	["AV8BNA"] = {
-		-- FWD Avionics Bay
-		'DMT_FAILURE_TOTAL',	--('DMT Camera Failure'),			
-		'ARBS_FAILURE_TOTAL',--('ARBS Failure'),					
-		'FLIR_FAILURE_TOTAL',--('NAVFLIR Failure'),				
+	-- ["AV8BNA"] = {
+	-- 	-- FWD Avionics Bay
+	-- 	'DMT_FAILURE_TOTAL',	--('DMT Camera Failure'),			
+	-- 	'ARBS_FAILURE_TOTAL',--('ARBS Failure'),					
+	-- 	'FLIR_FAILURE_TOTAL',--('NAVFLIR Failure'),				
 
-		-- AFT Avionics Bay
-		'ADC_FAILURE_TOTAL',	--('Air Data Computer Failure'),		
-		'MSC_FAILURE_TOTAL',	--('Mission Systems Computer Failure'),
-		'TCN_FAILURE_TOTAL',	--('TACAN Receiver Failure'),		
-		'COM1_FAILURE_TOTAL',--('Radio 1 Failure'),				
-		'DVMS_FAILURE_TOTAL',--('Moving Map Controller Failure'),	
-		'INS_FAILURE_VELOCITY',--('INS Velocity Failure'),			
-		'INS_FAILURE_HEADING',--('INS Heading Failure'),			
-		'INS_FAILURE_ATTITUDE',--('INS Attitude Failure'),			
-		'COM2_FAILURE_TOTAL',--('Radio 2 Failure'),				
-		'SMS_FAILURE_TOTAL',	--('Weapons Controller Failure'),	
+	-- 	-- AFT Avionics Bay
+	-- 	'ADC_FAILURE_TOTAL',	--('Air Data Computer Failure'),		
+	-- 	'MSC_FAILURE_TOTAL',	--('Mission Systems Computer Failure'),
+	-- 	'TCN_FAILURE_TOTAL',	--('TACAN Receiver Failure'),		
+	-- 	'COM1_FAILURE_TOTAL',--('Radio 1 Failure'),				
+	-- 	'DVMS_FAILURE_TOTAL',--('Moving Map Controller Failure'),	
+	-- 	'INS_FAILURE_VELOCITY',--('INS Velocity Failure'),			
+	-- 	'INS_FAILURE_HEADING',--('INS Heading Failure'),			
+	-- 	'INS_FAILURE_ATTITUDE',--('INS Attitude Failure'),			
+	-- 	'COM2_FAILURE_TOTAL',--('Radio 2 Failure'),				
+	-- 	'SMS_FAILURE_TOTAL',	--('Weapons Controller Failure'),	
 
-		-- Weapons Stations
-		'STATION_1_FAILURE',	--('Station 1 Failure'),				
-		'STATION_2_FAILURE',	--('Station 2 Failure'),				
-		'STATION_3_FAILURE',	--('Station 3 Failure'),				
-		'STATION_4_FAILURE',	--('Station 4 Failure'),				
-		'STATION_5_FAILURE',	--('Station 5 Failure'),				
-		'STATION_6_FAILURE',	--('Station 6 Failure'),				
-		'STATION_7_FAILURE',	--('Station 7 Failure'),				
-		'STRAKE_LEFT_FAILURE',--('Gun Pod Left Failure'),			
-		'STRAKE_RIGHT_FAILURE',--('Gun Pod Right Failure'),			
-	},
+	-- 	-- Weapons Stations
+	-- 	'STATION_1_FAILURE',	--('Station 1 Failure'),				
+	-- 	'STATION_2_FAILURE',	--('Station 2 Failure'),				
+	-- 	'STATION_3_FAILURE',	--('Station 3 Failure'),				
+	-- 	'STATION_4_FAILURE',	--('Station 4 Failure'),				
+	-- 	'STATION_5_FAILURE',	--('Station 5 Failure'),				
+	-- 	'STATION_6_FAILURE',	--('Station 6 Failure'),				
+	-- 	'STATION_7_FAILURE',	--('Station 7 Failure'),				
+	-- 	'STRAKE_LEFT_FAILURE',--('Gun Pod Left Failure'),			
+	-- 	'STRAKE_RIGHT_FAILURE',--('Gun Pod Right Failure'),			
+	-- },
 	["C-101"] =
 	{
 		"generator_fail",--("Generator failure"),	
@@ -3681,48 +3685,48 @@ Failures = {
 		'pp_damage_OilSeparator',--('Engine: Oil Separator FAILURE'),
 		-- 
 	},
-	["L-39"] = {
-		-- engine
-		'ef_shutdown',				--('Engine SHUTDOWN'),			
-		'ef_fire',					--('Engine FIRE'),				
-		'ef_vibration',				--('Engine VIBRATION'),			
-		'ef_surge',					--('Engine SURGE'),				  
-		'ef_rt12',					--('Engine RT-12 FAILURE'),		
-		'ef_fuel_reg',				--('Engine fuel governor FAILURE'),
+	-- ["L-39"] = {
+	-- 	-- engine
+	-- 	'ef_shutdown',				--('Engine SHUTDOWN'),			
+	-- 	'ef_fire',					--('Engine FIRE'),				
+	-- 	'ef_vibration',				--('Engine VIBRATION'),			
+	-- 	'ef_surge',					--('Engine SURGE'),				  
+	-- 	'ef_rt12',					--('Engine RT-12 FAILURE'),		
+	-- 	'ef_fuel_reg',				--('Engine fuel governor FAILURE'),
 
-		-- electric system
-		'ELEC_GENERATOR_FAILURE',		--('Generator FAILURE'),			
-		'ELEC_EMERGENCY_GENERATOR_FAILURE',		--('Emergency Generator FAILURE'),
-		'ELEC_STARTER_FAILURE',			--('Starter FAILURE'),			
-		'ELEC_BATTERY_DESTROYED',			--('Battery FAILURE'),			
-		'es_damage_Inverter36x3',	--('Inverter 3x36V FAILURE'),	
-		'es_damage_InverterPT500C',	--('Inverter PT-500 FAILURE'),	
-		'es_damage_Inverter115_1',	--('Inverter 115V I FAILURE'),	
-		'es_damage_Inverter115_2',	--('Inverter 115V II FAILURE'),	
-		-- fuel system
-		'FUEL_BOOSTER_FUEL_PUMP_0_FAILURE',	--('Fuel Booster Pump FAILURE'),	
-		-- hydraulic system
-		'HYDR_PUMP_FAILURE',		--('Main Hydraulic Pump FAILURE'),
-		'hs_damage_MainAccumulator',	--('Main Hydraulic Accumulator FAILURE'),	
-		'hs_damage_AuxAccumulator',	--('Auxiliary Accumulator FAILURE'),
-		-- oil system
-		'ENG0_OIL_PUMP_FAILURE',		--('Oil Pump FAILURE'),			
-		-- oxygen system
-		'OXYN_PRIMARY_CONTAINER_MINOR_LEAK',	--('Oxygen FAILURE'),			
-		-- air system
-		'PNEM_MAIN_HOSE_PERFORATED',--('Depressurization'),			
-		-- Instruments
-		'GMC1AE_GYRO_FAILURE',		--('GMC-1AE gyro FAILURE'),		
-		'AGD1_GYRO_TOTAL_FAILURE',	--('AGD-1 gyro FAILURE'),		
-		'ssf_full_pressure_fail',	--('fwd cockpit full p manometer FAILURE'),	
-		'ssf_static_pressure_fail',	--('fwd cockpit static p manometer FAILURE'),
-		-- RKL-41
-		'RKL_41_TOTAL_FAILURE',		--('RKL-41 Total FAILURE'),		
-		'RKL_41_ADF_DAMAGE',			--('RKL-41 Goniometer FAILURE'),	
-		'RKL_41_ANT_DAMAGE',			--('RKL-41 Antenna FAILURE'),	
-		-- Weapon System
-		'GSH23_CHARGED_FAILURE',		--('GSh-23l Charge FAILURE'),	
-	},
+	-- 	-- electric system
+	-- 	'ELEC_GENERATOR_FAILURE',		--('Generator FAILURE'),			
+	-- 	'ELEC_EMERGENCY_GENERATOR_FAILURE',		--('Emergency Generator FAILURE'),
+	-- 	'ELEC_STARTER_FAILURE',			--('Starter FAILURE'),			
+	-- 	'ELEC_BATTERY_DESTROYED',			--('Battery FAILURE'),			
+	-- 	'es_damage_Inverter36x3',	--('Inverter 3x36V FAILURE'),	
+	-- 	'es_damage_InverterPT500C',	--('Inverter PT-500 FAILURE'),	
+	-- 	'es_damage_Inverter115_1',	--('Inverter 115V I FAILURE'),	
+	-- 	'es_damage_Inverter115_2',	--('Inverter 115V II FAILURE'),	
+	-- 	-- fuel system
+	-- 	'FUEL_BOOSTER_FUEL_PUMP_0_FAILURE',	--('Fuel Booster Pump FAILURE'),	
+	-- 	-- hydraulic system
+	-- 	'HYDR_PUMP_FAILURE',		--('Main Hydraulic Pump FAILURE'),
+	-- 	'hs_damage_MainAccumulator',	--('Main Hydraulic Accumulator FAILURE'),	
+	-- 	'hs_damage_AuxAccumulator',	--('Auxiliary Accumulator FAILURE'),
+	-- 	-- oil system
+	-- 	'ENG0_OIL_PUMP_FAILURE',		--('Oil Pump FAILURE'),			
+	-- 	-- oxygen system
+	-- 	'OXYN_PRIMARY_CONTAINER_MINOR_LEAK',	--('Oxygen FAILURE'),			
+	-- 	-- air system
+	-- 	'PNEM_MAIN_HOSE_PERFORATED',--('Depressurization'),			
+	-- 	-- Instruments
+	-- 	'GMC1AE_GYRO_FAILURE',		--('GMC-1AE gyro FAILURE'),		
+	-- 	'AGD1_GYRO_TOTAL_FAILURE',	--('AGD-1 gyro FAILURE'),		
+	-- 	'ssf_full_pressure_fail',	--('fwd cockpit full p manometer FAILURE'),	
+	-- 	'ssf_static_pressure_fail',	--('fwd cockpit static p manometer FAILURE'),
+	-- 	-- RKL-41
+	-- 	'RKL_41_TOTAL_FAILURE',		--('RKL-41 Total FAILURE'),		
+	-- 	'RKL_41_ADF_DAMAGE',			--('RKL-41 Goniometer FAILURE'),	
+	-- 	'RKL_41_ANT_DAMAGE',			--('RKL-41 Antenna FAILURE'),	
+	-- 	-- Weapon System
+	-- 	'GSH23_CHARGED_FAILURE',		--('GSh-23l Charge FAILURE'),	
+	-- },
 	["MB-339A"] =
 	{
 		 "1",--("Starter/Generator 1 failure"),		
@@ -3777,22 +3781,22 @@ Failures = {
 		-- "dme_fail",--("DME signal fail"), 							
 	},
 
-	["OH58D"] =
-	{
-		'engine',
-		'LMFD',
-		'RMFD',
-		'MMSCamera',
-		'Inverter',
-		'Battery',
-		'Rectifier Unit',
-		'AC Generator',
-		'DC Generator',
-		'Transmission',
-		'Hydraulic Reserve',
-		'Tail Rotor',
-		'Engine Oil',
-	},
+	-- ["OH58D"] =
+	-- {
+	-- 	'engine',
+	-- 	'LMFD',
+	-- 	'RMFD',
+	-- 	'MMSCamera',
+	-- 	'Inverter',
+	-- 	'Battery',
+	-- 	'Rectifier Unit',
+	-- 	'AC Generator',
+	-- 	'DC Generator',
+	-- 	'Transmission',
+	-- 	'Hydraulic Reserve',
+	-- 	'Tail Rotor',
+	-- 	'Engine Oil',
+	-- },
 	["AH-64D_BLK_II"] =
 	{
 		'APU_Fire',--('APU Fire'),
@@ -3800,23 +3804,23 @@ Failures = {
 		'RightEngine_Fire',--('Engine 2 Fire'),			
 	},
 
-	["MiG-21bis"] =
-	{
-		'DC_BUS_FAILURE_TOTAL',--('DC Bus'), -- 0
-		'DC_BUS_GENERATOR_FAILURE',--('DC Generator'), -- 1
-		'AC_BUS_FAILURE_TOTAL',--('AC Bus'), -- 2
-		'AC_BUS_PO7501_FAILURE',--('PO7501 Inverter'), -- 3
-		'AC_BUS_PO7502_FAILURE',--('PO7502 Inverter'), -- 4
-		'ENGINE_FAILURE_TOTAL',--('Engine'), -- 5
-		'GYROS_FAILURE_TOTAL',--('Gyroscopes'), -- 6
-		'PITOT_FAILURE_TOTAL',--('Pitot Tubes'), -- 7
-		'WEAPONS_FAILURE_TOTAL',--('Weapons System'), -- 8
-		'SOPLO_FAILURE_PARTIAL',--('Engine Nozzle'), -- 9
-		'RADAR_FAILURE_TOTAL',--('Radar'), -- 10
-		'KPP_FAILURE_PARTIAL',--('Kpp'), -- 11
+	-- ["MiG-21bis"] =
+	-- {
+	-- 	'DC_BUS_FAILURE_TOTAL',--('DC Bus'), -- 0
+	-- 	'DC_BUS_GENERATOR_FAILURE',--('DC Generator'), -- 1
+	-- 	'AC_BUS_FAILURE_TOTAL',--('AC Bus'), -- 2
+	-- 	'AC_BUS_PO7501_FAILURE',--('PO7501 Inverter'), -- 3
+	-- 	'AC_BUS_PO7502_FAILURE',--('PO7502 Inverter'), -- 4
+	-- 	'ENGINE_FAILURE_TOTAL',--('Engine'), -- 5
+	-- 	'GYROS_FAILURE_TOTAL',--('Gyroscopes'), -- 6
+	-- 	'PITOT_FAILURE_TOTAL',--('Pitot Tubes'), -- 7
+	-- 	'WEAPONS_FAILURE_TOTAL',--('Weapons System'), -- 8
+	-- 	'SOPLO_FAILURE_PARTIAL',--('Engine Nozzle'), -- 9
+	-- 	'RADAR_FAILURE_TOTAL',--('Radar'), -- 10
+	-- 	'KPP_FAILURE_PARTIAL',--('Kpp'), -- 11
 
-		'LANDING_LIGHTS_FAILURE',--('Landing lights failure'), -- 12, 03. Dec 2014
-	},
+	-- 	'LANDING_LIGHTS_FAILURE',--('Landing lights failure'), -- 12, 03. Dec 2014
+	-- },
 
 	["MiG-29 Fulcrum"] =
 	{
@@ -4190,13 +4194,13 @@ Failures = {
 		'DNS_FAILURE',  --('DNS failure'), 	
 		'IMU_FAILURE',  --('INS failure'), 	
 	},
-	["Mi-24P"] =
-	{
-		'APU_Fire',--('AI-98 Tank-3 Fire'),
-		'LeftEngine_Fire',--('Left Engine Fire'),
-		'RightEngine_Fire',--('Right Engine Fire'),
-		'MainReducer_Fire',--('Main Reducer Fire'),
-	},
+	-- ["Mi-24P"] =
+	-- {
+	-- 	'APU_Fire',--('AI-98 Tank-3 Fire'),
+	-- 	'LeftEngine_Fire',--('Left Engine Fire'),
+	-- 	'RightEngine_Fire',--('Right Engine Fire'),
+	-- 	'MainReducer_Fire',--('Main Reducer Fire'),
+	-- },
 }
 
 DataCountry = {
@@ -4928,11 +4932,12 @@ function DataCompilation_DataDiscoveryA2()
 
 							if aircraft.HumanRadio then
 								dst.HumanRadio = aircraft.HumanRadio
-								-- _affiche(aircraft.HumanRadio, "  -> HumanRadio found ")
+								_affiche(aircraft.HumanRadio, "  -> HumanRadio found ")
 								-- os.execute 'pause'
 							end
 							if aircraft.panelRadio then
 								dst.panelRadio = aircraft.panelRadio
+								print("  -> panelRadio found ")
 								-- _affiche(aircraft.panelRadio, "  -> panelRadio found ")
 								-- os.execute 'pause'
 							end
@@ -5252,6 +5257,63 @@ end
 
 --rempli la table TaskByPlane avec les Tasks qui ne sont rempli que dans Data_divers
 function DataCompilation_TaskByPlane()
+
+	-- local cloneData = Deepcopy(Data_divers)
+
+	-- for _, planeDataA in pairs(Data_divers) do
+	-- 	if planeDataA.addTasks then
+	-- 		for _, add_task in pairs(planeDataA.addTasks) do
+	-- 			local foundTask = false
+	-- 			for cloneType, cloneTYpe in pairs(cloneData) do
+	-- 				if cloneTYpe.Tasks then
+	-- 					for _, cloneTask in pairs(cloneTYpe.Tasks) do
+	-- 						if cloneTask == add_task then
+	-- 							foundTask = true
+	-- 							break
+	-- 						end
+	-- 					end
+	-- 				end
+	-- 			end
+	-- 			if not foundTask then
+	-- 				table.insert(planeDataA.Tasks, add_task)
+	-- 			end
+	-- 		end
+	-- 	end
+	-- end
+
+
+	-- On parcourt chaque entrée de Data_divers
+	for planeName, planeData in pairs(Data_divers) do
+
+		-- Si cette entrée contient des tâches à ajouter
+		if planeData.addTasks then
+			-- On clone la table principale pour pouvoir comparer sans modifier l'original
+			local clonePlaneData = Deepcopy(planeData)
+
+			-- On parcourt chaque tâche à ajouter
+			for _, newTask in pairs(planeData.addTasks) do
+				local found = false
+
+				-- On cherche si cette tâche existe déjà dans la copie
+				if clonePlaneData.Tasks then
+					for _, existingTask in pairs(clonePlaneData.Tasks) do
+						if existingTask == newTask then
+							found = true
+							break
+						end
+					end
+				end
+				if found then break end
+
+				-- Si la tâche n'existe pas encore, on l'ajoute
+				if not found then
+					planeData.Tasks = planeData.Tasks or {}
+					table.insert(planeData.Tasks, newTask)
+				end
+			end
+		end
+	end
+
 	for planeType, planeData in pairs(Data_divers) do
 		if planeData.Tasks then
 			for taskN, task in pairs(planeData.Tasks) do

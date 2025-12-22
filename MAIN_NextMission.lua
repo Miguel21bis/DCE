@@ -584,29 +584,32 @@ for planeType, value in PairsByKeys(Data_divers) do
 	end
 end
 
---si ADD_data existe, on le precharge pour l'ajouter au DATA centram
-local addDataFile02 = "../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua"
-local testPathADD_addData = io.open(addDataFile02, "r")										--cette maniere de chercher la presence d un fichier evite un plantage
-if testPathADD_addData ~= nil  then														--check si le fichier existe dans ScriptsMod
-	dofile("../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua")
+--**
+--deprecated--
+--**
+-- --si ADD_data existe, on le precharge pour l'ajouter au DATA centram
+-- local addDataFile02 = "../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua"
+-- local testPathADD_addData = io.open(addDataFile02, "r")										--cette maniere de chercher la presence d un fichier evite un plantage
+-- if testPathADD_addData ~= nil  then														--check si le fichier existe dans ScriptsMod
+-- 	dofile("../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua")
 
-	if add_EPLRS_Capacity then
-		for key , value in pairs(add_EPLRS_Capacity) do
-			if not EPLRS_Capacity[key] then
-				EPLRS_Capacity[key] = true
-			end
-		end
-	end
+-- 	if add_EPLRS_Capacity then
+-- 		for key , value in pairs(add_EPLRS_Capacity) do
+-- 			if not EPLRS_Capacity[key] then
+-- 				EPLRS_Capacity[key] = true
+-- 			end
+-- 		end
+-- 	end
 
-	if add_TaskByPlane then
-		for key , value in pairs(add_TaskByPlane) do
-			if not TaskByPlane[key] then
-				TaskByPlane[key] = true
-			end
-		end
-	end
+-- 	if add_TaskByPlane then
+-- 		for key , value in pairs(add_TaskByPlane) do
+-- 			if not TaskByPlane[key] then
+-- 				TaskByPlane[key] = true
+-- 			end
+-- 		end
+-- 	end
 
-end
+-- end
 
 -- --assign les callsign par squad west
 AssignCallnameSquad()

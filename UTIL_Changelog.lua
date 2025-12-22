@@ -460,7 +460,7 @@ known issues:
 289 add		[plane]		Add Mirage  F-1EE
 288 add		[Datacard]	makes DCE compatible with the use of programs such as Datacard Generator or CombatFlite (M63)
 287 add		[third]		allows you to use third party files that Data information without being overwritten by central information updates (M62)
-				--> use Init\ADD_data.lua
+				--> use Init\ADD_data.lua -- deprecated
 
 ==:20.61.286:==
 286 fixed	[generator]	not enough Strike missions for some aircraft 

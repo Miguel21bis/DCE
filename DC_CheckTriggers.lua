@@ -282,7 +282,7 @@ Return = {}
 			end
 		end
 		if not foundTarget and Debug.debug  then
-			print("DcCT no found |"..tostring(targetName).."| in targetList, from campTriggers condition ") os.execute 'pause'
+			AddLog("DcCT no found |"..tostring(targetName).."| in targetList, from campTriggers condition ")
 		end
 	end
 

@@ -83,7 +83,7 @@ local function freqCapability(arg_TestFreq, arg_RadioPlane, arg_Nradio, arg_info
 		local bugTxt = "Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(arg_TestFreq).." Info: "..tostring(arg_info)
 		-- _affiche(arg_RadioPlane, "RadioPlane")
 		
-		AddLog("Note for the Campaign Maker"..bugTxt)
+		AddLog("Note for the Campaign Maker: "..bugTxt)
 
 	end
 
@@ -1719,7 +1719,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 					--***************************************************************************
 					--COMMON_freq****************************************************************
-					if mission_ini.MP_PlaneRecovery and Multi.NbGroup >= 1  then
+					-- if mission_ini.MP_PlaneRecovery and Multi.NbGroup >= 1  then
 						if CommonFreq[sideName]["UHF"][1] ~= 0 then
 							for cf = 1 , #CommonFreq[sideName]["UHF"] do
 								freqA = tonumber(CommonFreq[sideName]["UHF"][cf]) or 0
@@ -1853,7 +1853,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								end
 							end
 						end
-					end
+					-- end
 					--***************************************************************************
 					--AWACS_freq				
 					local copy_AWACS_freq = Deepcopy(frew_AWACS)
