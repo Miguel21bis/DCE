@@ -1225,7 +1225,7 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 						if group.route.points[1].task.params.tasks[t].params.action.id == "SetFrequency" then							--if group has a frequency set										
 							
 							if camp and camp.ewrFreqAdaptable then
-								ewr_call["frequencyMHz"] = GetFrequency(sidename, group.name, "EWR")
+								ewr_call["frequencyMHz"] = GetFrequencyNG(sidename, group.name, "EWR")
 								ewr_call["frequencyHz"] = ewr_call.frequencyMHz * 1000000		--convert to Hz
 								group.route.points[1].task.params.tasks[t].params.action.params.frequency = ewr_call["frequencyHz"]
 							else

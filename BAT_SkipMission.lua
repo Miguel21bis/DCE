@@ -34,7 +34,7 @@ TimeJump = false
 TimeJump_RosterUpdated = false
 CheckTriggersOnce = false
 Briefing_text = ""
-
+PlayerSide = nil
 
 local function acceptMission()
 	local m = ""
@@ -131,6 +131,34 @@ end
 if not ChangePlane then
 	require("Active/oob_air")
 end
+
+--affiche le type d'avion selectionné et son squadrons M55_a
+local playerInfo = {
+	planeBat = "",
+	squadBat = "",
+	countryBat = "",
+	sideBAT = "",
+}
+
+-- playerSide = ""
+local n_player = 0
+for side, squadTL in PairsByKeys(oob_air) do
+	for squad_n, squad in PairsByKeys(squadTL) do
+		if squad.player then
+			playerInfo.planeBAT = squad.type
+			playerInfo.squadBAT = squad.name
+			playerInfo.countryBAT = squad.country
+			playerInfo.sideBAT = side
+			n_player = n_player + 1
+		end
+	end
+end
+PlayerSide = playerInfo.sideBAT
+if n_player > 1 then
+	print("Warning: more than one player squadron found in OOB.")
+	os.execute 'pause'
+end
+
 dofile("Active/oob_scen.lua")
 
 
@@ -152,24 +180,6 @@ if f then
 		showVersion = showVersion .. " (" .. versionDCE["UTIL_Changelog.lua"] .. ")"
 	elseif versionDCE and versionDCE["UTIL_Changelog.txt"] then
 		showVersion = showVersion .. " (" .. versionDCE["UTIL_Changelog.txt"] .. ")"
-	end
-end
-
---affiche le type d'avion selectionné et son squadrons M55_a
-local playerInfo = {
-	planeBat = "",
-	squadBat = "",
-	countryBat = "",
-}
-
--- playerSide = ""
-for side, squadTL in PairsByKeys(oob_air) do
-	for squad_n, squad in PairsByKeys(squadTL) do
-		if squad.player then
-			playerInfo.planeBAT = squad.type
-			playerInfo.squadBAT = squad.name
-			playerInfo.countryBAT = squad.country
-		end
 	end
 end
 

@@ -28,6 +28,7 @@ Playable_m = {}
 SinglePlayer = false
 MissionInstance = 0
 Briefing_text = ""
+PlayerSide = nil
 
 
 Multi =
@@ -99,6 +100,33 @@ end
 
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ResetCampaign.lua")					--reset campaign status files. Required for first mission to generate according to initial status	
 
+--affiche le type d'avion selectionné et son squadrons M55_a
+local playerInfo = {
+	planeBat = "",
+	squadBat = "",
+	countryBat = "",
+	sideBAT = "",
+}
+
+-- playerSide = ""
+local n_player = 0
+for side, squadTL in PairsByKeys(oob_air) do
+	for squad_n, squad in PairsByKeys(squadTL) do
+		if squad.player then
+			playerInfo.planeBAT = squad.type
+			playerInfo.squadBAT = squad.name
+			playerInfo.countryBAT = squad.country
+			playerInfo.sideBAT = side
+			n_player = n_player + 1
+		end
+	end
+end
+PlayerSide = playerInfo.sideBAT
+
+if n_player > 1 then
+	print("Warning: more than one player squadron found in OOB.")
+	os.execute 'pause'
+end
 
 --***********NEW function***************--
 LoadFileAndUpdate("BAT_FirstMission "..debug.getinfo(1).currentline)
@@ -137,23 +165,7 @@ if  testPath ~= nil then
 	end
 end
 
---affiche le type d'avion selectionné et son squadrons M55_a
-local playerInfo = {
-	planeBat = "",
-	squadBat = "",
-	countryBat = "",
-}
 
--- playerSide = ""
-for side, squadTL in  PairsByKeys(oob_air) do
-	for squad_n, squad in  PairsByKeys(squadTL) do
-		if squad.player then
-			playerInfo.planeBAT = squad.type
-			playerInfo.squadBAT = squad.name
-			playerInfo.countryBAT = squad.country
-		end
-	end
-end
 
 
 if VersionPackageICM then

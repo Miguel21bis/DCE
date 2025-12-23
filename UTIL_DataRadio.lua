@@ -3,10 +3,11 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  updateData_n
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_DataRadio.lua"] = "1.4.51"
+versionDCE["UTIL_DataRadio.lua"] = "2.5.52"
 ------------------------------------------------------------------------------------------------------- 
 -- updateData_n				(n VSN_F104C)(m VSN_F4)(l: Fulcrum)k(Frequency)(CH-47F)(i: VSN_F100 + 105)(h F-4E-45MC)(g add Hercules)(h F-15ESE)(f add MB-339A)(e: add F1-EE)(d add 3xSa342)(c: L39+Su25)(b: add AH-64D_BLK_II)(a: add Mi24)
 -- Debug_f					(f: bug list Freq)(e correction F16)(d: fix Mi24 VHF/UHF)(c onlyVariableFrequency = true, for SA342)(b radio 2 UHF)(a Bf109, Spitfire)
+--new script
 -- modification M34_Bl		custom FrequenceRadio (l new file name)  (i: FreqCapability2)(f more Divert, more Coalition)(Bc Bug Mirage 2000)(Ba A-4E-C bug)(v delete Radio3 AV8)(t: radioname)(p LVHF)(i: 3 frequency bands)
 -- modification M20_b		Pannes aléatoires (Failures) en SingleMission et ForcedOption (external view etc..) (b failure adapted to each aircraft type)
 -- -------------------------------------------------------------------------------------------------------

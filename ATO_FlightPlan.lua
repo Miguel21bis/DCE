@@ -5188,56 +5188,58 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				-------- define group -----
 				-------- define group -----
 				---
-				local testFreqency = GetFrequency(sideName, flight[f].target_name, flight[f].task, type_withData, nil)
+				local testFreqency = GetFrequencyNG(sideName, flight[f].target_name, flight[f].task, type_withData, nil)
 
-				--certain plane ne peuvent pas dépasser les valeurs de la radio 1 pour la frequence générale (exemple M-2000)
-				local info = ""
-				if Frequency[type_withData] and Frequency[type_withData].radio.frequencyMustBeRadio1 then
-					if not FreqCapability2(testFreqency, type_withData, 1, info) then
+				-- --certain plane ne peuvent pas dépasser les valeurs de la radio 1 pour la frequence générale (exemple M-2000)
+				-- local info = type_withData
+				-- if Frequency[type_withData] and Frequency[type_withData].radio.frequencyMustBeRadio1 then
+				-- 	if not FreqCapability2(testFreqency, type_withData, 1, info) then
 
-						local foundFreq = false
-						if Frequency[type_withData].radio then
-							for range, value in pairs(Frequency[type_withData].radio) do
-								local i=0
-								repeat
-									testFreqency = GetFrequency(sideName, groupName, flight[f].task, type_withData, range)
-									print("AtoFP testFreqency: "..testFreqency)
-									if FreqCapability2(testFreqency, type_withData, 1, info) then
-										foundFreq = true
-									end
-									i=i+1
-								until foundFreq or i > 10
+				-- 		local foundFreq = false
+				-- 		if Frequency[type_withData].radio then
+				-- 			for range, value in pairs(Frequency[type_withData].radio) do
+				-- 				local i=0
+				-- 				repeat
+				-- 					testFreqency = GetFrequencyNG(sideName, groupName, flight[f].task, type_withData, range)
+				-- 					print("AtoFP testFreqency: "..testFreqency)
+				-- 					if FreqCapability2(testFreqency, type_withData, 1, info) then
+				-- 						foundFreq = true
+				-- 					end
+				-- 					i=i+1
+				-- 				until foundFreq or i > 10
 
-								if foundFreq then break end
+				-- 				if foundFreq then break end
 
-							end
-						end
-					end
+				-- 			end
+				-- 		end
+				-- 	end
 
-					if not FreqCapability2(testFreqency, type_withData, 1, info) then
-						DebugFLIGHT = DebugFLIGHT .. "\n"..("AtoFP error frequency: "..type_withData.." "..testFreqency)
-					end
-				end
+				-- 	if not FreqCapability2(testFreqency, type_withData, 1, info) then
+				-- 		DebugFLIGHT = DebugFLIGHT .. "\n"..("AtoFP error frequency: "..type_withData.." "..testFreqency)
+				-- 	end
+				-- end
 
-				if Frequency[type_withData] and Frequency[type_withData]["onlyVariableFrequency"] then
+				-- if Frequency[type_withData] and Frequency[type_withData]["onlyVariableFrequency"] then
 
-					if testFreqency >= Frequency[type_withData].onlyVariableFrequency.min
-					and testFreqency <= Frequency[type_withData].onlyVariableFrequency.max
-					then
-						-- print("AtoFp frequency Passe C Frequence "..tostring(testFreqency))
-					else
+				-- 	if testFreqency >= Frequency[type_withData].onlyVariableFrequency.min
+				-- 	and testFreqency <= Frequency[type_withData].onlyVariableFrequency.max
+				-- 	then
+				-- 		-- print("AtoFp frequency Passe C Frequence "..tostring(testFreqency))
+				-- 	else
 
-						local wave = FoundWave(Frequency[type_withData].onlyVariableFrequency)
+				-- 		local wave = FoundWave(Frequency[type_withData].onlyVariableFrequency)
 
-						testFreqency = GetFrequency(sideName, flight[f].target_name, flight[f].task, type_withData, wave)
+				-- 		-- testFreqency = GetFrequency(sideName, flight[f].target_name, flight[f].task, type_withData, wave)
+				-- 		testFreqency = GetFrequencyNG(sideName, flight[f].target_name, flight[f].task, type_withData, wave)
+				-- 		print("AtoFP new testFreqency: "..testFreqency.." for wave: "..tostring(wave).." type: "..type_withData)
 
-						if testFreqency < Frequency[type_withData].onlyVariableFrequency.min
-						or testFreqency > Frequency[type_withData].onlyVariableFrequency.max
-						then
-							DebugFLIGHT = DebugFLIGHT .. "\n"..("AtoFP error frequency: "..type_withData.." "..testFreqency)
-						end
-					end
-				end
+				-- 		if testFreqency < Frequency[type_withData].onlyVariableFrequency.min
+				-- 		or testFreqency > Frequency[type_withData].onlyVariableFrequency.max
+				-- 		then
+				-- 			DebugFLIGHT = DebugFLIGHT .. "\n"..("AtoFP error frequency: "..type_withData.." "..testFreqency)
+				-- 		end
+				-- 	end
+				-- end
 
 
 				if tonumber(testFreqency) == 243 or tonumber(testFreqency) == 121.5 then

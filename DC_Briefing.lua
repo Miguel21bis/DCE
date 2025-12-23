@@ -80,10 +80,10 @@ local function freqCapability(arg_TestFreq, arg_RadioPlane, arg_Nradio, arg_info
 	elseif arg_TestFreq >= 1 and arg_TestFreq < 20 then
 		waves = "HF"
 	else
-		local bugTxt = "Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(arg_TestFreq).." Info: "..tostring(arg_info)
+		local bugTxt = "DC_B Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(arg_TestFreq).." Info: "..tostring(arg_info)
 		-- _affiche(arg_RadioPlane, "RadioPlane")
 		
-		AddLog("Note for the Campaign Maker: "..bugTxt)
+		AddLog("Note for the Campaign Maker: freqCapability() "..bugTxt.." arg_RadioPlane[arg_Nradio]: "..tostring(arg_RadioPlane[arg_Nradio]))
 
 	end
 
@@ -1556,12 +1556,12 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								if landingPossible then
 									for i=1, #radioP do
 										if db_airbases[base].ATC_frequency and type(db_airbases[base].ATC_frequency)~= "table" then
-											if freqCapability(db_airbases[base].ATC_frequency, radioP, i, "Divert: ") then
+											if freqCapability(db_airbases[base].ATC_frequency, radioP, i, inheritedType.." Divert: ") then
 												freq_ATC_Divert[divertName] = db_airbases[base].ATC_frequency
 											end
 										elseif db_airbases[base].ATC_frequency and type(db_airbases[base].ATC_frequency)== "table" then
 											for n , freq in ipairs(db_airbases[base].ATC_frequency) do
-												if freqCapability(freq, radioP, i, "Divert: ") then
+												if freqCapability(freq, radioP, i, inheritedType.."Divert: ") then
 													freq_ATC_Divert[divertName] = db_airbases[base].ATC_frequency
 												end
 											end
@@ -1606,7 +1606,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						entry["call"] = ""
 						entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-						if freqCapability(freqA, radioP, radioN, "") then
+						if freqCapability(freqA, radioP, radioN, flight[f].type) then
 							-- for u = 1, #tempPlayer.group["units"] do
 								if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 									if radioP[radioN].startCanal == 0 then MC = -1 end
@@ -1652,7 +1652,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						entry["call"] = ReplaceBaseName(tempPlayer.airbase)
 						entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-						if freqCapability(freqA, radioP, radioN, "") then
+						if freqCapability(freqA, radioP, radioN, inheritedType) then
 							if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 								if radioP[radioN].startCanal == 0 then MC = -1 end
 								-- if RadioA[sideName][Nradio]  then
@@ -1683,7 +1683,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 								local numPreset
 
-								if freqCapability(freqA, radioP, radioN, "") then
+								if freqCapability(freqA, radioP, radioN, inheritedType) then
 									-- for u = 1, #tempPlayer.group["units"] do
 										if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] < radioP[radioN].nbCanal then
 											if radioP[radioN] and radioP[radioN].nbCanal > 0 then
@@ -1733,7 +1733,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["call"] = call
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-									if freqCapability(freqA, radioP, radioN, "") then
+									if freqCapability(freqA, radioP, radioN, inheritedType) then
 										-- for u = 1, #tempPlayer.group["units"] do
 											if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 												if radioP[radioN] and radioP[radioN].nbCanal > 0 then
@@ -1770,7 +1770,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["call"] = call
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-									if freqCapability(freqA, radioP, radioN, "") then
+									if freqCapability(freqA, radioP, radioN, inheritedType) then
 										-- for u = 1, #tempPlayer.group["units"] do
 											if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 												if radioP[radioN].startCanal == 0 then MC = -1 end
@@ -1803,7 +1803,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["call"] = call
 									entry["freq"] = string.format("%02.3f", freqA).. " MHz"
 
-									if freqCapability(freqA, radioP, radioN, "") then
+									if freqCapability(freqA, radioP, radioN, inheritedType) then
 										-- for u = 1, #tempPlayer.group["units"] do
 											if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 												if radioP[radioN].startCanal == 0 then MC = -1 end
@@ -1836,7 +1836,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["call"] = call
 									entry["freq"] = string.format("%02.3f", freqA).. " MHz"
 
-									if freqCapability(freqA, radioP, radioN, "") then
+									if freqCapability(freqA, radioP, radioN, inheritedType) then
 										-- for u = 1, #tempPlayer.group["units"] do
 											if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 												if radioP[radioN].startCanal == 0 then MC = -1 end
@@ -1883,7 +1883,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["call"] = call
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-								if freqCapability(freqA, radioP, radioN, "") then
+								if freqCapability(freqA, radioP, radioN, inheritedType) then
 
 									if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 										if radioP[radioN].startCanal == 0 then MC = -1 end
@@ -1913,7 +1913,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["call"] = call
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-								if freqCapability(freqA, radioP, radioN, "") then
+								if freqCapability(freqA, radioP, radioN, inheritedType) then
 									if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] < radioP[radioN].nbCanal then
 										if radioP[radioN].startCanal == 0 then MC = -1 end
 										table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
@@ -1957,7 +1957,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["call"] = call
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-									if freqCapability(freqA, radioP, radioN, "") then
+									if freqCapability(freqA, radioP, radioN, inheritedType) then
 										if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] < radioP[radioN].nbCanal then
 											if radioP[radioN].startCanal == 0 then MC = -1 end
 											table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
@@ -1994,7 +1994,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["call"] = call
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-								if freqCapability(freqA, radioP, radioN, "") then
+								if freqCapability(freqA, radioP, radioN, inheritedType) then
 									if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 										if radioP[radioN].startCanal == 0 then MC = -1 end
 										table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
@@ -2020,7 +2020,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							entry["call"] = call
 							entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-							if freqCapability(freqA, radioP, Nradio, "") then
+							if freqCapability(freqA, radioP, Nradio, inheritedType) then
 								if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 									if radioP[Nradio].startCanal == 0 then MC = -1 end
 									table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
@@ -2046,7 +2046,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["call"] = ReplaceBaseName(call)
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-								if freqCapability(freqA, radioP, Nradio, "") then
+								if freqCapability(freqA, radioP, Nradio, inheritedType) then
 									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 										if radioP[Nradio].startCanal == 0 then MC = -1 end
 										table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
@@ -2091,7 +2091,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["call"] = ReplaceBaseName(baseName)
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-									if freqCapability(freqA, radioP, radioN, "ATC "..tostring(baseName)) then
+									if freqCapability(freqA, radioP, radioN, inheritedType.." ATC "..tostring(baseName)) then
 										if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
 											if radioP[radioN].startCanal == 0 then MC = -1 end
 											table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
@@ -2116,7 +2116,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["call"] = call
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-								if freqCapability(freqA, radioP, Nradio, "") then
+								if freqCapability(freqA, radioP, Nradio, inheritedType) then
 									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
 										if radioP[Nradio].startCanal == 0 then MC = -1 end
 										table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)

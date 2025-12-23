@@ -345,9 +345,11 @@ if error >= 1 then
 		bugFile:close()
 	end
 
-	os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')			--open the BugList file with notepad
+	-- os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')			--open the BugList file with notepad
 
-	os.execute 'pause'
+	-- print("Read the Debug/BugList.lua file for more information about errors.")
+
+	-- os.execute 'pause'
 end
 
 
@@ -1950,7 +1952,13 @@ for sideName, draftT in pairs(draftSorties) do
 								--get possible loadouts
 								local unit_loadouts = {}														--table to hold all loadouts for this aircraft type and task
 
-								for loadout_name, ltable in pairs(LoadoutsList[unit.type][task]) do			--iterate through all loadouts for the aircraft type and task
+								if not LoadoutsList[unit.type] then
+									debugLog("Erreur loadouts : "..tostring("this aeronef type has no loadouts defined "..unit.type))
+								elseif not LoadoutsList[unit.type][task] then
+									debugLog("Erreur loadouts : "..tostring("this"))
+								end
+
+								for loadout_name, ltable in pairs((LoadoutsList[unit.type] and LoadoutsList[unit.type][task]) or {}) do			--iterate through all loadouts for the aircraft type and task
 									ltable.name = loadout_name
 									if ltable.standoff == nil then ltable.standoff = 0 end
 

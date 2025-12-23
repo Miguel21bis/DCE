@@ -280,7 +280,7 @@ TaskByPlane = {
 		["tu_22D"] = true,				--Mod
 
 		["Mi-24V"] = true,
-		["Mi-24P"] = true,
+		-- ["Mi-24P"] = true,
 		["Mi-28N"] = true,
 		["Ka-50"] = true,
 		["Ka-50_3"] = true,
