@@ -822,18 +822,18 @@ local function get_IDM_Id()
 	return testId
 end
 
---liste toutes les Fréquences déjà existantes pour ne pas creer de doublon
-for basename, base in pairs(db_airbases) do
-	if base.ATC_frequency and base.ATC_frequency ~= "" and type(base.ATC_frequency)~= "table" then
-		Assigned_freq[tonumber(base.ATC_frequency)] = basename
-	elseif base.ATC_frequency and type(base.ATC_frequency)== "table" then
-		for n , freq in ipairs(base.ATC_frequency) do
-			Assigned_freq[tonumber(freq)] = basename
-		end
-	else
-		-- _affiche(base.ATC_frequency, "AA base.ATC_frequency") 
-	end
-end
+-- --liste toutes les Fréquences déjà existantes pour ne pas creer de doublon
+-- for basename, base in pairs(db_airbases) do
+-- 	if base.ATC_frequency and base.ATC_frequency ~= "" and type(base.ATC_frequency)~= "table" then
+-- 		Assigned_freq[tonumber(base.ATC_frequency)] = basename
+-- 	elseif base.ATC_frequency and type(base.ATC_frequency)== "table" then
+-- 		for n , freq in ipairs(base.ATC_frequency) do
+-- 			Assigned_freq[tonumber(freq)] = basename
+-- 		end
+-- 	else
+-- 		-- _affiche(base.ATC_frequency, "AA base.ATC_frequency") 
+-- 	end
+-- end
 
 
 ---- function to assign A-A TACAN channels ----

@@ -56,7 +56,7 @@ if not _ then
 	end
 end
 
-Frequency = {
+FrequencyAG = {
 
 	["A-4E-C"] = {							--A-4C
 		radio = {						--range of radio frequencies of player aircraft

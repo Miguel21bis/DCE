@@ -1932,6 +1932,122 @@ function DCE_FindCommonRadioRanges()
 		end
 	end
 
+	-- mutualisation panelRadio + HumanRadio
+	for moduleName, dataRadio in pairs(Db_Frequency) do
+
+		dataRadio.radio = {}
+
+		------------------------------------------------------------------
+		-- 1) panelRadio
+		------------------------------------------------------------------
+		if dataRadio.panelRadio then
+			for radioN, radioData in pairs(dataRadio.panelRadio) do
+
+				local ranges = {}
+
+				if radioData.range then
+					for _, r in ipairs(radioData.range) do
+						ranges[#ranges + 1] = {
+							min = r.min,
+							max = r.max,
+						}
+					end
+				end
+
+				dataRadio.radio[#dataRadio.radio + 1] = {
+					name     = radioData.name or ("panelRadio_" .. tostring(radioN)),
+					nbCanal  = radioData.channels and #radioData.channels or 0,
+					range    = ranges,
+					source   = "panelRadio",
+				}
+			end
+		end
+	end
+
+		------------------------------------------------------------------
+		-- 2) HumanRadio
+		------------------------------------------------------------------
+	for moduleName, dataRadio in pairs(Db_Frequency) do
+		print("DCE_FindCommonRadioRanges A processing module "..moduleName)
+		if dataRadio.HumanRadio then
+
+			local hrMin = dataRadio.HumanRadio.minFrequency
+			local hrMax = dataRadio.HumanRadio.maxFrequency
+			print("DCE_FindCommonRadioRanges B HumanRadio for module "..moduleName.." range "..tostring(hrMin).." - "..tostring(hrMax))
+
+			if hrMin and hrMax then
+				print("DCE_FindCommonRadioRanges C adding HumanRadio for module "..moduleName.." range "..tostring(hrMin).." - "..tostring(hrMax))
+
+				for waveName, wave in pairs(RADIO_WAVES) do
+					print("DCE_FindCommonRadioRanges D checking wave "..waveName.." range "..tostring(wave.min).." - "..tostring(wave.max))
+
+					-- test d'intersection HumanRadio ↔ wave
+					if hrMax >= wave.min and hrMin <= wave.max then
+						print("DCE_FindCommonRadioRanges E wave "..waveName.." is intersecting HumanRadio for module "..moduleName)
+
+						-- vérifier si cette wave est déjà couverte par panelRadio
+						local waveAlreadyCovered = false
+
+						for _, radio in ipairs(dataRadio.radio) do
+							print("DCE_FindCommonRadioRanges F checking existing radio "..tostring(radio.name).." for module "..moduleName)
+							if radio.range then
+								print("DCE_FindCommonRadioRanges G radio "..tostring(radio.name).." has range for module "..moduleName)
+								
+								-- if radio.range and radio.range.min then
+								-- 	local r = radio.range
+								for _, r in ipairs(radio.range) do
+									print("DCE_FindCommonRadioRanges H checking range "..tostring(r.min).." - "..tostring(r.max).." of radio "..tostring(radio.name).." for module "..moduleName)
+									if r.max >= wave.min and r.min <= wave.max then
+										print("DCE_FindCommonRadioRanges I wave "..waveName.." is already covered by radio "..tostring(radio.name).." for module "..moduleName)
+										waveAlreadyCovered = true
+										break
+									end
+								end
+							end
+							if waveAlreadyCovered then break end
+						end
+
+						-- si pas couverte → ajouter radio Human
+						if not waveAlreadyCovered then
+							print("DCE_FindCommonRadioRanges J adding HumanRadio wave "..waveName.." for module "..moduleName)
+
+							-- intersection utile (le plus restrictif)
+							local minFreq = math.max(hrMin, wave.min)
+							local maxFreq = math.min(hrMax, wave.max)
+
+							dataRadio.radio[#dataRadio.radio + 1] = {
+								name    = "HumanRadio_" .. waveName,
+								nbCanal = 0,
+								range   = {
+									{
+										min = minFreq,
+										max = maxFreq,
+									},
+								},
+								source  = "HumanRadio",
+							}
+						end
+					end
+				end
+			end
+		else
+			if not dataRadio.radio or #dataRadio.radio < 1 then
+				dataRadio.radio[1] = {
+					name    = "defautRadio_VHF",
+					nbCanal = 0,
+					range   = {
+						{
+							min = RADIO_WAVES["VHF"].min,
+							max = RADIO_WAVES["VHF"].max,
+						},
+					},
+					source  = "default",
+				}
+			end
+		end
+	end
+
+
 
 	local camp_str = "Db_Frequency = " .. TableSerialization(Db_Frequency, 0)						--make a string
 	local campFile = io.open("Debug/Radio_Db_Frequency.lua", "w")	 or error("Failed to open debug file")
@@ -2086,13 +2202,40 @@ end
 ----------------------------------------------------------------
 ---
 ---
----
+--- --assigne les fréquences aux bases
+function AssignedFrequencies()
+	Assigned_freq = {}
+
+	--liste toutes les Fréquences déjà existantes pour ne pas creer de doublon
+	for basename, base in pairs(db_airbases) do
+		if base.ATC_frequency and base.ATC_frequency ~= "" and type(base.ATC_frequency)~= "table" then
+			Assigned_freq[tonumber(base.ATC_frequency)] = basename
+		elseif base.ATC_frequency and type(base.ATC_frequency)== "table" then
+			for n , freq in ipairs(base.ATC_frequency) do
+				Assigned_freq[tonumber(freq)] = basename
+			end
+		else
+			-- _affiche(base.ATC_frequency, "AA base.ATC_frequency") 
+		end
+	end
+
+	-- camp_str = "Assigned_freq = " .. TableSerialization(Assigned_freq, 0)						--make a string
+	-- campFile = io.open("Debug/RADIO_Assigned_freq.lua", "w")  or error("Failed to open debug file")
+	-- campFile:write(camp_str)																		--save new data
+	-- campFile:close()
+
+	-- print("AssignedFrequencies()")
+	-- os.execute 'pause'
+end
+
+
+
+
+
+
 -------------------------------------------------------------------
 -- START Get Frequency NG
 ----------------------------------------------------------------
-
-
-
 
 
 local EmergencyFreq = {
@@ -2106,7 +2249,16 @@ local waveDefinitions = {
     LVHF = { min = 30,  max = 75.95 },
 }
 
-local wavePriority = { "UHF", "VHF", "HF", "LVHF" }
+local wavePriority = { 
+	blue = {
+		plane = { "UHF", "VHF", "HF", "LVHF" },
+		helicopter = {  "LVHF", "VHF", "UHF", "HF", }
+	},
+	red = {
+		plane = {  "VHF", "UHF", "HF", "LVHF" },
+		helicopter = {  "LVHF", "VHF", "UHF", "HF", }
+	}
+}
 
 local specialTasks = {
     EWR = true,
@@ -2133,121 +2285,93 @@ end
 
 
 local function getRangesForContext(side, task, type_withData)
+	-- cas spécial : réseaux commandement joueur
+    if specialTasks[task] and side == PlayerSide and (not type_withData or not IsHelicopter[type_withData]) then
+		for _, wave in ipairs(wavePriority[side].plane) do
+			for n, dataFreq in ipairs(RadioPlayerWaveRanges or {}) do
+				if rangeIntersectsWave(dataFreq, wave) then
+					return wave, { dataFreq }
+				end
+			end
+		end
 
-    -- cas spécial : réseaux commandement joueur
-    if specialTasks[task]
-       and side == PlayerSide
-       and (not type_withData or not IsHelicopter[type_withData]) then
-
-        for _, wave in ipairs(wavePriority) do
-            for n, dataFreq in ipairs(RadioPlayerWaveRanges or {}) do
-                if rangeIntersectsWave(dataFreq, wave) then
-                    return wave, { dataFreq }
-                end
-            end
-        end
     end
 
     -- cas normal : coalition
-    for _, wave in ipairs(wavePriority) do
-        if RadioWaveCommon[side] and RadioWaveCommon[side][wave] then
-            return wave, { RadioWaveCommon[side][wave] }
-        end
-    end
+	if not IsHelicopter[type_withData] then
+		for _, wave in ipairs(wavePriority[side].plane) do
+			if RadioWaveCommon[side] and RadioWaveCommon[side][wave] then
+				return wave, { RadioWaveCommon[side][wave] }
+			end
+		end
+	else
+		for _, wave in ipairs(wavePriority[side].helicopter) do
+			if RadioWaveCommon[side] and RadioWaveCommon[side][wave] then
+				return wave, { RadioWaveCommon[side][wave] }
+			end
+		end
+	end
 
     return nil, {}
 end
 
-
-
 local function generateRandomFrequency(ranges)
-    -- _affiche(ranges, "generateRandomFrequency ranges: ")
 
-    local step = 0.05 -- XX.Y5
-    local range = nil
+	local step = 0.05
+	local range
 
-    -- 🔒 NORMALISATION
-    if ranges.min and ranges.max then
-        -- un seul range
-        range = ranges
-    elseif type(ranges) == "table" and #ranges > 0 then
-        -- liste de ranges
-        local n_choice = math.random(1, #ranges)
-        range = ranges[n_choice]
-    else
-        return nil
-    end
+	-- Normalisation du range
+	if ranges.min and ranges.max then
+		range = ranges
+	elseif type(ranges) == "table" and #ranges > 0 then
+		range = ranges[math.random(1, #ranges)]
+	else
+		return nil
+	end
 
-    -- _affiche(range, "generateRandomFrequency range: ")
+	if not range.min or not range.max then
+		return nil
+	end
 
-    if not range.min or not range.max then
-        return nil
-    end
+	local min = math.ceil(range.min / step) * step
+	local max = math.floor(range.max / step) * step
+	local count = math.floor((max - min) / step)
 
-    local min = math.ceil(range.min / step) * step
-    local max = math.floor(range.max / step) * step
+	if count <= 0 then
+		return nil
+	end
 
-    local count = math.floor((max - min) / step)
-    if count <= 0 then return nil end
+	local freq
+	local safety = 0
 
-    local freq
-    repeat
-        local index = math.random(0, count)
-        freq = min + index * step
-        freq = math.floor(freq * 100 + 0.5) / 100
-    until not EmergencyFreq[freq]
+	repeat
+		local index = math.random(0, count)
+		freq = min + index * step
 
-    return freq
+		-- normalisation décimale
+		freq = math.floor(freq * 100 + 0.5) / 100
+
+		safety = safety + 1
+		if safety > 200 then
+			return nil
+		end
+
+	until not EmergencyFreq[freq]
+	   and not Assigned_freq[freq]
+
+	return freq
 end
-
-
--- local function generateRandomFrequency(ranges)
--- 	_affiche(ranges, "generateRandomFrequency ranges: ")
---     local step = 0.05 -- XX.Y5
--- 	local range = nil
-
--- 	if #ranges == 0 then
--- 		range = ranges
--- 	else
--- 		local n_choice = math.random(1,#ranges )
--- 		range = ranges[n_choice]
--- 	end
-
--- 	_affiche(range, "generateRandomFrequency range: ")
-
---     local min = math.ceil(range.min / step) * step
---     local max = math.floor(range.max / step) * step
-
---     local count = math.floor((max - min) / step)
---     if count <= 0 then return nil end
-
---     local freq
---     repeat
---         local index = math.random(0, count)
---         freq = min + index * step
---         freq = math.floor(freq * 100 + 0.5) / 100
---     until not EmergencyFreq[freq]
-
---     return freq
--- end
-
-
-
--- local function getWaveRanges(side, wave)
---     if RadioWaveCommon[side] and RadioWaveCommon[side][wave] then
---         return { RadioWaveCommon[side][wave] }
---     end
---     return {}
--- end
 
 
 
 function GetFrequencyNG(side, target_name, task, type_withData, wave)
+	-- print("GetFrequencyNG A called for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(wave))
 
     AssignedTargetFrequency[side] = AssignedTargetFrequency[side] or {}
 
     -- 1. Cache par cible
     if target_name and AssignedTargetFrequency[side][target_name] then
+		-- print("GetFrequencyNG B returning cached frequency for target "..tostring(target_name).." freq "..tostring(AssignedTargetFrequency[side][target_name]))
         return AssignedTargetFrequency[side][target_name]
     end
 
@@ -2257,24 +2381,17 @@ function GetFrequencyNG(side, target_name, task, type_withData, wave)
     -- 2. Wave forcée
     if wave then
         selectedWave = wave
+		-- print("GetFrequencyNG C1 wave forced "..tostring(wave).." for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData))
         if RadioWaveCommon[side] and RadioWaveCommon[side][wave] then
+			-- print("GetFrequencyNG C2 wave forced "..tostring(wave).." found for side "..tostring(side))
             ranges = { RadioWaveCommon[side][wave] }
         end
 
     else
         -- 3. Choix automatique
+		-- print("GetFrequencyNG D automatic wave selection for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData))
         selectedWave, ranges = getRangesForContext(side, task, type_withData)
     end
-
-    -- if not selectedWave or #ranges == 0 then
-    --     return nil
-    -- end
-    -- if not selectedWave then
-    --     return nil
-    -- end
-
-	-- _affiche(ranges, "ranges: ")
-	-- os.execute("pause")
 
     -- 4. Génération fréquence
     local freq = generateRandomFrequency(ranges)
@@ -2285,6 +2402,7 @@ function GetFrequencyNG(side, target_name, task, type_withData, wave)
         AssignedTargetFrequency[side][target_name] = freq
     end
 
+	-- print("GetFrequencyNG F returning frequency "..tostring(freq).." for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(selectedWave))
     return freq
 end
 --
@@ -2304,7 +2422,7 @@ local function freqInRange(freq, range)
     return freq >= range.min and freq <= range.max
 end
 
-function FreqCapabilityNG(arg_testFreq, arg_type)
+function FreqCapabilityNG1(arg_testFreq, arg_type)
 
     local freq = tonumber(arg_testFreq)
     if not freq then
@@ -5394,6 +5512,9 @@ function LoadFileAndUpdate(from)
 
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
 
+	--remplit la table des frequences déjà utilisé dans la map ou les bases
+	AssignedFrequencies()
+
 	-- -- Recherche prioritaire du fichier UTIL_DataRadio dans ScriptsMod, sinon dans le dossier campagne
 	-- local radioFile = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua"
 	-- local radioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
@@ -5493,8 +5614,8 @@ function LoadFileAndUpdate(from)
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
 
-	CreatePlageFrequency_A()-- TODO a confirmer qu'il est encore utile cree une table de radio en fonction du canal puis de la wave
-	CreatePlageFrequency_B()	--cree une table de radio en fonction des wave
+	-- CreatePlageFrequency_A()-- TODO a confirmer qu'il est encore utile cree une table de radio en fonction du canal puis de la wave
+	-- CreatePlageFrequency_B()	--cree une table de radio en fonction des wave
 	
 	CommonRanges = DCE_FindCommonRadioRanges()	--get common radio range for all planes in campaign
 

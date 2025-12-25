@@ -1636,12 +1636,14 @@ if Debug.debug then
 	campFile:close()
 
 	if #Fighterthreats["blue"] == 0 then
-		print("AtoTE pas de menace air BLue? ^^")
-		os.execute 'pause'
+		-- print("AtoTE pas de menace air BLue? ^^")
+		AddLog("AtoTE pas de menace air BLue? ^^")
+		-- os.execute 'pause'
 	end
 	if #Fighterthreats["red"] == 0 then
-		print("AtoTE pas de menace air red? ^^")
-		os.execute 'pause'
+		-- print("AtoTE pas de menace air red? ^^")
+		AddLog("AtoTE pas de menace air red? ^^")
+		-- os.execute 'pause'
 	end
 
 end
