@@ -202,8 +202,6 @@ TaskByPlane = {
 		["L-39ZA"] = true,
 		["MiG-23MLD"] = true,
 		["MiG-27K"] = true,
-		["MiG-29A"] = true,
-
 
 		["Su-17M4"] = true,
 		["Su-24M"] = true,
@@ -266,7 +264,6 @@ TaskByPlane = {
 		["L-39C"] = true,
 		["L-39ZA"] = true,
 		["MiG-27K"] = true,
-		["MiG-29A"] = true,
 		["Su-17M4"] = true,
 		["Su-24M"] = true,
 		["Su-25"] = true,
@@ -346,7 +343,6 @@ TaskByPlane = {
 		["MiG-23MLD"] = true,
 		["MiG-25RBT"] = true,
 		["MiG-27K"] = true,
-		["MiG-29A"] = true,
 
 		["Su-17M4"] = true,
 		["Su-24M"] = true,
@@ -417,7 +413,6 @@ TaskByPlane = {
 		["Su-27"] = true,
 		["Su-30"] = true,
 		["Su-34"] = true,
-		["MiG-29A"] = true,
 		["MiG-27K"] = true,
 
 
@@ -460,7 +455,6 @@ TaskByPlane = {
 		["JF-17"] = true,
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
-		["MiG-29A"] = true,
 		["MiG-29S"] = true,
 		["MiG-31"] = true,
 
@@ -537,7 +531,6 @@ TaskByPlane = {
 		["JF-17"] = true,
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
-		["MiG-29A"] = true,
 		["MiG-29S"] = true,
 		["MiG-31"] = true,
 		["Su-27"] = true,
@@ -586,7 +579,6 @@ TaskByPlane = {
 		["L-39ZA"] = true,
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
-		["MiG-29A"] = true,
 		["MiG-29S"] = true,
 		["MiG-31"] = true,
 		["Su-27"] = true,
@@ -632,7 +624,6 @@ TaskByPlane = {
 		["vwv_mig17f"] = true,			--Mod
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
-		["MiG-29A"] = true,
 		["MiG-29S"] = true,
 		["MiG-31"] = true,
 		["Su-27"] = true,
@@ -2034,6 +2025,16 @@ Data_divers = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
+		Tasks = {
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(RunwayAttack),
+			aircraft_task(AntishipStrike),
+		},
 		vCruise = 213,
 		hCruise = 7011,
 	},

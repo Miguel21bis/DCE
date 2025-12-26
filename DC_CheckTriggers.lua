@@ -847,7 +847,7 @@ Action = {}
 					if unit.name == arg2_unitName and unit.base ~= arg2_baseDestination then
 						unit.base = arg2_baseDestination										--set new airbase for unit
 						-- ActivateBaseAndAssociatedTargets(baseDestination, true)
-						Action.Text(arg2_unitName.."  move to anotherBase."..ReplaceBaseName(arg2_baseDestination))
+						Action.Text(arg2_unitName.."  move to anotherBase."..AliasBaseName(arg2_baseDestination))
 					end
 				end
 			end
@@ -1115,10 +1115,10 @@ Action = {}
 
 				local text
 				if trans == 1 then
-					text = "" .. trans .. " replacement " .. ReplaceTypeName(destUnit.type) .. " has been transferred from " .. sourceName .. " to " .. destName .. ". \n \n"	--text to be added to briefing/oob
+					text = "" .. trans .. " replacement " .. AliasTypeName(destUnit.type) .. " has been transferred from " .. sourceName .. " to " .. destName .. ". \n \n"	--text to be added to briefing/oob
 				elseif trans > 1 then
 				-- else
-					text = "" .. trans .. " replacement " .. ReplaceTypeName(destUnit.type) .. " have been transferred from " .. sourceName .. " to " .. destName .. ". \n \n"	--text to be added to briefing/oob
+					text = "" .. trans .. " replacement " .. AliasTypeName(destUnit.type) .. " have been transferred from " .. sourceName .. " to " .. destName .. ". \n \n"	--text to be added to briefing/oob
 				end
 
 				if text then
@@ -1170,9 +1170,9 @@ Action = {}
 						end
 						local text
 						if repair == 1 then
-							text = "" .. repair .. " damaged " .. ReplaceTypeName(unit.type) .. " from ".. unit.name .. " has been repaired and returned back to service. \n \n"	--text to be added to briefing/oob
+							text = "" .. repair .. " damaged " .. AliasTypeName(unit.type) .. " from ".. unit.name .. " has been repaired and returned back to service. \n \n"	--text to be added to briefing/oob
 						else
-							text = "" .. repair .. " damaged " .. ReplaceTypeName(unit.type) .. " from ".. unit.name .. " have been repaired and returned back to service. \n \n"	--text to be added to briefing/oob
+							text = "" .. repair .. " damaged " .. AliasTypeName(unit.type) .. " from ".. unit.name .. " have been repaired and returned back to service. \n \n"	--text to be added to briefing/oob
 						end
 						if side_name == "blue" then									--side is blue
 							Briefing_oob_text_blue = Briefing_oob_text_blue .. text	--add to blue briefing oob text
@@ -2420,7 +2420,7 @@ for baseName, base in pairs(db_airbases) do
 			if debugKT then print(baseName.." 	airbase < 20 || airbase is destroyed and will not be able to support air units anymore. ") end
 
 			Action.ActivateBaseAndItsUnits(baseName, false )
-			Action.Text(ReplaceBaseName(baseName).." airbase is destroyed and will not be able to support air units anymore.")
+			Action.Text(AliasBaseName(baseName).." airbase is destroyed and will not be able to support air units anymore.")
 
 		elseif base.runwayAlive then
 			--runway gravement endommagé, irréparable

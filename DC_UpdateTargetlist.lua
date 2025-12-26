@@ -424,7 +424,8 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
 				if not pilots[1] then
 					print("DcUT Error_04 : No pilot in this SAR zone: "..tostring(zoneName).." for side "..tostring(sideTL) )
-					os.execute 'pause'
+					AddLog("DcUT Error_04 : No pilot in this SAR zone: "..tostring(zoneName).." for side "..tostring(sideTL) )
+					-- os.execute 'pause'
 					break
 				end
 

@@ -183,7 +183,7 @@ do
 						local unit_name = flight.units[n].name
 						local callsign = string.sub(flight.callsign, 1, -2) .. n
 						table.insert(entries[1].values, callsign)
-						table.insert(entries[2].values, ReplaceTypeName(flight.type))
+						table.insert(entries[2].values, AliasTypeName(flight.type))
 						table.insert(entries[3].values, flight.task)
 						table.insert(entries[4].values, packstats[unit_name].kills_air)
 						table.insert(entries[5].values, packstats[unit_name].kills_ground)
@@ -360,17 +360,17 @@ print("DEBRIEF_t A2 camp.player.flight "..tostring(camp.player.flight))
 		local target_unit_name = camp.player.pack[camp.player.role][camp.player.flight].target.unit.name
 
 		if player_task == "Strike" then
-			s = s .. "You have been tasked with striking " .. target_name .. " hosting " .. ReplaceTypeName(camp.player.pack[camp.player.role][camp.player.flight].target.unit.type) .. " of the " .. target_unit_name .. ". "
+			s = s .. "You have been tasked with striking " .. target_name .. " hosting " .. AliasTypeName(camp.player.pack[camp.player.role][camp.player.flight].target.unit.type) .. " of the " .. target_unit_name .. ". "
 		elseif player_task == "Escort" then
-			s = s .. "You have been tasked with escorting a strike against " .. target_name .. " hosting " .. ReplaceTypeName(camp.player.pack[camp.player.role][camp.player.flight].target.unit.type) .. " of the " .. target_unit_name .. ". "
+			s = s .. "You have been tasked with escorting a strike against " .. target_name .. " hosting " .. AliasTypeName(camp.player.pack[camp.player.role][camp.player.flight].target.unit.type) .. " of the " .. target_unit_name .. ". "
 		elseif player_task == "SEAD" then
-			s = s .. "You have been tasked with providing SEAD escort for a strike against " .. target_name .. " hosting " .. ReplaceTypeName(camp.player.pack[camp.player.role][camp.player.flight].target.unit.type) .. " of the " .. target_unit_name .. ". "
+			s = s .. "You have been tasked with providing SEAD escort for a strike against " .. target_name .. " hosting " .. AliasTypeName(camp.player.pack[camp.player.role][camp.player.flight].target.unit.type) .. " of the " .. target_unit_name .. ". "
 		elseif player_task == "Escort Jammer" then
-			s = s .. "You have been tasked with providing jammer escort for a strike against " .. target_name .. " hosting " .. ReplaceTypeName(camp.player.pack[camp.player.role][camp.player.flight].target.unit.type) .. " of the " .. target_unit_name .. ". "
+			s = s .. "You have been tasked with providing jammer escort for a strike against " .. target_name .. " hosting " .. AliasTypeName(camp.player.pack[camp.player.role][camp.player.flight].target.unit.type) .. " of the " .. target_unit_name .. ". "
 		elseif player_task == "Flare Illumination" then
-			s = s .. "You have been tasked with providing battlefield flare illumination for a strike against " .. target_name .. " hosting " .. ReplaceTypeName(camp.player.pack[camp.player.role][camp.player.flight].target.unit.type) .. " of the " .. target_unit_name .. ". "
+			s = s .. "You have been tasked with providing battlefield flare illumination for a strike against " .. target_name .. " hosting " .. AliasTypeName(camp.player.pack[camp.player.role][camp.player.flight].target.unit.type) .. " of the " .. target_unit_name .. ". "
 		elseif player_task == "Laser Illumination" then
-			s = s .. "You have been tasked with providing target laser designation for a strike against " .. target_name .. " hosting " .. ReplaceTypeName(camp.player.pack[camp.player.role][camp.player.flight].target.unit.type) .. " of the " .. target_unit_name .. ". "
+			s = s .. "You have been tasked with providing target laser designation for a strike against " .. target_name .. " hosting " .. AliasTypeName(camp.player.pack[camp.player.role][camp.player.flight].target.unit.type) .. " of the " .. target_unit_name .. ". "
 		end
 
 		if pack_kills_air > 0 then
@@ -902,8 +902,8 @@ do
 		for unit_n,unit in ipairs(side) do																								--iterate through units
 			if unit.inactive ~= true then																								--unit is active
 				table.insert(entries[side_name][1].values, unit.name)																	--unit name
-				table.insert(entries[side_name][2].values, ReplaceTypeName(unit.type))													--unit type
-				table.insert(entries[side_name][3].values, ReplaceBaseName(unit.base))																	--unit base
+				table.insert(entries[side_name][2].values, AliasTypeName(unit.type))													--unit type
+				table.insert(entries[side_name][3].values, AliasBaseName(unit.base))																	--unit base
 				if unit.score_last.kills_air > 0 then
 					table.insert(entries[side_name][4].values, unit.score.kills_air .. " (+" .. unit.score_last.kills_air .. ")")		--unit air kills plus score from this mission
 				else
@@ -943,14 +943,14 @@ do
 		entries["blue"][e].str_length = string.len(entries["blue"][e].header)						--store string length of header for this entry
 		entries["red"][e].str_length = string.len(entries["red"][e].header)							--store string length of header for this entry
 		for n = 1, #entries["blue"][e].values do													--iterate through values of this entry
-			local l = ReplaceTypeName(string.len(tostring(entries["blue"][e].values[n])))			--get string length of value of this entry
+			local l = AliasTypeName(string.len(tostring(entries["blue"][e].values[n])))			--get string length of value of this entry
 			if l > entries["blue"][e].str_length then												--if the string length is larger than the previous
 				entries["blue"][e].str_length = l													--make it the new length (find the largest)
 				entries["red"][e].str_length = l													--make it the new length (find the largest)
 			end
 		end
 		for n = 1, #entries["red"][e].values do														--iterate through values of this entry
-			local l = ReplaceTypeName(string.len(tostring(entries["red"][e].values[n])))			--get string length of value of this entry
+			local l = AliasTypeName(string.len(tostring(entries["red"][e].values[n])))			--get string length of value of this entry
 			if l > entries["red"][e].str_length then												--if the string length is larger than the previous
 				entries["blue"][e].str_length = l													--make it the new length (find the largest)
 				entries["red"][e].str_length = l													--make it the new length (find the largest)

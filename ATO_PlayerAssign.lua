@@ -396,7 +396,7 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 				for index = 1, #playable do
 					for unitN = 1, playable[index].number do
 						indexTotal = index .. unitN
-						io.write(indexTotal .. " : " .. ReplaceBaseName(playable[index].base) .. " | " .. ReplaceTypeName(playable[index].type) .. " | " .. playable[index].groupName.." - "..unitN)
+						io.write(indexTotal .. " : " .. AliasBaseName(playable[index].base) .. " | " .. AliasTypeName(playable[index].type) .. " | " .. playable[index].groupName.." - "..unitN)
 						
 						if unitN == 1 then  
 							io.write(" (Leader) ") 
@@ -412,7 +412,7 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 				end
 			else
 				for index = 1, #playable do
-					io.write(index .. " - " .. ReplaceBaseName(playable[index].base) .. " - " .. ReplaceTypeName(playable[index].type) .. " " .. playable[index].groupName)
+					io.write(index .. " - " .. AliasBaseName(playable[index].base) .. " - " .. AliasTypeName(playable[index].type) .. " " .. playable[index].groupName)
 					if playable[index].target_name ~= nil then  io.write(" | "..playable[index].target_name) end
 					io.write("\n")
 					tabIndex[tostring(index)] = true
@@ -536,7 +536,7 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 						if Debug.Generator.affiche then
 							info = " "..playable[index].id.." "
 						end
-						io.write(indexN..""..info.."(Nb: "..playable[index].number..") ".." -  Pack : "..playable[index].packN.." - "..ReplaceBaseName(playable[index].base).." - "..ReplaceTypeName(playable[index].type).." - "..playable[index].groupName )
+						io.write(indexN..""..info.."(Nb: "..playable[index].number..") ".." -  Pack : "..playable[index].packN.." - "..AliasBaseName(playable[index].base).." - "..AliasTypeName(playable[index].type).." - "..playable[index].groupName )
 						if playable[index].target_name ~= nil then  io.write(" - "..playable[index].target_name) end
 						io.write("\n")
 

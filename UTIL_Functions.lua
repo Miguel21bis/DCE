@@ -1274,7 +1274,7 @@ end
 
 
 --function to replace certain type names
-function ReplaceTypeName(s)
+function AliasTypeName(s)
 	if TypeAlias and TypeAlias[s] then
 		return TypeAlias[s]
 	else
@@ -1283,7 +1283,7 @@ function ReplaceTypeName(s)
 end
 
 --function to replace certain type names Init\various_table.lua
-function ReplaceBaseName(s)
+function AliasBaseName(s)
 	if BaseNameAlias and BaseNameAlias[s] then
 		return BaseNameAlias[s]
 	else
@@ -1945,6 +1945,22 @@ function DCE_FindCommonRadioRanges()
 
 				local ranges = {}
 
+				--transforme cette partie range de la meme maniere pour tout le monde:
+				if radioData.range then
+					-- Check if range is already an array or a single range object
+					if radioData.range.min and not radioData.range[1] then
+						-- Single range object: convert to array format
+						local copyRange = Deepcopy(radioData.range)
+						radioData.range = {
+							[1] = {
+								min = copyRange.min,
+								max = copyRange.max,
+							}
+						}
+					end
+					-- If already an array, leave it as-is
+				end
+
 				if radioData.range then
 					for _, r in ipairs(radioData.range) do
 						ranges[#ranges + 1] = {
@@ -1993,16 +2009,23 @@ function DCE_FindCommonRadioRanges()
 							if radio.range then
 								print("DCE_FindCommonRadioRanges G radio "..tostring(radio.name).." has range for module "..moduleName)
 								
-								-- if radio.range and radio.range.min then
-								-- 	local r = radio.range
-								for _, r in ipairs(radio.range) do
-									print("DCE_FindCommonRadioRanges H checking range "..tostring(r.min).." - "..tostring(r.max).." of radio "..tostring(radio.name).." for module "..moduleName)
-									if r.max >= wave.min and r.min <= wave.max then
-										print("DCE_FindCommonRadioRanges I wave "..waveName.." is already covered by radio "..tostring(radio.name).." for module "..moduleName)
-										waveAlreadyCovered = true
-										break
+								-- if #radio.range and #radio.range >= 1 then
+									for _, r in ipairs(radio.range) do
+										print("DCE_FindCommonRadioRanges H checking range "..tostring(r.min).." - "..tostring(r.max).." of radio "..tostring(radio.name).." for module "..moduleName)
+										if r.max >= wave.min and r.min <= wave.max then
+											print("DCE_FindCommonRadioRanges I1 wave "..waveName.." is already covered by radio "..tostring(radio.name).." for module "..moduleName)
+											waveAlreadyCovered = true
+											break
+										end
 									end
-								end
+								-- else
+								-- 	local r = radio.range
+								-- 	if r.max >= wave.min and r.min <= wave.max then
+								-- 		print("DCE_FindCommonRadioRanges I2 wave "..waveName.." is already covered by radio "..tostring(radio.name).." for module "..moduleName)
+								-- 		waveAlreadyCovered = true
+								-- 		break
+								-- 	end
+								-- end
 							end
 							if waveAlreadyCovered then break end
 						end
@@ -2284,29 +2307,44 @@ local function rangeIntersectsWave(range, wave)
 end
 
 
-local function getRangesForContext(side, task, type_withData)
+local function getRangesForContext(side, task, type_withData, flightOrPackage)
+	print("getRangesForContext A called for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData).." flightOrPackage "..tostring(flightOrPackage))
 	-- cas spécial : réseaux commandement joueur
-    if specialTasks[task] and side == PlayerSide and (not type_withData or not IsHelicopter[type_withData]) then
-		for _, wave in ipairs(wavePriority[side].plane) do
-			for n, dataFreq in ipairs(RadioPlayerWaveRanges or {}) do
-				if rangeIntersectsWave(dataFreq, wave) then
-					return wave, { dataFreq }
+	-- if specialTasks[task] and side == PlayerSide and (not type_withData or not IsHelicopter[type_withData]) then
+
+	if specialTasks[task] and side == PlayerSide and (not type_withData or not IsHelicopter[type_withData]) then
+		if not IsHelicopter[type_withData] then
+			for _, wave in ipairs(wavePriority[side].plane) do
+				for n, dataFreq in ipairs(RadioPlayerWaveRanges or {}) do
+					if rangeIntersectsWave(dataFreq, wave) then
+						print("getRangesForContext B special task "..tostring(task).." wave "..tostring(wave).." freq range "..tostring(dataFreq.min).." - "..tostring(dataFreq.max))
+						return wave, { dataFreq }
+					end
 				end
 			end
 		end
-
-    end
+	end
 
     -- cas normal : coalition
 	if not IsHelicopter[type_withData] then
 		for _, wave in ipairs(wavePriority[side].plane) do
 			if RadioWaveCommon[side] and RadioWaveCommon[side][wave] then
+				print("getRangesForContext C normal plane wave "..tostring(wave))
 				return wave, { RadioWaveCommon[side][wave] }
 			end
 		end
 	else
+		if flightOrPackage == "FreqFlight" and RadioWaveCommon[side] and RadioWaveCommon[side]["LVHF"] then
+			print("getRangesForContext D1 normal helicopter wave "..tostring("LVHF"))
+			return "LVHF", { RadioWaveCommon[side]["LVHF"] }
+		elseif flightOrPackage == "FreqPackage" and RadioWaveCommon[side] and RadioWaveCommon[side]["UHF"] then
+			print("getRangesForContext D2 normal helicopter wave "..tostring("UHF"))
+			return "UHF", { RadioWaveCommon[side]["UHF"] }
+		end
+
 		for _, wave in ipairs(wavePriority[side].helicopter) do
 			if RadioWaveCommon[side] and RadioWaveCommon[side][wave] then
+				print("getRangesForContext D3 normal helicopter wave "..tostring(wave))
 				return wave, { RadioWaveCommon[side][wave] }
 			end
 		end
@@ -2364,15 +2402,20 @@ end
 
 
 
-function GetFrequencyNG(side, target_name, task, type_withData, wave)
-	-- print("GetFrequencyNG A called for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(wave))
+function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPackage)
+	print("GetFrequencyNG A called for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(wave))
 
-    AssignedTargetFrequency[side] = AssignedTargetFrequency[side] or {}
+	AssignedTargetFrequency[side] = AssignedTargetFrequency[side] or {}
+
+	if target_name then
+		AssignedTargetFrequency[side][target_name] = AssignedTargetFrequency[side][target_name] or {}
+	end
+
 
     -- 1. Cache par cible
-    if target_name and AssignedTargetFrequency[side][target_name] then
-		-- print("GetFrequencyNG B returning cached frequency for target "..tostring(target_name).." freq "..tostring(AssignedTargetFrequency[side][target_name]))
-        return AssignedTargetFrequency[side][target_name]
+    if target_name and flightOrPackage and AssignedTargetFrequency[side][target_name][flightOrPackage] then
+		print("GetFrequencyNG B returning cached frequency for target "..tostring(target_name).." flightOrPackage: " .. tostring(flightOrPackage) .. " freq "..tostring(AssignedTargetFrequency[side][target_name][flightOrPackage]))
+        return AssignedTargetFrequency[side][target_name][flightOrPackage]
     end
 
     local selectedWave
@@ -2390,7 +2433,7 @@ function GetFrequencyNG(side, target_name, task, type_withData, wave)
     else
         -- 3. Choix automatique
 		-- print("GetFrequencyNG D automatic wave selection for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData))
-        selectedWave, ranges = getRangesForContext(side, task, type_withData)
+        selectedWave, ranges = getRangesForContext(side, task, type_withData, flightOrPackage)
     end
 
     -- 4. Génération fréquence
@@ -2398,8 +2441,8 @@ function GetFrequencyNG(side, target_name, task, type_withData, wave)
     if not freq then return nil end
 
     -- 5. Cache si target
-    if target_name then
-        AssignedTargetFrequency[side][target_name] = freq
+    if target_name and flightOrPackage then
+        AssignedTargetFrequency[side][target_name][flightOrPackage] = freq
     end
 
 	-- print("GetFrequencyNG F returning frequency "..tostring(freq).." for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(selectedWave))
@@ -3518,13 +3561,13 @@ function Check_TaskPossibleByPlane()
 					end
 				end
 
-				--si aucune tasks strike n'a �t� trouv�
+				--si aucune tasks strike n'a été trouvée
 				if not foundStrikeTask and addMultipleStrike then
 					debugTempFLIGHT = "(Error UutilF C03) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring("Strike ( CAS or Ground Attack or Pinpoint Strike )")
 					print(debugTempFLIGHT ) 
 					AddLog(debugTempFLIGHT)
 					error = error + 1
-					os.execute 'pause'
+					-- os.execute 'pause'
 				end
 				if not squad.inactive and not foundPlane   then
 					--TODO revoir ce pb, exemple avec campaign Hornet Over Carrier SC
