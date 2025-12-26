@@ -4955,7 +4955,7 @@ function DataCompilation_DataDiscoveryA2()
 							-- os.execute 'pause'
 
 							local file_str = "dst = " .. TableSerialization(dst, 0)			--make a string
-							local file_File = io.open("Debug/Data_Divers_GetMods"..planeType..".lua", "w") or error("Failed to open debug EWR_UtilDebug file")
+							local file_File = io.open("Debug/Data_Divers_GetMods_"..planeType..".lua", "w") or error("Failed to open debug EWR_UtilDebug file")
 							file_File:write(file_str)																	--save new data
 							file_File:close()
 
@@ -5240,7 +5240,7 @@ function DataCompilation_DataDiscovery_OLDA2()
 							-- os.execute 'pause'
 
 							local file_str = "dst = " .. TableSerialization(dst, 0)			--make a string
-							local file_File = io.open("Debug/Data_Divers_GetMods"..planeType..".lua", "w") or error("Failed to open debug EWR_UtilDebug file")
+							local file_File = io.open("Debug/Data_Divers_GetMods_"..planeType..".lua", "w") or error("Failed to open debug EWR_UtilDebug file")
 							file_File:write(file_str)																	--save new data
 							file_File:close()
 
@@ -5289,7 +5289,7 @@ function DataCompilation_TaskByPlane()
 		-- Si cette entrée contient des tâches à ajouter
 		if planeData.addTasks then
 			-- On clone la table principale pour pouvoir comparer sans modifier l'original
-			local clonePlaneData = Deepcopy(planeData)
+			local clonePlaneData = DeepCopy(planeData)
 
 			-- On parcourt chaque tâche à ajouter
 			for _, newTask in pairs(planeData.addTasks) do

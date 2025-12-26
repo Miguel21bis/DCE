@@ -206,7 +206,7 @@ if Multi.Group then
 end
 
 --fait une copie de Multi pour eviter de perdre le nombre d'avion
-local multiBIS = Deepcopy(Multi)
+local multiBIS = DeepCopy(Multi)
 local creaClientFlight = {}																									--crée une table pour dérouler plus tard les flight selectionnable
 local sum
 
@@ -251,7 +251,7 @@ for _, slot in ipairs(playable) do
 
                 -- Si aucune entrée existante, on en crée une
                 if not entryFound then
-                    local tabTemp = Deepcopy(requestGroup)
+                    local tabTemp = DeepCopy(requestGroup)
                     tabTemp.NbPlane = nbPlaneToAssign
                     table.insert(creaClientFlight, tabTemp)
                 end

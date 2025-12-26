@@ -84,7 +84,7 @@ end
 if not camp.Aircraft_availability and not camp.aircraft_availability then
 	camp.Aircraft_availability = {}
 elseif  camp.aircraft_availability then
-	camp.Aircraft_availability = Deepcopy(camp.aircraft_availability)
+	camp.Aircraft_availability = DeepCopy(camp.aircraft_availability)
 	camp.aircraft_availability = nil
 end
 AcftAvail = camp.Aircraft_availability																				--link to table for easier reference
@@ -1475,10 +1475,10 @@ for sideName, units in pairs(oob_air) do
 																									task = task,
 																									tasks = unit.tasks,
 																									loadout = unit_loadouts[l],
-																									target = Deepcopy(target),
+																									target = DeepCopy(target),
 																									target_name = target.titleName,
 																									targetPriority = target.priority,
-																									priorityIni = Deepcopy(target.priority),
+																									priorityIni = DeepCopy(target.priority),
 																									route = route,
 																									tot_from = tot_from,
 																									tot_to = tot_to,
@@ -2040,7 +2040,7 @@ for sideName, draftT in pairs(draftSorties) do
 
 										local overideMP_B_targetName = false
 										--TODO virer MP_Game des que possible, doublon/triplon etc...
-										overideMP_B_targetName = Deepcopy(overideMP_B)
+										overideMP_B_targetName = DeepCopy(overideMP_B)
 										
 										if multiPlaneSet then
 											if multiPlaneSet[side] and multiPlaneSet[side][unit.type] and multiPlaneSet[side][unit.type][task] then
@@ -2435,7 +2435,7 @@ for sideName, draftT in pairs(draftSorties) do
 																		tasks = unit.tasks,
 																		loadout = unit_loadouts[l],
 																		route = route,
-																		target = Deepcopy(draft.target),
+																		target = DeepCopy(draft.target),
 																		target_name = draft.target.titleName,
 																		tot_from = draft.tot_from,
 																		tot_to = draft.tot_to,
@@ -2810,7 +2810,7 @@ local function createATO_table(draftPriority)
 										--en fonction du learning des missions passé, interdit une mission si les task support ne sont pas present
 
 										local tempInfo = " AtoG NbTotPlanePerTask CALCUL"
-										local draft_availability = Deepcopy(AcftAvail)
+										local draft_availability = DeepCopy(AcftAvail)
 										if camp.newTaskPerTarget then
 											for tableTargetName, targetTask in pairs(camp.newTaskPerTarget) do
 												if tableTargetName == draft.target_name and targetTask.tasks then
@@ -2947,7 +2947,7 @@ local function createATO_table(draftPriority)
 
 														if not needSupport[draft.name] then needSupport[draft.name] = 0 end
 														if not availSupport[draft.name] then availSupport[draft.name] = 0 end
-														needSupport[draft.name] =  Deepcopy(draft.number)
+														needSupport[draft.name] =  DeepCopy(draft.number)
 
 														--TODO comment ça marche? ça a l'air inutile....
 														availSupport[draft.name] =  AcftAvail[draft.name].unassigned
@@ -2993,7 +2993,7 @@ local function createATO_table(draftPriority)
 										-- s il n y a qu un avion d escorte, on bache la mission
 										--obliger de regarder la demande total du package, par rapport aux existants
 
-										local dispoTmp = Deepcopy(AcftAvail)
+										local dispoTmp = DeepCopy(AcftAvail)
 
 										--enleve deja l effectif du main (il peut y avoir 4 F18 strike et 2f18 sead ou escorte)
 										dispoTmp[draft.name].unassigned = dispoTmp[draft.name].unassigned - draft.number
@@ -3201,7 +3201,7 @@ local function createATO_table(draftPriority)
 												or  (squad.tasks["SEAD"] and squad.tasks["SEAD"] == true) or  (squad.tasks["Strike"] and squad.tasks["Strike"] == true)  )
 												then
 
-													local test_Aircraftnumber = Deepcopy(draft.number)
+													local test_Aircraftnumber = DeepCopy(draft.number)
 													local needeMindAircraft = false
 
 													-- if AcftAvail[draft.name].unassigned - test_Aircraftnumber < 2 then
@@ -3422,7 +3422,7 @@ local function createATO_table(draftPriority)
 														task = arg_Entry.task,
 														loadout = arg_Entry.loadout,
 														route = {},																		--route is a table and connot be copied as a whole
-														target = Deepcopy(arg_Entry.target),
+														target = DeepCopy(arg_Entry.target),
 														target_name = arg_Entry.target_name,
 														firepower = assigned * arg_Entry.loadout.firepower,
 														tot_from = arg_Entry.tot_from,
@@ -3927,7 +3927,7 @@ end
 for targetSide, targets in pairs(targetlist) do
 	for targetN, target in pairs(targets) do
 		if  target.priorityINIT  then
-			target.priority = Deepcopy(target.priorityINIT)
+			target.priority = DeepCopy(target.priorityINIT)
 			target.priorityINIT = nil
 		end
 	end
@@ -4003,7 +4003,7 @@ if Debug.debug then
 		for unitN, unit in pairs(units) do
 			if not unit.inactive or unit.inactive == nil then
 				if AcftAvail[unit.name] then
-					local campSquad = Deepcopy(AcftAvail[unit.name])
+					local campSquad = DeepCopy(AcftAvail[unit.name])
 					local pourcent = campSquad.assigned / campSquad.ready * 100
 
 					if pourcent <= 25 then

@@ -409,7 +409,7 @@ end
 
 if mission_ini.slider_PercentPlane and type(mission_ini.slider_PercentPlane == "number") then
 	local nbTotalAeronefInit, nbTotalAeronefAfter = 0, 0
-	local view_oob_air = Deepcopy(oob_air)
+	local view_oob_air = DeepCopy(oob_air)
 	for side,unit in pairs(oob_air) do
 		for n = 1, #unit do
 			if 	not unit[n].inactive then

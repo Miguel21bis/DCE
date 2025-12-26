@@ -96,7 +96,7 @@ local dicStrFunc = loadstring(dicStr)()
 zipFile:unzLocateFile('l10n/DEFAULT/mapResource')
 local resStr = zipFile:unzReadAllCurrentFile()
 loadstring(resStr)()
-local oldMapResource = Deepcopy(mapResource)
+local oldMapResource = DeepCopy(mapResource)
 
 zipFile:unzClose()
 
@@ -1024,7 +1024,7 @@ for _, side in pairs(mission.coalition) do
 
 										else
 											--garde le nom du fichier autre que beacon
-											local tempOldFile = Deepcopy(oldMapResource[task.params.action.params.file])
+											local tempOldFile = DeepCopy(oldMapResource[task.params.action.params.file])
 
 											mission.maxDictId = mission.maxDictId + 1
 											task.params.action.params.subtitle = "DictKey_subtitle_"..mission.maxDictId

@@ -99,7 +99,7 @@ end
 
 if type(camp.automaticReinforce) ~= "table" and type(camp.automaticReinforce) == "number" then
 
-	local tempValue = Deepcopy(camp.automaticReinforce)
+	local tempValue = DeepCopy(camp.automaticReinforce)
 
 	camp.automaticReinforce = {
 		blue = tempValue,
@@ -114,7 +114,7 @@ else
 	}
 end
 
-local old_flag = Deepcopy(camp.flag)												--copy campaign flags, so that modifications of flags do not affect condition of subsequent campaign triggers in same mission
+local old_flag = DeepCopy(camp.flag)												--copy campaign flags, so that modifications of flags do not affect condition of subsequent campaign triggers in same mission
 
 ----- functions to return campaign information to build trigger conditions -----
 Return = {}
@@ -1981,8 +1981,8 @@ Action = {}
 
 
 		local tmp_ground = {}
-		tmp_ground["blue"] = Deepcopy(staticTemplate.coalition.blue.country)											--copy mission data
-		tmp_ground["red"] = Deepcopy(staticTemplate.coalition.red.country)												--copy mission data
+		tmp_ground["blue"] = DeepCopy(staticTemplate.coalition.blue.country)											--copy mission data
+		tmp_ground["red"] = DeepCopy(staticTemplate.coalition.red.country)												--copy mission data
 
 		-- tmp_dictionary = Deepcopy(staticTemplate.localization.DEFAULT)
 
@@ -2124,8 +2124,8 @@ Action = {}
 
 		dofile("Templates/"..file)
 		local tmp_ground = {}
-		tmp_ground["blue"] = Deepcopy(staticTemplate.coalition.blue.country)											--copy mission data
-		tmp_ground["red"] = Deepcopy(staticTemplate.coalition.red.country)												--copy mission data
+		tmp_ground["blue"] = DeepCopy(staticTemplate.coalition.blue.country)											--copy mission data
+		tmp_ground["red"] = DeepCopy(staticTemplate.coalition.red.country)												--copy mission data
 
 		-- tmp_dictionary = Deepcopy(staticTemplate.localization.DEFAULT)
 

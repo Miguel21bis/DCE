@@ -153,8 +153,8 @@ do
 
 
 	oob_ground = {}
-	oob_ground["blue"] = Deepcopy(mission.coalition.blue.country)											--copy mission data
-	oob_ground["red"] = Deepcopy(mission.coalition.red.country)												--copy mission data
+	oob_ground["blue"] = DeepCopy(mission.coalition.blue.country)											--copy mission data
+	oob_ground["red"] = DeepCopy(mission.coalition.red.country)												--copy mission data
 
 	--store group and unit names in oob_ground instead of pointers to dict table
 	for side_name, side in pairs(oob_ground) do																--iterate through sides

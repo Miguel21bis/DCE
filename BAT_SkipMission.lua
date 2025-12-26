@@ -80,7 +80,7 @@ UpdateConfMod(nil, nil, "BAT_SkipMission "..debug.getinfo(1).currentline)
 if not camp.dateInit then
 	local tempCamp = camp
 	dofile("Init/camp_init.lua")
-	local campInit =  Deepcopy(camp)
+	local campInit =  DeepCopy(camp)
 	camp = tempCamp
 	camp.dateInit = {
 		day = campInit.date.day,
@@ -100,7 +100,7 @@ if mission_ini.current_date and mission_ini.current_date.year then
 
 	if camp.date.day ~= mission_ini.current_date.day or camp.date.month ~= mission_ini.current_date.month or camp.date.year ~= mission_ini.current_date.year then
 
-		old_Date = Deepcopy(camp.date)
+		old_Date = DeepCopy(camp.date)
 		TimeJump = true
 
 		if Debug.debug then

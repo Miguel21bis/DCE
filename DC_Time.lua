@@ -70,7 +70,7 @@ camp.time = camp.time + idle_time
 -- print("DcIme B1 camp.time: ".. tostring(camp.time))
 
 -- Modification M25.b OnlyDayMission
-local tempTime = Deepcopy(camp.time)
+local tempTime = DeepCopy(camp.time)
 
 -- print("DcIme B2 tempTime: ".. tostring(tempTime) .." "..FormatTime(tempTime, "hh:mm").."\n")
 
@@ -143,7 +143,7 @@ end
 if not camp.dateInit then
 	local tempCamp = camp
 	dofile("Init/camp_init.lua")
-	local campInit =  Deepcopy(camp)
+	local campInit =  DeepCopy(camp)
 	camp = tempCamp
 	camp.dateInit = {
 		day = campInit.date.day,

@@ -1560,7 +1560,7 @@ for zone_n,zone in pairs(mission.triggers.zones) do												--iterate through
 	end
 end
 
-GroundthreatsAll = Deepcopy(groundthreats)
+GroundthreatsAll = DeepCopy(groundthreats)
 
 function CheckPointInCercle(point, circle)
 	--(x-center_x)^2 + (y - center_y)^2 < radius^2
@@ -1580,7 +1580,7 @@ sumCercleSAM = sumCercleSAM + #groundthreats["red"]
 
 --supprime les cercles dans les cercles pour eviter d'en avoir beaucoup beaucoup
 if sumCercleSAM >= reduceCercle then
-	local copyThreats = Deepcopy(groundthreats)
+	local copyThreats = DeepCopy(groundthreats)
 	for sideThreat, threats in pairs(groundthreats) do
 		for n=#threats-1, 2, -1 do
 			for copyThreats_n, copyThreat in pairs(copyThreats[sideThreat]) do

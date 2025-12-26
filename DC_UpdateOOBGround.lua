@@ -366,8 +366,8 @@ end
 --******************************************************************************************************************************
 
 
-mission.coalition.blue.country = Deepcopy(oob_ground.blue)											--copy blue oob into mission
-mission.coalition.red.country = Deepcopy(oob_ground.red)											--copy red oob into mission
+mission.coalition.blue.country = DeepCopy(oob_ground.blue)											--copy blue oob into mission
+mission.coalition.red.country = DeepCopy(oob_ground.red)											--copy red oob into mission
 
 --iterate through all vehicles and ships to remove those marked as dead during previous Debriefings (static objects need not be removed, as these are spawned in a destroyed state)
 for k1,v1 in pairs(mission.coalition) do															--side table(red/blue)	

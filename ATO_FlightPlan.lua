@@ -4440,7 +4440,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				-- ************* store player waypoints for briefing creation *************
 				if flight[f].player == true then
 
-					camp.player.waypoints = Deepcopy(waypoints)
+					camp.player.waypoints = DeepCopy(waypoints)
 					if camp.player.waypoints[2] then
 						camp.player.waypoints[2].speed = 0
 						camp.player.waypoints[2].alt = 0
@@ -4499,7 +4499,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					for w = 3, #waypoints do
 						if waypoints[w].alt < waypoints[w - 1].alt and waypoints[w]["type"] ~= "Land" 
 						and (waypoints[w]["briefing_name"] and waypoints[w]["briefing_name"] ~= "Stacking") then		--for any descend waypoint that is not the landing waypoint
-							local extraWP = Deepcopy(waypoints[w])												--make a copy of the descend waypoint
+							local extraWP = DeepCopy(waypoints[w])												--make a copy of the descend waypoint
 							extraWP.x = (waypoints[w].x + waypoints[w + -1].x) / 2								--position half-way between descend waypoint and previous waypoint
 							extraWP.y = (waypoints[w].y + waypoints[w + -1].y) / 2								--position half-way between descend waypoint and previous waypoint
 							extraWP.ETA = (waypoints[w].ETA + waypoints[w + -1].ETA) / 2						--ETA half-way between descend waypoint and previous waypoint
@@ -4763,7 +4763,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						local typeDatalink = Data_divers[flight[f].type].datalinks.type
 
 						units[n]["datalinks"] = {
-							[typeDatalink] = 	Deepcopy(datalinks[typeDatalink][flight[f].type])
+							[typeDatalink] = 	DeepCopy(datalinks[typeDatalink][flight[f].type])
 						}
 					end
 
@@ -4909,7 +4909,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						if Data_AddPropAircraft[type_withProp]  then
 							--ajoute AddPropAircraft aux types joueur/client
-							units[n]["AddPropAircraft"] = Deepcopy(Data_AddPropAircraft[type_withProp])
+							units[n]["AddPropAircraft"] = DeepCopy(Data_AddPropAircraft[type_withProp])
 
 							if isHumain then
 								-- print("passe C10 isHumain")
@@ -4959,7 +4959,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					--dataCartridge 2.9
 					if Data_divers[flight[f].type] and Data_divers[flight[f].type].dataCartridge then
-						units[n]["dataCartridge"] = 	Deepcopy(dataCartridge)
+						units[n]["dataCartridge"] = 	DeepCopy(dataCartridge)
 					end
 
 
@@ -4992,7 +4992,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				--********************************************************************************
 				if Data_divers[flight[f].type] and Data_divers[flight[f].type].datalinks and Data_divers[flight[f].type].datalinks.type then
 
-					local typeDatalink = Deepcopy(Data_divers[flight[f].type].datalinks.type)
+					local typeDatalink = DeepCopy(Data_divers[flight[f].type].datalinks.type)
 
 					--récupere les id des autres membres du group
 					local recordId = {}
@@ -5005,15 +5005,15 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						local isReceiver = Data_divers[flight[f].type].datalinks.isReceiver
 
 						for n=1, #units do
-							local copyRecordId = Deepcopy(recordId)
+							local copyRecordId = DeepCopy(recordId)
 
 							if not units[n].AddPropAircraft then
 								--essentielement pour les donnors
-								units[n].AddPropAircraft = Deepcopy(AddPropAircraft_datalinks[typeDatalink])
+								units[n].AddPropAircraft = DeepCopy(AddPropAircraft_datalinks[typeDatalink])
 							else
 								for keyA, valueA in  pairs(AddPropAircraft_datalinks[typeDatalink]) do
 									if not units[n].AddPropAircraft[keyA] then
-										units[n].AddPropAircraft[keyA] = Deepcopy(valueA)
+										units[n].AddPropAircraft[keyA] = DeepCopy(valueA)
 									end
 								end
 							end
@@ -5117,14 +5117,14 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					elseif typeDatalink == "IDM" then
 						for n=1, #units do
-							local copyRecordId = Deepcopy(recordId)
+							local copyRecordId = DeepCopy(recordId)
 							if not units[n].AddPropAircraft then
 								--essentielement pour les donnors
-								units[n].AddPropAircraft = Deepcopy(AddPropAircraft_datalinks[typeDatalink])
+								units[n].AddPropAircraft = DeepCopy(AddPropAircraft_datalinks[typeDatalink])
 							else
 								for keyA, valueA in  pairs(AddPropAircraft_datalinks[typeDatalink]) do
 									if not units[n].AddPropAircraft[keyA] then
-										units[n].AddPropAircraft[keyA] = Deepcopy(valueA)
+										units[n].AddPropAircraft[keyA] = DeepCopy(valueA)
 									end
 								end
 							end
@@ -5188,9 +5188,10 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				-------- define group -----
 				-------- define group -----
 				---
-				local DCE_FreqPackage = GetFrequencyNG(sideName, flight[f].target_name, flight[f].task, type_withData, nil, "FreqPackage")
+				local taskOrHuman = isHumain and "player" or flight[f].task
+				local DCE_FreqPackage = GetFrequencyNG(sideName, flight[f].target_name, taskOrHuman, type_withData, nil, "FreqPackage")
 
-				local DCE_FreqFlight = GetFrequencyNG(sideName, flight[f].target_name, flight[f].task, type_withData, nil, "FreqFlight")
+				local DCE_FreqFlight = GetFrequencyNG(sideName, flight[f].target_name, taskOrHuman, type_withData, nil, "FreqFlight")
 
 
 				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe waypoints[1][x] AA "..tostring(waypoints[1]["x"])) end
@@ -5236,7 +5237,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						if waypoints[w]["task"] and waypoints[w]["task"]["params"] and waypoints[w]["task"]["params"]["tasks"] then
 							for i_task, _task in pairs(waypoints[w]["task"]["params"]["tasks"]) do
 								if _task and _task.id and _task.id == "FAC" then
-									_task.params.frequency = testFreqency * 1000000
+									_task.params.frequency = DCE_FreqPackage * 1000000
 								end
 							end
 						end
@@ -6366,7 +6367,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				local groupRTB = {}
 				if mission_ini.MP_PlaneRecovery and Multi.NbGroup >= 1 and isHumain then
 
-					groupRTB = Deepcopy(group)
+					groupRTB = DeepCopy(group)
 					groupRTB.groupId = GenerateIDGroup()
 
 					local direction = 0
@@ -6797,7 +6798,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					table.insert(mission.coalition[sideName].country[addKeyCoalition].plane.group, group)
 
 					if flight[f].player == true then
-						camp.player.group = Deepcopy(mission.coalition[sideName].country[addKeyCoalition].plane.group[#mission.coalition[sideName].country[addKeyCoalition].plane.group])		--store a link to the player group in mission
+						camp.player.group = DeepCopy(mission.coalition[sideName].country[addKeyCoalition].plane.group[#mission.coalition[sideName].country[addKeyCoalition].plane.group])		--store a link to the player group in mission
 					end
 
 					if groupRTB.groupId then
@@ -6813,7 +6814,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					table.insert(mission.coalition[sideName].country[addKeyCoalition].helicopter.group, group)
 
 					if flight[f].player == true then
-						camp.player.group = Deepcopy(mission.coalition[sideName].country[addKeyCoalition].helicopter.group[#mission.coalition[sideName].country[addKeyCoalition].helicopter.group])		--store a link to the player group in mission
+						camp.player.group = DeepCopy(mission.coalition[sideName].country[addKeyCoalition].helicopter.group[#mission.coalition[sideName].country[addKeyCoalition].helicopter.group])		--store a link to the player group in mission
 					end
 
 					if groupRTB.groupId then
@@ -7358,7 +7359,7 @@ for _side, side in pairs(mission.coalition) do
 						if Data_divers[unit.type] and Data_divers[unit.type].datalinks and Data_divers[unit.type].datalinks.isReceiver then
 							local typeDataLink = Data_divers[unit.type].datalinks.type
 							for pack_N, listId in pairs(pack_L16_unitId) do
-								local listIdCopy = Deepcopy(listId)
+								local listIdCopy = DeepCopy(listId)
 
 								for n=1, #listId do
 									if unit.unitId == listId[n] then
@@ -7394,7 +7395,7 @@ for _side, side in pairs(mission.coalition) do
 							end
 
 							for pack_N, listId in pairs(pack_SADL_unitId) do
-								local listIdCopy = Deepcopy(listId)
+								local listIdCopy = DeepCopy(listId)
 
 								for n=1, #listId do
 									if unit.unitId == listId[n] then
@@ -7727,7 +7728,7 @@ end
 if camp.player then
 	if not camp.player.package then camp.player.package = {} end
 	if not camp.player.package[camp.player.pack_n] then
-		camp.player.package[camp.player.pack_n] = Deepcopy(ATO[camp.player.side][camp.player.pack_n])
+		camp.player.package[camp.player.pack_n] = DeepCopy(ATO[camp.player.side][camp.player.pack_n])
 	end
 
 	--for multi-package strikes, add flights from other packages with the same target to player package to enrich the briefiing
@@ -7736,7 +7737,7 @@ if camp.player then
 			-- print("AtoFP role: "..role)
 			for f = 1, #flight do												--iterate through flights in roles
 				if flight[f].target_name == camp.player.target.titleName and camp.player.pack_n ~= p then	--flights that have the same target as player but are not in the player package
-					table.insert(camp.player.package[camp.player.pack_n][role], Deepcopy(flight[f]))							--insert flight into player package to list it in player briefing
+					table.insert(camp.player.package[camp.player.pack_n][role], DeepCopy(flight[f]))							--insert flight into player package to list it in player briefing
 				end
 			end
 		end
@@ -7750,7 +7751,7 @@ if camp.client then
 	for c = 1, #camp.client do
 		if not camp.client.package then camp.client.package = {} end
 		if not camp.client.package[camp.client[c].pack_n] then
-			camp.client.package[camp.client[c].pack_n] = Deepcopy(ATO[camp.client[c].side][camp.client[c].pack_n])	--pack_n
+			camp.client.package[camp.client[c].pack_n] = DeepCopy(ATO[camp.client[c].side][camp.client[c].pack_n])	--pack_n
 		end
 	end
 
