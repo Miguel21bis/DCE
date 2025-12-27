@@ -564,9 +564,14 @@ else
 
 end
 
-if not camp.path or camp.path == nil then												-- modification M35.d version ScriptsMod
-	camp.path = os.getenv('pathSavedGames')												-- modification M35.e version ScriptsMod
+if not camp.path or camp.path == nil then
+	camp.path = os.getenv('pathSavedGames')
 	camp.path = string.gsub(camp.path, "\\", "/")
+end
+
+if not camp.pathDCS or camp.pathDCS == nil then
+	camp.pathDCS = os.getenv('pathDCS')
+	camp.pathDCS = string.gsub(camp.pathDCS, "\\", "/")
 end
 
 -- modification M35.d (d: info log) version ScriptsMod

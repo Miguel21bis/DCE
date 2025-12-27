@@ -4679,16 +4679,44 @@ local function make_stub()
 end
 
 
+
 -- --rempli le reste des variables en allant chercher elle meme dans le bon repertoire mod
 -- --si la table possede dataDiscovery = true
 -- --exemple, si dans planeData, il y a moduleName = "h60_a37_dragonfly",		--self_ID 
 -- -- le chemin : C:\Users\miguel\Saved Games\DCS\Mods\aircraft\h60_a37_dragonfly
 -- --donc camp.path..\DCS\Mods\aircraft\h60_a37_dragonfly
 
+local function getDcsRootFromExe()
+    if not arg or type(arg[-1]) ~= "string" then
+        return nil
+    end
+
+    -- normalisation séparateurs
+    local exe = arg[-1]:gsub("/", "\\")
+
+    -- retire \bin\luae.exe
+    local root = exe:match("^(.*)bin\\[^\\]+%.exe$")
+    return root
+end
+
 function DataCompilation_DataDiscoveryA2()
 
-    local camp_path = os.getenv('pathSavedGames')
-    local dcs_path  = os.getenv('pathDCS')
+    local path_camp = os.getenv('pathSavedGames') or camp.path
+    -- local path_dcs  = camp.path_dcs or os.getenv('pathDCS') or getCurrentDir()
+
+	local path_dcs = os.getenv("pathDCS") or getDcsRootFromExe() or camp.path_dcs
+
+
+	print()
+	print(" pathSavedGames: "..tostring(os.getenv('pathSavedGames')))
+	print(" pathDCS: "..tostring(os.getenv('pathDCS')))
+	print(" getDcsRootFromExe(): "..tostring(getDcsRootFromExe()))
+
+
+	print()
+	print("path_camp "..tostring(path_camp))
+	print("path_dcs "..tostring(path_dcs))
+	print()
 
     for planeType, planeData in pairs(Data_divers) do
         if AircraftInCampaign[planeType] and planeData.folderModName then
@@ -4703,24 +4731,25 @@ function DataCompilation_DataDiscoveryA2()
                 local modRoot
 
 				-- Construire le chemin CoreMods
-				local fullPath = dcs_path .. "CoreMods/aircraft/" .. folderModName .. "/entry.lua"
+				local fullPath = path_dcs .. "CoreMods/aircraft/" .. folderModName .. "/entry.lua"
 
 				if planeData.add_aircraftFileName then
-					fullPath = dcs_path .. "CoreMods/aircraft/" .. folderModName .. "/"..planeData.add_aircraftFileName	
+					fullPath = path_dcs .. "CoreMods/aircraft/" .. folderModName .. "/"..planeData.add_aircraftFileName	
 				end
 
 				-- Vérifier si le fichier existe dans le premier chemin (par exemple, CoreMods/aircraft/)
 				local f0 = io.open(fullPath, "r")
+				if Debug.debug then print("DataDiscovery_B1 test entry.lua : "..fullPath) end
 				if f0 then
-					modRoot  = dcs_path .. "CoreMods/aircraft/" .. folderModName
+					modRoot  = path_dcs .. "CoreMods/aircraft/" .. folderModName
 					f0:close()
 				else
 					-- Si non trouvé, basculer vers Mods (Saved Games)
-					fullPath = camp_path .. "Mods/aircraft/" .. folderModName .. "/entry.lua"
-					modRoot  = camp_path .. "Mods/aircraft/" .. folderModName
+					fullPath = path_camp .. "Mods/aircraft/" .. folderModName .. "/entry.lua"
+					modRoot  = path_camp .. "Mods/aircraft/" .. folderModName
 				end
 
-                print("DataDiscovery_B entry.lua : "..fullPath)
+                if Debug.debug then print("DataDiscovery_B2 entry.lua : "..fullPath) end
 
                 local env = {}
 
@@ -4773,7 +4802,7 @@ function DataCompilation_DataDiscoveryA2()
 				env.__DEBUG__        = false
 
 				--code original
-				env.db_path = dcs_path .. "Scripts/Database"
+				env.db_path = path_dcs .. "Scripts/Database"
 				env.aircraft_task = function(task)
 					return task
 				end
@@ -4804,7 +4833,7 @@ function DataCompilation_DataDiscoveryA2()
 					return res
 				end
 
-				-- 🔥 fallback universel
+				-- fallback universel
 				setmetatable(env, {
 					__index = function(t, k)
 						local v = make_stub()
@@ -4812,79 +4841,6 @@ function DataCompilation_DataDiscoveryA2()
 						return v
 					end
 				})
-
-
-
-				-- for k,v in pairs(base_env) do
-				-- 	env[k] = v
-				-- end
-
-				-- env.db_path = dcs_path .. "Scripts/Database"
-				-- env._ = function(s) return s end
-
-				-- env.ViewSettings = {}
-				-- env.weapons_loadouts = {}
-				-- env.weapons_loadouts_QF4 = {}
-
-				-- env.weapons = setmetatable({}, {
-				-- 	__index = function(t, k)
-				-- 		local w = { name = k }
-				-- 		rawset(t, k, w)
-				-- 		return w
-				-- 	end
-				-- })
-
-				-- env.warheads = setmetatable({}, {
-				-- 	__index = function(t, k)
-				-- 		local w = { name = k }
-				-- 		rawset(t, k, w)
-				-- 		return w
-				-- 	end
-				-- })
-
-				-- env.add_aircraft = function(def)
-				-- if type(def) ~= "table" then
-				-- 	print("  [add_aircraft IGNORED] invalid def:", type(def))
-				-- 	return
-				-- end
-				-- table.insert(collected, def)
-			-- end
-
-
-
-				-- -- CODE INITIAL
-				-- env.dofile = function(path)
-				-- 	local f = loadfile(path)
-				-- 	if not f then
-				-- 		print("  [IGNORED dofile] "..tostring(path))
-				-- 		return nil
-				-- 	end
-
-				-- 	setfenv(f, env)
-				-- 	local ok, res = pcall(f)
-				-- 	if not ok then
-				-- 		print("  [DOFILE ERROR] "..tostring(res))
-				-- 		return nil
-				-- 	end
-				-- 	return res
-				-- end
-
-				
-
-				-- env.current_mod_path = modRoot
-
-				-- -- variables DCS communes
-				-- env.current_mod_path = modRoot
-				-- env.__DCS_VERSION__  = "OFFLINE"
-				-- env.__DEBUG__        = false
-
-				-- setmetatable(env, {
-				-- 	__index = function(t, k)
-				-- 		local v = {}
-				-- 		-- rawset(t, k, v)
-				-- 		return v
-				-- 	end
-				-- })
 
 				-- chargement entry.lua
 				local chunk = loadfile(fullPath)
@@ -4971,290 +4927,6 @@ function DataCompilation_DataDiscoveryA2()
     end
 end
 
-function DataCompilation_DataDiscovery_OLDA2()
-
-    local camp_path = os.getenv('pathSavedGames')
-    local dcs_path  = os.getenv('pathDCS')
-
-    for planeType, planeData in pairs(Data_divers) do
-        if AircraftInCampaign[planeType] and planeData.folderModName then
-
-			print("DataDiscoveryA2 for aircraft: "..planeType)
-
-           local folderModName = planeData.folderModName
-
-            if type(folderModName) == "string" then
-
-                -- local fullPath
-                local modRoot
-
-				-- Construire le chemin CoreMods
-				local fullPath = dcs_path .. "CoreMods/aircraft/" .. folderModName .. "/entry.lua"
-
-				if planeData.add_aircraftFileName then
-					fullPath = dcs_path .. "CoreMods/aircraft/" .. folderModName .. "/"..planeData.add_aircraftFileName	
-				end
-
-				-- Vérifier si le fichier existe dans le premier chemin (par exemple, CoreMods/aircraft/)
-				local f0 = io.open(fullPath, "r")
-				if f0 then
-					modRoot  = dcs_path .. "CoreMods/aircraft/" .. folderModName
-					f0:close()
-				else
-					-- Si non trouvé, basculer vers Mods (Saved Games)
-					fullPath = camp_path .. "Mods/aircraft/" .. folderModName .. "/entry.lua"
-					modRoot  = camp_path .. "Mods/aircraft/" .. folderModName
-				end
-
-                print("DataDiscovery_B entry.lua : "..fullPath)
-
-                local collected = {}
-
-                -- ENVIRONNEMENT SANDBOX
-
-				local base_env = {
-					-- Lua standard (OBLIGATOIRE)
-					pairs      = pairs,
-					ipairs     = ipairs,
-					next       = next,
-					tonumber   = tonumber,
-					tostring   = tostring,
-					type       = type,
-					unpack     = unpack,
-					select     = select,
-
-					math       = math,
-					string     = string,
-					table      = table,
-
-					-- sécurité
-					assert     = assert,
-					error      = error,
-					pcall      = pcall,
-
-					-- logs
-					print      = print,
-				}
-
-				local env = {}
-
-				for k,v in pairs(base_env) do
-					env[k] = v
-				end
-
-				env.db_path = dcs_path .. "Scripts/Database"
-				env._ = function(s) return s end
-
-				env.ViewSettings = {}
-				env.weapons_loadouts = {}
-				env.weapons_loadouts_QF4 = {}
-
-				env.weapons = setmetatable({}, {
-					__index = function(t, k)
-						local w = { name = k }
-						rawset(t, k, w)
-						return w
-					end
-				})
-
-				env.warheads = setmetatable({}, {
-					__index = function(t, k)
-						local w = { name = k }
-						rawset(t, k, w)
-						return w
-					end
-				})
-
-
-				env.Transport        = "Transport"
-				env.Reconnaissance   = "Reconnaissance"
-				env.Refueling 		= "Refueling"
-				env.AWACS 			= "AWACS"
-
-				env.AFAC              = "AFAC"
-				env.CAP              = "CAP"
-				env.CAS              = "CAS"
-				env.GroundAttack     = "Ground Attack"
-				env.RunwayAttack     = "Runway Attack"
-				env.Intercept        = "Intercept"
-				env.AntishipStrike    = "Antiship Strike"
-				env.PinpointStrike	 = "Pinpoint Strike"
-				env.Escort           = "Escort"
-				env.FighterSweep     = "Fighter Sweep"
-				env.SEAD             = "SEAD"
-				env.Training         = "Training"
-				-- env.Airborne         = "Airborne"
-				env.Airborne         = "Transport"
-				env.MODULATION_AM	= "AM"
-				env.MODULATION_FM	= "FM"
-				env.MODULATION_AM_AND_FM = "AM AND FM"
-
-				env.aircraft_task = function(task)
-					return task
-				end
-
-				--CODE INI
-				-- env.add_aircraft = function(def)
-				-- 	print("  [add_aircraft] ")
-				-- 	table.insert(collected, def)
-				-- end
-
-				env.add_aircraft = function(def)
-				if type(def) ~= "table" then
-					print("  [add_aircraft IGNORED] invalid def:", type(def))
-					return
-				end
-				table.insert(collected, def)
-			end
-
-
-
-				-- CODE INITIAL
-				env.dofile = function(path)
-					local f = loadfile(path)
-					if not f then
-						print("  [IGNORED dofile] "..tostring(path))
-						return nil
-					end
-
-					setfenv(f, env)
-					local ok, res = pcall(f)
-					if not ok then
-						print("  [DOFILE ERROR] "..tostring(res))
-						return nil
-					end
-					return res
-				end
-
-				--INI 0A a supprimer
-				--///////////////////////////////////////////
-				-- ==== PLUGIN SYSTEM ====
-				env.declare_plugin = function(...) 
-					-- on ignore volontairement
-				end
-
-				env.plugin_done = function(...)
-				end
-
-				-- ==== VFS ====
-				env.mount_vfs_model_path = function(...) end
-				env.mount_vfs_liveries_path = function(...) end
-				env.mount_vfs_texture_path = function(...) end
-				env.mount_vfs_sound_path   = function(...) end
-
-				-- ==== misc ED ====
-				env.make_view_settings = function(...) return {} end
-				env.make_flyable = function(...) end
-				env.set_manual_path = function(...) end
-				--INI 0A a supprimer
-				--///////////////////////////////////////////
-
-				env.current_mod_path = modRoot
-
-				-- variables DCS communes
-				env.current_mod_path = modRoot
-				env.__DCS_VERSION__  = "OFFLINE"
-				env.__DEBUG__        = false
-
-				--INI0A
-				-- setmetatable(env, {
-				-- 	__index = function(_, k)
-				-- 		-- print("[STUB]", k)
-				-- 		return function() end
-				-- 	end
-				-- })
-
-				setmetatable(env, {
-					__index = function(t, k)
-						local v = {}
-						-- rawset(t, k, v)
-						return v
-					end
-				})
-
-				-- chargement entry.lua
-				local chunk = loadfile(fullPath)
-				if chunk then
-					setfenv(chunk, env)
-					local ok, err = pcall(chunk)
-					if not ok then
-						print("  [ENTRY ERROR] "..tostring(err))
-						-- os.execute 'pause'
-					end
-				else
-					print("  [MISSING entry.lua]")
-					os.execute 'pause'
-				end
-
-				local function isWantedAircraft(aircraft, wanted)
-					local name = aircraft.Name or aircraft.self_ID
-
-					print("  -> isWantedAircraft A2 name "..tostring(name).." wanted: "..tostring(wanted))
-
-					if not name or not wanted then
-						return false
-					end
-
-					return wanted == name
-				end
-
-
-				--  collected contient TOUS les avions du module
-				for _, aircraft in ipairs(collected) do
-
-					local dst = Data_divers[planeType]
-					local wanted = dst.inheritedModFrom or planeType
-
-					print("  -> collected A planeName "..tostring(planeType).." aircraft.Name: "..tostring(aircraft.Name).." wanted: "..tostring(wanted))
-
-					if wanted then
-						-- 🔴 FILTRE COMPATIBLE LUA 5.1
-						if isWantedAircraft(aircraft, wanted) then
-
-							if aircraft.Tasks then
-								dst.Tasks = aircraft.Tasks
-								_affiche(aircraft.Tasks, "  -> A2 Tasks found ")
-								-- os.execute 'pause'
-							end
-
-							if aircraft.HumanRadio then
-								dst.HumanRadio = aircraft.HumanRadio
-								-- _affiche(aircraft.HumanRadio, "  -> HumanRadio found ")
-								-- os.execute 'pause'
-							end
-							if aircraft.panelRadio then
-								dst.panelRadio = aircraft.panelRadio
-								-- _affiche(aircraft.panelRadio, "  -> panelRadio found ")
-								-- os.execute 'pause'
-							end
-							
-							-- FAILURES
-							local failures = extractFailuresA2(aircraft)
-							if failures then
-								Failures[planeType] = failures
-								dst.Failures = failures
-							end
-
-							-- extraction plus tard
-							print("  -> A2 aircraft captured "..planeType)
-							-- os.execute 'pause'
-
-							local file_str = "dst = " .. TableSerialization(dst, 0)			--make a string
-							local file_File = io.open("Debug/Data_Divers_GetMods_"..planeType..".lua", "w") or error("Failed to open debug EWR_UtilDebug file")
-							file_File:write(file_str)																	--save new data
-							file_File:close()
-
-						end
-					else
-						print("  -> collected A planeName "..tostring(planeType).." wanted: "..tostring(wanted))
-						os.execute 'pause'
-					end
-				end
-
-            end
-        end
-    end
-end
 
 --rempli la table TaskByPlane avec les Tasks qui ne sont rempli que dans Data_divers
 function DataCompilation_TaskByPlane()

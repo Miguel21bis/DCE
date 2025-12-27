@@ -994,7 +994,15 @@ local function onPlayerAddMarker(event)
 
 	if event.id == world.event.S_EVENT_BIRTH then
 
-		if event.initiator and Object.getCategory(event.initiator) ~= Object.Category.STATIC and event.initiator:getPlayerName() then
+		if event.initiator and Object.getCategory(event.initiator) then
+			
+			env.info("CG_ArtySpotter: S_EVENT_BIRTH: Category: "..tostring(Object.getCategory(event.initiator)))
+		else
+			env.info("CG_ArtySpotter: S_EVENT_BIRTH: Category: nil")
+		end
+
+        if event.initiator and Object.getCategory(event.initiator) ~= Object.Category.STATIC
+		and event.initiator.getPlayerName and event.initiator:getPlayerName() then
 
 			local gpGid = event.initiator:getGroup():getID()
 			local Uid = event.initiator:getID()

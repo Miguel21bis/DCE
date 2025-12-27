@@ -853,7 +853,7 @@ if input == "y" or input == "yes" then
 
 
 		if Debug.debug and Debug.AfficheFlight then
-			print("DCE debug")  os.execute 'pause'
+			print("0C1 DCE debug")  os.execute 'pause'
 		end
 
 	until 1 == 2																					--repeat until the next mission is ready (has a player flight)

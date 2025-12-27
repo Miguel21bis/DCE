@@ -854,7 +854,7 @@ function eventHandlerDCE:onEvent(event)
                     if event.initiator and event.initiator.getPlayerName then
 						env.info( "DCE_EventT_eject H :radioTransmission frequency A  "..tostring(campL.EjectedPilotFrequency[sideName].GuardEjection).." | "..tostring('GuardEjection'..pilotEjection.initiator))
 
-						trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', pilotEjection, 0, true, campL.EjectedPilotFrequency[sideName].GuardEjection, 0.1, 'GuardEjection'..pilotEjection.initiator)
+						trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', pilotEjection, 0, true, campL.EjectedPilotFrequency[sideName].GuardEjection, RadioWatt, 'GuardEjection'..pilotEjection.initiator)
 
 						env.info( "DCE_EventT_eject I :radioTransmission frequency B  "..tostring(campL.EjectedPilotFrequency[sideName].GuardEjection).." | "..tostring('GuardEjection'..pilotEjection.initiator))
 					end

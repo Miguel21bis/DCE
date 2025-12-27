@@ -632,7 +632,7 @@ local function startSAR(arg)
 								['action'] = {
 									['id'] = 'Script',
 									['params'] = {
-										["command"] = "Custom_Altitude(" .. arg_flightSAR.name .. ",   nil , " .."2".. ")",
+										["command"] = string.format ("Custom_Altitude('%s',   nil ,  %d)", arg_flightSAR.name, 2),
 									},
 								},
 							},
@@ -701,7 +701,15 @@ local function startSAR(arg)
 									["params"] =
 									{
 													-- Custom_SAR(grpname, airdrome, airdromeX2d, airdromeY2d, mgrsChute, speed, alt)
-										["command"] = "Custom_SAR(" .. arg_flightSAR.name .. ",  " .. arg_flightSAR.airdromeName .. ",  " .. arg_flightSAR.x .. ",  " .. arg_flightSAR.y .. ",  " .. arg_ejPil.MGRS_Chute .. ",   " .. arg_flightSAR.vCruise .. ",  " .. alt_cruise ..  ")",
+										["command"] = string.format("Custom_SAR('%s', '%s', %d, %d, '%s', %d, %d)",
+											arg_flightSAR.name,
+											arg_flightSAR.airdromeName,
+											arg_flightSAR.x,
+											arg_flightSAR.y,
+											arg_ejPil.MGRS_Chute,
+											arg_flightSAR.vCruise,
+											alt_cruise
+										),
 									}, -- end of ["params"]
 								}, -- end of ["action"]
 							}, -- end of ["params"]
@@ -1175,7 +1183,9 @@ function PedroSAR(arg)
 									['action'] = {
 										['id'] = 'Script',
 										['params'] = {
-											["command"] = "Custom_Altitude(" .. groupName .. ",    nil  , " .."1".. ")",
+                                        -- ["command"] = "Custom_Altitude(" .. groupName .. ",    nil  , " .. "1" .. ")",
+										["command"] = string.format("Custom_Altitude('%s',   nil ,  %d)",
+											groupName, 1),
 										},
 									},
 								},
@@ -2036,7 +2046,7 @@ function GetOutGDFM(arg)
 			local modulation = 0	--AM
 
 			env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency A  "..tostring(campL.EjectedPilotFrequency[infoPlayer.sideName].GuardEjection).." | "..tostring('GuardEjection'..name))
-			trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', arg_playerObj, modulation, true, campL.EjectedPilotFrequency[infoPlayer.sideName].GuardEjection, 0.1, 'GuardEjection'..name)
+			trigger.action.radioTransmission('l10n/DEFAULT/ejectionRadioBeacon.ogg', arg_playerObj, modulation, true, campL.EjectedPilotFrequency[infoPlayer.sideName].GuardEjection, RadioWatt, 'GuardEjection'..name)
 			env.info( "DCE_getOut infoPlayer EventT :radioTransmission frequency B  "..tostring(campL.EjectedPilotFrequency[infoPlayer.sideName].GuardEjection).." | "..tostring('GuardEjection'..name))
 
 			-- --position precise pour le fumigene
