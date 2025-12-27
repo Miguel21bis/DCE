@@ -141,7 +141,7 @@ TaskByPlane = {
 		["L-39ZA"] = true,
 		["Su-24M"] = true,
 
-		["Ka-50"] = true,
+		-- ["Ka-50"] = true,
 		["Ka-50_3"] = true,
 		["Mi-28N"] = true,
 
@@ -187,12 +187,8 @@ TaskByPlane = {
 		["H-6J"] = true,
 		["tu_22D"] = true,				--Mod
 
-		["F-86F Sabre"] = true,
-
 		["F-4E"] = true,
-		-- ["F-5E-3"] = true,
 		["F-15E"] = true,
-		["F-15ESE"] = true,
 		["F-16C bl.52d"] = true,
 	
 		["AH-64D_BLK_II"] = true,
@@ -213,7 +209,7 @@ TaskByPlane = {
 
 		["Mi-24V"] = true,
 		["Mi-28N"] = true,
-		["Ka-50"] = true,
+		-- ["Ka-50"] = true,
 		["Ka-50_3"] = true,
 
 	},
@@ -249,8 +245,6 @@ TaskByPlane = {
 
 		["H-6J"] = true,
 
-		["F-86F Sabre"] = true,
-
 		["F-4E"] = true,
 		-- ["F-5E-3"] = true,
 		["F-16C bl.52d"] = true,
@@ -279,7 +273,7 @@ TaskByPlane = {
 		["Mi-24V"] = true,
 		-- ["Mi-24P"] = true,
 		["Mi-28N"] = true,
-		["Ka-50"] = true,
+		-- ["Ka-50"] = true,
 		["Ka-50_3"] = true,
 
 
@@ -315,7 +309,6 @@ TaskByPlane = {
 		["A-10C"] = true,
 		["A-10C_2"] = true,
 		["A-10A"] = true,
-		-- ["AJS37"] = true,
 		["AV8BNA"] = true,
 
 		["B-1B"] = true,
@@ -324,12 +317,8 @@ TaskByPlane = {
 		["H-6J"] = true,
 		["tu_22D"] = true,				--Mod
 
-		["F-86F Sabre"] = true,
-
 		["F-4E"] = true,
-		-- ["F-5E-3"] = true,
 		["F-15E"] = true,
-		["F-15ESE"] = true,
 		["F-16C bl.52d"] = true,
 		["MB-339A"] = true,
 		["MirageF1"] = true,			--Mod
@@ -354,7 +343,7 @@ TaskByPlane = {
 
 		["Mi-24V"] = true,
 		["Mi-28N"] = true,
-		["Ka-50"] = true,
+		-- ["Ka-50"] = true,
 		["Ka-50_3"] = true,
 
 
@@ -382,13 +371,11 @@ TaskByPlane = {
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
 
-		-- ["A-4E-C"] = true,					--Mod
 		["A-6E"] = true,					--Mod
 		["A-10C"] = true,
 		["A-10C_2"] = true,
 		["A-10A"] = true,
 		["vwv_a1_skyraider"] = true,		--Mod
-		-- ["AJS37"] = true,
 		["AV8BNA"] = true,
 
 		["B-1B"] = true,
@@ -398,7 +385,6 @@ TaskByPlane = {
 		["tu_22D"] = true,					--Mod
 
 		["F-15E"] = true,
-		["F-15ESE"] = true,
 		["F-16C bl.52d"] = true,
 		["MB-339A"] = true,
 		["MirageF1"] = true,			--Mod
@@ -434,17 +420,12 @@ TaskByPlane = {
 
 		["I-16"] = true,
 
-
-		-- ["A-4E-C"] = true,				--Mod
 		["AV8BNA"] = true,
 
-		["F-86F Sabre"] = true,
 		["F-4E"] = true,
-		-- ["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
 		["F-15C"] = true,
 		["F-15E"] = true,
-		["F-15ESE"] = true,
 		["F-16C bl.52d"] = true,
 
 		["MirageF1"] = true,			--Mod
@@ -462,12 +443,11 @@ TaskByPlane = {
 		["Su-30"] = true,
 
 		["Mi-28N"] = true,
-		["Ka-50"] = true,
+		-- ["Ka-50"] = true,
 		["Ka-50_3"] = true,
 	},
 
 	["Pinpoint Strike"] = {
-		-- ["AJS37"] = true,
 		["AV8BNA"] = true,
 
 		["Tornado GR4"] = true,
@@ -480,9 +460,7 @@ TaskByPlane = {
 		["tu_22D"] = true,				--Mod
 
 		["F-4E"] = true,
-		-- ["F-5E-3"] = true,
 		["F-15E"] = true,
-		["F-15ESE"] = true,
 		["F-16C bl.52d"] = true,
 		["F-117A"] = true,
 
@@ -512,18 +490,11 @@ TaskByPlane = {
 		["I-16"] = true,
 
 
-		-- ["AJS37"] = true,
-
-		["F-86F Sabre"] = true,
-
 		["AV8BNA"] = true,
 		["F-4E"] = true,
-		-- ["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
 		["F-15C"] = true,
 		["F-15E"] = true,
-		["F-15ESE"] = true,
-
 		["F-16C bl.52d"] = true,
 
 		["MirageF1"] = true,			--Mod
@@ -556,19 +527,12 @@ TaskByPlane = {
 
 		["I-16"] = true,
 
-
-		-- ["AJS37"] = true,
-		-- ["A-4E-C"] = true,				--Mod
 		["AV8BNA"] = true,
 
-		["F-86F Sabre"] = true,
-
 		["F-4E"] = true,
-		-- ["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
 		["F-15C"] = true,
 		["F-15E"] = true,
-		["F-15ESE"] = true,
 		["F-16C bl.52d"] = true,
 		
 		["MirageF1"] = true,			--Mod
@@ -604,18 +568,11 @@ TaskByPlane = {
 
 		["I-16"] = true,
 
-
-		-- ["AJS37"] = true,
-
-		["F-86F Sabre"] = true,
-
 		["AV8BNA"] = true,
 		["F-4E"] = true,
-		-- ["F-5E-3"] = true,
 		["vwv_crusader"] = true,		--Mod
 		["F-15C"] = true,
 		["F-15E"] = true,
-		["F-15ESE"] = true,
 		["F-16C bl.52d"] = true,
 		
 		["MirageF1"] = true,			--Mod
@@ -1176,6 +1133,7 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		playable = true,
+		folderModName = "F-86",
 	},
 	["vwv_rf101b"] = 	{
 		instrumentUnits = "imperial",
@@ -1184,9 +1142,9 @@ Data_divers = {
 		folderModName = "[VWV] RF-101B",
 		vCruise = 215,
 		hCruise = 9000,
-		Tasks = {
-			aircraft_task(Reconnaissance),
-		},
+		-- Tasks = {
+		-- 	aircraft_task(Reconnaissance),
+		-- },
 	},
 	["VSN_F104C"] = 	{
 		instrumentUnits = "imperial",
@@ -1396,6 +1354,18 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = true,
 		playable = true,
+		folderModName = "F-15E",
+		moduleName = "F-15E",
+		-- Tasks = {
+		-- 	aircraft_task(CAP),
+		-- 	aircraft_task(Escort),
+		-- 	aircraft_task(FighterSweep),
+		-- 	aircraft_task(Intercept),
+		-- 	aircraft_task(PinpointStrike),
+		-- 	aircraft_task(CAS),
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(RunwayAttack),
+		-- },-- end of Tasks
 		vCruise = 250,
 		hCruise = 12670,
 		refuellingReceptacleType = "probe"
@@ -1537,7 +1507,6 @@ Data_divers = {
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
 		folderModName = "Mirage-F1",
 		inheritedModFrom = "Mirage-F1B",
-		-- inheritedModFrom = {"Mirage-F1B","Mirage-F1BE"},
 		refuellingReceptacleType = "drogue"
 	},
 
@@ -1999,6 +1968,7 @@ Data_divers = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
+		folderModName = "MiG-29-Fulcrum",
 		alignment_PropAircraft = {
 			fast = {
 				["IMU alignment type"] = 0,
@@ -2007,17 +1977,17 @@ Data_divers = {
 				["IMU alignment type"] = 1,
 			},
 		},
-		Tasks = {
-			aircraft_task(CAP),
-			aircraft_task(Escort),
-			aircraft_task(FighterSweep),
-			aircraft_task(Intercept),
-			aircraft_task(AFAC),
-			aircraft_task(GroundAttack),
-			aircraft_task(CAS),
-			aircraft_task(RunwayAttack),
-			aircraft_task(AntishipStrike),
-		},
+		-- Tasks = {
+		-- 	aircraft_task(CAP),
+		-- 	aircraft_task(Escort),
+		-- 	aircraft_task(FighterSweep),
+		-- 	aircraft_task(Intercept),
+		-- 	aircraft_task(AFAC),
+		-- 	aircraft_task(GroundAttack),
+		-- 	aircraft_task(CAS),
+		-- 	aircraft_task(RunwayAttack),
+		-- 	aircraft_task(AntishipStrike),
+		-- },
 		vCruise = 240, --m/s--a peaufiner
 		hCruise = 9000,	-- m--a peaufiner
 	},
@@ -2101,7 +2071,7 @@ Data_divers = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 	},
-	["Mi-8MT"] = {
+	["Mi-8MT"] = {--data a garder, ancien module, information non accessible
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
@@ -2144,11 +2114,13 @@ Data_divers = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
+		folderModName = "Ka-50",
 	},
 	["Ka-50_3"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
+		folderModName = "Ka-50",
 	},
 
 
@@ -3595,11 +3567,11 @@ Failures = {
     --    'EMERGENCY_GEAR_LEVER_PULLED', --('Emergency Gear Handle: Pulled'),    enable = false, hh = 0, mm = 0, mmint = 1, prob = 100},
 
     -- },
-	["F-15ESE"] = {
-		--'AAQ13_FLIR_SENSOR_FAIL',	--('AN/AAQ13 FLIR sensor fail'),
-		'AAQ13_TF_RADAR_SENSOR_FAIL',--('AN/AAQ13 TF radar fail'),
-		'CARA_RADALT_FAIL',		--('CARA Radar Altimeter fail')
-	},
+	-- ["F-15ESE"] = {
+	-- 	--'AAQ13_FLIR_SENSOR_FAIL',	--('AN/AAQ13 FLIR sensor fail'),
+	-- 	'AAQ13_TF_RADAR_SENSOR_FAIL',--('AN/AAQ13 TF radar fail'),
+	-- 	'CARA_RADALT_FAIL',		--('CARA Radar Altimeter fail')
+	-- },
 	-- ["FA-18C_hornet"] =
 	-- {
 	-- 	-- electric system
@@ -3659,33 +3631,33 @@ Failures = {
 	-- 	'Failure_Sens_LeftPitotHeater', --('Left PITOT Heater FAILURE'),								
 	-- 	'Failure_Sens_RightPitotHeater', --('Right PITOT Heater FAILURE'),							
 	-- },
-	["F-86F"] = {
-		-- electric system
-		'es_damage_Generator',	--('Generator FAILURE'), 		
-		'es_damage_MainInverter',--('Main Inverter FAILURE'), 	
-		'es_damage_AltInverter',	--('Alternate Inverter FAILURE'),
-		'es_damage_RadarInverter',--('Radar Inverter FAILURE'), 	
-		-- hydraulic system
-		'hs_damage_MainHydro',	--('Main Hydraulic FAILURE'),	
-		'hs_damage_AltHydro',	--('Alternate Hydraulic FAILURE'), 
-		'hs_damage_UtilityHydro',--('Utility Hydraulic FAILURE'), 
-		-- power plant
-		'pp_damage_BladesBrake',	--('Engine: Blades Brake'),		 
-		'pp_damage_Ignition',	--('Engine: Ignition FAILURE'),	 
+	-- ["F-86F"] = {
+	-- 	-- electric system
+	-- 	'es_damage_Generator',	--('Generator FAILURE'), 		
+	-- 	'es_damage_MainInverter',--('Main Inverter FAILURE'), 	
+	-- 	'es_damage_AltInverter',	--('Alternate Inverter FAILURE'),
+	-- 	'es_damage_RadarInverter',--('Radar Inverter FAILURE'), 	
+	-- 	-- hydraulic system
+	-- 	'hs_damage_MainHydro',	--('Main Hydraulic FAILURE'),	
+	-- 	'hs_damage_AltHydro',	--('Alternate Hydraulic FAILURE'), 
+	-- 	'hs_damage_UtilityHydro',--('Utility Hydraulic FAILURE'), 
+	-- 	-- power plant
+	-- 	'pp_damage_BladesBrake',	--('Engine: Blades Brake'),		 
+	-- 	'pp_damage_Ignition',	--('Engine: Ignition FAILURE'),	 
 
-		'pp_damage_MainMaxFreq',		--('Main Fuel: Max Freq. Limiter FAILURE'),
-		'pp_damage_MainMaxNormFreq',	--('Main Fuel: Max Normalized Freq. Limiter FAILURE'),
-		'pp_damage_MainMaxTempr',	--('Main Fuel: Max Temperature Limiter FAILURE'),
-		'pp_damage_MainStabFactor',	--('Main Fuel: Stability Factor FAILURE'),
+	-- 	'pp_damage_MainMaxFreq',		--('Main Fuel: Max Freq. Limiter FAILURE'),
+	-- 	'pp_damage_MainMaxNormFreq',	--('Main Fuel: Max Normalized Freq. Limiter FAILURE'),
+	-- 	'pp_damage_MainMaxTempr',	--('Main Fuel: Max Temperature Limiter FAILURE'),
+	-- 	'pp_damage_MainStabFactor',	--('Main Fuel: Stability Factor FAILURE'),
 
-		'pp_damage_EmergMaxFreq',	--('Emerg.Fuel: Max Freq. Limiter FAILURE'),
-		'pp_damage_EmergMaxNormFreq',--('Emerg.Fuel: Max Normalized Freq. Limiter FAILURE'),
-		'pp_damage_EmergMaxTempr',	--('Emerg.Fuel: Max Temperature Limiter FAILURE'),
+	-- 	'pp_damage_EmergMaxFreq',	--('Emerg.Fuel: Max Freq. Limiter FAILURE'),
+	-- 	'pp_damage_EmergMaxNormFreq',--('Emerg.Fuel: Max Normalized Freq. Limiter FAILURE'),
+	-- 	'pp_damage_EmergMaxTempr',	--('Emerg.Fuel: Max Temperature Limiter FAILURE'),
 
-		'pp_damage_OilPump',		--('Engine: Oil Pump FAILURE'),	
-		'pp_damage_OilSeparator',--('Engine: Oil Separator FAILURE'),
-		-- 
-	},
+	-- 	'pp_damage_OilPump',		--('Engine: Oil Pump FAILURE'),	
+	-- 	'pp_damage_OilSeparator',--('Engine: Oil Separator FAILURE'),
+	-- 	-- 
+	-- },
 	-- ["L-39"] = {
 	-- 	-- engine
 	-- 	'ef_shutdown',				--('Engine SHUTDOWN'),			
@@ -4163,21 +4135,21 @@ Failures = {
         'ENGINE_FAILURE_DEEC', --('ENGINE_FAILURE_DEEC')
     },
 
-	["Ka-50"] =
-	{
-		'hydro_main',  --('HYDRO MAIN'), 		
-		'hydro_common',  --('HYDRO COMMON'), 	
-		'l_engine',  --('L-ENGINE'), 		
-		'r_engine',  --('R-ENGINE'), 		
-		'asc_p',  	--('ASC PITCH'), 	
-		'asc_r',  	--('ASC ROLL'), 		
-		'asc_y',  	--('ASC YAW'), 		
-		'asc_a',  	--('ASC ALT'), 		
-		'abris_software',  	--('ABRIS SOFTWARE'),	
-		'abris_hardware',  	--('ABRIS HARDWARE'),	
-		'laser_failure' ,  	--('LASER FAILURE'),		
-		'RADAR_ALT_TOTAL_FAILURE', 	--("RALT FAILURE"), 
-	},
+	-- ["Ka-50"] =
+	-- {
+	-- 	'hydro_main',  --('HYDRO MAIN'), 		
+	-- 	'hydro_common',  --('HYDRO COMMON'), 	
+	-- 	'l_engine',  --('L-ENGINE'), 		
+	-- 	'r_engine',  --('R-ENGINE'), 		
+	-- 	'asc_p',  	--('ASC PITCH'), 	
+	-- 	'asc_r',  	--('ASC ROLL'), 		
+	-- 	'asc_y',  	--('ASC YAW'), 		
+	-- 	'asc_a',  	--('ASC ALT'), 		
+	-- 	'abris_software',  	--('ABRIS SOFTWARE'),	
+	-- 	'abris_hardware',  	--('ABRIS HARDWARE'),	
+	-- 	'laser_failure' ,  	--('LASER FAILURE'),		
+	-- 	'RADAR_ALT_TOTAL_FAILURE', 	--("RALT FAILURE"), 
+	-- },
 	["Ka-50 III"] =
 	{
 		'hydro_main',  --('HYDRO MAIN'), 		

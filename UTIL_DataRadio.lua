@@ -1378,112 +1378,9 @@ Db_Frequency = {
 	-- 	},
 	-- },
 
-	["F-86F Sabre"] = {
-		HumanRadio = {
-			frequency 		= 251.0,
-			editable 		= true,
-			minFrequency	= 225.000,
-			maxFrequency 	= 269.000,
-			modulation 		= MODULATION_AM
-		},
-
-		panelRadio = {
-			[1] = {
-				name = _("radio?"),
-				range = {
-					{min = 225.0, max = 269.0}
-				},
-				channels = {  -- matches L-39C except for channel 8, which was changed to a Georgian airport and #20 which is NTTR only (for now).  This radio goes 1-20 not 0-19.
-					[1] = { name = _("Channel 1"),		default = 264.0, modulation = _("AM"), connect = true}, -- mineralnye-vody (URMM) : 264.0
-					[2] = { name = _("Channel 2"),		default = 265.0, modulation = _("AM")},	-- nalchik (URMN) : 265.0
-					[3] = { name = _("Channel 3"),		default = 256.0, modulation = _("AM")},	-- sochi-adler (URSS) : 256.0
-					[4] = { name = _("Channel 4"),		default = 254.0, modulation = _("AM")},	-- maykop-khanskaya (URKH), nellis (KLSV) : 254.0
-					[5] = { name = _("Channel 5"),		default = 250.0, modulation = _("AM")},	-- anapa (URKA) : 250.0
-					[6] = { name = _("Channel 6"),		default = 270.0, modulation = _("AM")},	-- beslan (URMO) : 270.0
-					[7] = { name = _("Channel 7"),		default = 257.0, modulation = _("AM")},	-- krasnodar-pashkovsky (URKK) : 257.0
-					[8] = { name = _("Channel 8"),		default = 258.0, modulation = _("AM")},	-- sukhumi-babushara (UGSS) : 255.0
-					[9] = { name = _("Channel 9"),		default = 262.0, modulation = _("AM")},	-- kobuleti (UG5X) : 262.0
-					[10] = { name = _("Channel 10"),	default = 259.0, modulation = _("AM")},	-- gudauta (UG23) : 259.0
-					[11] = { name = _("Channel 11"),	default = 268.0, modulation = _("AM")},	-- tbilisi-soganlug (UG24) : 268.0
-					[12] = { name = _("Channel 12"),	default = 269.0, modulation = _("AM")},	-- tbilisi-vaziani (UG27) : 269.0
-					[13] = { name = _("Channel 13"),	default = 260.0, modulation = _("AM")},	-- batumi (UGSB) : 260.0
-					[14] = { name = _("Channel 14"),	default = 263.0, modulation = _("AM")},	-- kutaisi-kopitnari (UGKO) : 263.0
-					[15] = { name = _("Channel 15"),	default = 261.0, modulation = _("AM")},	-- senaki-kolkhi (UGKS) :  261.0
-					[16] = { name = _("Channel 16"),	default = 267.0, modulation = _("AM")},	-- tbilisi-lochini (UGTB) : 267.0
-					[17] = { name = _("Channel 17"),	default = 251.0, modulation = _("AM")},	-- krasnodar-center (URKI), creech (KINS) : 251.0
-					[18] = { name = _("Channel 18"),	default = 253.0, modulation = _("AM")},	-- krymsk (URKW), mccarran (KLAS) : 253.0
-				},
-			},
-		},
-	},
 
 
-
-	["F-15ESE"] = {
-		radio = {			
-			[1] = {						--radio 1 AN/ARC-164
-				UHF = {
-					min = 225,				--minimum radio frequency in mHz 
-					max = 399,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 20,
-				name = "UHF Radio 1",
-			},
-			[2] = {						--radio 2 AN/ARC-222
-				LVHF = {
-					min = 30,				--minimum radio frequency in mHz 
-					max = 87,				--maxium  radio frequency in mHz
-				},
-				-- VHF = { 
-				-- 	{min = 108.0, max = 115.975},				--minimum radio frequency in mHz   
-				-- 	{min = 118.0, max = 173.975},				--maxium  radio frequency in mHz
-				-- },
-				VHF = {
-					min = 118,				--minimum radio frequency in mHz   
-					max = 173,				--maxium  radio frequency in mHz
-				},
-				UHF = {
-					min = 225,				--minimum radio frequency in mHz 
-					max = 399,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 20,
-				name = "V/UHF Radio 2",
-			},
-		},
-	},
-	["F-16C_50"] = {
-		radio = {			
-			[1] = {						--radio 1 AN/ARC-164
-				UHF = {
-					min = 225,				--minimum radio frequency in mHz 
-					max = 399.975,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 20,
-				-- range = {
-				-- 	{min = 225.0, max = 399.975, modulation	= MODULATION_AM}
-				-- },
-			},
-			[2] = {						--radio 2 AN/ARC-222
-				LVHF = {
-					min = 30,				--minimum radio frequency in mHz 
-					max = 87.975,				--maxium  radio frequency in mHz
-				},
-				VHF = {
-					min = 116,				--minimum radio frequency in mHz   
-					max = 155.975,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 20,
-				-- range = {
-				-- 	{min =  30.0, max =  87.975, modulation	= MODULATION_FM},	-- FM
-				-- 	{min = 116.0, max = 155.975, modulation	= MODULATION_AM}	-- AM
-				-- },
-			},
-		},
-	},
-
-
-
-	["UH-1H"] = {
+	["UH-1H"] = {	--ne pas supprimer, fichier radio illisible dans le rep mod
 
 		HumanRadio	= {
 			frequency		= 305.0,
@@ -1522,7 +1419,7 @@ Db_Frequency = {
 	},
 
 
-	["SA342"] = {
+	["SA342"] = {	--ne pas supprimer, fichier radio non complet dans rep mod
 		HumanRadio	= {
 			frequency		= 305.0,
 			editable		= true,
@@ -1557,38 +1454,34 @@ Db_Frequency = {
 		},
 	},
 
-	["Hercules"] = {
-		-- prefFreqPackage = {
-		-- 	nRadio = 2,
-		-- 	range = "VHF",
-		-- 	},
-		radio = {						--range of radio frequencies of player aircraft
-			[1] = {						--radio 1
-				UHF = {
-					min = 225,				--minimum radio frequency in mHz
-					max = 399.975,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 20,
-				name = "UHF AN/ARC-164",
-			},
-			[2] = {						--radio 2
-				LVHF = {
-					min = 30,				--minimum radio frequency in mHz
-					max = 87.975,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 0,
-				name = "FM1",
-			},
-			[3] = {						--radio 3
-				VHF = {
-					min = 108,				--minimum radio frequency in mHz
-					max = 155.975,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 0,
-				name = "VHF Radio",
-			},
-		},
-	},
+	-- ["Hercules"] = {
+	-- 	radio = {						--range of radio frequencies of player aircraft
+	-- 		[1] = {						--radio 1
+	-- 			UHF = {
+	-- 				min = 225,				--minimum radio frequency in mHz
+	-- 				max = 399.975,				--maxium  radio frequency in mHz
+	-- 			},
+	-- 			nbCanal = 20,
+	-- 			name = "UHF AN/ARC-164",
+	-- 		},
+	-- 		[2] = {						--radio 2
+	-- 			LVHF = {
+	-- 				min = 30,				--minimum radio frequency in mHz
+	-- 				max = 87.975,				--maxium  radio frequency in mHz
+	-- 			},
+	-- 			nbCanal = 0,
+	-- 			name = "FM1",
+	-- 		},
+	-- 		[3] = {						--radio 3
+	-- 			VHF = {
+	-- 				min = 108,				--minimum radio frequency in mHz
+	-- 				max = 155.975,				--maxium  radio frequency in mHz
+	-- 			},
+	-- 			nbCanal = 0,
+	-- 			name = "VHF Radio",
+	-- 		},
+	-- 	},
+	-- },
 
 
 	["Su-25"] = {--Common aircraft definitions Su-25 & Su-25T
@@ -1610,30 +1503,6 @@ Db_Frequency = {
 		},
 	},
 
-	["MiG-29 Fulcrum"] = {
-		radio = {
-			[1] = {
-				VHF = {
-					min = 100,
-					max = 149.975,
-				},
-				UHF = {
-					min = 220,
-					max = 399.975,
-				},
-				nbCanal = 20,
-				name = "VHF/UHF R-862"
-			},
-			[2] = {
-				HF = {
-					min = 0.150,
-					max = 1.2995,
-				},
-				nbCanal = 8,
-				name = "ARK-19",
-			},
-		},
-	},
 	["MiG-29A"] = {
 		radio = {
 			[1] = {
@@ -1757,58 +1626,115 @@ Db_Frequency = {
 
 	["Ka-50"] = {
 		
-		radio = {						--range of radio frequencies of player aircraft
-			[1] = {						--radio 1
-				LVHF = {
-					min = 20,				--minimum radio frequency in mHz
-					max = 59,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 10,
+		HumanRadio = {
+			frequency = 124.0,
+			editable = true,
+			minFrequency = 0.15,
+			maxFrequency = 399.900,
+			modulation = MODULATION_AM,
+			rangeFrequency = {
+				{min =  0.150, max =  1.750, modulation	= MODULATION_AM},
+				{min =  20.0, max =  59.90, modulation	= MODULATION_FM},
+				{min = 100.0, max = 149.975, modulation	= MODULATION_AM},
+				{min = 220.0, max = 399.975, modulation	= MODULATION_AM},
 			},
-			[2] = {						--radio 2 simule la frequence FC3 de DCS
-				VHF = {
-					min = 100,				--minimum radio frequency in mHz
-					max = 224,				--maxium  radio frequency in mHz
-				},
-				UHF = {
-					min = 225,				--minimum radio frequency in mHz
-					max = 399,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 0,
-			},
-			-- [2] = {						--radio 2
-				-- min = 0.215,				--minimum radio frequency in mHz
-				-- max = 1.065,				--maxium  radio frequency in mHz
-				-- nbCanal = 16,
-			-- },
+		},
+		panelRadio = {
+			[1] = {  
+				name = _("R-828"),
+				range = {min = 20.0, max = 59.9},
+				channels = {
+					[1] = { name = _("Channel 1"),		default = 21.5, modulation = _("FM")},
+					[2] = { name = _("Channel 2"),		default = 25.7, modulation = _("FM")},
+					[3] = { name = _("Channel 3"),		default = 27.0, modulation = _("FM")},
+					[4] = { name = _("Channel 4"),		default = 28.0, modulation = _("FM")},
+					[5] = { name = _("Channel 5"),		default = 30.0, modulation = _("FM")},
+					[6] = { name = _("Channel 6"),		default = 32.0, modulation = _("FM")},
+					[7] = { name = _("Channel 7"),		default = 40.0, modulation = _("FM")},
+					[8] = { name = _("Channel 8"),		default = 50.0, modulation = _("FM")},
+					[9] = { name = _("Channel 9"),		default = 55.5, modulation = _("FM")},
+					[10] = { name = _("Channel 10"),	default = 59.9, modulation = _("FM")},
+				}
+			},--[1]
+			[2] = {
+				name = _("ARK-22"),                
+				displayUnits = "kHz", --отображаемые единицы в МЕ-- задавать ниже в MHz все
+				range = {min = 0.150, max = 1.750},
+				channels = {
+					[1] = { name = _("Channel 1, Outer"),		default	= 0.625,	modulation = _("AM")},	-- Krasnodar-Center
+					[2] = { name = _("Channel 1, Inner"),		default = 0.303,	modulation = _("AM")},	-- Krasnodar-Center
+					[3] = { name = _("Channel 2, Outer"),		default = 0.289,	modulation = _("AM")},	-- Maykop
+					[4] = { name = _("Channel 2, Inner"),		default = 0.591,	modulation = _("AM")},	-- Maykop
+					[5] = { name = _("Channel 3, Outer"),		default = 0.408,	modulation = _("AM")},	-- Krymsk
+					[6] = { name = _("Channel 3, Inner"),		default = 0.803,	modulation = _("AM")},	-- Krymsk
+					[7] = { name = _("Channel 4, Outer"),		default = 0.443,	modulation = _("AM")},	-- Anapa
+					[8] = { name = _("Channel 4, Inner"),		default = 0.215,	modulation = _("AM")},	-- Anapa
+					[9] = { name = _("Channel 5, Outer"),		default = 0.525,	modulation = _("AM")},	-- Mozdok
+					[10] = { name = _("Channel 5, Inner"),		default = 1.065,	modulation = _("AM")},	-- Mozdok
+					[11] = { name = _("Channel 6, Outer"),		default = 0.718,	modulation = _("AM")},	-- Nalchik
+					[12] = { name = _("Channel 6, Inner"),		default = 0.350,	modulation = _("AM")},	-- Nalchik
+					[13] = { name = _("Channel 7, Outer"),		default = 0.583,	modulation = _("AM")},	-- Min.Vody
+					[14] = { name = _("Channel 7, Inner"),		default = 0.283,	modulation = _("AM")},	-- Min.Vody
+					[15] = { name = _("Channel 8, Outer"),		default = 0.995,	modulation = _("AM")},	-- NDB Kislovodsk
+					[16] = { name = _("Channel 8, Inner"),		default = 1.210,	modulation = _("AM")},	-- NDB Peredovaya
+				}
+			},--[2]
 		},
 	},
 	["Ka-50_3"] = {
-		
-		radio = {						--range of radio frequencies of player aircraft
-			[1] = {						--radio 1
-				LVHF = {
-					min = 20,				--minimum radio frequency in mHz
-					max = 59,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 10,
+		HumanRadio = {
+			frequency = 124.0,
+			editable = true,
+			minFrequency = 0.15,
+			maxFrequency = 399.900,
+			modulation = MODULATION_AM,
+			rangeFrequency = {
+				{min =  0.150, max =  1.750, modulation	= MODULATION_AM},
+				{min =  20.0, max =  59.90, modulation	= MODULATION_FM},
+				{min = 100.0, max = 149.975, modulation	= MODULATION_AM},
+				{min = 220.0, max = 399.975, modulation	= MODULATION_AM},
 			},
-			[2] = {						--radio 2 simule la frequence FC3 de DCS
-				VHF = {
-					min = 100,				--minimum radio frequency in mHz
-					max = 224,				--maxium  radio frequency in mHz
-				},
-				UHF = {
-					min = 225,				--minimum radio frequency in mHz
-					max = 399,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 0,
-			},
-			-- [2] = {						--radio 2
-				-- min = 0.215,				--minimum radio frequency in mHz
-				-- max = 1.065,				--maxium  radio frequency in mHz
-				-- nbCanal = 16,
-			-- },
+		},
+		panelRadio = {
+			[1] = {  
+				name = _("R-828"),
+				range = {min = 20.0, max = 59.9},
+				channels = {
+					[1] = { name = _("Channel 1"),		default = 21.5, modulation = _("FM")},
+					[2] = { name = _("Channel 2"),		default = 25.7, modulation = _("FM")},
+					[3] = { name = _("Channel 3"),		default = 27.0, modulation = _("FM")},
+					[4] = { name = _("Channel 4"),		default = 28.0, modulation = _("FM")},
+					[5] = { name = _("Channel 5"),		default = 30.0, modulation = _("FM")},
+					[6] = { name = _("Channel 6"),		default = 32.0, modulation = _("FM")},
+					[7] = { name = _("Channel 7"),		default = 40.0, modulation = _("FM")},
+					[8] = { name = _("Channel 8"),		default = 50.0, modulation = _("FM")},
+					[9] = { name = _("Channel 9"),		default = 55.5, modulation = _("FM")},
+					[10] = { name = _("Channel 10"),	default = 59.9, modulation = _("FM")},
+				}
+			},--[1]
+			[2] = {
+				name = _("ARK-22"),                
+				displayUnits = "kHz", --отображаемые единицы в МЕ-- задавать ниже в MHz все
+				range = {min = 0.150, max = 1.750},
+				channels = {
+					[1] = { name = _("Channel 1, Outer"),		default	= 0.625,	modulation = _("AM")},	-- Krasnodar-Center
+					[2] = { name = _("Channel 1, Inner"),		default = 0.303,	modulation = _("AM")},	-- Krasnodar-Center
+					[3] = { name = _("Channel 2, Outer"),		default = 0.289,	modulation = _("AM")},	-- Maykop
+					[4] = { name = _("Channel 2, Inner"),		default = 0.591,	modulation = _("AM")},	-- Maykop
+					[5] = { name = _("Channel 3, Outer"),		default = 0.408,	modulation = _("AM")},	-- Krymsk
+					[6] = { name = _("Channel 3, Inner"),		default = 0.803,	modulation = _("AM")},	-- Krymsk
+					[7] = { name = _("Channel 4, Outer"),		default = 0.443,	modulation = _("AM")},	-- Anapa
+					[8] = { name = _("Channel 4, Inner"),		default = 0.215,	modulation = _("AM")},	-- Anapa
+					[9] = { name = _("Channel 5, Outer"),		default = 0.525,	modulation = _("AM")},	-- Mozdok
+					[10] = { name = _("Channel 5, Inner"),		default = 1.065,	modulation = _("AM")},	-- Mozdok
+					[11] = { name = _("Channel 6, Outer"),		default = 0.718,	modulation = _("AM")},	-- Nalchik
+					[12] = { name = _("Channel 6, Inner"),		default = 0.350,	modulation = _("AM")},	-- Nalchik
+					[13] = { name = _("Channel 7, Outer"),		default = 0.583,	modulation = _("AM")},	-- Min.Vody
+					[14] = { name = _("Channel 7, Inner"),		default = 0.283,	modulation = _("AM")},	-- Min.Vody
+					[15] = { name = _("Channel 8, Outer"),		default = 0.995,	modulation = _("AM")},	-- NDB Kislovodsk
+					[16] = { name = _("Channel 8, Inner"),		default = 1.210,	modulation = _("AM")},	-- NDB Peredovaya
+				}
+			},--[2]
 		},
 	},
 	["P-51D-30-NA"] = {
