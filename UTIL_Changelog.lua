@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "20.92.572"
+versionDCE["UTIL_Changelog.lua"] = "22.94.576"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "20.92.572"
+VersionDCE["UTIL_Changelog.txt"] = "22.94.576"
 --[[
 
 
@@ -9,8 +9,19 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
+
+==:22.94.576:==
+576 add		Data: Aircraft radio capabilities are now automatically retrieved from Mods and CoreMods, avoiding manual duplication and reducing DCE data maintenance.
+575 add		[22M94]	Radio: Using module-defined radio ranges, radio frequency assignment has been refined for improved realism and interoperability.
+
+574 modified	[loadout]		DCE loadout divisions into multiple files and in the db_loadouts folder
+573 add		[21M93]	Add a Mods directory so that anyone can add their own modules without a DCE update breaking their files.
+					You can place loadout files (db_loadouts = {}) and/or Data files (Data_divers = {}) there, regardless of the name of the file(s) added.
+
+
 ==:20.92.572:==
 572 add		[M92]	add new attributesCond in targetList for best squad selection
+			example of a target (targetList) specifically assigned to players, with additional limitations on helicopter type and squad:
 			attributesCond = {
 				op = "AND",
 				{ op = "AND", playerSquad = true, category = "helico" },
@@ -460,7 +471,7 @@ known issues:
 289 add		[plane]		Add Mirage  F-1EE
 288 add		[Datacard]	makes DCE compatible with the use of programs such as Datacard Generator or CombatFlite (M63)
 287 add		[third]		allows you to use third party files that Data information without being overwritten by central information updates (M62)
-				--> use Init\ADD_data.lua
+				--> use Init\ADD_data.lua -- deprecated
 
 ==:20.61.286:==
 286 fixed	[generator]	not enough Strike missions for some aircraft 

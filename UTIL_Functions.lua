@@ -50,7 +50,37 @@ RosterJumpTempPercent = 0.25			-- suite à un saut temporel, enleve une partie d
 WingmenPlayer = false			-- si true, les wingmen playable sont proposé aux joueurs
 LoadoutsList = {}				-- construit la table loadout en fonction du loadout général et de la campagne
 EPLRS_Capacity = {}
+AircraftInCampaign = {}				-- liste de tous les types d'avions utilisés dans la campagne
+AircraftCampaignBySide = {
+	["red"] = {},
+	["blue"] = {},
+}
+HelicoBySide= {
+	["red"] = {},
+	["blue"] = {},
+}
+PlaneBySide= {
+	["red"] = {},
+	["blue"] = {},
+}
 
+MODULATION_AM = "AM"
+MODULATION_AM_AND_FM = "AM/FM"
+MODULATION_FM = "FM"
+RadioPlayerWaveRanges = {}
+
+AssignedTargetFrequency = {
+	["blue"] = {},
+	["red"] = {},
+}
+-- AssignedFrequencies = {
+-- 	["blue"] = {},
+-- 	["red"] = {},
+-- }
+-- AssignedCommonFrequencies = {
+-- 	["blue"] = {},
+-- 	["red"] = {},
+-- }
 
 RadioA = {
 	["blue"] = {
@@ -66,6 +96,13 @@ RadioB = {
 }
 
 RadioWavePlayer = nil
+
+RADIO_WAVES = {
+	HF =       { min =   3.0, max =  30.0 },
+	LVHF =   { min =  30.0, max =  88.0 },
+	VHF =   { min = 108.0, max = 174.0 },
+	UHF =      { min = 225.0, max = 400.0 },
+}
 
 Brief = {
 	red = {},
@@ -105,14 +142,12 @@ Package_freq = {															--table to store frequencies assigned to packages
 	["blue"] = {
 		["UHF"] = {},
 		["VHF"] = {},
-		-- ["FM"] = {},
 		["LVHF"] = {},
 		["HF"] = {},
 	},
 	["red"] = {
 		["UHF"] = {},
 		["VHF"] = {},
-		-- ["FM"] = {},
 		["LVHF"] = {},
 		["HF"] = {},
 	},
@@ -121,6 +156,12 @@ Package_freq = {															--table to store frequencies assigned to packages
 
 local idGroupCounter = 3000
 local idUnitCounter = 3000
+
+if not _ then
+	function _(text)
+		return text
+	end
+end
 
 --function to return txt whith carriage return
 function StringToTxt(text)
@@ -309,7 +350,8 @@ function TableSerialization(t, i, options)
                 -- k = string.gsub(k, "'", "\\\'")
                 text = text .. tab .. '["' .. k .. '"] = '
             else
-                text = text .. tab .. "[" .. k .. "] = "
+                -- text = text .. tab .. "[" .. k .. "] = "
+				text = text .. tab .. "[" .. tostring(k) .. "] = "
             end
 
             if type(v) == "table" then
@@ -448,6 +490,14 @@ function TableSerializationAG_triggers(t, i)
     end
     return text
 end
+
+
+function Try_dofile(path)
+	local f3 = io.open(path, "r")
+	if f3 then f3:close(); dofile(path); return true end
+	return false
+end
+
 
 --function type DCS, ne pas changer la casse
 function aircraft_task(taskName)
@@ -637,7 +687,7 @@ function TableSerializationLoadout(t, i, iTotal)
 	return text
 end
 
-function Deepcopy(orig, copies)
+function DeepCopy(orig, copies)
     copies = copies or {}  -- Table pour suivre les références déjà copiées
 
     if type(orig) ~= 'table' then return orig end  -- Copie simple des types de base
@@ -648,10 +698,10 @@ function Deepcopy(orig, copies)
     copies[orig] = copy  -- Stocker la copie pour éviter de repasser sur la même table
 
     for orig_key, orig_value in pairs(orig) do
-        copy[Deepcopy(orig_key, copies)] = Deepcopy(orig_value, copies)
+        copy[DeepCopy(orig_key, copies)] = DeepCopy(orig_value, copies)
     end
 
-    setmetatable(copy, Deepcopy(getmetatable(orig), copies))
+    setmetatable(copy, DeepCopy(getmetatable(orig), copies))
     return copy
 end
 
@@ -1176,12 +1226,11 @@ end
 function FormatDistance(a, unitsUse)
 	a = a / 1000																			--round to km
 	if unitsUse == "metric" or unitsUse =="russian" then															--metric units
-		a = math.floor(a) .. " km"															--kilometers
+		return math.floor(a) .. " km"															--kilometers
 	else 													--imperial units
 		a = a * 0.539957																	--covert to nm
-		a = math.floor(a) .. " nm"															--nautical miles
+		return math.floor(a) .. " nm"															--nautical miles
 	end
-	return a
 end
 
 
@@ -1223,7 +1272,7 @@ end
 
 
 --function to replace certain type names
-function ReplaceTypeName(s)
+function AliasTypeName(s)
 	if TypeAlias and TypeAlias[s] then
 		return TypeAlias[s]
 	else
@@ -1232,7 +1281,7 @@ function ReplaceTypeName(s)
 end
 
 --function to replace certain type names Init\various_table.lua
-function ReplaceBaseName(s)
+function AliasBaseName(s)
 	if BaseNameAlias and BaseNameAlias[s] then
 		return BaseNameAlias[s]
 	else
@@ -1389,186 +1438,1116 @@ function _afficheTXT(_table, titre, prof)
 end -- function affiche
 
 
-function FreqCapability2(testFreq, flightType, radioN, info)
-	local waves  = ""
+-- --a priori, uniquement utile pour le M2000, donc....
+-- function FreqCapability2(testFreq, flightType, radioN, info)
+-- 	local waves  = ""
 
-	if not Frequency[flightType] then
-		--si le type de plane n'est pas dans la liste, c'est qu'il n'est pas jouable et donc que tout passe, au niveau radio
-		return true
-	end
-	local RadioPlane = Frequency[flightType].radio
+-- 	if not Frequency[flightType] then
+-- 		--si le type de plane n'est pas dans la liste, c'est qu'il n'est pas jouable et donc que tout passe, au niveau radio
+-- 		return true
+-- 	end
+-- 	local RadioPlane = Frequency[flightType].radio
 
-	if type(testFreq) == "table" then
+-- 	if type(testFreq) == "table" then
+-- 		return false
+-- 	elseif type(testFreq) == "string" then
+-- 		testFreq = tonumber(testFreq)
+-- 		if type(testFreq) ~= "number" then
+-- 			return false
+-- 		end
+-- 	end
+-- 	if not RadioPlane[radioN] or RadioPlane[radioN] == nil then
+-- 		return false
+-- 	end
+-- 	-- modification M34.n (n: bestCapability)
+-- 	for wave, freqRange in pairs(RadioPlane[radioN]) do
+-- 		-- if string.lower(wave)  ~= "nbcanal"  then
+-- 		if type(freqRange)  == "table"  then
+-- 			if tonumber(testFreq) < freqRange.max and  tonumber(testFreq) > freqRange.min then
+-- 				if RadioPlane[radioN] and RadioPlane[radioN][wave] and (testFreq > RadioPlane[radioN][wave].min and testFreq < RadioPlane[radioN][wave].max)	 then
+-- 					return true
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+
+-- 	if testFreq >= 225 then
+-- 		waves = "UHF"
+-- 	elseif testFreq >= 100 and testFreq < 225 then
+-- 		waves = "VHF"
+-- 	elseif testFreq >= 20 and testFreq < 100 then
+-- 		waves = "LVHF"
+-- 		if RadioPlane[radioN] and not RadioPlane[radioN][waves] then waves = "LVHF" end
+-- 	elseif testFreq >= 1 and testFreq < 20 then
+-- 		waves = "HF"
+-- 	else
+-- 		-- print("Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(testFreq).." Info: "..tostring(info))
+-- 		local bugTxt = "UtilF_FreqCapability2() Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(testFreq).." Info: "..tostring(info)
+-- 		AddLog("Note for the Campaign Maker"..bugTxt)
+-- 	end
+
+-- 	if RadioPlane[radioN] and RadioPlane[radioN][waves] and (testFreq > RadioPlane[radioN][waves].min and testFreq < RadioPlane[radioN][waves].max)	 then
+-- 		return true
+-- 	else
+-- 		return false
+-- 	end
+-- end
+
+--function pour assigner les fr�quences pour tout le monde, Plane and vehicle (EWR)
+-- modification M34.i  custom FrequenceRadio (i  3 frequency bands)(g: VHF helicopter)(h: bug Gazelle)
+
+-- function CreatePlageFrequency_A()																				--trouve une plage de frequence commune si c'est possible
+-- 	local activeVHF = false
+-- 	-- RadioA = {}
+
+
+-- 	-- modification M38.g (g: prise en compte des 3 bandes de fr�quence)(e: priority to the player's frequencies)
+-- 	for sideName, oob_side in pairs(oob_air) do
+-- 		for squadronN, sqd in pairs(oob_side) do
+-- 			-- if not sqd.inactive and sqd.player then
+-- 				if Frequency[sqd.type] then
+-- 					for n = 1,  #Frequency[sqd.type].radio do
+-- 						for bandFreq, value in pairs(Frequency[sqd.type].radio[n]) do
+-- 							if bandFreq == "HF" or bandFreq == "VHF" or bandFreq == "UHF" or bandFreq == "LVHF"  then			--or bandFreq == "FM"					
+
+-- 								if not RadioA[sideName][n] then RadioA[sideName][n] = {} end
+-- 								if not RadioA[sideName][n][bandFreq] then RadioA[sideName][n][bandFreq] = {} end
+
+-- 								RadioA[sideName][n][bandFreq].min = value.min
+-- 								RadioA[sideName][n][bandFreq].max = value.max
+-- 							end
+-- 						end
+-- 					end
+-- 				end
+-- 			-- end
+-- 		end
+-- 	end
+-- 	-- _affiche(TempRadio, "UTIL_F 1er TempRadio")
+
+-- 	for side, oob_side in pairs(oob_air) do
+-- 		for n, sqd in pairs(oob_side) do
+-- 			-- if not sqd.inactive then
+-- 				if Frequency[sqd.type] then
+-- 					for typeRadio , planeFreqRadio in pairs(Frequency[sqd.type]) do
+-- 						if typeRadio == "radio" and type(planeFreqRadio) == "table" then
+-- 							for nr , _bandFreq in pairs(planeFreqRadio) do	--for nr , value in pairs(frequency[sqd.type].radio) do
+-- 								for bandFreq , value in pairs(_bandFreq) do
+-- 									if bandFreq == "HF" or bandFreq == "LVHF" or bandFreq == "VHF" or bandFreq == "UHF" then
+
+-- 										if not RadioA[side][nr] then RadioA[side][nr] = {} end
+-- 										if not RadioA[side][nr][bandFreq] then RadioA[side][nr][bandFreq] = {} end
+-- 										if not RadioA[side][nr][bandFreq].min then RadioA[side][nr][bandFreq].min = value.min  end
+-- 										if not RadioA[side][nr][bandFreq].max then RadioA[side][nr][bandFreq].max = value.max  end
+
+-- 										if (value.min < RadioA[side][nr][bandFreq].max)  then								--si une plage radio est en dehors des autres, on privil�gie le joueur
+-- 											if value.min > RadioA[side][nr][bandFreq].min then
+-- 												RadioA[side][nr][bandFreq].min =  value.min
+-- 											end
+
+-- 											if (value.max < RadioA[side][nr][bandFreq].max) and (value.max > RadioA[side][nr][bandFreq].min )  then
+-- 												RadioA[side][nr][bandFreq].max =  value.max
+-- 											end
+-- 										end
+
+-- 										if sqd.player and RadioA[side][1][bandFreq] then
+-- 											-- print("sqd.type "..tostring(sqd.type))
+-- 											RadioA[side][1][bandFreq]["player"] = true
+-- 										end
+
+-- 									end
+-- 								end
+-- 							end
+-- 						elseif typeRadio == "frequency"  then											-- frequence de base utilis� par FC3 ou gazelle
+-- 								print("UTIL_F Type No Frequency FC3? "..sqd.type)
+-- 						end
+-- 					end
+-- 				else
+-- 					-- print("UTIL_F Type No Frequency "..sqd.type)
+-- 				end
+-- 			-- end
+-- 		end
+-- 	end
+
+-- end
+
+
+-- function CreatePlageFrequency_B()																				--trouve une plage de frequence commune si c'est possible
+
+-- 	for side, oob_side in pairs(oob_air) do
+-- 		for sqdN, sqd in pairs(oob_side) do
+-- 			-- if not sqd.inactive then
+-- 				if Frequency[sqd.type] then
+-- 					for typeRadio , planeFreqRadio in pairs(Frequency[sqd.type]) do
+-- 						if typeRadio == "radio" and type(planeFreqRadio) == "table" then
+-- 							for nr , waves in pairs(planeFreqRadio) do	--for nr , value in pairs(frequency[sqd.type].radio) do
+-- 								for waveName , value in pairs(waves) do
+-- 									if waveName == "HF" or waveName == "LVHF" or waveName == "VHF" or waveName == "UHF" then
+
+
+-- 										if not RadioB[side][waveName] then RadioB[side][waveName] = {} end
+-- 										if not RadioB[side][waveName].min then RadioB[side][waveName].min = value.min  end
+-- 										if not RadioB[side][waveName].max then RadioB[side][waveName].max = value.max  end
+
+-- 										if (value.min < RadioB[side][waveName].max)  then								--si une plage radio est en dehors des autres, on privil�gie le joueur
+-- 											if value.min > RadioB[side][waveName].min then
+-- 												RadioB[side][waveName].min =  value.min
+-- 											end
+
+-- 											if (value.max < RadioB[side][waveName].max) and (value.max > RadioB[side][waveName].min )  then
+-- 												RadioB[side][waveName].max =  value.max
+-- 											end
+-- 										end
+
+-- 										if sqd.player and RadioB[side][waveName] then
+-- 											-- print("sqd.type "..tostring(sqd.type))
+-- 											RadioB[side][waveName]["player"] = true
+-- 											RadioWavePlayer = waveName
+-- 										end
+
+-- 									end
+-- 								end
+-- 							end
+-- 						elseif typeRadio == "frequency"  then											-- frequence de base utilis� par FC3 ou gazelle
+-- 								print("UTIL_F Type No Frequency FC3? "..sqd.type)
+-- 						end
+-- 					end
+-- 				else
+-- 					-- print("UTIL_F Type No Frequency "..sqd.type)
+-- 				end
+-- 			-- end
+-- 		end
+-- 	end
+
+-- end
+
+
+--*******************************************************
+----------------------------------------------------------------
+-- Calcul Range Radio NG
+----------------------------------------------------------------
+----------------------------------------------------------------
+-- DCE - Common Radio Frequency Finder
+-- Lua 5.1 compatible
+----------------------------------------------------------------
+
+
+local function intersectRange(a, b)
+
+	
+	local function modulationCompatible(m1, m2)
+		if m1 == m2 then return true end
+		if m1 == MODULATION_AM_AND_FM then return true end
+		if m2 == MODULATION_AM_AND_FM then return true end
 		return false
-	elseif type(testFreq) == "string" then
-		testFreq = tonumber(testFreq)
-		if type(testFreq) ~= "number" then
-			return false
+	end
+
+	if not modulationCompatible(a.modulation, b.modulation) then
+		return nil
+	end
+
+	local minF = math.max(a.min, b.min)
+	local maxF = math.min(a.max, b.max)
+
+	if minF < maxF then
+		return {
+			min = minF,
+			max = maxF,
+			modulation = (a.modulation == b.modulation) and a.modulation or MODULATION_AM_AND_FM
+		}
+	end
+
+	return nil
+end
+
+
+local function intersect(a,b)
+	local min = math.max(a.min, b.min)
+	local max = math.min(a.max, b.max)
+	if max > min then
+		return { min = min, max = max }
+	end
+	end
+
+local function findBestCommonRange(ranges)
+
+	if type(ranges) ~= "table" or #ranges == 0 then
+		return nil
+	end
+
+	local best, bestScore = nil, 0
+
+	for i,candidate in ipairs(ranges) do
+		local score = 0
+		local current = candidate
+
+		for _,r in ipairs(ranges) do
+			local inter = intersect(current, r)
+			if inter then
+				current = inter
+				score = score + 1
+			end
+		end
+
+		if score > bestScore then
+			bestScore = score
+			best = current
 		end
 	end
-	if not RadioPlane[radioN] or RadioPlane[radioN] == nil then
-		return false
+
+	return best
+end
+
+local function simplifyRadioRanges(moduleData, isPlayer)
+
+	if isPlayer then print("simplifyRadioRanges called for moduleData isPlayer=? "..tostring(isPlayer)) end
+
+	if type(moduleData) ~= "table" then
+		print("return A no moduleData table")
+		return {}
 	end
-	-- modification M34.n (n: bestCapability)
-	for wave, freqRange in pairs(RadioPlane[radioN]) do
-		-- if string.lower(wave)  ~= "nbcanal"  then
-		if type(freqRange)  == "table"  then
-			if tonumber(testFreq) < freqRange.max and  tonumber(testFreq) > freqRange.min then
-				if RadioPlane[radioN] and RadioPlane[radioN][wave] and (testFreq > RadioPlane[radioN][wave].min and testFreq < RadioPlane[radioN][wave].max)	 then
-					return true
+
+	------------------------------------------------
+	-- 1) Collecte brute de toutes les plages
+	------------------------------------------------
+	local rawRanges = {}
+
+	local function addRange(min, max)
+
+		-- if isPlayer then print("SRR addRange() A1 "..tostring(min).." - "..tostring(max)) end
+
+		if type(min) == "number" and type(max) == "number" and max > min then
+			-- if isPlayer then print("addRange() A2 valid range") end
+			table.insert(rawRanges, { min = min, max = max })
+		end
+	end
+
+	-- HumanRadio
+	local hr = moduleData.HumanRadio
+	if type(hr) == "table" then
+		if type(hr.rangeFrequency) == "table" and hr.rangeFrequency[1] then
+			-- forme limitative
+			for _,r in ipairs(hr.rangeFrequency) do
+				-- if isPlayer then print("SRR addRange() B1sub-range "..tostring(r.min).." - "..tostring(r.max)) end
+				addRange(r.min, r.max)
+			end
+		elseif hr.minFrequency and hr.maxFrequency then
+			-- if isPlayer then print("SRR addRange() B2 minFrequency "..tostring(hr.minFrequency).." - "..tostring(hr.maxFrequency)) end
+			addRange(hr.minFrequency, hr.maxFrequency)
+		end
+	end
+
+	-- PanelRadio
+	local pr = moduleData.panelRadio
+	if type(pr) == "table" then
+		-- if isPlayer then _affiche(pr, "pr: ") end
+
+		for _,radio in pairs(pr) do
+			-- if isPlayer then print("SRR addRange() C _ ".._) _affiche(radio, "radio: ") end
+			
+			if type(radio.range) == "table" then
+				for _, rangeData in ipairs(radio.range) do
+					-- if isPlayer then print("SRR addRange() D panelRadio "..tostring(rangeData.min).." - "..tostring(rangeData.max)) end
+					addRange(rangeData.min, rangeData.max)
 				end
 			end
 		end
 	end
 
-	if testFreq >= 225 then
-		waves = "UHF"
-	elseif testFreq >= 100 and testFreq < 225 then
-		waves = "VHF"
-	elseif testFreq >= 20 and testFreq < 100 then
-		waves = "LVHF"
-		if RadioPlane[radioN] and not RadioPlane[radioN][waves] then waves = "LVHF" end
-	elseif testFreq >= 1 and testFreq < 20 then
-		waves = "HF"
-	else
-		-- print("Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(testFreq).." Info: "..tostring(info))
-		local bugTxt = "Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(testFreq).." Info: "..tostring(info)
-		AddLog("Note for the Campaign Maker"..bugTxt)
+	if #rawRanges == 0 then
+		-- if isPlayer then print("SRR return E no rawRanges collected") end
+		return {}
 	end
 
-	if RadioPlane[radioN] and RadioPlane[radioN][waves] and (testFreq > RadioPlane[radioN][waves].min and testFreq < RadioPlane[radioN][waves].max)	 then
-		return true
-	else
-		return false
+	------------------------------------------------
+	-- 2) CAS NON JOUEUR → UNION GLOBALE
+	------------------------------------------------
+	if not isPlayer then
+		table.sort(rawRanges, function(a,b) return a.min < b.min end)
+
+		local EPSILON = 0.01
+		local simplified = {}
+		local current = rawRanges[1]
+
+		for i = 2, #rawRanges do
+			local r = rawRanges[i]
+			if r.min <= current.max + EPSILON then
+				current.max = math.max(current.max, r.max)
+			else
+				table.insert(simplified, current)
+				current = r
+			end
+		end
+
+		table.insert(simplified, current)
+		-- print("SRR return F simplified non-player ranges")
+		return simplified
 	end
+
+	------------------------------------------------
+	-- 3) CAS JOUEUR → PLAGE LA PLUS RESTRICTIVE
+	------------------------------------------------
+	local best = nil
+	local bestWidth = nil
+	-- if isPlayer then print("SRR G1 searching best player range among "..tostring(#rawRanges).." ranges") end
+	
+	for _,r in ipairs(rawRanges) do
+		local width = r.max - r.min
+		-- if isPlayer then print("SRR G2 candidate player range "..tostring(r.min).." - "..tostring(r.max).." width "..tostring(width)) end
+		if not best or width < bestWidth then
+			best = { min = r.min, max = r.max }
+			bestWidth = width
+			-- if isPlayer then print("SRR G3 new best player range found") end
+		end
+	end
+
+	if best then
+		if isPlayer then 
+			-- print("SRR return H best player range "..tostring(best.min).." - "..tostring(best.max)) 
+			-- os.execute 'pause'
+			end
+		return { best }
+	end
+
+	-- if isPlayer then print("return Z no best player range") end
+
+	return {}
+
 end
 
---function pour assigner les fr�quences pour tout le monde, Plane and vehicle (EWR)
--- modification M34.i  custom FrequenceRadio (i  3 frequency bands)(g: VHF helicopter)(h: bug Gazelle)
-
-function CreatePlageFrequency_A()																				--trouve une plage de frequence commune si c'est possible
-	local activeVHF = false
-	-- RadioA = {}
 
 
-	-- modification M38.g (g: prise en compte des 3 bandes de fr�quence)(e: priority to the player's frequencies)
-	for sideName, oob_side in pairs(oob_air) do
-		for squadronN, sqd in pairs(oob_side) do
-			-- if not sqd.inactive and sqd.player then
-				if Frequency[sqd.type] then
-					for n = 1,  #Frequency[sqd.type].radio do
-						for bandFreq, value in pairs(Frequency[sqd.type].radio[n]) do
-							if bandFreq == "HF" or bandFreq == "VHF" or bandFreq == "UHF" or bandFreq == "LVHF"  then			--or bandFreq == "FM"					
+local function ComputeCommonRangesForModules(moduleList)
 
-								if not RadioA[sideName][n] then RadioA[sideName][n] = {} end
-								if not RadioA[sideName][n][bandFreq] then RadioA[sideName][n][bandFreq] = {} end
+	local common = nil
 
-								RadioA[sideName][n][bandFreq].min = value.min
-								RadioA[sideName][n][bandFreq].max = value.max
+	for moduleName,_ in pairs(moduleList) do
+		local data = Db_Frequency[moduleName]
+		if data then
+			print("moduleName CCRFmodules() "..moduleName.." has data")
+			local ranges = simplifyRadioRanges(data)
+			-- ignorer modules vides (OH-6, data pas prête)
+			if ranges[1] then
+				if not common then
+					common = DeepCopy(ranges)
+				else
+					local newCommon = {}
+					for _,c in ipairs(common) do
+						for _,r in ipairs(ranges) do
+							local inter = intersectRange(c, r)
+							if inter then
+								table.insert(newCommon, inter)
 							end
 						end
 					end
+					common = newCommon
 				end
-			-- end
+			end
 		end
 	end
-	-- _affiche(TempRadio, "UTIL_F 1er TempRadio")
 
-	for side, oob_side in pairs(oob_air) do
-		for n, sqd in pairs(oob_side) do
-			-- if not sqd.inactive then
-				if Frequency[sqd.type] then
-					for typeRadio , planeFreqRadio in pairs(Frequency[sqd.type]) do
-						if typeRadio == "radio" and type(planeFreqRadio) == "table" then
-							for nr , _bandFreq in pairs(planeFreqRadio) do	--for nr , value in pairs(frequency[sqd.type].radio) do
-								for bandFreq , value in pairs(_bandFreq) do
-									if bandFreq == "HF" or bandFreq == "LVHF" or bandFreq == "VHF" or bandFreq == "UHF" then
+	return common or {}
+end
 
-										if not RadioA[side][nr] then RadioA[side][nr] = {} end
-										if not RadioA[side][nr][bandFreq] then RadioA[side][nr][bandFreq] = {} end
-										if not RadioA[side][nr][bandFreq].min then RadioA[side][nr][bandFreq].min = value.min  end
-										if not RadioA[side][nr][bandFreq].max then RadioA[side][nr][bandFreq].max = value.max  end
 
-										if (value.min < RadioA[side][nr][bandFreq].max)  then								--si une plage radio est en dehors des autres, on privil�gie le joueur
-											if value.min > RadioA[side][nr][bandFreq].min then
-												RadioA[side][nr][bandFreq].min =  value.min
-											end
 
-											if (value.max < RadioA[side][nr][bandFreq].max) and (value.max > RadioA[side][nr][bandFreq].min )  then
-												RadioA[side][nr][bandFreq].max =  value.max
-											end
-										end
+----------------------------------------------------------------
+-- main function
+----------------------------------------------------------------
+function DCE_FindRadioCommonWaves()
 
-										if sqd.player and RadioA[side][1][bandFreq] then
-											-- print("sqd.type "..tostring(sqd.type))
-											RadioA[side][1][bandFreq]["player"] = true
-										end
+	local result = {
+		blue = {},
+		red  = {},
+	}
 
+	for side,modules in pairs(AircraftCampaignBySide) do
+
+		for waveName, wave in pairs(RADIO_WAVES) do
+
+		local common = nil
+		local validModuleCount = 0
+
+			for moduleName,_ in pairs(modules) do
+				
+				local moduleData = Db_Frequency[moduleName]
+				if moduleData then
+					print("moduleName DCE_FRC() "..moduleName)
+					local ranges = simplifyRadioRanges(moduleData)
+					local inWave = {}
+					
+					for _,r in ipairs(ranges) do
+						local inter = intersect(r, wave)
+						if inter then
+							table.insert(inWave, inter)
+						end
+					end
+
+					-- ce module participe à la wave
+					if inWave[1] then
+						validModuleCount = validModuleCount + 1
+						if not common then
+							common = DeepCopy(inWave)
+						else
+							local newCommon = {}
+
+							for _,c in ipairs(common) do
+								for _,m in ipairs(inWave) do
+									local inter2 = intersect(c, m)
+									if inter2 then
+										table.insert(newCommon, inter2)
 									end
 								end
 							end
-						elseif typeRadio == "frequency"  then											-- frequence de base utilis� par FC3 ou gazelle
-								print("UTIL_F Type No Frequency FC3? "..sqd.type)
-						end
-					end
-				else
-					-- print("UTIL_F Type No Frequency "..sqd.type)
-				end
-			-- end
-		end
-	end
 
-end
-
-
-function CreatePlageFrequency_B()																				--trouve une plage de frequence commune si c'est possible
-
-	for side, oob_side in pairs(oob_air) do
-		for sqdN, sqd in pairs(oob_side) do
-			-- if not sqd.inactive then
-				if Frequency[sqd.type] then
-					for typeRadio , planeFreqRadio in pairs(Frequency[sqd.type]) do
-						if typeRadio == "radio" and type(planeFreqRadio) == "table" then
-							for nr , waves in pairs(planeFreqRadio) do	--for nr , value in pairs(frequency[sqd.type].radio) do
-								for waveName , value in pairs(waves) do
-									if waveName == "HF" or waveName == "LVHF" or waveName == "VHF" or waveName == "UHF" then
-
-
-										if not RadioB[side][waveName] then RadioB[side][waveName] = {} end
-										if not RadioB[side][waveName].min then RadioB[side][waveName].min = value.min  end
-										if not RadioB[side][waveName].max then RadioB[side][waveName].max = value.max  end
-
-										if (value.min < RadioB[side][waveName].max)  then								--si une plage radio est en dehors des autres, on privil�gie le joueur
-											if value.min > RadioB[side][waveName].min then
-												RadioB[side][waveName].min =  value.min
-											end
-
-											if (value.max < RadioB[side][waveName].max) and (value.max > RadioB[side][waveName].min )  then
-												RadioB[side][waveName].max =  value.max
-											end
-										end
-
-										if sqd.player and RadioB[side][waveName] then
-											-- print("sqd.type "..tostring(sqd.type))
-											RadioB[side][waveName]["player"] = true
-											RadioWavePlayer = waveName
-										end
-
-									end
-								end
+							-- intersection impossible
+							if not newCommon[1] then
+								common = nil
+								break
 							end
-						elseif typeRadio == "frequency"  then											-- frequence de base utilis� par FC3 ou gazelle
-								print("UTIL_F Type No Frequency FC3? "..sqd.type)
+
+							common = newCommon
 						end
+						-- _affiche(common, "common : ")
 					end
 				else
-					-- print("UTIL_F Type No Frequency "..sqd.type)
+					if Data_divers[moduleName] and Data_divers[moduleName].playable then
+						print("DCE_FindRadioCommonWaves D no Data_divers for module "..moduleName)
+						os.execute("pause")
+					end
+
 				end
-			-- end
+			end
+
+			-- décision finale
+			if common and validModuleCount >= 1 then
+				result[side][waveName] = findBestCommonRange(common)
+			end
+		end
+
+	end
+
+	return result
+end
+
+
+function DCE_FindCommonRadioRanges()
+
+	--ajoute à la table Db_Frequency les data radio qui sont dans Data_divers
+	--ne l'ajoute pas si les tables radio sont déjà ajouté dans Db_Frequency
+	for moduleName, moduleData in pairs(Data_divers) do
+
+		if not Db_Frequency[moduleName] then
+			Db_Frequency[moduleName] = {}
+		end
+
+		if moduleData.HumanRadio then
+			Db_Frequency[moduleName].HumanRadio = moduleData.HumanRadio
+		end
+
+		if moduleData.panelRadio then
+			Db_Frequency[moduleName].panelRadio = moduleData.panelRadio
 		end
 	end
 
+	-- mutualisation panelRadio + HumanRadio
+	for moduleName, dataRadio in pairs(Db_Frequency) do
+
+		dataRadio.radio = {}
+
+		------------------------------------------------------------------
+		-- 1) panelRadio
+		------------------------------------------------------------------
+		if dataRadio.panelRadio then
+			for radioN, radioData in pairs(dataRadio.panelRadio) do
+
+				local ranges = {}
+
+				--transforme cette partie range de la meme maniere pour tout le monde:
+				if radioData.range then
+					-- Check if range is already an array or a single range object
+					if radioData.range.min and not radioData.range[1] then
+						-- Single range object: convert to array format
+						local copyRange = DeepCopy(radioData.range)
+						radioData.range = {
+							[1] = {
+								min = copyRange.min,
+								max = copyRange.max,
+							}
+						}
+					end
+					-- If already an array, leave it as-is
+				end
+
+				if radioData.range then
+					for _, r in ipairs(radioData.range) do
+						ranges[#ranges + 1] = {
+							min = r.min,
+							max = r.max,
+						}
+					end
+				end
+
+				dataRadio.radio[#dataRadio.radio + 1] = {
+					name     = radioData.name or ("panelRadio_" .. tostring(radioN)),
+					nbCanal  = radioData.channels and #radioData.channels or 0,
+					range    = ranges,
+					source   = "panelRadio",
+				}
+			end
+		end
+	end
+
+		------------------------------------------------------------------
+		-- 2) HumanRadio
+		------------------------------------------------------------------
+	for moduleName, dataRadio in pairs(Db_Frequency) do
+		-- print("DCE_FindCommonRadioRanges A processing module "..moduleName)
+		if dataRadio.HumanRadio then
+
+			local hrMin = dataRadio.HumanRadio.minFrequency
+			local hrMax = dataRadio.HumanRadio.maxFrequency
+			-- print("DCE_FindCommonRadioRanges B HumanRadio for module "..moduleName.." range "..tostring(hrMin).." - "..tostring(hrMax))
+
+			if hrMin and hrMax then
+				-- print("DCE_FindCommonRadioRanges C adding HumanRadio for module "..moduleName.." range "..tostring(hrMin).." - "..tostring(hrMax))
+
+				for waveName, wave in pairs(RADIO_WAVES) do
+					-- print("DCE_FindCommonRadioRanges D checking wave "..waveName.." range "..tostring(wave.min).." - "..tostring(wave.max))
+
+					-- test d'intersection HumanRadio ↔ wave
+					if hrMax >= wave.min and hrMin <= wave.max then
+						-- print("DCE_FindCommonRadioRanges E wave "..waveName.." is intersecting HumanRadio for module "..moduleName)
+
+						-- vérifier si cette wave est déjà couverte par panelRadio
+						local waveAlreadyCovered = false
+
+						for _, radio in ipairs(dataRadio.radio) do
+							-- print("DCE_FindCommonRadioRanges F checking existing radio "..tostring(radio.name).." for module "..moduleName)
+							if radio.range then
+								-- print("DCE_FindCommonRadioRanges G radio "..tostring(radio.name).." has range for module "..moduleName)
+								
+								-- if #radio.range and #radio.range >= 1 then
+									for _, r in ipairs(radio.range) do
+										-- print("DCE_FindCommonRadioRanges H checking range "..tostring(r.min).." - "..tostring(r.max).." of radio "..tostring(radio.name).." for module "..moduleName)
+										if r.max >= wave.min and r.min <= wave.max then
+											-- print("DCE_FindCommonRadioRanges I1 wave "..waveName.." is already covered by radio "..tostring(radio.name).." for module "..moduleName)
+											waveAlreadyCovered = true
+											break
+										end
+									end
+								-- else
+								-- 	local r = radio.range
+								-- 	if r.max >= wave.min and r.min <= wave.max then
+								-- 		print("DCE_FindCommonRadioRanges I2 wave "..waveName.." is already covered by radio "..tostring(radio.name).." for module "..moduleName)
+								-- 		waveAlreadyCovered = true
+								-- 		break
+								-- 	end
+								-- end
+							end
+							if waveAlreadyCovered then break end
+						end
+
+						-- si pas couverte → ajouter radio Human
+						if not waveAlreadyCovered then
+							-- print("DCE_FindCommonRadioRanges J adding HumanRadio wave "..waveName.." for module "..moduleName)
+
+							-- intersection utile (le plus restrictif)
+							local minFreq = math.max(hrMin, wave.min)
+							local maxFreq = math.min(hrMax, wave.max)
+
+							dataRadio.radio[#dataRadio.radio + 1] = {
+								name    = "HumanRadio_" .. waveName,
+								nbCanal = 0,
+								range   = {
+									{
+										min = minFreq,
+										max = maxFreq,
+									},
+								},
+								source  = "HumanRadio",
+							}
+						end
+					end
+				end
+			end
+		else
+			if not dataRadio.radio or #dataRadio.radio < 1 then
+				dataRadio.radio[1] = {
+					name    = "defautRadio_VHF",
+					nbCanal = 0,
+					range   = {
+						{
+							min = RADIO_WAVES["VHF"].min,
+							max = RADIO_WAVES["VHF"].max,
+						},
+					},
+					source  = "default",
+				}
+			end
+		end
+	end
+
+
+
+	-- local camp_str = "Db_Frequency = " .. TableSerialization(Db_Frequency, 0)						--make a string
+	-- local campFile = io.open("Debug/Radio_Db_Frequency.lua", "w")	 or error("Failed to open debug file")
+	-- campFile:write(camp_str)																		--save new data
+	-- campFile:close()
+
+	
+	local function intersectRangeFreqOnly(a, b)
+		local minF = math.max(a.min, b.min)
+		local maxF = math.min(a.max, b.max)
+
+		if minF < maxF then
+			return { min = minF, max = maxF }
+		end
+
+		return nil
+	end
+
+	--initie les waves de frequences
+	RadioWaveCommon = DCE_FindRadioCommonWaves()
+
+	-- camp_str = "RadioWaveCommon = " .. TableSerialization(RadioWaveCommon, 0)						--make a string
+	-- campFile = io.open("Debug/Radio_RadioWaveCommon_.lua", "w")	 or error("Failed to open debug file")
+	-- campFile:write(camp_str)																		--save new data
+	-- campFile:close()
+
+
+	------------------------------------------------
+	-- 1. Find player aircraft type
+	------------------------------------------------
+	local currentPlayerAircraftType = nil
+
+	for moduleName, value in pairs(AircraftInCampaign) do
+		if value == "player" then
+			currentPlayerAircraftType = moduleName
+			break
+		end
+	end
+
+	if not currentPlayerAircraftType then
+		-- print("DCE_FindRadioCommonRG ERROR: no player aircraft found")
+		return { red = {}, blue = {} }
+	end
+
+	------------------------------------------------
+	-- 2. Get player ranges (REFERENCE)
+	------------------------------------------------
+	local playerData = Db_Frequency[currentPlayerAircraftType]
+	-- print("DCE_FindRadioCommonRG player module data: "..currentPlayerAircraftType)
+
+	RadioPlayerWaveRanges = simplifyRadioRanges(playerData, true)
+
+		-- camp_str = "RadioPlayerWaveRanges = " .. TableSerialization(RadioPlayerWaveRanges, 0)						--make a string
+		-- campFile = io.open("Debug/RadioPlayerWaveRanges_"..currentPlayerAircraftType..".lua", "w")	 or error("Failed to open debug file")
+		-- campFile:write(camp_str)																		--save new data
+		-- campFile:close()
+
+	if not RadioPlayerWaveRanges or not RadioPlayerWaveRanges[1] then
+		-- print("DCE_FindRadioCommonRG WARNING: player has no radio data")
+		return { red = {}, blue = {} }
+	end
+
+	------------------------------------------------
+	-- 3. Determine player side
+	------------------------------------------------
+	local playerSide = nil
+	if AircraftCampaignBySide.red and AircraftCampaignBySide.red[currentPlayerAircraftType] then
+		playerSide = "red"
+	elseif AircraftCampaignBySide.blue and AircraftCampaignBySide.blue[currentPlayerAircraftType] then
+		playerSide = "blue"
+	end
+
+	if not playerSide then
+		return { red = {}, blue = {} }
+	end
+
+	------------------------------------------------
+	-- 4. Start with player ranges
+	------------------------------------------------
+	local commonRanges = {
+		red  = {},
+		blue = {},
+	}
+
+	commonRanges[playerSide] = DeepCopy(RadioPlayerWaveRanges)
+
+	------------------------------------------------
+	-- 5. Intersect ONLY with other modules of same side
+	------------------------------------------------
+	for moduleName, moduleData in pairs(Db_Frequency) do
+
+		if moduleName ~= currentPlayerAircraftType then
+
+			-- same side only
+			if AircraftCampaignBySide[playerSide] and AircraftCampaignBySide[playerSide][moduleName] then
+
+				-- print("DCE_FindRadioCommonRG checking module "..moduleName.." for side "..playerSide)
+				local moduleRanges = simplifyRadioRanges(moduleData)
+
+					-- camp_str = "moduleRanges = " .. TableSerialization(moduleRanges, 0)						--make a string
+					-- campFile = io.open("Debug/RadioRangeModule_"..moduleName..".lua", "w")	 or error("Failed to open debug file")
+					-- campFile:write(camp_str)																		--save new data
+					-- campFile:close()
+
+				-- IGNORE modules without radio data
+				if moduleRanges and moduleRanges[1] then
+
+					local newCommon = {}
+
+					for _,c in ipairs(commonRanges[playerSide]) do
+						for _,m in ipairs(moduleRanges) do
+							local inter = intersectRangeFreqOnly(c, m)
+							if inter then
+								-- _affiche(inter, "inter: ")
+								table.insert(newCommon, inter)
+							end
+						end
+					end
+
+					-- only reduce if something matched
+					if newCommon[1] then
+						commonRanges[playerSide] = newCommon
+					else
+						-- print("DCE_FindRadioCommonRG: no compatible ranges with "..moduleName..", ignored")
+					end
+				else
+					-- print("DCE_FindRadioCommonRG: module "..moduleName.." has no radio data, ignored")
+				end
+			end
+		end
+	end
+
+	local function UnionRanges(a, b)
+		local all = {}
+		for _,r in ipairs(a) do table.insert(all, r) end
+		for _,r in ipairs(b) do table.insert(all, r) end
+		return simplifyRadioRanges(all)
+	end
+
+	local eniSide = DCS_ENI_Side[SidePlayer]
+
+	local heliRanges  = ComputeCommonRangesForModules(HelicoBySide[eniSide])
+	local planeRanges = ComputeCommonRangesForModules(PlaneBySide[eniSide])
+
+	commonRanges[eniSide] = UnionRanges(heliRanges, planeRanges)
+
+	return commonRanges
 end
+
+----------------------------------------------------------------
+-- FIN FIN Calcul Range Radio NG FIN
+----------------------------------------------------------------
+---
+---
+--- --assigne les fréquences aux bases
+function AssignedFrequencies()
+	Assigned_freq = {}
+
+	--liste toutes les Fréquences déjà existantes pour ne pas creer de doublon
+	for basename, base in pairs(db_airbases) do
+		if base.ATC_frequency and base.ATC_frequency ~= "" and type(base.ATC_frequency)~= "table" then
+			Assigned_freq[tonumber(base.ATC_frequency)] = basename
+		elseif base.ATC_frequency and type(base.ATC_frequency)== "table" then
+			for n , freq in ipairs(base.ATC_frequency) do
+				Assigned_freq[tonumber(freq)] = basename
+			end
+		else
+			-- _affiche(base.ATC_frequency, "AA base.ATC_frequency") 
+		end
+	end
+
+	-- camp_str = "Assigned_freq = " .. TableSerialization(Assigned_freq, 0)						--make a string
+	-- campFile = io.open("Debug/RADIO_Assigned_freq.lua", "w")  or error("Failed to open debug file")
+	-- campFile:write(camp_str)																		--save new data
+	-- campFile:close()
+
+	-- print("AssignedFrequencies()")
+	-- os.execute 'pause'
+end
+
+
+
+
+
+
+-------------------------------------------------------------------
+-- START Get Frequency NG
+----------------------------------------------------------------
+
+
+local EmergencyFreq = {
+    [121.5] = true,
+    [243.0] = true,
+}
+-- local waveDefinitions = {
+--     UHF  = { min = 225, max = 399.95 },
+--     VHF  = { min = 116, max = 149.975 },
+--     HF   = { min = 3,   max = 17.999 },
+--     LVHF = { min = 30,  max = 75.95 },
+-- }
+
+local wavePriority = { 
+	blue = {
+		plane = { "UHF", "VHF", "HF", "LVHF" },
+		helicopter = {  "LVHF", "VHF", "UHF", "HF", }
+	},
+	red = {
+		plane = {  "VHF", "UHF", "HF", "LVHF" },
+		helicopter = {  "LVHF", "VHF", "UHF", "HF", }
+	}
+}
+
+local specialTasks = {
+    EWR = true,
+    AWACS = true,
+    Refueling = true,
+    AFAC = true,
+	player = true, 
+}
+
+
+local function rangeIntersectsWave(range, wave)
+    local waveDef = RADIO_WAVES[wave]
+    if not waveDef then
+        return false
+    end
+
+    return range.max >= waveDef.min
+       and range.min <= waveDef.max
+end
+
+
+local function getRangesForContext(side, task, type_withData, flightOrPackage)
+	-- print("getRangesForContext A called for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData).." flightOrPackage "..tostring(flightOrPackage))
+	-- cas spécial : réseaux commandement joueur
+	
+	if specialTasks[task] and side == PlayerSide and (not type_withData or not IsHelicopter[type_withData]) then
+		if not IsHelicopter[type_withData] then
+			for _, wave in ipairs(wavePriority[side].plane) do
+				for n, dataFreq in ipairs(RadioPlayerWaveRanges or {}) do
+					if rangeIntersectsWave(dataFreq, wave) then
+						-- print("getRangesForContext B special task "..tostring(task).." wave "..tostring(wave).." freq range "..tostring(dataFreq.min).." - "..tostring(dataFreq.max))
+						return wave, { dataFreq }
+					end
+				end
+			end
+		end
+	end
+
+    -- cas normal : coalition
+	if not IsHelicopter[type_withData] then
+		for _, wave in ipairs(wavePriority[side].plane) do
+			if RadioWaveCommon[side] and RadioWaveCommon[side][wave] then
+				-- print("getRangesForContext C normal plane wave "..tostring(wave))
+				return wave, { RadioWaveCommon[side][wave] }
+			end
+		end
+	else
+		if flightOrPackage == "FreqFlight" and RadioWaveCommon[side] and RadioWaveCommon[side]["LVHF"] then
+			-- print("getRangesForContext D1 normal helicopter wave "..tostring("LVHF"))
+			return "LVHF", { RadioWaveCommon[side]["LVHF"] }
+		elseif flightOrPackage == "FreqPackage" and RadioWaveCommon[side] and RadioWaveCommon[side]["UHF"] then
+			-- print("getRangesForContext D2 normal helicopter wave "..tostring("UHF"))
+			return "UHF", { RadioWaveCommon[side]["UHF"] }
+		end
+
+		for _, wave in ipairs(wavePriority[side].helicopter) do
+			if RadioWaveCommon[side] and RadioWaveCommon[side][wave] then
+				-- print("getRangesForContext D3 normal helicopter wave "..tostring(wave))
+				return wave, { RadioWaveCommon[side][wave] }
+			end
+		end
+	end
+
+    return nil, {}
+end
+
+
+
+local function generateRandomFrequency(ranges)
+
+	local step = 0.05
+	local range
+
+	-- Normalisation du range
+	if ranges.min and ranges.max then
+		range = ranges
+	elseif type(ranges) == "table" and #ranges > 0 then
+		range = ranges[math.random(1, #ranges)]
+	else
+		return nil
+	end
+
+	if not range.min or not range.max then
+		return nil
+	end
+
+	local min = math.ceil(range.min / step) * step
+	local max = math.floor(range.max / step) * step
+	local count = math.floor((max - min) / step)
+
+	if count <= 0 then
+		return nil
+	end
+
+	local freq
+	local safety = 0
+
+	repeat
+		local index = math.random(0, count)
+		freq = min + index * step
+
+		-- normalisation décimale
+		freq = math.floor(freq * 100 + 0.5) / 100
+
+		safety = safety + 1
+		if safety > 200 then
+			return nil
+		end
+
+	until not EmergencyFreq[freq]
+	   and not Assigned_freq[freq]
+
+	return freq
+end
+
+
+
+function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPackage)
+	-- print("GetFrequencyNG A called for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(wave))
+
+	AssignedTargetFrequency[side] = AssignedTargetFrequency[side] or {}
+
+	if target_name then
+		AssignedTargetFrequency[side][target_name] = AssignedTargetFrequency[side][target_name] or {}
+	end
+
+
+    -- 1. Cache par cible
+    if target_name and flightOrPackage and AssignedTargetFrequency[side][target_name][flightOrPackage] then
+		-- print("GetFrequencyNG B returning cached frequency for target "..tostring(target_name).." flightOrPackage: " .. tostring(flightOrPackage) .. " freq "..tostring(AssignedTargetFrequency[side][target_name][flightOrPackage]))
+        return AssignedTargetFrequency[side][target_name][flightOrPackage]
+    end
+
+    local selectedWave
+    local ranges = {}
+
+    -- 2. Wave forcée
+    if wave then
+        selectedWave = wave
+		-- print("GetFrequencyNG C1 wave forced "..tostring(wave).." for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData))
+        if RadioWaveCommon[side] and RadioWaveCommon[side][wave] then
+			-- print("GetFrequencyNG C2 wave forced "..tostring(wave).." found for side "..tostring(side))
+            ranges = { RadioWaveCommon[side][wave] }
+        end
+
+    else
+        -- 3. Choix automatique
+		-- print("GetFrequencyNG D automatic wave selection for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData))
+        selectedWave, ranges = getRangesForContext(side, task, type_withData, flightOrPackage)
+    end
+
+    -- 4. Génération fréquence
+    local freq = generateRandomFrequency(ranges)
+    if not freq then return nil end
+
+    -- 5. Cache si target
+    if target_name and flightOrPackage then
+        AssignedTargetFrequency[side][target_name][flightOrPackage] = freq
+    end
+
+	-- print("GetFrequencyNG F returning frequency "..tostring(freq).." for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(selectedWave))
+    return freq
+end
+--
+--
+----------------------------------------------------------------
+-- FIN FIN Calcul Range Radio NG FIN
+----------------------------------------------------------------
+
+----------------------------------------------------------------
+-- START START FreqCapabilityNG START
+----------------------------------------------------------------
+---
+local function freqInRange(freq, range)
+    if not range or not range.min or not range.max then
+        return false
+    end
+    return freq >= range.min and freq <= range.max
+end
+
+function FreqCapabilityNG1(arg_testFreq, arg_type)
+
+    local freq = tonumber(arg_testFreq)
+    if not freq then
+        return false
+    end
+
+    local db = Db_Frequency[arg_type]
+    if not db then
+        return false
+    end
+
+    ------------------------------------------------------------------
+    -- 1. HUMAN RADIO
+    ------------------------------------------------------------------
+    if db.HumanRadio then
+        local hr = db.HumanRadio
+
+        -- Cas 1 : rangeFrequency (le PLUS restrictif)
+        if hr.rangeFrequency then
+            for _, r in ipairs(hr.rangeFrequency) do
+                if freqInRange(freq, r) then
+                    return true
+                end
+            end
+        else
+            -- Cas 2 : minFrequency / maxFrequency
+            if hr.minFrequency and hr.maxFrequency then
+                if freq >= hr.minFrequency and freq <= hr.maxFrequency then
+                    return true
+                end
+            end
+        end
+    end
+
+    ------------------------------------------------------------------
+    -- 2. PANEL RADIO
+    ------------------------------------------------------------------
+    if db.panelRadio then
+        for _, radio in ipairs(db.panelRadio) do
+
+            -- Cas 1 : range sous forme de liste
+            if radio.range and type(radio.range) == "table" then
+                -- range[1..n]
+                if radio.range[1] then
+                    for _, r in ipairs(radio.range) do
+                        if freqInRange(freq, r) then
+                            return true
+                        end
+                    end
+                else
+                    -- range simple
+                    if freqInRange(freq, radio.range) then
+                        return true
+                    end
+                end
+            end
+        end
+    end
+
+    ------------------------------------------------------------------
+    -- 3. AUCUNE RADIO COMPATIBLE
+    ------------------------------------------------------------------
+    return false
+end
+----------------------------------------------------------------
+-- FIN FIN FreqCapabilityNG FIN
+----------------------------------------------------------------
+
 
 ----- function to assign frquencies to packages -----
 
@@ -1608,440 +2587,441 @@ function FoundWave(range)
 end
 
 
-function FreqCapability(arg_testFreq, arg_type, arg_radioN, arf_info)
-	local waves  = ""
-
-	if  not Frequency[arg_type] or not Frequency[arg_type].radio or not Frequency[arg_type].radio[arg_radioN] or Frequency[arg_type].radio[arg_radioN] == nil then
-		return false
-	end
-
-	local radioPlane = Frequency[arg_type].radio[arg_radioN]
-
-	for wave, freqRange in pairs(radioPlane) do
-		if wave  == "HF" or wave  == "LVHF" or  wave  == "VHF" or  wave  == "UHF" then
-			if freqRange and tonumber(arg_testFreq) < freqRange.max and  tonumber(arg_testFreq) > freqRange.min then
-				if radioPlane[wave] and (arg_testFreq > radioPlane[wave].min and arg_testFreq < radioPlane[wave].max)	 then
-					return true
-				end
-			end
-		end
-	end
-
-	return false
-
-end
-
--- from ATO_ThreatEvaluation pour asssigner une frequence EWR aléatoire
--- from ATO_FlightPlan pour assigner une freqence de groupe
-function GetFrequency(arg_Side, arg_TargetName, arg_Task, arg_Type, arg_Waves, arg_Overide)
-
-	local freq
-	local nRadio = 1																					--chose frequency range from radio 1
-	if RadioA and RadioA[arg_Side] and RadioA[arg_Side][2] and (arg_Task == "EWR" or arg_Task == "AWACS" or arg_Task == "Refueling" or arg_Task == "AFAC") then			--if player has two radions, chose frequency range from AWACS and tanker from radio 2
-		nRadio = 2
-	end
-
-	--check si la freq existe dans la radio 1, debug freq groupe
-	local tabWave = {"UHF", "VHF", "LVHF", "HF"}
-	local function freqValide(arg_checkFreq)
-		for _, Wave in pairs(tabWave) do
-			-- local radioN = 1
-			-- if Frequency[arg_Type] and Frequency[arg_Type].prefFreqPackage then
-			-- 	radioN = Frequency[arg_Type].prefFreqPackage.nRadio
-			-- end
-			if arg_checkFreq and Frequency[arg_Type] then
-				if Frequency[arg_Type]["radio"] then
-					for radioN = 1 , #Frequency[arg_Type]["radio"] do
-						if Frequency[arg_Type]["radio"][radioN][Wave] then
-							return true
-						end
-					end
-				end
-				return false
-			else
-				--pour les avions IA
-				return true
-			end
-		end
-	end
-
-	--si la freq package a déjà été désignée, on la reprend
-	if arg_Task ~= "coalition" and arg_Overide == nil then
-
-		-- if Debug.debug then print("UtilF_Debug GetFrequency 001 targetname? "..tostring(targetname)) end
-
-		if Package_freq[arg_Side]["UHF"][arg_TargetName] and freqValide(Package_freq[arg_Side]["UHF"][arg_TargetName]) then
-
-			-- if Debug.debug then print("UtilF_Debug GetFrequency return B1 Package_freq "..tostring(Package_freq[side]["UHF"][targetname])) end
-			return Package_freq[arg_Side]["UHF"][arg_TargetName]															--return frequency
-
-		elseif Package_freq[arg_Side]["VHF"][arg_TargetName] and freqValide(Package_freq[arg_Side]["VHF"][arg_TargetName]) then
-
-			-- if Debug.debug then print("UtilF_Debug GetFrequency return B2 Package_freq "..tostring(Package_freq[side]["VHF"][targetname])) end
-			return Package_freq[arg_Side]["VHF"][arg_TargetName]															--return frequency
-
-		elseif Package_freq[arg_Side]["LVHF"][arg_TargetName] and freqValide(Package_freq[arg_Side]["LVHF"][arg_TargetName]) then
-
-			-- if Debug.debug then print("UtilF_Debug GetFrequency return B3 Package_freq "..tostring(Package_freq[side]["LVHF"][targetname])) end
-			return Package_freq[arg_Side]["LVHF"][arg_TargetName]
-
-		elseif Package_freq[arg_Side]["HF"][arg_TargetName] and freqValide(Package_freq[arg_Side]["HF"][arg_TargetName]) then
-
-			-- if Debug.debug then print("UtilF_Debug GetFrequency return B4 Package_freq "..tostring(Package_freq[side]["HF"][targetname])) end
-			return Package_freq[arg_Side]["HF"][arg_TargetName]
-
-		end
-	end
-
-
-
-	local function getLocFrequency(arg2_Side, arg2_TargetName, arg2_radioN, arg2_Type,  arg2_Wave)
-
-		if arg_Task == "EWR" then		-- (range == "UHF" or range == "VHF")  and
-			arg2_Wave = RadioWavePlayer
-			if arg2_Wave and RadioA[arg2_Side][arg2_radioN] and RadioA[arg2_Side][arg2_radioN][arg2_Wave]  then		--Cherche d'abord une frequence UHF commune
-				repeat
-					freq = math.random(RadioA[arg2_Side][arg2_radioN][arg2_Wave].min, RadioA[arg2_Side][arg2_radioN][arg2_Wave].max - 1)		--find random frequency in mHz
-					local deci = math.random(0, 9) / 10									--random first decimal place
-					-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
-					local mil = 00														--impossible pour certain avions, comme le M2000
-					freq = freq + deci + mil											--combine to complete frequency
-				until Assigned_freq[freq] == nil and (freq<242.9 or freq>243.1)			--repeat until a frequency is found that is not yet in use
-
-				Assigned_freq[freq] = true												--mark frequency in use
-				Package_freq[arg2_Side][arg2_Wave][arg2_TargetName] = freq							--store frequency for package
-
-				-- if Debug.debug then print("UtilF_Debug GetFrequency return C1 Package_freq "..tostring(freq)) end
-				return freq																--return frequency
-			end
-
-		elseif arg_Task == "coalition"   then						--(range == "HF" or range == "FM")
-			if arg2_Wave == "HF"  then
-				if RadioB[arg2_Side] and RadioB[arg2_Side][arg2_Wave]  then
-					freq = 0
-					repeat
-						freq = math.random(RadioB[arg2_Side][arg2_Wave].min, RadioB[arg2_Side][arg2_Wave].max)		--find random frequency in mHz
-						local deci = math.random(0, 9) / 10									--random first decimal place
-						local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
-						-- local mil = 00														--impossible pour certain avions, comme le M2000
-
-						freq = freq + deci + mil											--combine to complete frequency
-					until Assigned_freq[freq] == nil										--repeat until a frequency is found that is not yet in use
-
-					Assigned_freq[freq] = true												--mark frequency in use
-
-					-- if Debug.debug then print("UtilF_Debug GetFrequency return C2 HF Package_freq "..tostring(freq)) end
-					return freq																--return frequency
-				else
-
-					-- if Debug.debug then print("UtilF_Debug GetFrequency return C2 HF 0") end
-					return 0
-				end
-			elseif arg2_Wave == "UHF"  then
-				if RadioB[arg2_Side] and RadioB[arg2_Side][arg2_Wave]   then		--Cherche d'abord une frequence UHF commune	--and CommonFreq[side]  == 0
-					freq = 0
-					repeat
-						freq = math.random(RadioB[arg2_Side][arg2_Wave].min, RadioB[arg2_Side][arg2_Wave].max - 1)		--find random frequency in mHz
-						local deci = math.random(0, 9) / 10									--random first decimal place
-						-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
-						local mil = 00														--impossible pour certain avions, comme le M2000
-
-						freq = freq + deci + mil											--combine to complete frequency
-					until Assigned_freq[freq] == nil and (freq<242.9 or freq>243.1)			--repeat until a frequency is found that is not yet in use
-
-					Assigned_freq[freq] = true												--mark frequency in use
-
-					-- if Debug.debug then print("UtilF_Debug GetFrequency return D1 UHF Package_freq "..tostring(freq)) end
-					return freq																--return frequency
-				else
-
-					-- if Debug.debug then print("UtilF_Debug GetFrequency return D2 UHF 0") end
-					return 0
-				end
-			elseif arg2_Wave == "VHF"  then
-				if RadioB[arg2_Side] and RadioB[arg2_Side][arg2_Wave]   then		--Cherche d'abord une frequence UHF commune	--and CommonFreq[side]  == 0
-					freq = 0
-					repeat
-						freq = math.random(RadioB[arg2_Side][arg2_Wave].min, RadioB[arg2_Side][arg2_Wave].max - 1)		--find random frequency in mHz
-						local deci = math.random(0, 9) / 10									--random first decimal place
-						-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
-						local mil = 00														--impossible pour certain avions, comme le M2000
-
-						freq = freq + deci + mil											--combine to complete frequency
-					until Assigned_freq[freq] == nil and (freq<121.45 or freq>121.55)	and freq ~= 123.1			--repeat until a frequency is found that is not yet in use
-
-					Assigned_freq[freq] = true												--mark frequency in use
-
-					-- if Debug.debug then print("UtilF_Debug GetFrequency return E1 VHF Package_freq "..tostring(freq)) end
-					return freq																--return frequency
-				else
-
-					-- if Debug.debug then print("UtilF_Debug GetFrequency return E2 VHF 0") end
-					return 0
-				end
-			elseif arg2_Wave == "LVHF" then
-				if RadioB[arg2_Side] and RadioB[arg2_Side][arg2_Wave]   then
-					freq = 0
-					repeat
-						freq = math.random(RadioB[arg2_Side][arg2_Wave].min, RadioB[arg2_Side][arg2_Wave].max - 1)		--find random frequency in mHz
-						local deci = math.random(0, 9) / 10									--random first decimal place
-						-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
-						local mil = 00														--impossible pour certain avions, comme le M2000
-						freq = freq + deci + mil											--combine to complete frequency
-					until Assigned_freq[freq] == nil										--repeat until a frequency is found that is not yet in use
-					Assigned_freq[freq] = true												--mark frequency in use
-
-					-- if Debug.debug then print("UtilF_Debug GetFrequency return F1 LVHF Package_freq "..tostring(freq)) end
-					return freq																--return frequency
-				else
-
-					-- if Debug.debug then print("UtilF_Debug GetFrequency return F2 LVHF 0") end
-					return 0
-				end
-			end
-		elseif arg2_Wave == "UHF" and arg_Task ~= "EWR" then
-			-- if Debug.debug then print("UtilF_Debug GetFrequency return G0 UHF non  EWR frequency[type] "..tostring(frequency[type])) end
-
-			if Frequency[arg2_Type] and Frequency[arg2_Type]["radio"]   then
-				for radioN = 1, #Frequency[arg2_Type]["radio"] do
-					-- local passe = true
-					-- if arg2_radioN ~= nil and arg2_radioN ~= radioN then
-					-- 	passe = false
-					-- end
-					for wave, freqRange in pairs(Frequency[arg2_Type]["radio"][radioN]) do
-						if wave == arg2_Wave  then
-							local i = 1
-							repeat
-								local rangeMin = RadioB[arg2_Side][arg2_Wave].min
-								local rangeMax = RadioB[arg2_Side][arg2_Wave].max
-								if freqRange and RadioB[arg2_Side][arg2_Wave].min < freqRange.min then rangeMin = freqRange.min end
-								if freqRange and RadioB[arg2_Side][arg2_Wave].max > freqRange.max then rangeMax = freqRange.max end
-
-								freq = math.random(rangeMin, rangeMax)
-
-								local deci = math.random(0, 9) / 10									--random first decimal place
-								-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
-								local mil = 00														--impossible pour certain avions, comme le M2000
-								freq = freq + deci + mil											--combine to complete frequency
-							until Assigned_freq[freq] == nil and FreqCapability(freq, arg2_Type, radioN) and (freq<242.9 or freq>243.1) or i > 1000		--repeat until a frequency is found that is not yet in use
-
-							-- if i>=1000 then
-							-- 	-- print("UtilF          BUG A range "..arg2_Wave .. " with "..tostring(arg2_Type))
-							-- end
-
-							Assigned_freq[freq] = true												--mark frequency in use
-							Package_freq[arg2_Side][arg2_Wave][arg2_TargetName] = freq							--store frequency for package
-
-							-- if Debug.debug then print("UtilF_Debug GetFrequency return G1 UHF non  EWR Package_freq "..tostring(freq)) end
-							return freq
-						end
-					end
-				end
-			end
-		elseif arg2_Wave == "VHF" then
-
-			if Frequency[arg2_Type] and Frequency[arg2_Type]["radio"]   then
-				for radioN = 1, #Frequency[arg2_Type]["radio"] do
-					local passe = true
-					if arg2_radioN ~= nil and arg2_radioN ~= radioN then
-						passe = false
-					end
-					for wave, freqRange in pairs(Frequency[arg2_Type]["radio"][radioN]) do
-						if wave == arg2_Wave and passe then
-							local i = 1
-							repeat
-								local rangeMin = RadioB[arg2_Side][arg2_Wave].min
-								local rangeMax = RadioB[arg2_Side][arg2_Wave].max
-								if freqRange and RadioB[arg2_Side][arg2_Wave].min < freqRange.min then rangeMin = freqRange.min end
-								if freqRange and RadioB[arg2_Side][arg2_Wave].max > freqRange.max then rangeMax = freqRange.max end
-
-								freq = math.random(rangeMin, rangeMax)
-								local deci = math.random(0, 9) / 10									--random first decimal place
-								-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
-								local mil = 00														--impossible pour certain avions, comme le M2000
-								freq = freq + deci + mil											--combine to complete frequency
-								i=i+1
-
-							until Assigned_freq[freq] == nil and FreqCapability(freq, arg2_Type, radioN) and (freq<121.45 or freq>121.55)	and freq ~= 123.1 or i > 1000		--repeat until a frequency is found that is not yet in use
-
-							if i>=1000 then
-								print("UtilF          BUG A range "..arg2_Wave .. " with "..tostring(arg2_Type))
-							end
-							Assigned_freq[freq] = true												--mark frequency in use
-
-							if arg_Overide ~= nil then
-								Package_freq[arg2_Side][arg2_Wave][arg2_TargetName] = freq							--store frequency for package
-							end
-
-							-- if Debug.debug then print("UtilF_Debug GetFrequency return H1 VHF Package_freq "..tostring(freq)) end
-							return freq
-						end
-					end
-
-				end
-			end
-		elseif arg2_Wave == "LVHF" then
-
-			if Frequency[arg2_Type] and Frequency[arg2_Type]["radio"]   then
-				for radioN = 1, #Frequency[arg2_Type]["radio"] do
-					for wave, freqRange in pairs(Frequency[arg2_Type]["radio"][radioN]) do
-						if wave == arg2_Wave  then
-
-							repeat
-								freq = math.random(RadioB[arg2_Side][arg2_Wave].min, RadioB[arg2_Side][arg2_Wave].max - 1)
-							until Assigned_freq[freq] == nil and freq ~= 4125 and freq ~= 5680		--repeat until a frequency is found that is not yet in use
-
-							Assigned_freq[freq] = true												--mark frequency in use
-							Package_freq[arg2_Side][arg2_Wave][arg2_TargetName] = freq							--store frequency for package
-
-
-							-- if Debug.debug then print("UtilF_Debug GetFrequency return I LVHF Package_freq "..tostring(freq)) end
-							return freq
-						end
-					end
-				end
-			end
-		elseif arg2_Wave == "HF" then
-
-			if Frequency[arg2_Type] and Frequency[arg2_Type]["radio"] then
-				-- print("UtilF		  typeB "..tostring(arg2_Type).." sideB "..tostring(arg2_Side).." waveB "..tostring(arg2_Wave))
-				repeat
-					freq = math.random(RadioB[arg2_Side][arg2_Wave].min * 10, RadioB[arg2_Side][arg2_Wave].max * 10)		--find random frequency in mHz
-				until Assigned_freq[freq] == nil and freq ~= 4125 and freq ~= 5680										--repeat until a frequency is found that is not yet in use
-
-				freq = freq /10
-				local freqRemp
-				repeat
-					-- local deci = math.random(0, 4) 									--random first decimal place
-					local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
-					freqRemp = freq + mil											--combine to complete frequency
-				until freqRemp >= RadioB[arg2_Side][arg2_Wave].min and freqRemp <= RadioB[arg2_Side][arg2_Wave].max
-				freq = freqRemp
-
-				Assigned_freq[freq] = true												--mark frequency in use
-				Package_freq[arg2_Side][arg2_Wave][arg2_TargetName] = freq							--store frequency for package
-
-				-- if Debug.debug then print("UtilF_Debug GetFrequency return J HF Package_freq "..tostring(freq)) end
-				return freq																--return frequency				
-			end
-		end
-	end
-
-	--TODO faire des functions pour nettoyer ce code
-	if arg_Type and arg_Type ~= nil and arg_Task ~= "coalition" then --and  waves ~= nil 
-		if Frequency[arg_Type] and Frequency[arg_Type].prefFreqPackage then
-
-			local result = getLocFrequency(arg_Side, arg_TargetName, Frequency[arg_Type].prefFreqPackage.nRadio, arg_Type, Frequency[arg_Type].prefFreqPackage.range)
-
-			-- if Debug.debug then print("UtilF_Debug GetFrequency return >K result "..tostring(result)) end
-			return result
-		end
-	end
-
-	local result
-
-	if arg_Waves == nil or arg_Waves == false then
-		arg_Waves = "UHF"
-		local foundUHFwave = false
-		if Frequency[arg_Type] and Frequency[arg_Type]["radio"] then
-			for numRadio = 1, #Frequency[arg_Type]["radio"] do
-				if Frequency[arg_Type]["radio"][numRadio][arg_Waves] then
-					foundUHFwave = true
-				end
-			end
-
-			if not foundUHFwave then
-				for waveName, waveTab in pairs( Frequency[arg_Type]["radio"][1] ) do
-					if waveName == "HF" or waveName == "LVHF" or waveName == "VHF" or waveName == "UHF" then
-						arg_Waves = waveName
-					end
-				end
-			end
-		end
-	end
-
-	if arg_Task == "EWR" then
-		if RadioA[arg_Side][1] and RadioA[arg_Side][1]["UHF"] and RadioA[arg_Side][1]["UHF"]["player"] then
-			result = getLocFrequency(arg_Side, arg_TargetName, nRadio, arg_Type,  "UHF")
-		elseif RadioA[arg_Side][1] and RadioA[arg_Side][1]["VHF"] and RadioA[arg_Side][1]["VHF"]["player"] then
-			result = getLocFrequency(arg_Side, arg_TargetName, nRadio, arg_Type,  "VHF")
-		else
-			result = getLocFrequency(arg_Side, arg_TargetName, nRadio, arg_Type,  "UHF")
-		end
-	elseif arg_Task == "coalition" then
-
-		result = getLocFrequency(arg_Side, "", "", arg_Type,  arg_Waves)
-
-		if Debug.debug then print("UtilF_Debug GetFrequency return L result "..tostring(result)) end
-		return result
-
-	elseif arg_Task == "group" then   --prend obligatoirement le channel 1 de la radio 1
-
-		result = getLocFrequency(arg_Side, arg_TargetName, 1, arg_Type,  arg_Waves)
-
-		if Debug.debug then print("UtilF_Debug GetFrequency return M result "..tostring(result)) end
-		return result
-	else
-		result = getLocFrequency(arg_Side, arg_TargetName, nRadio, arg_Type,  arg_Waves)
-		if Debug.debug then print("UtilF_Debug GetFrequency PASSE ELSE "..tostring(result)) end
-	end
-
-	if result then
-		if Debug.debug then print("UtilF_Debug GetFrequency PASSE return O "..tostring(result)) end
-		return result
-	else
-		result = getLocFrequency(arg_Side, arg_TargetName, nRadio, arg_Type,  "UHF")
-		if result then
-			if Debug.debug then print("UtilF_Debug GetFrequency PASSE return P UHF "..tostring(result)) end
-			return result
-		else
-			result = getLocFrequency(arg_Side, arg_TargetName, nRadio, arg_Type,  "LVHF")
-			if result then
-				if Debug.debug then print("UtilF_Debug GetFrequency PASSE return Q LVHF "..tostring(result)) end
-				return result
-			else
-				if not RadioA[arg_Side] then RadioA[arg_Side] = {} end
-				if not RadioA[arg_Side][nRadio] then RadioA[arg_Side][nRadio] = {} end
-				if not RadioA[arg_Side][nRadio]["VHF"] then RadioA[arg_Side][nRadio]["VHF"]  = {} end
-				RadioA[arg_Side][nRadio]["VHF"] = {
-					min = 118,
-					max = 136,
-				}
-				result = getLocFrequency(arg_Side, arg_TargetName, nRadio, arg_Type,  "VHF")
-				if Debug.debug then print("UtilF_Debug GetFrequency PASSE return R VHF  "..tostring(result)) end
-
-				if result then
-
-					if Debug.debug then print("UtilF_Debug GetFrequency return S result "..tostring(result)) end
-					return result
-				else
-
-					--TODO ajouter ici (ou ailleurs) une condition pour utiliser la bande de freq preféré du joueur
-
-					RadioA[arg_Side][nRadio]["UHF"] = {
-						min = 225,
-						max = 300,
-					}
-					local range = "UHF"
-					repeat
-						freq = math.random(RadioA[arg_Side][nRadio][range].min, RadioA[arg_Side][nRadio][range].max - 1)		--find random frequency in mHz
-						local deci = math.random(0, 9) / 10									--random first decimal place
-						-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
-						local mil = 00														--impossible pour certain avions, comme le M2000
-						freq = freq + deci + mil											--combine to complete frequency
-					until Assigned_freq[freq] == nil and (freq<242.9 or freq>243.1)			--repeat until a frequency is found that is not yet in use
-
-					Assigned_freq[freq] = true												--mark frequency in use
-					Package_freq[arg_Side][range][arg_TargetName] = freq							--store frequency for package
-
-					if Debug.debug then print("UtilF_Debug GetFrequency PASSE return Z UHF  "..tostring(freq)) end
-					return freq
-				end
-			end
-		end
-	end
-
-end
+
+-- function FreqCapability(arg_testFreq, arg_type, arg_radioN, arf_info)
+-- 	local waves  = ""
+
+-- 	if  not Frequency[arg_type] or not Frequency[arg_type].radio or not Frequency[arg_type].radio[arg_radioN] or Frequency[arg_type].radio[arg_radioN] == nil then
+-- 		return false
+-- 	end
+
+-- 	local radioPlane = Frequency[arg_type].radio[arg_radioN]
+
+-- 	for wave, freqRange in pairs(radioPlane) do
+-- 		if wave  == "HF" or wave  == "LVHF" or  wave  == "VHF" or  wave  == "UHF" then
+-- 			if freqRange and tonumber(arg_testFreq) < freqRange.max and  tonumber(arg_testFreq) > freqRange.min then
+-- 				if radioPlane[wave] and (arg_testFreq > radioPlane[wave].min and arg_testFreq < radioPlane[wave].max)	 then
+-- 					return true
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+
+-- 	return false
+
+-- end
+
+-- -- from ATO_ThreatEvaluation pour asssigner une frequence EWR aléatoire
+-- -- from ATO_FlightPlan pour assigner une freqence de groupe
+-- function GetFrequencyAG(arg_Side, arg_TargetName, arg_Task, arg_Type, arg_Waves, arg_Overide)
+
+-- 	local freq
+-- 	local nRadio = 1																					--chose frequency range from radio 1
+-- 	if RadioA and RadioA[arg_Side] and RadioA[arg_Side][2] and (arg_Task == "EWR" or arg_Task == "AWACS" or arg_Task == "Refueling" or arg_Task == "AFAC") then			--if player has two radions, chose frequency range from AWACS and tanker from radio 2
+-- 		nRadio = 2
+-- 	end
+
+-- 	--check si la freq existe dans la radio 1, debug freq groupe
+-- 	local tabWave = {"UHF", "VHF", "LVHF", "HF"}
+-- 	local function freqValide(arg_checkFreq)
+-- 		for _, Wave in pairs(tabWave) do
+-- 			-- local radioN = 1
+-- 			-- if Frequency[arg_Type] and Frequency[arg_Type].prefFreqPackage then
+-- 			-- 	radioN = Frequency[arg_Type].prefFreqPackage.nRadio
+-- 			-- end
+-- 			if arg_checkFreq and Frequency[arg_Type] then
+-- 				if Frequency[arg_Type]["radio"] then
+-- 					for radioN = 1 , #Frequency[arg_Type]["radio"] do
+-- 						if Frequency[arg_Type]["radio"][radioN][Wave] then
+-- 							return true
+-- 						end
+-- 					end
+-- 				end
+-- 				return false
+-- 			else
+-- 				--pour les avions IA
+-- 				return true
+-- 			end
+-- 		end
+-- 	end
+
+-- 	--si la freq package a déjà été désignée, on la reprend
+-- 	if arg_Task ~= "coalition" and arg_Overide == nil then
+
+-- 		-- if Debug.debug then print("UtilF_Debug GetFrequency 001 targetname? "..tostring(targetname)) end
+
+-- 		if Package_freq[arg_Side]["UHF"][arg_TargetName] and freqValide(Package_freq[arg_Side]["UHF"][arg_TargetName]) then
+
+-- 			-- if Debug.debug then print("UtilF_Debug GetFrequency return B1 Package_freq "..tostring(Package_freq[side]["UHF"][targetname])) end
+-- 			return Package_freq[arg_Side]["UHF"][arg_TargetName]															--return frequency
+
+-- 		elseif Package_freq[arg_Side]["VHF"][arg_TargetName] and freqValide(Package_freq[arg_Side]["VHF"][arg_TargetName]) then
+
+-- 			-- if Debug.debug then print("UtilF_Debug GetFrequency return B2 Package_freq "..tostring(Package_freq[side]["VHF"][targetname])) end
+-- 			return Package_freq[arg_Side]["VHF"][arg_TargetName]															--return frequency
+
+-- 		elseif Package_freq[arg_Side]["LVHF"][arg_TargetName] and freqValide(Package_freq[arg_Side]["LVHF"][arg_TargetName]) then
+
+-- 			-- if Debug.debug then print("UtilF_Debug GetFrequency return B3 Package_freq "..tostring(Package_freq[side]["LVHF"][targetname])) end
+-- 			return Package_freq[arg_Side]["LVHF"][arg_TargetName]
+
+-- 		elseif Package_freq[arg_Side]["HF"][arg_TargetName] and freqValide(Package_freq[arg_Side]["HF"][arg_TargetName]) then
+
+-- 			-- if Debug.debug then print("UtilF_Debug GetFrequency return B4 Package_freq "..tostring(Package_freq[side]["HF"][targetname])) end
+-- 			return Package_freq[arg_Side]["HF"][arg_TargetName]
+
+-- 		end
+-- 	end
+
+
+
+-- 	local function getLocFrequency(arg2_Side, arg2_TargetName, arg2_radioN, arg2_Type,  arg2_Wave)
+
+-- 		if arg_Task == "EWR" then		-- (range == "UHF" or range == "VHF")  and
+-- 			arg2_Wave = RadioWavePlayer
+-- 			if arg2_Wave and RadioA[arg2_Side][arg2_radioN] and RadioA[arg2_Side][arg2_radioN][arg2_Wave]  then		--Cherche d'abord une frequence UHF commune
+-- 				repeat
+-- 					freq = math.random(RadioA[arg2_Side][arg2_radioN][arg2_Wave].min, RadioA[arg2_Side][arg2_radioN][arg2_Wave].max - 1)		--find random frequency in mHz
+-- 					local deci = math.random(0, 9) / 10									--random first decimal place
+-- 					-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
+-- 					local mil = 00														--impossible pour certain avions, comme le M2000
+-- 					freq = freq + deci + mil											--combine to complete frequency
+-- 				until Assigned_freq[freq] == nil and (freq<242.9 or freq>243.1)			--repeat until a frequency is found that is not yet in use
+
+-- 				Assigned_freq[freq] = true												--mark frequency in use
+-- 				Package_freq[arg2_Side][arg2_Wave][arg2_TargetName] = freq							--store frequency for package
+
+-- 				-- if Debug.debug then print("UtilF_Debug GetFrequency return C1 Package_freq "..tostring(freq)) end
+-- 				return freq																--return frequency
+-- 			end
+
+-- 		elseif arg_Task == "coalition"   then						--(range == "HF" or range == "FM")
+-- 			if arg2_Wave == "HF"  then
+-- 				if RadioB[arg2_Side] and RadioB[arg2_Side][arg2_Wave]  then
+-- 					freq = 0
+-- 					repeat
+-- 						freq = math.random(RadioB[arg2_Side][arg2_Wave].min, RadioB[arg2_Side][arg2_Wave].max)		--find random frequency in mHz
+-- 						local deci = math.random(0, 9) / 10									--random first decimal place
+-- 						local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
+-- 						-- local mil = 00														--impossible pour certain avions, comme le M2000
+
+-- 						freq = freq + deci + mil											--combine to complete frequency
+-- 					until Assigned_freq[freq] == nil										--repeat until a frequency is found that is not yet in use
+
+-- 					Assigned_freq[freq] = true												--mark frequency in use
+
+-- 					-- if Debug.debug then print("UtilF_Debug GetFrequency return C2 HF Package_freq "..tostring(freq)) end
+-- 					return freq																--return frequency
+-- 				else
+
+-- 					-- if Debug.debug then print("UtilF_Debug GetFrequency return C2 HF 0") end
+-- 					return 0
+-- 				end
+-- 			elseif arg2_Wave == "UHF"  then
+-- 				if RadioB[arg2_Side] and RadioB[arg2_Side][arg2_Wave]   then		--Cherche d'abord une frequence UHF commune	--and CommonFreq[side]  == 0
+-- 					freq = 0
+-- 					repeat
+-- 						freq = math.random(RadioB[arg2_Side][arg2_Wave].min, RadioB[arg2_Side][arg2_Wave].max - 1)		--find random frequency in mHz
+-- 						local deci = math.random(0, 9) / 10									--random first decimal place
+-- 						-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
+-- 						local mil = 00														--impossible pour certain avions, comme le M2000
+
+-- 						freq = freq + deci + mil											--combine to complete frequency
+-- 					until Assigned_freq[freq] == nil and (freq<242.9 or freq>243.1)			--repeat until a frequency is found that is not yet in use
+
+-- 					Assigned_freq[freq] = true												--mark frequency in use
+
+-- 					-- if Debug.debug then print("UtilF_Debug GetFrequency return D1 UHF Package_freq "..tostring(freq)) end
+-- 					return freq																--return frequency
+-- 				else
+
+-- 					-- if Debug.debug then print("UtilF_Debug GetFrequency return D2 UHF 0") end
+-- 					return 0
+-- 				end
+-- 			elseif arg2_Wave == "VHF"  then
+-- 				if RadioB[arg2_Side] and RadioB[arg2_Side][arg2_Wave]   then		--Cherche d'abord une frequence UHF commune	--and CommonFreq[side]  == 0
+-- 					freq = 0
+-- 					repeat
+-- 						freq = math.random(RadioB[arg2_Side][arg2_Wave].min, RadioB[arg2_Side][arg2_Wave].max - 1)		--find random frequency in mHz
+-- 						local deci = math.random(0, 9) / 10									--random first decimal place
+-- 						-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
+-- 						local mil = 00														--impossible pour certain avions, comme le M2000
+
+-- 						freq = freq + deci + mil											--combine to complete frequency
+-- 					until Assigned_freq[freq] == nil and (freq<121.45 or freq>121.55)	and freq ~= 123.1			--repeat until a frequency is found that is not yet in use
+
+-- 					Assigned_freq[freq] = true												--mark frequency in use
+
+-- 					-- if Debug.debug then print("UtilF_Debug GetFrequency return E1 VHF Package_freq "..tostring(freq)) end
+-- 					return freq																--return frequency
+-- 				else
+
+-- 					-- if Debug.debug then print("UtilF_Debug GetFrequency return E2 VHF 0") end
+-- 					return 0
+-- 				end
+-- 			elseif arg2_Wave == "LVHF" then
+-- 				if RadioB[arg2_Side] and RadioB[arg2_Side][arg2_Wave]   then
+-- 					freq = 0
+-- 					repeat
+-- 						freq = math.random(RadioB[arg2_Side][arg2_Wave].min, RadioB[arg2_Side][arg2_Wave].max - 1)		--find random frequency in mHz
+-- 						local deci = math.random(0, 9) / 10									--random first decimal place
+-- 						-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
+-- 						local mil = 00														--impossible pour certain avions, comme le M2000
+-- 						freq = freq + deci + mil											--combine to complete frequency
+-- 					until Assigned_freq[freq] == nil										--repeat until a frequency is found that is not yet in use
+-- 					Assigned_freq[freq] = true												--mark frequency in use
+
+-- 					-- if Debug.debug then print("UtilF_Debug GetFrequency return F1 LVHF Package_freq "..tostring(freq)) end
+-- 					return freq																--return frequency
+-- 				else
+
+-- 					-- if Debug.debug then print("UtilF_Debug GetFrequency return F2 LVHF 0") end
+-- 					return 0
+-- 				end
+-- 			end
+-- 		elseif arg2_Wave == "UHF" and arg_Task ~= "EWR" then
+-- 			-- if Debug.debug then print("UtilF_Debug GetFrequency return G0 UHF non  EWR frequency[type] "..tostring(frequency[type])) end
+
+-- 			if Frequency[arg2_Type] and Frequency[arg2_Type]["radio"]   then
+-- 				for radioN = 1, #Frequency[arg2_Type]["radio"] do
+-- 					-- local passe = true
+-- 					-- if arg2_radioN ~= nil and arg2_radioN ~= radioN then
+-- 					-- 	passe = false
+-- 					-- end
+-- 					for wave, freqRange in pairs(Frequency[arg2_Type]["radio"][radioN]) do
+-- 						if wave == arg2_Wave  then
+-- 							local i = 1
+-- 							repeat
+-- 								local rangeMin = RadioB[arg2_Side][arg2_Wave].min
+-- 								local rangeMax = RadioB[arg2_Side][arg2_Wave].max
+-- 								if freqRange and RadioB[arg2_Side][arg2_Wave].min < freqRange.min then rangeMin = freqRange.min end
+-- 								if freqRange and RadioB[arg2_Side][arg2_Wave].max > freqRange.max then rangeMax = freqRange.max end
+
+-- 								freq = math.random(rangeMin, rangeMax)
+
+-- 								local deci = math.random(0, 9) / 10									--random first decimal place
+-- 								-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
+-- 								local mil = 00														--impossible pour certain avions, comme le M2000
+-- 								freq = freq + deci + mil											--combine to complete frequency
+-- 							until Assigned_freq[freq] == nil and FreqCapability(freq, arg2_Type, radioN) and (freq<242.9 or freq>243.1) or i > 1000		--repeat until a frequency is found that is not yet in use
+
+-- 							-- if i>=1000 then
+-- 							-- 	-- print("UtilF          BUG A range "..arg2_Wave .. " with "..tostring(arg2_Type))
+-- 							-- end
+
+-- 							Assigned_freq[freq] = true												--mark frequency in use
+-- 							Package_freq[arg2_Side][arg2_Wave][arg2_TargetName] = freq							--store frequency for package
+
+-- 							-- if Debug.debug then print("UtilF_Debug GetFrequency return G1 UHF non  EWR Package_freq "..tostring(freq)) end
+-- 							return freq
+-- 						end
+-- 					end
+-- 				end
+-- 			end
+-- 		elseif arg2_Wave == "VHF" then
+
+-- 			if Frequency[arg2_Type] and Frequency[arg2_Type]["radio"]   then
+-- 				for radioN = 1, #Frequency[arg2_Type]["radio"] do
+-- 					local passe = true
+-- 					if arg2_radioN ~= nil and arg2_radioN ~= radioN then
+-- 						passe = false
+-- 					end
+-- 					for wave, freqRange in pairs(Frequency[arg2_Type]["radio"][radioN]) do
+-- 						if wave == arg2_Wave and passe then
+-- 							local i = 1
+-- 							repeat
+-- 								local rangeMin = RadioB[arg2_Side][arg2_Wave].min
+-- 								local rangeMax = RadioB[arg2_Side][arg2_Wave].max
+-- 								if freqRange and RadioB[arg2_Side][arg2_Wave].min < freqRange.min then rangeMin = freqRange.min end
+-- 								if freqRange and RadioB[arg2_Side][arg2_Wave].max > freqRange.max then rangeMax = freqRange.max end
+
+-- 								freq = math.random(rangeMin, rangeMax)
+-- 								local deci = math.random(0, 9) / 10									--random first decimal place
+-- 								-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
+-- 								local mil = 00														--impossible pour certain avions, comme le M2000
+-- 								freq = freq + deci + mil											--combine to complete frequency
+-- 								i=i+1
+
+-- 							until Assigned_freq[freq] == nil and FreqCapability(freq, arg2_Type, radioN) and (freq<121.45 or freq>121.55)	and freq ~= 123.1 or i > 1000		--repeat until a frequency is found that is not yet in use
+
+-- 							if i>=1000 then
+-- 								print("UtilF          BUG A range "..arg2_Wave .. " with "..tostring(arg2_Type))
+-- 							end
+-- 							Assigned_freq[freq] = true												--mark frequency in use
+
+-- 							if arg_Overide ~= nil then
+-- 								Package_freq[arg2_Side][arg2_Wave][arg2_TargetName] = freq							--store frequency for package
+-- 							end
+
+-- 							-- if Debug.debug then print("UtilF_Debug GetFrequency return H1 VHF Package_freq "..tostring(freq)) end
+-- 							return freq
+-- 						end
+-- 					end
+
+-- 				end
+-- 			end
+-- 		elseif arg2_Wave == "LVHF" then
+
+-- 			if Frequency[arg2_Type] and Frequency[arg2_Type]["radio"]   then
+-- 				for radioN = 1, #Frequency[arg2_Type]["radio"] do
+-- 					for wave, freqRange in pairs(Frequency[arg2_Type]["radio"][radioN]) do
+-- 						if wave == arg2_Wave  then
+
+-- 							repeat
+-- 								freq = math.random(RadioB[arg2_Side][arg2_Wave].min, RadioB[arg2_Side][arg2_Wave].max - 1)
+-- 							until Assigned_freq[freq] == nil and freq ~= 4125 and freq ~= 5680		--repeat until a frequency is found that is not yet in use
+
+-- 							Assigned_freq[freq] = true												--mark frequency in use
+-- 							Package_freq[arg2_Side][arg2_Wave][arg2_TargetName] = freq							--store frequency for package
+
+
+-- 							-- if Debug.debug then print("UtilF_Debug GetFrequency return I LVHF Package_freq "..tostring(freq)) end
+-- 							return freq
+-- 						end
+-- 					end
+-- 				end
+-- 			end
+-- 		elseif arg2_Wave == "HF" then
+
+-- 			if Frequency[arg2_Type] and Frequency[arg2_Type]["radio"] then
+-- 				-- print("UtilF		  typeB "..tostring(arg2_Type).." sideB "..tostring(arg2_Side).." waveB "..tostring(arg2_Wave))
+-- 				repeat
+-- 					freq = math.random(RadioB[arg2_Side][arg2_Wave].min * 10, RadioB[arg2_Side][arg2_Wave].max * 10)		--find random frequency in mHz
+-- 				until Assigned_freq[freq] == nil and freq ~= 4125 and freq ~= 5680										--repeat until a frequency is found that is not yet in use
+
+-- 				freq = freq /10
+-- 				local freqRemp
+-- 				repeat
+-- 					-- local deci = math.random(0, 4) 									--random first decimal place
+-- 					local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
+-- 					freqRemp = freq + mil											--combine to complete frequency
+-- 				until freqRemp >= RadioB[arg2_Side][arg2_Wave].min and freqRemp <= RadioB[arg2_Side][arg2_Wave].max
+-- 				freq = freqRemp
+
+-- 				Assigned_freq[freq] = true												--mark frequency in use
+-- 				Package_freq[arg2_Side][arg2_Wave][arg2_TargetName] = freq							--store frequency for package
+
+-- 				-- if Debug.debug then print("UtilF_Debug GetFrequency return J HF Package_freq "..tostring(freq)) end
+-- 				return freq																--return frequency				
+-- 			end
+-- 		end
+-- 	end
+
+-- 	--TODO faire des functions pour nettoyer ce code
+-- 	if arg_Type and arg_Type ~= nil and arg_Task ~= "coalition" then --and  waves ~= nil 
+-- 		if Frequency[arg_Type] and Frequency[arg_Type].prefFreqPackage then
+
+-- 			local result = getLocFrequency(arg_Side, arg_TargetName, Frequency[arg_Type].prefFreqPackage.nRadio, arg_Type, Frequency[arg_Type].prefFreqPackage.range)
+
+-- 			-- if Debug.debug then print("UtilF_Debug GetFrequency return >K result "..tostring(result)) end
+-- 			return result
+-- 		end
+-- 	end
+
+-- 	local result
+
+-- 	if arg_Waves == nil or arg_Waves == false then
+-- 		arg_Waves = "UHF"
+-- 		local foundUHFwave = false
+-- 		if Frequency[arg_Type] and Frequency[arg_Type]["radio"] then
+-- 			for numRadio = 1, #Frequency[arg_Type]["radio"] do
+-- 				if Frequency[arg_Type]["radio"][numRadio][arg_Waves] then
+-- 					foundUHFwave = true
+-- 				end
+-- 			end
+
+-- 			if not foundUHFwave then
+-- 				for waveName, waveTab in pairs( Frequency[arg_Type]["radio"][1] ) do
+-- 					if waveName == "HF" or waveName == "LVHF" or waveName == "VHF" or waveName == "UHF" then
+-- 						arg_Waves = waveName
+-- 					end
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+
+-- 	if arg_Task == "EWR" then
+-- 		if RadioA[arg_Side][1] and RadioA[arg_Side][1]["UHF"] and RadioA[arg_Side][1]["UHF"]["player"] then
+-- 			result = getLocFrequency(arg_Side, arg_TargetName, nRadio, arg_Type,  "UHF")
+-- 		elseif RadioA[arg_Side][1] and RadioA[arg_Side][1]["VHF"] and RadioA[arg_Side][1]["VHF"]["player"] then
+-- 			result = getLocFrequency(arg_Side, arg_TargetName, nRadio, arg_Type,  "VHF")
+-- 		else
+-- 			result = getLocFrequency(arg_Side, arg_TargetName, nRadio, arg_Type,  "UHF")
+-- 		end
+-- 	elseif arg_Task == "coalition" then
+
+-- 		result = getLocFrequency(arg_Side, "", "", arg_Type,  arg_Waves)
+
+-- 		if Debug.debug then print("UtilF_Debug GetFrequency return L result "..tostring(result)) end
+-- 		return result
+
+-- 	elseif arg_Task == "group" then   --prend obligatoirement le channel 1 de la radio 1
+
+-- 		result = getLocFrequency(arg_Side, arg_TargetName, 1, arg_Type,  arg_Waves)
+
+-- 		if Debug.debug then print("UtilF_Debug GetFrequency return M result "..tostring(result)) end
+-- 		return result
+-- 	else
+-- 		result = getLocFrequency(arg_Side, arg_TargetName, nRadio, arg_Type,  arg_Waves)
+-- 		if Debug.debug then print("UtilF_Debug GetFrequency PASSE ELSE "..tostring(result)) end
+-- 	end
+
+-- 	if result then
+-- 		if Debug.debug then print("UtilF_Debug GetFrequency PASSE return O "..tostring(result)) end
+-- 		return result
+-- 	else
+-- 		result = getLocFrequency(arg_Side, arg_TargetName, nRadio, arg_Type,  "UHF")
+-- 		if result then
+-- 			if Debug.debug then print("UtilF_Debug GetFrequency PASSE return P UHF "..tostring(result)) end
+-- 			return result
+-- 		else
+-- 			result = getLocFrequency(arg_Side, arg_TargetName, nRadio, arg_Type,  "LVHF")
+-- 			if result then
+-- 				if Debug.debug then print("UtilF_Debug GetFrequency PASSE return Q LVHF "..tostring(result)) end
+-- 				return result
+-- 			else
+-- 				if not RadioA[arg_Side] then RadioA[arg_Side] = {} end
+-- 				if not RadioA[arg_Side][nRadio] then RadioA[arg_Side][nRadio] = {} end
+-- 				if not RadioA[arg_Side][nRadio]["VHF"] then RadioA[arg_Side][nRadio]["VHF"]  = {} end
+-- 				RadioA[arg_Side][nRadio]["VHF"] = {
+-- 					min = 118,
+-- 					max = 136,
+-- 				}
+-- 				result = getLocFrequency(arg_Side, arg_TargetName, nRadio, arg_Type,  "VHF")
+-- 				if Debug.debug then print("UtilF_Debug GetFrequency PASSE return R VHF  "..tostring(result)) end
+
+-- 				if result then
+
+-- 					if Debug.debug then print("UtilF_Debug GetFrequency return S result "..tostring(result)) end
+-- 					return result
+-- 				else
+
+-- 					--TODO ajouter ici (ou ailleurs) une condition pour utiliser la bande de freq preféré du joueur
+
+-- 					RadioA[arg_Side][nRadio]["UHF"] = {
+-- 						min = 225,
+-- 						max = 300,
+-- 					}
+-- 					local range = "UHF"
+-- 					repeat
+-- 						freq = math.random(RadioA[arg_Side][nRadio][range].min, RadioA[arg_Side][nRadio][range].max - 1)		--find random frequency in mHz
+-- 						local deci = math.random(0, 9) / 10									--random first decimal place
+-- 						-- local mil = math.random(0, 3) * 25 / 1000							--random second and third decimal place (00/25/50/75)
+-- 						local mil = 00														--impossible pour certain avions, comme le M2000
+-- 						freq = freq + deci + mil											--combine to complete frequency
+-- 					until Assigned_freq[freq] == nil and (freq<242.9 or freq>243.1)			--repeat until a frequency is found that is not yet in use
+
+-- 					Assigned_freq[freq] = true												--mark frequency in use
+-- 					Package_freq[arg_Side][range][arg_TargetName] = freq							--store frequency for package
+
+-- 					if Debug.debug then print("UtilF_Debug GetFrequency PASSE return Z UHF  "..tostring(freq)) end
+-- 					return freq
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+
+-- end
 
 
 --renommer les clefs, c'est obligatoire
@@ -2124,7 +3104,7 @@ function LoadAllLoadouts(subFolder)
     -- 1) ON PART DE LA TABLE ORIGINALE (celle de DCE)
     local final = {}
     if db_loadouts and type(db_loadouts) == "table" then
-        final = Deepcopy(db_loadouts)
+        final = DeepCopy(db_loadouts)
     else
         print("DCE WARNING : aucun db_loadouts initial trouvé !")
     end
@@ -2447,7 +3427,7 @@ function BuildLoadout()
 	-- copy_all_loadouts = makeStrutureLoadout(copy_all_loadouts)
 
 	if Debug.debug then
-		local test_loadouts = Deepcopy(LoadoutsList)
+		local test_loadouts = DeepCopy(LoadoutsList)
 		test_loadouts = makeStrutureLoadout(test_loadouts)
 
 		local test_str = "db_loadouts = " .. TableSerializationLoadout(test_loadouts, 0, 0)						--make a string	
@@ -2486,48 +3466,50 @@ function Check_TaskPossibleByPlane()
 		-- ["Pinpoint Strike"] = true,
 	-- }
 
+	--**
+	--deprecated
+	--**
+	-- --si ADD_data existe, on le precharge pour l'ajouter au DATA centram
+	-- local addDataFile02 = "../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua"
+	-- local testPathADD_addData = io.open(addDataFile02, "r")										--cette maniere de chercher la presence d un fichier evite un plantage
+	-- if testPathADD_addData ~= nil  then														--check si le fichier existe dans ScriptsMod
+	-- 	dofile("../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua")
 
-	--si ADD_data existe, on le precharge pour l'ajouter au DATA centram
-	local addDataFile02 = "../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua"
-	local testPathADD_addData = io.open(addDataFile02, "r")										--cette maniere de chercher la presence d un fichier evite un plantage
-	if testPathADD_addData ~= nil  then														--check si le fichier existe dans ScriptsMod
-		dofile("../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua")
+	-- 	if add_EPLRS_Capacity then
+	-- 		for key , value in pairs(add_EPLRS_Capacity) do
+	-- 			if not EPLRS_Capacity[key] then
+	-- 				EPLRS_Capacity[key] = true
+	-- 			end
+	-- 		end
+	-- 	end
 
-		if add_EPLRS_Capacity then
-			for key , value in pairs(add_EPLRS_Capacity) do
-				if not EPLRS_Capacity[key] then
-					EPLRS_Capacity[key] = true
-				end
-			end
-		end
+	-- 	if add_TaskByPlane then
+	-- 		for task , plane in pairs(add_TaskByPlane) do
+	-- 			for planeName , value in pairs(plane) do
+	-- 				if  TaskByPlane[task] then
+	-- 					if  not TaskByPlane[task][planeName] then
+	-- 						TaskByPlane[task][planeName] = true
+	-- 					end
+	-- 				else
+	-- 					TaskByPlane = {
+	-- 						task = {
+	-- 							planeName = true,
+	-- 						}
+	-- 					}
+	-- 				end
+	-- 			end
+	-- 		end
+	-- 	end
 
-		if add_TaskByPlane then
-			for task , plane in pairs(add_TaskByPlane) do
-				for planeName , value in pairs(plane) do
-					if  TaskByPlane[task] then
-						if  not TaskByPlane[task][planeName] then
-							TaskByPlane[task][planeName] = true
-						end
-					else
-						TaskByPlane = {
-							task = {
-								planeName = true,
-							}
-						}
-					end
-				end
-			end
-		end
+	-- end
 
-	end
-
-	local checkOobAir = Deepcopy(oob_air)
+	local checkOobAir = DeepCopy(oob_air)
 	for side, squadTbl in  pairs(checkOobAir) do
 		for squad_n, squad in  pairs(squadTbl) do
 
 			local foundPlane = false
 
-			if squad.tasks and type(squad.tasks) == "table" then
+			if squad.tasks and type(squad.tasks) == "table" and not squad.inactive then
 
 				-- StrikeCombi
 				local addMultipleStrike = false
@@ -2593,12 +3575,13 @@ function Check_TaskPossibleByPlane()
 					end
 				end
 
-				--si aucune tasks strike n'a �t� trouv�
-				if not foundStrikeTask and  addMultipleStrike then
+				--si aucune tasks strike n'a été trouvée
+				if not foundStrikeTask and addMultipleStrike then
 					debugTempFLIGHT = "(Error UutilF C03) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring("Strike ( CAS or Ground Attack or Pinpoint Strike )")
-					-- print("Error ") 
+					print(debugTempFLIGHT ) 
 					AddLog(debugTempFLIGHT)
 					error = error + 1
+					-- os.execute 'pause'
 				end
 				if not squad.inactive and not foundPlane   then
 					--TODO revoir ce pb, exemple avec campaign Hornet Over Carrier SC
@@ -2645,7 +3628,7 @@ function GetParkingId(parkingId, baseName)
 
 	for prefix, value in pairs(parkingId) do
 
-		local valueCopy = Deepcopy(value)
+		local valueCopy = DeepCopy(value)
 		counter = 0
 		local single = false
 		local singleTest = string.lower(tostring(valueCopy[1]))
@@ -3341,7 +4324,7 @@ function UpdateConfMod(setWeather, setDate, from)
     local clientConfig, clientStructure = loadConfigWithStructure(clientConfigPath)
 
 	-- Sauvegarde `pictureBrief` original AVANT toute modification
-	local backupPictureBrief = clientConfig.pictureBrief and Deepcopy(clientConfig.pictureBrief) or nil
+	local backupPictureBrief = clientConfig.pictureBrief and DeepCopy(clientConfig.pictureBrief) or nil
 
     local defaultConfig, defaultStructure = loadConfigWithStructure(defaultConfigPath)
 
@@ -3523,7 +4506,7 @@ function AssignCallnameSquad()
 		local f = assert(loadfile("Init/oob_air_init.lua"))
 		setfenv(f, tempEnv)
 		f()
-		initOobAir = Deepcopy(tempEnv.oob_air or {}) -- Copie profonde pour éviter les références partagées
+		initOobAir = DeepCopy(tempEnv.oob_air or {}) -- Copie profonde pour éviter les références partagées
 	end
 
 	-- Comparer et mettre à jour les callsigns si nécessaire
@@ -4345,7 +5328,7 @@ function LoadFileAndUpdate(from)
 
 	--********************************* targetlist ******************************************************
 	dofile("Init/targetlist_init.lua")
-	local targetlist_init = Deepcopy(targetlist)
+	local targetlist_init = DeepCopy(targetlist)
 	if not targetlist_init.blue[1] then
 		TargetlistToNum(targetlist_init)
 	end
@@ -4501,45 +5484,46 @@ function LoadFileAndUpdate(from)
 		end
 	end
 
-	-- petit code pour remettre les stock init comme au debut
-	if adjust_DCE_GC22 then
-		for side, sideTab in pairs(oob_air_init) do
-			if oob_air[side] then
-				for _, unitInit in pairs(sideTab) do
-					local found = false
-					for _, unitActive in pairs(oob_air[side]) do
-						if unitActive.name == unitInit.name then
-							found = true
-							if unitActive.number ~= unitInit.number then
-								if unitInit.number > unitActive.number then
-									if Debug and Debug.debug then
-										print("Check/MAJ oob_air oob_air_init/number to Active/number pour "..tostring(unitInit.type).." || "..unitActive.name.." ("..side..") : "..tostring(unitInit.number).." -> "..tostring(unitActive.number).." = "..tostring(unitInit.number))
-									end
-									unitActive.number = unitInit.number
-									unitActive.number = unitInit.number
-									if unitActive.rooster and unitActive.rooster.ready then
-										unitActive.rooster.ready = unitInit.number
-									end
-								else
-									if Debug and Debug.debug then
-										print("Check ---- oob_air_init/number to Active/number ----- pour "..tostring(unitInit.type).." || "..unitActive.name.." ("..side..") : "..tostring(unitInit.number ).." -> "..tostring(unitActive.number))
-									end
-								end
-							end
-							break
-						end
-					end
-					if not found and Debug and Debug.debug then
-						print("Unité "..unitInit.name.." ("..side..") non trouvée dans Active/oob_air")
-					end
-				end
-			end
-		end
-	end
+	-- -- petit code pour remettre les stock init comme au debut
+	-- if adjust_DCE_GC22 then
+	-- 	for side, sideTab in pairs(oob_air_init) do
+	-- 		if oob_air[side] then
+	-- 			for _, unitInit in pairs(sideTab) do
+	-- 				local found = false
+	-- 				for _, unitActive in pairs(oob_air[side]) do
+	-- 					if unitActive.name == unitInit.name then
+	-- 						found = true
+	-- 						if unitActive.number ~= unitInit.number then
+	-- 							if unitInit.number > unitActive.number then
+	-- 								if Debug and Debug.debug then
+	-- 									print("Check/MAJ oob_air oob_air_init/number to Active/number pour "..tostring(unitInit.type).." || "..unitActive.name.." ("..side..") : "..tostring(unitInit.number).." -> "..tostring(unitActive.number).." = "..tostring(unitInit.number))
+	-- 								end
+	-- 								unitActive.number = unitInit.number
+	-- 								unitActive.number = unitInit.number
+	-- 								if unitActive.rooster and unitActive.rooster.ready then
+	-- 									unitActive.rooster.ready = unitInit.number
+	-- 								end
+	-- 							else
+	-- 								if Debug and Debug.debug then
+	-- 									print("Check ---- oob_air_init/number to Active/number ----- pour "..tostring(unitInit.type).." || "..unitActive.name.." ("..side..") : "..tostring(unitInit.number ).." -> "..tostring(unitActive.number))
+	-- 								end
+	-- 							end
+	-- 						end
+	-- 						break
+	-- 					end
+	-- 				end
+	-- 				if not found and Debug and Debug.debug then
+	-- 					print("Unité "..unitInit.name.." ("..side..") non trouvée dans Active/oob_air")
+	-- 				end
+	-- 			end
+	-- 		end
+	-- 	end
+	-- end
 
 	--****************************************************************************************
 	--ajout automatique d'elements en cours de campagne: FIN
 	--****************************************************************************************
+
 
 	-- Exécution du fichier s'il existe
 	local testFile = "Init/various_table.lua"
@@ -4583,24 +5567,22 @@ function LoadFileAndUpdate(from)
 	end
 
 
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
 
-	-- Recherche prioritaire du fichier UTIL_DataRadio dans ScriptsMod, sinon dans le dossier campagne
-	local radioFile = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua"
-	local radioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
+	--remplit la table des frequences déjà utilisé dans la map ou les bases
+	AssignedFrequencies()
 
-	local function try_dofile(path)
-		local f3 = io.open(path, "r")
-		if f3 then f3:close(); dofile(path); return true end
-		return false
-	end
+	-- -- Recherche prioritaire du fichier UTIL_DataRadio dans ScriptsMod, sinon dans le dossier campagne
+	-- local radioFile = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua"
+	-- local radioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
 
-	if not try_dofile(radioFile) then
-		try_dofile(radioFile2)
-	end
+	-- if not try_dofile(radioFile) then
+	-- 	try_dofile(radioFile2)
+	-- end
 
 	--utilise ici le fichier Init/persistenceMP.lua s'il existe, pour facilité l'attribution des num tail/avion
 	local persistPath = "../../../Missions/Campaigns/"..camp.title.."/Init/persistenceMP.lua"
-	try_dofile(persistPath)
+	Try_dofile(persistPath)
 
 	--reorganise la table PersistenceMP en fonction de la Task et rank
 	if PersistenceMP then
@@ -4631,25 +5613,13 @@ function LoadFileAndUpdate(from)
 			PersistenceMP_byTask[task] = newRanks
 		end
 
-		-- if Debug and Debug.debug then
-		-- 	local str = "PersistenceMP_byTask = " .. TableSerialization(PersistenceMP_byTask, 0)						--make a string
-		-- 	local fileObj = io.open("Debug/PersistenceMP_byTask.lua", "w")  or error("Failed to open debug file")
-		-- 	fileObj:write(str)																		--save new data
-		-- 	fileObj:close()
-		-- end
-		-- os.execute 'pause'
-
 	end
 
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CampaignSettings.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Refpoints.lua")
-	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
-	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_AddPropAircraft.lua")
 
-	-- Check_TaskPossibleByPlane()
-
-    if Debug.debug then
+	 if Debug.debug then
         print("LOAD LoadFileAndUpdate() from " .. tostring(from))
     end
 
@@ -4659,9 +5629,39 @@ function LoadFileAndUpdate(from)
 	BuildLoadout()
 	--////////////////////////////////////////////////////////
 
+	CreateAircraftListInCampaign()
+	--supprime des mega grosse table DATA les info supperflue
+	CleanDataDivers()
+
+	--/////////////////////////////////////////////////////////////////////
+	--/////////////////////////////////////////////////////////////////////
+
 	InheritedFromProcessing()
+	DataCompilation_DataDiscoveryA2()
 	DataCompilation_TaskByPlane()
 
+	if Debug.debug then
+		local camp_str = "Data_divers = " .. TableSerialization(Data_divers, 0)
+		local campFile = io.open("Debug/Data_divers.lua", "w") or error("Échec d'ouverture du fichier Data_divers")
+		campFile:write(camp_str)
+		campFile:close()
+	
+		camp_str = "Failures = " .. TableSerialization(Failures, 0)
+		campFile = io.open("Debug/Failures.lua", "w") or error("Échec d'ouverture du fichier Failures")
+		campFile:write(camp_str)
+		campFile:close()
+
+		camp_str = "CampaignAircraft = " .. TableSerialization(AircraftInCampaign, 0)
+		campFile = io.open("Debug/AircraftInCampaign.lua", "w") or error("Échec d'ouverture du fichier Failures")
+		campFile:write(camp_str)
+		campFile:close()
+
+		camp_str = "AircraftCampaignBySide = " .. TableSerialization(AircraftCampaignBySide, 0)
+		campFile = io.open("Debug/AircraftCampaignBySide.lua", "w") or error("Échec d'ouverture du fichier Failures")
+		campFile:write(camp_str)
+		campFile:close()
+	end
+	
 	Check_TaskPossibleByPlane()
 
 	
@@ -4671,9 +5671,15 @@ function LoadFileAndUpdate(from)
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
 
-	CreatePlageFrequency_A()-- TODO a confirmer qu'il est encore utile cree une table de radio en fonction du canal puis de la wave
-	CreatePlageFrequency_B()	--cree une table de radio en fonction des wave
-	-- CreatePlageFrequency_C()	--cree une table de radio en fonction des wave
+	-- CreatePlageFrequency_A()-- TODO a confirmer qu'il est encore utile cree une table de radio en fonction du canal puis de la wave
+	-- CreatePlageFrequency_B()	--cree une table de radio en fonction des wave
+	
+	CommonRanges = DCE_FindCommonRadioRanges()	--get common radio range for all planes in campaign
+
+	local file_str = "CommonRanges = " .. TableSerialization(CommonRanges, 0)			--make a string
+	local file_File = io.open("Debug/Radio_CommonRanges.lua", "w") or error("Failed to open debug EWR_UtilDebug file")
+	file_File:write(file_str)																	--save new data
+	file_File:close()
 
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
@@ -5064,7 +6070,63 @@ function AddIconLayer(layersObjects, targetListRequired)
 
 end
 
+--cration de la table listant les avions uniquement necessaire à la campagne:
+function CreateAircraftListInCampaign()
+	for sideName, squads in pairs(oob_air) do
+		for squadN, squad in pairs(squads) do
+			--ne pas tenir compte des escadrilles inactives, car si activation en cours, ça bug
+			-- if not squad.inactive then
+				if not AircraftInCampaign[squad.type] then
+					AircraftInCampaign[squad.type] = true
+					AircraftCampaignBySide[sideName][squad.type] = true
 
+					if IsHelicopter[squad.type] then
+						HelicoBySide[sideName][squad.type] = true
+					else
+						PlaneBySide[sideName][squad.type] = true
+					end
+				end
+					if squad.player then
+						AircraftInCampaign[squad.type] = "player"
+						SidePlayer = sideName
+					end
+					if squad.client then
+						AircraftInCampaign[squad.type] = "client"
+					end
+			-- end
+		end
+	end
+end
+	
 
+--supprime de la mega table Data_divers les avions qui ne sont pas listé dans CampaignAircraft
+function CleanDataDivers()
+	for planeType, _ in pairs(Data_divers) do
+		if not AircraftInCampaign[planeType] then
+			Data_divers[planeType] = nil
+		end
+	end
+	for planeType, _ in pairs(Db_Frequency) do
+		if not AircraftInCampaign[planeType] then
+			Db_Frequency[planeType] = nil
+		end
+	end
+
+		camp_str = "AircraftInCampaign = " .. TableSerialization(AircraftInCampaign, 0)						--make a string
+		campFile = io.open("Debug/Z_AircraftInCampaign.lua", "w")	 or error("Failed to open debug file")
+		campFile:write(camp_str)																		--save new data
+		campFile:close()
+
+		camp_str = "Data_divers = " .. TableSerialization(Data_divers, 0)						--make a string
+		campFile = io.open("Debug/Z_Data_divers.lua", "w")	 or error("Failed to open debug file")
+		campFile:write(camp_str)																		--save new data
+		campFile:close()
+
+		camp_str = "Db_Frequency = " .. TableSerialization(Db_Frequency, 0)						--make a string
+		campFile = io.open("Debug/Z_Db_Frequency.lua", "w")	 or error("Failed to open debug file")
+		campFile:write(camp_str)																		--save new data
+		campFile:close()
+
+end
 
 

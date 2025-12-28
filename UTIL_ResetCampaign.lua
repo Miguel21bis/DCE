@@ -33,21 +33,23 @@ if not ChangePlane then
 end
 require("Init/db_airbases")
 
---retrocompatibilie location UTIL_DataRadio file
---recherche en priorite le fichier UTIL_DataRadio dans le dossier ScriptsMod puis dans le dossier campagne
-local radioFile = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua"
-local testPath = io.open(radioFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
-if testPath ~= nil then																					--check si le fichier existe dans ScriptsMod
-	io.close(testPath)
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
-else
-	local radioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
-	local testPath2 = io.open(radioFile2, "r")
-	if testPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
-		io.close(testPath2)
-		dofile(radioFile2)
-	end
-end
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
+
+-- --retrocompatibilie location UTIL_DataRadio file
+-- --recherche en priorite le fichier UTIL_DataRadio dans le dossier ScriptsMod puis dans le dossier campagne
+-- local radioFile = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua"
+-- local testPath = io.open(radioFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
+-- if testPath ~= nil then																					--check si le fichier existe dans ScriptsMod
+-- 	io.close(testPath)
+-- 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
+-- else
+-- 	local radioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
+-- 	local testPath2 = io.open(radioFile2, "r")
+-- 	if testPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
+-- 		io.close(testPath2)
+-- 		dofile(radioFile2)
+-- 	end
+-- end
 
 if Firstmission_flag then																				--if the script is called by BAT_FirstMission.lua, then FirstMission is true and camp_status is reset to init. When called by DEBRIEF_Master.lua, block is skipped and camp_camp status carried over in mission is used.
 	local camp_str = "camp = " .. TableSerialization(camp, 0)										--make a string of campaign initial status table
@@ -151,8 +153,8 @@ do
 
 
 	oob_ground = {}
-	oob_ground["blue"] = Deepcopy(mission.coalition.blue.country)											--copy mission data
-	oob_ground["red"] = Deepcopy(mission.coalition.red.country)												--copy mission data
+	oob_ground["blue"] = DeepCopy(mission.coalition.blue.country)											--copy mission data
+	oob_ground["red"] = DeepCopy(mission.coalition.red.country)												--copy mission data
 
 	--store group and unit names in oob_ground instead of pointers to dict table
 	for side_name, side in pairs(oob_ground) do																--iterate through sides

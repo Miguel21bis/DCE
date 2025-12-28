@@ -2990,7 +2990,7 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 
 	-- Si l'avion est posé, inutile de continuer
 	if not interUnitObj:inAir() then
-		env.info("DCE_Custom_Intercept: " .. argInterName .. " has landed — stopping logic.")
+		env.info("DCE_Custom_Intercept A : " .. argInterName .. " has landed — stopping logic.")
 		interceptorsActive[argInterName] = nil
 		groupTargetMemory[argInterName] = nil
 		return
@@ -3059,7 +3059,7 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 		local newTargetName = bestTarget:getName()
 
 		if not sameTarget then
-			env.info("DCE_Custom_Intercept: " .. argInterName .. " switching to new target " .. newTargetName)
+			env.info("DCE_Custom_Intercept C : " .. argInterName .. " switching to new target " .. newTargetName)
 			ctr:resetTask()
 
 			timer.scheduleFunction(function()
@@ -3078,7 +3078,7 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 					local ctr2 = interGroupObj:getController()
 					if ctr2 then
 						ctr2:pushTask(interceptTask)
-						env.info("DCE_Custom_Intercept: " .. argInterName .. " engaging " .. tostring(newTargetName))
+						env.info("DCE_Custom_Intercept B : " .. argInterName .. " engaging " .. tostring(newTargetName))
 						if campL.debug then
 							local current_time = timer.getTime()
 							local logStr = "params = " .. TableSerialization(interceptTask, 0)
@@ -3096,7 +3096,7 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 			end, {}, timer.getTime() + 1.5)
 			groupTargetMemory[argInterName] = bestTarget
 		else
-			env.info("DCE_Custom_Intercept: " .. argInterName .. " already targeting " .. newTargetName)
+			env.info("DCE_Custom_Intercept E : " .. argInterName .. " already targeting " .. newTargetName)
 		end
 	else
 		-- Aucune cible disponible : mise en orbite
@@ -3147,7 +3147,7 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 		}
 
 		ctr:setTask(capMission)
-		env.info("DCE_Custom_Intercept: " .. argInterName .. " now in CAP mission.")
+		env.info("DCE_Custom_Intercept F : " .. argInterName .. " now in CAP mission.")
 
 	end
 

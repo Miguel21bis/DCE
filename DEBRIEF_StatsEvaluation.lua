@@ -23,13 +23,13 @@ end
 packstats = {}	--track stats for player package
 
 if not AcceptedMission then
-	oob_air = Deepcopy(oob_air)
-	oob_ground = Deepcopy(oob_ground)
-	targetlist = Deepcopy(targetlist)
-	clientstats = Deepcopy(clientstats)
-	camp = Deepcopy(camp)
-	camp_ZoneSAR = Deepcopy(camp_ZoneSAR)
-	oob_scen = Deepcopy(oob_scen)
+	oob_air = DeepCopy(oob_air)
+	oob_ground = DeepCopy(oob_ground)
+	targetlist = DeepCopy(targetlist)
+	clientstats = DeepCopy(clientstats)
+	camp = DeepCopy(camp)
+	camp_ZoneSAR = DeepCopy(camp_ZoneSAR)
+	oob_scen = DeepCopy(oob_scen)
 
 	print()
 else

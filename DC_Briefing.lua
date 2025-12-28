@@ -42,8 +42,134 @@ local target_picture = {}
 ----- Mission Title -----
 mission.sortie = camp.title .. " - " .. camp.mission
 
+local function freqInRange(freq, range)
+    if not range or not range.min or not range.max then
+        return false
+    end
+    return freq >= range.min and freq <= range.max
+end
 
-local function freqCapability(arg_TestFreq, arg_RadioPlane, arg_Nradio, arg_info)
+local function freqInRanges(freq, ranges)
+    if not ranges then
+		print("freqInRanges A no ranges")
+        return false
+    end
+
+    -- ranges = { min=..., max=... }
+    if ranges.min and ranges.max then
+		print("freqInRanges B single range min "..tostring(ranges.min).." max "..tostring(ranges.max))
+        return freqInRange(freq, ranges)
+    end
+
+    -- ranges = { [1]={min,max}, [2]={min,max}, ... }
+    for _, r in ipairs(ranges) do
+		print("freqInRanges C checking range min "..tostring(r.min).." max "..tostring(r.max))
+        if freqInRange(freq, r) then
+			print("freqInRanges D freq "..tostring(freq).." is in range min "..tostring(r.min).." max "..tostring(r.max))
+            return true
+        end
+    end
+
+	print("freqInRanges E freq "..tostring(freq).." is not in any range")
+    return false
+end
+
+function FreqCapabilityNG(testFreq, planeType, radioN, info)
+
+	print("FreqCapabilityNG A called with testFreq "..tostring(testFreq).." planeType "..tostring(planeType).." radioN "..tostring(radioN).." info "..tostring(info))
+
+    local freq = tonumber(testFreq)
+    if not freq then
+		print("FreqCapabilityNG B invalid freq")
+        return false
+    end
+
+    local dbPlane = Db_Frequency[planeType]
+    if not dbPlane then
+		print("FreqCapabilityNG C no dbPlane for type "..tostring(planeType))
+        return false
+    end
+
+    ------------------------------------------------------------------
+    -- CAS 2 : radioN PRÉSENT → panelRadio[radioN] uniquement
+    ------------------------------------------------------------------
+    if not dbPlane.radio then
+		print("FreqCapabilityNG D no dbPlane.radio for type "..tostring(planeType))
+        return false
+    end
+
+    local radio = dbPlane.radio[radioN]
+    if not radio then
+		print("FreqCapabilityNG E no radioN "..tostring(radioN).." for type "..tostring(planeType))
+        return false
+    end
+
+    -- Cas : radio.range existe
+    if radio.range then
+		print("FreqCapabilityNG F checking range for freq "..tostring(freq).." on radioN "..tostring(radioN).." for type "..tostring(planeType))
+        return freqInRanges(freq, radio.range)
+    end
+
+    return false
+end
+
+function FreqCapabilityNG2(testFreq, planeType, radioN, info)
+
+    local freq = tonumber(testFreq)
+    if not freq then
+        return false
+    end
+
+    local dbPlane = Db_Frequency[planeType]
+    if not dbPlane then
+        return false
+    end
+
+    ------------------------------------------------------------------
+    -- CAS 1 : radioN ABSENT → HumanRadio uniquement
+    ------------------------------------------------------------------
+    if not radioN then
+        local hr = dbPlane.HumanRadio
+        if not hr then
+            return false
+        end
+
+        -- Cas prioritaire : rangeFrequency (le plus restrictif)
+        if hr.rangeFrequency then
+            return freqInRanges(freq, hr.rangeFrequency)
+        end
+
+        -- Cas standard : minFrequency / maxFrequency
+        if hr.minFrequency and hr.maxFrequency then
+            return freq >= hr.minFrequency and freq <= hr.maxFrequency
+        end
+
+        return false
+    end
+
+    ------------------------------------------------------------------
+    -- CAS 2 : radioN PRÉSENT → panelRadio[radioN] uniquement
+    ------------------------------------------------------------------
+    if not dbPlane.panelRadio then
+        return false
+    end
+
+    local radio = dbPlane.panelRadio[radioN]
+    if not radio then
+        return false
+    end
+
+    -- Cas : radio.range existe
+    if radio.range then
+        return freqInRanges(freq, radio.range)
+    end
+
+    return false
+end
+
+
+
+local function freqCapabilityAG(arg_TestFreq, arg_RadioPlane, arg_Nradio, arg_info)
 	local waves  = ""
 
 	if type(arg_TestFreq) == "table" then
@@ -80,10 +206,10 @@ local function freqCapability(arg_TestFreq, arg_RadioPlane, arg_Nradio, arg_info
 	elseif arg_TestFreq >= 1 and arg_TestFreq < 20 then
 		waves = "HF"
 	else
-		local bugTxt = "Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(arg_TestFreq).." Info: "..tostring(arg_info)
+		local bugTxt = "DC_B Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(arg_TestFreq).." Info: "..tostring(arg_info)
 		-- _affiche(arg_RadioPlane, "RadioPlane")
 		
-		AddLog("Note for the Campaign Maker"..bugTxt)
+		AddLog("Note for the Campaign Maker: freqCapability() "..bugTxt.." arg_RadioPlane[arg_Nradio]: "..tostring(arg_RadioPlane[arg_Nradio]))
 
 	end
 
@@ -229,8 +355,8 @@ do
 		for _, unit in ipairs(sorted_units) do															--iterate through units
 			if unit.inactive ~= true then															--unit is active
 				table.insert(entries[1].values, unit.name)											--unit name
-				table.insert(entries[2].values, ReplaceTypeName(unit.type))							--unit type
-				table.insert(entries[3].values, ReplaceBaseName(unit.base))											--unit base
+				table.insert(entries[2].values, AliasTypeName(unit.type))							--unit type
+				table.insert(entries[3].values, AliasBaseName(unit.base))											--unit base
 				table.insert(entries[4].values, unit.roster.lost)									--unit lost aircraft
 				table.insert(entries[5].values, unit.roster.damaged)								--unit damaged aircraft
 				table.insert(entries[6].values, unit.roster.ready)									--unit ready aircraft
@@ -395,10 +521,10 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 				local allowedBrief = false																--evite la répétition des briefings surtout en MP
 
 				-- inheritedFrom 
-				local inheritedType = flight[f].type
-				if Data_divers and Data_divers[flight[f].type] and Data_divers[flight[f].type].inheritedFrom then
-					inheritedType = Data_divers[flight[f].type].inheritedFrom
-				end
+				local planeType = flight[f].type
+				-- if Data_divers and Data_divers[flight[f].type] and Data_divers[flight[f].type].inheritedFrom then
+				-- 	planeType = Data_divers[flight[f].type].inheritedFrom
+				-- end
 
 				if PlayerFlight and (flight[f].player or flight[f].client) then
 
@@ -413,14 +539,14 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					--CLIENT************************************************
 					if flight[f].client then
 
-						print("DcBriefing client flight[f].IdClient : "..tostring(flight[f].IdClient))
-						print("DcBriefing client flight[f].type : "..tostring(flight[f].type))
+						-- print("DcBriefing client flight[f].IdClient : "..tostring(flight[f].IdClient))
+						-- print("DcBriefing client flight[f].type : "..tostring(flight[f].type))
 
 						--attention, ne pas enlever Deepcopy ici
-						tempPlayer = Deepcopy(camp.client[flight[f].IdClient])
+						tempPlayer = DeepCopy(camp.client[flight[f].IdClient])
 
 						tempPlayer.package = {
-							[tempPlayer.pack_n] = Deepcopy(camp.client.package[tempPlayer.pack_n]),
+							[tempPlayer.pack_n] = DeepCopy(camp.client.package[tempPlayer.pack_n]),
 						}
 
 						local tagBreak
@@ -454,11 +580,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					elseif flight[f].player then
 
 						--attention, ne pas enlever Deepcopy ici
-						tempPlayer = Deepcopy(camp.player)
-
-						-- tempPlayer.package = {
-						-- 	[tempPlayer.pack_n] = Deepcopy(camp.player.package[tempPlayer.pack_n]),
-						-- }
+						tempPlayer = DeepCopy(camp.player)
 
 						local tagBreak
 						--##parse mission table:
@@ -467,15 +589,9 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								for category, groups in pairs(country) do
 									if (category == "plane" or category == "helicopter" ) and type(groups) == "table" and groups["group"] then	--and groups[1].units
 										
-										-- print("DcBriefing client C groups[group] : "..tostring(groups["group"]))
-
 										for _, group in pairs(groups["group"]) do
 
-											-- print("DcBriefing client D unit.name : "..tostring(group.name).." tempPlayer.unitname "..tostring(tempPlayer.groupName))
-
 											if group.name == tempPlayer.groupName then
-
-												-- print("DcBriefing client E pASSE OK ")
 
 												--///////////////////////////////////////////////////////////////////////
 												--ATTENTION, ne PAS mettre Deepcopy ici, sinon les canaux de frequence ne pourront se mettre à jour
@@ -582,7 +698,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									init_packN = pack.main[1].init_packN,
 									sortie_n = sortie_n,
 									tot = tot,
-									type = ReplaceTypeName(pack.main[1].type),
+									type = AliasTypeName(pack.main[1].type),
 								}
 							else																					--ATOList has content
 								for a = 1, #ATOList do																--go through ATOList to see if there is already a package entered with same target
@@ -596,7 +712,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 											init_packN = pack.main[1].init_packN,
 											sortie_n = sortie_n,
 											tot = tot,
-											type = ReplaceTypeName(pack.main[1].type),
+											type = AliasTypeName(pack.main[1].type),
 										}
 									end
 								end
@@ -682,7 +798,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					s = "\n\n\n\n".."\n"
 					local sBrief = "_________________________________________ BRIEFING Part: _______________________________________\n"
 					s = s..sBrief
-					local sName = " "..ReplaceTypeName(flight[f].type).." "..squad.." "..player_task.." "
+					local sName = " "..AliasTypeName(flight[f].type).." "..squad.." "..player_task.." "
 					local space = string.len(tostring(sBrief)) - string.len(tostring(sName))									--calculate number of spaces that need 
 					for n = 1, (space / 2)-1  do
 						s = s .. "_"
@@ -732,12 +848,12 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								end
 							end
 							if tgt_n == 1 then
-								s = s .. "You are assigned to ground alert intercept duty at " .. ReplaceBaseName(airbase) .. ". Early warning radar has detected " .. tgt_n .. " target inbound to your sector at " .. math.floor(tgt_heading) .. "°/" .. FormatDistance(tgt_distance, unitsUse) .. ". Launch imediately for interception.\n"
+								s = s .. "You are assigned to ground alert intercept duty at " .. AliasBaseName(airbase) .. ". Early warning radar has detected " .. tgt_n .. " target inbound to your sector at " .. math.floor(tgt_heading) .. "°/" .. FormatDistance(tgt_distance, unitsUse) .. ". Launch imediately for interception.\n"
 							else
-								s = s .. "You are assigned to ground alert intercept duty at " .. ReplaceBaseName(airbase) .. ". Early warning radar has detected " .. tgt_n .. " targets inbound to your sector at " .. math.floor(tgt_heading) .. "°/" .. FormatDistance(tgt_distance, unitsUse) .. ". Launch imediately for interception.\n"
+								s = s .. "You are assigned to ground alert intercept duty at " .. AliasBaseName(airbase) .. ". Early warning radar has detected " .. tgt_n .. " targets inbound to your sector at " .. math.floor(tgt_heading) .. "°/" .. FormatDistance(tgt_distance, unitsUse) .. ". Launch imediately for interception.\n"
 							end
 					else
-							s = s .. "You are assigned to ground alert intercept duty at " .. ReplaceBaseName(airbase) .. " Wait for the GCI to scramble you..."
+							s = s .. "You are assigned to ground alert intercept duty at " .. AliasBaseName(airbase) .. " Wait for the GCI to scramble you..."
 
 					end
 					--Fighter Sweep
@@ -746,7 +862,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 					--Airbase Strike
 					elseif player_task == "Strike" and target.class == "airbase" then
-						s = s .. "You are tasked to strike " .. target.name .. " which hosts the " .. target.unit.name .. " equipped with " .. ReplaceTypeName(target.unit.type) .. ". Attack any parked aircraft on the airbase. Your Time On Target is " .. time_target .. "."
+						s = s .. "You are tasked to strike " .. target.name .. " which hosts the " .. target.unit.name .. " equipped with " .. AliasTypeName(target.unit.type) .. ". Attack any parked aircraft on the airbase. Your Time On Target is " .. time_target .. "."
 						if target.LaserCode then
 							s = s .. " Target designation laser code " .. target.LaserCode .. "."
 						end
@@ -771,7 +887,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					--Escort
 					elseif player_task == "Escort" then
 						if target.class == "airbase" then
-							s = s .. "Escort a strike mission against " .. ReplaceBaseName(target.name) .. ". Engage all hostile aircraft posing a threat to the strike package. "
+							s = s .. "Escort a strike mission against " .. AliasBaseName(target.name) .. ". Engage all hostile aircraft posing a threat to the strike package. "
 							--s = s .. "Man your aircraft at " .. time_start .. " and prepare to launch at " .. time_launch .. ". Your Time on Target is " .. time_target .. ". Good Luck."
 						elseif target.task == "Strike" or target.task == "Anti-ship Strike" then
 							s = s .. "Escort a strike mission against the " .. target_name .. ". Engage all hostile aircraft posing a threat to the strike package. "
@@ -857,11 +973,11 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 					--Transport
 					elseif player_task == "Transport" then
-						s = s .. "Fly a transport mission from " .. ReplaceBaseName(target.base) .. " to " .. ReplaceBaseName(target.destination) .. ".\n"
+						s = s .. "Fly a transport mission from " .. AliasBaseName(target.base) .. " to " .. AliasBaseName(target.destination) .. ".\n"
 
 					--Nothing/Ferry
 					elseif player_task == "Nothing" then
-						s = s .. "Ferry flight from " .. ReplaceBaseName(target.base) .. " to " .. ReplaceBaseName(target.destination) .. ".\n"
+						s = s .. "Ferry flight from " .. AliasBaseName(target.base) .. " to " .. AliasBaseName(target.destination) .. ".\n"
 					--SAR
 					elseif player_task == "SAR" then
 						local airbase = tempPlayer.airbase
@@ -932,7 +1048,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 										if element.type and not element.dead then
 
-											local aliasType = ReplaceTypeName(element.type)
+											local aliasType = AliasTypeName(element.type)
 
 											if listType[aliasType] then
 												listType[aliasType] = listType[aliasType] + 1
@@ -1000,9 +1116,9 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								local value = flight2[entries[e].lookup]
 
 								if entries[e].header == "Type" then
-									value = ReplaceTypeName(flight2[entries[e].lookup])
+									value = AliasTypeName(flight2[entries[e].lookup])
 								elseif entries[e].header == "Base" then
-									value = ReplaceBaseName(flight2[entries[e].lookup])
+									value = AliasBaseName(flight2[entries[e].lookup])
 								end
 
 								local l = string.len(tostring(value)) + 3										--get the string length of the current entry for this flight
@@ -1034,9 +1150,9 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									local value = flight2[entries[e].lookup]
 
 									if entries[e].header == "Type" then
-										value = ReplaceTypeName(flight2[entries[e].lookup])
+										value = AliasTypeName(flight2[entries[e].lookup])
 									elseif entries[e].header == "Base" then
-										value = ReplaceBaseName(flight2[entries[e].lookup])
+										value = AliasBaseName(flight2[entries[e].lookup])
 									end
 
 									s = s .. value																--add entry of this flight to list
@@ -1121,7 +1237,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					if Brief[sideName] then
 						if Brief[sideName].bullseye then
 							s = "Bullseye:\n"
-							s = s.." bullseye Name " .. ReplaceBaseName(Brief[sideName].bullseye.name)
+							s = s.." bullseye Name " .. AliasBaseName(Brief[sideName].bullseye.name)
 							if Brief[sideName]["bullseye"].lat then
 								s = s.." " .. Format_dms(Brief[sideName]["bullseye"].lat ,Brief[sideName]["bullseye"].lon ,4)  .." \n"
 							end
@@ -1264,7 +1380,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					--Radio navigation
 
 					s = "Radio Navigation:\n"
-					s = s .."Base: ".. ReplaceBaseName(tempPlayer.airbase)
+					s = s .."Base: ".. AliasBaseName(tempPlayer.airbase)
 					--homebase TACAN
 					if db_airbases[tempPlayer.airbase].TACAN then
 						s = s .. " TACAN: " .. db_airbases[tempPlayer.airbase].TACAN
@@ -1291,7 +1407,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					if TabDivert[tempPlayer.pack_n] then
 						for Divert, _base in pairs(TabDivert[tempPlayer.pack_n]) do
 							if Divert ~= tempPlayer.unitname then
-								s = s .."Divert: ".. ReplaceBaseName(_base)
+								s = s .."Divert: ".. AliasBaseName(_base)
 								--Divert TACAN
 								if db_airbases[_base].TACAN then
 									s = s .. " TACAN: " .. db_airbases[_base].TACAN
@@ -1356,21 +1472,44 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					s = "Communication:\n"																		--overview of relevant comms frequencies
 					local MC = 0
 
+					-- print("Test radio A for inhType "..inhType)
 					for u = 1, #tempPlayer.group["units"] do
-						for n = 1, #RadioA[sideName] do																		--do it for all the radios
-							if Frequency[inheritedType] then
-								for ir=1, #Frequency[inheritedType].radio do
-									if Frequency[inheritedType].radio[ir].nbCanal > 0 then
+						-- for n = 1, #RadioA[sideName] do																		--do it for all the radios
+						-- print("Test radio B for unit "..u.." of player "..inhType)
+							-- local inhType = GetInheritedType(tempPlayer.type) 	
+						if Db_Frequency[planeType] then
+								-- print("Test radio C for unit "..u.." of player "..inhType)
+								for radioN=1, #Db_Frequency[planeType].radio do
+									-- print("Test radio D number "..radioN.." for unit "..u.." of player "..inhType)
+									if Db_Frequency[planeType].radio[radioN].nbCanal > 0 then
+										-- print("Test radio E number "..radioN.." - found for unit "..u.." of player "..inhType)
 										if not tempPlayer.group["units"][u]["Radio"] then tempPlayer.group["units"][u]["Radio"] = {} end
 
-										tempPlayer.group["units"][u]["Radio"][ir] = {
-											["channels"] = {},
-										}
-									end
+											-- print("Adding radio Z "..radioN.." to unit "..u.." of player "..inhType)
+											tempPlayer.group["units"][u]["Radio"][radioN] = {
+												["channels"] = {},
+											}
+										end
 								end
 							end
-						end
+						-- end
 					end
+
+					-- for u = 1, #tempPlayer.group["units"] do
+					-- 	for n = 1, #RadioA[sideName] do																		--do it for all the radios
+					-- 		if Frequency[inheritedType] then
+					-- 			for ir=1, #Frequency[inheritedType].radio do
+					-- 				if Frequency[inheritedType].radio[ir].nbCanal > 0 then
+					-- 					if not tempPlayer.group["units"][u]["Radio"] then tempPlayer.group["units"][u]["Radio"] = {} end
+
+					-- 					tempPlayer.group["units"][u]["Radio"][ir] = {
+					-- 						["channels"] = {},
+					-- 					}
+					-- 				end
+					-- 			end
+					-- 		end
+					-- 	end
+					-- end
 
 					local frew_AWACS = {}
 					local freq_AFAC = {}																				--table to store AWACS frequencies
@@ -1381,8 +1520,8 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					local freq_ATC_Divert = {}
 					local freq_All = {}
 
-					for pack_n,pack in pairs(ATO[tempPlayer.side]) do														--iterate through packages in player side
-						for role_name,role in pairs(pack) do															--iterate through roles in package													--iterate through the flights in role
+					for packN, pack in pairs(ATO[tempPlayer.side]) do														--iterate through packages in player side
+						for roleName, role in pairs(pack) do															--iterate through roles in package													--iterate through the flights in role
 							if role[1] and role[1].task == "AWACS" then													--if first flight is AWACS
 								for fr = 1 , #role do
 									local time = ""
@@ -1432,7 +1571,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 											local tabElement = {
 												['callsign'] = role[fr].callsign,
 												['freq'] = role[fr].frequency,															--store callsign and frequency
-												['type'] = ReplaceTypeName(role[fr].type),
+												['type'] = AliasTypeName(role[fr].type),
 												['time'] = time,
 												['flight'] = fr,
 												['text'] = role[fr].target.text,
@@ -1459,7 +1598,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									local tabElement = {
 										['callsign'] = role[fr].callsign,
 										['freq'] = role[fr].frequency,															--store callsign and frequency
-										['type'] = ReplaceTypeName(role[fr].type),
+										['type'] = AliasTypeName(role[fr].type),
 										['time'] = time,
 										['flight'] = fr,
 										['LaserCode'] = role[1].target.LaserCode,
@@ -1470,12 +1609,13 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							elseif role[1] and role[1].task == "CAP" then												--if first flight is tanker
 								freq_CAP[role[1].callsign] = role[1].frequency											--store callsign and frequency
 
-							elseif role[1]  and  string.find(role[1].task,"Strike") and pack_n ~= tempPlayer.pack_n then								--and  string.find(role[1].task,"Strike")
+							elseif role[1]  and  string.find(role[1].task,"Strike") and packN ~= tempPlayer.pack_n then								--and  string.find(role[1].task,"Strike")
 
 								if not freq_All[role[1].callsign] then freq_All[role[1].callsign] = {} end
 
 								if not freq_All[role[1].callsign].freq then freq_All[role[1].callsign].freq = role[1].frequency end
 								if not freq_All[role[1].callsign].task then freq_All[role[1].callsign].task = role[1].task end
+								if not freq_All[role[1].callsign].name then freq_All[role[1].callsign].name = "Pack "..packN.." "..AliasTypeName(role[1].type) end
 
 							end
 						end
@@ -1514,20 +1654,41 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					-- local _radio = {}
 					local radioP = {}
 					local u = 1
+					local unit = tempPlayer.group["units"][u]
 
-					if not Frequency[inheritedType] then
+					if not Db_Frequency[planeType] then
 						radioP[1] = {
 							VHF = {
-								min = 118,
-								max = 173,
+								min = 116,
+								max = 149,
 							},
 							nbCanal = 0,
 						}
 					else
-						for i=1, #Frequency[inheritedType].radio do
-							radioP[i] = Frequency[inheritedType].radio[i]
+						for i=1, #Db_Frequency[planeType].radio do
+							radioP[i] = Db_Frequency[planeType].radio[i]
 						end
 					end
+
+					-- local camp_str = "radioP = " .. TableSerialization(radioP, 0)						--make a string
+					-- local campFile = io.open("Debug/RADIO_radioP_Briefing.lua", "w")	 or error("Failed to open debug file")
+					-- campFile:write(camp_str)																		--save new data
+					-- campFile:close()
+					-- os.execute 'pause'
+
+					-- if not Frequency[inheritedType] then
+					-- 	radioP[1] = {
+					-- 		VHF = {
+					-- 			min = 118,
+					-- 			max = 173,
+					-- 		},
+					-- 		nbCanal = 0,
+					-- 	}
+					-- else
+					-- 	for i=1, #Frequency[inheritedType].radio do
+					-- 		radioP[i] = Frequency[inheritedType].radio[i]
+					-- 	end
+					-- end
 
 					local radioName = {}																								--creation table des noms de radio
 					for radioN = 1, 10 do
@@ -1546,7 +1707,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								local landingPossible = false
 								local divertLowerStr = string.lower(divertName)
 								if string.find(divertLowerStr, "farp") or  string.find(divertLowerStr, "lha") then
-									if IsHelicopter[inheritedType] or inheritedType == "AV8BNA" then
+									if IsHelicopter[planeType] or planeType == "AV8BNA" then
 										landingPossible = true
 									end
 								else
@@ -1554,14 +1715,14 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								end
 
 								if landingPossible then
-									for i=1, #radioP do
+									for radioN=1, #radioP do
 										if db_airbases[base].ATC_frequency and type(db_airbases[base].ATC_frequency)~= "table" then
-											if freqCapability(db_airbases[base].ATC_frequency, radioP, i, "Divert: ") then
+											if FreqCapabilityNG(db_airbases[base].ATC_frequency, planeType, radioN, planeType.." Divert: ") then
 												freq_ATC_Divert[divertName] = db_airbases[base].ATC_frequency
 											end
 										elseif db_airbases[base].ATC_frequency and type(db_airbases[base].ATC_frequency)== "table" then
 											for n , freq in ipairs(db_airbases[base].ATC_frequency) do
-												if freqCapability(freq, radioP, i, "Divert: ") then
+												if FreqCapabilityNG(freq, planeType, radioN, planeType.."Divert: ") then
 													freq_ATC_Divert[divertName] = db_airbases[base].ATC_frequency
 												end
 											end
@@ -1596,6 +1757,35 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 
 					--***************************************************************************
+					--Flight_freq **************************************************************
+
+					for radioN = 1, #radioP do
+
+						local freqA = tonumber(tempPlayer.group.DCE_FreqFlight)
+						entry = {name = "", call = "", freq = "",radio = ""}
+						entry["name"] = "Flight: "
+						entry["call"] = ""
+						entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+						if FreqCapabilityNG(freqA, planeType, radioN, flight[f].type) then
+
+							local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
+							if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
+								table.insert(unit["Radio"][radioN]["channels"], freqA)
+								entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
+								local entryCopy = DeepCopy(entry)
+								table.insert(entriesRadio[radioN], entryCopy)
+							elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
+								local entryCopy = DeepCopy(entry)
+								table.insert(entriesRadio[radioN], entryCopy)
+							else
+								-- print("Package B ERROR ")
+							end
+
+						end
+					end
+
+					--***************************************************************************
 					--PACKAGE_freq **************************************************************
 
 					for radioN = 1, #radioP do
@@ -1606,39 +1796,76 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						entry["call"] = ""
 						entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-						if freqCapability(freqA, radioP, radioN, "") then
-							-- for u = 1, #tempPlayer.group["units"] do
-								if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
-									if radioP[radioN].startCanal == 0 then MC = -1 end
-									-- if RadioA[sideName][Nradio]  then
-									table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
-									entry["radio"] = radioName[radioN].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][radioN]["channels"]	 + MC
-									local entryCopy = Deepcopy(entry)
-									table.insert(entriesRadio[radioN], entryCopy)
-								elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-									local entryCopy = Deepcopy(entry)
-									table.insert(entriesRadio[radioN], entryCopy)
-								else
-									-- print("Package B ERROR ")
-								end
-							-- end
+						if FreqCapabilityNG(freqA, planeType, radioN, flight[f].type) then
+
+							-- local channelN = unit["Radio"] and unit["Radio"][radioN] and #unit["Radio"][radioN]["channels"] or 0
+							local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
+							if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
+								-- table.insert(unit["Radio"][radioN]["channels"], freqA)
+								table.insert(unit["Radio"][radioN]["channels"], freqA)
+								entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
+								local entryCopy = DeepCopy(entry)
+								table.insert(entriesRadio[radioN], entryCopy)
+							elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
+								local entryCopy = DeepCopy(entry)
+								table.insert(entriesRadio[radioN], entryCopy)
+							else
+								-- print("Package B ERROR ")
+							end
+
 						end
 					end
+
 
 					--***************************************************************************
 					--ATC_freq*******************************************************************
 					entry = {name = "", call = "", freq = "",radio = ""}
 					--ATC_frequency = {"4.725", "40.350", "120.200", "251.900" }
-					local atcPlayerFreq = db_airbases[tempPlayer.airbase].ATC_frequency
+					local atc_PlayerFreq = db_airbases[tempPlayer.airbase].ATC_frequency
+					-- _affiche(atc_PlayerFreq, "atc_PlayerFreq: ")
+					-- _affiche(radioP, "radioP: ")
 					local freqA = 0
-					--M34.o (o: all ATC freq in array)
-					if type(atcPlayerFreq) == "table" then
-						for i=#atcPlayerFreq, 1, -1 do
+					if type(atc_PlayerFreq) == "table" then
+						-- print("ATC Freq ATC A ")
+						for i = #atc_PlayerFreq, 1, -1 do
+							-- print("ATC Freq ATC B freq "..i.." : "..tostring(atc_PlayerFreq[i]))
 							for n = 1, #radioP do
-								for wave, freqTest in pairs(radioP[n]) do
-									if type(freqTest) == "table" and freqTest.max and tonumber(atcPlayerFreq[i]) < freqTest.max and  tonumber(atcPlayerFreq[i]) > freqTest.min then
-										freqA = tonumber(atcPlayerFreq[i]) or 0
-									end
+								-- print("ATC Freq ATC C radioN "..n)
+								for rangeN, freqTest in pairs(radioP[n].range) do
+									-- for rangeN, freqTest in pairs(rangeData) do	
+										-- print("ATC Freq ATC D rangeN "..rangeN.." "..tostring(freqTest.max).."-"..tostring(freqTest.min).." for freq "..tostring(atc_PlayerFreq[i]))
+										if type(freqTest) == "table" 
+										and freqTest.max and tonumber(atc_PlayerFreq[i]) < freqTest.max 
+										and tonumber(atc_PlayerFreq[i]) > freqTest.min then
+
+											freqA = tonumber(atc_PlayerFreq[i]) or 0
+											-- print("ATC Freq ATC E found freq "..tostring(freqA))
+
+											for radioN = 1, #radioP do
+												print("ATC Freq ATC F radioN "..radioN)
+												entry = {name = "", call = "", freq = "",radio = ""}
+												entry["name"] = "ATC: "
+												entry["call"] = AliasBaseName(tempPlayer.airbase)
+												entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+												if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
+													-- print("ATC Freq ATC G FreqCapabilityNG true for radioN "..radioN)
+													local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
+													-- print("ATC Freq ATC H channelN "..channelN)
+
+													if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
+														table.insert(unit["Radio"][radioN]["channels"], freqA)
+														entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
+														local entryCopy = DeepCopy(entry)
+														table.insert(entriesRadio[radioN], entryCopy)
+													elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
+														local entryCopy = DeepCopy(entry)
+														table.insert(entriesRadio[radioN], entryCopy)
+													end
+												end
+											end
+										end
+									-- end
 								end
 							end
 						end
@@ -1646,26 +1873,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						freqA = tonumber(db_airbases[tempPlayer.airbase].ATC_frequency) or 0
 					end
 
-					for radioN = 1, #radioP do
-						entry = {name = "", call = "", freq = "",radio = ""}
-						entry["name"] = "ATC: "
-						entry["call"] = ReplaceBaseName(tempPlayer.airbase)
-						entry["freq"] = string.format("%07.3f", freqA).. " MHz"
-
-						if freqCapability(freqA, radioP, radioN, "") then
-							if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
-								if radioP[radioN].startCanal == 0 then MC = -1 end
-								-- if RadioA[sideName][Nradio]  then
-								table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
-								entry["radio"] = radioName[radioN].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][radioN]["channels"]	 + MC
-								local entryCopy = Deepcopy(entry)
-								table.insert(entriesRadio[radioN], entryCopy)
-							elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-								local entryCopy = Deepcopy(entry)
-								table.insert(entriesRadio[radioN], entryCopy)
-							end
-						end
-					end
+					
 
 					--***************************************************************************
 					--Soviet Emergency 121.5 ****************************************************
@@ -1683,35 +1891,31 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 								local numPreset
 
-								if freqCapability(freqA, radioP, radioN, "") then
-									-- for u = 1, #tempPlayer.group["units"] do
-										if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] < radioP[radioN].nbCanal then
-											if radioP[radioN] and radioP[radioN].nbCanal > 0 then
-												if radioP[radioN].startCanal == 0 then MC = -1 end
+								if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
+									if radioP[radioN] and radioP[radioN].nbCanal > 0 and #unit["Radio"][radioN]["channels"] < radioP[radioN].nbCanal then
+										if radioP[radioN] and radioP[radioN].nbCanal > 0 then
+											if radioP[radioN].startCanal == 0 then MC = -1 end
 
-												--ça ne marche pas, on perd trop de temps dessus ..
-												-- if emergencyPreset then
-												-- 	table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], emergencyPreset,  freqA)
-												-- 	numPreset = #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] + MC
-												-- 	entry["radio"] = RadName[Nradio].." / Channel " .. emergencyPreset
-												-- 	local entryCopy = Deepcopy(entry)
-												-- 	table.insert(entriesRadio[Nradio], emergencyPreset, entryCopy)
-												-- else
-													table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
-													numPreset = #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] + MC
-													entry["radio"] = radioName[radioN].." / Channel " .. numPreset
-													local entryCopy = Deepcopy(entry)
-													table.insert(entriesRadio[radioN], entryCopy)
-												-- end
+											--ça ne marche pas, on perd trop de temps dessus ..
+											-- if emergencyPreset then
+											-- 	table.insert(unit["Radio"][radioN]["channels"], emergencyPreset,  freqA)
+											-- 	numPreset = #unit["Radio"][radioN]["channels"] + MC
+											-- 	entry["radio"] = RadName[radioN].." / Channel " .. emergencyPreset
+											-- 	local entryCopy = Deepcopy(entry)
+											-- 	table.insert(entriesRadio[radioN], emergencyPreset, entryCopy)
+											-- else
+												table.insert(unit["Radio"][radioN]["channels"], freqA)
+												numPreset = #unit["Radio"][radioN]["channels"] + MC
+												entry["radio"] = radioName[radioN].." / Channel " .. numPreset
+												local entryCopy = DeepCopy(entry)
+												table.insert(entriesRadio[radioN], entryCopy)
+										
 
-
-
-											elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-												local entryCopy = Deepcopy(entry)
-												table.insert(entriesRadio[radioN], emergencyPreset, entryCopy)
-											end
+										elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
+											local entryCopy = DeepCopy(entry)
+											table.insert(entriesRadio[radioN], emergencyPreset, entryCopy)
 										end
-									-- end
+									end
 								end
 							end
 						end
@@ -1719,7 +1923,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 					--***************************************************************************
 					--COMMON_freq****************************************************************
-					if mission_ini.MP_PlaneRecovery and Multi.NbGroup >= 1  then
+					-- if mission_ini.MP_PlaneRecovery and Multi.NbGroup >= 1  then
 						if CommonFreq[sideName]["UHF"][1] ~= 0 then
 							for cf = 1 , #CommonFreq[sideName]["UHF"] do
 								freqA = tonumber(CommonFreq[sideName]["UHF"][cf]) or 0
@@ -1733,22 +1937,19 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["call"] = call
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-									if freqCapability(freqA, radioP, radioN, "") then
-										-- for u = 1, #tempPlayer.group["units"] do
-											if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
-												if radioP[radioN] and radioP[radioN].nbCanal > 0 then
-													if radioP[radioN].startCanal == 0 then MC = -1 end
-													-- if RadioA[sideName][Nradio]  then
-													table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
-													entry["radio"] = radioName[radioN].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][radioN]["channels"]	 + MC
-													local entryCopy = Deepcopy(entry)
-													table.insert(entriesRadio[radioN], entryCopy)
-												elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-													local entryCopy = Deepcopy(entry)
-													table.insert(entriesRadio[radioN], entryCopy)
-												end
+									if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
+										local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
+										if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
+											if radioP[radioN] and radioP[radioN].nbCanal > 0 then
+												table.insert(unit["Radio"][radioN]["channels"], freqA)
+												entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
+												local entryCopy = DeepCopy(entry)
+												table.insert(entriesRadio[radioN], entryCopy)
+											elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
+												local entryCopy = DeepCopy(entry)
+												table.insert(entriesRadio[radioN], entryCopy)
 											end
-										-- end
+										end
 									end
 
 								end
@@ -1770,19 +1971,19 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["call"] = call
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-									if freqCapability(freqA, radioP, radioN, "") then
-										-- for u = 1, #tempPlayer.group["units"] do
-											if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
-												if radioP[radioN].startCanal == 0 then MC = -1 end
-												table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
-												entry["radio"] = radioName[radioN].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][radioN]["channels"]	 + MC
-												local entryCopy = Deepcopy(entry)
-												table.insert(entriesRadio[radioN], entryCopy)
-											elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-												local entryCopy = Deepcopy(entry)
-												table.insert(entriesRadio[radioN], entryCopy)
-											end
-										-- end
+									if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
+										local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
+										if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
+											-- if radioP[radioN].startCanal == 0 then MC = -1 end
+											table.insert(unit["Radio"][radioN]["channels"], freqA)
+											-- entry["radio"] = radioName[radioN].." / Channel " .. #unit["Radio"][radioN]["channels"]	 + MC
+											entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
+											local entryCopy = DeepCopy(entry)
+											table.insert(entriesRadio[radioN], entryCopy)
+										elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
+											local entryCopy = DeepCopy(entry)
+											table.insert(entriesRadio[radioN], entryCopy)
+										end
 									end
 								end
 							end
@@ -1803,19 +2004,20 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["call"] = call
 									entry["freq"] = string.format("%02.3f", freqA).. " MHz"
 
-									if freqCapability(freqA, radioP, radioN, "") then
-										-- for u = 1, #tempPlayer.group["units"] do
-											if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
-												if radioP[radioN].startCanal == 0 then MC = -1 end
-												table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
-												entry["radio"] = radioName[radioN].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][radioN]["channels"]	 + MC
-												local entryCopy = Deepcopy(entry)
-												table.insert(entriesRadio[radioN], entryCopy)
-											elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-												local entryCopy = Deepcopy(entry)
-												table.insert(entriesRadio[radioN], entryCopy)
-											end
-										-- end
+									if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
+										local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
+										if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
+											-- if radioP[radioN].startCanal == 0 then MC = -1 end
+											table.insert(unit["Radio"][radioN]["channels"], freqA)
+											-- entry["radio"] = radioName[radioN].." / Channel " .. #unit["Radio"][radioN]["channels"]	 + MC
+											entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
+											local entryCopy = DeepCopy(entry)
+											table.insert(entriesRadio[radioN], entryCopy)
+										elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
+											local entryCopy = DeepCopy(entry)
+											table.insert(entriesRadio[radioN], entryCopy)
+										end
+
 									end
 								end
 							end
@@ -1836,27 +2038,27 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["call"] = call
 									entry["freq"] = string.format("%02.3f", freqA).. " MHz"
 
-									if freqCapability(freqA, radioP, radioN, "") then
-										-- for u = 1, #tempPlayer.group["units"] do
-											if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
-												if radioP[radioN].startCanal == 0 then MC = -1 end
-												table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
-												entry["radio"] = radioName[radioN].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][radioN]["channels"]	 + MC
-												local entryCopy = Deepcopy(entry)
-												table.insert(entriesRadio[radioN], entryCopy)
-											elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-												local entryCopy = Deepcopy(entry)
-												table.insert(entriesRadio[radioN], entryCopy)
-											end
-										-- end
+									if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
+										local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
+										if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
+											-- if radioP[radioN].startCanal == 0 then MC = -1 end
+											table.insert(unit["Radio"][radioN]["channels"], freqA)
+											-- entry["radio"] = radioName[radioN].." / Channel " .. #unit["Radio"][radioN]["channels"]	 + MC
+											entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
+											local entryCopy = DeepCopy(entry)
+											table.insert(entriesRadio[radioN], entryCopy)
+										elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
+											local entryCopy = DeepCopy(entry)
+											table.insert(entriesRadio[radioN], entryCopy)
+										end
 									end
 								end
 							end
 						end
-					end
+					-- end
 					--***************************************************************************
 					--AWACS_freq				
-					local copy_AWACS_freq = Deepcopy(frew_AWACS)
+					local copy_AWACS_freq = DeepCopy(frew_AWACS)
 					for vN, value in pairs(frew_AWACS) do
 						freqA = tonumber(value.freq) or 0
 						local call = ""
@@ -1883,16 +2085,16 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["call"] = call
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-								if freqCapability(freqA, radioP, radioN, "") then
+								if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
 
-									if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
-										if radioP[radioN].startCanal == 0 then MC = -1 end
-										table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
-										entry["radio"] = radioName[radioN].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][radioN]["channels"]	 + MC
-										local entryCopy = Deepcopy(entry)
+									local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
+									if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
+										table.insert(unit["Radio"][radioN]["channels"], freqA)
+										entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
+										local entryCopy = DeepCopy(entry)
 										table.insert(entriesRadio[radioN], entryCopy)
 									elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-										local entryCopy = Deepcopy(entry)
+										local entryCopy = DeepCopy(entry)
 										table.insert(entriesRadio[radioN], entryCopy)
 									end
 
@@ -1913,15 +2115,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry["call"] = call
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-								if freqCapability(freqA, radioP, radioN, "") then
-									if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] < radioP[radioN].nbCanal then
-										if radioP[radioN].startCanal == 0 then MC = -1 end
-										table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
-										entry["radio"] = radioName[radioN].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][radioN]["channels"]	+ MC
-										local entryCopy = Deepcopy(entry)
+								if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
+									local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
+									if radioP[radioN] and radioP[radioN].nbCanal > 0 and #unit["Radio"][radioN]["channels"] < radioP[radioN].nbCanal then
+										table.insert(unit["Radio"][radioN]["channels"], freqA)
+										entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
+										local entryCopy = DeepCopy(entry)
 										table.insert(entriesRadio[radioN], entryCopy)
 									elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-										local entryCopy = Deepcopy(entry)
+										local entryCopy = DeepCopy(entry)
 										table.insert(entriesRadio[radioN], entryCopy)
 									end
 								end
@@ -1931,7 +2133,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 					--***************************************************************************
 					--tanker_freq			
-					local tanker_freq_2 = Deepcopy(frq_Tanker)
+					local tanker_freq_2 = DeepCopy(frq_Tanker)
 					if refuelable then
 						
 						for _, value in pairs(frq_Tanker) do
@@ -1957,15 +2159,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["call"] = call
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-									if freqCapability(freqA, radioP, radioN, "") then
-										if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] < radioP[radioN].nbCanal then
-											if radioP[radioN].startCanal == 0 then MC = -1 end
-											table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
-											entry["radio"] = radioName[radioN].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] + MC
-											local entryCopy = Deepcopy(entry)
+									if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
+										local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
+										if radioP[radioN] and radioP[radioN].nbCanal > 0 and #unit["Radio"][radioN]["channels"] < radioP[radioN].nbCanal then
+											table.insert(unit["Radio"][radioN]["channels"], freqA)
+											entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
+											local entryCopy = DeepCopy(entry)
 											table.insert(entriesRadio[radioN], entryCopy)
 										elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-											local entryCopy = Deepcopy(entry)
+											local entryCopy = DeepCopy(entry)
 											table.insert(entriesRadio[radioN], entryCopy)
 										end
 									end
@@ -1976,33 +2178,42 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 					--***************************************************************************
 					--AFAC_freq				
-					local copy_AFAC_freq = Deepcopy(freq_AFAC)
+					local freq_AFAC_2 = DeepCopy(freq_AFAC)
 					for vN, value in pairs(freq_AFAC) do
 						freqA = tonumber(value.freq) or 0
 						local call = ""
+						local n_txt = ""
+						local occurenceN = 0
 
-						for copy_vN, copyValue in pairs(copy_AFAC_freq) do
-							if tonumber(copyValue.freq) == freqA  then
-								call = call .. " "..copyValue.callsign
+						-- for copy_vN, copyValue in pairs(copy_AFAC_freq) do
+						-- 	if tonumber(copyValue.freq) == freqA  then
+						-- 		call = call .. " "..copyValue.callsign
+						-- 	end
+						-- end
+						for tankerN, value2 in pairs(freq_AFAC_2) do
+							if occurenceN >= 1 then n_txt = " - " else n_txt = "" end
+							if tonumber(value2.freq) == freqA  then
+								call = call .. n_txt..value2.callsign
+								occurenceN = occurenceN + 1
 							end
 						end
 
 						if value.flight == 1 then
 							for radioN = 1, #radioP do
 								entry = {name = "", call = "", freq = "",radio = ""}
-								entry["name"] = "AFAC: "..value.type .. " (laser: ".. tostring(value.LaserCode)..")"
+								entry["name"] = "AFAC: "..value.type .. (value.LaserCode and " (laser: ".. tostring(value.LaserCode)..")" or "")
 								entry["call"] = call
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-								if freqCapability(freqA, radioP, radioN, "") then
-									if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
-										if radioP[radioN].startCanal == 0 then MC = -1 end
-										table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
-										entry["radio"] = radioName[radioN].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][radioN]["channels"]	 + MC
-										local entryCopy = Deepcopy(entry)
+								if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
+									local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
+									if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
+										table.insert(unit["Radio"][radioN]["channels"], freqA)
+										entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
+										local entryCopy = DeepCopy(entry)
 										table.insert(entriesRadio[radioN], entryCopy)
 									elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-										local entryCopy = Deepcopy(entry)
+										local entryCopy = DeepCopy(entry)
 										table.insert(entriesRadio[radioN], entryCopy)
 									end
 								end
@@ -2014,22 +2225,22 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					for call,freq in pairs(freq_CAP) do
 						freqA = tonumber(freq) or 0
 
-						for Nradio = 1, #radioP do
+						for radioN = 1, #radioP do
 							entry = {name = "", call = "", freq = "", radio = ""}
 							entry["name"] = "CAP: "
 							entry["call"] = call
 							entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-							if freqCapability(freqA, radioP, Nradio, "") then
-								if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
-									if radioP[Nradio].startCanal == 0 then MC = -1 end
-									table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-									entry["radio"] = radioName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
-									local entryCopy = Deepcopy(entry)
-									table.insert(entriesRadio[Nradio], entryCopy)
-								elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
-									local entryCopy = Deepcopy(entry)
-									table.insert(entriesRadio[Nradio], entryCopy)
+							if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
+								local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
+								if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
+									table.insert(unit["Radio"][radioN]["channels"], freqA)
+									entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
+									local entryCopy = DeepCopy(entry)
+									table.insert(entriesRadio[radioN], entryCopy)
+								elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
+									local entryCopy = DeepCopy(entry)
+									table.insert(entriesRadio[radioN], entryCopy)
 								end
 							end
 						end
@@ -2040,22 +2251,22 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					for call,freq in pairs(freq_ATC_Divert) do
 						freqA = tonumber(freq) or 0
 						if freqA and freqA ~= nil then
-							for Nradio = 1, #radioP do
+							for radioN = 1, #radioP do
 								entry = {name = "", call = "", freq = "", radio = ""}
 								entry["name"] = "Divert: "
-								entry["call"] = ReplaceBaseName(call)
+								entry["call"] = AliasBaseName(call)
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-								if freqCapability(freqA, radioP, Nradio, "") then
-									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
-										if radioP[Nradio].startCanal == 0 then MC = -1 end
-										table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-										entry["radio"] = radioName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
-										local entryCopy = Deepcopy(entry)
-										table.insert(entriesRadio[Nradio], entryCopy)
-									elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
-										local entryCopy = Deepcopy(entry)
-										table.insert(entriesRadio[Nradio], entryCopy)
+								if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
+									local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
+									if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
+										table.insert(unit["Radio"][radioN]["channels"], freqA)
+										entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
+										local entryCopy = DeepCopy(entry)
+										table.insert(entriesRadio[radioN], entryCopy)
+									elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
+										local entryCopy = DeepCopy(entry)
+										table.insert(entriesRadio[radioN], entryCopy)
 									end
 								end
 							end
@@ -2070,16 +2281,13 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							if base.side == sideName then
 								local all_ATC_Freq = base.ATC_frequency
 								freqA = 0
-								--M34.o (o: all ATC freq in array)
 								if type(all_ATC_Freq) == "table" then
 									for i=#all_ATC_Freq, 1, -1 do
-
 										for wave, freqTest in pairs(radioP[radioN]) do
 											if type(freqTest) == "table" and freqTest.max and tonumber(all_ATC_Freq[i]) < freqTest.max and  tonumber(all_ATC_Freq[i]) > freqTest.min then
 												freqA = tonumber(all_ATC_Freq[i]) or 0
 											end
 										end
-
 									end
 								else
 									freqA = tonumber(base.ATC_frequency) or 0
@@ -2088,15 +2296,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								if freqA and freqA ~= nil and freqA ~= 0 then
 									entry = {name = "", call = "", freq = "", radio = ""}
 									entry["name"] = "ATC"
-									entry["call"] = ReplaceBaseName(baseName)
+									entry["call"] = AliasBaseName(baseName)
 									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-									if freqCapability(freqA, radioP, radioN, "ATC "..tostring(baseName)) then
-										if radioP[radioN] and radioP[radioN].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][radioN]["channels"] <  radioP[radioN].nbCanal then
-											if radioP[radioN].startCanal == 0 then MC = -1 end
-											table.insert(tempPlayer.group["units"][u]["Radio"][radioN]["channels"], freqA)
-											entry["radio"] = radioName[radioN].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][radioN]["channels"]	 + MC
-											local entryCopy = Deepcopy(entry)
+									if FreqCapabilityNG(freqA, planeType, radioN, planeType.." ATC "..tostring(baseName)) then
+										local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
+										if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
+											table.insert(unit["Radio"][radioN]["channels"], freqA)
+											entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
+											local entryCopy = DeepCopy(entry)
 											table.insert(entriesRadio[radioN], entryCopy)
 										end
 									end
@@ -2110,22 +2318,22 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						freqA = tonumber(freq.freq) or 0
 						if freqA and type(freqA) == "number" and freqA > 0 then
 
-							for Nradio = 1, #radioP do
+							for radioN = 1, #radioP do
 								entry = {name = "", call = "", freq = "", radio = ""}
-								entry["name"] = freq.task..": "
+								entry["name"] = freq.task.." "..freq.name..": "
 								entry["call"] = call
 								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
 
-								if freqCapability(freqA, radioP, Nradio, "") then
-									if radioP[Nradio] and radioP[Nradio].nbCanal > 0 and #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"] <  radioP[Nradio].nbCanal then
-										if radioP[Nradio].startCanal == 0 then MC = -1 end
-										table.insert(tempPlayer.group["units"][u]["Radio"][Nradio]["channels"], freqA)
-										entry["radio"] = radioName[Nradio].." / Channel " .. #tempPlayer.group["units"][u]["Radio"][Nradio]["channels"]	 + MC
-										local entryCopy = Deepcopy(entry)
-										table.insert(entriesRadio[Nradio], entryCopy)
-									elseif radioP[Nradio] and (radioP[Nradio].manual or radioP[Nradio].nbCanal == 0)  then
-										local entryCopy = Deepcopy(entry)
-										table.insert(entriesRadio[Nradio], entryCopy)
+								if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
+									local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
+									if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
+										table.insert(unit["Radio"][radioN]["channels"], freqA)
+										entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
+										local entryCopy = DeepCopy(entry)
+										table.insert(entriesRadio[radioN], entryCopy)
+									elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
+										local entryCopy = DeepCopy(entry)
+										table.insert(entriesRadio[radioN], entryCopy)
 									end
 								end
 							end
@@ -2248,7 +2456,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							if sideName == side then																	--if camp.player.side == side then
 								for base , Tmn in pairs(pPA) do
 									if base == tempPlayer.airbase then
-										s = s..ReplaceBaseName(base).." Takeoff time on the platform at ...\n"
+										s = s..AliasBaseName(base).." Takeoff time on the platform at ...\n"
 										for sec, name in PairsByKeys(Tmn) do
 											if tabNam[name] ~= true then
 												local catTime = camp.time + sec

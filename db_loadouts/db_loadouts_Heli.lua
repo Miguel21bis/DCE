@@ -3,8 +3,9 @@
 -------------------------------------------------------------------------------------------------------
 
 if not versionDCE then versionDCE = {} end
-versionDCE["loadouts_data/db_loadouts_Heli.lua"] = "1.1.3"
+versionDCE["loadouts_data/db_loadouts_Heli.lua"] = "1.1.4"
 
+-- 1.1.4 - UH-1H Loadout strike NAM Rockets HE 
 -- 1.1.3 - SH-3D missions adjustement
 -- 1.1.2 - OH58D NAM version
 -- 1.1.1 - Beginning of the versions of this loadouts file dedicated to the F4.
@@ -3405,7 +3406,7 @@ db_loadouts = {
 					SEAD = false,
 				},
 				attributes =  { "soft", "Structure" },
-				code_loadout =  { "Cyprus", "HWITC", "WOB", "NAM" },
+				code_loadout =  { "Cyprus", "HWITC", "WOB"},
 				expend = "Auto",
 				night = true,
 				adverseWeather = true,
@@ -3442,6 +3443,53 @@ db_loadouts = {
 					chaff = 0,
 					gun = 100,
 				},
+			},
+			["NAM Strike"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				attributes =  { "soft", "Structure" },
+				code_loadout =  { "NAM" },
+				expend = "Auto",
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 55,
+				vAttack = 60,
+				hCruise = 50,
+				hAttack = 50,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[5] = {
+							CLSID = "M261_MK151",
+						},
+						[2] = {
+							CLSID = "M261_MK151",
+						},
+						[4] = {
+							CLSID = "M60_SIDE_R",
+						},
+						[3] = {
+							CLSID = "M60_SIDE_L",
+						},
+					},
+					fuel = 631,
+					flare = 60,
+					chaff = 0,
+					gun = 100,
+				},
+				["AddPropAircraft"] = 
+					{
+						["SoloFlight"] = false,
+						["ExhaustScreen"] = false,
+						["GunnersAISkill"] = 90,
+						["NetCrewControlPriority"] = 0,
+						["EngineResource"] = 90,
+					}, -- end of ["AddPropAircraft"]
 			},
 			["WOC Strike rockets"] = {
 				minscore = 0.3,
@@ -3490,7 +3538,7 @@ db_loadouts = {
 			},
 		},
 		CSAR = {
-			["80s SAR Rocket Smk - Heat -  Door gunner M60"] = {
+			["80s SAR Rocket He -  Door gunner M60"] = {
 				minscore = 0.3,
 				support = {
 					Escort = true,
@@ -3510,7 +3558,7 @@ db_loadouts = {
 				stores = {
 					pylons = {
 						[5] = {
-							CLSID = "M261_MK156",
+							CLSID = "M261_MK151",
 						},
 						[2] = {
 							CLSID = "M261_MK151",
@@ -3527,10 +3575,18 @@ db_loadouts = {
 					chaff = 0,
 					gun = 100,
 				},
+				["AddPropAircraft"] = 
+					{
+						["SoloFlight"] = false,
+						["ExhaustScreen"] = false,
+						["GunnersAISkill"] = 90,
+						["NetCrewControlPriority"] = 0,
+						["EngineResource"] = 90,
+					}, -- end of ["AddPropAircraft"]
 			},
 		},
 		SAR = {
-			["80s SAR Rocket Smk - Heat -  Door gunner M60"] = {
+			["80s SAR Rocket He -  Door gunner M60"] = {
 				minscore = 0.3,
 				support = {
 				},
@@ -3548,7 +3604,7 @@ db_loadouts = {
 				stores = {
 					pylons = {
 						[5] = {
-							CLSID = "M261_MK156",
+							CLSID = "M261_MK151",
 						},
 						[2] = {
 							CLSID = "M261_MK151",
@@ -3565,6 +3621,14 @@ db_loadouts = {
 					chaff = 0,
 					gun = 100,
 				},
+				["AddPropAircraft"] = 
+					{
+						["SoloFlight"] = false,
+						["ExhaustScreen"] = false,
+						["GunnersAISkill"] = 90,
+						["NetCrewControlPriority"] = 0,
+						["EngineResource"] = 90,
+					}, -- end of ["AddPropAircraft"]
 			},
 		},
 		Transport = {

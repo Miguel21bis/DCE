@@ -2247,7 +2247,7 @@ end
 
 camp["debugTraceability"]["weather"] = debugTxt
 
-WeatherParams = Deepcopy(mission.weather)
+WeatherParams = DeepCopy(mission.weather)
 
 if debugWeather then
 	print()

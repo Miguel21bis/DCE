@@ -18,6 +18,8 @@ versionDCE["UTIL_Divers.lua"] = "1.5.28"
 
 require("Active/oob_ground")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+CreateAircraftListInCampaign()
+CleanDataDivers()
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 

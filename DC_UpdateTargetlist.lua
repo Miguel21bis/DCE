@@ -424,7 +424,8 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
 				if not pilots[1] then
 					print("DcUT Error_04 : No pilot in this SAR zone: "..tostring(zoneName).." for side "..tostring(sideTL) )
-					os.execute 'pause'
+					AddLog("DcUT Error_04 : No pilot in this SAR zone: "..tostring(zoneName).." for side "..tostring(sideTL) )
+					-- os.execute 'pause'
 					break
 				end
 
@@ -771,9 +772,9 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 													target.targetDead_last = true
 												end
 
-												element.dead = Deepcopy(unit.dead)								--store unit status
-												element.dead_last = Deepcopy(unit.dead_last)					--store unit dead_last
-												element.CheckDay = Deepcopy(unit.CheckDay)						-- M19 ajoute la date destruction/ravito pour les futurs check de ravitaillement
+												element.dead = DeepCopy(unit.dead)								--store unit status
+												element.dead_last = DeepCopy(unit.dead_last)					--store unit dead_last
+												element.CheckDay = DeepCopy(unit.CheckDay)						-- M19 ajoute la date destruction/ravito pour les futurs check de ravitaillement
 												element.x = unit.x
 												element.y = unit.y
 												element.class = classname
@@ -851,7 +852,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 							temp.x, temp.y, temp.class = checkElementXY(element, targetside)
 
 							if temp.x == nil and element.name then
-								local elementTMP = Deepcopy(element)
+								local elementTMP = DeepCopy(element)
 								elementTMP.name = elementTMP.name.."-1"
 								temp.x, temp.y, temp.class = checkElementXY(elementTMP, targetside)
 								if temp.x ~= nil then

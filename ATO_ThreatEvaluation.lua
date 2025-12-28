@@ -1225,7 +1225,7 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 						if group.route.points[1].task.params.tasks[t].params.action.id == "SetFrequency" then							--if group has a frequency set										
 							
 							if camp and camp.ewrFreqAdaptable then
-								ewr_call["frequencyMHz"] = GetFrequency(sidename, group.name, "EWR")
+								ewr_call["frequencyMHz"] = GetFrequencyNG(sidename, group.name, "EWR")
 								ewr_call["frequencyHz"] = ewr_call.frequencyMHz * 1000000		--convert to Hz
 								group.route.points[1].task.params.tasks[t].params.action.params.frequency = ewr_call["frequencyHz"]
 							else
@@ -1560,7 +1560,7 @@ for zone_n,zone in pairs(mission.triggers.zones) do												--iterate through
 	end
 end
 
-GroundthreatsAll = Deepcopy(groundthreats)
+GroundthreatsAll = DeepCopy(groundthreats)
 
 function CheckPointInCercle(point, circle)
 	--(x-center_x)^2 + (y - center_y)^2 < radius^2
@@ -1580,7 +1580,7 @@ sumCercleSAM = sumCercleSAM + #groundthreats["red"]
 
 --supprime les cercles dans les cercles pour eviter d'en avoir beaucoup beaucoup
 if sumCercleSAM >= reduceCercle then
-	local copyThreats = Deepcopy(groundthreats)
+	local copyThreats = DeepCopy(groundthreats)
 	for sideThreat, threats in pairs(groundthreats) do
 		for n=#threats-1, 2, -1 do
 			for copyThreats_n, copyThreat in pairs(copyThreats[sideThreat]) do
@@ -1636,12 +1636,14 @@ if Debug.debug then
 	campFile:close()
 
 	if #Fighterthreats["blue"] == 0 then
-		print("AtoTE pas de menace air BLue? ^^")
-		os.execute 'pause'
+		-- print("AtoTE pas de menace air BLue? ^^")
+		AddLog("AtoTE pas de menace air BLue? ^^")
+		-- os.execute 'pause'
 	end
 	if #Fighterthreats["red"] == 0 then
-		print("AtoTE pas de menace air red? ^^")
-		os.execute 'pause'
+		-- print("AtoTE pas de menace air red? ^^")
+		AddLog("AtoTE pas de menace air red? ^^")
+		-- os.execute 'pause'
 	end
 
 end

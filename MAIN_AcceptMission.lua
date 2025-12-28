@@ -86,6 +86,9 @@ scenFile:close()
 
 ----- run scripts to accept content of next mission -----
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
+CreateAircraftListInCampaign()
+CleanDataDivers()
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
@@ -98,21 +101,21 @@ dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
 
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
 
---retrocompatibilie location UTIL_DataRadio file
---recherche en priorit� le fichier radios_freq_compatible dans le dossier ScriptsMod puis dans le dossier campagne
-local radioFile = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua"
-local testPath = io.open(radioFile, "r")																--cette maniere de chercher la presence d un fichier evite un plantage
-if not testPath then																					--check si le fichier existe dans ScriptsMod
-	io.close(testPath)
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
-else
-	local radioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
-	local testPath2 = io.open(radioFile2, "r")
-	if testPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
-		io.close(testPath2)
-		dofile(radioFile2)
-	end
-end
+-- --retrocompatibilie location UTIL_DataRadio file
+-- --recherche en priorit� le fichier radios_freq_compatible dans le dossier ScriptsMod puis dans le dossier campagne
+-- local radioFile = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua"
+-- local testPath = io.open(radioFile, "r")																--cette maniere de chercher la presence d un fichier evite un plantage
+-- if not testPath then																					--check si le fichier existe dans ScriptsMod
+-- 	io.close(testPath)
+-- 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
+-- else
+-- 	local radioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
+-- 	local testPath2 = io.open(radioFile2, "r")
+-- 	if testPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
+-- 		io.close(testPath2)
+-- 		dofile(radioFile2)
+-- 	end
+-- end
 
 
 

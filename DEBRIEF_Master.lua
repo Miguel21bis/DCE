@@ -34,6 +34,7 @@ Briefing_status = ""																		--text string to be added to next briefing
 Briefing_oob_text_red = ""																	--text string to be added to next briefing (red repair and reinforcements)
 Briefing_oob_text_blue = ""																	--text string to be added to next briefing (blue repair and reinforcements)
 Briefing_text = ""
+PlayerSide = nil
 
 local function AcceptMission()
 	local m = ""
@@ -142,6 +143,33 @@ UpdateConfMod(nil, nil, "DEBRIEF_Master "..debug.getinfo(1).currentline)
 require("Active/oob_ground")																	--load ground oob
 require("Active/oob_air")																		--load air oob
 
+
+--affiche le type d'avion selectionné et son squadrons M55_a
+local playerInfo = {
+	planeBat = "",
+	squadBat = "",
+	countryBat = "",
+	sideBAT = "",
+}
+
+-- playerSide = ""
+local n_player = 0
+for side, squadTL in PairsByKeys(oob_air) do
+	for squad_n, squad in PairsByKeys(squadTL) do
+		if squad.player then
+			playerInfo.planeBAT = squad.type
+			playerInfo.squadBAT = squad.name
+			playerInfo.countryBAT = squad.country
+			playerInfo.sideBAT = side
+			n_player = n_player + 1
+		end
+	end
+end
+PlayerSide = playerInfo.sideBAT
+if n_player > 1 then
+	print("Warning: more than one player squadron found in OOB.")
+	os.execute 'pause'
+end
 
 -- Exécution du fichier s'il existe
 local testFile = "Init/various_table.lua"
@@ -253,24 +281,6 @@ if Debug.debug then
 end
 
 
-
---affiche le type d'avion selectionné et son squadrons M55_a
-local playerInfo = {
-	planeBat = "",
-	squadBat = "",
-	countryBat = "",
-}
-
--- playerSide = ""
-for side, squadTL in  PairsByKeys(oob_air) do
-	for squad_n, squad in  PairsByKeys(squadTL) do
-		if squad.player then
-			playerInfo.planeBAT = squad.type
-			playerInfo.squadBAT = squad.name
-			playerInfo.countryBAT = squad.country
-		end
-	end
-end
 
 if VersionPackageICM then
 	-- print("= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." = = = = = = = = = = = = = = = = = =")
@@ -843,7 +853,7 @@ if input == "y" or input == "yes" then
 
 
 		if Debug.debug and Debug.AfficheFlight then
-			print("DCE debug")  os.execute 'pause'
+			print("0C1 DCE debug")  os.execute 'pause'
 		end
 
 	until 1 == 2																					--repeat until the next mission is ready (has a player flight)

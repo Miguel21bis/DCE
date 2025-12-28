@@ -443,7 +443,7 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 
 						if #route > 1 then
 							route = {}
-							route = Deepcopy(routeModif)
+							route = DeepCopy(routeModif)
 						end
 
 						--recalcul les timmings en fonction des nouveaux wpt ajout�

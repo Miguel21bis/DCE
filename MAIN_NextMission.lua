@@ -96,7 +96,7 @@ local dicStrFunc = loadstring(dicStr)()
 zipFile:unzLocateFile('l10n/DEFAULT/mapResource')
 local resStr = zipFile:unzReadAllCurrentFile()
 loadstring(resStr)()
-local oldMapResource = Deepcopy(mapResource)
+local oldMapResource = DeepCopy(mapResource)
 
 zipFile:unzClose()
 
@@ -487,13 +487,6 @@ if mission_ini.load_CTLD then
 	AddFileTriggerTempo("CTLD.lua", 4, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})	-- modification M60 CTLD
 end
 
-
------ run scripts to create content of next mission -----
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
-
-
 if not mission_ini  or mission_ini == nil  then
 	dofile("Init/conf_mod.lua")
 end
@@ -571,9 +564,14 @@ else
 
 end
 
-if not camp.path or camp.path == nil then												-- modification M35.d version ScriptsMod
-	camp.path = os.getenv('pathSavedGames')												-- modification M35.e version ScriptsMod
+if not camp.path or camp.path == nil then
+	camp.path = os.getenv('pathSavedGames')
 	camp.path = string.gsub(camp.path, "\\", "/")
+end
+
+if not camp.pathDCS or camp.pathDCS == nil then
+	camp.pathDCS = os.getenv('pathDCS')
+	camp.pathDCS = string.gsub(camp.pathDCS, "\\", "/")
 end
 
 -- modification M35.d (d: info log) version ScriptsMod
@@ -591,29 +589,32 @@ for planeType, value in PairsByKeys(Data_divers) do
 	end
 end
 
---si ADD_data existe, on le precharge pour l'ajouter au DATA centram
-local addDataFile02 = "../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua"
-local testPathADD_addData = io.open(addDataFile02, "r")										--cette maniere de chercher la presence d un fichier evite un plantage
-if testPathADD_addData ~= nil  then														--check si le fichier existe dans ScriptsMod
-	dofile("../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua")
+--**
+--deprecated--
+--**
+-- --si ADD_data existe, on le precharge pour l'ajouter au DATA centram
+-- local addDataFile02 = "../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua"
+-- local testPathADD_addData = io.open(addDataFile02, "r")										--cette maniere de chercher la presence d un fichier evite un plantage
+-- if testPathADD_addData ~= nil  then														--check si le fichier existe dans ScriptsMod
+-- 	dofile("../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua")
 
-	if add_EPLRS_Capacity then
-		for key , value in pairs(add_EPLRS_Capacity) do
-			if not EPLRS_Capacity[key] then
-				EPLRS_Capacity[key] = true
-			end
-		end
-	end
+-- 	if add_EPLRS_Capacity then
+-- 		for key , value in pairs(add_EPLRS_Capacity) do
+-- 			if not EPLRS_Capacity[key] then
+-- 				EPLRS_Capacity[key] = true
+-- 			end
+-- 		end
+-- 	end
 
-	if add_TaskByPlane then
-		for key , value in pairs(add_TaskByPlane) do
-			if not TaskByPlane[key] then
-				TaskByPlane[key] = true
-			end
-		end
-	end
+-- 	if add_TaskByPlane then
+-- 		for key , value in pairs(add_TaskByPlane) do
+-- 			if not TaskByPlane[key] then
+-- 				TaskByPlane[key] = true
+-- 			end
+-- 		end
+-- 	end
 
-end
+-- end
 
 -- --assign les callsign par squad west
 AssignCallnameSquad()
@@ -622,20 +623,6 @@ AssignCallnameSquad()
 
 -- Appel de la fonction principale
 CheckAndFixAllIds()
-
-
-
---****************************************************************************************
---transferé dans UTIL_Fonctions LoadFileAndUpdate()
---****************************************************************************************
-
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CampaignSettings.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Refpoints.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_MissionScore.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
-
--- Check_TaskPossibleByPlane()
 
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_MissionScore.lua")
 
@@ -651,10 +638,9 @@ if MissionInstance >= 2 then
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
 	
-	CreatePlageFrequency_A()-- TODO a confirmer qu'il est encore utile cree une table de radio en fonction du canal puis de la wave
-	CreatePlageFrequency_B()	--cree une table de radio en fonction des wave
-	-- CreatePlageFrequency_C()	--cree une table de radio en fonction des wave
-
+	-- CreatePlageFrequency_A()-- TODO a confirmer qu'il est encore utile cree une table de radio en fonction du canal puis de la wave
+	-- CreatePlageFrequency_B()	--cree une table de radio en fonction des wave
+	
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
@@ -1043,7 +1029,7 @@ for _, side in pairs(mission.coalition) do
 
 										else
 											--garde le nom du fichier autre que beacon
-											local tempOldFile = Deepcopy(oldMapResource[task.params.action.params.file])
+											local tempOldFile = DeepCopy(oldMapResource[task.params.action.params.file])
 
 											mission.maxDictId = mission.maxDictId + 1
 											task.params.action.params.subtitle = "DictKey_subtitle_"..mission.maxDictId

@@ -310,17 +310,19 @@ CommonFreq = {
 --DCS_Side = {"blue", "red", "neutrals"}
 --commun frequence M34_
 for sideName, side in pairs(DCS_Side) do
-	CommonFreq[side]["UHF"][1] = GetFrequency(side, nil, "coalition", nil, "UHF")
-	CommonFreq[side]["UHF"][2] = GetFrequency(side, nil, "coalition", nil, "UHF")
+	CommonFreq[side]["UHF"][1] = GetFrequencyNG(side, nil, "coalition", nil, "UHF")
+	CommonFreq[side]["UHF"][2] = GetFrequencyNG(side, nil, "coalition", nil, "UHF")
 
-	CommonFreq[side]["VHF"][1] = GetFrequency(side, nil, "coalition", nil, "VHF")
-	CommonFreq[side]["VHF"][2] = GetFrequency(side, nil, "coalition", nil, "VHF")
+	CommonFreq[side]["VHF"][1] = GetFrequencyNG(side, nil, "coalition", nil, "VHF")
+	CommonFreq[side]["VHF"][2] = GetFrequencyNG(side, nil, "coalition", nil, "VHF")
 
-	CommonFreq[side]["HF"][1] = GetFrequency(side, nil, "coalition", nil, "HF")
-	CommonFreq[side]["HF"][2] = GetFrequency(side, nil, "coalition", nil, "HF")
+	CommonFreq[side]["HF"][1] = GetFrequencyNG(side, nil, "coalition", nil, "HF")
+	CommonFreq[side]["HF"][2] = GetFrequencyNG(side, nil, "coalition", nil, "HF")
+	CommonFreq[side]["LVHF"][1] = GetFrequencyNG(side, nil, "coalition", nil, "LVHF")
+	CommonFreq[side]["LVHF"][2] = GetFrequencyNG(side, nil, "coalition", nil, "LVHF")
 
-	CommonFreq[side]["LVHF"][1] = GetFrequency(side, nil, "coalition", nil, "LVHF")
-	CommonFreq[side]["LVHF"][2] = GetFrequency(side, nil, "coalition", nil, "LVHF")
+	_affiche(CommonFreq[side], "ATOFP CommonFreq "..side)
+	-- os.execute 'pause'
 
 	for n=1, 2 do
 		local testFreqency = tonumber(CommonFreq[side]["UHF"][n])
@@ -820,18 +822,18 @@ local function get_IDM_Id()
 	return testId
 end
 
---liste toutes les Fréquences déjà existantes pour ne pas creer de doublon
-for basename, base in pairs(db_airbases) do
-	if base.ATC_frequency and base.ATC_frequency ~= "" and type(base.ATC_frequency)~= "table" then
-		Assigned_freq[tonumber(base.ATC_frequency)] = basename
-	elseif base.ATC_frequency and type(base.ATC_frequency)== "table" then
-		for n , freq in ipairs(base.ATC_frequency) do
-			Assigned_freq[tonumber(freq)] = basename
-		end
-	else
-		-- _affiche(base.ATC_frequency, "AA base.ATC_frequency") 
-	end
-end
+-- --liste toutes les Fréquences déjà existantes pour ne pas creer de doublon
+-- for basename, base in pairs(db_airbases) do
+-- 	if base.ATC_frequency and base.ATC_frequency ~= "" and type(base.ATC_frequency)~= "table" then
+-- 		Assigned_freq[tonumber(base.ATC_frequency)] = basename
+-- 	elseif base.ATC_frequency and type(base.ATC_frequency)== "table" then
+-- 		for n , freq in ipairs(base.ATC_frequency) do
+-- 			Assigned_freq[tonumber(freq)] = basename
+-- 		end
+-- 	else
+-- 		-- _affiche(base.ATC_frequency, "AA base.ATC_frequency") 
+-- 	end
+-- end
 
 
 ---- function to assign A-A TACAN channels ----
@@ -2096,8 +2098,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				--on passe donc en mode dégradé
 				if not goodTask then
 					if goupTaskTemp ~= "Runway Attack" then
-						print("(downgraded mode  : don t found task "..flight[f].task.." of the "..flight[f].type.. "in the oob_air_init.lua file")
-						print("typeCible "..typeCible.." || "..flight[f].type.." "..goupTaskTemp.." "..tostring(flight[f].target.name))
+						print("(downgraded mode  : don t found task |"..flight[f].task.."| of the |"..flight[f].type.. " |in the oob_air_init.lua file")
+						print("typeCible |"..typeCible.."| |"..flight[f].type.."| |"..goupTaskTemp.."| |"..tostring(flight[f].target.name))
 					end
 
 					if TaskByPlane["Ground Attack"][flight[f].type]   then
@@ -2167,9 +2169,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						else
 							speed = pack[p].main[1].loadout.vCruise
-							-- if Debug.debug then
-								AddLog("this flight have not a speed Data_divers.vCruise: "..flight[f].name.." |type: "..flight[f].type)
-							-- end
+							if Debug.debug then
+								-- AddLog("this flight have not a speed Data_divers.vCruise: "..flight[f].name.." |type: "..flight[f].type)
+							end
 						end
 						
 					else
@@ -4438,7 +4440,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				-- ************* store player waypoints for briefing creation *************
 				if flight[f].player == true then
 
-					camp.player.waypoints = Deepcopy(waypoints)
+					camp.player.waypoints = DeepCopy(waypoints)
 					if camp.player.waypoints[2] then
 						camp.player.waypoints[2].speed = 0
 						camp.player.waypoints[2].alt = 0
@@ -4497,7 +4499,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					for w = 3, #waypoints do
 						if waypoints[w].alt < waypoints[w - 1].alt and waypoints[w]["type"] ~= "Land" 
 						and (waypoints[w]["briefing_name"] and waypoints[w]["briefing_name"] ~= "Stacking") then		--for any descend waypoint that is not the landing waypoint
-							local extraWP = Deepcopy(waypoints[w])												--make a copy of the descend waypoint
+							local extraWP = DeepCopy(waypoints[w])												--make a copy of the descend waypoint
 							extraWP.x = (waypoints[w].x + waypoints[w + -1].x) / 2								--position half-way between descend waypoint and previous waypoint
 							extraWP.y = (waypoints[w].y + waypoints[w + -1].y) / 2								--position half-way between descend waypoint and previous waypoint
 							extraWP.ETA = (waypoints[w].ETA + waypoints[w + -1].ETA) / 2						--ETA half-way between descend waypoint and previous waypoint
@@ -4761,7 +4763,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						local typeDatalink = Data_divers[flight[f].type].datalinks.type
 
 						units[n]["datalinks"] = {
-							[typeDatalink] = 	Deepcopy(datalinks[typeDatalink][flight[f].type])
+							[typeDatalink] = 	DeepCopy(datalinks[typeDatalink][flight[f].type])
 						}
 					end
 
@@ -4907,7 +4909,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						if Data_AddPropAircraft[type_withProp]  then
 							--ajoute AddPropAircraft aux types joueur/client
-							units[n]["AddPropAircraft"] = Deepcopy(Data_AddPropAircraft[type_withProp])
+							units[n]["AddPropAircraft"] = DeepCopy(Data_AddPropAircraft[type_withProp])
 
 							if isHumain then
 								-- print("passe C10 isHumain")
@@ -4957,7 +4959,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					--dataCartridge 2.9
 					if Data_divers[flight[f].type] and Data_divers[flight[f].type].dataCartridge then
-						units[n]["dataCartridge"] = 	Deepcopy(dataCartridge)
+						units[n]["dataCartridge"] = 	DeepCopy(dataCartridge)
 					end
 
 
@@ -4990,7 +4992,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				--********************************************************************************
 				if Data_divers[flight[f].type] and Data_divers[flight[f].type].datalinks and Data_divers[flight[f].type].datalinks.type then
 
-					local typeDatalink = Deepcopy(Data_divers[flight[f].type].datalinks.type)
+					local typeDatalink = DeepCopy(Data_divers[flight[f].type].datalinks.type)
 
 					--récupere les id des autres membres du group
 					local recordId = {}
@@ -5003,15 +5005,15 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						local isReceiver = Data_divers[flight[f].type].datalinks.isReceiver
 
 						for n=1, #units do
-							local copyRecordId = Deepcopy(recordId)
+							local copyRecordId = DeepCopy(recordId)
 
 							if not units[n].AddPropAircraft then
 								--essentielement pour les donnors
-								units[n].AddPropAircraft = Deepcopy(AddPropAircraft_datalinks[typeDatalink])
+								units[n].AddPropAircraft = DeepCopy(AddPropAircraft_datalinks[typeDatalink])
 							else
 								for keyA, valueA in  pairs(AddPropAircraft_datalinks[typeDatalink]) do
 									if not units[n].AddPropAircraft[keyA] then
-										units[n].AddPropAircraft[keyA] = Deepcopy(valueA)
+										units[n].AddPropAircraft[keyA] = DeepCopy(valueA)
 									end
 								end
 							end
@@ -5115,14 +5117,14 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					elseif typeDatalink == "IDM" then
 						for n=1, #units do
-							local copyRecordId = Deepcopy(recordId)
+							local copyRecordId = DeepCopy(recordId)
 							if not units[n].AddPropAircraft then
 								--essentielement pour les donnors
-								units[n].AddPropAircraft = Deepcopy(AddPropAircraft_datalinks[typeDatalink])
+								units[n].AddPropAircraft = DeepCopy(AddPropAircraft_datalinks[typeDatalink])
 							else
 								for keyA, valueA in  pairs(AddPropAircraft_datalinks[typeDatalink]) do
 									if not units[n].AddPropAircraft[keyA] then
-										units[n].AddPropAircraft[keyA] = Deepcopy(valueA)
+										units[n].AddPropAircraft[keyA] = DeepCopy(valueA)
 									end
 								end
 							end
@@ -5186,61 +5188,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				-------- define group -----
 				-------- define group -----
 				---
-				local testFreqency = GetFrequency(sideName, flight[f].target_name, flight[f].task, type_withData, nil)
+				local taskOrHuman = isHumain and "player" or flight[f].task
+				local DCE_FreqPackage = GetFrequencyNG(sideName, flight[f].target_name, taskOrHuman, type_withData, nil, "FreqPackage")
 
-				--certain plane ne peuvent pas dépasser les valeurs de la radio 1 pour la frequence générale (exemple M-2000)
-				local info = ""
-				if Frequency[type_withData] and Frequency[type_withData].radio.frequencyMustBeRadio1 then
-					if not FreqCapability2(testFreqency, type_withData, 1, info) then
+				local DCE_FreqFlight = GetFrequencyNG(sideName, flight[f].target_name, taskOrHuman, type_withData, nil, "FreqFlight")
 
-						local foundFreq = false
-						if Frequency[type_withData].radio then
-							for range, value in pairs(Frequency[type_withData].radio) do
-								local i=0
-								repeat
-									testFreqency = GetFrequency(sideName, groupName, flight[f].task, type_withData, range)
-									print("AtoFP testFreqency: "..testFreqency)
-									if FreqCapability2(testFreqency, type_withData, 1, info) then
-										foundFreq = true
-									end
-									i=i+1
-								until foundFreq or i > 10
-
-								if foundFreq then break end
-
-							end
-						end
-					end
-
-					if not FreqCapability2(testFreqency, type_withData, 1, info) then
-						DebugFLIGHT = DebugFLIGHT .. "\n"..("AtoFP error frequency: "..type_withData.." "..testFreqency)
-					end
-				end
-
-				if Frequency[type_withData] and Frequency[type_withData]["onlyVariableFrequency"] then
-
-					if testFreqency >= Frequency[type_withData].onlyVariableFrequency.min
-					and testFreqency <= Frequency[type_withData].onlyVariableFrequency.max
-					then
-						-- print("AtoFp frequency Passe C Frequence "..tostring(testFreqency))
-					else
-
-						local wave = FoundWave(Frequency[type_withData].onlyVariableFrequency)
-
-						testFreqency = GetFrequency(sideName, flight[f].target_name, flight[f].task, type_withData, wave)
-
-						if testFreqency < Frequency[type_withData].onlyVariableFrequency.min
-						or testFreqency > Frequency[type_withData].onlyVariableFrequency.max
-						then
-							DebugFLIGHT = DebugFLIGHT .. "\n"..("AtoFP error frequency: "..type_withData.." "..testFreqency)
-						end
-					end
-				end
-
-
-				if tonumber(testFreqency) == 243 or tonumber(testFreqency) == 121.5 then
-					DebugFLIGHT = DebugFLIGHT .. "\n"..("AtoFP error frequency GUARD: "..type_withData.." "..testFreqency)
-				end
 
 				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe waypoints[1][x] AA "..tostring(waypoints[1]["x"])) end
 
@@ -5251,7 +5203,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				local group =
 				{
-					['frequency'] = testFreqency,
+					['frequency'] = DCE_FreqPackage,
 					['taskSelected'] = true,
 					['modulation'] = 0,
 					['groupId'] = GenerateIDGroup(),
@@ -5271,6 +5223,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					['task'] = goupTask,
 					['uncontrolled'] = false,
 					['DCE_targetName'] = flight[f].target_name,
+					['DCE_FreqFlight'] = DCE_FreqFlight,
 
 				}
 
@@ -5284,7 +5237,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						if waypoints[w]["task"] and waypoints[w]["task"]["params"] and waypoints[w]["task"]["params"]["tasks"] then
 							for i_task, _task in pairs(waypoints[w]["task"]["params"]["tasks"]) do
 								if _task and _task.id and _task.id == "FAC" then
-									_task.params.frequency = testFreqency * 1000000
+									_task.params.frequency = DCE_FreqPackage * 1000000
 								end
 							end
 						end
@@ -6323,7 +6276,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					if	flight[f].player == true then suffixePlayer = " - Player" end
 					if	flight[f].client == true then suffixePlayer = " - Client" end
 
-					local etiquette = "Pack " .. p .. " - "..flight[f].number.." "..ReplaceTypeName(flight[f].type).. " - " .. flight[f].name .." - " .. flight[f].task .." ".. f.. suffixePlayer
+					local etiquette = "Pack " .. p .. " - "..flight[f].number.." "..AliasTypeName(flight[f].type).. " - " .. flight[f].name .." - " .. flight[f].task .." ".. f.. suffixePlayer
 
 					local testST
 					if (baseIsCarrier or db_airbases[flight[f].base].helipadId) then
@@ -6414,7 +6367,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				local groupRTB = {}
 				if mission_ini.MP_PlaneRecovery and Multi.NbGroup >= 1 and isHumain then
 
-					groupRTB = Deepcopy(group)
+					groupRTB = DeepCopy(group)
 					groupRTB.groupId = GenerateIDGroup()
 
 					local direction = 0
@@ -6845,7 +6798,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					table.insert(mission.coalition[sideName].country[addKeyCoalition].plane.group, group)
 
 					if flight[f].player == true then
-						camp.player.group = Deepcopy(mission.coalition[sideName].country[addKeyCoalition].plane.group[#mission.coalition[sideName].country[addKeyCoalition].plane.group])		--store a link to the player group in mission
+						camp.player.group = DeepCopy(mission.coalition[sideName].country[addKeyCoalition].plane.group[#mission.coalition[sideName].country[addKeyCoalition].plane.group])		--store a link to the player group in mission
 					end
 
 					if groupRTB.groupId then
@@ -6861,7 +6814,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					table.insert(mission.coalition[sideName].country[addKeyCoalition].helicopter.group, group)
 
 					if flight[f].player == true then
-						camp.player.group = Deepcopy(mission.coalition[sideName].country[addKeyCoalition].helicopter.group[#mission.coalition[sideName].country[addKeyCoalition].helicopter.group])		--store a link to the player group in mission
+						camp.player.group = DeepCopy(mission.coalition[sideName].country[addKeyCoalition].helicopter.group[#mission.coalition[sideName].country[addKeyCoalition].helicopter.group])		--store a link to the player group in mission
 					end
 
 					if groupRTB.groupId then
@@ -7406,7 +7359,7 @@ for _side, side in pairs(mission.coalition) do
 						if Data_divers[unit.type] and Data_divers[unit.type].datalinks and Data_divers[unit.type].datalinks.isReceiver then
 							local typeDataLink = Data_divers[unit.type].datalinks.type
 							for pack_N, listId in pairs(pack_L16_unitId) do
-								local listIdCopy = Deepcopy(listId)
+								local listIdCopy = DeepCopy(listId)
 
 								for n=1, #listId do
 									if unit.unitId == listId[n] then
@@ -7442,7 +7395,7 @@ for _side, side in pairs(mission.coalition) do
 							end
 
 							for pack_N, listId in pairs(pack_SADL_unitId) do
-								local listIdCopy = Deepcopy(listId)
+								local listIdCopy = DeepCopy(listId)
 
 								for n=1, #listId do
 									if unit.unitId == listId[n] then
@@ -7775,7 +7728,7 @@ end
 if camp.player then
 	if not camp.player.package then camp.player.package = {} end
 	if not camp.player.package[camp.player.pack_n] then
-		camp.player.package[camp.player.pack_n] = Deepcopy(ATO[camp.player.side][camp.player.pack_n])
+		camp.player.package[camp.player.pack_n] = DeepCopy(ATO[camp.player.side][camp.player.pack_n])
 	end
 
 	--for multi-package strikes, add flights from other packages with the same target to player package to enrich the briefiing
@@ -7784,7 +7737,7 @@ if camp.player then
 			-- print("AtoFP role: "..role)
 			for f = 1, #flight do												--iterate through flights in roles
 				if flight[f].target_name == camp.player.target.titleName and camp.player.pack_n ~= p then	--flights that have the same target as player but are not in the player package
-					table.insert(camp.player.package[camp.player.pack_n][role], Deepcopy(flight[f]))							--insert flight into player package to list it in player briefing
+					table.insert(camp.player.package[camp.player.pack_n][role], DeepCopy(flight[f]))							--insert flight into player package to list it in player briefing
 				end
 			end
 		end
@@ -7798,7 +7751,7 @@ if camp.client then
 	for c = 1, #camp.client do
 		if not camp.client.package then camp.client.package = {} end
 		if not camp.client.package[camp.client[c].pack_n] then
-			camp.client.package[camp.client[c].pack_n] = Deepcopy(ATO[camp.client[c].side][camp.client[c].pack_n])	--pack_n
+			camp.client.package[camp.client[c].pack_n] = DeepCopy(ATO[camp.client[c].side][camp.client[c].pack_n])	--pack_n
 		end
 	end
 
@@ -8088,6 +8041,13 @@ end
 if Debug.debug then
 	camp_str = "ATO_AtoFP = " .. TableSerialization(ATO, 0)						--make a string
 	campFile = io.open("Debug/ATO_AtoFP.lua", "w")  or error("Failed to open debug file")
+	campFile:write(camp_str)																		--save new data
+	campFile:close()
+
+	
+
+	camp_str = "CommonFreq = " .. TableSerialization(CommonFreq, 0)						--make a string
+	campFile = io.open("Debug/Radio_CommonFreq_FlightPlan.lua", "w")  or error("Failed to open debug file")
 	campFile:write(camp_str)																		--save new data
 	campFile:close()
 

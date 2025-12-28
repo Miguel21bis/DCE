@@ -36,6 +36,30 @@ end
 -- 	}
 -- }
 
+--mise à jour de la structure des ejectedPilot
+-- ["pos"] = 
+-- {
+--     ["y"] = 369606.85478994,
+--     ["Vec3x"] = 22004.83531289,
+--     ["z"] = 362.05462646484,
+--     ["Vec3y"] = 362.05462646484,
+--     ["Vec3z"] = 369606.85478994,
+--     ["x"] = 22004.83531289,
+-- },
+if camp_ZoneSAR and camp_ZoneSAR ~= nil then
+    for zoneSideName, sideSAR in pairs(camp_ZoneSAR) do
+        for zoneName, zone in pairs(sideSAR) do
+
+            for pilotN, pilot in ipairs(zone) do
+                if not pilot.pos then
+                    pilot = PatchEjectedPilotStructure(pilot, "updateSAR")
+                end
+                -- pilot = PatchEjectedPilotStructure(pilot, "updateSAR")
+            end
+        end
+    end
+end
+
 --temporaire, transforme les variables renommé:
 -- Supprime de oob_ground ET de camp_ZoneSAR les ejectedPilot capturés ou sauvés
 if camp_ZoneSAR and camp_ZoneSAR ~= nil then
@@ -567,7 +591,9 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                 end
 
                 for baseName, base in pairs(db_airbases) do
-                    if base.side == pilot.sideName then
+                    if base.side == pilot.sideName and base.x then
+                        -- _affiche(base, "DcUS base ")
+                        -- _affiche(pilot.pos, "pilot.pos ")
 
                         local distance = math.sqrt(math.pow(pilot.pos.x - base.x, 2) + math.pow(pilot.pos.y - base.y, 2))
                         if distance < 5000 then
