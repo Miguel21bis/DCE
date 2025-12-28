@@ -90,7 +90,7 @@ FrequencyAG = {
 				FC3 = true,
 				FC3Frequency = 124,
 			},
-		},	
+		},
 	},
 	["A-10C"] = {
 		radio = {						--range of radio frequencies of player aircraft
@@ -100,7 +100,7 @@ FrequencyAG = {
 					max = 399.975,			--maxium  radio frequency in mHz
 				},
 				nbCanal = 0,
-				name = "AN/ARC 164 UHF",	
+				name = "AN/ARC 164 UHF",
 			},
 			[2] = {						--radio 2 AN/ARC 186(V) VHF AM # 1  VHF FM #2
 				LVHF = {
@@ -110,9 +110,9 @@ FrequencyAG = {
 				VHF = {
 					min = 116,				--minimum radio frequency in mHz 
 					max = 151.975,			--maxium  radio frequency in mHz
-				},	
-				nbCanal = 0,	
-				name = "AN/ARC 186 VHF/FM",	
+				},
+				nbCanal = 0,
+				name = "AN/ARC 186 VHF/FM",
 			},
 		},
 	},
@@ -124,7 +124,7 @@ FrequencyAG = {
 					max = 399.975,			--maxium  radio frequency in mHz
 				},
 				nbCanal = 0,
-				name = "AN/ARC 164 UHF",	
+				name = "AN/ARC 164 UHF",
 			},
 			[2] = {						--radio 2 AN/ARC 186(V) VHF AM # 1  VHF FM #2
 				LVHF = {
@@ -134,9 +134,9 @@ FrequencyAG = {
 				VHF = {
 					min = 116,				--minimum radio frequency in mHz 
 					max = 151.975,			--maxium  radio frequency in mHz
-				},	
+				},
 				nbCanal = 0,
-				name = "AN/ARC 186 VHF/FM",	
+				name = "AN/ARC 186 VHF/FM",
 			},
 		},
 	},
@@ -164,7 +164,7 @@ FrequencyAG = {
 					max = 87.975,			--maxium  radio frequency in mHz
 				},
 				nbCanal = 8,
-				name = "FM Radio",	
+				name = "FM Radio",
 				-- range = {{min = 30, max = 87.975}},
 			},
 			[2] = {						--radio  
@@ -178,7 +178,7 @@ FrequencyAG = {
 			},
 		},
 	},
-	
+
 	["F-86F Sabre"] = {
 		radio = {						--range of radio frequencies of player aircraft
 			[1] = {						--radio 1
@@ -304,7 +304,7 @@ FrequencyAG = {
 
 	["F-5E-3"] = {
 		radio = {						--range of radio frequencies of player aircraft
-			[1] = {				
+			[1] = {
 				UHF = {
 					min = 225,				--minimum radio frequency in mHz   UHF ARC-164 20 preset channels
 					max = 399,				--maxium  radio frequency in mHz
@@ -312,10 +312,10 @@ FrequencyAG = {
 				nbCanal = 20,
 				manual = true,
 				name = "RC-164 UHF",
-			},			
+			},
 		},
 	},
-	
+
 	["F-14"] = {--Common aircraft definitions F-14A-135-GR & F-14B
 		-- HumanRadio = {
 		-- 	frequency     = 124.0, -- onboard radio, default DCSW frequency, chnl 0
@@ -364,7 +364,7 @@ FrequencyAG = {
 	},
 
 	["F-15ESE"] = {
-		radio = {			
+		radio = {
 			[1] = {						--radio 1 AN/ARC-164
 				UHF = {
 					min = 225,				--minimum radio frequency in mHz 
@@ -396,7 +396,7 @@ FrequencyAG = {
 		},
 	},
 	["F-16C_50"] = {
-		radio = {			
+		radio = {
 			[1] = {						--radio 1 AN/ARC-164
 				UHF = {
 					min = 225,				--minimum radio frequency in mHz 
@@ -477,12 +477,12 @@ FrequencyAG = {
 				VHF = {
 					min = 103,				--minimum radio frequency in mHz 	TODO a fonfirmer avec notice
 					max = 155.975,			--maxium  radio frequency in mHz
-				},	
+				},
 				UHF = {
 					min = 225,				--minimum radio frequency in mHz  
 					max = 399.95,			--maxium  radio frequency in mHz
-				},	
-				
+				},
+
 				nbCanal = 0,
 				manual = true,
 				name = "FR 22 V/UHF",
@@ -514,7 +514,7 @@ FrequencyAG = {
 				},
 				nbCanal = 26,
 				name = "ARC-210 COM1 V/UHF/AM/FM",
-				
+
 			},
 			[2] = {						-- V/UHF FM ARC-210 26 preset channels
 				LVHF = {
@@ -531,7 +531,7 @@ FrequencyAG = {
 				},
 				nbCanal = 26,
 				name = "ARC-210 COM2 V/UHF/AM/FM",
-			},			
+			},
 			-- [3] = {						--V/UHF FM ARC-210 30 preset channels  RCS
 				-- LVHF = {
 					-- min = 30,				--minimum radio frequency in mHz  
@@ -575,8 +575,8 @@ FrequencyAG = {
 				name = "Poste Vert V/UHF",
 			},
 		},
-	},	
-	
+	},
+
 	["Mirage-F1"] = {
 		radio = {						--range of radio frequencies of player aircraft
 			[1] = {						--radio 1
@@ -591,7 +591,7 @@ FrequencyAG = {
 				nbCanal = 20,
 				manual = true,
 				name = "Poste Vert V/UHF",
-			},			
+			},
 			[2] = {						--radio 2
 				UHF = {
 					min = 225,				--minimum radio frequency in mHz  
@@ -613,7 +613,7 @@ FrequencyAG = {
 				nbCanal = 20,
 				manual = true,
 				name = "UHF AN/ARC-150(V)-2 ", --UHF",
-			},			
+			},
 			[2] = {						--radio 2
 				LVHF = {
 					min = 30,				--minimum radio frequency in mHz
@@ -671,7 +671,7 @@ FrequencyAG = {
 	},
 
 	["AH-64D_BLK_II"] = {
-		
+
 		-- prefFreqPackage = {
 			-- nRadio = 2,
 			-- range = "VHF",
@@ -746,8 +746,8 @@ FrequencyAG = {
 				manual = true,
 			},
 		},
-		 
-		
+
+
 	},
 	["OH58D"] = {
 		onlyVariableFrequency = {
@@ -772,7 +772,7 @@ FrequencyAG = {
 				-- 	{min = 225.0, max = 399.975}
 				-- },
 			},
-			[2] = {	
+			[2] = {
 				VHF = {
 					min = 116,				--minimum radio frequency in mHz
 					max = 151.975,				--maxium  radio frequency in mHz
@@ -798,7 +798,7 @@ FrequencyAG = {
 				-- 	{min = 30.0, max = 87.975}
 				-- },
 			},
-			[4] = {	
+			[4] = {
 				LVHF = {
 					min = 30,				--minimum radio frequency in mHz
 					max = 87.975,				--maxium  radio frequency in mHz
@@ -848,9 +848,9 @@ FrequencyAG = {
 				VHF = {
 					min = 116,				--minimum radio frequency in mHz 
 					max = 151.975,			--maxium  radio frequency in mHz
-				},	
+				},
 				nbCanal = 20,
-				name = "AN/ARC 186 VHF/FM",	
+				name = "AN/ARC 186 VHF/FM",
 			},
 		},
 	},
@@ -956,7 +956,7 @@ FrequencyAG = {
 				startCanal = 0,
 				name = "R-832M V/UHF"
 			},
-		},	
+		},
 	},
 
 	["Su-25"] = {--Common aircraft definitions Su-25 & Su-25T
@@ -974,7 +974,7 @@ FrequencyAG = {
 				FC3 = true,
 				FC3Frequency = 124,
 			},
-		},	
+		},
 	},
 
 	["MiG-15bis"] = {
@@ -987,7 +987,7 @@ FrequencyAG = {
 				nbCanal = 0,
 				name = "RSI-6K",
 			},
-		},	
+		},
 	},
 	["MiG-19P"] = {
 		radio = {						--range of radio frequencies of player aircraft
@@ -999,7 +999,7 @@ FrequencyAG = {
 				nbCanal = 6,
 				name = "RSIU-4V VHF",
 			},
-		},	
+		},
 	},
 	["MiG-21Bis"] = {
 		radio = {
@@ -1059,7 +1059,7 @@ FrequencyAG = {
 				FC3 = true,
 				FC3Frequency = 124,
 			},
-		},	
+		},
 	},
 	["MiG-29S"] = {
 		radio = {						--range of radio frequencies of player aircraft
@@ -1076,10 +1076,10 @@ FrequencyAG = {
 				FC3 = true,
 				FC3Frequency = 124,
 			},
-		},	
+		},
 	},
 	["JF-17"] = {
-		radio = {			
+		radio = {
 			[1] = {						--radio 1
 				LVHF = {
 					min = 30,				--minimum radio frequency in mHz 
@@ -1099,13 +1099,13 @@ FrequencyAG = {
 	},
 
 	["Mi-8MT"] = {
-		
+
 		radio = {						--range of radio frequencies of player aircraft
 			[1] = {						--radio 1
 				VHF = {
 					min = 100,				--minimum radio frequency in mHz
 					max = 225,				--maxium  radio frequency in mHz
-				},	
+				},
 				UHF = {
 					min = 226,				--minimum radio frequency in mHz
 					max = 399,				--maxium  radio frequency in mHz
@@ -1135,7 +1135,7 @@ FrequencyAG = {
 		},
 	},
 	["Mi-24P"] = {
-		
+
 		radio = {
 			[1] = {						--radio 1 R863 VHF/UHF
 				VHF = {
@@ -1170,7 +1170,7 @@ FrequencyAG = {
 		},
 	},
 	["Ka-50"] = {
-		
+
 		radio = {						--range of radio frequencies of player aircraft
 			[1] = {						--radio 1
 				LVHF = {
@@ -1198,7 +1198,7 @@ FrequencyAG = {
 		},
 	},
 	["Ka-50_3"] = {
-		
+
 		radio = {						--range of radio frequencies of player aircraft
 			[1] = {						--radio 1
 				LVHF = {
@@ -1226,7 +1226,7 @@ FrequencyAG = {
 		},
 	},
 	["P-51D-30-NA"] = {
-		radio = {							
+		radio = {
 			[1] = {						--radio  SCR 522 A VHF RADIO
 				VHF = {
 					min = 100,				--minimum radio frequency in mHz
@@ -1237,7 +1237,7 @@ FrequencyAG = {
 		},
 	},
 	["P-47D-30"] = {
-		radio = {									
+		radio = {
 			[1] = {						--radio SCR 522 A VHF RADIO
 				VHF = {
 					min = 100,				--minimum radio frequency in mHz
@@ -1248,7 +1248,7 @@ FrequencyAG = {
 		},
 	},
 	["SpitfireLFMkIX"] = {
-		radio = {									
+		radio = {
 			[1] = {						--radio A R I 1063 type HF
 				VHF = {
 					min = 100,				--minimum radio frequency in mHz
@@ -1258,9 +1258,9 @@ FrequencyAG = {
 			},
 		},
 	},
-	
+
 	["MosquitoFBMkVI"] = {
-		radio = {									
+		radio = {
 			[1] = {						--radio VHF
 				VHF = {
 					min = 100,				--minimum radio frequency in mHz
@@ -1296,7 +1296,7 @@ FrequencyAG = {
 		},
 	},
 	["Bf-109K-4"] = {
-		radio = {									
+		radio = {
 			[1] = {						--radio 4 is equipped with a FUG 16ZY radio transmitter and receiver.
 				LVHF = {
 					min = 38.4,				--minimum radio frequency in mHz
@@ -1306,78 +1306,9 @@ FrequencyAG = {
 			},
 		},
 	},
-}	
-	
+}
+
 Db_Frequency = {
-
-
-	-- HumanRadio = {
-	-- 	frequency 		= 251.0,  -- Radio Freq angepasst F104
-	-- 	editable 		= true,
-	-- 	minFrequency	= 225.000, -- angepasst F104
-	-- 	maxFrequency 	= 399.979, -- angepasst F104
-	-- 	modulation 		= MODULATION_AM
-	-- },
-
-	-- 	panelRadio = {
-    --     [1] = {--ARC_66 has 27 slots...so look for those missing 7 ;-)
-    --         name = _("ARC_66"),
-    --         range = {
-	-- 					{min = 225.0, max = 399.0}
-    --         },
-    --         channels = {  -- matches L-39C except for channel 8, which was changed to a Georgian airport and #20 which is NTTR only (for now).  This radio goes 1-20 not 0-19.
-    --             [1] = { name = _("Channel 1"),		default = 264.0, modulation = _("AM"), connect = true}, -- mineralnye-vody (URMM) : 264.0
-    --             [2] = { name = _("Channel 2"),		default = 265.0, modulation = _("AM")},	-- nalchik (URMN) : 265.0
-    --             [3] = { name = _("Channel 3"),		default = 256.0, modulation = _("AM")},	-- sochi-adler (URSS) : 256.0
-    --             [4] = { name = _("Channel 4"),		default = 254.0, modulation = _("AM")},	-- maykop-khanskaya (URKH), nellis (KLSV) : 254.0
-    --             [5] = { name = _("Channel 5"),		default = 250.0, modulation = _("AM")},	-- anapa (URKA) : 250.0
-    --             [6] = { name = _("Channel 6"),		default = 270.0, modulation = _("AM")},	-- beslan (URMO) : 270.0
-    --             [7] = { name = _("Channel 7"),		default = 257.0, modulation = _("AM")},	-- krasnodar-pashkovsky (URKK) : 257.0
-    --             [8] = { name = _("Channel 8"),		default = 258.0, modulation = _("AM")},	-- sukhumi-babushara (UGSS) : 255.0
-    --             [9] = { name = _("Channel 9"),		default = 262.0, modulation = _("AM")},	-- kobuleti (UG5X) : 262.0
-    --             [10] = { name = _("Channel 10"),	default = 259.0, modulation = _("AM")},	-- gudauta (UG23) : 259.0
-    --             [11] = { name = _("Channel 11"),	default = 268.0, modulation = _("AM")},	-- tbilisi-soganlug (UG24) : 268.0
-    --             [12] = { name = _("Channel 12"),	default = 269.0, modulation = _("AM")},	-- tbilisi-vaziani (UG27) : 269.0
-    --             [13] = { name = _("Channel 13"),	default = 260.0, modulation = _("AM")},	-- batumi (UGSB) : 260.0
-    --             [14] = { name = _("Channel 14"),	default = 263.0, modulation = _("AM")},	-- kutaisi-kopitnari (UGKO) : 263.0
-    --             [15] = { name = _("Channel 15"),	default = 261.0, modulation = _("AM")},	-- senaki-kolkhi (UGKS) :  261.0
-    --             [16] = { name = _("Channel 16"),	default = 267.0, modulation = _("AM")},	-- tbilisi-lochini (UGTB) : 267.0
-    --             [17] = { name = _("Channel 17"),	default = 251.0, modulation = _("AM")},	-- krasnodar-center (URKI), creech (KINS) : 251.0
-    --             [18] = { name = _("Channel 18"),	default = 253.0, modulation = _("AM")},	-- krymsk (URKW), mccarran (KLAS) : 253.0
-	-- 			[19] = { name = _("Channel 19"),	default = 266.0, modulation = _("AM")},	-- mozdok (XRMF) : 266.0
-    --             [20] = { name = _("Channel 20"),	default = 252.0, modulation = _("AM")}, -- N/A, groom lake/homey (KXTA) : 252.0
-	-- 			[21] = { name = _("Channel 21"),	default = 252.8, modulation = _("AM")}, -- Syria Amman
-	-- 			[22] = { name = _("Channel 22"),	default = 252.9, modulation = _("AM")}, -- Syria Beirut-Rafic
-	-- 			[23] = { name = _("Channel 23"),	default = 252.1, modulation = _("AM")}, -- Syria Gecitcale
-	-- 			[24] = { name = _("Channel 24"),	default = 252.3, modulation = _("AM")}, -- Syria H3
-	-- 			[25] = { name = _("Channel 25"),	default = 360.1, modulation = _("AM")}, -- Syria Incirlic
-	-- 			[26] = { name = _("Channel 26"),	default = 250.4, modulation = _("AM")}, -- Syria King Hussein 				
-	-- 			[27] = { name = _("Channel 27"),	default = 251.8, modulation = _("AM")}, -- Syria Kingsfield
-	-- 		}
-    --     },
-	-- 	[2] = { --Guard_Radio
-	-- 		name = _("Guard_Channel ARC_66"),
-	-- 		range = { 
-	-- 					{min = 238.0, max = 248.0} 
-	-- 				},
-	-- 		channels = {
-	-- 			[1] = { name = _("Guard 1"),	default = 243.0, modulation = _("AM")},
-	-- 		}
-	-- 	},
-    -- }
-	
-		-- ["F-86F Sabre"] = {
-	-- 	radio = {						--range of radio frequencies of player aircraft
-	-- 		[1] = {						--radio 1
-	-- 			UHF = {
-	-- 				min = 225,				--minimum radio frequency in mHz
-	-- 				max = 269,				--maxium  radio frequency in mHz
-	-- 			},
-	-- 			nbCanal = 18,
-	-- 		},
-	-- 	},
-	-- },
-
 
 
 	["UH-1H"] = {	--ne pas supprimer, fichier radio illisible dans le rep mod
@@ -1394,12 +1325,12 @@ Db_Frequency = {
 			},
 			modulation	= MODULATION_AM,
 		},
-		
+
 		panelRadio =
-		{		
+		{
 			[1] =
 			{
-				name = _("ARC 51BX"),		   
+				name = _("ARC 51BX"),
 				range = {{min = 225, max = 399.975}},
 				channels =
 				{
@@ -1414,8 +1345,8 @@ Db_Frequency = {
 				}
 			},
 		},
-		 
-		
+
+
 	},
 
 
@@ -1432,12 +1363,12 @@ Db_Frequency = {
 			},
 			modulation	= MODULATION_AM,
 		},
-		
+
 		panelRadio =
-		{		
+		{
 			[1] =
 			{
-				name = _("FM Radio"),		   
+				name = _("FM Radio"),
 				range = {{min = 30, max = 87.975}},
 				channels =
 				{
@@ -1504,61 +1435,26 @@ Db_Frequency = {
 	},
 
 	["MiG-29A"] = {
-		radio = {
-			[1] = {
-				VHF = {
-					min = 100,
-					max = 224.995,
-				},
-				UHF = {
-					min = 225,
-					max = 399.98,
-				},
-				nbCanal = 0,
-				FC3 = true,
-				FC3Frequency = 124,
-			},
-		},	
+		HumanRadio = {
+			frequency 		= 251.0,  -- Radio Freq angepasst F104
+			editable 		= true,
+			minFrequency	= 100.000, -- angepasst F104
+			maxFrequency 	= 399.979, -- angepasst F104
+			modulation 		= MODULATION_AM,
+		},
 	},
 	["MiG-29S"] = {
-		radio = {						--range of radio frequencies of player aircraft
-			[1] = {
-				VHF = {
-					min = 100,
-					max = 224.995,
-				},
-				UHF = {
-					min = 225,
-					max = 399.98,
-				},
-				nbCanal = 0,
-				FC3 = true,
-				FC3Frequency = 124,
-			},
-		},	
-	},
-	["JF-17"] = {
-		radio = {			
-			[1] = {						--radio 1
-				LVHF = {
-					min = 30,				--minimum radio frequency in mHz 
-					max = 100,				--maxium  radio frequency in mHz
-				},
-				VHF = {
-					min = 101,				--minimum radio frequency in mHz 
-					max = 224,				--maxium  radio frequency in mHz
-				},
-				UHF = {
-					min = 225,				--minimum radio frequency in mHz  
-					max = 399,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 20,
-			},
+		HumanRadio = {
+			frequency 		= 251.0,  -- Radio Freq angepasst F104
+			editable 		= true,
+			minFrequency	= 100.000, -- angepasst F104
+			maxFrequency 	= 399.979, -- angepasst F104
+			modulation 		= MODULATION_AM,
 		},
 	},
 
 	["Mi-8MT"] = {
-		
+
 		HumanRadio	= {
 			frequency		= 305.0,
 			editable		= true,
@@ -1571,12 +1467,12 @@ Db_Frequency = {
 			},
 			modulation	= MODULATION_AM,
 		},
-		
+
 		panelRadio =
-		{	
+		{
 			[1] =
 			{
-				name = _("R-863"),		   
+				name = _("R-863"),
 				range = {{min = 100, max = 399.975}},
 				channels =
 				{
@@ -1601,10 +1497,10 @@ Db_Frequency = {
 					[19] = { name = _("Channel 18"),	default = 129.0, modulation = _("AM")},
 					[20] = { name = _("Channel 19"),	default = 130.0, modulation = _("AM")},
 				}
-			},	
+			},
 			[2] =
 			{
-				name = _("R-828"),		   
+				name = _("R-828"),
 				range = {{min = 20, max = 59.97}},
 				channels =
 				{
@@ -1625,7 +1521,7 @@ Db_Frequency = {
 	},
 
 	["Ka-50"] = {
-		
+
 		HumanRadio = {
 			frequency = 124.0,
 			editable = true,
@@ -1640,7 +1536,7 @@ Db_Frequency = {
 			},
 		},
 		panelRadio = {
-			[1] = {  
+			[1] = {
 				name = _("R-828"),
 				range = {min = 20.0, max = 59.9},
 				channels = {
@@ -1657,7 +1553,7 @@ Db_Frequency = {
 				}
 			},--[1]
 			[2] = {
-				name = _("ARK-22"),                
+				name = _("ARK-22"),
 				displayUnits = "kHz", --отображаемые единицы в МЕ-- задавать ниже в MHz все
 				range = {min = 0.150, max = 1.750},
 				channels = {
@@ -1696,7 +1592,7 @@ Db_Frequency = {
 			},
 		},
 		panelRadio = {
-			[1] = {  
+			[1] = {
 				name = _("R-828"),
 				range = {min = 20.0, max = 59.9},
 				channels = {
@@ -1713,7 +1609,7 @@ Db_Frequency = {
 				}
 			},--[1]
 			[2] = {
-				name = _("ARK-22"),                
+				name = _("ARK-22"),
 				displayUnits = "kHz", --отображаемые единицы в МЕ-- задавать ниже в MHz все
 				range = {min = 0.150, max = 1.750},
 				channels = {
@@ -1738,84 +1634,135 @@ Db_Frequency = {
 		},
 	},
 	["P-51D-30-NA"] = {
-		radio = {							
-			[1] = {						--radio  SCR 522 A VHF RADIO
-				VHF = {
-					min = 100,				--minimum radio frequency in mHz
-					max = 156,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 4,
-			},
-		},
+		panelRadio =
+		{
+			[1] =
+			{
+				name = _("SCR 522 A VHF RADIO"),
+				range = {{min = 100, max = 156}},
+				channels =
+				{
+					[1] = { name = _("Channel 1"),		default = 100.0, modulation = _("AM")}, --, connect = true}, -- default
+					[2] = { name = _("Channel 2"),		default = 102.0, modulation = _("AM")},
+					[3] = { name = _("Channel 3"),		default = 103.0, modulation = _("AM")},
+					[4] = { name = _("Channel 4"),		default = 104.0, modulation = _("AM")},
+				}
+			}
+		}
 	},
 	["P-47D-30"] = {
-		radio = {									
-			[1] = {						--radio SCR 522 A VHF RADIO
-				VHF = {
-					min = 100,				--minimum radio frequency in mHz
-					max = 156,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 4,
-			},
-		},
+		panelRadio =
+		{
+			[1] =
+			{
+				name = _("SCR 522 A VHF RADIO"),
+				range = {{min = 100, max = 156}},
+				channels =
+				{
+					[1] = { name = _("Channel 1"),		default = 100.0, modulation = _("AM")}, --, connect = true}, -- default
+					[2] = { name = _("Channel 2"),		default = 102.0, modulation = _("AM")},
+					[3] = { name = _("Channel 3"),		default = 103.0, modulation = _("AM")},
+					[4] = { name = _("Channel 4"),		default = 104.0, modulation = _("AM")},
+				}
+			}
+		}
 	},
 	["SpitfireLFMkIX"] = {
-		radio = {									
-			[1] = {						--radio A R I 1063 type HF
-				VHF = {
-					min = 100,				--minimum radio frequency in mHz
-					max = 156,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 4,
-			},
-		},
+		panelRadio =
+		{
+			[1] =
+			{
+				name = _("ARI 1063"),
+				range = {{min = 100, max = 156}},
+				channels =
+				{
+					[1] = { name = _("Channel 1"),		default = 100.0, modulation = _("AM")}, --, connect = true}, -- default
+					[2] = { name = _("Channel 2"),		default = 102.0, modulation = _("AM")},
+					[3] = { name = _("Channel 3"),		default = 103.0, modulation = _("AM")},
+					[4] = { name = _("Channel 4"),		default = 104.0, modulation = _("AM")},
+				}
+			}
+		}
 	},
-	
+
 	["MosquitoFBMkVI"] = {
-		radio = {									
-			[1] = {						--radio VHF
-				VHF = {
-					min = 100,				--minimum radio frequency in mHz
-					max = 156,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 4,
-				name = "SCR-522 (TR1143) VHF"
+		panelRadio = {
+			[1] =
+			{
+				name = _("VHF RADIO"),
+				range = {{min = 100, max = 156}},
+				channels =
+				{
+					[1] = { name = _("Channel 1"),		default = 100.0, modulation = _("AM")}, --, connect = true}, -- default
+					[2] = { name = _("Channel 2"),		default = 102.0, modulation = _("AM")},
+					[3] = { name = _("Channel 3"),		default = 103.0, modulation = _("AM")},
+					[4] = { name = _("Channel 4"),		default = 104.0, modulation = _("AM")},
+				}
 			},
-			[2] = {						--radio HF
-				HF = {
-					min = 5.5,				--minimum radio frequency in mHz
-					max = 10,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 8,
-				name = "HF Blue Range"
+			[2] =
+			{
+				name = _("HF Blue Range"),
+				range = {{min = 5.5, max = 10}},
+				channels =
+				{
+					[1] = { name = _("Channel 1"),		default	= 5.5,	modulation = _("AM")},
+					[2] = { name = _("Channel 2"),		default = 6.5,	modulation = _("AM")},
+					[3] = { name = _("Channel 3"),		default = 7.55,	modulation = _("AM")},
+					[4] = { name = _("Channel 4"),		default = 8.25,	modulation = _("AM")},
+					[5] = { name = _("Channel 5"),		default = 8.30,	modulation = _("AM")},
+					[6] = { name = _("Channel 6"),		default = 9.80,	modulation = _("AM")},
+					[7] = { name = _("Channel 7"),		default = 9.95,	modulation = _("AM")},
+					[8] = { name = _("Channel 8"),		default = 10.000,	modulation = _("AM")},
+
+				}
 			},
 			[3] = {						--radio HF
-				HF = {
-					min = 3,				--minimum radio frequency in mHz
-					max = 5.4,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 8,
-				name = "HF Red Range"
+				name = _("HF Red Range"),
+				range = {{min = 3, max = 5.4}},
+				channels =
+				{
+					[1] = { name = _("Channel 1"),		default	= 3.5,	modulation = _("AM")},
+					[2] = { name = _("Channel 2"),		default = 3.6,	modulation = _("AM")},
+					[3] = { name = _("Channel 3"),		default = 3.65,	modulation = _("AM")},
+					[4] = { name = _("Channel 4"),		default = 4.25,	modulation = _("AM")},
+					[5] = { name = _("Channel 5"),		default = 4.30,	modulation = _("AM")},
+					[6] = { name = _("Channel 6"),		default = 4.80,	modulation = _("AM")},
+					[7] = { name = _("Channel 7"),		default = 4.95,	modulation = _("AM")},
+					[8] = { name = _("Channel 8"),		default = 5.00,	modulation = _("AM")},
+
+				}
 			},
 			[4] = {						--radio MF
-				MF = {
-					min = 0.200,				--minimum radio frequency in mHz
-					max = 0.500,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 8,
-				name = "MF Yellow Range"
+				name = _("MF Yellow Range"),
+				range = {{min = 0.200, max = 0.500}},
+				channels =
+				{
+					[1] = { name = _("Channel 1"),		default	= 0.20,	modulation = _("AM")},
+					[2] = { name = _("Channel 2"),		default = 0.30,	modulation = _("AM")},
+					[3] = { name = _("Channel 3"),		default = 0.35,	modulation = _("AM")},
+					[4] = { name = _("Channel 4"),		default = 0.40,	modulation = _("AM")},
+					[5] = { name = _("Channel 5"),		default = 0.45,	modulation = _("AM")},
+					[6] = { name = _("Channel 6"),		default = 0.46,	modulation = _("AM")},
+					[7] = { name = _("Channel 7"),		default = 0.47,	modulation = _("AM")},
+					[8] = { name = _("Channel 8"),		default = 0.5,	modulation = _("AM")},
+
+				}
 			},
 		},
 	},
 	["Bf-109K-4"] = {
-		radio = {									
-			[1] = {						--radio 4 is equipped with a FUG 16ZY radio transmitter and receiver.
-				LVHF = {
-					min = 38.4,				--minimum radio frequency in mHz
-					max = 42.4,				--maxium  radio frequency in mHz
-				},
-				nbCanal = 4,
+		radio = {
+			[1] = {
+				name = _("FUG 16ZY"),
+				range = {{min = 38.4, max = 42.4}},
+				channels =
+				{
+					[1] = { name = _("Channel 1"),		default	= 39.0,	modulation = _("FM")},
+					[2] = { name = _("Channel 2"),		default = 40.5,	modulation = _("FM")},
+					[3] = { name = _("Channel 3"),		default = 41.75,	modulation = _("FM")},
+					[4] = { name = _("Channel 4"),		default = 42.0,	modulation = _("FM")},
+				}
 			},
 		},
 	},
-}	
+}

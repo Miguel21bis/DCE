@@ -824,7 +824,6 @@ Data_divers = {
 	},
 	["A6E"] = 	{				--Mod ED
 		instrumentUnits = "imperial",
-		requiredModules = true,						--itsModule
 		moduleName = "A6E",
 		folderModName = "A-6E",
 		EPLRS_Capacity = false,

@@ -2169,9 +2169,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						else
 							speed = pack[p].main[1].loadout.vCruise
-							-- if Debug.debug then
-								AddLog("this flight have not a speed Data_divers.vCruise: "..flight[f].name.." |type: "..flight[f].type)
-							-- end
+							if Debug.debug then
+								-- AddLog("this flight have not a speed Data_divers.vCruise: "..flight[f].name.." |type: "..flight[f].type)
+							end
 						end
 						
 					else
