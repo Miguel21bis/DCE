@@ -4607,7 +4607,7 @@ end
 
 local function extractFailuresA2(aircraft)
     if type(aircraft.Failures) ~= "table" then
-		print("extractFailuresA2: no Failures table")
+		-- print("extractFailuresA2: no Failures table")
         return nil
     end
 
@@ -4679,21 +4679,21 @@ function DataCompilation_DataDiscoveryA2()
 	local path_dcs = os.getenv("pathDCS") or getDcsRootFromExe() or camp.path_dcs
 
 
-	print()
-	print(" pathSavedGames: "..tostring(os.getenv('pathSavedGames')))
-	print(" pathDCS: "..tostring(os.getenv('pathDCS')))
-	print(" getDcsRootFromExe(): "..tostring(getDcsRootFromExe()))
+	-- print()
+	-- print(" pathSavedGames: "..tostring(os.getenv('pathSavedGames')))
+	-- print(" pathDCS: "..tostring(os.getenv('pathDCS')))
+	-- print(" getDcsRootFromExe(): "..tostring(getDcsRootFromExe()))
 
 
-	print()
-	print("path_camp "..tostring(path_camp))
-	print("path_dcs "..tostring(path_dcs))
-	print()
+	-- print()
+	-- print("path_camp "..tostring(path_camp))
+	-- print("path_dcs "..tostring(path_dcs))
+	-- print()
 
     for planeType, planeData in pairs(Data_divers) do
         if AircraftInCampaign[planeType] and planeData.folderModName then
 
-			print("DataDiscoveryA2 for aircraft: "..planeType)
+			-- print("DataDiscoveryA2 for aircraft: "..planeType)
 
            local folderModName = planeData.folderModName
 
@@ -4711,7 +4711,7 @@ function DataCompilation_DataDiscoveryA2()
 
 				-- Vérifier si le fichier existe dans le premier chemin (par exemple, CoreMods/aircraft/)
 				local f0 = io.open(fullPath, "r")
-				if Debug.debug then print("DataDiscovery_B1 test entry.lua : "..fullPath) end
+				-- if Debug.debug then print("DataDiscovery_B1 test entry.lua : "..fullPath) end
 				if f0 then
 					modRoot  = path_dcs .. "CoreMods/aircraft/" .. folderModName
 					f0:close()
@@ -4721,7 +4721,7 @@ function DataCompilation_DataDiscoveryA2()
 					modRoot  = path_camp .. "Mods/aircraft/" .. folderModName
 				end
 
-                if Debug.debug then print("DataDiscovery_B2 entry.lua : "..fullPath) end
+                -- if Debug.debug then print("DataDiscovery_B2 entry.lua : "..fullPath) end
 
                 local env = {}
 
@@ -4783,7 +4783,7 @@ function DataCompilation_DataDiscoveryA2()
 				local collected = {}
 				env.add_aircraft = function(def)
 					if type(def) ~= "table" then
-						print("  [add_aircraft IGNORED] invalid def:", type(def))
+						-- print("  [add_aircraft IGNORED] invalid def:", type(def))
 						return
 					end
 					table.insert(collected, def)
@@ -4793,13 +4793,13 @@ function DataCompilation_DataDiscoveryA2()
 				env.dofile = function(path)
 					local f = loadfile(path)
 					if not f then
-						print("  [IGNORED dofile] "..tostring(path))
+						-- print("  [IGNORED dofile] "..tostring(path))
 						return nil
 					end
 					setfenv(f, env)
 					local ok, res = pcall(f)
 					if not ok then
-						print("  [DOFILE ERROR] "..tostring(res))
+						-- print("  [DOFILE ERROR] "..tostring(res))
 						return nil
 					end
 					return res
@@ -4820,7 +4820,7 @@ function DataCompilation_DataDiscoveryA2()
 					setfenv(chunk, env)
 					local ok, err = pcall(chunk)
 					if not ok then
-						print("  [ENTRY ERROR] "..tostring(err))
+						-- print("  [ENTRY ERROR] "..tostring(err))
 						-- os.execute 'pause'
 					end
 				else
@@ -4831,7 +4831,7 @@ function DataCompilation_DataDiscoveryA2()
 				local function isWantedAircraft(aircraft, wanted)
 					local name = aircraft.Name or aircraft.self_ID
 
-					print("  -> isWantedAircraft A2 name "..tostring(name).." wanted: "..tostring(wanted))
+					-- print("  -> isWantedAircraft A2 name "..tostring(name).." wanted: "..tostring(wanted))
 
 					if not name or not wanted then
 						return false
@@ -4847,28 +4847,28 @@ function DataCompilation_DataDiscoveryA2()
 					local dst = Data_divers[planeType]
 					local wanted = dst.inheritedModFrom or planeType
 
-					print("  -> collected A planeName "..tostring(planeType).." aircraft.Name: "..tostring(aircraft.Name).." wanted: "..tostring(wanted))
+					-- print("  -> collected A planeName "..tostring(planeType).." aircraft.Name: "..tostring(aircraft.Name).." wanted: "..tostring(wanted))
 
 					if wanted then
-						-- 🔴 FILTRE COMPATIBLE LUA 5.1
+						-- FILTRE COMPATIBLE LUA 5.1
 						if isWantedAircraft(aircraft, wanted) then
 
 							if aircraft.Tasks then
 								dst.Tasks = aircraft.Tasks
-								_affiche(aircraft.Tasks, "  -> A2 Tasks found ")
-								-- os.execute 'pause'
+								-- _affiche(aircraft.Tasks, "  -> A2 Tasks found ")
+								
 							end
 
 							if aircraft.HumanRadio then
 								dst.HumanRadio = aircraft.HumanRadio
-								_affiche(aircraft.HumanRadio, "  -> HumanRadio found ")
-								-- os.execute 'pause'
+								-- _affiche(aircraft.HumanRadio, "  -> HumanRadio found ")
+								
 							end
 							if aircraft.panelRadio then
 								dst.panelRadio = aircraft.panelRadio
-								print("  -> panelRadio found ")
+								-- print("  -> panelRadio found ")
 								-- _affiche(aircraft.panelRadio, "  -> panelRadio found ")
-								-- os.execute 'pause'
+								
 							end
 							
 							-- FAILURES
@@ -4879,13 +4879,13 @@ function DataCompilation_DataDiscoveryA2()
 							end
 
 							-- extraction plus tard
-							print("  -> A2 aircraft captured "..planeType)
-							-- os.execute 'pause'
+							-- print("  -> A2 aircraft captured "..planeType)
+							
 
-							local file_str = "dst = " .. TableSerialization(dst, 0)			--make a string
-							local file_File = io.open("Debug/Data_Divers_GetMods_"..planeType..".lua", "w") or error("Failed to open debug EWR_UtilDebug file")
-							file_File:write(file_str)																	--save new data
-							file_File:close()
+							-- local file_str = "dst = " .. TableSerialization(dst, 0)			--make a string
+							-- local file_File = io.open("Debug/Data_Divers_GetMods_"..planeType..".lua", "w") or error("Failed to open debug EWR_UtilDebug file")
+							-- file_File:write(file_str)																	--save new data
+							-- file_File:close()
 
 						end
 					else
@@ -4962,7 +4962,7 @@ function DataCompilation_TaskByPlane()
 	for planeType, planeData in pairs(Data_divers) do
 		if planeData.Tasks then
 			for taskN, task in pairs(planeData.Tasks) do
-				print("DataCompilation_TaskByPlane: planeType "..planeType.." task "..tostring(task))
+				-- print("DataCompilation_TaskByPlane: planeType "..planeType.." task "..tostring(task))
 				if not TaskByPlane[task][planeType] then
 					TaskByPlane[task][planeType] = true
 				end

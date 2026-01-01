@@ -81,8 +81,9 @@ end
 dofile("Init/conf_mod.lua")
 dofile("Init/camp_init.lua")
 
-if mission_ini.current_date and mission_ini.current_date.year then
+if mission_ini.current_date and mission_ini.current_date.year and mission_ini.e then
 	camp.date = mission_ini.current_date
+	mission_ini.current_date.setDateInNextMission =false
 end
 
 if ChangePlane then

@@ -28,6 +28,7 @@ versionDCE["DC_CheckTriggers.lua"] = "1.16.96"
 
 if Debug.debug then
 	print("START DC_CheckTriggers.lua "..versionDCE["DC_CheckTriggers.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+	-- os.execute 'pause'
 end
 
 
@@ -38,6 +39,7 @@ end
 --Return.Month()											returns month as number
 --Return.Year()												returns year as number
 --Return.Mission()											returns campaign mission number
+--Return.DatePassed(y, m, d)								Returns true if campaign date is on or after the given date*
 --Return.CampFlag(flag-n)									returns value of campaign flag
 --Return.AirUnitActive("UnitName")							returned boolean whether the air unit is active			
 --Return.AirUnitReady("UnitName")							returns amount of ready aircraft in unit
@@ -82,7 +84,7 @@ end
 --Important notes:
 --for condition and action strings: outside with single quotes '', inside with double quotes ""!
 
-local debugKT = false
+local debugKT = true
 
 ----- campaign flags -----
 if camp.flag == nil then
@@ -90,6 +92,8 @@ if camp.flag == nil then
 end
 
 if not camp.automaticReinforce then
+	-- print("DcCT Set automaticReinforce à 0 ={}")
+	-- os.execute 'pause'
 	camp.automaticReinforce = {
 		blue = 0,
 		red = 0,
@@ -106,15 +110,48 @@ if type(camp.automaticReinforce) ~= "table" and type(camp.automaticReinforce) ==
 		red = tempValue,
 		neutral = tempValue,
 	}
-else
-	camp.automaticReinforce = {
-		blue = 0,
-		red = 0,
-		neutral = 0,
-	}
+	--ATTENTION, ne pas mettre le code plus bas, cela reinitialise tout et refais eternellement le reinforcement
+-- else
+-- 	camp.automaticReinforce = {
+-- 		blue = 0,
+-- 		red = 0,
+-- 		neutral = 0,
+-- 	}
 end
 
 local old_flag = DeepCopy(camp.flag)												--copy campaign flags, so that modifications of flags do not affect condition of subsequent campaign triggers in same mission
+
+local function dateToInt(d)
+	_affiche(d, "dateToInt d: ")
+    return d.year * 10000 + d.month * 100 + d.day
+end
+
+local function normalizeExpires(trigger)
+    if not trigger.expires then
+        return
+    end
+
+    -- déjà une table correcte
+    if type(trigger.expires) == "table" then
+        return
+    end
+
+    -- version legacy : string "{ day=20, month=7, year=1965 }"
+    if type(trigger.expires) == "string" then
+        local f, err = loadstring("return " .. trigger.expires)
+        if f then
+            local t = f()
+            if type(t) == "table" and t.day and t.month and t.year then
+                trigger.expires = t
+            else
+                trigger.expires = nil -- invalide → on ignore
+            end
+        else
+            trigger.expires = nil
+        end
+    end
+end
+
 
 ----- functions to return campaign information to build trigger conditions -----
 Return = {}
@@ -138,6 +175,19 @@ Return = {}
 	function Return.Year()
 		return camp.date.year
 	end
+
+	-- Return.DatePassed(year, month, day)
+	-- Returns true if campaign date is on or after the given date
+	-- Safe with time jumps
+	function Return.DatePassed(y, m, d)
+		local function toInt(year, month, day)
+			return year * 10000 + month * 100 + day
+		end
+
+		return toInt(camp.date.year, camp.date.month, camp.date.day)
+			>= toInt(y, m, d)
+	end
+
 
 	--return mission number
 	function Return.Mission()
@@ -2209,113 +2259,89 @@ for triggerName, trigger in pairs(camp_triggers) do								--iterate through tri
 
 	if debugKT then print("DcCT 00 trigger_name: "..tostring(triggerName).." trigger.name: "..tostring(trigger.name)) end
 
-		if trigger.active then														--trigger is active
+	if trigger.active then														--trigger is active
 
-			if debugKT then print("DcCT 01 if trigger.active: trigger.condition: "..tostring(trigger.condition)) end
+		if debugKT then print("DcCT 01 if trigger.active: trigger.condition: "..tostring(trigger.condition)) end
 
-			local conditionStr = trigger.condition
-			-- Remplace campMod.RepairMinimumDestroyed par une valeur numérique (exemple : 20)
-			conditionStr = string.gsub(conditionStr, "campMod.RepairMinimumDestroyed", "20")
+		_affiche(camp.date, "camp.date: ")
+
+		local campDate = dateToInt(camp.date)
+
+		if trigger.expires then
+			normalizeExpires(trigger)
+			if campDate > dateToInt(trigger.expires) then
+				trigger.active = false
+			end
+		end
+
+		local conditionStr = trigger.condition
+		-- Remplace campMod.RepairMinimumDestroyed par une valeur numérique (exemple : 20)
+		if string.find(conditionStr, "campMod.RepairMinimumDestroyed", 1, true) then
+			conditionStr = string.gsub(
+				conditionStr,
+				"campMod%.RepairMinimumDestroyed",
+				tostring(campMod.RepairMinimumDestroyed or 20)
+			)
+		end
 
 
-			local condition = loadstring("if " .. conditionStr .." then return true end")	--make a function from the string condition
-			if type(condition) == "function" and condition() then														--if the trigger condition is true
+		local condition = loadstring("if " .. conditionStr .." then return true end")	--make a function from the string condition
+		if type(condition) == "function" and condition() then							--if the trigger condition is true
 
 			if debugKT then print(" -> :DcCT 02 passe  condition()trigger_name: "..tostring(trigger.name)) end
 
-				if type(trigger.action) == "table" then								--multiple actions
-					for i,action in ipairs(trigger.action) do
-						if debugKT then print(" 	---> : "..tostring(trigger.action[i])) end
-						local f = loadstring(action)()								--run the trigger action
-					end
-				else																--single action
-					if debugKT then print(" 	---> : "..tostring(trigger.action)) end
-					local f = loadstring(trigger.action)()							--run the trigger action
+			if type(trigger.action) == "table" then								--multiple actions
+				for i,action in ipairs(trigger.action) do
+					if debugKT then print(" 	---> : "..tostring(trigger.action[i])) end
+					local f = loadstring(action)()								--run the trigger action
 				end
-				if trigger.once then												--trigger should only fire once
-					trigger.active = false											--set trigger inactive
-					if debugKT then print(" -> :DcCT 03 passe  trigger.active = false: "..tostring(trigger.name)) end
-				end
-
+			else																--single action
+				if debugKT then print(" 	---> : "..tostring(trigger.action)) end
+				local f = loadstring(trigger.action)()							--run the trigger action
 			end
+			
+			if trigger.once then												--trigger should only fire once
+				trigger.active = false											--set trigger inactive
+				if debugKT then print(" -> :DcCT 03 passe  trigger.active = false: "..tostring(trigger.name)) end
+			end
+
 		end
 	end
-
-
--- if debugKT then print("camp.automaticReinforce "..tostring(CampTotalTimeS).." >=? "..tostring(camp.automaticReinforce).." + "..tostring(campMod.airReinforceDelay).." *3600?".." cad: "..(camp.automaticReinforce + (campMod.airReinforceDelay * 3600))) end
-
-
---**********************************************************************************
---recompletement automatique des unités AIR
---**********************************************************************************
--- if CampTotalTimeS >= camp.automaticReinforce + campMod.airReinforceDelay * 3600 then
-
--- _affiche(camp.automaticReinforce, "camp.automaticReinforce")
-
--- for side_name, side in pairs(oob_air) do
--- 	print("DcCT side_name "..tostring(side_name))
--- 	print("DcCT CampTotalTimeS :"..CampTotalTimeS.." >=?    campMod.RepairOption[side_name][airUnit][3] *3600 "
--- 		..tostring(campMod.RepairOption[side_name]["airUnit"][3] * 3600).." ?")
-
--- 	if side_name ~= "neutral" then
--- 		if CampTotalTimeS >=  campMod.RepairOption[side_name]["airUnit"][3] * 3600 then
--- 			for unit_n, unit in pairs(side) do
--- 				if unit.roster.reserve and unit.roster.reserve > 0 then -- not unit.inactive and 
--- 					Action.AirUnitReinforce(unit.name, "")
--- 					if debugKT then print("DcCT automaticReinforce "..tostring(unit.name)) end
--- 					print("DcCT automaticReinforce "..tostring(unit.name))
--- 				end
--- 			end
--- 			camp.automaticReinforce[side_name] = CampTotalTimeS
--- 		end
--- 	end
--- end
-
--- for side_name, side in pairs(oob_air) do
--- 	print("DcCT side_name "..tostring(side_name))
-
--- 	if side_name ~= "neutral" then
-		
--- 		-- print("dcct campMod.RepairOption[side_name][airUnit][3] : "..campMod.RepairOption[side_name]["airUnit"][3])
--- 		print("DcCT CampTotalTimeS : "..CampTotalTimeS.." >=? camp.automaticReinforce ")
--- 		print("DcCT camp.automaticReinforce : "..tostring(camp.automaticReinforce[side_name]) )
--- 		print("DcCT campMod.RepairOption[side_name][airUnit][3] *3600 ")
--- 		print("DcCT ---------CALCul-------------------------------------- : "..(camp.automaticReinforce[side_name] 
--- 				+ 
--- 				(campMod.RepairOption[side_name]["airUnit"][3] * 3600))
--- 				)
-
--- 		if CampTotalTimeS >= camp.automaticReinforce[side_name] + campMod.RepairOption[side_name]["airUnit"][3] * 3600 then
--- 			for unit_n, unit in pairs(side) do
--- 				if unit.roster.reserve and unit.roster.reserve > 0 then -- not unit.inactive and 
--- 					Action.AirUnitReinforce(unit.name, "")
--- 					if debugKT then print("DcCT automaticReinforce "..tostring(unit.name)) end
--- 					print("DcCT automaticReinforce "..tostring(unit.name))
--- 				end
--- 			end
--- 			-- camp.automaticReinforce[side_name] = CampTotalTimeS
--- 			camp.automaticReinforce[side_name] = camp.automaticReinforce[side_name] + campMod.RepairOption[side_name]["airUnit"][3] * 3600
--- 		end
--- 	end
--- end
-
-
+end
 
 --Compatible avec les sauts temporels
 for side_name, side in pairs(oob_air) do
     
     if side_name ~= "neutral" then
-        local interval = campMod.RepairOption[side_name]["airUnit"][3] * 3600
+        -- local interval = campMod.RepairOption[side_name]["airUnit"][3] * 3600
+		local interval = campMod.RepairOption[side_name]["airUnit"][3]
+
+		-- _affiche( camp.automaticReinforce,"A0 automaticReinforce: ")
+
+		-- if debugKT then print("DcCT A automaticReinforce side_name : "..tostring(side_name)) end
+		-- if debugKT then print("DcCT B CampTotalTimeS: "..tostring(CampTotalTimeS)
+		-- .." >=? " ..tostring(camp.automaticReinforce[side_name])
+		-- .." + " ..tostring(interval)
+		-- .." ( " ..camp.automaticReinforce[side_name] + interval
+		-- .." ) " 
+		-- ) 
+		-- os.execute 'pause'
 		
-        while CampTotalTimeS >= camp.automaticReinforce[side_name] + interval do
+		-- end
+
+
+		--ATTENTION while est necessaire pour les sauts temporel, pour rattraper toutes les occurences de ravitaillement loupé
+        while CampTotalTimeH >= camp.automaticReinforce[side_name] + interval do
             for unit_n, unit in pairs(side) do
                 if unit.roster.reserve and unit.roster.reserve > 0 then
                     Action.AirUnitReinforce(unit.name, "")
-                    if debugKT then print("DcCT automaticReinforce "..tostring(unit.name)) end
+                    if debugKT then print("DcCT C automaticReinforce "..tostring(unit.name)) end
                 end
             end
             camp.automaticReinforce[side_name] = camp.automaticReinforce[side_name] + interval
         end
+		-- _affiche( camp.automaticReinforce,"D automaticReinforce: ")
+		-- os.execute 'pause'
     end
 end
 

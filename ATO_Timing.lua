@@ -833,59 +833,6 @@ for sideName, packs in pairs(ATO) do
 	end
 end
 
-
-
--- for side, pack in pairs(ATO) do
--- 	for p = 1, #pack do
--- 		for role, flight in pairs(pack[p]) do
--- 			for f = 1, #flight do
--- 				-- print()
--- 				for u = 1, flight[f].number do
-
--- 					if not flight[f] or not flight[f].route[1] or not flight[f].route[1].eta then
--- 						_affiche(flight, "flight[f].route[1].eta")
--- 					end
-
--- 					local operating_hours = 86400
--- 					local time_to_next_mission = operating_hours / flight[f].loadout.sortie_rate	--time duration until aircraft can do the next mission based on its sortie rate
-
--- 					-- if entry.loadout.tStation and #ATO[side][pack_n][role] == 1 then			--for a flight that has a station time and for the first flight in package
--- 					-- 	time_to_next_mission = time_to_next_mission - entry.loadout.tStation	--remove station time from time to next mission, because flight could airstart current mission at close to end of its station time
--- 					-- end
-
--- 					local flightStartTime_hour = (CampTotalTimeS / 3600) + (flight[f].route[1].eta / 3600)
--- 					local flightEndTime_hour = (CampTotalTimeS / 3600) + (flight[f].route[#flight[f].route].eta / 3600)
-
--- 					--temps calculé par sortie_rate:
--- 					local nextRate = flightStartTime_hour + time_to_next_mission
-
--- 					-- --temps de remise en oeuvre:
--- 					-- local remiseEnOeuvre = math.random(1800, 14400)/3600
--- 					-- local downtime_hour = flightEndTime_hour + remiseEnOeuvre
-
--- 					--temps de remise en oeuvre:
-
--- 					local downtime_hour = flightEndTime_hour
--- 					if downtime_hour < nextRate then
--- 						downtime_hour = nextRate
--- 					end
-
--- 					if (flight[f].task == "Refueling" or flight[f].task == "AWACS") then
--- 						if downtime_hour < ((CampTotalTimeS  + mission_ini.idle_time_min)/ 3600 ) then
--- 							table.insert(AcftAvail[flight[f].name].unavailable, downtime_hour)
--- 						else
--- 							-- print("AtoT AcftAvail _______Refueling__AWACS____*******_______________ dont insert OVERTIME "..flight[f].name.." downtime_hour "..downtime_hour.."******************")
--- 						end
--- 					else
--- 						table.insert(AcftAvail[flight[f].name].unavailable, downtime_hour)						--insert unavailable time into unavailable table of this unit
-					
--- 					end
--- 				end
--- 			end
--- 		end
--- 	end
--- end
-
 for side, pack in pairs(ATO) do
     for p = 1, #pack do
         local subPack = pack[p]
@@ -940,7 +887,7 @@ for side, pack in pairs(ATO) do
 						--si vol de type Inter ou SAR, pas de plan de vol complet, on prend donc en compte que le sortie_rate
 						local operating_hours = 86400   -- en secondes
 						local time_to_next_mission_h = operating_hours / fl.loadout.sortie_rate / 3600
-						local flightStartTime_hour = (CampTotalTimeS / 3600) + (fl.route[1].eta / 3600)
+						local flightStartTime_hour = (CampTotalTimeH) + (fl.route[1].eta / 3600)
 						downtime_hour = flightStartTime_hour + time_to_next_mission_h
 					else
 						-- 1) durée du vol en secondes
@@ -956,7 +903,7 @@ for side, pack in pairs(ATO) do
 						-- print("AtoT type: "..tostring(fl.type).." name: "..tostring(fl.name).." sortie_rate: "..tostring(fl.loadout.sortie_rate).." turnaround_time_s_h: "..tostring(turnaround_time_s/3600))
 
 						-- 4) temps de fin du vol en heures
-						local flightEndTime_hour = (CampTotalTimeS / 3600) + (fl.route[#fl.route].eta / 3600)
+						local flightEndTime_hour = (CampTotalTimeH) + (fl.route[#fl.route].eta / 3600)
 
 						-- 5) downtime = fin du vol + remise en œuvre
 						downtime_hour = flightEndTime_hour + (turnaround_time_s / 3600)
@@ -971,7 +918,7 @@ for side, pack in pairs(ATO) do
 						print("AtoT type: "..tostring(fl.type).." name: "..tostring(fl.name).." sortie_rate: "..tostring(fl.loadout.sortie_rate).." time_to_next_mission_h: "..tostring(downtime_hour))
 
                         if fl.task == "Refueling" or fl.task == "AWACS" then
-                            local limit = (CampTotalTimeS + mission_ini.idle_time_min) / 3600
+                            local limit = CampTotalTimeH + (mission_ini.idle_time_min / 3600)
                             if downtime_hour < limit then
                                 table.insert(AcftAvail[fl.name].unavailable, downtime_hour)
                             end

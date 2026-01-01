@@ -51,42 +51,42 @@ end
 
 local function freqInRanges(freq, ranges)
     if not ranges then
-		print("freqInRanges A no ranges")
+		-- print("freqInRanges A no ranges")
         return false
     end
 
     -- ranges = { min=..., max=... }
     if ranges.min and ranges.max then
-		print("freqInRanges B single range min "..tostring(ranges.min).." max "..tostring(ranges.max))
+		-- print("freqInRanges B single range min "..tostring(ranges.min).." max "..tostring(ranges.max))
         return freqInRange(freq, ranges)
     end
 
     -- ranges = { [1]={min,max}, [2]={min,max}, ... }
     for _, r in ipairs(ranges) do
-		print("freqInRanges C checking range min "..tostring(r.min).." max "..tostring(r.max))
+		-- print("freqInRanges C checking range min "..tostring(r.min).." max "..tostring(r.max))
         if freqInRange(freq, r) then
-			print("freqInRanges D freq "..tostring(freq).." is in range min "..tostring(r.min).." max "..tostring(r.max))
+			-- print("freqInRanges D freq "..tostring(freq).." is in range min "..tostring(r.min).." max "..tostring(r.max))
             return true
         end
     end
 
-	print("freqInRanges E freq "..tostring(freq).." is not in any range")
+	-- print("freqInRanges E freq "..tostring(freq).." is not in any range")
     return false
 end
 
 function FreqCapabilityNG(testFreq, planeType, radioN, info)
 
-	print("FreqCapabilityNG A called with testFreq "..tostring(testFreq).." planeType "..tostring(planeType).." radioN "..tostring(radioN).." info "..tostring(info))
+	-- print("FreqCapabilityNG A called with testFreq "..tostring(testFreq).." planeType "..tostring(planeType).." radioN "..tostring(radioN).." info "..tostring(info))
 
     local freq = tonumber(testFreq)
     if not freq then
-		print("FreqCapabilityNG B invalid freq")
+		-- print("FreqCapabilityNG B invalid freq")
         return false
     end
 
     local dbPlane = Db_Frequency[planeType]
     if not dbPlane then
-		print("FreqCapabilityNG C no dbPlane for type "..tostring(planeType))
+		-- print("FreqCapabilityNG C no dbPlane for type "..tostring(planeType))
         return false
     end
 
@@ -94,19 +94,19 @@ function FreqCapabilityNG(testFreq, planeType, radioN, info)
     -- CAS 2 : radioN PRÉSENT → panelRadio[radioN] uniquement
     ------------------------------------------------------------------
     if not dbPlane.radio then
-		print("FreqCapabilityNG D no dbPlane.radio for type "..tostring(planeType))
+		-- print("FreqCapabilityNG D no dbPlane.radio for type "..tostring(planeType))
         return false
     end
 
     local radio = dbPlane.radio[radioN]
     if not radio then
-		print("FreqCapabilityNG E no radioN "..tostring(radioN).." for type "..tostring(planeType))
+		-- print("FreqCapabilityNG E no radioN "..tostring(radioN).." for type "..tostring(planeType))
         return false
     end
 
     -- Cas : radio.range existe
     if radio.range then
-		print("FreqCapabilityNG F checking range for freq "..tostring(freq).." on radioN "..tostring(radioN).." for type "..tostring(planeType))
+		-- print("FreqCapabilityNG F checking range for freq "..tostring(freq).." on radioN "..tostring(radioN).." for type "..tostring(planeType))
         return freqInRanges(freq, radio.range)
     end
 
@@ -1540,7 +1540,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									local tabElement = {
 										['callsign'] = role[fr].callsign,
 										['freq'] = role[fr].frequency,																	--store callsign and frequency
-										['type'] = role[fr].type,
+										['type'] = AliasTypeName(role[fr].type),
 										['time'] = time,
 										['flight'] = fr,
 									}

@@ -770,7 +770,7 @@ for sideName, units in pairs(oob_air) do
 						AcftAvail[unit.name].serviceable = aircraft_serviceable										--store serviceable aircraft in availability table
 
 						if DebugAssignAll then
-							print("AtoGen&PA CampTotalTimeS "..tostring(CampTotalTimeS).." CampTotalTimeS en H "..CampTotalTimeS / 3600)
+							print("AtoGen&PA CampTotalTimeS "..tostring(CampTotalTimeS).." CampTotalTimeH "..CampTotalTimeH)
 						end
 						--unavailable aircraft
 						local u_entry = 0
@@ -780,11 +780,11 @@ for sideName, units in pairs(oob_air) do
 
 							if DebugAssignAll then print("AtoGen AcftAvail  "..unit.type.." || "..unit.name) end
 
-							if AcftAvail[unit.name].unavailable[u] > ((CampTotalTimeS / 3600))   then
+							if AcftAvail[unit.name].unavailable[u] > CampTotalTimeH   then
 								AcftAvail[unit.name].unavailable[u] = 0
 							end
 
-							if (CampTotalTimeS / 3600) >= AcftAvail[unit.name].unavailable[u] then
+							if CampTotalTimeH >= AcftAvail[unit.name].unavailable[u] then
 								table.remove(AcftAvail[unit.name].unavailable, u)								--remove this entry
 								if DebugAssignAll then  print("AtoGen AcftAvail     ____***______ REMOVE ") end
 							end

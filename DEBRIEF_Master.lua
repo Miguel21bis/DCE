@@ -137,7 +137,7 @@ dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 -- recherche tjs pourquoi on ne passe pas du 15 au 16
 -- puis pourquoi on n'a pas les nouvelles cibles du 16
 
-UpdateConfMod(nil, nil, "DEBRIEF_Master "..debug.getinfo(1).currentline)
+UpdateConfModSuite(nil, nil, "DEBRIEF_Master "..debug.getinfo(1).currentline)
 
 --load status file to be updated
 require("Active/oob_ground")																	--load ground oob

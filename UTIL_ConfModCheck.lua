@@ -77,6 +77,7 @@ mission_ini_check = {
 
 	--***current date during this campaign***
 	current_date = {
+		setDateInNextMission = false,	-- (true/false)				[default: false]	true: set the date defined below at the beginning of the next mission
 		day = 10,
 		year = 1965,
 		month = 7,

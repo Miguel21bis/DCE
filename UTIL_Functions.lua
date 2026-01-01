@@ -1823,7 +1823,7 @@ local function ComputeCommonRangesForModules(moduleList)
 	for moduleName,_ in pairs(moduleList) do
 		local data = Db_Frequency[moduleName]
 		if data then
-			print("moduleName CCRFmodules() "..moduleName.." has data")
+			-- print("moduleName CCRFmodules() "..moduleName.." has data")
 			local ranges = simplifyRadioRanges(data)
 			-- ignorer modules vides (OH-6, data pas prête)
 			if ranges[1] then
@@ -1871,7 +1871,7 @@ function DCE_FindRadioCommonWaves()
 				
 				local moduleData = Db_Frequency[moduleName]
 				if moduleData then
-					print("moduleName DCE_FRC() "..moduleName)
+					-- print("moduleName DCE_FRC() "..moduleName)
 					local ranges = simplifyRadioRanges(moduleData)
 					local inWave = {}
 					
@@ -3769,21 +3769,28 @@ function CheckPointInPolygon(point, polygon, show)
     end
     return oddNodes
 end
+function UpdateConfMod(setWeather, setDate, from)
+	if setWeather then
+		UpdateConfModSuite(setWeather, nil, "UpdateConfMod:"..from)
+	end
+	if setDate then
+		--mis à jour via camp_triggers et DC_CheckTriggers
+		camp.date = setDate
+		if Debug.debug then
+			print("date_override 5: camp.date = setDate from: "..tostring(from))
+			_affiche(setDate, "date_override 5: setDate ")
+		end
 
+		UpdateConfModSuite(nil, setDate, "UpdateConfMod:"..from)
+	end
+end
 
 --met à jour automatiquement le conf_mod en fonction des nouveautés apporté par UTIL_ConfModCheck
-function UpdateConfMod(setWeather, setDate, from)
+function UpdateConfModSuite(setWeather, setDate, from)
     --version UpdateConfMod VA_1.12
 
-	-- local weather_override = {
-	-- 	pHigh = 20,				--probability of high pressure weather system
-	-- 	pLow = 80,					--probability of low pressure weather system
-	-- 	refTemp = 18,				--average day max temperature
-	-- }
-
 	if Debug.debug then
-
-		print("UpdateConfMod() from "..tostring(from))
+		print("UpdateConfModSuite() from "..tostring(from))
 		_affiche(setWeather, "setWeather: ")
 		_affiche(setDate, "setDate: ")
 	end
@@ -3791,7 +3798,8 @@ function UpdateConfMod(setWeather, setDate, from)
 	local weather_override
 	local date_override
 
-	if camp.mission == 1 then
+	-- if camp.mission == 1 then
+	if Firstmission_flag then
 		if camp.weather and camp.weather.pHigh then
 			weather_override = camp.weather
 		else
@@ -3810,16 +3818,11 @@ function UpdateConfMod(setWeather, setDate, from)
 
 	else
 
-		-- if camp.date and camp.date.year then
-		-- 	date_override = camp.date
-		-- 	print("date_override 3 ")
-		-- else
-			dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua")
-			date_override = mission_ini_check.date
+		-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua")
+		-- date_override = mission_ini_check.date
 
-			if Debug.debug then
-				print("date_override 4 date_override = mission_ini_check.date ")
-			end
+		-- if Debug.debug then
+		-- 	print("date_override 4 date_override = mission_ini_check.date ")
 		-- end
 	end
 
@@ -3831,27 +3834,12 @@ function UpdateConfMod(setWeather, setDate, from)
 	--mis à jour via camp_triggers et DC_CheckTriggers
 	if setDate then
 		date_override = setDate
-		camp.date = setDate
+		-- camp.date = setDate
 
-		-- if Debug.debug then
-		-- 	print("date_override 5: camp.date = setDate ")
-		-- 	_affiche(setDate, "date_override 5: setDate ")
-		-- end
-	end
-
-
-	local function deepCopy(orig)
-		local copy
-		if type(orig) == 'table' then
-			copy = {}
-			for orig_key, orig_value in pairs(orig) do
-				copy[orig_key] = deepCopy(orig_value)
-			end
-			setmetatable(copy, deepCopy(getmetatable(orig)))
-		else
-			copy = orig
+		if Debug.debug then
+			print("date_override 5: camp.date = setDate ")
+			_affiche(date_override, "date_override 5: setDate ")
 		end
-		return copy
 	end
 
     -- Fonction pour charger la configuration avec la structure	
@@ -4076,7 +4064,7 @@ function UpdateConfMod(setWeather, setDate, from)
 					-- print("[mergeTables] D Map détectée :", mapName)
 					if not defaultValue[mapName] then
 						-- print("[mergeTables] E Nouvelle map ajoutée :", mapName)
-						defaultValue[mapName] = deepCopy(mapData) -- Ajoute la map à `config_default`
+						defaultValue[mapName] = DeepCopy(mapData) -- Ajoute la map à `config_default`
 
 						--   Ajouter aussi `mapName` à `structure` pour garantir l'écriture
 						table.insert(structure, "\t" .. mapName .. " = {")
@@ -4091,15 +4079,16 @@ function UpdateConfMod(setWeather, setDate, from)
 
 			-- `weather` doit **toujours** être remplacé par `weather_override`
 			elseif key == "weather" and weather_override then
-				clientTable[key] = deepCopy(weather_override)
-			-- `weather` doit **toujours** être remplacé par `weather_override`
+				clientTable[key] = DeepCopy(weather_override)
+			-- `current_date` doit **toujours** être remplacé par `date_override`
 			elseif key == "current_date" and date_override then
-				clientTable[key] = deepCopy(date_override)
+				clientTable[key] = DeepCopy(date_override)
+				_affiche(date_override, "date_override F1; ")
 			-- Fusion normale des sous-tables
 			elseif type(defaultValue) == "table" then
 				if not clientValue then
 					-- print("[mergeTables]   Copie de la table absente :", key)
-					clientTable[key] = deepCopy(defaultValue)
+					clientTable[key] = DeepCopy(defaultValue)
 				elseif type(clientValue) == "table" then
 					mergeTables(clientValue, defaultValue, structure)
 				end
@@ -4135,10 +4124,10 @@ function UpdateConfMod(setWeather, setDate, from)
 
 
 		if updatedConfig.mission_ini.date and date_override then
-			-- print("date_override 6 ")
+			print("date_override 6 ")
 			for key, forcedValue in pairs(date_override) do
 				updatedConfig.mission_ini.date[key] = forcedValue  -- **Écrase l'existant OU ajoute si absent**
-				-- print("date_override 7 ")
+				print("date_override 7 ")
 			end
 		end
 
@@ -5232,17 +5221,20 @@ function UpdateFilesAfterTimeJump()
 	zipFile:unzClose()
 
 	CampTotalTimeS = SecondsBetween(camp.dateInit, camp.date)
+	CampTotalTimeH = CampTotalTimeS / 3600
 
 	-- print("UTIL_function_UpdateFilesAfterTimeJump() The campaign will start on this date: " .. tostring(camp.dateInit.day) .. "." .. tostring(camp.dateInit.month) .. "." .. tostring(camp.dateInit.year) .. ".\n")
 	-- print("UTIL_function_UpdateFilesAfterTimeJump() The current date of the campaign is: " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
 
 	camp.date.CampTotalTimeS = CampTotalTimeS
-
+	camp.date.CampTotalTimeH = CampTotalTimeH
+	
 	require("Active/oob_ground")
 
     dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_UpdateTargetlist.lua")
 	dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Refpoints.lua")
 	dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_NavalEnvironment.lua")
+	if Debug.debug then print ("Lancement VIA UTIL_Fonction E 5235 (UpdateFilesAfterTimeJump)") end
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")
@@ -5284,6 +5276,10 @@ end
 
 function LoadFileAndUpdate(from)
 
+	if Debug.debug then
+		print("START LoadFileAndUpdate() "..tostring(from).." /1/1/1/1/1/1/1///1/1")
+	end
+
     FromFile = "UTIL_Functions/LoadFileAndUpdate()" -- file name for debug
 
 	----- unpack template mission file ----
@@ -5315,6 +5311,7 @@ function LoadFileAndUpdate(from)
 		require("Active/oob_scen")
 	end
 
+	_affiche(camp.date, "LoadFileAndUpdate()camp.date: ")
 	UpdateConfMod(nil, camp.date, "UTIL_Functions/LoadFileAndUpdate() "..debug.getinfo(1).currentline)
 
 	if Firstmission_flag then
@@ -5546,6 +5543,11 @@ function LoadFileAndUpdate(from)
 
 	--si le joueur fait un saut temporel (via date dans conf_mod) on met a jour les fichiers de la campagne
 	if not Firstmission_flag and TimeJump then
+		if Debug.debug then
+			print("UtilF jumpTime_C : "..tostring(TimeJump))
+			_affiche(mission_ini.current_date, "mission_ini.current_date")
+			_affiche(camp.date, "camp.date")
+		end
 		UpdateFilesAfterTimeJump()
 	end
 
@@ -5684,8 +5686,10 @@ function LoadFileAndUpdate(from)
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
 	CheckAll_Id()
+	if Debug.debug then print ("Lancement VIA UTIL_Fonction F 5687 (LoadFileAndUpdate)") end
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+	if Debug.debug then print ("Lancement VIA UTIL_Fonction G 5690 (LoadFileAndUpdate)") end
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 	--**************INITIALEMENT DANS MAIN_NextMission *****************************
 	--**************INITIALEMENT DANS MAIN_NextMission *****************************

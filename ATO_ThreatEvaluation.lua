@@ -1094,7 +1094,90 @@ local function addEWR(unit, side, ewrData)
 		}
 		insertEWR = true
 		insertGCi = true
+	elseif unit.type == "EWR P-37 BAR LOCK" then		--MOD https://github.com/Auranis/HighDigitSAMs
+		entry = {
+			type = unit.type,
+			class = "EWR",
+			x = unit.x,
+			y = unit.y,
+			range = 300000,
+			frequency = ewrData.frequencyMHz,
+			callsign = (ewrData.WEST_callnameString and ewrData.WEST_number) and (ewrData.WEST_callnameString .. "." .. tostring(ewrData.WEST_number)) or (ewrData.EST_callsign or ""),
+			elevation = 6,
+			min_alt = 0,
+			max_alt = 30000,
+			-- [call] = true,
+		}
+		insertEWR = true
+		insertGCi = true	
 
+	elseif unit.type == "EWR 55G6U NEBO-U" then		--MOD https://github.com/Auranis/HighDigitSAMs
+		entry = {
+			type = unit.type,
+			class = "EWR",
+			x = unit.x,
+			y = unit.y,
+			range = 500000,
+			frequency = ewrData.frequencyMHz,
+			callsign = (ewrData.WEST_callnameString and ewrData.WEST_number) and (ewrData.WEST_callnameString .. "." .. tostring(ewrData.WEST_number)) or (ewrData.EST_callsign or ""),
+			elevation = 39,
+			min_alt = 0,
+			max_alt = 30000,
+			-- [call] = true,
+		}
+		insertEWR = true
+		insertGCi = true			
+
+	elseif unit.type == "EWR 1L119 Nebo-SVU" then		--MOD https://github.com/Auranis/HighDigitSAMs
+		entry = {
+			type = unit.type,
+			class = "EWR",
+			x = unit.x,
+			y = unit.y,
+			range = 400000,
+			frequency = ewrData.frequencyMHz,
+			callsign = (ewrData.WEST_callnameString and ewrData.WEST_number) and (ewrData.WEST_callnameString .. "." .. tostring(ewrData.WEST_number)) or (ewrData.EST_callsign or ""),
+			elevation = 39,
+			min_alt = 0,
+			max_alt = 30000,
+			-- [call] = true,
+		}
+		insertEWR = true
+		insertGCi = true
+
+	elseif unit.type == "RLS_19J6" then		--
+		entry = {
+			type = unit.type,
+			class = "EWR",
+			x = unit.x,
+			y = unit.y,
+			range = 400000,
+			frequency = ewrData.frequencyMHz,
+			callsign = (ewrData.WEST_callnameString and ewrData.WEST_number) and (ewrData.WEST_callnameString .. "." .. tostring(ewrData.WEST_number)) or (ewrData.EST_callsign or ""),
+			elevation = 16,
+			min_alt = 0,
+			max_alt = 30000,
+			-- [call] = true,
+		}
+		insertEWR = true
+		insertGCi = true
+
+	elseif unit.type == "EWR P-14 Tall King" then		--MOD https://forum.dcs.world/topic/328269-p-14-tall-king-radar-v-101/
+		entry = {
+			type = unit.type,
+			class = "EWR",
+			x = unit.x,
+			y = unit.y,
+			range = 400000,
+			frequency = ewrData.frequencyMHz,
+			callsign = (ewrData.WEST_callnameString and ewrData.WEST_number) and (ewrData.WEST_callnameString .. "." .. tostring(ewrData.WEST_number)) or (ewrData.EST_callsign or ""),
+			elevation = 6,
+			min_alt = 0,
+			max_alt = 30000,
+			-- [call] = true,
+		}
+		insertEWR = true
+		insertGCi = true
 	--M07.g
 	elseif unit.type == "SNR_75V" then										--Participe � la chaine de detection
 		insertGCi = true

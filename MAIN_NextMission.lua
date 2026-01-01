@@ -643,8 +643,10 @@ if MissionInstance >= 2 then
 	
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+	if Debug.debug then print ("Lancement VIA Main_NM A 646") end
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+	if Debug.debug then print ("Lancement VIA Main_NM B 649") end
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 end
 
@@ -1143,10 +1145,12 @@ local campL = {
 -- 	camp.date.CampTotalTimeS = CampTotalTimeS
 -- end
 CampTotalTimeS = SecondsBetween(camp.dateInit, camp.date)
+CampTotalTimeH = CampTotalTimeS /3600
 camp.date.CampTotalTimeS = CampTotalTimeS
+camp.date.CampTotalTimeH = CampTotalTimeH
 
 -- met à jour la date de camp dans conf_mod.lua
-UpdateConfMod(nil, camp.date, "MAIN_NextMission "..debug.getinfo(1).currentline)
+UpdateConfModSuite(nil, camp.date, "MAIN_NextMission "..debug.getinfo(1).currentline)
 
 ----- create temporary content files of new mission file -----
 misStr = "mission = " .. TableSerialization(mission, 0)
