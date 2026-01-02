@@ -84,7 +84,7 @@ end
 --Important notes:
 --for condition and action strings: outside with single quotes '', inside with double quotes ""!
 
-local debugKT = true
+local debugKT = false
 
 ----- campaign flags -----
 if camp.flag == nil then

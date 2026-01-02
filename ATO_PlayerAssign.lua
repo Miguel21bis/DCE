@@ -20,26 +20,25 @@ if Debug.debug then
 	print("START ATO_PlayerAssign.lua "..versionDCE["ATO_PlayerAssign.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
 
--- local debugAssign = Debug.debug
-local debugAssign = false
-
-if DebugAssignAll then
-	debugAssign = true
-end
-
-local playable = {}
-local tab_doublon = {}
+--Global 
+HumainPack = {}
 PlayerFlight = false
-
+AllCoopPossible = false
 camp.player = nil
 camp.client = nil
-
-AllCoopPossible = false
 
 if camp.MultiPlayer then
 	camp.MultiPlayer.pack_n = {}
 end
 
+--local
+-- local debugAssign = Debug.debug
+local debugAssign = false
+if DebugAssignAll then
+	debugAssign = true
+end
+local playable = {}
+local tab_doublon = {}
 
 if not camp.MultiPlayer then camp.MultiPlayer = {} end
 if not camp.MultiPlayer["pack_n"] then camp.MultiPlayer["pack_n"] = {} end
@@ -457,22 +456,16 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 
 		until tabIndex[stringChoice]
 
-		-- if type(groupNChoice) == "string" then
-		-- 	if string.lower(groupNChoice) == "r" then
-		-- 		groupNChoice = math.random(1, #playable)
-		-- 	elseif string.lower(groupNChoice) == "s" then
-		-- 		--TODO pas sur que cela fonctionne
-		-- 		TaskRefused = true
-		-- 		groupNChoice = math.random(1, #playable)
-		-- 	end
-		-- end
-
-		print("groupNChoice: "..tostring(groupNChoice).." unitNChoice: "..tostring(unitNChoice))
+		-- print("groupNChoice: "..tostring(groupNChoice).." unitNChoice: "..tostring(unitNChoice))
 
 		if not TaskRefused then
 			
 			ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].player = true		--mark ATO entry as player flight
 			ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].unitPlayer = unitNChoice
+
+			HumainPack[playable[groupNChoice].packN] = {
+				humainTypePlane = playable[groupNChoice].type
+			}
 
 			camp.player = {
 				side = playable[groupNChoice].side,
@@ -506,20 +499,17 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 
 		local tabSelect = {}																		--table pour afficher * devant chaque selection
 		local badEntry = false
+		
 		for k=1, #creaClientFlight do																	-- si le multiplayer est demande
-			
-			local resteAPrendre = creaClientFlight[k].NbPlane
-				
+			local resteAPrendre = creaClientFlight[k].NbPlane		
 			repeat
 				local tabIndex = {}																		--table pour afficher uniquement les choix possibles
 
 				repeat
 					
 					print(" -------------------------------------------------------> Note: Your plane Flight wishes: ")
-					-- for k=1,  #creaClientFlight do
-						print(" -------------------------------------------------------> "..creaClientFlight[k].NbPlane.." "..creaClientFlight[k].PlaneType.." ("..creaClientFlight[k].side..") "..creaClientFlight[k].task)
-					-- end
-
+					print(" -------------------------------------------------------> "..creaClientFlight[k].NbPlane.." "..creaClientFlight[k].PlaneType.." ("..creaClientFlight[k].side..") "..creaClientFlight[k].task)
+					
 					
 					for index = 1, #playable do
 
@@ -556,8 +546,6 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 						if string.lower(groupNChoice) == "s" then
 							TaskRefused = true
 							groupNChoice = math.random(1, #playable)
-						-- elseif string.lower(groupNChoice) == "r" then
-						-- 	groupNChoice = math.random(1, #playable)
 						end
 					end
 
@@ -571,25 +559,11 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 
 				until tabIndex[groupNChoice]
 
-
-
 				if playable[groupNChoice] then print("Selected: "..playable[groupNChoice].groupName) end
 
-				-- if type(groupNChoice) == "string" then
-				-- 	if string.lower(groupNChoice) == "r" then
-				-- 		groupNChoice = math.random(1, #playable)
-				-- 	elseif string.lower(groupNChoice) == "s" then
-				-- 		--TODO par sur que cela fonctionne
-				-- 		TaskRefused = true
-				-- 		groupNChoice = math.random(1, #playable)
-				-- 		break
-				-- 	end
-				-- end
 
 				if not TaskRefused then
-
 					resteAPrendre = resteAPrendre - playable[groupNChoice].number
-
 					-- ajoute ce systeme pour avoir le briefing de tous
 					if not camp.client then camp.client = {} end
 
@@ -611,6 +585,10 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 
 					table.insert(camp.client, tabClient)
 
+					HumainPack[playable[groupNChoice].packN] = {
+						humainTypePlane = playable[groupNChoice].type
+					}
+
 
 					-- garde ce systeme pour ne faire un debriefing que sur un group, normalement celui du main
 					local foundGoodMain
@@ -631,6 +609,10 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 							type = playable[groupNChoice].type,
 						}
 
+						HumainPack[playable[groupNChoice].packN] = {
+							humainTypePlane = playable[groupNChoice].type
+						}
+
 						if playable[groupNChoice].role == "main" then foundGoodMain = true end
 					end
 
@@ -639,7 +621,7 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 					ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].IdClient = #camp.client
 					-- ATO[playable[r].side][playable[r].packN][playable[r].role][playable[r].flight].NbPlaneClient = creaClientFlight[#camp.client].NbPlane
 					ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].NbPlaneClient = creaClientFlight[k].NbPlane
-
+					
 					camp.MultiPlayer.pack_n[playable[groupNChoice].packN] = true
 				end
 			until resteAPrendre <= 0 or TaskRefused
@@ -698,23 +680,6 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 								local p90b_pB = math.sqrt(math.pow(ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].target.radius, 2) - math.pow(p90base_base, 2))	--distance between point on route perpendiculat to base and point on route intersecting base circle
 								local p1_pB = p1_p90base - p90b_pB																--distance from p1 to point on route intersecting base circle
 
-
-								-- local temp
-								-- if camp.player then
-								-- 	temp = camp.player
-								-- elseif camp.client then
-								-- 	temp = camp.client[MpIdInterceptor]
-								-- end
-
-								-- if p1_pC <= 0 then																				--if point on route intersecting ewr circle is ahead of p1
-								-- 	distance = 0																				--p1 is already within a ewr circle
-								-- 	temp.EWR_freq = ewr[playable[r].side][e].frequency									--store frequency of EWR station (stores nil for AWACS)
-								-- 	temp.EWR_call = ewr[playable[r].side][e].callsign									--store callsign of EWR station (stores nil for AWACS)
-								-- elseif p1_pC < distance then
-								-- 	distance = p1_pC																			--find the shortest distance to all ewr circles (this is the point on route where first EWR area is entered)
-								-- 	temp.EWR_freq = ewr[playable[r].side][e].frequency									--store frequency of EWR station (stores nil for AWACS)
-								-- 	temp.EWR_call = ewr[playable[r].side][e].callsign									--store callsign of EWR station (stores nil for AWACS)
-								-- end
 								if camp.player then
 									if p1_pC <= 0 then
 										distance = 0
@@ -745,26 +710,7 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 									end
 									detected = true	
 								end
-								-- elseif camp.client and camp.client[MpIdInterceptor] then
-								-- 	if p1_pC <= 0 then
-								-- 		distance = 0
-								-- 		camp.client[MpIdInterceptor].EWR_freq = ewr[playable[r].side][e].frequency
-								-- 		camp.client[MpIdInterceptor].EWR_call = ewr[playable[r].side][e].callsign
-								-- 	elseif p1_pC < distance then
-								-- 		distance = p1_pC
-								-- 		camp.client[MpIdInterceptor].EWR_freq = ewr[playable[r].side][e].frequency
-								-- 		camp.client[MpIdInterceptor].EWR_call = ewr[playable[r].side][e].callsign
-								-- 	end
-								-- 	if distance < p1_pB then
-								-- 		distance = p1_pB
-								-- 	end
-								-- 	detected = true	
-								-- end
-								
-								-- if distance < p1_pB then
-								-- 	distance = p1_pB
-								-- end
-								-- detected = true																					--route entered EWR coverage
+
 							end
 						end
 
@@ -829,5 +775,7 @@ if Debug.debug then
 	campFile = io.open("Debug/ATO_ATO_PA.lua", "w")	 or error("Failed to open debug file")
 	campFile:write(camp_str)																		--save new data
 	campFile:close()
-	
+
+	_affiche(HumainPack, "HumainPack: ")
+	os.execute 'pause'
 end

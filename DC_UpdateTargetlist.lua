@@ -391,12 +391,17 @@ local function checkRequiredModules()
 end
 
 
+print("DcUT A 0s")
+local checkTime = os.clock()
+
 checkRequiredModules()
 
 if Debug.checkTargetName and (Firstmission_flag or Skipmission_flag) then
-	tabTemplates = tabFileTemplate()
+    tabTemplates = tabFileTemplate()
 end
 
+print("DcUT B ".. string.format("%.3f", os.clock() - checkTime) .."s")
+checkTime = os.clock()
 
 --met a jour la structure des ejectedPilot dans le targetlist
 for side, targets in pairs(targetlist)	 do
@@ -415,7 +420,8 @@ for side, targets in pairs(targetlist)	 do
 	end
 end
 
-
+print("DcUT C ".. string.format("%.3f", os.clock() - checkTime) .."s")
+checkTime = os.clock()
 
 if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 	for sideTL, targets in pairs(targetlist)	 do
@@ -582,9 +588,11 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 	end
 end
 
+print("DcUT D ".. string.format("%.3f", os.clock() - checkTime) .."s")
+checkTime = os.clock()
 
-for side_name, targets in pairs(targetlist) do													--Iterate through all side
-	for targetN, target in pairs(targets) do												--Iterat through all targets
+for sideName, targets in pairs(targetlist) do													--Iterate through all side
+	for targetN, target in ipairs(targets) do												--Iterat through all targets
 		local maxRange = 0
 		local deadCount = 0
 		if not target.name then
@@ -607,7 +615,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 		end
 
 		local targetside = "red"															--variable which side the target is on
-		if side_name == "red" then
+		if sideName == "red" then
 			targetside = "blue"
 		end
 
@@ -651,8 +659,8 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 			local master_y
 
 			--find either master group or units (vehicle or ship) and get master  x-y coordinates
-			for coal_name,coal in pairs(oob_ground) do										--go through sides(red/blue)	
-				for country_n,country in ipairs(coal) do									--go through countries
+			for country_n, country in pairs(oob_ground[targetside]) do										--go through sides(red/blue)	
+				-- for country_n,country in ipairs(coal) do									--go through countries
 					if country.vehicle then													--country has vehicles
 						for group_n,group in ipairs(country.vehicle.group) do				--go through groups
 							if group.name == master then
@@ -688,7 +696,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 							end
 						end
 					end
-				end
+				-- end
 			end
 
 			if master_x and master_y then													--a master was found
@@ -807,27 +815,52 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 										end
 
 
-										--check range from threat
-										if GroundthreatsAll then
+									-- 	--check range from threat
+									-- 	if GroundthreatsAll then
 
-											for elementN, element in pairs(target.elements) do
-												for threatN, threat in pairs(GroundthreatsAll[ DCS_ENI_Side[side_name] ]) do
-													if element.x  and element.x > math.floor(threat.x)-1 and  element.x < math.floor(threat.x)+1 then
-														if element.y > math.floor(threat.y)-1 and  element.y < math.floor(threat.y)+1 then
-															element.range = threat.range
+									-- 		for elementN, element in pairs(target.elements) do
+									-- 			for threatN, threat in pairs(GroundthreatsAll[ DCS_ENI_Side[sideName] ]) do
+									-- 				if element.x and element.x > math.floor(threat.x)-1 and  element.x < math.floor(threat.x)+1 then
+									-- 					if element.y > math.floor(threat.y)-1 and  element.y < math.floor(threat.y)+1 then
+									-- 						element.range = threat.range
 
-															if not element.dead and  maxRange < element.range then
-																maxRange = element.range
-															end
+									-- 						if not element.dead and  maxRange < element.range then
+									-- 							maxRange = element.range
+									-- 						end
+									-- 					end
+									-- 				end
+									-- 			end
+									-- 		end
+									-- 	end
+
+										-- local maxRange = 0
+
+										-- local maxRange = 0
+
+										if GroundthreatsAll and target.x and target.y then
+											local threats = GroundthreatsAll[DCS_ENI_Side[sideName]]
+											if threats then
+												for _, threat in pairs(threats) do
+													local dx = target.x - threat.x
+													local dy = target.y - threat.y
+													local dist2 = dx*dx + dy*dy
+
+													if dist2 <= threat.range * threat.range then
+														if threat.range > maxRange then
+															maxRange = threat.range
 														end
 													end
 												end
 											end
 										end
 
+										target.range = maxRange
+
+
+
 									end
 
-									target.range = maxRange
+									-- target.range = maxRange
 								end
 							end
 						end
@@ -1236,7 +1269,7 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 				attribut = "generic"	
 			end
 			
-			local killTargetLocal = campMod.RepairOption[DCS_ENI_Side[side_name]][attribut][2]
+			local killTargetLocal = campMod.RepairOption[DCS_ENI_Side[sideName]][attribut][2]
 
 			if target.alive <= killTargetLocal and target.alive > 0 and attribut ~= "runway" then
 				
@@ -1267,9 +1300,9 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 			--calcul le nombre de cible encore intacte, pour stat DEBUG
 			if target.inactive ~= true then													--target is active
 				if 	target.task and target.task == "Strike" or target.task == "Anti-ship Strike" or target.task == "Runway Attack" then
-					GroundTarget[side_name].total = GroundTarget[side_name].total + 1			--count the number of all ground targets for each side
+					GroundTarget[sideName].total = GroundTarget[sideName].total + 1			--count the number of all ground targets for each side
 					if target.alive > 0 then													--target is not destroyed
-						GroundTarget[side_name].alive = GroundTarget[side_name].alive + 1		--count the number of all alive ground targets for each side
+						GroundTarget[sideName].alive = GroundTarget[sideName].alive + 1		--count the number of all alive ground targets for each side
 					end
 				end
 			end
@@ -1277,16 +1310,16 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 			if target.inactive ~= true then													--target is active
 				if 	target.zone then
 
-					if not GroundZoneTarget[side_name][target.zone] then
-						GroundZoneTarget[side_name][target.zone] = {
+					if not GroundZoneTarget[sideName][target.zone] then
+						GroundZoneTarget[sideName][target.zone] = {
 							total = 0,
 							alive = 0,
 						}
 					end
-					GroundZoneTarget[side_name][target.zone].total = GroundZoneTarget[side_name][target.zone].total + 1			--count the number of all ground targets for each side
+					GroundZoneTarget[sideName][target.zone].total = GroundZoneTarget[sideName][target.zone].total + 1			--count the number of all ground targets for each side
 
 					if target.alive > 0 then													--target is not destroyed
-						GroundZoneTarget[side_name][target.zone].alive = GroundZoneTarget[side_name][target.zone].alive + 1		--count the number of all alive ground targets for each side
+						GroundZoneTarget[sideName][target.zone].alive = GroundZoneTarget[sideName][target.zone].alive + 1		--count the number of all alive ground targets for each side
 					end
 				end
 			end
@@ -1294,10 +1327,16 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 	end
 
 
-	if GroundTarget[side_name].total > 0 then
-		GroundTarget[side_name].percent = math.ceil(100 / GroundTarget[side_name].total * GroundTarget[side_name].alive)	--calculate percentage of alive ground targets per side
-		checkBug2("DC_UT GroundTarget "..side_name.." percent "..GroundTarget[side_name].percent)
+	print("DcUT E1 ".. string.format("%.3f", os.clock() - checkTime) .."s")
+	checkTime = os.clock()
+
+	if GroundTarget[sideName].total > 0 then
+		GroundTarget[sideName].percent = math.ceil(100 / GroundTarget[sideName].total * GroundTarget[sideName].alive)	--calculate percentage of alive ground targets per side
+		checkBug2("DC_UT GroundTarget "..sideName.." percent "..GroundTarget[sideName].percent)
 	end
+
+	print("DcUT E2 ".. string.format("%.3f", os.clock() - checkTime) .."s")
+	checkTime = os.clock()
 
 	for sideString, zones in pairs(GroundZoneTarget) do
 		for zoneName, zone in pairs(zones) do
@@ -1309,6 +1348,8 @@ for side_name, targets in pairs(targetlist) do													--Iterate through all
 	end
 end
 
+print("DcUT Z ".. string.format("%.3f", os.clock() - checkTime) .."s")
+checkTime = os.clock()
 
 --********************************************************************************************************
 --Update targetList avec le fichier LL_Positions.lua
@@ -1854,7 +1895,7 @@ for targetSide, targets in pairs(targetlist) do
 	end
 end
 
-
+print("DcUT Z")
 
 		
 
