@@ -18,6 +18,14 @@ versionDCE["DC_UpdateTargetlist.lua"] = "1.11.52"
 -- modification M19_e		Repair GROUND
 -------------------------------------------------------------------------------------------------------
 
+local t0 = os.clock()
+local t_oob = 0
+local t_elements = 0
+local t_threats = 0
+local t_refpoint = 0
+local t_slaved = 0
+local t_runway = 0
+
 if Debug.debug then
 	print("START DC_UpdateTargetlist.lua "..versionDCE["DC_UpdateTargetlist.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 
@@ -71,6 +79,7 @@ GroundZoneTarget = {																				--count total and alive ground targets f
 	["blue"] = {},
 }
 
+--PERF: simplified to target-level threat calc (elements too close to matter)
 local oobGroupIndex = {}
 --indexation des groupName pour un acces ultraPlusRapide
 for countryName, countries in pairs(oob_ground) do
@@ -78,6 +87,7 @@ for countryName, countries in pairs(oob_ground) do
 		for classname, classG in pairs(country) do
 			if classname == "vehicle" or classname == "ship" or classname == "static" then
 				for group_n, group in pairs(classG.group) do
+					group["class"] = classname
 					oobGroupIndex[group.name] = group
 				end
 			end
@@ -120,35 +130,29 @@ local function checkBug3(txt)
 	end
 end
 
-local function checkElementXY(targetElement, targetside)
+local function checkElementXY(nameSearch, targetside)
 	--pour eviter les doubles target comme base strategique
 	--recherche position xy dans oob_ground
 	-- print("DcUT             MA"..tostring(targetElement.name))	
 
 	local foundElement = false
 
-	if targetElement.name then
-		for country_n, country in pairs(oob_ground[targetside]) do
-			for classname, class in pairs(country) do
-				if type(class) =="table" and class.group then
-					for group_n, group in pairs(class.group) do
-						if group.name == targetElement.name then
-							-- print("DcUT               MB return Found group.name")						
-							return group.x, group.y, classname
-						end
-					end
-				end
-			end
+	if nameSearch then
+
+		local group = oobGroupIndex[nameSearch]
+		if group then
+			print("DcUT               MB return Found group.name")	
+			return group.x, group.y, group.class
 		end
+
 		if not foundElement then
 			for country_n, country in pairs(oob_ground[targetside]) do
-
 				for classname, class in pairs(country) do
 					if type(class) =="table" and class.group then
-						for group_n, group in pairs(class.group) do
-							for unitN, unit in ipairs(group.units) do
-								if unit.name == targetElement.name then
-									-- print("DcUT               MC return Found group.name")	
+						for groupN, flight in pairs(class.group) do
+							for unitN, unit in ipairs(flight.units) do
+								if unit.name == nameSearch then
+									print("DcUT               MC return Found unit.name")	
 									return unit.x, unit.y, classname
 								end
 							end
@@ -156,7 +160,38 @@ local function checkElementXY(targetElement, targetside)
 					end
 				end
 			end
+
 		end
+
+		-- for country_n, country in pairs(oob_ground[targetside]) do
+		-- 	for classname, class in pairs(country) do
+		-- 		if type(class) =="table" and class.group then
+		-- 			for group_n, group in pairs(class.group) do
+		-- 				if group.name == targetElement.name then
+		-- 					-- print("DcUT               MB return Found group.name")						
+		-- 					return group.x, group.y, classname
+		-- 				end
+		-- 			end
+		-- 		end
+		-- 	end
+		-- end
+		-- if not foundElement then
+		-- 	for country_n, country in pairs(oob_ground[targetside]) do
+
+		-- 		for classname, class in pairs(country) do
+		-- 			if type(class) =="table" and class.group then
+		-- 				for group_n, group in pairs(class.group) do
+		-- 					for unitN, unit in ipairs(group.units) do
+		-- 						if unit.name == targetElement.name then
+		-- 							-- print("DcUT               MC return Found group.name")	
+		-- 							return unit.x, unit.y, classname
+		-- 						end
+		-- 					end
+		-- 				end
+		-- 			end
+		-- 		end
+		-- 	end
+		-- end
 	end
 
 	-- if not foundElement then
@@ -634,8 +669,12 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 			targetside = "blue"
 		end
 
+		
+		local t_D2 = os.clock()
+
 		--target position by refpoint 
 		if target.refpoint then																--target coordinates are referenced by a refpoint
+			
 			if Refpoint then																--global Refpoint is not available when UpdateTargelist is called by DEBRIEF_Master. In this case updating the target coordinates can be ignored as this is not needed for Debriefing.
 
 				if type(target.refpoint) == "table" then									--multiple refpoints
@@ -664,8 +703,13 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 			end
 		end
 
+		t_refpoint = t_refpoint + (os.clock() - t_D2)
+
+		local t_D3 = os.clock()
+
 		--target position slaved to group/unit
 		if target.slaved then																--target coordinates are slaved relative to a group/unit
+
 			local master = target.slaved[1]
 			local bearing = target.slaved[2]
 			local distance = target.slaved[3]
@@ -674,15 +718,8 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 			local master_y
 
 			--find either master group or units (vehicle or ship) and get master  x-y coordinates
-			print("DcUTl A targetside "..targetside)
 			for countryN, country in pairs(oob_ground[sideName]) do										--go through sides(red/blue)	
-				-- for country_n,country in ipairs(coal) do									--go through countries
-				print("DcUTl B1 country_n "..countryN.." country.vehicle?: "..tostring(country.vehicle))	
-				print("DcUTl B2 country_n "..countryN.." country.ship?: "..tostring(country.ship))	
-
 				if country.vehicle then													--country has vehicles
-					print("DcUTl C country.vehicle.group "..tostring(country.vehicle.group))
-					
 					for group_n,group in ipairs(country.vehicle.group) do				--go through groups
 						if group.name == master then
 							master_x = group.x
@@ -701,21 +738,14 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 				end
 
 				if country.ship then
-					print("DcUTl D country.ship.group "..tostring(country.ship.group))
-
 					for groupN,group in ipairs(country.ship.group) do
-						print("DcUTl D2")
 						if group.name == master then
-							print("DcUTl D3")
 							master_x = group.x
 							master_y = group.y
 							break
 						else
-							print("DcUTl D4")
 							for unitN,unit in ipairs(group.units) do
-								print("DcUTl D5")
 								if unit.name == master then
-									print("DcUTl D6")
 									master_x = unit.x
 									master_y = unit.y
 									break
@@ -734,13 +764,11 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 			end
 		end
 
+		t_slaved = t_slaved + (os.clock() - t_D3)
 
 		local debugTxt = ""
 
 		if target.task == "Strike" then
-			
-			-- print("DcUT F1a ".. string.format("%.3f", os.clock() - checkTime) .."s")
-			-- checkTime = os.clock()
 			
 			if target.class == nil or target.class == "vehicle" or  target.class == "static"  then														--For scenery object targets
 				
@@ -782,12 +810,15 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 					end
 				end
 
+				local t = os.clock()
+
 				-- for country_n, country in pairs(oob_ground[targetside]) do					--iterate through countries
 				-- 	for classname, classG in pairs(country) do								--iterate through classes in country 
 				-- 		if classname == "vehicle" or classname == "ship" or classname == "static" then				--for vehicles or ships
 				-- 			for group_n, group in pairs(classG.group) do						--iterate through groups in country.vehcile.group or country.ship.group table
 				local group = oobGroupIndex[target.name]
 				if group then
+					-- print("DcUT passe GROUP A")
 					-- if checkGroup[group.name] then							--if the target is found in group table
 					target.foundOobGround = true
 					if group.probability and group.probability < 1 then		--if group probability of spawn is less than 100%
@@ -805,6 +836,8 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 
 					if not target.elements then target.elements = {} end	--add elements table
 					
+					local tu = os.clock()
+
 					for unit_n, unit in pairs(group.units) do				--Iterate through all units of group
 						local alreadyThere = false
 						for elementN, element in pairs(target.elements) do
@@ -819,7 +852,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 								element.CheckDay = DeepCopy(unit.CheckDay)						-- M19 ajoute la date destruction/ravito pour les futurs check de ravitaillement
 								element.x = unit.x
 								element.y = unit.y
-								element.class = classname
+								element.class = group.class
 								element.fromGroupName = true
 								element.type = unit.type
 								element.mainObjective = checkGroup[group.name].MainObjective
@@ -838,7 +871,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 								CheckDay = unit.CheckDay,						-- M19 ajoute la date destruction/ravito pour les futurs check de ravitaillement
 								x = unit.x,
 								y = unit.y,
-								class = classname,
+								class =  group.class,
 								fromGroupName = true,
 								type = unit.type,
 								mainObjective = checkGroup[group.name].MainObjective,
@@ -869,6 +902,8 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 
 							-- local maxRange = 0
 
+						local tm = os.clock()
+
 						if GroundthreatsAll then
 							local threats = GroundthreatsAll[DCS_ENI_Side[sideName]]
 							if threats then
@@ -891,17 +926,18 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 							end
 						end
 
+						t_threats = t_threats + (os.clock() - t)
+
 						-- target.range = maxRange
 					end
 
-						target.range = maxRange
-					-- end
-				-- 			end
-				-- 		end
-				-- 	end
+					t_elements = t_elements + (os.clock() - tu)
 
+					target.range = maxRange
 
 				end
+
+				t_oob = t_oob + (os.clock() - t)
 
 				if not target.foundOobGround then
 					local InTemplate = findInTemplates(target.name, targetside, "vehicle")
@@ -1017,59 +1053,63 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 			end
 
 		elseif target.task == "Anti-ship Strike" then										--For ship group targets
-			for country_n, country in pairs(oob_ground[targetside]) do						--iterate through countries
-				if country.ship then
-					for group_n, group in pairs(country.ship.group) do						--Iterate through groups in country.ship.group table
-						checkBug(group.name, "base_mission", "ship")
-						if group.name == target.name then									--If the target is found in group table
-							target.foundOobGround = true
-							if group.probability and group.probability < 1 then			--if group probability of spawn is less than 100%
-								target.ATO = false										--remove target to ATO
-							end
-							target.alive = 100											--Introduce percentage of alive target elements
-							target.groupId = group.groupId								--store target group ID
-							target.x = group.x											--add x coordinate of target
-							target.y = group.y											--add y coordinate of target
+			-- for country_n, country in pairs(oob_ground[targetside]) do						--iterate through countries
+			-- 	if country.ship then
+			-- 		for group_n, group in pairs(country.ship.group) do						--Iterate through groups in country.ship.group table
+			-- 			checkBug(group.name, "base_mission", "ship")
+						-- if group.name == target.name then									--If the target is found in group table
+							
+			local group = oobGroupIndex[target.name]
+			if group then
+				target.foundOobGround = true
+				if group.probability and group.probability < 1 then			--if group probability of spawn is less than 100%
+					target.ATO = false										--remove target to ATO
+				end
+				target.alive = 100											--Introduce percentage of alive target elements
+				target.groupId = group.groupId								--store target group ID
+				target.x = group.x											--add x coordinate of target
+				target.y = group.y											--add y coordinate of target
 
-							if target.lat and target.lon then
-								group.hidden = true
-							end
+				if target.lat and target.lon then
+					group.hidden = true
+				end
 
-							target.elements = {}										--add elements table
-							target.alive_last = 0										--Introduce percentage of elements that died in last mission (for Debriefing)
-							for unit_n, unit in pairs(group.units) do					--Iterate through all units of group
-								local temp = {x=0,y=0,class=""}
-								temp.x, temp.y, temp.class = checkElementXY(unit, targetside)
-								if temp.x == nil then
-									temp.class = "MapObject"
-								end
-								target.elements[unit_n] = {								--add new element
-									name = unit.name,									--store unit name
-									dead = unit.dead,									--store unit status
-									dead_last = unit.dead_last,							--store unit dead_last
-									CheckDay = unit.CheckDay,							-- M19 ajoute la date destruction/ravito pour les futurs check de ravitaillement
-									class = temp.class,
-									x = temp.x,
-									y = temp.y,
-									type = unit.type,
-									mainObjective = true,
-								}
-							end
-							for unit_n, unit in pairs(group.units) do						--Iterate through all units of group
-								if unit.dead then											--Unit is dead
-									target.alive = target.alive - 100 / #target.elements	--reduce target alive percentage	
-								end
-								if unit.dead_last then
-									target.alive_last = target.alive_last + 100 / #target.elements	--add target died in last mission percentage
-								end
-							end
-							target.alive = math.floor(target.alive)
-							target.alive_last = math.floor(target.alive_last)
-							-- break
-						end
+				target.elements = {}										--add elements table
+				target.alive_last = 0										--Introduce percentage of elements that died in last mission (for Debriefing)
+				for unit_n, unit in pairs(group.units) do					--Iterate through all units of group
+					local temp = {x=0,y=0,class=""}
+					-- temp.x, temp.y, temp.class = checkElementXY(unit, targetside)
+					temp.x, temp.y, temp.class = unit.x, unit.y, group.class
+					if temp.x == nil then
+						temp.class = "MapObject"
+					end
+					target.elements[unit_n] = {								--add new element
+						name = unit.name,									--store unit name
+						dead = unit.dead,									--store unit status
+						dead_last = unit.dead_last,							--store unit dead_last
+						CheckDay = unit.CheckDay,							-- M19 ajoute la date destruction/ravito pour les futurs check de ravitaillement
+						class = temp.class,
+						x = temp.x,
+						y = temp.y,
+						type = unit.type,
+						mainObjective = true,
+					}
+				end
+				for unit_n, unit in pairs(group.units) do						--Iterate through all units of group
+					if unit.dead then											--Unit is dead
+						target.alive = target.alive - 100 / #target.elements	--reduce target alive percentage	
+					end
+					if unit.dead_last then
+						target.alive_last = target.alive_last + 100 / #target.elements	--add target died in last mission percentage
 					end
 				end
+				target.alive = math.floor(target.alive)
+				target.alive_last = math.floor(target.alive_last)
+				-- break
 			end
+				-- 	end
+				-- end
+			-- end
 
 			if not target.foundOobGround then
 				local InTemplate = findInTemplates(target.name, targetside, "ship", true)
@@ -1115,10 +1155,8 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 			-- en fonction du runway.life qui doit etre de 3600 point lorsqu'il est intacte.
 			
 			
-			-- print("DcUT F5 ".. string.format("%.3f", os.clock() - checkTime) .."s")
-			-- checkTime = os.clock()
+			local t_F5 = os.clock()
 			
-
 			debugTxt = debugTxt.." 0 "..target.db_airbaseName
 
 			if db_airbases[target.db_airbaseName] then									--if the target airbase has an entry in db_airbases table
@@ -1275,14 +1313,10 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 				-- InsertBugList(txt)
 			end
 
+			t_runway = t_runway + (os.clock() - t_F5)
+
 		end
 
-
-		
-		-- print("DcUT E4 ".. string.format("%.3f", os.clock() - checkTime) .."s")
-		-- checkTime = os.clock()
-
-		
 
 		if target.alive then																--target has an alive value (is a ground target)
 
@@ -1963,4 +1997,15 @@ if Debug.debug then
 	local campFile = io.open("Debug/oob_ground_DcUT.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
+
+	AddLog(string.format(
+		"DCE PERF: total=%.2fs | oob=%.2fs | elements=%.2fs | threats=%.2fs | refpoint=%.2fs | slaved=%.2fs | runway=%.2fs",
+		os.clock() - t0,
+		t_oob,
+		t_elements,
+		t_threats,
+		t_refpoint,
+		t_slaved,
+		t_runway
+	))
 end

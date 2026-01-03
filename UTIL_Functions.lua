@@ -3654,10 +3654,10 @@ function UpdateConfModSuite(setWeather, setDate, from)
 		date_override = setDate
 		-- camp.date = setDate
 
-		if Debug.debug then
-			print("date_override 5: camp.date = setDate ")
-			_affiche(date_override, "date_override 5: setDate ")
-		end
+		-- if Debug.debug then
+		-- 	print("date_override 5: camp.date = setDate ")
+		-- 	_affiche(date_override, "date_override 5: setDate ")
+		-- end
 	end
 
     -- Fonction pour charger la configuration avec la structure	
