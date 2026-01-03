@@ -3594,10 +3594,10 @@ function UpdateConfMod(setWeather, setDate, from)
 	if setDate then
 		--mis à jour via camp_triggers et DC_CheckTriggers
 		camp.date = setDate
-		if Debug.debug then
-			print("date_override 5: camp.date = setDate from: "..tostring(from))
-			_affiche(setDate, "date_override 5: setDate ")
-		end
+		-- if Debug.debug then
+		-- 	print("date_override 5: camp.date = setDate from: "..tostring(from))
+		-- 	_affiche(setDate, "date_override 5: setDate ")
+		-- end
 
 		UpdateConfModSuite(nil, setDate, "UpdateConfMod:"..from)
 	end
@@ -3607,11 +3607,11 @@ end
 function UpdateConfModSuite(setWeather, setDate, from)
     --version UpdateConfMod VA_1.12
 
-	if Debug.debug then
-		print("UpdateConfModSuite() from "..tostring(from))
-		_affiche(setWeather, "setWeather: ")
-		_affiche(setDate, "setDate: ")
-	end
+	-- if Debug.debug then
+	-- 	print("UpdateConfModSuite() from "..tostring(from))
+	-- 	_affiche(setWeather, "setWeather: ")
+	-- 	_affiche(setDate, "setDate: ")
+	-- end
 
 	local weather_override
 	local date_override
@@ -3901,7 +3901,7 @@ function UpdateConfModSuite(setWeather, setDate, from)
 			-- `current_date` doit **toujours** être remplacé par `date_override`
 			elseif key == "current_date" and date_override then
 				clientTable[key] = DeepCopy(date_override)
-				_affiche(date_override, "date_override F1; ")
+				-- _affiche(date_override, "date_override F1; ")
 			-- Fusion normale des sous-tables
 			elseif type(defaultValue) == "table" then
 				if not clientValue then
@@ -3942,10 +3942,10 @@ function UpdateConfModSuite(setWeather, setDate, from)
 
 
 		if updatedConfig.mission_ini.date and date_override then
-			print("date_override 6 ")
+			-- print("date_override 6 ")
 			for key, forcedValue in pairs(date_override) do
 				updatedConfig.mission_ini.date[key] = forcedValue  -- **Écrase l'existant OU ajoute si absent**
-				print("date_override 7 ")
+				-- print("date_override 7 ")
 			end
 		end
 
@@ -5129,7 +5129,7 @@ function LoadFileAndUpdate(from)
 		require("Active/oob_scen")
 	end
 
-	_affiche(camp.date, "LoadFileAndUpdate()camp.date: ")
+	-- _affiche(camp.date, "LoadFileAndUpdate()camp.date: ")
 	UpdateConfMod(nil, camp.date, "UTIL_Functions/LoadFileAndUpdate() "..debug.getinfo(1).currentline)
 
 	if Firstmission_flag then

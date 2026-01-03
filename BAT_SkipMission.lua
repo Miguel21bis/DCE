@@ -74,12 +74,7 @@ dofile("Active/camp_status.lua")
 
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
-_affiche(camp.date, "camp.date_D : ")
-_affiche(mission_ini.current_date, "mission_ini.current_date_D: ")
-
 UpdateConfModSuite(nil, nil, "BAT_SkipMission "..debug.getinfo(1).currentline)
-_affiche(camp.date, "camp.date_E : ")
-_affiche(mission_ini.current_date, "mission_ini.current_date_E: ")
 
 if not camp.dateInit then
 	local tempCamp = camp
@@ -92,41 +87,30 @@ if not camp.dateInit then
 		month = campInit.date.month,
 	}
 end
-_affiche(camp.date, "camp.date_F : ")
-_affiche(mission_ini.current_date, "mission_ini.current_date_F: ")
 
 if camp.pendingBriefing then
 	Briefing_text = camp.pendingBriefing .. Briefing_text																--briefing text to be added this mission instance
 	camp.pendingBriefing = nil																		--reset pending briefing text
 end
-_affiche(camp.date, "camp.date_G : ")
-_affiche(mission_ini.current_date, "mission_ini.current_date_G: ")
 
 if mission_ini.current_date.setDateInNextMission and mission_ini.current_date and mission_ini.current_date.year then
 
 	local old_Date
 
-	-- if camp.date.day ~= mission_ini.current_date.day or camp.date.month ~= mission_ini.current_date.month or camp.date.year ~= mission_ini.current_date.year then
+	old_Date = DeepCopy(camp.date)
+	TimeJump = true
 
-		old_Date = DeepCopy(camp.date)
-		TimeJump = true
+	if Debug.debug then
+		print("BatSM jumpTime_A : "..tostring(TimeJump))
+		_affiche(mission_ini.current_date, "mission_ini.current_date")
+		_affiche(camp.date, "camp.date")
+	end
 
-		if Debug.debug then
-			print("BatSM jumpTime_A : "..tostring(TimeJump))
-			_affiche(mission_ini.current_date, "mission_ini.current_date")
-			_affiche(camp.date, "camp.date")
-		end
-
-	-- end
 
 	--changement de date, on prend celle de conf_mod
 	mission_ini.current_date.setDateInNextMission = false
 
 	camp.date = mission_ini.current_date
-
-	-- CampTotalTimeS = SecondsBetween(camp.dateInit, camp.date)
-
-	-- if TimeJump then
 
 	local diffTime = SecondsBetween(old_Date, camp.date)
 
@@ -141,7 +125,6 @@ if mission_ini.current_date.setDateInNextMission and mission_ini.current_date an
 			end
 		end
 	end
-	-- end
 end
 
 if not ChangePlane then

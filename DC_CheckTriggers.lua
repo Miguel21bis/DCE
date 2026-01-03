@@ -122,7 +122,7 @@ end
 local old_flag = DeepCopy(camp.flag)												--copy campaign flags, so that modifications of flags do not affect condition of subsequent campaign triggers in same mission
 
 local function dateToInt(d)
-	_affiche(d, "dateToInt d: ")
+	-- _affiche(d, "dateToInt d: ")
     return d.year * 10000 + d.month * 100 + d.day
 end
 
@@ -2263,7 +2263,7 @@ for triggerName, trigger in pairs(camp_triggers) do								--iterate through tri
 
 		if debugKT then print("DcCT 01 if trigger.active: trigger.condition: "..tostring(trigger.condition)) end
 
-		_affiche(camp.date, "camp.date: ")
+		-- _affiche(camp.date, "camp.date: ")
 
 		local campDate = dateToInt(camp.date)
 
