@@ -19,32 +19,19 @@ versionDCE["DC_UpdateTargetlist.lua"] = "1.11.52"
 -------------------------------------------------------------------------------------------------------
 
 local t0 = os.clock()
+local t_strike  = 0
 local t_oob = 0
+local t_template = 0
 local t_elements = 0
+local t_elementsB = 0
+local t_units = 0
 local t_threats = 0
-local t_refpoint = 0
-local t_slaved = 0
 local t_runway = 0
+local t_alive  = 0
+local t_additional = 0
 
 if Debug.debug then
 	print("START DC_UpdateTargetlist.lua "..versionDCE["DC_UpdateTargetlist.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
-
-	-- local function stripSource(src)
-	-- 	if not src then return "?" end
-	-- 	if string.sub(src,1,1) == "@" then return string.sub(src,2) end
-	-- 	return src
-	-- end
-
-	-- -- affiche une dizaine de niveaux d'appel (2 = l'appelant direct)
-	-- for i = 2, 10 do
-	-- 	local info = debug.getinfo(i, "Sln")
-	-- 	if not info then break end
-	-- 	print(string.format("caller level %d -> %s:%d  func=%s  what=%s",
-	-- 		i, stripSource(info.source), info.currentline or 0, info.name or "-", info.what or "-"))
-	-- end
-
-	-- -- affichage complet de la trace (utile pour voir toute la pile)
-	-- print("Full traceback:\n" .. debug.traceback("", 2))
 end
 
 if not targetlist.blue[1] then
@@ -57,8 +44,7 @@ else
 	DC_UpdateTargetlist_counter = DC_UpdateTargetlist_counter + 1
 end
 
-local tabTemplates = {}
-
+TemplateIndex =  {}
 ListRequiredModules = {}
 
 GroundTarget = {																				--count total and alive ground targets for each side
@@ -78,6 +64,11 @@ GroundZoneTarget = {																				--count total and alive ground targets f
 	["red"] = {},
 	["blue"] = {},
 }
+
+
+local tabTemplates = {}
+
+
 
 --PERF: simplified to target-level threat calc (elements too close to matter)
 local oobGroupIndex = {}
@@ -295,35 +286,6 @@ local function tabFileTemplate()
 
 	arrayFileTemplate = {}
 	local camp_triggersTemPlaTe =  camp_triggers
-
-	-- for nTrigger, trigger in pairs(camp_triggersTemPlaTe) do
-	-- 	if type(trigger.action) == "table" then
-	-- 		for n = 1, #trigger.action do
-	-- 			-- [1] = 'Action.TemplateActive("North Cyprus Force 2 T1.stm")',
-
-	-- 			if trigger.action[n] then
-	-- 				if string.find(trigger.action[n], ".stm") then
-
-	-- 					local str2 = trigger.action[n]
-	-- 					local res2 = string.match(str2, '%b""')
-	-- 					res2 = string.gsub(res2, '"', "")
-
-	-- 					table.insert(arrayFileTemplate, res2)
-	-- 				end
-	-- 			else
-	-- 				print()
-	-- 				print("********************ATTENTION******************")
-	-- 				print("***************Note for the Campaign Maker***** the key: "..n.." is missing in the file camp_triggers_init.lua ****************")
-	-- 				print("********************ATTENTION******************")
-	-- 				print()
-	-- 				print("after this ligne: ")
-	-- 				print()
-	-- 				print(tostring(trigger.action[n-1]))
-	-- 				print("********************ATTENTION******************") os.execute 'pause'
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
 	
 	for nTrigger, trigger in pairs(camp_triggersTemPlaTe) do
 		if type(trigger.action) == "table" then
@@ -362,52 +324,96 @@ local function tabFileTemplate()
 	return arrayFileTemplate
 end
 
+local function buildTemplateIndex()
+    for i = 1, #tabTemplates do
+        dofile("Templates/" .. tabTemplates[i])
 
-local function findInTemplates(name, side, classT, debugDCUT)
-	if not (Debug.checkTargetName and (Firstmission_flag or Skipmission_flag)) then return true end
+        for side, coalition in pairs(staticTemplate.coalition) do
+            for _, country in pairs(coalition.country) do
+                for classname, class in pairs(country) do
+                    if TemplateIndex[side] and TemplateIndex[side][classname] then
+                        for _, group in pairs(class.group or {}) do
+                            TemplateIndex[side][classname][group.name] = true
+                        end
+                    end
+                end
+            end
+        end
 
-	if  type(tabTemplates) == "table" then		--Debug.checkTargetName2Space  and 
-		for i = 1 , #tabTemplates do
-			dofile("Templates/"..tabTemplates[i])
-
-			local DictKey = {}
-			if staticTemplate.localization and staticTemplate.localization.DEFAULT then
-				for dictNameId, key in pairs(staticTemplate.localization.DEFAULT) do
-					DictKey[dictNameId] = key
-				end
-
-			end
-			-- if debugDCUT then _affiche(DictKey, "DictKey DcUT") end
-
-			for country_n, country in pairs(staticTemplate.coalition[side].country) do					--iterate through countries
-				for classname, class in pairs(country) do
-					-- if debugDCUT then print("DCUT A classname: "..tostring(classname).." classT: "..tostring(classT)) end
-
-					if classname == classT  then
-						-- if debugDCUT then print("DCUT B ") end
-
-						for group_n, group in pairs(class.group) do				--iterate through groups in country.static.group table
-							-- if debugDCUT then print("DCUT C ") end
-
-							if group.name == name then				--if the target element is found in group table
-								return true
-							elseif string.find(group.name, "DictKey_") then
-								-- if debugDCUT then print("DCUT D DictKey[group.name]: "..tostring(DictKey[group.name]).." name: "..tostring(name)) end
-
-								if DictKey[group.name]  == name then
-									-- if debugDCUT then print("DCUT E return true") end
-
-									return true
-								end
-							end
-						end
-					end
-				end
-			end
-		end
-	end
-	return false
+        -- dictionnaire
+        if staticTemplate.localization
+        and staticTemplate.localization.DEFAULT then
+            for dictId, realName in pairs(staticTemplate.localization.DEFAULT) do
+                for side in pairs(TemplateIndex) do
+                    for classT in pairs(TemplateIndex[side]) do
+                        TemplateIndex[side][classT][realName] = true
+                    end
+                end
+            end
+        end
+    end
 end
+
+local function findInTemplates(name, side, classT)
+    if not (Debug.checkTargetName and (Firstmission_flag or Skipmission_flag)) then
+        return true
+    end
+
+    local sideIndex = TemplateIndex[side]
+    if not sideIndex then return false end
+
+    local classIndex = sideIndex[classT]
+    if not classIndex then return false end
+
+    return classIndex[name] == true
+end
+
+
+-- local function findInTemplates(name, side, classT, debugDCUT)
+-- 	if not (Debug.checkTargetName and (Firstmission_flag or Skipmission_flag)) then return true end
+
+-- 	if  type(tabTemplates) == "table" then		--Debug.checkTargetName2Space  and 
+-- 		for i = 1 , #tabTemplates do
+-- 			dofile("Templates/"..tabTemplates[i])
+
+-- 			local DictKey = {}
+-- 			if staticTemplate.localization and staticTemplate.localization.DEFAULT then
+-- 				for dictNameId, key in pairs(staticTemplate.localization.DEFAULT) do
+-- 					DictKey[dictNameId] = key
+-- 				end
+
+-- 			end
+-- 			-- if debugDCUT then _affiche(DictKey, "DictKey DcUT") end
+
+-- 			for country_n, country in pairs(staticTemplate.coalition[side].country) do					--iterate through countries
+-- 				for classname, class in pairs(country) do
+-- 					-- if debugDCUT then print("DCUT A classname: "..tostring(classname).." classT: "..tostring(classT)) end
+
+-- 					if classname == classT  then
+-- 						-- if debugDCUT then print("DCUT B ") end
+
+-- 						for group_n, group in pairs(class.group) do				--iterate through groups in country.static.group table
+-- 							-- if debugDCUT then print("DCUT C ") end
+
+-- 							if group.name == name then				--if the target element is found in group table
+-- 								return true
+-- 							elseif string.find(group.name, "DictKey_") then
+-- 								-- if debugDCUT then print("DCUT D DictKey[group.name]: "..tostring(DictKey[group.name]).." name: "..tostring(name)) end
+
+-- 								if DictKey[group.name]  == name then
+-- 									-- if debugDCUT then print("DCUT E return true") end
+
+-- 									return true
+-- 								end
+-- 							end
+-- 						end
+-- 					end
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+-- 	return false
+-- end
 
 
 -- ["requiredModules"] = 
@@ -670,8 +676,6 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 		end
 
 		
-		local t_D2 = os.clock()
-
 		--target position by refpoint 
 		if target.refpoint then																--target coordinates are referenced by a refpoint
 			
@@ -702,10 +706,6 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 				end
 			end
 		end
-
-		t_refpoint = t_refpoint + (os.clock() - t_D2)
-
-		local t_D3 = os.clock()
 
 		--target position slaved to group/unit
 		if target.slaved then																--target coordinates are slaved relative to a group/unit
@@ -764,12 +764,12 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 			end
 		end
 
-		t_slaved = t_slaved + (os.clock() - t_D3)
-
 		local debugTxt = ""
 
 		if target.task == "Strike" then
 			
+			local c_st = os.clock()
+
 			if target.class == nil or target.class == "vehicle" or  target.class == "static"  then														--For scenery object targets
 				
 				target.alive = 100															--Introduce percentage of alive target elements
@@ -786,6 +786,9 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 				checkGroup[target.name] = {
 					MainObjective = true,
 				}
+
+				local c_additional = os.clock()
+
 				if target.additionalGroupName then
 					for checkGroupN, checkGroupName in pairs(target.additionalGroupName) do
 						checkGroup[checkGroupName] = {
@@ -810,16 +813,11 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 					end
 				end
 
-				local t = os.clock()
+				t_additional = t_additional + (os.clock() - c_additional)
 
-				-- for country_n, country in pairs(oob_ground[targetside]) do					--iterate through countries
-				-- 	for classname, classG in pairs(country) do								--iterate through classes in country 
-				-- 		if classname == "vehicle" or classname == "ship" or classname == "static" then				--for vehicles or ships
-				-- 			for group_n, group in pairs(classG.group) do						--iterate through groups in country.vehcile.group or country.ship.group table
+				local c_oob = os.clock()
 				local group = oobGroupIndex[target.name]
 				if group then
-					-- print("DcUT passe GROUP A")
-					-- if checkGroup[group.name] then							--if the target is found in group table
 					target.foundOobGround = true
 					if group.probability and group.probability < 1 then		--if group probability of spawn is less than 100%
 						target.ATO = false									--remove target to ATO
@@ -847,9 +845,9 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 									target.targetDead_last = true
 								end
 
-								element.dead = DeepCopy(unit.dead)								--store unit status
-								element.dead_last = DeepCopy(unit.dead_last)					--store unit dead_last
-								element.CheckDay = DeepCopy(unit.CheckDay)						-- M19 ajoute la date destruction/ravito pour les futurs check de ravitaillement
+								element.dead = unit.dead
+								element.dead_last = unit.dead_last
+								element.CheckDay = unit.CheckDay
 								element.x = unit.x
 								element.y = unit.y
 								element.class = group.class
@@ -902,7 +900,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 
 							-- local maxRange = 0
 
-						local tm = os.clock()
+						local t_t = os.clock()
 
 						if GroundthreatsAll then
 							local threats = GroundthreatsAll[DCS_ENI_Side[sideName]]
@@ -926,31 +924,30 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 							end
 						end
 
-						t_threats = t_threats + (os.clock() - t)
+						t_threats = t_threats + (os.clock() - t_t)
 
 						-- target.range = maxRange
 					end
 
-					t_elements = t_elements + (os.clock() - tu)
+					t_units = t_units + (os.clock() - tu)
 
 					target.range = maxRange
 
 				end
+				t_oob = t_oob + (os.clock() - c_oob)
 
-				t_oob = t_oob + (os.clock() - t)
-
+				local c_template = os.clock()
 				if not target.foundOobGround then
 					local InTemplate = findInTemplates(target.name, targetside, "vehicle")
 					if InTemplate then
 						target.foundOobGround = true
 					end
 				end
+				t_template = t_template + (os.clock() - c_template)
 
 				target.range = maxRange
 
-				-- print("DcUT F1b ".. string.format("%.3f", os.clock() - checkTime) .."s")
-				-- checkTime = os.clock()
-			
+				local c_elem = os.clock()
 				if target.elements then
 					--permet de rechercher les elements déjà present dans targetList, car renseigné par campaignMaker
 					for elementN, element in pairs(target.elements) do									--Iterate through elements of target															
@@ -964,7 +961,6 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 								elementTMP.name = elementTMP.name.."-1"
 								temp.x, temp.y, temp.class = checkElementXY(elementTMP, targetside)
 								if temp.x ~= nil then
-
 									element.name = element.name.."-1"
 								end
 							end
@@ -994,7 +990,10 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 						end
 					end
 				end
+				t_elements = t_elements + (os.clock() - c_elem)
 
+
+				local c_elemB = os.clock()
 				if (target.x == nil or target.x == 0) and not target.inactive then
 					local totalGoodXY = 0
 					local centre = {
@@ -1019,6 +1018,9 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 						AddLog("DC_UT checkBug_xy :"..txt)
 					end
 				end
+				t_elementsB = t_elementsB + (os.clock() - c_elemB)
+
+			t_strike = t_strike + (os.clock() - c_st)
 
 			elseif target.class == "airbase" then											--target consists of aircraft on ground
 				target.ATO = false															--remove target from ATO (gets reverted further down if there are ready planes at target airbase)
@@ -1112,7 +1114,8 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 			-- end
 
 			if not target.foundOobGround then
-				local InTemplate = findInTemplates(target.name, targetside, "ship", true)
+				-- local InTemplate = findInTemplates(target.name, targetside, "ship", true)
+				local InTemplate = findInTemplates(target.name, targetside, "ship")
 				if InTemplate then
 					target.foundOobGround = true
 				end
@@ -1155,7 +1158,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 			-- en fonction du runway.life qui doit etre de 3600 point lorsqu'il est intacte.
 			
 			
-			local t_F5 = os.clock()
+			local t_ru = os.clock()
 			
 			debugTxt = debugTxt.." 0 "..target.db_airbaseName
 
@@ -1313,12 +1316,14 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 				-- InsertBugList(txt)
 			end
 
-			t_runway = t_runway + (os.clock() - t_F5)
+			t_runway = t_runway + (os.clock() - t_ru)
 
 		end
 
 
 		if target.alive then																--target has an alive value (is a ground target)
+			
+			local t_al = os.clock()
 
 			if target.elements then
 				target = updateAlive(target)
@@ -1407,6 +1412,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 					end
 				end
 			end
+			t_alive = t_alive + (os.clock() - t_al)
 		end
 	end
 
@@ -1999,13 +2005,17 @@ if Debug.debug then
 	campFile:close()
 
 	AddLog(string.format(
-		"DCE PERF: total=%.2fs | oob=%.2fs | elements=%.2fs | threats=%.2fs | refpoint=%.2fs | slaved=%.2fs | runway=%.2fs",
+		"DCE PERF: total=%.2fs | strike=%.2fs | additional=%.2fs |  template=%.2fs | oob=%.2fs | elements=%.2fs | elementsB=%.2fs | threats=%.2fs | units=%.2fs |runway=%.2fs | alive=%.2fs",
 		os.clock() - t0,
+		t_strike,
+		t_additional,
+		t_template,
 		t_oob,
 		t_elements,
+		t_elementsB,
 		t_threats,
-		t_refpoint,
-		t_slaved,
-		t_runway
+		t_units,
+		t_runway,
+		t_alive
 	))
 end
