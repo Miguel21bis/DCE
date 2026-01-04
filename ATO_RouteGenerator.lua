@@ -16,6 +16,12 @@ versionDCE["ATO_RouteGenerator.lua"] = "1.8.50"
 -- modification M06_a		helicoptere playable
 ------------------------------------------------------------------------------------------------------- 
 
+T0 = os.clock()
+T_intersect  = 0
+T_checkENY = 0
+T_altiHeli = 0
+T_GetRoute = 0
+T_GetEscortRoute = 0
 
 local debugRoute = false
 local assemblePlanePtDist = 20000
@@ -44,7 +50,47 @@ local assembleHeliPtDist = 2000
 -- 	return x,y
 -- end
 
+local function threatKey(p1, p2, alt)
+
+    -- quantification pour éviter les flottants instables
+    local function q(v)
+        return math.floor(v / 50)   -- précision 50 m (à ajuster)
+    end
+
+    local x1, y1 = q(p1.x), q(p1.y)
+    local x2, y2 = q(p2.x), q(p2.y)
+
+    -- ordre invariant (A→B == B→A)
+    if x1 > x2 or (x1 == x2 and y1 > y2) then
+        x1, x2 = x2, x1
+        y1, y2 = y2, y1
+    end
+
+    return x1 .. "," .. y1 .. "|" .. x2 .. "," .. y2 .. "@" .. alt
+end
+
+local function copyThreatTable(src)
+    local dst = {}
+    for i = 1, #src do
+        local t = src[i]
+        dst[i] = {
+            class = t.class,
+            x = t.x,
+            y = t.y,
+            range = t.range,
+            level = t.level,
+            SEAD_offset = t.SEAD_offset,
+            approachfactor = t.approachfactor
+        }
+    end
+    return dst
+end
+
+
+
 local function findIntersect(l1p1, l1p2, l2p1, l2p2)
+	local c_intersect = os.clock()
+
     local l1p1x, l1p1y, l1p2x, l1p2y = l1p1.x, l1p1.y, l1p2.x, l1p2.y
     local l2p1x, l2p1y, l2p2x, l2p2y = l2p1.x, l2p1.y, l2p2.x, l2p2.y
 
@@ -70,12 +116,15 @@ local function findIntersect(l1p1, l1p2, l2p1, l2p2)
         end
     end
 
+	T_intersect = T_intersect + (os.clock() - c_intersect)
+	
     return x, y
 end
 
 
 -- Détecte si le segment [A, B] croise la frontière ennemie (polygone ou liste de polygones)
 function CheckENY_BorderCrossPoint(A, B, enemyBoundary)
+	local c_checkENY = os.clock()
     -- enemyBoundary peut être un polygone (table de points) ou une liste de polygones
     local function checkPoly(poly)
         for i = 1, #poly do
@@ -83,9 +132,11 @@ function CheckENY_BorderCrossPoint(A, B, enemyBoundary)
             local p2 = poly[i % #poly + 1] -- boucle sur le dernier segment
             local x, y = findIntersect(A, B, p1, p2)
             if x and y then
+				T_checkENY = T_checkENY + (os.clock() - c_checkENY)
                 return {x = x, y = y}
             end
         end
+		T_checkENY = T_checkENY + (os.clock() - c_checkENY)
         return nil
     end
 
@@ -93,17 +144,25 @@ function CheckENY_BorderCrossPoint(A, B, enemyBoundary)
     if type(enemyBoundary[1]) == "table" and enemyBoundary[1].x == nil then
         for _, poly in ipairs(enemyBoundary) do
             local cross = checkPoly(poly)
-            if cross then return cross end
+            if cross then
+				T_checkENY = T_checkENY + (os.clock() - c_checkENY)
+				return cross 
+
+			end
         end
     else
         -- Un seul polygone
+		T_checkENY = T_checkENY + (os.clock() - c_checkENY)
         return checkPoly(enemyBoundary)
     end
+
+	T_checkENY = T_checkENY + (os.clock() - c_checkENY)
     return nil
 end
 
 
 local function createPolyAltiHelico(unitHelico, hHover)
+	local c_altiHeli = os.clock()
 	-- print("AtoRouteG A unitHelico "..unitHelico.." hHover "..hHover)
 
 	local tempAlti = {}
@@ -153,14 +212,14 @@ local function createPolyAltiHelico(unitHelico, hHover)
 
 	AltiHelicoMap[unitHelico][hHover] = tempAlti
 
-	-- local camp_str = "AltiHelicoMap = " .. TableSerialization(AltiHelicoMap[unitHelico], 0)						--make a string
-	-- local campFile = io.open("Debug/AltiHelicoMap_AtoGenerator_"..unitHelico..".lua", "w")										--open targetlist file
-	-- campFile:write(camp_str)																		--save new data
-	-- campFile:close()
+	T_altiHeli = T_altiHeli + (os.clock() - c_altiHeli)
 
 end
 
 function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, multipackmax, unit, viaFARP)							--enemy: "blue" or "red"; time: "day" or "night" -- Miguel21 modification M06 : helicoptere playable (ajout variable helico)
+	local c_GetRoute = os.clock()
+
+	local threatCache = {}
 
 	local route = {}																									--table to store the route to be built
 	local route_axis = GetHeadingDegre(target, basePoint)																--axis base-target
@@ -280,6 +339,13 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 
 	--function to check if a line between two points runs through a threat. Returns a table of threats
 	local function threatOnLeg(point1, point2, leg_alt)
+		
+		local key = threatKey(point1, point2, leg_alt)
+		local cached = threatCache[key]
+		if cached then
+			return copyThreatTable(cached)
+		end
+		
 		local tbl = {}																									--local table to collect threats on route leg
 
 		--check ground threats
@@ -342,7 +408,10 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			end
 		end
 
-		return tbl
+		threatCache[key] = tbl
+		return copyThreatTable(tbl)
+		-- threatCache[key] = tbl
+		-- return tbl
 	end
 
 
@@ -1910,12 +1979,15 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 		end
 	end
 
+	T_GetRoute = T_GetRoute + (os.clock() - c_GetRoute)
+
 	return route
 end
 
 
 
 function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainUnit)																					--get the escort route given the escort start point and an existing package route
+	local c_GetEscortRoute = os.clock()
 
 	--make a local copy of the route table forwarded as function argument (otherwise the original route gets adjusted
 	local route = DeepCopy(orig_route)
@@ -2220,5 +2292,6 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 		print("AtoRG passe CC route.lenght "..tostring(route.lenght))
 	end
 	
+	T_GetEscortRoute = T_GetEscortRoute + (os.clock() - c_GetEscortRoute)
 	return route
 end

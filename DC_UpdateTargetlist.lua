@@ -23,12 +23,15 @@ local t_strike  = 0
 local t_oob = 0
 local t_template = 0
 local t_elements = 0
+local t_elementsA = 0
 local t_elementsB = 0
 local t_units = 0
 local t_threats = 0
 local t_runway = 0
 local t_alive  = 0
 local t_additional = 0
+local t_checkXY_a = 0
+local t_checkXY_b = 0
 
 if Debug.debug then
 	print("START DC_UpdateTargetlist.lua "..versionDCE["DC_UpdateTargetlist.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
@@ -72,6 +75,7 @@ local tabTemplates = {}
 
 --PERF: simplified to target-level threat calc (elements too close to matter)
 local oobGroupIndex = {}
+local oobUnitIndex = {}
 --indexation des groupName pour un acces ultraPlusRapide
 for countryName, countries in pairs(oob_ground) do
 	for countryN, country in pairs(countries) do
@@ -80,6 +84,10 @@ for countryName, countries in pairs(oob_ground) do
 				for group_n, group in pairs(classG.group) do
 					group["class"] = classname
 					oobGroupIndex[group.name] = group
+					for unitN, unit in pairs(group.units) do
+						unit["class"] = classname
+						oobUnitIndex[unit.name] = unit
+					end
 				end
 			end
 		end
@@ -124,7 +132,9 @@ end
 local function checkElementXY(nameSearch, targetside)
 	--pour eviter les doubles target comme base strategique
 	--recherche position xy dans oob_ground
-	-- print("DcUT             MA"..tostring(targetElement.name))	
+	
+	local c_XY_a = os.clock()
+	local c_XY_b = os.clock()
 
 	local foundElement = false
 
@@ -132,61 +142,45 @@ local function checkElementXY(nameSearch, targetside)
 
 		local group = oobGroupIndex[nameSearch]
 		if group then
-			print("DcUT               MB return Found group.name")	
+			-- print("DcUT               MB return Found group.name")
+			t_checkXY_a = t_checkXY_a + (os.clock() - c_XY_a)
+
 			return group.x, group.y, group.class
 		end
 
 		if not foundElement then
-			for country_n, country in pairs(oob_ground[targetside]) do
-				for classname, class in pairs(country) do
-					if type(class) =="table" and class.group then
-						for groupN, flight in pairs(class.group) do
-							for unitN, unit in ipairs(flight.units) do
-								if unit.name == nameSearch then
-									print("DcUT               MC return Found unit.name")	
-									return unit.x, unit.y, classname
-								end
-							end
-						end
-					end
-				end
+
+			local unit = oobUnitIndex[nameSearch]
+			if unit then
+				-- print("DcUT               MB return Found unit.name")
+				t_checkXY_b = t_checkXY_b + (os.clock() - c_XY_b)
+
+				return unit.x, unit.y, unit.class
 			end
+
+
+			-- for country_n, country in pairs(oob_ground[targetside]) do
+			-- 	for classname, class in pairs(country) do
+			-- 		if type(class) =="table" and class.group then
+			-- 			for groupN, flight in pairs(class.group) do
+			-- 				for unitN, unit in ipairs(flight.units) do
+			-- 					if unit.name == nameSearch then
+			-- 						-- print("DcUT               MC return Found unit.name")
+			-- 						t_checkXY_b = t_checkXY_b + (os.clock() - c_XY_b)
+			-- 						return unit.x, unit.y, classname
+			-- 					end
+			-- 				end
+			-- 			end
+			-- 		end
+			-- 	end
+			-- end
 
 		end
 
-		-- for country_n, country in pairs(oob_ground[targetside]) do
-		-- 	for classname, class in pairs(country) do
-		-- 		if type(class) =="table" and class.group then
-		-- 			for group_n, group in pairs(class.group) do
-		-- 				if group.name == targetElement.name then
-		-- 					-- print("DcUT               MB return Found group.name")						
-		-- 					return group.x, group.y, classname
-		-- 				end
-		-- 			end
-		-- 		end
-		-- 	end
-		-- end
-		-- if not foundElement then
-		-- 	for country_n, country in pairs(oob_ground[targetside]) do
-
-		-- 		for classname, class in pairs(country) do
-		-- 			if type(class) =="table" and class.group then
-		-- 				for group_n, group in pairs(class.group) do
-		-- 					for unitN, unit in ipairs(group.units) do
-		-- 						if unit.name == targetElement.name then
-		-- 							-- print("DcUT               MC return Found group.name")	
-		-- 							return unit.x, unit.y, classname
-		-- 						end
-		-- 					end
-		-- 				end
-		-- 			end
-		-- 		end
-		-- 	end
-		-- end
 	end
 
 	-- if not foundElement then
-	-- 	checkBug3("Error_3 : The x and y positions of this target are missing:  '" .. targetElement.name .. "!")
+	-- 	checkBug3("Error_3 : The x and y positions of this target are missing:  '" .. nameSearch .. "!")
 
 	-- end
 
@@ -938,8 +932,8 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 
 				local c_template = os.clock()
 				if not target.foundOobGround then
-					local InTemplate = findInTemplates(target.name, targetside, "vehicle")
-					if InTemplate then
+					local inTemplate = findInTemplates(target.name, targetside, "vehicle")
+					if inTemplate then
 						target.foundOobGround = true
 					end
 				end
@@ -948,52 +942,52 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 				target.range = maxRange
 
 				local c_elem = os.clock()
+				
 				if target.elements then
 					--permet de rechercher les elements déjà present dans targetList, car renseigné par campaignMaker
-					for elementN, element in pairs(target.elements) do									--Iterate through elements of target															
-						if element.fromGroupName == nil and element.fromUnitName == nil  then  --and not element.class
+					for elementN, element in pairs(target.elements) do														
+						if element.fromGroupName == nil and element.fromUnitName == nil  then
 
+							local c_elemA = os.clock()
 							local temp = {x=0,y=0,class=""}
-							temp.x, temp.y, temp.class = checkElementXY(element, targetside)
+							temp.x, temp.y, temp.class = checkElementXY(element.name, targetside)
+							t_elementsA = t_elementsA + (os.clock() - c_elemA)
 
+
+							local c_elemB = os.clock()
 							if temp.x == nil and element.name then
-								local elementTMP = DeepCopy(element)
-								elementTMP.name = elementTMP.name.."-1"
-								temp.x, temp.y, temp.class = checkElementXY(elementTMP, targetside)
+		
+								temp.x, temp.y, temp.class = checkElementXY(element.name.."-1", targetside)
 								if temp.x ~= nil then
 									element.name = element.name.."-1"
 								end
 							end
-
+							t_elementsB = t_elementsB + (os.clock() - c_elemB)
+						
 
 							if temp.x == nil then
 								element.class = "MapObject"
 							else
 								element.class = temp.class
-								element.x = temp.x										--add x coordinate of target
-								element.y = temp.y										--add y coordinate of target
+								element.x = temp.x
+								element.y = temp.y
 							end
 
 							if  element.x then
-								target.x = element.x										--add x coordinate of target
-								target.y = element.y										--add y coordinate of target
+								target.x = element.x
+								target.y = element.y
 							end
-
+						
 						end
-					end
-				end
 
-				if target.elements and not target.inactive then
-					for elementN, element in pairs(target.elements) do
-						if  (element.x == 0 or not element.x) then
+						if not target.inactive and (element.x == 0 or not element.x)  then
 							checkBug3(" Error_05 : this targelist item was not found in oob_ground or base_mission, a space character error or -1?:  |" .. element.name .. "|")
 						end
 					end
 				end
+
 				t_elements = t_elements + (os.clock() - c_elem)
-
-
-				local c_elemB = os.clock()
+				
 				if (target.x == nil or target.x == 0) and not target.inactive then
 					local totalGoodXY = 0
 					local centre = {
@@ -1018,8 +1012,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 						AddLog("DC_UT checkBug_xy :"..txt)
 					end
 				end
-				t_elementsB = t_elementsB + (os.clock() - c_elemB)
-
+				
 			t_strike = t_strike + (os.clock() - c_st)
 
 			elseif target.class == "airbase" then											--target consists of aircraft on ground
@@ -2005,17 +1998,20 @@ if Debug.debug then
 	campFile:close()
 
 	AddLog(string.format(
-		"DCE PERF: total=%.2fs | strike=%.2fs | additional=%.2fs |  template=%.2fs | oob=%.2fs | elements=%.2fs | elementsB=%.2fs | threats=%.2fs | units=%.2fs |runway=%.2fs | alive=%.2fs",
+		"PERF UpdateTargetList: total=%.2fs | strike=%.2fs | additional=%.2fs |  template=%.2fs | oob=%.2fs | elements=%.2fs | elementsA=%.2fs  | elementsB=%.2fs | threats=%.2fs | units=%.2fs |runway=%.2fs | alive=%.2fs| t_checkXY_a=%.2fs | t_checkXY_b=%.2fs",
 		os.clock() - t0,
 		t_strike,
 		t_additional,
 		t_template,
 		t_oob,
 		t_elements,
+		t_elementsA,
 		t_elementsB,
 		t_threats,
 		t_units,
 		t_runway,
-		t_alive
+		t_alive,
+		t_checkXY_a,
+		t_checkXY_b
 	))
 end
