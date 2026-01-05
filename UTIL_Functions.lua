@@ -874,43 +874,93 @@ function GetOffsetPoint(point, heading, distance, show)
 end
 
 
---function to return closest distance of point p3 to the line p1 to p2
+-- --function to return closest distance of point p3 to the line p1 to p2
+-- function GetTangentDistance(p1, p2, p3)
+
+-- 	local c_GetTD = os.clock()
+
+-- 	local p1_p2_heading = GetHeadingDegre(p1, p2)
+-- 	local p1_p3_heading = GetHeadingDegre(p1, p3)
+-- 	local alpha = math.abs(p1_p2_heading - p1_p3_heading)
+-- 	if alpha > 180 then
+-- 		alpha = math.abs(alpha - 360)
+-- 	end
+-- 	local p1_p3_distance = GetDistance(p1, p3)
+
+-- 	local p2_p1_heading = GetHeadingDegre(p2, p1)
+-- 	local p2_p3_heading = GetHeadingDegre(p2, p3)
+
+-- 	local beta = math.abs(p2_p1_heading - p2_p3_heading)
+-- 	if beta > 180 then
+-- 		beta = math.abs(beta - 360)
+-- 	end
+-- 	local p2_p3_distance = GetDistance(p2, p3)
+
+-- 	if alpha > 90 or alpha < -90 then
+-- 		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
+-- 		return p1_p3_distance
+-- 	elseif beta > 90 or beta < -90 then
+-- 		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
+-- 		return p2_p3_distance
+-- 	elseif GetDistance(p1, p2) == 0 then
+-- 		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
+-- 		return p1_p3_distance
+-- 	else
+		
+-- 		local value = math.abs(math.sin(math.rad(alpha)) * p1_p3_distance)
+-- 		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
+-- 		return value
+-- 	end
+-- end
+
+-- Retourne la distance minimale entre un point (p3) et un segment (p1-p2),
+-- afin d’évaluer rapidement si un trajet intersecte une zone de menace.
+--https://www.geeksforgeeks.org/dsa/minimum-distance-from-a-point-to-the-line-segment-using-vectors/
+-- Cette version utilise la projection vectorielle pour calculer la
+-- distance minimale d’un point à un segment. Cela remplace les calculs
+-- d’angles et de trigonométrie (atan2/sin) par une formule directe, ce
+-- qui réduit fortement le coût CPU tout en donnant un résultat équivalent.
+
 function GetTangentDistance(p1, p2, p3)
 
-	local c_GetTD = os.clock()
+    local c_GetTD = os.clock()
 
-	local p1_p2_heading = GetHeadingDegre(p1, p2)
-	local p1_p3_heading = GetHeadingDegre(p1, p3)
-	local alpha = math.abs(p1_p2_heading - p1_p3_heading)
-	if alpha > 180 then
-		alpha = math.abs(alpha - 360)
-	end
-	local p1_p3_distance = GetDistance(p1, p3)
+    local x1, y1 = p1.x, p1.y
+    local x2, y2 = p2.x, p2.y
+    local x3, y3 = p3.x, p3.y
 
-	local p2_p1_heading = GetHeadingDegre(p2, p1)
-	local p2_p3_heading = GetHeadingDegre(p2, p3)
+    local dx = x2 - x1
+    local dy = y2 - y1
 
-	local beta = math.abs(p2_p1_heading - p2_p3_heading)
-	if beta > 180 then
-		beta = math.abs(beta - 360)
-	end
-	local p2_p3_distance = GetDistance(p2, p3)
+    local len2 = dx * dx + dy * dy
+    if len2 == 0 then
+        -- p1 et p2 confondus : distance point à point
+        local dist = math.sqrt((x3 - x1)^2 + (y3 - y1)^2)
+        T_GetTD = T_GetTD + (os.clock() - c_GetTD)
+        return dist
+    end
 
-	if alpha > 90 or alpha < -90 then
-		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
-		return p1_p3_distance
-	elseif beta > 90 or beta < -90 then
-		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
-		return p2_p3_distance
-	elseif GetDistance(p1, p2) == 0 then
-		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
-		return p1_p3_distance
-	else
-		
-		local value = math.abs(math.sin(math.rad(alpha)) * p1_p3_distance)
-		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
-		return value
-	end
+    -- Projection du point p3 sur la droite p1-p2 (paramètre t)
+    local t = ((x3 - x1) * dx + (y3 - y1) * dy) / len2
+
+    if t < 0 then
+        -- Projection avant p1
+        local dist = math.sqrt((x3 - x1)^2 + (y3 - y1)^2)
+        T_GetTD = T_GetTD + (os.clock() - c_GetTD)
+        return dist
+    elseif t > 1 then
+        -- Projection après p2
+        local dist = math.sqrt((x3 - x2)^2 + (y3 - y2)^2)
+        T_GetTD = T_GetTD + (os.clock() - c_GetTD)
+        return dist
+    else
+        -- Distance perpendiculaire au segment
+        local projx = x1 + t * dx
+        local projy = y1 + t * dy
+        local dist = math.sqrt((x3 - projx)^2 + (y3 - projy)^2)
+        T_GetTD = T_GetTD + (os.clock() - c_GetTD)
+        return dist
+    end
 end
 
 
@@ -5228,15 +5278,15 @@ function LoadFileAndUpdate(from)
 
 	-- Afficher les résultats
 	for _, added in ipairs(changes.added) do
-		print("Added triggers: Name:", added.name)
+		-- print("Added triggers: Name:", added.name)
 	end
 	for _, removed in ipairs(changes.removed) do
-		print("Removed triggers: Name:", removed.name)
+		-- print("Removed triggers: Name:", removed.name)
 	end
 
 	-- Ajouter les éléments manquants dans camp_triggers
 	for _, added in ipairs(changes.added) do
-		_affiche(added, "triggersAdded: ")
+		-- _affiche(added, "triggersAdded: ")
 		table.insert(camp_triggers, added)
 	end
 	-- Supprimer les éléments retirés de camp_triggers

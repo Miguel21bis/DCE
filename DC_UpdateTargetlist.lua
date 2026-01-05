@@ -441,8 +441,8 @@ local function checkRequiredModules()
 end
 
 
-print("DcUT A 0s")
-local checkTime = os.clock()
+-- print("DcUT A 0s")
+-- local checkTime = os.clock()
 
 checkRequiredModules()
 
@@ -450,8 +450,8 @@ if Debug.checkTargetName and (Firstmission_flag or Skipmission_flag) then
     tabTemplates = tabFileTemplate()
 end
 
-print("DcUT B ".. string.format("%.3f", os.clock() - checkTime) .."s")
-checkTime = os.clock()
+-- print("DcUT B ".. string.format("%.3f", os.clock() - checkTime) .."s")
+-- checkTime = os.clock()
 
 --met a jour la structure des ejectedPilot dans le targetlist
 for side, targets in pairs(targetlist)	 do
@@ -470,8 +470,8 @@ for side, targets in pairs(targetlist)	 do
 	end
 end
 
-print("DcUT C ".. string.format("%.3f", os.clock() - checkTime) .."s")
-checkTime = os.clock()
+-- print("DcUT C ".. string.format("%.3f", os.clock() - checkTime) .."s")
+-- checkTime = os.clock()
 
 if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 	for sideTL, targets in pairs(targetlist)	 do
@@ -638,8 +638,8 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 	end
 end
 
-print("DcUT D ".. string.format("%.3f", os.clock() - checkTime) .."s")
-checkTime = os.clock()
+-- print("DcUT D ".. string.format("%.3f", os.clock() - checkTime) .."s")
+-- checkTime = os.clock()
 
 for sideName, targets in pairs(targetlist) do													--Iterate through all side
 	for targetN, target in ipairs(targets) do												--Iterat through all targets
@@ -1410,16 +1410,16 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 	end
 
 
-	print("DcUT E5 ".. string.format("%.3f", os.clock() - checkTime) .."s")
-	checkTime = os.clock()
+	-- print("DcUT E5 ".. string.format("%.3f", os.clock() - checkTime) .."s")
+	-- checkTime = os.clock()
 
 	if GroundTarget[sideName].total > 0 then
 		GroundTarget[sideName].percent = math.ceil(100 / GroundTarget[sideName].total * GroundTarget[sideName].alive)	--calculate percentage of alive ground targets per side
 		checkBug2("DC_UT GroundTarget "..sideName.." percent "..GroundTarget[sideName].percent)
 	end
 
-	print("DcUT E6 ".. string.format("%.3f", os.clock() - checkTime) .."s")
-	checkTime = os.clock()
+	-- print("DcUT E6 ".. string.format("%.3f", os.clock() - checkTime) .."s")
+	-- checkTime = os.clock()
 
 	for sideString, zones in pairs(GroundZoneTarget) do
 		for zoneName, zone in pairs(zones) do
@@ -1431,8 +1431,8 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 	end
 end
 
-print("DcUT Z ".. string.format("%.3f", os.clock() - checkTime) .."s")
-checkTime = os.clock()
+-- print("DcUT Z ".. string.format("%.3f", os.clock() - checkTime) .."s")
+-- checkTime = os.clock()
 
 --********************************************************************************************************
 --Update targetList avec le fichier LL_Positions.lua

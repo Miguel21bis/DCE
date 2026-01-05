@@ -470,18 +470,86 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 	--function to define a set of nav points to make a route between two points that evades threats
 	local function findPath(from, to)
 
+		-- Cache des segments déjà explorés pour éviter les recalculs redondants
+		local exploredLegCache = {}
+
 		local findPathLegTable = {}																									--table to store the the FindPathLeg functions for execution
 		local navRoutes = {}																										--table to temporary store all possible nav routes
 		local direct_distance = GetDistance(from, to)																				--distance of direct path between start and end of route
 		local no_threat_route = {}																									--to collect route branches that found a no threat route in order to cancel other arms of that branch
+		
+		-- Meilleur score global trouvé jusqu'ici pour une route valide,
+		-- utilisé pour couper les branches déjà moins bonnes (Branch & Bound).
+		local bestRouteScore = math.huge
 
 
+		-- Cache local des menaces par segment de route (point1 → point2, altitude),
+		-- afin d’éviter les recalculs coûteux de threatOnLeg() sur des segments identiques.
+		local threatLegCache = {}
 
+		-- Génère une clé stable pour identifier un segment de route et son altitude,
+		-- utilisée pour mettre en cache les résultats de threatOnLeg().
+		-- Cette optimisation met en cache les résultats de threatOnLeg() pour chaque
+		-- segment de route évalué. Cela évite des recalculs identiques très fréquents
+		-- lors de l’exploration des branches de FindPathLeg(), réduisant fortement
+		-- le coût CPU sans modifier la logique tactique.
+
+		local function threatLegKey(p1, p2, leg_alt)
+
+			-- Quantification volontaire pour éviter les effets de flottants
+			local function q(v)
+				return math.floor(v / 100)	-- précision 100 m suffisante
+			end
+
+			local x1, y1 = q(p1.x), q(p1.y)
+			local x2, y2 = q(p2.x), q(p2.y)
+
+			-- Normalisation de l’ordre pour que A→B et B→A partagent la même clé
+			if x1 > x2 or (x1 == x2 and y1 > y2) then
+				x1, x2 = x2, x1
+				y1, y2 = y2, y1
+			end
+
+			return x1 .. "," .. y1 .. "|" .. x2 .. "," .. y2 .. "|" .. leg_alt
+		end
+
+
+		-- Génère une clé unique représentant un état de recherche de route,
+		-- afin d'éviter de recalculer plusieurs fois le même segment.
+		local function pathLegKey(p1, p2, leg_alt, instance)
+			return
+				math.floor(p1.x / 100) .. "," .. math.floor(p1.y / 100) .. "|" ..
+				math.floor(p2.x / 100) .. "," .. math.floor(p2.y / 100) .. "|" ..
+				leg_alt .. "|" .. instance
+		end
+
+		-- Calcule un score global pour une route en combinant distance et menace,
+		-- afin de comparer rapidement la qualité relative des branches.
+		local function computeRouteScore(distance, threatsum)
+			-- La menace est volontairement fortement pondérée pour favoriser
+			-- les routes plus sûres même si elles sont légèrement plus longues.
+			return distance + (threatsum * direct_distance)
+		end
+
+
+		-- Optimisation Branch & Bound :
+		-- cette logique coupe précocement les branches de recherche dont le score
+		-- (distance + pénalité de menace) est déjà supérieur à une route valide connue,
+		-- réduisant fortement le nombre d'appels récursifs sans modifier le résultat.
 		local function FindPathLeg(point1, point2, pointEnd, distance, arg_route, instance, leg_alt)									--find a route between point1 and point2		
 			local c_PathLeg = os.clock()
 
 
 			instance = instance + 1																									--increase instance of the function
+
+			-- Évite de recalculer un segment déjà exploré
+			local key = pathLegKey(point1, point2, leg_alt, instance)
+			if exploredLegCache[key] then
+				T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
+				return
+			end
+			exploredLegCache[key] = true
+
 
 			local freeRouteX, freeRouteY
 			local createRoute = false
@@ -534,7 +602,15 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			end
 
 			local distance_remain = GetDistance(point1, pointEnd)																	--remaining distance to end
-			local threat = threatOnLeg(point1, point2, leg_alt)																		--get the threat between point1 and point2
+			
+			-- local threat = threatOnLeg(point1, point2, leg_alt)																		--get the threat between point1 and point2
+			local key_leg = threatLegKey(point1, point2, leg_alt)
+			local threat = threatLegCache[key_leg]
+			if not threat then
+				threat = threatOnLeg(point1, point2, leg_alt)
+				threatLegCache[key_leg] = threat
+			end
+
 
 			--save the current route variant directly to end before trying to refine it further
 			local threatsum = 0																										--sum of threats from current point1 to end
@@ -543,15 +619,40 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 					threatsum = threatsum + threat[t].approachfactor																--sum the factors of each threat (1 = on top, 0 = tangential)
 				end
 			else
-				local threat2 = threatOnLeg(point1, pointEnd, leg_alt)																--get the threat between point1 and pointEnd
+				-- local threat2 = threatOnLeg(point1, pointEnd, leg_alt)																--get the threat between point1 and pointEnd
+				local key_leg2 = threatLegKey(point1, pointEnd, leg_alt)
+				local threat2 = threatLegCache[key_leg2]
+				if not threat2 then
+					threat2 = threatOnLeg(point1, pointEnd, leg_alt)
+					threatLegCache[key_leg2] = threat2
+				end
+
 				for t = 1, #threat2 do
 					threatsum = threatsum + threat2[t].approachfactor																--sum the factors of each threat (1 = on top, 0 = tangential)
 				end
 			end
 
+			-- Coupe la branche si son score minimal possible est déjà pire
+			-- que la meilleure route connue (Branch & Bound).
+			local optimisticScore = computeRouteScore(distance + distance_remain, threatsum)
+			if optimisticScore >= bestRouteScore then
+				T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
+				return
+			end
+
+
 			if not tooHighReliefB then
 				-- table.insert(NavRoutes, {navpoints = route, dist = distance + distance_remain, threats = threatsum})					--save route variant directly to end from current route branch
 				navRoutes[#navRoutes+1] = {navpoints = arg_route, dist = distance + distance_remain, threats = threatsum}
+			
+				-- Dès qu'une route valide est trouvée, on mémorise son score
+				-- pour éliminer plus tôt les branches déjà moins performantes.
+				-- Mise à jour du meilleur score global pour activer le pruning
+				local score = computeRouteScore(distance + distance_remain, threatsum)
+				if score < bestRouteScore then
+					bestRouteScore = score
+				end
+
 			end
 
 			if threatsum == 0 and not tooHighReliefB then																									--there are no threats to end (also no unavoidable threats)
@@ -606,7 +707,14 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 						end
 					end
 
-					local threat_leg = threatOnLeg(point1, point2alt, leg_alt)													--get threat between point1 and alternate point2
+					-- local threat_leg = threatOnLeg(point1, point2alt, leg_alt)													--get threat between point1 and alternate point2
+					local key_leg_alt = threatLegKey(point1, point2alt, leg_alt)
+					local threat_leg = threatLegCache[key_leg_alt]
+					if not threat_leg then
+						threat_leg = threatOnLeg(point1, point2alt, leg_alt)
+						threatLegCache[key_leg_alt] = threat_leg
+					end
+
 
 					--ignore threats that point1 is already in
 					for t = #threat_leg, 1, -1 do																				--iterate through threats from back to front
