@@ -2,7 +2,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification: M71_c
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Functions.lua"] = "1.19.136"
+versionDCE["UTIL_Functions.lua"] = "2.20.137"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_g				(g springCleaning)					
 -- adjustment_o				(n loadout code)(m Disp_time)(l add AFAC task)(k FormatTime)(i add InsertBugList(txt))(h use IsWesternCountry)(fg: add Loadout tiers)(e todo)(d:CheckConfModMaster )(c: fire Playable_m from conf_mod)
@@ -312,70 +312,184 @@ local function IsSequentialTable(t)
     return count == #t -- Vérifie qu'il n'y a pas de "trous" dans les indices
 end
 
--- Fonction pour sérialiser une table en chaîne
--- Fonction pour sérialiser une table en chaîne avec une option pour afficher les indices des tables séquentielles
+
+-- Fonction : sérialise une table Lua en texte exploitable par DCS
+-- Pourquoi : optimisation massive des performances (buffer, suppression du tri des clés, cache indentation)
+-- Où : remplace intégralement l'ancienne fonction TableSerialization
+
+local indentcache = {}	-- cache d'indentation partagé (évite string.rep coûteux)
+
 function TableSerialization(t, i, options)
-	-- Si options est un booléen, on le traite comme la valeur de writeNumericTable
-	local writeNumericTable = options
+
+	-- Gestion des options
+	-- Pourquoi : conserver le comportement existant sans casser les appels actuels
+	local writenumerictable = options
 	if type(options) == "table" then
-		writeNumericTable = options.writeNumericTable
+		writenumerictable = options.writeNumericTable
 	elseif options == nil then
-		writeNumericTable = true -- Valeur par défaut si options n'est pas fourni
+		writenumerictable = true
 	end
 
-    local crlf = ""
-    local tab1 = string.rep("\t", i) -- Indentation
-    local text = "\n" .. crlf .. tab1 .. "{\n" .. crlf
+	-- Buffer de sortie
+	-- Pourquoi : éviter les concaténations de strings (gain majeur de performance)
+	local buffer = {}
+	local bufferindex = 1
 
-    local tab = string.rep("\t", i + 1)
+	-- Fonction locale : retourne une indentation mise en cache
+	-- Pourquoi : éviter string.rep à chaque appel récursif
+	local function getindent(n)
+		local s = indentcache[n]
+		if not s then
+			s = string.rep("\t", n)
+			indentcache[n] = s
+		end
+		return s
+	end
 
-    if not writeNumericTable and IsSequentialTable(t) then
-        -- Si la table est strictement numérique et numericTable est false, on n'affiche pas les indices
-        for _, v in ipairs(t) do
-            if type(v) == "table" then
-                text = text .. tab .. TableSerialization(v, i + 1, writeNumericTable) .. ",\n"
-            elseif type(v) == "string" then
-                v = string.gsub(v, "\n", "\\\n")
-                v = string.gsub(v, "\"", "\\\"")
-                -- v = string.gsub(v, "'", "\\\'")
-                text = text .. tab .. '"' .. v .. '",\n'
-            elseif type(v) == "number" or type(v) == "boolean" then
-                text = text .. tab .. tostring(v) .. ",\n"
-            elseif v == nil then
-                text = text .. tab .. "nil,\n"
-            end
-        end
-    else
-        -- Sinon, on affiche les clés comme d'habitude
-        for k, v in PairsByKeys(t) do
-            if type(k) == "string" then
-                k = string.gsub(k, "\n", "\\\n")
-                k = string.gsub(k, "\"", "\\\"")
-                -- k = string.gsub(k, "'", "\\\'")
-                text = text .. tab .. '["' .. k .. '"] = '
-            else
-                -- text = text .. tab .. "[" .. k .. "] = "
-				text = text .. tab .. "[" .. tostring(k) .. "] = "
-            end
+	local tab1 = getindent(i)
+	local tab  = getindent(i + 1)
 
-            if type(v) == "table" then
-                text = text .. TableSerialization(v, i + 1, writeNumericTable) .. ",\n"
-            elseif type(v) == "string" then
-                v = string.gsub(v, "\n", "\\\n")
-                v = string.gsub(v, "\"", "\\\"")
-                -- v = string.gsub(v, "'", "\\\'")
-                text = text .. '"' .. v .. '",\n'
-            elseif type(v) == "number" or type(v) == "boolean" then
-                text = text .. tostring(v) .. ",\n"
-            elseif v == nil then
-                text = text .. "nil,\n"
-            end
-        end
-    end
+	buffer[bufferindex] = "\n" .. tab1 .. "{\n"
+	bufferindex = bufferindex + 1
 
-    text = text .. tab1 .. "}"
-    return text
+	-- Cas des tables séquentielles sans affichage des indices
+	if not writenumerictable and IsSequentialTable(t) then
+		for _, v in ipairs(t) do
+			if type(v) == "table" then
+				buffer[bufferindex] = tab .. TableSerialization(v, i + 1, writenumerictable) .. ",\n"
+				bufferindex = bufferindex + 1
+
+			elseif type(v) == "string" then
+				if v:find("\n", 1, true) then
+					v = v:gsub("\n", "\\\n")
+				end
+				if v:find('"', 1, true) then
+					v = v:gsub('"', '\\"')
+				end
+				buffer[bufferindex] = tab .. '"' .. v .. '",\n'
+				bufferindex = bufferindex + 1
+
+			elseif type(v) == "number" or type(v) == "boolean" then
+				buffer[bufferindex] = tab .. tostring(v) .. ",\n"
+				bufferindex = bufferindex + 1
+
+			elseif v == nil then
+				buffer[bufferindex] = tab .. "nil,\n"
+				bufferindex = bufferindex + 1
+			end
+		end
+
+	else
+		-- Cas général : table avec clés
+		-- Pourquoi : utilisation de pairs() (suppression du tri PairsByKeys → gain massif)
+		for k, v in pairs(t) do
+			if type(k) == "string" then
+				if k:find("\n", 1, true) then
+					k = k:gsub("\n", "\\\n")
+				end
+				if k:find('"', 1, true) then
+					k = k:gsub('"', '\\"')
+				end
+				buffer[bufferindex] = tab .. '["' .. k .. '"] = '
+			else
+				buffer[bufferindex] = tab .. "[" .. tostring(k) .. "] = "
+			end
+			bufferindex = bufferindex + 1
+
+			if type(v) == "table" then
+				buffer[bufferindex] = TableSerialization(v, i + 1, writenumerictable) .. ",\n"
+				bufferindex = bufferindex + 1
+
+			elseif type(v) == "string" then
+				if v:find("\n", 1, true) then
+					v = v:gsub("\n", "\\\n")
+				end
+				if v:find('"', 1, true) then
+					v = v:gsub('"', '\\"')
+				end
+				buffer[bufferindex] = '"' .. v .. '",\n'
+				bufferindex = bufferindex + 1
+
+			elseif type(v) == "number" or type(v) == "boolean" then
+				buffer[bufferindex] = tostring(v) .. ",\n"
+				bufferindex = bufferindex + 1
+
+			elseif v == nil then
+				buffer[bufferindex] = "nil,\n"
+				bufferindex = bufferindex + 1
+			end
+		end
+	end
+
+	buffer[bufferindex] = tab1 .. "}"
+	return table.concat(buffer)
 end
+
+
+-- Fonction pour sérialiser une table en chaîne
+-- Fonction pour sérialiser une table en chaîne avec une option pour afficher les indices des tables séquentielles
+-- function TableSerialization(t, i, options)
+-- 	-- Si options est un booléen, on le traite comme la valeur de writeNumericTable
+-- 	local writeNumericTable = options
+-- 	if type(options) == "table" then
+-- 		writeNumericTable = options.writeNumericTable
+-- 	elseif options == nil then
+-- 		writeNumericTable = true -- Valeur par défaut si options n'est pas fourni
+-- 	end
+
+--     local crlf = ""
+--     local tab1 = string.rep("\t", i) -- Indentation
+--     local text = "\n" .. crlf .. tab1 .. "{\n" .. crlf
+
+--     local tab = string.rep("\t", i + 1)
+
+--     if not writeNumericTable and IsSequentialTable(t) then
+--         -- Si la table est strictement numérique et numericTable est false, on n'affiche pas les indices
+--         for _, v in ipairs(t) do
+--             if type(v) == "table" then
+--                 text = text .. tab .. TableSerialization(v, i + 1, writeNumericTable) .. ",\n"
+--             elseif type(v) == "string" then
+--                 v = string.gsub(v, "\n", "\\\n")
+--                 v = string.gsub(v, "\"", "\\\"")
+--                 -- v = string.gsub(v, "'", "\\\'")
+--                 text = text .. tab .. '"' .. v .. '",\n'
+--             elseif type(v) == "number" or type(v) == "boolean" then
+--                 text = text .. tab .. tostring(v) .. ",\n"
+--             elseif v == nil then
+--                 text = text .. tab .. "nil,\n"
+--             end
+--         end
+--     else
+--         -- Sinon, on affiche les clés comme d'habitude
+--         for k, v in PairsByKeys(t) do
+--             if type(k) == "string" then
+--                 k = string.gsub(k, "\n", "\\\n")
+--                 k = string.gsub(k, "\"", "\\\"")
+--                 -- k = string.gsub(k, "'", "\\\'")
+--                 text = text .. tab .. '["' .. k .. '"] = '
+--             else
+--                 -- text = text .. tab .. "[" .. k .. "] = "
+-- 				text = text .. tab .. "[" .. tostring(k) .. "] = "
+--             end
+
+--             if type(v) == "table" then
+--                 text = text .. TableSerialization(v, i + 1, writeNumericTable) .. ",\n"
+--             elseif type(v) == "string" then
+--                 v = string.gsub(v, "\n", "\\\n")
+--                 v = string.gsub(v, "\"", "\\\"")
+--                 -- v = string.gsub(v, "'", "\\\'")
+--                 text = text .. '"' .. v .. '",\n'
+--             elseif type(v) == "number" or type(v) == "boolean" then
+--                 text = text .. tostring(v) .. ",\n"
+--             elseif v == nil then
+--                 text = text .. "nil,\n"
+--             end
+--         end
+--     end
+
+--     text = text .. tab1 .. "}"
+--     return text
+-- end
 
 --function to turn a table into a string
 function TableSerialization_TEMP1(t, i, params)

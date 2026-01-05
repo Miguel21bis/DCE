@@ -106,18 +106,18 @@ if Multi.NbGroup >= 1 then
 
 	mission_ini.PruneScript = true							-- reduce a mission by removing units (mod Tomsk M09) [MP: recommend: true]					PruneAggressiveness = 1.5,					-- How aggressive should the pruning be [0 to 2], larger numbers will remove more units, 0 = no pruning at all
 	mission_ini.PruneStatic = true							-- Should ALL parked (static) aircraft be pruned [MP: recommend: true]
-	-- mission_ini.ForcedPruneSam = true						-- PBO-CEF avait pr�vu de garder des SAM actif, cette option les d�sactives tout de m�me [MP: recommend: true]
+	-- mission_ini.ForcedPruneSam = true						-- PBO-CEF avait prévu de garder des SAM actif, cette option les d�sactives tout de m�me [MP: recommend: true]
 	mission_ini.failure = false								-- (true or false) modification M20 [MP: recommend: false]
 	-- mission_ini.ravitoByConvoy = false					-- [non encore fonctionnel] ravitaillement par convoy routier 
-	mission_ini.Keep_USNdeckCrew = false					-- false = supprime US Navy deck crew dans la g�n�ration de mission. Miguel Modification M23
+	mission_ini.Keep_USNdeckCrew = false					-- false = supprime US Navy deck crew dans la génération de mission. Miguel Modification M23
 	mission_ini.CV_CleanDeck = true 							-- true: Remove all static aircraft from the deck. ( M31 )
 
-	-- Force vos propres options plutot que ceux de base_ini.miz, qui correspondent � ceux de PBO-CEF ^^
+	-- Force vos propres options plutot que ceux de base_ini.miz, qui correspondent à ceux de PBO-CEF ^^
 	if not mission.forcedOptions then mission.forcedOptions = {} end
 	mission.forcedOptions.accidental_failures =  false
 	mission_forcedOptions.wakeTurbulence = false			-- False / true : turbulence  [MP: recommend: false]
 	mission_forcedOptions.civTraffic = ""					-- Traffic civil routier : ( "" : OFF ) || ( "low" : BAS ) || ( "medium" : MOYEN )|| ( "high" : ELEVE )  [MP: recommend: ""]
-	mission_forcedOptions.birds = 0							-- Collision volatile (probabilit�) ( 0 � 1000 )  [MP: recommend: 0]
+	mission_forcedOptions.birds = 0							-- Collision volatile (probabilité) ( 0 à 1000 )  [MP: recommend: 0]
 
 	mission.failures = {}
 end
@@ -5188,26 +5188,26 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				-------- define group -----
 				-------- define group -----
 
-				_affiche(HumainPack, "AtoFP HumainPack: ")
-				print("AtoFP A p "..p)
+				-- _affiche(HumainPack, "AtoFP HumainPack: ")
+				-- print("AtoFP A p "..p)
 
 				local taskOrHuman = isHumain and "player" or flight[f].task
-				print("AtoFP B taskOrHuman "..tostring(taskOrHuman))
+				-- print("AtoFP B taskOrHuman "..tostring(taskOrHuman))
 
 				if HumainPack[p] then
 					taskOrHuman = "playerInPackage"
 					type_withData = HumainPack[p].humainTypePlane
-					print("AtoFP C taskOrHuman: "..tostring(taskOrHuman))
+					-- print("AtoFP C taskOrHuman: "..tostring(taskOrHuman))
 				end
 
 
-				local DCE_FreqPackage = GetFrequencyNG(sideName, flight[f].target_name, taskOrHuman, type_withData, nil, "FreqPackage")
+				local DCE_FreqPackage = GetFrequencyNG(sideName, nil, taskOrHuman, type_withData, nil, "FreqPackage")
 
 				local DCE_FreqFlight = GetFrequencyNG(sideName, flight[f].target_name, taskOrHuman, type_withData, nil, "FreqFlight")
 
 				if isHumain then print("AtoFP DCE_FreqPackage: "..tostring(DCE_FreqPackage)) end
 				if isHumain then print("AtoFP DCE_FreqFlight:  "..tostring(DCE_FreqFlight))
-					os.execute 'pause'
+					-- os.execute 'pause'
 				end
 
 				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe waypoints[1][x] AA "..tostring(waypoints[1]["x"])) end

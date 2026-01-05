@@ -50,6 +50,12 @@ if Debug.debug then
 	print("START MAIN_NextMission.lua "..versionDCE["MAIN_NextMission.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
 
+local t0 = os.clock()
+local t_miz  = 0
+local t_lua2File = 0
+local t_lua2miz = 0
+local t_backup = 0
+
 PlacePA = {}
 AltitudeCruise = 5400			--for plane without hcruise
 
@@ -643,10 +649,10 @@ if MissionInstance >= 2 then
 	
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
-	if Debug.debug then print ("Lancement VIA Main_NM A 646") end
+	-- if Debug.debug then print ("Lancement VIA Main_NM A 646") end
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
-	if Debug.debug then print ("Lancement VIA Main_NM B 649") end
+	-- if Debug.debug then print ("Lancement VIA Main_NM B 649") end
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 end
 
@@ -1139,7 +1145,7 @@ local campL = {
 	-- camp.missionHistory[camp.mission] = camp.date
 }
 
-
+local c_lua2miz = os.clock()
 
 -- if not camp.date.CampTotalTimeS then
 -- 	camp.date.CampTotalTimeS = CampTotalTimeS
@@ -1193,7 +1199,7 @@ local cmpL_File = io.open("campL.lua", "w") or error("Failed to open debug file"
 cmpL_File:write(cmpL_Str)
 cmpL_File:close()
 
-
+t_lua2miz = t_lua2miz + (os.clock() - c_lua2miz)
 
 ----- create new mission file and add content files -----
 
@@ -1217,184 +1223,194 @@ else
 	NbMission = "__Old"
 end
 
-local miz
-if Firstmission_flag then																--is true if script is launched from GenerateFirstMission.lua
-	if not (mission_ini.backupAllMissionFiles and mission_ini.backupAllMissionFiles == true) then
-		os.remove("../"..camp.title.."/Debriefing/"..camp.title.."_first"..NbMission..".miz")
+
+if PlayerFlight then
+	
+	local c_miz = os.clock()
+
+	local miz
+
+	if Firstmission_flag then																--is true if script is launched from GenerateFirstMission.lua
+		if not (mission_ini.backupAllMissionFiles and mission_ini.backupAllMissionFiles == true) then
+			os.remove("../"..camp.title.."/Debriefing/"..camp.title.."_first"..NbMission..".miz")
+		end
+		os.rename("../"..camp.title.."_first.miz", "../"..camp.title.."/Debriefing/"..camp.title.."_first"..NbMission..".miz")
+		miz = minizip.zipCreate("../" .. camp.title .. "_first.miz")					--create the first campaign mission
+	else																				--is false if script is launched from Debrief_Master.lua
+		if Skipmission_flag then
+			os.remove( "../"..camp.title.."/Debriefing/"..camp.title.."_ongoing"..NbMission..".miz")
+		end
+		local res = os.rename("../"..camp.title.."_ongoing.miz", "../"..camp.title.."/Debriefing/"..camp.title.."_ongoing"..NbMission..".miz")
+		miz = minizip.zipCreate("../" .. camp.title .. "_ongoing.miz")
 	end
-	os.rename("../"..camp.title.."_first.miz", "../"..camp.title.."/Debriefing/"..camp.title.."_first"..NbMission..".miz")
-	miz = minizip.zipCreate("../" .. camp.title .. "_first.miz")					--create the first campaign mission
-else																				--is false if script is launched from Debrief_Master.lua
-	if Skipmission_flag then
-		os.remove( "../"..camp.title.."/Debriefing/"..camp.title.."_ongoing"..NbMission..".miz")
-	end
-	local res = os.rename("../"..camp.title.."_ongoing.miz", "../"..camp.title.."/Debriefing/"..camp.title.."_ongoing"..NbMission..".miz")
-	miz = minizip.zipCreate("../" .. camp.title .. "_ongoing.miz")
-end
 
 
 
 
-for filename, content in pairs(existing_files) do
-    if content then
-        if filename:match("mapResource") or filename:match("dictionary") then
-            -- Ajouter directement dans le .miz sans sauvegarde sur disque
-            -- miz:zipAddFileFromString(filename, content)
-        else
-            -- Extraire uniquement le nom du fichier (supprimer "l10n/DEFAULT/")
-            local temp_filename = filename:match("[^/]+$")
+	for filename, content in pairs(existing_files) do
+		if content then
+			if filename:match("mapResource") or filename:match("dictionary") then
+				-- Ajouter directement dans le .miz sans sauvegarde sur disque
+				-- miz:zipAddFileFromString(filename, content)
+			else
+				-- Extraire uniquement le nom du fichier (supprimer "l10n/DEFAULT/")
+				local temp_filename = filename:match("[^/]+$")
 
-            -- Écrire dans le répertoire courant
-            local temp_file = io.open(temp_filename, "wb")
-            if temp_file then
-                temp_file:write(content)
-                temp_file:close()
+				-- Écrire dans le répertoire courant
+				local temp_file = io.open(temp_filename, "wb")
+				if temp_file then
+					temp_file:write(content)
+					temp_file:close()
 
-                -- Ajouter au fichier .miz avec son chemin original
-                miz:zipAddFile(filename, temp_filename)
+					-- Ajouter au fichier .miz avec son chemin original
+					miz:zipAddFile(filename, temp_filename)
 
-                -- Supprimer le fichier temporaire
-                os.remove(temp_filename)
-            else
-                print("Impossible d'écrire le fichier temporaire : " .. temp_filename)
-            end
-        end
-    else
-        print("Contenu vide ou nil pour le fichier : " .. filename)
-    end
-end
-
-
-miz:zipAddFile("mission", "misFile.lua")
-miz:zipAddFile("options", "optFile.lua")
-miz:zipAddFile("warehouses", "warFile.lua")
-miz:zipAddFile("l10n/DEFAULT/dictionary", "dicFile.lua")
-miz:zipAddFile("l10n/DEFAULT/mapResource", "resFile.lua")
-miz:zipAddFile("l10n/DEFAULT/EventsTracker.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/EventsTracker.lua")
-miz:zipAddFile("l10n/DEFAULT/GCIdata.lua", "GCIdata.lua")
-miz:zipAddFile("l10n/DEFAULT/GCIscript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/GCIscript.lua")
-miz:zipAddFile("l10n/DEFAULT/ARM_Defence_Script.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ARM_Defence_Script.lua")
-miz:zipAddFile("l10n/DEFAULT/CustomTasksScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CustomTasksScript.lua")
-miz:zipAddFile("l10n/DEFAULT/AirGroundAttackScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/AirGroundAttackScript.lua")
-miz:zipAddFile("l10n/DEFAULT/CarrierIntoWindScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CarrierIntoWindScript.lua")
-miz:zipAddFile("l10n/DEFAULT/AddCommandRadioF10.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/AddCommandRadioF10.lua")				-- Modification M29
-miz:zipAddFile("l10n/DEFAULT/Fuel_Check.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Fuel_Check.lua")								-- Norman99 modification M57_a
-miz:zipAddFile("l10n/DEFAULT/ATC_ShutUp_GENERIC.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ATC_ShutUp_GENERIC.lua")				-- Psyko modification M59_a
-miz:zipAddFile("l10n/DEFAULT/Pedro.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Pedro.lua")										-- Pedro TEST
--- miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "Active/camp_status.lua")
-miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "campL.lua")
--- miz:zipAddFile("l10n/DEFAULT/FlightPlan_Generator_Debug.txt", "Debug/FlightPlan_Generator_Debug.txt")
--- miz:zipAddFile("l10n/DEFAULT/debugFlight.txt", "Debug/debugFlight.txt")
-miz:zipAddFile("l10n/DEFAULT/SAR.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/SAR.lua")
-
-if camp.theatre  == "Caucasus" then
-	miz:zipAddFile("l10n/DEFAULT/Cercle_City.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Cercle_City.lua")
-end
-
-miz:zipAddFile("l10n/DEFAULT/bombOnRunway.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/bombOnRunway.lua")
-miz:zipAddFile("l10n/DEFAULT/CG_ArtySpotter.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CG_ArtySpotter.lua")
-
-
-if not existing_files["l10n/DEFAULT/beacon.ogg"] then
-	miz:zipAddFile("l10n/DEFAULT/beacon.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/beacon.ogg")	
-end
-
-miz:zipAddFile("l10n/DEFAULT/beaconsilent.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/beaconsilent.ogg")
-miz:zipAddFile("l10n/DEFAULT/ejectionRadioBeacon.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ejectionRadioBeacon.ogg")
-
-if mission_ini.load_mist then
-	miz:zipAddFile("l10n/DEFAULT/mist.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/mist.lua")											-- modification M60 CTLD
-end
-if mission_ini.load_CTLD then
-	miz:zipAddFile("l10n/DEFAULT/CTLD.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CTLD.lua")											-- modification M60 CTLD
-end
-
-
-local screenTemp = {}
-local findValue
-
-for _, filename in ipairs(BriefingImagesB) do
-	findValue = false
-
-	for _, fileTemp in ipairs(screenTemp) do
-		if filename == fileTemp then
-			findValue = true
-			break
+					-- Supprimer le fichier temporaire
+					os.remove(temp_filename)
+				else
+					print("Impossible d'écrire le fichier temporaire : " .. temp_filename)
+				end
+			end
+		else
+			print("Contenu vide ou nil pour le fichier : " .. filename)
 		end
 	end
 
-	if not findValue then
-		table.insert(screenTemp, filename)
+
+	miz:zipAddFile("mission", "misFile.lua")
+	miz:zipAddFile("options", "optFile.lua")
+	miz:zipAddFile("warehouses", "warFile.lua")
+	miz:zipAddFile("l10n/DEFAULT/dictionary", "dicFile.lua")
+	miz:zipAddFile("l10n/DEFAULT/mapResource", "resFile.lua")
+	miz:zipAddFile("l10n/DEFAULT/EventsTracker.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/EventsTracker.lua")
+	miz:zipAddFile("l10n/DEFAULT/GCIdata.lua", "GCIdata.lua")
+	miz:zipAddFile("l10n/DEFAULT/GCIscript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/GCIscript.lua")
+	miz:zipAddFile("l10n/DEFAULT/ARM_Defence_Script.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ARM_Defence_Script.lua")
+	miz:zipAddFile("l10n/DEFAULT/CustomTasksScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CustomTasksScript.lua")
+	miz:zipAddFile("l10n/DEFAULT/AirGroundAttackScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/AirGroundAttackScript.lua")
+	miz:zipAddFile("l10n/DEFAULT/CarrierIntoWindScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CarrierIntoWindScript.lua")
+	miz:zipAddFile("l10n/DEFAULT/AddCommandRadioF10.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/AddCommandRadioF10.lua")				-- Modification M29
+	miz:zipAddFile("l10n/DEFAULT/Fuel_Check.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Fuel_Check.lua")								-- Norman99 modification M57_a
+	miz:zipAddFile("l10n/DEFAULT/ATC_ShutUp_GENERIC.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ATC_ShutUp_GENERIC.lua")				-- Psyko modification M59_a
+	miz:zipAddFile("l10n/DEFAULT/Pedro.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Pedro.lua")										-- Pedro TEST
+	-- miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "Active/camp_status.lua")
+	miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "campL.lua")
+	-- miz:zipAddFile("l10n/DEFAULT/FlightPlan_Generator_Debug.txt", "Debug/FlightPlan_Generator_Debug.txt")
+	-- miz:zipAddFile("l10n/DEFAULT/debugFlight.txt", "Debug/debugFlight.txt")
+	miz:zipAddFile("l10n/DEFAULT/SAR.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/SAR.lua")
+
+	if camp.theatre  == "Caucasus" then
+		miz:zipAddFile("l10n/DEFAULT/Cercle_City.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Cercle_City.lua")
 	end
-end
+
+	miz:zipAddFile("l10n/DEFAULT/bombOnRunway.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/bombOnRunway.lua")
+	miz:zipAddFile("l10n/DEFAULT/CG_ArtySpotter.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CG_ArtySpotter.lua")
 
 
+	if not existing_files["l10n/DEFAULT/beacon.ogg"] then
+		miz:zipAddFile("l10n/DEFAULT/beacon.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/beacon.ogg")	
+	end
 
-for _,  filename in ipairs(BriefingImagesR) do
-	findValue = false
+	miz:zipAddFile("l10n/DEFAULT/beaconsilent.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/beaconsilent.ogg")
+	miz:zipAddFile("l10n/DEFAULT/ejectionRadioBeacon.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ejectionRadioBeacon.ogg")
 
-	for _, fileTemp in ipairs(screenTemp) do
-		if filename == fileTemp then
-			findValue = true
-			break
+	if mission_ini.load_mist then
+		miz:zipAddFile("l10n/DEFAULT/mist.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/mist.lua")											-- modification M60 CTLD
+	end
+	if mission_ini.load_CTLD then
+		miz:zipAddFile("l10n/DEFAULT/CTLD.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CTLD.lua")											-- modification M60 CTLD
+	end
+
+
+	local screenTemp = {}
+	local findValue
+
+	for _, filename in ipairs(BriefingImagesB) do
+		findValue = false
+
+		for _, fileTemp in ipairs(screenTemp) do
+			if filename == fileTemp then
+				findValue = true
+				break
+			end
+		end
+
+		if not findValue then
+			table.insert(screenTemp, filename)
 		end
 	end
 
-	if not findValue then
-		table.insert(screenTemp, filename)
+
+
+	for _,  filename in ipairs(BriefingImagesR) do
+		findValue = false
+
+		for _, fileTemp in ipairs(screenTemp) do
+			if filename == fileTemp then
+				findValue = true
+				break
+			end
+		end
+
+		if not findValue then
+			table.insert(screenTemp, filename)
+		end
 	end
-end
 
--- Fonction de similarité (basique, mais efficace pour ce cas)
-local function areSimilar(str1, str2)
-    if #str1 == #str2 then
-        return true
-    elseif math.abs(#str1 - #str2) <= 3 then -- Tolérance sur la longueur
-        return true
-    end
-    return false
-end
+	-- Fonction de similarité (basique, mais efficace pour ce cas)
+	local function areSimilar(str1, str2)
+		if #str1 == #str2 then
+			return true
+		elseif math.abs(#str1 - #str2) <= 3 then -- Tolérance sur la longueur
+			return true
+		end
+		return false
+	end
 
-for _, filename in ipairs(screenTemp) do
-    if type(filename) == "string" and string.len(filename) > 0 then
-        local file_path = "Images/" .. filename
+	for _, filename in ipairs(screenTemp) do
+		if type(filename) == "string" and string.len(filename) > 0 then
+			local file_path = "Images/" .. filename
 
-        -- Vérification d'existence du fichier
-        local file = io.open(file_path, "rb")
-        if file then
-            file:close()
+			-- Vérification d'existence du fichier
+			local file = io.open(file_path, "rb")
+			if file then
+				file:close()
 
-            -- On extrait juste le nom du fichier sans le chemin
-            local actual = file_path:sub(8) -- Supprime "Images/"
-            local expected = filename
+				-- On extrait juste le nom du fichier sans le chemin
+				local actual = file_path:sub(8) -- Supprime "Images/"
+				local expected = filename
 
-            -- Vérification uniquement si les noms semblent similaires
-            if areSimilar(expected, actual) and expected ~= actual then
-                print("  Potential problem with encoding or invisible characters :")
-                print(" -> Expected name : " .. expected)
-                print(" -> Real name    : " .. actual)
-                print(" -> Bytes expected:", string.byte(expected, 1, #expected))
-                print(" -> Bytes real   :", string.byte(actual, 1, #actual))
-            end
+				-- Vérification uniquement si les noms semblent similaires
+				if areSimilar(expected, actual) and expected ~= actual then
+					print("  Potential problem with encoding or invisible characters :")
+					print(" -> Expected name : " .. expected)
+					print(" -> Real name    : " .. actual)
+					print(" -> Bytes expected:", string.byte(expected, 1, #expected))
+					print(" -> Bytes real   :", string.byte(actual, 1, #actual))
+				end
 
-            -- Ajout au zip si tout va bien
-            miz:zipAddFile("l10n/DEFAULT/" .. filename, file_path)
-        else
-            print("  File not found : " .. file_path)
-        end
-    end
-end
-
-
-
-if HumainInterceptor then
-	miz:zipAddFile("l10n/DEFAULT/alarme.wav" , "Sounds/alarme.wav")
-end
-
-miz:zipClose()
+				-- Ajout au zip si tout va bien
+				miz:zipAddFile("l10n/DEFAULT/" .. filename, file_path)
+			else
+				print("  File not found : " .. file_path)
+			end
+		end
+	end
 
 
 
+	if HumainInterceptor then
+		miz:zipAddFile("l10n/DEFAULT/alarme.wav" , "Sounds/alarme.wav")
+	end
+
+	miz:zipClose()
+
+	t_miz = t_miz + (os.clock() - c_miz)
+
+end -- PlayerFlight onverture/fermeture du fichier .miz
+
+
+local c_lua2File = os.clock()
 
 ----- remove temporary content files -----
 os.remove("misFile.lua")
@@ -1480,45 +1496,170 @@ if camp_ZoneSAR then
 	ZoneSARFile:close()
 end
 
+t_lua2File = t_lua2File + (os.clock() - c_lua2File)
 
 --reset TimeJump pour eviter les erreurs de mission suivante
 TimeJump = false
 
 
-if Debug.debug or mission_ini.backupAllMissionFiles then
-    local fileName
-    local folderName = "Debug" -- Pas de `/` au début pour chemin relatif sous Windows
+
+
+local function ensureDir(path)
+    -- Test si le dossier existe
+    local test = io.open(path .. "\\.dirtest", "w")
+    if test then
+        test:close()
+        os.remove(path .. "\\.dirtest")
+        return
+    end
+
+    -- Sinon, création via popen (plus léger que os.execute)
+    io.popen('md "'..path..'"')
+end
+
+local function listFiles(path)
+    local p = io.popen('dir "'..path..'" /b /a-d') or error("Failed to open file : "..tostring(path))
+    local t = {}
+    for file in p:lines() do
+        t[#t+1] = file
+    end
+    p:close()
+    return t
+end
+
+local function listDirs(path)
+    local p = io.popen('dir "'..path..'" /b /ad') or error("Failed to open file : "..tostring(path))
+    local t = {}
+    for dir in p:lines() do
+        t[#t+1] = dir
+    end
+    p:close()
+    return t
+end
+
+local function copyFile(src, dst)
+    local f1 = io.open(src, "rb")
+    if not f1 then return end
+    local data = f1:read("*all")
+    f1:close()
+
+    ensureDir(dst:match("^(.*)\\[^\\]+$")) -- crée le dossier parent si besoin
+
+    local f2 = io.open(dst, "wb") or error("Failed to open file : "..tostring(src))
+    f2:write(data)
+    f2:close()
+end
+
+local function copyDir(src, dst)
+    ensureDir(dst)
+
+    for _, file in ipairs(listFiles(src)) do
+        copyFile(src..'\\'..file, dst..'\\'..file)
+    end
+
+    for _, dir in ipairs(listDirs(src)) do
+        copyDir(src..'\\'..dir, dst..'\\'..dir)
+    end
+end
+
+local c_backup = os.clock()
+
+if (Debug.debug or mission_ini.backupAllMissionFiles) and PlayerFlight then
+    
+
+
+	local fileName
+    local folderName = "Debug"
 
     if Firstmission_flag then
         fileName = camp.title .. "_first.miz"
-
-        -- Créer le répertoire "mission_01" s'il n'existe pas
         folderName = folderName .. "\\mission_01"
-        os.execute('md "' .. folderName .. '" > nul 2>&1') -- Utilise `md` pour Windows
 
-        -- Copier fileName dans folderName
-        local sourcePath = "..\\" .. fileName -- Normaliser pour Windows
-        local destinationPath = folderName .. "\\" .. fileName
-        os.execute('copy "' .. sourcePath .. '" "' .. destinationPath .. '" > nul 2>&1') -- Utilise `copy`
-
-        -- Copier le répertoire "Active" dans folderName
-        local activeFolder = "Active" -- Normaliser pour Windows
-         os.execute('xcopy "' .. activeFolder .. '" "' .. folderName .. '\\Active" /E /I /Y /Q')
+        ensureDir(folderName)
+        copyFile("..\\" .. fileName, folderName .. "\\" .. fileName)
+        copyDir("Active", folderName .. "\\Active")
 
     else
         fileName = camp.title .. "_ongoing.miz"
-
-        -- Créer le répertoire "mission_n" s'il n'existe pas
         folderName = folderName .. "\\mission_" .. string.format("%02d", camp.mission)
-        os.execute('md "' .. folderName .. '" > nul 2>&1')
 
-        -- Copier fileName dans folderName
-        local sourcePath = "..\\" .. fileName
-        local destinationPath = folderName .. "\\" .. fileName
-        os.execute('copy "' .. sourcePath .. '" "' .. destinationPath .. '" > nul 2>&1')
-
-        -- Copier le répertoire "Active" dans folderName
-        local activeFolder = "Active"
-         os.execute('xcopy "' .. activeFolder .. '" "' .. folderName .. '\\Active" /E /I /Y /Q')
+        ensureDir(folderName)
+        copyFile("..\\" .. fileName, folderName .. "\\" .. fileName)
+        copyDir("Active", folderName .. "\\Active")
     end
 end
+
+t_backup = t_backup + (os.clock() - c_backup)
+
+-- if (Debug.debug or mission_ini.backupAllMissionFiles) and PlayerFlight then
+--     local fileName
+--     local folderName = "Debug" -- Pas de `/` au début pour chemin relatif sous Windows
+
+--     if Firstmission_flag then
+--         fileName = camp.title .. "_first.miz"
+
+--         -- Créer le répertoire "mission_01" s'il n'existe pas
+--         folderName = folderName .. "\\mission_01"
+--         os.execute('md "' .. folderName .. '" > nul 2>&1') -- Utilise `md` pour Windows
+
+--         -- Copier fileName dans folderName
+--         local sourcePath = "..\\" .. fileName -- Normaliser pour Windows
+--         local destinationPath = folderName .. "\\" .. fileName
+--         -- os.execute('copy "' .. sourcePath .. '" "' .. destinationPath .. '" > nul 2>&1') -- Utilise `copy`
+-- 		copyFile(sourcePath, destinationPath)
+
+--         -- Copier le répertoire "Active" dans folderName
+--         -- local activeFolder = "Active" -- Normaliser pour Windows
+--         --  os.execute('xcopy "' .. activeFolder .. '" "' .. folderName .. '\\Active" /E /I /Y /Q')
+-- 		copyDir("Active", folderName .. "\\Active")
+
+
+--     else
+--         fileName = camp.title .. "_ongoing.miz"
+
+--         -- Créer le répertoire "mission_n" s'il n'existe pas
+--         folderName = folderName .. "\\mission_" .. string.format("%02d", camp.mission)
+--         os.execute('md "' .. folderName .. '" > nul 2>&1')
+
+--         -- Copier fileName dans folderName
+--         local sourcePath = "..\\" .. fileName
+--         local destinationPath = folderName .. "\\" .. fileName
+--         -- os.execute('copy "' .. sourcePath .. '" "' .. destinationPath .. '" > nul 2>&1')
+-- 		copyFile(sourcePath, destinationPath)
+
+--         -- Copier le répertoire "Active" dans folderName
+--         -- local activeFolder = "Active"
+--         --  os.execute('xcopy "' .. activeFolder .. '" "' .. folderName .. '\\Active" /E /I /Y /Q')
+-- 		copyDir("Active", folderName .. "\\Active")
+--     end
+-- end
+
+	print("MAIN_NM test start")
+
+	print(string.format(
+		"PERF MainNM: total=%.2fs | t_miz=%.2fs | t_lua2miz=%.2fs | t_lua2File=%.2fs |  t_backup=%.2fs | ",
+		os.clock() - t0,
+		t_miz,
+		t_lua2File,
+		t_lua2miz,
+		t_backup
+	))
+
+	print("MAIN_NM test fin")
+
+	-- AddLog(string.format(
+	-- 	"PERF MainNM: total=%.2fs | t_miz=%.2fs | t_lua2Miz=%.2fs | t_lua2File=%.2fs |  t_backup=%.2fs | ",
+	-- 	os.clock() - t0,
+	-- 	t_miz,
+	-- 	t_lua2File,
+	-- 	t_lua2miz,
+	-- 	t_backup
+	-- ))
+
+	-- --recherche Debug/BugList.lua
+	-- fileName = "Debug/BugList.lua"
+	-- testPath = io.open(fileName, "r")										--cette maniere de chercer la presence d un fichier evite un plantage
+	-- -- if testPath ~= nil and MissionInstance == 1 then														--check si le fichier existe 
+	-- 	io.close(testPath)
+	-- 	os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')			--open the BugList file with notepad
+	-- -- end

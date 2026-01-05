@@ -1328,7 +1328,7 @@ local function generateDCSweather()
 
     local presetID, category, loc_debugChoice = chooseWeatherPreset(trend)
 
-	print("generateDCSweather() category "..category)
+	-- print("generateDCSweather() category "..category)
 	
 	local windDir = generateWindDirection(category, winDirection)
     local wind = generateWind(windActivity, windDir, category)
@@ -1978,7 +1978,9 @@ elseif camp.weather.zone == "low sector warm" then
 	end
 
 else
-	s = s .. "Weather data unavailable. "
+	-- s = s .. "Weather data unavailable. "
+
+	s = s .." Weather data: " ..camp.weather.zone
 
 end
 

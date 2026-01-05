@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "22.94.576"
+versionDCE["UTIL_Changelog.lua"] = "22.94.577"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "22.94.576"
+VersionDCE["UTIL_Changelog.txt"] = "22.94.577"
 --[[
 
 
@@ -10,7 +10,8 @@ known issues:
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
 
-==:22.94.576:==
+==:22.94.577:==
+577 fix 	[PERF] réelle optimisation du temps necessaire pour generer une mission
 576 add		Data: Aircraft radio capabilities are now automatically retrieved from Mods and CoreMods, avoiding manual duplication and reducing DCE data maintenance.
 575 add		[22M94]	Radio: Using module-defined radio ranges, radio frequency assignment has been refined for improved realism and interoperability.
 

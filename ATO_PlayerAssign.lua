@@ -776,6 +776,6 @@ if Debug.debug then
 	campFile:write(camp_str)																		--save new data
 	campFile:close()
 
-	_affiche(HumainPack, "HumainPack: ")
-	os.execute 'pause'
+	-- _affiche(HumainPack, "HumainPack: ")
+	-- os.execute 'pause'
 end

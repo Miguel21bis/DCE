@@ -2483,8 +2483,13 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					print(lMetar)
 
 
-					if allowedBrief then briefing[sideName] = briefing[sideName] .. s .. "\n\n" ..tostring(lMetar) .. "\n"		 end
-					if allowedBrief then briefing[sideName] = briefing[sideName] .. tostring(MoonTxt).. "\n"			end
+					if allowedBrief then 
+						briefing[sideName] = briefing[sideName] .. s .. "\n\n" ..tostring(lMetar) .. "\n"
+
+						if MoonTxt then 
+							briefing[sideName] = briefing[sideName] .. tostring(MoonTxt).. "\n"
+						end
+					end
 
 					--Assign briefing text to mission file
 					if sideName == "blue" then

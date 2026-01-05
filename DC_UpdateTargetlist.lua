@@ -124,7 +124,6 @@ end
 
 local function checkBug3(txt)
 	if Debug.checkTargetName and DC_UpdateTargetlist_counter > 1 then
-		-- table.insert(BugList, "DC_UT checkBug3 "..txt)
 		AddLog("DC_UT checkBug3 :"..txt)
 	end
 end
@@ -1304,9 +1303,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 
 			if not target.foundOobGround then 
 				local txt = " Error_12: this base |"..target.db_airbaseName.."| linked to this objective  (targetlist_ini.lua)|"..target.titleName.."| was not found in the file (db_airbase.lua) "..tostring(debugTxt) 
-				checkBug3(txt) 
-			
-				-- InsertBugList(txt)
+				checkBug3(txt)
 			end
 
 			t_runway = t_runway + (os.clock() - t_ru)
@@ -1978,19 +1975,11 @@ for targetSide, targets in pairs(targetlist) do
 	end
 end
 
-print("DcUT Z")
-
 		
 
 if Debug.debug then
 	_affiche(GroundTarget, " DcUT GroundTarget ")
 	_affiche(GroundZoneTarget, " DcUT GroundZoneTarget ")
-
-	-- local camp_str = "target = " .. TableSerialization(targetlist, 0)						--make a string
-	-- local campFile = io.open("Debug/targetlist_DcUT.lua", "w") or error("Failed to open debug file")
-	-- campFile:write(camp_str)															--save new data
-	-- campFile:close()
-
 
 	local camp_str = "oob_ground = " .. TableSerialization(oob_ground, 0)						--make a string
 	local campFile = io.open("Debug/oob_ground_DcUT.lua", "w") or error("Failed to open debug file")
