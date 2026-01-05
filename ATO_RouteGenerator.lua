@@ -4,16 +4,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  adjustment_m
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_RouteGenerator.lua"] = "1.8.50"
-------------------------------------------------------------------------------------------------------- 
--- cleancode_b				(d springCleaning)
--- adjustment_m				(m add assemblyPoint on escort())(n create assemblyPoint)(m add AFAC task)(l alti heli)k alti station on target)(j does not fly over the target)(i escort Transport)(h alti escorte helicoptere)(fg add axis patern)(e unit.helicopter)(d escort too low) (c: climb refueling)(a:alti diff en fonction du role dans le meme package)
--- Debug_e					(e SEAD SAm)(d route[m + 1])(c:supprime trop de waypoint lors de l'escorte)(b:quand les EWR sont d�truit: on active les CAP, si les CAP on besoin d'EWR c'est nul)(a:target ligne 473 Reconnaissance)
--- modification M66_a		add Runway Attack
--- modification M61_a		SAR
--- modification M16_d		SpawnAir B1b & B-52 need BaseAirStart = true in db_aibase
--- modification M38_t		Check and Help CampaignMaker (t debug info) 
--- modification M06_a		helicoptere playable
+versionDCE["ATO_RouteGenerator.lua"] = "2.8.50"
 ------------------------------------------------------------------------------------------------------- 
 
 T0 = os.clock()
@@ -22,6 +13,9 @@ T_checkENY = 0
 T_altiHeli = 0
 T_GetRoute = 0
 T_GetEscortRoute = 0
+T_OnLeg = 0
+T_PathLeg = 0
+
 
 local debugRoute = false
 local assemblePlanePtDist = 20000
@@ -50,6 +44,8 @@ local assembleHeliPtDist = 2000
 -- 	return x,y
 -- end
 
+-- Génère une clé unique et stable pour identifier un segment de route (point1-point2-altitude),
+-- afin de permettre la mise en cache des calculs de menace sur ce segment.
 local function threatKey(p1, p2, alt)
 
     -- quantification pour éviter les flottants instables
@@ -69,6 +65,8 @@ local function threatKey(p1, p2, alt)
     return x1 .. "," .. y1 .. "|" .. x2 .. "," .. y2 .. "@" .. alt
 end
 
+-- Crée une copie indépendante d’une table de menaces afin d’éviter les effets de bord
+-- lorsque les données mises en cache sont réutilisées et modifiées.
 local function copyThreatTable(src)
     local dst = {}
     for i = 1, #src do
@@ -85,6 +83,7 @@ local function copyThreatTable(src)
     end
     return dst
 end
+
 
 
 
@@ -219,7 +218,52 @@ end
 function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, multipackmax, unit, viaFARP)							--enemy: "blue" or "red"; time: "day" or "night" -- Miguel21 modification M06 : helicoptere playable (ajout variable helico)
 	local c_GetRoute = os.clock()
 
+	-- Cache local utilisé pour mémoriser les menaces calculées par segment de route
 	local threatCache = {}
+
+	-- -- Retourne la distance minimale entre un point et un segment,
+	-- -- en utilisant des calculs de distance locaux mis en cache pour optimiser les performances.
+	-- local function loc_getTangentDistance(p1, p2, p3)
+
+	-- 	local c_GetTD = os.clock()
+
+	-- 	local p1_p2_heading = GetHeadingDegre(p1, p2)
+	-- 	local p1_p3_heading = GetHeadingDegre(p1, p3)
+
+	-- 	local alpha = math.abs(p1_p2_heading - p1_p3_heading)
+	-- 	if alpha > 180 then
+	-- 		alpha = math.abs(alpha - 360)
+	-- 	end
+
+	-- 	local p1_p3_distance = loc_getDistance(p1, p3)
+
+	-- 	local p2_p1_heading = GetHeadingDegre(p2, p1)
+	-- 	local p2_p3_heading = GetHeadingDegre(p2, p3)
+
+	-- 	local beta = math.abs(p2_p1_heading - p2_p3_heading)
+	-- 	if beta > 180 then
+	-- 		beta = math.abs(beta - 360)
+	-- 	end
+
+	-- 	local p2_p3_distance = loc_getDistance(p2, p3)
+
+	-- 	if alpha > 90 then
+	-- 		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
+	-- 		return p1_p3_distance
+	-- 	elseif beta > 90 then
+	-- 		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
+	-- 		return p2_p3_distance
+	-- 	elseif loc_getDistance(p1, p2) == 0 then
+	-- 		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
+	-- 		return p1_p3_distance
+	-- 	else
+			
+	-- 		local value = math.abs(math.sin(math.rad(alpha)) * p1_p3_distance)
+	-- 		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
+	-- 		return value
+	-- 	end
+	-- end
+
 
 	local route = {}																									--table to store the route to be built
 	local route_axis = GetHeadingDegre(target, basePoint)																--axis base-target
@@ -339,10 +383,14 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 
 	--function to check if a line between two points runs through a threat. Returns a table of threats
 	local function threatOnLeg(point1, point2, leg_alt)
-		
+		local c_OnLeg = os.clock()
+
+		-- Utilisation d’un cache local pour éviter de recalculer plusieurs fois les menaces
+		-- sur un même segment de route, ce qui réduit drastiquement le temps CPU.
 		local key = threatKey(point1, point2, leg_alt)
 		local cached = threatCache[key]
 		if cached then
+			T_OnLeg = T_OnLeg + (os.clock() - c_OnLeg)
 			return copyThreatTable(cached)
 		end
 		
@@ -350,7 +398,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 
 		--check ground threats
 		for t = 1, #threat_table.ground[leg_alt] do																		--iterate through all ground threats
-			local threat_route_distance = GetTangentDistance(point1, point2, threat_table.ground[leg_alt][t])			--get closest distance from threat to route between point 1 and point 2
+			local threat_route_distance =  GetTangentDistance(point1, point2, threat_table.ground[leg_alt][t])			--get closest distance from threat to route between point 1 and point 2
 			if threat_route_distance < threat_table.ground[leg_alt][t].range then										--if route passes threat
 				table.insert(tbl, threat_table.ground[leg_alt][t])
 				local approachfactor = 1 - threat_route_distance / threat_table.ground[leg_alt][t].range				--factor how close route passes to threat (1 = on top)
@@ -387,9 +435,9 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 
 						if ewr_required == true then																		--EWR stations that can command fighters that require ewr guidance are counted as threats (AWACS and fighter areas are ignored, since these are too large areas to avoid anyway)
 							if GetDistance(threat_table.ewr[leg_alt][e], Fighterthreats[enemySide_name][t]) < threat_table.ewr[leg_alt][e].range + Fighterthreats[enemySide_name][t].range then	--if Fighterthreats and ewr are overlapping
-								if GetTangentDistance(point1, point2, Fighterthreats[enemySide_name][t]) < Fighterthreats[enemySide_name][t].range then								--if route leg is in range of fighterthreat
-									if GetTangentDistance(point1, point2, threat_table.ewr[leg_alt][e]) < threat_table.ewr[leg_alt][e].range then					--if route leg is in range of ewr
-										local approachfactor = 1 - GetTangentDistance(point1, point2, threat_table.ewr[leg_alt][e]) / threat_table.ewr[leg_alt][e].range		--factor how close route passes to threat (1 = on top)
+								if  GetTangentDistance(point1, point2, Fighterthreats[enemySide_name][t]) < Fighterthreats[enemySide_name][t].range then								--if route leg is in range of fighterthreat
+									if  GetTangentDistance(point1, point2, threat_table.ewr[leg_alt][e]) < threat_table.ewr[leg_alt][e].range then					--if route leg is in range of ewr
+										local approachfactor = 1 -  GetTangentDistance(point1, point2, threat_table.ewr[leg_alt][e]) / threat_table.ewr[leg_alt][e].range		--factor how close route passes to threat (1 = on top)
 										if approachfactor > entry.approachfactor then										--approach factor is higher than current entry for this ewr
 											entry = threat_table.ewr[leg_alt][e]											--make this ewr the entry
 											entry.level = Fighterthreats[enemySide_name][t].level									--capability level of fighter becomes new threat level of EWR station
@@ -408,7 +456,11 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			end
 		end
 
+		-- Stockage du résultat dans le cache pour réutilisation ultérieure sur ce segment
 		threatCache[key] = tbl
+
+		T_OnLeg = T_OnLeg + (os.clock() - c_OnLeg)
+
 		return copyThreatTable(tbl)
 		-- threatCache[key] = tbl
 		-- return tbl
@@ -423,7 +475,11 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 		local direct_distance = GetDistance(from, to)																				--distance of direct path between start and end of route
 		local no_threat_route = {}																									--to collect route branches that found a no threat route in order to cancel other arms of that branch
 
+
+
 		local function FindPathLeg(point1, point2, pointEnd, distance, arg_route, instance, leg_alt)									--find a route between point1 and point2		
+			local c_PathLeg = os.clock()
+
 
 			instance = instance + 1																									--increase instance of the function
 
@@ -472,6 +528,8 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 
 			--abort unneeded pathfing after a valid route has been found
 			if no_threat_route[leg_alt] and instance > no_threat_route[leg_alt] and not tooHighReliefB then												--if a no threat route has been found for this altitue, stop subsequent route branches(parallel instances of the no threat route are still checked as they might be shorter)
+				
+				T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
 				return																												--stop this route branch
 			end
 
@@ -497,6 +555,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			end
 
 			if threatsum == 0 and not tooHighReliefB then																									--there are no threats to end (also no unavoidable threats)
+				T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
 				return																											--abort this route branch
 			end
 
@@ -508,13 +567,16 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			end
 
 			if instance > 7 then																									--if function instance is bigger than 7
+				T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
 				return																												--abort this route branch
 			elseif distance + distance_remain > (direct_distance * 3.5) then														--if total route distance is bigger than 1.5 times the direct distance
+				T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
 				return																												--abort this route branch
 			-- elseif #threat == 0 and tooHighReliefB  then
 			elseif #threat == 0 and not tooHighReliefB then	--and not is_helicopter 																								--if no more threats on remaining route
 				if point2 == pointEnd and not tooHighReliefB then																							--if point2 is the pointEnd
 					no_threat_route[leg_alt] = instance																				--variable that will cancel subsequent route finding at this altitude (parallel branches of the same instance are still being checked)
+					T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
 					return 																										--abort further route finding
 				elseif not tooHighReliefB then																												--if point2 is not the end
 					distance = distance + GetDistance(point1, point2)																--complete route distance of this variant up to point2
@@ -601,7 +663,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 						if not tooHighReliefC2 then																					--if there is no threat between point 1 and alternate point2
 						-- 	if is_helicopter then print("AtoRG CCC2 ba passe instance "..instance) end
 
-						-- 	local distance_alt = distance + GetDistance(point1, point2alt)											--complete route distance of this variant up to point2alt
+						-- 	local distance_alt = distance + loc_getDistance(point1, point2alt)											--complete route distance of this variant up to point2alt
 						-- 	local route_alt = {}																					--make a local copy of the route up to now
 						-- 	for k, v in pairs(route) do
 						-- 		route_alt[k] = {
@@ -629,10 +691,16 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 				routeImpossible = true,
 				}
 
+				T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
 				return test
 			end
 
+			T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
+
 		end		--function FindPathLeg()
+
+
+
 
 		table.insert(findPathLegTable, {from, to, to, 0, {}, 0, profile.hCruise})									--insert first instance of FindPathLeg to find a route between start and end point. arguments: start, end, final end (same), initial route distance 0, initial route empty {}, initial instance of the function 0, cruise alt
 
@@ -781,7 +849,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 										awr_penality = true														--mark that the threat penality for one EWR has been marked 
 									end
 								else
-									local closest_approach = GetTangentDistance(draft_IP, draft_attackPoint, threat[t])	--closest approach distance to threat
+									local closest_approach =  GetTangentDistance(draft_IP, draft_attackPoint, threat[t])	--closest approach distance to threat
 									local closest_approach_factor = 1 - closest_approach / threat[t].range		--factor how close threat is approached (1 = on top, 0 not at all)
 									local lenght_in_threat = GetTangentLenght(draft_IP, draft_attackPoint, threat[t], threat[t].range)	--distance that is traveled within threat range
 									local threat_level = threat[t].level * (lenght_in_threat / (threat[t].range * 2)) * closest_approach_factor --threat level for this indiviudal threat (path lenght in threat circle compared to threat diameter * approach factor)
@@ -886,7 +954,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 											ewr_penality = true														--mark that the threat penality for one EWR has been marked 
 										end
 									else
-										local closest_approach = GetTangentDistance(egress_point_start, draft_egress, threat[t])	--closest approach distance to threat
+										local closest_approach =  GetTangentDistance(egress_point_start, draft_egress, threat[t])	--closest approach distance to threat
 										local closest_approach_factor = 1 - closest_approach / threat[t].range		--factor how close threat is approached (1 = on top, 0 not at all)
 										local lenght_in_threat = GetTangentLenght(egress_point_start, draft_egress, threat[t], threat[t].range)	--distance that is traveled within threat range
 										local threat_level = threat[t].level * (lenght_in_threat / (threat[t].range * 2)) * closest_approach_factor --threat level for this indiviudal threat (path lenght in threat circle compared to threat diameter * approach factor)
@@ -1055,7 +1123,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 		-- do
 		-- 	local heading = GetHeading(basePoint, joinPoint)
 		-- 	local distance = assembleHeliPtDist
-		-- 	if GetDistance(basePoint, joinPoint) < distance then distance = GetDistance(basePoint, joinPoint) -1000 end
+		-- 	if loc_getDistance(basePoint, joinPoint) < distance then distance = loc_getDistance(basePoint, joinPoint) -1000 end
 		-- 	assemblyPoint = GetOffsetPoint(basePoint, heading, distance)
 		-- end
 		do
@@ -1134,7 +1202,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 						if threat[t].class == "EWR" then																--threat is an EWR
 							local newEWRrange = 0																		--reduce EWR range to point where route enters the first fighter threat
 							for f = 1, #Fighterthreats[enemySide_name] do														--iterate through fighter threats to find the first fighter threat that route enters into
-								if GetTangentDistance(route[n], route[n + 1], Fighterthreats[enemySide_name][f]) < Fighterthreats[enemySide_name][f].range then	--route passes though fighter threat circle
+								if  GetTangentDistance(route[n], route[n + 1], Fighterthreats[enemySide_name][f]) < Fighterthreats[enemySide_name][f].range then	--route passes though fighter threat circle
 									--find point where route enters fighter circle					
 									local heading1 = GetHeadingDegre(route[n], route[n + 1])									--route heading
 									local heading2 = GetHeadingDegre(route[n], Fighterthreats[enemySide_name][f])						--heading to center of threat circle
@@ -1261,7 +1329,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 						if threat[t].class == "EWR" then																--threat is an EWR
 							local newEWRrange = 0																		--reduce EWR range to point where route enters the first fighter threat
 							for f = 1, #Fighterthreats[enemySide_name] do														--iterate through fighter threats to find the first fighter threat that route enters into
-								if GetTangentDistance(route[n], route[n - 1], Fighterthreats[enemySide_name][f]) < Fighterthreats[enemySide_name][f].range then	--route passes though fighter threat circle
+								if  GetTangentDistance(route[n], route[n - 1], Fighterthreats[enemySide_name][f]) < Fighterthreats[enemySide_name][f].range then	--route passes though fighter threat circle
 									--find point where route enters fighter circle					
 									local heading1 = GetHeadingDegre(route[n], route[n - 1])									--route heading
 									local heading2 = GetHeadingDegre(route[n], Fighterthreats[enemySide_name][f])						--heading to center of threat circle
@@ -1466,7 +1534,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 		-- do
 		-- 	local heading = GetHeading(basePoint, joinPoint)
 		-- 	local distance = assembleHeliPtDist
-		-- 	if GetDistance(basePoint, joinPoint) < distance then distance = GetDistance(basePoint, joinPoint) -1000 end
+		-- 	if loc_getDistance(basePoint, joinPoint) < distance then distance = loc_getDistance(basePoint, joinPoint) -1000 end
 		-- 	assemblyPoint = GetOffsetPoint(basePoint, heading, distance)
 		-- end
 
@@ -1597,7 +1665,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 		-- do
 		-- 	local heading = GetHeading(basePoint, joinPoint)
 		-- 	local distance = assembleHeliPtDist
-		-- 	if GetDistance(basePoint, joinPoint) < distance then distance = GetDistance(basePoint, joinPoint) -1000 end
+		-- 	if loc_getDistance(basePoint, joinPoint) < distance then distance = loc_getDistance(basePoint, joinPoint) -1000 end
 		-- 	assemblyPoint = GetOffsetPoint(basePoint, heading, distance)
 		-- end
 		do
@@ -1749,7 +1817,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 		-- do
 		-- 	local heading = GetHeading(basePoint, joinPoint)
 		-- 	local distance = assembleHeliPtDist
-		-- 	if GetDistance(basePoint, joinPoint) < distance then distance = GetDistance(basePoint, joinPoint) -1000 end
+		-- 	if loc_getDistance(basePoint, joinPoint) < distance then distance = loc_getDistance(basePoint, joinPoint) -1000 end
 		-- 	assemblyPoint = GetOffsetPoint(basePoint, heading, distance)
 		-- end
 		do
@@ -1847,7 +1915,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 				for n = 1, #route - 1 do																				--iterate through all route segements
 --TODO alt est mal renseigné, je
 					if route[n + 1].alt <= alt then																		--if route segement is in threat altitude
-						local distance = GetTangentDistance(route[n], route[n + 1], threat[t])							--distance of route segment to threat
+						local distance =  GetTangentDistance(route[n], route[n + 1], threat[t])							--distance of route segment to threat
 						if distance < threat[t].range then																--if route segment is in range of threat						
 							local adjusted_threat = threat[t].level - (threat[t].level / threat[t].range * distance)	--threat adjusted to distance to route leg
 							if route.threats.ground[threat[t].x .. "/" .. threat[t].y] then									--if this ground threat already has a threat entry for this route
@@ -1891,7 +1959,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 						route_leg_band = "low"
 					end
 
-					if GetTangentDistance(route[n], route[n + 1], Fighterthreats[enemySide_name][t]) < Fighterthreats[enemySide_name][t].range then	--if route segment is in range of fighter threat
+					if  GetTangentDistance(route[n], route[n + 1], Fighterthreats[enemySide_name][t]) < Fighterthreats[enemySide_name][t].range then	--if route segment is in range of fighter threat
 						local ewr_required																							--boolean whether ewr is required for the fighter to be a threat
 						if Fighterthreats[enemySide_name][t].class == "CAP" then																--if the fighter is CAP
 							if route_leg_band == "high" then																		--if route leg is at high altitude
@@ -1912,8 +1980,8 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 							local break_loop = false
 							for e = 1, #threat_table.ewr[route_leg_alt] do															--iterate through all ewr/awacs
 								if GetDistance(threat_table.ewr[route_leg_alt][e], Fighterthreats[enemySide_name][t]) < threat_table.ewr[route_leg_alt][e].range + Fighterthreats[enemySide_name][t].range then	--fighter operation area and ewr coverage are overlapping
-									if GetTangentDistance(route[n], route[n + 1], Fighterthreats[enemySide_name][t]) < Fighterthreats[enemySide_name][t].range then				--if route leg is in range of fighter
-										if GetTangentDistance(route[n], route[n + 1], threat_table.ewr[route_leg_alt][e]) < threat_table.ewr[route_leg_alt][e].range then	--if route leg is in range of ewr/awacs
+									if  GetTangentDistance(route[n], route[n + 1], Fighterthreats[enemySide_name][t]) < Fighterthreats[enemySide_name][t].range then				--if route leg is in range of fighter
+										if  GetTangentDistance(route[n], route[n + 1], threat_table.ewr[route_leg_alt][e]) < threat_table.ewr[route_leg_alt][e].range then	--if route leg is in range of ewr/awacs
 											if route.threats.air[Fighterthreats[enemySide_name][t].name] then															--if this fighter unit already has a threat entry for this route
 												if route.threats.air[Fighterthreats[enemySide_name][t].name].level < Fighterthreats[enemySide_name][t].level then					--if the existing threat entry is lower than the new one
 													route.threats.air[Fighterthreats[enemySide_name][t].name].level = Fighterthreats[enemySide_name][t].level						--overwrite threat entry with new one

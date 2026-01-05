@@ -28,6 +28,10 @@ if Debug.debug then
 	print("START UTIL_Functions.lua "..versionDCE["UTIL_Functions.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
 
+
+T_GetTD  = 0
+T_GetD = 0
+
 --local variable
 -- petit code pour remettre les stock init comme au debut
 local adjust_DCE_GC22 = true				-- variable pour ajuster les GC22, si false, ne pas ajuster
@@ -829,8 +833,12 @@ function GetDeltaHeading(h1, h2)
 end
 
 
+
+
 --function to return distance between two vector2 points
 function GetDistance(p1, p2)
+	
+	local c_GetD = os.clock()
 
 	if not p1.x or not p1.y then
 		_affiche(p1, "p1")
@@ -842,8 +850,15 @@ function GetDistance(p1, p2)
 
 	local deltax = p2.x - p1.x
 	local deltay = p2.y - p1.y
-	return math.sqrt(math.pow(deltax, 2) + math.pow(deltay, 2))
+
+	local result =  math.sqrt(math.pow(deltax, 2) + math.pow(deltay, 2))
+
+	T_GetD = T_GetD + (os.clock() - c_GetD)
+
+	return result
 end
+
+
 
 
 --function to return a new point offset from an initial point
@@ -861,6 +876,9 @@ end
 
 --function to return closest distance of point p3 to the line p1 to p2
 function GetTangentDistance(p1, p2, p3)
+
+	local c_GetTD = os.clock()
+
 	local p1_p2_heading = GetHeadingDegre(p1, p2)
 	local p1_p3_heading = GetHeadingDegre(p1, p3)
 	local alpha = math.abs(p1_p2_heading - p1_p3_heading)
@@ -879,13 +897,19 @@ function GetTangentDistance(p1, p2, p3)
 	local p2_p3_distance = GetDistance(p2, p3)
 
 	if alpha > 90 or alpha < -90 then
+		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
 		return p1_p3_distance
 	elseif beta > 90 or beta < -90 then
+		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
 		return p2_p3_distance
 	elseif GetDistance(p1, p2) == 0 then
+		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
 		return p1_p3_distance
 	else
-		return math.abs(math.sin(math.rad(alpha)) * p1_p3_distance)
+		
+		local value = math.abs(math.sin(math.rad(alpha)) * p1_p3_distance)
+		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
+		return value
 	end
 end
 
@@ -3587,9 +3611,11 @@ function CheckPointInPolygon(point, polygon, show)
     end
     return oddNodes
 end
+
+
 function UpdateConfMod(setWeather, setDate, from)
 	if setWeather then
-		UpdateConfModSuite(setWeather, nil, "UpdateConfMod:"..from)
+		UpdateConfModSuite(setWeather, nil, "UpdateConfMod:"..tostring(from))
 	end
 	if setDate then
 		--mis à jour via camp_triggers et DC_CheckTriggers
@@ -3599,7 +3625,7 @@ function UpdateConfMod(setWeather, setDate, from)
 		-- 	_affiche(setDate, "date_override 5: setDate ")
 		-- end
 
-		UpdateConfModSuite(nil, setDate, "UpdateConfMod:"..from)
+		UpdateConfModSuite(nil, setDate, "UpdateConfMod:"..tostring(from))
 	end
 end
 

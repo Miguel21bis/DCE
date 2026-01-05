@@ -4174,14 +4174,29 @@ end
 	))
 
 
-		AddLog(string.format(
-		"PERF RouteGen(): total=%.2fs | T_intersect=%.2fs | T_checkENY=%.2fs |  T_altiHeli=%.2fs |  T_GetRoute=%.2fs |  T_GetEscortRoute=%.2fs |",
+	AddLog(string.format(
+		"PERF RouteGen(): total=%.2fs | T_intersect=%.2fs | T_checkENY=%.2fs |  T_altiHeli=%.2fs |  T_GetRoute=%.2fs | T_GetEscortRoute=%.2fs |T_GetTD=%.2fs |T_GetD=%.2fs |T_OnLeg=%.2fs |T_PathLeg=%.2fs |",
 		os.clock() - T0,
 		T_intersect,
 		T_checkENY,
 		T_altiHeli,
 		T_GetRoute,
-		T_GetEscortRoute
+		T_GetEscortRoute,
+		T_GetTD,
+		T_GetD,
+		T_OnLeg,
+		T_PathLeg
 	))
+
+	if BugList and type(BugList) == "table" and #BugList >= 1 then
+		local table_Str = "BugList = " .. TableSerialization(BugList, 0)
+		local bugFile = io.open("Debug/BugList.lua", "w") or error("Failed to open debug file")
+		bugFile:write(table_Str)
+		bugFile:close()
+	end
+
+	os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')	
+
+	os.execute 'pause'
 
 
