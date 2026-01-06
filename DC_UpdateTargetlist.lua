@@ -18,20 +18,20 @@ versionDCE["DC_UpdateTargetlist.lua"] = "1.11.52"
 -- modification M19_e		Repair GROUND
 -------------------------------------------------------------------------------------------------------
 
-local t0 = os.clock()
-local t_strike  = 0
-local t_oob = 0
-local t_template = 0
-local t_elements = 0
-local t_elementsA = 0
-local t_elementsB = 0
-local t_units = 0
-local t_threats = 0
-local t_runway = 0
-local t_alive  = 0
-local t_additional = 0
-local t_checkXY_a = 0
-local t_checkXY_b = 0
+-- local t0 = os.clock()
+-- local t_strike  = 0
+-- local t_oob = 0
+-- local t_template = 0
+-- local t_elements = 0
+-- local t_elementsA = 0
+-- local t_elementsB = 0
+-- local t_units = 0
+-- local t_threats = 0
+-- local t_runway = 0
+-- local t_alive  = 0
+-- local t_additional = 0
+-- local t_checkXY_a = 0
+-- local t_checkXY_b = 0
 
 if Debug.debug then
 	print("START DC_UpdateTargetlist.lua "..versionDCE["DC_UpdateTargetlist.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
@@ -132,8 +132,8 @@ local function checkElementXY(nameSearch, targetside)
 	--pour eviter les doubles target comme base strategique
 	--recherche position xy dans oob_ground
 	
-	local c_XY_a = os.clock()
-	local c_XY_b = os.clock()
+	-- local c_XY_a = os.clock()
+	-- local c_XY_b = os.clock()
 
 	local foundElement = false
 
@@ -142,7 +142,7 @@ local function checkElementXY(nameSearch, targetside)
 		local group = oobGroupIndex[nameSearch]
 		if group then
 			-- print("DcUT               MB return Found group.name")
-			t_checkXY_a = t_checkXY_a + (os.clock() - c_XY_a)
+			-- t_checkXY_a = t_checkXY_a + (os.clock() - c_XY_a)
 
 			return group.x, group.y, group.class
 		end
@@ -152,37 +152,12 @@ local function checkElementXY(nameSearch, targetside)
 			local unit = oobUnitIndex[nameSearch]
 			if unit then
 				-- print("DcUT               MB return Found unit.name")
-				t_checkXY_b = t_checkXY_b + (os.clock() - c_XY_b)
+				-- t_checkXY_b = t_checkXY_b + (os.clock() - c_XY_b)
 
 				return unit.x, unit.y, unit.class
 			end
-
-
-			-- for country_n, country in pairs(oob_ground[targetside]) do
-			-- 	for classname, class in pairs(country) do
-			-- 		if type(class) =="table" and class.group then
-			-- 			for groupN, flight in pairs(class.group) do
-			-- 				for unitN, unit in ipairs(flight.units) do
-			-- 					if unit.name == nameSearch then
-			-- 						-- print("DcUT               MC return Found unit.name")
-			-- 						t_checkXY_b = t_checkXY_b + (os.clock() - c_XY_b)
-			-- 						return unit.x, unit.y, classname
-			-- 					end
-			-- 				end
-			-- 			end
-			-- 		end
-			-- 	end
-			-- end
-
 		end
-
 	end
-
-	-- if not foundElement then
-	-- 	checkBug3("Error_3 : The x and y positions of this target are missing:  '" .. nameSearch .. "!")
-
-	-- end
-
 end
 
 local function updateAlive(target)
@@ -440,17 +415,11 @@ local function checkRequiredModules()
 end
 
 
--- print("DcUT A 0s")
--- local checkTime = os.clock()
-
 checkRequiredModules()
 
 if Debug.checkTargetName and (Firstmission_flag or Skipmission_flag) then
     tabTemplates = tabFileTemplate()
 end
-
--- print("DcUT B ".. string.format("%.3f", os.clock() - checkTime) .."s")
--- checkTime = os.clock()
 
 --met a jour la structure des ejectedPilot dans le targetlist
 for side, targets in pairs(targetlist)	 do
@@ -468,9 +437,6 @@ for side, targets in pairs(targetlist)	 do
 		end
 	end
 end
-
--- print("DcUT C ".. string.format("%.3f", os.clock() - checkTime) .."s")
--- checkTime = os.clock()
 
 if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 	for sideTL, targets in pairs(targetlist)	 do
@@ -637,9 +603,6 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 	end
 end
 
--- print("DcUT D ".. string.format("%.3f", os.clock() - checkTime) .."s")
--- checkTime = os.clock()
-
 for sideName, targets in pairs(targetlist) do													--Iterate through all side
 	for targetN, target in ipairs(targets) do												--Iterat through all targets
 		local maxRange = 0
@@ -761,7 +724,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 
 		if target.task == "Strike" then
 			
-			local c_st = os.clock()
+			-- local c_st = os.clock()
 
 			if target.class == nil or target.class == "vehicle" or  target.class == "static"  then														--For scenery object targets
 				
@@ -780,7 +743,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 					MainObjective = true,
 				}
 
-				local c_additional = os.clock()
+				-- local c_additional = os.clock()
 
 				if target.additionalGroupName then
 					for checkGroupN, checkGroupName in pairs(target.additionalGroupName) do
@@ -806,9 +769,9 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 					end
 				end
 
-				t_additional = t_additional + (os.clock() - c_additional)
+				-- t_additional = t_additional + (os.clock() - c_additional)
 
-				local c_oob = os.clock()
+				-- local c_oob = os.clock()
 				local group = oobGroupIndex[target.name]
 				if group then
 					target.foundOobGround = true
@@ -827,7 +790,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 
 					if not target.elements then target.elements = {} end	--add elements table
 					
-					local tu = os.clock()
+					-- local tu = os.clock()
 
 					for unit_n, unit in pairs(group.units) do				--Iterate through all units of group
 						local alreadyThere = false
@@ -893,7 +856,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 
 							-- local maxRange = 0
 
-						local t_t = os.clock()
+						-- local t_t = os.clock()
 
 						if GroundthreatsAll then
 							local threats = GroundthreatsAll[DCS_ENI_Side[sideName]]
@@ -917,43 +880,43 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 							end
 						end
 
-						t_threats = t_threats + (os.clock() - t_t)
+						-- t_threats = t_threats + (os.clock() - t_t)
 
 						-- target.range = maxRange
 					end
 
-					t_units = t_units + (os.clock() - tu)
+					-- t_units = t_units + (os.clock() - tu)
 
 					target.range = maxRange
 
 				end
-				t_oob = t_oob + (os.clock() - c_oob)
+				-- t_oob = t_oob + (os.clock() - c_oob)
 
-				local c_template = os.clock()
+				-- local c_template = os.clock()
 				if not target.foundOobGround then
 					local inTemplate = findInTemplates(target.name, targetside, "vehicle")
 					if inTemplate then
 						target.foundOobGround = true
 					end
 				end
-				t_template = t_template + (os.clock() - c_template)
+				-- t_template = t_template + (os.clock() - c_template)
 
 				target.range = maxRange
 
-				local c_elem = os.clock()
+				-- local c_elem = os.clock()
 				
 				if target.elements then
 					--permet de rechercher les elements déjà present dans targetList, car renseigné par campaignMaker
 					for elementN, element in pairs(target.elements) do														
 						if element.fromGroupName == nil and element.fromUnitName == nil  then
 
-							local c_elemA = os.clock()
+							-- local c_elemA = os.clock()
 							local temp = {x=0,y=0,class=""}
 							temp.x, temp.y, temp.class = checkElementXY(element.name, targetside)
-							t_elementsA = t_elementsA + (os.clock() - c_elemA)
+							-- t_elementsA = t_elementsA + (os.clock() - c_elemA)
 
 
-							local c_elemB = os.clock()
+							-- local c_elemB = os.clock()
 							if temp.x == nil and element.name then
 		
 								temp.x, temp.y, temp.class = checkElementXY(element.name.."-1", targetside)
@@ -961,7 +924,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 									element.name = element.name.."-1"
 								end
 							end
-							t_elementsB = t_elementsB + (os.clock() - c_elemB)
+							-- t_elementsB = t_elementsB + (os.clock() - c_elemB)
 						
 
 							if temp.x == nil then
@@ -985,7 +948,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 					end
 				end
 
-				t_elements = t_elements + (os.clock() - c_elem)
+				-- t_elements = t_elements + (os.clock() - c_elem)
 				
 				if (target.x == nil or target.x == 0) and not target.inactive then
 					local totalGoodXY = 0
@@ -1012,7 +975,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 					end
 				end
 				
-			t_strike = t_strike + (os.clock() - c_st)
+			-- t_strike = t_strike + (os.clock() - c_st)
 
 			elseif target.class == "airbase" then											--target consists of aircraft on ground
 				target.ATO = false															--remove target from ATO (gets reverted further down if there are ready planes at target airbase)
@@ -1150,7 +1113,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 			-- en fonction du runway.life qui doit etre de 3600 point lorsqu'il est intacte.
 			
 			
-			local t_ru = os.clock()
+			-- local t_ru = os.clock()
 			
 			debugTxt = debugTxt.." 0 "..target.db_airbaseName
 
@@ -1306,14 +1269,14 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 				checkBug3(txt)
 			end
 
-			t_runway = t_runway + (os.clock() - t_ru)
+			-- t_runway = t_runway + (os.clock() - t_ru)
 
 		end
 
 
 		if target.alive then																--target has an alive value (is a ground target)
 			
-			local t_al = os.clock()
+			-- local t_al = os.clock()
 
 			if target.elements then
 				target = updateAlive(target)
@@ -1402,7 +1365,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 					end
 				end
 			end
-			t_alive = t_alive + (os.clock() - t_al)
+			-- t_alive = t_alive + (os.clock() - t_al)
 		end
 	end
 
@@ -1986,21 +1949,21 @@ if Debug.debug then
 	campFile:write(camp_str)															--save new data
 	campFile:close()
 
-	AddLog(string.format(
-		"PERF UpdateTargetList: total=%.2fs | strike=%.2fs | additional=%.2fs |  template=%.2fs | oob=%.2fs | elements=%.2fs | elementsA=%.2fs  | elementsB=%.2fs | threats=%.2fs | units=%.2fs |runway=%.2fs | alive=%.2fs| t_checkXY_a=%.2fs | t_checkXY_b=%.2fs",
-		os.clock() - t0,
-		t_strike,
-		t_additional,
-		t_template,
-		t_oob,
-		t_elements,
-		t_elementsA,
-		t_elementsB,
-		t_threats,
-		t_units,
-		t_runway,
-		t_alive,
-		t_checkXY_a,
-		t_checkXY_b
-	))
+	-- AddLog(string.format(
+	-- 	"PERF UpdateTargetList: total=%.2fs | strike=%.2fs | additional=%.2fs |  template=%.2fs | oob=%.2fs | elements=%.2fs | elementsA=%.2fs  | elementsB=%.2fs | threats=%.2fs | units=%.2fs |runway=%.2fs | alive=%.2fs| t_checkXY_a=%.2fs | t_checkXY_b=%.2fs",
+	-- 	os.clock() - t0,
+	-- 	t_strike,
+	-- 	t_additional,
+	-- 	t_template,
+	-- 	t_oob,
+	-- 	t_elements,
+	-- 	t_elementsA,
+	-- 	t_elementsB,
+	-- 	t_threats,
+	-- 	t_units,
+	-- 	t_runway,
+	-- 	t_alive,
+	-- 	t_checkXY_a,
+	-- 	t_checkXY_b
+	-- ))
 end

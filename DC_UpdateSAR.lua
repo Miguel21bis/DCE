@@ -15,6 +15,12 @@ if Debug.debug then
 	print("START DC_UpdateSAR.lua "..versionDCE["DC_UpdateSAR.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
 
+local t0 = os.clock()
+local t_a  = 0
+local t_b = 0
+local t_main = 0
+local t_c = 0
+
 -- camp.SAR = {
 -- 	helicopter = {
 -- 		[1] = "machprout",
@@ -46,6 +52,10 @@ end
 --     ["Vec3z"] = 369606.85478994,
 --     ["x"] = 22004.83531289,
 -- },
+
+
+local c_a = os.clock()
+
 if camp_ZoneSAR and camp_ZoneSAR ~= nil then
     for zoneSideName, sideSAR in pairs(camp_ZoneSAR) do
         for zoneName, zone in pairs(sideSAR) do
@@ -108,6 +118,8 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
         end
     end
 end
+
+t_a = t_a + (os.clock() - c_a)
 
 local function checkPointInPoly2(point, poly)
 
@@ -374,6 +386,9 @@ local function deleteAliasPilotInOobGround(ejectedPilot)
     return found
 end
 
+
+local c_b = os.clock()
+
 -- if not camp_ZoneSAR or camp_ZoneSAR == nil or not camp_ZoneSAR.blue or camp_ZoneSAR.blue == nil  then
 if not camp_ZoneSAR or not camp_ZoneSAR.blue then
 
@@ -475,7 +490,7 @@ end
 local foundBoundary = false
 
 -- creation des frontieres en fonction des dessins dans base_Mission red et blue qui comporte le nom border ou boundary
-if  tableDrawings and tableDrawings.layers then
+if tableDrawings and tableDrawings.layers then
     for Nlayers, layer in ipairs( tableDrawings.layers) do
         if (layer.name == "Red" or layer.name == "Blue" or layer.name == "Neutral" ) and layer.objects and #layer.objects >= 1 then
             for Nobjet, objet in ipairs(layer.objects) do
@@ -503,6 +518,8 @@ if not foundBoundary and Debug.debug then
 end
 
 camp.boundary = boundary
+
+t_b = t_b + (os.clock() - c_b)
 
 -- camp_ZoneSAR = {
 -- 	['neutrals'] = {
@@ -560,6 +577,7 @@ camp.boundary = boundary
 -- }
 
 
+local c_main = os.clock()
 --selectionne la base la plus proche pour leur porter secours
 --defini si le pilot est capturé ou récupérable
 
@@ -1083,6 +1101,11 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
     end
 end
 
+t_main = t_main + (os.clock() - c_main)
+
+
+local c_c = os.clock()
+
 -- Supprime de oob_ground ET de camp_ZoneSAR les ejectedPilot capturés ou sauvés
 if camp_ZoneSAR then
     for zone_sideName, sideTab in pairs(camp_ZoneSAR) do
@@ -1225,6 +1248,8 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
     end
 end
 
+t_c = t_c + (os.clock() - c_c)
+
 
 camp.SAR.alertSAR = {
 		["blue"] = {
@@ -1244,3 +1269,24 @@ camp.SAR.Flag = 600
 -- 	ZoneSARFile:write(ZoneSAR_str)																	--save new data
 -- 	ZoneSARFile:close()
 -- end
+
+
+	AddLog(string.format(
+		"PERF UpdateSAR: total=%.2fs | t_a=%.2fs | t_b=%.2fs | t_main=%.2fs | t_c=%.2fs |",
+		os.clock() - t0,
+		t_a,
+		t_b,
+		t_main,
+        t_c
+	))
+
+    -- if BugList and type(BugList) == "table" and #BugList >= 1 then
+	-- 	local table_Str = "BugList = " .. TableSerialization(BugList, 0)
+	-- 	local bugFile = io.open("Debug/BugList.lua", "w") or error("Failed to open debug file")
+	-- 	bugFile:write(table_Str)
+	-- 	bugFile:close()
+	-- end
+
+	-- os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')	
+
+	-- os.execute 'pause'

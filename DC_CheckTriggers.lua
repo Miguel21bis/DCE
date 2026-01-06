@@ -560,17 +560,17 @@ Action = {}
 
 		--pour ne pas reecrire la meme chose
 		if string.find(Briefing_text, text) then
-			print("DcCT PASSE B ")
+			-- print("DcCT PASSE B ")
 			return
 		end
 
 		if clear then
 			-- Briefing_status = ""												--clear briefing text from previous mission instances
 			Briefing_text = Briefing_text .. text .. " \n \n"					--add trigger text to briefing text of this mission instance with double new line
-			print("DcCT PASSE C "..Briefing_text)
+			-- print("DcCT PASSE C "..Briefing_text)
 		else
 			Briefing_text = Briefing_text .. text .. " \n \n"					--add trigger text to briefing text of this mission instance with double new line
-			print("DcCT PASSE D "..Briefing_text)
+			-- print("DcCT PASSE D "..Briefing_text)
 		end
 	end
 

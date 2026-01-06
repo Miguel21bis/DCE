@@ -3,7 +3,7 @@
 -------------------------------------------------------------------------------------------------------
 -- last modification:  debug_m
 if not versionDCE then versionDCE = {} end
-versionDCE["DEBRIEF_StatsEvaluation.lua"] = "1.8.68"
+versionDCE["DEBRIEF_StatsEvaluation.lua"] = "2.9.69"
 ------------------------------------------------------------------------------------------------------- 
 -- debug_m						(m events[e].target or "nil")(l package stats)(k task inc)(j element.x)(i inconnu events[e].initiator)(g mission+1) hit name)(h take debrief camp_status)(g some kills are not counted)(f debrief bug)(e pilotName)(c:equipage compte 2X)(b transport)(a: nom cible peut ressembler à nom AirUnit)
 -- cleancode_h					(h springCleaning)
@@ -19,8 +19,25 @@ if Debug.debug then
 	print("START DEBRIEF_StatsEvaluation.lua "..versionDCE["DEBRIEF_StatsEvaluation.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
 
+local t0 = os.clock()
+local t_a  = 0
+local t_b = 0
+local t_c = 0
+
+local t_bomb = 0
+local t_runway = 0
+local t_task = 0
+local t_LL = 0
+local t_SAR = 0
+local t_hit = 0
+
+local c_a = os.clock()
+
 --Global variable
 packstats = {}	--track stats for player package
+-- taille d'une cellule de la grille spatiale (en mètres)
+GridCellSize = 1000
+
 
 if not AcceptedMission then
 	oob_air = DeepCopy(oob_air)
@@ -96,14 +113,9 @@ else
 
 end
 
--- print(" targetlist D1: "..tostring(camp_triggers))
--- print(" targetlist D2: "..tostring(camp_triggers[1]["name"]))
-
 require("Active/last_Mission")
 
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
-
--- print("DebriefStatsEvaluation Initialisation AcceptedMission? "..tostring(AcceptedMission))
 
 --reset air oob last mission stats
 for side_name,side in pairs(oob_air) do														--iterate through all sides
@@ -214,7 +226,6 @@ end
 
 --reset client last mission stats
 for k,v in pairs(clientstats) do
-
 
 	v.score_last = {
 		kills_air = 0,
@@ -365,6 +376,10 @@ local function addPackstats(unitname, event, eventTable)
 		end
 	end
 end
+
+t_a = t_a + (os.clock() - c_a)
+
+local c_b = os.clock()
 
 --prepare client stats
 for e = 1, #events do																					--iterate through all events
@@ -593,62 +608,11 @@ for e = 1, #events do
 					end
 				end
 			end
-
 		end
-
-		-- --recherche le nom du SAM pour le reveler au yeux du monde ^^
-		-- if not killerIsPlane and  events[e].initiator ~= nil then
-		-- 	local tagbreak = false
-		-- 	for side_name, side in pairs(oob_ground) do																--iterate through sides
-		-- 		for countryN, country in pairs(side) do															--iterate through countries
-		-- 			for categorieN, categories in pairs(country) do
-		-- 				if type(categories) == "table" and categories.group then
-		-- 					for _group, groups in pairs(categories) do
-		-- 						for groupN, group in pairs(groups) do
-		-- 							for unitN, unit in ipairs(group.units) do	
-		-- 								if unit.name == events[e].initiator and not string.find(unit.name, "Soldier")  then
-		-- 									group.hidden = false
-		-- 									tagbreak = true
-
-		-- 									break
-		-- 								end
-		-- 								if tagbreak then break end
-		-- 							end
-		-- 							if tagbreak then break end
-		-- 						end
-		-- 						if tagbreak then break end
-		-- 					end
-		-- 				end
-		-- 				if tagbreak then break end
-		-- 			end
-		-- 			if tagbreak then break end
-		-- 		end
-		-- 		if tagbreak then break end
-		-- 	end
-
-		-- end
 
 		if  targetIsPlane  and  hit_table[target] then
 			hit_table[target] = nil															--once kills for the dead aircraft are awarded, remove it from the hit_table. The aircraft remaining in the hit_table after completed log evaluation are only damaged.
-			-- if string.find(events[e].target, "152 Filo") then
-			-- 	print("hit_table " ..events[e].target.." "..tostring(hit_table[target]))
-			-- end
 		end
-
-		-- ["statLost"] = 
-		-- {
-		-- 	["red"] = 
-		-- 	{
-		-- 		["C-130"] = 
-		-- 		{
-		-- 			["Transport"] = 
-		-- 			{
-		-- 				["Escort"] = true,
-		-- 			},
-
-		-- 		},
-		-- 	},
-		-- },
 
 		if targetIsPlane and last_Mission then
 
@@ -857,47 +821,42 @@ for e = 1, #events do
 							-- if unit.unitId == tonumber(events[e].initiatorMissionID) then				--check if unitId matches initiatorMissionID (string, needs to be converted to number)
 							if unit.name == events[e].initiator and not unit.dead then
 
-								-- if unit.name == events[e].initiator then
+								unit.dead = true														--mark unit as dead in oob_ground
+								unit.dead_last = true													--mark unit as died in last mission
+								unit.CheckDay = camp.date.CampTotalTimeS                            -- ajoute la date de destruction		 Miguel21 modification M19 : Repair SAM	
 
-									unit.dead = true														--mark unit as dead in oob_ground
-									unit.dead_last = true													--mark unit as died in last mission
-									unit.CheckDay = camp.date.CampTotalTimeS                            -- ajoute la date de destruction		 Miguel21 modification M19 : Repair SAM	
+								--award ground kill to air unit
+								if hit_table[initiator] ~= nil then														--check if dead vehicle has a hit entry
+									for killer_side_name,killer_side in pairs(oob_air) do											--iterate through all sides
+										for killer_unit_n,killer_unit in pairs(killer_side) do										--iterate through all air units
+											if string.find(hit_table[initiator], " " .. killer_unit.name .. " ", 1, true) then	--if the hitting unit is part of air unit name
+												if side_name ~= killer_side_name then												--make sure that hitting unit is not on same side as dead unit (friendly fire gives no kills)
+													killer_unit.score.kills_ground = killer_unit.score.kills_ground + 1				--award ground kill to air unit
+													killer_unit.score_last.kills_ground = killer_unit.score_last.kills_ground + 1
+													addPackstats(hit_table[initiator], "kill_ground", events[e])						--check if kill was in player package
 
-									--award ground kill to air unit
-									if hit_table[initiator] ~= nil then														--check if dead vehicle has a hit entry
-										for killer_side_name,killer_side in pairs(oob_air) do											--iterate through all sides
-											for killer_unit_n,killer_unit in pairs(killer_side) do										--iterate through all air units
-												if string.find(hit_table[initiator], " " .. killer_unit.name .. " ", 1, true) then	--if the hitting unit is part of air unit name
-													if side_name ~= killer_side_name then												--make sure that hitting unit is not on same side as dead unit (friendly fire gives no kills)
-														killer_unit.score.kills_ground = killer_unit.score.kills_ground + 1				--award ground kill to air unit
-														killer_unit.score_last.kills_ground = killer_unit.score_last.kills_ground + 1
-														addPackstats(hit_table[initiator], "kill_ground", events[e])						--check if kill was in player package
+													--award ground kill to client
+													if client_hit_table[initiator] then									--if dead vehicle was hit by a client
+														clientstats[client_hit_table[initiator]].kills_ground = clientstats[client_hit_table[initiator]].kills_ground + 1							--award gound kill to client
+														clientstats[client_hit_table[initiator]].score_last.kills_ground = clientstats[client_hit_table[initiator]].score_last.kills_ground + 1		--award ground kill to client
 
-														--award ground kill to client
-														if client_hit_table[initiator] then									--if dead vehicle was hit by a client
-															clientstats[client_hit_table[initiator]].kills_ground = clientstats[client_hit_table[initiator]].kills_ground + 1							--award gound kill to client
-															clientstats[client_hit_table[initiator]].score_last.kills_ground = clientstats[client_hit_table[initiator]].score_last.kills_ground + 1		--award ground kill to client
+														local item = {
+															event = events[e],
+															unit = unit,
+														}
 
-															local item = {
-																event = events[e],
-																unit = unit,
-															}
+														if not clientstatsDetail[client_hit_table[initiator]] then clientstatsDetail[client_hit_table[initiator]] = {} end
+														table.insert(clientstatsDetail[client_hit_table[initiator]], item)
 
-															if not clientstatsDetail[client_hit_table[initiator]] then clientstatsDetail[client_hit_table[initiator]] = {} end
-															table.insert(clientstatsDetail[client_hit_table[initiator]], item)
-
-														end
 													end
-													break
 												end
+												break
 											end
 										end
-										hit_table[initiator] = nil							--after kills are assigned, remove hit unit from hit_table
 									end
-									break
-								-- else
-								-- 	print("Debrief Ne trouve pas "..events[e].initiatorMissionID.." "..events[e].initiator)
-								-- end
+									hit_table[initiator] = nil							--after kills are assigned, remove hit unit from hit_table
+								end
+								break
 							end
 						end
 					end
@@ -1003,6 +962,10 @@ for e = 1, #events do
 	end
 end
 
+t_b = t_b + (os.clock() - c_b)
+
+local c_SAR = os.clock()
+
 --parse camp_ZoneSAR pour mettre à jour les POW
 if camp_ZoneSAR then
 	for side, zones in pairs(camp_ZoneSAR) do
@@ -1039,6 +1002,10 @@ if camp_ZoneSAR then
 else
 	print("DebriefSE ne trouve pas la table/fichier camp_ZoneSAR ")
 end
+
+t_SAR = t_SAR + (os.clock() - c_SAR)
+
+local c_hit = os.clock()
 
 --log damaged aircraft in oob_air
 for hit_unit,hitter in pairs(hit_table) do													--iterate through all remaining entries in the hit_table (all destroyed aircraft are removed meanwhile, damaged remain)
@@ -1080,111 +1047,114 @@ for hit_unit,hitter in pairs(hit_table) do													--iterate through all rem
 	end
 end
 
+t_hit = t_hit + (os.clock() - c_hit)
 
--- Fonction de distance entre deux points 3D
-local function distanceBombe(a, b)
-    local dx = a.x - b.x
-    local dy = (a.y or 0) - (b.y or 0)
-    local dz = a.z - b.z
-    return math.sqrt(dx*dx + dy*dy + dz*dz)
-end
 
--- Fonction principale de fusion
-local function fusionner_bombes(scen_log, rayon_max, temps_max)
-	local bombes = {}
-	local autres = {}
 
-	-- Séparation bombes et autres objets
-	for k, v in pairs(scen_log) do
-		if type(v) == "table" and v.event == "BOMB_IMPACT" then
-			table.insert(bombes, {key = k, data = v})
-		else
-			autres[k] = v
-		end
-	end
+-- -- Fonction de distance entre deux points 3D
+-- local function distanceBombe(a, b)
+--     local dx = a.x - b.x
+--     local dy = (a.y or 0) - (b.y or 0)
+--     local dz = a.z - b.z
+--     return math.sqrt(dx*dx + dy*dy + dz*dz)
+-- end
 
-	local groupes = {}
-	local used = {}
+-- -- Fonction principale de fusion
+-- local function fusionner_bombes(scen_log, rayon_max, temps_max)
+-- 	local bombes = {}
+-- 	local autres = {}
 
-	for i = 1, #bombes do
-		local bi = bombes[i]
-		if not used[bi.key] then
-			local groupe = {bi}
-			used[bi.key] = true
-			for j = i + 1, #bombes do
-				local bj = bombes[j]
-				if not used[bj.key] then
-					local dist = distanceBombe(bi.data, bj.data)
-					local delta_t = math.abs(bi.data.time - bj.data.time)
-					if dist <= rayon_max and delta_t <= temps_max then
-						table.insert(groupe, bj)
-						used[bj.key] = true
-					end
-				end
-			end
-			table.insert(groupes, groupe)
-		end
-	end
+-- 	-- Séparation bombes et autres objets
+-- 	for k, v in pairs(scen_log) do
+-- 		if type(v) == "table" and v.event == "BOMB_IMPACT" then
+-- 			table.insert(bombes, {key = k, data = v})
+-- 		else
+-- 			autres[k] = v
+-- 		end
+-- 	end
 
-    -- Fusion des groupes
-    local resultat = {}
-    local compteur = 1
+-- 	local groupes = {}
+-- 	local used = {}
 
-    for _, groupe in ipairs(groupes) do
-        if #groupe == 1 then
-            local unique = groupe[1]
-            resultat[unique.key] = unique.data
-        else
-            local total_mass = 0
-            local total_x, total_y, total_z, total_t = 0, 0, 0, 0
-            local noms = {}
+-- 	for i = 1, #bombes do
+-- 		local bi = bombes[i]
+-- 		if not used[bi.key] then
+-- 			local groupe = {bi}
+-- 			used[bi.key] = true
+-- 			for j = i + 1, #bombes do
+-- 				local bj = bombes[j]
+-- 				if not used[bj.key] then
+-- 					local dist = distanceBombe(bi.data, bj.data)
+-- 					local delta_t = math.abs(bi.data.time - bj.data.time)
+-- 					if dist <= rayon_max and delta_t <= temps_max then
+-- 						table.insert(groupe, bj)
+-- 						used[bj.key] = true
+-- 					end
+-- 				end
+-- 			end
+-- 			table.insert(groupes, groupe)
+-- 		end
+-- 	end
 
-            for _, item in ipairs(groupe) do
-                local d = item.data
-                total_mass = total_mass + (d.tntEquivalent or d.explosiveMass or d.warheadMass or 0)
-                total_x = total_x + d.x
-                total_y = total_y + (d.y or 0)
-                total_z = total_z + d.z
-                total_t = total_t + d.time
-                noms[d.weaponName or "UNKNOWN"] = true
-            end
+--     -- Fusion des groupes
+--     local resultat = {}
+--     local compteur = 1
 
-            local n = #groupe
-            local key = "BOMB_FUSED_" .. compteur
-            compteur = compteur + 1
-            local noms_concat = ""
-            for name, _ in pairs(noms) do
-                noms_concat = noms_concat .. name .. "+"
-            end
-            noms_concat = noms_concat:sub(1, -2)
+--     for _, groupe in ipairs(groupes) do
+--         if #groupe == 1 then
+--             local unique = groupe[1]
+--             resultat[unique.key] = unique.data
+--         else
+--             local total_mass = 0
+--             local total_x, total_y, total_z, total_t = 0, 0, 0, 0
+--             local noms = {}
 
-            resultat[key] = {
-                event = "BOMB_IMPACT",
-                explosiveMass = total_mass,
-                -- tntEquivalent = total_mass,
-                -- warheadMass = total_mass,
-                weaponName = noms_concat,
-                time = total_t / n,
-                x = total_x / n,
-                y = total_y / n,
-                z = total_z / n,
-                fusionCount = n,
-                fusedFrom = (function()
-                    local f = {}
-                    for _, b in ipairs(groupe) do table.insert(f, b.key) end
-                    return f
-                end)()
-            }
-        end
-    end
+--             for _, item in ipairs(groupe) do
+--                 local d = item.data
+--                 total_mass = total_mass + (d.tntEquivalent or d.explosiveMass or d.warheadMass or 0)
+--                 total_x = total_x + d.x
+--                 total_y = total_y + (d.y or 0)
+--                 total_z = total_z + d.z
+--                 total_t = total_t + d.time
+--                 noms[d.weaponName or "UNKNOWN"] = true
+--             end
 
-    -- Réintégration des autres objets
-    for k, v in pairs(autres) do
-        resultat[k] = v
-    end
+--             local n = #groupe
+--             local key = "BOMB_FUSED_" .. compteur
+--             compteur = compteur + 1
+--             local noms_concat = ""
+--             for name, _ in pairs(noms) do
+--                 noms_concat = noms_concat .. name .. "+"
+--             end
+--             noms_concat = noms_concat:sub(1, -2)
 
-    return resultat
-end
+--             resultat[key] = {
+--                 event = "BOMB_IMPACT",
+--                 explosiveMass = total_mass,
+--                 -- tntEquivalent = total_mass,
+--                 -- warheadMass = total_mass,
+--                 weaponName = noms_concat,
+--                 time = total_t / n,
+--                 x = total_x / n,
+--                 y = total_y / n,
+--                 z = total_z / n,
+--                 fusionCount = n,
+--                 fusedFrom = (function()
+--                     local f = {}
+--                     for _, b in ipairs(groupe) do table.insert(f, b.key) end
+--                     return f
+--                 end)()
+--             }
+--         end
+--     end
+
+--     -- Réintégration des autres objets
+--     for k, v in pairs(autres) do
+--         resultat[k] = v
+--     end
+
+--     return resultat
+-- end
 
 -- Exemple d’appel avec rayon de 15 mètres et fenêtre de 2 secondes
 --TODO reactiver ici la function, désactivé pour test
@@ -1195,89 +1165,174 @@ local scenFile = io.open("Debug/scen_log.lua", "w") or error("Failed to open deb
 scenFile:write(scen_str)																	--save new data
 scenFile:close()
 
---evaluate destroyed scenery objects
-for scenName, scen in pairs(scen_log) do													--iterate through destroyed scenery objects
+local c_bomb = os.clock()
 
-	local passeOK = true
-	-- local isForest = false
-	if scen.sceneryTypeName and string.find(scen.sceneryTypeName, "FOREST")  then
-		passeOK = false
-	end
 
-	if scen.x and scen.y and passeOK then
+-- calcule l'indice de cellule pour une coordonnée monde
+-- utile pour mapper une position X ou Y vers la grille
+-- la taille de cellule est définie par GridCellSize
+-- permet un regroupement spatial simple et rapide
+local function getCellIndex(value)
+	return math.floor(value / GridCellSize)
+end
 
-		for sideName, targets in pairs(targetlist) do											--iterate through targetlist
-			for targetN, target in pairs(targets) do										--iterate through targets				
-			
-				local passStructure = false
-				if target.attributes then
-					for attributN, attribut in pairs(target.attributes) do
-						local attrLower = string.lower(attribut)
-						if string.find(attrLower, "structure") or string.find(attrLower, "building") then
-							passStructure = true
-						end
+-- construit la grille spatiale à partir des targets
+-- utile pour éviter les comparaisons explosion vs tous les éléments
+-- chaque élément est inséré une seule fois dans la grille
+-- la grille est réutilisée pour tous les scen du debrief
+local function buildSpatialGrid(targetlist)
+	local grid = {}
+
+	for sideName, targets in pairs(targetlist) do
+		for _, target in pairs(targets) do
+			if target.elements then
+				for _, element in pairs(target.elements) do
+					if element.x and element.y then
+						local cx = getCellIndex(element.x)
+						local cy = getCellIndex(element.y)
+						grid[cx] = grid[cx] or {}
+						grid[cx][cy] = grid[cx][cy] or {}
+						table.insert(grid[cx][cy], {
+							element = element,
+							target = target,
+							sideName = sideName,
+						})
 					end
 				end
+			end
+		end
+	end
 
-				if target.elements  then
-					for elementN, element in pairs(target.elements) do						--iterate through target elements
-						if element.x then
+	return grid
+end
 
-							local distance = math.floor(math.sqrt((scen.x - element.x)^2 + (scen.y - element.y)^2))					--calculate distance between dead scenery and target element						
-							local correctedRadius = RayonDamaged
-							-- if scen.event == "BOMB_IMPACT_ZONE" or element.class == "static" then
-							-- 	correctedRadius = 15 -- 15 m
-								
-							-- elseif scen.explosiveMass and not scen.event == "BOMB_IMPACT" then
-							-- 	local k_val = 4.0  -- k = 4 par défaut, typique pour bâtiments légers
-							-- 	correctedRadius = k_val * (scen.explosiveMass)^(1/3)
-							-- end
+-- index des statics par nom
+-- utile car évite un scan complet de oob_ground à chaque destruction
+-- chaque static est stocké par son nom comme clé
+-- permet un accès direct et immédiat au bâtiment à détruire
+local oobStaticByName = {}
+for _, side in pairs(oob_ground) do
+	for _, country in pairs(side) do
+		if country.static then
+			for _, group in pairs(country.static.group or {}) do
+				for _, unit in pairs(group.units or {}) do
+					oobStaticByName[unit.name] = unit
+				end
+			end
+		end
+	end
+end
 
-							if scen.explosiveMass and not scen.event == "BOMB_IMPACT" then
-								local k_val = 4.0  -- k = 4 par défaut, typique pour bâtiments légers
-								correctedRadius = k_val * (scen.explosiveMass)^(1/3)
-							end
+-- pré-calcul des targets structure
+-- utile car évite de scanner les attributs texte à chaque explosion
+-- chaque target est analysée une seule fois au chargement du debrief
+-- un flag target.isStructure est ensuite utilisé directement
+for _, sides in pairs(targetlist) do
+	for _, target in pairs(sides) do
+		target.isStructure = false
+		if target.attributes then
+			for _, attr in pairs(target.attributes) do
+				local a = attr:lower()
+				if a:find("structure", 1, true) or a:find("building", 1, true) then
+					target.isStructure = true
+					break
+				end
+			end
+		end
+	end
+end
 
-							if not scen.lasthit and scen.initiator then
-								scen.lasthit = scen.initiator
-							end
+-- construction de la grille spatiale
+local spatialGrid = buildSpatialGrid(targetlist)
 
-							-- print("DebriefSE =========--> B0 distance: "..tostring(distance))
+-- local c_bomb = os.clock()
+
+for scenName, scen in pairs(scen_log) do
+
+	if not (scen.sceneryTypeName and scen.sceneryTypeName:find("FOREST", 1, true)) then
+		if scen.x and scen.y then
+
+			-- radius calculé une fois
+			if scen.explosiveMass and scen.event ~= "BOMB_IMPACT" then
+				scen.correctedRadius = 4.0 * (scen.explosiveMass)^(1/3)
+			else
+				scen.correctedRadius = RayonDamaged
+			end
+			local radius2 = scen.correctedRadius * scen.correctedRadius
+
+			if not scen.lasthit and scen.initiator then
+				scen.lasthit = scen.initiator
+			end
+
+			-- cellule du scen
+			local cx = getCellIndex(scen.x)
+			local cy = getCellIndex(scen.y)
 
 
-							if distance <= correctedRadius  then
-								
-								-- print("DebriefSE  - --> B1 lasthit? "..tostring(scen.lasthit).." event?: "..tostring(scen.event).." correctedRadius: "..correctedRadius )
+			-- récupération de la cellule du scen et de ses voisines
+			-- utile car une explosion ne peut affecter que les zones proches
+			-- seules 9 cellules maximum sont analysées
+			-- réduit drastiquement le nombre de calculs de distance
+			for dx = -1, 1 do
+				for dy = -1, 1 do
+					local col = spatialGrid[cx + dx]
+					if col then
+						local cell = col[cy + dy]
+						if cell then
+							for _, entry in pairs(cell) do
 
-								-- print("DebriefSE  - --> B2 distance: "..tostring(distance).." between scenaryName: "..tostring(scen.scenaryName).." sceneryTypeName: "..tostring(scen.sceneryTypeName).." and element.name: "..tostring(element.name))
-								
-								--plus bas, ne pas l'enlever, car il peut y avoir plusieurs detection de destruction, et cela fausse le resultat car detecté déjà detruit
-								if element.dead then	--and element.CheckDay and element.CheckDay < camp.date.CampTotalTimeS 
-									-- element.dead_last = false									--mark element as not died in last mission
-									-- print("DebriefSE  - --> C1 "..tostring(scenName).." |eName:| "..tostring(element.name).." |edead:| "..tostring(element.dead).." |eCheckDay:| "..tostring(element.CheckDay).." |elasthit:| "..tostring(element.lasthit))
-								else
-									-- print("DebriefSE  - --> C2 "..tostring(scenName).." |eName:| "..tostring(element.name).." |edead:| "..tostring(element.dead).." |eCheckDay:| "..tostring(element.CheckDay).." |elasthit:| "..tostring(element.lasthit))
-									element.dead = true											--mark element as dead
-									element.dead_last = true									--mark element as died in last mission
-									element.CheckDay = camp.date.CampTotalTimeS									-- ajoute la date de destruction		 Miguel21 modification M19.f : Repair SAM	
+								local element = entry.element
+								local target = entry.target
+								local sideName = entry.sideName
 
-									scen.lifePourcent = 0
+								if element.x and not element.dead then
+									local dx2 = scen.x - element.x
+									local dy2 = scen.y - element.y
+									local dist2 = dx2*dx2 + dy2*dy2
 
-									-- si c'est un static batiment, on casse le batiment aussi dans oob_ground
-									if passStructure then
-										for oobgSideName, side in pairs(oob_ground) do
-											for countryN, country in pairs(side) do
-												for class, typetable in pairs(country) do
-													if class == "static" then	--class == "vehicle" or class == "ship" or 
-														for groupN, group in pairs(typetable.group) do
-															for unitN, unit in pairs(group.units) do
-																if  element.name == unit.name then
-																	unit['dead'] = true
-																	unit['dead_last'] = true
-																	unit.CheckDay = camp.date.CampTotalTimeS
+									if dist2 <= radius2 then
+										element.dead = true
+										element.dead_last = true
+										element.CheckDay = camp.date.CampTotalTimeS
+										scen.lifePourcent = 0
 
-																end
+										-- destruction du static associé
+										if target.isStructure then
+											local unit = oobStaticByName[element.name]
+											if unit then
+												unit.dead = true
+												unit.dead_last = true
+												unit.CheckDay = camp.date.CampTotalTimeS
+											end
+										end
+
+										-- attribution kill
+										if not element.lasthit and scen.lasthit then
+											element.lasthit = scen.lasthit
+
+											for killerSideName, killer_side in pairs(oob_air) do
+												if sideName == killerSideName then
+													for _, killerUnit in pairs(killer_side) do
+														if scen.lasthit:find(" " .. killerUnit.name .. " ", 1, true) then
+															killerUnit.score.kills_ground = killerUnit.score.kills_ground + 1
+															killerUnit.score_last.kills_ground = killerUnit.score_last.kills_ground + 1
+															addPackstats(scen.lasthit, "kill_ground", nil)
+
+															if clientControl[scen.lasthit] then
+																local cid = clientControl[scen.lasthit]
+																clientstats[cid].kills_ground =
+																	clientstats[cid].kills_ground + 1
+																clientstats[cid].score_last.kills_ground =
+																	clientstats[cid].score_last.kills_ground + 1
+
+																clientstatsDetail[cid] = clientstatsDetail[cid] or {}
+																table.insert(clientstatsDetail[cid], {
+																	event = scenName,
+																	target_name = target.titleName,
+																	element = element,
+																})
 															end
+															break
 														end
 													end
 												end
@@ -1285,53 +1340,6 @@ for scenName, scen in pairs(scen_log) do													--iterate through destroyed
 										end
 									end
 								end
-
-								-- os.execute 'pause'
-
-								if element.dead and not element.lasthit then
-									--award ground kill to air unit
-									if scen.lasthit ~= nil then																			--check if dead scenery has a hit entry
-										
-										element.lasthit = scen.lasthit
-										
-										for killerSideName, killer_side in pairs(oob_air) do											--iterate through all sides
-											for killerUnitN, killerUnit in pairs(killer_side) do										--iterate through all air units
-												if string.find(scen.lasthit, " " .. killerUnit.name .. " ", 1, true) then				--if the hitting unit is part of air unit name
-													if sideName == killerSideName then												--make sure that hitting unit is hitting a target of his own side (friendly fire gives no kills)
-														killerUnit.score.kills_ground = killerUnit.score.kills_ground + 1				--award ground kill to air unit
-														killerUnit.score_last.kills_ground = killerUnit.score_last.kills_ground + 1
-														addPackstats(scen.lasthit, "kill_ground", nil)										--check if kill was in player package
-
-														-- print("DebriefSE  kill_ground -  - --> E scen.lasthit: "..tostring(scen.lasthit).." |killerUnit.name:| "..tostring(killerUnit.name).." |target.titleName:| "..tostring(target.titleName).." |e.name:| "..tostring(element.name) )
-
-														--award ground kill to client
-														if clientControl[scen.lasthit] then											--if dead scenery was hit by a client
-															
-															-- print("DebriefSE  kill_ground - -  - --> F")
-															
-															clientstats[clientControl[scen.lasthit]].kills_ground = clientstats[clientControl[scen.lasthit]].kills_ground + 1							--award ground kill to client
-															clientstats[clientControl[scen.lasthit]].score_last.kills_ground = clientstats[clientControl[scen.lasthit]].score_last.kills_ground + 1	--award ground kill to client
-
-
-															local item = {
-																event = scenName,
-																target_name = target.titleName,
-																element = element,
-															}
-
-															if not clientstatsDetail[clientControl[scen.lasthit]] then clientstatsDetail[clientControl[scen.lasthit]] = {} end
-															table.insert(clientstatsDetail[clientControl[scen.lasthit]], item)
-
-
-														end
-													end
-												end
-											end
-										end
-									end	
-								end
-
-
 							end
 						end
 					end
@@ -1341,7 +1349,161 @@ for scenName, scen in pairs(scen_log) do													--iterate through destroyed
 	end
 end
 
+t_bomb = t_bomb + (os.clock() - c_bomb)
+
+
+-- --evaluate destroyed scenery objects
+-- for scenName, scen in pairs(scen_log) do													--iterate through destroyed scenery objects
+
+-- 	local passeOK = true
+-- 	-- local isForest = false
+-- 	if scen.sceneryTypeName and string.find(scen.sceneryTypeName, "FOREST")  then
+-- 		passeOK = false
+-- 	end
+
+-- 	if scen.x and scen.y and passeOK then
+
+-- 		for sideName, targets in pairs(targetlist) do											--iterate through targetlist
+-- 			for targetN, target in pairs(targets) do										--iterate through targets				
+			
+-- 				local passStructure = false
+-- 				if target.attributes then
+-- 					for attributN, attribut in pairs(target.attributes) do
+-- 						local attrLower = string.lower(attribut)
+-- 						if string.find(attrLower, "structure") or string.find(attrLower, "building") then
+-- 							passStructure = true
+-- 						end
+-- 					end
+-- 				end
+
+-- 				if target.elements  then
+-- 					for elementN, element in pairs(target.elements) do						--iterate through target elements
+-- 						if element.x then
+
+-- 							local distance = math.floor(math.sqrt((scen.x - element.x)^2 + (scen.y - element.y)^2))					--calculate distance between dead scenery and target element						
+-- 							local correctedRadius = RayonDamaged
+-- 							-- if scen.event == "BOMB_IMPACT_ZONE" or element.class == "static" then
+-- 							-- 	correctedRadius = 15 -- 15 m
+								
+-- 							-- elseif scen.explosiveMass and not scen.event == "BOMB_IMPACT" then
+-- 							-- 	local k_val = 4.0  -- k = 4 par défaut, typique pour bâtiments légers
+-- 							-- 	correctedRadius = k_val * (scen.explosiveMass)^(1/3)
+-- 							-- end
+
+-- 							if scen.explosiveMass and not scen.event == "BOMB_IMPACT" then
+-- 								local k_val = 4.0  -- k = 4 par défaut, typique pour bâtiments légers
+-- 								correctedRadius = k_val * (scen.explosiveMass)^(1/3)
+-- 							end
+
+-- 							if not scen.lasthit and scen.initiator then
+-- 								scen.lasthit = scen.initiator
+-- 							end
+
+-- 							-- print("DebriefSE =========--> B0 distance: "..tostring(distance))
+
+
+-- 							if distance <= correctedRadius  then
+								
+-- 								-- print("DebriefSE  - --> B1 lasthit? "..tostring(scen.lasthit).." event?: "..tostring(scen.event).." correctedRadius: "..correctedRadius )
+
+-- 								-- print("DebriefSE  - --> B2 distance: "..tostring(distance).." between scenaryName: "..tostring(scen.scenaryName).." sceneryTypeName: "..tostring(scen.sceneryTypeName).." and element.name: "..tostring(element.name))
+								
+-- 								--plus bas, ne pas l'enlever, car il peut y avoir plusieurs detection de destruction, et cela fausse le resultat car detecté déjà detruit
+-- 								if element.dead then	--and element.CheckDay and element.CheckDay < camp.date.CampTotalTimeS 
+-- 									-- element.dead_last = false									--mark element as not died in last mission
+-- 									-- print("DebriefSE  - --> C1 "..tostring(scenName).." |eName:| "..tostring(element.name).." |edead:| "..tostring(element.dead).." |eCheckDay:| "..tostring(element.CheckDay).." |elasthit:| "..tostring(element.lasthit))
+-- 								else
+-- 									-- print("DebriefSE  - --> C2 "..tostring(scenName).." |eName:| "..tostring(element.name).." |edead:| "..tostring(element.dead).." |eCheckDay:| "..tostring(element.CheckDay).." |elasthit:| "..tostring(element.lasthit))
+-- 									element.dead = true											--mark element as dead
+-- 									element.dead_last = true									--mark element as died in last mission
+-- 									element.CheckDay = camp.date.CampTotalTimeS									-- ajoute la date de destruction		 Miguel21 modification M19.f : Repair SAM	
+
+-- 									scen.lifePourcent = 0
+
+-- 									-- si c'est un static batiment, on casse le batiment aussi dans oob_ground
+-- 									if passStructure then
+-- 										for oobgSideName, side in pairs(oob_ground) do
+-- 											for countryN, country in pairs(side) do
+-- 												for class, typetable in pairs(country) do
+-- 													if class == "static" then	--class == "vehicle" or class == "ship" or 
+-- 														for groupN, group in pairs(typetable.group) do
+-- 															for unitN, unit in pairs(group.units) do
+-- 																if  element.name == unit.name then
+-- 																	unit['dead'] = true
+-- 																	unit['dead_last'] = true
+-- 																	unit.CheckDay = camp.date.CampTotalTimeS
+
+-- 																end
+-- 															end
+-- 														end
+-- 													end
+-- 												end
+-- 											end
+-- 										end
+-- 									end
+-- 								end
+
+-- 								-- os.execute 'pause'
+
+-- 								if element.dead and not element.lasthit then
+-- 									--award ground kill to air unit
+-- 									if scen.lasthit ~= nil then																			--check if dead scenery has a hit entry
+										
+-- 										element.lasthit = scen.lasthit
+										
+-- 										for killerSideName, killer_side in pairs(oob_air) do											--iterate through all sides
+-- 											for killerUnitN, killerUnit in pairs(killer_side) do										--iterate through all air units
+-- 												if string.find(scen.lasthit, " " .. killerUnit.name .. " ", 1, true) then				--if the hitting unit is part of air unit name
+-- 													if sideName == killerSideName then												--make sure that hitting unit is hitting a target of his own side (friendly fire gives no kills)
+-- 														killerUnit.score.kills_ground = killerUnit.score.kills_ground + 1				--award ground kill to air unit
+-- 														killerUnit.score_last.kills_ground = killerUnit.score_last.kills_ground + 1
+-- 														addPackstats(scen.lasthit, "kill_ground", nil)										--check if kill was in player package
+
+-- 														-- print("DebriefSE  kill_ground -  - --> E scen.lasthit: "..tostring(scen.lasthit).." |killerUnit.name:| "..tostring(killerUnit.name).." |target.titleName:| "..tostring(target.titleName).." |e.name:| "..tostring(element.name) )
+
+-- 														--award ground kill to client
+-- 														if clientControl[scen.lasthit] then											--if dead scenery was hit by a client
+															
+-- 															-- print("DebriefSE  kill_ground - -  - --> F")
+															
+-- 															clientstats[clientControl[scen.lasthit]].kills_ground = clientstats[clientControl[scen.lasthit]].kills_ground + 1							--award ground kill to client
+-- 															clientstats[clientControl[scen.lasthit]].score_last.kills_ground = clientstats[clientControl[scen.lasthit]].score_last.kills_ground + 1	--award ground kill to client
+
+
+-- 															local item = {
+-- 																event = scenName,
+-- 																target_name = target.titleName,
+-- 																element = element,
+-- 															}
+
+-- 															if not clientstatsDetail[clientControl[scen.lasthit]] then clientstatsDetail[clientControl[scen.lasthit]] = {} end
+-- 															table.insert(clientstatsDetail[clientControl[scen.lasthit]], item)
+
+
+-- 														end
+-- 													end
+-- 												end
+-- 											end
+-- 										end
+-- 									end	
+-- 								end
+
+
+-- 							end
+-- 						end
+-- 					end
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+-- end
+
+-- t_bomb = t_bomb + (os.clock() - c_bomb)
+
 -- print("DebriefSE AAA "..tostring(targetlist.blue[8].elements[2].name).." dead? "..tostring(targetlist.blue[8].elements[2].dead))
+
+
+local c_runway = os.clock()
 
 -- RunwayLife[Id] = {
 -- 	name = tostring(b:getName()),
@@ -1505,6 +1667,9 @@ if camp.statLost then
 		end
 	end
 end
+t_runway = t_runway + (os.clock() - c_runway)
+
+local c_task = os.clock()
 
 if Debug.debug and camp.newTaskRequest then
 	local _Str = "newTaskRequest = " .. TableSerialization(camp.newTaskRequest, 0)
@@ -1559,6 +1724,9 @@ if camp.newTaskRequest then
 	end
 end
 
+t_task = t_task + (os.clock() - c_task)
+
+local c_LL = os.clock()
 -- Merge Mission_LL_Positions into LL_Positions (Active/LL_Positions.lua)
 LL_Positions = nil
 local posFile = "Active/LL_Positions.lua"
@@ -1637,6 +1805,11 @@ if not ok then
 	end
 end
 
+t_LL = t_LL + (os.clock() - c_LL)
+
+
+local c_c = os.clock()
+
 if Debug.debug  then
 	local _Str = "targetlistA = " .. TableSerialization(targetlist, 0)
 	local trigFile = io.open("Debug/targetlist_DEBRIEF_StatsEvaluation.lua", "w") or error("Failed to open debug file")
@@ -1651,8 +1824,6 @@ if Debug.debug and camp.statLost then
 	trigFile:close()
 end
 
-
-
 local _Str = "statLost = " .. TableSerialization(clientstatsDetail, 0)
 local trigFile = io.open("Debug/statsClientDetails.lua", "w") or error("Failed to open debug file")
 trigFile:write(_Str)
@@ -1665,6 +1836,27 @@ if Debug.debug then
 	campFile:close()
 end
 
+t_c = t_c + (os.clock() - c_c)
+
+
+AddLog(string.format(
+	"PERF DEBRIEF_SE: total=%.2fs | t_a=%.2fs | t_b=%.2fs | t_c=%.2fs | t_bomb=%.2fs | t_runway=%.2fs | t_task=%.2fs | t_LL=%.2fs | t_SAR=%.2fs | t_hit=%.2fs |",
+	os.clock() - t0,
+	t_a,
+	t_b,
+	t_c,
+ 	t_bomb,
+ 	t_runway,
+ 	t_task,
+ 	t_LL,
+	t_SAR,
+	t_hit
+))
+
+
+if Debug.debug then
+	print("FIN DEBRIEF_StatsEvaluation.lua "..versionDCE["DEBRIEF_StatsEvaluation.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
 
 -- print(" targetlist E1: "..tostring(camp_triggers))
 -- print(" targetlist E2: "..tostring(camp_triggers[1]["name"]))

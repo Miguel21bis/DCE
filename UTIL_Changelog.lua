@@ -4,21 +4,60 @@ if not VersionDCE then VersionDCE = {} end
 VersionDCE["UTIL_Changelog.txt"] = "22.94.577"
 --[[
 
+# DCE – Changelog
+
+This file describes the main changes in DCE that may affect gameplay, mission generation,
+and campaign customization.
+
+It is intended for **players and campaign makers**, not only developers.
+
+---
 
 known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
 
-==:22.94.577:==
-577 fix 	[PERF] réelle optimisation du temps necessaire pour generer une mission
-576 add		Data: Aircraft radio capabilities are now automatically retrieved from Mods and CoreMods, avoiding manual duplication and reducing DCE data maintenance.
-575 add		[22M94]	Radio: Using module-defined radio ranges, radio frequency assignment has been refined for improved realism and interoperability.
+##  Version 22.94.577
 
-574 modified	[loadout]		DCE loadout divisions into multiple files and in the db_loadouts folder
-573 add		[21M93]	Add a Mods directory so that anyone can add their own modules without a DCE update breaking their files.
-					You can place loadout files (db_loadouts = {}) and/or Data files (Data_divers = {}) there, regardless of the name of the file(s) added.
+	###  Fixed
 
+	- **Performance**
+	Major optimization of mission generation time.
+	Campaigns now generate missions significantly faster, especially large ones.
+
+	###  Added
+
+	- **Aircraft Radio Data (Automatic)**
+	Aircraft radio capabilities are now automatically read from `Mods` and `CoreMods`.
+
+	**Why this matters for users:**
+	- No more duplicated radio data in DCE files
+	- Easier maintenance
+	- Better compatibility with new or updated aircraft modules
+
+	- **Improved Radio Frequency Assignment**
+	Radio frequencies are now assigned using the radio ranges defined by each aircraft module.
+
+	**Result:**
+	- More realistic radio behavior
+	- Better interoperability between different aircraft types
+
+	###  Changed
+
+	- **Loadout Structure**
+	Loadouts have been split into multiple files and moved into the `db_loadouts` folder.
+
+	- **Custom Mods Support**
+	A new `Mods` directory has been added.
+
+	Users can now add their own files **without risk of being overwritten by a DCE update**.
+
+	Supported content:
+	- Loadout files (`db_loadouts = {}`)
+	- Data files (`Data_divers = {}`)
+
+	File names are free and do not need to follow a specific pattern.
 
 ==:20.92.572:==
 572 add		[M92]	add new attributesCond in targetList for best squad selection

@@ -101,43 +101,6 @@ dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
 
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
 
--- --retrocompatibilie location UTIL_DataRadio file
--- --recherche en priorit� le fichier radios_freq_compatible dans le dossier ScriptsMod puis dans le dossier campagne
--- local radioFile = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua"
--- local testPath = io.open(radioFile, "r")																--cette maniere de chercher la presence d un fichier evite un plantage
--- if not testPath then																					--check si le fichier existe dans ScriptsMod
--- 	io.close(testPath)
--- 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
--- else
--- 	local radioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
--- 	local testPath2 = io.open(radioFile2, "r")
--- 	if testPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
--- 		io.close(testPath2)
--- 		dofile(radioFile2)
--- 	end
--- end
-
-
-
-
-
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Refpoints.lua")			--besoin par NavalEnv
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_MissionScore.lua")
-
--- -- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Time.lua")				--need if AcceptedMission
--- -- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_MoonPhase.lua")
-
-
--- --TODO comment se passer de ca??
--- -- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")		--besoin par CheckTrigger pour bouger les navires
-
-
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
-
--- --TODO ici la cible Jask repasse à 30%, pourquoi
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")
-
 mission.currentKey = 1010000															--not clear how this works but is required for multiplyer clients to be available for selection on mission start
 
 -- camp.waitingNextGen = true
@@ -151,26 +114,6 @@ if Briefing_text and Briefing_text ~= "" then
 	end
 
 end
-
-
--- fou le bordel, TODO, il faudrait vérifier si certaines images ont le droit d'être sauvegardée pour la prochaine mission
-
--- --si la generation de la mission suivante est repoussee, on sauvegarde le txt cr�e par les trigger txt precedent
--- if BriefingImagesR ~= nil or (BriefingImagesR and #BriefingImagesR ~= 0) then
--- 	if camp["BriefingImagesR"] then
--- 		table.insert(camp["BriefingImagesR"], BriefingImagesR)
--- 	else
--- 		camp["BriefingImagesR"]	 = BriefingImagesR
--- 	end
--- end
--- if BriefingImagesB ~= nil or (BriefingImagesB and #BriefingImagesB ~= 0) then
--- 	if camp["BriefingImagesB"] then
--- 		table.insert(camp["BriefingImagesB"], BriefingImagesB)
--- 	else
--- 		camp["BriefingImagesB"]	 = BriefingImagesB
--- 	end
--- end
-
 
 ----- convert tables back to strings for insertion into content files -----
 local cmpStr = "camp = " .. TableSerialization(camp, 0)
@@ -204,18 +147,10 @@ local groundFile = io.open("Active/oob_ground.lua", "w") or error("Failed to ope
 groundFile:write(ground_str)																--save new data
 groundFile:close()
 
--- print("MAIN_AM targetlist M1: "..tostring(camp_triggers))
--- print("MAIN_AM targetlist M2: "..tostring(camp_triggers[1]["name"]))
-
 local tgt_str = "targetlist = " .. TableSerialization(targetlist, 0)						--make a string
 local tgtFile = io.open("Active/targetlist.lua", "w") or error("Failed to open debug file")
 tgtFile:write(tgt_str)																		--save new data
 tgtFile:close()
-
--- local trigStr = "camp_triggers = " .. TableSerializationAG(camp_triggers, 0)
--- local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to open debug file")
--- trigFile:write(trigStr)
--- trigFile:close()
 
 local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
 local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
@@ -227,18 +162,11 @@ local ZoneSARFile = io.open("Active/camp_ZoneSAR.lua", "w")	 or error("Failed to
 ZoneSARFile:write(ZoneSAR_str)																	--save new data
 ZoneSARFile:close()
 
-_affiche(camp.date, "camp.date")
-print("MAIN_AM BEFORE LoadFileAndUpdate()")
-
 --***********NEW function***************--
 --***********NEW function***************--
 LoadFileAndUpdate("MAIN_AcceptMission "..debug.getinfo(1).currentline)
 --***********NEW function***************--
 --***********NEW function***************--
-
-_affiche(camp.date, "camp.date")
-print("MAIN_AM AFTER LoadFileAndUpdate()")
-
 
 -- if TypeAlias then
 -- 	local _str = "TypeAlias = " .. TableSerialization(TypeAlias, 0)

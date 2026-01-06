@@ -2327,7 +2327,7 @@ end
 
 
 local function getRangesForContext(side, task, type_withData, flightOrPackage)
-	print("getRangesForContext A called for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData).." flightOrPackage "..tostring(flightOrPackage))
+	-- print("getRangesForContext A called for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData).." flightOrPackage "..tostring(flightOrPackage))
 	-- cas spécial : réseaux commandement joueur
 	
 	if specialTasks[task] and side == PlayerSide and (not type_withData or not IsHelicopter[type_withData]) then
@@ -2335,7 +2335,7 @@ local function getRangesForContext(side, task, type_withData, flightOrPackage)
 			for _, wave in ipairs(wavePriority[side].plane) do
 				for n, dataFreq in ipairs(RadioPlayerWaveRanges or {}) do
 					if rangeIntersectsWave(dataFreq, wave) then
-						print("getRangesForContext B special task "..tostring(task).." wave "..tostring(wave).." freq range "..tostring(dataFreq.min).." - "..tostring(dataFreq.max))
+						-- print("getRangesForContext B special task "..tostring(task).." wave "..tostring(wave).." freq range "..tostring(dataFreq.min).." - "..tostring(dataFreq.max))
 						return wave, { dataFreq }
 					end
 				end
@@ -2347,22 +2347,22 @@ local function getRangesForContext(side, task, type_withData, flightOrPackage)
 	if not IsHelicopter[type_withData] then
 		for _, wave in ipairs(wavePriority[side].plane) do
 			if RadioWaveCommon[side] and RadioWaveCommon[side][wave] then
-				print("getRangesForContext C normal plane wave "..tostring(wave))
+				-- print("getRangesForContext C normal plane wave "..tostring(wave))
 				return wave, { RadioWaveCommon[side][wave] }
 			end
 		end
 	else
 		if flightOrPackage == "FreqFlight" and RadioWaveCommon[side] and RadioWaveCommon[side]["LVHF"] then
-			print("getRangesForContext D1 normal helicopter wave "..tostring("LVHF"))
+			-- print("getRangesForContext D1 normal helicopter wave "..tostring("LVHF"))
 			return "LVHF", { RadioWaveCommon[side]["LVHF"] }
 		elseif flightOrPackage == "FreqPackage" and RadioWaveCommon[side] and RadioWaveCommon[side]["UHF"] then
-			print("getRangesForContext D2 normal helicopter wave "..tostring("UHF"))
+			-- print("getRangesForContext D2 normal helicopter wave "..tostring("UHF"))
 			return "UHF", { RadioWaveCommon[side]["UHF"] }
 		end
 
 		for _, wave in ipairs(wavePriority[side].helicopter) do
 			if RadioWaveCommon[side] and RadioWaveCommon[side][wave] then
-				print("getRangesForContext D3 normal helicopter wave "..tostring(wave))
+				-- print("getRangesForContext D3 normal helicopter wave "..tostring(wave))
 				return wave, { RadioWaveCommon[side][wave] }
 			end
 		end
@@ -2423,7 +2423,7 @@ end
 
 
 function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPackage)
-	print("GetFrequencyNG A called for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(wave))
+	-- print("GetFrequencyNG A called for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(wave))
 
 	AssignedTargetFrequency[side] = AssignedTargetFrequency[side] or {}
 
@@ -2434,7 +2434,7 @@ function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPa
 
     -- 1. Cache par cible
     if target_name and flightOrPackage and AssignedTargetFrequency[side][target_name][flightOrPackage] then
-		print("GetFrequencyNG B returning cached frequency for target "..tostring(target_name).." flightOrPackage: " .. tostring(flightOrPackage) .. " freq "..tostring(AssignedTargetFrequency[side][target_name][flightOrPackage]))
+		-- print("GetFrequencyNG B returning cached frequency for target "..tostring(target_name).." flightOrPackage: " .. tostring(flightOrPackage) .. " freq "..tostring(AssignedTargetFrequency[side][target_name][flightOrPackage]))
         return AssignedTargetFrequency[side][target_name][flightOrPackage]
     end
 
@@ -2444,15 +2444,15 @@ function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPa
     -- 2. Wave forcée
     if wave then
         selectedWave = wave
-		print("GetFrequencyNG C1 wave forced "..tostring(wave).." for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData))
+		-- print("GetFrequencyNG C1 wave forced "..tostring(wave).." for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData))
         if RadioWaveCommon[side] and RadioWaveCommon[side][wave] then
-			print("GetFrequencyNG C2 wave forced "..tostring(wave).." found for side "..tostring(side))
+			-- print("GetFrequencyNG C2 wave forced "..tostring(wave).." found for side "..tostring(side))
             ranges = { RadioWaveCommon[side][wave] }
         end
 
     else
         -- 3. Choix automatique
-		print("GetFrequencyNG D automatic wave selection for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData))
+		-- print("GetFrequencyNG D automatic wave selection for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData))
         selectedWave, ranges = getRangesForContext(side, task, type_withData, flightOrPackage)
     end
 
@@ -2465,7 +2465,7 @@ function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPa
         AssignedTargetFrequency[side][target_name][flightOrPackage] = freq
     end
 
-	print("GetFrequencyNG F returning frequency "..tostring(freq).." for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(selectedWave))
+	-- print("GetFrequencyNG F returning frequency "..tostring(freq).." for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(selectedWave))
     return freq
 end
 --
@@ -3160,24 +3160,24 @@ end
 function LoadModData(relativeFolder, ACCEPT_NEW_TABLES)
     ACCEPT_NEW_TABLES = not not ACCEPT_NEW_TABLES    -- bool
     local fullFolder = "../../../Missions/Campaigns/"..camp.title.."/"..relativeFolder
-    print("DCE : Scanning Mods folder : " .. tostring(fullFolder))
+    -- print("DCE : Scanning Mods folder : " .. tostring(fullFolder))
 
     local cmd = 'dir "' .. fullFolder .. '" /b'
     local p = io.popen(cmd)
     if not p then
-        print("DCE ERROR : impossible de lire le dossier Mods : " .. fullFolder)
+        -- print("DCE ERROR : impossible de lire le dossier Mods : " .. fullFolder)
         return
     end
 
     for file in p:lines() do
         if file:match("%.lua$") then
             local fullpath = fullFolder .. "/" .. file
-            print("DCE : Chargement MOD -> " .. fullpath)
+            -- print("DCE : Chargement MOD -> " .. fullpath)
 
             -- load the chunk (file) without executing it globally
             local chunk, loadErr = loadfile(fullpath)
             if not chunk then
-                print("DCE ERROR : loadfile failed for " .. fullpath .. " : " .. tostring(loadErr))
+                -- print("DCE ERROR : loadfile failed for " .. fullpath .. " : " .. tostring(loadErr))
             else
                 -- create an isolated env that falls back to _G for reads (so mod can call DCE functions)
                 local env = {}
@@ -3189,7 +3189,7 @@ function LoadModData(relativeFolder, ACCEPT_NEW_TABLES)
                 -- execute the chunk safely
                 local ok, execErr = pcall(chunk)
                 if not ok then
-                    print("DCE ERROR : execution failed for " .. fullpath .. " : " .. tostring(execErr))
+                    -- print("DCE ERROR : execution failed for " .. fullpath .. " : " .. tostring(execErr))
                 else
                     -- enumerate what the mod defined in env
                     for k, v in pairs(env) do
@@ -3197,19 +3197,19 @@ function LoadModData(relativeFolder, ACCEPT_NEW_TABLES)
                         if type(k) == "string" then
                             -- only consider tables defined by the mod (ignore functions, numbers...)
                             if type(v) == "table" then
-                                print("DCE : Table détectée dans MOD '" .. file .. "' : " .. tostring(k))
+                                -- print("DCE : Table détectée dans MOD '" .. file .. "' : " .. tostring(k))
 
                                 -- si DCE (global) a déjà une table du même nom -> merge dedans
                                 if type(_G[k]) == "table" then
-                                    print("DCE : Fusion dans DCE -> " .. tostring(k))
+                                    -- print("DCE : Fusion dans DCE -> " .. tostring(k))
                                     mergeTablesDeep(_G[k], v)
                                 else
                                     -- table nouvelle, décider selon ACCEPT_NEW_TABLES
                                     if ACCEPT_NEW_TABLES then
-                                        print("DCE : Ajout d'une nouvelle table globale -> " .. tostring(k))
+                                        -- print("DCE : Ajout d'une nouvelle table globale -> " .. tostring(k))
                                         _G[k] = v
                                     else
-                                        print("DCE : Table nouvelle ignorée (pour l'instant) -> " .. tostring(k))
+                                        -- print("DCE : Table nouvelle ignorée (pour l'instant) -> " .. tostring(k))
                                     end
                                 end
                             else

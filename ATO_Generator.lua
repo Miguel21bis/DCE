@@ -26,12 +26,11 @@ versionDCE["ATO_Generator.lua"] = "1.21.135"
 if Debug.debug then
 	print("START ATO_Generator.lua "..versionDCE["ATO_Generator.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
-local t0 = os.clock()
-local t_main  = 0
-local t_target = 0
-local t_route_a = 0
-local t_route_b = 0
--- local t_elements = 0
+-- local t0 = os.clock()
+-- local t_main  = 0
+-- local t_target = 0
+-- local t_route_a = 0
+-- local t_route_b = 0
 
 
 DebugAssignAll = false
@@ -664,7 +663,7 @@ table.sort(targetlist["red"], function(a,b) return a.priority > b.priority  end)
 --///////////////////////------------MAIN------------/////////////////////////////////////
 --///////////////////////------------MAIN------------/////////////////////////////////////
 --///////////////////////------------MAIN------------/////////////////////////////////////
-local c_main = os.clock()
+-- local c_main = os.clock()
 --creat draft sorties
 for sideName, units in pairs(oob_air) do
 
@@ -997,7 +996,7 @@ for sideName, units in pairs(oob_air) do
 												TrackPlayability(unit.player, "tot")															--track playabilty criterium has been met
 											end
 
-											local c_target = os.clock()
+											-- local c_target = os.clock()
 											local i_timmer01 = 0
 											for target_side_name, target_side in pairs(targetlist) do											--iterate through sides in targetlist				
 												i_timmer01 = i_timmer01 +1
@@ -1328,18 +1327,18 @@ for sideName, units in pairs(oob_air) do
 
 																							tempDebug = "\n"..("AtoG A_26                    AtoG toTarget "..tostring(toTarget).." <=?? unit_loadouts[l].range: "..tostring(unit_loadouts[l].range) )
 																							
-																							local c_route_a = os.clock()
-																							local c_route_b = os.clock()
+																							-- local c_route_a = os.clock()
+																							-- local c_route_b = os.clock()
 																							if toTarget <= unit_loadouts[l].range then		--basic feasibility check of range before performance intensive route calculations are done
 																								tempDebug = tempDebug.."\n"..("                    AtoG variant" )
 																								if variant == 1 or variant == 4 then
 																									tempDebug = tempDebug.."\n"..("AtoG  A_27a day")
 																									route = GetRoute(airbasePoint, target, unit_loadouts[l], sideName, task, "day", r, multipack, unit, viaFARP)	or {}--draftId,		--get the best route to this target at day-- modification M06 : helicopter playable(ajout variable helico pour generer une route )
-																									t_route_a = t_route_a + (os.clock() - c_route_a)
+																									-- t_route_a = t_route_a + (os.clock() - c_route_a)
 																								elseif variant == 2 or variant == 3 then
 																									tempDebug = tempDebug.."\n"..("AtoG  A_27b night")
 																									route = GetRoute(airbasePoint, target, unit_loadouts[l], sideName, task, "night", r, multipack, unit, viaFARP)	or {}	--get the best route to this target at night-- modification M06 : helicopter playable
-																									t_route_b = t_route_b + (os.clock() - c_route_b)
+																									-- t_route_b = t_route_b + (os.clock() - c_route_b)
 																								end
 																							end
 																							
@@ -1717,7 +1716,7 @@ for sideName, units in pairs(oob_air) do
 													end
 												end
 											end
-											t_target = t_target + (os.clock() - c_target)
+											-- t_target = t_target + (os.clock() - c_target)
 										end
 									end
 								end
@@ -1730,7 +1729,7 @@ for sideName, units in pairs(oob_air) do
 	end
 end
 
-t_main = t_main + (os.clock() - c_main)
+-- t_main = t_main + (os.clock() - c_main)
 
 print("-")
 print("ATO Generating Sortie (" .. status_counter_sorties .. ") - Complete")
@@ -4164,29 +4163,29 @@ end
 -- dloadoutFile:close()
 --***************ne pas effacer commenter	**************************
 
-	AddLog(string.format(
-		"PERF AtoGen: total=%.2fs | t_main=%.2fs | t_target=%.2fs |  t_route_a=%.2fs |  t_route_b=%.2fs |",
-		os.clock() - t0,
-		t_main,
-		t_target,
-		t_route_a,
-		t_route_b
-	))
+	-- AddLog(string.format(
+	-- 	"PERF AtoGen: total=%.2fs | t_main=%.2fs | t_target=%.2fs |  t_route_a=%.2fs |  t_route_b=%.2fs |",
+	-- 	os.clock() - t0,
+	-- 	t_main,
+	-- 	t_target,
+	-- 	t_route_a,
+	-- 	t_route_b
+	-- ))
 
 
-	AddLog(string.format(
-		"PERF RouteGen(): total=%.2fs | T_intersect=%.2fs | T_checkENY=%.2fs |  T_altiHeli=%.2fs |  T_GetRoute=%.2fs | T_GetEscortRoute=%.2fs |T_GetTD=%.2fs |T_GetD=%.2fs |T_OnLeg=%.2fs |T_PathLeg=%.2fs |",
-		os.clock() - T0,
-		T_intersect,
-		T_checkENY,
-		T_altiHeli,
-		T_GetRoute,
-		T_GetEscortRoute,
-		T_GetTD,
-		T_GetD,
-		T_OnLeg,
-		T_PathLeg
-	))
+	-- AddLog(string.format(
+	-- 	"PERF RouteGen(): total=%.2fs | T_intersect=%.2fs | T_checkENY=%.2fs |  T_altiHeli=%.2fs |  T_GetRoute=%.2fs | T_GetEscortRoute=%.2fs |T_GetTD=%.2fs |T_GetD=%.2fs |T_OnLeg=%.2fs |T_PathLeg=%.2fs |",
+	-- 	os.clock() - T0,
+	-- 	T_intersect,
+	-- 	T_checkENY,
+	-- 	T_altiHeli,
+	-- 	T_GetRoute,
+	-- 	T_GetEscortRoute,
+	-- 	T_GetTD,
+	-- 	T_GetD,
+	-- 	T_OnLeg,
+	-- 	T_PathLeg
+	-- ))
 
 	-- if BugList and type(BugList) == "table" and #BugList >= 1 then
 	-- 	local table_Str = "BugList = " .. TableSerialization(BugList, 0)

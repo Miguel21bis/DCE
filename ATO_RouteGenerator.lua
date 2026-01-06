@@ -7,14 +7,14 @@ if not versionDCE then versionDCE = {} end
 versionDCE["ATO_RouteGenerator.lua"] = "2.8.50"
 ------------------------------------------------------------------------------------------------------- 
 
-T0 = os.clock()
-T_intersect  = 0
-T_checkENY = 0
-T_altiHeli = 0
-T_GetRoute = 0
-T_GetEscortRoute = 0
-T_OnLeg = 0
-T_PathLeg = 0
+-- T0 = os.clock()
+-- T_intersect  = 0
+-- T_checkENY = 0
+-- T_altiHeli = 0
+-- T_GetRoute = 0
+-- T_GetEscortRoute = 0
+-- T_OnLeg = 0
+-- T_PathLeg = 0
 
 
 local debugRoute = false
@@ -88,7 +88,7 @@ end
 
 
 local function findIntersect(l1p1, l1p2, l2p1, l2p2)
-	local c_intersect = os.clock()
+	-- local c_intersect = os.clock()
 
     local l1p1x, l1p1y, l1p2x, l1p2y = l1p1.x, l1p1.y, l1p2.x, l1p2.y
     local l2p1x, l2p1y, l2p2x, l2p2y = l2p1.x, l2p1.y, l2p2.x, l2p2.y
@@ -115,7 +115,7 @@ local function findIntersect(l1p1, l1p2, l2p1, l2p2)
         end
     end
 
-	T_intersect = T_intersect + (os.clock() - c_intersect)
+	-- T_intersect = T_intersect + (os.clock() - c_intersect)
 	
     return x, y
 end
@@ -123,7 +123,7 @@ end
 
 -- Détecte si le segment [A, B] croise la frontière ennemie (polygone ou liste de polygones)
 function CheckENY_BorderCrossPoint(A, B, enemyBoundary)
-	local c_checkENY = os.clock()
+	-- local c_checkENY = os.clock()
     -- enemyBoundary peut être un polygone (table de points) ou une liste de polygones
     local function checkPoly(poly)
         for i = 1, #poly do
@@ -131,11 +131,11 @@ function CheckENY_BorderCrossPoint(A, B, enemyBoundary)
             local p2 = poly[i % #poly + 1] -- boucle sur le dernier segment
             local x, y = findIntersect(A, B, p1, p2)
             if x and y then
-				T_checkENY = T_checkENY + (os.clock() - c_checkENY)
+				-- T_checkENY = T_checkENY + (os.clock() - c_checkENY)
                 return {x = x, y = y}
             end
         end
-		T_checkENY = T_checkENY + (os.clock() - c_checkENY)
+		-- T_checkENY = T_checkENY + (os.clock() - c_checkENY)
         return nil
     end
 
@@ -144,24 +144,24 @@ function CheckENY_BorderCrossPoint(A, B, enemyBoundary)
         for _, poly in ipairs(enemyBoundary) do
             local cross = checkPoly(poly)
             if cross then
-				T_checkENY = T_checkENY + (os.clock() - c_checkENY)
+				-- T_checkENY = T_checkENY + (os.clock() - c_checkENY)
 				return cross 
 
 			end
         end
     else
         -- Un seul polygone
-		T_checkENY = T_checkENY + (os.clock() - c_checkENY)
+		-- T_checkENY = T_checkENY + (os.clock() - c_checkENY)
         return checkPoly(enemyBoundary)
     end
 
-	T_checkENY = T_checkENY + (os.clock() - c_checkENY)
+	-- T_checkENY = T_checkENY + (os.clock() - c_checkENY)
     return nil
 end
 
 
 local function createPolyAltiHelico(unitHelico, hHover)
-	local c_altiHeli = os.clock()
+	-- local c_altiHeli = os.clock()
 	-- print("AtoRouteG A unitHelico "..unitHelico.." hHover "..hHover)
 
 	local tempAlti = {}
@@ -211,60 +211,15 @@ local function createPolyAltiHelico(unitHelico, hHover)
 
 	AltiHelicoMap[unitHelico][hHover] = tempAlti
 
-	T_altiHeli = T_altiHeli + (os.clock() - c_altiHeli)
+	-- T_altiHeli = T_altiHeli + (os.clock() - c_altiHeli)
 
 end
 
 function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, multipackmax, unit, viaFARP)							--enemy: "blue" or "red"; time: "day" or "night" -- Miguel21 modification M06 : helicoptere playable (ajout variable helico)
-	local c_GetRoute = os.clock()
+	-- local c_GetRoute = os.clock()
 
 	-- Cache local utilisé pour mémoriser les menaces calculées par segment de route
 	local threatCache = {}
-
-	-- -- Retourne la distance minimale entre un point et un segment,
-	-- -- en utilisant des calculs de distance locaux mis en cache pour optimiser les performances.
-	-- local function loc_getTangentDistance(p1, p2, p3)
-
-	-- 	local c_GetTD = os.clock()
-
-	-- 	local p1_p2_heading = GetHeadingDegre(p1, p2)
-	-- 	local p1_p3_heading = GetHeadingDegre(p1, p3)
-
-	-- 	local alpha = math.abs(p1_p2_heading - p1_p3_heading)
-	-- 	if alpha > 180 then
-	-- 		alpha = math.abs(alpha - 360)
-	-- 	end
-
-	-- 	local p1_p3_distance = loc_getDistance(p1, p3)
-
-	-- 	local p2_p1_heading = GetHeadingDegre(p2, p1)
-	-- 	local p2_p3_heading = GetHeadingDegre(p2, p3)
-
-	-- 	local beta = math.abs(p2_p1_heading - p2_p3_heading)
-	-- 	if beta > 180 then
-	-- 		beta = math.abs(beta - 360)
-	-- 	end
-
-	-- 	local p2_p3_distance = loc_getDistance(p2, p3)
-
-	-- 	if alpha > 90 then
-	-- 		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
-	-- 		return p1_p3_distance
-	-- 	elseif beta > 90 then
-	-- 		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
-	-- 		return p2_p3_distance
-	-- 	elseif loc_getDistance(p1, p2) == 0 then
-	-- 		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
-	-- 		return p1_p3_distance
-	-- 	else
-			
-	-- 		local value = math.abs(math.sin(math.rad(alpha)) * p1_p3_distance)
-	-- 		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
-	-- 		return value
-	-- 	end
-	-- end
-
-
 	local route = {}																									--table to store the route to be built
 	local route_axis = GetHeadingDegre(target, basePoint)																--axis base-target
 	local standoff																										--standoff distance of attack WP from target
@@ -383,14 +338,14 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 
 	--function to check if a line between two points runs through a threat. Returns a table of threats
 	local function threatOnLeg(point1, point2, leg_alt)
-		local c_OnLeg = os.clock()
+		-- local c_OnLeg = os.clock()
 
 		-- Utilisation d’un cache local pour éviter de recalculer plusieurs fois les menaces
 		-- sur un même segment de route, ce qui réduit drastiquement le temps CPU.
 		local key = threatKey(point1, point2, leg_alt)
 		local cached = threatCache[key]
 		if cached then
-			T_OnLeg = T_OnLeg + (os.clock() - c_OnLeg)
+			-- T_OnLeg = T_OnLeg + (os.clock() - c_OnLeg)
 			return copyThreatTable(cached)
 		end
 		
@@ -459,7 +414,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 		-- Stockage du résultat dans le cache pour réutilisation ultérieure sur ce segment
 		threatCache[key] = tbl
 
-		T_OnLeg = T_OnLeg + (os.clock() - c_OnLeg)
+		-- T_OnLeg = T_OnLeg + (os.clock() - c_OnLeg)
 
 		return copyThreatTable(tbl)
 		-- threatCache[key] = tbl
@@ -537,7 +492,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 		-- (distance + pénalité de menace) est déjà supérieur à une route valide connue,
 		-- réduisant fortement le nombre d'appels récursifs sans modifier le résultat.
 		local function FindPathLeg(point1, point2, pointEnd, distance, arg_route, instance, leg_alt)									--find a route between point1 and point2		
-			local c_PathLeg = os.clock()
+			-- local c_PathLeg = os.clock()
 
 
 			instance = instance + 1																									--increase instance of the function
@@ -545,7 +500,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			-- Évite de recalculer un segment déjà exploré
 			local key = pathLegKey(point1, point2, leg_alt, instance)
 			if exploredLegCache[key] then
-				T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
+				-- T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
 				return
 			end
 			exploredLegCache[key] = true
@@ -597,7 +552,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			--abort unneeded pathfing after a valid route has been found
 			if no_threat_route[leg_alt] and instance > no_threat_route[leg_alt] and not tooHighReliefB then												--if a no threat route has been found for this altitue, stop subsequent route branches(parallel instances of the no threat route are still checked as they might be shorter)
 				
-				T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
+				-- T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
 				return																												--stop this route branch
 			end
 
@@ -636,7 +591,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			-- que la meilleure route connue (Branch & Bound).
 			local optimisticScore = computeRouteScore(distance + distance_remain, threatsum)
 			if optimisticScore >= bestRouteScore then
-				T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
+				-- T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
 				return
 			end
 
@@ -656,7 +611,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			end
 
 			if threatsum == 0 and not tooHighReliefB then																									--there are no threats to end (also no unavoidable threats)
-				T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
+				-- T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
 				return																											--abort this route branch
 			end
 
@@ -668,16 +623,16 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			end
 
 			if instance > 7 then																									--if function instance is bigger than 7
-				T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
+				-- T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
 				return																												--abort this route branch
 			elseif distance + distance_remain > (direct_distance * 3.5) then														--if total route distance is bigger than 1.5 times the direct distance
-				T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
+				-- T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
 				return																												--abort this route branch
 			-- elseif #threat == 0 and tooHighReliefB  then
 			elseif #threat == 0 and not tooHighReliefB then	--and not is_helicopter 																								--if no more threats on remaining route
 				if point2 == pointEnd and not tooHighReliefB then																							--if point2 is the pointEnd
 					no_threat_route[leg_alt] = instance																				--variable that will cancel subsequent route finding at this altitude (parallel branches of the same instance are still being checked)
-					T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
+					-- T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
 					return 																										--abort further route finding
 				elseif not tooHighReliefB then																												--if point2 is not the end
 					distance = distance + GetDistance(point1, point2)																--complete route distance of this variant up to point2
@@ -799,11 +754,11 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 				routeImpossible = true,
 				}
 
-				T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
+				-- T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
 				return test
 			end
 
-			T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
+			-- T_PathLeg = T_PathLeg + (os.clock() - c_PathLeg)
 
 		end		--function FindPathLeg()
 
@@ -2155,7 +2110,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 		end
 	end
 
-	T_GetRoute = T_GetRoute + (os.clock() - c_GetRoute)
+	-- T_GetRoute = T_GetRoute + (os.clock() - c_GetRoute)
 
 	return route
 end
@@ -2163,7 +2118,7 @@ end
 
 
 function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainUnit)																					--get the escort route given the escort start point and an existing package route
-	local c_GetEscortRoute = os.clock()
+	-- local c_GetEscortRoute = os.clock()
 
 	--make a local copy of the route table forwarded as function argument (otherwise the original route gets adjusted
 	local route = DeepCopy(orig_route)
@@ -2468,6 +2423,6 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 		print("AtoRG passe CC route.lenght "..tostring(route.lenght))
 	end
 	
-	T_GetEscortRoute = T_GetEscortRoute + (os.clock() - c_GetEscortRoute)
+	-- T_GetEscortRoute = T_GetEscortRoute + (os.clock() - c_GetEscortRoute)
 	return route
 end

@@ -915,7 +915,7 @@ for side, pack in pairs(ATO) do
 
                     for u = 1, fl.number do
 
-						print("AtoT type: "..tostring(fl.type).." name: "..tostring(fl.name).." sortie_rate: "..tostring(fl.loadout.sortie_rate).." time_to_next_mission_h: "..tostring(downtime_hour))
+						-- print("AtoT type: "..tostring(fl.type).." name: "..tostring(fl.name).." sortie_rate: "..tostring(fl.loadout.sortie_rate).." time_to_next_mission_h: "..tostring(downtime_hour))
 
                         if fl.task == "Refueling" or fl.task == "AWACS" then
                             local limit = CampTotalTimeH + (mission_ini.idle_time_min / 3600)

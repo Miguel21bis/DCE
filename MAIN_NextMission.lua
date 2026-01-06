@@ -1066,26 +1066,28 @@ if not (EndCampaign or camp.endCampaign )then
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_EndCampaign.lua")
 end
 
-if ListRequiredModules then
-	local infoShow = false
-	for _, module in pairs(ListRequiredModules) do
+if PlayerFlight then
+	
+	if ListRequiredModules then
+		local infoShow = false
+		for _, module in pairs(ListRequiredModules) do
 
-		if module and module ~= nil then
+			if module and module ~= nil then
 
-			if not infoShow then
-				print("Note that this mission requires these modules:")
-				infoShow = true
-			end
-			print("\n - "..tostring(module.name))
+				if not infoShow then
+					print("Note that this mission requires these modules:")
+					infoShow = true
+				end
+				print("\n - "..tostring(module.name))
 
-			for n, origine in pairs(module.origine) do
-				print(" - -------==> from: "..tostring(origine))
+				for n, origine in pairs(module.origine) do
+					print(" - -------==> from: "..tostring(origine))
 
+				end
 			end
 		end
 	end
 end
-
 
 --création d'un camp pour camp_status InGame nettement plus leger
 local campL = {
@@ -1158,75 +1160,79 @@ camp.date.CampTotalTimeH = CampTotalTimeH
 -- met à jour la date de camp dans conf_mod.lua
 UpdateConfModSuite(nil, camp.date, "MAIN_NextMission "..debug.getinfo(1).currentline)
 
------ create temporary content files of new mission file -----
-misStr = "mission = " .. TableSerialization(mission, 0)
-local misFile = io.open("misFile.lua", "w") or error("Failed to open debug file")											--mission
-misFile:write(misStr)
-misFile:close()
 
-optStr = "options = " .. TableSerialization(options, 0)
-local optFile = io.open("optFile.lua", "w") or error("Failed to open debug file")											--options
-optFile:write(optStr)
-optFile:close()
-
-warStr = "warehouses = " .. TableSerialization(warehouses, 0)
-local warFile = io.open("warFile.lua", "w") or error("Failed to open debug file")											--warehouses
-warFile:write(warStr)
-warFile:close()
-
-dicStr = "dictionary = " .. TableSerialization(dictionary, 0)
-local dicFile = io.open("dicFile.lua", "w") or error("Failed to open debug file")											--dictionary
-dicFile:write(dicStr)
-dicFile:close()
-
-resStr = "mapResource = " .. TableSerialization(mapResource, 0)
-local resFile = io.open("resFile.lua", "w")	 or error("Failed to open debug file")										--mapResource
-resFile:write(resStr)
-resFile:close()
-
-local gciStr = "GCI = " .. TableSerialization(GCI, 0)
-local gciFile = io.open("GCIdata.lua", "w") or error("Failed to open debug file")											--GCI data file (EWR radars, AWACS, interceptors)
-gciFile:write(gciStr)
-gciFile:close()
-
-local cmpStr = "camp = " .. TableSerialization(camp, 0)
-local cmpFile = io.open("Active/camp_status.lua", "w") or error("Failed to open debug file")								--campaign status file
-cmpFile:write(cmpStr)
-cmpFile:close()
-
-local cmpL_Str = "campL = " .. TableSerialization(campL, 0)
-local cmpL_File = io.open("campL.lua", "w") or error("Failed to open debug file")								--campaign status file
-cmpL_File:write(cmpL_Str)
-cmpL_File:close()
-
-t_lua2miz = t_lua2miz + (os.clock() - c_lua2miz)
-
------ create new mission file and add content files -----
-
-local NbMission  = tostring(camp.mission)
-
-if mission_ini.backupAllMissionFiles and mission_ini.backupAllMissionFiles == true then
-	if not Firstmission_flag then
-		NbMission = tostring(camp.mission - 1)
-		--en skipMission, la mission n'a pas �t� jou�e, donc c'est la suivante
-		if Skipmission_flag then
-			NbMission = NbMission + 1
-		end
-	end
-
-	if string.len(NbMission) > 1 then
-		NbMission = "__"..NbMission
-	else
-		NbMission = "__0"..NbMission
-	end
-else
-	NbMission = "__Old"
-end
-
-
+--on traite tous les fichiers uniquement si ça vaut le coup
+--bref, si DCE à trouver un siege au joueur
 if PlayerFlight then
 	
 	local c_miz = os.clock()
+		
+	----- create temporary content files of new mission file -----
+	misStr = "mission = " .. TableSerialization(mission, 0)
+	local misFile = io.open("misFile.lua", "w") or error("Failed to open debug file")											--mission
+	misFile:write(misStr)
+	misFile:close()
+
+	optStr = "options = " .. TableSerialization(options, 0)
+	local optFile = io.open("optFile.lua", "w") or error("Failed to open debug file")											--options
+	optFile:write(optStr)
+	optFile:close()
+
+	warStr = "warehouses = " .. TableSerialization(warehouses, 0)
+	local warFile = io.open("warFile.lua", "w") or error("Failed to open debug file")											--warehouses
+	warFile:write(warStr)
+	warFile:close()
+
+	dicStr = "dictionary = " .. TableSerialization(dictionary, 0)
+	local dicFile = io.open("dicFile.lua", "w") or error("Failed to open debug file")											--dictionary
+	dicFile:write(dicStr)
+	dicFile:close()
+
+	resStr = "mapResource = " .. TableSerialization(mapResource, 0)
+	local resFile = io.open("resFile.lua", "w")	 or error("Failed to open debug file")										--mapResource
+	resFile:write(resStr)
+	resFile:close()
+
+	local gciStr = "GCI = " .. TableSerialization(GCI, 0)
+	local gciFile = io.open("GCIdata.lua", "w") or error("Failed to open debug file")											--GCI data file (EWR radars, AWACS, interceptors)
+	gciFile:write(gciStr)
+	gciFile:close()
+
+	local cmpStr = "camp = " .. TableSerialization(camp, 0)
+	local cmpFile = io.open("Active/camp_status.lua", "w") or error("Failed to open debug file")								--campaign status file
+	cmpFile:write(cmpStr)
+	cmpFile:close()
+
+	local cmpL_Str = "campL = " .. TableSerialization(campL, 0)
+	local cmpL_File = io.open("campL.lua", "w") or error("Failed to open debug file")								--campaign status file
+	cmpL_File:write(cmpL_Str)
+	cmpL_File:close()
+
+	t_lua2miz = t_lua2miz + (os.clock() - c_lua2miz)
+
+	----- create new mission file and add content files -----
+
+	local NbMission  = tostring(camp.mission)
+
+	if mission_ini.backupAllMissionFiles and mission_ini.backupAllMissionFiles == true then
+		if not Firstmission_flag then
+			NbMission = tostring(camp.mission - 1)
+			--en skipMission, la mission n'a pas �t� jou�e, donc c'est la suivante
+			if Skipmission_flag then
+				NbMission = NbMission + 1
+			end
+		end
+
+		if string.len(NbMission) > 1 then
+			NbMission = "__"..NbMission
+		else
+			NbMission = "__0"..NbMission
+		end
+	else
+		NbMission = "__Old"
+	end
+
+
 
 	local miz
 
@@ -1504,92 +1510,217 @@ TimeJump = false
 
 
 
+-- local function ensureDir(path)
+--     -- Test si le dossier existe
+--     local test = io.open(path .. "\\.dirtest", "w")
+--     if test then
+--         test:close()
+--         os.remove(path .. "\\.dirtest")
+--         return
+--     end
+
+--     -- Sinon, création via popen (plus léger que os.execute)
+--     io.popen('md "'..path..'"')
+-- end
+
+-- local function listFiles(path)
+--     local p = io.popen('dir "'..path..'" /b /a-d') or error("Failed to open file : "..tostring(path))
+--     local t = {}
+--     for file in p:lines() do
+--         t[#t+1] = file
+--     end
+--     p:close()
+--     return t
+-- end
+
+-- local function listDirs(path)
+--     local p = io.popen('dir "'..path..'" /b /ad') or error("Failed to open file : "..tostring(path))
+--     local t = {}
+--     for dir in p:lines() do
+--         t[#t+1] = dir
+--     end
+--     p:close()
+--     return t
+-- end
+
+-- local function copyFile(src, dst)
+--     local f1 = io.open(src, "rb")
+--     if not f1 then return end
+--     local data = f1:read("*all")
+--     f1:close()
+
+--     ensureDir(dst:match("^(.*)\\[^\\]+$")) -- crée le dossier parent si besoin
+
+--     -- local f2 = io.open(dst, "wb") or error("Failed to open file : "..tostring(src))
+-- 	local f2 = io.open(dst, "wb") or error("Failed to open file (dst): "..tostring(dst))
+
+--     f2:write(data)
+--     f2:close()
+-- end
+
+-- local function copyDir(src, dst)
+--     ensureDir(dst)
+
+--     for _, file in ipairs(listFiles(src)) do
+--         copyFile(src..'\\'..file, dst..'\\'..file)
+--     end
+
+--     for _, dir in ipairs(listDirs(src)) do
+--         copyDir(src..'\\'..dir, dst..'\\'..dir)
+--     end
+-- end
+
+-- local c_backup = os.clock()
+
+-- if (Debug.debug or mission_ini.backupAllMissionFiles) and PlayerFlight then
+    
+
+
+-- 	local fileName
+--     local folderName = "Debug"
+
+--     if Firstmission_flag then
+--         fileName = camp.title .. "_first.miz"
+--         folderName = folderName .. "\\mission_01"
+
+--         ensureDir(folderName)
+--         copyFile("..\\" .. fileName, folderName .. "\\" .. fileName)
+--         copyDir("Active", folderName .. "\\Active")
+
+--     else
+--         fileName = camp.title .. "_ongoing.miz"
+--         folderName = folderName .. "\\mission_" .. string.format("%02d", camp.mission)
+
+--         ensureDir(folderName)
+--         copyFile("..\\" .. fileName, folderName .. "\\" .. fileName)
+--         copyDir("Active", folderName .. "\\Active")
+--     end
+-- end
+
+
+----------------------------------------------------------------
+-- Crée un dossier s'il n'existe pas (Windows, Lua 5.1, DCS safe)
+-- Pourquoi : mkdir ne génère pas d'erreur si le dossier existe
+----------------------------------------------------------------
 local function ensureDir(path)
-    -- Test si le dossier existe
-    local test = io.open(path .. "\\.dirtest", "w")
-    if test then
-        test:close()
-        os.remove(path .. "\\.dirtest")
+    if not path or path == "" then
+        return
+    end
+    os.execute('mkdir "' .. path .. '" >nul 2>nul')
+end
+
+
+----------------------------------------------------------------
+-- Liste les fichiers d'un dossier (sans sous-dossiers)
+-- Pourquoi : nécessaire pour copie récursive en Lua pur
+----------------------------------------------------------------
+local function listFiles(path)
+    local p = io.popen('dir "' .. path .. '" /b /a-d')
+    if not p then
+        return {}
+    end
+
+    local t = {}
+    for file in p:lines() do
+        t[#t + 1] = file
+    end
+    p:close()
+    return t
+end
+
+
+----------------------------------------------------------------
+-- Liste les sous-dossiers d'un dossier
+-- Pourquoi : permet la récursion de copyDir
+----------------------------------------------------------------
+local function listDirs(path)
+    local p = io.popen('dir "' .. path .. '" /b /ad')
+    if not p then
+        return {}
+    end
+
+    local t = {}
+    for dir in p:lines() do
+        t[#t + 1] = dir
+    end
+    p:close()
+    return t
+end
+
+
+----------------------------------------------------------------
+-- Copie un fichier binaire
+-- Pourquoi : copie fiable des .miz et fichiers Active
+----------------------------------------------------------------
+local function copyFile(src, dst)
+    local f1 = io.open(src, "rb")
+    if not f1 then
         return
     end
 
-    -- Sinon, création via popen (plus léger que os.execute)
-    io.popen('md "'..path..'"')
-end
-
-local function listFiles(path)
-    local p = io.popen('dir "'..path..'" /b /a-d') or error("Failed to open file : "..tostring(path))
-    local t = {}
-    for file in p:lines() do
-        t[#t+1] = file
-    end
-    p:close()
-    return t
-end
-
-local function listDirs(path)
-    local p = io.popen('dir "'..path..'" /b /ad') or error("Failed to open file : "..tostring(path))
-    local t = {}
-    for dir in p:lines() do
-        t[#t+1] = dir
-    end
-    p:close()
-    return t
-end
-
-local function copyFile(src, dst)
-    local f1 = io.open(src, "rb")
-    if not f1 then return end
     local data = f1:read("*all")
     f1:close()
 
-    ensureDir(dst:match("^(.*)\\[^\\]+$")) -- crée le dossier parent si besoin
+    local parentDir = dst:match("^(.*)\\[^\\]+$")
+    ensureDir(parentDir)
 
-    local f2 = io.open(dst, "wb") or error("Failed to open file : "..tostring(src))
+    local f2 = io.open(dst, "wb")
+    if not f2 then
+        error("Failed to open destination file : " .. tostring(dst))
+    end
+
     f2:write(data)
     f2:close()
 end
 
+
+----------------------------------------------------------------
+-- Copie récursive d'un dossier
+-- Pourquoi : remplacement propre de xcopy /E
+----------------------------------------------------------------
 local function copyDir(src, dst)
     ensureDir(dst)
 
     for _, file in ipairs(listFiles(src)) do
-        copyFile(src..'\\'..file, dst..'\\'..file)
+        copyFile(src .. "\\" .. file, dst .. "\\" .. file)
     end
 
     for _, dir in ipairs(listDirs(src)) do
-        copyDir(src..'\\'..dir, dst..'\\'..dir)
+        copyDir(src .. "\\" .. dir, dst .. "\\" .. dir)
     end
 end
 
+
+----------------------------------------------------------------
+-- Sauvegarde Debug / Backup mission
+-- Pourquoi : archivage sûr, exécuté UNE fois par mission
+----------------------------------------------------------------
 local c_backup = os.clock()
 
 if (Debug.debug or mission_ini.backupAllMissionFiles) and PlayerFlight then
-    
 
-
-	local fileName
+    local fileName
     local folderName = "Debug"
 
     if Firstmission_flag then
-        fileName = camp.title .. "_first.miz"
+        fileName   = camp.title .. "_first.miz"
         folderName = folderName .. "\\mission_01"
-
-        ensureDir(folderName)
-        copyFile("..\\" .. fileName, folderName .. "\\" .. fileName)
-        copyDir("Active", folderName .. "\\Active")
-
     else
-        fileName = camp.title .. "_ongoing.miz"
+        fileName   = camp.title .. "_ongoing.miz"
         folderName = folderName .. "\\mission_" .. string.format("%02d", camp.mission)
-
-        ensureDir(folderName)
-        copyFile("..\\" .. fileName, folderName .. "\\" .. fileName)
-        copyDir("Active", folderName .. "\\Active")
     end
+
+    ensureDir(folderName)
+
+    -- Copie du .miz
+    copyFile("..\\" .. fileName, folderName .. "\\" .. fileName)
+
+    -- Copie du dossier Active
+    copyDir("Active", folderName .. "\\Active")
 end
 
 t_backup = t_backup + (os.clock() - c_backup)
+
 
 -- if (Debug.debug or mission_ini.backupAllMissionFiles) and PlayerFlight then
 --     local fileName
@@ -1634,21 +1765,10 @@ t_backup = t_backup + (os.clock() - c_backup)
 --     end
 -- end
 
-	print("MAIN_NM test start")
+	-- print("MAIN_NM test start")
 
-	print(string.format(
-		"PERF MainNM: total=%.2fs | t_miz=%.2fs | t_lua2miz=%.2fs | t_lua2File=%.2fs |  t_backup=%.2fs | ",
-		os.clock() - t0,
-		t_miz,
-		t_lua2File,
-		t_lua2miz,
-		t_backup
-	))
-
-	print("MAIN_NM test fin")
-
-	-- AddLog(string.format(
-	-- 	"PERF MainNM: total=%.2fs | t_miz=%.2fs | t_lua2Miz=%.2fs | t_lua2File=%.2fs |  t_backup=%.2fs | ",
+	-- print(string.format(
+	-- 	"PERF MainNM: total=%.2fs | t_miz=%.2fs | t_lua2miz=%.2fs | t_lua2File=%.2fs |  t_backup=%.2fs | ",
 	-- 	os.clock() - t0,
 	-- 	t_miz,
 	-- 	t_lua2File,
@@ -1656,10 +1776,6 @@ t_backup = t_backup + (os.clock() - c_backup)
 	-- 	t_backup
 	-- ))
 
-	-- --recherche Debug/BugList.lua
-	-- fileName = "Debug/BugList.lua"
-	-- testPath = io.open(fileName, "r")										--cette maniere de chercer la presence d un fichier evite un plantage
-	-- -- if testPath ~= nil and MissionInstance == 1 then														--check si le fichier existe 
-	-- 	io.close(testPath)
-	-- 	os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')			--open the BugList file with notepad
-	-- -- end
+	-- print("MAIN_NM test fin")
+
+	

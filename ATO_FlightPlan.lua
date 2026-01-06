@@ -5201,14 +5201,18 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 
-				local DCE_FreqPackage = GetFrequencyNG(sideName, nil, taskOrHuman, type_withData, nil, "FreqPackage")
+				local DCE_FreqFlight = GetFrequencyNG(sideName, nil , taskOrHuman, type_withData, nil, "FreqFlight")
 
-				local DCE_FreqFlight = GetFrequencyNG(sideName, flight[f].target_name, taskOrHuman, type_withData, nil, "FreqFlight")
-
-				if isHumain then print("AtoFP DCE_FreqPackage: "..tostring(DCE_FreqPackage)) end
-				if isHumain then print("AtoFP DCE_FreqFlight:  "..tostring(DCE_FreqFlight))
-					-- os.execute 'pause'
-				end
+				-- if isHumain then 
+				-- 	print("AtoFP DCE_FreqFlight:  "..tostring(DCE_FreqFlight))
+				-- 	-- os.execute 'pause'
+				-- end
+				
+				local DCE_FreqPackage = GetFrequencyNG(sideName, flight[f].target_name, taskOrHuman, type_withData, nil, "FreqPackage")
+				-- if isHumain then 
+				-- 	print("AtoFP DCE_FreqPackage: "..tostring(DCE_FreqPackage)) 	
+				-- 	os.execute 'pause'
+				-- end
 
 				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe waypoints[1][x] AA "..tostring(waypoints[1]["x"])) end
 

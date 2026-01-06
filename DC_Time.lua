@@ -155,10 +155,10 @@ end
 CampTotalTimeS = SecondsBetween(camp.dateInit, camp.date)
 CampTotalTimeH = CampTotalTimeS / 3600
 if Debug.debug then
-	print("DcTime The campaign will start on this date: " .. tostring(camp.dateInit.day) .. "." .. tostring(camp.dateInit.month) .. "." .. tostring(camp.dateInit.year) .. ".\n")
-	print("DcTime The current date of the campaign is: " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
-	print("DcTime CampTotalTimeS: " .. tostring(CampTotalTimeS))
-	print("DcTime CampTotalTimeH: " .. tostring(CampTotalTimeH))
+	print("if Debug: DcTime The campaign will start on this date: " .. tostring(camp.dateInit.day) .. "." .. tostring(camp.dateInit.month) .. "." .. tostring(camp.dateInit.year) .. ".\n")
+	print("if Debug: DcTime The current date of the campaign is: " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
+	print("if Debug: DcTime CampTotalTimeS: " .. tostring(CampTotalTimeS))
+	print("if Debug: DcTime CampTotalTimeH: " .. tostring(CampTotalTimeH))
 end
 
 

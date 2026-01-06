@@ -10,6 +10,15 @@ versionDCE["DEBRIEF_Text.lua"] = "1.4.5"
 -- adjustment_b				(a priority numeric targetTable)
 -- modification M61_a		SAR
 ------------------------------------------------------------------------------------------------------- 
+if Debug.debug then
+	print("START DEBRIEF_Text.lua "..versionDCE["DEBRIEF_Text.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+end
+
+local t0 = os.clock()
+local t_a  = 0
+local t_b = 0
+local t_main = 0
+local t_c = 0
 
 Debriefing = ""
 
@@ -247,22 +256,6 @@ do
 	--################################################################################
 	--################################################################################
 
-
-
-
-print("DEBRIEF_t A1 camp.player.role "..tostring(camp.player.role))
-print("DEBRIEF_t A2 camp.player.flight "..tostring(camp.player.flight))
-
-	-- if not camp.player and camp.client then --par defaut, compatible avec les anciens debrief
-
-	-- 	camp["player"] = {
-	-- 		["pack"] = camp.client[1].pack
-	-- 	}
-
-	-- 	camp.player.role = camp.client.role
-	-- 	camp.player.flight = camp.client.flight
-
-	-- end
 
 	local player_task = camp.player.pack[camp.player.role][camp.player.flight].task								--player task
 	local target_name = camp.player.pack[camp.player.role][camp.player.flight].target_name						--name of player package target
@@ -1341,3 +1334,23 @@ do
 
 	Debriefing = Debriefing .. s
 end
+
+AddLog(string.format(
+	"PERF DEBRIEF_Txt: total=%.2fs | t_a=%.2fs | t_b=%.2fs | t_main=%.2fs | t_c=%.2fs |",
+	os.clock() - t0,
+	t_a,
+	t_b,
+	t_main,
+	t_c
+))
+
+if BugList and type(BugList) == "table" and #BugList >= 1 then
+	local table_Str = "BugList = " .. TableSerialization(BugList, 0)
+	local bugFile = io.open("Debug/BugList.lua", "w") or error("Failed to open debug file")
+	bugFile:write(table_Str)
+	bugFile:close()
+end
+
+os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')	
+
+os.execute 'pause'
