@@ -1344,13 +1344,3 @@ AddLog(string.format(
 	t_c
 ))
 
-if BugList and type(BugList) == "table" and #BugList >= 1 then
-	local table_Str = "BugList = " .. TableSerialization(BugList, 0)
-	local bugFile = io.open("Debug/BugList.lua", "w") or error("Failed to open debug file")
-	bugFile:write(table_Str)
-	bugFile:close()
-end
-
-os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')	
-
-os.execute 'pause'

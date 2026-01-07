@@ -251,7 +251,7 @@ for k,v in pairs(clientstats) do
 end
 
 local clientControl = {}																	--local table to store which client controls which unit
-local hit_table = {}																		--local table to store who was the last hitter to hit a unit
+local hitTbl_KillerByTarget = {}																		--local table to store who was the last hitter to hit a unit
 local health_table = {}																		--local table to store health of a hit unit
 local client_hit_table = {}																	--local table to store if a client has hit a unit
 local logistic_table = {}																	--local table to store if landing logistic plane
@@ -413,6 +413,98 @@ for e = 1, #events do																					--iterate through all events
 end
 
 local tabTransport = {}
+
+--------------------------------------------------------
+-- cache de résolution des killers air (clé = initiator)
+--------------------------------------------------------
+AirKillerCache = {}
+
+-- échappe les caractères spéciaux Lua pattern
+-- nécessaire pour un string.find fiable
+local function escapePattern(str)
+	return str:gsub("(%W)", "%%%1")
+end
+
+----------------------------------------------------------------
+-- INDEX DES SQUADRONS AIR (clé = nom échappé)
+----------------------------------------------------------------
+
+AirSquadronIndex = {}   -- [{ pattern=..., unit=..., side=... }]
+
+for sideName, side in pairs(oob_air) do
+	for _, unit in pairs(side) do
+		unit.side = sideName
+
+		table.insert(AirSquadronIndex, {
+			pattern = escapePattern(unit.name),
+			unit    = unit,
+			side    = sideName,
+		})
+	end
+end
+
+
+--------------------------------------------------------
+-- résout un initiator DCS vers une unité air (avec cache)
+--------------------------------------------------------
+local function resolveAirSquad(initiator)
+	if not initiator then return nil end
+
+	-- 1) cache hit (y compris false)
+	if AirKillerCache[initiator] ~= nil then
+		return AirKillerCache[initiator]
+	end
+
+	-- 2) recherche dans l’index des squadrons
+	for _, entry in ipairs(AirSquadronIndex) do
+		if string.find(initiator, entry.pattern, 1) then
+			AirKillerCache[initiator] = entry.unit
+			return entry.unit
+		end
+	end
+
+	-- 3) aucun match (on mémorise aussi l’échec)
+	AirKillerCache[initiator] = false
+	return nil
+end
+-- index direct des unités ground par nom
+GroundUnitByName = {}        -- ["SAM-1"] = { unit=ref, side=..., class=... }
+
+for sideName, side in pairs(oob_ground) do
+	for _, country in pairs(side) do
+		for class, typetable in pairs(country) do
+			if type(typetable) == "table" and typetable.group then
+				for _, group in pairs(typetable.group) do
+					for _, unit in pairs(group.units) do
+						unit["class"] = class
+						unit["side"] = sideName
+
+						GroundUnitByName[unit.name] = unit
+					end
+				end
+			end
+		end
+	end
+end
+
+
+-- pré-calcul des targets "structure"
+-- évite le scan string.lower / string.find à chaque explosion
+for _, sides in pairs(targetlist) do
+	for _, target in pairs(sides) do
+		target.isStructure = false
+		if target.attributes then
+			for _, attr in pairs(target.attributes) do
+				local a = string.lower(attr)
+				if a == "structure" or a == "building" then
+					target.isStructure = true
+					break
+				end
+			end
+		end
+	end
+end
+
 --evaluate log events
 for e = 1, #events do
 
@@ -469,68 +561,68 @@ for e = 1, #events do
 
 	-- elseif eventType == "hit"  and  not statutObject[target]["unit lost"] then				--  statutObject[target] ~= "unit lost"														--hit events
 	elseif eventType == "hit" and target and not statutObject[target].kill and not statutObject[target].crash then
-		hit_table[target] = events[e].initiator												--store who hits a target (subsequent hits overwrite previous hits)
+		hitTbl_KillerByTarget[target] = initiator												--store who hits a target (subsequent hits overwrite previous hits)
 		statutObject[target].hit = true
 		health_table[target] = events[e].health												--store health of the target
 		client_hit_table[target] = clientControl[initiator]						--store client name that has hit a unit (stores nil  if hitter is not a client)
 
-	elseif eventType == "crash" and events[e].initiator then
+	elseif eventType == "crash" and initiator then
 		--oob loss update for crashed aircraft
 		if statutObject[initiator].kill == false   then --and  statutObject[initiator] ~= "unit lost"
 			local crash_side																				--local variable to store the side of the crashed aircraft
-			for killer_side_name,killer_side in pairs(oob_air) do											--iterate through all sides
-				-- if killer_side_name and type(killer_side) == "table" then
-					for killer_unit_n,killer_unit in pairs(killer_side) do										--iterate through all air units
-						if events[e].initiator and string.find(events[e].initiator, " " .. killer_unit.name .. " ", 1, true) then		--if the crashed aircraft name is part of air unit name
-							crash_side = killer_side_name														--store side of the crashed aircraft
-							killer_unit.roster.lost = killer_unit.roster.lost + 1								--increase loss counter of air unit
-							killer_unit.score_last.lost = killer_unit.score_last.lost + 1						--increase loss counter for this mission of air unit
-							killer_unit.roster.ready = killer_unit.roster.ready - 1								--decrease number of ready aircraft of air unit
-							killer_unit.score_last.ready = killer_unit.score_last.ready + 1						--decrease number of ready aircraft for this mission of air unit
-							addPackstats(events[e].initiator, "lost", events[e])											--check if loss was in player package
+			
+			local crash_squad = resolveAirSquad(initiator)
+			if crash_squad then
 
-							--client stats for crashes
-							if clientControl[initiator] and ( (events[e].t - clientstats[clientControl[initiator]].score_last.Time_Crash) >   30) then											--if crashed aircraft is a client
+			-- for killer_side_name,killer_side in pairs(oob_air) do											--iterate through all sides
+			-- 	for killer_unit_n,killer_unit in pairs(killer_side) do										--iterate through all air units
+			-- 		if events[e].initiator and string.find(events[e].initiator, " " .. killer_unit.name .. " ", 1, true) then		--if the crashed aircraft name is part of air unit name
+				
+			
+				crash_side = crash_squad.side														--store side of the crashed aircraft
+				crash_squad.roster.lost = crash_squad.roster.lost + 1								--increase loss counter of air unit
+				crash_squad.score_last.lost = crash_squad.score_last.lost + 1						--increase loss counter for this mission of air unit
+				crash_squad.roster.ready = crash_squad.roster.ready - 1								--decrease number of ready aircraft of air unit
+				crash_squad.score_last.ready = crash_squad.score_last.ready + 1						--decrease number of ready aircraft for this mission of air unit
+				addPackstats(initiator, "lost", events[e])											--check if loss was in player package
 
-							-- if client_control[initiator]  then											--if crashed aircraft is a client
+				--client stats for crashes
+				if clientControl[initiator] and ( (events[e].t - clientstats[clientControl[initiator]].score_last.Time_Crash) >   30) then											--if crashed aircraft is a client
 
+					clientstats[clientControl[initiator]].crash = clientstats[clientControl[initiator]].crash + 1	--store crash for client
+					clientstats[clientControl[initiator]].score_last.crash =  clientstats[clientControl[initiator]].score_last.crash + 1			--store crash for client
+					clientstats[clientControl[initiator]].score_last.Time_Crash = events[e].t
 
-								clientstats[clientControl[initiator]].crash = clientstats[clientControl[initiator]].crash + 1	--store crash for client
-								clientstats[clientControl[initiator]].score_last.crash =  clientstats[clientControl[initiator]].score_last.crash + 1			--store crash for client
-								clientstats[clientControl[initiator]].score_last.Time_Crash = events[e].t
-
-							end
-							break
-						end
-					end
-				-- end
+				end
 			end
 
 			--oob kill update for crashed aircraft
-			for killer_side_name,killer_side in pairs(oob_air) do											--iterate through all sides
-				for killer_unit_n,killer_unit in pairs(killer_side) do										--iterate through all air units
-					if hit_table[initiator] ~= nil then											--check if the crashed aircraft has a hit entry
-						if string.find(hit_table[initiator], " " .. killer_unit.name .. " ", 1, true) then			--if the hitting unit is part of air unit name
-							if crash_side ~= killer_side_name then											--make sure that hitting unit and crashed aircraft are not on same side (friendly fire is not awarded as kill)
-								killer_unit.score.kills_air = killer_unit.score.kills_air + 1				--award air kill to air unit
-								killer_unit.score_last.kills_air = killer_unit.score_last.kills_air + 1		--increase kill counter for this mission of air unit
-								addPackstats(hit_table[initiator], "kill_air", events[e])					--check if kill was in player package
+			-- for killer_side_name,killer_side in pairs(oob_air) do											--iterate through all sides
+			-- 	for killer_unit_n,killer_unit in pairs(killer_side) do										--iterate through all air units
+			if hitTbl_KillerByTarget[initiator] ~= nil then											--check if the crashed aircraft has a hit entry
+				-- if string.find(hit_table[initiator], " " .. killer_unit.name .. " ", 1, true) then			--if the hitting unit is part of air unit name
+					
+				local killer_squad = resolveAirSquad(hitTbl_KillerByTarget[initiator])
+				if killer_squad then
 
-								--client stats for kills
-								-- if client_hit_table[initiator] then								--if crashed aircraft was hit by a client
-								if clientControl[initiator] and ( (events[e].t - clientstats[clientControl[initiator]].score_last.Time_kills_air) >   30) then											--if crashed aircraft is a client
+					if crash_side ~= killer_squad.side then											--make sure that hitting unit and crashed aircraft are not on same side (friendly fire is not awarded as kill)
+						killer_squad.score.kills_air = killer_squad.score.kills_air + 1				--award air kill to air unit
+						killer_squad.score_last.kills_air = killer_squad.score_last.kills_air + 1		--increase kill counter for this mission of air unit
+						addPackstats(hitTbl_KillerByTarget[initiator], "kill_air", events[e])					--check if kill was in player package
 
-									clientstats[client_hit_table[initiator]].kills_air = clientstats[client_hit_table[initiator]].kills_air + 1	--award air kill to client
-									clientstats[client_hit_table[initiator]].score_last.kills_air = clientstats[client_hit_table[initiator]].score_last.kills_air + 1
-								end
-								break
-							end
+						--client stats for kills
+						-- if client_hit_table[initiator] then								--if crashed aircraft was hit by a client
+						if clientControl[initiator] and ( (events[e].t - clientstats[clientControl[initiator]].score_last.Time_kills_air) >   30) then											--if crashed aircraft is a client
+
+							clientstats[client_hit_table[initiator]].kills_air = clientstats[client_hit_table[initiator]].kills_air + 1	--award air kill to client
+							clientstats[client_hit_table[initiator]].score_last.kills_air = clientstats[client_hit_table[initiator]].score_last.kills_air + 1
 						end
 					end
 				end
 			end
-			if hit_table[initiator] then
-				hit_table[initiator] = nil															--once kills for the dead aircraft are awarded, remove it from the hit_table. The aircraft remaining in the hit_table after completed log evaluation are only damaged.
+
+			if hitTbl_KillerByTarget[initiator] then
+				hitTbl_KillerByTarget[initiator] = nil															--once kills for the dead aircraft are awarded, remove it from the hit_table. The aircraft remaining in the hit_table after completed log evaluation are only damaged.
 			end
 		end
 		statutObject[initiator].crash = true
@@ -540,145 +632,144 @@ for e = 1, #events do
 		local targetSide																				--local variable to store the side of the crashed aircraft
 		local targetIsPlane
 		local killerIsPlane
-		local tagBreak
-		for target_side_name, target_side in pairs(oob_air) do											--iterate through all sides
-			if target_side_name and type(target_side) == "table" then
+		-- local tagBreak
 
-				for target_unit_n, target_unit in pairs(target_side) do										--iterate through all air units
-					if events[e].target and string.find(events[e].target, "Manhunt") then
-						targetIsPlane = false
+		-- for target_side_name, target_side in pairs(oob_air) do											--iterate through all sides
+		-- 	if target_side_name and type(target_side) == "table" then
+		-- 		for target_unit_n, target_unit in pairs(target_side) do										--iterate through all air units
+					
+		local target_unit = resolveAirSquad(target)
+		if target_unit then
 
-						addPackstats(hit_table[target], "kill_ground", events[e])						--check if kill was in player package
+			targetIsPlane = true
+			targetSide = target_unit.side														--store side of the crashed aircraft
+			target_unit.roster.lost = target_unit.roster.lost + 1								--increase loss counter of air unit
+			target_unit.score_last.lost = target_unit.score_last.lost + 1						--increase loss counter for this mission of air unit
+			target_unit.roster.ready = target_unit.roster.ready - 1								--decrease number of ready aircraft of air unit
+			target_unit.score_last.ready = target_unit.score_last.ready + 1						--decrease number of ready aircraft for this mission of air unit
+			addPackstats(target, "lost", events[e])											--check if loss was in player package
 
-						clientstats[clientControl[initiator]].kills_ground = clientstats[clientControl[initiator]].kills_ground + 1							--award gound kill to client
-						clientstats[clientControl[initiator]].score_last.kills_ground = clientstats[clientControl[initiator]].score_last.kills_ground + 1		--award ground kill to client
+			--client stats for crashes
+			if clientControl[target] and ( (events[e].t - clientstats[clientControl[target]].score_last.Time_Crash) >   30) then											--if crashed aircraft is a client
 
-						local item = {
-							event = events[e],
-							unit = events[e].target,
-						}
-							
-						tagBreak = true
-						break
-					elseif events[e].target and string.find(events[e].target, " " .. target_unit.name .. " ", 1, true) then		--if the crashed aircraft name is part of air unit name
-						targetIsPlane = true
-						targetSide = target_side_name														--store side of the crashed aircraft
-						target_unit.roster.lost = target_unit.roster.lost + 1								--increase loss counter of air unit
-						target_unit.score_last.lost = target_unit.score_last.lost + 1						--increase loss counter for this mission of air unit
-						target_unit.roster.ready = target_unit.roster.ready - 1								--decrease number of ready aircraft of air unit
-						target_unit.score_last.ready = target_unit.score_last.ready + 1						--decrease number of ready aircraft for this mission of air unit
-						addPackstats(events[e].target, "lost", events[e])											--check if loss was in player package
+				clientstats[clientControl[target]].crash = clientstats[clientControl[target]].crash + 1	--store crash for client
+				clientstats[clientControl[target]].score_last.crash =  clientstats[clientControl[target]].score_last.crash + 1			--store crash for client
+				clientstats[clientControl[target]].score_last.Time_Crash = events[e].t
 
-						--client stats for crashes
-						if clientControl[target] and ( (events[e].t - clientstats[clientControl[target]].score_last.Time_Crash) >   30) then											--if crashed aircraft is a client
-
-							clientstats[clientControl[target]].crash = clientstats[clientControl[target]].crash + 1	--store crash for client
-							clientstats[clientControl[target]].score_last.crash =  clientstats[clientControl[target]].score_last.crash + 1			--store crash for client
-							clientstats[clientControl[target]].score_last.Time_Crash = events[e].t
-
-						end
-						tagBreak = true
-						break
-					end
-				end
-				if tagBreak then break end
 			end
-		end
 
-		--oob kill update for crashed aircraft
-		if targetIsPlane then
-			for killer_side_name, killer_side in pairs(oob_air) do											--iterate through all sides
-				for killer_unit_n, killer_unit in pairs(killer_side) do										--iterate through all air units
-					--hit_table[target] = events[e].initiator
-					if hit_table[target] ~= nil then											--check if the crashed aircraft has a hit entry
-						if string.find(hit_table[target], " " .. killer_unit.name .. " ", 1, true) then			--if the hitting unit is part of air unit name
-							killerIsPlane = true
-							killer_unit.score.kills_air = killer_unit.score.kills_air + 1				--award air kill to air unit
-							killer_unit.score_last.kills_air = killer_unit.score_last.kills_air + 1		--increase kill counter for this mission of air unit
-							addPackstats(hit_table[target], "kill_air", events[e])					--check if kill was in player package
+			--oob kill update for crashed aircraft
 
-							--client stats for kills
-							if client_hit_table[target] then								--if crashed aircraft was hit by a client
+			-- for killer_side_name, killer_side in pairs(oob_air) do											--iterate through all sides
+			-- 	for killer_unit_n, killer_unit in pairs(killer_side) do										--iterate through all air units
+			-- 		if hitTbl_KillerByTarget[target] ~= nil then											--check if the crashed aircraft has a hit entry
+			-- 			if string.find(hitTbl_KillerByTarget[target], " " .. killer_unit.name .. " ", 1, true) then			--if the hitting unit is part of air unit name
+			if hitTbl_KillerByTarget[target] ~= nil then				
+				local killer_unit = resolveAirSquad(hitTbl_KillerByTarget[target])
+				if killer_unit then
+				
+					killerIsPlane = true
+					killer_unit.score.kills_air = killer_unit.score.kills_air + 1				--award air kill to air unit
+					killer_unit.score_last.kills_air = killer_unit.score_last.kills_air + 1		--increase kill counter for this mission of air unit
+					addPackstats(hitTbl_KillerByTarget[target], "kill_air", events[e])					--check if kill was in player package
 
-								clientstats[client_hit_table[target]].kills_air = clientstats[client_hit_table[target]].kills_air + 1	--award air kill to client
-								clientstats[client_hit_table[target]].score_last.kills_air = clientstats[client_hit_table[target]].score_last.kills_air + 1
-							end
-							break
-						end
+					--client stats for kills
+					if client_hit_table[target] then								--if crashed aircraft was hit by a client
+
+						clientstats[client_hit_table[target]].kills_air = clientstats[client_hit_table[target]].kills_air + 1	--award air kill to client
+						clientstats[client_hit_table[target]].score_last.kills_air = clientstats[client_hit_table[target]].score_last.kills_air + 1
 					end
 				end
 			end
+
+			--?????????????what?????????????
+			-- if targetIsPlane and hitTbl_KillerByTarget[target] then
+			-- 	hitTbl_KillerByTarget[target] = nil															--once kills for the dead aircraft are awarded, remove it from the hit_table. The aircraft remaining in the hit_table after completed log evaluation are only damaged.
+			-- end
+
+		elseif target and string.find(target, "Manhunt") then
+
+			targetIsPlane = false
+
+			addPackstats(hitTbl_KillerByTarget[target], "kill_ground", events[e])						--check if kill was in player package
+
+			clientstats[clientControl[initiator]].kills_ground = clientstats[clientControl[initiator]].kills_ground + 1							--award gound kill to client
+			clientstats[clientControl[initiator]].score_last.kills_ground = clientstats[clientControl[initiator]].score_last.kills_ground + 1		--award ground kill to client
+
+			local item = {
+				event = events[e],
+				unit = events[e].target,
+			}
+
 		end
 
-		if  targetIsPlane  and  hit_table[target] then
-			hit_table[target] = nil															--once kills for the dead aircraft are awarded, remove it from the hit_table. The aircraft remaining in the hit_table after completed log evaluation are only damaged.
-		end
 
-		if targetIsPlane and last_Mission then
 
-			local task = "inc"
-			local targetName = ""
-			local lostType = ""
-			local tagbreak = false
+		-- if targetIsPlane and last_Mission then
 
-			for _side, side in pairs(last_Mission.coalition) do
-				for _country, country in pairs(side.country) do
-					if _side == targetSide then
-						for chapterName, chapter in pairs(country) do
-							if type(chapter) == "table" and chapter.group then
-								for Ngroup, group in pairs(chapter.group) do
-									for n=1, #group.units do
-										if group.units[n].unitId == tonumber(events[e].targetMissionID) then
-											task = group.task
-											targetName = group.DCE_targetName
-											lostType = group.units[n].type
-											tagbreak = true
-											break
-										end
-									end
-									if tagbreak then break end
-								end
-							end
-							if tagbreak then break end
-						end
-					end
-					if tagbreak then break end
-				end
-				if tagbreak then break end
-			end
+		-- 	local task = "inc"
+		-- 	local targetName = ""
+		-- 	local lostType = ""
+		-- 	local tagbreak = false
 
-			if targetName == nil then
-				targetName = "test"
-			 end
+		-- 	for _side, side in pairs(last_Mission.coalition) do
+		-- 		for _country, country in pairs(side.country) do
+		-- 			if _side == targetSide then
+		-- 				for chapterName, chapter in pairs(country) do
+		-- 					if type(chapter) == "table" and chapter.group then
+		-- 						for Ngroup, group in pairs(chapter.group) do
+		-- 							for n=1, #group.units do
+		-- 								if group.units[n].unitId == tonumber(events[e].targetMissionID) then
+		-- 									task = group.task
+		-- 									targetName = group.DCE_targetName
+		-- 									lostType = group.units[n].type
+		-- 									tagbreak = true
+		-- 									break
+		-- 								end
+		-- 							end
+		-- 							if tagbreak then break end
+		-- 						end
+		-- 					end
+		-- 					if tagbreak then break end
+		-- 				end
+		-- 			end
+		-- 			if tagbreak then break end
+		-- 		end
+		-- 		if tagbreak then break end
+		-- 	end
 
-			if tagbreak == false then _affiche(events[e], "DebriefSE NothingFound in relation to last_Mission ") end
+		-- 	if targetName == nil then
+		-- 		targetName = "test"
+		-- 	 end
 
-			if not task then task = "inc" end
+		-- 	if tagbreak == false then _affiche(events[e], "DebriefSE NothingFound in relation to last_Mission ") end
 
-			if not camp.statLost then camp.statLost = {} end
-			if not camp.statLost[targetSide] then camp.statLost[targetSide] = {} end
-			if not camp.statLost[targetSide][targetName] then camp.statLost[targetSide][targetName] = {} end
+		-- 	if not task then task = "inc" end
 
-			if not camp.statLost[targetSide][targetName][lostType] then camp.statLost[targetSide][targetName][lostType] = {} end
-			if not camp.statLost[targetSide][targetName][lostType][task] then
-				camp.statLost[targetSide][targetName][lostType][task] = {
-					nbTotal = 0,
-					nbKillerIsPlane = 0,
-					nbKillerIsSAM = 0,
-					lastMission = camp.mission,
-				}
-			end
+		-- 	if not camp.statLost then camp.statLost = {} end
+		-- 	if not camp.statLost[targetSide] then camp.statLost[targetSide] = {} end
+		-- 	if not camp.statLost[targetSide][targetName] then camp.statLost[targetSide][targetName] = {} end
 
-			if killerIsPlane then
+		-- 	if not camp.statLost[targetSide][targetName][lostType] then camp.statLost[targetSide][targetName][lostType] = {} end
+		-- 	if not camp.statLost[targetSide][targetName][lostType][task] then
+		-- 		camp.statLost[targetSide][targetName][lostType][task] = {
+		-- 			nbTotal = 0,
+		-- 			nbKillerIsPlane = 0,
+		-- 			nbKillerIsSAM = 0,
+		-- 			lastMission = camp.mission,
+		-- 		}
+		-- 	end
 
-				camp.statLost[targetSide][targetName][lostType][task].nbTotal = camp.statLost[targetSide][targetName][lostType][task].nbTotal + 1
-				camp.statLost[targetSide][targetName][lostType][task].nbKillerIsPlane = camp.statLost[targetSide][targetName][lostType][task].nbKillerIsPlane + 1
-				camp.statLost[targetSide][targetName][lostType][task].lastMission = camp.mission
-			else
-				camp.statLost[targetSide][targetName][lostType][task].nbKillerIsSAM = camp.statLost[targetSide][targetName][lostType][task].nbKillerIsSAM + 1
-				camp.statLost[targetSide][targetName][lostType][task].lastMission = camp.mission
-			end
-		end
+		-- 	if killerIsPlane then
+
+		-- 		camp.statLost[targetSide][targetName][lostType][task].nbTotal = camp.statLost[targetSide][targetName][lostType][task].nbTotal + 1
+		-- 		camp.statLost[targetSide][targetName][lostType][task].nbKillerIsPlane = camp.statLost[targetSide][targetName][lostType][task].nbKillerIsPlane + 1
+		-- 		camp.statLost[targetSide][targetName][lostType][task].lastMission = camp.mission
+		-- 	else
+		-- 		camp.statLost[targetSide][targetName][lostType][task].nbKillerIsSAM = camp.statLost[targetSide][targetName][lostType][task].nbKillerIsSAM + 1
+		-- 		camp.statLost[targetSide][targetName][lostType][task].lastMission = camp.mission
+		-- 	end
+		-- end
 
 		statutObject[target].kill = true
 
@@ -792,12 +883,11 @@ for e = 1, #events do
 
 		if events[e].initiator then	statutObject[initiator].land = true end
 
-	elseif (eventType == "dead" or eventType == "unit lost") and events[e].initiator then
+	elseif (eventType == "dead" or eventType == "unit lost") and initiator then
 
 		--client stats for dead pilots
-		if clientControl[initiator] and ( (events[e].t - clientstats[clientControl[initiator]].score_last.Time_Dead) >   30) then
-		-- if client_control[initiator]  then														--if dead pilot is a client
-
+		if clientControl[initiator] and ( (events[e].t - clientstats[clientControl[initiator]].score_last.Time_Dead) > 30) then
+	
 			clientstats[clientControl[initiator]].dead = clientstats[clientControl[initiator]].dead + 1	--store death for client
 			clientstats[clientControl[initiator]].score_last.dead =  clientstats[clientControl[initiator]].score_last.dead + 1						--store dead pilot for client
 			clientstats[clientControl[initiator]].score_last.Time_Dead = events[e].t
@@ -807,154 +897,138 @@ for e = 1, #events do
 			end
 		end
 
-
 		--ground/naval/static loss events																--iterate through all the sub-tables of the oob_ground files and try to find the matching unitId of the dead unit (vehicle/ship/static)
 		if eventType == "unit lost" then																		--hit events
 			statutObject[initiator]["unit lost"] = true
 		end
 
-		for side_name,side in pairs(oob_ground) do														--side table(red/blue)											
-			for country_n,country in pairs(side) do														--country table (number array)
-				if country.vehicle then																	--if country has vehicles
-					for group_n,group in pairs(country.vehicle.group) do								--groups table (number array)
-						for unit_n,unit in pairs(group.units) do										--units table (number array)					
-							-- if unit.unitId == tonumber(events[e].initiatorMissionID) then				--check if unitId matches initiatorMissionID (string, needs to be converted to number)
-							if unit.name == events[e].initiator and not unit.dead then
+		-- for side_name,side in pairs(oob_ground) do														--side table(red/blue)											
+		-- 	for country_n,country in pairs(side) do														--country table (number array)
+				
+		local unit = GroundUnitByName[initiator]
+		if unit then
+		
+			if unit.class == "vehicle" then
+				unit.dead = true														--mark unit as dead in oob_ground
+				unit.dead_last = true													--mark unit as died in last mission
+				unit.CheckDay = camp.date.CampTotalTimeS                            -- ajoute la date de destruction		 Miguel21 modification M19 : Repair SAM	
 
-								unit.dead = true														--mark unit as dead in oob_ground
-								unit.dead_last = true													--mark unit as died in last mission
-								unit.CheckDay = camp.date.CampTotalTimeS                            -- ajoute la date de destruction		 Miguel21 modification M19 : Repair SAM	
+				--award ground kill to air unit
+				if hitTbl_KillerByTarget[initiator] ~= nil then														--check if dead vehicle has a hit entry
+					-- for killer_side_name,killer_side in pairs(oob_air) do											--iterate through all sides
+					-- 	for killer_unit_n,killer_unit in pairs(killer_side) do										--iterate through all air units
+					-- 		if string.find(hitTbl_KillerByTarget[initiator], " " .. killer_unit.name .. " ", 1, true) then	--if the hitting unit is part of air unit name
+								
+					local killer_unit = resolveAirSquad(hitTbl_KillerByTarget[initiator])
+					if killer_unit then
+						if unit.side ~= killer_unit.side then
+							killer_unit.score.kills_ground = killer_unit.score.kills_ground + 1				--award ground kill to air unit
+							killer_unit.score_last.kills_ground = killer_unit.score_last.kills_ground + 1
+							addPackstats(hitTbl_KillerByTarget[initiator], "kill_ground", events[e])						--check if kill was in player package
 
-								--award ground kill to air unit
-								if hit_table[initiator] ~= nil then														--check if dead vehicle has a hit entry
-									for killer_side_name,killer_side in pairs(oob_air) do											--iterate through all sides
-										for killer_unit_n,killer_unit in pairs(killer_side) do										--iterate through all air units
-											if string.find(hit_table[initiator], " " .. killer_unit.name .. " ", 1, true) then	--if the hitting unit is part of air unit name
-												if side_name ~= killer_side_name then												--make sure that hitting unit is not on same side as dead unit (friendly fire gives no kills)
-													killer_unit.score.kills_ground = killer_unit.score.kills_ground + 1				--award ground kill to air unit
-													killer_unit.score_last.kills_ground = killer_unit.score_last.kills_ground + 1
-													addPackstats(hit_table[initiator], "kill_ground", events[e])						--check if kill was in player package
+							--award ground kill to client
+							if client_hit_table[initiator] then									--if dead vehicle was hit by a client
+								clientstats[client_hit_table[initiator]].kills_ground = clientstats[client_hit_table[initiator]].kills_ground + 1							--award gound kill to client
+								clientstats[client_hit_table[initiator]].score_last.kills_ground = clientstats[client_hit_table[initiator]].score_last.kills_ground + 1		--award ground kill to client
 
-													--award ground kill to client
-													if client_hit_table[initiator] then									--if dead vehicle was hit by a client
-														clientstats[client_hit_table[initiator]].kills_ground = clientstats[client_hit_table[initiator]].kills_ground + 1							--award gound kill to client
-														clientstats[client_hit_table[initiator]].score_last.kills_ground = clientstats[client_hit_table[initiator]].score_last.kills_ground + 1		--award ground kill to client
+								local item = {
+									event = events[e],
+									unit = unit,
+								}
 
-														local item = {
-															event = events[e],
-															unit = unit,
-														}
+								if not clientstatsDetail[client_hit_table[initiator]] then clientstatsDetail[client_hit_table[initiator]] = {} end
+								table.insert(clientstatsDetail[client_hit_table[initiator]], item)
 
-														if not clientstatsDetail[client_hit_table[initiator]] then clientstatsDetail[client_hit_table[initiator]] = {} end
-														table.insert(clientstatsDetail[client_hit_table[initiator]], item)
-
-													end
-												end
-												break
-											end
-										end
-									end
-									hit_table[initiator] = nil							--after kills are assigned, remove hit unit from hit_table
-								end
-								break
 							end
 						end
 					end
+					hitTbl_KillerByTarget[initiator] = nil							--after kills are assigned, remove hit unit from hit_table
 				end
-				if country.ship then																--if country has ships
-					for group_n,group in pairs(country.ship.group) do								--groups table (number array)
-						for unit_n,unit in pairs(group.units) do									--units table (number array)
-							-- if unit.unitId == tonumber(events[e].initiatorMissionID) then			--check if unitId matches initiatorMissionID (string, needs to be converted to number)
-							if unit.name == events[e].initiator  and not unit.dead then
-								unit.dead = true													--mark unit as dead in oob_ground
-								unit.dead_last = true												--mark unit as died in last mission
-								unit.CheckDay = camp.date.CampTotalTimeS                            -- ajoute la date de destruction		 Miguel21 modification M19 : Repair SAM	
-								camp.ShipHealth[unit.name] = 0										--mark unit has 0 health for briefing/Debriefing
-								camp.ShipDamagedLast[unit.name] = true								--mark ship took damage in last mission for briefing/Debriefing
+								
+			elseif unit.class == "ship" then
 
-								--award ship kill to air unit
-								if hit_table[initiator] ~= nil then														--check if dead ship has a hit entry
-									for killer_side_name,killer_side in pairs(oob_air) do											--iterate through all sides
-										for killer_unit_n,killer_unit in pairs(killer_side) do										--iterate through all air units
-											if string.find(hit_table[initiator], " " .. killer_unit.name .. " ", 1, true) then	--if the hitting unit is part of air unit name
-												if side_name ~= killer_side_name then												--make sure that hitting unit is not on same side as dead unit (friendly fire gives no kills)
-													killer_unit.score.kills_ship = killer_unit.score.kills_ship + 1					--award ship kill to air unit
-													killer_unit.score_last.kills_ship = killer_unit.score_last.kills_ship + 1
-													addPackstats(hit_table[initiator], "kill_ship", events[e])						--check if kill was in player package
+				unit.CheckDay = camp.date.CampTotalTimeS                            -- ajoute la date de destruction		 Miguel21 modification M19 : Repair SAM	
+				camp.ShipHealth[unit.name] = 0										--mark unit has 0 health for briefing/Debriefing
+				camp.ShipDamagedLast[unit.name] = true								--mark ship took damage in last mission for briefing/Debriefing
 
-													--award ship kill to client
-													if client_hit_table[initiator] then									--if dead ship was hit by a client
-														clientstats[client_hit_table[initiator]].kills_ship = clientstats[client_hit_table[initiator]].kills_ship + 1							--award ship kill to client
-														clientstats[client_hit_table[initiator]].score_last.kills_ship = clientstats[client_hit_table[initiator]].score_last.kills_ship + 1		--award ship kill to client
-													end
-												end
-												break
-											end
-										end
-									end
-									hit_table[initiator] = nil							--after kills are assigned, remove hit unit from hit_table
-								end
-								break
+				--award ship kill to air unit
+				if hitTbl_KillerByTarget[initiator] ~= nil then														--check if dead ship has a hit entry
+					-- for killer_side_name,killer_side in pairs(oob_air) do											--iterate through all sides
+					-- 	for killer_unit_n,killer_unit in pairs(killer_side) do										--iterate through all air units
+					-- 		if string.find(hitTbl_KillerByTarget[initiator], " " .. killer_unit.name .. " ", 1, true) then	--if the hitting unit is part of air unit name
+					-- 			if unit.side ~= killer_side_name then												--make sure that hitting unit is not on same side as dead unit (friendly fire gives no kills)
+									
+					local killer_unit = resolveAirSquad(hitTbl_KillerByTarget[initiator])
+					if killer_unit then
+						if unit.side ~= killer_unit.side then
+							killer_unit.score.kills_ship = killer_unit.score.kills_ship + 1					--award ship kill to air unit
+							killer_unit.score_last.kills_ship = killer_unit.score_last.kills_ship + 1
+							addPackstats(hitTbl_KillerByTarget[initiator], "kill_ship", events[e])						--check if kill was in player package
+
+							--award ship kill to client
+							if client_hit_table[initiator] then									--if dead ship was hit by a client
+								clientstats[client_hit_table[initiator]].kills_ship = clientstats[client_hit_table[initiator]].kills_ship + 1							--award ship kill to client
+								clientstats[client_hit_table[initiator]].score_last.kills_ship = clientstats[client_hit_table[initiator]].score_last.kills_ship + 1		--award ship kill to client
 							end
 						end
 					end
+					hitTbl_KillerByTarget[initiator] = nil							--after kills are assigned, remove hit unit from hit_table
 				end
-				if country.static then																--if country has static objects
-					for group_n,group in pairs(country.static.group) do								--groups table (number array)
-						for unit_n,unit in pairs(group.units) do									--units table (number array)
+
+			elseif unit.class == "static" then																--if country has static objects
+				-- for group_n,group in pairs(country.static.group) do								--groups table (number array)
+				-- 	for unit_n,unit in pairs(group.units) do									--units table (number array)
+					
+				if unit.name == initiator and not unit.dead then
+--TODO, placer ce code dans update_oobGround
+					-- if unit.dead ~= true then											--unit is not yet dead (some static objects that are spawned in a destroyed state are logged dead at mission start, these must be excluded here)
+					-- group.dead = true												--mark group as dead in oob_ground (static objects can be set as group.dead and spawned in a destroyed state)
+					-- if group.linkOffset then										--static unit was linked to a carrier
+					-- 	group.linkOffset = false									--unlink  dead static from carrier
+					-- 	group.x = 2000000
+					-- 	group.y = 2000000
+					-- 	group.units[1].x = 2000000
+					-- 	group.units[1].y = 2000000
+					-- 	group.route.points[1].x = 2000000
+					-- 	group.route.points[1].y = 2000000
+					-- end
+					-- group.hidden = true	--TODO si le vehicle revit, il faudrait lui coller le hidden d'origine											--hide dead static object
+					unit.dead = true												--mark unit as dead in oob_ground (this is for the targetlist)
+					unit.dead_last = true											--mark unit as died in last mission
+					unit.CheckDay = camp.date.CampTotalTimeS                            -- ajoute la date de destruction		 Miguel21 modification M19 : Repair SAM	
+
+					--award ground kill to air unit
+					if hitTbl_KillerByTarget[initiator] ~= nil then														--check if dead static has a hit entry
+						-- for killer_side_name,killer_side in pairs(oob_air) do											--iterate through all sides
+						-- 	for killer_unit_n,killer_unit in pairs(killer_side) do										--iterate through all air units
+						-- 		if string.find(hitTbl_KillerByTarget[initiator], " " .. killer_unit.name .. " ", 1, true) then	--if the hitting unit is part of air unit name
+						-- 			if side_name ~= killer_side_name then												--make sure that hitting unit is not on same side as dead unit (friendly fire gives no kills)
+										
+						local killer_unit = resolveAirSquad(hitTbl_KillerByTarget[initiator])
+						if killer_unit then
+							if unit.side ~= killer_unit.side then
 						
-							if unit.name == events[e].initiator and not unit.dead then
-								if unit.dead ~= true then											--unit is not yet dead (some static objects that are spawned in a destroyed state are logged dead at mission start, these must be excluded here)
-									group.dead = true												--mark group as dead in oob_ground (static objects can be set as group.dead and spawned in a destroyed state)
-									if group.linkOffset then										--static unit was linked to a carrier
-										group.linkOffset = false									--unlink  dead static from carrier
-										group.x = 2000000
-										group.y = 2000000
-										group.units[1].x = 2000000
-										group.units[1].y = 2000000
-										group.route.points[1].x = 2000000
-										group.route.points[1].y = 2000000
-									end
-									group.hidden = true	--TODO si le vehicle revit, il faudrait lui coller le hidden d'origine											--hide dead static object
-									unit.dead = true												--mark unit as dead in oob_ground (this is for the targetlist)
-									unit.dead_last = true											--mark unit as died in last mission
-									unit.CheckDay = camp.date.CampTotalTimeS                            -- ajoute la date de destruction		 Miguel21 modification M19 : Repair SAM	
+								killer_unit.score.kills_ground = killer_unit.score.kills_ground + 1				--award ground kill to air unit
+								killer_unit.score_last.kills_ground = killer_unit.score_last.kills_ground + 1
+								addPackstats(hitTbl_KillerByTarget[initiator], "kill_ground", events[e])						--check if kill was in player package
 
-									--award ground kill to air unit
-									if hit_table[initiator] ~= nil then														--check if dead static has a hit entry
-										for killer_side_name,killer_side in pairs(oob_air) do											--iterate through all sides
-											for killer_unit_n,killer_unit in pairs(killer_side) do										--iterate through all air units
-												if string.find(hit_table[initiator], " " .. killer_unit.name .. " ", 1, true) then	--if the hitting unit is part of air unit name
-													if side_name ~= killer_side_name then												--make sure that hitting unit is not on same side as dead unit (friendly fire gives no kills)
-														killer_unit.score.kills_ground = killer_unit.score.kills_ground + 1				--award ground kill to air unit
-														killer_unit.score_last.kills_ground = killer_unit.score_last.kills_ground + 1
-														addPackstats(hit_table[initiator], "kill_ground", events[e])						--check if kill was in player package
+								--award ground kill to client
+								if client_hit_table[initiator] then									--if dead static was hit by a client
+									clientstats[client_hit_table[initiator]].kills_ground = clientstats[client_hit_table[initiator]].kills_ground + 1							--award ground kill to client
+									clientstats[client_hit_table[initiator]].score_last.kills_ground = clientstats[client_hit_table[initiator]].score_last.kills_ground + 1		--award ground kill to client
 
-														--award ground kill to client
-														if client_hit_table[initiator] then									--if dead static was hit by a client
-															clientstats[client_hit_table[initiator]].kills_ground = clientstats[client_hit_table[initiator]].kills_ground + 1							--award ground kill to client
-															clientstats[client_hit_table[initiator]].score_last.kills_ground = clientstats[client_hit_table[initiator]].score_last.kills_ground + 1		--award ground kill to client
+									local item = {
+										event = events[e],
+										unit = unit,
+									}
 
-															local item = {
-																event = events[e],
-																unit = unit,
-															}
+									if not clientstatsDetail[client_hit_table[initiator]] then clientstatsDetail[client_hit_table[initiator]] = {} end
+									table.insert(clientstatsDetail[client_hit_table[initiator]], item)
 
-															if not clientstatsDetail[client_hit_table[initiator]] then clientstatsDetail[client_hit_table[initiator]] = {} end
-															table.insert(clientstatsDetail[client_hit_table[initiator]], item)
-
-														end
-													end
-													break
-												end
-											end
-										end
-										hit_table[initiator] = nil						--after kills are assigned, remove hit unit from hit_table
-									end
-									break
 								end
 							end
 						end
+						hitTbl_KillerByTarget[initiator] = nil						--after kills are assigned, remove hit unit from hit_table
 					end
 				end
 			end
@@ -1008,7 +1082,7 @@ t_SAR = t_SAR + (os.clock() - c_SAR)
 local c_hit = os.clock()
 
 --log damaged aircraft in oob_air
-for hit_unit,hitter in pairs(hit_table) do													--iterate through all remaining entries in the hit_table (all destroyed aircraft are removed meanwhile, damaged remain)
+for hit_unit,hitter in pairs(hitTbl_KillerByTarget) do													--iterate through all remaining entries in the hit_table (all destroyed aircraft are removed meanwhile, damaged remain)
 	for side_name,side in pairs(oob_air) do													--iterate through all sides
 		for unit_n,unit in pairs(side) do													--iterate through all air units
 			if string.find(hit_unit, " " .. unit.name .. " ", 1, true) and health_table[hit_unit] then					--if hit unit is part of air unit name
