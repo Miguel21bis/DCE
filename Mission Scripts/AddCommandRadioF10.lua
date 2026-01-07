@@ -7,7 +7,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification  adjustment_i
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "1.14.52"
+versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "2.15.53"
 ------------------------------------------------------------------------------------------------------- 
 -- cleanCode_c				(b springCleaning)(a: remove RemovePlane)
 -- adjustment_i				(i bingo/RTB)(h avoid SAM zone)(g force RTB if bingo)(f ENI table)(e: add sar_F10)(d GetHeading)(c coalitionIdNumeric)(b group Item Radio)(a: ajust function trigo)
@@ -239,64 +239,144 @@ function PairsByKeys (t, f)
 end
 
 
---function to turn a table into a string
+-- --function to turn a table into a string
+-- function TableSerialization(t, i, params)
+
+-- 	local crlf = ""
+-- 	local tab1 = ""
+-- 	for n = 1, i do
+-- 		tab1 = tab1 .. "\t"
+-- 	end
+
+-- 	local text = "\n"..crlf..tab1.."{\n"..crlf
+
+-- 	local tab = ""
+-- 	for n = 1, i + 1 do
+-- 		tab = tab .. "\t"
+-- 	end
+
+-- 	for k,v in PairsByKeys(t) do
+-- 		if type(k) == "string" then
+-- 			k = string.gsub(k, "\n", "\\\n" )
+-- 			k = string.gsub(k, "\"", "\\\"" )
+-- 			-- k = string.gsub(k, "'", "\\\'" )
+-- 			text = text .. tab .. '["' .. k .. '"] = '
+-- 		else
+-- 			text = text .. tab .. "[" .. k .. "] = "
+-- 		end
+-- 		if type(v) == "string" then
+-- 			v = string.gsub(v, "\n", "\\\n" )
+-- 			v = string.gsub(v, "\"", "\\\"" )
+-- 			-- v = string.gsub(v, "'", "\\\'" )
+-- 			text = text .. '"' .. v .. '",\n'..crlf
+-- 		elseif type(v) == "number" then
+-- 			text = text .. v .. ",\n"..crlf
+-- 		elseif type(v) == "table" then
+-- 			text = text .. TableSerialization(v, i + 1)
+-- 		elseif type(v) == "boolean" then
+-- 			if v == true then
+-- 				text = text .. "true,\n"..crlf
+-- 			else
+-- 				text = text .. "false,\n"..crlf
+-- 			end
+-- 		elseif type(v) == "function" then
+-- 			text = text .. v .. ",\n"..crlf
+-- 		elseif v == nil then
+-- 			text = text .. "nil,\n"..crlf
+-- 		end
+-- 	end
+-- 	tab = ""
+-- 	for n = 1, i do
+-- 		tab = tab .. "\t"
+-- 	end
+-- 	if i == 0 then
+-- 		text = text .. tab .. "}\n"		..crlf
+-- 	else
+-- 		text = text .. tab .. "},\n"	..crlf
+-- 	end
+-- 	return text
+-- end
+
+-- Fonction : sérialise une table Lua en string (version optimisée DCS ingame)
+-- Pourquoi : suppression PairsByKeys + buffer concat + cache indentation
+-- Où : remplace intégralement l'ancienne TableSerialization
+
+local indentcache = {}
+
 function TableSerialization(t, i, params)
+	-- buffer de sortie
+	local buffer = {}
+	local bufferindex = 1
 
-	local crlf = ""
-	local tab1 = ""
-	for n = 1, i do
-		tab1 = tab1 .. "\t"
+	-- indentation avec cache
+	local function getindent(n)
+		local s = indentcache[n]
+		if not s then
+			s = string.rep("\t", n)
+			indentcache[n] = s
+		end
+		return s
 	end
 
-	local text = "\n"..crlf..tab1.."{\n"..crlf
+	local tab1          = getindent(i)
+	local tab           = getindent(i + 1)
 
-	local tab = ""
-	for n = 1, i + 1 do
-		tab = tab .. "\t"
-	end
+	buffer[bufferindex] = "\n" .. tab1 .. "{\n"
+	bufferindex         = bufferindex + 1
 
-	for k,v in PairsByKeys(t) do
+	-- itération SANS TRI (gros gain)
+	for k, v in pairs(t) do
+		-- clé
 		if type(k) == "string" then
-			k = string.gsub(k, "\n", "\\\n" )
-			k = string.gsub(k, "\"", "\\\"" )
-			-- k = string.gsub(k, "'", "\\\'" )
-			text = text .. tab .. '["' .. k .. '"] = '
-		else
-			text = text .. tab .. "[" .. k .. "] = "
-		end
-		if type(v) == "string" then
-			v = string.gsub(v, "\n", "\\\n" )
-			v = string.gsub(v, "\"", "\\\"" )
-			-- v = string.gsub(v, "'", "\\\'" )
-			text = text .. '"' .. v .. '",\n'..crlf
-		elseif type(v) == "number" then
-			text = text .. v .. ",\n"..crlf
-		elseif type(v) == "table" then
-			text = text .. TableSerialization(v, i + 1)
-		elseif type(v) == "boolean" then
-			if v == true then
-				text = text .. "true,\n"..crlf
-			else
-				text = text .. "false,\n"..crlf
+			if k:find("\n", 1, true) then
+				k = k:gsub("\n", "\\\n")
 			end
+			if k:find('"', 1, true) then
+				k = k:gsub('"', '\\"')
+			end
+			buffer[bufferindex] = tab .. '["' .. k .. '"] = '
+		else
+			buffer[bufferindex] = tab .. "[" .. tostring(k) .. "] = "
+		end
+		bufferindex = bufferindex + 1
+
+		-- valeur
+		if type(v) == "string" then
+			if v:find("\n", 1, true) then
+				v = v:gsub("\n", "\\\n")
+			end
+			if v:find('"', 1, true) then
+				v = v:gsub('"', '\\"')
+			end
+			buffer[bufferindex] = '"' .. v .. '",\n'
+			bufferindex = bufferindex + 1
+		elseif type(v) == "number" then
+			buffer[bufferindex] = tostring(v) .. ",\n"
+			bufferindex = bufferindex + 1
+		elseif type(v) == "table" then
+			buffer[bufferindex] = TableSerialization(v, i + 1) .. "\n"
+			bufferindex = bufferindex + 1
+		elseif type(v) == "boolean" then
+			buffer[bufferindex] = (v and "true" or "false") .. ",\n"
+			bufferindex = bufferindex + 1
 		elseif type(v) == "function" then
-			text = text .. v .. ",\n"..crlf
+			buffer[bufferindex] = tostring(v) .. ",\n"
+			bufferindex = bufferindex + 1
 		elseif v == nil then
-			text = text .. "nil,\n"..crlf
+			buffer[bufferindex] = "nil,\n"
+			bufferindex = bufferindex + 1
 		end
 	end
-	tab = ""
-	for n = 1, i do
-		tab = tab .. "\t"
-	end
-	if i == 0 then
-		text = text .. tab .. "}\n"		..crlf
-	else
-		text = text .. tab .. "},\n"	..crlf
-	end
-	return text
-end
 
+	-- fermeture
+	if i == 0 then
+		buffer[bufferindex] = tab1 .. "}\n"
+	else
+		buffer[bufferindex] = tab1 .. "},\n"
+	end
+
+	return table.concat(buffer)
+end
 --function to return distance between two vector2 points
 -- function GetDistance(p1, p2)
 function GetDistance(a, b)
