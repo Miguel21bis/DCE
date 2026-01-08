@@ -9,16 +9,9 @@
 -------------------------------------------------------------------------------------------------------
 -- last modification: cleancode_c
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_Prune.lua"] = "1.7.26"
+versionDCE["DC_Prune.lua"] = "1.7.27"
 -------------------------------------------------------------------------------------------------------
--- Reglage_g		(g targetList_InThisMission)(f debug file)(g add 9A33)(f ZSU_57_2)(e dont prune target mission)(d unit FARP)(c: scud)(b: add FPS-117 & FUG & FUSE) (a: ajust PruneScriptConf)
--- debug_g			(g function entry)(f: keept EWR)(e: prune category tag)(d: Static Plane Bug + Heli)(c: Package avion supprimé)(b: FARP)(a: helicopter)
--- cleancode_c		(a springCleaning)
--- M23_a			Désactive USN Mod
--- M21_a			Ajout Convoy (interdit à Prune de les Pruner..)
--- Z02_a			DontPrunSAM et prend en compte la position des intercepteur qui n'ont qu'un seul waypoint
--- M16_d			SpawnAir, & insert pos far target
--------------------------------------------------------------------------------------------------------
+
 if Debug.debug then
 	print("START DC_Prune.lua "..versionDCE["DC_Prune.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
@@ -246,7 +239,7 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 		-- print("DC_P_ keep scud")
 		return true -- keep scud
 	elseif  string.find(string.lower(unit.name),"_pilot_") then
-		print("DC_P_ keep _pilot_")
+		-- print("DC_P_ keep _pilot_")
 		return true -- keep ejected _pilot_
 	elseif  ( string.find(string.lower(unit.name),"ewr") or string.find(string.lower(unit.name),"fps") or string.find(string.lower(unit.name),"FuMG") or string.find(string.lower(unit.name),"FuSe") )   then
 		-- print("DC_P_ keep EWR")

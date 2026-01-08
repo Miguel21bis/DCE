@@ -969,9 +969,10 @@ end
 if debugWeather then
 	print("calcul new weather:")
 	_affiche(camp.weather, "camp.weather DcW ")
+	print("elapsed_Time = "..tostring(elapsed_Time))
 end
 
-print("elapsed_Time = "..tostring(elapsed_Time))
+
 --------------------------------------------------------------
 -- 1. Catégories de presets DCS
 --------------------------------------------------------------
@@ -1140,7 +1141,7 @@ local function generateWind(windActivity, winDir, category)
     end
 
     local meteoFactor = getMeteoFactor(category)
-    print("Wind category = "..tostring(category).." | meteoFactor = "..meteoFactor)
+    -- print("Wind category = "..tostring(category).." | meteoFactor = "..meteoFactor)
 
 
     ----------------------------------------------------------

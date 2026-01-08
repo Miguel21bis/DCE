@@ -677,29 +677,29 @@ if input == "y" or input == "yes" then
 			-- end
 				for _, crit in ipairs(Playability_criterium) do
 					if crit.key == "active_unit" and crit.value == nil then
-						print("\nPlayer unit is not active.\n\n")
+						print("\n(S1) Player unit is not active.\n\n")
 					elseif crit.key == "base" and crit.value == nil then
-						print("\nPlayer airbase is not operational.\n\n")
+						print("\n(S2) Player airbase is not operational.\n\n")
 					elseif crit.key == "ready_aircraft" and crit.value == nil then
-						print("\nPlayer unit has no ready aircraft.\n\n")
+						print("\n(S3) Player unit has no ready aircraft.\n\n")
 					elseif crit.key == "tot" and crit.value == nil then
-						print("\nPlayer aircraft type cannot operate at this time of day.\n\n")
+						print("\n(S4) Player aircraft type cannot operate at this time of day.\n\n")
 					elseif crit.key == "target" and crit.value == nil then
-						print("\nNo eligible mission available for player.\n\n")
+						print("\n(S5) No eligible mission available for player.\n\n")
 					elseif crit.key == "target_firepower" and crit.value == nil then
-						print("\nNot enough ready aircraft for this mission.\n\n")
+						print("\n(S6) Not enough ready aircraft for this mission.\n\n")
 					elseif crit.key == "weather" and crit.value == nil then
-						print("\nPlayer aircraft type cannot operate in this weather.\n\n")
+						print("\n(S7) Player aircraft type cannot operate in this weather.\n\n")
 					elseif crit.key == "target_range" and crit.value == nil then
-						print("\nNo eligible mission available for player.\n\n")
+						print("\n(S8) No eligible mission available for player.\n\n")
 					elseif crit.key == "coop" and crit.value == nil then
-						print("\nNot enough ready aircraft for all clients.\n\n")
+						print("\n(S9) Not enough ready aircraft for all clients.\n\n")
 					elseif crit.key == "intercept" and crit.value == nil then
-						print("\nGround alert intercept duty without launch.\n\n")
+						print("\n(S10) Ground alert intercept duty without launch.\n\n")
 					end
 				end
 				if Multi.NbGroup and not PlayerFlight then
-					print("\nNot enough ready aircraft for all clients..\n\n")
+					print("\n(M1) Not enough ready aircraft for all clients..\n\n")
 				end
 
 				os.execute 'timeout /t 4'

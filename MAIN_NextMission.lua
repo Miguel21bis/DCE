@@ -1398,7 +1398,8 @@ if PlayerFlight then
 				-- Ajout au zip si tout va bien
 				miz:zipAddFile("l10n/DEFAULT/" .. filename, file_path)
 			else
-				print("  File not found : " .. file_path)
+				-- print("  File not found : " .. file_path)
+				AddLog("Warning: Briefing image file not found: " .. file_path)
 			end
 		end
 	end

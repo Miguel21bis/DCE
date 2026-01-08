@@ -14,12 +14,6 @@ if Debug.debug then
 	print("START DEBRIEF_Text.lua "..versionDCE["DEBRIEF_Text.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
 
-local t0 = os.clock()
-local t_a  = 0
-local t_b = 0
-local t_main = 0
-local t_c = 0
-
 Debriefing = ""
 
 -- header ---------------------------------------------------------------------------------- 
@@ -1335,12 +1329,4 @@ do
 	Debriefing = Debriefing .. s
 end
 
-AddLog(string.format(
-	"PERF DEBRIEF_Txt: total=%.2fs | t_a=%.2fs | t_b=%.2fs | t_main=%.2fs | t_c=%.2fs |",
-	os.clock() - t0,
-	t_a,
-	t_b,
-	t_main,
-	t_c
-))
 

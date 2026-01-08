@@ -4,7 +4,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  M68_b cleanCode_d
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/CustomTasksScript.lua"] = "1.9.44"
+versionDCE["Mission Scripts/CustomTasksScript.lua"] = "1.9.45"
 ------------------------------------------------------------------------------------------------------- 
 -- Reglage_n				(n force RTB)(m stopcondition)(l escorte)(k CVN to CV)(j altitudeEnabled true)(h GetHeading)(global path)(f rejoin debug)(e more scheduleFunction) (d landingImpossible denivelé)(c: limit =  1 ?)(b: orbit infini) all ["groupAttack"] = false,
 -- cleanCode_d				(c GetCategory)(b springCleaning)
@@ -18,6 +18,7 @@ versionDCE["Mission Scripts/CustomTasksScript.lua"] = "1.9.44"
 
 ------------------------------------------------------------------------------------------------------- 
 
+env.info("### DCE START CustomIntercept.lua " .. versionDCE["Mission Scripts/CustomTasksScript.lua"] .. " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 
 local varFpsLeak = false
 local varFpsLeak_B = false

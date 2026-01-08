@@ -3,25 +3,9 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  M90_a
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_Generator.lua"] = "1.21.135"
+versionDCE["ATO_Generator.lua"] = "1.21.136"
 ------------------------------------------------------------------------------------------------------- 
--- cleancode_d				(d springCleaning)
--- adjustment_Ab			(b target priority (again))(low Red flight)(score & sort)(a country table)(z target priority)(y nb of Cap & Firepower)(v: depreciated variable capability)(u score & strikeOnlyWithEscorte)(minscore)(s tasks table)(op ne donne pas tout en CAP)(o info loadout)(N ne donne pas tout en CAP)(lM: MP) (ghi:donne une alti aléatoire) (f:altitude en fonction diff entre role)(e: random loadout temp)(cd:support équitable entre escadron)(b: TASK Coef)(a: escort mandatory or not)
--- Debug_t					(t boost priority in MP)(s no Choice Plane MP with SEAD)(r priority again)(q sort C broken)(p multipack broken)(o #Draft_sorties)(n db_loadouts)(m strikeOnlyWithEscorte)(l AltitudeFloorNew)(k too tanker&Awacs)(jk number entre 0 et1)(i info2000)(h:reecriture loadout_eligible) (f:interdit l'escorte avion/helico)(de:correction targetName)(c: mauvaise insertion dans la base)(b: haut score)(a: Fin de campagne)
--- modification M90_a		flight plan via a FARP to increase range
--- modification M68_a		add AFAC task
--- modification M61_a		SAR
--- modification M56_b		AssignCallnameSquad (b: callsignId)
--- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
--- modification M49_c		big central db_loadout (c: loadout statistics)
--- modification M43			assignation des numeros de parking du type C08 
--- modification M42			liveryModex
--- modification M38_t		Check and Help CampaignMaker (t debug/debugGenerator)(r +)(o _affiche) (e: loadout Task?)
--- modification M16_b		SpawnAir B1b & B-52 need BaseAirStart = true in db_aibase
--- modification M13_e		Performance Scripting
--- modification M11A_bk		Multiplayer	(bk tente d obtenir ce que l'on souahite)(bj same target)(bi bug CAP)(bb: rapport entre escorte et cap)(wxy: force same package)(z: debug MP avec 1 Plane)(y: interdit l'escorte avion/helico) (x: EscorteTot-max) (w: choix EscorteMax) (v: interdit Strike sans escorte)(u: reserve avion Escorte) (t: different Type possible/task)
--- modification M06			helicopter playable
-------------------------------------------------------------------------------------------------------- 	
+	
 
 if Debug.debug then
 	print("START ATO_Generator.lua "..versionDCE["ATO_Generator.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
@@ -3956,7 +3940,7 @@ local show = true
 
 
 if Debug.debug then
-	print("AtoG outMemory check Z1")
+	-- print("AtoG outMemory check Z1")
 	for side, packages in pairs(ATO) do
 		for packN, pack in pairs(packages) do
 			for role, flights in pairs(pack) do
@@ -3969,7 +3953,7 @@ if Debug.debug then
 		end
 	end
 
-	_affiche(checkNbPlane, "checkNbPlane: ")
+	-- _affiche(checkNbPlane, "checkNbPlane: ")
 
 
 	local resultPourcent =  checkNbPlane.blue.thisMission.used / checkNbPlane.blue.beforMission.ready * 100
@@ -3991,32 +3975,6 @@ if Debug.debug then
 		show = true
 	end
 
-
-
-
-
-	-- if camp.Aircraft_availability then
-	-- 	for squadName, squad in pairs(camp.Aircraft_availability) do
-	-- 		if squad then
-	-- 			if squad.unavailable then
-	-- 				local squadSide = FoundSquadSide(squadName)
-	-- 				if squadSide then
-
-	-- 					checkNbPlane[squadSide]["beforMission"].alreadyInFlight = checkNbPlane[squadSide]["beforMission"].alreadyInFlight + #squad.unavailable
-	-- 				else
-	-- 					print("AtoG strange, squad.unavailable on this squad ")
-	-- 					_affiche(squad, "squad")
-	-- 					if Debug.debug then
-	-- 					end
-
-	-- 				end
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
-
-
-
 	for side, units in pairs(oob_air) do
 		for unitN, unit in pairs(units) do
 			if not unit.inactive or unit.inactive == nil then
@@ -4035,10 +3993,6 @@ if Debug.debug then
 			end
 		end
 	end
-
-	-- if show then os.execute 'pause'
-	-- end
-
 end
 
 if Debug.debug and Debug.Generator.affiche and string.find(Debug.Generator.chapter, "C") then
@@ -4058,89 +4012,6 @@ if Debug.debug and Debug.Generator.affiche and string.find(Debug.Generator.chapt
 	end
 
 end
-
--- --place la clef occurence à tous les loadouts
--- Loadouts_archive = Loadouts_archive or {}
--- for plane, planeTab  in pairs(Loadouts_archive) do
--- 	for taskName, loadout  in pairs(planeTab) do
--- 		for loadoutName, value  in pairs(loadout) do
--- 			if type(value) == "table" then
--- 				if not value["occurence"] then value["occurence"] = 0 end
--- 			end
--- 		end
--- 	end
--- end
-
-
--- -- modification M49.c big central db_loadout (c: loadout statistics)
--- -- local found = false
--- for _, pack in pairs(ATO) do
--- 	for p = 1, #pack do
--- 		for _,flight in pairs(pack[p]) do
--- 			for f = 1, #flight do
--- 				local found = false
--- 				for plane, planeTab  in pairs(Loadouts_archive) do
--- 					if plane == flight[f].type then
--- 						for _, loadout  in pairs(planeTab) do
--- 							for loadoutName, value  in pairs(loadout) do
--- 								if loadoutName  == flight[f].loadout.name then
--- 									if not value["occurence"] or value["occurence"] == nil or value["occurence"] == " " then value["occurence"] = 0 end
--- 									value["occurence"] = value["occurence"] + 1
--- 									found = true
--- 									break
--- 								end
--- 								if found then break end
--- 							end
--- 							if found then break end
--- 						end
--- 						if found then break end
--- 					end
--- 					if found then break end
--- 				end
--- 			end
--- 		end
--- 	end
--- end
-
-
--- local s = ""
--- --place la clef occurence à tous les loadouts
--- for plane, planeTab  in pairs(Loadouts_archive) do
--- 	for taskName, loadout  in pairs(planeTab) do
--- 		for loadoutName, value  in pairs(loadout) do
--- 			if type(value) == "table" then
--- 				s = s.."\n"
--- 				s = s..plane
--- 				for i=1, 15 - string.len(plane) do
--- 					s = s.." "
--- 				end
-
--- 				s = s..taskName
--- 				for i=1, 20 - string.len(taskName) do
--- 					s = s.." "
--- 				end
-
--- 				if value.occurence == 0 then
--- 					value.occurence = " "
--- 				end
--- 				s = s..value.occurence
--- 				for i=1, 5 - string.len(value.occurence) do
--- 					s = s.." "
--- 				end
-
--- 				local minsCore = ""
--- 				if value.minscore then minsCore = value.minscore end
-
--- 				s = s..minsCore
--- 				for i=1, 5 - string.len(minsCore) do
--- 					s = s.." "
--- 				end
-
--- 				s = s..loadoutName
--- 			end
--- 		end
--- 	end
--- end
 
 if Debug.Generator and Debug.debug then
 	flushDebugLogs()

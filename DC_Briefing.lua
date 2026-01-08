@@ -3,33 +3,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification: debug_k
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_Briefing.lua"] = "1.24.158"
-------------------------------------------------------------------------------------------------------- 
--- cleancode_d				(d springCleaning)						
--- adjustment_b				(b \\" to \")(a add AFAC task)
--- debug_k					(k choix cahotique, entrainant un bug radio)(j tempPlayer.package)(i package stats)(h nbPasse)(g mission h)(f mission.maxDictId)(e intercept navigation) (d: affiche info MP)(c: camp.date.day)  (b: Mi8 & Mi24)(a: add Mig21 Channel 00)
-
--- modification M80_a		use various tables, such as base name or aircraft type aliases
--- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_Positions)
--- modification M61_a		SAR
--- modification M58_b		flight plan, heading, Dist, ETE (b bug, no view)
--- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
--- modification M51_d  		Moonphase (d: NVG info)
--- modification M48_g		Accept result mission (d: garde en memoire le txt camp.Briefing_text) (g: addImage trigger)(f: debug)
--- modification M47_d  		Keeps the history of the campaign files (d: Briefing part)
--- modification M41_b 		Sratchpad written in the Sratchpad file, if this modul is installed
--- modification M38_k 		Check and Help CampaignMaker (k: frequence)
--- modification M34_Bj  	custom FrequenceRadio (j inheritedType)(g pattern schedule)(f more Divert, more Coalition, bug list Freq)(e bug canal 0 ex Mig21)(Bd sautomatically selects the correct range ex Mig19)(z guard et reorganisation radio)(y supprime les n°indicatif AwacsTanker)(s: bug nb radio limited)(r: LVHF)(t: NameRadio)(s: Coalition)(s: debug R3)(r.o: all ATC freq in array)(n: bestCapability)(m: freq group bug)(l: bug (number expected, got string))(k: utilise les indicatifs WEST pour EWR)(i  3 frequency bands)
--- modification M33_m 		Custom Briefing (lm: use  DictKey_descriptionText)(ijk MP limite le nombre de briefing different)(h: only one time airlift info)(g: divert without freq)(f: divert CVN)(e: divers) (d: Divert)(c: Alignement du txt)(onBoardNum)
--- modification M27_b 		movedBullseye (b: bug if no Bullseye)
-								-- modification M17.c Option F-14B
--- Modification M15_d 		info catapulte/pont dans briefing
--- modification M11B 		Multiplayer--briefing
--- modification M11_y		Multiplayer (y: force same package)							
--- modification M07_h		EWR toujours affiché dans le briefing
--- modification M06_b		helicoptere playable
--- modification M05_c		ajout picture Briefing + pictures Target  (c: debug {""})
--- modification M04_h		ajout d'une troisieme radio (g: helicopter recovery radio)(g: recovery radio)(f: set up radio channels for wing players )
+versionDCE["DC_Briefing.lua"] = "1.25.159"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -1833,7 +1807,6 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 											freqA = tonumber(atc_PlayerFreq[i]) or 0
 											
 											for radioN = 1, #radioP do
-												print("ATC Freq ATC F radioN "..radioN)
 												entry = {name = "", call = "", freq = "",radio = ""}
 												entry["name"] = "ATC: "
 												entry["call"] = AliasBaseName(tempPlayer.airbase)

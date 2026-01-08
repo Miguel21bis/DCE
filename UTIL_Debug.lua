@@ -3,10 +3,7 @@
 -------------------------------------------------------------------------------------------------------
 -- last modification: cleancode_c
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Debug.lua"] = "1.3.11"
-------------------------------------------------------------------------------------------------------- 
--- cleancode_c		(b springCleaning)
--- adjustment_g		(f targetName)(e Package_freq)(ac affiche le nombre d element dans la mission)
+versionDCE["UTIL_Debug.lua"] = "1.3.12"
 ------------------------------------------------------------------------------------------------------- 
 
 
@@ -31,10 +28,10 @@ if Debug.debug then
 	availableFile:write(available_str)
 	availableFile:close()
 
-	local camp_str = "freqence_package_AtoFP = " .. TableSerialization(Package_freq, 0)			--make a string
-	local campFile = io.open("Debug/Package_freq__UtilDebug.lua", "w") or error("Failed to open debug Package_freq__UtilDebug file")
-	campFile:write(camp_str)																	--save new data
-	campFile:close()
+	-- local camp_str = "freqence_package_AtoFP = " .. TableSerialization(Package_freq, 0)			--make a string
+	-- local campFile = io.open("Debug/Package_freq__UtilDebug.lua", "w") or error("Failed to open debug Package_freq__UtilDebug file")
+	-- campFile:write(camp_str)																	--save new data
+	-- campFile:close()
 
 	local file_str = "GCI = " .. TableSerialization(GCI, 0)			--make a string
 	local file_File = io.open("Debug/GCI_Data_UtilDebug.lua", "w") or error("Failed to open debug GCI_Data_UtilDebug file")

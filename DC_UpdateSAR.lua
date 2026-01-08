@@ -15,12 +15,6 @@ if Debug.debug then
 	print("START DC_UpdateSAR.lua "..versionDCE["DC_UpdateSAR.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
 
-local t0 = os.clock()
-local t_a  = 0
-local t_b = 0
-local t_main = 0
-local t_c = 0
-
 -- camp.SAR = {
 -- 	helicopter = {
 -- 		[1] = "machprout",
@@ -53,8 +47,6 @@ local t_c = 0
 --     ["x"] = 22004.83531289,
 -- },
 
-
-local c_a = os.clock()
 
 if camp_ZoneSAR and camp_ZoneSAR ~= nil then
     for zoneSideName, sideSAR in pairs(camp_ZoneSAR) do
@@ -119,7 +111,6 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
     end
 end
 
-t_a = t_a + (os.clock() - c_a)
 
 local function checkPointInPoly2(point, poly)
 
@@ -386,9 +377,6 @@ local function deleteAliasPilotInOobGround(ejectedPilot)
     return found
 end
 
-
-local c_b = os.clock()
-
 -- if not camp_ZoneSAR or camp_ZoneSAR == nil or not camp_ZoneSAR.blue or camp_ZoneSAR.blue == nil  then
 if not camp_ZoneSAR or not camp_ZoneSAR.blue then
 
@@ -519,8 +507,6 @@ end
 
 camp.boundary = boundary
 
-t_b = t_b + (os.clock() - c_b)
-
 -- camp_ZoneSAR = {
 -- 	['neutrals'] = {
 -- 	},
@@ -576,8 +562,6 @@ t_b = t_b + (os.clock() - c_b)
 -- 	},
 -- }
 
-
-local c_main = os.clock()
 --selectionne la base la plus proche pour leur porter secours
 --defini si le pilot est capturé ou récupérable
 
@@ -1101,11 +1085,6 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
     end
 end
 
-t_main = t_main + (os.clock() - c_main)
-
-
-local c_c = os.clock()
-
 -- Supprime de oob_ground ET de camp_ZoneSAR les ejectedPilot capturés ou sauvés
 if camp_ZoneSAR then
     for zone_sideName, sideTab in pairs(camp_ZoneSAR) do
@@ -1115,7 +1094,7 @@ if camp_ZoneSAR then
                 local pilot = zone[pilotN]
                 if pilot.status == "rescued" or pilot.status == "POW" or pilot.status == "error" then
                     local result, resultTarget = deleteSoldierAliasPilot(pilot)
-                    if not result and not resultTarget then
+                    if not result and not resultTarget and Debug.debug then
                         print("DcUS GG (rescued or POW) Unable to delete this pilot "..pilot.status.." // "..tostring(pilot.name))
                     end
                     -- Suppression du pilote dans camp_ZoneSAR
@@ -1123,7 +1102,7 @@ if camp_ZoneSAR then
                     
                     -- Supprimer la zone si elle est vide
                     if not next(zone) then
-                        print("DcUS GH Supprimer la zone si elle est vide zoneName "..tostring(zoneName))
+                        -- print("DcUS GH Supprimer la zone si elle est vide zoneName "..tostring(zoneName))
                         sideTab[zoneName] = nil
                     end
 
@@ -1248,8 +1227,6 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
     end
 end
 
-t_c = t_c + (os.clock() - c_c)
-
 
 camp.SAR.alertSAR = {
 		["blue"] = {
@@ -1271,22 +1248,3 @@ camp.SAR.Flag = 600
 -- end
 
 
-	AddLog(string.format(
-		"PERF UpdateSAR: total=%.2fs | t_a=%.2fs | t_b=%.2fs | t_main=%.2fs | t_c=%.2fs |",
-		os.clock() - t0,
-		t_a,
-		t_b,
-		t_main,
-        t_c
-	))
-
-    -- if BugList and type(BugList) == "table" and #BugList >= 1 then
-	-- 	local table_Str = "BugList = " .. TableSerialization(BugList, 0)
-	-- 	local bugFile = io.open("Debug/BugList.lua", "w") or error("Failed to open debug file")
-	-- 	bugFile:write(table_Str)
-	-- 	bugFile:close()
-	-- end
-
-	-- os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')	
-
-	-- os.execute 'pause'
