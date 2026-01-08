@@ -3,60 +3,8 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification: adjustment_Ad debug_Ab
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_FlightPlan.lua"] = "1.58.290"
+versionDCE["ATO_FlightPlan.lua"] = "1.58.291"
 ------------------------------------------------------------------------------------------------------- 
-
--- SomethingSimple_a		(a add randomizeSkills)
-													-- (deprecate) Eagle_01 Modification E02_a		I16 and A-4e
--- Eagle_01 Modification E01_c
-
--- mouvedOption_CM_01_c		(c: manage les options de west callSign) (b: previent le CampaignMaker d'une nation manquante)
--- adjustment_Ad            (d Fighter Sweep standoff)(c TACAN_byTarget)(b predeterminedCallsign)(y AddPropAircraft for all)(x largage d urgence if not heli)(CVN to CV)(t adjustment_e)(s No ATE if antiShip + B52 ASM)
--- cleancode_n				(n springCleaning)
--- debug_Ab					(b Seasick intercept)(a flight delayed)(z package stats)(y polka on parking)(x frequency SA342)(w no recalculates all speeds)
-
--- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_Positions)
--- modification M74_a		mix static, vehicle and map elements in a Target.
--- modification M71_a		PayloadRestricted
--- modification M68_a		add AFAC task
--- modification M67_a		add 2.9 datalinks dataCartridge
--- modification M66_a		add Runway Attack
--- modification M65_a		add AirGroundAttackTask Mbot s file
--- modification M63_a		compatible Datacard Generator or CombatFlite
--- modification M61_k		SAR (k use parkAlertSAR for all Heli)(j bug parkAlertSAR.occupied)(debug SAR on CV)(f radio_start)(d theatre)
--- modification M60_c		add CTLD (c load_CTLD option)(b bug vehicul)(a JTAC)
--- modification M58_a		flight plan, heading, Dist, ETE
--- modification M56_c		AssignCallnameSquad (c callsign_flight)(b: callsignId)
--- modification M54_d		revoir CustomTaskScript et TaskBombing (c: "Guided bombs 268402702)(b: debug No XY)
--- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
--- modification M52_b		campaign player's choices  (b: difficulté de campagne)(a: durée de la campagne)
--- modification M47_c		Keeps the history of the campaign files (c: save debugging information during mission generation)
--- modification M46_f		SinglePlayer with dedicated server (f: set up the server correctly for sixpack)(d: MP spawnTime =0) ((c: D choice with AI AirSpawn) )
--- modification M45_s		Compatible with 2.7.0 (pqrs: debug deck)(o: bug spawnAir MP)(m: trigger)(l: debug Deck)(k: delayed landing before first catapults)(j: E2 S3 on catapult)(i: debug Deck)(h: player On Sixpack)(g: taxiing timetable)(f: activate true) (e: order of spawn on Deck)(c: IA catapult First)(b: F14 catapult)
--- modification M43_c		Assignment of parking numbers of type C08 (b: ("1.38.106") assignment of parking with a simple numbering )
--- modification M42_b		LiveryModex
--- modification M40_i		Pedro Helicopter (i use new follow task)
--- modification M38_e		Check and Help CampaignMaker (e: loadout Task?)
--- modification M34_Bj		Custom FrequenceRadio (j inheritedType)(i: FreqCapability2 et bug freqence invalid)(g group Frequency canal1 radio1)(f more divert, more Coalition, bug list Freq)(Be sautomatically selects the correct range ex Mig19)(Bd bug Guard)
--- modification M33_k		Custom Briefing (k debug MP)(j debug Client)(h: debug)(g: not airbase)(f: divert/CV possible)(d: divert)(c: Alignement du txt)(onBoardNum)
--- modification M31			Remove all static aircraft from the deck
--- modification M30_b		Desactive TriggerStart
--- modification M27_d		movedBullseye (d: selectedBullseye in db_airbases)(c: does not include carriers)
--- modification M24			Set Multiplayer 
--- modification M23			Désactive USN Mod 
--- modification M20_b		Pannes aléatoires (Failures) en SingleMission et ForcedOption (external view etc..) (b failure adapted to each aircraft type)
--- modification M18_e		(e: un avion BaseAirStart peu se poser sur une base)Despawn/destroy Plane on BaseAirStart
--- modification M17_g		Option F-14B & All AddPropAircraft (g rewriting NavTargetPoints)
--- Modification M15_e		Info catapulte/pont dans briefing (e info departure à toutes les bases)
--- modification M14_b		Versionning (b:"1.38.107")
--- modification M12_c		Skill (c: moved skill table)
--- modification M11B_c		Multiplayer--briefing	(c: info flight if MP)
--- modification M11A_b_l	Multiplayer (l distance btw 2 & 3)(duplicate groupName)(i ATTENTION MANQUE Start)(bh recovery wpt 2&3)(z nbrecovery)(y: force same package)(vwx: spawn intercepteur)(u: spawn in wpt 2)(ba t: AltitudeFloor)(s: F14 no limited to 2) (r: notRecovery for Inter)(q: take recovery plane)
--- modification M08_c		Hotstart  --||initialement ((départ de la piste + debug hotstart + intercepteur CV))(c: debug)
--- modification M06_i		Helicoptere playable (i over speed on spawn)(g: Start From FARP & LHA & delete E01)
--- modification M03_n		Parking assignment CV LHA FARP & shift the spawn (n debug limitedParking)(m: debug helico/FARP)(l: best check)(k: check place parking dispo en fonction des minutes)(i: Parking limite little base)
--- modification M01_b		Ajout datalink (b: UTIL_Data file)
-------------------------------------------------------------------------------------------------------- 	
 
 if Debug.debug then
 	print("START ATO_FlightPlan.lua "..versionDCE["ATO_FlightPlan.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
@@ -320,9 +268,6 @@ for sideName, side in pairs(DCS_Side) do
 	CommonFreq[side]["HF"][2] = GetFrequencyNG(side, nil, "coalition", nil, "HF")
 	CommonFreq[side]["LVHF"][1] = GetFrequencyNG(side, nil, "coalition", nil, "LVHF")
 	CommonFreq[side]["LVHF"][2] = GetFrequencyNG(side, nil, "coalition", nil, "LVHF")
-
-	_affiche(CommonFreq[side], "ATOFP CommonFreq "..side)
-	-- os.execute 'pause'
 
 	for n=1, 2 do
 		local testFreqency = tonumber(CommonFreq[side]["UHF"][n])
@@ -4841,24 +4786,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							local parkParameters = GetParkingId( flight[f].parking_id, flight[f].base)
 
-							if parkParameters and parkParameters["parking_id"] then
-								units[n]["parking_id"] = parkParameters["parking_id"]
+							if parkParameters then
+								units[n]["parking_id"] = parkParameters
 							end
-
-							-- local parkParameters = GetParkingId( flight[f].parking_id, flight[f].base)
-
-							-- if parkParameters and parkParameters["parking_id"] then
-							-- 	units[n]["heading"] = parkParameters["heading"]
-							-- 	units[n]["parking"] = parkParameters["parking"]
-							-- 	units[n]["parking_id"] = parkParameters["parking_id"]
-							-- 	units[n]["x"] = parkParameters["x"]
-							-- 	units[n]["y"] = parkParameters["y"]
-							-- 	if n==1 then
-							-- 		waypoints[1].x = parkParameters["x"]
-							-- 		waypoints[1].y = parkParameters["y"]
-							-- 	end
-							-- end
-
 
 						elseif flight[f]["parkAlertSAR"] and flight[f]["parkAlertSAR"][n] then
 							if n==1 then

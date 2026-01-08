@@ -4,26 +4,7 @@
 if not versionDCE then versionDCE = {} end
 versionDCE["UTIL_Functions.lua"] = "2.20.137"
 ------------------------------------------------------------------------------------------------------- 
--- cleancode_g				(g springCleaning)					
--- adjustment_o				(n loadout code)(m Disp_time)(l add AFAC task)(k FormatTime)(i add InsertBugList(txt))(h use IsWesternCountry)(fg: add Loadout tiers)(e todo)(d:CheckConfModMaster )(c: fire Playable_m from conf_mod)
--- debug_l					(l DC_NavalEnvironment)(k Package_freq-targetname)(j code_loadout bestMatch)(i planeType)(h Tha\'lah)(g string.gsub(v, "\"", "\\\"" ))(f new generateId)(d UH to HF) Angle et Bearing des statics sur PA
--- modification M85_a		new variables added to conf_mod (RepairOption, current_date, weather, etc.)
--- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a LL_Positions)
--- modification M77_l		CG_ArtySpotter (kl ListSpotterAircraft)
--- modification M71_c		PayloadRestricted (c:AuthorizedLoadout )(b Action.RestrictedLoadout(file))
--- modification M63_a		compatible Datacard Generator or CombatFlite
--- modification M61_a		SAR
--- modification M56_a		AssignCallnameSquad
--- modification M53_d		automatic update of the conf_mod file (b conf_mod reconfiguration)
--- modification M49_h		big central db_loadout (h buildsLoadout)(g emport.num)(b: routine Check)
--- modification M47_c		keeps the history of the campaign files (c: save debugging information during mission generation)
--- modification M43_d		assignation des numeros de parking du type C08 (d: bug static, solution : NbPlaneTot)
--- modification M41			Scratchpad written in the Sratchpad file, if this modul is installed
--- modification M38_z		Check and Help CampaignMaker (z new file name: UTIL_ConfModCheck) (s jammer)(pq infos)(e: helps to balance the game (type "Z" in firstmission.bat))(d: checks only the right  theatre) (c: Check conf_mod)
--- modification M34_Bk		custom FrequenceRadio (k FreqCapability)(FreqCapability2)(Bd_z guard)(debug Tanker NoRadio)(q: LVHF & CommunFrequency)(p: mil impossible M2000)(mno: freq group bug)(i  3 frequency bands)(g: VHF helicopter)(h: bug Gazelle)
--- modification M17_f		Option F-14B & All AddPropAircraft
-------------------------------------------------------------------------------------------------------- 
----
+
 if Debug.debug then
 	print("START UTIL_Functions.lua "..versionDCE["UTIL_Functions.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
@@ -33,8 +14,6 @@ T_GetTD  = 0
 T_GetD = 0
 
 --local variable
--- petit code pour remettre les stock init comme au debut
-local adjust_DCE_GC22 = true				-- variable pour ajuster les GC22, si false, ne pas ajuster
 
 --variable camp global
 if not camp.AuthorizedLoadout then
@@ -77,29 +56,6 @@ AssignedTargetFrequency = {
 	["blue"] = {},
 	["red"] = {},
 }
--- AssignedFrequencies = {
--- 	["blue"] = {},
--- 	["red"] = {},
--- }
--- AssignedCommonFrequencies = {
--- 	["blue"] = {},
--- 	["red"] = {},
--- }
-
-RadioA = {
-	["blue"] = {
-	},
-	["red"] = {
-	},
-}
-RadioB = {
-	["blue"] = {
-	},
-	["red"] = {
-	},
-}
-
-RadioWavePlayer = nil
 
 RADIO_WAVES = {
 	HF =       { min =   3.0, max =  30.0 },
@@ -142,20 +98,20 @@ Attribut2Target = {
 	["bridge"] = "bridge",
 }
 
-Package_freq = {															--table to store frequencies assigned to packages
-	["blue"] = {
-		["UHF"] = {},
-		["VHF"] = {},
-		["LVHF"] = {},
-		["HF"] = {},
-	},
-	["red"] = {
-		["UHF"] = {},
-		["VHF"] = {},
-		["LVHF"] = {},
-		["HF"] = {},
-	},
-}
+-- Package_freq = {															--table to store frequencies assigned to packages
+-- 	["blue"] = {
+-- 		["UHF"] = {},
+-- 		["VHF"] = {},
+-- 		["LVHF"] = {},
+-- 		["HF"] = {},
+-- 	},
+-- 	["red"] = {
+-- 		["UHF"] = {},
+-- 		["VHF"] = {},
+-- 		["LVHF"] = {},
+-- 		["HF"] = {},
+-- 	},
+-- }
 
 
 local idGroupCounter = 3000
@@ -195,29 +151,6 @@ function FileExists(path)
 	end
 end
 
--- sorts tables alphabetically, to be used in a "for" loop instead of pairs or ipairs
--- http://www.lua.org/pil/19.3.html
--- function PairsByKeys (t, f)
---     local a = {}
--- 	local initType
--- 	local dontSort = false
---     for n in pairs(t) do initType = type(n) break end
--- 	for n in pairs(t) do
--- 		table.insert(a, n)
--- 		if type(n) ~= initType then dontSort = true end
--- 	end
--- 	if not dontSort then
--- 		table.sort(a, f)
--- 	end
---     local i = 0      -- iterator variable
---     local iter = function ()   -- iterator function
---         i = i + 1
---         if a[i] == nil then return nil
---         else return a[i], t[a[i]]
---         end
---     end
---     return iter
--- end
 
 --function to sort tables alphabetically, to be used in a "for" loop instead of pairs or ipairs
 -- Fonction pour trier les clés numériques dans l'ordre croissant
@@ -951,7 +884,7 @@ end
 
 --function to return distance between two vector2 points
 function GetDistance(p1, p2)
-	
+
 	local c_GetD = os.clock()
 
 	if not p1.x or not p1.y then
@@ -1020,7 +953,7 @@ end
 -- 		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
 -- 		return p1_p3_distance
 -- 	else
-		
+
 -- 		local value = math.abs(math.sin(math.rad(alpha)) * p1_p3_distance)
 -- 		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
 -- 		return value
@@ -1198,7 +1131,7 @@ function CheckAll_Id()
 	-- 	-- Unix/Linux/Mac
 	-- 	os.execute("sleep 6")
 	-- end
-	
+
 	--pour le mission
 	for side_name, side in pairs(mission.coalition) do
 		for country_n, country_ in pairs(side.country) do
@@ -1637,7 +1570,7 @@ end -- function affiche
 
 local function intersectRange(a, b)
 
-	
+
 	local function modulationCompatible(m1, m2)
 		if m1 == m2 then return true end
 		if m1 == MODULATION_AM_AND_FM then return true end
@@ -1703,7 +1636,7 @@ end
 
 local function simplifyRadioRanges(moduleData, isPlayer)
 
-	if isPlayer then print("simplifyRadioRanges called for moduleData isPlayer=? "..tostring(isPlayer)) end
+	-- if isPlayer then print("simplifyRadioRanges called for moduleData isPlayer=? "..tostring(isPlayer)) end
 
 	if type(moduleData) ~= "table" then
 		print("return A no moduleData table")
@@ -1747,7 +1680,7 @@ local function simplifyRadioRanges(moduleData, isPlayer)
 
 		for _,radio in pairs(pr) do
 			-- if isPlayer then print("SRR addRange() C _ ".._) _affiche(radio, "radio: ") end
-			
+
 			if type(radio.range) == "table" then
 				for _, rangeData in ipairs(radio.range) do
 					-- if isPlayer then print("SRR addRange() D panelRadio "..tostring(rangeData.min).." - "..tostring(rangeData.max)) end
@@ -1793,7 +1726,7 @@ local function simplifyRadioRanges(moduleData, isPlayer)
 	local best = nil
 	local bestWidth = nil
 	-- if isPlayer then print("SRR G1 searching best player range among "..tostring(#rawRanges).." ranges") end
-	
+
 	for _,r in ipairs(rawRanges) do
 		local width = r.max - r.min
 		-- if isPlayer then print("SRR G2 candidate player range "..tostring(r.min).." - "..tostring(r.max).." width "..tostring(width)) end
@@ -1805,7 +1738,7 @@ local function simplifyRadioRanges(moduleData, isPlayer)
 	end
 
 	if best then
-		if isPlayer then 
+		if isPlayer then
 			-- print("SRR return H best player range "..tostring(best.min).." - "..tostring(best.max)) 
 			-- os.execute 'pause'
 			end
@@ -1872,13 +1805,13 @@ function DCE_FindRadioCommonWaves()
 		local validModuleCount = 0
 
 			for moduleName,_ in pairs(modules) do
-				
+
 				local moduleData = Db_Frequency[moduleName]
 				if moduleData then
 					-- print("moduleName DCE_FRC() "..moduleName)
 					local ranges = simplifyRadioRanges(moduleData)
 					local inWave = {}
-					
+
 					for _,r in ipairs(ranges) do
 						local inter = intersect(r, wave)
 						if inter then
@@ -2029,7 +1962,7 @@ function DCE_FindCommonRadioRanges()
 							-- print("DCE_FindCommonRadioRanges F checking existing radio "..tostring(radio.name).." for module "..moduleName)
 							if radio.range then
 								-- print("DCE_FindCommonRadioRanges G radio "..tostring(radio.name).." has range for module "..moduleName)
-								
+
 								-- if #radio.range and #radio.range >= 1 then
 									for _, r in ipairs(radio.range) do
 										-- print("DCE_FindCommonRadioRanges H checking range "..tostring(r.min).." - "..tostring(r.max).." of radio "..tostring(radio.name).." for module "..moduleName)
@@ -2098,7 +2031,7 @@ function DCE_FindCommonRadioRanges()
 	-- campFile:write(camp_str)																		--save new data
 	-- campFile:close()
 
-	
+
 	local function intersectRangeFreqOnly(a, b)
 		local minF = math.max(a.min, b.min)
 		local maxF = math.min(a.max, b.max)
@@ -2294,7 +2227,7 @@ local EmergencyFreq = {
 --     LVHF = { min = 30,  max = 75.95 },
 -- }
 
-local wavePriority = { 
+local wavePriority = {
 	blue = {
 		plane = { "UHF", "VHF", "HF", "LVHF" },
 		helicopter = {  "LVHF", "VHF", "UHF", "HF", }
@@ -2329,7 +2262,7 @@ end
 local function getRangesForContext(side, task, type_withData, flightOrPackage)
 	-- print("getRangesForContext A called for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData).." flightOrPackage "..tostring(flightOrPackage))
 	-- cas spécial : réseaux commandement joueur
-	
+
 	if specialTasks[task] and side == PlayerSide and (not type_withData or not IsHelicopter[type_withData]) then
 		if not IsHelicopter[type_withData] then
 			for _, wave in ipairs(wavePriority[side].plane) do
@@ -3051,7 +2984,7 @@ local function loadoutPylon(loadoutTable)
 
 					if newSort then
 						for chapterN, emport in pairs(loadout.stores.pylons) do
-							
+
 							if not emport.num then
 								-- AddLog("UtilF bug with plane "..plane.." loadoutName: "..loadoutName)
 							else
@@ -3064,7 +2997,7 @@ local function loadoutPylon(loadoutTable)
 								end
 								newSort = true
 							end
-							
+
 
 						end
 					else
@@ -3120,15 +3053,16 @@ function LoadAllLoadouts(subFolder)
 
     local p = io.popen(cmd)
     if not p then
-        print("DCE ERROR : impossible d’ouvrir le dossier : " .. folder)
+        -- print("DCE ERROR : impossible d’ouvrir le dossier : " .. folder)
+		AddLog("DCE ERROR : impossible d’ouvrir le dossier : " .. folder)
         return final
     end
 
     for file in p:lines() do
         if file:match("%.lua$") then
-            
+
             local fullpath = folder .. "/" .. file
-            print("DCE : loading loadout -> " .. fullpath)
+            -- print("DCE : loading loadout -> " .. fullpath)
 
             db_loadouts = nil  -- IMPORTANT : on purifie avant le dofile
 
@@ -3137,8 +3071,9 @@ function LoadAllLoadouts(subFolder)
             end)
 
             if not ok then
-                print("DCE ERROR : erreur dans " .. fullpath .. " : " .. err)
-            
+                -- print("DCE ERROR : erreur dans " .. fullpath .. " : " .. err)
+				AddLog("DCE ERROR : erreur dans " .. fullpath .. " : " .. err)
+
             elseif db_loadouts then
                 -- MERGE ici : final = final + db_loadouts
                 mergeTablesDeep(final, db_loadouts)
@@ -3231,7 +3166,7 @@ end
 -- modification M49.a big central db_loadout
 
 function BuildLoadout()
-	
+
 	if not camp.AuthorizedLoadout then
 		camp.AuthorizedLoadout = {}
 	end
@@ -3371,7 +3306,7 @@ function BuildLoadout()
 
 	-- helper: vérifie si 
 	local function plane_match(planeLoadout)
-		
+
 		for sideName, squads in pairs(oob_air) do
 			for squadN, squad in pairs(squads) do
 				if string.lower(squad.type) == string.lower(planeLoadout) then
@@ -3584,7 +3519,7 @@ function Check_TaskPossibleByPlane()
 				--si aucune tasks strike n'a été trouvée
 				if not foundStrikeTask and addMultipleStrike then
 					debugTempFLIGHT = "(Error UutilF C03) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring("Strike ( CAS or Ground Attack or Pinpoint Strike )")
-					print(debugTempFLIGHT ) 
+					print(debugTempFLIGHT )
 					AddLog(debugTempFLIGHT)
 					error = error + 1
 					-- os.execute 'pause'
@@ -3605,7 +3540,7 @@ function Check_TaskPossibleByPlane()
 	end
 end
 
-if error >= 1 then 
+if error >= 1 then
 
 	if BugList and type(BugList) == "table" and #BugList >= 1 then
 		local table_Str = "BugList = " .. TableSerialization(BugList, 0)
@@ -3615,11 +3550,10 @@ if error >= 1 then
 	end
 
 	os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')			--open the BugList file with notepad
-	
+
 	os.execute 'pause'
 end
 
---M43 assignation des numeros de parking du type C08 
 ParkOccupied = {}
 function GetParkingId(parkingId, baseName)
 	local s
@@ -3633,7 +3567,6 @@ function GetParkingId(parkingId, baseName)
 	-- },	
 
 	for prefix, value in pairs(parkingId) do
-
 		local valueCopy = DeepCopy(value)
 		counter = 0
 		local single = false
@@ -3657,9 +3590,8 @@ function GetParkingId(parkingId, baseName)
 					s = prefix .. randomValue
 				until ParkOccupied[baseName][s] == nil or counter == 100
 			else
-				print("Error: Range limits are not valid numbers."..baseName.." prefix: "..tostring(prefix))
+				AddLog("Error: GetParkingId(): Range limits are not valid numbers."..baseName.." prefix: "..tostring(prefix))
 			end
-
 		elseif #valueCopy > 2 or single then
 			repeat
 				counter = counter + 1
@@ -3677,41 +3609,13 @@ function GetParkingId(parkingId, baseName)
 
 	--ne trouve pas de place libre:
 	if counter >= 100 then
+		AddLog("GetParkingId() G no parking id available for base "..tostring(baseName))
 		return false
 	end
 
 	ParkOccupied[baseName][s] = true
 
 	return tostring(s)
-
-	-- local parkParameters = {}
-
-	-- if ParkListPosition and NameTheatre then
-
-	-- 	local airdromeId = db_airbases[baseName].airdromeId
-
-	-- 	if airdromeId and ParkListPosition[NameTheatre] and ParkListPosition[NameTheatre][airdromeId] then
-
-	-- 		for n, parkList in pairs(ParkListPosition[NameTheatre][airdromeId]) do
-	-- 			if s == tostring(parkList["parking_id"]) then
-	-- 				parkParameters = {
-	-- 					["heading"] = parkList["heading"],
-	-- 					["parking"] = parkList["parking"],
-	-- 					["parking_id"] = parkList["parking_id"],
-	-- 					["x"] = parkList["x"],
-	-- 					["y"] = parkList["y"],
-	-- 				}
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
-
-	-- return parkParameters
-
-	-- if not parkParameters.parking_id then
-	-- 	parkParameters["parking_id"] = s
-	-- end
-
 
 end
 
@@ -3784,10 +3688,6 @@ function UpdateConfMod(setWeather, setDate, from)
 	if setDate then
 		--mis à jour via camp_triggers et DC_CheckTriggers
 		camp.date = setDate
-		-- if Debug.debug then
-		-- 	print("date_override 5: camp.date = setDate from: "..tostring(from))
-		-- 	_affiche(setDate, "date_override 5: setDate ")
-		-- end
 
 		UpdateConfModSuite(nil, setDate, "UpdateConfMod:"..tostring(from))
 	end
@@ -3796,12 +3696,6 @@ end
 --met à jour automatiquement le conf_mod en fonction des nouveautés apporté par UTIL_ConfModCheck
 function UpdateConfModSuite(setWeather, setDate, from)
     --version UpdateConfMod VA_1.12
-
-	-- if Debug.debug then
-	-- 	print("UpdateConfModSuite() from "..tostring(from))
-	-- 	_affiche(setWeather, "setWeather: ")
-	-- 	_affiche(setDate, "setDate: ")
-	-- end
 
 	local weather_override
 	local date_override
@@ -4228,7 +4122,7 @@ function UpdateConfModSuite(setWeather, setDate, from)
                         key, value = line:match('([%w_%[%]"]+)%s*=%s*("?.-"?),?')
                         -- print("F1b key: " .. tostring(key) .. " value: |" .. tostring(value) .. "|")
                     end
-					
+
 					if key then
 						-- print("G key: "..tostring(key).." currentTable[key]: "..tostring(currentTable[key]).." value: |"..tostring(value).."|")
 
@@ -5301,7 +5195,7 @@ function LoadFileAndUpdate(from)
 
 	NameTheatreLower = string.lower(mission.theatre)
     NameTheatre = mission.theatre
-	
+
 	--util pour connaitre les warehouses utilisé lors du script DC_UpdateOOBGround.lua
 	zipFile:unzLocateFile('warehouses')
 	local warStr = zipFile:unzReadAllCurrentFile()
@@ -5633,7 +5527,7 @@ function LoadFileAndUpdate(from)
         print("LOAD LoadFileAndUpdate() from " .. tostring(from))
     end
 
-	
+
 	--////////////////////////////////////////////////////////
 	LoadModData("Mods", true)
 	BuildLoadout()
@@ -5655,7 +5549,7 @@ function LoadFileAndUpdate(from)
 		local campFile = io.open("Debug/Data_divers.lua", "w") or error("Échec d'ouverture du fichier Data_divers")
 		campFile:write(camp_str)
 		campFile:close()
-	
+
 		camp_str = "Failures = " .. TableSerialization(Failures, 0)
 		campFile = io.open("Debug/Failures.lua", "w") or error("Échec d'ouverture du fichier Failures")
 		campFile:write(camp_str)
@@ -5671,10 +5565,10 @@ function LoadFileAndUpdate(from)
 		campFile:write(camp_str)
 		campFile:close()
 	end
-	
+
 	Check_TaskPossibleByPlane()
 
-	
+
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Time.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_MoonPhase.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Weather.lua")
@@ -5683,7 +5577,7 @@ function LoadFileAndUpdate(from)
 
 	-- CreatePlageFrequency_A()-- TODO a confirmer qu'il est encore utile cree une table de radio en fonction du canal puis de la wave
 	-- CreatePlageFrequency_B()	--cree une table de radio en fonction des wave
-	
+
 	CommonRanges = DCE_FindCommonRadioRanges()	--get common radio range for all planes in campaign
 
 	local file_str = "CommonRanges = " .. TableSerialization(CommonRanges, 0)			--make a string
@@ -5789,7 +5683,7 @@ function PatchEjectedPilotStructure(pilot, from)
 		pilot.x2d = nil
 		pilot.y2d = nil
 		pilot.z2d = nil
-		pilot.SurfaceType = nil	
+		pilot.SurfaceType = nil
 	end
 
 	if from == "targetlist" and not pilot.x then
@@ -5906,7 +5800,7 @@ function AddIconLayer(layersObjects, targetListRequired)
         ["control_tower"] = {
             ["type"] = "txt",
             ["data"] = "CT",
-        }, 
+        },
         ["command_center"] = {
             ["type"] = "txt",
             ["data"] = "HQ",
@@ -5947,7 +5841,7 @@ function AddIconLayer(layersObjects, targetListRequired)
 
     local x_Legend = 999999999
     local y_Legend = 999999999
-                        
+
     local nb = 0
     for targetClientN, targetClientName in pairs(targetListRequired) do
         for targetSide, targets in pairs(targetlist) do
@@ -6026,7 +5920,7 @@ function AddIconLayer(layersObjects, targetListRequired)
                                     ["angle"] = 0,
                                 }
                             end
-                            
+
                             -- Trouver la position la plus à gauche (minX) et la plus en bas (minY) de tous les éléments du groupe
                             -- On initialise minX et minY si ce n'est pas déjà fait
                             if not x_Legend or element.x < x_Legend then
@@ -6035,7 +5929,7 @@ function AddIconLayer(layersObjects, targetListRequired)
                             if not y_Legend or element.y < y_Legend then
                                 y_Legend = element.y
                             end
-                            
+
                             nb = nb + 1
                             table.insert(mission.drawings.layers[4].objects, tempObject)
                         end
@@ -6047,7 +5941,7 @@ function AddIconLayer(layersObjects, targetListRequired)
 
     -- print("Number of targets added to the mission: " .. nb)
     -- print("x_Legend: " .. x_Legend.." y_Legend: " .. y_Legend)
-    
+
 
 
     x_Legend = x_Legend -500 -- Ajuster la position ordonné pour le texte
@@ -6109,7 +6003,7 @@ function CreateAircraftListInCampaign()
 		end
 	end
 end
-	
+
 
 --supprime de la mega table Data_divers les avions qui ne sont pas listé dans CampaignAircraft
 function CleanDataDivers()
