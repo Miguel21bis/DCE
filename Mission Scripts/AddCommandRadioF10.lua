@@ -2,27 +2,8 @@
 --Script attached to mission and executed via trigger
 --Functions accessed via LUA Run Script
 ------------------------------------------------------------------------------------------------------- 
---player can request emergency resupply with S-3B's
--- It is possible to send the whole PACK in RTB to avoid unnecessary losses. 
-------------------------------------------------------------------------------------------------------- 
--- last modification  adjustment_i
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "2.15.53"
-------------------------------------------------------------------------------------------------------- 
--- cleanCode_c				(b springCleaning)(a: remove RemovePlane)
--- adjustment_i				(i bingo/RTB)(h avoid SAM zone)(g force RTB if bingo)(f ENI table)(e: add sar_F10)(d GetHeading)(c coalitionIdNumeric)(b group Item Radio)(a: ajust function trigo)
--- debug_h					(h A/A off sur avoidZone)(g no menu in SP)(f getCategory)(e getHeading Z)(d: tanker exist)n'affiche pas les messages d'error sauf à la fin de mission
--- debug_bonfor_a			RTB from to inversé
--- modification M84_b		DCE_Bulle (b  adjust)
--- modification M81_a		text announcement of contacts as seen by EWR and SAM radar
--- modification M78_a		LatLon positions added and unit display removed on MAP F10 (a dcs_to_gps)
--- modification M69_a		getOut (a allows you to remove the pilot from a crashed helicopter, for immediate or later recovery)
--- modification M68_a		add AFAC task
--- modification M60_a		add CTLD (a JTAC)
--- modification M36_e		(e: 1 h) (d: add timer) MenuRadio request manual TurnIntoWind
--- modification M36_e		Help CAP (e: camp rouge et bleu)
--- modification M32_d		E-2C automatic retreat (d only if fighter)(c: debug)
--- modification M29_i		Added MenuRadio F10  (i:escorte to RTB(@bonfor))(h:strike or SEAD only packages to RTB(@bonfor))(g:movePlane) (f: CallTankRefuel camp rouge et bleu)
+versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "3.16.54"
 ------------------------------------------------------------------------------------------------------- 
 
 if not campL.debugInGamePopup then
@@ -32,6 +13,17 @@ end
 
 env.info("DCE_ACRF10 version of Lua _VERSION "..tostring(_VERSION))
 env.info("DCE_ACRF10 START LOADING AddCommandRadioF10.lua "..tostring(versionDCE["Mission Scripts/AddCommandRadioF10.lua"]))
+
+-- cumul CPU GetCarrierPosition (en secondes)
+GetCarrierPosition_cpu = 0
+-- nombre d’appels
+GetCarrierPosition_calls = 0
+
+Bingo_cpu = 0
+
+
+MissionGroupIndex = {}
+
 
 local useBubble_DisableEnable_Group = false
 -- Distance seuil pour activation/désactivation (en mètres)
@@ -551,6 +543,23 @@ function CheckPointInPoly_XY_3(point, poly)
     return inside
 end
 
+
+function BuildMissionGroupIndex()
+	MissionGroupIndex = {}
+
+	for _, coalition in pairs(env.mission.coalition) do
+		for _, country in pairs(coalition.country) do
+			if country.plane and country.plane.group then
+				for _, group in pairs(country.plane.group) do
+					if group.groupId then
+						MissionGroupIndex[group.groupId] = group
+					end
+				end
+			end
+		end
+	end
+end
+
 -- MGRS Rescue Zones (simplified)
 --
 -- Each MGRS square is divided into four rescue zones:
@@ -696,32 +705,103 @@ function GenerateIdAleatoire()
     return id
 end
 
---genere une table des CV et CVN par unitId pour retrouver leur position, car ils bougent les bougres ^^
-function GetCarrierPosition(linkUnit)
-    -- linkUnit peut être un ID numérique ou un nom (string)
-    for _, coalTab in ipairs({coalition.side.BLUE, coalition.side.RED}) do
-        local groups = coalition.getGroups(coalTab, Group.Category.SHIP)
-        for _, group in ipairs(groups) do
-            local units = group:getUnits()
-            for _, unit in ipairs(units) do
-                if unit and unit.getDesc and unit:getDesc() and unit:getDesc().category == Object.Category.SHIP then
-                    -- Vérifie que le carrier est vivant
-                    if unit.isExist and unit:isExist() and unit.getLife and unit:getLife() > 0 then
-                        -- Vérification par ID (plus rapide et sûr)
-                        if unit.getID and linkUnit and unit:getID() == linkUnit then
-                            return unit:getPoint() -- Retourne la position Vec3 (x, y, z)
-                        end
-                        -- Ou vérification par nom (si besoin)
-                        if unit.getName and linkUnit and unit:getName() == linkUnit then
-                            return unit:getPoint()
-                        end
-                    end
-                end
-            end
+-- Table globale
+CarrierIndex = {}
+
+-- construit l’index
+function BuildCarrierIndex()
+	CarrierIndex = {}
+
+	for _, coal in ipairs({ coalition.side.BLUE, coalition.side.RED }) do
+		local groups = coalition.getGroups(coal, Group.Category.SHIP)
+		if groups then
+			for _, group in ipairs(groups) do
+				local units = group:getUnits()
+				if units then
+					for _, unit in ipairs(units) do
+						if unit and unit.isExist and unit:isExist() then
+							local desc = unit:getDesc()
+							if desc and desc.category == Object.Category.SHIP then
+								local id = unit:getID()
+								if id then
+									CarrierIndex[id] = unit
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
+-- retourne la position d’un CV/CVN depuis son unitId ou son nom
+-- mesure le temps CPU cumulé consommé par cette fonction
+local function getCarrierPosition(linkUnit)
+
+    local t0 = timer.getTime()
+
+    GetCarrierPosition_calls = GetCarrierPosition_calls + 1
+
+    if not linkUnit then
+        GetCarrierPosition_cpu = GetCarrierPosition_cpu + (timer.getTime() - t0)
+        return nil
+    end
+
+    -- 1) cas normal : ID
+    if type(linkUnit) == "number" then
+        local u = CarrierIndex[linkUnit]
+        if u and u.isExist and u:isExist() and u.getLife and u:getLife() > 0 then
+            local p = u:getPoint()
+            GetCarrierPosition_cpu = GetCarrierPosition_cpu + (timer.getTime() - t0)
+            return p
+        end
+
+        GetCarrierPosition_cpu = GetCarrierPosition_cpu + (timer.getTime() - t0)
+        return nil
+    end
+
+    -- 2) fallback : recherche par nom (rare)
+    for _, u in pairs(CarrierIndex) do
+        if u and u.isExist and u:isExist() and u.getName and u:getName() == linkUnit then
+            local p = u:getPoint()
+            GetCarrierPosition_cpu = GetCarrierPosition_cpu + (timer.getTime() - t0)
+            return p
         end
     end
-    return nil -- Carrier non trouvé ou détruit
+
+    GetCarrierPosition_cpu = GetCarrierPosition_cpu + (timer.getTime() - t0)
+    return nil
 end
+
+
+
+-- --genere une table des CV et CVN par unitId pour retrouver leur position, car ils bougent les bougres ^^
+-- function GetCarrierPosition(linkUnit)
+--     -- linkUnit peut être un ID numérique ou un nom (string)
+--     for _, coalTab in ipairs({coalition.side.BLUE, coalition.side.RED}) do
+--         local groups = coalition.getGroups(coalTab, Group.Category.SHIP)
+--         for _, group in ipairs(groups) do
+--             local units = group:getUnits()
+--             for _, unit in ipairs(units) do
+--                 if unit and unit.getDesc and unit:getDesc() and unit:getDesc().category == Object.Category.SHIP then
+--                     -- Vérifie que le carrier est vivant
+--                     if unit.isExist and unit:isExist() and unit.getLife and unit:getLife() > 0 then
+--                         -- Vérification par ID (plus rapide et sûr)
+--                         if unit.getID and linkUnit and unit:getID() == linkUnit then
+--                             return unit:getPoint() -- Retourne la position Vec3 (x, y, z)
+--                         end
+--                         -- Ou vérification par nom (si besoin)
+--                         if unit.getName and linkUnit and unit:getName() == linkUnit then
+--                             return unit:getPoint()
+--                         end
+--                     end
+--                 end
+--             end
+--         end
+--     end
+--     return nil -- Carrier non trouvé ou détruit
+-- end
 
 
 function DCE_GetRoute(groupName, sideName)
@@ -1734,17 +1814,27 @@ end
 
 
 
-local function bingo(arg_gpGid, arg_groupMission)
+local function bingo(gpId, gpObj)
 
-	if arg_groupMission.getUnits then
-		for n, unit in pairs(arg_groupMission:getUnits()) do
+	local t0 = timer.getTime()
+
+	if gpObj.getUnits then
+		for n, unit in pairs(gpObj:getUnits()) do
 
 			local callSign = Unit.getCallsign(unit)
-			if not BingoPlaneTab[arg_gpGid] then BingoPlaneTab[arg_gpGid] = {} end
-			if not tabJockerPlane[arg_gpGid] then tabJockerPlane[arg_gpGid] = {} end
+			-- if not BingoPlaneTab[gpId] then BingoPlaneTab[gpId] = {} end
+			-- if not tabJockerPlane[gpId] then tabJockerPlane[gpId] = {} end
 
-			if BingoPlaneTab[arg_gpGid] and not BingoPlaneTab[arg_gpGid][callSign] then												-- si le callSign a deja dit qu'il etait Bingo, on l'oublie		
+			-- if BingoPlaneTab[gpId] and not BingoPlaneTab[gpId][callSign] then												-- si le callSign a deja dit qu'il etait Bingo, on l'oublie		
 
+			local bingoGp = BingoPlaneTab[gpId]
+			if not bingoGp then
+				bingoGp = {}
+				BingoPlaneTab[gpId] = bingoGp
+			end
+
+			if not bingoGp[callSign] then
+				
 				local fuelRemainingPercent = Unit.getFuel(unit)
 
 				-- if fuelRemainingPercent <=  0.35 then
@@ -1761,11 +1851,41 @@ local function bingo(arg_gpGid, arg_groupMission)
 					local speedMax = 0
 
 					--calcul de la distance restante vers la base
-					for coalitionN, coalition in pairs(env.mission.coalition) do
+					local mGroup = MissionGroupIndex[gpObj.id_]
+					if mGroup then
+						local route = mGroup.route.points
+						local unitVec3 = unit:getPoint()
+
+						local baseX, baseY
+
+						if route[1].type == "TakeOff" then
+							baseX = route[1].x
+							baseY = route[1].y
+						else
+							local last = route[#route]
+							baseX = last.x
+							baseY = last.y
+						end
+
+						-- CV ?
+						if route[1].linkUnit then
+							local cv = getCarrierPosition(route[1].linkUnit)
+							if cv then
+								baseX = cv.x
+								baseY = cv.z
+							end
+						end
+
+						distanceToBase_Km = GetDistance({x=baseX, y=baseY}, {x=unitVec3.x, y=unitVec3.z}) / 1000
+					end
+
+
+					--calcul de la distance restante vers la base
+--[[ 					for coalitionN, coalition in pairs(env.mission.coalition) do
 						for countryN, state in pairs(coalition.country) do
 							if state.plane then
 								for groupN, _group in pairs(state.plane.group) do
-									if _group.task ~= "Transport" and _group.groupId and _group.groupId == arg_groupMission.id_ then
+									if _group.task ~= "Transport" and _group.groupId and _group.groupId == gpObj.id_ then
 										if _group.route.points[1].type == 'TakeOff' then
 											--on prend le premier wpt de la route
 											local firstWPT = _group.route.points[1]
@@ -1775,8 +1895,8 @@ local function bingo(arg_gpGid, arg_groupMission)
 											-- env.info( "DCE_Bingo D1  distanceToBase: "..tostring(distanceToBase_Km).." groupName: "..tostring(_group.name).." groupMission.id_: "..tostring(arg_groupMission.id_) )
 
 											--if it's CV or CVN:
-											if  _group.route.points[1]["linkUnit"] then
-												local carrierPosVec3 = GetCarrierPosition(_group.route.points[1]["linkUnit"])
+											if _group.route.points[1]["linkUnit"] then
+												local carrierPosVec3 = getCarrierPosition(_group.route.points[1]["linkUnit"])
 												if carrierPosVec3 then
 													-- env.info( "DCE_Bingo D1+ carrierPos.x: "..tostring(carrierPosVec3.x).." carrierPos.y: "..tostring(carrierPosVec3.y).." carrierPos.z: "..tostring(carrierPosVec3.z))
 													firstWPTPos = {x=carrierPosVec3.x, y=carrierPosVec3.z}
@@ -1795,23 +1915,21 @@ local function bingo(arg_gpGid, arg_groupMission)
 											-- env.info( "DCE_Bingo D2  distanceToBase: "..tostring(distanceToBase_Km).." groupName: "..tostring(_group.name).." groupMission.id_: "..tostring(arg_groupMission.id_) )
 
 												--if it's CV or CVN:
-											if  _group.route.points[1]["linkUnit"] then
-												local carrierPosVec3 = GetCarrierPosition(_group.route.points[1]["linkUnit"])
+											if _group.route.points[1]["linkUnit"] then
+												local carrierPosVec3 = getCarrierPosition(_group.route.points[1]["linkUnit"])
 												if carrierPosVec3 then
 													-- env.info( "DCE_Bingo D1+ carrierPos.x: "..tostring(carrierPosVec3.x).." carrierPos.y: "..tostring(carrierPosVec3.y).." carrierPos.z: "..tostring(carrierPosVec3.z))
 													firstWPTPos = {x=carrierPosVec3.x, y=carrierPosVec3.z}
 													distanceToBase_Km = GetDistance(firstWPTPos, {x=unitVec3.x, y=unitVec3.z})/1000
 													-- env.info( "DCE_Bingo D1+  distanceToBase: "..tostring(distanceToBase_Km).." groupName: "..tostring(_group.name).." groupMission.id_: "..tostring(arg_groupMission.id_) )
 												end
-
 											end
-
 										end
 									end
 								end
 							end
 						end
-					end
+					end ]]
 
 					-- calcul de l'autonomie de carburant pour le retour
 					if unit.getDesc and unit.getID then
@@ -1842,18 +1960,16 @@ local function bingo(arg_gpGid, arg_groupMission)
 								end
 							end
 						else
-							env.info("DCE_Bingo D5  unitDesc invalid or missing fuelMassMax/range")
+							env.info("DCE_Bingo D5 DCE_BUG unitDesc invalid or missing fuelMassMax/range")
 						end
 					else
-						env.info("DCE_Bingo D6  unit:getDesc() is nil")
+						env.info("DCE_Bingo D6 DCE_BUG  unit:getDesc() is nil")
 					end
 
 					if toRTB then
+						trigger.action.outTextForGroup(gpId, callSign .." low fuel: RTB", 15 , true)
 
-						trigger.action.outTextForGroup(arg_gpGid, callSign .." low fuel: RTB", 15 , true)
-
-						BingoPlaneTab[arg_gpGid][callSign] = true																	-- la callSign à déja indiqué qu'il était Bingo
-
+						BingoPlaneTab[gpId][callSign] = true																	-- la callSign à déja indiqué qu'il était Bingo
 
 						local humainUnit
 						if unit and unit.getPlayerName then
@@ -1867,7 +1983,7 @@ local function bingo(arg_gpGid, arg_groupMission)
 
 						--for the leader, the task has to be set on the group level
 						if n == 1 then
-							cntrl = arg_groupMission:getController()
+							cntrl = gpObj:getController()
 						else
 							cntrl = unit:getController()
 						end
@@ -1886,12 +2002,12 @@ local function bingo(arg_gpGid, arg_groupMission)
 							to = 0
 						}
 
-						for coalitionB, coalition in pairs(env.mission.coalition) do
+						--[[ for coalitionB, coalition in pairs(env.mission.coalition) do
 
 							for countryN, _country in pairs(coalition.country) do
 								if _country.plane then
 									for Ngroup, _group in pairs(_country.plane.group) do
-										if _group.groupId and _group.groupId == arg_groupMission.id_ then
+										if _group.groupId and _group.groupId == gpObj.id_ then
 
 											rtbGroup.name = _group.name
 
@@ -1948,8 +2064,68 @@ local function bingo(arg_gpGid, arg_groupMission)
 							end
 
 							if breaktab then break end
+						end ]]
+
+                        -- for coalitionB, coalition in pairs(env.mission.coalition) do
+                        --     for countryN, _country in pairs(coalition.country) do
+                        --         if _country.plane then
+                        --             for Ngroup, mGroup in pairs(_country.plane.group) do
+                        --                 if mGroup.groupId and mGroup.groupId == gpObj.id_ then
+                        --                     rtbGroup.name = mGroup.name
+
+						local mGroupB = MissionGroupIndex[gpObj.id_]
+						if mGroupB then
+
+							--le wpt le plus proche de l'unit
+							local existIP = 0
+							local wptN_closest = #mGroupB.route.points - 1
+							local closestPoint = 99999999
+							for wptN, wpt in ipairs(mGroupB.route.points) do
+								if wpt.name == 'IP' then
+									existIP = wptN
+									closestPoint = 99999999
+									-- env.info( "DCE_Bingo D1  passIP existIP: "..tostring(existIP))
+								end
+								--on essai de passer le point IP et le target
+								if existIP > 0 and wptN < existIP + 2 then
+									closestPoint = 99999999
+									-- env.info( "DCE_Bingo D2 N1 existIP: "..tostring(existIP).." wptN : "..tostring(wptN).." < "..tostring(existIP+2))
+								end
+								local distance = GetDistance({ x = unitVec3.x, y = unitVec3.z },
+									{ x = wpt.x, y = wpt.y })
+								if distance < closestPoint then
+									closestPoint = distance
+									wptN_closest = wptN
+									-- env.info( "DCE_Bingo D1 N2 wptN_closest: "..tostring(wptN_closest).." closestPoint: "..tostring(closestPoint))
+								end
+							end
+
+							rtbGroup.from = wptN_closest
+
+							-- --Split
+							-- for key, value in ipairs(_group.route.points) do
+							-- 	if value.name == 'Split' then
+							-- 		rtbGroup.from = key
+							-- 	end
+							-- end
+
+
+							for key, value in ipairs(mGroupB.route.points) do
+								if value.type == 'Land' then
+									rtbGroup.to = key
+								end
+							end
+
+
+							if rtbGroup.to == 0 then
+								rtbGroup.to = #mGroupB.route.points
+							end
+
+							breaktab = true
+							break
 						end
 
+						
 						-- env.info( "DCE_Bingo DD        rtbGroup from "..tostring( rtbGroup.from).." to "..tostring( rtbGroup.to))
 
 						if rtbGroup.to ~= 0 then
@@ -1987,15 +2163,17 @@ local function bingo(arg_gpGid, arg_groupMission)
 				end
 			end
 
-			if tabJockerPlane[arg_gpGid] and not tabJockerPlane[arg_gpGid][callSign] then												-- si le callSign a deja dit qu'il etait Bingo, on l'oublie
+			if tabJockerPlane[gpId] and not tabJockerPlane[gpId][callSign] then												-- si le callSign a deja dit qu'il etait Bingo, on l'oublie
 				if Unit.getFuel(unit) <=  0.30 then																			-- Sur F14, 4000lbs/16000lbs = 0.25%
-					trigger.action.outTextForGroup(arg_gpGid, callSign .." Jocker Fuel", 15 , true)
+					trigger.action.outTextForGroup(gpId, callSign .." Jocker Fuel", 15 , true)
 					-- env.info( " Unit.getFuel(unit)  "..callSign.." humainUnit? "..tostring(humainUnit) )
-					tabJockerPlane[arg_gpGid][callSign] = true																	-- la callSign à déja indiqué qu'il était Bingo			
+					tabJockerPlane[gpId][callSign] = true																	-- la callSign à déja indiqué qu'il était Bingo			
 				end
 			end
 		end
 	end
+
+	Bingo_cpu = Bingo_cpu + (timer.getTime() - t0)
 
 end
 
@@ -3194,6 +3372,482 @@ timer.scheduleFunction(monitorAllGroups, nil, timer.getTime() + 1) ]]
 
 
 
+
+--[[
+
+
+--////////////////////////////////////////////////////////////////////////////////////////////
+--test BULLE (debut) IV
+--avec distance avion
+--////////////////////////////////////////////////////////////////////////////////////////////
+
+
+-- Fonction pour obtenir le heading correctement
+local function getHeadingDCE(unit)
+    local unitpos = unit:getPosition()
+    local heading
+    if unitpos then
+        heading = math.atan2(unitpos.x.z, unitpos.x.x)
+        if heading < 0 then
+            heading = heading + 2 * math.pi
+        end
+    end
+    return heading
+end
+
+local function tablelength(T)
+	local count = 0
+	for _ in pairs(T) do
+	  count = count + 1
+	end
+	return count
+  end
+
+  -- Liste des groupes et objets statiques sauvegardés (désactivés temporairement)
+local savedGroups = {}
+local savedStatics = {}
+local staticObjects = {}
+-- Liste des groupes au sol et leurs états d'origine
+local groundGroups = {} -- Stocke les groupes actifs
+
+
+
+--/////////////////////////////////////// DCE_Bulle /////////////////////////////////////////////////////
+local function DCE_BulleBy_DE()
+
+	--  **Collecte des objets statiques au démarrage**
+	local function collectStaticObjects()
+		staticObjects = {}
+
+		for _, coalTab in pairs({ coalition.side.RED, coalition.side.BLUE }) do
+			local allStatics = coalition.getStaticObjects(coalTab)
+			for _, static in ipairs(allStatics) do
+				if static and static:isExist() then
+					local staticName = static:getName()
+					staticObjects[staticName] = {
+						name = staticName,
+						country = static:getCountry(),
+						type = static:getTypeName(),
+						x = static:getPoint().x,
+						y = static:getPoint().z,
+						heading = getHeadingDCE(static)
+					}
+				end
+			end
+		end
+
+		local nombreElements = tablelength(staticObjects)
+
+		-- if camp.debug then
+		-- 	local current_time = timer.getTime()
+		-- 	local logStr = "OrbitPosition = " .. TableSerialization(staticObjects, 0)
+		-- 	local logFile = io.open(PathDCE.."Debug\\DCE_Bulle".."_".. "staticObjects"..current_time..".lua", "w")
+		-- 	if logFile then
+		-- 		logFile:write(logStr)
+		-- 		logFile:close()
+		-- 	else
+		-- 		-- env.info("DCE_Bulle: Failed to open log file for writing.")
+		-- 	end
+		-- end
+	end
+
+
+
+	--  **Collecte des groupes dynamiques au sol avec exclusion**
+	local function collectGroundGroups()
+		groundGroups = {}
+		local totalGroups = 0
+		local validGroups = 0
+
+		local function addGroupsFromCoalition(coalTab)
+			-- Récupère uniquement les groupes dynamiques au sol
+			local allGroups = coalition.getGroups(coalTab, Group.Category.GROUND)
+			totalGroups = totalGroups + #allGroups
+
+			for _, group in ipairs(allGroups) do
+				if group and group:isExist() then
+					local groupName = group:getName()
+					local units = group:getUnits()
+					local excludeGroup = false -- Flag pour exclure un groupe entier
+
+					if #units > 0 then
+						-- Vérifie si le groupe contient une unité interdite
+						for _, unit in ipairs(units) do
+							if excludedUnitTypes[unit:getTypeName()] then
+								excludeGroup = true
+								-- env.info("DCE_Bulle - Exclusion du groupe : " .. groupName .. " (contient " .. unit:getTypeName() .. ")")
+								break
+							end
+						end
+
+						if not excludeGroup then
+							-- Récupère le pays depuis la première unité du groupe
+							local firstUnit = units[1]
+							local country = firstUnit and firstUnit:getCountry() or nil
+
+							if country then
+								-- Sauvegarde la structure du groupe pour le recréer plus tard
+								local groupData = {
+									name = groupName,
+									country = country,
+									units = {}
+								}
+
+								for _, unit in ipairs(units) do
+									local posVec3 = unit:getPoint()
+									table.insert(groupData.units, {
+										name = unit:getName(),
+										type = unit:getTypeName(),
+										x = posVec3.x,
+										y = posVec3.z,
+										heading = math.deg(math.atan2(unit:getVelocity().z, unit:getVelocity().x))
+									})
+								end
+
+								groundGroups[groupName] = groupData
+								-- env.info("Added ground vehicle group: " .. groupName)
+								validGroups = validGroups + 1
+							else
+								env.warning("Impossible de récupérer le pays pour " .. groupName)
+							end
+						end
+					else
+						-- env.info("Skipped group (no units): " .. groupName)
+					end
+				end
+			end
+		end
+
+		-- Ajout des groupes des deux coalitions
+		addGroupsFromCoalition(coalition.side.RED)
+		addGroupsFromCoalition(coalition.side.BLUE)
+
+		env.info("Total groups found: " .. tostring(totalGroups))
+		env.info("Ground vehicle groups collected (après exclusion) : " .. tostring(validGroups))
+	end
+
+
+	--  **Récupérer tous les avions (joueurs et IA) en vol**
+	local function getAllAircrafts()
+		local aircrafts = {}
+
+		for _, coalTab in pairs({ coalition.side.RED, coalition.side.BLUE }) do
+			local airGroups = coalition.getGroups(coalTab, Group.Category.AIRPLANE) -- Récupère tous les groupes aériens
+			for _, group in ipairs(airGroups) do
+				if group and group:isExist() then
+					for _, unit in ipairs(group:getUnits()) do
+						if unit and unit:isExist() then
+							table.insert(aircrafts, unit)
+						end
+					end
+				end
+			end
+		end
+
+		return aircrafts
+	end
+
+
+	--  **Désactiver un groupe ou un objet statique**
+	local function disableGroup(groupData)
+		if not groupData or not groupData.name then
+			env.warning("DCE_Bulle Erreur : groupData invalide dans disableGroup")
+			return
+		end
+
+		groupData["respawnTime"] = 0
+
+		local group = Group.getByName(groupData.name)
+		if group and group:isExist() then
+			--  **Sauvegarde du groupe avant suppression**
+			local unitsData = {}
+			local foundCountry
+			for _, unit in ipairs(group:getUnits()) do
+				table.insert(unitsData, {
+					name = unit:getName(),
+					type = unit:getTypeName(),
+					x = unit:getPoint().x,
+					y = unit:getPoint().z,
+					heading = getHeadingDCE(unit),
+					skill = "Average",
+					playerCanDrive = true,
+				})
+				foundCountry = unit:getCountry()
+			end
+
+			savedGroups[groupData.name] = {
+				name = groupData.name,
+				country = foundCountry,
+				category = Group.Category.GROUND,
+				units = unitsData,
+				task = "Ground Nothing",
+				visible = false,
+				hidden = false,
+				start_time = 0,
+			}
+
+			group:destroy()
+			-- trigger.action.outText("Group " .. groupData.name .. " DISABLED", 2)
+			-- env.info("DCE_Bulle Group " .. groupData.name .. " has been disabled (destroyed)")
+
+		elseif staticObjects[groupData.name] then
+			--  **Gestion des objets statiques**
+			local staticData = staticObjects[groupData.name]
+			savedStatics[groupData.name] = staticData
+			local static = StaticObject.getByName(groupData.name)
+			if static then
+				static:destroy()
+				-- trigger.action.outText("Static Object " .. groupData.name .. " DISABLED", 2)
+				-- env.info("DCE_Bulle Static Object has been disabled (destroyed): " .. groupData.name )
+			end
+		else
+			env.warning("DCE_Bulle Group/Static Object " .. groupData.name .. " does not exist or is already destroyed")
+			-- trigger.action.outText("DCE_Bulle Group/Static Object ".. " does not exist or is already destroyed" .. groupData.name , 2)
+		end
+	end
+
+
+
+	local spawnQueue = {}  -- File d’attente pour la création progressive (groupes + statiques)
+
+	--  **Ajoute un élément (groupe ou statique) à la file d’attente**
+	local function queueSpawn(elementData, isStatic)
+		table.insert(spawnQueue, { data = elementData, isStatic = isStatic })
+	end
+
+	--  **Spawn progressif des groupes et objets statiques**
+	local function processSpawnQueue()
+		if #spawnQueue == 0 then
+			-- env.info("DCE_Bulle -E1- Tous les groupes et statiques ont été créés.")
+			return  -- Plus rien à créer
+		end
+
+		local spawnItem = table.remove(spawnQueue, 1)  -- Prend le premier élément de la file
+		local elementData = spawnItem.data
+		local isStatic = spawnItem.isStatic
+
+		if isStatic then
+			-- env.info("DCE_Bulle -E2- Création différée de l'objet statique : " .. elementData.name)
+			local status, err = pcall(function()
+				coalition.addStaticObject(elementData.country, {
+					name = elementData.name,
+					type = elementData.type,
+					x = elementData.x,
+					y = elementData.y,
+					heading = elementData.heading
+				})
+			end)
+
+			if not status then
+				env.warning("DCE_Bulle -E3- Erreur lors de la création de l'objet statique " .. elementData.name .. " : " .. tostring(err))
+			end
+		else
+			-- env.info("DCE_Bulle -E4- Création différée du groupe : " .. elementData.name)
+			local status, err = pcall(function()
+				coalition.addGroup(elementData.country, Group.Category.GROUND, elementData)
+			end)
+
+			if not status then
+				env.warning("DCE_Bulle -E5- Erreur lors de la création du groupe " .. elementData.name .. " : " .. tostring(err))
+			end
+		end
+
+		-- Planifie le spawn du prochain élément
+		if #spawnQueue > 0 then
+			timer.scheduleFunction(processSpawnQueue, nil, timer.getTime() + SPAWN_DELAY)
+		else
+			-- env.info("DCE_Bulle -E6- Tous les groupes et statiques ont été créés.")
+		end
+
+	end
+
+	--  **Réactiver un groupe ou un objet statique (file d’attente au lieu de spawn direct)**
+	local function enableGroup(groupData)
+
+		if not groupData or not groupData.name then
+			env.info("DCE_Bulle G1 - Erreur : groupData invalide dans enableGroup")
+			return
+		end
+
+		groupData["respawnTime"] = timer.getTime()
+
+		if savedGroups[groupData.name] then
+			local groupInfo = savedGroups[groupData.name]
+
+			local newGroup = {
+				name = groupInfo.name,
+				groupId = nil,
+				country = groupInfo.country,
+				category = Group.Category.GROUND,
+				task = groupInfo.task or "Ground Nothing",
+				start_time = 0,
+				visible = false,
+				hidden = false,
+				units = {},
+			}
+
+			for _, unit in ipairs(groupInfo.units) do
+				table.insert(newGroup.units, {
+					name = unit.name,
+					type = unit.type,
+					x = unit.x,
+					y = unit.y,
+					heading = unit.heading,
+					skill = unit.skill or "Average",
+					playerCanDrive = unit.playerCanDrive or true,
+					transportable = { randomTransportable = false },
+				})
+			end
+
+			-- Ajoute le groupe dans la file d’attente pour un spawn différé
+			queueSpawn(newGroup, false)
+			savedGroups[groupData.name] = nil
+
+			-- env.info("DCE_Bulle -G2- #spawnQueue " .. tostring(#spawnQueue))
+
+			-- Démarre le traitement si ce n'est pas déjà fait
+			if #spawnQueue == 1 then
+				-- env.info("DCE_Bulle -G3- Début du spawn progressif")
+				if #spawnQueue == 1 then
+					-- env.info("DCE_Bulle -G3- Début du spawn progressif")
+					timer.scheduleFunction(processSpawnQueue, nil, timer.getTime() + SPAWN_DELAY)
+				end
+
+			end
+
+		elseif savedStatics[groupData.name] then
+			-- env.info("DCE_Bulle -G4- Ajout à la file d'attente de l'objet statique : " .. groupData.name)
+			local staticInfo = savedStatics[groupData.name]
+
+			-- Ajoute le statique dans la file d’attente
+			queueSpawn(staticInfo, true)
+			savedStatics[groupData.name] = nil
+
+			-- Démarre le traitement si ce n'est pas déjà fait
+			if #spawnQueue == 1 then
+				-- env.info("DCE_Bulle -G5- Début du spawn progressif des statiques")
+				if #spawnQueue == 1 then
+					-- env.info("DCE_Bulle -G6- Début du spawn progressif")
+					timer.scheduleFunction(processSpawnQueue, nil, timer.getTime() + SPAWN_DELAY)
+				end
+
+			end
+		else
+			env.info("DCE_Bulle -G7- Le groupe/statique " .. groupData.name .. " n'était pas sauvegardé !")
+		end
+	end
+
+
+
+	--  **Calculer la distance entre un point et l'avion le plus proche**
+	local function getNearestAircraftDistance(targetX, targetY)
+		local aircrafts = getAllAircrafts()
+		local minDistance = math.huge -- Distance infinie par défaut
+
+		for _, aircraft in ipairs(aircrafts) do
+			local posVec3 = aircraft:getPoint()
+			local dx = posVec3.x - targetX
+			local dy = posVec3.z - targetY
+			local distance = math.sqrt(dx * dx + dy * dy)
+
+			if distance < minDistance then
+				minDistance = distance
+			end
+		end
+
+		return minDistance
+	end
+
+	--  **Vérifier et basculer les unités selon leur distance aux avions**
+	local function updateUnitVisibility()
+		-- env.info("DCE_Bulle -H1- Vérification des distances et basculement des unités...")
+
+		local activationN = 0
+		local deActivate = 0
+
+		--  **Véhicules dynamiques**
+		for groupName, groupData in pairs(groundGroups) do
+			if groupData and groupData.units then
+				local firstUnit = groupData.units[1] -- Prendre la première unité comme référence
+				local distance = getNearestAircraftDistance(firstUnit.x, firstUnit.y)
+
+				if distance < ACTIVATION_DISTANCE then
+					if savedGroups[groupName] then
+						-- env.info("DCE_Bulle -H2- Activation du groupe terrestre : " .. groupName)
+						activationN = activationN+1
+						enableGroup(groupData)
+					end
+				else
+					if not groupData.respawnTime or (groupData.respawnTime < timer.getTime() + 900) then
+						if not savedGroups[groupName] then
+							-- env.info("DCE_Bulle -H3- Désactivation du groupe terrestre : " .. groupName)
+							deActivate = deActivate + 1
+							disableGroup(groupData)
+						end
+					end
+				end
+			end
+		end
+
+		--  **Objets statiques**
+		for staticName, staticData in pairs(staticObjects) do
+			local distance = getNearestAircraftDistance(staticData.x, staticData.y)
+
+			if distance < ACTIVATION_DISTANCE then
+				if savedStatics[staticName] then
+					-- env.info("DCE_Bulle -H4- Activation de l'objet statique : " .. staticName)
+					activationN = activationN+1
+					enableGroup({ name = staticName }) -- Réactivation
+				end
+			else
+				if not savedStatics[staticName] then
+					-- env.info("DCE_Bulle -H5- Désactivation de l'objet statique : " .. staticName)
+					deActivate = deActivate+1
+					disableGroup({ name = staticName }) -- Désactivation
+				end
+			end
+		end
+
+		if activationN > 0 then
+			env.info("DCE_Bulle -H6- Activation de N objet : " .. activationN)
+			-- trigger.action.outText("DCE_Bulle - Activation de N objet : " .. activationN, 6)
+		end
+		if deActivate > 0 then
+			env.info("DCE_Bulle -H7- Suppresion de N objet : " .. deActivate)
+			-- trigger.action.outText("DCE_Bulle - Suppresion de N objet : " .. deActivate, 6)
+		end
+
+
+	end
+
+	--  **Planification du check toutes les 30 secondes**
+	local function scheduleUnitCheck()
+		-- env.info("DCE_Bulle - Planification de la vérification des unités dans 30 secondes...")
+		updateUnitVisibility()
+		return timer.getTime() + 30
+	end
+
+	--  **Planification initiale après collecte des unités et statiques**
+	timer.scheduleFunction(function()
+		-- env.info("DCE_Bulle - Démarrage de la collecte des groupes au sol et statiques...")
+		collectStaticObjects()
+		collectGroundGroups()
+		-- env.info("DCE_Bulle - Vérification et activation de la surveillance des unités...")
+		timer.scheduleFunction(scheduleUnitCheck, nil, timer.getTime() + 5) -- Premier check après 5 sec
+	end, nil, timer.getTime() + 10)
+
+end
+
+
+--////////////////////////////////////////////////////////////////////////////////////////////
+--test BULLE (fin) IV
+--avec distance avion
+--////////////////////////////////////////////////////////////////////////////////////////////
+ ]]
+
+
+ 
+
 function addFuncs(arg_Gid, arg_GroupObj, argPlayerName)
 
 	env.info("DCE_addFuncs _A gid "..tostring(arg_Gid).." Group "..tostring(arg_GroupObj).." argPlayerName: "..tostring(argPlayerName))
@@ -4246,6 +4900,23 @@ local function loopPilot()
 
 end
 
+local function performance()
+
+	env.info(
+		string.format(
+			"GetCarrierPosition calls: %d\nCPU: %.3f sec\nAvg: %.6f ms",
+			GetCarrierPosition_calls,
+			GetCarrierPosition_cpu,
+			(GetCarrierPosition_cpu / math.max(GetCarrierPosition_calls,1)) * 1000
+		)
+	)
+	env.info( "bingo_cpu: "..tostring(Bingo_cpu) )
+	
+
+	return timer.getTime() + 300
+
+end
+
 --creation de la table de couverture anti aérienne AMI
 hotSpotSAM()
 
@@ -4261,6 +4932,9 @@ if campL.debug then
 end
 
 timer.scheduleFunction(timerPlayerMenu, nil, timer.getTime() + 5)
+
+timer.scheduleFunction(BuildCarrierIndex, nil, timer.getTime() + 6)
+
 
 timer.scheduleFunction(loopPilot, nil, timer.getTime() + 15)
 
@@ -4278,6 +4952,8 @@ timer.scheduleFunction(EWR_magic, nil, timer.getTime() + 31)
 
 timer.scheduleFunction(setErrorMessageBoxShedul, nil, timer.getTime() + 32)
 
+timer.scheduleFunction(performance, nil, timer.getTime() + 300)
+
 
 -- --test pour exploser les unités detecté, afin de passer au suivant
 -- local function explodeOnPoint()
@@ -4289,477 +4965,6 @@ timer.scheduleFunction(setErrorMessageBoxShedul, nil, timer.getTime() + 32)
 -- end
 -- timer.scheduleFunction(explodeOnPoint, nil, timer.getTime() + 300)
 
-
-
-
-
---////////////////////////////////////////////////////////////////////////////////////////////
---test BULLE (debut) IV
---avec distance avion
---////////////////////////////////////////////////////////////////////////////////////////////
-
-
--- Fonction pour obtenir le heading correctement
-local function getHeadingDCE(unit)
-    local unitpos = unit:getPosition()
-    local heading
-    if unitpos then
-        heading = math.atan2(unitpos.x.z, unitpos.x.x)
-        if heading < 0 then
-            heading = heading + 2 * math.pi
-        end
-    end
-    return heading
-end
-
-local function tablelength(T)
-	local count = 0
-	for _ in pairs(T) do
-	  count = count + 1
-	end
-	return count
-  end
-
-  -- Liste des groupes et objets statiques sauvegardés (désactivés temporairement)
-local savedGroups = {}
-local savedStatics = {}
-local staticObjects = {}
--- Liste des groupes au sol et leurs états d'origine
-local groundGroups = {} -- Stocke les groupes actifs
-
-
-
---/////////////////////////////////////// DCE_Bulle /////////////////////////////////////////////////////
-local function DCE_BulleBy_DE()
-
-	--  **Collecte des objets statiques au démarrage** 
-	local function collectStaticObjects()
-		staticObjects = {}
-
-		for _, coalTab in pairs({ coalition.side.RED, coalition.side.BLUE }) do
-			local allStatics = coalition.getStaticObjects(coalTab)
-			for _, static in ipairs(allStatics) do
-				if static and static:isExist() then
-					local staticName = static:getName()
-					staticObjects[staticName] = {
-						name = staticName,
-						country = static:getCountry(),
-						type = static:getTypeName(),
-						x = static:getPoint().x,
-						y = static:getPoint().z,
-						heading = getHeadingDCE(static)
-					}
-				end
-			end
-		end
-
-		local nombreElements = tablelength(staticObjects)
-
-		-- if camp.debug then
-		-- 	local current_time = timer.getTime()
-		-- 	local logStr = "OrbitPosition = " .. TableSerialization(staticObjects, 0)
-		-- 	local logFile = io.open(PathDCE.."Debug\\DCE_Bulle".."_".. "staticObjects"..current_time..".lua", "w")
-		-- 	if logFile then
-		-- 		logFile:write(logStr)
-		-- 		logFile:close()
-		-- 	else
-		-- 		-- env.info("DCE_Bulle: Failed to open log file for writing.")
-		-- 	end
-		-- end
-	end
-
-
-
-	--  **Collecte des groupes dynamiques au sol avec exclusion** 
-	local function collectGroundGroups()
-		groundGroups = {}
-		local totalGroups = 0
-		local validGroups = 0
-
-		local function addGroupsFromCoalition(coalTab)
-			-- Récupère uniquement les groupes dynamiques au sol
-			local allGroups = coalition.getGroups(coalTab, Group.Category.GROUND)
-			totalGroups = totalGroups + #allGroups
-
-			for _, group in ipairs(allGroups) do
-				if group and group:isExist() then
-					local groupName = group:getName()
-					local units = group:getUnits()
-					local excludeGroup = false -- Flag pour exclure un groupe entier
-
-					if #units > 0 then
-						-- Vérifie si le groupe contient une unité interdite
-						for _, unit in ipairs(units) do
-							if excludedUnitTypes[unit:getTypeName()] then
-								excludeGroup = true
-								-- env.info("DCE_Bulle - Exclusion du groupe : " .. groupName .. " (contient " .. unit:getTypeName() .. ")")
-								break
-							end
-						end
-
-						if not excludeGroup then
-							-- Récupère le pays depuis la première unité du groupe
-							local firstUnit = units[1]
-							local country = firstUnit and firstUnit:getCountry() or nil
-
-							if country then
-								-- Sauvegarde la structure du groupe pour le recréer plus tard
-								local groupData = {
-									name = groupName,
-									country = country,
-									units = {}
-								}
-
-								for _, unit in ipairs(units) do
-									local posVec3 = unit:getPoint()
-									table.insert(groupData.units, {
-										name = unit:getName(),
-										type = unit:getTypeName(),
-										x = posVec3.x,
-										y = posVec3.z,
-										heading = math.deg(math.atan2(unit:getVelocity().z, unit:getVelocity().x))
-									})
-								end
-
-								groundGroups[groupName] = groupData
-								-- env.info("Added ground vehicle group: " .. groupName)
-								validGroups = validGroups + 1
-							else
-								env.warning("Impossible de récupérer le pays pour " .. groupName)
-							end
-						end
-					else
-						-- env.info("Skipped group (no units): " .. groupName)
-					end
-				end
-			end
-		end
-
-		-- Ajout des groupes des deux coalitions
-		addGroupsFromCoalition(coalition.side.RED)
-		addGroupsFromCoalition(coalition.side.BLUE)
-
-		env.info("Total groups found: " .. tostring(totalGroups))
-		env.info("Ground vehicle groups collected (après exclusion) : " .. tostring(validGroups))
-	end
-
-
-	--  **Récupérer tous les avions (joueurs et IA) en vol** 
-	local function getAllAircrafts()
-		local aircrafts = {}
-
-		for _, coalTab in pairs({ coalition.side.RED, coalition.side.BLUE }) do
-			local airGroups = coalition.getGroups(coalTab, Group.Category.AIRPLANE) -- Récupère tous les groupes aériens
-			for _, group in ipairs(airGroups) do
-				if group and group:isExist() then
-					for _, unit in ipairs(group:getUnits()) do
-						if unit and unit:isExist() then
-							table.insert(aircrafts, unit)
-						end
-					end
-				end
-			end
-		end
-
-		return aircrafts
-	end
-
-
-	--  **Désactiver un groupe ou un objet statique** 
-	local function disableGroup(groupData)
-		if not groupData or not groupData.name then
-			env.warning("DCE_Bulle Erreur : groupData invalide dans disableGroup")
-			return
-		end
-
-		groupData["respawnTime"] = 0
-
-		local group = Group.getByName(groupData.name)
-		if group and group:isExist() then
-			--  **Sauvegarde du groupe avant suppression**
-			local unitsData = {}
-			local foundCountry
-			for _, unit in ipairs(group:getUnits()) do
-				table.insert(unitsData, {
-					name = unit:getName(),
-					type = unit:getTypeName(),
-					x = unit:getPoint().x,
-					y = unit:getPoint().z,
-					heading = getHeadingDCE(unit),
-					skill = "Average",
-					playerCanDrive = true,
-				})
-				foundCountry = unit:getCountry()
-			end
-
-			savedGroups[groupData.name] = {
-				name = groupData.name,
-				country = foundCountry,
-				category = Group.Category.GROUND,
-				units = unitsData,
-				task = "Ground Nothing",
-				visible = false,
-				hidden = false,
-				start_time = 0,
-			}
-
-			group:destroy()
-			-- trigger.action.outText("Group " .. groupData.name .. " DISABLED", 2)
-			-- env.info("DCE_Bulle Group " .. groupData.name .. " has been disabled (destroyed)")
-
-		elseif staticObjects[groupData.name] then
-			--  **Gestion des objets statiques**
-			local staticData = staticObjects[groupData.name]
-			savedStatics[groupData.name] = staticData
-			local static = StaticObject.getByName(groupData.name)
-			if static then
-				static:destroy()
-				-- trigger.action.outText("Static Object " .. groupData.name .. " DISABLED", 2)
-				-- env.info("DCE_Bulle Static Object has been disabled (destroyed): " .. groupData.name )
-			end
-		else
-			env.warning("DCE_Bulle Group/Static Object " .. groupData.name .. " does not exist or is already destroyed")
-			-- trigger.action.outText("DCE_Bulle Group/Static Object ".. " does not exist or is already destroyed" .. groupData.name , 2)
-		end
-	end
-
-
-
-	local spawnQueue = {}  -- File d’attente pour la création progressive (groupes + statiques)
-
-	--  **Ajoute un élément (groupe ou statique) à la file d’attente** 
-	local function queueSpawn(elementData, isStatic)
-		table.insert(spawnQueue, { data = elementData, isStatic = isStatic })
-	end
-
-	--  **Spawn progressif des groupes et objets statiques** 
-	local function processSpawnQueue()
-		if #spawnQueue == 0 then
-			-- env.info("DCE_Bulle -E1- Tous les groupes et statiques ont été créés.")
-			return  -- Plus rien à créer
-		end
-
-		local spawnItem = table.remove(spawnQueue, 1)  -- Prend le premier élément de la file
-		local elementData = spawnItem.data
-		local isStatic = spawnItem.isStatic
-
-		if isStatic then
-			-- env.info("DCE_Bulle -E2- Création différée de l'objet statique : " .. elementData.name)
-			local status, err = pcall(function()
-				coalition.addStaticObject(elementData.country, {
-					name = elementData.name,
-					type = elementData.type,
-					x = elementData.x,
-					y = elementData.y,
-					heading = elementData.heading
-				})
-			end)
-
-			if not status then
-				env.warning("DCE_Bulle -E3- Erreur lors de la création de l'objet statique " .. elementData.name .. " : " .. tostring(err))
-			end
-		else
-			-- env.info("DCE_Bulle -E4- Création différée du groupe : " .. elementData.name)
-			local status, err = pcall(function()
-				coalition.addGroup(elementData.country, Group.Category.GROUND, elementData)
-			end)
-
-			if not status then
-				env.warning("DCE_Bulle -E5- Erreur lors de la création du groupe " .. elementData.name .. " : " .. tostring(err))
-			end
-		end
-
-		-- Planifie le spawn du prochain élément
-		if #spawnQueue > 0 then
-			timer.scheduleFunction(processSpawnQueue, nil, timer.getTime() + SPAWN_DELAY)
-		else
-			-- env.info("DCE_Bulle -E6- Tous les groupes et statiques ont été créés.")
-		end
-
-	end
-
-	--  **Réactiver un groupe ou un objet statique (file d’attente au lieu de spawn direct)** 
-	local function enableGroup(groupData)
-
-		if not groupData or not groupData.name then
-			env.info("DCE_Bulle G1 - Erreur : groupData invalide dans enableGroup")
-			return
-		end
-
-		groupData["respawnTime"] = timer.getTime()
-
-		if savedGroups[groupData.name] then
-			local groupInfo = savedGroups[groupData.name]
-
-			local newGroup = {
-				name = groupInfo.name,
-				groupId = nil,
-				country = groupInfo.country,
-				category = Group.Category.GROUND,
-				task = groupInfo.task or "Ground Nothing",
-				start_time = 0,
-				visible = false,
-				hidden = false,
-				units = {},
-			}
-
-			for _, unit in ipairs(groupInfo.units) do
-				table.insert(newGroup.units, {
-					name = unit.name,
-					type = unit.type,
-					x = unit.x,
-					y = unit.y,
-					heading = unit.heading,
-					skill = unit.skill or "Average",
-					playerCanDrive = unit.playerCanDrive or true,
-					transportable = { randomTransportable = false },
-				})
-			end
-
-			-- Ajoute le groupe dans la file d’attente pour un spawn différé
-			queueSpawn(newGroup, false)
-			savedGroups[groupData.name] = nil
-
-			-- env.info("DCE_Bulle -G2- #spawnQueue " .. tostring(#spawnQueue))
-
-			-- Démarre le traitement si ce n'est pas déjà fait
-			if #spawnQueue == 1 then
-				-- env.info("DCE_Bulle -G3- Début du spawn progressif")
-				if #spawnQueue == 1 then
-					-- env.info("DCE_Bulle -G3- Début du spawn progressif")
-					timer.scheduleFunction(processSpawnQueue, nil, timer.getTime() + SPAWN_DELAY)
-				end
-
-			end
-
-		elseif savedStatics[groupData.name] then
-			-- env.info("DCE_Bulle -G4- Ajout à la file d'attente de l'objet statique : " .. groupData.name)
-			local staticInfo = savedStatics[groupData.name]
-
-			-- Ajoute le statique dans la file d’attente
-			queueSpawn(staticInfo, true)
-			savedStatics[groupData.name] = nil
-
-			-- Démarre le traitement si ce n'est pas déjà fait
-			if #spawnQueue == 1 then
-				-- env.info("DCE_Bulle -G5- Début du spawn progressif des statiques")
-				if #spawnQueue == 1 then
-					-- env.info("DCE_Bulle -G6- Début du spawn progressif")
-					timer.scheduleFunction(processSpawnQueue, nil, timer.getTime() + SPAWN_DELAY)
-				end
-
-			end
-		else
-			env.info("DCE_Bulle -G7- Le groupe/statique " .. groupData.name .. " n'était pas sauvegardé !")
-		end
-	end
-
-
-
-	--  **Calculer la distance entre un point et l'avion le plus proche** 
-	local function getNearestAircraftDistance(targetX, targetY)
-		local aircrafts = getAllAircrafts()
-		local minDistance = math.huge -- Distance infinie par défaut
-
-		for _, aircraft in ipairs(aircrafts) do
-			local posVec3 = aircraft:getPoint()
-			local dx = posVec3.x - targetX
-			local dy = posVec3.z - targetY
-			local distance = math.sqrt(dx * dx + dy * dy)
-
-			if distance < minDistance then
-				minDistance = distance
-			end
-		end
-
-		return minDistance
-	end
-
-	--  **Vérifier et basculer les unités selon leur distance aux avions** 
-	local function updateUnitVisibility()
-		-- env.info("DCE_Bulle -H1- Vérification des distances et basculement des unités...")
-
-		local activationN = 0
-		local deActivate = 0
-
-		--  **Véhicules dynamiques**
-		for groupName, groupData in pairs(groundGroups) do
-			if groupData and groupData.units then
-				local firstUnit = groupData.units[1] -- Prendre la première unité comme référence
-				local distance = getNearestAircraftDistance(firstUnit.x, firstUnit.y)
-
-				if distance < ACTIVATION_DISTANCE then
-					if savedGroups[groupName] then
-						-- env.info("DCE_Bulle -H2- Activation du groupe terrestre : " .. groupName)
-						activationN = activationN+1
-						enableGroup(groupData)
-					end
-				else
-					if not groupData.respawnTime or (groupData.respawnTime < timer.getTime() + 900) then
-						if not savedGroups[groupName] then
-							-- env.info("DCE_Bulle -H3- Désactivation du groupe terrestre : " .. groupName)
-							deActivate = deActivate + 1
-							disableGroup(groupData)
-						end
-					end
-				end
-			end
-		end
-
-		--  **Objets statiques**
-		for staticName, staticData in pairs(staticObjects) do
-			local distance = getNearestAircraftDistance(staticData.x, staticData.y)
-
-			if distance < ACTIVATION_DISTANCE then
-				if savedStatics[staticName] then
-					-- env.info("DCE_Bulle -H4- Activation de l'objet statique : " .. staticName)
-					activationN = activationN+1
-					enableGroup({ name = staticName }) -- Réactivation
-				end
-			else
-				if not savedStatics[staticName] then
-					-- env.info("DCE_Bulle -H5- Désactivation de l'objet statique : " .. staticName)
-					deActivate = deActivate+1
-					disableGroup({ name = staticName }) -- Désactivation
-				end
-			end
-		end
-
-		if activationN > 0 then
-			env.info("DCE_Bulle -H6- Activation de N objet : " .. activationN)
-			-- trigger.action.outText("DCE_Bulle - Activation de N objet : " .. activationN, 6)
-		end
-		if deActivate > 0 then
-			env.info("DCE_Bulle -H7- Suppresion de N objet : " .. deActivate)
-			-- trigger.action.outText("DCE_Bulle - Suppresion de N objet : " .. deActivate, 6)
-		end
-
-
-	end
-
-	--  **Planification du check toutes les 30 secondes** 
-	local function scheduleUnitCheck()
-		-- env.info("DCE_Bulle - Planification de la vérification des unités dans 30 secondes...")
-		updateUnitVisibility()
-		return timer.getTime() + 30
-	end
-
-	--  **Planification initiale après collecte des unités et statiques** 
-	timer.scheduleFunction(function()
-		-- env.info("DCE_Bulle - Démarrage de la collecte des groupes au sol et statiques...")
-		collectStaticObjects()
-		collectGroundGroups()
-		-- env.info("DCE_Bulle - Vérification et activation de la surveillance des unités...")
-		timer.scheduleFunction(scheduleUnitCheck, nil, timer.getTime() + 5) -- Premier check après 5 sec
-	end, nil, timer.getTime() + 10)
-
-end
-
-
---////////////////////////////////////////////////////////////////////////////////////////////
---test BULLE (fin) IV
---avec distance avion
---////////////////////////////////////////////////////////////////////////////////////////////
 
 
 --  **Planification initiale après collecte des unités et statiques** 

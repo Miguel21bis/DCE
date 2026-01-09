@@ -161,7 +161,8 @@ local function schedulHit(hitTemp)
 		lifePourcent = 0,
 		x = hitTemp.x,
 		y = hitTemp.y,
-		z = hitTemp.z,
+        z = hitTemp.z,
+		initiator = hitTemp.initiator,
 		event = hitTemp.event,
 	}
 
@@ -1577,7 +1578,7 @@ function eventHandlerDCE:onEvent(event)
 
 					local hitTemp = {
 						scenaryName = scenaryName,
-						lasthit = initiatorName,
+						initiator = initiatorName,
 						lifePourcent = lifePourcent,
 						x = initPointVec3.x,
 						y = initPointVec3.z,
