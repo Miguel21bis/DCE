@@ -1224,6 +1224,8 @@ for scenName, scen in pairs(scen_log) do
 			local cy = getCellIndex(scen.y)
 
 
+			if scen.initiator then print("A scen "..tostring(scenName).." at ("..tostring(scen.x)..","..tostring(scen.y)..") initiated by "..tostring(scen.initiator).." with radius "..tostring(scen.correctedRadius)) end
+
 			-- récupération de la cellule du scen et de ses voisines
 			-- utile car une explosion ne peut affecter que les zones proches
 			-- seules 9 cellules maximum sont analysées
@@ -1235,17 +1237,22 @@ for scenName, scen in pairs(scen_log) do
 						local cell = col[cy + dy]
 						if cell then
 							for _, entry in pairs(cell) do
-
+								
 								local element = entry.element
 								local target = entry.target
-								local sideName = entry.sideName
+								-- local sideName = entry.sideName
 
-								if element.x and not element.dead then
+								if element.x and not element.lasthit then --and not element.dead 
 									local dx2 = scen.x - element.x
 									local dy2 = scen.y - element.y
 									local dist2 = dx2*dx2 + dy2*dy2
-
+									-- if scen.initiator then print("G element "..tostring(element.name).." scen.name: "..tostring(scen.name).." distance2 "..tostring(dist2).." radius2 "..tostring(radius2)) end
+									
 									if dist2 <= radius2 then
+										
+										if scen.initiator then print("H element "..tostring(element.name).." is within radius at distance "..tostring(math.sqrt(dist2))) end
+										-- print("H element.dead = true "..tostring(element.name)..", destroying it: scenName: "..scenName.." is within radius at distance "..tostring(math.sqrt(dist2)))
+
 										element.dead = true
 										element.dead_last = true
 										element.CheckDay = camp.date.CampTotalTimeS
@@ -1253,43 +1260,51 @@ for scenName, scen in pairs(scen_log) do
 
 										-- destruction du static associé
 										if target.isStructure then
-											local unit = oobStaticByName[element.name]
-											if unit then
-												unit.dead = true
-												unit.dead_last = true
-												unit.CheckDay = camp.date.CampTotalTimeS
+											-- if scen.initiator then print("I target "..tostring(target.titleName).." is a structure, destroying static "..tostring(element.name)) end
+											
+											local foundElement = oobStaticByName[element.name]
+											if foundElement then
+
+												-- if scen.initiator then print("J found oob static "..tostring(foundElement.name)..", destroying it") end
+												
+												foundElement.dead = true
+												foundElement.dead_last = true
+												foundElement.CheckDay = camp.date.CampTotalTimeS
 											end
 										end
 
-										-- attribution kill
+										-- print("H0 element.name "..tostring(element.name).." destroyed by scen "..tostring(scenName).." at ("..tostring(scen.x)..","..tostring(scen.y)..")")
+										-- print("H1 element.lasthit "..tostring(element.lasthit).." scen.lasthit "..tostring(scen.lasthit))
+										
+										
+										-- attribution kill------------------------
+										-- attribution kill-------------------------
+										-- attribution kill-------------------------
 										if not element.lasthit and scen.lasthit then
 											element.lasthit = scen.lasthit
 
-											for killerSideName, killer_side in pairs(oob_air) do
-												if sideName == killerSideName then
-													for _, killerUnit in pairs(killer_side) do
-														if scen.lasthit:find(" " .. killerUnit.name .. " ", 1, true) then
-															killerUnit.score.kills_ground = killerUnit.score.kills_ground + 1
-															killerUnit.score_last.kills_ground = killerUnit.score_last.kills_ground + 1
-															addPackstats(scen.lasthit, "kill_ground", nil)
+											-- print("I element.lasthit set to scen.lasthit "..tostring(scen.lasthit))
 
-															if clientControl[scen.lasthit] then
-																local cid = clientControl[scen.lasthit]
-																clientstats[cid].kills_ground =
-																	clientstats[cid].kills_ground + 1
-																clientstats[cid].score_last.kills_ground =
-																	clientstats[cid].score_last.kills_ground + 1
+											local killerSquad = resolveAirSquad(scen.lasthit)
+											-- print("perte structure scen.lasthit "..tostring(scen.lasthit).." killerSquad "..tostring(killerSquad and killerSquad.name))
+											if killerSquad then
+												killerSquad.score.kills_ground = killerSquad.score.kills_ground + 1
+												killerSquad.score_last.kills_ground = killerSquad.score_last.kills_ground + 1
+												addPackstats(scen.lasthit, "kill_ground", nil)
 
-																clientstatsDetail[cid] = clientstatsDetail[cid] or {}
-																table.insert(clientstatsDetail[cid], {
-																	event = scenName,
-																	target_name = target.titleName,
-																	element = element,
-																})
-															end
-															break
-														end
-													end
+												if clientControl[scen.lasthit] then
+													local cid = clientControl[scen.lasthit]
+													clientstats[cid].kills_ground =
+														clientstats[cid].kills_ground + 1
+													clientstats[cid].score_last.kills_ground =
+														clientstats[cid].score_last.kills_ground + 1
+
+													clientstatsDetail[cid] = clientstatsDetail[cid] or {}
+													table.insert(clientstatsDetail[cid], {
+														event = scenName,
+														target_name = target.titleName,
+														element = element,
+													})
 												end
 											end
 										end
