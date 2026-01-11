@@ -14,15 +14,32 @@ end
 env.info("DCE_ACRF10 version of Lua _VERSION "..tostring(_VERSION))
 env.info("DCE_ACRF10 START LOADING AddCommandRadioF10.lua "..tostring(versionDCE["Mission Scripts/AddCommandRadioF10.lua"]))
 
--- cumul CPU GetCarrierPosition (en secondes)
-GetCarrierPosition_cpu = 0
--- nombre d’appels
-GetCarrierPosition_calls = 0
+Bingo_time = 0
+Bingo_calls = 0
+Bingo_t0 = 0
 
-Bingo_cpu = 0
-
+-- Perf_A = 0
+Perf_Tot = 0
 
 MissionGroupIndex = {}
+BaseDistCache= {}
+-- Bingo_prof = {
+--     pass = 0,
+--     units = 0,
+-- 	dejaBingo_skip = 0,
+--     prefilter_skip = 0,
+--     heavy_calc = 0,
+-- 	ckeckRTB = 0,
+--     rtb_orders = 0,
+--     waypoint_scans = 0
+-- }
+
+-- FuelCache = {}    -- [unitId] = { fuel=..., fuelMassMax=..., range=..., lastUpdate=... }
+-- FuelCacheTTL = 30 -- secondes (tu peux mettre 10–30 sans problème)
+
+local fuelCacheCooldown = 5   -- secondes entre deux lectures DCS par avion
+FuelCache = FuelCache or {}
+
 
 
 local useBubble_DisableEnable_Group = false
@@ -183,6 +200,7 @@ PathDCE = PathDCE .."Mods\\tech\\DCE\\Missions\\Campaigns\\"..campL.title.."\\"
 env.info( "DCE_PathDCE "..tostring(PathDCE) )
 env.info( "DCE_PathDD "..tostring(PathDD) )
 -----*********check PathDCE**************---------
+
 
 
 function _affiche(t, indent)
@@ -739,12 +757,7 @@ end
 -- mesure le temps CPU cumulé consommé par cette fonction
 local function getCarrierPosition(linkUnit)
 
-    local t0 = timer.getTime()
-
-    GetCarrierPosition_calls = GetCarrierPosition_calls + 1
-
     if not linkUnit then
-        GetCarrierPosition_cpu = GetCarrierPosition_cpu + (timer.getTime() - t0)
         return nil
     end
 
@@ -753,11 +766,9 @@ local function getCarrierPosition(linkUnit)
         local u = CarrierIndex[linkUnit]
         if u and u.isExist and u:isExist() and u.getLife and u:getLife() > 0 then
             local p = u:getPoint()
-            GetCarrierPosition_cpu = GetCarrierPosition_cpu + (timer.getTime() - t0)
             return p
         end
 
-        GetCarrierPosition_cpu = GetCarrierPosition_cpu + (timer.getTime() - t0)
         return nil
     end
 
@@ -765,12 +776,10 @@ local function getCarrierPosition(linkUnit)
     for _, u in pairs(CarrierIndex) do
         if u and u.isExist and u:isExist() and u.getName and u:getName() == linkUnit then
             local p = u:getPoint()
-            GetCarrierPosition_cpu = GetCarrierPosition_cpu + (timer.getTime() - t0)
             return p
         end
     end
 
-    GetCarrierPosition_cpu = GetCarrierPosition_cpu + (timer.getTime() - t0)
     return nil
 end
 
@@ -806,6 +815,9 @@ end
 
 function DCE_GetRoute(groupName, sideName)
 
+	local t0 = os.clock()
+
+	
 	local mission = env.mission
     for coalitionName, coalData in pairs(mission.coalition) do
         for countryId, country in pairs(coalData.country) do
@@ -819,6 +831,10 @@ function DCE_GetRoute(groupName, sideName)
             end
         end
     end
+
+	local dt = os.clock() - t0
+	Perf_Tot = Perf_Tot + dt
+	
 	return nil
 end
 
@@ -1511,66 +1527,15 @@ local function airRetreat()
 					local ctrGroup = gp:getController() -- Récupère le contrôleur du GROUPE (sinon, l injectrion de task sur l unit leader fait planter DCS)
 					local targets = ctr:getDetectedTargets()											--get detected targets of this EWR
 					for t = 1, #targets do																--iterate through detected targets
-						if targets[t].object and current_time >  RetreatTimeGp[gpGid].rTime then
+						if targets[t].object and current_time > RetreatTimeGp[gpGid].rTime then
 							local objCat = Object.getCategory(targets[t].object)								--get object category
 							if objCat == Object.Category.UNIT then															--object is a _unit
 								local desc = targets[t].object:getDesc()								--get descriptor descriptor
 								local descAwacs = _unit:getDesc()
 
-								-- _affiche(titre) ACRF10 DCE Desc
-								-- _affiche (a b)     speedMax0 388.10000610352
-								-- _affiche (a b)     massEmpty 10550
-								-- _affiche (a b)     range 1950
-								-- _affiche(a c)           box min
-								-- _affiche(e f)                          y -2.3299200534821
-								-- _affiche(e f)                          x -10
-								-- _affiche(e f)                          z -9
-								-- _affiche(a c)           box max
-								-- _affiche(e f)                          y 2.7555100917816
-								-- _affiche(e f)                          x 11
-								-- _affiche(e f)                          z 9
-								-- _affiche (a b)     Hmax 18500
-								-- _affiche (a b)     Kmax 0.68999999761581
-								-- _affiche (a b)     _origin 
-								-- _affiche (a b)     speedMax10K 693.25
-								-- _affiche (a b)     NyMin -3
-								-- _affiche (a b)     fuelMassMax 3800
-								-- _affiche (a b)     speedMax 693.25
-								-- _affiche (a b)     NyMax 6.5
-								-- _affiche (a b)     massMax 17800
-								-- _affiche (a b)     RCS 4
-								-- _affiche (a b)     displayName mig-23ml
-								-- _affiche (a b)     life 16
-								-- _affiche (a b)     VyMax 240
-								-- _affiche (a b)     Kab 3
-								-- _affiche(a c)           attributes Air
-								-- _affiche(d)                true
-								-- _affiche(a c)           attributes Fighters
-								-- _affiche(d)                true
-								-- _affiche(a c)           attributes NonAndLightArmoredUnits
-								-- _affiche(d)                true
-								-- _affiche(a c)           attributes NonArmoredUnits
-								-- _affiche(d)                true
-								-- _affiche(a c)           attributes All
-								-- _affiche(d)                true
-								-- _affiche(a c)           attributes Battle airplanes
-								-- _affiche(d)                true
-								-- _affiche(a c)           attributes Planes
-								-- _affiche(d)                true
-								-- _affiche (a b)     typeName MiG-23MLD
-								-- _affiche (a b)     category 0
-
 								if desc.category == Unit.Category.AIRPLANE and (desc.attributes["Battle airplanes"] or desc.attributes.Fighters)  then												--descriptor category is airplane 
 									--To know what attributes the object type has, look for the unit type script in sub-directories planes/, helicopter/s, vehicles, navy/ of ./Scripts/Database/ directory.
 									--and desc.attributs ~= "Battleplane" and desc.attributs ~= "Fighter"
-
-									-- attributes Air true
-									-- attributes Fighters  true
-									-- attributes NonAndLightArmoredUnits true
-									-- attributes NonArmoredUnits true
-									-- attributes All  true
-									-- attributes Battle airplanes true
-									-- attributes Planes true
 
 									local targetVec3 = targets[t].object:getPoint()					--get target point					
 									local distance = math.sqrt(math.pow(awacsVec3.x - targetVec3.x, 2) + math.pow(awacsVec3.z - targetVec3.z, 2))
@@ -1813,51 +1778,138 @@ local function airRetreat()
 end
 
 
+-- met à jour ou retourne les infos fuel d’un avion avec cooldown
+-- retourne fuel et données avion avec cache temporel basé sur le temps DCS
+local function updateFuelCache(unit)
+	if not unit or not unit.isExist or not unit:isExist() then
+		return nil
+	end
+
+	local unitId = unit:getID()
+	local now = timer.getTime()
+
+	local c = FuelCache[unitId]
+
+	if not c then
+		local desc = unit:getDesc()
+		if not desc or not desc.fuelMassMax or not desc.range then
+			return nil
+		end
+
+		c = {
+			fuel = Unit.getFuel(unit),
+			fuelMassMax = desc.fuelMassMax,
+			range = desc.range,
+			nextUpdate = now + fuelCacheCooldown
+		}
+
+		FuelCache[unitId] = c
+		return c
+	end
+
+	-- cooldown pas expiré → aucune API DCS appelée
+	if now < c.nextUpdate then
+		return c
+	end
+
+	-- rafraîchissement réel
+	c.fuel = Unit.getFuel(unit)
+	c.nextUpdate = now + fuelCacheCooldown
+
+	return c
+end
+
+local function updateBaseDistance(unit, baseX, baseY)
+	local id = unit:getID()
+	local now = timer.getTime()
+
+	local c = BaseDistCache[id]
+	local pos = unit:getPoint()
+
+	local dx = pos.x - baseX
+	local dy = pos.z - baseY
+	local dist = math.sqrt(dx * dx + dy * dy) / 1000
+
+	if not c then
+		BaseDistCache[id] = {
+			baseX = baseX,
+			baseY = baseY,
+			lastDistKm = dist,
+			lastTime = now,
+			closingSpeed = 0
+		}
+		return dist
+	end
+
+	local dt = now - c.lastTime
+	if dt > 0 then
+		c.closingSpeed = (c.lastDistKm - dist) / dt
+	end
+
+	c.lastDistKm = dist
+	c.lastTime = now
+	c.baseX = baseX
+	c.baseY = baseY
+
+	return dist
+end
 
 local function bingo(gpId, gpObj)
 
-	local t0 = timer.getTime()
+	-- if Bingo_calls == 0 then
+	-- 	-- Bingo_t0 = timer.getTime()
+	-- 	Bingo_t0 = os.clock()
+	-- end
 
-	if gpObj.getUnits then
-		for n, unit in pairs(gpObj:getUnits()) do
+	-- Bingo_calls = Bingo_calls + 1
 
-			local callSign = Unit.getCallsign(unit)
-			-- if not BingoPlaneTab[gpId] then BingoPlaneTab[gpId] = {} end
-			-- if not tabJockerPlane[gpId] then tabJockerPlane[gpId] = {} end
+	-- Bingo_prof.pass = Bingo_prof.pass + 1
 
-			-- if BingoPlaneTab[gpId] and not BingoPlaneTab[gpId][callSign] then												-- si le callSign a deja dit qu'il etait Bingo, on l'oublie		
+	for n, unit in pairs(gpObj:getUnits()) do
+		-- Bingo_prof.units = Bingo_prof.units + 1
 
-			local bingoGp = BingoPlaneTab[gpId]
-			if not bingoGp then
-				bingoGp = {}
-				BingoPlaneTab[gpId] = bingoGp
-			end
+        local callSign = Unit.getCallsign(unit)
+		
+        -- if BingoPlaneTab[gpId] and BingoPlaneTab[gpId][callSign] then
+        --     Bingo_prof.dejaBingo_skip = Bingo_prof.dejaBingo_skip + 1
+        --     return
+        -- end
+		
+		if BingoPlaneTab[gpId] and BingoPlaneTab[gpId][callSign] then
+			-- Bingo_prof.dejaBingo_skip = Bingo_prof.dejaBingo_skip + 1
+		else
 
-			if not bingoGp[callSign] then
-				
-				local fuelRemainingPercent = Unit.getFuel(unit)
+			local toRTB
+			local distanceToBase_Km = 0
+			local cruiseSpeed = 300
+			local speedMini = 999999
+			local speedMax = 0
+					
+			local cache = updateFuelCache(unit)
+			if not cache then
+				env.info("DCE_BUG DCE_Bingo D6  not cache")
+			else
+				local fuelRemainingPercent = cache.fuel
+				local fuelMass = cache.fuel * cache.fuelMassMax
+				local unitRange = cache.range
+				local unitId = unit:getID() -- celui-là est cheap
 
-				-- if fuelRemainingPercent <=  0.35 then
-				-- 	trigger.action.outTextForGroup(gpGid, callSign .." Bingo Fuel", 15 , true)
-				-- end
-
-				-- if fuelRemainingPercent <=  0.50 then
-				if fuelRemainingPercent <=  0.99 then																			-- Sur F14, 4000lbs/16000lbs = 0.25%
-
-					local toRTB
-					local distanceToBase_Km = 0
-					local cruiseSpeed = 300
-					local speedMini = 999999
-					local speedMax = 0
+				-- 🟢 pré-filtre
+				-- if fuelRemainingPercent > 0.60 then
+				if fuelRemainingPercent > 2 then
+					-- Bingo_prof.prefilter_skip = Bingo_prof.prefilter_skip + 1
+				else
+					-- Bingo_prof.heavy_calc = Bingo_prof.heavy_calc + 1
 
 					--calcul de la distance restante vers la base
-					local mGroup = MissionGroupIndex[gpObj.id_]
+					local mGroup = MissionGroupIndex[gpId]
 					if mGroup then
 						local route = mGroup.route.points
 						local unitVec3 = unit:getPoint()
 
 						local baseX, baseY
 
+						--a mettre en cache
 						if route[1].type == "TakeOff" then
 							baseX = route[1].x
 							baseY = route[1].y
@@ -1875,305 +1927,200 @@ local function bingo(gpId, gpObj)
 								baseY = cv.z
 							end
 						end
+						-- distanceToBase_Km = GetDistance({ x = baseX, y = baseY }, { x = unitVec3.x, y = unitVec3.z }) / 1000
 
-						distanceToBase_Km = GetDistance({x=baseX, y=baseY}, {x=unitVec3.x, y=unitVec3.z}) / 1000
+						local c = BaseDistCache[unitId]
+                        if c then
+                            local dt = timer.getTime() - c.lastTime
+                            distanceToBase_Km = c.lastDistKm - c.closingSpeed * dt
+                        else
+                            distanceToBase_Km = updateBaseDistance(unit, baseX, baseY)
+                        end
+						
 					end
 
-
-					--calcul de la distance restante vers la base
---[[ 					for coalitionN, coalition in pairs(env.mission.coalition) do
-						for countryN, state in pairs(coalition.country) do
-							if state.plane then
-								for groupN, _group in pairs(state.plane.group) do
-									if _group.task ~= "Transport" and _group.groupId and _group.groupId == gpObj.id_ then
-										if _group.route.points[1].type == 'TakeOff' then
-											--on prend le premier wpt de la route
-											local firstWPT = _group.route.points[1]
-											local firstWPTPos = {x=firstWPT.x, y=firstWPT.y}
-											local unitVec3 = unit:getPoint()
-											distanceToBase_Km = GetDistance(firstWPTPos, {x=unitVec3.x, y=unitVec3.z})/1000
-											-- env.info( "DCE_Bingo D1  distanceToBase: "..tostring(distanceToBase_Km).." groupName: "..tostring(_group.name).." groupMission.id_: "..tostring(arg_groupMission.id_) )
-
-											--if it's CV or CVN:
-											if _group.route.points[1]["linkUnit"] then
-												local carrierPosVec3 = getCarrierPosition(_group.route.points[1]["linkUnit"])
-												if carrierPosVec3 then
-													-- env.info( "DCE_Bingo D1+ carrierPos.x: "..tostring(carrierPosVec3.x).." carrierPos.y: "..tostring(carrierPosVec3.y).." carrierPos.z: "..tostring(carrierPosVec3.z))
-													firstWPTPos = {x=carrierPosVec3.x, y=carrierPosVec3.z}
-													distanceToBase_Km = GetDistance(firstWPTPos, {x=unitVec3.x, y=unitVec3.z})/1000
-													-- env.info( "DCE_Bingo D1+  distanceToBase: "..tostring(distanceToBase_Km).." groupName: "..tostring(_group.name).." groupMission.id_: "..tostring(arg_groupMission.id_) )
-												end
-
-											end
-
-										else
-											--on prend le premier wpt de la route
-											local lastWPT = _group.route.points[#_group.route.points]
-											local firstWPTPos = {x=lastWPT.x, y=lastWPT.y}
-											local unitVec3 = unit:getPoint()
-											distanceToBase_Km = GetDistance(firstWPTPos, {x=unitVec3.x, y=unitVec3.z})/1000
-											-- env.info( "DCE_Bingo D2  distanceToBase: "..tostring(distanceToBase_Km).." groupName: "..tostring(_group.name).." groupMission.id_: "..tostring(arg_groupMission.id_) )
-
-												--if it's CV or CVN:
-											if _group.route.points[1]["linkUnit"] then
-												local carrierPosVec3 = getCarrierPosition(_group.route.points[1]["linkUnit"])
-												if carrierPosVec3 then
-													-- env.info( "DCE_Bingo D1+ carrierPos.x: "..tostring(carrierPosVec3.x).." carrierPos.y: "..tostring(carrierPosVec3.y).." carrierPos.z: "..tostring(carrierPosVec3.z))
-													firstWPTPos = {x=carrierPosVec3.x, y=carrierPosVec3.z}
-													distanceToBase_Km = GetDistance(firstWPTPos, {x=unitVec3.x, y=unitVec3.z})/1000
-													-- env.info( "DCE_Bingo D1+  distanceToBase: "..tostring(distanceToBase_Km).." groupName: "..tostring(_group.name).." groupMission.id_: "..tostring(arg_groupMission.id_) )
-												end
-											end
-										end
-									end
+					if fuelMass and fuelMass > 0 then
+						if distanceToBase_Km > 0 then
+							if not AvgConsumptionKgPerKm[unitId] then
+								if unitRange > 0 then
+									AvgConsumptionKgPerKm[unitId] = cache.fuelMassMax / unitRange
+								else
+									AvgConsumptionKgPerKm[unitId] = 3
 								end
 							end
-						end
-					end ]]
 
-					-- calcul de l'autonomie de carburant pour le retour
-					if unit.getDesc and unit.getID then
-						local unitDesc = unit:getDesc()
-						local unitId = unit:getID()
-						if unitDesc and unitDesc.fuelMassMax and unitDesc.range then
-							local fuelMass = fuelRemainingPercent * unitDesc.fuelMassMax
-							-- env.info("DCE_Bingo D3  fuelMass: "..tostring(fuelMass).." fuelRemainingPercent: "..tostring(fuelRemainingPercent).." unitId "..tostring(unitId).." range: "..tostring(unitDesc.range))
+							local availableDistanceKm = fuelMass / AvgConsumptionKgPerKm[unitId]
 
-							if distanceToBase_Km > 0 and fuelMass > 0 then
-								if not AvgConsumptionKgPerKm[unitId] then
-									if unitDesc.range > 0 then
-										AvgConsumptionKgPerKm[unitId] = unitDesc.fuelMassMax / unitDesc.range
-									else
-										AvgConsumptionKgPerKm[unitId] = 3  -- valeur moyenne réaliste pour un chasseur
-									end
-										
-								end
+							-- env.info("DCE_Bingo D3b availableDistanceKm: " .. tostring(availableDistanceKm) .. " <? distanceToBase_Km+200000: " .. tostring(distanceToBase_Km+200000))
 
-								local availableDistanceKm = fuelMass / AvgConsumptionKgPerKm[unitId]
-								
-								-- env.info("DCE_Bingo D3b availableDistanceKm: " ..
-								-- 	tostring(availableDistanceKm) .. " <? distanceToBase_Km+200: " .. tostring(distanceToBase_Km+200))
-								
-								if availableDistanceKm < (distanceToBase_Km + 200) then
-									-- env.info("DCE_Bingo D4 toRTB=true  distancePossibleKm: "..tostring(availableDistanceKm).." < distanceToBase: "..tostring(distanceToBase_Km))
-									toRTB = true
-								end
+							-- if availableDistanceKm < (distanceToBase_Km + 200) then
+							if availableDistanceKm < (distanceToBase_Km + 200000) then
+								toRTB = true
 							end
-						else
-							env.info("DCE_Bingo D5 DCE_BUG unitDesc invalid or missing fuelMassMax/range")
 						end
 					else
-						env.info("DCE_Bingo D6 DCE_BUG  unit:getDesc() is nil")
-					end
-
-					if toRTB then
-						trigger.action.outTextForGroup(gpId, callSign .." low fuel: RTB", 15 , true)
-
-						BingoPlaneTab[gpId][callSign] = true																	-- la callSign à déja indiqué qu'il était Bingo
-
-						local humainUnit
-						if unit and unit.getPlayerName then
-							humainUnit = unit:getPlayerName()
-						end
-						local unitName = unit:getName()
-						local unitVec3 = unit:getPoint()
-
-						local report = " is humainUnit?:  "..tostring(humainUnit)
-						local cntrl
-
-						--for the leader, the task has to be set on the group level
-						if n == 1 then
-							cntrl = gpObj:getController()
-						else
-							cntrl = unit:getController()
-						end
-
-						report = report.." RTB_ON_BINGO & PROHIBIT_AB "
-
-						-- env.info( "DCE_Bingo CC MM     report "..tostring(arg_groupMission.id_).." "..tostring(unitName).." "..callSign.." report "..tostring(report) )
-
-						-- local description = unit:getDesc()
-						-- _affiche(description, "description function bingo()")
-
-						local breaktab = false
-						local rtbGroup = {
-							name = "",
-							from = 0,
-							to = 0
-						}
-
-						--[[ for coalitionB, coalition in pairs(env.mission.coalition) do
-
-							for countryN, _country in pairs(coalition.country) do
-								if _country.plane then
-									for Ngroup, _group in pairs(_country.plane.group) do
-										if _group.groupId and _group.groupId == gpObj.id_ then
-
-											rtbGroup.name = _group.name
-
-											--le wpt le plus proche de l'unit
-											local existIP = 0
-											local wptN_closest = #_group.route.points - 1
-											local closestPoint = 99999999
-											for wptN, wpt in ipairs(_group.route.points) do
-												if wpt.name == 'IP' then
-													existIP = wptN
-													closestPoint = 99999999
-													-- env.info( "DCE_Bingo D1  passIP existIP: "..tostring(existIP))
-												end
-												--on essai de passer le point IP et le target
-												if existIP > 0 and wptN < existIP + 2 then
-													closestPoint = 99999999
-													-- env.info( "DCE_Bingo D2 N1 existIP: "..tostring(existIP).." wptN : "..tostring(wptN).." < "..tostring(existIP+2))
-												end
-												local distance  = GetDistance({x=unitVec3.x, y=unitVec3.z}, {x=wpt.x, y=wpt.y})
-												if distance < closestPoint then
-													closestPoint = distance
-													wptN_closest = wptN
-													-- env.info( "DCE_Bingo D1 N2 wptN_closest: "..tostring(wptN_closest).." closestPoint: "..tostring(closestPoint))
-												end
-											end
-
-											rtbGroup.from = wptN_closest
-
-											-- --Split
-											-- for key, value in ipairs(_group.route.points) do
-											-- 	if value.name == 'Split' then
-											-- 		rtbGroup.from = key
-											-- 	end
-											-- end
-
-
-											for key, value in ipairs(_group.route.points) do
-												if value.type == 'Land' then
-													rtbGroup.to = key
-												end
-											end
-
-
-											if rtbGroup.to == 0 then
-												rtbGroup.to = #_group.route.points
-											end
-
-											breaktab = true
-											break
-										end
-									end
-								end
-								if breaktab then break end
-							end
-
-							if breaktab then break end
-						end ]]
-
-                        -- for coalitionB, coalition in pairs(env.mission.coalition) do
-                        --     for countryN, _country in pairs(coalition.country) do
-                        --         if _country.plane then
-                        --             for Ngroup, mGroup in pairs(_country.plane.group) do
-                        --                 if mGroup.groupId and mGroup.groupId == gpObj.id_ then
-                        --                     rtbGroup.name = mGroup.name
-
-						local mGroupB = MissionGroupIndex[gpObj.id_]
-						if mGroupB then
-
-							--le wpt le plus proche de l'unit
-							local existIP = 0
-							local wptN_closest = #mGroupB.route.points - 1
-							local closestPoint = 99999999
-							for wptN, wpt in ipairs(mGroupB.route.points) do
-								if wpt.name == 'IP' then
-									existIP = wptN
-									closestPoint = 99999999
-									-- env.info( "DCE_Bingo D1  passIP existIP: "..tostring(existIP))
-								end
-								--on essai de passer le point IP et le target
-								if existIP > 0 and wptN < existIP + 2 then
-									closestPoint = 99999999
-									-- env.info( "DCE_Bingo D2 N1 existIP: "..tostring(existIP).." wptN : "..tostring(wptN).." < "..tostring(existIP+2))
-								end
-								local distance = GetDistance({ x = unitVec3.x, y = unitVec3.z },
-									{ x = wpt.x, y = wpt.y })
-								if distance < closestPoint then
-									closestPoint = distance
-									wptN_closest = wptN
-									-- env.info( "DCE_Bingo D1 N2 wptN_closest: "..tostring(wptN_closest).." closestPoint: "..tostring(closestPoint))
-								end
-							end
-
-							rtbGroup.from = wptN_closest
-
-							-- --Split
-							-- for key, value in ipairs(_group.route.points) do
-							-- 	if value.name == 'Split' then
-							-- 		rtbGroup.from = key
-							-- 	end
-							-- end
-
-
-							for key, value in ipairs(mGroupB.route.points) do
-								if value.type == 'Land' then
-									rtbGroup.to = key
-								end
-							end
-
-
-							if rtbGroup.to == 0 then
-								rtbGroup.to = #mGroupB.route.points
-							end
-
-							breaktab = true
-							break
-						end
-
-						
-						-- env.info( "DCE_Bingo DD        rtbGroup from "..tostring( rtbGroup.from).." to "..tostring( rtbGroup.to))
-
-						if rtbGroup.to ~= 0 then
-							local switchtask = {
-									id = "SwitchWaypoint",
-										params = {
-											goToWaypointIndex = rtbGroup.to,
-											fromWaypointIndex = rtbGroup.from
-									}
-								}
-
-
-							cntrl:resetTask()
-
-							cntrl:setCommand(switchtask)
-
-							cntrl:setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2)
-							cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, true) -- Désactiver l'engagement A/A
-							cntrl:setOption(AI.Option.Air.id.PROHIBIT_JETT, false)
-							cntrl:setOption(AI.Option.Air.id.PROHIBIT_AB, true)
-							cntrl:setOption(AI.Option.Air.id.JETT_TANKS_IF_EMPTY, true)
-
-			-- RTB_NO							= false,
-			-- RTB_AAR_REFUEL 					= true,
-			-- RTB_IGNORE_AAR					= 2,
-
-							cntrl:setOption(AI.Option.Air.id.RTB_ON_BINGO, 2) -- RTB on Bingo  RTB_IGNORE_AAR
-								--OptionName.RTB_ON_BINGO
-
-
-							env.info( "DCE_Bingo EE  O      SwitchWaypoint "..tostring(unitName).." "..callSign.." |from: "..tostring(rtbGroup.from).." |to: "..tostring(rtbGroup.to) )
-							_affiche(switchtask, "switchtask function bingo()")
-						end
+						env.info("DCE_Bug Bingo D5 unitDesc invalid or missing fuelMassMax/range")
 					end
 				end
-			end
 
-			if tabJockerPlane[gpId] and not tabJockerPlane[gpId][callSign] then												-- si le callSign a deja dit qu'il etait Bingo, on l'oublie
-				if Unit.getFuel(unit) <=  0.30 then																			-- Sur F14, 4000lbs/16000lbs = 0.25%
-					trigger.action.outTextForGroup(gpId, callSign .." Jocker Fuel", 15 , true)
-					-- env.info( " Unit.getFuel(unit)  "..callSign.." humainUnit? "..tostring(humainUnit) )
-					tabJockerPlane[gpId][callSign] = true																	-- la callSign à déja indiqué qu'il était Bingo			
+				if toRTB then
+					-- Bingo_prof.ckeckRTB = Bingo_prof.ckeckRTB + 1
+					
+					trigger.action.outTextForGroup(gpId, callSign .. " low fuel: RTB", 15, true)
+
+					if not BingoPlaneTab[gpId] then BingoPlaneTab[gpId] = {} end
+
+					BingoPlaneTab[gpId][callSign] = true -- la callSign à déja indiqué qu'il était Bingo
+
+					local humainUnit
+					if unit and unit.getPlayerName then
+						humainUnit = unit:getPlayerName()
+					end
+					-- local unitName = unit:getName()
+					local unitVec3 = unit:getPoint()
+
+					local report = " is humainUnit?:  " .. tostring(humainUnit)
+					local cntrl
+
+					--for the leader, the task has to be set on the group level
+					if n == 1 then
+						cntrl = gpObj:getController()
+					else
+						cntrl = unit:getController()
+					end
+
+					report = report .. " RTB_ON_BINGO & PROHIBIT_AB "
+
+					local breaktab = false
+					local rtbGroup = {
+						name = "",
+						from = 0,
+						to = 0
+					}
+
+					local mGroupB = MissionGroupIndex[gpId]
+					if mGroupB then
+						-- Bingo_prof.waypoint_scans = Bingo_prof.waypoint_scans + #mGroupB.route.points
+
+						--le wpt le plus proche de l'unit
+						local existIP = 0
+						local wptN_closest = #mGroupB.route.points - 1
+						local closestPoint = 99999999
+						for wptN, wpt in ipairs(mGroupB.route.points) do
+							if wpt.name == 'IP' then
+								existIP = wptN
+								closestPoint = 99999999
+								-- env.info( "DCE_Bingo D1  passIP existIP: "..tostring(existIP))
+							end
+							--on essai de passer le point IP et le target
+							if existIP > 0 and wptN < existIP + 2 then
+								closestPoint = 99999999
+								-- env.info( "DCE_Bingo D2 N1 existIP: "..tostring(existIP).." wptN : "..tostring(wptN).." < "..tostring(existIP+2))
+							end
+							local distance = GetDistance({ x = unitVec3.x, y = unitVec3.z },
+								{ x = wpt.x, y = wpt.y })
+							if distance < closestPoint then
+								closestPoint = distance
+								wptN_closest = wptN
+								-- env.info( "DCE_Bingo D1 N2 wptN_closest: "..tostring(wptN_closest).." closestPoint: "..tostring(closestPoint))
+							end
+						end
+
+						rtbGroup.from = wptN_closest
+
+						-- --Split
+						-- for key, value in ipairs(_group.route.points) do
+						-- 	if value.name == 'Split' then
+						-- 		rtbGroup.from = key
+						-- 	end
+						-- end
+
+
+						for key, value in ipairs(mGroupB.route.points) do
+							--  env.info( "DCE_Bingo D1        waypoint "..tostring(key).." type "..tostring(value.type))
+							if value.type == 'Land' then
+								--  env.info( "DCE_Bingo D_2        found Land waypoint at "..tostring(key))
+								rtbGroup.to = key
+							end
+						end
+
+
+						if rtbGroup.to == 0 then
+							rtbGroup.to = #mGroupB.route.points
+						end
+
+					end
+
+
+					-- env.info( "DCE_Bingo D__DD        rtbGroup from "..tostring( rtbGroup.from).." to "..tostring( rtbGroup.to))
+
+					if rtbGroup.to ~= 0 then
+						local switchtask = {
+							id = "SwitchWaypoint",
+							params = {
+								goToWaypointIndex = rtbGroup.to,
+								fromWaypointIndex = rtbGroup.from
+							}
+						}
+
+
+						cntrl:resetTask()
+
+						cntrl:setCommand(switchtask)
+
+						-- Bingo_prof.rtb_orders = Bingo_prof.rtb_orders + 1
+
+						cntrl:setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2)
+						cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, true) -- Désactiver l'engagement A/A
+						cntrl:setOption(AI.Option.Air.id.PROHIBIT_JETT, false)
+						cntrl:setOption(AI.Option.Air.id.PROHIBIT_AB, true)
+						cntrl:setOption(AI.Option.Air.id.JETT_TANKS_IF_EMPTY, true)
+
+						-- RTB_NO							= false,
+						-- RTB_AAR_REFUEL 					= true,
+						-- RTB_IGNORE_AAR					= 2,
+
+						cntrl:setOption(AI.Option.Air.id.RTB_ON_BINGO, 2) -- RTB on Bingo  RTB_IGNORE_AAR
+						--OptionName.RTB_ON_BINGO
+
+					end
 				end
 			end
 		end
 	end
 
-	Bingo_cpu = Bingo_cpu + (timer.getTime() - t0)
+	if tabJockerPlane[gpId] and not tabJockerPlane[gpId][callSign] then												-- si le callSign a deja dit qu'il etait Bingo, on l'oublie
+		if Unit.getFuel(unit) <=  0.30 then																			-- Sur F14, 4000lbs/16000lbs = 0.25%
+			trigger.action.outTextForGroup(gpId, callSign .." Jocker Fuel", 15 , true)
+			-- env.info( " Unit.getFuel(unit)  "..callSign.." humainUnit? "..tostring(humainUnit) )
+			tabJockerPlane[gpId][callSign] = true																	-- la callSign à déja indiqué qu'il était Bingo			
+		end
+	end
+
+
+	-- if Bingo_calls >= 1000 then
+	-- 	local dt = os.clock() - Bingo_t0
+	-- 	Bingo_time = Bingo_time + dt
+	-- 	env.info("DCE_Perf Bingo_time: " .. tostring(Bingo_time).. " seconds for "..tostring(Bingo_calls).." calls. Avg time per call: "..tostring(Bingo_time / Bingo_calls).." seconds.")
+		
+	-- 	Bingo_time = 0
+	-- 	Bingo_calls = 0
+
+	-- 	env.info(
+	-- 		"DCE_Bingo PROF D | pass=" .. Bingo_prof.pass ..
+    --         " units=" .. Bingo_prof.units ..
+	-- 		" bingoSkip=" .. Bingo_prof.dejaBingo_skip ..
+	-- 		" fuelSkip=" .. Bingo_prof.prefilter_skip ..
+    --         " heavy=" .. Bingo_prof.heavy_calc ..
+	-- 		" ckeckRTB=" .. Bingo_prof.ckeckRTB ..
+	-- 		" wptScan=" .. Bingo_prof.waypoint_scans ..
+	-- 		" RTB=" .. Bingo_prof.rtb_orders
+    --     )
+    --     for k in pairs(Bingo_prof) do
+    --         Bingo_prof[k] = 0
+    --     end
+
+	-- end
 
 end
 
@@ -3848,14 +3795,13 @@ end
 
  
 
-function addFuncs(arg_Gid, arg_GroupObj, argPlayerName)
+local function addFuncs(arg_Gid, arg_GroupObj, argPlayerName)
 
 	env.info("DCE_addFuncs _A gid "..tostring(arg_Gid).." Group "..tostring(arg_GroupObj).." argPlayerName: "..tostring(argPlayerName))
 
 	--si aucun argument, on s'appui sur la liste des joueurs fait maison
 	if not arg_Gid or not arg_GroupObj then
 		env.info("DCE_addFuncs _A2 with No arg ")
-		
 
 		for playerName, playerData in pairs(PlayerInOutAircraft) do
 			env.info("DCE_addFuncs  _A4 gid "..tostring(playerData.gid).." Group "..tostring(playerData.groupObject))
@@ -3864,7 +3810,6 @@ function addFuncs(arg_Gid, arg_GroupObj, argPlayerName)
 				addFuncs(playerData.gid, playerData.groupObject, playerName)
 			end
 		end
-
 	end
 
 	if arg_Gid and arg_GroupObj then
@@ -3876,26 +3821,6 @@ function addFuncs(arg_Gid, arg_GroupObj, argPlayerName)
 				EWR_on = false,
 			}
 		end
-
-		-- -- supprime les anciens items de la commande F10
-		-- missionCommands.removeItemForGroup(gid, {"Urgent_Refueling"})
-		-- missionCommands.removeItemForGroup(gid, {"Urgent_RequestCAP"})
-		-- missionCommands.removeItemForGroup(gid, {"BullsEye_LongLat"})	
-		-- missionCommands.removeItemForGroup(gid, {"Package_All_RTB"})
-		-- missionCommands.removeItemForGroup(gid, {"Package_Strike_RTB"})
-		-- missionCommands.removeItemForGroup(gid, {"Package_SEAD_RTB"})		
-		-- -- missionCommands.removeItemForGroup(gid, {"RemovePlane"})
-		-- missionCommands.removeItemForGroup(gid, {"CarrierIntoWind"})		
-
-		-- missionCommands.addCommandForGroup(gid, "Urgent_Refueling", nil, ReFueling, Group)
-		-- missionCommands.addCommandForGroup(gid, "Urgent_RequestCAP", nil, RequestCAP, Group)
-		-- missionCommands.addCommandForGroup(gid, "BullsEye_LongLat", nil, BullsEye, Group)
-		-- missionCommands.addCommandForGroup(gid, "Package_All_RTB", nil, RtbPack, Group)
-		-- missionCommands.addCommandForGroup(gid, "Package_Strike_RTB", nil, RtbStrikePack, Group)
-		-- missionCommands.addCommandForGroup(gid, "Package_SEAD_RTB", nil, RtbSEADPack, Group)		
-		-- -- missionCommands.addCommandForGroup(gid, "RemovePlane", nil, RemovePlane, Group)
-
-
 
 		-- supprime les anciens items de la commande F10**************************************
 
@@ -3921,12 +3846,6 @@ function addFuncs(arg_Gid, arg_GroupObj, argPlayerName)
 
 
 		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, "BullsEye_LongLat", nil, BullsEye, arg_GroupObj)
-
-
-		-- local subR = missionCommands.addSubMenu('Root SubMenu')
-		-- local subN1 = missionCommands.addSubMenu('SubMenu within RootSubmenu', subR)
-		-- local subN2 = missionCommands.addSubMenu('we must go deeper', subN1)
-		-- local subN3 = missionCommands.addSubMenu('Go take a UX class', subN2)
 
 		local subR_B1 = missionCommands.addSubMenuForGroup(arg_Gid, "EWR", nil)
 		local subR_B2 = missionCommands.addSubMenuForGroup(arg_Gid, "EWR ON", subR_B1)
@@ -4577,7 +4496,9 @@ function EventHandler2:onEvent(event)
 							if groupObject and passEscort then
 
 								-- local route = DCE_GetRoute(flightName, sideName)
-								local route = DCE_GetRoute(groupName)
+                                local route = DCE_GetRoute(groupName)
+								
+								print("DCE_Perf Perf_Tot "..tostring(Perf_Tot))
 
 								if route and #route > 0 then
 
@@ -4871,10 +4792,12 @@ local function loopPilot()
 
 	local groups = coalition.getGroups(coalition.side.BLUE, Group.Category.AIRPLANE)
 
-	for _, gp in pairs(groups) do
-		local gpGid = Group.getID(gp)
-		if gpGid and gp then
-			bingo(gpGid, gp)
+	for n=1, 5 do
+		for _, gp in pairs(groups) do
+			local gpGid = Group.getID(gp)
+			if gpGid and gp then
+				bingo(gpGid, gp)
+			end
 		end
 	end
 
@@ -4896,25 +4819,74 @@ local function loopPilot()
 	end
 
 
-	return timer.getTime() + 120
+    return timer.getTime() + 120
+	-- return timer.getTime() + 10
 
 end
 
-local function performance()
+local function testPerf()
 
-	env.info(
-		string.format(
-			"GetCarrierPosition calls: %d\nCPU: %.3f sec\nAvg: %.6f ms",
-			GetCarrierPosition_calls,
-			GetCarrierPosition_cpu,
-			(GetCarrierPosition_cpu / math.max(GetCarrierPosition_calls,1)) * 1000
-		)
-	)
-	env.info( "bingo_cpu: "..tostring(Bingo_cpu) )
+	local groups = coalition.getGroups(coalition.side.BLUE, Group.Category.AIRPLANE)
+    
+    for _, gp in pairs(groups) do
+        local gpGid = Group.getID(gp)
+        if gpGid and gp then
+            bingo(gpGid, gp)
+        end
+    end
 	
+end
 
-	return timer.getTime() + 300
 
+local benchState = {}
+
+
+
+-- Fait un round, puis se reprogramme
+local function benchStep()
+	env.info("DCE_Bench:A step nIndex=" .. tostring(benchState.nIndex))
+	local n = benchState.nList[benchState.nIndex]
+
+	-- local t0 = timer.getTime()
+	local t0 = os.clock()
+
+	env.info("DCE_Bench:B  n=" .. tostring(n) .. " rounds=" .. tostring(benchState.rounds))
+	for r = 1, benchState.rounds do
+		for i = 1, n do
+			testPerf()
+		end
+	end
+
+    env.info("DCE_Bench:C  step done, measuring time...")
+	
+	-- local t1 = timer.getTime()
+	local t1 = os.clock()
+	local dt = (t1 - t0) / benchState.rounds
+
+	env.info(string.format("DCE_Bench:DCS_CategoryById n=%d dt=%.4f", n, dt))
+
+	benchState.nIndex = benchState.nIndex + 1
+	if benchState.nIndex > #benchState.nList then
+		env.info("DCE_Bench:E terminé")
+		return
+	end
+
+	return timer.getTime() + 0.1 -- on laisse respirer DCS entre deux tailles
+end
+
+-- Lance le benchmark
+local function benchStart(nList, rounds)
+	env.info("DCE_Bench: démarrage")
+	benchState.nList = nList
+	benchState.rounds = rounds
+	benchState.nIndex = 1
+
+	timer.scheduleFunction(benchStep, nil, timer.getTime() + 0.1)
+end
+
+local function benchDrive()
+	benchStart({ 100, 500, 1000, 2000 }, 3)
+	-- benchStart({ 100, 500, 1000 }, 10)
 end
 
 --creation de la table de couverture anti aérienne AMI
@@ -4931,12 +4903,22 @@ if campL.debug then
 	end
 end
 
+
+
+timer.scheduleFunction(BuildMissionGroupIndex, nil, timer.getTime() + 0.01)
+
 timer.scheduleFunction(timerPlayerMenu, nil, timer.getTime() + 5)
 
 timer.scheduleFunction(BuildCarrierIndex, nil, timer.getTime() + 6)
 
 
-timer.scheduleFunction(loopPilot, nil, timer.getTime() + 15)
+--/////////////////////////bench
+-- timer.scheduleFunction(bench_B, nil, timer.getTime() + 7)
+
+-- timer.scheduleFunction(benchDrive, nil, timer.getTime() + 10)
+--/////////////////////////bench
+
+timer.scheduleFunction(loopPilot, nil, timer.getTime() + 15)--+15
 
 timer.scheduleFunction(loopAFAC, nil, timer.getTime() + 61)
 
@@ -4951,9 +4933,6 @@ timer.scheduleFunction(getLL_TargetPosition, nil, timer.getTime() + 21)
 timer.scheduleFunction(EWR_magic, nil, timer.getTime() + 31)
 
 timer.scheduleFunction(setErrorMessageBoxShedul, nil, timer.getTime() + 32)
-
-timer.scheduleFunction(performance, nil, timer.getTime() + 300)
-
 
 -- --test pour exploser les unités detecté, afin de passer au suivant
 -- local function explodeOnPoint()
