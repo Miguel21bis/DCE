@@ -3,7 +3,7 @@
 --Functions accessed via LUA Run Script
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "3.16.54"
+versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "3.16.55"
 ------------------------------------------------------------------------------------------------------- 
 
 if not campL.debugInGamePopup then
@@ -18,11 +18,21 @@ Bingo_time = 0
 Bingo_calls = 0
 Bingo_t0 = 0
 
--- Perf_A = 0
+Perf_A = 0
+Perf_A_N = 0
+Perf_B = 0
+Perf_B_N = 0
+Perf_C = 0
+Perf_C_N = 0
+
 Perf_Tot = 0
 
-MissionGroupIndex = {}
-BaseDistCache= {}
+MissGroupByName = {}
+BaseDistCache = {}
+DCE_hotspotGrid = {}
+DCE_hotspotCellSize = 100000 -- même que ton clusterThreshold
+
+
 -- Bingo_prof = {
 --     pass = 0,
 --     units = 0,
@@ -247,69 +257,6 @@ function PairsByKeys (t, f)
     end
     return iter
 end
-
-
--- --function to turn a table into a string
--- function TableSerialization(t, i, params)
-
--- 	local crlf = ""
--- 	local tab1 = ""
--- 	for n = 1, i do
--- 		tab1 = tab1 .. "\t"
--- 	end
-
--- 	local text = "\n"..crlf..tab1.."{\n"..crlf
-
--- 	local tab = ""
--- 	for n = 1, i + 1 do
--- 		tab = tab .. "\t"
--- 	end
-
--- 	for k,v in PairsByKeys(t) do
--- 		if type(k) == "string" then
--- 			k = string.gsub(k, "\n", "\\\n" )
--- 			k = string.gsub(k, "\"", "\\\"" )
--- 			-- k = string.gsub(k, "'", "\\\'" )
--- 			text = text .. tab .. '["' .. k .. '"] = '
--- 		else
--- 			text = text .. tab .. "[" .. k .. "] = "
--- 		end
--- 		if type(v) == "string" then
--- 			v = string.gsub(v, "\n", "\\\n" )
--- 			v = string.gsub(v, "\"", "\\\"" )
--- 			-- v = string.gsub(v, "'", "\\\'" )
--- 			text = text .. '"' .. v .. '",\n'..crlf
--- 		elseif type(v) == "number" then
--- 			text = text .. v .. ",\n"..crlf
--- 		elseif type(v) == "table" then
--- 			text = text .. TableSerialization(v, i + 1)
--- 		elseif type(v) == "boolean" then
--- 			if v == true then
--- 				text = text .. "true,\n"..crlf
--- 			else
--- 				text = text .. "false,\n"..crlf
--- 			end
--- 		elseif type(v) == "function" then
--- 			text = text .. v .. ",\n"..crlf
--- 		elseif v == nil then
--- 			text = text .. "nil,\n"..crlf
--- 		end
--- 	end
--- 	tab = ""
--- 	for n = 1, i do
--- 		tab = tab .. "\t"
--- 	end
--- 	if i == 0 then
--- 		text = text .. tab .. "}\n"		..crlf
--- 	else
--- 		text = text .. tab .. "},\n"	..crlf
--- 	end
--- 	return text
--- end
-
--- Fonction : sérialise une table Lua en string (version optimisée DCS ingame)
--- Pourquoi : suppression PairsByKeys + buffer concat + cache indentation
--- Où : remplace intégralement l'ancienne TableSerialization
 
 local indentcache = {}
 
@@ -561,22 +508,66 @@ function CheckPointInPoly_XY_3(point, poly)
     return inside
 end
 
+--*************** BLUILD TAB INIT *********************
+--*************** BLUILD TAB INIT *********************
 
 function BuildMissionGroupIndex()
-	MissionGroupIndex = {}
-
 	for _, coalition in pairs(env.mission.coalition) do
 		for _, country in pairs(coalition.country) do
 			if country.plane and country.plane.group then
 				for _, group in pairs(country.plane.group) do
-					if group.groupId then
-						MissionGroupIndex[group.groupId] = group
+					if group.name then
+						MissGroupByName[group.name] = group
 					end
 				end
 			end
 		end
 	end
 end
+
+
+function BuildMissionGroupRoute()
+	DCE_groupRouteCache = {}
+	for coalitionName, coalition in pairs(env.mission.coalition) do
+		for _, country in pairs(coalition.country or {}) do
+			if country.plane then
+				for _, group in pairs(country.plane.group or {}) do
+					local data = {}
+					data.base = group.route.points[#group.route.points]
+					for i, p in ipairs(group.route.points) do
+						if p.name == "Station" then
+							data.station1 = group.route.points[i]
+							data.station2 = group.route.points[i + 1]
+						end
+						if p.task and p.task.params and p.task.params.tasks then
+							for _, t in ipairs(p.task.params.tasks) do
+								local task = nil
+
+								if t.params then
+									if t.params.task then
+										task = t.params.task -- ControlledTask
+									elseif t.params.action then
+										task = t.params.action -- WrappedAction
+									end
+								end
+
+								if task and task.id == "Orbit" and task.params then
+									data.orbitAlt = task.params.altitude
+									data.orbitSpeed = task.params.speed
+								end
+							end
+						end
+					end
+					DCE_groupRouteCache[group.groupId] = data
+				end
+			end
+		end
+	end
+end
+
+--*************** BLUILD TAB INIT *********************
+--*************** BLUILD TAB INIT *********************
+
 
 -- MGRS Rescue Zones (simplified)
 --
@@ -688,7 +679,7 @@ local function setErrorMessageBoxShedul()
 	end
 end
 
-function getGroupById(groupId)
+local function getGroupById(groupId)
     for coalitionId = 1, 2 do -- 1 = Red, 2 = Blue
         local groups = coalition.getGroups(coalitionId)
         for _, group in ipairs(groups) do
@@ -813,29 +804,37 @@ end
 -- end
 
 
-function DCE_GetRoute(groupName, sideName)
+function DCE_GetRoute(name)
 
-	local t0 = os.clock()
+	local select = MissGroupByName[name]
+	if not select then
+		env.info("DCE_Bug DCE_GetRoute this group Id not found in MissionGroupIndex[] " .. tostring(name))
+	end
 
+	return select
 	
-	local mission = env.mission
-    for coalitionName, coalData in pairs(mission.coalition) do
-        for countryId, country in pairs(coalData.country) do
-            if country.plane and country.plane.group then
-                for _, group in pairs(country.plane.group) do
-                    if group.name == groupName then
-                        env.info("DCE_GetRoute Waypoints : " .. tostring(#group.route.points))
-                        return group.route.points
-                    end
-                end
-            end
-        end
-    end
+	-- local t0 = os.clock()
 
-	local dt = os.clock() - t0
-	Perf_Tot = Perf_Tot + dt
+	-- local mission = env.mission
+    -- for coalitionName, coalData in pairs(mission.coalition) do
+    --     for countryId, country in pairs(coalData.country) do
+    --         if country.plane and country.plane.group then
+    --             for _, group in pairs(country.plane.group) do
+    --                 if group.name == groupName then
+    --                     env.info("DCE_GetRoute Waypoints : " .. tostring(#group.route.points))
+	-- 					local dt = os.clock() - t0
+	-- 					Perf_Tot = Perf_Tot + dt
+    --                     return group.route.points
+    --                 end
+    --             end
+    --         end
+    --     end
+    -- end
+
+	-- local dt = os.clock() - t0
+	-- Perf_Tot = Perf_Tot + dt
 	
-	return nil
+	-- return nil
 end
 
 
@@ -938,6 +937,35 @@ end
 local function hotSpotSAM()
     if not campL.groundthreats then return end
 
+    DCE_hotspotGrid = {}
+
+    for sideName, antiAirCover in pairs(campL.groundthreats) do
+        DCE_hotspotGrid[sideName] = {}
+
+        for _, cover in ipairs(antiAirCover) do
+            if cover.class == "SAM" then
+                local cx = math.floor(cover.x / DCE_hotspotCellSize)
+                local cy = math.floor(cover.y / DCE_hotspotCellSize)
+                local key = cx .. ":" .. cy
+
+                local cell = DCE_hotspotGrid[sideName][key]
+                if not cell then
+                    cell = { sumX = 0, sumY = 0, count = 0 }
+                    DCE_hotspotGrid[sideName][key] = cell
+                end
+
+                cell.sumX = cell.sumX + cover.x
+                cell.sumY = cell.sumY + cover.y
+                cell.count = cell.count + 1
+            end
+        end
+    end
+end
+
+
+--[[ local function hotSpotSAMOLD()
+    if not campL.groundthreats then return end
+
     local clusterThreshold = 100000 -- Distance max pour regrouper les SAMs
 
     for sideName, antiAirCover in pairs(campL.groundthreats) do
@@ -981,29 +1009,81 @@ local function hotSpotSAM()
             table.insert(hotSpotAirDefense[sideName], { x = cluster.centerX, y = cluster.centerY })
         end
     end
-end
+end ]]
 
 
-local function chooseBestHotspot(arg_actualPos, arg_sideName)
-    local bestHotSpot = nil
-    local shortestDistance = math.huge
+local function chooseBestHotspot(pos, sideName)
+    local grid = DCE_hotspotGrid[sideName]
+    if not grid then return nil end
 
-    for _, hotspot in ipairs(hotSpotAirDefense[arg_sideName]) do
-        local dist = calculateDistance(arg_actualPos.x, arg_actualPos.y, hotspot.x, hotspot.y)
-        if dist < shortestDistance then
-            shortestDistance = dist
-            bestHotSpot = hotspot
+    local cx = math.floor(pos.x / DCE_hotspotCellSize)
+    local cy = math.floor(pos.y / DCE_hotspotCellSize)
+
+    local best = nil
+    local bestDist = math.huge
+
+    for dx = -1, 1 do
+        for dy = -1, 1 do
+            local key = (cx + dx) .. ":" .. (cy + dy)
+            local cell = grid[key]
+
+            if cell and cell.count > 0 then
+                local hx = cell.sumX / cell.count
+                local hy = cell.sumY / cell.count
+
+                local d = calculateDistance(pos.x, pos.y, hx, hy)
+                if d < bestDist then
+                    bestDist = d
+                    best = { x = hx, y = hy }
+                end
+            end
         end
     end
 
-    return bestHotSpot
+    return best
 end
 
 
+-- local function chooseBestHotspotOLD(arg_actualPos, arg_sideName)
+--     local bestHotSpot = nil
+--     local shortestDistance = math.huge
+
+--     for _, hotspot in ipairs(hotSpotAirDefense[arg_sideName]) do
+--         local dist = calculateDistance(arg_actualPos.x, arg_actualPos.y, hotspot.x, hotspot.y)
+--         if dist < shortestDistance then
+--             shortestDistance = dist
+--             bestHotSpot = hotspot
+--         end
+--     end
+
+--     return bestHotSpot
+-- end
+
+-- retourne le centre des avions actifs du groupe (leader si possible)
+local function getGroupReferencePoint(gp)
+	local units = gp:getUnits()
+	if not units then return nil end
+
+	local sx, sy, count = 0, 0, 0
+
+	for _, u in ipairs(units) do
+		if u and u:isActive() and u:inAir() then
+			local p = u:getPoint()
+			sx = sx + p.x
+			sy = sy + p.z
+			count = count + 1
+		end
+	end
+
+	if count == 0 then return nil end
+	return { x = sx / count, y = sy / count }
+end
 
 -- interdit aux CAP et Intercepteur d'entrer dans une zone SAM connu
 local function avoidArea()
 
+    local t0 = os.clock()
+	
 	local debug_avoidArea = false
 
     if not campL.groundthreats then
@@ -1032,474 +1112,512 @@ local function avoidArea()
 			end
 
 			if (string.find(gpName,"CAP") or string.find(gpName,"Intercept")) and passTimer then
-				local wingman = gp:getUnits()
-				for wingmanN, unitObj in ipairs(wingman) do
-					if unitObj and unitObj:isActive() and unitObj:inAir() then
+				-- local wingman = gp:getUnits()
+				-- for wingmanN, unitObj in ipairs(wingman) do
+				-- 	if unitObj and unitObj:isActive() and unitObj:inAir() then
 
-						local ctr
-						if wingmanN == 1 then												--for leader
-							ctr = gp:getController()							--get controller of group
-						else														--for wingmen
-							ctr = wingman[wingmanN]:getController()						--get controller of individual aircraft in flight
-							ctr:setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2) 	--set to evade fire again, as controller for individual unit does not take over options from parent group
+				-- 		local ctr
+				-- 		if wingmanN == 1 then												--for leader
+				-- 			ctr = gp:getController()							--get controller of group
+				-- 		else														--for wingmen
+				-- 			ctr = wingman[wingmanN]:getController()						--get controller of individual aircraft in flight
+				-- 			ctr:setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2) 	--set to evade fire again, as controller for individual unit does not take over options from parent group
+				-- 		end
+
+				-- 		local eni_side_name = DCS_ENI_Side[CoalitionIdToName[sideNum]]
+
+				-- 		for threatN, threat in pairs(campL.groundthreats[eni_side_name]) do
+				-- 			if threat and threat.class and threat.class == "SAM"  then
+
+				-- 				local currentPointVec3 = unitObj:getPoint()
+				-- 				local currentPointXY = {
+				-- 					x = currentPointVec3.x,
+				-- 					y = currentPointVec3.z,
+				-- 					z = currentPointVec3.y,
+				-- 						}
+						
+				-- 				local distance = math.sqrt(math.pow(threat.x - currentPointXY.x, 2) + math.pow(threat.y - currentPointXY.y, 2))
+
+				-- 				-- if debug_avoidArea or (distance and distance <= threat.range) then
+				-- 				if debug_avoidArea or (distance and distance <= ((2 / 3) * threat.range)) then
+
+				local groupPoint = getGroupReferencePoint(gp)
+				if groupPoint then
+
+                    
+					local currentPointXY = {
+						x = groupPoint.x,
+						y = groupPoint.y,
+						z = 0,
+							}
+					
+					local eni_side_name = DCS_ENI_Side[CoalitionIdToName[sideNum]]
+                    local threatHit = nil
+					-- local threat = nil
+
+					for _, threatData in pairs(campL.groundthreats[eni_side_name]) do
+						
+						if threatData and threatData.class == "SAM" then
+							local dx = threatData.x - groupPoint.x
+							local dy = threatData.y - groupPoint.y
+							local dist = math.sqrt(dx * dx + dy * dy)
+
+							if dist <= ((2 / 3) * threatData.range) then
+								threatHit = threatData
+								-- threat = threatData
+								break
+							end
+						end
+					end
+
+					if threatHit then
+						--ajoute ici les variables vraiment utile
+						-- local unitName = unitObj:getName()
+						-- local callSign = unitObj:getCallsign()
+						-- local description = unitObj:getDesc()
+						local speedMax = 300
+						local speedCruise = 300
+						local altiCruise = 7600
+                        local ctr = gp:getController() --get controller of group
+						
+						-- if description then
+						-- 	if description.speedMax then
+						-- 		speedMax = description.speedMax
+						-- 	end
+						-- 	if description.speedMax0 then
+						-- 		speedCruise = description.speedMax0 / 2
+						-- 	end
+						-- 	if description.Hmax then
+						-- 		altiCruise = description.Hmax / 3
+						-- 	end
+						-- end
+						
+						env.info( "ACRF10_avoidArea I4_______  ")
+
+						local foundGroup = false
+						local breaktab = false
+						-- local cap_group = {
+						-- 	name = "",
+						-- 	from = 0,
+						-- 	to = 0,
+						-- 	task = {},
+						-- 	base = {
+						-- 		x = 0,
+						-- 		y = 0 ,
+						-- 	},
+						-- 	orbitCAP = {
+						-- 		x = 0,
+						-- 		y = 0 ,
+						-- 		altitude = 0,
+						-- 		speed = 0,
+						-- 	},
+						-- 	sation1 = {},
+						-- 	sation2 = {},
+						-- }
+
+						local cap_group = DCE_groupRouteCache[gpGid]
+						if not cap_group then
+							env.info("DCE_Bug avoidArea: no cache for "..gpName)
+							break
 						end
 
-						local eni_side_name = DCS_ENI_Side[CoalitionIdToName[sideNum]]
+					--[[ 	for coalitionName, coalition in pairs(env.mission.coalition) do
+							env.info( "ACRF10_avoidArea J________  _coalition? "..tostring(coalitionName).." coalitionIdNumeric[sideNum]? "..tostring(CoalitionIdToName[sideNum]).." sideNum? "..tostring(sideNum))
 
-						for threatN, threat in pairs(campL.groundthreats[eni_side_name]) do
-							if threat and threat.class and threat.class == "SAM"  then
+							if coalitionName == CoalitionIdToName[sideNum] then
+								for countryN, countryData in pairs(coalition.country) do
+									if countryData.plane then
+										for groupN, groupData in pairs(countryData.plane.group) do
+											if groupData.groupId and groupData.groupId == gpGid then
 
-								local currentPointVec3 = unitObj:getPoint()
-								local currentPointXY = {
-									x = currentPointVec3.x,
-									y = currentPointVec3.z,
-									z = currentPointVec3.y,
-										}
-						
-								local distance = math.sqrt(math.pow(threat.x - currentPointXY.x, 2) + math.pow(threat.y - currentPointXY.y, 2))
+												cap_group.name = groupData.name
+												foundGroup = true
 
-								-- if debug_avoidArea or (distance and distance <= threat.range) then
-								if debug_avoidArea or (distance and distance <= ((2 / 3) * threat.range)) then
+												--Station
+												for pointN, value in ipairs(groupData.route.points) do
+													if value.name == 'Station' then
+														cap_group.to = pointN
+														cap_group.from = pointN - 1
+														if value.task then
 
-									--ajoute ici les variables vraiment utile
-									local unitName = unitObj:getName()
-									local callSign = unitObj:getCallsign()
-									local description = unitObj:getDesc()
-									local speedMax = 300
-									local speedCruise = 300
-                                    local altiCruise = 7600
-									
-                                    if description then
-                                        if description.speedMax then
-                                            speedMax = description.speedMax
-                                        end
-                                        if description.speedMax0 then
-                                            speedCruise = description.speedMax0 / 2
-                                        end
-                                        if description.Hmax then
-                                            altiCruise = description.Hmax / 3
-                                        end
-                                    end
-									
-									env.info( "ACRF10_avoidArea I4_______  ")
+															if value.task.params and value.task.params.tasks then
 
-									local foundGroup = false
-									local breaktab = false
-									local cap_group = {
-										name = "",
-										from = 0,
-										to = 0,
-										task = {},
-										base = {
-											x = 0,
-											y = 0 ,
-										},
-										orbitCAP = {
-											x = 0,
-											y = 0 ,
-											altitude = 0,
-											speed = 0,
-										},
-										sation1 = {},
-										sation2 = {},
-									}
+																for _, valueTasks in ipairs(value.task.params.tasks) do
 
-									for coalitionName, coalition in pairs(env.mission.coalition) do
-										env.info( "ACRF10_avoidArea J________  _coalition? "..tostring(coalitionName).." coalitionIdNumeric[sideNum]? "..tostring(CoalitionIdToName[sideNum]).." sideNum? "..tostring(sideNum))
+																	if valueTasks.params.task.id == "EngageTargetsInZone" then
 
-										if coalitionName == CoalitionIdToName[sideNum] then
-											for countryN, countryData in pairs(coalition.country) do
-												if countryData.plane then
-													for groupN, groupData in pairs(countryData.plane.group) do
-														if groupData.groupId and groupData.groupId == gpGid then
+																		--TODO prevoir une table globale pour ne par re itérer la mission entiere.
+																		cap_group.sation1 = groupData.route.points[pointN]
+																		cap_group.sation2 = groupData.route.points[pointN+1]
 
-															cap_group.name = groupData.name
-															foundGroup = true
-
-															--Station
-															for pointN, value in ipairs(groupData.route.points) do
-																if value.name == 'Station' then
-																	cap_group.to = pointN
-																	cap_group.from = pointN - 1
-																	if value.task then
-
-																		if value.task.params and value.task.params.tasks then
-
-																			for _, valueTasks in ipairs(value.task.params.tasks) do
-
-																				if valueTasks.params.task.id == "EngageTargetsInZone" then
-
-																					--TODO prevoir une table globale pour ne par re itérer la mission entiere.
-																					cap_group.sation1 = groupData.route.points[pointN]
-																					cap_group.sation2 = groupData.route.points[pointN+1]
-
-																					-- CAP_group.orbitCAP.x = valueTasks.params.task.params.x
-																					-- CAP_group.orbitCAP.y = valueTasks.params.task.params.y
+																		-- CAP_group.orbitCAP.x = valueTasks.params.task.params.x
+																		-- CAP_group.orbitCAP.y = valueTasks.params.task.params.y
 
 
-																				elseif valueTasks.params.task.id == "Orbit" then
-																					cap_group.orbitCAP.altitude = valueTasks.params.task.params.altitude
-																					cap_group.orbitCAP.speed = valueTasks.params.task.params.speed
-																				end
-																			end
-																		end
+																	elseif valueTasks.params.task.id == "Orbit" then
+																		cap_group.orbitCAP.altitude = valueTasks.params.task.params.altitude
+																		cap_group.orbitCAP.speed = valueTasks.params.task.params.speed
 																	end
-																	break
 																end
 															end
-
-															--BaseXY
-
-															cap_group.base = {
-																x = groupData.route.points[#groupData.route.points].x,
-																y = groupData.route.points[#groupData.route.points].y,
-															}
-
-															breaktab = true
-															break
 														end
+														break
 													end
 												end
-												if breaktab then break end
+
+												--BaseXY
+
+												cap_group.base = {
+													x = groupData.route.points[#groupData.route.points].x,
+													y = groupData.route.points[#groupData.route.points].y,
+												}
+
+												breaktab = true
+												break
 											end
 										end
-										if breaktab then break end
 									end
+									if breaktab then break end
+								end
+							end
+							if breaktab then break end
+						end ]]
 
-									if cap_group.to ~= 0 then
-										local switchtask = {
-												id = "SwitchWaypoint",
-													params = {
-														goToWaypointIndex = cap_group.to,
-														fromWaypointIndex = cap_group.from
-												}
-											}
+                        if cap_group.to ~= 0 then
+							local switchtask = {
+									id = "SwitchWaypoint",
+										params = {
+											goToWaypointIndex = cap_group.to,
+											fromWaypointIndex = cap_group.from
+									}
+								}
 
-										ctr:resetTask()
-										ctr:setCommand(switchtask)
-									end
+							ctr:resetTask()
+							ctr:setCommand(switchtask)
+						end
 
-									local pointOfCoverage = chooseBestHotspot(currentPointXY, CoalitionIdToName[sideNum])
-									local altCircle = altiCruise + (math.random(1,10) * 10)
-									local timeCircle = current_time
+						local pointOfCoverage = chooseBestHotspot(currentPointXY, CoalitionIdToName[sideNum])
+						local altCircle = altiCruise + (math.random(1,10) * 10)
+						local timeCircle = current_time
 
-									if cap_group.orbitCAP.altitude ~= 0 then
-										altiCruise = cap_group.orbitCAP.altitude
-									elseif altiCruise < currentPointXY.z then
-										altiCruise = currentPointXY.z
-									end
+						if cap_group.orbitCAP.altitude ~= 0 then
+							altiCruise = cap_group.orbitCAP.altitude
+						elseif altiCruise < currentPointXY.z then
+							altiCruise = currentPointXY.z
+						end
 
-									if cap_group.orbitCAP.speed ~= 0 then
-										speedCruise = cap_group.orbitCAP.speed
-									end
+						if cap_group.orbitCAP.speed ~= 0 then
+							speedCruise = cap_group.orbitCAP.speed
+						end
 
-									if cap_group.orbitCAP.altitude ~= 0 then
-										altCircle = cap_group.orbitCAP.altitude
-										timeCircle = timeCircle + 150
+                        if cap_group.orbitCAP.altitude ~= 0 then
+                            altCircle = cap_group.orbitCAP.altitude
+                            timeCircle = timeCircle + 150
+                        else
+                            --temps d orbit pour intercepteur
+                            timeCircle = timeCircle + 900
+                        end
+						
+						local threat = threatHit
 
-									else
-										--temps d orbit pour intercepteur
-										timeCircle = timeCircle + 900
-									end
+						local flightPlan
 
+						if pointOfCoverage then
 
+							-- env.info( "ACRF10_avoidArea K1_______ currentPointXY.y: "..tostring(currentPointXY.y).." threat.y "..tostring(threat.y))
 
-									local flightPlan
+							local oppositePoint_x, oppositePoint_y = getOppositePointOnCircle(currentPointXY, threat)
 
-									if pointOfCoverage then
-
-										-- env.info( "ACRF10_avoidArea K1_______ currentPointXY.y: "..tostring(currentPointXY.y).." threat.y "..tostring(threat.y))
-
-										local oppositePoint_x, oppositePoint_y = getOppositePointOnCircle(currentPointXY, threat)
-
-										flightPlan = {
-											id = 'Mission',
-											params = {
-												route = {
-													points = {
-														{
-															x = currentPointXY.x,
-															y = currentPointXY.y,
-															speed = speedMax,
-															speed_locked = true,
-															ETA_locked = false,
-															alt = altiCruise,
-															action = "Turning Point",
-															type = "Turning Point",
-															name = "Found pointOfCoverage"
-														},
-														{
-															x = oppositePoint_x,
-															y = oppositePoint_y,
-															speed = speedCruise,
-															alt = altiCruise,
-															speed_locked = true,
-															ETA_locked = false,
-															action = "Turning Point",
-															type = "Turning Point"
-														},
-														--point à mi chemin entre le point 2 et 4
-														{
-															x = pointOfCoverage.x ,
-															y = pointOfCoverage.y ,
-															speed = speedCruise,
-															alt = altiCruise,
-															speed_locked = true,
-															ETA_locked = false,
-															action = "Turning Point",
-															type = "Turning Point",
-															['task'] = {
-																['id'] = 'ComboTask',
+							flightPlan = {
+								id = 'Mission',
+								params = {
+									route = {
+										points = {
+											{
+												x = currentPointXY.x,
+												y = currentPointXY.y,
+												speed = speedMax,
+												speed_locked = true,
+												ETA_locked = false,
+												alt = altiCruise,
+												action = "Turning Point",
+												type = "Turning Point",
+												name = "Found pointOfCoverage"
+											},
+											{
+												x = oppositePoint_x,
+												y = oppositePoint_y,
+												speed = speedCruise,
+												alt = altiCruise,
+												speed_locked = true,
+												ETA_locked = false,
+												action = "Turning Point",
+												type = "Turning Point"
+											},
+											--point à mi chemin entre le point 2 et 4
+											{
+												x = pointOfCoverage.x ,
+												y = pointOfCoverage.y ,
+												speed = speedCruise,
+												alt = altiCruise,
+												speed_locked = true,
+												ETA_locked = false,
+												action = "Turning Point",
+												type = "Turning Point",
+												['task'] = {
+													['id'] = 'ComboTask',
+													['params'] = {
+														['tasks'] = {
+															[1] =
+															{
+																["enabled"] = true,
+																["name"] = "Interdiction combat AA",
+																["id"] = "WrappedAction",
+																["auto"] = false,
+																["number"] = 1,
+																["params"] =
+																{
+																	["action"] =
+																	{
+																		["id"] = "Option",
+																		["params"] =
+																		{
+																			["name"] = 14,
+																			["value"] = false,
+																		}, -- end of ["params"]
+																	}, -- end of ["action"]
+																}, -- end of ["params"]
+															}, -- end of [2]
+															[2] =
+															{
+																["number"] = 2,
+																["auto"] = false,
+																["id"] = "WrappedAction",
+																["name"] = "regleEngagement: feu a volonté",
+																["enabled"] = true,
+																["params"] =
+																{
+																	["action"] =
+																	{
+																		["id"] = "Option",
+																		["params"] =
+																		{
+																			["value"] = 0,
+																			["name"] = 0,
+																		}, -- end of ["params"]
+																	}, -- end of ["action"]
+																}, -- end of ["params"]
+															}, -- end of [1]
+															[3] =
+															{
+																["enabled"] = true,
+																["auto"] = false,
+																["id"] = "WrappedAction",
+																["name"] = "interdire la pc",
+																["number"] = 3,
+																["params"] =
+																{
+																	["action"] =
+																	{
+																		["id"] = "Option",
+																		["params"] =
+																		{
+																			["value"] = false,
+																			["name"] = 16,
+																		}, -- end of ["params"]
+																	}, -- end of ["action"]
+																}, -- end of ["params"]
+															}, -- end of [2]
+															[4] = {
+																['enabled'] = true,
+																['auto'] = false,
+																['id'] = 'ControlledTask',
+																['number'] = 4,
 																['params'] = {
-																	['tasks'] = {
-																		[1] =
-																		{
-																			["enabled"] = true,
-																			["name"] = "Interdiction combat AA",
-																			["id"] = "WrappedAction",
-																			["auto"] = false,
-																			["number"] = 1,
-																			["params"] =
-																			{
-																				["action"] =
-																				{
-																					["id"] = "Option",
-																					["params"] =
-																					{
-																						["name"] = 14,
-																						["value"] = false,
-																					}, -- end of ["params"]
-																				}, -- end of ["action"]
-																			}, -- end of ["params"]
-																		}, -- end of [2]
-																		[2] =
-																		{
-																			["number"] = 2,
-																			["auto"] = false,
-																			["id"] = "WrappedAction",
-																			["name"] = "regleEngagement: feu a volonté",
-																			["enabled"] = true,
-																			["params"] =
-																			{
-																				["action"] =
-																				{
-																					["id"] = "Option",
-																					["params"] =
-																					{
-																						["value"] = 0,
-																						["name"] = 0,
-																					}, -- end of ["params"]
-																				}, -- end of ["action"]
-																			}, -- end of ["params"]
-																		}, -- end of [1]
-																		[3] =
-																		{
-																			["enabled"] = true,
-																			["auto"] = false,
-																			["id"] = "WrappedAction",
-																			["name"] = "interdire la pc",
-																			["number"] = 3,
-																			["params"] =
-																			{
-																				["action"] =
-																				{
-																					["id"] = "Option",
-																					["params"] =
-																					{
-																						["value"] = false,
-																						["name"] = 16,
-																					}, -- end of ["params"]
-																				}, -- end of ["action"]
-																			}, -- end of ["params"]
-																		}, -- end of [2]
-																		[4] = {
-																			['enabled'] = true,
-																			['auto'] = false,
-																			['id'] = 'ControlledTask',
-																			['number'] = 4,
-																			['params'] = {
-																				['task'] = {
-																					['id'] = 'EngageTargetsInZone',
-																					['params'] = {
-																						['targetTypes'] = {
-																							[1] = 'Air',
-																							[2] = 'Cruise missiles',
-																						},
-																						['value'] = 'Air;Cruise missiles;',
-																						['priority'] = 0,
-																						x = pointOfCoverage.x ,
-																						y = pointOfCoverage.y ,
-																						['zoneRadius'] = 50000,
-																					},
-																				},
+																	['task'] = {
+																		['id'] = 'EngageTargetsInZone',
+																		['params'] = {
+																			['targetTypes'] = {
+																				[1] = 'Air',
+																				[2] = 'Cruise missiles',
 																			},
+																			['value'] = 'Air;Cruise missiles;',
+																			['priority'] = 0,
+																			x = pointOfCoverage.x ,
+																			y = pointOfCoverage.y ,
+																			['zoneRadius'] = 50000,
 																		},
-																		[5] = {
-																			['enabled'] = true,
-																			['auto'] = false,
-																			['id'] = 'ControlledTask',
-																			['number'] = 5,
-																			['params'] = {
-																				['task'] = {
-																					['id'] = 'Orbit',
-																					['params'] = {
-																						['altitude'] = altCircle,
-																						['pattern'] = 'Race-Track',
-																						['speed'] = speedCruise,
-																					},
-																				},
-																				['stopCondition'] = {
-																					['time'] = timeCircle,
-																				},
-
-																			},
-																		},
-
-
 																	},
 																},
 															},
+															[5] = {
+																['enabled'] = true,
+																['auto'] = false,
+																['id'] = 'ControlledTask',
+																['number'] = 5,
+																['params'] = {
+																	['task'] = {
+																		['id'] = 'Orbit',
+																		['params'] = {
+																			['altitude'] = altCircle,
+																			['pattern'] = 'Race-Track',
+																			['speed'] = speedCruise,
+																		},
+																	},
+																	['stopCondition'] = {
+																		['time'] = timeCircle,
+																	},
+
+																},
+															},
+
 
 														},
+													},
+												},
 
-														{
-															x = cap_group.base.x,
-															y = cap_group.base.y,
-															speed = speedCruise,
-															action = "Landing",
-															type = "Land"
-														}
-													}
-												}
+											},
+
+											{
+												x = cap_group.base.x,
+												y = cap_group.base.y,
+												speed = speedCruise,
+												action = "Landing",
+												type = "Land"
 											}
 										}
+									}
+								}
+							}
 
-										-- env.info( "ACRF10_avoidArea K2_______ #CAP_group.sation1: "..tostring(#CAP_group.sation1))
-										if cap_group.sation1 ~= nil and cap_group.sation2 ~= nil and cap_group.orbitCAP.altitude ~= 0 then
+							-- env.info( "ACRF10_avoidArea K2_______ #CAP_group.sation1: "..tostring(#CAP_group.sation1))
+							if cap_group.sation1 ~= nil and cap_group.sation2 ~= nil and cap_group.orbitCAP.altitude ~= 0 then
 
-											local numPoints = #flightPlan.params.route.points
-											local indexForStation1 = numPoints
-											local indexForStation2 = numPoints +1 -- Station2 viendra après Station1
+								local numPoints = #flightPlan.params.route.points
+								local indexForStation1 = numPoints
+								local indexForStation2 = numPoints +1 -- Station2 viendra après Station1
 
-											-- Insérer station1 et station2 à des indices fixes
-											table.insert(flightPlan.params.route.points, indexForStation1, cap_group.sation1)
-											table.insert(flightPlan.params.route.points, indexForStation2, cap_group.sation2)
+								-- Insérer station1 et station2 à des indices fixes
+								table.insert(flightPlan.params.route.points, indexForStation1, cap_group.sation1)
+								table.insert(flightPlan.params.route.points, indexForStation2, cap_group.sation2)
 
-										end
-
-									else --if NOT pointOfCoverage then
-
-										local position = unitObj:getPosition()
-										-- local heading = math.atan2(position.x.z, position.x.x) -- Calcul du cap en radians
-
-										env.info( "ACRF10_avoidArea L_______ currentPointXY.y: "..tostring(currentPointXY.y).." threat.y "..tostring(threat.y))
-
-										local oppositePoint_x, oppositePoint_y = getOppositePointOnCircle(currentPointXY, threat)
-
-										flightPlan = {
-											id = 'Mission',
-											params = {
-												route = {
-													points = {
-														{
-															x = currentPointXY.x,
-															y = currentPointXY.y,
-															speed = speedMax,
-															speed_locked = true,
-															alt = altiCruise,
-															ETA_locked = false,
-															action = "Turning Point",
-															type = "Turning Point",
-															name = "NOFound pointOfCoverage"
-														},
-														{
-															x = oppositePoint_x,
-															y = oppositePoint_y,
-															speed = speedCruise,
-															alt = altiCruise,
-															speed_locked = true,
-															ETA_locked = false,
-															action = "Turning Point",
-															type = "Turning Point"
-														},
-														--point à mi chemin entre le point 2 et 4
-														{
-															x = (oppositePoint_x + cap_group.base.x ) / 2,
-															y = (oppositePoint_y + cap_group.base.y ) / 2,
-															speed = speedCruise,
-															alt = altiCruise,
-															speed_locked = true,
-															ETA_locked = false,
-															action = "Turning Point",
-															type = "Turning Point",
-															-- cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, false)
-														},
-														{
-															x = cap_group.base.x,
-															y = cap_group.base.y,
-															speed = speedCruise,
-															action = "Landing",
-															type = "Land"
-														}
-													}
-												}
-											}
-										}
-
-									end
-
-									if not foundGroup then
-										env.info( "ACRF10_avoidArea Z        NO foundGroup "..tostring(unitName).." "..callSign )
-									end
-
-									if flightPlan then
-										ctr:resetTask()
-										-- ctr:setOption(AI.Option.Air.id.REACTION_ON_THREAT, AI.Option.Air.val.EVADE_FIRE)
-										ctr:setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2)
-										ctr:setOption(AI.Option.Air.id.PROHIBIT_AA, true) -- Désactiver l'engagement A/A
-										ctr:setTask(flightPlan)
-										flightPlanTimer[gpGid] = nowTime
-										-- _affiche(flightPlanTimer, "ACRF10_avoidArea Z2 flightPlanTimer")
-									end
-
-									if campL.debug then
-										local timeSearchEngage = timer.getTime() + 5
-										local logStr = "flightPlan = " .. TableSerialization(flightPlan, 0)
-										local flightNameClean = unitName:gsub('[%p%c%s]', '_')
-										local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_"..timeSearchEngage.."_avoidArea.lua", "w")
-
-										if logFile then
-											logFile:write(logStr)
-											logFile:close()
-										else
-											env.info("DCE_avoidArea: Failed to open log file for writing.")
-										end
-
-										env.info("DCE_avoidArea ZZZ " .. tostring(unitName))
-									end
-
-									break -- il est entre dans une zone interdite, on l evacue et on s arrete là
-								end
 							end
+
+						else --if NOT pointOfCoverage then
+
+							-- local position = unitObj:getPosition()
+							
+							env.info( "ACRF10_avoidArea L_______ currentPointXY.y: "..tostring(currentPointXY.y).." threat.y "..tostring(threat.y))
+
+							local oppositePoint_x, oppositePoint_y = getOppositePointOnCircle(currentPointXY, threat)
+
+							flightPlan = {
+								id = 'Mission',
+								params = {
+									route = {
+										points = {
+											{
+												x = currentPointXY.x,
+												y = currentPointXY.y,
+												speed = speedMax,
+												speed_locked = true,
+												alt = altiCruise,
+												ETA_locked = false,
+												action = "Turning Point",
+												type = "Turning Point",
+												name = "NOFound pointOfCoverage"
+											},
+											{
+												x = oppositePoint_x,
+												y = oppositePoint_y,
+												speed = speedCruise,
+												alt = altiCruise,
+												speed_locked = true,
+												ETA_locked = false,
+												action = "Turning Point",
+												type = "Turning Point"
+											},
+											--point à mi chemin entre le point 2 et 4
+											{
+												x = (oppositePoint_x + cap_group.base.x ) / 2,
+												y = (oppositePoint_y + cap_group.base.y ) / 2,
+												speed = speedCruise,
+												alt = altiCruise,
+												speed_locked = true,
+												ETA_locked = false,
+												action = "Turning Point",
+												type = "Turning Point",
+												-- cntrl:setOption(AI.Option.Air.id.PROHIBIT_AA, false)
+											},
+											{
+												x = cap_group.base.x,
+												y = cap_group.base.y,
+												speed = speedCruise,
+												action = "Landing",
+												type = "Land"
+											}
+										}
+									}
+								}
+							}
+
 						end
+
+                        if not foundGroup then
+							-- env.info( "ACRF10_avoidArea Z        NO foundGroup "..tostring(unitName).." "..callSign )
+							env.info( "DCE_Bug ACRF10_avoidArea Z        NO foundGroup ")
+						end
+
+						if flightPlan then
+							ctr:resetTask()
+							-- ctr:setOption(AI.Option.Air.id.REACTION_ON_THREAT, AI.Option.Air.val.EVADE_FIRE)
+							ctr:setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2)
+							ctr:setOption(AI.Option.Air.id.PROHIBIT_AA, true) -- Désactiver l'engagement A/A
+							ctr:setTask(flightPlan)
+							flightPlanTimer[gpGid] = nowTime
+							-- _affiche(flightPlanTimer, "ACRF10_avoidArea Z2 flightPlanTimer")
+						end
+
+                        if campL.debug then
+							local timeSearchEngage = timer.getTime() + 5
+							local logStr = "flightPlan = " .. TableSerialization(flightPlan, 0)
+							local flightNameClean = gpName:gsub('[%p%c%s]', '_')
+							local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_"..timeSearchEngage.."_avoidArea.lua", "w")
+
+							if logFile then
+								logFile:write(logStr)
+								logFile:close()
+							else
+								env.info("DCE_avoidArea: Failed to open log file for writing.")
+							end
+
+							-- env.info("DCE_avoidArea ZZZ " .. tostring(unitName))
+						end
+
+						break -- il est entre dans une zone interdite, on l evacue et on s arrete là
 					end
 				end
 			end
 		end
+		-- 		end
+		-- 	end
+		-- end
 	end
 
 
 	local groups = coalition.getGroups(coalition.side.BLUE, Group.Category.AIRPLANE)
 
-	-- for i, gp in pairs(groups) do	
+	local dt = os.clock() - t0
+	Perf_A = Perf_A + dt
+	Perf_A_N = Perf_A_N + 1
 
-
-	-- end
 	return timer.getTime() + 5
 end
 
 -- modification M32	E-2C automatic retreat 
 local function airRetreat()
+
+	local t0 = os.clock()
 
 	local current_time = timer.getTime()
 
@@ -1774,6 +1892,11 @@ local function airRetreat()
 			end
 		end
 	end
+
+	local dt = os.clock() - t0
+    Perf_C = Perf_C + dt
+	Perf_C_N = Perf_C_N + 1
+	
 	return timer.getTime() + 31
 end
 
@@ -1856,13 +1979,16 @@ end
 
 local function bingo(gpId, gpObj)
 
+	local t0 
+	if campL.debug then 
+		t0 = os.clock()
+	end
+
 	-- if Bingo_calls == 0 then
 	-- 	-- Bingo_t0 = timer.getTime()
 	-- 	Bingo_t0 = os.clock()
 	-- end
-
 	-- Bingo_calls = Bingo_calls + 1
-
 	-- Bingo_prof.pass = Bingo_prof.pass + 1
 
 	for n, unit in pairs(gpObj:getUnits()) do
@@ -1879,6 +2005,7 @@ local function bingo(gpId, gpObj)
 			-- Bingo_prof.dejaBingo_skip = Bingo_prof.dejaBingo_skip + 1
 		else
 
+			local groupName = gpObj:getName()
 			local toRTB
 			local distanceToBase_Km = 0
 			local cruiseSpeed = 300
@@ -1887,7 +2014,7 @@ local function bingo(gpId, gpObj)
 					
 			local cache = updateFuelCache(unit)
 			if not cache then
-				env.info("DCE_BUG DCE_Bingo D6  not cache")
+				env.info("DCE_Bingo D6 not cache, is dead? " .. tostring(callSign))
 			else
 				local fuelRemainingPercent = cache.fuel
 				local fuelMass = cache.fuel * cache.fuelMassMax
@@ -1895,17 +2022,17 @@ local function bingo(gpId, gpObj)
 				local unitId = unit:getID() -- celui-là est cheap
 
 				-- 🟢 pré-filtre
-				-- if fuelRemainingPercent > 0.60 then
-				if fuelRemainingPercent > 2 then
+				if fuelRemainingPercent > 0.60 then
+				-- if fuelRemainingPercent > 2 then --testing
 					-- Bingo_prof.prefilter_skip = Bingo_prof.prefilter_skip + 1
 				else
 					-- Bingo_prof.heavy_calc = Bingo_prof.heavy_calc + 1
 
 					--calcul de la distance restante vers la base
-					local mGroup = MissionGroupIndex[gpId]
+					local mGroup = MissGroupByName[groupName]
 					if mGroup then
 						local route = mGroup.route.points
-						local unitVec3 = unit:getPoint()
+						-- local unitVec3 = unit:getPoint()
 
 						local baseX, baseY
 
@@ -1936,7 +2063,8 @@ local function bingo(gpId, gpObj)
                         else
                             distanceToBase_Km = updateBaseDistance(unit, baseX, baseY)
                         end
-						
+					else
+						env.info("DCE_Bug DCE_Bingo this group not found in MissionGroupIndex[] " .. tostring(groupName))
 					end
 
 					if fuelMass and fuelMass > 0 then
@@ -1953,8 +2081,8 @@ local function bingo(gpId, gpObj)
 
 							-- env.info("DCE_Bingo D3b availableDistanceKm: " .. tostring(availableDistanceKm) .. " <? distanceToBase_Km+200000: " .. tostring(distanceToBase_Km+200000))
 
-							-- if availableDistanceKm < (distanceToBase_Km + 200) then
-							if availableDistanceKm < (distanceToBase_Km + 200000) then
+							if availableDistanceKm < (distanceToBase_Km + 200) then
+							-- if availableDistanceKm < (distanceToBase_Km + 200000) then
 								toRTB = true
 							end
 						end
@@ -1979,7 +2107,9 @@ local function bingo(gpId, gpObj)
 					-- local unitName = unit:getName()
 					local unitVec3 = unit:getPoint()
 
-					local report = " is humainUnit?:  " .. tostring(humainUnit)
+					
+					local report = "DCE_Bingo, pass toRTB, is humainUnit?:  " .. tostring(humainUnit)
+					report = report .. " "..tostring(callSign)
 					local cntrl
 
 					--for the leader, the task has to be set on the group level
@@ -1998,7 +2128,7 @@ local function bingo(gpId, gpObj)
 						to = 0
 					}
 
-					local mGroupB = MissionGroupIndex[gpId]
+					local mGroupB = MissGroupByName[groupName]
 					if mGroupB then
 						-- Bingo_prof.waypoint_scans = Bingo_prof.waypoint_scans + #mGroupB.route.points
 
@@ -2051,7 +2181,6 @@ local function bingo(gpId, gpObj)
 
 					end
 
-
 					-- env.info( "DCE_Bingo D__DD        rtbGroup from "..tostring( rtbGroup.from).." to "..tostring( rtbGroup.to))
 
 					if rtbGroup.to ~= 0 then
@@ -2083,19 +2212,22 @@ local function bingo(gpId, gpObj)
 						cntrl:setOption(AI.Option.Air.id.RTB_ON_BINGO, 2) -- RTB on Bingo  RTB_IGNORE_AAR
 						--OptionName.RTB_ON_BINGO
 
+						env.info( "DCE_Bingo D__DD        "..callSign.." RTB_ON_BINGO set" .. report)
+
 					end
 				end
 			end
 		end
 	end
 
-	if tabJockerPlane[gpId] and not tabJockerPlane[gpId][callSign] then												-- si le callSign a deja dit qu'il etait Bingo, on l'oublie
-		if Unit.getFuel(unit) <=  0.30 then																			-- Sur F14, 4000lbs/16000lbs = 0.25%
-			trigger.action.outTextForGroup(gpId, callSign .." Jocker Fuel", 15 , true)
-			-- env.info( " Unit.getFuel(unit)  "..callSign.." humainUnit? "..tostring(humainUnit) )
-			tabJockerPlane[gpId][callSign] = true																	-- la callSign à déja indiqué qu'il était Bingo			
-		end
-	end
+	--TODO a revoir, car callSign est hor boucle
+	-- if tabJockerPlane[gpId] and not tabJockerPlane[gpId][callSign] then												-- si le callSign a deja dit qu'il etait Bingo, on l'oublie
+	-- 	if Unit.getFuel(unit) <=  0.30 then																			-- Sur F14, 4000lbs/16000lbs = 0.25%
+	-- 		trigger.action.outTextForGroup(gpId, callSign .." Jocker Fuel", 15 , true)
+	-- 		-- env.info( " Unit.getFuel(unit)  "..callSign.." humainUnit? "..tostring(humainUnit) )
+	-- 		tabJockerPlane[gpId][callSign] = true																	-- la callSign à déja indiqué qu'il était Bingo			
+	-- 	end
+	-- end
 
 
 	-- if Bingo_calls >= 1000 then
@@ -2121,6 +2253,12 @@ local function bingo(gpId, gpObj)
     --     end
 
 	-- end
+
+	if campL.debug then 
+		local dt = os.clock() - t0
+		Bingo_time = Bingo_time + dt
+		Bingo_calls = Bingo_calls + 1
+	end
 
 end
 
@@ -3972,6 +4110,9 @@ end
 
 
 local function EWR_magic()
+
+	local t0 = os.clock()
+
 	local target_tracks = {
 		["blue"] = {},
 		["red"] = {}
@@ -4365,6 +4506,10 @@ local function EWR_magic()
 		end
 	end
 
+	local dt = os.clock() - t0
+	Perf_B = Perf_B + dt
+	Perf_B_N = Perf_B_N + 1
+	
 	return timer.getTime() + 60
 
 end
@@ -4441,14 +4586,6 @@ function EventHandler2:onEvent(event)
 		if event.id == world.event.S_EVENT_BIRTH then
 			-- env.info("DCE_EventHandler2 A S_EVENT_BIRTH.")
 
-			-- if event.initiator then
-			-- 	local test_getCategory = Object.getCategory(event.initiator)
-			-- 	env.info("DCE_EventHandler2 A2 test_getCategory: "..tostring(test_getCategory).." Object.Category.STATIC: "..tostring(Object.Category.STATIC))
-			-- 	env.info("DCE_EventHandler2 A3 event.initiator.getPlayerName: "..tostring(event.initiator.getPlayerName).." event.initiator.getGroup: "..tostring(event.initiator.getGroupC))
-			-- 	env.info("DCE_EventHandler2 A4 event.initiator:getPlayerName(): "..tostring(event.initiator:getPlayerName()).." event.initiator:getGroup(): "..tostring(event.initiator:getGroup()))
-				
-			-- end
-		
 			if event.initiator and Object.getCategory(event.initiator) ~= Object.Category.STATIC and event.initiator.getPlayerName and event.initiator.getGroup then
 				local playerName = event.initiator:getPlayerName()
 				local groupObject = event.initiator:getGroup()
@@ -4496,10 +4633,11 @@ function EventHandler2:onEvent(event)
 							if groupObject and passEscort then
 
 								-- local route = DCE_GetRoute(flightName, sideName)
-                                local route = DCE_GetRoute(groupName)
+                                -- local route = DCE_GetRoute(groupName)
+								local route = DCE_GetRoute(groupName)
 								
-								print("DCE_Perf Perf_Tot "..tostring(Perf_Tot))
-
+								-- env.info("DCE_Perf Perf_Tot " .. tostring(Perf_Tot))
+								
 								if route and #route > 0 then
 
 									SatusGroupAircraft[groupName]["waypoints"] = route
@@ -4889,8 +5027,17 @@ local function benchDrive()
 	-- benchStart({ 100, 500, 1000 }, 10)
 end
 
---creation de la table de couverture anti aérienne AMI
-hotSpotSAM()
+local function showPerformance()
+
+	env.info("DCE_showPerformance6, bingo() total: " .. tonumber(Bingo_time) .. " n: " .. tonumber(Bingo_calls) .. " /n: " .. tonumber(Bingo_time / Bingo_calls))
+	env.info("DCE_showPerformance, avoidAera() total: " .. tonumber(Perf_A) .." n: ".. tonumber(Perf_A_N).." /n: ".. tonumber(Perf_A / Perf_A_N))
+	env.info("DCE_showPerformance, EWR_magic() total: " .. tonumber(Perf_B) .." n: ".. tonumber(Perf_B_N).. " /n " .. tonumber(Perf_B / Perf_B_N))
+	env.info("DCE_showPerformance, airRetreat() total: " .. tonumber(Perf_C) .." n: ".. tonumber(Perf_B_N).. " /n " .. tonumber(Perf_C / Perf_C_N))
+
+	return timer.getTime() + 60
+
+end
+
 
 if campL.debug then
 	local logStr = "hotSpotAirDefense = " .. TableSerialization(hotSpotAirDefense, 0)
@@ -4906,6 +5053,9 @@ end
 
 
 timer.scheduleFunction(BuildMissionGroupIndex, nil, timer.getTime() + 0.01)
+timer.scheduleFunction(BuildMissionGroupRoute, nil, timer.getTime() + 0.02)
+--creation de la table de couverture anti aérienne AMI
+timer.scheduleFunction(hotSpotSAM, nil, timer.getTime() + 0.03)
 
 timer.scheduleFunction(timerPlayerMenu, nil, timer.getTime() + 5)
 
@@ -4916,6 +5066,10 @@ timer.scheduleFunction(BuildCarrierIndex, nil, timer.getTime() + 6)
 -- timer.scheduleFunction(bench_B, nil, timer.getTime() + 7)
 
 -- timer.scheduleFunction(benchDrive, nil, timer.getTime() + 10)
+
+timer.scheduleFunction(showPerformance, nil, timer.getTime() + 60)
+
+
 --/////////////////////////bench
 
 timer.scheduleFunction(loopPilot, nil, timer.getTime() + 15)--+15
@@ -4947,9 +5101,9 @@ timer.scheduleFunction(setErrorMessageBoxShedul, nil, timer.getTime() + 32)
 
 
 --  **Planification initiale après collecte des unités et statiques** 
-if useBubble_DisableEnable_Group then
-	timer.scheduleFunction(DCE_BulleBy_DE, nil, timer.getTime() + 20) -- start après 5 sec
-end
+-- if useBubble_DisableEnable_Group then
+-- 	timer.scheduleFunction(DCE_BulleBy_DE, nil, timer.getTime() + 20) -- start après 5 sec
+-- end
 --////////////////////////////////////////////////////////////////////////////////////////////
 --test BULLE (fin) IV
 --avec distance avion

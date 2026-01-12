@@ -1224,7 +1224,7 @@ for scenName, scen in pairs(scen_log) do
 			local cy = getCellIndex(scen.y)
 
 
-			if scen.initiator then print("A scen "..tostring(scenName).." at ("..tostring(scen.x)..","..tostring(scen.y)..") initiated by "..tostring(scen.initiator).." with radius "..tostring(scen.correctedRadius)) end
+			-- if scen.initiator then print("A scen "..tostring(scenName).." at ("..tostring(scen.x)..","..tostring(scen.y)..") initiated by "..tostring(scen.initiator).." with radius "..tostring(scen.correctedRadius)) end
 
 			-- récupération de la cellule du scen et de ses voisines
 			-- utile car une explosion ne peut affecter que les zones proches
@@ -1250,7 +1250,7 @@ for scenName, scen in pairs(scen_log) do
 									
 									if dist2 <= radius2 then
 										
-										if scen.initiator then print("H element "..tostring(element.name).." is within radius at distance "..tostring(math.sqrt(dist2))) end
+										-- if scen.initiator then print("H element "..tostring(element.name).." is within radius at distance "..tostring(math.sqrt(dist2))) end
 										-- print("H element.dead = true "..tostring(element.name)..", destroying it: scenName: "..scenName.." is within radius at distance "..tostring(math.sqrt(dist2)))
 
 										element.dead = true
@@ -1288,16 +1288,17 @@ for scenName, scen in pairs(scen_log) do
 											local killerSquad = resolveAirSquad(scen.lasthit)
 											-- print("perte structure scen.lasthit "..tostring(scen.lasthit).." killerSquad "..tostring(killerSquad and killerSquad.name))
 											if killerSquad then
+												
+												-- print("K killerSquad "..tostring(killerSquad.name).." destroyed element "..tostring(element.name).." of target "..tostring(target.titleName))
+												
 												killerSquad.score.kills_ground = killerSquad.score.kills_ground + 1
 												killerSquad.score_last.kills_ground = killerSquad.score_last.kills_ground + 1
 												addPackstats(scen.lasthit, "kill_ground", nil)
 
 												if clientControl[scen.lasthit] then
 													local cid = clientControl[scen.lasthit]
-													clientstats[cid].kills_ground =
-														clientstats[cid].kills_ground + 1
-													clientstats[cid].score_last.kills_ground =
-														clientstats[cid].score_last.kills_ground + 1
+													clientstats[cid].kills_ground = clientstats[cid].kills_ground + 1
+													clientstats[cid].score_last.kills_ground = clientstats[cid].score_last.kills_ground + 1
 
 													clientstatsDetail[cid] = clientstatsDetail[cid] or {}
 													table.insert(clientstatsDetail[cid], {
