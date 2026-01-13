@@ -23,8 +23,8 @@ local pruneStatic =				mission_ini.PruneScriptConf.PruneStatic
 local pruneSam =				mission_ini.PruneScriptConf.ForcedPruneSam
 
 -- Liste des mots-clés à pruner
-local pruneKeywords = { "bag", "wall", "sand", "camouflage", "barrier", "container", "tent", "cargo", "soldier" , "vc_" }
--- local pruneKeywords = { }
+-- local pruneKeywords = { "bag", "wall", "sand", "camouflage", "barrier", "container", "tent", "cargo", "soldier" , "vc_" }
+local pruneKeywords = { }
 -- Liste des mots-clés à garder
 local keepKeywords = { "farp", "dallas", "paris" }
 
@@ -205,17 +205,17 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 	elseif isPruneKeyword(lowCaseName) then
 
 		--[[particularité NAM GC22]]
-		if string.find(lowCaseName, "vc_") then
+		-- if string.find(lowCaseName, "vc_") then
 
-			-- Exception : ne prune pas si c'est VC_Khe-Sanh
-			if string.find(unit.name, "VC_Khe%-Sanh") then
-				-- print("DC_P_T9 ---K----> Keep VC: "..unit.name)
-				return true -- keep
-			end
+		-- 	-- Exception : ne prune pas si c'est VC_Khe-Sanh
+		-- 	if string.find(unit.name, "VC_Khe%-Sanh") then
+		-- 		-- print("DC_P_T9 ---K----> Keep VC: "..unit.name)
+		-- 		return true -- keep
+		-- 	end
 
-			-- print("DC_P_T2 -P----P--> Prune vc_: "..lowCaseName)
-			return false -- Prune
-		end
+		-- 	-- print("DC_P_T2 -P----P--> Prune vc_: "..lowCaseName)
+		-- 	return false -- Prune
+		-- end
 		--[[particularité NAM GC22]]
 
 		-- Vérifie la proximité d'un PointOfInterest

@@ -20,13 +20,25 @@ Bingo_t0 = 0
 
 Perf_A = 0
 Perf_A_N = 0
+
+
+
 Perf_B = 0
 Perf_B_N = 0
+Perf_Bb = 0
+Perf_B_Nb = 0
+
+
 Perf_C = 0
 Perf_C_N = 0
+Perf_D = 0
+Perf_D_N = 0
+Perf_E = 0
+Perf_E_N = 0
 
 Perf_Tot = 0
 
+DCE_groupRouteCache = {} -- [groupId] = { base=..., station1=..., station2=..., orbitAlt=..., orbitSpeed=... }
 MissGroupByName = {}
 BaseDistCache = {}
 DCE_hotspotGrid = {}
@@ -65,11 +77,10 @@ local CHECK_INTERVAL = 15            -- intervalle de vérification en secondes
 
 
 
-
 AFAC_available = {}				--liste les AFAC en position
 AFAC_targetStatus = {}    --table used by AFACs to monitor the status of targets and move on to the next ones
 
-LastInjectAFAC = {}    --garde les derniers plan de vol injecté
+-- LastInjectAFAC = {}    --garde les derniers plan de vol injecté
 LastInjectFlightPlan = {} --garde les derniers plan de vol injecté
 
 ScheduleTenth = {}					--table used to schedule the tenth of a second
@@ -91,6 +102,8 @@ BingoPlaneTab = {}
 AvgConsumptionKgPerKm = {}		--table used to store the available distance in km for each unitCat
 TypePedroByCV = {}         		--table used to store the type of Pedro by CV
 PlayerInOutAircraft = {}        --table used to store the type of Pedro by CV
+
+EWR_Magic_DISTANCE_KM = 150  --distance en km pour detecter les cibles
 
 SmokeColor_EjectedPilot = trigger.smokeColor.Orange
 SmokeColor_TargetDesignation = trigger.smokeColor.Blue
@@ -511,6 +524,103 @@ end
 --*************** BLUILD TAB INIT *********************
 --*************** BLUILD TAB INIT *********************
 
+-- Parse env.mission UNE seule fois et construit tous les index nécessaires
+-- Pourquoi : éviter 3 parcours complets très coûteux de env.mission
+local function buildMissionIndex()
+
+    local t0 = timer.getTime()
+
+    -- MissGroupByName = {}
+    -- DCE_groupRouteCache = {}
+    -- EnvMissionGroundUnits = {}
+
+    if not env or not env.mission or not env.mission.coalition then
+        return
+    end
+
+    for _, coalition in pairs(env.mission.coalition) do
+        if coalition.country then
+            for _, country in pairs(coalition.country) do
+
+                -- ========= AVIONS =========
+                if country.plane and country.plane.group then
+                    for _, group in pairs(country.plane.group) do
+
+                        -- index par nom
+                        if group.name then
+                            MissGroupByName[group.name] = group
+                        end
+
+                        -- routes
+                        if group.route and group.route.points then
+                            local data = {}
+                            data.base = group.route.points[#group.route.points]
+
+                            for i, p in ipairs(group.route.points) do
+                                if p.name == "Station" then
+                                    data.station1 = group.route.points[i]
+                                    data.station2 = group.route.points[i + 1]
+                                end
+
+                                if p.task and p.task.params and p.task.params.tasks then
+                                    for _, t in ipairs(p.task.params.tasks) do
+                                        local task = nil
+                                        if t.params then
+                                            if t.params.task then
+                                                task = t.params.task
+                                            elseif t.params.action then
+                                                task = t.params.action
+                                            end
+                                        end
+
+                                        if task and task.id == "Orbit" and task.params then
+                                            data.orbitAlt = task.params.altitude
+                                            data.orbitSpeed = task.params.speed
+                                        end
+                                    end
+                                end
+                            end
+
+                            DCE_groupRouteCache[group.groupId] = data
+                        end
+                    end
+                end
+
+                -- -- ========= UNITÉS SOL (AFAC) =========
+                -- if country.vehicle and country.vehicle.group then
+                --     for _, group in pairs(country.vehicle.group) do
+                --         if group.units then
+                --             for _, unit in pairs(group.units) do
+                --                 EnvMissionGroundUnits[#EnvMissionGroundUnits + 1] = unit
+                --             end
+                --         end
+                --     end
+                -- end
+
+            end
+        end
+    end
+
+	env.info("DCE buildMissionIndex: planes=" ..
+		tostring(#MissGroupByName) ..
+		-- " groundUnits=" .. #EnvMissionGroundUnits ..
+		" in " .. string.format("%.3f", timer.getTime() - t0) .. "s")
+
+	if campL.debug then
+		local logStr = "MissGroupByName = " .. TableSerialization(MissGroupByName, 0)
+		local logFile = io.open(PathDCE .. "Debug\\MissGroupByName.lua", "w")
+		if logFile then
+			logFile:write(logStr)
+			logFile:close()
+		else
+			env.info("DCE_AFAC : Failed to open log MissGroupByName file for writing.")
+		end
+	end
+end
+
+
+
+--[[ 
 function BuildMissionGroupIndex()
 	for _, coalition in pairs(env.mission.coalition) do
 		for _, country in pairs(coalition.country) do
@@ -563,7 +673,13 @@ function BuildMissionGroupRoute()
 			end
 		end
 	end
-end
+end ]]
+
+-- local function initTable()
+
+-- end
+
+
 
 --*************** BLUILD TAB INIT *********************
 --*************** BLUILD TAB INIT *********************
@@ -1214,7 +1330,8 @@ local function avoidArea()
 						-- 	sation1 = {},
 						-- 	sation2 = {},
 						-- }
-
+						
+						
 						local cap_group = DCE_groupRouteCache[gpGid]
 						if not cap_group then
 							env.info("DCE_Bug avoidArea: no cache for "..gpName)
@@ -4239,26 +4356,6 @@ local function EWR_magic()
 		end
 	end
 
-	-- Résultat
-	-- env.info("Regroupement terminé. Nombre de groupes par coalition :")
-	-- for coalitionName, groups in pairs(groupedTracks) do
-	-- 	env.info(coalitionName .. ": " .. tostring(#groups) .. " groupes")
-	-- end
-	--##############################################################
-	--################################################################
-
-
-	-- if camp.debug then
-	-- 	local current_time = timer.getTime()
-	-- 	local logStr = "groupedTracks = " .. TableSerialization(groupedTracks, 0)
-	-- 	local logFile = io.open(PathDCE.."Debug\\".. "_groupedTracks_"..current_time..".lua", "w")
-	-- 	if logFile then
-	-- 		logFile:write(logStr)
-	-- 		logFile:close()
-	-- 	else
-	-- 		env.info("DCE_Custom_Altitude_: Failed to open log file for writing.")
-	-- 	end
-	-- end
 
 	local function roundTo2NmUp(number)
 		-- Diviser le nombre par 2 pour travailler avec des pas de 2 NM
@@ -4325,7 +4422,7 @@ local function EWR_magic()
 			for gpN, gp in pairs(groups) do
 				local wingman = gp:getUnits()
 				for winmanN, _unit in ipairs(wingman) do
-					if _unit and _unit:isActive()  then --and _unit:inAir()
+					if _unit and _unit:isActive() then --and _unit:inAir()
 						local playerName =  _unit:getPlayerName()
 						local unitName = _unit:getName()
 
@@ -4340,6 +4437,8 @@ local function EWR_magic()
 
 						if EWR_optionPlayer[trucName] and ( not EWR_optionPlayer[trucName]["lasTime"] or EWR_optionPlayer[trucName]["lasTime"] +15  < locTimer) then
 
+                            local t0b = os.clock()
+							
 							local player = _unit
 							local playerId = Unit.getID(player)
 							local playerVec3 = player:getPoint()				--get target point
@@ -4352,7 +4451,6 @@ local function EWR_magic()
 
 							for  _, targets in pairs(groupedTracks) do
 								for _, target in pairs(targets) do
-
 									if target and type(target) == "table" and target.pointVec3.x and target.pointVec3.y then
 
 										-- Calcul de la distance
@@ -4360,8 +4458,18 @@ local function EWR_magic()
 										local dz = target.pointVec3.z - playerVec3.z
 										local distance = math.sqrt(dx^2 + dz^2)
 
-										target.distance = distance
-										table.insert(targetTracks_km_thisPlayer, target)
+										if (distance/1000) <= EWR_Magic_DISTANCE_KM then
+											
+											--attention ici on stocke une table avec la distance
+											-- target.distance = distance
+                                            -- table.insert(targetTracks_km_thisPlayer, target)
+											
+											table.insert(targetTracks_km_thisPlayer, {
+												target = target,     -- référence globale
+												distance = distance -- donnée privée du joueur
+                                            })
+										
+										end
 									end
 								end
 							end
@@ -4374,18 +4482,22 @@ local function EWR_magic()
 								red = {},
 								blue = {},
 							}
-							for trackN, target in pairs(targetTracks_km_thisPlayer) do
+							-- for trackN, target in pairs(targetTracks_km_thisPlayer) do
+							for trackN, item in ipairs(targetTracks_km_thisPlayer) do
+								local target = item.target -- le vrai track EWR
+                                local distance = item.distance -- la distance privée du joueur
+								
 								-- Conversion des distances
-								local distanceKm = math.floor(target.distance / 1000) -- En kilomètres
+								local distanceKm = math.floor(distance / 1000) -- En kilomètres
 								local displayDistance, displayAltitude, displayDistUnit, displayAltUnit
 
 								if campL.unitSystem and campL.unitSystem == "metric" then
-									displayDistance = math.ceil(target.distance / 4000) * 4000 -- En mètres, arrondi à 4 km près
+									displayDistance = math.ceil(distance / 4000) * 4000 -- En mètres, arrondi à 4 km près
 									displayAltitude = math.ceil(target.pointVec3.y / 1000) * 1000 -- Altitude en mètres, arrondi à 1000m
 									displayDistUnit = "m"
 									displayAltUnit = "m"
 								else
-									displayDistance = roundTo2NmUp(target.distance / 1852) -- En miles nautiques, arrondi à 2 Nm près
+									displayDistance = roundTo2NmUp(distance / 1852) -- En miles nautiques, arrondi à 2 Nm près
 									displayAltitude = math.floor((target.pointVec3.y * 3.281) / 1000) * 1000 -- Altitude en pieds	
 									displayDistUnit = "NM"
 									displayAltUnit = "ft"
@@ -4425,7 +4537,7 @@ local function EWR_magic()
 								local oldSoluce = false
 								if oldSoluce then
 									-- Affichage si la distance est dans les limites
-									if (distanceKm > 2 and distanceKm <= 150) or (distanceKm <= 2 and sideIFF == "ENEMY" ) then
+									if (distanceKm > 2 ) or (distanceKm <= 2 and sideIFF == "ENEMY" ) then
 
 										-- local freq = camp.EWR_frequency[coalitionIdNumeric[sideNum]][1]
 										local speak = target.qte.." "..sideIFF.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(displayDistance).." "..displayDistUnit.." | Altitude: "..tostring(displayAltitude).." "..displayAltUnit
@@ -4439,7 +4551,7 @@ local function EWR_magic()
 									end
 								else
 									-- Affichage si la distance est dans les limites
-									if (distanceKm > 2 and distanceKm <= 150) or (distanceKm <= 2 and sideIFF == "ENEMY" ) then
+									if (distanceKm > 2) or (distanceKm <= 2 and sideIFF == "ENEMY" ) then
 										-- local freq = camp.EWR_frequency[coalitionIdNumeric[sideNum]][1]
 										local speak = target.qte.." "..sideIFF.." "..catTarget.." "..tostring(aspect).." Bearing: "..string.format("%.0f", bearing).."° |  Distance: "..tostring(displayDistance).." "..displayDistUnit.." | Altitude: "..tostring(displayAltitude).." "..displayAltUnit
 
@@ -4499,6 +4611,12 @@ local function EWR_magic()
 								end
 
 							end
+
+							local dtb = os.clock() - t0b
+							Perf_Bb = Perf_Bb + dtb
+							Perf_B_Nb = Perf_B_Nb + 1
+
+
 						end
 					end
 				end
@@ -4628,7 +4746,17 @@ function EventHandler2:onEvent(event)
 
 							local passEscort = false
 							
-							if string.find(string.lower(groupName), "escort") then passEscort = true end
+                            if string.find(string.lower(groupName), "escort") then
+
+                                passEscort = true
+								
+								
+--TODO a supprimer une fois les tests finitos
+                                if campL.debug then
+									EWR_ON(flightName)
+                                end
+
+							end
 
 							if groupObject and passEscort then
 
@@ -5029,12 +5157,17 @@ end
 
 local function showPerformance()
 
-	env.info("DCE_showPerformance6, bingo() total: " .. tonumber(Bingo_time) .. " n: " .. tonumber(Bingo_calls) .. " /n: " .. tonumber(Bingo_time / Bingo_calls))
+	env.info("DCE_showPerformance_21, bingo() total: " .. tonumber(Bingo_time) .. " n: " .. tonumber(Bingo_calls) .. " /n: " .. tonumber(Bingo_time / Bingo_calls))
 	env.info("DCE_showPerformance, avoidAera() total: " .. tonumber(Perf_A) .." n: ".. tonumber(Perf_A_N).." /n: ".. tonumber(Perf_A / Perf_A_N))
 	env.info("DCE_showPerformance, EWR_magic() total: " .. tonumber(Perf_B) .." n: ".. tonumber(Perf_B_N).. " /n " .. tonumber(Perf_B / Perf_B_N))
+	env.info("DCE_showPerformance, EWR_magic()Player total: " .. tonumber(Perf_Bb) .." n: ".. tonumber(Perf_B_Nb).. " /n " .. tonumber(Perf_Bb / Perf_B_Nb))
+	
 	env.info("DCE_showPerformance, airRetreat() total: " .. tonumber(Perf_C) .." n: ".. tonumber(Perf_B_N).. " /n " .. tonumber(Perf_C / Perf_C_N))
-
-	return timer.getTime() + 60
+	env.info("DCE_showPerformance, CustomDesignationAFAC() total: " .. tonumber(Perf_D) .." n: ".. tonumber(Perf_D_N).. " /n " .. tonumber(Perf_D / Perf_D_N))
+	
+	env.info("DCE_showPerformance, CustomSearch() total: " .. tonumber(Perf_E) .." n: ".. tonumber(Perf_E_N).. " /n " .. tonumber(Perf_E / Perf_E_N))
+	
+return timer.getTime() + 60
 
 end
 
@@ -5052,15 +5185,14 @@ end
 
 
 
-timer.scheduleFunction(BuildMissionGroupIndex, nil, timer.getTime() + 0.01)
-timer.scheduleFunction(BuildMissionGroupRoute, nil, timer.getTime() + 0.02)
---creation de la table de couverture anti aérienne AMI
-timer.scheduleFunction(hotSpotSAM, nil, timer.getTime() + 0.03)
+-- timer.scheduleFunction(BuildMissionGroupIndex, nil, timer.getTime() + 0.01)
+-- timer.scheduleFunction(BuildMissionGroupRoute, nil, timer.getTime() + 0.02)
+timer.scheduleFunction(buildMissionIndex, nil, timer.getTime() + 0.02)
+timer.scheduleFunction(hotSpotSAM, nil, timer.getTime() + 0.03) --creation de la table de couverture anti aérienne AMI
+timer.scheduleFunction(BuildCarrierIndex, nil, timer.getTime() + 0.04)
+
 
 timer.scheduleFunction(timerPlayerMenu, nil, timer.getTime() + 5)
-
-timer.scheduleFunction(BuildCarrierIndex, nil, timer.getTime() + 6)
-
 
 --/////////////////////////bench
 -- timer.scheduleFunction(bench_B, nil, timer.getTime() + 7)
@@ -5118,5 +5250,6 @@ _affiche(Object.Category, "Object.Category ")
 -- for k, v in pairs(AI.Option.Air.val) do
 --     env.info(k .. " = " .. tostring(v))
 -- end
+
 
 env.info("DCE_ACRF10 END OF LOADING AdCR10 script ")
