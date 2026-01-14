@@ -4,18 +4,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  M68_b cleanCode_d
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/CustomTasksScript.lua"] = "1.9.45"
-------------------------------------------------------------------------------------------------------- 
--- Reglage_n				(n force RTB)(m stopcondition)(l escorte)(k CVN to CV)(j altitudeEnabled true)(h GetHeading)(global path)(f rejoin debug)(e more scheduleFunction) (d landingImpossible denivelé)(c: limit =  1 ?)(b: orbit infini) all ["groupAttack"] = false,
--- cleanCode_d				(c GetCategory)(b springCleaning)
--- Debug_h					(fgh: CAS AttackUnit)(e: static id -1)(d: Checking) creates custom files to observe (c: Helicopter)(b: strike bombing)(a: strike ASM B52)
-
--- modification M74_a		mix static, vehicle and map elements in a Target.
--- modification M68_b		add AFAC task (b CustomDesignation)
--- modification M61_j		SAR (j noSAR in wrongSide)(d Custom_Altitude-follow the valleys)(b debug+shifts task injections) 
--- modification M54_b		revoir CustomTaskScript et TaskBombing (b: add duration)
--- modification M45_a		compatible with 2.7.0
-
+versionDCE["Mission Scripts/CustomTasksScript.lua"] = "2.10.46"
 ------------------------------------------------------------------------------------------------------- 
 
 env.info("### DCE START CustomIntercept.lua " .. versionDCE["Mission Scripts/CustomTasksScript.lua"] .. " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
@@ -1862,71 +1851,92 @@ end
 -----************** CustomDesignationAFAC ************-----
 ------************** CustomDesignationAFAC ************-----
 ---	-- Contient toutes les unités sol par coalition
-AFAC_groundCache = {
-	[1] = {}, -- RED
-	[2] = {}, -- BLUE
-}
+-- AFAC_groundCache = {
+-- 	[1] = {}, -- RED
+-- 	[2] = {}, -- BLUE
+-- }
 
 AFAC_lastCacheUpdate = 0
-AFAC_CACHE_PERIOD = 30 -- secondes entre 2 reconstructions
+AFAC_CACHE_PERIOD = 600 -- secondes entre 2 reconstructions
+AFAC_MaxRange = 10000 -- portée max de détection des cibles par l'AFAC
 
 -- Empêche les AFAC de relancer une désignation trop souvent
 AFAC_lastRun = {}   -- [afacName] = time
 AFAC_isRunning = {} -- [afacName] = true/false
-AFAC_COOLDOWN = 120 -- secondes entre 2 désignations
+AFAC_COOLDOWN = 120 -- secondes entre 2 désignations (120)
 
-DCE_AFAC_RouteCache = {} -- [afacName] = stationRoutePart
+AFAC_RouteCache = {} -- [afacName] = stationRoutePart
+
+-- Taille d’une cellule en mètres
+AFAC_GRID_SIZE = 10000 -- 10 km
+
+-- Cache spatial
+AFAC_groundGrid = {}
+AFAC_groundGridStamp = -math.huge
 
 AFAC_DEBUG_FORCE_KILL = false -- true pour activer
-AFAC_DEBUG_KILL_PERIOD = 60   -- secondes
+AFAC_DEBUG_KILL_PERIOD = 35   -- secondes
 AFAC_DEBUG_lastKill = {}
+
+
+
+local function afacGetCell(x)
+    return math.floor(x / AFAC_GRID_SIZE)
+end
 
 -- AFAC_UpdateGroundCache()
 -- Sert à reconstruire périodiquement la liste des unités sol et statics pour AFAC
 -- Pourquoi : remplacer coalition.getGroups() + getStaticObjects() dans CustomDesignationAFAC()
 function AFAC_UpdateGroundCache()
+
 	local now = timer.getTime()
-
-	-- Si le cache n’a jamais été construit, on force la construction
-	if not AFAC_lastCacheUpdate then
-		AFAC_lastCacheUpdate = 0
-	end
-
-	-- Si le cache est encore valide, on ne reconstruit pas
-	if AFAC_lastCacheUpdate > 0 and (now - AFAC_lastCacheUpdate) < AFAC_CACHE_PERIOD then
+	if now - AFAC_groundGridStamp < AFAC_CACHE_PERIOD then
 		return
 	end
+	AFAC_groundGridStamp = now
 
-	AFAC_lastCacheUpdate = now
+	AFAC_groundGrid = {}
 
 	for side = 1, 2 do
-		AFAC_groundCache[side] = {}
-
-		-- unités mobiles
 		local groups = coalition.getGroups(side, Group.Category.GROUND)
-		if groups then
-			for _, gp in pairs(groups) do
-				local units = gp:getUnits()
-				for i = 1, #units do
-					local u = units[i]
-					if u:isExist() and u:isActive() then
-						AFAC_groundCache[side][#AFAC_groundCache[side] + 1] = u
-					end
-				end
-			end
-		end
+		for _, group in ipairs(groups) do
+			local units = group:getUnits()
+			for _, unit in ipairs(units) do
+				if unit:isExist() then
+					local p = unit:getPoint()
+					local cx = afacGetCell(p.x)
+					local cy = afacGetCell(p.z)
 
-		-- statics
-		local statics = coalition.getStaticObjects(side)
-		if statics then
-			for _, s in pairs(statics) do
-				if s:getLife() > 0 then
-					AFAC_groundCache[side][#AFAC_groundCache[side] + 1] = s
+					AFAC_groundGrid[cx] = AFAC_groundGrid[cx] or {}
+					AFAC_groundGrid[cx][cy] = AFAC_groundGrid[cx][cy] or {}
+
+					AFAC_groundGrid[cx][cy][#AFAC_groundGrid[cx][cy] + 1] = {
+						unit = unit,
+						x = p.x,
+						y = p.z,
+                        alt = p.y,
+						side = side
+					}
 				end
 			end
 		end
 	end
+
+	if campL.debug then
+		local logStr = "AFAC_groundGrid = " .. TableSerialization(AFAC_groundGrid, 0)
+		local logFile = io.open(PathDCE .. "Debug\\AFAC_groundGrid.lua", "w")
+		if logFile then
+			logFile:write(logStr)
+			logFile:close()
+		else
+			env.info("DCE_AFAC : Failed to open log AFAC_groundGrid file for writing.")
+		end
+	end
+
+
 end
+
+
 
 function AFAC_DebugTick(afacName, flagName)
     if not AFAC_DEBUG_FORCE_KILL then return end
@@ -1954,12 +1964,36 @@ local function extractStationPart(route)
 	return nil
 end
 
+
+local function distanceVisibilite(altitude_avion, altitude_terrain)
+	-- Vérifie que l'altitude de l'avion est au-dessus du terrain
+	if altitude_avion <= altitude_terrain then
+		return 0  -- Si l'avion est au sol ou en dessous du terrain, il ne voit rien
+	end
+
+	local hauteur_effective = altitude_avion - altitude_terrain
+	local k = 60000 / math.sqrt(7620)  -- Conversion en mètres (60 km -> 60000 m)
+
+	return k * math.sqrt(hauteur_effective)
+end
+
+-- Renvoie true si le point est dans un carré centré sur afac
+local function afacInAABB(ux, uy, ax, ay, range)
+	local dx = ux - ax
+	if dx > range or dx < -range then return false end
+
+	local dy = uy - ay
+	if dy > range or dy < -range then return false end
+
+	return true
+end
+
 function CustomDesignationAFAC(afac_Name, refX, refY, laserCode)
 	if varFpsLeak then return end
 
 	local t0 = os.clock()
 
-    env.info("DCE_AFAC() AA_21 : START " .. tostring(afac_Name))
+    env.info("DCE_AFAC() AA_30 : START " .. tostring(afac_Name))
 
 	local now = timer.getTime()
 
@@ -1991,16 +2025,10 @@ function CustomDesignationAFAC(afac_Name, refX, refY, laserCode)
 	AFAC_UpdateGroundCache()
 
 
-	local function distanceVisibilite(altitude_avion, altitude_terrain)
-		-- Vérifie que l'altitude de l'avion est au-dessus du terrain
-		if altitude_avion <= altitude_terrain then
-			return 0  -- Si l'avion est au sol ou en dessous du terrain, il ne voit rien
-		end
-
-		local hauteur_effective = altitude_avion - altitude_terrain
-		local k = 60000 / math.sqrt(7620)  -- Conversion en mètres (60 km -> 60000 m)
-
-		return k * math.sqrt(hauteur_effective)
+	if next(AFAC_groundGrid) ~= nil then
+		env.info("DCE_AFAC() DCE_INFO AFAC_groundGrid is NOT empty ")
+    else
+		env.info("DCE_AFAC() DCE_INFO AFAC_groundGrid is EMPTY ")
 	end
 	
 
@@ -2030,65 +2058,99 @@ function CustomDesignationAFAC(afac_Name, refX, refY, laserCode)
 
 	local afacPosVec3 = unitAFAC:getPoint()
 	local afacAlt = afacPosVec3.y
-	local terrainAlt = land.getHeight({x = afacPosVec3.x, y = afacPosVec3.z})
-	local distVisibility = distanceVisibilite(afacAlt, terrainAlt)
+	-- local terrainAlt = land.getHeight({x = afacPosVec3.x, y = afacPosVec3.z})
+	-- local distVisibility = distanceVisibilite(afacAlt, terrainAlt)
 
-
-	local unitGroundSelected_A = {}
+	-- local unitGroundSelected_A = {}
 	local unitGroundSelected_B = {}
 
-	-- Récupération de la liste pré-filtrée des unités sol
-	-- Pourquoi : utiliser le cache AFAC au lieu de rescanner la carte
-	local side = CoalitionIdToENI_Id[coalitionId]
-	local candidates = AFAC_groundCache[side]
+	local ax = afacPosVec3.x
+	local ay = afacPosVec3.z
+	local range = AFAC_MaxRange
+	local cellRadius = math.ceil(range / AFAC_GRID_SIZE)
 
-	env.info("DCE_AFAC() DCE_INFO #candidates " .. tostring(#candidates))
-	env.info("DCE_AFAC() DCE_INFO side " .. tostring(side))
+	local cx = afacGetCell(ax)
+	local cy = afacGetCell(ay)
 
-    for i = 1, #candidates do
-        local obj = candidates[i]
-        local unitPosVec3 = obj:getPoint()
+	local range2 = range * range
+	local best = {}
+	local bestCount = 0
+	local MAX_PRESELECT = 50   -- ne jamais dépasser
 
-        local dx = unitPosVec3.x - refX
-        local dz = unitPosVec3.z - refY
-        local dist2 = dx * dx + dz * dz
 
-        if dist2 < distVisibility * distVisibility then
-            local desc = obj:getDesc()
-            local typeName = (desc and desc.typeName) or ""
+	for gx = cx - cellRadius, cx + cellRadius do
+		local col = AFAC_groundGrid[gx]
+		if col then
+			for gy = cy - cellRadius, cy + cellRadius do
+				local cell = col[gy]
+				if cell then
+					for ic = 1, #cell do
+						local u = cell[ic]
 
-            -- évite les objets inutiles
-            if not string.find(string.lower(typeName), "sandbag") then
-                -- petit filtre vertical pour éviter les cibles masquées par le relief
-                -- if (unitPosVec3.y - afacAlt) > -200 then
-				if math.abs(unitPosVec3.y - afacAlt) < 5000 then
-                    -- ⚠ on ne fait le raycast QUE maintenant
-                    if land.isVisible(afacPosVec3, unitPosVec3) then
-                        local item = {
-                            unitGround = obj,
-                            unitTypeName = obj:getTypeName(),
-                            unitPosVec3 = unitPosVec3,
-                            desc = desc,
-                            distance = math.sqrt(dist2),
-                            life = desc and desc.life or 0,
-                            UnitId = obj:getID(),
-                            isStatic = (Object.getCategory(obj) == Object.Category.STATIC),
-                        }
+						if u.side ~= coalitionId then
 
-                        unitGroundSelected_A[#unitGroundSelected_A + 1] = item
-                    end
-                end
-            end
-        end
-    end
+							local dx = u.x - ax
+							local dy = u.y - ay
+							local dist2 = dx*dx + dy*dy
+
+							if dist2 < range2 then
+								bestCount = bestCount + 1
+								best[bestCount] = { u = u, d2 = dist2 }
+
+								if bestCount > MAX_PRESELECT then
+									-- on jette le plus loin
+									local worst = 1
+									for k = 2, bestCount do
+										if best[k].d2 > best[worst].d2 then
+											worst = k
+										end
+									end
+									best[worst] = best[bestCount]
+									bestCount = bestCount - 1
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	for i = 1, bestCount do
+		local u = best[i].u
+		local obj = u.unit
+
+		local unitPosVec3 = { x = u.x, y = u.alt, z = u.y }
+
+		if land.isVisible(afacPosVec3, unitPosVec3) then
+			local desc = obj:getDesc()
+			if desc then
+				local typeName = desc.typeName or ""
+				if not string.find(typeName:lower(), "sandbag") then
+					unitGroundSelected_B[#unitGroundSelected_B+1] = {
+						unitGround = obj,
+						unitTypeName = typeName,
+						unitPosVec3 = unitPosVec3,
+						desc = desc,
+						distance = math.sqrt(best[i].d2),
+						life = desc.life or 0,
+						UnitId = obj:getID(),
+						isStatic = (Object.getCategory(obj) == Object.Category.STATIC),
+					}
+				end
+			end
+		end
+	end
+
+
 	
-	table.sort(unitGroundSelected_A, function(a,b) return a.distance < b.distance  end)
+	-- table.sort(unitGroundSelected_A, function(a,b) return a.distance < b.distance  end)
 
-    for i = 1, 60 do
-        table.insert(unitGroundSelected_B, unitGroundSelected_A[i])
-    end
+    -- for i = 1, 60 do
+    --     table.insert(unitGroundSelected_B, unitGroundSelected_A[i])
+    -- end
 
-	unitGroundSelected_A = nil
+	-- unitGroundSelected_A = nil
 
 	env.info("DCE_AFAC() DCE_INFO #unitGroundSelected_B " .. tostring(#unitGroundSelected_B))
 
@@ -2151,14 +2213,14 @@ function CustomDesignationAFAC(afac_Name, refX, refY, laserCode)
 	local descAfac = unitAFAC:getDesc()
 
 
-	if not DCE_AFAC_RouteCache[afac_Name] then
+	if not AFAC_RouteCache[afac_Name] then
 		local group = MissGroupByName[afac_Name]
 		if group then
-			DCE_AFAC_RouteCache[afac_Name] = extractStationPart(group.route.points) or {}
+			AFAC_RouteCache[afac_Name] = extractStationPart(group.route.points) or {}
 		end
 	end
 
-	local modFPlan = Deepcopy(DCE_AFAC_RouteCache[afac_Name])
+	local modFPlan = Deepcopy(AFAC_RouteCache[afac_Name])
 
     if not modFPlan then
 		_affiche(modFPlan, "modFPlan: ")
@@ -2492,7 +2554,7 @@ function CustomDesignationAFAC(afac_Name, refX, refY, laserCode)
 
 
 	-- recalcul les ETA
-	i = 1
+	local i = 1
 	while newRoute[i] do
 
 		if i >= 5 then  -- Arrêter la boucle après le 3ème enregistrement
@@ -2534,17 +2596,17 @@ function CustomDesignationAFAC(afac_Name, refX, refY, laserCode)
 			}
 		}
 
-	if campL.debug then
-		local logStr = "afac = " .. TableSerialization(newMission, 0)
-		local flightNameClean = afac_Name:gsub('[%p%c%s]', '_')
-		local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_AFAC_"..current_time..".lua", "w")
-		if logFile then
-			logFile:write(logStr)
-			logFile:close()
-		else
-			env.info("DCE_AFAC : Failed to open log file for writing.")
-		end
-	end
+	-- if campL.debug then
+	-- 	local logStr = "afac = " .. TableSerialization(newMission, 0)
+	-- 	local flightNameClean = afac_Name:gsub('[%p%c%s]', '_')
+	-- 	local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_AFAC_"..current_time..".lua", "w")
+	-- 	if logFile then
+	-- 		logFile:write(logStr)
+	-- 		logFile:close()
+	-- 	else
+	-- 		env.info("DCE_AFAC : Failed to open log file for writing.")
+	-- 	end
+	-- end
 
 	ctr:resetTask() 			-- Efface les tâches existantes
 	ctr:setTask(newMission)
@@ -2567,7 +2629,6 @@ end
 
 function CustomSearchThenEngageTEST(flightName, radius, targetType, searchTime)
 	if varFpsLeak then return end
-	local t0 = os.clock()
 
 	env.info("DCE_CustomSearchThenEngage A START func() "..tostring(flightName))
 
@@ -2654,10 +2715,6 @@ function CustomSearchThenEngageTEST(flightName, radius, targetType, searchTime)
 			end
 		end
 	end
-
-	local dt = os.clock() - t0
-    Perf_E = Perf_E + dt
-    Perf_E_N = Perf_E_N + 1
 	
 	--  Lancement du suivi initial différé (ex : 30s pour laisser le temps au taxi/départ)
 	timer.scheduleFunction(checkLoop, nil, timer.getTime() + 30)
@@ -2825,12 +2882,17 @@ function CustomSearchThenEngageOLD_A(groupName, radius, targetType, searchTime)
 end --FIN CustomSearchThenEngage
 
 function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
+	
+    local t0 = os.clock()
+	local t0_timer = timer.getTime()
+	-- env.info("DCE_CustomSearchThenEngage A t0 : " .. tostring(t0) .. " t0_timer: " .. tostring(t0_timer))
+		
 	-- simple, friendly version with a small cache to avoid calling getDesc()/getPlayerName() every loop
 	if varFpsLeak then return end
 	local MIN_SEARCH_RADIUS = 30000
 	local HELICOPTER_ZONE_RADIUS = 15000
-	local ENGAGE_DURATION = 50
-	local RECHECK_INTERVAL = 60
+	local ENGAGE_DURATION = 25	--50
+	local RECHECK_INTERVAL = 30	--60
 	local CACHE_TTL = 60 -- seconds: don't re-call heavy APIs more often than this
 
 	radius = tonumber(radius) or MIN_SEARCH_RADIUS
@@ -2844,7 +2906,20 @@ function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
 	CustomSearchThenEngageActive[groupName] = true
 
 	-- per-unit cache kept by the closure
-	local unitCache = {} -- unitId -> { playerName, desc, lastUpdate }
+    local unitCache = {} -- unitId -> { playerName, desc, lastUpdate }
+	
+	-- cache de l'unité active (évite getUnits() en boucle)
+	local activeUnit = nil
+	
+	-- cache état et position
+	local lastAirCheck = 0
+	local lastInAir = false
+
+	local lastPosTime = 0
+	local lastPos = nil
+
+	local AIR_CHECK_INTERVAL = 10
+	local POSITION_UPDATE_INTERVAL = 20
 
 	local function refreshUnitCache(u)
 		-- safe checks
@@ -2880,15 +2955,6 @@ function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
 		return { playerName = c.dynamic and c.dynamic.playerName, desc = c.static, lastUpdate = now }
 	end
 
-	-- small helper: find first alive unit in group
-	local function findFirstActiveUnit(flight)
-		if not flight then return nil end
-		local units = flight:getUnits()
-		for _, uu in ipairs(units) do
-			if uu and uu:isExist() and uu:isActive() then return uu end
-		end
-		return nil
-	end
 
 	local function buildTask(isHelo, x, y, rad)
 		local zone = isHelo and HELICOPTER_ZONE_RADIUS or rad
@@ -2913,79 +2979,180 @@ function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
 		}
 	end
 
-	-- loop called by timer
-	local function loop(_, t)
-		local next_time = nil
-		local flight = Group.getByName(groupName)
+	-- retourne l'unité active sans rescanner si possible
+	-- local function getActiveUnit(flight)
+	-- 	if activeUnitId then
+	-- 		local u = Unit.getByID(activeUnitId)
+	-- 		if u and u:isExist() and u:isActive() then
+	-- 			return u
+	-- 		end
+	-- 		activeUnitId = nil
+	-- 	end
 
-		if flight and type(flight.isExist) == 'function' and flight:isExist() then
-			-- find first active unit (call isExist/isActive only once per unit)
-			local units = flight:getUnits()
-			local element = nil
-			for _, uu in ipairs(units) do
-				if uu then
-					local okExist, exist = pcall(function() return uu:isExist() end)
-					if okExist and exist then
-						local okActive, active = pcall(function() return uu:isActive() end)
-						if okActive and active then
-							element = uu
-							break
-						end
-					end
-				end
+	-- 	local units = flight:getUnits()
+	-- 	for i = 1, #units do
+	-- 		local u = units[i]
+	-- 		if u and u:isExist() and u:isActive() then
+	-- 			activeUnitId = u:getID()
+	-- 			return u
+	-- 		end
+	-- 	end
+
+	-- 	return nil
+	-- end
+	-- retourne l'unité active sans rescanner si possible
+	local function getActiveUnit(flight)
+		if activeUnit then
+			if activeUnit:isExist() and activeUnit:isActive() then
+				return activeUnit
 			end
-
-			if element then
-				-- if group is landing stop the loop
-				if SatusGroupAircraft and SatusGroupAircraft[groupName] and SatusGroupAircraft[groupName]["landing"] then
-					env.info("DCE_CustomSearchThenEngage RETURN landing " .. tostring(groupName))
-					CustomSearchThenEngageActive[groupName] = nil
-					next_time = nil
-				else
-					-- check airborne once
-					local okAir, inAir = pcall(function() return element:inAir() end)
-					if okAir and inAir then
-						-- refresh cached infos (playerName, desc) but cache limits calls
-						local cached = refreshUnitCache(element)
-						if not (cached and cached.playerName) then
-							local cntrl = flight:getController()
-							if cntrl then
-								local pos = element:getPoint()
-								local cat = cached and cached.desc and cached.desc.category or nil
-								local isHelo = (cat == Unit.Category.HELICOPTER)
-								local task = buildTask(isHelo, pos.x, pos.z, radius)
-
-								cntrl:setOption(AI.Option.Air.id.PROHIBIT_AG, true)
-								local okPush, errPush = pcall(function() cntrl:pushTask(task) end)
-								if not okPush then
-									env.info("DCE_CustomSearchThenEngage: pushTask failed: " .. tostring(errPush))
-								end
-
-								next_time = t + RECHECK_INTERVAL
-							else
-								next_time = t + RECHECK_INTERVAL
-							end
-						else
-							-- player onboard, recheck later
-							next_time = t + RECHECK_INTERVAL
-						end
-					else
-						-- not in air, recheck later
-						next_time = t + RECHECK_INTERVAL
-					end
-				end
-			else
-				-- no active element found, recheck later
-				next_time = t + RECHECK_INTERVAL
-			end
-		else
-			-- flight gone -> cleanup
-			CustomSearchThenEngageActive[groupName] = nil
-			next_time = nil
+			activeUnit = nil
 		end
 
-		return next_time
+		local units = flight:getUnits()
+		for i = 1, #units do
+			local u = units[i]
+			if u and u:isExist() and u:isActive() then
+				activeUnit = u
+				return u
+			end
+		end
+
+		return nil
 	end
+
+	-- loop called by timer
+    local function loop(_, t)
+
+		t0 = os.clock()
+		t0_timer = timer.getTime()
+        env.info("DCE_CustomSearchThenEngage A t0 : " .. tostring(t0) .. " t0_timer: " .. tostring(t0_timer))
+	
+		env.info("DCE_CustomSearchThenEngage t: " .. tostring(t))
+        local next_time = nil
+        local flight = Group.getByName(groupName)
+
+        if flight and type(flight.isExist) == 'function' and flight:isExist() then
+            -- -- find first active unit (call isExist/isActive only once per unit)
+            -- local units = flight:getUnits()
+            -- local element = nil
+            -- for _, uu in ipairs(units) do
+            --     if uu then
+            --         local okExist, exist = pcall(function() return uu:isExist() end)
+            --         if okExist and exist then
+            --             local okActive, active = pcall(function() return uu:isActive() end)
+            --             if okActive and active then
+            --                 element = uu
+            --                 break
+            --             end
+            --         end
+            --     end
+            -- end
+
+			local element = getActiveUnit(flight)
+
+            if element then
+                -- if group is landing stop the loop
+                if SatusGroupAircraft and SatusGroupAircraft[groupName] and SatusGroupAircraft[groupName]["landing"] then
+                    env.info("DCE_CustomSearchThenEngage RETURN landing " .. tostring(groupName))
+                    CustomSearchThenEngageActive[groupName] = nil
+                    next_time = nil
+
+					local dt = os.clock() - t0
+					local dt_timer = timer.getTime() - t0_timer
+					Perf_E = Perf_E + dt
+					Perf_E_timer = Perf_E_timer + dt_timer
+					Perf_E_N = Perf_E_N + 1
+                else
+                    -- check airborne once
+                    -- local okAir, inAir = pcall(function() return element:inAir() end)
+                    -- if okAir and inAir then
+
+					local now = timer.getTime()
+
+					if now - lastAirCheck > AIR_CHECK_INTERVAL then
+						lastInAir = element:inAir()
+						lastAirCheck = now
+					end
+
+					if lastInAir then
+
+
+                        -- refresh cached infos (playerName, desc) but cache limits calls
+                        local cached = refreshUnitCache(element)
+                        if not (cached and cached.playerName) then
+                            local cntrl = flight:getController()
+                            if cntrl then
+                                -- local pos = element:getPoint()
+								if not lastPos or (now - lastPosTime > POSITION_UPDATE_INTERVAL) then
+									lastPos = element:getPoint()
+									lastPosTime = now
+								end
+
+                                local pos = lastPos
+								
+                                local cat = cached and cached.desc and cached.desc.category or nil
+                                local isHelo = (cat == Unit.Category.HELICOPTER)
+                                local task = buildTask(isHelo, pos.x, pos.z, radius)
+
+                                cntrl:setOption(AI.Option.Air.id.PROHIBIT_AG, true)
+                                local okPush, errPush = pcall(function() cntrl:pushTask(task) end)
+                                if not okPush then
+                                    env.info("DCE_CustomSearchThenEngage: pushTask failed: " .. tostring(errPush))
+                                end
+
+                                next_time = t + RECHECK_INTERVAL
+                            else
+                                next_time = t + RECHECK_INTERVAL
+                            end
+                        else
+                            -- player onboard, recheck later
+                            next_time = t + RECHECK_INTERVAL
+                        end
+                    else
+                        -- not in air, recheck later
+                        next_time = t + RECHECK_INTERVAL
+                    end
+                end
+            else
+                -- no active element found, recheck later
+                next_time = t + RECHECK_INTERVAL
+            end
+        else
+            -- flight gone -> cleanup
+            CustomSearchThenEngageActive[groupName] = nil
+            next_time = nil
+
+			env.info("DCE_CustomSearchThenEngage RETURN flight gone -> cleanup " .. tostring(groupName))
+
+			local dt = os.clock() - t0
+			local dt_timer = timer.getTime() - t0_timer
+			Perf_E = Perf_E + dt
+			Perf_E_timer = Perf_E_timer + dt_timer
+			Perf_E_N = Perf_E_N + 1
+        end
+
+        env.info("DCE_CustomSearchThenEngage: next_time: " .. tostring(next_time))
+
+
+		local dt = os.clock() - t0
+		local dt_timer = timer.getTime() - t0_timer
+		Perf_E = Perf_E + dt
+		Perf_E_timer = Perf_E_timer + dt_timer
+		Perf_E_N = Perf_E_N + 1
+
+        return next_time
+    end
+	
+    local dt = os.clock() - t0
+	local dt_timer = timer.getTime() - t0_timer
+	
+	env.info("DCE_CustomSearchThenEngage Z delta_T : " .. tostring(dt) .. " delta_timer: " .. tostring(dt_timer))
+	
+
+	Perf_E = Perf_E + dt
+	Perf_E_timer = Perf_E_timer + dt_timer
+	Perf_E_N = Perf_E_N + 1
 
 	timer.scheduleFunction(loop, nil, timer.getTime() + 1)
 end

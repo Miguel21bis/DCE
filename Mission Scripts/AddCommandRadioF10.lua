@@ -36,6 +36,8 @@ Perf_D_N = 0
 Perf_E = 0
 Perf_E_N = 0
 
+Perf_E_timer = 0
+
 Perf_Tot = 0
 
 DCE_groupRouteCache = {} -- [groupId] = { base=..., station1=..., station2=..., orbitAlt=..., orbitSpeed=... }
@@ -5157,7 +5159,7 @@ end
 
 local function showPerformance()
 
-	env.info("DCE_showPerformance_21, bingo() total: " .. tonumber(Bingo_time) .. " n: " .. tonumber(Bingo_calls) .. " /n: " .. tonumber(Bingo_time / Bingo_calls))
+	env.info("DCE_showPerformance, bingo() total: " .. tonumber(Bingo_time) .. " n: " .. tonumber(Bingo_calls) .. " /n: " .. tonumber(Bingo_time / Bingo_calls))
 	env.info("DCE_showPerformance, avoidAera() total: " .. tonumber(Perf_A) .." n: ".. tonumber(Perf_A_N).." /n: ".. tonumber(Perf_A / Perf_A_N))
 	env.info("DCE_showPerformance, EWR_magic() total: " .. tonumber(Perf_B) .." n: ".. tonumber(Perf_B_N).. " /n " .. tonumber(Perf_B / Perf_B_N))
 	env.info("DCE_showPerformance, EWR_magic()Player total: " .. tonumber(Perf_Bb) .." n: ".. tonumber(Perf_B_Nb).. " /n " .. tonumber(Perf_Bb / Perf_B_Nb))
@@ -5165,23 +5167,23 @@ local function showPerformance()
 	env.info("DCE_showPerformance, airRetreat() total: " .. tonumber(Perf_C) .." n: ".. tonumber(Perf_B_N).. " /n " .. tonumber(Perf_C / Perf_C_N))
 	env.info("DCE_showPerformance, CustomDesignationAFAC() total: " .. tonumber(Perf_D) .." n: ".. tonumber(Perf_D_N).. " /n " .. tonumber(Perf_D / Perf_D_N))
 	
-	env.info("DCE_showPerformance, CustomSearch() total: " .. tonumber(Perf_E) .." n: ".. tonumber(Perf_E_N).. " /n " .. tonumber(Perf_E / Perf_E_N))
-	
-return timer.getTime() + 60
+	env.info("DCE_showPerformance_B_07, CustomSearch() total: " .. tonumber(Perf_E) .." n: ".. tonumber(Perf_E_N).. " /n " .. tonumber(Perf_E / Perf_E_N))
+	env.info("DCE_showPerformance, CustomSearch()Perf_E_timer total: " .. tonumber(Perf_E_timer) .." n: ".. tonumber(Perf_E_N).. " /n " .. tonumber(Perf_E_timer / Perf_E_N))
+return timer.getTime() + 30
 
 end
 
 
-if campL.debug then
-	local logStr = "hotSpotAirDefense = " .. TableSerialization(hotSpotAirDefense, 0)
-	local logFile = io.open(PathDCE.."Debug\\".."hotSpotAirDefense.lua", "w")
-	if logFile then
-		logFile:write(logStr)
-		logFile:close()
-	else
-		env.info("DCE_hotSpotAirDefense: Failed to open log file for writing.")
-	end
-end
+-- if campL.debug then
+-- 	local logStr = "hotSpotAirDefense = " .. TableSerialization(hotSpotAirDefense, 0)
+-- 	local logFile = io.open(PathDCE.."Debug\\".."hotSpotAirDefense.lua", "w")
+-- 	if logFile then
+-- 		logFile:write(logStr)
+-- 		logFile:close()
+-- 	else
+-- 		env.info("DCE_hotSpotAirDefense: Failed to open log file for writing.")
+-- 	end
+-- end
 
 
 
@@ -5195,12 +5197,9 @@ timer.scheduleFunction(BuildCarrierIndex, nil, timer.getTime() + 0.04)
 timer.scheduleFunction(timerPlayerMenu, nil, timer.getTime() + 5)
 
 --/////////////////////////bench
--- timer.scheduleFunction(bench_B, nil, timer.getTime() + 7)
-
--- timer.scheduleFunction(benchDrive, nil, timer.getTime() + 10)
-
-timer.scheduleFunction(showPerformance, nil, timer.getTime() + 60)
-
+-- if campL.Debug then
+	timer.scheduleFunction(showPerformance, nil, timer.getTime() + 30)
+-- end
 
 --/////////////////////////bench
 
