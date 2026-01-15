@@ -1154,17 +1154,15 @@ Data_divers = {
 		playable = true,
 		vCruise = 215,
 		hCruise = 9000,
-		-- Tasks = {
-		-- 	aircraft_task(CAP),
-		-- 	aircraft_task(Escort),
-		-- 	aircraft_task(FighterSweep),
-		-- 	aircraft_task(Intercept),
-		-- 	aircraft_task(Reconnaissance),
-		-- 	aircraft_task(GroundAttack),
-		-- 	aircraft_task(CAS),
-		-- 	aircraft_task(RunwayAttack),
-		-- 	aircraft_task(AntishipStrike),
-		-- },
+	},
+	["F111C"] = 	{
+		instrumentUnits = "imperial",
+		requiredModules = true,						--itsModule
+		moduleName = "F111C",	--if the aircraft type name does not match the requested module name
+		folderModName = "F111C",
+		playable = true,
+		-- vCruise = 215,
+		-- hCruise = 9000,
 	},
 	["F-4E"] = 	{
 		instrumentUnits = "imperial",
