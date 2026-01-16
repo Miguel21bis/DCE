@@ -44,7 +44,7 @@ local STICKY_TARGET_SECONDS    = 3.0   -- how long each emitter keeps its chosen
 local ALLOW_SAME_TARGET        = false -- if false, emitters will try to avoid sharing targets
 
 -- Debug
-local DEBUG_TEXT               = true
+local DEBUG_TEXT               = false
 
 local aaaZones                 = {}
 

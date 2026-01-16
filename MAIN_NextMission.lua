@@ -3,49 +3,9 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification: M90_a cleanCode_i
 if not versionDCE then versionDCE = {} end
-versionDCE["MAIN_NextMission.lua"] = "1.37.220"
+versionDCE["MAIN_NextMission.lua"] = "2.38.221"
 ------------------------------------------------------------------------------------------------------- 
--- debug_m 					(m zoneId)(l endCampaign)(ik error beacon file)(h mission.maxDictId)(g help campaignMaker)(f autolase)(e camp_ZoneSAR in skipmod)(d: oob_ground not in mission)(c: EndMission)
--- Reglage_e				(e EPLRS_Capacity)(d CVN to CV)(c stop si < 2.7.0 (ver18))(a: Init/loadout selection)
--- adjustment_h				(h add DC_Final_steps.lua)(g keep original triggers( a_remove_scene_objects ))(e oob_scen ==0)(d currentKey)(c clean conf_mod)(b Firstmission_flag)(a: add Loadout tiers)
--- cleanCode_i				(ag springCleaning)
--- modification M90_a		missionWithIcone
--- modification M83_c		Jammer checkMissileProximity (c all jammer in DataBase)(b B-52)
--- modification M77_k		CG_ArtySpotter (k ListSpotterAircraft)(c camp.spotter)(b tempo)
--- modification M71_b		PayloadRestricted  (b Action.RestrictedLoadout(file))
--- modification M66_a		bombOnRunway
--- modification M65_a		add AirGroundAttackTask Mbot s file
--- modification M64_b		adds elements of a new base_mission (b: update Type & groupId)
--- modification M63_a		compatible Datacard Generator or CombatFlite
--- modification M62_a		allows you to use third party files that Data information without being overwritten by central information updates
--- modification M61_g		SAR (g EjectedPilotFrequency)(c theatre)
--- modification M60_d		add CTLD (d always beacon.ogg)(c load_CTLD option)(b debug)
--- Psyko modification M59_a			silences the tower
--- Norman99 modification M57_a		Simple Fuel Check Script
--- modification M56_a		AssignCallnameSquad
--- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
--- modification M52_a		campaign player's choices 
--- modification M51_a		Moonphase
--- modification M49_f		big central db_loadout (f: detection automatique du codeNom)(d: tag in conf_mod)(ce: loadout statistics)(b: archive)
--- modification M48_e		Accept result mission (e: debug horaire)(d: garde en memoire le txt camp["Briefing_text"])
--- modification M47_c		keeps the history of the campaign files (c: save debugging information during mission generation)
--- modification M40_k		Template Active GroundGroup moving front (k: update Active/db_airbase)
--- modification M40			Pedro
--- modification M38_v		Check and Help CampaignMaker (check name&Id)(u debug.mission file)(ijk: debug)(h: KillTarget step by step)
--- modification M37_d		SuperCarrier
--- modification M35_d		(d: info log) version ScriptsMod
--- modification M36_d		(d: add timer) MenuRadio request manual TurnIntoWind
--- modification M34_Bl		custom FrequenceRadio (l new file name) (b: move file location)
--- modification M29			AddCommandRadioF10 CallTankRefuel
--- modification M26			destroys targets if below a certain value
--- modification M18_e		despawn (e: option confMod)
--- modification M17_f		add AddPropAircraft Option all type
--- modification M11A_v		Multiplayer (u: AltitudeFloor in UTIL_Data) (t: AltitudeFloor)
--- modification M14_c		Versionning(c: use changelog.lua)
--- Tomsk modification M09_b		Integration de  Prune Script
--- modification M05_c		ajout picture Briefing (c: correction path vide)
--- modification M00_b		Integration de conf_mod
--- -------------------------------------------------------------------------------------------------------	
+
 if Debug.debug then
 	print("START MAIN_NextMission.lua "..versionDCE["MAIN_NextMission.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
@@ -65,6 +25,7 @@ local minizip = require('minizip')
 local zipFile = minizip.unzOpen("Init/base_mission.miz", 'rb')
 local old_miz = minizip.unzOpen("Init/base_mission.miz", 'rb')
 local existing_files = {}
+local tab_aDoScriptFile = {}
 
 if old_miz then
     old_miz:unzGoToFirstFile()
@@ -111,6 +72,25 @@ if mission.version < 19 then --19ok 18bad
 	print("(MainNM) ATTENTION ") os.execute 'pause'
 	os.exit()
 end
+
+--parse la table original trigrules pour reperer les a_do_script_file 
+-- et ainsi garde en mémoire les fichiers à remettre, exemple: ["file"] = "ResKey_Action_34"
+for trigN, trig in pairs(mission.trigrules) do
+	if trig and trig.actions then
+		for actionN, action in pairs(trig.actions) do
+			if action and action.predicate == "a_do_script_file" and action.file then
+				if oldMapResource[action.file] then
+					local entrie = {
+						resKey = action.file,
+						file = oldMapResource[action.file],
+					}
+					table.insert(tab_aDoScriptFile, entrie )
+				end
+			end
+		end
+	end
+end
+
 
 local scenaryTrigN = #mission.trigrules + 1
 
@@ -237,6 +217,11 @@ end
 mapResource =
 {
 } -- end of mapResource
+
+
+for nFile, data in pairs(tab_aDoScriptFile) do
+	mapResource[data.resKey] = data.file
+end
 
 ----- prepare triggers to run files in mission -----
 -- local trig_n = 1
@@ -1039,6 +1024,8 @@ for _, side in pairs(mission.coalition) do
 											--garde le nom du fichier autre que beacon
 											local tempOldFile = DeepCopy(oldMapResource[task.params.action.params.file])
 
+											_affiche(tempOldFile, "tempOldFile: ")
+
 											mission.maxDictId = mission.maxDictId + 1
 											task.params.action.params.subtitle = "DictKey_subtitle_"..mission.maxDictId
 											mission.maxDictId = mission.maxDictId + 1
@@ -1193,6 +1180,11 @@ if PlayerFlight then
 	resFile:write(resStr)
 	resFile:close()
 
+camp_str = "player = " .. TableSerialization(mapResource, 0)						--make a string
+campFile = io.open("Debug/mapResource.lua", "w")  or error("Failed to open debug file")
+campFile:write(camp_str)																		--save new data
+campFile:close()
+
 	local gciStr = "GCI = " .. TableSerialization(GCI, 0)
 	local gciFile = io.open("GCIdata.lua", "w") or error("Failed to open debug file")											--GCI data file (EWR radars, AWACS, interceptors)
 	gciFile:write(gciStr)
@@ -1249,8 +1241,6 @@ if PlayerFlight then
 		local res = os.rename("../"..camp.title.."_ongoing.miz", "../"..camp.title.."/Debriefing/"..camp.title.."_ongoing"..NbMission..".miz")
 		miz = minizip.zipCreate("../" .. camp.title .. "_ongoing.miz")
 	end
-
-
 
 
 	for filename, content in pairs(existing_files) do
@@ -1449,7 +1439,6 @@ local groundFile = io.open("Active/oob_ground.lua", "w") or error("Failed to ope
 groundFile:write(ground_str)																--save new data
 groundFile:close()
 
-
 local tgt_str = "targetlist = " .. TableSerialization(targetlist, 0)						--make a string
 local tgtFile = io.open("Active/targetlist.lua", "w") or error("Failed to open debug file")
 tgtFile:write(tgt_str)																		--save new data
@@ -1465,31 +1454,15 @@ local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to op
 trigFile:write(trigStr)
 trigFile:close()
 
-
--- local miss_str = "last_Mission = " .. TableSerialization(mission, 0)						--make a string
--- local missFile = io.open("Active/last_Mission.lua", "w") or error("Failed to open debug file")
--- missFile:write(miss_str)															--save new data
--- missFile:close()
-
 local miss_str = "last_Mission = " .. TableSerialization(mission, 0, { writeNumericTable = true })						--make a string
 local missFile = io.open("Active/last_Mission.lua", "w") or error("Failed to open debug file")
 missFile:write(miss_str)															--save new data
 missFile:close()
 
-
--- if not (EndCampaign or camp.endCampaign) then
--- 	local loadout_str = "Loadouts_archive = " .. TableSerialization(Loadouts_archive, 0)	--make a string
--- 	local loadoutFile = io.open("Active/Loadouts_archive.lua", "w") or error("Failed to open debug file")
--- 	loadoutFile:write(loadout_str)																--save new data
--- 	loadoutFile:close()
--- end
-
-
 local loadout_str = "Loadouts_archive = " .. TableSerialization(LoadoutsList, 0)	--make a string
 local loadoutFile = io.open("Active/Loadouts_archive.lua", "w") or error("Failed to open debug file")
 loadoutFile:write(loadout_str)																--save new data
 loadoutFile:close()
-
 
 local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
 trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
@@ -1508,95 +1481,6 @@ t_lua2File = t_lua2File + (os.clock() - c_lua2File)
 --reset TimeJump pour eviter les erreurs de mission suivante
 TimeJump = false
 
-
-
-
--- local function ensureDir(path)
---     -- Test si le dossier existe
---     local test = io.open(path .. "\\.dirtest", "w")
---     if test then
---         test:close()
---         os.remove(path .. "\\.dirtest")
---         return
---     end
-
---     -- Sinon, création via popen (plus léger que os.execute)
---     io.popen('md "'..path..'"')
--- end
-
--- local function listFiles(path)
---     local p = io.popen('dir "'..path..'" /b /a-d') or error("Failed to open file : "..tostring(path))
---     local t = {}
---     for file in p:lines() do
---         t[#t+1] = file
---     end
---     p:close()
---     return t
--- end
-
--- local function listDirs(path)
---     local p = io.popen('dir "'..path..'" /b /ad') or error("Failed to open file : "..tostring(path))
---     local t = {}
---     for dir in p:lines() do
---         t[#t+1] = dir
---     end
---     p:close()
---     return t
--- end
-
--- local function copyFile(src, dst)
---     local f1 = io.open(src, "rb")
---     if not f1 then return end
---     local data = f1:read("*all")
---     f1:close()
-
---     ensureDir(dst:match("^(.*)\\[^\\]+$")) -- crée le dossier parent si besoin
-
---     -- local f2 = io.open(dst, "wb") or error("Failed to open file : "..tostring(src))
--- 	local f2 = io.open(dst, "wb") or error("Failed to open file (dst): "..tostring(dst))
-
---     f2:write(data)
---     f2:close()
--- end
-
--- local function copyDir(src, dst)
---     ensureDir(dst)
-
---     for _, file in ipairs(listFiles(src)) do
---         copyFile(src..'\\'..file, dst..'\\'..file)
---     end
-
---     for _, dir in ipairs(listDirs(src)) do
---         copyDir(src..'\\'..dir, dst..'\\'..dir)
---     end
--- end
-
--- local c_backup = os.clock()
-
--- if (Debug.debug or mission_ini.backupAllMissionFiles) and PlayerFlight then
-    
-
-
--- 	local fileName
---     local folderName = "Debug"
-
---     if Firstmission_flag then
---         fileName = camp.title .. "_first.miz"
---         folderName = folderName .. "\\mission_01"
-
---         ensureDir(folderName)
---         copyFile("..\\" .. fileName, folderName .. "\\" .. fileName)
---         copyDir("Active", folderName .. "\\Active")
-
---     else
---         fileName = camp.title .. "_ongoing.miz"
---         folderName = folderName .. "\\mission_" .. string.format("%02d", camp.mission)
-
---         ensureDir(folderName)
---         copyFile("..\\" .. fileName, folderName .. "\\" .. fileName)
---         copyDir("Active", folderName .. "\\Active")
---     end
--- end
 
 
 ----------------------------------------------------------------
@@ -1723,48 +1607,6 @@ end
 t_backup = t_backup + (os.clock() - c_backup)
 
 
--- if (Debug.debug or mission_ini.backupAllMissionFiles) and PlayerFlight then
---     local fileName
---     local folderName = "Debug" -- Pas de `/` au début pour chemin relatif sous Windows
-
---     if Firstmission_flag then
---         fileName = camp.title .. "_first.miz"
-
---         -- Créer le répertoire "mission_01" s'il n'existe pas
---         folderName = folderName .. "\\mission_01"
---         os.execute('md "' .. folderName .. '" > nul 2>&1') -- Utilise `md` pour Windows
-
---         -- Copier fileName dans folderName
---         local sourcePath = "..\\" .. fileName -- Normaliser pour Windows
---         local destinationPath = folderName .. "\\" .. fileName
---         -- os.execute('copy "' .. sourcePath .. '" "' .. destinationPath .. '" > nul 2>&1') -- Utilise `copy`
--- 		copyFile(sourcePath, destinationPath)
-
---         -- Copier le répertoire "Active" dans folderName
---         -- local activeFolder = "Active" -- Normaliser pour Windows
---         --  os.execute('xcopy "' .. activeFolder .. '" "' .. folderName .. '\\Active" /E /I /Y /Q')
--- 		copyDir("Active", folderName .. "\\Active")
-
-
---     else
---         fileName = camp.title .. "_ongoing.miz"
-
---         -- Créer le répertoire "mission_n" s'il n'existe pas
---         folderName = folderName .. "\\mission_" .. string.format("%02d", camp.mission)
---         os.execute('md "' .. folderName .. '" > nul 2>&1')
-
---         -- Copier fileName dans folderName
---         local sourcePath = "..\\" .. fileName
---         local destinationPath = folderName .. "\\" .. fileName
---         -- os.execute('copy "' .. sourcePath .. '" "' .. destinationPath .. '" > nul 2>&1')
--- 		copyFile(sourcePath, destinationPath)
-
---         -- Copier le répertoire "Active" dans folderName
---         -- local activeFolder = "Active"
---         --  os.execute('xcopy "' .. activeFolder .. '" "' .. folderName .. '\\Active" /E /I /Y /Q')
--- 		copyDir("Active", folderName .. "\\Active")
---     end
--- end
 
 	-- print("MAIN_NM test start")
 

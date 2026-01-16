@@ -3,7 +3,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification: cleancode_e
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_UpdateTargetlist.lua"] = "1.11.52"
+versionDCE["DC_UpdateTargetlist.lua"] = "1.11.53"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_e				(d springCleaning)
 -- adjustment_a				(a GroundTarget.percent = 100 & Error_05 )
@@ -648,14 +648,14 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 					target.y = target.MultiPoints[1].y
 				else																		--only a single refoint
 					if not Refpoint[target.refpoint] then
-						print("DCE does not find the name of this reference (of targetlist) in the fields of baseMission.miz "..tostring(target.refpoint))
-						
-						_affiche(Refpoint, "Refpoint")
-						print("DCE info")  os.execute 'pause'
-					end
+						-- print("DCE does not find the name of this reference (of targetlist) in the fields of baseMission.miz "..tostring(target.refpoint))
+						AddLog("DCE does not find the name of this reference (of targetlist) in the fields of baseMission.miz "..tostring(target.refpoint))
 
-					target.x = Refpoint[target.refpoint].x									--get x-coordinate
-					target.y = Refpoint[target.refpoint].y									--get y-coordinate
+					else
+
+						target.x = Refpoint[target.refpoint].x									--get x-coordinate
+						target.y = Refpoint[target.refpoint].y									--get y-coordinate
+					end
 				end
 				if target.x == nil or target.y == nil then
 					checkBug3(" Error_01: Refpoint '" .. target.refpoint .. "' of target '" .. target.name .. "' not found!")
