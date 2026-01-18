@@ -115,6 +115,7 @@ local errorMsg = ""																				--variable to store script status in case
 -- }
 
 local function GCI_Cycle()
+	
 	local current_time = timer.getTime()
 	--remove old targets from target_tracks
 	errorMsg = "Remove old tracks."																--Error message in case follow on code fails
@@ -252,29 +253,7 @@ local function GCI_Cycle()
 					elseif not ourSideOfBorder and not enemySideOfBorder then
 						authorizedInter = true
 					else
-						-- --check si le target est sur la mere
-						-- local surfaceType = land.getSurfaceType({x = target.point.x, y = target.point.z})
-						-- if surfaceType == land.SurfaceType.WATER then
-						-- 	local landFound = false
-
-						-- 	for _, rad in ipairs({0, math.pi / 2, math.pi, 3 * math.pi / 2}) do
-						-- 		local dist = 10000
-						-- 		local sondageLand = GetOffsetPoint({x=target.point.x, y=target.point.z}, rad, dist)
-						-- 		surfaceType = land.getSurfaceType(sondageLand)
-
-						-- 		if surfaceType ~= land.SurfaceType.WATER then
-						-- 			landFound = true
-						-- 			break
-						-- 		end
-						-- 	end
-							
-
-						-- 	if not landFound then
-						-- 		authorizedInter = true
-						-- 		env.info("DCE_Gci Passe B_C10 WATER sur, No Land Found ")
-						-- 	end
-							
-						-- end
+						
 					end
 				else
 					authorizedInter = true
@@ -300,13 +279,10 @@ local function GCI_Cycle()
 								if flight.time + 900 < current_time then								--interceptor flight has moved to ready status (from ready15) longer than 15 minutes ago and is ready for action (time is -900 for flight starting ready at mission start).
 									errorMsg = "Assign interceptors; Target: " .. target_name .. "; Interceptor: " .. flight.name						--Error message in case follow on code fails
 									
-									-- if current_time >= flight.tot_from and current_time <= flight.tot_to then											--flight can operate at current time							
-										-- local distance = math.sqrt(math.pow(target.pointVec3.x - flight.x, 2) + math.pow(target.pointVec3.z - flight.y, 2))		--distance between interceptor airbase and target
-										local distance = GetDistance(flight, { x = target.pointVec3.x, y = target.pointVec3.z })
-										if distance < flight.range then									--target is in interception range
-											eligible_flights[flight.name] = distance					--store flight name and interception distance in table
-										end
-									-- end
+									local distance = GetDistance(flight, { x = target.pointVec3.x, y = target.pointVec3.z })
+									if distance < flight.range then									--target is in interception range
+										eligible_flights[flight.name] = distance					--store flight name and interception distance in table
+									end
 								end
 							end
 						end
@@ -344,55 +320,8 @@ local function GCI_Cycle()
 										end								
 									end
 									
-									-- local idInfo = groupObj:getID()
-
-									-- -- on replace les vecteurs dans un repere x/y/z/
-									-- local newTarget = {}
-									-- newTarget.point = {}
-									-- newTarget.point.x = target.pointVec3.x
-									-- newTarget.point.y = target.pointVec3.z
-									-- newTarget.point.z = target.pointVec3.y
-
-									-- target.altitude = math.floor(target.pointVec3.y / 1000) * 1000
-									-- target.distance_Km = math.floor(selected_distance / 10000) * 10
-									-- target.distance = selected_distance
-									-- local testBearing = math.floor(GetHeadingIM(flight, newTarget.point))
 									target.bearing = math.floor(GetHeading({x=flightInter.x, y=flightInter.y}, {x=target.pointVec3.x, y=target.pointVec3.z} ))
 
-
-
-									-- env.info("DCE_Gci "..selected_flight .. " launched to intercept: " .. target.number .." | "..target.typeName.." |Bearing: "..target.bearing.. " |testBearing: "..testBearing.." |Angel: "..target.altitude.." |Distance: "..target.distance_Km.." Km")
-
-									-- trigger.action.outTextForGroup(idInfo, selected_flight .. " launched to intercept: " .. target.number .." "..target.typeName.." Bearing: "..target.bearing.." Angel: "..target.altitude.." Distance: "..target.distance_Km.." Km", 60 , true)
-
-									-- trigger.action.outSoundForGroup(idInfo, "l10n/DEFAULT/alarme.wav" )
-
-									--***********************************************************************************
-									--***********************************************************************************
-									
-									-- local distance2 = target.distance/3
-									-- local weaponType = 1069547520					--automatique
-									-- local point_1 = GetOffsetPoint(flight, target.bearing, distance2/2)
-
-									-- if target.category == 0 then             --avion
-									-- 	distance2 = (target.distance/3)*2
-									-- 	-- env.info( "DCE_Gci D9 avion "..tostring(distance2))
-									-- 	weaponType = 1069547520					--automatique
-									-- elseif  target.category == 1 then             --helico
-									-- 	distance2 = target.distance/3
-									-- 	-- env.info( "DCE_Gci D10 helico "..tostring(distance2))
-									-- 	weaponType = 4194304						--Short Range Missile (Fox2)
-									-- end
-
-									-- local point_2 = GetOffsetPoint(flight, target.bearing, distance2)
-
-									-- local distance3 = (target.distance/3)*2
-									-- local point_3 = GetOffsetPoint(flight, target.bearing, distance3)
-									-- point_3.x = point_3.x + 1000
-									-- point_3.y = point_3.y + 1000
-									-- local distAfterPt3 = math.sqrt(math.pow(point_2.x - point_3.x, 2) + math.pow(point_2.y - point_3.y, 2))
-									-- local distRTB = math.sqrt(math.pow(point_3.x - flight.x, 2) + math.pow(point_3.y - flight.y, 2))
-									-- local speed = 250      --mur du son 350 Atl0 293 Atl10000m
 									local speed = 340 --mach 0.95 au sol
 
 									--assign mission task to interceptor flight
@@ -415,44 +344,19 @@ local function GCI_Cycle()
 										local descIntercept = leaderObj:getDesc()
 										--mig23 speedMax0 388 m.s
                                         --["speedMax"] = 693.25,
-										env.info("DCE_Gci A speed: "..tostring(speed).." "..tostring(selectInterName))
+										-- env.info("DCE_Gci A speed: "..tostring(speed).." "..tostring(selectInterName))
 
 										if descIntercept and descIntercept.speedMax0 then
-											env.info("DCE_Gci B speedMax0: "..tostring(descIntercept.speedMax0))
+											-- env.info("DCE_Gci B speedMax0: "..tostring(descIntercept.speedMax0))
 										end
 
 										if descIntercept and descIntercept.speedMax0 and descIntercept.speedMax0 > speed then
 											-- speed = descIntercept.speedMax0 * 0.8
                                             speed = descIntercept.speedMax0
-											env.info("DCE_Gci C speed: " .. tostring(speed))
+											-- env.info("DCE_Gci C speed: " .. tostring(speed))
 										end
 
-										env.info("DCE_Gci D speed: " .. tostring(speed))
-
-
-										-- if camp.debug and descIntercept then
-										-- 	--export custom mission log
-										-- 	local logStr = "descIntercept = " .. TableSerialization(descIntercept, 0)
-										-- 	local flightNameClean = selectInterName:gsub('[%p%c%s]', '_')
-										-- 	local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_".. "DESCRIPT_INTER".."_"..tostring(current_time)..".lua", "w")
-										-- 	if logFile then
-										-- 		logFile:write(logStr)
-										-- 		logFile:close()
-										-- 	else
-										-- 		env.info("DCE_Gci E1 DCE_DESCRIPT_INTER: Failed to open log file for writing.")
-										-- 	end
-										-- end
-
-										-- local grpObjt =  Group.getByName(target_name)
-
-										-- if not grpObjt or grpObjt == nil then
-										-- 	return
-										-- end
-
-										-- local target_id = grpObjt:getID()
-										
-										-- target_id = Group.getByName(target_name):getID()					--get target group ID --TODO BUG 287: attempt to index a nil value stack traceback:
-										
+										-- env.info("DCE_Gci D speed: " .. tostring(speed))
 
 										local pointB = GetOffsetPoint(flightInter, target.bearing, 3000)
 

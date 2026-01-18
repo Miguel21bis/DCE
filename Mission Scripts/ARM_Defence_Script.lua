@@ -5,22 +5,52 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  M83_c
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/ARM_Defence_Script.lua"] = "2.4.10"
-------------------------------------------------------------------------------------------------------- 
-
--- cleanCode_a	
--- modification M83_c	Jammer checkMissileProximity (all jammer in database)(b B-52)		 
--- Reglage_b			(b more difficult with Patriot&Sa10)(a: RadarOn 6 a 9mn)			
--- Debug_b 				(b getCategory)(a:AGM-154 :31:  'getDesc' Static doesn't exist)
+versionDCE["Mission Scripts/ARM_Defence_Script.lua"] = "3.5.11"
 ------------------------------------------------------------------------------------------------------- 	
 
 env.info("DCE_ARM START LOADING ARM_Defence_Script.lua "..tostring(versionDCE["Mission Scripts/ARM_Defence_Script.lua"]))
+
+
+-- Cache global des jammers (mis à jour périodiquement)
+local cachedJammers = {}
+
+-- Intervalle de mise à jour des jammers (secondes)
+local jammerRefreshInterval = 30
 
 --  Table globale des missiles en cours de suivi
 local activeMissiles = {}
 
 --  Table des Jammers (actualisée à chaque tir de missile)
 local jammers = {}
+
+-- Met à jour la liste des jammers actifs (optimisation performance)
+-- Pourquoi : éviter de rescanner tous les avions à chaque tir de missile SAM
+local function updateJammers()
+	cachedJammers = {}
+
+	for _, sideNum in ipairs({ coalition.side.BLUE, coalition.side.RED }) do
+		local groups = coalition.getGroups(sideNum, Group.Category.AIRPLANE)
+		for _, gp in pairs(groups) do
+			if gp and gp:isExist() then
+				for _, unit in ipairs(gp:getUnits()) do
+					if unit and unit:isActive() and unit:inAir() then
+						local typeName = unit:getTypeName()
+						if campL.jammerOnBoard and campL.jammerOnBoard[typeName] then
+							table.insert(cachedJammers, {
+								unit = unit,
+								range = campL.jammerOnBoard[typeName].range,
+								efficiency = campL.jammerOnBoard[typeName].efficiency,
+							})
+						end
+					end
+				end
+			end
+		end
+	end
+
+	-- Relance périodique
+	timer.scheduleFunction(updateJammers, {}, timer.getTime() + jammerRefreshInterval)
+end
 
 local function makeExplosion(posMissile)
 
@@ -68,16 +98,20 @@ local function checkMissileProximity()
 
 					local jammerVec3 = jammer.unit:getPoint()
 
+					-- local dx = missileVec3.x - jammerVec3.x
+					-- local dy = missileVec3.y - jammerVec3.y
+					-- local dz = missileVec3.z - jammerVec3.z
+					-- local distance = math.sqrt(dx * dx + dy * dy + dz * dz)
+
+					-- if distance < jammer.range then
+
 					local dx = missileVec3.x - jammerVec3.x
 					local dy = missileVec3.y - jammerVec3.y
 					local dz = missileVec3.z - jammerVec3.z
-					local distance = math.sqrt(dx * dx + dy * dy + dz * dz)
+					local distance2 = dx * dx + dy * dy + dz * dz
+					local range2 = jammer.range * jammer.range
 
-					-- env.info("ARM_Jammer B1 Missile jammer.range: "..tostring(jammer.range).."|efficiency:"..tostring(jammer.efficiency))
-					-- _affiche(jammer, "ARM_Jammer B2 jammer")
-					-- env.info("ARM_Jammer B3 distance "..tostring(distance))
-
-					if distance < jammer.range then
+					if distance2 < range2 then
 
 						local valueRandom = math.random(0,100)
 						-- env.info("ARM_Jammer B4 valueRandom "..tostring(valueRandom))
@@ -260,11 +294,14 @@ function ARM_Shot_EventHandler:onEvent(event)
 
 		local desc = wep:getDesc()
 		if desc.missileCategory == 2 and (desc.guidance == 3 or desc.guidance == 4) then
-            -- env.info("ARM_Jammer A Missile SAM détecté ! Suivi activé.")
+            
 			-- Ajout du missile dans la table des missiles actifs
             table.insert(activeMissiles, wep)
 
-            -- Actualisation de la liste des jammers
+			-- Utilisation du cache de jammers (optimisé)
+			jammers = cachedJammers
+
+          --[[   -- Actualisation de la liste des jammers
             jammers = {}
 			-- local jammerDist_RealJammer = 10000
 			-- local jammerDist_B52 = 1000
@@ -312,7 +349,7 @@ function ARM_Shot_EventHandler:onEvent(event)
                         end
                     end
                 end
-            end
+            end ]]
 
             -- Démarrage de la surveillance si ce n'est pas déjà fait
             if #activeMissiles == 1 then
@@ -325,5 +362,8 @@ function ARM_Shot_EventHandler:onEvent(event)
 	end
 end
 world.addEventHandler(ARM_Shot_EventHandler)
+
+-- Initialisation du cache des jammers
+updateJammers()
 
 env.info("DCE_ARM END OF LOADING ARM_Defence_Script ")
