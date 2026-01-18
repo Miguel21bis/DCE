@@ -3,7 +3,7 @@
 --Functions accessed via LUA Run Script
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "3.16.55"
+versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "3.16.56"
 ------------------------------------------------------------------------------------------------------- 
 
 if not campL.debugInGamePopup then
@@ -35,10 +35,36 @@ Perf_D = 0
 Perf_D_N = 0
 Perf_E = 0
 Perf_E_N = 0
+Perf_F = 0
+Perf_F_N = 0
+
+Perf_G = 0
+Perf_G_N = 0
+Perf_H = 0
+Perf_H_N = 0
+
+Perf_J = 0
+Perf_J_N = 0
+
+Perf_K = 0
+Perf_K_N = 0
+Perf_L = 0
+Perf_L_N = 0
+
 
 Perf_E_timer = 0
 
 Perf_Tot = 0
+
+Cache_UnitCategoryByGetID = {} -- Unit.Category = {
+-- Unit.Category = {
+--   AIRPLANE      = 0,
+--   HELICOPTER    = 1,
+--   GROUND_UNIT   = 2,
+--   SHIP          = 3,
+--   STRUCTURE     = 4
+-- }
+
 
 DCE_groupRouteCache = {} -- [groupId] = { base=..., station1=..., station2=..., orbitAlt=..., orbitSpeed=... }
 MissGroupByName = {}
@@ -547,7 +573,6 @@ local function buildMissionIndex()
                 -- ========= AVIONS =========
                 if country.plane and country.plane.group then
                     for _, group in pairs(country.plane.group) do
-
                         -- index par nom
                         if group.name then
                             MissGroupByName[group.name] = group
@@ -586,19 +611,49 @@ local function buildMissionIndex()
                             DCE_groupRouteCache[group.groupId] = data
                         end
                     end
-                end
+				end
+				-- ========= HELICOPTERES =========
+				if country.helicopter and country.helicopter.group then
+					for _, group in pairs(country.helicopter.group) do
+						-- index par nom
+						if group.name then
+							MissGroupByName[group.name] = group
+						end
 
-                -- -- ========= UNITÉS SOL (AFAC) =========
-                -- if country.vehicle and country.vehicle.group then
-                --     for _, group in pairs(country.vehicle.group) do
-                --         if group.units then
-                --             for _, unit in pairs(group.units) do
-                --                 EnvMissionGroundUnits[#EnvMissionGroundUnits + 1] = unit
-                --             end
-                --         end
-                --     end
-                -- end
+						-- routes
+						if group.route and group.route.points then
+							local data = {}
+							data.base = group.route.points[#group.route.points]
 
+							for i, p in ipairs(group.route.points) do
+								if p.name == "Station" then
+									data.station1 = group.route.points[i]
+									data.station2 = group.route.points[i + 1]
+								end
+
+								if p.task and p.task.params and p.task.params.tasks then
+									for _, t in ipairs(p.task.params.tasks) do
+										local task = nil
+										if t.params then
+											if t.params.task then
+												task = t.params.task
+											elseif t.params.action then
+												task = t.params.action
+											end
+										end
+
+										if task and task.id == "Orbit" and task.params then
+											data.orbitAlt = task.params.altitude
+											data.orbitSpeed = task.params.speed
+										end
+									end
+								end
+							end
+
+							DCE_groupRouteCache[group.groupId] = data
+						end
+					end
+				end
             end
         end
     end
@@ -4703,92 +4758,132 @@ function EventHandler2:onEvent(event)
 			idLabel = tostring(Info_event[tonumber(event.id)])
 		end
 
-		if event.id == world.event.S_EVENT_BIRTH then
-			-- env.info("DCE_EventHandler2 A S_EVENT_BIRTH.")
+		-- if event.id == world.event.S_EVENT_BIRTH and event.initiator then
+		-- 	-- env.info("DCE_EventHandler2 A S_EVENT_BIRTH.")
 
-			if event.initiator and Object.getCategory(event.initiator) ~= Object.Category.STATIC and event.initiator.getPlayerName and event.initiator.getGroup then
-				local playerName = event.initiator:getPlayerName()
-				local groupObject = event.initiator:getGroup()
+		-- 	local evCategory = Object.getCategory(event.initiator)
 
-				-- env.info("DCE_EventHandler2 B playerName." .. tostring(playerName))
+		-- 	if evCategory ~= Object.Category.STATIC then
 
-				if groupObject and groupObject.getID then
+		-- 		--creation d'un cache category
+		-- 		if event.initiator.getID and event.initiator:getID() then
+		-- 			local unitId = event.initiator:getID()
+		-- 			DCE_categoryCache[unitId].category = event.initiator:getDesc().category
 
-                    local gpGid = groupObject:getID()
-					local flightName = event.initiator:getName()
-					local groupName = groupObject:getName()
+		-- 			if evCategory ~= DCE_categoryCache[unitId].category then
+		-- 				env.info("DCE_BUG category different: getDesc().category: " .. tostring(DCE_categoryCache[unitId].category).." evCategory: "..tostring(evCategory))
+		-- 			end
+		-- 		end
+
+
+		if event.id == world.event.S_EVENT_BIRTH and event.initiator then
+
+			local obj_Category = Object.getCategory(event.initiator)
+
+			-- on ignore les statics
+			if obj_Category ~= Object.Category.STATIC then
+
+				if event.initiator.getID then
+                    local unitId = event.initiator:getID()
 					
-					if playerName then
-						
-						env.info("DCE_EventHandler2 C0. playerName " .. tostring(playerName) .. " gpGid." .. tostring(gpGid) .. " groupObject." .. tostring(groupObject))
+					if unitId then
 
-						if gpGid and groupObject then
-							env.info("DCE_EventHandler2 C1 playerName S_EVENT_BIRTH. MAKE addFuncs() ")
-							addFuncs(gpGid, groupObject, playerName)
-
-                            local desc = event.initiator:getDesc()
-							env.info("DCE_EventHandler2 C2. desc" .. tostring(desc))
-							if desc.category == Unit.Category.HELICOPTER then
-								timer.scheduleFunction(MonitorPlayerAircraftActivity, { "in", playerName, flightName, desc.category, groupObject }, current_time + 1)
-							end
+						-- init cache
+						if not Cache_UnitCategoryByGetID[unitId] then
+							Cache_UnitCategoryByGetID[unitId] = {}
 						end
-					else
+
+						local desc = event.initiator:getDesc()
+						if desc and desc.category ~= nil then
+							Cache_UnitCategoryByGetID[unitId].category = desc.category
+						end
+					end
+				end
 						
-						if gpGid and groupObject then
+				if event.initiator.getPlayerName and event.initiator.getGroup then
+					local playerName = event.initiator:getPlayerName()
+					local groupObject = event.initiator:getGroup()
+
+					-- env.info("DCE_EventHandler2 B playerName." .. tostring(playerName))
+
+					if groupObject and groupObject.getID then
+
+						local gpGid = groupObject:getID()
+						local flightName = event.initiator:getName()
+						local groupName = groupObject:getName()
+						
+						if playerName then
 							
-							if not SatusGroupAircraft[groupName] then
-								SatusGroupAircraft[groupName] = {
-									["spawn"] = false,
-									["takeoff"] = false,
-									["landing"] = false,
-									["task"] = "",
-									["waypoints"] = {}, -- suivi des waypoints
-								}
-							end
+							env.info("DCE_EventHandler2 C0. playerName " .. tostring(playerName) .. " gpGid." .. tostring(gpGid) .. " groupObject." .. tostring(groupObject))
 
-							local passEscort = false
+							if gpGid and groupObject then
+								env.info("DCE_EventHandler2 C1 playerName S_EVENT_BIRTH. MAKE addFuncs() ")
+								addFuncs(gpGid, groupObject, playerName)
+
+								local desc = event.initiator:getDesc()
+								env.info("DCE_EventHandler2 C2. desc" .. tostring(desc))
+								if desc.category == Unit.Category.HELICOPTER then
+									timer.scheduleFunction(MonitorPlayerAircraftActivity, { "in", playerName, flightName, desc.category, groupObject }, current_time + 1)
+								end
+							end
+						else
 							
-                            if string.find(string.lower(groupName), "escort") then
-
-                                passEscort = true
+							if gpGid and groupObject then
 								
+								if not SatusGroupAircraft[groupName] then
+									SatusGroupAircraft[groupName] = {
+										["spawn"] = false,
+										["takeoff"] = false,
+										["landing"] = false,
+										["task"] = "",
+										["waypoints"] = {}, -- suivi des waypoints
+									}
+								end
+
+								local passEscort = false
 								
---TODO a supprimer une fois les tests finitos
-                                if campL.debug then
-									EWR_ON(flightName)
-                                end
+								if string.find(string.lower(groupName), "escort") then
 
-							end
+									passEscort = true
+									
+									
+	--TODO a supprimer une fois les tests finitos
+									if campL.debug then
+										EWR_ON(flightName)
+									end
 
-							if groupObject and passEscort then
+								end
 
-								-- local route = DCE_GetRoute(flightName, sideName)
-                                -- local route = DCE_GetRoute(groupName)
-								local route = DCE_GetRoute(groupName)
-								
-								-- env.info("DCE_Perf Perf_Tot " .. tostring(Perf_Tot))
-								
-								if route and #route > 0 then
+								if groupObject and passEscort then
 
-									SatusGroupAircraft[groupName]["waypoints"] = route
-									SatusGroupAircraft[groupName]["task"] = "escort"
+									-- local route = DCE_GetRoute(flightName, sideName)
+									-- local route = DCE_GetRoute(groupName)
+									local route = DCE_GetRoute(groupName)
+									
+									-- env.info("DCE_Perf Perf_Tot " .. tostring(Perf_Tot))
+									
+									if route and #route > 0 then
 
+										SatusGroupAircraft[groupName]["waypoints"] = route
+										SatusGroupAircraft[groupName]["task"] = "escort"
+
+									end
 								end
 							end
 						end
 					end
 				end
-			end
 
 
-			
-			if event.initiator then
-				local unit = event.initiator
-				if unit and unit.getPlayerName and unit:getPlayerName() then
-					local name = unit:getPlayerName()
-					local uName = unit:getName()
-					env.info("DCE_EventHandler2 D Joueur détecté: " .. name .. " (unité: " .. uName .. ")")
-					Players[uName] = name
+				
+				if event.initiator then
+					local unit = event.initiator
+					if unit and unit.getPlayerName and unit:getPlayerName() then
+						local name = unit:getPlayerName()
+						local uName = unit:getName()
+						env.info("DCE_EventHandler2 D Joueur détecté: " .. name .. " (unité: " .. uName .. ")")
+						Players[uName] = name
+					end
 				end
 			end
 
@@ -4957,8 +5052,15 @@ end
 
 
 local function loopAFAC_CAS()
-
-	if next(AFAC_available) == nil then return timer.getTime() + 17 end
+	local t0 = os.clock()
+    Perf_F_N = Perf_F_N + 1
+		
+    if next(AFAC_available) == nil then
+		local dt = os.clock() - t0
+		Perf_F = Perf_F + dt
+        return timer.getTime() + 17
+			
+	end
 
 	for _, sideNum in ipairs({coalition.side.BLUE, coalition.side.RED}) do
 
@@ -5002,7 +5104,8 @@ local function loopAFAC_CAS()
 			end
 		end
 	end
-
+	local dt = os.clock() - t0
+	Perf_F = Perf_F + dt
 	return timer.getTime() + 17
 end
 
@@ -5025,35 +5128,6 @@ local function loopAFAC()
 	return timer.getTime() + 61
 end
 
-
--- function MonitorWaypointProgress(flightName)
---     local flight = Group.getByName(flightName)
---     local stat = SatusGroupAircraft[flightName]
---     if not flight or not stat or stat["landing"] then return end
-
---     local unit = flight:getUnit(1)
---     if not unit or not unit:isExist() then return end
-
---     local pos = unit:getPoint()
---     local wpIndex = stat["currentWP"]
---     local wpList = stat["waypoints"]
---     if not wpList or not wpList[wpIndex] then return end
-
---     local wp = wpList[wpIndex]
---     local dx = pos.x - wp.x
---     local dz = pos.z - wp.y -- attention : "y" de la route est coordonnée horizontale Z !
---     local dist = math.sqrt(dx * dx + dz * dz)
-
---     if dist < 2000 then -- distance de validation (2 km par exemple)
---         stat["waypoints"][wpIndex]["passed"] = true
---         stat["currentWP"] = wpIndex + 1
---         env.info(string.format("[WP TRACK] %s a passé le WP %d à %.0f m", flightName, wpIndex, dist))
---     end
-
---     if wpIndex <= #wpList then
--- 		timer.scheduleFunction(MonitorWaypointProgress, flightName, timer.getTime() + 10)
---     end
--- end
 
 --uniquement pour le Bingo?
 local function loopPilot()
@@ -5159,17 +5233,28 @@ end
 
 local function showPerformance()
 
-	env.info("DCE_showPerformance, bingo() total: " .. tonumber(Bingo_time) .. " n: " .. tonumber(Bingo_calls) .. " /n: " .. tonumber(Bingo_time / Bingo_calls))
-	env.info("DCE_showPerformance, avoidAera() total: " .. tonumber(Perf_A) .." n: ".. tonumber(Perf_A_N).." /n: ".. tonumber(Perf_A / Perf_A_N))
-	env.info("DCE_showPerformance, EWR_magic() total: " .. tonumber(Perf_B) .." n: ".. tonumber(Perf_B_N).. " /n " .. tonumber(Perf_B / Perf_B_N))
-	env.info("DCE_showPerformance, EWR_magic()Player total: " .. tonumber(Perf_Bb) .." n: ".. tonumber(Perf_B_Nb).. " /n " .. tonumber(Perf_Bb / Perf_B_Nb))
+	env.info("DCE_showPerformance, bingo(): " .. tonumber(Bingo_time) .. " n: " .. tonumber(Bingo_calls) .. " /n: " .. tonumber(Bingo_time / Bingo_calls))
+	env.info("DCE_showPerformance, avoidAera(): " .. tonumber(Perf_A) .." n: ".. tonumber(Perf_A_N).." /n: ".. tonumber(Perf_A / Perf_A_N))
+	env.info("DCE_showPerformance, EWR_magic(): " .. tonumber(Perf_B) .." n: ".. tonumber(Perf_B_N).. " /n " .. tonumber(Perf_B / Perf_B_N))
+	env.info("DCE_showPerformance, EWR_magic()Player: " .. tonumber(Perf_Bb) .." n: ".. tonumber(Perf_B_Nb).. " /n " .. tonumber(Perf_Bb / Perf_B_Nb))
 	
-	env.info("DCE_showPerformance, airRetreat() total: " .. tonumber(Perf_C) .." n: ".. tonumber(Perf_B_N).. " /n " .. tonumber(Perf_C / Perf_C_N))
-	env.info("DCE_showPerformance, CustomDesignationAFAC() total: " .. tonumber(Perf_D) .." n: ".. tonumber(Perf_D_N).. " /n " .. tonumber(Perf_D / Perf_D_N))
-	
-	env.info("DCE_showPerformance_B_07, CustomSearch() total: " .. tonumber(Perf_E) .." n: ".. tonumber(Perf_E_N).. " /n " .. tonumber(Perf_E / Perf_E_N))
-	env.info("DCE_showPerformance, CustomSearch()Perf_E_timer total: " .. tonumber(Perf_E_timer) .." n: ".. tonumber(Perf_E_N).. " /n " .. tonumber(Perf_E_timer / Perf_E_N))
-return timer.getTime() + 30
+	env.info("DCE_showPerformance, airRetreat(): " .. tonumber(Perf_C) .." n: ".. tonumber(Perf_B_N).. " /n " .. tonumber(Perf_C / Perf_C_N))
+	env.info("DCE_showPerformance, CustomDesignationAFAC(): " .. tonumber(Perf_D) .." n: ".. tonumber(Perf_D_N).. " /n " .. tonumber(Perf_D / Perf_D_N))
+	env.info("DCE_showPerformance, loopAFAC_CAS(): " .. tonumber(Perf_F) .." n: ".. tonumber(Perf_F_N).. " /n " .. tonumber(Perf_F / Perf_F_N))
+
+	env.info("DCE_showPerformance, trackBomb(): " .. tonumber(Perf_E) .." n: ".. tonumber(Perf_E_N).. " /n " .. tonumber(Perf_E / Perf_E_N))
+	env.info("DCE_showPerformance, updateTrackedBombs(): " .. tonumber(Perf_H) .." n: ".. tonumber(Perf_H_N).. " /n " .. tonumber(Perf_H / Perf_H_N))
+	env.info("DCE_showPerformance, destructionScenaryInZone(): " .. tonumber(Perf_J) .." n: ".. tonumber(Perf_J_N).. " /n " .. tonumber(Perf_J / Perf_J_N))
+
+	env.info("DCE_showPerformance_B_16, Custom_Altitude(): " ..
+	tonumber(Perf_K) .. " n: " .. tonumber(Perf_K_N) .. " /n " .. tonumber(Perf_K / Perf_K_N))
+	env.info("DCE_showPerformance, Custom_SAR(): " ..
+	tonumber(Perf_L) .. " n: " .. tonumber(Perf_L_N) .. " /n " .. tonumber(Perf_L / Perf_L_N))
+	-- env.info("DCE_showPerformance, GCI_Cycle(): " .. tonumber(Perf_G) .." n: ".. tonumber(Perf_G_N).. " /n " .. tonumber(Perf_G / Perf_G_N))
+
+
+
+	return timer.getTime() + 30
 
 end
 
