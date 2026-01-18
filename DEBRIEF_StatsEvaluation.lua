@@ -69,19 +69,21 @@ else
 	--camp light type B
 	local campExport = loadfile("camp_status.lua")()												--camp_status
 	
-	--merge camp full and camp light
-	for k,v in pairs(camp) do
-		for kk,vv in pairs(campL) do
-			if k == kk then
-				v = vv
-			end
+	if campL then
+		--merge camp full and camp light
+		for k,v in pairs(camp) do
+			for kk,vv in pairs(campL) do
+				if k == kk then
+					v = vv
+				end
+			end	
 		end	
-	end	
 
-	-- add keys from campL that are not in camp
-	for kk,vv in pairs(campL) do
-		if not camp[kk] then
-			camp[kk] = vv
+		-- add keys from campL that are not in camp
+		for kk,vv in pairs(campL) do
+			if not camp[kk] then
+				camp[kk] = vv
+			end
 		end
 	end
 

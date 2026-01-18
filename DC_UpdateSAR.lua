@@ -565,7 +565,7 @@ camp.boundary = boundary
 --selectionne la base la plus proche pour leur porter secours
 --defini si le pilot est capturé ou récupérable
 
-local timeActualCampaignSecond = SecondsBetween(camp.dateInit, camp.date)
+-- local timeActualCampaignSecond = SecondsBetween(camp.dateInit, camp.date)
 
 if camp_ZoneSAR and camp_ZoneSAR ~= nil then
     for zoneSideName, sideSAR in pairs(camp_ZoneSAR) do

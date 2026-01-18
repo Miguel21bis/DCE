@@ -93,25 +93,29 @@ local logExport = loadfile("MissionEventsLog.lua")()											--mission events 
 local scenExport = loadfile("scen_destroyed.lua")()												--destroyed scenery objects
 local campExport = loadfile("camp_status.lua")()
 Mission_LL_Positions = nil
-local ll_PositionsExport = loadfile("Mission_LL_Positions.lua")()
+-- local ll_PositionsExport = loadfile("Mission_LL_Positions.lua")()
 local SARExport
+
+local ll_PositionsExport = (loadfile("Mission_LL_Positions.lua") or function() return {} end)()
 
 --camp full type A
 dofile("Active/camp_status.lua")
 
---merge camp full and camp light
-for k,v in pairs(camp) do
-	for kk,vv in pairs(campL) do
-		if k == kk then
-			v = vv
-		end
+if campL then
+	--merge camp full and camp light
+	for k,v in pairs(camp) do
+		for kk,vv in pairs(campL) do
+			if k == kk then
+				v = vv
+			end
+		end	
 	end	
-end	
 
--- add keys from campL that are not in camp
-for kk,vv in pairs(campL) do
-	if not camp[kk] then
-		camp[kk] = vv
+	-- add keys from campL that are not in camp
+	for kk,vv in pairs(campL) do
+		if not camp[kk] then
+			camp[kk] = vv
+		end
 	end
 end
 

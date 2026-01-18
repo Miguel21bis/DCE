@@ -2331,15 +2331,17 @@ for side_name, side in pairs(oob_air) do
 
 
 		--ATTENTION while est necessaire pour les sauts temporel, pour rattraper toutes les occurences de ravitaillement loupé
-        while CampTotalTimeH >= camp.automaticReinforce[side_name] + interval do
-            for unit_n, unit in pairs(side) do
-                if unit.roster.reserve and unit.roster.reserve > 0 then
-                    Action.AirUnitReinforce(unit.name, "")
-                    if debugKT then print("DcCT C automaticReinforce "..tostring(unit.name)) end
-                end
-            end
-            camp.automaticReinforce[side_name] = camp.automaticReinforce[side_name] + interval
-        end
+		if CampTotalTimeH and camp.automaticReinforce and camp.automaticReinforce[side_name] and interval then
+			while CampTotalTimeH >= camp.automaticReinforce[side_name] + interval do
+				for unit_n, unit in pairs(side) do
+					if unit.roster.reserve and unit.roster.reserve > 0 then
+						Action.AirUnitReinforce(unit.name, "")
+						if debugKT then print("DcCT C automaticReinforce "..tostring(unit.name)) end
+					end
+				end
+				camp.automaticReinforce[side_name] = camp.automaticReinforce[side_name] + interval
+			end
+		end
 		-- _affiche( camp.automaticReinforce,"D automaticReinforce: ")
 		-- os.execute 'pause'
     end
