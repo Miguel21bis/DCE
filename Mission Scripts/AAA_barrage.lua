@@ -2,8 +2,15 @@
 -- ONLY fires when the target aircraft is INSIDE a named trigger zone.
 -- Up to MAX_SIMULTANEOUS_TARGETS aircraft can be engaged at once,
 -- spread across EMITTERS, with sticky targeting to avoid constant retarget jitter.
---
--- Put in: MISSION START -> DO SCRIPT
+-------------------------------------------------------------------------------------------------------
+-- Grateful thanks to Bandit648 for allowing the use and adaptation of his mod. 
+-- His work delivers a true FPS‑like solution with immersive flak effects.
+-------------------------------------------------------------------------------------------------------
+if not versionDCE then versionDCE = {} end
+versionDCE["Mission Scripts/AAA_barrage.lua"] = "1.1.2"
+-------------------------------------------------------------------------------------------------------
+
+env.info("DCE START LOADING AAA_barrage.lua " .. tostring(versionDCE["Mission Scripts/AAA_barrage.lua"]))
 
 env.info("AAA_barrage START ")
 

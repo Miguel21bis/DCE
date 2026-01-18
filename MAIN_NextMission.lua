@@ -3,7 +3,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification: M90_a cleanCode_i
 if not versionDCE then versionDCE = {} end
-versionDCE["MAIN_NextMission.lua"] = "2.38.221"
+versionDCE["MAIN_NextMission.lua"] = "2.39.221"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -468,6 +468,8 @@ addFileTrigger("bombOnRunway.lua")
 addFileTrigger("beacon.ogg", nil, nil, "a_out_sound_c")
 addFileTrigger("beaconsilent.ogg", nil, nil, "a_out_sound_c")
 -- AddFileTrigger("CG_ArtySpotter.lua")												--https://www.digitalcombatsimulator.com/fr/files/3339128/
+
+AddFileTriggerTempo("AAA_barrage.lua", 1.5, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})
 
 AddFileTriggerTempo("CG_ArtySpotter.lua", 2, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})
 
@@ -1301,6 +1303,7 @@ campFile:close()
 
 	miz:zipAddFile("l10n/DEFAULT/bombOnRunway.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/bombOnRunway.lua")
 	miz:zipAddFile("l10n/DEFAULT/CG_ArtySpotter.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CG_ArtySpotter.lua")
+	miz:zipAddFile("l10n/DEFAULT/AAA_barrage.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/AAA_barrage.lua")
 
 
 	if not existing_files["l10n/DEFAULT/beacon.ogg"] then
