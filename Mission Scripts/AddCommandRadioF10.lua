@@ -51,6 +51,8 @@ Perf_K_N = 0
 Perf_L = 0
 Perf_L_N = 0
 
+Perf_M = 0
+Perf_M_N = 0
 
 Perf_E_timer = 0
 
@@ -5246,14 +5248,15 @@ local function showPerformance()
 	env.info("DCE_showPerformance, updateTrackedBombs(): " .. tonumber(Perf_H) .." n: ".. tonumber(Perf_H_N).. " /n " .. tonumber(Perf_H / Perf_H_N))
 	env.info("DCE_showPerformance, destructionScenaryInZone(): " .. tonumber(Perf_J) .." n: ".. tonumber(Perf_J_N).. " /n " .. tonumber(Perf_J / Perf_J_N))
 
-	env.info("DCE_showPerformance_B_16, Custom_Altitude(): " ..
+	env.info("DCE_showPerformance_B_17, Custom_Altitude(): " ..
 	tonumber(Perf_K) .. " n: " .. tonumber(Perf_K_N) .. " /n " .. tonumber(Perf_K / Perf_K_N))
+	
 	env.info("DCE_showPerformance, Custom_SAR(): " ..
 	tonumber(Perf_L) .. " n: " .. tonumber(Perf_L_N) .. " /n " .. tonumber(Perf_L / Perf_L_N))
-	-- env.info("DCE_showPerformance, GCI_Cycle(): " .. tonumber(Perf_G) .." n: ".. tonumber(Perf_G_N).. " /n " .. tonumber(Perf_G / Perf_G_N))
 
-
-
+	env.info("DCE_showPerformance, ARM_Defence_Script(): " ..
+		tonumber(Perf_M) .. " n: " .. tonumber(Perf_M_N) .. " /n " .. tonumber(Perf_M / Perf_M_N))
+		
 	return timer.getTime() + 30
 
 end

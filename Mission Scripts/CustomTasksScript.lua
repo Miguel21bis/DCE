@@ -4568,6 +4568,27 @@ end
 --adapte l'altitude aux chaines montagneuse
 function Custom_Altitude(grpName, wptAlti, wptTag)
 
+	-- =========================================
+	-- Cache terrain LOCAL Custom_Altitude
+	-- Pourquoi : réduire drastiquement les appels land.getHeight
+	-- Résolution volontairement grossière (hélico)
+	-- =========================================
+	local terrainCache = {}
+	local terrainCellSize = 100 -- mètres (50–150 ok pour hélico)
+
+	local function getTerrainCachedLocal(x, y)
+		local cx = math.floor(x / terrainCellSize)
+		local cy = math.floor(y / terrainCellSize)
+		local key = cx .. ":" .. cy
+
+		if terrainCache[key] then
+			return terrainCache[key]
+		end
+
+		local h = land.getHeight({ x = x, y = y })
+		terrainCache[key] = h
+		return h
+	end
 
 	if wptTag then
 		wptTag = tonumber(wptTag)
@@ -4732,7 +4753,27 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 			local copyRoute2 = {}
 			local altiWpt = {}
 
-			for n = 1, #copyRoute - 1  do
+            for n = 1, #copyRoute - 1 do
+
+				-- =========================================
+				-- Template waypoint Custom_Altitude
+				-- Pourquoi : éviter allocations Lua répétées
+				-- =========================================
+				local baseInterWpt = {
+					speed_locked = true,
+					type = "Turning Point",
+					action = "Fly Over Point",
+					alt_type = "RADIO",
+					formation_template = "",
+					ETA_locked = false,
+					task = {
+						id = "ComboTask",
+						params = {
+							tasks = {}
+						}
+					}
+                }
+				
 				if n > nWptNextCustom then    --ne pas ajouter trop de wpt, sinon ça plante DCS (75 wpt max)
 					break
 				end
@@ -4757,7 +4798,7 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 
 				selectedPoint = {x=copyRoute[n].x, y=copyRoute[n].y}
 				-- oldAltiMax = land.getHeight({x =selectedPoint.x, y = selectedPoint.y})
-				oldAltiMax = GetTerrainHeightCached(selectedPoint.x, selectedPoint.y)
+				oldAltiMax = getTerrainCachedLocal(selectedPoint.x, selectedPoint.y)
 
 				for interval = 1, distance, interDistance do
 
@@ -4784,7 +4825,7 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 							local headingAlt0 = heading + addHeading
 							local sondagePt0 = GetOffsetPoint(selectedPoint, headingAlt0 , interval0 )
 							-- sondageAlti = land.getHeight({x =sondagePt0.x, y = sondagePt0.y})
-							sondageAlti = GetTerrainHeightCached(sondagePt0.x, sondagePt0.y)
+							sondageAlti = getTerrainCachedLocal(sondagePt0.x, sondagePt0.y)
 
 							if altiMin0 >= sondageAlti then
 								altiMin0 = sondageAlti
@@ -4797,12 +4838,12 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 
 					local diffAlti0 = altiMax0 - altiMin0
 
-					if diffAlti0 >= 450 and  diffAlti0 < 950 then
+					if diffAlti0 >= 450 and diffAlti0 < 950 then
 						addHeadingMin = -25
 						addHeadingMax = 25
 						addDistance = 1100
 						diffHeading = 1
-					elseif  diffAlti0 >= 950 then
+					elseif diffAlti0 >= 950 then
 						addHeadingMin = -50
 						addHeadingMax = 50
 						addDistance = 400
@@ -4819,7 +4860,7 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 							headingAlt = heading + addHeading
 							sondagePt = GetOffsetPoint(selectedPoint, headingAlt , interval0 )
                             -- sondageAlti = land.getHeight({ x = sondagePt.x, y = sondagePt.y })
-							sondageAlti = GetTerrainHeightCached(sondagePt.x, sondagePt.y)
+							sondageAlti = getTerrainCachedLocal(sondagePt.x, sondagePt.y)
 
 							if not sumAlti[tostring(addHeading)] then
 								sumAlti[tostring(addHeading)] = {}
@@ -4842,7 +4883,7 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 							headingAlt = heading + addHeading
 							sondagePt = GetOffsetPoint(selectedPoint, headingAlt , interval0 )
                             -- sondageAlti = land.getHeight({ x = sondagePt.x, y = sondagePt.y })
-							sondageAlti = GetTerrainHeightCached(sondagePt.x, sondagePt.y)
+							sondageAlti = getTerrainCachedLocal(sondagePt.x, sondagePt.y)
 							
 
 							if not sumAlti[tostring(addHeading)] then
@@ -4869,7 +4910,7 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 					--regarde si au moins un cap est inferieur à l altiMaxLong
 					local foundLowAltiMaxLong = false
 					for addHdg_N, value in pairs(sumAlti) do
-						if  sumAlti[tostring(addHdg_N)].altiMaxLong < 2500 then
+						if sumAlti[tostring(addHdg_N)].altiMaxLong < 2500 then
 							foundLowAltiMaxLong = true
 							break
 						end
@@ -4921,28 +4962,42 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 						if printAltiMaxLong >= 3500 then
 							alti = printAltiMaxLong + addAlti
 						end
-						local interWpt = {
+						-- local interWpt = {
 
-							['speed_locked'] = true,
-							['type'] = 'Turning Point',
-							['action'] = 'Fly Over Point',
-							['alt_type'] = tostring(alt_type),
-							['ETA'] = (interval / copyRoute[n].speed) + copyRoute[n].ETA ,
-							['y'] = selectedPoint.y,
-							['x'] = selectedPoint.x,
-							['name'] = 'from Cus_tom_Alti_tude interWpt: '..tostring(#copyRoute2),
-							['formation_template'] = '',
-							['speed'] = tonumber(copyRoute[n].speed),
-							['ETA_locked'] = false,
-							['task'] = {
-								['id'] = 'ComboTask',
-								['params'] = {
-									['tasks'] = {
-									},
-								},
-							},
-							['alt'] = tonumber(alti),
-						}
+						-- 	['speed_locked'] = true,
+						-- 	['type'] = 'Turning Point',
+						-- 	['action'] = 'Fly Over Point',
+						-- 	['alt_type'] = tostring(alt_type),
+						-- 	['ETA'] = (interval / copyRoute[n].speed) + copyRoute[n].ETA ,
+						-- 	['y'] = selectedPoint.y,
+						-- 	['x'] = selectedPoint.x,
+						-- 	['name'] = 'from Cus_tom_Alti_tude interWpt: '..tostring(#copyRoute2),
+						-- 	['formation_template'] = '',
+						-- 	['speed'] = tonumber(copyRoute[n].speed),
+						-- 	['ETA_locked'] = false,
+						-- 	['task'] = {
+						-- 		['id'] = 'ComboTask',
+						-- 		['params'] = {
+						-- 			['tasks'] = {
+						-- 			},
+						-- 		},
+						-- 	},
+						-- 	['alt'] = tonumber(alti),
+						-- }
+
+						-- Construction légère du waypoint
+						local interWpt = {}
+						for k, v in pairs(baseInterWpt) do
+							interWpt[k] = v
+						end
+
+						interWpt.x = selectedPoint.x
+						interWpt.y = selectedPoint.y
+						interWpt.alt = tonumber(alti)
+						interWpt.alt_type = tostring(alt_type)
+						interWpt.speed = tonumber(copyRoute[n].speed)
+						interWpt.ETA = (interval / copyRoute[n].speed) + copyRoute[n].ETA
+						interWpt.name = "from Cus_tom_Alti_tude interWpt: " .. tostring(#copyRoute2)
 
 						-- pour passer dans les vallées, il faut etre en file indienne trail
 						--TODO revenir à une formation standart si on sort des vallées ou relief
@@ -4981,7 +5036,7 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 				--ajuste l'altitude des wpt d origine:
 				if origineN > 1  then
                     -- local altitude = land.getHeight({ x = copyRoute2[origineN].x, y = copyRoute2[origineN].y })
-					local altitude = GetTerrainHeightCached(copyRoute2[origineN].x, copyRoute2[origineN].y)
+					local altitude = getTerrainCachedLocal(copyRoute2[origineN].x, copyRoute2[origineN].y)
 					if copyRoute2[origineN-1].alt > altitude then
 						altitude = copyRoute2[origineN-1].alt
 					end
