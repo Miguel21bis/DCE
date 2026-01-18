@@ -189,6 +189,10 @@ local timingRadarOff = {5,15 }
 ARM_Shot_EventHandler = {}																					--Event handler to look for launched ARM
 function ARM_Shot_EventHandler:onEvent(event)
 	if event.id == world.event.S_EVENT_SHOT then
+		
+		local t0 = os.clock()
+		Perf_M_N = Perf_M_N + 1
+		
 		local wep = event.weapon																			--Get the weapon of the launch event
 		local tgt = wep:getTarget()																			--Get the target of the weapon
 		local addTime = 0
@@ -358,6 +362,9 @@ function ARM_Shot_EventHandler:onEvent(event)
                 checkMissileProximity()
             end
         end
+
+		local dt = os.clock() - t0
+		Perf_M = Perf_M + dt
 
 	end
 end
