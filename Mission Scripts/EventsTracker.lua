@@ -58,16 +58,16 @@ for eventName, eventId in pairs(world.event) do
 	table.insert(Info_event_B, eventId, eventName)
 end
 
-if campL.debug then
-	local logStr = "Info_event_B = " .. TableSerialization(Info_event_B, 0)
-	local logFile = io.open(PathDCE.."Debug\\Info_event_B.lua", "w")
-	if logFile then
-		logFile:write(logStr)
-		logFile:close()
-	else
-		env.info("DCE_EventT Info_event_B: Failed to open log file for writing.")
-	end
-end
+-- if campL.debug then
+-- 	local logStr = "Info_event_B = " .. TableSerialization(Info_event_B, 0)
+-- 	local logFile = io.open(PathDCE.."Debug\\Info_event_B.lua", "w")
+-- 	if logFile then
+-- 		logFile:write(logStr)
+-- 		logFile:close()
+-- 	else
+-- 		env.info("DCE_EventT Info_event_B: Failed to open log file for writing.")
+-- 	end
+-- end
 
 env.info("DCET_testingConstante: Unit.Category.AIRPLANE "..tostring(Unit.Category.AIRPLANE))
 env.info("DCET_testingConstante: Unit.Category.HELICOPTER "..tostring(Unit.Category.HELICOPTER))
@@ -1285,8 +1285,8 @@ function eventHandlerDCE:onEvent(event)
 											for countryN, state in pairs(coalition.country) do
 												if state.helicopter then
 													for groupN, _group in pairs(state.helicopter.group) do
-														if _group.task == "Transport" and _group.name:find(cvName) and _group.name:find("Pedro") then
-															
+														-- if _group.task == "Transport" and _group.name:find(cvName) and _group.name:find("Pedro") then
+														if _group.name:find(cvName) and _group.name:find("Pedro") then	
 															TypePedroByCV[cvName] = {
 																type = _group.units[1].type,
 																payload = _group.units[1].payload,
