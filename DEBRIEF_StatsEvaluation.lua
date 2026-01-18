@@ -1649,12 +1649,6 @@ local trigFile = io.open("Debug/statsClientDetails.lua", "w") or error("Failed t
 trigFile:write(_Str)
 trigFile:close()
 
-if Debug.debug then
-	camp_str = "clientstats = " .. TableSerialization(clientstats, 0)						--make a string
-	campFile = io.open("Debug/DEBRIEF_clientstats.lua", "w") or error("Failed to open debug file")
-	campFile:write(camp_str)															--save new data
-	campFile:close()
-end
 
 t_c = t_c + (os.clock() - c_c)
 
