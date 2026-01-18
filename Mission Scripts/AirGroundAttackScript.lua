@@ -6,7 +6,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/AirGroundAttackScript.lua"] = "1.2.3"
+versionDCE["Mission Scripts/AirGroundAttackScript.lua"] = "1.2.4"
 ------------------------------------------------------------------------------------------------------- 
 
 -- cleanCode_b				(b springCleaning)
@@ -111,6 +111,11 @@ function AirGroundAttackTask(flightName, target, weaponType, expendQty, dive, of
 	end
 	local AttackSpeed = route[AttackWpN].speed													--get speed at attack waypoint
 	local EgressSpeed = route[EgressWpN].speed													--get speed at egress waypoint
+	
+    if EgressWpN > #route then
+        EgressWpN = #route
+		env.info("AirGroundAttackTask ".. flightName .. " EgressWpN exceeded route length, set to last WP")
+    end
 	
 	--turn radius
 	local G = 3																					--make all turns at 3g
@@ -241,6 +246,12 @@ function AirGroundAttackTask(flightName, target, weaponType, expendQty, dive, of
 	end
 	
 	
+	env.info("DEBUG #route=" .. tostring(#route))
+	env.info("DEBUG route[EgressWpN]=" .. tostring(route and route[EgressWpN]))
+	env.info("DEBUG route[EgressWpN].x=" .. tostring(route and route[EgressWpN] and route[EgressWpN].x))
+	env.info("DEBUG targetList[1]=" .. tostring(targetList[1]))
+	env.info("DEBUG targetList[1].x=" .. tostring(targetList[1] and targetList[1].x))
+
 	----- egress direction -----
 	local EgressAngle																			--angle between attack axis and egress direction (positive to the right, negative to the left)
 	local EgressVec2 = {																		--vector from target to egress waypoint
