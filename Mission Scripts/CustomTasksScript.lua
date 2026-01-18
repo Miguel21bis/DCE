@@ -4,7 +4,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  M68_b cleanCode_d
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/CustomTasksScript.lua"] = "2.10.46"
+versionDCE["Mission Scripts/CustomTasksScript.lua"] = "2.11.47"
 ------------------------------------------------------------------------------------------------------- 
 
 env.info("### DCE START CustomIntercept.lua " .. versionDCE["Mission Scripts/CustomTasksScript.lua"] .. " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
@@ -30,7 +30,7 @@ local baseFullName =
 ----- attack group -----
 --allows each wingman of a flight to attack its own target in a vahicle/ship group simultaneously, then proceed to Egress point to join up (flight would not climb during egress if wingmen would joing leader imediately after attack)
 function CustomGroupAttack(arg_FlightName, arg_TargetName, arg_Expend, arg_WeaponType, arg_AttackType, arg_AttackAlt, arg_Id_task)
-	if varFpsLeak then return end
+	
 	env.info("DCE_CustomGroupAttack start| "..tostring(arg_FlightName))
 
 	-- Weapon.Category
@@ -270,7 +270,7 @@ end
 ----- attack multiple static objects -----
 --allows each wingman of a flight to attack its own individual target simultaneously, then proceed to Egress point to join up (flight would not climb during egress if wingmen would joing leader imediately after attack)
 function CustomStaticAttack(flightName, targetList, expend, weaponType, attackType, attackAlt, id_task)
-	if varFpsLeak then return end
+	
 	env.info("DCE_CustomStaticAttack | start| "..tostring(flightName))
 
 	local function execute(arg)
@@ -501,7 +501,7 @@ end
 ----- attack multiple all class objects -----
 --allows each wingman of a flight to attack its own individual target simultaneously, then proceed to Egress point to join up (flight would not climb during egress if wingmen would joing leader imediately after attack)
 function CustomMixClassAttack(flightName, targetList, expend, weaponType, attackType, attackAlt, id_task)
-	if varFpsLeak then return end
+	
 	env.info("DCE_CustomMixClassAttack | start| "..tostring(flightName))
 
 	--{cntrl, comboTask, n}
@@ -753,7 +753,7 @@ end
 ----- attack multiple map objects -----
 --allows each wingman of a flight to attack its own individual target simultaneously, then proceed to Egress point to join up (flight would not climb during egress if wingmen would joing leader imediately after attack)
 function CustomMapObjectAttack(FlightName, TargetList, expend, weaponType, attackType, attackAlt, id_task)
-	if varFpsLeak then return end
+	
 	env.info("DCE_CustomMapObjectAttack:  | start| "..tostring(FlightName))
 
 	local idTypeStrike  = "Bombing"
@@ -939,7 +939,7 @@ end
 ----- attack aircraft on ground -----
 --allows each wingman of a flight to attack its own target aircraft on ground simultaneously, then proceed to Egress point to join up (flight would not climb during egress if wingmen would joing leader imediately after attack)
 function CustomAirbaseAttack(FlightName, TargetPos, expend, weaponType, attackType, attackAlt)
-	if varFpsLeak then return end
+	
 	if attackCounter[TargetPos.x .. TargetPos.y] then													--counter with number of flights that have already attacked this target
 		attackCounter[TargetPos.x .. TargetPos.y] = attackCounter[TargetPos.x .. TargetPos.y] + 1		--increase counter by one
 	else																								--no flight has attacked this target yet
@@ -1119,7 +1119,7 @@ end
 ----- rejoin flight -----
 --resets tasks of individual wingmen to rejoin the flight
 function CustomRejoin(FlightName)
-	if varFpsLeak then return end
+	
 
 	-- local test = true
 	-- if test then return end
@@ -1162,7 +1162,7 @@ end
 
 ----- target illumination with flares -----
 function CustomFlareAttack(FlightName, tgt_x, tgt_y, grp_name, expend, weaponType, attackType, attackAlt)
-	if varFpsLeak then return end
+	
 	if attackType ~= "Dive" then
 		attackType = nil
 	end
@@ -1288,7 +1288,7 @@ end
 
 ----- target laser/fumigene illumination -----
 function CustomLaserDesignation(FlightName, target, class, laserCode)
-	if varFpsLeak then return end
+	
 	local laser														--variable to hold the laser spot
 
 	if laserCode and laserCode ~= "nil" then
@@ -1413,7 +1413,7 @@ end
 
 ----- CustomDesignationAFAC -----
 function CustomDesignationAFAC_OLD(afacFlightName, refX, refY, laserCode)
-	if varFpsLeak then return end
+	
 
 	-- local function distanceVisibilite(altitude)
 	-- 	local k = 60 / math.sqrt(7620)  -- Coefficient basé sur la première donnée
@@ -1989,17 +1989,17 @@ local function afacInAABB(ux, uy, ax, ay, range)
 end
 
 function CustomDesignationAFAC(afac_Name, refX, refY, laserCode)
-	if varFpsLeak then return end
+	
 
 	local t0 = os.clock()
 
-    env.info("DCE_AFAC() AA_30 : START " .. tostring(afac_Name))
+    -- env.info("DCE_AFAC() AA_30 : START " .. tostring(afac_Name))
 
 	local now = timer.getTime()
 
 	-- Si l'AFAC est déjà en train de gérer un target, on bloque
 	if AFAC_isRunning[afac_Name] then
-		env.info("DCE_AFAC() RETURN AFAC est déjà en train de gérer un target : "..tostring(afac_Name))
+		-- env.info("DCE_AFAC() RETURN AFAC est déjà en train de gérer un target : "..tostring(afac_Name))
 		local dt = os.clock() - t0
 		Perf_D = Perf_D + dt
 		Perf_D_N = Perf_D_N + 1
@@ -2008,7 +2008,7 @@ function CustomDesignationAFAC(afac_Name, refX, refY, laserCode)
 
 	-- Cooldown temporel
 	if AFAC_lastRun[afac_Name] and (now - AFAC_lastRun[afac_Name]) < AFAC_COOLDOWN then
-		env.info("DCE_AFAC() RETURN Cooldown temporel : "..tostring(afac_Name).." LastInjecAFAC: "..tostring(AFAC_lastRun[afac_Name]))
+		-- env.info("DCE_AFAC() RETURN Cooldown temporel : "..tostring(afac_Name).." LastInjecAFAC: "..tostring(AFAC_lastRun[afac_Name]))
 		local dt = os.clock() - t0
 		Perf_D = Perf_D + dt
 		Perf_D_N = Perf_D_N + 1
@@ -2023,13 +2023,6 @@ function CustomDesignationAFAC(afac_Name, refX, refY, laserCode)
 	-- Met à jour le cache AFAC si nécessaire
 	-- Pourquoi : éviter de rescanner la carte à chaque appel AFAC
 	AFAC_UpdateGroundCache()
-
-
-	if next(AFAC_groundGrid) ~= nil then
-		env.info("DCE_AFAC() DCE_INFO AFAC_groundGrid is NOT empty ")
-    else
-		env.info("DCE_AFAC() DCE_INFO AFAC_groundGrid is EMPTY ")
-	end
 	
 
 	local laser														--variable to hold the laser spot
@@ -2049,7 +2042,7 @@ function CustomDesignationAFAC(afac_Name, refX, refY, laserCode)
 
 	else
 		AFAC_available[afac_Name] = nil
-		env.info("DCE_AFAC() DCE_INFO AAc : else " .. tostring(afac_Name) .. " unitAFAC:isExist() "..tostring(unitAFAC and unitAFAC:isExist()))
+		-- env.info("DCE_AFAC() DCE_INFO AAc : else " .. tostring(afac_Name) .. " unitAFAC:isExist() "..tostring(unitAFAC and unitAFAC:isExist()))
 		local dt = os.clock() - t0
 		Perf_D = Perf_D + dt
 		Perf_D_N = Perf_D_N + 1
@@ -2142,17 +2135,7 @@ function CustomDesignationAFAC(afac_Name, refX, refY, laserCode)
 		end
 	end
 
-
-	
-	-- table.sort(unitGroundSelected_A, function(a,b) return a.distance < b.distance  end)
-
-    -- for i = 1, 60 do
-    --     table.insert(unitGroundSelected_B, unitGroundSelected_A[i])
-    -- end
-
-	-- unitGroundSelected_A = nil
-
-	env.info("DCE_AFAC() DCE_INFO #unitGroundSelected_B " .. tostring(#unitGroundSelected_B))
+	-- env.info("DCE_AFAC() DCE_INFO #unitGroundSelected_B " .. tostring(#unitGroundSelected_B))
 
 	--**** choisi THE target ^^ ****
 	local target = next(unitGroundSelected_B) and unitGroundSelected_B[next(unitGroundSelected_B)] or nil
@@ -2223,8 +2206,8 @@ function CustomDesignationAFAC(afac_Name, refX, refY, laserCode)
 	local modFPlan = Deepcopy(AFAC_RouteCache[afac_Name])
 
     if not modFPlan then
-		_affiche(modFPlan, "modFPlan: ")
-		env.info("DCE_AFAC() : DCE_INFO not modFPlan RETURN "..tostring(afac_Name))
+		-- _affiche(modFPlan, "modFPlan: ")
+		-- env.info("DCE_AFAC() : DCE_INFO not modFPlan RETURN "..tostring(afac_Name))
 		local dt = os.clock() - t0
 		Perf_D = Perf_D + dt
 		Perf_D_N = Perf_D_N + 1
@@ -2540,11 +2523,6 @@ function CustomDesignationAFAC(afac_Name, refX, refY, laserCode)
 		newRoute[j] = new_way[j]
 	end
 
-	-- -- Ajouter les éléments de new_way en premier
-	-- for j = 1, 3 do
-	-- 	newRoute[j] = new_way[j]
-	-- end
-
 	-- ajoute les anciens wpt aux nouveau
 	local startIndex = #new_way +1
 	for _, v in ipairs(modFPlan) do
@@ -2616,7 +2594,7 @@ function CustomDesignationAFAC(afac_Name, refX, refY, laserCode)
 	-- Libère l'AFAC pour la prochaine désignation
 	AFAC_isRunning[afac_Name] = false
 
-	env.info("DCE_AFAC Z nouvelle mission injectee")
+	-- env.info("DCE_AFAC Z nouvelle mission injectee")
 
 	local dt = os.clock() - t0
 	Perf_D = Perf_D + dt
@@ -2625,270 +2603,13 @@ function CustomDesignationAFAC(afac_Name, refX, refY, laserCode)
 end
 
 
-
-
-function CustomSearchThenEngageTEST(flightName, radius, targetType, searchTime)
-	if varFpsLeak then return end
-
-	env.info("DCE_CustomSearchThenEngage A START func() "..tostring(flightName))
-
-	if not radius or radius <= 40000 then
-		radius = 40000
-	end
-	if not searchTime then
-		searchTime = timer.getTime() + 1800
-	end
-
-	if not falseCycleCount[flightName] then falseCycleCount[flightName] = 0 end
-
-	local function ApplyEngageTargetsInZoneTask()
-		local elementInAir = false
-		local flight = Group.getByName(flightName)
-		if flight then
-			local units = flight:getUnits()
-			for _, unit in ipairs(units) do
-				if unit and unit:isExist() and unit:isActive() and unit:inAir() then
-					elementInAir = true
-					break
-				end
-			end
-
-			if elementInAir then
-				local element = units[1]
-				if element and element:getPlayerName() == nil then
-					local desc = element:getDesc()
-					local cat = desc and desc.category or nil
-					local cntrl = flight:getController()
-					local posVec3 = element:getPoint()
-
-					local task_entry = {
-						id = 'ControlledTask',
-						params = {
-							task = {
-								enabled = true,
-								auto = false,
-								id = "EngageTargetsInZone",
-								number = 1,
-								params = {
-									targetTypes = { targetType },
-									x = posVec3.x,
-									y = posVec3.z,
-									value = targetType .. ";",
-									priority = 0,
-									zoneRadius = radius,
-								}
-							},
-							stopCondition = {
-								duration = 50,
-							}
-						}
-					}
-
-					if cat == Unit.Category.HELICOPTER then
-						task_entry.params.task.params.zoneRadius = 15000
-					end
-
-					cntrl:pushTask(task_entry)
-					env.info(" Task pushed to group: "..flightName)
-
-					return true
-				end
-			end
-		end
-		return false
-	end
-
-	local function checkLoop()
-		local success = ApplyEngageTargetsInZoneTask()
-		if success then
-			falseCycleCount[flightName] = 0
-			env.info("DCE_CustomSearchThenEngage  TASK applied to "..flightName)
-		else
-			falseCycleCount[flightName] = falseCycleCount[flightName] + 1
-			env.info("DCE_CustomSearchThenEngage  NOT ready ("..falseCycleCount[flightName]..") for "..flightName)
-
-			if falseCycleCount[flightName] < 20 then
-				timer.scheduleFunction(checkLoop, nil, timer.getTime() + 30) -- retry dans 30s
-			else
-				env.info("DCE_CustomSearchThenEngage  ABANDONNE après trop d'échecs: "..flightName)
-				falseCycleCount[flightName] = nil
-			end
-		end
-	end
-	
-	--  Lancement du suivi initial différé (ex : 30s pour laisser le temps au taxi/départ)
-	timer.scheduleFunction(checkLoop, nil, timer.getTime() + 30)
-end
-
-
------ search then engage task -----
---allows to engage targets within a set distance from own group. CAUTION: Once this function is running, it group can no longer receive waypoint actions (DCS treats engage task set via script as never completed)!
-function CustomSearchThenEngageOLD_A(groupName, radius, targetType, searchTime)
--- "CustomSearchThenEngage(\'Pack 7 - 923rd-1 FR - Fighter Sweep 1\', 20000, \'Air\',2864.5791359112)"
-	if varFpsLeak then return end
-
-	env.info( "DCE_CustomSearchThenEngage A start func() "..tostring(groupName).."| radius |"..tostring(radius).."| targetType |"..tostring(targetType).."| searchTime |"..tostring(searchTime))
-
-	if not radius or radius == nil or radius <= 30000 then
-		radius = 30000
-	end
-	-- if not searchTime or searchTime == nil then
-	-- 	searchTime = timer.getTime() + 1800
-	-- end
-
-    local function applyEngageTargetsInZoneTask() --engage targets in zone task needs to be applied continously to update zone position to group position
-        local elementInAir = false
-        local elementExist = false
-        local flight = Group.getByName(groupName) --get group
-
-        if flight then                       --group still exists
-            local element = flight:getUnit(1) --get first unit in group
-
-            if SatusGroupAircraft[groupName] and (SatusGroupAircraft[groupName]["takeoff"] and not SatusGroupAircraft[groupName]["landing"]) then
-                elementInAir = true
-            end
-
-            if element and element.inAir and element:inAir() then
-                elementInAir = true
-            end
-
-            if SatusGroupAircraft[groupName] and SatusGroupAircraft[groupName]["landing"] then
-                elementInAir = false
-                env.info("DCE_CustomSearchThenEngage B1_99 RETURN landing "..tostring(groupName))
-                return
-            end
-
-            if element and element:isExist() and element:isActive() then --and element:inAir()
-                elementExist = true
-            else
-                local wingman = flight:getUnits() --get list of units from attacking flights
-                for n = 2, #wingman do
-                    element = flight:getUnit(n)
-
-                    if element and element:isExist() and element:isActive() then --and element:inAir()
-                        elementExist = true
-                        break
-                    end
-                end
-            end
-
-            if not elementExist then
-                env.info("DCE_CustomSearchThenEngage B99 RETURN not elementExist")
-                return
-            end
-
-            local rtb = false
-            local gpGid = ""
-            local callSign = ""
-            local cat
-            if element and element:getPlayerName() == nil and not rtb then
-                gpGid = Group.getID(flight)
-                callSign = Unit.getCallsign(element)
-                -- cat = Group.getCategory(flight)	--ne fonctionne plus (ne pas prendre getCategory pour les unit)
-
-                --detecte si l'helico se pose proche d'une FARP BASE
-                local desc = element:getDesc()
-                cat = desc.category
-
-                if BingoPlaneTab[gpGid] and BingoPlaneTab[gpGid][callSign] then
-                    return
-                end
-            end
-
-            --TODO detecter le passage de tous les wpt, puis la proximité de la base, pour enfin forcer l'atterrissage
-
-            if elementInAir and cat and element and element:getPlayerName() == nil then --and not RTB
-                local cntrl = flight:getController()                            --get controller of group
-                local posVec3 = element:getPoint()                              --get position
-                local task_entry = {}
-
-                if cat == Unit.Category.AIRPLANE then --0 Airplane
-                    task_entry = {        --define engage task		
-                        id = 'ControlledTask',
-                        params = {
-                            task = {
-                                enabled = true,
-                                auto = false,
-                                id = "EngageTargetsInZone",
-                                number = 1,
-                                params = {
-                                    targetTypes = { targetType },
-                                    x = posVec3.x,
-                                    y = posVec3.z,
-                                    value = targetType .. ";",
-                                    priority = 0,
-                                    zoneRadius = radius,
-                                }
-                            },
-                            stopCondition = {
-                                duration = 50,
-                            }
-                        }
-                    }
-
-
-                    cntrl:setOption(AI.Option.Air.id.PROHIBIT_AG, true)
-                elseif cat == Unit.Category.HELICOPTER then -- 1 helo
-                    task_entry = {
-                        id = 'ControlledTask',
-                        params = {
-                            task = {
-                                enabled = true,
-                                auto = false,
-                                id = "EngageTargetsInZone",
-                                number = 1,
-                                params = {
-                                    targetTypes = { "Helicopters" },
-                                    x = posVec3.x,
-                                    y = posVec3.z,
-                                    value = targetType .. ";",
-                                    priority = 0,
-                                    zoneRadius = 15000,
-                                }
-                            },
-                            stopCondition = {
-                                duration = 50,
-                            }
-                        }
-                    }
-                end
-
-                cntrl:pushTask(task_entry) --ERROR 2785: Task id missed
-
-
-                -- if camp.debug then
-                -- 	local current_time = timer.getTime() + 5
-                -- 	local logStr = "task_entry = " .. TableSerialization(task_entry, 0)
-                -- 	local flightNameClean = flightName:gsub('[%p%c%s]', '_')
-                -- 	local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_"..current_time.."_".. "_CustomSearchThenEngage.lua", "w")
-                -- 	if logFile then
-                -- 		logFile:write(logStr)
-                -- 		logFile:close()
-                -- 	else
-                -- 		env.info("DCE_CustomSearchThenEngage : Failed to open log file for writing.")
-                -- 	end
-
-                -- 	env.info( "DCE_CustomSearchThenEngage M : "..tostring(flightName).."| targetType |"..tostring(targetType).."| Radius |"..tostring(radius).." |ACTUALtime| "..timer.getTime())
-                -- end
-
-                -- env.info( "DCE_CustomSearchThenEngage O timer 60")
-                return timer.getTime() + 60
-            end
-        end
-    end
-
-	timer.scheduleFunction(applyEngageTargetsInZoneTask, nil, timer.getTime() + 1)			--schedule function
-
-end --FIN CustomSearchThenEngage
-
 function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
 	
     local t0 = os.clock()
 	local t0_timer = timer.getTime()
-	-- env.info("DCE_CustomSearchThenEngage A t0 : " .. tostring(t0) .. " t0_timer: " .. tostring(t0_timer))
 		
 	-- simple, friendly version with a small cache to avoid calling getDesc()/getPlayerName() every loop
-	if varFpsLeak then return end
+	
 	local MIN_SEARCH_RADIUS = 30000
 	local HELICOPTER_ZONE_RADIUS = 15000
 	local ENGAGE_DURATION = 25	--50
@@ -2900,7 +2621,7 @@ function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
 
 	if CustomSearchThenEngageActive == nil then CustomSearchThenEngageActive = {} end
 	if CustomSearchThenEngageActive[groupName] then
-		env.info("DCE_CustomSearchThenEngage: already active for " .. tostring(groupName))
+		-- env.info("DCE_CustomSearchThenEngage: already active for " .. tostring(groupName))
 		return
 	end
 	CustomSearchThenEngageActive[groupName] = true
@@ -2921,38 +2642,41 @@ function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
 	local AIR_CHECK_INTERVAL = 10
 	local POSITION_UPDATE_INTERVAL = 20
 
+	-- Rafraîchit le cache d'une unité (infos statiques + joueur)
+	-- Objectif : éviter pcall() et appels DCS coûteux répétés
 	local function refreshUnitCache(u)
-		-- safe checks
-		if not u or type(u.isExist) ~= 'function' then return nil end
-		local okExist, exist = pcall(function() return u:isExist() end)
-		if not okExist or not exist then return nil end
+
+		-- garde-fous DCS suffisants (pcall inutile ici)
+		if not u or not u.isExist or not u:isExist() then return nil end
 
 		local id = u:getID()
 		if not id then return nil end
 
 		local now = timer.getTime()
 		local c = unitCache[id]
+
 		if not c then
-			-- initialize cache entry with separate static/dynamic parts
-			c = { static = nil, dynamic = nil, lastDynamic = 0 }
+			c = { static = false, dynamic = false }
+			unitCache[id] = c
 		end
 
-		-- static info (desc) is read only once — it rarely changes
-		if not c.static then
-			local okd, desc = pcall(function() return u:getDesc() end)
-			if okd then c.static = desc else c.static = nil end
+		-- ===== STATIC (getDesc) : une seule fois par unité =====
+		if c.static == false then
+			local desc = u:getDesc()
+			c.static = desc or nil
 		end
 
-		-- playerName is considered effectively static for our use-case: read it once and cache
-		if not c.dynamic then
-			local okp, pname = pcall(function() return u:getPlayerName() end)
-			if okp then c.dynamic = { playerName = pname } else c.dynamic = { playerName = nil } end
-			c.lastDynamic = now
+		-- ===== DYNAMIC (playerName) : une seule fois =====
+		if c.dynamic == false then
+			local pname = u:getPlayerName()
+			c.dynamic = pname or nil
 		end
 
-		unitCache[id] = c
-		-- return a flat structure compatible with existing code
-		return { playerName = c.dynamic and c.dynamic.playerName, desc = c.static, lastUpdate = now }
+		return {
+			playerName = c.dynamic,
+			desc = c.static,
+			lastUpdate = now
+		}
 	end
 
 
@@ -2980,27 +2704,6 @@ function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
 	end
 
 	-- retourne l'unité active sans rescanner si possible
-	-- local function getActiveUnit(flight)
-	-- 	if activeUnitId then
-	-- 		local u = Unit.getByID(activeUnitId)
-	-- 		if u and u:isExist() and u:isActive() then
-	-- 			return u
-	-- 		end
-	-- 		activeUnitId = nil
-	-- 	end
-
-	-- 	local units = flight:getUnits()
-	-- 	for i = 1, #units do
-	-- 		local u = units[i]
-	-- 		if u and u:isExist() and u:isActive() then
-	-- 			activeUnitId = u:getID()
-	-- 			return u
-	-- 		end
-	-- 	end
-
-	-- 	return nil
-	-- end
-	-- retourne l'unité active sans rescanner si possible
 	local function getActiveUnit(flight)
 		if activeUnit then
 			if activeUnit:isExist() and activeUnit:isActive() then
@@ -3025,50 +2728,23 @@ function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
     local function loop(_, t)
 
 		t0 = os.clock()
-		t0_timer = timer.getTime()
-        env.info("DCE_CustomSearchThenEngage A t0 : " .. tostring(t0) .. " t0_timer: " .. tostring(t0_timer))
-	
-		env.info("DCE_CustomSearchThenEngage t: " .. tostring(t))
+        t0_timer = timer.getTime()
+		
         local next_time = nil
         local flight = Group.getByName(groupName)
 
         if flight and type(flight.isExist) == 'function' and flight:isExist() then
-            -- -- find first active unit (call isExist/isActive only once per unit)
-            -- local units = flight:getUnits()
-            -- local element = nil
-            -- for _, uu in ipairs(units) do
-            --     if uu then
-            --         local okExist, exist = pcall(function() return uu:isExist() end)
-            --         if okExist and exist then
-            --             local okActive, active = pcall(function() return uu:isActive() end)
-            --             if okActive and active then
-            --                 element = uu
-            --                 break
-            --             end
-            --         end
-            --     end
-            -- end
 
 			local element = getActiveUnit(flight)
 
             if element then
                 -- if group is landing stop the loop
                 if SatusGroupAircraft and SatusGroupAircraft[groupName] and SatusGroupAircraft[groupName]["landing"] then
-                    env.info("DCE_CustomSearchThenEngage RETURN landing " .. tostring(groupName))
+                    -- env.info("DCE_CustomSearchThenEngage RETURN landing " .. tostring(groupName))
                     CustomSearchThenEngageActive[groupName] = nil
                     next_time = nil
-
-					local dt = os.clock() - t0
-					local dt_timer = timer.getTime() - t0_timer
-					Perf_E = Perf_E + dt
-					Perf_E_timer = Perf_E_timer + dt_timer
-					Perf_E_N = Perf_E_N + 1
                 else
-                    -- check airborne once
-                    -- local okAir, inAir = pcall(function() return element:inAir() end)
-                    -- if okAir and inAir then
-
-					local now = timer.getTime()
+                   local now = timer.getTime()
 
 					if now - lastAirCheck > AIR_CHECK_INTERVAL then
 						lastInAir = element:inAir()
@@ -3076,7 +2752,6 @@ function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
 					end
 
 					if lastInAir then
-
 
                         -- refresh cached infos (playerName, desc) but cache limits calls
                         local cached = refreshUnitCache(element)
@@ -3090,10 +2765,14 @@ function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
 								end
 
                                 local pos = lastPos
-								
-                                local cat = cached and cached.desc and cached.desc.category or nil
-                                local isHelo = (cat == Unit.Category.HELICOPTER)
+								local elementId = element:getID()
+								local catEntry = elementId and Cache_UnitCategoryByGetID[elementId]
+								local isHelo = (catEntry and catEntry.category == Unit.Category.HELICOPTER)
                                 local task = buildTask(isHelo, pos.x, pos.z, radius)
+
+								if isHelo then
+									env.info("DCE_CustomSearchThenEngage: isHelo: " .. tostring(groupName))
+								end
 
                                 cntrl:setOption(AI.Option.Air.id.PROHIBIT_AG, true)
                                 local okPush, errPush = pcall(function() cntrl:pushTask(task) end)
@@ -3122,108 +2801,21 @@ function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
             -- flight gone -> cleanup
             CustomSearchThenEngageActive[groupName] = nil
             next_time = nil
-
-			env.info("DCE_CustomSearchThenEngage RETURN flight gone -> cleanup " .. tostring(groupName))
-
-			local dt = os.clock() - t0
-			local dt_timer = timer.getTime() - t0_timer
-			Perf_E = Perf_E + dt
-			Perf_E_timer = Perf_E_timer + dt_timer
-			Perf_E_N = Perf_E_N + 1
         end
 
-        env.info("DCE_CustomSearchThenEngage: next_time: " .. tostring(next_time))
-
-
-		local dt = os.clock() - t0
-		local dt_timer = timer.getTime() - t0_timer
-		Perf_E = Perf_E + dt
-		Perf_E_timer = Perf_E_timer + dt_timer
-		Perf_E_N = Perf_E_N + 1
+		-- if campL.debug then
+       	--  env.info("DCE_CustomSearchThenEngage: next_time: " .. tostring(next_time))
+		-- end
 
         return next_time
     end
 	
-    local dt = os.clock() - t0
-	local dt_timer = timer.getTime() - t0_timer
-	
-	env.info("DCE_CustomSearchThenEngage Z delta_T : " .. tostring(dt) .. " delta_timer: " .. tostring(dt_timer))
-	
-
-	Perf_E = Perf_E + dt
-	Perf_E_timer = Perf_E_timer + dt_timer
-	Perf_E_N = Perf_E_N + 1
+	-- env.info("DCE_CustomSearchThenEngage Z delta_T : " .. tostring(dt) .. " delta_timer: " .. tostring(dt_timer))
 
 	timer.scheduleFunction(loop, nil, timer.getTime() + 1)
 end
 
 
-
-function CustomSearchThenEngageFutur1(flightName, radius, targetType, searchTime)
-    radius = radius or 30000
-    -- searchTime = searchTime or timer.getTime() + 1800
-
-    local function loopEngage(_, t)
-        local flight = Group.getByName(flightName)
-        if not flight or not flight:isExist() then return end
-
-
-        local element = flight:getUnit(1)
-        if not element or not element:isExist() or not element:inAir() then
-            return t + 60
-        end
-
-        local rtb = false
-        local gpGid = ""
-        local callSign = ""
-        if element and element:getPlayerName() == nil and not rtb then
-            gpGid = Group.getID(flight)
-            callSign = Unit.getCallsign(element)
-            if BingoPlaneTab[gpGid] and BingoPlaneTab[gpGid][callSign] then
-                return
-            end
-        end
-
-        local posVec3 = element:getPoint()
-        local task = {
-            id = 'ControlledTask',
-            params = {
-                task = {
-                    id = "EngageTargetsInZone",
-                    params = {
-                        targetTypes = { targetType },
-                        x = posVec3.x,
-                        y = posVec3.z,
-                        zoneRadius = radius,
-                    }
-                },
-                stopCondition = { duration = 59 }
-            }
-        }
-
-        local cntrl = flight:getController()
-        cntrl:setOption(AI.Option.Air.id.PROHIBIT_AG, true)
-        cntrl:setTask(task) -- remplace pushTask()
-
-        if campL.debug then
-            local current_time = timer.getTime() + 5
-            local logStr = "task_entry = " .. TableSerialization(task, 0)
-            local flightNameClean = flightName:gsub('[%p%c%s]', '_')
-            local logFile = io.open(
-            PathDCE .. "Debug\\" .. flightNameClean .. "_" .. current_time .. "_" .. "_CustomSearchThenEngage.lua", "w")
-            if logFile then
-                logFile:write(logStr)
-                logFile:close()
-            else
-                env.info("DCE_CustomSearchThenEngage : Failed to open log file for writing.")
-            end
-        end
-
-        return t + 60
-    end
-
-    timer.scheduleFunction(loopEngage, nil, timer.getTime() + 1)
-end
 
 local MAX_INTERCEPT_RANGE = 100000 -- mètres
 local REEVAL_INTERVAL = 15
@@ -3237,12 +2829,17 @@ local groupTargetMemory = {}
 -- end
 
 function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, argPosX, argPosY)
-	if varFpsLeak then return end
+	
 
+    local t0 = os.clock()
+	
 	local interGroupObj = Group.getByName(argInterName)
 	if not interGroupObj or not interGroupObj:isExist() then
 		interceptorsActive[argInterName] = nil
 		groupTargetMemory[argInterName] = nil
+		local dt = os.clock() - t0
+		Perf_H = Perf_H + dt
+		Perf_H_N = Perf_H_N + 1
 		return
 	end
 
@@ -3250,35 +2847,39 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 	if not interUnitObj or not interUnitObj:isExist() then
 		interceptorsActive[argInterName] = nil
 		groupTargetMemory[argInterName] = nil
+		local dt = os.clock() - t0
+		Perf_H = Perf_H + dt
+		Perf_H_N = Perf_H_N + 1
 		return
 	end
 
 	-- Si l'avion est posé, inutile de continuer
-	if not interUnitObj:inAir() then
-		env.info("DCE_Custom_Intercept A : " .. argInterName .. " has landed — stopping logic.")
+    if not interUnitObj:inAir() then
+        if campL.debug then
+            env.info("DCE_Custom_Intercept A : " .. argInterName .. " has landed — stopping logic.")
+        end
+		
 		interceptorsActive[argInterName] = nil
 		groupTargetMemory[argInterName] = nil
+		local dt = os.clock() - t0
+		Perf_H = Perf_H + dt
+		Perf_H_N = Perf_H_N + 1
 		return
 	end
 
 	local friendCoalition = (argFriendSide == "red") and coalition.side.RED or coalition.side.BLUE
 	local enemyCoalition = (friendCoalition == coalition.side.RED) and coalition.side.BLUE or coalition.side.RED
 	local enemyGroups = coalition.getGroups(enemyCoalition)
-	if not enemyGroups then return end
+    if not enemyGroups then
+		local dt = os.clock() - t0
+		Perf_H = Perf_H + dt
+		Perf_H_N = Perf_H_N + 1
+        return
+	
+	end
 
 	local interPos = interUnitObj:getPoint()
 	local bestTarget, bestScore = nil, math.huge
-
-	-- local lastTarget = groupTargetMemory[argInterName]
-	-- if lastTarget and lastTarget:isExist() then
-	-- 	local tgtPos = lastTarget:getUnit(1):getPoint()		--3009: attempt to index a nil value
-	-- 	local dx, dz = tgtPos.x - interPos.x, tgtPos.z - interPos.z
-	-- 	local dist = math.sqrt(dx * dx + dz * dz)
-	-- 	if dist < 10000 then
-	-- 		bestTarget = lastTarget
-	-- 		env.info(argInterName .. " still engaging " .. lastTarget:getName() .. " (" .. math.floor(dist) .. "m)")
-	-- 	end
-	-- end
 
 	local lastTarget = groupTargetMemory[argInterName]
 	if lastTarget and lastTarget:isExist() then
@@ -3289,7 +2890,9 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 			local dist = math.sqrt(dx * dx + dz * dz)
 			if dist < 10000 then
 				bestTarget = lastTarget
-				env.info("DCE_Custom_Intercept: " ..argInterName .. " still engaging " .. lastTarget:getName() .. " (" .. math.floor(dist) .. "m)")
+				if campL.debug then
+					env.info("DCE_Custom_Intercept: " ..argInterName .. " still engaging " .. lastTarget:getName() .. " (" .. math.floor(dist) .. "m)")
+				end
 			end
 		else
 			-- cible morte ou invalide → purge mémoire
@@ -3324,7 +2927,9 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 		local newTargetName = bestTarget:getName()
 
 		if not sameTarget then
-			env.info("DCE_Custom_Intercept C : " .. argInterName .. " switching to new target " .. newTargetName)
+			if campL.debug then
+				env.info("DCE_Custom_Intercept C : " .. argInterName .. " switching to new target " .. newTargetName)
+			end
 			ctr:resetTask()
 
 			timer.scheduleFunction(function()
@@ -3343,8 +2948,9 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 					local ctr2 = interGroupObj:getController()
 					if ctr2 then
 						ctr2:pushTask(interceptTask)
-						env.info("DCE_Custom_Intercept B : " .. argInterName .. " engaging " .. tostring(newTargetName))
+						
 						if campL.debug then
+							env.info("DCE_Custom_Intercept B : " .. argInterName .. " engaging " .. tostring(newTargetName))
 							local current_time = timer.getTime()
 							local logStr = "params = " .. TableSerialization(interceptTask, 0)
 							local flightNameClean = argInterName:gsub('[%p%c%s]', '_')
@@ -3361,7 +2967,9 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 			end, {}, timer.getTime() + 1.5)
 			groupTargetMemory[argInterName] = bestTarget
 		else
-			env.info("DCE_Custom_Intercept E : " .. argInterName .. " already targeting " .. newTargetName)
+			if campL.debug then
+				env.info("DCE_Custom_Intercept E : " .. argInterName .. " already targeting " .. newTargetName)
+			end
 		end
 	else
 		-- Aucune cible disponible : mise en orbite
@@ -3412,12 +3020,20 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 		}
 
 		ctr:setTask(capMission)
-		env.info("DCE_Custom_Intercept F : " .. argInterName .. " now in CAP mission.")
+
+		if campL.debug then
+			env.info("DCE_Custom_Intercept F : " .. argInterName .. " now in CAP mission.")
+		end
 
 	end
 
 	-- Réévaluation périodique
-	if not interceptorsActive[argInterName] then
+    if not interceptorsActive[argInterName] then
+
+		local dt = os.clock() - t0
+		Perf_H = Perf_H + dt
+        Perf_H_N = Perf_H_N + 1
+		
 		interceptorsActive[argInterName] = true
 		timer.scheduleFunction(function()
 			interceptorsActive[argInterName] = nil
@@ -3429,211 +3045,12 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 end
 
 
-function CustomInterceptVersionA(argTargetName, argInterName, argFriendSide, argSpeed, argPosX, argPosY)
-	if varFpsLeak then return end
-
-	env.info( "DCE_Custom_Intercept A start func() "..tostring(argTargetName).."| argFriendSide |"..tostring(argFriendSide).."| arg_PosX |"..tostring(argPosX).."| arg_PosY |"..tostring(argPosY))
-
-	local interObj = Group.getByName(argInterName)
-	local selected_distance = 999999999
-    local enyCoalName = coalition.side.RED
-
-	env.info( "DCE_Custom_Intercept B")
-
-	if argFriendSide == "red" then
-		enyCoalName = coalition.side.BLUE
-	end
-
-    local enyGroups = coalition.getGroups(enyCoalName)
-    local selEnyGroup = nil
-    local selEnyPtVec3 = nil
-	local selEnyName = nil
-
-    env.info("DCE_Custom_Intercept C1")
-
-    for i, enyGroupObj in pairs(enyGroups) do
-
-		local enyUnitObj = enyGroupObj:getUnit(1)
-
-		env.info("DCE_Custom_Intercept C2 i "..i .." groupObj "..tostring(enyGroupObj).." unitObj "..tostring(enyUnitObj))
-
-		local enyUnitInAir_A = false
-		local enyUnitInAir_B = false
-		if enyUnitObj and enyUnitObj:isExist() then
-			local ok, result = pcall(function() return enyUnitObj:inAir() end)
-			if ok and result then
-				-- L’unité est en vol
-				enyUnitInAir_A = true
-				env.info("DCE_Custom_Intercept C3 enyUnitInAir_A")
-			end
-		end
-
-		if enyUnitObj and enyUnitObj.inAir and enyUnitObj:inAir() then
-			enyUnitInAir_B = true
-			env.info("DCE_Custom_Intercept C4 enyUnitInAir_B")
-		end
-
-
-		--and unitObj.isActive and unitObj:isActive() and unitObj.isExist and unitObj:isExist()
-		if enyUnitInAir_A or enyUnitInAir_B then
-
-			local uPointVec3 = enyUnitObj:getPoint()
-			local enyName = enyUnitObj:getName()
-
-			env.info("DCE_Custom_Intercept D1 inAir uPointVec3.x: "..tostring(uPointVec3.x).." uPointVec3.z "..tostring(uPointVec3.z).." : "..tostring(enyName))
-			env.info("DCE_Custom_Intercept D2 math.abs(uPointVec3.x - argPosX): "..tostring(math.abs(uPointVec3.x - argPosX)))
-			env.info("DCE_Custom_Intercept D3 math.abs(uPointVec3.z - argPosY): "..tostring(math.abs(uPointVec3.z - argPosY)))
-
-            if math.abs(uPointVec3.x - argPosX) < 150000 and math.abs(uPointVec3.z - argPosY) < 150000 then
-                -- Calcul précis seulement pour les avions proches
-
-                local tempDistance = math.sqrt(math.pow(uPointVec3.x - argPosX, 2) + math.pow(uPointVec3.z - argPosY, 2))
-
-				env.info("DCE_Custom_Intercept D4 tempDistance before: " .. tostring(tempDistance).." <? selected_distance "..tostring(selected_distance))
-
-                if tempDistance < selected_distance then
-					env.info("DCE_Custom_Intercept D5  " )
-                    selected_distance = tempDistance
-                    selEnyGroup = enyGroupObj
-                    selEnyPtVec3 = uPointVec3
-					selEnyName = enyName
-                end
-            end
-
-		end
-
-    end
-
-	env.info("DCE_Custom_Intercept E selected_group: "..tostring(selEnyGroup).." selected_PtVec3: "..tostring(selEnyPtVec3))
-
-    if selEnyGroup and selEnyPtVec3 then
-
-		local targetGpId = selEnyGroup:getID()
-        local weaponType = 1069547520 --automatique
-
-		env.info( "DCE_Custom_Intercept M²")
-
-		-- local mission = { --define mission for interceptor group
-		-- id = 'Mission',
-		-- 	params = {
-		-- 		route = {
-		-- 			["points"] = {
-		-- 				[1] =
-		-- 				{
-		-- 					["alt"] = selEnyPtVec3.y,
-		-- 					["type"] = "Turning Point",
-		-- 					["action"] = "Turning Point",
-		-- 					["alt_type"] = "BARO",
-		-- 					["formation_template"] = "",
-		-- 					["y"] = selEnyPtVec3.z,
-		-- 					["x"] = selEnyPtVec3.x,
-        --                     ["speed"] = argSpeed,
-		-- 					["speed_locked"] = true,
-		-- 					["ETA_locked"] = false,
-		-- 					["task"] = {
-		-- 						["id"] = "ComboTask",
-		-- 						["params"] = {
-		-- 							["tasks"] = {
-
-		-- 								[1] = {
-		-- 									["enabled"] = true,
-		-- 									["number"] = 1,
-		-- 									["auto"] = false,
-		-- 									-- ["id"] = "EngageGroup", -- en route
-		-- 									["id"] = "AttackGroup",	-- main task
-
-		-- 									["params"] = {
-		-- 										-- ["visible"] = false,
-		-- 										-- ["groupId"] = targetGpId,
-		-- 										-- ["priority"] = 1,
-		-- 										-- ["weaponType"] = weaponType,
-
-		-- 										["altitudeEnabled"] = true,
-		-- 										["groupId"] = 1,
-		-- 										["attackQtyLimit"] = false,
-		-- 										["attackQty"] = 1,
-		-- 										["expend"] = "Auto",
-		-- 										["altitude"] = selEnyPtVec3.y,
-		-- 										["directionEnabled"] = false,
-		-- 										["groupAttack"] = false,
-		-- 										["weaponType"] = 9659482112,
-		-- 										["direction"] = 0,
-		-- 									},
-		-- 								},
-
-		-- 							},
-		-- 						},
-		-- 					},
-		-- 				},
-		-- 			},
-		-- 		}
-		-- 	}
-		-- }
-
-		env.info( "DCE_Custom_Intercept N²")
-
-		--INFO: ne pas faire la suite car semble ecraser la route
-		-- local ctr = interObj:getController()
-        -- -- Controller.setTask(ctr, mission)	-- ecrase la mission precedente
-
-		-- -- Stop toute action en cours
-		-- ctr:setCommand({ id = 'StopRoute', params = { value = true } })
-
-		-- -- Supprime la tâche active si bloquante
-		-- ctr:popTask()
-
-		-- NE PAS faire StopRoute ni popTask
-		-- ctr:setCommand({ id = 'StopRoute', params = { value = true } })
-		-- ctr:popTask()
-
-
-		local ctr = interObj:getController()
-
-		-- Si tu veux être propre :
-		ctr:resetTask()
-
-		-- Prépare et injecte l’interception
-
-		local interceptTask = {
-			id = 'EngageGroup',
-			["params"] = {
-				["visible"] = false,
-				["groupId"] = targetGpId,
-				["priority"] = 1,
-				["weaponType"] = weaponType,
-			},
-		}
-		ctr:pushTask(interceptTask)
-
-		env.info("DCE_Custom_Intercept O² " .. tostring(argInterName) .." INITargInterName : "..argInterName.. " intercepting selEnyName " .. tostring(selEnyName))
-
-
-		if campL.debug then
-			--export custom mission log
-			local current_time = timer.getTime()
-			local logStr = "params = " .. TableSerialization(interceptTask, 0)
-			local flightNameClean = argInterName:gsub('[%p%c%s]', '_')
-			local logFile = io.open(
-			PathDCE .. "Debug\\" .. flightNameClean .. "_" .. "Custom_Intercept" .. "_" .. tostring(current_time) .. ".lua", "w")
-			if logFile then
-				logFile:write(logStr)
-				logFile:close()
-			else
-				env.info("DCE_INTERCEPTOR: Failed to open log file for writing.")
-			end
-		end
-
-
-	end
-
-end
-
 
 ----------------------------------------------------------------------------------------------------
 ----- ForceToLand -----
 ----------------------------------------------------------------------------------------------------
 function Custom_ForceToLand(argGroupName, argSpeed, argAltLanding, argLandingX, argLandingY, argLinkUnit)
-    if varFpsLeak then return end
+    
 
 	env.info( "DCE_Custom_ForceToLand A0 argFlightName |"..tostring(argGroupName).."| argLandingX |"..tostring(argLandingX).."| argLandingY |"..tostring(argLandingY).."| argLinkUnit |"..tostring(argLinkUnit))
 
@@ -3765,7 +3182,7 @@ end
 
 --lets flight orbit at the current position the task was applied (regardless of waypoints)
 function OrbitPosition(arg_FlightName, arg_Alt, arg_Speed, arg_UntilTime)
-	if varFpsLeak then return end
+	
 	local flight = Group.getByName(arg_FlightName)							--get group
 	local current_time0 = timer.getTime()
 	env.info(
@@ -3839,7 +3256,7 @@ end
 
 --actualizes the xy position of the CV/base to assign a correct position to WPT landing
 function Custom_RTB_2_Base(grpname, BaseName, speed, alt)
-	if varFpsLeak_B then return end
+	
 	env.info( "Custom_RTB_2_Base A, grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(speed).."|"..tostring(alt))
 
 	local function execute()
@@ -3986,26 +3403,26 @@ end	--Custom_RTB_2_Base
 ----------------------------------------------------------------------------------------------------
 
 --ajoute des wpt lorsqu'il trouve un EjectedPilot en plus
-function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
-	if varFpsLeak_B then return end
+function Custom_AddWptSAR(grpname, baseName, mgrsChute, speed, alt)
+	
 
 	local current_time = timer.getTime()
-	env.info( "current_time: "..tostring(current_time).." Custom_AddWptSAR A, grpname |"..tostring(grpname).."|"..tostring(BaseName).."|"..tostring(speed).."|"..tostring(alt))
+	env.info( "current_time: "..tostring(current_time).." Custom_AddWptSAR A, grpname |"..tostring(grpname).."|"..tostring(baseName).."|"..tostring(speed).."|"..tostring(alt))
 
 	local function execute()
 		local flight = Group.getByName(grpname)
 		local coalitionId = tostring(flight:getCoalition())						--obligé pour le string, car 0 est impossible en numerotation de table	
 		local leader = flight:getUnit(1)
-		local base = Unit.getByName(BaseName)								--trouve le CV si c'en est un
+		local base = Unit.getByName(baseName)								--trouve le CV si c'en est un
 		local  gpGid = Group.getID(flight)
 
 		if not base or base == nil then
-			base = Airbase.getByName(BaseName)								--trouve la base si c'est un Airbase
+			base = Airbase.getByName(baseName)								--trouve la base si c'est un Airbase
 
 			if not base or base == nil then									--trouve la base si le nom est incomplet
-				if  baseFullName[BaseName] then
-					BaseName = baseFullName[BaseName]
-					base = Airbase.getByName(BaseName)
+				if  baseFullName[baseName] then
+					baseName = baseFullName[baseName]
+					base = Airbase.getByName(baseName)
 				end
 			end
 		end
@@ -4160,7 +3577,7 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 												["id"] = "Script",
 												["params"] =
 												{
-													["command"] = "Custom_SAR('" .. grpname .. "', '" .. BaseName .. "', '" .. pt_landing.x .. "', '" .. pt_landing.y .. "', '" .. mgrsChute .. "', '" .. speed .. "', '" .. alt .. "')",
+													["command"] = "Custom_SAR('" .. grpname .. "', '" .. baseName .. "', '" .. pt_landing.x .. "', '" .. pt_landing.y .. "', '" .. mgrsChute .. "', '" .. speed .. "', '" .. alt .. "')",
 												}, -- end of ["params"]
 											}, -- end of ["action"]
 										}, -- end of ["params"]
@@ -4264,22 +3681,25 @@ function Custom_AddWptSAR(grpname, BaseName, mgrsChute, speed, alt)
 						end
 					end
 
-					if not foundAeronef then
-						for _coalition, coalition in pairs(env.mission.coalition) do
-							for Ncountry, _country in pairs(coalition.country) do
-								if _country.helicopter then
-									for Ngroup, _group in pairs(_country.helicopter.group) do
-										if _group.groupId == gpGid then
-											copyRoute = Deepcopy(_group.route.points)
-											foundAeronef = true
-											break
-										end
-									end
-								end
-								if foundAeronef then break end
-							end
-							if foundAeronef then break end
-						end
+                    if not foundAeronef then
+						
+						copyRoute = MissGroupByName[grpname].route
+
+						-- for _coalition, coalition in pairs(env.mission.coalition) do
+						-- 	for Ncountry, _country in pairs(coalition.country) do
+						-- 		if _country.helicopter then
+						-- 			for Ngroup, _group in pairs(_country.helicopter.group) do
+						-- 				if _group.groupId == gpGid then
+						-- 					copyRoute = Deepcopy(_group.route.points)
+						-- 					foundAeronef = true
+						-- 					break
+						-- 				end
+						-- 			end
+						-- 		end
+						-- 		if foundAeronef then break end
+						-- 	end
+						-- 	if foundAeronef then break end
+						-- end
 					end
 
 					local attackPoint = 0
@@ -4472,9 +3892,13 @@ end	--Custom_AddWptSAR
 
 --Makes a personalized approach depending on the presence of a landing point or a soldier or the sea 
 function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, alt)
-	if varFpsLeak_B then return end
-	local current_time = timer.getTime()
+	
+    local current_time = timer.getTime()
+	
 	local function execute()
+		local t0 = os.clock()
+        Perf_L_N = Perf_L_N + 1
+	
 		current_time = timer.getTime()
 		local flight = Group.getByName(grpname)								--get Group
 		local leader = flight:getUnit(1)									--get first unit in group
@@ -4582,6 +4006,8 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 		-- si pas de présence de soldat, simulant le piloteEjecté: on sort (cas des ejected en mer, par exemple)
 		if pt_dest.x == 0 then
 			-- env.info( "Custom_SAR Ib RETURN ************* ")
+			local dt = os.clock() - t0
+			Perf_L = Perf_L + dt
 			return
 		end
 
@@ -5103,6 +4529,9 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 		local ctr = flight:getController()
 		Controller.setTask(ctr, mission)
 
+		local dt = os.clock() - t0
+		Perf_L = Perf_L + dt
+
 	end     --fin execute
 
 	timer.scheduleFunction(execute, nil, timer.getTime() + 1)
@@ -5114,39 +4543,65 @@ end	--Custom_SAR
 ----------------------------------------------------------------------------------------------------
 ------------------------------------- Custom_Altitude task -----------------------------------------
 ----------------------------------------------------------------------------------------------------
+-- cache global du relief pour eviter les appels repetes a land.getHeight
+TerrainHeightCache = {}
+
+-- retourne l'altitude terrain avec mise en cache (precision par pas de 50m)
+-- pourquoi: evite des milliers d'appels couteux a land.getHeight
+function GetTerrainHeightCached(arg_x, arg_y)
+
+    local qx = math.floor(arg_x / 50)
+    local qy = math.floor(arg_y / 50)
+    local key = qx .. "_" .. qy
+
+    local cached = TerrainHeightCache[key]
+    if cached then
+        return cached
+    end
+
+    local h = land.getHeight({ x = arg_x, y = arg_y })
+    TerrainHeightCache[key] = h
+    return h
+end
+
 
 --adapte l'altitude aux chaines montagneuse
-function Custom_Altitude(arg_grpName, arg_wptAlti, arg_wptTag)
-	if varFpsLeak_B then return end
+function Custom_Altitude(grpName, wptAlti, wptTag)
 
-	if arg_wptTag then
-		arg_wptTag = tonumber(arg_wptTag)
+
+	if wptTag then
+		wptTag = tonumber(wptTag)
 	else
-		arg_wptTag = 0
+		wptTag = 0
 	end
-	if not arg_wptAlti or arg_wptAlti == nil then
-		arg_wptAlti = 1
-		env.info( "Custom_Altitude, A wptAlti  |"..tostring(arg_grpName).." |wptAlti: "..tostring(arg_wptAlti))
+	if not wptAlti or wptAlti == nil then
+		wptAlti = 1
+		env.info( "Custom_Altitude, A wptAlti  11|"..tostring(grpName).." |wptAlti: "..tostring(wptAlti))
 	end
 	local current_time = timer.getTime()
-	env.info( "current_time: "..tostring(current_time).." Custom_Altitude, B wptAlti  |"..tostring(arg_grpName).." |wptAlti: "..tostring(arg_wptAlti))
+	env.info( "current_time: "..tostring(current_time).." Custom_Altitude, B wptAlti  |"..tostring(grpName).." |wptAlti: "..tostring(wptAlti))
 
-	local function execute()
+    local function execute()
+		local t0 = os.clock()
+        Perf_K_N = Perf_K_N + 1
+		
 		current_time = timer.getTime()
-		local flight = Group.getByName(arg_grpName)
+		local flight = Group.getByName(grpName)
 
 		-- local selectedMember = flight:getUnits(1)
 		local selectedMember
 		local wingman = flight:getUnits()
 
 		for memberN, _unit in ipairs(wingman) do
-			if _unit and _unit:isExist() and _unit:isActive()  and _unit:inAir() then
+			if _unit and _unit:isExist() and _unit:isActive() and _unit:inAir() then
 				selectedMember = _unit
 				break
 			end
 		end
 
 		if not selectedMember then
+			local dt = os.clock() - t0
+			Perf_K = Perf_K + dt
 			return
 		end
 
@@ -5162,6 +4617,8 @@ function Custom_Altitude(arg_grpName, arg_wptAlti, arg_wptTag)
 
 		-- local str_selectedMember = selectedMember:getTypeName()
 		if type(str_selectedMember) ~= "string" then
+			local dt = os.clock() - t0
+			Perf_K = Perf_K + dt
 			return
 		end
 
@@ -5183,28 +4640,30 @@ function Custom_Altitude(arg_grpName, arg_wptAlti, arg_wptTag)
 				end
 			end
 
-			if not foundAeronef then
-				for _coalition, coalition in pairs(env.mission.coalition) do
-					for Ncountry, _country in pairs(coalition.country) do
-						if _country.helicopter then
-							for Ngroup, _group in pairs(_country.helicopter.group) do
-								if _group.groupId == gpGid then
-									copyRoute = Deepcopy(_group.route.points)
-									foundAeronef = true
-									break
-								end
-							end
-						end
-						if foundAeronef then break end
-					end
-					if foundAeronef then break end
-				end
+            if not foundAeronef then
+                copyRoute = MissGroupByName[grpName].route
+				
+				-- for _coalition, coalition in pairs(env.mission.coalition) do
+				-- 	for Ncountry, _country in pairs(coalition.country) do
+				-- 		if _country.helicopter then
+				-- 			for Ngroup, _group in pairs(_country.helicopter.group) do
+				-- 				if _group.groupId == gpGid then
+				-- 					copyRoute = Deepcopy(_group.route.points)
+				-- 					foundAeronef = true
+				-- 					break
+				-- 				end
+				-- 			end
+				-- 		end
+				-- 		if foundAeronef then break end
+				-- 	end
+				-- 	if foundAeronef then break end
+				-- end
 			end
 
 			--enleve le script Custom_Altitude pour eviter de le reinjecter et d avoir une boucle
-			if arg_wptTag and arg_wptTag ~= nil then
+			if wptTag and wptTag ~= nil then
 				for Npoint, point in ipairs(copyRoute)  do
-					if tonumber(Npoint) == tonumber( arg_wptTag) then
+					if tonumber(Npoint) == tonumber( wptTag) then
 						copyRoute[tonumber(Npoint)].name = "deleteBeforHere"
 						if point.task and point.task.params and point.task.params.tasks then
 							for Ntask , taskFinal in ipairs(point.task.params.tasks)  do
@@ -5241,9 +4700,9 @@ function Custom_Altitude(arg_grpName, arg_wptAlti, arg_wptTag)
 				end
 			end
 
-			if arg_wptTag and arg_wptTag > 0 then
+			if wptTag and wptTag > 0 then
 				for i = #copyRoute, 1, -1 do
-					if i <= arg_wptTag then
+					if i <= wptTag then
 						table.remove(copyRoute, i)
 					end
 				end
@@ -5297,7 +4756,8 @@ function Custom_Altitude(arg_grpName, arg_wptAlti, arg_wptTag)
 				local oldHeadingAlt = 0
 
 				selectedPoint = {x=copyRoute[n].x, y=copyRoute[n].y}
-				oldAltiMax = land.getHeight({x =selectedPoint.x, y = selectedPoint.y})
+				-- oldAltiMax = land.getHeight({x =selectedPoint.x, y = selectedPoint.y})
+				oldAltiMax = GetTerrainHeightCached(selectedPoint.x, selectedPoint.y)
 
 				for interval = 1, distance, interDistance do
 
@@ -5323,7 +4783,8 @@ function Custom_Altitude(arg_grpName, arg_wptAlti, arg_wptTag)
 						for interval0 = 0, 1500 , 150 do
 							local headingAlt0 = heading + addHeading
 							local sondagePt0 = GetOffsetPoint(selectedPoint, headingAlt0 , interval0 )
-							sondageAlti = land.getHeight({x =sondagePt0.x, y = sondagePt0.y})
+							-- sondageAlti = land.getHeight({x =sondagePt0.x, y = sondagePt0.y})
+							sondageAlti = GetTerrainHeightCached(sondagePt0.x, sondagePt0.y)
 
 							if altiMin0 >= sondageAlti then
 								altiMin0 = sondageAlti
@@ -5357,7 +4818,8 @@ function Custom_Altitude(arg_grpName, arg_wptAlti, arg_wptTag)
 						for interval0 = addDistance, interDistance , addDistance do
 							headingAlt = heading + addHeading
 							sondagePt = GetOffsetPoint(selectedPoint, headingAlt , interval0 )
-							sondageAlti = land.getHeight({x =sondagePt.x, y = sondagePt.y})
+                            -- sondageAlti = land.getHeight({ x = sondagePt.x, y = sondagePt.y })
+							sondageAlti = GetTerrainHeightCached(sondagePt.x, sondagePt.y)
 
 							if not sumAlti[tostring(addHeading)] then
 								sumAlti[tostring(addHeading)] = {}
@@ -5379,7 +4841,9 @@ function Custom_Altitude(arg_grpName, arg_wptAlti, arg_wptTag)
 						for interval0 = 600 , 10000 , 500 do
 							headingAlt = heading + addHeading
 							sondagePt = GetOffsetPoint(selectedPoint, headingAlt , interval0 )
-							sondageAlti = land.getHeight({x =sondagePt.x, y = sondagePt.y})
+                            -- sondageAlti = land.getHeight({ x = sondagePt.x, y = sondagePt.y })
+							sondageAlti = GetTerrainHeightCached(sondagePt.x, sondagePt.y)
+							
 
 							if not sumAlti[tostring(addHeading)] then
 								sumAlti[tostring(addHeading)] = {}
@@ -5516,7 +4980,8 @@ function Custom_Altitude(arg_grpName, arg_wptAlti, arg_wptTag)
 
 				--ajuste l'altitude des wpt d origine:
 				if origineN > 1  then
-					local altitude =  land.getHeight({x =copyRoute2[origineN].x, y = copyRoute2[origineN].y})
+                    -- local altitude = land.getHeight({ x = copyRoute2[origineN].x, y = copyRoute2[origineN].y })
+					local altitude = GetTerrainHeightCached(copyRoute2[origineN].x, copyRoute2[origineN].y)
 					if copyRoute2[origineN-1].alt > altitude then
 						altitude = copyRoute2[origineN-1].alt
 					end
@@ -5538,7 +5003,7 @@ function Custom_Altitude(arg_grpName, arg_wptAlti, arg_wptTag)
 
 			if campL.debug then
 				local logStr = "Mission = " .. TableSerialization(Mission, 0)
-				local grpnameClean = arg_grpName:gsub('[%p%c%s]', '_')
+				local grpnameClean = grpName:gsub('[%p%c%s]', '_')
 				local logFile = io.open(PathDCE.."Debug\\"..grpnameClean.."_".. "Custom_Altitude_"..current_time..".lua", "w")
 				if logFile then
 					logFile:write(logStr)
@@ -5550,10 +5015,14 @@ function Custom_Altitude(arg_grpName, arg_wptAlti, arg_wptTag)
 
 			Controller.setTask(ctr, Mission)										--activate task with mission for retreat AWACS
 
+			local dt = os.clock() - t0
+			Perf_K = Perf_K + dt
 			env.info( "Custom_Altitude, FIN_O |"..tostring(ctr))
 		end
 
-		env.info( "Custom_Altitude, FIN_P")
+		local dt = os.clock() - t0
+		Perf_K = Perf_K + dt
+		env.info("Custom_Altitude, FIN_P Perf_K: " .. tostring(Perf_K) .. " Perf_K_N: " .. tostring(Perf_K_N))
 	end
 
 	local nextSecond = math.ceil(timer.getTime()) + 1
@@ -5574,6 +5043,7 @@ function Custom_Altitude(arg_grpName, arg_wptAlti, arg_wptTag)
 		AgendaSeconde[nextSecond] = true
 	end
 
+	
 	timer.scheduleFunction(execute, nil, nextSecond)
 
 	-- timer.scheduleFunction(execute, nil, timer.getTime() + 1)
