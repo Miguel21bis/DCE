@@ -3,7 +3,7 @@
 -------------------------------------------------------------------------------------------------------
 -- last modification:  debug_m
 if not versionDCE then versionDCE = {} end
-versionDCE["DEBRIEF_StatsEvaluation.lua"] = "2.9.70"
+versionDCE["DEBRIEF_StatsEvaluation.lua"] = "2.9.71"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -387,17 +387,24 @@ for e = 1, #events do																					--iterate through all events
 end
 
 for e = 1, #events do																					--iterate through all events
-	if events[e].pilotName then
-		-- print("DebriefSE e: "..tostring(e).." pilotName: "..tostring( events[e].pilotName).." initiator: "..tostring(events[e].initiator))
-	end
+	
+	-- print("A events[e].initiator "..tostring(events[e].initiator))
+	-- _affiche( events[e], "events[e]: ")
+	-- _affiche( clientControl, "clientControl: ")
 
-	if events[e].initiator and string.find(events[e].initiator, "parachut") then
-		events[e].initiator = tostring(events[e].pilotName)
-	end
+	if events[e].initiator then
+		if events[e].pilotName then
+			-- print("DebriefSE e: "..tostring(e).." pilotName: "..tostring( events[e].pilotName).." initiator: "..tostring(events[e].initiator))
+		end
 
-	if events[e].pilotName and type(events[e].pilotName) == "string" and events[e].pilotName ~= "nil" then	--event is by a client
-		addClient(events[e].pilotName)
-		clientControl[events[e].initiator] = events[e].pilotName								--store which unit name (initiaror) is controllen by cliend (PilotName)
+		if events[e].initiator and string.find(events[e].initiator, "parachut") then
+			events[e].initiator = tostring(events[e].pilotName)
+		end
+
+		if events[e].pilotName and type(events[e].pilotName) == "string" and events[e].pilotName ~= "nil" then	--event is by a client
+			addClient(events[e].pilotName)
+			clientControl[events[e].initiator] = events[e].pilotName								--store which unit name (initiaror) is controllen by cliend (PilotName)
+		end
 	end
 end
 
