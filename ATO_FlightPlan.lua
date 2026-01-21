@@ -2963,11 +2963,19 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					local target_element, tgtlist
 					if flight[f].target.elements and #flight[f].target.elements >= 1 and flight[f].target.elements[1].x then
 						target_element = {}																			--table to hold the target element number to be struck
+						
 						for e = 1, #flight[f].target.elements do															--iterate trough all target elements
-							if flight[f].target.elements[e].dead ~= true then												--pick only elements that are not dead
+							if not flight[f].target.elements[e].dead then												--pick only elements that are not dead
 								table.insert(target_element, e)																--add to target element table
 							end
 						end
+						
+						-- for elementN, element in pairs(flight[f].target.elements) do															--iterate trough all target elements
+						-- 	if not element.dead then												--pick only elements that are not dead
+						-- 		table.insert(target_element, elementN)																--add to target element table
+						-- 	end
+						-- end
+
 						for n = 1, (f - 1) * 4 do																			--shift the order of target elements for subsequent flights in package, so that each flights starts attacking different elements (flight 1: element 1-4, flight 2: element 5-8, etc)
 							table.insert(target_element, target_element[1])													--shift element order, copy first element to back
 							table.remove(target_element, 1)																	--delete first element

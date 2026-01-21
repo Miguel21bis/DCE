@@ -580,8 +580,8 @@ end
 
 
 if Debug.debug and Debug.Generator.affiche then
-	_affiche(Multi, "ATO_G_A Multi")
-	_affiche(multiPlaneSet, "ATO_G_B multiPlaneSet B")
+	_affiche(Multi, "ATO_G_A Multi: ")
+	_affiche(multiPlaneSet, "ATO_G_B multiPlaneSet: ")
 end
 
 if Debug.debug then
@@ -802,6 +802,8 @@ for sideName, units in pairs(oob_air) do
 								end
 								if task_bool and task ~= "SEAD" and task ~= "Escort" and task ~= "Escort Jammer" and task ~= "Flare Illumination" and task ~= "Laser Illumination" then		--task is true and is no support task
 
+									print(draftId.." AtoG passe A_03b task: "..tostring(task).." task_bool: "..tostring(task_bool).."  ")
+
 									local isDebugModeA2 = Debug.Generator.affiche and string.find(Debug.Generator.chapter, "A")
 												and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name and Debug.Generator.SpyTask == task)
 
@@ -909,9 +911,10 @@ for sideName, units in pairs(oob_air) do
 
 									for l = 1, #unit_loadouts do																				--iterate through all available loadouts				
 										if isDebugModeA2 then
-											debugLog(draftId.." AtoG passe A_05 "..unit.type.." "..unit_loadouts[l].loadout_name.." Befor Loadouts Day/Night Condition")
+											debugLog(draftId.." AtoG passe A_05 "..unit.type.." "..unit_loadouts[l].loadout_name.." Befor Loadouts Day/Night Condition Daytime? "..tostring(Daytime))
 										end
 
+										local debug = "/n day: "..tostring(unit_loadouts[l].day) .." night?: ".. tostring(unit_loadouts[l].night)
 										if unit_loadouts[l].day == nil then
 											unit_loadouts[l].day = true
 										end
@@ -926,6 +929,7 @@ for sideName, units in pairs(oob_air) do
 											if task == "Intercept" or task == "SAR" then																			--for interceptors, tot_to is not limitted by mission duration
 												tot_to = 999999
 											end
+											debug = debug .. " A: tot_to "..tot_to
 										elseif unit_loadouts[l].day then																		--loadout is day capable
 											if Daytime == "night-day" then
 												tot_from = mission_ini.dawn - camp.time																--from dawn
@@ -933,16 +937,22 @@ for sideName, units in pairs(oob_air) do
 												if task == "Intercept" or task == "SAR" then																		--for interceptors, tot_to is not limitted by mission duration
 													tot_to = mission_ini.dusk - camp.time
 												end
+												debug = debug .. " B1: tot_to "..tot_to
 											elseif Daytime == "day" then
 												tot_from = 0																					--from missiom start
 												tot_to = mission_ini.mission_duration																	--to mission end
 												if task == "Intercept" or task == "SAR" then																		--for interceptors, tot_to is not limitted by mission duration
 													tot_to = mission_ini.dusk - camp.time
 												end
+												debug = debug .. " B2: tot_to "..tot_to
 											elseif Daytime == "day-night" then
 												tot_from = 0																					--from mission start
 												tot_to = mission_ini.dusk - camp.time																	--to dusk
+												debug = debug .. " B3: tot_to "..tot_to
 											end
+
+											debug = debug .. " B FIN: tot_to "..tot_to
+
 										elseif unit_loadouts[l].night then																		--loadout is night capable
 											if Daytime == "day-night" then
 												tot_from = mission_ini.dusk - camp.time																--from dusk
@@ -960,14 +970,20 @@ for sideName, units in pairs(oob_air) do
 												tot_from = 0																					--from mission start
 												tot_to = mission_ini.dawn - camp.time																	--to dawn
 											end
+											debug = debug .. " C FIN: tot_to "..tot_to
 										end
 
 
 										if tot_to < 0 then
 											tot_to = tot_to + 86400
+											debug = debug .. " D: tot_to "..tot_to
 										end
 										if tot_from < 0 then
 											tot_from = tot_from + 86400
+										end
+
+										if isDebugModeA2 then
+											debugLog(draftId.." AtoG passe A_05b tot_to: "..tot_to.." debug: "..tostring(debug))
 										end
 
 										if tot_to ~= 0 then
@@ -1022,18 +1038,21 @@ for sideName, units in pairs(oob_air) do
 																	end
 																end
 
-
+																local debugLocal = " "..unit_loadouts[l].name
 																 --check target/loadout attributes
                                                                 local loadout_eligible = true
                                                                 if target.attributes and target.attributes[1] and target.attributes[1] ~= "" then
                                                                     -- Il faut que TOUS les attributs du target soient présents dans le loadout
                                                                     for _, target_attribute in ipairs(target.attributes) do
+																		debugLocal = debugLocal .. " /n target_attribute: " ..target_attribute
                                                                         local found = false
                                                                         for _, loadout_attribute in ipairs(unit_loadouts[l].attributes or {}) do
                                                                              
 																			if target_attribute == loadout_attribute then
                                                                                 found = true
                                                                                 break
+																			else
+																				debugLocal = debugLocal .. " /n loadout_attribute: " ..loadout_attribute
                                                                             end
                                                                         end
 																		
@@ -1049,7 +1068,7 @@ for sideName, units in pairs(oob_air) do
 																end
 
 																if isDebugModeA2 then
-																	debugLog(draftId.." AtoG passe A_10 Befor Condition loadout_eligible?: "..tostring(loadout_eligible).." |unit.name: "..unit.name.." |target_name: "..target_name.." |target.base: "..tostring(target.base).." |unit.base: "..unit.base)
+																	debugLog(draftId.." AtoG passe A_10 Befor Condition loadout_eligible?: "..tostring(loadout_eligible).." |unit.name: "..unit.name.." |target_name: "..target_name.." |target.base: "..tostring(target.base).." |unit.base: "..unit.base.." debugLocal: "..tostring(debugLocal))
 																end
 
 																if loadout_eligible then
@@ -1163,6 +1182,8 @@ for sideName, units in pairs(oob_air) do
 																					multipack = target.firepower.packmax															--create draft sorties for this target for the requested amount of packages
 																				end
 
+																				overideMP_A = false
+
 																				for r = 1, multipack do																				--repeat draft sortie generation for the requirement amount of packages (may create different routes each time)
 
 																					if isDebugModeA2 then
@@ -1265,12 +1286,11 @@ for sideName, units in pairs(oob_air) do
 																							end
 
 																							local debugMulti = ""
-																							overideMP_A = false
+																							-- overideMP_A = false
 
 
 																							-- modification M11.o multiplayer
 																							if multiPlaneSet then
-
 																								debugMulti = debugMulti.."\n"..("AtoG passe A_AAb "..tostring(task).." "..unit.type)
 
 																								if multiPlaneSet[sideName] and multiPlaneSet[sideName][unit.type] and multiPlaneSet[sideName][unit.type][task] and task_bool then
@@ -1296,6 +1316,7 @@ for sideName, units in pairs(oob_air) do
 																							if isDebugModeA2 then
 																								debugLog(draftId.." "..debugMulti)
 																							end
+																							
 
 																							--augmente le rayon d'action pour les helico client (ils peuvent se ravitailler sur des FARP occasionel)
 																							if overideMP_A and IsHelicopter[unit.type] then
@@ -1354,7 +1375,7 @@ for sideName, units in pairs(oob_air) do
 																							local aircraft_requested = firepowerRequest / unit_loadouts[l].firepower
 
 																							if task == "Transport" then
-																								if multiPlaneSet and multiPlaneSet[sideName] and multiPlaneSet[sideName][unit.type]  and multiPlaneSet[sideName][unit.type][task]
+																								if multiPlaneSet and multiPlaneSet[sideName] and multiPlaneSet[sideName][unit.type] and multiPlaneSet[sideName][unit.type][task]
 																								and task_bool
 																								and aircraft_requested < multiPlaneSet[sideName][unit.type][task].NbPlane
 																								and task == "Transport"
@@ -1362,12 +1383,12 @@ for sideName, units in pairs(oob_air) do
 																									aircraft_requested =  multiPlaneSet[sideName][unit.type][task].NbPlane
 																									if aircraft_requested > 4 then aircraft_requested = 4 end
 																								end
-																							elseif task == "Strike" and aircraft_requested < 2 and aircraft_requested < 2  then
+																							elseif task == "Strike" and aircraft_requested < 2 and aircraft_requested < 2 then
 																								aircraft_requested = 2
 																							end
 
 																							local flights_requested
-																							if  task == "AWACS" or task == "Refueling" or task == "AFAC" then									--multiple flights are required to continously cover a station for the duration of the mission
+																							if task == "AWACS" or task == "Refueling" or task == "AFAC" then									--multiple flights are required to continously cover a station for the duration of the mission
 																								if not unit_loadouts[l].tStation then print("this variable <<tStation>> is missing  in this aircraft's "..task.." loadout "..unit.type) os.execute 'pause' end
 																								flights_requested = math.ceil((tot_to - tot_from) / unit_loadouts[l].tStation) + 1			--how many flights are needed to keep continous coverage of station, plus 1 for on station before mission start
 																								aircraft_requested = aircraft_requested * flights_requested									--total number of requested aircraft is number of aircraft needed to statisfy firepower requirement of station * number of flights needed for continous coverage
@@ -1422,6 +1443,7 @@ for sideName, units in pairs(oob_air) do
 																								end
 
 																								--M11.z
+																								print("AtoG_overideMP_A passe B_2 task: "..tostring(task).." "..unit.type.." sideName:"..tostring(sideName))
 																								if aircraft_assign < multiPlaneSet[sideName][unit.type][task].NbPlane then
 																									aircraft_assign = multiPlaneSet[sideName][unit.type][task].NbPlane
 																									debugMulti = debugMulti.."\n"..("AtoG_overideMP_A passe C "..unit.type.." aircraft_assign: "..tostring(aircraft_assign))
@@ -1635,14 +1657,21 @@ for sideName, units in pairs(oob_air) do
 
 																								-- modification M11.q multiplayer
 
-																								if multiPlaneSet[sideName] and  multiPlaneSet[sideName][unit.type] and  multiPlaneSet[sideName][unit.type][task] and task_bool and  multiPlaneSet[sideName][unit.type][task].NbPlane > 0 then
+																								if multiPlaneSet[sideName] and multiPlaneSet[sideName][unit.type] and multiPlaneSet[sideName][unit.type][task] and task_bool and multiPlaneSet[sideName][unit.type][task].NbPlane > 0 then
 																									draftSortiesEntry.score = draftSortiesEntry.score + 1000
-																									draftSortiesEntry.scoreAdd =  draftSortiesEntry.scoreAdd + 1000
+																									draftSortiesEntry.scoreAdd = draftSortiesEntry.scoreAdd + 1000
 																									if overideMP_A then
 
-																										draftSortiesEntry.score = draftSortiesEntry.score * 1.2 +1000
+																										draftSortiesEntry.score = draftSortiesEntry.score * 1.2 + 1000
 																										draftSortiesEntry.scoreCoef =  draftSortiesEntry.scoreCoef * 1.2
 																										draftSortiesEntry.scoreAdd =  draftSortiesEntry.scoreAdd + 1000
+
+																										--augmente de 10% le score si l'avion peut etre joué
+																										if unit.player then
+																											draftSortiesEntry.score = draftSortiesEntry.score * 1.3
+																											draftSortiesEntry.scoreAdd =  draftSortiesEntry.scoreAdd + 1000
+																											draftSortiesEntry.scoreCoef = draftSortiesEntry.scoreCoef * 1.3
+																										end
 
 																									end
 																								end
@@ -1651,7 +1680,7 @@ for sideName, units in pairs(oob_air) do
 																								if unit.player then
 																									draftSortiesEntry.score = draftSortiesEntry.score * 1.2
 																									-- draftSortiesEntry.scoreAdd =  draftSortiesEntry.scoreAdd + 1000
-																									draftSortiesEntry.scoreCoef =  draftSortiesEntry.scoreCoef * 1.2
+																									draftSortiesEntry.scoreCoef = draftSortiesEntry.scoreCoef * 1.2
 																								end
 
 																								if isDebugModeA2 then
