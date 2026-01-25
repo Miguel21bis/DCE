@@ -45,14 +45,26 @@ Perf_H_N = 0
 
 Perf_J = 0
 Perf_J_N = 0
+Perf_I = 0
+Perf_I_N = 0
 
 Perf_K = 0
 Perf_K_N = 0
+
+Perf_CustAlt = {}
+
 Perf_L = 0
 Perf_L_N = 0
 
 Perf_M = 0
 Perf_M_N = 0
+Perf_O = 0
+Perf_O_N = 0
+Perf_P = 0
+Perf_P_N = 0
+
+Perf_S = 0
+Perf_S_N = 0
 
 Perf_E_timer = 0
 
@@ -130,8 +142,8 @@ SatusGroupAircraft = {}			--table used to store the status of aircraft groups
 Players = {}					--table used to store player units
 BingoPlaneTab = {}
 AvgConsumptionKgPerKm = {}		--table used to store the available distance in km for each unitCat
-TypePedroByCV = {}         		--table used to store the type of Pedro by CV
-PlayerInOutAircraft = {}        --table used to store the type of Pedro by CV
+TypePedroByCV = campL.TypePedroByCV or {}         		--table used to store the type of Pedro by CV
+PlayerInOutAircraft = {}
 
 EWR_Magic_DISTANCE_KM = 150  --distance en km pour detecter les cibles
 
@@ -389,7 +401,7 @@ function GetDistance(a, b)
 end
 
 -- Helper : calcule distance 2D entre deux points {x,y} et {x,y}
-local function distance2D(a, b)
+function GetDistance2D(a, b)
 	local dx = a.x - b.x
 	local dy = a.y - b.y
 	return math.sqrt(dx * dx + dy * dy)
@@ -581,34 +593,45 @@ local function buildMissionIndex()
                         end
 
                         -- routes
-                        if group.route and group.route.points then
-                            local data = {}
-                            data.base = group.route.points[#group.route.points]
+						if group.route and group.route.points then
+							local data = {
+								orbitCAP = {
+									altitude = 0,
+									speed = 0
+								}
+							}
+							data.base = group.route.points[#group.route.points]
+							data.to = 0
+							data.from = 0
 
-                            for i, p in ipairs(group.route.points) do
-                                if p.name == "Station" then
-                                    data.station1 = group.route.points[i]
-                                    data.station2 = group.route.points[i + 1]
-                                end
+							for i, p in ipairs(group.route.points) do
+								if p.name == "Station" then
+									data.to = i
+									data.from = i - 1
+								end
 
-                                if p.task and p.task.params and p.task.params.tasks then
-                                    for _, t in ipairs(p.task.params.tasks) do
-                                        local task = nil
-                                        if t.params then
-                                            if t.params.task then
-                                                task = t.params.task
-                                            elseif t.params.action then
-                                                task = t.params.action
-                                            end
-                                        end
+								if p.task and p.task.params and p.task.params.tasks then
+									for _, t in ipairs(p.task.params.tasks) do
+										local task = nil
+										if t.params then
+											if t.params.task then
+												task = t.params.task
+											elseif t.params.action then
+												task = t.params.action
+											end
+										end
 
-                                        if task and task.id == "Orbit" and task.params then
-                                            data.orbitAlt = task.params.altitude
-                                            data.orbitSpeed = task.params.speed
-                                        end
-                                    end
-                                end
-                            end
+										if task and task.id == "EngageTargetsInZone" then
+											data.sation1 = group.route.points[i]
+											data.sation2 = group.route.points[i + 1]
+										end
+										if task and task.id == "Orbit" and task.params then
+											data.orbitCAP.altitude = task.params.altitude
+											data.orbitCAP.speed = task.params.speed
+										end
+									end
+								end
+							end
 
                             DCE_groupRouteCache[group.groupId] = data
                         end
@@ -665,78 +688,10 @@ local function buildMissionIndex()
 		-- " groundUnits=" .. #EnvMissionGroundUnits ..
 		" in " .. string.format("%.3f", timer.getTime() - t0) .. "s")
 
-	if campL.debug then
-		local logStr = "MissGroupByName = " .. TableSerialization(MissGroupByName, 0)
-		local logFile = io.open(PathDCE .. "Debug\\MissGroupByName.lua", "w")
-		if logFile then
-			logFile:write(logStr)
-			logFile:close()
-		else
-			env.info("DCE_AFAC : Failed to open log MissGroupByName file for writing.")
-		end
-	end
+
 end
 
 
-
---[[ 
-function BuildMissionGroupIndex()
-	for _, coalition in pairs(env.mission.coalition) do
-		for _, country in pairs(coalition.country) do
-			if country.plane and country.plane.group then
-				for _, group in pairs(country.plane.group) do
-					if group.name then
-						MissGroupByName[group.name] = group
-					end
-				end
-			end
-		end
-	end
-end
-
-
-function BuildMissionGroupRoute()
-	DCE_groupRouteCache = {}
-	for coalitionName, coalition in pairs(env.mission.coalition) do
-		for _, country in pairs(coalition.country or {}) do
-			if country.plane then
-				for _, group in pairs(country.plane.group or {}) do
-					local data = {}
-					data.base = group.route.points[#group.route.points]
-					for i, p in ipairs(group.route.points) do
-						if p.name == "Station" then
-							data.station1 = group.route.points[i]
-							data.station2 = group.route.points[i + 1]
-						end
-						if p.task and p.task.params and p.task.params.tasks then
-							for _, t in ipairs(p.task.params.tasks) do
-								local task = nil
-
-								if t.params then
-									if t.params.task then
-										task = t.params.task -- ControlledTask
-									elseif t.params.action then
-										task = t.params.action -- WrappedAction
-									end
-								end
-
-								if task and task.id == "Orbit" and task.params then
-									data.orbitAlt = task.params.altitude
-									data.orbitSpeed = task.params.speed
-								end
-							end
-						end
-					end
-					DCE_groupRouteCache[group.groupId] = data
-				end
-			end
-		end
-	end
-end ]]
-
--- local function initTable()
-
--- end
 
 
 
@@ -987,29 +942,6 @@ function DCE_GetRoute(name)
 	end
 
 	return select
-	
-	-- local t0 = os.clock()
-
-	-- local mission = env.mission
-    -- for coalitionName, coalData in pairs(mission.coalition) do
-    --     for countryId, country in pairs(coalData.country) do
-    --         if country.plane and country.plane.group then
-    --             for _, group in pairs(country.plane.group) do
-    --                 if group.name == groupName then
-    --                     env.info("DCE_GetRoute Waypoints : " .. tostring(#group.route.points))
-	-- 					local dt = os.clock() - t0
-	-- 					Perf_Tot = Perf_Tot + dt
-    --                     return group.route.points
-    --                 end
-    --             end
-    --         end
-    --     end
-    -- end
-
-	-- local dt = os.clock() - t0
-	-- Perf_Tot = Perf_Tot + dt
-	
-	-- return nil
 end
 
 
@@ -1257,7 +1189,10 @@ end
 -- interdit aux CAP et Intercepteur d'entrer dans une zone SAM connu
 local function avoidArea()
 
-    local t0 = os.clock()
+	local t0
+	if campL.debug then
+    	t0 = os.clock()
+	end
 	
 	local debug_avoidArea = false
 
@@ -1392,72 +1327,11 @@ local function avoidArea()
 						
 						
 						local cap_group = DCE_groupRouteCache[gpGid]
-						if not cap_group then
-							env.info("DCE_Bug avoidArea: no cache for "..gpName)
-							break
-						end
-
-					--[[ 	for coalitionName, coalition in pairs(env.mission.coalition) do
-							env.info( "ACRF10_avoidArea J________  _coalition? "..tostring(coalitionName).." coalitionIdNumeric[sideNum]? "..tostring(CoalitionIdToName[sideNum]).." sideNum? "..tostring(sideNum))
-
-							if coalitionName == CoalitionIdToName[sideNum] then
-								for countryN, countryData in pairs(coalition.country) do
-									if countryData.plane then
-										for groupN, groupData in pairs(countryData.plane.group) do
-											if groupData.groupId and groupData.groupId == gpGid then
-
-												cap_group.name = groupData.name
-												foundGroup = true
-
-												--Station
-												for pointN, value in ipairs(groupData.route.points) do
-													if value.name == 'Station' then
-														cap_group.to = pointN
-														cap_group.from = pointN - 1
-														if value.task then
-
-															if value.task.params and value.task.params.tasks then
-
-																for _, valueTasks in ipairs(value.task.params.tasks) do
-
-																	if valueTasks.params.task.id == "EngageTargetsInZone" then
-
-																		--TODO prevoir une table globale pour ne par re itérer la mission entiere.
-																		cap_group.sation1 = groupData.route.points[pointN]
-																		cap_group.sation2 = groupData.route.points[pointN+1]
-
-																		-- CAP_group.orbitCAP.x = valueTasks.params.task.params.x
-																		-- CAP_group.orbitCAP.y = valueTasks.params.task.params.y
-
-
-																	elseif valueTasks.params.task.id == "Orbit" then
-																		cap_group.orbitCAP.altitude = valueTasks.params.task.params.altitude
-																		cap_group.orbitCAP.speed = valueTasks.params.task.params.speed
-																	end
-																end
-															end
-														end
-														break
-													end
-												end
-
-												--BaseXY
-
-												cap_group.base = {
-													x = groupData.route.points[#groupData.route.points].x,
-													y = groupData.route.points[#groupData.route.points].y,
-												}
-
-												breaktab = true
-												break
-											end
-										end
-									end
-									if breaktab then break end
-								end
-							end
-							if breaktab then break end
-						end ]]
+                        if not cap_group then
+                            env.info("DCE_Bug avoidArea: no cache for " .. gpName)
+                            break
+                        end
+						
 
                         if cap_group.to ~= 0 then
 							local switchtask = {
@@ -1783,9 +1657,11 @@ local function avoidArea()
 
 	local groups = coalition.getGroups(coalition.side.BLUE, Group.Category.AIRPLANE)
 
-	local dt = os.clock() - t0
-	Perf_A = Perf_A + dt
-	Perf_A_N = Perf_A_N + 1
+	if campL.debug then
+		local dt = os.clock() - t0
+		Perf_A = Perf_A + dt
+		Perf_A_N = Perf_A_N + 1
+	end
 
 	return timer.getTime() + 5
 end
@@ -1793,7 +1669,10 @@ end
 -- modification M32	E-2C automatic retreat 
 local function airRetreat()
 
-	local t0 = os.clock()
+	local t0
+	if campL.debug then
+		t0 = os.clock()
+	end
 
 	local current_time = timer.getTime()
 
@@ -1805,27 +1684,31 @@ local function airRetreat()
 
 		if string.find(gpName,"AWACS") then
 			local units = gp:getUnits()
-			local _unit = units[1]
+			local unit = units[1]
 
 			-- if _unit and _unit:getTypeName() == "E-2C" and _unit:isActive() and _unit:inAir() then
-			if _unit and _unit:isActive() and _unit:inAir() then
-				local awacsVec3 = _unit:getPoint()
-				local  gpGid = Group.getID(gp)
-				local nameAwacs =  _unit:getName()
+            if unit and unit:isActive() and unit:inAir() then
+                local isAwacsCarrier = nil
+				if unit:getTypeName() == "E-2C" then
+					isAwacsCarrier = true
+				end
+				local awacsVec3 = unit:getPoint()
+				local gpGid = Group.getID(gp)
+				-- local nameAwacs = unit:getName()
 				if not RetreatTimeGp then RetreatTimeGp = {} end
 				if not RetreatTimeGp[gpGid] then RetreatTimeGp[gpGid] = {} end
 				if not RetreatTimeGp[gpGid].rTime then RetreatTimeGp[gpGid].rTime = 0  end
 
-				if _unit and current_time >  RetreatTimeGp[gpGid].rTime then							--if _unit exists
-					local ctr = _unit:getGroup():getController()										--get _unit controller
+				if unit and current_time > RetreatTimeGp[gpGid].rTime then							--if _unit exists
+					local ctr = unit:getGroup():getController()										--get _unit controller
 					local ctrGroup = gp:getController() -- Récupère le contrôleur du GROUPE (sinon, l injectrion de task sur l unit leader fait planter DCS)
 					local targets = ctr:getDetectedTargets()											--get detected targets of this EWR
 					for t = 1, #targets do																--iterate through detected targets
 						if targets[t].object and current_time > RetreatTimeGp[gpGid].rTime then
 							local objCat = Object.getCategory(targets[t].object)								--get object category
-							if objCat == Object.Category.UNIT then															--object is a _unit
+							if objCat == Object.Category.UNIT then												--object is a _unit
 								local desc = targets[t].object:getDesc()								--get descriptor descriptor
-								local descAwacs = _unit:getDesc()
+								local descAwacs = unit:getDesc()
 
 								if desc.category == Unit.Category.AIRPLANE and (desc.attributes["Battle airplanes"] or desc.attributes.Fighters)  then												--descriptor category is airplane 
 									--To know what attributes the object type has, look for the unit type script in sub-directories planes/, helicopter/s, vehicles, navy/ of ./Scripts/Database/ directory.
@@ -1837,7 +1720,7 @@ local function airRetreat()
 									if distance < 100000 then
 									-- if distance < 150000 then 
 
-										local callsign = _unit:getCallsign()
+										local callsign = unit:getCallsign()
 										env.info("ACRF10 DCE AWACS |03b|: Order to Retire "..distance)
 										env.info("ACRF10 DCE AWACS |03c|: Order to Retire "..callsign.." Retreat to the aircraft carrier")
 										trigger.action.outText(callsign.." Retreat to the aircraft carrier",10)
@@ -1847,218 +1730,246 @@ local function airRetreat()
 
 										local carrierDistance = 99999999
 										local retreat_x = 0
-										local retreat_y = 0
-										for coalition_name,coal in pairs(env.mission.coalition) do
-											if coalition_name == "blue" then
-												for country_n,country in ipairs(coal.country) do
-													if country.ship then
-														for group_n,group in ipairs(country.ship.group) do
-															local groupCarrier = Group.getByName(group.name)													--get carrier group
-															if groupCarrier then																				--group exists
-																local carrier = groupCarrier:getUnit(1)															--get group leader (assumed to be the carrier)								
-																local Desc = carrier:getDesc()
-																if Desc.attributes.AircraftCarrier or Desc.attributes["Aircraft Carriers"] then
-																	local carrierVec3 = carrier:getPoint()
-																	local carrierTestDist = math.sqrt(math.pow(carrierVec3.x - awacsVec3.x, 2) + math.pow(carrierVec3.z - awacsVec3.z, 2))
-																	if carrierTestDist < carrierDistance then
-																		retreat_x = carrierVec3.x
-																		retreat_y = carrierVec3.z
-																		carrierDistance =  carrierTestDist
-																	end
-																end
-															end
-														end
-													end
-												end
-											end
-										end
-
-
-										for _coalition, coalition in pairs(env.mission.coalition) do
-											if _coalition  == "blue" then
-												for countryN, _country in pairs(coalition.country) do
-													if _country.plane then
-														for groupN, _group in pairs(_country.plane.group) do
-															if _group.groupId == gpGid then
-
-																-- si aucun CVN n'a été trouvé, on prend comme position de retraite l'ID "land"
-																if retreat_x == 0 then
-																	for key, value in ipairs(_group.route.points) do				-- recherche de la position safe du PA et une alti						
-																		if value.type == 'Land' then
-																			retreat_x = value.x
-																			retreat_y = value.y
+                                        local retreat_y = 0
+										if isAwacsCarrier and not campL.Aircraft_Carriers then
+											for coalition_name,coal in pairs(env.mission.coalition) do
+												if coalition_name == "blue" then
+													for country_n,country in ipairs(coal.country) do
+														if country.ship then
+															for group_n,group in ipairs(country.ship.group) do
+																local groupCarrier = Group.getByName(group.name)													--get carrier group
+																if groupCarrier then																				--group exists
+																	local carrier = groupCarrier:getUnit(1)															--get group leader (assumed to be the carrier)								
+																	local Desc = carrier:getDesc()
+																	if Desc.attributes.AircraftCarrier or Desc.attributes["Aircraft Carriers"] then
+																		local carrierVec3 = carrier:getPoint()
+																		local carrierTestDist = math.sqrt(math.pow(carrierVec3.x - awacsVec3.x, 2) + math.pow(carrierVec3.z - awacsVec3.z, 2))
+																		if carrierTestDist < carrierDistance then
+																			retreat_x = carrierVec3.x
+																			retreat_y = carrierVec3.z
+																			carrierDistance =  carrierTestDist
 																		end
 																	end
 																end
-																local retreatRoute = {}
-
-																-- retreatRoute = _group.route.points										--copie de l'ancienne route
-																retreatRoute = Deepcopy(_group.route.points)
-
-																-- ajoute comme premier wpt leur position initial pour garder la fonction AWACS
-																local firstWPT = {
-																	['alt'] = awacsVec3.y,
-																	['type'] = 'Turning Point',
-																	['action'] = 'Turning Point',
-																	['alt_type'] = 'BARO',
-																	['speed_locked'] = true,
-																	['y'] = awacsVec3.z,
-																	['x'] = awacsVec3.x,
-																	['formation_template'] = '',
-																	['speed'] = descAwacs.speedMax,
-																	['ETA_locked'] = true,
-																	['task'] = {
-																		['id'] = 'ComboTask',
-																		['params'] = {
-																			['tasks'] = {
-																				[1] = {
-																					['enabled'] = true,
-																					['auto'] = false,
-																					['id'] = 'ControlledTask',
-																					['number'] = 1,
-																					['params'] = {
-																						['task'] = {
-																							['id'] = 'AWACS',
-																							['params'] = {
-																							},
-																						},
-																					},
-																				},
-																				[2] = {
-																					['enabled'] = true,
-																					['auto'] = false,
-																					['id'] = 'WrappedAction',
-																					['number'] = 2,
-																					['params'] = {
-																						['action'] = {
-																							['id'] = 'Option',
-																							['params'] = {
-																								['variantIndex'] = 1,
-																								['value'] = 458753,
-																								['name'] = 5,
-																								['formationIndex'] = 7,
-																							},
-																						},
-																					},
-																				},
-																				[3] = {
-																					['enabled'] = true,
-																					['auto'] = true,
-																					['id'] = 'WrappedAction',
-																					['number'] = 3,
-																					['params'] = {
-																						['action'] = {
-																							['id'] = 'EPLRS',
-																							['params'] = {
-																								['value'] = true,
-																								['groupId'] = 1,
-																							},
-																						},
-																					},
-																				},
-																				[4] = {
-																					['enabled'] = true,
-																					['auto'] = false,
-																					['id'] = 'WrappedAction',
-																					['number'] = 4,
-																					['params'] = {
-																						['action'] = {
-																							['id'] = 'Option',
-																							['params'] = {
-																								['value'] = 2,
-																								['name'] = 1,
-																							},
-																						},
-																					},
-																				},
-																			},
-																		},
-																	},
-																	['ETA'] = 0,
-																}
-
-
-																table.insert(retreatRoute, 1, firstWPT)
-
-																--modifie les coordonées du premier wpt initial
-																retreatRoute[2].x = retreat_x
-																retreatRoute[2].y = retreat_y
-																retreatRoute[2].alt = awacsVec3.y
-																retreatRoute[2].speed_locked = true
-																retreatRoute[2].ETA_locked = false
-																retreatRoute[2].speed = descAwacs.speedMax
-																retreatRoute[2].ETA = RetreatTimeGp[gpGid].rTime
-
-																local idTasks = #retreatRoute[2].task.params.tasks
-																local orbitRetreat = {
-
-																	['enabled'] = true,
-																	['auto'] = false,
-																	['id'] = 'ControlledTask',
-																	['number'] = idTasks+2,
-																	['params'] = {
-																		['task'] = {
-																			['id'] = 'Orbit',
-																			['params'] = {
-																				['altitude'] = 7315.2,
-																				['pattern'] = 'Circle',
-																				['speed'] = 138.889,
-																			},
-																		},
-																		['stopCondition'] = {
-																			['time'] = RetreatTimeGp[gpGid].rTime,
-																		},
-																	},
-
-																}
-
-																retreatRoute[2].task.params.tasks[idTasks +1] =  orbitRetreat
-
-																--ajoute la task awacs au premier wpt pour garder la fonction awacs operationnel
-																local TaskAwacs = {
-
-																		['enabled'] = true,
-																		['auto'] = false,
-																		['id'] = 'ControlledTask',
-																		['number'] = 1,
-																		['params'] = {
-																			['task'] = {
-																				['id'] = 'AWACS',
-																				['params'] = {
-																				},
-																			},
-																		},
-
-																	}
-																table.insert(retreatRoute[2].task.params.tasks, 1, TaskAwacs)
-
-																--renumerote les number des task																	
-																for j=1, #retreatRoute[1].task.params.tasks do
-																	retreatRoute[1].task.params.tasks[j].number = i
-																end
-
-																local mission = {														--define mission for retreat AWACS
-																		id = 'Mission',
-																		params = {
-																			route = {
-																				points = retreatRoute
-																			},
-																		}
-																	}
-
-
-																-- local logStr = "mission = " .. TableSerialization(mission, 0)
-																-- local logFile = io.open(PathDCE.."_"..nameAwacs.."_".. "Mission_AWACSretreatRoute.lua", "w")
-																-- logFile:write(logStr)
-																-- logFile:close()	
-
-																Controller.setTask(ctrGroup, mission)										--activate task with mission for retreat AWACS
 															end
 														end
 													end
 												end
 											end
+                                        elseif campL.Aircraft_Carriers then
+											for sideCarrier, carriers in ipairs(campL.Aircraft_Carriers) do
+												for group_n, carrier in ipairs(carriers) do
+													local carrierGroup = Group.getByName(carrier.name) --get carrier group
+													if carrierGroup then --group exists
+														local carrierUnit = carrierGroup:getUnit(1) --get group leader (assumed to be the carrier)								
+														
+														local carrierVec3 = carrier:getPoint()
+														local carrierTestDist = math.sqrt(math.pow( carrierVec3.x - awacsVec3.x, 2) + math.pow(carrierVec3.z - awacsVec3.z, 2))
+														if carrierTestDist < carrierDistance then
+															retreat_x = carrierVec3.x
+															retreat_y = carrierVec3.z
+															carrierDistance = carrierTestDist
+															
+														end
+													end
+												end
+											end
 										end
+
+
+										-- for _coalition, coalition in pairs(env.mission.coalition) do
+										-- 	if _coalition  == "blue" then
+										-- 		for countryN, _country in pairs(coalition.country) do
+										-- 			if _country.plane then
+										-- 				for groupN, _group in pairs(_country.plane.group) do
+										-- 					if _group.groupId == gpGid then
+
+										local retreatRoute = MissGroupByName[gpName].route.points
+										
+										-- -- si aucun CVN n'a été trouvé, on prend comme position de retraite l'ID "land"
+										-- if retreat_x == 0 then
+										-- 	for key, value in ipairs(_group.route.points) do				-- recherche de la position safe du PA et une alti						
+										-- 		if value.type == 'Land' then
+										-- 			retreat_x = value.x
+										-- 			retreat_y = value.y
+										-- 		end
+										-- 	end
+										-- end
+										-- si aucun CVN n'a été trouvé, on prend comme position de retraite l'ID "land"
+										if retreat_x == 0 or not isAwacsCarrier then
+											local lastWpt = retreatRoute[#retreatRoute]
+											retreat_x = lastWpt.x
+											retreat_y = lastWpt.y
+										end
+
+										-- local retreatRoute = {}
+
+										-- retreatRoute = Deepcopy(_group.route.points)
+
+										-- ajoute comme premier wpt leur position initial pour garder la fonction AWACS
+										local firstWPT = {
+											['alt'] = awacsVec3.y,
+											['type'] = 'Turning Point',
+											['action'] = 'Turning Point',
+											['alt_type'] = 'BARO',
+											['speed_locked'] = true,
+											['y'] = awacsVec3.z,
+											['x'] = awacsVec3.x,
+											['formation_template'] = '',
+											['speed'] = descAwacs.speedMax,
+											['ETA_locked'] = true,
+											['task'] = {
+												['id'] = 'ComboTask',
+												['params'] = {
+													['tasks'] = {
+														[1] = {
+															['enabled'] = true,
+															['auto'] = false,
+															['id'] = 'ControlledTask',
+															['number'] = 1,
+															['params'] = {
+																['task'] = {
+																	['id'] = 'AWACS',
+																	['params'] = {
+																	},
+																},
+															},
+														},
+														[2] = {
+															['enabled'] = true,
+															['auto'] = false,
+															['id'] = 'WrappedAction',
+															['number'] = 2,
+															['params'] = {
+																['action'] = {
+																	['id'] = 'Option',
+																	['params'] = {
+																		['variantIndex'] = 1,
+																		['value'] = 458753,
+																		['name'] = 5,
+																		['formationIndex'] = 7,
+																	},
+																},
+															},
+														},
+														[3] = {
+															['enabled'] = true,
+															['auto'] = true,
+															['id'] = 'WrappedAction',
+															['number'] = 3,
+															['params'] = {
+																['action'] = {
+																	['id'] = 'EPLRS',
+																	['params'] = {
+																		['value'] = true,
+																		['groupId'] = 1,
+																	},
+																},
+															},
+														},
+														[4] = {
+															['enabled'] = true,
+															['auto'] = false,
+															['id'] = 'WrappedAction',
+															['number'] = 4,
+															['params'] = {
+																['action'] = {
+																	['id'] = 'Option',
+																	['params'] = {
+																		['value'] = 2,
+																		['name'] = 1,
+																	},
+																},
+															},
+														},
+													},
+												},
+											},
+											['ETA'] = 0,
+										}
+
+
+										table.insert(retreatRoute, 1, firstWPT)
+
+										--modifie les coordonées du premier wpt initial
+										retreatRoute[2].x = retreat_x
+										retreatRoute[2].y = retreat_y
+										retreatRoute[2].alt = awacsVec3.y
+										retreatRoute[2].speed_locked = true
+										retreatRoute[2].ETA_locked = false
+										retreatRoute[2].speed = descAwacs.speedMax
+										retreatRoute[2].ETA = RetreatTimeGp[gpGid].rTime
+
+										local idTasks = #retreatRoute[2].task.params.tasks
+										local orbitRetreat = {
+
+											['enabled'] = true,
+											['auto'] = false,
+											['id'] = 'ControlledTask',
+											['number'] = idTasks+2,
+											['params'] = {
+												['task'] = {
+													['id'] = 'Orbit',
+													['params'] = {
+														['altitude'] = 7315.2,
+														['pattern'] = 'Circle',
+														['speed'] = 138.889,
+													},
+												},
+												['stopCondition'] = {
+													['time'] = RetreatTimeGp[gpGid].rTime,
+												},
+											},
+
+										}
+
+										retreatRoute[2].task.params.tasks[idTasks +1] =  orbitRetreat
+
+										--ajoute la task awacs au premier wpt pour garder la fonction awacs operationnel
+										local TaskAwacs = {
+
+												['enabled'] = true,
+												['auto'] = false,
+												['id'] = 'ControlledTask',
+												['number'] = 1,
+												['params'] = {
+													['task'] = {
+														['id'] = 'AWACS',
+														['params'] = {
+														},
+													},
+												},
+
+											}
+										table.insert(retreatRoute[2].task.params.tasks, 1, TaskAwacs)
+
+										--renumerote les number des task																	
+										for j=1, #retreatRoute[1].task.params.tasks do
+											retreatRoute[1].task.params.tasks[j].number = i
+										end
+
+										local mission = {														--define mission for retreat AWACS
+												id = 'Mission',
+												params = {
+													route = {
+														points = retreatRoute
+													},
+												}
+											}
+
+
+										-- local logStr = "mission = " .. TableSerialization(mission, 0)
+										-- local logFile = io.open(PathDCE.."_"..nameAwacs.."_".. "Mission_AWACSretreatRoute.lua", "w")
+										-- logFile:write(logStr)
+										-- logFile:close()	
+
+										Controller.setTask(ctrGroup, mission)										--activate task with mission for retreat AWACS
+										-- 					end
+										-- 				end
+										-- 			end
+										-- 		end
+										-- 	end
+										-- end
 									end
 								end
 							end
@@ -2069,9 +1980,11 @@ local function airRetreat()
 		end
 	end
 
-	local dt = os.clock() - t0
-    Perf_C = Perf_C + dt
-	Perf_C_N = Perf_C_N + 1
+	if campL.debug then
+		local dt = os.clock() - t0
+		Perf_C = Perf_C + dt
+		Perf_C_N = Perf_C_N + 1
+	end
 	
 	return timer.getTime() + 31
 end
@@ -4186,25 +4099,41 @@ local function addFuncs(arg_Gid, arg_GroupObj, argPlayerName)
 		if campL.SC_CarrierIntoWind == "man" then
 			missionCommands.removeItemForGroup(arg_Gid, {"CarrierIntoWind"})
 			local subR = missionCommands.addSubMenuForGroup(arg_Gid, "CarrierIntoWind", nil)
-			for coalition_name,coal in pairs(env.mission.coalition) do
-				for country_n,country in ipairs(coal.country) do
-					if country.ship then
-						for group_n,group in ipairs(country.ship.group) do
-							local groupCarrier = Group.getByName(group.name)													--get carrier group
-							if groupCarrier then																				--group exists
-								local carrier = groupCarrier:getUnit(1)															--get group leader (assumed to be the carrier)								
-								local desc = carrier:getDesc()
-								if desc.attributes.AircraftCarrier or desc.attributes["Aircraft Carriers"] then
-									local groupName = group.name
-									radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, group.name.." Into Wind 30mn", subR, TurnIntoWind, {groupName, nil, nil, 30} )	-- modification M36.d	(d: add timer) MenuRadio request manual TurnIntoWind
-									radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, group.name.." Into Wind 60mn", subR, TurnIntoWind, {groupName, nil, nil, 60} )
-									radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, group.name.." Resume Route", subR, ResumeRoute, {groupName, nil} )
-								end
-							end
-						end
-					end
-				end
-			end
+
+            if campL.Aircraft_Carriers then
+				--TODO ajouter une condition side
+                for sideCarrier, carriers in ipairs(campL.Aircraft_Carriers) do
+                    for group_n, carrier in ipairs(carriers) do
+                        local carrierGroup = Group.getByName(carrier.name)
+                        if carrierGroup then 
+                           
+							radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, carrier.name.." Into Wind 30mn", subR, TurnIntoWind, {carrier.name, nil, nil, 30} )
+							radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, carrier.name.." Into Wind 60mn", subR, TurnIntoWind, {carrier.name, nil, nil, 60} )
+							radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, carrier.name.." Resume Route", subR, ResumeRoute, {carrier.name, nil} )
+                        end
+                    end
+                end
+            end
+			
+			-- for coalition_name,coal in pairs(env.mission.coalition) do
+			-- 	for country_n,country in ipairs(coal.country) do
+			-- 		if country.ship then
+			-- 			for group_n,group in ipairs(country.ship.group) do
+			-- 				local groupCarrier = Group.getByName(group.name)
+			-- 				if groupCarrier then
+			-- 					local carrier = groupCarrier:getUnit(1)				--get group leader (assumed to be the carrier)								
+			-- 					local desc = carrier:getDesc()
+			-- 					if desc.attributes.AircraftCarrier or desc.attributes["Aircraft Carriers"] then
+			-- 						local groupName = group.name
+			-- 						radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, group.name.." Into Wind 30mn", subR, TurnIntoWind, {groupName, nil, nil, 30} )
+			-- 						radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, group.name.." Into Wind 60mn", subR, TurnIntoWind, {groupName, nil, nil, 60} )
+			-- 						radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, group.name.." Resume Route", subR, ResumeRoute, {groupName, nil} )
+			-- 					end
+			-- 				end
+			-- 			end
+			-- 		end
+			-- 	end
+			-- end
 		end
 
 		-- sar_F10(Group)
@@ -4287,7 +4216,10 @@ end
 
 local function EWR_magic()
 
-	local t0 = os.clock()
+	local t0
+	if campL.debug then
+		t0 = os.clock()
+	end
 
 	local target_tracks = {
 		["blue"] = {},
@@ -4496,7 +4428,10 @@ local function EWR_magic()
 
 						if EWR_optionPlayer[trucName] and ( not EWR_optionPlayer[trucName]["lasTime"] or EWR_optionPlayer[trucName]["lasTime"] +15  < locTimer) then
 
-                            local t0b = os.clock()
+							local t0b
+							if campL.debug then
+                            	t0b = os.clock()
+							end
 							
 							local player = _unit
 							local playerId = Unit.getID(player)
@@ -4671,9 +4606,11 @@ local function EWR_magic()
 
 							end
 
-							local dtb = os.clock() - t0b
-							Perf_Bb = Perf_Bb + dtb
-							Perf_B_Nb = Perf_B_Nb + 1
+							if campL.debug then
+								local dtb = os.clock() - t0b
+								Perf_Bb = Perf_Bb + dtb
+								Perf_B_Nb = Perf_B_Nb + 1
+							end
 
 
 						end
@@ -4683,9 +4620,11 @@ local function EWR_magic()
 		end
 	end
 
-	local dt = os.clock() - t0
-	Perf_B = Perf_B + dt
-	Perf_B_N = Perf_B_N + 1
+	if campL.debug then
+		local dt = os.clock() - t0
+		Perf_B = Perf_B + dt
+		Perf_B_N = Perf_B_N + 1
+	end
 	
 	return timer.getTime() + 60
 
@@ -5054,12 +4993,18 @@ end
 
 
 local function loopAFAC_CAS()
-	local t0 = os.clock()
-    Perf_F_N = Perf_F_N + 1
+
+	local t0
+	if campL.debug then
+		t0 = os.clock()
+		Perf_F_N = Perf_F_N + 1
+	end
 		
     if next(AFAC_available) == nil then
-		local dt = os.clock() - t0
-		Perf_F = Perf_F + dt
+		if campL.debug then
+			local dt = os.clock() - t0
+			Perf_F = Perf_F + dt
+		end
         return timer.getTime() + 17
 			
 	end
@@ -5106,8 +5051,10 @@ local function loopAFAC_CAS()
 			end
 		end
 	end
-	local dt = os.clock() - t0
-	Perf_F = Perf_F + dt
+	if campL.debug then
+		local dt = os.clock() - t0
+		Perf_F = Perf_F + dt
+	end
 	return timer.getTime() + 17
 end
 
@@ -5241,21 +5188,49 @@ local function showPerformance()
 	env.info("DCE_showPerformance, EWR_magic()Player: " .. tonumber(Perf_Bb) .." n: ".. tonumber(Perf_B_Nb).. " /n " .. tonumber(Perf_Bb / Perf_B_Nb))
 	
 	env.info("DCE_showPerformance, airRetreat(): " .. tonumber(Perf_C) .." n: ".. tonumber(Perf_B_N).. " /n " .. tonumber(Perf_C / Perf_C_N))
-	env.info("DCE_showPerformance, CustomDesignationAFAC(): " .. tonumber(Perf_D) .." n: ".. tonumber(Perf_D_N).. " /n " .. tonumber(Perf_D / Perf_D_N))
+	env.info("DCE_showPerformance, LoopSAR(): " .. tonumber(Perf_D) .." n: ".. tonumber(Perf_D_N).. " /n " .. tonumber(Perf_D / Perf_D_N))
 	env.info("DCE_showPerformance, loopAFAC_CAS(): " .. tonumber(Perf_F) .." n: ".. tonumber(Perf_F_N).. " /n " .. tonumber(Perf_F / Perf_F_N))
 
 	env.info("DCE_showPerformance, trackBomb(): " .. tonumber(Perf_E) .." n: ".. tonumber(Perf_E_N).. " /n " .. tonumber(Perf_E / Perf_E_N))
 	env.info("DCE_showPerformance, updateTrackedBombs(): " .. tonumber(Perf_H) .." n: ".. tonumber(Perf_H_N).. " /n " .. tonumber(Perf_H / Perf_H_N))
 	env.info("DCE_showPerformance, destructionScenaryInZone(): " .. tonumber(Perf_J) .." n: ".. tonumber(Perf_J_N).. " /n " .. tonumber(Perf_J / Perf_J_N))
 
-	env.info("DCE_showPerformance_B_17, Custom_Altitude(): " ..
-	tonumber(Perf_K) .. " n: " .. tonumber(Perf_K_N) .. " /n " .. tonumber(Perf_K / Perf_K_N))
-	
-	env.info("DCE_showPerformance, Custom_SAR(): " ..
-	tonumber(Perf_L) .. " n: " .. tonumber(Perf_L_N) .. " /n " .. tonumber(Perf_L / Perf_L_N))
 
-	env.info("DCE_showPerformance, ARM_Defence_Script(): " ..
-		tonumber(Perf_M) .. " n: " .. tonumber(Perf_M_N) .. " /n " .. tonumber(Perf_M / Perf_M_N))
+	env.info("DCE_showPerformance_B_39, Custom_Altitude(): " ..
+	tonumber(Perf_K) .. " n: " .. tonumber(Perf_K_N) .. " /n " .. tonumber(Perf_K / Perf_K_N))
+	env.info("DCE_showPerformance, getOffsetCached(): " ..
+		tonumber(Perf_O) .. " n: " .. tonumber(Perf_O_N) .. " /n " .. tonumber(Perf_O / Perf_O_N))
+	
+	
+	env.info("DCE_showPerformance, Custom_SAR(): " .. tonumber(Perf_L) .. " n: " .. tonumber(Perf_L_N) .. " /n " .. tonumber(Perf_L / Perf_L_N))
+	env.info("DCE_showPerformance, ARM_Defence_Script(): " .. tonumber(Perf_M) .. " n: " .. tonumber(Perf_M_N) .. " /n " .. tonumber(Perf_M / Perf_M_N))
+	env.info("DCE_showPerformance, CheckImmediatSAR(): " .. tonumber(Perf_S) .. " n: " .. tonumber(Perf_S_N) .. " /n " .. tonumber(Perf_S / Perf_S_N))
+	env.info("DCE_showPerformance, CheckRtbAirbase(): " ..
+        tonumber(Perf_I) .. " n: " .. tonumber(Perf_I_N) .. " /n " .. tonumber(Perf_I / Perf_I_N))
+		
+	env.info("DCE_showPerformance, CustomGroupAttack(): " ..
+        tonumber(Perf_P) .. " n: " .. tonumber(Perf_P_N) .. " /n " .. tonumber(Perf_P / Perf_P_N))
+		
+		
+	-- CheckRtbAirbase
+	-- Perf_I = 0
+	-- Perf_I_N = 0
+
+    -- local test = AirGroundAttackTask('Pack 16 - 561th FS - Strike 1', {
+	-- 	{'68th Rgt Bat 3-1-1','static','-189477.35697035','851942.63668399'},
+	-- 	{'68th Rgt Bat 3-1-2','static','-189225.28858242','851880.37368315'},
+	-- 	{'68th Rgt Bat 3-1-3','static','-189124.81319941','851839.11227216'},
+	-- 	{'68th Rgt Bat 3-1-4','static','-188911.57415046','851626.20472711'},
+    --     { '68th Rgt Bat 3-1-5', 'static', '-189017.98225094', '851622.6072349' },
+	-- 	{'68th Rgt Bat 3-1-6','static','-189143.95124601','851625.35879966'},
+	-- 	{'68th Rgt Bat 3-1-7','static','-188821.91001539','851509.53245532'},
+	-- 	{'68th Rgt Bat 3-1-8','static','-188751.75922484','851516.62308362'},
+	-- 	{'68th Rgt Bat 3-1-9','static','-188648.47482715','851603.79890553'},
+	-- 	{'68th Rgt Bat 3-1-10','static','-188677.17691867','851503.99578547'},
+	-- 	{'68th Rgt Bat 3-1-11','static','-188701.48940819','851499.57533283'},
+    --     { '68th Rgt Bat 3-1-12', 'static', '-188788.71419282', '851498.61938127' },
+	-- },
+	-- 'ASM', 'Auto', nil, 25, 35, 500, 5000, nil)
 		
 	return timer.getTime() + 30
 
@@ -5285,7 +5260,7 @@ timer.scheduleFunction(BuildCarrierIndex, nil, timer.getTime() + 0.04)
 timer.scheduleFunction(timerPlayerMenu, nil, timer.getTime() + 5)
 
 --/////////////////////////bench
--- if campL.Debug then
+-- if campL.debug then --ça, ça ne marche pas
 	timer.scheduleFunction(showPerformance, nil, timer.getTime() + 30)
 -- end
 
