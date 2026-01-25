@@ -188,124 +188,123 @@ local timingRadarOff = {5,15 }
 
 ARM_Shot_EventHandler = {}																					--Event handler to look for launched ARM
 function ARM_Shot_EventHandler:onEvent(event)
-	if event.id == world.event.S_EVENT_SHOT then
-		
-		local t0 = os.clock()
-		Perf_M_N = Perf_M_N + 1
-		
-		local wep = event.weapon																			--Get the weapon of the launch event
-		local tgt = wep:getTarget()																			--Get the target of the weapon
-		local addTime = 0
-		if not wep or not wep.getDesc then return end
 
-		-- if event.initiator and Object.getCategory(event.initiator) == Object.Category.UNIT  then										--initiator is a unit debug_ET01.h
-		-- 	env.info("DCE_ARM_S_EVENT A SHOT getPlayerName "..tostring( event.initiator:getPlayerName()))
-		-- end
-
-		-- env.info("DCE_ARM_S_EVENT    B SHOT tgt "..tostring(tgt))
-		if tgt and tgt:isExist() then
-
-			local desc = wep:getDesc()
-			env.info("DCE_ARM_S_EVENT       C ")
-			-- _affiche(desc, "DCE desc weapon ArmDS")
-
-			-- Weapon.MissileCategory = {
-			-- 	AAM,
-			-- 	SAM,
-			-- 	BM,
-			-- 	ANTI_SHIP,
-			-- 	CRUISE,
-			-- 	OTHER
-			--   }
-
-			-- Weapon.GuidanceType = {
-			-- 	INS,
-			-- 	IR,
-			-- 	RADAR_ACTIVE,
-			-- 	RADAR_SEMI_ACTIVE,
-			-- 	RADAR_PASSIVE,
-			-- 	TV,
-			-- 	LASER,
-			-- 	TELE
-			--   }
-
-			if desc.missileCategory == 6 and desc.guidance == 5 then										--Check if the weapon is an ARM
-				-- env.info("DCE_ARM_S_EVENT          D ")
-
-				-- Object.Category
-				-- UNIT    1
-				-- WEAPON  2
-				-- STATIC  3
-				-- BASE    4
-				-- SCENERY 5
-				-- Cargo   6
-
-				local objCat = Object.getCategory(tgt)
-
-				if objCat ~= Object.Category.SCENERY then														--target is not a scenery object
-					env.info("DCE_ARM_S_EVENT          E Object_Category: "..tostring(Object_Category[objCat]))
-
-					local unitCat = tgt:getDesc().category
-					env.info("DCE_ARM_S_EVENT          E unitCat: "..tostring(unitCat))
-					if unitCat ~= 3 then															--target is not a ship	-- bug AGM-154 :31: in function 'getDesc' Static doesn't exist
-						-- trigger.action.outText("ARM Launch", 3)	--DEBUG
-						-- env.info("DCE_ARM_               F Launch")
-
-						local descRadarSam = tgt:getDesc()
-
-						_affiche(descRadarSam, "descRadarSam ArmDefence")
-
-
-
-						if math.random(1,10) > 1 then																--90% chance that ARM launch is detected by target
-							local probaTurnOff = 75
-
-							if descRadarSam and descRadarSam.typeName and SAM_AMM[descRadarSam.typeName] then
-								probaTurnOff = 25
-							end
-
-							if math.random(1,100) <= probaTurnOff then
-								-- trigger.action.outText("RadarOff", 3)	--DEBUG
-								env.info("DCE_ARM_RadarOff")
-								
-                                if OLD_SAM_Radar[descRadarSam.typeName] then
-									addTime = 60
-									env.info("DCE_ARM_Defence OLD_SAM_Radar detected addTime: " .. tostring(addTime))
-								end
-								
-								timer.scheduleFunction(RadarOff, {tgt, wep}, timer.getTime() + math.random(timingRadarOff[1], timingRadarOff[2]) + addTime)		--Target reacts within 5 to 15 seconds after ARM launch with shutting down its radar
-							end
-
-						end
-					end
-				end
-
-				-- if tgt:getDesc().category ~= 3 then															--target is not a ship	-- bug AGM-154 :31: in function 'getDesc' Static doesn't exist
-				-- local desc = wep:getDesc()
-					-- if desc.missileCategory == 6 and desc.guidance == 5 then										--Check if the weapon is an ARM
-						-- --trigger.action.outText("ARM Launch", 3)	--DEBUG
-						-- if math.random(1,10) > 1 then																--90% chance that ARM launch is detected by target
-							-- timer.scheduleFunction(RadarOff, {tgt, wep}, timer.getTime() + math.random(5, 15))		--Target reacts within 5 to 15 seconds after ARM launch with shutting down its radar
-						-- end
-					-- end
-				-- end
-
-
-			end
+    if event.id == world.event.S_EVENT_SHOT then
+		local t0
+		if campL.debug then
+			t0 = os.clock()
+			Perf_M_N = Perf_M_N + 1
 		end
 
+        local wep = event.weapon    --Get the weapon of the launch event
+        local tgt = wep:getTarget() --Get the target of the weapon
+        local addTime = 0
+        if not wep or not wep.getDesc then return end
+
+        -- if event.initiator and Object.getCategory(event.initiator) == Object.Category.UNIT  then										--initiator is a unit debug_ET01.h
+        -- 	env.info("DCE_ARM_S_EVENT A SHOT getPlayerName "..tostring( event.initiator:getPlayerName()))
+        -- end
+
+        -- env.info("DCE_ARM_S_EVENT    B SHOT tgt "..tostring(tgt))
+        if tgt and tgt:isExist() then
+            local desc = wep:getDesc()
+            env.info("DCE_ARM_S_EVENT       C ")
+            -- _affiche(desc, "DCE desc weapon ArmDS")
+
+            -- Weapon.MissileCategory = {
+            -- 	AAM,
+            -- 	SAM,
+            -- 	BM,
+            -- 	ANTI_SHIP,
+            -- 	CRUISE,
+            -- 	OTHER
+            --   }
+
+            -- Weapon.GuidanceType = {
+            -- 	INS,
+            -- 	IR,
+            -- 	RADAR_ACTIVE,
+            -- 	RADAR_SEMI_ACTIVE,
+            -- 	RADAR_PASSIVE,
+            -- 	TV,
+            -- 	LASER,
+            -- 	TELE
+            --   }
+
+            if desc.missileCategory == 6 and desc.guidance == 5 then --Check if the weapon is an ARM
+                -- env.info("DCE_ARM_S_EVENT          D ")
+
+                -- Object.Category
+                -- UNIT    1
+                -- WEAPON  2
+                -- STATIC  3
+                -- BASE    4
+                -- SCENERY 5
+                -- Cargo   6
+
+                local objCat = Object.getCategory(tgt)
+
+                if objCat ~= Object.Category.SCENERY then --target is not a scenery object
+                    env.info("DCE_ARM_S_EVENT          E Object_Category: " .. tostring(Object_Category[objCat]))
+
+                    local unitCat = tgt:getDesc().category
+                    env.info("DCE_ARM_S_EVENT          E unitCat: " .. tostring(unitCat))
+                    if unitCat ~= 3 then --target is not a ship	-- bug AGM-154 :31: in function 'getDesc' Static doesn't exist
+                        -- trigger.action.outText("ARM Launch", 3)	--DEBUG
+                        -- env.info("DCE_ARM_               F Launch")
+
+                        local descRadarSam = tgt:getDesc()
+
+                        _affiche(descRadarSam, "descRadarSam ArmDefence")
 
 
-		local desc = wep:getDesc()
-		if desc.missileCategory == 2 and (desc.guidance == 3 or desc.guidance == 4) then
-            
-			-- Ajout du missile dans la table des missiles actifs
+
+                        if math.random(1, 10) > 1 then --90% chance that ARM launch is detected by target
+                            local probaTurnOff = 75
+
+                            if descRadarSam and descRadarSam.typeName and SAM_AMM[descRadarSam.typeName] then
+                                probaTurnOff = 25
+                            end
+
+                            if math.random(1, 100) <= probaTurnOff then
+                                -- trigger.action.outText("RadarOff", 3)	--DEBUG
+                                env.info("DCE_ARM_RadarOff")
+
+                                if OLD_SAM_Radar[descRadarSam.typeName] then
+                                    addTime = 60
+                                    env.info("DCE_ARM_Defence OLD_SAM_Radar detected addTime: " .. tostring(addTime))
+                                end
+
+                                timer.scheduleFunction(RadarOff, { tgt, wep },
+                                    timer.getTime() + math.random(timingRadarOff[1], timingRadarOff[2]) + addTime) --Target reacts within 5 to 15 seconds after ARM launch with shutting down its radar
+                            end
+                        end
+                    end
+                end
+
+                -- if tgt:getDesc().category ~= 3 then															--target is not a ship	-- bug AGM-154 :31: in function 'getDesc' Static doesn't exist
+                -- local desc = wep:getDesc()
+                -- if desc.missileCategory == 6 and desc.guidance == 5 then										--Check if the weapon is an ARM
+                -- --trigger.action.outText("ARM Launch", 3)	--DEBUG
+                -- if math.random(1,10) > 1 then																--90% chance that ARM launch is detected by target
+                -- timer.scheduleFunction(RadarOff, {tgt, wep}, timer.getTime() + math.random(5, 15))		--Target reacts within 5 to 15 seconds after ARM launch with shutting down its radar
+                -- end
+                -- end
+                -- end
+            end
+        end
+
+
+
+        local desc = wep:getDesc()
+        if desc.missileCategory == 2 and (desc.guidance == 3 or desc.guidance == 4) then
+            -- Ajout du missile dans la table des missiles actifs
             table.insert(activeMissiles, wep)
 
-			-- Utilisation du cache de jammers (optimisé)
-			jammers = cachedJammers
+            -- Utilisation du cache de jammers (optimisé)
+            jammers = cachedJammers
 
-          --[[   -- Actualisation de la liste des jammers
+            --[[   -- Actualisation de la liste des jammers
             jammers = {}
 			-- local jammerDist_RealJammer = 10000
 			-- local jammerDist_B52 = 1000
@@ -358,15 +357,17 @@ function ARM_Shot_EventHandler:onEvent(event)
             -- Démarrage de la surveillance si ce n'est pas déjà fait
             if #activeMissiles == 1 then
                 env.info("ARM_Jammer Démarrage de la surveillance des missiles...")
-				-- trigger.action.outText("ARM_Jammer Démarrage de la surveillance des missiles.",20)
+                -- trigger.action.outText("ARM_Jammer Démarrage de la surveillance des missiles.",20)
                 checkMissileProximity()
             end
         end
 
-		local dt = os.clock() - t0
-		Perf_M = Perf_M + dt
+		if campL.debug then
+			local dt = os.clock() - t0
+			Perf_M = Perf_M + dt
+		end
+    end
 
-	end
 end
 world.addEventHandler(ARM_Shot_EventHandler)
 
