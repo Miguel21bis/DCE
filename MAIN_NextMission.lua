@@ -18,6 +18,8 @@ local t_backup = 0
 
 PlacePA = {}
 AltitudeCruise = 5400			--for plane without hcruise
+AirbasesCarrier = {}
+
 
 --Check_TaskPossibleByPlane
 ----- unpack template mission file ----
@@ -484,13 +486,6 @@ if not mission_ini  or mission_ini == nil  then
 	dofile("Init/conf_mod.lua")
 end
 
-
--- UpdateConfMod()
-
--- if Firstmission_flag then
--- 	ModifiCampInit()
--- end
-
 local jammerOnBoard = {}
 for planeType, plane in pairs(Data_divers) do
 	if plane and plane.jammer then
@@ -581,33 +576,6 @@ for planeType, value in PairsByKeys(Data_divers) do
 		EPLRS_Capacity[planeType] = true
 	end
 end
-
---**
---deprecated--
---**
--- --si ADD_data existe, on le precharge pour l'ajouter au DATA centram
--- local addDataFile02 = "../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua"
--- local testPathADD_addData = io.open(addDataFile02, "r")										--cette maniere de chercher la presence d un fichier evite un plantage
--- if testPathADD_addData ~= nil  then														--check si le fichier existe dans ScriptsMod
--- 	dofile("../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua")
-
--- 	if add_EPLRS_Capacity then
--- 		for key , value in pairs(add_EPLRS_Capacity) do
--- 			if not EPLRS_Capacity[key] then
--- 				EPLRS_Capacity[key] = true
--- 			end
--- 		end
--- 	end
-
--- 	if add_TaskByPlane then
--- 		for key , value in pairs(add_TaskByPlane) do
--- 			if not TaskByPlane[key] then
--- 				TaskByPlane[key] = true
--- 			end
--- 		end
--- 	end
-
--- end
 
 -- --assign les callsign par squad west
 AssignCallnameSquad()
@@ -827,25 +795,6 @@ for _ , refName in pairs(groupIdError) do
 			end
 		end
 	end
-
-	-- --change l'Id dans oobGround, pour ne pas recommencer
-	-- for side_name, side in pairs(oob_ground) do																--iterate through sides
-	-- 	for countryN, country in pairs(side) do															--iterate through countries
-	-- 		for categorieN, categories in pairs(country) do
-	-- 			if type(categories) == "table" and categories.group then
-	-- 				for _group, groups in pairs(categories) do
-	-- 					for groupN, group in pairs(groups) do
-	-- 						-- print("MainNM group.name "..group.name.." refName: "..refName)
-	-- 						if group.name == refName then
-	-- 							-- print("MainNM oob_ground update NEW GroupId |"..testId.."| GroupName |".. group.name)
-	-- 							group.groupId = testId
-	-- 						end
-	-- 					end
-	-- 				end
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
 end
 print()
 
@@ -908,25 +857,6 @@ for _ , refNameB in pairs(unitIdError) do
 			end
 		end
 	end
-	-- --change l'Id dans oobGround, pour ne pas recommencer
-	-- for side_name, side in pairs(oob_ground) do																--iterate through sides
-	-- 	for countryN, country in pairs(side) do															--iterate through countries
-	-- 		for categorieN, categories in pairs(country) do
-	-- 			if type(categories) == "table" and categories.group then
-	-- 				for _group, groups in pairs(categories) do
-	-- 					for groupN, group in pairs(groups) do
-	-- 						for unitN, unit in ipairs(group.units) do	
-	-- 							if unit.name == refNameB then
-	-- 								-- print("MainNM update OOPGROUND NEW uniId |"..testId.."| groupName |".. group.name.."| unitName |".. unit.name)
-	-- 								unit.unitId = testId
-	-- 							end
-	-- 						end
-	-- 					end
-	-- 				end
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
 end
 
 --########   2   ##############
@@ -1078,6 +1008,48 @@ if PlayerFlight then
 	end
 end
 
+--cree la table AirbasesCarrier
+for baseName, base in pairs(db_airbases) do
+	if base.unitname then
+		AirbasesCarrier[base.unitname] = true
+	end
+
+end
+
+--ajoute dans la table campL.Aircraft_Carriers.side 
+-- les noms des CV, CVN et CLA, tout porte aéronef
+Aircraft_Carriers = {
+	red = {},
+	blue = {},
+}
+for side, coal in pairs(mission.coalition) do
+	for _, country in pairs(coal.country) do
+		if country.ship then
+			for _, shipGroup in pairs(country.ship.group) do
+				for _, shipUnit in pairs(shipGroup.units) do
+					if shipUnit.name and AirbasesCarrier[shipUnit.name] then
+
+						if Aircraft_Carriers[side] then
+							Aircraft_Carriers[side] = {}
+						end
+						table.insert(Aircraft_Carriers[side], shipUnit.name)
+
+						-- --ajoute le lien pedro <-> porte avions
+						-- if pedroLinkCV[shipUnit.name] == nil then
+						-- 	pedroLinkCV[shipUnit.name] = {}
+						-- end
+						-- pedroLinkCV[shipUnit.name].side = side
+						-- pedroLinkCV[shipUnit.name].groupName = shipGroup.name
+						-- pedroLinkCV[shipUnit.name].unitName = shipUnit.name
+
+					end
+				end
+			end
+		end
+	end
+end
+
+
 --création d'un camp pour camp_status InGame nettement plus leger
 local campL = {
 
@@ -1127,6 +1099,7 @@ local campL = {
 	ShipHealth = camp.ShipHealth,
 	ShipHealth0 = camp.ShipHealth0,
 	BaseAirStart = camp.BaseAirStart,
+	Aircraft_Carriers = Aircraft_Carriers,
 
 
 
@@ -1181,11 +1154,6 @@ if PlayerFlight then
 	local resFile = io.open("resFile.lua", "w")	 or error("Failed to open debug file")										--mapResource
 	resFile:write(resStr)
 	resFile:close()
-
-camp_str = "player = " .. TableSerialization(mapResource, 0)						--make a string
-campFile = io.open("Debug/mapResource.lua", "w")  or error("Failed to open debug file")
-campFile:write(camp_str)																		--save new data
-campFile:close()
 
 	local gciStr = "GCI = " .. TableSerialization(GCI, 0)
 	local gciFile = io.open("GCIdata.lua", "w") or error("Failed to open debug file")											--GCI data file (EWR radars, AWACS, interceptors)
