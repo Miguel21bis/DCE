@@ -170,13 +170,19 @@ end
 
 local function destructionScenaryInZone(point, radius, launcherName)
 
-	local t0 = os.clock()
-	Perf_J_N = Perf_J_N + 1
 
-	if radius > 1000 then
-        env.info("DCE_EventT destructionScenaryInZone: radius too big, RETURN ")
-		local dt = os.clock() - t0
-		Perf_J = Perf_J + dt
+	local t0
+	if campL.debug then
+		t0 = os.clock()
+		Perf_J_N = Perf_J_N + 1
+	end
+
+    if radius > 1000 then
+		if campL.debug then
+			env.info("DCE_EventT destructionScenaryInZone: radius too big, RETURN ")
+			local dt = os.clock() - t0
+			Perf_J = Perf_J + dt
+		end
 		
 		return
 	end
@@ -191,8 +197,10 @@ local function destructionScenaryInZone(point, radius, launcherName)
 			-- Optimisation: évite de traiter les objets de forêt (très nombreux) pour économiser du CPU
 			-- On ne fait la détection qu'une fois, et on saute le traitement si c'est une forêt
 			if objType and objType:find("FOREST", 1, true) then
-				local dt = os.clock() - t0
-				Perf_J = Perf_J + dt
+				if campL.debug then
+					local dt = os.clock() - t0
+					Perf_J = Perf_J + dt
+				end
 				return -- On sort immédiatement, on ne log pas les forêts
 			end
 
@@ -223,8 +231,10 @@ local function destructionScenaryInZone(point, radius, launcherName)
 	}
     world.searchObjects(Object.Category.SCENERY, searchArea, if_found)
 
-	local dt = os.clock() - t0
-	Perf_J = Perf_J + dt
+	if campL.debug then
+		local dt = os.clock() - t0
+		Perf_J = Perf_J + dt
+	end
 end
 
 
@@ -254,8 +264,11 @@ local function getTrackingInterval(alt)
 end
 
 local function updateTrackedBombs()
-	local t0 = os.clock()
-    Perf_H_N = Perf_H_N + 1
+	local t0
+	if campL.debug then
+		t0 = os.clock()
+		Perf_H_N = Perf_H_N + 1
+	end
 	
 	local now = timer.getTime()
 
@@ -304,20 +317,28 @@ local function updateTrackedBombs()
 		end
 	end
 
-	local dt = os.clock() - t0
-    Perf_H = Perf_H + dt
+	if campL.debug then
+		local dt = os.clock() - t0
+		Perf_H = Perf_H + dt
+	end
 	
 	return now + 0.2
 end
 
 
 local function trackBomb(bomb, desc, initiator)
-	local t0 = os.clock()
-    Perf_E_N = Perf_E_N + 1
+
+	local t0
+	if campL.debug then
+		t0 = os.clock()
+		Perf_E_N = Perf_E_N + 1
+	end
 	
     if not bomb or not bomb.isExist or not bomb:isExist() then
-		local dt = os.clock() - t0
-		Perf_E = Perf_E + dt
+		if campL.debug then
+			local dt = os.clock() - t0
+			Perf_E = Perf_E + dt
+		end
 		return
 	end
 
@@ -331,8 +352,10 @@ local function trackBomb(bomb, desc, initiator)
 		lastPosVec3 = nil,
 		impactHandled = false,
     }
-	local dt = os.clock() - t0
-    Perf_E = Perf_E + dt
+	if campL.debug then
+		local dt = os.clock() - t0
+		Perf_E = Perf_E + dt
+	end
 	
 end
 
@@ -1273,11 +1296,15 @@ function eventHandlerDCE:onEvent(event)
 								if initiatorName and string.find(initiatorName, "Pedro") then
 
 									--["name"] = "Unit_Pedro_CVN-71 Theodore Roosevelt_1",
-									local cvName = initiatorName
+									-- local cvName = initiatorName
 									
-									cvName = cvName:gsub( "Unit_Pedro_", "")
-									cvName, _ = cvName:match("([^,]+)_([^,]+)")
+									-- cvName = cvName:gsub( "Unit_Pedro_", "")
+									-- cvName, _ = cvName:match("([^,]+)_([^,]+)")
+									local cvName = initiatorName:gsub("Unit_Pedro_", "")
+									cvName = cvName:match("(.+)_") -- tout jusqu’au dernier underscore
 
+									env.info("DCE_EventT A check cvName " .. tostring(cvName))
+									
 									--cherche le type d'helico et les parametres de store et autre à lui coller pour creer un autre Pedro identique
 									if not TypePedroByCV[cvName] then
 
@@ -1286,7 +1313,9 @@ function eventHandlerDCE:onEvent(event)
 												if state.helicopter then
 													for groupN, _group in pairs(state.helicopter.group) do
 														-- if _group.task == "Transport" and _group.name:find(cvName) and _group.name:find("Pedro") then
+														env.info("DCE_EventT B Check cvName Pedro "..tostring(_group.name))
 														if _group.name:find(cvName) and _group.name:find("Pedro") then	
+															env.info("DCE_EventT C found cvName Pedro "..tostring(_group.name))
 															TypePedroByCV[cvName] = {
 																type = _group.units[1].type,
 																payload = _group.units[1].payload,
@@ -1302,7 +1331,12 @@ function eventHandlerDCE:onEvent(event)
 										end
 									end
 								
-									NeedPedro(cvName, TypePedroByCV[cvName])
+                                    if TypePedroByCV[cvName] then
+										_affiche(TypePedroByCV[cvName], "TypePedroByCV[cvName]: ")
+										NeedPedro(cvName, TypePedroByCV[cvName])
+									else
+										env.info("DCE_EventsT DCE_BUG Pedro introuvable initiatorName: "..tostring(initiatorName).." cvName: "..tostring(cvName))
+									end
 								end
 
                                 -- if initDesc.category == Unit.Category.HELICOPTER then
@@ -1331,7 +1365,19 @@ function eventHandlerDCE:onEvent(event)
 					-- 	log_entry.placeCoalitionId = Airbase.getCoalition(event.place)
 					-- 	log_entry.place = CleanName(log_entry.place)
 
-					-- end
+	
+                    if initiatorName then
+                        log_entry.initiator = initiatorName --store initiator name
+                        -- log_entry.type_name = event.initiator:getTypeName()
+
+                        log_entry.placeTypeName = CleanName(log_entry.placeTypeName)
+                        log_entry.placeCoalitionId = Airbase.getCoalition(event.place)
+                        log_entry.place = CleanName(log_entry.place)
+                    end
+					
+					if event.initiator.getTypeName then
+						event.initiator:getTypeName()
+					end
 
 					if initiatorObjCategory == Object.Category.UNIT and playerName then			--initiator is a unit debug_ET01.h
 						log_entry.pilotName = playerName
@@ -1465,7 +1511,7 @@ function eventHandlerDCE:onEvent(event)
 					log_entry.targetPilotName = event.target:getPlayerName()													--store player name
 					-- local desc = event.target:getDesc()
                     -- local unitCat = desc.category
-					local elementId = event.initiator:getID()
+					local elementId = event.target.getID and event.target:getID() or nil
 					local catEntry = elementId and Cache_UnitCategoryByGetID[elementId]
 					local isHelo = (catEntry and catEntry.category == Unit.Category.HELICOPTER)
 
@@ -1999,7 +2045,13 @@ end
 
 -- modification M18.c despawn/destroy Plane on BaseAirStart
 local function CheckRtbAirbase()
-
+	
+	local t0
+	if campL.debug then
+		t0 = os.clock()
+		Perf_I = 0
+		Perf_I_N = Perf_I_N + 1
+	end
 	-- BaseAirStart = {
 		-- ['BA Wahda'] = {
 			-- coalition = "blue"
@@ -2053,6 +2105,11 @@ local function CheckRtbAirbase()
 				env.info( "DCE_INFO : ***WARNING***, the AIRSTART base "..tostring(base_name).." does not have a declared coalition and therefore cannot despawn aircraft arriving at its level. ")
 			end
 		end
+	end
+
+	if campL.debug then
+		local dt = os.clock() - t0
+		Perf_I = Perf_I + dt
 	end
 
 	return timer.getTime() + 30
