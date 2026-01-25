@@ -22,6 +22,8 @@ local nbManhunt = {
 	[3] = 0,
 }
 
+local NB_MAX_MANHUNT = 8
+
 local guideSAR = {}
 local walkEjectedPilot = {}
 local soldierAliasManhunt = {}
@@ -436,17 +438,17 @@ function AddSoldierAliasManhunt(ejectedPilot)
 	-- _affiche(coalitionIdNumeric, "coalitionIdNumeric")
 	local manhuntSide = CoalitionIdToName[enemyCoalition]
 
-	env.info( "DCE_SAR_AddSoldierAliasManhunt 01 enemyCoalition:  "..tostring(enemyCoalition).." manhuntSide "..tostring(manhuntSide))
+	-- env.info( "DCE_SAR_AddSoldierAliasManhunt 01 enemyCoalition:  "..tostring(enemyCoalition).." manhuntSide "..tostring(manhuntSide))
 
-	env.info( "DCE_SAR_AddSoldierAliasManhunt C ejectedPilotName:  "..tostring(ejectedPilotName).." ejPilCoalitionId: "..tostring(ejPilCoalitionId).." enemyCoalition: "..tostring(enemyCoalition))
-	env.info( "DCE_SAR_AddSoldierAliasManhunt D coalitionIdNumeric[enemyCoalition]:  "..tostring(CoalitionIdToName[enemyCoalition]))
+	-- env.info( "DCE_SAR_AddSoldierAliasManhunt C ejectedPilotName:  "..tostring(ejectedPilotName).." ejPilCoalitionId: "..tostring(ejPilCoalitionId).." enemyCoalition: "..tostring(enemyCoalition))
+	-- env.info( "DCE_SAR_AddSoldierAliasManhunt D coalitionIdNumeric[enemyCoalition]:  "..tostring(CoalitionIdToName[enemyCoalition]))
 
 	local nMaxCountry = #env.mission.coalition[CoalitionIdToName[enemyCoalition]].country
 	local randomNCountry  = math.random(1,nMaxCountry )
 	local randomIdCountry = env.mission.coalition[CoalitionIdToName[enemyCoalition]].country[randomNCountry].id
 	local posEjectedPilotVec3 = ejectedPilot:getPoint()
 
-	env.info( "DCE_SAR_AddSoldierAliasManhunt E randomNCountry:  "..tostring(randomNCountry).." randomIdCountry: "..tostring(randomIdCountry))
+	-- env.info( "DCE_SAR_AddSoldierAliasManhunt E randomNCountry:  "..tostring(randomNCountry).." randomIdCountry: "..tostring(randomIdCountry))
 
 	for n = 1, 6 do
 		local portionCercle = 60*n
@@ -501,14 +503,14 @@ function AddSoldierAliasManhunt(ejectedPilot)
 			randomSpawn = true
 
 			--ne spawn pas un manhunt dans le camp ENI, donc on regarde sa position/frontiere
-			env.info( "DCE_SAR_AddSoldierAliasManhunt F1")
+			-- env.info( "DCE_SAR_AddSoldierAliasManhunt F1")
 
 			local rightSideOfBorder
 			if campL.boundary and campL.boundary[manhuntSide] and campL.boundary[manhuntSide] ~= nil then
 				rightSideOfBorder =  CheckPointInPoly_XY_2(pointSelected, campL.boundary[manhuntSide])
-				env.info( "DCE_SAR_AddSoldierAliasManhunt?  F2 boundary rightSideOfBorder __"..tostring(rightSideOfBorder).."__ ejectedPilot.side: "..tostring(manhuntSide))
+				-- env.info( "DCE_SAR_AddSoldierAliasManhunt?  F2 boundary rightSideOfBorder __"..tostring(rightSideOfBorder).."__ ejectedPilot.side: "..tostring(manhuntSide))
 				if rightSideOfBorder  then
-					env.info( "DCE_SAR_AddSoldierAliasManhunt? G rightSideOfBorder  ")
+					-- env.info( "DCE_SAR_AddSoldierAliasManhunt? G rightSideOfBorder  ")
 					rightSide = true
 				end
 			else
@@ -823,50 +825,13 @@ end
 
 function CheckImmediatSAR(ejPilot)
 
-	-- _affiche(ejPilot, "CheckImmediatSAR() ejPilot ")
+	local t0 = os.clock()
+	Perf_S_N = Perf_S_N + 1
 
-	env.info( "DCE_CheckImmediatSAR A "..tostring(ejPilot.name))
-
-	local pt_chute = {}
-	-- local initDesc = Event.initiator:getDesc()	
-
-	-- if ejPilot.coalitionId then
-	-- 	if ejPilot.initiatorSideName == 0 then
-	-- 		ejPilot.initiatorSideName = "neutrals"
-	-- 	elseif ejPilot.initiatorSideName == 1 then
-	-- 		ejPilot.initiatorSideName = "red"
-	-- 	elseif ejPilot.initiatorSideName == 2 then
-	-- 		ejPilot.initiatorSideName = "blue"
-	-- 	end
-	-- end
+	env.info( "DCE_CheckImmediatSAR START A "..tostring(ejPilot.name))
 
 	if ejPilot and ejPilot.pos.x then
-
-        -- local grid = coord.LLtoMGRS(coord.LOtoLL(ejectedPilot))
-
-		-- --Avec 2 lettres (A et B) on passe de zone de 10km à des zone de 50km (la limite supérieur serait de 100km)
-		-- local subdiv_E_Num = tonumber(string.sub(grid.Easting, 1, 1))
-		-- local subdiv_E_Alpha
-		-- if subdiv_E_Num < 5 then
-		-- 	subdiv_E_Alpha = "A"
-		-- else
-		-- 	subdiv_E_Alpha = "B"
-		-- end
-
-		-- local subdiv_N_Num = tonumber(string.sub(grid.Northing, 1, 1))
-		-- local subdiv_N_Alpha
-		-- if subdiv_N_Num < 5 then
-		-- 	subdiv_N_Alpha = "A"
-		-- else
-		-- 	subdiv_N_Alpha = "B"
-		-- end
-
-		-- local MGRS_Chute = grid.UTMZone.."_"..grid.MGRSDigraph.."_"..subdiv_E_Alpha.."_"..subdiv_N_Alpha
-		-- local MGRS_Chute_10KM = grid.UTMZone.."_"..grid.MGRSDigraph.."_"..subdiv_E_Num.."_"..subdiv_N_Num
-
-		-- -- env.info( "DCE_CheckImmediatSAR? A4 Start if ejectedPilot MGRS_Chute "..MGRS_Chute)
-		-- -- env.info( "DCE_CheckImmediatSAR? A5 Start if ejectedPilot MGRS_Chute_10KM "..MGRS_Chute_10KM)
-
+		
 		local t = timer.getTime()
 
 		ejPilot.type = "ejectedPilot"
@@ -908,21 +873,23 @@ function CheckImmediatSAR(ejPilot)
 		local wrongSide = false
 		local ENI_Side = DCS_ENI_Side[ejPilot.sideName]
 		if campL.boundary and campL.boundary[ENI_Side] and campL.boundary[ENI_Side] ~= nil then
-			wrongSide =  CheckPointInPoly_XY_2({x=ejPilot.pos.x,y=ejPilot.pos.y} , campL.boundary[ENI_Side])
+			wrongSide = CheckPointInPoly_XY_2({x=ejPilot.pos.x,y=ejPilot.pos.y} , campL.boundary[ENI_Side])
 			env.info( "DCE_CheckImmediatSAR C ?  boundary wrongSide ? __"..tostring(wrongSide))
 			if wrongSide  then
-				env.info( "DCE_CheckImmediatSAR? D boundary rightSideOfBorder __FALSE__ Return ")
+                env.info("DCE_CheckImmediatSAR? D boundary rightSideOfBorder __FALSE__ Return ")
+				local dt = os.clock() - t0
+				Perf_S = Perf_S + dt
 				return
 			end
 		end
 
 		--si ejectedPilot sur une VILLE on ne lance pas de SAR ni de CSAR
-		local NameTheatre =  string.lower(env.mission.theatre)
-		env.info( "DCE_CheckImmediatSAR? NameTheatre "..tostring(NameTheatre))
-		if circleCity and circleCity[NameTheatre] then
+		local nameTheatre =  string.lower(env.mission.theatre)
+		env.info( "DCE_CheckImmediatSAR? NameTheatre "..tostring(nameTheatre))
+		if circleCity and circleCity[nameTheatre] then
 			env.info( "DCE_CheckImmediatSAR? Passe 1 NameTheatre  ")
 
-			for nCircle, circle in ipairs(circleCity[NameTheatre]) do
+			for nCircle, circle in ipairs(circleCity[nameTheatre]) do
 				--voir le code identique sur DC_UpdateSAR.lua
 
 				local mission2d_x = 58538.7 - (47.2304 * circle.pixel_y )
@@ -961,7 +928,9 @@ function CheckImmediatSAR(ejPilot)
 							env.info("DCE_SAR zone CITY POW B ")
 						end
 
-						ejPilot.landingPossible = false
+                        ejPilot.landingPossible = false
+						local dt = os.clock() - t0
+						Perf_S = Perf_S + dt
 						return
 
 					end
@@ -1027,9 +996,6 @@ function CheckImmediatSAR(ejPilot)
 			local tempReact = (selected_distance * 30) / 6000
 			timer.scheduleFunction(PedroSAR, {selectedPoint, ejPilot.pos}, timer.getTime() + tempReact)
 
-		-- elseif ZoneSAR[pilot.MGRS_Chute] and (ZoneSAR[pilot.MGRS_Chute].groupSAR == "" or ZoneSAR[pilot.MGRS_Chute].groupSAR == nil or ZoneSAR[pilot.MGRS_Chute].groupSAR == false) then
-
-		
 		elseif chute and (not chute.groupSAR or chute.groupSAR == "") then
 
 			env.info( "DCE_CheckImmediatSAR? FFa >6000 donc TERRESTRE?   ")
@@ -1107,6 +1073,10 @@ function CheckImmediatSAR(ejPilot)
 			end
 		end
 	end
+
+	local dt = os.clock() - t0
+    Perf_S = Perf_S + dt
+	env.info("DCE_CheckImmediatSAR FIN Z " .. tostring(ejPilot.name) .. " dt " .. tostring(dt))
 end
 
 --{selectedPoint, ejectedPilot}
@@ -1410,11 +1380,9 @@ local function checkAddingManhunt()
 			if ejPil.name and ejPil.embarked ~= true and ( not nbOfTargetMan[MGRS_Chute] or nbOfTargetMan[MGRS_Chute] < 2 )   then
 				local unitEjPil = Unit.getByName(ejPil.name)
 
-				if unitEjPil and ejPil.coalitionId and  nbManhunt[ejPil.coalitionId] and  nbManhunt[ejPil.coalitionId] < 19 then
+				if unitEjPil and ejPil.coalitionId and nbManhunt[ejPil.coalitionId] and nbManhunt[ejPil.coalitionId] < NB_MAX_MANHUNT then
 					env.info( "")
 					env.info( "DCE_SAR:checkAddingManhunt   ejectedPilot.name | "..tostring(ejPil.name).." ejectedPilot.inTheEnemyCamp "..tostring( ejPil.inTheEnemyCamp))
-
-					env.info( "DCE_SAR:checkAddingManhunt PASSE BBB ")
 
 					local rightSideOfBorder
 					if campL.boundary and campL.boundary[ejPil.sideName] and campL.boundary[ejPil.sideName] ~= nil then
@@ -1703,6 +1671,13 @@ local function guideTreuilSAR(arg_uSAR, arg_EjPilPosVec3, arg_EjPil_tab)
 end
 
 function LoopSAR()
+
+	local t0
+    if campL.debug then
+        t0 = os.clock()
+		Perf_D_N = Perf_D_N + 1
+    end
+	
 	--** allume le fumigene lorsque la SAR est proche
 	--** déclare le pilote dans l'helico meme s'il ne peut pas se poser
 
@@ -1912,6 +1887,11 @@ function LoopSAR()
 			end
 		end
 	end
+
+    if campL.debug then
+		local dt = os.clock() - t0
+		Perf_D = Perf_D + dt
+    end
 
 	return timer.getTime() + 10
 

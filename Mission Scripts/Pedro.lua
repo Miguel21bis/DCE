@@ -301,7 +301,7 @@ local function createPedro(arg)
 end
 
 function NeedPedro(uCV_Name, parameters)
-	if uCV_Name  then
+	if uCV_Name then
 		timer.scheduleFunction(createPedro, { uCV_Name, parameters }, timer.getTime() + 30)
 	end
 end
