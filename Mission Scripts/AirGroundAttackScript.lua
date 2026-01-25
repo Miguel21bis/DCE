@@ -74,22 +74,25 @@ versionDCE["Mission Scripts/AirGroundAttackScript.lua"] = "1.2.4"
 
 local attackCounter	= {}																		--table to count how many flights have already attacked the same target and distribute target sub-elements for subsequent attacks accordingly
 
-function AirGroundAttackTask(flightName, target, weaponType, expendQty, dive, offsetAngle, climbAngle, popAlt, attackDist, reattack, debug)
+function AirGroundAttackTask(flightName, target, weaponType, expendQty, dive, offsetAngle, climbAngle, popAlt, attackDist, reattack)
 	local wingman = Group.getByName(flightName):getUnits()
 	
 	--get flight route of group for egress and resume route after attack
-	local function getPlaneGroupRoute(groupname)
-		for coalition_name,coal in pairs(env.mission.coalition) do
-			for country_n,country in pairs(coal.country) do
-				if country.plane then
-					for group_n,group in pairs(country.plane.group) do
-						if groupname == env.getValueDictByKey(group.name) then					--find group in env.mission
-							return group.route.points											--return the route
-						end
-					end
-				end
-			end
-		end
+    local function getPlaneGroupRoute(groupname)
+
+		return MissGroupByName[groupname].route.points
+		
+		-- for coalition_name,coal in pairs(env.mission.coalition) do
+		-- 	for country_n,country in pairs(coal.country) do
+		-- 		if country.plane then
+		-- 			for group_n,group in pairs(country.plane.group) do
+		-- 				if groupname == env.getValueDictByKey(group.name) then					--find group in env.mission
+		-- 					return group.route.points											--return the route
+		-- 				end
+		-- 			end
+		-- 		end
+		-- 	end
+		-- end
 	end
 	local route	= getPlaneGroupRoute(flightName)												--get the route of the flight from env.mission
 	local AttackWpN																				--number of attack waypoint in route
@@ -114,7 +117,7 @@ function AirGroundAttackTask(flightName, target, weaponType, expendQty, dive, of
 	
     if EgressWpN > #route then
         EgressWpN = #route
-		env.info("AirGroundAttackTask ".. flightName .. " EgressWpN exceeded route length, set to last WP")
+		env.info("DCE_Bug AirGroundAttackTask ".. flightName .. " EgressWpN exceeded route length, set to last WP")
     end
 	
 	--turn radius
@@ -245,13 +248,14 @@ function AirGroundAttackTask(flightName, target, weaponType, expendQty, dive, of
 		weaponType = {weaponType}																--turn weapon type into an array
 	end
 	
+	if campL.debug then
+        env.info("DEBUG #route=" .. tostring(#route))
+        env.info("DEBUG route[EgressWpN]=" .. tostring(route and route[EgressWpN]))
+        env.info("DEBUG route[EgressWpN].x=" .. tostring(route and route[EgressWpN] and route[EgressWpN].x))
+        env.info("DEBUG targetList[1]=" .. tostring(targetList[1]))
+        env.info("DEBUG targetList[1].x=" .. tostring(targetList[1] and targetList[1].x))
+    end
 	
-	env.info("DEBUG #route=" .. tostring(#route))
-	env.info("DEBUG route[EgressWpN]=" .. tostring(route and route[EgressWpN]))
-	env.info("DEBUG route[EgressWpN].x=" .. tostring(route and route[EgressWpN] and route[EgressWpN].x))
-	env.info("DEBUG targetList[1]=" .. tostring(targetList[1]))
-	env.info("DEBUG targetList[1].x=" .. tostring(targetList[1] and targetList[1].x))
-
 	----- egress direction -----
 	local EgressAngle																			--angle between attack axis and egress direction (positive to the right, negative to the left)
 	local EgressVec2 = {																		--vector from target to egress waypoint
