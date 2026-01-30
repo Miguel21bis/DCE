@@ -1,8 +1,7 @@
 --Various functions
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M71_c
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Functions.lua"] = "2.20.137"
+versionDCE["UTIL_Functions.lua"] = "2.20.138"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -5923,11 +5922,11 @@ function AddIconLayer(layersObjects, targetListRequired)
 
                             -- Trouver la position la plus à gauche (minX) et la plus en bas (minY) de tous les éléments du groupe
                             -- On initialise minX et minY si ce n'est pas déjà fait
-                            if not x_Legend or element.x < x_Legend then
-                                x_Legend = element.x
+                            if not x_Legend or element.x -200 < x_Legend then
+                                x_Legend = element.x -200
                             end
-                            if not y_Legend or element.y < y_Legend then
-                                y_Legend = element.y
+                            if not y_Legend or element.y - 200 < y_Legend then
+                                y_Legend = element.y - 200
                             end
 
                             nb = nb + 1
