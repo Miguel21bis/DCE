@@ -956,6 +956,9 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					elseif player_task == "SAR" then
 						local airbase = tempPlayer.airbase
 						s = s .. "You are assigned to ground alert SAR duty at " .. airbase ..  ".\n"
+						.. "Your main mission is SAR for pilots shot down in friendly or enemy territory not too far from the border.\n"
+						.. "You have artillery support up to 20 km beyond the border.\n"
+						.. "You can view the list of pilots shot down during previous missions in the SAR menu with F10.\n"
 					--CSAR
 					elseif player_task == "CSAR" then
 						s = s .. "You are tasked to Search and Rescue " .. target_name  ..  ".\n"
@@ -2560,8 +2563,7 @@ if BriefingImagesR and camp.BriefingImagesR and not TaskRefused then
 	camp.BriefingImagesR = nil
 end
 
--- _affiche(mission.pictureFileNameB, "DcBrief FF0 mission.pictureFileNameB ")
--- for n = 1, #BriefingImagesB do
+
 local frontlineN = 0
 for imageN, image in pairs(BriefingImagesB) do
 	local found_Frontline = false
@@ -2574,32 +2576,25 @@ for imageN, image in pairs(BriefingImagesB) do
 		mission.maxDictId = mission.maxDictId + 1
 		mapResource["ResKey_ImageBriefing_" .. mission.maxDictId] = image     --define key in mapResource file
 		table.insert(mission.pictureFileNameB, "ResKey_ImageBriefing_" .. mission.maxDictId)  --add picture to blue briefing
-		-- print("DcBrief FF1 table.insert(mission.pictureFileNameB  "..#mission.pictureFileNameB.." "..mission.pictureFileNameB[#mission.pictureFileNameB])
-		-- _affiche(mission.pictureFileNameB, "DcBrief FF2 mission.pictureFileNameB ")
 	end
 end
 
 frontlineN = 0
-for imageN, image in pairs(BriefingImagesR) do
-	local found_Frontline = false
-	if string.find(image, "Frontline") then
-		found_Frontline = true
-		frontlineN = frontlineN + 1
-	end
+if SinglePlayer then
+	for imageN, image in pairs(BriefingImagesR) do
+		local found_Frontline = false
+		if string.find(image, "Frontline") then
+			found_Frontline = true
+			frontlineN = frontlineN + 1
+		end
 
-	if not found_Frontline or (found_Frontline and frontlineN == 1) then
-		mission.maxDictId = mission.maxDictId + 1
-		mapResource["ResKey_ImageBriefing_" .. mission.maxDictId] = image     --define key in mapResource file
-		table.insert(mission.pictureFileNameR, "ResKey_ImageBriefing_" .. mission.maxDictId)  --add picture to blue briefing
+		if not found_Frontline or (found_Frontline and frontlineN == 1) then
+			mission.maxDictId = mission.maxDictId + 1
+			mapResource["ResKey_ImageBriefing_" .. mission.maxDictId] = image     --define key in mapResource file
+			table.insert(mission.pictureFileNameR, "ResKey_ImageBriefing_" .. mission.maxDictId)  --add picture to blue briefing
+		end
 	end
 end
-
--- for n = 1, #BriefingImagesR do
--- 	mission.maxDictId = mission.maxDictId + 1
--- 	mapResource["ResKey_ImageBriefing_" .. mission.maxDictId] = BriefingImagesB[n]     --define key in mapResource file
--- 	table.insert(mission.pictureFileNameR, "ResKey_ImageBriefing_" .. mission.maxDictId)  --add picture to blue briefing
--- end
-
 
 local briefingTmp = StringToTxt(dictionary.DictKey_descriptionRedTask_2)
 briefingTmp = briefingTmp.."\n\n"..StringToTxt(dictionary.DictKey_descriptionBlueTask_3)
