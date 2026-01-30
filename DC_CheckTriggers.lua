@@ -4,33 +4,13 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification: M71_c
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_CheckTriggers.lua"] = "1.16.96"
-------------------------------------------------------------------------------------------------------- 
-------------------------------------------------------------------------------------------------------- 
--- cleanCode_g				(g springCleaning)
--- adjustment_m				(m add new country if template need)(L win totalAirUnitAliveBySide)(k \\" to \")(j moveToAnotherBaseOrDeactivate name & attributes)(i add moveToAnotherBaseOrDeactivate)(h taskSelected)(g airReinforceDelay)(f add targetIsActive)(e check found activate target)(d totalAirUnitAliveBySide)(c add automaticReinforce) (a boat CampTotalTimeS)
--- debug_g					(fg -nan(ind) Return.BaseAlive)(e link of briefing)(d: ensures that DCE chooses between several ship patrol areas)(a: n'ajoute pas le texte s'il existe d�j�)
--- modification M73_d		automatic squad transfer based on available/unavailable runways/bases (c disabledByDCE)
--- modification M71_c		PayloadRestricted (c:AuthorizedLoadout )(b Action.RestrictedLoadout(file))
--- modification M70_a		GroundZoneTarget (adds the possibility of counting unit completeness by zone) 
--- modification M66_d		bombOnRunway and ActivateBaseAndItsUnits (d <0 non réparable)
--- modification M53_cd		simplification of the "Reserves" variable (cd: debug)(b: add reserve in AirUnitAlive)
--- modification M51_a		kill Pedro when CV sink
--- modification M50_b		Records landings for later use in logistics (C-130, Transport...) (b: suivi en %)
--- modification M48_h		Accept result mission (h: debug firstNews) (g: addImage trigger)(f: debug)(d: garde en memoire le txt camp["Briefing_text"])
--- modification M40_l		Template Active GroundGroup moving front (l: TemplateDeactivate)(k: update route)(ij: bug insert) (fgh: sideBase)(e: heading unite & group)(d: movedXY bug) (c: new unitId) (b: bug 2.7)
--- modification M38_j		Check and Help CampaignMaker (ij more info)(h: KillTarget step by step)
--- modification M33_n 		Custom Briefing (n don't overwrite old briefing info)(lm: use  DictKey_descriptionText)
--- modification M19_f		RepairGround
--- modification M11			Multiplayer
-------------------------------------------------------------------------------------------------------- 
+versionDCE["DC_CheckTriggers.lua"] = "1.16.97"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
 	print("START DC_CheckTriggers.lua "..versionDCE["DC_CheckTriggers.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 	-- os.execute 'pause'
 end
-
 
 
 --List of Return functions to build conditions:
@@ -897,7 +877,7 @@ Action = {}
 					if unit.name == arg2_unitName and unit.base ~= arg2_baseDestination then
 						unit.base = arg2_baseDestination										--set new airbase for unit
 						-- ActivateBaseAndAssociatedTargets(baseDestination, true)
-						Action.Text(arg2_unitName.."  move to anotherBase."..AliasBaseName(arg2_baseDestination))
+						Action.Text(arg2_unitName.."  move to anotherBase: "..AliasBaseName(arg2_baseDestination))
 					end
 				end
 			end
@@ -927,7 +907,7 @@ Action = {}
 		-- 'Action.moveToAnotherBaseOrDeactivate("28 GvIAP", {"Tiyas","Damascus Airbase"})',
 
 
-	function Action.moveToAnotherBaseOrDeactivate(unitName, tab_baseName)
+	function Action.moveToAnotherBaseOrDeactivate(unitName, baseAlternative)
 		if debugKT then print(" ->START function Action.moveToAnotherBaseOrDeactivate unitName  "..unitName) end
 		local transfertOk = false
 
@@ -955,51 +935,56 @@ Action = {}
 
 		local function checkBaseCapacity(arg2_UnitName, arg2_CheckBase)
 
-			if sideUnite == db_airbases[arg2_CheckBase].side then
+			if db_airbases[arg2_CheckBase] then
+				if sideUnite == db_airbases[arg2_CheckBase].side then
 
-				if not db_airbases[arg2_CheckBase].baseAlive then
-					Return.BaseAlive(arg2_CheckBase)
-				end
-
-				if not db_airbases[arg2_CheckBase].runwayAlive then
-					db_airbases[arg2_CheckBase].runwayAlive = 100
-				end
-
-				if IsHelicopter[typeAeronef] then
-					if db_airbases[arg2_CheckBase].baseAlive >= 20  then  --and db_airbases[checkBase].runwayAlive > 20
-						if debugKT then print(" 		-> moveToAnotherBaseOrDeactivate IsHelicopter baseAlive > 20 runwayAlive > 20 ") end
-						return true
-					else
-						return false
+					if not db_airbases[arg2_CheckBase].baseAlive then
+						Return.BaseAlive(arg2_CheckBase)
 					end
 
+					if not db_airbases[arg2_CheckBase].runwayAlive then
+						db_airbases[arg2_CheckBase].runwayAlive = 100
+					end
+
+					if IsHelicopter[typeAeronef] then
+						if db_airbases[arg2_CheckBase].baseAlive >= 20  then  --and db_airbases[checkBase].runwayAlive > 20
+							if debugKT then print(" 		-> moveToAnotherBaseOrDeactivate IsHelicopter baseAlive > 20 runwayAlive > 20 ") end
+							return true
+						else
+							return false
+						end
+
+					else
+						if db_airbases[arg2_CheckBase].baseAlive >= 20 and db_airbases[arg2_CheckBase].runwayAlive >= 50 then
+							if debugKT then print(" 		-> moveToAnotherBaseOrDeactivate PLANE baseAlive > 20 runwayAlive > 50 ") end
+							return true
+						else
+							return false
+						end
+					end
 				else
-					if db_airbases[arg2_CheckBase].baseAlive >= 20 and db_airbases[arg2_CheckBase].runwayAlive >= 50 then
-						if debugKT then print(" 		-> moveToAnotherBaseOrDeactivate PLANE baseAlive > 20 runwayAlive > 50 ") end
-						return true
-					else
-						return false
-					end
+					return false
 				end
 			else
-				return false
+				-- print("Error: Base '" .. tostring(arg2_CheckBase) .. "' does not exist in db_airbases.")
+				AddLog("Error: Base '" .. tostring(arg2_CheckBase) .. "' from oob_air/baseAlternative, does not exist in db_airbases.")
 			end
 		end
 
 		-- local placeToBeFound = false
-		if type(tab_baseName) == "string" then
-			if checkBaseCapacity(unitName, tab_baseName) then
-				Action.AirUnitBase(unitName, tab_baseName)
+		if type(baseAlternative) == "string" then
+			if checkBaseCapacity(unitName, baseAlternative) then
+				Action.AirUnitBase(unitName, baseAlternative)
 				transfertOk = true
 			end
-		elseif type(tab_baseName) == "table" and #tab_baseName == 1 then
-			if checkBaseCapacity(unitName, tab_baseName[1]) then
-				Action.AirUnitBase(unitName, tab_baseName[1])
+		elseif type(baseAlternative) == "table" and #baseAlternative == 1 then
+			if checkBaseCapacity(unitName, baseAlternative[1]) then
+				Action.AirUnitBase(unitName, baseAlternative[1])
 				transfertOk = true
 			end
-		elseif type(tab_baseName) == "table" and #tab_baseName > 1 then
+		elseif type(baseAlternative) == "table" and #baseAlternative > 1 then
 			-- local placeToBeFound = false
-			for n, baseName in ipairs(tab_baseName) do
+			for n, baseName in ipairs(baseAlternative) do
 				if debugKT then print(" 		-> moveToAnotherBaseOrDeactivate table test baseName "..baseName) end
 				if checkBaseCapacity(unitName, baseName) then
 					Action.AirUnitBase(unitName, baseName)
@@ -2492,7 +2477,7 @@ for baseName, base in pairs(db_airbases) do
 				if debugKT then print(" 	airbase < RepairBaseMinimumDestroyed  active: FALSE "..baseName) end
 
 				Action.ActivateBaseAndItsUnits(baseName, false)
-				Action.Text(baseName.." airbase is destroyed and will not be able to support air units.")
+				Action.Text(AliasBaseName(baseName).." airbase is destroyed and will not be able to support air units.")
 			end
 		end
 	end
