@@ -496,6 +496,8 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 		MpIdInterceptor = 1
 
 		io.write( "\n")
+		print("\n\n Day or Night? : "..Daytime)
+		io.write( "\n")
 
 		local tabSelect = {}																		--table pour afficher * devant chaque selection
 		local badEntry = false

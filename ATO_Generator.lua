@@ -179,10 +179,11 @@ if Debug.debug and oob_air then
 
 						checkNbPlane[squadSide]["beforMission"].alreadyInFlight = checkNbPlane[squadSide]["beforMission"].alreadyInFlight + #squad.unavailable
 					else
-						print("AtoG strange, squad.unavailable on this squad ")
-						_affiche(squad, "squad")
-						if Debug.debug then os.execute 'pause'
-						end
+						-- print("AtoG strange, squad.unavailable on this squad "..squadName)
+						AddLog("AtoG strange, squad.unavailable on this squad "..squadName)
+						-- _affiche(squad, "squad")
+						-- if Debug.debug then os.execute 'pause'
+						-- end
 
 					end
 				end
