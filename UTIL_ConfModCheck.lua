@@ -103,6 +103,7 @@ mission_ini_check = {
 	silenceATC = "auto",						-- ("auto"/false/true)		[default: "auto"]	auto: silence only MP silences the ATC | useful for many multiplayer flights where the ATC talks and blocks repeatedly (except CV)
 	load_CTLD = false,							-- (true/false)				[default: false]	loads the CTLD script
 	load_mist = false,							-- (true/false)				[default: false]	loads the mist script
+	preset_AAA_Barrage = 1,						-- (0/6)					[default: 0]		active loads a preset from the AAA_Barrage script (with the kind permission of Bandit648)
 
 	--***aircraft mod option***
 	--***F-4E option***

@@ -4901,29 +4901,6 @@ end
 --rempli la table TaskByPlane avec les Tasks qui ne sont rempli que dans Data_divers
 function DataCompilation_TaskByPlane()
 
-	-- local cloneData = Deepcopy(Data_divers)
-
-	-- for _, planeDataA in pairs(Data_divers) do
-	-- 	if planeDataA.addTasks then
-	-- 		for _, add_task in pairs(planeDataA.addTasks) do
-	-- 			local foundTask = false
-	-- 			for cloneType, cloneTYpe in pairs(cloneData) do
-	-- 				if cloneTYpe.Tasks then
-	-- 					for _, cloneTask in pairs(cloneTYpe.Tasks) do
-	-- 						if cloneTask == add_task then
-	-- 							foundTask = true
-	-- 							break
-	-- 						end
-	-- 					end
-	-- 				end
-	-- 			end
-	-- 			if not foundTask then
-	-- 				table.insert(planeDataA.Tasks, add_task)
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
-
 
 	-- On parcourt chaque entrée de Data_divers
 	for planeName, planeData in pairs(Data_divers) do
@@ -4976,3 +4953,105 @@ function DataCompilation_TaskByPlane()
 		end
 	end
 end
+
+Preset_AAA = {
+    [1] = {
+        -- Light / sparse (NAM) ://////////////////
+        -- Density / pattern
+        EMITTERS                 = 4,   -- number of parallel emitters (set to 6 to match your goal)
+        CLUSTER_MIN              = 1,   -- bursts per event
+        CLUSTER_MAX              = 1,
+        -- Offset / aim around the aircraft
+		LEAD_SECONDS             = 2, -- lead target based on velocity (0 to disable)
+        -- Explosion strength
+        POWER_MIN                = 4,
+        POWER_MAX                = 8,
+        -- Multi-target behavior
+        MAX_SIMULTANEOUS_TARGETS = 4,     -- cap number of distinct aircraft we engage at once
+    },
+    [2] = {
+        -- Light /dense
+        -- Density / pattern
+        EMITTERS                 = 6,   -- number of parallel emitters (set to 6 to match your goal)
+        CLUSTER_MIN              = 4,   -- bursts per event
+        CLUSTER_MAX              = 4,
+        -- Offset / aim around the aircraft
+        LEAD_SECONDS             = 3, -- lead target based on velocity (0 to disable)
+        -- Explosion strength
+        POWER_MIN                = 4,
+        POWER_MAX                = 8,
+        -- Multi-target behavior
+        MAX_SIMULTANEOUS_TARGETS = 6,     -- cap number of distinct aircraft we engage at once
+    },
+	[3] = {
+        -- Medium / sparse
+        -- Density / pattern
+        EMITTERS                 = 4,   -- number of parallel emitters (set to 6 to match your goal)
+        CLUSTER_MIN              = 1,   -- bursts per event
+        CLUSTER_MAX              = 1,
+        -- Offset / aim around the aircraft
+        LEAD_SECONDS             = 2, -- lead target based on velocity (0 to disable)
+        -- Explosion strength
+        POWER_MIN                = 6,
+        POWER_MAX                = 12,
+        -- Multi-target behavior
+        MAX_SIMULTANEOUS_TARGETS = 4,     -- cap number of distinct aircraft we engage at once
+    },
+	[4] = {
+        -- Medium / dense
+        -- Density / pattern
+        EMITTERS                 = 6,   -- number of parallel emitters (set to 6 to match your goal)
+        CLUSTER_MIN              = 4,   -- bursts per event
+        CLUSTER_MAX              = 4,
+        -- Offset / aim around the aircraft
+        LEAD_SECONDS             = 3, -- lead target based on velocity (0 to disable)
+        -- Explosion strength
+        POWER_MIN                = 6,
+        POWER_MAX                = 12,
+        -- Multi-target behavior
+        MAX_SIMULTANEOUS_TARGETS = 6,     -- cap number of distinct aircraft we engage at once
+    },
+	[5] = {
+        -- Heavy / sparse
+        -- Density / pattern
+        EMITTERS                 = 4,   -- number of parallel emitters (set to 6 to match your goal)
+        CLUSTER_MIN              = 1,   -- bursts per event
+        CLUSTER_MAX              = 1,
+        -- Offset / aim around the aircraft
+        LEAD_SECONDS             = 3, -- lead target based on velocity (0 to disable)
+        -- Explosion strength
+        POWER_MIN                = 15,
+        POWER_MAX                = 25,
+        -- Multi-target behavior
+        MAX_SIMULTANEOUS_TARGETS = 4,     -- cap number of distinct aircraft we engage at once
+    },
+	[6] = {
+        -- Heavy / sparse
+        -- Density / pattern
+        EMITTERS                 = 6,   -- number of parallel emitters (set to 6 to match your goal)
+        CLUSTER_MIN              = 2,   -- bursts per event
+        CLUSTER_MAX              = 2,
+        -- Offset / aim around the aircraft
+        LEAD_SECONDS             = 3, -- lead target based on velocity (0 to disable)
+        -- Explosion strength
+        POWER_MIN                = 15,
+        POWER_MAX                = 25,
+        -- Multi-target behavior
+        MAX_SIMULTANEOUS_TARGETS = 6,     -- cap number of distinct aircraft we engage at once
+    },
+}
+
+-- --En dur 
+-- -- Which coalition to target:
+-- local TARGET_COALITION = coalition.side.BLUE   -- coalition.side.RED
+-- local EVENT_MIN_DT             = 0.5 -- seconds between events per emitter
+-- local EVENT_MAX_DT             = 1.1
+-- local CLUSTER_RADIUS_M         = 160 -- burst spread around event center (meters)
+-- local AIM_RADIUS_M     = 450     -- how far from the aircraft the event center can be
+-- local ALTITUDE_MODE    = "AGL"   -- "MSL" or "AGL"
+-- local ALT_JITTER_M     = 120     -- +/- meters around target altitude
+-- local ALT_MIN_MSL      = 600     -- clamp for safety (MSL meters)
+-- local ALT_MAX_MSL      = 8000
+-- local STICKY_TARGET_SECONDS    = 3.0   -- how long each emitter keeps its chosen aircraft before retargeting
+-- local ALLOW_SAME_TARGET        = false -- if false, emitters will try to avoid sharing targets
+

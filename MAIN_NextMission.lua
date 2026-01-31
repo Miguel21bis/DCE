@@ -3,7 +3,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification: M90_a cleanCode_i
 if not versionDCE then versionDCE = {} end
-versionDCE["MAIN_NextMission.lua"] = "2.39.221"
+versionDCE["MAIN_NextMission.lua"] = "2.40.222"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -585,6 +585,41 @@ AssignCallnameSquad()
 -- Appel de la fonction principale
 CheckAndFixAllIds()
 
+
+--ajoute des zones en cours de campagne
+--si le fichier add_zones.lua existe, on l'ouvre et on ajoute ses informations à la table mission.zones déjà existante
+add_zones = nil   -- même nom, même casse
+
+local addZonesPath = "Init/add_zones.lua"
+testPath = io.open(addZonesPath, "r")
+
+print("DCE_Debug MainNM A : Checking for additional zones in "..addZonesPath)
+
+if testPath ~= nil then
+	print("DCE_Debug MainNM B : Additional zones found, loading zones from "..addZonesPath)
+	io.close(testPath)
+
+	dofile(addZonesPath)
+
+	print("DCE_Debug MainNM C : Merging additional zones into mission triggers add_zones: "..tostring(add_zones))
+
+	if add_zones and type(add_zones) == "table" then
+
+		local count = 0
+		for _ in pairs(add_zones) do
+			count = count + 1
+		end
+
+		print("DCE_Debug MainNM D : Found "..count.." additional zones to add")
+
+		for _, zone in pairs(add_zones) do
+			print("DCE_Debug MainNM E : Adding zone "..tostring(zone.name).." with ID "..tostring(zone.zoneId))
+			table.insert(mission.triggers.zones, zone)
+		end
+	end
+end
+
+
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_MissionScore.lua")
 
 if MissionInstance >= 2 then
@@ -1049,7 +1084,22 @@ for side, coal in pairs(mission.coalition) do
 	end
 end
 
+print("mission_ini.preset_AAA_Barrage: "..tostring(mission_ini.preset_AAA_Barrage))
 
+AAA_Barrage = nil
+--ajoute le preset AAA_Barrage s'il a été activé
+if mission_ini.preset_AAA_Barrage and type(mission_ini.preset_AAA_Barrage) == "number" then
+	print("AAA_barrage B")
+	if mission_ini.preset_AAA_Barrage > 0 then
+		print("AAA_barrage C")
+		if Preset_AAA and Preset_AAA[mission_ini.preset_AAA_Barrage] then
+			print("AAA_barrage D")
+			AAA_Barrage = Preset_AAA[mission_ini.preset_AAA_Barrage]
+		end
+	end
+end
+
+_affiche(AAA_Barrage , "AAA_Barrage ")
 --création d'un camp pour camp_status InGame nettement plus leger
 local campL = {
 
@@ -1100,6 +1150,7 @@ local campL = {
 	ShipHealth0 = camp.ShipHealth0,
 	BaseAirStart = camp.BaseAirStart,
 	Aircraft_Carriers = Aircraft_Carriers,
+	AAA_Barrage = AAA_Barrage,
 
 
 

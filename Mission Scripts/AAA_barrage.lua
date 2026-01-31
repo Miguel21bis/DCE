@@ -7,7 +7,7 @@
 -- His work delivers a true FPS‑like solution with immersive flak effects.
 -------------------------------------------------------------------------------------------------------
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/AAA_barrage.lua"] = "1.1.2"
+versionDCE["Mission Scripts/AAA_barrage.lua"] = "1.2.3"
 -------------------------------------------------------------------------------------------------------
 
 env.info("DCE START LOADING AAA_barrage.lua " .. tostring(versionDCE["Mission Scripts/AAA_barrage.lua"]))
@@ -24,29 +24,29 @@ local FIRE_ONLY_IN_ZONE        = true
 local PREFER_AIRPLANES         = true
 
 -- Density / pattern
-local EMITTERS                 = 6   -- number of parallel emitters (set to 6 to match your goal)
+local EMITTERS                 = (campL.AAA_Barrage and campL.AAA_Barrage.EMITTERS) or 6 --* number of parallel emitters (set to 6 to match your goal)
 local EVENT_MIN_DT             = 0.5 -- seconds between events per emitter
 local EVENT_MAX_DT             = 1.1
-local CLUSTER_MIN              = 4   -- bursts per event
-local CLUSTER_MAX              = 4
-local CLUSTER_RADIUS_M         = 160 -- burst spread around event center (meters)
+local CLUSTER_MIN              = (campL.AAA_Barrage and campL.AAA_Barrage.CLUSTER_MIN) or 4 --* bursts per event
+local CLUSTER_MAX              = (campL.AAA_Barrage and campL.AAA_Barrage.CLUSTER_MAX) or 4 --*
+local CLUSTER_RADIUS_M         = (campL.AAA_Barrage and campL.AAA_Barrage.EMICLUSTER_RADIUS_MTTERS) or 170 --* burst spread around event center (meters)
 
 -- Offset / aim around the aircraft
 local AIM_RADIUS_M             = 450 -- how far from the aircraft the event center can be
-local LEAD_SECONDS             = 0.6 -- lead target based on velocity (0 to disable)
+local LEAD_SECONDS             = 0.6 --* lead target based on velocity (0 to disable)
 
 -- Altitude behavior
-local ALTITUDE_MODE            = "MSL" -- "MSL" or "AGL"
+local ALTITUDE_MODE            = "AGL" -- "MSL" or "AGL"
 local ALT_JITTER_M             = 120   -- +/- meters around target altitude
-local ALT_MIN_MSL              = 200   -- clamp for safety (MSL meters)
-local ALT_MAX_MSL              = 12000
+local ALT_MIN_MSL              = 600   -- clamp for safety (MSL meters)
+local ALT_MAX_MSL              = 8000
 
 -- Explosion strength
-local POWER_MIN                = 4
-local POWER_MAX                = 12
+local POWER_MIN                = (campL.AAA_Barrage and campL.AAA_Barrage.POWER_MIN) or 4  --*
+local POWER_MAX                = (campL.AAA_Barrage and campL.AAA_Barrage.POWER_MAX) or 12  --*
 
 -- Multi-target behavior
-local MAX_SIMULTANEOUS_TARGETS = 6     -- cap number of distinct aircraft we engage at once
+local MAX_SIMULTANEOUS_TARGETS = 6     --* cap number of distinct aircraft we engage at once
 local STICKY_TARGET_SECONDS    = 3.0   -- how long each emitter keeps its chosen aircraft before retargeting
 local ALLOW_SAME_TARGET        = false -- if false, emitters will try to avoid sharing targets
 
@@ -353,4 +353,4 @@ for _, name in ipairs(aaaZones) do
     createAAAZone(name)
 end
 
-env.info("AAA_barrage loading complete")
+env.info("AAA_barrage loading complete, POWER_MAX: " .. tostring(POWER_MAX))
