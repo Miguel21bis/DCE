@@ -123,12 +123,16 @@ for missSideName, side in pairs(mission.coalition) do
 									--met à jour les unitId qui peuvent changer, si le base_mission à été changé aussi
 									-- tres important pour lier les pistes (FARP, base, CV CVN ) aux warehouses
 									for oobUnitN, oobUnit in ipairs(oobGroup.units) do
-										if warehouses.warehouses[missGroup.units[oobUnitN].unitId] then
-											if oobUnit.unitId ~= missGroup.units[oobUnitN].unitId then
-												oobUnit.unitId = missGroup.units[oobUnitN].unitId
+										if oobUnitN and missGroup.units[oobUnitN] then
+											local unitId = missGroup.units[oobUnitN].unitId
+										
+											if unitId and warehouses.warehouses[unitId] then
+												if oobUnit.unitId ~= unitId then
+													oobUnit.unitId = unitId
 
-												print("DcUOOBG miseAJour_ warehouses Id-- -- > C " .. missCategory .. " " .. oobUnit.type.." Id From missGroup.units "..missGroup.units[oobUnitN].unitId)
-												os.execute 'pause'
+													print("DcUOOBG miseAJour_ warehouses Id-- -- > C " .. missCategory .. " " .. oobUnit.type.." Id From missGroup.units "..missGroup.units[oobUnitN].unitId)
+													os.execute 'pause'
+												end
 											end
 										end
 									end
