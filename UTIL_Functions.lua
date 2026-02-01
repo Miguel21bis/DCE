@@ -5824,6 +5824,10 @@ function AddIconLayer(layersObjects, targetListRequired)
             ["type"] = "txt",
             ["data"] = "CC",
         },
+		["runway part"] = {
+            ["type"] = "txt",
+            ["data"] = "RW",
+        },
     }
 
     -- Les couleurs dans DCS sont généralement définies au format hexadécimal ARGB (Alpha, Rouge, Vert, Bleu).
