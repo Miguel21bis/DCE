@@ -7,7 +7,7 @@
 -- His work delivers a true FPS‑like solution with immersive flak effects.
 -------------------------------------------------------------------------------------------------------
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/AAA_barrage.lua"] = "1.2.4"
+versionDCE["Mission Scripts/AAA_barrage.lua"] = "1.2.5"
 -------------------------------------------------------------------------------------------------------
 
 env.info("DCE START LOADING AAA_barrage.lua " .. tostring(versionDCE["Mission Scripts/AAA_barrage.lua"]))
@@ -282,7 +282,7 @@ local function createAAAZone(zoneName)
 				emitterState[emitterId] = nil
                 return t + 1.0
             else
-				env.info("AAA_barrage FLAK: #eligible " .. tostring(#eligible))
+				-- env.info("AAA_barrage FLAK: #eligible " .. tostring(#eligible))
 			end
 
 			-- Cap how many aircraft we engage at once (<= 6)
@@ -301,14 +301,14 @@ local function createAAAZone(zoneName)
 			local unit = pickTargetForEmitter(emitterId, engagementSet, t, reserved)
 			if not unit then
 				emitterState[emitterId] = nil
-				env.info("AAA_barrage FLAK: return not unit " .. tostring(t + 0.25))
+				-- env.info("AAA_barrage FLAK: return not unit " .. tostring(t + 0.25))
 				return t + 0.25
 			end
 
 			local tgt = buildTargetState(unit)
 			if not tgt then
                 -- Target moved/died/out of zone; drop sticky and retry soon
-				env.info("AAA_barrage FLAK: return not tgt " .. tostring(t + 0.25))
+				-- env.info("AAA_barrage FLAK: return not tgt " .. tostring(t + 0.25))
 				emitterState[emitterId] = nil
 				return t + 0.25
 			end
@@ -319,7 +319,7 @@ local function createAAAZone(zoneName)
 
 			-- Cluster bursts
             local n = math.random(CLUSTER_MIN, CLUSTER_MAX)
-			env.info("AAA_barrage FLAK: Cluster bursts " .. tostring(n))
+			-- env.info("AAA_barrage FLAK: Cluster bursts " .. tostring(n))
 			for _ = 1, n do
 				local dx, dz = randInCircle(CLUSTER_RADIUS_M)
 
@@ -327,7 +327,7 @@ local function createAAAZone(zoneName)
 				alt = clamp(alt, ALT_MIN_MSL, ALT_MAX_MSL)
 
                 local power = math.random(POWER_MIN, POWER_MAX)
-				env.info("AAA_barrage FLAK: spawnExplosionAt, power: " .. tostring(power))
+				-- env.info("AAA_barrage FLAK: spawnExplosionAt, power: " .. tostring(power))
 				spawnExplosionAt(cx + dx, cz + dz, alt, power)
 			end
 
