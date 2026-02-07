@@ -3,7 +3,7 @@
 --Functions accessed via LUA Run Script
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "3.16.57"
+versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "3.16.58"
 ------------------------------------------------------------------------------------------------------- 
 
 if not campL.debugInGamePopup then
@@ -92,8 +92,12 @@ DCE_hotspotCellSize = 100000 -- même que ton clusterThreshold
 
 
 GroupRadioMenus = {} -- [gid] = { id1, id2, ... }
-LastMenuBuild = {}   -- [gid] = time
-GroupEWRMenus = {}   -- [gid] = { on = {}, off = {} }
+-- GroupEWRMenus = GroupEWRMenus or {}
+GroupMenusBuilt = GroupMenusBuilt or {}
+
+GroupEWRMenus = GroupEWRMenus or {}
+PlayerGroup = PlayerGroup or {}
+
 
 
 local fuelCacheCooldown = 5   -- secondes entre deux lectures DCS par avion
@@ -2918,84 +2922,74 @@ function EWR_OFF_old(playerName)
 	end
 end
 
-function EWR_ON(playerName)
-
-    local opt = EWR_optionPlayer[playerName]
-    if not opt then return end
-
-    opt.EWR_on = true
 
 
-    -- retrouver groupe via EWR table
-    for gid, ewr in pairs(GroupEWRMenus) do
+-- local function removeMenuId(gid, id)
 
-        local p = ewr.players[playerName]
+--     if not id then return end
 
-        if p then
+--     missionCommands.removeItem(id)
 
-            -- supprimer ON
-            if p.idOn then
-                missionCommands.removeItem(p.idOn)
-                p.idOn = nil
-            end
+--     local t = GroupRadioMenus[gid]
+--     if not t then return end
+
+--     for i = #t, 1, -1 do
+--         if t[i] == id then
+--             table.remove(t, i)
+--             break
+--         end
+--     end
+-- end
 
 
-            -- créer OFF
-            local idOff = missionCommands.addCommandForGroup(
-                gid,
-                playerName,
-                ewr.subOff,
-                EWR_OFF,
-                playerName
-            )
 
-            table.insert(GroupRadioMenus[gid], idOff)
+-- =================================================
+-- === EWR TOGGLE
+-- =================================================
 
-            p.idOff = idOff
-            p.state = true
+function EWR_TOGGLE(playerName)
 
-            return
+    if not playerName then return end
+
+    env.info("DCE_EWR_TOGGLE Player "..playerName)
+
+    if not EWR_optionPlayer[playerName] then
+        EWR_optionPlayer[playerName] = { EWR_on = false }
+    end
+
+
+    -- toggle state
+    local newState = not EWR_optionPlayer[playerName].EWR_on
+    EWR_optionPlayer[playerName].EWR_on = newState
+
+	local gid = PlayerGroup[playerName]
+	if gid and GroupEWRMenus[gid] and GroupEWRMenus[gid].players[playerName] then
+		GroupEWRMenus[gid].players[playerName].EWR_on = newState
+	end
+
+
+    env.info("DCE_EWR_TOGGLE Set "..playerName.." = "..tostring(newState))
+
+
+    -- retrouver groupe
+    local gid = nil
+
+    for gId, data in pairs(GroupEWRMenus) do
+        if data.buttons[playerName] then
+            gid = gId
+            break
         end
     end
-end
 
-function EWR_OFF(playerName)
-
-    local opt = EWR_optionPlayer[playerName]
-    if not opt then return end
-
-    opt.EWR_on = false
-
-
-    for gid, ewr in pairs(GroupEWRMenus) do
-
-        local p = ewr.players[playerName]
-
-        if p then
-
-            if p.idOff then
-                missionCommands.removeItem(p.idOff)
-                p.idOff = nil
-            end
-
-
-            local idOn = missionCommands.addCommandForGroup(
-                gid,
-                playerName,
-                ewr.subOn,
-                EWR_ON,
-                playerName
-            )
-
-            table.insert(GroupRadioMenus[gid], idOn)
-
-            p.idOn = idOn
-            p.state = false
-
-            return
-        end
+    if not gid then
+        env.info("DCE_EWR_TOGGLE No gid found for "..playerName)
+        return
     end
+
+
+    rebuildEWR(gid)
 end
+
 
 
 
@@ -4100,6 +4094,8 @@ end
 local function addFuncs(gId, gObj, pName)
 	env.info("DCE_addFuncs _A gid " .. tostring(gId) .. " Group " .. tostring(gObj) .. " argPlayerName: " .. tostring(pName))
 
+	trigger.action.outText("DCE_addFuncs gid " .. tostring(gId) .. " Group " .. tostring(gObj) .. " argPlayerName: " .. tostring(pName), 10)
+
 
 	--si aucun argument, on s'appui sur la liste des joueurs fait maison
 	if not gId or not gObj then
@@ -4116,182 +4112,177 @@ local function addFuncs(gId, gObj, pName)
 		end
 	end
 
-    if gId and gObj then
-		
-		local now = timer.getTime()
+	if gId and gObj then
 
-		--C+
-		if LastMenuBuild[gId] and (now - LastMenuBuild[gId] < 3) then
-			env.info("DCE_addFuncs: rebuild ignored (too soon)")
-			return
+		env.info("DCE_addFuncs _B  MAKE addFuncs() gid " .. tostring(gId) .. " Group " .. tostring(gObj) .. " argPlayerName: " .. tostring(pName))
+
+		local firstBuild = false
+
+		if not GroupMenusBuilt[gId] then
+			GroupMenusBuilt[gId] = true
+			firstBuild = true
+			env.info("DCE_addFuncs _B2  First build for group " .. tostring(gId) .. " Group " .. tostring(gObj) .. " argPlayerName: " .. tostring(pName))
 		end
 
-		LastMenuBuild[gId] = now
-
-
-		-- Nettoyage ancien menu
-        if GroupRadioMenus[gId] then
-            for _, cmdId in ipairs(GroupRadioMenus[gId]) do
-                missionCommands.removeItem(cmdId)
-            end
-        end
-		--C-
-
-		GroupRadioMenus[gId] = {}
-
-		-- if not EWR_optionPlayer[pName] then--C-
-		if pName and not EWR_optionPlayer[pName] then--C+
-			EWR_optionPlayer[pName] = {
-				EWR_on = false,
-			}
+		
+		if not GroupMenusBuilt[gId] then
+			GroupMenusBuilt[gId] = true
+			env.info("DCE_addFuncs _B2  First build for group " .. tostring(gId) .. " Group " .. tostring(gObj) .. " argPlayerName: " .. tostring(pName))
 		end
 
+		env.info("DCE_addFuncs _B3  First build " .. tostring(firstBuild) .. " for group " .. tostring(gId) .. " Group " .. tostring(gObj) .. " argPlayerName: " .. tostring(pName))
 
-		-- ajoute les nouvelles commandes F10 **************************************
-		local id = missionCommands.addCommandForGroup( gId, "Fuel Check", nil, FuelCheck, { gid = gId, groupObject = gObj }	)
-		table.insert(GroupRadioMenus[gId], id)
+		if firstBuild then
 
-		local subR_A = missionCommands.addSubMenuForGroup(gId, "Urgent request", nil)
-		table.insert(GroupRadioMenus[gId], subR_A)
+			env.info("DCE_addFuncs _C  Build F10 menu for group " .. tostring(gId) .. " Group " .. tostring(gObj) .. " argPlayerName: " .. tostring(pName))
 
-		id = missionCommands.addCommandForGroup(gId, "Urgent_Refueling", subR_A, ReFueling, gObj)
-        table.insert(GroupRadioMenus[gId], id)
-		
-		id = missionCommands.addCommandForGroup(gId, "Urgent_RequestCAP", subR_A, RequestCAP, gObj)
-        table.insert(GroupRadioMenus[gId], id)
-		
-		id = missionCommands.addCommandForGroup(gId, "Package_All_RTB", subR_A, RtbPack, gObj)
-        table.insert(GroupRadioMenus[gId], id)
-
-		id = missionCommands.addCommandForGroup(gId, "Package_Strike_RTB", subR_A, RtbStrikePack, gObj)
-        table.insert(GroupRadioMenus[gId], id)
-
-		id = missionCommands.addCommandForGroup(gId, "Package_SEAD_RTB", subR_A, RtbSEADPack, gObj)
-		table.insert(GroupRadioMenus[gId], id)
-
-		id = missionCommands.addCommandForGroup(gId, "BullsEye_LongLat", nil, BullsEye, gObj)
-        table.insert(GroupRadioMenus[gId], id)
-		
-		--D-
-		-- local subR_B1 = missionCommands.addSubMenuForGroup(gId, "EWR", nil)
-		-- table.insert(GroupRadioMenus[gId], subR_B1)
-		-- local subR_B2 = missionCommands.addSubMenuForGroup(gId, "EWR ON", subR_B1)
-		-- table.insert(GroupRadioMenus[gId], subR_B2)
-        -- local subR_B3 = missionCommands.addSubMenuForGroup(gId, "EWR OFF", subR_B1)
-		-- table.insert(GroupRadioMenus[gId], subR_B3)
-		--D-
+			if GroupRadioMenus[gId] then
+				for _, cmdId in ipairs(GroupRadioMenus[gId]) do
+					missionCommands.removeItemForGroup(gId, cmdId)
+				end
+			end
 
 
-		--D+
-		-- === EWR MENU (créé une seule fois par groupe) ===
-		if not GroupEWRMenus[gId] then
-			GroupEWRMenus[gId] = {
-				players = {}
-			}
+			GroupRadioMenus[gId] = {}
 
-			local root = missionCommands.addSubMenuForGroup(gId, "EWR", nil)
-			table.insert(GroupRadioMenus[gId], root)
+			-- -- if not EWR_optionPlayer[pName] then--C-
+			-- if pName and not EWR_optionPlayer[pName] then--C+
+			-- 	EWR_optionPlayer[pName] = {
+			-- 		EWR_on = false,
+			-- 	}
+			-- 	PlayerGroup[pName] = gId
+			-- 	env.info("DCE_addFuncs _C3  Init EWR_optionPlayer for player " .. tostring(pName) .. " for group " .. tostring(gId) .. " Group " .. tostring(gObj) )
+			-- end
 
-			local subOn = missionCommands.addSubMenuForGroup(gId, "EWR ON", root)
-			local subOff = missionCommands.addSubMenuForGroup(gId, "EWR OFF", root)
 
-			table.insert(GroupRadioMenus[gId], subOn)
-			table.insert(GroupRadioMenus[gId], subOff)
+			-- ajoute les nouvelles commandes F10 **************************************
+			local id = missionCommands.addCommandForGroup( gId, "Fuel Check", nil, FuelCheck, { gid = gId, groupObject = gObj }	)
+			table.insert(GroupRadioMenus[gId], id)
 
-			GroupEWRMenus[gId].subOn  = subOn
-			GroupEWRMenus[gId].subOff = subOff
-		end
-		--D+
+			local subR_A = missionCommands.addSubMenuForGroup(gId, "Urgent request", nil)
+			table.insert(GroupRadioMenus[gId], subR_A)
 
-		
-		local subR_C1 = missionCommands.addSubMenuForGroup(gId, "Get out of the cockpit", subR_A)
-		table.insert(GroupRadioMenus[gId], subR_C1)
-
-		--D-
-		-- for playerName, value in pairs(EWR_optionPlayer) do
-		-- 	id = missionCommands.addCommandForGroup(gId, playerName .. " EWR ON", subR_B2, EWR_ON, playerName)
-        --     table.insert(GroupRadioMenus[gId], id)
-
-		-- 	id = missionCommands.addCommandForGroup(gId, playerName .. " EWR OFF", subR_B3, EWR_OFF, playerName)
-        --     table.insert(GroupRadioMenus[gId], id)
+			id = missionCommands.addCommandForGroup(gId, "Urgent_Refueling", subR_A, ReFueling, gObj)
+			table.insert(GroupRadioMenus[gId], id)
 			
-		-- 	id = missionCommands.addCommandForGroup(gId, playerName .. " Get out", subR_C1, getOut, { gObj, playerName })
-		-- 	table.insert(GroupRadioMenus[gId], id)
-		
-        -- end
-        --D-
+			id = missionCommands.addCommandForGroup(gId, "Urgent_RequestCAP", subR_A, RequestCAP, gObj)
+			table.insert(GroupRadioMenus[gId], id)
+			
+			id = missionCommands.addCommandForGroup(gId, "Package_All_RTB", subR_A, RtbPack, gObj)
+			table.insert(GroupRadioMenus[gId], id)
 
-		--D+
-		local ewr = GroupEWRMenus[gId]
+			id = missionCommands.addCommandForGroup(gId, "Package_Strike_RTB", subR_A, RtbStrikePack, gObj)
+			table.insert(GroupRadioMenus[gId], id)
 
-		if pName and not ewr.players[pName] then
-			-- état initial
-			ewr.players[pName] = {
-				state = false,
-				unit = Unit.getByName(pName) -- temporaire
-			}
+			id = missionCommands.addCommandForGroup(gId, "Package_SEAD_RTB", subR_A, RtbSEADPack, gObj)
+			table.insert(GroupRadioMenus[gId], id)
+
+			id = missionCommands.addCommandForGroup(gId, "BullsEye_LongLat", nil, BullsEye, gObj)
+			table.insert(GroupRadioMenus[gId], id)
+			
+
+			-- =================================================
+			-- === EWR ROOT MENU (1 seule fois par groupe)
+			-- =================================================
+
+			-- === EWR ROOT ===
+
+			if not GroupEWRMenus[gId] then
+
+				env.info("DCE_EWR Init root for group "..gId)
+
+				local root = missionCommands.addSubMenuForGroup(gId, "EWR", nil)
+
+				GroupEWRMenus[gId] = {
+					root = root,
+					buttons = {}
+				}
+			end
 
 
-			-- bouton ON
-			local idOn = missionCommands.addCommandForGroup(
-				gId,
-				pName,
-				ewr.subOn,
-				EWR_ON,
-				pName
-			)
 
-			table.insert(GroupRadioMenus[gId], idOn)
+			-- === EWR PLAYER REGISTER ===
 
-			ewr.players[pName].idOn = idOn
-		end
-		--D+
+			local ewr = GroupEWRMenus[gId]
 
-		if campL.SC_CarrierIntoWind == "man" then
-			missionCommands.removeItemForGroup(gId, { "CarrierIntoWind" })
-			local subR = missionCommands.addSubMenuForGroup(gId, "CarrierIntoWind", nil)
+			-- init table joueurs du groupe si absente
+			if not ewr.players then
+				ewr.players = {}
+			end
 
-			if campL.Aircraft_Carriers then
-				--TODO ajouter une condition side
-				for sideCarrier, carriers in ipairs(campL.Aircraft_Carriers) do
-					for group_n, carrier in ipairs(carriers) do
-						local carrierGroup = Group.getByName(carrier.name)
-						if carrierGroup then
-							id = missionCommands.addCommandForGroup(gId, carrier.name .. " Into Wind 30mn", subR, TurnIntoWind, { carrier.name, nil, nil, 30 })
-							table.insert(GroupRadioMenus[gId], id)
-							id = missionCommands.addCommandForGroup(gId, carrier.name .. " Into Wind 60mn", subR, TurnIntoWind, { carrier.name, nil, nil, 60 })
-							table.insert(GroupRadioMenus[gId], id)
-							id = missionCommands.addCommandForGroup(gId, carrier.name .. " Resume Route", subR, ResumeRoute, { carrier.name, nil })
-							table.insert(GroupRadioMenus[gId], id)
+			if pName and not ewr.players[pName] then
+
+
+				env.info("DCE_EWR Register player "..pName.." in group "..gId)
+
+				ewr.players[pName] = {
+					EWR_on = false
+				}
+
+				PlayerGroup[pName] = gId
+
+				rebuildEWR(gId)
+			end
+
+
+
+			
+			local subR_C1 = missionCommands.addSubMenuForGroup(gId, "Get out of the cockpit", subR_A)
+			table.insert(GroupRadioMenus[gId], subR_C1)
+
+
+			if campL.SC_CarrierIntoWind == "man" then
+				missionCommands.removeItemForGroup(gId, { "CarrierIntoWind" })
+				local subR = missionCommands.addSubMenuForGroup(gId, "CarrierIntoWind", nil)
+
+				if campL.Aircraft_Carriers then
+					--TODO ajouter une condition side
+					for sideCarrier, carriers in ipairs(campL.Aircraft_Carriers) do
+						for group_n, carrier in ipairs(carriers) do
+							local carrierGroup = Group.getByName(carrier.name)
+							if carrierGroup then
+								id = missionCommands.addCommandForGroup(gId, carrier.name .. " Into Wind 30mn", subR, TurnIntoWind, { carrier.name, nil, nil, 30 })
+								table.insert(GroupRadioMenus[gId], id)
+								id = missionCommands.addCommandForGroup(gId, carrier.name .. " Into Wind 60mn", subR, TurnIntoWind, { carrier.name, nil, nil, 60 })
+								table.insert(GroupRadioMenus[gId], id)
+								id = missionCommands.addCommandForGroup(gId, carrier.name .. " Resume Route", subR, ResumeRoute, { carrier.name, nil })
+								table.insert(GroupRadioMenus[gId], id)
+							end
 						end
 					end
 				end
 			end
-		end
 
-		-- sar_F10(Group)
-		timer.scheduleFunction(SAR_fct.menuF10_SAR, { gId, gObj }, timer.getTime() + 5)
+			-- sar_F10(Group)
+			timer.scheduleFunction(SAR_fct.menuF10_SAR, { gId, gObj }, timer.getTime() + 5)
 
-		if campL.debug then
-			local timeSearchEngage = timer.getTime()
-			local logStr = "GroupRadioMenus = " .. TableSerialization(GroupRadioMenus, 0)
-			local flightNameClean = "GroupRadioMenus"
-			local logFile = io.open( PathDCE .. "Debug\\GroupRadioMenus_" .. timeSearchEngage .. "_.lua", "w")
-			if logFile then
-				logFile:write(logStr)
-				logFile:close()
-			else
-				env.info("DCE_addFuncs: Failed to open log file for writing.")
+			if campL.debug then
+				local timeSearchEngage = timer.getTime()
+				local logStr = "GroupRadioMenus = " .. TableSerialization(GroupRadioMenus, 0)
+				local flightNameClean = "GroupRadioMenus"
+				local logFile = io.open( PathDCE .. "Debug\\GroupRadioMenus_" .. timeSearchEngage .. "_.lua", "w")
+				if logFile then
+					logFile:write(logStr)
+					logFile:close()
+				else
+					env.info("DCE_addFuncs: Failed to open log file for writing.")
+				end
 			end
-		end
 
-		env.info("DCE_addFuncs PASSE   _D  ")
+			env.info("DCE_addFuncs PASSE   FIN  ")
+		end
 	end
 end
 
 local function cleanEWR_list(initiator)
 
-    if not initiator then return end
+	env.info("DCE_cleanEWR_list _A  initiator " .. tostring(initiator))
+
+    if not initiator then 
+		env.info("DCE_cleanEWR_list _B  RETURN no initiator ")
+		return 
+
+		end
 
 	local p
     local g
@@ -4299,12 +4290,30 @@ local function cleanEWR_list(initiator)
 	if initiator and initiator.getPlayerName then
 		p = initiator:getPlayerName()
 		g = initiator:getGroup()
+		env.info("DCE_cleanEWR_list _C  initiator player " .. tostring(p) .. " group " .. tostring(g))
 	end
 
 
-    if not p or not g then return end
+    if not p or not g then env.info("DCE_cleanEWR_list _return end") return end
 
     local gid = g:getID()
+
+	if GroupEWRMenus[gid] then
+
+		env.info("DCE_EWR Clean group "..gid)
+
+		-- on vide juste les boutons
+		local ewr = GroupEWRMenus[gid]
+
+		for p,id in pairs(ewr.buttons) do
+			if id then
+				missionCommands.removeItemForGroup(gid, id)
+			end
+		end
+
+
+		ewr.buttons = {}
+	end
 
 
     -- =========================
@@ -4312,29 +4321,117 @@ local function cleanEWR_list(initiator)
     -- =========================
     if GroupRadioMenus[gid] then
 
-        for _, id in ipairs(GroupRadioMenus[gid]) do
-            missionCommands.removeItem(id)
-        end
+		for _, id in ipairs(GroupRadioMenus[gid]) do
+			missionCommands.removeItemForGroup(gid, id)
+			env.info("DCE_cleanEWR_list _D  Remove F10 menu cmdId " .. tostring(id) .. " for group " .. tostring(gid) )
+		end
+
+		env.info("DCE_cleanEWR_list _E  Clear GroupRadioMenus for group " .. tostring(gid) )
 
         GroupRadioMenus[gid] = nil
     end
 
 
-    -- =========================
-    -- Nettoyage EWR groupe
-    -- =========================
-    if GroupEWRMenus[gid] then
-        GroupEWRMenus[gid] = nil
-    end
+	-- =========================
+	-- Nettoyage EWR joueur
+	-- =========================
+
+	if GroupEWRMenus[gid] and GroupEWRMenus[gid].players then
+
+		local ewr = GroupEWRMenus[gid]
+
+		env.info("DCE_cleanEWR_list _F  Clean EWR player button for group " .. tostring(gid) )
+
+		if ewr.players[p] then
+
+			local data = ewr.players[p]
+
+			env.info("DCE_cleanEWR_list _G  Remove EWR player button for player " .. tostring(p) .. " for group " .. tostring(gid) )
+
+			if data.id then
+				missionCommands.removeItemForGroup(gid, data.id)
+
+				env.info("DCE_cleanEWR_list _G2  Remove EWR player button cmdId " .. tostring(data.id) .. " for player " .. tostring(p) .. " for group " .. tostring(gid) )
+			end
+
+			ewr.players[p] = nil
+		end
+	end
 
 
+
+	-- Nettoyage joueur EWR dans le groupe
+	if GroupEWRMenus[gid] and GroupEWRMenus[gid].players then
+		GroupEWRMenus[gid].players[p] = nil
+	end
+
+
+	-- =========================
+    -- 
     -- =========================
-    -- Nettoyage joueur
-    -- =========================
-    EWR_optionPlayer[p] = nil
-    LastMenuBuild[gid] = nil
+	GroupMenusBuilt[gid] = nil
+
+	PlayerGroup[p] = nil
+
 end
 
+function rebuildEWR(gid)
+
+    local ewr = GroupEWRMenus[gid]
+    if not ewr then return end
+
+    env.info("DCE_EWR_REBUILD Start for group "..gid)
+
+    -- supprimer anciens boutons
+	for p, id in pairs(ewr.buttons) do
+		if id then
+			missionCommands.removeItemForGroup(gid, id)
+			env.info("DCE_EWR_REBUILD Remove EWR player button cmdId " .. tostring(id) .. " for player " .. tostring(p) .. " for group " .. tostring(gid) )
+		end
+	end
+
+
+    ewr.buttons = {}
+
+
+    -- recréer tous les boutons
+    local ewr = GroupEWRMenus[gid]
+	if not ewr or not ewr.players then return end
+
+	for playerName, data in pairs(ewr.players) do
+
+
+		if PlayerGroup[playerName] == gid then
+
+			if data then
+
+				local state = data.EWR_on
+
+				local txt
+
+				if state then
+					txt = "ON  → "..playerName.." (Disable)"
+				else
+					txt = "OFF → "..playerName.." (Enable)"
+				end
+
+				local id = missionCommands.addCommandForGroup(
+					gid,
+					txt,
+					ewr.root,
+					EWR_TOGGLE,
+					playerName
+				)
+
+				ewr.buttons[playerName] = id
+
+				env.info("DCE_EWR_REBUILD Add "..txt.." id "..tostring(id))
+			end
+		end
+	end
+
+    env.info("DCE_EWR_REBUILD End for group "..gid)
+end
 
 
 local function addFuncs_OLD(arg_Gid, arg_GroupObj, argPlayerName)
@@ -5254,6 +5351,8 @@ function EventHandler2:onEvent(event)
 end
 
 world.addEventHandler(EventHandler2)
+
+
 
 
 --sur certaines map en solo (Syria) l'evenement Birth n'est pas detectée
