@@ -1084,22 +1084,17 @@ for side, coal in pairs(mission.coalition) do
 	end
 end
 
-print("mission_ini.preset_AAA_Barrage: "..tostring(mission_ini.preset_AAA_Barrage))
 
 AAA_Barrage = nil
 --ajoute le preset AAA_Barrage s'il a été activé
 if mission_ini.preset_AAA_Barrage and type(mission_ini.preset_AAA_Barrage) == "number" then
-	print("AAA_barrage B")
 	if mission_ini.preset_AAA_Barrage > 0 then
-		print("AAA_barrage C")
 		if Preset_AAA and Preset_AAA[mission_ini.preset_AAA_Barrage] then
-			print("AAA_barrage D")
 			AAA_Barrage = Preset_AAA[mission_ini.preset_AAA_Barrage]
 		end
 	end
 end
 
-_affiche(AAA_Barrage , "AAA_Barrage ")
 --création d'un camp pour camp_status InGame nettement plus leger
 local campL = {
 
@@ -1169,6 +1164,9 @@ CampTotalTimeS = SecondsBetween(camp.dateInit, camp.date)
 CampTotalTimeH = CampTotalTimeS /3600
 camp.date.CampTotalTimeS = CampTotalTimeS
 camp.date.CampTotalTimeH = CampTotalTimeH
+
+--change la boundary de la mission en fonction du camp
+SetBoudaryFromCamp()
 
 -- met à jour la date de camp dans conf_mod.lua
 UpdateConfModSuite(nil, camp.date, "MAIN_NextMission "..debug.getinfo(1).currentline)

@@ -1900,7 +1900,6 @@ Action = {}
 		table.insert(camp.AuthorizedLoadout, authName)
 	end
 
-	--Miguel21 modification M40
 	--TemplateActive
 	function Action.TemplateActive(TabFile)
 		if debugKT then print("	--> function Action.TemplateActive "..tostring( TabFile)) end
@@ -2194,6 +2193,47 @@ Action = {}
 			end
 		end
 	end
+
+
+	function Action.LoadFileBorder(file)
+
+		print("DcCT LoadFileBorder "..tostring(file))
+
+		local minizip = require('minizip')
+		local zipFile = minizip.unzOpen("Files/" .. file, 'rb')
+
+		zipFile:unzLocateFile('mission')
+		local misStr = zipFile:unzReadAllCurrentFile()
+
+		zipFile:unzClose()
+
+		local missionWork = LoadMissionFromMizIsolated(misStr)
+
+		if missionWork then
+			local result = GetBoudary(missionWork)
+			if result then
+				print("DcCT LoadFileBorder GetBoudary success")
+				SetBoudaryFromCamp()
+			else
+				AddLog("Error: GetBoudary failed for file "..tostring(file))
+			end
+		else
+			error("Mission non trouvée dans "..file)
+		end
+	end
+
+
+
+	-- --LoadFileBorder
+	-- --change le border
+	-- function Action.LoadFileBorder(file)
+
+	-- 	local missionWork = dofile("Files/"..file)
+
+	-- 	GetBoudary(missionWork)
+	-- 	SetBoudaryFromCamp()
+
+	-- end
 
 	if not AirLiftObjectif then
 		AirLiftObjectif = {}

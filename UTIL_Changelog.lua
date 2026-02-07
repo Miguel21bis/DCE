@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "22.94.577"
+versionDCE["UTIL_Changelog.lua"] = "22.95.578"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "22.94.577"
+VersionDCE["UTIL_Changelog.txt"] = "22.95.578"
 --[[
 
 # DCE – Changelog
@@ -18,7 +18,7 @@ known issues:
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
 
-##  Version 22.94.577
+##  Version 22.95.578
 
 	###  Fixed
 
@@ -42,6 +42,8 @@ known issues:
 	**Result:**
 	- More realistic radio behavior
 	- Better interoperability between different aircraft types
+
+	- **change of front line during a campaign**
 
 	###  Changed
 

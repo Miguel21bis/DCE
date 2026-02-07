@@ -46,15 +46,16 @@ local camp_triggers_header = {
 --Action.AirUnitPlayer("UnitName", boolean)													--set unit playable
 --Action.AirUnitReinforce("SourceUnitName", "DestinationUnitName", destNumber)				--send reinforcement aircraft from one unit to another
 --Action.AirUnitRepair()																	--repair damaged aircraft in all air units
---Action.GroundUnitRepair()																	-- (ADD) M19.f : Repair Ground
+--Action.GroundUnitRepair()																	--Repair Ground
 --Action.AddGroundTargetIntel("sideName")													--add ground target intel updates to briefing
 --Action.GroupHidden("GroupName", boolean)													--change vehicle/ship group hidden status
 --Action.GroupProbability("GroupName", number 0-1)											--change vehicle/ship group probability status
 																							--due to the way stats are reset for a new playrun upon completing a FirstMission, groups probability changed by trigger in first mission will not be carried over to second mission! Repeat trigger on second mission or use the trigger from mission 2 on only for flawless function.
---Action.GroupMove(GroupName, ZoneName)														-- (ADD) move vehicle group to refpoint (See the DC_CheckTriggers.lua file for more explanation)
+--Action.GroupMove(GroupName, ZoneName)														--move vehicle group to refpoint (See the DC_CheckTriggers.lua file for more explanation)
 --Action.GroupSlave(GroupName, master, bearing, distance)									-- (ADD)
---Action.ShipMission(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTime)				-- (ADD) assign and run a movement mission to a ship group (See the DC_CheckTriggers.lua file for more explanation)
---Action.TemplateActive(TabFile)															-- (ADD) M40 : Template Active GroundGroup moving front (single file : active template) (if tab file: random activation)
+--Action.ShipMission(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTime)				--assign and run a movement mission to a ship group (See the DC_CheckTriggers.lua file for more explanation)
+--Action.TemplateActive(TabFile)															--Template Active GroundGroup moving front (single file : active template) (if tab file: random activation)
+--Action.LoadFileBorder("file.miz")															--To change the border outlines, place the .miz file in the /Files directory.
 
 
 

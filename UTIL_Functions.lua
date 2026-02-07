@@ -6039,3 +6039,245 @@ function CleanDataDivers()
 end
 
 
+function SetBoudaryFromCamp()
+	
+	print("BOUNDARY SetBoudaryFromCamp _A ".." camp.boundary "..tostring(camp.boundary) )
+
+	--ecrase mission pour mettre à jour son boudary
+	if camp.boundary then
+
+		print("BOUNDARY SetBoudaryFromCamp _B camp.boundary existe, on met à jour le boudary de la mission en cours")
+		
+		--si camp.boudary existe, il faut ecraser celui de la mission en cours
+		-- car ce n'est peut etre pas le meme
+
+		local drawTbl = {}
+		if mission and mission.drawings then
+
+			print("BOUNDARY SetBoudaryFromCamp _C mission.drawings existe, on cherche une ligne border a ecraser dans les layers de la mission")
+
+			drawTbl = mission.drawings
+			
+			-- cherche si un bordery existe et le remplace
+			if drawTbl and drawTbl.layers then
+				for layersN, layer in ipairs( drawTbl.layers) do
+					if (layer.name == "Red" or layer.name == "Blue" or layer.name == "Neutral" ) and layer.objects and #layer.objects >= 1 then
+						for objetN, objet in ipairs(layer.objects) do
+							local testName = string.lower(objet.name)
+							if ( string.find( testName , "border") or string.find( testName , "boundary") or string.find( testName , "frontline")   ) and #objet.points >= 3 then
+								if string.find( testName , "blue") then
+									objet.points = camp.boundary.blue
+									if camp.boundary.data and camp.boundary.data.blue then
+										objet.colorString = camp.boundary.data.blue.color or "0x0000ffff"
+										objet.mapY = camp.boundary.data.blue.mapY or 0
+										objet.mapX = camp.boundary.data.blue.mapX or 0
+									end
+								elseif string.find( testName , "red") then
+									objet.points = camp.boundary.red
+									if camp.boundary.data and camp.boundary.data.red then
+										objet.colorString = camp.boundary.data.red.color or "0xff0000ff"
+										objet.mapY = camp.boundary.data.red.mapY or 0
+										objet.mapX = camp.boundary.data.red.mapX or 0
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+
+		else
+
+			print("BOUNDARY SetBoudaryFromCamp _D mission.drawings n'existe pas, on le crée avec le boudary du camp")
+
+			mission.drawings = {
+				["options"] = 
+					{
+						["hiddenOnF10Map"] = 
+						{
+							["Observer"] = 
+							{
+								["Neutral"] = false,
+								["Blue"] = false,
+								["Red"] = false,
+							}, -- end of ["Observer"]
+							["Instructor"] = 
+							{
+								["Neutral"] = false,
+								["Blue"] = false,
+								["Red"] = false,
+							}, -- end of ["Instructor"]
+							["ForwardObserver"] = 
+							{
+								["Neutral"] = false,
+								["Blue"] = false,
+								["Red"] = false,
+							}, -- end of ["ForwardObserver"]
+							["Pilot"] = 
+							{
+								["Neutral"] = false,
+								["Blue"] = false,
+								["Red"] = false,
+							}, -- end of ["Pilot"]
+							["Spectrator"] = 
+							{
+								["Neutral"] = false,
+								["Blue"] = false,
+								["Red"] = false,
+							}, -- end of ["Spectrator"]
+							["ArtilleryCommander"] = 
+							{
+								["Neutral"] = false,
+								["Blue"] = false,
+								["Red"] = false,
+							}, -- end of ["ArtilleryCommander"]
+						}, -- end of ["hiddenOnF10Map"]
+					}, -- end of ["options"]
+				layers = {},
+			}
+
+			if camp.boundary.blue and #camp.boundary.blue >= 3 then
+				print("BOUNDARY SetBoudaryFromCamp _E camp.boundary.blue existe et comporte au moins 3 points, on ajoute une ligne blue dans les layers de la mission")
+
+				table.insert(mission.drawings.layers, {
+					name = "Blue",
+					visible = true,
+					objects = {
+						["visible"] = true,
+						["colorString"] = camp.boundary.data.blue.color or "0x0000ffff",
+						["lineMode"] = "segments",
+						["mapY"] = camp.boundary.data.blue.mapY or 0,
+						["primitiveType"] = "Line",
+						["style"] = "solid",
+						["closed"] = false,
+						["thickness"] = 8,
+						["mapX"] = camp.boundary.data.blue.mapX or 0,
+						["layerName"] = "Blue",
+						["name"] = "Border-Blue",
+						["points"] = camp.boundary.blue,
+					},
+				})
+			end
+
+			if camp.boundary.red and #camp.boundary.red >= 3 then
+				table.insert(mission.drawings.layers, {
+					name = "Red",
+					visible = true,
+					objects = {
+						["visible"] = true,
+						["colorString"] = camp.boundary.data.red.color or "0xff0000ff",
+						["lineMode"] = "segments",
+						["mapY"] = camp.boundary.data.red.mapY or 0,
+						["primitiveType"] = "Line",
+						["style"] = "solid",
+						["closed"] = false,
+						["thickness"] = 8,
+						["mapX"] = camp.boundary.data.red.mapX or 0,
+						["layerName"] = "Red",
+						["name"] = "Border-Red",
+						["points"] = camp.boundary.red,
+					},
+				})
+			end
+
+		end
+
+
+	end
+end
+
+--recupere les info boudary de base_mission ou mission trigger pour remplir le camp.boudary
+function GetBoudary(missionWork)
+
+	print("BOUNDARY GetBoudary _A missionWork "..tostring(missionWork).." camp.boundary "..tostring(camp.boundary) )
+		
+	local boundary = {
+		red = {},
+		blue = {},
+		neutral = {},
+	}
+
+	local tableDrawings = {}
+	if missionWork and missionWork.drawings then
+		tableDrawings = missionWork.drawings
+	else
+		AddLog("Error: No drawings found in the mission to extract boundary information.")
+		return false
+	end
+	local foundBoundary = false
+
+	-- creation des frontieres en fonction des dessins dans missionWork red et blue qui comporte le nom border ou boundary
+	if tableDrawings and tableDrawings.layers then
+		print("BOUNDARY GetBoudary _B tableDrawings.layers existe, on cherche une ligne border dans les layers de la mission")
+
+		for layersN, layer in ipairs( tableDrawings.layers) do
+			print("BOUNDARY GetBoudary _C layer.name "..tostring(layer.name).." layer.objects "..tostring(layer.objects) )
+
+			if (layer.name == "Red" or layer.name == "Blue" or layer.name == "Neutral" ) and layer.objects and #layer.objects >= 1 then
+				print("BOUNDARY GetBoudary _D layer.name "..tostring(layer.name).." correspond à une faction et comporte des objets, on cherche un objet border ou boundary dans les objets du layer")
+
+				for objetN, objet in ipairs(layer.objects) do
+					local testName = string.lower(objet.name)
+					print("BOUNDARY GetBoudary _E objet.name "..tostring(objet.name).." testName "..tostring(testName) )
+
+					if ( string.find( testName , "border") or string.find( testName , "boundary") or string.find( testName , "frontline")   ) and #objet.points >= 3 then
+						print("BOUNDARY GetBoudary _F objet.name "..tostring(objet.name).." correspond à une frontière et comporte au moins 3 points, on ajoute les points à la table boundary")
+
+						if objet.points and #objet.points >= 3 then
+							print("BOUNDARY GetBoudary _G objet.name "..tostring(objet.name).." comporte "..#objet.points.." points, on les ajoute à la table boundary")
+
+							camp.boundary.data = camp.boundary.data or {}
+							camp.boundary.data[string.lower(layer.name)] = camp.boundary.data[string.lower(layer.name)] or {}
+							camp.boundary.data[string.lower(layer.name)].color = objet.colorString or (layer.name == "Red" and "0xff0000ff" or "0x0000ffff")
+							camp.boundary.data[string.lower(layer.name)].mapX = objet.mapX or 0
+							camp.boundary.data[string.lower(layer.name)].mapY = objet.mapY or 0
+
+							for n, point in ipairs(objet.points) do
+								local newPoints = {
+									x = point.x + objet.mapX,
+									y = point.y + objet.mapY,
+								}
+
+								table.insert(boundary[string.lower(layer.name)], newPoints)
+
+								foundBoundary = true
+							end
+
+							camp.boundary[string.lower(layer.name)] = boundary[string.lower(layer.name)]
+						end
+					end
+				end
+			end
+		end
+	end
+
+	if not foundBoundary then
+		local bugTxt = " * * * DcUsar there are no valid borders in this campaign * * * "
+		AddLog("Note for the Campaign Maker"..bugTxt)
+		return false
+	else
+		return true
+	end
+end
+
+function LoadMissionFromMizIsolated(misStr)
+
+    local chunk, err = loadstring(misStr)
+    if not chunk then
+        error("Erreur loadstring mission: "..tostring(err))
+    end
+
+    local env = {}
+    setmetatable(env, { __index = _G })
+
+    setfenv(chunk, env)
+
+    local ok, execErr = pcall(chunk)
+    if not ok then
+        error("Erreur execution mission: "..tostring(execErr))
+    end
+
+    return env.mission
+end
+
+

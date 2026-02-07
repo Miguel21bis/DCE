@@ -15,6 +15,8 @@ if Debug.debug then
 	print("START DC_UpdateSAR.lua "..versionDCE["DC_UpdateSAR.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
 
+
+
 -- camp.SAR = {
 -- 	helicopter = {
 -- 		[1] = "machprout",
@@ -461,51 +463,18 @@ if zoneSAR and zoneSAR ~= nil then
     end
 end
 
+local boundaryTemp = {
+        red = {},
+        blue = {},
+        neutral = {},
+    }
+local boundary = boundaryTemp
 
---charge les coordonnées des boundary dessiné par le CampaignMaker
-local boundary = {
-    red = {},
-    blue = {},
-    neutral = {},
-}
-
-local tableDrawings = {}
-if last_Mission and last_Mission.drawings then
-    tableDrawings = last_Mission.drawings
-elseif mission and mission.drawings then
-    tableDrawings = mission.drawings
-end
-local foundBoundary = false
-
--- creation des frontieres en fonction des dessins dans base_Mission red et blue qui comporte le nom border ou boundary
-if tableDrawings and tableDrawings.layers then
-    for Nlayers, layer in ipairs( tableDrawings.layers) do
-        if (layer.name == "Red" or layer.name == "Blue" or layer.name == "Neutral" ) and layer.objects and #layer.objects >= 1 then
-            for Nobjet, objet in ipairs(layer.objects) do
-                local testName = string.lower(objet.name)
-                 if ( string.find( testName , "border") or string.find( testName , "boundary") or string.find( testName , "frontline")   ) and #objet.points >= 3 then
-					for n, point in ipairs(objet.points) do
-                        local newPoints = {
-                            x = point.x +  objet.mapX,
-                            y = point.y +  objet.mapY,
-                        }
-
-                        table.insert(boundary[string.lower(layer.name)], newPoints)
-
-						foundBoundary = true
-					end
-                end
-            end
-        end
-    end
+if camp.boundary then
+    boundary = camp.boundary
 end
 
-if not foundBoundary and Debug.debug then
-    local bugTxt = " * * * DcUsar there are no valid borders in this campaign * * * "
-    AddLog("Note for the Campaign Maker"..bugTxt)
-end
 
-camp.boundary = boundary
 
 -- camp_ZoneSAR = {
 -- 	['neutrals'] = {
