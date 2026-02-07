@@ -803,7 +803,7 @@ for sideName, units in pairs(oob_air) do
 								end
 								if task_bool and task ~= "SEAD" and task ~= "Escort" and task ~= "Escort Jammer" and task ~= "Flare Illumination" and task ~= "Laser Illumination" then		--task is true and is no support task
 
-									print(draftId.." AtoG passe A_03b task: "..tostring(task).." task_bool: "..tostring(task_bool).."  ")
+									-- print(draftId.." AtoG passe A_03b task: "..tostring(task).." task_bool: "..tostring(task_bool).."  ")
 
 									local isDebugModeA2 = Debug.Generator.affiche and string.find(Debug.Generator.chapter, "A")
 												and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name and Debug.Generator.SpyTask == task)
