@@ -6187,10 +6187,20 @@ function SetBoudaryFromCamp()
 							["mapX"] = camp.boundary.data.blue.mapX or 0,
 							["layerName"] = "Blue",
 							["name"] = "Border-Blue",
-							["points"] = camp.boundary.blue,
+							-- ["points"] = camp.boundary.blue,
 						},
 					},
 				}
+
+				local newPoints = {}
+				for n, point in ipairs(camp.boundary.blue) do
+					newPoints[n] = {
+						x = point.x - camp.boundary.data.blue.mapX,
+						y = point.y - camp.boundary.data.blue.mapY,
+					}
+				end
+				mission.drawings.layers[2]["points"] = newPoints
+
 			end
 
 			if camp.boundary.red and #camp.boundary.red >= 3 then
@@ -6214,6 +6224,16 @@ function SetBoudaryFromCamp()
 						},
 					},
 				}
+
+				local newPoints = {}
+				for n, point in ipairs(camp.boundary.red) do
+					newPoints[n] = {
+						x = point.x - camp.boundary.data.red.mapX,
+						y = point.y - camp.boundary.data.red.mapY,
+					}
+				end
+				mission.drawings.layers[1]["points"] = newPoints
+
 			end
 
 		end
