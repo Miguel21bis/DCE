@@ -3047,11 +3047,15 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								local tgtlist2 = ""																					--list of of names of all target elements
 								local AGAS_tgtList = ""
 								for n , element in ipairs(target_e) do
-									tgtlist2 = tgtlist2 .. "{'" .. element.name .. "','" .. tostring(element.class) .. "','" .. tostring(element.x) .. "','" .. tostring(element.y) .. "'}, "
-									AGAS_tgtList = AGAS_tgtList.. "{" .. element.x .. "," .. element.y .. "},"
+									if element.x and element.y then
+										tgtlist2 = tgtlist2 .. "{'" .. element.name .. "','" .. tostring(element.class) .. "','" .. tostring(element.x) .. "','" .. tostring(element.y) .. "'}, "
+										AGAS_tgtList = AGAS_tgtList.. "{" .. element.x .. "," .. element.y .. "},"
+									else
+										AddLog("element "..tostring(element.name).." of target "..tostring(flight[f].target_name).." has no coordinates, skipped for attack task")
+									end
 								end
 
-								if is_helicopter or AGAS_ready == false  then
+								if is_helicopter or AGAS_ready == false and tgtlist2 ~= ""then
 									if not isHumain then
 										local task_entry = {																				--task is a command to run LUA code
 											["enabled"] = true,
@@ -3075,7 +3079,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 									end
 
-								else
+								elseif AGAS_tgtList ~= "" then
 									if not isHumain then
 										local task_entry = {																				--task is a command to run LUA code
 											["enabled"] = true,
