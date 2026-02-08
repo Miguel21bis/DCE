@@ -6226,6 +6226,7 @@ function GetBoudary(missionWork)
 						if objet.points and #objet.points >= 3 then
 							print("BOUNDARY GetBoudary _G objet.name "..tostring(objet.name).." comporte "..#objet.points.." points, on les ajoute à la table boundary")
 
+							camp.boundary = camp.boundary or {}
 							camp.boundary.data = camp.boundary.data or {}
 							camp.boundary.data[string.lower(layer.name)] = camp.boundary.data[string.lower(layer.name)] or {}
 							camp.boundary.data[string.lower(layer.name)].color = objet.colorString or (layer.name == "Red" and "0xff0000ff" or "0x0000ffff")
