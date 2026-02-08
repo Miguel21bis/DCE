@@ -6133,51 +6133,87 @@ function SetBoudaryFromCamp()
 							}, -- end of ["ArtilleryCommander"]
 						}, -- end of ["hiddenOnF10Map"]
 					}, -- end of ["options"]
-				layers = {},
+				layers =
+				{
+					[1] = 
+					{
+						["visible"] = true,
+						["name"] = "Red",
+						["objects"] = {},
+					}, -- end of [1]
+					[2] = 
+					{
+						["visible"] = true,
+						["name"] = "Blue",
+						["objects"] = {},
+					}, -- end of [2]
+					[3] = 
+					{
+						["visible"] = true,
+						["name"] = "Neutral",
+						["objects"] = {},
+					}, -- end of [3]
+					[4] = 
+					{
+						["visible"] = true,
+						["name"] = "Common",
+						["objects"] = {},
+					}, -- end of [4]
+					[5] = 
+					{
+						["visible"] = true,
+						["name"] = "Author",
+						["objects"] = {},
+					}, -- end of [5]
+				}, -- end of ["layers"]
 			}
 
 			if camp.boundary.blue and #camp.boundary.blue >= 3 then
 				print("BOUNDARY SetBoudaryFromCamp _E camp.boundary.blue existe et comporte au moins 3 points, on ajoute une ligne blue dans les layers de la mission")
 
-				table.insert(mission.drawings.layers, {
+				mission.drawings.layers[2] = {
 					name = "Blue",
 					visible = true,
 					objects = {
-						["visible"] = true,
-						["colorString"] = camp.boundary.data.blue.color or "0x0000ffff",
-						["lineMode"] = "segments",
-						["mapY"] = camp.boundary.data.blue.mapY or 0,
-						["primitiveType"] = "Line",
-						["style"] = "solid",
-						["closed"] = false,
-						["thickness"] = 8,
-						["mapX"] = camp.boundary.data.blue.mapX or 0,
-						["layerName"] = "Blue",
-						["name"] = "Border-Blue",
-						["points"] = camp.boundary.blue,
+						[1] = {
+							["visible"] = true,
+							["colorString"] = camp.boundary.data.blue.color or "0x0000ffff",
+							["lineMode"] = "segments",
+							["mapY"] = camp.boundary.data.blue.mapY or 0,
+							["primitiveType"] = "Line",
+							["style"] = "solid",
+							["closed"] = false,
+							["thickness"] = 8,
+							["mapX"] = camp.boundary.data.blue.mapX or 0,
+							["layerName"] = "Blue",
+							["name"] = "Border-Blue",
+							["points"] = camp.boundary.blue,
+						},
 					},
-				})
+				}
 			end
 
 			if camp.boundary.red and #camp.boundary.red >= 3 then
-				table.insert(mission.drawings.layers, {
+				mission.drawings.layers[1] = {
 					name = "Red",
 					visible = true,
 					objects = {
-						["visible"] = true,
-						["colorString"] = camp.boundary.data.red.color or "0xff0000ff",
-						["lineMode"] = "segments",
-						["mapY"] = camp.boundary.data.red.mapY or 0,
-						["primitiveType"] = "Line",
-						["style"] = "solid",
-						["closed"] = false,
-						["thickness"] = 8,
-						["mapX"] = camp.boundary.data.red.mapX or 0,
-						["layerName"] = "Red",
-						["name"] = "Border-Red",
-						["points"] = camp.boundary.red,
+						[1] = {
+							["visible"] = true,
+							["colorString"] = camp.boundary.data.red.color or "0xff0000ff",
+							["lineMode"] = "segments",
+							["mapY"] = camp.boundary.data.red.mapY or 0,
+							["primitiveType"] = "Line",
+							["style"] = "solid",
+							["closed"] = false,
+							["thickness"] = 8,
+							["mapX"] = camp.boundary.data.red.mapX or 0,
+							["layerName"] = "Red",
+							["name"] = "Border-Red",
+							["points"] = camp.boundary.red,
+						},
 					},
-				})
+				}
 			end
 
 		end
