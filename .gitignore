@@ -2,3 +2,5 @@
 ScriptsMod.NG.code-workspace/
 *.bak
 534.zip
+Mission Scripts/AddCommandRadioF10_TMP.lua
+Mission Scripts/EventsTracker_TEMP.lua
