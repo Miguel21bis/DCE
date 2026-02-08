@@ -6199,7 +6199,7 @@ function SetBoudaryFromCamp()
 						y = point.y - camp.boundary.data.blue.mapY,
 					}
 				end
-				mission.drawings.layers[2]["points"] = newPoints
+				mission.drawings.layers[2].objects[1]["points"] = newPoints
 
 			end
 
@@ -6220,7 +6220,7 @@ function SetBoudaryFromCamp()
 							["mapX"] = camp.boundary.data.red.mapX or 0,
 							["layerName"] = "Red",
 							["name"] = "Border-Red",
-							["points"] = camp.boundary.red,
+							-- ["points"] = camp.boundary.red,
 						},
 					},
 				}
@@ -6232,7 +6232,7 @@ function SetBoudaryFromCamp()
 						y = point.y - camp.boundary.data.red.mapY,
 					}
 				end
-				mission.drawings.layers[1]["points"] = newPoints
+				mission.drawings.layers[1].objects[1]["points"] = newPoints
 
 			end
 
