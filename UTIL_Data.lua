@@ -1,29 +1,9 @@
 --Various DATA
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M90_a updateData_Bj
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Data.lua"] = "1.15.90"
+versionDCE["UTIL_Data.lua"] = "1.15.91"
 ------------------------------------------------------------------------------------------------------- 
--- updateData_Bj			(j ec-121 etc...)(i VSN_F4)(h Fulcrum)(g vwv_mig21mf)(f refuellingReceptacleType)(e Tu_22D)(Bd flyingAlone)(CH-47F H-6J)(a OH-58)(z F-4E-45MC)(UH-60L)(x hHover)(w reaper)(v Hercules)(u tabTask)(t add is_helicopter table)(s F1EE)(r F-16C_50)(q): Add helicos  (p): Add WOC80)(o: transfer the dataMap to another file)
--- debug_c					(c OH-6A)(b moduleName)(a add IsWesternCountry function)
--- cleanCode_a				(a: repetition)
--- adjustment_e				(e delete EPLRS_Capacity table)(d CVN to CV)(bombing on Group&Unit)(b: Syria nnTimeZone +3 & GudautaGPS )
--- modification M90_a		missionWithIcone
--- modification M68_a		add AFAC task
--- modification M67_a		add 2.9 datalinks dataCartridge
--- modification M66_a		add Runway Attack
--- modification M61_a		SAR
--- modification M56_b		AssignCallnameSquad (b: callsignId)
--- modification M54_a		revoir CustomTaskScript et TaskBombing (a: TaskByPlane)
--- modification M50_b		Records landings (b: add data file payload)
--- modification M20_b		Pannes aléatoires (Failures) en SingleMission et ForcedOption (external view etc..) (b failure adapted to each aircraft type)
--- modification M11A_t		Multiplayer (t: AltitudeFloor)
--- modification M01_b		Ajout datalink (b: UTIL_Data file)
-------------------------------------------------------------------------------------------------------- 
-
--- if flight[f].type == "E-2C" or flight[f].type == "E-3A" or flight[f].type == "F-15C" or flight[f].type == "F-15E" or flight[f].type == "F-16C bl.52d" 
---or flight[f].type == "FA-18C_hornet" or flight[f].type == "F/A-18C" or flight[f].type = "A-10C_2", then
 
 if Debug.debug then
 	print("START UTIL_Data.lua "..versionDCE["UTIL_Data.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
@@ -4270,6 +4250,7 @@ DataCountry = {
 	{id = 87, name = "Ghana"},
 	{id = 88, name = "Nigeria"},
 	{id = 89, name = "Peru"},
+	{id = 90, name = "Ecuador"},
 
 }
 

@@ -6689,6 +6689,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 
+					if not dataIdKey then
+						print("******ATTENTION******, no found dataIdKey with this country: "..tostring(flight[f].country).." ")
+						os.execute 'pause'
+					end
+
 					if dataIdCountry == nil or dataIdCountry == "" then
 						DebugFLIGHT = DebugFLIGHT .. "\n".."Error no found this contry "..tostring(flight[f].country).." into dataCoutrys"
 					end
