@@ -4453,7 +4453,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				-- ************* add descend waypoint *************
 				if flight[f].player ~= true and flight[f].client ~= true then																--for AI flights only
 					for w = 3, #waypoints do
-						if waypoints[w].alt < waypoints[w - 1].alt and waypoints[w]["type"] ~= "Land"
+						if not IsHelicopter and waypoints[w].alt < waypoints[w - 1].alt and waypoints[w]["type"] ~= "Land"
 						and (waypoints[w]["briefing_name"] and waypoints[w]["briefing_name"] ~= "Stacking") then		--for any descend waypoint that is not the landing waypoint
 							local extraWP = DeepCopy(waypoints[w])												--make a copy of the descend waypoint
 							extraWP.x = (waypoints[w].x + waypoints[w + -1].x) / 2								--position half-way between descend waypoint and previous waypoint
@@ -4477,6 +4477,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									end
 								end
 							end
+							
 						end
 					end
 				end
@@ -4522,7 +4523,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 						if waypoints[n]["briefing_name"] == "IP" or waypoints[n]["briefing_name"] == "Attack"  then   -- or waypoints[n]["briefing_name"] == "Egress"
 
-							local altEjected  = flight[f].target.elements[1].z + 100
+							-- local altEjected  = flight[f].target.elements[1].z + 100
+
+							local altEjected  = flight[f].target.z + 100
 
 							waypoints[n]["alt"] = altEjected
 
@@ -6596,31 +6599,31 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				--ajoute ici les Custom_Altitude car les num de wpt ne change plus
 				if is_helicopter and not flight[f].client and not flight[f].player  then
-					for n = 2, #group.route.points   do
+					for n = 2, #group.route.points do
 
 						if group.route.points[n].briefing_name == "Egress" then
 
-							local task_entry = {
-								["enabled"] = true,
-								["auto"] = false,
-								["id"] = "WrappedAction",
-								["number"] = #group.route.points[n]["task"]["params"]["tasks"] + 1,
-								["params"] =
-								{
-									["action"] = {
-										["id"] = "Script",
-										["params"] = {
-											["command"] = string.format(
-												"Custom_Altitude('%s', nil, %s)",
-												groupName,
-												tostring(n or 0)
-											),
-										},
-									},
+							-- local task_entry = {
+							-- 	["enabled"] = true,
+							-- 	["auto"] = false,
+							-- 	["id"] = "WrappedAction",
+							-- 	["number"] = #group.route.points[n]["task"]["params"]["tasks"] + 1,
+							-- 	["params"] =
+							-- 	{
+							-- 		["action"] = {
+							-- 			["id"] = "Script",
+							-- 			["params"] = {
+							-- 				["command"] = string.format(
+							-- 					"Custom_Altitude('%s', nil, %s)",
+							-- 					groupName,
+							-- 					tostring(n or 0)
+							-- 				),
+							-- 			},
+							-- 		},
 
-								},
-							}
-							table.insert(group.route.points[n]["task"]["params"]["tasks"], task_entry)
+							-- 	},
+							-- }
+							-- table.insert(group.route.points[n]["task"]["params"]["tasks"], task_entry)
 
 						elseif group.route.points[n].briefing_name == "Assemble" then
 
@@ -6647,7 +6650,6 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							table.insert(group.route.points[n]["task"]["params"]["tasks"], task_entry)
 
 						end
-
 
 					end
 				end
@@ -7132,9 +7134,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					..""..flight[f].id
 					.." |Pack: "..p
 					.." |Nb "..flight[f].number
-					.." | "..flight[f].type
+					.." | "..AliasTypeName(flight[f].type)
 					.." | "..group.name
-					.." | "..flight[f].base
+					.." | "..AliasBaseName(flight[f].base)
 					.." | "..flight[f].target_name
 					.." |start_time: ".. math.floor(debug_StartTime)
 					.." |ETA1: "..group.route.points[1]["ETA"]
