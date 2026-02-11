@@ -2120,8 +2120,13 @@ end
 function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainUnit)																					--get the escort route given the escort start point and an existing package route
 	-- local c_GetEscortRoute = os.clock()
 
+	-- print("AtoRouteG A mainUnit.task: "..tostring(mainUnit.task).." unitEscort.type "..tostring(unitEscort.type).." task: "..tostring(task))
+
 	--make a local copy of the route table forwarded as function argument (otherwise the original route gets adjusted
 	local route = DeepCopy(orig_route)
+	-- print("AtoRouteG B #route: "..tostring(#route))
+
+	if route and #route <= 4 then return end
 
 	-- ne recopie pas le Spawn des B1b et B-52 en apparation sur une base virtuel en alti
 	if route[1].id == "Spawn" then
@@ -2209,6 +2214,8 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 			break
 		end
 	end
+
+	-- print("AtoRouteG C jointWP: "..tostring(jointWP))
 
 	if not IsHelicopter[unitEscort.type] then
 		local heading = 0

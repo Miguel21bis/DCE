@@ -525,11 +525,11 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 							indexN = " "
 						end
 						local info = ""
-						if Debug.Generator.affiche then
-							info = " "..playable[index].id.." "
-						end
-						io.write(indexN..""..info.."(Nb: "..playable[index].number..") ".." -  Pack : "..playable[index].packN.." - "..AliasBaseName(playable[index].base).." - "..AliasTypeName(playable[index].type).." - "..playable[index].groupName )
-						if playable[index].target_name ~= nil then  io.write(" - "..playable[index].target_name) end
+						-- if Debug.Generator.affiche then
+						-- 	info = " "..playable[index].id.." "
+						-- end
+						io.write(indexN..""..info.."(Nb: "..playable[index].number..") ".." |-| "..AliasBaseName(playable[index].base).." |-| "..AliasTypeName(playable[index].type).." |-| "..playable[index].groupName )
+						if playable[index].target_name ~= nil then  io.write(" |-| "..playable[index].target_name) end
 						io.write("\n")
 
 					end

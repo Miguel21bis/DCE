@@ -306,24 +306,25 @@ if input == "y" or input == "yes" then
 					end
 
 					-- Fonction pour afficher les cibles standard (Strike, Runway Attack)
-					local function showStandardTargets(targetlist, side)
-						print("\n--- Sélectionnez une cible dans le camp "..side.." ---")
+					local function showStandardTargets(targetlist, targetSide)
+						local eniSide = DCS_ENI_Side[targetSide]
+						print("\n--- Sélectionnez une cible situé dans le camp "..eniSide.." ---")
 
 						-- Trier la table par priorité
-						table.sort(targetlist[side], function(a, b)
+						table.sort(targetlist[targetSide], function(a, b)
 							return a.priority > b.priority
 						end)
 
 						local tabIndex = {}
 						local Ckey = 0
 
-						for key, target in ipairs(targetlist[side]) do
+						for key, target in ipairs(targetlist[targetSide]) do
 							if target.inactive ~= true and target.ATO
 							and (string.find(target.task, "Strike") or target.task == "Runway Attack" or target.task == "CAP" or target.task == "Fighter Sweep" or target.task == "Transport")
 							and target.type ~= "Ejected Pilot"
 							then
 								Ckey = key
-								io.write(Ckey.." "..side.." "..tostring(target.titleName).."  "..tostring(target.alive).."%  X"..tostring(target.priority).."\n")
+								io.write(Ckey.." "..eniSide.." "..tostring(target.titleName).."  "..tostring(target.alive).."%  X"..tostring(target.priority).."\n")
 								tabIndex[Ckey] = target
 							end
 						end
@@ -332,28 +333,42 @@ if input == "y" or input == "yes" then
 					end
 
 					-- Fonction pour afficher les cibles de type CSAR (pilotes éjectés)
-					local function showCSARTargets(targetlist, side)
-						print("\n--- Select the pilot to be rescued, who has fallen into the "..DCS_ENI_Side[side].." side  ---")
+					local function showCSARTargets(targetlist, targetSide)
+						local eniSide = DCS_ENI_Side[targetSide]
+						print("\n--- Select the pilot to be rescued, who has fallen into the "..eniSide.." side  ---")
 						local tabIndex = {}
 						-- local Ckey = 0
 
-						for key, target in ipairs(targetlist[side]) do
-							if target.inactive ~= true and target.ATO and (target.task == "CSAR" or target.task == "SAR")
-							then
+						-- Trier la table par priorité
+						table.sort(targetlist[targetSide], function(a, b)
+							return a.priority > b.priority
+						end)
+
+						for key, target in ipairs(targetlist[targetSide]) do
+							if not target.inactive and target.ATO and (target.task == "CSAR" or target.task == "SAR") then
 								-- Ckey = key
-								io.write(key.." "..side.." "..tostring(target.titleName).."\n")
+								local mgrsInfo = target.MGRS_Chute_1km or target.MGRS_Chute or 0
+								io.write(key.." "..tostring(target.titleName).." "..tostring(mgrsInfo).."\n")
 								tabIndex[key] = target
 								
-								if target.task == "CSAR" and target.elements then
-									for ejectPilotN, ejectPilot in ipairs(target.elements) do
-										if ejectPilot.status == "EVAC_possible" then
-											local txtSup = ""
-											if ejectPilot.inTheEnemyCamp then txtSup = "in the enemy camp" end
-											io.write("          - - - - >"..tostring(ejectPilot.MGRS_Chute_10KM).." : "..tostring(ejectPilot.name).." "..txtSup.."\n")
-										end
-									end
-								end
+								-- if target.task == "CSAR" and target.elements then
+								-- 	for ejectPilotN, ejectPilot in pairs(target.elements) do
+								-- 		-- io.write(ejectPilotN.." ??? "..tostring(ejectPilot.name).."\n" )
+								-- 		if ejectPilot.status == "EVAC_possible" then
+								-- 			local txtSup = ""
+								-- 			if ejectPilot.inTheEnemyCamp then txtSup = "in the enemy camp" end
+								-- 			io.write("          - - - - >"..tostring(ejectPilot.MGRS_Chute_10KM).." : "..tostring(ejectPilot.name).." "..txtSup.."\n")
+								-- 		else
+								-- 			-- io.write(" NO "..eniSide.." "..tostring(target.titleName).." status?: "..tostring(ejectPilot.status).."\n")
+								-- 		end
+								-- 	end
+								
+								-- end
 							end
+							-- 	end
+							-- elseif (target.task == "CSAR" or target.task == "SAR") then
+							-- 	io.write(" NO "..eniSide.." "..tostring(target.titleName).." Inactive?: "..tostring(target.inactive).." ATO? "..tostring(target.ATO).."\n")
+							-- end
 						end
 
 						return tabIndex
@@ -361,16 +376,16 @@ if input == "y" or input == "yes" then
 
 					-- Fonction principale pour la sélection des cibles
 					local function selectTarget(targetlist)
-						local side = selectCamp()
-						if not side then return end -- Quitter si l'utilisateur choisit "Exit"
+						local targetSide = selectCamp()
+						if not targetSide then return end -- Quitter si l'utilisateur choisit "Exit"
 
 						local missionChoice = selectMissionType()
 
 						local tabIndex = {}
 						if missionChoice == 1 then
-							tabIndex = showStandardTargets(targetlist, side)
+							tabIndex = showStandardTargets(targetlist, targetSide)
 						elseif missionChoice == 2 then
-							tabIndex = showCSARTargets(targetlist, side)
+							tabIndex = showCSARTargets(targetlist, targetSide)
 						else
 							return selectTarget(targetlist) -- Retourner au choix du camp
 						end
@@ -392,7 +407,7 @@ if input == "y" or input == "yes" then
 
 						local selectedTarget = tabIndex[input]
 						Multi.Target = Multi.Target or {}
-						Multi.Target[side] = selectedTarget.titleName
+						Multi.Target[targetSide] = selectedTarget.titleName
 
 						print("\nSelected Target: "..selectedTarget.titleName)
 					end

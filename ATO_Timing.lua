@@ -245,7 +245,7 @@ for sideName, packs in pairs(ATO) do
 				if notIn(tasksInterdit, flight[f].task) then
 					local tSeparation = 8																		--basic separation between flights in seconds at cruise speed
 					local separation = tSeparation * main_vCruise													--basic separation between flights in meters
-					local offset																				--lateral offset of flight route in meters from route of lead flight
+					local offset = separation																				--lateral offset of flight route in meters from route of lead flight
 
 					if role == "main" or  role == "Strike" or  role == "Anti-ship Strike" then
 						if math.floor((f - 1) / 3) == (f - 1) / 3 then											--flight 1, 4, 7...

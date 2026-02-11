@@ -18,22 +18,103 @@ if Debug.debug then
 	print("START DC_Final_steps.lua "..versionDCE["DC_Final_steps.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
 
---set quelques unitées AAA en moyen
+-- local checkPoint = {
+--     ["y"] = 427946.75056108,
+--     ["x"] = -59046.908118635,
+--     }
+-- local unitsIdToRemove = {}
+-- local flagUnitToRemove = false
+-- --set quelques unitées AAA en moyen
+-- for _, side in pairs(mission.coalition) do
+-- 	for _, country in pairs(side.country) do
+-- 		for _, groups in pairs(country) do
+-- 			if type(groups) == "table" and groups["group"]  then
+-- 				for _, group in pairs(groups["group"]) do
+--                     flagUnitToRemove = false
+-- 					for _, unit in pairs(group.units) do
+-- 						if unit.type and (unit.type ==  "KS-19" or unit.type ==  "S-60_Type59_Artillery" ) then
+-- 							unit.skill = "Average"
+--                             --si la distance entre ces éléments et checkPoint est inferieur à 15km, on l'enregistre pour le supprimer juste apres
+--                             local distance = math.sqrt(math.pow(unit.x - checkPoint.x, 2) + math.pow(unit.y - checkPoint.y, 2))
+--                             if distance < 15000 then
+--                                 unitsIdToRemove = unitsIdToRemove or {}
+--                                 table.insert(unitsIdToRemove, unit.id)
+--                                 flagUnitToRemove = true
+--                             end
+
+-- 						end
+-- 					end
+--                     if flagUnitToRemove then
+--                         -- print("group "..tostring(group.name).." has a unit to remove")
+--                         for n=1, #group.units do
+--                             if group.units[n].id == unitsIdToRemove[#unitsIdToRemove] then
+--                                 table.remove(group.units, n)
+--                                 -- print("unit with id "..tostring(unitsIdToRemove[#unitsIdToRemove]).." removed")
+--                                 table.remove(unitsIdToRemove, #unitsIdToRemove)
+
+--                             end
+                            
+--                         end
+--                     end
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+-- end
+
+-- Point de référence
+local checkPoint = {
+    x = -59046.908118635,
+    y = 427946.75056108,
+}
+
+-- Distance max (15 km)
+local maxDistance = 15000
+
+
+-- Parcours des coalitions
 for _, side in pairs(mission.coalition) do
-	for _, country in pairs(side.country) do
-		for _, groups in pairs(country) do
-			if type(groups) == "table" and groups["group"]  then
-				for _, group in pairs(groups["group"]) do
-					for _, unit in pairs(group.units) do
-						if unit.type and (unit.type ==  "KS-19" or unit.type ==  "S-60_Type59_Artillery" ) then
-							unit.skill = "Average"
-						end
-					end
-				end
-			end
-		end
-	end
+    for _, country in pairs(side.country) do
+        for _, groups in pairs(country) do
+
+            if type(groups) == "table" and groups.group then
+
+                for _, group in pairs(groups.group) do
+
+                    -- Parcours A L'ENVERS pour suppression propre
+                    for i = #group.units, 1, -1 do
+
+                        local unit = group.units[i]
+
+                        if unit.type and
+                           (unit.type == "KS-19" or unit.type == "S-60_Type59_Artillery") then
+
+                            -- Mise en skill moyen
+                            unit.skill = "Average"
+
+                            -- Calcul distance
+                            local dx = unit.x - checkPoint.x
+                            local dy = unit.y - checkPoint.y
+
+                            local distance = math.sqrt(dx * dx + dy * dy)
+
+                            -- Suppression si trop proche
+                            if distance < maxDistance then
+
+                                -- Debug optionnel
+                                print("Suppression unité : "..tostring(unit.name).." "..unit.type)
+
+                                table.remove(group.units, i)
+
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
 end
+
 
 
 -- supprime les task EWR orphelines (sans unité EWR)
