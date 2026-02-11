@@ -4850,13 +4850,13 @@ local function rad_to_deg(rad)
 end
 
 
--- Constantes pour WGS84
-local a = 6378137.0 -- Demi-grand axe en mètres (WGS84)
-local f = 1 / 298.257223563 -- Aplatissement inverse (WGS84)
-local e2 = 2 * f - f * f -- Excentricité au carré
-local k0 = 0.9996 -- Facteur d'échelle sur le méridien central
+-- -- Constantes pour WGS84
+-- local a = 6378137.0 -- Demi-grand axe en mètres (WGS84)
+-- local f = 1 / 298.257223563 -- Aplatissement inverse (WGS84)
+-- local e2 = 2 * f - f * f -- Excentricité au carré
+-- local k0 = 0.9996 -- Facteur d'échelle sur le méridien central
 
--- Fonction pour convertir des coordonnées UTM en latitude et longitude
+--[[ -- Fonction pour convertir des coordonnées UTM en latitude et longitude
 local function dcs_to_gps(easting, northing, P0_lat, P0_lon)
     -- Convertir l'origine en radians
     local lat0_rad = math.rad(P0_lat)
@@ -4900,7 +4900,7 @@ local function dcs_to_gps(easting, northing, P0_lat, P0_lon)
     local longitude = math.deg(longitude_rad)
 
     return latitude, longitude
-end
+end ]]
 
 -- Fonction pour convertir les degrés en radians
 local function toRadians(degrees)
@@ -6336,5 +6336,154 @@ function LoadMissionFromMizIsolated(misStr)
 
     return env.mission
 end
+
+
+---------------------------------------------------------------------
+-- Formate un nombre avec des zéros devant (ex: 7 -> "007")
+-- Pourquoi : DCS ne supporte pas %0*d dans string.format
+---------------------------------------------------------------------
+local function padnumber(num, size)
+
+    local s = tostring(num)
+
+    while #s < size do
+        s = "0" .. s
+    end
+
+    return s
+end
+
+---------------------------------------------------------------------
+-- Convertit une latitude / longitude WGS84 en MGRS simplifié
+-- Précision : 1 km ou 100 m selon le paramètre
+---------------------------------------------------------------------
+function LatLonToMGRS(lat, lon, precision)
+    -- Pourquoi : constantes WGS84 nécessaires à la projection UTM
+    local a = 6378137.0
+    local f = 1 / 298.257223563
+    local k0 = 0.9996
+    local e2 = f * (2 - f)
+
+    -- Pourquoi : calcul de la zone UTM
+    local zone = math.floor((lon + 180) / 6) + 1
+
+    -- Pourquoi : méridien central de la zone
+    local lon0 = math.rad((zone - 1) * 6 - 180 + 3)
+
+    -- Conversion degrés → radians
+    local lat_rad = math.rad(lat)
+    local lon_rad = math.rad(lon)
+
+    -- Pourquoi : termes intermédiaires pour la projection
+    local n = a / math.sqrt(1 - e2 * math.sin(lat_rad)^2)
+    local t = math.tan(lat_rad)^2
+    local c = (e2 / (1 - e2)) * math.cos(lat_rad)^2
+    local a_term = math.cos(lat_rad) * (lon_rad - lon0)
+
+    -- Pourquoi : calcul du méridien (formule UTM standard)
+    local m = a * (
+        (1 - e2 / 4 - 3 * e2^2 / 64 - 5 * e2^3 / 256) * lat_rad
+        - (3 * e2 / 8 + 3 * e2^2 / 32 + 45 * e2^3 / 1024) * math.sin(2 * lat_rad)
+        + (15 * e2^2 / 256 + 45 * e2^3 / 1024) * math.sin(4 * lat_rad)
+        - (35 * e2^3 / 3072) * math.sin(6 * lat_rad)
+    )
+
+    -- Calcul Easting / Northing UTM
+    local easting = k0 * n * (
+        a_term
+        + (1 - t + c) * a_term^3 / 6
+        + (5 - 18 * t + t^2 + 72 * c) * a_term^5 / 120
+    ) + 500000
+
+    local northing = k0 * (
+        m
+        + n * math.tan(lat_rad) * (
+            a_term^2 / 2
+            + (5 - t + 9 * c + 4 * c^2) * a_term^4 / 24
+        )
+    )
+
+    -- Pourquoi : correction hémisphère sud
+    if lat < 0 then
+        northing = northing + 10000000
+    end
+
+    -- Pourquoi : bande latitudinale MGRS
+    local bands = "CDEFGHJKLMNPQRSTUVWX"
+    local band = bands:sub(math.floor((lat + 80) / 8) + 1,
+                            math.floor((lat + 80) / 8) + 1)
+
+    -- Pourquoi : carrés 100 km MGRS
+    local e100k = math.floor(easting / 100000)
+    local n100k = math.floor(northing / 100000)
+
+    local e_letters = {"ABCDEFGH", "JKLMNPQR", "STUVWXYZ"}
+    local e_letter = e_letters[(zone - 1) % 3 + 1]:sub(e100k + 1, e100k + 1)
+
+    local n_letters = "ABCDEFGHJKLMNPQRSTUV"
+    local n_letter = n_letters:sub((n100k % 20) + 1, (n100k % 20) + 1)
+
+    -- Pourquoi : réduction selon la précision demandée
+    local scale = (precision == 100) and 100 or 1000
+
+    local e_reduced = math.floor((easting % 100000) / scale)
+    local n_reduced = math.floor((northing % 100000) / scale)
+
+    local digits = (precision == 100) and 3 or 2
+
+	local zone_str = padnumber(zone, 2)
+	local e_str = padnumber(e_reduced, digits)
+	local n_str = padnumber(n_reduced, digits)
+
+	return zone_str .. band .. " " ..
+		e_letter .. n_letter .. " " ..
+		e_str .. " " .. n_str
+
+end
+
+
+---------------------------------------------------------------------
+-- Génère une zone MGRS floue (1km / 2km / 10km) à partir d'une table grid
+-- Pourquoi : représenter une zone d'incertitude (chute, impact, radar…)
+---------------------------------------------------------------------
+function GetFuzzyMGRS(grid, precision)
+
+    -- precision en mètres : 1000 / 2000 / 10000
+
+    local e = tostring(grid.Easting)
+    local n = tostring(grid.Northing)
+
+    -- Sécurité : toujours 5 chiffres
+    while #e < 5 do e = "0" .. e end
+    while #n < 5 do n = "0" .. n end
+
+    local mask
+
+    -- Pourquoi : nombre de chiffres à masquer selon la précision
+    if precision == 1000 then
+        mask = 2       -- 1 km → xx
+    elseif precision == 2000 then
+        mask = 2       -- 2 km ≈ même affichage, mais interprétation plus large
+    elseif precision == 10000 then
+        mask = 3       -- 10 km → xxx
+    else
+        mask = 2       -- défaut = 1 km
+    end
+
+    local function maskdigits(s, count)
+
+        return s:sub(1, 5 - count) .. string.rep("x", count)
+    end
+
+    local e_fuzzy = maskdigits(e, mask)
+    local n_fuzzy = maskdigits(n, mask)
+
+    return grid.UTMZone .. "_" ..
+           grid.MGRSDigraph .. "_" ..
+           e_fuzzy .. "_" ..
+           n_fuzzy
+end
+
+
 
 

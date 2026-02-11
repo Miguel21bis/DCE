@@ -318,25 +318,28 @@ local function deleteSoldierAliasPilot(ejectedPilot)
         if found then break end
     end
 
-    for side, targets in pairs(targetlist)	 do
+    for side, targets in pairs(targetlist) do
         for i = #targets, 1, -1 do
+           
+            if targets[i].name == ejectedPilot.name then
+
+                table.remove(targets, i)
+
+            end
+        end
+    end
+
+
+--[[        
+         for side, targets in pairs(targetlist) do     
             if targets[i].elements then
                 for elementN, element in ipairs(targets[i].elements) do
                     if element.name == ejectedPilot.name then
 
-                        -- print("DcUS_deleteSoldierAliasPilot() A Deleted pilot from targetlist: "..tostring(ejectedPilot.name).." from target "..tostring(targets[i].titleName) )
-
                         table.remove(targets[i].elements, elementN)
                         foundTarget = true
                         --supprime la zone SAR s'il n'y a plus d'élément dedans
-                        -- if targets[i].elements == nil or #targets[i].elements == 0 then
-                        --     table.remove(targets, i)
-                        -- end
-
-                        -- print("DcUS_deleteSoldierAliasPilot() B targets[i].elements "..tostring(targets[i].elements).." : "..tostring(#targets[i].elements) )
-
                         if not targets[i].elements or not next(targets[i].elements) then
-                            -- print("DcUS_deleteSoldierAliasPilot() C Deleted target from targetlist: "..tostring(targets[i].titleName) )
                             table.remove(targets, i)
                             
                         end
@@ -345,12 +348,12 @@ local function deleteSoldierAliasPilot(ejectedPilot)
                         break
                     end
                 end
-            end
+            end 
             if foundTarget then break end
         end
         if foundTarget then break end
     end
-
+]]
 
     return found, foundTarget
 end
@@ -576,15 +579,52 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                 end
 
                 --*************************************************************
-                if pilot.sideName == "red" and camp.code_loadout == "NAM" then
-                    
-                    local enemy = DCS_ENI_Side[zoneSideName]
-                    pilot.inTheEnemyCamp =  checkPointInPoly2({x=pilot.pos.x,y=pilot.pos.y}, boundary[enemy])
+                if camp.code_loadout == "NAM" then
 
-                    if not pilot.inTheEnemyCamp and pilot.date.year and pilot.date.month and pilot.date.day then
-                        if mia_Since > 2 then
-                            pilot.status = "rescued"
+                    if pilot.sideName == "red" then
+                    
+                        local enemy = DCS_ENI_Side[zoneSideName]
+                        pilot.inTheEnemyCamp = checkPointInPoly2({x=pilot.pos.x,y=pilot.pos.y}, boundary[enemy])
+
+                        if not pilot.inTheEnemyCamp and pilot.date.year and pilot.date.month and pilot.date.day then
+                            if mia_Since > 2 then
+                                pilot.status = "rescued"
+                            end
                         end
+
+                    elseif pilot.sideName == "blue" then
+                        --check si trop proche des grandes villes comme Hanoi
+                        --["x"] = 132610,
+                        --["y"] = 408650,
+
+                        local town = {
+                            ["Hanoi"] = {
+                                x= 132610,
+                                y = 408650,
+                                distInfluence = 30000,
+                            },
+                            ["Haiphong"] = {
+                                ["y"] = 452244,
+                                ["x"] = 70023,
+                                distInfluence = 20000,
+                            },
+                            ["Vihn"] = {
+                                ["y"] = 344113.5,
+                                ["x"] = -84651.667969,
+                                distInfluence = 10000,
+                            },
+                        }
+
+                      
+                        --parse les villes pour déclarer les pilotes ejecté: capturés s'ils sont dans le cercle d'influence 
+                        for townName, townData in pairs(town) do
+                            local distance = math.sqrt(math.pow(pilot.pos.x - townData.x, 2) + math.pow(pilot.pos.y - townData.y, 2))
+                            if distance < townData.distInfluence then
+                                print("DcUS SAR pilot too close from "..tostring(townName).." "..tostring(pilot.name).." set to POW")
+                                pilot.status = "POW"
+                            end
+                        end
+
                     end
 
                 end
@@ -713,6 +753,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                         if pilot.dataPOW.PowDayMax and pilot.date.year and pilot.date.month and pilot.date.day then
                             if mia_Since > pilot.dataPOW.PowDayMax then
                                 pilot.status = "POW"
+                                pilot.reason = "set to POW after max days "..tostring(pilot.dataPOW.PowDayMax)
                                 -- print("DcUS update Status A10 "..tostring(pilot.name).." set to POW after max days "..tostring(pilot.dataPOW.PowDayMax))
                             end
                         end
@@ -733,11 +774,13 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 							pilot.status = "EVAC_possible"
 						elseif  nbAMI_ENI[zoneSideName][500] == 0 and  nbAMI_ENI[enemy][500] >= 2  then
 							pilot.status = "POW"
+                            pilot.reason = "set to POW 500m ENI "
                             -- print("DcUS update Status D "..tostring(pilot.name).." set to POW 500m ENI")
 						elseif nbAMI_ENI[zoneSideName][3000] >= 2  and nbAMI_ENI[enemy][3000] < 2 then
 							pilot.status = "EVAC_possible"
 						elseif nbAMI_ENI[zoneSideName][3000] < 2  and nbAMI_ENI[enemy][3000] >= 2 then
 							pilot.status = "POW"
+                            pilot.reason = "set to POW 3000m ENI "
                             -- print("DcUS update Status E "..tostring(pilot.name).." set to POW 3000m ENI")
 						elseif nbAMI_ENI[zoneSideName][3000] >= 2  and nbAMI_ENI[enemy][3000] >= 2  then
 							local pourcent = (nbAMI_ENI[zoneSideName][3000] / ( nbAMI_ENI[zoneSideName][3000] + nbAMI_ENI[enemy][3000]))*100
@@ -747,6 +790,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
 							if randomMalChance > pourcent then
 								pilot.status = "POW"
+                                pilot.reason = "set to POW 3000m both sides, randomMalChance > pourcent "..randomMalChance.." > ".. pourcent
                                 -- print("DcUS update Status F "..tostring(pilot.name).." set to POW 3000m both sides")
 							else
 								pilot.status = "EVAC_possible"
@@ -766,6 +810,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                            
 							if randomMalChance > pourcent then
                                 pilot.status = "POW"
+                                pilot.reason = "set to POW 20000m both sides, randomMalChance > pourcent "..randomMalChance.." > ".. pourcent
                                 -- print("DcUS update Status G "..tostring(pilot.name).." set to POW 20000m both sides")
 							else
 								pilot.status = "EVAC_possible"
@@ -1061,18 +1106,28 @@ if camp_ZoneSAR then
             -- Parcours à l'envers pour supprimer sans bug d'index
             for pilotN = #zone, 1, -1 do
                 local pilot = zone[pilotN]
-                if pilot.status == "rescued" or pilot.status == "POW" or pilot.status == "error" then
+                if pilot.status == "rescued" or pilot.status == "POW" or pilot.status == "error" or pilot.status == "dead" then
                     local result, resultTarget = deleteSoldierAliasPilot(pilot)
                     if not result and not resultTarget and Debug.debug then
                         print("DcUS GG (rescued or POW) Unable to delete this pilot "..pilot.status.." // "..tostring(pilot.name))
                     end
+
+                    if Debug.debug then
+                        print("DcUS remove ejectedPilot from UpdateSAR "..pilot.name.." status: "..tostring(pilot.status).." Reason?: "..tostring(pilot.reason))
+                    end
+
                     -- Suppression du pilote dans camp_ZoneSAR
                     table.remove(zone, pilotN)
+
                     
                     -- Supprimer la zone si elle est vide
                     if not next(zone) then
-                        -- print("DcUS GH Supprimer la zone si elle est vide zoneName "..tostring(zoneName))
+                        if Debug.debug then
+                            print("DcUS GH Supprimer la zone si elle est vide zoneName "..tostring(zoneName))
+                        end
+                       
                         sideTab[zoneName] = nil
+
                     end
 
                 end
@@ -1215,5 +1270,14 @@ camp.SAR.Flag = 600
 -- 	ZoneSARFile:write(ZoneSAR_str)																	--save new data
 -- 	ZoneSARFile:close()
 -- end
+
+
+if Debug.debug then
+	local camp_str = "camp_ZoneSAR = " .. TableSerialization(camp_ZoneSAR, 0)
+	local campFile = io.open("Debug/camp_ZoneSAR_UpdateSAR.lua", "w") or error("Échec d'ouverture du fichier camp_ZoneSAR")
+	campFile:write(camp_str)
+	campFile:close()
+end
+
 
 

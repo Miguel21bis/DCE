@@ -3,7 +3,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification: cleancode_e
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_UpdateTargetlist.lua"] = "1.11.53"
+versionDCE["DC_UpdateTargetlist.lua"] = "1.12.54"
 ------------------------------------------------------------------------------------------------------- 
 -- cleancode_e				(d springCleaning)
 -- adjustment_a				(a GroundTarget.percent = 100 & Error_05 )
@@ -337,51 +337,6 @@ local function findInTemplates(name, side, classT)
 end
 
 
--- local function findInTemplates(name, side, classT, debugDCUT)
--- 	if not (Debug.checkTargetName and (Firstmission_flag or Skipmission_flag)) then return true end
-
--- 	if  type(tabTemplates) == "table" then		--Debug.checkTargetName2Space  and 
--- 		for i = 1 , #tabTemplates do
--- 			dofile("Templates/"..tabTemplates[i])
-
--- 			local DictKey = {}
--- 			if staticTemplate.localization and staticTemplate.localization.DEFAULT then
--- 				for dictNameId, key in pairs(staticTemplate.localization.DEFAULT) do
--- 					DictKey[dictNameId] = key
--- 				end
-
--- 			end
--- 			-- if debugDCUT then _affiche(DictKey, "DictKey DcUT") end
-
--- 			for country_n, country in pairs(staticTemplate.coalition[side].country) do					--iterate through countries
--- 				for classname, class in pairs(country) do
--- 					-- if debugDCUT then print("DCUT A classname: "..tostring(classname).." classT: "..tostring(classT)) end
-
--- 					if classname == classT  then
--- 						-- if debugDCUT then print("DCUT B ") end
-
--- 						for group_n, group in pairs(class.group) do				--iterate through groups in country.static.group table
--- 							-- if debugDCUT then print("DCUT C ") end
-
--- 							if group.name == name then				--if the target element is found in group table
--- 								return true
--- 							elseif string.find(group.name, "DictKey_") then
--- 								-- if debugDCUT then print("DCUT D DictKey[group.name]: "..tostring(DictKey[group.name]).." name: "..tostring(name)) end
-
--- 								if DictKey[group.name]  == name then
--- 									-- if debugDCUT then print("DCUT E return true") end
-
--- 									return true
--- 								end
--- 							end
--- 						end
--- 					end
--- 				end
--- 			end
--- 		end
--- 	end
--- 	return false
--- end
 
 
 -- ["requiredModules"] = 
@@ -438,108 +393,137 @@ for side, targets in pairs(targetlist)	 do
 	end
 end
 
-if camp_ZoneSAR and camp_ZoneSAR ~= nil then
-	for sideTL, targets in pairs(targetlist)	 do
-		if camp_ZoneSAR[sideTL] then
-			for zoneName, pilots in pairs(camp_ZoneSAR[sideTL]) do
+local newTargetEjecPilot = {
+	red = {},
+	blue = {},
+}
+--change l'oganisation des ejectedPilot
+for side, targets in pairs(targetlist) do
+	for targetN, target in pairs(targets) do
+		if target.task == "CSAR" and target.elements then
+			
+			for elementN, element in ipairs(target.elements) do
+				if element and type(element) == 'table' then
 
-				if not pilots[1] then
+					local entrie = element
+
+					local mgrsStr
+					if entrie.lat and entrie.lon then
+						mgrsStr = LatLonToMGRS(entrie.lat, entrie.lon, 100)
+					else
+						mgrsStr = "Unknown"
+					end
+
+					entrie["ATO"] = true
+					entrie["isStructure"] = false
+					entrie["firepower"] = 
+					{
+						["min"] = 1,
+						["max"] = 4,
+					}
+					entrie["priority"] = 5
+					entrie["task"] = "CSAR"
+					entrie["type"] = "Ejected Pilot"
+					-- entrie["selectedUnitSAR"] = "160th SOAR Det 1"
+					entrie["name"] = entrie["name"]
+					entrie["alive_last"] = 0
+					entrie["alive"] = 100
+					entrie["titleName"] = entrie["name"]
+					entrie["testMGRS"] = mgrsStr
+					entrie.MGRS_Chute_1km = GetFuzzyMGRS(entrie.grid, 1000)
+					entrie.MGRS_Chute_10KM = GetFuzzyMGRS(entrie.grid, 10000)
+
+					table.insert(newTargetEjecPilot[side], entrie)
+
+				end
+			end
+			target.element = nil
+			target.task = "CSAR_OLD"
+		end
+	end
+end
+
+--ajoute les nouveaux target dans la table targetList:
+for side, targets in pairs(newTargetEjecPilot) do
+	for i, target in ipairs(targets) do
+		table.insert(targetlist[side], target)
+	end
+end
+
+--supprime de la table targetlist tous les targets ayant comme task : "CSAR_OLD"
+for side, targets in pairs(targetlist) do
+	for i = #targets, 1, -1 do
+		if targets[i].task == "CSAR_OLD" then
+			table.remove(targets, i)
+		end
+	end
+end
+
+--ajoute dans une table Index_ejectPil, tous les ejectedPilot de la table targetlist
+Index_ejectPil ={}
+for side, targets in pairs(targetlist) do
+	Index_ejectPil[side] = {}
+	for targetN, target in pairs(targets) do
+		if target.type and target.type == "Ejected Pilot" then
+
+			Index_ejectPil[target.name] = true
+
+		end
+	end
+end
+
+if camp_ZoneSAR and camp_ZoneSAR ~= nil then
+	for sideTL, targets in pairs(targetlist) do
+		if camp_ZoneSAR[sideTL] then
+			for zoneName, zPilots in pairs(camp_ZoneSAR[sideTL]) do
+
+				if not zPilots[1] then
 					print("DcUT Error_04 : No pilot in this SAR zone: "..tostring(zoneName).." for side "..tostring(sideTL) )
 					AddLog("DcUT Error_04 : No pilot in this SAR zone: "..tostring(zoneName).." for side "..tostring(sideTL) )
 					-- os.execute 'pause'
 					break
 				end
 
+				for i = 1, #zPilots do
 
-				local altiReference = 999999
-				local referenceX = pilots[1].x or pilots[1].pos.x
-				local referenceY = pilots[1].y or pilots[1].pos.y
+					if not Index_ejectPil[zPilots[i].name] then
 
-				for i = 1, #pilots do
-
-					local ePriority = 0
-					if pilots[i].inTheEnemyCamp then
-						ePriority = 5		--	10
-					elseif pilots[i].inTheEnemyCamp == false then
-						ePriority = 7		--	100
-					elseif pilots[i].inTheEnemyCamp == nil then
-						ePriority = 6		--	50
-					end
-
-					local foundZoneName = false
-					for targetN, target in ipairs(targets) do
-						if target.titleName == zoneName then
-							local foundElement = false
-							if target.elements then
-
-								for elementN, element in pairs(target.elements) do
-									if pilots[i].name == element.name then
-										element.status = pilots[i].status
-										element.x = pilots[i].pos.x
-										element.y = pilots[i].pos.y
-										element.z = pilots[i].pos.z
-										foundElement = true
-									end
-								end
-							end
-
-							if not foundElement then
-								table.insert(target.elements, pilots[i] )
-							end
-
-							foundZoneName = true
-							target.selectedUnitSAR = pilots[1].selectedUnitSAR
-							break
+						local ePriority = 0
+						if zPilots[i].inTheEnemyCamp then
+							ePriority = 5		--	10
+						elseif zPilots[i].inTheEnemyCamp == false then
+							ePriority = 7		--	100
+						elseif zPilots[i].inTheEnemyCamp == nil then
+							ePriority = 6		--	50
 						end
-					end
 
-					if not foundZoneName then
-						local newElement = pilots[i]
-						newElement.type = "Ejected Pilot"
-						newElement.x = pilots[i].pos.x
-						newElement.y = pilots[i].pos.y
-						newElement.z = pilots[i].pos.z
-
-						local newTarget = {
-							task = "CSAR",
-							priority = ePriority,
-							titleName = zoneName,
-							type = "Ejected Pilot",
-							firepower = {
+						local newTarget = zPilots[i]
+						newTarget.type = "Ejected Pilot"
+						newTarget.x = newTarget.x or zPilots[i].pos.x
+						newTarget.y = newTarget.y or zPilots[i].pos.y
+						newTarget.z = newTarget.z or zPilots[i].pos.z
+						newTarget.task = "CSAR"
+						newTarget.priority = ePriority
+						newTarget.titleName = zPilots[i].name
+						newTarget.type = "Ejected Pilot"
+						newTarget.firepower = {
 								min = 1,
 								max = 1,
-							},
-
-							elements = {
-								[1] = newElement,
-							},
-							selectedUnitSAR = pilots[1].selectedUnitSAR
-						}
+							}
+						newTarget.MGRS_Chute_1km = GetFuzzyMGRS(zPilots[i].grid, 1000)
+						newTarget.MGRS_Chute_10KM = GetFuzzyMGRS(zPilots[i].grid, 10000)
+						newTarget.selectedUnitSAR = zPilots[i].selectedUnitSAR or zPilots[1].selectedUnitSAR
+						
 
 						table.insert(targets,newTarget )
-
-					end
-
-					--repere le EjectedPilot ayant l'alti le plus bas
-					if pilots[i].pos.z < altiReference and (pilots[i].status == "EVAC_possible" or pilots[i].status == "MIA" ) then
-						altiReference = pilots[i].pos.z
-						referenceX = pilots[i].pos.x
-						referenceY = pilots[i].pos.y
-					end
-				end
-
-				for targetN, target in ipairs(targets) do
-					if target.titleName == zoneName then
-						target.x = referenceX
-						target.y = referenceY
-						target.z = altiReference
 					end
 				end
 			end
 		end
 	end
+end
 
-	--suppression des éléments inutile (rescued ou POW)	
+--[[ 	--suppression des éléments inutile (rescued ou POW)	
 	repeat
 		local findDeprecated = false
 		for side, targets in pairs(targetlist)	 do
@@ -550,10 +534,10 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
 							table.remove(targets[i].elements, elementN)
 							findDeprecated = true
-								--supprime la zone SAR s'il n'y a plus d'élément dedans
-								if targets[i].elements == nil or #targets[i].elements == 0 then
-									table.remove(targets, i)
-								end
+								-- --supprime la zone SAR s'il n'y a plus d'élément dedans
+								-- if targets[i].elements == nil or #targets[i].elements == 0 then
+								-- 	table.remove(targets, i)
+								-- end
 							break
 						end
 					end
@@ -599,6 +583,70 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 					end
 				end
 			end
+		end
+	end
+end ]]
+
+--suppression des éléments inutile (rescued ou POW)	
+--supprime de la table targetlist tous les targets ayant comme task : "CSAR_OLD"
+for side, targets in pairs(targetlist) do
+	for i = #targets, 1, -1 do
+		local target = targets[i]
+		if target.type and target.type == "Ejected Pilot" then
+			if target.status and (target.status == 'rescued' or target.status == "POW" or target.status == "error") then
+				table.remove(targets, i)
+			end
+		end
+	end
+end
+
+
+--supprime les pilots de targetlist s'ils n'existent pas dans camp_ZoneSAR
+for side, targets in pairs(targetlist) do
+	for i = #targets, 1, -1 do
+		local target = targets[i]
+		if target.type and target.type == "Ejected Pilot" then
+
+			local foundPilot = false
+			for zoneName, zones in pairs(camp_ZoneSAR[side]) do
+				for pilotN, pilot in ipairs(zones) do
+					if pilot.name == target.name then
+						foundPilot = true
+						break
+					end
+				end
+				if foundPilot then break end
+			end
+
+			if not foundPilot then
+
+				print("DcUT A no found Pilot, delete him in targetList "..tostring(target.name) )
+
+				table.remove(targets , i)
+
+			end
+		end
+	end
+end
+
+--supprime des éléments inutile:
+--supprime de la table targetlist tous les targets ayant comme task : "CSAR_OLD"
+for side, targets in pairs(targetlist) do
+	for targetN, target in pairs(targets) do
+		if target.task == "CSAR" then
+			target.radio_on = nil
+			target.smokeTiming = nil
+			target.radio_start = nil
+			target.closeRoad = nil
+			-- target.pos = nil
+			target.groupSAR = nil
+			target.nameId = nil
+			target.unit = nil
+			target.initiatorMissionID = nil
+			target.createdSoldier = nil
+			target.initiator = nil
+			target.unitObj = nil
+
 		end
 	end
 end
@@ -1093,7 +1141,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 		elseif target.task == "CSAR" then
 			target.alive = 100															--Introduce percentage of alive target elements
 			target.alive_last = 0														--Introduce percentage of elements that died in last mission (for Debriefing)
-			for e = 1, #target.elements do												--Iterate through elements of target
+--[[ 			for e = 1, #target.elements do												--Iterate through elements of target
 				if not target.elements[e].x then
 					checkBug3(" Error_10: The x and y positions of this CSAR position are missing:  '" .. target.titleName .. "!")
 				end
@@ -1103,7 +1151,19 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 				if target.elements[e].dead_last then
 					target.alive_last = target.alive_last + 100 / #target.elements		--add target died in last mission percentage
 				end
+			end ]]
+
+
+			if not target.x then
+				checkBug3(" Error_10: The x and y positions of this CSAR position are missing:  '" .. target.titleName .. "!")
 			end
+			if target.dead then											--if target element is dead		
+				target.alive = target.alive - 100 / #target.elements				--reduce target alive percentage	
+			end
+			if target.dead_last then
+				target.alive_last = target.alive_last + 100 / #target.elements		--add target died in last mission percentage
+			end
+
 			target.alive = math.floor(target.alive)
 			target.alive_last = math.floor(target.alive_last)
 
@@ -1948,6 +2008,15 @@ if Debug.debug then
 	local campFile = io.open("Debug/oob_ground_DcUT.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
+
+	
+
+	camp_str = "targetlist_UpdateTgt = " .. TableSerialization(targetlist, 0)
+	campFile = io.open("Debug/targetlist_UpdateTgt.lua", "w") or error("Échec d'ouverture du fichier targetlist")
+	campFile:write(camp_str)
+	campFile:close()
+
+
 
 	-- AddLog(string.format(
 	-- 	"PERF UpdateTargetList: total=%.2fs | strike=%.2fs | additional=%.2fs |  template=%.2fs | oob=%.2fs | elements=%.2fs | elementsA=%.2fs  | elementsB=%.2fs | threats=%.2fs | units=%.2fs |runway=%.2fs | alive=%.2fs| t_checkXY_a=%.2fs | t_checkXY_b=%.2fs",
