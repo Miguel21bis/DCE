@@ -471,7 +471,9 @@ addFileTrigger("beacon.ogg", nil, nil, "a_out_sound_c")
 addFileTrigger("beaconsilent.ogg", nil, nil, "a_out_sound_c")
 -- AddFileTrigger("CG_ArtySpotter.lua")												--https://www.digitalcombatsimulator.com/fr/files/3339128/
 
-AddFileTriggerTempo("AAA_barrage.lua", 1.5, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})
+if AAA_Barrage then
+	AddFileTriggerTempo("AAA_barrage.lua", 1.5, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})
+end
 
 AddFileTriggerTempo("CG_ArtySpotter.lua", 2, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})
 
@@ -1148,12 +1150,10 @@ local campL = {
 	AAA_Barrage = AAA_Barrage,
 
 
-
-
-
 	-- if not camp.missionHistory then camp.missionHistory = {} end
 	-- camp.missionHistory[camp.mission] = camp.date
 }
+
 
 local c_lua2miz = os.clock()
 
@@ -1320,8 +1320,10 @@ if PlayerFlight then
 
 	miz:zipAddFile("l10n/DEFAULT/bombOnRunway.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/bombOnRunway.lua")
 	miz:zipAddFile("l10n/DEFAULT/CG_ArtySpotter.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CG_ArtySpotter.lua")
-	miz:zipAddFile("l10n/DEFAULT/AAA_barrage.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/AAA_barrage.lua")
-
+	
+	if AAA_Barrage then
+		miz:zipAddFile("l10n/DEFAULT/AAA_barrage.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/AAA_barrage.lua")
+	end
 
 	if not existing_files["l10n/DEFAULT/beacon.ogg"] then
 		miz:zipAddFile("l10n/DEFAULT/beacon.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/beacon.ogg")	
