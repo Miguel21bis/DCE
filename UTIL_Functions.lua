@@ -5639,6 +5639,19 @@ function PatchEjectedPilotStructure(pilot, from)
 
 	-- print("utilF pilot.x2d "..tostring(pilot.x2d).." pilot.y2d "..tostring(pilot.y2d).." pilot.z2d "..tostring(pilot.z2d).." pilot.name "..tostring(pilot.name) )
 
+	pilot.radio_on = nil
+	pilot.smokeTiming = nil
+	pilot.radio_start = nil
+	pilot.closeRoad = nil
+	-- pilot.pos = nil
+	pilot.groupSAR = nil
+	pilot.nameId = nil
+	pilot.unit = nil
+	pilot.initiatorMissionID = nil
+	pilot.createdSoldier = nil
+	pilot.initiator = nil
+	pilot.unitObj = nil
+
 	if not pilot.date then
 		pilot.date = {
 			day = pilot.day,

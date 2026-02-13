@@ -376,18 +376,32 @@ if Debug.checkTargetName and (Firstmission_flag or Skipmission_flag) then
     tabTemplates = tabFileTemplate()
 end
 
+-- --met a jour la structure des ejectedPilot dans le targetlist
+-- for side, targets in pairs(targetlist)	 do
+-- 	for i = #targets, 1, -1 do
+-- 		if targets[i].elements then
+-- 			for elementN, element in ipairs(targets[i].elements) do
+-- 				if element and type(element) == 'table' and (element["SumEjectedPilotDay"] or element["sumEjectedPilotDay"] or element.type == "ejectedPilot") then
+
+-- 					--met à jour la nouvelle structure des ejectedPilot
+-- 					element = PatchEjectedPilotStructure(element, "targetlist")
+
+
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+-- end
+
 --met a jour la structure des ejectedPilot dans le targetlist
 for side, targets in pairs(targetlist)	 do
-	for i = #targets, 1, -1 do
-		if targets[i].elements then
-			for elementN, element in ipairs(targets[i].elements) do
-				if element and type(element) == 'table' and (element["SumEjectedPilotDay"] or element["sumEjectedPilotDay"] or element.type == "ejectedPilot") then
+	for targetsN , target in pairs(targets) do
+		if target.task and target.task == "CSAR" then
+			if target["SumEjectedPilotDay"] or target["sumEjectedPilotDay"] or target.type == "ejectedPilot" then
 
-					--met à jour la nouvelle structure des ejectedPilot
-					element = PatchEjectedPilotStructure(element, "targetlist")
+				--met à jour la nouvelle structure des ejectedPilot
+				target = PatchEjectedPilotStructure(target, "targetlist")
 
-
-				end
 			end
 		end
 	end

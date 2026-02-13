@@ -65,7 +65,6 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 end
 
 --temporaire, transforme les variables renommé:
--- Supprime de oob_ground ET de camp_ZoneSAR les ejectedPilot capturés ou sauvés
 if camp_ZoneSAR and camp_ZoneSAR ~= nil then
     for _, sideSAR in pairs(camp_ZoneSAR) do
         for _, zone in pairs(sideSAR) do
@@ -1186,9 +1185,11 @@ end
 --     end
 -- end
 
-
-if not camp.SAR then camp.SAR = {} end
+camp.SAR = {}
 camp.SAR.pilotEjected = {}
+
+-- if not camp.SAR then camp.SAR = {} end
+-- camp.SAR.pilotEjected = {}
 
 --creation table de la liste des pilote ejecté à utiliser dans le game DC_StaticAircraft
 --UTIL pour calculer en temps réel la distance séparant ces pilotes des helico pour déclencher le fumigene
@@ -1217,27 +1218,14 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
                 if pilot.status == "EVAC_possible" and pilot.pos.surfaceType ~= 5  then
 
                     local addPilot = pilot
-                    addPilot.smokeTiming = 0
+                    -- addPilot.smokeTiming = 0
                     addPilot.embarked = false
                     addPilot.embarkAndSafe = false
                     addPilot.landingPossible = pilot.landingPossible
                     addPilot.inTheEnemyCamp = pilot.inTheEnemyCamp
                     addPilot.radio_on  = false
                     addPilot.radio_start = 0
-                    if pilot.MGRS_Chute_10KM then
-                        addPilot.MGRS_Chute_10KM = pilot.MGRS_Chute_10KM
-                    end
-                    -- local AddPilot = {
-                    --         name = element.name,
-                    --         initiatorPilotName = element.initiatorPilotName,
-                    --         side = element.side,
-                    --         smokeTiming = 0,
-                    --         embarked = false,
-                    --         embarkAndSafe = false,
-                    --         MGRS_Chute = element.MGRS_Chute,
-                    --     }
-
-                    --  print("DcUS G2 table.insert camp.SAR.pilotEjected "..tostring(pilot.name))
+                    pilot.MGRS_Chute_10KM = pilot.MGRS_Chute_10KM or nil
 
                     table.insert(camp.SAR.pilotEjected, addPilot)
 
