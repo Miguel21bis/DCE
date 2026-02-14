@@ -2,15 +2,12 @@
 --Script attached to mission and executed via trigger
 --Functions accessed via LUA Run Script on waypoint
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  M68_b cleanCode_d
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/CustomTasksScript.lua"] = "2.12.48"
+versionDCE["Mission Scripts/CustomTasksScript.lua"] = "2.12.50"
 ------------------------------------------------------------------------------------------------------- 
 
 env.info("### DCE START CustomIntercept.lua " .. versionDCE["Mission Scripts/CustomTasksScript.lua"] .. " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 
-local varFpsLeak = false
-local varFpsLeak_B = false
 local selectedTransport = 0			--util pour embarked
 local attackCounter	= {}
 local falseCycleCount = {}												--table to count how many flights have already attacked and distribute subsequent attacks accordingly
@@ -520,7 +517,13 @@ end
 --allows each wingman of a flight to attack its own individual target simultaneously, then proceed to Egress point to join up (flight would not climb during egress if wingmen would joing leader imediately after attack)
 function CustomMixClassAttack(flightName, targetList, expend, weaponType, attackType, attackAlt, id_task)
 	
-	env.info("DCE_CustomMixClassAttack | start| "..tostring(flightName))
+    env.info("DCE_CustomMixClassAttack | start| " .. tostring(flightName))
+	
+	local t0
+	if campL.debug then
+		t0 = os.clock()
+		Perf_Q_N = Perf_Q_N + 1
+	end
 
 	--{cntrl, comboTask, n}
 	local function execute(arg)
@@ -617,156 +620,159 @@ function CustomMixClassAttack(flightName, targetList, expend, weaponType, attack
 		end
 	end
 
-	for n = 1, #wingman do											--iterate through all aircraft in flight
-		local cntrl
-		if n == 1 then												--for leader
-			cntrl = flight:getController()							--get controller of group
-		else														--for wingmen
-			cntrl = wingman[n]:getController()						--get controller of individual aircraft in flight
-			cntrl:setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2) 	--set to evade fire again, as controller for individual unit does not take over options from parent group
-		end
+    for n = 1, #wingman do                                 --iterate through all aircraft in flight
+        local cntrl
+        if n == 1 then                                     --for leader
+            cntrl = flight:getController()                 --get controller of group
+        else                                               --for wingmen
+            cntrl = wingman[n]:getController()             --get controller of individual aircraft in flight
+            cntrl:setOption(AI.Option.Air.id.REACTION_ON_THREAT, 2) --set to evade fire again, as controller for individual unit does not take over options from parent group
+        end
 
-		local comboTask = {											--define combo task to hold multiple attack tasks
-			id = 'ComboTask',
-			params = {
-				tasks = {},
-			},
-		}
+        local comboTask = { --define combo task to hold multiple attack tasks
+            id = 'ComboTask',
+            params = {
+                tasks = {},
+            },
+        }
 
-		for t = 1, #targetList do									--iterate thourgh targets
+        for t = 1, #targetList do --iterate thourgh targets
+            --each wingman gets one attack task for each target	
+            local num = t + math.ceil((n - 1) * (#targetList / #wingman)) --distribute target numbers across flight
+            num = num + AttackN - 1                              --increase target number to adjust for previous attacks
+            while num > #targetList do
+                num = num - #targetList
+            end
 
-			--each wingman gets one attack task for each target	
-			local num = t + math.ceil((n - 1) * (#targetList / #wingman))	--distribute target numbers across flight
-			num = num + AttackN - 1											--increase target number to adjust for previous attacks
-			while num > #targetList do
-				num = num - #targetList
-			end
+            local targetName = targetList[num][1]
+            local targetClass = targetList[num][2]
+            local targetX = tostring(targetList[num][3])
+            local targetY = tostring(targetList[num][4])
+            local targetTemp = false
+            local targetTempPos = {}
+            local targetID
 
-			local targetName = targetList[num][1]
-			local targetClass = targetList[num][2]
-			local targetX = tostring(targetList[num][3])
-			local targetY = tostring(targetList[num][4])
-			local targetTemp = false
-			local targetTempPos = {}
-			local targetID
+            -- env.info("DCE_CustomMixClassAttack :targetName AA |"..tostring(targetName).."|targetClass: "..tostring(targetClass))
 
-			-- env.info("DCE_CustomMixClassAttack :targetName AA |"..tostring(targetName).."|targetClass: "..tostring(targetClass))
+            if targetClass == "static" then
+                targetTemp = StaticObject.getByName(targetName)
+                if targetTemp then
+                    targetTempPos = {
+                        x = targetTemp:getPoint().x,
+                        y = targetTemp:getPoint().z,
+                    }
+                    -- idTypeStrike  = "AttackUnit"
+                    -- targetID = targetTemp:getID()
 
-			if targetClass == "static" then
-				targetTemp = StaticObject.getByName(targetName)
-				if targetTemp then
-					targetTempPos ={
-						x = targetTemp:getPoint().x,
-						y = targetTemp:getPoint().z,
-					}
-					-- idTypeStrike  = "AttackUnit"
-					-- targetID = targetTemp:getID()
+                    idTypeStrike  = "Bombing"
 
-					idTypeStrike  = "Bombing"
+                    -- env.info("DCE_CustomMixClassAttack static found BB1 |"..tostring(targetName).."|")
+                    -- _affiche(targetTemp, "targetName StaticObject.getByName")
+                end
+            elseif (targetClass == "MapObject" or targetClass == nil or targetClass == "nil") then
+                targetTempPos = {
+                    x = targetX,
+                    y = targetY,
+                }
+                targetTemp    = true
+                idTypeStrike  = "Bombing"
 
-					-- env.info("DCE_CustomMixClassAttack static found BB1 |"..tostring(targetName).."|")
-					-- _affiche(targetTemp, "targetName StaticObject.getByName")
-				end
+                -- env.info("DCE_CustomMixClassAttack MapObject found BB2 |"..tostring(targetName).."|")
+            elseif targetClass == "nil" then
+                targetTempPos = {
+                    x = targetX,
+                    y = targetY,
+                }
+                targetTemp    = true
+                idTypeStrike  = "Bombing"
 
-			elseif (targetClass == "MapObject" or targetClass == nil or targetClass == "nil") then
-				targetTempPos ={
-					x = targetX,
-					y = targetY,
-				}
-				targetTemp = true
-				idTypeStrike  = "Bombing"
+                -- env.info("DCE_CustomMixClassAttack MapObject found BB22 |"..tostring(targetName).."|")
+            else --if targetClass == "vehicle" then
+                targetTemp = Unit.getByName(targetName)
+                if targetTemp then
+                    targetTempPos = {
+                        x = targetTemp:getPoint().x,
+                        y = targetTemp:getPoint().z,
+                    }
+                    -- idTypeStrike  = "AttackUnit"
+                    -- targetID = targetTemp:getID()
 
-				-- env.info("DCE_CustomMixClassAttack MapObject found BB2 |"..tostring(targetName).."|")
+                    idTypeStrike  = "Bombing"
 
-			elseif  targetClass == "nil" then
-				targetTempPos ={
-					x = targetX,
-					y = targetY,
-				}
-				targetTemp = true
-				idTypeStrike  = "Bombing"
+                    -- env.info("DCE_CustomMixClassAttack vehicle found BB3 |"..tostring(targetName).."|")
+                end
+            end
 
-				-- env.info("DCE_CustomMixClassAttack MapObject found BB22 |"..tostring(targetName).."|")
+            if targetTemp then --make sure that static object still exists
+                -- env.info("DCE_CustomMixClassAttack: DD1 ")
 
-			else --if targetClass == "vehicle" then
-				targetTemp = Unit.getByName(targetName)
-				if targetTemp then
-					targetTempPos ={
-						x = targetTemp:getPoint().x,
-						y = targetTemp:getPoint().z,
-					}
-					-- idTypeStrike  = "AttackUnit"
-					-- targetID = targetTemp:getID()
+                local task_entry = { --define attack task
+                    ["enabled"] = true,
+                    ["auto"] = false,
+                    ["id"] = idTypeStrike,
+                    ["number"] = #comboTask.params.tasks + 1,
+                    ["name"] = "task: " .. tostring(id_task) .. " class: " .. tostring(targetClass),
+                    ["params"] = {
+                        ["x"] = targetTempPos.x,
+                        ["y"] = targetTempPos.y,
+                        ["expend"] = expend,
+                        ["weaponType"] = tonumber(weaponType),
+                        ["groupAttack"] = false,
+                        ["attackType"] = attackType,
+                        ["attackQtyLimit"] = false,
+                        ["attackQty"] = 1,
+                        -- ["altitudeEdited"] = true,
+                        ["altitudeEnabled"] = true,
+                        ["altitude"] = tonumber(attackAlt),
+                        ["directionEnabled"] = false,
+                        ["direction"] = 0,
+                    },
+                }
 
-					idTypeStrike  = "Bombing"
+                --auto expend
+                if idTypeStrike == "AttackUnit" then
+                    task_entry["id"] = "AttackUnit"
+                    task_entry.params["unitId"] = tonumber(targetID)
+                    task_entry.params["attackQtyLimit"] = false
+                    task_entry.params["x"] = nil
+                    task_entry.params["y"] = nil
+                end
 
-					-- env.info("DCE_CustomMixClassAttack vehicle found BB3 |"..tostring(targetName).."|")
-				end
-			end
+                -- ["stopCondition"] =
+                -- {
+                -- 	["time"] = tonumber(UntilTime),
+                -- 	-- ["duration"] = tonumber(var_duration),
+                -- }
 
-			if targetTemp then							--make sure that static object still exists
-				-- env.info("DCE_CustomMixClassAttack: DD1 ")
+                -- env.info("DCE_CustomMixClassAttack: CustomStaticAttack DD |"..tostring(flightName).."| |"..tostring(task_entry["id"]))
 
-				local task_entry = {									--define attack task
-					["enabled"] = true,
-					["auto"] = false,
-					["id"] = idTypeStrike,
-					["number"] = #comboTask.params.tasks + 1,
-					["name"] = "task: "..tostring(id_task).." class: "..tostring(targetClass),
-					["params"] = {
-						["x"] = targetTempPos.x,
-						["y"] = targetTempPos.y,
-						["expend"] = expend,
-						["weaponType"] = tonumber(weaponType),
-						["groupAttack"] = false,
-						["attackType"] = attackType,
-						["attackQtyLimit"] = false,
-						["attackQty"] = 1,
-						-- ["altitudeEdited"] = true,
-						["altitudeEnabled"] = true,
-						["altitude"] = tonumber(attackAlt),
-						["directionEnabled"] = false,
-						["direction"] = 0,
-					},
-				}
+                table.insert(comboTask.params.tasks, task_entry)
+            end
+        end
 
-				--auto expend
-				if idTypeStrike == "AttackUnit" then
-					task_entry["id"] = "AttackUnit"
-					task_entry.params["unitId"] = tonumber(targetID)
-					task_entry.params["attackQtyLimit"] = false
-					task_entry.params["x"] = nil
-					task_entry.params["y"] = nil
-				end
+        -- local nextSecond = math.ceil(timer.getTime()) + 1
+        -- if AgendaSeconde[nextSecond] then
+        --     local i = 1
+        --     repeat
+        --         nextSecond = nextSecond + 1
+        --         i = i + 1
+        --     until not AgendaSeconde[nextSecond] or i > 1000
+        --     AgendaSeconde[nextSecond] = true
+        -- else
+        --     AgendaSeconde[nextSecond] = true
+        -- end
 
-				-- ["stopCondition"] = 
-				-- {
-				-- 	["time"] = tonumber(UntilTime),
-				-- 	-- ["duration"] = tonumber(var_duration),
-				-- }
+        -- timer.scheduleFunction(execute, { cntrl, comboTask, n }, nextSecond)
 
-				-- env.info("DCE_CustomMixClassAttack: CustomStaticAttack DD |"..tostring(flightName).."| |"..tostring(task_entry["id"]))
-
-				table.insert(comboTask.params.tasks, task_entry)
-
-			end
-		end
-
-		local nextSecond = math.ceil(timer.getTime()) + 1
-		if AgendaSeconde[nextSecond] then
-			local i = 1
-			repeat
-				nextSecond = nextSecond + 1
-				i = i + 1
-			until not AgendaSeconde[nextSecond] or i > 1000
-			AgendaSeconde[nextSecond] = true
-		else
-			AgendaSeconde[nextSecond] = true
-		end
-
-		timer.scheduleFunction(execute, {cntrl, comboTask, n} , nextSecond)
-
-	end
+        execute({ cntrl, comboTask, n })
+		
+    end
+	
+    if campL.debug then
+        local dt = os.clock() - t0
+		Perf_Q = Perf_Q + dt
+    end
+	
 end
 ----- attack multiple map objects -----
 --allows each wingman of a flight to attack its own individual target simultaneously, then proceed to Egress point to join up (flight would not climb during egress if wingmen would joing leader imediately after attack)
@@ -4494,9 +4500,10 @@ end	--Custom_SAR
 
 
 
-----------------------------------------------------------------------------------------------------
+--[[ ----------------------------------------------------------------------------------------------------
 ------------------------------------- Custom_Altitude task -----------------------------------------
 ----------------------------------------------------------------------------------------------------
+
 
 
 -- =========================================
@@ -4523,44 +4530,6 @@ local function getTerrainCachedLocal(x, y)
 	return h
 end
 
-
--- Cache OffsetPoint
--- local offsetCache = {}
-
--- local function getOffsetCached(pt, hdg, dist)
--- 	local t0
---     if campL.debug then
---         t0 = os.clock()
---     end
-	
---     local k = math.floor(pt.x)..":"..
---               math.floor(pt.y)..":"..
---               math.floor(hdg)..":"..
---               math.floor(dist)
-
---     local v = offsetCache[k]
---     if v then
-
---         if campL.debug then
---             local dt = os.clock() - t0
---             Perf_O = Perf_O + dt
---             Perf_O_N = Perf_O_N + 1
---         end
-		
---         return v
-			
--- 	end
-
---     v = GetOffsetPoint(pt, hdg, dist)
---     offsetCache[k] = v
-
---     if campL.debug then
---         local dt = os.clock() - t0
---         Perf_O = Perf_O + dt
---     end
-	
---     return v
--- end
 
 local function getOffset(pt, hdg, dist)
     return GetOffsetPoint(pt, hdg, dist)
@@ -4621,69 +4590,160 @@ local function ComputeHillPath(p1, p2, addAlti)
         table.insert(path,{
             x = bestP.x,
             y = bestP.y,
-            alt = bestAlt + addAlti,
+            alt = bestAlt + addAlti + 250,
             alt_type = "RADIO"
         })
 
         cur = bestP
     end
-
 	return path, compteur
 end
 
 
--- local function ComputeHillPath(p1, p2, addAlti, interval)
 
--- 	local heading = GetHeading(p1, p2)
--- 	local bestAlt = 999999
---     local bestHdg = heading
--- 	-- local terrain = getTerrain	
--- 	local compteur = 1
+local function IsInValley(cur, hdg)
+    local frontAlt = 0
+    local sideAlt  = 0
 
--- 	for ang = -15, 15, 5 do
--- 		local h0 = heading + ang
--- 		local p = getOffsetCached(p1, h0, interval)
+    -- devant
+    for d = 500, 3000, 500 do
+        local p = getOffset(cur, hdg, d)
+        local alt = getTerrainCachedLocal(p.x, p.y)
 
--- 		-- local a = getTerrain(p.x, p.y)
--- 		local a = getTerrainCachedLocal(p.x, p.y)
+        if alt > frontAlt then
+            frontAlt = alt
+        end
+    end
 
---         if a < bestAlt then
---             bestAlt = a
---             bestHdg = h0
---         end
--- 		compteur = compteur +1
--- 	end
+    -- côtés
+    for _, a in ipairs({ -60, 60 }) do
+        for d = 500, 2000, 500 do
+            local p = getOffset(cur, hdg + a, d)
+            local alt = getTerrainCachedLocal(p.x, p.y)
 
--- 	local mid = getOffsetCached(p1, bestHdg, interval)
+            if alt > sideAlt then
+                sideAlt = alt
+            end
+        end
+    end
 
--- 	return {
--- 		{
--- 			x = mid.x,
--- 			y = mid.y,
--- 			alt = bestAlt + addAlti,
--- 			alt_type = "RADIO"
--- 		}
--- 	}, compteur
--- end
+    -- vallée = côtés plus hauts que devant
+    if sideAlt > frontAlt + 150 then
+        return true
+    end
+
+    return false
+end
+
+local function FindValleyDirection(cur, pEnd)
+	local base = GetHeading(cur, pEnd)
+
+	local bestHdg = base
+	local bestAlt = math.huge
+
+	for ang = -70, 70, 10 do
+		local h = base + ang
+		local maxAlt = 0
+
+		-- for d = 1000, 6000, 1000 do
+		-- 	local p = getOffset(cur, h, d)
+		-- 	local alt = getTerrainCachedLocal(p.x, p.y)
+
+		-- 	if alt > maxAlt then
+		-- 		maxAlt = alt
+		-- 	end
+		-- end
+
+		local prevAlt = nil
+
+		-- for d = 1000, 8000, 800 do
+		for d = 1000, 20000, 1200 do
+			local p = getOffset(cur, h, d)
+			local alt = getTerrainCachedLocal(p.x, p.y)
+
+			if prevAlt then
+				local slope = alt - prevAlt
+
+				-- montée brutale = probablement un mur
+				if slope > 400 then
+					maxAlt = maxAlt + 2000
+				end
+			end
+
+			if alt > maxAlt then
+				maxAlt = alt
+			end
+
+			prevAlt = alt
+		end
+
+		if maxAlt < bestAlt then
+			bestAlt = maxAlt
+			bestHdg = h
+		end
+	end
+
+	return bestHdg
+end
+
+local function FindGlobalPass(cur, pEnd)
+
+    local base = GetHeading(cur, pEnd)
+
+    local bestHdg = base
+    local bestScore = math.huge
+
+    for ang = -90, 90, 5 do
+        local h = base + ang
+
+        local maxAlt = 0
+
+        for d = 2000, 25000, 1500 do
+            local p = getOffset(cur, h, d)
+            local alt = getTerrainCachedLocal(p.x, p.y)
+
+            if alt > maxAlt then
+                maxAlt = alt
+            end
+        end
+
+        -- pénalise l'éloignement de la cible
+        local dev = math.abs(ang) * 20
+
+        local score = maxAlt + dev
+
+        if score < bestScore then
+            bestScore = score
+            bestHdg = h
+        end
+    end
+
+    return bestHdg
+end
+
 
 --------------------------------------------------
 -- Scan vallée complet (montagne)
--- Trace progressive en montagne (suivi vallée)
 --------------------------------------------------
-local function ComputeMountainPath(pStart, pEnd, addAlti)
+local function ComputeMountainPath(pStart, pEnd, addAlti, altiMax)
 
-	if GetDistance2D(pStart, pEnd) < 100 then
-		return { pEnd }, 1
+    if GetDistance2D(pStart, pEnd) < 100 then
+        return { pEnd }, 1
+    end
+
+	local path = {}
+
+	local cur = {
+		x = pStart.x,
+		y = pStart.y
+	}
+
+	-- local corridorHdg = FindValleyDirection(cur, pEnd)
+	local corridorHdg = FindGlobalPass(cur, pEnd)
+	if not corridorHdg then
+		corridorHdg = GetHeading(cur, pEnd)
 	end
-
-    local path = {}
-    local cur = {
-        x = pStart.x,
-        y = pStart.y
-    }
-
-    local maxIter = 50
-    -- local step = 800
+	local maxIter = 50
 	local dist = GetDistance2D(cur, pEnd)
 
 	local step = 800
@@ -4691,123 +4751,173 @@ local function ComputeMountainPath(pStart, pEnd, addAlti)
 		step = 2000
 	elseif dist > 7000 then
 		step = 1200
+	elseif dist < 4000 then
+		step = 400
 	end
+
 	local compteur = 1
+	local lastDist = dist
 
-    local lastDist = GetDistance2D(pStart, pEnd)
+	-- cônes progressifs
+	-- local searchCones = { 15, 30, 60, 90 }
 	
-    for i = 1, maxIter do
+	local wasInValley = false
 
-        local hdg = GetHeading(cur, pEnd)
+	for i = 1, maxIter do
+        local hdg = corridorHdg
 
-        local bestScore = math.huge
-        local bestPoint = nil
-        local bestAlt = 0
+		-- détecte vallée AVANT
+		local inValley = IsInValley(cur, hdg)
 
-		-- for ang = -20, 20, 5 do -- 9 directions
-		for ang = -15, 15, 5 do ---- 7 directions
+		if wasInValley and not inValley then
+			-- tolérance : on garde le mode vallée encore 1 tour
+			inValley = true
+		end
 
-            local h = hdg + ang
-            local p = getOffset(cur, h, step)
+		if inValley then
+			TerrainStats_DETAIL["inValley"] = TerrainStats_DETAIL["inValley"] + 1
+		else
+			TerrainStats_DETAIL["outValley"] = TerrainStats_DETAIL["outValley"] + 1
+		end
 
-            local alt = getTerrainCachedLocal(p.x, p.y)
+		-- sortie de vallée
+		if wasInValley and not inValley then
+			TerrainStats_DETAIL["exitValleyCount"] = TerrainStats_DETAIL["exitValleyCount"] + 1
+		end
 
-            -- score = altitude + distance restante
-            local distEnd =
-                math.sqrt(
-                    (p.x - pEnd.x)^2 +
-                    (p.y - pEnd.y)^2
-                )
+		wasInValley = inValley
+		
+        if inValley and step < 700 then
+			step = 700
+		end
 
-            local score = alt + distEnd * 0.3
+		-- recalcul axe seulement si utile
+		-- if i % 5 == 0 and not inValley then
+		if i % 3 == 0 and not inValley then
+			corridorHdg = FindValleyDirection(cur, pEnd)
+			hdg = corridorHdg
+		end
 
-			if score < bestScore then
-				bestScore = score
-				bestPoint = p
-				bestAlt = alt
+		local bestPoint = nil
+		local bestAlt   = 0
+		local bestScore = math.huge
 
-				if score < 500 then break end
+		------------------------------------------------
+		-- Recherche progressive
+		------------------------------------------------
+        local startDist = GetDistance2D(cur, pEnd)
+		
+		local cones
+
+		if inValley then
+			-- on est dans un couloir → on fonce
+			cones = { 10 }
+		else
+			-- recherche normale
+			cones = { 15, 30, 60, 90 }
+		end
+
+
+		local function SearchWithCones(conesTable)
+			local found = false
+
+			for _, cone in ipairs(conesTable) do
+				for ang = -cone, cone, 5 do
+					local h = hdg + ang
+					local p = getOffset(cur, h, step)
+
+					local alt = getTerrainCachedLocal(p.x, p.y)
+					local requiredAlt = alt + addAlti + 250
+
+					local valid = true
+
+					if altiMax and requiredAlt > altiMax then
+						valid = false
+					end
+
+					if valid then
+						local dx = p.x - pEnd.x
+						local dy = p.y - pEnd.y
+						local distEnd = math.sqrt(dx * dx + dy * dy)
+
+						local score = alt + distEnd * 0.3
+
+						if score < bestScore and distEnd < startDist then
+							
+							bestScore = score
+							bestPoint = p
+							bestAlt   = alt
+							found     = true
+						end
+					end
+
+					compteur = compteur + 1
+				end
+
+				if found then
+					break
+				end
 			end
 
-			compteur = compteur + 1
-        end
+			return found
+		end
+		
+		local found = false
 
-        if not bestPoint then break end
+		-- 1) recherche normale
+		found = SearchWithCones(cones)
 
-        table.insert(path,{
-            x = bestPoint.x,
-            y = bestPoint.y,
-            alt = bestAlt + addAlti,
-            alt_type = "BARO"
-        })
+		-- 2) secours si bloqué
+		if not found then
+			local rescueCones = { 90, 120, 150 }
 
-        cur = bestPoint
+			found = SearchWithCones(rescueCones)
+		end
+
+		-- 3) abandon
+		if not found then
+			break
+		end
+
+		------------------------------------------------
+		-- Sécurité
+		------------------------------------------------
+		---if not bestPoint then
+		if not bestPoint then
+			break
+		end
+
+		------------------------------------------------
+		-- Ajout waypoint
+		------------------------------------------------
+		table.insert(path, {
+			x = bestPoint.x,
+			y = bestPoint.y,
+			alt = bestAlt + addAlti + 250,
+			alt_type = "BARO"
+		})
+
+		cur = bestPoint
 
 		local d = GetDistance2D(cur, pEnd)
 
+		-- pas de progression → stop
 		if d >= lastDist then
 			break
 		end
 
 		lastDist = d
 
-        -- proche destination
-        if GetDistance2D(cur, pEnd) < 1500 then
-            break
-        end
-    end
+		-- proche destination
+		if d < 1500 then
+			break
+		end
+	end
 
 	return path, compteur
 end
 
 
--- local function ComputeMountainPath(p1, p2, addAlti, interval)
--- 	local heading = GetHeading(p1, p2)
-
--- 	local bestSum = math.huge
--- 	local bestHdg = heading
--- 	local bestAlt = 0
--- 	-- local terrain = getTerrain
--- 	local compteur = 1
-
--- 	local best = bestHdg
-
--- 	for ang = best - 6, best + 6, 2 do
-		
--- 		local sum = 0
--- 		local maxAlt = 0
-
--- 		for d = 800, interval, 800 do
--- 			local p = getOffsetCached(p1, heading + ang, d)
--- 			-- local h = getTerrain(p.x, p.y)
--- 			local h = getTerrainCachedLocal(p.x, p.y)
-
--- 			sum = sum + h
--- 			if h > maxAlt then maxAlt = h end
-
--- 			compteur = compteur + 1
-
--- 			if maxAlt > interval then break end
--- 		end
-
--- 		if sum < bestSum then
--- 			bestSum = sum
--- 			bestHdg = heading + ang
--- 			bestAlt = maxAlt
--- 		end
--- 	end
-
--- 	local mid = getOffsetCached(p1, bestHdg, interval)
-
--- 	return {
--- 		{
--- 			x = mid.x,
--- 			y = mid.y,
--- 			alt = bestAlt + addAlti,
--- 			alt_type = "BARO"
--- 		}
--- 	}, compteur
--- end
 
 --------------------------------------------------
 -- Analyse grossière du terrain entre 2 points
@@ -4863,23 +4973,41 @@ local function getTerrainZone(p)
 	return zone
 end
 
+AltiMaxHeli = {
+	["AH-64D"] = 3505,
+	["AH-64D_BLK_II"] = 2990,
+	["SH-3D"] = 2500,
+	["SA342M"] = 2000,
+	["SA342L"] = 2000,
+	["SA342Minigun"] = 2000,
+	["Mi-8MT"] = 3960,
+	["Mi-24P"] = 1500,
+	["Mi-26"] = 1500,
+
+}
+
 --adapte l'altitude aux chaines montagneuse
 function Custom_Altitude(grpName, wptAlti, wptTag)
 
 	env.info("DEBUG: A Custom_Altitude() " .. tostring(grpName))
 
     local t_init
-    local t0_interval
-	local t0_addHeading
 	TerrainStats_N = 0
-	TerrainStats_Cache_N = 0
-	
+    TerrainStats_Cache_N = 0
+	TerrainStats_DETAIL = {
+		["inValley"] = 0,
+		["outValley"] = 0,
+		["exitValleyCount"] = 0,
+		["coneA"] = 0,
+		["coneB"] = 0,
+		["coneC"] = 0,
+
+	}
 
 	if campL.debug then
 		t_init = os.clock()
 		Perf_K_N = Perf_K_N + 1
 	end
-
 
 	if not Perf_CustAlt then
 		Perf_CustAlt = {}
@@ -4889,10 +5017,6 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 			N_Hill = 0,
 			N_Mountain = 0,
 			N_Flat = 0,
-			-- N_AnalyseTerrain = 0,
-			-- N_getOffsetCached = 0,
-			-- time_interval = 0,
-			-- time_addHeading = 0,
 			timeTotal = 0,
 			timeExecute = 0,
 		}
@@ -4960,6 +5084,10 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 			local gpGid = Group.getID(flight)
 			local foundAeronef = false
 			local copyRoute = {}
+
+			local typeHeli = MissGroupByName[grpName]["units"][1]["type"]
+			local altiMax = AltiMaxHeli[typeHeli]
+			env.info("DCE_CA: altiMax " .. tostring(altiMax) .. " typeHeli: " .. tostring(typeHeli))
 
             for tblGrpId, value in pairs(LastInjectFlightPlan) do
                 if tblGrpId == gpGid then
@@ -5033,7 +5161,10 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 					for Ntask, taskFinal in ipairs(point.task.params.tasks)  do
 						if taskFinal and taskFinal.params and taskFinal.params.action and taskFinal.params.action.id == "Script" then
 							if taskFinal.params.action.params and taskFinal.params.action.params.command
-							and ( string.find(taskFinal.params.action.params.command,"Custom_SAR") or string.find(taskFinal.params.action.params.command,"Custom_AddWptSAR")  ) then
+                                and (string.find(taskFinal.params.action.params.command, "Custom_SAR")
+                                    or string.find(taskFinal.params.action.params.command, "Custom_AddWptSAR")
+									or string.find(taskFinal.params.action.params.command, "Custom_Altitude")
+									) then
 
 								local convertedNpoint = tonumber(Npoint) -- Conversion sécurisée
 								if convertedNpoint then
@@ -5047,11 +5178,8 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 			end
 
 
-			local copyRoute2 = {}
-			local altiWpt = {}
-
-			-- env.info("DEBUG: X #copyRoute " .. tostring(#copyRoute))
-
+            local copyRoute2 = {}
+			
 			for n = 1, #copyRoute - 1 do
 				
 				if n > nWptNextCustom then    --ne pas ajouter trop de wpt, sinon ça plante DCS (75 wpt max)
@@ -5063,44 +5191,27 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 					copyRoute[1].y = actualPositionXY.y
 				end
 
-				table.insert(copyRoute2, copyRoute[n])
-				
-				-- local distance = math.sqrt(math.pow(copyRoute[n].x - copyRoute[n+1].x, 2) + math.pow(copyRoute[n].y - copyRoute[n+1].y, 2))
+                --actualise l'alti:
+				copyRoute[n].alt = getTerrainCachedLocal(copyRoute[n].x, copyRoute[n].y)
+				copyRoute[n].alt_type = "RADIO"
+
+                table.insert(copyRoute2, copyRoute[n])
+				--l'alti de consigne pour n est n-1
+				if n > 1 then
+					copyRoute2[#copyRoute2 - 1].alt = copyRoute2[#copyRoute2].alt
+				end
 				
 				local dx = copyRoute[n].x - copyRoute[n + 1].x
 				local dy = copyRoute[n].y - copyRoute[n + 1].y
 
 				local distance = math.sqrt(dx * dx + dy * dy)
 				
-				-- local origineN = #copyRoute2
-				
-
-				-- local terrainType = "FLAT"
-
-				-- for scanDist = 0, distance, distance / 10 do
-				-- 	local pScan = getOffset(
-				-- 		copyRoute[n],
-				-- 		GetHeading(copyRoute[n], copyRoute[n + 1]),
-				-- 		scanDist
-				-- 	)
-
-				-- 	local z = getTerrainZone(pScan)
-
-				-- 	if z == "MOUNTAIN" then
-				-- 		terrainType = "MOUNTAIN"
-				-- 		break
-				-- 	end
-
-				-- 	if z == "HILL" then
-				-- 		terrainType = "HILL"
-				-- 	end
-				-- end
-				
 				local terrainType = "FLAT"
 
 				local dist2 = GetDistance2D(copyRoute[n], copyRoute[n+1])
 
-				if dist2 < 1 then
+                if dist2 < 1 then
+					--on ne fait rien, on garde le wpt initial et le suivant
 					terrainType = "FLAT"
 				else
 					if distance > 1 then
@@ -5140,33 +5251,6 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 					
                     Perf_CustAlt[grpName]["N_Flat"] = Perf_CustAlt[grpName]["N_Flat"] + 1
 					
-					-- local interDistance = 7500 --7500m ou 2500 m
-					-- for interval = 1, distance, interDistance do
-					-- 	path = ComputeFlatPath(
-					-- 		copyRoute[n],
-					-- 		copyRoute[n + 1],
-					-- 		addAlti,
-					-- 		getTerrainCachedLocal
-					-- 	)
-					-- 	Perf_CustAlt[grpName]["N_Flat"] = Perf_CustAlt[grpName]["N_Flat"] + 1
-					-- 	if not path or #path == 0 then
-					-- 		env.info("DEBUG: no bestNode, path FLAT == 0")
-					-- 	end
-
-					-- 		for _, p in ipairs(path) do
-					-- 		local wpt = {
-					-- 			x = p.x,
-					-- 			y = p.y,
-					-- 			alt = p.alt,
-					-- 			alt_type = p.alt_type,
-					-- 			speed = copyRoute[n].speed,
-					-- 			action = "Fly Over Point",
-					-- 			type = "Turning Point"
-					-- 		}
-
-					-- 		table.insert(copyRoute2, wpt)
-					-- 	end
-					-- end
 				elseif terrainType == "HILL" then
 				
 					path, compteurN = ComputeHillPath(
@@ -5194,6 +5278,7 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 							x = p.x,
 							y = p.y,
 							alt = p.alt,
+							name = "AddByCustAlt HILL",
 							alt_type = p.alt_type,
 							speed = copyRoute[n].speed,
 							action = "Fly Over Point",
@@ -5204,6 +5289,10 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 						end
 
 						table.insert(copyRoute2, wpt)
+						--l'alti de consigne pour n est n-1
+						if n > 1 then
+							copyRoute2[#copyRoute2 - 1].alt = copyRoute2[#copyRoute2].alt
+						end
 					end
 				else	--terrainType == "Mountain"
 
@@ -5212,7 +5301,8 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 					path, compteurN = ComputeMountainPath(
 						copyRoute2[#copyRoute2],
 						copyRoute[n + 1],
-						addAlti
+						addAlti,
+						altiMax
 					)
 					if compteurN then
 						Perf_CustAlt[grpName]["N_Mountain"] = Perf_CustAlt[grpName]["N_Mountain"] + compteurN
@@ -5233,11 +5323,22 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 						local wpt = {
 							x = p.x,
 							y = p.y,
+							name = "AddByCustAlt Mountain",
 							alt = p.alt,
 							alt_type = p.alt_type,
 							speed = copyRoute[n].speed,
 							action = "Fly Over Point",
-							type = "Turning Point"
+							type = "Turning Point",
+							task = 
+							{
+								["id"] = "ComboTask",
+								["params"] = 
+								{
+									["tasks"] = 
+									{
+									},
+								},
+							},
 						}
 						
 						-- pour passer dans les vallées, il faut etre en file indienne trail
@@ -5274,30 +5375,23 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 						end
 						
 						table.insert(copyRoute2, wpt)
+						--l'alti de consigne pour n est n-1
+						if n > 1 then
+							copyRoute2[#copyRoute2 - 1].alt = copyRoute2[#copyRoute2].alt
+						end
 					end
 
 				end
-
-				-- --ajuste l'altitude des wpt d origine:
-				-- if origineN > 1  then
-				-- 	-- local altitude = getTerrainCachedLocal(copyRoute2[origineN].x, copyRoute2[origineN].y)
-				-- 	local refAlt = GetTerrain(copyRoute2[origineN].x, copyRoute2[origineN].y)
-				-- 	if copyRoute2[origineN-1].alt > refAlt then
-				-- 		refAlt = copyRoute2[origineN-1].alt
-				-- 	end
-				-- 	copyRoute2[origineN].alt = refAlt
-				-- end
 
                 if #copyRoute2 > 50 then break end
 				
 			end
 
-			-- --supprime le premier wpt, sinon l'helico revient sur ses pas.
-			-- table.remove(copyRoute2, 1)
 
-
-			--ajoute le dernier wpt (landing), car avec le script plus haut, il ne le sera jamais
-			table.insert(copyRoute2, copyRoute[#copyRoute])
+            --ajoute les waypoint apres nWptNextCustom, de copyRoute dans copyRoute2 sans modification d'altitude
+			for n = nWptNextCustom + 1, #copyRoute do
+				table.insert(copyRoute2, copyRoute[n])
+			end
 
 			local mission = {
 					id = 'Mission',
@@ -5343,10 +5437,894 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 		Perf_CustAlt[grpName]["timeTotal"] = dt
 
 		Perf_CustAlt[grpName].N_Terrain = TerrainStats_N
-		Perf_CustAlt[grpName].TerrainStats_Cache_N = TerrainStats_Cache_N
+        Perf_CustAlt[grpName].TerrainStats_Cache_N = TerrainStats_Cache_N
+		Perf_CustAlt[grpName].Detail = TerrainStats_DETAIL
 
-        _affiche(Perf_CustAlt, "Perf_CustAlt_B_39: ")
+        _affiche(Perf_CustAlt, "Perf_CustAlt: ")
 		
 	end
 
+end ]]
+
+----------------------------------------------------------------------------------------------------
+------------------------------------- Custom_Altitude task -----------------------------------------
+----------------------------------------------------------------------------------------------------
+-- cache global du relief pour eviter les appels repetes a land.getHeight
+TerrainHeightCache = {}
+
+-- retourne l'altitude terrain avec mise en cache (precision par pas de 50m)
+-- pourquoi: evite des milliers d'appels couteux a land.getHeight
+function GetTerrainHeightCached(arg_x, arg_y)
+	local qx = math.floor(arg_x / 50)
+	local qy = math.floor(arg_y / 50)
+	local key = qx .. "_" .. qy
+
+	local cached = TerrainHeightCache[key]
+	if cached then
+		TerrainStats_Cache_N = TerrainStats_Cache_N + 1
+		return cached
+	end
+
+	local h = land.getHeight({ x = arg_x, y = arg_y })
+    TerrainHeightCache[key] = h
+	
+    TerrainStats_N = TerrainStats_N + 1
+	
+	return h
+end
+
+
+
+
+-- =========================================
+-- Cache terrain LOCAL Custom_Altitude
+-- Pourquoi : réduire drastiquement les appels land.getHeight
+-- Résolution volontairement grossière (hélico)
+-- =========================================
+-- local terrainCache = {}
+-- local terrainCellSize = 100  -- mètres (50–150 ok pour hélico)
+
+-- local function getTerrainCachedLocal(x, y)
+-- 	local cx = math.floor(x / terrainCellSize)
+-- 	local cy = math.floor(y / terrainCellSize)
+-- 	local key = cx .. ":" .. cy
+
+-- 	if terrainCache[key] then
+-- 		TerrainStats_Cache_N = TerrainStats_Cache_N + 1
+-- 		return terrainCache[key]
+-- 	end
+
+-- 	local h = land.getHeight({ x = x, y = y })
+-- 	terrainCache[key] = h
+-- 	return h
+-- end
+
+AltiMaxHeli = {
+	["UH-1H"] = 2000,
+	["AH-64D"] = 3505,
+	["AH-64D_BLK_II"] = 2990,
+	["SH-3D"] = 2500,
+	["SA342M"] = 2000,
+	["SA342L"] = 2000,
+	["SA342Minigun"] = 2000,
+	["Mi-8MT"] = 3960,
+	["Mi-24P"] = 1500,
+	["Mi-24V"] = 1500,
+	["Mi-26"] = 1500,
+
+}
+
+
+
+--adapte l'altitude aux chaines montagneuse
+function Custom_Altitude(grpName, wptAlti, wptTag)
+	
+    local t_init
+	
+	TerrainStats_N = 0
+    TerrainStats_Cache_N = 0
+	
+	if campL.debug then
+		t_init = os.clock()
+		Perf_K_N = Perf_K_N + 1
+	end
+
+    if not Perf_CustAlt then
+        Perf_CustAlt = {}
+    end
+	
+	if not Perf_CustAlt[grpName] then
+		Perf_CustAlt[grpName] = {
+			-- N_interval = 0,
+			N_addHeading = 0,
+			timeTotal = 0,
+            TerrainStats_N = 0,
+			TerrainStats_Cache_N = 0,
+			N_interval = 0,
+		}
+	end
+
+
+	if wptTag then
+		wptTag = tonumber(wptTag) or 0
+	else
+		wptTag = 0
+	end
+	
+    if not wptAlti or wptAlti == nil then
+        wptAlti = 1
+        env.info("Custom_Altitude, B1 wptAlti  11|" .. tostring(grpName) .. " |wptAlti: " .. tostring(wptAlti))
+    end
+	
+    local current_time = timer.getTime()
+
+	local localTerrainCache = {}
+	
+	local function getTerrainLocal(x, y)
+		local k = math.floor(x / 50) .. "_" .. math.floor(y / 50)
+
+		local h = localTerrainCache[k]
+		if not h then
+			h = GetTerrainHeightCached(x, y)
+			localTerrainCache[k] = h
+		end
+		return h
+	end
+
+	-- =================================================
+	-- Cherche un point bas proche (vallée locale)
+	-- Pourquoi : sauver un WP trop haut
+	-- =================================================
+	local function findNearbyValley(origin, heading, maxDist)
+		local best = nil
+		local bestAlt = 999999
+
+		for angle = -90, 90, 15 do
+			local hdg = heading + angle
+
+			for d = 200, maxDist, 200 do
+				local p = GetOffsetPoint(origin, hdg, d)
+				local h = getTerrainLocal(p.x, p.y)
+
+				if h < bestAlt then
+					bestAlt = h
+					best = p
+				end
+			end
+		end
+
+		return best, bestAlt
+	end
+
+	local function execute()
+		-- current_time = timer.getTime()
+		local flight = Group.getByName(grpName)
+
+		-- local selectedMember = flight:getUnits(1)
+		local selectedMember
+		local wingman = flight:getUnits()
+
+		local injectTrail = false
+
+		for memberN, _unit in ipairs(wingman) do
+			if _unit and _unit:isExist() and _unit:isActive() and _unit:inAir() then
+				selectedMember = _unit
+				break
+			end
+		end
+
+		if not selectedMember then
+			local dt = os.clock() - t_init
+			Perf_K = Perf_K + dt
+			return
+		end
+
+		local ctr = selectedMember:getGroup():getController()
+		local actualPositionVec3 = selectedMember:getPoint()
+		local actualPositionXY = {
+			x = actualPositionVec3.x,
+			y = actualPositionVec3.z,
+		}
+
+		local addAlti = 150
+		local str_selectedMember = selectedMember:getTypeName()
+
+		-- local str_selectedMember = selectedMember:getTypeName()
+		if type(str_selectedMember) ~= "string" then
+			local dt = os.clock() - t_init
+			Perf_K = Perf_K + dt
+			return
+		end
+
+		if (str_selectedMember == "Mi-24P" or str_selectedMember == "UH-1H") then
+			addAlti = 250
+		end
+
+		if ctr then
+			local gpGid = Group.getID(flight)
+			local foundAeronef = false
+			local copyRoute = {}
+
+			for tblGrpId, value in pairs(LastInjectFlightPlan) do
+				if tblGrpId == gpGid then
+					copyRoute = Deepcopy(value.params.route.points)
+					foundAeronef = true
+					break
+				end
+			end
+
+			if not foundAeronef then
+				copyRoute = MissGroupByName[grpName]["route"]["points"]
+			end
+
+			--enleve le script Custom_Altitude pour eviter de le reinjecter et d avoir une boucle
+			if wptTag and wptTag ~= nil then
+				for pointN, point in ipairs(copyRoute) do
+					if tonumber(pointN) == wptTag then
+						copyRoute[tonumber(pointN)].name = "deleteBeforHere"
+						if point.task and point.task.params and point.task.params.tasks then
+							for Ntask, taskFinal in ipairs(point.task.params.tasks) do
+								if taskFinal and taskFinal.params and taskFinal.params.action and taskFinal.params.action.id == "Script" then
+									if taskFinal.params.action.params and taskFinal.params.action.params.command and string.find(taskFinal.params.action.params.command, "Custom_Altitude") then
+										point.task.params.tasks[Ntask] = nil
+
+										-- env.info( "Custom_Altitude, E1_f set name = deleteBeforHere  Npoint "..tostring(Npoint))
+									end
+								end
+							end
+						end
+					end
+				end
+			else
+				for pointN, point in ipairs(copyRoute) do
+					local distance = math.sqrt(math.pow(point.x - actualPositionVec3.x, 2) + math.pow(point.y - actualPositionVec3.z, 2))
+					if distance < 1000 then
+						if point.task and point.task.params and point.task.params.tasks then
+							for Ntask, taskFinal in ipairs(point.task.params.tasks) do
+								if taskFinal and taskFinal.params and taskFinal.params.action and taskFinal.params.action.id == "Script" then
+									if taskFinal.params.action.params and taskFinal.params.action.params.command and string.find(taskFinal.params.action.params.command, "Custom_Altitude") then
+										point.task.params.tasks[Ntask] = nil
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+
+			if wptTag and wptTag > 0 then
+				for i = #copyRoute, 1, -1 do
+					if i <= wptTag then
+						table.remove(copyRoute, i)
+						env.info("CustomAlti F removing wpt Npoint: " .. tostring(i) .. " wptTag: " .. tostring(wptTag))
+					end
+				end
+			end
+
+			--cherche la prochaine action pour ne pas trop calculer de wpt intermedaire
+			local nWptNextCustom = 9999
+			for pointN, point in ipairs(copyRoute) do
+				-- env.info("CustomAlti G checking Npoint: " .. tostring(Npoint))
+				if point.task and point.task.params and point.task.params.tasks then
+					for taskN, taskFinal in ipairs(point.task.params.tasks) do
+						if taskFinal and taskFinal.params and taskFinal.params.action and taskFinal.params.action.id == "Script" then
+							if taskFinal.params.action.params and taskFinal.params.action.params.command then
+                                print("DCE Custom_Altitude G5 pointN: "..pointN.." command: "..tostring(taskFinal.params.action.params.command))
+								if (string.find(taskFinal.params.action.params.command, "Custom_SAR")
+                                    or string.find(taskFinal.params.action.params.command, "Custom_AddWptSAR")
+									or string.find(taskFinal.params.action.params.command, "Custom_Altitude"))
+                                then
+									env.info("DCE Custom_Altitude G6 " )
+									local convertedNpoint = tonumber(pointN) -- Conversion sécurisée
+									if convertedNpoint then
+                                        nWptNextCustom = convertedNpoint
+										env.info("DCE Custom_Altitude G7 nWptNextCustom: " .. nWptNextCustom)
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+
+
+			local copyRoute2 = {}
+			env.info("DCE Custom_Altitude H nWptNextCustom: " .. tostring(nWptNextCustom))
+
+			local valleyHeading = nil
+
+            for n = 1, #copyRoute - 1 do
+				
+
+				-- =========================================
+				-- Template waypoint Custom_Altitude
+				-- Pourquoi : éviter allocations Lua répétées
+				-- =========================================
+				local baseInterWpt = {
+					speed_locked = true,
+					type = "Turning Point",
+					action = "Fly Over Point",
+					alt_type = "BARO",
+					formation_template = "",
+					name = "from Cus_tom_Alti_tude",
+					ETA_locked = false,
+					task = {
+						id = "ComboTask",
+						params = {
+							tasks = {}
+						}
+					}
+				}
+
+				if n >= nWptNextCustom then --ne pas ajouter trop de wpt, sinon ça plante DCS (75 wpt max)
+					break
+				end
+
+                if n == 1 then --force la position de l'etat actuel
+                    copyRoute[1].x = actualPositionXY.x
+                    copyRoute[1].y = actualPositionXY.y
+                end
+				--actualise l'alti:
+				copyRoute[n].alt = GetTerrainHeightCached(copyRoute[n].x, copyRoute[n].y)
+				copyRoute[n].alt_type = "BARO"
+
+				local typeHeli = MissGroupByName[grpName]["units"][1]["type"]
+				-- local altiHoover = AltiMaxHeli[typeHeli]
+				local altiMaxHeli = AltiMaxHeli[typeHeli] or 99999
+
+				local terrainAlt = copyRoute[n].alt
+
+                -- if altiMaxHeli and altiMaxHeli >= copyRoute[n].alt then--C-
+
+
+				--E+
+				-- Anticipation relief frontal
+				local lookAheadMax = 15000 -- 15 km
+				local step = 800 -- pas de sondage
+				local futureMax = 0
+
+				local origin1 = {
+					x = copyRoute[n].x,
+					y = copyRoute[n].y
+				}
+
+				local hdg1 = GetHeading(
+					origin1,
+					{ x = copyRoute[n + 1].x, y = copyRoute[n + 1].y }
+				)
+
+                for d = 2000, lookAheadMax, step do
+                    local p = GetOffsetPoint(origin1, hdg1, d)
+                    local h = GetTerrainHeightCached(p.x, p.y)
+
+                    if h > futureMax then
+                        futureMax = h
+                    end
+                end
+
+				local needValley = false
+
+				-- Danger immédiat
+				if terrainAlt > altiMaxHeli then
+					needValley = true
+				end
+
+				-- Danger futur
+				if futureMax + 150 > altiMaxHeli then
+					needValley = true
+				end
+				--E+
+
+
+
+				--C+
+				-- =====================================
+				-- Correction WPT trop haut → vallée
+				-- Pourquoi : éviter d’ignorer le point
+				-- =====================================
+
+				local goto_skip = false
+
+				-- Si trop haut pour l'hélico → tentative de correction
+				-- if terrainAlt > altiMaxHeli then--E-
+				if needValley then--E+
+					local origin = {
+						x = copyRoute[n].x,
+						y = copyRoute[n].y
+					}
+
+					local hdg = GetHeading(
+						origin,
+						{ x = copyRoute[n + 1].x, y = copyRoute[n + 1].y }
+					)
+
+					-- Recherche vallée proche
+					if findNearbyValley then
+						local newPos, newAlt = findNearbyValley(origin, hdg, 20000)
+
+						if newPos and newAlt then
+							-- Déplacement du WPT
+							copyRoute[n].x = newPos.x
+							copyRoute[n].y = newPos.y
+							copyRoute[n].alt = newAlt + 50
+
+							-- Recalcul terrain
+							terrainAlt = GetTerrainHeightCached(
+								newPos.x,
+								newPos.y
+							)
+
+							env.info("Custom_Altitude: WPT déplacé vers vallée")
+						else
+							goto_skip = true
+						end
+					else
+						goto_skip = true
+					end
+				end
+
+
+				-- Si toujours impossible → on ignore
+				if goto_skip then
+					env.info("Custom_Altitude: A WPT ignoré (pas de vallée)")
+				else
+				--C+
+
+					env.info("Custom_Altitude: B " .. terrainAlt .. " <=? " .. altiMaxHeli)
+					
+                    if terrainAlt <= altiMaxHeli then
+						
+                        env.info("Custom_Altitude: C pass OK ")
+						
+						table.insert(copyRoute2, copyRoute[n])
+						--l'alti de consigne pour n est n-1
+						if n > 1 and #copyRoute2 >= 2 and copyRoute2[#copyRoute2 - 1] and copyRoute2[#copyRoute2 - 1].alt then
+							copyRoute2[#copyRoute2 - 1].alt = copyRoute2[#copyRoute2].alt
+						end	
+						
+
+						-- local distance = math.sqrt(math.pow(copyRoute[n].x - copyRoute[n + 1].x, 2) + math.pow(copyRoute[n].y - copyRoute[n + 1].y, 2))
+						local dx = copyRoute[n].x - copyRoute[n + 1].x
+						local dy = copyRoute[n].y - copyRoute[n + 1].y
+
+						local distance = math.sqrt(dx * dx + dy * dy)
+						
+						-- local heading = GetHeading({ x = copyRoute[n].x, y = copyRoute[n].y }, { x = copyRoute[n + 1].x, y = copyRoute[n + 1].y })--E-
+						
+						--E+
+						local heading
+
+                        if valleyHeading then
+                            heading = valleyHeading
+                        else
+                            heading = GetHeading(
+                                { x = copyRoute[n].x, y = copyRoute[n].y },
+                                { x = copyRoute[n + 1].x, y = copyRoute[n + 1].y }
+                            )
+                        end
+						--E+
+						
+						local altiMax = 1
+
+						-- local origineN = #copyRoute2
+						-- local distInterWpt = 0
+						local sondagePt, sondageAlti, selectedPoint, headingAlt
+						local interDistance = 2500 --7500m ou 2500 m --B-
+						local oldAltiMax = 0
+						local oldHeadingAlt = 0
+
+						selectedPoint = { x = copyRoute[n].x, y = copyRoute[n].y }
+						oldAltiMax = GetTerrainHeightCached(selectedPoint.x, selectedPoint.y)
+
+						--[[ --B+
+						-- =========================================
+						-- Pré-analyse rapide du segment
+						-- Pourquoi : estimer relief global
+						-- =========================================
+
+						local roughMin = 999999
+						local roughMax = 0
+
+						for d = 0, math.min(distance, 3000), 800 do
+							local p = GetOffsetPoint(
+								{ x = copyRoute[n].x, y = copyRoute[n].y },
+								heading,
+								d
+							)
+
+							local h = GetTerrainHeightCached(p.x, p.y)
+
+							if h < roughMin then roughMin = h end
+							if h > roughMax then roughMax = h end
+						end
+
+						local roughDiff = roughMax - roughMin
+
+						local interDistance
+
+						if roughDiff > 900 then
+							interDistance = 1200
+						elseif roughDiff > 400 then
+							interDistance = 1800
+						else
+							interDistance = 2500
+						end
+						--B+ ]]
+
+						
+						for interval = 1, distance, interDistance do
+							if interval == 1 then
+								-- selectedPoint = {x=copyRoute[n].x, y=copyRoute[n].y}
+								-- oldAltiMax = land.getHeight({x =selectedPoint.x, y = selectedPoint.y})
+							else
+								-- prend le nouveau cap pour aller du point precedent calculé au futur point prévu par l'ancienne route
+                                -- heading = GetHeading({ x = selectedPoint.x, y = selectedPoint.y }, { x = copyRoute[n + 1].x, y = copyRoute[n + 1].y })--E-
+								--E+
+                                if valleyHeading then
+                                    heading = valleyHeading
+                                else
+                                    heading = GetHeading(
+                                        { x = selectedPoint.x, y = selectedPoint.y },
+                                        { x = copyRoute[n + 1].x, y = copyRoute[n + 1].y }
+                                    )
+                                end
+								--E+
+							end
+
+							-- =========================================
+							-- PREFILTRE terrain : faut-il chercher une vallée ?
+							-- Pourquoi : éviter addHeading coûteux en terrain plat
+							-- =========================================
+							local preMin = 999999
+							local preMax = 0
+
+							for d = 0, interDistance, 500 do--B-
+							-- for d = 0, interDistance, 800 do--B+
+								local p = GetOffsetPoint(selectedPoint, heading, d)
+								local h = GetTerrainHeightCached(p.x, p.y)
+
+								if h < preMin then preMin = h end
+								if h > preMax then preMax = h end
+							end
+
+							local preDiff = preMax - preMin
+
+							-- Terrain peu accidenté → pas de recherche vallée
+							local skipValleySearch = (preDiff < 200)--B-
+							-- local skipValleySearch = (preDiff < 250)--B+
+
+							local addHeadingMin = -5
+							local addHeadingMax = 5
+							local addDistance = 1000
+							local altiMin0 = 999999
+							local altiMax0 = 0
+							local diffHeading = 10
+
+
+							if not skipValleySearch then
+								-- regarde la topographie devant l helico
+								--si c est montagneux, on augmente le nb de wpt, sinon on ne fait rien ou presque
+								for addHeading = -90, 90 do
+									for interval0 = 0, 1500, 150 do
+										local headingAlt0 = heading + addHeading
+										local sondagePt0 = GetOffsetPoint(selectedPoint, headingAlt0, interval0)
+										sondageAlti = GetTerrainHeightCached(sondagePt0.x, sondagePt0.y)--B-
+
+										if altiMin0 >= sondageAlti then
+											altiMin0 = sondageAlti
+										end
+										if altiMax0 <= sondageAlti then
+											altiMax0 = sondageAlti
+										end
+									end
+								end
+							end
+
+							local diffAlti0 = altiMax0 - altiMin0
+
+							if diffAlti0 >= 900 then
+								interDistance = 1200
+							elseif diffAlti0 >= 500 then
+								interDistance = 1800
+							end
+
+							if diffAlti0 >= 450 and diffAlti0 < 950 then
+								addHeadingMin = -25
+								addHeadingMax = 25
+								addDistance = 1100
+								diffHeading = 1
+							elseif diffAlti0 >= 950 then
+								addHeadingMin = -50
+								addHeadingMax = 50
+								addDistance = 400
+								diffHeading = 5
+							end
+
+							local sumAlti = {}
+
+							-- Réduction dynamique de la recherche angulaire
+							if oldHeadingAlt ~= 0 and math.abs(oldHeadingAlt - heading) < 5 then
+								addHeadingMin = math.max(addHeadingMin, -15)
+								addHeadingMax = math.min(addHeadingMax, 15)
+							end
+
+							--B+
+							-- local centerHeading = 0
+							-- if oldHeadingAlt ~= 0 then
+							-- 	centerHeading = oldHeadingAlt - heading
+							-- end
+							--B+
+
+							--cumul les alti pour trouver la plus petite sur les differents chemin calculé
+							-- calcul pour la prochaine tranche de 5000m
+							-- for AddHeading = -30 , 30 do
+							for addHeading = addHeadingMin, addHeadingMax do--B-
+							-- for addHeading = math.max(addHeadingMin, centerHeading - 15), math.min(addHeadingMax, centerHeading + 15) do--B+
+								Perf_CustAlt[grpName]["N_addHeading"] = Perf_CustAlt[grpName]["N_addHeading"] + 1
+
+								local addHeading_str = tostring(addHeading)
+
+								for interval0 = addDistance, interDistance, addDistance do
+									headingAlt = heading + addHeading
+									sondagePt = GetOffsetPoint(selectedPoint, headingAlt, interval0)
+									sondageAlti = GetTerrainHeightCached(sondagePt.x, sondagePt.y)--B-
+									-- sondageAlti = getTerrainLocal(sondagePt.x, sondagePt.y)--B+
+								
+									if not sumAlti[addHeading_str] then
+										sumAlti[addHeading_str] = {}
+									end
+									if not sumAlti[addHeading_str]["sum"] then sumAlti[addHeading_str]["sum"] = 0 end
+									if not sumAlti[addHeading_str]["altiMax"] then sumAlti[addHeading_str]["altiMax"] = 0 end
+									if not sumAlti[addHeading_str]["distance"] then sumAlti[addHeading_str]["distance"] = 0 end
+
+
+									sumAlti[addHeading_str]["sum"] = sumAlti[addHeading_str]["sum"] + sondageAlti
+									sumAlti[addHeading_str]["distance"] = interval0
+
+									if sumAlti[addHeading_str]["altiMax"] < sondageAlti then
+										sumAlti[addHeading_str]["altiMax"] = sondageAlti
+									end
+								end
+
+								
+								--regarde l'alti max sur une tres longue distance, pour ne pas s orienter vers une trop grande montagne
+								for interval0 = 600, 10000, 500 do--B-
+								-- for interval0 = 600, 10000, 800 do--B+
+							
+									Perf_CustAlt[grpName]["N_interval"] = Perf_CustAlt[grpName]["N_interval"] + 1
+
+									headingAlt = heading + addHeading
+									sondagePt = GetOffsetPoint(selectedPoint, headingAlt, interval0)
+									-- sondageAlti = GetTerrainHeightCached(sondagePt.x, sondagePt.y) --B-
+									sondageAlti = getTerrainLocal(sondagePt.x, sondagePt.y)--B+
+								
+									-- if sondageAlti > 3000 then--B+
+									-- 	break
+									-- end
+
+
+									if not sumAlti[addHeading_str] then
+										sumAlti[addHeading_str] = {}
+									end
+									if not sumAlti[addHeading_str]["altiMaxLong"] then sumAlti[addHeading_str]["altiMaxLong"] = 0 end
+
+									if sumAlti[addHeading_str]["altiMaxLong"] < sondageAlti then
+										sumAlti[addHeading_str]["altiMaxLong"] = sondageAlti
+
+									end
+								end
+
+							end
+
+
+							if skipValleySearch then
+								sumAlti = {
+									["0"] = {
+										sum = preMax,
+										altiMax = preMax,
+										altiMaxLong = preMax,
+										distance = interDistance
+									}
+                                }
+								valleyHeading = nil --E+
+							end
+
+							
+
+
+							--selectionne la route ou la somme d'alti est la plus faible, cela fait suivre les vallees :)
+							-- et evite toutes les directions où l'alti est trop haute
+							local selectHdg = 0
+							local selectSum = 999999
+
+							--regarde si au moins un cap est inferieur à l altiMaxLong
+							local foundLowAltiMaxLong = false
+							for addHdg_N, value in pairs(sumAlti) do
+								if sumAlti[tostring(addHdg_N)].altiMaxLong < 2500 then
+									foundLowAltiMaxLong = true
+									break
+								end
+							end
+
+
+							for addHdg_N, value in pairs(sumAlti) do
+								local addHdg_N_str = tostring(addHdg_N)
+								if foundLowAltiMaxLong then
+									if sumAlti[addHdg_N_str].sum < selectSum and sumAlti[addHdg_N_str].altiMaxLong < 3500 then
+										selectSum = sumAlti[addHdg_N_str].sum
+										local convertHdg = tonumber(addHdg_N)
+										if convertHdg then
+											selectHdg = convertHdg
+										end
+									end
+								elseif sumAlti[addHdg_N_str].sum < selectSum then
+									selectSum = sumAlti[addHdg_N_str].sum
+									local convertHdg = tonumber(addHdg_N)
+									if convertHdg then
+										selectHdg = convertHdg
+									end
+								end
+							end
+
+                            -- altiMax = sumAlti[tostring(selectHdg)].altiMax--C-
+							--C+
+							local sel = sumAlti[tostring(selectHdg)]
+							if not sel then break end
+                            altiMax = sel.altiMax
+							--C+
+
+							headingAlt = heading + tonumber(selectHdg)
+							valleyHeading = headingAlt--E+
+
+							local selectedPointNew = GetOffsetPoint(selectedPoint, headingAlt,
+								sumAlti[tostring(selectHdg)].distance)
+							selectedPoint = selectedPointNew
+
+							local printAltiMaxLong = 0
+							if sumAlti[tostring(selectHdg)] and sumAlti[tostring(selectHdg)].altiMaxLong then
+								printAltiMaxLong = math.floor(sumAlti[tostring(selectHdg)].altiMaxLong)
+							end
+
+							local alt_type = "BARO"
+							
+							if (math.abs(oldAltiMax - altiMax) > 300 or math.abs(oldHeadingAlt - headingAlt) > diffHeading) then
+								oldAltiMax = altiMax
+								oldHeadingAlt = headingAlt
+							
+								
+								-- Altitude calculée par terrain
+								local alti = altiMax + addAlti
+
+								-- Sécurité montagne lointaine
+								-- if printAltiMaxLong >= 3500 then
+								if printAltiMaxLong >= 3500 then
+									alti = printAltiMaxLong + addAlti
+								end
+								
+								-- Sécurité minimale au-dessus du sol
+								local ground = GetTerrainHeightCached(selectedPoint.x, selectedPoint.y)
+
+								if alti < ground + 50 then
+									alti = ground + 50
+								end
+
+								-- Construction légère du waypoint
+								local interWpt = {}
+								for k, v in pairs(baseInterWpt) do
+									interWpt[k] = v
+								end
+
+								interWpt.x = selectedPoint.x
+								interWpt.y = selectedPoint.y
+								interWpt.alt = tonumber(alti)
+								interWpt.alt_type = tostring(alt_type)
+								interWpt.speed = tonumber(copyRoute[n].speed)
+								interWpt.ETA = (interval / copyRoute[n].speed) + copyRoute[n].ETA
+
+								-- pour passer dans les vallées, il faut etre en file indienne trail
+								--TODO revenir à une formation standart si on sort des vallées ou relief
+								--diffHeading = 1
+								if not injectTrail and (#copyRoute2 == 2)  then
+									interWpt.task.params.tasks =
+									{
+										["enabled"] = true,
+										["auto"] = false,
+										["id"] = "WrappedAction",
+										["number"] = 1,
+										["params"] =
+										{
+											["action"] =
+											{
+												["id"] = "Option",
+												["params"] =
+												{
+													["value"] = 720896,
+													["name"] = 5,
+													["formationIndex"] = 11,
+												}, -- end of ["params"]
+											}, -- end of ["action"]
+										}, -- end of ["params"]
+									}
+
+									injectTrail = true
+								end
+
+								if alti > altiMaxHeli then
+									table.insert(copyRoute2, interWpt)
+
+									--l'alti de consigne pour n est n-1
+									if n > 1 and #copyRoute2 >= 2 and copyRoute2[#copyRoute2 - 1] and copyRoute2[#copyRoute2 - 1].alt then
+										copyRoute2[#copyRoute2 - 1].alt = copyRoute2[#copyRoute2].alt
+									end
+								end
+
+
+								altiMax = 1
+							end
+							if #copyRoute2 > 50 then break end
+						end
+					end
+				end
+
+				--ajuste l'altitude des wpt d origine:
+				-- if origineN > 1 then
+				-- 	-- local altitude = land.getHeight({ x = copyRoute2[origineN].x, y = copyRoute2[origineN].y })
+				-- 	local altitude = getTerrainCachedLocal(copyRoute2[origineN].x, copyRoute2[origineN].y)
+				-- 	if copyRoute2[origineN - 1].alt > altitude then
+				-- 		altitude = copyRoute2[origineN - 1].alt
+				-- 	end
+				-- 	copyRoute2[origineN].alt = altitude
+				-- end
+			end
+
+			-- --supprime le premier wpt, sinon l'helico revient sur ses pas.
+			-- table.remove(copyRoute2, 1)
+
+			--ajoute les waypoint apres nWptNextCustom, de copyRoute dans copyRoute2 sans modification d'altitude
+            for n = nWptNextCustom + 1, #copyRoute do
+                table.insert(copyRoute2, copyRoute[n])
+            end
+
+			local mission = {
+				id = 'Mission',
+				params = {
+					route = {
+						points = copyRoute2
+					},
+				}
+			}
+
+			if campL.debug then
+				local logStr = "Mission = " .. TableSerialization(mission, 0)
+				local grpnameClean = grpName:gsub('[%p%c%s]', '_')
+				local logFile = io.open(
+					PathDCE .. "Debug\\Custom_Altitude_" .. grpnameClean .. "_C_A_" .. current_time ..
+					".lua", "w")
+				if logFile then
+					logFile:write(logStr)
+					logFile:close()
+				else
+					env.info("DCE_Custom_Altitude_: Failed to open log file for writing.")
+				end
+			end
+
+			Controller.setTask(ctr, mission) --activate task with mission for retreat AWACS
+		end
+
+	end
+
+
+	execute()
+
+	if campL.debug then
+		local dt = os.clock() - t_init
+		Perf_K = Perf_K + dt
+		Perf_CustAlt[grpName]["timeTotal"] = dt
+
+		Perf_CustAlt[grpName].TerrainStats_N = TerrainStats_N
+		Perf_CustAlt[grpName].TerrainStats_Cache_N = TerrainStats_Cache_N
+
+		_affiche(Perf_CustAlt, "Perf_CustAlt: ")
+	end
+	
 end
