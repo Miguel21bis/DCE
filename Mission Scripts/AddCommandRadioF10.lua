@@ -113,7 +113,7 @@ LastInjectFlightPlan = {} --garde les derniers plan de vol injecté
 ScheduleTenth = {}					--table used to schedule the tenth of a second
 AgendaSeconde = {}
 
--- EWR_optionPlayer = {}
+EWR_optionPlayer = {}
 EWR_rebuildPending = {}
 local requestEWRMenuRebuild
 local addFuncs
@@ -2910,7 +2910,7 @@ function EWR_ON(data)
 
     EWR_optionPlayer[playerName].EWR_on = true
 
-    requestEWRMenuRebuild(data.gid, data.groupObject)
+    requestEWRMenuRebuild(data.gid, data.groupObject, playerName)
 end
 
 function EWR_OFF(data)
@@ -2930,7 +2930,7 @@ function EWR_OFF(data)
 
 	EWR_optionPlayer[playerName].EWR_on = false
 
-	requestEWRMenuRebuild(data.gid, data.groupObject)
+	requestEWRMenuRebuild(data.gid, data.groupObject, playerName)
 end
 
 
@@ -3423,19 +3423,6 @@ addFuncs = function(arg_Gid, arg_GroupObj, argPlayerName)
 
 	env.info("DCE_addFuncs _A gid "..tostring(arg_Gid).." Group "..tostring(arg_GroupObj).." argPlayerName: "..tostring(argPlayerName))
 
-	-- --si aucun argument, on s'appui sur la liste des joueurs fait maison
-	-- if not arg_Gid or not arg_GroupObj then
-	-- 	env.info("DCE_addFuncs _A2 with No arg ")
-
-	-- 	for playerName, playerData in pairs(PlayerInOutAircraft) do
-	-- 		env.info("DCE_addFuncs  _A4 gid "..tostring(playerData.gid).." Group "..tostring(playerData.groupObject))
-	-- 		if playerData.gid and playerData.groupObject then
-	-- 			env.info("DCE_addFuncs  _A5  MAKE addFuncs() gid "..tostring(playerData.gid).." Group "..tostring(playerData.groupObject))
-	-- 			addFuncs(playerData.gid, playerData.groupObject, playerName)
-	-- 		end
-	-- 	end
-	-- end
-
 	--si aucun argument, on s'appui sur la liste des joueurs fait maison
 	if not arg_Gid or not arg_GroupObj then
 		for playerName, playerData in pairs(PlayerInOutAircraft or {}) do
@@ -3470,7 +3457,12 @@ addFuncs = function(arg_Gid, arg_GroupObj, argPlayerName)
 		missionCommands.removeItemForGroup(arg_Gid, {"Get out of the cockpit"})
 		missionCommands.removeItemForGroup(arg_Gid, {"CarrierIntoWind"})
 
+		-- pcall(function() missionCommands.removeItemForGroup(arg_Gid, { "EWR" }) end)
+
+		pcall(function() missionCommands.removeItemForGroup(arg_Gid, { "EWR", "EWR ON" }) end)
+		pcall(function() missionCommands.removeItemForGroup(arg_Gid, { "EWR", "EWR OFF" }) end)
 		pcall(function() missionCommands.removeItemForGroup(arg_Gid, { "EWR" }) end)
+
 
 
 
@@ -3491,23 +3483,6 @@ addFuncs = function(arg_Gid, arg_GroupObj, argPlayerName)
 		local subR_B1 = missionCommands.addSubMenuForGroup(arg_Gid, "EWR", nil)
 		local subR_B2 = missionCommands.addSubMenuForGroup(arg_Gid, "EWR ON", subR_B1)
 		local subR_B3 = missionCommands.addSubMenuForGroup(arg_Gid, "EWR OFF", subR_B1)
-
-        -- for playerName, value in pairs(EWR_optionPlayer) do
-        --     radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid,
-        --         tostring(playerName) .. " EWR ON", subR_B2, EWR_ON, playerName)
-        -- end
-		
-		-- local ewrCopy = {}
-		-- for k, v in pairs(EWR_optionPlayer) do
-		-- 	ewrCopy[k] = true
-		-- end
-
-		-- for playerName, _ in pairs(ewrCopy) do
-        --     if type(playerName) == "string" then
-		-- 		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, playerName .. " EWR ON", subR_B2, EWR_ON, playerName) 
-		-- 		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, playerName .." EWR OFF", subR_B3, EWR_OFF, playerName )
-		-- 	end
-		-- end
 
 		for rawName, state in pairs(EWR_optionPlayer or {}) do
 			if type(rawName) == "string" then
@@ -3603,7 +3578,7 @@ addFuncs = function(arg_Gid, arg_GroupObj, argPlayerName)
 end
 
 
-requestEWRMenuRebuild = function(gid, groupObject)
+requestEWRMenuRebuild = function(gid, groupObject, playerName)
 	if not gid or not groupObject then
 		return
 	end
@@ -3618,11 +3593,12 @@ requestEWRMenuRebuild = function(gid, groupObject)
 		timer.scheduleFunction(function(arg, time)
 			local _gid = arg[1]
 			local _groupObject = arg[2]
+			local _playerName = arg[3]
 
 			EWR_rebuildPending[_gid] = nil
 
-			addFuncs(_gid, _groupObject)
-		end, { gid, groupObject }, timer.getTime() + 0.3)
+			addFuncs(_gid, _groupObject, _playerName)
+		end, { gid, groupObject, playerName }, timer.getTime() + 0.3)
 	end
 end
 
