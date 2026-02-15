@@ -1631,7 +1631,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 				if baseIsFARP then
-					if  db_airbases[flight[f].base].parkAlertSAR and #db_airbases[flight[f].base].parkAlertSAR >= 4  then
+					if db_airbases[flight[f].base].parkAlertSAR and #db_airbases[flight[f].base].parkAlertSAR >= 2  then
 						farp_MorePlace = true
 					end
 				end
@@ -4736,7 +4736,6 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					--FARP parking id
-					-- if  flight[f].airdromeId >= 100 then
 					if baseIsFARP and waypoints[1].action ~= "Spawn" then
 						if not limitedParkTiming and not flight[f]["parkAlertSAR"] then
 
@@ -4750,6 +4749,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								waypoints[1]["action"] = "From Ground Area"
 								waypoints[1]["type"] = "TakeOffGround"
 								waypoints[1].airdromeId = nil
+								waypoints[1].linkUnit = nil
 								waypoints[1].x = flight[f]["parkAlertSAR"][n].x
 								waypoints[1].y = flight[f]["parkAlertSAR"][n].y
 								units[n].x = flight[f]["parkAlertSAR"][n].x
@@ -4764,6 +4764,14 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							waypoints[#waypoints]["type"] = "Land"
 							waypoints[#waypoints].x = flight[f]["parkAlertSAR"][n].x
 							waypoints[#waypoints].y = flight[f]["parkAlertSAR"][n].y
+
+							--supprime les clefs parking et parking_id s'ils existe dans les tables units
+							if units[n].parking then
+								units[n].parking = nil
+							end
+							if units[n].parking_id then
+								units[n].parking_id = nil
+							end
 
 						end
 						--pour les helico qui serait sur base, mais avec des points SAR utilisable
@@ -4775,6 +4783,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								waypoints[1]["action"] = "From Ground Area"
 								waypoints[1]["type"] = "TakeOffGround"
 								waypoints[1].airdromeId = nil
+								waypoints[1].linkUnit = nil
 								waypoints[1].x = flight[f]["parkAlertSAR"][n].x
 								waypoints[1].y = flight[f]["parkAlertSAR"][n].y
 								units[n].x = flight[f]["parkAlertSAR"][n].x
@@ -4789,6 +4798,14 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							waypoints[#waypoints]["type"] = "Land"
 							waypoints[#waypoints].x = flight[f]["parkAlertSAR"][n].x
 							waypoints[#waypoints].y = flight[f]["parkAlertSAR"][n].y
+
+							--supprime les clefs parking et parking_id s'ils existe dans les tables units
+							if units[n].parking then
+								units[n].parking = nil
+							end
+							if units[n].parking_id then
+								units[n].parking_id = nil
+							end
 
 						end
 					end
@@ -4810,6 +4827,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								waypoints[1]["action"] = "From Ground Area"
 								waypoints[1]["type"] = "TakeOffGround"
 								waypoints[1].airdromeId = nil
+								waypoints[1].linkUnit = nil
 								waypoints[1].x = flight[f]["parkAlertSAR"][n].x
 								waypoints[1].y = flight[f]["parkAlertSAR"][n].y
 								units[n].x = flight[f]["parkAlertSAR"][n].x
@@ -4824,8 +4842,16 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							waypoints[#waypoints]["type"] = "Land"
 							waypoints[#waypoints].x = flight[f]["parkAlertSAR"][n].x
 							waypoints[#waypoints].y = flight[f]["parkAlertSAR"][n].y
-						end
 
+							--supprime les clefs parking et parking_id s'ils existe dans les tables units
+							if units[n].parking then
+								units[n].parking = nil
+							end
+							if units[n].parking_id then
+								units[n].parking_id = nil
+							end
+
+						end
 					end
 
 					local pers_ACFT_bool = nil
@@ -5642,6 +5668,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							waypoints[1]["type"] = "TakeOffGround"
 
 							waypoints[1].airdromeId = nil
+							waypoints[1].linkUnit = nil
 
 							group.units[1].x = parkSarAirBase[flight[f].base][nPk].x
 							group.units[1].y = parkSarAirBase[flight[f].base][nPk].y
@@ -5652,17 +5679,19 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							waypoints[1].x = parkSarAirBase[flight[f].base][nPk].x
 							waypoints[1].y = parkSarAirBase[flight[f].base][nPk].y
 
-							if waypoints[1].linkUnit then
-								waypoints[1].linkUnit = nil
+							-- if waypoints[1].linkUnit then
+							-- 	waypoints[1].linkUnit = nil
+							-- end
+
+							--supprime les clefs parking et parking_id s'ils existe dans les tables units
+							for unitN, unit in pairs(group.units) do
+								if unit.parking then
+									unit.parking = nil
+								end
+								if unit.parking_id then
+									unit.parking_id = nil
+								end
 							end
-
-							-- if group.units[1].parking then
-							-- 	group.units[1].parking = nil
-							-- end
-
-							-- if group.units[1].parking_id then
-							-- 	group.units[1].parking_id = nil
-							-- end
 						end
 					end
 				end
@@ -5716,6 +5745,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							waypoints[1]["type"] = "TakeOffGround"
 
 							waypoints[1].airdromeId = nil
+							waypoints[1].linkUnit = nil
 
 							group.units[1].x = parkSarAirBase[flight[f].base][nPk].x
 							group.units[1].y = parkSarAirBase[flight[f].base][nPk].y
@@ -5726,16 +5756,18 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							waypoints[1].x = parkSarAirBase[flight[f].base][nPk].x
 							waypoints[1].y = parkSarAirBase[flight[f].base][nPk].y
 
-							if waypoints[1].linkUnit then
-								waypoints[1].linkUnit = nil
-							end
+							-- if waypoints[1].linkUnit then
+							-- 	waypoints[1].linkUnit = nil
+							-- end
 
-							if group.units[1].parking then
-								group.units[1].parking = nil
-							end
-
-							if group.units[1].parking_id then
-								group.units[1].parking_id = nil
+							--supprime les clefs parking et parking_id s'ils existe dans les tables units
+							for unitN, unit in pairs(group.units) do
+								if unit.parking then
+									unit.parking = nil
+								end
+								if unit.parking_id then
+									unit.parking_id = nil
+								end
 							end
 						end
 					end
