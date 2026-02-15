@@ -5698,11 +5698,18 @@ function PatchEjectedPilotStructure(pilot, from)
 		pilot.SurfaceType = nil
 	end
 
-	if from == "targetlist" and not pilot.x then
-		-- dans targetlist on a pas le side
-		pilot.x = pilot.pos.x
-		pilot.y = pilot.pos.y
-		pilot.z = pilot.pos.z
+	if from == "targetlist" then
+		
+		if not pilot.x then
+			-- dans targetlist on a pas le side
+			pilot.x = pilot.pos.x
+			pilot.y = pilot.pos.y
+			pilot.z = pilot.pos.z
+		end
+
+		if pilot.firepower.max then
+			pilot.firepower.max = 1
+		end
 	end
 
 	-- if not pilot.sumEjectedPilotDay then

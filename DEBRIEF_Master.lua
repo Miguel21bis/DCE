@@ -36,7 +36,7 @@ Briefing_oob_text_blue = ""																	--text string to be added to next br
 Briefing_text = ""
 PlayerSide = nil
 
-local function AcceptMission()
+local function acceptMission()
 	local m = ""
 	repeat
 		print("Actual time(DebriefMaster A): " .. FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year .. ".\n")
@@ -495,45 +495,41 @@ if input == "y" or input == "yes" then
 				end
 
 				-- Fonction pour afficher les cibles de type CSAR (pilotes éjectés)
-				local function showCSARTargets(targetlist, side)
-					print("\n--- Select the pilot to be rescued, who has fallen into the "..DCS_ENI_Side[side].." side  ---")
-					local tabIndex = {}
-					local Ckey = 0
+					local function showCSARTargets(targetlist, targetSide)
+						local eniSide = DCS_ENI_Side[targetSide]
+						print("\n--- Select the pilot to be rescued, who has fallen into the "..eniSide.." side  ---")
+						local tabIndex = {}
+						-- local Ckey = 0
 
-						for key, target in ipairs(targetlist[side]) do
-							if target.inactive ~= true and target.ATO and (target.task == "CSAR" or target.task == "SAR")
-							then
+						-- Trier la table par priorité
+						table.sort(targetlist[targetSide], function(a, b)
+							return a.priority > b.priority
+						end)
+
+						for key, target in ipairs(targetlist[targetSide]) do
+							if not target.inactive and target.ATO and (target.task == "CSAR" or target.task == "SAR") then
 								-- Ckey = key
-								io.write(key.." "..side.." "..tostring(target.titleName).."\n")
+								local mgrsInfo = target.MGRS_Chute_1km or target.MGRS_Chute or 0
+								io.write(key.." "..tostring(target.titleName).." "..tostring(mgrsInfo).."\n")
 								tabIndex[key] = target
-								
-								if target.task == "CSAR" and target.elements then
-									for ejectPilotN, ejectPilot in ipairs(target.elements) do
-										if ejectPilot.status == "EVAC_possible" then
-											local txtSup = ""
-											if ejectPilot.inTheEnemyCamp then txtSup = "in the enemy camp" end
-											io.write("          - - - - >"..tostring(ejectPilot.MGRS_Chute_10KM).." : "..tostring(ejectPilot.name).." "..txtSup.."\n")
-										end
-									end
-								end
 							end
 						end
 
-					return tabIndex
-				end
+						return tabIndex
+					end
 
 				-- Fonction principale pour la sélection des cibles
 				local function selectTarget(targetlist)
-					local side = selectCamp()
-					if not side then return end -- Quitter si l'utilisateur choisit "Exit"
+					local targetSide = selectCamp()
+					if not targetSide then return end -- Quitter si l'utilisateur choisit "Exit"
 
 					local missionChoice = selectMissionType()
 
 					local tabIndex = {}
 					if missionChoice == 1 then
-						tabIndex = showStandardTargets(targetlist, side)
+						tabIndex = showStandardTargets(targetlist, targetSide)
 					elseif missionChoice == 2 then
-						tabIndex = showCSARTargets(targetlist, side)
+						tabIndex = showCSARTargets(targetlist, targetSide)
 					else
 						return selectTarget(targetlist) -- Retourner au choix du camp
 					end
@@ -555,7 +551,7 @@ if input == "y" or input == "yes" then
 
 					local selectedTarget = tabIndex[input]
 					Multi.Target = Multi.Target or {}
-					Multi.Target[side] = selectedTarget.titleName
+					Multi.Target[targetSide] = selectedTarget.titleName
 
 					print("\nSelected Target: "..selectedTarget.titleName)
 				end
@@ -777,13 +773,15 @@ if input == "y" or input == "yes" then
 			print("\n This campaign is a ".. tostring(EndInfo).."  \nEND OF THE CAMPAIGN, SEE THE BRIEFING IN THE MISSION..\n")					-- end of camapaign
 			break
 		elseif Multi.NbGroup >= 1 and PlayerFlight then
-			if AcceptMission() then
+			if acceptMission() then
+				BackupFilesMission()
 				print("\nMultiplayerCampaign Next mission generated.\n")								--confirmation text
 				 break
 			end
 		elseif SinglePlayer and PlayerFlight  then														--mission has a player flight
-			if AcceptMission() then
-				 print("\nNext mission generated.\n")													--confirmation text
+			if acceptMission() then
+				BackupFilesMission() 
+				print("\nNext mission generated.\n")													--confirmation text
 				 break
 			end
 		elseif StopBug then																			--mission has a player flight

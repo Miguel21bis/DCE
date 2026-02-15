@@ -395,6 +395,13 @@ local function debugLog(message)
 	end
 end
 
+local function debugLogBeforeCrash(message)
+	table.insert(debugLogs, message)
+
+	flushDebugLogs()
+
+end
+
 -- Initialiser le fichier
 initDebugLogs()
 
@@ -654,10 +661,10 @@ for sideName, units in pairs(oob_air) do
 
 	local draftId = 1
 	if Debug.Generator.affiche then
-		debugLog(draftId.." AtoG passe A_0 chapter: "..Debug.Generator.chapter.." SpySquad:  "..Debug.Generator.SpySquad.." SpyTask: "..Debug.Generator.SpyTask)
+		debugLog("draftId"..draftId.." AtoG passe A_0 chapter: "..Debug.Generator.chapter.." SpySquad:  "..Debug.Generator.SpySquad.." SpyTask: "..Debug.Generator.SpyTask)
 
 		if Debug.Generator.SpyTarget then
-			debugLog(draftId.." \n\n"..Debug.Generator.SpyTarget)
+			debugLog("draftId"..draftId.." \n\n"..Debug.Generator.SpyTarget)
 		end
 	end
 
@@ -678,7 +685,7 @@ for sideName, units in pairs(oob_air) do
 					and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name )
 
 				if isDebugModeA1 then
-					debugLog(draftId.." AtoG passe A_00 "..unit.type.." Befor Airbase Condition ")
+					debugLog("draftId"..draftId.." AtoG passe A_00 "..unit.type.." Befor Airbase Condition ")
 				end
 
 				TrackPlayability(unit.player, "active_unit")																		--track playabilty criterium has been met
@@ -686,7 +693,7 @@ for sideName, units in pairs(oob_air) do
 				if db_airbases[unit.base] and db_airbases[unit.base].inactive ~= true and db_airbases[unit.base].x and db_airbases[unit.base].y then	--base exists and is active and has a position value (carrier that exists)
 					
 					if isDebugModeA1 then
-						debugLog(draftId.." AtoG passe A_01 "..unit.type.." Befor roster.ready Condition  ")
+						debugLog("draftId"..draftId.." AtoG passe A_01 "..unit.type.." Befor roster.ready Condition  ")
 					end
 
 					TrackPlayability(unit.player, "base")																		--track playabilty criterium has been met
@@ -697,7 +704,7 @@ for sideName, units in pairs(oob_air) do
 					-- 	if unit.roster.ready < multiPlaneSet[sideName][unit.type].InitNbPlane then
 					-- 		unit.roster.ready = multiPlaneSet[sideName][unit.type].InitNbPlane + 1
 					-- 		if isDebugModeA then
-					-- 			debugLog(draftId.." AtoG 1_A multiPlaneSetPass  ")
+					-- 			debugLog("draftId"..draftId.." AtoG 1_A multiPlaneSetPass  ")
 					-- 		end
 					-- 	end
 					-- 	overRideReady = true
@@ -714,7 +721,7 @@ for sideName, units in pairs(oob_air) do
 					-- if unit.roster.ready > 0 then
 
 						if isDebugModeA1 then
-							debugLog(draftId.." AtoG passe A_02 "..unit.type.." Befor aircraft_available Condition ")
+							debugLog("draftId"..draftId.." AtoG passe A_02 "..unit.type.." Befor aircraft_available Condition ")
 						end
 
 						if Multi and Multi.Group and Debug.debug then
@@ -722,7 +729,7 @@ for sideName, units in pairs(oob_air) do
 								if Multi.Group[k].PlaneType == unit.type then
 									-- print("AtoG type: "..unit.type.." rosterReady: "..unit.roster.ready)
 									if isDebugModeA1 then
-										debugLog(draftId.." AtoG type: "..unit.type.." rosterReady: "..unit.roster.ready)
+										debugLog("draftId"..draftId.." AtoG type: "..unit.type.." rosterReady: "..unit.roster.ready)
 									end
 								end
 							end
@@ -799,7 +806,7 @@ for sideName, units in pairs(oob_air) do
 
 							for task, task_bool in pairs(unit.tasks) do																		--iterate through all tasks of unit		
 								if isDebugModeA1 then
-									debugLog(draftId.." AtoG passe A_03b task: "..tostring(task).." task_bool: "..tostring(task_bool).."  ")
+									debugLog("draftId"..draftId.." AtoG passe A_03b task: "..tostring(task).." task_bool: "..tostring(task_bool).."  ")
 								end
 								if task_bool and task ~= "SEAD" and task ~= "Escort" and task ~= "Escort Jammer" and task ~= "Flare Illumination" and task ~= "Laser Illumination" then		--task is true and is no support task
 
@@ -809,7 +816,7 @@ for sideName, units in pairs(oob_air) do
 												and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name and Debug.Generator.SpyTask == task)
 
 									if isDebugModeA2 then
-										debugLog(draftId.." AtoG passe A_04b "..unit.type.." Befor task Condition | task: "..task)
+										debugLog("draftId"..draftId.." AtoG passe A_04b "..unit.type.." Befor task Condition | task: "..task)
 									end
 
 									--get possible loadouts
@@ -912,7 +919,7 @@ for sideName, units in pairs(oob_air) do
 
 									for l = 1, #unit_loadouts do																				--iterate through all available loadouts				
 										if isDebugModeA2 then
-											debugLog(draftId.." AtoG passe A_05 "..unit.type.." "..unit_loadouts[l].loadout_name.." Befor Loadouts Day/Night Condition Daytime? "..tostring(Daytime))
+											debugLog("draftId"..draftId.." AtoG passe A_05 "..unit.type.." "..unit_loadouts[l].loadout_name.." Befor Loadouts Day/Night Condition Daytime? "..tostring(Daytime))
 										end
 
 										local debug = "/n day: "..tostring(unit_loadouts[l].day) .." night?: ".. tostring(unit_loadouts[l].night)
@@ -984,13 +991,13 @@ for sideName, units in pairs(oob_air) do
 										end
 
 										if isDebugModeA2 then
-											debugLog(draftId.." AtoG passe A_05b tot_to: "..tot_to.." debug: "..tostring(debug))
+											debugLog("draftId"..draftId.." AtoG passe A_05b tot_to: "..tot_to.." debug: "..tostring(debug))
 										end
 
 										if tot_to ~= 0 then
 											-- if tot_from ~= 0 or tot_to ~= 0 then																	--loadout has an eligible time on target
 											if isDebugModeA2 then
-												debugLog(draftId.." AtoG passe A_06 ".." Befor targetlist Boucle")
+												debugLog("draftId"..draftId.." AtoG passe A_06 ".." Befor targetlist Boucle")
 											end
 
 											if tot_from == 0 then																				--player is only allowed to start at mission start
@@ -1021,7 +1028,7 @@ for sideName, units in pairs(oob_air) do
 																or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == target.titleName ))
 
 															if isDebugModeA2 then
-																debugLog(draftId.." AtoG passe A_07c :"..unit.type.." "..target.titleName.." Befor task Condition: "..target.task .." ==? task? "..task.." || "..target_name)
+																debugLog("draftId"..draftId.." AtoG passe A_07c :"..unit.type.." "..target.titleName.." Befor task Condition: "..target.task .." ==? task? "..task.." || "..target_name)
 															end
 
 															if target.task == task then															--if target is valid for aircaft-loadout															
@@ -1069,11 +1076,13 @@ for sideName, units in pairs(oob_air) do
 																end
 
 																if isDebugModeA2 then
-																	debugLog(draftId.." AtoG passe A_10 Befor Condition loadout_eligible?: "..tostring(loadout_eligible).." |unit.name: "..unit.name.." |target_name: "..target_name.." |target.base: "..tostring(target.base).." |unit.base: "..unit.base.." debugLocal: "..tostring(debugLocal))
+																	debugLog("draftId"..draftId.." AtoG passe A_10 Befor Condition loadout_eligible?: "..tostring(loadout_eligible).." |unit.name: "..unit.name.." |target_name: "..target_name.." |target.base: "..tostring(target.base).." |unit.base: "..unit.base.." debugLocal: "..tostring(debugLocal))
 																end
 
 																if loadout_eligible then
-																--continue if loadout is eligible
+																
+																	--attention, overideMP_A garde une ancienne valeur a true
+																	overideMP_A = false
 
 																	if ( target.base
 																		and  ((task == "Intercept" and target.base == unit.base) or (task == "SAR" and target.base == unit.base) ) or (task == "Transport" and target.base == unit.base) or (task == "Nothing" and target.base == unit.base)
@@ -1086,15 +1095,20 @@ for sideName, units in pairs(oob_air) do
 																		if multiPlaneSet then
 																			debugMulti = debugMulti.."\n"..("AtoG passe A_AAb "..tostring(task).." "..unit.type)
 
-																			if multiPlaneSet[sideName] and multiPlaneSet[sideName][unit.type] and multiPlaneSet[sideName][unit.type][task] and task_bool then
+																			if multiPlaneSet[sideName] and multiPlaneSet[sideName][unit.type] and multiPlaneSet[sideName][unit.type][task] then
 																				if Multi.Target and Multi.Target[sideName] then
 																					debugMulti = debugMulti.."\n"..("AtoG passe A_AAe Multi.Target[side] "..tostring(Multi.Target[sideName]) .. " ==? target_name? " .. tostring(target_name))
 																					if Multi.Target[sideName] == target_name  then
 																						debugMulti = debugMulti.."\n"..("AtoG passe A_AAf Multi.Target[side] "..tostring(Multi.Target[sideName]) .. " ==? target_name? " .. tostring(target_name).." "..unit.type.." "..tostring(task))
 																						overideMP_A = true
+																						if target.powerfire and target.powerfire.max then
+																							if target.powerfire.max < multiPlaneSet[sideName][unit.type][task].NbPlane then
+																								target.powerfire.max = multiPlaneSet[sideName][unit.type][task].NbPlane + 1
+																							end
+																						end
 																					end
 																				else
-																					debugMulti = debugMulti.."\n"..("AtoG passe A_AAg  " .. " ==? target_name? " .. tostring(target_name).." "..unit.type.." "..tostring(task))
+																					debugMulti = debugMulti.."\n"..("AtoG passe A_AAg ==? target_name? " .. tostring(target_name).." "..unit.type.." "..tostring(task))
 
 																					Multi.Target = {}
 																					Multi.Target[sideName] = target_name
@@ -1107,12 +1121,12 @@ for sideName, units in pairs(oob_air) do
 																		end
 
 																		if isDebugModeA2 then
-																			debugLog(draftId.." "..debugMulti)
+																			debugLog("draftId"..draftId.." "..debugMulti)
 																		end
 
 
 																		if isDebugModeA2 then
-																			debugLog(draftId.." AtoG passe A_11 overRideMP_A? "..tostring(overideMP_A).." Befor firepower Condition".." || "..target_name
+																			debugLog("draftId"..draftId.." AtoG passe A_11 overRideMP_A? "..tostring(overideMP_A).." Befor firepower Condition".." || "..target_name
 																			.." "..unit.type
 																			.." firepower.min? "..target.firepower.min
 																			.." <= aircraft_available: ".. aircraft_available
@@ -1123,7 +1137,7 @@ for sideName, units in pairs(oob_air) do
 																		if target.firepower.min <= aircraft_available * unit_loadouts[l].firepower or overideMP_A then				--enough aircraft are available to satisfy minimum firepower requirement of target	
 
 																			if isDebugModeA2 then
-																				debugLog(draftId.." AtoG passe A_12  Befor weather Condition || overRideReady: "..tostring(overRideReady).." || "..target_name)
+																				debugLog("draftId"..draftId.." AtoG passe A_12  Befor weather Condition || overRideReady: "..tostring(overRideReady).." || "..target_name)
 																			end
 
 																			TrackPlayability(unit.player, "target_firepower")																			--track playabilty criterium has been met
@@ -1133,7 +1147,7 @@ for sideName, units in pairs(oob_air) do
 																			if mission.weather["clouds"]["density"] > 8 then																				--overcast clouds
 
 																				if isDebugModeA2 then
-																					debugLog(draftId.." AtoG passe A_13a "..unit_loadouts[l].loadout_name.." After weather Condition "..target_name)
+																					debugLog("draftId"..draftId.." AtoG passe A_13a "..unit_loadouts[l].loadout_name.." After weather Condition "..target_name)
 																				end
 
 																				local cloud_base = mission.weather["clouds"]["base"]
@@ -1185,14 +1199,14 @@ for sideName, units in pairs(oob_air) do
 																			end
 
 																			if isDebugModeA2 then
-																				debugLog(draftId.." AtoG passe A_13__C ".." proxiCSAR "..tostring(proxiCSAR).." ".. tostring(unit.name).." selectedUnitSAR: "..tostring(target.selectedUnitSAR).." target.name: "..tostring(target.name))
-																				debugLog(draftId.." AtoG passe A_13__D weather_eligible? "..tostring(weather_eligible).." overRideReady: "..tostring(overRideReady).." overideMP_A? "..tostring(overideMP_A))
+																				debugLog("draftId"..draftId.." AtoG passe A_13__C ".." proxiCSAR "..tostring(proxiCSAR).." ".. tostring(unit.name).." selectedUnitSAR: "..tostring(target.selectedUnitSAR).." target.name: "..tostring(target.name))
+																				debugLog("draftId"..draftId.." AtoG passe A_13__D weather_eligible? "..tostring(weather_eligible).." overRideReady: "..tostring(overRideReady).." overideMP_A? "..tostring(overideMP_A))
 																			end
 
 																			if (weather_eligible and proxiCSAR) or overRideReady then																				--continue of this loadout is eligible for weather
 
 																				if isDebugModeA2 then
-																					debugLog(draftId.." AtoG passe A_14 ".." After weather_eligible Condition "..target_name)
+																					debugLog("draftId"..draftId.." AtoG passe A_14 ".." After weather_eligible Condition "..target_name)
 																				end
 
 																				TrackPlayability(unit.player, "weather")															--track playabilty criterium has been met
@@ -1217,7 +1231,7 @@ for sideName, units in pairs(oob_air) do
 																				for r = 1, multipack do																				--repeat draft sortie generation for the requirement amount of packages (may create different routes each time)
 
 																					if isDebugModeA2 then
-																						debugLog(draftId.." AtoG passe A_15 multipack "..tostring(multipack).." FOR multipack Boucle "..target_name)
+																						debugLog("draftId"..draftId.." AtoG passe A_15 multipack "..tostring(multipack).." FOR multipack Boucle "..target_name)
 																					end
 
 																					--determine route variants depending on Daytime
@@ -1233,7 +1247,7 @@ for sideName, units in pairs(oob_air) do
 																					end
 
 																					if isDebugModeA2 then
-																						debugLog(draftId.." AtoG passe A_16 "..tostring(variant).." "..tostring(Daytime).." Befor variant Condition "..target_name)
+																						debugLog("draftId"..draftId.." AtoG passe A_16 "..tostring(variant).." "..tostring(Daytime).." Befor variant Condition "..target_name)
 																					end
 
 																					local viaFARP = nil
@@ -1244,7 +1258,7 @@ for sideName, units in pairs(oob_air) do
 																							draftId = draftId + 1
 																						end
 																						if isDebugModeA2 then
-																							debugLog(draftId.." AtoG passe A_18 ".." After variant Condition "..target_name)
+																							debugLog("draftId"..draftId.." AtoG passe A_18 ".." After variant Condition "..target_name)
 																						end
 
 																						local tempDebug = ""
@@ -1344,7 +1358,7 @@ for sideName, units in pairs(oob_air) do
 																							-- end
 
 																							-- if isDebugModeA2 then
-																							-- 	debugLog(draftId.." "..debugMulti)
+																							-- 	debugLog("draftId"..draftId.." "..debugMulti)
 																							-- end
 																							
 
@@ -1355,7 +1369,7 @@ for sideName, units in pairs(oob_air) do
 
 
 																							if isDebugModeA2 then
-																								debugLog(draftId.." AtoG A_25 "..tostring(toTarget).." || LoadoutUnitRange: "..tostring(unit_loadouts[l].range).." "..tostring(unit_loadouts[l].name)
+																								debugLog("draftId"..draftId.." AtoG A_25 "..tostring(toTarget).." || LoadoutUnitRange: "..tostring(unit_loadouts[l].range).." "..tostring(unit_loadouts[l].name)
 																								.."\n".."______________toTarget "..tostring(toTarget).." <=? "..tostring(unit_loadouts[l].range)
 																								)
 																							end
@@ -1396,7 +1410,7 @@ for sideName, units in pairs(oob_air) do
 																						--if sortie route lenght is within range of aircraft-loadout
 																						if route and route.lenght and route.lenght <= unit_loadouts[l].range * 2 and altiPass then
 																							if isDebugModeA2 then
-																								debugLog(draftId.." AtoG passe A_29 After Range Condition | firepower.max: "..tostring(target.firepower.max).." / loadoutFirepower "..tostring(unit_loadouts[l].firepower))
+																								debugLog("draftId"..draftId.." AtoG passe A_29 After Range Condition | firepower.max: "..tostring(target.firepower.max).." / loadoutFirepower "..tostring(unit_loadouts[l].firepower))
 																							end
 
 																							TrackPlayability(unit.player, "target_range")												--track playabilty criterium has been met
@@ -1406,7 +1420,6 @@ for sideName, units in pairs(oob_air) do
 
 																							if task == "Transport" then
 																								if multiPlaneSet and multiPlaneSet[sideName] and multiPlaneSet[sideName][unit.type] and multiPlaneSet[sideName][unit.type][task]
-																								and task_bool
 																								and aircraft_requested < multiPlaneSet[sideName][unit.type][task].NbPlane
 																								and task == "Transport"
 																								then
@@ -1487,7 +1500,7 @@ for sideName, units in pairs(oob_air) do
 																							debugMulti = debugMulti.."\n"..("AtoG_overideMP_A passe D "..unit.type.." aircraft_assign: "..tostring(aircraft_assign))
 
 																							if isDebugModeA2 then
-																								debugLog(draftId.." "..debugMulti)
+																								debugLog("draftId"..draftId.." "..debugMulti)
 																							end
 
 																							--self escort
@@ -1503,7 +1516,7 @@ for sideName, units in pairs(oob_air) do
 																								local idTemp = "id"..#draftSorties[sideName]+1
 
 																								if isDebugModeA2 then
-																									debugLog(draftId.." AtoG passe A_30a "..idTemp.." clientPlayer: "..tostring(clientPlayer) .. " overRideMP_A: "
+																									debugLog("draftId"..draftId.." AtoG passe A_30a "..idTemp.." clientPlayer: "..tostring(clientPlayer) .. " overRideMP_A: "
 																									.. tostring(overideMP_A).." idTemp: "..tostring(idTemp).." aircraft_assign: "..tostring(aircraft_assign).." |Nb Draft "..tostring(#draftSorties[sideName]))
 																								end
 
@@ -1555,7 +1568,7 @@ for sideName, units in pairs(oob_air) do
 																								}
 
 																									if isDebugModeA2 then
-																										debugLog(draftId.." AtoG passe A_31a "..idTemp.." Add SUPPORT CSAR task?: "..tostring(task).." overideMP_A? "..tostring(overideMP_A))
+																										debugLog("draftId"..draftId.." AtoG passe A_31a "..idTemp.." Add SUPPORT CSAR task?: "..tostring(task).." overideMP_A? "..tostring(overideMP_A))
 																										
 																									end
 
@@ -1565,7 +1578,7 @@ for sideName, units in pairs(oob_air) do
 																									-- _affiche(draftSortiesEntry.support, "support?: ")
 																									-- os.execute 'pause'
 																									if isDebugModeA2 then
-																										debugLog(draftId.." AtoG passe A_31b "..idTemp.." Add SUPPORT CSAR ")
+																										debugLog("draftId"..draftId.." AtoG passe A_31b "..idTemp.." Add SUPPORT CSAR ")
 																										
 																									end
 																								end
@@ -1585,7 +1598,7 @@ for sideName, units in pairs(oob_air) do
 																								end
 
 																								if isDebugModeA2 then
-																									debugLog(draftId.." AtoG passe A_32: " .. idTemp.." score: "..tostring(draftSortiesEntry.score).." *T_priority "..tostring(target.priority).." /threat "..tostring(route_threat)
+																									debugLog("draftId"..draftId.." AtoG passe A_32: " .. idTemp.." score: "..tostring(draftSortiesEntry.score).." *T_priority "..tostring(target.priority).." /threat "..tostring(route_threat)
 																									.." (ground_total "..route.threats.ground_total.." + air_total:"..route.threats.air_total.." )")
 																								end
 
@@ -1680,7 +1693,7 @@ for sideName, units in pairs(oob_air) do
 																								end
 
 																								if isDebugModeA2 then
-																									debugLog(draftId.." AtoG passe A_33: " ..idTemp.." score: ".. tostring(draftSortiesEntry.score).." "..unit.type.." "..tostring(task))
+																									debugLog("draftId"..draftId.." AtoG passe A_33: " ..idTemp.." score: ".. tostring(draftSortiesEntry.score).." "..unit.type.." "..tostring(task))
 																								end
 
 																								--augmente le score si l armement a une allonge, comme demandé par la cible
@@ -1691,7 +1704,7 @@ for sideName, units in pairs(oob_air) do
 																									debuGenTxtTemp = "\n".."AtoG AA.score __"..draftSortiesEntry.score.."__ "..target.name .."\n"
 																									debuGenTxtTemp = debuGenTxtTemp .. "AtoG 				AA1 target.range "..target.range.." standoff: "..unit_loadouts[l].standoff.." a/b "..tostring(target.range / unit_loadouts[l].standoff).." 1/: "..tostring(1/(target.range / unit_loadouts[l].standoff)) .."\n"
 
-																									local standOffCoef =  1/(target.range / unit_loadouts[l].standoff) * 10
+																									local standOffCoef = 1/(target.range / unit_loadouts[l].standoff) * 10
 																									if standOffCoef < 0.01 then
 																										standOffCoef = 0.01
 																									elseif standOffCoef > 100 then
@@ -1699,25 +1712,26 @@ for sideName, units in pairs(oob_air) do
 																									end
 
 																									draftSortiesEntry.score = draftSortiesEntry.score * standOffCoef
-																									draftSortiesEntry.scoreCoef =  draftSortiesEntry.scoreCoef * standOffCoef
+																									draftSortiesEntry.scoreCoef = draftSortiesEntry.scoreCoef * standOffCoef
 																									debuGenTxtTemp = debuGenTxtTemp .."AtoG BB.score__"..draftSortiesEntry.score.."__ "..unit_loadouts[l].name .."\n"
 																								end
 
 																								-- modification M11.q multiplayer
 
-																								if multiPlaneSet[sideName] and multiPlaneSet[sideName][unit.type] and multiPlaneSet[sideName][unit.type][task] and task_bool and multiPlaneSet[sideName][unit.type][task].NbPlane > 0 then
+																								if multiPlaneSet[sideName] and multiPlaneSet[sideName][unit.type] and multiPlaneSet[sideName][unit.type][task] and multiPlaneSet[sideName][unit.type][task].NbPlane > 0 then
 																									draftSortiesEntry.score = draftSortiesEntry.score + 1000
 																									draftSortiesEntry.scoreAdd = draftSortiesEntry.scoreAdd + 1000
+																									
 																									if overideMP_A then
 
 																										draftSortiesEntry.score = draftSortiesEntry.score * 1.2 + 1000
-																										draftSortiesEntry.scoreCoef =  draftSortiesEntry.scoreCoef * 1.2
-																										draftSortiesEntry.scoreAdd =  draftSortiesEntry.scoreAdd + 1000
+																										draftSortiesEntry.scoreCoef = draftSortiesEntry.scoreCoef * 1.2
+																										draftSortiesEntry.scoreAdd = draftSortiesEntry.scoreAdd + 1000
 
 																										--augmente de 10% le score si l'avion peut etre joué
 																										if unit.player then
 																											draftSortiesEntry.score = draftSortiesEntry.score * 1.3
-																											draftSortiesEntry.scoreAdd =  draftSortiesEntry.scoreAdd + 1000
+																											draftSortiesEntry.scoreAdd = draftSortiesEntry.scoreAdd + 1000
 																											draftSortiesEntry.scoreCoef = draftSortiesEntry.scoreCoef * 1.3
 																										end
 
@@ -1732,7 +1746,7 @@ for sideName, units in pairs(oob_air) do
 																								end
 
 																								if isDebugModeA2 then
-																									debugLog(draftId.." "..debuGenTxtTemp.." AtoG passe A_34 INSERT IN Draft_sorties: " ..idTemp.." score: ".. tostring(draftSortiesEntry.score).." "..unit.type.." "..tostring(task))
+																									debugLog("draftId"..draftId.." "..debuGenTxtTemp.." AtoG passe A_34 INSERT IN Draft_sorties: " ..idTemp.." score: ".. tostring(draftSortiesEntry.score).." "..unit.type.." "..tostring(task))
 																								end
 
 
@@ -1846,6 +1860,8 @@ if Debug.Generator.affiche then
 						" /main_overideMP/ " ..tostring(draft.main_overideMP)..
 						" /remainingFirepower/ " ..draft.remainingFirepower..
 						" /multipack/ " ..draft.multipack
+						.." /supportEscort?/ " ..tostring(draft.support["Escort"])
+						.." /supportCSAR?/ " ..tostring(draft.support["CSAR"])
 
 						-- .." /loadout/ "..tostring(draft.loadout.loadout_name)
 						)
@@ -1973,14 +1989,12 @@ for sideName, draftT in pairs(draftSorties) do
 		local remain_air_total = draft.route.threats.air_total
 
 		for side, units in pairs(oob_air) do
-			-- local NbTotalSupport = {}
-
+			
 			if units and units ~= nil then
 				for unitN, unitSupport in pairs(units) do
 
 					local overideMP_B = false
-
-					-- if side == sideName and unit.inactive ~= true and db_airbases[unit.base] and db_airbases[unit.base].inactive ~= true and ( overideMP_B or (AcftAvail[unit.name] and AcftAvail[unit.name].available > 0))  and db_airbases[unit.base].x  then	--if unit is active, its base is active and has available aircraft -- ATO_G_debug01 Fin de campagne					
+					
 					if side == sideName and unitSupport.inactive ~= true and db_airbases[unitSupport.base] and db_airbases[unitSupport.base].inactive ~= true and (  (AcftAvail[unitSupport.name] and AcftAvail[unitSupport.name].available > 0))  and db_airbases[unitSupport.base].x  then	--if unit is active, its base is active and has available aircraft -- ATO_G_debug01 Fin de campagne					
 
 						if isDebugModeB then
@@ -1991,678 +2005,668 @@ for sideName, draftT in pairs(draftSorties) do
 						end
 
 						for task, task_bool in pairs(unitSupport.tasks) do
-							local playable_II = false
-
-							if isDebugModeB then
-								debugLog(draft.id.." AtoG II pass B_03 task.: "..tostring(task).." task_bool: "..tostring(task_bool) .." |score: "..tostring(draft.score))
-							end
-
-							if overideMP_B or( multiPlaneSet[side] and multiPlaneSet[side][unitSupport.type] and multiPlaneSet[side][unitSupport.type][task] and task_bool) then
-
-								overideMP_B = true
-
-								if not Multi.Target and draft.task ~= "CSAR" and draft.task ~= "SAR" and draft.task ~= "CAP" then
-									Multi.Target = {}
-									Multi.Target[side] = draft.target_name
-									
-									if isDebugModeB then
-										debugLog(draft.id.." AtoG II pass B_04 draft.: "..draft.type.." OOBunit: "..unitSupport.type.." overideMP_B?: "..tostring(overideMP_B) .." |score: "..tostring(draft.score))
-									end
-								end
-
-							else
-								overideMP_B = false
-							end
-
-							local temp_Draft_sorties = {}														--temporary table to hold additional draft sorties with escorts assigned
-
-							--**cet overideMP_B donne trop d'avion
-							if overideMP_B or (( draft.task ~= "CAP" and draft.task ~= "Intercept" ) 
-								and (task == "SEAD" or task == "Escort" or task == "Escort Jammer" or task == "Flare Illumination" or task == "Laser Illumination" or task == "Strike") 
-								and task_bool) then
+							if task_bool then
+								local playable_II = false
 
 								if isDebugModeB then
-									debugLog(draft.id.." AtoG II pass B_05  " .." |score: "..tostring(draft.score))
+									debugLog(draft.id.." AtoG II pass B_03 task.: "..tostring(task))
 								end
 
-								--get possible loadouts
-								local unit_loadouts = {}														--table to hold all loadouts for this aircraft type and task
+								if multiPlaneSet[side] and multiPlaneSet[side][unitSupport.type] and multiPlaneSet[side][unitSupport.type][task] then
 
-								-- if not LoadoutsList[unitSupport.type] then
-								-- 	debugLog("Erreur loadouts : "..tostring("this aeronef type has no loadouts defined "..unitSupport.type))
-								-- elseif not LoadoutsList[unitSupport.type][task] then
-								-- 	debugLog("Erreur loadouts : "..tostring("this aeronef type has no loadouts defined "..unitSupport.type.." task "..task))
-								-- end
-
-								for loadout_name, ltable in pairs((LoadoutsList[unitSupport.type] and LoadoutsList[unitSupport.type][task]) or {}) do			--iterate through all loadouts for the aircraft type and task
-									ltable.name = loadout_name
-									if ltable.standoff == nil then ltable.standoff = 0 end
-
-									local countryEligible = false
-									if ltable.country == nil  then
-										countryEligible = true
-									elseif type(ltable.country) == "string" then
-										if string.lower(ltable.country) == string.lower(unitSupport.country) or string.lower(ltable.country) == "all" then
-											countryEligible = true
-										end
-
-									elseif type(ltable.country) == "table" then
-										for n, countryLabel in pairs(ltable.country) do
-											if string.lower(countryLabel) == string.lower(unitSupport.country) or string.lower(countryLabel) == "all" then
-												countryEligible = true
-												break
-											end
-										end
-									end
-
-									if countryEligible then
-										unit_loadouts[#unit_loadouts+1] = ltable
-									end
-
-								end
-
-								-- trie par standoff
-								table.sort(unit_loadouts, function(a,b) return a.standoff > b.standoff end)
-
-								for l = 1, #unit_loadouts do													--iterate through all available loadouts				
-
-									--get possible Time on Target
-									local tot_from = 0															--earliest Time on Target for this loadout
-									local tot_to = 0															--latest Time on target for this loadout
-
-									if unit_loadouts[l].day == nil then
-										unit_loadouts[l].day = true
-									end
-
-									if unit_loadouts[l].day and unit_loadouts[l].night then						--loadout is day and night capable
-										tot_from = 0															--from mission start
-										tot_to = mission_ini.mission_duration											--to mission end
-									elseif unit_loadouts[l].day then											--loadout is day capable
-										if Daytime == "night-day" then
-											tot_from = mission_ini.dawn - camp.time									--from dawn
-											tot_to = mission_ini.mission_duration										--to mission end
-										elseif Daytime == "day" then
-											tot_from = 0														--from missiom start
-											tot_to = mission_ini.mission_duration										--to mission end
-										elseif Daytime == "day-night" then
-											tot_from = 0														--from mission start
-											tot_to = mission_ini.dusk - camp.time										--to dusk
-										end
-									elseif unit_loadouts[l].night then											--loadout is night capable
-										if Daytime == "day-night" then
-											tot_from = mission_ini.dusk - camp.time									--from dusk
-											tot_to = mission_ini.mission_duration										--to mission end
-										elseif Daytime == "night" then
-											tot_from = 0														--from mission start
-											tot_to = mission_ini.mission_duration										--to mission end
-										elseif Daytime == "night-day" then
-											tot_from = 0														--from mission start
-											tot_to = mission_ini.dawn - camp.time										--to dawn
-										end
-									end
-
-									if isDebugModeB then
-										debugLog(draft.id.." AtoG II pass B_06 tot_from: "..tot_from.." tot_to: "..tot_to.." overideMP_B: "..tostring(overideMP_B) .." |score: "..tostring(draft.score))
-									end
-
-									--**cet overideMP_B donne trop d'avion
-									-- if overideMP_B or (tot_from ~= 0 or tot_to ~= 0)   then										--loadout has an eligible time on target
-									-- if (tot_from ~= 0 or tot_to ~= 0) and draft.support[task] then
-									if (tot_to ~= 0) and draft.support[task] then
-
-										if isDebugModeB then
-											debugLog(draft.id.." AtoG II pass B_7a MP_Game = true target_name: "..tostring(draft.target_name) .." |score: "..tostring(draft.score))
-										end
-
-										-- if not draft.support[task] then draft.support[task] ={} end
-										if not draft.support[task]["NbTotalSupport"] then draft.support[task]["NbTotalSupport"] = 0 end
-										-- if not draft.support[task]["escort_max"] then draft.support[task]["escort_max"] = campMod.Setting_Generation.limit_escort end
-										if not draft.support[task]["escort_max"] then draft.support[task]["escort_max"] = 999 end
-
-										local overideMP_B_targetName = false
-										--TODO virer MP_Game des que possible, doublon/triplon etc...
-										overideMP_B_targetName = DeepCopy(overideMP_B)
+									if not Multi.Target and draft.task ~= "SAR" and draft.task ~= "CAP" then
+										Multi.Target = {}
+										Multi.Target[side] = draft.target_name
 										
-										if multiPlaneSet then
-											if multiPlaneSet[side] and multiPlaneSet[side][unitSupport.type] and multiPlaneSet[side][unitSupport.type][task] then
+										if isDebugModeB then
+											debugLog(draft.id.." AtoG II pass B_04 draft.: "..draft.type.." OOBunit: "..unitSupport.type.." overideMP_B?: "..tostring(overideMP_B))
+										end
+									end
 
-												if isDebugModeB then
-													debugLog(draft.id.." AtoG II pass B_7b Multi.Target[side]: "..tostring(Multi.Target[side]).." target_name: "..tostring(draft.target_name))
+									if Multi.Target[side] == draft.target_name then
+										--TODO il reste a enlever le nb d helico max de la farp mais qui ne cible pas le bon target
+									
+										draft.loadout.support = draft.loadout.support or {}
+										draft.loadout.support[task] = draft.loadout.support[task] or true
+										draft.support[task]["escort_max"] = 4
+
+										overideMP_B = true
+									end
+
+								end
+
+								local temp_Draft_sorties = {}														--temporary table to hold additional draft sorties with escorts assigned
+
+								--**cet overideMP_B donne trop d'avion
+								if overideMP_B or (( draft.task ~= "CAP" and draft.task ~= "Intercept" ) 
+									and (task == "SEAD" or task == "Escort" or task == "Escort Jammer" or task == "Flare Illumination" or task == "Laser Illumination" or task == "Strike") 
+									and task_bool) then
+
+									if isDebugModeB then debugLog(draft.id.." AtoG II pass B_05  " ) end
+
+									--get possible loadouts
+									local unit_loadouts = {}														--table to hold all loadouts for this aircraft type and task
+
+									for loadout_name, ltable in pairs((LoadoutsList[unitSupport.type] and LoadoutsList[unitSupport.type][task]) or {}) do			--iterate through all loadouts for the aircraft type and task
+										ltable.name = loadout_name
+										if ltable.standoff == nil then ltable.standoff = 0 end
+
+										local countryEligible = false
+										if ltable.country == nil  then
+											countryEligible = true
+										elseif type(ltable.country) == "string" then
+											if string.lower(ltable.country) == string.lower(unitSupport.country) or string.lower(ltable.country) == "all" then
+												countryEligible = true
+											end
+
+										elseif type(ltable.country) == "table" then
+											for n, countryLabel in pairs(ltable.country) do
+												if string.lower(countryLabel) == string.lower(unitSupport.country) or string.lower(countryLabel) == "all" then
+													countryEligible = true
+													break
 												end
+											end
+										end
 
-												if Multi.Target and Multi.Target[side] and Multi.Target[side] == draft.target_name then
+										if countryEligible then
+											unit_loadouts[#unit_loadouts+1] = ltable
+										end
 
-													if isDebugModeB then
-														debugLog(draft.id.." AtoG II pass B_7c Multi.Target[side]: "..tostring(Multi.Target[side]).." target_name: "..tostring(draft.target_name))
-													end
+									end
 
-													if draft.task ~= "SAR" then
-														overideMP_B_targetName = true
+									-- trie par standoff
+									table.sort(unit_loadouts, function(a,b) return a.standoff > b.standoff end)
 
-														--ATTENTION: les lignes plus bas sont dangereuse ^^ 
-														--cela crée une table bancale, avec des task support inconnue
-														draft.loadout.support = draft.loadout.support or {}
-														draft.loadout.support[task] = draft.loadout.support[task] or true
-														draft.support[task]["escort_max"] = 4
-													
-														if isDebugModeB then
-															debugLog(draft.id.." AtoG II pass B_7d Multi.Target[side]: "..tostring(Multi.Target[side]).." target_name: "..tostring(draft.target_name))
-														end
+									for l = 1, #unit_loadouts do													--iterate through all available loadouts				
 
-													end
+										--get possible Time on Target
+										local tot_from = 0															--earliest Time on Target for this loadout
+										local tot_to = 0															--latest Time on target for this loadout
 
+										if unit_loadouts[l].day == nil then
+											unit_loadouts[l].day = true
+										end
 
-
-
-													-- --TODO faire en sorte qu'un seul score soit augmenté
-													-- --augmente de 10% le score si l'avion peut etre joué
-													-- -- if unit.player then
-													-- draft.score = draft.score * 20
-													-- -- Draft_sorties_entry.scoreAdd =  Draft_sorties_entry.scoreAdd + 1000
-													-- draft.scoreCoef =  draft.scoreCoef * 20
-													-- -- endroit
-
-													if isDebugModeB then
-														debugLog(draft.id.." AtoG II pass B_7e MP_Game = true target_name: "..tostring(draft.target_name) .." |score: "..tostring(draft.score))
-													end
-
-												end
+										if unit_loadouts[l].day and unit_loadouts[l].night then						--loadout is day and night capable
+											tot_from = 0															--from mission start
+											tot_to = mission_ini.mission_duration											--to mission end
+										elseif unit_loadouts[l].day then											--loadout is day capable
+											if Daytime == "night-day" then
+												tot_from = mission_ini.dawn - camp.time									--from dawn
+												tot_to = mission_ini.mission_duration										--to mission end
+											elseif Daytime == "day" then
+												tot_from = 0														--from missiom start
+												tot_to = mission_ini.mission_duration										--to mission end
+											elseif Daytime == "day-night" then
+												tot_from = 0														--from mission start
+												tot_to = mission_ini.dusk - camp.time										--to dusk
+											end
+										elseif unit_loadouts[l].night then											--loadout is night capable
+											if Daytime == "day-night" then
+												tot_from = mission_ini.dusk - camp.time									--from dusk
+												tot_to = mission_ini.mission_duration										--to mission end
+											elseif Daytime == "night" then
+												tot_from = 0														--from mission start
+												tot_to = mission_ini.mission_duration										--to mission end
+											elseif Daytime == "night-day" then
+												tot_from = 0														--from mission start
+												tot_to = mission_ini.dawn - camp.time										--to dawn
 											end
 										end
 
 										if isDebugModeB then
-											debugLog(draft.id.." AtoG II pass B_10 overideMP_B_targetName: "..tostring(overideMP_B_targetName).." task: "..tostring(task) .." |draft.loadout.support[task]: "..tostring(draft.loadout.support[task]).." draft.support[task][escort_max]: "..tostring(draft.support[task]["escort_max"]).." draft.support[task][NbTotalSupport]: "..tostring(draft.support[task]["NbTotalSupport"]).." |score: "..tostring(draft.score))
+											debugLog(draft.id.." AtoG II pass B_06 tot_from: "..tot_from.." tot_to: "..tot_to.." overideMP_B: "..tostring(overideMP_B))
 										end
 
-										i_timmer02 = i_timmer02 +1
-										if (draft.loadout.support and draft.loadout.support[task])
-											and ( (tonumber(draft.support[task]["NbTotalSupport"]) < tonumber(draft.support[task]["escort_max"]) ) ) then
-
-										-- if overideMP_B or (draft.loadout.support and draft.loadout.support[task])
-											-- and ( (tonumber(draft.support[task]["NbTotalSupport"]) < tonumber(draft.support[task]["escort_max"])) or MP_Game ) then
+										--**cet overideMP_B donne trop d'avion
+										-- if overideMP_B or (tot_from ~= 0 or tot_to ~= 0)   then										--loadout has an eligible time on target
+										if (tot_from ~= 0 or tot_to ~= 0) and draft.support[task] then
+										-- if (tot_to ~= 0) and draft.support[task] then
 
 											if isDebugModeB then
-												debugLog(draft.id.." AtoG II pass B_12 task "..task.." SEAD_offset  "..tostring(draft.route.threats.SEAD_offset) 
-												
-												
-												.." |unitSupport.player: "..tostring(unitSupport.player)
-												.." |unitSupport.clent: "..tostring(unitSupport.client)
-												.." |draft.task: "..tostring(draft.task)
-												.." |score: "..tostring(draft.score))
+												debugLog(draft.id.." AtoG II pass B_7a target_name: "..tostring(draft.target_name))
 											end
 
+											if not draft or not draft.support or not draft.support[task] then
+												print("task: "..tostring(task).." overideMP_B: "..tostring(overideMP_B).." draft.type: "..tostring(draft.type))
+												flushDebugLogs()
 
-											local support_requirement = false
-											if task == "SEAD" then
-												if draft.route.threats.SEAD_offset > 0 then												--draft sortie has a SEAD offset requirement
-													support_requirement = true
-												end
-											elseif task == "Escort" then
-												if draft.route.threats.air_total > 0.5 then												--draft sortie has an air threat
-													support_requirement = true
-												end
-											elseif task == "Escort Jammer" then
-												if draft.route.threats.SEAD_offset > 0 or draft.route.threats.air_total > 0.5 then		--draft sortie has either a SEAD offest requirement or an air threat
-													support_requirement = true
-												end
-											elseif task == "Flare Illumination" or task == "Laser Illumination"then
-												support_requirement = true
-
-											elseif task == "CSAR" then
-												--on n'active que des support CSAR Player/Client
-												if unitSupport.player or unitSupport.client then
-													support_requirement = true
-												else
-													support_requirement = false
-													overideMP_B_targetName = false
-												end
 											end
 
+											-- if not draft.support[task] then draft.support[task] ={} end
+											if not draft.support[task]["NbTotalSupport"] then draft.support[task]["NbTotalSupport"] = 0 end
+											-- if not draft.support[task]["escort_max"] then draft.support[task]["escort_max"] = campMod.Setting_Generation.limit_escort end
+											if not draft.support[task]["escort_max"] then draft.support[task]["escort_max"] = 999 end
+
+											local overideMP_B_targetName = false
 											
-											if draft.task == "SAR" then
-												support_requirement = false
-											end
+											overideMP_B_targetName = DeepCopy(overideMP_B)
+											
+											-- if multiPlaneSet then
+											-- 	if multiPlaneSet[side] and multiPlaneSet[side][unitSupport.type] and multiPlaneSet[side][unitSupport.type][task] then
 
-											if isDebugModeB then
-												debugLog(draft.id.." AtoG II pass B_15 threats.SEAD_offset?: "..tostring(draft.route.threats.SEAD_offset)
-												.." threats.air_total?: "..tostring(draft.route.threats.air_total)
-												.." "..unitSupport.type.." overideMP_B_targetName: "..tostring(overideMP_B_targetName) 
-												
-												.." |support_requirement: "..tostring(support_requirement)
-												.." |score: "..tostring(draft.score))
-											end
+											-- 		if isDebugModeB then
+											-- 			debugLog(draft.id.." AtoG II pass B_7b Multi.Target[side]: "..tostring(Multi.Target[side]).." target_name: "..tostring(draft.target_name))
+											-- 		end
 
-											-- if overideMP_B_targetName then
-											-- 	support_requirement = true
+											-- 		if Multi.Target and Multi.Target[side] and Multi.Target[side] == draft.target_name then
+
+											-- 			if isDebugModeB then
+											-- 				debugLog(draft.id.." AtoG II pass B_7c Multi.Target[side]: "..tostring(Multi.Target[side]).." target_name: "..tostring(draft.target_name))
+											-- 			end
+
+											-- 			if draft.task ~= "SAR" then
+											-- 				overideMP_B_targetName = true
+
+											-- 				--ATTENTION: les lignes plus bas sont dangereuse ^^ 
+											-- 				--cela crée une table bancale, avec des task support inconnue
+											-- 				draft.loadout.support = draft.loadout.support or {}
+											-- 				draft.loadout.support[task] = draft.loadout.support[task] or true
+											-- 				draft.support[task]["escort_max"] = 4
+														
+											-- 				if isDebugModeB then
+											-- 					debugLog(draft.id.." AtoG II pass B_7d Multi.Target[side]: "..tostring(Multi.Target[side]).." target_name: "..tostring(draft.target_name))
+											-- 				end
+
+											-- 			end
+
+											-- 			if isDebugModeB then
+											-- 				debugLog(draft.id.." AtoG II pass B_7e  target_name: "..tostring(draft.target_name) )
+											-- 			end
+
+											-- 		end
+											-- 	end
 											-- end
 
-											if support_requirement or overideMP_B_targetName then																	--go ahead with this support task
+											if isDebugModeB then
+												debugLog(draft.id.." AtoG II pass B_10 overideMP_B_targetName: "..tostring(overideMP_B_targetName).." task: "..tostring(task) .." |draft.loadout.support[task]: "..tostring(draft.loadout.support[task]).." draft.support[task][escort_max]: "..tostring(draft.support[task]["escort_max"]).." draft.support[task][NbTotalSupport]: "..tostring(draft.support[task]["NbTotalSupport"]))
+											end
+
+											i_timmer02 = i_timmer02 +1
+											if (draft.loadout.support and draft.loadout.support[task])
+												and ( (tonumber(draft.support[task]["NbTotalSupport"]) < tonumber(draft.support[task]["escort_max"]) ) ) then
+
 												if isDebugModeB then
-													debugLog(tostring(draft.id).." AtoG II pass B_15b support_requirement passe: " .." |score: "..tostring(draft.score))
+													debugLog(draft.id.." AtoG II pass B_12 task "..task.." SEAD_offset  "..tostring(draft.route.threats.SEAD_offset) 
+													
+													.." |unitSupport.player: "..tostring(unitSupport.player)
+													.." |unitSupport.clent: "..tostring(unitSupport.client)
+													.." |draft.task: "..tostring(draft.task)
+													)
 												end
 
 
-												if (unit_loadouts[l].day and draft.loadout.day) or (unit_loadouts[l].night and draft.loadout.night) then	--support can join package at either day or night
-													TrackPlayability(unitSupport.player, "escort_tot")															--track playabilty criterium has been met
-													--admet une vitesse (escort) 75% plus faible que la vitesse du Main
-													if unit_loadouts[l].vCruise < draft.loadout.vCruise then
-
-														if isDebugModeB then
-															debugLog(draft.id.." AtoG II pass B_15c unit_loadouts[l].vCruise : "..tostring(unit_loadouts[l].vCruise).." < "..tostring(draft.loadout.vCruise).. " | %: "..tostring(unit_loadouts[l].vCruise / draft.loadout.vCruise) .." |score: "..tostring(draft.score))
-														end
-
-														--ATTENTION, ce code descend trop bas la vitesse des bombers
-														-- if (unit_loadouts[l].vCruise / draft.loadout.vCruise) * 100 >= 75 then
-														-- 	draft.loadout.vCruise = unit_loadouts[l].vCruise
-														-- end
+												local support_requirement = false
+												if task == "SEAD" then
+													if draft.route.threats.SEAD_offset > 0 then												--draft sortie has a SEAD offset requirement
+														support_requirement = true
 													end
+												elseif task == "Escort" then
+													if draft.route.threats.air_total > 0.5 then												--draft sortie has an air threat
+														support_requirement = true
+													end
+												elseif task == "Escort Jammer" then
+													if draft.route.threats.SEAD_offset > 0 or draft.route.threats.air_total > 0.5 then		--draft sortie has either a SEAD offest requirement or an air threat
+														support_requirement = true
+													end
+												elseif task == "Flare Illumination" or task == "Laser Illumination"then
+													support_requirement = true
 
+												elseif task == "CSAR" then
+													--on n'active que des support CSAR Player/Client
+													if unitSupport.player or unitSupport.client then
+														support_requirement = true
+													else
+														support_requirement = false
+														overideMP_B_targetName = false
+													end
+												end
 
+												
+												if draft.task == "SAR" then
+													support_requirement = false
+												end
+
+												if isDebugModeB then
+													debugLog(draft.id.." AtoG II pass B_15 threats.SEAD_offset?: "..tostring(draft.route.threats.SEAD_offset)
+													.." threats.air_total?: "..tostring(draft.route.threats.air_total)
+													.." "..unitSupport.type.." overideMP_B_targetName: "..tostring(overideMP_B_targetName) 
+													
+													.." |support_requirement: "..tostring(support_requirement)
+													)
+												end
+
+												if support_requirement or overideMP_B_targetName then																	--go ahead with this support task
 													if isDebugModeB then
-														debugLog(draft.id.." AtoG II pass B_15d support_requirement passe: " .." |score: "..tostring(draft.score))
+														debugLog(tostring(draft.id).." AtoG II pass B_15b support_requirement passe " )
 													end
 
-													if unit_loadouts[l].vCruise >= draft.loadout.vCruise or overideMP_B_targetName then										--support has a cruise speed equal or higher than main body
-														TrackPlayability(unitSupport.player, "escort_target")													--track playabilty criterium has been met
 
-														local debuGenTxt1480 = "\n"..(tostring(draft.id).." AtoG II pass B_15e support_requirement passe: " .." |score: "..tostring(draft.score))
-
-														--check weather
-														local weather_eligible = true
-														if mission.weather["clouds"]["density"] > 8 then											--overcast clouds
-															local cloud_base = mission.weather["clouds"]["base"]
-															local cloud_top = mission.weather["clouds"]["base"] + mission.weather["clouds"]["thickness"]
-															if db_airbases[unitSupport.base].elevation + 333 > cloud_base then							--cloud base is less than 1000 ft above airbase elevation
-																if unit_loadouts[l].adverseWeather == false then									--loadout is not adverse weather capable
-																	weather_eligible = false														--not eligible for this weather
-																end
-															else
-																if draft.loadout.hCruise > cloud_base and draft.loadout.hCruise < cloud_top then	--cruise alt is in the clouds
-																	if unit_loadouts[l].adverseWeather == false then								--loadout is not adverse weather capable
-																		weather_eligible = false													--not eligible for this weather
-																	end
-																elseif draft.loadout.hAttack > cloud_base and draft.loadout.hAttack < cloud_top then	--attack alt is in the clouds
-																	if unit_loadouts[l].adverseWeather == false then								--loadout is not adverse weather capable
-																		weather_eligible = false													--not eligible for this weather
-																	end
-																end
-															end
-														end
-														if mission.weather["enable_fog"] == true then												--fog
-															if db_airbases[unitSupport.base].elevation < mission.weather["fog"]["thickness"] then		--base elevation in fog
-																if mission.weather["fog"]["visibility"] < 5000 then									--less than 5000m visibility
-																	if unit_loadouts[l].adverseWeather == false then								--loadout is not adverse weather capable
-																		weather_eligible = false													--not eligible for this weather
-																	end
-																end
-															end
-														end
-
-														if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "B")
-														and (Debug.Generator.SpySquad and (Debug.Generator.SpySquad == unitSupport.name or Debug.Generator.SpySquad == draft.name)  and  (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
-														or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
-														then
-															-- debuGenTxt = debuGenTxt..debuGenTxt1480.."\n"..(tostring(draft.id).." AtoG II pass B_15e support_requirement passe: weather_eligible "..tostring(weather_eligible).." overideMP_B "..tostring(overideMP_B))
-															debugLog(debuGenTxt1480.."\n"..(tostring(draft.id).." AtoG II pass B_15e support_requirement passe: weather_eligible "..tostring(weather_eligible).." overideMP_B "..tostring(overideMP_B)) .." |score: "..tostring(draft.score))
-															
-														end
-
-														if weather_eligible or overideMP_B_targetName then												--continue of this loadout is eligible for weather
-
-															TrackPlayability(unitSupport.player, "escort_weather")												--track playabilty criterium has been met								
-															--get airbase position
-															local airbasePoint = {																	--get the x-y coordinates of the airbase where the unit is located
-																x = db_airbases[unitSupport.base].x,
-																y = db_airbases[unitSupport.base].y,
-																h = db_airbases[unitSupport.base].elevation,
-															}
-
-															local route = GetEscortRoute(airbasePoint, draft.route, task, unit_loadouts[l], unitSupport, draft)									--get the route to escort this sortie
+													if (unit_loadouts[l].day and draft.loadout.day) or (unit_loadouts[l].night and draft.loadout.night) then	--support can join package at either day or night
+														TrackPlayability(unitSupport.player, "escort_tot")															--track playabilty criterium has been met
+														--admet une vitesse (escort) 75% plus faible que la vitesse du Main
+														if unit_loadouts[l].vCruise < draft.loadout.vCruise then
 
 															if isDebugModeB then
-																debugLog(draft.id.." AtoG II pass B_16 weather_eligible route.lenght: "..tostring(route and route.lenght).. " <= "..tostring(unit_loadouts[l].range * 2)
-																.." (loadouts: )" ..tostring(unit_loadouts[l].range)..") loadoutName: "..tostring(unit_loadouts[l].name) .." |score: "..tostring(draft.score))
+																debugLog(draft.id.." AtoG II pass B_15c unit_loadouts[l].vCruise : "..tostring(unit_loadouts[l].vCruise).." < "..tostring(draft.loadout.vCruise).. " | %: "..tostring(unit_loadouts[l].vCruise / draft.loadout.vCruise))
 															end
 
+															--ATTENTION, ce code descend trop bas la vitesse des bombers
+															-- if (unit_loadouts[l].vCruise / draft.loadout.vCruise) * 100 >= 75 then
+															-- 	draft.loadout.vCruise = unit_loadouts[l].vCruise
+															-- end
+														end
 
-															if route and route.lenght <= unit_loadouts[l].range * 2 then		--escort route lenght is within range capability of loadout
-																TrackPlayability(unitSupport.player, "escort_target_range")									--track playabilty criterium has been met
 
-																local debuGenTxt1545 = "\n"..(tostring(draft.id).." AtoG II pass B_17  " .." |score: "..tostring(draft.score))
+														if isDebugModeB then
+															debugLog(draft.id.." AtoG II pass B_15d support_requirement passe" )
+														end
 
-																--determine number of escorts
-																local escort_num = 0
-																local escort_max = 0
+														if unit_loadouts[l].vCruise >= draft.loadout.vCruise or overideMP_B_targetName then
+															TrackPlayability(unitSupport.player, "escort_target")
 
-																if draft.support[task]["escort_max"] ~= 999 then
-																	escort_max = draft.support[task]["escort_max"]
+															local debuGenTxt1480 = "\n"..(tostring(draft.id).." AtoG II pass B_15e support_requirement passe ")
+
+															--check weather
+															local weather_eligible = true
+															if mission.weather["clouds"]["density"] > 8 then											--overcast clouds
+																local cloud_base = mission.weather["clouds"]["base"]
+																local cloud_top = mission.weather["clouds"]["base"] + mission.weather["clouds"]["thickness"]
+																if db_airbases[unitSupport.base].elevation + 333 > cloud_base then							--cloud base is less than 1000 ft above airbase elevation
+																	if unit_loadouts[l].adverseWeather == false then									--loadout is not adverse weather capable
+																		weather_eligible = false														--not eligible for this weather
+																	end
 																else
-																	escort_max = 0
+																	if draft.loadout.hCruise > cloud_base and draft.loadout.hCruise < cloud_top then	--cruise alt is in the clouds
+																		if unit_loadouts[l].adverseWeather == false then								--loadout is not adverse weather capable
+																			weather_eligible = false													--not eligible for this weather
+																		end
+																	elseif draft.loadout.hAttack > cloud_base and draft.loadout.hAttack < cloud_top then	--attack alt is in the clouds
+																		if unit_loadouts[l].adverseWeather == false then								--loadout is not adverse weather capable
+																			weather_eligible = false													--not eligible for this weather
+																		end
+																	end
+																end
+															end
+															if mission.weather["enable_fog"] == true then												--fog
+																if db_airbases[unitSupport.base].elevation < mission.weather["fog"]["thickness"] then		--base elevation in fog
+																	if mission.weather["fog"]["visibility"] < 5000 then									--less than 5000m visibility
+																		if unit_loadouts[l].adverseWeather == false then								--loadout is not adverse weather capable
+																			weather_eligible = false													--not eligible for this weather
+																		end
+																	end
+																end
+															end
+
+															if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "B")
+															and (Debug.Generator.SpySquad and (Debug.Generator.SpySquad == unitSupport.name or Debug.Generator.SpySquad == draft.name)  and  (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
+															or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
+															then
+																-- debuGenTxt = debuGenTxt..debuGenTxt1480.."\n"..(tostring(draft.id).." AtoG II pass B_15e support_requirement passe: weather_eligible "..tostring(weather_eligible).." overideMP_B "..tostring(overideMP_B))
+																debugLog(debuGenTxt1480.."\n"..(tostring(draft.id).." AtoG II pass B_15e support_requirement passe: weather_eligible "..tostring(weather_eligible).." overideMP_B "..tostring(overideMP_B)))
+																
+															end
+
+															if weather_eligible or overideMP_B_targetName then												--continue of this loadout is eligible for weather
+
+																TrackPlayability(unitSupport.player, "escort_weather")												--track playabilty criterium has been met								
+																--get airbase position
+																local airbasePoint = {																	--get the x-y coordinates of the airbase where the unit is located
+																	x = db_airbases[unitSupport.base].x,
+																	y = db_airbases[unitSupport.base].y,
+																	h = db_airbases[unitSupport.base].elevation,
+																}
+
+																local route = GetEscortRoute(airbasePoint, draft.route, task, unit_loadouts[l], unitSupport, draft)									--get the route to escort this sortie
+
+																if isDebugModeB then
+																	debugLog(draft.id.." AtoG II pass B_16 weather_eligible route.lenght: "..tostring(route and route.lenght).. " <= "..tostring(unit_loadouts[l].range * 2)
+																	.." (loadouts: )" ..tostring(unit_loadouts[l].range)..") loadoutName: "..tostring(unit_loadouts[l].name) )
 																end
 
-																if task == "SEAD" then
-																	escort_num = draft.route.threats.SEAD_offset / unit_loadouts[l].firepower 		-- unit_loadouts[l].capability  capability determines amount of offset per aircraft
-																	-- escort_num = remain_SEAD_offset / unit_loadouts[l].firepower
-																	escort_num = math.ceil(escort_num / 2) * 2										--round up requested escorts to even number
 
-																	--TODO revoir ça
-																	-- if totalPlanePerTask[side][task] and totalPlanePerTask[side][task]/2 >= escort_num then
-																	-- 	draft.score = draft.score + (1 * draft.loadout.firepower) * draft.target.priority
-																	-- end
+																if route and route.lenght <= unit_loadouts[l].range * 2 then		--escort route lenght is within range capability of loadout
+																	TrackPlayability(unitSupport.player, "escort_target_range")									--track playabilty criterium has been met
 
-																	debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_SEAD B "..unitSupport.type.." "..task.." "..escort_num.." NbTotalSupport: "..draft.support[task]["NbTotalSupport"].." draft.score: "..draft.score)
-																	debuGenTxt1545 = debuGenTxt1545.."\n"..("-------------------- escort_num: "..(draft.route.threats.SEAD_offset / unit_loadouts[l].firepower).. "= SEAD_Offset: "..draft.route.threats.SEAD_offset.." /firepower "..unit_loadouts[l].firepower
-																	)
+																	local debuGenTxt1545 = "\n"..(tostring(draft.id).." AtoG II pass B_17  ")
 
+																	--determine number of escorts
+																	local escort_num = 0
+																	local escort_max = 0
 
-																elseif task == "Escort" then
 																	if draft.support[task]["escort_max"] ~= 999 then
-																		escort_num = draft.support[task]["escort_max"] - draft.support[task]["NbTotalSupport"]	-- modification M11.x : Multiplayer	(x: EscorteTot-max)
-
-																		debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_Escort B "..unitSupport.type.." "..task.." "..escort_num.." NbTotalSupport: "..draft.support[task]["NbTotalSupport"])
-
+																		escort_max = draft.support[task]["escort_max"]
 																	else
+																		escort_max = 0
+																	end
 
-																		local escort_offset_level =  unit_loadouts[l].firepower	--unit_loadouts[l].capability *--threat level that each fighter escort can offset
-																		-- escort_num = (draft.route.threats.air_total - 0.5) / escort_offset_level		--number of escorts needed to offset total air threat (-0.5 because that is no air threat)
-																		escort_num = (remain_air_total - 0.5) / escort_offset_level
-
-
-
-																		if escort_num > draft.number * 2 then											--when more escorts 2 times escorts than escorted aircraft
-																			escort_num = draft.number * 2												--limit escort number to 2 times escorted aircraft
-																		end
-																		-- if escort_num > campMod.Setting_Generation.limit_escort then
-																		-- 	escort_num = campMod.Setting_Generation.limit_escort
-																		-- end
-
+																	if task == "SEAD" then
+																		escort_num = draft.route.threats.SEAD_offset / unit_loadouts[l].firepower 		-- unit_loadouts[l].capability  capability determines amount of offset per aircraft
+																		-- escort_num = remain_SEAD_offset / unit_loadouts[l].firepower
 																		escort_num = math.ceil(escort_num / 2) * 2										--round up requested escorts to even number
 
-																		if escort_num > escort_max then
-																			escort_max = escort_num
-																			draft.support[task]["escort_max"] = escort_max
+																		--TODO revoir ça
+																		-- if totalPlanePerTask[side][task] and totalPlanePerTask[side][task]/2 >= escort_num then
+																		-- 	draft.score = draft.score + (1 * draft.loadout.firepower) * draft.target.priority
+																		-- end
+
+																		debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_SEAD B "..unitSupport.type.." "..task.." "..escort_num.." NbTotalSupport: "..draft.support[task]["NbTotalSupport"].." draft.score: "..draft.score)
+																		debuGenTxt1545 = debuGenTxt1545.."\n"..("-------------------- escort_num: "..(draft.route.threats.SEAD_offset / unit_loadouts[l].firepower).. "= SEAD_Offset: "..draft.route.threats.SEAD_offset.." /firepower "..unit_loadouts[l].firepower
+																		)
+
+
+																	elseif task == "Escort" then
+																		if draft.support[task]["escort_max"] ~= 999 then
+																			escort_num = draft.support[task]["escort_max"] - draft.support[task]["NbTotalSupport"]	-- modification M11.x : Multiplayer	(x: EscorteTot-max)
+
+																			debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_Escort B "..unitSupport.type.." "..task.." "..escort_num.." NbTotalSupport: "..draft.support[task]["NbTotalSupport"])
+
+																		else
+
+																			local escort_offset_level =  unit_loadouts[l].firepower	--unit_loadouts[l].capability *--threat level that each fighter escort can offset
+																			-- escort_num = (draft.route.threats.air_total - 0.5) / escort_offset_level		--number of escorts needed to offset total air threat (-0.5 because that is no air threat)
+																			escort_num = (remain_air_total - 0.5) / escort_offset_level
+
+
+
+																			if escort_num > draft.number * 2 then											--when more escorts 2 times escorts than escorted aircraft
+																				escort_num = draft.number * 2												--limit escort number to 2 times escorted aircraft
+																			end
+																			-- if escort_num > campMod.Setting_Generation.limit_escort then
+																			-- 	escort_num = campMod.Setting_Generation.limit_escort
+																			-- end
+
+																			escort_num = math.ceil(escort_num / 2) * 2										--round up requested escorts to even number
+
+																			if escort_num > escort_max then
+																				escort_max = escort_num
+																				draft.support[task]["escort_max"] = escort_max
+																			end
+
+																			debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_Escort I "..unitSupport.type.." "..task.." "..escort_num)
+
 																		end
 
-																		debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_Escort I "..unitSupport.type.." "..task.." "..escort_num)
+																	elseif task == "Escort Jammer" then
+																		escort_num = 1																	--escort jamming by single aircraft
+																	elseif task == "Flare Illumination" then
+																		escort_num = 1																	--flare illumination by single aircraft
+																	elseif task == "Laser Illumination" then
+																		escort_num = 1																	--laser illumination by single aircraft
+																	elseif task == "Strike" and not overideMP_B_targetName then
+																		-- escort_num = 4
+																		escort_num = draft.remainingFirepower / unit_loadouts[l].firepower
+																	elseif task == "Strike"  then
+																		escort_num = 4
+																	end
+
+																	--ici 4 Mi24 redemandé
+																	-- mais c'est 4 de trop, 4 sont déjà pris en main strike
+																	if escort_num > AcftAvail[unitSupport.name].available then					--if more escorts are requested than available
+																		escort_num = AcftAvail[unitSupport.name].available						--reduce requested escorts to number of available escorts
+																		escort_num = math.floor(escort_num / 2) * 2										--round down to even number
+
+																		debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_Escort J "..unitSupport.type.." "..task.." escort_num: "..escort_num.." available: "..AcftAvail[unitSupport.name].available)
 
 																	end
 
-																elseif task == "Escort Jammer" then
-																	escort_num = 1																	--escort jamming by single aircraft
-																elseif task == "Flare Illumination" then
-																	escort_num = 1																	--flare illumination by single aircraft
-																elseif task == "Laser Illumination" then
-																	escort_num = 1																	--laser illumination by single aircraft
-																elseif task == "Strike" and not overideMP_B_targetName then
-																	-- escort_num = 4
-																	escort_num = draft.remainingFirepower / unit_loadouts[l].firepower
-																elseif task == "Strike"  then
-																	escort_num = 4
-																end
-
-																--ici 4 Mi24 redemandé
-																-- mais c'est 4 de trop, 4 sont déjà pris en main strike
-																if escort_num > AcftAvail[unitSupport.name].available then					--if more escorts are requested than available
-																	escort_num = AcftAvail[unitSupport.name].available						--reduce requested escorts to number of available escorts
-																	escort_num = math.floor(escort_num / 2) * 2										--round down to even number
-
-																	debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_Escort J "..unitSupport.type.." "..task.." escort_num: "..escort_num.." available: "..AcftAvail[unitSupport.name].available)
-
-																end
-
-																debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_Escort P "..unitSupport.type.." "..task.." "..escort_num)
+																	debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_Escort P "..unitSupport.type.." "..task.." "..escort_num)
 
 
-																--*********************************************************************************
-																-- modification M11.o multiplayer**************************************************
-																local txtDebug = ""
-																if multiPlaneSet_B  then
-																	txtDebug = txtDebug .. " passeA ".."/n"
+																	--*********************************************************************************
+																	-- modification M11.o multiplayer**************************************************
+																	local txtDebug = ""
+																	if multiPlaneSet_B  then
+																		txtDebug = txtDebug .. " passeA ".."/n"
 
-																	if multiPlaneSet_B[side] and multiPlaneSet_B[side][unitSupport.type] and multiPlaneSet_B[side][unitSupport.type][task] then	
-																	
-																		--si l'avion de support est déjà utilise en MAIN, on enleve la qté dejà utilisé
-																		if multiPlaneSet_B and multiPlaneSet_B[side] and multiPlaneSet_B[side][draft.type] and multiPlaneSet_B[side][draft.type][draft.task] and task_bool then
+																		if multiPlaneSet_B[side] and multiPlaneSet_B[side][unitSupport.type] and multiPlaneSet_B[side][unitSupport.type][task] then	
+																		
+																			--si l'avion de support est déjà utilise en MAIN, on enleve la qté dejà utilisé
+																			if multiPlaneSet_B and multiPlaneSet_B[side] and multiPlaneSet_B[side][draft.type] and multiPlaneSet_B[side][draft.type][draft.task] and task_bool then
 
-																			multiPlaneSet_B[side][draft.type][draft.task].NbPlane = multiPlaneSet_B[side][draft.type][draft.task].InitNbPlaneByTask - draft.number
-																			txtDebug = txtDebug .. "    passeB NbPlane: "..multiPlaneSet_B[side][draft.type][draft.task].NbPlane.." draft.task: "..tostring(draft.task).."/n"
+																				multiPlaneSet_B[side][draft.type][draft.task].NbPlane = multiPlaneSet_B[side][draft.type][draft.task].InitNbPlaneByTask - draft.number
+																				txtDebug = txtDebug .. "    passeB NbPlane: "..multiPlaneSet_B[side][draft.type][draft.task].NbPlane.." draft.task: "..tostring(draft.task).."/n"
 
-																		end
+																			end
 
 
-																		playable_II = true
+																			playable_II = true
 
-																		if escort_num < multiPlaneSet_B[side][unitSupport.type][task].NbPlane then
-																			escort_num =  multiPlaneSet_B[side][unitSupport.type][task].NbPlane
-																			txtDebug = txtDebug .. "    passeC "..escort_num.."/n"
-																		elseif escort_num > multiPlaneSet_B[side][unitSupport.type][task].NbPlane then
-																			escort_num =  multiPlaneSet_B[side][unitSupport.type][task].NbPlane
-																			txtDebug = txtDebug .. "    passeD "..escort_num.."/n"
-																		end
+																			if escort_num < multiPlaneSet_B[side][unitSupport.type][task].NbPlane then
+																				escort_num =  multiPlaneSet_B[side][unitSupport.type][task].NbPlane
+																				txtDebug = txtDebug .. "    passeC "..escort_num.."/n"
+																			elseif escort_num > multiPlaneSet_B[side][unitSupport.type][task].NbPlane then
+																				escort_num =  multiPlaneSet_B[side][unitSupport.type][task].NbPlane
+																				txtDebug = txtDebug .. "    passeD "..escort_num.."/n"
+																			end
 
-																		txtDebug = txtDebug .. "    passeE "..draft.score.."/n"
+																			
+																			if escort_num >= 1 then
+																				draft.score = draft.score * 1.2 + 1000
+																				draft.scoreAdd =  draft.scoreAdd + 1000
+																				draft.scoreCoef =  draft.scoreCoef * 1.2
+																				txtDebug = txtDebug .. "    passeE "..draft.score.."/n"
+																			end
 
-																		draft.score = draft.score * 1.2 + 1000
-																		draft.scoreAdd =  draft.scoreAdd + 1000
-																		draft.scoreCoef =  draft.scoreCoef * 1.2
+																			txtDebug = txtDebug .. "    passeF "..draft.score.."/n"
 
-																		txtDebug = txtDebug .. "    passeF "..draft.score.."/n"
+																			txtDebug = txtDebug .. "    passeG NbPlane "..multiPlaneSet_B[side][unitSupport.type][task].NbPlane.."/n"
+																			txtDebug = txtDebug .." 	passeH InitNbPlaneByTask: "..tostring(multiPlaneSet_B[side][unitSupport.type][task].InitNbPlaneByTask)
 
-																		txtDebug = txtDebug .. "    passeG NbPlane "..multiPlaneSet_B[side][unitSupport.type][task].NbPlane.."/n"
-																		txtDebug = txtDebug .." InitNbPlaneByTask: "..tostring(multiPlaneSet_B[side][unitSupport.type][task].InitNbPlaneByTask)
+																			-- Marquer l'unité comme vérifiée
+																			multiPlaneSet_B[side][unitSupport.type][task].checked = true
 
-																		-- Marquer l'unité comme vérifiée
-																		multiPlaneSet_B[side][unitSupport.type][task].checked = true
-
-																		-- Vérification si tous les éléments sont cochés
-																		local fullMP_Plane = true
-																		for typeM, tasksM in pairs(multiPlaneSet_B[side]) do
-																			if type(tasksM) == "table" then
-																				for taskM, value in pairs(tasksM) do
-																					if type(value) == "table" and not value.checked then
-																						fullMP_Plane = false
-																						break  -- Arrêter la vérification dès qu'un élément n'est pas coché
+																			-- Vérification si tous les éléments sont cochés
+																			local fullMP_Plane = true
+																			for typeM, tasksM in pairs(multiPlaneSet_B[side]) do
+																				if type(tasksM) == "table" then
+																					for taskM, value in pairs(tasksM) do
+																						if type(value) == "table" and not value.checked then
+																							fullMP_Plane = false
+																							break  -- Arrêter la vérification dès qu'un élément n'est pas coché
+																						end
+																					end
+																					if not fullMP_Plane then
+																						break  -- Sortir complètement si un type n'est pas entièrement vérifié
 																					end
 																				end
-																				if not fullMP_Plane then
-																					break  -- Sortir complètement si un type n'est pas entièrement vérifié
-																				end
 																			end
+
+																			-- Doubler le score si tous les éléments sont cochés
+																			if fullMP_Plane and not uniqueBonus then
+																				draft.score = draft.score * 2000
+																				draft.scoreCoef =  draft.scoreCoef * 2000
+
+																				uniqueBonus = true
+
+																				-- print(tostring(draft.id).." "..draft.score)	
+																				txtDebug = txtDebug .. "    passeI uniqueBonus "..draft.score.."/n"																		
+																			end
+
 																		end
 
-																		-- Doubler le score si tous les éléments sont cochés
-																		if fullMP_Plane and not uniqueBonus then
-																			draft.score = draft.score * 2000
-																			draft.scoreCoef =  draft.scoreCoef * 2000
 
-																			uniqueBonus = true
-
-																			-- print(tostring(draft.id).." "..draft.score)																			
+																		if isDebugModeB then
+																			debugLog(debuGenTxt1545..draft.id.." AtoG II pass B_20a2. escort_num "..tostring(escort_num).." txtDebug: "..txtDebug   .." |score: "..tostring(draft.score))
 																		end
 
 																	end
 
+																	if Multi.NbGroup == 0 then
+																		playable_II = unitSupport.player
+																	end
+
+																	local wi = 1
 
 																	if isDebugModeB then
-																		debugLog(debuGenTxt1545..draft.id.." AtoG II pass B_20a2. escort_num "..tostring(escort_num).." txtDebug: "..txtDebug   .." |score: "..tostring(draft.score))
+																		debugLog(draft.id.." AtoG II pass B_21c Id "..tostring(draft.id).." "..unitSupport.type.." "..unitSupport.name.." escort_num "..tostring(escort_num).." "..draft.target_name.." NbTotalSupport: "..draft.support[task]["NbTotalSupport"] )
 																	end
 
-																end
+																	TrackPlayability(unitSupport.player, "escort_target_firepower")							--track playabilty criterium has been met
 
-																if Multi.NbGroup == 0 then
-																	playable_II = unitSupport.player
-																end
+																	local entryEscortNum
 
-																local wi = 1
+																	entryEscortNum = escort_num
 
-																if isDebugModeB then
-																	debugLog(draft.id.." AtoG II pass B_21c Id "..tostring(draft.id).." "..unitSupport.type.." "..unitSupport.name.." escort_num "..tostring(escort_num).." "..draft.target_name.." NbTotalSupport: "..draft.support[task]["NbTotalSupport"]   .." |score: "..tostring(draft.score))
-																end
-
-																TrackPlayability(unitSupport.player, "escort_target_firepower")							--track playabilty criterium has been met
-
-																local entryEscortNum
-
-																entryEscortNum = escort_num
-
-																--TODO heuuuuuuuu, risqué ça
-																if not draft.support[task] then
-																	draft.support[task] = {}
-																end
+																	-- --TODO heuuuuuuuu, risqué ça
+																	-- if not draft.support[task] then
+																	-- 	draft.support[task] = {}
+																	-- end
 
 
-																--add escort table to sortie															
-																draft.support[task]["NbTotalSupport"] = draft.support[task]["NbTotalSupport"] + escort_num
-																draft.support[task]["escort_max"] = escort_max
+																	--add escort table to sortie															
+																	draft.support[task]["NbTotalSupport"] = draft.support[task]["NbTotalSupport"] + escort_num
+																	draft.support[task]["escort_max"] = escort_max
 
-																if isDebugModeB then
-																	debugLog(draft.id.." AtoG II pass B_21d Id "..tostring(draft.id).." "..unitSupport.type.." "..unitSupport.name.."".." escort_num "..tostring(escort_num).." "..draft.target_name.." NbTotalSupport: "..draft.support[task]["NbTotalSupport"].." entryEscortNum: "..tostring(entryEscortNum)   .." |score: "..tostring(draft.score))
-																end
-
-																if entryEscortNum >= 1 then
-
-																	if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "B")
-																	and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unitSupport.name  and  (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
-																	or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
-																	then
-																		-- debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II pass B_21c Add In draft.support ")
-																		debugLog(tostring(draft.id).." AtoG II pass B_21c Add In draft.support " .." |score: "..tostring(draft.score))
+																	if isDebugModeB then
+																		debugLog(draft.id.." AtoG II pass B_21d Id "..tostring(draft.id).." "..unitSupport.type.." "..unitSupport.name.."".." escort_num "..tostring(escort_num).." "..draft.target_name.." NbTotalSupport: "..draft.support[task]["NbTotalSupport"].." entryEscortNum: "..tostring(entryEscortNum))
 																	end
 
-																	if not draft.support[task][unitSupport.type] then
-																		draft.support[task][unitSupport.type] = {}
-																	end
+																	if entryEscortNum >= 1 then
 
-																	draft.support[task][unitSupport.type] = {
-																		id = draft.id.."-"..wi.."-"..wk,
-																		name = unitSupport.name,
-																		playable = playable_II,								--unit.player,
-																		-- playable = unit.player,
-																		type = unitSupport.type,
-																		modification = unitSupport.modification,
-																		callsign = unitSupport.callsign,
-																		callsignId = unitSupport.callsignId,
-																		helicopter = unitSupport.helicopter,											-- modification M06 : helicopter playable
-																		number = entryEscortNum,
-																		country = unitSupport.country,
-																		livery = unitSupport.livery,
-																		sidenumber = unitSupport.sidenumber,
-																		liveryModex = unitSupport.liveryModex,
-																		base = unitSupport.base,
-																		airdromeId = db_airbases[unitSupport.base].airdromeId,
-																		parking_id = unitSupport.parking_id,
-																		skill = unitSupport.skill,
-																		task = task,
-																		tasks = unitSupport.tasks,
-																		loadout = unit_loadouts[l],
-																		route = route,
-																		target = DeepCopy(draft.target),
-																		target_name = draft.target.titleName,
-																		tot_from = draft.tot_from,
-																		tot_to = draft.tot_to,
-																		rejected = {},
-																		main_overideMP = draft.main_overideMP,
-																		overideMP_B_targetName = overideMP_B_targetName,
-																		priorityIni = draft.priorityIni,
-																		support_requirement = support_requirement,
-																	}
-
-																end
-
-																--recalculate threat level for sortie adjusted by number of escort
-																local route_threat_OLD = draft.route.threats.ground_total + draft.route.threats.air_total
-																local route_threat_recalc = 0.5	
-																--recalculated route threat with escort in place (0.5 == no threat)
-																if task == "SEAD" then
-																	local escort_offset = escort_num *  unit_loadouts[l].firepower					--* unit_loadouts[l].capability--number of available SEAD to offset threats
-																	for k, tGround in pairs(draft.route.threats.ground) do									--iterate through route ground threats
-																		if tGround.offset > 0 then														--if threat can be offset by SEAD
-																			if escort_offset >= tGround.offset then										--some SEAD aircraft remain to offset the threat
-																				route_threat_recalc = escort_offset - tGround.offset							--use these SEAD aircraft to offset and ignore the therat
-																			else																	--no SEAD aircraft remain unassignedd
-																				route_threat_recalc = route_threat_recalc + tGround.level					--sum route ground threat levels
-																			end
-																		else																		--threat cannot be offset by SEAD
-																			route_threat_recalc = route_threat_recalc + tGround.level						--sum route ground threat levels
+																		if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "B")
+																		and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unitSupport.name  and  (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
+																		or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
+																		then
+																			-- debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG II pass B_21c Add In draft.support ")
+																			debugLog(tostring(draft.id).." AtoG II pass B_21c Add In draft.support ")
 																		end
+
+																		if not draft.support[task][unitSupport.type] then
+																			draft.support[task][unitSupport.type] = {}
+																		end
+
+																		draft.support[task][unitSupport.type] = {
+																			id = draft.id.."-"..wi.."-"..wk,
+																			name = unitSupport.name,
+																			playable = playable_II,								--unit.player,
+																			-- playable = unit.player,
+																			type = unitSupport.type,
+																			modification = unitSupport.modification,
+																			callsign = unitSupport.callsign,
+																			callsignId = unitSupport.callsignId,
+																			helicopter = unitSupport.helicopter,											-- modification M06 : helicopter playable
+																			number = entryEscortNum,
+																			country = unitSupport.country,
+																			livery = unitSupport.livery,
+																			sidenumber = unitSupport.sidenumber,
+																			liveryModex = unitSupport.liveryModex,
+																			base = unitSupport.base,
+																			airdromeId = db_airbases[unitSupport.base].airdromeId,
+																			parking_id = unitSupport.parking_id,
+																			skill = unitSupport.skill,
+																			task = task,
+																			tasks = unitSupport.tasks,
+																			loadout = unit_loadouts[l],
+																			route = route,
+																			target = DeepCopy(draft.target),
+																			target_name = draft.target.titleName,
+																			tot_from = draft.tot_from,
+																			tot_to = draft.tot_to,
+																			rejected = {},
+																			main_overideMP = draft.main_overideMP,
+																			overideMP_B_targetName = overideMP_B_targetName,
+																			priorityIni = draft.priorityIni,
+																			support_requirement = support_requirement,
+																		}
+
 																	end
 
-																	if not draft.route.threats.ground_total_Init then
-																		draft.route.threats.ground_total_Init = draft.route.threats.ground_total
+																	--recalculate threat level for sortie adjusted by number of escort
+																	local route_threat_OLD = draft.route.threats.ground_total + draft.route.threats.air_total
+																	local route_threat_recalc = 0.5	
+																	--recalculated route threat with escort in place (0.5 == no threat)
+																	if task == "SEAD" then
+																		local escort_offset = escort_num *  unit_loadouts[l].firepower					--* unit_loadouts[l].capability--number of available SEAD to offset threats
+																		for k, tGround in pairs(draft.route.threats.ground) do									--iterate through route ground threats
+																			if tGround.offset > 0 then														--if threat can be offset by SEAD
+																				if escort_offset >= tGround.offset then										--some SEAD aircraft remain to offset the threat
+																					route_threat_recalc = escort_offset - tGround.offset							--use these SEAD aircraft to offset and ignore the therat
+																				else																	--no SEAD aircraft remain unassignedd
+																					route_threat_recalc = route_threat_recalc + tGround.level					--sum route ground threat levels
+																				end
+																			else																		--threat cannot be offset by SEAD
+																				route_threat_recalc = route_threat_recalc + tGround.level						--sum route ground threat levels
+																			end
+																		end
+
+																		if not draft.route.threats.ground_total_Init then
+																			draft.route.threats.ground_total_Init = draft.route.threats.ground_total
+																		end
+
+																		if route_threat_recalc < 0.5 then
+																			route_threat_recalc = 0.5
+																		end
+
+																		draft.route.threats.ground_total = route_threat_recalc			--recalculated total route grund threat
+
+																	elseif task == "Escort" then
+
+																		local escort_offset_level =  unit_loadouts[l].firepower		--unit_loadouts[l].capability *--threat level that each fighter escort can offset
+																		route_threat_recalc = draft.route.threats.air_total - escort_offset_level * escort_num			--recalculated total route air threat
+
+																		if route_threat_recalc < 0.5 then
+																			route_threat_recalc = 0.5
+																		end
+
+																		draft.route.threats.air_total = route_threat_recalc
+
+																	elseif task == "Escort Jammer" then
+		--ADD RECALCULATED THREAT LEVEL WITH ESCORT JAMMERS
 																	end
 
-																	if route_threat_recalc < 0.5 then
-																		route_threat_recalc = 0.5
-																	end
 
-																	draft.route.threats.ground_total = route_threat_recalc			--recalculated total route grund threat
+																	local route_threat_New = draft.route.threats.ground_total + draft.route.threats.air_total
+																	
+																	if route_threat_New ~= route_threat_OLD then
+																		-- local oldScore = draft.score
+																		local testScore = draft.priorityIni / route_threat_New
+																		testScore = draft.score * draft.scoreCoef
+																		testScore = draft.score + draft.scoreAdd
 
-																elseif task == "Escort" then
-
-																	local escort_offset_level =  unit_loadouts[l].firepower		--unit_loadouts[l].capability *--threat level that each fighter escort can offset
-																	route_threat_recalc = draft.route.threats.air_total - escort_offset_level * escort_num			--recalculated total route air threat
-
-																	if route_threat_recalc < 0.5 then
-																		route_threat_recalc = 0.5
-																	end
-
-																	draft.route.threats.air_total = route_threat_recalc
-
-																elseif task == "Escort Jammer" then
-	--ADD RECALCULATED THREAT LEVEL WITH ESCORT JAMMERS
-																end
-
-
-																local route_threat_New = draft.route.threats.ground_total + draft.route.threats.air_total
-																
-																if route_threat_New ~= route_threat_OLD then
-																	-- local oldScore = draft.score
-																	local testScore = draft.priorityIni / route_threat_New
-																	testScore = draft.score * draft.scoreCoef
-																	testScore = draft.score + draft.scoreAdd
-
-																	if overideMP_B_targetName then
-																		if testScore > draft.score then
+																		if overideMP_B_targetName then
+																			if testScore > draft.score then
+																				draft.score = testScore
+																			end
+																		else
 																			draft.score = testScore
 																		end
-																	else
-																		draft.score = testScore
+																		-- draft.score = draft.priorityIni / route_threat_New
+
+																		-- draft.score = draft.score * draft.scoreCoef
+																		-- draft.score = draft.score + draft.scoreAdd
+
 																	end
-																	-- draft.score = draft.priorityIni / route_threat_New
 
-																	-- draft.score = draft.score * draft.scoreCoef
-																	-- draft.score = draft.score + draft.scoreAdd
+																	--adjust sortie Time on Target
+																	if tot_from > draft.tot_from then									--if earliest escort Time on Target is later than main body TOT
+																		draft.tot_from = tot_from							--make earliest escort TOT the draft sortie earliest TOT 
+																	end
+																	if tot_to < draft.tot_to then										--if latest escort Time on Target is sooner than main body TOT
+																		draft.tot_to = tot_to								--make latest escort TOT the draft sortie latest TOT
+																	end
+
+																	--status report
+																	status_counter_escorts = status_counter_escorts + 1
+																	
+																	wi = wi + 1
+
+																	if isDebugModeB then
+																		debugLog(draft.id.." AtoG II pass B_22 escort_num "..tostring(escort_num).." "..unitSupport.type.." target_name: "..tostring(draft.target_name)  .." |score: "..tostring(draft.score))
+																	end
 
 																end
-
-																--adjust sortie Time on Target
-																if tot_from > draft.tot_from then									--if earliest escort Time on Target is later than main body TOT
-																	draft.tot_from = tot_from							--make earliest escort TOT the draft sortie earliest TOT 
-																end
-																if tot_to < draft.tot_to then										--if latest escort Time on Target is sooner than main body TOT
-																	draft.tot_to = tot_to								--make latest escort TOT the draft sortie latest TOT
-																end
-
-																--status report
-																status_counter_escorts = status_counter_escorts + 1
-																
-																wi = wi + 1
-
-																if isDebugModeB then
-																	debugLog(draft.id.." AtoG II pass B_22 escort_num "..tostring(escort_num).." "..unitSupport.type.." target_name: "..tostring(draft.target_name)  .." |score: "..tostring(draft.score))
-																end
-
 															end
 														end
 													end
 												end
+											else
+												-- print("ATO_G  Refused02 ||:if draft.loadout.support and draft.loadout.support[task] and "..debug.getinfo(1).currentline)
+												-- print("    draft.type"..tostring(draft.type).."[task]?: "..tostring(task).." NbTotalSupport: "..tonumber(draft.support[task]["NbTotalSupport"]).." < "..tonumber(draft.support[task]["escort_max"]))
 											end
-										else
-											-- print("ATO_G  Refused02 ||:if draft.loadout.support and draft.loadout.support[task] and "..debug.getinfo(1).currentline)
-											-- print("    draft.type"..tostring(draft.type).."[task]?: "..tostring(task).." NbTotalSupport: "..tonumber(draft.support[task]["NbTotalSupport"]).." < "..tonumber(draft.support[task]["escort_max"]).." or "..tostring(MP_Game))
+											if i_timmer02 >= 1000  then io.write(".") i_timmer02 = 0 end
+											wk = wk +1
 										end
-										if i_timmer02 >= 1000  then io.write(".") i_timmer02 = 0 end
-										wk = wk +1
 									end
 								end
 							end

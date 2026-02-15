@@ -350,25 +350,7 @@ if input == "y" or input == "yes" then
 								local mgrsInfo = target.MGRS_Chute_1km or target.MGRS_Chute or 0
 								io.write(key.." "..tostring(target.titleName).." "..tostring(mgrsInfo).."\n")
 								tabIndex[key] = target
-								
-								-- if target.task == "CSAR" and target.elements then
-								-- 	for ejectPilotN, ejectPilot in pairs(target.elements) do
-								-- 		-- io.write(ejectPilotN.." ??? "..tostring(ejectPilot.name).."\n" )
-								-- 		if ejectPilot.status == "EVAC_possible" then
-								-- 			local txtSup = ""
-								-- 			if ejectPilot.inTheEnemyCamp then txtSup = "in the enemy camp" end
-								-- 			io.write("          - - - - >"..tostring(ejectPilot.MGRS_Chute_10KM).." : "..tostring(ejectPilot.name).." "..txtSup.."\n")
-								-- 		else
-								-- 			-- io.write(" NO "..eniSide.." "..tostring(target.titleName).." status?: "..tostring(ejectPilot.status).."\n")
-								-- 		end
-								-- 	end
-								
-								-- end
 							end
-							-- 	end
-							-- elseif (target.task == "CSAR" or target.task == "SAR") then
-							-- 	io.write(" NO "..eniSide.." "..tostring(target.titleName).." Inactive?: "..tostring(target.inactive).." ATO? "..tostring(target.ATO).."\n")
-							-- end
 						end
 
 						return tabIndex
@@ -644,6 +626,7 @@ if input == "y" or input == "yes" then
 				break
 			elseif Multi.NbGroup >= 1 and PlayerFlight then
 				if acceptMission() then
+					BackupFilesMission()
 					print("\nMultiplayerCampaign Next mission generated.\n")								--confirmation text
 					break
 				else
@@ -651,6 +634,7 @@ if input == "y" or input == "yes" then
 				end
 			elseif SinglePlayer and PlayerFlight  then														--mission has a player flight
 				if acceptMission() then
+					BackupFilesMission()
 					print("\nNext mission generated.\n")													--confirmation text
 					break
 				else

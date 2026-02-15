@@ -376,23 +376,6 @@ if Debug.checkTargetName and (Firstmission_flag or Skipmission_flag) then
     tabTemplates = tabFileTemplate()
 end
 
--- --met a jour la structure des ejectedPilot dans le targetlist
--- for side, targets in pairs(targetlist)	 do
--- 	for i = #targets, 1, -1 do
--- 		if targets[i].elements then
--- 			for elementN, element in ipairs(targets[i].elements) do
--- 				if element and type(element) == 'table' and (element["SumEjectedPilotDay"] or element["sumEjectedPilotDay"] or element.type == "ejectedPilot") then
-
--- 					--met à jour la nouvelle structure des ejectedPilot
--- 					element = PatchEjectedPilotStructure(element, "targetlist")
-
-
--- 				end
--- 			end
--- 		end
--- 	end
--- end
-
 --met a jour la structure des ejectedPilot dans le targetlist
 for side, targets in pairs(targetlist)	 do
 	for targetsN , target in pairs(targets) do
@@ -433,7 +416,7 @@ for side, targets in pairs(targetlist) do
 					entrie["firepower"] = 
 					{
 						["min"] = 1,
-						["max"] = 4,
+						["max"] = 1,
 					}
 					entrie["priority"] = 5
 					entrie["task"] = "CSAR"
@@ -537,69 +520,6 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 	end
 end
 
---[[ 	--suppression des éléments inutile (rescued ou POW)	
-	repeat
-		local findDeprecated = false
-		for side, targets in pairs(targetlist)	 do
-			for i = #targets, 1, -1 do
-				if targets[i].elements then
-					for elementN, element in ipairs(targets[i].elements) do
-						if element.status and (element.status == 'rescued' or element.status == "POW" or element.status == "error") then
-
-							table.remove(targets[i].elements, elementN)
-							findDeprecated = true
-								-- --supprime la zone SAR s'il n'y a plus d'élément dedans
-								-- if targets[i].elements == nil or #targets[i].elements == 0 then
-								-- 	table.remove(targets, i)
-								-- end
-							break
-						end
-					end
-				end
-				if findDeprecated then break end
-			end
-			if findDeprecated then break end
-		end
-
-	until findDeprecated == false
-
-	--supprime les pilots de targetlist s'ils n'existent pas dans camp_ZoneSAR
-	for side, targets in pairs(targetlist)	 do
-		for i = #targets, 1, -1 do
-			if targets[i].elements then
-				for elementN, element in ipairs(targets[i].elements) do
-					if element and type(element) == 'table' and (element["SumEjectedPilotDay"] or element.type == "ejectedPilot") then
-
-						local foundPilot = false
-						for zoneName, zones in pairs(camp_ZoneSAR[side]) do
-							for pilotN, pilot in ipairs(zones) do
-								if pilot.name == element.name then
-									foundPilot = true
-									break
-								end
-							end
-							if foundPilot then break end
-						end
-
-						if not foundPilot then
-
-							print("DcUT A no found Pilot, delete him in targetList "..tostring(element.name) )
-
-							table.remove(targets[i].elements, elementN)
-
-							--supprime la zone SAR s'il n'y a plus d'élément dedans
-							if targets[i].elements == nil or #targets[i].elements == 0 then
-								print("DcUT B no found Pilot, delete the zone in targetList "..tostring(targets[i].name) )
-								table.remove(targets, i)
-							end
-						end
-
-					end
-				end
-			end
-		end
-	end
-end ]]
 
 --suppression des éléments inutile (rescued ou POW)	
 --supprime de la table targetlist tous les targets ayant comme task : "CSAR_OLD"
@@ -643,8 +563,6 @@ for side, targets in pairs(targetlist) do
 	end
 end
 
---supprime des éléments inutile:
---supprime de la table targetlist tous les targets ayant comme task : "CSAR_OLD"
 for side, targets in pairs(targetlist) do
 	for targetN, target in pairs(targets) do
 		if target.task == "CSAR" then
@@ -660,6 +578,10 @@ for side, targets in pairs(targetlist) do
 			target.createdSoldier = nil
 			target.initiator = nil
 			target.unitObj = nil
+
+			if target.firepower and target.firepower.max then
+				target.firepower.max = 1
+			end
 
 		end
 	end
@@ -897,29 +819,6 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 							table.insert(target.elements, elementTemp)
 						end
 
-
-						-- 	--check range from threat
-						-- 	if GroundthreatsAll then
-
-						-- 		for elementN, element in pairs(target.elements) do
-						-- 			for threatN, threat in pairs(GroundthreatsAll[ DCS_ENI_Side[sideName] ]) do
-						-- 				if element.x and element.x > math.floor(threat.x)-1 and  element.x < math.floor(threat.x)+1 then
-						-- 					if element.y > math.floor(threat.y)-1 and  element.y < math.floor(threat.y)+1 then
-						-- 						element.range = threat.range
-
-						-- 						if not element.dead and  maxRange < element.range then
-						-- 							maxRange = element.range
-						-- 						end
-						-- 					end
-						-- 				end
-						-- 			end
-						-- 		end
-						-- 	end
-
-							-- local maxRange = 0
-
-						-- local t_t = os.clock()
-
 						if GroundthreatsAll then
 							local threats = GroundthreatsAll[DCS_ENI_Side[sideName]]
 							if threats then
@@ -941,18 +840,11 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 								end
 							end
 						end
-
-						-- t_threats = t_threats + (os.clock() - t_t)
-
-						-- target.range = maxRange
 					end
-
-					-- t_units = t_units + (os.clock() - tu)
 
 					target.range = maxRange
 
 				end
-				-- t_oob = t_oob + (os.clock() - c_oob)
 
 				-- local c_template = os.clock()
 				if not target.foundOobGround then
@@ -961,12 +853,9 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 						target.foundOobGround = true
 					end
 				end
-				-- t_template = t_template + (os.clock() - c_template)
-
+				
 				target.range = maxRange
 
-				-- local c_elem = os.clock()
-				
 				if target.elements then
 					--permet de rechercher les elements déjà present dans targetList, car renseigné par campaignMaker
 					for elementN, element in pairs(target.elements) do														
@@ -975,9 +864,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 							-- local c_elemA = os.clock()
 							local temp = {x=0,y=0,class=""}
 							temp.x, temp.y, temp.class = checkElementXY(element.name, targetside)
-							-- t_elementsA = t_elementsA + (os.clock() - c_elemA)
-
-
+							
 							-- local c_elemB = os.clock()
 							if temp.x == nil and element.name then
 		
@@ -986,8 +873,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 									element.name = element.name.."-1"
 								end
 							end
-							-- t_elementsB = t_elementsB + (os.clock() - c_elemB)
-						
+							
 
 							if temp.x == nil then
 								element.class = "MapObject"
@@ -1010,8 +896,6 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 					end
 				end
 
-				-- t_elements = t_elements + (os.clock() - c_elem)
-				
 				if (target.x == nil or target.x == 0) and not target.inactive then
 					local totalGoodXY = 0
 					local centre = {
@@ -1036,9 +920,7 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 						AddLog("DC_UT checkBug_xy :"..txt)
 					end
 				end
-				
-			-- t_strike = t_strike + (os.clock() - c_st)
-
+			
 			elseif target.class == "airbase" then											--target consists of aircraft on ground
 				target.ATO = false															--remove target from ATO (gets reverted further down if there are ready planes at target airbase)
 				-- target.alive = 0
@@ -1153,20 +1035,8 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 			target.y = db_airbases[target.destination].y
 
 		elseif target.task == "CSAR" then
-			target.alive = 100															--Introduce percentage of alive target elements
-			target.alive_last = 0														--Introduce percentage of elements that died in last mission (for Debriefing)
---[[ 			for e = 1, #target.elements do												--Iterate through elements of target
-				if not target.elements[e].x then
-					checkBug3(" Error_10: The x and y positions of this CSAR position are missing:  '" .. target.titleName .. "!")
-				end
-				if target.elements[e].dead then											--if target element is dead		
-					target.alive = target.alive - 100 / #target.elements				--reduce target alive percentage	
-				end
-				if target.elements[e].dead_last then
-					target.alive_last = target.alive_last + 100 / #target.elements		--add target died in last mission percentage
-				end
-			end ]]
-
+			target.alive = 100	
+			target.alive_last = 0
 
 			if not target.x then
 				checkBug3(" Error_10: The x and y positions of this CSAR position are missing:  '" .. target.titleName .. "!")
@@ -1350,8 +1220,6 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 
 		if target.alive then																--target has an alive value (is a ground target)
 			
-			-- local t_al = os.clock()
-
 			if target.elements then
 				target = updateAlive(target)
 			end
@@ -1439,21 +1307,13 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 					end
 				end
 			end
-			-- t_alive = t_alive + (os.clock() - t_al)
 		end
 	end
-
-
-	-- print("DcUT E5 ".. string.format("%.3f", os.clock() - checkTime) .."s")
-	-- checkTime = os.clock()
 
 	if GroundTarget[sideName].total > 0 then
 		GroundTarget[sideName].percent = math.ceil(100 / GroundTarget[sideName].total * GroundTarget[sideName].alive)	--calculate percentage of alive ground targets per side
 		checkBug2("DC_UT GroundTarget "..sideName.." percent "..GroundTarget[sideName].percent)
 	end
-
-	-- print("DcUT E6 ".. string.format("%.3f", os.clock() - checkTime) .."s")
-	-- checkTime = os.clock()
 
 	for sideString, zones in pairs(GroundZoneTarget) do
 		for zoneName, zone in pairs(zones) do
@@ -1464,9 +1324,6 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 		end
 	end
 end
-
--- print("DcUT Z ".. string.format("%.3f", os.clock() - checkTime) .."s")
--- checkTime = os.clock()
 
 --********************************************************************************************************
 --Update targetList avec le fichier LL_Positions.lua
