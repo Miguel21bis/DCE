@@ -90,14 +90,17 @@ BaseDistCache = {}
 DCE_hotspotGrid = {}
 DCE_hotspotCellSize = 100000 -- même que ton clusterThreshold
 
-
-GroupRadioMenus = {} -- [gid] = { id1, id2, ... }
--- GroupEWRMenus = GroupEWRMenus or {}
 GroupMenusBuilt = GroupMenusBuilt or {}
 
 GroupEWRMenus = GroupEWRMenus or {}
 PlayerGroup = PlayerGroup or {}
-
+EWR_optionPlayer = {}
+EWR_rebuildPending = {}
+local requestEWRMenuRebuild
+local addFuncs
+if not EWR_menuRootByGroup then
+	EWR_menuRootByGroup = {}
+end
 
 
 local fuelCacheCooldown = 5   -- secondes entre deux lectures DCS par avion
@@ -112,11 +115,6 @@ LastInjectFlightPlan = {} --garde les derniers plan de vol injecté
 
 ScheduleTenth = {}					--table used to schedule the tenth of a second
 AgendaSeconde = {}
-
-EWR_optionPlayer = {}
-EWR_rebuildPending = {}
-local requestEWRMenuRebuild
-local addFuncs
 
 
 ZoneSAR = {} --table enumérant les helico SAR pour eviter d'en envoyer plusieurs aux memes endroits
@@ -3439,9 +3437,6 @@ addFuncs = function(arg_Gid, arg_GroupObj, argPlayerName)
 
 		env.info("DCE_addFuncs  _B  ")
 
-
-		GroupRadioMenus[arg_Gid] = {}
-
 		if not EWR_optionPlayer[argPlayerName] then
 			EWR_optionPlayer[argPlayerName] = {
 				EWR_on = false,
@@ -3456,13 +3451,12 @@ addFuncs = function(arg_Gid, arg_GroupObj, argPlayerName)
 		-- missionCommands.removeItemForGroup(arg_Gid, {"EWR"})
 		missionCommands.removeItemForGroup(arg_Gid, {"Get out of the cockpit"})
 		missionCommands.removeItemForGroup(arg_Gid, {"CarrierIntoWind"})
-
-		-- pcall(function() missionCommands.removeItemForGroup(arg_Gid, { "EWR" }) end)
-
-		pcall(function() missionCommands.removeItemForGroup(arg_Gid, { "EWR", "EWR ON" }) end)
-		pcall(function() missionCommands.removeItemForGroup(arg_Gid, { "EWR", "EWR OFF" }) end)
-		pcall(function() missionCommands.removeItemForGroup(arg_Gid, { "EWR" }) end)
-
+		
+		-- Suppression propre via handle
+		if EWR_menuRootByGroup[arg_Gid] then
+			missionCommands.removeItemForGroup(arg_Gid, EWR_menuRootByGroup[arg_Gid])
+			EWR_menuRootByGroup[arg_Gid] = nil
+		end
 
 
 
@@ -3481,6 +3475,7 @@ addFuncs = function(arg_Gid, arg_GroupObj, argPlayerName)
 		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, "BullsEye_LongLat", nil, BullsEye, arg_GroupObj)
 
 		local subR_B1 = missionCommands.addSubMenuForGroup(arg_Gid, "EWR", nil)
+		EWR_menuRootByGroup[arg_Gid] = subR_B1
 		local subR_B2 = missionCommands.addSubMenuForGroup(arg_Gid, "EWR ON", subR_B1)
 		local subR_B3 = missionCommands.addSubMenuForGroup(arg_Gid, "EWR OFF", subR_B1)
 
