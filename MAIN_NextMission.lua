@@ -1604,26 +1604,28 @@ end
 ----------------------------------------------------------------
 local c_backup = os.clock()
 
-if (Debug.debug or mission_ini.backupAllMissionFiles) and PlayerFlight then
+function BackupFilesMission()
+	if (Debug.debug or mission_ini.backupAllMissionFiles) and PlayerFlight then
 
-    local fileName
-    local folderName = "Debug"
+		local fileName
+		local folderName = "Debug"
 
-    if Firstmission_flag then
-        fileName   = camp.title .. "_first.miz"
-        folderName = folderName .. "\\mission_01"
-    else
-        fileName   = camp.title .. "_ongoing.miz"
-        folderName = folderName .. "\\mission_" .. string.format("%02d", camp.mission)
-    end
+		if Firstmission_flag then
+			fileName   = camp.title .. "_first.miz"
+			folderName = folderName .. "\\mission_01"
+		else
+			fileName   = camp.title .. "_ongoing.miz"
+			folderName = folderName .. "\\mission_" .. string.format("%02d", camp.mission)
+		end
 
-    ensureDir(folderName)
+		ensureDir(folderName)
 
-    -- Copie du .miz
-    copyFile("..\\" .. fileName, folderName .. "\\" .. fileName)
+		-- Copie du .miz
+		copyFile("..\\" .. fileName, folderName .. "\\" .. fileName)
 
-    -- Copie du dossier Active
-    copyDir("Active", folderName .. "\\Active")
+		-- Copie du dossier Active
+		copyDir("Active", folderName .. "\\Active")
+	end
 end
 
 t_backup = t_backup + (os.clock() - c_backup)
