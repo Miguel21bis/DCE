@@ -72,6 +72,7 @@ local checkPoint = {
 local maxDistance = 15000
 
 
+--[[ --particularité NAM
 -- Parcours des coalitions
 for _, side in pairs(mission.coalition) do
     for _, country in pairs(side.country) do
@@ -113,7 +114,7 @@ for _, side in pairs(mission.coalition) do
             end
         end
     end
-end
+end ]]
 
 
 

@@ -483,12 +483,14 @@ repeat
 
 		if Multi.NbGroup >= 1 and PlayerFlight then
 			if acceptMission() then
-				 print("\nMultiplayerCampaign Next mission generated.\n")								--confirmation text
+				BackupFilesMission() 
+				print("\nMultiplayerCampaign Next mission generated.\n")								--confirmation text
 				 break
 			end
 		elseif SinglePlayer and PlayerFlight  then														--mission has a player flight
 			if acceptMission() then
-				 print("\nCampaign reset and first campaign mission re-generated.\n")					--confirmation text
+				BackupFilesMission() 
+				print("\nCampaign reset and first campaign mission re-generated.\n")					--confirmation text
 				 break
 			end
 		elseif StopBug then																				--mission has a player flight
