@@ -3422,7 +3422,7 @@ local function createATO_table(draftPriority)
 										end
 
 										--add new package to ATO
-										if support_available  then																		--continue if no support is required or enough support is available to create package
+										if support_available and draft.number > 0 then																		--continue if no support is required or enough support is available to create package
 
 											local pack_n = #ATO[side]
 

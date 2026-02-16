@@ -1166,7 +1166,7 @@ camp.date.CampTotalTimeS = CampTotalTimeS
 camp.date.CampTotalTimeH = CampTotalTimeH
 
 --change la boundary de la mission en fonction du camp
-SetBoudaryFromCamp()
+SetBoundaryFromCamp()
 
 -- met à jour la date de camp dans conf_mod.lua
 UpdateConfModSuite(nil, camp.date, "MAIN_NextMission "..debug.getinfo(1).currentline)
