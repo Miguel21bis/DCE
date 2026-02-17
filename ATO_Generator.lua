@@ -1134,7 +1134,15 @@ for sideName, units in pairs(oob_air) do
 																			)
 																		end
 
-																		if target.firepower.min <= aircraft_available * unit_loadouts[l].firepower or overideMP_A then				--enough aircraft are available to satisfy minimum firepower requirement of target	
+																		local passHumain = true
+																		if unit.humainOnly then
+																			passHumain = false
+																			if (unit.player or unit.client) then
+																				passHumain = true
+																			end
+																		end
+
+																		if (passHumain and (target.firepower.min <= aircraft_available * unit_loadouts[l].firepower)) or overideMP_A then				--enough aircraft are available to satisfy minimum firepower requirement of target	
 
 																			if isDebugModeA2 then
 																				debugLog("draftId"..draftId.." AtoG passe A_12  Befor weather Condition || overRideReady: "..tostring(overRideReady).." || "..target_name)
@@ -1194,7 +1202,7 @@ for sideName, units in pairs(oob_air) do
 																				end
 																			end
 
-																			if overideMP_A or unit.player then
+																			if overideMP_A or unit.player or unit.client then
 																				proxiCSAR = true
 																			end
 
@@ -1567,19 +1575,15 @@ for sideName, units in pairs(oob_air) do
 
 																								}
 
-																									if isDebugModeA2 then
-																										debugLog("draftId"..draftId.." AtoG passe A_31a "..idTemp.." Add SUPPORT CSAR task?: "..tostring(task).." overideMP_A? "..tostring(overideMP_A))
-																										
-																									end
+																								if isDebugModeA2 then
+																									debugLog("draftId"..draftId.." AtoG passe A_31a "..idTemp.." Add SUPPORT CSAR task?: "..tostring(task).." overideMP_A? "..tostring(overideMP_A))
+																									
+																								end
 
 																								if task == "CSAR" and overideMP_A then
 																									draftSortiesEntry["support"]["CSAR"] = {}
-																									-- print(draftSortiesEntry["support"]["type"])
-																									-- _affiche(draftSortiesEntry.support, "support?: ")
-																									-- os.execute 'pause'
 																									if isDebugModeA2 then
 																										debugLog("draftId"..draftId.." AtoG passe A_31b "..idTemp.." Add SUPPORT CSAR ")
-																										
 																									end
 																								end
 
@@ -2307,7 +2311,15 @@ for sideName, draftT in pairs(draftSorties) do
 																
 															end
 
-															if weather_eligible or overideMP_B_targetName then												--continue of this loadout is eligible for weather
+															local passHumain = true
+															if unitSupport.humainOnly then
+																passHumain = false
+																if (unitSupport.player or unitSupport.client) then
+																	passHumain = true
+																end
+															end
+
+															if (passHumain and weather_eligible) or overideMP_B_targetName then												--continue of this loadout is eligible for weather
 
 																TrackPlayability(unitSupport.player, "escort_weather")												--track playabilty criterium has been met								
 																--get airbase position
@@ -3439,13 +3451,13 @@ local function createATO_table(draftPriority)
 
 											}
 
-											print("Task: "..tostring(draft.task).." overideMP_B_targetName: "..tostring(draft.overideMP_B_targetName).." override_MP_C: "..tostring(override_MP_C))
+											-- print("Task: "..tostring(draft.task).." overideMP_B_targetName: "..tostring(draft.overideMP_B_targetName).." override_MP_C: "..tostring(override_MP_C))
 											debugLog(draft.id.." AtoG passe C_04b Task: "..tostring(draft.task).." overideMP_B_targetName: "..tostring(draft.overideMP_B_targetName).." override_MP_C: "..tostring(override_MP_C).." draft.main_overideMP?: "..tostring(draft.main_overideMP) )
 											if draft.main_overideMP and draft.task == "CSAR" then
 												ATO[side][pack_n + 1]["CSAR"] = {}
 												debugLog(draft.id.." AtoG passe C_04c")
 											end
-											_affiche(ATO[side][pack_n + 1], "ATO: ")
+											-- _affiche(ATO[side][pack_n + 1], "ATO: ")
 
 											pack_n = pack_n + 1
 
@@ -3461,7 +3473,6 @@ local function createATO_table(draftPriority)
 											--add flights of 1, 2 or 4 aircraft to package
 											local function addFlight(arg_Assign, arg_Role, arg_Entry)
 
-												print("arg_Entry.task: "..tostring(arg_Entry.task).." arg_Role: "..tostring(arg_Role))
 												local assigned
 												while arg_Assign > 0 do																		--loop as long as there are aircraft to assign
 
@@ -3607,7 +3618,7 @@ local function createATO_table(draftPriority)
 													-- print("ATO="..tostring(ATO))
 													-- print("ATO[side]="..tostring(ATO and ATO[side]))
 													-- print("ATO[side][pack_n]="..tostring(ATO and ATO[side] and ATO[side][pack_n]))
-													print("ATO[side][pack_n][arg_Role]="..tostring(ATO and ATO[side] and ATO[side][pack_n] and ATO[side][pack_n][arg_Role]))
+													-- print("ATO[side][pack_n][arg_Role]="..tostring(ATO and ATO[side] and ATO[side][pack_n] and ATO[side][pack_n][arg_Role]))
 
 													if ATO[side][pack_n][arg_Role] and ATO[side][pack_n][arg_Role] ~= nil then
 														table.insert(ATO[side][pack_n][arg_Role], flight)
@@ -4090,60 +4101,58 @@ for targetSide, targets in pairs(targetlist) do
 	end
 end
 
-
-local show = true
-
-
 if Debug.debug then
-	-- print("AtoG outMemory check Z1")
-	for side, packages in pairs(ATO) do
-		for packN, pack in pairs(packages) do
-			for role, flights in pairs(pack) do
-				for flightN, flight in pairs(flights) do
+	local show = true
 
-					checkNbPlane[side]["thisMission"].used = checkNbPlane[side]["thisMission"].used + flight.number
 
+	if Debug.debug then
+		-- print("AtoG outMemory check Z1")
+		for side, packages in pairs(ATO) do
+			for packN, pack in pairs(packages) do
+				for role, flights in pairs(pack) do
+					for flightN, flight in pairs(flights) do
+
+						checkNbPlane[side]["thisMission"].used = checkNbPlane[side]["thisMission"].used + flight.number
+
+					end
 				end
 			end
 		end
-	end
 
-	-- _affiche(checkNbPlane, "checkNbPlane: ")
+		local resultPourcent = checkNbPlane.blue.thisMission.used / checkNbPlane.blue.beforMission.ready * 100
 
+		local resultPourcent2 = checkNbPlane.blue.thisMission.used / (checkNbPlane.blue.beforMission.ready - checkNbPlane.blue.beforMission.alreadyInFlight) * 100
+		-- print("AtoG caution 2, not enough BLUE aircraft used compared to available aircraft. Maybe a bug? "..resultPourcent2.." %")
 
-	local resultPourcent =  checkNbPlane.blue.thisMission.used / checkNbPlane.blue.beforMission.ready * 100
+		if resultPourcent < 75 then
+			print("AtoG caution, not enough BLUE aircraft used compared to available aircraft. Maybe a bug? "..resultPourcent.." %")
+			show = true
+		end
 
-	local resultPourcent2 =  checkNbPlane.blue.thisMission.used / (checkNbPlane.blue.beforMission.ready - checkNbPlane.blue.beforMission.alreadyInFlight) * 100
-	print("AtoG caution 2, not enough BLUE aircraft used compared to available aircraft. Maybe a bug? "..resultPourcent2.." %")
+		resultPourcent = checkNbPlane.red.thisMission.used / checkNbPlane.red.beforMission.ready * 100
+		resultPourcent2 = checkNbPlane.red.thisMission.used / (checkNbPlane.red.beforMission.ready - checkNbPlane.red.beforMission.alreadyInFlight) * 100
+		-- print("AtoG caution 2, not enough RED aircraft used compared to available aircraft. Maybe a bug? "..resultPourcent2.." %")
 
-	if resultPourcent < 75 then
-		print("AtoG caution, not enough BLUE aircraft used compared to available aircraft. Maybe a bug? "..resultPourcent.." %")
-		show = true
-	end
+		if resultPourcent < 75 then
+			print("AtoG caution, not enough RED aircraft used compared to available aircraft. Maybe a bug? "..resultPourcent.." %")
+			show = true
+		end
 
-	resultPourcent =  checkNbPlane.red.thisMission.used / checkNbPlane.red.beforMission.ready * 100
-	resultPourcent2 =  checkNbPlane.red.thisMission.used / (checkNbPlane.red.beforMission.ready - checkNbPlane.red.beforMission.alreadyInFlight) * 100
-	print("AtoG caution 2, not enough RED aircraft used compared to available aircraft. Maybe a bug? "..resultPourcent2.." %")
+		for side, units in pairs(oob_air) do
+			for unitN, unit in pairs(units) do
+				if not unit.inactive or unit.inactive == nil then
+					if AcftAvail[unit.name] then
+						local campSquad = DeepCopy(AcftAvail[unit.name])
+						local pourcent = campSquad.assigned / campSquad.ready * 100
 
-	if resultPourcent < 75 then
-		print("AtoG caution, not enough RED aircraft used compared to available aircraft. Maybe a bug? "..resultPourcent.." %")
-		show = true
-	end
+						if pourcent <= 25 then
+							print("AtoG caution, low available unassigned aircraft. Maybe a bug? "..unit.type.." : "..pourcent.." %: "..unit.name)
+							_affiche(campSquad, "_affiche squad : ")
+							print()
+						end
+					else
 
-	for side, units in pairs(oob_air) do
-		for unitN, unit in pairs(units) do
-			if not unit.inactive or unit.inactive == nil then
-				if AcftAvail[unit.name] then
-					local campSquad = DeepCopy(AcftAvail[unit.name])
-					local pourcent = campSquad.assigned / campSquad.ready * 100
-
-					if pourcent <= 25 then
-						print("AtoG caution, low available unassigned aircraft. Maybe a bug? "..unit.type.." : "..pourcent.." %: "..unit.name)
-						_affiche(campSquad, "_affiche squad : ")
-						print()
 					end
-				else
-
 				end
 			end
 		end

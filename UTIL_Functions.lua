@@ -6061,12 +6061,12 @@ end
 
 function SetBoundaryFromCamp()
 	
-	print("BOUNDARY SetBoundaryFromCamp _A ".." camp.boundary "..tostring(camp.boundary) )
+	-- print("BOUNDARY SetBoundaryFromCamp _A ".." camp.boundary "..tostring(camp.boundary) )
 
 	--ecrase mission pour mettre à jour son boundary
 	if camp.boundary then
 
-		print("BOUNDARY SetBoundaryFromCamp _B camp.boundary existe, on met à jour le boundary de la mission en cours")
+		-- print("BOUNDARY SetBoundaryFromCamp _B camp.boundary existe, on met à jour le boundary de la mission en cours")
 		
 		--si camp.boundary existe, il faut ecraser celui de la mission en cours
 		-- car ce n'est peut etre pas le meme
@@ -6074,7 +6074,7 @@ function SetBoundaryFromCamp()
 		local drawTbl = {}
 		if mission and mission.drawings then
 
-			print("BOUNDARY SetBoundaryFromCamp _C mission.drawings existe, on cherche une ligne border a ecraser dans les layers de la mission")
+			-- print("BOUNDARY SetBoundaryFromCamp _C mission.drawings existe, on cherche une ligne border a ecraser dans les layers de la mission")
 
 			drawTbl = mission.drawings
 			
@@ -6133,7 +6133,7 @@ function SetBoundaryFromCamp()
 
 		else
 
-			print("BOUNDARY SetBoundaryFromCamp _D mission.drawings n'existe pas, on le crée avec le boundary du camp")
+			-- print("BOUNDARY SetBoundaryFromCamp _D mission.drawings n'existe pas, on le crée avec le boundary du camp")
 
 			mission.drawings = {
 				["options"] = 
@@ -6214,7 +6214,7 @@ function SetBoundaryFromCamp()
 			}
 
 			if camp.boundary.blue and #camp.boundary.blue >= 3 then
-				print("BOUNDARY SetBoundaryFromCamp _E camp.boundary.blue existe et comporte au moins 3 points, on ajoute une ligne blue dans les layers de la mission")
+				-- print("BOUNDARY SetBoundaryFromCamp _E camp.boundary.blue existe et comporte au moins 3 points, on ajoute une ligne blue dans les layers de la mission")
 
 				mission.drawings.layers[2] = {
 					name = "Blue",
@@ -6290,7 +6290,7 @@ end
 --recupere les info boundary de base_mission ou mission trigger pour remplir le camp.boundary
 function GetBoundary(missionWork)
 
-	print("BOUNDARY GetBoundary _A missionWork "..tostring(missionWork).." camp.boundary "..tostring(camp.boundary) )
+	-- print("BOUNDARY GetBoundary _A missionWork "..tostring(missionWork).." camp.boundary "..tostring(camp.boundary) )
 		
 	local boundary = {
 		red = {},
@@ -6309,23 +6309,23 @@ function GetBoundary(missionWork)
 
 	-- creation des frontieres en fonction des dessins dans missionWork red et blue qui comporte le nom border ou boundary
 	if tableDrawings and tableDrawings.layers then
-		print("BOUNDARY GetBoundary _B tableDrawings.layers existe, on cherche une ligne border dans les layers de la mission")
+		-- print("BOUNDARY GetBoundary _B tableDrawings.layers existe, on cherche une ligne border dans les layers de la mission")
 
 		for layersN, layer in ipairs( tableDrawings.layers) do
-			print("BOUNDARY GetBoundary _C layer.name "..tostring(layer.name).." layer.objects "..tostring(layer.objects) )
+			-- print("BOUNDARY GetBoundary _C layer.name "..tostring(layer.name).." layer.objects "..tostring(layer.objects) )
 
 			if (layer.name == "Red" or layer.name == "Blue" or layer.name == "Neutral" ) and layer.objects and #layer.objects >= 1 then
-				print("BOUNDARY GetBoundary _D layer.name "..tostring(layer.name).." correspond à une faction et comporte des objets, on cherche un objet border ou boundary dans les objets du layer")
+				-- print("BOUNDARY GetBoundary _D layer.name "..tostring(layer.name).." correspond à une faction et comporte des objets, on cherche un objet border ou boundary dans les objets du layer")
 
 				for objetN, objet in ipairs(layer.objects) do
 					local testName = string.lower(objet.name)
-					print("BOUNDARY GetBoundary _E objet.name "..tostring(objet.name).." testName "..tostring(testName) )
+					-- print("BOUNDARY GetBoundary _E objet.name "..tostring(objet.name).." testName "..tostring(testName) )
 
 					if ( string.find( testName , "border") or string.find( testName , "boundary") or string.find( testName , "frontline")   ) and #objet.points >= 3 then
-						print("BOUNDARY GetBoundary _F objet.name "..tostring(objet.name).." correspond à une frontière et comporte au moins 3 points, on ajoute les points à la table boundary")
+						-- print("BOUNDARY GetBoundary _F objet.name "..tostring(objet.name).." correspond à une frontière et comporte au moins 3 points, on ajoute les points à la table boundary")
 
 						if objet.points and #objet.points >= 3 then
-							print("BOUNDARY GetBoundary _G objet.name "..tostring(objet.name).." comporte "..#objet.points.." points, on les ajoute à la table boundary")
+							-- print("BOUNDARY GetBoundary _G objet.name "..tostring(objet.name).." comporte "..#objet.points.." points, on les ajoute à la table boundary")
 
 							camp.boundary = camp.boundary or {}
 							camp.boundary.data = camp.boundary.data or {}
@@ -6529,6 +6529,48 @@ function GetFuzzyMGRS(grid, precision)
            n_fuzzy
 end
 
+-- function SetBaseClient(baseName)
 
+-- 	--parse la table db_airbases puis trouve la baseName puis y ajoute la variable : client = true
+-- 	for baseTitre, base in pairs(db_airbases) do
+-- 		if base.name == baseName then
+-- 			base.client = true
+-- 			return true
+-- 		end
+-- 	end
 
+-- 	return false
+-- end
 
+-- function ResetBaseClient()
+
+-- 	--parse la table db_airbases et met à nil tout base.client
+-- 	for baseTitre, base in pairs(db_airbases) do
+-- 		base.client = nil
+-- 	end
+
+-- end
+
+function SetUnitClient(unitName)
+	--parse la table oob_air puis trouve unitName puis y ajoute la variable : client = true
+	for sideName, squads in pairs(oob_air) do
+		for squadN, squad in pairs(squads) do
+			if squad.name == unitName then
+				squad.client = true
+				print("SetUnitClient return TRUE")
+				return true
+			end
+		end
+	end
+	print("SetUnitClient return FALSE")
+	return false
+end
+
+function ResetUnitClient()
+	--parse la table oob_air et met à nil tout squad.client
+	for sideName, squads in pairs(oob_air) do
+		for squadN, squad in pairs(squads) do
+			squad.client = nil
+		end
+	end
+end
