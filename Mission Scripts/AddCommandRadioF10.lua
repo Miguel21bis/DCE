@@ -2900,15 +2900,13 @@ function EWR_ON(data)
         EWR_optionPlayer = {}
     end
 
-    local playerName = string.lower(data.playerName)
-
-    if not EWR_optionPlayer[playerName] then
-        EWR_optionPlayer[playerName] = {}
+    if not EWR_optionPlayer[data.playerName] then
+        EWR_optionPlayer[data.playerName] = {}
     end
 
-    EWR_optionPlayer[playerName].EWR_on = true
+    EWR_optionPlayer[data.playerName].EWR_on = true
 
-    requestEWRMenuRebuild(data.gid, data.groupObject, playerName)
+	requestEWRMenuRebuild(data.gid, data.groupObject, data.playerName)
 end
 
 function EWR_OFF(data)
@@ -2920,15 +2918,13 @@ function EWR_OFF(data)
 		EWR_optionPlayer = {}
 	end
 
-	local playerName = string.lower(data.playerName)
-
-	if not EWR_optionPlayer[playerName] then
-		EWR_optionPlayer[playerName] = {}
+	if not EWR_optionPlayer[data.playerName] then
+		EWR_optionPlayer[data.playerName] = {}
 	end
 
-	EWR_optionPlayer[playerName].EWR_on = false
+	EWR_optionPlayer[data.playerName].EWR_on = false
 
-	requestEWRMenuRebuild(data.gid, data.groupObject, playerName)
+	requestEWRMenuRebuild(data.gid, data.groupObject, data.playerName)
 end
 
 
@@ -3435,8 +3431,6 @@ addFuncs = function(arg_Gid, arg_GroupObj, argPlayerName)
 
 	if arg_Gid and arg_GroupObj then
 
-		env.info("DCE_addFuncs  _B  ")
-
 		if not EWR_optionPlayer[argPlayerName] then
 			EWR_optionPlayer[argPlayerName] = {
 				EWR_on = false,
@@ -3481,7 +3475,7 @@ addFuncs = function(arg_Gid, arg_GroupObj, argPlayerName)
 
 		for rawName, state in pairs(EWR_optionPlayer or {}) do
 			if type(rawName) == "string" then
-				local playerName = string.lower(rawName)
+				local playerName = rawName
 
 				if not state or not state.EWR_on then
 					radioCommands[#radioCommands + 1] =
@@ -3505,19 +3499,11 @@ addFuncs = function(arg_Gid, arg_GroupObj, argPlayerName)
 			end
 		end
 
-		-- for playerName, value in pairs(EWR_optionPlayer) do
-		-- 	radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, tostring(playerName) .." EWR OFF", subR_B3, EWR_OFF, playerName )
-		-- end
-
-
 		-- radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Get out of the cockpit", subR_A, getOut, gid)
 		local subR_C1 = missionCommands.addSubMenuForGroup(arg_Gid, "Get out of the cockpit", subR_A)
 		for playerName, value in pairs(EWR_optionPlayer) do
 			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, tostring(playerName) .." Get out", subR_C1, getOut, {arg_GroupObj ,playerName} )
 		end
-
-
-		env.info("DCE_addFuncs PASSE   _C  ")
 
 		if campL.SC_CarrierIntoWind == "man" then
 			missionCommands.removeItemForGroup(arg_Gid, {"CarrierIntoWind"})
@@ -3566,8 +3552,6 @@ addFuncs = function(arg_Gid, arg_GroupObj, argPlayerName)
 				env.info("DCE_addFuncs: Failed to open log file for writing.")
 			end
 		 end
-
-		 env.info("DCE_addFuncs PASSE   _D  ")
 
 	end
 end
@@ -4225,6 +4209,18 @@ function EventHandler2:onEvent(event)
 					end
 				end
 			end
+
+		elseif event.id == world.event.S_EVENT_PLAYER_LEAVE_UNIT then
+			-- Quand un joueur quitte un slot
+			if event.initiator and event.initiator.getPlayerName then
+				local playerName = event.initiator:getPlayerName()
+
+				if playerName and EWR_optionPlayer[playerName] then
+					EWR_optionPlayer[playerName] = nil
+				end
+				-- requestEWRMenuRebuild(gid, groupObject)
+			end
+
 		elseif not event.place then
 			if event.subPlace then
 				if event.initiator and event.initiator.getPlayerName then
