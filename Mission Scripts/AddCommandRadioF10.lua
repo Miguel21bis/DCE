@@ -2570,7 +2570,7 @@ end
 
 	--************* SAR ejectedPilot PART ****************************************
 	--on refait régulierement le menu SAR pour actualiser la liste des pilotes ejectés, et le proposer aux menu des joueurs
-function SAR_fct.menuF10_SAR(arg)
+function SAR_fct.menuF10_SAR_OLD(arg)
 
 	env.info("DCE_menuF10_SAR A timer.getTime() "..tostring(timer.getTime()))
 
@@ -3540,8 +3540,8 @@ addFuncs = function(arg_Gid, arg_GroupObj, argPlayerName)
 			
 		end
 
-		-- sar_F10(Group)
-		timer.scheduleFunction(SAR_fct.menuF10_SAR, {arg_Gid, arg_GroupObj}, timer.getTime() + 5)
+		-- -- sar_F10(Group)
+		-- timer.scheduleFunction(SAR_fct.menuF10_SAR, {arg_Gid, arg_GroupObj}, timer.getTime() + 5)
 
 		-- -- AFAC_F10(Group)
 		-- timer.scheduleFunction(AFAC_F10, groupObject, timer.getTime() + 2)
