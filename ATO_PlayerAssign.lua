@@ -40,6 +40,22 @@ end
 local playable = {}
 local tab_doublon = {}
 
+-- Tronque une chaine au milieu avec ".."
+local function truncateMiddle(str, maxLen)
+	if #str <= maxLen then return str end
+	if maxLen <= 4 then return string.sub(str, 1, maxLen) end
+	
+	local part = math.floor((maxLen - 2) / 2)
+	return string.sub(str, 1, part) .. ".." .. string.sub(str, -part)
+end
+
+-- Pad à droite
+local function padRight(str, len)
+	return str .. string.rep(" ", len - #str)
+end
+
+
+
 if not camp.MultiPlayer then camp.MultiPlayer = {} end
 if not camp.MultiPlayer["pack_n"] then camp.MultiPlayer["pack_n"] = {} end
 
@@ -512,7 +528,12 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 					print(" -------------------------------------------------------> Note: Your plane Flight wishes: ")
 					print(" -------------------------------------------------------> "..creaClientFlight[k].NbPlane.." "..creaClientFlight[k].PlaneType.." ("..creaClientFlight[k].side..") "..creaClientFlight[k].task)
 					
-					
+--[[ 					
+					-- ========================================
+					-- Construction des lignes avant affichage
+					-- ========================================
+
+					local lines = {}
 					for index = 1, #playable do
 
 						local indexN = " "
@@ -525,14 +546,169 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 							indexN = " "
 						end
 						local info = ""
-						-- if Debug.Generator.affiche then
-						-- 	info = " "..playable[index].id.." "
-						-- end
-						io.write(indexN..""..info.."(Nb: "..playable[index].number..") ".." |-| "..AliasBaseName(playable[index].base).." |-| "..AliasTypeName(playable[index].type).." |-| "..playable[index].groupName )
-						if playable[index].target_name ~= nil then  io.write(" |-| "..playable[index].target_name) end
-						io.write("\n")
 
+						-- io.write(indexN..""..info.."(Nb: "..playable[index].number..") ".." |-| "..AliasBaseName(playable[index].base).." |-| "..AliasTypeName(playable[index].type).." |-| "..playable[index].groupName )
+						-- if playable[index].target_name ~= nil then  io.write(" |-| "..playable[index].target_name) end
+						-- io.write("\n")
+							
+						local col1 = indexN..info.."(Nb: "..playable[index].number..")"
+						local col2 = AliasBaseName(playable[index].base)
+						local col3 = AliasTypeName(playable[index].type)
+						local col4 = playable[index].groupName or ""
+						local col5 = playable[index].groupName or ""
+
+						table.insert(lines, {
+							c1 = col1,
+							c2 = col2,
+							c3 = col3,
+							c4 = col4,
+							c5 = col5
+						})
 					end
+
+					-- ========================================
+					-- Calcul largeur max par colonne
+					-- ========================================
+
+					local w1, w2, w3, w4 = 0,0,0,0
+
+					for _, l in ipairs(lines) do
+						if #l.c1 > w1 then w1 = #l.c1 end
+						if #l.c2 > w2 then w2 = #l.c2 end
+						if #l.c3 > w3 then w3 = #l.c3 end
+						if #l.c4 > w4 then w4 = #l.c4 end
+					end
+
+					-- Limites max raisonnables par colonne
+					w1 = math.min(w1, 12)
+					w2 = math.min(w2, 22)
+					w3 = math.min(w3, 10)
+					w4 = math.min(w4, 50)
+
+					-- ========================================
+					-- Affichage aligné et borné
+					-- ========================================
+
+					for _, l in ipairs(lines) do
+						
+						local c1 = padRight(truncateMiddle(l.c1, w1), w1)
+						local c2 = padRight(truncateMiddle(l.c2, w2), w2)
+						local c3 = padRight(truncateMiddle(l.c3, w3), w3)
+						local c4 = truncateMiddle(l.c4, w4)
+
+						local line = c1.."  |-| "..c2.." |-| "..c3.." |-| "..c4
+						
+						-- sécurité largeur max globale
+						if #line > MAX_LINE_LEN then
+							line = truncateMiddle(line, MAX_LINE_LEN)
+						end
+						
+						print(line)
+					end ]]
+
+
+					-- ========================================
+					-- Construction des lignes avant affichage
+					-- ========================================
+
+					local MAX_LINE_LEN = 120
+					local lines = {}
+
+					for index = 1, #playable do
+
+						local indexN = " "
+						if tabSelect[index] then
+							indexN = "*"
+						elseif creaClientFlight[k].PlaneType == playable[index].type then
+							indexN = tostring(index)
+							tabIndex[index] = true
+						end
+
+						local col1 = indexN.."(Nb: "..playable[index].number..")"
+						local col2 = AliasBaseName(playable[index].base)
+						local col3 = AliasTypeName(playable[index].type)
+						local col4 = playable[index].groupName or ""
+						local col5 = playable[index].target_name or ""
+
+						--  IMPORTANT : array simple, PAS c1= !
+						table.insert(lines, {
+							col1,
+							col2,
+							col3,
+							col4,
+							col5
+						})
+					end
+
+
+					-- ========================================
+					-- CONFIG
+					-- ========================================
+
+					-- largeur max par colonne (optionnel, extensible)
+					local maxWidth = {
+						12,  -- col1
+						22,  -- col2
+						12,  -- col3
+						40,  -- col4
+						40,  -- col5
+						-- tu peux ajouter col6, col7 plus tard
+					}
+
+					-- ========================================
+					-- CALCUL LARGEUR AUTO
+					-- ========================================
+
+					local colCount = #lines[1]
+					local widths = {}
+
+					for c = 1, colCount do
+						widths[c] = 0
+					end
+
+					-- calcule largeur max réelle
+					for _, line in ipairs(lines) do
+						for c = 1, colCount do
+							local value = line[c] or ""
+							if #value > widths[c] then
+								widths[c] = #value
+							end
+						end
+					end
+
+					-- applique limites
+					for c = 1, colCount do
+						if maxWidth[c] then
+							widths[c] = math.min(widths[c], maxWidth[c])
+						end
+					end
+
+					-- affichage final
+					for _, line in ipairs(lines) do
+						
+						local parts = {}
+						
+						for c = 1, colCount do
+							local value = line[c] or ""
+							value = truncateMiddle(value, widths[c])
+							
+							if c < colCount then
+								value = padRight(value, widths[c])
+							end
+							
+							table.insert(parts, value)
+						end
+						
+						local finalLine = table.concat(parts, " | ")
+						
+						if #finalLine > MAX_LINE_LEN then
+							finalLine = truncateMiddle(finalLine, MAX_LINE_LEN)
+						end
+						
+						print(finalLine)
+					end
+
+
 
 					print("s - skip mission")
 					tabIndex["s"] = true
