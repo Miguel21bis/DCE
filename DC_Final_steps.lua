@@ -190,7 +190,7 @@ end
 
 
 
-for _, side in pairs(mission.coalition) do
+--[[ for _, side in pairs(mission.coalition) do
     for _, country in pairs(side.country) do
         for category, groups in pairs(country) do
             -- Vérifier si la catégorie est "static" (string)
@@ -254,7 +254,104 @@ for _, side in pairs(mission.coalition) do
             end
         end
     end
+end ]]
+
+----------------------------------------------------------------
+-- supprime les clés listées dans removeList d'une table donnée
+-- pourquoi : évite de répéter 15 fois if var then var = nil
+----------------------------------------------------------------
+local function removeKeys(t, removeList)
+    if not t then return end
+    for i = 1, #removeList do
+        t[removeList[i]] = nil
+    end
 end
+
+
+----------------------------------------------------------------
+-- configuration centralisée des variables à supprimer
+-- pourquoi : tout regrouper ici pour maintenance facile
+----------------------------------------------------------------
+local removeConfig = {
+
+    group = {
+        "DCE_targetName",
+        "debug",
+    },
+
+    routePoint = {
+        "briefing_name", -- à réactiver si besoin
+        "hCruiseREF",
+        "TotFlightTime",
+        "TotFlightDist",
+        "etaSpawn",
+        "baseStartup",
+        "debug",
+        "DCE_FreqFlight" ,
+        
+    },
+
+    unit = {
+        "dead_last",
+        "CheckDay",
+    },
+
+    payload = {
+        "DCE_payloadtName",
+    }
+}
+
+
+for _, side in pairs(mission.coalition) do
+    for _, country in pairs(side.country) do
+        for _, groups in pairs(country) do
+
+            if type(groups) == "table" and groups.group then
+
+                for _, group in pairs(groups.group) do
+
+                    ------------------------------------------------
+                    -- nettoyage group
+                    ------------------------------------------------
+                    removeKeys(group, removeConfig.group)
+
+                    ------------------------------------------------
+                    -- nettoyage route.points
+                    ------------------------------------------------
+                    if group.route and group.route.points then
+                        for _, point in pairs(group.route.points) do
+                            removeKeys(point, removeConfig.routePoint)
+                        end
+                    end
+
+                    ------------------------------------------------
+                    -- nettoyage units
+                    ------------------------------------------------
+                    if group.units then
+                        for _, unit in pairs(group.units) do
+
+                            removeKeys(unit, removeConfig.unit)
+
+                            if unit.payload then
+                                removeKeys(unit.payload, removeConfig.payload)
+                            end
+
+                            ------------------------------------------------
+                            -- correction bug SH-3D
+                            ------------------------------------------------
+                            if unit.type == "SH-3D" and group.task == "Transport" then
+                                group.task = "CAS"
+                            end
+
+                        end
+                    end
+
+                end
+            end
+        end
+    end
+end
+
 
 
 --supprime les élements dead

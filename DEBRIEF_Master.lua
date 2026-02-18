@@ -215,6 +215,8 @@ debriefFile:close()
 os.execute('start "Debriefing" "notepad.exe" "Debriefing/Debriefing ' .. camp.mission .. '.txt"')	--open the Debriefing file with notepad
 
 
+ResetUnitClient()
+
 local showVersion = VersionPackageICM
 
 local changelogPath = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_Changelog.lua"
@@ -229,35 +231,7 @@ if f then
 	end
 end
 
-
-
---mmm non, ça doit effacer les fichiers maj plus haut
--- --***********NEW function***************--
--- --***********NEW function***************--
--- LoadFileAndUpdate()
--- --***********NEW function***************--
--- --***********NEW function***************--
-
-
-	--Compare les noms des bases de DCS avec ceux enregistré dans DCE		[1] = 
-		-- {
-		-- 	["baseObject"] = 
-		-- 	{
-		-- 		["id_"] = 5000002,
-		-- 	},
-		-- 	["life"] = 3600,
-		-- 	["life0"] = 3600,
-		-- 	["name"] = "Abu al-Duhur",
-		-- 	["point"] = 
-		-- 	{
-		-- 		["x"] = 75929.7734375,
-		-- 		["y"] = 250.00024414062,
-		-- 		["z"] = 112670.328125,
-		-- 	},
-		-- },
-		-- [2] = 
-		-- {
-	-- for baseName, base in pairs(db_airbases) do
+-- for baseName, base in pairs(db_airbases) do
 if Debug.debug then
 	local foundN = 0
 	local foundX = 0
@@ -604,50 +578,75 @@ if input == "y" or input == "yes" then
 				local ti = 65 																						--char(65) == a
 				local tabTaskAvailable = {}
 
-				-- parse toutes les unites et rempli le tab tabTaskAvailable pour etre sur de proposer toutes les task propos� active 
+				-- parse toutes les unités et rempli le tab tabTaskAvailable pour etre sur de proposer toutes les task proposé active 
 				for nSide , oob_airSide in PairsByKeys(oob_air) do
 					print() print(nSide..":")
-					for m , unit in PairsByKeys(oob_airSide) do
-						if Playable_m[unit.type]  and unit.inactive ~= true then
-							for taskStr , nbool in PairsByKeys(oob_air[nSide][m].tasks) do
-								taskStr = tostring(taskStr)
+					for m, unit in PairsByKeys(oob_airSide) do
+						if Playable_m[unit.type] and unit.inactive ~= true then
 
-								if not tabTaskAvailable[nSide] then tabTaskAvailable[nSide] = {} end
-								if not tabTaskAvailable[nSide][unit.type] then tabTaskAvailable[nSide][unit.type] = {} end
-								if not tabTaskAvailable[nSide][unit.type][taskStr] then tabTaskAvailable[nSide][unit.type][taskStr] = nbool end
-								if nbool == true then	tabTaskAvailable[nSide][unit.type][taskStr] = true	end
+							tabTaskAvailable[nSide] = tabTaskAvailable[nSide] or {}
+							-- tabTaskAvailable[nSide][unit.name] = {
+							-- 	type = unit.type,
+							-- 	base = unit.base,
+							-- 	tasks = {},
+							-- }
+
+							table.insert(tabTaskAvailable[nSide], {
+								name = unit.name,
+								type = unit.type,
+								base = unit.base,
+								tasks = {},
+							})
+
+							for taskStr, nbool in PairsByKeys(oob_air[nSide][m].tasks) do
+								if nbool then
+									taskStr = tostring(taskStr)
+									table.insert(tabTaskAvailable[nSide][#tabTaskAvailable[nSide]]["tasks"],taskStr)
+								end
 							end
+
 						end
 					end
 				end
-
-								-- display le tableau des choix d'avion et de task
+				-- display le tableau des choix d'avion et de task
 				local tabBug = {}
 
-				for nSide , unit_type in PairsByKeys(tabTaskAvailable) do
+				-- for nSide, units in PairsByKeys(tabTaskAvailable) do
+				for nSide, units in pairs(tabTaskAvailable) do
 					print() print(nSide..":")
-					for unitType , TabType in PairsByKeys(unit_type) do
 
-						local IndexStringType = string.lower(string.char(ti))
-						if not playable_type[IndexStringType] then playable_type[IndexStringType] = {} end
-						playable_type[IndexStringType]["type"] = unitType
-						playable_type[IndexStringType]["side"] = nSide
+					--sort units par la key units.type
+					table.sort(units, function(a, b)
+						return a.type < b.type
+					end)
 
-						io.write(" (1 to 8): ("..IndexStringType.."): "..unitType..":")
 
-						for taskStr , nbool in PairsByKeys(TabType) do
+					-- for unitName, unit in PairsByKeys(units) do
+					for unitN, unit in ipairs(units) do
 
-							if TabTask[taskStr] and nbool == true then
+						local indexStringType = string.lower(string.char(ti))
+
+						playable_type[indexStringType] = playable_type[indexStringType] or {}
+						playable_type[indexStringType]["type"] = unit.type
+						playable_type[indexStringType]["side"] = nSide
+						playable_type[indexStringType]["base"] = unit.base
+						playable_type[indexStringType]["unitName"] = unit.name
+
+						io.write(" (1 to 8): ("..indexStringType.."): "..unit.type.." || "..AliasBaseName(unit.base).." || ")
+
+						for taskN, taskStr in PairsByKeys(unit.tasks) do
+
+							if TabTask[taskStr] then
 								io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
 								-- local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
-								tabIndex[tostring(1)..IndexStringType..TabTask[taskStr]] = true
-								tabIndex[tostring(2)..IndexStringType..TabTask[taskStr]] = true
-								tabIndex[tostring(3)..IndexStringType..TabTask[taskStr]] = true
-								tabIndex[tostring(4)..IndexStringType..TabTask[taskStr]] = true
-								tabIndex[tostring(5)..IndexStringType..TabTask[taskStr]] = true
-								tabIndex[tostring(6)..IndexStringType..TabTask[taskStr]] = true
-								tabIndex[tostring(7)..IndexStringType..TabTask[taskStr]] = true
-								tabIndex[tostring(8)..IndexStringType..TabTask[taskStr]] = true
+								tabIndex[tostring(1)..indexStringType..TabTask[taskStr]] = true
+								tabIndex[tostring(2)..indexStringType..TabTask[taskStr]] = true
+								tabIndex[tostring(3)..indexStringType..TabTask[taskStr]] = true
+								tabIndex[tostring(4)..indexStringType..TabTask[taskStr]] = true
+								tabIndex[tostring(5)..indexStringType..TabTask[taskStr]] = true
+								tabIndex[tostring(6)..indexStringType..TabTask[taskStr]] = true
+								tabIndex[tostring(7)..indexStringType..TabTask[taskStr]] = true
+								tabIndex[tostring(8)..indexStringType..TabTask[taskStr]] = true
 
 							elseif not TabTask[taskStr] and not string.lower(taskStr) == "spotter" then
 								table.insert(tabBug,taskStr )
@@ -658,53 +657,32 @@ if input == "y" or input == "yes" then
 					end
 				end
 
-				-- -- display le tableau des choix d'avion et de task
-				-- --tabTaskAvailable[nSide][unit.type][taskStr]
-				-- for nSide , unit_type in PairsByKeys(tabTaskAvailable) do
-				-- 	print() print(nSide..":")
-				-- 	for unitType , TabType in PairsByKeys(unit_type) do
-
-				-- 		local IndexStringType = string.lower(string.char(ti))
-				-- 		if not playable_type[IndexStringType] then playable_type[IndexStringType] = {} end
-				-- 		playable_type[IndexStringType]["type"] = unitType
-				-- 		playable_type[IndexStringType]["side"] = nSide
-
-				-- 		io.write(" (1 to 8): ("..IndexStringType.."): "..unitType..":")
-
-				-- 		for taskStr , nbool in PairsByKeys(TabType) do
-				-- 			if   nbool == true then
-				-- 				io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
-				-- 				local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
-				-- 				tabIndex[tostring(1)..IndexStringType..TabTask[taskStr]] = true
-				-- 				tabIndex[tostring(2)..IndexStringType..TabTask[taskStr]] = true
-				-- 				tabIndex[tostring(3)..IndexStringType..TabTask[taskStr]] = true
-				-- 				tabIndex[tostring(4)..IndexStringType..TabTask[taskStr]] = true
-				-- 				tabIndex[tostring(5)..IndexStringType..TabTask[taskStr]] = true
-				-- 				tabIndex[tostring(6)..IndexStringType..TabTask[taskStr]] = true
-				-- 				tabIndex[tostring(7)..IndexStringType..TabTask[taskStr]] = true
-				-- 				tabIndex[tostring(8)..IndexStringType..TabTask[taskStr]] = true
-
-				-- 			end
-				-- 		end
-				-- 		io.write("\n")
-				-- 		ti = ti+1
-				-- 	end
-				-- end
-
 				io.write( "\n")
+
+				if next(tabBug) == nil then
+					-- print("La table est vide.")
+				else
+					for _, bug in ipairs(tabBug) do
+						print("Bug with: "..bug)
+					end
+				end
 			--===================================================================================
-				-- Ecran N 5 Selection Nombre d'avion Multiplayer
+				-- Ecran N°5 Selection Nombre d'avion Multiplayer
 					repeat
 						input = string.lower(io.stdin:read())
-						if  tabIndex[input] then
-							if not Multi.Group[i] then Multi.Group[i]= {} end
+						if tabIndex[input] then
 
-							local inputNb = tonumber(string.sub (input, 1, 1))
-							Multi.Group[i].NbPlane = inputNb
+							Multi.Group[i] = Multi.Group[i] or {}
+
+							Multi.Group[i].NbPlane = tonumber(string.sub (input, 1, 1))
 
 							local inputTyp = tostring(string.sub (input, 2, 2))
 							Multi.Group[i].PlaneType = playable_type[inputTyp].type
 							Multi.Group[i].side = playable_type[inputTyp].side
+							Multi.Group[i].base = playable_type[inputTyp].base
+							-- print("SetBaseClient TEST "..tostring(playable_type[inputTyp].base))
+							local result = SetUnitClient(playable_type[inputTyp].unitName)
+							if not result then print("SetUnitClient ECHEC "..AliasBaseName(tostring(playable_type[inputTyp].base))) end
 
 							local inputTsk = tostring(string.sub (input, 3, 4))
 							Multi.Group[i].task = TabTask[inputTsk]
@@ -712,14 +690,20 @@ if input == "y" or input == "yes" then
 						else
 							print("\nInvalid entry.\n")
 						end
-					until   tabIndex[input]
+					until tabIndex[input]
 
 					io.write( "\n")
 
 					--========================= affiche le choix du joueurs
 					print(" -------------------------------------------------------> Building your different Flight: ")
 					for k=1, i do
-						print(" -------------------------------------------------------> "..Multi.Group[k].NbPlane.." "..Multi.Group[k].PlaneType.." ("..Multi.Group[k].side..")".." "..Multi.Group[k].task)
+						print(" -------------------------------------------------------> "
+						..Multi.Group[k].NbPlane
+						.." "..Multi.Group[k].PlaneType
+						.." ("..Multi.Group[k].side ..")"
+						.." "..Multi.Group[k].task
+						.." "..AliasBaseName(Multi.Group[k].base)
+					)
 					end
 					io.write( "\n")
 

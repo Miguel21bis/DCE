@@ -7,13 +7,14 @@
 -- His work delivers a true FPS‑like solution with immersive flak effects.
 -------------------------------------------------------------------------------------------------------
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/AAA_barrage.lua"] = "1.2.5"
+versionDCE["Mission Scripts/AAA_barrage.lua"] = "1.2.6"
 -------------------------------------------------------------------------------------------------------
 
 env.info("DCE START LOADING AAA_barrage.lua " .. tostring(versionDCE["Mission Scripts/AAA_barrage.lua"]))
 
 env.info("AAA_barrage START ")
 
+--TODO reste à integrer le camp automatiquement
 -- Which coalition to target:
 local TARGET_COALITION         = coalition.side.BLUE -- coalition.side.RED
 
@@ -32,14 +33,14 @@ local CLUSTER_MAX              = (campL.AAA_Barrage and campL.AAA_Barrage.CLUSTE
 local CLUSTER_RADIUS_M         = 160 -- burst spread around event center (meters)
 
 -- Offset / aim around the aircraft
-local AIM_RADIUS_M             = 450 -- how far from the aircraft the event center can be
+local AIM_RADIUS_M             = 650 -- how far from the aircraft the event center can be
 local LEAD_SECONDS             = (campL.AAA_Barrage and campL.AAA_Barrage.LEAD_SECONDS) or 0.6 --* lead target based on velocity (0 to disable)
 
 -- Altitude behavior
 local ALTITUDE_MODE            = "AGL" -- "MSL" or "AGL"
-local ALT_JITTER_M             = 120   -- +/- meters around target altitude
-local ALT_MIN_MSL              = 600   -- clamp for safety (MSL meters)
-local ALT_MAX_MSL              = 8000
+local ALT_JITTER_M             = 220   -- +/- meters around target altitude
+local ALT_MIN_MSL              = 700   -- clamp for safety (MSL meters)
+local ALT_MAX_MSL              = 7000
 
 -- Explosion strength
 local POWER_MIN                = (campL.AAA_Barrage and campL.AAA_Barrage.POWER_MIN) or 4  --*

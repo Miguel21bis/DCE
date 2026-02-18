@@ -2210,30 +2210,18 @@ Action = {}
 		local missionWork = LoadMissionFromMizIsolated(misStr)
 
 		if missionWork then
-			local result = GetBoudary(missionWork)
+			local result = GetBoundary(missionWork)
 			if result then
-				print("DcCT LoadFileBorder GetBoudary success")
-				SetBoudaryFromCamp()
+				print("DcCT LoadFileBorder GetBoundary success")
+				SetBoundaryFromCamp()
 			else
-				AddLog("Error: GetBoudary failed for file "..tostring(file))
+				AddLog("Error: GetBoundary failed for file "..tostring(file))
 			end
 		else
 			error("Mission non trouvée dans "..file)
 		end
 	end
 
-
-
-	-- --LoadFileBorder
-	-- --change le border
-	-- function Action.LoadFileBorder(file)
-
-	-- 	local missionWork = dofile("Files/"..file)
-
-	-- 	GetBoudary(missionWork)
-	-- 	SetBoudaryFromCamp()
-
-	-- end
 
 	if not AirLiftObjectif then
 		AirLiftObjectif = {}
