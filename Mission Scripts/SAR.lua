@@ -1459,9 +1459,13 @@ end
 
 function StartRadioTransmission(arg)
 
-    local ejPilData = arg[1]
-	local ejPilotVec3 = arg[2]
-	local gpGid = arg[2]
+	local gpGid = arg[1]
+    local ejPilData = arg[2]
+	local ejPilotVec3 = arg[3]
+
+	_affiche(arg, "DCE_SAR: arg")
+
+	env.info( "DCE_SAR:StartRadioTransmission A gpGid "..tostring(gpGid).." |ejPilData.name: "..tostring(ejPilData.name).." |ejPilotVec3: "..tostring(ejPilotVec3))
 
 	if ejPilData and not ejPilData.radio_on and ejPilotVec3 then
 

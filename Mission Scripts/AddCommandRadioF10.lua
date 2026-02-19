@@ -2602,43 +2602,49 @@ function SAR_fct.menuF10_SAR(arg)
 		return
 	end
 
-	local unitSAR = groupObj:getUnits(1)
+	local wingman = groupObj:getUnits()
+	local unitSAR = wingman[1]
 	local sar_CoalitionId = tostring(unitSAR:getCoalition())
-	local uSAR_Player = unitSAR:getPlayerName()
-
-	-- env.info("DCE_LoopSAR H coalName "..tostring(coalName).." sar_CoalitionId "..tostring(sar_CoalitionId))
-	-- env.info("DCE_LoopSAR H  == ? CoalitionIdAlphaToName "..tostring(CoalitionIdAlphaToName[sar_CoalitionId] ))
+	-- local uSAR_Player = unitSAR:getPlayerName()
 
 	if unitSAR:isExist() and unitSAR:isActive() then
 		local pos_SAR_vec3 = unitSAR:getPoint()
-		local uSAR_unitId = Unit.getID(unitSAR)
-		local uSAR_Name = unitSAR:getName()
+		-- local uSAR_unitId = Unit.getID(unitSAR)
+		-- local uSAR_Name = unitSAR:getName()
 		-- local uSAR_inAir = unitSAR:inAir()
 
-		-- env.info("DCE_LoopSAR I uSAR_inAir "..tostring(uSAR_inAir))
+		env.info("DCE_menuF10_SAR E unitSAR:isExist() "..tostring(unitSAR:isExist()).." unitSAR:isActive() "..tostring(unitSAR:isActive()).." pos_SAR_vec3.x "..tostring(pos_SAR_vec3.x).." pos_SAR_vec3.y "..tostring(pos_SAR_vec3.y).." pos_SAR_vec3.z "..tostring(pos_SAR_vec3.z))
+		
+		local txt = "Downed pilot, this is Sandy, key your radio and give me a beep."
+		timer.scheduleFunction(ResponseTimeForGp, { gId, txt }, timer.getTime() + 2)
+		
 		for MGRS_Chute, zone in pairs(ZoneSAR) do
+			env.info("DCE_menuF10_SAR _F1 MGRS_Chute "..tostring(MGRS_Chute))
 			for pilotN, ejPil in ipairs(zone) do
+				env.info("DCE_menuF10_SAR _F2 pilotN "..tostring(pilotN).." ejPil.name "..tostring(ejPil.name).." ejPil.embarked "..tostring(ejPil.embarked).." ejPil.sideName "..tostring(ejPil.sideName).." CoalitionIdAlphaToName[sar_CoalitionId] "..tostring(CoalitionIdAlphaToName[sar_CoalitionId]).." ejPil.radio_on "..tostring(ejPil.radio_on))
+
                 if ejPil.name and not ejPil.embarked and ejPil.sideName == CoalitionIdAlphaToName[sar_CoalitionId]
 					and not ejPil.radio_on then
+					
+					env.info("DCE_menuF10_SAR _F3 pilotN "..tostring(pilotN).." ejPil.name "..tostring(ejPil.name).." ejPil.embarked "..tostring(ejPil.embarked).." ejPil.sideName "..tostring(ejPil.sideName).." CoalitionIdAlphaToName[sar_CoalitionId] "..tostring(CoalitionIdAlphaToName[sar_CoalitionId]).." ejPil.radio_on "..tostring(ejPil.radio_on))
 					local unitEjectPilot = Unit.getByName(ejPil.name)
 
 					if unitEjectPilot then
 						local ejPilotVec3 = unitEjectPilot:getPoint()
-						local distance = math.sqrt(math.pow(
-						pos_SAR_vec3.x - ejPilotVec3.x, 2) +
-						math.pow(pos_SAR_vec3.z - ejPilotVec3.z, 2))
+						local distance = math.sqrt(math.pow( pos_SAR_vec3.x - ejPilotVec3.x, 2) + math.pow(pos_SAR_vec3.z - ejPilotVec3.z, 2))
 
-						if distance <= 50000 then
+						env.info("DCE_menuF10_SAR _F4 pilotN "..tostring(pilotN).." ejPil.name "..tostring(ejPil.name).." distance to player "..tostring(distance))
+
+						if distance <= 140000 then
+
+							env.info("DCE_menuF10_SAR __G pilotN "..tostring(pilotN).." ejPil.name "..tostring(ejPil.name).." is in range for radio transmission")
 							
 							-- local ejPilData = arg[1]
 							-- local ejPilObj = arg[2]
 							-- StartRadioTransmission(arg)
 
-							timer.scheduleFunction(StartRadioTransmission, { ejPil, ejPilotVec3, gId }, timer.getTime() + 10)
+							timer.scheduleFunction(StartRadioTransmission, { gId, ejPil, ejPilotVec3}, timer.getTime() + 10)
 
-							local txt = "Downed pilot, this is Sandy, key your radio and give me a beep."
-							timer.scheduleFunction(ResponseTimeForGp, { gId, txt }, timer.getTime() + 2)
-							
 							if not unitEjectPilot:isExist() then
 								StopRadioTransmission(ejPil.name)
 							end
@@ -3601,7 +3607,13 @@ addFuncs = function(gId, gObj, playerName)
 			end
 		end
 
-		MenuF10ByGroupByCmd[gId]["SAR"] = missionCommands.addCommandForGroup(gId, "CSAR: Request Survivor Beep", nil, SAR_fct.menuF10_SAR, {gid = gId, groupObject = gObj } )
+		MenuF10ByGroupByCmd[gId] = MenuF10ByGroupByCmd[gId] or {}
+		--trouve ici le camp, la coalition du joueur, a partir de son gId ou gObj ou playerName
+		
+		local unitsObj = gObj:getUnits()
+		local sideName = CoalitionIdToName[unitsObj[1]:getCoalition()] or "blue"
+		local freqence = campL.EjectedPilotFrequency[sideName].radioBeacon or 0
+		MenuF10ByGroupByCmd[gId]["SAR"] = missionCommands.addCommandForGroup(gId, "CSAR: Request Survivor Beep "..tostring(freqence), nil, SAR_fct.menuF10_SAR, {gId, gObj} )
 
 		
 		-- radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Get out of the cockpit", subR_A, getOut, gid)

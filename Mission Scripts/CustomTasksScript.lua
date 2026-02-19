@@ -5040,7 +5040,6 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 		current_time = timer.getTime()
 		local flight = Group.getByName(grpName)
 
-		-- local selectedMember = flight:getUnits(1)
 		local selectedMember
 		local wingman = flight:getUnits()
 
@@ -5600,7 +5599,6 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 		-- current_time = timer.getTime()
 		local flight = Group.getByName(grpName)
 
-		-- local selectedMember = flight:getUnits(1)
 		local selectedMember
 		local wingman = flight:getUnits()
 
