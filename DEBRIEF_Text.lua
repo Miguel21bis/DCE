@@ -1280,13 +1280,6 @@ do
 		end
 	end
 
-	if Debug.debug then
-		local camp_str = "entries = " .. TableSerialization(entries, 0)						--make a string
-		local campFile = io.open("Debug/DEBRIEF_TXT.lua", "w") or error("Failed to open debug file")
-		campFile:write(camp_str)															--save new data
-		campFile:close()
-	end
-
 	--determine maximum string length for each entry
 	for e = 1, #entries do																		--iterate through entries
 		entries[e].str_length = string.len(entries[e].header)									--store string length of header for this entry

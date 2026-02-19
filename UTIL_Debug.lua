@@ -107,13 +107,6 @@ infoPopulate = infoPopulate .."Number of static groups: "..tostring(NbGrStatic).
 
 print(infoPopulate)
 
-DebugFLIGHT = DebugFLIGHT .. infoPopulate
-
-local debugFLIGHTFile = io.open("Debug/debugFlight.txt", "w") or error("Failed to open debug file")
-debugFLIGHTFile:write(DebugFLIGHT)																		--save new data
-debugFLIGHTFile:close()
-
-
 --recherche si toutes les cibles des packages existent dans la mission
 function CustomGroupAttack(FlightName, TargetName, expend, weaponType, attackType, attackAlt, id_task)
 

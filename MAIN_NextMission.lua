@@ -1311,7 +1311,6 @@ if PlayerFlight then
 	-- miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "Active/camp_status.lua")
 	miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "campL.lua")
 	-- miz:zipAddFile("l10n/DEFAULT/FlightPlan_Generator_Debug.txt", "Debug/FlightPlan_Generator_Debug.txt")
-	-- miz:zipAddFile("l10n/DEFAULT/debugFlight.txt", "Debug/debugFlight.txt")
 	miz:zipAddFile("l10n/DEFAULT/SAR.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/SAR.lua")
 
 	if camp.theatre  == "Caucasus" then
@@ -1442,8 +1441,7 @@ os.remove("campL.lua")
 
 if not Debug.debug then
 	--delete mission temporary files
-	os.remove("../"..camp.title.."/Debug/debugFlight.txt")
-	os.remove("../"..camp.title.."/Debug/FlightPlan_Generator_Debug.txt")
+	os.remove("../"..camp.title.."/Debug/FlightPlan_FLIGHT_Debug.txt")
 end
 
 

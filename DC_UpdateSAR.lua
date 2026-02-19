@@ -644,13 +644,13 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                         },
                         red = {
                             [500] = 0,
-                            [3000] = 0,
+                            [1500] = 0,
                             [20000] = 0,
                             [200000] = 0
                         },
                         blue = {
                             [500] = 0,
-                            [3000] = 0,
+                            [1500] = 0,
                             [20000] = 0,
                             [200000] = 0
                         },
@@ -775,14 +775,14 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 							pilot.status = "POW"
                             pilot.reason = "set to POW 500m ENI "
                             -- print("DcUS update Status D "..tostring(pilot.name).." set to POW 500m ENI")
-						elseif nbAMI_ENI[zoneSideName][3000] >= 2  and nbAMI_ENI[enemy][3000] < 2 then
+						elseif nbAMI_ENI[zoneSideName][1500] >= 2  and nbAMI_ENI[enemy][1500] < 2 then
 							pilot.status = "EVAC_possible"
-						elseif nbAMI_ENI[zoneSideName][3000] < 2  and nbAMI_ENI[enemy][3000] >= 2 then
+						elseif nbAMI_ENI[zoneSideName][1500] < 2  and nbAMI_ENI[enemy][1500] >= 2 then
 							pilot.status = "POW"
                             pilot.reason = "set to POW 3000m ENI "
                             -- print("DcUS update Status E "..tostring(pilot.name).." set to POW 3000m ENI")
-						elseif nbAMI_ENI[zoneSideName][3000] >= 2  and nbAMI_ENI[enemy][3000] >= 2  then
-							local pourcent = (nbAMI_ENI[zoneSideName][3000] / ( nbAMI_ENI[zoneSideName][3000] + nbAMI_ENI[enemy][3000]))*100
+						elseif nbAMI_ENI[zoneSideName][1500] >= 2  and nbAMI_ENI[enemy][1500] >= 2  then
+							local pourcent = (nbAMI_ENI[zoneSideName][1500] / ( nbAMI_ENI[zoneSideName][1500] + nbAMI_ENI[enemy][1500]))*100
 							local coef = (pilot.dataPOW.ejectNbDay*(-1) + 5) -- plus le nb de jour augmente, plus les chances d etre capturé augmente
                             if coef < 1 then coef = 1 end
                             local randomMalChance = math.random(1, 100) / coef
@@ -1107,9 +1107,9 @@ if camp_ZoneSAR then
                 local pilot = zone[pilotN]
                 if pilot.status == "rescued" or pilot.status == "POW" or pilot.status == "error" or pilot.status == "dead" then
                     local result, resultTarget = deleteSoldierAliasPilot(pilot)
-                    if not result and not resultTarget and Debug.debug then
-                        print("DcUS GG (rescued or POW) Unable to delete this pilot "..pilot.status.." // "..tostring(pilot.name))
-                    end
+                    -- if not result and not resultTarget and Debug.debug then
+                    --     print("DcUS GG (rescued or POW) Unable to delete this pilot "..pilot.status.." // "..tostring(pilot.name))
+                    -- end
 
                     if Debug.debug then
                         print("DcUS remove ejectedPilot from UpdateSAR "..pilot.name.." status: "..tostring(pilot.status).." Reason?: "..tostring(pilot.reason))

@@ -5544,10 +5544,6 @@ function LoadFileAndUpdate(from)
 	DataCompilation_TaskByPlane()
 
 	if Debug.debug then
-		local camp_str = "Data_divers = " .. TableSerialization(Data_divers, 0)
-		local campFile = io.open("Debug/Data_divers.lua", "w") or error("Échec d'ouverture du fichier Data_divers")
-		campFile:write(camp_str)
-		campFile:close()
 
 		camp_str = "Failures = " .. TableSerialization(Failures, 0)
 		campFile = io.open("Debug/Failures.lua", "w") or error("Échec d'ouverture du fichier Failures")
@@ -6043,11 +6039,6 @@ function CleanDataDivers()
 
 		camp_str = "AircraftInCampaign = " .. TableSerialization(AircraftInCampaign, 0)						--make a string
 		campFile = io.open("Debug/Z_AircraftInCampaign.lua", "w")	 or error("Failed to open debug file")
-		campFile:write(camp_str)																		--save new data
-		campFile:close()
-
-		camp_str = "Data_divers = " .. TableSerialization(Data_divers, 0)						--make a string
-		campFile = io.open("Debug/Z_Data_divers.lua", "w")	 or error("Failed to open debug file")
 		campFile:write(camp_str)																		--save new data
 		campFile:close()
 
