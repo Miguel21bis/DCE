@@ -808,12 +808,18 @@ for sideName, units in pairs(oob_air) do
 								if isDebugModeA1 then
 									debugLog("draftId"..draftId.." AtoG passe A_03b task: "..tostring(task).." task_bool: "..tostring(task_bool).."  ")
 								end
+
 								if task_bool and task ~= "SEAD" and task ~= "Escort" and task ~= "Escort Jammer" and task ~= "Flare Illumination" and task ~= "Laser Illumination" then		--task is true and is no support task
 
 									-- print(draftId.." AtoG passe A_03b task: "..tostring(task).." task_bool: "..tostring(task_bool).."  ")
 
-									local isDebugModeA2 = Debug.Generator.affiche and string.find(Debug.Generator.chapter, "A")
-												and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name and Debug.Generator.SpyTask == task)
+									local isDebugModeA2 =
+										Debug.Generator.affiche
+										and string.find(Debug.Generator.chapter, "A")
+										and (
+											(Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name)
+											or (not Debug.Generator.SpySquad and Debug.Generator.SpyTask == task)
+										)
 
 									if isDebugModeA2 then
 										debugLog("draftId"..draftId.." AtoG passe A_04b "..unit.type.." Befor task Condition | task: "..task)
@@ -1023,11 +1029,25 @@ for sideName, units in pairs(oob_air) do
 														local target_name = target.titleName
 
 														if not target.inactive and target.ATO then											--if target is active and should be added to ATO
-															isDebugModeA2 = Debug.Generator.affiche and string.find(Debug.Generator.chapter, "A")
-																and (Debug.Generator.SpySquad and Debug.Generator.SpySquad == unit.name and Debug.Generator.SpyTask == task
-																or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == target.titleName ))
+															local isDebugModeA3 =
+																Debug.Generator.affiche
+																and string.find(Debug.Generator.chapter, "A")
+																and (
+																	(
+																		Debug.Generator.SpySquad
+																		and Debug.Generator.SpySquad == unit.name
+																		and Debug.Generator.SpyTask == task
+																	)
+																	or (
+																		not Debug.Generator.SpySquad
+																		and (
+																			Debug.Generator.SpyTask == task
+																			or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == target.titleName)
+																		)
+																	)
+																)
 
-															if isDebugModeA2 then
+															if isDebugModeA3 then
 																debugLog("draftId"..draftId.." AtoG passe A_07c :"..unit.type.." "..target.titleName.." Befor task Condition: "..target.task .." ==? task? "..task.." || "..target_name)
 															end
 
@@ -1072,10 +1092,10 @@ for sideName, units in pairs(oob_air) do
                                                                 end
 
 																if target.attributesCond then
-																	loadout_eligible = evalAttributesCond(target.attributesCond, unit, isDebugModeA2)
+																	loadout_eligible = evalAttributesCond(target.attributesCond, unit, isDebugModeA3)
 																end
 
-																if isDebugModeA2 then
+																if isDebugModeA3 then
 																	debugLog("draftId"..draftId.." AtoG passe A_10 Befor Condition loadout_eligible?: "..tostring(loadout_eligible).." |unit.name: "..unit.name.." |target_name: "..target_name.." |target.base: "..tostring(target.base).." |unit.base: "..unit.base.." debugLocal: "..tostring(debugLocal))
 																end
 
@@ -1120,12 +1140,12 @@ for sideName, units in pairs(oob_air) do
 																			end
 																		end
 
-																		if isDebugModeA2 then
+																		if isDebugModeA3 then
 																			debugLog("draftId"..draftId.." "..debugMulti)
 																		end
 
 
-																		if isDebugModeA2 then
+																		if isDebugModeA3 then
 																			debugLog("draftId"..draftId.." AtoG passe A_11 overRideMP_A? "..tostring(overideMP_A).." Befor firepower Condition".." || "..target_name
 																			.." "..unit.type
 																			.." firepower.min? "..target.firepower.min
@@ -1144,7 +1164,7 @@ for sideName, units in pairs(oob_air) do
 
 																		if (passHumain and (target.firepower.min <= aircraft_available * unit_loadouts[l].firepower)) or overideMP_A then				--enough aircraft are available to satisfy minimum firepower requirement of target	
 
-																			if isDebugModeA2 then
+																			if isDebugModeA3 then
 																				debugLog("draftId"..draftId.." AtoG passe A_12  Befor weather Condition || overRideReady: "..tostring(overRideReady).." || "..target_name)
 																			end
 
@@ -1154,7 +1174,7 @@ for sideName, units in pairs(oob_air) do
 																			local weather_eligible = true
 																			if mission.weather["clouds"]["density"] > 8 then																				--overcast clouds
 
-																				if isDebugModeA2 then
+																				if isDebugModeA3 then
 																					debugLog("draftId"..draftId.." AtoG passe A_13a "..unit_loadouts[l].loadout_name.." After weather Condition "..target_name)
 																				end
 
@@ -1206,14 +1226,14 @@ for sideName, units in pairs(oob_air) do
 																				proxiCSAR = true
 																			end
 
-																			if isDebugModeA2 then
+																			if isDebugModeA3 then
 																				debugLog("draftId"..draftId.." AtoG passe A_13__C ".." proxiCSAR "..tostring(proxiCSAR).." ".. tostring(unit.name).." selectedUnitSAR: "..tostring(target.selectedUnitSAR).." target.name: "..tostring(target.name))
 																				debugLog("draftId"..draftId.." AtoG passe A_13__D weather_eligible? "..tostring(weather_eligible).." overRideReady: "..tostring(overRideReady).." overideMP_A? "..tostring(overideMP_A))
 																			end
 
 																			if (weather_eligible and proxiCSAR) or overRideReady then																				--continue of this loadout is eligible for weather
 
-																				if isDebugModeA2 then
+																				if isDebugModeA3 then
 																					debugLog("draftId"..draftId.." AtoG passe A_14 ".." After weather_eligible Condition "..target_name)
 																				end
 
@@ -1238,7 +1258,7 @@ for sideName, units in pairs(oob_air) do
 
 																				for r = 1, multipack do																				--repeat draft sortie generation for the requirement amount of packages (may create different routes each time)
 
-																					if isDebugModeA2 then
+																					if isDebugModeA3 then
 																						debugLog("draftId"..draftId.." AtoG passe A_15 multipack "..tostring(multipack).." FOR multipack Boucle "..target_name)
 																					end
 
@@ -1254,7 +1274,7 @@ for sideName, units in pairs(oob_air) do
 																						variant = 4
 																					end
 
-																					if isDebugModeA2 then
+																					if isDebugModeA3 then
 																						debugLog("draftId"..draftId.." AtoG passe A_16 "..tostring(variant).." "..tostring(Daytime).." Befor variant Condition "..target_name)
 																					end
 
@@ -1265,7 +1285,7 @@ for sideName, units in pairs(oob_air) do
 																						if variant ~= 1 then
 																							draftId = draftId + 1
 																						end
-																						if isDebugModeA2 then
+																						if isDebugModeA3 then
 																							debugLog("draftId"..draftId.." AtoG passe A_18 ".." After variant Condition "..target_name)
 																						end
 
@@ -1365,7 +1385,7 @@ for sideName, units in pairs(oob_air) do
 																							-- 	end
 																							-- end
 
-																							-- if isDebugModeA2 then
+																							-- if isDebugModeA3 then
 																							-- 	debugLog("draftId"..draftId.." "..debugMulti)
 																							-- end
 																							
@@ -1376,7 +1396,7 @@ for sideName, units in pairs(oob_air) do
 																							end
 
 
-																							if isDebugModeA2 then
+																							if isDebugModeA3 then
 																								debugLog("draftId"..draftId.." AtoG A_25 "..tostring(toTarget).." || LoadoutUnitRange: "..tostring(unit_loadouts[l].range).." "..tostring(unit_loadouts[l].name)
 																								.."\n".."______________toTarget "..tostring(toTarget).." <=? "..tostring(unit_loadouts[l].range)
 																								)
@@ -1408,7 +1428,7 @@ for sideName, units in pairs(oob_air) do
 																							altiPass = false
 																						end
 
-																						if isDebugModeA2 then
+																						if isDebugModeA3 then
 																							debugLog(tempDebug..draftId.."\n".."AtoG passe A_28d "
 																							.."\n".."______________route.lenght "..tostring(route.lenght).." <=? "..tostring(unit_loadouts[l].range * 2)
 																							.."\n".."______________altiPass? "..tostring(altiPass)
@@ -1417,7 +1437,7 @@ for sideName, units in pairs(oob_air) do
 
 																						--if sortie route lenght is within range of aircraft-loadout
 																						if route and route.lenght and route.lenght <= unit_loadouts[l].range * 2 and altiPass then
-																							if isDebugModeA2 then
+																							if isDebugModeA3 then
 																								debugLog("draftId"..draftId.." AtoG passe A_29 After Range Condition | firepower.max: "..tostring(target.firepower.max).." / loadoutFirepower "..tostring(unit_loadouts[l].firepower))
 																							end
 
@@ -1507,7 +1527,7 @@ for sideName, units in pairs(oob_air) do
 
 																							debugMulti = debugMulti.."\n"..("AtoG_overideMP_A passe D "..unit.type.." aircraft_assign: "..tostring(aircraft_assign))
 
-																							if isDebugModeA2 then
+																							if isDebugModeA3 then
 																								debugLog("draftId"..draftId.." "..debugMulti)
 																							end
 
@@ -1523,7 +1543,7 @@ for sideName, units in pairs(oob_air) do
 																							repeat																							--for tasks with station repeat to make entries for lesser amount of aircraft, repeat once for everything else
 																								local idTemp = "id"..#draftSorties[sideName]+1
 
-																								if isDebugModeA2 then
+																								if isDebugModeA3 then
 																									debugLog("draftId"..draftId.." AtoG passe A_30a "..idTemp.." clientPlayer: "..tostring(clientPlayer) .. " overRideMP_A: "
 																									.. tostring(overideMP_A).." idTemp: "..tostring(idTemp).." aircraft_assign: "..tostring(aircraft_assign).." |Nb Draft "..tostring(#draftSorties[sideName]))
 																								end
@@ -1575,14 +1595,14 @@ for sideName, units in pairs(oob_air) do
 
 																								}
 
-																								if isDebugModeA2 then
+																								if isDebugModeA3 then
 																									debugLog("draftId"..draftId.." AtoG passe A_31a "..idTemp.." Add SUPPORT CSAR task?: "..tostring(task).." overideMP_A? "..tostring(overideMP_A))
 																									
 																								end
 
 																								if task == "CSAR" and overideMP_A then
 																									draftSortiesEntry["support"]["CSAR"] = {}
-																									if isDebugModeA2 then
+																									if isDebugModeA3 then
 																										debugLog("draftId"..draftId.." AtoG passe A_31b "..idTemp.." Add SUPPORT CSAR ")
 																									end
 																								end
@@ -1601,7 +1621,7 @@ for sideName, units in pairs(oob_air) do
 																									draftSortiesEntry.score =  target.priority / route_threat	--unit_loadouts[l].capability *	--calculate the score to measure the importance of the sortie
 																								end
 
-																								if isDebugModeA2 then
+																								if isDebugModeA3 then
 																									debugLog("draftId"..draftId.." AtoG passe A_32: " .. idTemp.." score: "..tostring(draftSortiesEntry.score).." *T_priority "..tostring(target.priority).." /threat "..tostring(route_threat)
 																									.." (ground_total "..route.threats.ground_total.." + air_total:"..route.threats.air_total.." )")
 																								end
@@ -1696,7 +1716,7 @@ for sideName, units in pairs(oob_air) do
 
 																								end
 
-																								if isDebugModeA2 then
+																								if isDebugModeA3 then
 																									debugLog("draftId"..draftId.." AtoG passe A_33: " ..idTemp.." score: ".. tostring(draftSortiesEntry.score).." "..unit.type.." "..tostring(task))
 																								end
 
@@ -1749,7 +1769,7 @@ for sideName, units in pairs(oob_air) do
 																									draftSortiesEntry.scoreCoef = draftSortiesEntry.scoreCoef * 1.5
 																								end
 
-																								if isDebugModeA2 then
+																								if isDebugModeA3 then
 																									debugLog("draftId"..draftId.." "..debuGenTxtTemp.." AtoG passe A_34 INSERT IN Draft_sorties: " ..idTemp.." score: ".. tostring(draftSortiesEntry.score).." "..unit.type.." "..tostring(task))
 																								end
 
@@ -1776,7 +1796,7 @@ for sideName, units in pairs(oob_air) do
 																									aircraft_assign = 0																		--do not make additional draft sorties
 																								end
 
-																								if isDebugModeA2 then
+																								if isDebugModeA3 then
 																									debugLog(draftId .." AtoG passe A_35_Recalcul_NB : "..idTemp.." aircraft_assign "..aircraft_assign.." |Nb de draft: "..#draftSorties[sideName])
 																								end
 

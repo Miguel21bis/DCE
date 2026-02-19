@@ -2259,10 +2259,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					-- ************* store spawn and departure time for flight *************
 					if flight[f].route[w].id == "Taxi" or flight[f].route[w].id == "Spawn" then --or flight[f].route[w].id == "SAR"
-						-- spawn_time = flight[f].route[w].eta --spawn_time_bug ?
 						start_time = flight[f].route[w].eta
-						-- departure_time = flight[f].route[w].eta
-						debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP Taxi or Spawn and SAR or set departure_time " .. tostring(departure_time) )
+						debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP Taxi or Spawn and SAR or set departure_time " .. tostring(start_time) )
 
 					elseif flight[f].route[w].id == "Departure" then
 						departure_time = flight[f].route[w].eta
@@ -2271,6 +2269,15 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					if flight[f].route[w].id == "Join" then
 						waypoints[w]["hCruiseREF"] = flight[f].route[w].hCruiseREF
 						waypoints[w]["test"] = flight[f].route[w].test
+					end
+
+					if isHumain then
+
+						start_time = 0
+
+						if flight[f].route[w].id == "Taxi" or flight[f].route[w].id == "Spawn" then
+							flight[f].route[w].eta = 0
+						end
 					end
 
 
@@ -5371,6 +5378,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					group.start_time = 0	--start_time_bug group.start_time = 1
 					group['route']['points'][1]["ETA"] = 0
 
+					debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP Taxi or Spawn and SAR or set departure_time " .. tostring(group.start_time) )
+
+
 					local playerSixPack = {}
 					if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe PlayerClient AddtimingDeckCata "..spawn_time) end
 					--construit une table que l'on triera plus tard pour decider qui a le droit d etre sur le sixpack et ne pas gener les autres
@@ -7046,6 +7056,12 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						DebugFLIGHT = DebugFLIGHT .. "\n".."Error info02"..info02
 					end
+					if group.start_time > 1 then
+						info02 = info02.."\n".."|+start_time|ATTENTION start_time ClientPlayer > 1 "..group.start_time.."\n"
+						tagATTENTION = true
+
+						DebugFLIGHT = DebugFLIGHT .. "\n".."Error info02"..info02
+					end
 				end
 
 				if group.route.points[1].linkUnit then
@@ -7769,7 +7785,7 @@ end
 camp.BaseAirStart = tempBaseAirStart
 
 -- local debugTxt_AtoFP = debugTxt_AtoFP
-local debugGenMFile = io.open("Debug/FlightPlan_Generator_Debug.txt", "w") or error("Failed to open debug file")
+local debugGenMFile = io.open("Debug/FlightPlan_FLIGHT_Debug.txt", "w") or error("Failed to open debug file")
 debugGenMFile:write(debugTxt_AtoFP)
 debugGenMFile:close()
 
@@ -8023,12 +8039,11 @@ end
 
 
 if Debug.debug then
+
 	camp_str = "ATO_AtoFP = " .. TableSerialization(ATO, 0)						--make a string
 	campFile = io.open("Debug/ATO_AtoFP.lua", "w")  or error("Failed to open debug file")
 	campFile:write(camp_str)																		--save new data
 	campFile:close()
-
-
 
 	camp_str = "CommonFreq = " .. TableSerialization(CommonFreq, 0)						--make a string
 	campFile = io.open("Debug/Radio_CommonFreq_FlightPlan.lua", "w")  or error("Failed to open debug file")
