@@ -101,7 +101,7 @@ local addFuncs
 if not EWR_menuRootByGroup then
 	EWR_menuRootByGroup = {}
 end
-
+MenuF10ByGroupByCmd = MenuF10ByGroupByCmd or {}
 
 local fuelCacheCooldown = 5   -- secondes entre deux lectures DCS par avion
 FuelCache = FuelCache or {}
@@ -393,6 +393,22 @@ function GetDistance2D(a, b)
 	local dy = a.y - b.y
 	return math.sqrt(dx * dx + dy * dy)
 end
+
+--response time of the interlocutor, so that the answer is not immediate like a computer
+function ResponseTimeForU(arg)
+    local Uid = arg[1]
+    local txt = arg[2]
+
+    trigger.action.outTextForUnit(Uid, txt, 10)
+end
+
+function ResponseTimeForGp(arg)
+	local gpGid = arg[1]
+    local txt = arg[2]
+
+	trigger.action.outTextForGroup(gpGid, txt, 10)
+end
+
 
 --proxyBase
 function ProxyBase(selectedEjection)
@@ -2569,7 +2585,75 @@ function SAR_fct.StopRadioBeaconTransmission(ejPilotName)
 end
 
 	--************* SAR ejectedPilot PART ****************************************
-	--on refait régulierement le menu SAR pour actualiser la liste des pilotes ejectés, et le proposer aux menu des joueurs
+--on refait régulierement le menu SAR pour actualiser la liste des pilotes ejectés, et le proposer aux menu des joueurs
+function SAR_fct.menuF10_SAR(arg)
+
+	-- “Downed pilot, this is Sandy. If you hear me, key your radio twice.”
+	env.info("DCE_menuF10_SAR A timer.getTime() " .. tostring(timer.getTime()))
+
+	local gId = arg[1]
+	local groupObj = arg[2]
+
+	env.info("DCE_menuF10_SAR C1 arg_gpGid " .. tostring(gId) .. " arg_playerGroup: " .. tostring(groupObj))
+
+	if groupObj and groupObj:isExist() then
+	else
+		env.info("DCE_menuF10_SAR D playerGroup not exist")
+		return
+	end
+
+	local unitSAR = groupObj:getUnits(1)
+	local sar_CoalitionId = tostring(unitSAR:getCoalition())
+	local uSAR_Player = unitSAR:getPlayerName()
+
+	-- env.info("DCE_LoopSAR H coalName "..tostring(coalName).." sar_CoalitionId "..tostring(sar_CoalitionId))
+	-- env.info("DCE_LoopSAR H  == ? CoalitionIdAlphaToName "..tostring(CoalitionIdAlphaToName[sar_CoalitionId] ))
+
+	if unitSAR:isExist() and unitSAR:isActive() then
+		local pos_SAR_vec3 = unitSAR:getPoint()
+		local uSAR_unitId = Unit.getID(unitSAR)
+		local uSAR_Name = unitSAR:getName()
+		-- local uSAR_inAir = unitSAR:inAir()
+
+		-- env.info("DCE_LoopSAR I uSAR_inAir "..tostring(uSAR_inAir))
+		for MGRS_Chute, zone in pairs(ZoneSAR) do
+			for pilotN, ejPil in ipairs(zone) do
+                if ejPil.name and not ejPil.embarked and ejPil.sideName == CoalitionIdAlphaToName[sar_CoalitionId]
+					and not ejPil.radio_on then
+					local unitEjectPilot = Unit.getByName(ejPil.name)
+
+					if unitEjectPilot then
+						local ejPilotVec3 = unitEjectPilot:getPoint()
+						local distance = math.sqrt(math.pow(
+						pos_SAR_vec3.x - ejPilotVec3.x, 2) +
+						math.pow(pos_SAR_vec3.z - ejPilotVec3.z, 2))
+
+						if distance <= 50000 then
+							
+							-- local ejPilData = arg[1]
+							-- local ejPilObj = arg[2]
+							-- StartRadioTransmission(arg)
+
+							timer.scheduleFunction(StartRadioTransmission, { ejPil, ejPilotVec3, gId }, timer.getTime() + 10)
+
+							local txt = "Downed pilot, this is Sandy, key your radio and give me a beep."
+							timer.scheduleFunction(ResponseTimeForGp, { gId, txt }, timer.getTime() + 2)
+							
+							if not unitEjectPilot:isExist() then
+								StopRadioTransmission(ejPil.name)
+							end
+
+						end
+					end
+				end
+			end
+		end
+	end
+
+end
+
+
+
 function SAR_fct.menuF10_SAR_OLD(arg)
 
 	env.info("DCE_menuF10_SAR A timer.getTime() "..tostring(timer.getTime()))
@@ -3413,101 +3497,122 @@ end
 
 
 
-addFuncs = function(arg_Gid, arg_GroupObj, argPlayerName)
+addFuncs = function(gId, gObj, playerName)
 
-	env.info("DCE_addFuncs _A gid "..tostring(arg_Gid).." Group "..tostring(arg_GroupObj).." argPlayerName: "..tostring(argPlayerName))
+	env.info("DCE_addFuncs _A gid "..tostring(gId).." Group "..tostring(gObj).." argPlayerName: "..tostring(playerName))
 
 	--si aucun argument, on s'appui sur la liste des joueurs fait maison
-	if not arg_Gid or not arg_GroupObj then
-		for playerName, playerData in pairs(PlayerInOutAircraft or {}) do
+	if not gId or not gObj then
+		for pName, playerData in pairs(PlayerInOutAircraft or {}) do
 			if playerData
 				and playerData.gid
 				and playerData.groupObject then
-				addFuncs(playerData.gid, playerData.groupObject, playerName)
+				addFuncs(playerData.gid, playerData.groupObject, pName)
 			end
 		end
 		return -- IMPORTANT
 	end
 
-	if arg_Gid and arg_GroupObj then
+	if gId and gObj then
 
-		if not EWR_optionPlayer[argPlayerName] then
-			EWR_optionPlayer[argPlayerName] = {
+		if not EWR_optionPlayer[playerName] then
+			EWR_optionPlayer[playerName] = {
 				EWR_on = false,
 			}
 		end
 
 		-- supprime les anciens items de la commande F10**************************************
 
-		missionCommands.removeItemForGroup(arg_Gid, {"Fuel Check"})
-		missionCommands.removeItemForGroup(arg_Gid, {"Urgent request"})
-		missionCommands.removeItemForGroup(arg_Gid, {"BullsEye_LongLat"})
+		-- missionCommands.removeItemForGroup(arg_gpGid, { "SAR" })
+		-- missionCommands.removeItemForGroup(arg_gpGid, { "Activate beacon radios", "SAR" })
+		-- missionCommands.removeItemForGroup(arg_gpGid, { "Turns off beacon radios", "SAR" })
+		-- missionCommands.removeItemForGroup(arg_gpGid, { "Radio transmitting", "SAR" })
+
+		-- missionCommands.addSubMenuForGroup(arg_gpGid, "SAR")
+
+		-- local ejctedPilRadioON = missionCommands.addSubMenuForGroup(arg_gpGid, "Activate beacon radios", { "SAR" })
+		-- local ejctedPilRadioOFF = missionCommands.addSubMenuForGroup(arg_gpGid, "Turns off beacon radios", { "SAR" })
+
+		missionCommands.removeItemForGroup(gId, {"Fuel Check"})
+		missionCommands.removeItemForGroup(gId, {"Urgent request"})
+		missionCommands.removeItemForGroup(gId, {"BullsEye_LongLat"})
 		-- missionCommands.removeItemForGroup(arg_Gid, {"EWR"})
-		missionCommands.removeItemForGroup(arg_Gid, {"Get out of the cockpit"})
-		missionCommands.removeItemForGroup(arg_Gid, {"CarrierIntoWind"})
+		missionCommands.removeItemForGroup(gId, {"Get out of the cockpit"})
+		missionCommands.removeItemForGroup(gId, {"CarrierIntoWind"})
 		
-		-- Suppression propre via handle
-		if EWR_menuRootByGroup[arg_Gid] then
-			missionCommands.removeItemForGroup(arg_Gid, EWR_menuRootByGroup[arg_Gid])
-			EWR_menuRootByGroup[arg_Gid] = nil
+        -- Suppression propre via handle
+		--"EWR"
+		if EWR_menuRootByGroup[gId] then
+			missionCommands.removeItemForGroup(gId, EWR_menuRootByGroup[gId])
+			EWR_menuRootByGroup[gId] = nil
+		end
+
+		-- "SAR"
+        if MenuF10ByGroupByCmd[gId] then
+			if MenuF10ByGroupByCmd[gId]["SAR"] then
+				missionCommands.removeItemForGroup(gId, MenuF10ByGroupByCmd[gId]["SAR"])
+			end
 		end
 
 
 
 		-- ajoute les nouvelles commandes F10 **************************************
-		missionCommands.addCommandForGroup(arg_Gid, "Fuel Check", nil, FuelCheck, {gid = arg_Gid, groupObject = arg_GroupObj })
+		missionCommands.addCommandForGroup(gId, "Fuel Check", nil, FuelCheck, {gid = gId, groupObject = gObj })
 
-		local subR_A = missionCommands.addSubMenuForGroup(arg_Gid, "Urgent request", nil)
+		local subR_A = missionCommands.addSubMenuForGroup(gId, "Urgent request", nil)
 
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, "Urgent_Refueling", subR_A, ReFueling, arg_GroupObj )
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, "Urgent_RequestCAP", subR_A, RequestCAP, arg_GroupObj)
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, "Package_All_RTB", subR_A, RtbPack, arg_GroupObj)
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, "Package_Strike_RTB", subR_A, RtbStrikePack, arg_GroupObj)
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, "Package_SEAD_RTB", subR_A, RtbSEADPack, arg_GroupObj)
+		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gId, "Urgent_Refueling", subR_A, ReFueling, gObj )
+		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gId, "Urgent_RequestCAP", subR_A, RequestCAP, gObj)
+		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gId, "Package_All_RTB", subR_A, RtbPack, gObj)
+		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gId, "Package_Strike_RTB", subR_A, RtbStrikePack, gObj)
+		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gId, "Package_SEAD_RTB", subR_A, RtbSEADPack, gObj)
 
 
-		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, "BullsEye_LongLat", nil, BullsEye, arg_GroupObj)
+		radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gId, "BullsEye_LongLat", nil, BullsEye, gObj)
 
-		local subR_B1 = missionCommands.addSubMenuForGroup(arg_Gid, "EWR", nil)
-		EWR_menuRootByGroup[arg_Gid] = subR_B1
-		local subR_B2 = missionCommands.addSubMenuForGroup(arg_Gid, "EWR ON", subR_B1)
-		local subR_B3 = missionCommands.addSubMenuForGroup(arg_Gid, "EWR OFF", subR_B1)
+		local subR_B1 = missionCommands.addSubMenuForGroup(gId, "EWR", nil)
+		EWR_menuRootByGroup[gId] = subR_B1
+		local subR_B2 = missionCommands.addSubMenuForGroup(gId, "EWR ON", subR_B1)
+		local subR_B3 = missionCommands.addSubMenuForGroup(gId, "EWR OFF", subR_B1)
 
 		for rawName, state in pairs(EWR_optionPlayer or {}) do
 			if type(rawName) == "string" then
-				local playerName = rawName
+				local pName = rawName
 
 				if not state or not state.EWR_on then
 					radioCommands[#radioCommands + 1] =
 						missionCommands.addCommandForGroup(
-							arg_Gid,
-							playerName .. " EWR ON",
+							gId,
+							pName .. " EWR ON",
 							subR_B2,
 							EWR_ON,
-							{ playerName = playerName, gid = arg_Gid, groupObject = arg_GroupObj }
+							{ playerName = pName, gid = gId, groupObject = gObj }
 						)
 				else
 					radioCommands[#radioCommands + 1] =
 						missionCommands.addCommandForGroup(
-							arg_Gid,
-							playerName .. " EWR OFF",
+							gId,
+							pName .. " EWR OFF",
 							subR_B3,
 							EWR_OFF,
-							{ playerName = playerName, gid = arg_Gid, groupObject = arg_GroupObj }
+							{ playerName = pName, gid = gId, groupObject = gObj }
 						)
 				end
 			end
 		end
 
+		MenuF10ByGroupByCmd[gId]["SAR"] = missionCommands.addCommandForGroup(gId, "CSAR: Request Survivor Beep", nil, SAR_fct.menuF10_SAR, {gid = gId, groupObject = gObj } )
+
+		
 		-- radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Get out of the cockpit", subR_A, getOut, gid)
-		local subR_C1 = missionCommands.addSubMenuForGroup(arg_Gid, "Get out of the cockpit", subR_A)
-		for playerName, value in pairs(EWR_optionPlayer) do
-			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, tostring(playerName) .." Get out", subR_C1, getOut, {arg_GroupObj ,playerName} )
+		local subR_C1 = missionCommands.addSubMenuForGroup(gId, "Get out of the cockpit", subR_A)
+		for pName, value in pairs(EWR_optionPlayer) do
+			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gId, tostring(pName) .." Get out", subR_C1, getOut, {gObj ,pName} )
 		end
 
 		if campL.SC_CarrierIntoWind == "man" then
-			missionCommands.removeItemForGroup(arg_Gid, {"CarrierIntoWind"})
-			local subR = missionCommands.addSubMenuForGroup(arg_Gid, "CarrierIntoWind", nil)
+			missionCommands.removeItemForGroup(gId, {"CarrierIntoWind"})
+			local subR = missionCommands.addSubMenuForGroup(gId, "CarrierIntoWind", nil)
 
             if campL.Aircraft_Carriers then
 				--TODO ajouter une condition side
@@ -3516,9 +3621,9 @@ addFuncs = function(arg_Gid, arg_GroupObj, argPlayerName)
                         local carrierGroup = Group.getByName(carrier.name)
                         if carrierGroup then 
                            
-							radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, carrier.name.." Into Wind 30mn", subR, TurnIntoWind, {carrier.name, nil, nil, 30} )
-							radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, carrier.name.." Into Wind 60mn", subR, TurnIntoWind, {carrier.name, nil, nil, 60} )
-							radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(arg_Gid, carrier.name.." Resume Route", subR, ResumeRoute, {carrier.name, nil} )
+							radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gId, carrier.name.." Into Wind 30mn", subR, TurnIntoWind, {carrier.name, nil, nil, 30} )
+							radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gId, carrier.name.." Into Wind 60mn", subR, TurnIntoWind, {carrier.name, nil, nil, 60} )
+							radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gId, carrier.name.." Resume Route", subR, ResumeRoute, {carrier.name, nil} )
                         end
                     end
                 end

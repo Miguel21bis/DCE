@@ -1415,7 +1415,7 @@ local function checkAddingManhunt()
 
 end
 
-function LoopManagedRadioTransmission()
+function LoopManagedRadioTransmission_OLD()
 	for MGRS_Chute, zone in pairs(ZoneSAR) do
 		for pilotN, ejPil in ipairs(zone) do
 			if ejPil.name and (not ejPil.radio_on or ejPil.radio_on == nil) and ejPil.embarked ~= true   then
@@ -1456,13 +1456,39 @@ function LoopManagedRadioTransmission()
 	return timer.getTime() + 60
 end
 
+
+function StartRadioTransmission(arg)
+
+    local ejPilData = arg[1]
+	local ejPilotVec3 = arg[2]
+	local gpGid = arg[2]
+
+	if ejPilData and not ejPilData.radio_on and ejPilotVec3 then
+
+		local modulation = 0	--AM
+		if campL.EjectedPilotFrequency[ejPilData.sideName].radioBeacon < 90000000 then
+			modulation = 1	--FM
+		end
+
+		trigger.action.radioTransmission('l10n/DEFAULT/beacon.ogg', ejPilotVec3, modulation, true,
+            campL.EjectedPilotFrequency[ejPilData.sideName].radioBeacon, RadioWatt, 'radioBeacon_' .. ejPilData.name)
+			
+		ejPilData.radio_on = true
+
+		local txt = "Sandy, " .. tostring(ejPilData.name) .. " … damn, good to hear you. Beeper’s active."
+		trigger.action.outTextForGroup(gpGid, txt, 10)
+		
+		env.info( "DCE_SAR:StartRadioTransmission frequency  "..tostring(campL.EjectedPilotFrequency[ejPilData.sideName].radioBeacon).." MGRS_Chute: "..tostring(ejPilData.MGRS_Chute).." |MGRS_Chute_10KM: "..tostring(ejPilData.MGRS_Chute_10KM).." "..tostring('radio_'..ejPilData.name))
+
+	end
+end
+
+
 function StopRadioTransmission(PilotName)
 
 	trigger.action.stopRadioTransmission('radioBeacon_'..PilotName)
 
 	env.info( "DCE_RADIO StopRadioTransmission  "..tostring('radioBeacon_'..PilotName))
-
-
 
 end
 
@@ -2294,7 +2320,7 @@ end
 
 if campL.SAR and campL.SAR.helicopter then
 	timer.scheduleFunction(LoopSAR, nil, timer.getTime() + 5)
-	timer.scheduleFunction(LoopManagedRadioTransmission, nil, timer.getTime() + 60)
+	-- timer.scheduleFunction(LoopManagedRadioTransmission, nil, timer.getTime() + 60)
 end
 
 
