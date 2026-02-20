@@ -4688,7 +4688,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					local define_x = waypoints[1]["x"]
 					local define_y = waypoints[1]["y"]
 
-					if not (is_helicopter and waypoints[1]["action"] == "From Ground Area" and baseIsFARP ) then --n >= 2 and
+					if is_helicopter and waypoints[1]["action"] ~= "From Ground Area" then --and baseIsFARP n >= 2 and
 						define_x = waypoints[1]["x"] + ((n - 1) * 15) +  ((f-1) * 15) + ((p - 1) * 15) -- ATO_FP_Debug01	--ANTI-COLLISION B
 						define_y = waypoints[1]["y"] + ((n - 1) * 15) +  ((f-1) * 15) + ((p - 1) * 15) --ATO_FP_Debug01 	--ANTI-COLLISION B
 					end
@@ -5371,7 +5371,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					-- spawn_time = mission_ini.startup_time_player
 					spawn_time = 0
 
-					if flight[f].task == "Intercept"  or   flight[f].task == "SAR" then
+					if flight[f].task == "Intercept" or flight[f].task == "SAR" then
 						spawn_time = -1
 					end
 
