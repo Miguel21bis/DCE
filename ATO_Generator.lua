@@ -2043,11 +2043,14 @@ for sideName, draftT in pairs(draftSorties) do
 						for task, task_bool in pairs(unitSupport.tasks) do
 							if task_bool then
 								local playable_II = false
+								local reserveClient = false
 
 								if isDebugModeB then
 									debugLog(draft.id.." AtoG II pass B_03 task.: "..tostring(task))
 								end
 
+
+								--//**MULTIPLAYER--**//
 								if multiPlaneSet[side] and multiPlaneSet[side][unitSupport.type] and multiPlaneSet[side][unitSupport.type][task] then
 
 									if not Multi.Target and draft.task ~= "SAR" and draft.task ~= "CAP" then
@@ -2059,20 +2062,24 @@ for sideName, draftT in pairs(draftSorties) do
 										end
 									end
 
-									if Multi.Target[side] == draft.target_name and unitSupport.client then
-										--TODO il reste a enlever le nb d helico max de la farp mais qui ne cible pas le bon target
-									
-										draft.loadout.support = draft.loadout.support or {}
-										draft.loadout.support[task] = draft.loadout.support[task] or true
-										draft.support[task]["escort_max"] = 4
+									if Multi.Target[side] == draft.target_name  then
 
-										overideMP_B = true
+										--ici, on reserve la place pour un type d'avion prevu pour le MP
+										reserveClient = true
+										if unitSupport.client then
+											
+											draft.loadout.support = draft.loadout.support or {}
+											draft.loadout.support[task] = draft.loadout.support[task] or true
+											draft.support[task]["escort_max"] = 4
+
+											overideMP_B = true
+										end
 									end
 
 								end
+								--//**MULTIPLAYER--**//
 
-								local temp_Draft_sorties = {}														--temporary table to hold additional draft sorties with escorts assigned
-
+							
 								--**cet overideMP_B donne trop d'avion
 								if overideMP_B or (( draft.task ~= "CAP" and draft.task ~= "Intercept" ) 
 									and (task == "SEAD" or task == "Escort" or task == "Escort Jammer" or task == "Flare Illumination" or task == "Laser Illumination" or task == "Strike") 
@@ -2169,47 +2176,9 @@ for sideName, draftT in pairs(draftSorties) do
 
 											end
 
-											-- if not draft.support[task] then draft.support[task] ={} end
 											if not draft.support[task]["NbTotalSupport"] then draft.support[task]["NbTotalSupport"] = 0 end
-											-- if not draft.support[task]["escort_max"] then draft.support[task]["escort_max"] = campMod.Setting_Generation.limit_escort end
 											if not draft.support[task]["escort_max"] then draft.support[task]["escort_max"] = 999 end
 
-											
-											-- if multiPlaneSet then
-											-- 	if multiPlaneSet[side] and multiPlaneSet[side][unitSupport.type] and multiPlaneSet[side][unitSupport.type][task] then
-
-											-- 		if isDebugModeB then
-											-- 			debugLog(draft.id.." AtoG II pass B_7b Multi.Target[side]: "..tostring(Multi.Target[side]).." target_name: "..tostring(draft.target_name))
-											-- 		end
-
-											-- 		if Multi.Target and Multi.Target[side] and Multi.Target[side] == draft.target_name then
-
-											-- 			if isDebugModeB then
-											-- 				debugLog(draft.id.." AtoG II pass B_7c Multi.Target[side]: "..tostring(Multi.Target[side]).." target_name: "..tostring(draft.target_name))
-											-- 			end
-
-											-- 			if draft.task ~= "SAR" then
-											-- 				overideMP_B = true
-
-											-- 				--ATTENTION: les lignes plus bas sont dangereuse ^^ 
-											-- 				--cela crée une table bancale, avec des task support inconnue
-											-- 				draft.loadout.support = draft.loadout.support or {}
-											-- 				draft.loadout.support[task] = draft.loadout.support[task] or true
-											-- 				draft.support[task]["escort_max"] = 4
-														
-											-- 				if isDebugModeB then
-											-- 					debugLog(draft.id.." AtoG II pass B_7d Multi.Target[side]: "..tostring(Multi.Target[side]).." target_name: "..tostring(draft.target_name))
-											-- 				end
-
-											-- 			end
-
-											-- 			if isDebugModeB then
-											-- 				debugLog(draft.id.." AtoG II pass B_7e  target_name: "..tostring(draft.target_name) )
-											-- 			end
-
-											-- 		end
-											-- 	end
-											-- end
 
 											if isDebugModeB then
 												debugLog(draft.id.." AtoG II pass B_10 overideMP_B: "..tostring(overideMP_B).." task: "..tostring(task) .." |draft.loadout.support[task]: "..tostring(draft.loadout.support[task]).." draft.support[task][escort_max]: "..tostring(draft.support[task]["escort_max"]).." draft.support[task][NbTotalSupport]: "..tostring(draft.support[task]["NbTotalSupport"]))
@@ -2331,24 +2300,36 @@ for sideName, draftT in pairs(draftSorties) do
 																end
 															end
 
-															if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "B")
-															and (Debug.Generator.SpySquad and (Debug.Generator.SpySquad == unitSupport.name or Debug.Generator.SpySquad == draft.name)  and  (Debug.Generator.SpyTask == draft.task or Debug.Generator.SpyTask == task)
-															or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
-															then
-																-- debuGenTxt = debuGenTxt..debuGenTxt1480.."\n"..(tostring(draft.id).." AtoG II pass B_15e support_requirement passe: weather_eligible "..tostring(weather_eligible).." overideMP_B "..tostring(overideMP_B))
+															if isDebugModeB then
 																debugLog(debuGenTxt1480.."\n"..(tostring(draft.id).." AtoG II pass B_15e support_requirement passe: weather_eligible "..tostring(weather_eligible).." overideMP_B "..tostring(overideMP_B)))
-																
 															end
 
-															local passHumain = true
-															if unitSupport.humainOnly then
-																passHumain = false
-																if (unitSupport.player or unitSupport.client) then
-																	passHumain = true
-																end
+
+															local passIsClientCondition = true
+
+															--systeme compliqué pour privilégier les slots humain s'il y en a
+															-- 1) Cas override MP + réserve client
+															if reserveClient then
+																passIsClientCondition = overideMP_B
+																-- if isDebugModeB then
+																-- 	debugLog(debuGenTxt1480.."\n"..(tostring(draft.id).." AtoG II pass B_15_f support_requirement passe: reserveClient "..tostring(reserveClient).." passIsClientCondition "..tostring(passIsClientCondition)))
+																-- end
 															end
 
-															if (passHumain and weather_eligible) or overideMP_B then												--continue of this loadout is eligible for weather
+															-- 2) Cas humainOnly
+															if passIsClientCondition and unitSupport.humainOnly then
+																passIsClientCondition = (unitSupport.player or unitSupport.client)
+																-- if isDebugModeB then
+																-- 	debugLog(debuGenTxt1480.."\n"..(tostring(draft.id).." AtoG II pass B_15_g support_requirement passe: humainOnly "..tostring(unitSupport.humainOnly).." passIsClientCondition "..tostring(passIsClientCondition)))
+																-- end
+															end
+
+															if isDebugModeB then
+																debugLog(debuGenTxt1480.."\n"..(tostring(draft.id).." AtoG II pass B_15_h support_requirement passe: final passIsClientCondition "..tostring(passIsClientCondition)))
+															end
+
+															-- 3) Condition finale
+															if weather_eligible and passIsClientCondition then												--continue of this loadout is eligible for weather
 
 																TrackPlayability(unitSupport.player, "escort_weather")												--track playabilty criterium has been met								
 																--get airbase position
@@ -2559,14 +2540,10 @@ for sideName, draftT in pairs(draftSorties) do
 																	draft.support[task]["NbTotalSupport"] = draft.support[task]["NbTotalSupport"] + escort_num
 																	draft.support[task]["escort_max"] = escort_max
 
-																	local free_slot = true
-																	--regarde si l'enregistrement n'a pas encore eu lieu, sinon bloque avec la variable added_OK 
+																	
+																	--regarde si l'enregistrement n'a pas encore eu lieu, sinon bloque avec la variable free_slot 
 																	--ceci doit etre vide draft.support[task][unitSupport.type]
-																	if draft.support[task][unitSupport.type] then
-																		if draft.support[task][unitSupport.type].id == draft.id.."-"..wi.."-"..wk then
-																			free_slot = false
-																		end
-																	end
+																	local free_slot = (draft.support[task][unitSupport.type] == nil)
 
 																	if isDebugModeB then
 																		debugLog(draft.id.." AtoG II pass B_21d Id "..tostring(draft.id).." "..unitSupport.type.." "..unitSupport.name.."".." escort_num "..tostring(escort_num).." "..draft.target_name.." NbTotalSupport: "..draft.support[task]["NbTotalSupport"].." entryEscortNum: "..tostring(entryEscortNum).." free_slot: "..tostring(free_slot and " free_slot: true " or " free_slot: false ") )
