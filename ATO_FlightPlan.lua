@@ -300,6 +300,32 @@ for i=1, 4 do
 	end
 end
 
+local function getParkSarAirBase(flightF)
+
+
+	if parkSarAirBase[flightF.base] then
+
+		local pkFound = false
+		local nLoop = 1
+		local nPk = 0
+		repeat
+			nPk = math.random(1, #parkSarAirBase[flightF.base])
+
+			if not parkSarAirBase[flightF.base][nPk].occupied or parkSarAirBase[flightF.base][nPk].occupied == false then
+				parkSarAirBase[flightF.base][nPk].occupied = true
+				return nPk
+				-- pkFound = true
+			end
+			nLoop = nLoop + 1
+		until nLoop > 200
+	end
+
+	return nil
+
+end
+
+
+
 
 -- Ajout d'un tanker avec rotation du cap
 local function addAndSpaceTankers(groupName, startX, startY)
@@ -1513,7 +1539,7 @@ for baseName, base in pairs(db_airbases) do
 
 		for parkN, park in pairs(parkSarAirBase[baseName]) do
 			park.occupied = false
-			park.reservedAR = false
+			park.reservedSAR = false
 		end
 	end
 end
@@ -1522,8 +1548,8 @@ end
 
 -- 	--combien de place libre reste t'il:
 -- 	local freeParkSpace = 0 
--- 	for baseN, park in pairs(ParkSarAirBase[flight[f].base]) do
--- 		if (not park.occupied or park.occupied == nil) and not park.reservedAR then
+-- 	for baseN, park in pairs(arkSarAirBase[flight[f].base]) do
+-- 		if (not park.occupied or park.occupied == nil) and not park.reservedSAR then
 -- 			freeParkSpace = freeParkSpace + 1
 -- 		end
 -- 	end
@@ -1538,9 +1564,9 @@ for side, pack in pairs(ATO) do
 					if parkSarAirBase[flight[f].base] then
 						for n=1, flight[f].number do
 							for parkN, park in pairs(parkSarAirBase[flight[f].base]) do
-								if not park.reservedAR or park.reservedAR == nil then
-									park.reservedAR = true
-									flight[f]["reservedAR"] = true
+								if not park.reservedSAR or park.reservedSAR == nil then
+									park.reservedSAR = true
+									flight[f]["reservedSAR"] = true
 									break
 								end
 							end
@@ -1551,6 +1577,10 @@ for side, pack in pairs(ATO) do
 		end
 	end
 end
+
+
+if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP parkSarAirBase 00 ").._afficheTXT(parkSarAirBase) end
+
 
 -- garde en mémoire les targets pour eviter de les pruner plus tard
 for side, pack in pairs(ATO) do
@@ -1786,22 +1816,27 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					[-6] = 16,
 					--]]
 
-				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe ParkSarAirBase A0 "..tostring(flight[f].route[1].id).." "..tostring(flight[f].route[2])) end
+				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passeparkSarAirBase 0a "..tostring(flight[f].route[1].id).." "..tostring(debug.getinfo(1).currentline)) end
 
 				if (flight[f].route[1].id ~= "Spawn" and flight[f].route[1].eta and flight[f].route[2]) or (flight[f].route[1].id ~= "Spawn" and flight[f].route[1].eta and not baseIsCarrier) then
+
+					if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passeparkSarAirBase 0b ") end
+
 
 					for mn =  -mn_StartParking, timmingParking  do
 						if not TabLPark[flight[f].base]["minuteTable"][mn] then TabLPark[flight[f].base]["minuteTable"][mn] = 0 end
 
-						if flight[f].task == "SAR" and flight[f].reservedAR then
+						if flight[f].task == "SAR" and flight[f].reservedSAR then
 
 						else
+							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passeparkSarAirBase A1 ") end
 							--s'il n'y a plus de place, on le dit (limitedParkTiming) et on arrete de compter
 							if db_airbases[flight[f].base].LimitedParkNb and TabLPark[flight[f].base]["minuteTable"][mn] + flight[f].number > db_airbases[flight[f].base].LimitedParkNb then
 								limitedParkTiming = true
-								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe LimitedParkNb A "..tostring(db_airbases[flight[f].base].LimitedParkNb) ) end
+								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe LimitedParkNb A2 "..tostring(db_airbases[flight[f].base].LimitedParkNb) ) end
 								break
 							else
+								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passeparkSarAirBase A3 ") end
 								--si il reste de la place, on ajoute la somme 
 								TabLPark[flight[f].base]["minuteTable"][mn] = TabLPark[flight[f].base]["minuteTable"][mn] + flight[f].number
 							end
@@ -1816,37 +1851,40 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					if limitedParkTiming then
+						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passeparkSarAirBase B1 ") end
 
 						if db_airbases[flight[f].base].parkAlertSAR and IsHelicopter[flight[f].type] then
+
+							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passeparkSarAirBase B2 ") end
 
 							--combien de place libre reste t'il:
 							local freeParkSpace = 0
 							for baseN, park in pairs(parkSarAirBase[flight[f].base]) do
-								if (not park.occupied or park.occupied == nil) and not park.reservedAR then
+								if (not park.occupied or park.occupied == nil) and not park.reservedSAR then
 									freeParkSpace = freeParkSpace + 1
 								end
 							end
 
-							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe ParkSarAirBase D "..tostring(freeParkSpace).." "..tostring(debug.getinfo(1).currentline)) end
+							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passeparkSarAirBase B3 "..tostring(freeParkSpace).." "..tostring(debug.getinfo(1).currentline)) end
 
 							if freeParkSpace >= flight[f].number then
-								--il y a donc de la place sur les parking SAR (ParkSarAirBase), on enleve donc la limite limitedParkTiming
+								--il y a donc de la place sur les parking SAR (arkSarAirBase), on enleve donc la limite limitedParkTiming
 								limitedParkTiming = false
-								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe LimitedParkNb B "..tostring(db_airbases[flight[f].base].LimitedParkNb) ) end
+								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe LimitedParkNb B4 "..tostring(db_airbases[flight[f].base].LimitedParkNb) ) end
 
 								--TODO enlever ceci: ai décollage
 								-- ["helipadId"] = 1665,
 								-- ["linkUnit"] = 1665,
 
-								for n = 1,  flight[f].number do
+								for n = 1, flight[f].number do
 
 									for baseN, park in pairs(parkSarAirBase[flight[f].base]) do
-										if (not park.occupied or park.occupied == nil) and not park.reservedAR then
+										if (not park.occupied or park.occupied == nil) and not park.reservedSAR then
 											park.occupied = true
-											if not flight[f]["parkAlertSAR"] then flight[f]["parkAlertSAR"] = {} end
-											flight[f]["parkAlertSAR"][n] = park
+											if not parkSarAirBase[flight[f].base] then parkSarAirBase[flight[f].base] = {} end
+											parkSarAirBase[flight[f].base][n] = park
 
-											if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe ParkSarAirBase E "..tostring(flight[f]["parkAlertSAR"]).." "..tostring(debug.getinfo(1).currentline)) end
+											if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passeparkSarAirBase B5 "..tostring(parkSarAirBase[flight[f].base]).." "..tostring(debug.getinfo(1).currentline)) end
 
 											break
 										end
@@ -2470,7 +2508,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						else
 							waypoints[w]["type"] = "TakeOffParking"
 							waypoints[w]["action"] = "From Parking Area"
-							if baseIsCarrier or (flight[f].airdromeId and flight[f].airdromeId >= 100 and not flight[f]["parkAlertSAR"]) then									--airbase is a carrier
+							if baseIsCarrier or (flight[f].airdromeId and flight[f].airdromeId >= 100 and not parkSarAirBase[flight[f].base]) then									--airbase is a carrier
 								waypoints[w].linkUnit = flight[f].airdromeId
 								waypoints[w].helipadId = flight[f].airdromeId
 							else
@@ -4592,8 +4630,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 				for n = 1, flight[f].number do
-					-- modification M12.b : Skill
-					-- le niveau est s�par� en 4 (25% de 100)
+
+					-- le niveau est séparé en 4 (25% de 100)
 					--Average (0 à 25)
 					--Good (25 à 50)
 					--High (50 à 75)
@@ -4743,70 +4781,55 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					--FARP parking id
-					if baseIsFARP and waypoints[1].action ~= "Spawn" then
-						if not limitedParkTiming and not flight[f]["parkAlertSAR"] then
+					-- if baseIsFARP and waypoints[1].action ~= "Spawn" then
+					if waypoints[1].action ~= "Spawn" and is_helicopter and not db_airbases[flight[f].base].BaseAirStart then
 
-							units[n]["parking"] = tostring(n)
-							units[n]["parking_id"] = tostring(n)
+						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP limitedParkTiming C1 "..tostring(limitedParkTiming).." flight[f][parkAlertSAR]: "..tostring(parkSarAirBase[flight[f].base])) end
 
-						elseif flight[f]["parkAlertSAR"] and flight[f]["parkAlertSAR"][n] then
+						if not parkSarAirBase[flight[f].base] then
+							
+							if flight[f].parking_id then
+								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP limitedParkTiming C2 ") end
+
+								local parkParameters = GetParkingId( flight[f].parking_id, flight[f].base)
+
+								if parkParameters then
+									units[n]["parking_id"] = parkParameters
+								end
+
+							elseif not limitedParkTiming then
+								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP limitedParkTiming C3 ") end
+
+								units[n]["parking"] = tostring(n)
+								units[n]["parking_id"] = tostring(n)
+							end
+
+						elseif parkSarAirBase[flight[f].base] then
+							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP limitedParkTiming C4 ") end
 
 							if n==1 then
-								--groups.xy se fera plus loin, dans le code, avec waypoints[1].xy comme ref
 								waypoints[1]["action"] = "From Ground Area"
 								waypoints[1]["type"] = "TakeOffGround"
 								waypoints[1].airdromeId = nil
 								waypoints[1].linkUnit = nil
 								waypoints[1].helipadId = nil
-								waypoints[1].x = flight[f]["parkAlertSAR"][n].x
-								waypoints[1].y = flight[f]["parkAlertSAR"][n].y
-								units[n].x = flight[f]["parkAlertSAR"][n].x
-								units[n].y = flight[f]["parkAlertSAR"][n].y
+
+								--on le fait reposer au meme endroit:
+								waypoints[#waypoints]["action"] = "Landing"
+								waypoints[#waypoints]["type"] = "Land"
+							end
+
+							local nParkSar = getParkSarAirBase(flight[f])
+							if nParkSar then
+								units[n].x = parkSarAirBase[flight[f].base][nParkSar].x
+								units[n].y = parkSarAirBase[flight[f].base][nParkSar].y
 							else
-								units[n].x = flight[f]["parkAlertSAR"][n].x
-								units[n].y = flight[f]["parkAlertSAR"][n].y
+								waypoints[1]["action"] = "Turning Point"
+								waypoints[1]["type"] = "Turning Point"
+
 							end
 
-							--on le fait reposer au meme endroit:
-							waypoints[#waypoints]["action"] = "Landing"
-							waypoints[#waypoints]["type"] = "Land"
-							waypoints[#waypoints].x = flight[f]["parkAlertSAR"][n].x
-							waypoints[#waypoints].y = flight[f]["parkAlertSAR"][n].y
 
-							--supprime les clefs parking et parking_id s'ils existe dans les tables units
-							if units[n].parking then
-								units[n].parking = nil
-							end
-							if units[n].parking_id then
-								units[n].parking_id = nil
-							end
-
-						end
-						--pour les helico qui serait sur base, mais avec des points SAR utilisable
-					elseif is_helicopter and waypoints[1].action ~= "Spawn" then
-						if flight[f]["parkAlertSAR"] and flight[f]["parkAlertSAR"][n] then
-
-							if n==1 then
-								--groups.xy se fera plus loin, dans le code, avec waypoints[1].xy comme ref
-								waypoints[1]["action"] = "From Ground Area"
-								waypoints[1]["type"] = "TakeOffGround"
-								waypoints[1].airdromeId = nil
-								waypoints[1].linkUnit = nil
-								waypoints[1].helipadId = nil
-								waypoints[1].x = flight[f]["parkAlertSAR"][n].x
-								waypoints[1].y = flight[f]["parkAlertSAR"][n].y
-								units[n].x = flight[f]["parkAlertSAR"][n].x
-								units[n].y = flight[f]["parkAlertSAR"][n].y
-							else
-								units[n].x = flight[f]["parkAlertSAR"][n].x
-								units[n].y = flight[f]["parkAlertSAR"][n].y
-							end
-
-							--on le fait reposer au meme endroit:
-							waypoints[#waypoints]["action"] = "Landing"
-							waypoints[#waypoints]["type"] = "Land"
-							waypoints[#waypoints].x = flight[f]["parkAlertSAR"][n].x
-							waypoints[#waypoints].y = flight[f]["parkAlertSAR"][n].y
 
 							--supprime les clefs parking et parking_id s'ils existe dans les tables units
 							if units[n].parking then
@@ -4818,51 +4841,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						end
 					end
-
-
-					-- n assigne pas de parking aux IA qui spawn in air
-					if waypoints[1]["action"] == "From Parking Area" and not limitedParkTiming and not db_airbases[flight[f].base].BaseAirStart then
-						if not flight[f]["parkAlertSAR"] and flight[f].parking_id then
-
-							local parkParameters = GetParkingId( flight[f].parking_id, flight[f].base)
-
-							if parkParameters then
-								units[n]["parking_id"] = parkParameters
-							end
-
-						elseif flight[f]["parkAlertSAR"] and flight[f]["parkAlertSAR"][n] then
-							if n==1 then
-								--groups.xy se fera plus loin, dans le code, avec waypoints[1].xy comme ref
-								waypoints[1]["action"] = "From Ground Area"
-								waypoints[1]["type"] = "TakeOffGround"
-								waypoints[1].airdromeId = nil
-								waypoints[1].linkUnit = nil
-								waypoints[1].helipadId = nil
-								waypoints[1].x = flight[f]["parkAlertSAR"][n].x
-								waypoints[1].y = flight[f]["parkAlertSAR"][n].y
-								units[n].x = flight[f]["parkAlertSAR"][n].x
-								units[n].y = flight[f]["parkAlertSAR"][n].y
-							else
-								units[n].x = flight[f]["parkAlertSAR"][n].x
-								units[n].y = flight[f]["parkAlertSAR"][n].y
-							end
-
-							--on le fait reposer au meme endroit:
-							waypoints[#waypoints]["action"] = "Landing"
-							waypoints[#waypoints]["type"] = "Land"
-							waypoints[#waypoints].x = flight[f]["parkAlertSAR"][n].x
-							waypoints[#waypoints].y = flight[f]["parkAlertSAR"][n].y
-
-							--supprime les clefs parking et parking_id s'ils existe dans les tables units
-							if units[n].parking then
-								units[n].parking = nil
-							end
-							if units[n].parking_id then
-								units[n].parking_id = nil
-							end
-
-						end
-					end
+						
 
 					local pers_ACFT_bool = nil
 					local pers_ACFT_prefixFileName = nil
@@ -5628,7 +5607,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					------------------	
 					--SUR PISTE DUR---
 					------------------	
-					elseif (flight[f].task ~= "Intercept" and flight[f].task ~= "SAR" and not flight[f]["parkAlertSAR"]) then
+					elseif (flight[f].task ~= "Intercept" and flight[f].task ~= "SAR" and not parkSarAirBase[flight[f].base]) then
 						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe II SUR PISTE DUR") end
 
 						if limitedParkTiming or db_airbases[flight[f].base].BaseAirStart then
@@ -5657,54 +5636,54 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				----- provisions for CSAR -----
 
-				if (flight[f].task == "CSAR" )  then
+				-- if (flight[f].task == "CSAR" )  then
 
-					-- ParkSarAirBase
-					if parkSarAirBase[flight[f].base] then
+				-- 	--parkSarAirBase
+				-- 	if parkSarAirBase[flight[f].base] then
 
-						local pkFound = false
-						local nLoop = 1
-						local nPk = 0
-						repeat
-							nPk = math.random(1, #parkSarAirBase[flight[f].base])
+				-- 		local pkFound = false
+				-- 		local nLoop = 1
+				-- 		local nPk = 0
+				-- 		repeat
+				-- 			nPk = math.random(1, #parkSarAirBase[flight[f].base])
 
-							if not parkSarAirBase[flight[f].base][nPk].occupied or parkSarAirBase[flight[f].base][nPk].occupied == false then
-								parkSarAirBase[flight[f].base][nPk].occupied = true
-								pkFound = true
-							end
-							nLoop = nLoop + 1
-						until nLoop > 200 or pkFound
+				-- 			if not parkSarAirBase[flight[f].base][nPk].occupied or parkSarAirBase[flight[f].base][nPk].occupied == false then
+				-- 				parkSarAirBase[flight[f].base][nPk].occupied = true
+				-- 				pkFound = true
+				-- 			end
+				-- 			nLoop = nLoop + 1
+				-- 		until nLoop > 200 or pkFound
 
-						if pkFound then
+				-- 		if pkFound then
 
-							waypoints[1]["action"] = "From Ground Area"
-							waypoints[1]["type"] = "TakeOffGround"
+				-- 			waypoints[1]["action"] = "From Ground Area"
+				-- 			waypoints[1]["type"] = "TakeOffGround"
 
-							waypoints[1].airdromeId = nil
-							waypoints[1].linkUnit = nil
-							waypoints[1].helipadId = nil
+				-- 			waypoints[1].airdromeId = nil
+				-- 			waypoints[1].linkUnit = nil
+				-- 			waypoints[1].helipadId = nil
 
-							group.units[1].x = parkSarAirBase[flight[f].base][nPk].x
-							group.units[1].y = parkSarAirBase[flight[f].base][nPk].y
+				-- 			group.units[1].x = parkSarAirBase[flight[f].base][nPk].x
+				-- 			group.units[1].y = parkSarAirBase[flight[f].base][nPk].y
 
-							group.x = parkSarAirBase[flight[f].base][nPk].x
-							group.y = parkSarAirBase[flight[f].base][nPk].y
+				-- 			group.x = parkSarAirBase[flight[f].base][nPk].x
+				-- 			group.y = parkSarAirBase[flight[f].base][nPk].y
 
-							waypoints[1].x = parkSarAirBase[flight[f].base][nPk].x
-							waypoints[1].y = parkSarAirBase[flight[f].base][nPk].y
+				-- 			waypoints[1].x = parkSarAirBase[flight[f].base][nPk].x
+				-- 			waypoints[1].y = parkSarAirBase[flight[f].base][nPk].y
 
-							--supprime les clefs parking et parking_id s'ils existe dans les tables units
-							for unitN, unit in pairs(group.units) do
-								if unit.parking then
-									unit.parking = nil
-								end
-								if unit.parking_id then
-									unit.parking_id = nil
-								end
-							end
-						end
-					end
-				end
+				-- 			--supprime les clefs parking et parking_id s'ils existe dans les tables units
+				-- 			for unitN, unit in pairs(group.units) do
+				-- 				if unit.parking then
+				-- 					unit.parking = nil
+				-- 				end
+				-- 				if unit.parking_id then
+				-- 					unit.parking_id = nil
+				-- 				end
+				-- 			end
+				-- 		end
+				-- 	end
+				-- end
 
 				----- provisions for SAR -----
 
@@ -5720,7 +5699,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				if (flight[f].task == "SAR" and conditionUno) then			--or flight[f].task == "CSAR" 		
 					camp.SAR.Flag = camp.SAR.Flag + 1								--go to next trigger flag number					
 
-					-- ParkSarAirBase
+					--parkSarAirBase
 					if parkSarAirBase[flight[f].base] then
 
 						local pkFound = false
@@ -5728,7 +5707,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 						--premier passage, on se positionne sur les places reservées, si elles existent
 						for parkN, park in pairs(parkSarAirBase[flight[f].base]) do
-							if park.reservedAR and not park.occupied then
+							if park.reservedSAR and not park.occupied then
 								park.occupied = true
 								nPk = parkN
 								pkFound = true
@@ -5787,7 +5766,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 
-					if ( flight[f].client ~= true and flight[f].player ~= true)  then	--or limitedParkTiming or  ParkSarAirBase[flight[f].base]						-- M11 PVP ne copie pas de trigger retardé START pour les clients/joueurs	
+					if ( flight[f].client ~= true and flight[f].player ~= true)  then	--or limitedParkTiming or parkSarAirBase[flight[f].base]						-- M11 PVP ne copie pas de trigger retardé START pour les clients/joueurs	
 
 						if polkaOff then
 
@@ -6334,7 +6313,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						waypoints[1]["alt"] = 500 + db_airbases[flight[f].base].elevation
 					end
 
-					-- if baseIsCarrier or (flight[f].airdromeId and flight[f].airdromeId >= 100 and not flight[f]["parkAlertSAR"]) then									--airbase is a carrier
+					-- if baseIsCarrier or (flight[f].airdromeId and flight[f].airdromeId >= 100 and not parkSarAirBase[flight[f].base]) then									--airbase is a carrier
 					-- 	waypoints[1].linkUnit = flight[f].airdromeId						--Debug_l
 					-- 	waypoints[1].helipadId = flight[f].airdromeId
 					-- else
@@ -7128,7 +7107,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 				if units[1].skill == "Player" or units[1].skill == "Client" then
-					infoFlight = infoFlight.."\n"..("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ")
+					infoFlight = infoFlight.."\n"..("= = = = = = = = = = = = = = = = = ="..units[1].skill.." = = = = = = = = = = = = = = = = = = = = ")
 					infoFlight = infoFlight.."\n"..("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ")
 				end
 
