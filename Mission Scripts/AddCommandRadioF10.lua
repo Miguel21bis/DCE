@@ -3,7 +3,7 @@
 --Functions accessed via LUA Run Script
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "3.16.58"
+versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "3.16.59"
 ------------------------------------------------------------------------------------------------------- 
 
 if not campL.debugInGamePopup then
@@ -2996,7 +2996,9 @@ function EWR_ON(data)
 
     EWR_optionPlayer[data.playerName].EWR_on = true
 
-	requestEWRMenuRebuild(data.gid, data.groupObject, data.playerName)
+	local txt = tostring(data.playerName).. " switch EWR to ON"
+	trigger.action.outTextForGroup(data.gid, txt, 10)
+	
 end
 
 function EWR_OFF(data)
@@ -3012,9 +3014,10 @@ function EWR_OFF(data)
 		EWR_optionPlayer[data.playerName] = {}
 	end
 
-	EWR_optionPlayer[data.playerName].EWR_on = false
-
-	requestEWRMenuRebuild(data.gid, data.groupObject, data.playerName)
+    EWR_optionPlayer[data.playerName].EWR_on = false
+	
+	local txt = tostring(data.playerName) .. " switch EWR to OFF"
+	trigger.action.outTextForGroup(data.gid, txt, 10)
 end
 
 
@@ -3581,30 +3584,20 @@ addFuncs = function(gId, gObj, playerName)
 		local subR_B2 = missionCommands.addSubMenuForGroup(gId, "EWR ON", subR_B1)
 		local subR_B3 = missionCommands.addSubMenuForGroup(gId, "EWR OFF", subR_B1)
 
-		for rawName, state in pairs(EWR_optionPlayer or {}) do
-			if type(rawName) == "string" then
-				local pName = rawName
-
-				if not state or not state.EWR_on then
-					radioCommands[#radioCommands + 1] =
-						missionCommands.addCommandForGroup(
-							gId,
-							pName .. " EWR ON",
-							subR_B2,
-							EWR_ON,
-							{ playerName = pName, gid = gId, groupObject = gObj }
-						)
-				else
-					radioCommands[#radioCommands + 1] =
-						missionCommands.addCommandForGroup(
-							gId,
-							pName .. " EWR OFF",
-							subR_B3,
-							EWR_OFF,
-							{ playerName = pName, gid = gId, groupObject = gObj }
-						)
-				end
-			end
+		-- missionCommands.addCommandForGroup( gId, playerName, subR_B2, EWR_ON, { playerName = playerName, gid = gId, groupObject = gObj } )
+		-- missionCommands.addCommandForGroup( gId, playerName, subR_B3, EWR_OFF, { playerName = playerName, gid = gId, groupObject = gObj } )
+        -- for playersName, value in pairs(EWR_optionPlayer) do
+        --     missionCommands.addCommandForGroup(gId, tostring(playersName) .. " EWR ON", subR_B2, EWR_ON,
+        --         { playersName = playerName, gid = gId, groupObject = gObj })
+        --     missionCommands.addCommandForGroup(gId, tostring(playersName) .. " EWR OFF", subR_B3, EWR_OFF,
+        --         { playersName = playerName, gid = gId, groupObject = gObj })
+        -- end
+		local wingmans = gObj:getUnits()
+		for playersName, unitObj in ipairs(wingmans) do
+			missionCommands.addCommandForGroup(gId, tostring(playersName) .. " EWR ON", subR_B2, EWR_ON,
+				{ playersName = playerName, gid = gId, groupObject = gObj })
+			missionCommands.addCommandForGroup(gId, tostring(playersName) .. " EWR OFF", subR_B3, EWR_OFF,
+				{ playersName = playerName, gid = gId, groupObject = gObj })
 		end
 
 		MenuF10ByGroupByCmd[gId] = MenuF10ByGroupByCmd[gId] or {}
@@ -3618,8 +3611,11 @@ addFuncs = function(gId, gObj, playerName)
 		
 		-- radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gid, "Get out of the cockpit", subR_A, getOut, gid)
 		local subR_C1 = missionCommands.addSubMenuForGroup(gId, "Get out of the cockpit", subR_A)
-		for pName, value in pairs(EWR_optionPlayer) do
-			radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gId, tostring(pName) .." Get out", subR_C1, getOut, {gObj ,pName} )
+		-- for pName, value in pairs(EWR_optionPlayer) do
+		-- 	radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gId, tostring(pName) .." Get out", subR_C1, getOut, {gObj ,pName} )
+        -- end
+		for playersName, unitObj in ipairs(wingmans) do
+			missionCommands.addCommandForGroup(gId, tostring(playersName) .. " Get out", subR_C1, getOut, { gObj, playersName })
 		end
 
 		if campL.SC_CarrierIntoWind == "man" then
@@ -3670,31 +3666,6 @@ addFuncs = function(gId, gObj, playerName)
 			end
 		 end
 
-	end
-end
-
-
-requestEWRMenuRebuild = function(gid, groupObject, playerName)
-	if not gid or not groupObject then
-		return
-	end
-
-	if not EWR_rebuildPending then
-		EWR_rebuildPending = {}
-	end
-
-	if not EWR_rebuildPending[gid] then
-		EWR_rebuildPending[gid] = true
-
-		timer.scheduleFunction(function(arg, time)
-			local _gid = arg[1]
-			local _groupObject = arg[2]
-			local _playerName = arg[3]
-
-			EWR_rebuildPending[_gid] = nil
-
-			addFuncs(_gid, _groupObject, _playerName)
-		end, { gid, groupObject, playerName }, timer.getTime() + 0.3)
 	end
 end
 
