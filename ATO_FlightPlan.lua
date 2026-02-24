@@ -5854,6 +5854,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 
+					if not IsHelicopter[flight[f].type] then
+						print("BUG no IsHelicopter[flight[f].type] "..IsHelicopter[flight[f].type])
+						os.execute 'pause'
+					end
+					
 					local t = {
 						name = group.name,
 						number = #group.units,
@@ -5871,7 +5876,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						vAttack = flight[f].loadout.vAttack,
 						hCruise = flight[f].loadout.hCruise,
 						hAttack = flight[f].loadout.hAttack,
-						hHover = IsHelicopter[flight[f].type].hHover,
+						hHover = IsHelicopter[flight[f].type].hHover or 1500,
 					}
 
 					if camp.SAR.alertSAR[sideName].base[flight[f].base] == nil then
