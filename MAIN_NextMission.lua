@@ -595,15 +595,13 @@ add_zones = nil   -- même nom, même casse
 local addZonesPath = "Init/add_zones.lua"
 testPath = io.open(addZonesPath, "r")
 
-print("DCE_Debug MainNM A : Checking for additional zones in "..addZonesPath)
-
 if testPath ~= nil then
-	print("DCE_Debug MainNM B : Additional zones found, loading zones from "..addZonesPath)
+	-- print("DCE_Debug MainNM B : Additional zones found, loading zones from "..addZonesPath)
 	io.close(testPath)
 
 	dofile(addZonesPath)
 
-	print("DCE_Debug MainNM C : Merging additional zones into mission triggers add_zones: "..tostring(add_zones))
+	-- print("DCE_Debug MainNM C : Merging additional zones into mission triggers add_zones: "..tostring(add_zones))
 
 	if add_zones and type(add_zones) == "table" then
 
@@ -612,10 +610,10 @@ if testPath ~= nil then
 			count = count + 1
 		end
 
-		print("DCE_Debug MainNM D : Found "..count.." additional zones to add")
+		-- print("DCE_Debug MainNM D : Found "..count.." additional zones to add")
 
 		for _, zone in pairs(add_zones) do
-			print("DCE_Debug MainNM E : Adding zone "..tostring(zone.name).." with ID "..tostring(zone.zoneId))
+			-- print("DCE_Debug MainNM E : Adding zone "..tostring(zone.name).." with ID "..tostring(zone.zoneId))
 			table.insert(mission.triggers.zones, zone)
 		end
 	end
