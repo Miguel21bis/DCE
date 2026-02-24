@@ -2998,11 +2998,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					if flight[f].loadout.AGAS_AttackDist or flight[f].loadout.AGAS_PopAlt or flight[f].loadout.AGAS_OffsetAngle or flight[f].loadout.AGAS_ClimbAngle then
 						AGAS_ready = true
 					end
-					local OffsetAngle = flight[f].loadout.AGAS_OffsetAngle or 20
-					local ClimbAngle  = flight[f].loadout.AGAS_ClimbAngle or 30   --climb angles smaller than 15 are not possible
-					local PopAlt = flight[f].loadout.AGAS_PopAlt or nil   --500   --Pop-up maneuver prior to attack
-					local AttackDist = flight[f].loadout.AGAS_AttackDist or nil   --3000
-					local Reattack = flight[f].loadout.AGAS_Reattack or nil
+					local offsetAngle = flight[f].loadout.AGAS_OffsetAngle or 20
+					local climbAngle  = flight[f].loadout.AGAS_ClimbAngle or 30   --climb angles smaller than 15 are not possible
+					local popAlt = flight[f].loadout.AGAS_PopAlt or nil   --500   --Pop-up maneuver prior to attack
+					local attackDist = flight[f].loadout.AGAS_AttackDist or nil   --3000
+					local reattack = flight[f].loadout.AGAS_Reattack or nil
 					local DebugTask = Debug.debug
 
 					local target_element, tgtlist
@@ -3072,23 +3072,21 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						if flight[f].task == "Strike" then
 							if flight[f].target.class == nil or flight[f].target.class ~= "airbase" and attackType ~= "Carpet" then
 								local target_e = {}																			--table to hold the target element number to be struck
-								-- local target_elements = {}
-								if flight[f].target and not flight[f].target.elements then
-									_affiche(flight[f].target, "flight[f].target")
-								end
-								for n, element in pairs(flight[f].target.elements) do
-									if element.dead ~= true then
-										table.insert(target_e, element)
+								
+								if flight[f].target.elements and #flight[f].target.elements >= 1 and flight[f].target.elements[1].x then
+									if flight[f].target and not flight[f].target.elements then
+										_affiche(flight[f].target, "flight[f].target")
 									end
-									-- if flight[f].target.elements[e].dead ~= true then
-									-- 	table.insert(target_elements, flight[f].target.elements[e])																--add to target element table
-									-- end
+									
+									for n, element in pairs(flight[f].target.elements) do
+										if element.dead ~= true then
+											table.insert(target_e, element)
+										end
+									end
+								else
+									table.insert(target_e, flight[f].target)
 								end
-								-- for n = 1, (f - 1) * 4 do																			--shift the order of target elements for subsequent flights in package, so that each flights starts attacking different elements (flight 1: element 1-4, flight 2: element 5-8, etc)
-								-- 	table.insert(target_e, target_e[1])													--shift element order, copy first element to back
-								-- 	table.remove(target_e, 1)																	--delete first element
-								-- end
-
+						
 								local tgtlist2 = ""																					--list of of names of all target elements
 								local AGAS_tgtList = ""
 								for n , element in ipairs(target_e) do
@@ -3139,7 +3137,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 													["params"] =
 													{
 																	--AirGroundAttackTask(FlightName,				 Target,						 WeaponType,string			 expendQty,string		 dive,			 OffsetAngle, 			ClimbAngle, 		PopAlt, 		AttackDist, 			Reattack,			 Debug)
-														["command"] = "AirGroundAttackTask('" .. groupName .. "', {" .. AGAS_tgtList .. "}, '" .. weaponType_ .. "', '"  .. expendQty .. "', " .. tostring(dive) .. ", " .. tostring(OffsetAngle) .. ", " .. tostring(ClimbAngle) ..", " .. tostring(PopAlt) ..", " .. tostring(AttackDist) ..", " .. tostring(Reattack) .. ")",
+														["command"] = "AirGroundAttackTask('" .. groupName .. "', {" .. AGAS_tgtList .. "}, '" .. weaponType_ .. "', '"  .. expendQty .. "', " .. tostring(dive) .. ", " .. tostring(offsetAngle) .. ", " .. tostring(climbAngle) ..", " .. tostring(popAlt) ..", " .. tostring(attackDist) ..", " .. tostring(reattack) .. ")",
 													},
 												},
 											},
@@ -3197,7 +3195,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 													["params"] =
 													{
 																	--AirGroundAttackTask(FlightName,				 Target,															 WeaponType,string			 expendQty,string		 dive,			 OffsetAngle, 			ClimbAngle, 		PopAlt, 		AttackDist, 			Reattack,			 Debug)
-														["command"] = "AirGroundAttackTask('" .. groupName .. "', {x = " .. flight[f].target.x .. ", y = " .. flight[f].target.y .. "}, '" .. weaponType_ .. "', '"  .. expendQty .. "', " .. tostring(dive) .. ", " .. tostring(OffsetAngle) .. ", " .. tostring(ClimbAngle) ..", " .. tostring(PopAlt) ..", " .. tostring(AttackDist) ..", " .. tostring(Reattack) .. ")",
+														["command"] = "AirGroundAttackTask('" .. groupName .. "', {x = " .. flight[f].target.x .. ", y = " .. flight[f].target.y .. "}, '" .. weaponType_ .. "', '"  .. expendQty .. "', " .. tostring(dive) .. ", " .. tostring(offsetAngle) .. ", " .. tostring(climbAngle) ..", " .. tostring(popAlt) ..", " .. tostring(attackDist) ..", " .. tostring(reattack) .. ")",
 													},
 												},
 											},
@@ -3326,7 +3324,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 												["params"] =
 												{
 																--AirGroundAttackTask(FlightName,				 Target,						 WeaponType,string			 expendQty,string		 dive,			 OffsetAngle, 			ClimbAngle, 		PopAlt, 		AttackDist, 			Reattack,			 Debug)
-													["command"] = "AirGroundAttackTask('" .. groupName .. "', '" .. flight[f].target.name .. "', '" .. weaponType_ .. "', '"  .. expendQty .. "', " .. tostring(dive) .. ", " .. tostring(OffsetAngle) .. ", " .. tostring(ClimbAngle) ..", " .. tostring(PopAlt) ..", " .. tostring(AttackDist) ..", " .. tostring(Reattack) .. ")",
+													["command"] = "AirGroundAttackTask('" .. groupName .. "', '" .. flight[f].target.name .. "', '" .. weaponType_ .. "', '"  .. expendQty .. "', " .. tostring(dive) .. ", " .. tostring(offsetAngle) .. ", " .. tostring(climbAngle) ..", " .. tostring(popAlt) ..", " .. tostring(attackDist) ..", " .. tostring(reattack) .. ")",
 												},
 											},
 										},
@@ -5855,10 +5853,10 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					if not IsHelicopter[flight[f].type] then
-						print("BUG no IsHelicopter[flight[f].type] "..IsHelicopter[flight[f].type])
+						print("BUG no IsHelicopter[flight[f].type] "..flight[f].type)
 						os.execute 'pause'
 					end
-					
+
 					local t = {
 						name = group.name,
 						number = #group.units,
