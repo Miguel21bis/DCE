@@ -109,7 +109,7 @@ TaskByPlane = {
 		["A-10C"] = true,
 		["A-10C_2"] = true,
 		["A-10A"] = true,
-		["Bronco-OV-10A"] = true,		--Mod
+		-- ["Bronco-OV-10A"] = true,		--Mod
 		["vwv_a1_skyraider"] = true,	--Mod
 		["vwv_o-1"] = true,         	--Mod
 
@@ -153,7 +153,7 @@ TaskByPlane = {
 		["A-10C"] = true,
 		["A-10C_2"] = true,
 		["A-10A"] = true,
-		["Bronco-OV-10A"] = true,		--Mod
+		-- ["Bronco-OV-10A"] = true,		--Mod
 		["vwv_a1_skyraider"] = true,	--Mod
 
 		-- ["AJS37"] = true,
@@ -284,7 +284,7 @@ TaskByPlane = {
 
 		-- ["A-4E-C"] = true,				--Mod
 		["A-6E"] = true,				--Mod
-		["Bronco-OV-10A"] = true,		--Mod
+		-- ["Bronco-OV-10A"] = true,		--Mod
 		["vwv_a1_skyraider"] = true,	--Mod
 		["A-10C"] = true,
 		["A-10C_2"] = true,
@@ -907,6 +907,7 @@ Data_divers = {
 		hCruise = 4570,
 		laserDesignator = false,
 		playable = true,
+		folderModName = "BRONCO_V1.24",
 	},
 
 	["vwv_a1_skyraider"] = 	{				--Mod
@@ -2287,6 +2288,8 @@ IsHelicopter = {
 	["vwv_sh2f"] = {},                            --mod
 	["vwv_hh2d"] = {},                            --mod
 
+	
+	["vwv_ch46d"] = {},
 	["CH-47D"] = {},
 	["CH-47Fbl1"] = {},
 	["CH-53E"] = {},
