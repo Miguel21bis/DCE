@@ -4,11 +4,12 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["loadouts_data/db_loadouts_Mods.lua"] = "1.3.200"
+versionDCE["loadouts_data/db_loadouts_Mods.lua"] = "1.3.201"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
+-- V201 - Transport for SH-3D
 -- V200 - only Mods
 -- V198 - F-4E GBU - AGM - Mk20 
 -- V197 - AI restricted loadouts
@@ -5232,6 +5233,32 @@ db_loadouts = {
 		},
 	},
 	["SH-3D"] = {
+		Transport = {
+			["transport SH-3D"] = {
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					},
+					uel = 1157,
+					flare = 30,
+					chaff = 30,
+					gun = 100,
+				},
+			},
+		},	
 		["Anti-ship Strike"] = {
 			["Antiship - Penguinx2"] = {
 				minscore = 0.3,
