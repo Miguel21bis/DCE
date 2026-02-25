@@ -1,9 +1,8 @@
 --To evaluate the DCS debrief.log and update the campaign status files
 --Initiated by DEBRIEF_Master.lua
 -------------------------------------------------------------------------------------------------------
--- last modification:  debug_m
 if not versionDCE then versionDCE = {} end
-versionDCE["DEBRIEF_StatsEvaluation.lua"] = "2.9.71"
+versionDCE["DEBRIEF_StatsEvaluation.lua"] = "2.9.72"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -946,6 +945,10 @@ for e = 1, #events do
 				unit.CheckDay = camp.date.CampTotalTimeS                            -- ajoute la date de destruction		 Miguel21 modification M19 : Repair SAM	
 				camp.ShipHealth[unit.name] = 0										--mark unit has 0 health for briefing/Debriefing
 				camp.ShipDamagedLast[unit.name] = true								--mark ship took damage in last mission for briefing/Debriefing
+
+				unit.dead = true														--mark unit as dead in oob_ground
+				unit.dead_last = true													--mark unit as died in last mission
+				unit.CheckDay = camp.date.CampTotalTimeS  
 
 				--award ship kill to air unit
 				if hitTbl_KillerByTarget[initiator] ~= nil then														--check if dead ship has a hit entry

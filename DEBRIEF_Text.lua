@@ -257,9 +257,11 @@ do
 	local target_alive = 0
 	local target_hit = 0
 	local targetSelect = {}
+	print("DEBRIEF_t A camp.player.side "..tostring(camp.player.side).." target_name "..tostring(target_name))
 	for targetN, target in ipairs(targetlist[camp.player.side]) do
+		print("DEBRIEF_t B target.titleName "..tostring(target.titleName).." target.elements "..tostring(target.elements))
 		if target.titleName == target_name and target.elements  then
-			-- print("DEBRIEF_t B titleName "..tostring(target.titleName).." alive_last: "..tostring(target.alive_last))
+			print("DEBRIEF_t C titleName "..tostring(target.titleName).." alive_last: "..tostring(target.alive_last))
 			target_alive = target.alive
 			target_hit = target.alive_last
 			targetSelect = target
@@ -404,15 +406,7 @@ do
 		s = s .. "You have been tasked with striking " .. target_name
 
 		local ship_hit
-		-- if targetlist[camp.player.side][target_name].elements then
-		-- 	for e = 1, #targetlist[camp.player.side][target_name].elements do
-		-- 		if camp.ShipDamagedLast and camp.ShipDamagedLast[targetlist[camp.player.side][target_name].elements[e].name] then
-		-- 			ship_hit = true
-		-- 			break
-		-- 		end
-		-- 	end
-		-- end
-
+		
 		if targetSelect.elements then
 			for e = 1, #targetSelect.elements do
 				if camp.ShipDamagedLast and camp.ShipDamagedLast[targetSelect.elements[e].name] then
@@ -454,20 +448,13 @@ do
 		end
 		s = s .. packageStats() .. "\n\n"																			--add stats list for each aircraft in package
 
+		
 	--Anti-ship Strike
 	elseif player_task == "Anti-ship Strike" then
 		s = s .. "You have been tasked with an anti-ship strike against "  .. target_name
 
 		local ship_hit
-		-- if targetlist[camp.player.side][target_name].elements then
-		-- 	for e = 1, #targetlist[camp.player.side][target_name].elements do
-		-- 		if camp.ShipDamagedLast and camp.ShipDamagedLast[targetlist[camp.player.side][target_name].elements[e].name] then
-		-- 			ship_hit = true
-		-- 			break
-		-- 		end
-		-- 	end
-		-- end
-
+		
 		if targetSelect.elements then
 			for e = 1, #targetSelect.elements do
 				if camp.ShipDamagedLast and camp.ShipDamagedLast[targetSelect.elements[e].name] then
@@ -519,14 +506,7 @@ do
 			s = s .. "You have been tasked with escorting a strike against " .. target_name
 
 			local ship_hit
-			-- if targetlist[camp.player.side][target_name].elements then
-			-- 	for e = 1, #targetlist[camp.player.side][target_name].elements do
-			-- 		if camp.ShipDamagedLast and camp.ShipDamagedLast[targetlist[camp.player.side][target_name].elements[e].name] then
-			-- 			ship_hit = true
-			-- 			break
-			-- 		end
-			-- 	end
-			-- end
+			
 			if targetSelect.elements then
 				for e = 1, #targetSelect.elements do
 					if camp.ShipDamagedLast and camp.ShipDamagedLast[targetSelect.elements[e].name] then
