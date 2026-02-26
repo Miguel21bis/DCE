@@ -2585,7 +2585,6 @@ function SAR_fct.StopRadioBeaconTransmission(ejPilotName)
 end
 
 	--************* SAR ejectedPilot PART ****************************************
---on refait régulierement le menu SAR pour actualiser la liste des pilotes ejectés, et le proposer aux menu des joueurs
 function SAR_fct.menuF10_SAR(arg)
 
 	-- “Downed pilot, this is Sandy. If you hear me, key your radio twice.”
@@ -2609,9 +2608,6 @@ function SAR_fct.menuF10_SAR(arg)
 
 	if unitSAR:isExist() and unitSAR:isActive() then
 		local pos_SAR_vec3 = unitSAR:getPoint()
-		-- local uSAR_unitId = Unit.getID(unitSAR)
-		-- local uSAR_Name = unitSAR:getName()
-		-- local uSAR_inAir = unitSAR:inAir()
 
 		env.info("DCE_menuF10_SAR E unitSAR:isExist() "..tostring(unitSAR:isExist()).." unitSAR:isActive() "..tostring(unitSAR:isActive()).." pos_SAR_vec3.x "..tostring(pos_SAR_vec3.x).." pos_SAR_vec3.y "..tostring(pos_SAR_vec3.y).." pos_SAR_vec3.z "..tostring(pos_SAR_vec3.z))
 		
@@ -2635,7 +2631,7 @@ function SAR_fct.menuF10_SAR(arg)
 
 						env.info("DCE_menuF10_SAR _F4 pilotN "..tostring(pilotN).." ejPil.name "..tostring(ejPil.name).." distance to player "..tostring(distance))
 
-						if distance <= 140000 then
+						if distance <= 40000 then--if distance <= 140000 
 
 							env.info("DCE_menuF10_SAR __G pilotN "..tostring(pilotN).." ejPil.name "..tostring(ejPil.name).." is in range for radio transmission")
 							
@@ -2983,6 +2979,7 @@ end
 
 function EWR_ON(data)
     if not data or not data.playerName or not data.gid or not data.groupObject then
+		env.info("EWR_ON: Missing data, cannot process EWR_ON command.")
         return
     end
 
@@ -2997,12 +2994,13 @@ function EWR_ON(data)
     EWR_optionPlayer[data.playerName].EWR_on = true
 
 	local txt = tostring(data.playerName).. " switch EWR to ON"
-	trigger.action.outTextForGroup(data.gid, txt, 10)
+	trigger.action.outTextForGroup(data.gid, txt, 20)
 	
 end
 
 function EWR_OFF(data)
 	if not data or not data.playerName or not data.gid or not data.groupObject then
+		env.info("EWR_ON: Missing data, cannot process EWR_ON command.")
 		return
 	end
 
@@ -3017,8 +3015,26 @@ function EWR_OFF(data)
     EWR_optionPlayer[data.playerName].EWR_on = false
 	
 	local txt = tostring(data.playerName) .. " switch EWR to OFF"
-	trigger.action.outTextForGroup(data.gid, txt, 10)
+	trigger.action.outTextForGroup(data.gid, txt, 20)
 end
+
+
+function EWR_Status(data)
+	if not data or not data.gid or not data.groupObject then
+		env.info("EWR_Status: Missing data, cannot process EWR_Status command.")
+		return
+	end
+
+	for playerName, options in pairs(EWR_optionPlayer) do
+
+		local status = options.EWR_on and "ON" or "OFF"
+		local txt = tostring(playerName) .. " EWR is currently: " .. status
+		trigger.action.outTextForGroup(data.gid, txt, 20)
+
+	end
+
+end
+
 
 
 function EWR_ON_OLD(playerName)
@@ -3530,17 +3546,6 @@ addFuncs = function(gId, gObj, playerName)
 			}
 		end
 
-		-- supprime les anciens items de la commande F10**************************************
-
-		-- missionCommands.removeItemForGroup(arg_gpGid, { "SAR" })
-		-- missionCommands.removeItemForGroup(arg_gpGid, { "Activate beacon radios", "SAR" })
-		-- missionCommands.removeItemForGroup(arg_gpGid, { "Turns off beacon radios", "SAR" })
-		-- missionCommands.removeItemForGroup(arg_gpGid, { "Radio transmitting", "SAR" })
-
-		-- missionCommands.addSubMenuForGroup(arg_gpGid, "SAR")
-
-		-- local ejctedPilRadioON = missionCommands.addSubMenuForGroup(arg_gpGid, "Activate beacon radios", { "SAR" })
-		-- local ejctedPilRadioOFF = missionCommands.addSubMenuForGroup(arg_gpGid, "Turns off beacon radios", { "SAR" })
 
 		missionCommands.removeItemForGroup(gId, {"Fuel Check"})
 		missionCommands.removeItemForGroup(gId, {"Urgent request"})
@@ -3583,22 +3588,21 @@ addFuncs = function(gId, gObj, playerName)
 		EWR_menuRootByGroup[gId] = subR_B1
 		local subR_B2 = missionCommands.addSubMenuForGroup(gId, "EWR ON", subR_B1)
 		local subR_B3 = missionCommands.addSubMenuForGroup(gId, "EWR OFF", subR_B1)
+		missionCommands.addCommandForGroup(gId, "Group EWR Status", subR_B1, EWR_Status, { gid = gId, groupObject = gObj })
 
-		-- missionCommands.addCommandForGroup( gId, playerName, subR_B2, EWR_ON, { playerName = playerName, gid = gId, groupObject = gObj } )
-		-- missionCommands.addCommandForGroup( gId, playerName, subR_B3, EWR_OFF, { playerName = playerName, gid = gId, groupObject = gObj } )
-        -- for playersName, value in pairs(EWR_optionPlayer) do
-        --     missionCommands.addCommandForGroup(gId, tostring(playersName) .. " EWR ON", subR_B2, EWR_ON,
-        --         { playersName = playerName, gid = gId, groupObject = gObj })
-        --     missionCommands.addCommandForGroup(gId, tostring(playersName) .. " EWR OFF", subR_B3, EWR_OFF,
-        --         { playersName = playerName, gid = gId, groupObject = gObj })
-        -- end
+
 		local wingmans = gObj:getUnits()
-		for playersName, unitObj in ipairs(wingmans) do
-			missionCommands.addCommandForGroup(gId, tostring(playersName) .. " EWR ON", subR_B2, EWR_ON,
-				{ playersName = playerName, gid = gId, groupObject = gObj })
-			missionCommands.addCommandForGroup(gId, tostring(playersName) .. " EWR OFF", subR_B3, EWR_OFF,
-				{ playersName = playerName, gid = gId, groupObject = gObj })
+		for unitN, unitObj in ipairs(wingmans) do
+			local pName = unitObj:getPlayerName()
+
+			if pName then
+				missionCommands.addCommandForGroup(gId, tostring(pName) .. " EWR ON", subR_B2, EWR_ON, { playerName = pName, gid = gId, groupObject = gObj })
+				missionCommands.addCommandForGroup(gId, tostring(pName) .. " EWR OFF", subR_B3, EWR_OFF, { playerName = pName, gid = gId, groupObject = gObj })
+			else
+				env.info("DCE_addFuncs: BUG Unit "..tostring(unitN).." in group "..tostring(gId).." has no playerName, skipping EWR command creation for this unit.")
+			end
 		end
+		
 
 		MenuF10ByGroupByCmd[gId] = MenuF10ByGroupByCmd[gId] or {}
 		--trouve ici le camp, la coalition du joueur, a partir de son gId ou gObj ou playerName
@@ -3606,6 +3610,7 @@ addFuncs = function(gId, gObj, playerName)
 		local unitsObj = gObj:getUnits()
 		local sideName = CoalitionIdToName[unitsObj[1]:getCoalition()] or "blue"
 		local freqence = campL.EjectedPilotFrequency[sideName].radioBeacon or 0
+		freqence = freqence /100000
 		MenuF10ByGroupByCmd[gId]["SAR"] = missionCommands.addCommandForGroup(gId, "CSAR: Request Survivor Beep "..tostring(freqence), nil, SAR_fct.menuF10_SAR, {gId, gObj} )
 
 		
@@ -4258,15 +4263,15 @@ function EventHandler2:onEvent(event)
 
 								local passEscort = false
 
-								if string.find(string.lower(groupName), "escort") then
-									passEscort = true
+								-- if string.find(string.lower(groupName), "escort") then
+								-- 	passEscort = true
 
 
-									--TODO a supprimer une fois les tests finitos
-									if campL.debug then
-										EWR_ON(flightName)
-									end
-								end
+								-- 	--TODO a supprimer une fois les tests finitos
+								-- 	if campL.debug then
+								-- 		EWR_ON(flightName)
+								-- 	end
+								-- end
 
 								if groupObject and passEscort then
 									-- local route = DCE_GetRoute(flightName, sideName)
