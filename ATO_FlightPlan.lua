@@ -4803,7 +4803,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							end
 
 						elseif parkSarAirBase[flight[f].base] then
-							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP limitedParkTiming C4 ") end
+							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP limitedParkTiming C4 n: "..n) end
 
 							if n==1 then
 								waypoints[1]["action"] = "From Ground Area"
@@ -4811,6 +4811,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								waypoints[1].airdromeId = nil
 								waypoints[1].linkUnit = nil
 								waypoints[1].helipadId = nil
+
+								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP limitedParkTiming C5 action: "..waypoints[1]["action"]) end
 
 								--on le fait reposer au meme endroit:
 								waypoints[#waypoints]["action"] = "Landing"
@@ -5145,31 +5147,16 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				-------- define group -----
 				-------- define group -----
 
-				-- _affiche(HumainPack, "AtoFP HumainPack: ")
-				-- print("AtoFP A p "..p)
-
 				local taskOrHuman = isHumain and "player" or flight[f].task
-				-- print("AtoFP B taskOrHuman "..tostring(taskOrHuman))
 
 				if HumainPack[p] then
 					taskOrHuman = "playerInPackage"
 					type_withData = HumainPack[p].humainTypePlane
-					-- print("AtoFP C taskOrHuman: "..tostring(taskOrHuman))
 				end
 
 
-				local DCE_FreqFlight = GetFrequencyNG(sideName, nil , taskOrHuman, type_withData, nil, "FreqFlight")
-
-				-- if isHumain then 
-				-- 	print("AtoFP DCE_FreqFlight:  "..tostring(DCE_FreqFlight))
-				-- 	-- os.execute 'pause'
-				-- end
-				
+				local DCE_FreqFlight = GetFrequencyNG(sideName, nil , taskOrHuman, type_withData, nil, "FreqFlight")			
 				local DCE_FreqPackage = GetFrequencyNG(sideName, flight[f].target_name, taskOrHuman, type_withData, nil, "FreqPackage")
-				-- if isHumain then 
-				-- 	print("AtoFP DCE_FreqPackage: "..tostring(DCE_FreqPackage)) 	
-				-- 	os.execute 'pause'
-				-- end
 
 				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe waypoints[1][x] AA "..tostring(waypoints[1]["x"])) end
 
@@ -5204,7 +5191,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				}
 
-				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe group[x] BB "..tostring(group["x"])) end
+				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe group[x] BB "..tostring(group["x"]).." "..tostring(group["route"]["points"][1]["action"])) end
 
 				flight[f].groupId = group.groupId
 
@@ -6306,11 +6293,12 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					waypoints[1]["ETA"] = 0													-- Place l'heure d'apparition au lancement de mission, pour avoir plus de temps...^^	
 
-					--ne change pas le type de decollage d'une position SAR (from ground)
-					if waypoints[1]["type"] ~= "TakeOffGround" then
-						waypoints[1]["type"] = "TakeOffParking"
-						waypoints[1]["action"] = "From Parking Area"							--TODO pourquoi je l'avais enlevé déjà????
-					end
+					--ATTENTION ce qui suit plus bas pose un pb sur les FARP a une place
+					-- --ne change pas le type de decollage d'une position SAR (from ground)
+					-- if waypoints[1]["type"] ~= "TakeOffGround" then
+					-- 	waypoints[1]["type"] = "TakeOffParking"
+					-- 	waypoints[1]["action"] = "From Parking Area"							--TODO pourquoi je l'avais enlevé déjà????
+					-- end
 
 					if db_airbases[flight[f].base].elevation then
 						waypoints[1]["alt"] = 500 + db_airbases[flight[f].base].elevation
