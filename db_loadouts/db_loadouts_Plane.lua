@@ -4,11 +4,12 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["loadouts_data/db_loadouts_Plane.lua"] = "1.3.201"
+versionDCE["loadouts_data/db_loadouts_Plane.lua"] = "1.3.202"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
+-- V202 - Su-33 CV
 -- V201 - no Mods - A6E - C-130J-30
 -- V198 - F-4E GBU - AGM - Mk20 
 -- V197 - AI restricted loadouts
@@ -22671,6 +22672,296 @@ db_loadouts = {
 						[10] = {
 							CLSID = "{44EE8698-89F9-48EE-AF36-5FD31896A82A}",
 						},
+					},
+					fuel = 5590.18,
+					flare = 96,
+					chaff = 96,
+					gun = 100,
+				},
+			},
+		},
+	},
+	["Su-33"] = {
+		CAP = {
+			["Su-33 CV CAP R-73*2,R-27ER*4,R-27ET*2,ECM"] = {
+				attributes =  { },
+				code_loadout =  { "TF", "Caucasus" },
+				night = true,
+				adverseWeather = true,
+				range = 600000,
+				firepower = 1,
+				vCruise = 213.222,
+				vAttack = 213.555,
+				hCruise = 8500,
+				hAttack = 8500,
+				standoff = 70000,
+				tStation = 3700,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = 
+						{
+							["CLSID"] = "{44EE8698-89F9-48EE-AF36-5FD31896A82F}",
+						}, -- end of [1]
+						[2] = 
+						{
+							["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+						}, -- end of [2]
+						[3] = 
+						{
+							["CLSID"] = "{B79C379A-9E87-4E50-A1EE-7F7E29C2E87A}",
+						}, -- end of [3]
+						[4] = 
+						{
+							["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [4]
+						[5] = 
+						{
+							["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [5]
+						[6] = 
+						{
+							["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [6]
+						[7] = 
+						{
+							["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [7]
+						[8] = 
+						{
+							["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [8]
+						[9] = 
+						{
+							["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [9]
+						[10] = 
+						{
+							["CLSID"] = "{B79C379A-9E87-4E50-A1EE-7F7E29C2E87A}",
+						}, -- end of [10]
+						[11] = 
+						{
+							["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+						}, -- end of [11]
+						[12] = 
+						{
+							["CLSID"] = "{44EE8698-89F9-48EE-AF36-5FD31896A82A}",
+						}, -- end of [12]
+					},
+					["fuel"] = 4750,
+					["flare"] = 48,
+					["chaff"] = 48,
+					["gun"] = 100,
+				},
+			},
+		},
+		["Fighter Sweep"] = {
+			["Su-33 CV Sweep R-73*2,R-27ER*4,R-27ET*2,ECM"] = {
+				attributes =  { },
+				code_loadout =  { "TF", "Caucasus" },
+				night = true,
+				adverseWeather = true,
+				range = 800000,
+				firepower = 1,
+				vCruise = 260.222,
+				vAttack = 300.555,
+				hCruise = 8500,
+				hAttack = 8500,
+				standoff = 70000,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = 
+						{
+						["CLSID"] = "{44EE8698-89F9-48EE-AF36-5FD31896A82F}",
+						}, -- end of [1]
+						[2] = 
+						{
+						["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+						}, -- end of [2]
+						[3] = 
+						{
+						["CLSID"] = "{B79C379A-9E87-4E50-A1EE-7F7E29C2E87A}",
+						}, -- end of [3]
+						[4] = 
+						{
+						["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [4]
+						[5] = 
+						{
+						["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [5]
+						[6] = 
+						{
+						["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [6]
+						[7] = 
+						{
+						["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [7]
+						[8] = 
+						{
+						["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [8]
+						[9] = 
+						{
+						["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [9]
+						[10] = 
+						{
+						["CLSID"] = "{B79C379A-9E87-4E50-A1EE-7F7E29C2E87A}",
+						}, -- end of [10]
+						[11] = 
+						{
+						["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+						}, -- end of [11]
+						[12] = 
+						{
+						["CLSID"] = "{44EE8698-89F9-48EE-AF36-5FD31896A82A}",
+						}, -- end of [12]
+					},
+					fuel = 5590.18,
+					flare = 96,
+					chaff = 96,
+					gun = 100,
+				},
+			},
+		},
+		Escort = {
+			["Su-33 CV Escort R-73*2,R-27ER*4,R-27ET*2,ECM"] = {
+				attributes =  { },
+				code_loadout =  { "TF", "Caucasus" },
+				night = true,
+				adverseWeather = true,
+				range = 800000,
+				firepower = 1,
+				vCruise = 260.222,
+				vAttack = 300.555,
+				hCruise = 8500,
+				hAttack = 8500,
+				standoff = 70000,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = 
+						{
+						["CLSID"] = "{44EE8698-89F9-48EE-AF36-5FD31896A82F}",
+						}, -- end of [1]
+						[2] = 
+						{
+						["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+						}, -- end of [2]
+						[3] = 
+						{
+						["CLSID"] = "{B79C379A-9E87-4E50-A1EE-7F7E29C2E87A}",
+						}, -- end of [3]
+						[4] = 
+						{
+						["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [4]
+						[5] = 
+						{
+						["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [5]
+						[6] = 
+						{
+						["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [6]
+						[7] = 
+						{
+						["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [7]
+						[8] = 
+						{
+						["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [8]
+						[9] = 
+						{
+						["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [9]
+						[10] = 
+						{
+						["CLSID"] = "{B79C379A-9E87-4E50-A1EE-7F7E29C2E87A}",
+						}, -- end of [10]
+						[11] = 
+						{
+						["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+						}, -- end of [11]
+						[12] = 
+						{
+						["CLSID"] = "{44EE8698-89F9-48EE-AF36-5FD31896A82A}",
+						}, -- end of [12]
+					},
+					fuel = 5590.18,
+					flare = 96,
+					chaff = 96,
+					gun = 100,
+				},
+			},
+		},
+		Intercept = {
+			["Su-33 CV Intercept R-73*2,R-27ER*4,R-27ET*2,ECM"] = {
+				attributes =  { },
+				code_loadout =  { "TF", "Caucasus" },
+				night = true,
+				adverseWeather = true,
+				range = 800000,
+				firepower = 1,
+				LDSD = true,
+				sortie_rate = 10,
+				stores = {
+					pylons = {
+						[1] = 
+						{
+						["CLSID"] = "{44EE8698-89F9-48EE-AF36-5FD31896A82F}",
+						}, -- end of [1]
+						[2] = 
+						{
+						["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+						}, -- end of [2]
+						[3] = 
+						{
+						["CLSID"] = "{B79C379A-9E87-4E50-A1EE-7F7E29C2E87A}",
+						}, -- end of [3]
+						[4] = 
+						{
+						["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [4]
+						[5] = 
+						{
+						["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [5]
+						[6] = 
+						{
+						["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [6]
+						[7] = 
+						{
+						["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [7]
+						[8] = 
+						{
+						["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [8]
+						[9] = 
+						{
+						["CLSID"] = "{E8069896-8435-4B90-95C0-01A03AE6E400}",
+						}, -- end of [9]
+						[10] = 
+						{
+						["CLSID"] = "{B79C379A-9E87-4E50-A1EE-7F7E29C2E87A}",
+						}, -- end of [10]
+						[11] = 
+						{
+						["CLSID"] = "{FBC29BFE-3D24-4C64-B81D-941239D12249}",
+						}, -- end of [11]
+						[12] = 
+						{
+						["CLSID"] = "{44EE8698-89F9-48EE-AF36-5FD31896A82A}",
+						}, -- end of [12]
 					},
 					fuel = 5590.18,
 					flare = 96,
