@@ -405,10 +405,10 @@ datalinks =
 			{
 				["teamMembers"] = 
 				{
-					[1] = 
-					{
-						["missionUnitId"] = 1,
-					}, -- end of [1]
+					-- [1] = 
+					-- {
+					-- 	["missionUnitId"] = 1,
+					-- }, -- end of [1]
 					-- [2] = 
 					-- {
 					-- 	["missionUnitId"] = 2,
@@ -442,11 +442,11 @@ datalinks =
 			{
 				["teamMembers"] = 
 				{
-					[1] = 
-					{
-						["missionUnitId"] = 1,
-						["TDOA"] = true,
-					}, -- end of [1]
+					-- [1] = 
+					-- {
+					-- 	["missionUnitId"] = 1,
+					-- 	["TDOA"] = true,
+					-- }, -- end of [1]
 					-- [2] = 
 					-- {
 					-- 	["missionUnitId"] = 2,
@@ -483,22 +483,22 @@ datalinks =
 			{
 				["teamMembers"] = 
 				{
-					[1] = 
-					{
-						["missionUnitId"] = 9,
-					}, -- end of [1]
-					[2] = 
-					{
-						["missionUnitId"] = 10,
-					}, -- end of [2]
-					[4] = 
-					{
-						["missionUnitId"] = 12,
-					}, -- end of [4]
-					[3] = 
-					{
-						["missionUnitId"] = 11,
-					}, -- end of [3]
+					-- [1] = 
+					-- {
+					-- 	["missionUnitId"] = 9,
+					-- }, -- end of [1]
+					-- [2] = 
+					-- {
+					-- 	["missionUnitId"] = 10,
+					-- }, -- end of [2]
+					-- [4] = 
+					-- {
+					-- 	["missionUnitId"] = 12,
+					-- }, -- end of [4]
+					-- [3] = 
+					-- {
+					-- 	["missionUnitId"] = 11,
+					-- }, -- end of [3]
 				}, -- end of ["teamMembers"]
 				["donors"] = 
 				{

@@ -1,9 +1,8 @@
 --To create the flight plans in the mission file for all flights in the ATO
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: adjustment_Ad debug_Ab
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_FlightPlan.lua"] = "1.58.291"
+versionDCE["ATO_FlightPlan.lua"] = "1.58.292"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -4712,6 +4711,14 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					local unitIdTemp = 1
 					if not UnitByName[unitName] then
 						unitIdTemp = GenerateIDUnit(unitName)
+					else
+						unitIdTemp = UnitByName[unitName]
+					end
+
+					if unitIdTemp == 1 then
+						print("bug unitName: "..tostring(unitName))
+						_affiche(UnitByName, "UnitByName: ")
+						os.execute 'pause'
 					end
 
 					if flight[f].route[1].id == "Spawn" and flight[f].task == "Refueling" then
@@ -4980,7 +4987,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							if units[n]["AddPropAircraft"]["STN_L16"] then
 								--essentielement pour les donnors HA BON?
 								units[n]["AddPropAircraft"]["STN_L16"] =  Get_L16_Id()
-								if not pack_L16_unitId[p] then pack_L16_unitId[p] = {} end
+								pack_L16_unitId[p] = pack_L16_unitId[p] or {}
 								table.insert(pack_L16_unitId[p], units[n].unitId)
 							elseif units[n]["AddPropAircraft"]["SADL_TN"] then
 								units[n]["AddPropAircraft"]["SADL_TN"] =  Get_SADL_Id()
@@ -5013,7 +5020,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								end
 
 								--pour distribuer les unitId aux members
-								for m = 1, flight[f].number do
+								--[[ for m = 1, flight[f].number do
 									if m == 1 then
 										units[n].datalinks[typeDatalink].network.teamMembers[m] = {missionUnitId = units[n].unitId}
 										for r, copyId in pairs(copyRecordId) do
@@ -5051,7 +5058,6 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 										end
 										if flight[f]["type"] == "F-16C_50" then
 											member["TDOA"] = true
-
 										end
 									else
 
@@ -5066,13 +5072,10 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 									end
 
-								end
+								end ]]
 							end
 
-							-- if n == 1 then
-							-- 	units[n].datalinks[typeDatalink].settings.flightLead = true
-							-- end
-
+					
 						end
 					elseif typeDatalink == "IDM" then
 						for n=1, #units do
@@ -7315,8 +7318,6 @@ if ListRequiredModules then
 	end
 end
 
-
-
 --mettre dans le for du pack ATO les avions link16 capa
 
 for _side, side in pairs(mission.coalition) do
@@ -7338,14 +7339,15 @@ for _side, side in pairs(mission.coalition) do
 												["missionUnitId"] = value,
 											}
 
-											--cas avion RECOVERY, place ici l unitId dans le premier members
-											if unit.datalinks[typeDataLink].network.teamMembers[1].missionUnitId ~= unit.unitId then
-												unit.datalinks[typeDataLink].network.teamMembers[1].missionUnitId = unit.unitId
-											end
+											-- --cas avion RECOVERY, place ici l unitId dans le premier members
+											-- if unit.datalinks[typeDataLink].network.teamMembers[1].missionUnitId ~= unit.unitId then
+											-- 	unit.datalinks[typeDataLink].network.teamMembers[1].missionUnitId = unit.unitId
+											-- end
 
 											if #unit.datalinks[typeDataLink].network.teamMembers < Data_divers[unit.type].datalinks.hasTeamMembers then
 												table.insert(unit.datalinks[typeDataLink].network.teamMembers, data )
-											elseif #unit.datalinks[typeDataLink].network.donors < Data_divers[unit.type].datalinks.hasDonors then
+											end
+											if #unit.datalinks[typeDataLink].network.donors < Data_divers[unit.type].datalinks.hasDonors then
 
 												--check si l'id du donor n'est pas déjà dans members
 												local found = false
@@ -7375,15 +7377,16 @@ for _side, side in pairs(mission.coalition) do
 												["missionUnitId"] = value,
 											}
 
-											--cas avion RECOVERY, place ici l unitId dans le premier members
-											if unit.datalinks[typeDataLink].network.teamMembers[1].missionUnitId ~= unit.unitId then
-												unit.datalinks[typeDataLink].network.teamMembers[1].missionUnitId = unit.unitId
-											end
+											-- --cas avion RECOVERY, place ici l unitId dans le premier members
+											-- if unit.datalinks[typeDataLink].network.teamMembers[1].missionUnitId ~= unit.unitId then
+											-- 	unit.datalinks[typeDataLink].network.teamMembers[1].missionUnitId = unit.unitId
+											-- end
 
 											if #unit.datalinks[typeDataLink].network.teamMembers < Data_divers[unit.type].datalinks.hasTeamMembers then
 												table.insert(unit.datalinks[typeDataLink].network.teamMembers, data )
+											end
 
-											elseif #unit.datalinks[typeDataLink].network.donors < Data_divers[unit.type].datalinks.hasDonors then
+											if #unit.datalinks[typeDataLink].network.donors < Data_divers[unit.type].datalinks.hasDonors then
 
 												--check si l'id du donor n'est pas déjà dans members
 												local found = false
