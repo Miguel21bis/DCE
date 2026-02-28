@@ -730,9 +730,6 @@ if input == "y" or input == "yes" then
 
 --==========================================================
 
-	--increase campaign mission number
-	-- camp.mission = camp.mission + 1	
-
 	--generate next campaign mission
 
 	PlayerFlight = false																		--variable to control mission generation loop
@@ -762,7 +759,7 @@ if input == "y" or input == "yes" then
 				print("\nMultiplayerCampaign Next mission generated.\n")								--confirmation text
 				 break
 			end
-		elseif SinglePlayer and PlayerFlight  then														--mission has a player flight
+		elseif SinglePlayer and PlayerFlight then														--mission has a player flight
 			if acceptMission() then
 				BackupFilesMission() 
 				print("\nNext mission generated.\n")													--confirmation text
@@ -816,17 +813,21 @@ if input == "y" or input == "yes" then
 					print("Player aircraft type cannot operate in this weather.\n\n")
 				elseif crit.key == "target_range" and crit.value == nil then
 					print("No eligible mission available for player.\n\n")
-				elseif crit.key == "coop" and crit.value == nil then
-					print("Not enough ready aircraft for all clients.\n\n")
 				elseif crit.key == "intercept" and crit.value == nil then
 					print("Ground alert intercept duty without launch.\n\n")
+				-- else
+				-- 	print("No eligible mission available.\n\n")
 				end
 			end
 			if Multi.NbGroup and not PlayerFlight then
 				print("Not enough ready aircraft for all clients..\n\n")
 			end
 
+			os.execute 'timeout /t 4'
+
 		end
+
+
 		if showVersion then
 			print("0C1= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
 			print("= = = = = = = = = = = = = Script Version : "..tostring(showVersion).." = = Lua Version : "..tostring(_VERSION))
@@ -838,8 +839,11 @@ if input == "y" or input == "yes" then
 		end
 
 
-		if Debug.debug and Debug.AfficheFlight then
-			print("0C1 DCE debug")  os.execute 'pause'
+		if Debug.debug and not PlayerFlight then
+			print("0C1 DCE debug")  
+			_affiche(Playability_criterium)
+			
+			-- os.execute 'pause'
 		end
 
 	until 1 == 2																					--repeat until the next mission is ready (has a player flight)

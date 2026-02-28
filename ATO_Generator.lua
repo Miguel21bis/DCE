@@ -2066,10 +2066,11 @@ for sideName, draftT in pairs(draftSorties) do
 
 										--ici, on reserve la place pour un type d'avion prevu pour le MP
 										reserveClient = true
-										if unitSupport.client then
+										if unitSupport.client and task ~= "Intercept" then
 											
 											draft.loadout.support = draft.loadout.support or {}
 											draft.loadout.support[task] = draft.loadout.support[task] or true
+											draft.support[task] = draft.support[task] or {}
 											draft.support[task]["escort_max"] = 4
 
 											overideMP_B = true

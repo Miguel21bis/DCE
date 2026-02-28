@@ -120,7 +120,7 @@ for sideName, packs in pairs(ATO) do
 			tot = TOTtable[sideName][packs[p].main[1].target_name]															--give this package the same TOT
 
 			local earliest = packs[p].main[1].tot_from + mission_ini.startup_time_player   --600														--earliest TOT is 10 minutes after tot_from to make sure it is at least 10 minutes after mission start
-			if packs[p].main[1].loadout.standoff then															--for strikes 
+			if packs[p].main[1].loadout.standoff and packs[p].main[1].loadout.standoff > 0 then															--for strikes 
 				earliest = earliest + packs[p].main[1].loadout.standoff / packs[p].main[1].loadout.vAttack		--earliest TOT to make sure that aircraft always spawn 10 minutes ahead of IP at mission start
 			end
 			local latest = packs[p].main[1].tot_to																--latest TOT
@@ -155,7 +155,12 @@ for sideName, packs in pairs(ATO) do
 				earliest = earliest
 			end
 
-			if packs[p].main[1].loadout.standoff and  packs[p].main[1].task ~= "CAP"  then															--for strikes 
+			if (packs[p].main[1].loadout.standoff and packs[p].main[1].loadout.standoff > 0 ) and packs[p].main[1].task ~= "CAP" then															--for strikes 
+				if not packs[p].main[1].loadout.vAttack then
+					print("AtoT Bug: no vAttack p "..p.." for this "..packs[p].main[1].type.." |loadout_name:| "..packs[p].main[1].loadout.loadout_name)
+					print("task: "..packs[p].main[1].task)
+					os.execute 'pause'
+				end
 				earliest = earliest + packs[p].main[1].loadout.standoff / packs[p].main[1].loadout.vAttack		--earliest TOT to make sure that aircraft always spawn 10 minutes ahead of IP at mission start
 			end
 

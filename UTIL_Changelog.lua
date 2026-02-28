@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "22.95.578"
+versionDCE["UTIL_Changelog.lua"] = "22.98.583"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "22.95.578"
+VersionDCE["UTIL_Changelog.txt"] = "22.98.583"
 --[[
 
 # DCE – Changelog
@@ -18,37 +18,33 @@ known issues:
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
 
-##  Version 22.95.578
+##  Version 22.98.583
 
 	###  Fixed
-
 	- **Performance**
-	Major optimization of mission generation time.
-	Campaigns now generate missions significantly faster, especially large ones.
+		Major optimization of mission generation time.
+		Campaigns now generate missions significantly faster, especially large ones.
 
 	###  Added
-
 	- **Aircraft Radio Data (Automatic)**
-	Aircraft radio capabilities are now automatically read from `Mods` and `CoreMods`.
-
-	**Why this matters for users:**
-	- No more duplicated radio data in DCE files
-	- Easier maintenance
-	- Better compatibility with new or updated aircraft modules
-
-	- **Improved Radio Frequency Assignment**
-	Radio frequencies are now assigned using the radio ranges defined by each aircraft module.
-
-	**Result:**
-	- More realistic radio behavior
-	- Better interoperability between different aircraft types
+		Aircraft radio capabilities are now automatically read from `Mods` and `CoreMods`.
 
 	- **change of front line during a campaign**
 
-	###  Changed
+	- **The choice of aircraft in MP takes into account the base.**
 
+	- **AAA_Barrage with the kind permission of Bandit648 .**
+
+	- **Support for multiple third-party mods**
+		You still need to download and install these mods.
+		tetet_etc** // VSN_etc** // vwv_etc** // 
+		A-4E-C // A-6E // A_6B // 
+		Bronco-OV-10A // F111C // 
+		AH-1G // SH-3D // UH-60L // OH-6A
+
+	###  Changed
 	- **Loadout Structure**
-	Loadouts have been split into multiple files and moved into the `db_loadouts` folder.
+		Loadouts have been split into multiple files and moved into the `db_loadouts` folder.
 
 	- **Custom Mods Support**
 	A new `Mods` directory has been added.
@@ -60,6 +56,16 @@ known issues:
 	- Data files (`Data_divers = {}`)
 
 	File names are free and do not need to follow a specific pattern.
+
+	- **MenuF10**
+	Loadouts have been split into multiple files and moved into the `db_loadouts` folder.
+
+	- **F10 EWR Magic Menu Review**
+	New method for calling ejected pilots to transmit on their frequency. You must be close (~40km) and ask regularly on the radio:
+
+	This avoids chaos if dozens of pilots need to be rescued (as in the Vietnam campaign).
+
+	- **better presentation of aircraft choices in MP**
 
 ==:20.92.572:==
 572 add		[M92]	add new attributesCond in targetList for best squad selection

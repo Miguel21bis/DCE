@@ -813,6 +813,11 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 		campFile:close()
 	end
 
+	if Debug.debug then
+		if not AllCoopPossible then
+			_affiche(playable, "playable: ")
+		end
+	end
 
 	if TaskRefused == true then
 		PlayerFlight = false																--set true to end mission generation loop

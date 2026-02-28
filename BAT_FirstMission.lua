@@ -289,76 +289,184 @@ repeat
 				end
 			until   (input >= 1 and  input <= 10)
 
+			-- --===================================================================================
+			-- -- Ecran N°4 Selection du type d'avion Multiplayer	
+			-- local tabIndex = {}
+			-- for i = 1 , Multi.NbGroup do
+			-- 	local ExPlaneA = ""
+			-- 	local stopLoop = false
+			-- 	for nSide , oob_airSide in PairsByKeys(oob_air) do														--pour afficher l'exemple de selection du premier avion présenté
+			-- 		for m , unit in PairsByKeys(oob_airSide) do
+			-- 			if Playable_m[unit.type] and unit.inactive ~= true and not stopLoop then
+			-- 				ExPlaneA = unit.type
+			-- 				stopLoop = true
+			-- 			end
+			-- 		end
+			-- 	end
+
+			-- 	print("Choose your aircraft type for Flight n°"..i)
+			-- 	print("(number of aircraft) (type of aircraft) (type of mission)")
+			-- 	print("example for (4 "..ExPlaneA..": Escort): 4ae or 4AE")
+
+			-- 	if not Multi.Group then Multi.Group= {} end
+			-- 	if not Multi.Group[i] then Multi.Group[i]= {} end
+
+			-- 	local playable_type = {}
+			-- 	local ti = 65 																						--char(65) == a
+			-- 	local tabTaskAvailable = {}
+
+			-- 	-- parse toutes les unités et rempli le tab tabTaskAvailable pour etre sur de proposer toutes les task proposé active 
+			-- 	for nSide , oob_airSide in PairsByKeys(oob_air) do
+			-- 		print() print(nSide..":")
+			-- 		for m , unit in PairsByKeys(oob_airSide) do
+			-- 			if Playable_m[unit.type]  and unit.inactive ~= true then
+			-- 				for taskStr , nbool in PairsByKeys(oob_air[nSide][m].tasks) do
+			-- 					taskStr = tostring(taskStr)
+
+			-- 					if not tabTaskAvailable[nSide] then tabTaskAvailable[nSide] = {} end
+			-- 					if not tabTaskAvailable[nSide][unit.type] then tabTaskAvailable[nSide][unit.type] = {} end
+			-- 					if not tabTaskAvailable[nSide][unit.type][taskStr] then tabTaskAvailable[nSide][unit.type][taskStr] = nbool end
+			-- 					if nbool == true then	tabTaskAvailable[nSide][unit.type][taskStr] = true	end
+			-- 				end
+			-- 			end
+			-- 		end
+			-- 	end
+
+			-- 	-- display le tableau des choix d'avion et de task
+			-- 	local tabBug = {}
+
+			-- 	for nSide , unit_type in PairsByKeys(tabTaskAvailable) do
+			-- 		print() print(nSide..":")
+			-- 		for unitType , TabType in PairsByKeys(unit_type) do
+
+			-- 			local IndexStringType = string.lower(string.char(ti))
+			-- 			if not playable_type[IndexStringType] then playable_type[IndexStringType] = {} end
+			-- 			playable_type[IndexStringType]["type"] = unitType
+			-- 			playable_type[IndexStringType]["side"] = nSide
+
+			-- 			io.write(" (1 to 8): ("..IndexStringType.."): "..unitType..":")
+
+			-- 			for taskStr , nbool in PairsByKeys(TabType) do
+
+			-- 				if TabTask[taskStr] and nbool == true then
+			-- 					io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
+			-- 					-- local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
+			-- 					tabIndex[tostring(1)..IndexStringType..TabTask[taskStr]] = true
+			-- 					tabIndex[tostring(2)..IndexStringType..TabTask[taskStr]] = true
+			-- 					tabIndex[tostring(3)..IndexStringType..TabTask[taskStr]] = true
+			-- 					tabIndex[tostring(4)..IndexStringType..TabTask[taskStr]] = true
+			-- 					tabIndex[tostring(5)..IndexStringType..TabTask[taskStr]] = true
+			-- 					tabIndex[tostring(6)..IndexStringType..TabTask[taskStr]] = true
+			-- 					tabIndex[tostring(7)..IndexStringType..TabTask[taskStr]] = true
+			-- 					tabIndex[tostring(8)..IndexStringType..TabTask[taskStr]] = true
+
+			-- 				elseif not TabTask[taskStr] and not string.lower(taskStr) == "spotter" then
+			-- 					table.insert(tabBug,taskStr )
+			-- 				end
+			-- 			end
+			-- 			io.write("\n")
+			-- 			ti = ti+1
+			-- 		end
+			-- 	end
+
+			-- 	io.write( "\n")
 			--===================================================================================
 			-- Ecran N°4 Selection du type d'avion Multiplayer	
-			local tabIndex = {}
-			for i = 1 , Multi.NbGroup do
-				local ExPlaneA = ""
-				local stopLoop = false
-				for nSide , oob_airSide in PairsByKeys(oob_air) do														--pour afficher l'exemple de selection du premier avion présenté
-					for m , unit in PairsByKeys(oob_airSide) do
-						if Playable_m[unit.type] and unit.inactive ~= true and not stopLoop then
-							ExPlaneA = unit.type
-							stopLoop = true
+				local tabIndex = {}
+				for i = 1 , Multi.NbGroup do
+					local ExPlaneA = ""
+					local stopLoop = false
+					for nSide , oob_airSide in PairsByKeys(oob_air) do														--pour afficher l'exemple de selection du premier avion présenté
+						for m , unit in PairsByKeys(oob_airSide) do
+							if Playable_m[unit.type] and unit.inactive ~= true and not stopLoop then
+								ExPlaneA = unit.type
+								stopLoop = true
+							end
 						end
 					end
-				end
 
-				print("Choose your aircraft type for Flight n°"..i)
-				print("(number of aircraft) (type of aircraft) (type of mission)")
-				print("example for (4 "..ExPlaneA..": Escort): 4ae or 4AE")
+					print("Choose your aircraft type for Flight n°"..i)
+					print("(number of aircraft) (type of aircraft) (type of mission)")
+					print("example for (4 "..ExPlaneA..": Escort): 4ae or 4AE")
 
-				if not Multi.Group then Multi.Group= {} end
-				if not Multi.Group[i] then Multi.Group[i]= {} end
+					if not Multi.Group then Multi.Group= {} end
+					if not Multi.Group[i] then Multi.Group[i]= {} end
 
-				local playable_type = {}
+					local playable_type = {}
+					local seen = {}
+					local tasks = {}
 				local ti = 65 																						--char(65) == a
 				local tabTaskAvailable = {}
 
 				-- parse toutes les unités et rempli le tab tabTaskAvailable pour etre sur de proposer toutes les task proposé active 
 				for nSide , oob_airSide in PairsByKeys(oob_air) do
 					print() print(nSide..":")
-					for m , unit in PairsByKeys(oob_airSide) do
-						if Playable_m[unit.type]  and unit.inactive ~= true then
-							for taskStr , nbool in PairsByKeys(oob_air[nSide][m].tasks) do
-								taskStr = tostring(taskStr)
+					for m, unit in PairsByKeys(oob_airSide) do
+						if Playable_m[unit.type] and unit.inactive ~= true then
 
-								if not tabTaskAvailable[nSide] then tabTaskAvailable[nSide] = {} end
-								if not tabTaskAvailable[nSide][unit.type] then tabTaskAvailable[nSide][unit.type] = {} end
-								if not tabTaskAvailable[nSide][unit.type][taskStr] then tabTaskAvailable[nSide][unit.type][taskStr] = nbool end
-								if nbool == true then	tabTaskAvailable[nSide][unit.type][taskStr] = true	end
+							tabTaskAvailable[nSide] = tabTaskAvailable[nSide] or {}
+							-- tabTaskAvailable[nSide][unit.name] = {
+							-- 	type = unit.type,
+							-- 	base = unit.base,
+							-- 	tasks = {},
+							-- }
+
+							table.insert(tabTaskAvailable[nSide], {
+								name = unit.name,
+								type = unit.type,
+								base = unit.base,
+								tasks = {},
+							})
+
+							for taskStr, nbool in PairsByKeys(oob_air[nSide][m].tasks) do
+								if nbool then
+									taskStr = tostring(taskStr)
+									table.insert(tabTaskAvailable[nSide][#tabTaskAvailable[nSide]]["tasks"],taskStr)
+								end
 							end
+
 						end
 					end
 				end
-
 				-- display le tableau des choix d'avion et de task
 				local tabBug = {}
 
-				for nSide , unit_type in PairsByKeys(tabTaskAvailable) do
+				-- for nSide, units in PairsByKeys(tabTaskAvailable) do
+				for nSide, units in pairs(tabTaskAvailable) do
 					print() print(nSide..":")
-					for unitType , TabType in PairsByKeys(unit_type) do
 
-						local IndexStringType = string.lower(string.char(ti))
-						if not playable_type[IndexStringType] then playable_type[IndexStringType] = {} end
-						playable_type[IndexStringType]["type"] = unitType
-						playable_type[IndexStringType]["side"] = nSide
+					--sort units par la key units.type
+					table.sort(units, function(a, b)
+						return a.type < b.type
+					end)
 
-						io.write(" (1 to 8): ("..IndexStringType.."): "..unitType..":")
 
-						for taskStr , nbool in PairsByKeys(TabType) do
+					-- for unitName, unit in PairsByKeys(units) do
+					for unitN, unit in ipairs(units) do
 
-							if TabTask[taskStr] and nbool == true then
+						local indexStringType = string.lower(string.char(ti))
+
+						playable_type[indexStringType] = playable_type[indexStringType] or {}
+						playable_type[indexStringType]["type"] = unit.type
+						playable_type[indexStringType]["side"] = nSide
+						playable_type[indexStringType]["base"] = unit.base
+						playable_type[indexStringType]["unitName"] = unit.name
+
+						io.write(" (1 to 8): ("..indexStringType.."): "..unit.type.." || "..AliasBaseName(unit.base).." || ")
+
+						for taskN, taskStr in PairsByKeys(unit.tasks) do
+
+							if TabTask[taskStr] then
 								io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
 								-- local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
-								tabIndex[tostring(1)..IndexStringType..TabTask[taskStr]] = true
-								tabIndex[tostring(2)..IndexStringType..TabTask[taskStr]] = true
-								tabIndex[tostring(3)..IndexStringType..TabTask[taskStr]] = true
-								tabIndex[tostring(4)..IndexStringType..TabTask[taskStr]] = true
-								tabIndex[tostring(5)..IndexStringType..TabTask[taskStr]] = true
-								tabIndex[tostring(6)..IndexStringType..TabTask[taskStr]] = true
-								tabIndex[tostring(7)..IndexStringType..TabTask[taskStr]] = true
-								tabIndex[tostring(8)..IndexStringType..TabTask[taskStr]] = true
+								tabIndex[tostring(1)..indexStringType..TabTask[taskStr]] = true
+								tabIndex[tostring(2)..indexStringType..TabTask[taskStr]] = true
+								tabIndex[tostring(3)..indexStringType..TabTask[taskStr]] = true
+								tabIndex[tostring(4)..indexStringType..TabTask[taskStr]] = true
+								tabIndex[tostring(5)..indexStringType..TabTask[taskStr]] = true
+								tabIndex[tostring(6)..indexStringType..TabTask[taskStr]] = true
+								tabIndex[tostring(7)..indexStringType..TabTask[taskStr]] = true
+								tabIndex[tostring(8)..indexStringType..TabTask[taskStr]] = true
 
 							elseif not TabTask[taskStr] and not string.lower(taskStr) == "spotter" then
 								table.insert(tabBug,taskStr )
@@ -370,6 +478,14 @@ repeat
 				end
 
 				io.write( "\n")
+
+				if next(tabBug) == nil then
+					-- print("La table est vide.")
+				else
+					for _, bug in ipairs(tabBug) do
+						print("Bug with: "..bug)
+					end
+				end
 			--===================================================================================
 				-- Ecran N°5 Selection Nombre d'avion Multiplayer
 				repeat
@@ -542,15 +658,18 @@ repeat
 					print("Player aircraft type cannot operate in this weather.\n\n")
 				elseif crit.key == "target_range" and crit.value == nil then
 					print("No eligible mission available for player.\n\n")
-				elseif crit.key == "coop" and crit.value == nil then
-					print("Not enough ready aircraft for all clients.\n\n")
 				elseif crit.key == "intercept" and crit.value == nil then
 					print("Ground alert intercept duty without launch.\n\n")
+				-- else
+				-- 	print("No eligible mission available.\n\n")
 				end
 			end
 			if Multi.NbGroup and not PlayerFlight then
 				print("Not enough ready aircraft for all clients..\n\n")
 			end
+
+			os.execute 'timeout /t 4'
+			
 		end
 
 		if showVersion  then
@@ -560,6 +679,13 @@ repeat
 			print()
 		else
 			print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
+		end
+
+		if Debug.debug and not PlayerFlight then
+			print("0C1 DCE debug")  
+			_affiche(Playability_criterium)
+			
+			-- os.execute 'pause'
 		end
 
 	until 1 == 2

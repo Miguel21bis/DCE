@@ -257,11 +257,8 @@ do
 	local target_alive = 0
 	local target_hit = 0
 	local targetSelect = {}
-	print("DEBRIEF_t A camp.player.side "..tostring(camp.player.side).." target_name "..tostring(target_name))
 	for targetN, target in ipairs(targetlist[camp.player.side]) do
-		print("DEBRIEF_t B target.titleName "..tostring(target.titleName).." target.elements "..tostring(target.elements))
-		if target.titleName == target_name and target.elements  then
-			print("DEBRIEF_t C titleName "..tostring(target.titleName).." alive_last: "..tostring(target.alive_last))
+		if target.titleName == target_name and target.elements then
 			target_alive = target.alive
 			target_hit = target.alive_last
 			targetSelect = target
