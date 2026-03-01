@@ -2,15 +2,9 @@
 -- 
 -- .
 ------------------------------------------------------------------------------------------------------- 
--- last modification cleanCode_c debug_a
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/SAR.lua"] = "1.4.24"
+versionDCE["Mission Scripts/SAR.lua"] = "1.4.25"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_c				(c springCleaning)
--- debug_a	 				(a: getOut land.getSurfaceType() error GroundDamagedFlyingMachine)
--- adjustment_g				(if exist)(f don't spawn a manhunt in the ENI camp)(e CVN to CV)(c ajust nb of ManHunt)								
--- modification M61_j		SAR (j noSAR in wrongSide)(i correction 100 to 200m)(g guideTreuilSAR)(e: add MGRS_Chute_10KM)(b debug)
--------------------------------------------------------------------------------------------------------
 
 
 env.info("DCE_SAR START LOADING SAR.lua "..tostring(versionDCE["Mission Scripts/SAR.lua"]))
@@ -22,7 +16,7 @@ local nbManhunt = {
 	[3] = 0,
 }
 
-local NB_MAX_MANHUNT = 8
+local NB_MAX_MANHUNT = 30
 
 local guideSAR = {}
 local walkEjectedPilot = {}

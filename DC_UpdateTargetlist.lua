@@ -487,11 +487,13 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
 						local ePriority = 0
 						if zPilots[i].inTheEnemyCamp then
-							ePriority = 5		--	10
-						elseif zPilots[i].inTheEnemyCamp == false then
-							ePriority = 7		--	100
-						elseif zPilots[i].inTheEnemyCamp == nil then
-							ePriority = 6		--	50
+							ePriority = 5
+						else
+							ePriority = 10
+						end
+
+						if zPilots[i].pilotName then
+							ePriority = 50
 						end
 
 						local newTarget = zPilots[i]

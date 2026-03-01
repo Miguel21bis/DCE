@@ -137,6 +137,64 @@ local function checkPointInPoly2(point, poly)
 	end
 end
 
+-- calcule la distance minimale entre un point et un segment
+local function distancePointToSegment(point, a, b)
+
+    local px = point.x
+    local py = point.y
+
+    local ax = a.x
+    local ay = a.y
+    local bx = b.x
+    local by = b.y
+
+    local dx = bx - ax
+    local dy = by - ay
+
+    local lengthSquared = dx * dx + dy * dy
+
+    if lengthSquared == 0 then
+        -- a et b sont le même point
+        local dxp = px - ax
+        local dyp = py - ay
+        return math.sqrt(dxp * dxp + dyp * dyp)
+    end
+
+    -- projection du point sur le segment (paramètre t)
+    local t = ((px - ax) * dx + (py - ay) * dy) / lengthSquared
+
+    -- on limite t entre 0 et 1 (segment, pas droite infinie)
+    if t < 0 then
+        t = 0
+    elseif t > 1 then
+        t = 1
+    end
+
+    -- point projeté sur le segment
+    local projx = ax + t * dx
+    local projy = ay + t * dy
+
+    local distx = px - projx
+    local disty = py - projy
+
+    return math.sqrt(distx * distx + disty * disty)
+end
+
+-- retourne la distance minimale entre un point et un polygone
+local function distanceToPolygonBoundary(point, poly)
+
+    local minDist = math.huge
+
+    for i = 1, #poly - 1 do
+        local dist = distancePointToSegment(point, poly[i], poly[i + 1])
+        if dist < minDist then
+            minDist = dist
+        end
+    end
+
+    return minDist
+end
+
 local function addSoldierAliasPilot(soldier)
     -- print("DcUS GG passe AddPilotSoldier ")
     -- [element] = {
@@ -619,8 +677,9 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                         for townName, townData in pairs(town) do
                             local distance = math.sqrt(math.pow(pilot.pos.x - townData.x, 2) + math.pow(pilot.pos.y - townData.y, 2))
                             if distance < townData.distInfluence then
-                                print("DcUS SAR pilot too close from "..tostring(townName).." "..tostring(pilot.name).." set to POW")
+                                -- print("DcUS SAR pilot too close from "..tostring(townName).." "..tostring(pilot.name).." set to POW")
                                 pilot.status = "POW"
+                                pilot.reason = "too close from "..townName
                             end
                         end
 
@@ -715,16 +774,6 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                         enemy = "blue"
                     end
 
-                    -- local aliasInitYear = camp.dateInit.year
-                    -- if aliasInitYear < 1970 then
-                    --     aliasInitYear = 1970
-                    -- end
-                
-                    -- local aliasYear = camp.date.year
-                    -- if aliasYear < 1970 then
-                    --     aliasYear = 1970
-                    -- end
-
                     --ajoute et met à jour le nb de jour depuis son ejection
                     if not pilot.dataPOW.ejectNbDay then
                         pilot.dataPOW.ejectNbDay = mia_Since
@@ -732,8 +781,6 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                 
                         -- mia_Since = SecondsBetween( camp.date, pilot.date) / (24 * 60 * 60)
                         pilot.dataPOW.ejectNbDay = tonumber(mia_Since)
-
-                        -- print("daysfrom "..mia_Since)
 
                     end
 
@@ -743,11 +790,11 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
                     --cherche s'il est ejecté chez l'ENI
                     if not pilot.dataPOW.initChoicePOW or pilot.dataPOW.initChoicePOW == nil then
-                        pilot.inTheEnemyCamp =  checkPointInPoly2({x=pilot.pos.x,y=pilot.pos.y}, boundary[enemy])
+                        pilot.inTheEnemyCamp = checkPointInPoly2({x=pilot.pos.x,y=pilot.pos.y}, boundary[enemy])
                         pilot.dataPOW.initChoicePOW = true
                         pilot.dataPOW.PowDayMax = math.random(3, 15)
 
-                    elseif pilot.dataPOW.initChoicePOW and pilot.inTheEnemyCamp then
+                     elseif pilot.dataPOW.initChoicePOW and pilot.inTheEnemyCamp then
 
                         if pilot.dataPOW.PowDayMax and pilot.date.year and pilot.date.month and pilot.date.day then
                             if mia_Since > pilot.dataPOW.PowDayMax then
@@ -756,8 +803,12 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                                 -- print("DcUS update Status A10 "..tostring(pilot.name).." set to POW after max days "..tostring(pilot.dataPOW.PowDayMax))
                             end
                         end
+                    end
 
+                     pilot.distanceFromFrontline = 0 
 
+                    if pilot.inTheEnemyCamp then
+                      pilot.distanceFromFrontline = distanceToPolygonBoundary(pilot.pos, boundary[enemy])
                     end
 
                     --  print("DcUS update Status B2 "..tostring(pilot.inTheEnemyCamp).." pilot.dataPOW.ejectNbDay "..tostring(pilot.dataPOW.ejectNbDay).." pilot.dataPOW.POW_nextDayCheck "..tostring(pilot.dataPOW.POW_nextDayCheck) )
@@ -1076,7 +1127,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                                         print("ATTENTION ") os.execute 'pause'
                                     end
 
-                                    if unit.base and db_airbases[unit.base] and db_airbases[unit.base].x then
+                                    if unit.base and db_airbases[unit.base] and db_airbases[unit.base].x and not db_airbases[unit.base].humainOnly then
                                         local distance = math.sqrt(math.pow(pilot.pos.x -  db_airbases[unit.base].x, 2) + math.pow(pilot.pos.y -  db_airbases[unit.base].y, 2))
                                         if distance <= selectedDistance then
                                             selectedDistance = distance
@@ -1089,9 +1140,9 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                         end
                     end
                 end
-                if selectedUnitName ~= "" then
+                -- if selectedUnitName ~= "" then
                     pilot.selectedUnitSAR = selectedUnitName
-                end
+                -- end
 
             end
         end
