@@ -1395,20 +1395,6 @@ Data_divers = {
 			isDonnor = true,
 			isReceiver = true,
 		},
-		-- Tasks = {
-		-- 	aircraft_task(CAP),
-		-- 	aircraft_task(Escort),
-		-- 	aircraft_task(FighterSweep),
-		-- 	aircraft_task(Intercept),
-		-- 	aircraft_task(PinpointStrike),
-		-- 	aircraft_task(CAS),
-		-- 	aircraft_task(GroundAttack),
-		-- 	aircraft_task(RunwayAttack),
-		-- 	aircraft_task(SEAD),
-		-- 	aircraft_task(AFAC),
-		-- 	aircraft_task(AntishipStrike),
-		-- 	aircraft_task(Reconnaissance),
-		-- },-- end of Tasks
 		dataCartridge = true,
 		playable = true,
 		vCruise = 230,
@@ -1443,24 +1429,7 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		requiredModules = true,						--itsModule
 	},
-	-- ["MirageF1CT"] = {--mod
-	-- 	instrumentUnits = "imperial",
-	-- 	folderModName = "Mirage-F1",
-	-- 	inheritedModFrom = {"Mirage-F1","Mirage-F1C"},
-	-- 	EPLRS_Capacity = false,
-	-- 	requiredModules = true,						--itsModule
-	-- },
 
-	-- ["Mirage-F1"] = {--Common aircraft definitions
-	-- 	instrumentUnits = "imperial",
-	-- 	EPLRS_Capacity = false,
-	-- 	-- folderModName = "Mirage-F1",
-	-- 	-- 		3 types : Mirage-F1CE, Mirage-F1EE, Mirage-F1BE 
-	-- 	-- Le futur devrait être le F-1M ... le plus moderne mais pas pour tout de suite je pense ...
-	-- 	playable = true,
-	-- 	vCruise = 250,
-	-- 	hCruise = 7548,
-	-- },
 	["Mirage-F1CE"] = {
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
 		folderModName = "Mirage-F1",
@@ -1506,16 +1475,7 @@ Data_divers = {
 				["InitHotDrift"] = 0,
 			}
 		},
-		-- Tasks = {
-		-- 	aircraft_task(CAP),
-		-- 	aircraft_task(Escort),
-		-- 	aircraft_task(FighterSweep),
-		-- 	aircraft_task(Intercept),
-		-- 	aircraft_task(GroundAttack),
-		-- 	aircraft_task(CAS),
-		-- 	aircraft_task(RunwayAttack),
-		-- 	aircraft_task(PinpointStrike),
-	  	-- },
+
 		refuellingReceptacleType = "drogue",
 		vCruise = 250,
 		hCruise = 8000,
@@ -1588,13 +1548,6 @@ Data_divers = {
 		requiredModules = true,
 		moduleName = "AH-1G",
 		folderModName = "AH-1G",
-		-- Tasks = {
-		-- 	aircraft_task(CAS),
-		-- 	aircraft_task(GroundAttack),
-		-- 	aircraft_task(Escort),
-		-- 	aircraft_task(AFAC),
-		-- 	aircraft_task(AntishipStrike)
-		-- },
 		vCruise = 55,	--TODO a verifier
 		hCruise = 50,
 	},
@@ -1617,10 +1570,6 @@ Data_divers = {
 		requiredModules = true,						--itsModule
 		moduleName = "jjj_uh2a",		--self_ID  require module name
 		folderModName = "[VWV] UH-2A",
-		-- Tasks = {
-		-- 	aircraft_task(Transport),
-		-- 	aircraft_task(Reconnaissance),
-		-- },
 		vCruise = 40,	--TODO a verifier
 		hCruise = 500,
 	},
@@ -1630,10 +1579,6 @@ Data_divers = {
 		requiredModules = true,						--itsModule
 		moduleName = "jjj_uh2b",		--self_ID  require module name
 		folderModName = "[VWV] UH-2B",
-		-- Tasks = {
-		-- 	aircraft_task(Transport),
-		-- 	aircraft_task(Reconnaissance),
-		-- },
 		vCruise = 40,	--TODO a verifier
 		hCruise = 500,
 	},
@@ -1644,10 +1589,6 @@ Data_divers = {
 		moduleName = "jjj_uh2c",
 		folderModName = "[VWV] UH-2C",
 		savedGameMod = true,
-		-- Tasks = {
-		-- 	aircraft_task(Transport),
-		-- 	aircraft_task(Reconnaissance),
-		-- },
 		vCruise = 40,	--TODO a verifier
 		hCruise = 500,
 	},
@@ -1670,11 +1611,6 @@ Data_divers = {
 		requiredModules = true,
 		moduleName = "tetet_ch46d",
 		folderModName = "[VWV] CH-46D",
-		-- Tasks = {
-		-- 	aircraft_task(Transport),
-		-- 	aircraft_task(Reconnaissance),
-		-- 	-- aircraft_task(Airborne),
-		-- },
 		hCruise = 200,
 		vCruise = 75, -- (m/s, ≈ 270 km/h)
 	},
@@ -1692,9 +1628,6 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		playable = true,
 		folderModName = "CH-47F",
-		-- Tasks = {
-		-- 	aircraft_task(Transport),
-		-- },
 		hCruise = 200,
 		vCruise = 75, -- (m/s, ≈ 270 km/h)
 	},
@@ -1712,14 +1645,6 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		playable = true,
 		folderModName = "OH-58D",
-		-- Tasks = {
-		-- 	aircraft_task(AFAC),
-		-- 	aircraft_task(Escort),
-		-- 	aircraft_task(Reconnaissance),
-		-- 	aircraft_task(GroundAttack),
-		-- 	aircraft_task(CAS),
-		-- 	aircraft_task(Transport),
-		-- },
 		hCruise = 150,
 		vCruise = 65, -- (m/s, ≈ 235 km/h)
 	},
@@ -1785,15 +1710,6 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		folderModName = "MiG-15bis",
 		playable = true,
-		-- Tasks = {
-		-- 	aircraft_task(CAP),
-		-- 	aircraft_task(Escort),
-		-- 	aircraft_task(FighterSweep),
-		-- 	aircraft_task(Intercept),
-		-- 	aircraft_task(GroundAttack),
-		-- 	aircraft_task(CAS),
-		-- 	aircraft_task(AFAC),
-		-- },
 		vCruise = 180,   -- m/s 648km/h M ≈ 0.59
 		hCruise = 8500,  -- m
 	},
@@ -1804,23 +1720,6 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		moduleName = "tetet_mig17f",
 		folderModName = "[VWV] MiG-17",
-		-- radio = {
-		-- 	frequency = 127.5, -- Radio Freq
-		-- 	editable = true,
-		-- 	minFrequency = 100.000,
-		-- 	maxFrequency = 156.000,
-		-- 	modulation = MODULATION_AM,
-		-- },
-		-- Tasks = {
-		-- 	aircraft_task(CAP),
-		-- 	aircraft_task(Escort),
-		-- 	aircraft_task(FighterSweep),
-		-- 	aircraft_task(Intercept),
-		-- 	aircraft_task(GroundAttack),
-		-- 	aircraft_task(CAS),
-		-- 	aircraft_task(AntishipStrike),
-		-- 	aircraft_task(AFAC),
-		-- },
 		vCruise = 200,   -- m/s 720km/h M ≈ 0.66
 		hCruise = 9000,  -- m
 	},
@@ -1838,15 +1737,6 @@ Data_divers = {
 				["NAV_Initial_Hdg"] = 0,
 			}
 		},
-		-- Tasks = {
-		-- 	aircraft_task(CAP),
-		-- 	aircraft_task(Escort),
-		-- 	aircraft_task(FighterSweep),
-		-- 	aircraft_task(Intercept),
-		-- 	aircraft_task(GroundAttack),
-		-- 	aircraft_task(CAS),
-		-- 	aircraft_task(AntishipStrike),
-		-- },
 		vCruise = 220,   -- m/s (≈ 792 km/h)Mach ≈ 0.72
 		hCruise = 9000,  -- m (≈ 9 000 m)
 	},
@@ -1857,22 +1747,6 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		moduleName = "tetet_mig21pfm",
 		folderModName = "vwv_MiG-21PFM",
-		-- radio = {
-		-- 	frequency = 127.5, -- Radio Freq
-		-- 	editable = true,
-		-- 	minFrequency = 100.000,
-		-- 	maxFrequency = 156.000,
-		-- 	modulation = MODULATION_AM,
-		-- },
-		-- Tasks = {
-		-- 	aircraft_task(CAP),
-		-- 	aircraft_task(Escort),
-		-- 	aircraft_task(FighterSweep),
-		-- 	aircraft_task(Intercept),
-		-- 	aircraft_task(GroundAttack),
-		-- 	aircraft_task(CAS),
-		-- 	aircraft_task(AntishipStrike),
-		-- },
 		vCruise = 220,   -- m/s
 		hCruise = 11000, -- m
 	},
@@ -1883,19 +1757,6 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		moduleName = "tetet_mig21mf",
 		folderModName = "[VWV] MiG-21MF",
-		-- radio = {
-		-- 	frequency = 127.5, -- Radio Freq
-		-- 	editable = true,
-		-- 	minFrequency = 100.000,
-		-- 	maxFrequency = 156.000,
-		-- 	modulation = MODULATION_AM,
-		-- },
-		-- Tasks = {
-		-- 	aircraft_task(CAP),
-		-- 	aircraft_task(Escort),
-		-- 	aircraft_task(FighterSweep),
-		-- 	aircraft_task(Intercept),
-		-- },
 		vCruise = 240,   -- m/s (≈ 864 km/h)Mach ≈ 0.81
 		hCruise = 11000, -- m (≈ 11 000 m)
 	},
@@ -1907,15 +1768,6 @@ Data_divers = {
 		folderModName = "MiG-21bis",
 		vCruise = 225,
 		hCruise = 7548,
-		-- Tasks = {
-		-- 	aircraft_task(CAP),
-		-- 	aircraft_task(Escort),
-		-- 	aircraft_task(FighterSweep),
-		-- 	aircraft_task(Intercept),
-		-- 	aircraft_task(GroundAttack),
-		-- 	aircraft_task(CAS),
-		-- 	aircraft_task(Reconnaissance),
-		-- },
 	},
 	["MiG-23MLD"] = {
 		instrumentUnits = "russian",
@@ -1956,17 +1808,6 @@ Data_divers = {
 				["IMU alignment type"] = 1,
 			},
 		},
-		-- Tasks = {
-		-- 	aircraft_task(CAP),
-		-- 	aircraft_task(Escort),
-		-- 	aircraft_task(FighterSweep),
-		-- 	aircraft_task(Intercept),
-		-- 	aircraft_task(AFAC),
-		-- 	aircraft_task(GroundAttack),
-		-- 	aircraft_task(CAS),
-		-- 	aircraft_task(RunwayAttack),
-		-- 	aircraft_task(AntishipStrike),
-		-- },
 		vCruise = 240, --m/s--a peaufiner
 		hCruise = 9000,	-- m--a peaufiner
 	},
@@ -2040,6 +1881,13 @@ Data_divers = {
 		vCruise = 230,
 		hCruise = 10000,
 	},
+	["Su-33"] = {
+		instrumentUnits = "russian",
+		folderModName = "Su-33",
+		playable = true,
+		vCruise = 213.222,--TODO a confirmer
+		hCruise = 7548,
+	},
 	["Su-34"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
@@ -2075,13 +1923,6 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		playable = true,
 		folderModName = "Mi-24P",
-		-- Tasks = {
-		-- 	aircraft_task(Escort),
-		-- 	aircraft_task(AFAC),
-		-- 	aircraft_task(GroundAttack),
-		-- 	aircraft_task(CAS),
-		-- 	aircraft_task(Transport),
-		-- },
 		hCruise = 150,    -- m  (vol basse altitude typique)
 		vCruise = 75,     -- m/s  (≈ 270 km/h)
 	},
