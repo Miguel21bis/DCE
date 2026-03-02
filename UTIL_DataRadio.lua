@@ -200,6 +200,33 @@ Db_Frequency = {
 			modulation 		= MODULATION_AM,
 		},
 	},
+	["Su-27"] = {
+		HumanRadio = {
+			frequency 		= 251.0,  -- Radio Freq angepasst F104
+			editable 		= true,
+			minFrequency	= 100.000, -- angepasst F104
+			maxFrequency 	= 399.979, -- angepasst F104
+			modulation 		= MODULATION_AM,
+		},
+	},
+	["J-11"] = {
+		HumanRadio = {
+			frequency 		= 251.0,  -- Radio Freq angepasst F104
+			editable 		= true,
+			minFrequency	= 100.000, -- angepasst F104
+			maxFrequency 	= 399.979, -- angepasst F104
+			modulation 		= MODULATION_AM,
+		},
+	},
+	["Su-33"] = {
+		HumanRadio = {
+			frequency 		= 251.0,  -- Radio Freq angepasst F104
+			editable 		= true,
+			minFrequency	= 100.000, -- angepasst F104
+			maxFrequency 	= 399.979, -- angepasst F104
+			modulation 		= MODULATION_AM,
+		},
+	},
 
 	["Mi-8MT"] = {
 

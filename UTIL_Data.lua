@@ -183,7 +183,7 @@ TaskByPlane = {
 		["Su-24M"] = true,
 		["Su-25"] = true,
 		["Su-25T"] = true,
-		["Su-27"] = true,
+		-- ["Su-27"] = true,
 		["Su-30"] = true,
 		["Su-34"] = true,
 
@@ -245,7 +245,7 @@ TaskByPlane = {
 		["Su-25TM"] = true,
 		["Su-34"] = true,
 
-		["Su-27"] = true,
+		-- ["Su-27"] = true,
 		["Su-30"] = true,
 
 		["tu_22D"] = true,				--Mod
@@ -317,7 +317,7 @@ TaskByPlane = {
 		["Su-24M"] = true,
 		["Su-25"] = true,
 		["Su-25T"] = true,
-		["Su-27"] = true,
+		-- ["Su-27"] = true,
 		["Su-30"] = true,
 		["Su-34"] = true,
 
@@ -376,7 +376,7 @@ TaskByPlane = {
 		["Su-24M"] = true,
 		["Su-25"] = true,
 		["Su-25T"] = true,
-		["Su-27"] = true,
+		-- ["Su-27"] = true,
 		["Su-30"] = true,
 		["Su-34"] = true,
 		["MiG-27K"] = true,
@@ -419,7 +419,7 @@ TaskByPlane = {
 		["MiG-29S"] = true,
 		["MiG-31"] = true,
 
-		["Su-27"] = true,
+		-- ["Su-27"] = true,
 		["Su-30"] = true,
 
 		["Mi-28N"] = true,
@@ -484,7 +484,7 @@ TaskByPlane = {
 		["MiG-25PD"] = true,
 		["MiG-29S"] = true,
 		["MiG-31"] = true,
-		["Su-27"] = true,
+		-- ["Su-27"] = true,
 		["Su-30"] = true,
 
 
@@ -525,7 +525,7 @@ TaskByPlane = {
 		["MiG-25PD"] = true,
 		["MiG-29S"] = true,
 		["MiG-31"] = true,
-		["Su-27"] = true,
+		-- ["Su-27"] = true,
 		["Su-30"] = true,
 
 
@@ -563,7 +563,7 @@ TaskByPlane = {
 		["MiG-25PD"] = true,
 		["MiG-29S"] = true,
 		["MiG-31"] = true,
-		["Su-27"] = true,
+		-- ["Su-27"] = true,
 		["Su-30"] = true,
 
 
@@ -1872,6 +1872,34 @@ Data_divers = {
 	["Su-27"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
+		playable = true,
+		Tasks = {
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(RunwayAttack),
+			aircraft_task(AntishipStrike),
+		},
+		vCruise = 213.222,--TODO a confirmer
+		hCruise = 8500,
+	},
+	["J-11"] = {
+		instrumentUnits = "russian",
+		EPLRS_Capacity = false,
+		playable = true,
+		Tasks = {
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+			aircraft_task(GroundAttack),
+			aircraft_task(CAS),
+			aircraft_task(RunwayAttack),
+			aircraft_task(AntishipStrike),
+		},
 		vCruise = 213.222,--TODO a confirmer
 		hCruise = 8500,
 	},
