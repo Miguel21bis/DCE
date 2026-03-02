@@ -1257,7 +1257,8 @@ for sideName, units in pairs(oob_air) do
 																					y = db_airbases[unit.base].y,
 																					h = db_airbases[unit.base].elevation,
 																					BaseAirStart = db_airbases[unit.base].BaseAirStart,
-																					name = db_airbases[unit.base].base,
+																					-- name = db_airbases[unit.base].base,
+																					name = unit.base,
 																				}
 
 																				local multipack = 1

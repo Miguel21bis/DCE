@@ -1691,6 +1691,9 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			end
 			local heading = GetHeadingDegre(basePoint, point)
 
+			if not basePoint.h then
+				print("basePoint "..tostring(basePoint.name))
+			end
 			local distance = math.abs((profile.hCruise - basePoint.h) * 7)												--distance to climb from base elevation to cruise altitude with 8� pitch (make sure distance is positive)
 			if distance >= GetDistance(basePoint, point) then															--climb distance bigger than distance to first WP
 				distance = GetDistance(basePoint, point) / 3 * 2														--join point is 2/3 to first WP

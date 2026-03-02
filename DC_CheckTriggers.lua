@@ -1793,40 +1793,47 @@ Action = {}
 	--CruiseSpeed is the speed in m/s at which the ship group will follow the route.
 	--PatrolSpeed is the speed in m/s at which the ship group will randomly patrol a polygon at the end of the route. Ships won't patrol at the end of the route if the PatrolSpeed is nil or zero or if the last waypoint is a single point only (no polygon).
 	--StartTime is the campaign time in seconds (time since campaign start) at which the mission was assigned. It is used to control progress along the route across multiple missions of the campaign. If nil, then current campaign time us used automatically.
-	function Action.ShipMission(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTime)
-		-- print("DcCT GroupName "..GroupName)
-		-- _affiche(WPtable, "DcCT WPtable")
+	function Action.ShipMission(groupName, wpTable, cruiseSpeed, patrolSpeed, startTime)
+
+		-- print("/r/n DcCT_ShipMission A  groupName "..groupName)
+		-- _affiche(wpTable, "DcCT wpTable")
+
 		for coal_name,coal in pairs(oob_ground) do								--go through sides(red/blue)	
 			for country_n,country in ipairs(coal) do							--go through countries
 				if country.ship then											--country has ships
 					for group_n,group in ipairs(country.ship.group) do			--go through groups
 
-						if GroupName == group.name then							--ship group found							
+						-- print("DcCT_ShipMission B groupName "..groupName.." ?= "..group.name)
+						if groupName == group.name then							--ship group found		
+							
+							-- print("DcCT_ShipMission C found groupName "..groupName)
 
 							local firstWPT = "test"
-							if type(WPtable) == "table" then
-								if WPtable[1] == ""  then
-									table.remove(WPtable, 1)
+							if type(wpTable) == "table" then
+								if wpTable[1] == ""  then
+									table.remove(wpTable, 1)
 									firstWPT = ""
 								end
 
-								RandomWPtable = WPtable[math.random(1, #WPtable)]
+								local randomWPtable = wpTable[math.random(1, #wpTable)]
 
 								if firstWPT == "" then
-									table.insert(RandomWPtable, 1, firstWPT)
+									table.insert(randomWPtable, 1, firstWPT)
 								end
 							end
 
-							camp.ShipMissions[GroupName] = {					--store ship mission in camp for subsequent executions during later missions
-								WPtable = WPtable,
-								CruiseSpeed = CruiseSpeed,
-								PatrolSpeed = PatrolSpeed,
+							camp.ShipMissions[groupName] = {					--store ship mission in camp for subsequent executions during later missions
+								WPtable = wpTable,
+								CruiseSpeed = cruiseSpeed,
+								PatrolSpeed = patrolSpeed,
 								-- StartTime = StartTime
 							}
 
-							-- print("DcCT START Action.ShipMission GroupName " .. GroupName .. " ShipGroupMovement")
+							-- print("DcCT_ShipMission -> D groupName " .. groupName .. " ShipGroupMovement")
 
-							ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, CampTotalTimeS)	--exectue ship mission
+							ShipGroupMovement(groupName, wpTable, cruiseSpeed, patrolSpeed, CampTotalTimeS)	--exectue ship mission
+
+							MajPosition()
 						end
 					end
 				end

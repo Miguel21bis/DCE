@@ -101,7 +101,9 @@ end
 
 
 --function to assign movement to ship groups
-function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTime)
+function ShipGroupMovement(groupName, wpTable, cruiseSpeed, patrolSpeed, startTime)
+
+	-- print("DcNE ShipGroupMovement A groupName "..tostring(groupName))
 
 	local poly = {}
 	local firstItem = ""
@@ -112,33 +114,33 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 		WindDirection = 0
 	end
 
-	if type(WPtable) == "table" then
-		if WPtable[1] == ""  then
-			table.remove(WPtable, 1)
+	if type(wpTable) == "table" then
+		if wpTable[1] == ""  then
+			table.remove(wpTable, 1)
 			firstItem = "originalWPT"
 		end
-		RandomWPtable = WPtable[math.random(1, #WPtable)]
+		randomWPtable = wpTable[math.random(1, #wpTable)]
 	end
 
-	if WPtable[1] == "" or  WPtable[1] == nil then
+	if wpTable[1] == "" or  wpTable[1] == nil then
 		firstItem = "originalWPT"
-		table.remove(WPtable, 1)
+		table.remove(wpTable, 1)
 	end
-	if type(WPtable[1]) == "table" and (WPtable[1][1] == "" or  WPtable[1][1] == nil) then
+	if type(wpTable[1]) == "table" and (wpTable[1][1] == "" or  wpTable[1][1] == nil) then
 		firstItem = "originalWPT"
-		table.remove(WPtable[1], 1)
+		table.remove(wpTable[1], 1)
 	end
 
-	if type(WPtable[1]) == "string" then												--WP is a single point marked by trigger zone	
-		for w = 1, #WPtable do
-			poly[w] = Refpoint[WPtable[w]]
+	if type(wpTable[1]) == "string" then												--WP is a single point marked by trigger zone	
+		for w = 1, #wpTable do
+			poly[w] = Refpoint[wpTable[w]]
 		end
-	elseif type(WPtable[1]) == "table" then												--WP is a polygon marked by multiple trigger zones
+	elseif type(wpTable[1]) == "table" then												--WP is a polygon marked by multiple trigger zones
 		--c'est une double table, il ne faut en choisir qu'une seule
-		local nWP = math.random(1, #WPtable)
+		local nWP = math.random(1, #wpTable)
 
-		for w = 1, #WPtable[nWP] do
-			poly[w] = Refpoint[WPtable[nWP][w]]
+		for w = 1, #wpTable[nWP] do
+			poly[w] = Refpoint[wpTable[nWP][w]]
 		end
 	end
 
@@ -155,14 +157,15 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 		poly = shuffled
 	end
 
-	local MaxLoop = 20																		--Maximum Loop to maximizes the distance between two ship turns (recommended : 2)
+	local maxLoop = 20																		--Maximum Loop to maximizes the distance between two ship turns (recommended : 2)
 	--search for ship group
 	for coal_name,coal in pairs(oob_ground) do												--go through sides(red/blue)	
 		for country_n,country in ipairs(coal) do											--go through countries
 			if country.ship then															--country has ships
 				for group_n,group in ipairs(country.ship.group) do							--go through groups
-					if GroupName == group.name then											--ship group found
-						--determine ship route
+					if groupName == group.name then											--ship group found
+					-- print("DcNE ShipGroupMovement B groupName "..tostring(groupName).." found, start movement")	
+					--determine ship route
 						local route = {}																		--local table to build group route
 
 						if firstItem == "originalWPT" then														--if the WP string is empty, use the groups initial position
@@ -176,14 +179,14 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 							route[1] = poly[1]												--store x-y coordnates of that trigger zone
 						end
 
-						route[1].time = StartTime
+						route[1].time = startTime
 
-						if #poly == 1 and PatrolSpeed  then				--patrol after route
-							route[1].speed = PatrolSpeed													--set speed to patrol speed
+						if #poly == 1 and patrolSpeed  then				--patrol after route
+							route[1].speed = patrolSpeed													--set speed to patrol speed
 						elseif #poly == 1 then
 							route[1].speed = 0
 						else
-							route[1].speed = CruiseSpeed
+							route[1].speed = cruiseSpeed
 						end
 
 
@@ -192,8 +195,8 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 						local nTotal
 						if (string.find(group.units[1].name, "CV")  or string.find(group.units[1].name, "LHA") )then
 							nTotal = 10
-							CruiseSpeed = Data_configuration.CV_Vmax
-							PatrolSpeed = Data_configuration.CV_Vmax
+							cruiseSpeed = Data_configuration.CV_Vmax
+							patrolSpeed = Data_configuration.CV_Vmax
 						else
 							nTotal = #poly																	--pour revenir au code original de Mbot
 							-- QteWptConnu = true
@@ -255,8 +258,8 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 											if not foundWpt_2  then
 												--si on ne peux pas placer un wpt 2 dans le vent, on bouge le WPT1 et on recommence
 												route[1] = randomPointInPoly(poly)
-												route[1].time = StartTime
-												route[1].speed = CruiseSpeed
+												route[1].time = startTime
+												route[1].speed = cruiseSpeed
 
 												foundWpt_2 = false
 
@@ -294,7 +297,7 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 										local distBtw  = {}
 										local tabTestWPT = {}
 										local maxDistId = 1
-										for i = 1 , MaxLoop do
+										for i = 1 , maxLoop do
 											tabTestWPT[i] = randomPointInPoly(poly)
 											distBtw[i] =  GetDistance(route[n - 1], tabTestWPT[i])
 											if distBtw[i] > distBtw[maxDistId] then
@@ -308,16 +311,16 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 								end
 							end
 
-							if #poly == 1 and PatrolSpeed  then				--patrol after route
+							if #poly == 1 and patrolSpeed  then				--patrol after route
 
-								route[n].speed = tonumber(PatrolSpeed)													--set speed to patrol speed
+								route[n].speed = tonumber(patrolSpeed)													--set speed to patrol speed
 							elseif #poly == 1 then
 								route[n].speed = 0
 							else
-								route[n].speed = tonumber(CruiseSpeed)
+								route[n].speed = tonumber(cruiseSpeed)
 							end
 
-							route[n].time = route[n - 1].time + GetDistance(route[n - 1], route[n]) / CruiseSpeed	--calculate time at waypoint based on speed and distance from previous waypoint
+							route[n].time = route[n - 1].time + GetDistance(route[n - 1], route[n]) / cruiseSpeed	--calculate time at waypoint based on speed and distance from previous waypoint
 
 						end
 
@@ -326,8 +329,8 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 						for n = #route, 1, -1 do																--go through route from back to front
 							if route[n].time < CurrentTime then													--check if waypoint time is earlier than current time
 								if n == #route then																--waypoint is last waypoint
-									if PatrolSpeed and #poly >= 2  then					--patrol after route
-										route[n].speed = PatrolSpeed											--set speed to patrol speed
+									if patrolSpeed and #poly >= 2  then					--patrol after route
+										route[n].speed = patrolSpeed											--set speed to patrol speed
 									else
 										route[n].speed = 0														--set speed to zero
 									end
@@ -347,7 +350,7 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 						end
 
 						--patrol zone at end of route
-						if PatrolSpeed and PatrolSpeed > 0 then													--if there is a patrol speed assigned, ship should patrol at end of route
+						if patrolSpeed and patrolSpeed > 0 then													--if there is a patrol speed assigned, ship should patrol at end of route
 							while route[#route].time < CurrentTime + mission_ini.mission_duration * 2 do			--repeat as long as last waypoint time is within twice the mission duration
 								local nextWP																--next waypoint
 								if #poly == 2 then												--poly has two points only, patrol between these two points
@@ -360,7 +363,7 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 									local distBtw  = {}
 									local tabTestWPT = {}
 									local maxDistId = 1
-									for i = 1 , MaxLoop do
+									for i = 1 , maxLoop do
 										tabTestWPT[i] = randomPointInPoly(poly)
 										distBtw[i] =  GetDistance(route[#route], tabTestWPT[i])
 										if distBtw[i] > distBtw[maxDistId] then
@@ -372,12 +375,12 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 								end
 
 
-								local nextTime = route[#route].time + GetDistance(route[#route], nextWP) / PatrolSpeed	--time at next waypoint
+								local nextTime = route[#route].time + GetDistance(route[#route], nextWP) / patrolSpeed	--time at next waypoint
 
 								route[#route + 1] = {
 									x = nextWP.x,
 									y = nextWP.y,
-									speed = PatrolSpeed,
+									speed = patrolSpeed,
 									time =  nextTime
 								}
 
@@ -424,7 +427,7 @@ function ShipGroupMovement(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTi
 									waypoint = {
 										x = intercalWP.x,
 										y = intercalWP.y,
-										speed = PatrolSpeed,
+										speed = patrolSpeed,
 										time =  0
 									}
 
@@ -579,81 +582,93 @@ end
 if camp.ShipMissions == nil then															--storage table for ship missions in camp doesn't exist yet
 	camp.ShipMissions = {}																	--create it
 end
-for GroupName,entry in pairs(camp.ShipMissions) do
-	-- ShipGroupMovement(GroupName, entry.WPtable, entry.CruiseSpeed, entry.PatrolSpeed, entry.StartTime)	--execute ship mission
-	ShipGroupMovement(GroupName, entry.WPtable, entry.CruiseSpeed, entry.PatrolSpeed, CampTotalTimeS)	--execute ship mission
-end
 
---update aircraft carriers in db_airbase table and enable CarrierIntoWindScript for carrier
+function MajPosition()
+	-- print("DcNE MajPosition")
+	for groupName,entry in pairs(camp.ShipMissions) do
+		-- ShipGroupMovement(GroupName, entry.WPtable, entry.CruiseSpeed, entry.PatrolSpeed, entry.StartTime)	--execute ship mission
+		ShipGroupMovement(groupName, entry.WPtable, entry.CruiseSpeed, entry.PatrolSpeed, CampTotalTimeS)	--execute ship mission
+	end
 
-for basename,base in pairs(db_airbases) do															--iterate through airbases
-	if base.unitname then																			--if airbase is a carrier, find the unit in the OOB Ground
-		-- print("DcNE C unitName "..tostring(base.unitname) )
+
+	--update aircraft carriers in db_airbase table and enable CarrierIntoWindScript for carrier
+
+	for basename,base in pairs(db_airbases) do															--iterate through airbases
+		-- print("DcNE update_aircraft_carriers A basename: "..tostring(basename).." unitname: "..tostring(base.unitname))
 		
-		for coal_name,coal in pairs(oob_ground) do													--go through sides(red/blue)	
-			for country_n,country in ipairs(coal) do												--go through countries
-				if country.ship then																--country has ships
-					for groupn,group in pairs(country.ship.group) do								--group table
-						for unitn,unit in pairs(group.units) do										--units table
-							if unit.name == base.unitname then										--respective unit found
-								-- print("DcNE J unit.name "..tostring(unit.name) )
-							
-								base.airdromeId = unit.unitId
-								base.x = unit.x
-								base.y = unit.y
-								base.elevation = 0
-								if not base.ATC_frequency then										--modification M33.e 	Custom Briefing (e: CV Manual Freq)								
-									base.ATC_frequency = tostring(unit.frequency / 1000000)			--si ATC_frequency non present dans db_airbases, on prend la freq de base_mission
-								else
-									unit.frequency = base.ATC_frequency * 1000000
-								end
-								--get carrier TACAN and ICLS
-								for taskn,task in ipairs(group.route.points[1].task.params.tasks) do	--go through group tasks in first waypoint
-									if task.params then
-										if task.params.action then
-											if task.params.action.id == "ActivateBeacon" then		--has beacon
-												if task.params.action.params.channel and task.params.action.params.modeChannel and task.params.action.params.callsign then						--beacon is TACAN
-													base.TACAN = task.params.action.params.channel .. task.params.action.params.modeChannel .. " / " .. task.params.action.params.callsign		--store tacan channel and callsign in airbase entry
+		if base.unitname then																			--if airbase is a carrier, find the unit in the OOB Ground
+			-- print("DcNE update_aircraft_carriers B base.unitname : " ..tostring(base.unitname))
+			
+			for coal_name,coal in pairs(oob_ground) do													--go through sides(red/blue)	
+				-- print("DcNE update_aircraft_carriers C")
+				for country_n,country in ipairs(coal) do												--go through countries
+					-- print("DcNE update_aircraft_carriers D")
+					if country.ship then																--country has ships
+						-- print("DcNE update_aircraft_carriers E")
+						for groupn,group in pairs(country.ship.group) do								--group table
+							-- print("DcNE update_aircraft_carriers F")
+							for unitn,unit in pairs(group.units) do										--units table
+								-- print("DcNE update_aircraft_carriers G")
+								if unit.name == base.unitname then										--respective unit found
+									-- print("DcNE update_aircraft_carriers -> H unit.name "..tostring(unit.name) )
+								
+									base.airdromeId = unit.unitId
+									base.x = unit.x
+									base.y = unit.y
+									base.elevation = 0
+									if not base.ATC_frequency then										--modification M33.e 	Custom Briefing (e: CV Manual Freq)								
+										base.ATC_frequency = tostring(unit.frequency / 1000000)			--si ATC_frequency non present dans db_airbases, on prend la freq de base_mission
+									else
+										unit.frequency = base.ATC_frequency * 1000000
+									end
+									--get carrier TACAN and ICLS
+									for taskn,task in ipairs(group.route.points[1].task.params.tasks) do	--go through group tasks in first waypoint
+										if task.params then
+											if task.params.action then
+												if task.params.action.id == "ActivateBeacon" then		--has beacon
+													if task.params.action.params.channel and task.params.action.params.modeChannel and task.params.action.params.callsign then						--beacon is TACAN
+														base.TACAN = task.params.action.params.channel .. task.params.action.params.modeChannel .. " / " .. task.params.action.params.callsign		--store tacan channel and callsign in airbase entry
+													end
+												elseif task.params.action.id == "ActivateICLS" then		--has ICLS
+													base.icls = task.params.action.params.channel		--store ICLS channel in airbase entry
 												end
-											elseif task.params.action.id == "ActivateICLS" then		--has ICLS
-												base.icls = task.params.action.params.channel		--store ICLS channel in airbase entry
 											end
 										end
 									end
-								end
 
-								if string.lower(mission_ini.SC_CarrierIntoWind) == "auto" then											-- modification M36.d	(d: add timer) MenuRadio request manual TurnIntoWind
-									--add mission trigger to add carrier to CarrierIntoWindScript (turn into wind during flight ops)
-									local trig_n = #mission.trig.funcStartup + 1
-									mission.trig.funcStartup[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
-									mission.trig.flag[trig_n] = true
-									mission.trig.conditions[trig_n] = "return(true)"
-									-- mission.trig.actions[trig_n] = 'a_do_script(\\\"CarrierIntoWind(\\\\\\"' .. group.name .. '\\\\\\")\\\"); mission.trig.funcStartup[' .. trig_n .. ']=nil;'
+									if string.lower(mission_ini.SC_CarrierIntoWind) == "auto" then											-- modification M36.d	(d: add timer) MenuRadio request manual TurnIntoWind
+										--add mission trigger to add carrier to CarrierIntoWindScript (turn into wind during flight ops)
+										local trig_n = #mission.trig.funcStartup + 1
+										mission.trig.funcStartup[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
+										mission.trig.flag[trig_n] = true
+										mission.trig.conditions[trig_n] = "return(true)"
+										-- mission.trig.actions[trig_n] = 'a_do_script(\\\"CarrierIntoWind(\\\\\\"' .. group.name .. '\\\\\\")\\\"); mission.trig.funcStartup[' .. trig_n .. ']=nil;'
 
-									mission.trig.actions[trig_n] = "a_do_script('CarrierIntoWind(\\\"" .. group.name .. "\\\")'); mission.trig.funcStartup[" .. trig_n .. "]=nil;"
+										mission.trig.actions[trig_n] = "a_do_script('CarrierIntoWind(\\\"" .. group.name .. "\\\")'); mission.trig.funcStartup[" .. trig_n .. "]=nil;"
 
-									mission.trigrules[trig_n] = {
-										["rules"] = {},
-										["eventlist"] = "",
-										["comment"] = "Trigger " .. trig_n,
-										["predicate"] = "triggerStart",
-										["actions"] = {
-											[1] = {
-												["predicate"] = "a_do_script",
-												["text"] = "CarrierIntoWind('" .. group.name .. "')",
-												["KeyDict_text"] = "CarrierIntoWind('" .. group.name .. "')",
-												["ai_task"] =
-												{
-													[1] = "",
-													[2] = "",
+										mission.trigrules[trig_n] = {
+											["rules"] = {},
+											["eventlist"] = "",
+											["comment"] = "Trigger " .. trig_n,
+											["predicate"] = "triggerStart",
+											["actions"] = {
+												[1] = {
+													["predicate"] = "a_do_script",
+													["text"] = "CarrierIntoWind('" .. group.name .. "')",
+													["KeyDict_text"] = "CarrierIntoWind('" .. group.name .. "')",
+													["ai_task"] =
+													{
+														[1] = "",
+														[2] = "",
+													},
 												},
 											},
-										},
-									}
+										}
+									end
+
+									-- print("DcNE Zbase.x "..tostring(base.x) )
+
 								end
-
-								-- print("DcNE Zbase.x "..tostring(base.x) )
-
 							end
 						end
 					end
@@ -699,3 +714,5 @@ function DeleteStaticOnCV(GroupName)
 		end
 	end
 end
+
+MajPosition()		--execute ship missions at mission start
