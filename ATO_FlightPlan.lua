@@ -1993,7 +1993,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				local id_task = ""
 				if not TaskByPlane[goupTaskTemp][flight[f].type] or not GoupTaskByTypeTarget[typeCible][goupTaskTemp]  then
 
-					-- print("AtoFP  if not  TaskByPlane[GoupTaskTemp][flight[f].type]  "..tostring(GoupTaskTemp))
+					local txt = "AtoFP if not TaskByPlane[GoupTaskTemp][flight[f].type]  "..tostring(goupTaskTemp).." type: "..tostring(flight[f].type)
+					AddLog(txt)
 
 					goodTask = false
 
