@@ -142,58 +142,6 @@ function FreqCapabilityNG2(testFreq, planeType, radioN, info)
 end
 
 
-
-local function freqCapabilityAG(arg_TestFreq, arg_RadioPlane, arg_Nradio, arg_info)
-	local waves  = ""
-
-	if type(arg_TestFreq) == "table" then
-		return false
-	elseif type(arg_TestFreq) == "string" then
-		arg_TestFreq = tonumber(arg_TestFreq)
-		if type(arg_TestFreq) ~= "number" then
-			return false
-		end
-	end
-	if not arg_RadioPlane[arg_Nradio] or arg_RadioPlane[arg_Nradio] == nil then
-		return false
-	end
-	-- modification M34.n (n: bestCapability)
-	for wave, freqRange in pairs(arg_RadioPlane[arg_Nradio]) do
-		if wave  == "HF" or wave  == "LVHF" or  wave  == "VHF" or  wave  == "UHF" then
-			if type(freqRange)  == "table"  then
-				if tonumber(arg_TestFreq) < freqRange.max and  tonumber(arg_TestFreq) > freqRange.min then
-					if arg_RadioPlane[arg_Nradio] and arg_RadioPlane[arg_Nradio][wave] and (arg_TestFreq > arg_RadioPlane[arg_Nradio][wave].min and arg_TestFreq < arg_RadioPlane[arg_Nradio][wave].max)	 then
-						return true
-					end
-				end
-			end
-		end
-	end
-
-	if arg_TestFreq >= 225 then
-		waves = "UHF"
-	elseif arg_TestFreq >= 100 and arg_TestFreq < 225 then
-		waves = "VHF"
-	elseif arg_TestFreq >= 20 and arg_TestFreq < 100 then
-		waves = "LVHF"
-		if arg_RadioPlane[arg_Nradio] and not arg_RadioPlane[arg_Nradio][waves] then waves = "LVHF" end
-	elseif arg_TestFreq >= 1 and arg_TestFreq < 20 then
-		waves = "HF"
-	else
-		local bugTxt = "DC_B Problem with frequency UFF? VHF? LVHF? HF? frequence: "..tostring(arg_TestFreq).." Info: "..tostring(arg_info)
-		-- _affiche(arg_RadioPlane, "RadioPlane")
-		
-		AddLog("Note for the Campaign Maker: freqCapability() "..bugTxt.." arg_RadioPlane[arg_Nradio]: "..tostring(arg_RadioPlane[arg_Nradio]))
-
-	end
-
-	if arg_RadioPlane[arg_Nradio] and arg_RadioPlane[arg_Nradio][waves] and (arg_TestFreq > arg_RadioPlane[arg_Nradio][waves].min and arg_TestFreq < arg_RadioPlane[arg_Nradio][waves].max)	 then
-		return true
-	else
-		return false
-	end
-end
-
 local function hasAnEmergencyFreq(radioPlane)
 
 	local emergencyFreq = 0

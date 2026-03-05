@@ -3044,7 +3044,7 @@ function LoadAllLoadouts(subFolder)
     if db_loadouts and type(db_loadouts) == "table" then
         final = DeepCopy(db_loadouts)
     else
-        print("DCE WARNING : aucun db_loadouts initial trouvé !")
+        -- print("DCE WARNING : aucun db_loadouts initial trouvé !")
     end
 
     local folder = baseDir .. subFolder
