@@ -191,7 +191,7 @@ Db_Frequency = {
 			modulation 		= MODULATION_AM,
 		},
 	},
-	["MiG-29S"] = {
+	["MiG-29S"] = {--FC3
 		HumanRadio = {
 			frequency 		= 251.0,  -- Radio Freq angepasst F104
 			editable 		= true,
@@ -200,7 +200,7 @@ Db_Frequency = {
 			modulation 		= MODULATION_AM,
 		},
 	},
-	["Su-27"] = {
+	["Su-27"] = {--FC3
 		HumanRadio = {
 			frequency 		= 251.0,  -- Radio Freq angepasst F104
 			editable 		= true,
@@ -209,7 +209,8 @@ Db_Frequency = {
 			modulation 		= MODULATION_AM,
 		},
 	},
-	["J-11"] = {
+	
+	["J-11A"] = {--FC3
 		HumanRadio = {
 			frequency 		= 251.0,  -- Radio Freq angepasst F104
 			editable 		= true,
@@ -218,7 +219,7 @@ Db_Frequency = {
 			modulation 		= MODULATION_AM,
 		},
 	},
-	["Su-33"] = {
+	["Su-33"] = {--FC3
 		HumanRadio = {
 			frequency 		= 251.0,  -- Radio Freq angepasst F104
 			editable 		= true,

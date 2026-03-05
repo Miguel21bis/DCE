@@ -82,6 +82,8 @@ end
 
 
 TaskByPlane = {
+	["Escort Jammer"] = {
+	},
 
 	["AFAC"] = {
 		-- ["MosquitoFBMkVI"] = true,
@@ -821,6 +823,7 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		requiredModules = true,						--itsModule
+		folderModName = "Northrop Grumman EA-6B Prowler",
 		vCruise = 216,
 		hCruise = 10670,
 		jammer = {
@@ -828,9 +831,8 @@ Data_divers = {
 			efficiency = 95,
 			range = 10000,
 		},
-		Tasks = {
-			aircraft_task(GroundAttack),
-			aircraft_task(SEAD),
+		addTasks = {                     -- defined in db_units_planes.lua
+			aircraft_task("Escort Jammer"),
 		},
 	},
 
@@ -877,17 +879,7 @@ Data_divers = {
 		moduleName = "VSN_F105",	--self_ID  require module name
 		folderModName = "VSN_F105",
 		EPLRS_Capacity = false,
-	-- 	Tasks = {
-	-- 		aircraft_task(CAP),
-	-- 		aircraft_task(Escort),
-	-- 		aircraft_task(FighterSweep),
-	-- 		aircraft_task(Intercept),
-	-- 		aircraft_task(Reconnaissance),
-	-- 		aircraft_task(GroundAttack),
-	-- 		aircraft_task(CAS),
-	-- 		aircraft_task(RunwayAttack),
-	-- 		aircraft_task(AntishipStrike),
-	--   },
+
 		playable = true,
 		jammer = {
 			type = "AN/ALQ-71",
@@ -1886,7 +1878,7 @@ Data_divers = {
 		vCruise = 213.222,--TODO a confirmer
 		hCruise = 8500,
 	},
-	["J-11"] = {
+	["J-11A"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
 		playable = true,
@@ -2724,20 +2716,7 @@ TabTask = {
 }
 
 Failures = {
-	-- ["A-4E-C"] = {
-    --     'asc',        --('ASC'),        
-    --     'autopilot',--('AUTOPILOT'),
-    --     'hydro',     --('HYDRO'),    
-    --     'l_engine', --('L-ENGINE'),    
-    --     'r_engine', --('R-ENGINE'),    
-    --     'radar',     --('RADAR'),    
-    --     'eos',         --('EOS'),        
-    --     'helmet',     --('HELMET'),    
-    --     'rws',         --('RWS'),        
-    --     'ecm',      --('ECM'),        
-    --     'hud',         --('HUD'),        
-    --     'mfd',         --('MFD'),        
-    -- },
+
 	["A-10A"] = {
 		'asc',--('ASC'),
 		'autopilot',--('AUTOPILOT'),
@@ -2813,115 +2792,7 @@ Failures = {
 		'CDU_FAILURE_TOTAL',	  					--('CDU'),		
 		'EGI_FAILURE_TOTAL',	  					--('EGI'),		
     },
-	-- ["AJS37"] = {
-	-- 	'ADI_UNIT',--('Flight attitude and direction unit'),
-	-- 	'CK_UNIT',--('Centralkalkylator 37'),
-	-- 	'DATACARTRIDGE',--('Data cartridge'),
-	-- 	'RPMSENSOR',--('RPM sensor'),
-	-- 	'EGTSENSOR',--('EGT sensor'),
-	-- 	'EPRSENSOR',--('EPR sensor'),
-	-- 	'TVDISPLAY',--('EP13 Maverick sight display'),
-	-- 	'HUDDISPLAY',--('EP08 Head Up Display'),
-	-- 	'MAINPITOT',--('Main pitot'),
-	-- 	'AOASENSOR',--('Angle of attack sensor'),
-	-- 	'ACCSENSOR',--('Accelerometer unit'),
-	-- 	'FDU',--('Flight Data Unit'),
-	-- 	'BCKPITOT',--('Backup pitot'),
-	-- 	'BCKGYRO',--('Backup gyro'),
-	-- 	'TEMPSENSOR',--('Temperature sensor'),
-	-- 	'HAW',--('High Alpha Warning'),
-	-- 	'FR22RADIO',--('FR22 Radio unit'),
-	-- 	'FR22ANTENNA',--('FR22 Radio antenna'),
-	-- 	'FR24RADIO',--('FR24 Radio unit'),
-	-- 	'FR24ANTENNA',--('FR24 Radio antenna'),
-	-- 	'RADARALTUNIT',--('Radar altimeter unit'),
-	-- 	'RADARALTANT',--('Radar altimeter antenna'),
-	-- 	'RADARASS',--('Radar PS-37 assembly'),
-	-- 	'RADARDISPL',--('Central Indikator display'),
-	-- 	'TAPEREC',--('Tape recorder'),
-	-- 	'RB05ANT',--('Rb05 antenna unit'),
-	-- 	'RWRANTLEFT',--('RWR antenna left wing'),
-	-- 	'RWRANTRIGHT',--('RWR antenna right wing'),
-	-- 	'RWRANTREAR',--('RWR antenna rear'),
-	-- 	'RWRUNIT',--('RWR control unit'),
-	-- 	'JAMMER',--('U22 or U22/A Jammer'),
-	-- 	'CMDISP',--('KB countermeasure dispenser'),
-	-- 	'AUTOPILOT',--('SA-06 Autopilot unit'),
-	-- 	'ELEVONOUTERLEFT',--('Elevon control surface outer left'),
-	-- 	'ELEVONINNERLEFT',--('Elevon control surface inner left'),
-	-- 	'ELEVONINNERRIGHT',--('Elevon control surface inner right'),
-	-- 	'ELEVONOUTERRIGHT',--('Elevon control surface outer right'),
-	-- 	'ELEVONSERVOUTERLEFT',--('Elevon servo outer left'),
-	-- 	'ELEVONSERVINNERLEFT',--('Elevon servo inner left'),
-	-- 	'ELEVONSERVINNERRIGHT',--('Elevon servo inner right'),
-	-- 	'ELEVONSERVOUTERRIGHT',--('Elevon servo outer right'),
-	-- 	'RUDDER',--('Rudder control surface'),
-	-- 	'RUDDERSERV',--('Rudder servo'),
-	-- 	'CANARDFLAPLEFT',--('Canard flap surface left'),
-	-- 	'CANARDFLAPRIGHT',--('Canard flap surface right'),
-	-- 	'CANARDSERVOLEFT',--('Canard flap servo left'),
-	-- 	'CANARDSERVORIGHT',--('Canard flap servo right'),
-	-- 	'AIRBRAKE',--('Airbrake surfaces'),
-	-- 	'AIRBRAKESERVO',--('Airbrake servo'),
-	-- 	'HYDR1PUMP',--('Hydraulic pump System 1'),
-	-- 	'HYDR1ACC',--('Hydraulic accumulator System 1'),
-	-- 	'HYDR2PUMP',--('Hydraulic pump System 2'),
-	-- 	'HYDR2ACC',--('Hydraulic accumulator System 2'),
-	-- 	'HYDRRESERVPUMP',--('Hydraulic pump backup'),
-	-- 	'OXYGEN',--('Oxygen bottle'),
-	-- 	'MAINPOWER',--('Main electrical junction & relays'),
-	-- 	'MAINGENERATOR',--('Main generator'),
-	-- 	'BACKUPGENERATOR',--('Backup generator (RAT)'),
-	-- 	'BATTERY',--('Main battery'),
-	-- 	'IFF',--('IFF'),
-	-- 	'TILS',--('TILS'),
-	-- 	'DOPPLER_UNIT',--('Doppler unit'),
-	-- 	'COMPRESSOR',--('Engine fan and compressor stage'),
-	-- 	'BURNER',--('Engine burner stage'),
-	-- 	'TURBINE',--('Engine turbine stage'),
-	-- 	'GTS',--('Engine starter (GTS)'),
-	-- 	'AFK',--('Auto-thrust (AFK)'),
-	-- 	'REVERSER',--('Thrust reverser'),
-	-- 	'FUELTANK2',--('Fuel tank 2'),
-	-- 	'FUELTANK3L',--('Fuel tank 3V'),
-	-- 	'FUELTANK3R',--('Fuel tank 3H'),
-	-- 	'FUELTANK1',--('Fuel tank 1'),
-	-- 	'FUELTANK4L',--('Fuel tank 4V'),
-	-- 	'FUELTANK5L',--('Fuel tank 5V'),
-	-- 	'FUELTANK4R',--('Fuel tank 4H'),
-	-- 	'FUELTANK5R',--('Fuel tank 5H'),
-	-- 	'LANDINGGEARL',--('Left landing gear'),
-	-- 	'LANDINGGEARR',--('Right landing gear'),
-	-- },
-	-- ["AV8BNA"] = {
-	-- 	-- FWD Avionics Bay
-	-- 	'DMT_FAILURE_TOTAL',	--('DMT Camera Failure'),			
-	-- 	'ARBS_FAILURE_TOTAL',--('ARBS Failure'),					
-	-- 	'FLIR_FAILURE_TOTAL',--('NAVFLIR Failure'),				
 
-	-- 	-- AFT Avionics Bay
-	-- 	'ADC_FAILURE_TOTAL',	--('Air Data Computer Failure'),		
-	-- 	'MSC_FAILURE_TOTAL',	--('Mission Systems Computer Failure'),
-	-- 	'TCN_FAILURE_TOTAL',	--('TACAN Receiver Failure'),		
-	-- 	'COM1_FAILURE_TOTAL',--('Radio 1 Failure'),				
-	-- 	'DVMS_FAILURE_TOTAL',--('Moving Map Controller Failure'),	
-	-- 	'INS_FAILURE_VELOCITY',--('INS Velocity Failure'),			
-	-- 	'INS_FAILURE_HEADING',--('INS Heading Failure'),			
-	-- 	'INS_FAILURE_ATTITUDE',--('INS Attitude Failure'),			
-	-- 	'COM2_FAILURE_TOTAL',--('Radio 2 Failure'),				
-	-- 	'SMS_FAILURE_TOTAL',	--('Weapons Controller Failure'),	
-
-	-- 	-- Weapons Stations
-	-- 	'STATION_1_FAILURE',	--('Station 1 Failure'),				
-	-- 	'STATION_2_FAILURE',	--('Station 2 Failure'),				
-	-- 	'STATION_3_FAILURE',	--('Station 3 Failure'),				
-	-- 	'STATION_4_FAILURE',	--('Station 4 Failure'),				
-	-- 	'STATION_5_FAILURE',	--('Station 5 Failure'),				
-	-- 	'STATION_6_FAILURE',	--('Station 6 Failure'),				
-	-- 	'STATION_7_FAILURE',	--('Station 7 Failure'),				
-	-- 	'STRAKE_LEFT_FAILURE',--('Gun Pod Left Failure'),			
-	-- 	'STRAKE_RIGHT_FAILURE',--('Gun Pod Right Failure'),			
-	-- },
 	["C-101"] =
 	{
 		"generator_fail",--("Generator failure"),	
@@ -3013,553 +2884,7 @@ Failures = {
 		"radioalt_fail",--("Radio altimeter signal fail"), 		
 		"sight_lamps_fail",--("Gunsight lamps failure"),   
 	},
-	-- ["F-5E-3"] = {
-	-- 	-- electric system
-	-- 	'esf_LeftGenerator',	--('Electricity: Left Generator'),				
-	-- 	'esf_RightGenerator',--('Electricity: Right Generator'),				
-	-- 	'esf_LeftRectifier',	--('Electricity: Left Rectifier'),				
-	-- 	'esf_RightRectifier',--('Electricity: Right Rectifier'),				
-	-- 	'esf_StaticInverter',--('Electricity: Static Inverter'),				
-	-- 	-- fuel system
-	-- 	'fsf_AutoBalance',	--('Fuel System: Fuel Autobalance'),				
-	-- 	'fsf_LeftBoostPump',	--('Fuel System: Left Fuel Boost Pump'),			
-	-- 	'fsf_RightBoostPump',--('Fuel System: Right Fuel Boost Pump'),		
-	-- 	'fsf_CrossfeedValve',--('Fuel System: Crossfeed Valve'),				
-	-- 	-- hydraulic system
-	-- 	'hsf_UtilityHydraulic',--('Hydraulic: Utility Hydraulic System'),		
-	-- 	'hsf_ControlHydraulic',--('Hydraulic: Flight Control Hydraulic System'),
-	-- 	-- control system
-	-- 	'csf_PitchDamper',	--('Control: Pitch Damper'),						
-	-- 	'csf_YawDamper',		--('Control: Yaw Damper'),						
-	-- 	'csf_PitchTrim',		--('Control: Pitch Trim'),						
-	-- 	'csf_AutoFlap',		--('Control: Auto Flap System'),					
-	-- 	-- sensors system
-	-- 	'sensf_CADC',		--('Sensors: Central Air Data Computer'),		
-	-- 	'sensf_PITOT_DAMAGE',--('Sensors: Pitot-static System Leakage'),		
-	-- 	-- power plant
-	-- 	'ppf_LeftGearbox',	--('Power Plant: Left Gearbox'),					
-	-- 	'ppf_RightGearbox',	--('Power Plant: Right Gearbox'),				
-	-- 	'ppf_FireLeft',		--('Power Plant: Fire Left Engine'),				
-	-- 	'ppf_FireRight',		--('Power Plant: Fire Right Engine'),			
-	-- 	'ppf_LeftNozzleControl',--('Power Plant: Left Nozzle Control System'),	
-	-- 	'ppf_RightNozzleControl',--('Power Plant: Right Nozzle Control System'),	
-	-- 	'ppf_LeftOil',		--('Power Plant: Left Oil System'),				
-	-- 	'ppf_RightOil',		--('Power Plant: Right Oil System'),				
-	-- 	-- oxygen system
-	-- 	'oxy_FAILURE_TOTAL',	--('Oxygen System: Total Failure'),				
-	-- 	-- weapon system
-
-	-- 	-- radio devices
-	-- },
-	-- ["M-2000C"] = {
-	-- 	'HYD_PUMP_1_FAIL_100',
-	-- 	'HYD_PUMP_2_FAIL_100',
-	-- 	'HYD_PUMP_3_FAIL_100',
-	-- 	'OIL_SYSTEM_FAIL_050',
-	-- 	'OIL_SYSTEM_FAIL_100',
-	-- 	'BATT_FAIL',
-	-- 	'TRN_FAIL',
-	-- 	'TRN_FAIL_AUX',
-	-- 	'ENG_ALT_1_FAIL',
-	-- 	'ENG_ALT_2_FAIL',
-	-- 	'HYD_ALT_1_FAIL',
-	-- 	'HYD_ALT_2_FAIL',
-	-- 	'INS_PART_FAIL',
-	-- 	'INS_GYROS_FAIL',
-	-- 	'INS_TOTAL_FAIL',
-	-- 	'RWR_FAILURE_SENSOR_TAIL',
-	-- 	'RWR_FAILURE_SENSOR_LEFT',
-	-- 	'RWR_FAILURE_SENSOR_RIGHT',
-	-- 	'RWR_FAILURE_TOTAL',
-	-- 	'IFF_FAILURE_MAIN',
-	-- },
-	-- ["Mirage-F1"] =
-	-- {
-	-- 	"battery_fail",
-	-- 	"alt1_fail",
-	-- 	"alt2_fail",
-	-- 	"tr1_fail",
-	-- 	"tr2_fail",
-	-- 	"triphase_inv_fail",
-	-- 	"miss_bus_fail",
-
-	-- 	"left_fuel_pump_fail",
-	-- 	"right_fuel_pump_fail",
-	-- 	"detotalizer_fail",
-	-- 	"fuel_gauges_fail",
-	-- 	"fuel_intercom_fail",
-	-- 	"left_wing_transfer_fail",
-	-- 	"right_wing_transfer_fail",
-	-- 	"front_central_transfer_fail",
-	-- 	"left_front_transfer_fail",
-	-- 	"right_front_transfer_fail",
-	-- 	"left_rear_transfer_fail",
-	-- 	"right_rear_transfer_fail",
-	-- 	"external_tanks_transfer_fail",
-	-- 	"left_wing_leaks",
-	-- 	"right_wing_leaks",
-	-- 	"front_central_leaks",
-	-- 	"left_front_leaks",
-	-- 	"right_front_leaks",
-	-- 	"left_rear_leaks",
-	-- 	"right_rear_leaks",
-	-- 	"left_feeder_leaks",
-	-- 	"right_feeder_leaks",
-	-- 	"fuel_accu_leaks",
-
-	-- 	"left_airbrake_fail",
-	-- 	"right_airbrake_fail",
-	-- 	"gear_lever_fail",
-	-- 	"gear_down_lock_fail",
-	-- 	"gear_nose_stuck",
-	-- 	"gear_left_stuck",
-	-- 	"gear_right_stuck",
-	-- 	"brakes_fail",
-	-- 	"chute_fail",
-	-- 	"electropump_fail",
-	-- 	"hydr1_leaks",
-	-- 	"hydr1_reserv_leaks",
-	-- 	"hydr1_pump_fail",
-	-- 	"hydr2_leaks",
-	-- 	"hydr2_reserv_leaks",
-	-- 	"hydr2_pump_fail",
-	-- 	"hydr_serv_leaks",
-	-- 	"flap_left_stuck",
-	-- 	"flap_right_stuck",
-	-- 	"flaps_stuck",
-	-- 	"slat_inner_left_stuck",
-	-- 	"slat_inner_right_stuck",
-	-- 	"slat_outer_left_stuck",
-	-- 	"slat_outer_right_stuck",
-	-- 	"slats_stuck",
-
-	-- 	"pitot_heat_fail",
-	-- 	"altitude_chain_fail",
-	-- 	"mach_chain_fail",
-	-- 	"incidometer_fail",
-	-- 	"incidometer_blockage_fail",
-	-- 	"anemo_central_fail",
-
-	-- 	"trim_pitch_fail",
-	-- 	"trim_roll_fail",
-	-- 	"trim_yaw_fail",
-	-- 	"trim_elect_supply",
-	-- 	"yaw_damper_fail",
-	-- 	"pilot_aids_1_fail",
-	-- 	"pilot_aids_2_fail",
-	-- 	"pitch_chain_fail",
-	-- 	"ap_global_fail",
-
-	-- 	"broken_guards",
-	-- 	"oil_fail",
-	-- 	"nosecone_stuck",
-	-- 	"nosecone_stuck_forward",
-	-- 	"nosecone_stuck_backward",
-	-- 	"start_fail",
-	-- 	"ignition_fail",
-	-- 	"total_comp_stall",
-	-- 	"partial_comp_stall",
-	-- 	"overspeed_fail",
-	-- 	"discharge_valves_fail",
-	-- 	"engine_fire",
-	-- 	"AB_fire",
-	-- 	"compressor_damage",
-	-- 	"engine_flameout",
-	-- 	"cabin_temp_fail",
-	-- 	"equip_temp_fail",
-	-- 	"oxygen_regulator_fail",
-
-	-- 	"gyros_general_BSM_fail",
-	-- 	"gyros_main_att_fail",
-	-- 	"gyros_main_fail",
-	-- 	"gyros_emergency_fail",
-	-- 	"gyros_att_indicator",
-	-- 	"gyros_temp_drift",
-	-- 	"BARAX_fail",
-
-	-- },
-
-	-- ["F-4E-45-MC"] =
-	-- {
-	-- 	[1] = "/F-4E-45-MC/Pilot Cockpit/Pilot Left Console/Intercom Panel:Full Damage",
-	-- 	[2] = "/F-4E-45-MC/Air Data Computer/Static Pressure Compensator/On-Off logic Calculator:SPC Failed",
-	-- 	[3] = "/F-4E-45-MC/IFF Interrogator System:IFF Interrogator Damage",
-	-- 	[4] = "/F-4E-45-MC/Angle Of Attack Indicator WSO/Servo:AoA Indicator Failure",
-	-- 	[5] = "/F-4E-45-MC/Pilot Cockpit/Pilot Front Panel/VOR ILS/WSO ARN-127 Aural Tone Generator:VOR ILS Aural Tone Generator Malfunction",
-	-- 	[6] = "/F-4E-45-MC/Airborne Video Tape Recorder (AVTR):AVTR Damage",
-	-- 	[7] = "/F-4E-45-MC/Right Engine/Fire Detection:Engine Fire",
-	-- 	[8] = "/F-4E-45-MC/WSO Cockpit/WSO Front Panel/ECM System Right:ECM Broken",
-	-- 	[9] = "/F-4E-45-MC/EO TGT Designator System/Range Indicator:Damage",
-	-- 	[10] = "/F-4E-45-MC/Left Engine/Gas Generator:Compressor Stall",
-	-- 	[11] = "/F-4E-45-MC/Exterior Lights/Formation Lights Left Damage:HitDamage",
-	-- 	[12] = "/F-4E-45-MC/Right Engine/Nozzle Controller:Failure",
-	-- 	[13] = "/F-4E-45-MC/WSO Cockpit/WSO Left Console/Intercom Panel:Full Damage",
-	-- 	[14] = "/F-4E-45-MC/Weapons/Nosegun:Gun Damage",
-	-- 	[15] = "/F-4E-45-MC/Pilot Servoed Altimeter/Altitude Meter/Output Calculator:Pressure Set Rollers Stuck",
-	-- 	[16] = "/F-4E-45-MC/Bearing Distance Heading Indicator/BDHI Meter:BDHI Stuck",
-	-- 	[17] = "/F-4E-45-MC/Pilot Cockpit/Pilot Left Console/Intercom Panel:Backup Amplifier Failure",
-	-- 	[18] = "/F-4E-45-MC/Exterior Lights/Fuselage Lights Bottom Damage:HitDamage",
-	-- 	[19] = "/F-4E-45-MC/ASN-63/Mode Logic:Failed",
-	-- 	[20] = "/F-4E-45-MC/EO TGT Designator System/Pave Spike/Camera Damage:HitDamage",
-	-- 	[21] = "/F-4E-45-MC/Right Engine/Spool Dynamics:Seizure",
-	-- 	[22] = "/F-4E-45-MC/Ground Speed Indicator:Ground Speed Indicator Stuck",
-	-- 	[23] = "/F-4E-45-MC/Pilot Vertical Velocity Indicator/Vertical Velocity Meter/Vertical Speed From Pressure Calculator:Vertical Velocity Indicator Pressure Leak Clogged",
-	-- 	[24] = "/F-4E-45-MC/WSO Servoed Altimeter/Altitude Meter/Output Calculator:Pressure Set Rollers Stuck",
-	-- 	[25] = "/F-4E-45-MC/UHF Radio:Lower Antenna Damaged",
-	-- 	[26] = "/F-4E-45-MC/Pilot Cockpit/Pilot Left Console/Intercom Panel:Microphone Failure",
-	-- 	[27] = "/F-4E-45-MC/WSO Cockpit/WSO Left Console/Intercom Panel:Microphone Failure",
-	-- 	[28] = "/F-4E-45-MC/TACAN Info:Transmitter Damage",
-	-- 	[29] = "/F-4E-45-MC/UHF Radio/UHF Radio:UHF ARC 164 Radio Failed",
-	-- 	[30] = "/F-4E-45-MC/WSO Servoed Altimeter/Three Position Switch:Broken",
-	-- 	[31] = "/F-4E-45-MC/Exterior Lights/Wing Pos Light Left Damage:HitDamage",
-	-- 	[32] = "/F-4E-45-MC/Hud:HUD Damage",
-	-- 	[33] = "/F-4E-45-MC/Exterior Lights/Formation Lights Right Damage:HitDamage",
-	-- 	[34] = "/F-4E-45-MC/Exterior Lights/Wing Pos Light Right Damage:HitDamage",
-	-- 	[35] = "/F-4E-45-MC/WSO Cockpit/WSO Front Panel/ECM System Left:ECM Broken",
-	-- 	[36] = "/F-4E-45-MC/WSO Servoed Altimeter/Reference Pressure Knob:Broken",
-	-- 	[37] = "/F-4E-45-MC/WSO Cockpit/WSO Left Console/Intercom Panel:Internal Failure",
-	-- 	[38] = "/F-4E-45-MC/WSO Vertical Velocity Indicator/Vertical Velocity Meter/Vertical Speed From Pressure Calculator:Vertical Velocity Indicator Calibrated Leak Clogged",
-	-- 	[39] = "/F-4E-45-MC/TACAN Info:Total Damage",
-	-- 	[40] = "/F-4E-45-MC/Pilot Servoed Altimeter/Three Position Switch:Broken",
-	-- 	[41] = "/F-4E-45-MC/WSO Servoed Altimeter/Altitude Meter/Output Calculator:Needle Stuck",
-	-- 	[42] = "/F-4E-45-MC/WSO Cockpit/WSO Right Console/Interior Lights:Interior Light Damage",
-	-- 	[43] = "/F-4E-45-MC/Landing Gear/Right Main Landing Gear/Side Brace Actuator/Actuator:Mechanical Failure",
-	-- 	[44] = "/F-4E-45-MC/Right Engine/Gas Generator:Compressor Stall",
-	-- 	[45] = "/F-4E-45-MC/Right Engine/Engine Oil System:Oil Leak",
-	-- 	[46] = "/F-4E-45-MC/EO TGT Designator System/Laser Coder Control:Damage",
-	-- 	[47] = "/F-4E-45-MC/Pilot Cockpit/Pilot Front Panel/VOR ILS/VOR ARN-127 Positioning Aid:VOR Receiver Malfunction",
-	-- 	[48] = "/F-4E-45-MC/Exterior Lights/Anti-Coll Lights Damage:HitDamage",
-	-- 	[49] = "/F-4E-45-MC/Pilot Servoed Altimeter/Reference Pressure Knob:Broken",
-	-- 	[50] = "/F-4E-45-MC/WSO Vertical Velocity Indicator/Vertical Velocity Meter/Vertical Speed From Pressure Calculator:Vertical Velocity Indicator Pressure Leak Clogged",
-	-- 	[51] = "/F-4E-45-MC/Pilot Mach And Airspeed Indicator:Mach And Airspeed Stuck",
-	-- 	[52] = "/F-4E-45-MC/Left Engine/Engine Oil System:Oil Leak",
-	-- 	[53] = "/F-4E-45-MC/Pilot Vertical Velocity Indicator/Vertical Velocity Meter/Vertical Speed From Pressure Calculator:Vertical Velocity Indicator Calibrated Leak Clogged",
-	-- 	[54] = "/F-4E-45-MC/Navigation Computer/Test Cap Off Light:NAV Comp Test Cap failed",
-	-- 	[55] = "/F-4E-45-MC/Pilot True Airspeed Indicator:True Airspeed Indicator Stuck",
-	-- 	[56] = "/F-4E-45-MC/WSO Vertical Velocity Indicator/Vertical Velocity Meter:Vertical Velocity Indicator Stuck",
-	-- 	[57] = "/F-4E-45-MC/WSO Servoed Altimeter/Altitude Meter/Operation Mode Logic:Electric Servo Failed",
-	-- 	[58] = "/F-4E-45-MC/Exterior Lights/Landing Light Damage:HitDamage",
-	-- 	[59] = "/F-4E-45-MC/Angle Of Attack Indicator Pilot/Servo:AoA Indicator Failure",
-	-- 	[60] = "/F-4E-45-MC/Landing Gear/Nose Landing Gear/Drag Brace Actuator/Actuator:Mechanical Failure",
-	-- 	[61] = "/F-4E-45-MC/Exterior Lights/Tail Pos Light Damage:HitDamage",
-	-- 	[62] = "/F-4E-45-MC/WSO Cockpit/WSO Left Console/Intercom Panel:Normal Amplifier Failure",
-	-- 	[63] = "/F-4E-45-MC/UHF Remote Indicator Pilot:Frequency Channel Indicator Damage",
-	-- 	[64] = "/F-4E-45-MC/WSO Accelerometer:G-Meter Stuck",
-	-- 	[65] = "/F-4E-45-MC/Pilot Cockpit/Pilot Front Panel/VOR ILS:VOR ILS Malfunction",
-	-- 	[66] = "/F-4E-45-MC/Pilot Cockpit/Pilot Front Panel/VOR ILS/Pilot ARN-127 Aural Tone Generator:VOR ILS Aural Tone Generator Malfunction",
-	-- 	[67] = "/F-4E-45-MC/Attitude Indicator (Rear Cockpit)/Meter:Attitude Indicator Stuck",
-	-- 	[68] = "/F-4E-45-MC/WSO Mach And Airspeed Indicator:Mach And Airspeed Stuck",
-	-- 	[69] = "/F-4E-45-MC/Pilot Servoed Altimeter/Altitude Meter/Operation Mode Logic:Electric Servo Failed",
-	-- 	[70] = "/F-4E-45-MC/TACAN Info:WSO Module Damage",
-	-- 	[71] = "/F-4E-45-MC/Air Data Computer:Total Failure",
-	-- 	[72] = "/F-4E-45-MC/Air Data Computer/Altitude Encoder:Altitude Encoder Failed",
-	-- 	[73] = "/F-4E-45-MC/Left Engine/Fire Detection:Engine Fire",
-	-- 	[74] = "/F-4E-45-MC/Aural Tone System:Aural Tone Damage",
-	-- 	[75] = "/F-4E-45-MC/WSO Cockpit/WSO Left Console/Radio Panel/Panel Logic:Panel failed",
-	-- 	[76] = "/F-4E-45-MC/Exterior Lights/Refueling Light Damage:HitDamage",
-	-- 	[77] = "/F-4E-45-MC/UHF Radio:Upper Antenna Damaged",
-	-- 	[78] = "/F-4E-45-MC/WSO Cockpit/WSO Left Console/Intercom Panel:Backup Amplifier Failure",
-	-- 	[79] = "/F-4E-45-MC/WSO Servoed Altimeter/Altitude Meter/Output Calculator:Altitude Rollers Stuck",
-	-- 	[80] = "/F-4E-45-MC/Exterior Lights/Fuselage Light Top Damage:HitDamage",
-	-- 	[81] = "/F-4E-45-MC/Pilot Cockpit/Pilot Left Console/Intercom Panel:Normal Amplifier Failure",
-	-- 	[82] = "/F-4E-45-MC/IFF Transponder:Failure",
-	-- 	[83] = "/F-4E-45-MC/Pilot Cockpit/Pilot Left Console/Intercom Panel:Internal Failure",
-	-- 	[84] = "/F-4E-45-MC/EO TGT Designator System/Azimuth Elevation Indicator:Damage",
-	-- 	[85] = "/F-4E-45-MC/Pilot Cockpit/Pilot Right Console/Interior Lights:Interior Light Damage",
-	-- 	[86] = "/F-4E-45-MC/EO TGT Designator System/Pave Spike/Cooling Damage:HitDamage",
-	-- 	[87] = "/F-4E-45-MC/WSO Servoed Altimeter:Altimeter Stuck",
-	-- 	[88] = "/F-4E-45-MC/Pilot Servoed Altimeter/Altitude Meter/Output Calculator:Altitude Rollers Stuck",
-	-- 	[89] = "/F-4E-45-MC/KY-28:Failure",
-	-- 	[90] = "/F-4E-45-MC/Exterior Lights/Taxi Light Damage:HitDamage",
-	-- 	[91] = "/F-4E-45-MC/Pilot Servoed Altimeter:Altimeter Stuck",
-	-- 	[92] = "/F-4E-45-MC/Pilot Cockpit/Pilot Right Console/Radio Panel/Panel Logic:Panel failed",
-	-- 	[93] = "/F-4E-45-MC/Left Engine/Nozzle Controller:Failure",
-	-- 	[94] = "/F-4E-45-MC/Navigation Computer:Nav Comp Damaged",
-	-- 	[95] = "/F-4E-45-MC/EO TGT Designator System/Target Designator Set Control:Damage",
-	-- 	[96] = "/F-4E-45-MC/WSO True Airspeed Indicator:True Airspeed Indicator Stuck",
-	-- 	[97] = "/F-4E-45-MC/Left Engine/Spool Dynamics:Seizure",
-	-- 	[98] = "/F-4E-45-MC/UHF Remote Indicator WSO:Frequency Channel Indicator Damage",
-	-- 	[99] = "/F-4E-45-MC/Aural Tone System:Stall Vibrator Damage",
-	-- 	[100] = "/F-4E-45-MC/Pilot Servoed Altimeter/Altitude Meter/Output Calculator:Needle Stuck",
-	-- 	[101] = "/F-4E-45-MC/Horizontal Situation Indicator/HSI Meter:HSI Stuck",
-	-- 	[102] = "/F-4E-45-MC/TACAN Info:Pilot Module Damage",
-	-- 	[103] = "/F-4E-45-MC/Pilot Seat:Seat Motor Overheated",
-	-- 	[104] = "/F-4E-45-MC/Pilot Cockpit/Pilot Front Panel/VOR ILS/ILS ARN-127 Landing Aid:ILS Antenna Malfunction",
-	-- 	[105] = "/F-4E-45-MC/Pilot Main ADI:Failed",
-	-- 	[106] = "/F-4E-45-MC/Pilot Accelerometer:G-Meter Stuck",
-	-- 	[107] = "/F-4E-45-MC/UHF Radio/ADF:ADF Damaged",
-	-- 	[108] = "/F-4E-45-MC/Exterior Lights/Joinup Light Left Damage:HitDamage",
-	-- 	[109] = "/F-4E-45-MC/TACAN Info:Receiver Damage",
-	-- 	[110] = "/F-4E-45-MC/Landing Gear/Left Main Landing Gear/Side Brace Actuator/Actuator:Mechanical Failure",
-	-- 	[111] = "/F-4E-45-MC/Exterior Lights/Joinup Light Right Damage:HitDamage",
-	-- 	[112] = "/F-4E-45-MC/WSO Seat:Seat Motor Overheated",
-	-- 	[113] = "/F-4E-45-MC/Pilot Vertical Velocity Indicator/Vertical Velocity Meter:Vertical Velocity Indicator Stuck",
-	-- 	[114] = "/F-4E-45-MC/EO TGT Designator System/Pave Spike:System Damage",
-	-- },
-
-	-- ["F-14"] =
-	-- {
-    --     'RADAR_FAILURE_TOTAL', --('Radar: Total') -- 0
-    --     'DDD_FAILURE_TOTAL', --('DDD: Total')
-    --     -- ENGINE
-    --     'L_ENG_FIRE', --('Left Engine: Fire')
-    --     'R_ENG_FIRE', --('Right Engine: Fire')
-    --     'L_ENG_SEIZED', --('Left Engine: Main Spool Seizure')
-    --     'R_ENG_SEIZED', --('Right Engine: Main Spool Seizure')
-    --     'L_ENG_TURBINE_FAILURE', --('Left Engine: Turbine Failed')
-    --     'R_ENG_TURBINE_FAILURE', --('Right Engine: Turbine Failed')
-    --     'L_ENG_OIL_LEAK_SLOW', --('Left Engine: Slow Oil Leak (1 hr)')
-    --     'R_ENG_OIL_LEAK_SLOW', --('Right Engine: Slow Oil Leak (1 hr)')
-    --     'L_ENG_OIL_LEAK_MODERATE', --('Left Engine: Moderate Oil Leak (30 min)')
-    --     'R_ENG_OIL_LEAK_MODERATE', --('Right Engine: Moderate Oil Leak (30 min)')
-    --     'L_ENG_OIL_LEAK_SEVERE', --('Left Engine: Severe Oil Leak (2 min)')
-    --     'R_ENG_OIL_LEAK_SEVERE', --('Right Engine: Severe Oil Leak (2 min)')
-    --     'L_ENG_COMPRESSOR_STALL', --('Left Engine: Compressor Stall')
-    --     'R_ENG_COMPRESSOR_STALL', --('Right Engine: Compressor Stall')
-    --     'L_ENG_POP_STALL', --('Left Engine: Pop Stall')
-    --     'R_ENG_POP_STALL', --('Right Engine: Pop Stall')
-	-- 	--      'L_ENG_SUPERSONIC_INLET_BUZZ', --('Left Engine: Supersonic Inlet Buzz')
-	-- 	--      'R_ENG_SUPERSONIC_INLET_BUZZ', --('Right Engine: Supersonic Inlet Buzz')
-    --     'L_ENG_HPT_OVERSPEED', --('Left Engine: Turbine Overspeed')
-    --     'R_ENG_HPT_OVERSPEED', --('Right Engine: Turbine Overspeed')
-    --     'L_ENG_AFTC_PRI_FAILED', --('Left Engine: AFTC Failure')
-    --     'R_ENG_AFTC_PRI_FAILED', --('Right Engine: AFTC Failure')
-    --     'L_ENG_AICS_RAMP_FAIL_OPEN', --('Left Engine: AICS Ramp Fail Open')
-    --     'R_ENG_AICS_RAMP_FAIL_OPEN', --('Right Engine: AICS Ramp Fail Open')
-    --     'L_ENG_AICS_RAMP_FAIL_CLOSED', --('Left Engine: AICS Ramp Fail Closed')
-    --     'R_ENG_AICS_RAMP_FAIL_CLOSED', --('Right Engine: AICS Ramp Fail Closed')
-    --     'L_ENG_AICS_RAMP_FAIL_IN_POS', --('Left Engine: AICS Ramp Fail In Position')
-    --     'R_ENG_AICS_RAMP_FAIL_IN_POS', --('Right Engine: AICS Ramp Fail In Position')
-    --     'L_ENG_NOZZLE_FAILURE', --('Left Engine: Exhaust Nozzle Failure')
-    --     'R_ENG_NOZZLE_FAILURE', --('Right Engine: Exhaust Nozzle Failure')
-    --     -- CADC
-    --     'CADC_FAILURE_TOTAL', --('CADC: Total')
-    --     'CADC_PRESSURE_SENSOR', --('CADC: Pressure sensor')
-    --     'CADC_WING_SWEEP_COMMAND_CHANNEL_1', --('CADC: Wing Sweep Channel 1')
-    --     'CADC_WING_SWEEP_COMMAND_CHANNEL_2', --('CADC: Wing Sweep Channel 2')
-    --     'CADC_MANEUVER_FLAP_COMMAND', --('CADC: Maneuver Flap Command')
-    --     'CADC_RUDDER_AUTHORITY_COMMAND', --('CADC: Rudder Authority Command')
-    --     'CADC_STABILIZER_AUTHORITY_COMMAND', --('CADC: Stabilizer Authority Command')
-    --     'CADC_ANGLE_OF_ATTACK_SIGNAL', --('CADC: Angle Of Attack Signal')
-    --     'CADC_TOTAL_TEMPERATURE_SIGNAL', --('CADC: Temperature Signal')
-    --     'CADC_WING_SWEEP_INDICATOR', --('CADC: Wing Sweep Indicator')
-    --     'CADC_CSDC_CONNECTION', --('CADC: Digital output to CSDC')
-    --     -- NAV
-    --     'INS_FAILURE_TOTAL', --('INS: Total')
-    --     'INS_FAILURE_NAV_COMPUTER', --('INS: Nav Computer')
-    --     'IMU_FAILURE_TOTAL', --('IMU: Total')
-    --     'IMU_FAILURE_QUANTIZER', --('IMU: Quantizer')
-    --     'AHRS_FAILURE_TOTAL', --('AHRS: Total')
-    --     'AHRS_FAILURE_GYRO', --('AHRS: Gyro Platform')
-    --     'AHRS_FAILURE_MAD', --('AHRS: Magnetic Azimuth Detector')
-    --     -- RWR AN/ALR-67
-    --     'RWR_FAILURE_TOTAL', --('RWR: Total')
-    --     'RWR_FAILURE_CONTROL_BOX', --('RWR: Control Box')
-    --     'RWR_FAILURE_COMPUTER', --('RWR: Computer')
-    --     'RWR_FAILURE_LOW_BAND', --('RWR: Low Band Receiver/Antenna')
-    --     'RWR_FAILURE_QUAD45', --('RWR: 45 Quad Receiver/Antenna')
-    --     'RWR_FAILURE_QUAD135', --('RWR: 135 Quad Receiver/Antenna')
-    --     'RWR_FAILURE_QUAD225', --('RWR: 225 Quad Receiver/Antenna')
-    --     'RWR_FAILURE_QUAD315', --('RWR: 315 Quad Receiver/Antenna')
-    --     'RWR_FAILURE_MBE', --('RWR: MBE BUS')
-    --     'RWR_FAILURE_BLANKER', --('RWR: Interference Blanker')
-    --     'RWR_FAILURE_DISPLAY_PILOT', --('RWR: Display Pilot')
-    --     'RWR_FAILURE_DISPLAY_RIO', --('RWR: Display RIO')
-    --     -- COUNTERMEASURES AN/ALE-39
-    --     'CMS_FAILURE_PROGRAMMER', --('Countermeasures: Programmer')
-    --     'CMS_FAILURE_LEFT_DISPENSER', --('Countermeasures: Left Dispenser')
-    --     'CMS_FAILURE_RIGHT_DISPENSER', --('Countermeasures: Right Dispenser')
-    --     -- UHF AN/ARC-159
-    --     'UHF_ARC_159_FAILURE_TOTAL', --('UHF AN/ARC-159: Total')
-    --     'UHF_ARC_159_FAILURE_DISPLAY', --('UHF AN/ARC-159: Display')
-    --     'UHF_ARC_159_FAILURE_REMOTE_DISPLAY', --('UHF AN/ARC-159: Remote Display Pilot')
-    --     'UHF_ARC_159_FAILURE_REMOTE_DISPLAY_RIO', --('UHF AN/ARC-159: Remote Display RIO')
-    --     'UHF_ARC_159_FAILURE_INTERNAL_MODULE', --('UHF AN/ARC-159: Internal Module')
-    --     'UHF_ARC_159_FAILURE_TRANSCEIVER', --('UHF AN/ARC-159: Transceiver')
-    --     'UHF_ARC_159_FAILURE_ANTENNA', --('UHF AN/ARC-159: Antenna')
-    --     -- VHF/UHF AN/ARC-182
-    --     'VHF_ARC_182_FAILURE_TOTAL', --('VHF/UHF AN/ARC-182: Total')
-    --     'VHF_ARC_182_FAILURE_DISPLAY', --('VHF/UHF AN/ARC-182: Display')
-    --     'VHF_ARC_182_FAILURE_REMOTE_DISPLAY', --('VHF/UHF AN/ARC-182: Remote Display')
-    --     'VHF_ARC_182_FAILURE_INTERNAL_MODULE', --('VHF/UHF AN/ARC-182: Internal Module')
-    --     'VHF_ARC_182_FAILURE_TRANSCEIVER', --('VHF/UHF AN/ARC-182: Transceiver')
-    --     'VHF_ARC_182_FAILURE_ANTENNA', --('VHF/UHF AN/ARC-182: Antenna')
-    --     -- ICS
-    --     'ICS_FAILURE_AMPLIFIER_PILOT_NORM', --('ICS: Amplifier Pilot')
-    --     'ICS_FAILURE_AMPLIFIER_PILOT_BU', --('ICS: Amplifier Pilot Backup')
-    --     'ICS_FAILURE_AMPLIFIER_RIO_NORM', --('ICS: Amplifier RIO')
-    --     'ICS_FAILURE_AMPLIFIER_RIO_BU', --('ICS: Amplifier RIO Backup')
-    --     -- TACAN
-    --     'TACAN_FAILURE_TOTAL', --('TACAN: Total')
-    --     'TACAN_FAILURE_TRANSMITTER', --('TACAN: Transmitter')
-    --     'TACAN_FAILURE_RECEIVER', --('TACAN: Receiver')
-    --     -- ILS
-    --     'ILS_FAILURE_TOTAL', --('ILS: Total')
-    --     'ILS_FAILURE_DECODER', --('ILS: Decoder')
-    --     'ILS_FAILURE_ANTENNA', --('ILS: Antenna')
-    --     -- HUD
-    --     'HUD_FAILURE_TOTAL', --('HUD: Total')
-    --     -- VDI
-    --     'VDI_FAILURE_TOTAL', --('VDI: Total')
-    --     -- RIO TID bowl
-    --     'TID_FAILURE_TOTAL', --('TID: Total')
-
-    --     -- Wings
-    --     'W_S_L', --('Wings: Left Sweep Failure')
-    --     'W_S_R', --('Wings: Right Sweep Failure')
-
-    --     -- Engines
-
-
-    --     -- Hydraulics
-    --     'HYD_Combined', --('Hydraulics: Left Engine Pump')
-    --     'HYD_Flight', --('Hydraulics: Right Engine Pump')
-    --     'HYD_Transf', --('Hydraulics: Transfer Pump-Motor')
-    --    --'HYD_CombLeak', --('Hydraulics: Combined System Leak')
-    --    --'HYD_FlightLeak', --('Hydraulics: Flight System Leak')
-    --    --'HYD_SpoilLeak', --('Hydraulics: Spoiler System Leak')
-    --    --'HYD_FBackLeak', --('Hydraulics: Flight Backup System Leak')
-
-    --    -- Jester
-    --    'JESTER', --('Jester: Incapacitated')
-
-    --    -- Emergency Gear Handle
-    --    'EMERGENCY_GEAR_LEVER_PULLED', --('Emergency Gear Handle: Pulled'),    enable = false, hh = 0, mm = 0, mmint = 1, prob = 100},
-
-    -- },
-	-- ["F-15ESE"] = {
-	-- 	--'AAQ13_FLIR_SENSOR_FAIL',	--('AN/AAQ13 FLIR sensor fail'),
-	-- 	'AAQ13_TF_RADAR_SENSOR_FAIL',--('AN/AAQ13 TF radar fail'),
-	-- 	'CARA_RADALT_FAIL',		--('CARA Radar Altimeter fail')
-	-- },
-	-- ["FA-18C_hornet"] =
-	-- {
-	-- 	-- electric system
-	-- 	'Failure_Elec_UtilityBattery', --('Utility Battery FAILURE'), 								
-	-- 	'Failure_Elec_EmergencyBattery', --('Emergency Battery FAILURE'), 							
-	-- 	'Failure_Elec_LeftGenerator', --('Left Generator FAILURE'),								
-	-- 	'Failure_Elec_RightGenerator', --('Right Generator FAILURE'), 								
-	-- 	'Failure_Elec_LeftTransformerRectifier', --('Left Transformer-Rectifier FAILURE'), 					
-	-- 	'Failure_Elec_RightTransformerRectifier', --('Right Transformer-Rectifier FAILURE'), 					
-	-- 	-- hydraulic system
-	-- 	'Failure_Hyd_HYD1A_Leak',	 --('HYD 1A LEAKAGE'),										
-	-- 	'Failure_Hyd_HYD1B_Leak',	 --('HYD 1B LEAKAGE'), 										
-	-- 	'Failure_Hyd_HYD2A_Leak',	 --('HYD 2A LEAKAGE'), 										
-	-- 	'Failure_Hyd_HYD2B_Leak',	 --('HYD 2B LEAKAGE'), 										
-	-- 	'Failure_Hyd_IsolatedHYD2BSystem_Leak', --('Isolated HYD 2B System LEAKAGE'), 						
-	-- 	-- power plant
-	-- 	'Failure_PP_EngL_Main_FFCS',	 --('Left Engine: Main Fuel Flow Control System FAILURE'),	
-	-- 	'Failure_PP_EngR_Main_FFCS',	 --('Right Engine: Main Fuel Flow Control System FAILURE'),	
-	-- 	'Failure_PP_EngL_AB_FFCS',	 --('Left Engine: AB Fuel Flow Control System FAILURE'),		
-	-- 	'Failure_PP_EngR_AB_FFCS',	 --('Right Engine: AB Fuel Flow Control System FAILURE'),		
-	-- 	'Failure_PP_EngL_Nozzle_CS',	 --('Left Engine: Nozzle Control System FAILURE'),			
-	-- 	'Failure_PP_EngR_Nozzle_CS',	 --('Right Engine: Nozzle Control System FAILURE'),			
-	-- 	'Failure_PP_EngL_OilLeak',	 --('Left Engine: Oil LEAKAGE'),								
-	-- 	'Failure_PP_EngR_OilLeak',	 --('Right Engine: Oil LEAKAGE'),								
-	-- 	'Failure_PP_LeftPTS',		 --('Left PTS FAILURE'),										
-	-- 	'Failure_PP_RightPTS',		 --('Right PTS FAILURE'),										
-	-- 	'Failure_PP_LeftAMAD_OilLeak', --('Left AMAD Oil LEAKAGE'),									
-	-- 	'Failure_PP_RightAMAD_OilLeak', --('Right AMAD Oil LEAKAGE'),								
-	-- 	-- fuel system
-	-- 	'Failure_Fuel_LeftBoostPump', --('Left Boost Pump FAILURE'),								
-	-- 	'Failure_Fuel_RightBoostPump', --('Right Boost Pump FAILURE'),								
-	-- 	'Failure_Fuel_Tank1Transfer', --('Tank 1 Transfer FAILURE'),								
-	-- 	'Failure_Fuel_Tank4Transfer', --('Tank 4 Transfer FAILURE'),								
-	-- 	'Failure_Fuel_ExtTankTransferL', --('External Left Wing Tank Transfer FAILURE'),				
-	-- 	'Failure_Fuel_ExtTankTransferR', --('External Right Wing Tank Transfer FAILURE'),				
-	-- 	'Failure_Fuel_ExtTankTransferC', --('External Centerline Tank Transfer FAILURE'),				
-	-- 	'Failure_Fuel_QuantityGaging', --('Fuel Quantity Gaging System FAILURE'),					
-	-- 	-- gear system
-	-- 	'Failure_Gear_WOW',			 --('WOW System FAILURE'),									
-	-- 	'Failure_Gear_NWS',			 --('NWS FAILURE'),											
-	-- 	-- ECS
-	-- 	'Failure_ECS_Valve',			 --('ECS Valve FAILURE'),										
-	-- 	'Failure_ECS_OBOGS',			 --('OBOGS FAILURE'),											
-	-- 	-- control system
-	-- 	'Failure_Ctrl_LEF',			 --('LEF FAILURE'),											
-	-- 	'Failure_Ctrl_Aileron',		 --('Aileron FAILURE'),										
-	-- 	'Failure_Ctrl_FCS_Ch1',		 --('FCS Channel 1 FAILURE'),									
-	-- 	'Failure_Ctrl_FCS_Ch2',		 --('FCS Channel 2 FAILURE'),									
-	-- 	'Failure_Ctrl_FCS_Ch3',		 --('FCS Channel 3 FAILURE'),									
-	-- 	'Failure_Ctrl_FCS_Ch4',		 --('FCS Channel 4 FAILURE'),									
-	-- 	-- computers
-	-- 	'Failure_Comp_ADC',			 --('ADC FAILURE'),											
-	-- 	'Failure_Comp_MC1',			 --('MC 1 FAILURE'),											
-	-- 	'Failure_Comp_MC2',			 --('MC 2 FAILURE'),											
-	-- 	--'Failure_Comp_CSC_Mux',		 --('CSC MUX FAILURE'),										
-	-- 	-- sensors
-	-- 	'Failure_Sens_LeftPitotHeater', --('Left PITOT Heater FAILURE'),								
-	-- 	'Failure_Sens_RightPitotHeater', --('Right PITOT Heater FAILURE'),							
-	-- },
-	-- ["F-86F"] = {
-	-- 	-- electric system
-	-- 	'es_damage_Generator',	--('Generator FAILURE'), 		
-	-- 	'es_damage_MainInverter',--('Main Inverter FAILURE'), 	
-	-- 	'es_damage_AltInverter',	--('Alternate Inverter FAILURE'),
-	-- 	'es_damage_RadarInverter',--('Radar Inverter FAILURE'), 	
-	-- 	-- hydraulic system
-	-- 	'hs_damage_MainHydro',	--('Main Hydraulic FAILURE'),	
-	-- 	'hs_damage_AltHydro',	--('Alternate Hydraulic FAILURE'), 
-	-- 	'hs_damage_UtilityHydro',--('Utility Hydraulic FAILURE'), 
-	-- 	-- power plant
-	-- 	'pp_damage_BladesBrake',	--('Engine: Blades Brake'),		 
-	-- 	'pp_damage_Ignition',	--('Engine: Ignition FAILURE'),	 
-
-	-- 	'pp_damage_MainMaxFreq',		--('Main Fuel: Max Freq. Limiter FAILURE'),
-	-- 	'pp_damage_MainMaxNormFreq',	--('Main Fuel: Max Normalized Freq. Limiter FAILURE'),
-	-- 	'pp_damage_MainMaxTempr',	--('Main Fuel: Max Temperature Limiter FAILURE'),
-	-- 	'pp_damage_MainStabFactor',	--('Main Fuel: Stability Factor FAILURE'),
-
-	-- 	'pp_damage_EmergMaxFreq',	--('Emerg.Fuel: Max Freq. Limiter FAILURE'),
-	-- 	'pp_damage_EmergMaxNormFreq',--('Emerg.Fuel: Max Normalized Freq. Limiter FAILURE'),
-	-- 	'pp_damage_EmergMaxTempr',	--('Emerg.Fuel: Max Temperature Limiter FAILURE'),
-
-	-- 	'pp_damage_OilPump',		--('Engine: Oil Pump FAILURE'),	
-	-- 	'pp_damage_OilSeparator',--('Engine: Oil Separator FAILURE'),
-	-- 	-- 
-	-- },
-	-- ["L-39"] = {
-	-- 	-- engine
-	-- 	'ef_shutdown',				--('Engine SHUTDOWN'),			
-	-- 	'ef_fire',					--('Engine FIRE'),				
-	-- 	'ef_vibration',				--('Engine VIBRATION'),			
-	-- 	'ef_surge',					--('Engine SURGE'),				  
-	-- 	'ef_rt12',					--('Engine RT-12 FAILURE'),		
-	-- 	'ef_fuel_reg',				--('Engine fuel governor FAILURE'),
-
-	-- 	-- electric system
-	-- 	'ELEC_GENERATOR_FAILURE',		--('Generator FAILURE'),			
-	-- 	'ELEC_EMERGENCY_GENERATOR_FAILURE',		--('Emergency Generator FAILURE'),
-	-- 	'ELEC_STARTER_FAILURE',			--('Starter FAILURE'),			
-	-- 	'ELEC_BATTERY_DESTROYED',			--('Battery FAILURE'),			
-	-- 	'es_damage_Inverter36x3',	--('Inverter 3x36V FAILURE'),	
-	-- 	'es_damage_InverterPT500C',	--('Inverter PT-500 FAILURE'),	
-	-- 	'es_damage_Inverter115_1',	--('Inverter 115V I FAILURE'),	
-	-- 	'es_damage_Inverter115_2',	--('Inverter 115V II FAILURE'),	
-	-- 	-- fuel system
-	-- 	'FUEL_BOOSTER_FUEL_PUMP_0_FAILURE',	--('Fuel Booster Pump FAILURE'),	
-	-- 	-- hydraulic system
-	-- 	'HYDR_PUMP_FAILURE',		--('Main Hydraulic Pump FAILURE'),
-	-- 	'hs_damage_MainAccumulator',	--('Main Hydraulic Accumulator FAILURE'),	
-	-- 	'hs_damage_AuxAccumulator',	--('Auxiliary Accumulator FAILURE'),
-	-- 	-- oil system
-	-- 	'ENG0_OIL_PUMP_FAILURE',		--('Oil Pump FAILURE'),			
-	-- 	-- oxygen system
-	-- 	'OXYN_PRIMARY_CONTAINER_MINOR_LEAK',	--('Oxygen FAILURE'),			
-	-- 	-- air system
-	-- 	'PNEM_MAIN_HOSE_PERFORATED',--('Depressurization'),			
-	-- 	-- Instruments
-	-- 	'GMC1AE_GYRO_FAILURE',		--('GMC-1AE gyro FAILURE'),		
-	-- 	'AGD1_GYRO_TOTAL_FAILURE',	--('AGD-1 gyro FAILURE'),		
-	-- 	'ssf_full_pressure_fail',	--('fwd cockpit full p manometer FAILURE'),	
-	-- 	'ssf_static_pressure_fail',	--('fwd cockpit static p manometer FAILURE'),
-	-- 	-- RKL-41
-	-- 	'RKL_41_TOTAL_FAILURE',		--('RKL-41 Total FAILURE'),		
-	-- 	'RKL_41_ADF_DAMAGE',			--('RKL-41 Goniometer FAILURE'),	
-	-- 	'RKL_41_ANT_DAMAGE',			--('RKL-41 Antenna FAILURE'),	
-	-- 	-- Weapon System
-	-- 	'GSH23_CHARGED_FAILURE',		--('GSh-23l Charge FAILURE'),	
-	-- },
+	
 	["MB-339A"] =
 	{
 		 "1",--("Starter/Generator 1 failure"),		
@@ -3637,23 +2962,6 @@ Failures = {
 		'RightEngine_Fire',--('Engine 2 Fire'),			
 	},
 
-	-- ["MiG-21bis"] =
-	-- {
-	-- 	'DC_BUS_FAILURE_TOTAL',--('DC Bus'), -- 0
-	-- 	'DC_BUS_GENERATOR_FAILURE',--('DC Generator'), -- 1
-	-- 	'AC_BUS_FAILURE_TOTAL',--('AC Bus'), -- 2
-	-- 	'AC_BUS_PO7501_FAILURE',--('PO7501 Inverter'), -- 3
-	-- 	'AC_BUS_PO7502_FAILURE',--('PO7502 Inverter'), -- 4
-	-- 	'ENGINE_FAILURE_TOTAL',--('Engine'), -- 5
-	-- 	'GYROS_FAILURE_TOTAL',--('Gyroscopes'), -- 6
-	-- 	'PITOT_FAILURE_TOTAL',--('Pitot Tubes'), -- 7
-	-- 	'WEAPONS_FAILURE_TOTAL',--('Weapons System'), -- 8
-	-- 	'SOPLO_FAILURE_PARTIAL',--('Engine Nozzle'), -- 9
-	-- 	'RADAR_FAILURE_TOTAL',--('Radar'), -- 10
-	-- 	'KPP_FAILURE_PARTIAL',--('Kpp'), -- 11
-
-	-- 	'LANDING_LIGHTS_FAILURE',--('Landing lights failure'), -- 12, 03. Dec 2014
-	-- },
 
 	["MiG-29 Fulcrum"] =
 	{
@@ -4793,7 +4101,7 @@ function DataCompilation_TaskByPlane()
 	for planeType, planeData in pairs(Data_divers) do
 		if planeData.Tasks then
 			for taskN, task in pairs(planeData.Tasks) do
-				-- print("DataCompilation_TaskByPlane: planeType "..planeType.." task "..tostring(task))
+				print("DataCompilation_TaskByPlane: planeType "..planeType.." task "..tostring(task))
 				if not TaskByPlane[task][planeType] then
 					TaskByPlane[task][planeType] = true
 				end
