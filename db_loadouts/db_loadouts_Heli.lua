@@ -3,7 +3,7 @@
 -------------------------------------------------------------------------------------------------------
 
 if not versionDCE then versionDCE = {} end
-versionDCE["loadouts_data/db_loadouts_Heli.lua"] = "1.1.5"
+versionDCE["db_loadout/db_loadouts_Heli.lua"] = "1.1.5"
 
 -- 1.1.5 - No Mods
 -- 1.1.4 - UH-1H Loadout strike NAM Rockets HE 

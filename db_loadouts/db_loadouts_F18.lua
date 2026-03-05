@@ -3,8 +3,9 @@
 -------------------------------------------------------------------------------------------------------
 
 if not versionDCE then versionDCE = {} end
-versionDCE["loadouts_data/db_loadouts_F18.lua"] = "1.1.1"
+versionDCE["loadouts_data/db_loadouts_F18.lua"] = "1.1.2"
 
+-- 1.1.2 - Add ["Escort Jammer"] = true, standoff harpoon for TF = 150000
 -- 1.1.1 - Beginning of the versions of this loadouts file dedicated to the F4.
 
 db_loadouts = {
@@ -15,6 +16,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Structure" },
 				code_loadout =  { },
@@ -70,6 +72,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "Structure", "SAM" },
 				code_loadout =  { "TF", "Caucasus" },
@@ -126,6 +129,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Bridge", "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { "TF80s", "TF80sRED" },
@@ -181,6 +185,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Structure" },
 				code_loadout =  { },
@@ -236,6 +241,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "SAM-LR" },
 				code_loadout =  { "TF", "Caucasus" },
@@ -292,6 +298,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "frontline" },
 				code_loadout =  { "Caucasus" },
@@ -347,6 +354,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { "TF80s", "TF80sRED" },
@@ -402,6 +410,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Structure" },
 				code_loadout =  { "Crisis", "PG" },
@@ -457,6 +466,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Structure" },
 				code_loadout =  { "TF80s", "TF80sRED", "WOC80" },
@@ -513,6 +523,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Structure" },
 				code_loadout =  { "PG" },
@@ -569,6 +580,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "frontline" },
 				code_loadout =  { "TF", "Caucasus", "WOB" },
@@ -625,6 +637,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "SAM-LR" },
 				code_loadout =  { "TF", "Caucasus" },
@@ -681,6 +694,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { },
@@ -736,6 +750,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { "Crisis", "PG" },
@@ -791,6 +806,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Structure" },
 				code_loadout =  { "TF", "Caucasus" },
@@ -846,6 +862,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM", "frontline" },
 				code_loadout =  { "TF80s", "TF80sRED", "WOC80" },
@@ -902,6 +919,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { },
@@ -957,6 +975,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "frontline" },
 				code_loadout =  { "Caucasus" },
@@ -1012,6 +1031,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { "TF80s", "TF80sRED" },
@@ -1068,6 +1088,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft" },
 				code_loadout =  { "TF" },
@@ -1123,6 +1144,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { "PG" },
@@ -1179,6 +1201,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { },
@@ -1234,6 +1257,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { "TF80s", "TF80sRED" },
@@ -1290,6 +1314,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "frontline" },
 				code_loadout =  { "Caucasus" },
@@ -1345,6 +1370,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { "Crisis", "PG" },
@@ -1457,6 +1483,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { "Crisis", "PG" },
@@ -1512,6 +1539,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { "PG" },
@@ -1625,6 +1653,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Structure" },
 				code_loadout =  { "Crisis", "PG" },
@@ -1680,6 +1709,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { "Crisis", "PG" },
@@ -1735,6 +1765,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Bridge", "soft", "Parked Aircraft" },
 				code_loadout =  { "TF" },
@@ -1790,6 +1821,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "frontline" },
 				code_loadout =  { },
@@ -1845,6 +1877,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "frontline" },
 				code_loadout =  { },
@@ -1900,6 +1933,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Structure" },
 				code_loadout =  { "Crisis", "PG" },
@@ -1955,6 +1989,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "frontline" },
 				code_loadout =  { "Caucasus" },
@@ -2010,6 +2045,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Structure" },
 				code_loadout =  { "Crisis", "PG" },
@@ -2121,6 +2157,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Bridge", "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { "Crisis", "PG" },
@@ -2176,6 +2213,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { "Crisis", "PG" },
@@ -2232,6 +2270,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Structure" },
 				code_loadout =  { "TF", "Caucasus" },
@@ -2287,6 +2326,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft" },
 				code_loadout =  { "TF" },
@@ -2342,6 +2382,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { },
@@ -2398,6 +2439,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "Structure", "SAM" },
 				code_loadout =  { "TF", "Caucasus" },
@@ -2454,6 +2496,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Bridge", "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { "Crisis", "PG" },
@@ -2509,6 +2552,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "frontline" },
 				code_loadout =  { "TF", "Caucasus", "WOB" },
@@ -2565,6 +2609,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Structure" },
 				code_loadout =  { "TF", "Caucasus", "WOB" },
@@ -2621,6 +2666,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Bridge", "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { "TF80s", "TF80sRED" },
@@ -2676,6 +2722,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "SAM-LR" },
 				code_loadout =  { "TF", "Caucasus" },
@@ -2732,6 +2779,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { },
@@ -2787,6 +2835,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "frontline", "SAM" },
 				code_loadout =  { "TF", "Caucasus", "WOB" },
@@ -2843,6 +2892,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "frontline", "SAM" },
 				code_loadout =  { "TF", "Caucasus", "WOB" },
@@ -2899,6 +2949,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Structure" },
 				code_loadout =  { "TF", "Caucasus", "WOB" },
@@ -2955,6 +3006,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { "Crisis", "PG" },
@@ -3068,6 +3120,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "frontline" },
 				code_loadout =  { "Caucasus" },
@@ -3123,6 +3176,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "SAM-LR" },
 				code_loadout =  { "TF", "Caucasus" },
@@ -3179,6 +3233,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Bridge", "soft", "Parked Aircraft" },
 				code_loadout =  { "TF" },
@@ -3234,6 +3289,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Structure" },
 				code_loadout =  { "PG" },
@@ -3290,6 +3346,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "frontline" },
 				code_loadout =  { "Caucasus" },
@@ -3345,6 +3402,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { },
@@ -3404,6 +3462,7 @@ db_loadouts = {
 					SEAD = false,
 					Escort = true,
 					["Laser Illumination"] = false,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "ship" },
 				code_loadout =  { "TF80s", "TF80sRED", "WOC80" },
@@ -3417,7 +3476,7 @@ db_loadouts = {
 				vAttack = 300.5,
 				hCruise = 5486.4,
 				hAttack = 4572,
-				standoff = 50000,
+				standoff = 60000,
 				LDSD = true,
 				sortie_rate = 6,
 				stores = {
@@ -3476,7 +3535,7 @@ db_loadouts = {
 				vAttack = 300.5,
 				hCruise = 5486.4,
 				hAttack = 4572,
-				standoff = 50000,
+				standoff = 60000,
 				LDSD = true,
 				sortie_rate = 6,
 				stores = {
@@ -3521,6 +3580,7 @@ db_loadouts = {
 					SEAD = false,
 					Escort = true,
 					["Laser Illumination"] = false,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "ship" },
 				code_loadout =  { "Crisis", "PG" },
@@ -3534,7 +3594,7 @@ db_loadouts = {
 				vAttack = 300.5,
 				hCruise = 5486.4,
 				hAttack = 4572,
-				standoff = 50000,
+				standoff = 60000,
 				LDSD = true,
 				sortie_rate = 6,
 				stores = {
@@ -3579,6 +3639,7 @@ db_loadouts = {
 					SEAD = false,
 					Escort = true,
 					["Laser Illumination"] = false,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "ship" },
 				code_loadout =  { "Crisis", "PG" },
@@ -3592,7 +3653,7 @@ db_loadouts = {
 				vAttack = 300.5,
 				hCruise = 5486.4,
 				hAttack = 4572,
-				standoff = 50000,
+				standoff = 60000,
 				LDSD = true,
 				sortie_rate = 6,
 				stores = {
@@ -3637,6 +3698,7 @@ db_loadouts = {
 					SEAD = false,
 					Escort = true,
 					["Laser Illumination"] = false,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "ship" },
 				code_loadout =  { "TF", "Caucasus", "WOB" },
@@ -3650,7 +3712,7 @@ db_loadouts = {
 				vAttack = 300.5,
 				hCruise = 5486.4,
 				hAttack = 4572,
-				standoff = 50000,
+				standoff = 150000,
 				LDSD = true,
 				sortie_rate = 6,
 				stores = {
@@ -3695,6 +3757,7 @@ db_loadouts = {
 					SEAD = false,
 					Escort = true,
 					["Laser Illumination"] = false,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "ship" },
 				code_loadout =  { "TF", "Caucasus", "WOB" },
@@ -3708,7 +3771,7 @@ db_loadouts = {
 				vAttack = 300.5,
 				hCruise = 5486.4,
 				hAttack = 4572,
-				standoff = 50000,
+				standoff = 150000,
 				LDSD = true,
 				sortie_rate = 6,
 				stores = {
@@ -4335,6 +4398,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Runway" },
 				code_loadout =  { "TF", "Caucasus", "WOB" },
@@ -4391,6 +4455,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Runway" },
 				code_loadout =  { "TF80s", "TF80sRED", "TF80sI", "WOC80" },
@@ -4447,6 +4512,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Runway" },
 				code_loadout =  { "TF", "Caucasus", "WOB" },
@@ -4503,6 +4569,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Runway" },
 				code_loadout =  { "TF", "Caucasus", "WOB" },
@@ -4559,6 +4626,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Runway" },
 				code_loadout =  { "Crisis", "PG" },
@@ -4615,6 +4683,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Runway" },
 				code_loadout =  { "TF80s", "TF80sRED", "TF80sI", "WOC80" },
@@ -4671,6 +4740,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Runway" },
 				code_loadout =  { "Crisis", "PG" },

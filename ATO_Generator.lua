@@ -1911,15 +1911,9 @@ if Debug.Generator.affiche then
 
 end
 
--- if Debug.Generator and Debug.debug then
---     local _str = "debugLogs = " .. TableSerializationAG_triggers(debugLogs, 0)
--- 	local _file = io.open("Debug/AtoGenerator_Debug_A_Logs.lua", "w") or error("Échec d'ouverture du fichier AtoGenerator_Debug_Logs")
--- 	_file:write(_str)
--- 	_file:close()
---     debugLogs = {}        -- on supprime la référence
---     collectgarbage("collect") -- on force la libération
-
--- end
+if Debug.Generator and Debug.debug then
+	flushDebugLogs()
+end
 
 --create additional draft sorties with support flights assigned
 local wk = 1
@@ -2041,18 +2035,18 @@ for sideName, draftT in pairs(draftSorties) do
 							)
 						end
 
-						for task, task_bool in pairs(unitSupport.tasks) do
+						for sptTask, task_bool in pairs(unitSupport.tasks) do
 							if task_bool then
 								local playable_II = false
 								local reserveClient = false
 
 								if isDebugModeB then
-									debugLog(draft.id.." AtoG II pass B_03 task.: "..tostring(task))
+									debugLog(draft.id.." AtoG II pass B_03 task.: "..tostring(sptTask))
 								end
 
 
 								--//**MULTIPLAYER--**//
-								if multiPlaneSet[side] and multiPlaneSet[side][unitSupport.type] and multiPlaneSet[side][unitSupport.type][task] then
+								if multiPlaneSet[side] and multiPlaneSet[side][unitSupport.type] and multiPlaneSet[side][unitSupport.type][sptTask] then
 
 									if not Multi.Target and draft.task ~= "SAR" and draft.task ~= "CAP" then
 										Multi.Target = {}
@@ -2067,12 +2061,12 @@ for sideName, draftT in pairs(draftSorties) do
 
 										--ici, on reserve la place pour un type d'avion prevu pour le MP
 										reserveClient = true
-										if unitSupport.client and task ~= "Intercept" then
+										if unitSupport.client and sptTask ~= "Intercept" then
 											
 											draft.loadout.support = draft.loadout.support or {}
-											draft.loadout.support[task] = draft.loadout.support[task] or true
-											draft.support[task] = draft.support[task] or {}
-											draft.support[task]["escort_max"] = 4
+											draft.loadout.support[sptTask] = draft.loadout.support[sptTask] or true
+											draft.support[sptTask] = draft.support[sptTask] or {}
+											draft.support[sptTask]["escort_max"] = 4
 
 											overideMP_B = true
 										end
@@ -2084,7 +2078,7 @@ for sideName, draftT in pairs(draftSorties) do
 							
 								--**cet overideMP_B donne trop d'avion
 								if overideMP_B or (( draft.task ~= "CAP" and draft.task ~= "Intercept" ) 
-									and (task == "SEAD" or task == "Escort" or task == "Escort Jammer" or task == "Flare Illumination" or task == "Laser Illumination" or task == "Strike") 
+									and (sptTask == "SEAD" or sptTask == "Escort" or sptTask == "Escort Jammer" or sptTask == "Flare Illumination" or sptTask == "Laser Illumination" or sptTask == "Strike") 
 									and task_bool) then
 
 									if isDebugModeB then debugLog(draft.id.." AtoG II pass B_05  " ) end
@@ -2092,7 +2086,7 @@ for sideName, draftT in pairs(draftSorties) do
 									--get possible loadouts
 									local unit_loadouts = {}														--table to hold all loadouts for this aircraft type and task
 
-									for loadout_name, ltable in pairs((LoadoutsList[unitSupport.type] and LoadoutsList[unitSupport.type][task]) or {}) do			--iterate through all loadouts for the aircraft type and task
+									for loadout_name, ltable in pairs((LoadoutsList[unitSupport.type] and LoadoutsList[unitSupport.type][sptTask]) or {}) do			--iterate through all loadouts for the aircraft type and task
 										ltable.name = loadout_name
 										if ltable.standoff == nil then ltable.standoff = 0 end
 
@@ -2165,58 +2159,67 @@ for sideName, draftT in pairs(draftSorties) do
 
 										--**cet overideMP_B donne trop d'avion
 										-- if overideMP_B or (tot_from ~= 0 or tot_to ~= 0)   then										--loadout has an eligible time on target
-										if (tot_from ~= 0 or tot_to ~= 0) and draft.support[task] then
+										if (tot_from ~= 0 or tot_to ~= 0) and draft.support[sptTask] then
 										-- if (tot_to ~= 0) and draft.support[task] then
 
 											if isDebugModeB then
 												debugLog(draft.id.." AtoG II pass B_7a target_name: "..tostring(draft.target_name))
 											end
 
-											if not draft or not draft.support or not draft.support[task] then
-												print("task: "..tostring(task).." overideMP_B: "..tostring(overideMP_B).." draft.type: "..tostring(draft.type))
+											if not draft or not draft.support or not draft.support[sptTask] then
+												print("task: "..tostring(sptTask).." overideMP_B: "..tostring(overideMP_B).." draft.type: "..tostring(draft.type))
 												flushDebugLogs()
 
 											end
 
-											if not draft.support[task]["NbTotalSupport"] then draft.support[task]["NbTotalSupport"] = 0 end
-											if not draft.support[task]["escort_max"] then draft.support[task]["escort_max"] = 999 end
+											if not draft.support[sptTask]["NbTotalSupport"] then draft.support[sptTask]["NbTotalSupport"] = 0 end
+											if not draft.support[sptTask]["escort_max"] then draft.support[sptTask]["escort_max"] = 999 end
 
 
 											if isDebugModeB then
-												debugLog(draft.id.." AtoG II pass B_10 overideMP_B: "..tostring(overideMP_B).." task: "..tostring(task) .." |draft.loadout.support[task]: "..tostring(draft.loadout.support[task]).." draft.support[task][escort_max]: "..tostring(draft.support[task]["escort_max"]).." draft.support[task][NbTotalSupport]: "..tostring(draft.support[task]["NbTotalSupport"]))
+												debugLog(draft.id.." AtoG II pass B_10 overideMP_B: "..tostring(overideMP_B).." task: "..tostring(sptTask) .." |draft.loadout.support[task]: "..tostring(draft.loadout.support[sptTask]).." draft.support[task][escort_max]: "..tostring(draft.support[sptTask]["escort_max"]).." draft.support[task][NbTotalSupport]: "..tostring(draft.support[sptTask]["NbTotalSupport"]))
 											end
 
 											i_timmer02 = i_timmer02 +1
-											if (draft.loadout.support and draft.loadout.support[task])
-												and ( (tonumber(draft.support[task]["NbTotalSupport"]) < tonumber(draft.support[task]["escort_max"]) ) ) then
+											if (draft.loadout.support and draft.loadout.support[sptTask])
+												and ( (tonumber(draft.support[sptTask]["NbTotalSupport"]) < tonumber(draft.support[sptTask]["escort_max"]) ) ) then
 
 												if isDebugModeB then
-													debugLog(draft.id.." AtoG II pass B_12 task "..task.." SEAD_offset  "..tostring(draft.route.threats.SEAD_offset) 
+													debugLog(draft.id.." AtoG II pass B_12 task "..sptTask.." SEAD_offset  "..tostring(draft.route.threats.SEAD_offset) 
 													
 													.." |unitSupport.player: "..tostring(unitSupport.player)
-													.." |unitSupport.clent: "..tostring(unitSupport.client)
+													.." |unitSupport.client: "..tostring(unitSupport.client)
 													.." |draft.task: "..tostring(draft.task)
 													)
 												end
 
 
 												local support_requirement = false
-												if task == "SEAD" then
+												if sptTask == "SEAD" then
 													if draft.route.threats.SEAD_offset > 0 then												--draft sortie has a SEAD offset requirement
 														support_requirement = true
 													end
-												elseif task == "Escort" then
+													if campMod.strikeOnlyWithEscorte then
+														support_requirement = true
+													end
+												elseif sptTask == "Escort" then
 													if draft.route.threats.air_total > 0.5 then												--draft sortie has an air threat
 														support_requirement = true
 													end
-												elseif task == "Escort Jammer" then
+													if campMod.strikeOnlyWithEscorte then
+														support_requirement = true
+													end
+												elseif sptTask == "Escort Jammer" then
 													if draft.route.threats.SEAD_offset > 0 or draft.route.threats.air_total > 0.5 then		--draft sortie has either a SEAD offest requirement or an air threat
 														support_requirement = true
 													end
-												elseif task == "Flare Illumination" or task == "Laser Illumination"then
+													if campMod.strikeOnlyWithEscorte then
+														support_requirement = true
+													end
+												elseif sptTask == "Flare Illumination" or sptTask == "Laser Illumination"then
 													support_requirement = true
 
-												elseif task == "CSAR" then
+												elseif sptTask == "CSAR" then
 													--on n'active que des support CSAR Player/Client
 													if unitSupport.player or unitSupport.client then
 														support_requirement = true
@@ -2263,10 +2266,18 @@ for sideName, draftT in pairs(draftSorties) do
 
 
 														if isDebugModeB then
-															debugLog(draft.id.." AtoG II pass B_15d support_requirement passe" )
+															debugLog(draft.id.." AtoG II pass B_15d support_requirement passe UnitvCruise: "..unit_loadouts[l].vCruise.." >=? MainvCruise "..draft.loadout.vCruise )
 														end
 
-														if unit_loadouts[l].vCruise >= draft.loadout.vCruise or overideMP_B then
+														local tolerance = draft.loadout.vCruise * 0.10 -- 10%
+														local toleranceBool = false
+
+														if unit_loadouts[l].vCruise + tolerance >= draft.loadout.vCruise then
+															toleranceBool = true
+														end
+
+														-- if unit_loadouts[l].vCruise >= draft.loadout.vCruise or overideMP_B then
+														if toleranceBool or overideMP_B then
 															TrackPlayability(unitSupport.player, "escort_target")
 
 															local debuGenTxt1480 = "\n"..(tostring(draft.id).." AtoG II pass B_15e support_requirement passe ")
@@ -2341,7 +2352,7 @@ for sideName, draftT in pairs(draftSorties) do
 																	h = db_airbases[unitSupport.base].elevation,
 																}
 
-																local route = GetEscortRoute(airbasePoint, draft.route, task, unit_loadouts[l], unitSupport, draft)									--get the route to escort this sortie
+																local route = GetEscortRoute(airbasePoint, draft.route, sptTask, unit_loadouts[l], unitSupport, draft)									--get the route to escort this sortie
 
 																if isDebugModeB then
 																	debugLog(draft.id.." AtoG II pass B_16 weather_eligible route.lenght: "..tostring(route and route.lenght).. " <= "..tostring(unit_loadouts[l].range * 2)
@@ -2358,13 +2369,13 @@ for sideName, draftT in pairs(draftSorties) do
 																	local escort_num = 0
 																	local escort_max = 0
 
-																	if draft.support[task]["escort_max"] ~= 999 then
-																		escort_max = draft.support[task]["escort_max"]
+																	if draft.support[sptTask]["escort_max"] ~= 999 then
+																		escort_max = draft.support[sptTask]["escort_max"]
 																	else
 																		escort_max = 0
 																	end
 
-																	if task == "SEAD" then
+																	if sptTask == "SEAD" then
 																		escort_num = draft.route.threats.SEAD_offset / unit_loadouts[l].firepower 		-- unit_loadouts[l].capability  capability determines amount of offset per aircraft
 																		-- escort_num = remain_SEAD_offset / unit_loadouts[l].firepower
 																		escort_num = math.ceil(escort_num / 2) * 2										--round up requested escorts to even number
@@ -2374,16 +2385,16 @@ for sideName, draftT in pairs(draftSorties) do
 																		-- 	draft.score = draft.score + (1 * draft.loadout.firepower) * draft.target.priority
 																		-- end
 
-																		debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_SEAD B "..unitSupport.type.." "..task.." "..escort_num.." NbTotalSupport: "..draft.support[task]["NbTotalSupport"].." draft.score: "..draft.score)
+																		debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_SEAD B "..unitSupport.type.." "..sptTask.." "..escort_num.." NbTotalSupport: "..draft.support[sptTask]["NbTotalSupport"].." draft.score: "..draft.score)
 																		debuGenTxt1545 = debuGenTxt1545.."\n"..("-------------------- escort_num: "..(draft.route.threats.SEAD_offset / unit_loadouts[l].firepower).. "= SEAD_Offset: "..draft.route.threats.SEAD_offset.." /firepower "..unit_loadouts[l].firepower
 																		)
 
 
-																	elseif task == "Escort" then
-																		if draft.support[task]["escort_max"] ~= 999 then
-																			escort_num = draft.support[task]["escort_max"] - draft.support[task]["NbTotalSupport"]	-- modification M11.x : Multiplayer	(x: EscorteTot-max)
+																	elseif sptTask == "Escort" then
+																		if draft.support[sptTask]["escort_max"] ~= 999 then
+																			escort_num = draft.support[sptTask]["escort_max"] - draft.support[sptTask]["NbTotalSupport"]	-- modification M11.x : Multiplayer	(x: EscorteTot-max)
 
-																			debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_Escort B "..unitSupport.type.." "..task.." "..escort_num.." NbTotalSupport: "..draft.support[task]["NbTotalSupport"])
+																			debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_Escort B "..unitSupport.type.." "..sptTask.." "..escort_num.." NbTotalSupport: "..draft.support[sptTask]["NbTotalSupport"])
 
 																		else
 
@@ -2404,23 +2415,23 @@ for sideName, draftT in pairs(draftSorties) do
 
 																			if escort_num > escort_max then
 																				escort_max = escort_num
-																				draft.support[task]["escort_max"] = escort_max
+																				draft.support[sptTask]["escort_max"] = escort_max
 																			end
 
-																			debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_Escort I "..unitSupport.type.." "..task.." "..escort_num)
+																			debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_Escort I "..unitSupport.type.." "..sptTask.." "..escort_num)
 
 																		end
 
-																	elseif task == "Escort Jammer" then
+																	elseif sptTask == "Escort Jammer" then
 																		escort_num = 1																	--escort jamming by single aircraft
-																	elseif task == "Flare Illumination" then
+																	elseif sptTask == "Flare Illumination" then
 																		escort_num = 1																	--flare illumination by single aircraft
-																	elseif task == "Laser Illumination" then
+																	elseif sptTask == "Laser Illumination" then
 																		escort_num = 1																	--laser illumination by single aircraft
-																	elseif task == "Strike" and not overideMP_B then
+																	elseif sptTask == "Strike" and not overideMP_B then
 																		-- escort_num = 4
 																		escort_num = draft.remainingFirepower / unit_loadouts[l].firepower
-																	elseif task == "Strike"  then
+																	elseif sptTask == "Strike"  then
 																		escort_num = 4
 																	end
 
@@ -2430,11 +2441,11 @@ for sideName, draftT in pairs(draftSorties) do
 																		escort_num = AcftAvail[unitSupport.name].available						--reduce requested escorts to number of available escorts
 																		escort_num = math.floor(escort_num / 2) * 2										--round down to even number
 
-																		debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_Escort J "..unitSupport.type.." "..task.." escort_num: "..escort_num.." available: "..AcftAvail[unitSupport.name].available)
+																		debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_Escort J "..unitSupport.type.." "..sptTask.." escort_num: "..escort_num.." available: "..AcftAvail[unitSupport.name].available)
 
 																	end
 
-																	debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_Escort P "..unitSupport.type.." "..task.." "..escort_num)
+																	debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II pass_Escort P "..unitSupport.type.." "..sptTask.." "..escort_num)
 
 
 																	--*********************************************************************************
@@ -2443,7 +2454,7 @@ for sideName, draftT in pairs(draftSorties) do
 																	if multiPlaneSet_B  then
 																		txtDebug = txtDebug .. " passeA ".."/n"
 
-																		if multiPlaneSet_B[side] and multiPlaneSet_B[side][unitSupport.type] and multiPlaneSet_B[side][unitSupport.type][task] then	
+																		if multiPlaneSet_B[side] and multiPlaneSet_B[side][unitSupport.type] and multiPlaneSet_B[side][unitSupport.type][sptTask] then	
 																		
 																			--si l'avion de support est déjà utilise en MAIN, on enleve la qté dejà utilisé
 																			if multiPlaneSet_B and multiPlaneSet_B[side] and multiPlaneSet_B[side][draft.type] and multiPlaneSet_B[side][draft.type][draft.task] and task_bool then
@@ -2456,11 +2467,11 @@ for sideName, draftT in pairs(draftSorties) do
 
 																			playable_II = true
 
-																			if escort_num < multiPlaneSet_B[side][unitSupport.type][task].NbPlane then
-																				escort_num =  multiPlaneSet_B[side][unitSupport.type][task].NbPlane
+																			if escort_num < multiPlaneSet_B[side][unitSupport.type][sptTask].NbPlane then
+																				escort_num =  multiPlaneSet_B[side][unitSupport.type][sptTask].NbPlane
 																				txtDebug = txtDebug .. "    passeC "..escort_num.."/n"
-																			elseif escort_num > multiPlaneSet_B[side][unitSupport.type][task].NbPlane then
-																				escort_num =  multiPlaneSet_B[side][unitSupport.type][task].NbPlane
+																			elseif escort_num > multiPlaneSet_B[side][unitSupport.type][sptTask].NbPlane then
+																				escort_num =  multiPlaneSet_B[side][unitSupport.type][sptTask].NbPlane
 																				txtDebug = txtDebug .. "    passeD "..escort_num.."/n"
 																			end
 
@@ -2474,11 +2485,11 @@ for sideName, draftT in pairs(draftSorties) do
 
 																			txtDebug = txtDebug .. "    passeF "..draft.score.."/n"
 
-																			txtDebug = txtDebug .. "    passeG NbPlane "..multiPlaneSet_B[side][unitSupport.type][task].NbPlane.."/n"
-																			txtDebug = txtDebug .." 	passeH InitNbPlaneByTask: "..tostring(multiPlaneSet_B[side][unitSupport.type][task].InitNbPlaneByTask)
+																			txtDebug = txtDebug .. "    passeG NbPlane "..multiPlaneSet_B[side][unitSupport.type][sptTask].NbPlane.."/n"
+																			txtDebug = txtDebug .." 	passeH InitNbPlaneByTask: "..tostring(multiPlaneSet_B[side][unitSupport.type][sptTask].InitNbPlaneByTask)
 
 																			-- Marquer l'unité comme vérifiée
-																			multiPlaneSet_B[side][unitSupport.type][task].checked = true
+																			multiPlaneSet_B[side][unitSupport.type][sptTask].checked = true
 
 																			-- Vérification si tous les éléments sont cochés
 																			local fullMP_Plane = true
@@ -2523,7 +2534,7 @@ for sideName, draftT in pairs(draftSorties) do
 																	local wi = 1
 
 																	if isDebugModeB then
-																		debugLog(draft.id.." AtoG II pass B_21c Id "..tostring(draft.id).." "..unitSupport.type.." "..unitSupport.name.." escort_num "..tostring(escort_num).." "..draft.target_name.." NbTotalSupport: "..draft.support[task]["NbTotalSupport"] )
+																		debugLog(draft.id.." AtoG II pass B_21c Id "..tostring(draft.id).." "..unitSupport.type.." "..unitSupport.name.." escort_num "..tostring(escort_num).." "..draft.target_name.." NbTotalSupport: "..draft.support[sptTask]["NbTotalSupport"] )
 																	end
 
 																	TrackPlayability(unitSupport.player, "escort_target_firepower")							--track playabilty criterium has been met
@@ -2539,16 +2550,16 @@ for sideName, draftT in pairs(draftSorties) do
 
 
 																	--add escort table to sortie															
-																	draft.support[task]["NbTotalSupport"] = draft.support[task]["NbTotalSupport"] + escort_num
-																	draft.support[task]["escort_max"] = escort_max
+																	draft.support[sptTask]["NbTotalSupport"] = draft.support[sptTask]["NbTotalSupport"] + escort_num
+																	draft.support[sptTask]["escort_max"] = escort_max
 
 																	
 																	--regarde si l'enregistrement n'a pas encore eu lieu, sinon bloque avec la variable free_slot 
 																	--ceci doit etre vide draft.support[task][unitSupport.type]
-																	local free_slot = (draft.support[task][unitSupport.type] == nil)
+																	local free_slot = (draft.support[sptTask][unitSupport.type] == nil)
 
 																	if isDebugModeB then
-																		debugLog(draft.id.." AtoG II pass B_21d Id "..tostring(draft.id).." "..unitSupport.type.." "..unitSupport.name.."".." escort_num "..tostring(escort_num).." "..draft.target_name.." NbTotalSupport: "..draft.support[task]["NbTotalSupport"].." entryEscortNum: "..tostring(entryEscortNum).." free_slot: "..tostring(free_slot and " free_slot: true " or " free_slot: false ") )
+																		debugLog(draft.id.." AtoG II pass B_21d Id "..tostring(draft.id).." "..unitSupport.type.." "..unitSupport.name.."".." escort_num "..tostring(escort_num).." "..draft.target_name.." NbTotalSupport: "..draft.support[sptTask]["NbTotalSupport"].." entryEscortNum: "..tostring(entryEscortNum).." free_slot: "..tostring(free_slot and " free_slot: true " or " free_slot: false ") )
 																	end
 
 																	if entryEscortNum >= 1 and free_slot then
@@ -2557,11 +2568,11 @@ for sideName, draftT in pairs(draftSorties) do
 																			debugLog(tostring(draft.id).." AtoG II pass B_9999 Add In draft.support ")
 																		end
 
-																		if not draft.support[task][unitSupport.type] then
-																			draft.support[task][unitSupport.type] = {}
+																		if not draft.support[sptTask][unitSupport.type] then
+																			draft.support[sptTask][unitSupport.type] = {}
 																		end
 
-																		draft.support[task][unitSupport.type] = {
+																		draft.support[sptTask][unitSupport.type] = {
 																			id = draft.id.."-"..wi.."-"..wk,
 																			name = unitSupport.name,
 																			playable = playable_II,								--unit.player,
@@ -2580,7 +2591,7 @@ for sideName, draftT in pairs(draftSorties) do
 																			airdromeId = db_airbases[unitSupport.base].airdromeId,
 																			parking_id = unitSupport.parking_id,
 																			skill = unitSupport.skill,
-																			task = task,
+																			task = sptTask,
 																			tasks = unitSupport.tasks,
 																			loadout = unit_loadouts[l],
 																			route = route,
@@ -2602,8 +2613,8 @@ for sideName, draftT in pairs(draftSorties) do
 																	local route_threat_OLD = draft.route.threats.ground_total + draft.route.threats.air_total
 																	local route_threat_recalc = 0.5	
 																	--recalculated route threat with escort in place (0.5 == no threat)
-																	if task == "SEAD" then
-																		local escort_offset = escort_num *  unit_loadouts[l].firepower					--* unit_loadouts[l].capability--number of available SEAD to offset threats
+																	if sptTask == "SEAD" then
+																		local escort_offset = escort_num * unit_loadouts[l].firepower					--* unit_loadouts[l].capability--number of available SEAD to offset threats
 																		for k, tGround in pairs(draft.route.threats.ground) do									--iterate through route ground threats
 																			if tGround.offset > 0 then														--if threat can be offset by SEAD
 																				if escort_offset >= tGround.offset then										--some SEAD aircraft remain to offset the threat
@@ -2626,9 +2637,9 @@ for sideName, draftT in pairs(draftSorties) do
 
 																		draft.route.threats.ground_total = route_threat_recalc			--recalculated total route grund threat
 
-																	elseif task == "Escort" then
+																	elseif sptTask == "Escort" then
 
-																		local escort_offset_level =  unit_loadouts[l].firepower		--unit_loadouts[l].capability *--threat level that each fighter escort can offset
+																		local escort_offset_level = unit_loadouts[l].firepower		--unit_loadouts[l].capability *--threat level that each fighter escort can offset
 																		route_threat_recalc = draft.route.threats.air_total - escort_offset_level * escort_num			--recalculated total route air threat
 
 																		if route_threat_recalc < 0.5 then
@@ -2637,18 +2648,17 @@ for sideName, draftT in pairs(draftSorties) do
 
 																		draft.route.threats.air_total = route_threat_recalc
 
-																	elseif task == "Escort Jammer" then
-		--ADD RECALCULATED THREAT LEVEL WITH ESCORT JAMMERS
+																	elseif sptTask == "Escort Jammer" then
+																		draft.route.threats.ground_total = draft.route.threats.ground_total / 2 
 																	end
 
 
 																	local route_threat_New = draft.route.threats.ground_total + draft.route.threats.air_total
 																	
 																	if route_threat_New ~= route_threat_OLD then
-																		-- local oldScore = draft.score
+																		
 																		local testScore = draft.priorityIni / route_threat_New
-																		testScore = draft.score * draft.scoreCoef
-																		testScore = draft.score + draft.scoreAdd
+																		testScore = testScore * draft.scoreCoef + draft.scoreAdd
 
 																		if overideMP_B then
 																			if testScore > draft.score then
@@ -2658,9 +2668,6 @@ for sideName, draftT in pairs(draftSorties) do
 																			draft.score = testScore
 																		end
 																		-- draft.score = draft.priorityIni / route_threat_New
-
-																		-- draft.score = draft.score * draft.scoreCoef
-																		-- draft.score = draft.score + draft.scoreAdd
 
 																	end
 
@@ -2780,16 +2787,9 @@ if Debug.Generator.affiche then
 	
 end
 
--- if Debug.Generator and Debug.debug then
-
--- 	local _str = "debugLogs = " .. TableSerializationAG_triggers(debugLogs, 0)
--- 	local _file = io.open("Debug/AtoGenerator_Debug_B_Logs.lua", "w") or error("Échec d'ouverture du fichier AtoGenerator_Debug_Logs")
--- 	_file:write(_str)
--- 	_file:close()
---     debugLogs = {}        -- on supprime la référence
---     collectgarbage("collect") -- on force la libération
-
--- end
+if Debug.Generator and Debug.debug then
+	flushDebugLogs()
+end
 
 --table to store the final ATO
 ATO = {
@@ -3213,29 +3213,32 @@ local function createATO_table(draftPriority)
 											local tmpTxt = ""
 											--draft.support[task][unit.type] = {
 											for supportTask,_support in pairs(draft.support) do																							--iterate through support in draft sortie
-												tmpTxt = tmpTxt .."_A_ supportTask: "..tostring(supportTask)
+												tmpTxt = tmpTxt .."\r\n_A_ supportTask: "..tostring(supportTask)
 
 												if support_available and type(_support) == "table" then
-													tmpTxt = tmpTxt .." _B_ "
+													tmpTxt = tmpTxt .."\r\n _B_ "
 
 													for supportUnitType, support in pairs(_support) do																							--iterate through support in draft sortie
-														tmpTxt = tmpTxt .." _C_supportName: "..tostring(supportUnitType)
+														tmpTxt = tmpTxt .." \r\n_C_supportName: "..tostring(supportUnitType)
 
-														if 	type(support) == "table" then
-															tmpTxt = tmpTxt .." _D_support.number: "..tostring(support.number).." >? "..AcftAvail[support.name].unassigned
+														if supportUnitType ~= "escort_max_A_" and supportUnitType ~= "NbTotalSupport" and type(support) == "table" then
+															tmpTxt = tmpTxt .."\r\n _D_support.number: "..tostring(support.number).." >? "..AcftAvail[support.name].unassigned
 
-															if support.number > AcftAvail[support.name].unassigned then															--not enough aircraft available from this unit for this task
-																tmpTxt = tmpTxt .." _E_ "
-																if tracing then txtTracing = txtTracing .. "Passe 1E EJECT".."\n" end
+															if support.name then
+																if support.number > AcftAvail[support.name].unassigned then															--not enough aircraft available from this unit for this task
+																	tmpTxt = tmpTxt .."\r\n _E_ "
+																	if tracing then txtTracing = txtTracing .. "Passe 1E EJECT".."\n" end
 
-																support_available = false																									--not enough support available
+																	support_available = false																									--not enough support available
 
-																local tabRejected = {}
-																tabRejected["sujet"]  = support.id.." type: "..support.type.." (strikeOnlyWithEscorte) support_available if support.number > AcftAvail[support.name].unassigned "..supportUnitType
-																tabRejected["cause"] = { [1] =  support.number, [2] = AcftAvail[support.name].unassigned, }
-																-- tabRejected["ligne"]  = debug.getinfo(1).currentline
-																tabRejected["ligne"]  = SafeGetLine()
-																table.insert(draft["rejected"], tabRejected)
+																	local tabRejected = {}
+																	tabRejected["sujet"]  = support.id.." type: "..support.type.." (strikeOnlyWithEscorte) support_available if support.number > AcftAvail[support.name].unassigned "..supportUnitType
+																	tabRejected["cause"] = { [1] =  support.number, [2] = AcftAvail[support.name].unassigned, }
+																	-- tabRejected["ligne"]  = debug.getinfo(1).currentline
+																	tabRejected["ligne"]  = SafeGetLine()
+																	table.insert(draft["rejected"], tabRejected)
+
+																end
 
 															end
 														end
@@ -3251,42 +3254,102 @@ local function createATO_table(draftPriority)
 											
 											--[[ debut du strikeOnlyWithEscorte pur]]--
 											--si escorte obligatoire(pévu dans le loadout main) et qu'il n'y en a pas de prévu, on shunt
-											if support_available and draft.loadout.support then																									--main body loadout support requirements
+											--[[ if support_available and draft.loadout.support then																									--main body loadout support requirements
 
-												for loadoutNeedTask, loadoutNeedTaskValue in pairs(draft.loadout.support) do																		--iterate through support requirements of loadout
-													tmpTxt = tmpTxt .. "Passe 2B |||"..tostring(draft.loadout.name).."|||"..tostring(loadoutNeedTask).."||| Value: |||"..tostring(loadoutNeedTaskValue).."|||\n"
+												for loadoutNeedTask, loadoutNeedTaskBool in pairs(draft.loadout.support) do																		--iterate through support requirements of loadout
+													tmpTxt = tmpTxt .. "Passe 2B |||"..tostring(draft.loadout.name)"\n"
 
-													if draft.loadout.support[loadoutNeedTask]   then
-														tmpTxt = tmpTxt .. "Passe 2C ".."\n"
+													if draft.loadout.support[loadoutNeedTask] and loadoutNeedTaskBool then
+														tmpTxt = tmpTxt .. "Passe 2C |||"..tostring(loadoutNeedTask).."\n"
 
 														local foundOnePlane = false
+
 														for planeSupport, support in pairs(draft.support[loadoutNeedTask]) do
-															tmpTxt = tmpTxt .. "Passe 2D "..tostring(planeSupport).."\n"
+															
+															if planeSupport ~= "NbTotalSupport" and planeSupport ~= "escort_max" then
+																foundOnePlane = false
+																tmpTxt = tmpTxt .. "Passe 2D "..tostring(planeSupport).."\n"
 
-															if type(support) == "table" then
-																tmpTxt = tmpTxt .. "Passe 2E ".."\n"
+																if type(support) == "table" then
+																	tmpTxt = tmpTxt .. "Passe 2E ".."\n"
 
-																if support.name  then
-																	tmpTxt = tmpTxt .. "Passe 2H "..tostring(support.name).."\n"
+																	if support.name  then
+																		tmpTxt = tmpTxt .. "Passe 2H "..tostring(support.name).."\n"
 
-																	foundOnePlane = true
+																		foundOnePlane = true
+																	end
+																end
+															end
+														
+
+															if not foundOnePlane then
+																tmpTxt = tmpTxt .. "Passe 2J EJECT".."\n"
+
+																support_available = false																							--necessary support is not available
+
+																local tabRejected = {}
+																tabRejected["sujet"]  = draft.id.." type: ".." aucun SUPPORT "..tostring(loadoutNeedTask)
+																tabRejected["cause"] = { [1] =  draft.support["support"], [2] = "", }
+																tabRejected["ligne"]  = debug.getinfo(1).currentline
+																table.insert(draft["rejected"], tabRejected)
+
+																-- print("tmpTxt "..tmpTxt)
+															end
+														end
+													end
+												end
+											end ]]
+
+											
+											-- vérifie que tous les supports demandés existent
+											if support_available and draft.loadout.support then
+
+												for loadoutNeedTask, loadoutNeedTaskBool in pairs(draft.loadout.support) do
+
+													tmpTxt = tmpTxt .. "Passe 2B |||"..tostring(draft.loadout.name).."\n"
+
+													if loadoutNeedTaskBool then
+
+														tmpTxt = tmpTxt .. "Passe 2C |||"..tostring(loadoutNeedTask).."\n"
+
+														local foundOnePlane = false
+
+														if draft.support[loadoutNeedTask] then
+
+															for planeSupport, support in pairs(draft.support[loadoutNeedTask]) do
+
+																if planeSupport ~= "NbTotalSupport" and planeSupport ~= "escort_max" then
+
+																	tmpTxt = tmpTxt .. "Passe 2D "..tostring(planeSupport).."\n"
+
+																	if type(support) == "table" and support.name then
+
+																		tmpTxt = tmpTxt .. "Passe 2H "..tostring(support.name).."\n"
+
+																		foundOnePlane = true
+																		break
+																	end
 																end
 															end
 														end
 
+														-- si ce support n'a aucun avion disponible -> ECHEC
 														if not foundOnePlane then
-															tmpTxt = tmpTxt .. "Passe 2J EJECT".."\n"
 
-															support_available = false																							--necessary support is not available
+															tmpTxt = tmpTxt .. "Passe 2J EJECT\n"
+
+															support_available = false
 
 															local tabRejected = {}
-															tabRejected["sujet"]  = draft.id.." type: ".." aucun SUPPORT "..tostring(loadoutNeedTask)
-															tabRejected["cause"] = { [1] =  draft.support["support"], [2] = "", }
+															tabRejected["sujet"]  = draft.id.." type: aucun SUPPORT "..tostring(loadoutNeedTask)
+															tabRejected["cause"]  = { [1] = draft.support["support"], [2] = "" }
 															tabRejected["ligne"]  = debug.getinfo(1).currentline
+
 															table.insert(draft["rejected"], tabRejected)
 
-															-- print("tmpTxt "..tmpTxt)
+															break -- inutile de vérifier les autres supports
 														end
+
 													end
 												end
 											end

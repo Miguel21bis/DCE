@@ -3,7 +3,7 @@
 -------------------------------------------------------------------------------------------------------
 
 if not versionDCE then versionDCE = {} end
-versionDCE["loadouts_data/db_loadouts_F14.lua"] = "1.1.1"
+versionDCE["db_loadout/db_loadouts_F14.lua"] = "1.1.1"
 
 -- 1.1.1 - Beginning of the versions of this loadouts file dedicated to the F4.
 
@@ -1830,7 +1830,7 @@ db_loadouts = {
 				code_loadout =  { "Crisis", "PG", "TF", "Caucasus", "WOB" },
 				night = true,
 				adverseWeather = true,
-				range = 500000,
+				range = 550000,
 				firepower = 5,
 				vCruise = 255.83333333333,
 				vAttack = 315.83333333333,
@@ -1937,7 +1937,7 @@ db_loadouts = {
 				code_loadout =  { "Crisis", "PG", "TF", "Caucasus", "WOB" },
 				night = true,
 				adverseWeather = true,
-				range = 450000,
+				range = 550000,
 				firepower = 5,
 				vCruise = 255.83333333333,
 				standoff = 80300,
@@ -2036,7 +2036,7 @@ db_loadouts = {
 				code_loadout =  { "Crisis", "PG", "TF", "Caucasus", "WOB" },
 				night = true,
 				adverseWeather = true,
-				range = 450000,
+				range = 550000,
 				firepower = 5,
 				vCruise = 213.83333333333,
 				vAttack = 213.83333333333,

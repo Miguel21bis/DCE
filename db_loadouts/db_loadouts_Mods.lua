@@ -4,7 +4,7 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["loadouts_data/db_loadouts_Mods.lua"] = "1.3.201"
+versionDCE["db_loadout/db_loadouts_Mods.lua"] = "1.3.201"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
@@ -2758,7 +2758,7 @@ db_loadouts = {
 				adverseWeather = true,
 				range = 1000000,
 				firepower = 2,
-				vCruise = 205.5,
+				vCruise = 240,
 				sortie_rate = 12,
 				stores = {
 					pylons = {
@@ -2792,7 +2792,7 @@ db_loadouts = {
 				adverseWeather = true,
 				range = 1000000,
 				firepower = 2,
-				vCruise = 205.5,
+				vCruise = 240,
 				sortie_rate = 12,
 				stores = {
 					pylons = {
