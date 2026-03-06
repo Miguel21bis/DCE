@@ -4101,7 +4101,7 @@ function DataCompilation_TaskByPlane()
 	for planeType, planeData in pairs(Data_divers) do
 		if planeData.Tasks then
 			for taskN, task in pairs(planeData.Tasks) do
-				print("DataCompilation_TaskByPlane: planeType "..planeType.." task "..tostring(task))
+				-- print("DataCompilation_TaskByPlane: planeType "..planeType.." task "..tostring(task))
 				if not TaskByPlane[task][planeType] then
 					TaskByPlane[task][planeType] = true
 				end
