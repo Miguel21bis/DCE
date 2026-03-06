@@ -103,9 +103,9 @@ dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ResetCampaign.lua")				
 
 --affiche le type d'avion selectionné et son squadrons M55_a
 local playerInfo = {
-	planeBat = "",
-	squadBat = "",
-	countryBat = "",
+	planeBAT = "",
+	squadBAT = "",
+	countryBAT = "",
 	sideBAT = "",
 }
 
@@ -116,6 +116,7 @@ for side, squadTL in PairsByKeys(oob_air) do
 		if squad.player then
 			playerInfo.planeBAT = squad.type
 			playerInfo.squadBAT = squad.name
+			playerInfo.baseBAT = squad.base
 			playerInfo.countryBAT = squad.country
 			playerInfo.sideBAT = side
 			n_player = n_player + 1
@@ -130,8 +131,13 @@ if n_player > 1 then
 end
 
 --***********NEW function***************--
+--***********NEW function***************--
 LoadFileAndUpdate("BAT_FirstMission "..debug.getinfo(1).currentline)
 --***********NEW function***************--
+--***********NEW function***************--
+
+ResetUnitClient()
+ResetBaseHumain()
 
 -- Exécution du fichier s'il existe
 local testFile = "Init/various_table.lua"
@@ -228,10 +234,17 @@ repeat
 
 		choix1 = string.lower(choix1)
 		
-		if choix1 == "n" or  choix1 == "t"  then
+		--===================================================================================
+		-- "T Multiplayer by choice of (T)arget \n"..
+		-- "N multiplayer by choice of (N)ATO".."\n"..
+		--===================================================================================
+		if choix1 == "n" or choix1 == "t"  then
 			if choix1 == "t"  then
 				--===================================================================================
-				-- Ecran N°2 Selection du Target	
+				-- Ecran N°2 Selection du Target 
+				--===================================================================================
+
+				
 				print("choose a Single target")
 
 				local tabIndex = {}
@@ -289,87 +302,7 @@ repeat
 				end
 			until   (input >= 1 and  input <= 10)
 
-			-- --===================================================================================
-			-- -- Ecran N°4 Selection du type d'avion Multiplayer	
-			-- local tabIndex = {}
-			-- for i = 1 , Multi.NbGroup do
-			-- 	local ExPlaneA = ""
-			-- 	local stopLoop = false
-			-- 	for nSide , oob_airSide in PairsByKeys(oob_air) do														--pour afficher l'exemple de selection du premier avion présenté
-			-- 		for m , unit in PairsByKeys(oob_airSide) do
-			-- 			if Playable_m[unit.type] and unit.inactive ~= true and not stopLoop then
-			-- 				ExPlaneA = unit.type
-			-- 				stopLoop = true
-			-- 			end
-			-- 		end
-			-- 	end
-
-			-- 	print("Choose your aircraft type for Flight n°"..i)
-			-- 	print("(number of aircraft) (type of aircraft) (type of mission)")
-			-- 	print("example for (4 "..ExPlaneA..": Escort): 4ae or 4AE")
-
-			-- 	if not Multi.Group then Multi.Group= {} end
-			-- 	if not Multi.Group[i] then Multi.Group[i]= {} end
-
-			-- 	local playable_type = {}
-			-- 	local ti = 65 																						--char(65) == a
-			-- 	local tabTaskAvailable = {}
-
-			-- 	-- parse toutes les unités et rempli le tab tabTaskAvailable pour etre sur de proposer toutes les task proposé active 
-			-- 	for nSide , oob_airSide in PairsByKeys(oob_air) do
-			-- 		print() print(nSide..":")
-			-- 		for m , unit in PairsByKeys(oob_airSide) do
-			-- 			if Playable_m[unit.type]  and unit.inactive ~= true then
-			-- 				for taskStr , nbool in PairsByKeys(oob_air[nSide][m].tasks) do
-			-- 					taskStr = tostring(taskStr)
-
-			-- 					if not tabTaskAvailable[nSide] then tabTaskAvailable[nSide] = {} end
-			-- 					if not tabTaskAvailable[nSide][unit.type] then tabTaskAvailable[nSide][unit.type] = {} end
-			-- 					if not tabTaskAvailable[nSide][unit.type][taskStr] then tabTaskAvailable[nSide][unit.type][taskStr] = nbool end
-			-- 					if nbool == true then	tabTaskAvailable[nSide][unit.type][taskStr] = true	end
-			-- 				end
-			-- 			end
-			-- 		end
-			-- 	end
-
-			-- 	-- display le tableau des choix d'avion et de task
-			-- 	local tabBug = {}
-
-			-- 	for nSide , unit_type in PairsByKeys(tabTaskAvailable) do
-			-- 		print() print(nSide..":")
-			-- 		for unitType , TabType in PairsByKeys(unit_type) do
-
-			-- 			local IndexStringType = string.lower(string.char(ti))
-			-- 			if not playable_type[IndexStringType] then playable_type[IndexStringType] = {} end
-			-- 			playable_type[IndexStringType]["type"] = unitType
-			-- 			playable_type[IndexStringType]["side"] = nSide
-
-			-- 			io.write(" (1 to 8): ("..IndexStringType.."): "..unitType..":")
-
-			-- 			for taskStr , nbool in PairsByKeys(TabType) do
-
-			-- 				if TabTask[taskStr] and nbool == true then
-			-- 					io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
-			-- 					-- local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
-			-- 					tabIndex[tostring(1)..IndexStringType..TabTask[taskStr]] = true
-			-- 					tabIndex[tostring(2)..IndexStringType..TabTask[taskStr]] = true
-			-- 					tabIndex[tostring(3)..IndexStringType..TabTask[taskStr]] = true
-			-- 					tabIndex[tostring(4)..IndexStringType..TabTask[taskStr]] = true
-			-- 					tabIndex[tostring(5)..IndexStringType..TabTask[taskStr]] = true
-			-- 					tabIndex[tostring(6)..IndexStringType..TabTask[taskStr]] = true
-			-- 					tabIndex[tostring(7)..IndexStringType..TabTask[taskStr]] = true
-			-- 					tabIndex[tostring(8)..IndexStringType..TabTask[taskStr]] = true
-
-			-- 				elseif not TabTask[taskStr] and not string.lower(taskStr) == "spotter" then
-			-- 					table.insert(tabBug,taskStr )
-			-- 				end
-			-- 			end
-			-- 			io.write("\n")
-			-- 			ti = ti+1
-			-- 		end
-			-- 	end
-
-			-- 	io.write( "\n")
+			
 			--===================================================================================
 			-- Ecran N°4 Selection du type d'avion Multiplayer	
 				local tabIndex = {}
@@ -488,41 +421,56 @@ repeat
 				end
 			--===================================================================================
 				-- Ecran N°5 Selection Nombre d'avion Multiplayer
-				repeat
-					input = string.lower(io.stdin:read())
-					if  tabIndex[input] then
-						if not Multi.Group[i] then Multi.Group[i]= {} end
+					repeat
+						input = string.lower(io.stdin:read())
+						if tabIndex[input] then
 
-						local inputNb = tonumber(string.sub (input, 1, 1))
-						Multi.Group[i].NbPlane = inputNb
+							Multi.Group[i] = Multi.Group[i] or {}
 
-						local inputTyp = tostring(string.sub (input, 2, 2))
-						Multi.Group[i].PlaneType = playable_type[inputTyp].type
-						Multi.Group[i].side = playable_type[inputTyp].side
+							Multi.Group[i].NbPlane = tonumber(string.sub (input, 1, 1))
 
-						local inputTsk = tostring(string.sub (input, 3, 4))
-						Multi.Group[i].task = TabTask[inputTsk]
+							local inputTyp = tostring(string.sub (input, 2, 2))
+							Multi.Group[i].PlaneType = playable_type[inputTyp].type
+							Multi.Group[i].side = playable_type[inputTyp].side
+							Multi.Group[i].base = playable_type[inputTyp].base
+							-- print("SetBaseClient TEST "..tostring(playable_type[inputTyp].unitName))
+							local result = SetUnitClient(playable_type[inputTyp].unitName)
+							if not result then print("SetUnitClient ECHEC || "..playable_type[inputTyp].unitName.." || "..AliasBaseName(tostring(playable_type[inputTyp].base))) end
 
-					else
-						print("\nInvalid entry.\n")
+							local inputTsk = tostring(string.sub (input, 3, 4))
+							Multi.Group[i].task = TabTask[inputTsk]
+
+						else
+							print("\nInvalid entry.\n")
+						end
+					until tabIndex[input]
+
+					io.write( "\n")
+
+					--========================= affiche le choix du joueurs
+					print(" -------------------------------------------------------> Building your different Flight: ")
+					for k=1, i do
+						print(" -------------------------------------------------------> "
+						..Multi.Group[k].NbPlane
+						.." "..Multi.Group[k].PlaneType
+						.." ("..Multi.Group[k].side ..")"
+						.." "..Multi.Group[k].task
+						.." "..AliasBaseName(Multi.Group[k].base)
+					)
 					end
-				until   tabIndex[input]
+					io.write( "\n")
 
-				io.write( "\n")
-
-				--========================= affiche le choix du joueurs
-				print(" -------------------------------------------------------> Building your different Flight: ")
-				for k=1, i do
-					print(" -------------------------------------------------------> "..Multi.Group[k].NbPlane.." "..Multi.Group[k].PlaneType.." ("..Multi.Group[k].side..")".." "..Multi.Group[k].task)
 				end
-				io.write( "\n")
-
-			end
 			--===================================================================================
 			-- Ecran N°6 SinglePlayer
 
 		elseif choix1 == "s" then
-		  SinglePlayer = true
+			SinglePlayer = true
+
+			local result = SetBaseHumain(playerInfo.baseBAT)
+			if not result then 
+				AddLog("BatFM ECHEC to set HumanBase " ..tostring(playerInfo.baseBAT))
+			end
 
 		elseif choix1 == "d" then
 		  SinglePlayer = true
@@ -582,13 +530,9 @@ repeat
 				dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Divers.lua") os.execute 'pause'
 			end
 			break
-		-- elseif choix1 == "w3" then
-		-- 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_TestCercle.lua") os.execute 'pause'																					--pause command window for user to read text
-		-- 	os.exit()
+
 		end
 	until tabIndex01[choix1]
-
-	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ResetCampaign.lua")					--reset campaign status files. Required for first mission to generate according to initial status	
 
 	print("\n\n")
 	repeat
@@ -617,29 +561,6 @@ repeat
 			print("Mission Generation Error. No eligible player flight in 20 attempts. Try again.\n\n")
 			break
 		else																							--no player flight could be assigned, advance time and try again
-			-- if Playability_criterium["1_active_unit"] == false then
-			-- 	print("Player unit is not active.\n\n")
-			-- elseif Playability_criterium["2_base"] == false then
-			-- 	print("Player airbase is not operational.\n\n")
-			-- elseif Playability_criterium["3_ready_aircraft"] == false then
-			-- 	print("Player unit has no ready aircraft.\n\n")
-			-- elseif Playability_criterium["4_available_aircraft"] == false then
-			-- 	print("Player unit has no available aircraft.\n\n")
-			-- elseif Playability_criterium["5_tot"] == false then
-			-- 	print("Player aircraft type cannot operate at this time of day.\n\n")
-			-- elseif Playability_criterium["6_target"] == false then
-			-- 	print("No available target for player.\n\n")
-			-- elseif Playability_criterium["7_target_firepower"] == false then
-			-- 	print("Not enough firepower or ready aircraft for this mission.\n\n")
-			-- elseif Playability_criterium["8_weather"] == false then
-			-- 	print("Player aircraft type cannot operate in this weather.\n\n")
-			-- elseif Playability_criterium["9_target_range"] == false then
-			-- 	print("No eligible mission available for player.\n\n")
-			-- elseif Multi.NbGroup and not PlayerFlight then
-			-- 	print("Not enough ready aircraft for all clients..\n\n")
-			-- elseif Playability_criterium.intercept == false then
-			-- 	print("Ground alert intercept duty without launch.\n\n")
-			-- end
 
 			for _, crit in ipairs(Playability_criterium) do
 				if crit.key == "active_unit" and crit.value == nil then

@@ -5367,7 +5367,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				--limitedParkTiming RAPPEL concerne: CV LHA FARP et Petite BASE, si le nombre de place est superieur à db_airbases.LimitedParkNb				
 				----- late groups spawn uncontrolled at mission start -----
-				if (( flight[f].task ~= "Intercept"  and flight[f].task ~= "SAR") or limitedParkTiming ) and not isHumain and waypoints[1]["type"] ~= "Turning Point"
+				if (( flight[f].task ~= "Intercept" and flight[f].task ~= "SAR") or limitedParkTiming ) and not isHumain and waypoints[1]["type"] ~= "Turning Point"
 					then	--group launches after mission start																	-- calcul le nombre de flight dans un Package, en comptant ceux des Roles				
 					if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe AA limitedParkTiming "..tostring(limitedParkTiming)) end
 
@@ -5375,8 +5375,14 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe BB unitname+FARP "..group['route']['points'][1]["ETA"].." Multi.NbGroup?: "..tostring(Multi.NbGroup).." MultiPlayer.pack_n[p?: ".. tostring(camp.MultiPlayer.pack_n[p]) .." SingleWithDServerAiAir?: "..tostring(SingleWithDServerAiAir) ) end
 
 						--permet de spawner les avions avant qu'ils ne démarrent
-						if spawn_time - 120	>  (mission_ini.startup_time_player + 200) then
+						if spawn_time - 120	> (mission_ini.startup_time_player + 200) then
 							activate_time = spawn_time - 120
+						end
+						if db_airbases[flight[f].base].humainSquad then
+							if spawn_time < 300 or activate_time < 300 then
+								activate_time = 300 
+								spawn_time = 300
+							end
 						end
 
 						--si multi ou ddserverAirAir: les IA en vol
@@ -5388,13 +5394,13 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							-- = = = SixPack = = = = - = - = - = -- = - = - = - = - = - = - = - = - = - = -- = - =
 
 							--construit une table que l'on triera plus tard pour decider qui a le droit d etre sur le sixpack et ne pas gener les autres
-							if group['route']['points'][1].ETA <  (mission_ini.startup_time_player + 200) and waypoints[1]["action"] ~= "Turning Point" and not spawnAir and not spawnCata then
+							if group['route']['points'][1].ETA < (mission_ini.startup_time_player + 200) and waypoints[1]["action"] ~= "Turning Point" and not spawnAir and not spawnCata then
 								-- and flight[f].type ~= "E-2C" and flight[f].type ~= "S-3B Tanker"
 
 								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe -- == SixPack == -- ") end
 
-								if not timingDeckCata[sideName] then timingDeckCata[sideName] = {} end
-								if not timingDeckCata[sideName][flight[f].base] then timingDeckCata[sideName][flight[f].base] = {} end
+								timingDeckCata[sideName] = timingDeckCata[sideName] or {}
+								timingDeckCata[sideName][flight[f].base] = timingDeckCata[sideName][flight[f].base] or {}
 
 								-- TODO il faudrait prendre en compte le nombre d'avion à lancer, mais bordel à faire
 								-- local timeToLauch = flight[f].number * mission_ini.CV_TimeBtwPlane
@@ -5408,7 +5414,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								repeat
 									counter = counter + 1
 									placeTiming = placeTiming - timeToLauch
-								until not timingDeckCata[sideName][flight[f].base][placeTiming]  or counter == 20	or placeTiming < 0
+								until not timingDeckCata[sideName][flight[f].base][placeTiming] or counter == 20 or placeTiming < 0
 
 								if counter == 20 or placeTiming < 0 then
 
@@ -5423,6 +5429,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									activate_time = 5
 									group.start_time = 5
 									nbPlanetDeck = nbPlanetDeck + flight[f].number
+
+									if db_airbases[flight[f].base].humainSquad then
+										activate_time = 300
+										-- group.start_time = 300
+									end
 
 									local tempSixPack = {}
 									if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe BBB2 AddtimingDeckCata "..placeTiming.." NbPlanetDeck: "..nbPlanetDeck) end
@@ -5536,6 +5547,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							--au final, Start+Activate si le flight ne spawn pas en vol
 							if waypoints[1]["action"] ~= "Turning Point" then
+								
+								if db_airbases[flight[f].base].humainSquad and activate_time < 300 then
+									activate_time = 300 
+									AddLog("AtoFP PROTECTION startTime < 300")
+								end
 								activate_group_time_after(group, activate_time, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
 								start_Set_Ai_Task(group, spawn_time, nil, debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
 
@@ -8023,6 +8039,19 @@ if Debug.debug then
 	campFile = io.open("Debug/Radio_CommonFreq_FlightPlan.lua", "w")  or error("Failed to open debug file")
 	campFile:write(camp_str)																		--save new data
 	campFile:close()
+
+	camp_str = "timingDeckCata = " .. TableSerialization(timingDeckCata, 0)						--make a string
+	campFile = io.open("Debug/CVN_timingDeckCata.lua", "w")  or error("Failed to open debug file")
+	campFile:write(camp_str)																		--save new data
+	campFile:close()
+
+		camp_str = "testSixPack = " .. TableSerialization(testSixPack, 0)						--make a string
+	campFile = io.open("Debug/CVN_testSixPack.lua", "w")  or error("Failed to open debug file")
+	campFile:write(camp_str)																		--save new data
+	campFile:close()
+	
+
+	
 
 	if camp.client then
 		camp_str = "client = " .. TableSerialization(camp.client, 0)						--make a string

@@ -3164,7 +3164,7 @@ local function createATO_table(draftPriority)
 													if 	type(support) == "table"  then --and support.name ~= nil	
 
 														if support.number == nil or dispoTmp[support.name].unassigned == nil then
-															print("AtoG bugA1 supportTask|"..supportTask.."|supportName:|"..tostring(supportName).."|"..tostring(support.name).." no unassigned "..tostring(support.number))
+															-- print("AtoG bugA1 supportTask|"..supportTask.."|supportName:|"..tostring(supportName).."|"..tostring(support.name).." no unassigned "..tostring(support.number))
 															if isDebugModeC then
 																debugLog(draft.id.." AtoG bugA1 supportTask|"..supportTask.."|supportName:|"..tostring(supportName).."|"..tostring(support.name).." no unassigned "..tostring(support.number))
 															end

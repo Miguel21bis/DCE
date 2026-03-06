@@ -216,6 +216,7 @@ os.execute('start "Debriefing" "notepad.exe" "Debriefing/Debriefing ' .. camp.mi
 
 
 ResetUnitClient()
+ResetBaseHumain()
 
 local showVersion = VersionPackageICM
 

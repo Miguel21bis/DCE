@@ -6542,18 +6542,35 @@ end
 
 -- end
 
+function SetBaseHumain(baseSelected)
+	for baseName, base in pairs(db_airbases) do
+		if baseName == baseSelected then
+			base["humainSquad"] = true
+			return true
+			-- break
+		end
+	end
+	return false
+end
+function ResetBaseHumain()
+	for baseName, base in pairs(db_airbases) do
+		base.humainSquad = nil
+	end
+end
+
 function SetUnitClient(unitName)
 	--parse la table oob_air puis trouve unitName puis y ajoute la variable : client = true
 	for sideName, squads in pairs(oob_air) do
 		for squadN, squad in pairs(squads) do
 			if squad.name == unitName then
 				squad.client = true
-				print("SetUnitClient return TRUE")
+				SetBaseHumain(squad.base)
 				return true
 			end
 		end
 	end
-	print("SetUnitClient return FALSE")
+
+	-- print("SetUnitClient return FALSE")
 	return false
 end
 

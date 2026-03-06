@@ -133,9 +133,9 @@ end
 
 --affiche le type d'avion selectionné et son squadrons M55_a
 local playerInfo = {
-	planeBat = "",
-	squadBat = "",
-	countryBat = "",
+	planeBAT = "",
+	squadBAT = "",
+	countryBAT = "",
 	sideBAT = "",
 }
 
@@ -146,6 +146,7 @@ for side, squadTL in PairsByKeys(oob_air) do
 		if squad.player then
 			playerInfo.planeBAT = squad.type
 			playerInfo.squadBAT = squad.name
+			playerInfo.baseBAT = squad.base
 			playerInfo.countryBAT = squad.country
 			playerInfo.sideBAT = side
 			n_player = n_player + 1
@@ -168,6 +169,7 @@ LoadFileAndUpdate("BAT_SkipMission "..debug.getinfo(1).currentline)
 --***********NEW function***************--
 
 ResetUnitClient()
+ResetBaseHumain()
 
 local showVersion = VersionPackageICM
 
@@ -544,9 +546,15 @@ if input == "y" or input == "yes" then
 							Multi.Group[i].PlaneType = playable_type[inputTyp].type
 							Multi.Group[i].side = playable_type[inputTyp].side
 							Multi.Group[i].base = playable_type[inputTyp].base
-							-- print("SetBaseClient TEST "..tostring(playable_type[inputTyp].unitName))
+							
 							local result = SetUnitClient(playable_type[inputTyp].unitName)
-							if not result then print("SetUnitClient ECHEC || "..playable_type[inputTyp].unitName.." || "..AliasBaseName(tostring(playable_type[inputTyp].base))) end
+							if not result then 
+								AddLog("BatSM ECHEC to SetUnitClient() || "..playable_type[inputTyp].unitName.." || "..AliasBaseName(tostring(playable_type[inputTyp].base)))
+							end
+							result = SetBaseHumain(playerInfo.baseBAT)
+							if not result then 
+								AddLog("BatSM ECHEC to set HumanBase " ..tostring(playerInfo.baseBAT))
+							end
 
 							local inputTsk = tostring(string.sub (input, 3, 4))
 							Multi.Group[i].task = TabTask[inputTsk]
