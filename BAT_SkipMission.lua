@@ -551,10 +551,6 @@ if input == "y" or input == "yes" then
 							if not result then 
 								AddLog("BatSM ECHEC to SetUnitClient() || "..playable_type[inputTyp].unitName.." || "..AliasBaseName(tostring(playable_type[inputTyp].base)))
 							end
-							result = SetBaseHumain(playerInfo.baseBAT)
-							if not result then 
-								AddLog("BatSM ECHEC to set HumanBase " ..tostring(playerInfo.baseBAT))
-							end
 
 							local inputTsk = tostring(string.sub (input, 3, 4))
 							Multi.Group[i].task = TabTask[inputTsk]
@@ -585,7 +581,10 @@ if input == "y" or input == "yes" then
 
 			elseif choix1 == "s" then
 			  SinglePlayer = true
-
+				local result = SetBaseHumain(playerInfo.baseBAT)
+				if not result then 
+					AddLog("BatFM ECHEC to set HumanBase " ..tostring(playerInfo.baseBAT))
+				end
 			elseif choix1 == "d" then
 			  SinglePlayer = true
 			  SingleWithDServer = true

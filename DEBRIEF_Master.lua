@@ -540,16 +540,16 @@ if input == "y" or input == "yes" then
 
 			--===================================================================================
 			-- Ecran N 3 Selection nb of Flight
-				repeat
-					print("Select number of Flight :\n")
-					input = tonumber(io.stdin:read())
-					if (input == nil or input == "") then input = 999 end
-					if  (input >= 1 and  input <= 10) then
-						Multi.NbGroup = input
-					else
-						print("\nInvalid entry.\n")
-					end
-				until   (input >= 1 and  input <= 10)
+			repeat
+				print("Select number of Flight :\n")
+				input = tonumber(io.stdin:read())
+				if (input == nil or input == "") then input = 999 end
+				if  (input >= 1 and  input <= 10) then
+					Multi.NbGroup = input
+				else
+					print("\nInvalid entry.\n")
+				end
+			until   (input >= 1 and  input <= 10)
 
 			--===================================================================================
 			-- Ecran N 4 Selection du type d'avion Multiplayer	
@@ -669,52 +669,55 @@ if input == "y" or input == "yes" then
 				end
 			--===================================================================================
 				-- Ecran N°5 Selection Nombre d'avion Multiplayer
-					repeat
-						input = string.lower(io.stdin:read())
-						if tabIndex[input] then
+				repeat
+					input = string.lower(io.stdin:read())
+					if tabIndex[input] then
 
-							Multi.Group[i] = Multi.Group[i] or {}
+						Multi.Group[i] = Multi.Group[i] or {}
 
-							Multi.Group[i].NbPlane = tonumber(string.sub (input, 1, 1))
+						Multi.Group[i].NbPlane = tonumber(string.sub (input, 1, 1))
 
-							local inputTyp = tostring(string.sub (input, 2, 2))
-							Multi.Group[i].PlaneType = playable_type[inputTyp].type
-							Multi.Group[i].side = playable_type[inputTyp].side
-							Multi.Group[i].base = playable_type[inputTyp].base
-							-- print("SetBaseClient TEST "..tostring(playable_type[inputTyp].base))
-							local result = SetUnitClient(playable_type[inputTyp].unitName)
-							if not result then print("SetUnitClient ECHEC "..AliasBaseName(tostring(playable_type[inputTyp].base))) end
+						local inputTyp = tostring(string.sub (input, 2, 2))
+						Multi.Group[i].PlaneType = playable_type[inputTyp].type
+						Multi.Group[i].side = playable_type[inputTyp].side
+						Multi.Group[i].base = playable_type[inputTyp].base
+						-- print("SetBaseClient TEST "..tostring(playable_type[inputTyp].base))
+						local result = SetUnitClient(playable_type[inputTyp].unitName)
+						if not result then print("SetUnitClient ECHEC "..AliasBaseName(tostring(playable_type[inputTyp].base))) end
 
-							local inputTsk = tostring(string.sub (input, 3, 4))
-							Multi.Group[i].task = TabTask[inputTsk]
+						local inputTsk = tostring(string.sub (input, 3, 4))
+						Multi.Group[i].task = TabTask[inputTsk]
 
-						else
-							print("\nInvalid entry.\n")
-						end
-					until tabIndex[input]
-
-					io.write( "\n")
-
-					--========================= affiche le choix du joueurs
-					print(" -------------------------------------------------------> Building your different Flight: ")
-					for k=1, i do
-						print(" -------------------------------------------------------> "
-						..Multi.Group[k].NbPlane
-						.." "..Multi.Group[k].PlaneType
-						.." ("..Multi.Group[k].side ..")"
-						.." "..Multi.Group[k].task
-						.." "..AliasBaseName(Multi.Group[k].base)
-					)
+					else
+						print("\nInvalid entry.\n")
 					end
-					io.write( "\n")
+				until tabIndex[input]
 
+				io.write( "\n")
+
+				--========================= affiche le choix du joueurs
+				print(" -------------------------------------------------------> Building your different Flight: ")
+				for k=1, i do
+					print(" -------------------------------------------------------> "
+					..Multi.Group[k].NbPlane
+					.." "..Multi.Group[k].PlaneType
+					.." ("..Multi.Group[k].side ..")"
+					.." "..Multi.Group[k].task
+					.." "..AliasBaseName(Multi.Group[k].base)
+				)
 				end
-			--===================================================================================
-				-- Ecran N 6 SinglePlayer
+				io.write( "\n")
+
+			end
+		--===================================================================================
+			-- Ecran N 6 SinglePlayer
 
 		elseif choix1 == "s" then
 		  SinglePlayer = true
-
+		local result = SetBaseHumain(playerInfo.baseBAT)
+		if not result then 
+			AddLog("BatFM ECHEC to set HumanBase " ..tostring(playerInfo.baseBAT))
+		end
 		elseif choix1 == "d" then
 		  SinglePlayer = true
 		  SingleWithDServer = true
@@ -773,29 +776,6 @@ if input == "y" or input == "yes" then
 			print("Mission Generation Error. No eligible player flight in 50 attempts. Start a new campaign.\n\n")
 			break
 		else																					--no player flight could be assigned, advance time and try again
-			-- if Playability_criterium.active_unit == nil then
-			-- 	print("Player unit is not active.\n\n")
-			-- elseif Playability_criterium.base == nil then
-			-- 	print("Player airbase is not operational.\n\n")
-			-- elseif Playability_criterium.ready_aircraft == nil then
-			-- 	print("Player unit has no ready aircraft.\n\n")
-			-- elseif Playability_criterium.tot == nil then
-			-- 	print("Player aircraft type cannot operate at this time of day.\n\n")
-			-- elseif Playability_criterium.target == nil then
-			-- 	print("No eligible mission available for player.\n\n")
-			-- elseif Playability_criterium.target_firepower == nil then
-			-- 	print("Not enough ready aircraft for this mission.\n\n")
-			-- elseif Playability_criterium.weather == nil then
-			-- 	print("Player aircraft type cannot operate in this weather.\n\n")
-			-- elseif Playability_criterium.target_range == nil then
-			-- 	print("No eligible mission available for player.\n\n")
-			-- elseif Playability_criterium.coop == nil then
-			-- 	print("Not enough ready aircraft for all clients.\n\n")
-			-- elseif Multi.NbGroup and not PlayerFlight then
-			-- 	print("Not enough ready aircraft for all clients.\n\n")
-			-- elseif Playability_criterium.intercept == nil then
-			-- 	print("Ground alert intercept duty without launch.\n\n")
-			-- end
 			
 			for _, crit in ipairs(Playability_criterium) do
 				if crit.key == "active_unit" and crit.value == nil then

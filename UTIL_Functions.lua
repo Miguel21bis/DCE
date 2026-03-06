@@ -6565,6 +6565,10 @@ function SetUnitClient(unitName)
 			if squad.name == unitName then
 				squad.client = true
 				SetBaseHumain(squad.base)
+				local result = SetBaseHumain(squad.base)
+				if not result then 
+					AddLog("BatSM ECHEC to set HumanBase " ..tostring(squad.base))
+				end
 				return true
 			end
 		end
