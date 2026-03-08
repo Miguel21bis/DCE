@@ -980,7 +980,7 @@ if Debug.debug then
 	testFile:close()
 
 	local debugTmp = StringToTxt(debugTxt_AtoT)
-	local debugTmpFile = io.open("Debug/debugTxt_AtoT_AtoTiming.lua", "w") or error("Failed to open debug file")
+	local debugTmpFile = io.open("Debug/Timing_ATO_TimingDebug.lua", "w") or error("Failed to open debug file")
 	debugTmpFile:write(debugTmp)
 	debugTmpFile:close()
 

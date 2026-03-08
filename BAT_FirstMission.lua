@@ -218,8 +218,8 @@ repeat
 		if choix1 == nil then
 			print("Select :\n"..
 				"S (S)ingleplayer  \n"..
-				"D Singleplayer with (D)edicated Server \n"..
-				"DF Singleplayer with (D)edicated Server, (F)ull plane on Deck \n"..
+				-- "D Singleplayer with (D)edicated Server \n"..
+				-- "DF Singleplayer with (D)edicated Server, (F)ull plane on Deck \n"..
 				"\n"..
 				"C (C)hange type of plane\n"..
 				"\n"..
@@ -472,14 +472,14 @@ repeat
 				AddLog("BatFM ECHEC to set HumanBase " ..tostring(playerInfo.baseBAT))
 			end
 
-		elseif choix1 == "d" then
-		  SinglePlayer = true
-		  SingleWithDServer = true
-		  SingleWithDServerAiAir = true
+		-- elseif choix1 == "d" then
+		--   SinglePlayer = true
+		--   SingleWithDServer = true
+		--   SingleWithDServerAiAir = true
 
-		elseif choix1 == "df" then
-		  SinglePlayer = true
-		  SingleWithDServer = true
+		-- elseif choix1 == "df" then
+		--   SinglePlayer = true
+		--   SingleWithDServer = true
 
 		--M55_a		player can change the type of plane
 		elseif choix1 == "c" then
