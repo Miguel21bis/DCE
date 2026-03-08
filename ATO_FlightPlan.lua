@@ -5447,11 +5447,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 												number = flight[f].number,
 												type = flight[f].type
 											}
-											spawn_time = 1
+											spawn_time = 5
 											-- pour un group player, pas de activate_time, le joueur ne peut pas spawner
 											-- pour un group player, pas de lateActivation, le joueur ne peut pas spawner
-											group.start_time = 1
-											waypoints[1].ETA = 1
+											group.start_time = 5
+											waypoints[1].ETA = 5
 											cv_nbPlanetDeck = cv_nbPlanetDeck + flight[f].number
 											isProcessed = true
 										
@@ -5506,11 +5506,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 											type = flight[f].type
 										}
 
-										spawn_time = 2
-										activate_time = 2
+										spawn_time = 10
+										activate_time = 10
 										group.start_time = placeTiming
 										waypoints[1].ETA = placeTiming
-										group.lateActivation = true
+										-- group.lateActivation = true
 
 										cv_nbPlanetDeck = cv_nbPlanetDeck + flight[f].number
 								-- 	end
@@ -5556,7 +5556,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							elseif group['route']['points'][1].ETA <= mission_ini.startup_time_player + 200 and db_airbases[flight[f].base].LimitedParkNb then		--+ 600					-- Gère le spawn des groupes au début de mission																	
 								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe FFa ETA mission_ini.startup_time_player + 200 & LimitedParkNb NbPlanetDeck: "..cv_nbPlanetDeck) end
 
-								if not flagInsertSixpack  and flight[f].number + cv_nbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb  then										-- on ne dépasse pas le nb max de spawn sur le CV 
+								if not flagInsertSixpack and flight[f].number + cv_nbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb  then										-- on ne dépasse pas le nb max de spawn sur le CV 
 									if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe FFb  NbPlanetDeck >= LimitedParkNb") end
 
 									group['lateActivation'] = true							--make group late activation  -- SOL decale 			 : lateActivation + a_activate_group
