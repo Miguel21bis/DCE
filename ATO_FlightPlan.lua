@@ -1253,22 +1253,23 @@ local function activate_Group_WithFlag(group, flag, from)
 end
 
 --activate_group_time_after
-local function activate_group_time_after(group, AirSpawnTime, from)
+local function activate_group_time_after(group, airSpawnTime, from)
 
 	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe 1B activate_group_time_after "..tostring(from)) end
 
-	-- group['lateActivation'] = true --incompatible avec l'activation sur sixpack
+	--ça tombe bien, on ne fait pas sur le sixpack
+	group['lateActivation'] = true --incompatible avec l'activation sur sixpack
 
 	local trig_n =  #mission.trig.actions + 1
 	Missionfunc = Missionfunc + 1
 	mission.trig.func[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
 	mission.trig.flag[trig_n] = true
-	mission.trig.conditions[trig_n] = "return(c_time_after(" .. AirSpawnTime .. ") )"
+	mission.trig.conditions[trig_n] = "return(c_time_after(" .. airSpawnTime .. ") )"
 	mission.trig.actions[trig_n] = "a_activate_group(" .. group.groupId .. "); mission.trig.func[" .. trig_n .. "]=nil;"
 	mission.trigrules[trig_n] = {
 		['rules'] = {
 			[1] = {
-				["seconds"] = AirSpawnTime,
+				["seconds"] = airSpawnTime,
 				["predicate"] = "c_time_after",
 			},
 		},
@@ -5416,8 +5417,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				--limitedParkTiming RAPPEL concerne: CV LHA FARP et Petite BASE, si le nombre de place est superieur à db_airbases.LimitedParkNb				
 				----- late groups spawn uncontrolled at mission start -----
-				if (( flight[f].task ~= "Intercept" and flight[f].task ~= "SAR") or limitedParkTiming ) and waypoints[1]["type"] ~= "Turning Point"
-					then	--group launches after mission start																	-- calcul le nombre de flight dans un Package, en comptant ceux des Roles				
+				if (( flight[f].task ~= "Intercept" and flight[f].task ~= "SAR") or limitedParkTiming ) and waypoints[1]["type"] ~= "Turning Point" then	--group launches after mission start																	-- calcul le nombre de flight dans un Package, en comptant ceux des Roles				
 					if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe AA limitedParkTiming "..tostring(limitedParkTiming)) end
 
 					if baseIsCarrier then			--for groups on aircraft carriers
@@ -5429,16 +5429,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						if spawn_time - 120	> (mission_ini.startup_time_player + 200) then
 							activate_time = spawn_time - 120
 						end
-						-- if db_airbases[flight[f].base].humainSquad then
-						-- 	if spawn_time < 300 or activate_time < 300 then
-						-- 		activate_time = 300 
-						-- 		spawn_time = 300
-						-- 	end
-						-- end
 
-						--si multi ou ddserverAirAir: les IA en vol
-						-- single ou ddserver : on gere les taxiing cata
-						-- if (SinglePlayer or SingleWithDServer) and not SingleWithDServerAiAir then
 						if SinglePlayer then
 							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe CC SinglePlayer "..tostring(waypoints[1]["type"])) end
 
@@ -5466,7 +5457,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 											if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe 6p D ") end
 											
 											local placeTiming = 75 * flight[f].number
-											-- cv_timingDeckCata[sideName][flight[f].base][placeTiming] = group.name
+
 											cv_timingDeckCata[sideName][flight[f].base][placeTiming] = {
 												groupName = group.name,
 												number = flight[f].number,
@@ -5474,24 +5465,14 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 											}
 
 											spawn_time = 0
-											activate_time = 0
 											group.start_time = 0
 											waypoints[1].ETA = 0
 											cv_nbPlanetDeck = cv_nbPlanetDeck + flight[f].number
 											cv_nbPlaneSixPack[flight[f].base] = cv_nbPlaneSixPack[flight[f].base] + flight[f].number
 
-											-- local tempSixPack = {
-											-- 	time = placeTiming ,
-											-- 	groupName = group.name,
-											-- 	number = flight[f].number,
-											-- 	LimitedParkNb = db_airbases[flight[f].base].LimitedParkNb,
-											-- 	type = flight[f].type,
-											-- 	}
-
 											flagInsertSixpack = true
-											-- if not testSixPack[flight[f].base] then testSixPack[flight[f].base] = {} end
-											-- table.insert(testSixPack[flight[f].base], tempSixPack)
 											isProcessed = true
+											spawnDeck = true
 										end
 
 										if flight[f].player and not flagInsertSixpack then
@@ -5503,16 +5484,18 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 												number = flight[f].number,
 												type = flight[f].type
 											}
-											spawn_time = 5
+											spawn_time = 10
 											-- pour un group player, pas de activate_time, le joueur ne peut pas spawner
 											-- pour un group player, pas de lateActivation, le joueur ne peut pas spawner
-											group.start_time = 5
-											waypoints[1].ETA = 5
+											-- group.lateActivation = true
+											-- activate_time = 10
+											group.start_time = 10
+											waypoints[1].ETA = 10
 											cv_nbPlanetDeck = cv_nbPlanetDeck + flight[f].number
 											isProcessed = true
+											spawnDeck = true
 										
 										end
-
 									end
 								end
 
@@ -5544,17 +5527,13 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 									if counter >= 20 then
 										-- Trop de conflits → fallback spawn air
-										if debugStart then
-											debugTxt_AtoFP = debugTxt_AtoFP.."\nAtoFP passe 6p G (fallback airspawn)"
-										end
+										if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\nAtoFP passe 6p G (fallback airspawn)" end
 										local infoFrom = "timingDeckCata "..debug.getinfo(1).currentline
 										local airSpawnTime = waypoints[1]["etaSpawn"]
 										spawnOn("air", waypoints, group, pn, airSpawnTime, infoFrom, flight, f, role)
 									else
 										-- Créneau trouvé
-										if debugStart then
-											debugTxt_AtoFP = debugTxt_AtoFP.."\nAtoFP passe 6p H (créneau trouvé: "..placeTiming..")"
-										end
+										if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\nAtoFP passe 6p H (créneau trouvé: "..placeTiming..")" end
 
 										cv_timingDeckCata[sideName][flight[f].base][placeTiming] = {
 											groupName = group.name,
@@ -5562,35 +5541,15 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 											type = flight[f].type
 										}
 
-										spawn_time = 10
-										activate_time = 10
+										spawn_time = 20
+										activate_time = 20
+
+										spawnDeck = true
+
 										group.start_time = placeTiming
 										waypoints[1].ETA = placeTiming
-										-- group.lateActivation = true
 
 										cv_nbPlanetDeck = cv_nbPlanetDeck + flight[f].number
-								-- 	end
-								-- end
-
-										-- if db_airbases[flight[f].base].humainSquad then
-										-- 	activate_time = 300
-										-- 	-- group.start_time = 300
-										-- end
-
-										-- local tempSixPack = {}
-										-- if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe BBB2 AddtimingDeckCata "..placeTiming.." NbPlanetDeck: "..nbPlanetDeck) end
-										-- --construit une table que l'on triera plus tard pour decider qui a le droit d etre sur le sixpack et ne pas gener les autres
-										-- tempSixPack = {
-										-- 	time = placeTiming ,
-										-- 	groupName = group.name,
-										-- 	number = flight[f].number,
-										-- 	LimitedParkNb = db_airbases[flight[f].base].LimitedParkNb,
-										-- 	type = flight[f].type,
-										-- 	}
-
-										-- flagInsertSixpack = true
-										-- testSixPack[flight[f].base] = testSixPack[flight[f].base] or {}
-										-- table.insert(testSixPack[flight[f].base], tempSixPack)
 
 									end
 								end
@@ -5615,46 +5574,42 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								if not flagInsertSixpack and flight[f].number + cv_nbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb  then										-- on ne dépasse pas le nb max de spawn sur le CV 
 									if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe FFb  NbPlanetDeck >= LimitedParkNb") end
 
-									group['lateActivation'] = true							--make group late activation  -- SOL decale 			 : lateActivation + a_activate_group
-									-- group['uncontrolled'] = true		VOL decale			: lateActivation + a_activate_group																--Seulement sur CV, lateActivation and uncontrolled requis
-
-									-- = SixPack? =
 									local infoFrom =  " NbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb "..debug.getinfo(1).currentline
 									local airSpawnTIme = waypoints[1]["etaSpawn"]
 									spawnOn( "air", waypoints, group, pn, airSpawnTIme, infoFrom, flight, f, role)
 
-								-- on ne dépasse pas le nb max de spawn sur le CV 
-								elseif flagInsertSixpack and cv_nbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb then
-									if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe FFb  NbPlanetDeck >= LimitedParkNb") end
+								-- -- on ne dépasse pas le nb max de spawn sur le CV 
+								-- elseif flagInsertSixpack and cv_nbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb then
+								-- 	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe FFb  NbPlanetDeck >= LimitedParkNb") end
 
-									group['lateActivation'] = true																		--make group late activation  -- SOL decale 			 : lateActivation + a_activate_group
-									-- group['uncontrolled'] = true			VOL decale			: lateActivation + a_activate_group															--Seulement sur CV, lateActivation and uncontrolled requis
+								-- 	group['lateActivation'] = true																		--make group late activation  -- SOL decale 			 : lateActivation + a_activate_group
+								-- 	-- group['uncontrolled'] = true			VOL decale			: lateActivation + a_activate_group															--Seulement sur CV, lateActivation and uncontrolled requis
 
-									--= SixPack =
-									local infoFrom =  " NbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb "..debug.getinfo(1).currentline
-									local airSpawnTIme = waypoints[1]["etaSpawn"]
-									spawnOn( "air", waypoints, group, pn, airSpawnTIme, infoFrom, flight, f, role)
+								-- 	--= SixPack =
+								-- 	local infoFrom =  " NbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb "..debug.getinfo(1).currentline
+								-- 	local airSpawnTIme = waypoints[1]["etaSpawn"]
+								-- 	spawnOn( "air", waypoints, group, pn, airSpawnTIme, infoFrom, flight, f, role)
 
-									--si le vol postulait pour le sixpack, on le supprime de la table
-									table.remove(cv_testSixPack[flight[f].base])
-									flagInsertSixpack  = false
-									for forTiming, value in pairs(cv_timingDeckCata[sideName][flight[f].base]) do
-										if value == group.name then
-											cv_timingDeckCata[sideName][flight[f].base][value] = nil
-										end
-									end
+								-- 	--si le vol postulait pour le sixpack, on le supprime de la table
+								-- 	table.remove(cv_testSixPack[flight[f].base])
+								-- 	flagInsertSixpack  = false
+								-- 	for forTiming, value in pairs(cv_timingDeckCata[sideName][flight[f].base]) do
+								-- 		if value == group.name then
+								-- 			cv_timingDeckCata[sideName][flight[f].base][value] = nil
+								-- 		end
+								-- 	end
 								end
-							else
-								if not flagInsertSixpack  then																			--les planes qui ne sont pas ajouté dans les catégories précédente, spawn décalé
-									if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe FFd  not flagInsertSixpack  "..tostring(waypoints[1]["type"])) end
-									group['lateActivation'] = true																		--make group late activation  -- SOL decale 			 : lateActivation + a_activate_group
-									group['uncontrolled'] = true																		--Seulement sur CV, lateActivation and uncontrolled requis
-								end
+							-- else
+							-- 	if not flagInsertSixpack  then																			--les planes qui ne sont pas ajouté dans les catégories précédente, spawn décalé
+							-- 		if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe FFd  not flagInsertSixpack  "..tostring(waypoints[1]["type"])) end
+							-- 		group['lateActivation'] = true																		--make group late activation  -- SOL decale 			 : lateActivation + a_activate_group
+							-- 		group['uncontrolled'] = true																		--Seulement sur CV, lateActivation and uncontrolled requis
+							-- 	end
 							end
 
 							--les Planes qui genent le taxiing spawn selon conf_mod
 							if not spawnDeck then
-								--= SixPack =
+								
 								local bugFrom =  " if not SpawnDeck "..debug.getinfo(1).currentline
 								spawnOn(Data_configuration.SC_SpawnOn[flight[f].type], waypoints, group, pn, spawn_time, bugFrom, flight, f, role)
 							end
@@ -5664,38 +5619,33 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe LLLa limitedParkTiming OR BaseAirStart ") end
 								local infoFrom =  " limitedParkTiming or BaseAirStart "..debug.getinfo(1).currentline
 
-								--= SixPack =
-
 								local airSpawnTIme = waypoints[1]["etaSpawn"]
 								spawnOn( "air", waypoints, group, pn, airSpawnTIme, infoFrom, flight, f, role)
 								--TODO vérifier si c'est utile:
 								modify_Activate_GroupTime(group, airSpawnTIme - 1, debug.getinfo(1).currentline)
 
-								if flagInsertSixpack  then																			--si le vol postulait pour le sixpack, on le supprime de la table
-									table.remove(cv_testSixPack[flight[f].base])
-									flagInsertSixpack  = false
-									for forTiming, value in pairs(cv_timingDeckCata[sideName][flight[f].base]) do
-										if value == group.name then
-											cv_timingDeckCata[sideName][flight[f].base][value] = nil
-										end
-									end
-								end
+								-- if flagInsertSixpack  then																			--si le vol postulait pour le sixpack, on le supprime de la table
+								-- 	table.remove(cv_testSixPack[flight[f].base])
+								-- 	flagInsertSixpack  = false
+								-- 	for forTiming, value in pairs(cv_timingDeckCata[sideName][flight[f].base]) do
+								-- 		if value == group.name then
+								-- 			cv_timingDeckCata[sideName][flight[f].base][value] = nil
+								-- 		end
+								-- 	end
+								-- end
 							end
 
-							--au final, Start+Activate si le flight ne spawn pas en vol
-							if waypoints[1]["action"] ~= "Turning Point" and not isHumain then
-								
-								-- if db_airbases[flight[f].base].humainSquad and activate_time < 300 then
-								-- 	activate_time = 300 
-								-- 	AddLog("AtoFP PROTECTION startTime < 300")
-								-- end
+							--au final, Start+Activate si le flight ne spawn sur le deck
+							if waypoints[1]["action"] ~= "Turning Point" and not flagInsertSixpack and not isHumain then
+
 								if not activate_time then
-									AddLog("AtoFP not activate_time")
+									AddLog("AtoFP not activate_time A")
 								end
 								activate_group_time_after(group, activate_time, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
 								start_Set_Ai_Task(group, spawn_time, nil, debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
 
 								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP arg_group['uncontrolled']: "..tostring(group['uncontrolled'])) end
+
 							end
 
 						-- elseif (Multi.NbGroup >= 1 and not camp.MultiPlayer.pack_n[p]) or SingleWithDServerAiAir then
@@ -5720,10 +5670,10 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									end
 								end
 
-								--au final, Start+Activate si le flight ne spawn pas en vol
+								--au final, Start+Activate si le flight ne spawn sur le deck
 								if waypoints[1]["action"] ~= "Turning Point" then
-									group['lateActivation'] = true										--make group late activation 
-									-- group['uncontrolled'] = true		--sera fait dans start_Set_Ai_Task								--Seulement sur CV, lateActivation and uncontrolled requis
+									-- group['lateActivation'] = true	 --sera fait dans activate_group_time_after()
+									-- group['uncontrolled'] = true		--sera fait dans start_Set_Ai_Task()
 									activate_group_time_after(group, activate_time, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
 									start_Set_Ai_Task(group, spawn_time, nil,  debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
 									if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP arg_group['uncontrolled']: "..tostring(group['uncontrolled'])) end
@@ -5872,6 +5822,27 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						-- 	activate_Group_WithFlag(group, camp.SAR.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
 
 						-- else
+						if (baseIsCarrier or limitedParkTiming or db_airbases[flight[f].base].BaseAirStart) and not farp_MorePlace  then
+
+							local infoFrom =  " SAR sur CV et parking limité spawn en vol "..debug.getinfo(1).currentline
+
+							activate_Group_WithFlag(group, camp.SAR.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --	
+
+							spawnOn( "air", waypoints, group, pn, 0, infoFrom, flight, f, role)
+
+							-- group['lateActivation'] = true											--make group late activation "en vol"
+							-- group['uncontrolled'] = false
+							-- group['tasks'] = {}
+
+							-- mission.trig.actions[trig_n] = "a_activate_group(" .. group.groupId .. "); mission.trig.func[" .. trig_n .. "]=nil;"
+							-- mission.trigrules[trig_n]['actions'][1] = {
+							-- 	["group"] = group.groupId,
+							-- 	["predicate"] = "a_activate_group",
+							-- }
+
+							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe activate 03") end
+
+						else
 
 							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP tasks_Start "..tostring(debug.getinfo(1).currentline)) end
 
@@ -5949,7 +5920,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe activate 03") end
 						end
-					-- end
+					end
 
 					if not IsHelicopter[flight[f].type] then
 						print("BUG no IsHelicopter[flight[f].type] "..flight[f].type)
@@ -6069,6 +6040,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							-- group['uncontrolled'] = false
 							-- group['tasks'] = {}
 
+							local trig_n = Missionfunc + #mission.trig.funcStartup + 1										--next available trigger number
 							mission.trig.actions[trig_n] = "a_activate_group(" .. group.groupId .. "); mission.trig.func[" .. trig_n .. "]=nil;"
 							mission.trigrules[trig_n]['actions'][1] = {
 								["group"] = group.groupId,
