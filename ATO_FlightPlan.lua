@@ -950,6 +950,15 @@ local function modify_Activate_GroupTime(arg_Group, arg_AirSpawnTime, from)
 		if mission.trigrules[trig_n] and mission.trigrules[trig_n].actions and mission.trigrules[trig_n].actions[1] then
 			if mission.trigrules[trig_n].actions[1].group and mission.trigrules[trig_n].actions[1].group == arg_Group.groupId then
 
+				
+				if mission.trigrules[trig_n].rules and mission.trigrules[trig_n].rules[1] then
+					if mission.trigrules[trig_n].rules[1].flag then
+						
+						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_modify_Activate_GroupTime() passe Z, RETURN, activate by flag found ") end
+						return
+					end
+				end
+
 				if arg_AirSpawnTime == -1 then
 					arg_AirSpawnTime = 0
 				end
@@ -1052,40 +1061,75 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 			end
 		end
 
-		if arg_SpawnTime and arg_SpawnTime > 1 and Missionfunc then	--not group["TrigActivate"] and
-			if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_spawnOn() C0  ") end
+		--///---enleve la task demarrage--///---
+		--///---enleve la task demarrage--///---
+		arg_Group['uncontrolled'] = false
+		arg_Group['tasks'] = {}														--supprime le tasks start
 
-			-- group["TrigActivate"] = true ATTENTION semble bloquer les orbite indefiniment
-			arg_Group['lateActivation'] = true											--make group late activation "en vol"
-			arg_Group['uncontrolled'] = false
-			arg_Group['tasks'] = {}														--supprime le tasks start
+		--si le tasks START est supprimé, il faut aussi le supprimer des trigrules &Co
+		local found_trigN
+		for trig_n = 1, #mission.trigrules do
+			if mission.trigrules[trig_n] and mission.trigrules[trig_n].actions and mission.trigrules[trig_n].actions[1] then
+				if mission.trigrules[trig_n].actions[1].set_ai_task and mission.trigrules[trig_n].actions[1].set_ai_task[1] and mission.trigrules[trig_n].actions[1].set_ai_task[1] == arg_Group.groupId then
+					if mission.trigrules[trig_n].actions[1]["predicate"] == "a_set_ai_task" then
 
-			--si le tasks START est supprimé, il faut aussi le supprimer des trigrules &Co
-			local found_trigN
-			for trig_n = 1, #mission.trigrules do
-				if mission.trigrules[trig_n] and mission.trigrules[trig_n].actions and mission.trigrules[trig_n].actions[1] then
-					if mission.trigrules[trig_n].actions[1].set_ai_task and mission.trigrules[trig_n].actions[1].set_ai_task[1] and mission.trigrules[trig_n].actions[1].set_ai_task[1] == arg_Group.groupId then
-						if mission.trigrules[trig_n].actions[1]["predicate"] == "a_set_ai_task" then
-
-							found_trigN = trig_n
-							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_spawnOn() C0b supprime start_Set_Ai_Task groupId "..arg_Group.groupId.." trig_n: "..tostring(trig_n)) end
-							break
+						found_trigN = trig_n
+						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_spawnOn() C0b supprime start_Set_Ai_Task groupId "..arg_Group.groupId.." trig_n: "..tostring(trig_n)) end
+						break
 
 
-						end
 					end
 				end
 			end
+		end
 
-			-- supprime le trigrule start_Set_Ai_Task
-			if found_trigN then
-				table.remove(mission.trigrules, found_trigN)
-				table.remove(mission.trig.flag, found_trigN)
-				table.remove(mission.trig.conditions, found_trigN)
-				table.remove(mission.trig.actions, found_trigN)
-				table.remove(mission.trig.func, found_trigN)
+		-- supprime le trigrule start_Set_Ai_Task
+		if found_trigN then
+			table.remove(mission.trigrules, found_trigN)
+			table.remove(mission.trig.flag, found_trigN)
+			table.remove(mission.trig.conditions, found_trigN)
+			table.remove(mission.trig.actions, found_trigN)
+			table.remove(mission.trig.func, found_trigN)
 
-			end
+		end
+		--///---enleve la task demarrage--///---
+		--///---enleve la task demarrage--///---
+
+		if arg_SpawnTime and arg_SpawnTime > 1 and Missionfunc then	--not group["TrigActivate"] and
+			if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_spawnOn() C0  ") end
+
+			-- arg_Group['uncontrolled'] = false
+			-- arg_Group['tasks'] = {}														--supprime le tasks start
+
+			-- --si le tasks START est supprimé, il faut aussi le supprimer des trigrules &Co
+			-- local found_trigN
+			-- for trig_n = 1, #mission.trigrules do
+			-- 	if mission.trigrules[trig_n] and mission.trigrules[trig_n].actions and mission.trigrules[trig_n].actions[1] then
+			-- 		if mission.trigrules[trig_n].actions[1].set_ai_task and mission.trigrules[trig_n].actions[1].set_ai_task[1] and mission.trigrules[trig_n].actions[1].set_ai_task[1] == arg_Group.groupId then
+			-- 			if mission.trigrules[trig_n].actions[1]["predicate"] == "a_set_ai_task" then
+
+			-- 				found_trigN = trig_n
+			-- 				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_spawnOn() C0b supprime start_Set_Ai_Task groupId "..arg_Group.groupId.." trig_n: "..tostring(trig_n)) end
+			-- 				break
+
+
+			-- 			end
+			-- 		end
+			-- 	end
+			-- end
+
+			-- -- supprime le trigrule start_Set_Ai_Task
+			-- if found_trigN then
+			-- 	table.remove(mission.trigrules, found_trigN)
+			-- 	table.remove(mission.trig.flag, found_trigN)
+			-- 	table.remove(mission.trig.conditions, found_trigN)
+			-- 	table.remove(mission.trig.actions, found_trigN)
+			-- 	table.remove(mission.trig.func, found_trigN)
+
+			-- end
+
+			-- group["TrigActivate"] = true ATTENTION semble bloquer les orbite indefiniment
+			arg_Group['lateActivation'] = true											--make group late activation "en vol"
 
 			local activateGroupExist = false
 			for n , trigrule in pairs(mission.trigrules) do
@@ -1133,7 +1177,15 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 		end
 
 		-- remet l'horaire d'origine sur activate
-		modify_Activate_GroupTime(arg_Group, arg_SpawnTime, debug.getinfo(1).currentline)
+		local passModified = true
+		if mission.trigrules and mission.trigrules[trig_n] and mission.trigrules[trig_n].rules and mission.trigrules[trig_n].rules[1] then
+			if mission.trigrules[trig_n].rules[1].flag then
+				passModified = false
+			end
+		end
+		if passModified then
+			modify_Activate_GroupTime(arg_Group, arg_SpawnTime, debug.getinfo(1).currentline)
+		end
 
 		--supprime les avions initialement prévu sur le pont, puisque maintenant, ils spawnent en vol
 		if testDeckPlace and testDeckPlace[arg_Flight[arg_f].base] then
@@ -1240,7 +1292,7 @@ local function start_Set_Ai_Task(arg_group, aiStart_Time, flag, from)
 	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP tasks_Start start_set_ai_task "..tostring(from)) end
 
 	-- local trig_n = Missionfunc + #mission.trig.funcStartup + 1										--next available trigger number
-	local trig_n =  #mission.trig.actions + 1
+	local trig_n = #mission.trig.actions + 1
 	Missionfunc = Missionfunc + 1
 	mission.trig.func[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
 	mission.trig.flag[trig_n] = true
@@ -2184,6 +2236,10 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						elseif atlTemp > 1500 then
 							atlTemp = 1500
 						end
+					else
+						if flight[f].route[w].alt < 500 then
+							atlTemp = 1000
+						end
 					end
 
 					local speed = 0
@@ -2256,7 +2312,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						waypoints[2] = {
 							-- ["name"] = flight[f].route[w].id,
 							-- ["briefing_name"] = flight[f].route[w].id,				--not needed for actual mission creation, but added for navigation overview in briefing
-							["alt"] = flight[f].route[w].alt,
+							["alt"] = atlTemp,
 							type = "Turning Point",
 							["action"] =  "Turning Point",
 							["alt_type"] = "BARO",
@@ -2269,9 +2325,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							-- 	["vangle"] = 0,
 							-- 	["steer"] = 2,
 							-- },
-							["ETA"] = flight[f].route[w].eta,
-							["y"] = flight[f].route[w].y,
-							["x"] = flight[f].route[w].x,
+							["ETA"] = flight[f].route[w].eta + 10,
+							["y"] = flight[f].route[w].y + 1000,
+							["x"] = flight[f].route[w].x + 1000,
 							["speed"] = speed,
 							["ETA_locked"] = false,
 							["task"] =
@@ -5627,7 +5683,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							end
 
 							--au final, Start+Activate si le flight ne spawn pas en vol
-							if waypoints[1]["action"] ~= "Turning Point" then
+							if waypoints[1]["action"] ~= "Turning Point" and not isHumain then
 								
 								-- if db_airbases[flight[f].base].humainSquad and activate_time < 300 then
 								-- 	activate_time = 300 
@@ -5809,13 +5865,13 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					if ( flight[f].client ~= true and flight[f].player ~= true)  then	--or limitedParkTiming or parkSarAirBase[flight[f].base]						-- M11 PVP ne copie pas de trigger retardé START pour les clients/joueurs	
 
-						if polkaOff then
+						-- if polkaOff then
 
-							group['lateActivation'] = false
-							group['uncontrolled'] = false
-							activate_Group_WithFlag(group, camp.SAR.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
+						-- 	group['lateActivation'] = false
+						-- 	group['uncontrolled'] = false
+						-- 	activate_Group_WithFlag(group, camp.SAR.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
 
-						else
+						-- else
 
 							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP tasks_Start "..tostring(debug.getinfo(1).currentline)) end
 
@@ -5881,19 +5937,19 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							local infoFrom =  " SAR sur CV et parking limité spawn en vol "..debug.getinfo(1).currentline
 							spawnOn( "air", waypoints, group, pn, 0, infoFrom, flight, f, role)
 
-							group['lateActivation'] = true											--make group late activation "en vol"
-							group['uncontrolled'] = false
-							group['tasks'] = {}
+							-- group['lateActivation'] = true											--make group late activation "en vol"
+							-- group['uncontrolled'] = false
+							-- group['tasks'] = {}
 
-							mission.trig.actions[trig_n] = "a_activate_group(" .. group.groupId .. "); mission.trig.func[" .. trig_n .. "]=nil;"
-							mission.trigrules[trig_n]['actions'][1] = {
-								["group"] = group.groupId,
-								["predicate"] = "a_activate_group",
-							}
+							-- mission.trig.actions[trig_n] = "a_activate_group(" .. group.groupId .. "); mission.trig.func[" .. trig_n .. "]=nil;"
+							-- mission.trigrules[trig_n]['actions'][1] = {
+							-- 	["group"] = group.groupId,
+							-- 	["predicate"] = "a_activate_group",
+							-- }
 
 							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe activate 03") end
 						end
-					end
+					-- end
 
 					if not IsHelicopter[flight[f].type] then
 						print("BUG no IsHelicopter[flight[f].type] "..flight[f].type)
@@ -5938,18 +5994,19 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					GCI.Flag = GCI.Flag + 1															--go to next trigger flag number					
 					if not isHumain then	-- and limitedParkTiming							-- M11 PVP ne copie pas de trigger retardé START pour les clients/joueurs	
 
-						if polkaOff then
-							group['lateActivation'] = false
-							group['uncontrolled'] = false
-							activate_Group_WithFlag(group, GCI.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
+						-- if polkaOff then
+						-- 	group['lateActivation'] = false
+						-- 	group['uncontrolled'] = false
+						-- 	activate_Group_WithFlag(group, GCI.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
 
-						else
+						-- else
 							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP tasks_Start "..tostring(debug.getinfo(1).currentline)) end
 
-							group['uncontrolled'] = true											--make interceptor groups uncontrolled at mission start
-							group['lateActivation'] = false
+							-- group['uncontrolled'] = true											--make interceptor groups uncontrolled at mission start
+							-- group['lateActivation'] = false
 
-							start_Set_Ai_Task(group, nil, GCI.Flag, debug.getinfo(1).currentline)
+							-- start_Set_Ai_Task(group, nil, GCI.Flag, debug.getinfo(1).currentline)
+							activate_Group_WithFlag(group, GCI.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --	
 
 						-- 	--triggered action to start uncontrolled group
 						-- 	group['tasks'] = {
@@ -5999,11 +6056,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						-- 	}
 
 
-						end
+						-- end
 
 						--if the group is on a carrier, it gets late activation instead of uncontrolled. An activate trigger is needed instead of AI task trigger.
 						-- Les inter sur CV et parking limité spawn en vol
-						if baseIsCarrier or limitedParkTiming or db_airbases[flight[f].base].BaseAirStart then
+						if (baseIsCarrier or limitedParkTiming or db_airbases[flight[f].base].BaseAirStart) and waypoints[1]["type"] ~= "Turning Point" then
 
 							local infoFrom =  " IA intercept "..debug.getinfo(1).currentline
 							spawnOn( "air", waypoints, group, pn, 0, infoFrom, flight, f, role)
@@ -6883,12 +6940,14 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				local tagATTENTION, a_activate, a_set_ai_task, c_time, c_flag = false, false, false, false, false
 				local task_START = false
 				local testtrigrule = {}
+				local infoTemp = ""
 
 				for n , trigrule in pairs(mission.trigrules) do
 					if type(trigrule) == "table" then
 						if trigrule.actions and trigrule.actions[1] and trigrule.actions[1].group == group.groupId then
 							if trigrule.actions[1]["predicate"] == "a_activate_group" then
 								nbactivate = nbactivate + 1
+								infoTemp = infoTemp .."|"..n.."|"
 
 								a_activate = true
 								testtrigrule = trigrule
@@ -6922,7 +6981,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 				if nbactivate and nbactivate > 1 then
-					info06 = info06.."\n".."|+T1|ATTENTION plusieurs ACTIVATE ".."\n"
+					info06 = info06.."\n".."|+T1|ATTENTION plusieurs ACTIVATE "..infoTemp.."\n"
 					tagATTENTION = true
 				end
 
