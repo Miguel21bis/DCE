@@ -6264,24 +6264,27 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				-- initie et place dans la table PlacePA les horaires "esperés" de catapultage
 				if group['route']['points'][1]["type"] ~= "Turning Point" then
 
-					if not PlacePA[sideName] then PlacePA[sideName] = {} end
-					if not PlacePA[sideName][flight[f].base] then PlacePA[sideName][flight[f].base] = {} end
+					PlacePA[sideName] = PlacePA[sideName] or {}
+					PlacePA[sideName][flight[f].base] = PlacePA[sideName][flight[f].base] or {}
 
 					local suffixePlayer = "."
-					if	flight[f].player == true then suffixePlayer = " - Player" end
-					if	flight[f].client == true then suffixePlayer = " - Client" end
+					if flight[f].player == true then suffixePlayer = " - Player" end
+					if flight[f].client == true then suffixePlayer = " - Client" end
 
 					local etiquette = "Pack " .. p .. " - "..flight[f].number.." "..AliasTypeName(flight[f].type).. " - " .. flight[f].name .." - " .. flight[f].task .." ".. f.. suffixePlayer
 
 					local testST
 					if (baseIsCarrier or db_airbases[flight[f].base].helipadId) then
 						if start_time then
-							testST =  start_time	- 120
+							testST =  start_time - 120
+							etiquette = etiquette .. " (start_time)"
 						else
 							testST =  departure_time
+							etiquette = etiquette .. " (else departure_time)"
 						end
 					else
 						testST =  departure_time
+						etiquette = etiquette .. " (not Carrier, departur_time)"
 					end
 
 					-- testST =  spawn_time	- 120						--	+ 200					-- ajoute 200s, cela correspond au roulage apres activatin (donc demarrage)													

@@ -89,6 +89,7 @@ MissGroupByName = {}
 BaseDistCache = {}
 DCE_hotspotGrid = {}
 DCE_hotspotCellSize = 100000 -- même que ton clusterThreshold
+DCE_carriers = {}
 
 GroupMenusBuilt = GroupMenusBuilt or {}
 
@@ -682,13 +683,39 @@ local function buildMissionIndex()
 						end
 					end
 				end
+
+				-- ========= SHIPS / CARRIERS =========
+				if country.ship and country.ship.group then
+					for _, group in pairs(country.ship.group) do
+						if group.units then
+							for _, unit in pairs(group.units) do
+
+								if unit.type then
+
+									local desc = Unit.getDescByName(unit.type)
+
+									if desc and desc.attributes and desc.attributes["Aircraft Carriers"] then
+
+										DCE_carriers[#DCE_carriers + 1] = {
+											name = unit.name,
+											groupName = group.name
+										}
+
+									end
+
+								end
+
+							end
+						end
+					end
+				end
             end
         end
     end
 
 	env.info("DCE buildMissionIndex: planes=" ..
 		tostring(#MissGroupByName) ..
-		-- " groundUnits=" .. #EnvMissionGroundUnits ..
+		" carriers=" .. tostring(#DCE_carriers) ..
 		" in " .. string.format("%.3f", timer.getTime() - t0) .. "s")
 
 
@@ -1153,6 +1180,196 @@ local function chooseBestHotspot(pos, sideName)
     return best
 end
 
+
+-- surveillance des avions bloqués sur porte-avions
+-- pourquoi : éviter blocages deck crew ou taxi bug
+
+CarrierDeckMonitor = {}
+
+CarrierDeckMonitor.watch = {}
+
+CarrierDeckMonitor.minRelSpeed = 0.5
+CarrierDeckMonitor.slowSpeed = 0.3
+CarrierDeckMonitor.maxIdleTime = 240
+CarrierDeckMonitor.maxSlowTime = 240
+CarrierDeckMonitor.checkInterval = 5
+
+function getCarrierUnderUnit(unit)
+
+    local p = unit:getPoint()
+
+    for _,cv in ipairs(DCE_carriers) do
+
+        local carrier = Unit.getByName(cv.name)
+
+        if carrier and carrier:isExist() then
+
+            local cp = carrier:getPoint()
+
+            local dx = p.x - cp.x
+            local dz = p.z - cp.z
+
+            local dist = math.sqrt(dx*dx + dz*dz)
+
+            if dist < 150 then
+                return carrier
+            end
+
+        end
+
+    end
+
+    return nil
+end
+
+-- vitesse relative avion / carrier
+function CarrierDeckMonitor.getRelativeSpeed(unit, carrier)
+
+    local v1 = unit:getVelocity()
+    local v2 = carrier:getVelocity()
+
+    local dx = v1.x - v2.x
+    local dy = v1.y - v2.y
+    local dz = v1.z - v2.z
+
+	local result = math.sqrt(dx*dx + dy*dy + dz*dz)
+
+	env.info("DCE_CarrierDeckMonitor.getRelativeSpeed() "..unit:getName().." carrier="..carrier:getName().." relSpeed="..string.format("%.2f", result))
+
+    return result
+
+end
+
+
+-- vérification
+function CarrierDeckMonitor.check()
+
+    for name,data in pairs(CarrierDeckMonitor.watch) do
+
+        if data.unit:isExist() and data.carrier:isExist() then
+
+            local relSpeed = CarrierDeckMonitor.getRelativeSpeed(data.unit, data.carrier)
+
+			-- détection début roulage
+			if not data.taxiStarted then
+
+				if relSpeed > CarrierDeckMonitor.minRelSpeed then
+					data.taxiStarted = true
+					env.info("CarrierDeckMonitor taxi started "..name)
+				end
+
+				-- tant que l'avion ne roule pas, on ne surveille rien
+				-- on passe simplement à l'unité suivante
+			else
+
+				env.info("DCE_CarrierDeckMonitor.check() A "..name.." relSpeed="..string.format("%.2f", relSpeed).." idle="..data.idle.." slow="..data.slow)
+
+				if relSpeed < CarrierDeckMonitor.minRelSpeed then
+					data.idle = data.idle + CarrierDeckMonitor.checkInterval
+				else
+					data.idle = 0
+				end
+
+
+				if relSpeed < CarrierDeckMonitor.slowSpeed then
+					data.slow = data.slow + CarrierDeckMonitor.checkInterval
+				else
+					data.slow = 0
+				end
+
+				env.info("DCE_CarrierDeckMonitor.check() B "..name.." relSpeed="..string.format("%.2f", relSpeed).." idle="..data.idle.." slow="..data.slow)
+				
+				if data.idle > CarrierDeckMonitor.maxIdleTime or data.slow > CarrierDeckMonitor.maxSlowTime then
+					env.info("DCE_CarrierDeckMonitor.check() C "..name.." relSpeed="..string.format("%.2f", relSpeed).." idle="..data.idle.." slow="..data.slow.." => BLOCKED")
+					
+					local unit = data.unit
+
+					if unit and unit:isExist() then
+
+						local uName = unit:getName()
+
+						trigger.action.outText(
+							"Carrier ops: aircraft "..uName.." removed (deck blockage)",
+							10
+						)
+
+						env.info("CarrierDeckMonitor removed blocked aircraft "..uName)
+
+						unit:destroy()
+
+					end
+
+					-- CarrierDeckMonitor.watch[name] = nil
+					CarrierDeckMonitor.watch[data.unit:getName()] = nil
+
+				end
+			end
+
+        else
+            -- CarrierDeckMonitor.watch[name] = nil
+			CarrierDeckMonitor.watch[data.unit:getName()] = nil
+        end
+
+    end
+
+
+    timer.scheduleFunction(
+        CarrierDeckMonitor.check,
+        nil,
+        timer.getTime() + CarrierDeckMonitor.checkInterval
+    )
+
+end
+
+
+
+CarrierDeckMonitor.handler = {}
+
+function CarrierDeckMonitor.handler:onEvent(event)
+
+    if not event.initiator then return end
+
+    local unit = event.initiator
+
+	-- moteur démarré
+	if event.id == world.event.S_EVENT_ENGINE_STARTUP then
+
+		if not unit:getDesc() then return end
+
+   		 if unit:getDesc().category ~= Unit.Category.AIRPLANE then return end
+
+		local carrier = getCarrierUnderUnit(unit)
+
+		if carrier then
+
+			CarrierDeckMonitor.watch[unit:getName()] = {
+				unit = unit,
+				carrier = carrier,
+				idle = 0,
+				slow = 0,
+				taxiStarted = false
+			}
+
+			env.info("CarrierDeckMonitor: watching "..unit:getName())
+
+		end
+
+	end
+
+
+    -- décollage
+    if event.id == world.event.S_EVENT_TAKEOFF then
+
+        CarrierDeckMonitor.watch[unit:getName()] = nil
+
+    end
+
+end
+
+
+world.addEventHandler(CarrierDeckMonitor.handler)
+
+CarrierDeckMonitor.check()
 
 -- local function chooseBestHotspotOLD(arg_actualPos, arg_sideName)
 --     local bestHotSpot = nil
