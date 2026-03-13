@@ -6345,10 +6345,10 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					elseif (baseIsCarrier or db_airbases[flight[f].base].helipadId) then
 						if start_time then
 							-- testST =  start_time - 120
-							testST = start_time
+							testST = start_time + 120
 							-- etiquette = etiquette .. " (start_time)"
 						else
-							testST = departure_time
+							testST = departure_time + 120
 							-- etiquette = etiquette .. " (else departure_time)"
 						end
 					else
@@ -7734,7 +7734,7 @@ if debugStart then
 		for side , pPA in pairs(PlacePA) do
 			if camp.player.side == side then
 				for base , time_mn in pairs(pPA) do
-					debugTxt_AtoFP = debugTxt_AtoFP.."\n"..(tostring(base).." Takeoff time on the platform at ...")
+					debugTxt_AtoFP = debugTxt_AtoFP.."\n"..(tostring(base).." taxiing schedule on the deck at ...")
 					for s, name in PairsByKeys(time_mn) do
 
 						if tabNam[name] ~= true then
