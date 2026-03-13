@@ -1602,7 +1602,7 @@ end
 
 local function findDeckSlot(baseName, duration)
 
-	local startTime = 140
+	local startTime = 420
 
 	while true do
 
@@ -5537,6 +5537,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 											-- pour un group player, pas de lateActivation, le joueur ne peut pas spawner
 											
 											group.start_time = 5
+											waypoints[1].ETA = 5
 											cv_nbPlanetDeck = cv_nbPlanetDeck + flight[f].number
 											isProcessed = true
 											spawnDeck = true

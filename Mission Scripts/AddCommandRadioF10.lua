@@ -987,7 +987,7 @@ if campL.MsgForPlayerInMsn then
 	end
 end
 
-local lastCheck
+local lastCheck = 0
 
 local function checkMessages()
 	if totalMessages == 0 then
