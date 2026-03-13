@@ -1146,6 +1146,7 @@ local campL = {
 	BaseAirStart = camp.BaseAirStart,
 	Aircraft_Carriers = Aircraft_Carriers,
 	AAA_Barrage = AAA_Barrage,
+	MsgForPlayerInMsn = MsgForPlayerInMsn,
 
 
 	-- if not camp.missionHistory then camp.missionHistory = {} end

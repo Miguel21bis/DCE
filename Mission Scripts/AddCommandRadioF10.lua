@@ -975,6 +975,49 @@ function DCE_GetRoute(name)
 end
 
 
+--envoi des messages au Player
+-- notemment les heures de départ/roulage etc...
+local totalMessages = 0
+
+if campL.MsgForPlayerInMsn then
+	for t, timeTable in pairs(campL.MsgForPlayerInMsn) do
+		for groupId, msgs in pairs(timeTable) do
+			totalMessages = totalMessages + #msgs
+		end
+	end
+end
+
+local lastCheck
+
+local function checkMessages()
+	if totalMessages == 0 then
+		return nil
+	end
+
+	local now = math.floor(timer.getTime())
+
+	for t = lastCheck + 1, now do
+		local timeTable = campL.MsgForPlayerInMsn[t]
+
+		if timeTable then
+			for groupName, msgs in pairs(timeTable) do
+				local group = Group.getByName(groupName)
+
+                if group then
+					for i = 1, #msgs do
+						trigger.action.outTextForGroup(group:getID(), msgs[i], 10)
+						totalMessages = totalMessages - 1
+					end
+				end
+			end
+		end
+	end
+
+	lastCheck = now
+
+	return now + 10
+end
+
 
 function FctRemovePlane(_unit)
 	_unit:destroy()
@@ -4977,6 +5020,10 @@ timer.scheduleFunction(getLL_TargetPosition, nil, timer.getTime() + 21)
 timer.scheduleFunction(EWR_magic, nil, timer.getTime() + 31)
 
 timer.scheduleFunction(setErrorMessageBoxShedul, nil, timer.getTime() + 32)
+
+if campL.MsgForPlayerInMsn then
+	timer.scheduleFunction(checkMessages, nil, timer.getTime() + 10)
+end
 
 -- --test pour exploser les unités detecté, afin de passer au suivant
 -- local function explodeOnPoint()

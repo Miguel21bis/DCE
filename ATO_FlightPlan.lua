@@ -15,6 +15,8 @@ TargetList_InThisMission = {}			-- garde en mémoire les targets pour eviter de 
 PointOfInterest = {}					-- liste des points d'interet
 TabDivert = {}							--liste des pistes de deroutement
 HumainInterceptor = false
+MsgForPlayerInMsn = {}
+
 
 local debugStart = true					--NE PAS CHANGER, les infos restent seulement dans le fichier FlightPlan_Generator_Debug
 local debugTxt_AtoFP = ""
@@ -1570,6 +1572,21 @@ for sideName, pack in pairs(ATO) do
 	end
 end
 
+-- Ajoute un message à envoyer à un groupe à un moment donné
+local function addMessageForGroup(groupName, time, message)
+
+    if not MsgForPlayerInMsn[time] then
+        MsgForPlayerInMsn[time] = {}
+    end
+
+    if not MsgForPlayerInMsn[time][groupName] then
+        MsgForPlayerInMsn[time][groupName] = {}
+    end
+
+    table.insert(MsgForPlayerInMsn[time][groupName], message)
+
+end
+
 local function isTimeFree(baseName, startTime, endTime)
 
 	for _, r in ipairs(cv_deckReservations[baseName]) do
@@ -1637,12 +1654,9 @@ if carrierPlayer.carrierName then
 						placeTiming = placeTiming + mission_ini.startup_time_player 
 						cv_deckReservations[flight.base] = cv_deckReservations[flight.base] or {}
 
-						local taxiTimePerPlane = 100
+						local taxiTimePerPlane = 75
+						if string.find(flight.type, "F-14") then taxiTimePerPlane = 110 end
 						local duration = flight.number * taxiTimePerPlane
-
-						-- local placeTiming = findDeckSlot(duration)
-
-						
 
 						table.insert(cv_deckReservations[flight.base],{
 							start = mission_ini.startup_time_player,
@@ -1658,7 +1672,7 @@ if carrierPlayer.carrierName then
 	end
 end
 
-_affiche(carrierPlayer, "carrierPlayer: ")
+-- _affiche(carrierPlayer, "carrierPlayer: ")
 
 
 -- Assigne le temp d occupation parking du joueur, pour manager le parking avion
@@ -4135,7 +4149,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								speed = flight[f].loadout.vCruise / 3 * 2
 							end
 
-							task_entry = {
+							local task_entry = {
 								["enabled"] = true,
 								["auto"] = false,
 								["id"] = "ControlledTask",
@@ -5491,8 +5505,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 											-- 	isHumain = isHumain
 											-- }
 
-											local taxiTimePerPlane = 100
-											local duration = flight[f].number * taxiTimePerPlane
+											local taxiTimePerPlane = 75
+											if string.find(flight[f].type, "F-14") then taxiTimePerPlane = 110 end
+											local duration = (flight[f].number * taxiTimePerPlane) + 120  --120 s necessaire pour le demarrage avant le taxiage
 
 
 											table.insert(cv_deckReservations[flight[f].base],{
@@ -5514,24 +5529,25 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 										if flight[f].player and not flagInsertSixpack then
 											if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe 6p E ") end
-											-- local placeTiming = 75 * flight[f].number
-											-- placeTiming = placeTiming + mission_ini.startup_time_player 
-											-- -- cv_deckReservations[sideName][flight[f].base][placeTiming] = group.name
-											-- cv_deckReservations[flight[f].base][placeTiming] = {
-											-- 	groupName = group.name,
-											-- 	number = flight[f].number,
-											-- 	type = flight[f].type,
-											-- 	isHumain = isHumain
-											-- }
+											
+											-- cv_deckReservations déjà reservé en amont de ce script
+
 											start_time = 5 --information courcircuité plus tard pour PlacePA et etiquette
 											-- pour un group player, pas de activate_time, le joueur ne peut pas spawner
 											-- pour un group player, pas de lateActivation, le joueur ne peut pas spawner
 											
 											group.start_time = 5
-											-- waypoints[1].ETA = 5
 											cv_nbPlanetDeck = cv_nbPlanetDeck + flight[f].number
 											isProcessed = true
 											spawnDeck = true
+
+											local message = ""
+											if mission_ini.startup_time_player - 300 > 0 then
+												message = "Your group is due to depart in 5 minutes"
+												addMessageForGroup(group.name, mission_ini.startup_time_player - 300, message)
+											end
+											message = "Your taxiing slot is now"
+											addMessageForGroup(group.name, mission_ini.startup_time_player, message)
 										
 										end
 									end
@@ -5540,24 +5556,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								if not isProcessed then
 									if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\nAtoFP passe 6p F (hors sixpack)" end
 
-									-- -- Nombre total d’avions déjà planifiés sur ce pont
-									-- local totalPlanned = 0
-									-- for _, info in pairs(cv_deckReservations[sideName][flight[f].base]) do
-									-- 	if info and info.number then
-									-- 		totalPlanned = totalPlanned + info.number
-									-- 	else
-									-- 		totalPlanned = totalPlanned + 1
-									-- 	end
-									-- end
-
-									-- -- Timing basé sur 75 s par avion
-									-- local timeStep = 100
-									-- local placeTiming = totalPlanned * timeStep + 140--120s, ajouté car 2mn de démarrage pour les premiers
-
-									-- Durée estimée d'occupation du pont
-
-
-									local taxiTimePerPlane = 100
+									local taxiTimePerPlane = 75
+									if string.find(flight[f].type, "F-14") then taxiTimePerPlane = 110 end
 									local duration = flight[f].number * taxiTimePerPlane
 
 									local placeTiming = findDeckSlot(flight[f].base, duration)
@@ -5570,32 +5570,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 											groupName = group.name
 										})
 
-									-- -- Recherche d’un créneau libre (max 20 essais)
-									-- local counter = 0
-									-- while cv_deckReservations[sideName][flight[f].base][placeTiming] and counter < 20 do
-									-- 	placeTiming = placeTiming + timeStep
-									-- 	counter = counter + 1
-									-- end
-
-									-- if counter >= 20 then
-									-- 	-- Trop de conflits → fallback spawn air
-									-- 	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\nAtoFP passe 6p G (fallback airspawn)" end
-									-- 	local infoFrom = "timingDeckCata "..debug.getinfo(1).currentline
-									-- 	local airSpawnTime = waypoints[1]["etaSpawn"]
-									-- 	spawnOn("air", waypoints, group, pn, airSpawnTime, infoFrom, flight, f, role)
-									-- else
-									-- 	-- Créneau trouvé
-									-- 	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\nAtoFP passe 6p H (créneau trouvé: waypoints[1].ETA "..waypoints[1].ETA.." devient:(start_time ou placeTiming ) "..placeTiming..")" end
-
-									-- 	cv_deckReservations[sideName][flight[f].base][placeTiming] = {
-									-- 		groupName = group.name,
-									-- 		number = flight[f].number,
-									-- 		type = flight[f].type, 
-									-- 		isHumain = isHumain
-									-- 	}
-										
-
-										start_time = placeTiming
+										start_time = placeTiming - 120 --120 s necessaire pour le demarrage avant le taxiage
 										activate_time = 10
 
 										spawnDeck = true
