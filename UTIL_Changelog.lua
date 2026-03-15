@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "22.98.583"
+versionDCE["UTIL_Changelog.lua"] = "22.99.587"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "22.98.583"
+VersionDCE["UTIL_Changelog.txt"] = "22.99.587"
 --[[
 
 # DCE – Changelog
@@ -18,22 +18,53 @@ known issues:
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
 
-##  Version 22.98.583
-
+##  Version 22.99.587
+	version supporting Cef's new Vietnam campaign
+	
 	###  Fixed
 	- **Performance**
 		Major optimization of mission generation time.
 		Campaigns now generate missions significantly faster, especially large ones.
+
+	- **Datalink**
+
+	- **Spawn on supercarrier**
+		We need to completely overhaul the player spawn on the Supercarrier. 
+		Players should not spawn on the Sixpack; this greatly simplifies crew conflicts and taxiing.
+		There is still an issue with the second player in the group, 
+		but it only seems to occur when using a dedicated server.
+
+		We managed to launch more than 16 planes without a hitch :)
+
+		In MP, there will still be no AI spawning on the deck. Only players will be allowed.
+
+		Also, the taxiing times provided in the briefing are becoming more and more accurate. 
+		You must stick to them, as you’ll have about 5 minutes to move.
+
+	- **strikeOnlyWithEscorte**
+		Creating a package is not possible or results in an error if the strikeOnlyWithEscorte option is enabled
+
+	- **MP choice**
+		The aircraft selection in MP mode is unsatisfactory
+
+	- **helicopter spawn**
+		The helicopter spawn point is incorrect
+
 
 	###  Added
 	- **Aircraft Radio Data (Automatic)**
 		Aircraft radio capabilities are now automatically read from `Mods` and `CoreMods`.
 
 	- **change of front line during a campaign**
+		Action.LoadFileBorder("file.miz")	in camp_triggers_init
+		The .miz file must be located in the \Files folder (create it if necessary)
 
 	- **The choice of aircraft in MP takes into account the base.**
 
 	- **AAA_Barrage with the kind permission of Bandit648 .**
+		To use it, you must:
+		- use a preset_AAA_Barrage in conf_mod other than 0
+		- add zones to base_mission whose names begin with “AAA_ZONE_”
 
 	- **Support for multiple third-party mods**
 		You still need to download and install these mods.
@@ -47,23 +78,23 @@ known issues:
 		Loadouts have been split into multiple files and moved into the `db_loadouts` folder.
 
 	- **Custom Mods Support**
-	A new `Mods` directory has been added.
+		A new `Mods` directory has been added.
 
-	Users can now add their own files **without risk of being overwritten by a DCE update**.
+		Users can now add their own files **without risk of being overwritten by a DCE update**.
 
-	Supported content:
-	- Loadout files (`db_loadouts = {}`)
-	- Data files (`Data_divers = {}`)
+		Supported content:
+		- Loadout files (`db_loadouts = {}`)
+		- Data files (`Data_divers = {}`)
 
-	File names are free and do not need to follow a specific pattern.
+		File names are free and do not need to follow a specific pattern.
 
 	- **MenuF10**
-	Loadouts have been split into multiple files and moved into the `db_loadouts` folder.
+		The F10 menu has been redesigned
 
 	- **F10 EWR Magic Menu Review**
-	New method for calling ejected pilots to transmit on their frequency. You must be close (~40km) and ask regularly on the radio:
+		New method for calling ejected pilots to transmit on their frequency. You must be close (~40km) and ask regularly on the radio:
 
-	This avoids chaos if dozens of pilots need to be rescued (as in the Vietnam campaign).
+		This avoids chaos if dozens of pilots need to be rescued (as in the Vietnam campaign).
 
 	- **better presentation of aircraft choices in MP**
 

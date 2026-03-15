@@ -1628,10 +1628,10 @@ local carrierPlayer = {
 	sideName = ""
 }
 for baseName, base in pairs(db_airbases) do
-	print("AtoFP cherche carrierPlayer.carrierName: "..tostring(baseName))
+	-- print("AtoFP cherche carrierPlayer.carrierName: "..tostring(baseName))
 	if base.humainSquad and base.unitname then
 		carrierPlayer.carrierName = baseName
-		print("AtoFP trouve carrierPlayer.carrierName: "..tostring(carrierPlayer.carrierName))
+		-- print("AtoFP trouve carrierPlayer.carrierName: "..tostring(carrierPlayer.carrierName))
 		break
 	end
 end
