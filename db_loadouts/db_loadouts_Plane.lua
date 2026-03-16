@@ -4,7 +4,7 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["loadouts_data/db_loadouts_Plane.lua"] = "1.3.203"
+versionDCE["db_loadouts/db_loadouts_Plane.lua"] = "1.3.203"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file

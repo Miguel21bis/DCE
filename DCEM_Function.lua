@@ -3,10 +3,7 @@
 -- cleancode_a				(a springCleaning)
 -- last modification: adjustment_c
 if not versionDCE then versionDCE = {} end
-versionDCE["DCEM_Function.lua"] = "1.2.5"
--------------------------------------------------------------------------------------------------------
--- adjustment_c			(c playerSide)(b add tabSquad)(a SAR & CSAR)
--- cleancode_a			(a springCleaning)
+versionDCE["DCEM_Function.lua"] = "1.2.6"
 -------------------------------------------------------------------------------------------------------
 
 --function type DCS, ne pas changer la casse

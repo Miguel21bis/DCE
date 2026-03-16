@@ -1,9 +1,8 @@
 --For easy reference to x-y coordinates, create Refpoints from trigger zones in base_mission
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: 
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_Refpoints.lua"] = "1.1.1"
+versionDCE["DC_Refpoints.lua"] = "1.1.2"
 ------------------------------------------------------------------------------------------------------- 
 if Debug.debug then
 	print("START DC_Refpoints.lua "..versionDCE["DC_Refpoints.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")

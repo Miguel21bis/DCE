@@ -1,14 +1,8 @@
 --To create the Debriefing text for the mission
 --Initiated by DEBRIEF_Master.lua
 -------------------------------------------------------------------------------------------------------
--- last modification: debug_c
 if not versionDCE then versionDCE = {} end
-versionDCE["DEBRIEF_Text.lua"] = "1.4.5"
-------------------------------------------------------------------------------------------------------- 
--- debug_c                  (c alive_last)(b package stats)(a: neutral side) 
--- cleancode_a				(a springCleaning)
--- adjustment_b				(a priority numeric targetTable)
--- modification M61_a		SAR
+versionDCE["DEBRIEF_Text.lua"] = "1.4.6"
 ------------------------------------------------------------------------------------------------------- 
 if Debug.debug then
 	print("START DEBRIEF_Text.lua "..versionDCE["DEBRIEF_Text.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")

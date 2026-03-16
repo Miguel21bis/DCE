@@ -1,25 +1,9 @@
 --To generate a new mission file. Unzips template mission, defines content of next missions and packs a new mission file
 --Initiated by Debrief_Master.lua, BAT_FirstMission.lua or BAT_RedoMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification debug_b
 if not versionDCE then versionDCE = {} end
-versionDCE["MAIN_AcceptMission.lua"] = "1.10.65"
-------------------------------------------------------------------------------------------------------- 
-
--- cleanCode_g				(g springCleaning)(e: os.remove)
--- debug_b					(b Briefing_text)(a endCampaign)
--- adjustment_g				(f currentKey)(e not DC_Weather)(d PairsByKeys)(c move UpdateSar & correct Brief Systeme)(b: don't load UTIL_Debug)(a: don't load Ini/db_airbase)
--- modification M63_a		compatible Datacard Generator or CombatFlite
--- modification M61_a		SAR
--- modification M56_a		AssignCallnameSquad
--- modification M51_a		Moonphase
--- modification M49_a		big central db_loadout
--- modification M48_g		Accept result mission (d: garde en memoire le txt camp.pendingBriefing) (g: addImage trigger)(af: debug)
--- modification M34_Bl		custom FrequenceRadio (l new file name)
+versionDCE["MAIN_AcceptMission.lua"] = "1.10.66"
 -- -------------------------------------------------------------------------------------------------------
-
--- print("MAIN_AM targetlist F1: "..tostring(camp_triggers))
--- print("MAIN_AM targetlist F2: "..tostring(camp_triggers[1]["name"]))
 
 ----- unpack template mission file ----
 local minizip = require('minizip')

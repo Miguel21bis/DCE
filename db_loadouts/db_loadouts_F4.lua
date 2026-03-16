@@ -3,7 +3,7 @@
 -------------------------------------------------------------------------------------------------------
 
 if not versionDCE then versionDCE = {} end
-versionDCE["db_loadout/db_loadouts_F4.lua"] = "1.1.1"
+versionDCE["db_loadouts/db_loadouts_F4.lua"] = "1.1.1"
 
 -- 1.1.1 - Beginning of the versions of this loadouts file dedicated to the F4.
 

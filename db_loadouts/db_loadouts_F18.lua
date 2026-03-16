@@ -3,7 +3,7 @@
 -------------------------------------------------------------------------------------------------------
 
 if not versionDCE then versionDCE = {} end
-versionDCE["loadouts_data/db_loadouts_F18.lua"] = "1.1.2"
+versionDCE["db_loadouts/db_loadouts_F18.lua"] = "1.1.2"
 
 -- 1.1.2 - Add ["Escort Jammer"] = true, standoff harpoon for TF = 150000
 -- 1.1.1 - Beginning of the versions of this loadouts file dedicated to the F4.

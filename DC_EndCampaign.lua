@@ -1,13 +1,9 @@
 --To delete mission content and prevent campaign progression if the campaign has ended
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleancode_c
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_EndCampaign.lua"] = "1.2.8"
+versionDCE["DC_EndCampaign.lua"] = "1.2.9"
 ------------------------------------------------------------------------------------------------------- 
--- debug_g 			(g bug end campaign)(f mission.maxDictId)(d: EndMission not remove static (FARPS))(c: oldImage)(ab: EndMission)
--- cleancode_c		(c springCleaning)
--- -------------------------------------------------------------------------------------------------------
 if Debug.debug then
 	print("START DC_EndCampaign.lua "..versionDCE["DC_EndCampaign.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
@@ -15,43 +11,6 @@ end
 if EndCampaign or camp.endCampaign then												--if the campaign has ended
 	PlayerFlight = true											--set true to stop mission generation loop in DEBRIEF_Master.lua
 
-	-- ----- unpack template mission file ----
-	-- local minizip = require('minizip')
-
-	-- local zipFile = minizip.unzOpen("../" .. camp.title .. "_ongoing.miz", 'rb')
-
-	-- zipFile:unzLocateFile('mission')
-	-- local misStr0 = zipFile:unzReadAllCurrentFile()
-	-- misStr0 = misStr0:gsub("%(\"ResKey_Action", "(\\\\\"ResKey_Action")
-	-- misStr0 = misStr0:gsub("%\"%)", "\\\\\")")
-
-	-- -- local BriefingTmp = StringToTxt(misStr0)
-	-- -- local Afile = io.open("Debug/misStr0.txt", "w")										--open targetlist file
-	-- -- Afile:write(BriefingTmp)																		--save new data
-	-- -- Afile:close()
-
-	-- -- print("DcEC pause debug fucking end mission ")
-
-	-- local misStrFunc = loadstring(misStr0)()
-
-	-- zipFile:unzLocateFile('options')
-	-- local optStr = zipFile:unzReadAllCurrentFile()
-	-- local optStrFunc = loadstring(optStr)()
-
-	-- zipFile:unzLocateFile('warehouses')
-	-- local warStr = zipFile:unzReadAllCurrentFile()
-	-- local warStrFunc = loadstring(warStr)()
-
-	-- zipFile:unzLocateFile('l10n/DEFAULT/dictionary')
-	-- local dicStr = zipFile:unzReadAllCurrentFile()
-	-- local dicStrFunc = loadstring(dicStr)()
-	
-	-- --a desactiver, sinon les anciennes images apparaissent dans mapResource
-	-- -- zipFile:unzLocateFile('l10n/DEFAULT/mapResource')
-	-- -- local resStr = zipFile:unzReadAllCurrentFile()
-	-- -- local resStrFunc = loadstring(resStr)()
-
-	-- zipFile:unzClose()
 	
 	if EndCampaign == "win" then
 		mission.sortie = "CAMPAIGN VICTORY"
@@ -173,85 +132,5 @@ if EndCampaign or camp.endCampaign then												--if the campaign has ended
 	-- mission.descriptionText = ""
 	mission.descriptionText = Briefing_status .. "\\n"
 	
-	-- ----- convert tables back to strings for insertion into content files -----
-	-- local misStr = "mission = " .. TableSerialization(mission, 0)
-	-- local optStr = "options = " .. TableSerialization(options, 0)
-	-- local warStr = "warehouses = " .. TableSerialization(warehouses, 0)
-	-- local dicStr = "dictionary = " .. TableSerialization(dictionary, 0)
-	-- local resStr = "mapResource = " .. TableSerialization(mapResource, 0)
-	-- -- local gciStr = "GCI = " .. TableSerialization(GCI, 0)
-	-- local cmpStr = "camp = " .. TableSerialization(camp, 0)
-
-	-- ----- create temporary content files of new mission file -----
-	-- local misFile = io.open("misFile.lua", "w")											--mission
-	-- misFile:write(misStr)
-	-- misFile:close()
-
-	-- local optFile = io.open("optFile.lua", "w")											--options
-	-- optFile:write(optStr)
-	-- optFile:close()
-
-	-- local warFile = io.open("warFile.lua", "w")											--warehouses
-	-- warFile:write(warStr)
-	-- warFile:close()
-
-	-- local dicFile = io.open("dicFile.lua", "w")											--dictionary
-	-- dicFile:write(dicStr)
-	-- dicFile:close()
-
-	-- local resFile = io.open("resFile.lua", "w")											--mapResource
-	-- resFile:write(resStr)
-	-- resFile:close()
-
-	-- local cmpFile = io.open("Active/camp_status.lua", "w")								--campaign status file
-	-- cmpFile:write(cmpStr)
-	-- cmpFile:close()
-	
-
-	-- miz = minizip.zipCreate("../" .. camp.title .. "_ongoing.miz")
-	
-	-- miz:zipAddFile("mission", "misFile.lua")
-	-- miz:zipAddFile("options", "optFile.lua")
-	-- miz:zipAddFile("warehouses", "warFile.lua")
-	-- miz:zipAddFile("l10n/DEFAULT/dictionary", "dicFile.lua")
-	-- miz:zipAddFile("l10n/DEFAULT/mapResource", "resFile.lua")
-	-- miz:zipAddFile("l10n/DEFAULT/EventsTracker.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/EventsTracker.lua")
-
-	-- miz:zipAddFile("l10n/DEFAULT/ARM_Defence_Script.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ARM_Defence_Script.lua")
-	-- miz:zipAddFile("l10n/DEFAULT/CustomTasksScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CustomTasksScript.lua")
-	-- miz:zipAddFile("l10n/DEFAULT/CarrierIntoWindScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CarrierIntoWindScript.lua")
-	-- miz:zipAddFile("l10n/DEFAULT/AddCommandRadioF10.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/AddCommandRadioF10.lua")				-- Miguel21 Modification M29
-	-- miz:zipAddFile("l10n/DEFAULT/Pedro.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Pedro.lua")				-- Miguel21 Pedro TEST
-	-- miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "Active/camp_status.lua")
-	-- miz:zipAddFile("l10n/DEFAULT/FlightPlan_Generator_Debug.txt", "Debug/FlightPlan_Generator_Debug.txt")
-	
-	
-	-- local BriefingImages = {}
-	-- for _i,_filename in ipairs(BriefingImagesB) do	
-	-- 	findValue = false
-	-- 	for i,filename in ipairs(BriefingImages) do
-	-- 		if _filename == filename then findValue = true    break end
-	-- 	end
-	-- 	if not findValue then
-	-- 		table.insert(BriefingImages, _filename)
-	-- 	end 
-	-- end
-	-- for _i,_filename in ipairs(BriefingImagesR) do	
-	-- 	findValue = false
-	-- 	for i,filename in ipairs(BriefingImages) do
-	-- 		if _filename == filename then findValue = true  break end
-	-- 	end
-	-- 	if not findValue then
-	-- 		table.insert(BriefingImages, _filename)
-	-- 	end 
-	-- end
-
-	-- for i,filename in ipairs(BriefingImages) do											-- Miguel21 M05.b : ajout picture Briefing + pictures Target
-	-- 	if type(filename) == "string" and string.len(filename) > 0 then 				-- Miguel21 M05.c : ajout picture Briefing (c: correction path vide)
-	-- 		miz:zipAddFile("l10n/DEFAULT/" .. filename, "Images/" .. filename)
-	-- 	end
-	-- end
-	
-	-- miz:zipClose()
 	
 end
