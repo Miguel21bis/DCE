@@ -2,7 +2,7 @@
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Data.lua"] = "1.15.91"
+versionDCE["UTIL_Data.lua"] = "1.15.92"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -841,7 +841,6 @@ Data_divers = {
 		requiredModules = true,						--itsModule
 		moduleName = "VSN_F100",		--self_ID  require module name
 		folderModName = "VSN_F100",
-		playable = true,
 		vCruise = 200,	--TODO a confirmer
 		hCruise = 4500,
 		-- Tasks = {

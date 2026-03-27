@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "22.99.587"
+versionDCE["UTIL_Changelog.lua"] = "22.99.588"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "22.99.587"
+VersionDCE["UTIL_Changelog.txt"] = "22.99.588"
 --[[
 
 # DCE – Changelog
@@ -17,6 +17,10 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
+##  Version 22.99.588
+	###  Fixed
+	F-100 no plyable
+
 
 ##  Version 22.99.587
 	version supporting Cef's new Vietnam campaign
@@ -31,7 +35,7 @@ known issues:
 	- **Spawn on supercarrier**
 		We need to completely overhaul the player spawn on the Supercarrier. 
 		Players should not spawn on the Sixpack; this greatly simplifies crew conflicts and taxiing.
-		There is still an issue with the second player in the group, 
+		There may be a problem with Wingman No. 3 in your group, 
 		but it only seems to occur when using a dedicated server.
 
 		We managed to launch more than 16 planes without a hitch :)
@@ -91,7 +95,7 @@ known issues:
 	- **MenuF10**
 		The F10 menu has been redesigned
 
-	- **F10 EWR Magic Menu Review**
+	- **F10 EjectedPilot**
 		New method for calling ejected pilots to transmit on their frequency. You must be close (~40km) and ask regularly on the radio:
 
 		This avoids chaos if dozens of pilots need to be rescued (as in the Vietnam campaign).
