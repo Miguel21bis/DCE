@@ -1082,10 +1082,12 @@ function GenerateIDUnit(unitName)
 			error("GenerateIDUnit: Too many attempts to find a unique unit ID")
 		end
 	until not AllIdUnit[idUnitCounter]
+
 	AllIdUnit[idUnitCounter] = unitName
 	if unitName then
 		UnitByName[unitName] = idUnitCounter
 	end
+
 	return idUnitCounter
 end
 
@@ -1105,8 +1107,8 @@ function FirstCheck_Id()
 								if unit.unitId == warhouse_Id then
 									AllIdUnit[unit.unitId] = unit.name
 								end
-
 							end
+
 						end
 					end
 				end
@@ -1114,7 +1116,7 @@ function FirstCheck_Id()
 		end
 	end
 
-	-- _affiche(AllIdUnit, "warehouses ")
+	_affiche(AllIdUnit, "warehouses ")
 
 end
 

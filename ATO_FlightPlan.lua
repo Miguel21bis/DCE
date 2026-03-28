@@ -33,7 +33,6 @@ local is_helicopter
 local baseIsFARP
 local baseIsCarrier
 local tacan_byTarget = {}				--liste les TACAN pour un meme parttern , util pour les multiples tanker
-local polkaOff = false					--evite la dance des aeronefs sur le parking (Inter et SAR compris)
 local proximityAircraft = {} 			-- Table des avions de ravitaillement déjà enregistrés
 local offsetDistance = 15000			-- Distance minimale entre tankers (15 km)
 local currentHeading = 0  				-- Angle initial-- On démarre vers le Nord
@@ -305,17 +304,19 @@ end
 
 local function getParkSarAirBase(flightF)
 
+	local nLoop = 1
 
 	if parkSarAirBase[flightF.base] then
 
 		local pkFound = false
-		local nLoop = 1
+
 		local nPk = 0
 		repeat
 			nPk = math.random(1, #parkSarAirBase[flightF.base])
 
 			if not parkSarAirBase[flightF.base][nPk].occupied or parkSarAirBase[flightF.base][nPk].occupied == false then
 				parkSarAirBase[flightF.base][nPk].occupied = true
+				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_getParkSarAirBase |return nil| flightF.base: "..tostring(flightF.base).. " |nPk :  "..tostring(nPk)) end
 				return nPk
 				-- pkFound = true
 			end
@@ -323,6 +324,8 @@ local function getParkSarAirBase(flightF)
 		until nLoop > 200
 	end
 
+	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_getParkSarAirBase |return nil| flightF.base: "..tostring(flightF.base).. " |nLoop :  "..tostring(nLoop)) end	
+	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_getParkSarAirBase ").._afficheTXT(parkSarAirBase[flightF.base]) end
 	return nil
 
 end
@@ -1033,6 +1036,9 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 			arg_Waypoints[1].linkUnit = nil
 		end
 
+		if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_spawnOn() A SpawnOn() Turning Point "..arg_Spawn.." from: "..tostring(arg_From).." Missionfunc: "..tostring(Missionfunc)) end
+
+
 		local alt = 150
 
 		if is_helicopter  then 											-- M6.1 sauf helicopter			
@@ -1712,6 +1718,8 @@ for baseName, base in pairs(db_airbases) do
 	end
 end
 
+if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP parkSarAirBase RESET ").._afficheTXT(parkSarAirBase) end
+
 -- if db_airbases[flight[f].base].parkAlertSAR and IsHelicopter[flight[f].type] then
 
 -- 	--combien de place libre reste t'il:
@@ -1746,6 +1754,7 @@ for side, pack in pairs(ATO) do
 	end
 end
 
+-- _affiche(parkSarAirBase, "parkSarAirBase: ")
 
 if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP parkSarAirBase 00 ").._afficheTXT(parkSarAirBase) end
 
@@ -2018,49 +2027,52 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 
-					if limitedParkTiming then
-						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passeparkSarAirBase B1 ") end
+					--existe déjà avec ça : local function getParkSarAirBase(flightF)
 
-						if db_airbases[flight[f].base].parkAlertSAR and IsHelicopter[flight[f].type] then
 
-							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passeparkSarAirBase B2 ") end
+					-- if limitedParkTiming then
+					-- 	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passeparkSarAirBase B1 ") end
 
-							--combien de place libre reste t'il:
-							local freeParkSpace = 0
-							for baseN, park in pairs(parkSarAirBase[flight[f].base]) do
-								if (not park.occupied or park.occupied == nil) and not park.reservedSAR then
-									freeParkSpace = freeParkSpace + 1
-								end
-							end
+					-- 	if db_airbases[flight[f].base].parkAlertSAR and IsHelicopter[flight[f].type] then
 
-							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passeparkSarAirBase B3 "..tostring(freeParkSpace).." "..tostring(debug.getinfo(1).currentline)) end
+					-- 		if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passeparkSarAirBase B2 ") end
 
-							if freeParkSpace >= flight[f].number then
-								--il y a donc de la place sur les parking SAR (arkSarAirBase), on enleve donc la limite limitedParkTiming
-								limitedParkTiming = false
-								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe LimitedParkNb B4 "..tostring(db_airbases[flight[f].base].LimitedParkNb) ) end
+					-- 		--combien de place libre reste t'il:
+					-- 		local freeParkSpace = 0
+					-- 		for baseN, park in pairs(parkSarAirBase[flight[f].base]) do
+					-- 			if (not park.occupied or park.occupied == nil) and not park.reservedSAR then
+					-- 				freeParkSpace = freeParkSpace + 1
+					-- 			end
+					-- 		end
 
-								--TODO enlever ceci: ai décollage
-								-- ["helipadId"] = 1665,
-								-- ["linkUnit"] = 1665,
+					-- 		if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passeparkSarAirBase B3 "..tostring(freeParkSpace).." "..tostring(debug.getinfo(1).currentline)) end
 
-								for n = 1, flight[f].number do
+					-- 		if freeParkSpace >= flight[f].number then
+					-- 			--il y a donc de la place sur les parking SAR (arkSarAirBase), on enleve donc la limite limitedParkTiming
+					-- 			limitedParkTiming = false
+					-- 			if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe LimitedParkNb B4 "..tostring(db_airbases[flight[f].base].LimitedParkNb) ) end
 
-									for baseN, park in pairs(parkSarAirBase[flight[f].base]) do
-										if (not park.occupied or park.occupied == nil) and not park.reservedSAR then
-											park.occupied = true
-											if not parkSarAirBase[flight[f].base] then parkSarAirBase[flight[f].base] = {} end
-											parkSarAirBase[flight[f].base][n] = park
+					-- 			--TODO enlever ceci: ai décollage
+					-- 			-- ["helipadId"] = 1665,
+					-- 			-- ["linkUnit"] = 1665,
 
-											if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passeparkSarAirBase B5 "..tostring(parkSarAirBase[flight[f].base]).." "..tostring(debug.getinfo(1).currentline)) end
+					-- 			for n = 1, flight[f].number do
 
-											break
-										end
-									end
-								end
-							end
-						end
-					end
+					-- 				for baseN, park in pairs(parkSarAirBase[flight[f].base]) do
+					-- 					if (not park.occupied or park.occupied == nil) and not park.reservedSAR then
+					-- 						park.occupied = true
+					-- 						if not parkSarAirBase[flight[f].base] then parkSarAirBase[flight[f].base] = {} end
+					-- 						parkSarAirBase[flight[f].base][n] = park
+
+					-- 						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passeparkSarAirBase B5 "..tostring(parkSarAirBase[flight[f].base]).." "..tostring(debug.getinfo(1).currentline)) end
+
+					-- 						break
+					-- 					end
+					-- 				end
+					-- 			end
+					-- 		end
+					-- 	end
+					-- end
 				end
 
 				local navTargetPoints = {}
@@ -2369,6 +2381,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						["baseStartup"] =  flight[f].route[w].baseStartup,
 					}
 
+					if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_waypoints[w] = { Turning Point ") end
+
+
 					if waypoints[w].name == "Target" then
 						wptTargetPass = true
 					end
@@ -2413,6 +2428,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							},
 							["speed_locked"] =  true,
 						}
+						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_Intercept or SAR = { Turning Point ") end
 					end
 
 					-- modification M17.e
@@ -2671,7 +2687,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								waypoints[w]["action"] = "Turning Point"
 								flight[f].route[w].id = "Spawn"
 								flight[f].route[w].eta = flight[f].route[w].eta - 300
-								-- spawn_time = flight[f].route[w].eta --spawn_time_bug							
+								-- spawn_time = flight[f].route[w].eta --spawn_time_bug		
+								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_AI_Spawn AIR = { Turning Point ") end					
 							elseif string.upper(db_airbases[flight[f].base].AI_Spawn) == "RUNWAY" then
 								waypoints[w]["type"] = "Turning TakeOff"
 								waypoints[w]["action"] = "From Runway"
@@ -2741,6 +2758,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							waypoints[w]["debug"] = (waypoints[w]["debug"] or "") .." ETA_locked G False "
 
 							local stopTime = waypoints[w].ETA + 7200
+
+							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_route[w].id land = { Turning Point ") end	
 
 
 							local task_entry = {
@@ -5008,6 +5027,8 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								waypoints[1]["action"] = "Turning Point"
 								waypoints[1]["type"] = "Turning Point"
 
+								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_FARP parking id ~= Spawn = { Turning Point ") end	
+
 							end
 
 
@@ -5608,13 +5629,6 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								end
 							end
 
-							-- --les Planes qui genent le taxiing spawn selon conf_mod
-							-- if not spawnDeck then
-								
-							-- 	local bugFrom =  " if not SpawnDeck "..debug.getinfo(1).currentline
-							-- 	spawnOn(Data_configuration.SC_SpawnOn[flight[f].type], waypoints, group, pn, start_time, bugFrom, flight, f, role)
-							-- end
-
 							--TODO, c'est utile ça?
 							-- if limitedParkTiming or db_airbases[flight[f].base].BaseAirStart then
 							if db_airbases[flight[f].base].BaseAirStart then
@@ -5711,25 +5725,25 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					elseif (flight[f].task ~= "Intercept" and flight[f].task ~= "SAR" and not parkSarAirBase[flight[f].base]) then
 						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe II SUR PISTE DUR") end
 
-						if limitedParkTiming or db_airbases[flight[f].base].BaseAirStart then
-							group['lateActivation'] = true
-							group['uncontrolled'] = false
-							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe LLLb limitedParkTiming OR BaseAirStart ") end
-							local infoFrom =  " limitedParkTiming or BaseAirStart "..debug.getinfo(1).currentline
-							local airSpawnTIme = waypoints[1]["etaSpawn"] or waypoints[1]["ETA"]
-							spawnOn( "air", waypoints, group, pn, airSpawnTIme, infoFrom, flight, f, role)
-							--TODO vérifier si c'est utile:
-							modify_Activate_GroupTime(group, airSpawnTIme - 1, debug.getinfo(1).currentline)
+						if not isHumain then
+							if limitedParkTiming or db_airbases[flight[f].base].BaseAirStart then
+								group['lateActivation'] = true
+								group['uncontrolled'] = false
+								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe LLLb limitedParkTiming OR BaseAirStart ") end
+								local infoFrom =  " limitedParkTiming or BaseAirStart "..debug.getinfo(1).currentline
+								local airSpawnTIme = waypoints[1]["etaSpawn"] or waypoints[1]["ETA"]
+								spawnOn( "air", waypoints, group, pn, airSpawnTIme, infoFrom, flight, f, role)
+								--TODO vérifier si c'est utile:
+								modify_Activate_GroupTime(group, airSpawnTIme - 1, debug.getinfo(1).currentline)
 
 
-						elseif group.route.points[1].action ~= "Turning Point" then
+							elseif group.route.points[1].action ~= "Turning Point" then
 
-							group['lateActivation'] = false
-							
-							group['start_time'] = start_time - 15		--evite le BUG actuel de la Polka sur parking
+								group['lateActivation'] = false
 
-							start_Set_Ai_Task(group, start_time, nil,  debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
-							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP arg_group['uncontrolled']: "..tostring(group['uncontrolled'])) end
+								start_Set_Ai_Task(group, start_time, nil,  debug.getinfo(1).currentline)			-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --
+								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP arg_group['uncontrolled']: "..tostring(group['uncontrolled'])) end
+							end
 						end
 					end
 
@@ -5818,13 +5832,6 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					if ( flight[f].client ~= true and flight[f].player ~= true)  then	--or limitedParkTiming or parkSarAirBase[flight[f].base]						-- M11 PVP ne copie pas de trigger retardé START pour les clients/joueurs	
 
-						-- if polkaOff then
-
-						-- 	group['lateActivation'] = false
-						-- 	group['uncontrolled'] = false
-						-- 	activate_Group_WithFlag(group, camp.SAR.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
-
-						-- else
 						if (baseIsCarrier or limitedParkTiming or db_airbases[flight[f].base].BaseAirStart) and not farp_MorePlace  then
 
 							local infoFrom =  " SAR sur CV et parking limité spawn en vol "..debug.getinfo(1).currentline
@@ -5832,16 +5839,6 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							activate_Group_WithFlag(group, camp.SAR.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --	
 
 							spawnOn( "air", waypoints, group, pn, 0, infoFrom, flight, f, role)
-
-							-- group['lateActivation'] = true											--make group late activation "en vol"
-							-- group['uncontrolled'] = false
-							-- group['tasks'] = {}
-
-							-- mission.trig.actions[trig_n] = "a_activate_group(" .. group.groupId .. "); mission.trig.func[" .. trig_n .. "]=nil;"
-							-- mission.trigrules[trig_n]['actions'][1] = {
-							-- 	["group"] = group.groupId,
-							-- 	["predicate"] = "a_activate_group",
-							-- }
 
 							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe activate 03") end
 
@@ -5968,69 +5965,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					GCI.Flag = GCI.Flag + 1															--go to next trigger flag number					
 					if not isHumain then	-- and limitedParkTiming							-- M11 PVP ne copie pas de trigger retardé START pour les clients/joueurs	
 
-						-- if polkaOff then
-						-- 	group['lateActivation'] = false
-						-- 	group['uncontrolled'] = false
-						-- 	activate_Group_WithFlag(group, GCI.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --															
+						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP tasks_Start "..tostring(debug.getinfo(1).currentline)) end
 
-						-- else
-							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP tasks_Start "..tostring(debug.getinfo(1).currentline)) end
-
-							-- group['uncontrolled'] = true											--make interceptor groups uncontrolled at mission start
-							-- group['lateActivation'] = false
-
-							-- start_Set_Ai_Task(group, nil, GCI.Flag, debug.getinfo(1).currentline)
-							activate_Group_WithFlag(group, GCI.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --	
-
-						-- 	--triggered action to start uncontrolled group
-						-- 	group['tasks'] = {
-						-- 		[1] = {
-						-- 			["number"] = 1,
-						-- 			["name"] = group.name,
-						-- 			["id"] = "WrappedAction",
-						-- 			["auto"] = false,
-						-- 			["enabled"] = true,
-						-- 			["params"] = {
-						-- 				["action"] = {
-						-- 					["id"] = "Start",
-						-- 					["params"] = {},
-						-- 				},
-						-- 			},
-						-- 		},
-						-- 	}
-
-						-- 	--mission trigger to initiate triggered action
-						-- 	-- local trig_n = Missionfunc + #mission.trig.funcStartup + 1										--next available trigger number
-						-- 	trig_n =  #mission.trig.actions + 1
-						-- 	Missionfunc = Missionfunc + 1 																	--M11.o
-						-- 	mission.trig.func[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
-						-- 	mission.trig.flag[trig_n] = true
-						-- 	mission.trig.conditions[trig_n] = "return(c_flag_is_true(" .. GCI.Flag .. ") )"
-						-- 	mission.trig.actions[trig_n] = "a_set_ai_task(" .. group.groupId .. ", 1); mission.trig.func[" .. trig_n .. "]=nil;"
-						-- 	mission.trigrules[trig_n] = {
-						-- 		['rules'] = {
-						-- 			[1] = {
-						-- 				["flag"] = GCI.Flag,
-						-- 				["predicate"] = "c_flag_is_true",
-						-- 				["zone"] = "",
-						-- 			},
-						-- 		},
-						-- 		['eventlist'] = '',
-						-- 		['comment'] = 'Trigger ' .. trig_n,
-						-- 		['predicate'] = 'triggerOnce',
-						-- 		['actions'] = {
-						-- 			[1] = {
-						-- 				["predicate"] = "a_set_ai_task",
-						-- 				["set_ai_task"] = {
-						-- 					[1] = group.groupId,
-						-- 					[2] = 1,
-						-- 				}
-						-- 			},
-						-- 		},
-						-- 	}
-
-
-						-- end
+						activate_Group_WithFlag(group, GCI.Flag, debug.getinfo(1).currentline )	-- = - = - = - = -- = - = - = - = - = - = - = - = - = - = --	
 
 						--if the group is on a carrier, it gets late activation instead of uncontrolled. An activate trigger is needed instead of AI task trigger.
 						-- Les inter sur CV et parking limité spawn en vol
@@ -6038,10 +5975,6 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							local infoFrom =  " IA intercept "..debug.getinfo(1).currentline
 							spawnOn( "air", waypoints, group, pn, 0, infoFrom, flight, f, role)
-
-							-- group['lateActivation'] = true											--make group late activation "en vol"
-							-- group['uncontrolled'] = false
-							-- group['tasks'] = {}
 
 							local trig_n = Missionfunc + #mission.trig.funcStartup + 1										--next available trigger number
 							mission.trig.actions[trig_n] = "a_activate_group(" .. group.groupId .. "); mission.trig.func[" .. trig_n .. "]=nil;"
@@ -6155,7 +6088,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						y=0,
 					}
 					local onCV = false
-					if Data_configuration.SC_SpawnOn["Pedro"] == "deck"  and playerTask ~= "Intercept"  then
+					if Data_configuration.SC_SpawnOn["Pedro"] == "deck" and playerTask ~= "Intercept"  then
 						-- action = "From Parking Area"
 						-- type = "TakeOffParking"
 						action =  "From Parking Area Hot"
@@ -6177,6 +6110,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						alt = 60
 						pos.x = pedroLinkCV.x + 100
 						pos.y = pedroLinkCV.y + 100
+						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_PEDRO or not = { Turning Point ") end	
 					end
 
 					group.units[1].alt = alt
@@ -7402,7 +7336,7 @@ end
 							if unit.category and unit.category == "Heliports" then
 								if not warehouses.warehouses[unit.unitId] then
 									warehouses.warehouses[unit.unitId] = Data_warehouses
-									-- print("AtoFP: add warehouse for FARP "..unit.unitId.." || "..unit.name)
+									print("AtoFP: add warehouse for FARP "..unit.unitId.." || "..unit.name)
 								end
 							end
 						end
