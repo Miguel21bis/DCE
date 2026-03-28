@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "22.99.588"
+versionDCE["UTIL_Changelog.lua"] = "22.99.589"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "22.99.588"
+VersionDCE["UTIL_Changelog.txt"] = "22.99.589"
 --[[
 
 # DCE – Changelog
@@ -17,9 +17,12 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-##  Version 22.99.588
+##  Version 22.99.589
 	###  Fixed
 	F-100 no plyable
+
+	###  Changed
+	loadout OH58D and UH-1H strike range to 150000
 
 
 ##  Version 22.99.587

@@ -3,8 +3,9 @@
 -------------------------------------------------------------------------------------------------------
 
 if not versionDCE then versionDCE = {} end
-versionDCE["db_loadouts/db_loadouts_Heli.lua"] = "1.1.5"
+versionDCE["db_loadouts/db_loadouts_Heli.lua"] = "1.1.6"
 
+-- 1.1.6 - OH58D and UH-1H strike range to 150000
 -- 1.1.5 - No Mods
 -- 1.1.4 - UH-1H Loadout strike NAM Rockets HE 
 -- 1.1.3 - SH-3D missions adjustement
@@ -3006,7 +3007,7 @@ db_loadouts = {
 				expend = "Auto",
 				night = true,
 				adverseWeather = true,
-				range = 500000,
+				range = 150000,
 				firepower = 1,
 				vCruise = 55,
 				vAttack = 60,
@@ -3225,7 +3226,7 @@ db_loadouts = {
 				expend = "Auto",
 				night = true,
 				adverseWeather = true,
-				range = 200000,
+				range = 150000,
 				firepower = 1,
 				vCruise = 55,
 				vAttack = 60,
