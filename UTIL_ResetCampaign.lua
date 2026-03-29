@@ -2,22 +2,8 @@
 --Initiated by EventsTracker.lua running from within DCS if the mission was a first campaign mission
 --Initated by BAT_FirstMission.lua if a campaign is reset manually
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  cleanCode_a
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_ResetCampaign.lua"] = "1.12.59"
-------------------------------------------------------------------------------------------------------- 
--- cleanCode_a			(a springCleaning)
--- adjustment_c			(c targetList)(b PairsByKeys)(a Firstmission_flag)
--- modification M63_a	compatible Datacard Generator or CombatFlite
--- modification M61_a	SAR
--- modification M55_c	player can change the type of plane (c:triggers part)
--- modification Mxx_a	c# compatible
--- modification M53_a	simplification of the "Reserves" variable 
--- modification M45		compatible with 2.7.0
--- modification M40_f	Template Active GroundGroup moving front (f: sideBase)
--- modification M40		Pedro Helicopter
--- modification M35		version ScriptsMod
--- modification M34_Bl	custom FrequenceRadio (l new file name) (b: move file location)
+versionDCE["UTIL_ResetCampaign.lua"] = "1.12.60"
 ------------------------------------------------------------------------------------------------------- 
 
 
@@ -34,22 +20,6 @@ end
 require("Init/db_airbases")
 
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
-
--- --retrocompatibilie location UTIL_DataRadio file
--- --recherche en priorite le fichier UTIL_DataRadio dans le dossier ScriptsMod puis dans le dossier campagne
--- local radioFile = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua"
--- local testPath = io.open(radioFile, "r")																--cette maniere de chercer la presence d un fichier evite un plantage
--- if testPath ~= nil then																					--check si le fichier existe dans ScriptsMod
--- 	io.close(testPath)
--- 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
--- else
--- 	local radioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
--- 	local testPath2 = io.open(radioFile2, "r")
--- 	if testPath2 ~= nil then																			--check si le fichier exist dans le dossier campagne
--- 		io.close(testPath2)
--- 		dofile(radioFile2)
--- 	end
--- end
 
 if Firstmission_flag then																				--if the script is called by BAT_FirstMission.lua, then FirstMission is true and camp_status is reset to init. When called by DEBRIEF_Master.lua, block is skipped and camp_camp status carried over in mission is used.
 	local camp_str = "camp = " .. TableSerialization(camp, 0)										--make a string of campaign initial status table

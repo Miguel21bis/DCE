@@ -2204,7 +2204,7 @@ Action = {}
 
 	function Action.LoadFileBorder(file)
 
-		print("DcCT LoadFileBorder "..tostring(file))
+		-- print("DcCT LoadFileBorder "..tostring(file))
 
 		local minizip = require('minizip')
 		local zipFile = minizip.unzOpen("Files/" .. file, 'rb')
@@ -2219,7 +2219,7 @@ Action = {}
 		if missionWork then
 			local result = GetBoundary(missionWork)
 			if result then
-				print("DcCT LoadFileBorder GetBoundary success")
+				-- print("DcCT LoadFileBorder GetBoundary success")
 				SetBoundaryFromCamp()
 			else
 				AddLog("Error: GetBoundary failed for file "..tostring(file))

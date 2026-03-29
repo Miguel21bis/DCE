@@ -1092,7 +1092,7 @@ function GenerateIDUnit(unitName, type)
 		UnitByName[unitName] = idUnitCounter
 	end
 
-	print("GenerateIDUnit "..unitName.." | "..type.." | "..idUnitCounter)
+	-- print("GenerateIDUnit "..unitName.." | "..type.." | "..idUnitCounter)
 
 	return idUnitCounter
 end
@@ -1123,7 +1123,7 @@ function FirstCheck_Id()
 		end
 	end
 
-	_affiche(AllIdUnit, "warehouses ")
+	-- _affiche(AllIdUnit, "warehouses ")
 
 end
 
@@ -5489,14 +5489,6 @@ function LoadFileAndUpdate(from)
 	--remplit la table des frequences déjà utilisé dans la map ou les bases
 	AssignedFrequencies()
 
-	-- -- Recherche prioritaire du fichier UTIL_DataRadio dans ScriptsMod, sinon dans le dossier campagne
-	-- local radioFile = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua"
-	-- local radioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
-
-	-- if not try_dofile(radioFile) then
-	-- 	try_dofile(radioFile2)
-	-- end
-
 	--utilise ici le fichier Init/persistenceMP.lua s'il existe, pour facilité l'attribution des num tail/avion
 	local persistPath = "../../../Missions/Campaigns/"..camp.title.."/Init/persistenceMP.lua"
 	Try_dofile(persistPath)
@@ -5599,11 +5591,16 @@ function LoadFileAndUpdate(from)
 	CheckAll_Id()
 	if Debug.debug then print ("Lancement VIA UTIL_Fonction F 5687 (LoadFileAndUpdate)") end
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+	if not camp.boundary then
+		--creation des borders
+		GetBoundary()
+	end
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
 	if Debug.debug then print ("Lancement VIA UTIL_Fonction G 5690 (LoadFileAndUpdate)") end
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 	--**************INITIALEMENT DANS MAIN_NextMission *****************************
 	--**************INITIALEMENT DANS MAIN_NextMission *****************************
+
 
 end
 
@@ -6296,6 +6293,8 @@ end
 function GetBoundary(missionWork)
 
 	-- print("BOUNDARY GetBoundary _A missionWork "..tostring(missionWork).." camp.boundary "..tostring(camp.boundary) )
+
+	if not missionWork then missionWork = mission end
 		
 	local boundary = {
 		red = {},
@@ -6314,23 +6313,23 @@ function GetBoundary(missionWork)
 
 	-- creation des frontieres en fonction des dessins dans missionWork red et blue qui comporte le nom border ou boundary
 	if tableDrawings and tableDrawings.layers then
-		-- print("BOUNDARY GetBoundary _B tableDrawings.layers existe, on cherche une ligne border dans les layers de la mission")
+		print("BOUNDARY GetBoundary _B tableDrawings.layers existe, on cherche une ligne border dans les layers de la mission")
 
 		for layersN, layer in ipairs( tableDrawings.layers) do
-			-- print("BOUNDARY GetBoundary _C layer.name "..tostring(layer.name).." layer.objects "..tostring(layer.objects) )
+			print("BOUNDARY GetBoundary _C layer.name "..tostring(layer.name).." layer.objects "..tostring(layer.objects) )
 
 			if (layer.name == "Red" or layer.name == "Blue" or layer.name == "Neutral" ) and layer.objects and #layer.objects >= 1 then
-				-- print("BOUNDARY GetBoundary _D layer.name "..tostring(layer.name).." correspond à une faction et comporte des objets, on cherche un objet border ou boundary dans les objets du layer")
+				print("BOUNDARY GetBoundary _D layer.name "..tostring(layer.name).." correspond à une faction et comporte des objets, on cherche un objet border ou boundary dans les objets du layer")
 
 				for objetN, objet in ipairs(layer.objects) do
 					local testName = string.lower(objet.name)
-					-- print("BOUNDARY GetBoundary _E objet.name "..tostring(objet.name).." testName "..tostring(testName) )
+					print("BOUNDARY GetBoundary _E objet.name "..tostring(objet.name).." testName "..tostring(testName) )
 
 					if ( string.find( testName , "border") or string.find( testName , "boundary") or string.find( testName , "frontline")   ) and #objet.points >= 3 then
-						-- print("BOUNDARY GetBoundary _F objet.name "..tostring(objet.name).." correspond à une frontière et comporte au moins 3 points, on ajoute les points à la table boundary")
+						print("BOUNDARY GetBoundary _F objet.name "..tostring(objet.name).." correspond à une frontière et comporte au moins 3 points, on ajoute les points à la table boundary")
 
 						if objet.points and #objet.points >= 3 then
-							-- print("BOUNDARY GetBoundary _G objet.name "..tostring(objet.name).." comporte "..#objet.points.." points, on les ajoute à la table boundary")
+							print("BOUNDARY GetBoundary _G objet.name "..tostring(objet.name).." comporte "..#objet.points.." points, on les ajoute à la table boundary")
 
 							camp.boundary = camp.boundary or {}
 							camp.boundary.data = camp.boundary.data or {}
