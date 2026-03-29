@@ -3,15 +3,10 @@
 -- original code by ************ Carsten Gurk aka Don Rudi ***************
 -- modified by Miguel & Cef with kind permission of Don Rudi :)
 ------------------------------------------------------------------------------------------------------- 
--- last modification   cleanCode_a debug_c
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/CG_ArtySpotter.lua"] = "1.4.18"
+versionDCE["Mission Scripts/CG_ArtySpotter.lua"] = "1.4.19"
 ------------------------------------------------------------------------------------------------------- 
--- cleanCode_a				(a springCleaning)				
--- adjustment_						
--- debug_c					(c removeItemForGroup Init)
--- modification M77_m		CG_ArtySpotter (m subMenu)(l spotterAircraft)(i boundary)(h camp.spotter)(g tempo)(f smoke & remains)(e lineOfSight)(d artyZone)(c timeImpact)(b qty_Total_Shells)(a responseTimeVar)	
-------------------------------------------------------------------------------------------------------- 
+
 local version = "script merge 2.3_f_15h.00"
 
 env.info("CG_ArtySpotter: Start loading CG_ArtySpotter script created by Carsten Gurk aka Don Rudi")
@@ -759,7 +754,9 @@ artyAction = function ( initiatorName )
 						env.info("CG_ArtySpotter: artyPoint = nil ERROR ?")
 					end
 				end
+			else
 
+				env.info("CG_ArtySpotter: no found campL.boundary ")
 			end
 
 			local passZoneDistance = false
@@ -767,6 +764,9 @@ artyAction = function ( initiatorName )
 			local distPlayerTarget_Km
 			if nearestZone < artyDistance then
 				passZoneDistance = true
+				distKm = math.floor(nearestZone / 1000)
+				distPlayerTarget_Km = math.floor(distPlayerTarget / 1000)
+			else
 				distKm = math.floor(nearestZone / 1000)
 				distPlayerTarget_Km = math.floor(distPlayerTarget / 1000)
 			end
