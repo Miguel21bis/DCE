@@ -2,7 +2,7 @@
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_StaticAircraft.lua"] = "1.3.12"
+versionDCE["DC_StaticAircraft.lua"] = "1.3.13"
 ------------------------------------------------------------------------------------------------------- 
 if Debug.debug then
 	print("START DC_StaticAircraft.lua "..versionDCE["DC_StaticAircraft.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
@@ -97,7 +97,7 @@ local function AddUncontrolledAircraft(side, unit, number, parkingId, base)
 						{
 					},
 					["speed"] = 0,															--138.88888888889
-					["unitId"] = GenerateIDUnit("DcSA ".."Static " .. unit.name .. " " .. u .. "-1"),
+					["unitId"] = GenerateIDUnit("DcSA ".."Static " .. unit.name .. " " .. u .. "-1", unit.type),
 					["alt_type"] = "BARO",
 					["skill"] = unit.skill,
 					["hardpoint_racks"] = true,
@@ -129,7 +129,7 @@ local function AddUncontrolledAircraft(side, unit, number, parkingId, base)
 		end
 		
 		if unit.sidenumber and unit.sidenumber[1] and unit.sidenumber[2] then											--squadron has sidenumbers defined
-			group.units[1]["onboard_num"] = GetSidenumber(unit.name, unit.sidenumber[1], unit.sidenumber[2])			--get new sidenumber
+			group.units[1]["onboard_num"] = GetSidenumber(unit.name, unit.sidenumber[1])			--get new sidenumber
 		else																											--squadron has no sidenumbers defined
 			group.units[1]["onboard_num"] = "0" .. math.random(1, 99)													--us a random number
 		end

@@ -3,7 +3,7 @@
 -------------------------------------------------------------------------------------------------------
 -- last modification: debug_b
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_UpdateOOBGround.lua"] = "1.4.12"
+versionDCE["DC_UpdateOOBGround.lua"] = "1.4.13"
 ------------------------------------------------------------------------------------------------------- 
 -- debug_b					(ShipHealth < 66%)(a id duplicates)
 -- cleancode_a				(a springCleaning)
@@ -417,7 +417,7 @@ for k1,v1 in pairs(mission.coalition) do															--side table(red/blue)
 									["category"] = "Unarmed",
 									["canCargo"] = false,
 									["type"] = v2.vehicle.group[n].units[m].type,
-									["unitId"] = GenerateIDUnit("DcUooBG dead "..v2.vehicle.group[n].units[m].name),
+									["unitId"] = GenerateIDUnit("DcUooBG dead "..v2.vehicle.group[n].units[m].name, v2.vehicle.group[n].units[m].type),
 									["y"] = v2.vehicle.group[n].units[m].y,
 									["x"] = v2.vehicle.group[n].units[m].x,
 									["name"] = v2.vehicle.group[n].units[m].name,

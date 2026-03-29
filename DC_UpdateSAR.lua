@@ -3,7 +3,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  debug_h
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_UpdateSAR.lua"] = "1.4.19"
+versionDCE["DC_UpdateSAR.lua"] = "1.4.20"
 -------------------------------------------------------------------------------------------------------
 -- adjustement_g			(f coldAtStart)(d: enregistre les ref des circles dans la mission)(c inTheEnemyCamp)(b detect not camp_ZoneSAR.blue )(a boundary)
 -- cleanCode_a
@@ -304,7 +304,7 @@ local function addSoldierAliasPilot(soldier)
             [1] =
             {
                 ["type"] = "Soldier M4",
-                ["unitId"] = GenerateIDUnit(soldier.name),
+                ["unitId"] = GenerateIDUnit(soldier.name, "Soldier M4"),
                 ["livery_id"] = "winter",
                 ["skill"] = "Average",
                 ["y"] = tonumber(soldier.pos.y),

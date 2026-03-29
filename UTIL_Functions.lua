@@ -1,7 +1,7 @@
 --Various functions
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Functions.lua"] = "2.20.138"
+versionDCE["UTIL_Functions.lua"] = "2.20.139"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -1072,9 +1072,10 @@ function GenerateIDGroup(groupName)
 end
 
 -- Génère un nouvel ID d'unité unique
-function GenerateIDUnit(unitName)
+function GenerateIDUnit(unitName, type)
 	local maxAttempts = 10000
 	local attempts = 0
+
 	repeat
 		idUnitCounter = idUnitCounter + 1
 		attempts = attempts + 1
@@ -1083,10 +1084,15 @@ function GenerateIDUnit(unitName)
 		end
 	until not AllIdUnit[idUnitCounter]
 
-	AllIdUnit[idUnitCounter] = unitName
+	AllIdUnit[idUnitCounter] = {
+		name = unitName,
+		type = type,
+	}
 	if unitName then
 		UnitByName[unitName] = idUnitCounter
 	end
+
+	print("GenerateIDUnit "..unitName.." | "..type.." | "..idUnitCounter)
 
 	return idUnitCounter
 end
@@ -1105,7 +1111,8 @@ function FirstCheck_Id()
 							-- Vérifie les doublons de unitId
 							for unitN, unit in pairs(groupData.units or {}) do
 								if unit.unitId == warhouse_Id then
-									AllIdUnit[unit.unitId] = unit.name
+									AllIdUnit[unit.unitId] = {name = unit.name, type = unit.type}
+									break
 								end
 							end
 
@@ -1148,7 +1155,7 @@ function CheckAll_Id()
                         for Nunit, unit in pairs(groupData.units or {}) do
                             if AllIdUnit[unit.unitId] then
                             else
-                                AllIdUnit[unit.unitId] = unit.name
+                                AllIdUnit[unit.unitId] = {name = unit.name, type = unit.type}
                                 UnitByName[unit.name] = unit.unitId
                             end
                         end
@@ -1173,7 +1180,7 @@ function CheckAll_Id()
                         for Nunit, unit in pairs(groupData.units or {}) do
                             if AllIdUnit[unit.unitId] then
                             else
-                                AllIdUnit[unit.unitId] = unit.name
+                                AllIdUnit[unit.unitId] = {name = unit.name, type = unit.type}
                                 UnitByName[unit.name] = unit.unitId
                             end
                         end
@@ -1212,10 +1219,15 @@ function CheckAndFixAllIds()
                         end
                         -- Vérifie les doublons de unitId
                         for Nunit, unit in pairs(group.units or {}) do
-                            if AllIdUnit[unit.unitId] and AllIdUnit[unit.unitId] ~= unit.name then
-                                table.insert(unitIdError, unit)
+                            if AllIdUnit[unit.unitId] and AllIdUnit[unit.unitId].name ~= unit.name then
+								--on evite de changer l'Id si c'est une FARP, a cause des multiple lien (warhouse, linkUnit, etc...)
+								if string.find(AllIdUnit[unit.unitId].type, "FARP") then
+                                	table.insert(unitIdError, unit)
+								else
+									table.insert(unitIdError, AllIdUnit[unit.unitId])
+								end
                             else
-                                AllIdUnit[unit.unitId] = unit.name
+                                AllIdUnit[unit.unitId] = {name = unit.name, type = unit.type}
                                 UnitByName[unit.name] = unit.unitId
                             end
                         end
@@ -1235,7 +1247,7 @@ function CheckAndFixAllIds()
 
     -- 3. Correction des doublons de unitId
     for _, unit in ipairs(unitIdError) do
-        unit.unitId = GenerateIDUnit(unit.name)
+        unit.unitId = GenerateIDUnit(unit.name, unit.type)
         if Debug and Debug.debug then
             print("Nouveau unitId attribué : "..tostring(unit.unitId).." pour "..tostring(unit.name))
         end

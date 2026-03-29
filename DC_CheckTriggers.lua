@@ -4,7 +4,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification: M71_c
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_CheckTriggers.lua"] = "1.16.97"
+versionDCE["DC_CheckTriggers.lua"] = "1.16.98"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -2049,7 +2049,7 @@ Action = {}
 								if groupAlreadyExist then
 									movedXY(unit, category )
 								else
-									unit.unitId = GenerateIDUnit()
+									unit.unitId = GenerateIDUnit(unitname, unit.type)
 
 									if unit.category == "Heliports" then
 										db_airbases[groupData.name] = {

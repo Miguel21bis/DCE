@@ -2,7 +2,7 @@
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_FlightPlan.lua"] = "1.58.292"
+versionDCE["ATO_FlightPlan.lua"] = "1.58.293"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -4207,7 +4207,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								end
 
 								-- local unitIdTemp = GenerateIDUnit("AtoFP ".. "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. (f + addNflight) .. "-1")
-								local unitIdTemp = GenerateIDUnit(groupName.. "-1")
+								local unitIdTemp = GenerateIDUnit(groupName.. "-1", flight[f]["type"])
 
 								local task_entry = {
 									["enabled"] = true,
@@ -4903,7 +4903,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					local unitName = groupName .. "-" .. n
 					local unitIdTemp = 1
 					if not UnitByName[unitName] then
-						unitIdTemp = GenerateIDUnit(unitName)
+						unitIdTemp = GenerateIDUnit(unitName, flight[f]["type"])
 					else
 						unitIdTemp = UnitByName[unitName]
 					end
@@ -6533,7 +6533,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					for i=1 , #groupRTB.units do
-						local unitId_ = GenerateIDUnit("AtoFP ".."Recovery "..groupRTB.units[i].name)
+						local unitId_ = GenerateIDUnit("AtoFP ".."Recovery "..groupRTB.units[i].name, groupRTB.units[i].type)
 						groupRTB.units[i].payload.fuel = groupRTB.units[i].payload.fuel * 0.80
 						groupRTB.units[i].name = "Recovery "..groupRTB.units[i].name
 						groupRTB.units[i].unitId = unitId_
@@ -7964,7 +7964,7 @@ if testPosRunwayImpact then
 						{
 
 							["type"] = "Soldier M4",
-							["unitId"] = GenerateIDUnit("AtoFP ".."UnitRunway_"..baseName.."_"..e),
+							["unitId"] = GenerateIDUnit("AtoFP ".."UnitRunway_"..baseName.."_"..e, "Soldier M4"),
 							["livery_id"] = "winter",
 							["skill"] = "Average",
 							["y"] = tonumber(element.y),

@@ -3,18 +3,9 @@
 -- avec la commmande w2
 -- Supprime un Groupe entier en donnant son numero de groupe
 ------------------------------------------------------------------------------------------------------- 
--- Last Modification M90_a cleancode_b
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Divers.lua"] = "1.5.28"
+versionDCE["UTIL_Divers.lua"] = "1.5.29"
 ------------------------------------------------------------------------------------------------------- 
--- cleancode_b				(a springCleaning)
--- adjustment_a				(a ajout dataMap)
--- updateFunction_d			(d helpBalancePower())(c KillTarget())(b fuelConsumption())(a DelGroup())
--- modification M90_a		missionWithIcone
--- modification M38_n		Check and Help CampaignMaker (n: delete Ngroug)
-------------------------------------------------------------------------------------------------------- 
-
-
 
 require("Active/oob_ground")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
@@ -682,7 +673,7 @@ elseif ArgTools == "fuelConsumption" then
 							['DCE_payloadtName'] = loadout.name,
 						},
 						["AddPropAircraft"] = loadout.AddPropAircraft,
-						["unitId"] = GenerateIDUnit(unitName),
+						["unitId"] = GenerateIDUnit(unitName, typePlane),
 						["alt_type"] = "BARO",
 						["skill"] = "High",
 						["hardpoint_racks"] = true,
@@ -839,7 +830,7 @@ elseif ArgTools == "fuelConsumption" then
 							['DCE_payloadtName'] = loadout.name,
 						},
 						["AddPropAircraft"] = loadout.AddPropAircraft,
-						["unitId"] = GenerateIDUnit(unitName),
+						["unitId"] = GenerateIDUnit(unitName, typePlane),
 						["alt_type"] = "BARO",
 						["skill"] = "High",
 						["hardpoint_racks"] = true,
