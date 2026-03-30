@@ -607,7 +607,6 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                 local mia_Since
 
                 if pilot.date then
-
                     mia_Since = SecondsBetween( camp.date, pilot.date) / (24 * 60 * 60)
                 end
 
@@ -634,7 +633,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
 
                     end
                 end
-
+                
                 --*************************************************************
                 if camp.code_loadout == "NAM" then
 

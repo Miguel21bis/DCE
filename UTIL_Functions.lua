@@ -3660,26 +3660,6 @@ function CheckPointInPolygon(point, polygon, show)
     local j = #polygon
     for i = 1, #polygon do
 
-		-- if show then
-		-- 	_affiche(point, "point")
-
-		-- 	print("UtilsF i "..tostring(i))
-		-- 	_affiche(polygon[i], "polygon[i]")
-
-		-- 	print("UtilsF j "..tostring(j))
-		-- 	_affiche(polygon[j], "polygon[j]")
-
-		-- 	print("UtilsF polygon[i].x "..tostring(polygon[i].x))
-		-- 	print("UtilsF polygon[i].y "..tostring(polygon[i].y))
-
-		-- 	print("UtilsF point.x "..tostring(point.x))
-		-- 	print("UtilsF point.y "..tostring(point.y))
-
-		-- 	print("UtilsF polygon[j].x "..tostring(polygon[j].x))
-		-- 	print("UtilsF polygon[j].y "..tostring(polygon[j].y))
-
-		-- end
-
         if (polygon[i].y < point.y
 		and polygon[j].y >= point.y
 		or polygon[j].y < point.y
