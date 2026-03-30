@@ -327,7 +327,7 @@ end
 
 ----- prepare triggers to run files in mission with tempo-----
 function AddFileTriggerTempo(arg_filename, arg_time, arg_predicat0, arg_actionPredicate0)
-
+	-- print("AddFileTriggerTempo called with filename: "..tostring(arg_filename)..", time: "..tostring(arg_time)..", predicate: "..tostring(arg_predicat0))
 	mission.maxDictId = mission.maxDictId +1
 	local table_trigrulesAction = {}
 	-- local trig_n =  #mission.trig.actions + 1										--next available trigger number
@@ -363,9 +363,11 @@ function AddFileTriggerTempo(arg_filename, arg_time, arg_predicat0, arg_actionPr
 
 
 	if arg_filename and arg_filename ~= "" then
+
 		mapResource["ResKey_Action_" .. mission.maxDictId] = arg_filename
 		--							[1] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_6\"));",
 		mission.trig.actions[trig_n] = "a_do_script_file(getValueResourceByKey('ResKey_Action_"..mission.maxDictId.."')); mission.trig.func[" .. trig_n .. "]=nil;"
+		
 	else
 		--[3] = "a_do_script(\"ctld.JTACAutoLase('JTAC1', 1688, false,\\\"all\\\")\"); mission.trig.func[3]=nil;",		
 		mission.trig.actions[trig_n] = s..' mission.trig.func[' .. trig_n .. ']=nil;'
@@ -471,9 +473,7 @@ addFileTrigger("beacon.ogg", nil, nil, "a_out_sound_c")
 addFileTrigger("beaconsilent.ogg", nil, nil, "a_out_sound_c")
 -- AddFileTrigger("CG_ArtySpotter.lua")												--https://www.digitalcombatsimulator.com/fr/files/3339128/
 
-if AAA_Barrage then
-	AddFileTriggerTempo("AAA_barrage.lua", 1.5, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})
-end
+
 
 AddFileTriggerTempo("CG_ArtySpotter.lua", 2, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})
 
@@ -1095,6 +1095,11 @@ if mission_ini.preset_AAA_Barrage and type(mission_ini.preset_AAA_Barrage) == "n
 	end
 end
 
+if AAA_Barrage then
+	-- print("AAA_Barrage A : Adding trigger for AAA Barrage preset "..tostring(mission_ini.preset_AAA_Barrage))
+	AddFileTriggerTempo("AAA_barrage.lua", 1.5, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})
+end
+
 --création d'un camp pour camp_status InGame nettement plus leger
 local campL = {
 
@@ -1443,6 +1448,18 @@ if not Debug.debug then
 	os.remove("../"..camp.title.."/Debug/FlightPlan_FLIGHT_Debug.txt")
 end
 
+
+if Debug.debug then
+	local data_str = "campL = " .. TableSerialization(campL, 0)								--make a string
+	local dataFile = io.open("Debug/campL.lua", "w") or error("Failed to open debug file")
+	dataFile:write(data_str)																		--save new data
+	dataFile:close()
+
+	data_str = "mapResource = " .. TableSerialization(mapResource, 0)								--make a string
+	dataFile = io.open("Debug/mapResource.lua", "w") or error("Failed to open debug file")
+	dataFile:write(data_str)																		--save new data
+	dataFile:close()
+end
 
 ----- save updated status files  -----
 table.sort(oob_air.blue, function(a, b) return a.type:upper() < b.type:upper() end)
