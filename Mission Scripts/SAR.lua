@@ -3,7 +3,7 @@
 -- .
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/SAR.lua"] = "1.4.25"
+versionDCE["Mission Scripts/SAR.lua"] = "1.4.26"
 ------------------------------------------------------------------------------------------------------- 
 
 
@@ -16,7 +16,7 @@ local nbManhunt = {
 	[3] = 0,
 }
 
-local NB_MAX_MANHUNT = 30
+local NB_MAX_MANHUNT = 40
 
 local guideSAR = {}
 local walkEjectedPilot = {}
@@ -423,34 +423,15 @@ function AddSoldierAliasManhunt(ejectedPilot)
 		enemyCoalition = 1
 	end
 
-	-- coalitionIdNumeric = {
-	-- 	[0] = "neutral",
-	-- 	[1] = "red",
-	-- 	[2] = "blue",
-	-- }
-
-	-- _affiche(coalitionIdNumeric, "coalitionIdNumeric")
 	local manhuntSide = CoalitionIdToName[enemyCoalition]
-
-	-- env.info( "DCE_SAR_AddSoldierAliasManhunt 01 enemyCoalition:  "..tostring(enemyCoalition).." manhuntSide "..tostring(manhuntSide))
-
-	-- env.info( "DCE_SAR_AddSoldierAliasManhunt C ejectedPilotName:  "..tostring(ejectedPilotName).." ejPilCoalitionId: "..tostring(ejPilCoalitionId).." enemyCoalition: "..tostring(enemyCoalition))
-	-- env.info( "DCE_SAR_AddSoldierAliasManhunt D coalitionIdNumeric[enemyCoalition]:  "..tostring(CoalitionIdToName[enemyCoalition]))
-
 	local nMaxCountry = #env.mission.coalition[CoalitionIdToName[enemyCoalition]].country
 	local randomNCountry  = math.random(1,nMaxCountry )
 	local randomIdCountry = env.mission.coalition[CoalitionIdToName[enemyCoalition]].country[randomNCountry].id
 	local posEjectedPilotVec3 = ejectedPilot:getPoint()
 
-	-- env.info( "DCE_SAR_AddSoldierAliasManhunt E randomNCountry:  "..tostring(randomNCountry).." randomIdCountry: "..tostring(randomIdCountry))
-
 	for n = 1, 6 do
 		local portionCercle = 60*n
 		local distance = math.random(35, 65) * 100
-		-- local pointTest = GetOffsetPoint( {x=PosEjectedPilot.x, y=PosEjectedPilot.z}, portionCercle, 5000)
-		-- local pointSelected = pointTest
-		-- local testLand 
-
 		-- local testAlti = land.getHeight({x = PosEjectedPilot.x, y = PosEjectedPilot.z})
 			-- land.SurfaceType 
 			-- LAND             1
@@ -462,10 +443,8 @@ function AddSoldierAliasManhunt(ejectedPilot)
 			-- 	x = PilotEjection.x,
 			-- 	y = PilotEjection.z,
 			-- }
-		-- local testX = PosEjectedPilot.x
-		-- local testY = PosEjectedPilot.z
+
 		local i = 1
-		-- local alti 
 		local altiSelected = 999999
 
 		local pointSelected = {
@@ -477,8 +456,6 @@ function AddSoldierAliasManhunt(ejectedPilot)
 		repeat
 
 			portionCercle = portionCercle + 1
-			-- local distance = math.random(35, 65)
-			-- distance = distance * 100
 			i = i + 1
 			local testPoint = GetOffsetPoint( {x=posEjectedPilotVec3.x, y=posEjectedPilotVec3.z}, portionCercle, distance)
 			local testAlti = land.getHeight({testPoint.x, testPoint.y})
@@ -1367,11 +1344,20 @@ local function checkAddingManhunt()
 	-- if 1==1 then
 	-- 	return
 	-- end
+
+    -- distanceFromFrontline
+	table.sort(campL.SAR.pilotEjected, function(a, b)
+		local distA = a.distanceFromFrontline or math.huge
+		local distB = b.distanceFromFrontline or math.huge
+
+		return distA < distB
+	end)
+
 	local nbOfTargetMan = {}
-	for MGRS_Chute, zone in pairs(ZoneSAR) do
-		if not nbOfTargetMan[MGRS_Chute] then nbOfTargetMan[MGRS_Chute] = 0 end
-		for N_Pilot, ejPil in ipairs(zone) do
-			if ejPil.name and ejPil.embarked ~= true and ( not nbOfTargetMan[MGRS_Chute] or nbOfTargetMan[MGRS_Chute] < 2 )   then
+	for mgrs_Chute, zone in pairs(ZoneSAR) do
+		if not nbOfTargetMan[mgrs_Chute] then nbOfTargetMan[mgrs_Chute] = 0 end
+		for pilotN, ejPil in ipairs(zone) do
+			if ejPil.name and ejPil.embarked ~= true and ( not nbOfTargetMan[mgrs_Chute] or nbOfTargetMan[mgrs_Chute] < 2 )   then
 				local unitEjPil = Unit.getByName(ejPil.name)
 
 				if unitEjPil and ejPil.coalitionId and nbManhunt[ejPil.coalitionId] and nbManhunt[ejPil.coalitionId] < NB_MAX_MANHUNT then
@@ -1392,11 +1378,11 @@ local function checkAddingManhunt()
 
 					if ejPil.inTheEnemyCamp then
 
-						env.info( "DCE_SAR:checkAddingManhunt EEE "..tostring(MGRS_Chute).." | "..tostring(ejPil.name))
+						env.info( "DCE_SAR:checkAddingManhunt EEE "..tostring(mgrs_Chute).." | "..tostring(ejPil.name))
 						env.info( "DCE_SAR:checkAddingManhunt timer.scheduleFunction(DespawnSoldierAliasPilot "..tostring(ejPil.name))
 
 						timer.scheduleFunction(AddSoldierAliasManhunt, unitEjPil, timer.getTime() + 2)
-						nbOfTargetMan[MGRS_Chute] = nbOfTargetMan[MGRS_Chute] + 1
+						nbOfTargetMan[mgrs_Chute] = nbOfTargetMan[mgrs_Chute] + 1
 					end
 
 				end
