@@ -776,11 +776,9 @@ function Add_MGRS_Chute(pilot)
 	end
 
 	-- Construct final strings
-	pilot.MGRS_Chute = grid.UTMZone .. "_" ..
-		grid.MGRSDigraph .. "_Zone_" .. zoneNumber
+	pilot.MGRS_Chute = grid.UTMZone .. "_" .. grid.MGRSDigraph .. "_Zone_" .. zoneNumber
 
-	pilot.MGRS_Chute_10KM = grid.UTMZone .. "_" ..
-		grid.MGRSDigraph .. "_" .. E .. "_" .. N
+	pilot.MGRS_Chute_10KM = grid.UTMZone .. "_" .. grid.MGRSDigraph .. "_" .. E .. "_" .. N
 
 	return pilot
 end

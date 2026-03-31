@@ -16,7 +16,7 @@ local nbManhunt = {
 	[3] = 0,
 }
 
-local NB_MAX_MANHUNT = 40
+local NB_MAX_MANHUNT = 20
 
 local guideSAR = {}
 local walkEjectedPilot = {}
@@ -58,6 +58,14 @@ local createWreckCrew = {}
 -- 	}
 -- }
 
+-- distanceFromFrontline
+table.sort(campL.SAR.pilotEjected, function(a, b)
+	local distA = a.distanceFromFrontline or math.huge
+	local distB = b.distanceFromFrontline or math.huge
+
+	return distA < distB
+end)
+
 --ajoute la table (camp.SAR.pilotEjected) dans SAR  pour n'avoir qu'une seule table
 for pilotN, ejectedPilot in ipairs(campL.SAR.pilotEjected) do
 	if ejectedPilot and ejectedPilot.MGRS_Chute   then
@@ -67,6 +75,18 @@ for pilotN, ejectedPilot in ipairs(campL.SAR.pilotEjected) do
 		table.insert( ZoneSAR[ejectedPilot.MGRS_Chute], ejectedPilot)
 	end
 end
+
+if campL.debug then
+	local logStr = "ZoneSAR = " .. TableSerialization(ZoneSAR, 0)
+	local logFile = io.open(PathDCE .. "Debug\\ZoneSAR.lua", "w")
+	if logFile then
+		logFile:write(logStr)
+		logFile:close()
+	else
+		env.info("DCE_AFAC : Failed to open log ZoneSAR file for writing.")
+	end
+end
+
 
 function DespawnSoldierAliasPilot(arg)
 	local pilotName = arg[1]
@@ -313,18 +333,8 @@ end
 
 function AddSoldierAliasManhunt(ejectedPilot)
 
+	local manhuntN = 0
 	local function AddMultipleSoldier(ejectedPilotName, randomIdCountry, point, n)
-
-		env.info( "DCE_SAR_AddSoldierAliasManhunt A randomIdCountry:  "..tostring(randomIdCountry))
-
-		if not soldierAliasManhunt[randomIdCountry] then soldierAliasManhunt[randomIdCountry] = 0 end
-
-		-- _affiche(soldierAliasManhunt[randomIdCountry], "SoldierAliasManhunt[randomIdCountry]")
-
-		if soldierAliasManhunt[randomIdCountry] > 15 then
-			env.info( "DCE_SAR_AddSoldierAliasManhunt Z return:  ")
-			return
-		end
 
 		env.info( "DCE_SAR_AddSoldierAliasManhunt B ejectedPilotName:  "..tostring(ejectedPilotName).." randomIdCountry: "..tostring(randomIdCountry).." n: "..tostring(n))
 
@@ -409,7 +419,8 @@ function AddSoldierAliasManhunt(ejectedPilot)
 		}
 
 		coalition.addGroup(randomIdCountry, Group.Category.GROUND, addGroup)
-		soldierAliasManhunt[randomIdCountry] = soldierAliasManhunt[randomIdCountry] + 1
+
+		manhuntN = manhuntN + 1
 	end
 
 
@@ -493,9 +504,10 @@ function AddSoldierAliasManhunt(ejectedPilot)
 		if altiSelected < 999999 and randomSpawn and rightSide then
 			env.info( "DCE_SAR_AddSoldierAliasManhunt G ejectedPilotName:  "..tostring(ejectedPilotName).." randomIdCountry: "..tostring(randomIdCountry).." n: "..tostring(n))
 			AddMultipleSoldier(ejectedPilotName, randomIdCountry, pointSelected, n)
-			nbManhunt[ejPilCoalitionId] = nbManhunt[ejPilCoalitionId] + 1
 		end
 	end
+
+	return manhuntN
 
 end	--function AddSoldierAliasManhunt(EjectedPilot)
 
@@ -1345,44 +1357,55 @@ local function checkAddingManhunt()
 	-- 	return
 	-- end
 
-    -- distanceFromFrontline
-	table.sort(campL.SAR.pilotEjected, function(a, b)
-		local distA = a.distanceFromFrontline or math.huge
-		local distB = b.distanceFromFrontline or math.huge
+    -- -- distanceFromFrontline
+	-- table.sort(campL.SAR.pilotEjected, function(a, b)
+	-- 	local distA = a.distanceFromFrontline or math.huge
+	-- 	local distB = b.distanceFromFrontline or math.huge
 
-		return distA < distB
-	end)
+	-- 	return distA < distB
+	-- end)
 
-	local nbOfTargetMan = {}
+
+
+	-- local nbOfTargetMan = {}
 	for mgrs_Chute, zone in pairs(ZoneSAR) do
-		if not nbOfTargetMan[mgrs_Chute] then nbOfTargetMan[mgrs_Chute] = 0 end
+		-- if not nbOfTargetMan[mgrs_Chute] then nbOfTargetMan[mgrs_Chute] = 0 end
+		env.info( "DCE_SAR_checkAddingManhunt() A MGRS_Chute: "..tostring(mgrs_Chute).." | #zone: "..tostring(#zone))
+		
 		for pilotN, ejPil in ipairs(zone) do
-			if ejPil.name and ejPil.embarked ~= true and ( not nbOfTargetMan[mgrs_Chute] or nbOfTargetMan[mgrs_Chute] < 2 )   then
+			env.info( "DCE_SAR_checkAddingManhunt() B MGRS_Chute: "..tostring(mgrs_Chute).." | pilotN: "..tostring(pilotN).." | ejPil.name: "..tostring(ejPil.name).." | ejPil.embarked: "..tostring(ejPil.embarked).." |distanceFromFrontline: "..tostring(ejPil.distanceFromFrontline))
+			-- if ejPil.name and ejPil.embarked ~= true and ( not nbOfTargetMan[mgrs_Chute] or nbOfTargetMan[mgrs_Chute] < 2 )   then
+			
+			if ejPil.name and ejPil.embarked ~= true then
 				local unitEjPil = Unit.getByName(ejPil.name)
+				env.info( "DCE_SAR_checkAddingManhunt() C MGRS_Chute: "..tostring(mgrs_Chute).." | pilotN: "..tostring(pilotN).." | unitEjPil: "..tostring(unitEjPil).." nbManhunt: "..tostring(nbManhunt[ejPil.coalitionId]))
 
 				if unitEjPil and ejPil.coalitionId and nbManhunt[ejPil.coalitionId] and nbManhunt[ejPil.coalitionId] < NB_MAX_MANHUNT then
-					env.info( "")
-					env.info( "DCE_SAR:checkAddingManhunt   ejectedPilot.name | "..tostring(ejPil.name).." ejectedPilot.inTheEnemyCamp "..tostring( ejPil.inTheEnemyCamp))
+					env.info( "DCE_SAR_checkAddingManhunt() D ejectedPilot.sideName | "..tostring(ejPil.sideName).." ejectedPilot.coalitionId "..tostring(ejPil.coalitionId))
 
 					local rightSideOfBorder
 					if campL.boundary and campL.boundary[ejPil.sideName] and campL.boundary[ejPil.sideName] ~= nil then
 						rightSideOfBorder = CheckPointInPoly_XY_2(ejPil.pos, campL.boundary[ejPil.sideName])
-						env.info( "DCE_checkAddingManhunt?  CCC boundary rightSideOfBorder __"..tostring(rightSideOfBorder).."__ ejectedPilot.sideName: "..tostring(ejPil.sideName))
-						
+						env.info( "DCE_SAR_checkAddingManhunt() E boundary rightSideOfBorder?  "..tostring(rightSideOfBorder))
+
                         if rightSideOfBorder == nil or rightSideOfBorder == false then
                             ejPil.inTheEnemyCamp = true
-                            env.info("DCE_checkAddingManhunt? DDD boundary  ejectedPilot.inTheEnemyCamp = true  ")
+                            env.info( "DCE_SAR_checkAddingManhunt() E1 boundary rightSideOfBorder?  "..tostring(rightSideOfBorder).." so ejPil.inTheEnemyCamp = true")
                         end
 						
 					end
 
 					if ejPil.inTheEnemyCamp then
 
-						env.info( "DCE_SAR:checkAddingManhunt EEE "..tostring(mgrs_Chute).." | "..tostring(ejPil.name))
-						env.info( "DCE_SAR:checkAddingManhunt timer.scheduleFunction(DespawnSoldierAliasPilot "..tostring(ejPil.name))
+						nbManhunt[ejPil.coalitionId] = nbManhunt[ejPil.coalitionId] or 0
 
-						timer.scheduleFunction(AddSoldierAliasManhunt, unitEjPil, timer.getTime() + 2)
-						nbOfTargetMan[mgrs_Chute] = nbOfTargetMan[mgrs_Chute] + 1
+						env.info( "DCE_SAR_checkAddingManhunt() F addManhunt  "..tostring(ejPil.name).." | coalitionId: "..tostring(ejPil.coalitionId).." | nbManhunt: "..tostring(nbManhunt[ejPil.coalitionId]))
+
+						local manhunt_N  = AddSoldierAliasManhunt(unitEjPil)
+						nbManhunt[ejPil.coalitionId] = nbManhunt[ejPil.coalitionId] + manhunt_N
+
+						-- timer.scheduleFunction(AddSoldierAliasManhunt, unitEjPil, timer.getTime() + 2)
+						-- nbOfTargetMan[mgrs_Chute] = nbOfTargetMan[mgrs_Chute] + 1
 					end
 
 				end
