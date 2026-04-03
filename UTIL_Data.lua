@@ -560,7 +560,6 @@ TaskByPlane = {
 		["MirageF1"] = true,			--Mod
 
 		["JF-17"] = true,
-		["vwv_mig17f"] = true,			--Mod
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-29S"] = true,
@@ -1247,21 +1246,6 @@ Data_divers = {
 				["INSAlignmentStored"] = false,
 			},
 		},
-		-- Tasks = {
-		-- 	aircraft_task(CAP),
-		-- 	aircraft_task(Escort),
-		-- 	aircraft_task(FighterSweep),
-		-- 	aircraft_task(Intercept),
-		-- 	aircraft_task(Reconnaissance),
-		-- 	aircraft_task(GroundAttack),
-		-- 	aircraft_task(CAS),
-		--   	aircraft_task(AFAC),
-		-- 	aircraft_task(RunwayAttack),
-		-- 	aircraft_task(PinpointStrike),
-		-- 	aircraft_task(AntishipStrike),
-		-- 	aircraft_task(SEAD),
-	  	-- },
-
 		vCruise = 230,
 		hCruise = 9140,
 		refuellingReceptacleType = "drogue"
@@ -1282,20 +1266,6 @@ Data_divers = {
 				["INSAlignmentStored"] = false,
 			},
 		},
-		-- Tasks = {
-		-- 	aircraft_task(CAP),
-		-- 	aircraft_task(Escort),
-		-- 	aircraft_task(FighterSweep),
-		-- 	aircraft_task(Intercept),
-		-- 	aircraft_task(Reconnaissance),
-		-- 	aircraft_task(GroundAttack),
-		-- 	aircraft_task(CAS),
-		--   	aircraft_task(AFAC),
-		-- 	aircraft_task(RunwayAttack),
-		-- 	aircraft_task(PinpointStrike),
-		-- 	aircraft_task(AntishipStrike),
-		-- 	aircraft_task(SEAD),
-	  	-- },
 		vCruise = 230,
 		hCruise = 9140,
 		refuellingReceptacleType = "drogue"

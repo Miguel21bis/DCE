@@ -955,7 +955,7 @@ end
 
 if Debug.debug then
 	local camp_str = "AtoTiming = " .. TableSerialization(ATO, 0)						--make a string
-	local campFile = io.open("Debug/ATO_AtoTiming.lua", "w") or error("Failed to open debug file")
+	local campFile = io.open("Debug/ATO_3_AtoTiming.lua", "w") or error("Failed to open debug file")
 	campFile:write(camp_str)															--save new data
 	campFile:close()
 

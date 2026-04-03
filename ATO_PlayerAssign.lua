@@ -955,7 +955,7 @@ if Debug.debug then
 
 
 	camp_str = "ATO_ATO_PA = " .. TableSerialization(ATO, 0)						--make a string
-	campFile = io.open("Debug/ATO_ATO_PA.lua", "w")	 or error("Failed to open debug file")
+	campFile = io.open("Debug/ATO_2_ATO_PA.lua", "w")	 or error("Failed to open debug file")
 	campFile:write(camp_str)																		--save new data
 	campFile:close()
 

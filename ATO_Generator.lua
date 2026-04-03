@@ -3,7 +3,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  M90_a
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_Generator.lua"] = "1.21.136"
+versionDCE["ATO_Generator.lua"] = "1.21.137"
 ------------------------------------------------------------------------------------------------------- 
 	
 
@@ -3629,17 +3629,18 @@ local function createATO_table(draftPriority)
 														debugE = debugE .. " _F_ || elseAFTER assigned: "..assigned
 													end
 
-													-- if assign >= 4 then															--if more than 4 aircraft are to be assigned
-													-- 	assigned = 4																--assign flight of 4 aircaft
-													-- else
-													-- 	assigned = assign															--else assign flight size of what is left
-													-- end
-
-													if arg_Entry.main_overideMP then
-														if multiPlaneSet[side][draft.type][draft.task] then
-															assigned = arg_Entry.number
-														end
+													if arg_Assign >= 4 then															--if more than 4 aircraft are to be assigned
+														assigned = 4																--assign flight of 4 aircaft
+													else
+														assigned = arg_Assign															--else assign flight size of what is left
 													end
+
+													--ATTENTION, le code plus bas est débile, et crée des flights de 6 (par exemple)
+													-- if arg_Entry.main_overideMP then
+													-- 	if multiPlaneSet[side][draft.type][draft.task] then
+													-- 		assigned = arg_Entry.number
+													-- 	end
+													-- end
 
 													if isDebugModeC then
 														debugLog(draft.id.." AtoG passe C_11 |||BEFORE insert/create ATO table|||  _A_" ..debugA.." \r\n _E_ "..debugE.." \r\n assigned "..assigned)
@@ -4258,7 +4259,7 @@ end
 if Debug.debug and Debug.Generator.affiche and string.find(Debug.Generator.chapter, "C") then
 	
 	local camp_str = "ATO = " .. TableSerialization(ATO, 0)
-	local campFile = io.open("Debug/ATO_AtoGenerator.lua", "w")
+	local campFile = io.open("Debug/ATO_1_AtoGenerator.lua", "w")
 	if campFile then
 		campFile:write(camp_str)
 		campFile:close()
