@@ -3,7 +3,7 @@
 --Functions accessed via LUA Run Script
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "3.16.59"
+versionDCE["Mission Scripts/AddCommandRadioF10.lua"] = "3.16.60"
 ------------------------------------------------------------------------------------------------------- 
 
 if not campL.debugInGamePopup then
@@ -2889,7 +2889,7 @@ function SAR_fct.menuF10_SAR(arg)
 
 						env.info("DCE_menuF10_SAR _F4 pilotN "..tostring(pilotN).." ejPil.name "..tostring(ejPil.name).." distance to player "..tostring(distance))
 
-						if distance <= 40000 then--if distance <= 140000 
+						if distance <= 30000 then--if distance <= 140000 
 
 							env.info("DCE_menuF10_SAR __G pilotN "..tostring(pilotN).." ejPil.name "..tostring(ejPil.name).." is in range for radio transmission")
 							

@@ -3,7 +3,7 @@
 -- .
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/SAR.lua"] = "1.4.26"
+versionDCE["Mission Scripts/SAR.lua"] = "1.4.27"
 ------------------------------------------------------------------------------------------------------- 
 
 
@@ -1466,7 +1466,7 @@ function StartRadioTransmission(arg)
     local ejPilData = arg[2]
 	local ejPilotVec3 = arg[3]
 
-	_affiche(arg, "DCE_SAR: arg")
+	-- _affiche(arg, "DCE_SAR: arg")
 
 	env.info( "DCE_SAR:StartRadioTransmission A gpGid "..tostring(gpGid).." |ejPilData.name: "..tostring(ejPilData.name).." |ejPilotVec3: "..tostring(ejPilotVec3))
 
