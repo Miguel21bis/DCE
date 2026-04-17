@@ -1,9 +1,7 @@
---explication
+
 ------------------------------------------------------------------------------------------------------- 
--- cleancode_a				(a springCleaning)
--- last modification: adjustment_c
 if not versionDCE then versionDCE = {} end
-versionDCE["DCEM_Function.lua"] = "1.2.6"
+versionDCE["DCEM_Function.lua"] = "1.2.7"
 -------------------------------------------------------------------------------------------------------
 
 --function type DCS, ne pas changer la casse
@@ -140,43 +138,93 @@ end
 --******************************************************************--
 
 
-local taskByPlane = {}
---affiche le type d'avion selectionné et son squadrons
-for side, squadTL in  pairs(oob_air) do
-	for squad_n, squad in  pairs(squadTL) do
-		if squad.type then 
-            for task, data in  pairs(TaskByPlane) do
-                for dataType, value in  pairs(data) do
+-- local taskByPlane = {}
+-- --affiche le type d'avion selectionné et son squadrons
+-- for side, squadTL in pairs(oob_air) do
+-- 	for squad_n, squad in pairs(squadTL) do
+-- 		if squad.type then 
+--             for task, data in pairs(TaskByPlane) do
+--                 for dataType, value in  pairs(data) do
                    
-                    if squad.type == dataType and value then
+--                     if squad.type == dataType and value then
 
-                        if task == "Nothing" then
-                        else
+--                         if task == "Nothing" then
+--                         else
 
-                            if not taskByPlane[squad.type] then taskByPlane[squad.type] = {} end
+--                             if not taskByPlane[squad.type] then taskByPlane[squad.type] = {} end
 
-                            --modifie certain air/ground en strike
-                            if task == "CAS" or task == "Ground Attack" or task == "Pinpoint Strike"   then
-                                task = "Strike"			
+--                             --modifie certain air/ground en strike
+--                             if task == "CAS" or task == "Ground Attack" or task == "Pinpoint Strike"   then
+--                                 task = "Strike"			
+--                             end
+
+-- 							--si transport et helico, ajoute SAR et CSAR
+--                             if task == "Transport" and IsHelicopter[squad.type]    then
+--                                 task = "SAR"		
+-- 								if not taskByPlane[squad.type][task] then taskByPlane[squad.type][task] = true end	
+-- 								task = "CSAR"		
+-- 								if not taskByPlane[squad.type][task] then taskByPlane[squad.type][task] = true end
+-- 								task = "Transport"
+--                             end
+
+--                             if not taskByPlane[squad.type][task] then taskByPlane[squad.type][task] = true end
+--                         end
+--                     end
+--                 end
+--             end
+-- 		end
+-- 	end
+-- end
+
+local taskByPlane = {}
+
+for side, squadTL in pairs(oob_air) do
+    for squad_n, squad in pairs(squadTL) do
+        local planeType = squad.type
+        if planeType then
+
+            for task, data in pairs(TaskByPlane) do
+                for dataType, value in pairs(data) do
+
+                    if planeType == dataType and value then
+                        if task ~= "Nothing" then
+
+                            -- Initialise la liste si nécessaire
+                            if not taskByPlane[planeType] then
+                                taskByPlane[planeType] = {}
                             end
 
-							--si transport et helico, ajoute SAR et CSAR
-                            if task == "Transport" and IsHelicopter[squad.type]    then
-                                task = "SAR"		
-								if not taskByPlane[squad.type][task] then taskByPlane[squad.type][task] = true end	
-								task = "CSAR"		
-								if not taskByPlane[squad.type][task] then taskByPlane[squad.type][task] = true end
-								task = "Transport"
+                            -- Normalisation Strike
+                            if task == "CAS" or task == "Ground Attack" or task == "Pinpoint Strike" then
+                                task = "Strike"
                             end
 
-                            if not taskByPlane[squad.type][task] then taskByPlane[squad.type][task] = true end
+                            -- Cas spécial Transport hélico → SAR + CSAR
+                            if task == "Transport" and IsHelicopter[planeType] then
+                                local list = taskByPlane[planeType]
+
+                                list[#list+1] = "SAR"
+                                list[#list+1] = "CSAR"
+                                -- On remet task pour l’ajouter ensuite
+                                task = "Transport"
+                            end
+
+                            -- Ajout de la tâche
+                            local list = taskByPlane[planeType]
+                            list[#list+1] = task
                         end
                     end
                 end
             end
-		end
-	end
+        end
+    end
 end
+
+-- 🔥 Tri final des tâches pour chaque avion
+for planeType, list in pairs(taskByPlane) do
+    table.sort(list)
+end
+
 
 --******************************************************************--
 --******************************************************************--
@@ -184,13 +232,95 @@ end
 --******************************************************************--
 --******************************************************************--
 
-local Playable_m = {}
-for planeType, value in pairs(Data_divers) do	
-	if value.playable then
-		Playable_m[planeType] = true
-	end
-end	
 
+local Playable_m = {}
+
+for planeType, value in pairs(Data_divers) do
+    if value.playable then
+        Playable_m[#Playable_m + 1] = planeType
+    end
+end
+
+table.sort(Playable_m)
+
+
+--******************************************************************--
+--******************************************************************--
+--********* Function qui retourne tous les avions/helicopter
+--******************************************************************--
+--******************************************************************--
+
+local all_PlaneHeli = {}
+for planeType, value in pairs(Data_divers) do
+    all_PlaneHeli[#all_PlaneHeli + 1] = planeType
+end
+
+table.sort(all_PlaneHeli)
+
+--******************************************************************--
+--******************************************************************--
+--********* Function qui retourne tous all_Country
+--******************************************************************--
+--******************************************************************--
+
+local all_Country = {}
+for n, value in pairs(DataCountry) do
+    all_Country[#all_Country + 1] = value.name
+end
+
+table.sort(all_Country)
+
+--******************************************************************--
+--******************************************************************--
+--********* Function qui retourne tous all_callsign_west
+--******************************************************************--
+--******************************************************************--
+
+local all_callsign_west = {}
+
+for typeFct, callSigns in pairs(Callsign_west) do
+    if type(callSigns) == "table" then
+        
+        all_callsign_west[typeFct] = {}  --  IMPORTANT
+
+        for i = 1, #callSigns do
+            local value = callSigns[i]
+            if value ~= nil then
+                all_callsign_west[typeFct][#all_callsign_west[typeFct] + 1] = value
+            end
+        end
+    end
+end
+
+
+--******************************************************************--
+--******************************************************************--
+--********* Function qui retourne tous all_specific_callsigns
+--******************************************************************--
+--******************************************************************--
+
+local all_specific_callsigns = {}
+
+for aircraft, countries in pairs(SpecificCallnames) do
+    if type(countries) == "table" then
+
+        all_specific_callsigns[aircraft] = {}
+
+        for country, callSigns in pairs(countries) do
+            if type(callSigns) == "table" then
+
+                all_specific_callsigns[aircraft][country] = {}
+
+                for _, value in pairs(callSigns) do  -- 🔴 FIX ICI
+                    if value ~= nil then
+                        all_specific_callsigns[aircraft][country][#all_specific_callsigns[aircraft][country] + 1] = value
+                    end
+                end
+
+            end
+        end
+    end
+end
 
 --******************************************************************--
 --******************************************************************--
@@ -240,34 +370,6 @@ for m , unit in ipairs(oobAirSide) do
 	end
 end
 
---******************************************************************--
---******************************************************************--
---********* 
---******************************************************************--
---******************************************************************--
-
--- local test_str = "tabSquad = " .. TableSerialization(tabSquad, 0)						--make a string
--- local testFile = io.open(pathCampaign.."/Debug/DCEM_Function_tabSquad.lua", "w") or error("Failed to open debug file")
--- testFile:write(test_str)															--save new data
--- testFile:close()
-
--- test_str = "taskByPlane = " .. TableSerialization(taskByPlane, 0)						--make a string
--- testFile = io.open(pathCampaign.."/Debug/DCEM_Function_taskByPlane.lua", "w") or error("Failed to open debug file")
--- testFile:write(test_str)															--save new data
--- testFile:close()
-
--- test_str = "Playable_m = " .. TableSerialization(Playable_m, 0)						--make a string
--- testFile = io.open(pathCampaign.."/Debug/DCEM_Function_Playable_m.lua", "w") or error("Failed to open debug file")
--- testFile:write(test_str)															--save new data
--- testFile:close()
-
-
--- test_str = "Data_divers = " .. TableSerialization(Data_divers, 0)						--make a string
--- testFile = io.open(pathCampaign.."/Debug/DCEM_Function_Data_divers.lua", "w") or error("Failed to open debug file")
--- testFile:write(test_str)															--save new data
--- testFile:close()
-
-
 
 --******************************************************************--
 --******************************************************************--
@@ -279,6 +381,10 @@ return {
     taskByPlane = taskByPlane,
     Playable_m = Playable_m,
 	tabSquad = tabSquad,
+	all_PlaneHeli = all_PlaneHeli,
+    Country = all_Country,
+    CallsignWest = all_callsign_west,
+    SpecificCallnames = all_specific_callsigns,
 }
 
 
