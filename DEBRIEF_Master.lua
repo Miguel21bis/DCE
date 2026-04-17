@@ -24,7 +24,7 @@ versionDCE["DEBRIEF_Master.lua"] = "1.17.137"
 -- modification M11A_b_l	Multiplayer (bl MP overRide) (g %target alive)(t:display name )(s: T choice bug)(q: displays all tasks of several squadrons)
 -------------------------------------------------------------------------------------------------------
 
-BugList = {}
+BugList = BugList or {}
 Playable_m = {}
 AcceptedMission = false
 MissionInstance = 0

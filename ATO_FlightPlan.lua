@@ -2,7 +2,7 @@
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_FlightPlan.lua"] = "1.58.293"
+versionDCE["ATO_FlightPlan.lua"] = "1.58.294"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -4508,9 +4508,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									heading = heading - 360
 								end
 								if heading < 10 then
-									heading = "00" .. heading
+									heading = "00" .. tostring(heading)
 								elseif heading < 100 then
-									heading = "0" .. heading
+									heading = "0" .. tostring(heading)
 								end
 
 
@@ -5976,12 +5976,34 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							local infoFrom =  " IA intercept "..debug.getinfo(1).currentline
 							spawnOn( "air", waypoints, group, pn, 0, infoFrom, flight, f, role)
 
-							local trig_n = Missionfunc + #mission.trig.funcStartup + 1										--next available trigger number
-							mission.trig.actions[trig_n] = "a_activate_group(" .. group.groupId .. "); mission.trig.func[" .. trig_n .. "]=nil;"
-							mission.trigrules[trig_n]['actions'][1] = {
-								["group"] = group.groupId,
-								["predicate"] = "a_activate_group",
-							}
+							--**
+							-- local trig_n = Missionfunc + #mission.trig.funcStartup + 1										--next available trigger number
+							-- local trig_n =  #mission.trig.actions + 1
+							-- mission.trig.actions[trig_n] = "a_activate_group(" .. group.groupId .. "); mission.trig.func[" .. trig_n .. "]=nil;"
+							-- mission.trigrules[trig_n]['actions'][1] = {
+							-- 	["group"] = group.groupId,
+							-- 	["predicate"] = "a_activate_group",
+							-- }
+
+							--**
+
+							-- mission.trigrules[trig_n] = {
+							-- 	['rules'] = {
+							-- 		[1] = {
+							-- 			["seconds"] = arg_SpawnTime,
+							-- 			["predicate"] = "c_time_after",
+							-- 		},
+							-- 	},
+							-- 	['eventlist'] = '',
+							-- 	['comment'] = 'Trigger ' .. trig_n,
+							-- 	['predicate'] = 'triggerOnce',
+							-- 	['actions'] = {
+							-- 		[1] = {
+							-- 			["group"] = group.groupId,
+							-- 			["predicate"] = "a_activate_group",
+							-- 		},
+							-- 	}
+							-- }
 
 							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe activate 03") end
 						end

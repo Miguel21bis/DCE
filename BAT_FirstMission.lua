@@ -22,7 +22,7 @@ versionDCE["BAT_FirstMission.lua"] = "1.15.100"
 -------------------------------------------------------------------------------------------------------
 
 
-BugList = {}
+BugList = BugList or {}
 Firstmission_flag = true
 Playable_m = {}
 SinglePlayer = false

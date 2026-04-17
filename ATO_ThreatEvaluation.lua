@@ -1,17 +1,8 @@
 --To check oob_ground for threats and rate and store them in a table for later mission plannning
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  debug_c
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_ThreatEvaluation.lua"] = "1.7.56"
-------------------------------------------------------------------------------------------------------- 
--- cleancode_g				(g springCleaning)
--- debug_c					(c Fighterthreats & country table(b EWR again)(a Freq EWR)
--- Reglage_i				(i: KS-19 & S-60)(k: ZSU_57_2)(j station awacs position)(debug alti)(g SetFrequency only EWR)(f: add FPS-117 EWR)(e SEAD_offset CVN)(c: more info)(b: ajout des CVN_71/CVN_75 et SA-5)
--- modification M38_h		Check and Help CampaignMaker (h: loadout info)
--- modification M34_r		change freq EWR + custom FrequenceRadio (qr debug units[1])(p LVHF)(o: debug boucle 2 unites)(lmn: debug)(k: utilise les indicatifs WEST pour EWR)
--- modification M28_b		helicoptere see all SAM
--- modification M07_g		EWR toujours affiché dans le briefing + 07g ajout des SAM et Boat dans la chaine de detection
+versionDCE["ATO_ThreatEvaluation.lua"] = "1.7.57"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -1220,7 +1211,6 @@ local function addEWR(unit, side, ewrData)
 		return false
 	end
 
-
 	if insertEWR then
 		if entry.callsign then
 			table.insert(EWR_DB[side], entry)
@@ -1231,12 +1221,19 @@ local function addEWR(unit, side, ewrData)
 			return false
 		end
 	end
+
 	if insertGCi then
 		GCI.EWR[side][unit.name] = true
+
+		if not unit.name or unit.name == nil or unit.name == "" then
+			AddLog("ATTENTION: you must specify the EWR units")
+		else
+			-- print("EWR unit.name : " .. tostring(unit.name))
+		end
 	end
 
-
 	-- _affiche(GCI , "AtoTE passe 00bc GCI ")
+	-- os.execute 'pause'
 end
 
 local ewrFreqDejaTraite = {}

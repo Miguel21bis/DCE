@@ -1890,16 +1890,19 @@ local function avoidArea()
 						end
 
                         if campL.debug then
+							
 							local timeSearchEngage = timer.getTime() + 5
 							local logStr = "flightPlan = " .. TableSerialization(flightPlan, 0)
 							local flightNameClean = gpName:gsub('[%p%c%s]', '_')
 							local logFile = io.open(PathDCE.."Debug\\"..flightNameClean.."_"..timeSearchEngage.."_avoidArea.lua", "w")
 
+                            env.info("DCE_avoidArea: NewFlightPlan to " .. tostring(flightNameClean))
+							
 							if logFile then
 								logFile:write(logStr)
 								logFile:close()
 							else
-								env.info("DCE_avoidArea: Failed to open log file for writing.")
+								env.info("DCE_ERROR DCE_avoidArea: Failed to open log file for writing.")
 							end
 
 							-- env.info("DCE_avoidArea ZZZ " .. tostring(unitName))

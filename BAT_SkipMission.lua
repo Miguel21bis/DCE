@@ -24,7 +24,7 @@ versionDCE["BAT_SkipMission.lua"] = "1.17.101"
 
 FromFile = "BAT_SkipMission.lua"																	-- file name for debug
 
-BugList = {}
+BugList = BugList or {}
 Skipmission_flag = true
 MissionInstance = 0
 Playable_m = {}
