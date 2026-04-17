@@ -5,6 +5,7 @@
 if not versionDCE then versionDCE = {} end
 versionDCE["db_loadouts/db_loadouts_F16.lua"] = "1.1.1"
 
+-- 1.1.2 - TF loadout 
 -- 1.1.1 - Beginning of the versions of this loadouts file dedicated to the F4.
 
 db_loadouts = {
@@ -530,7 +531,7 @@ db_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM", "frontline" },
-				code_loadout =  { "Caucasus", "WOB" },
+				code_loadout =  { "Caucasus", "WOB", "TF" },
 				weaponType = "ASM",
 				expend = "Auto",
 								range = 150000,
@@ -588,7 +589,7 @@ db_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { "Structure", "Bridge" },
-				code_loadout =  { "Caucasus", "WOB" },
+				code_loadout =  { "Caucasus", "WOB", "TF" },
 				weaponType = "Guided bombs",
 				expend = "Auto",
 				night = true,
@@ -703,7 +704,7 @@ db_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM", "frontline" },
-				code_loadout =  { "Caucasus", "WOB" },
+				code_loadout =  { "Caucasus", "WOB", "TF" },
 				weaponType = "Guided bombs",
 				expend = "Auto",
 				night = true,
@@ -997,7 +998,7 @@ db_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { "Structure", "Bridge" },
-				code_loadout =  { "Caucasus", "WOB" },
+				code_loadout =  { "Caucasus", "WOB", "TF" },
 				weaponType = "Guided bombs",
 				expend = "Auto",
 								range = 450000,
@@ -1345,7 +1346,7 @@ db_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { "Structure", "Bridge" },
-				code_loadout =  { "Caucasus", "WOB" },
+				code_loadout =  { "Caucasus", "WOB", "TF" },
 				weaponType = "Guided bombs",
 				expend = "Auto",
 				night = true,
@@ -1405,7 +1406,7 @@ db_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { "Structure", "Bridge" },
-				code_loadout =  { "Caucasus", "WOB" },
+				code_loadout =  { "Caucasus", "WOB", "TF" },
 				weaponType = "Guided bombs",
 				expend = "Auto",
 								range = 250000,
@@ -1521,7 +1522,7 @@ db_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { "Bridge", "soft", "Parked Aircraft", "SAM", "frontline" },
-				code_loadout =  { "Caucasus" },
+				code_loadout =  { "Caucasus", "TF" },
 				weaponType = "Guided bombs",
 				expend = "Auto",
 								range = 150000,
@@ -1692,7 +1693,7 @@ db_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM", "frontline" },
-				code_loadout =  { "Caucasus", "WOB" },
+				code_loadout =  { "Caucasus", "WOB", "TF" },
 				weaponType = "ASM",
 				expend = "Auto",
 								range = 450000,
@@ -1750,7 +1751,7 @@ db_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { "Bridge", "soft", "Parked Aircraft", "SAM", "frontline" },
-				code_loadout =  { "Caucasus" },
+				code_loadout =  { "Caucasus", "TF" },
 				weaponType = "Guided bombs",
 				expend = "Auto",
 								range = 450000,
@@ -1981,7 +1982,7 @@ db_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM", "frontline" },
-				code_loadout =  { "Caucasus", "WOB" },
+				code_loadout =  { "Caucasus", "WOB", "TF" },
 				weaponType = "Guided bombs",
 				expend = "Auto",
 				night = true,
@@ -2561,7 +2562,7 @@ db_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { "ship" },
-				code_loadout =  { "Caucasus", "WOB" },
+				code_loadout =  { "Caucasus", "WOB", "TF" },
 				weaponType = "ASM",
 				expend = "Auto",
 								range = 450000,
@@ -2619,7 +2620,7 @@ db_loadouts = {
 					SEAD = true,
 				},
 				attributes =  { "ship" },
-				code_loadout =  { "Caucasus", "WOB" },
+				code_loadout =  { "Caucasus", "WOB", "TF" },
 				weaponType = "ASM",
 				expend = "Auto",
 								range = 250000,
@@ -2732,7 +2733,7 @@ db_loadouts = {
 		Intercept = {
 			["2000s LR AA AIM-120C*4, AIM-9X*2, FT*3"] = {
 				attributes =  { },
-				code_loadout =  { "Caucasus", "WOB" },
+				code_loadout =  { "Caucasus", "WOB", "TF" },
 				night = true,
 				adverseWeather = true,
 				range = 450000,
@@ -2867,7 +2868,7 @@ db_loadouts = {
 			},
 			["2000s SR AA AIM-120C*4, AIM-9X*2, FT*1"] = {
 				attributes =  { },
-				code_loadout =  { "Caucasus", "WOB" },
+				code_loadout =  { "Caucasus", "WOB", "TF" },
 				night = true,
 				adverseWeather = true,
 				range = 250000,
@@ -3329,7 +3330,7 @@ db_loadouts = {
 			},
 			["2000s LR AA AIM-120C*4, AIM-9X*2, FT*3"] = {
 				attributes =  { },
-				code_loadout =  { "Caucasus", "WOB" },
+				code_loadout =  { "Caucasus", "WOB", "TF" },
 				night = true,
 				adverseWeather = true,
 				range = 510000,
@@ -3376,7 +3377,7 @@ db_loadouts = {
 			},
 			["2000s SR AA AIM-120C*4, AIM-9X*2, FT*1"] = {
 				attributes =  { },
-				code_loadout =  { "Caucasus", "WOB" },
+				code_loadout =  { "Caucasus", "WOB", "TF" },
 				night = true,
 				adverseWeather = true,
 				range = 250000,
@@ -3727,7 +3728,7 @@ db_loadouts = {
 			},
 			["2000s LR AA AIM-120C*4, AIM-9X*2, FT*3"] = {
 				attributes =  { "Air Forces" },
-				code_loadout =  { "Caucasus", "WOB" },
+				code_loadout =  { "Caucasus", "WOB", "TF" },
 				night = true,
 				adverseWeather = true,
 				range = 450000,
@@ -4069,7 +4070,7 @@ db_loadouts = {
 		SEAD = {
 			["Caucasus LR SEAD AGM88*2,AIM-120C*2, AIM-9X*2, FT*2, LP, HTS, ECM"] = {
 				attributes =  { },
-				code_loadout =  { "Caucasus" },
+				code_loadout =  { "Caucasus", "TF" },
 				weaponType = "ASM",
 				night = true,
 				adverseWeather = true,
@@ -4124,7 +4125,7 @@ db_loadouts = {
 			},
 			["Caucasus SR SEAD AGM88*2,AIM-120C*2, AIM-9X*2, Mav-IR*2, Mav Las*2 LP, HTS, ECM"] = {
 				attributes =  { },
-				code_loadout =  { "Caucasus" },
+				code_loadout =  { "Caucasus", "TF" },
 				weaponType = "ASM",
 				night = true,
 				adverseWeather = true,
@@ -4179,7 +4180,7 @@ db_loadouts = {
 			},
 			["WOB SR SEAD AGM88*2,AIM-120C*2, AIM-9X*2, Mav-IR*2, Mav Las*2 LP, HTS, ECM"] = {
 				attributes =  { },
-				code_loadout =  { "WOB" },
+				code_loadout =  { "WOB", "TF" },
 				weaponType = "ASM",
 				night = true,
 				adverseWeather = true,
@@ -4234,7 +4235,7 @@ db_loadouts = {
 			},
 			["WOB LR SEAD AGM88*2,AIM-120C*2, AIM-9X*2, FT*2, LP, HTS, ECM"] = {
 				attributes =  { },
-				code_loadout =  { "WOB" },
+				code_loadout =  { "WOB", "TF" },
 				weaponType = "ASM",
 				night = true,
 				adverseWeather = true,
@@ -4890,7 +4891,7 @@ db_loadouts = {
 			},
 			["2000s LR AA AIM-120C*4, AIM-9X*2, FT*3"] = {
 				attributes =  { },
-				code_loadout =  { "Caucasus", "WOB" },
+				code_loadout =  { "Caucasus", "WOB", "TF" },
 				night = true,
 				adverseWeather = true,
 				range = 450000,
@@ -4940,7 +4941,7 @@ db_loadouts = {
 			},
 			["2000s SR AA AIM-120C*4, AIM-9X*2, FT*1"] = {
 				attributes =  { },
-				code_loadout =  { "Caucasus", "WOB" },
+				code_loadout =  { "Caucasus", "WOB", "TF" },
 				night = true,
 				adverseWeather = true,
 				range = 250000,
