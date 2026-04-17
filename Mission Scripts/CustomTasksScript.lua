@@ -3,10 +3,13 @@
 --Functions accessed via LUA Run Script on waypoint
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/CustomTasksScript.lua"] = "2.12.50"
+versionDCE["Mission Scripts/CustomTasksScript.lua"] = "2.12.51"
 ------------------------------------------------------------------------------------------------------- 
 
 env.info("### DCE START CustomIntercept.lua " .. versionDCE["Mission Scripts/CustomTasksScript.lua"] .. " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+
+GroupStateMemory = GroupStateMemory or {}
+
 
 local selectedTransport = 0			--util pour embarked
 local attackCounter	= {}
@@ -2799,6 +2802,9 @@ local groupTargetMemory = {}
 
 function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, argPosX, argPosY)
 	
+	-- Mémoire d'état (CAP / INTERCEPT) pour éviter de réinjecter les missions inutilement
+	GroupStateMemory = GroupStateMemory or {}
+
 	local interGroupObj = Group.getByName(argInterName)
 	if not interGroupObj or not interGroupObj:isExist() then
 		interceptorsActive[argInterName] = nil
@@ -2821,6 +2827,7 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 		
 		interceptorsActive[argInterName] = nil
 		groupTargetMemory[argInterName] = nil
+		GroupStateMemory[argInterName] = nil
 		return
 	end
 
@@ -2879,7 +2886,9 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 		local sameTarget = (groupTargetMemory[argInterName] == bestTarget)
 		local newTargetName = bestTarget:getName()
 
-		if not sameTarget then
+        if not sameTarget then
+            GroupStateMemory[argInterName] = "INTERCEPT"
+			
 			if campL.debug then
 				env.info("DCE_Custom_Intercept C : " .. argInterName .. " switching to new target " .. newTargetName)
 			end
@@ -2902,19 +2911,21 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 					if ctr2 then
 						ctr2:pushTask(interceptTask)
 						
-						if campL.debug then
-							env.info("DCE_Custom_Intercept B : " .. argInterName .. " engaging " .. tostring(newTargetName))
-							local current_time = timer.getTime()
-							local logStr = "params = " .. TableSerialization(interceptTask, 0)
-							local flightNameClean = argInterName:gsub('[%p%c%s]', '_')
-							local logFile = io.open(
-								PathDCE .. "Debug\\" .. flightNameClean ..
-								"_" .. "Custom_Intercept" .. "_" .. tostring(current_time) .. ".lua", "w")
-							if logFile then
-								logFile:write(logStr)
-								logFile:close()
-							end
-						end
+                        if campL.debug then
+                            env.info("DCE_Custom_Intercept B : " ..
+                            argInterName .. " engaging " .. tostring(newTargetName))
+                            local current_time = timer.getTime()
+                            local logStr = "params = " .. TableSerialization(interceptTask, 0)
+                            local flightNameClean = argInterName:gsub('[%p%c%s]', '_')
+                            local logFile = io.open(
+                                PathDCE .. "Debug\\" .. flightNameClean ..
+                                "_" .. "Custom_Intercept" .. "_" .. tostring(current_time) .. ".lua", "w")
+                            if logFile then
+                                logFile:write(logStr)
+                                logFile:close()
+                            end
+                        end
+						
 					end
 				end
 			end, {}, timer.getTime() + 1.5)
@@ -2926,6 +2937,14 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 		end
 	else
 		-- Aucune cible disponible : mise en orbite
+		-- Si déjà en CAP, ne rien faire
+        if GroupStateMemory[argInterName] == "CAP" then
+            if campL.debug then
+                env.info("DCE_Custom_Intercept: " .. argInterName .. " already in CAP — no change.")
+            end
+            return
+        end
+		
 		local capMission = {
 			id = 'Mission',
 			params = {
@@ -2974,8 +2993,20 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 
 		ctr:setTask(capMission)
 
+		GroupStateMemory[argInterName] = "CAP"
+
 		if campL.debug then
-			env.info("DCE_Custom_Intercept F : " .. argInterName .. " now in CAP mission.")
+            env.info("DCE_Custom_Intercept F CAP : " .. argInterName .. " now in CAP mission.")
+			
+			local current_time = timer.getTime()
+			local logStr = "params = " .. TableSerialization(capMission, 0)
+			local flightNameClean = argInterName:gsub('[%p%c%s]', '_')
+			local logFile = io.open( PathDCE .. "Debug\\" .. flightNameClean .. "_" .. "Custom_Intercept" .. "_" .. tostring(current_time) .. ".lua", "w")
+			if logFile then
+				logFile:write(logStr)
+				logFile:close()
+			end
+
 		end
 
 	end

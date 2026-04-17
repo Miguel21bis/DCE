@@ -1073,21 +1073,51 @@ function eventHandlerDCE:onEvent(event)
         if event.target then
             targetObjCategory = Object.getCategory(event.target)
 
-           if Object_Category[targetObjCategory] then
-                 if event.target.getCoalition then
-                    if event.target.isExist and event.target:isExist() then
-                        local targetCoalId = event.target:getCoalition() --779: Unit doesn't exist
-                        targetSideName = CoalitionIdToName[tonumber(targetCoalId)]
-                    else -- pour éviter --779: Unit doesn't exist
-                        env.info("DCE_EventsTracker target Unit doesn't exist: Category: " .. tostring(targetObjCategory))
-                        -- if event.target.getDesc then
-                        -- 	local targetDesc = event.target:getDesc()
-                        -- 	_affiche(targetDesc, "DCE_EventsTracker targetDesc ")
-                        -- end
-                    end
-                end
-            end
+        --    if Object_Category[targetObjCategory] then
+        --          if event.target.getCoalition then
+        --             if event.target.isExist and event.target:isExist() then
+        --                 local targetCoalId = event.target:getCoalition() --1079: Unit doesn't exist
+        --                 targetSideName = CoalitionIdToName[tonumber(targetCoalId)]
+        --             else -- pour éviter --779: Unit doesn't exist
+        --                 env.info("DCE_EventsTracker target Unit doesn't exist: Category: " .. tostring(targetObjCategory))
+        --                 -- if event.target.getDesc then
+        --                 -- 	local targetDesc = event.target:getDesc()
+        --                 -- 	_affiche(targetDesc, "DCE_EventsTracker targetDesc ")
+        --                 -- end
+        --             end
+        --         end
+        --     end
+
+			-- priorité : utiliser les données déjà présentes dans l'event (0 coût CPU, 0 risque)
+			local targetCoalId = event.target_coalition
+
+			if targetCoalId and targetCoalId ~= 0 then
+				targetSideName = CoalitionIdToName[targetCoalId]
+			else
+				-- fallback uniquement si vraiment nécessaire
+				if Object_Category[targetObjCategory] then
+					-- filtre dur : uniquement les UNIT
+					if targetObjCategory == Object.Category.UNIT then
+						if event.target
+							and event.target.getCoalition
+							and event.target.isExist
+							and event.target:isExist()
+						then
+							targetCoalId = event.target:getCoalition()
+							targetSideName = CoalitionIdToName[targetCoalId]
+						else
+							env.info("DCE_EventsTracker target invalid (UNIT expected)")
+						end
+					else
+						-- debug utile pour comprendre les cas foireux (point, weapon, etc.)
+						env.info("DCE_EventsTracker target skipped (not UNIT): " .. tostring(targetObjCategory))
+					end
+				end
+			end
+
         end
+
+		
 
 		if log_entry.type == "eject"  then
             env.info("DCE_EventT_eject A, id: " .. tostring(event.id) .. " event.initiator " .. tostring(event.initiator))
@@ -1510,10 +1540,13 @@ function eventHandlerDCE:onEvent(event)
 			
 			if event.initiator then
 
-				local playerName = event.initiator:getPlayerName()
+                local playerName = event.initiator:getPlayerName()
+				
+				-- env.info("DCE_EventT land B " .. tostring(playerName))
 
 				if event.place then
-
+                    -- env.info("DCE_EventT land C place name: " .. tostring(event.place:getName()) .. " | place type: " .. tostring(event.place:getTypeName()))
+					
 					log_entry.place = event.place and event.place:getName() or "unknown"
 					log_entry.placeTypeName = tostring(event.place:getTypeName())
 					-- local baseCoalitionId = Airbase.getCoalition(event.place)
@@ -1532,70 +1565,83 @@ function eventHandlerDCE:onEvent(event)
 					-- 	SHIP = 2,
 					-- }
 					-- if event.place:getCategory() == Airbase.Category.SHIP    and not event.initiator:getPlayerName() then 
+					
 					if not playerName then
+                        -- env.info("DCE_EventT land D place category: " .. tostring(placeDesc.category) .. " | Airbase.Category.SHIP: " .. tostring(Airbase.Category.SHIP)
+						-- .. " | isHelo: " .. tostring(isHelo))
 						
 						if env.mission.theatre ~= "Kola" then
-							if placeDesc.category == Airbase.Category.SHIP then 											-- category ship
-								
+							-- env.info("DCE_EventT land E theatre: " .. tostring(env.mission.theatre))
+							
+                            if placeDesc.category == Airbase.Category.SHIP then -- category ship
+                                -- env.info(
+                                    -- "DCE_EventT land F category ship detected, check if it's a Pedro and relaunch it if needed")
+
                                 --relance un Pedro si c'est un Pedro qui se pose
-								if initiatorName and string.find(initiatorName, "Pedro") then
+                                if initiatorName and string.find(initiatorName, "Pedro") then
+                                    -- env.info("DCE_EventT land G Pedro detected: " .. tostring(initiatorName))
+                                    --["name"] = "Unit_Pedro_CVN-71 Theodore Roosevelt_1",
+                                    -- local cvName = initiatorName
 
-									--["name"] = "Unit_Pedro_CVN-71 Theodore Roosevelt_1",
-									-- local cvName = initiatorName
-									
-									-- cvName = cvName:gsub( "Unit_Pedro_", "")
-									-- cvName, _ = cvName:match("([^,]+)_([^,]+)")
-									local cvName = initiatorName:gsub("Unit_Pedro_", "")
-									cvName = cvName:match("(.+)_") -- tout jusqu’au dernier underscore
+                                    -- cvName = cvName:gsub( "Unit_Pedro_", "")
+                                    -- cvName, _ = cvName:match("([^,]+)_([^,]+)")
+                                    local cvName = initiatorName:gsub("Unit_Pedro_", "")
+                                    cvName = cvName:match("(.+)_") -- tout jusqu’au dernier underscore
 
-									env.info("DCE_EventT A check cvName " .. tostring(cvName))
-									
-									--cherche le type d'helico et les parametres de store et autre à lui coller pour creer un autre Pedro identique
-									if not TypePedroByCV[cvName] then
+                                    -- env.info("DCE_EventT A check cvName " .. tostring(cvName))
 
-										for coalitionN, coalition in pairs(env.mission.coalition) do
-											for countryN, state in pairs(coalition.country) do
-												if state.helicopter then
-													for groupN, _group in pairs(state.helicopter.group) do
-														-- if _group.task == "Transport" and _group.name:find(cvName) and _group.name:find("Pedro") then
-														env.info("DCE_EventT B Check cvName Pedro "..tostring(_group.name))
-														if _group.name:find(cvName) and _group.name:find("Pedro") then	
-															env.info("DCE_EventT C found cvName Pedro "..tostring(_group.name))
-															TypePedroByCV[cvName] = {
-																type = _group.units[1].type,
-																payload = _group.units[1].payload,
-																livery_id = _group.units[1].livery_id,
-																AddPropAircraft = _group.units[1].AddPropAircraft,
-																callsign = _group.units[1].callsign,
-															}
-															break
-														end
-													end
-												end
-											end
-										end
-									end
-								
+                                    --cherche le type d'helico et les parametres de store et autre à lui coller pour creer un autre Pedro identique
+                                    if not TypePedroByCV[cvName] then
+                                        for coalitionN, coalition in pairs(env.mission.coalition) do
+                                            for countryN, state in pairs(coalition.country) do
+                                                if state.helicopter then
+                                                    for groupN, _group in pairs(state.helicopter.group) do
+                                                        -- if _group.task == "Transport" and _group.name:find(cvName) and _group.name:find("Pedro") then
+                                                        -- env.info("DCE_EventT B Check cvName Pedro " .. tostring(_group.name))
+                                                        if _group.name:find(cvName) and _group.name:find("Pedro") then
+                                                            -- env.info("DCE_EventT C found cvName Pedro " .. tostring(_group.name))
+                                                            TypePedroByCV[cvName] = {
+                                                                type = _group.units[1].type,
+                                                                payload = _group.units[1].payload,
+                                                                livery_id = _group.units[1].livery_id,
+                                                                AddPropAircraft = _group.units[1].AddPropAircraft,
+                                                                callsign = _group.units[1].callsign,
+                                                            }
+                                                            break
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+
                                     if TypePedroByCV[cvName] then
-										_affiche(TypePedroByCV[cvName], "TypePedroByCV[cvName]: ")
-										NeedPedro(cvName, TypePedroByCV[cvName])
-									else
-										env.info("DCE_EventsT DCE_BUG Pedro introuvable initiatorName: "..tostring(initiatorName).." cvName: "..tostring(cvName))
-									end
-								end
+                                        _affiche(TypePedroByCV[cvName], "TypePedroByCV[cvName]: ")
+                                        NeedPedro(cvName, TypePedroByCV[cvName])
+                                    else
+                                        env.info("DCE_EventsT DCE_BUG Pedro introuvable initiatorName: " ..
+                                        tostring(initiatorName) .. " cvName: " .. tostring(cvName))
+                                    end
+                                end
 
                                 -- if initDesc.category == Unit.Category.HELICOPTER then
                                 --     table.insert(despawn, event.initiator)
                                 -- end
-								if isHelo then
-									table.insert(despawn, event.initiator)
-								end
+                                -- env.info("DCE_EventT land H despawn initiator: " .. tostring(initiatorName) .. " | isHelo: " .. tostring(isHelo))
+                                -- if isHelo then
+                                -- env.info("DCE_EventT land I despawn initiator: " .. tostring(initiatorName))
+                                table.insert(despawn, event.initiator)
+                                -- end
 
-							elseif placeDesc.category == Airbase.Category.HELIPAD then 											-- category ship
-								table.insert(despawn, event.initiator)
-
-							end
-						else
+                                -- env.info("DCE_EventT land J place category: " ..  tostring(placeDesc.category) ..
+                                -- " | Airbase.Category.HELIPAD: " .. tostring(Airbase.Category.HELIPAD))
+                            elseif placeDesc.category == Airbase.Category.HELIPAD then -- category ship ??heing???
+                                -- env.info( "DCE_EventT land K category helipad detected, check if it's a Pedro and relaunch it if needed")
+                                table.insert(despawn, event.initiator)
+                            end
+							-- env.info("DCE_EventT land L end of ship check, isHelo: " .. tostring(isHelo))
+                        else
+							-- env.info("DCE_EventT land M theatre is Kola, despawn without check")
 							table.insert(despawn, event.initiator)
 						end
 						

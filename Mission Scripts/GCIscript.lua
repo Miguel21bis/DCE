@@ -180,9 +180,9 @@ local function GCI_Cycle()
 					--le radar peut aussi detecter les missiles, il faut donc prouver que c'est une unité avant toute chose
 					if targets[t].object and Object.getCategory(targets[t].object) == Object.Category.UNIT then
 						
-						local objCat = Object.getCategory(targets[t].object)						
+						-- local objCat = Object.getCategory(targets[t].object)						
 						local targetDesc = targets[t].object:getDesc()
-						local txtA = ""
+						-- local txtA = ""
 						local targetCat = targetDesc.category
 						local isExist = targets[t].object:isExist()
 						local inAir = targets[t].object:inAir()
@@ -241,23 +241,26 @@ local function GCI_Cycle()
 				-- ou si le target est entre chez nous et chez eux (zone tampon ou eau international)
 				local ourSideOfBorder = false
 				local enemySideOfBorder = false
-				local authorizedInter = false
+				local authorizedInter = true
 
-				if campL.boundary and campL.boundary[friendSideName] and campL.boundary[friendSideName] ~= nil then
+				--TODO prevoir une exeception pour intercepter au dela de la frontiere
+				-- local authorizedInter = false
+
+				-- if campL.boundary and campL.boundary[friendSideName] and campL.boundary[friendSideName] ~= nil then
 					
-					ourSideOfBorder =  CheckPointInPoly_XY_3({x=target.pointVec3.x,y=target.pointVec3.z}, campL.boundary[friendSideName])
-					enemySideOfBorder =  CheckPointInPoly_XY_3({x=target.pointVec3.x,y=target.pointVec3.z}, campL.boundary[DCS_ENI_Side[friendSideName]])
+				-- 	ourSideOfBorder =  CheckPointInPoly_XY_3({x=target.pointVec3.x,y=target.pointVec3.z}, campL.boundary[friendSideName])
+				-- 	enemySideOfBorder =  CheckPointInPoly_XY_3({x=target.pointVec3.x,y=target.pointVec3.z}, campL.boundary[DCS_ENI_Side[friendSideName]])
 
-					if ourSideOfBorder then
-						authorizedInter = true
-					elseif not ourSideOfBorder and not enemySideOfBorder then
-						authorizedInter = true
-					else
+				-- 	if ourSideOfBorder then
+				-- 		authorizedInter = true
+				-- 	elseif not ourSideOfBorder and not enemySideOfBorder then
+				-- 		authorizedInter = true
+				-- 	else
 						
-					end
-				else
-					authorizedInter = true
-				end
+				-- 	end
+				-- else
+				-- 	authorizedInter = true
+				-- end
 
 				if authorizedInter and target.assigned < target.number then												--if target has less interceptors assigned than it has aircraft in group
 					--find all flights in range to intercept target
@@ -393,7 +396,7 @@ local function GCI_Cycle()
 																					["id"] = "Script",
 																					["params"] =
 																					{
-																						["command"] = "env.info('interceptPlanDeVol W1 A " .. tostring(selectInterName) .. "')",
+																						["command"] = "env.info('DCE_interceptPlanDeVol W1 A " .. tostring(selectInterName) .. "')",
 																					},
 																				},
 																			},
@@ -459,7 +462,7 @@ local function GCI_Cycle()
 																					["id"] = "Script",
 																					["params"] =
 																					{
-																						["command"] = "env.info('interceptPlanDeVol W2 A " .. tostring(selectInterName) .. "')",
+																						["command"] = "env.info('DCE_interceptPlanDeVol W2 A " .. tostring(selectInterName) .. "')",
 																					},
 																				},
 																			},
@@ -502,7 +505,7 @@ local function GCI_Cycle()
 																					["id"] = "Script",
 																					["params"] =
 																					{
-																						["command"] = "env.info('interceptPlanDeVol W2 C " .. tostring(selectInterName) .. "')",
+																						["command"] = "env.info('DCE_interceptPlanDeVol W2 C " .. tostring(selectInterName) .. "')",
 																					},
 																				},
 																			},
@@ -629,7 +632,7 @@ local function GCI_Cycle()
 																					["id"] = "Script",
 																					["params"] =
 																					{
-																						["command"] = "env.info('interceptPlanDeVol W3 D " .. tostring(selectInterName) .. "')",
+																						["command"] = "env.info('DCE_interceptPlanDeVol W3 D " .. tostring(selectInterName) .. "')",
 
 																					},
 																				},
