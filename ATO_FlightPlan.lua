@@ -7137,6 +7137,13 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				if group.task then
 					info06 = info06.."task "..group.task
+					if group.task == "AWACS" or group.task == "Refueling" then
+						if #group.units > 1 then
+							info06 = info06.."\n".."|+T17|ATTENTION >1 UNIT "..group.task.."\n"
+							tagATTENTION = true
+						end
+
+					end
 				else
 					info06 = info06.."\n".."|+T17|ATTENTION NO task ".."\n"
 					tagATTENTION = true
