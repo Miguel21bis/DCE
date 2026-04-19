@@ -325,7 +325,8 @@ local function GCI_Cycle()
 									
 									target.bearing = math.floor(GetHeading({x=flightInter.x, y=flightInter.y}, {x=target.pointVec3.x, y=target.pointVec3.z} ))
 
-									local speed = 340 --mach 0.95 au sol
+                                    -- local speed = 340 --mach 0.95 au sol
+									local speed = 300 
 
 									--assign mission task to interceptor flight
 									errorMsg = "Assign interceptors; Target: " .. target_name .. "; Selected Flight: " .. selectInterName				--Error message in case follow on code fails
@@ -349,19 +350,19 @@ local function GCI_Cycle()
                                         --["speedMax"] = 693.25,
 										-- env.info("DCE_Gci A speed: "..tostring(speed).." "..tostring(selectInterName))
 
-										if descIntercept and descIntercept.speedMax0 then
-											-- env.info("DCE_Gci B speedMax0: "..tostring(descIntercept.speedMax0))
-										end
+										-- if descIntercept and descIntercept.speedMax0 then
+										-- 	-- env.info("DCE_Gci B speedMax0: "..tostring(descIntercept.speedMax0))
+										-- end
 
-										if descIntercept and descIntercept.speedMax0 and descIntercept.speedMax0 > speed then
-											-- speed = descIntercept.speedMax0 * 0.8
-                                            speed = descIntercept.speedMax0
-											-- env.info("DCE_Gci C speed: " .. tostring(speed))
-										end
+										-- if descIntercept and descIntercept.speedMax0 and descIntercept.speedMax0 > speed then
+										-- 	-- speed = descIntercept.speedMax0 * 0.8
+                                        --     speed = descIntercept.speedMax0
+										-- 	-- env.info("DCE_Gci C speed: " .. tostring(speed))
+										-- end
 
 										-- env.info("DCE_Gci D speed: " .. tostring(speed))
 
-										local pointB = GetOffsetPoint(flightInter, target.bearing, 3000)
+										local pointB = GetOffsetPoint(flightInter, target.bearing, 2000)
 
 										local planDeVol = {														--define mission for interceptor group
 											id = 'Mission',

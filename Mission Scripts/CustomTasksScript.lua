@@ -2819,8 +2819,25 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 		return
 	end
 
-	-- Si l'avion est posé, inutile de continuer
-    if not interUnitObj:inAir() then
+	-- -- Si l'avion est posé, inutile de continuer
+    -- if not interUnitObj:inAir() then
+    --     if campL.debug then
+    --         env.info("DCE_Custom_Intercept A : " .. argInterName .. " has landed — stopping logic.")
+    --     end
+		
+	-- 	interceptorsActive[argInterName] = nil
+	-- 	groupTargetMemory[argInterName] = nil
+	-- 	GroupStateMemory[argInterName] = nil
+	-- 	return
+	-- end
+
+	-- Si l'avion est réellement posé (et pas en phase de décollage), inutile de continuer
+	local vel = interUnitObj:getVelocity()
+	local speed = math.sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z)
+	local alt = interUnitObj:getPoint().y
+
+	-- seuils tolérants pour éviter faux négatif au décollage
+	if not interUnitObj:inAir() and speed < 50 and alt < 5 then
         if campL.debug then
             env.info("DCE_Custom_Intercept A : " .. argInterName .. " has landed — stopping logic.")
         end
@@ -2881,18 +2898,36 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 		end
 	end
 
-	local ctr = interGroupObj:getController()
+    local ctr = interGroupObj:getController()
+	
+	local fuel = interUnitObj:getFuel()
+	local desc = interUnitObj:getDesc()
+
+    if campL.debug then
+        env.info(string.format(
+            "DEBUG %s | inAir=%s | speed=%.1f | fuel=%.2f | state=%s | target=%s",
+            argInterName,
+            tostring(interUnitObj:inAir()),
+            math.sqrt(interUnitObj:getVelocity().x ^ 2 + interUnitObj:getVelocity().z ^ 2),
+            fuel or -1,
+            tostring(GroupStateMemory[argInterName]),
+            tostring(groupTargetMemory[argInterName] and groupTargetMemory[argInterName]:getName() or "nil")
+        ))
+    end
+
+
 	if bestTarget then
 		local sameTarget = (groupTargetMemory[argInterName] == bestTarget)
 		local newTargetName = bestTarget:getName()
 
-        if not sameTarget then
+        -- if not sameTarget then
+		if not sameTarget or GroupStateMemory[argInterName] ~= "INTERCEPT" then
             GroupStateMemory[argInterName] = "INTERCEPT"
 			
 			if campL.debug then
 				env.info("DCE_Custom_Intercept C : " .. argInterName .. " switching to new target " .. newTargetName)
 			end
-			ctr:resetTask()
+			-- ctr:resetTask() --si on utilise ceci, il faut ensuite coller une mission 
 
 			timer.scheduleFunction(function()
 				if interGroupObj and interGroupObj:isExist() then
@@ -2991,6 +3026,8 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 			},
 		}
 
+        ctr:resetTask()
+		
 		ctr:setTask(capMission)
 
 		GroupStateMemory[argInterName] = "CAP"

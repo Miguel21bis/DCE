@@ -5,7 +5,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  M83_c
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/ARM_Defence_Script.lua"] = "3.5.11"
+versionDCE["Mission Scripts/ARM_Defence_Script.lua"] = "3.5.12"
 ------------------------------------------------------------------------------------------------------- 	
 
 env.info("DCE_ARM START LOADING ARM_Defence_Script.lua "..tostring(versionDCE["Mission Scripts/ARM_Defence_Script.lua"]))
@@ -22,6 +22,25 @@ local activeMissiles = {}
 
 --  Table des Jammers (actualisée à chaque tir de missile)
 local jammers = {}
+
+SAM_AMM = {
+    ["Patriot str"] = true,
+    ["S-300PS 40B6M tr"] = true,
+    ["S-300PS 40B6MD sr"] = true,
+    ["S-300PS 54K6 cp"] = true,
+    ["S-300PS 64H6E sr"] = true,
+    
+}
+
+OLD_SAM_Radar = {
+    ["SNR_75V"] = true,
+    ["snr s-125 tr"] = true,
+}
+
+local timingRadarOff = { 5, 15 }
+
+ARM_Shot_EventHandler = {}
+
 
 -- Met à jour la liste des jammers actifs (optimisation performance)
 -- Pourquoi : éviter de rescanner tous les avions à chaque tir de missile SAM
@@ -163,30 +182,24 @@ local function RadarOn(ctrl)																				--Function to turn radar back on
 end
 
 local function RadarOff(arg)																				--Function to shut down radar of attacked unit/group
-	local grp = arg[1]:getGroup()																			--Get group of attached unit (radar can only be turned off for whole group)
-	if grp ~= nil then
-		local ctrl = grp:getController()																	--Get controller of group
-		ctrl:setOption(AI.Option.Ground.id.ALARM_STATE, AI.Option.Ground.val.ALARM_STATE.GREEN)				--Turn off radar
-		--trigger.action.outText("Radar Off", 3)	--DEBUG
-		-- timer.scheduleFunction(RadarOn, ctrl, timer.getTime() + math.random(120, 240))						--Schedule turning radar back on in 2 to 4 minutes
-		timer.scheduleFunction(RadarOn, ctrl, timer.getTime() + math.random(360, 540))						--Schedule turning radar back on in 6 to 9 minutes
-	end
+    if not arg or not arg[1] or not arg[1].getGroup then return end
+    -- local grp = arg[1]:getGroup()																			--Get group of attached unit (radar can only be turned off for whole group)
+	if arg[1] and arg[1]:isExist() then
+        local grp = arg[1]:getGroup()
+        if grp ~= nil then
+            local ctrl = grp:getController()																	--Get controller of group
+            if ctrl then
+                ctrl:setOption(AI.Option.Ground.id.ALARM_STATE, AI.Option.Ground.val.ALARM_STATE.GREEN)				--Turn off radar
+                --trigger.action.outText("Radar Off", 3)	--DEBUG
+                -- timer.scheduleFunction(RadarOn, ctrl, timer.getTime() + math.random(120, 240))						--Schedule turning radar back on in 2 to 4 minutes
+                timer.scheduleFunction(RadarOn, ctrl, timer.getTime() + math.random(360, 540))						--Schedule turning radar back on in 6 to 9 minutes
+            end
+        end
+    end
 end
 
 
-SAM_AMM = {
-	["Patriot str"] = true,
-	["S-300PS 40B6M tr"] = true,
-}
-
-OLD_SAM_Radar = {
-    ["SNR_75V"] = true,
-	["snr s-125 tr"] = true,
-}
-
-local timingRadarOff = {5,15 }
-
-ARM_Shot_EventHandler = {}																					--Event handler to look for launched ARM
+--Event handler to look for launched ARM
 function ARM_Shot_EventHandler:onEvent(event)
 
     if event.id == world.event.S_EVENT_SHOT then
@@ -199,7 +212,8 @@ function ARM_Shot_EventHandler:onEvent(event)
         local wep = event.weapon    --Get the weapon of the launch event
         local tgt = wep:getTarget() --Get the target of the weapon
         local addTime = 0
-        if not wep or not wep.getDesc then return end
+        -- if not wep or not wep.getDesc then return end
+        if not wep or not wep:isExist() or not wep.getDesc then return end
 
         -- if event.initiator and Object.getCategory(event.initiator) == Object.Category.UNIT  then										--initiator is a unit debug_ET01.h
         -- 	env.info("DCE_ARM_S_EVENT A SHOT getPlayerName "..tostring( event.initiator:getPlayerName()))
@@ -250,13 +264,14 @@ function ARM_Shot_EventHandler:onEvent(event)
                     local unitCat = tgt:getDesc().category
                     env.info("DCE_ARM_S_EVENT          E unitCat: " .. tostring(unitCat))
                     if unitCat ~= 3 then --target is not a ship	-- bug AGM-154 :31: in function 'getDesc' Static doesn't exist
-                        -- trigger.action.outText("ARM Launch", 3)	--DEBUG
-                        -- env.info("DCE_ARM_               F Launch")
+                        -- trigger.action.outText("ARM Launch", 3)    --DEBUG
+                        local name = tgt:getName()
+
+                        env.info("DCE_ARM_               F Launch name tgt radar: " .. tostring(name))
 
                         local descRadarSam = tgt:getDesc()
 
                         _affiche(descRadarSam, "descRadarSam ArmDefence")
-
 
 
                         if math.random(1, 10) > 1 then --90% chance that ARM launch is detected by target
@@ -267,7 +282,7 @@ function ARM_Shot_EventHandler:onEvent(event)
                             end
 
                             if math.random(1, 100) <= probaTurnOff then
-                                -- trigger.action.outText("RadarOff", 3)	--DEBUG
+                                trigger.action.outText("RadarOff", 3)	--DEBUG
                                 env.info("DCE_ARM_RadarOff")
 
                                 if OLD_SAM_Radar[descRadarSam.typeName] then
