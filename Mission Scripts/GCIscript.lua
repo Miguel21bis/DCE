@@ -364,6 +364,12 @@ local function GCI_Cycle()
 
 										local pointB = GetOffsetPoint(flightInter, target.bearing, 2000)
 
+										local distBaseTarget = GetDistance2D(flightInter, { x = target.pointVec3.x, y = target.pointVec3.z })
+
+										env.info("DCE_Gci D distBaseTarget: " .. tostring(distBaseTarget))
+										
+										local pointC = GetOffsetPoint( {x=target.pointVec3.x, y=target.pointVec3.z}, target.bearing, distBaseTarget * 2/3)
+
 										local planDeVol = {														--define mission for interceptor group
 											id = 'Mission',
 											params = {
@@ -388,7 +394,7 @@ local function GCI_Cycle()
 																			["number"] = 1,
 																			["auto"] = false,
 																			["id"] = "WrappedAction",
-																			["name"] = "partie script",
+																			["name"] = "partie GCIscript",
 																			["enabled"] = true,
 																			["params"] =
 																			{
@@ -611,8 +617,8 @@ local function GCI_Cycle()
 															["alt_type"] = "BARO",
 															["formation_template"] = "",
 															["ETA"] = current_time + 3000,
-															["y"] = flightInter.y,
-															["x"] = flightInter.x,
+															["y"] = pointC.y,
+															["x"] = pointC.x,
 															["speed"] = tonumber(speed),
 															["ETA_locked"] = false,
 															["task"] = {
