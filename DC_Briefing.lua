@@ -25,63 +25,48 @@ end
 
 local function freqInRanges(freq, ranges)
     if not ranges then
-		-- print("freqInRanges A no ranges")
-        return false
+		 return false
     end
 
-    -- ranges = { min=..., max=... }
     if ranges.min and ranges.max then
-		-- print("freqInRanges B single range min "..tostring(ranges.min).." max "..tostring(ranges.max))
-        return freqInRange(freq, ranges)
+		return freqInRange(freq, ranges)
     end
 
-    -- ranges = { [1]={min,max}, [2]={min,max}, ... }
     for _, r in ipairs(ranges) do
-		-- print("freqInRanges C checking range min "..tostring(r.min).." max "..tostring(r.max))
-        if freqInRange(freq, r) then
-			-- print("freqInRanges D freq "..tostring(freq).." is in range min "..tostring(r.min).." max "..tostring(r.max))
-            return true
+		if freqInRange(freq, r) then
+			return true
         end
     end
 
-	-- print("freqInRanges E freq "..tostring(freq).." is not in any range")
-    return false
+	return false
 end
 
 function FreqCapabilityNG(testFreq, planeType, radioN, info)
 
-	-- print("FreqCapabilityNG A called with testFreq "..tostring(testFreq).." planeType "..tostring(planeType).." radioN "..tostring(radioN).." info "..tostring(info))
-
-    local freq = tonumber(testFreq)
+	local freq = tonumber(testFreq)
     if not freq then
-		-- print("FreqCapabilityNG B invalid freq")
-        return false
+		return false
     end
 
     local dbPlane = Db_Frequency[planeType]
     if not dbPlane then
-		-- print("FreqCapabilityNG C no dbPlane for type "..tostring(planeType))
-        return false
+		return false
     end
 
     ------------------------------------------------------------------
     -- CAS 2 : radioN PRÉSENT → panelRadio[radioN] uniquement
     ------------------------------------------------------------------
     if not dbPlane.radio then
-		-- print("FreqCapabilityNG D no dbPlane.radio for type "..tostring(planeType))
-        return false
+		return false
     end
 
     local radio = dbPlane.radio[radioN]
     if not radio then
-		-- print("FreqCapabilityNG E no radioN "..tostring(radioN).." for type "..tostring(planeType))
-        return false
+		return false
     end
 
-    -- Cas : radio.range existe
-    if radio.range then
-		-- print("FreqCapabilityNG F checking range for freq "..tostring(freq).." on radioN "..tostring(radioN).." for type "..tostring(planeType))
-        return freqInRanges(freq, radio.range)
+   if radio.range then
+		return freqInRanges(freq, radio.range)
     end
 
     return false
@@ -211,8 +196,6 @@ end
 
 --Order of Battle
 do
-	-- local s = ""
-
 	local s =  FormatDate(camp.date.day, camp.date.month, camp.date.year) .. ", " .. FormatTime(camp.time, "hh:mm") .. ":\n\n"		--add date and time header
 
 	if AirLiftObjectif and next(AirLiftObjectif) ~= nil then
@@ -913,21 +896,27 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 					end
 
+					local precisionGPS = 4
+					if camp.date.year >= 1999 then
+						precisionGPS = 8
+					end
 					if (player_task == "Strike" or player_task == "Anti-ship Strike") then
 						for targetN, targetPlayer in ipairs(targetlist[tempPlayer.side]) do
-							local precisionGPS = 8
+							
 							local attributMaster = ""
+
 							if targetPlayer.attributes then
 								for attributN, attribut in pairs(targetPlayer.attributes) do
 									if string.lower(attribut) == "soft" or string.lower(attribut) == "static" then
-										precisionGPS = 4
+										-- precisionGPS = 4
 										attributMaster = "soft"
 									end
 								end
 							end
+
 							if attributMaster == "" and targetPlayer.class and targetPlayer.class == "static" then
 
-								precisionGPS = 4
+								-- precisionGPS = 4
 								attributMaster = "soft"
 
 							end
@@ -942,22 +931,23 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 								s = s .. "\n"
 
-								if #targetPlayer.elements < 10 then
+								if #targetPlayer.elements < 10 or camp.date.year >= 1999 then
 									for elementN, element in pairs(targetPlayer.elements) do						--list all target elements
-										local ename = element.name			--element name
+										-- local ename = element.name			--element name
+										local ename = element.type
 										local i = string.find(ename, "#")													--position of # in string
 										if i then
-											if element.type then
+											-- if element.type then
 												ename = element.type
-											else
-												ename = string.sub(ename, 0, i - 1) 											--only display part of element name before #
-											end
+											-- else
+											-- 	ename = string.sub(ename, 0, i - 1) 											--only display part of element name before #
+											-- end
 										end
 										s = s .. "- " .. ename
 										if element.dead == true then			--if the target element is destroyed
 											s = s .. " (destroyed)\n"														--mark as destroyed and make new line
 										else
-											if element.lat and element.lon and attributMaster ~= "soft"  then
+											if element.lat and element.lon then --and attributMaster ~= "soft"  
 
 												local dms_string =  " " ..Format_dms(element.lat, element.lon, precisionGPS)
 
@@ -1397,20 +1387,12 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					s = "Communication:\n"																		--overview of relevant comms frequencies
 					local MC = 0
 
-					-- print("Test radio A for inhType "..inhType)
 					for u = 1, #tempPlayer.group["units"] do
-						-- for n = 1, #RadioA[sideName] do																		--do it for all the radios
-						-- print("Test radio B for unit "..u.." of player "..inhType)
-							-- local inhType = GetInheritedType(tempPlayer.type) 	
 						if Db_Frequency[planeType] then
-								-- print("Test radio C for unit "..u.." of player "..inhType)
 								for radioN=1, #Db_Frequency[planeType].radio do
-									-- print("Test radio D number "..radioN.." for unit "..u.." of player "..inhType)
 									if Db_Frequency[planeType].radio[radioN].nbCanal > 0 then
-										-- print("Test radio E number "..radioN.." - found for unit "..u.." of player "..inhType)
 										if not tempPlayer.group["units"][u]["Radio"] then tempPlayer.group["units"][u]["Radio"] = {} end
 
-											-- print("Adding radio Z "..radioN.." to unit "..u.." of player "..inhType)
 											tempPlayer.group["units"][u]["Radio"][radioN] = {
 												["channels"] = {},
 											}
@@ -1419,22 +1401,6 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							end
 						-- end
 					end
-
-					-- for u = 1, #tempPlayer.group["units"] do
-					-- 	for n = 1, #RadioA[sideName] do																		--do it for all the radios
-					-- 		if Frequency[inheritedType] then
-					-- 			for ir=1, #Frequency[inheritedType].radio do
-					-- 				if Frequency[inheritedType].radio[ir].nbCanal > 0 then
-					-- 					if not tempPlayer.group["units"][u]["Radio"] then tempPlayer.group["units"][u]["Radio"] = {} end
-
-					-- 					tempPlayer.group["units"][u]["Radio"][ir] = {
-					-- 						["channels"] = {},
-					-- 					}
-					-- 				end
-					-- 			end
-					-- 		end
-					-- 	end
-					-- end
 
 					local frew_AWACS = {}
 					local freq_AFAC = {}																				--table to store AWACS frequencies
@@ -1549,7 +1515,6 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					--make EWR_freq table				
 					local tempEWR = EWR_DB[tempPlayer.side]
 
-					-- modification M34.g change freq EWR + custom FrequenceRadio (g: utilise les indicatifs WEST pour EWR)
 					local comparePossible = true
 					for z=1, #tempEWR do
 						if type(tempEWR[z].callsign) ~= "number" then
@@ -1594,26 +1559,6 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							radioP[i] = Db_Frequency[planeType].radio[i]
 						end
 					end
-
-					-- local camp_str = "radioP = " .. TableSerialization(radioP, 0)						--make a string
-					-- local campFile = io.open("Debug/RADIO_radioP_Briefing.lua", "w")	 or error("Failed to open debug file")
-					-- campFile:write(camp_str)																		--save new data
-					-- campFile:close()
-					-- os.execute 'pause'
-
-					-- if not Frequency[inheritedType] then
-					-- 	radioP[1] = {
-					-- 		VHF = {
-					-- 			min = 118,
-					-- 			max = 173,
-					-- 		},
-					-- 		nbCanal = 0,
-					-- 	}
-					-- else
-					-- 	for i=1, #Frequency[inheritedType].radio do
-					-- 		radioP[i] = Frequency[inheritedType].radio[i]
-					-- 	end
-					-- end
 
 					local radioName = {}																								--creation table des noms de radio
 					for radioN = 1, 10 do
