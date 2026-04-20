@@ -267,18 +267,24 @@ function ARM_Shot_EventHandler:onEvent(event)
                         -- trigger.action.outText("ARM Launch", 3)    --DEBUG
                         local name = tgt:getName()
 
-                        env.info("DCE_ARM_               F Launch name tgt radar: " .. tostring(name))
-
+                        env.info("DCE_ARM_               F1 Launch name tgt radar: " .. tostring(name))
+                       
                         local descRadarSam = tgt:getDesc()
 
-                        _affiche(descRadarSam, "descRadarSam ArmDefence")
+                        _affiche(descRadarSam, "descRadarSam: ")
+
+                        env.info("DCE_ARM_               F2 Launch name tgt descRadarSam.typeName: " .. tostring(descRadarSam.typeName))
 
 
                         if math.random(1, 10) > 1 then --90% chance that ARM launch is detected by target
                             local probaTurnOff = 75
 
+                            env.info("DCE_ARM_Radar SAM_AMM? " .. tostring(SAM_AMM[descRadarSam.typeName]))
+
                             if descRadarSam and descRadarSam.typeName and SAM_AMM[descRadarSam.typeName] then
-                                probaTurnOff = 25
+                                -- probaTurnOff = 5
+                                env.info("DCE_ARM_Radar return")
+                                return
                             end
 
                             if math.random(1, 100) <= probaTurnOff then
