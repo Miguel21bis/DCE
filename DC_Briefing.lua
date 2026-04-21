@@ -1633,7 +1633,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							entry = {name = "", call = "", freq = "",radio = ""}
 							entry["name"] = "Flight: "
 							entry["call"] = ""
-							entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+							-- entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+							if freqA < 30 then
+								-- HF : pas de padding
+								entry["freq"] = string.format("%.3f", freqA) .. " MHz"
+							else
+								-- VHF/UHF : format fixe
+								entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
+							end
 
 							if FreqCapabilityNG(freqA, planeType, radioN, flight[f].type) then
 
@@ -1662,7 +1670,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						entry = {name = "", call = "", freq = "",radio = ""}
 						entry["name"] = "Package: "
 						entry["call"] = ""
-						entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+						-- entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+						if freqA < 30 then
+							-- HF : pas de padding
+							entry["freq"] = string.format("%.3f", freqA) .. " MHz"
+						else
+							-- VHF/UHF : format fixe
+							entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
+						end
 
 						if FreqCapabilityNG(freqA, planeType, radioN, flight[f].type) then
 
@@ -1706,7 +1722,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 												entry = {name = "", call = "", freq = "",radio = ""}
 												entry["name"] = "ATC: "
 												entry["call"] = AliasBaseName(tempPlayer.airbase)
-												entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+												-- entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+												if freqA < 30 then
+													-- HF : pas de padding
+													entry["freq"] = string.format("%.3f", freqA) .. " MHz"
+												else
+													-- VHF/UHF : format fixe
+													entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
+												end
 
 												if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
 													local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
@@ -1745,7 +1769,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry = {name = "", call = "", freq = "",radio = ""}
 								entry["name"] = "Emergency :"
 								entry["call"] = call
-								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+								-- entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+								if freqA < 30 then
+									-- HF : pas de padding
+									entry["freq"] = string.format("%.3f", freqA) .. " MHz"
+								else
+									-- VHF/UHF : format fixe
+									entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
+								end
 
 								local numPreset
 
@@ -1793,7 +1825,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry = {name = "", call = "", freq = "",radio = ""}
 									entry["name"] = "Coalition UHF("..lib.."):"
 									entry["call"] = call
-									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+									-- entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+									if freqA < 30 then
+										-- HF : pas de padding
+										entry["freq"] = string.format("%.3f", freqA) .. " MHz"
+									else
+										-- VHF/UHF : format fixe
+										entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
+									end
 
 									if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
 										local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
@@ -1827,7 +1867,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry = {name = "", call = "", freq = "",radio = ""}
 									entry["name"] = "Coalition VHF("..lib.."):"
 									entry["call"] = call
-									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+									-- entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+									if freqA < 30 then
+										-- HF : pas de padding
+										entry["freq"] = string.format("%.3f", freqA) .. " MHz"
+									else
+										-- VHF/UHF : format fixe
+										entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
+									end
 
 									if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
 										local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
@@ -1858,7 +1906,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry = {name = "", call = "", freq = "",radio = ""}
 									entry["name"] = "Coalition HF("..lib.."):"
 									entry["call"] = call
-									entry["freq"] = string.format("%02.3f", freqA).. " MHz"
+									-- entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+									if freqA < 30 then
+										-- HF : pas de padding
+										entry["freq"] = string.format("%.3f", freqA) .. " MHz"
+									else
+										-- VHF/UHF : format fixe
+										entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
+									end
 
 									if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
 										local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
@@ -1890,7 +1946,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry = {name = "", call = "", freq = "",radio = ""}
 									entry["name"] = "Coalition LVHF("..lib.."):"
 									entry["call"] = call
-									entry["freq"] = string.format("%02.3f", freqA).. " MHz"
+									-- entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+									if freqA < 30 then
+										-- HF : pas de padding
+										entry["freq"] = string.format("%.3f", freqA) .. " MHz"
+									else
+										-- VHF/UHF : format fixe
+										entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
+									end
 
 									if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
 										local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
@@ -1935,7 +1999,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry = {name = "", call = "", freq = "",radio = ""}
 								entry["name"] = "AWACS: "..value.type
 								entry["call"] = call
-								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+								-- entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+								if freqA < 30 then
+									-- HF : pas de padding
+									entry["freq"] = string.format("%.3f", freqA) .. " MHz"
+								else
+									-- VHF/UHF : format fixe
+									entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
+								end
 
 								if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
 
@@ -1965,7 +2037,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry = {name = "", call = "", freq = "",radio = ""}
 								entry["name"] = "EWR: "
 								entry["call"] = call
-								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+								-- entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+								if freqA < 30 then
+									-- HF : pas de padding
+									entry["freq"] = string.format("%.3f", freqA) .. " MHz"
+								else
+									-- VHF/UHF : format fixe
+									entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
+								end
 
 								if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
 									local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
@@ -2009,7 +2089,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry = {name = "", call = "", freq = "", radio = ""}
 									entry["name"] = "Tanker: "..tostring(tanker_TACAN[callINI]).." "..value.type.." "..postTxt
 									entry["call"] = call
-									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+									-- entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+									if freqA < 30 then
+										-- HF : pas de padding
+										entry["freq"] = string.format("%.3f", freqA) .. " MHz"
+									else
+										-- VHF/UHF : format fixe
+										entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
+									end
 
 									if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
 										local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
@@ -2050,7 +2138,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry = {name = "", call = "", freq = "",radio = ""}
 								entry["name"] = "AFAC: "..value.type .. (value.LaserCode and " (laser: ".. tostring(value.LaserCode)..")" or "")
 								entry["call"] = call
-								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+								-- entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+								if freqA < 30 then
+									-- HF : pas de padding
+									entry["freq"] = string.format("%.3f", freqA) .. " MHz"
+								else
+									-- VHF/UHF : format fixe
+									entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
+								end
 
 								if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
 									local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
@@ -2076,7 +2172,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							entry = {name = "", call = "", freq = "", radio = ""}
 							entry["name"] = "CAP: "
 							entry["call"] = call
-							entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+							-- entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+							if freqA < 30 then
+								-- HF : pas de padding
+								entry["freq"] = string.format("%.3f", freqA) .. " MHz"
+							else
+								-- VHF/UHF : format fixe
+								entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
+							end
 
 							if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
 								local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
@@ -2102,7 +2206,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry = {name = "", call = "", freq = "", radio = ""}
 								entry["name"] = "Divert: "
 								entry["call"] = AliasBaseName(call)
-								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+								-- entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+								if freqA < 30 then
+									-- HF : pas de padding
+									entry["freq"] = string.format("%.3f", freqA) .. " MHz"
+								else
+									-- VHF/UHF : format fixe
+									entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
+								end
 
 								if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
 									local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
@@ -2144,7 +2256,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry = {name = "", call = "", freq = "", radio = ""}
 									entry["name"] = "ATC"
 									entry["call"] = AliasBaseName(baseName)
-									entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+									-- entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+									if freqA < 30 then
+										-- HF : pas de padding
+										entry["freq"] = string.format("%.3f", freqA) .. " MHz"
+									else
+										-- VHF/UHF : format fixe
+										entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
+									end
 
 									if FreqCapabilityNG(freqA, planeType, radioN, planeType.." ATC "..tostring(baseName)) then
 										local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
@@ -2169,7 +2289,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								entry = {name = "", call = "", freq = "", radio = ""}
 								entry["name"] = freq.task.." "..freq.name..": "
 								entry["call"] = call
-								entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+								-- entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+
+								if freqA < 30 then
+									-- HF : pas de padding
+									entry["freq"] = string.format("%.3f", freqA) .. " MHz"
+								else
+									-- VHF/UHF : format fixe
+									entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
+								end
 
 								if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
 									local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})

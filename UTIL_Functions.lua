@@ -1663,7 +1663,7 @@ local function simplifyRadioRanges(moduleData, isPlayer)
 
 	local function addRange(min, max)
 
-		-- if isPlayer then print("SRR addRange() A1 "..tostring(min).." - "..tostring(max)) end
+		if isPlayer then print("SRR addRange() A1 "..tostring(min).." - "..tostring(max)) end
 
 		if type(min) == "number" and type(max) == "number" and max > min then
 			-- if isPlayer then print("addRange() A2 valid range") end
@@ -1681,7 +1681,7 @@ local function simplifyRadioRanges(moduleData, isPlayer)
 				addRange(r.min, r.max)
 			end
 		elseif hr.minFrequency and hr.maxFrequency then
-			-- if isPlayer then print("SRR addRange() B2 minFrequency "..tostring(hr.minFrequency).." - "..tostring(hr.maxFrequency)) end
+			if isPlayer then print("SRR addRange() B2 minFrequency "..tostring(hr.minFrequency).." - "..tostring(hr.maxFrequency)) end
 			addRange(hr.minFrequency, hr.maxFrequency)
 		end
 	end
@@ -2273,7 +2273,7 @@ end
 
 
 local function getRangesForContext(side, task, type_withData, flightOrPackage)
-	print("getRangesForContext A called for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData).." flightOrPackage "..tostring(flightOrPackage))
+	-- print("getRangesForContext A called for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData).." flightOrPackage "..tostring(flightOrPackage))
 	-- cas spécial : réseaux commandement joueur
 
 	if specialTasks[task] and side == PlayerSide and (not type_withData or not IsHelicopter[type_withData]) then
@@ -2281,7 +2281,7 @@ local function getRangesForContext(side, task, type_withData, flightOrPackage)
 			for _, wave in ipairs(wavePriority[side].plane) do
 				for n, dataFreq in ipairs(RadioPlayerWaveRanges or {}) do
 					if rangeIntersectsWave(dataFreq, wave) then
-						print("getRangesForContext B special task "..tostring(task).." wave "..tostring(wave).." freq range "..tostring(dataFreq.min).." - "..tostring(dataFreq.max))
+						-- print("getRangesForContext B special task "..tostring(task).." wave "..tostring(wave).." freq range "..tostring(dataFreq.min).." - "..tostring(dataFreq.max))
 						return wave, { dataFreq }
 					end
 				end
@@ -2293,33 +2293,36 @@ local function getRangesForContext(side, task, type_withData, flightOrPackage)
 	if not IsHelicopter[type_withData] then
 		for _, wave in ipairs(wavePriority[side].plane) do
 			if RadioWaveCommon[side] and RadioWaveCommon[side][wave] then
-				print("getRangesForContext C normal plane wave "..tostring(wave))
+				-- print("getRangesForContext C normal plane wave "..tostring(wave).." type_withData: "..tostring(type_withData))
 				return wave, { RadioWaveCommon[side][wave] }
 			end
 		end
 	else
 		if flightOrPackage == "FreqFlight" and RadioWaveCommon[side] and RadioWaveCommon[side]["LVHF"] then
-			print("getRangesForContext D1 normal helicopter wave "..tostring("LVHF"))
+			-- print("getRangesForContext D1 normal helicopter wave "..tostring("LVHF"))
 			return "LVHF", { RadioWaveCommon[side]["LVHF"] }
 		elseif flightOrPackage == "FreqPackage" and RadioWaveCommon[side] and RadioWaveCommon[side]["UHF"] then
-			print("getRangesForContext D2 normal helicopter wave "..tostring("UHF"))
+			-- print("getRangesForContext D2 normal helicopter wave "..tostring("UHF"))
 			return "UHF", { RadioWaveCommon[side]["UHF"] }
 		end
 
 		for _, wave in ipairs(wavePriority[side].helicopter) do
 			if RadioWaveCommon[side] and RadioWaveCommon[side][wave] then
-				print("getRangesForContext D3 normal helicopter wave "..tostring(wave))
+				-- print("getRangesForContext D3 normal helicopter wave "..tostring(wave))
 				return wave, { RadioWaveCommon[side][wave] }
 			end
 		end
 	end
 
+	-- print("getRangesForContext Z return nil ")
     return nil, {}
 end
 
 
 
 local function generateRandomFrequency(ranges)
+
+	-- print("generateRandomFrequency 0 called for ranges: "..tostring(ranges) )
 
 	local step = 0.05
 	local range
@@ -2330,11 +2333,19 @@ local function generateRandomFrequency(ranges)
 	elseif type(ranges) == "table" and #ranges > 0 then
 		range = ranges[math.random(1, #ranges)]
 	else
+		-- print("generateRandomFrequency A RETURN NIL no valid range")
 		return nil
 	end
 
 	if not range.min or not range.max then
+		-- print("generateRandomFrequency B RETURN NIL no valid range.min or range.max")
 		return nil
+	end
+
+	-- Ajustement du step pour HF (petites plages)
+	-- Pourquoi : éviter saturation (trop peu de fréquences disponibles)
+	if (range.max - range.min) <= 2 then
+		step = 0.01
 	end
 
 	local min = math.ceil(range.min / step) * step
@@ -2342,6 +2353,7 @@ local function generateRandomFrequency(ranges)
 	local count = math.floor((max - min) / step)
 
 	if count <= 0 then
+		-- print("generateRandomFrequency C RETURN NIL no valid frequencies in range")
 		return nil
 	end
 
@@ -2357,16 +2369,21 @@ local function generateRandomFrequency(ranges)
 
 		safety = safety + 1
 		if safety > 200 then
+			-- print("generateRandomFrequency D RETURN NIL safety limit reached")
 			return nil
 		end
 
 	until not EmergencyFreq[freq]
 	   and not Assigned_freq[freq]
 
+	-- print("generateRandomFrequency E generated frequency "..tostring(freq).." in range "..tostring(range.min).." - "..tostring(range.max))
 	return freq
 end
 
+
 function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPackage, groupName)
+	
+	-- print("GetFrequencyNG 0 called for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(wave).." flightOrPackage "..tostring(flightOrPackage).." groupName "..tostring(groupName))
 
 	AssignedTargetFrequency[side] = AssignedTargetFrequency[side] or {}
 	AssignedGroupFrequency = AssignedGroupFrequency or {}
@@ -2386,6 +2403,7 @@ function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPa
 		groupKey = type_withData .. "|" .. root .. "|" .. flightOrPackage
 
 		if AssignedGroupFrequency[side][groupKey] then
+			-- print("GetFrequencyNG A returning cached frequency for groupKey "..tostring(groupKey).." freq "..tostring(AssignedGroupFrequency[side][groupKey]))
 			return AssignedGroupFrequency[side][groupKey]
 		end
 	end
@@ -2394,6 +2412,7 @@ function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPa
 	-- 2. CACHE CLASSIQUE
 	----------------------------------------------------------------
 	if target_name and flightOrPackage and AssignedTargetFrequency[side][target_name][flightOrPackage] then
+		-- print("GetFrequencyNG B returning cached frequency for target "..tostring(target_name).." flightOrPackage: " .. tostring(flightOrPackage) .. " freq "..tostring(AssignedTargetFrequency[side][target_name][flightOrPackage]))
 		return AssignedTargetFrequency[side][target_name][flightOrPackage]
 	end
 
@@ -2417,7 +2436,11 @@ function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPa
 	-- 4. GÉNÉRATION
 	----------------------------------------------------------------
 	local freq = generateRandomFrequency(ranges)
-	if not freq then return nil end
+	if not freq then 
+		-- print("GetFrequencyNG C no frequency generated for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(selectedWave))
+		return nil 
+
+	end
 
 	----------------------------------------------------------------
 	-- 5. SAUVEGARDE
@@ -2430,6 +2453,7 @@ function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPa
 		AssignedTargetFrequency[side][target_name][flightOrPackage] = freq
 	end
 
+	-- print("GetFrequencyNG D returning frequency "..tostring(freq).." for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(selectedWave).." groupKey "..tostring(groupKey))
 	return freq
 end
 

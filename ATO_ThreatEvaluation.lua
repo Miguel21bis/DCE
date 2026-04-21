@@ -1306,15 +1306,16 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 							
 							if camp and camp.ewrFreqAdaptable then
 								ewr_call["frequencyMHz"] = GetFrequencyNG(sidename, group.name, "EWR")
-								ewr_call["frequencyHz"] = ewr_call.frequencyMHz * 1000000		--convert to Hz
+								--TODO pb de retour de variable? il attend frequencyHz alors qu'on lui envoi return wave, { dataFreq }
+								ewr_call["frequencyHz"] = ewr_call["frequencyMHz"] * 1000000		--convert to Hz
 								group.route.points[1].task.params.tasks[t].params.action.params.frequency = ewr_call["frequencyHz"]
 							else
 								ewr_call["frequencyHz"] = group.route.points[1].task.params.tasks[t].params.action.params.frequency
 								ewr_call["frequencyMHz"] = ewr_call.frequencyHz / 1000000		--convert to MHz
 							end
 
-							if Assigned_freq and ewr_call.frequencyMHz then
-								Assigned_freq[ewr_call.frequencyMHz] = true
+							if Assigned_freq and ewr_call["frequencyMHz"] then
+								Assigned_freq[ewr_call["frequencyMHz"]] = true
 							end
 
 						end
