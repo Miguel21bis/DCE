@@ -2025,7 +2025,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 						route_leg_band = "low"
 					end
 
-					if  GetTangentDistance(route[n], route[n + 1], Fighterthreats[enemySide_name][t]) < Fighterthreats[enemySide_name][t].range then	--if route segment is in range of fighter threat
+					if GetTangentDistance(route[n], route[n + 1], Fighterthreats[enemySide_name][t]) < Fighterthreats[enemySide_name][t].range then	--if route segment is in range of fighter threat
 						local ewr_required																							--boolean whether ewr is required for the fighter to be a threat
 						if Fighterthreats[enemySide_name][t].class == "CAP" then																--if the fighter is CAP
 							if route_leg_band == "high" then																		--if route leg is at high altitude
