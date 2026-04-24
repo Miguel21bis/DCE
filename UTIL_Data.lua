@@ -185,7 +185,6 @@ TaskByPlane = {
 		["Su-24M"] = true,
 		["Su-25"] = true,
 		["Su-25T"] = true,
-		-- ["Su-27"] = true,
 		["Su-30"] = true,
 		["Su-34"] = true,
 
@@ -1827,6 +1826,14 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		inheritedFrom = "Su-25",	--copy radio frequency, failures ...
 		playable = true,
+		vCruise = 185,
+		hCruise = 5000,
+	},
+	["Su-25TM"] = {
+		instrumentUnits = "russian",
+		EPLRS_Capacity = false,
+		inheritedFrom = "Su-25",	--copy radio frequency, failures ...
+		-- playable = true,
 		vCruise = 185,
 		hCruise = 5000,
 	},
