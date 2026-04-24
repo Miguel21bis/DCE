@@ -1321,11 +1321,6 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 								ewr_data["frequencyMHz"] = ewr_data.frequencyHz / 1000000		--convert to MHz
 							end
 
-							-- if Assigned_freq and ewr_data["frequencyMHz"] then
-							-- 	print("AtoTE EWR D Assigned_freq ".. tostring(ewr_data["frequencyMHz"]))
-							-- 	Assigned_freq[ewr_data["frequencyMHz"]] = true
-							-- end
-
 						end
 					end
 				end
@@ -1333,29 +1328,18 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 
 				--parse toutes les unités car le/les radars ne sont pas forcement en position 1
 				
-				-- print("AtoTE EWR_UNIT INIT")
 				for _, unit in pairs(group.units) do				--Iterate through all units			
-					-- print("AtoTE EWR_UNIT A ".._)
 					if not unit.dead then
-						-- print("AtoTE EWR_UNIT B")
 						addThreat(unit, sidename, group.hidden)
-
 						--tente d'ajouter cette unité dans la table EWR du script GCI inGame
 						--si elle est reconnue EWR, elle sera ajoutée
 
 						local testAdd_EWR = addEWR(unit, sidename, ewr_data)	--Add to EWR table
-						-- print("AtoTE EWR_UNIT C "..tostring(testAdd_EWR))
 						if testAdd_EWR then
-							-- print("AtoTE EWR_UNIT D")
-							-- _affiche(ewr_data, "ewr_data: ")
 							if camp and camp.ewrFreqAdaptable and ewr_data["taskN"] then
-								-- print("AtoTE EWR_UNIT E")
 								local tt = ewr_data["taskN"]
-								-- print("AtoTE EWR_UNIT F tt : "..tostring(tt)) 
 								group.route.points[1].task.params.tasks[tt].params.action.params.frequency = ewr_data["frequencyHz"]
-								print("AtoTE EWR_UNIT G "..tostring(group.name).." EST_callsign: "..tostring(ewr_data["EST_callsign"]).." "..tostring(ewr_data["frequencyHz"]))
 							end
-							-- print("AtoTE EWR_UNIT ZZZ BEAK")
 							break
 						end
 					end

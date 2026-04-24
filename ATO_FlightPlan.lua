@@ -5303,8 +5303,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				local DCE_FreqPackage = GetFrequencyNG(sideName, flight[f].target_name, taskOrHuman, flight[f].type, nil, "FreqPackage", groupName)
 
 				if not DCE_FreqPackage or DCE_FreqPackage == nil then
-					print("AtoFP ERROR, no DCE_FreqPackage "..flight[f].type) 
-					os.execute 'pause'
+					-- print("AtoFP ERROR, no DCE_FreqPackage "..flight[f].type)
+					AddLog("AtoFP ERROR, no DCE_FreqPackage for "..flight[f].type)
+					-- os.execute 'pause'
 				end
 
 				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe waypoints[1][x] AA "..tostring(waypoints[1]["x"])) end

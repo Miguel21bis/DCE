@@ -2230,7 +2230,7 @@ function DCE_FindCommonRadioRanges()
 
 	commonRanges[eniSide] = UnionRanges(heliRanges, planeRanges)
 
-	_affiche(commonRanges, "commonRanges: ")
+	-- _affiche(commonRanges, "commonRanges: ")
 
 	return commonRanges
 end
@@ -2253,7 +2253,8 @@ function AssignedFrequencies()
 				Assigned_freq[tonumber(freq)] = basename
 			end
 		else
-			_affiche(base.ATC_frequency, "AA base.ATC_frequency") 
+			print("BUG whith AssignedFrequencies():")
+			_affiche(base.ATC_frequency, "AA base.ATC_frequency: ") 
 		end
 	end
 
@@ -2435,9 +2436,9 @@ local function generateRandomFrequency(ranges)
 end
 
 
-function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPackage, groupName)
+function GetFrequencyNG(side, target_name, task, type, wave, flightOrPackage, groupName)
 	
-	-- print("GetFrequencyNG 0 called for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(wave).." flightOrPackage "..tostring(flightOrPackage).." groupName "..tostring(groupName))
+	-- print("GetFrequencyNG 0 called for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type).." wave "..tostring(wave).." flightOrPackage "..tostring(flightOrPackage).." groupName "..tostring(groupName))
 
 	AssignedTargetFrequency[side] = AssignedTargetFrequency[side] or {}
 	AssignedGroupFrequency = AssignedGroupFrequency or {}
@@ -2452,14 +2453,14 @@ function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPa
 	----------------------------------------------------------------
 	local groupKey = nil
 
-	if groupName and type_withData and flightOrPackage then
+	if groupName and type and flightOrPackage then
 		local root = string.gsub(groupName, "%s%d+$", "")
-		groupKey = type_withData .. "|" .. root .. "|" .. flightOrPackage
+		groupKey = type .. "|" .. root .. "|" .. flightOrPackage
 
 		if AssignedGroupFrequency[side][groupKey] then
 			local freqCache = AssignedGroupFrequency[side][groupKey]
 			-- print("GetFrequencyNG A1 ")
-			if FreqCapabilityNG1(freqCache, type_withData) then
+			if FreqCapabilityNG1(freqCache, type) then
 				-- print("GetFrequencyNG A2 returning cached frequency for groupKey "..tostring(groupKey).." freq "..tostring(AssignedGroupFrequency[side][groupKey]))
 				return AssignedGroupFrequency[side][groupKey]
 			end
@@ -2473,7 +2474,7 @@ function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPa
 		local freqCache = AssignedTargetFrequency[side][target_name][flightOrPackage]
 		
 		-- print("GetFrequencyNG B2 ")
-		if FreqCapabilityNG1(freqCache, type_withData) then
+		if FreqCapabilityNG1(freqCache, type) then
 
 			-- print("GetFrequencyNG B2 returning cached frequency for target "..tostring(target_name).." flightOrPackage: " .. tostring(flightOrPackage) .. " freq "..tostring(AssignedTargetFrequency[side][target_name][flightOrPackage]))
 			return freqCache
@@ -2493,7 +2494,7 @@ function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPa
 			ranges = { RadioWaveCommon[side][wave] }
 		end
 	else
-		selectedWave, ranges = getRangesForContext(side, task, type_withData, flightOrPackage)
+		selectedWave, ranges = getRangesForContext(side, task, type, flightOrPackage)
 	end
 
 	----------------------------------------------------------------
@@ -2501,7 +2502,8 @@ function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPa
 	----------------------------------------------------------------
 	local freq = generateRandomFrequency(ranges)
 	if not freq then 
-		-- print("GetFrequencyNG C no frequency generated for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(selectedWave))
+		-- _affiche(ranges, "ranges: ")
+		-- print("GetFrequencyNG C no frequency generated for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type).." wave "..tostring(selectedWave))
 		return nil 
 
 	end
@@ -2517,60 +2519,10 @@ function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPa
 		AssignedTargetFrequency[side][target_name][flightOrPackage] = freq
 	end
 
-	-- print("GetFrequencyNG D returning frequency "..tostring(freq).." for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(selectedWave).." groupKey "..tostring(groupKey))
+	-- print("GetFrequencyNG D returning frequency "..tostring(freq).." for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type).." wave "..tostring(selectedWave).." groupKey "..tostring(groupKey))
 	return freq
 end
 
--- function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPackage)
--- 	-- print("GetFrequencyNG A called for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(wave))
-
--- 	AssignedTargetFrequency[side] = AssignedTargetFrequency[side] or {}
-
--- 	if target_name then
--- 		AssignedTargetFrequency[side][target_name] = AssignedTargetFrequency[side][target_name] or {}
--- 	end
-
-
---     -- 1. Cache par cible
---     if target_name and flightOrPackage and AssignedTargetFrequency[side][target_name][flightOrPackage] then
--- 		-- print("GetFrequencyNG B returning cached frequency for target "..tostring(target_name).." flightOrPackage: " .. tostring(flightOrPackage) .. " freq "..tostring(AssignedTargetFrequency[side][target_name][flightOrPackage]))
---         return AssignedTargetFrequency[side][target_name][flightOrPackage]
---     end
-
---     local selectedWave
---     local ranges = {}
-
---     -- 2. Wave forcée
---     if wave then
---         selectedWave = wave
--- 		-- print("GetFrequencyNG C1 wave forced "..tostring(wave).." for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData))
---         if RadioWaveCommon[side] and RadioWaveCommon[side][wave] then
--- 			-- print("GetFrequencyNG C2 wave forced "..tostring(wave).." found for side "..tostring(side))
---             ranges = { RadioWaveCommon[side][wave] }
---         end
-
---     else
---         -- 3. Choix automatique
--- 		-- print("GetFrequencyNG D automatic wave selection for side "..tostring(side).." task "..tostring(task).." type_withData "..tostring(type_withData))
---         selectedWave, ranges = getRangesForContext(side, task, type_withData, flightOrPackage)
---     end
-
---     -- 4. Génération fréquence
---     local freq = generateRandomFrequency(ranges)
---     if not freq then return nil end
-
---     -- 5. Cache si target
---     if target_name and flightOrPackage then
---         AssignedTargetFrequency[side][target_name][flightOrPackage] = freq
---     end
-
--- 	-- print("GetFrequencyNG F returning frequency "..tostring(freq).." for side "..tostring(side).." target_name "..tostring(target_name).." task "..tostring(task).." type_withData "..tostring(type_withData).." wave "..tostring(selectedWave))
---     return freq
--- end
-
-----------------------------------------------------------------
--- FIN FIN Calcul Range Radio NG FIN
-----------------------------------------------------------------
 
 ----------------------------------------------------------------
 -- START START FreqCapabilityNG START
