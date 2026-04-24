@@ -933,28 +933,26 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 								if #targetPlayer.elements < 10 or camp.date.year >= 1999 then
 									for elementN, element in pairs(targetPlayer.elements) do						--list all target elements
-										-- local ename = element.name			--element name
-										local ename = element.type
-										local i = string.find(ename, "#")													--position of # in string
-										if i then
-											-- if element.type then
+										
+										if element.type then
+											local ename = element.type
+											local i = string.find(ename, "#")													--position of # in string
+											if i then
 												ename = element.type
-											-- else
-											-- 	ename = string.sub(ename, 0, i - 1) 											--only display part of element name before #
-											-- end
-										end
-										s = s .. "- " .. ename
-										if element.dead == true then			--if the target element is destroyed
-											s = s .. " (destroyed)\n"														--mark as destroyed and make new line
-										else
-											if element.lat and element.lon then --and attributMaster ~= "soft"  
-
-												local dms_string =  " " ..Format_dms(element.lat, element.lon, precisionGPS)
-
-												s = s ..dms_string
-
 											end
-											s = s .. "\n"
+											s = s .. "- " .. ename
+											if element.dead == true then			--if the target element is destroyed
+												s = s .. " (destroyed)\n"														--mark as destroyed and make new line
+											else
+												if element.lat and element.lon then --and attributMaster ~= "soft"  
+
+													local dms_string =  " " ..Format_dms(element.lat, element.lon, precisionGPS)
+
+													s = s ..dms_string
+
+												end
+												s = s .. "\n"
+											end
 										end
 									end
 								else
