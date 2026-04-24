@@ -5299,8 +5299,13 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 
-				local DCE_FreqFlight = GetFrequencyNG(sideName, nil , taskOrHuman, type_withData, nil, "FreqFlight", groupName)			
-				local DCE_FreqPackage = GetFrequencyNG(sideName, flight[f].target_name, taskOrHuman, type_withData, nil, "FreqPackage", groupName)
+				local DCE_FreqFlight = GetFrequencyNG(sideName, nil , taskOrHuman, flight[f].type, nil, "FreqFlight", groupName)			
+				local DCE_FreqPackage = GetFrequencyNG(sideName, flight[f].target_name, taskOrHuman, flight[f].type, nil, "FreqPackage", groupName)
+
+				if not DCE_FreqPackage or DCE_FreqPackage == nil then
+					print("AtoFP ERROR, no DCE_FreqPackage "..flight[f].type) 
+					os.execute 'pause'
+				end
 
 				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe waypoints[1][x] AA "..tostring(waypoints[1]["x"])) end
 
@@ -5311,7 +5316,6 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				local group =
 				{
-					['frequency'] = DCE_FreqPackage,
 					['taskSelected'] = true,
 					['modulation'] = 0,
 					['groupId'] = GenerateIDGroup(),
@@ -5332,6 +5336,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					['uncontrolled'] = false,
 					['DCE_targetName'] = flight[f].target_name,
 					['DCE_FreqFlight'] = DCE_FreqFlight,
+					['frequency'] = DCE_FreqPackage,
 
 				}
 
@@ -7211,12 +7216,12 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					.." | "..flight[f].target_name
 					.." |activate: "..tostring(activateGroupSecondes)
 					.." |start_time: ".. math.floor(debug_StartTime)
-					.." |ETA1: "..group.route.points[1]["ETA"]
+					.." |ETA1: "..(group.route.points[1]["ETA"])
 					-- .." |ETA2: "..group.route.points[2]["ETA"]
-					.." | "..group.frequency
-					.." |threatsG: "..flight[f].threatsGround
-					.." |threatsA: "..flight[f].threatsAir
-					.." |score: "..flight[f].score
+					.." |frequency: "..tostring(group.frequency)
+					.." |threatsG: "..tostring(flight[f].threatsGround)
+					.." |threatsA: "..tostring(flight[f].threatsAir)
+					.." |score: "..tostring(flight[f].score)
 
 
 

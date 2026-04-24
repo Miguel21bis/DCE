@@ -33,8 +33,10 @@ local function AddUncontrolledAircraft(side, unit, number, parkingId, base)
 	-- print("DcSA Passe base "..tostring(base).." : ") 
 	for u = 1, number do													--Repeat for each unasisgned aircraft
 		
+		local DCE_FreqPackage = GetFrequencyNG(side, "static", nil, unit.type, nil, "FreqPackage", nil)
+
 		local group = {														--Define group to spawn
-			['frequency'] = 124,
+			['frequency'] = DCE_FreqPackage,
 			['taskSelected'] = true,
 			['modulation'] = 0,
 			['groupId'] = GenerateIDGroup(),

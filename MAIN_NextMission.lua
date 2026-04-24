@@ -634,27 +634,23 @@ if MissionInstance >= 2 then
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
 	
-	-- CreatePlageFrequency_A()-- TODO a confirmer qu'il est encore utile cree une table de radio en fonction du canal puis de la wave
-	-- CreatePlageFrequency_B()	--cree une table de radio en fonction des wave
-	
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
-	-- if Debug.debug then print ("Lancement VIA Main_NM A 646") end
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
-	-- if Debug.debug then print ("Lancement VIA Main_NM B 649") end
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 end
 
 PayloadRestricted = makePayloadRestricted()
 
+
+dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
 
 if ArgTools == "KillTarget" then
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Divers.lua")
 end
 
-dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_RouteGenerator.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Generator.lua")
 dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_PlayerAssign.lua")

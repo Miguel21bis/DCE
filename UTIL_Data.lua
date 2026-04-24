@@ -4012,16 +4012,16 @@ function DataCompilation_DataDiscoveryA2()
 							-- print("  -> A2 aircraft captured "..planeType)
 							
 
-							-- local file_str = "dst = " .. TableSerialization(dst, 0)			--make a string
+							-- local file_str = "dst = " .. TableSerialization(Data_divers[planeType], 0)			--make a string
 							-- local file_File = io.open("Debug/Data_Divers_GetMods_"..planeType..".lua", "w") or error("Failed to open debug EWR_UtilDebug file")
 							-- file_File:write(file_str)																	--save new data
 							-- file_File:close()
 
 						end
 					else
-						print("  -> collected A planeName "..tostring(planeType).." wanted: "..tostring(wanted))
+						-- print("  -> collected A planeName "..tostring(planeType).." wanted: "..tostring(wanted))
 						AddLog("WARNING: collected aircraft "..tostring(aircraft.Name or aircraft.self_ID).." does not match wanted "..tostring(wanted).." for planeType "..tostring(planeType))
-						os.execute 'pause'
+						-- os.execute 'pause'
 					end
 				end
 

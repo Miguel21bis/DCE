@@ -1,7 +1,7 @@
 --Various functions
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Functions.lua"] = "2.20.139"
+versionDCE["UTIL_Functions.lua"] = "2.20.140"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -32,6 +32,7 @@ RosterJumpTempPercent = 0.25			-- suite à un saut temporel, enleve une partie d
 WingmenPlayer = false			-- si true, les wingmen playable sont proposé aux joueurs
 LoadoutsList = {}				-- construit la table loadout en fonction du loadout général et de la campagne
 EPLRS_Capacity = {}
+CurrentPlayerAircraftType = nil
 AircraftInCampaign = {}				-- liste de tous les types d'avions utilisés dans la campagne
 AircraftCampaignBySide = {
 	["red"] = {},
@@ -96,22 +97,6 @@ Attribut2Target = {
 	["ewr"] = "ewr",
 	["bridge"] = "bridge",
 }
-
--- Package_freq = {															--table to store frequencies assigned to packages
--- 	["blue"] = {
--- 		["UHF"] = {},
--- 		["VHF"] = {},
--- 		["LVHF"] = {},
--- 		["HF"] = {},
--- 	},
--- 	["red"] = {
--- 		["UHF"] = {},
--- 		["VHF"] = {},
--- 		["LVHF"] = {},
--- 		["HF"] = {},
--- 	},
--- }
-
 
 local idGroupCounter = 3000
 local idUnitCounter = 3000
@@ -1663,7 +1648,7 @@ local function simplifyRadioRanges(moduleData, isPlayer)
 
 	local function addRange(min, max)
 
-		if isPlayer then print("SRR addRange() A1 "..tostring(min).." - "..tostring(max)) end
+		-- if isPlayer then print("SRR addRange() A1 "..tostring(min).." - "..tostring(max)) end
 
 		if type(min) == "number" and type(max) == "number" and max > min then
 			-- if isPlayer then print("addRange() A2 valid range") end
@@ -1681,7 +1666,7 @@ local function simplifyRadioRanges(moduleData, isPlayer)
 				addRange(r.min, r.max)
 			end
 		elseif hr.minFrequency and hr.maxFrequency then
-			if isPlayer then print("SRR addRange() B2 minFrequency "..tostring(hr.minFrequency).." - "..tostring(hr.maxFrequency)) end
+			-- if isPlayer then print("SRR addRange() B2 minFrequency "..tostring(hr.minFrequency).." - "..tostring(hr.maxFrequency)) end
 			addRange(hr.minFrequency, hr.maxFrequency)
 		end
 	end
@@ -1803,6 +1788,7 @@ end
 ----------------------------------------------------------------
 -- main function
 ----------------------------------------------------------------
+---	CurrentPlayerAircraftType = nil
 function DCE_FindRadioCommonWaves()
 
 	local result = {
@@ -1814,62 +1800,95 @@ function DCE_FindRadioCommonWaves()
 
 		for waveName, wave in pairs(RADIO_WAVES) do
 
-		local common = nil
-		local validModuleCount = 0
+			-- local common = nil
+			--**
+			local common = nil
+			local validModuleCount = 0
 
-			for moduleName,_ in pairs(modules) do
+			-- 🔹 CONTRAINTE JOUEUR
+			local playerData = Db_Frequency[CurrentPlayerAircraftType]
+			local playerInWave = nil
 
-				local moduleData = Db_Frequency[moduleName]
-				if moduleData then
-					-- print("moduleName DCE_FRC() "..moduleName)
-					local ranges = simplifyRadioRanges(moduleData)
-					local inWave = {}
+			if playerData then
+				local playerRanges = simplifyRadioRanges(playerData)
+				playerInWave = {}
 
-					for _,r in ipairs(ranges) do
-						local inter = intersect(r, wave)
-						if inter then
-							table.insert(inWave, inter)
-						end
+				for _, r in ipairs(playerRanges) do
+					local inter = intersect(r, wave)
+					if inter then
+						playerInWave[#playerInWave+1] = inter
 					end
+				end
 
-					-- ce module participe à la wave
-					if inWave[1] then
-						validModuleCount = validModuleCount + 1
-						if not common then
-							common = DeepCopy(inWave)
-						else
-							local newCommon = {}
+				-- si le joueur ne supporte pas la wave → on neutralise
+				if not playerInWave[1] then
+					playerInWave = false
+				else
+					common = DeepCopy(playerInWave)
+				end
+			end
+			--**
+			-- local validModuleCount = 0
 
-							for _,c in ipairs(common) do
-								for _,m in ipairs(inWave) do
-									local inter2 = intersect(c, m)
-									if inter2 then
-										table.insert(newCommon, inter2)
+			if playerInWave == false then
+				-- le joueur ne supporte pas cette wave → on skip
+			else
+
+				for moduleName,_ in pairs(modules) do
+
+					local moduleData = Db_Frequency[moduleName]
+					if moduleData then
+						-- print("moduleName DCE_FRC() "..moduleName)
+						local ranges = simplifyRadioRanges(moduleData)
+						local inWave = {}
+
+						for _,r in ipairs(ranges) do
+							local inter = intersect(r, wave)
+							if inter then
+								table.insert(inWave, inter)
+							end
+						end
+
+						-- ce module participe à la wave
+						if inWave[1] then
+							validModuleCount = validModuleCount + 1
+							if not common then
+								common = DeepCopy(inWave)
+							else
+								local newCommon = {}
+
+								for _,c in ipairs(common) do
+									for _,m in ipairs(inWave) do
+										local inter2 = intersect(c, m)
+										if inter2 then
+											table.insert(newCommon, inter2)
+										end
 									end
 								end
-							end
 
-							-- intersection impossible
-							if not newCommon[1] then
-								common = nil
-								break
-							end
+								-- intersection impossible
+								if not newCommon[1] then
+									common = nil
+									break
+								end
 
-							common = newCommon
+								common = newCommon
+							end
+							-- _affiche(common, "common : ")
 						end
-						-- _affiche(common, "common : ")
-					end
-				else
-					if Data_divers[moduleName] and Data_divers[moduleName].playable then
-						print("DCE_FindRadioCommonWaves D no Data_divers for module "..moduleName)
-						os.execute("pause")
-					end
+					else
+						-- if Data_divers[moduleName] and Data_divers[moduleName].playable then
+						-- 	print("DCE_FindRadioCommonWaves D no Data_divers for module "..moduleName)
+						-- 	os.execute("pause")
+						-- end
 
+					end
 				end
 			end
 
 			-- décision finale
-			if common and validModuleCount >= 1 then
+			-- if common and validModuleCount >= 1 then
+			if common and playerInWave ~= false and validModuleCount >= 1 then
 				result[side][waveName] = findBestCommonRange(common)
 			end
 		end
@@ -1879,26 +1898,52 @@ function DCE_FindRadioCommonWaves()
 	return result
 end
 
-
-function DCE_FindCommonRadioRanges()
+function Make_Db_Frequency()
 
 	--ajoute à la table Db_Frequency les data radio qui sont dans Data_divers
 	--ne l'ajoute pas si les tables radio sont déjà ajouté dans Db_Frequency
 	for moduleName, moduleData in pairs(Data_divers) do
+		
+		-- if string.find(moduleName, "F-14") then
+		-- 	print("Make_Db_Frequency A processing module "..moduleName)
+		-- 	_affiche(moduleData, "moduleData: ")
+		-- end
+		local addRadioData = false
 
-		if not Db_Frequency[moduleName] then
-			Db_Frequency[moduleName] = {}
-		end
-
+		Db_Frequency[moduleName] = Db_Frequency[moduleName] or {}
+		
 		if moduleData.HumanRadio then
 			Db_Frequency[moduleName].HumanRadio = moduleData.HumanRadio
+			addRadioData = true
 		end
 
 		if moduleData.panelRadio then
 			Db_Frequency[moduleName].panelRadio = moduleData.panelRadio
+			addRadioData = true
+		end
+
+		if not addRadioData then
+			
+			HumanRadio = {
+				frequency = 127.5, -- Radio Freq
+				editable = true,
+				minFrequency = 100.000,
+				maxFrequency = 156.000,
+				modulation = MODULATION_AM
+			}
+
+			Db_Frequency[moduleName].HumanRadio = HumanRadio
+
 		end
 	end
 
+	-- local camp_str = "Db_Frequency = " .. TableSerialization(Db_Frequency, 0)						--make a string
+	-- local campFile = io.open("Debug/Z1_Radio_Db_Frequency.lua", "w")	 or error("Failed to open debug file")
+	-- campFile:write(camp_str)																		--save new data
+	-- campFile:close()
+end
+
+function DCE_FindCommonRadioRanges()
 	-- mutualisation panelRadio + HumanRadio
 	for moduleName, dataRadio in pairs(Db_Frequency) do
 
@@ -2068,16 +2113,16 @@ function DCE_FindCommonRadioRanges()
 	------------------------------------------------
 	-- 1. Find player aircraft type
 	------------------------------------------------
-	local currentPlayerAircraftType = nil
+	-- CurrentPlayerAircraftType = nil
 
 	for moduleName, value in pairs(AircraftInCampaign) do
 		if value == "player" then
-			currentPlayerAircraftType = moduleName
+			CurrentPlayerAircraftType = moduleName
 			break
 		end
 	end
 
-	if not currentPlayerAircraftType then
+	if not CurrentPlayerAircraftType then
 		-- print("DCE_FindRadioCommonRG ERROR: no player aircraft found")
 		return { red = {}, blue = {} }
 	end
@@ -2085,14 +2130,14 @@ function DCE_FindCommonRadioRanges()
 	------------------------------------------------
 	-- 2. Get player ranges (REFERENCE)
 	------------------------------------------------
-	local playerData = Db_Frequency[currentPlayerAircraftType]
-	-- print("DCE_FindRadioCommonRG player module data: "..currentPlayerAircraftType)
+	local playerData = Db_Frequency[CurrentPlayerAircraftType]
+	-- print("DCE_FindRadioCommonRG player module data: "..CurrentPlayerAircraftType)
 
 	RadioPlayerWaveRanges = simplifyRadioRanges(playerData, true)
 
 	if Debug.debug then
 		local camp_str = "RadioPlayerWaveRanges = " .. TableSerialization(RadioPlayerWaveRanges, 0)						--make a string
-		local campFile = io.open("Debug/RadioPlayerWaveRanges_"..currentPlayerAircraftType..".lua", "w")	 or error("Failed to open debug file")
+		local campFile = io.open("Debug/RadioPlayerWaveRanges_"..CurrentPlayerAircraftType..".lua", "w")	 or error("Failed to open debug file")
 		campFile:write(camp_str)																		--save new data
 		campFile:close()
 	end
@@ -2105,9 +2150,9 @@ function DCE_FindCommonRadioRanges()
 	-- 3. Determine player side
 	------------------------------------------------
 	local playerSide = nil
-	if AircraftCampaignBySide.red and AircraftCampaignBySide.red[currentPlayerAircraftType] then
+	if AircraftCampaignBySide.red and AircraftCampaignBySide.red[CurrentPlayerAircraftType] then
 		playerSide = "red"
-	elseif AircraftCampaignBySide.blue and AircraftCampaignBySide.blue[currentPlayerAircraftType] then
+	elseif AircraftCampaignBySide.blue and AircraftCampaignBySide.blue[CurrentPlayerAircraftType] then
 		playerSide = "blue"
 	end
 
@@ -2130,7 +2175,7 @@ function DCE_FindCommonRadioRanges()
 	------------------------------------------------
 	for moduleName, moduleData in pairs(Db_Frequency) do
 
-		if moduleName ~= currentPlayerAircraftType then
+		if moduleName ~= CurrentPlayerAircraftType then
 
 			-- same side only
 			if AircraftCampaignBySide[playerSide] and AircraftCampaignBySide[playerSide][moduleName] then
@@ -2185,6 +2230,8 @@ function DCE_FindCommonRadioRanges()
 
 	commonRanges[eniSide] = UnionRanges(heliRanges, planeRanges)
 
+	_affiche(commonRanges, "commonRanges: ")
+
 	return commonRanges
 end
 
@@ -2206,7 +2253,7 @@ function AssignedFrequencies()
 				Assigned_freq[tonumber(freq)] = basename
 			end
 		else
-			-- _affiche(base.ATC_frequency, "AA base.ATC_frequency") 
+			_affiche(base.ATC_frequency, "AA base.ATC_frequency") 
 		end
 	end
 
@@ -2233,12 +2280,12 @@ local EmergencyFreq = {
     [121.5] = true,
     [243.0] = true,
 }
--- local waveDefinitions = {
---     UHF  = { min = 225, max = 399.95 },
---     VHF  = { min = 116, max = 149.975 },
---     HF   = { min = 3,   max = 17.999 },
---     LVHF = { min = 30,  max = 75.95 },
--- }
+local waveDefinitions = {
+    UHF  = { min = 225, max = 399.95 },
+    VHF  = { min = 116, max = 149.975 },
+    HF   = { min = 3,   max = 17.999 },
+    LVHF = { min = 30,  max = 75.95 },
+}
 
 local wavePriority = {
 	blue = {
@@ -2291,10 +2338,15 @@ local function getRangesForContext(side, task, type_withData, flightOrPackage)
 
     -- cas normal : coalition
 	if not IsHelicopter[type_withData] then
+		-- _affiche(wavePriority[side], "wavePriority[side]: ")
 		for _, wave in ipairs(wavePriority[side].plane) do
+			-- print("getRangesForContext C0 _ ".._.." type_withData: "..tostring(type_withData))
 			if RadioWaveCommon[side] and RadioWaveCommon[side][wave] then
-				-- print("getRangesForContext C normal plane wave "..tostring(wave).." type_withData: "..tostring(type_withData))
-				return wave, { RadioWaveCommon[side][wave] }
+				-- print("getRangesForContext C1 "..wave)
+				if type_withData == nil or WaveCapability(wave, type_withData) then
+					-- print("getRangesForContext C2 normal plane wave "..tostring(wave).." type_withData: "..tostring(type_withData))
+					return wave, { RadioWaveCommon[side][wave] }
+				end
 			end
 		end
 	else
@@ -2323,6 +2375,8 @@ end
 local function generateRandomFrequency(ranges)
 
 	-- print("generateRandomFrequency 0 called for ranges: "..tostring(ranges) )
+	-- _affiche(ranges, "ranges: ")
+	-- print("generateRandomFrequency 0b ")
 
 	local step = 0.05
 	local range
@@ -2344,7 +2398,7 @@ local function generateRandomFrequency(ranges)
 
 	-- Ajustement du step pour HF (petites plages)
 	-- Pourquoi : éviter saturation (trop peu de fréquences disponibles)
-	if (range.max - range.min) <= 2 then
+	if (range.max - range.min) <= 3 then
 		step = 0.01
 	end
 
@@ -2403,8 +2457,12 @@ function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPa
 		groupKey = type_withData .. "|" .. root .. "|" .. flightOrPackage
 
 		if AssignedGroupFrequency[side][groupKey] then
-			-- print("GetFrequencyNG A returning cached frequency for groupKey "..tostring(groupKey).." freq "..tostring(AssignedGroupFrequency[side][groupKey]))
-			return AssignedGroupFrequency[side][groupKey]
+			local freqCache = AssignedGroupFrequency[side][groupKey]
+			-- print("GetFrequencyNG A1 ")
+			if FreqCapabilityNG1(freqCache, type_withData) then
+				-- print("GetFrequencyNG A2 returning cached frequency for groupKey "..tostring(groupKey).." freq "..tostring(AssignedGroupFrequency[side][groupKey]))
+				return AssignedGroupFrequency[side][groupKey]
+			end
 		end
 	end
 
@@ -2412,8 +2470,14 @@ function GetFrequencyNG(side, target_name, task, type_withData, wave, flightOrPa
 	-- 2. CACHE CLASSIQUE
 	----------------------------------------------------------------
 	if target_name and flightOrPackage and AssignedTargetFrequency[side][target_name][flightOrPackage] then
-		-- print("GetFrequencyNG B returning cached frequency for target "..tostring(target_name).." flightOrPackage: " .. tostring(flightOrPackage) .. " freq "..tostring(AssignedTargetFrequency[side][target_name][flightOrPackage]))
-		return AssignedTargetFrequency[side][target_name][flightOrPackage]
+		local freqCache = AssignedTargetFrequency[side][target_name][flightOrPackage]
+		
+		-- print("GetFrequencyNG B2 ")
+		if FreqCapabilityNG1(freqCache, type_withData) then
+
+			-- print("GetFrequencyNG B2 returning cached frequency for target "..tostring(target_name).." flightOrPackage: " .. tostring(flightOrPackage) .. " freq "..tostring(AssignedTargetFrequency[side][target_name][flightOrPackage]))
+			return freqCache
+		end
 	end
 
 	----------------------------------------------------------------
@@ -2512,6 +2576,79 @@ end
 -- START START FreqCapabilityNG START
 ----------------------------------------------------------------
 ---
+
+function WaveCapability(wave, type)
+
+	if not wave then 
+		-- print("WaveCapability A no wave provided")
+		return false 
+
+	end
+
+	local db = Db_Frequency[type]
+	if not db then
+		-- print("WaveCapability B no db entry for type "..tostring(type))
+		return false
+	else
+		-- print("WaveCapability B0 type: "..tostring(type))
+		-- _affiche(db, "Db_Frequency: ")
+	end
+
+	local waveDef = waveDefinitions[wave]
+	if not waveDef then
+		-- print("WaveCapability C no wave definition for wave "..tostring(wave))
+		return false
+	end
+
+	------------------------------------------------------------------
+	-- 1) HUMAN RADIO
+	------------------------------------------------------------------
+	if db.HumanRadio then
+		local hr = db.HumanRadio
+
+		-- cas rangeFrequency
+		if hr.rangeFrequency then
+			for _, r in ipairs(hr.rangeFrequency) do
+				if r.max >= waveDef.min and r.min <= waveDef.max then
+					-- print("WaveCapability D wave "..tostring(wave).." is compatible with HumanRadio range "..tostring(r.min).." - "..tostring(r.max).." for type "..tostring(type))
+					return true
+				end
+			end
+		end
+
+		-- cas min/max classique
+		if hr.minFrequency and hr.maxFrequency then
+			if hr.maxFrequency >= waveDef.min and hr.minFrequency <= waveDef.max then
+				-- print("WaveCapability E wave "..tostring(wave).." is compatible with HumanRadio range "..tostring(hr.minFrequency).." - "..tostring(hr.maxFrequency).." for type "..tostring(type))
+				return true
+			end
+		end
+	end
+
+	------------------------------------------------------------------
+	-- 2) PANEL RADIO
+	------------------------------------------------------------------
+	if db.panelRadio then
+		for _, radio in ipairs(db.panelRadio) do
+
+			if radio.range then
+				for _, r in ipairs(radio.range) do
+					if r.max >= waveDef.min and r.min <= waveDef.max then
+						-- print("WaveCapability F wave "..tostring(wave).." is compatible with panelRadio "..tostring(r.min).." - "..tostring(r.max).." for type "..tostring(type))
+						return true
+					end
+				end
+			end
+
+		end
+	end
+
+	------------------------------------------------------------------
+	-- print("WaveCapability G wave "..tostring(wave).." is NOT compatible with type "..tostring(type))
+	return false
+end
+
+
 local function freqInRange(freq, range)
     if not range or not range.min or not range.max then
         return false
@@ -5066,7 +5203,6 @@ function LoadFileAndUpdate(from)
 	--ajout automatique d'elements en cours de campagne: FIN
 	--****************************************************************************************
 
-
 	-- Exécution du fichier s'il existe
 	local testFile = "Init/various_table.lua"
 	if FileExists(testFile) then
@@ -5113,11 +5249,7 @@ function LoadFileAndUpdate(from)
 		camp_ZoneSAR = { blue = {}, red = {}, neutrals = {} }
 	end
 
-
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
-
-	--remplit la table des frequences déjà utilisé dans la map ou les bases
-	AssignedFrequencies()
 
 	--utilise ici le fichier Init/persistenceMP.lua s'il existe, pour facilité l'attribution des num tail/avion
 	local persistPath = "../../../Missions/Campaigns/"..camp.title.."/Init/persistenceMP.lua"
@@ -5162,22 +5294,27 @@ function LoadFileAndUpdate(from)
         print("LOAD LoadFileAndUpdate() from " .. tostring(from))
     end
 
-
 	--////////////////////////////////////////////////////////
 	LoadModData("Mods", true)
 	BuildLoadout()
 	--////////////////////////////////////////////////////////
 
 	CreateAircraftListInCampaign()
-	--supprime des mega grosse table DATA les info supperflue
-	CleanDataDivers()
-
+	
 	--/////////////////////////////////////////////////////////////////////
 	--/////////////////////////////////////////////////////////////////////
 
 	InheritedFromProcessing()
 	DataCompilation_DataDiscoveryA2()
 	DataCompilation_TaskByPlane()
+
+	Make_Db_Frequency()
+
+	--remplit la table des frequences déjà utilisé dans la map ou les bases
+	AssignedFrequencies()
+
+	--supprime des mega grosse table DATA les info supperflue
+	CleanDataDivers()
 
 	if Debug.debug then
 
@@ -5205,9 +5342,6 @@ function LoadFileAndUpdate(from)
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Weather.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
-
-	-- CreatePlageFrequency_A()-- TODO a confirmer qu'il est encore utile cree une table de radio en fonction du canal puis de la wave
-	-- CreatePlageFrequency_B()	--cree une table de radio en fonction des wave
 
 	CommonRanges = DCE_FindCommonRadioRanges()	--get common radio range for all planes in campaign
 
@@ -5667,26 +5801,30 @@ end
 
 --supprime de la mega table Data_divers les avions qui ne sont pas listé dans CampaignAircraft
 function CleanDataDivers()
+
+	-- _affiche(AircraftInCampaign, "AircraftInCampaign: ")
 	for planeType, _ in pairs(Data_divers) do
 		if not AircraftInCampaign[planeType] then
 			Data_divers[planeType] = nil
 		end
 	end
 	for planeType, _ in pairs(Db_Frequency) do
+		-- print("CleanDataDivers A: Db_Frequency planeType present dans AircraftInCampaign?  "..planeType)
 		if not AircraftInCampaign[planeType] then
 			Db_Frequency[planeType] = nil
+			-- print("CleanDataDivers B delete "..planeType.." In Db_Frequency ")
 		end
 	end
 
-		camp_str = "AircraftInCampaign = " .. TableSerialization(AircraftInCampaign, 0)						--make a string
-		campFile = io.open("Debug/Z_AircraftInCampaign.lua", "w")	 or error("Failed to open debug file")
-		campFile:write(camp_str)																		--save new data
-		campFile:close()
+	-- camp_str = "AircraftInCampaign = " .. TableSerialization(AircraftInCampaign, 0)						--make a string
+	-- campFile = io.open("Debug/Z_AircraftInCampaign.lua", "w")	 or error("Failed to open debug file")
+	-- campFile:write(camp_str)																		--save new data
+	-- campFile:close()
 
-		camp_str = "Db_Frequency = " .. TableSerialization(Db_Frequency, 0)						--make a string
-		campFile = io.open("Debug/Z_Db_Frequency.lua", "w")	 or error("Failed to open debug file")
-		campFile:write(camp_str)																		--save new data
-		campFile:close()
+	-- camp_str = "Db_Frequency = " .. TableSerialization(Db_Frequency, 0)						--make a string
+	-- campFile = io.open("Debug/Z2_Db_Frequency.lua", "w")	 or error("Failed to open debug file")
+	-- campFile:write(camp_str)																		--save new data
+	-- campFile:close()
 
 end
 

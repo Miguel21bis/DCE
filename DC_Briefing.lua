@@ -3,7 +3,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification: debug_k
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_Briefing.lua"] = "1.25.159"
+versionDCE["DC_Briefing.lua"] = "1.25.160"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -1389,17 +1389,16 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 					for u = 1, #tempPlayer.group["units"] do
 						if Db_Frequency[planeType] then
-								for radioN=1, #Db_Frequency[planeType].radio do
-									if Db_Frequency[planeType].radio[radioN].nbCanal > 0 then
-										if not tempPlayer.group["units"][u]["Radio"] then tempPlayer.group["units"][u]["Radio"] = {} end
+							for radioN=1, #Db_Frequency[planeType].radio do
+								if Db_Frequency[planeType].radio[radioN].nbCanal > 0 then
+									if not tempPlayer.group["units"][u]["Radio"] then tempPlayer.group["units"][u]["Radio"] = {} end
 
-											tempPlayer.group["units"][u]["Radio"][radioN] = {
-												["channels"] = {},
-											}
-										end
-								end
+										tempPlayer.group["units"][u]["Radio"][radioN] = {
+											["channels"] = {},
+										}
+									end
 							end
-						-- end
+						end
 					end
 
 					local frew_AWACS = {}
@@ -1500,7 +1499,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							elseif role[1] and role[1].task == "CAP" then												--if first flight is tanker
 								freq_CAP[role[1].callsign] = role[1].frequency											--store callsign and frequency
 
-							elseif role[1]  and  string.find(role[1].task,"Strike") and packN ~= tempPlayer.pack_n then								--and  string.find(role[1].task,"Strike")
+							elseif role[1] and string.find(role[1].task,"Strike") and packN ~= tempPlayer.pack_n then								--and  string.find(role[1].task,"Strike")
 
 								if not freq_All[role[1].callsign] then freq_All[role[1].callsign] = {} end
 
@@ -1625,7 +1624,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					}
 
 					--***************************************************************************
-					--Flight_freq **************************************************************
+					--Flight_freq (UNIQUEMENT EN MP) **************************************************************
 					if mission_ini.MP_PlaneRecovery and Multi.NbGroup >= 1 then
 						for radioN = 1, #radioP do
 
@@ -1696,7 +1695,10 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							else
 								-- print("Package B ERROR ")
 							end
-
+						else
+							-- print("Package B ERROR ")
+							-- print("DcBriefing "..tostring(freqA).." ".. tostring(planeType).." "..tostring(radioN).." "..tostring(flight[f].type) )
+							-- os.execute 'pause'
 						end
 					end
 

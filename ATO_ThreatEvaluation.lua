@@ -2,7 +2,7 @@
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_ThreatEvaluation.lua"] = "1.7.57"
+versionDCE["ATO_ThreatEvaluation.lua"] = "1.7.58"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -10,6 +10,8 @@ if Debug.debug then
 end
 
 local reduceCercle = 100
+
+-- Assigned_freq = {}
 
 --table to store ground/sea threats
 groundthreats = {
@@ -411,8 +413,10 @@ local function addThreat(unit, side, hide)											--unput is side and unit-ta
 		threatentry = {
 			type = unit.type,
 			class = "SAM",
-			level = 10,
-			SEAD_offset = 4,
+			-- level = 10,
+			level = 1000,
+			-- SEAD_offset = 4,
+			SEAD_offset = 8,
 			x = unit.x,
 			y = unit.y,
 			range = 92000,
@@ -564,8 +568,10 @@ local function addThreat(unit, side, hide)											--unput is side and unit-ta
 		threatentry = {
 			type = unit.type,
 			class = "SAM",
-			level = 10,
-			SEAD_offset = 4,
+			-- level = 10,
+			level = 1000,
+			-- SEAD_offset = 4,
+			SEAD_offset = 8,
 			x = unit.x,
 			y = unit.y,
 			range = 90000,
@@ -1215,8 +1221,7 @@ local function addEWR(unit, side, ewrData)
 		if entry.callsign then
 			table.insert(EWR_DB[side], entry)
 
-			--TODO a quoi ça sert?
-			-- EWR_DB[side][#EWR_DB[side]][call] = true
+			return true
 		else
 			return false
 		end
@@ -1242,9 +1247,10 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 	for country_n, country in pairs(side) do								--Iterate through all countries
 		if country.vehicle then												--If country has vehicles
 			for group_n, group in pairs(country.vehicle.group) do			--Iterate through all groups				
-				local ewr_task = false							--group has EWR task
+			-- print("AtoTE EWR_GROUP INIT group_n: "..group_n)	
+			local ewr_task = false							--group has EWR task
 				-- local ewr_freq = nil							--group has a communications frequency
-				local ewr_call = {
+				local ewr_data = {
 					EST_callsign = nil ,
 					frequencyHz = nil,
 					frequencyMHz = nil,
@@ -1277,11 +1283,11 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 				for t = 1, #group.route.points[1].task.params.tasks do
 					-- camp west, si utilisation des EWR, pour que les indicatifs soient bien pris en compte, l'enregistrement par DCS est comme ci dessus, il n'y a pas de SetCallsign
 					if group.route.points[1].task.params.tasks[t].params.callname then							--if group has a callsign set									
-						ewr_call["WEST_callnameId"] = group.route.points[1].task.params.tasks[t].params.callname					--set callname modification M07f
-						ewr_call["WEST_number"] = group.route.points[1].task.params.tasks[t].params.number
+						ewr_data["WEST_callnameId"] = group.route.points[1].task.params.tasks[t].params.callname					--set callname modification M07f
+						ewr_data["WEST_number"] = group.route.points[1].task.params.tasks[t].params.number
 						-- print("AtoTE EWR A "..tostring(group.name).." callname: "..tostring(ewr_call))							--debug
 						
-						ewr_call["WEST_callnameString"] = Callsign_west.JTAC_EWR[ewr_call.WEST_callnameId]
+						ewr_data["WEST_callnameString"] = Callsign_west.JTAC_EWR[ewr_data.WEST_callnameId]
 					end
 
 					if group.route.points[1].task.params.tasks[t].params.action and ewr_task then
@@ -1289,14 +1295,14 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 							
 						--EST side
 							if group.route.points[1].task.params.tasks[t].params.action.params.callsign then
-								ewr_call["EST_callsign"] = group.route.points[1].task.params.tasks[t].params.action.params.callsign						--set callsign
+								ewr_data["EST_callsign"] = group.route.points[1].task.params.tasks[t].params.action.params.callsign						--set callsign
 								
 							--WEST side
 							elseif group.route.points[1].task.params.tasks[t].params.action.params.callname then						-- callname is Callsign_west
-								ewr_call["WEST_callnameId"] = group.route.points[1].task.params.tasks[t].params.action.params.callname
-								ewr_call["WEST_number"] = group.route.points[1].task.params.tasks[t].params.action.params.number						--set callname modification M07e
+								ewr_data["WEST_callnameId"] = group.route.points[1].task.params.tasks[t].params.action.params.callname
+								ewr_data["WEST_number"] = group.route.points[1].task.params.tasks[t].params.action.params.number						--set callname modification M07e
 
-								ewr_call["WEST_callnameString"] = Callsign_west.JTAC_EWR[ewr_call.WEST_callnameId]
+								ewr_data["WEST_callnameString"] = Callsign_west.JTAC_EWR[ewr_data.WEST_callnameId]
 							end
 						end
 
@@ -1305,18 +1311,20 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 						if group.route.points[1].task.params.tasks[t].params.action.id == "SetFrequency" then							--if group has a frequency set										
 							
 							if camp and camp.ewrFreqAdaptable then
-								ewr_call["frequencyMHz"] = GetFrequencyNG(sidename, group.name, "EWR")
-								--TODO pb de retour de variable? il attend frequencyHz alors qu'on lui envoi return wave, { dataFreq }
-								ewr_call["frequencyHz"] = ewr_call["frequencyMHz"] * 1000000		--convert to Hz
-								group.route.points[1].task.params.tasks[t].params.action.params.frequency = ewr_call["frequencyHz"]
+								ewr_data["frequencyMHz"] = GetFrequencyNG(sidename, group.name, "EWR")
+								ewr_data["frequencyHz"] = ewr_data["frequencyMHz"] * 1000000		--convert to Hz
+								ewr_data["taskN"] = t
+								-- group.route.points[1].task.params.tasks[t].params.action.params.frequency = ewr_call["frequencyHz"]
+								-- print("AtoTE EWR C "..tostring(group.name).." EST_callsign: "..tostring(ewr_call["EST_callsign"]).." "..tostring(ewr_call["frequencyHz"]))
 							else
-								ewr_call["frequencyHz"] = group.route.points[1].task.params.tasks[t].params.action.params.frequency
-								ewr_call["frequencyMHz"] = ewr_call.frequencyHz / 1000000		--convert to MHz
+								ewr_data["frequencyHz"] = group.route.points[1].task.params.tasks[t].params.action.params.frequency
+								ewr_data["frequencyMHz"] = ewr_data.frequencyHz / 1000000		--convert to MHz
 							end
 
-							if Assigned_freq and ewr_call["frequencyMHz"] then
-								Assigned_freq[ewr_call["frequencyMHz"]] = true
-							end
+							-- if Assigned_freq and ewr_data["frequencyMHz"] then
+							-- 	print("AtoTE EWR D Assigned_freq ".. tostring(ewr_data["frequencyMHz"]))
+							-- 	Assigned_freq[ewr_data["frequencyMHz"]] = true
+							-- end
 
 						end
 					end
@@ -1324,34 +1332,31 @@ for sidename, side in pairs(oob_ground) do									--Iterate through all sides
 
 
 				--parse toutes les unités car le/les radars ne sont pas forcement en position 1
-				local testAdd = false
+				
+				-- print("AtoTE EWR_UNIT INIT")
 				for _, unit in pairs(group.units) do				--Iterate through all units			
+					-- print("AtoTE EWR_UNIT A ".._)
 					if not unit.dead then
-
-						-- print("AtoTE group.name "..group.name.." group.hidden: "..tostring(group.hidden))
-						-- print(" - - - AtoTE unit.name "..unit.name.." group.hidden: "..tostring(group.hidden))
+						-- print("AtoTE EWR_UNIT B")
 						addThreat(unit, sidename, group.hidden)
 
-						if not ewrFreqDejaTraite[sidename] then ewrFreqDejaTraite[sidename]= {} end
-						if not ewrFreqDejaTraite[sidename][group.groupId] then
+						--tente d'ajouter cette unité dans la table EWR du script GCI inGame
+						--si elle est reconnue EWR, elle sera ajoutée
 
-							--tente d'ajouter cette unité dans la table EWR du script GCI inGame
-							--si elle est reconnue EWR, elle sera ajoutée
-
-							testAdd = addEWR(unit, sidename, ewr_call)	--Add to EWR table
-							if testAdd ~= false then
-								ewrFreqDejaTraite[sidename][group.groupId] = true
-								-- tempFreq = ewr_freq * 1000000
-								EwrAdd = true
-							elseif ewrFreqDejaTraite[sidename][group.groupId] then
-								AddLog("no callsign planned for this EWR name "..tostring(unit.name).." type "..tostring(unit.type))
+						local testAdd_EWR = addEWR(unit, sidename, ewr_data)	--Add to EWR table
+						-- print("AtoTE EWR_UNIT C "..tostring(testAdd_EWR))
+						if testAdd_EWR then
+							-- print("AtoTE EWR_UNIT D")
+							-- _affiche(ewr_data, "ewr_data: ")
+							if camp and camp.ewrFreqAdaptable and ewr_data["taskN"] then
+								-- print("AtoTE EWR_UNIT E")
+								local tt = ewr_data["taskN"]
+								-- print("AtoTE EWR_UNIT F tt : "..tostring(tt)) 
+								group.route.points[1].task.params.tasks[tt].params.action.params.frequency = ewr_data["frequencyHz"]
+								print("AtoTE EWR_UNIT G "..tostring(group.name).." EST_callsign: "..tostring(ewr_data["EST_callsign"]).." "..tostring(ewr_data["frequencyHz"]))
 							end
-
-						else
-							-- print("AtoTE  EWR _Z_  ")
-							-- ewr_freq = nil
-							-- ewr_call = nil
-							-- tempFreq = nil
+							-- print("AtoTE EWR_UNIT ZZZ BEAK")
+							break
 						end
 					end
 				end
@@ -1532,8 +1537,8 @@ for side, threats in pairs(CAPthreats) do
 
 	end
 end
-table.sort(cap_threatsSort["blue"], function(a,b) return a.level > b.level  end)
-table.sort(cap_threatsSort["red"], function(a,b) return a.level > b.level  end)
+table.sort(cap_threatsSort["blue"], function(a,b) return a.level > b.level end)
+table.sort(cap_threatsSort["red"], function(a,b) return a.level > b.level end)
 
 --find AWACS, CAP and interceptors in aircraft units and populate ewr/Fighterthreats table
 for side, targets in pairs(targetlist) do																--iterate through all sides
