@@ -4,19 +4,22 @@ if not versionDCE then versionDCE = {} end
 versionDCE["DCEM_Function.lua"] = "1.2.7"
 -------------------------------------------------------------------------------------------------------
 
+
 --function type DCS, ne pas changer la casse
 function aircraft_task(taskName)
-
 	return taskName
 end
 
-pathScriptsMod = pathScriptsMod or  "C:/Users/miguel/Saved Games/DCS/Mods/tech/DCE/ScriptsMod.NG"
-pathCampaign = pathCampaign or  "C:/Users/miguel/Saved Games/DCS/Mods/tech/DCE/Missions/Campaigns/Hot War in The Cold - Fishbed"
 
-print("debug pathCampaign "..tostring(pathCampaign))
+
+pathScriptsMod = pathScriptsMod or  "C:/Users/miguel/Saved Games/DCS/Mods/tech/DCE/ScriptsMod.NG"
+-- pathCampaign = pathCampaign or  "C:/Users/miguel/Saved Games/DCS/Mods/tech/DCE/Missions/Campaigns/Hot War in The Cold - Fishbed"
+
+-- print("debug pathCampaign "..tostring(pathCampaign))
 dofile(pathScriptsMod.."/UTIL_Data.lua")
 dofile(pathCampaign.."/Init/oob_air_init.lua")
 
+local debugTab = {}
 
 
 --function to turn a table into a string
@@ -232,16 +235,20 @@ end
 --******************************************************************--
 --******************************************************************--
 
-
 local Playable_m = {}
-
 for planeType, value in pairs(Data_divers) do
     if value.playable then
-        Playable_m[#Playable_m + 1] = planeType
+        Playable_m[planeType] = true
     end
 end
 
-table.sort(Playable_m)
+local Playable_Num = {}
+for planeType, value in pairs(Data_divers) do
+    if value.playable then
+        Playable_Num[#Playable_Num + 1] = planeType
+    end
+end
+table.sort(Playable_Num)
 
 
 --******************************************************************--
@@ -329,10 +336,11 @@ end
 --******************************************************************--
 --******************************************************************--
 
-local oldSquadName = ""
-local newSquadName = ""
+-- local oldSquadName = ""
+-- local newSquadName = ""
 
-local playerSide = "blue"
+-- local playerSide = "blue"
+local playerSide
 
 --affiche le type d'avion selectionné et son squadrons
 for side, squadTL in  pairs(oob_air) do
@@ -346,30 +354,48 @@ for side, squadTL in  pairs(oob_air) do
 	end
 end
 
+debugTab["playerSide"] = playerSide
+
 --TIPS sort (attention suite à un tri, la boucle doit etre fait avec ipairs)
 local oobAirSide = oob_air[playerSide]
 table.sort(oobAirSide, function(a, b) return a.type:upper() < b.type:upper() end)
 
--- Playable_m = {}
--- for planeType, value in pairs(Data_divers) do	
--- 	if value.playable then
--- 		Playable_m[planeType] = true
--- 	end
--- end	
-
-
 local nType = 1
 local tabSquad = {}
 
+debugTab["A"] = {}
+debugTab["B"] = {}
 for m , unit in ipairs(oobAirSide) do
-	if Playable_m[unit.type] then
+    
+    table.insert(debugTab["A"],unit.type)
 
+	if Playable_m[unit.type] then
+        table.insert(debugTab["B"],unit.type)
 		table.insert(tabSquad, nType, unit.type.." | "..unit.name.." | "..unit.base)
+        -- table.insert(tabSquad, unit.type.." | "..unit.name.." | "..unit.base)
 
 		nType = nType + 1
 	end
 end
 
+
+
+debugTab["C"] = nType
+
+local camp_str = "debugTab = " .. TableSerialization(debugTab, 0)						--make a string
+local campFile = io.open(pathCampaign.."/".."Debug/DCEM_debugTab.lua", "w")	 or error("Failed to open debug file")
+campFile:write(camp_str)																		--save new data
+campFile:close()
+
+camp_str = "tabSquad = " .. TableSerialization(tabSquad, 0)						--make a string
+campFile = io.open(pathCampaign.."/".."Debug/DCEM_tabSquad.lua", "w")	 or error("Failed to open debug file")
+campFile:write(camp_str)																		--save new data
+campFile:close()
+
+camp_str = "Playable_m = " .. TableSerialization(Playable_m, 0)						--make a string
+campFile = io.open(pathCampaign.."/".."Debug/DCEM_Playable_m.lua", "w")	 or error("Failed to open debug file")
+campFile:write(camp_str)																		--save new data
+campFile:close()
 
 --******************************************************************--
 --******************************************************************--
@@ -379,8 +405,8 @@ end
 
 return {
     taskByPlane = taskByPlane,
-    Playable_m = Playable_m,
-	tabSquad = tabSquad,
+    Playable_m = Playable_Num,
+	TabSquad = tabSquad,
 	all_PlaneHeli = all_PlaneHeli,
     Country = all_Country,
     CallsignWest = all_callsign_west,
