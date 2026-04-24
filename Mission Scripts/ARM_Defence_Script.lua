@@ -5,7 +5,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  M83_c
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/ARM_Defence_Script.lua"] = "3.5.12"
+versionDCE["Mission Scripts/ARM_Defence_Script.lua"] = "4.6.13"
 ------------------------------------------------------------------------------------------------------- 	
 
 env.info("DCE_ARM START LOADING ARM_Defence_Script.lua "..tostring(versionDCE["Mission Scripts/ARM_Defence_Script.lua"]))
@@ -41,6 +41,13 @@ local timingRadarOff = { 5, 15 }
 
 ARM_Shot_EventHandler = {}
 
+-- =========================
+-- SA-10 RADAR MANAGEMENT
+-- =========================
+
+local sa10Sites = {}
+local sa10CheckInterval = 15
+
 
 -- Met à jour la liste des jammers actifs (optimisation performance)
 -- Pourquoi : éviter de rescanner tous les avions à chaque tir de missile SAM
@@ -69,6 +76,43 @@ local function updateJammers()
 
 	-- Relance périodique
 	timer.scheduleFunction(updateJammers, {}, timer.getTime() + jammerRefreshInterval)
+end
+
+local function initSa10Sites()
+    for _, side in ipairs({ coalition.side.RED, coalition.side.BLUE }) do
+        local groups = coalition.getGroups(side, Group.Category.GROUND)
+
+        for _, grp in pairs(groups) do
+            if grp and grp:isExist() then
+                local grpName = grp:getName()
+                local units = grp:getUnits()
+
+                local launchers = {}
+
+                for _, u in ipairs(units) do
+                    if u and u:isExist() then
+                        local t = u:getTypeName()
+
+                        if t == "S-300PS 5P85C ln" or t == "S-300PS 5P85D ln" then
+                            table.insert(launchers, u)
+                        end
+                    end
+                end
+
+                if #launchers > 0 then
+                    sa10Sites[grpName] = {
+                        group = grp,
+                        launchers = launchers,
+                        maxAmmo = #launchers * 4, -- hypothèse SA-10 standard
+                        radarOff = false,
+                    }
+
+                    env.info("DCE_SA10 INIT " .. grpName .. " launchers=" .. #launchers)
+
+                end
+            end
+        end
+    end
 end
 
 local function makeExplosion(posMissile)
@@ -198,6 +242,144 @@ local function RadarOff(arg)																				--Function to shut down radar of
     end
 end
 
+-- Détection menace proche (avion uniquement)
+-- Pourquoi : éviter scan lourd, suffisant pour déclencher le radar
+local function isThreatNearby(site, range)
+    local grp = site.group
+    if not grp or not grp:isExist() then return false end
+
+    local units = grp:getUnits()
+    if not units or not units[1] then return false end
+
+    local pos = units[1]:getPoint()
+    local range2 = range * range
+
+    for _, side in ipairs({ coalition.side.BLUE, coalition.side.RED }) do
+        local groups = coalition.getGroups(side, Group.Category.AIRPLANE)
+
+        for _, g in pairs(groups) do
+            if g and g:isExist() then
+                for _, u in ipairs(g:getUnits()) do
+                    if u and u:isExist() and u:inAir() then
+                        local p = u:getPoint()
+
+                        local dx = pos.x - p.x
+                        local dz = pos.z - p.z
+                        local dist2 = dx * dx + dz * dz
+
+                        if dist2 < range2 then
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return false
+end
+
+local function updateSa10Radar()
+    -- env.info("DCE_SA10 updateSa10Radar A ")
+
+    for name, site in pairs(sa10Sites) do
+        -- env.info("DCE_SA10 updateSa10Radar B")
+        if site.group and site.group:isExist() then
+            local totalAmmo = 0
+            -- env.info("DCE_SA10 updateSa10Radar C")
+
+            for _, u in ipairs(site.launchers) do
+                -- env.info("DCE_SA10 updateSa10Radar D")
+                if u and u:isExist() then
+                    local ammo = u:getAmmo()
+                    -- env.info("DCE_SA10 updateSa10Radar E")
+                    -- _affiche(ammo , "ammo: ")
+
+                    if ammo then
+                        -- env.info("DCE_SA10 updateSa10Radar F")
+                        for _, w in ipairs(ammo) do
+                            -- env.info("DCE_SA10 updateSa10Radar G"..tostring(w.desc and w.desc.typeName) )
+                            -- filtre missiles uniquement
+                            -- if w.desc and w.desc.category == 4 then
+                                -- env.info("DCE_SA10 updateSa10Radar H "..tostring(w.count))
+                                totalAmmo = totalAmmo + (w.count or 0)
+                            -- end
+                        end
+                    end
+                end
+            end
+
+            local ratio = 0
+            local threat = isThreatNearby(site, 20000)
+            if site.maxAmmo > 0 then
+                ratio = totalAmmo / site.maxAmmo
+            else
+                env.info("DCE_SA10 site.maxAmmo == 0 " .. name )
+            end
+
+            local ctrl = site.group:getController()
+            if ctrl then
+                -- PRIORITÉ : menace proche → ON
+                if threat then
+                    if site.radarOff then
+                        ctrl:setOption(AI.Option.Ground.id.ALARM_STATE,
+                            AI.Option.Ground.val.ALARM_STATE.AUTO)
+
+                        site.radarOff = false
+                        env.info("DCE_SA10 RADAR ON (THREAT) " .. name .. " ratio=" .. ratio)
+                        env.info("DCE_SA10 "..name.." ammo="..totalAmmo.."/"..site.maxAmmo.." ratio="..ratio.." threat="..tostring(threat))
+                    end
+
+                    -- SINON logique stock
+                else
+                    if ratio < 0.33 then
+                        if not site.radarOff then
+                            ctrl:setOption(AI.Option.Ground.id.ALARM_STATE,
+                                AI.Option.Ground.val.ALARM_STATE.GREEN)
+
+                            site.radarOff = true
+                            env.info("DCE_SA10 RADAR OFF " .. name .. " ratio=" .. ratio)
+                            env.info("DCE_SA10 "..name.." ammo="..totalAmmo.."/"..site.maxAmmo.." ratio="..ratio.." threat="..tostring(threat))
+                        end
+                    else
+                        if site.radarOff then
+                            ctrl:setOption(AI.Option.Ground.id.ALARM_STATE,
+                                AI.Option.Ground.val.ALARM_STATE.AUTO)
+
+                            site.radarOff = false
+                            env.info("DCE_SA10 RADAR ON " .. name .. " ratio=" .. ratio)
+                            env.info("DCE_SA10 "..name.." ammo="..totalAmmo.."/"..site.maxAmmo.." ratio="..ratio.." threat="..tostring(threat))
+                        end
+                    end
+                end
+                -- -- OFF logique
+                -- if ratio < 0.66 then
+                --     if not site.radarOff then
+                --         ctrl:setOption(AI.Option.Ground.id.ALARM_STATE,
+                --             AI.Option.Ground.val.ALARM_STATE.GREEN)
+
+                --         site.radarOff = true
+                --         env.info("DCE_SA10 RADAR OFF " .. name .. " ratio=" .. ratio)
+                --     end
+
+                --     -- ON logique
+                -- else
+                --     if site.radarOff then
+                --         ctrl:setOption(AI.Option.Ground.id.ALARM_STATE,
+                --             AI.Option.Ground.val.ALARM_STATE.AUTO)
+
+                --         site.radarOff = false
+                --         env.info("DCE_SA10 RADAR ON " .. name .. " ratio=" .. ratio)
+                --     end
+                -- end
+            end
+        end
+    end
+
+    return timer.getTime() + sa10CheckInterval
+end
+
+
 
 --Event handler to look for launched ARM
 function ARM_Shot_EventHandler:onEvent(event)
@@ -222,7 +404,7 @@ function ARM_Shot_EventHandler:onEvent(event)
         -- env.info("DCE_ARM_S_EVENT    B SHOT tgt "..tostring(tgt))
         if tgt and tgt:isExist() then
             local desc = wep:getDesc()
-            env.info("DCE_ARM_S_EVENT       C ")
+            -- env.info("DCE_ARM_S_EVENT       C ")
             -- _affiche(desc, "DCE desc weapon ArmDS")
 
             -- Weapon.MissileCategory = {
@@ -259,19 +441,19 @@ function ARM_Shot_EventHandler:onEvent(event)
                 local objCat = Object.getCategory(tgt)
 
                 if objCat ~= Object.Category.SCENERY then --target is not a scenery object
-                    env.info("DCE_ARM_S_EVENT          E Object_Category: " .. tostring(Object_Category[objCat]))
+                    -- env.info("DCE_ARM_S_EVENT          E Object_Category: " .. tostring(Object_Category[objCat]))
 
                     local unitCat = tgt:getDesc().category
-                    env.info("DCE_ARM_S_EVENT          E unitCat: " .. tostring(unitCat))
+                    -- env.info("DCE_ARM_S_EVENT          E unitCat: " .. tostring(unitCat))
                     if unitCat ~= 3 then --target is not a ship	-- bug AGM-154 :31: in function 'getDesc' Static doesn't exist
                         -- trigger.action.outText("ARM Launch", 3)    --DEBUG
                         local name = tgt:getName()
 
-                        env.info("DCE_ARM_               F1 Launch name tgt radar: " .. tostring(name))
+                        -- env.info("DCE_ARM_               F1 Launch name tgt radar: " .. tostring(name))
                        
                         local descRadarSam = tgt:getDesc()
 
-                        _affiche(descRadarSam, "descRadarSam: ")
+                        -- _affiche(descRadarSam, "descRadarSam: ")
 
                         env.info("DCE_ARM_               F2 Launch name tgt descRadarSam.typeName: " .. tostring(descRadarSam.typeName))
 
@@ -303,15 +485,7 @@ function ARM_Shot_EventHandler:onEvent(event)
                     end
                 end
 
-                -- if tgt:getDesc().category ~= 3 then															--target is not a ship	-- bug AGM-154 :31: in function 'getDesc' Static doesn't exist
-                -- local desc = wep:getDesc()
-                -- if desc.missileCategory == 6 and desc.guidance == 5 then										--Check if the weapon is an ARM
-                -- --trigger.action.outText("ARM Launch", 3)	--DEBUG
-                -- if math.random(1,10) > 1 then																--90% chance that ARM launch is detected by target
-                -- timer.scheduleFunction(RadarOff, {tgt, wep}, timer.getTime() + math.random(5, 15))		--Target reacts within 5 to 15 seconds after ARM launch with shutting down its radar
-                -- end
-                -- end
-                -- end
+
             end
         end
 
@@ -324,56 +498,6 @@ function ARM_Shot_EventHandler:onEvent(event)
 
             -- Utilisation du cache de jammers (optimisé)
             jammers = cachedJammers
-
-            --[[   -- Actualisation de la liste des jammers
-            jammers = {}
-			-- local jammerDist_RealJammer = 10000
-			-- local jammerDist_B52 = 1000
-
-			for _, sideNum in ipairs({coalition.side.BLUE, coalition.side.RED}) do
-                local groups = coalition.getGroups(sideNum, Group.Category.AIRPLANE)
-                for _, gp in pairs(groups) do
-                    local gpName = Group.getName(gp)  -- Protection pour éviter un crash si `gpName` est nil
-                    -- if gpName and string.find(gpName, "Jammer") then
-                    --     for _, unit in ipairs(gp:getUnits()) do
-                    --         if unit and unit:isActive() and unit:inAir() then
-                    --             local entry = {
-                    --                 unit = unit,
-                    --                 dist = jammerDist_RealJammer,
-                    --             }
-                    --             table.insert(jammers, entry)
-                    --         end
-                    --     end
-					-- elseif gpName then
-                    if gpName then
-                        for _, unit in ipairs(gp:getUnits()) do
-                            if unit and unit:isActive() and unit:inAir() then
-								local typeName = unit:getTypeName()
-
-								-- env.info("ARM_Jammer B typeName: "..tostring(typeName))
-
-								if campL.jammerOnBoard and campL.jammerOnBoard[typeName] then
-									local entry = {
-										unit = unit,
-										range = campL.jammerOnBoard[typeName].range,
-										efficiency = campL.jammerOnBoard[typeName].efficiency,
-									}
-									table.insert(jammers, entry)
-									-- env.info("ARM_Jammer C table.insert(jammers ")
-								end
-
-								-- if typeName == "B-52H" or typeName == "VSN_F105G" or typeName == "vwv_ra-5" then
-								-- 	local entry = {
-								-- 		unit = unit,
-								-- 		dist = jammerDist_B52,
-								-- 	}
-								-- 	table.insert(jammers, entry)
-								-- end
-                            end
-                        end
-                    end
-                end
-            end ]]
 
             -- Démarrage de la surveillance si ce n'est pas déjà fait
             if #activeMissiles == 1 then
@@ -396,3 +520,7 @@ world.addEventHandler(ARM_Shot_EventHandler)
 updateJammers()
 
 env.info("DCE_ARM END OF LOADING ARM_Defence_Script ")
+
+-- initSa10Sites()
+-- _affiche(sa10Sites, "sa10Sites: ")
+-- timer.scheduleFunction(updateSa10Radar, {}, timer.getTime() + 10)
