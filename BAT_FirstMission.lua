@@ -1,26 +1,9 @@
 --To manually generate the first campaign mission and reset the campaign to initial status. For manual use by campaign designer only, not required for normal campaign play.
 --Initiated by FirstMission.bat
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M90_a
 if not versionDCE then versionDCE = {} end
-versionDCE["BAT_FirstMission.lua"] = "1.15.100"
+versionDCE["BAT_FirstMission.lua"] = "1.15.101"
 -------------------------------------------------------------------------------------------------------
--- adjustment_p				(p tools)(o full targetList)(n targetList numeric)(m BAT)(l Playable_m from Data_divers)(k BugList)(j PairsByKeys)(i global TabTask)(h Firstmission_flag)(g mise a niveau)(d: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form)
--- cleancode_d				(d springCleaning)
--- modification M90_a		missionWithIcone
--- modification M85_a		new variables added to conf_mod (RepairOption, current_date, weather, etc.)
--- modification M80_a		use various tables, such as base name or aircraft type aliases
--- modification M61_c		SAR (c DEV creation fichier cercle commande: w3)
--- modification M55_a		player can change the type of plane
--- modification M47_c		keeps the history of the campaign files (c: save debugging information during mission generation)
--- modification M46_d		singlePlayer with dedicated server (c: DF choice)(c: D choice with AI AirSpawn)
--- modification M40_f		Template Active GroundGroup moving front (f: sideBase)
--- modification M38_n		helps to balance the game (n: delete Ngroug)
--- modification M35_e		version ScriptsMod + camp (e: ScriptsMod_version from UTIL_Changelog)
--- modification M14			Versionning
--- modification M11A_b_l	Multiplayer (bl MP overRide) (gh %target alive)(x: only active Target)(q: displays all tasks of several squadrons)(p: Task table)
--------------------------------------------------------------------------------------------------------
-
 
 BugList = BugList or {}
 Firstmission_flag = true
@@ -179,6 +162,7 @@ if VersionPackageICM then
 	print("0A0= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
 	print("= = = = = = = = = = = = = Script Version : "..tostring(showVersion).." = = Lua Version : "..tostring(_VERSION))
 	print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
+	print("= = = = = = = = = = = = = Debug Mod? : "..tostring(Debug.debug))
 	print()
 
 else
@@ -232,7 +216,23 @@ repeat
 			choix1 = io.stdin:read()
 		end
 
+		-- choix1 = string.lower(choix1)
+
+		-- choix1 = io.stdin:read()
 		choix1 = string.lower(choix1)
+
+		-- Détection du mode debug : activation avec "+", désactivation avec "-"
+		if string.find(choix1, "%+") then
+			Debug.debug = true
+			Debug.AfficheFlight = true
+			print("Debug mode activated. Logs will be more detailed and mission generation will not stop for player flight assignment issues.")
+			choix1 = string.gsub(choix1, "%+", "")   -- Retirer tous les points
+		elseif string.find(choix1, "%-") then
+			Debug.debug = false
+			Debug.AfficheFlight = false
+			print("Debug mode deactivated.")
+			choix1 = string.gsub(choix1, "%-", "")   -- Retirer tous les tirets
+		end
 		
 		--===================================================================================
 		-- "T Multiplayer by choice of (T)arget \n"..

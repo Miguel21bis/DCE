@@ -1,25 +1,8 @@
 --To manually re-generate and replace the current campaign mission. For contingency only, not required for normal campaign play.
 --Initiated by RedoMission.bat
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M85_a
 if not versionDCE then versionDCE = {} end
-versionDCE["BAT_SkipMission.lua"] = "1.17.101"
--------------------------------------------------------------------------------------------------------
--- adjustment_o				(o tools)(n targetList numeric)(m BAT)(l Playable_m from Data_divers)(k BugList)(j PairsByKeys)(i global TabTask)(h Skipmission_flag)(g mise a niveau)(e: use io.stdin:read)(c: fire Playable_m from conf_mod)(b: robust form) 
--- debug_d					(cd: EndMission)
--- cleancode_d				(d springCleaning)
--- modification M90_a		missionWithIcone
--- modification M85_a		new variables added to conf_mod (RepairOption, current_date, weather, etc.)
--- modification M80_a		use various tables, such as base name or aircraft type aliases
--- modification M61_a		SAR
--- modification M55_a		player can change the type of plane
--- modification M47_d		keeps the history of the campaign files (d: debug) (c: save debugging information during mission generation)
--- modification M46_d		singlePlayer with dedicated server (c: DF choice)(c: D choice with AI AirSpawn)
--- modification M40_f		Template Active GroundGroup moving front (f: sideBase, move db_airbase to Actice folder)
--- modification M38_n		Check and Help CampaignMaker (n: delete Ngroug)(h: KillTarget step by step)
--- modification M35_e		version ScriptsMod + camp (e: ScriptsMod_version from UTIL_Changelog)
--- modification M14			Versionning
--- modification M11A_b_l	Multiplayer (bl MP overRide)(g %target alive)(y: force same package)(x: only active Target)(t:display name )(s: T choice bug)(r: targets already destroyed)(q: displays all tasks of several squadrons)
+versionDCE["BAT_SkipMission.lua"] = "1.17.102"
 -------------------------------------------------------------------------------------------------------
 
 FromFile = "BAT_SkipMission.lua"																	-- file name for debug
@@ -190,6 +173,7 @@ if VersionPackageICM then
 	print("0B0= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
 	print("= = = = = = = = = = = = = Script Version : "..tostring(showVersion).." = = Lua Version : "..tostring(_VERSION))
 	print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
+	print("= = = = = = = = = = = = = Debug Mod? : "..tostring(Debug.debug))
 	print()
 
 else
@@ -262,8 +246,24 @@ if input == "y" or input == "yes" then
 				"O t(o)ols (tools for CampaignMaker and Coder)"
 			)
 
+			-- choix1 = io.stdin:read()
+			-- choix1 = string.lower(choix1)
+
 			choix1 = io.stdin:read()
 			choix1 = string.lower(choix1)
+
+			-- Détection du mode debug : activation avec "+", désactivation avec "-"
+			if string.find(choix1, "%+") then
+				Debug.debug = true
+				Debug.AfficheFlight = true
+				print("Debug mode activated. Logs will be more detailed and mission generation will not stop for player flight assignment issues.")
+				choix1 = string.gsub(choix1, "%+", "")   -- Retirer tous les points
+			elseif string.find(choix1, "%-") then
+				Debug.debug = false
+				Debug.AfficheFlight = false
+				print("Debug mode deactivated.")
+				choix1 = string.gsub(choix1, "%-", "")   -- Retirer tous les tirets
+			end
 
 			if choix1 == "n" or  choix1 == "t"  then
 				if choix1 == "t"  then
