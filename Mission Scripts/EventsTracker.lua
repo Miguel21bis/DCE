@@ -1782,7 +1782,7 @@ function eventHandlerDCE:onEvent(event)
 					--Function also works with UNIT, STATIC, BASE
 					log_entry.target = event.target:getName()
 
-					if event.target.getID then
+					if event.target.getID and event.target.isExist and event.target:isExist() then
 						log_entry.targetMissionID = event.target:getID()
 					end
 

@@ -31,6 +31,13 @@ SAM_AMM = {
     ["S-300PS 64H6E sr"] = true,
     
 }
+-- Liste des radars SA-10 à couper explicitement
+-- Pourquoi : ALARM_STATE sur groupe ne coupe pas tous les émetteurs dans DCS
+local SA10_RADARS = {
+    ["S-300PS 40B6M tr"] = true,
+    ["S-300PS 40B6MD sr"] = true,
+    ["S-300PS 64H6E sr"] = true,
+}
 
 OLD_SAM_Radar = {
     ["SNR_75V"] = true,
@@ -47,7 +54,7 @@ ARM_Shot_EventHandler = {}
 
 local sa10Sites = {}
 local sa10CheckInterval = 15
-
+local sa10MissilesInFlight = {} -- missiles en vol par site
 
 -- Met à jour la liste des jammers actifs (optimisation performance)
 -- Pourquoi : éviter de rescanner tous les avions à chaque tir de missile SAM
@@ -103,9 +110,11 @@ local function initSa10Sites()
                     sa10Sites[grpName] = {
                         group = grp,
                         launchers = launchers,
-                        maxAmmo = #launchers * 4, -- hypothèse SA-10 standard
+                        maxAmmo = #launchers * 4,
                         radarOff = false,
                     }
+
+                    sa10MissilesInFlight[grpName] = 0
 
                     env.info("DCE_SA10 INIT " .. grpName .. " launchers=" .. #launchers)
 
@@ -136,6 +145,52 @@ local function missileDisappearTimer(missile)
 	end
 end
 
+local function updateSa10Radar()
+    for name, site in pairs(sa10Sites) do
+        if site.group and site.group:isExist() then
+            local totalAmmo = 0
+
+            for _, u in ipairs(site.launchers) do
+                if u and u:isExist() then
+                    local ammo = u:getAmmo()
+                    if ammo then
+                        for _, w in ipairs(ammo) do
+                            totalAmmo = totalAmmo + (w.count or 0)
+                        end
+                    end
+                end
+            end
+
+            local inFlight = sa10MissilesInFlight[name] or 0
+            -- sécurité : éviter désynchro compteur
+            if inFlight < 0 then
+                sa10MissilesInFlight[name] = 0
+                inFlight = 0
+            end
+
+            local ctrl = site.group:getController()
+            if ctrl then
+                if totalAmmo == 0 and inFlight == 0 then
+                    if not site.radarOff then
+                        sa10RadarOff(site)
+
+                        site.radarOff = true
+                        env.info("DCE_SA10 RADAR OFF " .. name)
+                    end
+                else
+                    if site.radarOff then
+                        sa10RadarOn(site)
+
+                        site.radarOff = false
+                    end
+                end
+            end
+        end
+    end
+
+    return timer.getTime() + sa10CheckInterval
+end
+
 --  Fonction de surveillance active
 local function checkMissileProximity()
 	-- env.info("ARM_Jammer B0 ")
@@ -147,10 +202,18 @@ local function checkMissileProximity()
 
     -- Vérification des distances missile ↔ jammer
     for i = #activeMissiles, 1, -1 do
-        local missile = activeMissiles[i]
+        -- local missile = activeMissiles[i]
+        local data = activeMissiles[i]
+        local missile = data.weapon
 
         -- Vérification stricte : si le missile n'existe plus, on le supprime
         if not missile or not missile:isExist() or not missile.getPoint then
+            -- table.remove(activeMissiles, i)
+            if data.site and sa10MissilesInFlight[data.site] then
+                sa10MissilesInFlight[data.site] = math.max(0, sa10MissilesInFlight[data.site] - 1)
+                env.info("DCE_SA10 MISSILE -1 " .. data.site .. " = " .. sa10MissilesInFlight[data.site])
+            end
+
             table.remove(activeMissiles, i)
         else
             local missileVec3 = missile:getPoint()
@@ -199,9 +262,19 @@ local function checkMissileProximity()
 							-- trigger.action.outText("Missile ira au BUT", 20)
 						end
 
-						-- Suppression du missile suivi
-						table.remove(activeMissiles, i)
-						break
+						-- -- Suppression du missile suivi
+						-- table.remove(activeMissiles, i)
+                        -- break
+                        -- Décrément SA-10 si nécessaire
+                        if data.site and sa10MissilesInFlight[data.site] then
+                            sa10MissilesInFlight[data.site] = math.max(0, sa10MissilesInFlight[data.site] - 1)
+                            env.info("DCE_SA10 MISSILE -1 (jammer) " ..
+                            data.site .. " = " .. sa10MissilesInFlight[data.site])
+                        end
+
+                        -- Suppression du missile suivi
+                        table.remove(activeMissiles, i)
+                        break
 					end
 				end
             end
@@ -237,6 +310,56 @@ local function RadarOff(arg)																				--Function to shut down radar of
                 --trigger.action.outText("Radar Off", 3)	--DEBUG
                 -- timer.scheduleFunction(RadarOn, ctrl, timer.getTime() + math.random(120, 240))						--Schedule turning radar back on in 2 to 4 minutes
                 timer.scheduleFunction(RadarOn, ctrl, timer.getTime() + math.random(360, 540))						--Schedule turning radar back on in 6 to 9 minutes
+            end
+        end
+    end
+end
+
+-- Coupe TOUS les radars d’un site SA-10 (unité par unité)
+-- Pourquoi : éviter qu’un HARM accroche encore une émission résiduelle
+function sa10RadarOff(site)
+    if not site or not site.group or not site.group:isExist() then return end
+
+    for _, u in ipairs(site.group:getUnits()) do
+        if u and u:isExist() then
+            local t = u:getTypeName()
+
+            if SA10_RADARS[t] then
+                local ctrl = u:getController()
+                if ctrl then
+                    ctrl:setOption(AI.Option.Ground.id.ALARM_STATE,
+                        AI.Option.Ground.val.ALARM_STATE.GREEN)
+
+                    ctrl:setOption(AI.Option.Ground.id.ROE,
+                        AI.Option.Ground.val.ROE.HOLD_FIRE)
+
+                    env.info("DCE_SA10 UNIT RADAR OFF " .. t)
+                end
+            end
+        end
+    end
+end
+
+-- Rallume les radars SA-10
+-- Pourquoi : restaurer comportement normal quand missiles dispos
+function sa10RadarOn(site)
+    if not site or not site.group or not site.group:isExist() then return end
+
+    for _, u in ipairs(site.group:getUnits()) do
+        if u and u:isExist() then
+            local t = u:getTypeName()
+
+            if SA10_RADARS[t] then
+                local ctrl = u:getController()
+                if ctrl then
+                    ctrl:setOption(AI.Option.Ground.id.ALARM_STATE,
+                        AI.Option.Ground.val.ALARM_STATE.AUTO)
+
+                    ctrl:setOption(AI.Option.Ground.id.ROE,
+                        AI.Option.Ground.val.ROE.OPEN_FIRE)
+
+                    env.info("DCE_SA10 UNIT RADAR ON " .. t)
+                end
             end
         end
     end
@@ -279,105 +402,105 @@ local function isThreatNearby(site, range)
     return false
 end
 
-local function updateSa10Radar()
-    -- env.info("DCE_SA10 updateSa10Radar A ")
+-- local function updateSa10Radar()
+--     -- env.info("DCE_SA10 updateSa10Radar A ")
 
-    for name, site in pairs(sa10Sites) do
-        -- env.info("DCE_SA10 updateSa10Radar B")
-        if site.group and site.group:isExist() then
-            local totalAmmo = 0
-            -- env.info("DCE_SA10 updateSa10Radar C")
+--     for name, site in pairs(sa10Sites) do
+--         -- env.info("DCE_SA10 updateSa10Radar B")
+--         if site.group and site.group:isExist() then
+--             local totalAmmo = 0
+--             -- env.info("DCE_SA10 updateSa10Radar C")
 
-            for _, u in ipairs(site.launchers) do
-                -- env.info("DCE_SA10 updateSa10Radar D")
-                if u and u:isExist() then
-                    local ammo = u:getAmmo()
-                    -- env.info("DCE_SA10 updateSa10Radar E")
-                    -- _affiche(ammo , "ammo: ")
+--             for _, u in ipairs(site.launchers) do
+--                 -- env.info("DCE_SA10 updateSa10Radar D")
+--                 if u and u:isExist() then
+--                     local ammo = u:getAmmo()
+--                     -- env.info("DCE_SA10 updateSa10Radar E")
+--                     -- _affiche(ammo , "ammo: ")
 
-                    if ammo then
-                        -- env.info("DCE_SA10 updateSa10Radar F")
-                        for _, w in ipairs(ammo) do
-                            -- env.info("DCE_SA10 updateSa10Radar G"..tostring(w.desc and w.desc.typeName) )
-                            -- filtre missiles uniquement
-                            -- if w.desc and w.desc.category == 4 then
-                                -- env.info("DCE_SA10 updateSa10Radar H "..tostring(w.count))
-                                totalAmmo = totalAmmo + (w.count or 0)
-                            -- end
-                        end
-                    end
-                end
-            end
+--                     if ammo then
+--                         -- env.info("DCE_SA10 updateSa10Radar F")
+--                         for _, w in ipairs(ammo) do
+--                             -- env.info("DCE_SA10 updateSa10Radar G"..tostring(w.desc and w.desc.typeName) )
+--                             -- filtre missiles uniquement
+--                             -- if w.desc and w.desc.category == 4 then
+--                                 -- env.info("DCE_SA10 updateSa10Radar H "..tostring(w.count))
+--                                 totalAmmo = totalAmmo + (w.count or 0)
+--                             -- end
+--                         end
+--                     end
+--                 end
+--             end
 
-            local ratio = 0
-            local threat = isThreatNearby(site, 20000)
-            if site.maxAmmo > 0 then
-                ratio = totalAmmo / site.maxAmmo
-            else
-                env.info("DCE_SA10 site.maxAmmo == 0 " .. name )
-            end
+--             local ratio = 0
+--             local threat = isThreatNearby(site, 20000)
+--             if site.maxAmmo > 0 then
+--                 ratio = totalAmmo / site.maxAmmo
+--             else
+--                 env.info("DCE_SA10 site.maxAmmo == 0 " .. name )
+--             end
 
-            local ctrl = site.group:getController()
-            if ctrl then
-                -- PRIORITÉ : menace proche → ON
-                if threat then
-                    if site.radarOff then
-                        ctrl:setOption(AI.Option.Ground.id.ALARM_STATE,
-                            AI.Option.Ground.val.ALARM_STATE.AUTO)
+--             local ctrl = site.group:getController()
+--             if ctrl then
+--                 -- PRIORITÉ : menace proche → ON
+--                 if threat then
+--                     if site.radarOff then
+--                         ctrl:setOption(AI.Option.Ground.id.ALARM_STATE,
+--                             AI.Option.Ground.val.ALARM_STATE.AUTO)
 
-                        site.radarOff = false
-                        env.info("DCE_SA10 RADAR ON (THREAT) " .. name .. " ratio=" .. ratio)
-                        env.info("DCE_SA10 "..name.." ammo="..totalAmmo.."/"..site.maxAmmo.." ratio="..ratio.." threat="..tostring(threat))
-                    end
+--                         site.radarOff = false
+--                         env.info("DCE_SA10 RADAR ON (THREAT) " .. name .. " ratio=" .. ratio)
+--                         env.info("DCE_SA10 "..name.." ammo="..totalAmmo.."/"..site.maxAmmo.." ratio="..ratio.." threat="..tostring(threat))
+--                     end
 
-                    -- SINON logique stock
-                else
-                    if ratio < 0.33 then
-                        if not site.radarOff then
-                            ctrl:setOption(AI.Option.Ground.id.ALARM_STATE,
-                                AI.Option.Ground.val.ALARM_STATE.GREEN)
+--                     -- SINON logique stock
+--                 else
+--                     if ratio < 0.33 then
+--                         if not site.radarOff then
+--                             ctrl:setOption(AI.Option.Ground.id.ALARM_STATE,
+--                                 AI.Option.Ground.val.ALARM_STATE.GREEN)
 
-                            site.radarOff = true
-                            env.info("DCE_SA10 RADAR OFF " .. name .. " ratio=" .. ratio)
-                            env.info("DCE_SA10 "..name.." ammo="..totalAmmo.."/"..site.maxAmmo.." ratio="..ratio.." threat="..tostring(threat))
-                        end
-                    else
-                        if site.radarOff then
-                            ctrl:setOption(AI.Option.Ground.id.ALARM_STATE,
-                                AI.Option.Ground.val.ALARM_STATE.AUTO)
+--                             site.radarOff = true
+--                             env.info("DCE_SA10 RADAR OFF " .. name .. " ratio=" .. ratio)
+--                             env.info("DCE_SA10 "..name.." ammo="..totalAmmo.."/"..site.maxAmmo.." ratio="..ratio.." threat="..tostring(threat))
+--                         end
+--                     else
+--                         if site.radarOff then
+--                             ctrl:setOption(AI.Option.Ground.id.ALARM_STATE,
+--                                 AI.Option.Ground.val.ALARM_STATE.AUTO)
 
-                            site.radarOff = false
-                            env.info("DCE_SA10 RADAR ON " .. name .. " ratio=" .. ratio)
-                            env.info("DCE_SA10 "..name.." ammo="..totalAmmo.."/"..site.maxAmmo.." ratio="..ratio.." threat="..tostring(threat))
-                        end
-                    end
-                end
-                -- -- OFF logique
-                -- if ratio < 0.66 then
-                --     if not site.radarOff then
-                --         ctrl:setOption(AI.Option.Ground.id.ALARM_STATE,
-                --             AI.Option.Ground.val.ALARM_STATE.GREEN)
+--                             site.radarOff = false
+--                             env.info("DCE_SA10 RADAR ON " .. name .. " ratio=" .. ratio)
+--                             env.info("DCE_SA10 "..name.." ammo="..totalAmmo.."/"..site.maxAmmo.." ratio="..ratio.." threat="..tostring(threat))
+--                         end
+--                     end
+--                 end
+--                 -- -- OFF logique
+--                 -- if ratio < 0.66 then
+--                 --     if not site.radarOff then
+--                 --         ctrl:setOption(AI.Option.Ground.id.ALARM_STATE,
+--                 --             AI.Option.Ground.val.ALARM_STATE.GREEN)
 
-                --         site.radarOff = true
-                --         env.info("DCE_SA10 RADAR OFF " .. name .. " ratio=" .. ratio)
-                --     end
+--                 --         site.radarOff = true
+--                 --         env.info("DCE_SA10 RADAR OFF " .. name .. " ratio=" .. ratio)
+--                 --     end
 
-                --     -- ON logique
-                -- else
-                --     if site.radarOff then
-                --         ctrl:setOption(AI.Option.Ground.id.ALARM_STATE,
-                --             AI.Option.Ground.val.ALARM_STATE.AUTO)
+--                 --     -- ON logique
+--                 -- else
+--                 --     if site.radarOff then
+--                 --         ctrl:setOption(AI.Option.Ground.id.ALARM_STATE,
+--                 --             AI.Option.Ground.val.ALARM_STATE.AUTO)
 
-                --         site.radarOff = false
-                --         env.info("DCE_SA10 RADAR ON " .. name .. " ratio=" .. ratio)
-                --     end
-                -- end
-            end
-        end
-    end
+--                 --         site.radarOff = false
+--                 --         env.info("DCE_SA10 RADAR ON " .. name .. " ratio=" .. ratio)
+--                 --     end
+--                 -- end
+--             end
+--         end
+--     end
 
-    return timer.getTime() + sa10CheckInterval
-end
+--     return timer.getTime() + sa10CheckInterval
+-- end
 
 
 
@@ -494,7 +617,40 @@ function ARM_Shot_EventHandler:onEvent(event)
         local desc = wep:getDesc()
         if desc.missileCategory == 2 and (desc.guidance == 3 or desc.guidance == 4) then
             -- Ajout du missile dans la table des missiles actifs
-            table.insert(activeMissiles, wep)
+            -- table.insert(activeMissiles, wep)
+            -- table.insert(activeMissiles, {
+            --     weapon = wep,
+            --     site = (event.initiator and event.initiator:getGroup() and event.initiator:getGroup():getName()) or nil
+            -- })
+            local siteName = nil
+
+            if event.initiator and event.initiator:isExist() then
+                local grp = event.initiator:getGroup()
+                if grp then
+                    local name = grp:getName()
+                    if sa10MissilesInFlight[name] ~= nil then
+                        siteName = name
+                    end
+                end
+            end
+
+            table.insert(activeMissiles, {
+                weapon = wep,
+                site = siteName
+            })
+
+            -- Associer missile à son site SA-10
+            if event.initiator and event.initiator:isExist() then
+                local grp = event.initiator:getGroup()
+                if grp then
+                    local name = grp:getName()
+
+                    if sa10MissilesInFlight[name] ~= nil then
+                        sa10MissilesInFlight[name] = sa10MissilesInFlight[name] + 1
+                        env.info("DCE_SA10 MISSILE +1 " .. name .. " = " .. sa10MissilesInFlight[name])
+                    end
+                end
+            end
 
             -- Utilisation du cache de jammers (optimisé)
             jammers = cachedJammers
@@ -521,6 +677,6 @@ updateJammers()
 
 env.info("DCE_ARM END OF LOADING ARM_Defence_Script ")
 
--- initSa10Sites()
--- _affiche(sa10Sites, "sa10Sites: ")
--- timer.scheduleFunction(updateSa10Radar, {}, timer.getTime() + 10)
+initSa10Sites()
+_affiche(sa10Sites, "sa10Sites: ")
+timer.scheduleFunction(updateSa10Radar, {}, timer.getTime() + 10)

@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "22.99.589"
+versionDCE["UTIL_Changelog.lua"] = "22.99.596"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "22.99.589"
+VersionDCE["UTIL_Changelog.txt"] = "22.99.596"
 --[[
 
 # DCE – Changelog
@@ -17,12 +17,19 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-##  Version 22.99.589
+##  Version 22.99.596
 	###  Fixed
+	Radio HF of the Mig-15
+	EWR frequency
+	the interceptors are landing too early
+	two AWACS or two tankers may spawn for the same mission
+	Helicopters spawn randomly at FARPs, which is also linked to the unitId bug in the warehouses
 	F-100 no plyable
 
 	###  Changed
 	loadout OH58D and UH-1H strike range to 150000
+	latLont of all element in the target
+	Manhunts tend to spawn primarily on ejection seats closest to the border
 
 
 ##  Version 22.99.587
