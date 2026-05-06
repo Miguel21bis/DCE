@@ -4,11 +4,12 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["db_loadouts/db_loadouts_Plane.lua"] = "1.3.203"
+versionDCE["db_loadouts/db_loadouts_Plane.lua"] = "1.3.204"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
+-- V204 - add refuel capacity to A6E
 -- V203 - add ["Escort Jammer"] = true, to B-52 AV8NA
 -- V202 - Su-33 CV
 -- V201 - no Mods - A6E - C-130J-30
@@ -9999,6 +10000,52 @@ db_loadouts = {
 		},
 	},
 	["A6E"] = {
+		Refueling = {
+			["Low Track"] = {
+				attributes =  { "low" },
+				code_loadout =  { "All" },
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 180,
+				vAttack = 150,
+				hCruise = 1828.8,
+				hAttack = 1828.8,
+				tStation = 10800,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					},
+					fuel = 7229.8,
+					flare = 30,
+					chaff = 30,
+					gun = 100,
+				},
+			},
+			["Medium Track"] = {
+				attributes =  { "medium" },
+				code_loadout =  { "All" },
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 200,
+				vAttack = 150,
+				hCruise = 6096,
+				hAttack = 6096,
+				tStation = 10800,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					},
+					fuel = 7229.8,
+					flare = 30,
+					chaff = 30,
+					gun = 100,
+				},
+			},
+		},
 		SEAD = {
 			["NAM SEAD AGM-45*4, ECM"] = {
 				attributes =  { },
@@ -10068,7 +10115,7 @@ db_loadouts = {
 					},
 				},
 					},
-					fuel = 6994,
+					fuel = 7229.8,
 					flare = 30,
 					chaff = 30,
 					gun = 100,

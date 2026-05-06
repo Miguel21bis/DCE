@@ -2,7 +2,7 @@
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Data.lua"] = "1.15.92"
+versionDCE["UTIL_Data.lua"] = "1.15.93"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -150,15 +150,12 @@ TaskByPlane = {
 
 		["I-16"] = true,
 
-		-- ["A-4E-C"] = true,			--Mod
 		["A-6E"] = true,			--Mod
 		["A-10C"] = true,
 		["A-10C_2"] = true,
 		["A-10A"] = true,
-		-- ["Bronco-OV-10A"] = true,		--Mod
 		["vwv_a1_skyraider"] = true,	--Mod
 
-		-- ["AJS37"] = true,
 		["AV8BNA"] = true,
 		["MB-339A"] = true,
 		["MirageF1"] = true,			--Mod
@@ -190,7 +187,6 @@ TaskByPlane = {
 
 		["Mi-24V"] = true,
 		["Mi-28N"] = true,
-		-- ["Ka-50"] = true,
 		["Ka-50_3"] = true,
 
 	},
@@ -215,19 +211,16 @@ TaskByPlane = {
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
 
-		-- ["A-4E-C"] = true,				--Mod
 		["A-10C"] = true,
 		["A-10C_2"] = true,
 		["A-10A"] = true,
 		["vwv_a1_skyraider"] = true,	--Mod
-		-- ["AJS37"] = true,
 		["AV8BNA"] = true,
 		["B-52H"] = true,
 
 		["H-6J"] = true,
 
 		["F-4E"] = true,
-		-- ["F-5E-3"] = true,
 		["F-16C bl.52d"] = true,
 		["MB-339A"] = true,			 
 		
@@ -246,15 +239,12 @@ TaskByPlane = {
 		["Su-25TM"] = true,
 		["Su-34"] = true,
 
-		-- ["Su-27"] = true,
 		["Su-30"] = true,
 
 		["tu_22D"] = true,				--Mod
 
 		["Mi-24V"] = true,
-		-- ["Mi-24P"] = true,
 		["Mi-28N"] = true,
-		-- ["Ka-50"] = true,
 		["Ka-50_3"] = true,
 
 
@@ -283,9 +273,7 @@ TaskByPlane = {
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
 
-		-- ["A-4E-C"] = true,				--Mod
 		["A-6E"] = true,				--Mod
-		-- ["Bronco-OV-10A"] = true,		--Mod
 		["vwv_a1_skyraider"] = true,	--Mod
 		["A-10C"] = true,
 		["A-10C_2"] = true,
@@ -318,13 +306,11 @@ TaskByPlane = {
 		["Su-24M"] = true,
 		["Su-25"] = true,
 		["Su-25T"] = true,
-		-- ["Su-27"] = true,
 		["Su-30"] = true,
 		["Su-34"] = true,
 
 		["Mi-24V"] = true,
 		["Mi-28N"] = true,
-		-- ["Ka-50"] = true,
 		["Ka-50_3"] = true,
 
 
@@ -600,6 +586,8 @@ TaskByPlane = {
 		["KC-135"] = true,
 		["KC130"] = true,
 		["IL-78M"] = true,
+		["A6E"] = true,
+		
 	},
 
 	["AWACS"] = {
@@ -802,17 +790,20 @@ Data_divers = {
 		hCruise = 10630,--TODO a confirmer
 		refuellingReceptacleType = "drogue"
 	},
-	["A6E"] = 	{				--Mod ED
+	["A6E"] = 	{--natif ED mais folder name particulier
 		instrumentUnits = "imperial",
-		moduleName = "A6E",
+		moduleName = "A-6E",
 		folderModName = "A-6E",
 		EPLRS_Capacity = false,
+		refuellingType = "drogue",
 		vCruise = 216,
 		hCruise = 10670,
 	},
 	["A-6E"] = 	{				--Mod
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
+		-- moduleName = "A-6E",
+		-- folderModName = "A-6E",
 		EPLRS_Capacity = false,
 		vCruise = 216,
 		hCruise = 10670,
@@ -1008,15 +999,6 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		moduleName = "h60_a37_dragonfly",		--self_ID 
 		folderModName = "[VWV] A-37",
-		-- Tasks = {
-		-- 	aircraft_task(FighterSweep),
-		-- 	aircraft_task(Intercept),
-		-- 	aircraft_task(GroundAttack),
-		-- 	aircraft_task(CAS),
-		-- 	aircraft_task(AFAC),
-		-- 	aircraft_task(RunwayAttack),
-		-- 	aircraft_task(AntishipStrike),
-		-- },
 		playable = false,
 		vCruise = 125,						--V_opt
 		hCruise = 6000,
@@ -1148,19 +1130,6 @@ Data_divers = {
 		playable = true,
 		vCruise = 215,
 		hCruise = 9000,
-	-- 	Tasks = {
-	-- 		aircraft_task(CAP),
-	-- 		aircraft_task(Escort),
-	-- 		aircraft_task(FighterSweep),
-	-- 		aircraft_task(Intercept),
-	-- 		aircraft_task(Reconnaissance),
-	-- 		aircraft_task(GroundAttack),
-	-- 		aircraft_task(CAS),
-	-- 		aircraft_task(AFAC),
-	-- 		aircraft_task(RunwayAttack),
-	-- 		aircraft_task(PinpointStrike), --NEU
-	-- --  	aircraft_task(AntishipStrike),
-	-- 	},
 	},
 	["VSN_F4C"] = 	{
 		instrumentUnits = "imperial",
@@ -1170,20 +1139,6 @@ Data_divers = {
 		playable = true,
 		vCruise = 215,
 		hCruise = 9000,
-	-- 	Tasks = {
-	-- 		aircraft_task(CAP),
-	-- 		aircraft_task(Escort),
-	-- 		aircraft_task(FighterSweep),
-	-- 		aircraft_task(Intercept),
-	-- 		aircraft_task(Reconnaissance),
-	-- 		aircraft_task(GroundAttack),
-	-- 		aircraft_task(CAS),
-	-- 		aircraft_task(AFAC),
-	-- 		aircraft_task(RunwayAttack),
-	-- 		aircraft_task(SEAD), --NEU
-	-- 		aircraft_task(PinpointStrike), --NEU
-	-- --  	aircraft_task(AntishipStrike),
-	-- 	},	
 	},
 
 	["F-4E-45MC"] = 	{
@@ -1199,20 +1154,6 @@ Data_divers = {
 				["INSAlignmentStored"] = false,
 			},
 		},
-		-- Tasks = {
-		-- 	aircraft_task(CAP),
-		-- 	aircraft_task(Escort),
-		-- 	aircraft_task(FighterSweep),
-		-- 	aircraft_task(Intercept),
-		-- 	aircraft_task(GroundAttack),
-		-- 	aircraft_task(RunwayAttack),
-		-- 	aircraft_task(PinpointStrike),
-		-- 	aircraft_task(CAS),
-		-- 	aircraft_task(AFAC),
-		-- 	aircraft_task(SEAD),
-		-- 	aircraft_task(AntishipStrike),
-		-- 	aircraft_task(Reconnaissance),
-		-- },
 		vCruise = 215,--a peaufiner
 		hCruise = 9000,--a peaufiner
 		refuellingReceptacleType = "probe"

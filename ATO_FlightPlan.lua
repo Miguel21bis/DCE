@@ -4201,7 +4201,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					--w == 1 : suite au bug des tacan qui ne s'active plus en cours du plan de vol, sauf sur le wpt 0
 					if (flight[f].route[w].id == "Station" and flight[f].route[w + 1].id == "Station") or w == 1 then
 						if flight[f].task == "Refueling" then
-							if flight[f]["type"] == "KC-135" or flight[f]["type"] == "KC130" or flight[f]["type"] == "KC135BDA" or flight[f]["type"] == "S-3B Tanker" or flight[f]["type"] == "KC135MPRS" then	--only specific tanker types have air-air TACAN
+							-- if flight[f]["type"] == "KC-135" or flight[f]["type"] == "KC130" or flight[f]["type"] == "KC135BDA" or flight[f]["type"] == "S-3B Tanker" or flight[f]["type"] == "KC135MPRS" then	--only specific tanker types have air-air TACAN
 								if flight[1].tacan == nil then
 									flight[1].tacan = getTankerTACAN(flight[f].target_name)															--get new channel for first flight in pack only, all other flights will use same channel
 								end
@@ -4239,7 +4239,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								-- 	task_entry.params.action.params.frequency = task_entry.params.action.params.frequency - 126000000
 								-- end
 								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-							end
+							-- end
 						end
 					end
 
@@ -4247,7 +4247,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					--A-A TACAN for tankers, deactivate beacon after 2 wpt on orbit WP
 					if w > 2 and (flight[f].route[w-1].id == "Station" and flight[f].route[w - 2].id == "Station") then
 						if flight[f].task == "Refueling" then
-							if flight[f]["type"] == "KC-135" or flight[f]["type"] == "KC135MPRS"  or flight[f]["type"] == "KC130" or flight[f]["type"] == "KC135BDA" or flight[f]["type"] == "S-3B Tanker" then	--only specific tanker types have air-air TACAN			
+							-- if flight[f]["type"] == "KC-135" or flight[f]["type"] == "KC135MPRS"  or flight[f]["type"] == "KC130" or flight[f]["type"] == "KC135BDA" or flight[f]["type"] == "S-3B Tanker" then	--only specific tanker types have air-air TACAN			
 								local task_entry = {
 									["enabled"] = true,
 									["auto"] = false,
@@ -4265,7 +4265,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									},
 								}
 								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-							end
+							-- end
 						end
 					end
 
