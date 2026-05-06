@@ -10016,6 +10016,26 @@ db_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
+					[1] = 
+					{
+						["CLSID"] = "{HB_A6E_AERO1D}",
+					}, -- end of [1]
+					[2] = 
+					{
+						["CLSID"] = "{HB_A6E_AERO1D}",
+					}, -- end of [2]
+					[3] = 
+					{
+						["CLSID"] = "{HB_A6E_D704}",
+					}, -- end of [3]
+					[4] = 
+					{
+						["CLSID"] = "{HB_A6E_AERO1D}",
+					}, -- end of [4]
+					[5] = 
+					{
+						["CLSID"] = "{HB_A6E_AERO1D}",
+					}, -- end of [5]
 					},
 					fuel = 7229.8,
 					flare = 30,
@@ -10038,6 +10058,26 @@ db_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
+					[1] = 
+					{
+						["CLSID"] = "{HB_A6E_AERO1D}",
+					}, -- end of [1]
+					[2] = 
+					{
+						["CLSID"] = "{HB_A6E_AERO1D}",
+					}, -- end of [2]
+					[3] = 
+					{
+						["CLSID"] = "{HB_A6E_D704}",
+					}, -- end of [3]
+					[4] = 
+					{
+						["CLSID"] = "{HB_A6E_AERO1D}",
+					}, -- end of [4]
+					[5] = 
+					{
+						["CLSID"] = "{HB_A6E_AERO1D}",
+					}, -- end of [5]
 					},
 					fuel = 7229.8,
 					flare = 30,
