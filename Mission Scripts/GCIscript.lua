@@ -368,7 +368,8 @@ local function GCI_Cycle()
 
 										env.info("DCE_Gci D distBaseTarget: " .. tostring(distBaseTarget))
 										
-										local pointC = GetOffsetPoint( {x=target.pointVec3.x, y=target.pointVec3.z}, target.bearing, distBaseTarget * 2/3)
+										-- local pointC = GetOffsetPoint( {x=target.pointVec3.x, y=target.pointVec3.z}, target.bearing, distBaseTarget * 2/3)
+										local pointC = GetOffsetPoint( {x=target.pointVec3.x, y=target.pointVec3.z}, target.bearing, distBaseTarget)
 
 										local planDeVol = {														--define mission for interceptor group
 											id = 'Mission',
@@ -491,8 +492,8 @@ local function GCI_Cycle()
 																							selectInterName,
 																							friendSideName,
 																							tostring(speed or 0),
-																							tostring(point_0.x or 0),
-																							tostring(point_0.y or 0)
+																							tostring(pointC.x or 0),
+																							tostring(pointC.y or 0)
 																						),
 																					},
 																				},
@@ -661,7 +662,7 @@ local function GCI_Cycle()
 																				["priority"] = 0,
 																			}, -- end of ["params"]
 																			["maxDistEnabled"] = true,
-                                                               				["maxDist"] = 40000,
+                                                               				["maxDist"] = 150000,
 																		}, -- end of [1]
 
 																		[3] = {
@@ -679,7 +680,7 @@ local function GCI_Cycle()
 																					},
 																				},
 																				["stopCondition"] = {
-																					["time"] = current_time + 3000,
+																					["time"] = current_time + 3600,
 																				}
 																			}
 																		},

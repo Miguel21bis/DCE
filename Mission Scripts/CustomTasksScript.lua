@@ -3003,7 +3003,7 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 											params = {
 												targetTypes = { "Air" },
 												priority = 0,
-												maxDist = 80000,
+												maxDist = 150000,
 												maxDistEnabled = true,
 											},
 										},
