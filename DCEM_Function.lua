@@ -140,45 +140,6 @@ end
 --******************************************************************--
 --******************************************************************--
 
-
--- local taskByPlane = {}
--- --affiche le type d'avion selectionné et son squadrons
--- for side, squadTL in pairs(oob_air) do
--- 	for squad_n, squad in pairs(squadTL) do
--- 		if squad.type then 
---             for task, data in pairs(TaskByPlane) do
---                 for dataType, value in  pairs(data) do
-                   
---                     if squad.type == dataType and value then
-
---                         if task == "Nothing" then
---                         else
-
---                             if not taskByPlane[squad.type] then taskByPlane[squad.type] = {} end
-
---                             --modifie certain air/ground en strike
---                             if task == "CAS" or task == "Ground Attack" or task == "Pinpoint Strike"   then
---                                 task = "Strike"			
---                             end
-
--- 							--si transport et helico, ajoute SAR et CSAR
---                             if task == "Transport" and IsHelicopter[squad.type]    then
---                                 task = "SAR"		
--- 								if not taskByPlane[squad.type][task] then taskByPlane[squad.type][task] = true end	
--- 								task = "CSAR"		
--- 								if not taskByPlane[squad.type][task] then taskByPlane[squad.type][task] = true end
--- 								task = "Transport"
---                             end
-
---                             if not taskByPlane[squad.type][task] then taskByPlane[squad.type][task] = true end
---                         end
---                     end
---                 end
---             end
--- 		end
--- 	end
--- end
-
 local taskByPlane = {}
 
 for side, squadTL in pairs(oob_air) do
@@ -223,7 +184,7 @@ for side, squadTL in pairs(oob_air) do
     end
 end
 
--- 🔥 Tri final des tâches pour chaque avion
+-- Tri final des tâches pour chaque avion
 for planeType, list in pairs(taskByPlane) do
     table.sort(list)
 end
@@ -290,10 +251,9 @@ for typeFct, callSigns in pairs(Callsign_west) do
         
         all_callsign_west[typeFct] = {}  --  IMPORTANT
 
-        for i = 1, #callSigns do
-            local value = callSigns[i]
+        for k, value in pairs(callSigns) do
             if value ~= nil then
-                all_callsign_west[typeFct][#all_callsign_west[typeFct] + 1] = value
+                all_callsign_west[typeFct][k] = value
             end
         end
     end
@@ -318,9 +278,15 @@ for aircraft, countries in pairs(SpecificCallnames) do
 
                 all_specific_callsigns[aircraft][country] = {}
 
-                for _, value in pairs(callSigns) do  -- 🔴 FIX ICI
+                -- for _, value in pairs(callSigns) do 
+                --     if value ~= nil then
+                --         all_specific_callsigns[aircraft][country][#all_specific_callsigns[aircraft][country] + 1] = value
+                --     end
+                -- end
+
+                for id, value in pairs(callSigns) do
                     if value ~= nil then
-                        all_specific_callsigns[aircraft][country][#all_specific_callsigns[aircraft][country] + 1] = value
+                        all_specific_callsigns[aircraft][country][id] = value
                     end
                 end
 
