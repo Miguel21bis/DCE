@@ -101,61 +101,103 @@ end
 
 
 --function to assign movement to ship groups
+-- function ShipGroupMovement(groupName, wpTable, cruiseSpeed, patrolSpeed, startTime)
+
+-- 	print("DcNE ShipGroupMovement A groupName "..tostring(groupName))
+
+-- 	local poly = {}
+-- 	local firstItem = ""
+
+-- 	local testTxt = ""
+
+-- 	if not WindDirection or WindDirection == nil then
+-- 		WindDirection = 0
+-- 	end
+
+-- 	if type(wpTable) == "table" then
+-- 		if wpTable[1] == ""  then
+-- 			table.remove(wpTable, 1)
+-- 			firstItem = "originalWPT"
+-- 		end
+-- 		randomWPtable = wpTable[math.random(1, #wpTable)]
+-- 	end
+
+-- 	if wpTable[1] == "" or  wpTable[1] == nil then
+-- 		firstItem = "originalWPT"
+-- 		table.remove(wpTable, 1)
+-- 	end
+-- 	if type(wpTable[1]) == "table" and (wpTable[1][1] == "" or  wpTable[1][1] == nil) then
+-- 		firstItem = "originalWPT"
+-- 		table.remove(wpTable[1], 1)
+-- 	end
+
+-- 	if type(wpTable[1]) == "string" then												--WP is a single point marked by trigger zone	
+-- 		for w = 1, #wpTable do
+-- 			poly[w] = Refpoint[wpTable[w]]
+-- 		end
+-- 	elseif type(wpTable[1]) == "table" then												--WP is a polygon marked by multiple trigger zones
+-- 		--c'est une double table, il ne faut en choisir qu'une seule
+-- 		local nWP = math.random(1, #wpTable)
+
+-- 		for w = 1, #wpTable[nWP] do
+-- 			poly[w] = Refpoint[wpTable[nWP][w]]
+-- 		end
+-- 	end
+
+-- 	--melange l'ordre des ZoneWP
+
+-- 	if type(poly) == "table" then
+-- 		local shuffled = {}
+-- 		for i, v in ipairs(poly) do
+-- 			if v ~= "" and v ~= nil then
+-- 				local pos = math.random(1, #shuffled+1)
+-- 				table.insert(shuffled, pos, v)
+-- 			end
+-- 		end
+-- 		poly = shuffled
+-- 	end
 function ShipGroupMovement(groupName, wpTable, cruiseSpeed, patrolSpeed, startTime)
+    print("DcNE ShipGroupMovement A groupName " .. tostring(groupName))
 
-	-- print("DcNE ShipGroupMovement A groupName "..tostring(groupName))
+    if type(wpTable) ~= "table" or #wpTable == 0 then return end
 
-	local poly = {}
-	local firstItem = ""
+    local poly = {}
+    
+    -- 1. Nettoyage initial : on enlève les entrées vides au début proprement
+    while #wpTable > 0 and (wpTable[1] == "" or wpTable[1] == nil) do
+        table.remove(wpTable, 1)
+    end
 
-	local testTxt = ""
+    if #wpTable == 0 then return end -- Sécurité si la table est devenue vide
 
-	if not WindDirection or WindDirection == nil then
-		WindDirection = 0
-	end
+    -- 2. Détermination du type de structure
+    if type(wpTable[1]) == "string" then
+        -- Cas simple : liste de points directement
+        for w = 1, #wpTable do
+            if Refpoint[wpTable[w]] then
+                table.insert(poly, Refpoint[wpTable[w]])
+            end
+        end
+    elseif type(wpTable[1]) == "table" then
+        -- Cas complexe : On choisit UNE sous-table parmi celles dispo
+        local nWP = math.random(1, #wpTable)
+        local selectedSubTable = wpTable[nWP]
 
-	if type(wpTable) == "table" then
-		if wpTable[1] == ""  then
-			table.remove(wpTable, 1)
-			firstItem = "originalWPT"
-		end
-		randomWPtable = wpTable[math.random(1, #wpTable)]
-	end
+        for w = 1, #selectedSubTable do
+            local pointName = selectedSubTable[w]
+            if pointName ~= "" and pointName ~= nil and Refpoint[pointName] then
+                table.insert(poly, Refpoint[pointName])
+            end
+        end
+    end
 
-	if wpTable[1] == "" or  wpTable[1] == nil then
-		firstItem = "originalWPT"
-		table.remove(wpTable, 1)
-	end
-	if type(wpTable[1]) == "table" and (wpTable[1][1] == "" or  wpTable[1][1] == nil) then
-		firstItem = "originalWPT"
-		table.remove(wpTable[1], 1)
-	end
-
-	if type(wpTable[1]) == "string" then												--WP is a single point marked by trigger zone	
-		for w = 1, #wpTable do
-			poly[w] = Refpoint[wpTable[w]]
-		end
-	elseif type(wpTable[1]) == "table" then												--WP is a polygon marked by multiple trigger zones
-		--c'est une double table, il ne faut en choisir qu'une seule
-		local nWP = math.random(1, #wpTable)
-
-		for w = 1, #wpTable[nWP] do
-			poly[w] = Refpoint[wpTable[nWP][w]]
-		end
-	end
-
-	--melange l'ordre des ZoneWP
-
-	if type(poly) == "table" then
-		local shuffled = {}
-		for i, v in ipairs(poly) do
-			if v ~= "" and v ~= nil then
-				local pos = math.random(1, #shuffled+1)
-				table.insert(shuffled, pos, v)
-			end
-		end
-		poly = shuffled
-	end
+    -- 3. Mélange (Shuffle)
+    local shuffled = {}
+    for i = 1, #poly do
+        local pos = math.random(1, #shuffled + 1)
+        table.insert(shuffled, pos, poly[i])
+    end
+    poly = shuffled
 
 	local maxLoop = 20																		--Maximum Loop to maximizes the distance between two ship turns (recommended : 2)
 	--search for ship group
@@ -164,7 +206,7 @@ function ShipGroupMovement(groupName, wpTable, cruiseSpeed, patrolSpeed, startTi
 			if country.ship then															--country has ships
 				for group_n,group in ipairs(country.ship.group) do							--go through groups
 					if groupName == group.name then											--ship group found
-					-- print("DcNE ShipGroupMovement B groupName "..tostring(groupName).." found, start movement")	
+					print("DcNE ShipGroupMovement B groupName "..tostring(groupName).." found, start movement")	
 					--determine ship route
 						local route = {}																		--local table to build group route
 
@@ -183,8 +225,10 @@ function ShipGroupMovement(groupName, wpTable, cruiseSpeed, patrolSpeed, startTi
 
 						if #poly == 1 and patrolSpeed  then				--patrol after route
 							route[1].speed = patrolSpeed													--set speed to patrol speed
+							AddLog("(a)This group of boats has only one WPT and won't move; is that normal?: "..tostring(groupName))
 						elseif #poly == 1 then
 							route[1].speed = 0
+							AddLog("(b)This group of boats has only one WPT and won't move; is that normal?: "..tostring(groupName))
 						else
 							route[1].speed = cruiseSpeed
 						end
@@ -197,12 +241,26 @@ function ShipGroupMovement(groupName, wpTable, cruiseSpeed, patrolSpeed, startTi
 							nTotal = 10
 							cruiseSpeed = Data_configuration.CV_Vmax
 							patrolSpeed = Data_configuration.CV_Vmax
+						-- else
+						-- 	nTotal = #poly																	--pour revenir au code original de Mbot
+						-- 	-- QteWptConnu = true
+						-- end
 						else
-							nTotal = #poly																	--pour revenir au code original de Mbot
-							-- QteWptConnu = true
+							-- Si on veut au moins un mouvement, on peut forcer nTotal 
+							-- à une valeur fixe ou au nombre de points dans le polygone choisi.
+							
+							nTotal = #poly
+							AddLog("DCNE (c1)  nTotal: "..nTotal)
+
+							if nTotal == 1 then 
+								-- Si le polygone n'a qu'un point, on force quand même 
+								-- quelques répétitions pour le patrouillage
+								nTotal = 4 
+								AddLog("DCNE (c2) ancien Blocage nTotal: "..nTotal)
+							end
 						end
 
-						testTxt = ""
+						local testTxt = ""
 
 						for n = 2, nTotal do																	--go through waypoints table passed as function argument
 							--oriente les CV dans le sens du vent au tout d�but
@@ -276,8 +334,17 @@ function ShipGroupMovement(groupName, wpTable, cruiseSpeed, patrolSpeed, startTi
 							else
 								testTxt = testTxt.." 02 "
 
-								if #poly == 1 then												--WP is a single point marked by trigger zone	
-									route[n] = poly[1]												--store x-y coordnates of that trigger zone
+								if #poly == 1 then
+
+									--Pourquoi : plusieurs WPT identiques donnent une distance nulle,
+									--donc les bateaux restent immobiles dans DCS.
+									--On crée donc un léger offset aléatoire autour du point.
+									local offset = 1500
+
+									route[n] = {
+										x = poly[1].x + math.random(-offset, offset),
+										y = poly[1].y + math.random(-offset, offset)
+									}
 
 								elseif #poly == 2 then												--WP is a polygon marked by multiple trigger zones
 									local p1 = poly[1]
@@ -320,27 +387,39 @@ function ShipGroupMovement(groupName, wpTable, cruiseSpeed, patrolSpeed, startTi
 								route[n].speed = tonumber(cruiseSpeed)
 							end
 
+							AddLog(
+								"DCNE TIMECALC n="..n
+								.." dist="..tostring(GetDistance(route[n - 1], route[n]))
+								.." cruiseSpeed="..tostring(cruiseSpeed)
+								.." routeSpeed="..tostring(route[n].speed)
+							)
+
 							route[n].time = route[n - 1].time + GetDistance(route[n - 1], route[n]) / cruiseSpeed	--calculate time at waypoint based on speed and distance from previous waypoint
 
 						end
 
 						--ship position at current time
-						local CurrentTime = (camp.day - 1) * 86400 + camp.time									--total time in seconds since campaign start
+						-- local currentTime = (camp.day - 1) * 86400 + camp.time									--total time in seconds since campaign start
+						
+						AddLog("DCNE M #route "..#route)
+
+						
+						local currentTime = (camp.date.day - 1) * 86400 + camp.time
 						for n = #route, 1, -1 do																--go through route from back to front
-							if route[n].time < CurrentTime then													--check if waypoint time is earlier than current time
+							if route[n].time < currentTime then													--check if waypoint time is earlier than current time
 								if n == #route then																--waypoint is last waypoint
 									if patrolSpeed and #poly >= 2  then					--patrol after route
 										route[n].speed = patrolSpeed											--set speed to patrol speed
 									else
 										route[n].speed = 0														--set speed to zero
 									end
-									route[n].time = CurrentTime
+									route[n].time = currentTime
 								else
-									local TimePassed = CurrentTime - route[n].time								--time since passed last waypoint
-									local DistancePassed = TimePassed * route[n].speed							--distance covered since passed last waypoint
+									local timePassed = currentTime - route[n].time								--time since passed last waypoint
+									local distancePassed = timePassed * route[n].speed							--distance covered since passed last waypoint
 									local heading = GetHeadingDegre(route[n], route[n + 1])							--heading from last to next waypoint
-									route[n].x = route[n].x + math.cos(math.rad(heading)) * DistancePassed		--update last waypoint to position at current time
-									route[n].y = route[n].y + math.sin(math.rad(heading)) * DistancePassed		--update last waypoint to position at current time
+									route[n].x = route[n].x + math.cos(math.rad(heading)) * distancePassed		--update last waypoint to position at current time
+									route[n].y = route[n].y + math.sin(math.rad(heading)) * distancePassed		--update last waypoint to position at current time
 								end
 								for w = n - 1, 1, -1 do															--go throut all waypoints ahead of waypoint at current time
 									table.remove(route, w)														--remove these waypoints
@@ -349,9 +428,11 @@ function ShipGroupMovement(groupName, wpTable, cruiseSpeed, patrolSpeed, startTi
 							end
 						end
 
+						AddLog("DCNE N #route "..#route)
+
 						--patrol zone at end of route
 						if patrolSpeed and patrolSpeed > 0 then													--if there is a patrol speed assigned, ship should patrol at end of route
-							while route[#route].time < CurrentTime + mission_ini.mission_duration * 2 do			--repeat as long as last waypoint time is within twice the mission duration
+							while route[#route].time < currentTime + mission_ini.mission_duration * 2 do			--repeat as long as last waypoint time is within twice the mission duration
 								local nextWP																--next waypoint
 								if #poly == 2 then												--poly has two points only, patrol between these two points
 									if #route % 2 == 0 then													--even
@@ -388,18 +469,38 @@ function ShipGroupMovement(groupName, wpTable, cruiseSpeed, patrolSpeed, startTi
 							end
 						end
 
+						AddLog("DCNE R #route "..#route)
+
 						--suppression des doublons
-						if #route > 1 then
-							for n = 2, #route do
+						--Pourquoi : avec un seul point de patrouille (#poly == 1),
+						--on génère volontairement plusieurs WPT proches pour forcer un mouvement.
+						--Il ne faut donc PAS supprimer ces points.
+						if #route > 1 and #poly > 1 then
+
+							local n = 2
+
+							while n <= #route do
+
 								if route[n-1] and route[n] then
-									if (route[n-1].x ==   route[n].x) and (route[n-1].y ==   route[n].y) then
-										table.remove(route, n )
+
+									if (route[n-1].x == route[n].x)
+									and (route[n-1].y == route[n].y) then
+
+										table.remove(route, n)
+
+										AddLog("DCNE (o) suppression doublon n "..n)
+
+									else
+										n = n + 1
 									end
+
 								else
 									break
 								end
 							end
 						end
+
+						AddLog("DCNE P #route "..#route)
 
 						--DC_NE_Debug01	transforms an angle of more than 90� into 2 WPT of less than 90�
 						-- tablWPT = {} utilité?
@@ -407,6 +508,7 @@ function ShipGroupMovement(groupName, wpTable, cruiseSpeed, patrolSpeed, startTi
 						if #route > 1 then
 							routeModif[1] = route[1]
 							for n = 2, #route-1 do
+
 								local waypoint = {}
 								local h1 = GetHeadingDegre(route[n-1], route[n] )
 								local h2 = GetHeadingDegre(route[n], route[n+1] )
@@ -434,20 +536,33 @@ function ShipGroupMovement(groupName, wpTable, cruiseSpeed, patrolSpeed, startTi
 									table.insert(routeModif, waypoint )
 								end
 
-								if  angle ~= 0  then
+								if angle ~= 0 then
 									table.insert(routeModif, route[n] )
 								end
 							end
-							-- if  angle ~= 0  then
+
+							--Ajout du dernier waypoint
+							--Pourquoi : le dernier point n'était jamais réinjecté
+							--dans routeModif.
+							table.insert(routeModif, route[#route])
+
+							AddLog("DCNE FIX #routeModif "..#routeModif)
+
+							-- if angle ~= 0  then
 							-- 	table.insert(routeModif, route[n] )
 							-- 	-- print("DcNE _03_ #routeModif "..tostring(#routeModif))
 							-- end
 						end
 
+						AddLog("DCNE Q1 #route "..#route)
+						AddLog("DCNE Q2 #routeModif "..#routeModif)
+
 						if #route > 1 then
 							route = {}
 							route = DeepCopy(routeModif)
 						end
+
+						AddLog("DCNE S #route "..#route)
 
 						--recalcul les timmings en fonction des nouveaux wpt ajout�
 						local addTime
@@ -521,6 +636,34 @@ function ShipGroupMovement(groupName, wpTable, cruiseSpeed, patrolSpeed, startTi
 							group.units[1].heading = PaHeading			--update initial leader heading
 						end
 
+						AddLog("DCNE DEBUG FINAL ROUTE COUNT = "..tostring(#route))
+
+						for i = 1, #route do
+
+							AddLog(
+								"DCNE ROUTE["..i.."] "
+								.."x="..tostring(route[i].x)
+								.." y="..tostring(route[i].y)
+								.." speed="..tostring(route[i].speed)
+								.." time="..tostring(route[i].time)
+							)
+
+						end
+
+						if #route <=1 then
+							os.remove("Debug/BugList.lua")
+
+							if BugList and type(BugList) == "table" and #BugList >= 1 then
+								local table_Str = "BugList = " .. TableSerialization(BugList, 0)
+								local bugFile = io.open("Debug/BugList.lua", "w") or error("Failed to open debug file")
+								bugFile:write(table_Str)
+								bugFile:close()
+							end
+
+							os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')
+							os.execute 'pause'
+						end
+
 						--group route
 						group.route.points[1].x = route[1].x
 						group.route.points[1].y = route[1].y
@@ -555,19 +698,19 @@ function ShipGroupMovement(groupName, wpTable, cruiseSpeed, patrolSpeed, startTi
 						for basename,base in pairs(db_airbases) do							--go through airbases
 							for u = 1, #group.units do										--go through units in group
 
-								-- print("DcNE passe BA base.unitname "..tostring(base.unitname).." uName "..tostring(group.units[u].name).." u: "..u )
+								print("DcNE passe BA base.unitname "..tostring(base.unitname).." uName "..tostring(group.units[u].name).." u: "..u )
 
 								if base.unitname == group.units[u].name then				--if unit is an airbase (carrier)	
 									base.x = group.units[u].x								--update airbase (carrier) position
 									base.y = group.units[u].y								--update airbase (carrier) position
-									-- print("DcNE passe BB "..base.unitname.." "..base.x)
+									print("DcNE passe BB "..base.unitname.." "..base.x)
 								end
 
 								--dans le cas, où il y aurait 2 CV dans le group
 								if u > 1 and base.unitname == group.units[u].name then				--if unit is an airbase (carrier)	
 									base.x = group.units[1].x								--update airbase (carrier) position
 									base.y = group.units[1].y								--update airbase (carrier) position
-									-- print("DcNE passe BC "..base.unitname.." "..base.x)
+									print("DcNE passe BC "..base.unitname.." "..base.x)
 								end
 							end
 						end

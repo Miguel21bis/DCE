@@ -1795,18 +1795,18 @@ Action = {}
 	--StartTime is the campaign time in seconds (time since campaign start) at which the mission was assigned. It is used to control progress along the route across multiple missions of the campaign. If nil, then current campaign time us used automatically.
 	function Action.ShipMission(groupName, wpTable, cruiseSpeed, patrolSpeed, startTime)
 
-		-- print("/r/n DcCT_ShipMission A  groupName "..groupName)
-		-- _affiche(wpTable, "DcCT wpTable")
+		print("/r/n DcCT_ShipMission A  groupName "..groupName)
+		_affiche(wpTable, "DcCT wpTable")
 
 		for coal_name,coal in pairs(oob_ground) do								--go through sides(red/blue)	
 			for country_n,country in ipairs(coal) do							--go through countries
 				if country.ship then											--country has ships
 					for group_n,group in ipairs(country.ship.group) do			--go through groups
 
-						-- print("DcCT_ShipMission B groupName "..groupName.." ?= "..group.name)
+						print("DcCT_ShipMission B groupName "..groupName.." ?= "..group.name)
 						if groupName == group.name then							--ship group found		
 							
-							-- print("DcCT_ShipMission C found groupName "..groupName)
+							print("DcCT_ShipMission C found groupName "..groupName)
 
 							local firstWPT = "test"
 							if type(wpTable) == "table" then
@@ -1829,7 +1829,7 @@ Action = {}
 								-- StartTime = StartTime
 							}
 
-							-- print("DcCT_ShipMission -> D groupName " .. groupName .. " ShipGroupMovement")
+							print("DcCT_ShipMission -> D groupName " .. groupName .. " ShipGroupMovement")
 
 							ShipGroupMovement(groupName, wpTable, cruiseSpeed, patrolSpeed, CampTotalTimeS)	--exectue ship mission
 
