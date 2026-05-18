@@ -86,7 +86,6 @@ TaskByPlane = {
 	},
 
 	["AFAC"] = {
-		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
 
@@ -107,11 +106,9 @@ TaskByPlane = {
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
 
-		-- ["A-4E-C"] = true,				--Mod
 		["A-10C"] = true,
 		["A-10C_2"] = true,
 		["A-10A"] = true,
-		-- ["Bronco-OV-10A"] = true,		--Mod
 		["vwv_a1_skyraider"] = true,	--Mod
 		["vwv_o-1"] = true,         	--Mod
 
@@ -123,7 +120,6 @@ TaskByPlane = {
 		["L-39ZA"] = true,
 		["Su-24M"] = true,
 
-		-- ["Ka-50"] = true,
 		["Ka-50_3"] = true,
 		["Mi-28N"] = true,
 
@@ -131,12 +127,9 @@ TaskByPlane = {
 
 	},
 	["CAS"] = {
-		-- ["MosquitoFBMkVI"] = true,
 		["SpitfireLFMkIX"] = true,
 		["SpitfireLFMkIXCW"] = true,
-
 		["A-20G"] = true,
-
 		["P-47D-30bl1"] = true,
 		["P-47D-30"] = true,
 		["P-47D-40"] = true,
@@ -147,7 +140,6 @@ TaskByPlane = {
 		["FW-190A8"] = true,
 		["FW-190D9"] = true,
 		["Ju-88A4"] = true,
-
 		["I-16"] = true,
 
 		["A-6E"] = true,			--Mod
@@ -363,7 +355,6 @@ TaskByPlane = {
 		["Su-24M"] = true,
 		["Su-25"] = true,
 		["Su-25T"] = true,
-		-- ["Su-27"] = true,
 		["Su-30"] = true,
 		["Su-34"] = true,
 		["MiG-27K"] = true,
@@ -549,9 +540,7 @@ TaskByPlane = {
 		["MiG-25PD"] = true,
 		["MiG-29S"] = true,
 		["MiG-31"] = true,
-		-- ["Su-27"] = true,
 		["Su-30"] = true,
-
 
 	},
 
@@ -564,8 +553,6 @@ TaskByPlane = {
 		["Tornado GR4"] = true,
 		["Tornado IDS"] = true,
 
-		-- ["A-4E-C"] = true,				--Mod
-		-- ["AJS37"] = true,
 		["F-4E"] = true,
 		["vwv_crusader"] = true,		--Mod
 		["vwv_ra-5"] = true,		--Mod
@@ -574,13 +561,11 @@ TaskByPlane = {
 
 		["JF-17"] = true,
 		["MiG-25RBT"] = true,
-		["Su-24MR"] = true,
 		["tu_22D"] = true,				--Mod
 	},
 
 
 	["Refueling"] = {
-		-- ["A-4E-C"] = true,				--Mod
 		["S-3B Tanker"] = true,
 		["KC135MPRS"] = true,
 		["KC-135"] = true,
@@ -1958,12 +1943,21 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		vCruise = 250,
 		hCruise = 10096,
+		jammer = {
+			type = "SPS-5 Fasol",
+			efficiency = 90,
+			range = 7500,
+		},
+		Tasks = {
+			aircraft_task(Reconnaissance),
+			aircraft_task("Escort Jammer"),--Su-24MP "Fencer-F"
+		},
 	},
 
 	["Tu-22M3"] = {
 		instrumentUnits = "russian",
 		EPLRS_Capacity = false,
-		flyingAlone = true,
+		-- flyingAlone = true,
 		heavyBomber = true,
 		Tasks = {
 			aircraft_task(GroundAttack),
@@ -3828,7 +3822,7 @@ function DataCompilation_DataDiscoveryA2()
 				env.GroundAttack     = "Ground Attack"
 				env.RunwayAttack     = "Runway Attack"
 				env.Intercept        = "Intercept"
-				env.AntishipStrike    = "Antiship Strike"
+				env.AntishipStrike   = "Antiship Strike"
 				env.PinpointStrike	 = "Pinpoint Strike"
 				env.Escort           = "Escort"
 				env.FighterSweep     = "Fighter Sweep"

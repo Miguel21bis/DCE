@@ -1,24 +1,14 @@
 --To define Time on target for all packages and ETA for all aircraft waypoints
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  Debug_l
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_Timing.lua"] = "1.7.70"
+versionDCE["ATO_Timing.lua"] = "1.7.71"
 ------------------------------------------------------------------------------------------------------- 
----
-			-- Chaque waypoint contient sa propre alt, alt_type, speed, et speed_locked.
-			-- Quand l’IA se déplace d’un waypoint N vers un waypoint N+1 :
-			-- Elle utilise la vitesse définie dans le waypoint N+1 comme consigne pour ce segment de vol.
-			-- Idem pour l’altitude : l’IA cherchera à être à l’altitude du waypoint N+1 lorsqu’elle l’atteint.
-
+-- Chaque waypoint contient sa propre alt, alt_type, speed, et speed_locked.
+-- Quand l’IA se déplace d’un waypoint N vers un waypoint N+1 :
+-- Elle utilise la vitesse définie dans le waypoint N+1 comme consigne pour ce segment de vol.
+-- Idem pour l’altitude : l’IA cherchera à être à l’altitude du waypoint N+1 lorsqu’elle l’atteint.
 ------------------------------------------------------------------------------------------------------- 
--- cleancode_d				(d springCleaning)
--- adjustment_i				(i subtract time for taxi)(h fuel consumption)(g add AFAC task)(f not standoff in cap)(d escort Transport)(c airstart for Fuel)(b attempts to "dilute" all packages throughout the duration of the mission)(a gives more time to set up the player flight (SP and MP))						
--- Debug_l					(l TOT main[2] etc)(k latest = nil)(j time between CAPs too long)(i client Transport)(h tot bug with same target_name)(g escort/transport)(f add offset role == Anti-ship Strike)(e retablit ate<0 jusqu'a wpt 1) (d: tot transport bug)(c: speed trop faible pour les escort : = flight[f].loadout.vCruise * (1 - 10/100)) (c: Spawn before Departure) (a: vCruise by default)
--- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
--- modification M17_b		Option F-14B
--- modification M11A_bi		Multiplayer (bi: clientETA>0 au sol)(b(dh): clientETA<0 au sol)(w: force same package)
--- modification M06_e		helicoptere playable
 
 if Debug.debug then
 	print("START ATO_Timing.lua "..versionDCE["ATO_Timing.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
@@ -180,7 +170,7 @@ for sideName, packs in pairs(ATO) do
 				-- pour peupler chaque quart par un TOT, si c'est possible
 				local randtot
 				if packs[p].main[1].task ~= "AWACS" and packs[p].main[1].task ~= "Refueling" and packs[p].main[1].task ~= "SAR"
-				and packs[p].main[1].task ~= "Intercept" then
+					and packs[p].main[1].task ~= "Intercept" then
 					local i = 1
 					local i_choice = 1
 					repeat

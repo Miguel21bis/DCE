@@ -9,6 +9,7 @@ versionDCE["db_loadouts/db_loadouts_Plane.lua"] = "1.3.204"
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
+-- V205 - add SU-24MR escort jammer capacity and used by antiship planes 
 -- V204 - add refuel capacity to A6E
 -- V203 - add ["Escort Jammer"] = true, to B-52 AV8NA
 -- V202 - Su-33 CV
@@ -2230,7 +2231,7 @@ db_loadouts = {
 		},
 		["Anti-ship Strike"] = {
 			["Antiship  Kh-22N*3"] = {
-				minscore = 0.3,
+				minscore = 0.1,
 				support = {
 					Escort = true,
 					SEAD = false,
@@ -2252,7 +2253,7 @@ db_loadouts = {
 				ingress = 50000,
 				egress = 10000,
 				MaxAttackOffset = 60,
-				sortie_rate = 6,
+				sortie_rate = 2,
 				stores = {
 					pylons = {
 						[1] = {
@@ -2294,7 +2295,7 @@ db_loadouts = {
 				ingress = 50000,
 				egress = 10000,
 				MaxAttackOffset = 60,
-				sortie_rate = 6,
+				sortie_rate = 2,
 				stores = {
 					pylons = {
 						[1] = {
@@ -5187,6 +5188,47 @@ db_loadouts = {
 		},
 	},
 	["Su-24MR"] = {
+		["Escort Jammer"] = {
+			["Escort-Jammer : Elint pod, ETHER, Fuel*2"] = {
+				attributes =  { },
+				code_loadout =  { "All" },
+				attackType = "Dive",
+				night = true,
+				adverseWeather = true,
+				range = 1000000,
+				firepower = 2,
+				vCruise = 240,
+				sortie_rate = 12,
+				stores = {
+					pylons = {
+						[1] = 
+							{
+							["CLSID"] = "{B0DBC591-0F52-4F7D-AD7B-51E67725FB81}",
+							}, -- end of [1]
+						[2] = 
+							{
+							["CLSID"] = "{7D7EC917-05F6-49D4-8045-61FC587DD019}",
+							}, -- end of [2]
+						[5] = 
+							{
+							["CLSID"] = "{0519A262-0AB6-11d6-9193-00A0249B6F00}",
+							}, -- end of [5]
+						[7] = 
+							{
+							["CLSID"] = "{7D7EC917-05F6-49D4-8045-61FC587DD019}",
+							}, -- end of [7]
+						[8] = 
+							{
+							["CLSID"] = "{0519A261-0AB6-11d6-9193-00A0249B6F00}",
+							}, -- end of [8]
+					},
+					fuel = 11700,
+					flare = 96,
+					chaff = 96,
+					gun = 100,
+				},
+			},
+		},
 		Reconnaissance = {
 			["Reco TANGAZH,ETHER,R-60M*2,Fuel*2"] = {
 				support = {
@@ -13770,10 +13812,11 @@ db_loadouts = {
 	["Su-25TM"] = {
 		["Anti-ship Strike"] = {
 			["Antiship Kh-35*2_R-73*2_Fuel*2_MPS410_Kopyo-25"] = {
-				minscore = 0.3,
+				minscore = 0.1,
 				support = {
 					Escort = true,
 					SEAD = false,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "ship" },
 				code_loadout =  { "TF", "Caucasus" },
@@ -13829,10 +13872,11 @@ db_loadouts = {
 				},
 			},
 			["Antiship Kh-31A*2_R-73*2_Fuel*2_MPS410_Kopyo-25"] = {
-				minscore = 0.3,
+				minscore = 0.1,
 				support = {
 					Escort = true,
 					SEAD = false,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "ship" },
 				code_loadout =  { "TF", "Caucasus" },
@@ -17304,10 +17348,11 @@ db_loadouts = {
 	["Tu-142"] = {
 		["Anti-ship Strike"] = {
 			["Antiship Kh-35*6"] = {
-				minscore = 0.3,
+				minscore = 0.1,
 				support = {
 					Escort = true,
 					SEAD = false,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "ship" },
 				code_loadout =  { "TF", "TF80s", "TF80sRED", "TF80sI", "WOC80" },
@@ -17325,7 +17370,7 @@ db_loadouts = {
 				ingress = 50000,
 				egress = 10000,
 				MaxAttackOffset = 60,
-				sortie_rate = 6,
+				sortie_rate = 3,
 				stores = {
 					pylons = {
 						[1] = {
@@ -18722,6 +18767,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Structure", "SAM", "frontline" },
 				code_loadout =  { "Caucasus", "WOB" },
@@ -18766,6 +18812,7 @@ db_loadouts = {
 					SEAD = true,
 					Escort = true,
 					["Laser Illumination"] = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Structure", "frontline" },
 				code_loadout =  { "Crisis", "PG", "Caucasus", "WOB" },
@@ -18818,6 +18865,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM", "Structure", "frontline" },
 				code_loadout =  { "Crisis", "PG", "Caucasus", "WOB" },
@@ -18868,10 +18916,11 @@ db_loadouts = {
 		},
 		["Anti-ship Strike"] = {
 			["Antiship, Kh-31A*2,R-60M*4,Fuel"] = {
-				minscore = 0.3,
+				minscore = 0.1,
 				support = {
 					Escort = true,
 					SEAD = false,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "ship" },
 				code_loadout =  { "Crisis", "PG", "TF", "TF80s", "TF80sRED", "TF80sI", "Caucasus", "WOB" },
@@ -18997,6 +19046,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Runway" },
 				code_loadout =  { "TF", "Caucasus", "WOB" },
@@ -19044,6 +19094,7 @@ db_loadouts = {
 				support = {
 					Escort = true,
 					SEAD = true,
+					["Escort Jammer"] = true,
 				},
 				attributes =  { "Runway" },
 				code_loadout =  { "TF", "Caucasus", "WOB" },

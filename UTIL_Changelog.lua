@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "22.99.596"
+versionDCE["UTIL_Changelog.lua"] = "22.99.597"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "22.99.596"
+VersionDCE["UTIL_Changelog.txt"] = "22.99.597"
 --[[
 
 # DCE – Changelog
@@ -17,7 +17,7 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-##  Version 22.99.596
+##  Version 22.99.597
 	###  Fixed
 	Radio HF of the Mig-15
 	EWR frequency
@@ -25,6 +25,7 @@ known issues:
 	two AWACS or two tankers may spawn for the same mission
 	Helicopters spawn randomly at FARPs, which is also linked to the unitId bug in the warehouses
 	F-100 no plyable
+	Ships don't move
 
 	###  Changed
 	loadout OH58D and UH-1H strike range to 150000

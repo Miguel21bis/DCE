@@ -334,8 +334,6 @@ local function GCI_Cycle()
 									local bearingWing = 90
 									local point_0 = GetOffsetPoint(flightInter, bearingWing, 1500)
 									
-
-
 									local function assignMission()												--function to set interception mission (to be executed with 2 seconds delay, in order for the group to activate first)
 
 										if groupObj and groupObj:isExist() then
@@ -415,7 +413,7 @@ local function GCI_Cycle()
 																			["enabled"] = true,
 																			["auto"] = false,
 																			["id"] = "WrappedAction",
-																			["name"] = "force la PC after burner (inerception)",
+																			["name"] = "force la PC after burner (interception)",
 																			["params"] =
 																			{
 																				["action"] =
@@ -425,6 +423,25 @@ local function GCI_Cycle()
 																					{
 																						["value"] = false,
 																						["name"] = 16,
+																					},
+																				},
+																			},
+                                                                        },
+																		[3] = {
+																			["number"] = 4,
+																			["auto"] = false,
+																			["id"] = "WrappedAction",
+																			["name"] = "BINGO RTB: ignorer le ravito Vol WPT1",
+																			["enabled"] = true,
+																			["params"] =
+																			{
+																				["action"] =
+																				{
+																					["id"] = "Option",
+																					["params"] =
+																					{
+																						["value"] = 2,
+																						["name"] = 6,
 																					},
 																				},
 																			},
@@ -524,93 +541,6 @@ local function GCI_Cycle()
 															},
 														},
 														
-														-- {
-														-- 	["alt"] = 2000,
-														-- 	["type"] = "Turning Point",
-														-- 	["action"] = "Turning Point",
-														-- 	["alt_type"] = "BARO",
-														-- 	["formation_template"] = "",
-														-- 	["ETA"] = tonumber((distance2 / speed) + current_time) ,
-														-- 	["y"] = point_1.y,
-														-- 	["x"] = point_1.x,
-														-- 	["speed"] = tonumber(speed),
-														-- 	["ETA_locked"] = false,
-														-- 	["task"] = {
-														-- 		["id"] = "ComboTask",
-														-- 		["params"] = {
-														-- 			["tasks"] = {
-
-														-- 				[1] = {
-														-- 					["enabled"] = true,
-														-- 					["number"] = 1,
-														-- 					["auto"] = false,
-														-- 					["id"] = "EngageGroup",
-														-- 					["params"] = {
-														-- 						["visible"] = false,
-														-- 						["groupId"] = target_id,
-														-- 						["priority"] = 1,
-														-- 						["weaponType"] = weaponType,
-														-- 					},
-														-- 				},
-
-														-- 			},
-														-- 		},
-														-- 	},
-														-- 	["speed_locked"] = true,
-														-- },
-														-- {
-														-- 	["alt"] = target.altitude + 500,
-														-- 	["type"] = "Turning Point",
-														-- 	["action"] = "Turning Point",
-														-- 	["alt_type"] = "BARO",
-														-- 	["formation_template"] = "",
-														-- 	["ETA"] = tonumber((distance2 / speed) + current_time) ,
-														-- 	["y"] = point_2.y,
-														-- 	["x"] = point_2.x,
-														-- 	["speed"] = tonumber(speed),
-														-- 	["ETA_locked"] = false,
-														-- 	["task"] = {
-														-- 		["id"] = "ComboTask",
-														-- 		["params"] = {
-														-- 			["tasks"] = {
-
-														-- 				[1] = {
-														-- 					["enabled"] = true,
-														-- 					["number"] = 1,
-														-- 					["auto"] = false,
-														-- 					["id"] = "EngageGroup",
-														-- 					["params"] = {
-														-- 						["visible"] = false,
-														-- 						["groupId"] = target_id,
-														-- 						["priority"] = 1,
-														-- 						["weaponType"] = weaponType,
-														-- 					},
-														-- 				},
-														-- 				-- [2] = {
-														-- 				-- 	["number"] = 2,
-														-- 				-- 	["auto"] = false,
-														-- 				-- 	["id"] = "ControlledTask",
-														-- 				-- 	["enabled"] = true,
-														-- 				-- 	["params"] = {
-														-- 				-- 		["task"] = {
-														-- 				-- 			["id"] = "Orbit",
-														-- 				-- 			["params"] = {
-														-- 				-- 				["altitude"] = target.altitude + 500,
-														-- 				-- 				["pattern"] = "Circle",
-														-- 				-- 				["speed"] = 200,
-														-- 				-- 			},
-														-- 				-- 		},
-														-- 				-- 		["stopCondition"] = {
-														-- 				-- 			["time"] = current_time + 1200,
-														-- 				-- 		}
-														-- 				-- 	}
-														-- 				-- },
-
-														-- 			},
-														-- 		},
-														-- 	},
-														-- 	["speed_locked"] = true,
-														-- },
 														{
 															["alt"] = 1000,
 															["type"] = "Turning Point",

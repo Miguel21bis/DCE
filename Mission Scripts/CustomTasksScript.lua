@@ -2819,18 +2819,6 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 		return
 	end
 
-	-- -- Si l'avion est posé, inutile de continuer
-    -- if not interUnitObj:inAir() then
-    --     if campL.debug then
-    --         env.info("DCE_Custom_Intercept A : " .. argInterName .. " has landed — stopping logic.")
-    --     end
-		
-	-- 	interceptorsActive[argInterName] = nil
-	-- 	groupTargetMemory[argInterName] = nil
-	-- 	GroupStateMemory[argInterName] = nil
-	-- 	return
-	-- end
-
 	-- Si l'avion est réellement posé (et pas en phase de décollage), inutile de continuer
 	local vel = interUnitObj:getVelocity()
 	local speed = math.sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z)
@@ -2868,7 +2856,7 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 			if dist < 10000 then
 				bestTarget = lastTarget
 				if campL.debug then
-					env.info("DCE_Custom_Intercept: " ..argInterName .. " still engaging " .. lastTarget:getName() .. " (" .. math.floor(dist) .. "m)")
+					env.info("DCE_Custom_Intercept B: " ..argInterName .. " still engaging " .. lastTarget:getName() .. " (" .. math.floor(dist) .. "m)")
 				end
 			end
 		else
@@ -2905,7 +2893,7 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 
     if campL.debug then
         env.info(string.format(
-            "DEBUG %s | inAir=%s | speed=%.1f | fuel=%.2f | state=%s | target=%s",
+			"DCE_Custom_Intercept C %s | inAir=%s | speed=%.1f | fuel=%.2f | state=%s | target=%s",
             argInterName,
             tostring(interUnitObj:inAir()),
             math.sqrt(interUnitObj:getVelocity().x ^ 2 + interUnitObj:getVelocity().z ^ 2),
@@ -2925,7 +2913,7 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
             GroupStateMemory[argInterName] = "INTERCEPT"
 			
 			if campL.debug then
-				env.info("DCE_Custom_Intercept C : " .. argInterName .. " switching to new target " .. newTargetName)
+				env.info("DCE_Custom_Intercept D : " .. argInterName .. " switching to new target " .. newTargetName)
 			end
 			-- ctr:resetTask() --si on utilise ceci, il faut ensuite coller une mission 
 
@@ -2947,14 +2935,14 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 						ctr2:pushTask(interceptTask)
 						
                         if campL.debug then
-                            env.info("DCE_Custom_Intercept B : " ..
+                            env.info("DCE_Custom_Intercept E : " ..
                             argInterName .. " engaging " .. tostring(newTargetName))
                             local current_time = timer.getTime()
                             local logStr = "params = " .. TableSerialization(interceptTask, 0)
                             local flightNameClean = argInterName:gsub('[%p%c%s]', '_')
                             local logFile = io.open(
                                 PathDCE .. "Debug\\" .. flightNameClean ..
-                                "_" .. "Custom_Intercept" .. "_" .. tostring(current_time) .. ".lua", "w")
+								"_" .. "Custom_Intercept_pushTask" .. "_" .. tostring(current_time) .. ".lua", "w")
                             if logFile then
                                 logFile:write(logStr)
                                 logFile:close()
@@ -2967,7 +2955,7 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 			groupTargetMemory[argInterName] = bestTarget
 		else
 			if campL.debug then
-				env.info("DCE_Custom_Intercept E : " .. argInterName .. " already targeting " .. newTargetName)
+				env.info("DCE_Custom_Intercept F : " .. argInterName .. " already targeting " .. newTargetName)
 			end
 		end
 	else
@@ -2975,7 +2963,7 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 		-- Si déjà en CAP, ne rien faire
         if GroupStateMemory[argInterName] == "CAP" then
             if campL.debug then
-                env.info("DCE_Custom_Intercept: " .. argInterName .. " already in CAP — no change.")
+                env.info("DCE_Custom_Intercept G : " .. argInterName .. " already in CAP — no change.")
             end
             return
         end
@@ -2988,8 +2976,11 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 						[1] = {
 							type = "Turning Point",
 							action = "Turning Point",
-							x = interPos.x + 1000,
-							y = interPos.z + 1000,
+							-- x = interPos.x + 1000,
+                            -- y = interPos.z + 1000,
+							x = argPosX,
+							y = argPosY,
+							
 							alt = 6000,
 							speed = argSpeed or 250,
 							task = {
@@ -3017,6 +3008,25 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 												altitude = 6000,
 											},
 										},
+										[3] = {
+											["number"] = 4,
+											["auto"] = false,
+											["id"] = "WrappedAction",
+											["name"] = "BINGO RTB: ignorer le ravito Vol WPT1",
+											["enabled"] = true,
+											["params"] =
+											{
+												["action"] =
+												{
+													["id"] = "Option",
+													["params"] =
+													{
+														["value"] = 2,
+														["name"] = 6,
+													},
+												},
+											},
+										},
 									},
 								},
 							},
@@ -3033,7 +3043,7 @@ function CustomIntercept(argTargetName, argInterName, argFriendSide, argSpeed, a
 		GroupStateMemory[argInterName] = "CAP"
 
 		if campL.debug then
-            env.info("DCE_Custom_Intercept F CAP : " .. argInterName .. " now in CAP mission.")
+            env.info("DCE_Custom_Intercept Z CAP : " .. argInterName .. " now in CAP mission.")
 			
 			local current_time = timer.getTime()
 			local logStr = "params = " .. TableSerialization(capMission, 0)

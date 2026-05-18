@@ -820,7 +820,7 @@ for sideName, units in pairs(oob_air) do
 
 							for task, task_bool in pairs(unit.tasks) do																		--iterate through all tasks of unit		
 								if isDebugModeA1 then
-									debugLog("draftId"..draftId.." AtoG passe A_03b task: "..tostring(task).." task_bool: "..tostring(task_bool).."  ")
+									debugLog("draftId"..draftId.." AtoG passe A_03b task: "..tostring(task).." task_bool: "..tostring(task_bool).."  available: "..tostring(aircraft_available).." = ready:  "..tostring(unit.roster.ready) .." - unavailable: ".. tostring(#AcftAvail[unit.name].unavailable))
 								end
 
 								if task_bool and task ~= "SEAD" and task ~= "Escort" and task ~= "Escort Jammer" and task ~= "Flare Illumination" and task ~= "Laser Illumination" then		--task is true and is no support task
@@ -1174,7 +1174,18 @@ for sideName, units in pairs(oob_air) do
 																			end
 																		end
 
-																		if (passHumain and (target.firepower.min <= aircraft_available * unit_loadouts[l].firepower)) or overideMP_A then				--enough aircraft are available to satisfy minimum firepower requirement of target	
+																		--TODO ajouter ici la possibilité d'autre squad de les aider, donc leur qté d'avion dispo
+																		--pass packmax
+																		local passPackmax
+																		if target.firepower.packmax and target.firepower.packmax > 1 then
+																			passPackmax = true
+																		end
+
+																		if isDebugModeA3 then
+																			debugLog("draftId"..draftId.." AtoG passe A_11b passPackmax? "..tostring(passPackmax).." ||target.firepower.packmax: "..tostring(target.firepower.packmax))
+																		end
+
+																		if (passHumain and (target.firepower.min <= aircraft_available * unit_loadouts[l].firepower)) or overideMP_A or passPackmax then				--enough aircraft are available to satisfy minimum firepower requirement of target	
 
 																			if isDebugModeA3 then
 																				debugLog("draftId"..draftId.." AtoG passe A_12  Befor weather Condition || overRideReady: "..tostring(overRideReady).." || "..target_name)
@@ -2804,20 +2815,27 @@ local function createATO_table(draftPriority)
 				--diminue le minscore en fonction du nombre de tentative de generation de mission
 				--evite un blocage de generation
 				if draft.loadout.minscore and MissionInstance >= 2 then
-					-- print("AtoG BEFOR minscore "..draft.loadout.minscore)
 					draft.loadout.minscore = draft.loadout.minscore / ((MissionInstance )/10 +1)
-					-- print("AtoG After minscore "..draft.loadout.minscore)
 				end
 
 				if draft.loadout.minscore == nil or draft.score >= draft.loadout.minscore then					--draft sortie has no minimum score requirement or minimum score requirement is satisified		
-				-- if 1 == 1 then
+				
 					-- if draft.multipack > 0 then												--target does not have a requirment for a specific number of packages, or still needs more packages		
-					if multipackByTargetName[draft.target_name] > 0 then
+					if multipackByTargetName[draft.target_name]["nbPack"] > 0 then
 
 						if draft.target.firepower.max > 0 and draft.target.firepower.max >= draft.target.firepower.min then	--the target of this draft sortie must have a need for firepower above the minimum firepower threshold	
 							local available = AcftAvail[draft.name].unassigned											--shortcut for available aircraft for this draft sortie					
 
-							if available * draft.loadout.firepower >= draft.target.firepower.min and draft.number * draft.loadout.firepower >= draft.target.firepower.min then	--enough aircraft are available to satisfy minimum firepower requirement for target						
+							--TODO ajouter ici la possibilité d'autre squad de les aider, donc leur qté d'avion dispo
+							--pass packmax
+							local passPackmax
+							if multipackByTargetName[draft.target_name]["nbPack"] > 1 then
+								if multipackByTargetName[draft.target_name].supporTotal >= 2 then 
+									passPackmax = true
+								end
+							end
+
+							if (available * draft.loadout.firepower >= draft.target.firepower.min and draft.number * draft.loadout.firepower >= draft.target.firepower.min) or passPackmax then	--enough aircraft are available to satisfy minimum firepower requirement for target						
 
 								if draft.target.firepower.packmin == nil or available * draft.loadout.firepower >= (draft.target.firepower.packmin - 1) * draft.target.firepower.max + draft.target.firepower.min then	--if the target has a minimum package number requirement, sufficient aircraft are available from this unit to satisfy it					
 
@@ -2831,7 +2849,7 @@ local function createATO_table(draftPriority)
 											.." overideMP_B?: "..tostring(draft.overideMP_B))
 									end
 
-									if (draft.flights == nil or draft.number <= available or draft.main_overideMP) and limitMP then											--for targets with station time (multiple flights), continue only if sufficient aircraft are availabe. Additional lower scored sorties with less airctaft required will come later 
+									if (draft.flights == nil or draft.number <= available or draft.main_overideMP or passPackmax) and limitMP then											--for targets with station time (multiple flights), continue only if sufficient aircraft are availabe. Additional lower scored sorties with less airctaft required will come later 
 
 										--adjust the number of requested aircraft to the number of available aircraft
 										if draft.number > available and not draft.main_overideMP then
@@ -3153,17 +3171,22 @@ local function createATO_table(draftPriority)
 
 														--si c'est un task d'une demande MP, on chunte la restrition plus loin
 														--TODO pourquoi le coef est plus important sur d'autre élément que lorsqu'on demande notre target?
-														local MPOverride_C  = false
+														local MPOverride_C = false
 														if multiPlaneSet[side] and multiPlaneSet[side][draft.type] then
 															MPOverride_C = true
 														end
 
-														if isDebugModeC then
-															debugLog(draft.id.." AtoG passe C_00_h  we don't accept a single aircraft as escort supportTask "..supportTask.." draft.task "..tostring(draft.task))
+														if passPackmax then
+
 														end
 
-														if support.support_requirement and mission_ini.strikeOnlyWithEscorte and (support.number >= 2 and dispoTmp[support.name].unassigned < 2 and draft.task ~= supportTask) and not MPOverride_C then
+														if support.support_requirement and mission_ini.strikeOnlyWithEscorte and (support.number >= 2 and dispoTmp[support.name].unassigned < 2 and draft.task ~= supportTask) and not MPOverride_C and not passPackmax then
 
+															if isDebugModeC then
+																debugLog(draft.id.." AtoG passe C_00_h  we don't accept a single aircraft as escort supportTask "..supportTask.." draft.task "..tostring(draft.task))
+															end
+
+														
 															support_available = false																									--not enough support available
 
 															local tabRejected = {}
@@ -3181,7 +3204,7 @@ local function createATO_table(draftPriority)
 											end
 										end
 
-										if support_available and not draft.main_overideMP and mission_ini.strikeOnlyWithEscorte then
+										if support_available and not draft.main_overideMP and not passPackmax and mission_ini.strikeOnlyWithEscorte then
 
 											local tracing = false
 											local txtTracing = ""
@@ -3214,7 +3237,6 @@ local function createATO_table(draftPriority)
 																	local tabRejected = {}
 																	tabRejected["sujet"]  = support.id.." type: "..support.type.." (strikeOnlyWithEscorte) support_available if support.number > AcftAvail[support.name].unassigned "..supportUnitType
 																	tabRejected["cause"] = { [1] =  support.number, [2] = AcftAvail[support.name].unassigned, }
-																	-- tabRejected["ligne"]  = debug.getinfo(1).currentline
 																	tabRejected["ligne"]  = SafeGetLine()
 																	table.insert(draft["rejected"], tabRejected)
 
@@ -3282,7 +3304,7 @@ local function createATO_table(draftPriority)
 
 											
 											-- vérifie que tous les supports demandés existent
-											if support_available and draft.loadout.support then
+											if support_available and draft.loadout.support and not passPackmax  then
 
 												for loadoutNeedTask, loadoutNeedTaskBool in pairs(draft.loadout.support) do
 
@@ -3324,7 +3346,6 @@ local function createATO_table(draftPriority)
 															tabRejected["sujet"]  = draft.id.." type: aucun SUPPORT "..tostring(loadoutNeedTask)
 															tabRejected["cause"]  = { [1] = draft.support["support"], [2] = "" }
 															tabRejected["ligne"]  = debug.getinfo(1).currentline
-
 															table.insert(draft["rejected"], tabRejected)
 
 															break -- inutile de vérifier les autres supports
@@ -3347,7 +3368,7 @@ local function createATO_table(draftPriority)
 															if 	type(support) == "table" then
 															tmpTxt = tmpTxt .."_B4_"
 
-															if AcftAvail[support.name].unassigned <=0 then
+															if AcftAvail[support.name].unassigned <=0 and not passPackmax  then
 																tmpTxt = tmpTxt .."_B5_"
 
 																if tracing then txtTracing = txtTracing .. "Passe 3E EJECT".."\n" end
@@ -3357,7 +3378,6 @@ local function createATO_table(draftPriority)
 																local tabRejected = {}
 																tabRejected["sujet"]  = draft.id.." type: "..support.type.." (strikeOnlyWithEscorte) AVION SUPPORT INSUFFISANT()support_available if AcftAvail[support.name].unassigned <=0"
 																tabRejected["cause"] = { [1] = AcftAvail[support.name].unassigned, [2] = "", }
-																-- tabRejected["ligne"]  = debug.getinfo(1).currentline
 																tabRejected["ligne"]  = SafeGetLine()
 																table.insert(draft["rejected"], tabRejected)
 															end
@@ -3389,9 +3409,9 @@ local function createATO_table(draftPriority)
 
 										if isDebugModeC then
 											debugLog(draft.id.." AtoG passe C_02b serviceable: "
-														..tostring(AcftAvail[draft.name].serviceable)
-														.." |available: "..tostring(AcftAvail[draft.name].available)
-														.." >? "..tostring(AcftAvail[draft.name].available / denom_NeDonnePasTOUT))
+												..tostring(AcftAvail[draft.name].serviceable)
+												.." |available: "..tostring(AcftAvail[draft.name].available)
+												.." >? "..tostring(AcftAvail[draft.name].available / denom_NeDonnePasTOUT))
 										end
 
 										-- modification M11.u : Multiplayer	(u: reserve avion Escorte)
@@ -3444,7 +3464,6 @@ local function createATO_table(draftPriority)
 														local tabRejected = {}
 														tabRejected["sujet"]  = draft.id.." NE DONNE PAS TOUT en CAP ou Intercept ()support_available if AcftAvail[draft.name].unassigned - draft.number <= AcftAvail[draft.name].serviceable/3"
 														tabRejected["cause"] = { " unassigned - draft.number: ", tostring(AcftAvail[draft.name].unassigned - draft.number), "serviceable/ denom_NeDonnePasTOUT: ", tostring(AcftAvail[draft.name].serviceable/ denom_NeDonnePasTOUT) }
-														-- tabRejected["ligne"]  = debug.getinfo(1).currentline
 														tabRejected["ligne"]  = SafeGetLine()
 														table.insert(draft["rejected"], tabRejected)
 
@@ -3506,8 +3525,6 @@ local function createATO_table(draftPriority)
 												["Laser Illumination"] = {},															--laser illumination
 												["Strike"] = {},
 												["Anti-ship Strike"] = {},
-												
-
 											}
 
 											-- debugLog(draft.id.." AtoG passe C_04b Task: "..tostring(draft.task).." overideMP_B: "..tostring(draft.overideMP_B).." override_MP_C: "..tostring(override_MP_C).." draft.main_overideMP?: "..tostring(draft.main_overideMP) )
@@ -3787,15 +3804,6 @@ local function createATO_table(draftPriority)
 																number = support.number
 															end
 
-															-- if draft.main_overideMP and multiPlaneSet[side] and multiPlaneSet[side][support.type] and multiPlaneSet[side][support.type][support.task] 
-															-- and multiPlaneSet[side][support.type][support.task].NbPlane and support.client then
-															-- 	-- number = support.number
-															-- 	number = multiPlaneSet[side][support.type][support.task].NbPlane
-															-- 	if isDebugModeC then
-															-- 		debugLog(draft.id.." AtoG passe C_06b  |AddFlight SUPPORT| number "..tostring(number))
-															-- 	end
-															-- end
-
 															if isDebugModeC then
 																debugLog(draft.id.." AtoG passe C_06  |AddFlight SUPPORT| numberFINAL "..tostring(number).." support_name: "..taskSupport.." unassigned: "..tostring(AcftAvail[support.name].unassigned))
 															end
@@ -3804,49 +3812,16 @@ local function createATO_table(draftPriority)
 															addFlight(number, taskSupport, support)										--add support flights to package
 															--********************************************************************************************
 
+															multipackByTargetName[draft.target_name].supporTotal = multipackByTargetName[draft.target_name].supporTotal + number
+
 														else
-															-- if type(support) ~= "table" then
-															-- 	txt0 = "support != table "
-															-- 		.." OveRide?: "..tostring(draft.main_overideMP)
-															-- 		.." type: "..tostring(draft.type)
-															-- 		.." key: "..tostring(_plane)
-															-- 		.." supportPart(_plane): "..tostring(supportPart[_plane]) 
-															-- 		.." support: "..tostring(support) 
-															-- 		.." supportPart: "..tostring(supportPart) 
-															-- 		.." || "
-
-															-- 		if Debug.Generator.affiche and string.find(Debug.Generator.chapter, "C") 
-															-- 		and ( Debug.Generator.SpySquad and Debug.Generator.SpySquad == draft.name 
-															-- 		or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
-															-- 		then
-															-- 			debuGenTxt = debuGenTxt.."\n"..(tostring(draft.id).." AtoG passe C_08")
-															-- 			debuGenTxt = debuGenTxt.."\n"..(txt0)
-															-- 			-- _affiche(supportPart, "supportPart")
-															-- 		end	
-
-
-
-															-- txt0 = draft.id.." IN AddFlight: type(support) ~= table or support_name "
-															-- 	.." OveRide?: "..tostring(draft.main_overideMP)
-															-- 	.." "..tostring(draft.type) 
-															-- 	.." support_name: "..tostring(support_name)
-															-- 	-- .."\n".. TableSerialization(draft.loadout, 0)  
-
-
-
-															-- local tabRejected = {}
-															-- tabRejected["sujet"]  = txt0
-															-- tabRejected["cause"] = { [1] = support_available, [2]  = "", }
-															-- tabRejected["ligne"]  = debug.getinfo(1).currentline
-															-- table.insert(draft["rejected"], tabRejected)
-
+															
 														end
 													end
 												else
 													local tabRejected = {}
 													tabRejected["sujet"]  = draft.id.." IN AddFlight type(supportPart) == table"
 													tabRejected["cause"] = { "support_available: ", tostring(support_available) }
-													-- tabRejected["ligne"]  = debug.getinfo(1).currentline
 													tabRejected["ligne"]  = SafeGetLine()
 													table.insert(draft["rejected"], tabRejected)
 												end
@@ -3877,8 +3852,8 @@ local function createATO_table(draftPriority)
 											-- 	end
 											-- end
 
-											if multipackByTargetName[draft.target_name] then
-												multipackByTargetName[draft.target_name] = multipackByTargetName[draft.target_name] -1
+											if multipackByTargetName[draft.target_name] and multipackByTargetName[draft.target_name]["nbPack"] then
+												multipackByTargetName[draft.target_name]["nbPack"] = multipackByTargetName[draft.target_name]["nbPack"] -1
 											end
 
 											--status report
@@ -3888,7 +3863,6 @@ local function createATO_table(draftPriority)
 											local tabRejected = {}
 											tabRejected["sujet"]  = draft.id.." SUPPORT IMPOSSIBLE()if support_available"
 											tabRejected["cause"] = { "support_available: ", tostring(support_available) }
-											-- tabRejected["ligne"]  = debug.getinfo(1).currentline
 											tabRejected["ligne"]  = SafeGetLine()
 											table.insert(draft["rejected"], tabRejected)
 										end
@@ -3896,16 +3870,13 @@ local function createATO_table(draftPriority)
 										local tabRejected = {}
 										tabRejected["sujet"]  = draft.id.." AVIONS INSUFFISANT()if draft.number <= available and limitMP then {draft.number, limitMP}"
 										tabRejected["cause"] = {"draft.number: ", tostring(draft.number), "limitMP: ", tostring(limitMP)}
-										-- tabRejected["ligne"]  = debug.getinfo(1).currentline
 										tabRejected["ligne"]  = SafeGetLine()
 										table.insert(draft["rejected"], tabRejected)
 									end
 								else
-									--if draft.target.firepower.packmin == nil or available * draft.loadout.firepower >= (draft.target.firepower.packmin - 1) * draft.target.firepower.max + draft.target.firepower.min
 									local tabRejected = {}
 									tabRejected["sujet"]  = draft.id.." FIREPOWER du PACKAGE INSUFFISANT()if  available * draft.loadout.firepower >= (draft.target.firepower.packmin - 1) * draft.target.firepower.max"
 									tabRejected["cause"] = { [1] = tostring(available * draft.loadout.firepower), [2]  = tostring((draft.target.firepower.packmin - 1) * draft.target.firepower.max), }
-									-- tabRejected["ligne"]  = debug.getinfo(1).currentline
 									tabRejected["ligne"]  = SafeGetLine()
 									table.insert(draft["rejected"], tabRejected)
 								end
@@ -3913,7 +3884,6 @@ local function createATO_table(draftPriority)
 								local tabRejected = {}
 								tabRejected["sujet"]  = draft.id.." "..tostring(draft.type).." AVION DISPONIBLE INSUFFISANT "..tostring(draft.name).." available: "..tostring(available).." draft.loadout.firepower: "..tostring(draft.loadout.firepower.." firepowerMin: "..tostring(draft.target.firepower.min))
 								tabRejected["cause"] = { [1] = tostring(available * draft.loadout.firepower), [2]  = tostring(draft.target.firepower.min), }
-								-- tabRejected["ligne"]  = debug.getinfo(1).currentline
 								tabRejected["ligne"]  = SafeGetLine()
 								table.insert(draft["rejected"], tabRejected)
 							end
@@ -3921,7 +3891,6 @@ local function createATO_table(draftPriority)
 							local tabRejected = {}
 							tabRejected["sujet"]  = draft.id.." FIREPOWER INSUFFISANT (a augmenter dans loadout)if draft.target.firepower.max > 0 and draft.target.firepower.max >= draft.target.firepower.min"
 							tabRejected["cause"] = { [1] = tostring(draft.target.firepower.max), [2]  = tostring(draft.target.firepower.max), }
-							-- tabRejected["ligne"]  = debug.getinfo(1).currentline
 							tabRejected["ligne"]  = SafeGetLine()
 							table.insert(draft["rejected"], tabRejected)
 						end
@@ -3929,7 +3898,6 @@ local function createATO_table(draftPriority)
 						local tabRejected = {}
 						tabRejected["sujet"]  = draft.id.." MultiPACKAGE A 0 (?)if draft.multipack == nil or draft.multipack > 0 || target_name: "..tostring(draft.target_name).." || multipack: " ..tostring(draft.multipack)
 						tabRejected["cause"] = { [1] = tostring(draft.multipack), [2]  = tostring(draft.multipack), }
-						-- tabRejected["ligne"]  = debug.getinfo(1).currentline
 						tabRejected["ligne"]  = SafeGetLine()
 						table.insert(draft["rejected"], tabRejected)
 					end
@@ -3937,7 +3905,6 @@ local function createATO_table(draftPriority)
 					local tabRejected = {}
 					tabRejected["sujet"]  = draft.id.." MENACE TROP IMPORTANTE (descendre minscore ou diminuer Menace AA AS) draft.loadout.minscore <= draft.score"
 					tabRejected["cause"] = { [1] = tostring(draft.loadout.minscore), [2]  = tostring(draft.score), }
-					-- tabRejected["ligne"]  = debug.getinfo(1).currentline
 					tabRejected["ligne"]  = SafeGetLine()
 					table.insert(draft["rejected"], tabRejected)
 				end
@@ -4051,10 +4018,13 @@ end
 multipackByTargetName = {}
 for side, drafts in pairs(draftSorties) do
 	for draftN, draft in ipairs(drafts)do
-		if not multipackByTargetName[draft.target_name] then  multipackByTargetName[draft.target_name] = 0 end
+		multipackByTargetName[draft.target_name] = multipackByTargetName[draft.target_name] or {}
+		multipackByTargetName[draft.target_name]["nbPack"] = multipackByTargetName[draft.target_name]["nbPack"] or 0
+		
+		multipackByTargetName[draft.target_name].supporTotal = multipackByTargetName[draft.target_name].supporTotal or 0
 
-		if multipackByTargetName[draft.target_name] < draft.multipack then
-			multipackByTargetName[draft.target_name] = draft.multipack
+		if multipackByTargetName[draft.target_name]["nbPack"] < draft.multipack then
+			multipackByTargetName[draft.target_name]["nbPack"] = draft.multipack
 		end
 	end
 end
