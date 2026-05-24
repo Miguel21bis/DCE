@@ -568,19 +568,19 @@ function ShipGroupMovement(groupName, wpTable, cruiseSpeed, patrolSpeed, startTi
 						for basename,base in pairs(db_airbases) do							--go through airbases
 							for u = 1, #group.units do										--go through units in group
 
-								print("DcNE passe BA base.unitname "..tostring(base.unitname).." uName "..tostring(group.units[u].name).." u: "..u )
+								-- print("DcNE passe BA base.unitname "..tostring(base.unitname).." uName "..tostring(group.units[u].name).." u: "..u )
 
 								if base.unitname == group.units[u].name then				--if unit is an airbase (carrier)	
 									base.x = group.units[u].x								--update airbase (carrier) position
 									base.y = group.units[u].y								--update airbase (carrier) position
-									print("DcNE passe BB "..base.unitname.." "..base.x)
+									-- print("DcNE passe BB "..base.unitname.." "..base.x)
 								end
 
 								--dans le cas, où il y aurait 2 CV dans le group
 								if u > 1 and base.unitname == group.units[u].name then				--if unit is an airbase (carrier)	
 									base.x = group.units[1].x								--update airbase (carrier) position
 									base.y = group.units[1].y								--update airbase (carrier) position
-									print("DcNE passe BC "..base.unitname.." "..base.x)
+									-- print("DcNE passe BC "..base.unitname.." "..base.x)
 								end
 							end
 						end

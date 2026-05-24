@@ -4,11 +4,12 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["db_loadouts/db_loadouts_Plane.lua"] = "1.3.204"
+versionDCE["db_loadouts/db_loadouts_Plane.lua"] = "1.3.206"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
+-- V206 - add Tu-95MS reco plane for TF
 -- V205 - add SU-24MR escort jammer capacity and used by antiship planes 
 -- V204 - add refuel capacity to A6E
 -- V203 - add ["Escort Jammer"] = true, to B-52 AV8NA
@@ -2233,8 +2234,8 @@ db_loadouts = {
 			["Antiship  Kh-22N*3"] = {
 				minscore = 0.1,
 				support = {
-					Escort = true,
-					SEAD = false,
+					-- Escort = true,
+					-- SEAD = false,
 					["Escort Jammer"] = true,
 				},
 				attributes =  { "ship" },
@@ -2253,7 +2254,7 @@ db_loadouts = {
 				ingress = 50000,
 				egress = 10000,
 				MaxAttackOffset = 60,
-				sortie_rate = 2,
+				sortie_rate = 6,
 				stores = {
 					pylons = {
 						[1] = {
@@ -2275,8 +2276,8 @@ db_loadouts = {
 			["Antiship TF80s Kh-22N*3"] = {
 				minscore = 0.1,
 				support = {
-					Escort = false,
-					SEAD = false,
+					-- Escort = false,
+					-- SEAD = false,
 					["Escort Jammer"] = true,
 				},
 				attributes =  { "ship" },
@@ -2295,7 +2296,7 @@ db_loadouts = {
 				ingress = 50000,
 				egress = 10000,
 				MaxAttackOffset = 60,
-				sortie_rate = 2,
+				sortie_rate = 6,
 				stores = {
 					pylons = {
 						[1] = {
@@ -5269,6 +5270,37 @@ db_loadouts = {
 					fuel = 11700,
 					flare = 96,
 					chaff = 96,
+					gun = 100,
+				},
+			},
+		},
+	},
+	["Tu-95MS"] = {
+		Reconnaissance = {
+			["Reco"] = {
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				night = true,
+				day = false,
+				adverseWeather = true,
+				range = 1000000,
+				firepower = 10,
+				vCruise = 210,
+				vAttack = 250,
+				hCruise = 10096,
+				hAttack = 10096,
+				tStation = 6000,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					},
+					fuel = 87000,
+					flare = 48,
+					chaff = 48,
 					gun = 100,
 				},
 			},
@@ -17348,7 +17380,7 @@ db_loadouts = {
 	["Tu-142"] = {
 		["Anti-ship Strike"] = {
 			["Antiship Kh-35*6"] = {
-				minscore = 0.1,
+				minscore = 0.3,
 				support = {
 					Escort = true,
 					SEAD = false,
@@ -17370,7 +17402,7 @@ db_loadouts = {
 				ingress = 50000,
 				egress = 10000,
 				MaxAttackOffset = 60,
-				sortie_rate = 3,
+				sortie_rate = 6,
 				stores = {
 					pylons = {
 						[1] = {

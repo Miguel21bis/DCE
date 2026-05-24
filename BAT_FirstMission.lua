@@ -216,10 +216,10 @@ repeat
 			choix1 = io.stdin:read()
 		end
 
-		-- choix1 = string.lower(choix1)
-
+		
 		-- choix1 = io.stdin:read()
-		choix1 = string.lower(choix1)
+		-- choix1 = string.lower(choix1)
+		choix1 = string.lower(choix1 or "")
 
 		-- Détection du mode debug : activation avec "+", désactivation avec "-"
 		if string.find(choix1, "%+") then
@@ -401,7 +401,8 @@ repeat
 								tabIndex[tostring(7)..indexStringType..TabTask[taskStr]] = true
 								tabIndex[tostring(8)..indexStringType..TabTask[taskStr]] = true
 
-							elseif not TabTask[taskStr] and not string.lower(taskStr) == "spotter" then
+							-- elseif not TabTask[taskStr] and not string.lower(taskStr) == "spotter" then
+							elseif not TabTask[taskStr] and string.lower(taskStr) ~= "spotter" then
 								table.insert(tabBug,taskStr )
 							end
 						end
@@ -422,7 +423,8 @@ repeat
 			--===================================================================================
 				-- Ecran N°5 Selection Nombre d'avion Multiplayer
 					repeat
-						input = string.lower(io.stdin:read())
+						-- input = string.lower(io.stdin:read())
+						input = string.lower(io.stdin:read() or "")
 						if tabIndex[input] then
 
 							Multi.Group[i] = Multi.Group[i] or {}
@@ -494,6 +496,9 @@ repeat
 				["d"] = true,
 				["e"] = true,
 			}
+
+			local choix2 = nil
+
 			-- Ecran N°3 Selection nb of Flight
 			repeat
 				print("Tools menu: \n")
@@ -506,7 +511,8 @@ repeat
 				"\n"
 				)
 
-				local choix2 = string.lower(io.stdin:read())
+				-- local choix2 = string.lower(io.stdin:read())
+				choix2 = string.lower(io.stdin:read() or "")
 
 				if tabIndexTools[choix2] then
 					if choix2 == "a" then
@@ -557,7 +563,7 @@ repeat
 			print("\n\n StopBug .\n")																	--confirmation text
 			break
 
-		elseif MissionInstance == 20 then																--no player flight could be assigned in 20 tries, stop it
+		elseif MissionInstance >= 20 then																--no player flight could be assigned in 20 tries, stop it
 			print("Mission Generation Error. No eligible player flight in 20 attempts. Try again.\n\n")
 			break
 		else																							--no player flight could be assigned, advance time and try again
@@ -585,8 +591,63 @@ repeat
 				-- 	print("No eligible mission available.\n\n")
 				end
 			end
+			
 			if Multi.NbGroup and not PlayerFlight then
-				print("Not enough ready aircraft for all clients..\n\n")
+
+				print("Mission generation failed:\n")
+
+				if PlayerAssignFailure then
+
+					for _, failData in pairs(PlayerAssignFailure) do
+
+						print(
+							tostring(failData.requestedPlane)
+							.." "
+							..tostring(failData.requestedTask)
+							..":"
+						)
+
+						print(
+							"- Requested: "
+							..tostring(failData.requestedNb)
+							.." aircraft"
+						)
+
+						if failData.reason == "no_aircraft_generated" then
+
+							print("- No aircraft of this type generated")
+
+						elseif failData.reason == "task_not_generated" then
+
+							print("- Aircraft generated but requested task not generated")
+
+							if failData.bestFlight then
+								print("- Best available flight: "..tostring(failData.bestFlight))
+							end
+
+						elseif failData.reason == "insufficient_aircraft" then
+
+							print(
+								"- Generated: "
+								..tostring(failData.foundAircraft)
+								.." aircraft"
+							)
+
+							print(
+								"- Missing: "
+								..tostring(failData.requestedNb - failData.foundAircraft)
+								.." aircraft"
+							)
+
+							if failData.bestFlight then
+								print("- Best available flight: "..tostring(failData.bestFlight))
+							end
+
+						end
+
+						print()
+					end
+				end
 			end
 
 			os.execute 'timeout /t 4'

@@ -38,6 +38,7 @@ if DebugAssignAll then
 	debugAssign = true
 end
 local playable = {}
+PlayerAssignFailure = {}
 local tab_doublon = {}
 
 -- Tronque une chaine au milieu avec ".."
@@ -51,7 +52,14 @@ end
 
 -- Pad à droite
 local function padRight(str, len)
-	return str .. string.rep(" ", len - #str)
+
+	local missing = len - #str
+
+	if missing <= 0 then
+		return str
+	end
+
+	return str .. string.rep(" ", missing)
 end
 
 
@@ -77,7 +85,8 @@ for side, pack in pairs(ATO) do															--iterate through sides in ATO
 								enemy = "red"
 							end
 							for enemyPackN, enemy_pack in pairs(ATO[enemy]) do							--iterate through enemy packages
-								if enemy_pack.main[1].tot_from == 0 then									--enemy package is allowed to fly at mission start
+								if enemy_pack and enemy_pack.main and enemy_pack.main[1]
+									and enemy_pack.main[1].route and enemy_pack.main[1].tot_from == 0 then									--enemy package is allowed to fly at mission start
 									for _, wp in pairs(enemy_pack.main[1].route) do						--iterate through waypoints of first enemy main flight
 										if wp.id == "Attack" then											--waypoint is an attack waypoint (ignore target as enemy package might do a standoff attack)
 											local dist = GetDistance(wp, flight[f].route[1])				--measure distance from interceptor base to target
@@ -109,13 +118,18 @@ for side, pack in pairs(ATO) do															--iterate through sides in ATO
 									end
 								end
 							end
+
 						elseif flight[f].task == "SAR" then							--if the task is intercept, check if there is an enemy strike with target in range of player interceptor
+							
 							local enemy = "blue"
 							if side == "blue" then
 								enemy = "red"
 							end
 
-							if not tab_doublon[flight[f].groupName] then
+							-- if not tab_doublon[flight[f].groupName] then
+							local uniqueFlightId = side .. "_" .. p .. "_" .. role .. "_" .. f
+
+							if not tab_doublon[uniqueFlightId] then
 
 								TrackPlayability(flight[f].playable, "playerAssign_SAR")			--track playabilty criterium has been met
 
@@ -134,7 +148,7 @@ for side, pack in pairs(ATO) do															--iterate through sides in ATO
 									task = flight[f].task,
 									id = flight[f].id,
 								}
-								tab_doublon[flight[f].groupName] = true
+								tab_doublon[uniqueFlightId] = true
 							end
 
 						elseif flight[f].task == "CAP" then													--if the task is CAP, check if enemy aircraft will enter the CAP area when player is on station
@@ -147,32 +161,33 @@ for side, pack in pairs(ATO) do															--iterate through sides in ATO
 								end
 
 								for enemy_pack_n, enemy_pack in pairs(ATO[enemy]) do						--iterate through enemy packages
+									if enemy_pack and enemy_pack.main and enemy_pack.main[1] and enemy_pack.main[1].route then
+										for w = 1, #enemy_pack.main[1].route - 1 do								--iterate through waypoints of first enemy main flight
+											if Multi.NbGroup >= 1 or ((enemy_pack.main[1].route[w].id ~= "Target" and enemy_pack.main[1].route[w + 1].id ~= "Target") or enemy_pack.main[1].loadout.standoff == nil or enemy_pack.main[1].loadout.standoff <= 15000) then		--Ignore target WP for aircraft with standoff > 15 km
+												
+												local dist = GetTangentDistance(enemy_pack.main[1].route[w], enemy_pack.main[1].route[w + 1], flight[f].target)		--get closest distance from CAP station to route between WP w and WP w+1																	
+												if Multi.NbGroup >= 1 or dist <= flight[f].target.radius then							--route segement is in range of CAP station											
 
-									for w = 1, #enemy_pack.main[1].route - 1 do								--iterate through waypoints of first enemy main flight
-										if Multi.NbGroup >= 1 or ((enemy_pack.main[1].route[w].id ~= "Target" and enemy_pack.main[1].route[w + 1].id ~= "Target") or enemy_pack.main[1].loadout.standoff == nil or enemy_pack.main[1].loadout.standoff <= 15000) then		--Ignore target WP for aircraft with standoff > 15 km
-											
-											local dist = GetTangentDistance(enemy_pack.main[1].route[w], enemy_pack.main[1].route[w + 1], flight[f].target)		--get closest distance from CAP station to route between WP w and WP w+1																	
-											if Multi.NbGroup >= 1 or dist <= flight[f].target.radius then							--route segement is in range of CAP station											
-
-												if not tab_doublon[flight[f].groupName] then
-													TrackPlayability(flight[f].playable, "playerAssign_CAP_hostile")
-													playable[#playable + 1] = {									--add flight to playable table
-														side = side,
-														packN = p,
-														role = role,
-														flight = f,
-														base = flight[f].base,
-														-- unitname = unitname_,
-														groupName = flight[f].groupName,
-														number = flight[f].number,
-														target_side = enemy,
-														target_pack = enemy_pack_n,
-														type = flight[f].type,
-														squadName = flight[f].name,
-														task = flight[f].task,
-														id = flight[f].id,
-													}
-													tab_doublon[flight[f].groupName] = true
+													if not tab_doublon[flight[f].groupName] then
+														TrackPlayability(flight[f].playable, "playerAssign_CAP_hostile")
+														playable[#playable + 1] = {									--add flight to playable table
+															side = side,
+															packN = p,
+															role = role,
+															flight = f,
+															base = flight[f].base,
+															-- unitname = unitname_,
+															groupName = flight[f].groupName,
+															number = flight[f].number,
+															target_side = enemy,
+															target_pack = enemy_pack_n,
+															type = flight[f].type,
+															squadName = flight[f].name,
+															task = flight[f].task,
+															id = flight[f].id,
+														}
+														tab_doublon[flight[f].groupName] = true
+													end
 												end
 											end
 										end
@@ -217,6 +232,20 @@ TaskRefused = false
 if Multi.Group then
 	for i = 1, #Multi.Group do
 		Multi.Group[i].counted = nil
+		
+		PlayerAssignFailure[i] = {
+		requestedPlane = Multi.Group[i].PlaneType,
+		requestedTask = Multi.Group[i].task,
+		requestedNb = Multi.Group[i].NbPlane,
+
+		foundFlights = 0,
+		foundAircraft = 0,
+
+		bestFlight = nil,
+		bestAircraft = 0,
+
+		reason = nil,
+	}
 	end
 end
 
@@ -239,15 +268,46 @@ end
 for _, slot in ipairs(playable) do
     if not slot.counted then
         for _, requestGroup in ipairs(multiBIS.Group or {}) do
-            if slot.type == requestGroup.PlaneType and not requestGroup.counted then
+           
+			for failN, failData in pairs(PlayerAssignFailure) do
+
+				if slot.type == failData.requestedPlane then
+
+					failData.foundFlights = failData.foundFlights + 1
+
+					if slot.number > failData.bestAircraft then
+						failData.bestAircraft = slot.number
+						failData.bestFlight = slot.groupName
+					end
+
+					if slot.task == failData.requestedTask then
+						failData.foundAircraft = failData.foundAircraft + slot.number
+					end
+				end
+			end
+
+			if slot.type == requestGroup.PlaneType and not requestGroup.counted then
                 
                 -- Initialise le quota restant si nécessaire
                 if requestGroup.NotAssigned == nil then
                     requestGroup.NotAssigned = requestGroup.NbPlane
                 end
 
+				if requestGroup.found == nil then requestGroup.found = 0 end
+
                 -- Calcule combien d'avions peuvent être affectés
                 local nbPlaneToAssign = math.min(slot.number, requestGroup.NotAssigned)
+
+				for failN, failData in pairs(PlayerAssignFailure) do
+					if failData.requestedPlane == requestGroup.PlaneType and failData.requestedTask == requestGroup.task then
+						-- failData.found = failData.found + nbPlaneToAssign
+						failData.found = (failData.found or 0) + nbPlaneToAssign
+					end
+				end
+
+				slot.remaining = slot.remaining or slot.number
+				slot.remaining = slot.remaining - nbPlaneToAssign
+
                 requestGroup.NotAssigned = requestGroup.NotAssigned - nbPlaneToAssign
 
                 -- Cherche une entrée existante dans creaClientFlight
@@ -274,57 +334,16 @@ for _, slot in ipairs(playable) do
                 -- Marque comme traité si quota atteint
                 if requestGroup.NotAssigned <= 0 then
                     requestGroup.counted = true
-                    slot.counted  = true
+                    -- slot.counted  = true
+					if slot.remaining <= 0 then
+						slot.counted = true
+					end
                 end
             end
         end
     end
 end
 
-
-
--- if #playable > 0 and MultiBIS.NbGroup then
--- 	for i = 1, #playable do
--- 		for k = 1, MultiBIS.NbGroup do
--- 			local group = MultiBIS.Group[k]
--- 			if playable[i].type == group.PlaneType and not group.counted then
--- 				if group.NotAssigned == nil then
--- 					group.NotAssigned = Deepcopy(group.NbPlane)
--- 				end
-
--- 				local nbPlaneFlight = playable[i].number
--- 				if nbPlaneFlight >= group.NotAssigned then
--- 					nbPlaneFlight = group.NotAssigned
--- 					group.NotAssigned = 0
--- 				else
--- 					group.NotAssigned = group.NotAssigned - nbPlaneFlight
--- 				end
-
--- 				-- Cherche si une entrée existe déjà dans creaClientFlight
--- 				local found = false
--- 				for _, entry in ipairs(creaClientFlight) do
--- 					if entry.PlaneType == group.PlaneType and entry.task == group.task and entry.side == group.side then
--- 						entry.NbPlane = entry.NbPlane + nbPlaneFlight
--- 						entry.NotAssigned = group.NotAssigned
--- 						found = true
--- 						break
--- 					end
--- 				end
-
--- 				if not found then
--- 					local tabTemp = Deepcopy(group)
--- 					tabTemp.NbPlane = nbPlaneFlight
--- 					table.insert(creaClientFlight, tabTemp)
--- 				end
-
--- 				if group.NotAssigned <= 0 then
--- 					group.counted = true
--- 					playable[i].counted = true
--- 				end
--- 			end
--- 		end
--- 	end
--- end
 
 if #playable > 0 and multiBIS.NbGroup then
 	if multiBIS.Group then
@@ -333,6 +352,40 @@ if #playable > 0 and multiBIS.NbGroup then
 			if multiBIS.Group[k].counted and multiBIS.Group[k].NotAssigned then
 			else
 				AllCoopPossible = false
+				if PlayerAssignFailure[k] then
+					PlayerAssignFailure[k].remaining = multiBIS.Group[k].NotAssigned or 0
+
+					if #playable == 0 then
+						PlayerAssignFailure[k].reason = "no_playable_flight_generated"
+					else
+						local foundPlane = false
+						local foundTask = false
+
+						for _, slot in ipairs(playable) do
+							if slot.type == multiBIS.Group[k].PlaneType then
+								foundPlane = true
+
+								if slot.task == multiBIS.Group[k].task then
+									foundTask = true
+								end
+							end
+						end
+
+						if not foundPlane then
+							PlayerAssignFailure[k].reason = "no_aircraft_generated"
+
+						elseif not foundTask then
+							PlayerAssignFailure[k].reason = "task_not_generated"
+
+						elseif PlayerAssignFailure[k].foundAircraft < PlayerAssignFailure[k].requestedNb then
+							PlayerAssignFailure[k].reason = "insufficient_aircraft"
+
+						else
+							PlayerAssignFailure[k].reason = "unknown"
+						end
+					end
+				end
+
 				if Debug.debug then
 					print("AtoPA   no flight possible or not NotAssigned:  "..tostring(multiBIS.Group[k].NotAssigned).." for this aircraft: "..tostring(multiBIS.Group[k].PlaneType))
 					_affiche(multiBIS,"MultiBIS")
@@ -449,7 +502,7 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 			-- r = io.read()
 			choice = io.stdin:read()
 
-			if choice ~= "" and string.byte(choice) <= 57 then				-- adjustment A01 : robust form 									-- si inférieur à 57 ASCII, c'est inférieur au chiffre 9, donc c'est un chiffre
+			if type(choice) == "string" and choice ~= "" and string.match(choice, "^%d+$") then	
 				if WingmenPlayer then
 					groupNChoice = math.floor(choice / 10)	-- dizaine
 					unitNChoice = choice % 10				-- unité
@@ -472,44 +525,44 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 
 		until tabIndex[stringChoice]
 
-		-- print("groupNChoice: "..tostring(groupNChoice).." unitNChoice: "..tostring(unitNChoice))
-
 		if not TaskRefused then
-			
-			ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].player = true		--mark ATO entry as player flight
-			ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].unitPlayer = unitNChoice
 
-			HumainPack[playable[groupNChoice].packN] = {
-				humainTypePlane = playable[groupNChoice].type
-			}
+			local selectedPlayable = playable[groupNChoice]
 
-			camp.player = {
-				side = playable[groupNChoice].side,
-				pack_n = playable[groupNChoice].packN,
-				role = playable[groupNChoice].role,
-				flight = playable[groupNChoice].flight,
-				-- unitname = playable[r].unitname,
-				groupName = playable[groupNChoice].groupName,
-				target = ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].target,
-				tgt_side = playable[groupNChoice].target_side,
-				tgt_pack = playable[groupNChoice].target_pack,
-				tgt_wp = 1,
-				airbase = playable[groupNChoice].base,
-				squadName = playable[groupNChoice].squadName,
-				task = playable[groupNChoice].task,
-				type = playable[groupNChoice].type,
-			}
+			if not selectedPlayable then
+				print("ERROR: invalid playable flight selection.")
+				TaskRefused = true
+			else
+
+				ATO[selectedPlayable.side][selectedPlayable.packN][selectedPlayable.role][selectedPlayable.flight].player = true
+				ATO[selectedPlayable.side][selectedPlayable.packN][selectedPlayable.role][selectedPlayable.flight].unitPlayer = unitNChoice
+
+				HumainPack[selectedPlayable.packN] = {
+					humainTypePlane = selectedPlayable.type
+				}
+
+				camp.player = {
+					side = selectedPlayable.side,
+					pack_n = selectedPlayable.packN,
+					role = selectedPlayable.role,
+					flight = selectedPlayable.flight,
+					groupName = selectedPlayable.groupName,
+					target = ATO[selectedPlayable.side][selectedPlayable.packN][selectedPlayable.role][selectedPlayable.flight].target,
+					tgt_side = selectedPlayable.target_side,
+					tgt_pack = selectedPlayable.target_pack,
+					tgt_wp = 1,
+					airbase = selectedPlayable.base,
+					squadName = selectedPlayable.squadName,
+					task = selectedPlayable.task,
+					type = selectedPlayable.type,
+				}
+			end
 		end
+
 		------------------
 	elseif AllCoopPossible then	--si le multiplayerF1 est demandé
 
-		-- print(" -------------------------------------------------------> Note: Your plane Flight wishes: ")
-		-- for k=1,  #creaClientFlight do
-		-- 	print(" -------------------------------------------------------> "..creaClientFlight[k].NbPlane.." "..creaClientFlight[k].PlaneType.." ("..creaClientFlight[k].side..") "..creaClientFlight[k].task)
-		-- end
-
-
-		MpIdInterceptor = 1
+		local MpIdInterceptor = 1
 
 		io.write( "\n")
 		print("\n\n Day or Night? : "..Daytime)
@@ -517,7 +570,8 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 
 		local tabSelect = {}																		--table pour afficher * devant chaque selection
 		local badEntry = false
-		
+		local foundGoodMain = false
+
 		for k=1, #creaClientFlight do																	-- si le multiplayer est demande
 			local resteAPrendre = creaClientFlight[k].NbPlane		
 			repeat
@@ -528,84 +582,6 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 					print(" -------------------------------------------------------> Note: Your plane Flight wishes: ")
 					print(" -------------------------------------------------------> "..creaClientFlight[k].NbPlane.." "..creaClientFlight[k].PlaneType.." ("..creaClientFlight[k].side..") "..creaClientFlight[k].task)
 					
---[[ 					
-					-- ========================================
-					-- Construction des lignes avant affichage
-					-- ========================================
-
-					local lines = {}
-					for index = 1, #playable do
-
-						local indexN = " "
-						if tabSelect[index] then
-							indexN = "*"
-						elseif creaClientFlight[k].PlaneType == playable[index].type then
-							indexN = tostring(index)
-							tabIndex[index] = true
-						else
-							indexN = " "
-						end
-						local info = ""
-
-						-- io.write(indexN..""..info.."(Nb: "..playable[index].number..") ".." |-| "..AliasBaseName(playable[index].base).." |-| "..AliasTypeName(playable[index].type).." |-| "..playable[index].groupName )
-						-- if playable[index].target_name ~= nil then  io.write(" |-| "..playable[index].target_name) end
-						-- io.write("\n")
-							
-						local col1 = indexN..info.."(Nb: "..playable[index].number..")"
-						local col2 = AliasBaseName(playable[index].base)
-						local col3 = AliasTypeName(playable[index].type)
-						local col4 = playable[index].groupName or ""
-						local col5 = playable[index].groupName or ""
-
-						table.insert(lines, {
-							c1 = col1,
-							c2 = col2,
-							c3 = col3,
-							c4 = col4,
-							c5 = col5
-						})
-					end
-
-					-- ========================================
-					-- Calcul largeur max par colonne
-					-- ========================================
-
-					local w1, w2, w3, w4 = 0,0,0,0
-
-					for _, l in ipairs(lines) do
-						if #l.c1 > w1 then w1 = #l.c1 end
-						if #l.c2 > w2 then w2 = #l.c2 end
-						if #l.c3 > w3 then w3 = #l.c3 end
-						if #l.c4 > w4 then w4 = #l.c4 end
-					end
-
-					-- Limites max raisonnables par colonne
-					w1 = math.min(w1, 12)
-					w2 = math.min(w2, 22)
-					w3 = math.min(w3, 10)
-					w4 = math.min(w4, 50)
-
-					-- ========================================
-					-- Affichage aligné et borné
-					-- ========================================
-
-					for _, l in ipairs(lines) do
-						
-						local c1 = padRight(truncateMiddle(l.c1, w1), w1)
-						local c2 = padRight(truncateMiddle(l.c2, w2), w2)
-						local c3 = padRight(truncateMiddle(l.c3, w3), w3)
-						local c4 = truncateMiddle(l.c4, w4)
-
-						local line = c1.."  |-| "..c2.." |-| "..c3.." |-| "..c4
-						
-						-- sécurité largeur max globale
-						if #line > MAX_LINE_LEN then
-							line = truncateMiddle(line, MAX_LINE_LEN)
-						end
-						
-						print(line)
-					end ]]
-
 
 					-- ========================================
 					-- Construction des lignes avant affichage
@@ -659,7 +635,18 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 					-- CALCUL LARGEUR AUTO
 					-- ========================================
 
-					local colCount = #lines[1]
+					local colCount = 0
+
+					if lines[1] then
+						colCount = #lines[1]
+					else
+						colCount = 0
+					end
+					if colCount == 0 then
+						print("No selectable flights available.")
+						break
+					end
+
 					local widths = {}
 
 					for c = 1, colCount do
@@ -718,7 +705,7 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 
 					groupNChoice = io.stdin:read()
 
-					if groupNChoice ~= "" and string.byte(groupNChoice) <= 57 then				-- adjustment A01 : robust form 
+					if type(groupNChoice) == "string" and groupNChoice ~= "" and string.match(groupNChoice, "^%d+$") then
 						groupNChoice = tonumber(groupNChoice)										-- si inférieur à 57 ASCII, c'est inférieur au chiffre 9, donc c'est un chiffre
 					elseif type(groupNChoice) == "string" then
 						if string.lower(groupNChoice) == "s" then
@@ -739,68 +726,72 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 
 				if playable[groupNChoice] then print("Selected: "..playable[groupNChoice].groupName) end
 
+				local selectedPlayable = playable[groupNChoice]
 
-				if not TaskRefused then
-					resteAPrendre = resteAPrendre - playable[groupNChoice].number
+				-- if not TaskRefused then
+				if not TaskRefused and selectedPlayable then
+
+					resteAPrendre = resteAPrendre - selectedPlayable.number
+
 					-- ajoute ce systeme pour avoir le briefing de tous
 					if not camp.client then camp.client = {} end
 
 					local tabClient = {
-						side = playable[groupNChoice].side,
-						pack_n = playable[groupNChoice].packN,
-						role = playable[groupNChoice].role,
-						flight = playable[groupNChoice].flight,
-						groupName = playable[groupNChoice].groupName,
-						target = ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].target,
-						tgt_side = playable[groupNChoice].target_side,
-						tgt_pack = playable[groupNChoice].target_pack,
+						side = selectedPlayable.side,
+						pack_n = selectedPlayable.packN,
+						role = selectedPlayable.role,
+						flight = selectedPlayable.flight,
+						groupName = selectedPlayable.groupName,
+						target = ATO[selectedPlayable.side][selectedPlayable.packN][selectedPlayable.role][selectedPlayable.flight].target,
+						tgt_side = selectedPlayable.target_side,
+						tgt_pack = selectedPlayable.target_pack,
 						tgt_wp = 1,
-						airbase = playable[groupNChoice].base,
-						squadName = playable[groupNChoice].squadName,
-						task = playable[groupNChoice].task,
-						type = playable[groupNChoice].type,
+						airbase = selectedPlayable.base,
+						squadName = selectedPlayable.squadName,
+						task = selectedPlayable.task,
+						type = selectedPlayable.type,
 					}
 
 					table.insert(camp.client, tabClient)
 
-					HumainPack[playable[groupNChoice].packN] = {
-						humainTypePlane = playable[groupNChoice].type
+					HumainPack[selectedPlayable.packN] = {
+						humainTypePlane = selectedPlayable.type
 					}
 
 
 					-- garde ce systeme pour ne faire un debriefing que sur un group, normalement celui du main
-					local foundGoodMain
+					-- local foundGoodMain
 					if not foundGoodMain then
 						camp.player = {
-							side = playable[groupNChoice].side,
-							pack_n = playable[groupNChoice].packN,
-							role = playable[groupNChoice].role,
-							flight = playable[groupNChoice].flight,
-							groupName = playable[groupNChoice].groupName,
-							target = ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].target,
-							tgt_side = playable[groupNChoice].target_side,
-							tgt_pack = playable[groupNChoice].target_pack,
+							side = selectedPlayable.side,
+							pack_n = selectedPlayable.packN,
+							role = selectedPlayable.role,
+							flight = selectedPlayable.flight,
+							groupName = selectedPlayable.groupName,
+							target = ATO[selectedPlayable.side][selectedPlayable.packN][selectedPlayable.role][selectedPlayable.flight].target,
+							tgt_side = selectedPlayable.target_side,
+							tgt_pack = selectedPlayable.target_pack,
 							tgt_wp = 1,
-							airbase = playable[groupNChoice].base,
-							squadName = playable[groupNChoice].squadName,
-							task = playable[groupNChoice].task,
-							type = playable[groupNChoice].type,
+							airbase = selectedPlayable.base,
+							squadName = selectedPlayable.squadName,
+							task = selectedPlayable.task,
+							type = selectedPlayable.type,
 						}
 
-						HumainPack[playable[groupNChoice].packN] = {
-							humainTypePlane = playable[groupNChoice].type
+						HumainPack[selectedPlayable.packN] = {
+							humainTypePlane = selectedPlayable.type
 						}
 
-						if playable[groupNChoice].role == "main" then foundGoodMain = true end
+						if selectedPlayable.role == "main" then foundGoodMain = true end
 					end
 
 
-					ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].client = true
-					ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].IdClient = #camp.client
+					ATO[selectedPlayable.side][selectedPlayable.packN][selectedPlayable.role][selectedPlayable.flight].client = true
+					ATO[selectedPlayable.side][selectedPlayable.packN][selectedPlayable.role][selectedPlayable.flight].IdClient = #camp.client
 					-- ATO[playable[r].side][playable[r].packN][playable[r].role][playable[r].flight].NbPlaneClient = creaClientFlight[#camp.client].NbPlane
-					ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].NbPlaneClient = creaClientFlight[k].NbPlane
+					ATO[selectedPlayable.side][selectedPlayable.packN][selectedPlayable.role][selectedPlayable.flight].NbPlaneClient = creaClientFlight[k].NbPlane
 					
-					camp.MultiPlayer.pack_n[playable[groupNChoice].packN] = true
+					camp.MultiPlayer.pack_n[selectedPlayable.packN] = true
 				end
 			until resteAPrendre <= 0 or TaskRefused
 		end
@@ -826,52 +817,87 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 	end
 
 	if not TaskRefused then
-		--for intercept task, modify target package spawn to enter EWR coverage at mission start		
-		if groupNChoice and ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].task == "Intercept" and ATO[playable[groupNChoice].target_side] then		--player task is intercept -- modification M11.j : Multiplayer
-			local pack = ATO[playable[groupNChoice].target_side][playable[groupNChoice].target_pack]											--pointer to target package
+		if not playable[groupNChoice] then
+			print("ERROR: invalid playable flight selection.")
+			TaskRefused = true
+			groupNChoice = nil
+		end
 
+		local selectedPlayable = playable[groupNChoice]
+
+		if not selectedPlayable then
+			print("ERROR: invalid playable flight selection.")
+			TaskRefused = true
+		end
+
+		--for intercept task, modify target package spawn to enter EWR coverage at mission start		
+		if groupNChoice and ATO[selectedPlayable.side][selectedPlayable.packN][selectedPlayable.role][selectedPlayable.flight].task == "Intercept" and ATO[selectedPlayable.target_side] then		--player task is intercept -- modification M11.j : Multiplayer
+			local pack = ATO[selectedPlayable.target_side][selectedPlayable.target_pack]											--pointer to target package
+
+			local selectedFlight =
+					ATO[selectedPlayable.side]
+					[selectedPlayable.packN]
+					[selectedPlayable.role]
+					[selectedPlayable.flight]
+					
 			--find point where target package enters EWR coverage
 			for w = 1, #pack.main[1].route - 1 do																		--iterate through waypoints of first main flight
 				if (pack.main[1].route[w].id ~= "Target" and pack.main[1].route[w + 1].id ~= "Target") or pack.main[1].loadout.standoff == nil or pack.main[1].loadout.standoff <= 15000 then				--Ignore target WP for aircraft with standoff > 15 km
 
-					local base_route_distance = GetTangentDistance(pack.main[1].route[w], pack.main[1].route[w + 1], ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].route[1])	--get closest distance from interceptor base to route between WP w and WP w+1
-					if base_route_distance <= ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].target.radius then		--route segement is in range of interceptor
+					local base_route_distance = GetTangentDistance(pack.main[1].route[w], pack.main[1].route[w + 1], selectedFlight.route[1])	--get closest distance from interceptor base to route between WP w and WP w+1
+					if base_route_distance <= selectedFlight.target.radius then		--route segement is in range of interceptor
 
 						local detected = false
 						local distance = 100000000																				--distance from WP w to point where EWR coverage is entered
 						local heading = GetHeadingDegre(pack.main[1].route[w], pack.main[1].route[w + 1])							--heading between WP w and WP w+1
 
-						for e = 1, #EWR_DB[playable[groupNChoice].side] do																	--iterate through all ewr/awacs
+						for e = 1, #EWR_DB[selectedPlayable.side] do																	--iterate through all ewr/awacs
 
-							local radar_route_distance = GetTangentDistance(pack.main[1].route[w], pack.main[1].route[w + 1], EWR_DB[playable[groupNChoice].side][e])		--get closest distance from radar to route between WP w and WP w+1
-							if radar_route_distance < EWR_DB[playable[groupNChoice].side][e].range then										--if route passes radar range circle
+							local radar_route_distance = GetTangentDistance(pack.main[1].route[w], pack.main[1].route[w + 1], EWR_DB[selectedPlayable.side][e])		--get closest distance from radar to route between WP w and WP w+1
+							if radar_route_distance < EWR_DB[selectedPlayable.side][e].range then										--if route passes radar range circle
 								
-								local p1_ewr_heading = GetHeadingDegre(pack.main[1].route[w], EWR_DB[playable[groupNChoice].side][e])				--heading from p1 to radar
+								local p1_ewr_heading = GetHeadingDegre(pack.main[1].route[w], EWR_DB[selectedPlayable.side][e])				--heading from p1 to radar
 								local alpha = math.abs(heading - p1_ewr_heading)												--angle beteen route and p1-ewr
 								if alpha > 180 then
 									alpha = math.abs(alpha - 360)
 								end
-								local p1_ewr = GetDistance(pack.main[1].route[w], EWR_DB[playable[groupNChoice].side][e])						--distance between p1 and ewr
+								local p1_ewr = GetDistance(pack.main[1].route[w], EWR_DB[selectedPlayable.side][e])						--distance between p1 and ewr
 								local p1_p90ewr = math.cos(math.rad(alpha)) * p1_ewr											--distance between p1 and point on route perpendicular to ewr
 								local p90ewr_ewr = p1_ewr * math.sin(math.rad(alpha))											--distance between ewr and point on route perpendicular to ewr
-								local p90t_pC = math.sqrt(math.pow(EWR_DB[playable[groupNChoice].side][e].range, 2) - math.pow(p90ewr_ewr, 2))	--distance between point on route perpendiculat to ewr and point on route intersecting ewr circle
+								-- local p90t_pC = math.sqrt(math.pow(EWR_DB[selectedPlayable.side][e].range, 2) - math.pow(p90ewr_ewr, 2))	--distance between point on route perpendiculat to ewr and point on route intersecting ewr circle
+								local sqrtValue = math.pow(EWR_DB[selectedPlayable.side][e].range, 2) - math.pow(p90ewr_ewr, 2)
+
+								if sqrtValue < 0 then
+									sqrtValue = 0
+								end
+
+								local p90t_pC = math.sqrt(sqrtValue)
+
 								local p1_pC = p1_p90ewr - p90t_pC																--distance from p1 to point on route intersecting ewr circle
 
-								local p1_base = GetDistance(pack.main[1].route[w], ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].route[1])	--distance between p1 and interceptor base
+								local p1_base = GetDistance(pack.main[1].route[w], selectedFlight.route[1])	--distance between p1 and interceptor base
 								local p1_p90base = math.cos(math.rad(alpha)) * p1_base											--distance between p1 and point on route perpendicular to base
 								local p90base_base = p1_base * math.sin(math.rad(alpha))										--distance between base and point on route perpendicular to base
-								local p90b_pB = math.sqrt(math.pow(ATO[playable[groupNChoice].side][playable[groupNChoice].packN][playable[groupNChoice].role][playable[groupNChoice].flight].target.radius, 2) - math.pow(p90base_base, 2))	--distance between point on route perpendiculat to base and point on route intersecting base circle
+								-- local p90b_pB = math.sqrt(math.pow(ATO[selectedPlayable.side][selectedPlayable.packN][selectedPlayable.role][selectedPlayable.flight].target.radius, 2) - math.pow(p90base_base, 2))	--distance between point on route perpendiculat to base and point on route intersecting base circle
+								sqrtValue = math.pow( selectedFlight.target.radius, 2) - math.pow(p90base_base, 2)
+
+								if sqrtValue < 0 then
+									sqrtValue = 0
+								end
+
+								local p90b_pB = math.sqrt(sqrtValue)
+								
 								local p1_pB = p1_p90base - p90b_pB																--distance from p1 to point on route intersecting base circle
 
 								if camp.player then
 									if p1_pC <= 0 then
 										distance = 0
-										camp.player.EWR_freq = EWR_DB[playable[groupNChoice].side][e].frequency
-										camp.player.EWR_call = EWR_DB[playable[groupNChoice].side][e].callsign
+										camp.player.EWR_freq = EWR_DB[selectedPlayable.side][e].frequency
+										camp.player.EWR_call = EWR_DB[selectedPlayable.side][e].callsign
 									elseif p1_pC < distance then
 										distance = p1_pC
-										camp.player.EWR_freq = EWR_DB[playable[groupNChoice].side][e].frequency
-										camp.player.EWR_call = EWR_DB[playable[groupNChoice].side][e].callsign
+										camp.player.EWR_freq = EWR_DB[selectedPlayable.side][e].frequency
+										camp.player.EWR_call = EWR_DB[selectedPlayable.side][e].callsign
 									end
 									if distance < p1_pB then
 										distance = p1_pB
@@ -881,12 +907,12 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 								elseif camp.client then
 									if p1_pC <= 0 then
 										distance = 0
-										camp.player.EWR_freq = EWR_DB[playable[groupNChoice].side][e].frequency
-										camp.player.EWR_call = EWR_DB[playable[groupNChoice].side][e].callsign
+										camp.player.EWR_freq = EWR_DB[selectedPlayable.side][e].frequency
+										camp.player.EWR_call = EWR_DB[selectedPlayable.side][e].callsign
 									elseif p1_pC < distance then
 										distance = p1_pC
-										camp.player.EWR_freq = EWR_DB[playable[groupNChoice].side][e].frequency
-										camp.player.EWR_call = EWR_DB[playable[groupNChoice].side][e].callsign
+										camp.player.EWR_freq = EWR_DB[selectedPlayable.side][e].frequency
+										camp.player.EWR_call = EWR_DB[selectedPlayable.side][e].callsign
 									end
 									if distance < p1_pB then
 										distance = p1_pB
