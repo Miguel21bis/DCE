@@ -385,7 +385,7 @@ repeat
 						playable_type[indexStringType]["base"] = unit.base
 						playable_type[indexStringType]["unitName"] = unit.name
 
-						io.write(" (1 to 8): ("..indexStringType.."): "..unit.type.." || "..AliasBaseName(unit.base).." || ")
+						io.write(" (1 to 8): ("..indexStringType.."): "..unit.type.." || "..AliasBaseName(unit.base).." || "..unit.name)
 
 						for taskN, taskStr in PairsByKeys(unit.tasks) do
 
@@ -435,6 +435,7 @@ repeat
 							Multi.Group[i].PlaneType = playable_type[inputTyp].type
 							Multi.Group[i].side = playable_type[inputTyp].side
 							Multi.Group[i].base = playable_type[inputTyp].base
+							Multi.Group[i].unitName = playable_type[inputTyp].unitName
 							-- print("SetBaseClient TEST "..tostring(playable_type[inputTyp].unitName))
 							local result = SetUnitClient(playable_type[inputTyp].unitName)
 							if not result then print("SetUnitClient ECHEC || "..playable_type[inputTyp].unitName.." || "..AliasBaseName(tostring(playable_type[inputTyp].base))) end
@@ -591,7 +592,7 @@ repeat
 				-- 	print("No eligible mission available.\n\n")
 				end
 			end
-			
+
 			if Multi.NbGroup and not PlayerFlight then
 
 				print("Mission generation failed:\n")

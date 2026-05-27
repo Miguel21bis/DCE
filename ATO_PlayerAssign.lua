@@ -247,6 +247,22 @@ if Multi.Group then
 		reason = nil,
 	}
 	end
+elseif SinglePlayer then
+
+	PlayerAssignFailure[1] = {
+		requestedPlane = PlayerPlane or "unknown",
+		-- requestedTask = PlayerData and PlayerData.task or "unknown",
+		requestedTask =  "unknown",
+		requestedNb = 1,
+
+		foundFlights = 0,
+		foundAircraft = 0,
+
+		bestFlight = nil,
+		bestAircraft = 0,
+
+		reason = nil,
+	}
 end
 
 --fait une copie de Multi pour eviter de perdre le nombre d'avion
@@ -260,14 +276,20 @@ if debugAssign then
 end
 
 -- Vérifie si on a bien des avions jouables et des groupes définis
-if #playable == 0 or not multiBIS.NbGroup then
+-- if #playable == 0 or not multiBIS.NbGroup then
+--     return
+-- end
+if not multiBIS.NbGroup then
     return
 end
 
 -- Parcours des slots jouables
 for _, slot in ipairs(playable) do
     if not slot.counted then
-        for _, requestGroup in ipairs(multiBIS.Group or {}) do
+        if SinglePlayer then
+			break
+		end
+		for _, requestGroup in ipairs(multiBIS.Group or {}) do
            
 			for failN, failData in pairs(PlayerAssignFailure) do
 
@@ -345,7 +367,8 @@ for _, slot in ipairs(playable) do
 end
 
 
-if #playable > 0 and multiBIS.NbGroup then
+-- if #playable > 0 and multiBIS.NbGroup then
+if multiBIS.NbGroup then
 	if multiBIS.Group then
 		AllCoopPossible = true
 		for k=1, #multiBIS.Group do
@@ -388,7 +411,7 @@ if #playable > 0 and multiBIS.NbGroup then
 
 				if Debug.debug then
 					print("AtoPA   no flight possible or not NotAssigned:  "..tostring(multiBIS.Group[k].NotAssigned).." for this aircraft: "..tostring(multiBIS.Group[k].PlaneType))
-					_affiche(multiBIS,"MultiBIS")
+					_affiche(multiBIS,"ATO_PA_MultiBIS: ")
 
 					for sideName, units in pairs(oob_air) do
 						for unitN, unit in pairs(units) do

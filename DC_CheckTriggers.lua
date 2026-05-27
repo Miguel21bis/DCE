@@ -1795,8 +1795,8 @@ Action = {}
 	--StartTime is the campaign time in seconds (time since campaign start) at which the mission was assigned. It is used to control progress along the route across multiple missions of the campaign. If nil, then current campaign time us used automatically.
 	function Action.ShipMission(groupName, wpTable, cruiseSpeed, patrolSpeed, startTime)
 
-		print("/r/n DcCT_ShipMission A  groupName "..groupName)
-		_affiche(wpTable, "DcCT wpTable")
+		-- print("/r/n DcCT_ShipMission A  groupName "..groupName)
+		-- _affiche(wpTable, "DcCT wpTable")
 
 		for coal_name,coal in pairs(oob_ground) do								--go through sides(red/blue)	
 			for country_n,country in ipairs(coal) do							--go through countries

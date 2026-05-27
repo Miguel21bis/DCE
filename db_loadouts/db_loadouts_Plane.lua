@@ -18167,7 +18167,7 @@ db_loadouts = {
 			},
 		},
 		Strike = {
-		["AG - 2000s - FAB-500*4 - R-73*2 - FT"] = {
+			["AG - 2000s - FAB-500*4 - R-73*2 - FT"] = {
 				minscore = 0.3,
 				support = {
 					Escort = true,
