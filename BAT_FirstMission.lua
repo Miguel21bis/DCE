@@ -2,7 +2,7 @@
 --Initiated by FirstMission.bat
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["BAT_FirstMission.lua"] = "1.15.101"
+versionDCE["BAT_FirstMission.lua"] = "2.16.102"
 -------------------------------------------------------------------------------------------------------
 
 BugList = BugList or {}
@@ -53,6 +53,81 @@ local function acceptMission()
 	end
 end
 
+-- Convertit les tasks longues en codes courts lisibles console
+local function taskToShort(task)
+
+	local taskMap = {
+		["Strike"] = "STR",
+		["Escort"] = "ESC",
+		["CAP"] = "CAP",
+		["Intercept"] = "INT",
+		["Fighter Sweep"] = "FS",
+		["SEAD"] = "SD",
+		["Anti-ship Strike"] = "ASH",
+		["Runway Attack"] = "RW",
+		["SAR"] = "SAR",
+		["CSAR"] = "CSAR",
+	}
+
+	return taskMap[task] or task
+end
+
+
+-- Construit la liste compacte des tasks dispo pour un squadron
+local function buildTaskString(playableFlight)
+
+	local tasks = {}
+
+	if playableFlight.task then
+		tasks[#tasks + 1] = taskToShort(playableFlight.task)
+	end
+
+	-- évite doublons
+	local already = {}
+	local result = {}
+
+	for i = 1, #tasks do
+		if not already[tasks[i]] then
+			already[tasks[i]] = true
+			result[#result + 1] = tasks[i]
+		end
+	end
+
+	return table.concat(result, " ")
+end
+
+-- Tronque une chaine à une longueur fixe pour affichage console
+local function fitString(txt, maxLen)
+
+	txt = tostring(txt or "")
+
+	if string.len(txt) <= maxLen then
+		return txt
+	end
+
+	if maxLen <= 3 then
+		return string.sub(txt, 1, maxLen)
+	end
+
+	return string.sub(txt, 1, maxLen - 3).."..."
+end
+
+
+-- -- Construit une chaine compacte des tasks disponibles
+-- local function buildTaskList(tasks)
+
+-- 	local result = {}
+
+-- 	for _, taskStr in PairsByKeys(tasks) do
+
+-- 		if TabTask[taskStr] then
+-- 			result[#result + 1] = taskToShort(taskStr)
+-- 		end
+-- 	end
+
+-- 	return table.concat(result, " ")
+-- end
+
 -- random seed -----
 local seed = os.time() -- Récupérer un timestamp en secondes
 math.randomseed(seed)  -- Initialiser le générateur pseudo-aléatoire
@@ -84,7 +159,7 @@ end
 
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ResetCampaign.lua")					--reset campaign status files. Required for first mission to generate according to initial status	
 
---affiche le type d'avion selectionné et son squadrons M55_a
+--affiche le type d'avion selectionné et son squadrons
 local playerInfo = {
 	planeBAT = "",
 	squadBAT = "",
@@ -106,6 +181,7 @@ for side, squadTL in PairsByKeys(oob_air) do
 		end
 	end
 end
+
 PlayerSide = playerInfo.sideBAT
 
 if n_player > 1 then
@@ -159,10 +235,26 @@ end
 
 
 if VersionPackageICM then
-	print("0A0= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
-	print("= = = = = = = = = = = = = Script Version : "..tostring(showVersion).." = = Lua Version : "..tostring(_VERSION))
-	print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
-	print("= = = = = = = = = = = = = Debug Mod? : "..tostring(Debug.debug))
+	-- print("0A0= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
+	-- print("= = = = = = = = = = = = = Script Version : "..tostring(showVersion).." = = Lua Version : "..tostring(_VERSION))
+	-- print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
+	-- print("= = = = = = = = = = = = = Debug Mod? : "..tostring(Debug.debug))
+	-- print()
+
+	print("==============================================================")
+	print(" DCE CAMPAIGN GENERATOR")
+	print(" "..tostring(camp.title).."   |   "..tostring(camp.version))
+	print("==============================================================")
+	print()
+	print(" Script : "..tostring(showVersion))
+	-- print(" Lua    : "..tostring(_VERSION))
+	print()
+	print(" Player Aircraft : "..tostring(playerInfo.planeBAT))
+	print(" Squadron         : "..tostring(playerInfo.squadBAT))
+	print(" Country          : "..tostring(playerInfo.countryBAT))
+	print()
+	print(" Debug Mode       : "..(Debug.debug and "ENABLED" or "DISABLED"))
+	print("==============================================================")
 	print()
 
 else
@@ -200,18 +292,32 @@ repeat
 	repeat
 		
 		if choix1 == nil then
-			print("Select :\n"..
-				"S (S)ingleplayer  \n"..
-				-- "D Singleplayer with (D)edicated Server \n"..
-				-- "DF Singleplayer with (D)edicated Server, (F)ull plane on Deck \n"..
-				"\n"..
-				"C (C)hange type of plane\n"..
-				"\n"..
-				"T Multiplayer by choice of (T)arget \n"..
-				"N multiplayer by choice of (N)ATO".."\n"..
-				"\n"..
-				"O t(o)ols (tools for CampaignMaker and Coder)"
-			)
+			-- print("Select :\n"..
+			-- 	"S (S)ingleplayer  \n"..
+			-- 	-- "D Singleplayer with (D)edicated Server \n"..
+			-- 	-- "DF Singleplayer with (D)edicated Server, (F)ull plane on Deck \n"..
+			-- 	"\n"..
+			-- 	"C (C)hange type of plane\n"..
+			-- 	"\n"..
+			-- 	"T Multiplayer by choice of (T)arget \n"..
+			-- 	"N multiplayer by choice of (N)ATO".."\n"..
+			-- 	"\n"..
+			-- 	"O t(o)ols (tools for CampaignMaker and Coder)"
+			-- )
+
+			print("--------------------------------------------------------------")
+			print(" Reset campaign and generate first mission")
+			print("--------------------------------------------------------------")
+			print()
+			print(" [S] Singleplayer")
+			print()
+			print(" [C] Change aircraft type")
+			print()
+			print(" [T] Multiplayer by Target")
+			print(" [N] Multiplayer by NATO package")
+			print()
+			print(" [O] Tools / CampaignMaker")
+			print()
 
 			choix1 = io.stdin:read()
 		end
@@ -333,7 +439,7 @@ repeat
 
 				-- parse toutes les unités et rempli le tab tabTaskAvailable pour etre sur de proposer toutes les task proposé active 
 				for nSide , oob_airSide in PairsByKeys(oob_air) do
-					print() print(nSide..":")
+					-- print() print(nSide..":")
 					for m, unit in PairsByKeys(oob_airSide) do
 						if Playable_m[unit.type] and unit.inactive ~= true then
 
@@ -364,6 +470,18 @@ repeat
 				-- display le tableau des choix d'avion et de task
 				local tabBug = {}
 
+				print("Select your flight:")
+				print("Format: [1-8 aircraft][ID][Task code]")
+				print("Example: 4de = 4 aircraft, ID d, Escort mission")
+				print()
+
+				print("Task codes:")
+				print("STR=Strike  ESC=Escort  CAP=CAP  INT=Intercept")
+				print("FS=FighterSweep  SD=SEAD  ASH=AntiShip  RW=Runway")
+				print("SAR=SAR  CSAR=CSAR")
+				print()
+
+
 				-- for nSide, units in PairsByKeys(tabTaskAvailable) do
 				for nSide, units in pairs(tabTaskAvailable) do
 					print() print(nSide..":")
@@ -373,6 +491,9 @@ repeat
 						return a.type < b.type
 					end)
 
+
+					print("ID Aircraft     Base                Squadron        Tasks")
+					print("----------------------------------------------------------------")
 
 					-- for unitName, unit in PairsByKeys(units) do
 					for unitN, unit in ipairs(units) do
@@ -385,13 +506,67 @@ repeat
 						playable_type[indexStringType]["base"] = unit.base
 						playable_type[indexStringType]["unitName"] = unit.name
 
-						io.write(" (1 to 8): ("..indexStringType.."): "..unit.type.." || "..AliasBaseName(unit.base).." || "..unit.name)
+						-- io.write(" (1 to 8): ("..indexStringType.."): "..unit.type.." || "..AliasBaseName(unit.base).." || "..unit.name)
+
+						-- for taskN, taskStr in PairsByKeys(unit.tasks) do
+
+						-- 	if TabTask[taskStr] then
+						-- 		io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
+						-- 		-- local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
+						-- 		tabIndex[tostring(1)..indexStringType..TabTask[taskStr]] = true
+						-- 		tabIndex[tostring(2)..indexStringType..TabTask[taskStr]] = true
+						-- 		tabIndex[tostring(3)..indexStringType..TabTask[taskStr]] = true
+						-- 		tabIndex[tostring(4)..indexStringType..TabTask[taskStr]] = true
+						-- 		tabIndex[tostring(5)..indexStringType..TabTask[taskStr]] = true
+						-- 		tabIndex[tostring(6)..indexStringType..TabTask[taskStr]] = true
+						-- 		tabIndex[tostring(7)..indexStringType..TabTask[taskStr]] = true
+						-- 		tabIndex[tostring(8)..indexStringType..TabTask[taskStr]] = true
+
+						-- 	-- elseif not TabTask[taskStr] and not string.lower(taskStr) == "spotter" then
+						-- 	elseif not TabTask[taskStr] and string.lower(taskStr) ~= "spotter" then
+						-- 		table.insert(tabBug,taskStr )
+						-- 	end
+						-- end
+						-- io.write("\n")
+
+
+						-- local shortTasks = buildTaskList(unit.tasks)
+						local shortTasks = {}
+						local displayTasks = {}
+
+						for _, taskStr in PairsByKeys(unit.tasks) do
+
+							if TabTask[taskStr] then
+
+								shortTasks[#shortTasks + 1] = taskToShort(taskStr)
+
+								displayTasks[#displayTasks + 1] =
+									taskToShort(taskStr)
+									.."("
+									..string.lower(TabTask[taskStr])
+									..")"
+							end
+						end
+
+						local shortTaskText = table.concat(displayTasks, " ")
+
+						local line =
+							string.format(
+								"%-3s %-12s %-19s %-15s %s",
+								indexStringType,
+								fitString(unit.type, 12),
+								fitString(AliasBaseName(unit.base), 19),
+								fitString(unit.name, 15),
+								-- shortTasks
+								shortTaskText
+							)
+
+						print(line)
 
 						for taskN, taskStr in PairsByKeys(unit.tasks) do
 
 							if TabTask[taskStr] then
-								io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
-								-- local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
+
 								tabIndex[tostring(1)..indexStringType..TabTask[taskStr]] = true
 								tabIndex[tostring(2)..indexStringType..TabTask[taskStr]] = true
 								tabIndex[tostring(3)..indexStringType..TabTask[taskStr]] = true
@@ -401,12 +576,13 @@ repeat
 								tabIndex[tostring(7)..indexStringType..TabTask[taskStr]] = true
 								tabIndex[tostring(8)..indexStringType..TabTask[taskStr]] = true
 
-							-- elseif not TabTask[taskStr] and not string.lower(taskStr) == "spotter" then
-							elseif not TabTask[taskStr] and string.lower(taskStr) ~= "spotter" then
-								table.insert(tabBug,taskStr )
+							elseif string.lower(taskStr) ~= "spotter" then
+
+								table.insert(tabBug, taskStr)
+
 							end
 						end
-						io.write("\n")
+
 						ti = ti+1
 					end
 				end
@@ -420,50 +596,50 @@ repeat
 						print("Bug with: "..bug)
 					end
 				end
-			--===================================================================================
+				--===================================================================================
 				-- Ecran N°5 Selection Nombre d'avion Multiplayer
-					repeat
-						-- input = string.lower(io.stdin:read())
-						input = string.lower(io.stdin:read() or "")
-						if tabIndex[input] then
+				repeat
+					-- input = string.lower(io.stdin:read())
+					input = string.lower(io.stdin:read() or "")
+					if tabIndex[input] then
 
-							Multi.Group[i] = Multi.Group[i] or {}
+						Multi.Group[i] = Multi.Group[i] or {}
 
-							Multi.Group[i].NbPlane = tonumber(string.sub (input, 1, 1))
+						Multi.Group[i].NbPlane = tonumber(string.sub (input, 1, 1))
 
-							local inputTyp = tostring(string.sub (input, 2, 2))
-							Multi.Group[i].PlaneType = playable_type[inputTyp].type
-							Multi.Group[i].side = playable_type[inputTyp].side
-							Multi.Group[i].base = playable_type[inputTyp].base
-							Multi.Group[i].unitName = playable_type[inputTyp].unitName
-							-- print("SetBaseClient TEST "..tostring(playable_type[inputTyp].unitName))
-							local result = SetUnitClient(playable_type[inputTyp].unitName)
-							if not result then print("SetUnitClient ECHEC || "..playable_type[inputTyp].unitName.." || "..AliasBaseName(tostring(playable_type[inputTyp].base))) end
+						local inputTyp = tostring(string.sub (input, 2, 2))
+						Multi.Group[i].PlaneType = playable_type[inputTyp].type
+						Multi.Group[i].side = playable_type[inputTyp].side
+						Multi.Group[i].base = playable_type[inputTyp].base
+						Multi.Group[i].unitName = playable_type[inputTyp].unitName
+						-- print("SetBaseClient TEST "..tostring(playable_type[inputTyp].unitName))
+						local result = SetUnitClient(playable_type[inputTyp].unitName)
+						if not result then print("SetUnitClient ECHEC || "..playable_type[inputTyp].unitName.." || "..AliasBaseName(tostring(playable_type[inputTyp].base))) end
 
-							local inputTsk = tostring(string.sub (input, 3, 4))
-							Multi.Group[i].task = TabTask[inputTsk]
+						local inputTsk = tostring(string.sub (input, 3, 4))
+						Multi.Group[i].task = TabTask[inputTsk]
 
-						else
-							print("\nInvalid entry.\n")
-						end
-					until tabIndex[input]
-
-					io.write( "\n")
-
-					--========================= affiche le choix du joueurs
-					print(" -------------------------------------------------------> Building your different Flight: ")
-					for k=1, i do
-						print(" -------------------------------------------------------> "
-						..Multi.Group[k].NbPlane
-						.." "..Multi.Group[k].PlaneType
-						.." ("..Multi.Group[k].side ..")"
-						.." "..Multi.Group[k].task
-						.." "..AliasBaseName(Multi.Group[k].base)
-					)
+					else
+						print("\nInvalid entry.\n")
 					end
-					io.write( "\n")
+				until tabIndex[input]
 
+				io.write( "\n")
+
+				--========================= affiche le choix du joueurs
+				print(" -------------------------------------------------------> Building your different Flight: ")
+				for k=1, i do
+					print(" -------------------------------------------------------> "
+					..Multi.Group[k].NbPlane
+					.." "..Multi.Group[k].PlaneType
+					.." ("..Multi.Group[k].side ..")"
+					.." "..Multi.Group[k].task
+					.." "..AliasBaseName(Multi.Group[k].base)
+				)
 				end
+				io.write( "\n")
+
+			end
 			--===================================================================================
 			-- Ecran N°6 SinglePlayer
 
@@ -596,54 +772,56 @@ repeat
 			if Multi.NbGroup and not PlayerFlight then
 
 				print("Mission generation failed:\n")
-
+				print("ID  Aircraft     Base                Squadron        Tasks")
+				print("----------------------------------------------------------------")
 				if PlayerAssignFailure then
 
 					for _, failData in pairs(PlayerAssignFailure) do
 
-						print(
-							tostring(failData.requestedPlane)
-							.." "
-							..tostring(failData.requestedTask)
-							..":"
-						)
+						local shortTasks = failData.generatedTasksShort or "---"
 
-						print(
-							"- Requested: "
-							..tostring(failData.requestedNb)
-							.." aircraft"
-						)
+						local line =
+							string.format(
+								"%-3s %-12s %-19s %-15s %s",
+								tostring(failData.id or "?"),
+								tostring(failData.requestedPlane or "---"),
+								tostring(failData.baseShort or "---"),
+								tostring(failData.squadronShort or "---"),
+								shortTasks
+							)
 
-						if failData.reason == "no_aircraft_generated" then
+						print(line)
 
-							print("- No aircraft of this type generated")
+						if failData.reason == "no_main_task_generated" then
+
+							print(" -> Requested main task never generated.")
+
+						elseif failData.reason == "task_filtered" then
+
+							print(" -> Main task generated but filtered during Block A.")
 
 						elseif failData.reason == "task_not_generated" then
 
-							print("- Aircraft generated but requested task not generated")
-
-							if failData.bestFlight then
-								print("- Best available flight: "..tostring(failData.bestFlight))
-							end
+							print(" -> Aircraft generated but requested task unavailable.")
 
 						elseif failData.reason == "insufficient_aircraft" then
 
 							print(
-								"- Generated: "
-								..tostring(failData.foundAircraft)
-								.." aircraft"
+								" -> Generated "
+								..tostring(failData.foundAircraft or 0)
+								.." / "
+								..tostring(failData.requestedNb or "?")
+								.." aircraft."
 							)
 
-							print(
-								"- Missing: "
-								..tostring(failData.requestedNb - failData.foundAircraft)
-								.." aircraft"
-							)
+						elseif failData.reason == "no_aircraft_generated" then
 
-							if failData.bestFlight then
-								print("- Best available flight: "..tostring(failData.bestFlight))
-							end
+							print(" -> No compatible aircraft generated.")
 
+						end
+
+						if failData.debugReason then
+							print(" -> "..tostring(failData.debugReason))
 						end
 
 						print()

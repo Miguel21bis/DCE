@@ -682,7 +682,8 @@ if input == "y" or input == "yes" then
 							Multi.Group[i].PlaneType = playable_type[inputTyp].type
 							Multi.Group[i].side = playable_type[inputTyp].side
 							Multi.Group[i].base = playable_type[inputTyp].base
-							-- print("SetBaseClient TEST "..tostring(playable_type[inputTyp].base))
+							Multi.Group[i].unitName = playable_type[inputTyp].unitName
+							
 							local result = SetUnitClient(playable_type[inputTyp].unitName)
 							if not result then print("SetUnitClient ECHEC "..AliasBaseName(tostring(playable_type[inputTyp].base))) end
 

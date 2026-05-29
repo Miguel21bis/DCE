@@ -1225,17 +1225,17 @@ function CheckAndFixAllIds()
     -- 2. Correction des doublons de groupId
     for _, group in ipairs(groupIdError) do
         group.groupId = GenerateIDGroup(group.name)
-        if Debug and Debug.debug then
-            print("Nouveau groupId attribué : "..tostring(group.groupId).." pour "..tostring(group.name))
-        end
+        -- if Debug and Debug.debug then
+        --     print("Nouveau groupId attribué : "..tostring(group.groupId).." pour "..tostring(group.name))
+        -- end
     end
 
     -- 3. Correction des doublons de unitId
     for _, unit in ipairs(unitIdError) do
         unit.unitId = GenerateIDUnit(unit.name, unit.type)
-        if Debug and Debug.debug then
-            print("Nouveau unitId attribué : "..tostring(unit.unitId).." pour "..tostring(unit.name))
-        end
+        -- if Debug and Debug.debug then
+        --     print("Nouveau unitId attribué : "..tostring(unit.unitId).." pour "..tostring(unit.name))
+        -- end
     end
 end
 

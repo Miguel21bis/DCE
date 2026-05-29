@@ -1,19 +1,8 @@
 --To assign the player to a flight in the ATO
 --Initiated by Main_NextMission.lua 
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  debug_d
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_PlayerAssign.lua"] = "1.9.75"
-------------------------------------------------------------------------------------------------------- 
--- cleancode_f				(f springCleaning)
--- adjustment_d				(b: use io.stdin:read)(a:robust form) 
--- debug_d					(d choix cahotique, entrainant un bug radio)(c package stats)(b number of aircraft assigned to MP)(a: supprime la table camp.player qui garde par erreur celle du dossier Active)
--- modification M61_a		SAR
--- modification M48_f		Accept result mission (d: garde en memoire le txt camp["Briefing_text"])
--- modification M38_t		Check and Help CampaignMaker (t id info)
--- modification M33			Custom Briefing (TargetName)
--- Zarbas modification Z01	Select Task possible
--- modification M11A_bf		Multiplayer (f: interceptor)(bd wingmen)(wxy: force same package)
+versionDCE["ATO_PlayerAssign.lua"] = "2.10.76"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -91,28 +80,39 @@ for side, pack in pairs(ATO) do															--iterate through sides in ATO
 										if wp.id == "Attack" then											--waypoint is an attack waypoint (ignore target as enemy package might do a standoff attack)
 											local dist = GetDistance(wp, flight[f].route[1])				--measure distance from interceptor base to target
 											if dist <= flight[f].target.radius then							--target is in range for interception
-												if not tab_doublon[flight[f].groupName] then	
-													TrackPlayability(flight[f].playable, "playerAssign_intercept_hostile")			--track playabilty criterium has been met
+												
+												local existingIndex = tab_doublon[flight[f].groupName]
 
-													playable[#playable + 1] = {									--add flight to playable table
-														side = side,
-														packN = p,
-														role = role,
-														flight = f,
-														base = flight[f].base,
-														-- unitname = unitname_,
-														groupName = flight[f].groupName,
-														number = flight[f].number,
-														target_side = enemy,
-														target_pack = enemyPackN,
-														type = flight[f].type,
-														squadName = flight[f].name,
-														task = flight[f].task,
-														id = flight[f].id,
-													}
-													tab_doublon[flight[f].groupName] = true
+												local newEntry = {
+													side = side,
+													packN = p,
+													role = role,
+													flight = f,
+													base = flight[f].base,
+													groupName = flight[f].groupName,
+													number = flight[f].number,
+													target_name = flight[f].target_name,
+													type = flight[f].type,
+													squadName = flight[f].name,
+													task = flight[f].task or role,
+													id = flight[f].id,
+												}
+
+												if existingIndex then
+
+													local existing = playable[existingIndex]
+
+													-- garde la version la plus complète
+													if newEntry.number > existing.number then
+														playable[existingIndex] = newEntry
+													end
+
+												else
+
+													table.insert(playable, newEntry)
+													tab_doublon[flight[f].groupName] = #playable
+
 												end
-
 											end
 										end
 									end
@@ -133,19 +133,21 @@ for side, pack in pairs(ATO) do															--iterate through sides in ATO
 
 								TrackPlayability(flight[f].playable, "playerAssign_SAR")			--track playabilty criterium has been met
 
-								playable[#playable + 1] = {									--add flight to playable table
+								
+								local existingIndex = tab_doublon[flight[f].groupName]
+
+								local newEntry = {
 									side = side,
 									packN = p,
 									role = role,
 									flight = f,
 									base = flight[f].base,
-									-- unitname = unitname_,
 									groupName = flight[f].groupName,
 									number = flight[f].number,
-									target_side = enemy,
+									target_name = flight[f].target_name,
 									type = flight[f].type,
 									squadName = flight[f].name,
-									task = flight[f].task,
+									task = flight[f].task or role,
 									id = flight[f].id,
 								}
 								tab_doublon[uniqueFlightId] = true
@@ -168,25 +170,39 @@ for side, pack in pairs(ATO) do															--iterate through sides in ATO
 												local dist = GetTangentDistance(enemy_pack.main[1].route[w], enemy_pack.main[1].route[w + 1], flight[f].target)		--get closest distance from CAP station to route between WP w and WP w+1																	
 												if Multi.NbGroup >= 1 or dist <= flight[f].target.radius then							--route segement is in range of CAP station											
 
-													if not tab_doublon[flight[f].groupName] then
-														TrackPlayability(flight[f].playable, "playerAssign_CAP_hostile")
-														playable[#playable + 1] = {									--add flight to playable table
-															side = side,
-															packN = p,
-															role = role,
-															flight = f,
-															base = flight[f].base,
-															-- unitname = unitname_,
-															groupName = flight[f].groupName,
-															number = flight[f].number,
-															target_side = enemy,
-															target_pack = enemy_pack_n,
-															type = flight[f].type,
-															squadName = flight[f].name,
-															task = flight[f].task,
-															id = flight[f].id,
-														}
-														tab_doublon[flight[f].groupName] = true
+													
+
+													local existingIndex = tab_doublon[flight[f].groupName]
+
+													local newEntry = {
+														side = side,
+														packN = p,
+														role = role,
+														flight = f,
+														base = flight[f].base,
+														groupName = flight[f].groupName,
+														number = flight[f].number,
+														target_name = flight[f].target_name,
+														type = flight[f].type,
+														squadName = flight[f].name,
+														task = flight[f].task or role,
+														id = flight[f].id,
+													}
+
+													if existingIndex then
+
+														local existing = playable[existingIndex]
+
+														-- garde la version la plus complète
+														if newEntry.number > existing.number then
+															playable[existingIndex] = newEntry
+														end
+
+													else
+
+														table.insert(playable, newEntry)
+														tab_doublon[flight[f].groupName] = #playable
+
 													end
 												end
 											end
@@ -196,26 +212,39 @@ for side, pack in pairs(ATO) do															--iterate through sides in ATO
 							end
 						else
 							
-							if not tab_doublon[flight[f].groupName] then								--check for duplicate entries
 							
-								playable[#playable + 1] = {														--add flight to playable table
-									side = side,
-									packN = p,
-									role = role,
-									flight = f,
-									base = flight[f].base,
-									-- unitname = "Pack " .. p .. " - " .. flight[f].name .. " - " .. flight[f].task .. " " .. f .. "-" .. 1,
-									-- unitname = unitname_,
-									groupName = flight[f].groupName,
-									number = flight[f].number,
-									target_name = flight[f].target_name,										-- modification M33 	Custom Briefing (TargetName)
-									type = flight[f].type,
-									squadName = flight[f].name,
-									task = flight[f].task,
-									id = flight[f].id,
-								}
-								tab_doublon[flight[f].groupName] = true
-							end
+							local existingIndex = tab_doublon[flight[f].groupName]
+
+							local newEntry = {
+								side = side,
+								packN = p,
+								role = role,
+								flight = f,
+								base = flight[f].base,
+								groupName = flight[f].groupName,
+								number = flight[f].number,
+								target_name = flight[f].target_name,
+								type = flight[f].type,
+								squadName = flight[f].name,
+								task = flight[f].task or role,
+								id = flight[f].id,
+							}
+
+							if existingIndex then
+
+								local existing = playable[existingIndex]
+
+								-- garde la version la plus complète
+								if newEntry.number > existing.number then
+									playable[existingIndex] = newEntry
+								end
+
+							else
+
+								table.insert(playable, newEntry)
+								tab_doublon[flight[f].groupName] = #playable
+
+							end							
 						end
 					end
 				end
@@ -308,7 +337,10 @@ for _, slot in ipairs(playable) do
 				end
 			end
 
-			if slot.type == requestGroup.PlaneType and not requestGroup.counted then
+			-- if slot.type == requestGroup.PlaneType and not requestGroup.counted then
+			if slot.type == requestGroup.PlaneType
+				and slot.task == requestGroup.task
+				and not requestGroup.counted then
                 
                 -- Initialise le quota restant si nécessaire
                 if requestGroup.NotAssigned == nil then
@@ -372,7 +404,8 @@ if multiBIS.NbGroup then
 	if multiBIS.Group then
 		AllCoopPossible = true
 		for k=1, #multiBIS.Group do
-			if multiBIS.Group[k].counted and multiBIS.Group[k].NotAssigned then
+			-- if multiBIS.Group[k].counted and multiBIS.Group[k].NotAssigned then
+			if multiBIS.Group[k].counted and multiBIS.Group[k].NotAssigned ~= nil and multiBIS.Group[k].NotAssigned <= 0 then
 			else
 				AllCoopPossible = false
 				if PlayerAssignFailure[k] then
@@ -469,6 +502,18 @@ else
 	end
 end
 
+print()
+print("DEBUG #playable = "..tostring(#playable))
+print("DEBUG AllCoopPossible = "..tostring(AllCoopPossible))
+
+for k=1, #(multiBIS.Group or {}) do
+	print(
+		"DEBUG GROUP "..k..
+		" counted="..tostring(multiBIS.Group[k].counted)..
+		" NotAssigned="..tostring(multiBIS.Group[k].NotAssigned)
+	)
+end
+print()
 
 if #playable > 0 and AllCoopPossible then																--there are playable flights
 
