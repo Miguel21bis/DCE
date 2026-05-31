@@ -235,10 +235,10 @@ if VersionPackageICM then
 	-- print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
 	-- print("= = = = = = = = = = = = = Debug Mod? : "..tostring(Debug.debug))
 	-- print()
-	print("==============================================================")
+	print("============================================================================================================================")
 	print(" DCE CAMPAIGN GENERATOR")
 	print(" "..tostring(camp.title).."   |   "..tostring(camp.version))
-	print("==============================================================")
+	print("============================================================================================================================")
 	print()
 	print(" Script : "..tostring(showVersion))
 	-- print(" Lua    : "..tostring(_VERSION))
@@ -248,11 +248,11 @@ if VersionPackageICM then
 	print(" Country          : "..tostring(playerInfo.countryBAT))
 	print()
 	print(" Debug Mode       : "..(Debug.debug and "ENABLED" or "DISABLED"))
-	print("==============================================================")
+	print("============================================================================================================================")
 	print()
 
 else
-	print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
+	print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
 end
 	--===================================================================================
 	-- Ecran N°0 Choix next campaign mission
@@ -306,23 +306,11 @@ if input == "y" or input == "yes" then
 			-- ["w"] = true,--ne pas le mettre pour renouveller un choix possible
 		}
 
-		repeat																							-- adjustment A01 : robust form 
+		repeat
 
-			-- print("Select :\n"..
-			-- 	"S (S)ingleplayer  \n"..
-			-- 	"D Singleplayer with (D)edicated Server \n"..
-			-- 	"DF Singleplayer with (D)edicated Server, (F)ull plane on Deck \n"..
-			-- 	"\n"..
-			-- 	"C (C)hange type of plane\n"..
-			-- 	"\n"..
-			-- 	"T Multiplayer by choice of (T)arget \n"..
-			-- 	"N multiplayer by choice of (N)ATO".."\n"..
-			-- 	"\n"..
-			-- 	"O t(o)ols (tools for CampaignMaker and Coder)"
-			-- )
 
 			print("--------------------------------------------------------------")
-			print(" Reset campaign and generate first mission")
+			print(" Generate next campaign mission")
 			print("--------------------------------------------------------------")
 			print()
 			print(" [S] Singleplayer")
@@ -352,12 +340,12 @@ if input == "y" or input == "yes" then
 			end
 
 
-		--===================================================================================
-		-- "T Multiplayer by choice of (T)arget \n"..
-		-- "N multiplayer by choice of (N)ATO".."\n"..
-		--===================================================================================
+			--===================================================================================
+			-- "T Multiplayer by choice of (T)arget \n"..
+			-- "N multiplayer by choice of (N)ATO".."\n"..
+			--===================================================================================
 
-			if choix1 == "n" or  choix1 == "t"  then
+			if choix1 == "n" or choix1 == "t"  then
 				if choix1 == "t"  then
 
 				--===================================================================================
@@ -855,33 +843,7 @@ if input == "y" or input == "yes" then
 				print("Mission Generation Error. No eligible player flight in 20 attempts. Try again.\n\n")
 				break
 			else																							--no player flight could be assigned, advance time and try again
-			-- 	if Playability_criterium.active_unit == nil then
-			-- 		print("Player unit is not active.\n\n")
-			-- 	elseif Playability_criterium.base == nil then
-			-- 		print("Player airbase is not operational.\n\n")
-			-- 	elseif Playability_criterium.ready_aircraft == nil then
-			-- 		print("Player unit has no ready aircraft.\n\n")
-			-- 	elseif Playability_criterium.tot == nil then
-			-- 		print("Player aircraft type cannot operate at this time of day.\n\n")
-			-- 	elseif Playability_criterium.target == nil then
-			-- 		print("No eligible mission available for player.\n\n")
-			-- 	elseif Playability_criterium.target_firepower == nil then
-			-- 		print("Not enough ready aircraft for this mission.\n\n")
-			-- 	elseif Playability_criterium.weather == nil then
-			-- 		print("Player aircraft type cannot operate in this weather.\n\n")
-			-- 	elseif Playability_criterium.target_range == nil then
-			-- 		print("No eligible mission available for player.\n\n")
-			-- 	elseif Playability_criterium.coop == nil then
-			-- 		print("Not enough ready aircraft for all clients.\n\n")
-			-- 	elseif Multi.NbGroup and not PlayerFlight then
-			-- 		print("Not enough ready aircraft for all clients.\n\n")
-			-- 	elseif Playability_criterium.intercept == nil then
-			-- 		print("Ground alert intercept duty without launch.\n\n")
-			-- 	else
-			-- 		print("\nDebug C: Playability_criterium .\n")
-			-- 		_affiche(Playability_criterium, "Playability_criterium")
-			-- 	end
-			-- end
+			
 				for _, crit in ipairs(Playability_criterium) do
 					if crit.key == "active_unit" and crit.value == nil then
 						print("Player unit is not active.\n\n")
@@ -913,13 +875,25 @@ if input == "y" or input == "yes" then
 
 			end
 
-			if showVersion  then
-				print("0B1= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
-				print("= = = = = = = = = = = = = Script Version : "..tostring(showVersion).." = = Lua Version : "..tostring(_VERSION))
-				print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
+			if showVersion then
+				print("============================================================================================================================")
+				print(" DCE CAMPAIGN GENERATOR")
+				print(" "..tostring(camp.title).."   |   "..tostring(camp.version))
+				print("============================================================================================================================")
 				print()
+				print(" Script : "..tostring(showVersion))
+				-- print(" Lua    : "..tostring(_VERSION))
+				print()
+				print(" Player Aircraft : "..tostring(playerInfo.planeBAT))
+				print(" Squadron         : "..tostring(playerInfo.squadBAT))
+				print(" Country          : "..tostring(playerInfo.countryBAT))
+				print()
+				print(" Debug Mode       : "..(Debug.debug and "ENABLED" or "DISABLED"))
+				print("============================================================================================================================")
+				print()
+
 			else
-				print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
+				print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
 			end
 
 			if Debug.debug and not PlayerFlight then

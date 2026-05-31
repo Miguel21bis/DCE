@@ -2213,7 +2213,7 @@ db_loadouts = {
 								range = 900000,
 				firepower = 1,
 				vCruise = 250,
-				vAttack = 300,
+				vAttack = 500,
 				hCruise = 6096,
 				hAttack = 6096,
 				sortie_rate = 6,
@@ -2231,7 +2231,7 @@ db_loadouts = {
 			},
 		},
 		["Anti-ship Strike"] = {
-			["Antiship  Kh-22N*3"] = {
+			["Antiship  Kh-22N*1"] = {
 				minscore = 0.1,
 				support = {
 					-- Escort = true,
@@ -2244,28 +2244,28 @@ db_loadouts = {
 				expend = "All",
 				night = true,
 				adverseWeather = true,
-				range = 900000,
+				range = 2000000,
 				firepower = 1,
 				vCruise = 250,
-				vAttack = 300,
-				hCruise = 6096,
-				hAttack = 6096,
-				standoff = 200000,
+				vAttack = 500,
+				hCruise = 10000,
+				hAttack = 10000,
+				standoff = 350000,
 				ingress = 50000,
 				egress = 10000,
 				MaxAttackOffset = 60,
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-						[1] = {
-							CLSID = "{12429ECF-03F0-4DF6-BCBD-5D38B6343DE1}",
-						},
+						-- [1] = {
+						-- 	CLSID = "{12429ECF-03F0-4DF6-BCBD-5D38B6343DE1}",
+						-- },
 						[3] = {
 							CLSID = "{12429ECF-03F0-4DF6-BCBD-5D38B6343DE1}",
 						},
-						[5] = {
-							CLSID = "{12429ECF-03F0-4DF6-BCBD-5D38B6343DE1}",
-						},
+						-- [5] = {
+						-- 	CLSID = "{12429ECF-03F0-4DF6-BCBD-5D38B6343DE1}",
+						-- },
 					},
 					fuel = 50000,
 					flare = 48,
@@ -2273,7 +2273,7 @@ db_loadouts = {
 					gun = 100,
 				},
 			},
-			["Antiship TF80s Kh-22N*3"] = {
+			["Antiship TF80s Kh-22N*2"] = {
 				minscore = 0.1,
 				support = {
 					-- Escort = false,
@@ -2286,13 +2286,13 @@ db_loadouts = {
 				expend = "All",
 				night = true,
 				adverseWeather = true,
-				range = 900000,
+				range = 2000000,
 				firepower = 1,
 				vCruise = 250,
 				vAttack = 300,
-				hCruise = 6096,
-				hAttack = 6096,
-				standoff = 200000,
+				hCruise = 10000,
+				hAttack = 10000,
+				standoff = 350000,
 				ingress = 50000,
 				egress = 10000,
 				MaxAttackOffset = 60,
@@ -2302,9 +2302,9 @@ db_loadouts = {
 						[1] = {
 							CLSID = "{12429ECF-03F0-4DF6-BCBD-5D38B6343DE1}",
 						},
-						[3] = {
-							CLSID = "{12429ECF-03F0-4DF6-BCBD-5D38B6343DE1}",
-						},
+						-- [3] = {
+						-- 	CLSID = "{12429ECF-03F0-4DF6-BCBD-5D38B6343DE1}",
+						-- },
 						[5] = {
 							CLSID = "{12429ECF-03F0-4DF6-BCBD-5D38B6343DE1}",
 						},

@@ -241,10 +241,10 @@ if VersionPackageICM then
 	-- print("= = = = = = = = = = = = = Debug Mod? : "..tostring(Debug.debug))
 	-- print()
 
-	print("==============================================================")
+	print("============================================================================================================================")
 	print(" DCE CAMPAIGN GENERATOR")
 	print(" "..tostring(camp.title).."   |   "..tostring(camp.version))
-	print("==============================================================")
+	print("============================================================================================================================")
 	print()
 	print(" Script : "..tostring(showVersion))
 	-- print(" Lua    : "..tostring(_VERSION))
@@ -254,11 +254,11 @@ if VersionPackageICM then
 	print(" Country          : "..tostring(playerInfo.countryBAT))
 	print()
 	print(" Debug Mode       : "..(Debug.debug and "ENABLED" or "DISABLED"))
-	print("==============================================================")
+	print("============================================================================================================================")
 	print()
 
 else
-	print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
+	print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
 end
 	--===================================================================================
 	-- Ecran N°0 Choix next mission
@@ -833,13 +833,25 @@ repeat
 			
 		end
 
-		if showVersion  then
-			print("0A1= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
-			print("= = = = = = = = = = = = = Script Version : "..tostring(showVersion).." = = Lua Version : "..tostring(_VERSION))
-			print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
+		if showVersion then
+			print("============================================================================================================================")
+			print(" DCE CAMPAIGN GENERATOR")
+			print(" "..tostring(camp.title).."   |   "..tostring(camp.version))
+			print("============================================================================================================================")
 			print()
+			print(" Script : "..tostring(showVersion))
+			-- print(" Lua    : "..tostring(_VERSION))
+			print()
+			print(" Player Aircraft : "..tostring(playerInfo.planeBAT))
+			print(" Squadron         : "..tostring(playerInfo.squadBAT))
+			print(" Country          : "..tostring(playerInfo.countryBAT))
+			print()
+			print(" Debug Mode       : "..(Debug.debug and "ENABLED" or "DISABLED"))
+			print("============================================================================================================================")
+			print()
+
 		else
-			print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
+			print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
 		end
 
 		if Debug.debug and not PlayerFlight then

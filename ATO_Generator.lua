@@ -164,7 +164,7 @@ local function registerPlayerFailure(data)
 	PlayerAssignFailure[#PlayerAssignFailure + 1] = {
 
 		draftId = data.draftId,
-		type = data.type,
+		unitType = data.unitType or "type_unknown",
 
 		requestedPlane = data.requestedPlane,
 		requestedTask = data.requestedTask,
@@ -274,11 +274,25 @@ local function validateStep(ctx, stepName)
 	return true
 end
 
+
 local function rejectStep(draft, step, reason, data, bloc, line)
 
 	if not draft.rejectReasons then
 		draft.rejectReasons = {}
 	end
+
+	if not draft.rejectStats then
+	draft.rejectStats = {}
+	end
+
+	-- draft.rejectStats[reason] =
+	-- 	(draft.rejectStats[reason] or 0) + 1
+
+	local rejectKey =
+	tostring(step) .. "|" .. tostring(reason)
+
+	draft.rejectStats[rejectKey] =
+		(draft.rejectStats[rejectKey] or 0) + 1
 
 	draft.rejectReasons[#draft.rejectReasons + 1] = {
 		step = step,
@@ -323,38 +337,85 @@ local function rejectStep(draft, step, reason, data, bloc, line)
 	
 	-- if isPlayerRelatedDraft(draft) and draft.clientPlayer and not draft.playerFailureRegistered then
 	-- if draft.clientPlayer and not draft.playerFailureRegistered then
-	if isPlayerRelatedDraft(draft) and not draft.playerFailureRegistered then
-		draft.playerFailureRegistered = true
+	-- if isPlayerRelatedDraft(draft) and not draft.playerFailureRegistered then
+	-- 	draft.playerFailureRegistered = true
 
-		registerPlayerFailure({
+	-- 	registerPlayerFailure({
 
-			draftId = draft.draftId,
-			type = draft.type,
+	-- 		draftId = draft.draftId,
+	-- 		unitType = draft.unitType,
 
-			requestedPlane = draft.type,
-			requestedTask = draft.task,
-			requestedNb = draft.number,
+	-- 		requestedPlane = draft.type,
+	-- 		requestedTask = draft.task,
+	-- 		requestedNb = draft.number,
 
-			stage = bloc,
-			reason = reason,
-			line = line,
+	-- 		stage = bloc,
+	-- 		reason = reason,
+	-- 		line = line,
 
-			details = data,
+	-- 		details = data,
 
-			debugText = reason,
-		})
-	else
-		-- if draft.unit.name == 'VFA-106' then
-		-- 	print("Draft_draftId: "..tostring(draft.draftId).." name: "..tostring(draft.unit.name)
-		-- 	.." isPlayerRelatedDraft?: "..tostring(isPlayerRelatedDraft(draft))
-		-- 	.." player?: "..tostring(draft.unit.player)
-		-- 	.." draft.playerFailureRegistered?: "..tostring(draft.playerFailureRegistered)
-		-- 	.." rejected at step "..tostring(step).." for reason: "..tostring(reason).." (not player related or player unit not detected)")	
-		-- 	os.execute 'pause'
-		-- end
-	end
+	-- 		debugText = reason,
+	-- 	})
+	-- end
+
+	
 end
 
+local function getDominantRejectReason(draft)
+
+	if not draft.rejectStats then
+		return nil
+	end
+
+	local priority = {
+
+		no_aircraft = 100,
+		insufficient_aircraft = 90,
+
+		range = 80,
+
+		weather = 70,
+
+		no_loadoutEligible = 60,
+
+		loadout_day_only = 55,
+		loadout_night_only = 55,
+
+		task = 40,
+
+		no_target_ATO = 20,
+		no_target_active = 10,
+	}
+
+	local bestReason
+	local bestPriority = -1
+
+	-- for reason,_ in pairs(draft.rejectStats) do
+
+	-- 	local p = priority[reason] or 0
+
+	-- 	if p > bestPriority then
+	-- 		bestPriority = p
+	-- 		bestReason = reason
+	-- 	end
+	-- end
+
+	for rejectKey,_ in pairs(draft.rejectStats) do
+
+		local reason =
+			string.match(rejectKey, "|(.+)$")
+
+		local p = priority[reason] or 0
+
+		if p > bestPriority then
+			bestPriority = p
+			bestReason = reason
+		end
+	end
+
+	return bestReason
+end
 
 --Ajoute une raison de rejet dans le draft
 --Pourquoi: comprendre pourquoi un draft/squad/target est refusé
@@ -600,7 +661,9 @@ local function computeTOTWindow(draftContext, currentLoadout, Daytime, mission_i
 			draftContext.state.tot_from = 0																					--from mission start
 			draftContext.state.tot_to = mission_ini.dawn - camp.time																	--to dawn
 		end
+		
 		debug = debug .. " C FIN: tot_to "..draftContext.state.tot_to
+		
 	end
 
 
@@ -1643,7 +1706,9 @@ local function buildDraftSorties(
 			end
 		end
 
+		-- draftContext.generatedSortie = true
 		draftContext.generatedSortie = true
+		draftContext.anyMissionGenerated = true
 
 		validateStep(draftContext, "sortie")
 
@@ -2238,11 +2303,13 @@ for sideName, units in pairs(oob_air) do
 		--Pourquoi: centraliser l'état du draft dès le début du pipeline
 		local draftContext = {
 			--debug
-			debugId = draftId,
+			-- debugId = draftId,
+			draftId = draftId,
 			rejectReasons = {},
 			rejectCount = {},
 			finalReject = nil,
 			generatedSortie = false,
+			anyMissionGenerated = false,
 
 			--unit runtime
 			unit = unit,
@@ -2448,9 +2515,47 @@ for sideName, units in pairs(oob_air) do
 							currentLoadout.day = true
 						end
 
+						local loadoutCompatible = true
+
+						if Daytime == "night" and currentLoadout.day and not currentLoadout.night then
+
+							loadoutCompatible = false
+
+							rejectStep( draftContext, "loadout", "loadout_day_only",
+								{
+									loadout = currentLoadout.loadoutName,
+									day = currentLoadout.day,
+									night = currentLoadout.night,
+									missionDaytime = Daytime,
+								},
+								"BLOCK_A",
+								SafeGetLine()
+							)
+						elseif Daytime == "day" and currentLoadout.night and not currentLoadout.day then
+
+							loadoutCompatible = false
+
+							rejectStep(draftContext, "loadout", "loadout_night_only",
+								{
+									loadout = currentLoadout.loadoutName,
+									day = currentLoadout.day,
+									night = currentLoadout.night,
+									missionDaytime = Daytime,
+								},
+								"BLOCK_A",
+								SafeGetLine()
+							)
+						end
+
+						--risque contient encore l'ancienne valeur du loadout précédent.
+						draftContext.state.tot_from = 0
+						draftContext.state.tot_to   = 0
+
 						--*****************************
 						--get possible Time on Target
-						draftContext = computeTOTWindow(draftContext, currentLoadout, Daytime, mission_ini, camp, task, draftId, isDebugModeA2)
+						if loadoutCompatible then
+							draftContext = computeTOTWindow(draftContext, currentLoadout, Daytime, mission_ini, camp, task, draftId, isDebugModeA2)
+						end
 						--*****************************
 
 						if draftContext.state.tot_to ~= 0 then
@@ -2464,20 +2569,21 @@ for sideName, units in pairs(oob_air) do
 							end
 
 							local i_timmer01 = 0
-							for target_side_name, target_side in pairs(targetlist) do											--iterate through sides in targetlist				
+							for target_sideName, targets in pairs(targetlist) do											--iterate through sides in targetlist				
 								i_timmer01 = i_timmer01 +1
-								if sideName == target_side_name then																--if the target is hostile
+								if sideName == target_sideName then																--if the target is hostile
 									local totalTarget = 0
-									for target_name, target in pairs(target_side) do
+									for target_name, target in pairs(targets) do
 										totalTarget = totalTarget + 1
 									end
 
 									local iTarget = 0
-									for targetN, target in pairs(target_side) do											--iterate through all hostile targets
+									for targetN, target in pairs(targets) do											--iterate through all hostile targets
 										iTarget = iTarget + 1
 										if iTarget ~= 1 then
 											draftId = draftId + 1
 										end
+										
 										local target_name = target.titleName
 
 										if not target.inactive and target.ATO then											--if target is active and should be added to ATO
@@ -2574,54 +2680,102 @@ for sideName, units in pairs(oob_air) do
 						else
 							-- if draftContext.state.tot_to ~= 0 then
 						end
+
 					end
 				end
+			end
+
+			if isPlayerRelatedDraft(draftContext) and not draftContext.generatedSortie and next(draftContext.rejectStats or {}) then
+
+				local reason =
+					getDominantRejectReason(draftContext)
+
+				registerPlayerFailure({
+
+					-- draftId = draftContext.debugId,
+					draftId = draftContext.draftId,
+
+					requestedPlane = unit.type,
+					requestedTask = "MULTI",
+					requestedNb = 1,
+
+					stage = "BLOCK_A",
+
+					reason = reason,
+
+					details = DeepCopy(draftContext.rejectStats),
+
+					debugText = reason,
+				})
 			end
 		end
 
+
+
 		--debug final reject
 		--Pourquoi: afficher précisément le dernier blocage rencontré pour ce squad
-		if atoMainTaskFound and not draftContext.generatedSortie then
-		-- if atoMainTaskFound and draftContext.finalReject and not draftContext.generatedSortie then
+		-- if atoMainTaskFound and not draftContext.generatedSortie then
+
+		if atoMainTaskFound and not draftContext.generatedSortie and not draftContext.anyMissionGenerated then
 
 			local reject = draftContext.finalReject
 
-			local txt =
-				(unit and unit.name or "nil")
-				.." | "..unit.type
-				.." | finalRejectStep: "..tostring(reject and reject.step or "nil")
-				.." | reason: "..tostring(reject and reject.reason or "nil")
-				.." | ==> | "
+			local dominantReason = getDominantRejectReason(draftContext)
 
-			if reject and reject.data then
+			local rejectStatsTxt = ""
 
-				if type(reject.data) == "table" then
-
-					for k, v in pairs(reject.data) do
-						txt = txt.." | "..tostring(k)..": "..tostring(v)
-					end
-				elseif type(reject.data) == "string" then
-						txt = txt.." | "..reject.data
+			if draftContext.rejectStats then
+				for reason, count in pairs(draftContext.rejectStats) do
+					rejectStatsTxt =
+						rejectStatsTxt
+						.. reason
+						.. "="
+						.. count
+						.. " "
 				end
-				rejectStep(draftContext, 
-					tostring(reject and reject.step or "nil"), 
-					tostring(reject and reject.reason or "nil"), 
-					reject.data,
-					"BLOCK_A",
-					SafeGetLine()
-				)
-											
 			end
 
-			print("\r\n"..txt)
+			if not reject or (reject and reject.reason ~= "inactive") then
 
-			if not reject or not reject.step or not reject.reason then
-				printDraftProgressReport(unit.name)
+				print("\n========== NO GENERATION REASON ==========")
+				
+				local txt =
+					(unit and unit.name or "nil")
+					.." | "..unit.type
+					.." | finalRejectStep: "..tostring(reject and reject.step or "nil")
+					.." | finalReason: "..tostring(reject and reject.reason or "nil")
+					.." | dominantReason: "..tostring(dominantReason or "nil")
+					.." | stats: "..rejectStatsTxt
+					.." | ==> | "
+
+				if reject and reject.data then
+
+					if type(reject.data) == "table" then
+
+						for k, v in pairs(reject.data) do
+							txt = txt.." | "..tostring(k)..": "..tostring(v)
+						end
+					elseif type(reject.data) == "string" then
+							txt = txt.." | "..reject.data
+					end
+					rejectStep(draftContext, 
+						tostring(reject and reject.step or "nil"), 
+						tostring(reject and reject.reason or "nil"), 
+						reject.data,
+						"BLOCK_A",
+						SafeGetLine()
+					)
+												
+				end
+
+				print("\r\n"..txt)
+				print("===========================================\n")
+
+				-- if not reject or not reject.step or not reject.reason then
+				-- 	printDraftProgressReport(unit.name)
+				-- end
+
 			end
-			-- if multiPlaneSet[sideName][unit.name] then
-
-			-- end
-
 		end
 	end
 end
