@@ -33,6 +33,8 @@ PlayerAssignFailure = {}
 
 -- Report des échecs de génération MAIN pour les demandes joueurs
 PlayerMainTaskFailure = {}
+-- Etat final de génération par squad
+local SquadGenerationStatus = {}
 
 DraftProgress = {}
 
@@ -415,6 +417,42 @@ local function getDominantRejectReason(draft)
 	end
 
 	return bestReason
+end
+
+-- Calcule un score représentatif d'échec
+-- Pourquoi : conserver uniquement le rejet le plus significatif d'un squad
+local function computeRejectScore(draftContext)
+
+	if not draftContext
+	or not draftContext.rejectStats then
+		return 0
+	end
+
+	local score = 0
+
+	for reason, count in pairs(draftContext.rejectStats) do
+
+		if reason == "no_loadoutEligible" then
+			score = score + count * 100
+
+		elseif reason == "range" then
+			score = score + count * 80
+
+		elseif reason == "weather" then
+			score = score + count * 60
+
+		elseif reason == "loadout_day_only" then
+			score = score + count * 50
+
+		elseif reason == "loadout_night_only" then
+			score = score + count * 50
+
+		elseif reason == "no_target_active" then
+			score = score + count * 1
+		end
+	end
+
+	return score
 end
 
 --Ajoute une raison de rejet dans le draft
@@ -2299,6 +2337,21 @@ for sideName, units in pairs(oob_air) do
 			print("AtoG attention, the player's squad is inactive. Activate it via DCE_Manager or directly in Init\\oob_air and Active\\oob_air ") os.execute 'pause'
 		end
 
+		if not SquadGenerationStatus[unit.name] then
+
+			SquadGenerationStatus[unit.name] = {
+
+				unitName = unit.name,
+				unitType = unit.type,
+
+				mainGenerated = false,
+				supportGenerated = false,
+
+				bestReject = nil,
+				bestScore = -1,
+			}
+		end
+
 		--Contexte local du draft
 		--Pourquoi: centraliser l'état du draft dès le début du pipeline
 		local draftContext = {
@@ -2716,65 +2769,89 @@ for sideName, units in pairs(oob_air) do
 		--Pourquoi: afficher précisément le dernier blocage rencontré pour ce squad
 		-- if atoMainTaskFound and not draftContext.generatedSortie then
 
-		if atoMainTaskFound and not draftContext.generatedSortie and not draftContext.anyMissionGenerated then
+		-- if atoMainTaskFound and not draftContext.generatedSortie and not draftContext.anyMissionGenerated then
 
-			local reject = draftContext.finalReject
+		-- 	local reject = draftContext.finalReject
 
-			local dominantReason = getDominantRejectReason(draftContext)
+		-- 	local dominantReason = getDominantRejectReason(draftContext)
 
-			local rejectStatsTxt = ""
+		-- 	local rejectStatsTxt = ""
 
-			if draftContext.rejectStats then
-				for reason, count in pairs(draftContext.rejectStats) do
-					rejectStatsTxt =
-						rejectStatsTxt
-						.. reason
-						.. "="
-						.. count
-						.. " "
-				end
-			end
+		-- 	if draftContext.rejectStats then
+		-- 		for reason, count in pairs(draftContext.rejectStats) do
+		-- 			rejectStatsTxt =
+		-- 				rejectStatsTxt
+		-- 				.. reason
+		-- 				.. "="
+		-- 				.. count
+		-- 				.. " "
+		-- 		end
+		-- 	end
 
-			if not reject or (reject and reject.reason ~= "inactive") then
+		-- 	if not reject or (reject and reject.reason ~= "inactive") then
 
-				print("\n========== NO GENERATION REASON ==========")
+		-- 		print("\n========== NO GENERATION REASON ==========")
 				
-				local txt =
-					(unit and unit.name or "nil")
-					.." | "..unit.type
-					.." | finalRejectStep: "..tostring(reject and reject.step or "nil")
-					.." | finalReason: "..tostring(reject and reject.reason or "nil")
-					.." | dominantReason: "..tostring(dominantReason or "nil")
-					.." | stats: "..rejectStatsTxt
-					.." | ==> | "
+		-- 		local txt =
+		-- 			(unit and unit.name or "nil")
+		-- 			.." | "..unit.type
+		-- 			.." | finalRejectStep: "..tostring(reject and reject.step or "nil")
+		-- 			.." | finalReason: "..tostring(reject and reject.reason or "nil")
+		-- 			.." | dominantReason: "..tostring(dominantReason or "nil")
+		-- 			.." | stats: "..rejectStatsTxt
+		-- 			.." | ==> | "
 
-				if reject and reject.data then
+		-- 		if reject and reject.data then
 
-					if type(reject.data) == "table" then
+		-- 			if type(reject.data) == "table" then
 
-						for k, v in pairs(reject.data) do
-							txt = txt.." | "..tostring(k)..": "..tostring(v)
-						end
-					elseif type(reject.data) == "string" then
-							txt = txt.." | "..reject.data
-					end
-					rejectStep(draftContext, 
-						tostring(reject and reject.step or "nil"), 
-						tostring(reject and reject.reason or "nil"), 
-						reject.data,
-						"BLOCK_A",
-						SafeGetLine()
-					)
+		-- 				for k, v in pairs(reject.data) do
+		-- 					txt = txt.." | "..tostring(k)..": "..tostring(v)
+		-- 				end
+		-- 			elseif type(reject.data) == "string" then
+		-- 					txt = txt.." | "..reject.data
+		-- 			end
+		-- 			rejectStep(draftContext, 
+		-- 				tostring(reject and reject.step or "nil"), 
+		-- 				tostring(reject and reject.reason or "nil"), 
+		-- 				reject.data,
+		-- 				"BLOCK_A",
+		-- 				SafeGetLine()
+		-- 			)
 												
+		-- 		end
+
+		-- 		print("\r\n"..txt)
+		-- 		print("===========================================\n")
+
+		-- 		-- if not reject or not reject.step or not reject.reason then
+		-- 		-- 	printDraftProgressReport(unit.name)
+		-- 		-- end
+
+		-- 	end
+		-- end
+
+		if atoMainTaskFound and not draftContext.generatedSortie then
+
+			local squadStatus = SquadGenerationStatus[unit.name]
+
+			if squadStatus then
+
+				local score = computeRejectScore(draftContext)
+
+				if score > squadStatus.bestScore then
+
+					squadStatus.bestScore = score
+
+					squadStatus.bestReject = {
+
+						finalReject = DeepCopy(draftContext.finalReject),
+
+						dominantReason = getDominantRejectReason(draftContext),
+
+						stats = DeepCopy(draftContext.rejectStats),
+					}
 				end
-
-				print("\r\n"..txt)
-				print("===========================================\n")
-
-				-- if not reject or not reject.step or not reject.reason then
-				-- 	printDraftProgressReport(unit.name)
-				-- end
-
 			end
 		end
 	end
@@ -3145,6 +3222,13 @@ local function addSupportToDraft(
 			support_requirement = support_requirement,
 			client = unitSupport.client,
 		}
+
+		local squadStatus = SquadGenerationStatus[unitSupport.name]
+		-- print("create support AAA sortie for squad "..unitSupport.name.." with task "..sptTask.." escort_num: "..tostring(escort_num).." free_slot: "..tostring(free_slot and "true" or "false") 	)
+		if squadStatus then
+			squadStatus.supportGenerated = true
+			-- print("create support BBB squadStatus.supportGenerated set to true for squad "..unitSupport.name)
+		end
 
 	end
 
@@ -3828,29 +3912,22 @@ for sideName, draftT in pairs(draftSorties) do
 														if route and route.lenght <= uSupportloadouts[l].range * 2 then		--escort route lenght is within range capability of loadout
 
 															addSupportToDraft(
-															draft,
-															unitSupport,
-															uSupportloadouts[l],
-															sptTask,
-															route,
-															side,
-															playable_II,
-															overideMP_B,
-															isDebugModeB,
-															remain_air_total,
-															support_requirement,
-															support_tot_from,
-															support_tot_to,
-															wk
-															)--multiPlaneSet,
+																draft,
+																unitSupport,
+																uSupportloadouts[l],
+																sptTask,
+																route,
+																side,
+																playable_II,
+																overideMP_B,
+																isDebugModeB,
+																remain_air_total,
+																support_requirement,
+																support_tot_from,
+																support_tot_to,
+																wk
+																)--multiPlaneSet,
 
-															-- if result then
-															--     temp_ground_total = result.ground_total
-															--     temp_air_total = result.air_total
-															--     temp_score = result.score
-															--     temp_tot_from = result.tot_from
-															--     temp_tot_to = result.tot_to
-															-- end
 														else
 
 															local details = {
@@ -4033,26 +4110,23 @@ local function createATO_table(draftPriority)
 
 
 				local isDebugModeC =
-					-- Debug.Generator.affiche and string.find(Debug.Generator.chapter, "C")
-					-- 	and ( Debug.Generator.SpySquad and Debug.Generator.SpySquad == draft.name
-					-- 	or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name ))
-
-						Debug.Generator.affiche
-						and string.find(Debug.Generator.chapter, "C")
-						and (
-							(
-								Debug.Generator.SpySquad
-								and Debug.Generator.SpySquad == draft.name
-								and Debug.Generator.SpyTask == draft.task
-							)
-							or (
-								not Debug.Generator.SpySquad
-								and (
-									Debug.Generator.SpyTask == draft.task
-									or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name)
-								)
+					
+					Debug.Generator.affiche
+					and string.find(Debug.Generator.chapter, "C")
+					and (
+						(
+							Debug.Generator.SpySquad
+							and Debug.Generator.SpySquad == draft.name
+							and Debug.Generator.SpyTask == draft.task
+						)
+						or (
+							not Debug.Generator.SpySquad
+							and (
+								Debug.Generator.SpyTask == draft.task
+								or (Debug.Generator.SpyTarget and Debug.Generator.SpyTarget == draft.target_name)
 							)
 						)
+					)
 
 				if isDebugModeC then
 					debugLog(draft.id.." AtoG passe C_00 "..draft.type.." "..draft.task.." "..draft.score)
@@ -4073,17 +4147,6 @@ local function createATO_table(draftPriority)
 							local available = AcftAvail[draft.name].unassigned											--shortcut for available aircraft for this draft sortie					
 
 							local requestedNumber = draft.number -- copie locale de travail pour éviter de modifier le draft original et provoquer des effets de bord entre validations
-
-							--TODO ajouter ici la possibilité d'autre squad de les aider, donc leur qté d'avion dispo
-							--pass packmax
-							-- local passPackmax
-							-- if multipackByTargetName[draft.target_name]["nbPack"] > 1 then
-							-- 	if multipackByTargetName[draft.target_name].supporTotal >= 2 then 
-							-- 		--TODO, ici il faut vraiment trouver le nb de support qu'il aura apres
-							-- 		--c'est la clef
-							-- 		passPackmax = true
-							-- 	end
-							-- end
 
 							local passPackmax
 							if draft.target.firepower and draft.target.firepower.packmax and draft.target.firepower.packmax > 1 then
@@ -4110,17 +4173,6 @@ local function createATO_table(draftPriority)
 									end
 
 									if (draft.flights == nil or draft.number <= available or draft.main_overideMP or passPackmax) and limitMP then											--for targets with station time (multiple flights), continue only if sufficient aircraft are availabe. Additional lower scored sorties with less airctaft required will come later 
-
-										--adjust the number of requested aircraft to the number of available aircraft
-										-- if draft.number > available and not draft.main_overideMP then
-
-										-- 	draft.number = available
-
-										-- 	if isDebugModeC then
-										-- 		debugLog(draft.id.." AtoG passe C_00_c  number "..tostring(draft.number))
-										-- 	end
-
-										-- end
 
 										if requestedNumber > available and not draft.main_overideMP then
 
@@ -4786,6 +4838,14 @@ local function createATO_table(draftPriority)
 
 													if ATO[side][pack_n][arg_Role] and ATO[side][pack_n][arg_Role] ~= nil then
 														table.insert(ATO[side][pack_n][arg_Role], flight)
+
+														local squadStatus = SquadGenerationStatus[flight.name]
+														-- print("create flight AAA "..flight.name.." for role "..arg_Role.." in package "..pack_n.." with "..assigned.." aircraft, total firepower: "..flight.firepower)
+														if squadStatus then
+															squadStatus.mainGenerated = true
+															-- print("SquadGenerationStatus BBB for "..flight.name.." mainGenerated set to true")
+														end
+
 													else
 														-- if isDebugModeC then
 															debugLog(draft.id.." AtoG passe C_12 ERROR ATO = nil arg_Role "..arg_Role)
@@ -4970,6 +5030,7 @@ local function createATO_table(draftPriority)
 		end
 	end
 end
+
 
 
 -- _affiche(Draft_sorties.blue[1], "Draft_sorties.blue[1]")
@@ -5164,6 +5225,27 @@ for sidePrio, tableauPrio in pairs(targetListPrio) do
 	end
 end
 
+
+print("\n========== FINAL SQUAD REPORT ==========\n")
+
+for squadName, status in pairs(SquadGenerationStatus) do
+
+	if not status.mainGenerated and not status.supportGenerated then
+
+		print(
+			squadName
+			.." | "..status.unitType
+			.." | dominantReason: "
+			..tostring(
+				status.bestReject
+				and status.bestReject.dominantReason
+			)
+		)
+	end
+end
+
+print("\n========================================\n")
+
 -- local allFlightName_AtoG = {}
 -- --assign le nom des packages
 -- for _, packages in pairs(ATO) do
@@ -5275,15 +5357,15 @@ end
 
 if Debug.debug and Debug.Generator.affiche and string.find(Debug.Generator.chapter, "C") then
 
-	local camp_str = "ATO = " .. TableSerialization(ATO, 0)
-	local campFile = io.open("Debug/ATO_1_AtoGenerator.lua", "w")
-	if campFile then
-		campFile:write(camp_str)
-		campFile:close()
-	end
+	-- local camp_str = "ATO = " .. TableSerialization(ATO, 0)
+	-- local campFile = io.open("Debug/ATO_1_AtoGenerator.lua", "w")
+	-- if campFile then
+	-- 	campFile:write(camp_str)
+	-- 	campFile:close()
+	-- end
 
-	camp_str = "camp = " .. TableSerialization(camp, 0)
-	campFile = io.open("Debug/CAMP_Ato_Generator.lua", "w")
+	local camp_str = "camp = " .. TableSerialization(camp, 0)
+	local campFile = io.open("Debug/CAMP_Ato_Generator.lua", "w")
 	if campFile then
 		campFile:write(camp_str)
 		campFile:close()

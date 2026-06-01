@@ -7129,6 +7129,14 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 				end
 
+				for i = 1, #group.route.points do
+					--['briefing_name'] = 'IP'
+					if group.route.points[i]["name"] and group.route.points[i]["name"] == "Target" then
+						info06 = info06.." Target_ETA : "..group.route.points[i].ETA.." "
+						break
+					end
+				end
+
 				if waypoints[#waypoints]["airdromeId"] then				
 					info06 = info06.." airdromeId LANDING "..waypoints[#waypoints]["airdromeId"]				
 				end	

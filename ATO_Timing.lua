@@ -2,7 +2,7 @@
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_Timing.lua"] = "1.7.71"
+versionDCE["ATO_Timing.lua"] = "1.7.72"
 ------------------------------------------------------------------------------------------------------- 
 -- Chaque waypoint contient sa propre alt, alt_type, speed, et speed_locked.
 -- Quand l’IA se déplace d’un waypoint N vers un waypoint N+1 :
@@ -69,17 +69,6 @@ for sideName, packs in pairs(ATO) do
 		end
 	end
 
-	-- for n = 1, #pack do
-		-- if PlayerFlight and camp.client then																				-- modification M11.j : Multiplayer
-			-- for i=2, Multi.NbGroup do	
-				-- if side == camp.client[i].side and n == camp.client[i].pack_n and not tabPackStudied[n] then
-					-- table.insert(pack_n, tabPackPrioritaire+1, n)
-					-- tabPackPrioritaire = tabPackPrioritaire+1																			--insert at the end of table
-					-- tabPackStudied[n] = true
-				-- end
-			-- end																				--insert at the end of table
-		-- end
-	-- end
 
 	--iterate through package numbers (player package always comes first)
 	for k,p in ipairs(pack_n) do
@@ -87,11 +76,6 @@ for sideName, packs in pairs(ATO) do
 		local player_start_shift = 0																			--waypoint time shift to start player at mission start
 
 		local mainFlight = packs[p].main[1]
-		local mainLoadout = mainFlight.loadout
-
-		--TODO ajouter encore du temps ici
-
-		--TODO faire un player start uniquement client
 		local tot = 0 																								--set time on target in seconds after mission start
 
 		if packs[p].main and mainFlight and mainFlight.tot then
@@ -112,6 +96,14 @@ for sideName, packs in pairs(ATO) do
 		if mainFlight.tot then
 			tot = mainFlight.tot																			--set package tot
 			TOTtable[sideName][mainFlight.target_name] = tot															--store TOT for target
+		
+			print(
+				"TOT REUSE",
+				sideName,
+				mainFlight.target_name,
+				"stored="..tostring(TOTtable[sideName][mainFlight.target_name])
+			)
+		
 		elseif TOTtable[sideName][mainFlight.target_name] then														--target already has a TOT assigned from another package
 			if mainFlight.standoff == nil or mainFlight.standoff <= 15000 then		--if package overflies the target, add 15 seconds tot interval between multi-packages
 				TOTtable[sideName][mainFlight.target_name] = TOTtable[sideName][mainFlight.target_name] + 15
@@ -119,12 +111,17 @@ for sideName, packs in pairs(ATO) do
 			tot = TOTtable[sideName][mainFlight.target_name]															--give this package the same TOT
 
 			local earliest = mainFlight.tot_from + mission_ini.startup_time_player   --600														--earliest TOT is 10 minutes after tot_from to make sure it is at least 10 minutes after mission start
+			
+			
 			if mainFlight.standoff and mainFlight.standoff > 0 then															--for strikes 
 				if mainFlight.vAttack and mainFlight.vAttack > 0 then
 					earliest = earliest + mainFlight.standoff / mainFlight.vAttack
 				else
 					print("AtoT Critical: invalid vAttack for "..tostring(mainFlight.type))
 				end		--earliest TOT to make sure that aircraft always spawn 10 minutes ahead of IP at mission start
+			
+			else
+			
 			end
 			local latest = mainFlight.tot_to																--latest TOT
 
@@ -189,8 +186,7 @@ for sideName, packs in pairs(ATO) do
 				--divise le temps possible par quartTime
 				-- pour peupler chaque quart par un TOT, si c'est possible
 				local randtot
-				if mainFlight.task ~= "AWACS" and mainFlight.task ~= "Refueling" and mainFlight.task ~= "SAR"
-					and mainFlight.task ~= "Intercept" then
+				if mainFlight.task ~= "AWACS" and mainFlight.task ~= "Refueling" and mainFlight.task ~= "SAR" and mainFlight.task ~= "Intercept" then
 					local i = 1
 					local i_choice = 1
 					repeat
@@ -201,7 +197,6 @@ for sideName, packs in pairs(ATO) do
 					if i > 20 then
 						-- print("AtoT i: "..i.." reset Quart ")
 						TOT_TimeOccupation[#TOT_TimeOccupation+1]= DeepCopy(timingQuarOccupation)
-						-- timingQuarOccupation = {blue = {0,0,0,0}, red = {0,0,0,0}}
 						timingQuarOccupation[sideName] =  {0,0,0,0}
 						repeat
 							i_choice = math.random(1, 4)
@@ -215,7 +210,13 @@ for sideName, packs in pairs(ATO) do
 						quartTime = 1
 					end
 
-					randtot = math.random(0, quartTime)
+					local quartStart = earliest + ((i_choice - 1) * quartTime)
+					local quartEnd   = quartStart + quartTime
+
+					--ERROR en bas, ne respecte pas le startup_time_player
+					-- randtot = math.random(0, quartTime)
+
+					randtot = math.random(quartStart, quartEnd)
 					timingQuarOccupation[sideName][i_choice] = randtot.." _ "..mainFlight.target_name
 				else
 					earliest = math.floor(earliest)
@@ -237,20 +238,6 @@ for sideName, packs in pairs(ATO) do
 
 		local main_vCruise = mainFlight.vCruise															--set package cruise speed
 		local main_vAttack = mainFlight.vAttack															--set package attack speed
-
-		-- --recherche la vitesse la plus faible du package
-		-- local vCruiseMini = 999999
-		-- local vAttackMini = 999999
-		-- for role,flight in pairs(pack[p]) do
-		-- 	for f = 1, #flight do	
-		-- 		if flight[f].loadout.vCruise < vCruiseMini then
-		-- 			vCruise = vCruiseMini
-		-- 		end
-		-- 		if flight[f].loadout.vAttack < vAttackMini then
-		-- 			vAttack = vAttackMini
-		-- 		end
-		-- 	end
-		-- end
 
 		local target_wp = 1																						--local variable to store the target waypoint number
 		local partial_station = 0																				--local variable to hold time that an orbiting flight is already on station at mission start
@@ -484,6 +471,15 @@ for sideName, packs in pairs(ATO) do
 				local eta = tot + flight[f].eta_offset
 
 				if role == "main" and f == 1 then
+					print(
+						"TOT STORE",
+						sideName,
+						mainFlight.target_name,
+						"tot="..tostring(tot),
+						"eta="..tostring(eta),
+						"offset="..tostring(flight[f].eta_offset)
+					)
+
 					TOTtable[sideName][mainFlight.target_name] = eta
 				end
 
@@ -948,20 +944,6 @@ for side, pack in pairs(ATO) do
 end
 
 
-
--- --complete unit unavailable table with zero entries for unassigned aircraft
--- for side,unit in pairs(oob_air) do																					--iterate through all sides
--- 	for n = 1, #unit do																								--iterate through all units
--- 		if AcftAvail[unit[n].name] and AcftAvail[unit[n].name].unavailable then
--- 			for u = 1, unit[n].roster.ready - #AcftAvail[unit[n].name].unavailable do					--for all ready aircraft that are not assigned to the ATO			
--- 				table.insert(AcftAvail[unit[n].name].unavailable, 0)									--insert a zero unavilable entry
--- 				print("AtoT AcftAvail __________table.insert_0________________ "..unit[n].name.." "..u)
--- 			end
--- 		end
--- 	end
--- end
-
-
 if Debug.debug then
 	local camp_str = "AtoTiming = " .. TableSerialization(ATO, 0)						--make a string
 	local campFile = io.open("Debug/ATO_3_AtoTiming.lua", "w") or error("Failed to open debug file")
@@ -995,8 +977,5 @@ if Debug.debug then
 
 
 end
--- local camp_str = "CAMPTiming = " .. TableSerialization(camp, 0)			
--- local campFile = io.open("Debug/CAMP_Timing_AtoFP.lua", "w")				
--- campFile:write(camp_str)													
--- campFile:close()
+
 
