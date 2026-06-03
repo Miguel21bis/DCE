@@ -2,7 +2,7 @@
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_FlightPlan.lua"] = "1.58.294"
+versionDCE["ATO_FlightPlan.lua"] = "1.58.295"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -1022,6 +1022,18 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 
 		arg_Waypoints[1]["action"] = "Turning Point"
 		arg_Waypoints[1]["type"] = "Turning Point"
+
+		local psi = 0
+		local heading = 0
+
+		if arg_Waypoints[2] then
+			local dx = arg_Waypoints[2].x - arg_Waypoints[1].x
+			local dy = arg_Waypoints[2].y - arg_Waypoints[1].y
+
+			heading = math.atan2(dx, dy)
+			psi = -heading
+		end
+
 		arg_Waypoints[1]["alt"] = altBase + (arg_Pn * altStep) + (alt_Role * 33)
 		arg_Waypoints[1]["speed"] = speed
 		-- arg_Waypoints[1]["ETA"] = spawnTime
@@ -1051,13 +1063,17 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 		local spacing = 330 -- Mets ici la distance minimale souhaitée (en mètres)
 		if is_helicopter then spacing = 100 end
 
-		for	n = 1 , #arg_Group.units do
+		for	n = 1, #arg_Group.units do
+
 			if not arg_Flight[arg_f].task == "AFAC" then
 				arg_Group.units[n].x = ((arg_Pn-1) * spacing) + ((arg_f-1) * spacing) + arg_Group.units[n].x + (spacing * n)	--ANTI-COLLISION A
 				arg_Group.units[n].y = ((arg_Pn-1) * spacing) + ((arg_f-1) * spacing) + arg_Group.units[n].y + (spacing * n)	--ANTI-COLLISION A
 				arg_Group.units[n].alt = ((arg_Pn-1) * spacing/1.2) + ((arg_f-1) * spacing) + arg_Waypoints[1]["alt"] + (spacing * n) 		--ANTI-COLLISION A
 			end
+
 			arg_Group.units[n].speed = speed
+			arg_Group.units[n].psi = psi
+			arg_Group.units[n].heading = heading
 
 			if is_helicopter  then
 				-- group.units[n]["alt"] = alt  + (Pn * 10) + alt_Role * 11
@@ -1107,37 +1123,6 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 		if arg_SpawnTime and arg_SpawnTime > 1 and Missionfunc then	--not group["TrigActivate"] and
 			if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_spawnOn() C0  ") end
 
-			-- arg_Group['uncontrolled'] = false
-			-- arg_Group['tasks'] = {}														--supprime le tasks start
-
-			-- --si le tasks START est supprimé, il faut aussi le supprimer des trigrules &Co
-			-- local found_trigN
-			-- for trig_n = 1, #mission.trigrules do
-			-- 	if mission.trigrules[trig_n] and mission.trigrules[trig_n].actions and mission.trigrules[trig_n].actions[1] then
-			-- 		if mission.trigrules[trig_n].actions[1].set_ai_task and mission.trigrules[trig_n].actions[1].set_ai_task[1] and mission.trigrules[trig_n].actions[1].set_ai_task[1] == arg_Group.groupId then
-			-- 			if mission.trigrules[trig_n].actions[1]["predicate"] == "a_set_ai_task" then
-
-			-- 				found_trigN = trig_n
-			-- 				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_spawnOn() C0b supprime start_Set_Ai_Task groupId "..arg_Group.groupId.." trig_n: "..tostring(trig_n)) end
-			-- 				break
-
-
-			-- 			end
-			-- 		end
-			-- 	end
-			-- end
-
-			-- -- supprime le trigrule start_Set_Ai_Task
-			-- if found_trigN then
-			-- 	table.remove(mission.trigrules, found_trigN)
-			-- 	table.remove(mission.trig.flag, found_trigN)
-			-- 	table.remove(mission.trig.conditions, found_trigN)
-			-- 	table.remove(mission.trig.actions, found_trigN)
-			-- 	table.remove(mission.trig.func, found_trigN)
-
-			-- end
-
-			-- group["TrigActivate"] = true ATTENTION semble bloquer les orbite indefiniment
 			arg_Group['lateActivation'] = true											--make group late activation "en vol"
 
 			local activateGroupExist = false
@@ -2880,28 +2865,58 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					if flight[f].route[w].id == "Departure" or flight[f].route[w].id == "Spawn" then
 						local task_entry = {}
 						if is_helicopter then
+							
 							task_entry = {															--helicopter Spread Four Close
-							["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-							["auto"] = true,
-							["id"] = "WrappedAction",
-							["name"] = "Formation Coin",
-							["enabled"] = true,
-							["params"] =
-							{
-								["action"] =
+								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+								["auto"] = true,
+								["id"] = "WrappedAction",
+								["name"] = "Formation Coin",
+								["enabled"] = true,
+								["params"] =
 								{
-									["id"] = "Option",
-									["params"] =
+									["action"] =
 									{
-										["value"] = 8,
-										["name"] = 5,
-										["formationIndex"] = 8,
+										["id"] = "Option",
+										["params"] =
+										{
+											["value"] = 8,
+											["name"] = 5,
+											["formationIndex"] = 8,
+										},
 									},
 								},
-							},
-						}
-						else
+							}
 
+
+							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+							
+						else --IsPlane
+
+						--************* PC gourmand interdit *************
+							if flight[f].type == "Tu-22M3" and flight[f].route[w].id == "Spawn" then
+								task_entry =
+								{
+									["enabled"] = true,
+									["auto"] = false,
+									["id"] = "WrappedAction",
+									["name"] = "interdit la PC after burner (id == Assemble)",
+									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+									["params"] =
+									{
+										["action"] =
+										{
+											["id"] = "Option",
+											["params"] =
+											{
+												["value"] = true,
+												["name"] = 16,
+											},
+										},
+									},
+								}
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+							end
+							
 							--************* largage d'urgence *************
 							if (Data_divers[flight[f].type] and Data_divers[flight[f].type].heavyBomber)
 								or flight[f].task == "SEAD" or flight[f].task == "Escort Jammer" then
@@ -4873,6 +4888,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					if (flight[f].task == "Refueling" or flight[f].task == "AWACS")
 						and waypoints[1].briefing_name and  waypoints[1].briefing_name == "Spawn"
 						and flight[f].route[1].airstart
+						and flight[f].type ~= "Tu-22M3"
 					then
 						fuelTemp = fuelTemp * 0.75
 					end
@@ -4929,18 +4945,30 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						define_y = waypoints[1]["y"] + ((n - 1) * 15) +  ((f-1) * 15) + ((p - 1) * 15) --ATO_FP_Debug01 	--ANTI-COLLISION B
 					end
 
+					-- Calculate aircraft orientation for air starts from WP1 -> WP2 direction
+					local heading = 0
+					local psi = 0
+
+					if waypoints[2] and waypoints[1].type == "Turning Point" and waypoints[1].action == "Turning Point" then
+
+						local dx = waypoints[2].x - waypoints[1].x
+						local dy = waypoints[2].y - waypoints[1].y
+
+						heading = math.atan2(dx, dy)
+						psi = -heading
+					end
+
 					units[n] =
 					{
 						["alt"] = waypoints[1].alt,
-						["heading"] = 0,
+						["heading"] = heading,
+						["psi"] = psi,
 						["callsign"] = getCallsign(flight[f].country, flight[f], flight[f].task, f, n),
-						["psi"] = 0,
 						["livery_id"] = flight[f].livery,
 						["type"] = flight[f].type,
 						["x"] = define_x ,
 						["y"] = define_y ,
 						["name"] = unitName,
-						-- ["payload"] = flight[f].loadout.stores,
 						["payload"] = {
 							["pylons"] = flight[f].loadout.stores.pylons,
 							["fuel"] = fuelTemp,
@@ -4965,7 +4993,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						local typeDatalink = Data_divers[flight[f].type].datalinks.type
 
 						units[n]["datalinks"] = {
-							[typeDatalink] = 	DeepCopy(datalinks[typeDatalink][flight[f].type])
+							[typeDatalink] = DeepCopy(datalinks[typeDatalink][flight[f].type])
 						}
 					end
 

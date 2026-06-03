@@ -471,15 +471,6 @@ for sideName, packs in pairs(ATO) do
 				local eta = tot + flight[f].eta_offset
 
 				if role == "main" and f == 1 then
-					print(
-						"TOT STORE",
-						sideName,
-						mainFlight.target_name,
-						"tot="..tostring(tot),
-						"eta="..tostring(eta),
-						"offset="..tostring(flight[f].eta_offset)
-					)
-
 					TOTtable[sideName][mainFlight.target_name] = eta
 				end
 
