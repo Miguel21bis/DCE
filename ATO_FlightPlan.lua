@@ -1060,14 +1060,38 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 			arg_Waypoints[1]["alt"] = alt  + (arg_Pn * 10) + alt_Role * 33
 		end
 
-		local spacing = 330 -- Mets ici la distance minimale souhaitée (en mètres)
+		-- anti collision entre packages différents
+		local spawnHash = math.abs(
+			math.floor(arg_Waypoints[1].x / 1000) +
+			math.floor(arg_Waypoints[1].y / 1000)
+		)
+
+		local spacing = 500 -- Mets ici la distance minimale souhaitée (en mètres)
+
+		local spawnOffsetX = ((spawnHash % 7) - 3) * spacing * 2
+		local spawnOffsetY = (((math.floor(spawnHash / 7)) % 7) - 3) * spacing * 2
+
+		
 		if is_helicopter then spacing = 100 end
 
 		for	n = 1, #arg_Group.units do
 
-			if not arg_Flight[arg_f].task == "AFAC" then
-				arg_Group.units[n].x = ((arg_Pn-1) * spacing) + ((arg_f-1) * spacing) + arg_Group.units[n].x + (spacing * n)	--ANTI-COLLISION A
-				arg_Group.units[n].y = ((arg_Pn-1) * spacing) + ((arg_f-1) * spacing) + arg_Group.units[n].y + (spacing * n)	--ANTI-COLLISION A
+			if arg_Flight[arg_f].task ~= "AFAC" then
+				-- arg_Group.units[n].x = ((arg_Pn-1) * spacing) + ((arg_f-1) * spacing) + arg_Group.units[n].x + (spacing * n)	--ANTI-COLLISION A
+				-- arg_Group.units[n].y = ((arg_Pn-1) * spacing) + ((arg_f-1) * spacing) + arg_Group.units[n].y + (spacing * n)	--ANTI-COLLISION A
+				
+				arg_Group.units[n].x = spawnOffsetX +
+					((arg_Pn-1) * spacing) +
+					((arg_f-1) * spacing) +
+					arg_Group.units[n].x +
+					(spacing * n)
+
+				arg_Group.units[n].y = spawnOffsetY +
+					((arg_Pn-1) * spacing) +
+					((arg_f-1) * spacing) +
+					arg_Group.units[n].y +
+					(spacing * n)
+				
 				arg_Group.units[n].alt = ((arg_Pn-1) * spacing/1.2) + ((arg_f-1) * spacing) + arg_Waypoints[1]["alt"] + (spacing * n) 		--ANTI-COLLISION A
 			end
 
@@ -2173,7 +2197,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									if groupTaskTemp == task_ then
 										for idStrike_, value2 in pairs(idStrike) do
 											if idStrike_ and idStrike_ ~= nil then
-												if flight[f].task == "Strike" or  flight[f].task == "Antiship Strike" then
+												if flight[f].task == "Strike" or flight[f].task == "Anti-ship Strike" then
 													if task_ == "Antiship Strike" and goupTaskTemp == "Ship" then
 														-- print("AtoFP  GoupTaskTemp avant "..tostring(GoupTaskTemp))
 
@@ -2306,10 +2330,10 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						elseif atlTemp > 1500 then
 							atlTemp = 1500
 						end
-					else
-						if flight[f].route[w].alt < 500 then
-							atlTemp = 1000
-						end
+					-- else
+					-- 	if flight[f].route[w].alt < 500 then
+					-- 		atlTemp = 1000
+					-- 	end
 					end
 
 					local speed = 0
@@ -2864,6 +2888,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					-- ************* formations et largage d'urgence *************
 					if flight[f].route[w].id == "Departure" or flight[f].route[w].id == "Spawn" then
 						local task_entry = {}
+						
 						if is_helicopter then
 							
 							task_entry = {															--helicopter Spread Four Close
@@ -2890,9 +2915,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 							
-						else --IsPlane
+						else 
+							
+							--IsPlane
 
-						--************* PC gourmand interdit *************
+							--************* PC gourmand interdit *************
 							if flight[f].type == "Tu-22M3" and flight[f].route[w].id == "Spawn" then
 								task_entry =
 								{
@@ -2921,35 +2948,12 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							if (Data_divers[flight[f].type] and Data_divers[flight[f].type].heavyBomber)
 								or flight[f].task == "SEAD" or flight[f].task == "Escort Jammer" then
 
-								--largage d'urgence FALSE *************
+								--interdiction largage d'urgence  *************
 								task_entry = {
 									["enabled"] = true,
 									["auto"] = true,
 									["id"] = "WrappedAction",
-									["name"] = "emergency jettison: FALSE (Departure/Spawn, SEAD)",
-									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-									["params"] =
-									{
-										["action"] =
-										{
-											["id"] = "Option",
-											["params"] =
-											{
-												["value"] = false,
-												["name"] = 15,
-											},
-										},
-									},
-								}
-								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-							else
-
-								--largage d'urgence TRUE *************
-								task_entry = {
-									["enabled"] = true,
-									["auto"] = true,
-									["id"] = "WrappedAction",
-									["name"] = "emergency jettison: TRUE (Departure/Spawn)",
+									["name"] = "PROHIBIT JETTISON: true (Departure/Spawn, SEAD)",
 									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 									["params"] =
 									{
@@ -2959,6 +2963,29 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 											["params"] =
 											{
 												["value"] = true,
+												["name"] = 15,
+											},
+										},
+									},
+								}
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+							else
+
+								--largage d'urgence autorisé (Prohibit JETTISON false) *************
+								task_entry = {
+									["enabled"] = true,
+									["auto"] = true,
+									["id"] = "WrappedAction",
+									["name"] = "PROHIBIT JETTISON: FALSE (Departure/Spawn)",
+									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+									["params"] =
+									{
+										["action"] =
+										{
+											["id"] = "Option",
+											["params"] =
+											{
+												["value"] = false,
 												["name"] = 15,
 											},
 										},
@@ -3124,6 +3151,27 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								}
 								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
+								--************* EngageTargets *************
+							elseif flight[f].task == "Anti-ship Strike" then
+
+								task_entry = {
+									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+									["enabled"] = true,
+									["key"] = "AntiShip",
+									["id"] = "EngageTargets",
+									["auto"] = true,
+									["params"] =
+									{
+										["targetTypes"] =
+										{
+											[1] = "Ships",
+										}, -- end of ["targetTypes"]
+										["priority"] = 0,
+									}, -- end of ["params"]
+
+								}
+								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+
 							end
 						end -- is plane
 					end --if Departure or Spawn
@@ -3246,16 +3294,16 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						AddLog("no known runway element for the target "..tostring(flight[f].target_name))
 					end
 
-					-- ************* SEAD switch from IP to egress *************
+					-- *************  switch from IP to egress *************
 					if flight[f].route[w].id == "IP" then
 
 						if not is_helicopter then
-							--largage d'urgence
+							--interdiction de largage d'urgence
 							local task_entry = {
 								["enabled"] = true,
 								["auto"] = false,
 								["id"] = "WrappedAction",
-								["name"] = "emergency jettison : FALSE (id == IP)",
+								["name"] = "PROHIBIT JETTISON : true (id == IP)",
 								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 								["params"] =
 								{
@@ -3264,7 +3312,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 										["id"] = "Option",
 										["params"] =
 										{
-											["value"] = false,			--false interdit le largage d'urgence
+											["value"] = true,
 											["name"] = 15,
 										},
 									},
@@ -3476,28 +3524,28 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						--*********************************Anti-ship Strike*******************************************
 						elseif flight[f].task == "Anti-ship Strike" then
 
-							if is_helicopter or AGAS_ready == false  then
+							if not is_helicopter or AGAS_ready == false  then
 
-								local task_entry = {															--Spread Four Close
-									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-									["enabled"] = true,
-									["key"] = "AntiShip",
-									["id"] = "EngageTargets",
-									["auto"] = true,
-									["params"] =
-									{
-										["targetTypes"] =
-										{
-											[1] = "Ships",
-										}, -- end of ["targetTypes"]
-										["priority"] = 0,
-									}, -- end of ["params"]
+								-- local task_entry = {															--Spread Four Close
+								-- 	["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+								-- 	["enabled"] = true,
+								-- 	["key"] = "AntiShip",
+								-- 	["id"] = "EngageTargets",
+								-- 	["auto"] = true,
+								-- 	["params"] =
+								-- 	{
+								-- 		["targetTypes"] =
+								-- 		{
+								-- 			[1] = "Ships",
+								-- 		}, -- end of ["targetTypes"]
+								-- 		["priority"] = 0,
+								-- 	}, -- end of ["params"]
 
-								}
-								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+								-- }
+								-- table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
 								-- + ATO_FP_Debug03 Antiship strike
-								task_entry = {
+								local task_entry = {
 									["enabled"] = true,
 									["auto"] = false,
 									["id"] = "AttackGroup",
@@ -3507,7 +3555,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 										["groupId"] = flight[f].target.groupId,
 										["weaponType"] = weaponType,
 										["expend"] = flight[f].loadout.expend,
-										["attackType"] = flight[f].loadout.attackType,
+										["attackQty"] = 1,
+										["altitudeEnabled"] = false,
+										-- ["attackType"] = flight[f].loadout.attackType,
 									}
 								}
 
@@ -4437,7 +4487,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								["enabled"] = true,
 								["auto"] = false,
 								["id"] = "WrappedAction",
-								["name"] = "emergency jettison TRUE : Egress",
+								["name"] = "PROHIBIT JETTISON false : Egress",
 								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 								["params"] =
 								{
@@ -4446,7 +4496,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 										["id"] = "Option",
 										["params"] =
 										{
-											["value"] = true,			--true: autorise le largage d urgence, false interdit le largage
+											["value"] = false,
 											["name"] = 15,
 										},
 									},
@@ -4886,11 +4936,13 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					local fuelTemp = flight[f].loadout.stores.fuel
 
 					if (flight[f].task == "Refueling" or flight[f].task == "AWACS")
-						and waypoints[1].briefing_name and  waypoints[1].briefing_name == "Spawn"
-						and flight[f].route[1].airstart
-						and flight[f].type ~= "Tu-22M3"
+						and waypoints[1].briefing_name and waypoints[1].briefing_name == "Spawn"
+						-- and flight[f].route[1].airstart
+						-- and flight[f].type ~= "Tu-22M3"
 					then
-						fuelTemp = fuelTemp * 0.75
+						if not db_airbases[flight[f].base].BaseAirStart then
+							fuelTemp = fuelTemp * 0.8
+						end
 					end
 
 					if flight[f].type == "A-4E-C" then

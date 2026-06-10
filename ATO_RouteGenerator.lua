@@ -230,6 +230,37 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 		is_helicopter = true
 	end
 
+	local new_hCruise = nil
+	local new_hAttack = nil
+
+	-- altitude randomization
+	local altitudeOffset = 0
+	if profile.hCruise and profile.hCruise > 2000 then
+
+		local randomChance = math.random(0,100)
+
+		if randomChance < 50 then
+			altitudeOffset = math.random(100,200) * 10
+
+		elseif randomChance < 70 then
+			altitudeOffset = math.random(0,100) * 10
+		end
+
+		altitudeOffset = altitudeOffset * (math.random(0,1) * 2 - 1)
+
+		new_hCruise = math.max( 300, profile.hCruise + altitudeOffset )
+	else
+		new_hCruise = profile.hCruise
+
+	end
+
+	if profile.hAttack == profile.hCruise then
+		new_hAttack = new_hCruise
+
+	else
+		new_hAttack = profile.hAttack
+	end
+
 	if not AltiHelicoMap[unit.type] then
 		if is_helicopter then
 			if IsHelicopter[unit.type] and IsHelicopter[unit.type]["hHover"] then
@@ -262,7 +293,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 	--M28 les helicoptere peuvent voir toutes les défense, meme celles hidden
 	-- local HiddenCheck = true																						-- l'avion vole haut et vite et ne voit pas les menaces
 	-- if helicopter then HiddenCheck = true end																		-- l'helicoptere vole bas et voit les menaces, meme caché
-	threat_table.ground[profile.hCruise] = {}
+	threat_table.ground[new_hCruise] = {}
 	threat_table.ground[profile.hAttack] = {}
 	for threat_n,threat in pairs(groundthreats[enemySide_name]) do																--iterate through ground threats
 		if (time == "day" or threat.night == true) and (not threat.hidden or is_helicopter)  then							--and threat.hidden == HiddenCheck										--during day or threat is night capable to be counted as threat
@@ -274,19 +305,19 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 				range = threat.range,
 				type = threat.type,
 			}
-			if threat.min_alt <= profile.hCruise and threat.max_alt >= profile.hCruise then								--threat covers cruise alt
-				local maxrange = radarHorizon(threat.elevation, profile.hCruise + 100)									--get the maximal range due to radar horizon (profile alt +100 m for safety)
+			if threat.min_alt <= new_hCruise and threat.max_alt >= new_hCruise then								--threat covers cruise alt
+				local maxrange = radarHorizon(threat.elevation, new_hCruise + 100)									--get the maximal range due to radar horizon (profile alt +100 m for safety)
 				if maxrange < threat.range then																			--maximal range due to radar horizon is smaller than threat range
 					threatentry.range = maxrange																		--use maximal range due to radar horizon
 				end
-				if profile.hCruise <= 100 then																			--if alt is lower than 100m
+				if new_hCruise <= 100 then																			--if alt is lower than 100m
 					threatentry.level = threat.level / 2																--only 50% of threat level is applied as low level clutter bonus
 				else																									--alt is higher than 100m
 					threatentry.level = threat.level																	--full threat level is applied
 				end
-				table.insert(threat_table.ground[profile.hCruise], threatentry)
+				table.insert(threat_table.ground[new_hCruise], threatentry)
 			end
-			if profile.hCruise ~= profile.hAttack then																	--attack alt is different than cruise alt
+			if new_hCruise ~= profile.hAttack then																	--attack alt is different than cruise alt
 				if threat.min_alt <= profile.hAttack and threat.max_alt >= profile.hAttack then							--threat covers attack alt		
 					threatentry.range = threat.range
 					local maxrange = radarHorizon(threat.elevation, profile.hAttack + 100)								--get the maximal range due to radar horizon (profile alt +100 m for safety)
@@ -304,7 +335,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 		end
 	end
 
-	threat_table.ewr[profile.hCruise] = {}
+	threat_table.ewr[new_hCruise] = {}
 	threat_table.ewr[profile.hAttack] = {}
 	for threat_n,threat in pairs(EWR_DB[enemySide_name]) do																			--iterate through ewr threats
 		local cruisethreatentry = {
@@ -313,12 +344,12 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			y = threat.y,
 			range = threat.range,
 		}
-		if threat.min_alt <= profile.hCruise and threat.max_alt >= profile.hCruise then									--threat covers cruise alt
-			local maxrange = radarHorizon(threat.elevation, profile.hCruise + 100)										--get the maximal range due to radar horizon (profile alt +100 m for safety)
+		if threat.min_alt <= new_hCruise and threat.max_alt >= new_hCruise then									--threat covers cruise alt
+			local maxrange = radarHorizon(threat.elevation, new_hCruise + 100)										--get the maximal range due to radar horizon (profile alt +100 m for safety)
 			if maxrange < threat.range then																				--maximal range due to radar horizon is smaller than threat range
 				cruisethreatentry.range = maxrange																			--use maximal range due to radar horizon
 			end
-			table.insert(threat_table.ewr[profile.hCruise], cruisethreatentry)
+			table.insert(threat_table.ewr[new_hCruise], cruisethreatentry)
 		end
 		local attackthreatentry = {
 			class = threat.class,
@@ -765,7 +796,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 
 
 
-		table.insert(findPathLegTable, {from, to, to, 0, {}, 0, profile.hCruise})									--insert first instance of FindPathLeg to find a route between start and end point. arguments: start, end, final end (same), initial route distance 0, initial route empty {}, initial instance of the function 0, cruise alt
+		table.insert(findPathLegTable, {from, to, to, 0, {}, 0, new_hCruise})									--insert first instance of FindPathLeg to find a route between start and end point. arguments: start, end, final end (same), initial route distance 0, initial route empty {}, initial instance of the function 0, cruise alt
 
 		for num,arg in ipairs(findPathLegTable) do																	--go through table of FindPathLegt functions and execute them. Each FindPathLegt functions can add more instances of same function for execution at end of table
 			
@@ -1146,7 +1177,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			end
 			local heading = GetHeadingDegre(basePoint, point)
 
-			local distance = math.abs((profile.hCruise - basePoint.h) * 10)												--distance to climb from base elevation to cruise altitude with 6� pitch (make sure distance is positive)
+			local distance = math.abs((new_hCruise - basePoint.h) * 10)												--distance to climb from base elevation to cruise altitude with 6� pitch (make sure distance is positive)
 			if distance >= GetDistance(basePoint, point) then															--climb distance bigger than distance to first WP
 				distance = GetDistance(basePoint, point) / 3 * 2														--join point is 2/3 to first WP
 			elseif distance < 15000 then																				--climb distance less than 15 km
@@ -1169,7 +1200,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			end
 			local heading = GetHeadingDegre(basePoint, point)
 
-			local distance = math.abs((profile.hCruise - basePoint.h) * 4)												--distance to descend from cruise alt to base elevation with 15� pitch (make sure distance is positive)
+			local distance = math.abs((new_hCruise - basePoint.h) * 4)												--distance to descend from cruise alt to base elevation with 15� pitch (make sure distance is positive)
 			if distance >= GetDistance(basePoint, point) then															--descend distance bigger than distance to last WP
 				distance = GetDistance(basePoint, point) / 3 * 2														--join point is 2/3 to last WP
 			elseif distance < 15000 then																				--descend distance less than 15 km
@@ -1206,27 +1237,62 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 		-- Miguel21 modification M16.d : SpawnAir B1b & B-52 need BaseAirStart = true in db_aibase
 		if basePoint.BaseAirStart == true then
 			
-			table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Spawn", alt = profile.hCruise })
-			table.insert(route, {x = joinPoint.x, y = joinPoint.y, id = "Join", alt = profile.hCruise, hCruiseREF = profile.hCruiseREF})
+			table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Spawn", alt = new_hCruise })
+			table.insert(route, {x = joinPoint.x, y = joinPoint.y, id = "Join", alt = new_hCruise, hCruiseREF = profile.hCruiseREF})
 		
 		elseif is_helicopter and viaFARP then
 			--build complete route
 			table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Taxi", alt = basePoint.h})
 			table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Departure", alt = basePoint.h })		--+ delta_h
-			table.insert(route, {x = assemblyPoint.x, y = assemblyPoint.y, id = "Assemble", alt = profile.hCruise })
-			table.insert(route, {x = joinPoint.x, y = joinPoint.y, id = "Join", alt = profile.hCruise , hCruiseREF = profile.hCruiseREF})
+			table.insert(route, {x = assemblyPoint.x, y = assemblyPoint.y, id = "Assemble", alt = new_hCruise })
+			table.insert(route, {x = joinPoint.x, y = joinPoint.y, id = "Join", alt = new_hCruise , hCruiseREF = profile.hCruiseREF})
 
 			table.insert(route, {x = viaFARP.x, y = viaFARP.y, id = "LandRefuel", alt = viaFARP.h })		--+ delta_h
 		else
 			--build complete route
 			table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Taxi", alt = basePoint.h})
 			table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Departure", alt = basePoint.h })		--+ delta_h
-			table.insert(route, {x = assemblyPoint.x, y = assemblyPoint.y, id = "Assemble", alt = profile.hCruise })
-			table.insert(route, {x = joinPoint.x, y = joinPoint.y, id = "Join", alt = profile.hCruise , hCruiseREF = profile.hCruiseREF})
+			table.insert(route, {x = assemblyPoint.x, y = assemblyPoint.y, id = "Assemble", alt = new_hCruise })
+			table.insert(route, {x = joinPoint.x, y = joinPoint.y, id = "Join", alt = new_hCruise , hCruiseREF = profile.hCruiseREF})
 		end
 
 		for n = 1, #outbound_navRoute.navpoints do
-			table.insert(route, {x = outbound_navRoute.navpoints[n].x, y = outbound_navRoute.navpoints[n].y, id = "Nav", alt = profile.hCruise, debug = "Nav_A"})
+			table.insert(route, {x = outbound_navRoute.navpoints[n].x, y = outbound_navRoute.navpoints[n].y, id = "Nav", alt = new_hCruise, debug = "Nav_A"})
+		end
+
+		-- Heavy bomber helper waypoint
+		if Data_divers[unit.type] and Data_divers[unit.type].heavyBomber then
+
+			local lastWp = route[#route]
+
+			local distJoinIP = GetDistance(lastWp, initialPoint)
+
+			if distJoinIP > 150000 then
+
+				local headingPreIP = GetHeadingDegre(initialPoint, lastWp)
+
+				local preIPDistance = math.min(
+					100000,
+					math.max(
+						50000,
+						math.floor(distJoinIP * 0.25)
+					)
+				)
+
+				local preIP = GetOffsetPoint(
+					initialPoint,
+					headingPreIP,
+					preIPDistance
+				)
+
+				table.insert(route, {
+					x = preIP.x,
+					y = preIP.y,
+					id = "PreIP",
+					alt = profile.hAttack,
+					debug = "HeavyBomber_PreIP "..preIPDistance
+				})
+			end
 		end
 
 		table.insert(route, {x = initialPoint.x, y = initialPoint.y, id = "IP", alt = profile.hAttack, debug = "ip_distance: "..initialPoint.ip_distance})
@@ -1239,25 +1305,25 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 		table.insert(route, {x = egressPoint.x, y = egressPoint.y, id = "Egress", alt = profile.hAttack})
 
 		for n = #inbound_navRoute.navpoints, 1, -1 do
-			table.insert(route, {x = inbound_navRoute.navpoints[n].x, y = inbound_navRoute.navpoints[n].y, id = "Nav", alt = profile.hCruise, debug = "Nav_B"})
+			table.insert(route, {x = inbound_navRoute.navpoints[n].x, y = inbound_navRoute.navpoints[n].y, id = "Nav", alt = new_hCruise, debug = "Nav_B"})
 		end
 
-		table.insert(route, {x = splitPoint.x, y = splitPoint.y, id = "Split", alt = profile.hCruise})
-		table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Land", alt = profile.hCruise})
+		table.insert(route, {x = splitPoint.x, y = splitPoint.y, id = "Split", alt = new_hCruise})
+		table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Land", alt = new_hCruise})
 
 		--///////////////////==========================================================
 		--set descend and climb points in route
-		if profile.hCruise > profile.hAttack then																		--if cruise is higher than attack altitude, a descend and a climb point must be inserted
+		if new_hCruise > profile.hAttack then																		--if cruise is higher than attack altitude, a descend and a climb point must be inserted
 
 		--///////////////////==========================================================		
 			--descend point
 			for n = 3, #route - 2 do																					--iterate through route between join and split point
-				if route[n].alt == profile.hCruise then
+				if route[n].alt == new_hCruise then
 
 					--get high and low threats on route segement
 					local threat = {}																					--threats on leg at high alt default to 0 as an earlier change in altitude is of no advantage
 					if profile.hAttack < 1000 then																		--if attack alt is at low altitude, collect actual threats to determine descend point on route
-						threat = threatOnLeg(route[n], route[n + 1], profile.hCruise)									--collect threats on leg at high alt
+						threat = threatOnLeg(route[n], route[n + 1], new_hCruise)									--collect threats on leg at high alt
 					end
 
 					--reduce threat range of EWR to areas of fighter threat
@@ -1308,19 +1374,19 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 						if route[n].alt > route[n + 1].alt then															--but route segment is the descend leg
 							local descendPoint = {}																		--point to start descend
 							local heading = GetHeadingDegre(route[n + 1], route[n])											--descend point is on route leg
-							local distance = math.abs((profile.hCruise - profile.hAttack)) * 6							--distance to descend is 6 times the altitude difference (~-10� pitch) (make sure is positive)
+							local distance = math.abs((new_hCruise - profile.hAttack)) * 6							--distance to descend is 6 times the altitude difference (~-10� pitch) (make sure is positive)
 							if distance < GetDistance(route[n + 1], route[n]) then										--if descend distance is longer than route leg distance, ignore descend point
 								descendPoint = GetOffsetPoint(route[n + 1], heading, distance)							--define descend point position
 								descendPoint.id = "Nav"
 								descendPoint.debug = "Nav_C"
-								descendPoint.alt = profile.hCruise
+								descendPoint.alt = new_hCruise
 								table.insert(route, n + 1, descendPoint)												--insert into route
 							end
 							break																						--stop going through waypoints for the descend
 						end
 					else																								--if there are threats on route leg, make the descend on this route leg
 						for m = n, #route do																			--move forward in route and put all subsequent waypoints until IP to low alt
-							if route[m + 1] and route[m + 1].alt and route[m + 1].alt == profile.hCruise then													--if next waypoint is still at cruise
+							if route[m + 1] and route[m + 1].alt and route[m + 1].alt == new_hCruise then													--if next waypoint is still at cruise
 								route[m + 1].alt = profile.hAttack														--adjust waypoint alt to attack
 							else
 								break																					--stop when attack part of route is reached
@@ -1361,13 +1427,13 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 							descendPointEnd.debug = "Nav_D"
 							descendPointEnd.alt = profile.hAttack
 							table.insert(route, n + 1, descendPointEnd)													--insert into route
-							local descend_distance = (profile.hCruise - profile.hAttack) * 6							--distance to descend is 6 times the altitude difference (~-10� pitch)
+							local descend_distance = (new_hCruise - profile.hAttack) * 6							--distance to descend is 6 times the altitude difference (~-10� pitch)
 							if descend_distance < distance then
 								local descendPointStart = {}															--point where descend starts
 								descendPointStart = GetOffsetPoint(route[n], heading, (distance - descend_distance))	--define descend point position
 								descendPointStart.id = "Nav"
-								descendPointStart.debug = "Nav_D2"
-								descendPointStart.alt = profile.hCruise
+								descendPointStart.debug = "descendPointStart_Nav_D2"
+								descendPointStart.alt = new_hCruise
 								table.insert(route, n + 1, descendPointStart)											--insert into route
 							end
 						end
@@ -1379,12 +1445,12 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 		--///////////////////==========================================================			
 			--climb point
 			for n = #route - 1, 4, -1 do																				--iterate through route backkwards between split and join point
-				if route[n].alt == profile.hCruise then
+				if route[n].alt == new_hCruise then
 
 					--get high and low threats on route segement
 					local threat = {}																					--threats on leg at high alt default to 0 as an earlier change in altitude is of no advantage
 					if profile.hAttack < 1000 then																		--if attack alt is at low altitude, collect actual threats to determine climb point on route
-						threat = threatOnLeg(route[n], route[n - 1], profile.hCruise)									--collect threats on leg at high alt
+						threat = threatOnLeg(route[n], route[n - 1], new_hCruise)									--collect threats on leg at high alt
 					end
 
 					--reduce threat range of EWR to areas of fighter threat
@@ -1434,19 +1500,19 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 						if route[n].alt > route[n - 1].alt then															--but route segment is the climb leg
 							local climbPoint = {}																		--point to start climb
 							local heading = GetHeadingDegre(route[n - 1], route[n])											--climb point is on route leg
-							local distance = math.abs((profile.hCruise - profile.hAttack)) * 10							--distance to climb is 10 times the altitude difference (~-6� pitch) (make sure is positive)
+							local distance = math.abs((new_hCruise - profile.hAttack)) * 10							--distance to climb is 10 times the altitude difference (~-6� pitch) (make sure is positive)
 							if distance < GetDistance(route[n - 1], route[n]) then										--if climb distance is longer than route leg distance, ignore clinb point
 								climbPoint = GetOffsetPoint(route[n - 1], heading, distance)							--define climb point position
 								climbPoint.id = "Nav"
 								climbPoint.debug = "Nav_E"
-								climbPoint.alt = profile.hCruise
+								climbPoint.alt = new_hCruise
 								table.insert(route, n, climbPoint)														--insert into route
 							end
 							break																						--stop going through waypoints for the climb
 						end
 					else																								--if there are threats on route leg, make the climb on this route leg
 						for m = n, 1, -1 do																				--move backward in route and put all previous wayoints until Egress to low alt
-							if route[m - 1].alt == profile.hCruise then													--if previous waypoint is still at cruise
+							if route[m - 1].alt == new_hCruise then													--if previous waypoint is still at cruise
 								route[m - 1].alt = profile.hAttack														--adjust waypoint alt to attack
 							else
 								break																					--stop when attack part of route is reached
@@ -1487,13 +1553,13 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 							climbPointStart.debug = "Nav_F"
 							climbPointStart.alt = profile.hAttack
 							table.insert(route, n, climbPointStart)														--insert into route
-							local climb_distance = (profile.hCruise - profile.hAttack) * 10								--distance to climb is 10 times the altitude difference (~-6� pitch)
+							local climb_distance = (new_hCruise - profile.hAttack) * 10								--distance to climb is 10 times the altitude difference (~-6� pitch)
 							if climb_distance < distance then
 								local climbPointEnd = {}																--point where climb ends
 								climbPointEnd = GetOffsetPoint(route[n + 1], heading, (distance - climb_distance))		--define climb point position
 								climbPointEnd.id = "Nav"
 								climbPointEnd.debug = "Nav_F2"
-								climbPointEnd.alt = profile.hCruise
+								climbPointEnd.alt = new_hCruise
 								table.insert(route, n + 1, climbPointEnd)												--insert into route
 							end
 						end
@@ -1502,17 +1568,17 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 				end
 			end
 
-		elseif profile.hCruise < profile.hAttack then																	--if cruise is lower than attack altitude, a descend and a climb point must be inserted
+		elseif new_hCruise < profile.hAttack then																	--if cruise is lower than attack altitude, a descend and a climb point must be inserted
 			for n = 3, #route - 2 do																					--iterate through route between join and split point
 				if route[n].alt < route[n + 1].alt then																	--climb route leg
 					local climbPoint = {}																				--point to start climb
 					local heading = GetHeadingDegre(route[n + 1], route[n])													--climb point is on route leg
-					local distance = math.abs((profile.hCruise - profile.hAttack) * 10)									--distance to climb is 10 times the altitude difference (~6� pitch) (make sure is positive)
+					local distance = math.abs((new_hCruise - profile.hAttack) * 10)									--distance to climb is 10 times the altitude difference (~6� pitch) (make sure is positive)
 					if distance < GetDistance(route[n], route[n + 1]) then												--if climb distance is longer than route leg distance, ignore climb point
 						climbPoint = GetOffsetPoint(route[n + 1], heading, distance)									--define climb point position
 						climbPoint.id = "Nav"
 						climbPoint.debug = "Nav_G"
-						climbPoint.alt = profile.hCruise
+						climbPoint.alt = new_hCruise
 						table.insert(route, n + 1, climbPoint)															--insert into route
 					end
 					break
@@ -1522,12 +1588,12 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 				if route[n].alt > route[n + 1].alt then																	--descend route leg
 					local descendPoint = {}																				--point to start descend
 					local heading = GetHeadingDegre(route[n], route[n + 1])													--descend point is on route leg
-					local distance = math.abs((profile.hCruise - profile.hAttack) * 10)									--distance to descend is 10 times the altitude difference (~-6� pitch) (make sure is positive)
+					local distance = math.abs((new_hCruise - profile.hAttack) * 10)									--distance to descend is 10 times the altitude difference (~-6� pitch) (make sure is positive)
 					if distance < GetDistance(route[n + 1], route[n]) then												--if descend distance is longer than route leg distance, ignore descend point
 						descendPoint = GetOffsetPoint(route[n], heading, distance)										--define descend point position
 						descendPoint.id = "Nav"
 						descendPoint.debug = "Nav_H"
-						descendPoint.alt = profile.hCruise
+						descendPoint.alt = new_hCruise
 						table.insert(route, n + 1, descendPoint)														--insert into route
 					end
 					break
@@ -1561,7 +1627,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			end
 			local heading = GetHeadingDegre(basePoint, point)
 
-			local distance = math.abs((profile.hCruise - basePoint.h) * 7)												--distance to climb from base elevation to cruise altitude with 8� pitch (make sure distance is positive)
+			local distance = math.abs((new_hCruise - basePoint.h) * 7)												--distance to climb from base elevation to cruise altitude with 8� pitch (make sure distance is positive)
 			if distance >= GetDistance(basePoint, point) then															--climb distance bigger than distance to first WP
 				distance = GetDistance(basePoint, point) / 3 * 2														--join point is 2/3 to first WP
 			elseif distance < 15000 then																				--climb distance less than 15 km
@@ -1583,7 +1649,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			end
 			local heading = GetHeadingDegre(basePoint, point)
 
-			local distance = math.abs((profile.hCruise - basePoint.h) * 7)												--distance to descend from cruise alt to base elevation with 8� pitch (make sure distance is positive)
+			local distance = math.abs((new_hCruise - basePoint.h) * 7)												--distance to descend from cruise alt to base elevation with 8� pitch (make sure distance is positive)
 			if distance >= GetDistance(basePoint, point) then															--descend distance bigger than distance to last WP
 				distance = GetDistance(basePoint, point) / 3 * 2														--join point is 2/3 to last WP
 			elseif distance < 15000 then																				--descend distance less than 15 km
@@ -1612,10 +1678,10 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 		--build complete route
 		table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Taxi", alt = basePoint.h})
 		table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Departure", alt = basePoint.h })		--+ 1000
-		table.insert(route, {x = assemblyPoint.x, y = assemblyPoint.y, id = "Assemble", alt = profile.hCruise })
-		table.insert(route, {x = joinPoint.x, y = joinPoint.y, id = "Join", alt = profile.hCruise, hCruiseREF = profile.hCruiseREF})
+		table.insert(route, {x = assemblyPoint.x, y = assemblyPoint.y, id = "Assemble", alt = new_hCruise })
+		table.insert(route, {x = joinPoint.x, y = joinPoint.y, id = "Join", alt = new_hCruise, hCruiseREF = profile.hCruiseREF})
 		for n = 1, #outbound_navRoute.navpoints do
-			table.insert(route, {x = outbound_navRoute.navpoints[n].x, y = outbound_navRoute.navpoints[n].y, id = "Nav", alt = profile.hCruise, debug = "Nav_I"})
+			table.insert(route, {x = outbound_navRoute.navpoints[n].x, y = outbound_navRoute.navpoints[n].y, id = "Nav", alt = new_hCruise, debug = "Nav_I"})
 		end
 		if target.MultiPoints then																					--the sweep target has multiple points
 			for n = 1, #target.MultiPoints do
@@ -1625,10 +1691,10 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			table.insert(route, {x = target.x, y = target.y, id = "Sweep", alt = profile.hAttack})
 		end
 		for n = #inbound_navRoute.navpoints, 1, -1 do
-			table.insert(route, {x = inbound_navRoute.navpoints[n].x, y = inbound_navRoute.navpoints[n].y, id = "Nav", alt = profile.hCruise, debug = "Nav_J"})
+			table.insert(route, {x = inbound_navRoute.navpoints[n].x, y = inbound_navRoute.navpoints[n].y, id = "Nav", alt = new_hCruise, debug = "Nav_J"})
 		end
-		table.insert(route, {x = splitPoint.x, y = splitPoint.y, id = "Split", alt = profile.hCruise})
-		table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Land", alt = profile.hCruise})
+		table.insert(route, {x = splitPoint.x, y = splitPoint.y, id = "Split", alt = new_hCruise})
+		table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Land", alt = new_hCruise})
 
 
 	elseif task == "CAP" or task == "AWACS" or task == "Refueling" or task == "AFAC" then
@@ -1694,7 +1760,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			if not basePoint.h then
 				print("basePoint "..tostring(basePoint.name))
 			end
-			local distance = math.abs((profile.hCruise - basePoint.h) * 7)												--distance to climb from base elevation to cruise altitude with 8� pitch (make sure distance is positive)
+			local distance = math.abs((new_hCruise - basePoint.h) * 7)												--distance to climb from base elevation to cruise altitude with 8� pitch (make sure distance is positive)
 			if distance >= GetDistance(basePoint, point) then															--climb distance bigger than distance to first WP
 				distance = GetDistance(basePoint, point) / 3 * 2														--join point is 2/3 to first WP
 			elseif distance < 15000 then																				--climb distance less than 15 km
@@ -1716,7 +1782,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			end
 			local heading = GetHeadingDegre(basePoint, point)
 
-			local distance = math.abs((profile.hCruise - basePoint.h) * 7)												--distance to descend from cruise alt to base elevation with 8� pitch (make sure distance is positive)
+			local distance = math.abs((new_hCruise - basePoint.h) * 7)												--distance to descend from cruise alt to base elevation with 8� pitch (make sure distance is positive)
 			if distance >= GetDistance(basePoint, point) then															--descend distance bigger than distance to last WP
 				distance = GetDistance(basePoint, point) / 3 * 2														--join point is 2/3 to last WP
 			elseif distance < 15000 then																				--descend distance less than 15 km
@@ -1745,10 +1811,10 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 		--build complete route
 		table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Taxi", alt =  basePoint.h})
 		table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Departure", alt = basePoint.h})	-- + 1000
-		table.insert(route, {x = assemblyPoint.x, y = assemblyPoint.y, id = "Assemble", alt = profile.hCruise })
-		table.insert(route, {x = joinPoint.x, y = joinPoint.y, id = "Join", alt = profile.hCruise, hCruiseREF = profile.hCruiseREF})
+		table.insert(route, {x = assemblyPoint.x, y = assemblyPoint.y, id = "Assemble", alt = new_hCruise })
+		table.insert(route, {x = joinPoint.x, y = joinPoint.y, id = "Join", alt = new_hCruise, hCruiseREF = profile.hCruiseREF})
 		for n = 1, #outbound_navRoute.navpoints do
-			table.insert(route, {x = outbound_navRoute.navpoints[n].x, y = outbound_navRoute.navpoints[n].y, id = "Nav", alt = profile.hCruise})
+			table.insert(route, {x = outbound_navRoute.navpoints[n].x, y = outbound_navRoute.navpoints[n].y, id = "Nav", alt = new_hCruise})
 		end
 
 		local tempAlt = profile.hAttack
@@ -1759,24 +1825,24 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 		table.insert(route, {x = orbitStart.x, y = orbitStart.y, id = "Station", alt = tempAlt})
 		table.insert(route, {x = orbitEnd.x, y = orbitEnd.y, id = "Station", alt = tempAlt})
 		for n = #inbound_navRoute.navpoints, 1, -1 do
-			table.insert(route, {x = inbound_navRoute.navpoints[n].x, y = inbound_navRoute.navpoints[n].y, id = "Nav", alt = profile.hCruise})
+			table.insert(route, {x = inbound_navRoute.navpoints[n].x, y = inbound_navRoute.navpoints[n].y, id = "Nav", alt = new_hCruise})
 		end
-		table.insert(route, {x = splitPoint.x, y = splitPoint.y, id = "Split", alt = profile.hCruise})
-		table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Land", alt = profile.hCruise})
+		table.insert(route, {x = splitPoint.x, y = splitPoint.y, id = "Split", alt = new_hCruise})
+		table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Land", alt = new_hCruise})
 
 
 		--climb and descend points
-		if profile.hCruise < profile.hAttack then																		--if cruise and attack altitude are not the same, a descend and a climb point must be inserted
+		if new_hCruise < profile.hAttack then																		--if cruise and attack altitude are not the same, a descend and a climb point must be inserted
 			for n = 3, #route - 2 do																					--iterate through route between join and split point
 				if route[n].alt < route[n + 1].alt then																	--climb route leg
 					local climbPoint = {}																				--point to start climb
 					local heading = GetHeadingDegre(route[n + 1], route[n])													--climb point is on route leg
-					local distance = math.abs((profile.hCruise - profile.hAttack) * 12)									--distance to climb is 10 times the altitude difference (~6� pitch) (make sure is positive)
+					local distance = math.abs((new_hCruise - profile.hAttack) * 12)									--distance to climb is 10 times the altitude difference (~6� pitch) (make sure is positive)
 					if distance < GetDistance(route[n], route[n + 1]) then												--if climb distance is longer than route leg distance, ignore climb point
 						climbPoint = GetOffsetPoint(route[n + 1], heading, distance)									--define climb point position
 						climbPoint.id = "Nav"
 						climbPoint.debug = "Nav_K"
-						climbPoint.alt = profile.hCruise
+						climbPoint.alt = new_hCruise
 						table.insert(route, n + 1, climbPoint)															--insert into route
 					end
 					break
@@ -1786,28 +1852,28 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 				if route[n].alt > route[n + 1].alt then																	--descend route leg
 					local descendPoint = {}																				--point to start descend
 					local heading = GetHeadingDegre(route[n], route[n + 1])													--descend point is on route leg
-					local distance = math.abs((profile.hCruise - profile.hAttack) * 10)									--distance to descend is 10 times the altitude difference (~-6� pitch) (make sure is positive)
+					local distance = math.abs((new_hCruise - profile.hAttack) * 10)									--distance to descend is 10 times the altitude difference (~-6� pitch) (make sure is positive)
 					if distance < GetDistance(route[n + 1], route[n]) then												--if descend distance is longer than route leg distance, ignore descend point
 						descendPoint = GetOffsetPoint(route[n], heading, distance)										--define descend point position
 						descendPoint.id = "Nav"
 						descendPoint.debug = "Nav_L"
-						descendPoint.alt = profile.hCruise
+						descendPoint.alt = new_hCruise
 						table.insert(route, n + 1, descendPoint)														--insert into route
 					end
 					break
 				end
 			end
-		elseif profile.hCruise > profile.hAttack then																		--if cruise and attack altitude are not the same, a descend and a climb point must be inserted
+		elseif new_hCruise > profile.hAttack then																		--if cruise and attack altitude are not the same, a descend and a climb point must be inserted
 			for n = 3, #route - 2 do																					--iterate through route between join and split point
 				if route[n].alt < route[n + 1].alt then																	--climb route leg
 					local climbPoint = {}																				--point to start climb
 					local heading = GetHeadingDegre(route[n], route[n + 1])													--climb point is on route leg
-					local distance = math.abs((profile.hCruise - profile.hAttack) * 10)									--distance to climb is 10 times the altitude difference (~6� pitch) (make sure is positive)
+					local distance = math.abs((new_hCruise - profile.hAttack) * 10)									--distance to climb is 10 times the altitude difference (~6� pitch) (make sure is positive)
 					if distance < GetDistance(route[n], route[n + 1]) then												--if climb distance is longer than route leg distance, ignore climb point
 						climbPoint = GetOffsetPoint(route[n], heading, distance)										--define climb point position
 						climbPoint.id = "Nav"
 						climbPoint.debug = "Nav_M"
-						climbPoint.alt = profile.hCruise
+						climbPoint.alt = new_hCruise
 						table.insert(route, n + 1, climbPoint)															--insert into route
 					end
 					break
@@ -1817,12 +1883,12 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 				if route[n].alt > route[n + 1].alt then																	--descend route leg
 					local descendPoint = {}																				--point to start descend
 					local heading = GetHeadingDegre(route[n + 1], route[n])													--descend point is on route leg
-					local distance = math.abs((profile.hCruise - profile.hAttack) * 10)									--distance to descend is 10 times the altitude difference (~-6� pitch) (make sure is positive)
+					local distance = math.abs((new_hCruise - profile.hAttack) * 10)									--distance to descend is 10 times the altitude difference (~-6� pitch) (make sure is positive)
 					if distance < GetDistance(route[n + 1], route[n]) then												--if descend distance is longer than route leg distance, ignore descend point
 						descendPoint = GetOffsetPoint(route[n + 1], heading, distance)									--define descend point position
 						descendPoint.id = "Nav"
 						descendPoint.debug = "Nav_N"
-						descendPoint.alt = profile.hCruise
+						descendPoint.alt = new_hCruise
 						table.insert(route, n + 1, descendPoint)														--insert into route
 					end
 					break
@@ -1868,7 +1934,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			end
 			local heading = GetHeadingDegre(target, point)
 
-			local distance = math.abs((profile.hCruise - basePoint.h) * 7)												--distance to descend from cruise alt to base elevation with 8� pitch (make sure distance is positive)
+			local distance = math.abs((new_hCruise - basePoint.h) * 7)												--distance to descend from cruise alt to base elevation with 8� pitch (make sure distance is positive)
 			if distance >= GetDistance(basePoint, point) then															--descend distance bigger than distance to last WP
 				distance = GetDistance(basePoint, point) / 3 * 2														--join point is 2/3 to last WP
 			elseif distance < 15000 then																				--descend distance less than 15 km
@@ -1896,10 +1962,10 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 
 		table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Taxi", alt = basePoint.h})
 		table.insert(route, {x = basePoint.x, y = basePoint.y, id = "Departure", alt = basePoint.h })		--+ 1000
-		table.insert(route, {x = assemblyPoint.x, y = assemblyPoint.y, id = "Assemble", alt = profile.hCruise })
-		table.insert(route, {x = joinPoint.x, y = joinPoint.y, id = "Join", alt = profile.hCruise})
-		table.insert(route, {x = splitPoint.x, y = splitPoint.y, id = "Split", alt = profile.hCruise})
-		table.insert(route, {x = target.x, y = target.y, id = "Land", alt = profile.hCruise})
+		table.insert(route, {x = assemblyPoint.x, y = assemblyPoint.y, id = "Assemble", alt = new_hCruise })
+		table.insert(route, {x = joinPoint.x, y = joinPoint.y, id = "Join", alt = new_hCruise})
+		table.insert(route, {x = splitPoint.x, y = splitPoint.y, id = "Split", alt = new_hCruise})
+		table.insert(route, {x = target.x, y = target.y, id = "Land", alt = new_hCruise})
 	end
 
 
@@ -2018,7 +2084,7 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 					local route_leg_alt
 					local route_leg_band
 					if route[n].alt >= 3000 and route[n + 1].alt >= 3000 then
-						route_leg_alt = profile.hCruise
+						route_leg_alt = new_hCruise
 						route_leg_band = "high"
 					else
 						route_leg_alt = profile.hAttack

@@ -25,6 +25,7 @@ local playerRequestedMainTask = {}
 
 local multiPlaneSet = {}
 local multiSquadSet = {}
+local priorityMaxValue = {}
 
 local playerFailureDedup = {}
 -- Causes structurées d'échec de génération Player/Client
@@ -528,6 +529,27 @@ local function playerRejectReason(draftContext, reason, rejectReason)
 		end
 	end
 end
+
+
+--parse la table targetList, ignore les tasks Intercept, CAP, Refueling
+-- et recupere la valeur maximal de priority
+for sideName, targets in pairs(targetlist) do
+	-- print("create priorityMaxValue for "..sideName)
+	priorityMaxValue[sideName] = 0
+	for targetN, target in pairs(targets) do
+		-- print("check target "..target.name.." with task "..target.task.." and priority "..tostring(target.priority))
+		if not target.inactive and target.task ~= "Intercept" and target.task ~= "CAP" and target.task ~= "Refueling" and target.task ~= "SAR" and target.task ~= "CSAR" then
+			-- print("create priorityMaxValue for "..sideName.." with target "..target.name.." and priority "..tostring(target.priority))
+			if target.priority and target.priority > priorityMaxValue[sideName] then
+				-- print("create priorityMaxValue for "..sideName.." with target "..target.name.." and priority "..tostring(target.priority))
+				priorityMaxValue[sideName] = target.priority
+			end
+		end
+	end
+end
+
+_affiche(priorityMaxValue, "priorityMaxValue: ")
+-- os.execute 'pause'
 
 --Vérifie si le loadout est compatible avec la météo actuelle
 --Pourquoi: sortir la logique météo du pipeline principal pour simplifier le draft
@@ -1606,8 +1628,7 @@ local function buildDraftSorties(
 		local idTemp = "id"..#draftSorties[sideName]+1
 
 		if isDebugModeA3 then
-			debugLog(
-				"draftId"..draftId .." AtoG BUILD_SORTIE "
+			debugLog( "draftId"..draftId .." AtoG BUILD_SORTIE "
 				..idTemp .." aircraft_assign: " ..tostring(draftContext.state.futureAircraftAssign)
 			)
 		end
@@ -1630,6 +1651,7 @@ local function buildDraftSorties(
 		local draftSortiesEntry = {
 			name = unit.name,
 			playable = draftContext.clientPlayer,
+			side = draftContext.side,
 			type = unit.type,
 			modification = unit.modification,
 			callsign = unit.callsign,
@@ -1682,8 +1704,7 @@ local function buildDraftSorties(
 		draftSortiesEntry.scoreAdd = 0.000011
 		draftSortiesEntry.scoreCoef = 1
 
-		local route_threat =
-			draftContext.state.route.threats.ground_total
+		local route_threat = draftContext.state.route.threats.ground_total
 			+ draftContext.state.route.threats.air_total
 
 		if task == "CAP" or task == "Intercept" or task == "SAR" then
@@ -1700,10 +1721,24 @@ local function buildDraftSorties(
 				draftSortiesEntry.score = draftSortiesEntry.score + 100
 			end
 
+
+
 			if not target.newPriority then
+				
+				local maxVal = priorityMaxValue[draftSortiesEntry.side]
+				local coef = (maxVal / target.priority) + 0.1
+                
+                -- Si la priorité était déjà supérieure ou égale au max, on s'assure que le coef soit au moins > 1
+                if coef <= 1 then coef = 1.1 end
+                
+                -- Application du coefficient
+                target.priority = target.priority * coef + 1
 				target.newPriority = true
-				target.priority = target.priority * 4
-				draftSortiesEntry.targetPriority = draftSortiesEntry.targetPriority * 4
+				draftSortiesEntry.targetPriority = draftSortiesEntry.targetPriority * coef + 1
+                
+				-- target.newPriority = true
+				-- target.priority = target.priority * 6
+				-- draftSortiesEntry.targetPriority = draftSortiesEntry.targetPriority * 6
 			end
 		end
 
@@ -1876,21 +1911,6 @@ local function processEligibleLoadout(draftContext, sideName, task, target, targ
 			firepowerValid = true
 			draftContext.passPackmax = true
 
-			-- --évite les contributions ridicules
-			-- local minimumContribution = target.firepower.min / target.firepower.packmax
-
-			-- if squadFirepower >= minimumContribution then
-
-			-- 	firepowerValid = true
-			-- 	draftContext.passPackmax = true
-
-			-- 	if isDebugModeA3 then
-			-- 		debugLog( "draftId"..draftId .." A_12_ packmax contribution accepted "
-			-- 			..unit.name .." squadFirepower: " ..math.floor(squadFirepower)
-			-- 			.." / minimumContribution: " ..math.floor(minimumContribution)
-			-- 		)
-			-- 	end
-			-- end
 		end
 
 
@@ -2167,7 +2187,7 @@ local function processEligibleLoadout(draftContext, sideName, task, target, targ
 
 						local remainingFirepowerNeeded = target.firepower.max - assignedFirepower
 
-						if remainingFirepowerNeeded <= 0 then
+						if remainingFirepowerNeeded <= 0 and not draftContext.overideMP_A then
 
 							if isDebugModeA3 then
 								debugLog(
@@ -2228,10 +2248,13 @@ local function processEligibleLoadout(draftContext, sideName, task, target, targ
 						end
 
 						-- local aircraft_assign
+						local logTmp = ""
 						if draftContext.aircraft_requested > AcftAvail[unit.name].available then
 							draftContext.state.futureAircraftAssign = math.floor(AcftAvail[unit.name].available)
+							logTmp = logTmp .. " a "
 						else
 							draftContext.state.futureAircraftAssign = math.floor(draftContext.aircraft_requested)
+							logTmp = logTmp .. " /b "
 						end
 
 						--garde en memoire remainingFirepower pour ajouter (ou non) un strike support
@@ -2248,12 +2271,14 @@ local function processEligibleLoadout(draftContext, sideName, task, target, targ
 							--TODO a regarder si c'etait utile
 							if draftContext.state.futureAircraftAssign > 4 and ( task == "CAP" ) then
 								draftContext.state.futureAircraftAssign = 4
+								logTmp = logTmp .. " /c "
 							end
 
 							--M11.z
 							if mp_Data and mp_Data.NbPlane then
 								if draftContext.state.futureAircraftAssign < mp_Data.NbPlane then
 									draftContext.state.futureAircraftAssign = mp_Data.NbPlane
+									logTmp = logTmp .. " /d "
 									debugMulti = debugMulti.."\n"..("AtoG_overideMP_A passe C "..unit.type.." aircraft_assign: "..tostring(draftContext.state.futureAircraftAssign))
 								end
 							end
@@ -2298,7 +2323,15 @@ local function processEligibleLoadout(draftContext, sideName, task, target, targ
 
 						if isDebugModeA3 then
 							debugLog(
-								"draftId"..draftId .." A_30 PACKAGE COMPLETE "
+								"draftId"..draftId .." A_30 buildDraftSorties()  "
+								.." draftContext.state.futureAircraftAssign: "..draftContext.state.futureAircraftAssign
+								.." logTmp : "..tostring(logTmp) 
+
+						)
+							
+							
+							debugLog(
+								"draftId"..draftId .." A_30 buildDraftSorties() PACKAGE COMPLETE "
 								..target_name .." targetAssignedFirepower/target.firepower.max: "
 								..targetAssignedFirepower[target_name] .."/" ..target.firepower.max
 							)
@@ -2389,6 +2422,7 @@ for sideName, units in pairs(oob_air) do
 			unit = unit,
 			unitName = unit.name,
 			unitType = unit.type,
+			side = sideName,
 
 			--state runtime
 			state = {},
@@ -2505,33 +2539,33 @@ for sideName, units in pairs(oob_air) do
 								localLoadout["hCruiseREF"] = localLoadout.hCruise
 								localLoadout["hAttackREF"] = localLoadout.hAttack
 
-								--ceci est un anti PBO_Corse66 ^^
-								-- donne une alti aléatoire pour éviter de connaitre le type d'avion pas l'altitude habituellement utilisée
-								if localLoadout.hCruise and localLoadout.hCruise > 2000 then
-									local altiRandom = 0
-									local RandomChance = math.random(0,100)
+								-- --ceci est un anti PBO_Corse66 ^^
+								-- -- donne une alti aléatoire pour éviter de connaitre le type d'avion pas l'altitude habituellement utilisée
+								-- if localLoadout.hCruise and localLoadout.hCruise > 2000 then
+								-- 	local altiRandom = 0
+								-- 	local RandomChance = math.random(0,100)
 
-									if RandomChance < 50 then										--20% de chance d'avoir une alti de 1000 à 2000m de difference 
-										altiRandom = math.random(100 ,200)
+								-- 	if RandomChance < 50 then										--20% de chance d'avoir une alti de 1000 à 2000m de difference 
+								-- 		altiRandom = math.random(100 ,200)
 
-									elseif RandomChance < 70 then									--30% de chance d'avoir une alti de 1000m de difference
-										altiRandom = math.random(0,100)
-									end																--50% de chance d'avoir une alti de 0 de difference
+								-- 	elseif RandomChance < 70 then									--30% de chance d'avoir une alti de 1000m de difference
+								-- 		altiRandom = math.random(0,100)
+								-- 	end																--50% de chance d'avoir une alti de 0 de difference
 
-									altiRandom = altiRandom *10 * (math.random(0, 1)*2-1)			--choisi si c'est une diff positive ou negative												
-									localLoadout.hCruise = localLoadout.hCruise + altiRandom
-									if localLoadout.hCruise < 300 then
-										localLoadout.hCruise = 300
-									end
+								-- 	altiRandom = altiRandom *10 * (math.random(0, 1)*2-1)			--choisi si c'est une diff positive ou negative												
+								-- 	localLoadout.hCruise = localLoadout.hCruise + altiRandom
+								-- 	if localLoadout.hCruise < 300 then
+								-- 		localLoadout.hCruise = 300
+								-- 	end
 
 
-									if localLoadout.hAttack then
-										localLoadout.hAttack = localLoadout.hAttack + (altiRandom /2)
-										if localLoadout.hAttack < 300 then
-											localLoadout.hAttack = 300
-										end
-									end
-								end
+								-- 	if localLoadout.hAttack then
+								-- 		localLoadout.hAttack = localLoadout.hAttack + (altiRandom /2)
+								-- 		if localLoadout.hAttack < 300 then
+								-- 			localLoadout.hAttack = 300
+								-- 		end
+								-- 	end
+								-- end
 
 
 								--ajoute une task obligatoire en fonction du learning des missions précédentes
@@ -5262,18 +5296,18 @@ for targetSide, targets in pairs(tgtList_Gen) do
 
 end
 
-_affiche(targetNamePrio, "targetNamePrio: ")
-print()
-_affiche(targetListPrio, "targetListPrio: ")
+-- _affiche(targetNamePrio, "targetNamePrio: ")
+-- print()
+-- _affiche(targetListPrio, "targetListPrio: ")
 
-print("before")
-_affiche(targetListPrio["blue"], "blue")
+-- print("before")
+-- _affiche(targetListPrio["blue"], "blue")
 
 table.sort(targetListPrio["blue"], function(a,b) return a > b  end)
 table.sort(targetListPrio["red"], function(a,b) return a > b  end)
 
-print("after")
-_affiche(targetListPrio["blue"], "blue")
+-- print("after")
+-- _affiche(targetListPrio["blue"], "blue")
 
 for sidePrio, tableauPrio in pairs(targetListPrio) do
 	for tableN, value_prio in pairs(tableauPrio) do
