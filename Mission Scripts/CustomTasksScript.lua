@@ -2600,9 +2600,11 @@ function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
 	radius = tonumber(radius) or MIN_SEARCH_RADIUS
 	if radius < MIN_SEARCH_RADIUS then radius = MIN_SEARCH_RADIUS end
 
+	env.info("DCE_CustomSearchThenEngage A called for " .. tostring(groupName) .. " with radius " .. tostring(radius) .. " and targetType " .. tostring(targetType))
+
 	if CustomSearchThenEngageActive == nil then CustomSearchThenEngageActive = {} end
 	if CustomSearchThenEngageActive[groupName] then
-		-- env.info("DCE_CustomSearchThenEngage: already active for " .. tostring(groupName))
+		env.info("DCE_CustomSearchThenEngage B return: already active for " .. tostring(groupName))
 		return
 	end
 	CustomSearchThenEngageActive[groupName] = true
@@ -2711,14 +2713,20 @@ function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
         local next_time = nil
         local flight = Group.getByName(groupName)
 
+		if campL.debug then env.info("DCE_CustomSearchThenEngage loop C tick for " .. tostring(groupName) .. " at time " .. tostring(t)) end
+
         if flight and type(flight.isExist) == 'function' and flight:isExist() then
 
 			local element = getActiveUnit(flight)
 
+			if campL.debug then env.info("DCE_CustomSearchThenEngage loop D active unit for " .. tostring(groupName) .. " is " .. tostring(element and element:getName())) end
+
             if element then
+				if campL.debug then env.info("DCE_CustomSearchThenEngage loop E check landing for " .. tostring(groupName)) end
                 -- if group is landing stop the loop
                 if SatusGroupAircraft and SatusGroupAircraft[groupName] and SatusGroupAircraft[groupName]["landing"] then
                     -- env.info("DCE_CustomSearchThenEngage RETURN landing " .. tostring(groupName))
+					if campL.debug then env.info("DCE_CustomSearchThenEngage loop F landing detected for " .. tostring(groupName) .. ", stopping loop.") end
                     CustomSearchThenEngageActive[groupName] = nil
                     next_time = nil
                 else
@@ -2729,12 +2737,18 @@ function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
 						lastAirCheck = now
 					end
 
+					if campL.debug then env.info("DCE_CustomSearchThenEngage loop G inAir for " .. tostring(groupName) .. " is " .. tostring(lastInAir)) end
+
 					if lastInAir then
+
+						if campL.debug then env.info("DCE_CustomSearchThenEngage loop H in air, checking cache for " .. tostring(groupName)) end
 
                         -- refresh cached infos (playerName, desc) but cache limits calls
                         local cached = refreshUnitCache(element)
                         if not (cached and cached.playerName) then
                             local cntrl = flight:getController()
+
+							if campL.debug then env.info("DCE_CustomSearchThenEngage loop I no playerName, got controller for " .. tostring(groupName) .. ": " .. tostring(cntrl)) end
                             if cntrl then
                                 -- local pos = element:getPoint()
 								if not lastPos or (now - lastPosTime > POSITION_UPDATE_INTERVAL) then
@@ -2748,14 +2762,16 @@ function CustomSearchThenEngage(groupName, radius, targetType, searchTime)
 								local isHelo = (catEntry and catEntry.category == Unit.Category.HELICOPTER)
                                 local task = buildTask(isHelo, pos.x, pos.z, radius)
 
+								if campL.debug then env.info("DCE_CustomSearchThenEngage loop J built task for " .. tostring(groupName) .. ": " .. TableSerialization(task, 0)) end
+
 								if isHelo then
-									env.info("DCE_CustomSearchThenEngage: isHelo: " .. tostring(groupName))
+									if campL.debug then env.info("DCE_CustomSearchThenEngage J2 : isHelo: " .. tostring(groupName)) end
 								end
 
                                 cntrl:setOption(AI.Option.Air.id.PROHIBIT_AG, true)
                                 local okPush, errPush = pcall(function() cntrl:pushTask(task) end)
                                 if not okPush then
-                                    env.info("DCE_CustomSearchThenEngage: pushTask failed: " .. tostring(errPush))
+                                    if campL.debug then env.info("DCE_CustomSearchThenEngage J3: pushTask failed: " .. tostring(errPush)) end
                                 end
 
                                 next_time = t + RECHECK_INTERVAL

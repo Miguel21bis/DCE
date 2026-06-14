@@ -2187,17 +2187,17 @@ local function processEligibleLoadout(draftContext, sideName, task, target, targ
 
 						local remainingFirepowerNeeded = target.firepower.max - assignedFirepower
 
-						if remainingFirepowerNeeded <= 0 and not draftContext.overideMP_A then
+						-- if remainingFirepowerNeeded <= 0 and not draftContext.overideMP_A then
 
-							if isDebugModeA3 then
-								debugLog(
-									"draftId"..draftId .." A_29_B target already satisfied "
-									..target_name .." assigned: "..assignedFirepower .." / "..target.firepower.max
-								)
-							end
+						-- 	if isDebugModeA3 then
+						-- 		debugLog(
+						-- 			"draftId"..draftId .." A_29_B target already satisfied "
+						-- 			..target_name .." assigned: "..assignedFirepower .." / "..target.firepower.max
+						-- 		)
+						-- 	end
 
-							break
-						end
+						-- 	break
+						-- end
 
 						-- local firepowerRequest = GetWeightedRandom(target.firepower.min, target.firepower.max, bias)
 						local firepowerRequest = GetWeightedRandom( target.firepower.min, remainingFirepowerNeeded, bias )
@@ -2319,6 +2319,7 @@ local function processEligibleLoadout(draftContext, sideName, task, target, targ
 						--Pourquoi: empêcher les squads suivants de surcharger le target
 						local generatedFirepower = currentLoadout.firepower * assignedAircraft
 
+						--TODO ici, il ne faut mettre que les targets qui ont un packMax
 						targetAssignedFirepower[target_name] = (targetAssignedFirepower[target_name] or 0) + generatedFirepower
 
 						if isDebugModeA3 then
@@ -5396,8 +5397,8 @@ for _, packages in pairs(ATO) do
 
 				if type(flight) == "table" and flight.name then
 
-					-- Nom de base lisible
-					local baseName =
+					-- Nom commun  lisible
+					local communBase =
 						"Pack "
 						.. tostring(packN)
 						.. " - "
@@ -5406,12 +5407,12 @@ for _, packages in pairs(ATO) do
 						.. tostring(flight.task)
 
 					local duplicateIndex = 1
-					local finalName = baseName .. " " .. duplicateIndex
+					local finalName = communBase .. " " .. duplicateIndex
 
 					-- Tant qu'un doublon existe
 					while allFlightName_AtoG[finalName] do
 						duplicateIndex = duplicateIndex + 1
-						finalName = baseName .. " " .. duplicateIndex
+						finalName = communBase .. " " .. duplicateIndex
 					end
 
 					-- Validation définitive

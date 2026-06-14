@@ -4,52 +4,15 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["db_loadouts/db_loadouts_Plane.lua"] = "1.3.206"
+versionDCE["db_loadouts/db_loadouts_Plane.lua"] = "1.3.207"
 
--- modification M66_a		add Runway Attack
--- modification M65_a		add AirGroundAttackTask Mbot s file
-
+-- V207 - add F-100D for NAM
 -- V206 - add Tu-95MS reco plane for TF
 -- V205 - add SU-24MR escort jammer capacity and used by antiship planes 
 -- V204 - add refuel capacity to A6E
 -- V203 - add ["Escort Jammer"] = true, to B-52 AV8NA
 -- V202 - Su-33 CV
 -- V201 - no Mods - A6E - C-130J-30
--- V198 - F-4E GBU - AGM - Mk20 
--- V197 - AI restricted loadouts
--- V196 - F-4E Fuel tanks 
--- V195 - A-5 Vigilante speed
--- V194 - MiG-29 for TF80s
--- V193 - MiG-29 Fulcrum loadout first version
--- V192 - Armement des MIG-21 (Ajout version 4 missiles ) - Modif de l'armement des A-4 (toujours 2 Fuel Tanks)
--- V191 KC-135 v = 185
--- V190 A-4E fuel = 2467
--- V189 - Crusader Escort
--- V188 - Mod MiG-21MF (TeTe) + PFM (Miguel Mod)
--- V187 - R-5C Vigilante
--- V185 - New B-52 loadouts
--- V184 - Cruse CAP and Mig-15 and Mig-21 sweep for NAM..
--- V183 Crusader range..
--- V182 Escort Jammer for F-105G
--- V181 - Loft Shrike for NAM - EA-6B Shrike
--- V180 - Escort jammer for F-4E
--- V 179 - vwv-o-1 and AFAC loaouts for Bronco O-1 and Skyraider for NAM
-
--- V178 - Tu-22M3 no escort and Minscore 0.1  for TF-80-Full
--- V177 - Mirage F-1EE big Fuel tank
--- V176 - update of speed/altitude of MirageF1/Mig21/Su17 etc... from IIW following new consumption script 
--- V175 - tu-22D War over Chad Campaign
--- V 174 - Su-17M4 (modification of certain speeds and altitudes)
--- V 173 - code_loadout =  { "All" }, correction ! thanks BAMSE
--- V 172 - Crusader - Skyraider - MiG-17F - HH-2D - SH-2F
--- V 171 - CH-47F - H-6J from JG_1 BAMSE
--- V 170 - New Shrikes for the NAM A-4E
--- V168 - WOB ajustements
--- V166 - F-4E for WOB - OH-58D
--- V165 - Fixes for Iran Irak War
--- V164 - NAM loadout (later) and No guided weapons for F-4E (bugged for IA)
--- V163 - Canadian F-5E for WOC80
-
 --[[ Loadout Entry Example ----------------------------------------------------------------------------
 
 
@@ -2127,7 +2090,7 @@ db_loadouts = {
 				vAttack = 300,
 				hCruise = 6096,
 				hAttack = 6096,
-				sortie_rate = 6,
+				sortie_rate = 2,
 				stores = {
 					pylons = {
 						[3] = {
@@ -2158,7 +2121,7 @@ db_loadouts = {
 				vAttack = 300,
 				hCruise = 4096,
 				hAttack = 4000,
-				sortie_rate = 6,
+				sortie_rate = 2,
 				stores = {
 					pylons = {
 						[3] = {
@@ -2187,7 +2150,7 @@ db_loadouts = {
 				vAttack = 300,
 				hCruise = 4096,
 				hAttack = 1000,
-				sortie_rate = 6,
+				sortie_rate = 2,
 				stores = {
 					pylons = {
 						[3] = {
@@ -2216,7 +2179,7 @@ db_loadouts = {
 				vAttack = 500,
 				hCruise = 6096,
 				hAttack = 6096,
-				sortie_rate = 6,
+				sortie_rate = 2,
 				stores = {
 					pylons = {
 						[3] = {
@@ -2236,7 +2199,7 @@ db_loadouts = {
 				support = {
 					-- Escort = true,
 					-- SEAD = false,
-					["Escort Jammer"] = true,
+					-- ["Escort Jammer"] = true,
 				},
 				attributes =  { "ship" },
 				code_loadout =  { "TF", "Caucasus", "WOC80" },
@@ -2254,7 +2217,7 @@ db_loadouts = {
 				ingress = 50000,
 				egress = 50000,
 				MaxAttackOffset = 30,
-				sortie_rate = 4,
+				sortie_rate = 1,
 				stores = {
 					pylons = {
 						-- [1] = {
@@ -2278,7 +2241,7 @@ db_loadouts = {
 				support = {
 					-- Escort = false,
 					-- SEAD = false,
-					["Escort Jammer"] = true,
+					-- ["Escort Jammer"] = true,
 				},
 				attributes =  { "ship" },
 				code_loadout =  { "TF80s", "TF80sRED", "TF80sI" },
@@ -2296,7 +2259,7 @@ db_loadouts = {
 				ingress = 50000,
 				egress = 50000,
 				MaxAttackOffset = 30,
-				sortie_rate = 4,
+				sortie_rate = 1,
 				stores = {
 					pylons = {
 						[1] = {
@@ -2334,7 +2297,7 @@ db_loadouts = {
 				vAttack = 300,
 				hCruise = 4096,
 				hAttack = 4000,
-				sortie_rate = 6,
+				sortie_rate = 2,
 				stores = {
 					pylons = {
 						[3] = {
@@ -2363,7 +2326,7 @@ db_loadouts = {
 				vAttack = 300,
 				hCruise = 6096,
 				hAttack = 6096,
-				sortie_rate = 6,
+				sortie_rate = 2,
 				stores = {
 					pylons = {
 						[3] = {
@@ -3876,6 +3839,516 @@ db_loadouts = {
 					fuel = 2280,
 					flare = 40,
 					chaff = 18,
+					gun = 100,
+				},
+			},
+		},
+	},
+	["F-100D"] = {
+		SEAD = {
+			["NAM - SEAD - FT*2 - AGM-45*2 - RKT*38"] = {
+				attributes =  { },
+				country = {
+					[1] = "USA",
+				},
+				code_loadout =  { "NAM" },
+				attackType = "Dive",
+								night = false,
+				adverseWeather = false,
+				range = 600000,
+				firepower = 0.5,
+				vCruise = 200,
+				sortie_rate = 12,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{GD_F100_STRIKE_CAMERA}",
+					["num"] = 8,
+				},
+				[2] = {
+					["CLSID"] = "{GD_F100_450_GAL_TANK}",
+					["num"] = 6,
+				},
+				[3] = {
+					["CLSID"] = "{GD_F100_450_GAL_TANK}",
+					["num"] = 2,
+				},
+				[4] = {
+					["CLSID"] = "{LAU3_FFAR_MK5HEAT}",
+					["num"] = 7,
+				},
+				[5] = {
+					["CLSID"] = "{LAU3_FFAR_MK5HEAT}",
+					["num"] = 1,
+				},
+				[6] = {
+					["CLSID"] = "{AGM_45A}",
+					["num"] = 5,
+					["settings"] = {
+						["EAS_bypass_ctrl"] = 1,
+						["NFP_PRESID"] = "AGM_45",
+						["NFP_PRESVER"] = 1,
+						["NFP_rfgu_type"] = 1,
+						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
+						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
+						["smoke_marker"] = 0,
+					},
+				},
+				[7] = {
+					["CLSID"] = "{AGM_45A}",
+					["num"] = 3,
+					["settings"] = {
+						["EAS_bypass_ctrl"] = 1,
+						["NFP_PRESID"] = "AGM_45",
+						["NFP_PRESVER"] = 1,
+						["NFP_rfgu_type"] = 1,
+						["rf_lower_limit_ctrl_Mk22Mod2"] = 4800000000,
+						["rf_upper_limit_ctrl_Mk22Mod2"] = 5200000000,
+						["smoke_marker"] = 0,
+					},
+				},
+					},
+					fuel = 3505.4,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+		Strike = {
+			["NAM - Strike - FT*2 - Snakeyes*8"] = {
+				minscore = 0.3,
+				support = {
+					SEAD = true,
+					Escort = true,
+					["Escort Jammer"] = true,
+				},
+				attributes =  { "soft", "Parked Aircraft", "SAM" },
+				country = {
+					[1] = "USA",
+				},
+				code_loadout =  { "NAM" },
+				weaponType = "Bombs",
+				expend = "All",
+								night = false,
+				adverseWeather = false,
+				range = 600000,
+				firepower = 0.5,
+				vCruise = 200,
+				vAttack = 350,
+				hCruise = 500,
+				hAttack = 50,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{GD_F100_STRIKE_CAMERA}",
+					["num"] = 8,
+				},
+				[2] = {
+					["CLSID"] = "{GD_F100_335_GAL_TANK_R}",
+					["num"] = 6,
+				},
+				[3] = {
+					["CLSID"] = "{GD_F100_335_GAL_TANK_L}",
+					["num"] = 2,
+				},
+				[4] = {
+					["CLSID"] = "{Mk82SNAKEYE}",
+					["num"] = 7,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
+						["NFP_PRESVER"] = 2,
+						["NFP_VIS_DrawArgNo_57"] = 0,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[5] = {
+					["CLSID"] = "{Mk82SNAKEYE}",
+					["num"] = 1,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
+						["NFP_PRESVER"] = 2,
+						["NFP_VIS_DrawArgNo_57"] = 0,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[6] = {
+					["CLSID"] = "{GD_F100_TER_MK-82_Snakeye_x3}",
+					["num"] = 5,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
+						["NFP_PRESVER"] = 2,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[7] = {
+					["CLSID"] = "{GD_F100_TER_MK-82_Snakeye_x3}",
+					["num"] = 3,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
+						["NFP_PRESVER"] = 2,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+					},
+					fuel = 3505.4,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+			["NAM - Strike - FT*2 - Snackeye*3 - AIM-9J*2 - RKT*38"] = {
+				minscore = 0.3,
+				support = {
+					SEAD = true,
+					Escort = true,
+					["Escort Jammer"] = true,
+				},
+				attributes =  { "soft", "Parked Aircraft", "SAM" },
+				country = {
+					[1] = "USA",
+				},
+				code_loadout =  { "NAM" },
+				weaponType = "Bombs",
+				expend = "All",
+								night = false,
+				adverseWeather = false,
+				range = 600000,
+				firepower = 0.5,
+				vCruise = 200,
+				vAttack = 350,
+				hCruise = 500,
+				hAttack = 50,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{GD_F100_STRIKE_CAMERA}",
+					["num"] = 8,
+				},
+				[2] = {
+					["CLSID"] = "{GD_F100_335_GAL_TANK_R}",
+					["num"] = 6,
+				},
+				[3] = {
+					["CLSID"] = "{GD_F100_335_GAL_TANK_L}",
+					["num"] = 2,
+				},
+				[4] = {
+					["CLSID"] = "{LAU3_FFAR_MK5HEAT}",
+					["num"] = 7,
+				},
+				[5] = {
+					["CLSID"] = "{LAU3_FFAR_MK5HEAT}",
+					["num"] = 1,
+				},
+				[6] = {
+					["CLSID"] = "{GD_F100_TER_MK-82_Snakeye_x3}",
+					["num"] = 5,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
+						["NFP_PRESVER"] = 2,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[7] = {
+					["CLSID"] = "{GD_F100_AIM-9J_x2}",
+					["num"] = 3,
+				},
+					},
+					fuel = 3505.4,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+			["NAM - Strike - FT*2 - Snackeye*6 - RKT*38"] = {
+				minscore = 0.3,
+				support = {
+					SEAD = true,
+					Escort = true,
+					["Escort Jammer"] = true,
+				},
+				attributes =  { "soft", "Parked Aircraft", "SAM" },
+				country = {
+					[1] = "USA",
+				},
+				code_loadout =  { "NAM" },
+				weaponType = "Bombs",
+				expend = "All",
+								night = false,
+				adverseWeather = false,
+				range = 600000,
+				firepower = 0.5,
+				vCruise = 200,
+				vAttack = 350,
+				hCruise = 500,
+				hAttack = 50,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{GD_F100_STRIKE_CAMERA}",
+					["num"] = 8,
+				},
+				[2] = {
+					["CLSID"] = "{GD_F100_335_GAL_TANK_R}",
+					["num"] = 6,
+				},
+				[3] = {
+					["CLSID"] = "{GD_F100_335_GAL_TANK_L}",
+					["num"] = 2,
+				},
+				[4] = {
+					["CLSID"] = "{LAU3_FFAR_MK5HEAT}",
+					["num"] = 7,
+				},
+				[5] = {
+					["CLSID"] = "{LAU3_FFAR_MK5HEAT}",
+					["num"] = 1,
+				},
+				[6] = {
+					["CLSID"] = "{GD_F100_TER_MK-82_Snakeye_x3}",
+					["num"] = 5,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
+						["NFP_PRESVER"] = 2,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[7] = {
+					["CLSID"] = "{GD_F100_TER_MK-82_Snakeye_x3}",
+					["num"] = 3,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
+						["NFP_PRESVER"] = 2,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+					},
+					fuel = 3505.4,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+			["NAM - Strike - FT*2 - MK-83*2"] = {
+				minscore = 0.3,
+				support = {
+					SEAD = true,
+					Escort = true,
+					["Escort Jammer"] = true,
+				},
+				attributes =  { "Bridges", "Structure" },
+				country = {
+					[1] = "USA",
+				},
+				code_loadout =  { "NAM" },
+				weaponType = "Bombs",
+				expend = "All",
+								night = false,
+				adverseWeather = false,
+				range = 1600000,
+				firepower = 0.5,
+				vCruise = 200,
+				vAttack = 350,
+				hCruise = 4500,
+				hAttack = 4500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{GD_F100_STRIKE_CAMERA}",
+					["num"] = 8,
+				},
+				[2] = {
+					["CLSID"] = "{GD_F100_335_GAL_TANK_R}",
+					["num"] = 6,
+				},
+				[3] = {
+					["CLSID"] = "{GD_F100_335_GAL_TANK_L}",
+					["num"] = 2,
+				},
+				[4] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 7,
+				},
+				[5] = {
+					["CLSID"] = "<CLEAN>",
+					["num"] = 1,
+				},
+				[6] = {
+					["CLSID"] = "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}",
+					["num"] = 5,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 2,
+						["NFP_VIS_DrawArgNo_57"] = 0,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[7] = {
+					["CLSID"] = "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}",
+					["num"] = 3,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 2,
+						["NFP_VIS_DrawArgNo_57"] = 0,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+					},
+					fuel = 3505.4,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+			["NAM - Strike - FT*2 - Mk-82*8"] = {
+				minscore = 0.3,
+				support = {
+					SEAD = true,
+					Escort = true,
+					["Escort Jammer"] = true,
+				},
+				attributes =  { "soft", "Parked Aircraft", "SAM" },
+				country = {
+					[1] = "USA",
+				},
+				code_loadout =  { "NAM" },
+				weaponType = "Bombs",
+				expend = "All",
+								night = false,
+				adverseWeather = false,
+				range = 1600000,
+				firepower = 0.5,
+				vCruise = 200,
+				vAttack = 350,
+				hCruise = 4500,
+				hAttack = 4500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{GD_F100_STRIKE_CAMERA}",
+					["num"] = 8,
+				},
+				[2] = {
+					["CLSID"] = "{GD_F100_335_GAL_TANK_R}",
+					["num"] = 6,
+				},
+				[3] = {
+					["CLSID"] = "{GD_F100_335_GAL_TANK_L}",
+					["num"] = 2,
+				},
+				[4] = {
+					["CLSID"] = "{BCE4E030-38E9-423E-98ED-24BE3DA87C32}",
+					["num"] = 7,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 2,
+						["NFP_VIS_DrawArgNo_57"] = 0,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[5] = {
+					["CLSID"] = "{BCE4E030-38E9-423E-98ED-24BE3DA87C32}",
+					["num"] = 1,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 2,
+						["NFP_VIS_DrawArgNo_57"] = 0,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[6] = {
+					["CLSID"] = "{GD_F100_TER_MK-82_x3}",
+					["num"] = 5,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 2,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[7] = {
+					["CLSID"] = "{GD_F100_TER_MK-82_x3}",
+					["num"] = 3,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 2,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+					},
+					fuel = 3505.4,
+					flare = 0,
+					chaff = 0,
 					gun = 100,
 				},
 			},
@@ -17410,7 +17883,7 @@ db_loadouts = {
                 egress = 50000,                -- Augmenté : Pour maintenir la fuite TBA hors de portée des SAM
                 MaxAttackOffset = 30,          -- Réduit : L'IA gère mal les grands angles pour les missiles anti-navires
 				-- MaxAttackOffset = 60,
-				sortie_rate = 4,
+				sortie_rate = 1,
 				stores = {
 					pylons = {
 						[1] = {
@@ -19025,7 +19498,7 @@ db_loadouts = {
 				standoff = 70000,
 				ingress = 220000,
 				egress = 20000,
-				MaxAttackOffset = 60,
+				MaxAttackOffset = 30,
 				sortie_rate = 6,
 				stores = {
 					pylons = {
@@ -23591,7 +24064,7 @@ db_loadouts = {
 	},
 	["MiG-31"] = {
 		CAP = {
-			["Intercept  R-60M*4,R-33*4"] = {
+			["CAP R-60M*4,R-33*4"] = {
 				attributes =  { "Mig-31" },
 				code_loadout =  { "TF", "Caucasus" },
 				night = true,
@@ -23635,7 +24108,7 @@ db_loadouts = {
 			},
 		},
 		["Fighter Sweep"] = {
-			["Intercept  R-60M*4,R-33*4"] = {
+			["Fighter Sweep R-60M*4,R-33*4"] = {
 				attributes =  { },
 				code_loadout =  { "TF", "Caucasus" },
 				night = true,
@@ -23678,7 +24151,7 @@ db_loadouts = {
 			},
 		},
 		Escort = {
-			["Intercept  R-60M*4,R-33*4"] = {
+			["Escort R-60M*4,R-33*4"] = {
 				attributes =  { },
 				code_loadout =  { "TF", "Caucasus" },
 				night = true,

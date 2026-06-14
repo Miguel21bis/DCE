@@ -2953,7 +2953,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									["enabled"] = true,
 									["auto"] = true,
 									["id"] = "WrappedAction",
-									["name"] = "PROHIBIT JETTISON: true (Departure/Spawn, SEAD)",
+									["name"] = "PROHIBIT JETTISON: true (=jettisonOFF) (Departure/Spawn, SEAD)",
 									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 									["params"] =
 									{
@@ -2976,7 +2976,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									["enabled"] = true,
 									["auto"] = true,
 									["id"] = "WrappedAction",
-									["name"] = "PROHIBIT JETTISON: FALSE (Departure/Spawn)",
+									["name"] = "PROHIBIT JETTISON: FALSE (=jettisonOK) (Departure/Spawn)",
 									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 									["params"] =
 									{
@@ -3303,7 +3303,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								["enabled"] = true,
 								["auto"] = false,
 								["id"] = "WrappedAction",
-								["name"] = "PROHIBIT JETTISON : true (id == IP)",
+								["name"] = "PROHIBIT JETTISON : true (=jettisonOFF (id == IP)",
 								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 								["params"] =
 								{
@@ -3768,11 +3768,139 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					-- ************* Escort and Fighter Sweep Custom Search and Engage Task CustomSearchThenEngage *************
 					elseif flight[f].task == "Fighter Sweep" then
 
+						-- if flight[f].route[w].id == "Spawn" or flight[f].route[w].id == "Departure" then
+						-- 	local searchTime = flight[f].route[#flight[f].route].eta
+						-- 	if not flight[f].loadout.standoff then
+						-- 		DebugFLIGHT = DebugFLIGHT .. "\n".."no standoff in the loadout of the task ..Fighter Sweep.. of the type: "..tostring(flight[f].type)
+						-- 	end
+						-- 	local task_entry = {
+						-- 		["enabled"] = true,
+						-- 		["auto"] = false,
+						-- 		["id"] = "WrappedAction",
+						-- 		["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+						-- 		["params"] =
+						-- 		{
+						-- 			["action"] =
+						-- 			{
+						-- 				["id"] = "Script",
+						-- 				["params"] =
+						-- 				{
+						-- 					["command"] = "CustomSearchThenEngage('" .. groupName .. "', "  .. tostring(flight[f].loadout.standoff) .. ", 'Air',"   .. searchTime .. ")",
+						-- 				},
+						-- 			},
+						-- 		},
+						-- 	}
+						-- 	table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+						-- end
+						local task_entry = {
+							["name"] = "EngageTargets ex CustomSearchThenEngage()",
+							["enabled"] = true,
+							["auto"] = false,
+							["id"] = "ControlledTask",
+							["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+							["params"] =
+							{
+								["task"] =
+								{
+									["enabled"] = true,
+									["auto"] = false,
+									["id"] = "EngageTargets",
+									["params"] =
+									{
+										["targetTypes"] =
+										{
+											[1] = "Air",
+										}, -- end of ["targetTypes"]
+										["priority"] = 0,
+										["value"] = "Air;",
+										["noTargetTypes"] =
+										{
+											[1] = "Cruise missiles",
+											[2] = "Antiship Missiles",
+											[3] = "AA Missiles",
+											[4] = "AG Missiles",
+											[5] = "SA Missiles",
+										}, -- end of ["noTargetTypes"]
+										["maxDistEnabled"] = true,
+										["maxDist"] = flight[f].loadout.standoff or 60000,
+									}, -- end of ["params"]
+								},
+							}
+						}
+						table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+					elseif flight[f].task == "Escort" then
+					
 						if flight[f].route[w].id == "Spawn" or flight[f].route[w].id == "Departure" then
-							local searchTime = flight[f].route[#flight[f].route].eta
-							if not flight[f].loadout.standoff then
-								DebugFLIGHT = DebugFLIGHT .. "\n".."no standoff in the loadout of the task ..Fighter Sweep.. of the type: "..tostring(flight[f].type)
-							end
+							-- local target = "Battle airplanes"
+							-- if  is_helicopter then															-- modif M06 : helicoptere playable
+							-- 	target = "Helicopters"
+							-- end
+
+							-- if not flight[f].loadout.standoff then
+							-- 	DebugFLIGHT = DebugFLIGHT .. "\n".."no standoff in the loadout of the task ..Escort.. of the type: "..tostring(flight[f].type)
+							-- end
+
+							-- local searchTime = flight[f].route[#flight[f].route].eta
+
+							-- local task_entry = {
+							-- 	["enabled"] = true,
+							-- 	["auto"] = false,
+							-- 	["id"] = "WrappedAction",
+							-- 	["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+							-- 	["params"] =
+							-- 	{
+							-- 		["action"] =
+							-- 		{
+							-- 			["id"] = "Script",
+							-- 			["params"] =
+							-- 			{
+							-- 				["command"] = "CustomSearchThenEngage('" .. groupName .. "', "  .. tostring(flight[f].loadout.standoff) .. ", 'Air',"   .. searchTime .. ")",
+							-- 			},
+							-- 		},
+							-- 	},
+							-- }
+							-- table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+						
+							local task_entry = {
+								["name"] = "EngageTargets ex CustomSearchThenEngage()",
+								["enabled"] = true,
+								["auto"] = false,
+								["id"] = "ControlledTask",
+								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+								["params"] =
+								{
+									["task"] =
+									{
+										["enabled"] = true,
+										["auto"] = false,
+										["id"] = "EngageTargets",
+										["params"] =
+										{
+											["targetTypes"] =
+											{
+												[1] = "Air",
+											}, -- end of ["targetTypes"]
+											["priority"] = 0,
+											["value"] = "Air;",
+											["noTargetTypes"] =
+											{
+												[1] = "Cruise missiles",
+												[2] = "Antiship Missiles",
+												[3] = "AA Missiles",
+												[4] = "AG Missiles",
+												[5] = "SA Missiles",
+											}, -- end of ["noTargetTypes"]
+											["maxDistEnabled"] = true,
+											["maxDist"] = flight[f].loadout.standoff or 60000,
+										}, -- end of ["params"]
+									},
+								}
+							}
+							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+						
+						end
+
+						if flight[f].route[w].id == "WPT Before Landing" then
 							local task_entry = {
 								["enabled"] = true,
 								["auto"] = false,
@@ -3780,144 +3908,88 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 								["params"] =
 								{
-									["action"] =
-									{
+									["action"] = {
 										["id"] = "Script",
-										["params"] =
-										{
-											["command"] = "CustomSearchThenEngage('" .. groupName .. "', "  .. tostring(flight[f].loadout.standoff) .. ", 'Air',"   .. searchTime .. ")",
+										["params"] = {
+											["command"] = "env.info(\'DCE_WPT Before Landing #WPT-1 \')",
+										},
+									},
+								},
+							}
+							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+
+
+							task_entry = {
+								["enabled"] = true,
+								["auto"] = false,
+								["id"] = "WrappedAction",
+								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+								["params"] =
+								{
+									["action"] = {
+										["id"] = "Script",
+										["params"] = {
+											["command"] = string.format(
+												"Custom_ForceToLand('%s', %s, %s, %s, %s, %s)",
+												groupName,
+												tostring(flight[f].route[w].speed or 0),
+												tostring(flight[f].route[w].alt or 0),
+												tostring(flight[f].route[w].x or 0),
+												tostring(flight[f].route[w].y or 0),
+												tostring(waypoints[w].linkUnit or "nil")
+											),
 										},
 									},
 								},
 							}
 							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 						end
-					elseif flight[f].task == "Escort" then
-						-- if flight[f].route[w + 1] ~= nil then
 
-							if flight[f].route[w].id == "Spawn" or flight[f].route[w].id == "Departure" then
-								local target = "Battle airplanes"
-								if  is_helicopter then															-- modif M06 : helicoptere playable
-									target = "Helicopters"
-								end
 
-								if not flight[f].loadout.standoff then
-									DebugFLIGHT = DebugFLIGHT .. "\n".."no standoff in the loadout of the task ..Escort.. of the type: "..tostring(flight[f].type)
-								end
-
-								local searchTime = flight[f].route[#flight[f].route].eta
-
-								local task_entry = {
-									["enabled"] = true,
-									["auto"] = false,
-									["id"] = "WrappedAction",
-									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-									["params"] =
-									{
-										["action"] =
-										{
-											["id"] = "Script",
-											["params"] =
-											{
-												["command"] = "CustomSearchThenEngage('" .. groupName .. "', "  .. tostring(flight[f].loadout.standoff) .. ", 'Air',"   .. searchTime .. ")",
-											},
+						if flight[f].route[w].id == "Land" then
+							local task_entry = {
+								["enabled"] = true,
+								["auto"] = false,
+								["id"] = "WrappedAction",
+								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+								["params"] =
+								{
+									["action"] = {
+										["id"] = "Script",
+										["params"] = {
+											["command"] = "env.info(\'DCE_WPT_Land #WPT \')",
 										},
 									},
-								}
-								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-							end
+								},
+							}
+							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
-							if flight[f].route[w].id == "WPT Before Landing" then
-								local task_entry = {
-									["enabled"] = true,
-									["auto"] = false,
-									["id"] = "WrappedAction",
-									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-									["params"] =
-									{
-										["action"] = {
-											["id"] = "Script",
-											["params"] = {
-												["command"] = "env.info(\'DCE_WPT Before Landing #WPT-1 \')",
-											},
+
+							task_entry = {
+								["enabled"] = true,
+								["auto"] = false,
+								["id"] = "WrappedAction",
+								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+								["params"] =
+								{
+									["action"] = {
+										["id"] = "Script",
+										["params"] = {
+											["command"] = string.format(
+												"Custom_ForceToLand('%s', %s, %s, %s, %s, %s)",
+												groupName,
+												tostring(flight[f].route[w].speed or 0),
+												tostring(flight[f].route[w].alt or 0),
+												tostring(flight[f].route[w].x or 0),
+												tostring(flight[f].route[w].y or 0),
+												tostring(waypoints[w].linkUnit or "nil")
+											),
 										},
 									},
-								}
-								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-
-
-								task_entry = {
-									["enabled"] = true,
-									["auto"] = false,
-									["id"] = "WrappedAction",
-									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-									["params"] =
-									{
-										["action"] = {
-											["id"] = "Script",
-											["params"] = {
-												["command"] = string.format(
-													"Custom_ForceToLand('%s', %s, %s, %s, %s, %s)",
-													groupName,
-													tostring(flight[f].route[w].speed or 0),
-													tostring(flight[f].route[w].alt or 0),
-													tostring(flight[f].route[w].x or 0),
-													tostring(flight[f].route[w].y or 0),
-													tostring(waypoints[w].linkUnit or "nil")
-												),
-											},
-										},
-									},
-								}
-								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-							end
-
-
-							if flight[f].route[w].id == "Land" then
-								local task_entry = {
-									["enabled"] = true,
-									["auto"] = false,
-									["id"] = "WrappedAction",
-									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-									["params"] =
-									{
-										["action"] = {
-											["id"] = "Script",
-											["params"] = {
-												["command"] = "env.info(\'DCE_WPT_Land #WPT \')",
-											},
-										},
-									},
-								}
-								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-
-
-								task_entry = {
-									["enabled"] = true,
-									["auto"] = false,
-									["id"] = "WrappedAction",
-									["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
-									["params"] =
-									{
-										["action"] = {
-											["id"] = "Script",
-											["params"] = {
-												["command"] = string.format(
-													"Custom_ForceToLand('%s', %s, %s, %s, %s, %s)",
-													groupName,
-													tostring(flight[f].route[w].speed or 0),
-													tostring(flight[f].route[w].alt or 0),
-													tostring(flight[f].route[w].x or 0),
-													tostring(flight[f].route[w].y or 0),
-													tostring(waypoints[w].linkUnit or "nil")
-												),
-											},
-										},
-									},
-								}
-								table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
-							end
-						-- end
+								},
+							}
+							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+						end
 					elseif flight[f].task == "AFAC" then
 						if w == 1 and flight[f].route[w] ~= nil then
 
@@ -3980,6 +4052,49 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 						end
 
+					elseif flight[f].task == "Escort" then
+						
+						if flight[f].route[w].id ~= "Station" and flight[f].route[w].id ~= "Land" then 
+							
+							local task_entry = {
+								["name"] = "EngageTargets maxDistEnabled",
+								["enabled"] = true,
+								["auto"] = false,
+								["id"] = "ControlledTask",
+								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
+								["params"] =
+								{
+									["task"] =
+									{
+										["enabled"] = true,
+										["auto"] = false,
+										["id"] = "EngageTargets",
+										["params"] =
+										{
+											["targetTypes"] =
+											{
+												[1] = "Air",
+											}, -- end of ["targetTypes"]
+											["priority"] = 0,
+											["value"] = "Air;",
+											["noTargetTypes"] =
+											{
+												[1] = "Cruise missiles",
+												[2] = "Antiship Missiles",
+												[3] = "AA Missiles",
+												[4] = "AG Missiles",
+												[5] = "SA Missiles",
+											}, -- end of ["noTargetTypes"]
+											["maxDistEnabled"] = true,
+											["maxDist"] = flight[f].loadout.standoff or 60000,
+										}, -- end of ["params"]
+									},
+								}
+							}
+							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
+						end
+
+					
 					elseif flight[f].task == "Escort Jammer" then
 
 						if (flight[f].route[w].id == "IP" or flight[f].route[w].id == "Target") and not alreadyTreated  then
@@ -4487,7 +4602,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								["enabled"] = true,
 								["auto"] = false,
 								["id"] = "WrappedAction",
-								["name"] = "PROHIBIT JETTISON false : Egress",
+								["name"] = "PROHIBIT JETTISON false (=jettisonOK) : Egress",
 								["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
 								["params"] =
 								{

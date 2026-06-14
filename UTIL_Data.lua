@@ -2,7 +2,7 @@
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Data.lua"] = "1.15.93"
+versionDCE["UTIL_Data.lua"] = "1.15.94"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -395,9 +395,7 @@ TaskByPlane = {
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-29S"] = true,
-		["MiG-31"] = true,
 
-		-- ["Su-27"] = true,
 		["Su-30"] = true,
 
 		["Mi-28N"] = true,
@@ -461,8 +459,7 @@ TaskByPlane = {
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-29S"] = true,
-		["MiG-31"] = true,
-		-- ["Su-27"] = true,
+
 		["Su-30"] = true,
 
 
@@ -502,8 +499,7 @@ TaskByPlane = {
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-29S"] = true,
-		["MiG-31"] = true,
-		-- ["Su-27"] = true,
+
 		["Su-30"] = true,
 
 
@@ -539,7 +535,6 @@ TaskByPlane = {
 		["MiG-23MLD"] = true,
 		["MiG-25PD"] = true,
 		["MiG-29S"] = true,
-		["MiG-31"] = true,
 		["Su-30"] = true,
 
 	},
@@ -1072,6 +1067,16 @@ Data_divers = {
 		playable = true,
 		folderModName = "F-86",
 	},
+	
+
+	["F-100D"] = 	{
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		folderModName = "F-100D",
+		playable = true,
+		refuellingReceptacleType = "drogue"
+	},
+
 	["vwv_rf101b"] = 	{
 		instrumentUnits = "imperial",
 		requiredModules = true,						--itsModule
@@ -1726,6 +1731,13 @@ Data_divers = {
 		EPLRS_Capacity = false,
 		vCruise = 220,
 		hCruise = 10500,
+		fuelStupidNeedAirSpawn = true, -- to avoid fuel issues when spawning in air
+		Tasks = {
+			aircraft_task(CAP),
+			aircraft_task(Escort),
+			aircraft_task(FighterSweep),
+			aircraft_task(Intercept),
+		},
 	},
 	["Su-17M4"] = {
 		instrumentUnits = "russian",
@@ -1966,6 +1978,7 @@ Data_divers = {
 		},
 		hCruise = 10000,   -- m
 		vCruise = 260,     -- m/s (≈ 935 km/h, Mach 0.84 à 10 km)
+		fuelStupidNeedAirSpawn = true
 
 	},
 	["Tu-95MS"] = {

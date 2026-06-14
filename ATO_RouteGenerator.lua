@@ -1295,9 +1295,38 @@ function GetRoute(basePoint, target, profile, sideName, task, time, multipackn, 
 			end
 		end
 
+		-- Décalage visuel des multipackages sur la même cible
+		local attackTargetOffset = 0
+
+		if multipackmax and multipackmax > 1 then
+
+			local center = (multipackmax + 1) / 2
+
+			attackTargetOffset = (multipackn - center) * 300
+		end
+
+		-- Décalage latéral des points Attack/Target
+		if attackTargetOffset ~= 0 then
+
+			local attackHeading = GetHeadingDegre(initialPoint, initialPoint)
+
+			attackPoint = GetOffsetPoint(
+				attackPoint,
+				attackHeading + 90,
+				attackTargetOffset
+			)
+
+			-- targetPoint = GetOffsetPoint(
+			-- 	targetPoint,
+			-- 	attackHeading + 90,
+			-- 	attackTargetOffset
+			-- )
+		end
+
 		table.insert(route, {x = initialPoint.x, y = initialPoint.y, id = "IP", alt = profile.hAttack, debug = "ip_distance: "..initialPoint.ip_distance})
 		table.insert(route, {x = attackPoint.x, y = attackPoint.y, id = "Attack", alt = profile.hAttack})
 
+		
 		if standoff <= 15000 then																						--if standoff is less than 15 km, then assume target is overflown. For higher standoff, target is only inserted after route lenght and threats are calculated-
 			table.insert(route, {x = target.x, y = target.y, id = "Target", alt = profile.hAttack})
 		end
@@ -2195,6 +2224,13 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 	local route = DeepCopy(orig_route)
 	-- print("AtoRouteG B #route: "..tostring(#route))
 
+	-- décalage latéral permanent de l'escorte
+	local escortOffset = 300
+
+	if math.random(0,1) == 1 then
+		escortOffset = -escortOffset
+	end
+
 	if route and #route <= 4 then return end
 
 	-- ne recopie pas le Spawn des B1b et B-52 en apparation sur une base virtuel en alti
@@ -2268,6 +2304,27 @@ function GetEscortRoute(basePoint, orig_route, task, loadouts, unitEscort, mainU
 		end
 	end
 
+
+	-- décale tous les waypoints hérités du MAIN
+	for w = 3, #route - 2 do
+
+		local heading
+
+		if route[w + 1] then
+			heading = GetHeadingDegre(route[w], route[w + 1])
+		else
+			heading = GetHeadingDegre(route[w - 1], route[w])
+		end
+
+		local offsetPoint = GetOffsetPoint(
+			route[w],
+			heading + 90,
+			escortOffset
+		)
+
+		route[w].x = offsetPoint.x
+		route[w].y = offsetPoint.y
+	end
 
 	--adjust route for escort joining the package
 	local join_distance = 99999999																								--shortest distance from escort start point to package route leg

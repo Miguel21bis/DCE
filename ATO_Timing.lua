@@ -726,12 +726,20 @@ for sideName, packs in pairs(ATO) do
 				end
 
 				--Air starts
+				local forceAirSpawn = false
+
+				if flight[f].fuelStupidNeedAirSpawn then
+					forceAirSpawn = true
+				end
+
 				local airstart = 0															--if TOT causes a take off before mission start, flight becomes air start and this variable gets the number of the spawn WP
 				local deltaETA = 0
 				
 				for w = target_wp - 1, 1, -1 do													--iterate through waypoints backwards
 
-					if flight[f].route[w].eta < 0 and not (flight[f].client or flight[f].player) then		--ETA before mission start
+					-- if flight[f].route[w].eta < 0 and not (flight[f].client or flight[f].player) then		--ETA before mission start
+					if ( flight[f].route[w].eta < 0 or forceAirSpawn ) and not (flight[f].client or flight[f].player) then
+						
 						deltaETA = flight[f].route[1].eta
 
 						--find flight position at mission start and make it a WP
