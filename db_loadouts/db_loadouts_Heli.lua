@@ -1136,7 +1136,7 @@ db_loadouts = {
 	["SH-60B"] = {
 		CSAR = {
 			["CSAR test"] = {
-				minscore = 0.3,
+				minscore = 0.001,
 				support = {
 					Escort = true,
 					SEAD = false,
@@ -1164,7 +1164,7 @@ db_loadouts = {
 		},
 		SAR = {
 			["SAR test"] = {
-				minscore = 0.3,
+				minscore = 0.001,
 				support = {
 				},
 				attributes =  { },
@@ -1215,7 +1215,7 @@ db_loadouts = {
 	["CH-53E"] = {
 		CSAR = {
 			["CSAR test"] = {
-				minscore = 0.3,
+				minscore = 0.001,
 				support = {
 					Escort = true,
 					SEAD = false,
@@ -1243,7 +1243,7 @@ db_loadouts = {
 		},
 		SAR = {
 			["SAR test"] = {
-				minscore = 0.3,
+				minscore = 0.001,
 				support = {
 				},
 				attributes =  { },
@@ -2428,7 +2428,7 @@ db_loadouts = {
 		},
 		CSAR = {
 			["CSAR test"] = {
-				minscore = 0.3,
+				minscore = 0.001,
 				support = {
 					Escort = true,
 					SEAD = false,
@@ -2462,7 +2462,7 @@ db_loadouts = {
 		},
 		SAR = {
 			["SAR test"] = {
-				minscore = 0.3,
+				minscore = 0.001,
 				support = {
 				},
 				attributes =  { },
@@ -3091,7 +3091,7 @@ db_loadouts = {
 		},
 		CSAR = {
 			["80s SAR Rocket He -  Door gunner M60"] = {
-				minscore = 0.3,
+				minscore = 0.001,
 				support = {
 					Escort = true,
 					SEAD = false,
@@ -3139,7 +3139,7 @@ db_loadouts = {
 		},
 		SAR = {
 			["80s SAR Rocket He -  Door gunner M60"] = {
-				minscore = 0.3,
+				minscore = 0.001,
 				support = {
 				},
 				attributes =  { },

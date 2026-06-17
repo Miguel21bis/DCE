@@ -4,8 +4,9 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["db_loadouts/db_loadouts_Plane.lua"] = "1.3.207"
+versionDCE["db_loadouts/db_loadouts_Plane.lua"] = "1.3.208"
 
+-- V208 - add Fuel tanks to Mig-15bis for NAM
 -- V207 - add F-100D for NAM
 -- V206 - add Tu-95MS reco plane for TF
 -- V205 - add SU-24MR escort jammer capacity and used by antiship planes 
@@ -425,6 +426,14 @@ db_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					["pylons"] = {
+					[1] = {
+					["CLSID"] = "PTB400_MIG15",
+					["num"] = 2,
+					},
+					[2] = {
+					["CLSID"] = "PTB400_MIG15",
+					["num"] = 1,
+					},
 					},
 					fuel = 1172,
 					flare = 0,
@@ -448,6 +457,14 @@ db_loadouts = {
 				standoff = 20000,
 				stores = {
 					pylons = {
+					[1] = {
+					["CLSID"] = "PTB400_MIG15",
+					["num"] = 2,
+					},
+					[2] = {
+					["CLSID"] = "PTB400_MIG15",
+					["num"] = 1,
+					},					
 					},
 					fuel = 1172,
 					flare = 0,
@@ -474,6 +491,14 @@ db_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					["pylons"] = {
+					[1] = {
+					["CLSID"] = "PTB400_MIG15",
+					["num"] = 2,
+					},
+					[2] = {
+					["CLSID"] = "PTB400_MIG15",
+					["num"] = 1,
+					},					
 					},
 					fuel = 1172,
 					flare = 0,
@@ -2213,7 +2238,7 @@ db_loadouts = {
 				vAttack = 340,
 				hCruise = 9000,
 				hAttack = 9000,
-				standoff = 280000,
+				standoff = 180000,
 				ingress = 50000,
 				egress = 50000,
 				MaxAttackOffset = 30,
@@ -2255,7 +2280,7 @@ db_loadouts = {
 				vAttack = 290,
 				hCruise = 9000,
 				hAttack = 9000,
-				standoff = 280000,
+				standoff = 180000,
 				ingress = 50000,
 				egress = 50000,
 				MaxAttackOffset = 30,
