@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "22.99.597"
+versionDCE["UTIL_Changelog.lua"] = "22.105.618"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "22.99.597"
+VersionDCE["UTIL_Changelog.txt"] = "22.105.618"
 --[[
 
 # DCE – Changelog
@@ -17,20 +17,59 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-##  Version 22.99.597
+##  Version 22.105.618
 	###  Fixed
-	Radio HF of the Mig-15
-	EWR frequency
-	the interceptors are landing too early
-	two AWACS or two tankers may spawn for the same mission
-	Helicopters spawn randomly at FARPs, which is also linked to the unitId bug in the warehouses
-	F-100 no plyable
-	Ships don't move
+		Boundary: If there is no trigger, the boundary table must be created via base_mission
+		ArtySpotter bug nil km
+		FARP & warhouses unitId
+		AAA_Barrage not loaded on firstMission
+		Interceptor: they land too quickly, often with dry tanks
+		2 AWACS or 2 tankers may spawn for the same mission, in a same flight
+		the radio frequencies of Escort Flight 1 and Escort Flight 2 are different
+		Mig-17s using HF-only radio cannot communicate with EWRs
+		ships may not move correctly or may not move at all
 
 	###  Changed
-	loadout OH58D and UH-1H strike range to 150000
-	latLont of all element in the target
-	Manhunts tend to spawn primarily on ejection seats closest to the border
+		manhunt: add manhunt preferentially on ejected pilots closest to the border, using the distanceFromFrontline variable
+		distance SANDY EjectedPIlot sound ( distance <= 30000 )
+		Loadout F-16
+		DCE_Manager compatibility
+		after 1999, targets are individually listed with LatLon coordinates in precise mode
+		intercepteur range and position
+		Redesign of the AntishipStrike mission on the Russian side: they can now attack in multiple packages of different aircraft types
+			just increase the packmax value in the targetList
+			example:
+			["firepower"] = 
+			{
+				["min"] = 100,
+				["packmax"] = 5,
+				["max"] = 150,
+			},
+			["titleName"] = "TF-71",
+			TODO: still need to attack targets by stages, avoiding spreading aircraft over multiple targets
+
+
+	###  Add
+		SA-10 radars are automatically turned off if it has no missiles left, avoiding its destruction by HARM
+		Su-25TM
+		A6E refueling
+		Give the player a real reason for the absence of flight for him (in progress)
+		F-100D		
+
+##  Version 22.99.597
+	###  Fixed
+		Radio HF of the Mig-15
+		EWR frequency
+		the interceptors are landing too early
+		two AWACS or two tankers may spawn for the same mission
+		Helicopters spawn randomly at FARPs, which is also linked to the unitId bug in the warehouses
+		F-100 no plyable
+		Ships don't move
+
+	###  Changed
+		loadout OH58D and UH-1H strike range to 150000
+		latLont of all element in the target
+		Manhunts tend to spawn primarily on ejection seats closest to the border
 
 
 ##  Version 22.99.587
