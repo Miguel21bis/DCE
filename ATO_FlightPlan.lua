@@ -2270,7 +2270,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				--n'a pas trouvé de task correspondant à l'avion et au type de cible
 				--on passe donc en mode dégradé
 				if not goodTask then
-					if goupTaskTemp ~= "Runway Attack" then
+					if goupTaskTemp ~= "Runway Attack" and Debug.debug then
 						print("(downgraded mode  : don t found task |"..flight[f].task.."| of the |"..flight[f].type.. " |in the oob_air_init.lua file")
 						print("typeCible |"..typeCible.."| |"..flight[f].type.."| |"..goupTaskTemp.."| |"..tostring(flight[f].target.name))
 					end

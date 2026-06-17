@@ -1803,7 +1803,7 @@ Action = {}
 				if country.ship then											--country has ships
 					for group_n,group in ipairs(country.ship.group) do			--go through groups
 
-						print("DcCT_ShipMission B groupName "..groupName.." ?= "..group.name)
+						-- print("DcCT_ShipMission B groupName "..groupName.." ?= "..group.name)
 						if groupName == group.name then							--ship group found		
 							
 							print("DcCT_ShipMission C found groupName "..groupName)
@@ -1829,7 +1829,7 @@ Action = {}
 								-- StartTime = StartTime
 							}
 
-							print("DcCT_ShipMission -> D groupName " .. groupName .. " ShipGroupMovement")
+							-- print("DcCT_ShipMission -> D groupName " .. groupName .. " ShipGroupMovement")
 
 							ShipGroupMovement(groupName, wpTable, cruiseSpeed, patrolSpeed, CampTotalTimeS)	--exectue ship mission
 

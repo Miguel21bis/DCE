@@ -2123,7 +2123,7 @@ function GetOutGDFM(arg)
 
 				env.info("DCE_getOut infoPlayer E test typeLand "..tostring(typeLand))
 
-				if typeLand ~= 3 and typeLand ~= 5  then
+				-- if typeLand ~= 3 and typeLand ~= 5  then
 
 					AddSoldierAliasPilot(infoPlayer)
 					infoPlayer.createdSoldier = true
@@ -2173,11 +2173,11 @@ function GetOutGDFM(arg)
 					trigger.action.smoke(smokePosVec3, SmokeColor_EjectedPilot)
 					-- ejectedPilot.smokeTiming = timer.getTime()	-- mettre à jour le temps du fumigène
 
-				else
-					env.info( "DCE_GetOutGDFM M emergency evacuation impossible, no-go area (water(3)  or runway(5)) "..tostring(typeLand))
-					trigger.action.outTextForUnit(arg_playerId, "emergency evacuation impossible, no-go area (water(3)  or runway(5)) "..tostring(typeLand), 15)
+				-- else
+				-- 	env.info( "DCE_GetOutGDFM M emergency evacuation impossible, no-go area (water(3)  or runway(5)) "..tostring(typeLand))
+				-- 	trigger.action.outTextForUnit(arg_playerId, "emergency evacuation impossible, no-go area (water(3)  or runway(5)) "..tostring(typeLand), 15)
 
-				end
+				-- end
 
 
 				local log_entry = {
@@ -2247,7 +2247,7 @@ function GetOutGDFM(arg)
 
 							env.info("DCE_getOut G baseName "..tostring(baseName).." distanceBase "..tostring(distanceBase))
 
-							if distanceBase > 15000 and typeLand ~= land.SurfaceType.WATER and typeLand ~= land.SurfaceType.RUNWAY  then
+							if distanceBase > 15000 and typeLand ~= land.SurfaceType.RUNWAY then --and typeLand ~= land.SurfaceType.WATER
 
 								AddSoldierAliasPilot(damaged)
 								damaged.createdSoldier = true

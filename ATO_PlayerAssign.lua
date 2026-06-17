@@ -502,9 +502,9 @@ else
 	end
 end
 
-print()
-print("DEBUG #playable = "..tostring(#playable))
-print("DEBUG AllCoopPossible = "..tostring(AllCoopPossible))
+-- print()
+-- print("DEBUG #playable = "..tostring(#playable))
+-- print("DEBUG AllCoopPossible = "..tostring(AllCoopPossible))
 
 for k=1, #(multiBIS.Group or {}) do
 	print(

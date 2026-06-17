@@ -1265,7 +1265,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
 
                 -- print("DcUS G1 (maj) pilot.status "..pilot.status.." // "..tostring(pilot.name))
 
-                if pilot.status == "EVAC_possible" and pilot.pos.surfaceType ~= 5  then
+                if pilot.status == "EVAC_possible" and pilot.pos.surfaceType ~= 5  then --RUNWAY           5
 
                     local addPilot = pilot
                     -- addPilot.smokeTiming = 0
@@ -1280,9 +1280,9 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then   -- and camp_ZoneSAR.blue ????
                     table.insert(camp.SAR.pilotEjected, addPilot)
 
                     --ne spawn pas dans l'eau (pas encore)
-                    if pilot.pos.surfaceType ~= 3 then
+                    -- if pilot.pos.surfaceType ~= 3 then
                         addSoldierAliasPilot(pilot)
-                    end
+                    -- end
                 end
            end
         end

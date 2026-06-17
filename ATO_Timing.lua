@@ -726,11 +726,6 @@ for sideName, packs in pairs(ATO) do
 				end
 
 				--Air starts
-				local forceAirSpawn = false
-
-				if flight[f].fuelStupidNeedAirSpawn then
-					forceAirSpawn = true
-				end
 
 				local airstart = 0															--if TOT causes a take off before mission start, flight becomes air start and this variable gets the number of the spawn WP
 				local deltaETA = 0
@@ -738,7 +733,7 @@ for sideName, packs in pairs(ATO) do
 				for w = target_wp - 1, 1, -1 do													--iterate through waypoints backwards
 
 					-- if flight[f].route[w].eta < 0 and not (flight[f].client or flight[f].player) then		--ETA before mission start
-					if ( flight[f].route[w].eta < 0 or forceAirSpawn ) and not (flight[f].client or flight[f].player) then
+					if ( flight[f].route[w].eta < 0 ) and not (flight[f].client or flight[f].player) then
 						
 						deltaETA = flight[f].route[1].eta
 
@@ -749,11 +744,12 @@ for sideName, packs in pairs(ATO) do
 
 						--TODO, revoir cette partie, y'a souvent erreur d'ETA ici
 						local dist = flight[f].route[w + 1].eta * flight[f].route[w + 1].speed							--distance covered from mission start to first positive ETA
+						
 						if dist > GetDistance(flight[f].route[w], flight[f].route[w + 1]) then	--if distance is ahead of WP (caused by extra minutes at take off WP), keep spawn point over take off point but adjust id and alt for air spawn
 
 							flight[f].route[w].name = "Create Spawn Wp in AtoTiming "..flight[f].route[w].id.." "..tostring(debug.getinfo(1).currentline)
 							flight[f].route[w].id = "Spawn"
-							flight[f].route[w].alt = flight[f].route[w + 1].alt
+							flight[f].route[w].alt = flight[f].route[w].alt
 							flight[f].route[w].eta = 0											--ETA of WP is at mission start
 							-- flight[f].route[w].speed = speed									--set NEWSPEED
 						
@@ -774,7 +770,6 @@ for sideName, packs in pairs(ATO) do
 								speed = flight[f].route[w + 1].speed,													--set NEWSPEED
 							}
 						end
-						
 
 						airstart = w															--store the number of the spawn WP (WPs ahead will be removed)
 						break
@@ -782,7 +777,27 @@ for sideName, packs in pairs(ATO) do
 					end
 				end
 
+
+				if Data_divers[flight[f].type] and Data_divers[flight[f].type].fuelStupidNeedAirSpawn then
+					flight[f].route[1].name = "Create Spawn Wp fuelStupidNeedAirSpawn in AtoTiming "..flight[f].route[1].id.." "..tostring(debug.getinfo(1).currentline)
+					flight[f].route[1].id = "Spawn"
+
+					flight[f].route[1].alt = flight[f].loadout.hCruise or 2000
+					flight[f].route[1].speed = flight[f].loadout.vCruise or 200
+				end
+						
+
 				if flight[f].route[1].id == "Spawn" then
+					
+					-- Waypoints à supprimer (dans l'ordre décroissant)
+					for idx = #flight[f].route, 1, -1 do
+						local wp = flight[f].route[idx]
+						if wp and (wp.id == "Departure" or wp.id == "Assemble") then
+							table.remove(flight[f].route, idx)
+						end
+					end
+
+
 					for w = 1, #flight[f].route do
 						if flight[f].route[w].etaSpawn then
 							flight[f].route[w].eta = flight[f].route[w].etaSpawn

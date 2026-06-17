@@ -548,7 +548,7 @@ for sideName, targets in pairs(targetlist) do
 	end
 end
 
-_affiche(priorityMaxValue, "priorityMaxValue: ")
+-- _affiche(priorityMaxValue, "priorityMaxValue: ")
 -- os.execute 'pause'
 
 --Vérifie si le loadout est compatible avec la météo actuelle
@@ -1388,32 +1388,12 @@ local draftSorties = {
 	red = {}
 }
 
-
-
--- multiPlaneSet = {}
-
--- for k=1, Multi.NbGroup do
--- 	--TODO beurk, à refaire ça propre
--- 	if not multiPlaneSet[Multi.Group[k].side] then multiPlaneSet[Multi.Group[k].side] = {} end
--- 	if not multiPlaneSet[Multi.Group[k].side][Multi.Group[k].PlaneType] then multiPlaneSet[Multi.Group[k].side][Multi.Group[k].PlaneType] = {} end
--- 	-- multiPlaneSet[Multi.Group[k].PlaneType][Multi.Group[k].task] = true
-
--- 	if not multiPlaneSet[Multi.Group[k].side][Multi.Group[k].PlaneType][Multi.Group[k].task] then multiPlaneSet[Multi.Group[k].side][Multi.Group[k].PlaneType][Multi.Group[k].task] = {} end
--- 	if not multiPlaneSet[Multi.Group[k].side][Multi.Group[k].PlaneType][Multi.Group[k].task]["NbPlane"] then multiPlaneSet[Multi.Group[k].side][Multi.Group[k].PlaneType][Multi.Group[k].task]["NbPlane"] = 0 end
-
--- 	multiPlaneSet[Multi.Group[k].side][Multi.Group[k].PlaneType][Multi.Group[k].task].NbPlane = Multi.Group[k].NbPlane + multiPlaneSet[Multi.Group[k].side][Multi.Group[k].PlaneType][Multi.Group[k].task].NbPlane
--- 	multiPlaneSet[Multi.Group[k].side][Multi.Group[k].PlaneType][Multi.Group[k].task].InitNbPlaneByTask =  multiPlaneSet[Multi.Group[k].side][Multi.Group[k].PlaneType][Multi.Group[k].task].NbPlane
-
--- 	if not multiPlaneSet[Multi.Group[k].side][Multi.Group[k].PlaneType].InitNbPlane then multiPlaneSet[Multi.Group[k].side][Multi.Group[k].PlaneType].InitNbPlane = 0 end
--- 			multiPlaneSet[Multi.Group[k].side][Multi.Group[k].PlaneType].InitNbPlane = multiPlaneSet[Multi.Group[k].side][Multi.Group[k].PlaneType].InitNbPlane + Multi.Group[k].NbPlane
--- end
-
 if Debug.debug and Debug.Generator.affiche then
 	_affiche(Multi, "ATO_G_Multi: ")
 end
 
 for k = 1, Multi.NbGroup do
-    -- 1️⃣ Mise en cache locale du groupe courant (Énorme gain CPU)
+
     local group = Multi.Group[k]
     local side  = group.side
     local pType = group.PlaneType
@@ -1423,43 +1403,14 @@ for k = 1, Multi.NbGroup do
     local task  = group.task
     local count = group.NbPlane or 0
 
-    -- 2️⃣ Initialisation sécurisée de l'arbre de tables (Vivification)
-
-    -- if not multiSquadSet[side] then
-    --     multiSquadSet[side] = {}
-    -- end
-
-    -- if not multiSquadSet[side][squadName] then
-    --     multiSquadSet[side][squadName] = true
-    -- end
-
-	print("side "..tostring(side))
-	print("planeType "..tostring(planeType))
-	print("squadName "..tostring(squadName))
 
     multiSquadSet[side] = multiSquadSet[side] or {}
 	multiSquadSet[side][squadName] = multiSquadSet[side][squadName] or true
-
-
-    -- if not multiPlaneSet[side] then
-    --     multiPlaneSet[side] = {}
-    -- end
-    -- if not multiPlaneSet[side][planeType] then
-    --     multiPlaneSet[side][planeType] = {}
-    -- end
 
 	--==============
     multiPlaneSet[side] = multiPlaneSet[side] or {}
     multiPlaneSet[side][planeType] =  multiPlaneSet[side][planeType] or {}
 	--======================
-	
-
-    -- if not multiPlaneSet[side][planeType][squadName] then
-    --     multiPlaneSet[side][planeType][squadName] = {
-    --         InitNbPlane = 0
-    --     }
-    -- end
-
 
 	multiPlaneSet[side][planeType][squadName] = multiPlaneSet[side][planeType][squadName] or { InitNbPlane = 0 }
 
@@ -1476,7 +1427,7 @@ for k = 1, Multi.NbGroup do
     -- Raccourci vers le niveau "task"
     local taskData = planeTypeData[task]
 
-    -- 3️⃣ Accumulation des données
+    -- 3️ Accumulation des données
     -- taskData.NbPlane            = taskData.NbPlane + count
     -- taskData.InitNbPlaneByTask  = taskData.NbPlane  -- Copie la valeur cumulée courante
 
@@ -5337,54 +5288,28 @@ for sidePrio, tableauPrio in pairs(targetListPrio) do
 	end
 end
 
+if Debug.debug then
 
-print("\n========== FINAL SQUAD REPORT ==========\n")
+	print("\n========== FINAL SQUAD REPORT ==========\n")
 
-for squadName, status in pairs(SquadGenerationStatus) do
+	for squadName, status in pairs(SquadGenerationStatus) do
 
-	if not status.mainGenerated and not status.supportGenerated then
+		if not status.mainGenerated and not status.supportGenerated then
 
-		print(
-			squadName
-			.." | "..status.unitType
-			.." | dominantReason: "
-			..tostring(
-				status.bestReject
-				and status.bestReject.dominantReason
+			print(
+				squadName
+				.." | "..status.unitType
+				.." | dominantReason: "
+				..tostring(
+					status.bestReject
+					and status.bestReject.dominantReason
+				)
 			)
-		)
+		end
 	end
+
+	print("\n========================================\n")
 end
-
-print("\n========================================\n")
-
--- local allFlightName_AtoG = {}
--- --assign le nom des packages
--- for _, packages in pairs(ATO) do
--- 	for packN, pack in pairs(packages) do
--- 		for _, flights in pairs(pack) do
--- 			for flightN, flight in pairs(flights) do
--- 				if type(flight) == "table" and flight.name then
-
--- 					--pour eviter le pb du flight 2 du main(strike) qui peut etre en conflit avec une escorte strike 		
--- 					local tempNumFlight = flightN
--- 					flight.groupName = "Pack " .. packN .. " - " .. flight.name .. " - " .. flight.task .. " " .. tempNumFlight
--- 					repeat
--- 						flight.groupName = "Pack " .. packN .. " - " .. flight.name .. " - " .. flight.task .. " " .. tempNumFlight
--- 						tempNumFlight = tempNumFlight + 1
--- 					until not allFlightName_AtoG[flight.groupName]
-
--- 					-- print("AtoG assign flight G: groupName: " .. tostring(flight.groupName))
-
--- 				else
--- 					-- _affiche(flight, "AtoG H flight:: ")
--- 				end
-
--- 			end
--- 		end
--- 	end
--- end
-
 
 
 local allFlightName_AtoG = {}

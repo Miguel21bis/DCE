@@ -2253,8 +2253,10 @@ function AssignedFrequencies()
 				Assigned_freq[tonumber(freq)] = basename
 			end
 		else
-			print("BUG whith AssignedFrequencies():")
-			_affiche(base.ATC_frequency, "AA base.ATC_frequency: ") 
+			if Debug.debug then
+				print("BUG whith AssignedFrequencies():")
+				_affiche(base.ATC_frequency, "AA base.ATC_frequency: ") 
+			end
 		end
 	end
 
