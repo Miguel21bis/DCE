@@ -26,7 +26,7 @@ known issues:
 		Interceptor: they land too quickly, often with dry tanks
 		2 AWACS or 2 tankers may spawn for the same mission, in a same flight
 		the radio frequencies of Escort Flight 1 and Escort Flight 2 are different
-		Mig-17s using HF-only radio cannot communicate with EWRs
+		Mig-15bis using HF-only radio cannot communicate with EWRs
 		ships may not move correctly or may not move at all
 
 	###  Changed
