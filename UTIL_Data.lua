@@ -2,7 +2,7 @@
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Data.lua"] = "1.15.94"
+versionDCE["UTIL_Data.lua"] = "1.15.95"
 ------------------------------------------------------------------------------------------------------- 
 
 if Debug.debug then
@@ -1160,6 +1160,46 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 	},
+	["F-14A-95-GR"] = 	{
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		inheritedFrom = "F-14",	--copy radio frequency, failures ...
+		inherited_APA_From = "F-14",	--copy AddPropAircraft
+		folderModName = "F14",
+		fileModName = "F-14B.lua",		--exactement les meme fichiers que le F-14B
+		playable = true,
+		alignment_PropAircraft = {
+			fast = {
+				["INSAlignmentStored"] = true,
+			},
+			slow = {
+				["INSAlignmentStored"] = false,
+			},
+		},
+		vCruise = 230,
+		hCruise = 9140,
+		refuellingReceptacleType = "drogue"
+	},
+	["F-14A-135-GR-Early"] = 	{
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		inheritedFrom = "F-14",	--copy radio frequency, failures ...
+		inherited_APA_From = "F-14",	--copy AddPropAircraft
+		folderModName = "F14",
+		fileModName = "F-14B.lua",		--exactement les meme fichiers que le F-14B
+		playable = true,
+		alignment_PropAircraft = {
+			fast = {
+				["INSAlignmentStored"] = true,
+			},
+			slow = {
+				["INSAlignmentStored"] = false,
+			},
+		},
+		vCruise = 230,
+		hCruise = 9140,
+		refuellingReceptacleType = "drogue"
+	},
 	["F-14A-135-GR"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -1180,6 +1220,7 @@ Data_divers = {
 		hCruise = 9140,
 		refuellingReceptacleType = "drogue"
 	},
+
 	["F-14B"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -3988,7 +4029,6 @@ end
 
 --rempli la table TaskByPlane avec les Tasks qui ne sont rempli que dans Data_divers
 function DataCompilation_TaskByPlane()
-
 
 	-- On parcourt chaque entrée de Data_divers
 	for planeName, planeData in pairs(Data_divers) do

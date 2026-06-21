@@ -156,7 +156,7 @@ if mission_ini.failure then										-- not multiplayer --	if mission_ini.failur
 
 	-- ajoute accidental_failures = true � forcedOptions
 	if not mission.forcedOptions then mission.forcedOptions = {} end
-	mission.forcedOptions.accidental_failures =  true
+	mission.forcedOptions.accidental_failures = true
 
 
 	local n= 1
@@ -434,7 +434,7 @@ local function getCallsignWest(category, task, flight_f, flight_n, aircraft_n)
 
 		--M56_b
 		--si le callsign à déjà été défini par AssignCallnameSquad() ou oob_air_init
-		if flight_f and flight_f["callsign"] and flight_f["callsignId"]  then
+		if flight_f and flight_f["callsign"] and flight_f["callsignId"] then
 
 			if aircraft_n == 1 then
 
@@ -621,7 +621,7 @@ function GetSidenumber(flight, nUnit)				--not local, also used in DC_StaticAirc
 	oob_air = oob_air or {}
 	for side_name,side in pairs(oob_air) do
 		for n,unit in pairs(side) do
-			if unit.name == squadron and unit.player  then
+			if unit.name == squadron and unit.player then
 				reservedDigit = 1												--ajoute un chiffre pour les IA, exemple 200+1 pour l'ia, 200 etant reservé au joueur
 			end
 		end
@@ -637,7 +637,7 @@ function GetSidenumber(flight, nUnit)				--not local, also used in DC_StaticAirc
 				counter = counter + 1
 				s = math.random(lowerNum +reservedDigit, upperNum)		--find random sidenumber
 
-				if nUnit == 1 and tonumber(string.sub (s, -1)) ~= 0 and not sidenumbers[squadron][lower]  then	--on s assure que le num 200 (par exemple) est donné au leader et pas un ailier
+				if nUnit == 1 and tonumber(string.sub (s, -1)) ~= 0 and not sidenumbers[squadron][lower] then	--on s assure que le num 200 (par exemple) est donné au leader et pas un ailier
 					leaderCheck = false
 				end
 
@@ -893,7 +893,7 @@ local function fct_movedBullseye(arg_Side, arg_NameTheatre)
 
 		for baseName, base in pairs(db_airbases) do
 			if base.x and not base.unitname then
-			-- if base.x  then
+			-- if base.x then
 				if GetDistance(campMod.movedBullseye[arg_NameTheatre].pos, base) <= (campMod.movedBullseye[arg_NameTheatre].rayon * 1000) then
 					db_airbases[baseName]["name"] = baseName
 					table.insert(tempArrayBulls, db_airbases[baseName])
@@ -927,7 +927,7 @@ local function fct_movedBullseye(arg_Side, arg_NameTheatre)
 		if LL_PositionsFileExit then
 
 			local xKey = math.abs(math.floor(tempBullseye.x))
-			if LL_Positions[xKey]  then
+			if LL_Positions[xKey] then
 				local testX = math.floor(Brief[arg_Side].bullseye.x)
 				local testY = math.floor(Brief[arg_Side].bullseye.y)
 				for n, llPos in pairs(LL_Positions[xKey] ) do
@@ -1011,7 +1011,7 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 		end
 		local altStep = 500
 		local speed = 200
-		if is_helicopter  then
+		if is_helicopter then
 			altStep = 50
 			speed = arg_Flight[arg_f].loadout.vCruise / 4 * 3
 		end
@@ -1053,7 +1053,7 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 
 		local alt = 150
 
-		if is_helicopter  then 											-- M6.1 sauf helicopter			
+		if is_helicopter then 											-- M6.1 sauf helicopter			
 			if db_airbases[arg_Flight[arg_f].base].elevation then							--airbase has defined elevation
 				alt = alt + db_airbases[arg_Flight[arg_f].base].elevation					--make alt above base
 			end
@@ -1099,7 +1099,7 @@ local function spawnOn(arg_Spawn, arg_Waypoints, arg_Group, arg_Pn, arg_SpawnTim
 			arg_Group.units[n].psi = psi
 			arg_Group.units[n].heading = heading
 
-			if is_helicopter  then
+			if is_helicopter then
 				-- group.units[n]["alt"] = alt  + (Pn * 10) + alt_Role * 11
 				arg_Group.units[n].alt = ((arg_Pn-1) * spacing/1.2) + ((arg_f-1) * spacing) + arg_Waypoints[1]["alt"] + (spacing * n) 		--ANTI-COLLISION A
 				-- group.units[n]["alt"] = waypoints[1]["alt"]
@@ -1471,7 +1471,7 @@ local function createBombingChapter(arg_idTask, arg_Flight, arg_Wpt, arg_WeaponT
 				["attackType"] = arg_Flight.loadout.attackType,
 			}
 		}
-	elseif arg_idTask == "AttackUnit"  then
+	elseif arg_idTask == "AttackUnit" then
 		-- print("AtoFP CBC passe N AttackUnit ")
 		task_entry = {
 			["enabled"] = taskEnable,
@@ -1495,7 +1495,7 @@ local function createBombingChapter(arg_idTask, arg_Flight, arg_Wpt, arg_WeaponT
 				["direction"] = 0,
 			},
 		}
-	elseif arg_idTask == "Bombing"  then
+	elseif arg_idTask == "Bombing" then
 		if not arg_Element.x then
 			DebugFLIGHT = DebugFLIGHT .. "\n"..("AtoFp (arg_idTask == Bombing) noX "..arg_Element.name.." |from| "..tostring(arg_From))
 		end
@@ -1521,7 +1521,7 @@ local function createBombingChapter(arg_idTask, arg_Flight, arg_Wpt, arg_WeaponT
 				["direction"] = 0,
 			},
 		}
-	elseif arg_idTask == "AttackMapObject"  then
+	elseif arg_idTask == "AttackMapObject" then
 		task_entry = {
 			["enabled"] = taskEnable,
 			["auto"] = false,
@@ -1541,7 +1541,7 @@ local function createBombingChapter(arg_idTask, arg_Flight, arg_Wpt, arg_WeaponT
 				["altitudeEnabled"] = false,
 			},
 		}
-	elseif arg_idTask == ""  then
+	elseif arg_idTask == "" then
 		DebugFLIGHT = DebugFLIGHT .. "\n"..("AtoFp no id_task from "..tostring(arg_From))
 	end
 
@@ -1598,7 +1598,7 @@ local function addMessageForGroup(groupName, time, message)
         MsgForPlayerInMsn[time][groupName] = {}
     end
 
-    table.insert(MsgForPlayerInMsn[time][groupName], message)
+   table.insert(MsgForPlayerInMsn[time][groupName], message)
 
 end
 
@@ -1847,7 +1847,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 				if baseIsFARP then
-					if db_airbases[flight[f].base].parkAlertSAR and #db_airbases[flight[f].base].parkAlertSAR >= 2  then
+					if db_airbases[flight[f].base].parkAlertSAR and #db_airbases[flight[f].base].parkAlertSAR >= 2 then
 						farp_MorePlace = true
 					end
 				end
@@ -1915,7 +1915,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 
-				if IsHelicopter[flight[f].type]  then
+				if IsHelicopter[flight[f].type] then
 					is_helicopter = true
 					if not IsHelicopter[flight[f].type].hHover then
 						IsHelicopter[flight[f].type].hHover = 1500
@@ -2127,7 +2127,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				local goupTaskTemp = flight[f].task
 
 				if flight[f].task == "Strike" then												--Strike is a generic A-G task that needs to be replaced by the respective DCS task
-					if flight[f].loadout.weaponType == "ASM"  then
+					if flight[f].loadout.weaponType == "ASM" then
 						goupTaskTemp = "Ground Attack"
 					elseif flight[f].target.class == nil or  flight[f].target.class == "vehicle" or  flight[f].target.class == "static" or  flight[f].target.class == "airbase" then
 						goupTaskTemp = "Ground Attack"
@@ -2148,9 +2148,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					goupTaskTemp = "AFAC"
 				elseif flight[f].task == "Anti-ship Strike" then
 					goupTaskTemp = "Antiship Strike"											-- Miguel debugB 
-				elseif flight[f].task == "SAR" or flight[f].task == "CSAR"  then
+				elseif flight[f].task == "SAR" or flight[f].task == "CSAR" then
 					goupTaskTemp = "Transport"													-- Miguel debugB 
-				elseif flight[f].task == "Runway Attack"  then
+				elseif flight[f].task == "Runway Attack" then
 					goupTaskTemp = "Runway Attack"
 				end
 
@@ -2161,7 +2161,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					typeCible = "Static"
 				-- elseif flight[f].task == "Strike" and flight[f].target.class == "vehicle" then
 				-- 	typeCible = "DynamicGroup"
-				elseif flight[f].task == "Strike" and (flight[f].target.class == "static" or  flight[f].target.class == "vehicle"  or  flight[f].target.class == "airbase")  then
+				elseif flight[f].task == "Strike" and (flight[f].target.class == "static" or  flight[f].target.class == "vehicle"  or  flight[f].target.class == "airbase") then
 					typeCible = "Static"
 				-- elseif flight[f].task == "Strike" and flight[f].target.class == "airbase" then
 				-- 	typeCible = "Static" 
@@ -2181,7 +2181,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				local breakloop = false
 				local goodTask = true
 				local id_task = ""
-				if not TaskByPlane[goupTaskTemp][flight[f].type] or not GoupTaskByTypeTarget[typeCible][goupTaskTemp]  then
+				if not TaskByPlane[goupTaskTemp][flight[f].type] or not GoupTaskByTypeTarget[typeCible][goupTaskTemp] then
 
 					local txt = "AtoFP if not TaskByPlane[GoupTaskTemp][flight[f].type]  "..tostring(goupTaskTemp).." type: "..tostring(flight[f].type)
 					AddLog(txt)
@@ -2217,7 +2217,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 														goodTask = true
 														breakloop = true
 														break
-													elseif not (task_ == "Runway Attack" or  task_ == "Antiship Strike" )then
+													elseif not (task_ == "Runway Attack" or task_ == "Antiship Strike" )then
 														id_task = idStrike_
 														goupTaskTemp = task_
 
@@ -2275,7 +2275,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						print("typeCible |"..typeCible.."| |"..flight[f].type.."| |"..goupTaskTemp.."| |"..tostring(flight[f].target.name))
 					end
 
-					if TaskByPlane["Ground Attack"][flight[f].type]   then
+					if TaskByPlane["Ground Attack"][flight[f].type]  then
 						goupTaskTemp = "Ground Attack"
 						id_task = "Bombing"
 						goodTask = true
@@ -2435,7 +2435,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									["tasks"] = {}
 								},
 							},
-							["speed_locked"] =  true,
+							["speed_locked"] = true,
 						}
 						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_Intercept or SAR = { Turning Point ") end
 					end
@@ -2533,7 +2533,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP Departure or (Spawn and Departure ) set Altitude " )
 
 							local alt = 609.6														--initial departure alt to try: 2'000 ft
-							if is_helicopter  then 											-- M6.1 sauf helicopter
+							if is_helicopter then 											-- M6.1 sauf helicopter
 								alt = 50
 							end
 							if db_airbases[flight[f].base].elevation then							--airbase has defined elevation
@@ -2604,11 +2604,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						}
 						table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
-					elseif waypoints[w]["name"] == "Assemble"  then
+					elseif waypoints[w]["name"] == "Assemble" then
 						waypoints[w]["ETA_locked"] = false
 						waypoints[w]["speed_locked"] = true
 						waypoints[w]["debug"] = (waypoints[w]["debug"] or "") .." ETA_locked C False "
-					elseif waypoints[w]["name"] == "Departure"  then
+					elseif waypoints[w]["name"] == "Departure" then
 						-- waypoints[w]["speed"] = pack[p].main[1].loadout.vCruise / 4 * 3					--set NEWSPEED
 					end
 
@@ -2689,7 +2689,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					-- ************* take off and landing *************
-					if (flight[f].route[w].id == "Taxi" and flight[f].route[w].eta >= 0) or (flight[f].route[w].id == "Intercept" or flight[f].route[w].id == "SAR")  then
+					if (flight[f].route[w].id == "Taxi" and flight[f].route[w].eta >= 0) or (flight[f].route[w].id == "Intercept" or flight[f].route[w].id == "SAR") then
 						if not isHumain and db_airbases[flight[f].base].AI_Spawn and string.upper(db_airbases[flight[f].base].AI_Spawn) ~= "PARKING" then
 							if string.upper(db_airbases[flight[f].base].AI_Spawn) == "AIR" then
 								waypoints[w]["type"] = "Turning Point"
@@ -2718,17 +2718,17 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							if (flight[f].player == true or flight[f].client == true) and mission_ini.parking_hotstart and (flight[f].task ~= "Intercept" and flight[f].task ~= "SAR") then
 
 								if mission_ini.parking_hotstart then
-									if  type(mission_ini.parking_hotstart) == "boolean"  then
+									if type(mission_ini.parking_hotstart) == "boolean" then
 										waypoints[w]["action"] = "From Parking Area Hot"
 										waypoints[w]["type"] = "TakeOffParkingHot"
 										-- print("AtoFP passe boolean TakeOffParkingHot")
-									elseif  type(mission_ini.parking_hotstart) == "number" and mission_ini.parking_hotstart == 0  then
+									elseif type(mission_ini.parking_hotstart) == "number" and mission_ini.parking_hotstart == 0 then
 										waypoints[w]["action"] = "From Parking Area"
 										waypoints[w]["type"] = "TakeOffParking"
-									elseif  type(mission_ini.parking_hotstart) == "number" and mission_ini.parking_hotstart == 1  then
+									elseif type(mission_ini.parking_hotstart) == "number" and mission_ini.parking_hotstart == 1 then
 										waypoints[w]["action"] = "From Parking Area Hot"
 										waypoints[w]["type"] = "TakeOffParkingHot"
-									elseif  type(mission_ini.parking_hotstart) == "number" and mission_ini.parking_hotstart == 2  then
+									elseif type(mission_ini.parking_hotstart) == "number" and mission_ini.parking_hotstart == 2 then
 										waypoints[w]["action"] = "From Runway"
 										waypoints[w]["type"] = "TakeOff"
 									end
@@ -2737,16 +2737,16 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							--if defined in conf_mod, task intercept player flight starts with engines running										-- modification M08	: hotstart
 							elseif (flight[f].player == true or flight[f].client == true) and (flight[f].task == "Intercept" or flight[f].task == "SAR") then													--if flight[f].player == true and camp.hotstart then
 								if  mission_ini.intercept_hotstart then
-									if  type(mission_ini.intercept_hotstart) == "boolean"  then														--if flight[f].player == true and camp.hotstart then
+									if type(mission_ini.intercept_hotstart) == "boolean" then														--if flight[f].player == true and camp.hotstart then
 										waypoints[w]["action"] = "From Parking Area Hot"
 										waypoints[w]["type"] = "TakeOffParkingHot"
-									elseif  type(mission_ini.intercept_hotstart) == "number" and mission_ini.intercept_hotstart == 0  then			--if flight[f].player == true and camp.hotstart then
+									elseif type(mission_ini.intercept_hotstart) == "number" and mission_ini.intercept_hotstart == 0 then			--if flight[f].player == true and camp.hotstart then
 										waypoints[w]["action"] = "From Parking Area"
 										waypoints[w]["type"] = "TakeOffParking"
-									elseif  type(mission_ini.intercept_hotstart) == "number" and mission_ini.intercept_hotstart == 1  then			--if flight[f].player == true and camp.hotstart then
+									elseif type(mission_ini.intercept_hotstart) == "number" and mission_ini.intercept_hotstart == 1 then			--if flight[f].player == true and camp.hotstart then
 										waypoints[w]["action"] = "From Parking Area Hot"
 										waypoints[w]["type"] = "TakeOffParkingHot"
-									elseif  type(mission_ini.intercept_hotstart) == "number" and mission_ini.intercept_hotstart == 2  then			--if flight[f].player == true and camp.hotstart then
+									elseif type(mission_ini.intercept_hotstart) == "number" and mission_ini.intercept_hotstart == 2 then			--if flight[f].player == true and camp.hotstart then
 										waypoints[w]["action"] = "From Runway"
 										waypoints[w]["type"] = "TakeOff"
 									end
@@ -3244,7 +3244,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					local attackType = flight[f].loadout.attackType or "nil"
 					local attackAlt = flight[f].loadout.attackAlt or flight[f].loadout.hAttack
 					local dive = nil
-					if flight[f].loadout.attackType and  string.lower( flight[f].loadout.attackType) == "dive"  then
+					if flight[f].loadout.attackType and  string.lower( flight[f].loadout.attackType) == "dive" then
 						dive = true
 					end
 
@@ -3413,7 +3413,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							elseif flight[f].target.class == "airbase" then
 								---- "airbase" 					
 
-								if is_helicopter or  AGAS_ready == false  then
+								if is_helicopter or  AGAS_ready == false then
 
 									local task_entry = {																				--task is a command to run LUA code
 										["enabled"] = true,
@@ -3524,7 +3524,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						--*********************************Anti-ship Strike*******************************************
 						elseif flight[f].task == "Anti-ship Strike" then
 
-							if not is_helicopter or AGAS_ready == false  then
+							if not is_helicopter or AGAS_ready == false then
 
 								-- local task_entry = {															--Spread Four Close
 								-- 	["number"] = #waypoints[w]["task"]["params"]["tasks"] + 1,
@@ -4097,7 +4097,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					
 					elseif flight[f].task == "Escort Jammer" then
 
-						if (flight[f].route[w].id == "IP" or flight[f].route[w].id == "Target") and not alreadyTreated  then
+						if (flight[f].route[w].id == "IP" or flight[f].route[w].id == "Target") and not alreadyTreated then
 
 							local task_entry = {
 								["enabled"] = true,
@@ -4752,11 +4752,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								-- modification M17
 								if flight[f]["type"] == "F-14B" and navTargetPoints[1] then
 									if waypoints[w].name == "Target" or waypoints[w].name == "Attack" then  waypoints[w].NavTP = "ST" end
-									if waypoints[w].name == "Station"  then  waypoints[w].NavTP = "DP" end
+									if waypoints[w].name == "Station" then  waypoints[w].NavTP = "DP" end
 								end
 								waypoints[w]["name"] = waypoints[w]["name"] .. "" .. heading .. " / " .. distance.." / "..ete			--add heading and distance to waypoint name
 
-								if waypoints[w].briefing_name == "Land"  then
+								if waypoints[w].briefing_name == "Land" then
 									local tempTime = 0
 									local tempTimeStr = ""
 									for ww = 1, #waypoints do
@@ -4785,7 +4785,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 					-- print("AtoFp "..flight[f].task.." _________ wptTargetPass: "..tostring(wptTargetPass).." wptName "..tostring(waypoints[w]["name"]) )
-					if flight[f].task == "Anti-ship Strike" and wptTargetPass and waypoints[w]["name"] ~= "Land"  then
+					if flight[f].task == "Anti-ship Strike" and wptTargetPass and waypoints[w]["name"] ~= "Land" then
 						waypoints[w]["ETA_locked"] = false
 						waypoints[w]["speed_locked"] = true
 						waypoints[w]["debug"] = (waypoints[w]["debug"] or "") .." ETA_locked J False "
@@ -4933,10 +4933,10 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							waypoints[n]["action"] = "LandingReFuAr"
 							waypoints[n]["type"] = "LandingReFuAr"
 						end
-						if waypoints[n]["briefing_name"] == "Join" or waypoints[n]["briefing_name"] == "Nav" or waypoints[n]["briefing_name"] == "Split"  then
+						if waypoints[n]["briefing_name"] == "Join" or waypoints[n]["briefing_name"] == "Nav" or waypoints[n]["briefing_name"] == "Split" then
 							waypoints[n]["alt"] = waypoints[n]["alt"] + db_airbases[flight[f].base].elevation
 						end
-						if waypoints[n]["briefing_name"] == "IP" or waypoints[n]["briefing_name"] == "Attack"  then   -- or waypoints[n]["briefing_name"] == "Egress"
+						if waypoints[n]["briefing_name"] == "IP" or waypoints[n]["briefing_name"] == "Attack" then   -- or waypoints[n]["briefing_name"] == "Egress"
 
 							-- local altEjected  = flight[f].target.elements[1].z + 100
 
@@ -4964,7 +4964,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				-- modification M11.l : Multiplayer (M11.l:groupe superieur à 2 possible)
 				if Multi.NbGroup >= 1 then
-					if  flight[f].client  or  flight[f].player  then
+					if  flight[f].client  or  flight[f].player then
 						if flight[f].number >= 2 and flight[f].NbPlaneClient <=2 then																			-- on ne veut pas d'avionIA au dela de 2
 							flight[f].number = 2
 						elseif flight[f].NbPlaneClient > 4 then
@@ -5252,7 +5252,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					-- if units[n]["livery_id"] and type(units[n]["livery_id"]) == "table" then
-					if units[n]["livery_id"] and type(units[n]["livery_id"]) == "table"  then					--if skin is a table							
+					if units[n]["livery_id"] and type(units[n]["livery_id"]) == "table" then					--if skin is a table							
 						if  #units[n]["livery_id"] ~= 0 then
 							units[n]["livery_id"] = units[n]["livery_id"][math.random(1, #units[n]["livery_id"])]	--chose a random skin from table
 						else
@@ -5263,7 +5263,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					--prend en compte en priorité la version AddProp du loadout
 					if units[n]["AddPropAircraft"] == false or units[n]["AddPropAircraft"] == nil then
 
-						if Data_AddPropAircraft[type_withProp]  then
+						if Data_AddPropAircraft[type_withProp] then
 							--ajoute AddPropAircraft aux types joueur/client
 							units[n]["AddPropAircraft"] = DeepCopy(Data_AddPropAircraft[type_withProp])
 
@@ -5541,7 +5541,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				flight[f].groupId = group.groupId
 
 				--ajoute la frequence à l AFAC
-				if flight[f].task == "AFAC"  then
+				if flight[f].task == "AFAC" then
 					for w=1, #waypoints do
 						if waypoints[w]["task"] and waypoints[w]["task"]["params"] and waypoints[w]["task"]["params"]["tasks"] then
 							for i_task, _task in pairs(waypoints[w]["task"]["params"]["tasks"]) do
@@ -5564,7 +5564,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 				-- decale les apparitions en vol pour eviter les collisions en vol
-				if waypoints[1]["type"] == "Turning Point" and waypoints[1]["briefing_name"] == "Spawn" and not flight[f].task == "AFAC"  then
+				if waypoints[1]["type"] == "Turning Point" and waypoints[1]["briefing_name"] == "Spawn" and not flight[f].task == "AFAC" then
 					local spacing = 330 -- Mets ici la distance minimale souhaitée (en mètres)
 					for n = 1, #group.units do
 						group.units[n].x = ((p-1) * spacing/1.2) + ((f-1) * spacing) + group.units[n].x + (spacing * n) 	--ANTI-COLLISION C
@@ -5588,7 +5588,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				group['task'] = goupTaskTemp
 
 				---- unhide player package -----
-				if mission_ini.cheat_Mod_Eye  then																--debug is on
+				if mission_ini.cheat_Mod_Eye then																--debug is on
 					group.hidden = false														--unhide all groups
 				elseif camp.player and camp.player.side == sideName then							--player side										
 					group.hidden = false														--unhide group
@@ -5821,7 +5821,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							elseif (group['route']['points'][1].ETA <= mission_ini.startup_time_player + 600) and db_airbases[flight[f].base].LimitedParkNb then																	
 								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe FFa ETA mission_ini.startup_time_player + 600 & LimitedParkNb NbPlanetDeck: "..cv_nbPlanetDeck) end
 
-								if not flagInsertSixpack and flight[f].number + cv_nbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb  then										-- on ne dépasse pas le nb max de spawn sur le CV 
+								if not flagInsertSixpack and flight[f].number + cv_nbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb then										-- on ne dépasse pas le nb max de spawn sur le CV 
 									if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe FFb  NbPlanetDeck >= LimitedParkNb") end
 
 									local infoFrom =  " NbPlanetDeck >= db_airbases[flight[f].base].LimitedParkNb "..debug.getinfo(1).currentline
@@ -5875,7 +5875,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									--= SixPack =
 									local bugFrom =  " not SpawnDeck "..debug.getinfo(1).currentline
 									spawnOn(Data_configuration.SC_SpawnOn[flight[f].type], waypoints, group, pn, start_time + 30, bugFrom, flight, f, role)
-									if flagInsertSixpack  then																			--si le vol postulait pour le sixpack, on le supprime de la table
+									if flagInsertSixpack then																			--si le vol postulait pour le sixpack, on le supprime de la table
 										table.remove(cv_testSixPack[flight[f].base])
 										flagInsertSixpack  = false
 										for forTiming, value in pairs(cv_deckReservations[flight[f].base]) do
@@ -5904,7 +5904,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						-- if group['route']['points'][1]["type"] ~= "Turning Point" and not flagInsertSixpack and not SingleWithDServerAiAir then
 						if group['route']['points'][1]["type"] ~= "Turning Point" and not flagInsertSixpack then
 							
-							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe GGa  table.insert(testDeckPlace |start_time: "..tostring(start_time)) end
+							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe GGa table.insert(testDeckPlace |start_time: "..tostring(start_time)) end
 
 							tempDeckPlace = {
 								-- time = group['route']['points'][1].ETA ,
@@ -5917,7 +5917,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 							-- flagInsertSixpack  = true
 							if not testDeckPlace[flight[f].base] then testDeckPlace[flight[f].base] = {} end
-							table.insert(testDeckPlace[flight[f].base],  tempDeckPlace)
+							table.insert(testDeckPlace[flight[f].base], tempDeckPlace)
 						end
 
 					------------------	
@@ -5956,7 +5956,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				local conditionUno = true
 				if flight[f].task == "SAR" and baseIsCarrier then
 					conditionUno = false
-					if pedroOK[flight[f].base]  then
+					if pedroOK[flight[f].base] then
 						conditionUno = true
 					end
 				end
@@ -5980,7 +5980,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							end
 						end
 
-						if not pkFound  then
+						if not pkFound then
 							local nLoop = 1
 							repeat
 							nPk = math.random(1, #parkSarAirBase[flight[f].base])
@@ -6031,9 +6031,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 					end
 
-					if ( flight[f].client ~= true and flight[f].player ~= true)  then	--or limitedParkTiming or parkSarAirBase[flight[f].base]						-- M11 PVP ne copie pas de trigger retardé START pour les clients/joueurs	
+					if ( flight[f].client ~= true and flight[f].player ~= true) then	--or limitedParkTiming or parkSarAirBase[flight[f].base]						-- M11 PVP ne copie pas de trigger retardé START pour les clients/joueurs	
 
-						if (baseIsCarrier or limitedParkTiming or db_airbases[flight[f].base].BaseAirStart) and not farp_MorePlace  then
+						if (baseIsCarrier or limitedParkTiming or db_airbases[flight[f].base].BaseAirStart) and not farp_MorePlace then
 
 							local infoFrom =  " SAR sur CV et parking limité spawn en vol "..debug.getinfo(1).currentline
 
@@ -6104,7 +6104,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						--if the group is on a carrier, it gets late activation instead of uncontrolled. An activate trigger is needed instead of AI task trigger.
 						-- Les SAR sur CV et parking limité spawn en vol
 
-						if (baseIsCarrier or limitedParkTiming or db_airbases[flight[f].base].BaseAirStart) and not farp_MorePlace  then
+						if (baseIsCarrier or limitedParkTiming or db_airbases[flight[f].base].BaseAirStart) and not farp_MorePlace then
 
 							local infoFrom =  " SAR sur CV et parking limité spawn en vol "..debug.getinfo(1).currentline
 							spawnOn( "air", waypoints, group, pn, 0, infoFrom, flight, f, role)
@@ -6311,7 +6311,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						y=0,
 					}
 					local onCV = false
-					if Data_configuration.SC_SpawnOn["Pedro"] == "deck" and playerTask ~= "Intercept"  then
+					if Data_configuration.SC_SpawnOn["Pedro"] == "deck" and playerTask ~= "Intercept" then
 						-- action = "From Parking Area"
 						-- type = "TakeOffParking"
 						action =  "From Parking Area Hot"
@@ -6394,7 +6394,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						["y"] =  pos.y,
 						["x"] =  pos.x,
 						["formation_template"] = "",
-						["speed_locked"] =  true,
+						["speed_locked"] = true,
 					}
 
 					if onCV then
@@ -6446,7 +6446,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						["y"] = pos.y + 300,
 						["x"] = pos.x + 300,
 						["formation_template"] = "",
-						["speed_locked"] =  true,
+						["speed_locked"] = true,
 					}
 
 					pedroOK[flight[f].base] = true
@@ -6676,7 +6676,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					local altFloor = -1
 
-					if AltitudeFloorNew  then
+					if AltitudeFloorNew then
 
 						local function findCorrectAltitude(testN, Heading)
 						local altFloorFunc = 99999
@@ -6741,7 +6741,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					if altFloor > -1 then
 
-						if is_helicopter and  groupRTB.route.points[1]["alt"] < altFloor  then
+						if is_helicopter and  groupRTB.route.points[1]["alt"] < altFloor then
 							groupRTB.route.points[1]["alt"] =  altFloor + 20 + ((pn-1) * 20) + (altRole * 5)
 
 						elseif groupRTB.route.points[1]["alt"] < altFloor + 200 then
@@ -6862,7 +6862,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 				--ajoute ici les Custom_Altitude car les num de wpt ne change plus
-				if is_helicopter and not flight[f].client and not flight[f].player  then
+				if is_helicopter and not flight[f].client and not flight[f].player then
 					for n = 2, #group.route.points do
 
 						if group.route.points[n].briefing_name == "Egress" then
@@ -7187,7 +7187,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					if a_activate then
 						if c_time and activateGroupSecondes then
 							--si c'est sur CV, on peux faire apparaitre (a_activate_group) le plane, avant le démarrage (a_set_ai_task)
-							if (debug_StartTime < activateGroupSecondes) and group.route.points[1]["action"] ~= "Turning Point"  then
+							if (debug_StartTime < activateGroupSecondes) and group.route.points[1]["action"] ~= "Turning Point" then
 								info03 = "\n".."|+T7|ATTENTION SECONDES a_activate_group  |activateGrpSecondes "..activateGroupSecondes .."  ~= |start_time: "..debug_StartTime.."\n"
 								tagATTENTION = true
 
@@ -7268,7 +7268,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 						if postWptData.ETA then
-							if (math.abs(calPostETA - postWptData.ETA) > 50) and not diversParamsTiming and not isHumain  then
+							if (math.abs(calPostETA - postWptData.ETA) > 50) and not diversParamsTiming and not isHumain then
 								info06 = info06.."\n".."|+T13|ATTENTION bad ETA wpt+1| "..(wtpN+1).." // "..postWptData.briefing_name.." |distance:| "..distance.." |calPostETA:| "..calPostETA.." |>| "..postWptData.ETA.." |infoCompl: "..infoCompl.."\n"
 								tagATTENTION = true
 							end
@@ -7368,7 +7368,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				-- end	
 
 				-- for i=1, #waypoints do
-					-- if waypoints[i]["briefing_name"] and waypoints[i]["briefing_name"] == "Join"  then				
+					-- if waypoints[i]["briefing_name"] and waypoints[i]["briefing_name"] == "Join" then				
 						-- info06 = info06.." |"..waypoints[i]["briefing_name"]..": "..tostring(waypoints[i]["hCruiseREF"])..": "..waypoints[i]["alt"]				
 					-- end
 				-- end
@@ -7440,7 +7440,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					debugTempFLIGHT = debugTempFLIGHT.."\n"..("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ")
 				end
 
-				if Debug.AfficheFlight  then
+				if Debug.AfficheFlight then
 					print(debugTempFLIGHT)
 				end
 
@@ -7503,7 +7503,7 @@ function GeWpindex(groupIdCheck, wpLabel)
 	for _side, side in pairs(mission.coalition) do
 		for countryN, country in pairs(side.country) do
 			for category, groups in pairs(country) do
-				if type(groups) == "table" and groups["group"]  then
+				if type(groups) == "table" and groups["group"] then
 					for Ngroup, group in pairs(groups["group"]) do
 						if group.groupId == groupIdCheck then
 							for unitN, unit in pairs(group.units) do
@@ -7535,7 +7535,7 @@ for side, pack in pairs(ATO) do
 
 					for countryN, country in pairs(mission.coalition[side].country) do
 						for category, groups in pairs(country) do
-							if type(groups) == "table" and groups["group"]  then	--and groups[1].units							
+							if type(groups) == "table" and groups["group"] then	--and groups[1].units							
 								for Ngroup, group in pairs(groups["group"]) do
 
 									if group.groupId == flight[f].groupId then
@@ -7598,7 +7598,7 @@ end
 for _side, side in pairs(mission.coalition) do
 	for countryN, country in pairs(side.country) do
 		for category, groups in pairs(country) do
-			if type(groups) == "table" and groups["group"]  then	--and groups[1].units
+			if type(groups) == "table" and groups["group"] then	--and groups[1].units
 				for Ngroup, group in pairs(groups["group"]) do
 					for Nunit, unit in pairs(group.units) do
 
@@ -7712,7 +7712,7 @@ function af_spawnOn(where, groupName)
 						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFp AF_spawnOn Find "..group.units[1].type.." "..group.name.." "..group.route.points[1]['type']) end
 					end
 				end
-			elseif country.helicopter  then
+			elseif country.helicopter then
 				for Ngroup,group in pairs(country.helicopter.group) do
 					if group.name ==  groupName then
 						group.route.points[1]['action'] = action
@@ -7759,7 +7759,7 @@ for cv, sixPack in pairs(cv_testSixPack) do
 					if country.plane then
 						for Ngroup,group in pairs(country.plane.group) do
 							if group.name == sixpackWiner then
-								if group.units[1]["type"] == "S-3B Tanker" or group.units[1]["type"] == "E-2C"  then						-- cet endroit est bloqué par DCS pour ces 2 avions
+								if group.units[1]["type"] == "S-3B Tanker" or group.units[1]["type"] == "E-2C" then						-- cet endroit est bloqué par DCS pour ces 2 avions
 									af_spawnOn("catapult", group.name)
 									modify_Activate_GroupTime(group, -1, debug.getinfo(1).currentline)								--supprime le triger activate (vraiment?)
 									-- modify_set_ai_task(group, -1, debug.getinfo(1).currentline) --supprime le triger start(vraiment?)
@@ -7791,7 +7791,7 @@ for cv, sixPack in pairs(cv_testSixPack) do
 			end
 
 			if breakloop or n > #sixPack then
-				-- if sixPack[n]["client"] and SingleWithDServer  then
+				-- if sixPack[n]["client"] and SingleWithDServer then
 				-- 	print()
 				-- 	print("********************ATTENTION******************")
 				-- 	print()
@@ -7872,7 +7872,7 @@ for cv, deckGroups in pairs(testDeckPlace) do
 												if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFp DeckWiner Find "..group.name.." +number: "..deckGr["number"]) end
 											end
 										end
-									elseif country.helicopter  then
+									elseif country.helicopter then
 										for _, group in pairs(country.helicopter.group) do
 											if group.name ==  deckWiner then
 												group['uncontrolled'] = true
@@ -7943,7 +7943,7 @@ if mission_ini.load_CTLD then
 		end
 	end
 
-	if #TableJTAC >= 1  then
+	if #TableJTAC >= 1 then
 		AddFileTriggerTempo(nil, 10, "triggerOnce", TableJTAC)	-- modification M60 CTLD
 	end
 end
@@ -7969,7 +7969,7 @@ for _side,side in pairs(mission.coalition) do
 	end
 end
 
-if #TableTransportPilotNames >= 1  then
+if #TableTransportPilotNames >= 1 then
 	camp["TableTransportPilotNames"] = TableTransportPilotNames	-- modification M60 CTLD
 end
 
@@ -8170,7 +8170,7 @@ if testPosRunwayImpact then
 										},
 									}, -- end of ["params"]
 								}, -- end of ["task"]
-								["speed_locked"] =  true,
+								["speed_locked"] = true,
 							}, -- end of [1]
 						}, -- end of ["points"]
 					}, -- end of ["route"]
@@ -8231,7 +8231,7 @@ for _side, side in pairs(mission.coalition) do
 
 		for category, groups in pairs(country) do
 
-			if (category == "plane" or category == "helicopter" ) and type(groups) == "table" and groups["group"]  then	--and groups[1].units
+			if (category == "plane" or category == "helicopter" ) and type(groups) == "table" and groups["group"] then	--and groups[1].units
 				for Ngroup, group in pairs(groups["group"]) do
 
 					for pointN, point in pairs(group.route.points) do
@@ -8252,7 +8252,7 @@ local positionCentrale = {}
 for _side, side in pairs(mission.coalition) do
 	for countryN, country in pairs(side.country) do
 		for category, groups in pairs(country) do
-			if (category == "vehicule" or category == "static"  ) and type(groups) == "table" and groups["group"]  then
+			if (category == "vehicule" or category == "static"  ) and type(groups) == "table" and groups["group"] then
 				for Ngroup, group in pairs(groups["group"]) do
 					if string.find(group.name, "ASTI") then
 						positionCentrale.x = group.x
@@ -8270,10 +8270,10 @@ end
 -- for _, side in pairs(mission.coalition) do
 -- 	for _, country in pairs(side.country) do
 -- 		for _, groups in pairs(country) do
--- 			if type(groups) == "table" and groups["group"]  then
+-- 			if type(groups) == "table" and groups["group"] then
 -- 				for _, group in pairs(groups["group"]) do
 -- 					for _, unit in pairs(group.units) do
--- 						if unit.payload and unit.payload.pylons   then
+-- 						if unit.payload and unit.payload.pylons  then
 -- 							for _, pylon in pairs(unit.payload.pylons) do
 -- 								if pylon and pylon.num then
 -- 									pylon.num = nil

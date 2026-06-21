@@ -2281,5 +2281,364 @@ db_loadouts = {
 			},
 		},
 	},
-
+	["F-14A-95-GR"] = {
+		CAP = {
+			["90s-2000s AA Iran AIM-54A-MK47*2, AIM-7MH*3, AIM-9M*2"] = {
+				attributes =  { "IRIAF" },
+				code_loadout =  { "Crisis", "PG", "IIW" },
+				night = true,
+				adverseWeather = true,
+				range = 450000,
+				firepower = 3.5,
+				vCruise = 213.83333333333,
+				vAttack = 213.83333333333,
+				hCruise = 9753.6,
+				hAttack = 9753.6,
+				standoff = 100300,
+				tStation = 3600,
+				LDSD = true,
+				sortie_rate = 5,
+				stores = {
+					pylons = {
+						[1] = {
+							CLSID = "{LAU-138 wtip - AIM-9M}",
+						},
+						[2] = {
+							CLSID = "{SHOULDER AIM-7MH}",
+						},
+						[4] = {
+							CLSID = "{AIM_54A_Mk47}",
+						},
+						[5] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[10] = {
+							CLSID = "{LAU-138 wtip - AIM-9M}",
+						},
+						[7] = {
+							CLSID = "{AIM_54A_Mk47}",
+						},
+						[9] = {
+							CLSID = "{SHOULDER AIM-7MH}",
+						},
+					},
+					fuel = "7348",
+					flare = 60,
+					chaff = 140,
+					gun = 100,
+				},
+			},
+			["90s-2000s AA Iran AIM-7MH*6, AIM-9M*2"] = {
+				attributes =  { "IRIAF" },
+				code_loadout =  { "Crisis", "PG", "IIW" },
+				night = true,
+				adverseWeather = true,
+				range = 450000,
+				firepower = 3,
+				vCruise = 213.83333333333,
+				vAttack = 213.83333333333,
+				hCruise = 9753.6,
+				hAttack = 9753.6,
+				standoff = 20000,
+				tStation = 3600,
+				LDSD = true,
+				sortie_rate = 5,
+				stores = {
+					pylons = {
+						[1] = {
+							CLSID = "{LAU-138 wtip - AIM-9M}",
+						},
+						[2] = {
+							CLSID = "{SHOULDER AIM-7MH}",
+						},
+						[4] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[5] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[6] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[7] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[10] = {
+							CLSID = "{LAU-138 wtip - AIM-9M}",
+						},
+						[9] = {
+							CLSID = "{SHOULDER AIM-7MH}",
+						},
+					},
+					fuel = "7348",
+					flare = 60,
+					chaff = 140,
+					gun = 100,
+				},
+			},
+		},
+		["Fighter Sweep"] = {
+			["90s-2000s AA Iran AIM-54A-MK47*2, AIM-7MH*3, AIM-9M*2"] = {
+				attributes =  { "IRIAF" },
+				code_loadout =  { "Crisis", "PG", "IIW" },
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 3.5,
+				vCruise = 213.83333333333,
+				vAttack = 213.83333333333,
+				hCruise = 9753.6,
+				hAttack = 9753.6,
+				standoff = 100300,
+				tStation = 3600,
+				LDSD = true,
+				sortie_rate = 5,
+				stores = {
+					pylons = {
+						[1] = {
+							CLSID = "{LAU-138 wtip - AIM-9L}",
+						},
+						[2] = {
+							CLSID = "{SHOULDER AIM-7MH}",
+						},
+						[4] = {
+							CLSID = "{AIM_54A_Mk47}",
+						},
+						[5] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[10] = {
+							CLSID = "{LAU-138 wtip - AIM-9L}",
+						},
+						[7] = {
+							CLSID = "{AIM_54A_Mk47}",
+						},
+						[9] = {
+							CLSID = "{SHOULDER AIM-7MH}",
+						},
+					},
+					fuel = "7348",
+					flare = 60,
+					chaff = 140,
+					gun = 100,
+				},
+			},
+			["90s-2000s AA Iran AIM-7MH*6, AIM-9M*2"] = {
+				attributes =  { "IRIAF" },
+				code_loadout =  { "Crisis", "PG", "IIW" },
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 3,
+				vCruise = 213.83333333333,
+				vAttack = 213.83333333333,
+				hCruise = 9753.6,
+				hAttack = 9753.6,
+				standoff = 20300,
+				tStation = 3600,
+				LDSD = true,
+				sortie_rate = 5,
+				stores = {
+					pylons = {
+						[1] = {
+							CLSID = "{LAU-138 wtip - AIM-9M}",
+						},
+						[2] = {
+							CLSID = "{SHOULDER AIM-7MH}",
+						},
+						[4] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[5] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[6] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[7] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[10] = {
+							CLSID = "{LAU-138 wtip - AIM-9M}",
+						},
+						[9] = {
+							CLSID = "{SHOULDER AIM-7MH}",
+						},
+					},
+					fuel = "7348",
+					flare = 60,
+					chaff = 140,
+					gun = 100,
+				},
+			},
+		},
+		Escort = {
+			["90s-2000s AA Iran AIM-54A-MK47*2, AIM-7MH*3, AIM-9M*2"] = {
+				attributes =  { },
+				code_loadout =  { "Crisis", "PG", "IIW" },
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 3.5,
+				vCruise = 255.83333333333,
+				standoff = 80300,
+				LDSD = true,
+				sortie_rate = 5,
+				stores = {
+					pylons = {
+						[1] = {
+							CLSID = "{LAU-138 wtip - AIM-9M}",
+						},
+						[2] = {
+							CLSID = "{SHOULDER AIM-7MH}",
+						},
+						[4] = {
+							CLSID = "{AIM_54A_Mk47}",
+						},
+						[5] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[10] = {
+							CLSID = "{LAU-138 wtip - AIM-9M}",
+						},
+						[7] = {
+							CLSID = "{AIM_54A_Mk47}",
+						},
+						[9] = {
+							CLSID = "{SHOULDER AIM-7MH}",
+						},
+					},
+					fuel = "7348",
+					flare = 60,
+					chaff = 140,
+					gun = 100,
+				},
+			},
+			["90s-2000s AA Iran AIM-7MH*6, AIM-9M*2"] = {
+				attributes =  { },
+				code_loadout =  { "Crisis", "PG", "IIW" },
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 3,
+				vCruise = 255.83333333333,
+				standoff = 80300,
+				LDSD = true,
+				sortie_rate = 5,
+				stores = {
+					pylons = {
+						[1] = {
+							CLSID = "{LAU-138 wtip - AIM-9M}",
+						},
+						[2] = {
+							CLSID = "{SHOULDER AIM-7MH}",
+						},
+						[4] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[5] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[6] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[7] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[10] = {
+							CLSID = "{LAU-138 wtip - AIM-9M}",
+						},
+						[9] = {
+							CLSID = "{SHOULDER AIM-7MH}",
+						},
+					},
+					fuel = "7348",
+					flare = 60,
+					chaff = 140,
+					gun = 100,
+				},
+			},
+		},
+		Intercept = {
+			["90s-2000s AA Iran AIM-54A-MK47*2, AIM-7MH*3, AIM-9M*2"] = {
+				attributes =  { "IRIAF" },
+				code_loadout =  { "Crisis", "PG", "IIW" },
+				night = true,
+				adverseWeather = true,
+				range = 450000,
+				firepower = 3.5,
+				sortie_rate = 5,
+				stores = {
+					pylons = {
+						[1] = {
+							CLSID = "{LAU-138 wtip - AIM-9M}",
+						},
+						[2] = {
+							CLSID = "{SHOULDER AIM-7MH}",
+						},
+						[4] = {
+							CLSID = "{AIM_54A_Mk47}",
+						},
+						[5] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[10] = {
+							CLSID = "{LAU-138 wtip - AIM-9M}",
+						},
+						[7] = {
+							CLSID = "{AIM_54A_Mk47}",
+						},
+						[9] = {
+							CLSID = "{SHOULDER AIM-7MH}",
+						},
+					},
+					fuel = "7348",
+					flare = 60,
+					chaff = 140,
+					gun = 100,
+				},
+			},
+			["90s-2000s AA Iran AIM-7MH*6, AIM-9M*2"] = {
+				attributes =  { "IRIAF" },
+				code_loadout =  { "Crisis", "PG", "IIW" },
+				night = true,
+				adverseWeather = true,
+				range = 450000,
+				firepower = 3,
+				sortie_rate = 5,
+				stores = {
+					pylons = {
+						[1] = {
+							CLSID = "{LAU-138 wtip - AIM-9M}",
+						},
+						[2] = {
+							CLSID = "{SHOULDER AIM-7MH}",
+						},
+						[4] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[5] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[6] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[7] = {
+							CLSID = "{BELLY AIM-7MH}",
+						},
+						[10] = {
+							CLSID = "{LAU-138 wtip - AIM-9M}",
+						},
+						[9] = {
+							CLSID = "{SHOULDER AIM-7MH}",
+						},
+					},
+					fuel = "7348",
+					flare = 60,
+					chaff = 140,
+					gun = 100,
+				},
+			},
+		},
+	},
 }

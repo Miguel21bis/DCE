@@ -147,18 +147,18 @@ function PairsByKeys(t, f)
     for n in pairs(t) do
         initType = type(n)
         if initType == "number" then
-            table.insert(numericKeys, n)
+          table.insert(numericKeys, n)
         else
-            table.insert(otherKeys, n)
+          table.insert(otherKeys, n)
         end
     end
 
     -- Trier les clés numériques
-    table.sort(numericKeys, f)
+  table.sort(numericKeys, f)
 
     -- Concaténer les clés non numériques (non triées)
     for _, key in ipairs(otherKeys) do
-        table.insert(numericKeys, key)
+      table.insert(numericKeys, key)
     end
 
     local i = 0 -- Variable d'itération
@@ -364,16 +364,16 @@ end
 --         -- Si la table est strictement numérique et numericTable est false, on n'affiche pas les indices
 --         for _, v in ipairs(t) do
 --             if type(v) == "table" then
---                 text = text .. tab .. TableSerialization(v, i + 1, writeNumericTable) .. ",\n"
+--               text = text .. tab .. TableSerialization(v, i + 1, writeNumericTable) .. ",\n"
 --             elseif type(v) == "string" then
 --                 v = string.gsub(v, "\n", "\\\n")
 --                 v = string.gsub(v, "\"", "\\\"")
 --                 -- v = string.gsub(v, "'", "\\\'")
---                 text = text .. tab .. '"' .. v .. '",\n'
+--               text = text .. tab .. '"' .. v .. '",\n'
 --             elseif type(v) == "number" or type(v) == "boolean" then
---                 text = text .. tab .. tostring(v) .. ",\n"
+--               text = text .. tab .. tostring(v) .. ",\n"
 --             elseif v == nil then
---                 text = text .. tab .. "nil,\n"
+--               text = text .. tab .. "nil,\n"
 --             end
 --         end
 --     else
@@ -383,28 +383,28 @@ end
 --                 k = string.gsub(k, "\n", "\\\n")
 --                 k = string.gsub(k, "\"", "\\\"")
 --                 -- k = string.gsub(k, "'", "\\\'")
---                 text = text .. tab .. '["' .. k .. '"] = '
+--               text = text .. tab .. '["' .. k .. '"] = '
 --             else
 --                 -- text = text .. tab .. "[" .. k .. "] = "
 -- 				text = text .. tab .. "[" .. tostring(k) .. "] = "
 --             end
 
 --             if type(v) == "table" then
---                 text = text .. TableSerialization(v, i + 1, writeNumericTable) .. ",\n"
+--               text = text .. TableSerialization(v, i + 1, writeNumericTable) .. ",\n"
 --             elseif type(v) == "string" then
 --                 v = string.gsub(v, "\n", "\\\n")
 --                 v = string.gsub(v, "\"", "\\\"")
 --                 -- v = string.gsub(v, "'", "\\\'")
---                 text = text .. '"' .. v .. '",\n'
+--               text = text .. '"' .. v .. '",\n'
 --             elseif type(v) == "number" or type(v) == "boolean" then
---                 text = text .. tostring(v) .. ",\n"
+--               text = text .. tostring(v) .. ",\n"
 --             elseif v == nil then
---                 text = text .. "nil,\n"
+--               text = text .. "nil,\n"
 --             end
 --         end
 --     end
 
---     text = text .. tab1 .. "}"
+--   text = text .. tab1 .. "}"
 --     return text
 -- end
 
@@ -479,49 +479,49 @@ function TableSerializationAG_triggers(t, i)
         -- Si la table est strictement numérique, on n'affiche pas les indices
         for _, v in ipairs(t) do
             if type(v) == "string" then
-                text = text .. tab .. "'" .. v .. "',\n"
+              text = text .. tab .. "'" .. v .. "',\n"
             elseif type(v) == "number" then
-                text = text .. tab .. v .. ",\n"
+              text = text .. tab .. v .. ",\n"
             elseif type(v) == "table" then
-                text = text .. tab .. TableSerializationAG(v, i + 1)
+              text = text .. tab .. TableSerializationAG(v, i + 1)
             elseif type(v) == "boolean" then
-                text = text .. tab .. tostring(v) .. ",\n"
+              text = text .. tab .. tostring(v) .. ",\n"
             elseif type(v) == "function" then
-                text = text .. tab .. tostring(v) .. ",\n"
+              text = text .. tab .. tostring(v) .. ",\n"
             elseif v == nil then
-                text = text .. tab .. "nil,\n"
+              text = text .. tab .. "nil,\n"
             end
         end
     else
         -- Sinon, on affiche les clés triées
         for k, v in PairsByKeys(t) do
             if type(k) == "string" then
-                text = text .. tab .. "['" .. k .. "'] = "
+              text = text .. tab .. "['" .. k .. "'] = "
             else
-                text = text .. tab .. "[" .. k .. "] = "
+              text = text .. tab .. "[" .. k .. "] = "
             end
 
             if type(v) == "string" then
-                text = text .. "'" .. v .. "',\n"
+              text = text .. "'" .. v .. "',\n"
             elseif type(v) == "number" then
-                text = text .. v .. ",\n"
+              text = text .. v .. ",\n"
             elseif type(v) == "table" then
-                text = text .. TableSerializationAG(v, i + 1)
+              text = text .. TableSerializationAG(v, i + 1)
             elseif type(v) == "boolean" then
-                text = text .. tostring(v) .. ",\n"
+              text = text .. tostring(v) .. ",\n"
             elseif type(v) == "function" then
-                text = text .. tostring(v) .. ",\n"
+              text = text .. tostring(v) .. ",\n"
             elseif v == nil then
-                text = text .. "nil,\n"
+              text = text .. "nil,\n"
             end
         end
     end
 
-    tab = string.rep("\t", i)
+  tab = string.rep("\t", i)
     if i == 0 then
-        text = text .. tab .. "}\n" -- La dernière accolade ne doit pas être suivie d'une virgule
+      text = text .. tab .. "}\n" -- La dernière accolade ne doit pas être suivie d'une virgule
     else
-        text = text .. tab .. "},\n" -- Toutes les autres accolades sont suivies d'une virgule
+      text = text .. tab .. "},\n" -- Toutes les autres accolades sont suivies d'une virgule
     end
     return text
 end
@@ -967,7 +967,7 @@ function GetTangentDistance(p1, p2, p3)
     if len2 == 0 then
         -- p1 et p2 confondus : distance point à point
         local dist = math.sqrt((x3 - x1)^2 + (y3 - y1)^2)
-        T_GetTD = T_GetTD + (os.clock() - c_GetTD)
+      t_GetTD = T_GetTD + (os.clock() - c_GetTD)
         return dist
     end
 
@@ -977,19 +977,19 @@ function GetTangentDistance(p1, p2, p3)
     if t < 0 then
         -- Projection avant p1
         local dist = math.sqrt((x3 - x1)^2 + (y3 - y1)^2)
-        T_GetTD = T_GetTD + (os.clock() - c_GetTD)
+      t_GetTD = T_GetTD + (os.clock() - c_GetTD)
         return dist
     elseif t > 1 then
         -- Projection après p2
         local dist = math.sqrt((x3 - x2)^2 + (y3 - y2)^2)
-        T_GetTD = T_GetTD + (os.clock() - c_GetTD)
+      t_GetTD = T_GetTD + (os.clock() - c_GetTD)
         return dist
     else
         -- Distance perpendiculaire au segment
         local projx = x1 + t * dx
         local projy = y1 + t * dy
         local dist = math.sqrt((x3 - projx)^2 + (y3 - projy)^2)
-        T_GetTD = T_GetTD + (os.clock() - c_GetTD)
+      t_GetTD = T_GetTD + (os.clock() - c_GetTD)
         return dist
     end
 end
@@ -1198,7 +1198,7 @@ function CheckAndFixAllIds()
                     for groupN, group in pairs(groups["group"] or {}) do
                         -- Vérifie les doublons de groupId
                         if AllIdGroup[group.groupId] and AllIdGroup[group.groupId] ~= group.name then
-                            table.insert(groupIdError, group)
+                          table.insert(groupIdError, group)
                         else
                             AllIdGroup[group.groupId] = group.name
                         end
@@ -2780,10 +2780,10 @@ end
 local function mergeTablesDeep(target, source)
     for k, v in pairs(source) do
         if type(v) == "table" then
-            target[k] = target[k] or {}
+          target[k] = target[k] or {}
             mergeTablesDeep(target[k], v)
         else
-            target[k] = v
+          target[k] = v
         end
     end
 end
@@ -3161,46 +3161,10 @@ function Check_TaskPossibleByPlane()
 		-- ["Pinpoint Strike"] = true,
 	-- }
 
-	--**
-	--deprecated
-	--**
-	-- --si ADD_data existe, on le precharge pour l'ajouter au DATA centram
-	-- local addDataFile02 = "../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua"
-	-- local testPathADD_addData = io.open(addDataFile02, "r")										--cette maniere de chercher la presence d un fichier evite un plantage
-	-- if testPathADD_addData ~= nil  then														--check si le fichier existe dans ScriptsMod
-	-- 	dofile("../../../Missions/Campaigns/"..camp.title.."/Init/ADD_data.lua")
-
-	-- 	if add_EPLRS_Capacity then
-	-- 		for key , value in pairs(add_EPLRS_Capacity) do
-	-- 			if not EPLRS_Capacity[key] then
-	-- 				EPLRS_Capacity[key] = true
-	-- 			end
-	-- 		end
-	-- 	end
-
-	-- 	if add_TaskByPlane then
-	-- 		for task , plane in pairs(add_TaskByPlane) do
-	-- 			for planeName , value in pairs(plane) do
-	-- 				if  TaskByPlane[task] then
-	-- 					if  not TaskByPlane[task][planeName] then
-	-- 						TaskByPlane[task][planeName] = true
-	-- 					end
-	-- 				else
-	-- 					TaskByPlane = {
-	-- 						task = {
-	-- 							planeName = true,
-	-- 						}
-	-- 					}
-	-- 				end
-	-- 			end
-	-- 		end
-	-- 	end
-
-	-- end
 
 	local checkOobAir = DeepCopy(oob_air)
-	for side, squadTbl in  pairs(checkOobAir) do
-		for squad_n, squad in  pairs(squadTbl) do
+	for side, squadTbl in pairs(checkOobAir) do
+		for squad_n, squad in pairs(squadTbl) do
 
 			local foundPlane = false
 
@@ -3208,7 +3172,7 @@ function Check_TaskPossibleByPlane()
 
 				-- StrikeCombi
 				local addMultipleStrike = false
-				for taskOA, valueOA in  pairs(squad.tasks) do
+				for taskOA, valueOA in pairs(squad.tasks) do
 					if taskOA == "Strike" and valueOA == true  then
 						addMultipleStrike = true
 					end
@@ -3224,7 +3188,7 @@ function Check_TaskPossibleByPlane()
 				end
 
 				local foundStrikeTask = false
-				for taskOA, valueOA in  pairs(squad.tasks) do
+				for taskOA, valueOA in pairs(squad.tasks) do
 
 					local foundTask = false
 
@@ -3248,8 +3212,8 @@ function Check_TaskPossibleByPlane()
 					end
 
 					if valueOA == true and TaskByPlane[taskOA] then
-						for plane_TbP, value in  pairs(TaskByPlane[taskOA]) do
-							if squad.type == plane_TbP   then
+						for plane_TbP, value in pairs(TaskByPlane[taskOA]) do
+							if squad.type == plane_TbP then
 								foundPlane = true
 								foundTask = true
 								if taskOA == "CAS" or taskOA == "Ground Attack" or taskOA == "Pinpoint Strike"  then
@@ -3262,6 +3226,7 @@ function Check_TaskPossibleByPlane()
 						if not foundTask and not addMultipleStrike and not tostring(taskOA) == "Fighter Sweep" then
 							debugTempFLIGHT = "(Error UutilF C01) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring(taskOA)
 							error = error + 1
+							AddLog(debugTempFLIGHT)
 						end
 
 					elseif valueOA == true and not TaskByPlane[taskOA] and not tostring(taskOA) == "Fighter Sweep" then
@@ -3278,12 +3243,12 @@ function Check_TaskPossibleByPlane()
 					error = error + 1
 					-- os.execute 'pause'
 				end
-				if not squad.inactive and not foundPlane   then
+				if not squad.inactive and not foundPlane then
 					--TODO revoir ce pb, exemple avec campaign Hornet Over Carrier SC
 					debugTempFLIGHT = "(Error UutilF C04)||"..tostring(squad.type).."||"..tostring(squad.name).."||  impossible to find a task/aircraft match with all files concerned ".." (oob_air_init or  UTIL_Data.lua or bad Task or bad boolean task)"
 					AddLog(debugTempFLIGHT)
 
-					for taskOA, valueOA in  pairs(squad.tasks) do
+					for taskOA, valueOA in pairs(squad.tasks) do
 						debugTempFLIGHT = tostring(taskOA).." : "..tostring(valueOA)
 						AddLog(debugTempFLIGHT)
 					end
@@ -4039,8 +4004,8 @@ function ModifiCampInit()
 			varString = line
 		end
 
-		if string.find(line, "{")   then n = n+1  end
-		if string.find(line, "}")   then n = n-1  end
+		if string.find(line, "{") then n = n+1  end
+		if string.find(line, "}") then n = n-1  end
 
 		if varString ~= nil and string.find(varString, "=") then
 
@@ -4054,19 +4019,19 @@ function ModifiCampInit()
 				if varStringB == varRef  then
 					txt = txt .. line .. "\n"
 					addLine = true
-					if string.find(line, "{")   then nTab[n] = true end
-					if string.find(line, "}")   then nTab[n+1] = false end
+					if string.find(line, "{") then nTab[n] = true end
+					if string.find(line, "}") then nTab[n+1] = false end
 					-- print("UtilF passe ADD  H n:|"..tostring(n).." nTab[n]: "..tostring(nTab[n]))
 					break
 				end
 			end
 
-			if string.find(line, "}") and not addLine and varStringB == nil   then
+			if string.find(line, "}") and not addLine and varStringB == nil then
 				n = n - 1
 				if not addLine then
 					txt = txt .. line .. "\n"
-					if string.find(line, "{")   then nTab[n] = true end
-					if string.find(line, "}")   then nTab[n+1] = false end
+					if string.find(line, "{") then nTab[n] = true end
+					if string.find(line, "}") then nTab[n+1] = false end
 					-- print("UtilF passe ADD  I n:|"..tostring(n).." nTab[n]: "..tostring(nTab[n]))
 					break
 				end
@@ -4074,7 +4039,7 @@ function ModifiCampInit()
 
 		else
 
-			if not string.find(line, "}")   then
+			if not string.find(line, "}") then
 				txt = txt .. line .. "\n"
 				-- print("UtilF passe ADD  J n:|"..tostring(n).." nTab[n]: "..tostring(nTab[n]))
 			else
@@ -4373,7 +4338,7 @@ function CompareTargetLists(reference, working)
             end
             if not found then
                 -- Si l'élément n'existe pas dans la table de travail, il a été supprimé
-                table.insert(changes.removed, { side = side, data = workData })
+              table.insert(changes.removed, { side = side, data = workData })
             end
         end
     end
@@ -4442,7 +4407,7 @@ function CompareTableNumericTrigger(reference, working)
 			end
 
             -- Si l'élément n'existe pas dans la table de travail, il a été ajouté
-            table.insert(changes.added, refData)
+          table.insert(changes.added, refData)
 			-- print("UtilF          DDDD ----------------->> BAD ")
         end
     end
@@ -4458,7 +4423,7 @@ function CompareTableNumericTrigger(reference, working)
     --     end
     --     if not found then
     --         -- Si l'élément n'existe pas dans la table de référence, il a été supprimé
-    --         table.insert(changes.removed, workData)
+    --       table.insert(changes.removed, workData)
     --     end
     -- end
 
@@ -4482,7 +4447,7 @@ function CompareTableAlphaNumeric(reference, working)
         end
         if not found then
             -- Si l'élément n'existe pas dans la table de travail, il a été ajouté
-            table.insert(changes.added, { name = refKey, data = refData })
+          table.insert(changes.added, { name = refKey, data = refData })
         end
     end
 
@@ -4497,7 +4462,7 @@ function CompareTableAlphaNumeric(reference, working)
         end
         if not found then
             -- Si l'élément n'existe pas dans la table de référence, il a été supprimé
-            table.insert(changes.removed, { name = workKey, data = workData })
+          table.insert(changes.removed, { name = workKey, data = workData })
         end
     end
 
@@ -4904,7 +4869,7 @@ function ConvertAlphaToNumeric(tbl)
     for k, v in pairs(tbl) do
         if type(v) == "table" then
             v.name = k -- copie la clé alphanumérique dans le champ 'name'
-            table.insert(numericTbl, v)
+          table.insert(numericTbl, v)
         end
     end
     return numericTbl
@@ -5638,7 +5603,7 @@ function AddIconLayer(layersObjects, targetListRequired)
                             end
 
                             if layerType == "icon" then
-                                tempObject = {
+                              tempObject = {
                                     ["visible"] = true,
                                     ["mapX"] = element.x,
                                     ["mapY"] = element.y,
@@ -5651,7 +5616,7 @@ function AddIconLayer(layersObjects, targetListRequired)
                                     ["angle"] = 0,
                                 }
                             elseif layerType == "txt" then
-                                tempObject =
+                              tempObject =
                                 {
                                     ["visible"] = true,
                                     ["borderThickness"] = 0,
@@ -5679,7 +5644,7 @@ function AddIconLayer(layersObjects, targetListRequired)
                             end
 
                             nb = nb + 1
-                            table.insert(mission.drawings.layers[4].objects, tempObject)
+                          table.insert(mission.drawings.layers[4].objects, tempObject)
                         end
                     end
                 end
@@ -5714,7 +5679,7 @@ function AddIconLayer(layersObjects, targetListRequired)
             -- print("object.mapX: "..object.mapX.." (x_Legend: "..x_Legend.." + delta_x: "..delta_x..")")
             -- print("object.mapY: "..object.mapY.." (y_Legend: "..y_Legend.." + delta_y: "..delta_y..")")
 
-            table.insert(mission.drawings.layers[4].objects, object)
+          table.insert(mission.drawings.layers[4].objects, object)
         end
     end
 
