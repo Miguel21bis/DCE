@@ -618,6 +618,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                 if string.find(lowerName, "pedro") and string.find(lowerName, "damaged") then
                     -- print("DcUS SAR pilot with damaged  "..tostring(pilot.name).." set to error")
                     pilot.status = "error"
+                    pilot.reason = "pilot name contains 'damaged' "
                 end
 
                 for baseName, base in pairs(db_airbases) do
@@ -629,6 +630,7 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                         if distance < 5000 then
                             -- print("DcUS SAR pilot on BASE  "..tostring(pilot.name).." set to error")
                             pilot.status = "error"
+                            pilot.reason = "pilot too close from base "..tostring(baseName).." distance: "..tostring(distance)
                         end
 
                     end
@@ -1163,6 +1165,7 @@ if camp_ZoneSAR then
 
                     if Debug.debug then
                         print("DcUS remove ejectedPilot from UpdateSAR "..pilot.name.." status: "..tostring(pilot.status).." Reason?: "..tostring(pilot.reason))
+                        -- _affiche(pilot, "pilot: ")
                     end
 
                     -- Suppression du pilote dans camp_ZoneSAR

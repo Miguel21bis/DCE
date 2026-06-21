@@ -295,8 +295,8 @@ if Debug.debug then
 			end
 		end
 	end
-	print("DebriefMaster "..tostring(foundN).."  foundN in db_airbases")
-	print("DebriefMaster "..tostring(foundX).."  foundX in db_airbases")
+	-- print("DebriefMaster "..tostring(foundN).."  foundN in db_airbases")
+	-- print("DebriefMaster "..tostring(foundX).."  foundX in db_airbases")
 end
 
 

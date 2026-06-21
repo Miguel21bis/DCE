@@ -2430,8 +2430,7 @@ db_loadouts = {
 			["CSAR test"] = {
 				minscore = 0.001,
 				support = {
-					Escort = true,
-					SEAD = false,
+					Escort = false,
 				},
 				attributes =  { },
 				code_loadout =  { "All" },
@@ -3093,8 +3092,8 @@ db_loadouts = {
 			["80s SAR Rocket He -  Door gunner M60"] = {
 				minscore = 0.001,
 				support = {
-					Escort = true,
-					SEAD = false,
+					-- Escort = true,
+					-- SEAD = false,
 				},
 				attributes =  { },
 				code_loadout =  { "All" },

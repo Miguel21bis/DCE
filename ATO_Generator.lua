@@ -2275,7 +2275,7 @@ local function processEligibleLoadout(draftContext, sideName, task, target, targ
 
 						if isDebugModeA3 then
 							debugLog(
-								"draftId"..draftId .." A_30 buildDraftSorties()  "
+								"draftId"..draftId .." AtoG passe A_30 buildDraftSorties()  "
 								.." draftContext.state.futureAircraftAssign: "..draftContext.state.futureAircraftAssign
 								.." logTmp : "..tostring(logTmp) 
 
@@ -2283,7 +2283,7 @@ local function processEligibleLoadout(draftContext, sideName, task, target, targ
 							
 							
 							debugLog(
-								"draftId"..draftId .." A_30 buildDraftSorties() PACKAGE COMPLETE "
+								"draftId"..draftId .." AtoG passe A_30 buildDraftSorties() PACKAGE COMPLETE "
 								..target_name .." targetAssignedFirepower/target.firepower.max: "
 								..targetAssignedFirepower[target_name] .."/" ..target.firepower.max
 							)

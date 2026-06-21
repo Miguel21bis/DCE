@@ -10,7 +10,7 @@ if Debug.debug then
 end
 
 local t0 = os.clock()
-local t_a  = 0
+local t_a = 0
 local t_b = 0
 local t_c = 0
 
@@ -432,8 +432,8 @@ for sideName, side in pairs(oob_air) do
 
 		table.insert(AirSquadronIndex, {
 			pattern = escapePattern(unit.name),
-			unit    = unit,
-			side    = sideName,
+			unit = unit,
+			side = sideName,
 		})
 	end
 end
@@ -585,7 +585,7 @@ for e = 1, #events do
 				if clientControl[initiator] and ( (events[e].t - clientstats[clientControl[initiator]].score_last.Time_Crash) >   30) then											--if crashed aircraft is a client
 
 					clientstats[clientControl[initiator]].crash = clientstats[clientControl[initiator]].crash + 1	--store crash for client
-					clientstats[clientControl[initiator]].score_last.crash =  clientstats[clientControl[initiator]].score_last.crash + 1			--store crash for client
+					clientstats[clientControl[initiator]].score_last.crash = clientstats[clientControl[initiator]].score_last.crash + 1			--store crash for client
 					clientstats[clientControl[initiator]].score_last.Time_Crash = events[e].t
 
 				end
@@ -648,7 +648,7 @@ for e = 1, #events do
 			if clientControl[target] and ( (events[e].t - clientstats[clientControl[target]].score_last.Time_Crash) >   30) then											--if crashed aircraft is a client
 
 				clientstats[clientControl[target]].crash = clientstats[clientControl[target]].crash + 1	--store crash for client
-				clientstats[clientControl[target]].score_last.crash =  clientstats[clientControl[target]].score_last.crash + 1			--store crash for client
+				clientstats[clientControl[target]].score_last.crash = clientstats[clientControl[target]].score_last.crash + 1			--store crash for client
 				clientstats[clientControl[target]].score_last.Time_Crash = events[e].t
 
 			end
@@ -707,14 +707,21 @@ for e = 1, #events do
 			local lostType = ""
 			local tagbreak = false
 
-			for _side, side in pairs(last_Mission.coalition) do
-				for _country, country in pairs(side.country) do
-					if _side == targetSide then
+			for sideName, sideTab in pairs(last_Mission.coalition) do
+				for countryN, country in pairs(sideTab.country) do
+					if sideName == targetSide then
 						for chapterName, chapter in pairs(country) do
 							if type(chapter) == "table" and chapter.group then
 								for Ngroup, group in pairs(chapter.group) do
 									for n=1, #group.units do
-										if group.units[n].unitId == tonumber(events[e].targetMissionID) then
+										
+										if events[e].targetMissionID and group.units[n].unitId == tonumber(events[e].targetMissionID) then
+											task = group.task
+											targetName = group.DCE_targetName
+											lostType = group.units[n].type
+											tagbreak = true
+											break
+										elseif events[e].target and group.units[n].name == events[e].target then
 											task = group.task
 											targetName = group.DCE_targetName
 											lostType = group.units[n].type
@@ -737,7 +744,12 @@ for e = 1, #events do
 				targetName = "test"
 			 end
 
-			if tagbreak == false then _affiche(events[e], "DebriefSE NothingFound in relation to last_Mission ") end
+			if tagbreak == false then
+				print()
+
+				_affiche(events[e], "DebriefSE NothingFound in relation to last_Mission ") 
+
+			end
 
 			if not task then task = "inc" end
 
@@ -773,15 +785,15 @@ for e = 1, #events do
 		if clientControl[initiator] and ( (events[e].t - clientstats[clientControl[initiator]].score_last.Time_Eject) >   30)  then														--if ejected pilot is a client
 
 			clientstats[clientControl[initiator]].eject = clientstats[clientControl[initiator]].eject + 1	--store ejection for client
-			clientstats[clientControl[initiator]].score_last.eject =  clientstats[clientControl[initiator]].score_last.eject + 1						--store eject for client
+			clientstats[clientControl[initiator]].score_last.eject = clientstats[clientControl[initiator]].score_last.eject + 1						--store eject for client
 			clientstats[clientControl[initiator]].score_last.Time_Eject = events[e].t
 
 			if statutObject[initiator]["unit lost"] then
 				clientstats[clientControl[initiator]].dead = clientstats[clientControl[initiator]].dead - 1	--store death for client
-				clientstats[clientControl[initiator]].score_last.dead =  clientstats[clientControl[initiator]].score_last.dead - 1						--store dead pilot for client
+				clientstats[clientControl[initiator]].score_last.dead = clientstats[clientControl[initiator]].score_last.dead - 1						--store dead pilot for client
 				clientstats[clientControl[initiator]].score_last.Time_Dead = 0
-				statutObject[initiator]["pilot dead"] =  false
-				statutObject[initiator]["unit lost"] =  false
+				statutObject[initiator]["pilot dead"] = false
+				statutObject[initiator]["unit lost"] = false
 			end
 		end
 		statutObject[initiator].eject = true
@@ -789,17 +801,17 @@ for e = 1, #events do
 		--client stats for dead pilots
 		if clientControl[initiator] and ( (events[e].t - clientstats[clientControl[initiator]].score_last.Time_Dead) >   30) then														--if dead pilot is a client
 			clientstats[clientControl[initiator]].dead = clientstats[clientControl[initiator]].dead + 1	--store death for client
-			clientstats[clientControl[initiator]].score_last.dead =  clientstats[clientControl[initiator]].score_last.dead + 1						--store dead pilot for client
+			clientstats[clientControl[initiator]].score_last.dead = clientstats[clientControl[initiator]].score_last.dead + 1						--store dead pilot for client
 			clientstats[clientControl[initiator]].score_last.Time_Dead = events[e].t
 		end
-		statutObject[initiator]["pilot dead"] =  true
+		statutObject[initiator]["pilot dead"] = true
 
 	elseif eventType == "pilot land" and events[e].initiator then
 
 		--client stats for landing pilots
 		if clientControl[initiator] and ( (events[e].t - clientstats[clientControl[initiator]].score_last.Time_MIA) >   30) then														--if landing pilot is a client
 			clientstats[clientControl[initiator]].MIA = clientstats[clientControl[initiator]].MIA + 1	--store MIA for client
-			clientstats[clientControl[initiator]].score_last.MIA =  1						--store MIA pilot for client
+			clientstats[clientControl[initiator]].score_last.MIA = 1						--store MIA pilot for client
 			clientstats[clientControl[initiator]].score_last.Time_MIA = events[e].t
 
 			-- print("DebriefSE initiator "..tostring(events[e].initiator).." MIA: "..tostring(clientstats[client_control[initiator]].MIA))
@@ -820,27 +832,27 @@ for e = 1, #events do
 	elseif eventType == "embarkedEjectedPilot" then
 		--l'initiator sauve quelqu'un
 		if clientControl[initiator] and ( (events[e].t - clientstats[clientControl[initiator]].score_last.Time_rescue ) > 30) then
-			clientstats[clientControl[initiator]].rescue  = clientstats[clientControl[initiator]].rescue  + 1
-			clientstats[clientControl[initiator]].score_last.rescue  = clientstats[clientControl[initiator]].score_last.rescue + 1
-			clientstats[clientControl[initiator]].score_last.Time_rescue =  events[e].t
+			clientstats[clientControl[initiator]].rescue = clientstats[clientControl[initiator]].rescue  + 1
+			clientstats[clientControl[initiator]].score_last.rescue = clientstats[clientControl[initiator]].score_last.rescue + 1
+			clientstats[clientControl[initiator]].score_last.Time_rescue = events[e].t
 		end
 		--le pilote sauvé est le target
 		if clientControl[target] and ( (events[e].t - clientstats[clientControl[target]].score_last.Time_rescued ) > 30) then
-			clientstats[clientControl[target]].rescued  = clientstats[clientControl[target]].rescued  + 1
-			clientstats[clientControl[target]].score_last.rescued  = clientstats[clientControl[target]].score_last.rescued + 1
-			clientstats[clientControl[target]].score_last.Time_rescued =  events[e].t
+			clientstats[clientControl[target]].rescued = clientstats[clientControl[target]].rescued  + 1
+			clientstats[clientControl[target]].score_last.rescued = clientstats[clientControl[target]].score_last.rescued + 1
+			clientstats[clientControl[target]].score_last.Time_rescued = events[e].t
 
 			clientstats[clientControl[target]].MIA = clientstats[clientControl[target]].MIA - 1
-			clientstats[clientControl[target]].score_last.MIA =  -1
+			clientstats[clientControl[target]].score_last.MIA = -1
 		end
 		--le pilote sauvé est le target (prise en compte du PilotName s'il existe)
 		if clientstats[events[e].targetPilotName] and ( (events[e].t - clientstats[events[e].targetPilotName].score_last.Time_rescued ) > 30) then
-			clientstats[events[e].targetPilotName].rescued  = clientstats[events[e].targetPilotName].rescued  + 1
-			clientstats[events[e].targetPilotName].score_last.rescued  = clientstats[events[e].targetPilotName].score_last.rescued + 1
-			clientstats[events[e].targetPilotName].score_last.Time_rescued =  events[e].t
+			clientstats[events[e].targetPilotName].rescued = clientstats[events[e].targetPilotName].rescued  + 1
+			clientstats[events[e].targetPilotName].score_last.rescued = clientstats[events[e].targetPilotName].score_last.rescued + 1
+			clientstats[events[e].targetPilotName].score_last.Time_rescued = events[e].t
 
 			clientstats[events[e].targetPilotName].MIA = clientstats[events[e].targetPilotName].MIA - 1
-			clientstats[events[e].targetPilotName].score_last.MIA =  -1
+			clientstats[events[e].targetPilotName].score_last.MIA = -1
 		end
 
 	elseif eventType == "land" then
@@ -853,10 +865,10 @@ for e = 1, #events do
 		end
 
 		if events[e].initiator and string.find(events[e].initiator,"Transport") and not tabTransport[initiator] then
-			local payload  = 0
+			local payload = 0
 
 			if PayloadType[events[e].type_name] then
-				payload  = PayloadType[events[e].type_name]																--see UTIL_Data.lua
+				payload = PayloadType[events[e].type_name]																--see UTIL_Data.lua
 			end
 
 			if events[e].place then
@@ -884,9 +896,9 @@ for e = 1, #events do
 		if clientControl[initiator] and ( (events[e].t - clientstats[clientControl[initiator]].score_last.Time_Dead) > 30) then
 	
 			clientstats[clientControl[initiator]].dead = clientstats[clientControl[initiator]].dead + 1	--store death for client
-			clientstats[clientControl[initiator]].score_last.dead =  clientstats[clientControl[initiator]].score_last.dead + 1						--store dead pilot for client
+			clientstats[clientControl[initiator]].score_last.dead = clientstats[clientControl[initiator]].score_last.dead + 1						--store dead pilot for client
 			clientstats[clientControl[initiator]].score_last.Time_Dead = events[e].t
-			statutObject[initiator]["pilot dead"] =  true
+			statutObject[initiator]["pilot dead"] = true
 			if eventType == "unit lost" then
 				statutObject[initiator]["unit lost"] = true
 			end
@@ -910,10 +922,7 @@ for e = 1, #events do
 
 				--award ground kill to air unit
 				if hitTbl_KillerByTarget[initiator] ~= nil then														--check if dead vehicle has a hit entry
-					-- for killer_side_name,killer_side in pairs(oob_air) do											--iterate through all sides
-					-- 	for killer_unit_n,killer_unit in pairs(killer_side) do										--iterate through all air units
-					-- 		if string.find(hitTbl_KillerByTarget[initiator], " " .. killer_unit.name .. " ", 1, true) then	--if the hitting unit is part of air unit name
-								
+							
 					local killer_unit = resolveAirSquad(hitTbl_KillerByTarget[initiator])
 					if killer_unit then
 						if unit.side ~= killer_unit.side then
