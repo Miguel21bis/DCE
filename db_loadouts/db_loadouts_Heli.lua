@@ -3835,5 +3835,405 @@ db_loadouts = {
 			},
 		},
 	},
+	["uh2a"] = {
+		CSAR = {
+			["CSAR uh2a"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = 
+					{
+					["CLSID"] = "{UH2A_FUEL_TANK_120R}",
+					}, -- end of [1]
+					[2] = 
+					{
+					["CLSID"] = "{UH2A_FUEL_TANK_120L}",
+					}, -- end of [2]
+					},
+					fuel = 631,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+		SAR = {
+			["SAR uh2a"] = {
+				minscore = 0.3,
+				support = {
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = 
+					{
+					["CLSID"] = "{UH2A_FUEL_TANK_120R}",
+					}, -- end of [1]
+					[2] = 
+					{
+					["CLSID"] = "{UH2A_FUEL_TANK_120L}",
+					}, -- end of [2]
+					},
+					fuel = 631,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+		Transport = {
+			["Transport uh2a"] = {
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = 
+					{
+					["CLSID"] = "{UH2A_FUEL_TANK_120R}",
+					}, -- end of [1]
+					[2] = 
+					{
+					["CLSID"] = "{UH2A_FUEL_TANK_120L}",
+					}, -- end of [2]
+					},
+					fuel = 631,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+	},
+	["uh2b"] = {
+		CSAR = {
+			["CSAR uh2b"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = 
+					{
+					["CLSID"] = "{UH2B_FUEL_TANK_120R}",
+					}, -- end of [1]
+					[2] = 
+					{
+					["CLSID"] = "{UH2B_FUEL_TANK_120L}",
+					}, -- end of [2]
+					},
+					fuel = 631,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+		SAR = {
+			["SAR uh2b"] = {
+				minscore = 0.3,
+				support = {
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = 
+					{
+					["CLSID"] = "{UH2B_FUEL_TANK_120R}",
+					}, -- end of [1]
+					[2] = 
+					{
+					["CLSID"] = "{UH2B_FUEL_TANK_120L}",
+					}, -- end of [2]
+					},
+					fuel = 631,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+		Transport = {
+			["Transport uh2b"] = {
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = 
+					{
+					["CLSID"] = "{UH2B_FUEL_TANK_120R}",
+					}, -- end of [1]
+					[2] = 
+					{
+					["CLSID"] = "{UH2B_FUEL_TANK_120L}",
+					}, -- end of [2]
+					},
+					fuel = 631,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+	},
+	["uh2c"] = {
+		CSAR = {
+			["CSAR uh2c"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = 
+					{
+					["CLSID"] = "{UH2C_FUEL_TANK_120R}",
+					}, -- end of [1]
+					[2] = 
+					{
+					["CLSID"] = "{UH2C_FUEL_TANK_120L}",
+					}, -- end of [2]
+					},
+					fuel = 631,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+		SAR = {
+			["SAR uh2c"] = {
+				minscore = 0.3,
+				support = {
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = 
+					{
+					["CLSID"] = "{UH2C_FUEL_TANK_120R}",
+					}, -- end of [1]
+					[2] = 
+					{
+					["CLSID"] = "{UH2C_FUEL_TANK_120L}",
+					}, -- end of [2]
+					},
+					fuel = 631,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+		Transport = {
+			["Transport uh2c"] = {
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = 
+					{
+					["CLSID"] = "{UH2C_FUEL_TANK_120R}",
+					}, -- end of [1]
+					[2] = 
+					{
+					["CLSID"] = "{UH2C_FUEL_TANK_120L}",
+					}, -- end of [2]
+					},
+					fuel = 631,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+	},
+	["uh2f"] = {
+		CSAR = {
+			["CSAR SH-2"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					},
+					fuel = 1100,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+		SAR = {
+			["SAR SH-2"] = {
+				minscore = 0.3,
+				support = {
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					},
+					fuel = 1100,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+		Transport = {
+			["transport SH-2"] = {
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				attributes =  { },
+				code_loadout =  { "All" },
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 40,
+				vAttack = 40,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					},
+					fuel = 1100,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
+	},
 
 }

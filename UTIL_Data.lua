@@ -1495,7 +1495,43 @@ Data_divers = {
 		vCruise = 55,	--TODO a verifier
 		hCruise = 50,
 	},
-	
+
+	["uh2a"] = {--mod
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		requiredModules = true,						--itsModule jjj_Kaman
+		moduleName = "jjj_Kaman",		--self_ID  require module name
+		folderModName = "[VWV] H-2",
+		vCruise = 40,	--TODO a verifier
+		hCruise = 500,
+	},
+	["uh2b"] = {--mod
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		requiredModules = true,						--itsModule jjj_Kaman
+		moduleName = "jjj_Kaman",		--self_ID  require module name
+		folderModName = "[VWV] H-2",
+		vCruise = 40,	--TODO a verifier
+		hCruise = 500,
+	},
+	["uh2c"] = {--mod
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		requiredModules = true,						--itsModule jjj_Kaman
+		moduleName = "jjj_Kaman",		--self_ID  require module name
+		folderModName = "[VWV] H-2",
+		vCruise = 40,	--TODO a verifier
+		hCruise = 500,
+	},
+	["sh2f"] = {--mod
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		requiredModules = true,						--itsModule jjj_Kaman
+		moduleName = "jjj_Kaman",		--self_ID  require module name
+		folderModName = "[VWV] H-2",
+		vCruise = 40,	--TODO a verifier
+		hCruise = 500,
+	},
 	["vwv_uh2a"] = {--mod
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -2117,6 +2153,11 @@ IsHelicopter = {
 	["UH-1H"] = {},
 	["AH-1G"] = {},
 	["AH-1W"] = {},
+
+	["uh2a"] = {},                            --mod
+	["uh2b"] = {},                            --mod
+	["uh2c"] = {},                            --mod
+	["uh2d"] = {},                            --mod
 
 	["vwv_uh2a"] = {},                            --mod
 	["vwv_uh2b"] = {},                            --mod
@@ -4005,6 +4046,7 @@ function DataCompilation_DataDiscoveryA2()
 							end
 
 							-- extraction plus tard
+							
 							-- print("  -> A2 aircraft captured "..planeType)
 							
 
