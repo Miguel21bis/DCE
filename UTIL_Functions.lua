@@ -905,44 +905,6 @@ function GetOffsetPoint(point, heading, distance, show)
 end
 
 
--- --function to return closest distance of point p3 to the line p1 to p2
--- function GetTangentDistance(p1, p2, p3)
-
--- 	local c_GetTD = os.clock()
-
--- 	local p1_p2_heading = GetHeadingDegre(p1, p2)
--- 	local p1_p3_heading = GetHeadingDegre(p1, p3)
--- 	local alpha = math.abs(p1_p2_heading - p1_p3_heading)
--- 	if alpha > 180 then
--- 		alpha = math.abs(alpha - 360)
--- 	end
--- 	local p1_p3_distance = GetDistance(p1, p3)
-
--- 	local p2_p1_heading = GetHeadingDegre(p2, p1)
--- 	local p2_p3_heading = GetHeadingDegre(p2, p3)
-
--- 	local beta = math.abs(p2_p1_heading - p2_p3_heading)
--- 	if beta > 180 then
--- 		beta = math.abs(beta - 360)
--- 	end
--- 	local p2_p3_distance = GetDistance(p2, p3)
-
--- 	if alpha > 90 or alpha < -90 then
--- 		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
--- 		return p1_p3_distance
--- 	elseif beta > 90 or beta < -90 then
--- 		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
--- 		return p2_p3_distance
--- 	elseif GetDistance(p1, p2) == 0 then
--- 		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
--- 		return p1_p3_distance
--- 	else
-
--- 		local value = math.abs(math.sin(math.rad(alpha)) * p1_p3_distance)
--- 		T_GetTD = T_GetTD + (os.clock() - c_GetTD)
--- 		return value
--- 	end
--- end
 
 -- Retourne la distance minimale entre un point (p3) et un segment (p1-p2),
 -- afin d’évaluer rapidement si un trajet intersecte une zone de menace.
@@ -4834,6 +4796,7 @@ function UpdateFilesAfterTimeJump()
 
     dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_UpdateTargetlist.lua")
 	dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Refpoints.lua")
+	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Weather.lua")
 	dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_NavalEnvironment.lua")
 	if Debug.debug then print ("Lancement VIA UTIL_Fonction E 5235 (UpdateFilesAfterTimeJump)") end
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
