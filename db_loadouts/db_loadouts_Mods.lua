@@ -4,11 +4,12 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["db_loadouts/db_loadouts_Mods.lua"] = "1.3.201"
+versionDCE["db_loadouts/db_loadouts_Mods.lua"] = "1.3.202"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
+-- V202 - New UH2 SH2 
 -- V201 - Transport for SH-3D
 -- V200 - only Mods
 -- V198 - F-4E GBU - AGM - Mk20 
@@ -4742,7 +4743,7 @@ db_loadouts = {
 			},
 		},
 	},
-	["vwv_uh2a"] = {
+	["uh2a"] = {
 		CSAR = {
 			["CSAR uh2a"] = {
 				minscore = 0.3,
@@ -4765,14 +4766,14 @@ db_loadouts = {
 					pylons = {
 					[1] = 
 					{
-					["CLSID"] = "{UH2A_FUEL_TANK_120R}",
+					["CLSID"] = "{SH2F_FUEL_TANK_120R}",
 					}, -- end of [1]
 					[2] = 
 					{
-					["CLSID"] = "{UH2A_FUEL_TANK_120L}",
+					["CLSID"] = "{SH2F_FUEL_TANK_120L}",
 					}, -- end of [2]
 					},
-					fuel = 631,
+					fuel = 668.8,
 					flare = 0,
 					chaff = 0,
 					gun = 100,
@@ -4799,14 +4800,14 @@ db_loadouts = {
 					pylons = {
 					[1] = 
 					{
-					["CLSID"] = "{UH2A_FUEL_TANK_120R}",
+					["CLSID"] = "{SH2F_FUEL_TANK_120R}",
 					}, -- end of [1]
 					[2] = 
 					{
-					["CLSID"] = "{UH2A_FUEL_TANK_120L}",
+					["CLSID"] = "{SH2F_FUEL_TANK_120L}",
 					}, -- end of [2]
 					},
-					fuel = 631,
+					fuel = 668.8,
 					flare = 0,
 					chaff = 0,
 					gun = 100,
@@ -4833,14 +4834,14 @@ db_loadouts = {
 					pylons = {
 					[1] = 
 					{
-					["CLSID"] = "{UH2A_FUEL_TANK_120R}",
+					["CLSID"] = "{SH2F_FUEL_TANK_120R}",
 					}, -- end of [1]
 					[2] = 
 					{
-					["CLSID"] = "{UH2A_FUEL_TANK_120L}",
+					["CLSID"] = "{SH2F_FUEL_TANK_120L}",
 					}, -- end of [2]
 					},
-					fuel = 631,
+					fuel = 668.8,
 					flare = 0,
 					chaff = 0,
 					gun = 100,
@@ -4848,7 +4849,7 @@ db_loadouts = {
 			},
 		},
 	},
-	["vwv_uh2b"] = {
+	["uh2b"] = {
 		CSAR = {
 			["CSAR uh2b"] = {
 				minscore = 0.3,
@@ -4871,14 +4872,14 @@ db_loadouts = {
 					pylons = {
 					[1] = 
 					{
-					["CLSID"] = "{UH2B_FUEL_TANK_120R}",
+					["CLSID"] = "{SH2F_FUEL_TANK_120R}",
 					}, -- end of [1]
 					[2] = 
 					{
-					["CLSID"] = "{UH2B_FUEL_TANK_120L}",
+					["CLSID"] = "{SH2F_FUEL_TANK_120L}",
 					}, -- end of [2]
 					},
-					fuel = 631,
+					fuel = 668.8,
 					flare = 0,
 					chaff = 0,
 					gun = 100,
@@ -4905,14 +4906,14 @@ db_loadouts = {
 					pylons = {
 					[1] = 
 					{
-					["CLSID"] = "{UH2B_FUEL_TANK_120R}",
+					["CLSID"] = "{SH2F_FUEL_TANK_120R}",
 					}, -- end of [1]
 					[2] = 
 					{
-					["CLSID"] = "{UH2B_FUEL_TANK_120L}",
+					["CLSID"] = "{SH2F_FUEL_TANK_120L}",
 					}, -- end of [2]
 					},
-					fuel = 631,
+					fuel = 668.8,
 					flare = 0,
 					chaff = 0,
 					gun = 100,
@@ -4939,14 +4940,14 @@ db_loadouts = {
 					pylons = {
 					[1] = 
 					{
-					["CLSID"] = "{UH2B_FUEL_TANK_120R}",
+					["CLSID"] = "{SH2F_FUEL_TANK_120R}",
 					}, -- end of [1]
 					[2] = 
 					{
-					["CLSID"] = "{UH2B_FUEL_TANK_120L}",
+					["CLSID"] = "{SH2F_FUEL_TANK_120L}",
 					}, -- end of [2]
 					},
-					fuel = 631,
+					fuel = 668.8,
 					flare = 0,
 					chaff = 0,
 					gun = 100,
@@ -4954,7 +4955,7 @@ db_loadouts = {
 			},
 		},
 	},
-	["vwv_uh2c"] = {
+	["uh2c"] = {
 		CSAR = {
 			["CSAR uh2c"] = {
 				minscore = 0.3,
@@ -4977,14 +4978,14 @@ db_loadouts = {
 					pylons = {
 					[1] = 
 					{
-					["CLSID"] = "{UH2C_FUEL_TANK_120R}",
+					["CLSID"] = "{SH2F_FUEL_TANK_120R}",
 					}, -- end of [1]
 					[2] = 
 					{
-					["CLSID"] = "{UH2C_FUEL_TANK_120L}",
+					["CLSID"] = "{SH2F_FUEL_TANK_120L}",
 					}, -- end of [2]
 					},
-					fuel = 631,
+					fuel = 668.8,
 					flare = 0,
 					chaff = 0,
 					gun = 100,
@@ -5011,14 +5012,14 @@ db_loadouts = {
 					pylons = {
 					[1] = 
 					{
-					["CLSID"] = "{UH2C_FUEL_TANK_120R}",
+					["CLSID"] = "{SH2F_FUEL_TANK_120R}",
 					}, -- end of [1]
 					[2] = 
 					{
-					["CLSID"] = "{UH2C_FUEL_TANK_120L}",
+					["CLSID"] = "{SH2F_FUEL_TANK_120L}",
 					}, -- end of [2]
 					},
-					fuel = 631,
+					fuel = 668.8,
 					flare = 0,
 					chaff = 0,
 					gun = 100,
@@ -5045,14 +5046,14 @@ db_loadouts = {
 					pylons = {
 					[1] = 
 					{
-					["CLSID"] = "{UH2C_FUEL_TANK_120R}",
+					["CLSID"] = "{SH2F_FUEL_TANK_120R}",
 					}, -- end of [1]
 					[2] = 
 					{
-					["CLSID"] = "{UH2C_FUEL_TANK_120L}",
+					["CLSID"] = "{SH2F_FUEL_TANK_120L}",
 					}, -- end of [2]
 					},
-					fuel = 631,
+					fuel = 668.8,
 					flare = 0,
 					chaff = 0,
 					gun = 100,
@@ -5060,97 +5061,7 @@ db_loadouts = {
 			},
 		},
 	},
-	["vwv_hh2d"] = {
-		CSAR = {
-			["CSAR HH-2"] = {
-				minscore = 0.3,
-				support = {
-					Escort = true,
-					SEAD = false,
-				},
-				attributes =  { },
-				code_loadout =  { "All" },
-				night = true,
-				adverseWeather = true,
-				range = 500000,
-				firepower = 1,
-				vCruise = 40,
-				vAttack = 40,
-				hCruise = 500,
-				hAttack = 500,
-				sortie_rate = 6,
-				stores = {
-					pylons = {
-					[1] = {
-					["CLSID"] = "ab-212_cable",
-					["num"] = 5,
-					},
-					},
-					fuel = 1100,
-					flare = 0,
-					chaff = 0,
-					gun = 100,
-				},
-			},
-		},
-		SAR = {
-			["SAR HH-2"] = {
-				minscore = 0.3,
-				support = {
-				},
-				attributes =  { },
-				code_loadout =  { "All" },
-				night = true,
-				adverseWeather = true,
-				range = 500000,
-				firepower = 1,
-				vCruise = 40,
-				vAttack = 40,
-				hCruise = 500,
-				hAttack = 500,
-				sortie_rate = 6,
-				stores = {
-					pylons = {
-					[1] = {
-					["CLSID"] = "ab-212_cable",
-					["num"] = 5,
-					},
-					},
-					fuel = 1100,
-					flare = 0,
-					chaff = 0,
-					gun = 100,
-				},
-			},
-		},
-		Transport = {
-			Default = {
-				support = {
-					Escort = true,
-					SEAD = false,
-				},
-				attributes =  { },
-				code_loadout =  { "All" },
-				adverseWeather = true,
-				range = 500000,
-				firepower = 1,
-				vCruise = 40,
-				vAttack = 40,
-				hCruise = 500,
-				hAttack = 500,
-				sortie_rate = 6,
-				stores = {
-					pylons = {
-					},
-					fuel = 1100,
-					flare = 0,
-					chaff = 0,
-					gun = 100,
-				},
-			},
-		},
-	},
-	["vwv_sh2f"] = {
+	["sh2f"] = {
 		CSAR = {
 			["CSAR SH-2"] = {
 				minscore = 0.3,
@@ -5171,8 +5082,16 @@ db_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-					},
-					fuel = 1100,
+					[3] = 
+					{
+					["CLSID"] = "{SH2F_FUEL_TANK_120L}",
+					}, -- end of [3]
+					[2] = 
+					{
+					["CLSID"] = "{SH2F_FUEL_TANK_120R}",
+					}, -- end of [2]
+					}, -- end of ["pylons"]
+					["fuel"] = 652.8,
 					flare = 0,
 					chaff = 0,
 					gun = 100,
@@ -5197,8 +5116,16 @@ db_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-					},
-					fuel = 1100,
+					[3] = 
+					{
+					["CLSID"] = "{SH2F_FUEL_TANK_120L}",
+					}, -- end of [3]
+					[2] = 
+					{
+					["CLSID"] = "{SH2F_FUEL_TANK_120R}",
+					}, -- end of [2]
+					}, -- end of ["pylons"]
+					["fuel"] = 652.8,
 					flare = 0,
 					chaff = 0,
 					gun = 100,
@@ -5223,8 +5150,16 @@ db_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-					},
-					fuel = 1100,
+					[3] = 
+					{
+					["CLSID"] = "{SH2F_FUEL_TANK_120L}",
+					}, -- end of [3]
+					[2] = 
+					{
+					["CLSID"] = "{SH2F_FUEL_TANK_120R}",
+					}, -- end of [2]
+					}, -- end of ["pylons"]
+					["fuel"] = 652.8,
 					flare = 0,
 					chaff = 0,
 					gun = 100,

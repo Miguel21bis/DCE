@@ -421,19 +421,19 @@ db_loadouts = {
 					[1] = "Vietnam",
 				},
 				code_loadout =  { "NAM" },
-								range = 150000,
+				range = 151000, --150000,
 				firepower = 1,
 				sortie_rate = 6,
 				stores = {
 					["pylons"] = {
-					[1] = {
-					["CLSID"] = "PTB400_MIG15",
-					["num"] = 2,
-					},
-					[2] = {
-					["CLSID"] = "PTB400_MIG15",
-					["num"] = 1,
-					},
+						[1] = {
+							["CLSID"] = "PTB400_MIG15",
+							["num"] = 2,
+						},
+						[2] = {
+							["CLSID"] = "PTB400_MIG15",
+							["num"] = 1,
+						},
 					},
 					fuel = 1172,
 					flare = 0,

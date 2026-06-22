@@ -2429,6 +2429,7 @@ for sideName, units in pairs(oob_air) do
 					["Reconnaissance"] = true,
 					["AWACS"] = true,
 					["Refueling"] = true,
+					["Fighter Sweep"] = true,
 				}
 
 				if task_bool and MAIN_TASKS[task] then
@@ -2623,7 +2624,7 @@ for sideName, units in pairs(oob_air) do
 						if draftContext.state.tot_to ~= 0 then
 							-- if tot_from ~= 0 or tot_to ~= 0 then																	--loadout has an eligible time on target
 							if isDebugModeA2 then
-								debugLog("draftId"..draftId.." AtoG passe A_06 ".." Befor targetlist Boucle")
+								debugLog("draftId"..draftId.." AtoG passe A_06 Befor targetlist Boucle")
 							end
 
 							if draftContext.state.tot_from == 0 then																				--player is only allowed to start at mission start
@@ -2633,8 +2634,10 @@ for sideName, units in pairs(oob_air) do
 							local i_timmer01 = 0
 							for target_sideName, targets in pairs(tgtList_Gen) do											--iterate through sides in targetlist				
 								i_timmer01 = i_timmer01 +1
+								
 								if sideName == target_sideName then																--if the target is hostile
 									local totalTarget = 0
+									
 									for target_name, target in pairs(targets) do
 										totalTarget = totalTarget + 1
 									end
@@ -2649,8 +2652,8 @@ for sideName, units in pairs(oob_air) do
 										local target_name = target.titleName
 
 										if not target.inactive and target.ATO then											--if target is active and should be added to ATO
-											local isDebugModeA3 =
-												Debug.Generator.affiche
+											
+											local isDebugModeA3 = Debug.Generator.affiche
 												and string.find(Debug.Generator.chapter, "A")
 												and (
 													(

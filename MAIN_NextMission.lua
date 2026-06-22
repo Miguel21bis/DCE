@@ -987,7 +987,7 @@ for _, side in pairs(mission.coalition) do
 											--garde le nom du fichier autre que beacon
 											local tempOldFile = DeepCopy(oldMapResource[task.params.action.params.file])
 
-											_affiche(tempOldFile, "tempOldFile: ")
+											-- _affiche(tempOldFile, "tempOldFile: ")
 
 											mission.maxDictId = mission.maxDictId + 1
 											task.params.action.params.subtitle = "DictKey_subtitle_"..mission.maxDictId
