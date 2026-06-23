@@ -4680,17 +4680,20 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								distance = GetDistance(waypoints[w - 2], waypoints[w])										--for target waypoint measure distance from IP, since attack point is removed for player flight
 							end
 							if distance > 0 then																			--distance is not zero
-								local heading = math.floor(GetHeadingDegre(waypoints[w - 1], waypoints[w]))						--heading between waypoints
-								heading = heading - camp.variation															--adjust heading (true heading) with variation of map to get magnetix heading
-								if heading < 0 then
-									heading = heading + 360
-								elseif heading > 359 then
-									heading = heading - 360
+								local headingNum = math.floor(GetHeadingDegre(waypoints[w - 1], waypoints[w]))						--heading between waypoints
+								local headingStr = ""
+								headingNum = headingNum - camp.variation															--adjust heading (true heading) with variation of map to get magnetix heading
+								if headingNum < 0 then
+									headingNum = headingNum + 360
+								elseif headingNum > 359 then
+									headingNum = headingNum - 360
 								end
-								if heading < 10 then
-									heading = "00" .. tostring(heading)
-								elseif heading < 100 then
-									heading = "0" .. tostring(heading)
+								if headingNum < 10 then
+									headingStr = "00" .. tostring(headingNum)
+								elseif headingNum < 100 then
+									headingStr = "0" .. tostring(headingNum)
+								else
+									headingStr = tostring(headingNum)
 								end
 
 
@@ -4724,12 +4727,12 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								end
 								waypoints[w]["name"] = waypoints[w]["name"] .. s
 
-								space = 4 - string.len(tostring(heading))
+								space = 4 - string.len(tostring(headingNum))
 								s = ""
 								for n = 1, space  do
 									s = s .. " "
 								end
-								heading = heading .. s
+								headingStr = headingStr .. s
 
 								space = 7 - string.len(tostring(distanceStr))
 								s = ""
@@ -4754,7 +4757,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 									if waypoints[w].name == "Target" or waypoints[w].name == "Attack" then  waypoints[w].NavTP = "ST" end
 									if waypoints[w].name == "Station" then  waypoints[w].NavTP = "DP" end
 								end
-								waypoints[w]["name"] = waypoints[w]["name"] .. "" .. heading .. " / " .. distance.." / "..ete			--add heading and distance to waypoint name
+								waypoints[w]["name"] = waypoints[w]["name"] .. "" .. headingStr .. " / " .. distance.." / "..ete			--add heading and distance to waypoint name
 
 								if waypoints[w].briefing_name == "Land" then
 									local tempTime = 0
@@ -7689,7 +7692,7 @@ for _side, side in pairs(mission.coalition) do
 end
 
 
-function af_spawnOn(where, groupName)
+local function af_spawnOn(where, groupName)
 	if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFp AF_spawnOn  "..groupName) end
 
 		local action = 'From Runway'
