@@ -1,7 +1,7 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "22.105.618"
+versionDCE["UTIL_Changelog.lua"] = "22.107.621"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "22.105.618"
+VersionDCE["UTIL_Changelog.txt"] = "22.107.621"
 --[[
 
 # DCE – Changelog
@@ -17,7 +17,7 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-##  Version 22.105.618
+##  Version 22.107.621
 	###  Fixed
 		Boundary: If there is no trigger, the boundary table must be created via base_mission
 		ArtySpotter bug nil km
@@ -28,6 +28,7 @@ known issues:
 		the radio frequencies of Escort Flight 1 and Escort Flight 2 are different
 		Mig-15bis using HF-only radio cannot communicate with EWRs
 		ships may not move correctly or may not move at all
+		"Fighter Sweep" flights are no longer proposed
 
 	###  Changed
 		manhunt: add manhunt preferentially on ejected pilots closest to the border, using the distanceFromFrontline variable
@@ -55,6 +56,9 @@ known issues:
 		A6E refueling
 		Give the player a real reason for the absence of flight for him (in progress)
 		F-100D		
+		F-14A-95-GR
+		F-14A-135-GR-Early
+		uh2a uh2b uh2c uh2f
 
 ##  Version 22.99.597
 	###  Fixed
