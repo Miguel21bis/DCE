@@ -59,7 +59,7 @@ DraftStepIndex = {
 -- SÉCURITÉ & LOGS DE CONFIGURATION (En-tête du script)
 -- ============================================================================
 
-local logFilePath = "Debug/Generator_debugLogs.txt"
+local logFilePath = "Debug/Generator_debugLogs.lua"
 local logBufferSize = 1000  -- Nombre de lignes avant écriture disque
 
 -- -- CORRECTION 1 : Il faut déclarer la table de buffer de manière locale 
@@ -789,11 +789,7 @@ Playability_criterium = {
     { key = "playerAssign_CAP_hostile",             value = nil }, -- 
 
 }
--- function TrackPlayability(player_unit, criterium)																				--function that tracks whether a playability criterium has been met
--- 	if player_unit == true then																									--unit in question is playable by player
--- 		Playability_criterium[criterium] = true																					--set playability criterium to be met
--- 	end
--- end
+
 function TrackPlayability(player_unit, criterium)
     if player_unit == true then
         for i, crit in ipairs(Playability_criterium) do
@@ -806,7 +802,24 @@ function TrackPlayability(player_unit, criterium)
     end
 end
 
+function CheckAssignments()
+    -- 1. Create a quick dictionary for key-based lookups
+    local status = {}
+    for _, crit in ipairs(Playability_criterium) do
+        status[crit.key] = crit.value
+    end
 
+    -- 2. Apply your logical rules
+    -- CAP Rule
+    if status["playerAssign_CAP"] == true and status["playerAssign_CAP_hostile"] ~= true then
+        print("CAP possible but no hostiles expected in the area")
+    end
+
+    -- Intercept Rule
+    if status["playerAssign_intercept"] == true and status["playerAssign_intercept_hostile"] ~= true then
+        print("Interception possible but no hostiles expected in the area")
+    end
+end
 
 
 
@@ -1664,6 +1677,10 @@ local function buildDraftSorties(
 			draftSortiesEntry.score = target.priority / route_threat
 		end
 
+		if unit.player then
+			draftSortiesEntry.score = draftSortiesEntry.score * 1.5
+		end
+
 		if draftContext.overideMP_A then
 			
 			if draftSortiesEntry.score < 100 then
@@ -2275,7 +2292,7 @@ local function processEligibleLoadout(draftContext, sideName, task, target, targ
 
 						if isDebugModeA3 then
 							debugLog(
-								"draftId"..draftId .." AtoG passe A_30 buildDraftSorties()  "
+								"draftId"..draftId .." AtoG passe A_30 = = = = = = = = = = = = >>>>>> buildDraftSorties()  "
 								.." draftContext.state.futureAircraftAssign: "..draftContext.state.futureAircraftAssign
 								.." logTmp : "..tostring(logTmp) 
 
@@ -2283,7 +2300,7 @@ local function processEligibleLoadout(draftContext, sideName, task, target, targ
 							
 							
 							debugLog(
-								"draftId"..draftId .." AtoG passe A_30 buildDraftSorties() PACKAGE COMPLETE "
+								"draftId"..draftId .." AtoG passe A_30 = = = = = = = = = = = = >>>>>>  buildDraftSorties() PACKAGE COMPLETE "
 								..target_name .." targetAssignedFirepower/target.firepower.max: "
 								..targetAssignedFirepower[target_name] .."/" ..target.firepower.max
 							)
