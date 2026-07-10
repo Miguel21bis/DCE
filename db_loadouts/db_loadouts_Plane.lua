@@ -4,8 +4,9 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["db_loadouts/db_loadouts_Plane.lua"] = "1.3.208"
+versionDCE["db_loadouts/db_loadouts_Plane.lua"] = "1.3.209"
 
+-- V209 - add Fuel tank to MiG-21Bis and extend range for NAM - Sweep to MiG-19P
 -- V208 - add Fuel tanks to Mig-15bis for NAM
 -- V207 - add F-100D for NAM
 -- V206 - add Tu-95MS reco plane for TF
@@ -447,7 +448,7 @@ db_loadouts = {
 				self_escort = true,
 				attributes =  { },
 				code_loadout =  { "All" },
-				range = 250000,
+				range = 500000,
 				firepower = 1,
 				vCruise = 200,
 				vAttack = 213.86666666667,
@@ -480,7 +481,7 @@ db_loadouts = {
 				country = {
 					[1] = "Vietnam",
 				},
-								range = 150000,
+								range = 250000,
 				firepower = 1,
 				vCruise = 200,
 				vAttack = 213.86666666667,
@@ -674,6 +675,39 @@ db_loadouts = {
 					gun = 100,
 				},
 			},
+			["Fighter Sweep NAM - AA - FT - K-13Ax2"] = {
+				self_escort = true,
+				attributes =  { },
+				code_loadout =  { "NAM" },
+				range = 1000000,
+				firepower = 1,
+				vCruise = 200,
+				vAttack = 250,
+				hCruise = 5000,
+				hAttack = 5000,
+				sortie_rate = 6,
+				standoff = 40000,
+				stores = {
+					pylons = {
+						[1] = {
+							CLSID = "{K-13A}",
+						},
+						[2] = {
+							CLSID = "PTB760_MIG19",
+						},
+						[6] = {
+							CLSID = "{K-13A}",
+						},
+						[5] = {
+							CLSID = "PTB760_MIG19",
+						},
+					},
+					fuel = 1800,
+					flare = 0,
+					chaff = 0,
+					gun = 100,
+				},
+			},
 		},
 		Escort = {
 			[" Escort IPW K-13A*2, PTB-760*2"] = {
@@ -746,7 +780,7 @@ db_loadouts = {
 					[1] = "Vietnam",
 				},
 				code_loadout =  { "NAM" },
-								range = 250000,
+								range = 300000,
 				firepower = 1,
 				vCruise = 200,
 				vAttack = 213.86666666667,
@@ -3291,12 +3325,12 @@ db_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM - AA Intercept - AA-2Bx4"] = {
+			["NAM - AA CAP - AA-2Bx4"] = {
 				attributes =  { },
 				code_loadout =  { "NAM" },
 								night = false,
 				adverseWeather = false,
-				range = 600000,
+				range = 1000000,
 				firepower = 1,
 				vCruise = 250,
 				vAttack = 350,
@@ -3323,6 +3357,10 @@ db_loadouts = {
 					["CLSID"] = "{R-3S}",
 					["num"] = 1,
 				},
+				[5] = {
+					["CLSID"] = "{PTB_800_MIG21}",
+					["num"] = 3,
+				},
 					},
 					fuel = 2280,
 					flare = 0,
@@ -3330,12 +3368,12 @@ db_loadouts = {
 					gun = 100,
 				},
 			},
-			["NAM - AA Intercept - AA-2Bx2"] = {
+			["NAM - AA CAP - AA-2Bx2"] = {
 				attributes =  { },
 				code_loadout =  { "NAM" },
 								night = false,
 				adverseWeather = false,
-				range = 600000,
+				range = 1000000,
 				firepower = 1,
 				vCruise = 250,
 				vAttack = 350,
@@ -3353,6 +3391,10 @@ db_loadouts = {
 				[2] = {
 					["CLSID"] = "{R-3S}",
 					["num"] = 2,
+				},
+				[3] = {
+					["CLSID"] = "{PTB_800_MIG21}",
+					["num"] = 3,
 				},
 					},
 					fuel = 2280,
@@ -3448,7 +3490,7 @@ db_loadouts = {
 				code_loadout =  { "NAM" },
 								night = false,
 				adverseWeather = false,
-				range = 600000,
+				range = 1000000,
 				firepower = 1,
 				vCruise = 250,
 				vAttack = 350,
@@ -3465,6 +3507,10 @@ db_loadouts = {
 				[2] = {
 					["CLSID"] = "{R-3S}",
 					["num"] = 2,
+				},
+				[3] = {
+					["CLSID"] = "{PTB_800_MIG21}",
+					["num"] = 3,
 				},
 					},
 					fuel = 2280,
@@ -3748,7 +3794,7 @@ db_loadouts = {
 				code_loadout =  { "NAM" },
 				night = true,
 				adverseWeather = true,
-				range = 600000,
+				range = 1000000,
 				firepower = 1,
 				sortie_rate = 6,
 				stores = {
@@ -3760,6 +3806,10 @@ db_loadouts = {
 				[2] = {
 					["CLSID"] = "{R-3S}",
 					["num"] = 2,
+				},
+				[3] = {
+					["CLSID"] = "{PTB_800_MIG21}",
+					["num"] = 3,
 				},
 					},
 					fuel = 2280,
