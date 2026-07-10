@@ -1,7 +1,9 @@
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_Changelog.lua"] = "22.107.621"
+
+versionDCE["UTIL_Changelog.lua"] = "22.108.627"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "22.107.621"
+VersionDCE["UTIL_Changelog.txt"] = "22.108.627"
+
 --[[
 
 # DCE – Changelog
@@ -16,6 +18,19 @@ It is intended for **players and campaign makers**, not only developers.
 known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
+
+##  Version 22.108.627
+	###  Fixed
+		Datalink: sur F-18 et s'il y a plus de 4 avions, les id sont mélangé
+		MP : probleme de generation avion et hélicopter mélangé
+		génrateur de mission: l'avion du player n'est jamais proposé
+
+	###  Loadout
+		V209 - add Fuel tank to MiG-21Bis and extend range for NAM - Sweep to MiG-19P
+
+	###  Changed
+		si la génération de mission echoue, le systeme indique parfois que des mission de CAP ou interception sont générées mais que par manque d'opposition, elles ne sont pas proposées.
+
 
 ##  Version 22.107.621
 	###  Fixed

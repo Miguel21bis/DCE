@@ -59,7 +59,7 @@ DraftStepIndex = {
 -- SÉCURITÉ & LOGS DE CONFIGURATION (En-tête du script)
 -- ============================================================================
 
-local logFilePath = "Debug/Generator_debugLogs.txt"
+local logFilePath = "Debug/Generator_debugLogs.lua"
 local logBufferSize = 1000  -- Nombre de lignes avant écriture disque
 
 -- -- CORRECTION 1 : Il faut déclarer la table de buffer de manière locale 
@@ -789,11 +789,7 @@ Playability_criterium = {
     { key = "playerAssign_CAP_hostile",             value = nil }, -- 
 
 }
--- function TrackPlayability(player_unit, criterium)																				--function that tracks whether a playability criterium has been met
--- 	if player_unit == true then																									--unit in question is playable by player
--- 		Playability_criterium[criterium] = true																					--set playability criterium to be met
--- 	end
--- end
+
 function TrackPlayability(player_unit, criterium)
     if player_unit == true then
         for i, crit in ipairs(Playability_criterium) do
@@ -806,7 +802,24 @@ function TrackPlayability(player_unit, criterium)
     end
 end
 
+function CheckAssignments()
+    -- 1. Create a quick dictionary for key-based lookups
+    local status = {}
+    for _, crit in ipairs(Playability_criterium) do
+        status[crit.key] = crit.value
+    end
 
+    -- 2. Apply your logical rules
+    -- CAP Rule
+    if status["playerAssign_CAP"] == true and status["playerAssign_CAP_hostile"] ~= true then
+        print("CAP possible but no hostiles expected in the area")
+    end
+
+    -- Intercept Rule
+    if status["playerAssign_intercept"] == true and status["playerAssign_intercept_hostile"] ~= true then
+        print("Interception possible but no hostiles expected in the area")
+    end
+end
 
 
 
@@ -1664,6 +1677,10 @@ local function buildDraftSorties(
 			draftSortiesEntry.score = target.priority / route_threat
 		end
 
+		if unit.player then
+			draftSortiesEntry.score = draftSortiesEntry.score * 1.5
+		end
+
 		if draftContext.overideMP_A then
 			
 			if draftSortiesEntry.score < 100 then
@@ -2275,7 +2292,7 @@ local function processEligibleLoadout(draftContext, sideName, task, target, targ
 
 						if isDebugModeA3 then
 							debugLog(
-								"draftId"..draftId .." AtoG passe A_30 buildDraftSorties()  "
+								"draftId"..draftId .." AtoG passe A_30 = = = = = = = = = = = = >>>>>> buildDraftSorties()  "
 								.." draftContext.state.futureAircraftAssign: "..draftContext.state.futureAircraftAssign
 								.." logTmp : "..tostring(logTmp) 
 
@@ -2283,7 +2300,7 @@ local function processEligibleLoadout(draftContext, sideName, task, target, targ
 							
 							
 							debugLog(
-								"draftId"..draftId .." AtoG passe A_30 buildDraftSorties() PACKAGE COMPLETE "
+								"draftId"..draftId .." AtoG passe A_30 = = = = = = = = = = = = >>>>>>  buildDraftSorties() PACKAGE COMPLETE "
 								..target_name .." targetAssignedFirepower/target.firepower.max: "
 								..targetAssignedFirepower[target_name] .."/" ..target.firepower.max
 							)
@@ -2430,6 +2447,7 @@ for sideName, units in pairs(oob_air) do
 					["AWACS"] = true,
 					["Refueling"] = true,
 					["Fighter Sweep"] = true,
+					["AFAC"] = true,
 				}
 
 				if task_bool and MAIN_TASKS[task] then
@@ -3608,7 +3626,8 @@ for sideName, draftT in pairs(draftSorties) do
 
 
 						--**cet overideMP_B donne trop d'avion
-						if overideMP_B or (( draft.task ~= "CAP" and draft.task ~= "Intercept" )
+						-- if overideMP_B or (( draft.task ~= "CAP" and draft.task ~= "Intercept" )
+						if (( draft.task ~= "CAP" and draft.task ~= "Intercept" )
 							and (sptTask == "SEAD" or sptTask == "Escort" or sptTask == "Escort Jammer" or sptTask == "Flare Illumination" or sptTask == "Laser Illumination" or sptTask == "Strike")
 							and task_bool) then
 
@@ -3725,7 +3744,7 @@ for sideName, draftT in pairs(draftSorties) do
 
 
 									if isDebugModeB and draft.loadout.support and draft.support  then
-										debugLog(draft.id.." AtoG II pass B_10 overideMP_B: "..tostring(overideMP_B).." task: "..tostring(sptTask) .." |draft.loadout.support[task]: "..tostring(draft.loadout.support[sptTask]).." draft.support[task][escort_max]: "..tostring(draft.support[sptTask]["escort_max"]).." draft.support[task][NbTotalSupport]: "..tostring(draft.support[sptTask]["NbTotalSupport"]))
+										debugLog(draft.id.." AtoG II pass B_10 overideMP_B: "..tostring(overideMP_B).." sptTask: "..tostring(sptTask) .." |draft.loadout.support[task]: "..tostring(draft.loadout.support[sptTask]).." draft.support[task][escort_max]: "..tostring(draft.support[sptTask]["escort_max"]).." draft.support[task][NbTotalSupport]: "..tostring(draft.support[sptTask]["NbTotalSupport"]))
 									end
 
 									i_timmer02 = i_timmer02 +1

@@ -1,13 +1,13 @@
 --To create the flight plans in the mission file for all flights in the ATO
 --Initiated by Main_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
-if not versionDCE then versionDCE = {} end
-versionDCE["ATO_FlightPlan.lua"] = "1.58.295"
-------------------------------------------------------------------------------------------------------- 
+-- if not versionDCE then versionDCE = {} end
+-- versionDCE["ATO_FlightPlan.lua"] = "1.58.295"
+-- ------------------------------------------------------------------------------------------------------- 
 
-if Debug.debug then
-	print("START ATO_FlightPlan.lua "..versionDCE["ATO_FlightPlan.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
-end
+-- if Debug.debug then
+-- 	print("START ATO_FlightPlan.lua "..versionDCE["ATO_FlightPlan.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+-- end
 
 DebugFLIGHT = ""
 TabLPark	= {}
@@ -708,7 +708,7 @@ local function Get_L16_Id()
 
 		testId = preTest..digit4..digit5
 
-	until STN_L16_Id[testId] == nil 	or i >= 300
+	until STN_L16_Id[testId] == nil or i >= 300
 
 	if i >= 300 then
 		preTest = "003"
@@ -7602,11 +7602,26 @@ for _side, side in pairs(mission.coalition) do
 	for countryN, country in pairs(side.country) do
 		for category, groups in pairs(country) do
 			if type(groups) == "table" and groups["group"] then	--and groups[1].units
-				for Ngroup, group in pairs(groups["group"]) do
-					for Nunit, unit in pairs(group.units) do
+				for groupN, group in pairs(groups["group"]) do
+					for unitN, unit in pairs(group.units) do
 
 						if Data_divers[unit.type] and Data_divers[unit.type].datalinks and Data_divers[unit.type].datalinks.isReceiver then
+							
 							local typeDataLink = Data_divers[unit.type].datalinks.type
+
+							--ajoute déjà les membres du fligh/group
+							local copyUnits = DeepCopy(group.units)
+							-- _affiche(copyUnits, "copyUnits: ")
+							-- _affiche(unit.datalinks, "unit.datalinks: ")
+							for n=1, #copyUnits do
+								-- print("AtoFP: copyUnits[n].unitId "..tostring(copyUnits[n].unitId))
+								-- pint("AtoFP: copyUnits[n].unitId "..tostring(copyUnits[n].unitId))	
+								local data = {
+									["missionUnitId"] = copyUnits[n].unitId,
+								}
+								unit.datalinks[typeDataLink].network.teamMembers[n] = data
+							end
+							
 							for pack_N, listId in pairs(pack_L16_unitId) do
 								local listIdCopy = DeepCopy(listId)
 
@@ -7625,6 +7640,7 @@ for _side, side in pairs(mission.coalition) do
 											if #unit.datalinks[typeDataLink].network.teamMembers < Data_divers[unit.type].datalinks.hasTeamMembers then
 												table.insert(unit.datalinks[typeDataLink].network.teamMembers, data )
 											end
+
 											if #unit.datalinks[typeDataLink].network.donors < Data_divers[unit.type].datalinks.hasDonors then
 
 												--check si l'id du donor n'est pas déjà dans members

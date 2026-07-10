@@ -774,6 +774,8 @@ repeat
 				print("Mission generation failed:\n")
 				print("ID  Aircraft     Base                Squadron        Tasks")
 				print("----------------------------------------------------------------")
+
+
 				if PlayerAssignFailure then
 
 					for _, failData in pairs(PlayerAssignFailure) do
@@ -826,6 +828,10 @@ repeat
 
 						print()
 					end
+
+					CheckAssignments()
+					
+					
 				end
 			end
 
@@ -852,13 +858,6 @@ repeat
 
 		else
 			print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
-		end
-
-		if Debug.debug and not PlayerFlight then
-			print("0C1 DCE debug")  
-			_affiche(Playability_criterium)
-			
-			-- os.execute 'pause'
 		end
 
 	until 1 == 2

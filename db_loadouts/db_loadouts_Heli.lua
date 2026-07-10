@@ -1715,11 +1715,11 @@ db_loadouts = {
 	["CH-47Fbl1"] = {
 		CSAR = {
 			["CSAR test"] = {
-				minscore = 0.3,
-				support = {
-					Escort = true,
-					SEAD = false,
-				},
+				-- minscore = 0.3,
+				-- support = {
+				-- 	Escort = true,
+				-- 	SEAD = false,
+				-- },
 				attributes =  { },
 				code_loadout =  { "All" },
 				night = true,
@@ -1752,7 +1752,7 @@ db_loadouts = {
 		},
 		SAR = {
 			["SAR test"] = {
-				minscore = 0.3,
+				-- minscore = 0.3,
 				support = {
 				},
 				attributes =  { },
