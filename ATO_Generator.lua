@@ -2430,6 +2430,7 @@ for sideName, units in pairs(oob_air) do
 					["AWACS"] = true,
 					["Refueling"] = true,
 					["Fighter Sweep"] = true,
+					["AFAC"] = true,
 				}
 
 				if task_bool and MAIN_TASKS[task] then
@@ -3608,7 +3609,8 @@ for sideName, draftT in pairs(draftSorties) do
 
 
 						--**cet overideMP_B donne trop d'avion
-						if overideMP_B or (( draft.task ~= "CAP" and draft.task ~= "Intercept" )
+						-- if overideMP_B or (( draft.task ~= "CAP" and draft.task ~= "Intercept" )
+						if (( draft.task ~= "CAP" and draft.task ~= "Intercept" )
 							and (sptTask == "SEAD" or sptTask == "Escort" or sptTask == "Escort Jammer" or sptTask == "Flare Illumination" or sptTask == "Laser Illumination" or sptTask == "Strike")
 							and task_bool) then
 
@@ -3725,7 +3727,7 @@ for sideName, draftT in pairs(draftSorties) do
 
 
 									if isDebugModeB and draft.loadout.support and draft.support  then
-										debugLog(draft.id.." AtoG II pass B_10 overideMP_B: "..tostring(overideMP_B).." task: "..tostring(sptTask) .." |draft.loadout.support[task]: "..tostring(draft.loadout.support[sptTask]).." draft.support[task][escort_max]: "..tostring(draft.support[sptTask]["escort_max"]).." draft.support[task][NbTotalSupport]: "..tostring(draft.support[sptTask]["NbTotalSupport"]))
+										debugLog(draft.id.." AtoG II pass B_10 overideMP_B: "..tostring(overideMP_B).." sptTask: "..tostring(sptTask) .." |draft.loadout.support[task]: "..tostring(draft.loadout.support[sptTask]).." draft.support[task][escort_max]: "..tostring(draft.support[sptTask]["escort_max"]).." draft.support[task][NbTotalSupport]: "..tostring(draft.support[sptTask]["NbTotalSupport"]))
 									end
 
 									i_timmer02 = i_timmer02 +1
