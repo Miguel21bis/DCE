@@ -867,8 +867,72 @@ if input == "y" or input == "yes" then
 					-- 	print("No eligible mission available.\n\n")
 					end
 				end
+
+
 				if Multi.NbGroup and not PlayerFlight then
-					print("Not enough ready aircraft for all clients..\n\n")
+
+					print("Mission generation failed:\n")
+					print("ID  Aircraft     Base                Squadron        Tasks")
+					print("----------------------------------------------------------------")
+
+
+					if PlayerAssignFailure then
+
+						for _, failData in pairs(PlayerAssignFailure) do
+
+							local shortTasks = failData.generatedTasksShort or "---"
+
+							local line =
+								string.format(
+									"%-3s %-12s %-19s %-15s %s",
+									tostring(failData.id or "?"),
+									tostring(failData.requestedPlane or "---"),
+									tostring(failData.baseShort or "---"),
+									tostring(failData.squadronShort or "---"),
+									shortTasks
+								)
+
+							print(line)
+
+							if failData.reason == "no_main_task_generated" then
+
+								print(" -> Requested main task never generated.")
+
+							elseif failData.reason == "task_filtered" then
+
+								print(" -> Main task generated but filtered during Block A.")
+
+							elseif failData.reason == "task_not_generated" then
+
+								print(" -> Aircraft generated but requested task unavailable.")
+
+							elseif failData.reason == "insufficient_aircraft" then
+
+								print(
+									" -> Generated "
+									..tostring(failData.foundAircraft or 0)
+									.." / "
+									..tostring(failData.requestedNb or "?")
+									.." aircraft."
+								)
+
+							elseif failData.reason == "no_aircraft_generated" then
+
+								print(" -> No compatible aircraft generated.")
+
+							end
+
+							if failData.debugReason then
+								print(" -> "..tostring(failData.debugReason))
+							end
+
+							print()
+						end
+
+						CheckAssignments()
+						
+						
+					end
 				end
 
 				os.execute 'timeout /t 4'
@@ -896,12 +960,6 @@ if input == "y" or input == "yes" then
 				print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
 			end
 
-			if Debug.debug and not PlayerFlight then
-				print("0C1 DCE debug")  
-				_affiche(Playability_criterium)
-				
-				-- os.execute 'pause'
-			end
 
 		until 1 == 2
 
