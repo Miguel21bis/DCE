@@ -1160,7 +1160,7 @@ Data_divers = {
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 	},
-	["F-14A-95-GR"] = 	{
+	["F-14A-95-GR"] = 	{  --'F-14A-95-GR',_('F-14A Export')
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
 		inheritedFrom = "F-14",	--copy radio frequency, failures ...
@@ -1200,6 +1200,7 @@ Data_divers = {
 		hCruise = 9140,
 		refuellingReceptacleType = "drogue"
 	},
+
 	["F-14A-135-GR"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
@@ -1241,6 +1242,29 @@ Data_divers = {
 		hCruise = 9140,
 		refuellingReceptacleType = "drogue"
 	},
+
+	["F-14BU"] = 	{
+		instrumentUnits = "imperial",
+		EPLRS_Capacity = false,
+		inheritedFrom = "F-14",	--copy radio frequency, failures ...
+		inherited_APA_From = "F-14",	--copy AddPropAircraft
+		folderModName = "F14",
+		fileModName = "F-14B.lua",--exactement les meme fichiers que le F-14B
+		playable = true,
+		alignment_PropAircraft = {
+			fast = {
+				["INSAlignmentStored"] = true,
+			},
+			slow = {
+				["INSAlignmentStored"] = false,
+			},
+		},
+		vCruise = 230,
+		hCruise = 9140,
+		refuellingReceptacleType = "drogue"
+	},
+
+	
 	["F-15C"] = 	{
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = true,
