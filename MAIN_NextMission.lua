@@ -1081,19 +1081,36 @@ for side, coal in pairs(mission.coalition) do
 end
 
 
+-- AAA_Barrage = nil
+-- --ajoute le preset AAA_Barrage s'il a été activé
+-- if mission_ini.preset_AAA_Barrage and type(mission_ini.preset_AAA_Barrage) == "number" then
+-- 	if mission_ini.preset_AAA_Barrage > 0 then
+-- 		if Preset_AAA and Preset_AAA[mission_ini.preset_AAA_Barrage] then
+-- 			AAA_Barrage = Preset_AAA[mission_ini.preset_AAA_Barrage]
+-- 		end
+-- 	end
+-- end
+
+-- if AAA_Barrage then
+-- 	-- print("AAA_Barrage A : Adding trigger for AAA Barrage preset "..tostring(mission_ini.preset_AAA_Barrage))
+-- 	AddFileTriggerTempo("AAA_barrage.lua", 1.5, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})
+-- end
+
 AAA_Barrage = nil
---ajoute le preset AAA_Barrage s'il a été activé
-if mission_ini.preset_AAA_Barrage and type(mission_ini.preset_AAA_Barrage) == "number" then
-	if mission_ini.preset_AAA_Barrage > 0 then
-		if Preset_AAA and Preset_AAA[mission_ini.preset_AAA_Barrage] then
-			AAA_Barrage = Preset_AAA[mission_ini.preset_AAA_Barrage]
-		end
-	end
+
+local function loadAAAPreset(indexOpt)
+    if indexOpt and type(indexOpt) == "number" and indexOpt > 0 and Preset_AAA and Preset_AAA[indexOpt] then
+        return Preset_AAA[indexOpt]
+    end
+    return nil
 end
 
-if AAA_Barrage then
-	-- print("AAA_Barrage A : Adding trigger for AAA Barrage preset "..tostring(mission_ini.preset_AAA_Barrage))
-	AddFileTriggerTempo("AAA_barrage.lua", 1.5, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})
+local aaaBlue = loadAAAPreset(mission_ini.preset_AAA_Barrage_BLUE)
+local aaaRed  = loadAAAPreset(mission_ini.preset_AAA_Barrage_RED)
+
+if aaaBlue or aaaRed then
+    AAA_Barrage = { BLUE = aaaBlue, RED = aaaRed }
+    AddFileTriggerTempo("AAA_barrage.lua", 1.5, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})
 end
 
 --création d'un camp pour camp_status InGame nettement plus leger
@@ -1169,7 +1186,9 @@ camp.date.CampTotalTimeH = CampTotalTimeH
 SetBoundaryFromCamp()
 
 -- met à jour la date de camp dans conf_mod.lua
-UpdateConfModSuite(nil, camp.date, "MAIN_NextMission "..debug.getinfo(1).currentline)
+--TODO UpdateConfMod utile?
+-- UpdateConfModSuite(nil, camp.date, "MAIN_NextMission "..debug.getinfo(1).currentline)
+UpdateConfMod(nil, camp.date, "MAIN_NextMission "..debug.getinfo(1).currentline)
 
 
 --on traite tous les fichiers uniquement si ça vaut le coup
