@@ -7,6 +7,11 @@
 -- Grateful thanks to Bandit648 for allowing the use and adaptation of his mod.
 -- His work delivers a true FPS‑like solution with immersive flak effects.
 -------------------------------------------------------------------------------------------------------
+if not versionDCE then versionDCE = {} end
+versionDCE["Mission Scripts/AAA_barrage.lua"] = "1.3.0"
+-------------------------------------------------------------------------------------------------------
+
+env.info("DCE START LOADING AAA_barrage.lua " .. tostring(versionDCE["Mission Scripts/AAA_barrage.lua"]))
 
 env.info("AAA_barrage START ")
 
@@ -37,20 +42,25 @@ local ALLOW_SAME_TARGET        = false -- if false, emitters will try to avoid s
 -- Debug
 local DEBUG_TEXT               = false
 
--- Réglages spécifiques par camp, fournis depuis campL.AAA_Barrage.BLUE / .RED
--- (chacun peut valoir nil si le camp correspondant n'a pas de preset activé)
-local sideConfigs = {
-	{ side = coalition.side.BLUE, sideName = "BLUE", cfg = campL.AAA_Barrage and campL.AAA_Barrage.BLUE },
-	{ side = coalition.side.RED,  sideName = "RED",  cfg = campL.AAA_Barrage and campL.AAA_Barrage.RED },
-}
+-- Convention de nommage des zones : AAA_ZONE_<CAMP>_<nom>, ex: AAA_ZONE_BLUE_Town01, AAA_ZONE_RED_Harbor
+-- <CAMP> = camp PROPRIETAIRE de la DCA dans cette zone ; elle engage donc le camp OPPOSE.
+-- Une zone "AAA_ZONE_<nom>" sans camp reste supportée (ancien format) : elle tire alors
+-- pour les deux camps actifs (comportement de compatibilité).
+local function parseZoneOwner(zoneName)
+	local owner = zoneName:match("^AAA_ZONE_(BLUE)_") or zoneName:match("^AAA_ZONE_(RED)_")
+	return owner
+end
 
 local aaaZones                 = {}
 
 for zoneN, zone in pairs(env.mission.triggers.zones) do
 	env.info("AAA_barrage A :check zone name " .. tostring(zone.name))
 	if string.sub(zone.name, 1, 9) == "AAA_ZONE_" then
-		aaaZones[#aaaZones + 1] = zone.name
-		env.info("AAA_barrage B :is  AAA_ZONE_: " .. tostring(zone.name))
+		-- Rétrocompatibilité : "AAA_ZONE_xxx" sans camp explicite est traitée
+		-- comme "AAA_ZONE_BLUE_xxx" (comportement des anciennes missions).
+		local owner = parseZoneOwner(zone.name) or "BLUE"
+		aaaZones[#aaaZones + 1] = { name = zone.name, owner = owner }
+		env.info("AAA_barrage B :is  AAA_ZONE_: " .. tostring(zone.name) .. " (owner: " .. owner .. ")")
 	end
 end
 
@@ -349,18 +359,27 @@ local function createAAAZone(zoneName, side, sideName, cfg)
 	end
 end
 
--- Pour chaque camp ayant un preset actif, on instancie l'ensemble des zones AAA_ZONE_*
--- avec ses propres réglages. Les deux camps peuvent donc tourner simultanément,
--- avec des intensités différentes, sur les mêmes zones.
-for _, sc in ipairs(sideConfigs) do
-	if sc.cfg then
-		env.info("AAA_barrage FLAK: activation camp " .. sc.sideName ..
-			", POWER_MAX=" .. tostring(sc.cfg.POWER_MAX))
-		for _, name in ipairs(aaaZones) do
-			createAAAZone(name, sc.side, sc.sideName, sc.cfg)
-		end
+local function sideByName(name)
+	if name == "BLUE" then return coalition.side.BLUE end
+	if name == "RED" then return coalition.side.RED end
+	return nil
+end
+
+local function cfgForOwner(ownerName)
+	return campL.AAA_Barrage and campL.AAA_Barrage[ownerName]
+end
+
+-- Pour chaque zone : le camp indiqué dans le nom (ou BLUE par défaut pour une zone
+-- legacy sans camp) POSSEDE la DCA, elle engage donc le camp OPPOSE.
+for _, z in ipairs(aaaZones) do
+	local opposingName = (z.owner == "BLUE") and "RED" or "BLUE"
+	local cfg = cfgForOwner(z.owner)
+	if cfg then
+		env.info("AAA_barrage FLAK: zone " .. z.name .. " defendue par " .. z.owner ..
+			", engage " .. opposingName)
+		createAAAZone(z.name, sideByName(opposingName), opposingName, cfg)
 	else
-		env.info("AAA_barrage FLAK: pas de preset actif pour le camp " .. sc.sideName)
+		env.info("AAA_barrage FLAK: zone " .. z.name .. " ignoree, pas de preset actif pour " .. z.owner)
 	end
 end
 
