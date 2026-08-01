@@ -866,82 +866,166 @@ local function getTankerTACAN(tarnetName)
 	return channel																--return channel
 end
 
---Mod M27.b Randomly moves the 2 BullsEye
+
+-- local function fct_movedBullseye(arg_Side, arg_NameTheatre)
+
+-- 	local tempArrayBulls = {}
+-- 	local tempBullseye =
+-- 	{
+-- 		x = 0,
+-- 		y = 0,
+-- 		name = "",
+-- 	}
+
+
+
+-- 	if not mission_ini.movedBullseye then
+-- 		for name, base in pairs(db_airbases) do
+-- 			if base.x and not base.unitname and base.side == arg_Side then
+-- 				if base.selectedBullseye then
+-- 					tempBullseye.x = base.x
+-- 					tempBullseye.y = base.y
+-- 					tempBullseye.name = name
+-- 				end
+-- 			end
+-- 		end
+-- 	else
+
+-- 		for baseName, base in pairs(db_airbases) do
+-- 			if base.x and not base.unitname then
+-- 			-- if base.x then
+-- 				if GetDistance(campMod.movedBullseye[arg_NameTheatre].pos, base) <= (campMod.movedBullseye[arg_NameTheatre].rayon * 1000) then
+-- 					db_airbases[baseName]["name"] = baseName
+-- 					table.insert(tempArrayBulls, db_airbases[baseName])
+-- 				end
+-- 			end
+-- 		end
+
+
+-- 		-- local i = table.getn(tempArrayBulls)
+-- 		local i = #tempArrayBulls
+
+-- 		if i >= 1 then
+-- 			local j = math.random(1, i)
+-- 			tempBullseye.x = tempArrayBulls[j].x
+-- 			tempBullseye.y = tempArrayBulls[j].y
+-- 			tempBullseye.name = tempArrayBulls[j].name
+-- 		end
+-- 	end
+
+-- 	if tempBullseye.name ~= "" and tempBullseye.x ~= 0 then
+-- 		--ajoute bullseye dans mission
+-- 		mission.coalition[arg_Side].bullseye.x = tempBullseye.x
+-- 		mission.coalition[arg_Side].bullseye.y = tempBullseye.y
+
+-- 		--ajoute bullseye dans briefing
+-- 		if not Brief[arg_Side].bullseye then Brief[arg_Side].bullseye = {} end
+-- 		Brief[arg_Side].bullseye.name = tempBullseye.name
+-- 		Brief[arg_Side].bullseye.x = tempBullseye.x
+-- 		Brief[arg_Side].bullseye.y = tempBullseye.y
+
+-- 		if LL_PositionsFileExit then
+
+-- 			local xKey = math.abs(math.floor(tempBullseye.x))
+-- 			if LL_Positions[xKey] then
+-- 				local testX = math.floor(Brief[arg_Side].bullseye.x)
+-- 				local testY = math.floor(Brief[arg_Side].bullseye.y)
+-- 				for n, llPos in pairs(LL_Positions[xKey] ) do
+-- 					if testX == llPos.x and testY == llPos.y then
+-- 						Brief[arg_Side].bullseye.lat = llPos.lat
+-- 						Brief[arg_Side].bullseye.lon = llPos.lon
+-- 						break
+-- 					end
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+
+-- 	return mission.coalition[arg_Side].bullseye, Brief[arg_Side].bullseye
+
+-- end
+
 local function fct_movedBullseye(arg_Side, arg_NameTheatre)
 
-	local tempArrayBulls = {}
-	local tempBullseye =
-	{
-		x = 0,
-		y = 0,
-		name = "",
-	}
+    local tempArrayBulls = {}
+    local tempBullseye =
+    {
+        x = 0,
+        y = 0,
+        name = "",
+    }
 
+    if not mission_ini.movedBullseye then
+        for name, base in pairs(db_airbases) do
+            if base.x and not base.unitname and base.side == arg_Side then
+                if base.selectedBullseye then
+                    tempBullseye.x = base.x
+                    tempBullseye.y = base.y
+                    tempBullseye.name = name
+                end
+            end
+        end
+    else
 
+        --resout la zone a utiliser : override campaignMaker si actif, sinon la valeur par defaut de la carte
+        local zone
+        if campMod.bullseyeZoneOverride and campMod.bullseyeZoneOverride.enabled then
+            zone = {
+                pos   = { x = campMod.bullseyeZoneOverride.x, y = campMod.bullseyeZoneOverride.y },
+                rayon = campMod.bullseyeZoneOverride.rayon,
+            }
+        else
+            zone = BullseyeZone[arg_NameTheatre]
+        end
 
-	if not mission_ini.movedBullseye then
-		for name, base in pairs(db_airbases) do
-			if base.x and not base.unitname and base.side == arg_Side then
-				if base.selectedBullseye then
-					tempBullseye.x = base.x
-					tempBullseye.y = base.y
-					tempBullseye.name = name
-				end
-			end
-		end
-	else
+        for baseName, base in pairs(db_airbases) do
+            if base.x and not base.unitname then
+                if GetDistance(zone.pos, base) <= (zone.rayon * 1000) then
+                    db_airbases[baseName]["name"] = baseName
+                    table.insert(tempArrayBulls, db_airbases[baseName])
+                end
+            end
+        end
 
-		for baseName, base in pairs(db_airbases) do
-			if base.x and not base.unitname then
-			-- if base.x then
-				if GetDistance(campMod.movedBullseye[arg_NameTheatre].pos, base) <= (campMod.movedBullseye[arg_NameTheatre].rayon * 1000) then
-					db_airbases[baseName]["name"] = baseName
-					table.insert(tempArrayBulls, db_airbases[baseName])
-				end
-			end
-		end
+        local i = #tempArrayBulls
 
+        if i >= 1 then
+            local j = math.random(1, i)
+            tempBullseye.x = tempArrayBulls[j].x
+            tempBullseye.y = tempArrayBulls[j].y
+            tempBullseye.name = tempArrayBulls[j].name
+        end
+    end
 
-		-- local i = table.getn(tempArrayBulls)
-		local i = #tempArrayBulls
+    if tempBullseye.name ~= "" and tempBullseye.x ~= 0 then
+        --ajoute bullseye dans mission
+        mission.coalition[arg_Side].bullseye.x = tempBullseye.x
+        mission.coalition[arg_Side].bullseye.y = tempBullseye.y
 
-		if i >= 1 then
-			local j = math.random(1, i)
-			tempBullseye.x = tempArrayBulls[j].x
-			tempBullseye.y = tempArrayBulls[j].y
-			tempBullseye.name = tempArrayBulls[j].name
-		end
-	end
+        --ajoute bullseye dans briefing
+        if not Brief[arg_Side].bullseye then Brief[arg_Side].bullseye = {} end
+        Brief[arg_Side].bullseye.name = tempBullseye.name
+        Brief[arg_Side].bullseye.x = tempBullseye.x
+        Brief[arg_Side].bullseye.y = tempBullseye.y
 
-	if tempBullseye.name ~= "" and tempBullseye.x ~= 0 then
-		--ajoute bullseye dans mission
-		mission.coalition[arg_Side].bullseye.x = tempBullseye.x
-		mission.coalition[arg_Side].bullseye.y = tempBullseye.y
+        if LL_PositionsFileExit then
 
-		--ajoute bullseye dans briefing
-		if not Brief[arg_Side].bullseye then Brief[arg_Side].bullseye = {} end
-		Brief[arg_Side].bullseye.name = tempBullseye.name
-		Brief[arg_Side].bullseye.x = tempBullseye.x
-		Brief[arg_Side].bullseye.y = tempBullseye.y
+            local xKey = math.abs(math.floor(tempBullseye.x))
+            if LL_Positions[xKey] then
+                local testX = math.floor(Brief[arg_Side].bullseye.x)
+                local testY = math.floor(Brief[arg_Side].bullseye.y)
+                for n, llPos in pairs(LL_Positions[xKey] ) do
+                    if testX == llPos.x and testY == llPos.y then
+                        Brief[arg_Side].bullseye.lat = llPos.lat
+                        Brief[arg_Side].bullseye.lon = llPos.lon
+                        break
+                    end
+                end
+            end
+        end
+    end
 
-		if LL_PositionsFileExit then
-
-			local xKey = math.abs(math.floor(tempBullseye.x))
-			if LL_Positions[xKey] then
-				local testX = math.floor(Brief[arg_Side].bullseye.x)
-				local testY = math.floor(Brief[arg_Side].bullseye.y)
-				for n, llPos in pairs(LL_Positions[xKey] ) do
-					if testX == llPos.x and testY == llPos.y then
-						Brief[arg_Side].bullseye.lat = llPos.lat
-						Brief[arg_Side].bullseye.lon = llPos.lon
-						break
-					end
-				end
-			end
-		end
-	end
-
-	return mission.coalition[arg_Side].bullseye, Brief[arg_Side].bullseye
+    return mission.coalition[arg_Side].bullseye, Brief[arg_Side].bullseye
 
 end
 
@@ -1808,7 +1892,7 @@ end
 for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
-	if campMod.movedBullseye[nameTheatre] or mission_ini.movedBullseye == false then
+	if BullseyeZone[nameTheatre] or mission_ini.movedBullseye == false then
 		mission.coalition[sideName].bullseye, Brief[sideName].bullseye = fct_movedBullseye(sideName, nameTheatre)
 	end
 

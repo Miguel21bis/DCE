@@ -636,27 +636,20 @@ Action = {}
 		local weather
 		loadstring(new_Weather)()
 		
-		if weather.pHigh then mission_ini.weather.trend = weather.pHigh end
-		if weather.refTemp then mission_ini.weather.refTemp = weather.refTemp end
+		if weather.pHigh then Weather.trend = weather.pHigh end
+		if weather.refTemp then Weather.refTemp = weather.refTemp end
 
 
-		if weather.trend then mission_ini.weather.trend = weather.trend end
-		if weather.variance then mission_ini.weather.variance = weather.variance end
-		if weather.instability then mission_ini.weather.instability = weather.instability end
-		if weather.windActivity then mission_ini.weather.windActivity = weather.windActivity end
-		if weather.winDirection then mission_ini.weather.winDirection = weather.winDirection end
+		if weather.trend then Weather.trend = weather.trend end
+		if weather.variance then Weather.variance = weather.variance end
+		if weather.instability then Weather.instability = weather.instability end
+		if weather.windActivity then Weather.windActivity = weather.windActivity end
+		if weather.winDirection then Weather.winDirection = weather.winDirection end
 
-		-- ---@diagnostic disable-next-line: undefined-global
-		-- if weather.pHigh then mission_ini.weather.pHigh = weather.pHigh end
-		-- ---@diagnostic disable-next-line: undefined-global
-		-- if weather.pLow then mission_ini.weather.pLow = weather.pLow end
-		-- ---@diagnostic disable-next-line: undefined-global
-		-- if weather.refTemp then mission_ini.weather.refTemp = weather.refTemp end
-		-- ---@diagnostic disable-next-line: undefined-global
-		-- if weather.weatherChangeRate then mission_ini.weather.weatherChangeRate = weather.weatherChangeRate end
+		-- UpdateConfMod(mission_ini.weather, nil,  "DC_CheckTriggers "..debug.getinfo(1).currentline)
+		UpdateConfMod(campMod.weather, nil,  "DC_CheckTriggers "..debug.getinfo(1).currentline)
 
-		UpdateConfMod(mission_ini.weather, nil,  "DC_CheckTriggers "..debug.getinfo(1).currentline)
-		
+		--TODO UpdateConfMod vraiment util?
 
 	end
 
@@ -1806,7 +1799,7 @@ Action = {}
 						-- print("DcCT_ShipMission B groupName "..groupName.." ?= "..group.name)
 						if groupName == group.name then							--ship group found		
 							
-							print("DcCT_ShipMission C found groupName "..groupName)
+							-- print("DcCT_ShipMission C found groupName "..groupName)
 
 							local firstWPT = "test"
 							if type(wpTable) == "table" then

@@ -1,6 +1,6 @@
 if not versionDCE then versionDCE = {} end
 
-versionDCE["UTIL_Changelog.lua"] = "22.108.627"
+versionDCE["UTIL_Changelog.lua"] = "22.108.620"
 if not VersionDCE then VersionDCE = {} end
 VersionDCE["UTIL_Changelog.txt"] = "22.108.627"
 
@@ -21,15 +21,15 @@ known issues:
 
 ##  Version 22.108.627
 	###  Fixed
-		Datalink: sur F-18 et s'il y a plus de 4 avions, les id sont mélangé
-		MP : probleme de generation avion et hélicopter mélangé
-		génrateur de mission: l'avion du player n'est jamais proposé
+		Datalink: on F-18 and if there are more than 4 aircraft, the IDs are mixed up
+		MP: problem with mixed aircraft and helicopter generation
+		mission generator: player aircraft is never proposed
 
 	###  Loadout
 		V209 - add Fuel tank to MiG-21Bis and extend range for NAM - Sweep to MiG-19P
 
 	###  Changed
-		si la génération de mission echoue, le systeme indique parfois que des mission de CAP ou interception sont générées mais que par manque d'opposition, elles ne sont pas proposées.
+		if mission generation fails, the system sometimes indicates that CAP or interception missions are generated but are not proposed due to lack of opposition.
 
 
 ##  Version 22.107.621

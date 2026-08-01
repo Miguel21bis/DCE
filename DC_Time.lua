@@ -143,7 +143,7 @@ end
 if not camp.dateInit then
 	local tempCamp = camp
 	dofile("Init/camp_init.lua")
-	local campInit =  DeepCopy(camp)
+	local campInit = DeepCopy(camp)
 	camp = tempCamp
 	camp.dateInit = {
 		day = campInit.date.day,
@@ -151,6 +151,7 @@ if not camp.dateInit then
 		month = campInit.date.month,
 	}
 end
+
 
 CampTotalTimeS = SecondsBetween(camp.dateInit, camp.date)
 CampTotalTimeH = CampTotalTimeS / 3600
@@ -206,7 +207,9 @@ print(FormatTime(idle_time, "dd:hh:mm") .. " passed. Next mission scheduled at: 
 TimeAlreadyAdded = true
 
 --mise à jour de date dans confMod
-UpdateConfModSuite(nil, camp.date, "DC_Time " .. debug.getinfo(1).currentline)
+--TODO UpdateConfMod
+-- UpdateConfModSuite(nil, camp.date, "DC_Time " .. debug.getinfo(1).currentline)
+UpdateConfMod(nil, camp.date, "DC_Time " .. debug.getinfo(1).currentline)
 
 -- print("Test Time DC_Time  Y : " .. FormatTime(mission["start_time"], "hh:mm"))
 -- _affiche(mission["date"], "Test Time DC_Time Yb: mission[date] ")

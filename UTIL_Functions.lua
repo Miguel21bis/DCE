@@ -343,70 +343,6 @@ function TableSerialization(t, i, options)
 end
 
 
--- Fonction pour sérialiser une table en chaîne
--- Fonction pour sérialiser une table en chaîne avec une option pour afficher les indices des tables séquentielles
--- function TableSerialization(t, i, options)
--- 	-- Si options est un booléen, on le traite comme la valeur de writeNumericTable
--- 	local writeNumericTable = options
--- 	if type(options) == "table" then
--- 		writeNumericTable = options.writeNumericTable
--- 	elseif options == nil then
--- 		writeNumericTable = true -- Valeur par défaut si options n'est pas fourni
--- 	end
-
---     local crlf = ""
---     local tab1 = string.rep("\t", i) -- Indentation
---     local text = "\n" .. crlf .. tab1 .. "{\n" .. crlf
-
---     local tab = string.rep("\t", i + 1)
-
---     if not writeNumericTable and IsSequentialTable(t) then
---         -- Si la table est strictement numérique et numericTable est false, on n'affiche pas les indices
---         for _, v in ipairs(t) do
---             if type(v) == "table" then
---               text = text .. tab .. TableSerialization(v, i + 1, writeNumericTable) .. ",\n"
---             elseif type(v) == "string" then
---                 v = string.gsub(v, "\n", "\\\n")
---                 v = string.gsub(v, "\"", "\\\"")
---                 -- v = string.gsub(v, "'", "\\\'")
---               text = text .. tab .. '"' .. v .. '",\n'
---             elseif type(v) == "number" or type(v) == "boolean" then
---               text = text .. tab .. tostring(v) .. ",\n"
---             elseif v == nil then
---               text = text .. tab .. "nil,\n"
---             end
---         end
---     else
---         -- Sinon, on affiche les clés comme d'habitude
---         for k, v in PairsByKeys(t) do
---             if type(k) == "string" then
---                 k = string.gsub(k, "\n", "\\\n")
---                 k = string.gsub(k, "\"", "\\\"")
---                 -- k = string.gsub(k, "'", "\\\'")
---               text = text .. tab .. '["' .. k .. '"] = '
---             else
---                 -- text = text .. tab .. "[" .. k .. "] = "
--- 				text = text .. tab .. "[" .. tostring(k) .. "] = "
---             end
-
---             if type(v) == "table" then
---               text = text .. TableSerialization(v, i + 1, writeNumericTable) .. ",\n"
---             elseif type(v) == "string" then
---                 v = string.gsub(v, "\n", "\\\n")
---                 v = string.gsub(v, "\"", "\\\"")
---                 -- v = string.gsub(v, "'", "\\\'")
---               text = text .. '"' .. v .. '",\n'
---             elseif type(v) == "number" or type(v) == "boolean" then
---               text = text .. tostring(v) .. ",\n"
---             elseif v == nil then
---               text = text .. "nil,\n"
---             end
---         end
---     end
-
---   text = text .. tab1 .. "}"
---     return text
--- end
 
 --function to turn a table into a string
 function TableSerialization_TEMP1(t, i, params)
@@ -532,6 +468,87 @@ function Try_dofile(path)
 	if f3 then f3:close(); dofile(path); return true end
 	return false
 end
+
+--****************************************** ****************************************** ******************************************
+--****************************************** ****************************************** ******************************************
+--****************************************** ****************************************** ******************************************
+-- Pour chaque variable logique, les chemins possibles, du plus récent
+-- (schéma cible) au plus ancien (legacy), dans l'ordre où ils sont essayés.
+WEATHER_PATHS = {
+	trend        = { "campMod.weather.trend",       "mission_ini.weather.trend" },
+	variance     = { "campMod.weather.variance",     "mission_ini.weather.variance" },
+	refTemp      = { "campMod.weather.refTemp",      "mission_ini.weather.refTemp", "camp.weather.refTemp" },
+	instability  = { "campMod.weather.instability",  "mission_ini.weather.instability" },
+	windActivity = { "campMod.weather.windActivity", "mission_ini.weather.windActivity" },
+	winDirection = { "campMod.weather.winDirection", "mission_ini.weather.winDirection" },
+	weather_playerBias = { "mission_ini.weather_playerBias" },
+}
+
+PICTURE_BRIEF_PATHS = {
+	pictureBrief        = { "camp.pictureBrief",       "pictureBrief" },
+}
+
+
+-- Résout un chemin pointé ("mission_ini.weather.trend") en valeur réelle,
+-- sans lever d'erreur si un maillon du chemin est absent.
+local function getByPath(path)
+	local value = _G
+	for segment in path:gmatch("[^.]+") do
+		if type(value) ~= "table" then return nil end
+		value = value[segment]
+		if value == nil then return nil end
+	end
+	return value
+end
+
+-- Essaie chaque chemin candidat dans l'ordre, retourne la première valeur
+-- trouvée. Loggue un avertissement si la valeur vient d'un chemin autre
+-- que le premier (donc un chemin legacy) — c'est ce log qui te dira,
+-- plus tard, quand tu peux supprimer les chemins legacy en toute sécurité.
+local function resolveValue(fieldName, candidatePaths, default)
+	for i, path in ipairs(candidatePaths) do
+		local value = getByPath(path)
+		if value ~= nil then
+			if i > 1 then
+				print("[ConfigResolver] '" .. fieldName .. "' trouvé via chemin legacy : " .. path
+					.. " (chemin cible : " .. candidatePaths[1] .. ")")
+			end
+			return value
+		end
+	end
+	print("[ConfigResolver] '" .. fieldName .. "' introuvable, valeur par défaut : " .. tostring(default))
+	return default
+end
+
+local function resolveGroup(pathsByField, defaults)
+	local resolved = {}
+	for fieldName, candidatePaths in pairs(pathsByField) do
+		resolved[fieldName] = resolveValue(fieldName, candidatePaths, defaults and defaults[fieldName])
+	end
+	return resolved
+end
+
+local function generateSolid_G_Variable()
+	Weather = resolveGroup(WEATHER_PATHS, {
+		trend = 50, variance = 30, refTemp = 20,
+		instability = 60, windActivity = 2.5, winDirection = 158, weather_playerBias = 0
+	})
+
+	PictureBrief = resolveGroup(PICTURE_BRIEF_PATHS, {
+    	pictureBrief = { blue = {}, red = {} 
+	},
+})
+
+
+end
+
+
+--construit les variables de maniere robuste, suite aux changements de structure de conf_mod.lua et mission_ini.lua
+generateSolid_G_Variable()
+
+--****************************************** ****************************************** ******************************************
+--****************************************** ****************************************** ******************************************
+--****************************************** ****************************************** ******************************************
 
 
 --function type DCS, ne pas changer la casse
@@ -3342,692 +3359,340 @@ function CheckPointInPolygon(point, polygon, show)
 end
 
 
-function UpdateConfMod(setWeather, setDate, from)
-	if setWeather then
-		UpdateConfModSuite(setWeather, nil, "UpdateConfMod:"..tostring(from))
-	end
-	if setDate then
-		--mis à jour via camp_triggers et DC_CheckTriggers
-		camp.date = setDate
 
-		UpdateConfModSuite(nil, setDate, "UpdateConfMod:"..tostring(from))
+--=========================================================================
+-- ModifiCampInit
+-- Recale Init/camp_init.lua sur la référence UTIL_REF_camp_init.lua (REF_camp) :
+--   - REF_camp fait autorité sur la liste des variables valides, leur ordre
+--     et leurs commentaires/tags @ui
+--   - une variable présente dans REF_camp ET dans le local : on garde la
+--     valeur locale, jamais celle de la référence
+--   - une variable présente dans REF_camp mais absente du local : on prend
+--     la valeur par défaut de la référence
+--   - une variable locale absente de REF_camp : soit elle est connue comme
+--     devant être portée vers conf_mod.lua (table MIGRATE_TO_CONFMOD),
+--     soit elle est obsolète et supprimée
+--=========================================================================
+
+
+local REF_PATH        = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_REF_camp_init.lua"
+local CAMP_INIT_PATH  = "Init/camp_init.lua"
+local CONF_MOD_PATH   = "Init/conf_mod.lua"
+
+local LOCAL_ROOT_NAME = "camp"
+local REF_ROOT_NAME   = "REF_camp"
+
+-- Anciennes variables qui ont pu traîner dans camp_init.lua et qui doivent
+-- être reversées dans conf_mod.lua plutôt que simplement supprimées.
+-- Table extensible : ajouter une entrée suffit, pas besoin de toucher au moteur.
+local MIGRATE_TO_CONFMOD = {
+	["weather.trend"]        = "mission_ini.weather.trend",
+	["weather.variance"]     = "mission_ini.weather.variance",
+	["weather.refTemp"]      = "mission_ini.weather.refTemp",
+	["weather.instability"]  = "mission_ini.weather.instability",
+	["weather.windActivity"] = "mission_ini.weather.windActivity",
+	["weather.winDirection"] = "mission_ini.weather.winDirection",
+}
+
+local function loadDataFile(path, globalName)
+	local ok, err = pcall(dofile, path)
+	if not ok then
+		return nil, "impossible de charger " .. path .. " globalName: " .. globalName .. " (" .. tostring(err) .. ")"
 	end
+	if _G[globalName] == nil then
+		return nil, path .. " ne définit pas " .. globalName
+	end
+	return _G[globalName]
 end
 
---met à jour automatiquement le conf_mod en fonction des nouveautés apporté par UTIL_ConfModCheck
-function UpdateConfModSuite(setWeather, setDate, from)
-    --version UpdateConfMod VA_1.12
-
-	local weather_override
-	local date_override
-
-	-- if camp.mission == 1 then
-	if Firstmission_flag then
-		if camp.weather and camp.weather.pHigh then
-			weather_override = camp.weather
+-- Aplatit une table imbriquée en {["a.b.c"] = valeur}. Un tableau-liste
+-- (v[1] existe) est traité comme une feuille, pas aplati plus loin.
+local function flatten(t, prefix, out)
+	out = out or {}
+	for k, v in pairs(t) do
+		local path = prefix and (prefix .. "." .. tostring(k)) or tostring(k)
+		if type(v) == "table" and v[1] == nil then
+			flatten(v, path, out)
 		else
-			dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua")
-			weather_override = mission_ini_check.weather
-
-		end
-
-		if camp.date and camp.date.year then
-			date_override = camp.date
-		else
-			dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua")
-			date_override = mission_ini_check.date
-
-		end
-
-	else
-
-		-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ConfModCheck.lua")
-		-- date_override = mission_ini_check.date
-
-		-- if Debug.debug then
-		-- 	print("date_override 4 date_override = mission_ini_check.date ")
-		-- end
-	end
-
-	--mis à jour via camp_triggers et DC_CheckTriggers
-	if setWeather then
-		weather_override = setWeather
-	end
-
-	--mis à jour via camp_triggers et DC_CheckTriggers
-	if setDate then
-		date_override = setDate
-		-- camp.date = setDate
-
-		-- if Debug.debug then
-		-- 	print("date_override 5: camp.date = setDate ")
-		-- 	_affiche(date_override, "date_override 5: setDate ")
-		-- end
-	end
-
-    -- Fonction pour charger la configuration avec la structure	
-	local function loadConfigWithStructure(filePath)
-		-- version loadConfigWithStructure VA_1.38b
-		local config = {}
-		local structure = {}
-		local stack = {}
-		local currentTable = config
-		local currentKey = nil
-		local pendingTable = nil -- Stocker temporairement le nom d'une table qui attend `{`
-
-		for line in io.lines(filePath) do
-			line = line:gsub("_check", "") -- Supprimer "_check"
-
-			-- print("\nLCWS A "..line) -- Debug simple sans icône
-
-			-- Ignorer les lignes commentées
-			if line:match("^%s*%-%-") then
-				table.insert(structure, line)
-
-			-- Ignorer les lignes versionDCE
-			elseif line:match("versionDCE") then
-
-			else
-				table.insert(structure, line) -- Stockage brut de la structure du fichier
-
-				-- Détection des structures Lua
-				local singleLineTable = line:match("(%S+)%s*=%s*{(.-)}%s*,?%s*$")
-				local tableStart = line:match("(%S+)%s*=%s*{")
-				local tableEnd = line:match("^%s*}%s*[,]?")
-				local listValue = line:match('^%s*"(.-)",?%s*$')
-				local tableStartUnique = line:match('%["([^"]+)"%]%s*=%s*$') or line:match("(%S+)%s*=%s*$")
-
-				local key, value, comment = line:match('(%S+)%s*=%s*(["]?[%w%s%p]+["]?)%s*,?%s*%-%-%s*(.*)')
-				-- print("lCWS AA1 value?: "..tostring(value))
-				if not key then
-					key, value = line:match('(%S+)%s*=%s*(["]?[%w%s%p]+["]?)%s*,?')
-					-- print("lCWS AA2 value?: "..tostring(value))
-
-				end
-
-
-				--  Tables sur une seule ligne (ex: `x = {1, 2, 3}`)
-				if singleLineTable then
-					-- print("LCWS B ")
-					local name, contents = line:match("(%S+)%s*=%s*{(.-)}")
-					local newTable = {}
-					for valueB in contents:gmatch("[^,]+") do
-						valueB = valueB:match("^%s*(.-)%s*$") -- Supprimer les espaces blancs
-						newTable[#newTable + 1] = tonumber(valueB) or valueB
-					end
-					currentTable[name] = newTable
-
-				--`pictureBrief =` suivi de `{` sur la ligne suivante
-				elseif tableStartUnique then
-					-- print("LCWS C ")
-					pendingTable = tableStartUnique -- Retenir le nom de la table
-
-				elseif line:match("^%s*{%s*$") and pendingTable then
-					-- print("\nLCWS D ")
-					currentTable[pendingTable] = {} -- Créer la table
-					table.insert(stack, { table = currentTable, key = currentKey }) -- Sauvegarde du contexte
-					currentTable = currentTable[pendingTable]
-					currentKey = pendingTable
-					pendingTable = nil -- Réinitialisation
-
-				--Tables classiques (`key = {`)
-				elseif tableStart then
-					-- print("LCWS E ")
-
-					if not currentTable[tableStart] then
-						currentTable[tableStart] = {} -- Créer la table si elle n'existe pas
-					end
-					table.insert(stack, { table = currentTable, key = currentKey })
-					currentTable = currentTable[tableStart]
-					currentKey = tableStart
-
-
-				--`blue = {` et `red = {` sous `pictureBrief`
-				elseif (line:match("^%s*(blue|red)%s*=%s*{") or line:match("^%s*%[%d+%]%s*=%s*{")) and currentKey == "pictureBrief" then
-					-- print("LCWS F ")
-					local subKey = line:match("^%s*(blue|red)%s*=%s*{") or line:match("^%s*%[(%d+)%]%s*=%s*{")
-					if not currentTable[subKey] then
-						currentTable[subKey] = {}
-					end
-					table.insert(stack, { table = currentTable, key = currentKey })
-					currentTable = currentTable[subKey]
-					currentKey = subKey
-
-				--Fermeture de table (`}`)
-				elseif tableEnd then
-					-- print("LCWS G ")
-					if #stack > 0 then
-						local popped = table.remove(stack)
-						currentTable = popped.table
-						currentKey = popped.key
-					end
-
-				--Détection des listes `"texte",`
-				elseif listValue then
-					-- print("LCWS H ")
-
-					table.insert(currentTable, listValue)
-
-				--Détection des valeurs indexées `[1] = "..."``
-				elseif line:match("^%s*%[%d+%]%s*=%s*") then
-					-- print("LCWS I ")
-					local index, listValueB = line:match("^%s*%[(%d+)%]%s*=%s*\"(.-)\"")
-					if index and listValueB and currentKey then
-
-						currentTable[tonumber(index)] = listValueB
-
-					end
-				--Variables classiques `key = value`
-				elseif key and value then
-					--   Suppression propre des `,` et espaces parasites en fin de valeur
-					value = value:match("^%s*(.-)%s*$") -- Trim des espaces inutiles
-					value = value:gsub(",%s*$", "")     -- Supprimer `,` en fin de ligne
-
-					--   Conversion propre en nombre
-					local numValue = tonumber(value)
-					-- print("LCWS J2 "..tostring(value))
-					currentTable[key] = numValue or value  -- Si c'est un nombre, on le stocke en tant que nombre
-
-
-				end
-			end
-		end
-
-		return config, structure
-	end
-
-	--   Fonction pour récupérer la vraie valeur (sans toujours mettre des strings)
-	local function getFormattedValue(value)
-
-		--   Si `value` est une table contenant { value = ..., comment = ... }
-		if type(value) == "table" and value.value ~= nil then
-			return getFormattedValue(value.value) -- Récupérer directement `value`
-		end
-
-		--   Gestion des types normaux (string, booléens, nombres)
-		if type(value) == "string" then
-			if value == "true" or value == "false" then
-				return value -- Garder sans guillemets
-			elseif tonumber(value) then
-				return value -- Convertir en nombre
-			else
-				return '"' .. value:gsub('"', '') .. '"' -- Supprime les doubles guillemets parasites
-			end
-		elseif type(value) == "boolean" then
-			return tostring(value)
-		elseif type(value) == "number" then
-			return value
-		elseif type(value) == "table" then
-			--   Vérifier si c'est une liste indexée
-			local isArray = (#value > 0) and (next(value, #value) == nil)
-
-			if isArray then
-				return "{ " .. table.concat(value, ", ") .. " }"  --   Format propre des listes !
-			else
-				local formattedTable = {}
-				for k, v in pairs(value) do
-					table.insert(formattedTable, "[" .. tostring(k) .. "] = " .. getFormattedValue(v))
-				end
-				return "{ " .. table.concat(formattedTable, ", ") .. " }"
-			end
-
-		else
-			return tostring(value)
+			out[path] = v
 		end
 	end
-
-    -- Fonction pour supprimer les clés obsolètes
-    local function removeObsoleteEntries(clientConfig, referenceConfig)
-        --version removeObsoleteEntries VA_1.12
-        local function deepClean(clientTable, referenceTable)
-            for key, value in pairs(clientTable) do
-                if key ~= "pictureBrief" and key ~= "movedBullseye" then
-					if type(value) == "table" then
-						if not referenceTable[key] then
-							clientTable[key] = nil  -- Supprime la table complète si elle est absente du modèle
-						else
-							deepClean(value, referenceTable[key])  -- Nettoie récursivement les sous-tables
-						end
-					elseif not referenceTable[key] then
-						clientTable[key] = nil  -- Supprime les variables obsolètes
-					end
-				else
-
-				end
-            end
-        end
-
-        deepClean(clientConfig, referenceConfig)
-        return clientConfig
-    end
-
-	local function mergeTables(clientTable, defaultTable, structure)
-		for key, defaultValue in pairs(defaultTable) do
-
-			local clientValue = clientTable[key]
-
-			--   `pictureBrief` ne doit pas être touché
-			if key == "pictureBrief" then
-				-- print("[mergeTables] A `pictureBrief` préservé")
-
-			--   `movedBullseye` doit fusionner **ET** accepter de nouvelles maps
-			elseif key == "movedBullseye" and type(defaultValue) == "table" then
-				-- print("[mergeTables] B Fusion `movedBullseye`")
-				if type(clientValue) ~= "table" then
-					-- print("[mergeTables] C `movedBullseye` absent dans clientTable, création.."..key)
-					clientTable[key] = {}
-					clientValue = clientTable[key]
-				end
-
-				--   Fusion normale des maps existantes
-				mergeTables(clientValue, defaultValue, structure)
-
-				--   Ajouter les nouvelles maps du client qui n'existent pas dans `defaultTable`
-				for mapName, mapData in pairs(clientValue) do
-					-- print("[mergeTables] D Map détectée :", mapName)
-					if not defaultValue[mapName] then
-						-- print("[mergeTables] E Nouvelle map ajoutée :", mapName)
-						defaultValue[mapName] = DeepCopy(mapData) -- Ajoute la map à `config_default`
-
-						--   Ajouter aussi `mapName` à `structure` pour garantir l'écriture
-						table.insert(structure, "\t" .. mapName .. " = {")
-						table.insert(structure, "\t\tpos = {")
-						table.insert(structure, "\t\t\tx = " .. getFormattedValue(mapData.pos.x) .. ",")
-						table.insert(structure, "\t\t\ty = " .. getFormattedValue(mapData.pos.y) .. ",")
-						table.insert(structure, "\t\t},")
-						table.insert(structure, "\t\trayon = " .. getFormattedValue(mapData.rayon) .. ",")
-						table.insert(structure, "\t},")
-					end
-				end
-
-			-- `weather` doit **toujours** être remplacé par `weather_override`
-			elseif key == "weather" and weather_override then
-				clientTable[key] = DeepCopy(weather_override)
-			-- `current_date` doit **toujours** être remplacé par `date_override`
-			elseif key == "current_date" and date_override then
-				clientTable[key] = DeepCopy(date_override)
-				-- _affiche(date_override, "date_override F1; ")
-			-- Fusion normale des sous-tables
-			elseif type(defaultValue) == "table" then
-				if not clientValue then
-					-- print("[mergeTables]   Copie de la table absente :", key)
-					clientTable[key] = DeepCopy(defaultValue)
-				elseif type(clientValue) == "table" then
-					mergeTables(clientValue, defaultValue, structure)
-				end
-
-			-- Valeur simple : on applique la valeur par défaut si absente
-			else
-				if clientValue == nil then
-					-- print("[mergeTables]   Valeur par défaut appliquée :", key)
-					clientTable[key] = defaultValue
-				end
-			end
-		end
-	end
-
-    -- Nouvelle fonction pour insérer les nouvelles tables et variables manquantes dans la structure
-	local function updateConfiguration(clientConfig, defaultConfig)
-
-		mergeTables(clientConfig, defaultConfig)
-
-		return clientConfig  --   Ajout du retour de la table mise à jour !
-	end
-
-
-
-	local function saveUpdatedConfig(filePath, updatedConfig, structure)
-		-- version saveUpdatedConfig VA_1.50 (Correction des valeurs sous forme de table et commentaires)
-
-		if updatedConfig.mission_ini.weather and weather_override then
-			for key, forcedValue in pairs(weather_override) do
-				updatedConfig.mission_ini.weather[key] = forcedValue  -- **Écrase l'existant OU ajoute si absent**
-			end
-		end
-
-
-		if updatedConfig.mission_ini.date and date_override then
-			-- print("date_override 6 ")
-			for key, forcedValue in pairs(date_override) do
-				updatedConfig.mission_ini.date[key] = forcedValue  -- **Écrase l'existant OU ajoute si absent**
-				-- print("date_override 7 ")
-			end
-		end
-
-		local file = io.open(filePath, "w")
-		if not file then error("Cannot open file for writing: " .. filePath) end
-
-		local indentLevel = 0
-		local stack = {}  -- Suivi des tables imbriquées
-
-		--   Fonction d'indentation stricte
-		local function getIndent(level)
-			return string.rep("\t", level)
-		end
-
-
-		local function writeStructureLines(currentTable, structureLocal, level)
-
-			for i, line in ipairs(structureLocal) do
-				local trimmedLine = line:match("^%s*(.-)%s*$") -- Supprimer espaces début/fin
-				-- print("A "..line)
-
-				local key, value, comment = line:match('(%S+)%s*=%s*([^%s,]+)%s*,?%s*%-%-%s*(.*)')
-				if not key then
-					key, value = line:match('(%S+)%s*=%s*([^%s,]+)')
-				end
-
-				--   Conserver les commentaires et lignes vides
-				if trimmedLine:match("^%-%-") or trimmedLine == "" then
-					-- print("B "..getIndent(level) .. line .. "\n")
-					file:write(getIndent(level) .. line .. "\n")
-
-				--   Détection des tables sur une seule ligne
-				elseif trimmedLine:match("(%S+)%s*=%s*{.-}%s*,?%s*$") then
-					key = trimmedLine:match("(%S+)%s*=%s*{")
-					local clientValue = currentTable[key]
-					if clientValue then
-						-- print("C1 "..getIndent(level) .. key .. " = " .. getFormattedValue(clientValue) .. ",\n")
-						file:write(getIndent(level) .. key .. " = " .. getFormattedValue(clientValue) .. ",\n")
-					end
-
-				--   Détection de déclaration de table avec indentation correcte
-				elseif trimmedLine:match("(%S+)%s*=%s*{") then
-					key = trimmedLine:match("(%S+)%s*=%s*{")
-					local clientValue = currentTable[key]
-					if clientValue and type(clientValue) == "table" and next(clientValue) then
-						-- print("D1 "..getIndent(level) .. key .. " = {\n")
-						file:write(getIndent(level) .. key .. " = {\n")
-						table.insert(stack, { name = key, table = currentTable })
-						currentTable = clientValue
-						level = level + 1
-						-- print("D2 #stack "..tostring(#stack))
-					end
-
-					--   Détection des fermetures de table
-					elseif trimmedLine:match("^%s*}%s*[,]?") then
-						-- print("E1 #stack "..tostring(#stack))
-						if #stack > 0 then
-							local popped = table.remove(stack)
-							currentTable = popped.table
-							level = level - 1
-						end
-
-						--   Vérifier si on doit ajouter une virgule après `}`
-						local nextLine = structureLocal[i + 1] or ""
-						local addComma = not nextLine:match("^%s*}%s*$")
-
-						if level > 0 then
-							-- print("E2 "..getIndent(level) .. "}" .. (addComma and "," or "") .. "\n")
-							file:write(getIndent(level) .. "}" .. (addComma and "," or "") .. "\n")
-						else
-							-- print("E3 "..getIndent(level) .. "}\n")
-							file:write(getIndent(level) .. "}\n")
-						end
-
-				--   Gestion des affectations (Valeur + Commentaire propre)
-				else
-
-					-- key, value, comment = line:match('(%S+)%s*=%s*([^,%s]+)%s*,?%s*%-%-%s*(.*)')
-					-- print("F1a key: "..tostring(key).." value: |"..tostring(value).."|")
-
-					-- if not key then
-					-- 	key, value = line:match('(%S+)%s*=%s*([^,%s]+)%s*,?%s*$') -- Capture sans commentaire
-					-- 	print("F1b key: "..tostring(key).." value: |"..tostring(value).."|")
-					-- end
-
-					key, value, comment = line:match('([%w_%[%]"]+)%s*=%s*("?.-"?),?%s*%-%-%s*(.*)')
-					-- print("F1a key: " .. tostring(key) .. " value: |" .. tostring(value) .. "|")
-
-                    if not key then
-                        key, value = line:match('([%w_%[%]"]+)%s*=%s*("?.-"?),?')
-                        -- print("F1b key: " .. tostring(key) .. " value: |" .. tostring(value) .. "|")
-                    end
-
-					if key then
-						-- print("G key: "..tostring(key).." currentTable[key]: "..tostring(currentTable[key]).." value: |"..tostring(value).."|")
-
-						local clientValue = currentTable[key] or value
-						local formattedValue = getFormattedValue(clientValue)
-
-						-- -- Calcul de la largeur max des clés pour un alignement automatique
-						-- local keyColumnWidth = 0
-						-- for k, _ in pairs(currentTable) do
-						-- 	if type(k) == "string" then
-						-- 		keyColumnWidth = math.max(keyColumnWidth, #k)
-						-- 	end
-						-- end
-						-- keyColumnWidth = keyColumnWidth + 2  -- Ajout de 2 espaces pour plus de lisibilité
-
-						-- 📏 Calcul de la largeur max des clés pour aligner les `=`
-						local maxKeyLength = 0
-						for k, _ in pairs(currentTable) do
-							if type(k) == "string" then
-								maxKeyLength = math.max(maxKeyLength, #k)
-							end
-						end
-						local spacingAfterKey = string.rep(" ", math.max(1, maxKeyLength - #key + 2)) -- Ajoute 2 espaces pour lisibilité
-
-
-
-						-- --   Ajustement de l'alignement
-						-- local spacingAfterKey = string.rep(" ", keyColumnWidth - #key)
-
-						local spacingAfterEqual = " "
-						local valueColumnWidth = 8  -- 🛠 Réduit l'espace après la valeur
-						local spacingAfterValue = string.rep(" ", math.max(1, valueColumnWidth - #tostring(formattedValue)))
-
-						--   Vérifier si on ajoute une virgule
-						local nextLine = structureLocal[i + 1] or ""
-						local addComma = not nextLine:match("^%s*}%s*$")
-
-						-- Écriture avec **espacement plus serré**
-						if comment then
-							-- print("H2 "..getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and "," or "") .. spacingAfterValue .. "-- " .. comment .. "\n")
-							-- file:write(getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and "," or "") .. spacingAfterValue .. "-- " .. comment .. "\n")
-							file:write(getIndent(level) .. key .. spacingAfterKey .. "= " .. formattedValue .. (addComma and "," or "") .. spacingAfterValue .. "-- " .. comment .. "\n")
-
-						else
-							-- print("H3 "..getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and ",") .. "\n")
-							file:write(getIndent(level) .. key .. spacingAfterKey .. "=" .. spacingAfterEqual .. formattedValue .. (addComma and ",") .. "\n")
-						end
-					end
-				end
-			end
-
-			--   Vérification finale : s'assurer que toutes les tables sont bien fermées
-			while #stack > 0 do
-				local popped = table.remove(stack)
-				level = level - 1
-				file:write(getIndent(level) .. "}\n")
-			end
-
-			--   Ajout manuel de `pictureBrief` à la fin si présent
-			if currentTable.pictureBrief then
-				file:write("\n" .. getIndent(level) .. "pictureBrief = {\n")
-				level = level + 1
-
-				for category, images in pairs(currentTable.pictureBrief) do
-					file:write(getIndent(level) .. category .. " = {\n")
-					for _, image in ipairs(images) do
-						file:write(getIndent(level + 1) .. '"' .. image .. '",\n')
-					end
-					file:write(getIndent(level) .. "},--pictureBrief\n")  -- Fermeture de `blue` ou `red`
-				end
-
-				level = level - 1
-				file:write(getIndent(level) .. "}\n")  -- Fermeture de `pictureBrief`
-			end
-
-
-		end
-
-		--   Écrire la structure dans le fichier en respectant les valeurs du client
-		writeStructureLines(updatedConfig, structure, indentLevel)
-
-		file:close()
-	end
-
-    -- Chemins des fichiers de configuration
-    local clientConfigPath = "Init/conf_mod.lua"
-    local defaultConfigPath = "../../../ScriptsMod." .. VersionPackageICM .. "/UTIL_ConfModCheck.lua"
-
-    -- Charger les fichiers de configuration client et par défaut
-    local clientConfig, clientStructure = loadConfigWithStructure(clientConfigPath)
-
-	-- Sauvegarde `pictureBrief` original AVANT toute modification
-	local backupPictureBrief = clientConfig.pictureBrief and DeepCopy(clientConfig.pictureBrief) or nil
-
-    local defaultConfig, defaultStructure = loadConfigWithStructure(defaultConfigPath)
-
-	mergeTables(clientConfig, defaultConfig, clientStructure)
-
-	-- Nettoyer les variables obsolètes du client
-    clientConfig = removeObsoleteEntries(clientConfig, defaultConfig)
-
-	-- Mettre à jour la configuration client avec les valeurs par défaut manquantes
-	clientConfig = updateConfiguration(clientConfig, defaultConfig)
-
-	if backupPictureBrief then
-		-- print("  Restauration de `pictureBrief` après traitement !")
-		clientConfig.pictureBrief = backupPictureBrief
-	end
-
-
-	-- Sauvegarder la configuration mise à jour
-	-- clientConfigPath = "Init/conf_mod_BBB.lua"
-	saveUpdatedConfig(clientConfigPath, clientConfig, defaultStructure)
-
-	dofile("Init/conf_mod.lua")
+	return out
 end
 
+local function serializeScalar(v)
+	if type(v) == "string" then return string.format("%q", v) end
+	return tostring(v)
+end
 
---reecrit le fichier camp_ini en ne gardant que les variables utile, les autres ayant été transférée dans conf_mo
+-- Remplace uniquement la partie "valeur" d'une ligne "clé = valeur, -- commentaire",
+-- en conservant l'indentation, la clé et le commentaire tels quels.
+local function setValueOnLine(line, value)
+	local beforeEq, afterEq = line:match("^(%s*[%a_][%w_]*%s*=)%s*(.*)$")
+	if not beforeEq then return line end
+	local comment = afterEq:match("%-%-.*$") or ""
+	return beforeEq .. " " .. serializeScalar(value) .. (comment ~= "" and (", " .. comment) or ",")
+end
+
+-- Porte les variables retrouvées vers conf_mod.lua (une seule responsabilité :
+-- ce fichier, dans son propre format, avec la même technique de substitution).
+function PortLegacyFieldsToConfMod(path, portable)
+	local byPath = {}
+	for _, migration in ipairs(portable) do byPath[migration.toPath] = migration.value end
+
+	local file = io.open(path, "r")
+	if not file then
+		print("[PortLegacyFieldsToConfMod] impossible d'ouvrir " .. path)
+		return false
+	end
+
+	local pathStack, outLines = {}, {}
+	for line in file:lines() do
+		local key = line:match("^%s*([%a_][%w_]*)%s*=")
+		if key and line:match("=%s*{") then
+			pathStack[#pathStack + 1] = key
+			outLines[#outLines + 1] = line
+		elseif key then
+			local full = (#pathStack > 0 and (table.concat(pathStack, ".") .. "." .. key)) or key
+			if byPath[full] ~= nil then
+				outLines[#outLines + 1] = setValueOnLine(line, byPath[full])
+				print("[ModifiCampInit] porté vers conf_mod : " .. full)
+			else
+				outLines[#outLines + 1] = line
+			end
+		else
+			outLines[#outLines + 1] = line
+			if line:match("^%s*}") and #pathStack > 0 then
+				pathStack[#pathStack] = nil
+			end
+		end
+	end
+	file:close()
+
+	local out = io.open(path, "w")
+	if not out then
+		print("[PortLegacyFieldsToConfMod] impossible d'écrire " .. path)
+		return false
+	end
+	out:write(table.concat(outLines, "\n"))
+	out:close()
+	return true
+end
+
 function ModifiCampInit()
 
-	-- camp = {
-	-- 	--any modification of this part requires a restart of the campaign to be taken into account.
-	-- 	title = "WOC-80s-Blue-GC22-5",		--Title of campaign (name of missions)
-	-- 	version = "V25-gc",
-	-- 	mission = 1,					--campaig mission number
-	-- 	date = {						--campaign date
-	-- 		day = 6,
-	-- 		year = 1986,
-	-- 		month = 4,
-	-- 	},
-	-- 	time = 11700,					--Daytime in seconds
-	-- 	variation = 4,					--variation in degrees from true north to magneitic north
+	local REF_camp, refErr = loadDataFile(REF_PATH, REF_ROOT_NAME)
+	if not REF_camp then print("[ModifiCampInit] " .. refErr) return false end
 
-	local txt = ""
-	-- local nTab = 0
-	local compareVariable = {
-		"camp",
-		"title",
-		"version",
-		"mission",
-		"date",
-		"day",
-		"year",
-		"month",
-		"weather",
-		"trend",
-		"variance",
-		"refTemp",
-		"instability",
-		"windActivity",
-		"winDirection",
-		"time",
-		"variation",
-		"ewrFreqAdaptable",
-	}
+	local camp, campErr = loadDataFile(CAMP_INIT_PATH, LOCAL_ROOT_NAME)
+	if not camp then print("[ModifiCampInit] " .. campErr) return false end
 
-	local monfichier = io.open("Init/camp_init.lua", "r") or error("Failed to open debug file")
+	local refFile = io.open(REF_PATH, "r")
+	if not refFile then print("[ModifiCampInit] impossible d'ouvrir " .. REF_PATH) return false end
 
-	io.input(monfichier)
-	local n = 0
-	local nTab = {
-		false,
-		false,
-		false,
-		false,
-	}
-	for line in io.lines() do
+	local localFlat   = flatten(camp, nil, {})
+	local visited     = {}
+	local pathStack   = {}
+	local skippingList = false
+	local outLines    = {}
 
-		local addLine = false
-		local varString, com2, comTemp
-
-		if string.find(line, "%-%-")  then
-			--traitement du commentaire avec la valeur de la variable
-			varString, com2 = line:match("(.*)-(.*)")
-			if com2 and string.find(com2, "%-%-") then
-				comTemp, com2 = com2:match("(.*)-(.*)")
-			end
-		else
-			varString = line
-		end
-
-		if string.find(line, "{") then n = n+1  end
-		if string.find(line, "}") then n = n-1  end
-
-		if varString ~= nil and string.find(varString, "=") then
-
-			local varStringB, varValue = varString:match("(.*)=(.*)")
-
-			varStringB = varStringB:gsub(" ", "")
-			varStringB = varStringB:gsub("\t", "")
-
-			for m, varRef in ipairs(compareVariable) do
-
-				if varStringB == varRef  then
-					txt = txt .. line .. "\n"
-					addLine = true
-					if string.find(line, "{") then nTab[n] = true end
-					if string.find(line, "}") then nTab[n+1] = false end
-					-- print("UtilF passe ADD  H n:|"..tostring(n).." nTab[n]: "..tostring(nTab[n]))
-					break
-				end
-			end
-
-			if string.find(line, "}") and not addLine and varStringB == nil then
-				n = n - 1
-				if not addLine then
-					txt = txt .. line .. "\n"
-					if string.find(line, "{") then nTab[n] = true end
-					if string.find(line, "}") then nTab[n+1] = false end
-					-- print("UtilF passe ADD  I n:|"..tostring(n).." nTab[n]: "..tostring(nTab[n]))
-					break
-				end
-			end
-
-		else
-
-			if not string.find(line, "}") then
-				txt = txt .. line .. "\n"
-				-- print("UtilF passe ADD  J n:|"..tostring(n).." nTab[n]: "..tostring(nTab[n]))
-			else
-
-				-- print("UtilF passe ADD  K1 n:|"..tostring(n).." nTab[n]: "..tostring(nTab[n]).." nTabn+1 "..tostring(nTab[n+1]))
-
-				if nTab[n+1] == true then
-					txt = txt .. line .. "\n"
-					-- print("UtilF passe ADD  K2 n:|"..tostring(n).." nTab[n]: "..tostring(nTab[n]))
-					nTab[n+1] = false
-				end
-			end
-
-		end
-
+	local function currentPath()
+		return table.concat(pathStack, ".")
 	end
 
-	io.close(monfichier)
+	local isRootLine = true -- traite la toute première ligne "REF_camp = {" à part
 
-	local updateFile = io.open("Init/camp_init.lua", "w") or error("Failed to open debug file")
-	updateFile:write(txt)																		--save new data
+	for line in refFile:lines() do
 
-	io.close(updateFile)
+		local key = line:match("^%s*([%a_][%w_]*)%s*=")
 
-	dofile("Init/camp_init.lua")
+		if isRootLine and key == REF_ROOT_NAME then
+			-- la ligne d'ouverture porte le nom de la référence (REF_camp) ;
+			-- on la réécrit avec le nom réellement utilisé dans camp_init.lua (camp)
+			outLines[#outLines + 1] = line:gsub("^(%s*)" .. REF_ROOT_NAME, "%1" .. LOCAL_ROOT_NAME)
+			isRootLine = false
 
+		elseif skippingList then
+			-- on saute les lignes d'exemple d'une liste déjà régénérée
+			if line:match("^%s*}") then
+				outLines[#outLines + 1] = line
+				pathStack[#pathStack] = nil
+				skippingList = false
+			end
+
+		elseif key and line:match("=%s*{") then
+			-- ouverture d'une sous-table
+			pathStack[#pathStack + 1] = key
+			outLines[#outLines + 1] = line
+
+			-- ne régénère que si la donnée locale à ce chemin est un vrai
+			-- tableau-liste ; sinon ce n'est qu'un conteneur (ex: pictureBrief
+			-- au-dessus de blue/red), on continue la récursion normalement
+			local path = currentPath()
+			local values = localFlat[path]
+			if type(values) == "table" and values[1] ~= nil then
+				local indent = (line:match("^(%s*)") or "") .. "\t"
+				for _, picName in ipairs(values) do
+					outLines[#outLines + 1] = indent .. serializeScalar(picName) .. ","
+				end
+				skippingList = true
+			end
+
+		elseif key then
+			-- ligne "clé = valeur, -- commentaire"
+			local path = currentPath() ~= "" and (currentPath() .. "." .. key) or key
+			visited[path] = true
+			local value = localFlat[path]
+			outLines[#outLines + 1] = (value ~= nil) and setValueOnLine(line, value) or line
+
+		else
+			outLines[#outLines + 1] = line
+			if line:match("^%s*}") and #pathStack > 0 then
+				pathStack[#pathStack] = nil
+			end
+		end
+	end
+	refFile:close()
+
+	-- variables locales absentes de REF_camp : à porter, ou obsolètes
+	local portable = {}
+	for path, value in pairs(localFlat) do
+		if not visited[path] then
+			local target = MIGRATE_TO_CONFMOD[path]
+			if target then
+				portable[#portable + 1] = { fromPath = path, toPath = target, value = value }
+			else
+				print("[ModifiCampInit] variable obsolète supprimée : " .. path)
+			end
+		end
+	end
+
+	local outFile = io.open(CAMP_INIT_PATH, "w")
+	if not outFile then print("[ModifiCampInit] impossible d'écrire " .. CAMP_INIT_PATH) return false end
+	outFile:write(table.concat(outLines, "\n"))
+	outFile:close()
+
+	if #portable > 0 then
+		PortLegacyFieldsToConfMod(CONF_MOD_PATH, portable)
+	end
+
+	dofile(CAMP_INIT_PATH)
+	return true
+end
+
+-- local CONF_MOD_PATH = "Init/conf_mod.lua"
+
+-- local function serializeScalar(v)
+-- 	if type(v) == "string" then return string.format("%q", v) end
+-- 	return tostring(v)
+-- end
+
+-- local function setValueOnLine(line, value)
+-- 	local beforeEq, afterEq = line:match("^(%s*[%a_][%w_]*%s*=)%s*(.*)$")
+-- 	if not beforeEq then return line end
+-- 	local comment = afterEq:match("%-%-.*$") or ""
+-- 	return beforeEq .. " " .. serializeScalar(value) .. (comment ~= "" and (", " .. comment) or ",")
+-- end
+
+-- Applique un ensemble {chemin.point = valeur} sur conf_mod.lua, en ne
+-- touchant qu'aux lignes correspondantes, sans réordonner le reste du fichier.
+local function applyUpdatesToFile(path, updates)
+	local file = io.open(path, "r")
+	if not file then
+		print("[UpdateConfMod] impossible d'ouvrir " .. path)
+		return false
+	end
+
+	local pathStack, outLines, applied = {}, {}, {}
+	for line in file:lines() do
+		local key = line:match("^%s*([%a_][%w_]*)%s*=")
+		if key and line:match("=%s*{") then
+			pathStack[#pathStack + 1] = key
+			outLines[#outLines + 1] = line
+		elseif key then
+			local full = (#pathStack > 0 and (table.concat(pathStack, ".") .. "." .. key)) or key
+			if updates[full] ~= nil then
+				outLines[#outLines + 1] = setValueOnLine(line, updates[full])
+				applied[full] = true
+			else
+				outLines[#outLines + 1] = line
+			end
+		else
+			outLines[#outLines + 1] = line
+			if line:match("^%s*}") and #pathStack > 0 then
+				pathStack[#pathStack] = nil
+			end
+		end
+	end
+	file:close()
+
+	local outFile = io.open(path, "w")
+	if not outFile then
+		print("[UpdateConfMod] impossible d'écrire " .. path)
+		return false
+	end
+	outFile:write(table.concat(outLines, "\n"))
+	outFile:close()
+
+	return true, applied
+end
+
+--=========================================================================
+-- UpdateConfMod(setWeather, setDate, from)
+--
+--   setWeather : table optionnelle, ex: { trend = 20, refTemp = 15 }
+--                seules les clés fournies sont modifiées.
+--   setDate    : table optionnelle, ex: { day = 12, month = 8, year = 1996 }
+--                mêmes règles que setWeather.
+--   from       : chaîne libre indiquant l'origine de l'appel
+--                ("trigger", "user", "missionGeneration"...) — sert
+--                uniquement au log/traçabilité, aucune restriction de
+--                droits n'est appliquée selon cette valeur pour l'instant.
+--=========================================================================
+function UpdateConfMod(setWeather, setDate, from)
+
+	from = from or "unknown"
+
+	if not setWeather and not setDate then
+		-- print("[UpdateConfMod] appel depuis '" .. from .. "' sans rien à changer, ignoré")
+		return true
+	end
+
+	local updates = {}
+
+	if setWeather then
+		for field, value in pairs(setWeather) do
+			updates["mission_ini.weather." .. field] = value
+			-- print("[UpdateConfMod][" .. from .. "] weather." .. field .. " -> " .. tostring(value))
+		end
+	end
+
+	if setDate then
+
+		if not setDate.setDateInNextMission then setDate.setDateInNextMission = false end
+		if setDate.setDateInNextMission then setDate.setDateInNextMission = false end
+
+		for field, value in pairs(setDate) do
+			updates["mission_ini.current_date." .. field] = value
+			-- print("[UpdateConfMod][" .. from .. "] current_date." .. field .. " -> " .. tostring(value))
+		end
+	end
+
+	local ok, applied = applyUpdatesToFile(CONF_MOD_PATH, updates)
+	if not ok then
+		-- print("[UpdateConfMod][" .. from .. "] échec de l'écriture de " .. CONF_MOD_PATH)
+		return false
+	end
+
+	for path in pairs(updates) do
+		if not applied[path] then
+			-- print("[UpdateConfMod][" .. from .. "] AVERTISSEMENT : clé introuvable dans conf_mod.lua : " .. path)
+		end
+	end
+
+	dofile(CONF_MOD_PATH) -- recharge mission_ini en mémoire avec les nouvelles valeurs
+
+	return true
 end
 
 --assigne un CallName � tous les squad West pour tout le reste de la campagne 
@@ -4875,12 +4540,14 @@ function LoadFileAndUpdate(from)
 		require("Active/oob_scen")
 	end
 
-	-- _affiche(camp.date, "LoadFileAndUpdate()camp.date: ")
 	UpdateConfMod(nil, camp.date, "UTIL_Functions/LoadFileAndUpdate() "..debug.getinfo(1).currentline)
 
-	if Firstmission_flag then
-		ModifiCampInit()
-	end
+
+	--TODO risque de razer completement camp_init, pas glop, à revoir
+	-- if Firstmission_flag then
+		-- ModifiCampInit()
+	-- end
+
 
 	--****************************************************************************************
 	--ajout automatique d'elements en cours de campagne: START
@@ -5045,45 +4712,12 @@ function LoadFileAndUpdate(from)
 		end
 	end
 
-	-- -- petit code pour remettre les stock init comme au debut
-	-- if adjust_DCE_GC22 then
-	-- 	for side, sideTab in pairs(oob_air_init) do
-	-- 		if oob_air[side] then
-	-- 			for _, unitInit in pairs(sideTab) do
-	-- 				local found = false
-	-- 				for _, unitActive in pairs(oob_air[side]) do
-	-- 					if unitActive.name == unitInit.name then
-	-- 						found = true
-	-- 						if unitActive.number ~= unitInit.number then
-	-- 							if unitInit.number > unitActive.number then
-	-- 								if Debug and Debug.debug then
-	-- 									print("Check/MAJ oob_air oob_air_init/number to Active/number pour "..tostring(unitInit.type).." || "..unitActive.name.." ("..side..") : "..tostring(unitInit.number).." -> "..tostring(unitActive.number).." = "..tostring(unitInit.number))
-	-- 								end
-	-- 								unitActive.number = unitInit.number
-	-- 								unitActive.number = unitInit.number
-	-- 								if unitActive.rooster and unitActive.rooster.ready then
-	-- 									unitActive.rooster.ready = unitInit.number
-	-- 								end
-	-- 							else
-	-- 								if Debug and Debug.debug then
-	-- 									print("Check ---- oob_air_init/number to Active/number ----- pour "..tostring(unitInit.type).." || "..unitActive.name.." ("..side..") : "..tostring(unitInit.number ).." -> "..tostring(unitActive.number))
-	-- 								end
-	-- 							end
-	-- 						end
-	-- 						break
-	-- 					end
-	-- 				end
-	-- 				if not found and Debug and Debug.debug then
-	-- 					print("Unité "..unitInit.name.." ("..side..") non trouvée dans Active/oob_air")
-	-- 				end
-	-- 			end
-	-- 		end
-	-- 	end
-	-- end
-
+	
 	--****************************************************************************************
 	--ajout automatique d'elements en cours de campagne: FIN
 	--****************************************************************************************
+
+
 
 	-- Exécution du fichier s'il existe
 	local testFile = "Init/various_table.lua"

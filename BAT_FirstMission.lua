@@ -113,21 +113,6 @@ local function fitString(txt, maxLen)
 end
 
 
--- -- Construit une chaine compacte des tasks disponibles
--- local function buildTaskList(tasks)
-
--- 	local result = {}
-
--- 	for _, taskStr in PairsByKeys(tasks) do
-
--- 		if TabTask[taskStr] then
--- 			result[#result + 1] = taskToShort(taskStr)
--- 		end
--- 	end
-
--- 	return table.concat(result, " ")
--- end
-
 -- random seed -----
 local seed = os.time() -- Récupérer un timestamp en secondes
 math.randomseed(seed)  -- Initialiser le générateur pseudo-aléatoire
@@ -151,7 +136,27 @@ else
 end
 
 dofile("Init/db_airbases.lua")
+
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
+
+--met à jour le fichier camp_init en fonction du template UTIL_REF_camp_init.lua
+ModifiCampInit()
+
+if not camp.dateInit then
+	local tempCamp = camp
+	dofile("Init/camp_init.lua")
+	local campInit = DeepCopy(camp)
+	-- print("BAT_SkipMission campInit.date.day = "..tostring(campInit.date.day))
+	
+	camp = tempCamp
+	camp.dateInit = {
+		day = campInit.date.day,
+		year = campInit.date.year,
+		month = campInit.date.month,
+	}
+end
+
+
 dofile("Init/targetlist_init.lua")--ne pas supprimé, util pour inscrire targetlist dans Active
 if not targetlist.blue[1] then
 	TargetlistToNum(targetlist)

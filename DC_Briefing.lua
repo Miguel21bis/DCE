@@ -1,14 +1,14 @@
 --To create the briefing for the next mission
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: debug_k
-if not versionDCE then versionDCE = {} end
-versionDCE["DC_Briefing.lua"] = "1.25.160"
-------------------------------------------------------------------------------------------------------- 
+-- -- last modification: debug_k
+-- if not versionDCE then versionDCE = {} end
+-- versionDCE["DC_Briefing.lua"] = "1.25.160"
+-- ------------------------------------------------------------------------------------------------------- 
 
-if Debug.debug then
-	print("START DC_Briefing.lua "..versionDCE["DC_Briefing.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
-end
+-- if Debug.debug then
+-- 	print("START DC_Briefing.lua "..versionDCE["DC_Briefing.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+-- end
 
 local nbPasse = 0
 local target_picture = {}
@@ -2520,8 +2520,8 @@ dictionary.DictKey_descriptionBlueTask_3 = mission.descriptionBlueTask
 mission.descriptionBlueTask = "DictKey_descriptionBlueTask_3"
 
 -- ajoute les images permanentes du briefing
-if not (EndCampaign or camp.endCampaign) then
-	for side, file in pairs(pictureBrief) do
+if not (EndCampaign or camp.endCampaign) and PictureBrief then
+	for side, file in pairs(PictureBrief) do
 		if side == "blue" then
 			for nb, filename in ipairs(file) do
 				table.insert(BriefingImagesB, filename)

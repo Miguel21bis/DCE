@@ -3766,21 +3766,21 @@ for sideName, draftT in pairs(draftSorties) do
 											if draft.route.threats.SEAD_offset > 0 then												--draft sortie has a SEAD offset requirement
 												support_requirement = true
 											end
-											if campMod.strikeOnlyWithEscorte then
+											if mission_ini.strikeOnlyWithEscorte then
 												support_requirement = true
 											end
 										elseif sptTask == "Escort" then
 											if draft.route.threats.air_total > 0.5 then												--draft sortie has an air threat
 												support_requirement = true
 											end
-											if campMod.strikeOnlyWithEscorte then
+											if mission_ini.strikeOnlyWithEscorte then
 												support_requirement = true
 											end
 										elseif sptTask == "Escort Jammer" then
 											if draft.route.threats.SEAD_offset > 0 or draft.route.threats.air_total > 0.5 then		--draft sortie has either a SEAD offest requirement or an air threat
 												support_requirement = true
 											end
-											if campMod.strikeOnlyWithEscorte then
+											if mission_ini.strikeOnlyWithEscorte then
 												support_requirement = true
 											end
 										elseif sptTask == "Flare Illumination" or sptTask == "Laser Illumination"then
@@ -4338,7 +4338,7 @@ local function createATO_table(draftPriority)
 										-- ATO_G_adjustment01 escort mandatory or not
 										-- regarde uniquement pour les bombardiers necessitant une escorte
 
-										if campMod.strikeOnlyWithEscorte and not draft.loadout.self_escort then
+										if mission_ini.strikeOnlyWithEscorte and not draft.loadout.self_escort then
 											if (db_loadouts[draft.type]["Anti-ship Strike"] or db_loadouts[draft.type]["Strike"])  then
 												local break_loop = false
 												for n_squad, squad in pairs(oob_air[side]) do

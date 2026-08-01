@@ -67,29 +67,6 @@ local function taskToShort(task)
 end
 
 
--- Construit la liste compacte des tasks dispo pour un squadron
-local function buildTaskString(playableFlight)
-
-	local tasks = {}
-
-	if playableFlight.task then
-		tasks[#tasks + 1] = taskToShort(playableFlight.task)
-	end
-
-	-- évite doublons
-	local already = {}
-	local result = {}
-
-	for i = 1, #tasks do
-		if not already[tasks[i]] then
-			already[tasks[i]] = true
-			result[#result + 1] = tasks[i]
-		end
-	end
-
-	return table.concat(result, " ")
-end
-
 -- Tronque une chaine à une longueur fixe pour affichage console
 local function fitString(txt, maxLen)
 
@@ -115,12 +92,15 @@ dofile("Active/camp_status.lua")
 
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
-UpdateConfModSuite(nil, nil, "BAT_SkipMission "..debug.getinfo(1).currentline)
+--met à jour le fichier camp_init en fonction du template UTIL_REF_camp_init.lua
+ModifiCampInit()
 
 if not camp.dateInit then
 	local tempCamp = camp
 	dofile("Init/camp_init.lua")
-	local campInit =  DeepCopy(camp)
+	local campInit = DeepCopy(camp)
+	print("BAT_SkipMission campInit.date.day = "..tostring(campInit.date.day))
+	
 	camp = tempCamp
 	camp.dateInit = {
 		day = campInit.date.day,
@@ -128,6 +108,7 @@ if not camp.dateInit then
 		month = campInit.date.month,
 	}
 end
+
 
 if camp.pendingBriefing then
 	Briefing_text = camp.pendingBriefing .. Briefing_text																--briefing text to be added this mission instance

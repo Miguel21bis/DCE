@@ -962,7 +962,7 @@ local showOneNight = true
 
 if not camp.weather then
 	camp.weather = {
-		refTemp = mission_ini.weather.refTemp
+		refTemp = Weather.refTemp
 	}
 end
 
@@ -1320,11 +1320,12 @@ end
 --------------------------------------------------------------
 
 local function generateDCSweather()
-	local trend = mission_ini.weather.trend
-	local refTemp = mission_ini.weather.refTemp
-	local instability = mission_ini.weather.instability
-	local windActivity = mission_ini.weather.windActivity
-	local winDirection = mission_ini.weather.winDirection
+
+	local trend = Weather.trend
+	local refTemp = Weather.refTemp
+	local instability = Weather.instability
+	local windActivity = Weather.windActivity
+	local winDirection = Weather.winDirection
 
 
     local presetID, category, loc_debugChoice = chooseWeatherPreset(trend)
