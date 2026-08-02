@@ -510,13 +510,13 @@ local function resolveValue(fieldName, candidatePaths, default)
 		local value = getByPath(path)
 		if value ~= nil then
 			if i > 1 then
-				print("[ConfigResolver] '" .. fieldName .. "' trouvé via chemin legacy : " .. path
-					.. " (chemin cible : " .. candidatePaths[1] .. ")")
+				-- print("[ConfigResolver] '" .. fieldName .. "' trouvé via chemin legacy : " .. path
+				-- 	.. " (chemin cible : " .. candidatePaths[1] .. ")")
 			end
 			return value
 		end
 	end
-	print("[ConfigResolver] '" .. fieldName .. "' introuvable, valeur par défaut : " .. tostring(default))
+	-- print("[ConfigResolver] '" .. fieldName .. "' introuvable, valeur par défaut : " .. tostring(default))
 	return default
 end
 
@@ -3442,7 +3442,7 @@ function PortLegacyFieldsToConfMod(path, portable)
 
 	local file = io.open(path, "r")
 	if not file then
-		print("[PortLegacyFieldsToConfMod] impossible d'ouvrir " .. path)
+		-- print("[PortLegacyFieldsToConfMod] impossible d'ouvrir " .. path)
 		return false
 	end
 
@@ -3456,7 +3456,7 @@ function PortLegacyFieldsToConfMod(path, portable)
 			local full = (#pathStack > 0 and (table.concat(pathStack, ".") .. "." .. key)) or key
 			if byPath[full] ~= nil then
 				outLines[#outLines + 1] = setValueOnLine(line, byPath[full])
-				print("[ModifiCampInit] porté vers conf_mod : " .. full)
+				-- print("[ModifiCampInit] porté vers conf_mod : " .. full)
 			else
 				outLines[#outLines + 1] = line
 			end
@@ -3471,7 +3471,7 @@ function PortLegacyFieldsToConfMod(path, portable)
 
 	local out = io.open(path, "w")
 	if not out then
-		print("[PortLegacyFieldsToConfMod] impossible d'écrire " .. path)
+		-- print("[PortLegacyFieldsToConfMod] impossible d'écrire " .. path)
 		return false
 	end
 	out:write(table.concat(outLines, "\n"))
@@ -3562,7 +3562,7 @@ function ModifiCampInit()
 			if target then
 				portable[#portable + 1] = { fromPath = path, toPath = target, value = value }
 			else
-				print("[ModifiCampInit] variable obsolète supprimée : " .. path)
+				-- print("[ModifiCampInit] variable obsolète supprimée : " .. path)
 			end
 		end
 	end
