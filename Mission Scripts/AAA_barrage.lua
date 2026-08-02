@@ -57,8 +57,8 @@ for zoneN, zone in pairs(env.mission.triggers.zones) do
 	env.info("AAA_barrage A :check zone name " .. tostring(zone.name))
 	if string.sub(zone.name, 1, 9) == "AAA_ZONE_" then
 		-- Rétrocompatibilité : "AAA_ZONE_xxx" sans camp explicite est traitée
-		-- comme "AAA_ZONE_BLUE_xxx" (comportement des anciennes missions).
-		local owner = parseZoneOwner(zone.name) or "BLUE"
+		-- comme "AAA_ZONE_RED_xxx" (comportement des anciennes missions).
+		local owner = parseZoneOwner(zone.name) or "RED"
 		aaaZones[#aaaZones + 1] = { name = zone.name, owner = owner }
 		env.info("AAA_barrage B :is  AAA_ZONE_: " .. tostring(zone.name) .. " (owner: " .. owner .. ")")
 	end
