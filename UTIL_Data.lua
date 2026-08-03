@@ -1161,12 +1161,13 @@ Data_divers = {
 		EPLRS_Capacity = false,
 	},
 	["F-14A-95-GR"] = 	{  --'F-14A-95-GR',_('F-14A Export')
+		folderModName = "F14",
+		inherited_All_Mod_From = "F-14B",	--special copy
+		inherited_APA_From = "F-14",	--copy AddPropAircraft
+
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-		inheritedFrom = "F-14",	--copy radio frequency, failures ...
-		inherited_APA_From = "F-14",	--copy AddPropAircraft
-		folderModName = "F14",
-		fileModName = "F-14B.lua",		--exactement les meme fichiers que le F-14B
+
 		playable = true,
 		alignment_PropAircraft = {
 			fast = {
@@ -1181,12 +1182,13 @@ Data_divers = {
 		refuellingReceptacleType = "drogue"
 	},
 	["F-14A-135-GR-Early"] = 	{
+		folderModName = "F14",
+		inherited_All_Mod_From = "F-14B",	--special copy
+		inherited_APA_From = "F-14",	--copy AddPropAircraft
+
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-		inheritedFrom = "F-14",	--copy radio frequency, failures ...
-		inherited_APA_From = "F-14",	--copy AddPropAircraft
-		folderModName = "F14",
-		fileModName = "F-14B.lua",		--exactement les meme fichiers que le F-14B
+
 		playable = true,
 		alignment_PropAircraft = {
 			fast = {
@@ -1202,12 +1204,13 @@ Data_divers = {
 	},
 
 	["F-14A-135-GR"] = 	{
+		folderModName = "F14",
+		inherited_All_Mod_From = "F-14B",	--special copy
+		inherited_APA_From = "F-14",	--copy AddPropAircraft
+
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-		inheritedFrom = "F-14",	--copy radio frequency, failures ...
-		inherited_APA_From = "F-14",	--copy AddPropAircraft
-		folderModName = "F14",
-		fileModName = "F-14B.lua",		--exactement les meme fichiers que le F-14B
+
 		playable = true,
 		alignment_PropAircraft = {
 			fast = {
@@ -1223,12 +1226,13 @@ Data_divers = {
 	},
 
 	["F-14B"] = 	{
+		folderModName = "F14",
+		inherited_All_Mod_From = "F-14B",	--special copy
+		inherited_APA_From = "F-14",	--copy AddPropAircraft
+
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-		inheritedFrom = "F-14",	--copy radio frequency, failures ...
-		inherited_APA_From = "F-14",	--copy AddPropAircraft
-		folderModName = "F14",
-		fileModName = "F-14B.lua",
+
 		playable = true,
 		alignment_PropAircraft = {
 			fast = {
@@ -1244,12 +1248,13 @@ Data_divers = {
 	},
 
 	["F-14BU"] = 	{
+		folderModName = "F14",
+		inherited_All_Mod_From = "F-14B",	--special copy
+		inherited_APA_From = "F-14",	--copy AddPropAircraft
+
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = false,
-		inheritedFrom = "F-14",	--copy radio frequency, failures ...
-		inherited_APA_From = "F-14",	--copy AddPropAircraft
-		folderModName = "F14",
-		fileModName = "F-14B.lua",--exactement les meme fichiers que le F-14B
+
 		playable = true,
 		alignment_PropAircraft = {
 			fast = {
@@ -1389,13 +1394,13 @@ Data_divers = {
 	["Mirage-F1CE"] = {
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
 		folderModName = "Mirage-F1",
-		inheritedModFrom = "Mirage-F1C",
+		inherited_All_Mod_From = "Mirage-F1C",
 		refuellingReceptacleType = "drogue",
 	},
 	["Mirage-F1EE"] = {
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
 		folderModName = "Mirage-F1",
-		inheritedModFrom = "Mirage-F1C",
+		inherited_All_Mod_From = "Mirage-F1C",
 		alignment_PropAircraft = {
 			fast = {
 				["INSStartMode"] = 1,
@@ -1410,7 +1415,7 @@ Data_divers = {
 	["Mirage-F1BE"] = {
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
 		folderModName = "Mirage-F1",
-		inheritedModFrom = "Mirage-F1B",
+		inherited_All_Mod_From = "Mirage-F1B",
 		refuellingReceptacleType = "drogue"
 	},
 
@@ -3895,6 +3900,10 @@ function DataCompilation_DataDiscoveryA2()
 					fullPath = path_dcs .. "CoreMods/aircraft/" .. folderModName .. "/"..planeData.add_aircraftFileName	
 				end
 
+				if planeData.overridePATH then
+					fullPath = path_dcs .. "CoreMods/aircraft/" .. planeData.overridePATH
+				end
+
 				-- Vérifier si le fichier existe dans le premier chemin (par exemple, CoreMods/aircraft/)
 				local f0 = io.open(fullPath, "r")
 				-- if Debug.debug then print("DataDiscovery_B1 test entry.lua : "..fullPath) end
@@ -3913,11 +3922,20 @@ function DataCompilation_DataDiscoveryA2()
 						))
 					end
 
+					
+
+
 					fullPath = path_camp .. "Mods/aircraft/" .. folderModName .. "/entry.lua"
 					modRoot  = path_camp .. "Mods/aircraft/" .. folderModName
+
 				end
 
-                -- if Debug.debug then print("DataDiscovery_B2 entry.lua : "..fullPath) end
+				if planeData.override_PATH_File then
+					fullPath =  modRoot .."/" .. planeData.override_PATH_File
+				end 
+
+
+                if Debug.debug then print("DataDiscovery_B2 entry.lua : "..fullPath) end
 
                 local env = {}
 
@@ -4021,7 +4039,7 @@ function DataCompilation_DataDiscoveryA2()
 						-- os.execute 'pause'
 					end
 				else
-					-- if Debug.debug then print("  [MISSING entry.lua] for "..tostring(planeType)) os.execute 'pause' end
+					-- if Debug.debug then print("  [MISSING entry.lua] for "..tostring(planeType) .." in fullPath : "..tostring(fullPath)) os.execute 'pause' end
 					AddLog("ERROR: entry.lua not found for "..tostring(planeType).." at path: "..tostring(fullPath))
 					
 				end
@@ -4043,7 +4061,7 @@ function DataCompilation_DataDiscoveryA2()
 				for _, aircraft in ipairs(collected) do
 
 					local dst = Data_divers[planeType]
-					local wanted = dst.inheritedModFrom or planeType
+					local wanted = dst.inherited_All_Mod_From or planeType
 
 					-- if Debug.debug then  print("  -> collected A planeName "..tostring(planeType).." aircraft.Name: "..tostring(aircraft.Name).." wanted: "..tostring(wanted)) end
 
@@ -4084,10 +4102,10 @@ function DataCompilation_DataDiscoveryA2()
 							-- print("  -> A2 aircraft captured "..planeType)
 							
 
-							-- local file_str = "dst = " .. TableSerialization(Data_divers[planeType], 0)			--make a string
-							-- local file_File = io.open("Debug/Data_Divers_GetMods_"..planeType..".lua", "w") or error("Failed to open debug EWR_UtilDebug file")
-							-- file_File:write(file_str)																	--save new data
-							-- file_File:close()
+							local file_str = "dst = " .. TableSerialization(Data_divers[planeType], 0)			--make a string
+							local file_File = io.open("Debug/Data_Divers_GetMods_"..planeType..".lua", "w") or error("Failed to open debug EWR_UtilDebug file")
+							file_File:write(file_str)																	--save new data
+							file_File:close()
 
 						end
 					else

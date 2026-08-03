@@ -2704,13 +2704,22 @@ local function loadoutPylon(loadoutTable)
 		for task, ltable in pairs(loadoutByTask) do
 			for loadoutName, loadout in pairs(ltable) do
 
+				-- if debug.debug then
+				-- 	print("UtilF loadoutPylon loadoutName: "..tostring(loadoutName))
+				-- end
+
 				local newSortPylons = {}
 				local newSort = false
 				if loadout.stores and loadout.stores.pylons then
 
 					for chapterN, emport in pairs(loadout.stores.pylons) do
+						-- if debug.debug then
+						-- 	print("UtilF loadoutPylon chapterN: "..tostring(chapterN).." emport: "..tostring(emport))
+						-- end
 						if emport.num and emport.num ~= chapterN then
-								-- print("UtilF incoherence pylon N and Num: "..tostring(plane).." "..tostring(task).." "..tostring(loadoutName).." "..tostring(chapterN))
+							-- if debug.debug then
+							-- 	print("UtilF incoherence pylon N and Num: |"..tostring(plane).."| |"..tostring(task).."| chapterN |"..tostring(chapterN))
+							-- end
 							newSort = true
 						end
 					end
