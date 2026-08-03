@@ -10,6 +10,19 @@ if Debug.debug then
 	print("START ATO_Generator_C_Core.lua "..versionDCE["ATO_Generator_C_Core.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
 
+-- ============================================================================
+-- REGLAGE : réduction du minscore selon la couverture escorte
+-- ============================================================================
+--Pourquoi: si un package a les escortes qu'il demandait (en nombre), on descend son minscore
+--pour autoriser sa création malgré une menace élevée / un score insuffisant.
+--
+--0    = aucun effet (comportement identique à avant)
+--1    = minscore ramené à 0 quand l'escorte demandée est à 100% (couverture partielle = réduction proportionnelle)
+--0.3  = à 100% d'escorte, minscore réduit de 30% ; à 50% d'escorte, réduit de 15% (proportionnel)
+--
+--A ajuster ici, avec l'expérience, sans toucher au reste du fichier.
+ESCORT_MINSCORE_DISCOUNT = 0
+
 local atoMainTaskFound = false
 
 local multiPlaneSet = {}
@@ -548,26 +561,33 @@ local function prepareUnitContext(draftContext, sideName)
 		end
 	end
 
-	local aircraft_serviceable = computeServiceableAircraft(unit, sideName)
+	--Pourquoi: cette fonction est appelée UNE FOIS PAR TENTATIVE DE DRAFT (une fois par cible/tâche essayée),
+	--pas une fois par squad. Recalculer/écraser la disponibilité à chaque appel revenait à retirer au sort
+	--et remplacer le nombre d'avions disponibles à chaque tentative -> le compteur final dépendait du DERNIER
+	--tirage aléatoire rencontré, pas des vrais avions du squad. On ne calcule donc plus qu'une seule fois.
+	if AcftAvail[unit.name].unassigned == nil then
 
-	AcftAvail[unit.name].ready = unit.roster.ready
-	AcftAvail[unit.name].serviceable = aircraft_serviceable
+		local aircraft_serviceable = computeServiceableAircraft(unit, sideName)
 
-	cleanupUnavailableAircraft(unit)
+		AcftAvail[unit.name].ready = unit.roster.ready
+		AcftAvail[unit.name].serviceable = aircraft_serviceable
 
-	local aircraft_available = unit.roster.ready - #AcftAvail[unit.name].unavailable
+		cleanupUnavailableAircraft(unit)
 
-	if aircraft_serviceable < aircraft_available then
-		aircraft_available = aircraft_serviceable
+		local aircraft_available = unit.roster.ready - #AcftAvail[unit.name].unavailable
+
+		if aircraft_serviceable < aircraft_available then
+			aircraft_available = aircraft_serviceable
+		end
+
+		AcftAvail[unit.name].available = aircraft_available
+		AcftAvail[unit.name].assigned = 0
+		AcftAvail[unit.name].unassigned = aircraft_available
 	end
 
-	AcftAvail[unit.name].available = aircraft_available
-	AcftAvail[unit.name].assigned = 0
-	AcftAvail[unit.name].unassigned = aircraft_available
+	draftContext.aircraft_available = AcftAvail[unit.name].available
 
-	draftContext.aircraft_available = aircraft_available
-
-	if aircraft_available <= 0 then
+	if AcftAvail[unit.name].available <= 0 then
 		-- rejectStep(draftContext, "NbAircraft", "no_aircraft_available")
 		rejectStep(draftContext, "NbAircraft", "no_aircraft_available", "no_aircraft_available", "BLOCK_A", SafeGetLine())
 		return false
@@ -1033,7 +1053,9 @@ local function buildDraftSorties(
 		end
 
 		if unit.player then
-			draftSortiesEntry.score = draftSortiesEntry.score * 1.5
+			-- draftSortiesEntry.score = draftSortiesEntry.score * 1.5
+			draftSortiesEntry.score = draftSortiesEntry.score * 15
+			draftSortiesEntry.scoreCoef = 15
 		end
 
 		if draftContext.overideMP_A then
@@ -1705,6 +1727,27 @@ for sideName, units in pairs(oob_air) do
 
 		if not SquadGenerationStatus[unit.name] then
 
+			--Pourquoi: garder la liste des tâches et savoir si le squad a une vraie tâche principale,
+			--pour que le rapport final ne confonde plus "pas de bestReject" avec "escort/support pur"
+			local MAIN_TASKS_INIT = {
+				["Strike"] = true, ["CAP"] = true, ["Intercept"] = true, ["CAS"] = true,
+				["Transport"] = true, ["SAR"] = true, ["CSAR"] = true, ["Runway Attack"] = true,
+				["Anti-ship Strike"] = true, ["Reconnaissance"] = true, ["AWACS"] = true,
+				["Refueling"] = true, ["Fighter Sweep"] = true, ["AFAC"] = true,
+			}
+
+			local enabledTasks = {}
+			local hasMainTask = false
+
+			for taskName, taskBool in pairs(unit.tasks or EMPTY) do
+				if taskBool then
+					enabledTasks[#enabledTasks + 1] = taskName
+					if MAIN_TASKS_INIT[taskName] then
+						hasMainTask = true
+					end
+				end
+			end
+
 			SquadGenerationStatus[unit.name] = {
 
 				unitName = unit.name,
@@ -1715,6 +1758,9 @@ for sideName, units in pairs(oob_air) do
 
 				bestReject = nil,
 				bestScore = -1,
+
+				tasks = enabledTasks,
+				hasMainTask = hasMainTask,
 			}
 		end
 
@@ -2334,6 +2380,10 @@ local function addSupportToDraft(
 		-- escort_num = remain_SEAD_offset / uSupportLoadout.firepower
 		escort_num = math.ceil(escort_num / 2) * 2										--round up requested escorts to even number
 
+		if escort_num > 4 then
+			escort_num = 4
+		end	
+
 		--TODO revoir ça
 		-- if totalPlanePerTask[side][task] and totalPlanePerTask[side][task]/2 >= escort_num then
 		-- 	draft.score = draft.score + (1 * draft.loadout.firepower) * draft.target.priority
@@ -2920,7 +2970,50 @@ for sideName, draftT in pairs(draftSorties) do
 						)
 					end
 
-					for sptTask, task_bool in pairs(unitSupport.tasks) do if task_bool then
+					--Pourquoi: pairs() itère les tâches d'un squad dans un ordre fixe (ni aléatoire ni pondéré) ;
+					--tasksCoef n'était jamais lu nulle part. Résultat: quand un squad a plusieurs tâches
+					--possibles (ex: SEAD + Escort Jammer), c'est toujours LA MEME qui passait en premier,
+					--sans jamais varier selon le coefficient voulu ("tout ou rien").
+					--On tire maintenant UNE seule tâche par squad et par tentative, au sort, pondérée par tasksCoef
+					--(coefficient plus haut = plus de chances d'être choisie, jamais 100% ni 0%).
+					local tasksToTry = unitSupport.tasks
+
+					if unitSupport.tasksCoef then
+
+						local weightedTasks = {}
+						local totalCoef = 0
+
+						for sptTaskName, taskIsEnabled in pairs(unitSupport.tasks) do
+							if taskIsEnabled then
+								local coef = unitSupport.tasksCoef[sptTaskName] or 1
+								weightedTasks[#weightedTasks + 1] = { name = sptTaskName, coef = coef }
+								totalCoef = totalCoef + coef
+							end
+						end
+
+						if #weightedTasks > 1 and totalCoef > 0 then
+
+							local roll = math.random() * totalCoef
+							local cumulative = 0
+							local chosen = weightedTasks[1].name
+
+							for _, weightedTask in ipairs(weightedTasks) do
+								cumulative = cumulative + weightedTask.coef
+								if roll <= cumulative then
+									chosen = weightedTask.name
+									break
+								end
+							end
+
+							tasksToTry = { [chosen] = true }
+
+							if isDebugModeB then
+								debugLog(draft.id.." AtoG II tasksCoef: "..unitSupport.name.." a choisi "..chosen.." (tirage pondéré parmi "..#weightedTasks.." tâches)")
+							end
+						end
+					end
+
+					for sptTask, task_bool in pairs(tasksToTry) do if task_bool then
 						local playable_II = false
 						local reserveClient = false
 
@@ -3420,6 +3513,14 @@ local function rejectDraft(draft, sujet, cause, line)
 
 	table.insert(draft["rejected"], tabRejected)
 
+	--Pourquoi: rejectDraft (ici, dans createATO_table) et rejectStep/bestReject (dans processEligibleLoadout)
+	--sont deux systèmes de suivi séparés qui ne communiquaient pas entre eux : un squad pouvait traverser
+	--tout le pipeline avec succès puis être rejeté ICI (menace trop importante, firepower insuffisant, etc.)
+	--sans que ça remonte nulle part dans le rapport final. On les raccroche au même wagon.
+	if draft.name and not escortRejectReasons[draft.name] then
+		addEscortRejectReason(draft.name, tostring(sujet))
+	end
+
 end
 
 local function validSupportIterator(arg_supportTable, arg_dispoTmp)
@@ -3499,29 +3600,58 @@ local function createATO_table(draftPriority)
 					draft.loadout.minscore = draft.loadout.minscore / ((MissionInstance )/10 +1)
 				end
 
+				--Pourquoi: si les escortes demandées sont là, en quantité demandée, on descend le minscore
+				--pour autoriser la création du flight malgré une menace élevée. Reglage: ESCORT_MINSCORE_DISCOUNT (en tête de fichier).
+				--Version un-seul-package : additionne la couverture sur toutes les tâches de support du draft
+				--(Escort, SEAD, Escort Jammer, ...), pas seulement une.
+				if draft.loadout.minscore and draft.support then
+
+					local totalRequested = 0
+					local totalAssigned = 0
+
+					for sptTaskName, supportData in pairs(draft.support) do
+						if type(supportData) == "table" and supportData["escort_max"] and supportData["escort_max"] > 0 then
+							totalRequested = totalRequested + supportData["escort_max"]
+							totalAssigned = totalAssigned + (supportData["NbTotalSupport"] or 0)
+						end
+					end
+
+					if totalRequested > 0 then
+
+						local escortCoverage = math.min(1, totalAssigned / totalRequested)
+
+						draft.loadout.minscore = draft.loadout.minscore * (1 - ESCORT_MINSCORE_DISCOUNT * escortCoverage)
+
+						if isDebugModeC then
+							debugLog(draft.id.." AtoG passe C_00b escort coverage: "..tostring(totalAssigned).."/"..tostring(totalRequested)
+								.." ("..tostring(math.floor(escortCoverage * 100)).."%) minscore ajusté: "..tostring(draft.loadout.minscore))
+						end
+					end
+				end
+
 				if draft.loadout.minscore == nil or draft.score >= draft.loadout.minscore then					--draft sortie has no minimum score requirement or minimum score requirement is satisified		
 
 					-- if draft.multipack > 0 then												--target does not have a requirment for a specific number of packages, or still needs more packages		
 					if multipackByTargetName[draft.target_name]["nbPack"] > 0 then
 
 						if draft.target.firepower.max > 0 and draft.target.firepower.max >= draft.target.firepower.min then	--the target of this draft sortie must have a need for firepower above the minimum firepower threshold	
-							local available = AcftAvail[draft.name].unassigned											--shortcut for available aircraft for this draft sortie					
+							local available_Main = AcftAvail[draft.name].unassigned											--shortcut for available aircraft for this draft sortie					
 
-							local requestedNumber = draft.number -- copie locale de travail pour éviter de modifier le draft original et provoquer des effets de bord entre validations
+							local request_Main_Nb = draft.number -- copie locale de travail pour éviter de modifier le draft original et provoquer des effets de bord entre validations
 
 							local passPackmax_C
 							if draft.target.firepower and draft.target.firepower.packmax and draft.target.firepower.packmax > 1 then
-								if available >= draft.number then
+								if available_Main >= draft.number then
 									passPackmax_C = true
 								end
 							end
 
 							--enough aircraft are available to satisfy minimum firepower requirement for target
 							-- if (available * draft.loadout.firepower >= draft.target.firepower.min and draft.number * draft.loadout.firepower >= draft.target.firepower.min) or passPackmax_C then				
-							if (available * draft.loadout.firepower >= draft.target.firepower.min ) or passPackmax_C then
+							if (available_Main * draft.loadout.firepower >= draft.target.firepower.min ) or passPackmax_C then
 
 								--if the target has a minimum package number requirement, sufficient aircraft are available from this unit to satisfy it	
-								if draft.target.firepower.packmin == nil or available * draft.loadout.firepower >= (draft.target.firepower.packmin - 1) * draft.target.firepower.max + draft.target.firepower.min then				
+								if draft.target.firepower.packmin == nil or available_Main * draft.loadout.firepower >= (draft.target.firepower.packmin - 1) * draft.target.firepower.max + draft.target.firepower.min then				
 
 									local limitMP = true   --TODO a revoir, semble inutile
 
@@ -3529,20 +3659,20 @@ local function createATO_table(draftPriority)
 
 									if isDebugModeC and mpTask_Check then
 										debugLog(draft.id.." AtoG passe C_00_b  ".." "..draft.type
-											.." available: "..tostring(available)
+											.." available: "..tostring(available_Main)
 											.." < NbPlane? ".. tostring(multiPlaneSet[side][draft.type][draft.name].NbPlane)
 											.." main_overideMP?: "..tostring(draft.main_overideMP)
 											.." overideMP_B?: "..tostring(draft.overideMP_B))
 									end
 
-									if (draft.flights == nil or draft.number <= available or draft.main_overideMP or passPackmax_C) and limitMP then											--for targets with station time (multiple flights), continue only if sufficient aircraft are availabe. Additional lower scored sorties with less airctaft required will come later 
+									if (draft.flights == nil or draft.number <= available_Main or draft.main_overideMP or passPackmax_C) and limitMP then											--for targets with station time (multiple flights), continue only if sufficient aircraft are availabe. Additional lower scored sorties with less airctaft required will come later 
 
-										if requestedNumber > available and not draft.main_overideMP then
+										if request_Main_Nb > available_Main and not draft.main_overideMP then
 
-											requestedNumber = available
+											request_Main_Nb = available_Main
 
 											if isDebugModeC then
-												debugLog(draft.id.." AtoG passe C_00_c requestedNumber "..tostring(requestedNumber))
+												debugLog(draft.id.." AtoG passe C_00_c requestedNumber "..tostring(request_Main_Nb))
 											end
 
 										end
@@ -3550,7 +3680,7 @@ local function createATO_table(draftPriority)
 										--check if there are enough supports available if supports are required		
 										local support_available = true
 										local need = {}																														--collect the total number of aircraft needed from each unit to complete the package
-										need[draft.name] = requestedNumber
+										need[draft.name] = request_Main_Nb
 										local avail = {}																													--collect the maximal number of available aircraft from this unit (biggest number of all tasks)
 										avail[draft.name] = AcftAvail[draft.name].unassigned
 
@@ -3657,8 +3787,8 @@ local function createATO_table(draftPriority)
 
 										if mission_ini.strikeOnlyWithEscorte and not draft.loadout.self_escort then
 											if (db_loadouts[draft.type]["Anti-ship Strike"] or db_loadouts[draft.type]["Strike"])  then
-												local break_loop = false
-												for n_squad, squad in pairs(oob_air[side]) do
+												-- local break_loop = false
+												for squadN, squad in pairs(oob_air[side]) do
 
 													if isDebugModeC then
 														debugLog(draft.id.." ".." AtoG III passe SWE _01 "..draft.type.." "..squad.type)
@@ -3670,8 +3800,8 @@ local function createATO_table(draftPriority)
 
 														if not needSupport[draft.name] then needSupport[draft.name] = 0 end
 														if not availSupport[draft.name] then availSupport[draft.name] = 0 end
-														-- needSupport[draft.name] =  DeepCopy(draft.number)
-														needSupport[draft.name] = requestedNumber
+														
+														-- needSupport[draft.name] = request_Main_Nb
 
 														--TODO comment ça marche? ça a l'air inutile....
 														availSupport[draft.name] =  AcftAvail[draft.name].unassigned
@@ -3692,18 +3822,18 @@ local function createATO_table(draftPriority)
 															end
 														end
 
-														--TODO encore utile ça?												
-														for Sname,_ in pairs(needSupport) do
-															if needSupport[Sname] - (needSupport[Sname] * 0.25)  > availSupport[Sname] then
+														-- --TODO encore utile ça?												
+														-- for Sname,_ in pairs(needSupport) do
+														-- 	if needSupport[Sname] - (needSupport[Sname] * 0.25)  > availSupport[Sname] then
 
-																support_available = false																									--not enough support available
+														-- 		support_available = false																									--not enough support available
 
-																local sujet = draft.id.." BOMBARDIER NECESSITANT ESCORTE()support_available if needSupport[Sname] - (needSupport[Sname] * 0.15) > availSupport[Sname]"
-																local cause = { [1] =  needSupport[Sname] - (needSupport[Sname] * 0.25), [2] = availSupport[Sname], }
+														-- 		local sujet = draft.id.." BOMBARDIER NECESSITANT ESCORTE()support_available if needSupport[Sname] - (needSupport[Sname] * 0.15) > availSupport[Sname]"
+														-- 		local cause = { [1] =  needSupport[Sname] - (needSupport[Sname] * 0.25), [2] = availSupport[Sname], }
 
-																rejectDraft(draft, sujet, cause, SafeGetLine())
-															end
-														end
+														-- 		rejectDraft(draft, sujet, cause, SafeGetLine())
+														-- 	end
+														-- end
 													end
 												end
 											end
@@ -3724,7 +3854,7 @@ local function createATO_table(draftPriority)
 
 										--enleve deja l effectif du main (il peut y avoir 4 F18 strike et 2f18 sead ou escorte)
 										-- dispoTmp[draft.name].unassigned = dispoTmp[draft.name].unassigned - draft.number
-										dispoTmp[draft.name].unassigned = dispoTmp[draft.name].unassigned - requestedNumber
+										dispoTmp[draft.name].unassigned = dispoTmp[draft.name].unassigned - request_Main_Nb
 
 										for _, supportData in pairs(validSupportIterator(draft.support, dispoTmp)) do
 
@@ -3749,10 +3879,21 @@ local function createATO_table(draftPriority)
 
 											-- end
 
-											if support.support_requirement and mission_ini.strikeOnlyWithEscorte and (support.number >= 2 and dispoTmp[support.name].unassigned < 2 and draft.task ~= supportTask) and not MPOverride_C and not passPackmax_C then
+											if support.support_requirement and mission_ini.strikeOnlyWithEscorte and 
+											(support.number >= 2 and dispoTmp[support.name].unassigned < 2 and draft.task ~= supportTask) 
+											and not MPOverride_C and not passPackmax_C
+											and supportTask ~= "Escort Jammer"
+											 then
+
+												local txt_nb = nil
+												if dispoTmp[support.name].unassigned <= 0 then
+													txt_nb = " 0 "
+												else
+													txt_nb = " single "
+												end
 
 												if isDebugModeC then
-													debugLog(draft.id.." AtoG passe C_00_h  we don't accept a single aircraft as escort supportTask "..supportTask.." draft.task "..tostring(draft.task))
+													debugLog(draft.id.." AtoG passe C_00_h  we don't accept a "..txt_nb.." aircraft as escort supportTask "..supportTask.." draft.task "..tostring(draft.task))
 												end
 
 												escortDiagnostic.rejected[#escortDiagnostic.rejected + 1] =
@@ -3763,8 +3904,8 @@ local function createATO_table(draftPriority)
 
 												support_available = false																									--not enough support available
 
-												local sujet = support.id.." type: "..support.type.." we don't accept a single aircraft as escort "..supportName
-												local cause = { "support.number: ",support.number, "unassigned:" , tostring(dispoTmp[support.name].unassigned), " available: ", tostring(dispoTmp[support.name].aircraft_available), "supportName: ", tostring(supportName), " task: ", tostring(draft.task)  }
+												local sujet = support.id.." type: "..support.type.." we don't accept a "..txt_nb.." aircraft as escort "..supportName
+												local cause = { "support.number: ",support.number, "unassigned:" , tostring(dispoTmp[support.name].unassigned), " available: ", tostring(dispoTmp[support.name].aircraft_available), "supportName: ", tostring(supportName), " task: ", tostring(draft.task) , " supportTask: ", tostring(supportTask) }
 
 												-- rejectDraft(draft, sujet, cause)
 												rejectDraft(draft, sujet, cause, SafeGetLine())
@@ -3969,7 +4110,7 @@ local function createATO_table(draftPriority)
 													end
 
 													-- draft.number = test_Aircraftnumber
-													requestedNumber = test_Aircraftnumber
+													request_Main_Nb = test_Aircraftnumber
 
 													if not needeMindAircraft then
 														support_available = false
@@ -3995,7 +4136,7 @@ local function createATO_table(draftPriority)
 
 										--add new package to ATO
 										-- if support_available and draft.number > 0 then																		--continue if no support is required or enough support is available to create package
-										if support_available and requestedNumber > 0 then
+										if support_available and request_Main_Nb > 0 then
 
 											local pack_n = #ATO[side]
 
@@ -4220,6 +4361,21 @@ local function createATO_table(draftPriority)
 														debugLog(draft.id.." ERROR AcftAvail missing for "..tostring(arg_Entry.name))
 														return
 													end
+
+													--Pourquoi: tracer précisément CHAQUE décrémentation réelle d'AcftAvail (la seule dans tout le
+													--fichier), avec avant/après, pour repérer une éventuelle fuite de compteur sans avion en vol
+													if isDebugModeC or AcftAvail[arg_Entry.name].unassigned <= 0 then
+														debugLog(
+															draft.id.." AtoG DECREMENT_ACFTAVAIL squad: "..tostring(arg_Entry.name)
+															.." role: "..tostring(arg_Role)
+															.." draft.task: "..tostring(draft.task)
+															.." target: "..tostring(draft.target_name)
+															.." avant: "..tostring(AcftAvail[arg_Entry.name].unassigned)
+															.." retire: "..tostring(assigned)
+															.." apres: "..tostring(AcftAvail[arg_Entry.name].unassigned - assigned)
+														)
+													end
+
 													AcftAvail[arg_Entry.name].assigned = AcftAvail[arg_Entry.name].assigned + assigned
 													AcftAvail[arg_Entry.name].unassigned = AcftAvail[arg_Entry.name].unassigned - assigned		--remove assigned aircraft from total number of available aircraft for this unit
 													arg_Assign = arg_Assign - assigned															--continue loop until are aircraft are assigned
@@ -4238,9 +4394,9 @@ local function createATO_table(draftPriority)
 											--********************************************************************************************
 											-- addFlight(draft.number, "main", draft)												--add main body flights to package
 											local draftForFlight = DeepCopy(draft)
-											draftForFlight.number = requestedNumber
+											draftForFlight.number = request_Main_Nb
 
-											addFlight(requestedNumber, "main", draftForFlight)
+											addFlight(request_Main_Nb, "main", draftForFlight)
 											--********************************************************************************************
 
 											-- for taskSupport, supportPart in pairs(draft.support) do										--iterate through all package support
@@ -4332,12 +4488,12 @@ local function createATO_table(draftPriority)
 									end
 								else
 									local sujet = draft.id.." FIREPOWER du PACKAGE INSUFFISANT()if  available * draft.loadout.firepower >= (draft.target.firepower.packmin - 1) * draft.target.firepower.max"
-									local cause = { [1] = tostring(available * draft.loadout.firepower), [2]  = tostring((draft.target.firepower.packmin - 1) * draft.target.firepower.max), }
+									local cause = { [1] = tostring(available_Main * draft.loadout.firepower), [2]  = tostring((draft.target.firepower.packmin - 1) * draft.target.firepower.max), }
 									rejectDraft(draft, sujet, cause, SafeGetLine())
 								end
 							else
-								local sujet = draft.id.." "..tostring(draft.type).." AVION DISPONIBLE INSUFFISANT "..tostring(draft.name).." available: "..tostring(available).." draft.loadout.firepower: "..tostring(draft.loadout.firepower.." firepowerMin: "..tostring(draft.target.firepower.min))
-								local cause = { [1] = tostring(available * draft.loadout.firepower), [2]  = tostring(draft.target.firepower.min), }
+								local sujet = draft.id.." "..tostring(draft.type).." AVION DISPONIBLE INSUFFISANT "..tostring(draft.name).." available: "..tostring(available_Main).." draft.loadout.firepower: "..tostring(draft.loadout.firepower.." firepowerMin: "..tostring(draft.target.firepower.min))
+								local cause = { [1] = tostring(available_Main * draft.loadout.firepower), [2]  = tostring(draft.target.firepower.min), }
 								rejectDraft(draft, sujet, cause, SafeGetLine())
 							end
 						else
@@ -4351,7 +4507,7 @@ local function createATO_table(draftPriority)
 						rejectDraft(draft, sujet, cause, SafeGetLine())
 					end
 				else
-					local sujet = draft.id.." MENACE TROP IMPORTANTE (descendre minscore ou diminuer Menace AA AS) draft.loadout.minscore <= draft.score"
+					local sujet = draft.id.." MENACE TROP IMPORTANTE (descendre minscore ou diminuer Menace AA AS) minscore  "..tostring(draft.loadout.minscore).." <score? "..tostring(draft.score)
 					local cause = { [1] = tostring(draft.loadout.minscore), [2]  = tostring(draft.score), }
 					rejectDraft(draft, sujet, cause, SafeGetLine())
 
@@ -4623,35 +4779,49 @@ if Debug.debug then
 
 			else
 
+				local taskListTxt = (status.tasks and #status.tasks > 0) and table.concat(status.tasks, ", ") or "aucune"
+				local trackedReason = escortRejectReasons[squadName] and escortRejectReasons[squadName][1]
+
 				if bestReject then
 
 					print(
 						squadName
 						.." | "..status.unitType
+						.." | tâches: "..taskListTxt
 						.." | dominantReason: "
 						..tostring(bestReject.dominantReason)
 					)
 
+				elseif trackedReason then
+
+					-- raison précise trouvée (soit via processEligibleLoadout/addSupportToDraft, soit via
+					-- createATO_table/rejectDraft - le draft a été construit avec succès puis rejeté plus tard)
+					print(
+						squadName
+						.." | "..status.unitType
+						.." | tâches: "..taskListTxt
+						.." | raison: "..tostring(trackedReason)
+					)
+
+				elseif status.hasMainTask then
+
+					-- a une vraie tâche principale (Strike/CAS/AWACS/Anti-ship/...), mais aucune raison
+					-- n'a été trackée pour elle : à ne pas confondre avec un squad escorte pur
+					print(
+						squadName
+						.." | "..status.unitType
+						.." | tâches: "..taskListTxt
+						.." | a une tâche principale mais aucune raison de rejet n'a été trackée (limite actuelle du tracking, pas un squad escorte)"
+					)
+
 				else
 
-					local escortReasons = escortRejectReasons[squadName]
-
-					if escortReasons and escortReasons[1] then
-
-						print(
-							squadName
-							.." | "..status.unitType
-							.." | escort/support uniquement | raison: "..tostring(escortReasons[1])
-						)
-
-					else
-
-						print(
-							squadName
-							.." | "..status.unitType
-							.." | escort/support uniquement | a passé les contrôles de base (actif, base valide, appareils dispo) mais n'a jamais été sélectionné : soit sa tâche n'était pas demandée sur cette mission, soit un autre squad a été préféré"
-						)
-					end
+					print(
+						squadName
+						.." | "..status.unitType
+						.." | tâches: "..taskListTxt
+						.." | escort/support uniquement | a passé les contrôles de base (actif, base valide, appareils dispo) mais n'a jamais été sélectionné : soit sa tâche n'était pas demandée sur cette mission, soit un autre squad a été préféré"
+					)
 				end
 
 				if bestReject and bestReject.finalReject then
