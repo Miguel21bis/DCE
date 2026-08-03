@@ -6678,6 +6678,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 				--M11.r ajoute une copie des avions multijoueur commançant en l'air // retab // recovery
+				-- start RECOVERY*********************************************************************
+				-- start RECOVERY*********************************************************************
+				-- start RECOVERY*********************************************************************
 				local groupRTB = {}
 				if mission_ini.MP_PlaneRecovery and Multi.NbGroup >= 1 and isHumain then
 
@@ -6710,7 +6713,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						end
 
 
-						groupRTB.route.points[2] = groupRTB.route.points[1]
+						-- groupRTB.route.points[2] = groupRTB.route.points[1]
+						--FIX ne recopie pas exactemetn, bug en prod
+						groupRTB.route.points[2] = DeepCopy(groupRTB.route.points[1])
 
 						groupRTB.route.points[2]['airdromeId'] = nil
 						groupRTB.route.points[2]['task'] = {
@@ -6722,7 +6727,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 															}
 						groupRTB.route.points[2]["ETA_locked"] = false
 
-					elseif groupRTB.route.points[2] and  groupRTB.route.points[3] then
+					elseif groupRTB.route.points[2] and groupRTB.route.points[3] then
 						-- groupRTB.route.points[1] = groupRTB.route.points[2]
 
 						--cherche le milieu entre le wpt 2 et 3
@@ -6730,7 +6735,9 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						local distance = GetDistance(groupRTB.route.points[2], groupRTB.route.points[3]) / 2
 						local tempWPT = GetOffsetPoint(groupRTB.route.points[2], direction, distance)
 
-						groupRTB.route.points[1] = groupRTB.route.points[3]
+						-- groupRTB.route.points[1] = groupRTB.route.points[3]
+						--FIX ne recopie pas exactemetn, bug en prod
+						groupRTB.route.points[1] = DeepCopy(groupRTB.route.points[3])
 
 						groupRTB.route.points[1]["speed_locked"] = true
 						groupRTB.route.points[1]["ETA_locked"] = true
@@ -6887,6 +6894,11 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 
 				end	-- fin RECOVERY
+				-- fin RECOVERY*********************************************************************
+				-- fin RECOVERY*********************************************************************
+				-- fin RECOVERY*********************************************************************
+
+
 
 				-- modification M33_e 	Custom Briefing (e: divert/CV possible)
 				-- place dans une table les bases proches des WPT
