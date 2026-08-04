@@ -524,6 +524,81 @@ local function computeServiceableAircraft(unit, sideName)
 	return aircraft_serviceable
 end
 
+--Missions traditionnellement solo en aviation : unité minimale de 1 au lieu de 2
+local SOLO_TASKS = {
+	["AWACS"] = true,
+	["AFAC"] = true,
+	["Refueling"] = true,
+	["Reconnaissance"] = true,
+}
+
+--Répartit les avions d'un squad entre ses tâches actives, au prorata de tasksCoef, par paires
+--(unité de 2, sauf tâches solo type AWACS/AFAC/Refueling/Reconnaissance = unité de 1).
+--Pourquoi: un squad avec Escort=5 et CAP=1 doit voir ses avions se répartir ~5/6 Escort, ~1/6 CAP,
+--pas systématiquement 100% sur l'une ou l'autre. Une tâche dont la part arrondie tombe à 0 est
+--simplement absente de la table retournée (pas assez d'avions pour l'ouvrir en paire complète).
+local function allocateAircraftByTask(unit, totalAvailable)
+
+	if not unit.tasksCoef or not unit.tasks or totalAvailable <= 0 then
+		return nil
+	end
+
+	local candidates = {}
+	local totalCoef = 0
+
+	for taskName, enabled in pairs(unit.tasks) do
+		if enabled then
+			local coef = unit.tasksCoef[taskName] or 1
+			if coef > 0 then
+				candidates[#candidates + 1] = {
+					name = taskName,
+					coef = coef,
+					unitSize = SOLO_TASKS[taskName] and 1 or 2,
+				}
+				totalCoef = totalCoef + coef
+			end
+		end
+	end
+
+	if #candidates == 0 or totalCoef <= 0 then
+		return nil
+	end
+
+	if #candidates == 1 then
+		return { [candidates[1].name] = totalAvailable }
+	end
+
+	--1er passage: part proportionnelle, arrondie au multiple de unitSize INFERIEUR
+	local allocation = {}
+	local usedTotal = 0
+
+	for _, c in ipairs(candidates) do
+		local rawShare = totalAvailable * (c.coef / totalCoef)
+		local units = math.floor(rawShare / c.unitSize)
+		local count = units * c.unitSize
+		allocation[c.name] = count
+		c.remainder = rawShare - count
+		usedTotal = usedTotal + count
+	end
+
+	--2eme passage: distribue ce qui reste (par paquets de unitSize) aux tâches ayant le plus gros reste
+	table.sort(candidates, function(a, b) return a.remainder > b.remainder end)
+
+	local remaining = totalAvailable - usedTotal
+	local guard = 0
+
+	while remaining > 0 and guard < #candidates * 20 do
+		local c = candidates[(guard % #candidates) + 1]
+		if remaining >= c.unitSize then
+			allocation[c.name] = allocation[c.name] + c.unitSize
+			remaining = remaining - c.unitSize
+		end
+		guard = guard + 1
+	end
+
+	return allocation
+end
+
 --Prépare tout le contexte UNIT du draft
 --Pourquoi: sortir les validations unit/base/availability de la cascade principale
 local function prepareUnitContext(draftContext, sideName)
@@ -583,6 +658,20 @@ local function prepareUnitContext(draftContext, sideName)
 		AcftAvail[unit.name].available = aircraft_available
 		AcftAvail[unit.name].assigned = 0
 		AcftAvail[unit.name].unassigned = aircraft_available
+
+		--Pourquoi: répartit une fois pour toutes le stock de ce squad entre ses tâches (tasksCoef),
+		--pour que Part A (tâches principales) et Part B (support/escorte) puisent chacune dans SA part
+		--au lieu de se disputer le même pool global en tout-ou-rien.
+		AcftAvail[unit.name].taskCap = allocateAircraftByTask(unit, aircraft_available)
+		AcftAvail[unit.name].taskUsed = {}
+
+		if Debug.debug and AcftAvail[unit.name].taskCap then
+			local txt = "AtoG ALLOCATION_PAR_TACHE "..unit.name..": "
+			for taskName, count in pairs(AcftAvail[unit.name].taskCap) do
+				txt = txt..taskName.."="..count.." "
+			end
+			debugLog(txt.."(total: "..aircraft_available..")")
+		end
 	end
 
 	draftContext.aircraft_available = AcftAvail[unit.name].available
@@ -1054,8 +1143,17 @@ local function buildDraftSorties(
 
 		if unit.player then
 			-- draftSortiesEntry.score = draftSortiesEntry.score * 1.5
-			draftSortiesEntry.score = draftSortiesEntry.score * 15
-			draftSortiesEntry.scoreCoef = 15
+			draftSortiesEntry.score = draftSortiesEntry.score * 500
+			draftSortiesEntry.scoreCoef = 500
+
+			if Debug.debug then
+				debugLog("draftId"..draftId.." AtoG PLAYER_SCORE_INIT "..unit.name
+					.." target.priority: "..tostring(target.priority)
+					.." route_threat: "..tostring(route_threat)
+					.." score_apres_coef: "..tostring(draftSortiesEntry.score)
+					.." scoreCoef: "..tostring(draftSortiesEntry.scoreCoef)
+				)
+			end
 		end
 
 		if draftContext.overideMP_A then
@@ -1817,27 +1915,35 @@ for sideName, units in pairs(oob_air) do
 			end
 
 			atoMainTaskFound = false
-			for task, task_bool in pairs(unit.tasks) do																		--iterate through all tasks of unit		
+
+			local MAIN_TASKS = {
+				["Strike"] = true,
+				["CAP"] = true,
+				["Intercept"] = true,
+				["CAS"] = true,
+				["Transport"] = true,
+				["SAR"] = true,
+				["CSAR"] = true,
+				["Runway Attack"] = true,
+				["Anti-ship Strike"] = true,
+				["Reconnaissance"] = true,
+				["AWACS"] = true,
+				["Refueling"] = true,
+				["Fighter Sweep"] = true,
+				["AFAC"] = true,
+			}
+
+			--Pourquoi: la restriction "une seule tâche par recherche" (basée sur tasksCoef) a été retirée :
+			--elle empêchait un squad de jamais être tenté sur sa tâche à plus faible coefficient, même
+			--quand taskCap lui réserve encore de la place dessus. taskCap (dans addFlight) gère maintenant
+			--la répartition équitable au moment de la consommation ; la recherche retente donc toutes les
+			--tâches actives du squad, comme avant tasksCoef.
+			local mainTasksToTry = unit.tasks
+
+			for task, task_bool in pairs(mainTasksToTry) do																		--iterate through all tasks of unit		
 				if isDebugModeA1 then
 					debugLog("draftId"..draftId.." AtoG passe A_03b task: "..tostring(task).." task_bool: "..tostring(task_bool).."  available: "..tostring(AcftAvail[unit.name].available).." = ready:  "..tostring(unit.roster.ready) .." - unavailable: ".. tostring(#AcftAvail[unit.name].unavailable))
 				end
-
-				local MAIN_TASKS = {
-					["Strike"] = true,
-					["CAP"] = true,
-					["Intercept"] = true,
-					["CAS"] = true,
-					["Transport"] = true,
-					["SAR"] = true,
-					["CSAR"] = true,
-					["Runway Attack"] = true,
-					["Anti-ship Strike"] = true,
-					["Reconnaissance"] = true,
-					["AWACS"] = true,
-					["Refueling"] = true,
-					["Fighter Sweep"] = true,
-					["AFAC"] = true,
-				}
 
 				if task_bool and MAIN_TASKS[task] then
 
@@ -2685,7 +2791,20 @@ local function addSupportToDraft(
 		-- local testScore = draft.priorityIni / route_threat_New
 		local testScore = draft.targetPriority / route_threat_New
 
+		local testScore_beforeCoef = testScore
+
 		testScore = testScore * draft.scoreCoef + draft.scoreAdd
+
+		if isDebugModeB then
+			debugLog(draft.id.." AtoG SCORE_RECALC targetPriority: "..tostring(draft.targetPriority)
+				.." route_threat_New: "..tostring(route_threat_New)
+				.." testScore_avant_coef: "..tostring(testScore_beforeCoef)
+				.." scoreCoef: "..tostring(draft.scoreCoef)
+				.." scoreAdd: "..tostring(draft.scoreAdd)
+				.." testScore_final: "..tostring(testScore)
+				.." draft.score_avant: "..tostring(draft.score)
+			)
+		end
 
 		if overideMP_B then
 			if testScore > draft.score then
@@ -2970,48 +3089,14 @@ for sideName, draftT in pairs(draftSorties) do
 						)
 					end
 
-					--Pourquoi: pairs() itère les tâches d'un squad dans un ordre fixe (ni aléatoire ni pondéré) ;
-					--tasksCoef n'était jamais lu nulle part. Résultat: quand un squad a plusieurs tâches
-					--possibles (ex: SEAD + Escort Jammer), c'est toujours LA MEME qui passait en premier,
-					--sans jamais varier selon le coefficient voulu ("tout ou rien").
-					--On tire maintenant UNE seule tâche par squad et par tentative, au sort, pondérée par tasksCoef
-					--(coefficient plus haut = plus de chances d'être choisie, jamais 100% ni 0%).
+					--Pourquoi: la restriction "une seule tâche par recherche" (basée sur tasksCoef) a été retirée :
+					--elle empêchait un squad de jamais être tenté sur sa tâche à plus faible coefficient
+					--(ex: SEAD quand Escort a un coefficient plus haut), même quand taskCap lui réserve
+					--encore de la place dessus -- ce qui pouvait rejeter un draft entier faute de candidat
+					--jamais tenté, alors qu'un candidat existait bel et bien. taskCap (dans addFlight) gère
+					--maintenant la répartition équitable au moment de la consommation ; la recherche retente
+					--donc toutes les tâches actives du squad, comme avant tasksCoef.
 					local tasksToTry = unitSupport.tasks
-
-					if unitSupport.tasksCoef then
-
-						local weightedTasks = {}
-						local totalCoef = 0
-
-						for sptTaskName, taskIsEnabled in pairs(unitSupport.tasks) do
-							if taskIsEnabled then
-								local coef = unitSupport.tasksCoef[sptTaskName] or 1
-								weightedTasks[#weightedTasks + 1] = { name = sptTaskName, coef = coef }
-								totalCoef = totalCoef + coef
-							end
-						end
-
-						if #weightedTasks > 1 and totalCoef > 0 then
-
-							local roll = math.random() * totalCoef
-							local cumulative = 0
-							local chosen = weightedTasks[1].name
-
-							for _, weightedTask in ipairs(weightedTasks) do
-								cumulative = cumulative + weightedTask.coef
-								if roll <= cumulative then
-									chosen = weightedTask.name
-									break
-								end
-							end
-
-							tasksToTry = { [chosen] = true }
-
-							if isDebugModeB then
-								debugLog(draft.id.." AtoG II tasksCoef: "..unitSupport.name.." a choisi "..chosen.." (tirage pondéré parmi "..#weightedTasks.." tâches)")
-							end
-						end
-					end
 
 					for sptTask, task_bool in pairs(tasksToTry) do if task_bool then
 						local playable_II = false
@@ -3636,6 +3721,21 @@ local function createATO_table(draftPriority)
 
 						if draft.target.firepower.max > 0 and draft.target.firepower.max >= draft.target.firepower.min then	--the target of this draft sortie must have a need for firepower above the minimum firepower threshold	
 							local available_Main = AcftAvail[draft.name].unassigned											--shortcut for available aircraft for this draft sortie					
+
+							--Pourquoi: available_Main ne reflétait que le pool GLOBAL du squad, jamais le cap PAR TACHE
+							--(taskCap) -- résultat: un squad pouvait être accepté pour bien plus de packages "Strike"
+							--que sa part réellement allouée, tant que le pool global (partagé avec CAP/Escort/...)
+							--n'était pas totalement à sec. On clampe donc ici, AVANT toute décision d'accepter le
+							--draft, pas seulement au moment de l'assignation réelle dans addFlight.
+							if AcftAvail[draft.name].taskCap and AcftAvail[draft.name].taskCap[draft.task] ~= nil then
+
+								local usedForTask = (AcftAvail[draft.name].taskUsed and AcftAvail[draft.name].taskUsed[draft.task]) or 0
+								local capRemaining = AcftAvail[draft.name].taskCap[draft.task] - usedForTask
+
+								if capRemaining < available_Main then
+									available_Main = capRemaining
+								end
+							end
 
 							local request_Main_Nb = draft.number -- copie locale de travail pour éviter de modifier le draft original et provoquer des effets de bord entre validations
 
@@ -4362,9 +4462,55 @@ local function createATO_table(draftPriority)
 														return
 													end
 
+													--Pourquoi: si ce squad a une répartition par tâche (tasksCoef), on plafonne "assigned" à ce qu'il
+													--reste pour CETTE tâche précise, même si le pool global AcftAvail n'est pas épuisé -- sinon la
+													--première tâche traitée peut engloutir tout le squad avant que les autres n'aient leur part.
+													local taskForCap = (arg_Role == "main") and draft.task or arg_Role
+													local assigned_avant_clamp = assigned
+
+													if AcftAvail[arg_Entry.name].taskCap and AcftAvail[arg_Entry.name].taskCap[taskForCap] ~= nil then
+
+														AcftAvail[arg_Entry.name].taskUsed = AcftAvail[arg_Entry.name].taskUsed or {}
+														local usedSoFar = AcftAvail[arg_Entry.name].taskUsed[taskForCap] or 0
+														local cap = AcftAvail[arg_Entry.name].taskCap[taskForCap]
+														local remaining = cap - usedSoFar
+
+														if remaining <= 0 then
+															assigned = 0
+														elseif assigned > remaining then
+															assigned = remaining
+														end
+
+														AcftAvail[arg_Entry.name].taskUsed[taskForCap] = usedSoFar + assigned
+
+														debugLog(draft.id.." AtoG TASKCAP squad: "..tostring(arg_Entry.name)
+															.." arg_Role: "..tostring(arg_Role)
+															.." taskForCap: "..tostring(taskForCap)
+															.." cap: "..tostring(cap)
+															.." deja_utilise_avant: "..tostring(usedSoFar)
+															.." assigned_avant_clamp: "..tostring(assigned_avant_clamp)
+															.." assigned_final: "..tostring(assigned)
+															.." deja_utilise_apres: "..tostring(AcftAvail[arg_Entry.name].taskUsed[taskForCap]))
+
+													else
+														--Pourquoi: si on arrive ICI, le plafond n'a PAS été consulté du tout pour cet appel
+														--(pas de taskCap pour ce squad, ou taskForCap ne correspond à aucune clé de taskCap)
+														---> assigned part sans aucune limite par tâche, uniquement limité par le pool global.
+														debugLog(draft.id.." AtoG TASKCAP_SKIPPED squad: "..tostring(arg_Entry.name)
+															.." arg_Role: "..tostring(arg_Role)
+															.." taskForCap: "..tostring(taskForCap)
+															.." assigned_sans_plafond: "..tostring(assigned)
+															.." taskCap_existe: "..tostring(AcftAvail[arg_Entry.name].taskCap ~= nil))
+													end
+
+													if assigned <= 0 then
+														--plus de part disponible pour CETTE tâche précise (même si le pool global n'est pas vide)
+														return
+													end
+
 													--Pourquoi: tracer précisément CHAQUE décrémentation réelle d'AcftAvail (la seule dans tout le
 													--fichier), avec avant/après, pour repérer une éventuelle fuite de compteur sans avion en vol
-													if isDebugModeC or AcftAvail[arg_Entry.name].unassigned <= 0 then
+													if Debug.debug then
 														debugLog(
 															draft.id.." AtoG DECREMENT_ACFTAVAIL squad: "..tostring(arg_Entry.name)
 															.." role: "..tostring(arg_Role)
