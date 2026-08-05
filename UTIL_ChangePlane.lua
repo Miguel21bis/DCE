@@ -1,16 +1,5 @@
 --gives the player the possibility to change planes during the campaign.
 ------------------------------------------------------------------------------------------------------- 
--- last modification: cleanCode_c
-if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_ChangePlane.lua"] = "1.5.9"
--------------------------------------------------------------------------------------------------------
-
--- cleanCode_c				(b springCleaning)
--- adjustment_a
--- debug_a					(a recipient == nil)
--- modification M63_a		compatible Datacard Generator or CombatFlite
--- modification M55_c		player can change the type of plane (c:triggers part)(b:same Side)
--------------------------------------------------------------------------------------------------------
 
 
 --====================================================================================================
@@ -26,17 +15,17 @@ local newSquadName = ""
 --essais de trier par type d'avion
 --try to sort by aircraft type
 --https://stackoverflow.com/questions/27909784/lua-sort-table-alphabetically-except-numbers
-local function cmp(a, b)
-   a = tostring(a.name)
-   b = tostring(b.name)
-   local patt = '^(.-)%s*(%d+)$'
-   local _,_, col1, num1 = a:find(patt)
-   local _,_, col2, num2 = b:find(patt)
-   if (col1 and col2) and col1 == col2 then
-      return tonumber(num1) < tonumber(num2)
-   end
-   return a < b
-end
+-- local function cmp(a, b)
+--    a = tostring(a.name)
+--    b = tostring(b.name)
+--    local patt = '^(.-)%s*(%d+)$'
+--    local _,_, col1, num1 = a:find(patt)
+--    local _,_, col2, num2 = b:find(patt)
+--    if (col1 and col2) and col1 == col2 then
+--       return tonumber(num1) < tonumber(num2)
+--    end
+--    return a < b
+-- end
 
 local playerPlane, playerSquad, playerCountry, playerSide
 
@@ -62,10 +51,15 @@ local nType = 1
 local tabSquad = {}
 
 for unitN , unit in ipairs(oobAirSide) do
-	if Playable_m[unit.type] and unit.inactive ~= true  then
+	if Playable_m[unit.type] then	--and unit.inactive ~= true  
 		table.insert(tabSquad,nType, unit.name)
 
-		io.write("\n"..nType .." | "..unit.type .." | "..unit.name.." | "..unit.country)
+		local inactive = ""
+		if unit.inactive then
+			inactive = " (inactive)"
+		end
+
+		io.write("\n"..nType .." | "..unit.type .." | "..unit.name.." | "..unit.country .." | "..inactive)
 
 		nType = nType + 1
 	end
@@ -91,10 +85,11 @@ repeat
 		end
 
 		--ajout le player du nouveau squad
-		for side, squadTL in  pairs(oob_air) do
-			for squad_n, squad in  pairs(squadTL) do
+		for side, squadTL in pairs(oob_air) do
+			for squad_n, squad in pairs(squadTL) do
 				if squad.name == newSquadName then
 					squad.player = true
+					squad.inactive = false
 				end
 			end
 		end
@@ -111,138 +106,6 @@ airFile:write(air_str)																		--save new data
 airFile:close()
 
 
-
---====================================================================================================
---====================================================================================================
--- partie trigger
---change les conditions de victoire/defaite dans la table camp_triggers
---en changeant le nom du squad (on prend le nouveau squad et son Reinforce)
---====================================================================================================
---====================================================================================================
--- monfichier = io.open("../../../Missions/Campaigns/"..camp.title.."/Active/camp_triggers.lua", "r")
--- RadioFile2 = "../../../Missions/Campaigns/"..camp.title.."/Init/radios_freq_compatible.lua"
-
--- oldSquadName = playerSquad
--- newSquadName = tabSquad[input]
-
--- if Skipmission_flag then
--- 	-- dofile("../../../Missions/Campaigns/"..camp.title.."/Active/camp_triggers.lua")	
--- 	dofile("Active/camp_triggers.lua")
--- elseif Firstmission_flag then
--- 	dofile("../../../Missions/Campaigns/"..camp.title.."/Init/camp_triggers_init.lua")
--- 	-- dofile("Init/camp_triggers.lua")	
--- end
-
--- --****************************************************************************************
--- --ajout automatique d'elements en cours de campagne: START
--- --****************************************************************************************
--- --********************************* targetlist ******************************************************
--- dofile("Init/targetlist_init.lua")
--- local targetlist_init = targetlist
--- if not targetlist_init.blue[1] then
--- 	TargetlistToNum(targetlist_init)
--- end
-
--- dofile("Active/targetlist.lua")
--- if not targetlist.blue[1] then
--- 	TargetlistToNum(targetlist)
--- end
-
--- local changes = CompareTargetLists(targetlist_init, targetlist)
-
--- -- Afficher les résultats
--- for _, added in ipairs(changes.added) do
--- 	print("Added TargetList: Name:", added.data.name)
--- end
--- -- for _, removed in ipairs(changes.removed) do
--- -- 	print("Removed TargetList: Name:", removed.data.name)
--- -- end
-
--- -- Ajout des éléments manquants dans targetlist
--- for _, added in ipairs(changes.added) do
--- 	if not targetlist[added.side] then
--- 		targetlist[added.side] = {}
--- 	end
--- 	-- Insérer l'élément à la fin de la table numérique
--- 	table.insert(targetlist[added.side], added.data)
--- end
-
--- -- -- Suppression des éléments retirés de targetlist
--- -- for _, removed in ipairs(changes.removed) do
--- -- 	if targetlist[removed.side] then
--- -- 		for i, target in ipairs(targetlist[removed.side]) do
--- -- 			if target.name == removed.name then
--- -- 				table.remove(targetlist[removed.side], i)
--- -- 				break
--- -- 			end
--- -- 		end
--- -- 	end
--- -- end
-
--- --********************************* camp_triggers ******************************************************
--- -- Charger les fichiers de référence et de travail
--- dofile("Init/camp_triggers_init.lua")
--- local camp_triggers_init = camp_triggers
-
--- dofile("Active/camp_triggers.lua")
-
--- -- Comparer les deux tables
--- changes = CompareTableNumeric(camp_triggers_init, camp_triggers)
-
--- -- Afficher les résultats
--- for _, added in ipairs(changes.added) do
--- 	print("Added triggers: Name:", added.name)
--- end
--- for _, removed in ipairs(changes.removed) do
--- 	print("Removed triggers: Name:", removed.name)
--- end
-
--- -- Ajouter les éléments manquants dans camp_triggers
--- for _, added in ipairs(changes.added) do
--- 	table.insert(camp_triggers, added)
--- end
--- -- Supprimer les éléments retirés de camp_triggers
--- for _, removed in ipairs(changes.removed) do
--- 	for i, trigger in ipairs(camp_triggers) do
--- 		if trigger.name == removed.name then
--- 			table.remove(camp_triggers, i)
--- 			break
--- 		end
--- 	end
--- end
-
-
-
--- --********************************* db_airbases ******************************************************
--- -- Charger les fichiers de référence et de travail
--- dofile("Init/db_airbases.lua")
--- local db_airbases_init = db_airbases
-
--- dofile("Active/db_airbases.lua")
-
--- -- Comparer les deux tables
--- changes = CompareTableAlphaNumeric(db_airbases_init, db_airbases)
-
--- -- Afficher les résultats
--- for _, added in ipairs(changes.added) do
---     print("\nAdded db_airbases Name:", added.name)
--- end
--- for _, removed in ipairs(changes.removed) do
---     print("\nRemoved db_airbases: Name:", removed.name)
--- end
-
--- -- Ajouter les éléments manquants dans db_airbases
--- for _, added in ipairs(changes.added) do
---     db_airbases[added.name] = added.data
--- end
--- -- Supprimer les éléments retirés de db_airbases
--- for _, removed in ipairs(changes.removed) do
---     db_airbases[removed.name] = nil
--- end
-
--- --****************************************************************************************
--- --ajout automatique d'elements en cours de campagne: FIN
--- --****************************************************************************************
 
 LoadFileAndUpdate("UTIL_ChangePlane "..debug.getinfo(1).currentline)
 

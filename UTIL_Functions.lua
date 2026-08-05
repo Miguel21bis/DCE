@@ -3658,50 +3658,78 @@ end
 --                uniquement au log/traçabilité, aucune restriction de
 --                droits n'est appliquée selon cette valeur pour l'instant.
 --=========================================================================
+local function dateToNumber(d)
+    return (d.year or 0) * 10000 + (d.month or 0) * 100 + (d.day or 0)
+end
+
 function UpdateConfMod(setWeather, setDate, from)
 
-	from = from or "unknown"
+    from = from or "unknown"
 
-	if not setWeather and not setDate then
-		-- print("[UpdateConfMod] appel depuis '" .. from .. "' sans rien à changer, ignoré")
-		return true
-	end
+    if not setWeather and not setDate then
+        if Debug.debug then print("[UpdateConfMod] appel depuis '" .. from .. "' sans rien à changer, ignoré") end
+        return true
+    end
 
-	local updates = {}
+    local updates = {}
 
-	if setWeather then
-		for field, value in pairs(setWeather) do
-			updates["mission_ini.weather." .. field] = value
-			-- print("[UpdateConfMod][" .. from .. "] weather." .. field .. " -> " .. tostring(value))
-		end
-	end
+    if setWeather then
+        for field, value in pairs(setWeather) do
+            updates["mission_ini.weather." .. field] = value
+            if Debug.debug then print("[UpdateConfMod][" .. from .. "] weather." .. field .. " -> " .. tostring(value)) end
+        end
+    end
 
-	if setDate then
+    if setDate then
 
-		if not setDate.setDateInNextMission then setDate.setDateInNextMission = false end
-		if setDate.setDateInNextMission then setDate.setDateInNextMission = false end
+        setDate.setDateInNextMission = false
 
-		for field, value in pairs(setDate) do
-			updates["mission_ini.current_date." .. field] = value
-			-- print("[UpdateConfMod][" .. from .. "] current_date." .. field .. " -> " .. tostring(value))
-		end
-	end
+        -- date proposée = date actuelle + les champs fournis
+        local newDate = {
+            day   = setDate.day   or camp.date.day,
+            month = setDate.month or camp.date.month,
+            year  = setDate.year  or camp.date.year,
+        }
 
-	local ok, applied = applyUpdatesToFile(CONF_MOD_PATH, updates)
-	if not ok then
-		-- print("[UpdateConfMod][" .. from .. "] échec de l'écriture de " .. CONF_MOD_PATH)
-		return false
-	end
+        if dateToNumber(newDate) < dateToNumber(camp.date) then
+			if Debug.debug then 
+				print("[UpdateConfMod][" .. from .. "] REFUS date : "
+					.. string.format("%04d-%02d-%02d", newDate.year, newDate.month, newDate.day)
+					.. " antérieure à "
+					.. string.format("%04d-%02d-%02d", camp.date.year, camp.date.month, camp.date.day)
+					.. " -> changement de date ignoré, le reste est appliqué")
+			end
+        else
+            camp.date = newDate
 
-	for path in pairs(updates) do
-		if not applied[path] then
-			-- print("[UpdateConfMod][" .. from .. "] AVERTISSEMENT : clé introuvable dans conf_mod.lua : " .. path)
-		end
-	end
+            for field, value in pairs(setDate) do
+                updates["mission_ini.current_date." .. field] = value
+                if Debug.debug then print("[UpdateConfMod][" .. from .. "] current_date." .. field .. " -> " .. tostring(value)) end
+            end
+        end
+    end
 
-	dofile(CONF_MOD_PATH) -- recharge mission_ini en mémoire avec les nouvelles valeurs
+    -- la date a pu être refusée et il n'y avait rien d'autre : plus rien à écrire
+    if next(updates) == nil then
+        if Debug.debug then print("[UpdateConfMod][" .. from .. "] aucune mise à jour à écrire") end
+        return true
+    end
 
-	return true
+    local ok, applied = applyUpdatesToFile(CONF_MOD_PATH, updates)
+    if not ok then
+        if Debug.debug then print("[UpdateConfMod][" .. from .. "] échec de l'écriture de " .. CONF_MOD_PATH) end
+        return false
+    end
+
+    for path in pairs(updates) do
+        if not applied[path] then
+            if Debug.debug then print("[UpdateConfMod][" .. from .. "] AVERTISSEMENT : clé introuvable dans conf_mod.lua : " .. path) end
+        end
+    end
+
+    dofile(CONF_MOD_PATH) -- recharge mission_ini en mémoire avec les nouvelles valeurs
+
+    return true
 end
 
 --assigne un CallName � tous les squad West pour tout le reste de la campagne 
@@ -4514,9 +4542,7 @@ end
 
 function LoadFileAndUpdate(from)
 
-	if Debug.debug then
-		print("START LoadFileAndUpdate() "..tostring(from).." /1/1/1/1/1/1/1///1/1")
-	end
+	if Debug.debug then print("START UTIL_Functions LoadFileAndUpdate() "..tostring(from).." /1/1/1/1/1/1/1///1/1 /1/1/1/1/1/1/1///1/1 /1/1/1/1/1/1/1///1/1 /1/1/1/1/1/1/1///1/1") end
 
     FromFile = "UTIL_Functions/LoadFileAndUpdate()" -- file name for debug
 
@@ -4861,12 +4887,15 @@ function LoadFileAndUpdate(from)
 
 	Check_TaskPossibleByPlane()
 
+	-- print('campDate A '..camp.date.year)
 
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Time.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_MoonPhase.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Weather.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
+
+	-- print('campDate B '..camp.date.year)
 
 	CommonRanges = DCE_FindCommonRadioRanges()	--get common radio range for all planes in campaign
 
@@ -4878,8 +4907,14 @@ function LoadFileAndUpdate(from)
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
 	CheckAll_Id()
-	if Debug.debug then print ("Lancement VIA UTIL_Fonction F 5687 (LoadFileAndUpdate)") end
+	if Debug.debug then print ("Lancement VIA UTIL_Fonction F 4884 (LoadFileAndUpdate)") end
+
+
+	-- print('campDate C '..camp.date.year)
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+	-- print('campDate D '..camp.date.year)
+
+
 	if not camp.boundary then
 		--creation des borders
 		GetBoundary()
@@ -4887,8 +4922,13 @@ function LoadFileAndUpdate(from)
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
 	if Debug.debug then print ("Lancement VIA UTIL_Fonction G 5690 (LoadFileAndUpdate)") end
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+
+	print('campDate E '..camp.date.year)
 	--**************INITIALEMENT DANS MAIN_NextMission *****************************
 	--**************INITIALEMENT DANS MAIN_NextMission *****************************
+
+	if Debug.debug then print("FIN UTIL_Functions LoadFileAndUpdate()  /2222222222222222222222222222222222") end
+
 
 
 end

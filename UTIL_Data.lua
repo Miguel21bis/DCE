@@ -3935,7 +3935,7 @@ function DataCompilation_DataDiscoveryA2()
 				end 
 
 
-                if Debug.debug then print("DataDiscovery_B2 entry.lua : "..fullPath) end
+                -- if Debug.debug then print("DataDiscovery_B2 entry.lua : "..fullPath) end
 
                 local env = {}
 
