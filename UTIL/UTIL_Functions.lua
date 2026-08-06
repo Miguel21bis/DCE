@@ -2776,60 +2776,93 @@ local function mergeTablesDeep(target, source)
     end
 end
 
+-- function LoadAllLoadouts(subFolder)
+
+-- 	-- récupère le chemin du script actuel (UTIL_Functions.lua)
+-- 	local currentScript = debug.getinfo(1).source:sub(2)
+-- 	local baseDir = currentScript:match("(.*/)") or "./"
+
+--     -- 1) ON PART DE LA TABLE ORIGINALE (celle de DCE)
+--     local final = {}
+--     if db_loadouts and type(db_loadouts) == "table" then
+--         final = DeepCopy(db_loadouts)
+--     else
+--         -- print("DCE WARNING : aucun db_loadouts initial trouvé !")
+--     end
+
+--     local folder = baseDir .. subFolder
+--     local cmd = 'dir "' .. folder .. '" /b'
+
+--     local p = io.popen(cmd)
+--     if not p then
+--         -- print("DCE ERROR : impossible d’ouvrir le dossier : " .. folder)
+-- 		AddLog("DCE ERROR : impossible d’ouvrir le dossier : " .. folder)
+--         return final
+--     end
+
+--     for file in p:lines() do
+--         if file:match("%.lua$") then
+
+--             local fullpath = folder .. "/" .. file
+--             -- print("DCE : loading loadout -> " .. fullpath)
+
+--             db_loadouts = nil  -- IMPORTANT : on purifie avant le dofile
+
+--             local ok, err = pcall(function()
+--                 dofile(fullpath)
+--             end)
+
+--             if not ok then
+--                 -- print("DCE ERROR : erreur dans " .. fullpath .. " : " .. err)
+-- 				AddLog("DCE ERROR : erreur dans " .. fullpath .. " : " .. err)
+
+--             elseif db_loadouts then
+--                 -- MERGE ici : final = final + db_loadouts
+--                 mergeTablesDeep(final, db_loadouts)
+
+--                 db_loadouts = nil  -- nettoyage
+--             end
+--         end
+--     end
+
+--     p:close()
+--     return final
+-- end
+
 function LoadAllLoadouts(subFolder)
 
-	-- récupère le chemin du script actuel (UTIL_Functions.lua)
-	local currentScript = debug.getinfo(1).source:sub(2)
-	local baseDir = currentScript:match("(.*/)") or "./"
+	-- 1) ON PART DE LA TABLE ORIGINALE (celle de DCE)
+	local final = {}
+	if type(db_loadouts) == "table" then
+		final = DeepCopy(db_loadouts)
+	end
 
-    -- 1) ON PART DE LA TABLE ORIGINALE (celle de DCE)
-    local final = {}
-    if db_loadouts and type(db_loadouts) == "table" then
-        final = DeepCopy(db_loadouts)
-    else
-        -- print("DCE WARNING : aucun db_loadouts initial trouvé !")
-    end
+	-- 2) Le dossier est repéré depuis la RACINE de ScriptsMod,
+	--    plus depuis la position de ce fichier.
+	local files, folder = ListLuaFiles(subFolder)
 
-    local folder = baseDir .. subFolder
-    local cmd = 'dir "' .. folder .. '" /b'
+	if #files == 0 then
+		AddLog("DCE ERROR : aucun fichier .lua trouvé dans " .. folder)
+		return final
+	end
 
-    local p = io.popen(cmd)
-    if not p then
-        -- print("DCE ERROR : impossible d’ouvrir le dossier : " .. folder)
-		AddLog("DCE ERROR : impossible d’ouvrir le dossier : " .. folder)
-        return final
-    end
+	-- 3) Chargement + fusion
+	for _, fullpath in ipairs(files) do
 
-    for file in p:lines() do
-        if file:match("%.lua$") then
+		db_loadouts = nil							-- on purifie avant le dofile
 
-            local fullpath = folder .. "/" .. file
-            -- print("DCE : loading loadout -> " .. fullpath)
+		local ok, err = pcall(dofile, fullpath)
 
-            db_loadouts = nil  -- IMPORTANT : on purifie avant le dofile
+		if not ok then
+			AddLog("DCE ERROR : erreur dans " .. fullpath .. " : " .. tostring(err))
+		elseif db_loadouts then
+			mergeTablesDeep(final, db_loadouts)
+			db_loadouts = nil
+		end
+	end
 
-            local ok, err = pcall(function()
-                dofile(fullpath)
-            end)
-
-            if not ok then
-                -- print("DCE ERROR : erreur dans " .. fullpath .. " : " .. err)
-				AddLog("DCE ERROR : erreur dans " .. fullpath .. " : " .. err)
-
-            elseif db_loadouts then
-                -- MERGE ici : final = final + db_loadouts
-                mergeTablesDeep(final, db_loadouts)
-
-                db_loadouts = nil  -- nettoyage
-            end
-        end
-    end
-
-    p:close()
-    return final
+	return final
 end
-
-
 
 -- Charge les mods d'un dossier, exécute chaque fichier dans un env isolé
 -- relativeFolder = "../../../Missions/Campaigns/"..camp.title.."/Mods" par exemple
@@ -2952,7 +2985,7 @@ function BuildLoadout()
 	if (campaigns_code_loadout )then
 		local bestMatch = nil
 		local bestMatchCount = 0
-		-- campConfMod = {}
+
 
 		-- Parcourir la table des codes
 		for codeName, prefix_s in pairs(campaigns_code_loadout) do
@@ -3118,18 +3151,7 @@ function BuildLoadout()
 		testFile:write(test_str)															--save new data
 		testFile:close()
 
-		-- if db_loadouts then
 
-		-- 	local copy_all_loadouts = Deepcopy(db_loadouts)
-		-- 	copy_all_loadouts = loadoutPylon(copy_all_loadouts)
-
-		-- 	copy_all_loadouts = makeStrutureLoadout(copy_all_loadouts)
-
-		-- 	test_str = "db_all_loadouts = " .. TableSerializationLoadout(copy_all_loadouts, 0, 0)						--make a string	
-		-- 	testFile = io.open("Debug/loadouts_global_clean.lua", "w") or error("Failed to open debug file")
-		-- 	testFile:write(test_str)															--save new data
-		-- 	testFile:close()
-		-- end
 	end
 end
 
@@ -3667,7 +3689,7 @@ function UpdateConfMod(setWeather, setDate, from)
     from = from or "unknown"
 
     if not setWeather and not setDate then
-        if Debug.debug then print("[UpdateConfMod] appel depuis '" .. from .. "' sans rien à changer, ignoré") end
+        -- if Debug.debug then print("[UpdateConfMod] appel depuis '" .. from .. "' sans rien à changer, ignoré") end
         return true
     end
 
@@ -3676,7 +3698,7 @@ function UpdateConfMod(setWeather, setDate, from)
     if setWeather then
         for field, value in pairs(setWeather) do
             updates["mission_ini.weather." .. field] = value
-            if Debug.debug then print("[UpdateConfMod][" .. from .. "] weather." .. field .. " -> " .. tostring(value)) end
+            -- if Debug.debug then print("[UpdateConfMod][" .. from .. "] weather." .. field .. " -> " .. tostring(value)) end
         end
     end
 
@@ -3704,26 +3726,26 @@ function UpdateConfMod(setWeather, setDate, from)
 
             for field, value in pairs(setDate) do
                 updates["mission_ini.current_date." .. field] = value
-                if Debug.debug then print("[UpdateConfMod][" .. from .. "] current_date." .. field .. " -> " .. tostring(value)) end
+                -- if Debug.debug then print("[UpdateConfMod][" .. from .. "] current_date." .. field .. " -> " .. tostring(value)) end
             end
         end
     end
 
     -- la date a pu être refusée et il n'y avait rien d'autre : plus rien à écrire
     if next(updates) == nil then
-        if Debug.debug then print("[UpdateConfMod][" .. from .. "] aucune mise à jour à écrire") end
+        -- if Debug.debug then print("[UpdateConfMod][" .. from .. "] aucune mise à jour à écrire") end
         return true
     end
 
     local ok, applied = applyUpdatesToFile(CONF_MOD_PATH, updates)
     if not ok then
-        if Debug.debug then print("[UpdateConfMod][" .. from .. "] échec de l'écriture de " .. CONF_MOD_PATH) end
+        -- if Debug.debug then print("[UpdateConfMod][" .. from .. "] échec de l'écriture de " .. CONF_MOD_PATH) end
         return false
     end
 
     for path in pairs(updates) do
         if not applied[path] then
-            if Debug.debug then print("[UpdateConfMod][" .. from .. "] AVERTISSEMENT : clé introuvable dans conf_mod.lua : " .. path) end
+            -- if Debug.debug then print("[UpdateConfMod][" .. from .. "] AVERTISSEMENT : clé introuvable dans conf_mod.lua : " .. path) end
         end
     end
 
@@ -4568,8 +4590,11 @@ function LoadFileAndUpdate(from)
 
 	zipFile:unzClose()
 
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
+
+	IncludeOnce("UTIL_Data.lua")
+	IncludeOnce("UTIL_DataMap.lua")
 
 	if not oob_scen and Firstmission_flag then
 		require("Active/oob_scen")
@@ -4800,7 +4825,8 @@ function LoadFileAndUpdate(from)
 		camp_ZoneSAR = { blue = {}, red = {}, neutrals = {} }
 	end
 
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
+	IncludeOnce("UTIL_DataRadio.lua")
 
 	--utilise ici le fichier Init/persistenceMP.lua s'il existe, pour facilité l'attribution des num tail/avion
 	local persistPath = "../../../Missions/Campaigns/"..camp.title.."/Init/persistenceMP.lua"
@@ -4837,9 +4863,12 @@ function LoadFileAndUpdate(from)
 
 	end
 
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CampaignSettings.lua")
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Refpoints.lua")
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_AddPropAircraft.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CampaignSettings.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Refpoints.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_AddPropAircraft.lua")
+	Include("DC_CampaignSettings.lua")
+	Include("DC_Refpoints.lua")
+	Include("UTIL_AddPropAircraft.lua")
 
 	 if Debug.debug then
         print("LOAD LoadFileAndUpdate() from " .. tostring(from))
@@ -4889,11 +4918,16 @@ function LoadFileAndUpdate(from)
 
 	-- print('campDate A '..camp.date.year)
 
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Time.lua")
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_MoonPhase.lua")
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Weather.lua")
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Time.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_MoonPhase.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Weather.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
+	Include("DC_Time.lua")
+	Include("UTIL_MoonPhase.lua")
+	Include("DC_Weather.lua")
+	Include("DC_NavalEnvironment.lua")
+	Include("DC_UpdateSAR.lua")
 
 	-- print('campDate B '..camp.date.year)
 
@@ -4904,24 +4938,29 @@ function LoadFileAndUpdate(from)
 	file_File:write(file_str)																	--save new data
 	file_File:close()
 
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+	Include("ATO_ThreatEvaluation.lua")
+	Include("DC_UpdateTargetlist.lua")
+
+
 	CheckAll_Id()
 	if Debug.debug then print ("Lancement VIA UTIL_Fonction F 4884 (LoadFileAndUpdate)") end
 
-
-	-- print('campDate C '..camp.date.year)
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
-	-- print('campDate D '..camp.date.year)
-
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+	Include("DC_CheckTriggers.lua")
 
 	if not camp.boundary then
 		--creation des borders
 		GetBoundary()
 	end
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+	Include("DC_UpdateTargetlist.lua")
+
 	if Debug.debug then print ("Lancement VIA UTIL_Fonction G 5690 (LoadFileAndUpdate)") end
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+	Include("DC_CheckTriggers.lua")
+
 
 	print('campDate E '..camp.date.year)
 	--**************INITIALEMENT DANS MAIN_NextMission *****************************

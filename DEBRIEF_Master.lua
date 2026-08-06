@@ -175,7 +175,9 @@ if not VersionPackageICM or VersionPackageICM == nil then										-- modificati
 end
 
 
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Include.lua")
+IncludeOnce("UTIL_Functions.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
 --TODO ceci ne fonctionne pas
 -- recherche tjs pourquoi on ne passe pas du 15 au 16
@@ -236,8 +238,11 @@ end
 --ne pas supprimer, utile pour le fichier statsevaluation
 dofile("Active/db_airbases.lua")
 dofile("Active/targetlist.lua")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
+
+IncludeOnce("UTIL_Data.lua")
+IncludeOnce("UTIL_DataMap.lua")
 
 
 ----*********** create and view Debriefing file for mission ********************************************

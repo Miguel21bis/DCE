@@ -542,16 +542,6 @@ if testPath ~= nil then
 	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Changelog.lua")
 	camp.ScriptsMod = versionDCE["UTIL_Changelog.lua"]
 
-else
-	--OBSOLETE
-	verScriptsModPath = "../../../ScriptsMod."..VersionPackageICM.."/UTIL_Version.lua"
-	testPath = io.open(verScriptsModPath, "r")
-	if testPath ~= nil then
-		io.close(testPath)
-		dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Version.lua")
-		camp.ScriptsMod = version_ScriptsMod.ScriptsMod
-	end
-
 end
 
 if not camp.path or camp.path == nil then
@@ -620,7 +610,8 @@ if testPath ~= nil then
 end
 
 
-dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_MissionScore.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_MissionScore.lua")
+	Include("DC_MissionScore.lua")
 
 if MissionInstance >= 2 then
 	if Debug.debug then
@@ -628,41 +619,68 @@ if MissionInstance >= 2 then
 		print("LOAD DC_Time from "..tostring("MAIN_NextMission "..debug.getinfo(1).currentline))
 	end
 
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Time.lua")
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_MoonPhase.lua")
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Weather.lua")
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Time.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_MoonPhase.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Weather.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
 	
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+
+	Include("DC_Time.lua")
+	Include("UTIL_MoonPhase.lua")
+	Include("DC_Weather.lua")
+	Include("DC_NavalEnvironment.lua")
+	Include("DC_UpdateSAR.lua")
+
+	Include("ATO_ThreatEvaluation.lua")
+	Include("DC_UpdateTargetlist.lua")
+	Include("DC_CheckTriggers.lua")
+	Include("DC_UpdateTargetlist.lua")
+	Include("DC_CheckTriggers.lua")
+
 end
 
 PayloadRestricted = makePayloadRestricted()
 
 
-dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
+Include("ATO_ThreatEvaluation.lua")
+Include("DC_UpdateOOBGround.lua")
+
 
 if ArgTools == "KillTarget" then
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Divers.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Divers.lua")
+	Include("UTIL_Divers.lua")
 end
 
-dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_RouteGenerator.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_RouteGenerator.lua")
 
--- dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Generator.lua")
+-- -- dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Generator.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Generator_A_Debug.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Generator_B_Eval.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Generator_C_Core.lua")
 
-dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Generator_A_Debug.lua")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Generator_B_Eval.lua")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Generator_C_Core.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_PlayerAssign.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Timing.lua")
 
-dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_PlayerAssign.lua")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_Timing.lua")
+-- dofile("../../../ScriptsMod." .. VersionPackageICM .. "/ATO_FlightPlan.lua")
 
-dofile("../../../ScriptsMod." .. VersionPackageICM .. "/ATO_FlightPlan.lua")
+	Include("ATO_RouteGenerator.lua")
+	-- Include("ATO_Generator.lua")
+	Include("ATO_Generator_A_Debug.lua")
+	Include("ATO_Generator_B_Eval.lua")
+	Include("ATO_Generator_C_Core.lua")
+
+	Include("ATO_PlayerAssign.lua")
+	Include("ATO_Timing.lua")
+	Include("ATO_FlightPlan.lua")
+
 
 if mission.drawings and not mission.drawings.layers[4].objects then
 	mission.drawings.layers[4].objects = {}
@@ -687,10 +705,14 @@ if mission.drawings then
 end
 
 
-dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_StaticAircraft.lua")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Prune.lua")
-dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Briefing.lua")
-dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Final_steps.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_StaticAircraft.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Prune.lua")
+-- dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Briefing.lua")
+-- dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Final_steps.lua")
+Include("DC_StaticAircraft.lua")
+Include("DC_Prune.lua")
+Include("DC_Briefing.lua")
+Include("DC_Final_steps.lua")
 
 -- Supprime le fichier sans vérifier s'il existe
 os.remove("Debug/BugList.lua")
@@ -701,7 +723,8 @@ if BugList and type(BugList) == "table" and #BugList >= 1 then
 	bugFile:write(table_Str)
 	bugFile:close()
 end
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Debug.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Debug.lua")
+Include("UTIL_Debug.lua")
 
 camp["groundthreats"] = groundthreats
 

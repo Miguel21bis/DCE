@@ -90,7 +90,9 @@ math.randomseed(seed)  -- Initialiser le générateur pseudo-aléatoire
 dofile("Init/conf_mod.lua")
 dofile("Active/camp_status.lua")
 
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Include.lua")
+IncludeOnce("UTIL_Functions.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
 --met à jour le fichier camp_init en fonction du template UTIL_REF_camp_init.lua
 ModifiCampInit()

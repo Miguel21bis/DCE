@@ -69,7 +69,9 @@ scenFile:close()
 
 
 ----- run scripts to accept content of next mission -----
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+IncludeOnce("UTIL_Data.lua")
+
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
 CreateAircraftListInCampaign()
 CleanDataDivers()

@@ -28,6 +28,7 @@ local function acceptMission()
 	local m = ""
 	repeat
 		print("\n\n Night or Day ? : "..Daytime)													-- info day or not
+		print("\n  "..camp.date.day.."/"..camp.date.month.."/"..camp.date.year)
 		print("\n\nAccept Mission ?:")
 
 		print("a".." - Accept mission")
@@ -137,7 +138,11 @@ end
 
 dofile("Init/db_airbases.lua")
 
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
+
+
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Include.lua")
+IncludeOnce("UTIL_Functions.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
 --met à jour le fichier camp_init en fonction du template UTIL_REF_camp_init.lua
 ModifiCampInit()
@@ -162,7 +167,8 @@ if not targetlist.blue[1] then
 	TargetlistToNum(targetlist)
 end
 
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ResetCampaign.lua")					--reset campaign status files. Required for first mission to generate according to initial status	
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ResetCampaign.lua")					--reset campaign status files. Required for first mission to generate according to initial status	
+IncludeOnce("UTIL_ResetCampaign.lua")
 
 --affiche le type d'avion selectionné et son squadrons
 local playerInfo = {
