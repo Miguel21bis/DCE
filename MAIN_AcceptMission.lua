@@ -69,23 +69,30 @@ scenFile:close()
 
 
 ----- run scripts to accept content of next mission -----
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Include.lua")
 -- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
 IncludeOnce("UTIL_Data.lua")
 
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
+Include("UTIL_DataRadio.lua")
 CreateAircraftListInCampaign()
 CleanDataDivers()
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
+Include("UTIL_DataMap.lua")
+Include("UTIL_Functions.lua")
 
 --run log evaluation and status updates
-dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_StatsEvaluation.lua")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_StatsEvaluation.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+Include("DEBRIEF_StatsEvaluation.lua")
+Include("DC_UpdateTargetlist.lua")
 
 --create and view Debriefing file for mission
 --cette foi-ci, on enregistre les stats, mais sans les montrer
 
-dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
+Include("DEBRIEF_Text.lua")
 
 mission.currentKey = 1010000															--not clear how this works but is required for multiplyer clients to be available for selection on mission start
 

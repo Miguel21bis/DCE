@@ -774,12 +774,14 @@ if input == "y" or input == "yes" then
 				until tabIndexTools[choix2]
 
 				if ArgTools ~= "KillTarget" then
-					dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Divers.lua") os.execute 'pause'
+					-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Divers.lua")
+					IncludeOnce("UTIL_Divers.lua")  os.execute 'pause'
 				end
 
 				break
 			elseif choix1 == "c" then
-				dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ChangePlane.lua")
+				-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ChangePlane.lua")
+				IncludeOnce("UTIL_ChangePlane.lua")
 			end
 
 		until tabIndex01[choix1]
@@ -791,8 +793,8 @@ if input == "y" or input == "yes" then
 			MissionInstance = MissionInstance + 1															--count the number of times the mission is generated
 
 			camp.VersionPackageICM = tostring(VersionPackageICM)											-- modification M35 version ScriptsMod -- ajoute la version du script dans camp_status pour utilisation en fin de mission																				--set amount of players
-			dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_NextMission.lua")																--generate mission
-
+			-- dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_NextMission.lua")																--generate mission
+			IncludeOnce("MAIN_NextMission.lua")
 
 			if EndCampaign or camp.endCampaign then 																			-- debug01.b EndMission
 				local EndInfo

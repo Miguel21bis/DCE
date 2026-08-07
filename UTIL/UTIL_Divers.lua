@@ -8,11 +8,14 @@ versionDCE["UTIL_Divers.lua"] = "1.5.29"
 ------------------------------------------------------------------------------------------------------- 
 
 require("Active/oob_ground")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+IncludeOnce("UTIL_Data.lua")
 CreateAircraftListInCampaign()
 CleanDataDivers()
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
+IncludeOnce("UTIL_DataMap.lua")
+IncludeOnce("UTIL_Functions.lua")
 
 
 -- debugKT = true
@@ -1139,12 +1142,13 @@ elseif ArgTools == "KillTarget" then
 
 		local active
 		repeat
-			dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+			-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+			IncludeOnce("UTIL_DataDC_UpdateTargetlistMap.lua")
 			if Debug.debug then print ("Lancement VIA UTIL_Div C 1152") end 	--ce n'est pas un doublon, il faut garder les 2 Update
-			dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
-			dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
-
-
+			-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+			-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
+			IncludeOnce("DC_CheckTriggers.lua")
+			IncludeOnce("DC_UpdateOOBGround.lua")
 
 			local inputString = string.lower(io.stdin:read())
 			if inputString == "s" then
@@ -1263,10 +1267,13 @@ elseif ArgTools == "KillTarget" then
 
 
 
-			dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")		--ce n'est pas un doublon, il faut garder les 2 Update
+			-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")		--ce n'est pas un doublon, il faut garder les 2 Update
+			IncludeOnce("DC_UpdateTargetlist.lua")
 			if Debug.debug then print ("Lancement VIA UTIL_Div C 1276") end
-			dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
-			dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
+			-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
+			-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
+			IncludeOnce("DC_CheckTriggers.lua")
+			IncludeOnce("DC_UpdateOOBGround.lua")
 
 
 
@@ -1624,7 +1631,8 @@ elseif ArgTools == "missionWithIcone" then
 
 	-- os.execute 'pause'
 
-	dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Final_steps.lua")
+	-- dofile("../../../ScriptsMod." .. VersionPackageICM .. "/DC_Final_steps.lua")
+	IncludeOnce("DC_Final_steps.lua")
 	mission.drawings.layers[4].objects = AddIconLayer(mission.drawings.layers[4].objects, targetListRequired)
 
 

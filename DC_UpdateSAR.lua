@@ -890,7 +890,9 @@ if camp_ZoneSAR and camp_ZoneSAR ~= nil then
                     --////////////////////////////************************////////////////////
 
                    if camp.theatre and camp.theatre == "caucasus" then
-                        dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data_circleSAR_Caucasus.lua")
+                        -- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data_circleSAR_Caucasus.lua")
+
+                        IncludeOnce("UTIL_Data_circleSAR_Caucasus.lua")
 
                         pilot.theatreCercle = true
 
