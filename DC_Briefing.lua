@@ -149,6 +149,182 @@ local function hasAnEmergencyFreq(radioPlane)
 end
 
 
+--=======================================================================
+--   GESTION CENTRALISEE DES CANAUX RADIO   (anti-doublon + logs)
+--=======================================================================
+-- Avant : chaque bloc (ATC, EWR, Tanker, CAP...) refaisait a la main
+-- "je regarde combien de canaux sont pris, j'insere, je vais chercher le
+-- nom du canal". Aucun ne verifiait si la frequence etait deja posee, et
+-- le bloc ATC inserait meme la frequence une fois par plage de la radio.
+-- Tout passe maintenant par AddRadioChannel().
+--
+-- Mettre DCE_RADIO_DEBUG a true pour tracer chaque canal refuse.
+DCE_RADIO_DEBUG = false
+
+local function RadioLog(txt)
+	if DCE_RADIO_DEBUG then
+		print("DC_Briefing RADIO | " .. tostring(txt))
+	end
+end
+
+-- radio[] est reconstruit par DCE_FindCommonRadioRanges() (UTIL_Functions).
+-- Les entrees issues de panelRadio portent panelIndex ; repli sur radioN
+-- pour rester compatible avec une version plus ancienne du fichier.
+local function RadioPanelIndex(radioP, radioN)
+	local r = radioP and radioP[radioN]
+	if r and r.panelIndex then return r.panelIndex end
+	return radioN
+end
+
+-- Nom du canal tel que l'affiche le cockpit (ex: "Channel 7").
+local function RadioChannelName(planeType, radioP, radioN, channelPos)
+	local db = Db_Frequency[planeType]
+	local pIdx = RadioPanelIndex(radioP, radioN)
+	if db and db.panelRadio and db.panelRadio[pIdx]
+	   and db.panelRadio[pIdx].channels
+	   and db.panelRadio[pIdx].channels[channelPos]
+	   and db.panelRadio[pIdx].channels[channelPos].name then
+		return db.panelRadio[pIdx].channels[channelPos].name
+	end
+	RadioLog("nom de canal introuvable, repli generique : " .. tostring(planeType)
+		.. " radio " .. tostring(radioN) .. " (panelRadio " .. tostring(pIdx) .. ")"
+		.. " canal " .. tostring(channelPos))
+	return "Channel " .. tostring(channelPos)
+end
+
+-- Position d'une frequence deja presente dans la liste des canaux, ou nil.
+local function FindChannelPos(channels, freqA)
+	if not channels then return nil end
+	for n = 1, #channels do
+		if tonumber(channels[n]) == freqA then return n end
+	end
+	return nil
+end
+
+-- Pose une frequence sur une radio et ajoute la ligne au briefing.
+--   context   : texte libre, uniquement pour les logs de debug
+--   retourne  : true si la ligne a ete ajoutee au briefing
+--
+-- Regles :
+--   * radio a presets, frequence nouvelle  -> occupe le canal suivant
+--   * radio a presets, frequence deja posee -> AUCUN nouveau canal, mais la
+--     ligne est quand meme affichee en pointant le canal existant
+--   * radio manuelle / sans preset -> ligne affichee, pas de canal
+--   * radio pleine -> ligne refusee + log
+local function AddRadioChannel(context, unit, radioP, radioN, freqA, entry, entriesRadio, planeType)
+
+	local radio = radioP and radioP[radioN]
+	if not radio then
+		RadioLog(tostring(context) .. " : radio " .. tostring(radioN) .. " inconnue")
+		return false
+	end
+
+	freqA = tonumber(freqA)
+	if not freqA or freqA <= 0 then
+		RadioLog(tostring(context) .. " : frequence invalide (" .. tostring(freqA) .. ")")
+		return false
+	end
+
+	-- entriesRadio n'etait pre-dimensionne que jusqu'a 5 : un avion avec
+	-- davantage de radios (waves HumanRadio ajoutees) plantait ici.
+	if not entriesRadio[radioN] then entriesRadio[radioN] = {} end
+
+	----------------------------------------------------------------
+	-- radio sans preset (reglage manuel) : on affiche, sans canal
+	----------------------------------------------------------------
+	if radio.manual or not radio.nbCanal or radio.nbCanal == 0 then
+		table.insert(entriesRadio[radioN], DeepCopy(entry))
+		return true
+	end
+
+	----------------------------------------------------------------
+	-- radio a presets
+	----------------------------------------------------------------
+	if not (unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"]) then
+		RadioLog(tostring(context) .. " : pas de table Radio pour la radio " .. tostring(radioN)
+			.. " (" .. tostring(radio.name) .. ")")
+		return false
+	end
+
+	local channels = unit["Radio"][radioN]["channels"]
+
+	-- deja posee ? on reutilise le canal existant au lieu d'en gaspiller un
+	local channelPos = FindChannelPos(channels, freqA)
+	if channelPos then
+		entry["radio"] = RadioChannelName(planeType, radioP, radioN, channelPos)
+		table.insert(entriesRadio[radioN], DeepCopy(entry))
+		RadioLog(tostring(context) .. " : " .. tostring(freqA) .. " deja sur "
+			.. tostring(radio.name) .. " canal " .. tostring(channelPos) .. ", pas de nouveau canal")
+		return true
+	end
+
+	-- plus de canal libre
+	if #channels >= radio.nbCanal then
+		RadioLog(tostring(context) .. " : " .. tostring(radio.name) .. " pleine ("
+			.. tostring(radio.nbCanal) .. " canaux), " .. tostring(freqA) .. " non attribuee")
+		return false
+	end
+
+	table.insert(channels, freqA)
+	entry["radio"] = RadioChannelName(planeType, radioP, radioN, #channels)
+	table.insert(entriesRadio[radioN], DeepCopy(entry))
+	return true
+end
+
+--=======================================================================
+
+-- Choisit UNE SEULE frequence parmi plusieurs bandes proposees pour un meme
+-- point de contact (ATC, Divert...), au lieu de toutes les afficher.
+-- freqOrTable : soit une frequence unique, soit une table de frequences
+--               representant la meme station sur differentes bandes
+--               (ex: ATC_frequency = {"4.725","40.350","120.200","251.900"}).
+-- Priorite de bande : wavePriority[side][plane|helicopter] (FUNC_Radio.lua) :
+--   UHF>VHF>FM>HF pour blue, VHF en tete pour red, FM>VHF>UHF>HF pour un helico.
+-- Si la bande prioritaire n'est recevable par AUCUNE radio de l'avion, on
+-- retombe sur la bande suivante ("si indispo, VHF etc...").
+local function PickBestBandFreq(freqOrTable, planeType, radioP, side)
+
+	local function isReceivable(f)
+		for radioN = 1, #radioP do
+			if FreqCapabilityNG(f, planeType, radioN) then
+				return true
+			end
+		end
+		return false
+	end
+
+	-- cas simple : une seule frequence, pas de choix de bande a faire
+	if type(freqOrTable) ~= "table" then
+		local f = tonumber(freqOrTable)
+		if f and f > 0 and isReceivable(f) then return f end
+		return nil
+	end
+
+	local category = (IsHelicopter and IsHelicopter[planeType]) and "helicopter" or "plane"
+	local order = WavePriority and side and WavePriority[side] and WavePriority[side][category]
+
+	if order then
+		for _, wave in ipairs(order) do
+			for _, raw in ipairs(freqOrTable) do
+				local f = tonumber(raw)
+				if f and f > 0 and BandOfFrequency(f) == wave and isReceivable(f) then
+					return f
+				end
+			end
+		end
+	end
+
+	-- repli : priorite indisponible (side/planeType inconnu) ou aucune bande
+	-- prioritaire recevable -- on garde la premiere frequence recevable du
+	-- tableau d'origine plutot que de ne rien afficher du tout.
+	for _, raw in ipairs(freqOrTable) do
+		local f = tonumber(raw)
+		if f and f > 0 and isReceivable(f) then return f end
+	end
+
+	return nil
+end
+
 local function writeWordsNicelyTidy(entries)
 	local txt = ""
 
@@ -1544,12 +1720,15 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					local unit = tempPlayer.group["units"][u]
 
 					if not Db_Frequency[planeType] then
+						--structure alignee sur celle produite par DCE_FindCommonRadioRanges()
+						--(l'ancien repli n'avait pas de .range : le bloc ATC plantait dessus)
 						radioP[1] = {
-							VHF = {
-								min = 116,
-								max = 149,
-							},
+							name    = "Radio VHF",
 							nbCanal = 0,
+							manual  = true,
+							range   = { { min = 116, max = 149 } },
+							VHF     = { min = 116, max = 149 },
+							source  = "defaut",
 						}
 					else
 						for i=1, #Db_Frequency[planeType].radio do
@@ -1642,18 +1821,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 							if FreqCapabilityNG(freqA, planeType, radioN, flight[f].type) then
 
-								local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
-								if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
-									table.insert(unit["Radio"][radioN]["channels"], freqA)
-									entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
-									local entryCopy = DeepCopy(entry)
-									table.insert(entriesRadio[radioN], entryCopy)
-								elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-									local entryCopy = DeepCopy(entry)
-									table.insert(entriesRadio[radioN], entryCopy)
-								else
-									-- print("Package B ERROR ")
-								end
+								AddRadioChannel("Flight", unit, radioP, radioN, freqA, entry, entriesRadio, planeType)
 
 							end
 						end
@@ -1680,19 +1848,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 						if FreqCapabilityNG(freqA, planeType, radioN, flight[f].type) then
 
 							-- local channelN = unit["Radio"] and unit["Radio"][radioN] and #unit["Radio"][radioN]["channels"] or 0
-							local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
-							if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
-								-- table.insert(unit["Radio"][radioN]["channels"], freqA)
-								table.insert(unit["Radio"][radioN]["channels"], freqA)
-								entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
-								local entryCopy = DeepCopy(entry)
-								table.insert(entriesRadio[radioN], entryCopy)
-							elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-								local entryCopy = DeepCopy(entry)
-								table.insert(entriesRadio[radioN], entryCopy)
-							else
-								-- print("Package B ERROR ")
-							end
+							AddRadioChannel("Package", unit, radioP, radioN, freqA, entry, entriesRadio, planeType)
 						else
 							-- print("Package B ERROR ")
 							-- print("DcBriefing "..tostring(freqA).." ".. tostring(planeType).." "..tostring(radioN).." "..tostring(flight[f].type) )
@@ -1703,59 +1859,108 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 					--***************************************************************************
 					--ATC_freq*******************************************************************
+					-- CORRECTIF : le test de plage et l'insertion etaient imbriques.
+					-- La boucle d'insertion "for radioN = 1, #radioP" tournait a
+					-- l'interieur des boucles de test (radio n, plage rangeN), donc une
+					-- frequence etait posee autant de fois qu'il existait de couples
+					-- (radio, plage) capables de la recevoir -- sur CHAQUE radio.
+					-- Exemple F-4E : 250.050 acceptee par l'ARC-159 (1 plage UHF) et par
+					-- l'ARC-182 (plage UHF) = 2 couples = 2 canaux identiques par radio.
+					-- Tant que radio.range etait une plage unique {min=,max=}, le test
+					-- type(freqTest)=="table" echouait et le bloc ne posait rien du tout :
+					-- c'est la normalisation des plages en tableau qui a reveille le bug.
+					--
+					-- On construit d'abord la liste dedupliquee des frequences ATC de la
+					-- base joueur, puis on insere une seule fois par radio.
+					-- entry = {name = "", call = "", freq = "",radio = ""}
+					--ATC_frequency = {"4.725", "40.350", "120.200", "251.900" }
+					-- local atc_PlayerFreq = db_airbases[tempPlayer.airbase].ATC_frequency
+					-- local freqA = 0
+
+					-- local atcFreqList = {}
+					-- local atcSeen = {}
+
+					-- local function CollectAtcFreq(f)
+					-- 	local n = tonumber(f)
+					-- 	if n and n > 0 and not atcSeen[n] then
+					-- 		atcSeen[n] = true
+					-- 		atcFreqList[#atcFreqList + 1] = n
+					-- 	end
+					-- end
+
+					-- if type(atc_PlayerFreq) == "table" then
+					-- 	--ordre d'origine conserve (du dernier au premier)
+					-- 	for i = #atc_PlayerFreq, 1, -1 do
+					-- 		CollectAtcFreq(atc_PlayerFreq[i])
+					-- 	end
+					-- else
+					-- 	CollectAtcFreq(atc_PlayerFreq)
+					-- end
+
+					-- if #atcFreqList == 0 then
+					-- 	RadioLog("ATC base joueur " .. tostring(tempPlayer.airbase) .. " : aucune frequence exploitable")
+					-- end
+
+					-- for _, atcFreq in ipairs(atcFreqList) do
+					-- 	for radioN = 1, #radioP do
+					-- 		if FreqCapabilityNG(atcFreq, planeType, radioN, planeType .. " ATC") then
+					-- 			entry = {name = "", call = "", freq = "",radio = ""}
+					-- 			entry["name"] = "ATC: "
+					-- 			entry["call"] = AliasBaseName(tempPlayer.airbase)
+
+					-- 			if atcFreq < 30 then
+					-- 				-- HF : pas de padding
+					-- 				entry["freq"] = string.format("%.3f", atcFreq) .. " MHz"
+					-- 			else
+					-- 				-- VHF/UHF : format fixe
+					-- 				entry["freq"] = string.format("%07.3f", atcFreq) .. " MHz"
+					-- 			end
+
+					-- 			AddRadioChannel("ATC base joueur", unit, radioP, radioN, atcFreq, entry, entriesRadio, planeType)
+					-- 		end
+					-- 	end
+					-- end
+
+					--freqA reste renseignee pour le code aval qui la relisait
+					-- freqA = atcFreqList[1] or 0
+					--***************************************************************************
+					--ATC_freq*******************************************************************
+					-- CORRECTIF : quand la base ATC publie plusieurs frequences pour des bandes
+					-- differentes (HF/LVHF/VHF/UHF, ex: ATC_frequency =
+					-- {"4.725","40.350","120.200","251.900"}), on ne garde plus toutes les
+					-- bandes -- ca affichait "ATC: Lar" plusieurs fois sur une meme radio
+					-- multi-bande (ARC-182). On ne garde desormais qu'UNE seule bande, choisie
+					-- par priorite via PickBestBandFreq() / wavePriority[sideName], puis
+					-- dupliquee sur toutes les radios compatibles (comme avant).
 					entry = {name = "", call = "", freq = "",radio = ""}
 					--ATC_frequency = {"4.725", "40.350", "120.200", "251.900" }
 					local atc_PlayerFreq = db_airbases[tempPlayer.airbase].ATC_frequency
-					local freqA = 0
-					if type(atc_PlayerFreq) == "table" then
-						for i = #atc_PlayerFreq, 1, -1 do
-							for n = 1, #radioP do
-								for rangeN, freqTest in pairs(radioP[n].range) do
-									-- for rangeN, freqTest in pairs(rangeData) do	
-										if type(freqTest) == "table" 
-										and freqTest.max and tonumber(atc_PlayerFreq[i]) < freqTest.max 
-										and tonumber(atc_PlayerFreq[i]) > freqTest.min then
+					local freqA = PickBestBandFreq(atc_PlayerFreq, planeType, radioP, sideName)
 
-											freqA = tonumber(atc_PlayerFreq[i]) or 0
-											
-											for radioN = 1, #radioP do
-												entry = {name = "", call = "", freq = "",radio = ""}
-												entry["name"] = "ATC: "
-												entry["call"] = AliasBaseName(tempPlayer.airbase)
-												-- entry["freq"] = string.format("%07.3f", freqA).. " MHz"
+					if not freqA then
+						RadioLog("ATC base joueur " .. tostring(tempPlayer.airbase) .. " : aucune frequence exploitable")
+					else
+						for radioN = 1, #radioP do
+							if FreqCapabilityNG(freqA, planeType, radioN, planeType .. " ATC") then
+								entry = {name = "", call = "", freq = "",radio = ""}
+								entry["name"] = "ATC: "
+								entry["call"] = AliasBaseName(tempPlayer.airbase)
 
-												if freqA < 30 then
-													-- HF : pas de padding
-													entry["freq"] = string.format("%.3f", freqA) .. " MHz"
-												else
-													-- VHF/UHF : format fixe
-													entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
-												end
-
-												if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
-													local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
-													
-													if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
-														table.insert(unit["Radio"][radioN]["channels"], freqA)
-														entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
-														local entryCopy = DeepCopy(entry)
-														table.insert(entriesRadio[radioN], entryCopy)
-													elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-														local entryCopy = DeepCopy(entry)
-														table.insert(entriesRadio[radioN], entryCopy)
-													end
-												end
-											end
-										end
-									-- end
+								if freqA < 30 then
+									-- HF : pas de padding
+									entry["freq"] = string.format("%.3f", freqA) .. " MHz"
+								else
+									-- VHF/UHF : format fixe
+									entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
 								end
+
+								AddRadioChannel("ATC base joueur", unit, radioP, radioN, freqA, entry, entriesRadio, planeType)
 							end
 						end
-					else
-						freqA = tonumber(db_airbases[tempPlayer.airbase].ATC_frequency) or 0
 					end
 
-					
+					--freqA reste renseignee pour le code aval qui la relisait
+					freqA = freqA or 0
 
 					--***************************************************************************
 					--Soviet Emergency 121.5 ****************************************************
@@ -1779,33 +1984,11 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
 								end
 
-								local numPreset
-
+								--CORRECTIF : la branche "radio manuelle" etait imbriquee DANS la
+								--branche "nbCanal > 0" (donc jamais atteinte), et son table.insert
+								--utilisait emergencyPreset comme index alors qu'il pouvait etre nil.
 								if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
-									if radioP[radioN] and radioP[radioN].nbCanal > 0 and #unit["Radio"][radioN]["channels"] < radioP[radioN].nbCanal then
-										if radioP[radioN] and radioP[radioN].nbCanal > 0 then
-											if radioP[radioN].startCanal == 0 then MC = -1 end
-
-											--ça ne marche pas, on perd trop de temps dessus ..
-											-- if emergencyPreset then
-											-- 	table.insert(unit["Radio"][radioN]["channels"], emergencyPreset,  freqA)
-											-- 	numPreset = #unit["Radio"][radioN]["channels"] + MC
-											-- 	entry["radio"] = RadName[radioN].." / Channel " .. emergencyPreset
-											-- 	local entryCopy = Deepcopy(entry)
-											-- 	table.insert(entriesRadio[radioN], emergencyPreset, entryCopy)
-											-- else
-												table.insert(unit["Radio"][radioN]["channels"], freqA)
-												numPreset = #unit["Radio"][radioN]["channels"] + MC
-												entry["radio"] = radioName[radioN].." / Channel " .. numPreset
-												local entryCopy = DeepCopy(entry)
-												table.insert(entriesRadio[radioN], entryCopy)
-										
-
-										elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-											local entryCopy = DeepCopy(entry)
-											table.insert(entriesRadio[radioN], emergencyPreset, entryCopy)
-										end
-									end
+									AddRadioChannel("Emergency", unit, radioP, radioN, freqA, entry, entriesRadio, planeType)
 								end
 							end
 						end
@@ -1836,18 +2019,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									end
 
 									if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
-										local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
-										if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
-											if radioP[radioN] and radioP[radioN].nbCanal > 0 then
-												table.insert(unit["Radio"][radioN]["channels"], freqA)
-												entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
-												local entryCopy = DeepCopy(entry)
-												table.insert(entriesRadio[radioN], entryCopy)
-											elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-												local entryCopy = DeepCopy(entry)
-												table.insert(entriesRadio[radioN], entryCopy)
-											end
-										end
+										AddRadioChannel("COMMON_UHF", unit, radioP, radioN, freqA, entry, entriesRadio, planeType)
 									end
 
 								end
@@ -1878,16 +2050,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									end
 
 									if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
-										local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
-										if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
-											table.insert(unit["Radio"][radioN]["channels"], freqA)
-											entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
-											local entryCopy = DeepCopy(entry)
-											table.insert(entriesRadio[radioN], entryCopy)
-										elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-											local entryCopy = DeepCopy(entry)
-											table.insert(entriesRadio[radioN], entryCopy)
-										end
+										AddRadioChannel("COMMON_VHF", unit, radioP, radioN, freqA, entry, entriesRadio, planeType)
 									end
 								end
 							end
@@ -1917,16 +2080,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									end
 
 									if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
-										local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
-										if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
-											table.insert(unit["Radio"][radioN]["channels"], freqA)
-											entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
-											local entryCopy = DeepCopy(entry)
-											table.insert(entriesRadio[radioN], entryCopy)
-										elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-											local entryCopy = DeepCopy(entry)
-											table.insert(entriesRadio[radioN], entryCopy)
-										end
+										AddRadioChannel("COMMON_HF", unit, radioP, radioN, freqA, entry, entriesRadio, planeType)
 
 									end
 								end
@@ -1957,16 +2111,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									end
 
 									if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
-										local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
-										if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
-											table.insert(unit["Radio"][radioN]["channels"], freqA)
-											entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
-											local entryCopy = DeepCopy(entry)
-											table.insert(entriesRadio[radioN], entryCopy)
-										elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-											local entryCopy = DeepCopy(entry)
-											table.insert(entriesRadio[radioN], entryCopy)
-										end
+										AddRadioChannel("COMMON_LVHF", unit, radioP, radioN, freqA, entry, entriesRadio, planeType)
 									end
 								end
 							end
@@ -2011,16 +2156,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 								if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
 
-									local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
-									if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
-										table.insert(unit["Radio"][radioN]["channels"], freqA)
-										entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
-										local entryCopy = DeepCopy(entry)
-										table.insert(entriesRadio[radioN], entryCopy)
-									elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-										local entryCopy = DeepCopy(entry)
-										table.insert(entriesRadio[radioN], entryCopy)
-									end
+									AddRadioChannel("AWACS", unit, radioP, radioN, freqA, entry, entriesRadio, planeType)
 
 								end
 							end
@@ -2048,16 +2184,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								end
 
 								if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
-									local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
-									if radioP[radioN] and radioP[radioN].nbCanal > 0 and #unit["Radio"][radioN]["channels"] < radioP[radioN].nbCanal then
-										table.insert(unit["Radio"][radioN]["channels"], freqA)
-										entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
-										local entryCopy = DeepCopy(entry)
-										table.insert(entriesRadio[radioN], entryCopy)
-									elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-										local entryCopy = DeepCopy(entry)
-										table.insert(entriesRadio[radioN], entryCopy)
-									end
+									AddRadioChannel("EWR", unit, radioP, radioN, freqA, entry, entriesRadio, planeType)
 								end
 							end
 						end
@@ -2100,16 +2227,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 									end
 
 									if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
-										local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
-										if radioP[radioN] and radioP[radioN].nbCanal > 0 and #unit["Radio"][radioN]["channels"] < radioP[radioN].nbCanal then
-											table.insert(unit["Radio"][radioN]["channels"], freqA)
-											entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
-											local entryCopy = DeepCopy(entry)
-											table.insert(entriesRadio[radioN], entryCopy)
-										elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-											local entryCopy = DeepCopy(entry)
-											table.insert(entriesRadio[radioN], entryCopy)
-										end
+										AddRadioChannel("tanker", unit, radioP, radioN, freqA, entry, entriesRadio, planeType)
 									end
 								end
 							end
@@ -2149,16 +2267,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								end
 
 								if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
-									local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
-									if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
-										table.insert(unit["Radio"][radioN]["channels"], freqA)
-										entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
-										local entryCopy = DeepCopy(entry)
-										table.insert(entriesRadio[radioN], entryCopy)
-									elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-										local entryCopy = DeepCopy(entry)
-										table.insert(entriesRadio[radioN], entryCopy)
-									end
+									AddRadioChannel("AFAC", unit, radioP, radioN, freqA, entry, entriesRadio, planeType)
 								end
 							end
 						end
@@ -2183,16 +2292,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 							end
 
 							if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
-								local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
-								if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
-									table.insert(unit["Radio"][radioN]["channels"], freqA)
-									entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
-									local entryCopy = DeepCopy(entry)
-									table.insert(entriesRadio[radioN], entryCopy)
-								elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-									local entryCopy = DeepCopy(entry)
-									table.insert(entriesRadio[radioN], entryCopy)
-								end
+								AddRadioChannel("CAP", unit, radioP, radioN, freqA, entry, entriesRadio, planeType)
 							end
 						end
 					end
@@ -2200,7 +2300,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 					--***************************************************************************
 					--ATC_Divert_freq
 					for call,freq in pairs(freq_ATC_Divert) do
-						freqA = tonumber(freq) or 0
+						freqA = PickBestBandFreq(freq, planeType, radioP, sideName) or 0
 						if freqA and freqA ~= nil then
 							for radioN = 1, #radioP do
 								entry = {name = "", call = "", freq = "", radio = ""}
@@ -2217,16 +2317,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								end
 
 								if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
-									local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
-									if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
-										table.insert(unit["Radio"][radioN]["channels"], freqA)
-										entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
-										local entryCopy = DeepCopy(entry)
-										table.insert(entriesRadio[radioN], entryCopy)
-									elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-										local entryCopy = DeepCopy(entry)
-										table.insert(entriesRadio[radioN], entryCopy)
-									end
+									AddRadioChannel("ATC_Divert", unit, radioP, radioN, freqA, entry, entriesRadio, planeType)
 								end
 							end
 						end
@@ -2234,46 +2325,37 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 
 					--***************************************************************************
 					--ATC all freq
-					for radioN = 1, #radioP do
+					-- CORRECTIF : freqA etait recalculee a chaque radioN en ne gardant que "le
+					-- plus petit index compatible du tableau", sans rapport avec une priorite
+					-- de bande. On calcule maintenant UNE fois par base la meilleure bande
+					-- recevable via PickBestBandFreq(), puis on la duplique sur toutes les
+					-- radios compatibles.
+					-- CORRECTIF 2 : la base du joueur est deja affichee par le bloc ATC_freq
+					-- dedie ci-dessus ("ATC: <base>") -- on l'exclut ici pour eviter de la
+					-- reafficher une seconde fois (sous le libelle "ATC" sans les deux-points)
+					-- dans la liste generale de toutes les bases du camp.
+					for baseName, base in pairs(db_airbases) do
+						if base.side == sideName and baseName ~= tempPlayer.airbase then
 
-						for baseName, base in pairs(db_airbases) do
-							if base.side == sideName then
-								local all_ATC_Freq = base.ATC_frequency
-								freqA = 0
-								if type(all_ATC_Freq) == "table" then
-									for i=#all_ATC_Freq, 1, -1 do
-										for wave, freqTest in pairs(radioP[radioN]) do
-											if type(freqTest) == "table" and freqTest.max and tonumber(all_ATC_Freq[i]) < freqTest.max and  tonumber(all_ATC_Freq[i]) > freqTest.min then
-												freqA = tonumber(all_ATC_Freq[i]) or 0
-											end
-										end
-									end
-								else
-									freqA = tonumber(base.ATC_frequency) or 0
-								end
+							local all_ATC_Freq = base.ATC_frequency
+							freqA = PickBestBandFreq(all_ATC_Freq, planeType, radioP, sideName)
 
-								if freqA and freqA ~= nil and freqA ~= 0 then
-									entry = {name = "", call = "", freq = "", radio = ""}
-									entry["name"] = "ATC"
-									entry["call"] = AliasBaseName(baseName)
-									-- entry["freq"] = string.format("%07.3f", freqA).. " MHz"
-
-									if freqA < 30 then
-										-- HF : pas de padding
-										entry["freq"] = string.format("%.3f", freqA) .. " MHz"
-									else
-										-- VHF/UHF : format fixe
-										entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
-									end
-
+							if freqA then
+								for radioN = 1, #radioP do
 									if FreqCapabilityNG(freqA, planeType, radioN, planeType.." ATC "..tostring(baseName)) then
-										local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
-										if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
-											table.insert(unit["Radio"][radioN]["channels"], freqA)
-											entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
-											local entryCopy = DeepCopy(entry)
-											table.insert(entriesRadio[radioN], entryCopy)
+										entry = {name = "", call = "", freq = "", radio = ""}
+										entry["name"] = "ATC"
+										entry["call"] = AliasBaseName(baseName)
+
+										if freqA < 30 then
+											-- HF : pas de padding
+											entry["freq"] = string.format("%.3f", freqA) .. " MHz"
+										else
+											-- VHF/UHF : format fixe
+											entry["freq"] = string.format("%07.3f", freqA) .. " MHz"
 										end
+
+										AddRadioChannel("ATC", unit, radioP, radioN, freqA, entry, entriesRadio, planeType)
 									end
 								end
 							end
@@ -2300,16 +2382,7 @@ for sideName, packs in pairs(ATO) do																		--iterate through sides in
 								end
 
 								if FreqCapabilityNG(freqA, planeType, radioN, planeType) then
-									local channelN = #(unit["Radio"] and unit["Radio"][radioN] and unit["Radio"][radioN]["channels"] or {})
-									if radioP[radioN] and radioP[radioN].nbCanal > 0 and channelN < radioP[radioN].nbCanal then
-										table.insert(unit["Radio"][radioN]["channels"], freqA)
-										entry["radio"] = Db_Frequency[planeType].panelRadio[radioN]["channels"][channelN+1]["name"]
-										local entryCopy = DeepCopy(entry)
-										table.insert(entriesRadio[radioN], entryCopy)
-									elseif radioP[radioN] and (radioP[radioN].manual or radioP[radioN].nbCanal == 0)  then
-										local entryCopy = DeepCopy(entry)
-										table.insert(entriesRadio[radioN], entryCopy)
-									end
+									AddRadioChannel("All", unit, radioP, radioN, freqA, entry, entriesRadio, planeType)
 								end
 							end
 						end

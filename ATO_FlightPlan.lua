@@ -260,16 +260,16 @@ CommonFreq = {
 --DCS_Side = {"blue", "red", "neutrals"}
 --commun frequence M34_
 for sideName, side in pairs(DCS_Side) do
-	CommonFreq[side]["UHF"][1] = GetFrequencyNG(side, nil, "coalition", nil, "UHF")
-	CommonFreq[side]["UHF"][2] = GetFrequencyNG(side, nil, "coalition", nil, "UHF")
+	CommonFreq[side]["UHF"][1] = GetFrequencyNG(side, nil, "coalition", nil, "UHF", nil, nil, "ATO_FlightPlan commun UHF 1")
+	CommonFreq[side]["UHF"][2] = GetFrequencyNG(side, nil, "coalition", nil, "UHF", nil, nil, "ATO_FlightPlan commun UHF 2")
 
-	CommonFreq[side]["VHF"][1] = GetFrequencyNG(side, nil, "coalition", nil, "VHF")
-	CommonFreq[side]["VHF"][2] = GetFrequencyNG(side, nil, "coalition", nil, "VHF")
+	CommonFreq[side]["VHF"][1] = GetFrequencyNG(side, nil, "coalition", nil, "VHF", nil, nil, "ATO_FlightPlan commun VHF 1")
+	CommonFreq[side]["VHF"][2] = GetFrequencyNG(side, nil, "coalition", nil, "VHF", nil, nil, "ATO_FlightPlan commun VHF 2")
 
-	CommonFreq[side]["HF"][1] = GetFrequencyNG(side, nil, "coalition", nil, "HF")
-	CommonFreq[side]["HF"][2] = GetFrequencyNG(side, nil, "coalition", nil, "HF")
-	CommonFreq[side]["LVHF"][1] = GetFrequencyNG(side, nil, "coalition", nil, "LVHF")
-	CommonFreq[side]["LVHF"][2] = GetFrequencyNG(side, nil, "coalition", nil, "LVHF")
+	CommonFreq[side]["HF"][1] = GetFrequencyNG(side, nil, "coalition", nil, "HF", nil, nil, "ATO_FlightPlan commun HF 1")
+	CommonFreq[side]["HF"][2] = GetFrequencyNG(side, nil, "coalition", nil, "HF", nil, nil, "ATO_FlightPlan commun HF 2")
+	CommonFreq[side]["LVHF"][1] = GetFrequencyNG(side, nil, "coalition", nil, "LVHF", nil, nil, "ATO_FlightPlan commun LVHF 1")
+	CommonFreq[side]["LVHF"][2] = GetFrequencyNG(side, nil, "coalition", nil, "LVHF", nil, nil, "ATO_FlightPlan commun LVHF 2")
 
 	for n=1, 2 do
 		local testFreqency = tonumber(CommonFreq[side]["UHF"][n])
@@ -5581,8 +5581,15 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 
-				local DCE_FreqFlight = GetFrequencyNG(sideName, nil , taskOrHuman, flight[f].type, nil, "FreqFlight", groupName)			
-				local DCE_FreqPackage = GetFrequencyNG(sideName, flight[f].target_name, taskOrHuman, flight[f].type, nil, "FreqPackage", groupName)
+				if Debug.debug then print("AtoFP RADIO A: "..tostring(taskOrHuman).." for "..tostring(flight[f].type).." "..tostring(flight[f].task)) end
+
+				local DCE_FreqFlight = GetFrequencyNG(sideName, nil, taskOrHuman, flight[f].type, nil, "FreqFlight", groupName, "ATO_FlightPlan DCE_FreqFlight")
+
+				if Debug.debug then print("AtoFP RADIO B DCE_FreqFlight: "..tostring(DCE_FreqFlight).." for "..tostring(flight[f].type).." "..tostring(flight[f].task)) end
+
+				local DCE_FreqPackage = GetFrequencyNG(sideName, flight[f].target_name, taskOrHuman, flight[f].type, nil, "FreqPackage", groupName, "ATO_FlightPlan DCE_FreqPackage")
+
+				if Debug.debug then print("AtoFPRADIO C  DCE_FreqPackage: "..tostring(DCE_FreqPackage).." for "..tostring(flight[f].type).." "..tostring(flight[f].task)) end
 
 				if not DCE_FreqPackage or DCE_FreqPackage == nil then
 					-- print("AtoFP ERROR, no DCE_FreqPackage "..flight[f].type)
