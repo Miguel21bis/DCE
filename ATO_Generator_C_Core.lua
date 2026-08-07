@@ -637,10 +637,23 @@ local function prepareUnitContext(draftContext, sideName)
 	end
 
 	--Pourquoi: cette fonction est appelée UNE FOIS PAR TENTATIVE DE DRAFT (une fois par cible/tâche essayée),
-	--pas une fois par squad. Recalculer/écraser la disponibilité à chaque appel revenait à retirer au sort
+	--pas une fois par squad. Recalculer/écraser la disponibilité à CHAQUE appel revenait à retirer au sort
 	--et remplacer le nombre d'avions disponibles à chaque tentative -> le compteur final dépendait du DERNIER
-	--tirage aléatoire rencontré, pas des vrais avions du squad. On ne calcule donc plus qu'une seule fois.
-	if AcftAvail[unit.name].unassigned == nil then
+	--tirage aléatoire rencontré, pas des vrais avions du squad.
+	--MAIS AcftAvail = camp.Aircraft_availability persiste au-delà de cette seule fonction (géré par camp,
+	--sauvegardé/rechargé avec la campagne), et un cycle de génération raté doit libérer les avions qu'il
+	--avait réservés pour le cycle suivant (MissionInstance). Problème : MissionInstance seul ne distingue
+	--pas "nouveau cycle dans la même génération" de "nouvelle génération de mission" (ex: bouton "Next
+	--Mission"), qui repart généralement de MissionInstance=1 aussi -> on ajoute CampTotalTimeH (le temps de
+	--campagne), qui lui avance forcément entre deux missions mais reste fixe entre deux cycles d'une même
+	--tentative. On recalcule dès que L'UN OU L'AUTRE a changé.
+	local currentMissionInstance = MissionInstance or 0
+	local currentCampTime = CampTotalTimeH or 0
+
+	if AcftAvail[unit.name].unassigned == nil
+		or AcftAvail[unit.name].computedAtCycle ~= currentMissionInstance
+		or AcftAvail[unit.name].computedAtTime ~= currentCampTime
+	then
 
 		local aircraft_serviceable = computeServiceableAircraft(unit, sideName)
 
@@ -658,6 +671,8 @@ local function prepareUnitContext(draftContext, sideName)
 		AcftAvail[unit.name].available = aircraft_available
 		AcftAvail[unit.name].assigned = 0
 		AcftAvail[unit.name].unassigned = aircraft_available
+		AcftAvail[unit.name].computedAtCycle = currentMissionInstance
+		AcftAvail[unit.name].computedAtTime = currentCampTime
 
 		--Pourquoi: répartit une fois pour toutes le stock de ce squad entre ses tâches (tasksCoef),
 		--pour que Part A (tâches principales) et Part B (support/escorte) puisent chacune dans SA part
@@ -666,7 +681,7 @@ local function prepareUnitContext(draftContext, sideName)
 		AcftAvail[unit.name].taskUsed = {}
 
 		if Debug.debug and AcftAvail[unit.name].taskCap then
-			local txt = "AtoG ALLOCATION_PAR_TACHE "..unit.name..": "
+			local txt = "AtoG ALLOCATION_PAR_TACHE (cycle "..tostring(currentMissionInstance)..", t="..tostring(currentCampTime)..") "..unit.name..": "
 			for taskName, count in pairs(AcftAvail[unit.name].taskCap) do
 				txt = txt..taskName.."="..count.." "
 			end

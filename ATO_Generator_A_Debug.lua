@@ -10,6 +10,9 @@ if Debug.debug then
 	print("START ATO_Generator_A_Debug.lua "..versionDCE["ATO_Generator_A_Debug.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
 
+-- Mettre a false pour couper l'affichage console de chaque echec joueur
+PRINT_PLAYER_FAILURE = true
+
 -- ============================================================================
 -- ETAT PARTAGE (tables de tracking)
 -- ============================================================================
@@ -57,10 +60,29 @@ local logBufferSize = 1000  -- Nombre de lignes avant écriture disque
 -- -- sinon Lua va planter dès le premier debugLog.
 -- local debugLogs = {} 
 
+--Compteur de passes de generation.
+--Ce fichier est rejoue a chaque tentative de generation : la variable est donc
+--le moyen le plus simple de savoir combien de fois le generateur a tourne.
+GeneratorPass = (GeneratorPass or 0) + 1
+
 -- Réinitialiser le fichier au démarrage
 local function initDebugLogs()
+    -- On ne vide le fichier qu'au TOUT PREMIER chargement du process.
+    -- Sinon, comme ce fichier est rejoue a chaque tentative de generation,
+    -- on ne garderait que les logs de la derniere passe (et donc jamais ceux
+    -- de la passe qui a reellement pose probleme).
+    if GeneratorPass > 1 then
+        local file = io.open(logFilePath, "a")
+        if file then
+            file:write("\n-- ================ PASSE DE GENERATION "..GeneratorPass.." ================\n")
+            file:close()
+        end
+        return
+    end
+
     local file = io.open(logFilePath, "w")
     if file then
+        file:write("-- ================ PASSE DE GENERATION 1 ================\n")
         file:close()
     end
 end
@@ -172,6 +194,17 @@ function registerPlayerFailure(data)
 
 		debugText = data.debugText or "",
 	}
+
+	--Trace immediate : on voit l'echec au moment ou il est enregistre, sans
+	--attendre le tableau de fin qui, lui, arrive apres 50 tentatives.
+	if PRINT_PLAYER_FAILURE then
+		print("[FAIL] passe "..tostring(GeneratorPass)
+			.." | draft "..tostring(data.draftId)
+			.." | "..tostring(data.requestedPlane)
+			.." | stage "..tostring(data.stage)
+			.." | reason "..tostring(data.reason)
+			.." | ligne "..tostring(data.line))
+	end
 end
 
 --Enregistre l'étape la plus avancée atteinte par un squad
@@ -504,6 +537,39 @@ local function playerRejectReason(draftContext, reason, rejectReason)
 			end
 		end
 	end
+end
+
+--Synthese lisible de l'etat du suivi, a appeler depuis n'importe ou
+--(ex: printGeneratorSummary() juste apres la generation) quand on veut savoir
+--d'un coup d'oeil si le generateur a produit quelque chose a cette passe.
+function printGeneratorSummary()
+
+	local function compte(t)
+		if type(t) ~= "table" then return 0 end
+		local n = 0
+		for _ in pairs(t) do n = n + 1 end
+		return n
+	end
+
+	print("\n---------- GENERATOR SUMMARY (passe "..tostring(GeneratorPass)..") ----------")
+	print(" squads suivis         : "..compte(DraftProgress))
+	print(" echecs joueur         : "..compte(PlayerAssignFailure))
+	print(" echecs MAIN demandees : "..compte(PlayerMainTaskFailure))
+	print(" squads sans escorte   : "..compte(escortRejectReasons))
+
+	local aucunSucces = true
+	for _, data in pairs(DraftProgress) do
+		if data.success then
+			aucunSucces = false
+			break
+		end
+	end
+
+	if aucunSucces then
+		print(" !! AUCUN squad n'a atteint l'etape sortie a cette passe.")
+	end
+
+	print("--------------------------------------------------------\n")
 end
 
 function addEscortRejectReason(squadName, reason)
