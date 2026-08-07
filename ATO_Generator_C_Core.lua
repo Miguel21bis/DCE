@@ -3909,46 +3909,48 @@ local function createATO_table(draftPriority)
 														debugLog(draft.id.." ".." AtoG III passe SWE _01 "..draft.type.." "..squad.type)
 													end
 
-													if draft.main_overideMP or ((squad.tasks["Anti-ship Strike"]  or squad.tasks["Strike"] ) and squad.type == draft.type) then
-														local needSupport = {}																														--collect the total number of aircraft needed from each unit to complete the package																							--number of main body aircraft 
-														local availSupport = {}																													--collect the maximal number of available aircraft from this unit (biggest number of all tasks)
+													if squad.tasks then
+														if draft.main_overideMP or ((squad.tasks["Anti-ship Strike"]  or squad.tasks["Strike"] ) and squad.type == draft.type) then
+															local needSupport = {}																														--collect the total number of aircraft needed from each unit to complete the package																							--number of main body aircraft 
+															local availSupport = {}																													--collect the maximal number of available aircraft from this unit (biggest number of all tasks)
 
-														if not needSupport[draft.name] then needSupport[draft.name] = 0 end
-														if not availSupport[draft.name] then availSupport[draft.name] = 0 end
-														
-														-- needSupport[draft.name] = request_Main_Nb
+															if not needSupport[draft.name] then needSupport[draft.name] = 0 end
+															if not availSupport[draft.name] then availSupport[draft.name] = 0 end
+															
+															-- needSupport[draft.name] = request_Main_Nb
 
-														--TODO comment ça marche? ça a l'air inutile....
-														availSupport[draft.name] =  AcftAvail[draft.name].unassigned
+															--TODO comment ça marche? ça a l'air inutile....
+															availSupport[draft.name] =  AcftAvail[draft.name].unassigned
 
-														for _p,_support in pairs(draft.support) do																							--iterate through support in draft sortie	
-															if 	type(_support) == "table" then
-																for _a,support in pairs(_support) do
-																	if 	type(support) == "table" then
+															for _p,_support in pairs(draft.support) do																							--iterate through support in draft sortie	
+																if 	type(_support) == "table" then
+																	for _a,support in pairs(_support) do
+																		if 	type(support) == "table" then
 
-																		if not needSupport[support.name] then needSupport[support.name] = 0 end
-																		if not availSupport[support.name] then availSupport[support.name] = 0 end
+																			if not needSupport[support.name] then needSupport[support.name] = 0 end
+																			if not availSupport[support.name] then availSupport[support.name] = 0 end
 
-																		needSupport[support.name] =  needSupport[support.name] + support.number																	--add number of support aircraft from same unit
-																		availSupport[support.name] =  AcftAvail[support.name].unassigned
+																			needSupport[support.name] =  needSupport[support.name] + support.number																	--add number of support aircraft from same unit
+																			availSupport[support.name] =  AcftAvail[support.name].unassigned
 
+																		end
 																	end
 																end
 															end
+
+															-- --TODO encore utile ça?												
+															-- for Sname,_ in pairs(needSupport) do
+															-- 	if needSupport[Sname] - (needSupport[Sname] * 0.25)  > availSupport[Sname] then
+
+															-- 		support_available = false																									--not enough support available
+
+															-- 		local sujet = draft.id.." BOMBARDIER NECESSITANT ESCORTE()support_available if needSupport[Sname] - (needSupport[Sname] * 0.15) > availSupport[Sname]"
+															-- 		local cause = { [1] =  needSupport[Sname] - (needSupport[Sname] * 0.25), [2] = availSupport[Sname], }
+
+															-- 		rejectDraft(draft, sujet, cause, SafeGetLine())
+															-- 	end
+															-- end
 														end
-
-														-- --TODO encore utile ça?												
-														-- for Sname,_ in pairs(needSupport) do
-														-- 	if needSupport[Sname] - (needSupport[Sname] * 0.25)  > availSupport[Sname] then
-
-														-- 		support_available = false																									--not enough support available
-
-														-- 		local sujet = draft.id.." BOMBARDIER NECESSITANT ESCORTE()support_available if needSupport[Sname] - (needSupport[Sname] * 0.15) > availSupport[Sname]"
-														-- 		local cause = { [1] =  needSupport[Sname] - (needSupport[Sname] * 0.25), [2] = availSupport[Sname], }
-
-														-- 		rejectDraft(draft, sujet, cause, SafeGetLine())
-														-- 	end
-														-- end
 													end
 												end
 											end
