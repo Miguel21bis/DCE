@@ -39,6 +39,101 @@ local tasksInterdit = {
 	Transport = true,
 }
 
+--- Recalcule les ETA d'une portion de route après suppression d'un ou plusieurs waypoints.
+--- Repart d'un point d'ancrage (anchorIndex) dont l'ETA reste fiable, et propage vers l'avant
+--- en utilisant la vitesse déjà stockée sur chaque waypoint (pas besoin de redéterminer vAttack/
+--- vCruise/Assemble*0.9/etc, cette logique a déjà été appliquée à l'origine et reste valide
+--- pour peu que route[w].speed soit correct pour CE waypoint, peu importe son prédécesseur).
+--- route        : la table flight[f].route, DÉJÀ nettoyée des waypoints supprimés
+--- anchorIndex  : index du waypoint dont l'ETA est fiable, point de départ du recalcul
+--- endIndex     : dernier index à recalculer (par défaut #route)
+--- fallbackSpeed: vitesse à utiliser si un waypoint n'a pas de .speed défini
+function RecalcEtaFromAnchor(route, anchorIndex, endIndex, fallbackSpeed)
+
+	if not route or not route[anchorIndex] or not route[anchorIndex].eta then
+		return false
+	end
+
+	endIndex = endIndex or #route
+
+	local eta = route[anchorIndex].eta
+
+	for w = anchorIndex + 1, endIndex do
+		local wp = route[w]
+		if wp then
+			if wp.id == "Station" then
+				eta = wp.eta or eta
+			else
+				local speed = wp.speed or fallbackSpeed
+
+				if speed and speed > 0 then
+					local leg = GetDistance(route[w - 1], wp)
+					eta = eta + (leg / speed)
+
+					wp.eta = eta
+
+					wp["debug"] = (wp["debug"] or "")..
+						"\nRecalcEtaFromAnchor w "..w..
+						"\nRecalcEtaFromAnchor eta "..eta..
+						"\nRecalcEtaFromAnchor speed "..speed..
+						"\nRecalcEtaFromAnchor leg "..leg
+				else
+					print("RecalcEtaFromAnchor: invalid speed at index "..w)
+				end
+			end
+		end
+	end
+
+	return true
+end
+
+--- Recalcule les ETA d'une portion de route EN REMONTANT depuis un point d'ancrage FIXE
+--- (typiquement Target, dont le TOT ne doit jamais être modifié).
+--- route       : la table flight[f].route
+--- anchorIndex : index du waypoint dont l'ETA est fixe (ex: Target) — jamais modifié
+--- startIndex  : premier index à recalculer, remonte jusqu'à startIndex+1 inclus (défaut 1)
+--- fallbackSpeed : vitesse de secours si un waypoint n'a pas de .speed défini
+function RecalcEtaBackwardFromAnchor(route, anchorIndex, startIndex, fallbackSpeed)
+
+	if not route or not route[anchorIndex] or not route[anchorIndex].eta then
+		return false
+	end
+
+	startIndex = startIndex or 1
+
+	local eta = route[anchorIndex].eta
+
+	for w = anchorIndex, startIndex + 1, -1 do
+		local wp = route[w]
+		local prevWp = route[w - 1]
+		if wp and prevWp then
+			if wp.id == "Station" then
+				eta = wp.eta or eta
+			else
+				local speed = wp.speed or fallbackSpeed
+
+				if speed and speed > 0 then
+					local leg = GetDistance(prevWp, wp)
+					eta = eta - (leg / speed)
+
+					prevWp.eta = eta
+
+					prevWp["debug"] = (prevWp["debug"] or "")..
+						"\nRecalcEtaBackwardFromAnchor w "..(w-1)..
+						"\nRecalcEtaBackwardFromAnchor eta "..eta..
+						"\nRecalcEtaBackwardFromAnchor speed "..speed..
+						"\nRecalcEtaBackwardFromAnchor leg "..leg
+				else
+					print("RecalcEtaBackwardFromAnchor: invalid speed at index "..w)
+				end
+			end
+		end
+	end
+
+	return true
+end
+
+
 for sideName, packs in pairs(ATO) do
 	local pack_n = {}																							--table to store all package numbers. Numbe sequence needs to be adjusted to do timingh for player package ahead of all other packages
 	local tabPackPrioritaire = 0																				--table pour prioriser les packages clients
@@ -384,7 +479,8 @@ for sideName, packs in pairs(ATO) do
 			--set WP ETAs going backwards from target to take off
 			-- local startUp_time = 600
 			for f = 1, #flight do
-				local startUp_time = 600
+				local startUp_time = 600				--buffer pour décollage au sol (mise en route + taxi), affiné par db_airbases[base].startup
+				local airSpawn_buffer = 300			--buffer pour spawn en vol (assemblage/radio), indépendant du taxi au sol
 				-- local target_wp
 				if flight[f].player or flight[f].client then --for player flight
                     if mission_ini.startup_time_player then --if player value defined in camp -- modification M17.b Option F-14B, changement du temps avant start, possible � chaque mission plutot qu'au demarrage de la campagne
@@ -660,10 +756,14 @@ for sideName, packs in pairs(ATO) do
 
 						-- Cas du premier WP
 						if w - 1 == 1 then
-							-- Spawn au sol, on ajoute le temps de startup/taxi
+							-- Spawn au sol, on ajoute le temps de startup/taxi (dépend de la base / distance de taxi)
 							eta = eta - startUp_time
 							flight[f].route[w - 1].eta = eta
 							flight[f].route[w - 1].baseStartup = db_airbases[flight[f].base].startup or startUp_time
+
+							-- Spawn en vol : marge fixe par défaut, indépendante du taxi/startup au sol
+							etaSpawn = etaSpawn - airSpawn_buffer
+							flight[f].route[w - 1].etaSpawn = etaSpawn
 
 						elseif w - 1 == 2 then
 							flight[f].route[w - 1].baseStartup = db_airbases[flight[f].base].startup or startUp_time
@@ -790,40 +890,32 @@ for sideName, packs in pairs(ATO) do
 				if flight[f].route[1].id == "Spawn" then
 					
 					-- Waypoints à supprimer (dans l'ordre décroissant)
+					local removedCount = 0
 					for idx = #flight[f].route, 1, -1 do
 						local wp = flight[f].route[idx]
 						if wp and (wp.id == "Departure" or wp.id == "Assemble") then
 							table.remove(flight[f].route, idx)
+							removedCount = removedCount + 1
 						end
 					end
 
+					-- ***** route[1].etaSpawn porte déjà la bonne valeur : buffer air-spawn (5 min) déjà appliqué plus haut *****
+					-- ***** (voir "etaSpawn = etaSpawn - airSpawn_buffer" dans la passe backward) *****
+					if flight[f].route[1].etaSpawn then
+						flight[f].route[1].eta = flight[f].route[1].etaSpawn
 
-					for w = 1, #flight[f].route do
-						if flight[f].route[w].etaSpawn then
-							flight[f].route[w].eta = flight[f].route[w].etaSpawn
+						flight[f].route[1]["debug"] = (flight[f].route[1]["debug"] or "")..
+							"\nAtoT_eta id == Spawn , WPT: 1"..
+							"\nAtoT_eta suite_Spawn, new eta "..flight[f].route[1].eta
+					end
 
-							flight[f].route[w]["debug"] = (flight[f].route[w]["debug"] or "")..
-							"\nAtoT_eta id == Spawn , WPT: "..w..
-							"\nAtoT_eta suite_Spawn, new eta "..flight[f].route[w].eta
-						end
+					-- ***** recalcule Join <- IP <- Attack EN REMONTANT depuis Target (ancre TOT, jamais modifiée) *****
+					-- ***** corrige la distance Spawn->Attack (suppression Departure/Assemble) sans créer d'écart avant Target *****
+					if target_wp then
+						local adjustedTargetWp = target_wp - removedCount
+						RecalcEtaBackwardFromAnchor(flight[f].route, adjustedTargetWp, 1, flight[f].loadout.vCruise or main_vCruise)
 					end
 				end
-
-
-				-- if flight[f].route[1].id == "Spawn" then
-				-- 	for w = 1, #flight[f].route do	
-				-- 		if w == 1 or w == 2 then
-				-- 			flight[f].route[w].eta = flight[f].route[w].eta + flight[f].route[w].startUp_time
-				-- 		elseif flight[f].route[w].eta1calc then
-				-- 			flight[f].route[w].eta = flight[f].route[w].eta1calc
-				-- 			-- flight[f].route[w_].eta1calc = nil
-				-- 			flight[f].route[w].debug = flight[f].route[w].debug.."\nAtoT_eta1calc w "..w.." eta1calc: "..flight[f].route[w].eta1calc
-				-- 		end
-
-
-				-- 	end
-				-- end
-
 
 				--remove WPs ahead of spawn WP
 				local flight_tgt_wp = target_wp													--local copy of the target waypoint number for this flight only
@@ -837,20 +929,24 @@ for sideName, packs in pairs(ATO) do
 					flight[f].route[1].airstart = true
 				end
 
-				--remove target and attack WP for escort tasks
 				if flight[f].task == "Escort" and ( mainFlight.task ~= "Transport" and mainFlight.task ~= "Nothing") then
-					table.remove(flight[f].route, flight_tgt_wp)								--remove target WP from route
+					local removedAttack = false
+
+					table.remove(flight[f].route, flight_tgt_wp)
 					if flight[f].route[flight_tgt_wp - 1].id ~= "Spawn" then
-						table.remove(flight[f].route, flight_tgt_wp - 1)						--remove attack WP from route
+						table.remove(flight[f].route, flight_tgt_wp - 1)
+						removedAttack = true
 					end
-					if flight[f].player then													--if this is the player flight
-						camp.player.tgt_wp = camp.player.tgt_wp - 2								--update the target WP (IP for Escort and SEAD)
-					elseif flight[f].client then													--if this is the player flight
-						camp.client[flight[f].IdClient].tgt_wp = camp.client[flight[f].IdClient].tgt_wp - 2								--update the target WP (IP for Escort and SEAD)
+
+					local anchorIndex = removedAttack and (flight_tgt_wp - 2) or (flight_tgt_wp - 1)
+					RecalcEtaFromAnchor(flight[f].route, anchorIndex, #flight[f].route, flight[f].loadout.vCruise or main_vCruise)
+
+					if flight[f].player then
+						camp.player.tgt_wp = camp.player.tgt_wp - 2
+					elseif flight[f].client then
+						camp.client[flight[f].IdClient].tgt_wp = camp.client[flight[f].IdClient].tgt_wp - 2
 					end
 				end
-				
-
 
 			end
 		end
