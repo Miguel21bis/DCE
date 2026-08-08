@@ -171,7 +171,7 @@ end
 IncludeOnce("UTIL_ResetCampaign.lua")
 
 --affiche le type d'avion selectionné et son squadrons
-local playerInfo = {
+playerInfo = {
 	planeBAT = "",
 	squadBAT = "",
 	countryBAT = "",
@@ -252,10 +252,10 @@ if VersionPackageICM then
 	-- print("= = = = = = = = = = = = = Debug Mod? : "..tostring(Debug.debug))
 	-- print()
 
-	print("============================================================================================================================")
+	print("========================================================================================================================")
 	print(" DCE CAMPAIGN GENERATOR")
 	print(" "..tostring(camp.title).."   |   "..tostring(camp.version))
-	print("============================================================================================================================")
+	print("========================================================================================================================")
 	print()
 	print(" Script : "..tostring(showVersion))
 	-- print(" Lua    : "..tostring(_VERSION))
@@ -265,7 +265,7 @@ if VersionPackageICM then
 	print(" Country          : "..tostring(playerInfo.countryBAT))
 	print()
 	print(" Debug Mode       : "..(Debug.debug and "ENABLED" or "DISABLED"))
-	print("============================================================================================================================")
+	print("========================================================================================================================")
 	print()
 
 else
@@ -733,8 +733,9 @@ repeat
 		print("Generating First Mission.\n")
 
 		MissionInstance = MissionInstance + 1															--count the number of times the mission is generated
-		dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_NextMission.lua")						--generate mission
-
+		-- dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_NextMission.lua")						--generate mission
+		Include("MAIN_NextMission.lua")
+		
 		if Multi.NbGroup >= 1 and PlayerFlight then
 			if acceptMission() then
 				BackupFilesMission() 
@@ -756,94 +757,10 @@ repeat
 			break
 		else																							--no player flight could be assigned, advance time and try again
 
-			for _, crit in ipairs(Playability_criterium) do
-				if crit.key == "active_unit" and crit.value == nil then
-					print("Player unit is not active.\n\n")
-				elseif crit.key == "base" and crit.value == nil then
-					print("Player airbase is not operational.\n\n")
-				elseif crit.key == "ready_aircraft" and crit.value == nil then
-					print("Player unit has no ready aircraft.\n\n")
-				elseif crit.key == "tot" and crit.value == nil then
-					print("Player aircraft type cannot operate at this time of day.\n\n")
-				elseif crit.key == "target" and crit.value == nil then
-					print("No eligible mission available for player.\n\n")
-				elseif crit.key == "target_firepower" and crit.value == nil then
-					print("Not enough ready aircraft for this mission.\n\n")
-				elseif crit.key == "weather" and crit.value == nil then
-					print("Player aircraft type cannot operate in this weather.\n\n")
-				elseif crit.key == "target_range" and crit.value == nil then
-					print("No eligible mission available for player.\n\n")
-				elseif crit.key == "intercept" and crit.value == nil then
-					print("Ground alert intercept duty without launch.\n\n")
-				-- else
-				-- 	print("No eligible mission available.\n\n")
-				end
-			end
-
-			if Multi.NbGroup and not PlayerFlight then
-
-				print("Mission generation failed:\n")
-				print("ID  Aircraft     Base                Squadron        Tasks")
-				print("----------------------------------------------------------------")
-
-
-				if PlayerAssignFailure then
-
-					for _, failData in pairs(PlayerAssignFailure) do
-
-						local shortTasks = failData.generatedTasksShort or "---"
-
-						local line =
-							string.format(
-								"%-3s %-12s %-19s %-15s %s",
-								tostring(failData.id or "?"),
-								tostring(failData.requestedPlane or "---"),
-								tostring(failData.baseShort or "---"),
-								tostring(failData.squadronShort or "---"),
-								shortTasks
-							)
-
-						print(line)
-
-						if failData.reason == "no_main_task_generated" then
-
-							print(" -> Requested main task never generated.")
-
-						elseif failData.reason == "task_filtered" then
-
-							print(" -> Main task generated but filtered during Block A.")
-
-						elseif failData.reason == "task_not_generated" then
-
-							print(" -> Aircraft generated but requested task unavailable.")
-
-						elseif failData.reason == "insufficient_aircraft" then
-
-							print(
-								" -> Generated "
-								..tostring(failData.foundAircraft or 0)
-								.." / "
-								..tostring(failData.requestedNb or "?")
-								.." aircraft."
-							)
-
-						elseif failData.reason == "no_aircraft_generated" then
-
-							print(" -> No compatible aircraft generated.")
-
-						end
-
-						if failData.debugReason then
-							print(" -> "..tostring(failData.debugReason))
-						end
-
-						print()
-					end
-
-					CheckAssignments()
-					
-					
-				end
+			if SinglePlayer then
+				PrintPlayerRejectionSP()
+			else
+				PrintPlayerRejectionMP()
 			end
 
 			os.execute 'timeout /t 4'

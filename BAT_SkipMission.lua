@@ -156,7 +156,7 @@ if not ChangePlane then
 end
 
 --affiche le type d'avion selectionné et son squadrons
-local playerInfo = {
+playerInfo = {
 	planeBAT = "",
 	squadBAT = "",
 	countryBAT = "",
@@ -218,10 +218,10 @@ if VersionPackageICM then
 	-- print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
 	-- print("= = = = = = = = = = = = = Debug Mod? : "..tostring(Debug.debug))
 	-- print()
-	print("============================================================================================================================")
+	print("========================================================================================================================")
 	print(" DCE CAMPAIGN GENERATOR")
 	print(" "..tostring(camp.title).."   |   "..tostring(camp.version))
-	print("============================================================================================================================")
+	print("========================================================================================================================")
 	print()
 	print(" Script : "..tostring(showVersion))
 	-- print(" Lua    : "..tostring(_VERSION))
@@ -231,7 +231,7 @@ if VersionPackageICM then
 	print(" Country          : "..tostring(playerInfo.countryBAT))
 	print()
 	print(" Debug Mode       : "..(Debug.debug and "ENABLED" or "DISABLED"))
-	print("============================================================================================================================")
+	print("========================================================================================================================")
 	print()
 
 else
@@ -781,7 +781,7 @@ if input == "y" or input == "yes" then
 				break
 			elseif choix1 == "c" then
 				-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ChangePlane.lua")
-				IncludeOnce("UTIL_ChangePlane.lua")
+				Include("UTIL_ChangePlane.lua")
 			end
 
 		until tabIndex01[choix1]
@@ -794,7 +794,7 @@ if input == "y" or input == "yes" then
 
 			camp.VersionPackageICM = tostring(VersionPackageICM)											-- modification M35 version ScriptsMod -- ajoute la version du script dans camp_status pour utilisation en fin de mission																				--set amount of players
 			-- dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_NextMission.lua")																--generate mission
-			IncludeOnce("MAIN_NextMission.lua")
+			Include("MAIN_NextMission.lua")
 
 			if EndCampaign or camp.endCampaign then 																			-- debug01.b EndMission
 				local EndInfo
@@ -829,96 +829,102 @@ if input == "y" or input == "yes" then
 				break
 			else																							--no player flight could be assigned, advance time and try again
 			
-				for _, crit in ipairs(Playability_criterium) do
-					if crit.key == "active_unit" and crit.value == nil then
-						print("Player unit is not active.\n\n")
-					elseif crit.key == "base" and crit.value == nil then
-						print("Player airbase is not operational.\n\n")
-					elseif crit.key == "ready_aircraft" and crit.value == nil then
-						print("Player unit has no ready aircraft.\n\n")
-					elseif crit.key == "tot" and crit.value == nil then
-						print("Player aircraft type cannot operate at this time of day.\n\n")
-					elseif crit.key == "target" and crit.value == nil then
-						print("No eligible mission available for player.\n\n")
-					elseif crit.key == "target_firepower" and crit.value == nil then
-						print("Not enough ready aircraft for this mission.\n\n")
-					elseif crit.key == "weather" and crit.value == nil then
-						print("Player aircraft type cannot operate in this weather.\n\n")
-					elseif crit.key == "target_range" and crit.value == nil then
-						print("No eligible mission available for player.\n\n")
-					elseif crit.key == "intercept" and crit.value == nil then
-						print("Ground alert intercept duty without launch.\n\n")
-					-- else
-					-- 	print("No eligible mission available.\n\n")
-					end
+				if SinglePlayer then
+					PrintPlayerRejectionSP()
+				else
+					PrintPlayerRejectionMP()
 				end
 
+				-- for _, crit in ipairs(Playability_criterium) do
+				-- 	if crit.key == "active_unit" and crit.value == nil then
+				-- 		print("Player unit is not active.\n\n")
+				-- 	elseif crit.key == "base" and crit.value == nil then
+				-- 		print("Player airbase is not operational.\n\n")
+				-- 	elseif crit.key == "ready_aircraft" and crit.value == nil then
+				-- 		print("Player unit has no ready aircraft.\n\n")
+				-- 	elseif crit.key == "tot" and crit.value == nil then
+				-- 		print("Player aircraft type cannot operate at this time of day.\n\n")
+				-- 	elseif crit.key == "target" and crit.value == nil then
+				-- 		print("No eligible mission available for player.\n\n")
+				-- 	elseif crit.key == "target_firepower" and crit.value == nil then
+				-- 		print("Not enough ready aircraft for this mission.\n\n")
+				-- 	elseif crit.key == "weather" and crit.value == nil then
+				-- 		print("Player aircraft type cannot operate in this weather.\n\n")
+				-- 	elseif crit.key == "target_range" and crit.value == nil then
+				-- 		print("No eligible mission available for player.\n\n")
+				-- 	elseif crit.key == "intercept" and crit.value == nil then
+				-- 		print("Ground alert intercept duty without launch.\n\n")
+				-- 	-- else
+				-- 	-- 	print("No eligible mission available.\n\n")
+				-- 	end
+				-- end
 
-				if Multi.NbGroup and not PlayerFlight then
 
-					print("Mission generation failed:\n")
-					print("ID  Aircraft     Base                Squadron        Tasks")
-					print("----------------------------------------------------------------")
+				-- if Multi.NbGroup and not PlayerFlight then
+
+				-- 	print("Mission generation failed:\n")
+				-- 	print("ID  Aircraft     Base                Squadron        Tasks")
+				-- 	print("----------------------------------------------------------------")
 
 
-					if PlayerAssignFailure then
+				-- 	if PlayerAssignFailure then
 
-						for _, failData in pairs(PlayerAssignFailure) do
+				-- 		for _, failData in pairs(PlayerAssignFailure) do
 
-							local shortTasks = failData.generatedTasksShort or "---"
+				-- 			local shortTasks = failData.generatedTasksShort or "---"
 
-							local line =
-								string.format(
-									"%-3s %-12s %-19s %-15s %s",
-									tostring(failData.id or "?"),
-									tostring(failData.requestedPlane or "---"),
-									tostring(failData.baseShort or "---"),
-									tostring(failData.squadronShort or "---"),
-									shortTasks
-								)
+				-- 			local line =
+				-- 				string.format(
+				-- 					"%-3s %-12s %-19s %-15s %s",
+				-- 					tostring(failData.id or "?"),
+				-- 					tostring(failData.requestedPlane or "---"),
+				-- 					tostring(failData.baseShort or "---"),
+				-- 					tostring(failData.squadronShort or "---"),
+				-- 					shortTasks
+				-- 				)
 
-							print(line)
+				-- 			print(line)
 
-							if failData.reason == "no_main_task_generated" then
+				-- 			if failData.reason == "no_main_task_generated" then
 
-								print(" -> Requested main task never generated.")
+				-- 				print(" -> Requested main task never generated.")
 
-							elseif failData.reason == "task_filtered" then
+				-- 			elseif failData.reason == "task_filtered" then
 
-								print(" -> Main task generated but filtered during Block A.")
+				-- 				print(" -> Main task generated but filtered during Block A.")
 
-							elseif failData.reason == "task_not_generated" then
+				-- 			elseif failData.reason == "task_not_generated" then
 
-								print(" -> Aircraft generated but requested task unavailable.")
+				-- 				print(" -> Aircraft generated but requested task unavailable.")
 
-							elseif failData.reason == "insufficient_aircraft" then
+				-- 			elseif failData.reason == "insufficient_aircraft" then
 
-								print(
-									" -> Generated "
-									..tostring(failData.foundAircraft or 0)
-									.." / "
-									..tostring(failData.requestedNb or "?")
-									.." aircraft."
-								)
+				-- 				print(
+				-- 					" -> Generated "
+				-- 					..tostring(failData.foundAircraft or 0)
+				-- 					.." / "
+				-- 					..tostring(failData.requestedNb or "?")
+				-- 					.." aircraft."
+				-- 				)
 
-							elseif failData.reason == "no_aircraft_generated" then
+				-- 			elseif failData.reason == "no_aircraft_generated" then
 
-								print(" -> No compatible aircraft generated.")
+				-- 				print(" -> No compatible aircraft generated.")
 
-							end
+				-- 			end
 
-							if failData.debugReason then
-								print(" -> "..tostring(failData.debugReason))
-							end
+				-- 			if failData.debugReason then
+				-- 				print(" -> "..tostring(failData.debugReason))
+				-- 			end
 
-							print()
-						end
+				-- 			print()
+				-- 		end
 
-						CheckAssignments()
+				-- 		CheckAssignments()
 						
 						
-					end
-				end
+				-- 	end
+				-- end
 
 				os.execute 'timeout /t 4'
 

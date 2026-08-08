@@ -30,7 +30,7 @@ local multiSquadSet = {}
 local priorityMaxValue = {}
 
 -- Etat final de génération par squad
-local SquadGenerationStatus = {}
+SquadGenerationStatus = {}
 
 local tgtList_Gen = DeepCopy(targetlist)
 
@@ -268,60 +268,46 @@ if Debug.Generator.affiche then
 end
 
 --to track what caused lack of playable sortie for the player
-Playability_criterium = {
-    { key = "active_unit",           value = nil }, -- Player unit is not active
-    { key = "base",                  value = nil }, -- Player airbase is not operational
-    { key = "ready_aircraft",        value = nil }, -- Player unit has no ready aircraft
-    { key = "tot",                   value = nil }, -- Player aircraft type cannot operate at this time of day
-    { key = "target",                value = nil }, -- No eligible mission available for player
-    { key = "target_firepower",      value = nil }, -- Not enough ready aircraft for this mission
-    { key = "weather",               value = nil }, -- Player aircraft type cannot operate in this weather
-    { key = "target_range",          value = nil }, -- No eligible mission available for player
+--NOTE : l'ancienne table Playability_criterium (une vingtaine de booleens vagues) a ete retiree
+--du chemin d'explication au joueur. Elle est conservee vide ci-dessous uniquement pour eviter
+--une erreur "attempt to index a nil value" partout ou elle etait encore lue en debug
+--(ex: ATO_PlayerAssign.lua ligne ~500, GenCriteriaOK() dans DEBRIEF_Master.lua).
+--L'explication reelle des rejets se base desormais sur rejectStep/getDominantRejectReason/
+--SquadGenerationStatus (ATO_Generator_A_Debug.lua), affichee via PrintPlayerRejectionSP/MP.
+Playability_criterium = {}
 
-	{ key = "escort_tot",            		      value = nil }, -- 
-    { key = "escort_target",         			   value = nil }, -- 
-	{ key = "escort_weather",                  		value = nil }, -- 
-    { key = "escort_target_range",             		value = nil }, -- 
-    { key = "escort_target_firepower",             value = nil }, -- 
+--Suivi minimal conserve : uniquement pour detecter "tache CAP/Intercept jouable mais
+--aucun hostile attendu dans la zone" (le reste de l'ancien systeme est retire).
+HostileContextTrack = {}
 
-	{ key = "playerAssign_ATO",            		      value = nil }, -- 
-    { key = "playerAssign_intercept",         			   value = nil }, -- 
-	{ key = "playerAssign_intercept_hostile",                  		value = nil }, -- 
-    { key = "playerAssign_SAR",             		value = nil }, -- 
-    { key = "playerAssign_CAP",             value = nil }, -- 
-    { key = "playerAssign_CAP_hostile",             value = nil }, -- 
-
+local HostileContextKeys = {
+	playerAssign_CAP               = true,
+	playerAssign_CAP_hostile       = true,
+	playerAssign_intercept         = true,
+	playerAssign_intercept_hostile = true,
+	playerAssign_SAR               = true,
 }
 
+--Ancien nom conserve pour ne pas toucher aux appels existants (C_Core.lua et
+--ATO_PlayerAssign.lua en comptent une vingtaine). Les cles hors HostileContextKeys
+--sont desormais silencieusement ignorees (c'etait l'ancien Playability_criterium).
 function TrackPlayability(player_unit, criterium)
-    if player_unit == true then
-        for i, crit in ipairs(Playability_criterium) do
-            -- crit.key peut être "3_ready_aircraft" ou "ready_aircraft" selon ta déclaration
-            if crit.key == criterium or tostring(i).."_"..crit.key == criterium then
-                crit.value = true
-                break
-            end
-        end
-    end
+	if player_unit ~= true then
+		return
+	end
+	if HostileContextKeys[criterium] then
+		HostileContextTrack[criterium] = true
+	end
 end
 
 function CheckAssignments()
-    -- 1. Create a quick dictionary for key-based lookups
-    local status = {}
-    for _, crit in ipairs(Playability_criterium) do
-        status[crit.key] = crit.value
-    end
+	if HostileContextTrack.playerAssign_CAP == true and HostileContextTrack.playerAssign_CAP_hostile ~= true then
+		print("CAP possible but no hostiles expected in the area")
+	end
 
-    -- 2. Apply your logical rules
-    -- CAP Rule
-    if status["playerAssign_CAP"] == true and status["playerAssign_CAP_hostile"] ~= true then
-        print("CAP possible but no hostiles expected in the area")
-    end
-
-    -- Intercept Rule
-    if status["playerAssign_intercept"] == true and status["playerAssign_intercept_hostile"] ~= true then
-        print("Interception possible but no hostiles expected in the area")
-    end
+	if HostileContextTrack.playerAssign_intercept == true and HostileContextTrack.playerAssign_intercept_hostile ~= true then
+		print("Interception possible but no hostiles expected in the area")
+	end
 end
 
 --table to hold availability of aircraft
@@ -3091,7 +3077,7 @@ for sideName, draftT in pairs(draftSorties) do
 					end
 
 					if reason then
-						addEscortRejectReason(unitSupport.name, reason)
+						AddEscortRejectReason(unitSupport.name, reason)
 					end
 				end
 
@@ -3497,7 +3483,7 @@ for sideName, draftT in pairs(draftSorties) do
 															--Pourquoi: rattacher la raison au squad-escorte lui-meme (unitSupport), pas seulement
 															--au draft demandeur ; une seule raison gardee par squad (evite le bruit)
 															if not escortRejectReasons[unitSupport.name] then
-																addEscortRejectReason(
+																AddEscortRejectReason(
 																	unitSupport.name,
 																	"distance vers la cible ("..tostring(route and math.floor(route.lenght) or -1)
 																	..") superieure au rayon d'action aller-retour du loadout '"..tostring(uSupportloadouts[l].name)
@@ -3605,7 +3591,7 @@ if Debug.Generator and Debug.debug then
 	flushDebugLogs()
 end
 
-local function rejectDraft(draft, sujet, cause, line)
+local function rejectDraft(draft, sujet, cause, line, reasonCode)
 	local tabRejected = {}
 	tabRejected["sujet"] = sujet
 	tabRejected["cause"] = cause
@@ -3617,8 +3603,10 @@ local function rejectDraft(draft, sujet, cause, line)
 	--sont deux systèmes de suivi séparés qui ne communiquaient pas entre eux : un squad pouvait traverser
 	--tout le pipeline avec succès puis être rejeté ICI (menace trop importante, firepower insuffisant, etc.)
 	--sans que ça remonte nulle part dans le rapport final. On les raccroche au même wagon.
+	--reasonCode (optionnel) : code court exploitable par ExplainPlayerRejectionSP (ATO_Generator_A_Debug.lua)
+	--pour donner un message joueur propre, plutot que le texte de debug brut "sujet".
 	if draft.name and not escortRejectReasons[draft.name] then
-		addEscortRejectReason(draft.name, tostring(sujet))
+		AddEscortRejectReason(draft.name, tostring(sujet), reasonCode, cause)
 	end
 
 end
@@ -4647,22 +4635,29 @@ local function createATO_table(draftPriority)
 									else
 										local sujet = draft.id.." AVIONS INSUFFISANT()if draft.number <= available and limitMP then {draft.number, limitMP}"
 										local cause = {"draft.number: ", tostring(draft.number), "limitMP: ", tostring(limitMP)}
-										rejectDraft(draft, sujet, cause, SafeGetLine())
+										rejectDraft(draft, sujet, cause, SafeGetLine(), "insufficient_aircraft_count")
 									end
 								else
 									local sujet = draft.id.." FIREPOWER du PACKAGE INSUFFISANT()if  available * draft.loadout.firepower >= (draft.target.firepower.packmin - 1) * draft.target.firepower.max"
 									local cause = { [1] = tostring(available_Main * draft.loadout.firepower), [2]  = tostring((draft.target.firepower.packmin - 1) * draft.target.firepower.max), }
-									rejectDraft(draft, sujet, cause, SafeGetLine())
+									rejectDraft(draft, sujet, cause, SafeGetLine(), "insufficient_package_firepower")
 								end
+							
 							else
+								--available_Main == 0 : c'est le vrai "plus aucun avion", cas le plus parlant pour le joueur.
+								--available_Main > 0  : il reste des avions mais leur puissance de feu cumulee ne suffit pas.
+								local reasonCode = "insufficient_firepower_available"
+								if available_Main <= 0 then
+									reasonCode = "no_aircraft_available"
+								end
 								local sujet = draft.id.." "..tostring(draft.type).." AVION DISPONIBLE INSUFFISANT "..tostring(draft.name).." available: "..tostring(available_Main).." draft.loadout.firepower: "..tostring(draft.loadout.firepower.." firepowerMin: "..tostring(draft.target.firepower.min))
-								local cause = { [1] = tostring(available_Main * draft.loadout.firepower), [2]  = tostring(draft.target.firepower.min), }
-								rejectDraft(draft, sujet, cause, SafeGetLine())
+								local cause = { [1] = tostring(available_Main), [2]  = tostring(draft.target.firepower.min), }
+								rejectDraft(draft, sujet, cause, SafeGetLine(), reasonCode)
 							end
 						else
 							local sujet = draft.id.." FIREPOWER INSUFFISANT (a augmenter dans loadout)if draft.target.firepower.max > 0 and draft.target.firepower.max >= draft.target.firepower.min"
 							local cause = { [1] = tostring(draft.target.firepower.max), [2]  = tostring(draft.target.firepower.max), }
-							rejectDraft(draft, sujet, cause, SafeGetLine())
+							rejectDraft(draft, sujet, cause, SafeGetLine(), "loadout_firepower_too_low")
 						end
 					else
 						local sujet = draft.id.." MultiPACKAGE A 0 (?)if draft.multipack == nil or draft.multipack > 0 || target_name: "..tostring(draft.target_name).." || multipack: " ..tostring(draft.multipack)
@@ -4678,7 +4673,16 @@ local function createATO_table(draftPriority)
 
 				if isDebugModeC and next(escortRejectReasons) then
 					for squadName, reasons in pairs(escortRejectReasons) do
-						debugLog(draft.id.." ESCORT_REJECT "..squadName.." => "..table.concat(reasons, " | "))
+
+						--reasons est desormais une liste de tables {sujet=..., reasonCode=..., cause=...}
+						--(depuis addEscortRejectReason), plus une liste de chaines -> on ne peut plus
+						--faire table.concat(reasons, ...) directement, il faut d'abord extraire .sujet.
+						local sujets = {}
+						for _, entry in ipairs(reasons) do
+							sujets[#sujets + 1] = (type(entry) == "table" and entry.sujet) or tostring(entry)
+						end
+
+						debugLog(draft.id.." ESCORT_REJECT "..squadName.." => "..table.concat(sujets, " | "))
 					end
 				end
 
@@ -4943,7 +4947,8 @@ if Debug.debug then
 			else
 
 				local taskListTxt = (status.tasks and #status.tasks > 0) and table.concat(status.tasks, ", ") or "aucune"
-				local trackedReason = escortRejectReasons[squadName] and escortRejectReasons[squadName][1]
+				local trackedReasonEntry = escortRejectReasons[squadName] and escortRejectReasons[squadName][1]
+				local trackedReason = trackedReasonEntry and trackedReasonEntry.sujet
 
 				if bestReject then
 

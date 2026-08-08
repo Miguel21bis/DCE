@@ -69,6 +69,11 @@ for side, pack in pairs(ATO) do															--iterate through sides in ATO
 							
 							TrackPlayability(flight[f].playable, "playerAssign_intercept")
 
+							--Etiquette posee directement sur CE vol (pas une variable globale a toute
+							--la mission) : par defaut on part du principe qu'aucun hostile n'a ete
+							--trouve, et on la passe a true seulement si on en trouve un ci-dessous.
+							flight[f].hostileFound = false
+
 							local enemy = "blue"
 							if side == "blue" then
 								enemy = "red"
@@ -80,7 +85,10 @@ for side, pack in pairs(ATO) do															--iterate through sides in ATO
 										if wp.id == "Attack" then											--waypoint is an attack waypoint (ignore target as enemy package might do a standoff attack)
 											local dist = GetDistance(wp, flight[f].route[1])				--measure distance from interceptor base to target
 											if dist <= flight[f].target.radius then							--target is in range for interception
-												
+
+												--Un hostile a bien ete trouve a portee pour CE vol precis.
+												flight[f].hostileFound = true
+
 												local existingIndex = tab_doublon[flight[f].groupName]
 
 												local newEntry = {
@@ -156,6 +164,10 @@ for side, pack in pairs(ATO) do															--iterate through sides in ATO
 						elseif flight[f].task == "CAP" then													--if the task is CAP, check if enemy aircraft will enter the CAP area when player is on station
 							TrackPlayability(flight[f].playable, "playerAssign_CAP")
 
+							--Meme principe que pour Intercept ci-dessus : etiquette posee sur CE vol,
+							--pas sur une variable globale a toute la mission.
+							flight[f].hostileFound = false
+
 							if Multi.NbGroup >= 1 or ((f == 1 and (#flight - 1) * flight[f].loadout.tStation < flight[f].tot_to - flight[f].tot_from) or (f == 2 and (#flight - 1) * flight[f].loadout.tStation >= flight[f].tot_to - flight[f].tot_from)) then	--allow only the first or second flight (relief on station) in package to be playable
 								local enemy = "blue"
 								if side == "blue" then
@@ -170,7 +182,8 @@ for side, pack in pairs(ATO) do															--iterate through sides in ATO
 												local dist = GetTangentDistance(enemy_pack.main[1].route[w], enemy_pack.main[1].route[w + 1], flight[f].target)		--get closest distance from CAP station to route between WP w and WP w+1																	
 												if Multi.NbGroup >= 1 or dist <= flight[f].target.radius then							--route segement is in range of CAP station											
 
-													
+													--Un hostile a bien ete trouve dans la zone de patrouille pour CE vol precis.
+													flight[f].hostileFound = true
 
 													local existingIndex = tab_doublon[flight[f].groupName]
 

@@ -49,6 +49,69 @@ DraftStepIndex = {
 
 escortRejectReasons = {}
 
+--Traduction lisible des codes de rejet produits par rejectStep()/PlayerAssignFailure.
+--priority sert a choisir la raison "dominante" quand plusieurs rejets ont ete tentes
+--pour le meme escadron (cf getDominantRejectReason). Plus le chiffre est haut, plus
+--la raison est consideree comme parlante/utile a afficher au joueur.
+--NOTE : "texte" est le message montre aux joueurs -> style compte-rendu militaire,
+--court (max ~10-12 mots), pas de tournure journalistique.
+RejectReasonInfo = {
+
+	--blocages de base (rien n'a ete tente ensuite)
+	inactive               = { priority = 95, texte = "Squadron currently inactive." },
+	invalid_airbase        = { priority = 95, texte = "Home base non-operational." },
+	no_aircraft_available  = { priority = 90, texte = "No aircraft ready at this time." },
+
+	--route / portee
+	route_not_found        = { priority = 85, texte = "No valid route to target." },
+	range_too_short        = { priority = 80, texte = "Target out of range." },
+	support_no_range       = { priority = 80, texte = "Target out of range for escort tasking." },
+
+	--meteo
+	weather_not_eligible   = { priority = 70, texte = "Weather unsuitable for this airframe." },
+	no_weatherEligible     = { priority = 70, texte = "Weather grounds all available targets." },
+
+	--puissance de feu
+	firepower_insufficient = { priority = 65, texte = "Insufficient firepower for this target." },
+
+	--loadout / heure du jour
+	loadout_day_only       = { priority = 55, texte = "Loadout restricted to daylight ops." },
+	loadout_night_only     = { priority = 55, texte = "Loadout restricted to night ops." },
+	HumainRequired         = { priority = 55, texte = "Tasking requires a human pilot slot." },
+
+	--loadout / tache
+	no_loadoutEligible     = { priority = 40, texte = "No eligible loadout for current conditions." },
+	no_aircraft_loadout    = { priority = 40, texte = "No loadout configured for this airframe." },
+	no_task_loadout        = { priority = 40, texte = "No loadout configured for this tasking." },
+	no_loadout_country     = { priority = 40, texte = "No loadout configured for your coalition." },
+
+	--cible
+	no_full_target_attributes     = { priority = 25, texte = "No target meets mission requirements." },
+	no_full_target_attributesCond = { priority = 25, texte = "No target meets mission conditions." },
+	no_target_active               = { priority = 20, texte = "No active target for this tasking." },
+	no_target_ATO                  = { priority = 20, texte = "No target assigned in the ATO." },
+	["no_target.task == task"]     = { priority = 20, texte = "No target matches requested tasking." },
+
+	--CAP / Intercept jouables mais sans opposition (flight.hostileFound == false)
+	no_hostile_in_CAP_area   = { priority = 60, texte = "CAP airborne, no bandits expected in sector." },
+	no_hostile_for_intercept = { priority = 60, texte = "Intercept airborne, no bogeys in range." },
+
+	--raisons agregees multijoueur (ATO_PlayerAssign.lua)
+	no_playable_flight_generated = { priority = 90, texte = "No playable flight generated this pass." },
+	no_aircraft_generated        = { priority = 85, texte = "No aircraft of this type generated." },
+	task_not_generated            = { priority = 60, texte = "Aircraft generated, wrong tasking assigned." },
+	insufficient_aircraft         = { priority = 50, texte = "Insufficient aircraft generated for this request." },
+	unknown                        = { priority = 0,  texte = "Cause undetermined." },
+	
+	--rejets remontes par rejectDraft() dans createATO_table (ATO_Generator_C_Core.lua) :
+	--un 3e circuit, distinct de rejectStep/SquadGenerationStatus, qui intervient plus tard
+	--dans la construction du package (apres qu'un loadout ait ete juge eligible).
+	insufficient_aircraft_count   = { priority = 90, texte = "Not enough aircraft to fill this tasking." },
+	insufficient_package_firepower = { priority = 65, texte = "Package firepower below required threshold." },
+	insufficient_firepower_available = { priority = 65, texte = "Available aircraft can't generate required firepower." },
+	loadout_firepower_too_low      = { priority = 55, texte = "Loadout firepower too low, adjust weapons load." },
+}
+
 -- ============================================================================
 -- SÉCURITÉ & LOGS DE CONFIGURATION (En-tête du script)
 -- ============================================================================
@@ -383,45 +446,16 @@ function getDominantRejectReason(draft)
 		return nil
 	end
 
-	local priority = {
-
-		no_aircraft = 100,
-		insufficient_aircraft = 90,
-
-		range = 80,
-
-		weather = 70,
-
-		no_loadoutEligible = 60,
-
-		loadout_day_only = 55,
-		loadout_night_only = 55,
-
-		task = 40,
-
-		no_target_ATO = 20,
-		no_target_active = 10,
-	}
-
 	local bestReason
 	local bestPriority = -1
-
-	-- for reason,_ in pairs(draft.rejectStats) do
-
-	-- 	local p = priority[reason] or 0
-
-	-- 	if p > bestPriority then
-	-- 		bestPriority = p
-	-- 		bestReason = reason
-	-- 	end
-	-- end
 
 	for rejectKey,_ in pairs(draft.rejectStats) do
 
 		local reason =
 			string.match(rejectKey, "|(.+)$")
 
-		local p = priority[reason] or 0
+		local info = RejectReasonInfo[reason]
+		local p = info and info.priority or 0
 
 		if p > bestPriority then
 			bestPriority = p
@@ -572,11 +606,181 @@ function printGeneratorSummary()
 	print("--------------------------------------------------------\n")
 end
 
-function addEscortRejectReason(squadName, reason)
+
+--Enregistre la raison de rejet d'un squad-escorte/support (une seule gardee par squad, la
+--premiere rencontree, cf les appels avec "if not escortRejectReasons[...] then").
+--sujet      : texte de debug brut (francais, garde pour le rapport FINAL SQUAD REPORT)
+--reasonCode : cle optionnelle de RejectReasonInfo, pour un message joueur propre et court
+--cause      : donnees brutes optionnelles associees (chiffres, etc.)
+function AddEscortRejectReason(squadName, sujet, reasonCode, cause)
 	if not escortRejectReasons[squadName] then
 		escortRejectReasons[squadName] = {}
 	end
 
-	table.insert(escortRejectReasons[squadName], reason)
+	table.insert(escortRejectReasons[squadName], {
+		sujet = sujet,
+		reasonCode = reasonCode,
+		cause = cause,
+	})
+end
+
+--Cherche le flight du joueur dans l'ATO en cours (comparaison sur le nom d'escadron,
+--identique a la logique de ATO_PlayerAssign.lua : flight[f].name == squadron name).
+local function FindFlightByName(squadName)
+
+	if not ATO or not squadName then
+		return nil
+	end
+
+	for _, pack in pairs(ATO) do
+		for p = 1, #pack do
+			for _, flight in pairs(pack[p]) do
+				for f = 1, #flight do
+					if flight[f].name == squadName then
+						return flight[f]
+					end
+				end
+			end
+		end
+	end
+
+	return nil
+end
+
+--Construit les lignes d'explication pour le joueur solo.
+--1) vol genere mais volontairement exclu (CAP/Intercept sans hostile a portee)
+--2) sinon, aucun vol genere du tout -> SquadGenerationStatus[squadName].bestReject
+--   (circuit rejectStep, dans processEligibleLoadout)
+--3) sinon, squad rejete plus tard dans la construction du package -> escortRejectReasons[squadName]
+--   (circuit rejectDraft, dans createATO_table -- un point de blocage different du n°2,
+--   qui intervient APRES qu'un loadout ait ete juge eligible)
+--Style volontairement court/compte-rendu militaire : 1 ligne, ~10-12 mots max.
+function ExplainPlayerRejectionSP(squadName)
+
+	local msg = {}
+
+	local flight = FindFlightByName(squadName)
+
+	if flight and flight.playable == true then
+
+		if flight.task == "CAP" and flight.hostileFound == false then
+			msg[#msg + 1] = RejectReasonInfo.no_hostile_in_CAP_area.texte
+			return msg
+
+		elseif flight.task == "Intercept" and flight.hostileFound == false then
+			msg[#msg + 1] = RejectReasonInfo.no_hostile_for_intercept.texte
+			return msg
+
+		else
+			msg[#msg + 1] =
+				"Flight tasked to your squadron ("
+				..tostring(flight.task or "?")
+				.."), not slotted as playable this pass."
+			return msg
+		end
+	end
+
+	local status = SquadGenerationStatus and SquadGenerationStatus[squadName]
+
+	if status and status.bestReject then
+
+		local bestReject = status.bestReject
+
+		local reasonKey =
+			bestReject.dominantReason
+			or (bestReject.finalReject and bestReject.finalReject.reason)
+
+		local info = RejectReasonInfo[reasonKey]
+
+		if info then
+			msg[#msg + 1] = "Cause: "..info.texte
+			return msg
+		end
+	end
+
+	--rien trouve via rejectStep : on tente le 2e circuit (rejectDraft/createATO_table)
+	local escortReason = escortRejectReasons and escortRejectReasons[squadName] and escortRejectReasons[squadName][1]
+	local escortInfo = escortReason and escortReason.reasonCode and RejectReasonInfo[escortReason.reasonCode]
+
+	if escortInfo then
+		msg[#msg + 1] = "Cause: "..escortInfo.texte
+		return msg
+	end
+
+	msg[#msg + 1] = "No blocking data logged for your squadron this pass."
+	return msg
+end
+
+--A appeler depuis les lanceurs (BAT_FirstMission / BAT_SkipMission / DEBRIEF_Master) en solo.
+function PrintPlayerRejectionSP()
+
+	local squadName = playerInfo and playerInfo.squadBAT
+
+	print("\nNo playable flight could be offered to you this pass.")
+
+	for _, line in ipairs(ExplainPlayerRejectionSP(squadName)) do
+		print(line)
+	end
+
+	print()
+end
+
+--A appeler depuis les lanceurs en multijoueur.
+function PrintPlayerRejectionMP()
+
+	if not (Multi.NbGroup and not PlayerFlight) then
+		return
+	end
+
+	print("Mission generation failed:\n")
+	print("ID  Aircraft     Base                Squadron        Tasks")
+	print("----------------------------------------------------------------")
+
+	if not PlayerAssignFailure then
+		return
+	end
+
+	for _, failData in pairs(PlayerAssignFailure) do
+
+		local shortTasks = failData.generatedTasksShort or "---"
+
+		local line =
+			string.format(
+				"%-3s %-12s %-19s %-15s %s",
+				tostring(failData.id or "?"),
+				tostring(failData.requestedPlane or "---"),
+				tostring(failData.baseShort or "---"),
+				tostring(failData.squadronShort or "---"),
+				shortTasks
+			)
+
+		print(line)
+
+		local info = RejectReasonInfo[failData.reason]
+
+		if failData.reason == "insufficient_aircraft" then
+			print(
+				" -> Generated "
+				..tostring(failData.foundAircraft or 0)
+				.." / "
+				..tostring(failData.requestedNb or "?")
+				.." aircraft."
+			)
+		elseif info then
+			print(" -> "..info.texte)
+		elseif failData.reason then
+			print(" -> Unmapped reason code: "..tostring(failData.reason))
+		else
+			print(" -> Cause undetermined.")
+		end
+
+		if failData.debugReason then
+			print("    -> "..tostring(failData.debugReason))
+		end
+
+		print()
+	end
+
+	CheckAssignments()
 end
 

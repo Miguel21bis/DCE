@@ -88,34 +88,68 @@ function GenCount(t)
 	return n
 end
 
---liste compacte des criteres de jouabilite reellement atteints
+--resume compact de la raison dominante trackee pour l'escadron du joueur (solo uniquement)
 function GenCriteriaOK()
-	if type(Playability_criterium) ~= "table" then
-		return "(table absente)"
+	if not (playerInfo and playerInfo.squadBAT) then
+		return "(pas de squadBAT connu)"
 	end
-	local ok = {}
-	for _, crit in ipairs(Playability_criterium) do
-		if crit.value then
-			ok[#ok + 1] = crit.key
-		end
+
+	local status = SquadGenerationStatus and SquadGenerationStatus[playerInfo.squadBAT]
+
+	if not status or not status.bestReject then
+		return "aucune raison trackee"
 	end
-	if #ok == 0 then
-		return "aucun"
-	end
-	return table.concat(ok, ", ")
+
+	local reasonKey =
+		status.bestReject.dominantReason
+		or (status.bestReject.finalReject and status.bestReject.finalReject.reason)
+
+	return tostring(reasonKey or "inconnue")
 end
 
 --a appeler JUSTE AVANT de (re)jouer MAIN_NextMission.lua
 function GenPassStart()
 	GenTrace.passe = GenTrace.passe + 1
 	GenTrace.chrono = os.clock()
-	GenTrace.empreinte = tostring(Playability_criterium)
+	GenTrace.empreinte = tostring(SquadGenerationStatus)
 
 	GenPrint("---------------------------------------------------------------")
 	GenPrint("PASSE "..GenTrace.passe.."   (MissionInstance = "..tostring(MissionInstance)..")")
 	GenPrint("  avant : PlayerFlight = "..tostring(PlayerFlight)
 		.." | TaskRefused = "..tostring(TaskRefused)
 		.." | camp.time = "..tostring(camp and camp.time))
+end
+
+--a appeler JUSTE APRES avoir (re)joue MAIN_NextMission.lua
+function GenPassEnd()
+	local duree = os.clock() - GenTrace.chrono
+	local empreinte = tostring(SquadGenerationStatus)
+
+	--SquadGenerationStatus est recreee a chaque execution de ATO_Generator_C_Core.lua.
+	--Si l'adresse de la table n'a pas bouge, c'est que le generateur n'a pas tourne du tout.
+	if GenTrace.passe > 1 and empreinte == GenTrace.empreinte then
+		GenPrint("  !! ALERTE : le generateur n'a PAS ete rejoue a cette passe.")
+		GenPrint("  !! SquadGenerationStatus est la meme table qu'au passage precedent ("..empreinte..").")
+		GenPrint("  !! Cause habituelle : IncludeOnce() au lieu de Include() sur un fichier rejouable.")
+	end
+
+	local packages, vols, avions = GenCountATO()
+
+	GenPrint(string.format("  apres : ATO = %d package(s), %d vol(s), %d avion(s)   [%.2f s]",
+		packages, vols, avions, duree))
+	GenPrint("  apres : PlayerFlight = "..tostring(PlayerFlight)
+		.." | EndCampaign = "..tostring(EndCampaign)
+		.." | StopBug = "..tostring(StopBug))
+	GenPrint("  suivi : PlayerAssignFailure = "..GenCount(PlayerAssignFailure)
+		.." | DraftProgress = "..GenCount(DraftProgress)
+		.." | escortRejectReasons = "..GenCount(escortRejectReasons))
+	GenPrint("  raison dominante joueur : "..GenCriteriaOK())
+
+	--Controle croise : GeneratorPass est incremente dans ATO_Generator_A_Debug.lua.
+	--S'il reste bloque alors que le numero de passe augmente, ce sont les fichiers
+	--ATO_Generator_* qui ne sont pas rejoues (IncludeOnce quelque part en amont).
+	GenPrint("  moteur : GeneratorPass = "..tostring(GeneratorPass)
+		.." (doit valoir "..GenTrace.passe..")")
 end
 
 --a appeler JUSTE APRES avoir (re)joue MAIN_NextMission.lua
@@ -370,9 +404,9 @@ end
 --ne pas supprimer, utile pour le fichier statsevaluation
 dofile("Active/db_airbases.lua")
 dofile("Active/targetlist.lua")
+
 -- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
 -- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
-
 IncludeOnce("UTIL_Data.lua")
 IncludeOnce("UTIL_DataMap.lua")
 
@@ -383,10 +417,11 @@ IncludeOnce("UTIL_DataMap.lua")
 -- dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_StatsEvaluation.lua")
 IncludeOnce("DEBRIEF_StatsEvaluation.lua")
 dofile("Active/oob_scen.lua")
+
 --il faut laisser cette ligne, sinon le double appel crée un pb de alive_last
 -- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
 -- dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
-IncludeOnce("DC_UpdateTargetlist.lua")
+Include ("DC_UpdateTargetlist.lua")
 IncludeOnce("DEBRIEF_Text.lua")
 
 local debriefFile = io.open("Debriefing/Debriefing " .. camp.mission .. ".txt", "w") or error("Failed to open debug file")
@@ -1090,115 +1125,121 @@ if input == "y" or input == "yes" then
 				break
 			else																					--no player flight could be assigned, advance time and try again
 				
-				for _, crit in ipairs(Playability_criterium) do
-					if crit.key == "active_unit" and crit.value == nil then
-						print("Player unit is not active.\n\n")
-					elseif crit.key == "base" and crit.value == nil then
-						print("Player airbase is not operational.\n\n")
-					elseif crit.key == "ready_aircraft" and crit.value == nil then
-						print("Player unit has no ready aircraft.\n\n")
-					elseif crit.key == "tot" and crit.value == nil then
-						print("Player aircraft type cannot operate at this time of day.\n\n")
-					elseif crit.key == "target" and crit.value == nil then
-						print("No eligible mission available for player.\n\n")
-					elseif crit.key == "target_firepower" and crit.value == nil then
-						print("Not enough ready aircraft for this mission.\n\n")
-					elseif crit.key == "weather" and crit.value == nil then
-						print("Player aircraft type cannot operate in this weather.\n\n")
-					elseif crit.key == "target_range" and crit.value == nil then
-						print("No eligible mission available for player.\n\n")
-					elseif crit.key == "intercept" and crit.value == nil then
-						print("Ground alert intercept duty without launch.\n\n")
-					-- else
-					-- 	print("No eligible mission available.\n\n")
-					end
+				if SinglePlayer then
+					PrintPlayerRejectionSP()
+				else
+					PrintPlayerRejectionMP()
 				end
 
+				-- for _, crit in ipairs(Playability_criterium) do
+				-- 	if crit.key == "active_unit" and crit.value == nil then
+				-- 		print("Player unit is not active.\n\n")
+				-- 	elseif crit.key == "base" and crit.value == nil then
+				-- 		print("Player airbase is not operational.\n\n")
+				-- 	elseif crit.key == "ready_aircraft" and crit.value == nil then
+				-- 		print("Player unit has no ready aircraft.\n\n")
+				-- 	elseif crit.key == "tot" and crit.value == nil then
+				-- 		print("Player aircraft type cannot operate at this time of day.\n\n")
+				-- 	elseif crit.key == "target" and crit.value == nil then
+				-- 		print("No eligible mission available for player.\n\n")
+				-- 	elseif crit.key == "target_firepower" and crit.value == nil then
+				-- 		print("Not enough ready aircraft for this mission.\n\n")
+				-- 	elseif crit.key == "weather" and crit.value == nil then
+				-- 		print("Player aircraft type cannot operate in this weather.\n\n")
+				-- 	elseif crit.key == "target_range" and crit.value == nil then
+				-- 		print("No eligible mission available for player.\n\n")
+				-- 	elseif crit.key == "intercept" and crit.value == nil then
+				-- 		print("Ground alert intercept duty without launch.\n\n")
+				-- 	-- else
+				-- 	-- 	print("No eligible mission available.\n\n")
+				-- 	end
+				-- end
 
-				if Multi.NbGroup and not PlayerFlight then
 
-					print("Mission generation failed:\n")
-					print("ID  Aircraft     Base                Squadron        Tasks")
-					print("----------------------------------------------------------------")
+				-- if Multi.NbGroup and not PlayerFlight then
+
+				-- 	print("Mission generation failed:\n")
+				-- 	print("ID  Aircraft     Base                Squadron        Tasks")
+				-- 	print("----------------------------------------------------------------")
 
 
-					if PlayerAssignFailure then
+				-- 	if PlayerAssignFailure then
 
-						for _, failData in pairs(PlayerAssignFailure) do
+				-- 		for _, failData in pairs(PlayerAssignFailure) do
 
-							local shortTasks = failData.generatedTasksShort or "---"
+				-- 			local shortTasks = failData.generatedTasksShort or "---"
 
-							local line =
-								string.format(
-									"%-3s %-12s %-19s %-15s %s",
-									tostring(failData.id or "?"),
-									tostring(failData.requestedPlane or "---"),
-									tostring(failData.baseShort or "---"),
-									tostring(failData.squadronShort or "---"),
-									shortTasks
-								)
+				-- 			local line =
+				-- 				string.format(
+				-- 					"%-3s %-12s %-19s %-15s %s",
+				-- 					tostring(failData.id or "?"),
+				-- 					tostring(failData.requestedPlane or "---"),
+				-- 					tostring(failData.baseShort or "---"),
+				-- 					tostring(failData.squadronShort or "---"),
+				-- 					shortTasks
+				-- 				)
 
-							print(line)
+				-- 			print(line)
 
-							--registerPlayerFailure() enregistre draftId / stage / reason / details,
-							--et PAS id / baseShort / squadronShort : sans ces lignes le tableau
-							--ci-dessus est toujours vide de sens.
-							print("    draftId: "..tostring(failData.draftId)
-								.." | unitType: "..tostring(failData.unitType)
-								.." | stage: "..tostring(failData.stage)
-								.." | reason: "..tostring(failData.reason)
-								.." | line: "..tostring(failData.line))
+				-- 			--registerPlayerFailure() enregistre draftId / stage / reason / details,
+				-- 			--et PAS id / baseShort / squadronShort : sans ces lignes le tableau
+				-- 			--ci-dessus est toujours vide de sens.
+				-- 			print("    draftId: "..tostring(failData.draftId)
+				-- 				.." | unitType: "..tostring(failData.unitType)
+				-- 				.." | stage: "..tostring(failData.stage)
+				-- 				.." | reason: "..tostring(failData.reason)
+				-- 				.." | line: "..tostring(failData.line))
 
-							if type(failData.details) == "table" then
-								local detail = {}
-								for k, v in pairs(failData.details) do
-									detail[#detail + 1] = tostring(k).."="..tostring(v)
-								end
-								if #detail > 0 then
-									print("    rejets : "..table.concat(detail, "   "))
-								end
-							end
+				-- 			if type(failData.details) == "table" then
+				-- 				local detail = {}
+				-- 				for k, v in pairs(failData.details) do
+				-- 					detail[#detail + 1] = tostring(k).."="..tostring(v)
+				-- 				end
+				-- 				if #detail > 0 then
+				-- 					print("    rejets : "..table.concat(detail, "   "))
+				-- 				end
+				-- 			end
 
-							if failData.reason == "no_main_task_generated" then
+				-- 			if failData.reason == "no_main_task_generated" then
 
-								print(" -> Requested main task never generated.")
+				-- 				print(" -> Requested main task never generated.")
 
-							elseif failData.reason == "task_filtered" then
+				-- 			elseif failData.reason == "task_filtered" then
 
-								print(" -> Main task generated but filtered during Block A.")
+				-- 				print(" -> Main task generated but filtered during Block A.")
 
-							elseif failData.reason == "task_not_generated" then
+				-- 			elseif failData.reason == "task_not_generated" then
 
-								print(" -> Aircraft generated but requested task unavailable.")
+				-- 				print(" -> Aircraft generated but requested task unavailable.")
 
-							elseif failData.reason == "insufficient_aircraft" then
+				-- 			elseif failData.reason == "insufficient_aircraft" then
 
-								print(
-									" -> Generated "
-									..tostring(failData.foundAircraft or 0)
-									.." / "
-									..tostring(failData.requestedNb or "?")
-									.." aircraft."
-								)
+				-- 				print(
+				-- 					" -> Generated "
+				-- 					..tostring(failData.foundAircraft or 0)
+				-- 					.." / "
+				-- 					..tostring(failData.requestedNb or "?")
+				-- 					.." aircraft."
+				-- 				)
 
-							elseif failData.reason == "no_aircraft_generated" then
+				-- 			elseif failData.reason == "no_aircraft_generated" then
 
-								print(" -> No compatible aircraft generated.")
+				-- 				print(" -> No compatible aircraft generated.")
 
-							end
+				-- 			end
 
-							if failData.debugReason then
-								print(" -> "..tostring(failData.debugReason))
-							end
+				-- 			if failData.debugReason then
+				-- 				print(" -> "..tostring(failData.debugReason))
+				-- 			end
 
-							print()
-						end
+				-- 			print()
+				-- 		end
 
-						CheckAssignments()
+				-- 		CheckAssignments()
 						
 						
-					end
-				end
+				-- 	end
+				-- end
 
 				GenPrint("  echec de la passe "..GenTrace.passe..", nouvelle tentative...")
 
