@@ -13,6 +13,7 @@ Include("FUNC/FUNC_Coordinates.lua")
 Include("FUNC/FUNC_Radio.lua")
 Include("FUNC/FUNC_Loadout.lua")
 Include("FUNC/FUNC_Ids.lua")
+-- Include("FUNC/FUNC_Config.lua")
 -- Include("FUNC/FUNC_Campaign.lua")
 -- Include("FUNC/FUNC_Target.lua")
 
@@ -76,13 +77,6 @@ DCS_ENI_Side = {
 	["red"] = "blue"
 	}
 
-	-- airbase = { 25, 12, 20, 15, 0 },
-	-- runWay = { 25, 12, 20, 15, 0 },
-	-- SAM = { 25, 12, 20, 15, 0 },
-	-- EWR = { 25, 12, 20, 15, 0 },
-	-- bridge = { 25, 12, 20, 15, 0 },
-	-- generic = { 25, 12, 20, 15, 0 },
-
 Attribut2Target = {
 	["airbase"] = "airbase",
 	["base"] = "airbase",
@@ -119,62 +113,7 @@ PICTURE_BRIEF_PATHS = {
 }
 
 
--- Résout un chemin pointé ("mission_ini.weather.trend") en valeur réelle,
--- sans lever d'erreur si un maillon du chemin est absent.
-local function getByPath(path)
-	local value = _G
-	for segment in path:gmatch("[^.]+") do
-		if type(value) ~= "table" then return nil end
-		value = value[segment]
-		if value == nil then return nil end
-	end
-	return value
-end
 
--- Essaie chaque chemin candidat dans l'ordre, retourne la première valeur
--- trouvée. Loggue un avertissement si la valeur vient d'un chemin autre
--- que le premier (donc un chemin legacy) — c'est ce log qui te dira,
--- plus tard, quand tu peux supprimer les chemins legacy en toute sécurité.
-local function resolveValue(fieldName, candidatePaths, default)
-	for i, path in ipairs(candidatePaths) do
-		local value = getByPath(path)
-		if value ~= nil then
-			if i > 1 then
-				-- print("[ConfigResolver] '" .. fieldName .. "' trouvé via chemin legacy : " .. path
-				-- 	.. " (chemin cible : " .. candidatePaths[1] .. ")")
-			end
-			return value
-		end
-	end
-	-- print("[ConfigResolver] '" .. fieldName .. "' introuvable, valeur par défaut : " .. tostring(default))
-	return default
-end
-
-local function resolveGroup(pathsByField, defaults)
-	local resolved = {}
-	for fieldName, candidatePaths in pairs(pathsByField) do
-		resolved[fieldName] = resolveValue(fieldName, candidatePaths, defaults and defaults[fieldName])
-	end
-	return resolved
-end
-
-local function generateSolid_G_Variable()
-	Weather = resolveGroup(WEATHER_PATHS, {
-		trend = 50, variance = 30, refTemp = 20,
-		instability = 60, windActivity = 2.5, winDirection = 158, weather_playerBias = 0
-	})
-
-	PictureBrief = resolveGroup(PICTURE_BRIEF_PATHS, {
-    	pictureBrief = { blue = {}, red = {} 
-	},
-})
-
-
-end
-
-
---construit les variables de maniere robuste, suite aux changements de structure de conf_mod.lua et mission_ini.lua
-generateSolid_G_Variable()
 
 --****************************************** ****************************************** ******************************************
 --****************************************** ****************************************** ******************************************
@@ -256,19 +195,6 @@ function AliasBaseName(s)
 		return s
 	end
 end
-
--- -- Fonction récursive pour itérer sur la table
--- function Display(t, indent)
---     indent = indent or ""
---     for key, value in pairs(t) do
---         if type(value) == "table" then
---             print(indent .. tostring(key) .. ":")
---             Display(value, indent .. "  ")
---         else
---             print(indent .. tostring(key) .. ": " .. tostring(value))
---         end
---     end
--- end
 
 -- Fonction récursive pour afficher une table en évitant les erreurs
 function Display(t, indent)
@@ -1246,13 +1172,13 @@ function UpdateFilesAfterTimeJump()
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")
-	IncludeOnce("DC_UpdateTargetlist.lua")
-	IncludeOnce("DC_Refpoints.lua")
-	IncludeOnce("DC_Weather.lua")
-	IncludeOnce("DC_NavalEnvironment.lua")
-	IncludeOnce("DC_CheckTriggers.lua")
-	IncludeOnce("DC_UpdateTargetlist.lua")
-	IncludeOnce("DC_UpdateOOBGround.lua")
+	Include ("DC_UpdateTargetlist.lua")
+	Include ("DC_Refpoints.lua")
+	Include ("DC_Weather.lua")
+	Include ("DC_NavalEnvironment.lua")
+	Include ("DC_CheckTriggers.lua")
+	Include ("DC_UpdateTargetlist.lua")
+	Include ("DC_UpdateOOBGround.lua")
 
 	local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
 	local trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
@@ -2089,3 +2015,62 @@ function ResetUnitClient()
 		end
 	end
 end
+
+
+
+-- Résout un chemin pointé ("mission_ini.weather.trend") en valeur réelle,
+-- sans lever d'erreur si un maillon du chemin est absent.
+function getByPath(path)
+	local value = _G
+	for segment in path:gmatch("[^.]+") do
+		if type(value) ~= "table" then return nil end
+		value = value[segment]
+		if value == nil then return nil end
+	end
+	return value
+end
+
+-- Essaie chaque chemin candidat dans l'ordre, retourne la première valeur
+-- trouvée. Loggue un avertissement si la valeur vient d'un chemin autre
+-- que le premier (donc un chemin legacy) — c'est ce log qui te dira,
+-- plus tard, quand tu peux supprimer les chemins legacy en toute sécurité.
+function resolveValue(fieldName, candidatePaths, default)
+	for i, path in ipairs(candidatePaths) do
+		local value = getByPath(path)
+		if value ~= nil then
+			if i > 1 then
+				-- print("[ConfigResolver] '" .. fieldName .. "' trouvé via chemin legacy : " .. path
+				-- 	.. " (chemin cible : " .. candidatePaths[1] .. ")")
+			end
+			return value
+		end
+	end
+	-- print("[ConfigResolver] '" .. fieldName .. "' introuvable, valeur par défaut : " .. tostring(default))
+	return default
+end
+
+function resolveGroup(pathsByField, defaults)
+	local resolved = {}
+	for fieldName, candidatePaths in pairs(pathsByField) do
+		resolved[fieldName] = resolveValue(fieldName, candidatePaths, defaults and defaults[fieldName])
+	end
+	return resolved
+end
+
+function generateSolid_G_Variable()
+	Weather = resolveGroup(WEATHER_PATHS, {
+		trend = 50, variance = 30, refTemp = 20,
+		instability = 60, windActivity = 2.5, winDirection = 158, weather_playerBias = 0
+	})
+
+	PictureBrief = resolveGroup(PICTURE_BRIEF_PATHS, {
+    	pictureBrief = { blue = {}, red = {} 
+	},
+})
+
+
+end
+
+--construit les variables de maniere robuste, suite aux changements de structure de conf_mod.lua et mission_ini.lua
+generateSolid_G_Variable()
+

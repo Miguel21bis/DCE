@@ -98,21 +98,23 @@ end
 -- modification M38 : Debug Name of TargetList 
 local function checkBug(name, origine, category)
 
+	if not Debug.debug then return end
+
 	if name == nil then
 		print("DC_UT checkBug "..origine.." "..category..", ATTENTION: Name is empty: "..tostring(name))
 	end
 
-	if Debug.checkTargetName2Space then
+	-- if Debug.checkTargetName2Space then
 		local i, j = string.find(name, "  ")
 		if i then
 			print("DC_UT checkBug "..origine.." "..category..", ATTENTION: Name whith Double Space: "..name)
 		end
-	end
+	-- end
 
-	if Debug.checkTargetName then
+	-- if Debug.checkTargetName then
 		if string.sub(name, -1) == " " then print("DC_UT "..origine.." "..category..", ATTENTION: Name ending with a space|"..name.."|") end
 		if string.sub(name, 1,1) == " " then print("DC_UT "..origine.." "..category..", ATTENTION: Name beginning with a space|"..name.."|") end
-	end
+	-- end
 end
 
 local function checkBug2(txt)

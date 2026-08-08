@@ -144,8 +144,8 @@ Debug_check = {
 		SpyTask    = "Escort", -- @ui text audience=campaignMaker group="Debug" label="Spy task" help=Logs this squad AND its task's passage through the ATO_Generator.
 		SpyTarget  = "Bandar-e-Jask airfield", -- @ui text audience=campaignMaker group="Debug" label="Spy target" help=Logs this target's passage through the ATO_Generator.
 	},
-	checkTargetName        = true,    -- @ui checkbox audience=campaignMaker group="Debug" label="Check target names" help=Checks whether the target exists in oob_ground or in a template. [default: false]
-	checkTargetName2Space  = true,    -- @ui checkbox audience=campaignMaker group="Debug" label="Check double spaces in names" help=Alerts on FirstMission if target names contain 2 consecutive spaces. [default: false]
+	-- checkTargetName        = true,    -- @ui checkbox audience=campaignMaker group="Debug" label="Check target names" help=Checks whether the target exists in oob_ground or in a template. [default: false]
+	-- checkTargetName2Space  = true,    -- @ui checkbox audience=campaignMaker group="Debug" label="Check double spaces in names" help=Alerts on FirstMission if target names contain 2 consecutive spaces. [default: false]
 		-- makeCampaign = false,						-- (true/false)	[default: false]	allows campaignMaker to create a file mapping xy positions to LL (Init\LL_Positions.lua) this file is created automatically during the first 60 seconds of a DCE mission in DCS
 }
 
@@ -174,8 +174,7 @@ campMod_check = {
 			ewr = { 25 , 20 , 12 , 15 , 0 },
 			bridge = { 25 , 20 , 12 , 8 , 0 },
 			generic = { 25 , 20 , 12 , 2 , 0 },
-			runway = {0, 20, 0, 0, 25, 50
-			},
+			runway = {0, 20, 0, 0, 25, 50},
 		},
 		red = { -- @ui matrix audience=campaignMaker group="Repair (Red)" label="Repair options" rows="airUnit:Air unit,airbase:Airbase,sam:SAM,ewr:EWR,bridge:Bridge,generic:Generic" cols="1:Min repair %,2:Death point %,3:Reinforce delay (h),4:Repair chance %,5:Repair value/day"
 			airUnit = { 0 , 0 , 12 , 0 , 0 },

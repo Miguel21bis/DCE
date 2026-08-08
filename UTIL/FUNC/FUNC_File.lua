@@ -822,7 +822,7 @@ function UpdateConfMod(setWeather, setDate, from)
 
     for path in pairs(updates) do
         if not applied[path] and Debug.debug then
-            print("[UpdateConfMod][" .. from .. "] AVERTISSEMENT : clé introuvable dans conf_mod.lua : " .. path)
+            -- print("[UpdateConfMod][" .. from .. "] AVERTISSEMENT : clé introuvable dans conf_mod.lua : " .. path)
         end
     end
 
