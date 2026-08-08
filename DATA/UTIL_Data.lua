@@ -162,7 +162,7 @@ TaskByPlane = {
 		["F-15E"] = true,
 		["F-16C bl.52d"] = true,
 	
-		["AH-64D_BLK_II"] = true,
+		-- ["AH-64D_BLK_II"] = true,
 
 		["JF-17"] = true,
 		["L-39C"] = true,
@@ -216,7 +216,7 @@ TaskByPlane = {
 		["F-16C bl.52d"] = true,
 		["MB-339A"] = true,			 
 		
-		["AH-64D_BLK_II"] = true,
+		-- ["AH-64D_BLK_II"] = true,
 		["AH-64A"] = true,
 		["SH-3D"] = true,				--Mod
 
@@ -284,7 +284,7 @@ TaskByPlane = {
 		["MB-339A"] = true,
 		["MirageF1"] = true,			--Mod
 
-		["AH-64D_BLK_II"] = true,
+		-- ["AH-64D_BLK_II"] = true,
 		["AH-64A"] = true,
 
 		["JF-17"] = true,
@@ -388,7 +388,7 @@ TaskByPlane = {
 
 		["MirageF1"] = true,			--Mod
 
-		["AH-64D_BLK_II"] = true,
+		-- ["AH-64D_BLK_II"] = true,
 
 		["Yak-52"] = true,
 		["JF-17"] = true,
@@ -1657,6 +1657,7 @@ Data_divers = {
 		playable = true,
 	},
 	["AH-64D_BLK_II"] = {
+		folderModName = "AH-64D",
 		instrumentUnits = "imperial",
 		EPLRS_Capacity = true,
 		datalinks = {
@@ -2974,28 +2975,13 @@ Failures = {
 		-- "dme_fail",--("DME signal fail"), 							
 	},
 
-	-- ["OH58D"] =
+
+	-- ["AH-64D_BLK_II"] =
 	-- {
-	-- 	'engine',
-	-- 	'LMFD',
-	-- 	'RMFD',
-	-- 	'MMSCamera',
-	-- 	'Inverter',
-	-- 	'Battery',
-	-- 	'Rectifier Unit',
-	-- 	'AC Generator',
-	-- 	'DC Generator',
-	-- 	'Transmission',
-	-- 	'Hydraulic Reserve',
-	-- 	'Tail Rotor',
-	-- 	'Engine Oil',
+	-- 	'APU_Fire',--('APU Fire'),
+	-- 	'LeftEngine_Fire',--('Engine 1 Fire'),
+	-- 	'RightEngine_Fire',--('Engine 2 Fire'),			
 	-- },
-	["AH-64D_BLK_II"] =
-	{
-		'APU_Fire',--('APU Fire'),
-		'LeftEngine_Fire',--('Engine 1 Fire'),
-		'RightEngine_Fire',--('Engine 2 Fire'),			
-	},
 
 
 	["MiG-29 Fulcrum"] =
@@ -4102,10 +4088,10 @@ function DataCompilation_DataDiscoveryA2()
 							-- print("  -> A2 aircraft captured "..planeType)
 							
 
-							local file_str = "dst = " .. TableSerialization(Data_divers[planeType], 0)			--make a string
-							local file_File = io.open("Debug/Data_Divers_GetMods_"..planeType..".lua", "w") or error("Failed to open debug EWR_UtilDebug file")
-							file_File:write(file_str)																	--save new data
-							file_File:close()
+							-- local file_str = "dst = " .. TableSerialization(Data_divers[planeType], 0)			--make a string
+							-- local file_File = io.open("Debug/Data_Divers_GetMods_"..planeType..".lua", "w") or error("Failed to open debug EWR_UtilDebug file")
+							-- file_File:write(file_str)																	--save new data
+							-- file_File:close()
 
 						end
 					else

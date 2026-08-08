@@ -20,6 +20,13 @@ MsgForPlayerInMsn = {}
 
 local debugStart = true					--NE PAS CHANGER, les infos restent seulement dans le fichier FlightPlan_Generator_Debug
 local debugTxt_AtoFP = ""
+
+local function dbg(msg)
+	if debugStart then
+		debugTxt_AtoFP = debugTxt_AtoFP.."\n"..msg
+	end
+end
+
 local callSignFlight = {}
 local callSignFlightUnite = {}
 local playerTask = ""
@@ -695,6 +702,11 @@ end
 ---- function to get datalink Id -----
 local pack_L16_unitId = {}		--permet de retrouver tous les unitId participant à un package
 local STN_L16_Id = {}
+local pack_SADL_unitId = {}		--permet de retrouver tous les unitId participant à un package
+local SADL_TN_Id = {}
+local pack_IDM_unitId = {}
+local IDM_Id = {}
+
 
 local function Get_L16_Id()
 	local i = 0
@@ -750,8 +762,6 @@ local function Get_L16_Id()
 end
 
 --spécial datalink A-10
-local pack_SADL_unitId = {}		--permet de retrouver tous les unitId participant à un package
-local SADL_TN_Id = {}
 local function Get_SADL_Id()
 	local i = 0
 	local preTest = "01"
@@ -776,9 +786,6 @@ end
 
 
 --spécial datalink AH-64
-local pack_IDM_unitId = {}
-local IDM_Id = {}
-
 local function get_IDM_Id()
 	local i = 0
 
@@ -2474,7 +2481,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 						["baseStartup"] =  flight[f].route[w].baseStartup,
 					}
 
-					if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_waypoints[w] = { Turning Point ") end
+					dbg("AtoFP_waypoints[w] = { Turning Point | w:| "..w.." |briefing_name:| "..tostring(waypoints[w]["briefing_name"]))
 
 
 					if waypoints[w].name == "Target" then
@@ -2580,7 +2587,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					-- ************* store spawn and departure time for flight *************
 					if flight[f].route[w].id == "Taxi" or flight[f].route[w].id == "Spawn" then --or flight[f].route[w].id == "SAR"
 						start_time = flight[f].route[w].eta
-						debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP Taxi or Spawn and SAR or set departure_time " .. tostring(start_time) )
+						dbg("AtoFP Taxi or Spawn and SAR or set departure_time " .. tostring(start_time) )
 
 					elseif flight[f].route[w].id == "Departure" then
 						departure_time = flight[f].route[w].eta
@@ -4365,7 +4372,16 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 					-- ************* orbit on departure/Assemble *************
 					if flight[f].route[w].id == "Assemble" then
-						if flight[f].number > 1 or (#flight > 1 and flight[f].loadout.tStation == nil) or flight[f].target.firepower.packmax then		--orbit on departure only for flights larger than 1-ship, flights that are part of a package (but no on-station tasks) or multi-packages
+
+						-- ***** calcule le slack réel entre l'arrivée physique et l'ETA officielle (même formule que le détecteur +T13) *****
+						local slackToKill = 0
+						if waypoints[w - 1] and waypoints[w - 1]["ETA"] and waypoints[w]["ETA"] and waypoints[w]["speed"] and waypoints[w]["speed"] > 0 then
+							local legDist = GetDistance(waypoints[w - 1], waypoints[w])
+							local physicalETA = waypoints[w - 1]["ETA"] + (legDist / waypoints[w]["speed"])
+							slackToKill = waypoints[w]["ETA"] - physicalETA
+						end
+
+						-- if flight[f].number > 1 or (#flight > 1 and flight[f].loadout.tStation == nil) or flight[f].target.firepower.packmax or slackToKill > 50 then		--orbit on departure only for flights larger than 1-ship, flights that are part of a package (but no on-station tasks), multi-packages, OR any flight (solo compris) qui arrive en avance sur son ETA (slack > 50s) -> on préfère faire orbiter l'appareil plutôt que le laisser rattraper un ETA verrouillé plus loin, ce qui produit des demi-tours
 
 							if not is_helicopter then
 								local task_entry =
@@ -4458,7 +4474,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							}
 							table.insert(waypoints[w]["task"]["params"]["tasks"], task_entry)
 
-						end
+						-- end
 					end
 
 					-- ************* A-A TACAN for tankers, activate TACAN on first orbit WP *************
@@ -5261,15 +5277,14 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					end
 
 					--FARP parking id
-					-- if baseIsFARP and waypoints[1].action ~= "Spawn" then
-					if waypoints[1].action ~= "Spawn" and is_helicopter and not db_airbases[flight[f].base].BaseAirStart then
+					if (waypoints[1].action ~= "Turning Point") and is_helicopter and not db_airbases[flight[f].base].BaseAirStart then
 
-						if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP limitedParkTiming C1 "..tostring(limitedParkTiming).." flight[f][parkAlertSAR]: "..tostring(parkSarAirBase[flight[f].base])) end
+						dbg("AtoFP limitedParkTiming C1 "..tostring(limitedParkTiming).." flight[f][parkAlertSAR]: "..tostring(parkSarAirBase[flight[f].base]))
 
 						if not parkSarAirBase[flight[f].base] then
 							
 							if flight[f].parking_id then
-								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP limitedParkTiming C2 ") end
+								dbg("AtoFP limitedParkTiming C2 ")
 
 								local parkParameters = GetParkingId( flight[f].parking_id, flight[f].base)
 
@@ -5278,14 +5293,14 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								end
 
 							elseif not limitedParkTiming then
-								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP limitedParkTiming C3 ") end
+								dbg("AtoFP limitedParkTiming C3 ")
 
 								units[n]["parking"] = tostring(n)
 								units[n]["parking_id"] = tostring(n)
 							end
 
 						elseif parkSarAirBase[flight[f].base] then
-							if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP limitedParkTiming C4 n: "..n) end
+							dbg("AtoFP limitedParkTiming C4 n: "..n)
 
 							if n==1 then
 								waypoints[1]["action"] = "From Ground Area"
@@ -5294,7 +5309,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								waypoints[1].linkUnit = nil
 								waypoints[1].helipadId = nil
 
-								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP limitedParkTiming C5 action: "..waypoints[1]["action"]) end
+								dbg("AtoFP limitedParkTiming C5 action: "..waypoints[1]["action"])
 
 								--on le fait reposer au meme endroit:
 								waypoints[#waypoints]["action"] = "Landing"
@@ -5309,7 +5324,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 								waypoints[1]["action"] = "Turning Point"
 								waypoints[1]["type"] = "Turning Point"
 
-								if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP_FARP parking id ~= Spawn = { Turning Point ") end	
+								dbg("AtoFP_FARP parking id ~= Spawn = { Turning Point ")
 
 							end
 
@@ -5462,14 +5477,24 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 							end
 
 							if units[n]["AddPropAircraft"]["STN_L16"] then
+								
 								--essentielement pour les donnors HA BON?
 								units[n]["AddPropAircraft"]["STN_L16"] =  Get_L16_Id()
 								pack_L16_unitId[p] = pack_L16_unitId[p] or {}
 								table.insert(pack_L16_unitId[p], units[n].unitId)
+							
 							elseif units[n]["AddPropAircraft"]["SADL_TN"] then
+								
 								units[n]["AddPropAircraft"]["SADL_TN"] =  Get_SADL_Id()
 								if not pack_SADL_unitId[p] then pack_SADL_unitId[p] = {} end
 								table.insert(pack_SADL_unitId[p], units[n].unitId)
+							
+							elseif units[n]["AddPropAircraft"]["TN_IDM_LB"] then
+								
+								units[n]["AddPropAircraft"]["SADLTN_IDM_LB_TN"] =  get_IDM_Id()
+								if not pack_IDM_unitId[p] then pack_IDM_unitId[p] = {} end
+								table.insert(pack_IDM_unitId[p], units[n].unitId)
+							
 							end
 
 							--["VoiceCallsignLabel"] = "CT",
@@ -5581,15 +5606,15 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 				end
 
 
-				if Debug.debug then print("AtoFP RADIO A: "..tostring(taskOrHuman).." for "..tostring(flight[f].type).." "..tostring(flight[f].task)) end
+				-- if Debug.debug then print("AtoFP RADIO A: "..tostring(taskOrHuman).." for "..tostring(flight[f].type).." "..tostring(flight[f].task)) end
 
 				local DCE_FreqFlight = GetFrequencyNG(sideName, nil, taskOrHuman, flight[f].type, nil, "FreqFlight", groupName, "ATO_FlightPlan DCE_FreqFlight")
 
-				if Debug.debug then print("AtoFP RADIO B DCE_FreqFlight: "..tostring(DCE_FreqFlight).." for "..tostring(flight[f].type).." "..tostring(flight[f].task)) end
+				-- if Debug.debug then print("AtoFP RADIO B DCE_FreqFlight: "..tostring(DCE_FreqFlight).." for "..tostring(flight[f].type).." "..tostring(flight[f].task)) end
 
 				local DCE_FreqPackage = GetFrequencyNG(sideName, flight[f].target_name, taskOrHuman, flight[f].type, nil, "FreqPackage", groupName, "ATO_FlightPlan DCE_FreqPackage")
 
-				if Debug.debug then print("AtoFPRADIO C  DCE_FreqPackage: "..tostring(DCE_FreqPackage).." for "..tostring(flight[f].type).." "..tostring(flight[f].task)) end
+				-- if Debug.debug then print("AtoFPRADIO C  DCE_FreqPackage: "..tostring(DCE_FreqPackage).." for "..tostring(flight[f].type).." "..tostring(flight[f].task)) end
 
 				if not DCE_FreqPackage or DCE_FreqPackage == nil then
 					-- print("AtoFP ERROR, no DCE_FreqPackage "..flight[f].type)
@@ -5597,7 +5622,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 					-- os.execute 'pause'
 				end
 
-				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe waypoints[1][x] AA "..tostring(waypoints[1]["x"])) end
+				dbg("AtoFP passe waypoints[1][x] AA "..tostring(waypoints[1]["x"]))
 
 				local goupTask = flight[f].task
 				if flight[f].type == "SH-3D" and flight[f].task == "Transport" then
@@ -5630,7 +5655,7 @@ for sideName, pack in pairs(ATO) do													--iterate through sides in ATO
 
 				}
 
-				if debugStart then debugTxt_AtoFP = debugTxt_AtoFP.."\n"..("AtoFP passe group[x] BB "..tostring(group["x"]).." "..tostring(group["route"]["points"][1]["action"])) end
+				dbg("AtoFP passe group[x] BB "..tostring(group["x"]).." "..tostring(group["route"]["points"][1]["action"]))
 
 				flight[f].groupId = group.groupId
 
@@ -7709,20 +7734,21 @@ for _side, side in pairs(mission.coalition) do
 					for unitN, unit in pairs(group.units) do
 
 						if Data_divers[unit.type] and Data_divers[unit.type].datalinks and Data_divers[unit.type].datalinks.isReceiver then
-							
+						
 							local typeDataLink = Data_divers[unit.type].datalinks.type
 
 							--ajoute déjà les membres du fligh/group
 							local copyUnits = DeepCopy(group.units)
-							-- _affiche(copyUnits, "copyUnits: ")
-							-- _affiche(unit.datalinks, "unit.datalinks: ")
+
 							for n=1, #copyUnits do
-								-- print("AtoFP: copyUnits[n].unitId "..tostring(copyUnits[n].unitId))
-								-- pint("AtoFP: copyUnits[n].unitId "..tostring(copyUnits[n].unitId))	
+								
 								local data = {
 									["missionUnitId"] = copyUnits[n].unitId,
 								}
-								unit.datalinks[typeDataLink].network.teamMembers[n] = data
+
+								if unit.datalinks[typeDataLink].network.teamMembers then
+									unit.datalinks[typeDataLink].network.teamMembers[n] = data
+								end
 							end
 							
 							for pack_N, listId in pairs(pack_L16_unitId) do
