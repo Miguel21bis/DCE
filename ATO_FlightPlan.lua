@@ -7659,44 +7659,20 @@ for _side, side in pairs(mission.coalition) do
 					for unitN, unit in pairs(group.units) do
 
 						if Data_divers[unit.type] and Data_divers[unit.type].datalinks and Data_divers[unit.type].datalinks.isReceiver then
-						
-							if not string.find(unit.name, "PACK") then
-								-- print("AtoFP: skip datalink network for unit "..unit.unitId.." || "..unit.name.." || "..unit.type)
-								-- -- _affiche(unit, "unit: ")
-								-- _affiche(unit, "unit: ")
-
-								-- os.execute 'pause'
-
-								break
-							end
-
+							
 							local typeDataLink = Data_divers[unit.type].datalinks.type
-
-							-- print("typeDataLink "..typeDataLink.." || "..unit.type)
-
-						
-
-							-- if typeDataLink and unit.type and not unit.datalinks then
-							-- 	print("create datalink network for unit "..unit.unitId.." || "..unit.name.." || "..unit.type.." || "..typeDataLink)
-							-- 	-- _affiche(unit, "unit: ")
-							-- 	_affiche(unit, "unit: ")
-
-							-- 	os.execute 'pause'
-
-							-- end
 
 							--ajoute déjà les membres du fligh/group
 							local copyUnits = DeepCopy(group.units)
-
+							-- _affiche(copyUnits, "copyUnits: ")
+							-- _affiche(unit.datalinks, "unit.datalinks: ")
 							for n=1, #copyUnits do
-								
+								-- print("AtoFP: copyUnits[n].unitId "..tostring(copyUnits[n].unitId))
+								-- pint("AtoFP: copyUnits[n].unitId "..tostring(copyUnits[n].unitId))	
 								local data = {
 									["missionUnitId"] = copyUnits[n].unitId,
 								}
-
-								if unit.datalinks[typeDataLink].network.teamMembers then
-									unit.datalinks[typeDataLink].network.teamMembers[n] = data
-								end
+								unit.datalinks[typeDataLink].network.teamMembers[n] = data
 							end
 							
 							for pack_N, listId in pairs(pack_L16_unitId) do
