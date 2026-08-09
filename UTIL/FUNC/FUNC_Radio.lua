@@ -787,16 +787,23 @@ function AssignedFrequencies()
 	--liste toutes les Fréquences déjà existantes pour ne pas creer de doublon
 	for basename, base in pairs(db_airbases) do
 		if base.ATC_frequency and base.ATC_frequency ~= "" and type(base.ATC_frequency)~= "table" then
-			Assigned_freq[tonumber(base.ATC_frequency)] = basename
+			local freqNum = tonumber(base.ATC_frequency)
+			if freqNum then
+				Assigned_freq[freqNum] = basename
+			else
+				if Debug.debug then
+					AddLog("BUG whith AssignedFrequencies(): base.ATC_frequency is not a number for base "..basename)
+				end
+			end
+			-- print("DEBUG AssignedFrequencies() base.ATC_frequency: "..tostring(base.ATC_frequency).." for base "..basename)
+			-- Assigned_freq[tonumber(base.ATC_frequency)] = basename
 		elseif base.ATC_frequency and type(base.ATC_frequency)== "table" then
 			for n , freq in ipairs(base.ATC_frequency) do
 				Assigned_freq[tonumber(freq)] = basename
 			end
 		else
-			if Debug.debug then
-				print("BUG whith AssignedFrequencies():")
-				_affiche(base.ATC_frequency, "AA base.ATC_frequency: ") 
-			end
+			-- print("BUG whith AssignedFrequencies():")
+			AddLog("BUG whith AssignedFrequencies(): base.ATC_frequency is nil for base "..basename)
 		end
 	end
 

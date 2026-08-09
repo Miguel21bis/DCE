@@ -12,6 +12,7 @@ SinglePlayer = false
 MissionInstance = 0
 Briefing_text = ""
 PlayerSide = nil
+MissionAccepted = nil
 
 
 Multi =
@@ -25,33 +26,27 @@ oob_air = {}					--pour declarer la table globale et calmer les inquietudes d'ID
 
 
 local function acceptMission()
-	local m = ""
-	repeat
-		print("\n\n Night or Day ? : "..Daytime)													-- info day or not
-		print("\n  "..camp.date.day.."/"..camp.date.month.."/"..camp.date.year)
-		print("\n\nAccept Mission ?:")
+    local m
+    repeat
+        print("\n\n Night or Day ? : " .. Daytime)
+        print("\n  " .. camp.date.day .. "/" .. camp.date.month .. "/" .. camp.date.year)
+        print("\n\nAccept Mission ?:")
+        print("a - Accept mission")
+        print("s - Skip mission")
 
-		print("a".." - Accept mission")
-		print("s".." - Skip mission")
+        m = string.lower(io.read() or "")
 
-		-- m = tostring(io.read())
-		m = tostring(io.stdin:read())
-		m = string.lower(m)
+        if m == "d" then
+            os.execute('start "Debug" "notepad++.exe" "Debug/debugFlight.txt"')
+        elseif m ~= "a" and m ~= "s" then
+            print("\nInvalid entry.\n")
+        end
+    -- La boucle continue tant que l'utilisateur n'a pas saisi "a" ou "s"
+    until m == "a" or m == "s"
 
-		if not ( m ~= nil and ( m == "a" or m == "s" or m == "d")) then
-			print("\nInvalid entry.\n")
-		end
-	until m ~= nil and ( m == "a" or m == "s" or m == "d")
-
-	if  m == "s" then
-		TaskRefused = true
-		return false
-	elseif  m == "d" then
-		os.execute('start "Debug" "notepad++.exe" "Debug/debugFlight' .. '.txt"')
-		return true
-	else
-		return true
-	end
+    TaskRefused = (m == "s")
+    MissionAccepted = (m == "a")
+    return MissionAccepted
 end
 
 -- Convertit les tasks longues en codes courts lisibles console
@@ -738,6 +733,7 @@ repeat
 		
 		if Multi.NbGroup >= 1 and PlayerFlight then
 			if acceptMission() then
+				ShowBugsWindows()
 				BackupFilesMission() 
 				print("\nMultiplayerCampaign Next mission generated.\n")								--confirmation text
 				 break
@@ -745,6 +741,7 @@ repeat
 		elseif SinglePlayer and PlayerFlight  then														--mission has a player flight
 			if acceptMission() then
 				BackupFilesMission() 
+				ShowBugsWindows()
 				print("\nCampaign reset and first campaign mission re-generated.\n")					--confirmation text
 				 break
 			end

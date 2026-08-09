@@ -106,7 +106,7 @@ end
 require("Active/last_Mission")
 
 -- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
-IncludeOnce("DC_UpdateSAR.lua")
+Include("DC_UpdateSAR.lua")
 
 --reset air oob last mission stats
 for side_name,side in pairs(oob_air) do														--iterate through all sides

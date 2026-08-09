@@ -714,15 +714,19 @@ Include("DC_Prune.lua")
 Include("DC_Briefing.lua")
 Include("DC_Final_steps.lua")
 
--- Supprime le fichier sans vérifier s'il existe
-os.remove("Debug/BugList.lua")
-
+-- Écrit toujours le fichier (jamais de suppression) pour éviter tout état
+-- ambigu si un programme externe (antivirus, indexeur, sync) a brièvement
+-- verrouillé le fichier au moment d'un os.remove().
+local bugFile = io.open("Debug/BugList.lua", "w") or error("Failed to open debug file")
 if BugList and type(BugList) == "table" and #BugList >= 1 then
 	local table_Str = "BugList = " .. TableSerialization(BugList, 0)
-	local bugFile = io.open("Debug/BugList.lua", "w") or error("Failed to open debug file")
 	bugFile:write(table_Str)
-	bugFile:close()
+else
+	bugFile:write("BugList = {}")
 end
+bugFile:close()
+
+
 -- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Debug.lua")
 Include("UTIL_Debug.lua")
 

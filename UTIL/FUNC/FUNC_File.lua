@@ -760,6 +760,77 @@ local function dateToNumber(d)
     return (d.year or 0) * 10000 + (d.month or 0) * 100 + (d.day or 0)
 end
 
+-- function UpdateConfMod(setWeather, setDate, from)
+
+--     from = from or "unknown"
+
+--     if not setWeather and not setDate then
+--         -- if Debug.debug then print("[UpdateConfMod] appel depuis '" .. from .. "' sans rien à changer, ignoré") end
+--         return true
+--     end
+
+--     local updates = {}
+
+--     if setWeather then
+--         for field, value in pairs(setWeather) do
+--             updates["mission_ini.weather." .. field] = value
+--             -- if Debug.debug then print("[UpdateConfMod][" .. from .. "] weather." .. field .. " -> " .. tostring(value)) end
+--         end
+--     end
+
+--     if setDate then
+
+--         setDate.setDateInNextMission = false
+
+--         -- date proposée = date actuelle + les champs fournis
+--         local newDate = {
+--             day   = setDate.day   or camp.date.day,
+--             month = setDate.month or camp.date.month,
+--             year  = setDate.year  or camp.date.year,
+--         }
+
+--         if dateToNumber(newDate) < dateToNumber(camp.date) then
+--             if Debug.debug then 
+--                 print("[UpdateConfMod][" .. from .. "] REFUS date : "
+--                     .. string.format("%04d-%02d-%02d", newDate.year, newDate.month, newDate.day)
+--                     .. " antérieure à "
+--                     .. string.format("%04d-%02d-%02d", camp.date.year, camp.date.month, camp.date.day)
+--                     .. " -> changement de date ignoré, le reste est appliqué")
+--             end
+--         else
+--             camp.date = newDate
+
+--             for field, value in pairs(setDate) do
+--                 updates["mission_ini.current_date." .. field] = value
+--                 -- if Debug.debug then print("[UpdateConfMod][" .. from .. "] current_date." .. field .. " -> " .. tostring(value)) end
+--             end
+--         end
+--     end
+
+--     -- la date a pu être refusée et il n'y avait rien d'autre : plus rien à écrire
+--     if next(updates) == nil then
+--         -- if Debug.debug then print("[UpdateConfMod][" .. from .. "] aucune mise à jour à écrire") end
+--         return true
+--     end
+
+--     local ok, applied = applyUpdatesToFile(CONF_MOD_PATH, updates)
+--     if not ok then
+--         -- if Debug.debug then print("[UpdateConfMod][" .. from .. "] échec de l'écriture de " .. CONF_MOD_PATH) end
+--         return false
+--     end
+--     applied = applied or {}
+
+--     for path in pairs(updates) do
+--         if not applied[path] and Debug.debug then
+--             -- print("[UpdateConfMod][" .. from .. "] AVERTISSEMENT : clé introuvable dans conf_mod.lua : " .. path)
+--         end
+--     end
+
+--     dofile(CONF_MOD_PATH) -- recharge mission_ini en mémoire avec les nouvelles valeurs
+
+--     return true
+-- end
+
 function UpdateConfMod(setWeather, setDate, from)
 
     from = from or "unknown"
@@ -790,13 +861,13 @@ function UpdateConfMod(setWeather, setDate, from)
         }
 
         if dateToNumber(newDate) < dateToNumber(camp.date) then
-            if Debug.debug then 
-                print("[UpdateConfMod][" .. from .. "] REFUS date : "
-                    .. string.format("%04d-%02d-%02d", newDate.year, newDate.month, newDate.day)
-                    .. " antérieure à "
-                    .. string.format("%04d-%02d-%02d", camp.date.year, camp.date.month, camp.date.day)
-                    .. " -> changement de date ignoré, le reste est appliqué")
-            end
+			if Debug.debug then 
+				print("[UpdateConfMod][" .. from .. "] REFUS date : "
+					.. string.format("%04d-%02d-%02d", newDate.year, newDate.month, newDate.day)
+					.. " antérieure à "
+					.. string.format("%04d-%02d-%02d", camp.date.year, camp.date.month, camp.date.day)
+					.. " -> changement de date ignoré, le reste est appliqué")
+			end
         else
             camp.date = newDate
 
@@ -818,15 +889,37 @@ function UpdateConfMod(setWeather, setDate, from)
         -- if Debug.debug then print("[UpdateConfMod][" .. from .. "] échec de l'écriture de " .. CONF_MOD_PATH) end
         return false
     end
-    applied = applied or {}
 
     for path in pairs(updates) do
-        if not applied[path] and Debug.debug then
-            -- print("[UpdateConfMod][" .. from .. "] AVERTISSEMENT : clé introuvable dans conf_mod.lua : " .. path)
+        if not applied[path] then
+            -- if Debug.debug then print("[UpdateConfMod][" .. from .. "] AVERTISSEMENT : clé introuvable dans conf_mod.lua : " .. path) end
         end
     end
 
+    -- Le dofile ci-dessous recrée entièrement la table Debug avec les valeurs
+    -- par défaut du fichier conf_mod.lua, ce qui écraserait une activation
+    -- runtime du mode debug (touche "+") lors des cycles de génération suivants.
+    -- On sauvegarde donc l'état courant et on le réapplique juste après.
+    local savedDebugMode         = Debug.debug
+    local savedAfficheFlight     = Debug.AfficheFlight
+
     dofile(CONF_MOD_PATH) -- recharge mission_ini en mémoire avec les nouvelles valeurs
 
+    Debug.debug        = savedDebugMode
+    Debug.AfficheFlight = savedAfficheFlight
+
     return true
+end
+
+
+function ShowBugsWindows()
+	if not Debug.debug then return end
+		--recherche Debug/BugList.lua
+		--cette maniere de chercer la presence d un fichier evite un plantage
+	local fileName = "Debug/BugList.lua"
+	local testPath = io.open(fileName, "r")
+	if testPath ~= nil then	
+		io.close(testPath)
+		os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')
+	end
 end

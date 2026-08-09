@@ -1143,12 +1143,12 @@ elseif ArgTools == "KillTarget" then
 		local active
 		repeat
 			-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
-			IncludeOnce("UTIL_DataDC_UpdateTargetlistMap.lua")
+			Include("DC_UpdateTargetlist.lua")
 			if Debug.debug then print ("Lancement VIA UTIL_Div C 1152") end 	--ce n'est pas un doublon, il faut garder les 2 Update
 			-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 			-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
-			IncludeOnce("DC_CheckTriggers.lua")
-			IncludeOnce("DC_UpdateOOBGround.lua")
+			Include("DC_CheckTriggers.lua")
+			Include("DC_UpdateOOBGround.lua")
 
 			local inputString = string.lower(io.stdin:read())
 			if inputString == "s" then
@@ -1268,12 +1268,12 @@ elseif ArgTools == "KillTarget" then
 
 
 			-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")		--ce n'est pas un doublon, il faut garder les 2 Update
-			IncludeOnce("DC_UpdateTargetlist.lua")
+			Include("DC_UpdateTargetlist.lua")
 			if Debug.debug then print ("Lancement VIA UTIL_Div C 1276") end
 			-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 			-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateOOBGround.lua")		-- add oob_ground in mission.coalition..... don't forget ^^
-			IncludeOnce("DC_CheckTriggers.lua")
-			IncludeOnce("DC_UpdateOOBGround.lua")
+			Include("DC_CheckTriggers.lua")
+			Include("DC_UpdateOOBGround.lua")
 
 
 

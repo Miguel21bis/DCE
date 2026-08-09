@@ -60,14 +60,16 @@ function RecalcEtaFromAnchor(route, anchorIndex, endIndex, fallbackSpeed)
 
 	for w = anchorIndex + 1, endIndex do
 		local wp = route[w]
+		local prevWp = route[w - 1]
 		if wp then
-			if wp.id == "Station" then
+			if wp.id == "Station" and prevWp and prevWp.id == "Station" then
+				-- jambe Station -> Station : c'est le temps sur zone (loiter), pas une distance à parcourir, géré ailleurs
 				eta = wp.eta or eta
 			else
 				local speed = wp.speed or fallbackSpeed
 
 				if speed and speed > 0 then
-					local leg = GetDistance(route[w - 1], wp)
+					local leg = GetDistance(prevWp, wp)
 					eta = eta + (leg / speed)
 
 					wp.eta = eta
@@ -107,8 +109,9 @@ function RecalcEtaBackwardFromAnchor(route, anchorIndex, startIndex, fallbackSpe
 		local wp = route[w]
 		local prevWp = route[w - 1]
 		if wp and prevWp then
-			if wp.id == "Station" then
-				eta = wp.eta or eta
+			if wp.id == "Station" and prevWp.id == "Station" then
+				-- jambe Station -> Station : c'est le temps sur zone (loiter), pas une distance à parcourir, géré ailleurs
+				eta = prevWp.eta or eta
 			else
 				local speed = wp.speed or fallbackSpeed
 
@@ -887,36 +890,6 @@ for sideName, packs in pairs(ATO) do
 				end
 						
 
-				if flight[f].route[1].id == "Spawn" then
-					
-					-- Waypoints à supprimer (dans l'ordre décroissant)
-					local removedCount = 0
-					for idx = #flight[f].route, 1, -1 do
-						local wp = flight[f].route[idx]
-						if wp and (wp.id == "Departure" or wp.id == "Assemble") then
-							table.remove(flight[f].route, idx)
-							removedCount = removedCount + 1
-						end
-					end
-
-					-- ***** route[1].etaSpawn porte déjà la bonne valeur : buffer air-spawn (5 min) déjà appliqué plus haut *****
-					-- ***** (voir "etaSpawn = etaSpawn - airSpawn_buffer" dans la passe backward) *****
-					if flight[f].route[1].etaSpawn then
-						flight[f].route[1].eta = flight[f].route[1].etaSpawn
-
-						flight[f].route[1]["debug"] = (flight[f].route[1]["debug"] or "")..
-							"\nAtoT_eta id == Spawn , WPT: 1"..
-							"\nAtoT_eta suite_Spawn, new eta "..flight[f].route[1].eta
-					end
-
-					-- ***** recalcule Join <- IP <- Attack EN REMONTANT depuis Target (ancre TOT, jamais modifiée) *****
-					-- ***** corrige la distance Spawn->Attack (suppression Departure/Assemble) sans créer d'écart avant Target *****
-					if target_wp then
-						local adjustedTargetWp = target_wp - removedCount
-						RecalcEtaBackwardFromAnchor(flight[f].route, adjustedTargetWp, 1, flight[f].loadout.vCruise or main_vCruise)
-					end
-				end
-
 				--remove WPs ahead of spawn WP
 				local flight_tgt_wp = target_wp													--local copy of the target waypoint number for this flight only
 				if airstart ~= 0 then																--if the flight is an air start
@@ -927,6 +900,34 @@ for sideName, packs in pairs(ATO) do
 					end
 					flight[f].route[1].deltaETA = deltaETA
 					flight[f].route[1].airstart = true
+				end
+
+				if flight[f].route[1].id == "Spawn" then
+					
+					-- Waypoints à supprimer (dans l'ordre décroissant)
+					for idx = #flight[f].route, 1, -1 do
+						local wp = flight[f].route[idx]
+						if wp and (wp.id == "Departure" or wp.id == "Assemble") then
+							table.remove(flight[f].route, idx)
+							if idx <= flight_tgt_wp then
+								flight_tgt_wp = flight_tgt_wp - 1
+							end
+						end
+					end
+
+					-- ***** route[1].etaSpawn porte déjà la bonne valeur : buffer air-spawn (5 min) déjà appliqué plus haut *****
+					if flight[f].route[1].etaSpawn then
+						flight[f].route[1].eta = flight[f].route[1].etaSpawn
+
+						flight[f].route[1]["debug"] = (flight[f].route[1]["debug"] or "")..
+							"\nAtoT_eta id == Spawn , WPT: 1"..
+							"\nAtoT_eta suite_Spawn, new eta "..flight[f].route[1].eta
+					end
+
+					-- ***** recalcule EN REMONTANT depuis flight_tgt_wp (Target/Station, ancre TOT, jamais modifiée) *****
+					if flight_tgt_wp then
+						RecalcEtaBackwardFromAnchor(flight[f].route, flight_tgt_wp, 1, flight[f].loadout.vCruise or main_vCruise)
+					end
 				end
 
 				if flight[f].task == "Escort" and ( mainFlight.task ~= "Transport" and mainFlight.task ~= "Nothing") then

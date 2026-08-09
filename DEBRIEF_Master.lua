@@ -17,6 +17,8 @@ Briefing_oob_text_red = ""																	--text string to be added to next bri
 Briefing_oob_text_blue = ""																	--text string to be added to next briefing (blue repair and reinforcements)
 Briefing_text = ""
 PlayerSide = nil
+MissionAccepted = nil
+
 
 -- ============================================================================
 -- DEBUG DE LA BOUCLE DE GENERATION
@@ -185,32 +187,27 @@ function GenPassEnd()
 end
 
 local function acceptMission()
-	local m = ""
-	repeat
-		print("Actual time(DebriefMaster A): " .. FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year .. ".\n")
-		print("\n\n Night or Day ? : "..Daytime)											-- info day or not
-		print("\n\nAccept Mission ?:")
+    local m
+    repeat
+        print("\n\n Night or Day ? : " .. Daytime)
+        print("\n  " .. camp.date.day .. "/" .. camp.date.month .. "/" .. camp.date.year)
+        print("\n\nAccept Mission ?:")
+        print("a - Accept mission")
+        print("s - Skip mission")
 
-		print("a".." - Accept mission")
-		print("s".." - Skip mission")
+        m = string.lower(io.read() or "")
 
-		m = tostring(io.stdin:read())
-		m = string.lower(m)
+        if m == "d" then
+            os.execute('start "Debug" "notepad++.exe" "Debug/debugFlight.txt"')
+        elseif m ~= "a" and m ~= "s" then
+            print("\nInvalid entry.\n")
+        end
+    -- La boucle continue tant que l'utilisateur n'a pas saisi "a" ou "s"
+    until m == "a" or m == "s"
 
-		if not ( m ~= nil and ( m == "a" or m == "s" or m == "d")) then
-			print("\nInvalid entry.\n")
-		end
-	until m ~= nil and ( m == "a" or m == "s" or m == "d")
-
-	if  m == "s" then
-		TaskRefused = true
-		return false
-	elseif  m == "d" then
-		os.execute('start "Debug" "notepad++.exe" "Debug/debugFlight' .. '.txt"')
-		return true
-	else
-		return true
-	end
+    TaskRefused = (m == "s")
+    MissionAccepted = (m == "a")
+    return MissionAccepted
 end
 
 -- Convertit les tasks longues en codes courts lisibles console
@@ -1107,12 +1104,14 @@ if input == "y" or input == "yes" then
 				break
 			elseif Multi.NbGroup >= 1 and PlayerFlight then
 				if acceptMission() then
+					ShowBugsWindows()
 					BackupFilesMission()
 					print("\nMultiplayerCampaign Next mission generated.\n")								--confirmation text
 					break
 				end
 			elseif SinglePlayer and PlayerFlight then														--mission has a player flight
 				if acceptMission() then
+					ShowBugsWindows()
 					BackupFilesMission() 
 					print("\nNext mission generated.\n")													--confirmation text
 					break

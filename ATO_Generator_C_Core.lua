@@ -1838,6 +1838,11 @@ for sideName, units in pairs(oob_air) do
 			local enabledTasks = {}
 			local hasMainTask = false
 
+			-- if type(unit.tasks == "string") then
+			-- 	print("AtoG attention, the squad "..unit.name.." tasks: "..tostring(unit.tasks).." has a string instead of a table for its tasks. Fix it in Init\\oob_air and Active\\oob_air ")
+			-- 	_affiche(unit.tasks, "unit.tasks: ")
+			-- 	--  os.execute 'pause'
+			-- end
 			for taskName, taskBool in pairs(unit.tasks or EMPTY) do
 				if taskBool then
 					enabledTasks[#enabledTasks + 1] = taskName
