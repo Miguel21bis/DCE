@@ -1,8 +1,8 @@
 if not versionDCE then versionDCE = {} end
 
-versionDCE["UTIL_Changelog.lua"] = "22.108.620"
+versionDCE["UTIL_Changelog.lua"] = "22.110.636"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "22.108.627"
+VersionDCE["UTIL_Changelog.txt"] = "22.110.636"
 
 --[[
 
@@ -18,6 +18,22 @@ It is intended for **players and campaign makers**, not only developers.
 known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
+
+
+##  Version 22.110.636
+    ###  Add
+        F-14BU
+        camp_init and conf_mod can now be edited directly via DCE_Manager
+    ###  Fixed
+        SetDate not working
+        generator tasksCoef not functioning
+        generator: certain aircraft never selected (F-14BU)
+        Apache Datalink
+        aircraft recovery corrupted
+    ###  Changed
+        new generator organisation
+        AAA blue & red; both sides can now fire
+
 
 ##  Version 22.108.627
 	###  Fixed
